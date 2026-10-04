@@ -1194,8 +1194,8 @@ Token Compiler.after_hole(Compiler c) {
    visible local `name`: its first use declares a hole, and the quotation
    applies to that local's value. A `${expression}` is a hole for a hidden
    local that the quotation declares before it builds its code. A typed
-   quotation, `$!(T)( expression )`, builds its code where it is written
-   (see "typed quotations"). */
+   quotation, `$!T{ expression }` or `$!(T){ expression }`, builds its code
+   where it is written (see "typed quotations"). */
 
 /** Parses a quotation at `$!` into the code it builds from the locals its
     body names. */
@@ -1442,10 +1442,12 @@ static List Compiler._built_hole(
 
 /* typed quotations
 
-   `$!(T)( expression )` builds `(expr T CONTENT)` where it is written,
+   `$!T{ expression }`, where `T` names no kind, and
+   `$!(T){ expression }` build `(expr T CONTENT)` where they are written,
    from the template a rebuild fills: constant syntax from the literal
-   cache, and each hole's value inserted as a rebuild inserts it. It binds
-   nothing, so it may declare no name and apply no template. */
+   cache, and each hole's value inserted as a rebuild inserts it. A typed
+   quotation binds nothing, so it may declare no name and apply no
+   template. */
 
 static List Definition.typed_construction(Definition &d) {
   Compiler c = d.c;

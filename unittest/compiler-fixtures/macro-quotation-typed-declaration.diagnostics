@@ -1,5 +1,5 @@
 unittest/compiler-fixtures/macro-quotation-typed-declaration.x:7:3: parse: typed quotation cannot declare a name or apply a template
-    $!(int)( ({ int total = $value; total + 1; }) );
+    $!int{ ({ int total = $value; total + 1; }) };
     ^
   note: a typed quotation builds its code where it is written
 

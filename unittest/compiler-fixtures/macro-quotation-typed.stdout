@@ -7,6 +7,7 @@
  (call (expr (macro-expr) (ident (binding-name "f")))
   (args (expr (int) (ident "a")) (expr (int) (literal (int) "1"))
    (expr (int) (literal (int) "2")))))
+(expr ("Type") (ident "a"))
 (expr (double)
  (cast (decl (double) (bindings (bind () ())))
   (expr (int) (parens (expr (int) (literal (int) "-3"))))))

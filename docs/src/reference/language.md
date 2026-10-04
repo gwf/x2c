@@ -1513,17 +1513,26 @@ name. See
 [Quoting code](../guide/meta-functions.md#quoting-code-with-) for an
 example.
 
-A quotation written `$!(T)( expression )`, where `T` is a type name, a
-`Type` local, or a `${...}` hole of type `Type`, is a typed quotation. It
-builds `(expr T CONTENT)` where it is written. It binds nothing, counts no
-expansion, and opens no transaction. Its holes take the values a rebuild
-gives them: syntax unchanged, a binding identity or `x2c.ident` spelling as
-an identifier expression, and an `int`, String, or Symbol as a literal.
-Inner nodes keep the placeholder type of unbound syntax, and free names stay
-names that bind where the code is bound. A typed quotation may not declare a
-name or apply a template. The compiler accepts `T` as the expression's type without checking it.
-A `$!( ... )` group followed directly by `(` is a typed quotation; otherwise
-it is an expression quotation. See
+A typed quotation is written `$!T{ expression }`, where `T` is one
+identifier that names a type, or `$!(T){ expression }`, where `T` is any
+type, a `Type` local, or a `${...}` hole of type `Type`. An identifier
+after `$!` that spells a macro kind in any case, such as `Unit` or `Type`,
+always names that kind, so a type with that spelling uses the
+parenthesized form. A `$!( ... )` group followed directly
+by `{` is a typed quotation; otherwise it is an expression quotation. A
+typed quotation builds `(expr T CONTENT)` where it is written. It binds
+nothing, counts no expansion, and opens no transaction. Its holes take the
+values a rebuild gives them: syntax unchanged, a binding identity or
+`x2c.ident` spelling as an identifier expression, an `x2c.ident` in a
+member position as its spelling, a number as a literal of its own type with
+its exact value, and a String or Symbol as a literal. A String is a String
+literal when the whole expression is the hole and `T` is `String`; elsewhere
+it is a C string literal. Inner nodes keep the placeholder type of unbound
+syntax, and free names stay names that bind where the code is bound. A
+typed quotation may not declare a name or apply a template. The compiler
+accepts `T` as the expression's type without checking it. A typed quotation
+states the type the code has; it converts nothing, so write a cast inside
+the braces when the code needs one. See
 [Code that knows its type](../guide/meta-functions.md#code-that-knows-its-type).
 
 When one `Name` hole appears in a declaration, a reference, and a member

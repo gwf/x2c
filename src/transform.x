@@ -717,7 +717,7 @@ static List Compiler._declaration(Compiler c, List ast) {
           case %(op = (bind ?var ?mods) ?rhs): {
             Type target_type = %(declare $target
               (bindings (bind $var $mods))).type_from_ast();
-            List native_target = $!($target_type)( $var );
+            List native_target = $!($target_type){ $var };
             List converted = c.convert_initializer(
               rhs, target_type, native_target);
             new_bind = %(op = (bind $var $mods) $converted);
@@ -788,7 +788,7 @@ static List Compiler._destructure_value(Compiler c, List ast) {
                     (!set ?source (expr ?type ?))): {
       List result = c.sym.introduce(c.fresh_name("destructure_result"));
       List temporary = c.sym.introduce(c.fresh_name("destructure"));
-      List result_expr = $!($type)( $result );
+      List result_expr = $!($type){ $result };
       List converted = c._destructure_source(result_expr, type);
       List assignments = c._destructure_assignments(targets, temporary);
       Macro shape = macro Expression(
@@ -824,7 +824,7 @@ static List Compiler._named_destructure(
   Array declarations = [], expressions = [];
   foreach (List ident, targets) {
     declarations.push(%(bind $ident ()));
-    expressions.push($!($type)( $ident ));
+    expressions.push($!($type){ $ident });
   }
   List target_decl =
     c.rebuild_statement($!{ $type ${declarations.list_free()}...; }).cadr();
@@ -894,7 +894,7 @@ static List Compiler._destructure_assignments(
       match (target)
         case %(expr ?type ?): {
           List expression =
-            $!($type)( $target = ${_destructure_element(temporary, index++)} );
+            $!($type){ $target = ${_destructure_element(temporary, index++)} };
           return c._as_statement(expression);
         }
     });
@@ -1413,8 +1413,8 @@ static List Compiler._truthy_expression(Compiler c, List expr) {
   List resolved = c.resolve_protocol_member(expr.cadr(), "truth");
   if (!resolved) return expr;
   (List binding, Type signature) = resolved;
-  List callee = $!($signature)( $binding );
-  return $!(int)( $callee($expr) );
+  List callee = $!($signature){ $binding };
+  return $!int{ $callee($expr) };
 }
 
 static List Compiler._to_var(Compiler c, List expr) =>
@@ -1472,10 +1472,10 @@ static List Compiler._comparison(
   lhs = c.convert_expression(lhs, %("Var"));
   rhs = c.convert_expression(rhs, %("Var"));
   switch (op) {
-    case <==>:  return $!(int)( Var_equal($lhs, $rhs) ).caddr();
-    case <!=>:  return $!(int)( !Var_equal($lhs, $rhs) );
-    case <===>: return $!(int)( Var_same($lhs, $rhs) ).caddr();
-    case <!==>: return $!(int)( !Var_same($lhs, $rhs) );
+    case <==>:  return $!int{ Var_equal($lhs, $rhs) }.caddr();
+    case <!=>:  return $!int{ !Var_equal($lhs, $rhs) };
+    case <===>: return $!int{ Var_same($lhs, $rhs) }.caddr();
+    case <!==>: return $!int{ !Var_same($lhs, $rhs) };
   }
   List call = %(call "Var_compare" (args $lhs $rhs));
   List zero = x2c_literal_int(0);
@@ -1523,7 +1523,7 @@ static List Compiler._dynamic_binary(
   }
   lhs = c.convert_expression(lhs, %("Var"));
   rhs = c.convert_expression(rhs, %("Var"));
-  return $!(Var)( Var_binary($lhs, $op, $rhs) ).caddr();
+  return $!Var{ Var_binary($lhs, $op, $rhs) }.caddr();
 }
 
 static List Compiler._dynamic_compound(
@@ -1670,7 +1670,7 @@ static List Compiler._indexed_call_expr(
   Compiler c, List resolved, List arguments) {
   (List binding, Type signature) = resolved;
   Macro called = $called;
-  List callee = $!($signature)( $binding );
+  List callee = $!($signature){ $binding };
   return c.rebuild_expression(signature.cdr(), called(callee, arguments));
 }
 
@@ -1684,7 +1684,7 @@ static List Compiler._sequenced(
   Type type = value.cadr();
   List temporary = c.sym.introduce(c.fresh_name(stem));
   declarations.push(_value_declaration(type, temporary, value));
-  return $!($type)( $temporary );
+  return $!($type){ $temporary };
 }
 
 /* A C macro such as raylib's WHITE expands to an expression x2c has no
