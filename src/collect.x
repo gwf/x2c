@@ -995,8 +995,9 @@ static void Compiler._replay_included(
     macro imports that the included file exports, as the unit's own imports
     written there would be installed. */
 void Compiler.import_included_exports(Compiler c) {
-  Token first = c.token;
-  for (Token token = first - 1; token >= c.tokenizer.tokens; token--) {
+  Token first = c.token, tokens = c.tokenizer.tokens;
+  for (Token token = first; token > tokens;) {
+    token--;
     if (token.type != <preproc> && token.type != <space> &&
         token.type != <comment>) break;
     first = token;
