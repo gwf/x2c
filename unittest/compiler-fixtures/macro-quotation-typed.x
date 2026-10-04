@@ -7,7 +7,10 @@
 
 typedef struct Call { List callee; Type result; } Call;
 
-static void show(List code) { printf("%s\n", code.repr()); }
+/* The printed form without the spaces repr leaves at its line breaks. */
+static void show(List code) {
+  printf("%s\n", code.repr().replace(" \n", "\n"));
+}
 
 static void built(void) {
   List lhs = %(expr (int) (ident "a"));
