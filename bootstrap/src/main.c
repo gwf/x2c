@@ -96,7 +96,7 @@ typedef struct Workers{
   long * pids;
   int * carried;
   File * captures;
-  String * output;
+  Block * output;
   int live, started, shown, failed, done;
 }
 Workers;
@@ -172,14 +172,28 @@ _x2c_defer_env_0;
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
-static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
-
 typedef struct _x2c_defer_env_1{
   const void * _x2c_defer_capture_1;
 }
 _x2c_defer_env_1;
 
+static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
+
+typedef struct _x2c_defer_env_2{
+  const void * _x2c_defer_capture_2;
+}
+_x2c_defer_env_2;
+
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
+
+static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3);
+
+typedef struct _x2c_defer_env_3{
+  const void * _x2c_defer_capture_3;
+}
+_x2c_defer_env_3;
+
+static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4);
 
 Var Symbol_var(Symbol);
 
@@ -913,7 +927,7 @@ static int Translation_run_workers(Translation * t, Array slices){
   if(jobs > count) jobs = count;
   if((* t).request -> verbose) fprintf(stderr, "x2c: translate with %d workers over %d files\n", jobs, (* t).total);
   _workers =(Workers){
-    .t = &(* t), .slices = slices, .pids = Scope_calloc(jobs, sizeof(long)), .carried = Scope_calloc(jobs, sizeof(int)), .captures = Scope_calloc(jobs, sizeof(File)), .output = Scope_calloc(count, sizeof(String))
+    .t = &(* t), .slices = slices, .pids = Scope_calloc(jobs, sizeof(long)), .carried = Scope_calloc(jobs, sizeof(int)), .captures = Scope_calloc(jobs, sizeof(File)), .output = Scope_calloc(count, sizeof(Block))
   }
   ;
   struct sigaction term, interrupt;
@@ -985,7 +999,9 @@ static void Translation_work(Translation * t, List slice){
 
 int worker_wait_any(long *, int, int *);
 
-String File_string_close(File);
+Block Block_new(size_t);
+
+FileReadStatus File_read_into(File, Block);
 
 static void Workers_reap(Workers * w){
   int status, slot = worker_wait_any((* w).pids, (* w).live, &(status));
@@ -993,25 +1009,65 @@ static void Workers_reap(Workers * w){
   int index =(* w).carried[slot];
   List slice = Var_list(Array_getindex((* w).slices, index));
   File capture =(* w).captures[slot];
-  File_rewind(capture);
-  (* w).output[index] = File_string_close(capture);
-  if((* w).t -> build && ! status) Build_end_translation((* w).t -> build, Var_string(List_car(slice)), 0);
-  (* w).done += List_len(slice);
-  sigset_t unblocked = _block_stop_signals();
-  (* w).live --;
-  (* w).pids[slot] =(* w).pids[(* w).live];
-  (* w).carried[slot] =(* w).carried[(* w).live];
-  (* w).captures[slot] =(* w).captures[(* w).live];
-  sigprocmask(SIG_SETMASK, & unblocked, NULL);
-  if(!(* w).t -> build) report_progress(45220543335690, (* w).done, (* w).t -> total, NULL);
+  {
+    _x2c_defer_env_1 _x2c_macro_environment_1 ={
+      0
+    }
+    ;
+    _x2c_macro_environment_1._x2c_defer_capture_1 =(const void *) & capture;
+    X2CCleanup _x2c_defer_record_1 ={
+      .fn = _x2c_defer_cleanup_1, .env = & _x2c_macro_environment_1
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_1);
+    {
+      File_rewind(capture);
+      Block output = Block_new(sizeof(char));
+      File_read_into(capture, output);
+      (* w).output[index] = output;
+      if((* w).t -> build && ! status) Build_end_translation((* w).t -> build, Var_string(List_car(slice)), 0);
+      (* w).done += List_len(slice);
+      sigset_t unblocked = _block_stop_signals();
+      (* w).live --;
+      (* w).pids[slot] =(* w).pids[(* w).live];
+      (* w).carried[slot] =(* w).carried[(* w).live];
+      (* w).captures[slot] =(* w).captures[(* w).live];
+      sigprocmask(SIG_SETMASK, & unblocked, NULL);
+      if(!(* w).t -> build) report_progress(45220543335690, (* w).done, (* w).t -> total, NULL);
+    }
+    x2c_cleanup_leave(& _x2c_defer_record_1);
+  }
+
 }
+
+int File_write_all(File, const void *, size_t);
 
 static void Workers_show(Workers * w){
   while((* w).shown <(* w).started && ! Workers_carries(&((* w)), (* w).shown)){
-    String text =(* w).output[(* w).shown ++];
-    if(! String_truth(text)) continue;
-    report_suspend();
-    fputs(text, stderr);
+    Block output =(* w).output[(* w).shown ++];
+    if(output == NULL) continue;
+    {
+      _x2c_defer_env_2 _x2c_macro_environment_2 ={
+        0
+      }
+      ;
+      _x2c_macro_environment_2._x2c_defer_capture_2 =(const void *) & output;
+      X2CCleanup _x2c_defer_record_2 ={
+        .fn = _x2c_defer_cleanup_2, .env = & _x2c_macro_environment_2
+      }
+      ;
+      x2c_cleanup_push(& _x2c_defer_record_2);
+      {
+        if(! output -> length){
+          x2c_cleanup_leave(& _x2c_defer_record_2);
+          continue;
+        }
+        report_suspend();
+        File_write_all(stderr, output -> bytes, output -> length);
+      }
+      x2c_cleanup_leave(& _x2c_defer_record_2);
+    }
+
   }
 
 }
@@ -1091,23 +1147,23 @@ void Build_publish_script(Build, String);
 static int _build_target(CliRequest request, Array commands){
   Context target = Context_open_isolated_named("build target");
   {
-    _x2c_defer_env_1 _x2c_macro_environment_1 ={
+    _x2c_defer_env_3 _x2c_macro_environment_3 ={
       0
     }
     ;
-    _x2c_macro_environment_1._x2c_defer_capture_1 =(const void *) & target;
-    X2CCleanup _x2c_defer_record_1 ={
-      .fn = _x2c_defer_cleanup_2, .env = & _x2c_macro_environment_1
+    _x2c_macro_environment_3._x2c_defer_capture_3 =(const void *) & target;
+    X2CCleanup _x2c_defer_record_3 ={
+      .fn = _x2c_defer_cleanup_4, .env = & _x2c_macro_environment_3
     }
     ;
-    x2c_cleanup_push(& _x2c_defer_record_1);
+    x2c_cleanup_push(& _x2c_defer_record_3);
     {
       {
-        X2CCleanup _x2c_defer_record_2 ={
-          .fn = _x2c_defer_cleanup_1, .env = 0
+        X2CCleanup _x2c_defer_record_4 ={
+          .fn = _x2c_defer_cleanup_3, .env = 0
         }
         ;
-        x2c_cleanup_push(& _x2c_defer_record_2);
+        x2c_cleanup_push(& _x2c_defer_record_4);
         {
           Build b = CliRequest_prepare(request);
           request -> cc = Var_string(Context_export(target, String_var(request -> cc)));
@@ -1121,8 +1177,8 @@ static int _build_target(CliRequest request, Array commands){
             {
               int _x2c_return_value_1 = status;
               {
-                x2c_cleanup_leave(& _x2c_defer_record_2);
-                x2c_cleanup_leave(& _x2c_defer_record_1);
+                x2c_cleanup_leave(& _x2c_defer_record_4);
+                x2c_cleanup_leave(& _x2c_defer_record_3);
                 return _x2c_return_value_1;
               }
 
@@ -1136,19 +1192,19 @@ static int _build_target(CliRequest request, Array commands){
           {
             int _x2c_return_value_2 = status;
             {
-              x2c_cleanup_leave(& _x2c_defer_record_2);
-              x2c_cleanup_leave(& _x2c_defer_record_1);
+              x2c_cleanup_leave(& _x2c_defer_record_4);
+              x2c_cleanup_leave(& _x2c_defer_record_3);
               return _x2c_return_value_2;
             }
 
           }
 
         }
-        x2c_cleanup_leave(& _x2c_defer_record_2);
+        x2c_cleanup_leave(& _x2c_defer_record_4);
       }
 
     }
-    x2c_cleanup_leave(& _x2c_defer_record_1);
+    x2c_cleanup_leave(& _x2c_defer_record_3);
   }
 
 }
@@ -1464,16 +1520,28 @@ static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   ParsedUnit_close(&((*(ParsedUnit *) _x2c_defer_data_0->_x2c_defer_capture_0)));
 }
 
+static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
+  _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;
+  File_close((*(File *) _x2c_defer_data_1->_x2c_defer_capture_1));
+}
+
+void Block_free(Block);
+
+static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
+  _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_2;
+  Block_free((*(Block *) _x2c_defer_data_2->_x2c_defer_capture_2));
+}
+
 void macro_library_reset(void);
 
-static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
+static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3){
   macro_library_reset();
 }
 
 void Context_cleanup(Context);
 
-static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
-  _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_2;
-  Context_cleanup((*(Context *) _x2c_defer_data_1->_x2c_defer_capture_1));
+static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4){
+  _x2c_defer_env_3 * _x2c_defer_data_3 =(_x2c_defer_env_3 *) _x2c_defer_opaque_4;
+  Context_cleanup((*(Context *) _x2c_defer_data_3->_x2c_defer_capture_3));
 }
 
