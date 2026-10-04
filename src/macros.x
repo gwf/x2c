@@ -586,12 +586,15 @@ static void Definition.body(Definition &d) {
   }
 }
 
-/* A Stmt result's body after `=>` is one expression statement, whose `;`
-   an anonymous macro omits. */
+/* A Stmt result's body after `=>` is one statement: a Stmt macro
+   invocation, or else an expression statement, whose `;` an anonymous
+   macro omits. */
 static List Definition.read_body(Definition &d) {
   Compiler c = d.c;
   if (d.has_expression_body()) return d.expression_body();
   if (c.peek(0) == <"{">) return c._parse_body(d.body_kind(), d.using);
+  if (!d.anonymous && c.macro_starts_target_at(AST_STATEMENT))
+    return c.try_parse_macro_target_at(AST_STATEMENT);
   List expression = c.parse_expression();
   if (!d.anonymous) c.expect(<;>);
   return %(seq (stmnt $expression));
