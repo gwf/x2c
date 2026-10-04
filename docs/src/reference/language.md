@@ -877,6 +877,28 @@ form; its body is then the single statement `expression;`. When that
 expression is a `meta` call, the call may return a statement, as described
 under [Macro-visible syntax](#macro-visible-syntax).
 
+Here `guarded` returns an `if` statement, which an expression position
+would reject:
+
+```x2c
+#include "meta.x"
+meta static List guarded(List condition, List body) =>
+  $!{ if ($condition) $body };
+
+macro Stmt $when(Expr $condition, Stmt $body) =>
+  $guarded($condition, $body);
+
+int main(void) {
+  int n = 3;
+  $when(n > 2, printf("%d\n", n););
+  return 0;
+}
+```
+
+```text
+3
+```
+
 For source compatibility, the compiler also accepts the former `=> { ... }`
 braced form and a complete parenthesized expression body written as
 `=> (expression)` without a semicolon. New code should use the forms above.
