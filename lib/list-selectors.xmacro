@@ -1,0 +1,29 @@
+/*  list-selectors.xmacro -- compound List selector templates
+
+    One helper builds a selector's car and cdr chain from its spelling, and
+    two templates state the List and Var forms by the selector's last step.
+*/
+
+/* `value` with the steps `spelling` names applied right to left: `a` is
+   car and `d` is cdr. */
+meta static List _selector_chain(String spelling, List value) {
+  for (int i = spelling.len() - 2; i >= 1; i--)
+    value = spelling[i] == 'a' ? $!( car($value) ) : $!( cdr($value) );
+  return value;
+}
+
+/* A selector whose last step is car. */
+macro Unit $selector.car(Name $name) {
+  /** Returns the element that `$name` selects from `value`. */
+  inline Var List.$name(List value) => $_selector_chain($name, value);
+  /** Returns the element that `$name` selects from `value` as a `List`. */
+  inline Var Var.$name(Var value) => $_selector_chain($name, value);
+}
+
+/* A selector whose last step is cdr. */
+macro Unit $selector.cdr(Name $name) {
+  /** Returns the tail that `$name` selects from `value`. */
+  inline Self List.$name(Self value) => $_selector_chain($name, value);
+  /** Returns the tail that `$name` selects from `value` as a `List`. */
+  inline List Var.$name(Var value) => $_selector_chain($name, value);
+}

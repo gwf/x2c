@@ -11,6 +11,7 @@
 
 #pragma once
 #include "x2c.x"
+$(import "list-selectors.xmacro")
 
 /** Returns `cdr(car(value))`. */
 inline Self List.cdar(Self value) => cdr(car(value));
