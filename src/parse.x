@@ -142,10 +142,10 @@ static List Compiler._top_level_lisp(Compiler c, int skip_body) {
   return NULL;
 }
 
-/* `export` marks a file-scope import, unless a declaration names a type
-   `export`. */
+/* `export` marks the compile-time form that follows it. Before anything
+   else it is an ordinary identifier, such as a C macro's name. */
 static int Compiler._at_export(Compiler c) =>
-  c.at_word("export") && !c.sym.get(%("export")).type().is_typedef();
+  c.at_word("export") && c.peek(1) == <"$(">;
 
 /* `export $(import "...")` gives the import to every file that includes
    this one, so collection records it in the file's interface. The full

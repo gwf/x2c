@@ -2089,12 +2089,13 @@ decorators, its `keyword` aliases, its `meta` functions and `meta static`
 values, its top-level Lisp forms, and the files it imports. An exported
 `.xlisp` import delivers its Lisp definitions.
 
-`export` applies only to a file-scope `$(import ...)` in a `.x` file. A
-macro, `keyword`, `meta` function, or Lisp definition written in the `.x`
-file stays in that file. To share one, move it to an `.xmacro` file and
-export that import. An `.xmacro` file needs no `export`, because its imports
-already reach the file that imports it. An import without `export` stays in
-its file.
+`export` applies only to a file-scope `$(import ...)` in a `.x` file.
+Unless `$(` follows it, `export` is an ordinary identifier, such as the
+name of a C macro. A macro, `keyword`, `meta` function, or Lisp definition
+written in the `.x` file stays in that file. To share one, move it to an
+`.xmacro` file and export that import. An `.xmacro` file needs no `export`,
+because its imports already reach the file that imports it. An import
+without `export` stays in its file.
 
 The usual import rules apply at the include line. A delivered definition
 that collides with a visible macro is an error. A later definition in the
