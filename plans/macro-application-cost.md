@@ -190,6 +190,19 @@ the branch tip; mean of four alternating runs after a warm-up), translating
 instead of 236.3 G. The 2,000-function `foreach` unit takes 1.6 s instead
 of 18.8 s when both runs are warm.
 
+## Integration review
+
+The integrator reproduced and repaired two gaps before publication:
+
+- In-place symbol maps made rejected declaration source metadata survive
+  rollback. Source metadata writes now use the same undo log. A native probe
+  retained the original declaration on dev and the rejected declaration on
+  the submitted tree; the repaired tree retains the original declaration.
+- An empty binder-use map was mistaken for an absent map. A template with no
+  holes therefore still reached the 10,000-expansion limit. Definition
+  finishing now tests map identity, so empty templates receive rebuild and
+  leaf rows too. A 12,000-application probe verifies that case.
+
 ## Outside this plan
 - Two bootstrap-refresh rounds are needed when a change alters the
   compiler's own emitted C. After one round, `.xi` files carry the old

@@ -1935,7 +1935,7 @@ void Compiler.record_source_declaration(
   List key = source_key.cadr();
   Type type = symbols[key];
   List declaration = %(@range $type);
-  c.source_declarations[source_key] = declaration;
+  c.sym.put(c.source_declarations, source_key, declaration);
   if (c.source_primary && !c.shallow) {
     c.source_definitions[binding] = declaration;
     c.source_occurrences.push(%(@range $binding $type));
@@ -1971,8 +1971,8 @@ void Compiler.copy_source_declaration(
   Var declaration;
   List target_key = %($target $key);
   if (c.source_declarations.try_get(%($source $key), declaration))
-    c.source_declarations[target_key] = declaration;
-  else c.source_declarations.del(target_key);
+    c.sym.put(c.source_declarations, target_key, declaration);
+  else c.sym.drop(c.source_declarations, target_key);
 }
 
 /** Carries declaration metadata beside a completed symbol-map merge. */

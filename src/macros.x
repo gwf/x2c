@@ -606,7 +606,7 @@ static void Definition.finish(Definition &d) {
   d.fresh = d.fresh_rows(locals);
   d.pattern = d.invocation_pattern();
   Map uses = _binder_uses(d.template);
-  if (!uses) return;
+  if (!(void *) uses) return;
   d.rebuild = %(${d.rebuild_template()} ${d.rebuild_keys(uses)});
   d.leaf = !d.nested && d.uses_holes_once(uses);
 }

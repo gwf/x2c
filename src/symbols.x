@@ -1287,14 +1287,15 @@ static void SymTxn._save_sources(SymTxn &s) {
   s.source_occurrences = s.c.source_occurrences.len();
 }
 
-/* Rollback restores the active scope's maps, file statics, and binding
-   facts. A macro value application also restores the other base scopes'
-   bindings. Rows of other maps stay in the log for an enclosing
-   transaction. */
+/* Rollback restores the active scope's maps, file statics, binding facts,
+   and declaration source metadata. A macro value application also restores
+   the other base scopes' bindings. Rows of other maps stay in the log for
+   an enclosing transaction. */
 static int SymTxn._tracks(SymTxn &s, Map map) {
   if (_same(map, s.scope.symbols) || _same(map, s.scope.bindings) ||
       _same(map, s.scope.enumerators) || _same(map, s.scope.macros) ||
       _same(map, s.statics) || _same(map, s.binding_facts)) return 1;
+  if (s.c.source_facts && _same(map, s.c.source_declarations)) return 1;
   if (!s.extended) return 0;
   Sym sym = s.c.sym;
   for (int i = 0; i < sym.base_scopes; i++)
