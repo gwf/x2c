@@ -206,9 +206,12 @@ Phase 3 builds a quotation without slots where it is written, as
 `("x2c.quoted" FRESH SYNTAX)`, with `("x2c.hole" ...)` for each hole use
 and `("x2c.at" NODE)` for each origin anchor. `Compiler.land_quotation`
 names the private binders, projects each hole through the existing
-capture-row code at the landing, and binds without a transaction, an
-expansion count, or a Match. Projection stays at the landing because a
-rebuild keeps `src` wrappers that a site projection would strip; the
+capture-row code at the landing, and binds without an expansion count or
+a Match. It opens the existing semantic transaction during recovery, as
+the pending Macro carrier does. A native integration probe verifies that
+rejected syntax leaves no binding identities or facts behind. Projection
+stays at the landing because a rebuild keeps `src` wrappers that a site
+projection would strip; the
 projections therefore stay in `src/macros.x` and the helper needs no copy.
 
 | Probe (seconds) | Quotation before | Quotation after | Raw List |

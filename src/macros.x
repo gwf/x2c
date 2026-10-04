@@ -3066,8 +3066,8 @@ static List _row_fields(List row) {
    file-scope row declares with linkage. Landing fills the syntax as an
    expansion fills its template: it names the private binders, projects
    each hole as a capture row would, and keeps anchors only where an
-   invocation lands it. It opens no transaction and counts no expansion,
-   since the template applies nothing. */
+   invocation lands it. Recovery gives binding a semantic transaction.
+   It counts no expansion, since the template applies nothing. */
 
 /* One landing of quoted syntax. `retain` keeps each hole's value as the
    syntax it is, as a rebuild does. */
@@ -3084,11 +3084,16 @@ List Compiler.land_quotation(
     .c = c, .site = site ? site : c.token, .anchored = !!site};
   List bound = NULL;
   $let(c.macro_application, c.macro_application + 1) {
+    SymTxn transaction = { 0 };
+    if (c.recovery_depth > 0)
+      transaction = c.begin_semantic_transaction();
+    defer transaction.rollback();
     landing.names = c._private_names(fresh);
     Var filled = landing.fill(syntax);
     $let(c.token, site)
     $let(c.origin, c.record_origin(site))
       bound = c.bind_syntax(filled, position, return_type);
+    transaction.commit();
   }
   if (position == AST_BLOCK || position == AST_STATEMENT ||
       position == AST_UNIT)
