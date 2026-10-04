@@ -2468,28 +2468,16 @@ void Compiler.close_child(Compiler c, Compiler child) {
     state.
 */
 void Compiler.borrow_unit_semantics(Compiler c, Compiler owner) {
-  c.sym = owner.sym;
-  c.fn_defs = owner.fn_defs;
-  c.id_keys = owner.id_keys;
-  c.key_ids = owner.key_ids;
-  c.protocols = owner.protocols;
-  c.adoptions = owner.adoptions;
-  c.conforms = owner.conforms;
-  c.protocol_helpers = owner.protocol_helpers;
-  c.proto_cache = owner.proto_cache;
-  c.meta_comptime = owner.meta_comptime;
-  c.meta_regions = owner.meta_regions;
-  c.meta_hashes = owner.meta_hashes;
-  c.meta_calls = owner.meta_calls;
-  c.native_meta = owner.native_meta;
+  $copy_fields(c, owner, sym, fn_defs, id_keys, key_ids, protocols,
+               adoptions, conforms, protocol_helpers, proto_cache,
+               meta_comptime, meta_regions, meta_hashes, meta_calls,
+               native_meta);
 }
 
 /** Shares `owner`'s pending `meta` group and the definitions it reads, which
     belong with the Lisp session that holds the group's stubs. */
 void Compiler.share_meta_group(Compiler c, Compiler owner) {
-  c.meta_group = owner.meta_group;
-  c.meta_group_bound = owner.meta_group_bound;
-  c.meta_defs = owner.meta_defs;
+  $copy_fields(c, owner, meta_group, meta_group_bound, meta_defs);
 }
 
 /** Takes over `owner`'s macro, object-like `#define`, import, keyword,
@@ -2498,15 +2486,8 @@ void Compiler.share_meta_group(Compiler c, Compiler owner) {
     unit's literal cache and use its Lisp environment.
 */
 void Compiler.take_unit_state(Compiler c, Compiler owner) {
-  c.id_keys = owner.id_keys;
-  c.key_ids = owner.key_ids;
-  c.macros = owner.macros;
-  c.object_macros = owner.object_macros;
-  c.imports = owner.imports;
-  c.kw_aliases = owner.kw_aliases;
-  c.kw_seen = owner.kw_seen;
-  c.macro_lisp = owner.macro_lisp;
-  c.declaration_effects = owner.declaration_effects;
+  $copy_fields(c, owner, id_keys, key_ids);
+  $segment_state(c, owner);
   c.borrowed_lisp = c.macro_lisp != NULL;
   c.share_meta_group(owner);
 }
@@ -2516,13 +2497,7 @@ void Compiler.take_unit_state(Compiler c, Compiler owner) {
     the shadow is released.
 */
 void Compiler.return_unit_state(Compiler c, Compiler owner) {
-  owner.macros = c.macros;
-  owner.object_macros = c.object_macros;
-  owner.imports = c.imports;
-  owner.kw_aliases = c.kw_aliases;
-  owner.kw_seen = c.kw_seen;
-  owner.macro_lisp = c.macro_lisp;
-  owner.declaration_effects = c.declaration_effects;
+  $segment_state(owner, c);
   owner.declaration_produced |= c.declaration_produced;
   c.borrowed_lisp = c.macro_lisp != NULL;
 }
@@ -2662,66 +2637,34 @@ static Compiler _new(Compiler owner) {
 
 static void Compiler._init_tables(Compiler c) {
   c.id_keys = [];
-  c.key_ids = {};
-  c.deps = {};
-  c.macros = {};
-  c.kw_aliases = {};
-  c.kw_seen = {};
-  c.object_macros = {};
-  c.proto_cache = {};
-  c.imports = {};
-  c.init_tokens = {};
-  c.static_init_deps = {};
-  c.fn_defs = {};
-  c.meta_comptime = {};
-  c.meta_regions = {};
-  c.meta_hashes = {};
-  c.meta_calls = {};
-  c.native_meta = {};
+  $set_fields(c, {}, key_ids, deps, macros, kw_aliases, kw_seen,
+              object_macros, proto_cache, imports, init_tokens,
+              static_init_deps, fn_defs, meta_comptime, meta_regions,
+              meta_hashes, meta_calls, native_meta);
 }
 
 /* A child compiler owns its tokens, symbols, and diagnostics. Package
    registries and generated-name state belong to the whole translation
    unit, so every child must mutate the owner's exact objects. */
 static void Compiler._share_unit(Compiler c, Compiler owner) {
-  c.package = owner.package;
-  c.package_dirs = owner.package_dirs;
-  c.package_roots = owner.package_roots;
-  c.package_aliases = owner.package_aliases;
-  c.package_members = owner.package_members;
-  c.names = owner.names;
-  c.source_map = owner.source_map;
-  c.recovery_depth = owner.recovery_depth;
-  c.sources = owner.sources;
-  c.declaration_produced = owner.declaration_produced;
-  c.source_facts = owner.source_facts;
-  c.source_occurrences = owner.source_occurrences;
-  c.source_definitions = owner.source_definitions;
-  c.source_declarations = owner.source_declarations;
-  c.source_texts = owner.source_texts;
-  c.unit_script = owner.unit_script;
-  c.include_dirs = owner.include_dirs;
-  c.meta_build = owner.meta_build;
+  $copy_fields(c, owner, package, package_dirs, package_roots,
+               package_aliases, package_members, names, source_map,
+               recovery_depth, sources, declaration_produced, source_facts,
+               source_occurrences, source_definitions, source_declarations,
+               source_texts, unit_script, include_dirs, meta_build);
 }
 
 /* The first compiler of a unit creates the state its children share and
    starts from the shared session's compile-time-only definitions. */
 static void Compiler._own_unit(Compiler c) {
   c.inherit_library_comptime();
-  c.package_roots = {};
-  c.package_aliases = {};
-  c.package_members = {};
+  $set_fields(c, {}, package_roots, package_aliases, package_members);
   c.names = Scope.calloc(1, sizeof(struct GenNames));
-  c.names.counters = {};
-  c.names.adapters = {};
-  c.names.file_scope_owners = {};
+  $set_fields(c.names, {}, counters, adapters, file_scope_owners);
 }
 
 static void Compiler._init_queues(Compiler c) {
-  c.inits = [];
-  c.early_decls = [];
-  c.meta_defs = [];
-  c.meta_group = [];
+  $set_fields(c, [], inits, early_decls, meta_defs, meta_group);
   c.meta_group_bound = {};
 }
 

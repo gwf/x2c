@@ -4094,19 +4094,12 @@ static void Import.borrow(Import &in, Compiler child) {
   Compiler c = in.c;
   child.borrow_diagnostics(c);
   child.borrow_unit_semantics(c);
-  child.macros = c.macros;
-  child.kw_aliases = c.kw_aliases;
-  child.kw_seen = c.kw_seen;
-  child.macro_lisp = c.macro_lisp;
-  child.meta_group = c.meta_group;
-  child.meta_group_bound = c.meta_group_bound;
-  child.unit_nodes = c.unit_nodes;
+  $copy_fields(child, c, macros, kw_aliases, kw_seen, macro_lisp,
+               meta_group, meta_group_bound, unit_nodes, imports,
+               import_stack, declaration_effects);
   child.borrowed_lisp = 1;
   child.import_src = in.path;
   child.inherited_lisp = Compiler.inherits_import(in.path);
-  child.imports = c.imports;
-  child.import_stack = c.import_stack;
-  child.declaration_effects = c.declaration_effects;
 }
 
 static void Import.form(Import &in, Compiler child) {
