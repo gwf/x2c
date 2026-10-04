@@ -2746,15 +2746,25 @@ static String Compiler._filled_doc(Compiler c, String doc) {
    loaded. Forwarding keeps the original source wrapper, so the inner hole
    reads as the outer argument, even when two arguments have equal syntax. */
 static Map Compiler._hole_spellings(Compiler c) {
-  Map spellings = {};
+  Map written = {}, spellings = {};
   String file = absolute_path(c.filename);
+  foreach (List frame, c.macro_stack)
+    foreach (List binding, frame[2])
+      match (binding)
+        case %(? (src (source ?(String path) ?(int begin) ?(int end))
+                      ?syntax)):
+          if (c.text && path == file)
+            written[syntax] = String.new_len(c.text + begin, end - begin);
   foreach (List binding, c.macro_stack.car().list()[2]) {
     (Var binder, Var value) = binding;
-    Var spelling = value is <string> ? value : void;
+    Var syntax = value;
+    match (value) case %(src ? ?captured): syntax = captured;
+    Var spelling = syntax is <string> ? syntax : void;
     match (value)
       case %(src (source ?(String path) ?(int begin) ?(int end)) ?):
-        if (c.text && path == file)
+        if (spelling is void && c.text && path == file)
           spelling = String.new_len(c.text + begin, end - begin);
+    if (spelling is void) spelling = written[syntax];
     if (spelling is not void) spellings[binder.str()[1:]] = spelling;
   }
   return spellings;

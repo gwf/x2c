@@ -334,6 +334,7 @@ grep -Fq "expected atomic expression" "$BUILD/dump-later.stderr"
 cat >"$BUILD/doc-holes.x" <<'EOF'
 #include "x2c.x"
 int x;
+typedef int DocFamily;
 macro Unit $documented(Name $name, Expr $left, Expr $right) {
   /** name=$name left=$left right=$right unknown=$unknown */
   int $name(void) { return $left + $right; }
@@ -341,8 +342,16 @@ macro Unit $documented(Name $name, Expr $left, Expr $right) {
 macro Unit $forwarded(Name $name, Expr $left, Expr $right) {
   $documented($name, $left, $right);
 }
+macro Unit $type_documented(Type $family) {
+  /** Reads $family.get. */
+  int $family.doc_get($family value) { return value; }
+}
+macro Unit $type_forwarded(Type $outer) {
+  $type_documented($outer);
+}
 $documented(direct, x+1, x + 1);
 $forwarded(forwarded, x+2, x + 2);
+$type_forwarded(DocFamily);
 EOF
 "$X2C" translate -q --dump-definitions "$BUILD/doc-holes.x" \
   >"$BUILD/doc-holes.stdout"
@@ -350,6 +359,7 @@ grep -Fq 'name=direct left=x+1 right=x + 1 unknown=$unknown' \
   "$BUILD/doc-holes.stdout"
 grep -Fq 'name=forwarded left=x+2 right=x + 2 unknown=$unknown' \
   "$BUILD/doc-holes.stdout"
+grep -Fq 'Reads DocFamily.get.' "$BUILD/doc-holes.stdout"
 
 set +e
 "$X2C" "$BUILD/a/item.x" >"$BUILD/no-command.stdout" \
