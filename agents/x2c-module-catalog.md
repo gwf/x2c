@@ -953,15 +953,15 @@ optional compound `List` selectors.
 
 Public functions:
 
-`List.cdar`, `Var.cdar`, `List.caaar`, `Var.caaar`, `List.caadr`, `Var.caadr`,
-`List.cadar`, `Var.cadar`, `List.cdaar`, `Var.cdaar`, `List.cdadr`,
-`Var.cdadr`, `List.cddar`, `Var.cddar`, `List.cdddr`, `Var.cdddr`,
-`List.caaaar`, `Var.caaaar`, `List.caaadr`, `Var.caaadr`, `List.caadar`,
-`Var.caadar`, `List.caaddr`, `Var.caaddr`, `List.cadaar`, `Var.cadaar`,
-`List.cadadr`, `Var.cadadr`, `List.caddar`, `Var.caddar`, `List.cadddr`,
-`Var.cadddr`, `List.cdaaar`, `Var.cdaaar`, `List.cdaadr`, `Var.cdaadr`,
-`List.cdadar`, `Var.cdadar`, `List.cdaddr`, `Var.cdaddr`, `List.cddaar`,
-`Var.cddaar`, `List.cddadr`, `Var.cddadr`, `List.cdddar`, `Var.cdddar`,
+`List.cdar`, `Var.cdar`, `List.caaar`, `Var.caaar`, `List.cdaar`, `Var.cdaar`,
+`List.cadar`, `Var.cadar`, `List.cddar`, `Var.cddar`, `List.caadr`,
+`Var.caadr`, `List.cdadr`, `Var.cdadr`, `List.cdddr`, `Var.cdddr`,
+`List.caaaar`, `Var.caaaar`, `List.cdaaar`, `Var.cdaaar`, `List.cadaar`,
+`Var.cadaar`, `List.cddaar`, `Var.cddaar`, `List.caadar`, `Var.caadar`,
+`List.cdadar`, `Var.cdadar`, `List.caddar`, `Var.caddar`, `List.cdddar`,
+`Var.cdddar`, `List.caaadr`, `Var.caaadr`, `List.cdaadr`, `Var.cdaadr`,
+`List.cadadr`, `Var.cadadr`, `List.cddadr`, `Var.cddadr`, `List.caaddr`,
+`Var.caaddr`, `List.cdaddr`, `Var.cdaddr`, `List.cadddr`, `Var.cadddr`,
 `List.cddddr`, `Var.cddddr`
 
 ### [lib/list.x](../lib/list.x)
