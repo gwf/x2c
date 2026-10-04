@@ -117,6 +117,12 @@ static int MatchCaptureLayout__buffer_valid(MatchCaptureLayout layout, MatchCapt
 
 static int MatchPlan__capture(MatchPlan m, Var input, MatchCaptureBuffer * captures, MachineStats * stats);
 
+static List _seen_list(Var value, Var(* view)(Var));
+
+static int MatchPlan__key_admits(MatchPlan plan, MatchKey * key, List list, Var(* view)(Var));
+
+static int MatchPlan__key_equal(MatchPlan plan, Var value, Var key);
+
 static int _run_capture(MachineView view, MatchMachine * m, Var input, MatchCaptureBuffer * captures);
 
 static int _commit(MachineView view, MatchMachine * m, MatchCaptureBuffer * captures);
@@ -635,7 +641,7 @@ _Noreturn void MatchPlan_raise_ineligible(const char * reason, const char * owne
   if(! _init_guard_) _file_init_();
   String fence = String_new(reason), site = String_new(owner);
   {
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/match.x",.function = "MatchPlan_raise_ineligible",.line = 440};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/match.x",.function = "MatchPlan_raise_ineligible",.line = 456};
     x2c_error_raise_n(& _x2c_error_site_0, 1358596898646632, 2, Symbol_var(32993636), String_var(site), Symbol_var(12939466), String_var(fence));
     __builtin_unreachable();
   }
@@ -671,10 +677,43 @@ MachineView MachineProgram_view(MachineProgram);
 void MatchMachine_release(MatchMachine *);
 
 static int MatchPlan__capture(MatchPlan m, Var input, MatchCaptureBuffer * captures, MachineStats * stats){
+  if(! MatchPlan_admits(m, input, NULL)) return 0;
   MatchMachine * machine = MatchMachine_acquire(stats);
   int result = _run_capture(MachineProgram_view(m -> program), &(* machine), input, captures);
   MatchMachine_release(machine);
   return result;
+}
+
+int MatchPlan_admits(MatchPlan plan, Var input, Var(* view)(Var)){
+  if(! _init_guard_) _file_init_();
+  if(! plan -> key_count) return 1;
+  List list = _seen_list(input, view);
+  if(! List_truth(list)) return 0;
+  for(int i = 0;  i < plan -> key_count;  i ++) if(MatchPlan__key_admits(plan, & plan -> keys[i], list, view)) return 1;
+  return 0;
+}
+
+static List _seen_list(Var value, Var(* view)(Var)){
+  if(view) value = view(value);
+  return Var_is_row(value, 9, 7, 4) ? Var_list(value) : NULL;
+}
+
+static int MatchPlan__key_admits(MatchPlan plan, MatchKey * key, List list, Var(* view)(Var)){
+  if(! MatchPlan__key_equal(plan, List_car(list), key -> head)) return 0;
+  if(! key -> index) return 1;
+  for(int i = 0;  i < key -> index && List_truth(list);  i ++) list = List_cdr(list);
+  if(! List_truth(list)) return 0;
+  Var element = List_car(list);
+  if(key -> nested){
+    List inner = _seen_list(element, view);
+    if(! List_truth(inner)) return 0;
+    element = List_car(inner);
+  }
+  return MatchPlan__key_equal(plan, element, key -> inner);
+}
+
+static int MatchPlan__key_equal(MatchPlan plan, Var value, Var key){
+  return plan -> key_bits ? value.u64 == key.u64 : Var_equal(value, key);
 }
 
 void MatchMachine_begin(MatchMachine *, MachineView, Var);
@@ -717,6 +756,7 @@ int MatchPlan_execute(MatchPlan plan, Var input, List * out_bindings, MachineSta
   if(! _init_guard_) _file_init_();
   if(! MatchPlan__prepared(plan, "MatchPlan.execute")) return - 1;
   if(! out_bindings) return - 1;
+  if(! MatchPlan_admits(plan, input, NULL)) return 0;
   MatchMachine * machine = MatchMachine_acquire(stats);
   List bindings;
   int result = MatchPlan__run(plan, &(* machine), input, &(bindings));
@@ -835,7 +875,7 @@ static int MatchPlan__replace_all(MatchPlan plan, List input, Var template, List
 }
 
 static int MatchWalk__test(MatchWalk * walk, Var node){
-  return _run_capture((* walk).view, &(*(* walk).m), node, (* walk).captures);
+  return MatchPlan_admits((* walk).plan, node, NULL) ? _run_capture((* walk).view, &(*(* walk).m), node, (* walk).captures) : 0;
 }
 
 static List MatchWalk__hit(MatchWalk * walk, Var node){

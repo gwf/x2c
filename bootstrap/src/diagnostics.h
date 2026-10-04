@@ -10,6 +10,7 @@
 #include "compiler.h"
 typedef struct Diagnostics{
   Array entries;
+  Map published;
   Compiler printer;
   int limit;
   int count, limit_notified;
@@ -52,6 +53,8 @@ _Noreturn void Compiler_report_error(Compiler compiler, Symbol code, String mess
 void Compiler_report_warning(Compiler c, Symbol code, String message, Token token, List notes);
 
 void Compiler_report_warning_at(Compiler compiler, Symbol code, String message, List location, List notes);
+
+void Compiler_take_diagnostics(Compiler c, Compiler child);
 
 int Compiler_error_count(Compiler compiler);
 

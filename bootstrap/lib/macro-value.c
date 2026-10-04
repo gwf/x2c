@@ -841,6 +841,7 @@ static MacroFixedSlots _macro_fixed_slots(Macro t, List names, MatchPlan plan){
 }
 
 int MatchPlan_execute_capture(MatchPlan, Var, MatchCaptureBuffer *, MachineStats *);
+int MatchPlan_admits(MatchPlan, Var, Var(*)(Var));
 void MatchMachine_open(MatchMachine *);
 void MatchMachine_begin(MatchMachine *, MachineView, Var);
 MachineView MachineProgram_view(MachineProgram);
@@ -848,7 +849,7 @@ void MatchMachine_run(MatchMachine *);
 void MatchMachine_finish(MatchMachine *);
 void MatchMachine_dispose(MatchMachine *);
 static int _macro_case_match(List code, MatchPlan plan, MacroFixedSlots * policy, MatchCaptureBuffer * captured){
-  if(plan -> status != MACHINE_PREPARED) return MatchPlan_execute_capture(plan, List_var(code), &(* captured), NULL) == 1;  MatchMachine machine;  MatchMachine_open(&(machine));  machine.relation = _macro_identity_equal;  machine.relation_context = policy;  machine.view = _macro_unwrap;  MatchMachine_begin(&(machine), MachineProgram_view(plan -> program), List_var(code));  MatchMachine_run(&(machine));  int matched = machine.status == 982 && _macro_take_slots(&(machine), captured);  MatchMachine_finish(&(machine));  MatchMachine_dispose(&(machine));  return matched;
+  if(plan -> status != MACHINE_PREPARED) return MatchPlan_execute_capture(plan, List_var(code), &(* captured), NULL) == 1;  if(! MatchPlan_admits(plan, List_var(code), _macro_unwrap)) return 0;  MatchMachine machine;  MatchMachine_open(&(machine));  machine.relation = _macro_identity_equal;  machine.relation_context = policy;  machine.view = _macro_unwrap;  MatchMachine_begin(&(machine), MachineProgram_view(plan -> program), List_var(code));  MatchMachine_run(&(machine));  int matched = machine.status == 982 && _macro_take_slots(&(machine), captured);  MatchMachine_finish(&(machine));  MatchMachine_dispose(&(machine));  return matched;
 }
 
 List MatchMachine_materialize_span(MatchMachine *, MachineSpan);

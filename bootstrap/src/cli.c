@@ -907,7 +907,7 @@ static void _one_dash_removed(String arg, String use);
 
 _Noreturn static void _response_error(String path, int line, const char * message);
 
-static int _default_build_jobs(void);
+static int _default_jobs(void);
 
 typedef struct _x2c_defer_env_0{
   const void * _x2c_defer_capture_0;
@@ -1059,7 +1059,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _129 = String_new("Run \'x2c help <command>\' or \'x2c <command> --help\' for command help.");
   _130 = String_new("/commands.txt");
   _131 = String_new("Usage:\n  x2c translate [options] <input.x>...\n\nTranslate each x2c input into a matching C source and header.");
-  _132 = String_new("The output directory defaults to the current directory and must already\nexist. Use --out-dir to select another directory.\nShell wildcards are allowed because the shell expands them; x2c does not\ninterpret wildcard characters in input operands.");
+  _132 = String_new("The output directory defaults to the current directory and must already\nexist. Use --out-dir to select another directory.\nShell wildcards are allowed because the shell expands them; x2c does not\ninterpret wildcard characters in input operands.\nInputs translate in parallel, one job per online processor. Under Make\nthe default is one job; -j 1 translates serially.");
   _133 = String_new("Usage:\n  x2c build [options] <input>...\n  x2c build [options] [--target <name>]\n\nTranslate x2c sources, compile C sources, and link one target.\nWith explicit inputs, the default target is an executable. Without\ninputs, x2c reads the nearest x2c.toml and builds its default\ntarget.");
   _134 = String_new("Inputs may be .x, .c, .o, or .a files. x2c links its runtime and\nrequired platform libraries automatically. Directory operands and\nunexpanded wildcard operands are rejected.");
   _135 = String_new("Usage:\n  x2c run [build-options] <input>... [-- <argument>...]\n  x2c run [build-options] [--target <name>] [-- <argument>...]\n\nBuild one executable and run it. Arguments after -- are passed\nunchanged to the executable.");
@@ -1903,7 +1903,7 @@ CliRequest cli_request(Symbol command){
   int mask = _command_mask(command);
   CliRequest request = Scope_calloc(1, sizeof(struct CliRequest));
   request -> command = command;
-  request -> jobs = mask & CLI_NATIVE ? _default_build_jobs() : 1;
+  request -> jobs = _default_jobs();
   request -> max_errors = 20;
   if(mask & CLI_NATIVE) request -> kind = 404971770155786;
   return request;
@@ -1911,7 +1911,7 @@ CliRequest cli_request(Symbol command){
 
 int report_make_owned(void);
 
-static int _default_build_jobs(void){
+static int _default_jobs(void){
   if(report_make_owned()) return 1;
   long count = sysconf(_SC_NPROCESSORS_ONLN);
   return count > 0 && count <= INT_MAX ?(int) count : 1;
