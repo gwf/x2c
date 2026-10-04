@@ -995,7 +995,7 @@ static List Compiler__catch_handle(Compiler c){
 
 List Compiler_catch_binder_declarations(Compiler, List, List);
 static List Compiler__catch_arm(Compiler c, int * is_default, List handle){
-  Token start = c -> token;  List pattern = NULL;  if(Compiler_test(c, 117))(* is_default) = 1;  else pattern = Compiler__catch_filter(c);  List bindings = Compiler_begin_catch_arm(c, pattern, start);  List body = Compiler_parse_governed(c, AST_STATEMENT);  Compiler___complete_here(c, 239352771914, _154);  if(Compiler_peek(c, 0) == 6398160 || Compiler_peek(c, 0) == 13518332722) body = Compiler__continued(c, body);  Sym_pop_scope(c -> sym);  return({
+  Token start = c -> token;  List pattern = NULL;  if(Compiler_test(c, 117))(* is_default) = 1;  else pattern = Compiler__catch_filter(c);  List bindings = Compiler_begin_catch_arm(c, pattern, start);  List body = Compiler_parse_governed(c, AST_STATEMENT);  Compiler___complete_here(c, 239352771914, _154);  if(Compiler_peek(c, 0) == 6398160 || Compiler_peek(c, 0) == 13518332722) body = Compiler__continued(c, body);  Sym_pop_scope(c -> sym);  if(Map_truth(c -> macro_holes)) return cons(List_var(pattern), cons(List_var(body), NULL));  return({
     Var _x2c_literal_part_10 = List_var(pattern);  Var _x2c_literal_part_11 = List_var(({
       List _x2c_literal_part_9 = Compiler_catch_binder_declarations(c, bindings, handle);  cons(_123, List_append(_x2c_literal_part_9, cons(List_var(body), NULL)));
     }
