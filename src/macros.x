@@ -3867,9 +3867,9 @@ static void Import.macros(Import &in) {
   child.filename = in.path;
   child.collect_protocols = c.collect_protocols;
   /* The caller's collection pass parses no bodies and so keeps its
-     protocol registries empty. A `meta` definition here is the one body it
-     does parse, and its `foreach` is the only reader, so the import
-     installs the protocols visible to it when one is asked for. */
+     protocol registries empty. The import's templates and `meta` bodies
+     are the bodies it does parse, so the import installs the protocols
+     visible to it when one is asked for. */
   child.import_protocols = c.shallow;
   $let(c.diagnostics.printer, c.diagnostics.printer) {
     in.borrow(child);
