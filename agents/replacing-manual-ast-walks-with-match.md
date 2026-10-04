@@ -224,6 +224,8 @@ The literal is the output grammar. A reviewer can compare the input pattern
 and output template without executing a cons-cell program mentally. `cons()`
 still belongs where newest-first accumulation or suffix sharing is the actual
 algorithm. It does not belong merely because AST nodes use List storage.
+When the output is C, write it as a quotation instead; see
+[Choosing how to build syntax](lowering-with-macros.md#choosing-how-to-build-syntax).
 
 ### 5. Match captures do not remove semantic ordering requirements
 
@@ -578,7 +580,8 @@ For new code, the desired order is:
 4. make each function own one stage of the recursive descent rather than
    reparsing its caller's node or monolithically interpreting several rules;
 5. keep semantic decisions inside the corresponding case;
-6. write transformed output as a literal template;
+6. write transformed output as a literal template, or as a quotation when
+   it is C;
 7. use `foreach` for generic child traversal;
 8. rely on target-typed conversions unless generated C proves an explicit
    crossing is needed.

@@ -7,7 +7,8 @@ template whose body is the C builds the output. This page shows the try
 lowering, which every later lowering copies, and states the rules a
 lowering meets. The
 [dual-macro contract](../plans/archive/compiler-dual-macro-contract.md) uses these
-rules as its acceptance test for later migrations.
+rules as its acceptance test for later migrations. Any code that builds
+syntax follows [Choosing how to build syntax](#choosing-how-to-build-syntax).
 
 The campaign also reviews ownership across the compiler. Shared grammar
 macros remove repeated knowledge of source structure; recognition-only use
@@ -261,6 +262,124 @@ List builtin_catch_cases(List selected, List arms) {
 - A slot argument in an expression position inside a `meta` body is an
   ordinary call, so a count the C needs in both a declarator and a call is
   a hole, as in the Func call template.
+
+## Choosing how to build syntax
+
+Compiler and `meta` code that builds C writes it as C. Take the first
+choice below that fits; a `%(...)` List of node tags is the last one. The
+book owns the semantics:
+[Quoting code with `$!`](../docs/src/guide/meta-functions.md#quoting-code-with-)
+and [Macro values](../docs/src/reference/language.md#macro-values). The
+examples are excerpts from current source.
+
+1. **A quotation**, for code the compiler binds where it lands. `$!( )`
+   builds an expression, `$!{ }` statements, and `$!Unit{ }` or another
+   category that kind of code. Names the body declares are private to
+   that landing; other names resolve there. A quotation that applies no
+   other template is built where it is written, so it costs about what the
+   equal List costs (PR #130). From `_scope_expand` in `src/builtins.x`:
+
+   ```x2c
+   List enter = destinations ? $!( Scope_push($destinations...) )
+                             : $!( Scope_retain() );
+   List leave = destinations ? $!( Scope_pop() ) : $!( Scope_release() );
+   return $!{ { $enter; { defer $leave; $body } } };
+   ```
+
+2. **Holes from locals.** `$name` inserts a local's value and `$name...`
+   splices a List local. A `Type` local fills a type position, a binding
+   identity names that binding, and an `int`, String, or Symbol becomes a
+   literal. `_declare` in `src/builtins.x`:
+
+   ```x2c
+   static List _declare(Type type, Var binding, List initializer) =>
+     initializer ? $!{ $type $binding = $initializer; } : $!{ $type $binding; };
+   ```
+
+   A declared name is private to one quotation. When separately built
+   quotations must share a name, put `x2c_ident(...)` in a local and use it
+   as the hole in each. `_fields_hash` in `src/builtins.x`:
+
+   ```x2c
+   List hash = x2c_ident("hash");
+   Array body = [$!{ unsigned $hash = 0; }];
+   foreach (List field, fields)
+     body.push($!{
+       $hash = x2c_hash_word($hash ^ Var_hash((Var)${_field_value(field)}));
+     });
+   body.push($!{ return $hash; });
+   ```
+
+   A name that must not collide with user names is a fresh binding from
+   `c.sym.introduce(c.fresh_name(...))`, used the same way.
+
+3. **Expression holes.** `${expr}` inserts a field, an element, or a call
+   result without a local, and `${expr}...` splices a List. The function
+   evaluates each hole once, where the quotation is written, in written
+   order. Call helpers this way rather than as `$helper(...)` slots. A slot
+   makes the quotation apply a template, so it is no longer built where it
+   is written (PR #135). `Foreach.loop` in `src/builtins.x`:
+
+   ```x2c
+   return $!{ { ${f.declaration} $setup... while ($condition) $body } };
+   ```
+
+4. **A typed quotation.** `$!(T)( expr )` builds `(expr T ...)` at once.
+   Use it when an operation reads the type before the code lands, or when
+   nothing binds the code again. It binds nothing, types only the outermost
+   expression, declares no name, and applies no template. From
+   `src/builtins.x`:
+
+   ```x2c
+   static List _iter_call(List function, List collection) =>
+     $!(Iter)( $function($collection) );
+
+   static List _expr(List type, Var binding) => $!($type)( $binding );
+   ```
+
+5. **A retained rebuild.** `c.rebuild_statement(application)` and
+   `c.rebuild_expression(type, application)` fill a template around
+   children that are already bound or lowered, and bind nothing again. The
+   template must be structural: no new names, no slots, and no template
+   applications. `rebuild_statement` returns a `seq`; take its `.cdr()` or
+   `.cadr()`. `rebuild_expression` applies a named template such as
+   `$called`; for a one-off expression, a typed quotation does the same
+   work. `_run_once` in `src/cache.x`:
+
+   ```x2c
+   List flag = $!(int)( $guard );
+   return c.rebuild_statement($!{ if ($flag) return; $flag = 1; }).cdr();
+   ```
+
+   [Retained template construction](#retained-template-construction)
+   explains why the lambda producers use it.
+
+A hand-built `%(...)` List is still right in these cases:
+
+- **Patterns and data.** `case` patterns are not code. Neither are fact
+  rows, such as the one `_catch_clause` returns above.
+- **Parser productions.** The parser assembles nodes from children it has
+  already parsed and bound, as in `%(while $cond $body)` in
+  `src/statements.x`. A quotation would bind them again.
+- **Binder output.** Identifier resolution in `src/expressions.x` returns
+  `%(expr $type (ident $binding))`. A quotation would call the binder that
+  is producing it.
+- **Forms with no source spelling.** Examples are a call whose native
+  callee is a String, as in `_entry_call` in `src/cache.x`, the
+  `(cache ID)` that `Compiler.cache` returns, and `(initval ...)`
+  initializer rows.
+- **Typed inner nodes.** A typed quotation types only its outermost
+  expression. `_assignment` in `src/cache.x` also types the identifier
+  inside: `%( stmnt (expr $type (op = (expr $type (ident $binding)) $rhs)))`.
+- **Code queued with `Compiler.add_init`.** Generation splices it after the
+  transform, so it must already be lowered. Bind a quotation for it only
+  when nothing in it still needs lowering; a `String` literal still does.
+  Otherwise build it from lowered pieces, as `_builtin_registration` in
+  `src/protocol.x` does.
+- **Measured hot paths.** Keep the List where a converged A/B shows that
+  the quotation costs more. As a quotation, `_assignment` cost 2.1% more
+  (PR #142). Measure before converting a producer that runs for every
+  expression or statement.
 
 ## Rebuilding a bound source expression
 

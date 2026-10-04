@@ -145,6 +145,27 @@ when a macro needs substantial compile-time Lisp or AST manipulation to save a
 few tokens. The macro body, imports, and generated declarations are part of the
 maintenance cost.
 
+## Write generated code as the code it builds
+
+A `meta` function that returns code should show that code. A quotation
+shows the C that will land; a `%(...)` List of node tags hides it. Choose the
+first row that fits. [Meta Functions](meta-functions.md#quoting-code-with-)
+explains each form with examples.
+
+| To build | Write |
+| --- | --- |
+| Code with one shape at several sites | a named macro, applied from the function as in [source templates](meta-functions.md#source-templates-from-meta-functions) |
+| Code that one function builds | a quotation: `$!( expression )`, `$!{ statements }`, or `$!Unit{ ... }` |
+| Code that uses a field, an element, or a call result | a [`${expression}` hole](meta-functions.md#holes-that-name-an-expression), evaluated once where the quotation is written |
+| Code in which separate quotations share one name | `List name = x2c_ident("total");`, then `$name` in each quotation |
+| An expression whose type is read before it lands | a [typed quotation](meta-functions.md#code-that-knows-its-type), such as `$!(double)( $value * 2 )` |
+| Code the function inspects before it returns | the builders in [`lib/meta.x`](meta-functions.md#what-the-compiler-answers), such as `x2c_expr_call` |
+| A pattern, a data row, or a form with no source spelling | a `%(...)` List |
+
+A name that a quotation declares is private to it, so another quotation
+cannot refer to it. An `x2c_ident` hole declares and refers to one exact
+name.
+
 ## Choose collections by mutation and identity
 
 Use `List` for immutable sequences that share structure, `Array` for mutable
