@@ -81,6 +81,22 @@ List x2c_type_members(List type) {
   return rows.reverse();
 }
 
+/* --- src/fields.xmacro --------------------------------------------------- */
+
+static List _field_copies(List to, List from, List fields) {
+  if (!fields) return NULL;
+  Var field = fields.car();
+  return %(${$!{ $to.$field = $from.$field; }}
+           @{_field_copies(to, from, fields.cdr())});
+}
+
+static List _field_sets(List to, List value, List fields) {
+  if (!fields) return NULL;
+  Var field = fields.car();
+  return %(${$!{ $to.$field = $value; }}
+           @{_field_sets(to, value, fields.cdr())});
+}
+
 /* --- src/grammar.xmacro -------------------------------------------------- */
 
 static List source_return_type(List node) {
@@ -739,6 +755,8 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_meta_fail", _meta_fail);
   $linked.row(rows, "_meta_member", _meta_member);
   $linked.row(rows, "x2c_type_members", x2c_type_members);
+  $linked.row(rows, "_field_copies", _field_copies);
+  $linked.row(rows, "_field_sets", _field_sets);
   $linked.row(rows, "source_return_type", source_return_type);
   $linked.row(rows, "source_conditional_statement", source_conditional_statement);
   $linked.row(rows, "source_any_lambda", source_any_lambda);
