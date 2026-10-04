@@ -90,7 +90,7 @@ Source: `src/macros.x:4346`
 Ends the shared compile-time library before its build-target Context is
 reclaimed. A later target creates a fresh session in its own Context.
 
-Source: `src/macros.x:4545`
+Source: `src/macros.x:4544`
 
 #### x2c_template_call
 
@@ -124,7 +124,7 @@ its Lisp name in `lisp`. A predicate answers a Lisp truth value where the
 x2c spelling answers `int`. A definition the compile-time libraries
 already give that name wins, because it adapts the arguments.
 
-Source: `src/macros.x:4485`
+Source: `src/macros.x:4484`
 
 <a id="Compiler.capture_macro_value"></a>
 #### Compiler.capture_macro_value
@@ -584,7 +584,7 @@ Source: `src/macros.x:4330`
 Reports that the compile-time Lisp `source` failed with `error` at
 `invocation`.
 
-Source: `src/macros.x:4517`
+Source: `src/macros.x:4516`
 
 <a id="Compiler.shared_definitions"></a>
 #### Compiler.shared_definitions

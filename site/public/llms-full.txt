@@ -5286,7 +5286,9 @@ produced, prints a `function` row, and each `typedef` or `class` prints a
   alias, whose `line` is that of its alias application.
 - `doc` is the body of the `/**` comment that ends on the line before the
   form or on its first line, without its delimiters; it is empty when there
-  is none.
+  is none. In a Unit macro's template, `$name` in that comment reads as the
+  hole's argument as the invocation wrote it, so `$type` documents
+  `$scalar(char, ...)` as `char`.
 - `text` is a written function's declarator, or a type's statement without
   its `;`, with comments removed and each run of whitespace written as one
   space. It is empty for a function the file does not spell.
