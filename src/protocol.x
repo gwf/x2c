@@ -1629,43 +1629,16 @@ static void _dump_member(
 
 // operators
 
-/* Maps each operator to its protocol member. Direct rows lower the operator
-   straight to its member; derived rows compute `!=` from `equal` and the
-   ordered comparisons from `compare` against zero. The punctuation table in
-   docs/src/guide/protocols.md mirrors these rows. */
-static const SymbolSet operator_ops =
-  %<<"+" "-" "*" "/" "%" "@" "==" "!=" "<" "<=" ">" ">=">>;
-
-static const struct { Symbol member; int derived; } operator_members[] = {
-  { <add>, 0 },      { <sub>, 0 },      { <mul>, 0 },
-  { <div>, 0 },      { <mod>, 0 },      { <matmul>, 0 },
-  { <equal>, 0 },
-  { <equal>, 1 },    { <compare>, 1 },  { <compare>, 1 },
-  { <compare>, 1 },  { <compare>, 1 }
-};
-
-static Symbol _operator_row(Symbol op, int derived) {
-  int index = operator_ops.index(op);
-  if (index < 0 || operator_members[index].derived != derived) return 0;
-  return operator_members[index].member;
-}
-
 /** Returns the protocol member corresponding to a direct binary operator.
     Returns zero when the operator has no direct protocol mapping.
 */
-Symbol Compiler.operator_member(Compiler c, Symbol op) {
-  (void) c;
-  return _operator_row(op, 0);
-}
+Symbol Compiler.operator_member(Compiler c, Symbol op);
 
 /** Returns the protocol member that derives a comparison operator.
     Inequality derives from `equal`, ordered comparisons derive from `compare`,
     and unsupported operators return zero.
 */
-Symbol Compiler.derived_member(Compiler c, Symbol op) {
-  (void) c;
-  return _operator_row(op, 1);
-}
+Symbol Compiler.derived_member(Compiler c, Symbol op);
 
 // member resolution
 
