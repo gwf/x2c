@@ -59,20 +59,28 @@ MISSING_GENERATED = $(filter-out \
 	$(C_FILES) $(H_FILES) $(XI_FILES))
 MISSING_X = $(sort $(patsubst $(BUILD)/%,$(SOURCE)/%.x, \
 	$(basename $(MISSING_GENERATED))))
+# Make drops a leading ./ from the names in $?, so compare in that form.
+X_NAMES = $(X_FILES:./%=%)
 
 $(BUILD)/.translated: $(X_FILES) $(X2C_TRANSLATE_DEPS) | $(BUILD)
 	$(X2C) translate $(if $(BUILD_JOBS),-j $(BUILD_JOBS)) $(X2CFLAGS) \
-		$(if $(filter-out $(X_FILES) FORCE-TRANSLATE,$?),$(X_FILES), \
-		$(sort $(filter $(X_FILES),$?) $(MISSING_X)))
+		$(if $(filter-out $(X_NAMES) FORCE-TRANSLATE,$?),$(X_FILES), \
+		$(sort $(filter $(X_NAMES),$?) $(MISSING_X:./%=%)))
 	@touch $@
 $(C_FILES) $(H_FILES): $(BUILD)/.translated
 
 # Included x2c prerequisites live on the generated C/H targets. The stamp
 # still owns clean-build batching; this rule retranslates only a unit whose
-# discovered prerequisite is newer than its generated C.
+# discovered prerequisite is newer than its generated C. Make computes $?
+# from times read before the batch ran, so the recipe compares them again
+# and skips a unit the batch has just written.
 $(BUILD)/%.c: $(SOURCE)/%.x
 	$(if $(filter-out $(BUILD)/.translated,$?), \
-		$(X2C) translate $(X2CFLAGS) $<)
+		@if [ -n "$$(find $(filter-out $(BUILD)/.translated,$?) \
+			-newer $@)" ]; then \
+			echo '$(X2C) translate $(X2CFLAGS) $<'; \
+			$(X2C) translate $(X2CFLAGS) $<; \
+		fi)
 
 $(BUILD)/%.h: $(BUILD)/%.c
 
