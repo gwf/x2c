@@ -1370,9 +1370,10 @@ own map. Aliases never leak into the including file.
 
 An explicitly imported `.xmacro` file may contain macro definitions and
 `keyword` declarations. Its aliases become visible in the importing `.x` file
-at the import position. Every `.x` file that wants the spellings imports the
-pack itself; an included file's import does not expose them to its caller, and
-no pack is loaded implicitly by `x2c.x`. Macro templates are parsed when
+at the import position. Every `.x` file that wants the spellings or the
+macros imports the pack itself; an included file's import, like a macro the
+included file defines, does not expose them to its caller, and no pack is
+loaded implicitly by `x2c.x`. Macro templates are parsed when
 defined, so a later alias does not reinterpret an earlier template; generated
 `List`s and strings are not reparsed as alias-bearing source.
 
