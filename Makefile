@@ -205,12 +205,19 @@ precommit: build					## Prepare the final tree for commit
 	$(MAKE) stage-diff-0
 	$(MAKE) stage-diff-1
 
+# After precommit, these checks share no outputs, so they run at once, each
+# with its own log under debug/agent-pr-check. Precommit made the build and
+# stage 1, so the steps do not remake them. The commands are made first
+# because the CLI probe in verify reads their manifest, and the atomicity
+# proof runs first because verify cleans unittest/build, where it works.
+AGENT_PR_STEPS = doc-check proof-cold-collection verify doc-outputs \
+	commands-check
+
 agent-pr-check:					## Run complete agent PR proof once
 	time $(MAKE) precommit
-	time $(MAKE) doc-check
-	time $(MAKE) proof-cold-collection
-	$(MAKE) check-after-precommit
-	time $(MAKE) commands-check
+	time $(MAKE) commands proof-artifact-atomicity
+	time tools/run-make-steps.sh debug/agent-pr-check \
+		-o build -o stage-1 -o commands -- $(AGENT_PR_STEPS)
 
 sanity-check: bootstrap-refresh			## Prove bootstrap recovery and self-hosting
 	$(MAKE) build-safe
