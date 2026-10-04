@@ -26,9 +26,9 @@ The `Var` encoding every runtime module shares.
 | [`String.truth`](#String.truth) | Returns nonzero when `string` contains at least one byte. |
 | [`String.var`](#String.var) | Boxes a `String` value as `Var`. |
 | [`Symbol.var`](#Symbol.var) | Boxes a `Symbol` value as `Var`. |
-| [`Var.array`](#Var.array) | Extracts the `$type` payload of `value`, or NULL for another tag. |
-| [`Var.as_iter`](#Var.as_iter) | Extracts the `$type` payload of `value`, or NULL for another tag. |
-| [`Var.block`](#Var.block) | Extracts the `$type` payload of `value`, or NULL for another tag. |
+| [`Var.array`](#Var.array) | Extracts the `Array` payload of `value`, or NULL for another tag. |
+| [`Var.as_iter`](#Var.as_iter) | Extracts the `Iter` payload of `value`, or NULL for another tag. |
+| [`Var.block`](#Var.block) | Extracts the `Block` payload of `value`, or NULL for another tag. |
 | [`Var.box_f32`](#Var.box_f32) | Boxes a native `float` as an immediate `<f32>` `Var`. |
 | [`Var.box_f64`](#Var.box_f64) | Boxes a native `double` as an immediate `<f64>` `Var`. |
 | [`Var.box_i16`](#Var.box_i16) | Boxes a native `short` as an immediate `<i16>` `Var`. |
@@ -37,25 +37,25 @@ The `Var` encoding every runtime module shares.
 | [`Var.box_u16`](#Var.box_u16) | Boxes a native `ushort` as an immediate `<u16>` `Var`. |
 | [`Var.box_u32`](#Var.box_u32) | Boxes a native `uint` as an immediate `<u32>` `Var`. |
 | [`Var.box_u8`](#Var.box_u8) | Boxes a native `uchar` as an immediate `<u8>` `Var`. |
-| [`Var.buffer`](#Var.buffer) | Extracts the `$type` payload of `value`, or NULL for another tag. |
-| [`Var.bytes`](#Var.bytes) | Extracts the `$type` payload of `value`, or NULL for another tag. |
+| [`Var.buffer`](#Var.buffer) | Extracts the `Buffer` payload of `value`, or NULL for another tag. |
+| [`Var.bytes`](#Var.bytes) | Extracts the `Bytes` payload of `value`, or NULL for another tag. |
 | [`Var.char`](#Var.char) | Returns `x` as a native `char` under the `Var.convert` rules. |
 | [`Var.decode_f32`](#Var.decode_f32) | Decodes an immediate `<f32>` `Var`. |
 | [`Var.decode_f64`](#Var.decode_f64) | Decodes an immediate `<f64>` `Var`. |
 | [`Var.double`](#Var.double) | Returns `x` as a native `double` under the `Var.convert` rules. |
-| [`Var.file`](#Var.file) | Extracts the `$type` payload of `value`, or NULL for another tag. |
+| [`Var.file`](#Var.file) | Extracts the `File` payload of `value`, or NULL for another tag. |
 | [`Var.float`](#Var.float) | Returns `x` as a native `float` under the `Var.convert` rules. |
 | [`Var.int`](#Var.int) | Returns `x` as a native `int` under the `Var.convert` rules. |
 | [`Var.is_row`](#Var.is_row) | Reports whether `value` occupies the encoding row at `top`/`bottom`. |
 | [`Var.is_wide`](#Var.is_wide) | Reports whether `v` uses a scope-owned wide numeric box. |
-| [`Var.list`](#Var.list) | Extracts the `$type` payload of `value`, or NULL for another tag. |
+| [`Var.list`](#Var.list) | Extracts the `List` payload of `value`, or NULL for another tag. |
 | [`Var.long`](#Var.long) | Returns `x` as a native `long` under the `Var.convert` rules. |
 | [`Var.long_double`](#Var.long_double) | Returns `x` as a native `long double` under the `Var.convert` rules. |
 | [`Var.long_long`](#Var.long_long) | Returns `x` as a native `long long` under the `Var.convert` rules. |
-| [`Var.map`](#Var.map) | Extracts the `$type` payload of `value`, or NULL for another tag. |
+| [`Var.map`](#Var.map) | Extracts the `Map` payload of `value`, or NULL for another tag. |
 | [`Var.payload32`](#Var.payload32) | Returns the low 32 payload bits of an immediate `Var`. |
 | [`Var.short`](#Var.short) | Returns `x` as a native `short` under the `Var.convert` rules. |
-| [`Var.string`](#Var.string) | Extracts the `$type` payload of `value`, or NULL for another tag. |
+| [`Var.string`](#Var.string) | Extracts the `String` payload of `value`, or NULL for another tag. |
 | [`Var.symbol`](#Var.symbol) | Extracts the `symbol` payload after the caller establishes the matching `Var` kind. |
 | [`Var.uchar`](#Var.uchar) | Returns `x` as a native `uchar` under the `Var.convert` rules. |
 | [`Var.uint`](#Var.uint) | Returns `x` as a native `uint` under the `Var.convert` rules. |
@@ -63,37 +63,37 @@ The `Var` encoding every runtime module shares.
 | [`Var.ulong_long`](#Var.ulong_long) | Returns `x` as a native `unsigned long long` under the `Var.convert` rules. |
 | [`Var.unsigned`](#Var.unsigned) | Returns `x` as a native `unsigned` under the `Var.convert` rules. |
 | [`Var.ushort`](#Var.ushort) | Returns `x` as a native `ushort` under the `Var.convert` rules. |
-| [`char.repr`](#char.repr) | Returns the readable representation of `$type`. |
-| [`char.str`](#char.str) | Returns the display `String` of `$type`. |
-| [`char.var`](#char.var) | Boxes a native `$type` value as `Var`. |
-| [`double.repr`](#double.repr) | Returns the readable representation of `$type`. |
-| [`double.str`](#double.str) | Returns the display `String` of `$type`. |
-| [`double.var`](#double.var) | Boxes a native `$type` value as `Var`. |
-| [`float.repr`](#float.repr) | Returns the readable representation of `$type`. |
-| [`float.str`](#float.str) | Returns the display `String` of `$type`. |
-| [`float.var`](#float.var) | Boxes a native `$type` value as `Var`. |
-| [`int.repr`](#int.repr) | Returns the readable representation of `$type`. |
-| [`int.str`](#int.str) | Returns the display `String` of `$type`. |
-| [`int.var`](#int.var) | Boxes a native `$type` value as `Var`. |
+| [`char.repr`](#char.repr) | Returns the readable representation of `char`. |
+| [`char.str`](#char.str) | Returns the display `String` of `char`. |
+| [`char.var`](#char.var) | Boxes a native `char` value as `Var`. |
+| [`double.repr`](#double.repr) | Returns the readable representation of `double`. |
+| [`double.str`](#double.str) | Returns the display `String` of `double`. |
+| [`double.var`](#double.var) | Boxes a native `double` value as `Var`. |
+| [`float.repr`](#float.repr) | Returns the readable representation of `float`. |
+| [`float.str`](#float.str) | Returns the display `String` of `float`. |
+| [`float.var`](#float.var) | Boxes a native `float` value as `Var`. |
+| [`int.repr`](#int.repr) | Returns the readable representation of `int`. |
+| [`int.str`](#int.str) | Returns the display `String` of `int`. |
+| [`int.var`](#int.var) | Boxes a native `int` value as `Var`. |
 | [`long.repr`](#long.repr) | Returns the readable representation of `long`. |
 | [`long.str`](#long.str) | Returns the display `String` of `long`. |
 | [`long.var`](#long.var) | Boxes a long value as `Var`. |
-| [`short.repr`](#short.repr) | Returns the readable representation of `$type`. |
-| [`short.str`](#short.str) | Returns the display `String` of `$type`. |
-| [`short.var`](#short.var) | Boxes a native `$type` value as `Var`. |
-| [`uchar.repr`](#uchar.repr) | Returns the readable representation of `$type`. |
-| [`uchar.str`](#uchar.str) | Returns the display `String` of `$type`. |
-| [`uchar.var`](#uchar.var) | Boxes a native `$type` value as `Var`. |
-| [`uint.repr`](#uint.repr) | Returns the readable representation of `$type`. |
-| [`uint.str`](#uint.str) | Returns the display `String` of `$type`. |
-| [`uint.var`](#uint.var) | Boxes a native `$type` value as `Var`. |
+| [`short.repr`](#short.repr) | Returns the readable representation of `short`. |
+| [`short.str`](#short.str) | Returns the display `String` of `short`. |
+| [`short.var`](#short.var) | Boxes a native `short` value as `Var`. |
+| [`uchar.repr`](#uchar.repr) | Returns the readable representation of `uchar`. |
+| [`uchar.str`](#uchar.str) | Returns the display `String` of `uchar`. |
+| [`uchar.var`](#uchar.var) | Boxes a native `uchar` value as `Var`. |
+| [`uint.repr`](#uint.repr) | Returns the readable representation of `uint`. |
+| [`uint.str`](#uint.str) | Returns the display `String` of `uint`. |
+| [`uint.var`](#uint.var) | Boxes a native `uint` value as `Var`. |
 | [`ulong.var`](#ulong.var) | Boxes a `ulong` value as `Var`. |
-| [`unsigned.repr`](#unsigned.repr) | Returns the readable representation of `$type`. |
-| [`unsigned.str`](#unsigned.str) | Returns the display `String` of `$type`. |
-| [`unsigned.var`](#unsigned.var) | Boxes a native `$type` value as `Var`. |
-| [`ushort.repr`](#ushort.repr) | Returns the readable representation of `$type`. |
-| [`ushort.str`](#ushort.str) | Returns the display `String` of `$type`. |
-| [`ushort.var`](#ushort.var) | Boxes a native `$type` value as `Var`. |
+| [`unsigned.repr`](#unsigned.repr) | Returns the readable representation of `unsigned`. |
+| [`unsigned.str`](#unsigned.str) | Returns the display `String` of `unsigned`. |
+| [`unsigned.var`](#unsigned.var) | Boxes a native `unsigned` value as `Var`. |
+| [`ushort.repr`](#ushort.repr) | Returns the readable representation of `ushort`. |
+| [`ushort.str`](#ushort.str) | Returns the display `String` of `ushort`. |
+| [`ushort.var`](#ushort.var) | Boxes a native `ushort` value as `Var`. |
 
 ### Functions
 
@@ -274,7 +274,7 @@ Source: `lib/common.x:566`
 
 `Array Var.array(Var value)`
 
-Extracts the `$type` payload of `value`, or NULL for another tag.
+Extracts the `Array` payload of `value`, or NULL for another tag.
 
 Source: `lib/common.x:625`
 
@@ -283,7 +283,7 @@ Source: `lib/common.x:625`
 
 `Iter Var.as_iter(Var value)`
 
-Extracts the `$type` payload of `value`, or NULL for another tag.
+Extracts the `Iter` payload of `value`, or NULL for another tag.
 
 Source: `lib/common.x:630`
 
@@ -292,7 +292,7 @@ Source: `lib/common.x:630`
 
 `Block Var.block(Var value)`
 
-Extracts the `$type` payload of `value`, or NULL for another tag.
+Extracts the `Block` payload of `value`, or NULL for another tag.
 
 Source: `lib/common.x:626`
 
@@ -373,7 +373,7 @@ Source: `lib/common.x:519`
 
 `Buffer Var.buffer(Var value)`
 
-Extracts the `$type` payload of `value`, or NULL for another tag.
+Extracts the `Buffer` payload of `value`, or NULL for another tag.
 
 Source: `lib/common.x:627`
 
@@ -382,7 +382,7 @@ Source: `lib/common.x:627`
 
 `Bytes Var.bytes(Var value)`
 
-Extracts the `$type` payload of `value`, or NULL for another tag.
+Extracts the `Bytes` payload of `value`, or NULL for another tag.
 
 Source: `lib/common.x:628`
 
@@ -433,7 +433,7 @@ Source: `lib/common.x:785`
 
 `File Var.file(Var value)`
 
-Extracts the `$type` payload of `value`, or NULL for another tag.
+Extracts the `File` payload of `value`, or NULL for another tag.
 
 Source: `lib/common.x:629`
 
@@ -489,7 +489,7 @@ Source: `lib/common.x:480`
 
 `List Var.list(Var value)`
 
-Extracts the `$type` payload of `value`, or NULL for another tag.
+Extracts the `List` payload of `value`, or NULL for another tag.
 
 Source: `lib/common.x:631`
 
@@ -534,7 +534,7 @@ Source: `lib/common.x:742`
 
 `Map Var.map(Var value)`
 
-Extracts the `$type` payload of `value`, or NULL for another tag.
+Extracts the `Map` payload of `value`, or NULL for another tag.
 
 Source: `lib/common.x:632`
 
@@ -564,7 +564,7 @@ Source: `lib/common.x:674`
 
 `String Var.string(Var value)`
 
-Extracts the `$type` payload of `value`, or NULL for another tag.
+Extracts the `String` payload of `value`, or NULL for another tag.
 
 Source: `lib/common.x:633`
 
@@ -658,7 +658,7 @@ Source: `lib/common.x:683`
 
 `String char.repr(char x)`
 
-Returns the readable representation of `$type`.
+Returns the readable representation of `char`.
 
 Source: `lib/common.x:590`
 
@@ -667,7 +667,7 @@ Source: `lib/common.x:590`
 
 `String char.str(char x)`
 
-Returns the display `String` of `$type`.
+Returns the display `String` of `char`.
 
 Source: `lib/common.x:590`
 
@@ -676,7 +676,7 @@ Source: `lib/common.x:590`
 
 `Var char.var(char x)`
 
-Boxes a native `$type` value as `Var`.
+Boxes a native `char` value as `Var`.
 
 Source: `lib/common.x:590`
 
@@ -687,7 +687,7 @@ Source: `lib/common.x:590`
 
 `String double.repr(double x)`
 
-Returns the readable representation of `$type`.
+Returns the readable representation of `double`.
 
 Source: `lib/common.x:599`
 
@@ -696,7 +696,7 @@ Source: `lib/common.x:599`
 
 `String double.str(double x)`
 
-Returns the display `String` of `$type`.
+Returns the display `String` of `double`.
 
 Source: `lib/common.x:599`
 
@@ -705,7 +705,7 @@ Source: `lib/common.x:599`
 
 `Var double.var(double x)`
 
-Boxes a native `$type` value as `Var`.
+Boxes a native `double` value as `Var`.
 
 Source: `lib/common.x:599`
 
@@ -716,7 +716,7 @@ Source: `lib/common.x:599`
 
 `String float.repr(float x)`
 
-Returns the readable representation of `$type`.
+Returns the readable representation of `float`.
 
 Source: `lib/common.x:598`
 
@@ -725,7 +725,7 @@ Source: `lib/common.x:598`
 
 `String float.str(float x)`
 
-Returns the display `String` of `$type`.
+Returns the display `String` of `float`.
 
 Source: `lib/common.x:598`
 
@@ -734,7 +734,7 @@ Source: `lib/common.x:598`
 
 `Var float.var(float x)`
 
-Boxes a native `$type` value as `Var`.
+Boxes a native `float` value as `Var`.
 
 Source: `lib/common.x:598`
 
@@ -745,7 +745,7 @@ Source: `lib/common.x:598`
 
 `String int.repr(int x)`
 
-Returns the readable representation of `$type`.
+Returns the readable representation of `int`.
 
 Source: `lib/common.x:594`
 
@@ -754,7 +754,7 @@ Source: `lib/common.x:594`
 
 `String int.str(int x)`
 
-Returns the display `String` of `$type`.
+Returns the display `String` of `int`.
 
 Source: `lib/common.x:594`
 
@@ -763,7 +763,7 @@ Source: `lib/common.x:594`
 
 `Var int.var(int x)`
 
-Boxes a native `$type` value as `Var`.
+Boxes a native `int` value as `Var`.
 
 Source: `lib/common.x:594`
 
@@ -803,7 +803,7 @@ Source: `lib/common.x:604`
 
 `String short.repr(short x)`
 
-Returns the readable representation of `$type`.
+Returns the readable representation of `short`.
 
 Source: `lib/common.x:592`
 
@@ -812,7 +812,7 @@ Source: `lib/common.x:592`
 
 `String short.str(short x)`
 
-Returns the display `String` of `$type`.
+Returns the display `String` of `short`.
 
 Source: `lib/common.x:592`
 
@@ -821,7 +821,7 @@ Source: `lib/common.x:592`
 
 `Var short.var(short x)`
 
-Boxes a native `$type` value as `Var`.
+Boxes a native `short` value as `Var`.
 
 Source: `lib/common.x:592`
 
@@ -832,7 +832,7 @@ Source: `lib/common.x:592`
 
 `String uchar.repr(uchar x)`
 
-Returns the readable representation of `$type`.
+Returns the readable representation of `uchar`.
 
 Source: `lib/common.x:591`
 
@@ -841,7 +841,7 @@ Source: `lib/common.x:591`
 
 `String uchar.str(uchar x)`
 
-Returns the display `String` of `$type`.
+Returns the display `String` of `uchar`.
 
 Source: `lib/common.x:591`
 
@@ -850,7 +850,7 @@ Source: `lib/common.x:591`
 
 `Var uchar.var(uchar x)`
 
-Boxes a native `$type` value as `Var`.
+Boxes a native `uchar` value as `Var`.
 
 Source: `lib/common.x:591`
 
@@ -861,7 +861,7 @@ Source: `lib/common.x:591`
 
 `String uint.repr(uint x)`
 
-Returns the readable representation of `$type`.
+Returns the readable representation of `uint`.
 
 Source: `lib/common.x:595`
 
@@ -870,7 +870,7 @@ Source: `lib/common.x:595`
 
 `String uint.str(uint x)`
 
-Returns the display `String` of `$type`.
+Returns the display `String` of `uint`.
 
 Source: `lib/common.x:595`
 
@@ -879,7 +879,7 @@ Source: `lib/common.x:595`
 
 `Var uint.var(uint x)`
 
-Boxes a native `$type` value as `Var`.
+Boxes a native `uint` value as `Var`.
 
 Source: `lib/common.x:595`
 
@@ -901,7 +901,7 @@ Source: `lib/common.x:606`
 
 `String unsigned.repr(unsigned x)`
 
-Returns the readable representation of `$type`.
+Returns the readable representation of `unsigned`.
 
 Source: `lib/common.x:596`
 
@@ -910,7 +910,7 @@ Source: `lib/common.x:596`
 
 `String unsigned.str(unsigned x)`
 
-Returns the display `String` of `$type`.
+Returns the display `String` of `unsigned`.
 
 Source: `lib/common.x:596`
 
@@ -919,7 +919,7 @@ Source: `lib/common.x:596`
 
 `Var unsigned.var(unsigned x)`
 
-Boxes a native `$type` value as `Var`.
+Boxes a native `unsigned` value as `Var`.
 
 Source: `lib/common.x:596`
 
@@ -930,7 +930,7 @@ Source: `lib/common.x:596`
 
 `String ushort.repr(ushort x)`
 
-Returns the readable representation of `$type`.
+Returns the readable representation of `ushort`.
 
 Source: `lib/common.x:593`
 
@@ -939,7 +939,7 @@ Source: `lib/common.x:593`
 
 `String ushort.str(ushort x)`
 
-Returns the display `String` of `$type`.
+Returns the display `String` of `ushort`.
 
 Source: `lib/common.x:593`
 
@@ -948,7 +948,7 @@ Source: `lib/common.x:593`
 
 `Var ushort.var(ushort x)`
 
-Boxes a native `$type` value as `Var`.
+Boxes a native `ushort` value as `Var`.
 
 Source: `lib/common.x:593`
 

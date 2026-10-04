@@ -13,6 +13,12 @@ their source file; larger groups live in a sibling `*-reports.xmacro` imported
 there. Compiler and driver calls use `$report.<category>.<case>`. Runtime
 formatting and Regex catalogues also provide named expression macros for
 reason strings, leaving their shared failure helpers responsible for payloads.
+Runtime, package, and command `*-errors.xmacro` files define one macro per
+condition. Only the raising unit imports such a file, so a name carries no
+module prefix. Its first part says what the call does: `$error` raises,
+`$refusal` refuses REPL input, `$decline` declines a REPL lowering, and
+`$reason` returns message text. The parts after it name the condition, as in
+`$error.read.end(r)`.
 
 These are compile-time expansions, not runtime message registries. Reports
 still run at their call sites through the existing reporting owners. Guards,

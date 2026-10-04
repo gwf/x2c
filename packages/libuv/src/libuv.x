@@ -296,7 +296,7 @@ struct UvProcess {
 static void _uv_raise(String operation, int status) {
   String name = String.new(uv_err_name(status));
   String message = String.new(uv_strerror(status));
-  $uv.error("native.status", operation, status, name, message);
+  $error.native.status(operation, status, name, message);
 }
 
 static void _uv_callback_failed(UvLoop loop, Symbol cause, List detail) {
@@ -309,7 +309,7 @@ static void _uv_callback_failed(UvLoop loop, Symbol cause, List detail) {
 static String _uv_address_string(Pool strings, const char *text) {
   if (!text) return NULL;
   size_t length = strlen(text);
-  if (length > INT_MAX) $uv.error("address.length");
+  if (length > INT_MAX) $error.address.length();
   return String.new_in(strings, text, (int) length);
 }
 
@@ -327,7 +327,7 @@ static void _uv_address_name(UvAddress address, Pool strings) {
 static void _uv_address_copy(
   UvAddress address, struct addrinfo *info, Pool strings) {
   if (!info->ai_addr || info->ai_addrlen > sizeof(struct sockaddr_storage)) {
-    $uv.error("address.invalid");
+    $error.address.invalid();
   }
   memcpy(&address.address, info->ai_addr, info->ai_addrlen);
   address.length = info->ai_addrlen;
@@ -388,13 +388,13 @@ static void _uv_lookup_callback(
 
 static void _uv_process_ready(UvProcess process, String operation) {
   if (!process) {
-    $uv.error("process.unstarted", operation);
+    $error.process.unstarted(operation);
   }
   if (process.released) {
-    $uv.error("process.released", operation);
+    $error.process.released(operation);
   }
   if (!process.started) {
-    $uv.error("process.unstarted", operation);
+    $error.process.unstarted(operation);
   }
   if (process.input_status < 0) {
     _uv_raise(operation, process.input_status);
@@ -403,10 +403,10 @@ static void _uv_process_ready(UvProcess process, String operation) {
 
 static void _uv_process_pending(UvProcess process, String operation) {
   if (!process) {
-    $uv.error("command.required", operation);
+    $error.command.required(operation);
   }
   if (process.started) {
-    $uv.error("command.started", operation);
+    $error.command.started(operation);
   }
 }
 
@@ -837,7 +837,7 @@ static void _uv_stream_shutdown_callback(uv_shutdown_t *request, int status) {
 static void _uv_stream_bad_state(
   UvStream stream, String operation, String state) {
   String reason = %"the ${stream.kind} $state";
-  $uv.error("stream.state", operation, reason);
+  $error.stream.state(operation, reason);
 }
 
 static UvStream _uv_stream_live(UvStream stream, String operation) {
@@ -863,7 +863,7 @@ static void _uv_stream_readable(UvStream stream) {
   if (stream.read_eof)
     _uv_stream_bad_state(stream, "read_start", "read side has reached EOF");
   if (stream.reading) {
-    $uv.error("stream.reading");
+    $error.stream.reading();
   }
 }
 
@@ -889,7 +889,7 @@ static void _uv_stream_submit_write(
     _uv_stream_bad_state(stream, "write", "write side has shut down");
   if (!length) return;
   if (length > UINT_MAX)
-    $uv.error("stream.write.length", length);
+    $error.stream.write.length(length);
   UvStreamWrite write = Scope.calloc_in(
     &stream.owner_scope, 1, sizeof(struct UvStreamWrite)
   );
@@ -946,7 +946,7 @@ UvLoop UvLoop.free(UvLoop loop) {
   if (loop.pending_requests || loop.open_files) {
     long pending = (long) loop.pending_requests;
     long files = (long) loop.open_files;
-    $uv.error("loop.pending", pending, files);
+    $error.loop.pending(pending, files);
   }
   uv_walk(&loop.loop, _uv_close_walk_callback, NULL);
   uv_run(&loop.loop, UV_RUN_DEFAULT);
@@ -967,7 +967,7 @@ uv_loop_t *UvLoop.native(UvLoop loop) =>
 
 int UvLoop.run(UvLoop loop, uv_run_mode mode) {
   if (!loop || !loop.initialized || loop.running) {
-    $uv.error("loop.run.state");
+    $error.loop.run.state();
   }
   loop.running = 1;
   defer loop.running = 0;
@@ -991,7 +991,7 @@ void UvLoop.stop(UvLoop loop) {
 
 UvAddress UvAddress.ip4(String host, int port) {
   if (!host || port < 0 || port > UINT16_MAX) {
-    $uv.error("ip4.args");
+    $error.ip4.args();
   }
   UvAddress address = Scope.calloc(1, sizeof(struct UvAddress));
   int status = uv_ip4_addr(
@@ -1008,7 +1008,7 @@ UvAddress UvAddress.ip4(String host, int port) {
 
 UvAddress UvAddress.ip6(String host, int port) {
   if (!host || port < 0 || port > UINT16_MAX) {
-    $uv.error("ip6.args");
+    $error.ip6.args();
   }
   UvAddress address = Scope.calloc(1, sizeof(struct UvAddress));
   int status = uv_ip6_addr(
@@ -1064,7 +1064,7 @@ const struct sockaddr *UvAddress.native(UvAddress address) =>
 
 UvLookup UvLoop.lookup(UvLoop loop, String node, String service) {
   if (!loop || !loop.initialized || (!node && !service)) {
-    $uv.error("lookup.args");
+    $error.lookup.args();
   }
   UvLookup lookup = Scope.calloc(1, sizeof(struct UvLookup));
   lookup.loop = loop;
@@ -1081,10 +1081,10 @@ UvLookup UvLoop.lookup(UvLoop loop, String node, String service) {
 UvLookup UvLookup.hints(
   UvLookup lookup, int family, int socket_type, int transport, int flags) {
   if (!lookup) {
-    $uv.error("lookup.hints.args");
+    $error.lookup.hints.args();
   }
   if (lookup.started) {
-    $uv.error("lookup.hints.started");
+    $error.lookup.hints.started();
   }
   with lookup.hints {
     memset(&_, 0, sizeof(_));
@@ -1099,13 +1099,13 @@ UvLookup UvLookup.hints(
 UvLookup UvLookup.start(
   UvLookup lookup, Var value, void (*fn)(UvLookup, Var)) {
   if (!lookup || !fn) {
-    $uv.error("lookup.start.args");
+    $error.lookup.start.args();
   }
   if (lookup.started) {
-    $uv.error("lookup.started");
+    $error.lookup.started();
   }
   if (!lookup.loop || !lookup.loop.initialized) {
-    $uv.error("lookup.closed");
+    $error.lookup.closed();
   }
   lookup.value = value;
   lookup.handler = fn;
@@ -1131,10 +1131,10 @@ UvLookup UvLoop.resolve(
 
 int UvLookup.cancel(UvLookup lookup) {
   if (!lookup) {
-    $uv.error("lookup.cancel.args");
+    $error.lookup.cancel.args();
   }
   if (!lookup.started) {
-    $uv.error("lookup.unstarted");
+    $error.lookup.unstarted();
   }
   if (lookup.completed) return 0;
   int status = uv_cancel((uv_req_t *) &lookup.request);
@@ -1148,7 +1148,7 @@ int UvLookup.cancelled(UvLookup lookup) =>
 
 size_t UvLookup.count(UvLookup lookup) {
   if (!lookup || !lookup.completed) {
-    $uv.error("lookup.incomplete");
+    $error.lookup.incomplete();
   }
   if (lookup.status < 0 && !lookup.cancelled) {
     _uv_raise("getaddrinfo", lookup.status);
@@ -1160,7 +1160,7 @@ UvAddress UvLookup.address(UvLookup lookup, int index) {
   size_t count = lookup.count();
   if (index < 0 || (size_t) index >= count) {
     long size = (long) count;
-    $uv.error("lookup.address.index", index, size);
+    $error.lookup.address.index(index, size);
   }
   return &lookup.addresses[index];
 }
@@ -1210,7 +1210,7 @@ macro Unit $uv.stream(
 
   static UvStream $ready($endpoint endpoint, String operation) {
     if (!endpoint) {
-      $uv.error("stream.required", operation, $required);
+      $error.stream.required(operation, $required);
     }
     return _uv_stream_live(&endpoint.stream, operation);
   }
@@ -1244,7 +1244,7 @@ macro Unit $uv.stream(
 
   $endpoint UvLoop.$method(UvLoop loop) {
     if (!loop || !loop.initialized) {
-      $uv.error("stream.args", $operation);
+      $error.stream.args($operation);
     }
     return _new(loop);
   }
@@ -1254,7 +1254,7 @@ macro Unit $uv.stream(
     void (*fn)($endpoint, $endpoint, Var)) {
     UvStream stream = $ready(endpoint, "listen");
     if (!fn || backlog < 1) {
-      $uv.error("stream.listen.args");
+      $error.stream.listen.args();
     }
     _uv_stream_unused(stream, "listen");
     endpoint.listen_value = value;
@@ -1277,7 +1277,7 @@ macro Unit $uv.stream(
     $endpoint endpoint, Var value, void (*fn)($endpoint, Bytes, Var)) {
     UvStream stream = $ready(endpoint, "read_start");
     if (!fn) {
-      $uv.error("stream.read.args");
+      $error.stream.read.args();
     }
     _uv_stream_readable(stream);
     endpoint.read_value = value;
@@ -1300,18 +1300,18 @@ macro Unit $uv.stream(
 
   $endpoint $endpoint.write($endpoint endpoint, String text) {
     if (!text) {
-      $uv.error("stream.write.text");
+      $error.stream.write.text();
     }
     return _write(endpoint, text, (size_t) text.len());
   }
 
   $endpoint $endpoint.write_bytes($endpoint endpoint, Bytes bytes) {
     if (!bytes) {
-      $uv.error("stream.write.bytes");
+      $error.stream.write.bytes();
     }
     Block block = bytes;
     if (block.length && block.width > SIZE_MAX / block.length)
-      $uv.error("stream.write.limit");
+      $error.stream.write.limit();
     return _write(endpoint, bytes, block.width * block.length);
   }
 
@@ -1347,7 +1347,7 @@ UvTcp UvTcp.bind(UvTcp tcp, UvAddress address, unsigned flags) {
   _uv_tcp_ready(tcp, "tcp_bind");
   if (!address || (address.family() != AF_INET &&
                    address.family() != AF_INET6)) {
-    $uv.error("tcp.bind.args");
+    $error.tcp.bind.args();
   }
   int status = uv_tcp_bind(&tcp.handle, address.native(), flags);
   if (status < 0) _uv_raise("tcp_bind", status);
@@ -1358,7 +1358,7 @@ UvTcp UvTcp.connect(
   UvTcp tcp, UvAddress address, Var value, void (*fn)(UvTcp, Var)) {
   UvStream stream = _uv_tcp_ready(tcp, "tcp_connect");
   if (!address || !fn) {
-    $uv.error("tcp.connect.args");
+    $error.tcp.connect.args();
   }
   _uv_stream_unused(stream, "tcp_connect");
   tcp.connect_value = value;
@@ -1412,7 +1412,7 @@ $uv.stream(
 
 static void _uv_pipe_path(String name, String operation) {
   if (!name || !name.len() || memchr(name, '\0', name.len())) {
-    $uv.error("pipe.path", operation);
+    $error.pipe.path(operation);
   }
 }
 
@@ -1429,7 +1429,7 @@ UvPipe UvPipe.connect(
   UvStream stream = _uv_pipe_ready(pipe, "pipe_connect");
   _uv_pipe_path(name, "pipe_connect");
   if (!fn) {
-    $uv.error("pipe.connect.args");
+    $error.pipe.connect.args();
   }
   _uv_stream_unused(stream, "pipe_connect");
   pipe.connect_value = value;
@@ -1456,7 +1456,7 @@ static String _uv_pipe_name(UvPipe pipe, int peer) {
   int allocated = 0;
   if (status == UV_ENOBUFS) {
     if (!length || length > INT_MAX) {
-      $uv.error("pipe.name.limit");
+      $error.pipe.name.limit();
     }
     buffer = Scope.malloc(length);
     allocated = 1;
@@ -1470,7 +1470,7 @@ static String _uv_pipe_name(UvPipe pipe, int peer) {
   }
   if (length > INT_MAX || memchr(buffer, '\0', length)) {
     if (allocated) Scope.free(buffer);
-    $uv.error("pipe.name.encoding");
+    $error.pipe.name.encoding();
   }
   String name = String.new_len(buffer, (int) length);
   if (allocated) Scope.free(buffer);
@@ -1483,21 +1483,21 @@ String UvPipe.peer_name(UvPipe pipe) => _uv_pipe_name(pipe, 1);
 
 static UvUdp _uv_udp_ready(UvUdp udp, String operation) {
   if (!udp) {
-    $uv.error("udp.required", operation);
+    $error.udp.required(operation);
   }
   if (!udp.loop || !udp.loop.initialized || udp.closing || udp.closed) {
-    $uv.error("udp.closed", operation);
+    $error.udp.closed(operation);
   }
   return udp;
 }
 
 static size_t _uv_udp_address_size(UvAddress address, String operation) {
   if (!address) {
-    $uv.error("address.required", operation);
+    $error.address.required(operation);
   }
   if (address.family() == AF_INET) return sizeof(struct sockaddr_in);
   if (address.family() == AF_INET6) return sizeof(struct sockaddr_in6);
-  $uv.error("address.family", operation);
+  $error.address.family(operation);
 }
 
 static UvAddress _uv_udp_copy_address(
@@ -1508,7 +1508,7 @@ static UvAddress _uv_udp_copy_address(
       ? sizeof(struct sockaddr_in6)
       : 0;
   if (!length) {
-    $uv.error("udp.source.invalid");
+    $error.udp.source.invalid();
   }
   UvAddress address = Scope.calloc_in(
     &udp.owner_scope, 1, sizeof(struct UvAddress)
@@ -1611,7 +1611,7 @@ static void _uv_udp_send_callback(uv_udp_send_t *request, int status) {
 
 UvUdp UvLoop.udp(UvLoop loop) {
   if (!loop || !loop.initialized) {
-    $uv.error("udp.args");
+    $error.udp.args();
   }
   UvUdp udp = Scope.calloc(1, sizeof(struct UvUdp));
   int status = uv_udp_init(&loop.loop, &udp.udp);
@@ -1650,7 +1650,7 @@ static UvUdp _uv_udp_send(
     ? _uv_udp_address_size(target, "udp_send")
     : 0;
   if (length > UINT_MAX) {
-    $uv.error("udp.send.length", length);
+    $error.udp.send.length(length);
   }
   UvUdpSend send = Scope.calloc_in(
     &udp.owner_scope, 1, sizeof(struct UvUdpSend)
@@ -1680,18 +1680,18 @@ static UvUdp _uv_udp_send(
 
 UvUdp UvUdp.send(UvUdp udp, UvAddress target, String text) {
   if (!text) {
-    $uv.error("udp.send.text");
+    $error.udp.send.text();
   }
   return _uv_udp_send(udp, target, text, (size_t) text.len());
 }
 
 UvUdp UvUdp.send_bytes(UvUdp udp, UvAddress target, Bytes bytes) {
   if ((void *) bytes == NULL) {
-    $uv.error("udp.send.bytes");
+    $error.udp.send.bytes();
   }
   Block block = bytes;
   if (block.length && block.width > SIZE_MAX / block.length) {
-    $uv.error("udp.send.limit");
+    $error.udp.send.limit();
   }
   return _uv_udp_send(
     udp, target, bytes, block.width * block.length
@@ -1701,10 +1701,10 @@ UvUdp UvUdp.send_bytes(UvUdp udp, UvAddress target, Bytes bytes) {
 UvUdp UvUdp.max_receive(UvUdp udp, size_t bytes) {
   _uv_udp_ready(udp, "udp_max_receive");
   if (!bytes) {
-    $uv.error("udp.limit.args");
+    $error.udp.limit.args();
   }
   if (udp.receiving) {
-    $uv.error("udp.limit.active");
+    $error.udp.limit.active();
   }
   udp.receive_limit = bytes;
   return udp;
@@ -1714,10 +1714,10 @@ UvUdp UvUdp.receive(
   UvUdp udp, Var value, void (*fn)(UvUdp, Bytes, UvAddress, unsigned, Var)) {
   _uv_udp_ready(udp, "udp_receive");
   if (!fn) {
-    $uv.error("udp.receive.args");
+    $error.udp.receive.args();
   }
   if (udp.receiving) {
-    $uv.error("udp.receiving");
+    $error.udp.receiving();
   }
   udp.receive_value = value;
   udp.receive_handler = fn;
@@ -1801,7 +1801,7 @@ static String _uv_fs_operation_name(uv_fs_type operation) {
 static UvFs _uv_fs_new_in(
   UvLoop loop, uv_fs_type operation, Var value, UvFsFn handler, Scope *owner) {
   if (!loop || !loop.initialized || !handler) {
-    $uv.error("fs.args");
+    $error.fs.args();
   }
   UvFs fs = Scope.calloc_in(owner, 1, sizeof(struct UvFs));
   fs.loop = loop;
@@ -1860,7 +1860,7 @@ static void _uv_fs_copy_scan(UvFs fs) {
   int status;
   while (!(status = uv_fs_scandir_next(&fs.request, &entry))) {
     if (fs.entry_count >= capacity) {
-      $uv.error("fs.scandir.count");
+      $error.fs.scandir.count();
     }
     fs.entries[fs.entry_count].name = _uv_address_string(
       fs.strings, entry.name
@@ -1906,7 +1906,7 @@ static void _uv_fs_finish(UvFs fs) {
   }
   if (fs.limit_exceeded) {
     size_t limit = fs.limit;
-    try $uv.error("fs.readfile.limit", limit);
+    try $error.fs.readfile.limit(limit);
     catch %(?cause *detail): {
       _uv_callback_failed(fs.loop, cause, detail);
     }
@@ -2136,7 +2136,7 @@ UvFs UvLoop.open(
   UvLoop loop, String path, int flags, int mode, Var value,
   void (*fn)(UvFs, Var)) {
   if (!path || !path.len()) {
-    $uv.error("fs.open.path");
+    $error.fs.open.path();
   }
   UvFs fs = _uv_fs_new(loop, UV_FS_OPEN, value, fn);
   fs.path = String.new_in(fs.strings, path, path.len());
@@ -2151,10 +2151,10 @@ UvFs UvLoop.open(
 
 static UvFile _uv_file_ready(UvFile file, String operation) {
   if (!file) {
-    $uv.error("file.required", operation);
+    $error.file.required(operation);
   }
   if (!file.loop || !file.loop.initialized || file.closing || file.closed) {
-    $uv.error("file.closed", operation);
+    $error.file.closed(operation);
   }
   return file;
 }
@@ -2164,7 +2164,7 @@ UvFs UvFile.read(
   void (*fn)(UvFs, Var)) {
   _uv_file_ready(file, "fs_read");
   if (length > UINT_MAX) {
-    $uv.error("fs.read.length", length);
+    $error.fs.read.length(length);
   }
   UvFs fs = _uv_fs_new_in(
     file.loop, UV_FS_READ, value, fn, &file.owner_scope
@@ -2188,7 +2188,7 @@ static UvFs _uv_file_write(
   UvFsFn fn) {
   _uv_file_ready(file, "fs_write");
   if (length > UINT_MAX) {
-    $uv.error("fs.write.length", length);
+    $error.fs.write.length(length);
   }
   UvFs fs = _uv_fs_new_in(
     file.loop, UV_FS_WRITE, value, fn, &file.owner_scope
@@ -2212,7 +2212,7 @@ static UvFs _uv_file_write(
 UvFs UvFile.write(
   UvFile file, String text, int64_t offset, Var value, void (*fn)(UvFs, Var)) {
   if (!text) {
-    $uv.error("fs.write.text");
+    $error.fs.write.text();
   }
   return _uv_file_write(file, text, text.len(), offset, value, fn);
 }
@@ -2220,11 +2220,11 @@ UvFs UvFile.write(
 UvFs UvFile.write_bytes(
   UvFile file, Bytes bytes, int64_t offset, Var value, void (*fn)(UvFs, Var)) {
   if ((void *) bytes == NULL) {
-    $uv.error("fs.write.bytes");
+    $error.fs.write.bytes();
   }
   Block block = bytes;
   if (block.length && block.width > SIZE_MAX / block.length) {
-    $uv.error("fs.write.limit");
+    $error.fs.write.limit();
   }
   return _uv_file_write(
     file, bytes, block.width * block.length, offset, value, fn
@@ -2235,7 +2235,7 @@ UvFs UvFile.close(UvFile file, Var value, void (*fn)(UvFs, Var)) {
   _uv_file_ready(file, "fs_close");
   if (file.pending) {
     size_t pending = file.pending;
-    $uv.error("file.pending", pending);
+    $error.file.pending(pending);
   }
   UvFs fs = _uv_fs_new_in(
     file.loop, UV_FS_CLOSE, value, fn, &file.owner_scope
@@ -2264,7 +2264,7 @@ static UvFs _uv_fs_whole(
   size_t length, size_t limit, int mode, Var value, UvFsFn fn) {
   String operation_name = _uv_fs_operation_name(operation);
   if (!path || !path.len()) {
-    $uv.error("fs.path", operation_name);
+    $error.fs.path(operation_name);
   }
   UvFs fs = _uv_fs_new(loop, operation, value, fn);
   fs.phase = UV_FS_PHASE_OPEN;
@@ -2303,7 +2303,7 @@ UvFs UvLoop.read_file(
 UvFs UvLoop.write_file(
   UvLoop loop, String path, String text, Var value, void (*fn)(UvFs, Var)) {
   if (!text) {
-    $uv.error("fs.writefile.text");
+    $error.fs.writefile.text();
   }
   return _uv_fs_whole(
     loop, path, UV_FS_WRITE, text, text.len(), 0, 0666, value, fn
@@ -2313,11 +2313,11 @@ UvFs UvLoop.write_file(
 UvFs UvLoop.write_file_bytes(
   UvLoop loop, String path, Bytes bytes, Var value, void (*fn)(UvFs, Var)) {
   if ((void *) bytes == NULL) {
-    $uv.error("fs.writefile.bytes");
+    $error.fs.writefile.bytes();
   }
   Block block = bytes;
   if (block.length && block.width > SIZE_MAX / block.length) {
-    $uv.error("fs.writefile.limit");
+    $error.fs.writefile.limit();
   }
   return _uv_fs_whole(
     loop, path, UV_FS_WRITE, bytes, block.width * block.length,
@@ -2327,7 +2327,7 @@ UvFs UvLoop.write_file_bytes(
 
 UvFs UvLoop.stat(UvLoop loop, String path, Var value, void (*fn)(UvFs, Var)) {
   if (!path || !path.len()) {
-    $uv.error("fs.stat.path");
+    $error.fs.stat.path();
   }
   UvFs fs = _uv_fs_new(loop, UV_FS_STAT, value, fn);
   fs.path = String.new_in(fs.strings, path, path.len());
@@ -2341,7 +2341,7 @@ UvFs UvLoop.stat(UvLoop loop, String path, Var value, void (*fn)(UvFs, Var)) {
 
 UvFs UvLoop.scan(UvLoop loop, String path, Var value, void (*fn)(UvFs, Var)) {
   if (!path || !path.len()) {
-    $uv.error("fs.scandir.path");
+    $error.fs.scandir.path();
   }
   UvFs fs = _uv_fs_new(loop, UV_FS_SCANDIR, value, fn);
   fs.path = String.new_in(fs.strings, path, path.len());
@@ -2355,10 +2355,10 @@ UvFs UvLoop.scan(UvLoop loop, String path, Var value, void (*fn)(UvFs, Var)) {
 
 int UvFs.cancel(UvFs fs) {
   if (!fs) {
-    $uv.error("fs.cancel.args");
+    $error.fs.cancel.args();
   }
   if (!fs.started) {
-    $uv.error("fs.unstarted");
+    $error.fs.unstarted();
   }
   if (fs.completed || fs.phase == UV_FS_PHASE_CLOSE) return 0;
   int status = uv_cancel((uv_req_t *) &fs.request);
@@ -2371,7 +2371,7 @@ int UvFs.cancelled(UvFs fs) => fs && fs.completed && fs.cancelled;
 
 static UvFs _uv_fs_completed(UvFs fs, String operation) {
   if (!fs || !fs.completed) {
-    $uv.error("fs.incomplete", operation);
+    $error.fs.incomplete(operation);
   }
   return fs;
 }
@@ -2381,7 +2381,7 @@ static void _uv_fs_check_failure(UvFs fs) {
     Error.raise(fs.failure_cause, fs.failure_detail);
   if (fs.limit_exceeded) {
     size_t limit = fs.limit;
-    $uv.error("fs.readfile.limit", limit);
+    $error.fs.readfile.limit(limit);
   }
   if (fs.status < 0 && !fs.cancelled) {
     _uv_raise(
@@ -2396,7 +2396,7 @@ static UvFs _uv_fs_result_type(
   UvFs fs, uv_fs_type expected, String operation) {
   _uv_fs_completed(fs, operation);
   if (fs.operation != expected || fs.cancelled) {
-    $uv.error("fs.result", operation);
+    $error.fs.result(operation);
   }
   _uv_fs_check_failure(fs);
   return fs;
@@ -2430,7 +2430,7 @@ static UvDirEntry _uv_fs_entry(UvFs fs, int index, String operation) {
   size_t count = fs.entry_count();
   if (index < 0 || (size_t) index >= count) {
     long size = (long) count;
-    $uv.error("fs.entry.index", operation, index, size);
+    $error.fs.entry.index(operation, index, size);
   }
   return &fs.entries[index];
 }
@@ -2463,7 +2463,7 @@ const uv_stat_t *UvStat.native(UvStat stat) => stat ? &stat.value : NULL;
 */
 UvAsync UvLoop.async(UvLoop loop, Var value, void (*fn)(UvAsync, Var)) {
   if (!loop || !loop.initialized || !fn) {
-    $uv.error("async.args");
+    $error.async.args();
   }
   UvAsync async = Scope.calloc(1, sizeof(struct UvAsync));
   async.loop = loop;
@@ -2480,10 +2480,10 @@ UvAsync UvLoop.async(UvLoop loop, Var value, void (*fn)(UvAsync, Var)) {
 
 UvAsync UvAsync.send(UvAsync async) {
   if (!async) {
-    $uv.error("async.required");
+    $error.async.required();
   }
   if (async.stopped) {
-    $uv.error("async.stopped");
+    $error.async.stopped();
   }
   int status = uv_async_send(&async.async);
   if (status < 0) _uv_raise("async_send", status);
@@ -2535,7 +2535,7 @@ macro Unit $uv.phase(
 
   $phase UvLoop.$method(UvLoop loop, Var value, void (*fn)($phase, Var)) {
     if (!loop || !loop.initialized || !fn) {
-      $uv.error("phase.args", $operation);
+      $error.phase.args($operation);
     }
     $phase phase = Scope.calloc(1, sizeof(*phase));
     phase.loop = loop;
@@ -2593,7 +2593,7 @@ $uv.phase(
 UvTimer UvLoop.timer(
   UvLoop loop, long delay, long repeat, Var value, void (*fn)(UvTimer, Var)) {
   if (!loop || !loop.initialized || !fn || delay < 0 || repeat < 0) {
-    $uv.error("timer.args");
+    $error.timer.args();
   }
   UvTimer timer = Scope.calloc(1, sizeof(struct UvTimer));
   int status = uv_timer_init(&loop.loop, &timer.timer);
@@ -2631,7 +2631,7 @@ uv_timer_t *UvTimer.native(UvTimer timer) => timer ? &timer.timer : NULL;
 UvSignal UvLoop.signal(
   UvLoop loop, int number, Var value, void (*fn)(UvSignal, Var)) {
   if (!loop || !loop.initialized || !fn || number <= 0) {
-    $uv.error("signal.args");
+    $error.signal.args();
   }
   UvSignal signal = Scope.calloc(1, sizeof(struct UvSignal));
   int status = uv_signal_init(&loop.loop, &signal.signal);
@@ -2674,7 +2674,7 @@ uv_signal_t *UvSignal.native(UvSignal signal) =>
 UvWatch UvLoop.watch(
   UvLoop loop, String path, Var value, void (*fn)(UvWatch, Var)) {
   if (!loop || !loop.initialized || !fn || !path || !path.len()) {
-    $uv.error("watch.args");
+    $error.watch.args();
   }
   UvWatch watch = Scope.calloc(1, sizeof(struct UvWatch));
   int status = uv_fs_event_init(&loop.loop, &watch.event);
@@ -2699,7 +2699,7 @@ UvWatch UvLoop.watch(
 */
 String UvWatch.entry(UvWatch watch) {
   if (!watch) {
-    $uv.error("watch.required");
+    $error.watch.required();
   }
   if (watch.status < 0) {
     _uv_raise("entry", watch.status);
@@ -2727,17 +2727,17 @@ uv_fs_event_t *UvWatch.native(UvWatch watch) => watch ? &watch.event : NULL;
 */
 UvProcess UvLoop.command(UvLoop loop, List arguments) {
   if (!loop || !loop.initialized || !arguments || !arguments.len()) {
-    $uv.error("command.args");
+    $error.command.args();
   }
   size_t count = arguments.len();
   if (count > INT_MAX) {
-    $uv.error("command.count", count);
+    $error.command.count(count);
   }
   char **argv = Scope.calloc(count + 1, sizeof(char *));
   size_t index = 0;
   foreach(Var argument, arguments) {
     if (argument is not <string>) {
-      $uv.error("command.types");
+      $error.command.types();
     }
     String text = argument;
     argv[index++] = text ? text : "";
@@ -2762,7 +2762,7 @@ static UvStdioMode _uv_stdio_mode(Symbol mode, String operation) {
   if (mode == <pipe>) return UV_STDIO_PIPE;
   if (mode == <inherit>) return UV_STDIO_INHERIT;
   if (mode == <ignore>) return UV_STDIO_IGNORE;
-  $uv.error("command.stdio", operation);
+  $error.command.stdio(operation);
 }
 
 /*  Configures stdin, stdout, and stderr before start. <pipe> enables the
@@ -2783,7 +2783,7 @@ UvProcess UvProcess.stdio(
 UvProcess UvProcess.directory(UvProcess process, String path) {
   _uv_process_pending(process, "directory");
   if (!path || !path.len()) {
-    $uv.error("command.directory");
+    $error.command.directory();
   }
   process.directory = path;
   return process;
@@ -2795,13 +2795,13 @@ UvProcess UvProcess.directory(UvProcess process, String path) {
 UvProcess UvProcess.environment(UvProcess process, Map variables) {
   _uv_process_pending(process, "environment");
   if (!variables) {
-    $uv.error("command.environment");
+    $error.command.environment();
   }
   char **environment = Scope.calloc(variables.len() + 1, sizeof(char *));
   size_t index = 0;
   foreach(Var (name, value), variables) {
     if (name is not <string> || value is not <string>) {
-      $uv.error("command.env.types");
+      $error.command.env.types();
     }
     environment[index++] = "%s=%s".printf(name.string(), value.string());
   }
@@ -2815,7 +2815,7 @@ UvProcess UvProcess.environment(UvProcess process, Map variables) {
 UvProcess UvProcess.deadline(UvProcess process, long milliseconds) {
   _uv_process_pending(process, "deadline");
   if (milliseconds <= 0) {
-    $uv.error("command.deadline");
+    $error.command.deadline();
   }
   process.deadline_ms = milliseconds;
   return process;
@@ -2824,7 +2824,7 @@ UvProcess UvProcess.deadline(UvProcess process, long milliseconds) {
 UvProcess UvProcess.max_output(UvProcess process, size_t bytes) {
   _uv_process_pending(process, "max_output");
   if (!bytes) {
-    $uv.error("command.limit");
+    $error.command.limit();
   }
   process.output.limit = bytes;
   process.error.limit = bytes;
@@ -2950,24 +2950,24 @@ UvProcess UvLoop.spawn(UvLoop loop, List arguments) =>
 UvProcess UvProcess.write(UvProcess process, String text) {
   _uv_process_ready(process, "write");
   if (process.input_mode != UV_STDIO_PIPE) {
-    $uv.error("process.stdin.mode");
+    $error.process.stdin.mode();
   }
   if (process.input_closed || process.shutdown_pending) {
-    $uv.error("process.stdin.closed");
+    $error.process.stdin.closed();
   }
   size_t length = text.len();
   if (!length) return process;
   if (length > UINT_MAX) {
-    $uv.error("process.write.limit", length);
+    $error.process.write.limit(length);
   }
   UvWrite write = calloc(1, sizeof(struct UvWrite));
   if (!write) {
-    $uv.error("process.write.alloc", length);
+    $error.process.write.alloc(length);
   }
   write.bytes = malloc(length);
   if (!write.bytes) {
     free(write);
-    $uv.error("process.write.alloc", length);
+    $error.process.write.alloc(length);
   }
   write.process = process;
   write.request.data = write;
@@ -3008,7 +3008,7 @@ UvProcess UvProcess.close_stdin(UvProcess process) {
 UvProcess UvProcess.kill(UvProcess process, int number) {
   _uv_process_ready(process, "process_kill");
   if (process.exited) {
-    $uv.error("process.exited");
+    $error.process.exited();
   }
   int status = uv_process_kill(&process.process, number);
   if (status < 0) {
@@ -3035,7 +3035,7 @@ int UvProcess.timed_out(UvProcess process) {
 long UvProcess.exit_status(UvProcess process) {
   _uv_process_ready(process, "exit_status");
   if (!process.exited) {
-    $uv.error("process.exit.pending");
+    $error.process.exit.pending();
   }
   return (long) process.exit_status;
 }
@@ -3043,7 +3043,7 @@ long UvProcess.exit_status(UvProcess process) {
 int UvProcess.term_signal(UvProcess process) {
   _uv_process_ready(process, "term_signal");
   if (!process.exited) {
-    $uv.error("process.signal.pending");
+    $error.process.signal.pending();
   }
   return process.term_signal;
 }
@@ -3057,7 +3057,7 @@ static void _uv_capture_check(
   UvProcess process, UvCapture *capture, String operation) {
   _uv_process_ready(process, operation);
   if (!capture.enabled) {
-    $uv.error("process.capture", operation);
+    $error.process.capture(operation);
   }
   if (capture.status < 0) _uv_raise(operation, capture.status);
 }
@@ -3074,38 +3074,38 @@ static String _uv_capture_text(
   _uv_capture_check(process, capture, operation);
   if (capture.length > INT_MAX) {
     size_t bytes = capture.length;
-    $uv.error("process.output.limit", operation, bytes);
+    $error.process.output.limit(operation, bytes);
   }
   if (capture.length && memchr(capture.bytes, '\0', capture.length)) {
-    $uv.error("process.output.encoding", operation);
+    $error.process.output.encoding(operation);
   }
   return String.new_len(capture.bytes, (int) capture.length);
 }
 
 Bytes UvProcess.stdout_bytes(UvProcess process) {
   if (!process) {
-    $uv.error("process.stdout.bytes");
+    $error.process.stdout.bytes();
   }
   return _uv_capture_bytes(process, &process.output, "stdout_bytes");
 }
 
 Bytes UvProcess.stderr_bytes(UvProcess process) {
   if (!process) {
-    $uv.error("process.stderr.bytes");
+    $error.process.stderr.bytes();
   }
   return _uv_capture_bytes(process, &process.error, "stderr_bytes");
 }
 
 String UvProcess.stdout(UvProcess process) {
   if (!process) {
-    $uv.error("process.stdout.args");
+    $error.process.stdout.args();
   }
   return _uv_capture_text(process, &process.output, "stdout");
 }
 
 String UvProcess.stderr(UvProcess process) {
   if (!process) {
-    $uv.error("process.stderr.args");
+    $error.process.stderr.args();
   }
   return _uv_capture_text(process, &process.error, "stderr");
 }
@@ -3117,7 +3117,7 @@ UvProcess UvProcess.free(UvProcess process) {
        !process.input_closed || !process.output.closed ||
        !process.error.closed || !process.deadline_closed ||
        process.pending_writes || process.shutdown_pending)) {
-    $uv.error("process.free.pending");
+    $error.process.free.pending();
   }
   free(process.output.bytes);
   free(process.error.bytes);

@@ -1,53 +1,36 @@
 /* Lisp session error conditions. Runtime operands retain their original
    detail types, order and source helper ownership. */
 
-macro Stmt $_lisp_session_error_callback_absent(Expr $operation) {
+macro Stmt $error.callback.absent(Expr $operation) {
   raise %(bad-state (operation ${$operation}) (why "no session"));
 }
 
-macro Stmt $_lisp_session_error_callback_wrong(Expr $operation) {
+macro Stmt $error.callback.wrong(Expr $operation) {
   raise %(bad-state (operation ${$operation}) (why "wrong session"));
 }
 
-macro Stmt $_lisp_session_error_entry_null(Expr $operation) {
+macro Stmt $error.entry.null(Expr $operation) {
   raise %(bad-arg (operation ${$operation}));
 }
 
-macro Stmt $_lisp_session_error_global_args() {
+macro Stmt $error.global.args() {
   raise %(bad-arg (operation "Lisp.set_global"));
 }
 
-macro Stmt $_lisp_session_error_global_frozen() {
+macro Stmt $error.global.frozen() {
   raise %(bad-state (operation "Lisp.set_global") (why "frozen"));
 }
 
-macro Stmt $_lisp_session_error_global_inherited(Expr $name) {
+macro Stmt $error.global.inherited(Expr $name) {
   raise %(bad-state (operation "Lisp.set_global") (why "inherited")
           (name ${$name}));
 }
 
-macro Stmt $_lisp_session_error_bind_args() {
+macro Stmt $error.bind.args() {
   raise %(bad-arg (operation "Lisp.bind"));
 }
 
-macro Stmt $_lisp_session_error_source_callable(Expr $callable) {
+macro Stmt $error.source.callable(Expr $callable) {
   raise %(bad-types (operation "lisp_source_function") (want "Lambda")
           (actual ${$callable.kind()}));
-}
-
-macro Stmt $lisp.session.error(Literal $key, Expr $arguments...) {
-  $(let* ((key (x2c.literal.value $key))
-          (row (assoc key '(
-        ("callback.absent" _lisp_session_error_callback_absent)
-        ("callback.wrong" _lisp_session_error_callback_wrong)
-        ("entry.null" _lisp_session_error_entry_null)
-        ("global.args" _lisp_session_error_global_args)
-        ("global.frozen" _lisp_session_error_global_frozen)
-        ("global.inherited" _lisp_session_error_global_inherited)
-        ("bind.args" _lisp_session_error_bind_args)
-        ("source.callable" _lisp_session_error_source_callable)))))
-    (if row
-      (list (_x2c.tpl-call (cadr row) $arguments))
-      (x2c.diagnostic.fail
-        (string-append "unknown Lisp session error '" key "'") '())))...
 }

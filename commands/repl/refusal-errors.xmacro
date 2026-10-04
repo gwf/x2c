@@ -1,79 +1,37 @@
 /* Session refusals keep their existing raise and transaction boundary. */
 
-meta static Map _repl_refusal_rows(void) => {
+macro Stmt $refusal.binding.unresolved(Expr $name) =>
+  _refuse(%"unresolved identifier: ${$name}");
 
-  "binding.unresolved" :
-  macro Stmt(Expr $name) {
-    _refuse(%"unresolved identifier: ${$name}");
-  },
+macro Stmt $refusal.storage.native() =>
+  _refuse("static, extern, and threaded storage need native execution");
 
-  "storage.native" :
-  macro Stmt() {
-    _refuse("static, extern, and threaded storage need native execution");
-  },
+macro Stmt $refusal.binding.redefined() =>
+  _refuse("redeclaration is disabled; use assignment");
 
-  "binding.redefined" :
-  macro Stmt() {
-    _refuse("redeclaration is disabled; use assignment");
-  },
+macro Stmt $refusal.binding.initializer() =>
+  _refuse("top-level values need an initializer and a simple binding");
 
-  "binding.initializer" :
-  macro Stmt() {
-    _refuse("top-level values need an initializer and a simple binding");
-  },
+macro Stmt $refusal.form.unsupported() =>
+  _refuse("this top-level form is outside the REPL subset");
 
-  "form.unsupported" :
-  macro Stmt() {
-    _refuse("this top-level form is outside the REPL subset");
-  },
+macro Stmt $refusal.input.unsupported() =>
+  _refuse("preprocessor and direct Lisp input are unsupported");
 
-  "input.unsupported" :
-  macro Stmt() {
-    _refuse("preprocessor and direct Lisp input are unsupported");
-  },
+macro Stmt $refusal.qualifier.native() =>
+  _refuse("const and volatile need native checks outside the REPL");
 
-  "qualifier.native" :
-  macro Stmt() {
-    _refuse("const and volatile need native checks outside the REPL");
-  },
+macro Stmt $refusal.definition.unsupported() =>
+  _refuse("compiler-session definitions are outside the REPL subset");
 
-  "definition.unsupported" :
-  macro Stmt() {
-    _refuse("compiler-session definitions are outside the REPL subset");
-  },
+macro Stmt $refusal.declaration.unsupported() =>
+  _refuse("type and storage declarations are outside the REPL subset");
 
-  "declaration.unsupported" :
-  macro Stmt() {
-    _refuse("type and storage declarations are outside the REPL subset");
-  },
+macro Stmt $refusal.function.redefined() =>
+  _refuse("function redeclaration is disabled");
 
-  "function.redefined" :
-  macro Stmt() {
-    _refuse("function redeclaration is disabled");
-  },
+macro Stmt $refusal.function.missing(Expr $name) =>
+  _refuse(%"no native function is available for ${$name}");
 
-  "function.missing" :
-  macro Stmt(Expr $name) {
-    _refuse(%"no native function is available for ${$name}");
-  },
-
-  "type.redefined" :
-  macro Stmt() {
-    _refuse("a type cannot be redefined; the session keeps its layout");
-  }
-};
-
-meta static List _repl_refusal_expand(String key, List arguments) {
-  Map rows = _repl_refusal_rows();
-  Var value = rows[key];
-  if (value is void)
-    x2c_diagnostic_fail(%"unknown REPL refusal '$key'", %());
-  Macro selected = value;
-  if (arguments.len() != selected.assoc(<parameters>).list().len())
-    x2c_diagnostic_fail(%"wrong argument count for REPL refusal '$key'", %());
-  return %(${Macro_apply(selected, arguments)});
-}
-
-macro Stmt $repl.error(Literal $key, Expr $arguments...) {
-  $(_repl_refusal_expand (x2c.literal.value $key) $arguments)...
-}
+macro Stmt $refusal.type.redefined() =>
+  _refuse("a type cannot be redefined; the session keeps its layout");

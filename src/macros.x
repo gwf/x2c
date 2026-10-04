@@ -2061,13 +2061,15 @@ static List Compiler._peek_invocation(Compiler c) {
 }
 
 /* Scans the dotted name after the current `$` without consuming tokens.
+   A component after a dot may be a keyword, as in `$error.arg.void`.
    Returns the token after the name, or the token where a name component is
    missing with `spelling` set to NULL. */
 static Token Compiler._scan_name(Compiler c, String &spelling) {
   Token token = c.token, String name = NULL;
   do {
     token = Token.skip_trivia(token + 1);
-    if (token.type != <ident>) {
+    if (token.type != <ident> &&
+        !(name && scan_keyword_type(token.text, token.text.len()))) {
       name = NULL;
       break;
     }
@@ -4461,7 +4463,6 @@ static void _bind_primitives(Lisp lisp) {
   $lisp.bind(lisp, "x2c_literal_int", x2c_literal_int);
   $lisp.bind(lisp, "x2c_literal_symbol", x2c_literal_symbol);
   $lisp.bind(lisp, "_x2c.import-hook", _lisp_import_hook);
-  $lisp.bind(lisp, "_x2c.tpl-call", _sdk_template_call);
   Compiler.bind_sdk_primitives(lisp);
 }
 

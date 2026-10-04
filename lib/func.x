@@ -106,12 +106,12 @@ static void *Func._context(Func f) => (unsigned char *) f + _context_offset();
     result remains no-value. Other results have the ownership of the value the
     adapter returned. */
 Var Func.apply(Func f, unsigned argc, const FuncArg *argv) {
-  if (!f || (argc && !argv)) $func.error("apply.args");
+  if (!f || (argc && !argv)) $error.apply.args();
   if (!f.rest) {
     if (argc != f.nparams) {
       List sig = f.sig;
       unsigned expected = f.nparams;
-      $func.error("apply.arity", sig, expected, argc);
+      $error.apply.arity(sig, expected, argc);
     }
     return f.adapter(f, argv);
   }
@@ -119,9 +119,9 @@ Var Func.apply(Func f, unsigned argc, const FuncArg *argv) {
   for (unsigned i = argc; i; i--) {
     unsigned index = i - 1;
     if (argv[index].reference_type)
-      $func.error("arg.value", sig, index);
+      $error.arg.value(sig, index);
     Var value = argv[index].data.value;
-    if (value is void) $func.error("arg.void", sig, index);
+    if (value is void) $error.arg.void(sig, index);
     rest = cons(value, rest);
   }
   FuncArg packed = FuncArg.value(rest);
@@ -180,12 +180,12 @@ inline Var Func.apply_values(Func fn, Var left, Var right) {
     `<bad-arity>` when `argc` disagrees with a fixed signature. */
 List x2c_func_reference_type(Func fn, unsigned argc, unsigned index) {
   if (!fn || index >= argc)
-    $func.error("apply.index", index);
+    $error.apply.index(index);
   if (fn.rest) return NULL;
   if (argc != fn.nparams) {
     List sig = fn.sig;
     unsigned expected = fn.nparams;
-    $func.error("apply.arity", sig, expected, argc);
+    $error.apply.arity(sig, expected, argc);
   }
   List parameter = fn._parameter(index);
   return _is_reference(parameter) ? parameter.cdr() : NULL;
@@ -218,10 +218,10 @@ Var x2c_func_value_argument(
   Func fn, const FuncArg *argv, unsigned i, Symbol want) {
   List sig = fn ? fn.sig : NULL;
   if (argv[i].reference_type)
-    $func.error("arg.value", sig, i);
+    $error.arg.value(sig, i);
   Var value = argv[i].data.value;
   if (want == <var>) return value;
-  if (value is void) $func.error("arg.void", sig, i);
+  if (value is void) $error.arg.void(sig, i);
   X2CVarNumericInfo info;
   if (Var.numeric_info(want, info)) {
     Var converted = void;
@@ -231,13 +231,13 @@ Var x2c_func_value_argument(
     catch %((!or ?code bad-enc void-op bad-target conv-range no-convert)
             *cause): {
       List lower = cons(code, cause);
-      $func.error("arg.convert", code, sig, i, want, lower);
+      $error.arg.convert(code, sig, i, want, lower);
     }
     return converted;
   }
   /* Object parameters require their declared tag, but nil is a legal List. */
   if (value is not want && !(want == <list> && value.is_null()))
-    $func.error("arg.type", sig, i, value.tag(), want);
+    $error.arg.type(sig, i, value.tag(), want);
   return value;
 }
 
@@ -254,7 +254,7 @@ void *x2c_func_pointer_argument(Func fn, const FuncArg *argv, unsigned i) {
   if (argv[i].reference_type ||
       (kind != <pointer> && kind != <reference> && value is not <string>)) {
     List sig = fn ? fn.sig : NULL;
-    $func.error("arg.pointer", sig, i, value.tag());
+    $error.arg.pointer(sig, i, value.tag());
   }
   return value.pointer();
 }
@@ -265,7 +265,7 @@ void *x2c_func_pointer_argument(Func fn, const FuncArg *argv, unsigned i) {
 */
 FuncArg x2c_func_unrepresentable_argument(Func fn, unsigned i, List source) {
   List sig = fn ? fn.sig : NULL;
-  $func.error("arg.unboxed", sig, i, source);
+  $error.arg.unboxed(sig, i, source);
 }
 
 /** Boxes a record result as a `<p48>` to a copy of its `size` bytes in the
@@ -309,7 +309,7 @@ static void *Func._reference_argument(
       (!_reference_type_accepts(want, source) &&
        !_reference_type_accepts(declared_target, source))) {
     List sig = fn ? fn.sig : NULL;
-    $func.error("arg.ref", sig, i, source, want);
+    $error.arg.ref(sig, i, source, want);
   }
   return (void *) argv[i].data.reference;
 }
@@ -401,18 +401,18 @@ static Func _new(
   FuncAdapter adapter, List signature, int rest,
   const void *context, size_t context_size) {
   if (rest && !signature.match(%((func (("List"))) ? *)))
-    $func.error("bind.sig", signature);
-  if (!adapter) $func.error("bind.sig", signature);
+    $error.bind.sig(signature);
+  if (!adapter) $error.bind.sig(signature);
   List params = NULL;
   match (signature)
     case %((func (!set ?captured (!is type list))) ? *):
       params = captured;
-  if (!params) $func.error("bind.sig", signature);
+  if (!params) $error.bind.sig(signature);
   if (context_size && !context)
-    $func.error("context.source");
+    $error.context.source();
   size_t context_offset = _context_offset();
   if (context_size > SIZE_MAX - context_offset)
-    $func.error("context.size", context_size);
+    $error.context.size(context_size);
   int n = params.len();
   int void_params = n == 1 && params.car() is <list> &&
                     params.car() == %(void);
@@ -433,7 +433,7 @@ static Func _new(
     The result has the `((func (PARAMETERS...)) RESULT...)` shape supplied to
     the constructor and remains valid for the binding's lifetime. */
 List Func.signature(Func function) {
-  if (!function) $func.error("signature.null");
+  if (!function) $error.signature.null();
   return function.sig;
 }
 
@@ -443,7 +443,7 @@ List Func.signature(Func function) {
     Raises: `<bad-arg>` for a null binding. It does not return on failure.
 */
 const void *Func.context(Func function) {
-  if (!function) $func.error("context.null");
+  if (!function) $error.context.null();
   return function.context_size ? function._context() : NULL;
 }
 
@@ -466,6 +466,6 @@ Var Func.var(Func function) => Var.new(<func>, function);
 /** Returns the borrowed native callable carried by `v`.
     Raises: `<bad-types>` when the value is not a `Func`. */
 Func Var.func(Var v) {
-  if (v is not <func>) $func.error("box.type", v.tag());
+  if (v is not <func>) $error.box.type(v.tag());
   return v.pointer();
 }
