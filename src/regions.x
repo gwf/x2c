@@ -290,9 +290,9 @@ static void Walk.fixpoint(Walk &w, List ast) {
      round changes no summary. Each function's last walk then read final
      summaries, and its warnings are the unit's. */
   int count = functions.len();
-  Array found = $auto([]), stale = $auto([]);
+  Array found = $auto([]);
   w.readers = {};
-  w.stale = stale;
+  w.stale = [];
   for (int i = 0; i < count; i++) {
     found.push(NULL);
     w.stale.push(1);
