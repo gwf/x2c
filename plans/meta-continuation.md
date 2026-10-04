@@ -10,8 +10,8 @@
 > This document is a campaign roadmap, not an implementation specification.
 > Updating this record does not authorize implementation or publication.
 > Follow-up: Gary approved the operator ledger implementation. It is integrated
-> locally on origin/dev a0135f6b. The full publication checks pass; delivery
-> and the advisory performance checkpoint remain pending.
+> locally on origin/dev 26a29650. The full publication checks pass, and the
+> advisory performance checkpoint is neutral. Delivery awaits the branch choice.
 
 ## Intended result
 
@@ -351,7 +351,23 @@ constant diagnostic initializer. Adjacent literal fragments replace its two
 runtime additions and preserve the exact diagnostic. Convergence now passes;
 the general cause of that prototype difference remains unproved.
 
-Representative translation performance remains pending a quiet host window.
+The advisory checkpoint compares converged origin/dev 26a29650 with candidate
+25539444 on the same host. Nine alternating warm runs translate seven
+byte-identical top-level inputs: transform, emit, expressions, generate,
+parse, type, and tokenizer. Each compiler uses its own matching source tree
+and prelude. Median elapsed time is 2.204 seconds for dev and 2.200 seconds
+for the candidate. Median retired instructions total 30,869,262,837 and
+30,829,044,110 respectively, a 0.13% reduction. These results support neutral
+throughput, not a meaningful speedup. This is translation of seven modules,
+not a full native build or application workload. The compiler executable grows
+from 2,692,864 to 2,693,152 bytes, including the new linked meta helpers.
+
+The earlier mixed-root comparison is invalid: the candidate used baseline
+headers alongside its own prelude. A mixed-root live-symbol run also rejected
+duplicate macro imports. Neither result describes normal matching-tree
+throughput. The reproducible comparison and raw samples are retained in
+`.context/operator-ledger-spike/compare-translation.py` and
+`.context/operator-ledger-spike/translation-results.json`.
 
 ### 5. Extend canonical generation into packages and tools
 
@@ -377,8 +393,11 @@ lookup cost, and source clarity may favor retaining the current code.
 
 ## Continuation and delivery
 
-The selected implementation is the operator ledger. Its remaining work is the
-advisory performance checkpoint and delivery under the chosen branch policy.
+The selected implementation is the operator ledger. Implementation, focused
+parity, full correctness checks, and the advisory checkpoint are complete.
+Delivery remains under the chosen branch policy. The supplied session
+instructions name main; current repository instructions reserve main for
+releases and use dev. Resolve that destination before pushing.
 Match preparation and prepared formatting remain deferred. Record further
 baseline drift before using their older prototype findings as current evidence.
 
