@@ -870,10 +870,10 @@ static List Walk._lower_defer(
   List cleanup = c._defer_cleanup(record);
   return c.bind_syntax($!{
     {
-      $builtin_defer_record($record, $callback, $env, $records)...
+      ${builtin_defer_record(record, callback, env, records)}
       x2c_cleanup_push(&$record);
       ${w._try_region(cleanup, body)}
-      $builtin_try_cleanup_placement($cleanup)...
+      ${builtin_try_cleanup_placement(cleanup)}
     }
   }, AST_BLOCK, c.return_type);
 }

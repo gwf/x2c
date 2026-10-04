@@ -3035,6 +3035,7 @@ static Var Compiler._helper_result(Compiler c, Var value) {
   if (value is not <list> || value.is_nil()) return value;
   match (value) {
     case %((!or macrodef "x2c.quoted") *): return value;
+    case %(code-value "lowered" *): return value;
     case $source_literal_content(%(*)): return value;
   }
   match (value) {
@@ -3499,16 +3500,19 @@ static List Compiler._captured_pair(Compiler c, List binding, Type type) {
     into a macro value application. Effects are applied in order under the
     application's transaction, and their tokens are replaced in the code.
     `retained` reports a bound or lowered stage, which ordinary binding
-    leaves untouched. Returns 0 for any other value.
+    leaves untouched. Lowered code is not searched for a leftover binder.
+    Returns 0 for any other value.
 */
 int Compiler.take_code_value(
   Compiler c, Var input, Var &value, int &retained) {
   match (input) case %(code-value ?(String stage) ?code ?effects): {
     Map replacements = c._code_effects(effects);
-    value = _replace_bindings(code, replacements);
-    Var binder = _carrier_binder(value);
-    if (binder) c._unbound(binder.str(), c.token);
+    value = replacements.len() ? _replace_bindings(code, replacements) : code;
     retained = stage != "source";
+    if (stage != "lowered") {
+      Var binder = _carrier_binder(value);
+      if (binder) c._unbound(binder.str(), c.token);
+    }
     return 1;
   }
   return 0;
