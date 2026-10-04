@@ -270,6 +270,10 @@ macro Stmt $project.note(Expr $value) =>
 ~}
 ```
 
+That expression may also be a call to a `meta` function that returns a
+statement, as shown under
+[Compute with meta functions](#compute-with-meta-functions).
+
 An expression macro is not a statement macro, and a unit macro cannot appear
 inside a function. The compiler diagnoses the mismatch at the invocation.
 
@@ -562,6 +566,31 @@ diagnostics, identifiers, types, bindings, source text or function bodies.
 The [meta-function guide](meta-functions.md) introduces these operations;
 the [language reference](../reference/language.md#the-same-operations-from-x2c)
 specifies them.
+
+A `Stmt` macro can also call its helper with the arrow form. The helper
+receives captured statements as code and may return any statement that fits
+where the macro is invoked. `$!{ ... }` quotes statements the way
+`$!( ... )` quotes an expression:
+
+```x2c
+#include "meta.x"
+meta static List project_logged(List code) =>
+  $!{ { puts("before"); $code puts("after"); } };
+
+macro Stmt $project.logged(Stmt $code) => $project_logged($code);
+
+int main(void) {
+  int ready = 1;
+  $project.logged(if (ready) puts("ready"););
+  return 0;
+}
+```
+
+```text
+before
+ready
+after
+```
 
 A `meta` parameter declared `TypeInfo` receives a description of the
 argument's type, including a struct or union's fields in declaration
