@@ -865,7 +865,7 @@ compiler must construct code representing that value.
 | Native integers and floating values | Preserves the numeric Var family, including width, signedness and floating precision. |
 | Computed string | Inserts a quoted C string literal. |
 | `Symbol` | Inserts a Symbol literal. |
-| Identifier or nonempty code `List` | Binds the returned code through normal compiler binding and typing. A data List is not automatically an expression. |
+| Identifier or nonempty code `List` | Binds the returned code through normal compiler binding and typing, in ordinary code and in macro bodies alike. A List is code when it is an expression node, a macro application, a quotation, or an identifier. A data List is not automatically an expression, and a result used as a `case` pattern stays data. |
 | Boxed `Var` | Insertion follows the contained value. |
 | `{}` stored in a `Var` | A fresh empty Map, as in compiled code; inserted like any other Map. |
 | `Array` or `Map`, nested at any depth | Constructs fresh collections through the ordinary literal constructors. |

@@ -1114,7 +1114,7 @@ explains each form with examples.
 | Code that one function builds | a quotation: `$!( expression )`, `$!{ statements }`, or `$!Unit{ ... }` |
 | Code that uses a field, an element, or a call result | a [`${expression}` hole](https://x2c-lang.dev/docs/guide/meta-functions.html#holes-that-name-an-expression), evaluated once where the quotation is written |
 | Code in which separate quotations share one name | `List name = x2c_ident("total");`, then `$name` in each quotation |
-| An expression whose type is read before it lands | a [typed quotation](https://x2c-lang.dev/docs/guide/meta-functions.html#code-that-knows-its-type), such as `$!(double)( $value * 2 )` |
+| An expression whose type is read before it lands | a [typed quotation](https://x2c-lang.dev/docs/guide/meta-functions.html#code-that-knows-its-type), such as `$!double{ $value * 2 }` |
 | Code the function inspects before it returns | the builders in [`lib/meta.x`](https://x2c-lang.dev/docs/guide/meta-functions.html#what-the-compiler-answers), such as `x2c_expr_call` |
 | A pattern, a data row, or a form with no source spelling | a `%(...)` List |
 
@@ -2144,7 +2144,8 @@ grammar accepts a definition and a result kind and macro name follow it. It
 remains legal as an ordinary typedef, variable, parameter, field, or function
 name everywhere else. A braced definition places `{ ... }` directly after the
 signature. An expression definition places `=> expression;` after it,
-including the trailing semicolon.
+including the trailing semicolon. A `Stmt` macro may also use the expression
+form; its body is then the single statement `expression;`.
 
 For source compatibility, the compiler also accepts the former `=> { ... }`
 braced form and a complete parenthesized expression body written as
@@ -2644,9 +2645,10 @@ own map. Aliases never leak into the including file.
 
 An explicitly imported `.xmacro` file may contain macro definitions and
 `keyword` declarations. Its aliases become visible in the importing `.x` file
-at the import position. Every `.x` file that wants the spellings imports the
-pack itself; an included file's import does not expose them to its caller, and
-no pack is loaded implicitly by `x2c.x`. Macro templates are parsed when
+at the import position. Every `.x` file that wants the spellings or the
+macros imports the pack itself; an included file's import, like a macro the
+included file defines, does not expose them to its caller, and no pack is
+loaded implicitly by `x2c.x`. Macro templates are parsed when
 defined, so a later alias does not reinterpret an earlier template; generated
 `List`s and strings are not reparsed as alias-bearing source.
 
@@ -2785,17 +2787,26 @@ name. See
 [Quoting code](https://x2c-lang.dev/docs/guide/meta-functions.html#quoting-code-with-) for an
 example.
 
-A quotation written `$!(T)( expression )`, where `T` is a type name, a
-`Type` local, or a `${...}` hole of type `Type`, is a typed quotation. It
-builds `(expr T CONTENT)` where it is written. It binds nothing, counts no
-expansion, and opens no transaction. Its holes take the values a rebuild
-gives them: syntax unchanged, a binding identity or `x2c.ident` spelling as
-an identifier expression, and an `int`, String, or Symbol as a literal.
-Inner nodes keep the placeholder type of unbound syntax, and free names stay
-names that bind where the code is bound. A typed quotation may not declare a
-name or apply a template. The compiler accepts `T` as the expression's type without checking it.
-A `$!( ... )` group followed directly by `(` is a typed quotation; otherwise
-it is an expression quotation. See
+A typed quotation is written `$!T{ expression }`, where `T` is one
+identifier that names a type, or `$!(T){ expression }`, where `T` is any
+type, a `Type` local, or a `${...}` hole of type `Type`. An identifier
+after `$!` that spells a macro kind in any case, such as `Unit` or `Type`,
+always names that kind, so a type with that spelling uses the
+parenthesized form. A `$!( ... )` group followed directly
+by `{` is a typed quotation; otherwise it is an expression quotation. A
+typed quotation builds `(expr T CONTENT)` where it is written. It binds
+nothing, counts no expansion, and opens no transaction. Its holes take the
+values a rebuild gives them: syntax unchanged, a binding identity or
+`x2c.ident` spelling as an identifier expression, an `x2c.ident` in a
+member position as its spelling, a number as a literal of its own type with
+its exact value, and a String or Symbol as a literal. A String is a String
+literal when the whole expression is the hole and `T` is `String`; elsewhere
+it is a C string literal. Inner nodes keep the placeholder type of unbound
+syntax, and free names stay names that bind where the code is bound. A
+typed quotation may not declare a name or apply a template. The compiler
+accepts `T` as the expression's type without checking it. A typed quotation
+states the type the code has; it converts nothing, so write a cast inside
+the braces when the code needs one. See
 [Code that knows its type](https://x2c-lang.dev/docs/guide/meta-functions.html#code-that-knows-its-type).
 
 When one `Name` hole appears in a declaration, a reference, and a member
@@ -5163,6 +5174,14 @@ replays the header from its process cache. The default limit is the host's
 online processor count, or one job under Make, as for `build` below; `-j 1`
 translates serially in one process. The inspection and dump modes stay
 serial; they write one ordered stream to standard output.
+
+A serial translation stops at the first unit that fails. In a parallel
+translation, a worker stops at the first failing unit of its share of the
+inputs while the other workers continue. Diagnostics appear in input order,
+because the command holds each worker's standard error until the worker
+ends; one unit's diagnostics are never split by another's. A parallel
+`build` translates each unit in its own worker, so it reports every failing
+unit. Stopping the command with `SIGTERM` or `SIGINT` also stops its workers.
 
 Compile-time code runs once per translated unit. When several units import
 the same file, each worker runs that file's compile-time forms, including

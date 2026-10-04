@@ -34,7 +34,7 @@ Source-ordered shallow symbol collection and replay.
 
 Returns the canonical paths collected so far.
 
-Source: `src/collect.x:1253`
+Source: `src/collect.x:1267`
 
 #### collect_forget_entries_since
 
@@ -45,7 +45,7 @@ Drops the entries collected since `before` returned by
 compile-time effects of the file's imports, which the unit that walked
 it installed in its own session.
 
-Source: `src/collect.x:1259`
+Source: `src/collect.x:1273`
 
 #### collect_forget_preload_entries
 
@@ -54,7 +54,7 @@ Source: `src/collect.x:1259`
 Drops the entries collected without declaration defaults while the shared
 compile-time session was filled. Call once that session is published.
 
-Source: `src/collect.x:1247`
+Source: `src/collect.x:1261`
 
 #### collect_resolve_include
 
@@ -63,7 +63,7 @@ Source: `src/collect.x:1247`
 The file the include of `target` from `includer_dir` names, searched as
 collection searches `dirs`, or NULL.
 
-Source: `src/collect.x:519`
+Source: `src/collect.x:533`
 
 #### interface_configure
 
@@ -76,7 +76,7 @@ stage directory when it runs from `<home>/builds/`, otherwise under the
 home. A `cold` process reads no interface and still writes its own. Call
 it before opening any translation unit's Context.
 
-Source: `src/collect.x:974`
+Source: `src/collect.x:988`
 
 #### interface_prelude
 
@@ -86,7 +86,7 @@ Returns the path of the first prelude interface this compiler wrote, or
 NULL when there is none or the compiler's identity is unknown. Its
 source hashes are not checked.
 
-Source: `src/collect.x:1161`
+Source: `src/collect.x:1175`
 
 #### interface_text
 
@@ -98,7 +98,7 @@ identity is unknown, since no compiler could replay that interface. A
 contribution that the interface grammar cannot spell is reported as an
 `emit` diagnostic.
 
-Source: `src/collect.x:1183`
+Source: `src/collect.x:1197`
 
 ### `Compiler`
 
@@ -116,7 +116,7 @@ protocol rows enter the current symbol state, and dependencies enter the
 importing compiler. Replay also merges recorded function definitions.
 `token` locates lookup and public-surface errors.
 
-Source: `src/collect.x:735`
+Source: `src/collect.x:749`
 
 <a id="Compiler.collect_symbols"></a>
 #### Compiler.collect_symbols
@@ -147,7 +147,7 @@ is skipped with the files it reaches, and each file reached is added to
 `seen`. NULL when the include does not resolve to x2c source; a runtime
 module adds nothing the prelude has not declared.
 
-Source: `src/collect.x:532`
+Source: `src/collect.x:546`
 
 <a id="Compiler.record_generated_symbol"></a>
 #### Compiler.record_generated_symbol
@@ -159,7 +159,7 @@ current file's collected entry contributes, which is the map its
 interface publishes. A file without a collected declaration map records
 nothing. The cache retains `signature`.
 
-Source: `src/collect.x:666`
+Source: `src/collect.x:680`
 
 <a id="Compiler.replay_included_package_imports"></a>
 #### Compiler.replay_included_package_imports
@@ -170,7 +170,7 @@ Repeats included imports after full parsing resets macros, in the
 cache's original include order. The unit's own imports stay at their
 source sites.
 
-Source: `src/collect.x:938`
+Source: `src/collect.x:952`
 
 <a id="Compiler.replay_package_imports"></a>
 #### Compiler.replay_package_imports
@@ -180,7 +180,7 @@ Source: `src/collect.x:938`
 Replays the import operations retained by this declaration contribution.
 The shadow borrows the unit's macro state and shared package registries.
 
-Source: `src/collect.x:890`
+Source: `src/collect.x:904`
 
 ## Design notes
 
