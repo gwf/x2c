@@ -1,8 +1,12 @@
 # Macro application cost
 
-> Status: active. Phases 1 and 2 and the undo-log transaction landed in
-> PR #129 (2026-10-03). Phase 3 is implemented and submitted to the
-> integrator.
+> Status: done 2026-10-04.
+> Phases 1 and 2 and the undo-log transaction landed in PR #129
+> (2026-10-03). Phase 3 landed in PR #130 (2026-10-03). The build speed
+> batch, PR #132 (2026-10-03), stopped counting compiler lowerings toward
+> the expansion limit. PR #135 (2026-10-04) lowered `defer` without slot
+> calls or lowered-code rewalks. The open options remain under "Outside
+> this plan".
 
 ## Result
 
