@@ -86,11 +86,13 @@ static int Map__core_compare(Map _x2c_macro_a_5, Map _x2c_macro_b_5);
 
 static Buffer Map__core_write(Map _x2c_macro_map_39, Buffer _x2c_macro_out_9, Symbol _x2c_macro_mode_0);
 
-static int _x2c_macro_next_0(Iter _x2c_macro_iter_0, Var * _x2c_macro_out_14);
+static int _x2c_macro_step_0(Iter _x2c_macro_iter_0, Var * _x2c_macro_key_28, Var * _x2c_macro_val_8);
 
-static int _x2c_macro_keys_next_0(Iter _x2c_macro_iter_1, Var * _x2c_macro_out_15);
+static int _x2c_macro_next_0(Iter _x2c_macro_iter_1, Var * _x2c_macro_out_14);
 
-static int _x2c_macro_enumerate_next_0(Iter _x2c_macro_iter_2, Var * _x2c_macro_out_16);
+static int _x2c_macro_keys_next_0(Iter _x2c_macro_iter_2, Var * _x2c_macro_out_15);
+
+static int _x2c_macro_enumerate_next_0(Iter _x2c_macro_iter_3, Var * _x2c_macro_out_16);
 
 typedef struct _x2c_defer_env_0{
   const void * _x2c_defer_capture_0;
@@ -1083,27 +1085,28 @@ String Map_repr(Map _x2c_macro_map_43){
 
 Map Var_map(Var);
 
-static int _x2c_macro_next_0(Iter _x2c_macro_iter_0, Var * _x2c_macro_out_14){
+static int _x2c_macro_step_0(Iter _x2c_macro_iter_0, Var * _x2c_macro_key_28, Var * _x2c_macro_val_8){
   Map _x2c_macro_map_44 = Var_map(_x2c_macro_iter_0 -> obj);
-  if((void *) _x2c_macro_map_44 == 0 || ! _x2c_macro_out_14) return 0;
+  if((void *) _x2c_macro_map_44 == 0) return 0;
   unsigned _x2c_macro_cursor_8 = Var_uint(Var_convert(_x2c_macro_iter_0 -> state, 3847013));
-  Var _x2c_macro_key_28;
-  Var _x2c_macro_val_8;
-  if(! Map_try_next(_x2c_macro_map_44, &(_x2c_macro_cursor_8), &(_x2c_macro_key_28), &(_x2c_macro_val_8))) return 0;
+  if(! Map_try_next(_x2c_macro_map_44, &(_x2c_macro_cursor_8), &((* _x2c_macro_key_28)), &((* _x2c_macro_val_8)))) return 0;
   _x2c_macro_iter_0 -> state = unsigned_var(_x2c_macro_cursor_8);
-  * _x2c_macro_out_14 = _box_var(_x2c_macro_val_8);
   return 1;
 }
 
-static int _x2c_macro_keys_next_0(Iter _x2c_macro_iter_1, Var * _x2c_macro_out_15){
-  Map _x2c_macro_map_45 = Var_map(_x2c_macro_iter_1 -> obj);
-  if((void *) _x2c_macro_map_45 == 0 || ! _x2c_macro_out_15) return 0;
-  unsigned _x2c_macro_cursor_9 = Var_uint(Var_convert(_x2c_macro_iter_1 -> state, 3847013));
+static int _x2c_macro_next_0(Iter _x2c_macro_iter_1, Var * _x2c_macro_out_14){
   Var _x2c_macro_key_29;
   Var _x2c_macro_val_9;
-  if(! Map_try_next(_x2c_macro_map_45, &(_x2c_macro_cursor_9), &(_x2c_macro_key_29), &(_x2c_macro_val_9))) return 0;
-  _x2c_macro_iter_1 -> state = unsigned_var(_x2c_macro_cursor_9);
-  * _x2c_macro_out_15 = _box_var(_x2c_macro_key_29);
+  if(! _x2c_macro_out_14 || ! _x2c_macro_step_0(_x2c_macro_iter_1, &(_x2c_macro_key_29), &(_x2c_macro_val_9))) return 0;
+  * _x2c_macro_out_14 = _box_var(_x2c_macro_val_9);
+  return 1;
+}
+
+static int _x2c_macro_keys_next_0(Iter _x2c_macro_iter_2, Var * _x2c_macro_out_15){
+  Var _x2c_macro_key_30;
+  Var _x2c_macro_val_10;
+  if(! _x2c_macro_out_15 || ! _x2c_macro_step_0(_x2c_macro_iter_2, &(_x2c_macro_key_30), &(_x2c_macro_val_10))) return 0;
+  * _x2c_macro_out_15 = _box_var(_x2c_macro_key_30);
   return 1;
 }
 
@@ -1111,15 +1114,11 @@ Var List_var(List);
 
 List cons(Var, List);
 
-static int _x2c_macro_enumerate_next_0(Iter _x2c_macro_iter_2, Var * _x2c_macro_out_16){
-  Map _x2c_macro_map_46 = Var_map(_x2c_macro_iter_2 -> obj);
-  if((void *) _x2c_macro_map_46 == 0 || ! _x2c_macro_out_16) return 0;
-  unsigned _x2c_macro_cursor_10 = Var_uint(Var_convert(_x2c_macro_iter_2 -> state, 3847013));
-  Var _x2c_macro_key_30;
-  Var _x2c_macro_val_10;
-  if(! Map_try_next(_x2c_macro_map_46, &(_x2c_macro_cursor_10), &(_x2c_macro_key_30), &(_x2c_macro_val_10))) return 0;
-  _x2c_macro_iter_2 -> state = unsigned_var(_x2c_macro_cursor_10);
-  Var _x2c_macro_boxed_key_1 = _box_var(_x2c_macro_key_30), _x2c_macro_boxed_value_2 = _box_var(_x2c_macro_val_10);
+static int _x2c_macro_enumerate_next_0(Iter _x2c_macro_iter_3, Var * _x2c_macro_out_16){
+  Var _x2c_macro_key_31;
+  Var _x2c_macro_val_11;
+  if(! _x2c_macro_out_16 || ! _x2c_macro_step_0(_x2c_macro_iter_3, &(_x2c_macro_key_31), &(_x2c_macro_val_11))) return 0;
+  Var _x2c_macro_boxed_key_1 = _box_var(_x2c_macro_key_31), _x2c_macro_boxed_value_2 = _box_var(_x2c_macro_val_11);
   * _x2c_macro_out_16 = List_var(cons(_x2c_macro_boxed_key_1, cons(_x2c_macro_boxed_value_2, NULL)));
   return 1;
 }
@@ -1128,19 +1127,19 @@ Iter Iter_init(Iter, Var, IterNextFn, Var);
 
 Var Map_var(Map);
 
-Iter Map_iter(Map _x2c_macro_map_47, Iter _x2c_macro_dest_0){
+Iter Map_iter(Map _x2c_macro_map_45, Iter _x2c_macro_dest_0){
   if((void *) _x2c_macro_dest_0 == 0) return 0;
-  return Iter_init(_x2c_macro_dest_0, Map_var(_x2c_macro_map_47), _x2c_macro_next_0, int_var(0));
+  return Iter_init(_x2c_macro_dest_0, Map_var(_x2c_macro_map_45), _x2c_macro_next_0, int_var(0));
 }
 
-Iter Map_keys(Map _x2c_macro_map_48, Iter _x2c_macro_dest_1){
+Iter Map_keys(Map _x2c_macro_map_46, Iter _x2c_macro_dest_1){
   if((void *) _x2c_macro_dest_1 == 0) return 0;
-  return Iter_init(_x2c_macro_dest_1, Map_var(_x2c_macro_map_48), _x2c_macro_keys_next_0, int_var(0));
+  return Iter_init(_x2c_macro_dest_1, Map_var(_x2c_macro_map_46), _x2c_macro_keys_next_0, int_var(0));
 }
 
-Iter Map_enumerate(Map _x2c_macro_map_49, Iter _x2c_macro_dest_2){
+Iter Map_enumerate(Map _x2c_macro_map_47, Iter _x2c_macro_dest_2){
   if((void *) _x2c_macro_dest_2 == 0) return 0;
-  return Iter_init(_x2c_macro_dest_2, Map_var(_x2c_macro_map_49), _x2c_macro_enumerate_next_0, int_var(0));
+  return Iter_init(_x2c_macro_dest_2, Map_var(_x2c_macro_map_47), _x2c_macro_enumerate_next_0, int_var(0));
 }
 
 void Map_cleanup(Map value){

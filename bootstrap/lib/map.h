@@ -72,11 +72,11 @@ String Map_str(Map _x2c_macro_map_42);
 
 String Map_repr(Map _x2c_macro_map_43);
 
-Iter Map_iter(Map _x2c_macro_map_47, Iter _x2c_macro_dest_0);
+Iter Map_iter(Map _x2c_macro_map_45, Iter _x2c_macro_dest_0);
 
-Iter Map_keys(Map _x2c_macro_map_48, Iter _x2c_macro_dest_1);
+Iter Map_keys(Map _x2c_macro_map_46, Iter _x2c_macro_dest_1);
 
-Iter Map_enumerate(Map _x2c_macro_map_49, Iter _x2c_macro_dest_2);
+Iter Map_enumerate(Map _x2c_macro_map_47, Iter _x2c_macro_dest_2);
 
 void Map_cleanup(Map value);
 
