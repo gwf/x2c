@@ -1534,7 +1534,7 @@ List Sym_bind_identity(Sym, List, List, List);
 
 List Type_declaration_ast(Type, List);
 
-List Macro_typed(List, List);
+List Macro_typed(List, Var);
 
 static List Compiler__initializer_index(Compiler c, List index, List * reference){
 
@@ -1557,7 +1557,7 @@ default: break;
 unsigned long long at;  if(_initializer_integer(index, &(at))){
   (* reference) = index;  return index;
 }
-Type type = Var_type(List_cadr(index));  List binding = Sym_introduce(c -> sym, Compiler_fresh_name(c, _372));  Sym_bind_identity(c -> sym, NULL, binding, Type_declaration_ast(type, binding));  Type native = List_type(cons(_338, cons(List_var(cons(List_var(cons(_297, cons(_339, cons(List_var(binding), cons(List_var(index), NULL))))), NULL)), NULL))); (* reference) = Macro_typed(Type_list(type), Var_list(Macro_inserted(List_var(binding), 1, 1)));  return({
+Type type = Var_type(List_cadr(index));  List binding = Sym_introduce(c -> sym, Compiler_fresh_name(c, _372));  Sym_bind_identity(c -> sym, NULL, binding, Type_declaration_ast(type, binding));  Type native = List_type(cons(_338, cons(List_var(cons(List_var(cons(_297, cons(_339, cons(List_var(binding), cons(List_var(index), NULL))))), NULL)), NULL))); (* reference) = Macro_typed(Type_list(type), List_var(binding));  return({
   Var _x2c_literal_part_25 = List_var(type);  Var _x2c_literal_part_26 = List_var(({
     Var _x2c_literal_part_23 = List_var(native);  Var _x2c_literal_part_24 = List_var((* reference));  cons(_298, cons(_x2c_literal_part_23, cons(_x2c_literal_part_24, NULL)));
   }
@@ -2303,12 +2303,12 @@ static List Compiler__initializer_adapter(Compiler c, List source, List converte
   Type from = Compiler__initializer_value_type(c, Var_type(List_cadr(source)));  Type result = Compiler__initializer_value_type(c, Var_type(List_cadr(converted)));  List formal = cons(_0, cons(List_cadr(source), _703));  List body = List_search_replace(converted, List_var(cons(_548, cons(List_var(source), NULL))), List_var(formal));  List key = cons(_704, cons(List_var(from), cons(List_var(result), cons(List_var(body), NULL)))), adapter = NULL;  Var _x2c_macro_cached_0;  if(Map_try_get(c -> names -> adapters, List_var(key), &(_x2c_macro_cached_0))) adapter = Var_list(_x2c_macro_cached_0);  else{
     {
       List parameter = Sym_introduce(c -> sym, Compiler_fresh_name(c, _705));  List input =({
-        Var _x2c_hole_0 = List_cadr(source);  Macro_typed(Var_list(_x2c_hole_0), Var_list(Macro_inserted(List_var(parameter), 1, 1)));
+        Var _x2c_hole_0 = List_cadr(source);  Macro_typed(Var_list(_x2c_hole_0), List_var(parameter));
       }
       );  body = List_search_replace(body, List_var(cons(_548, cons(List_var(formal), NULL))), List_var(input));  List binding = Sym_introduce(c -> sym, Compiler_fresh_name(c, _706));  Compiler_add_early(c, Compiler_wrapper_function(c, List_type(cons(_707, List_append(Type_list(result), NULL))), binding, cons(List_var(Type_parameter_ast(from, parameter)), NULL), cons(List_var(cons(_708, cons(List_var(result), cons(List_var(body), NULL)))), NULL)));  Type callable = List_type(({
         Var _x2c_literal_part_101 = List_var(cons(_709, cons(List_var(cons(List_var(from), NULL)), NULL)));  List _x2c_literal_part_102 = Type_list(result);  cons(_x2c_literal_part_101, List_append(_x2c_literal_part_102, NULL));
       }
-      ));  adapter = Macro_typed(Type_list(callable), Var_list(Macro_inserted(List_var(binding), 1, 1)));
+      ));  adapter = Macro_typed(Type_list(callable), List_var(binding));
     }
     ;  Map_setindex(c -> names -> adapters, List_var(key), List_var(adapter));
   }

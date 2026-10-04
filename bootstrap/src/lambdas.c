@@ -1202,8 +1202,7 @@ int Compiler_lambda_capture_required(Compiler c, List binding){
 return 0;
 }
 
-List Macro_typed(List, List);
-Var Macro_inserted(Var, int, int);
+List Macro_typed(List, Var);
 List Compiler_capture_lambda_identifier(Compiler c, List binding, Type type){
   if(! _init_guard_) _file_init_();  List original = binding; {
     List frame;  List _x2c_macro_object_5 = List_reverse(c -> lambda_scopes);  List _x2c_macro_cursor_5 = _x2c_macro_object_5;  Var _x2c_macro_cursor_output_5;  while(List_try_next(_x2c_macro_object_5, &(_x2c_macro_cursor_5), &(_x2c_macro_cursor_output_5))){
@@ -1223,7 +1222,7 @@ List Compiler_capture_lambda_identifier(Compiler c, List binding, Type type){
   }
 
 }
-return Macro_typed(Type_list(type), Var_list(Macro_inserted(List_var(binding), 1, 1)));
+return Macro_typed(Type_list(type), List_var(binding));
 }
 
 int Type_is_static(Type);
@@ -1276,8 +1275,9 @@ static int Compiler__declared_outside(Compiler c, List binding, int depth){
   Var captured_depth;  Map facts = Compiler_semantic_binding_facts(c);  if(Map_try_get(facts, List_var(cons(_453, cons(List_var(binding), NULL))), &(captured_depth))) return Var_integer(captured_depth) < depth;  return Map_contains(facts, List_var(cons(_21, cons(List_var(binding), NULL)))) && Sym_binding_is_local_before(c -> sym, binding, depth);
 }
 
+Var Macro_inserted(Var, int, int);
 static List Capture_add(Capture * k){
-  Type type =(* k).type, captured_type = Var_equal(List_car(Type_list(type)), Symbol_var(77)) ? List_cdr(type) : type;  List binding =(* k).binding, expression = Macro_typed(Type_list(type), Var_list(Macro_inserted(List_var(binding), 1, 1)));  int reference = List_contains(Var_list((* k).references), List_var((* k).original));  if(List_truth((* k).prescribed)){
+  Type type =(* k).type, captured_type = Var_equal(List_car(Type_list(type)), Symbol_var(77)) ? List_cdr(type) : type;  List binding =(* k).binding, expression = Macro_typed(Type_list(type), List_var(binding));  int reference = List_contains(Var_list((* k).references), List_var((* k).original));  if(List_truth((* k).prescribed)){
 
   {
     List _x2c_match_expr = (* k).prescribed;

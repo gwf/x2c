@@ -4,11 +4,11 @@
 
 #include "exception.h"
 
-static List _333, _332, _331, _329, _328, _326, _325, _324, _322, _321, _320, _319, _316, _315, _314, _305, _304, _303, _301, _300, _298, _297, _296, _281, _280, _278, _276, _275, _274, _273, _271, _270, _268, _267, _265, _263, _260, _257, _254, _251, _247, _242, _241, _240, _239, _237, _236, _234, _233, _232, _230, _229, _228, _226, _225, _224, _222, _221, _219, _218, _217, _215, _214, _212, _211, _210, _208, _207, _205, _204, _203, _199, _196, _195, _194, _192, _191, _190, _188, _185, _184, _183, _181, _180, _178, _177, _176, _174, _173, _172, _170, _167, _166, _165, _163, _162, _160, _159, _158, _152, _149, _148, _147, _145, _144, _143, _142, _139, _138, _137, _135, _134, _133, _131, _130, _129, _127, _126, _125, _123, _122, _121, _120, _119, _117, _116, _115, _113, _110, _109, _108, _106, _105, _103, _101, _100, _97, _95, _94, _93, _89, _88, _86, _85, _84, _83, _77, _73, _72, _71, _69, _68, _65, _64, _63, _61, _60, _59, _58, _54, _53, _52, _50, _49, _48, _43, _42, _41, _39, _38, _35, _34, _33, _31, _30, _27, _26, _25, _23, _22, _20, _19, _18, _16, _15, _9, _8, _7, _5, _4;
+static List _306, _305, _304, _302, _301, _299, _298, _297, _295, _294, _293, _292, _289, _288, _287, _278, _277, _276, _274, _273, _271, _270, _269, _260, _257, _254, _251, _247, _242, _241, _240, _239, _237, _236, _234, _233, _232, _230, _229, _228, _226, _225, _224, _222, _221, _219, _218, _217, _215, _214, _212, _211, _210, _208, _207, _205, _204, _203, _199, _196, _195, _194, _192, _191, _190, _188, _185, _184, _183, _181, _180, _178, _177, _176, _174, _173, _172, _170, _167, _166, _165, _163, _162, _160, _159, _158, _152, _149, _148, _147, _145, _144, _143, _142, _139, _138, _137, _135, _134, _133, _131, _130, _129, _127, _126, _125, _123, _122, _121, _120, _119, _117, _116, _115, _113, _110, _109, _108, _106, _105, _103, _101, _100, _97, _95, _94, _93, _89, _88, _86, _85, _84, _83, _77, _73, _72, _71, _69, _68, _65, _64, _63, _61, _60, _59, _58, _54, _53, _52, _50, _49, _48, _43, _42, _41, _39, _38, _35, _34, _33, _31, _30, _27, _26, _25, _23, _22, _20, _19, _18, _16, _15, _9, _8, _7, _5, _4;
 
-static String _312, _310, _308, _307, _306, _288, _287, _286, _285, _284, _283, _258, _255, _252, _249, _245, _244, _243, _201, _197, _186, _156, _150, _75, _74, _66, _11, _10;
+static String _285, _283, _281, _280, _279, _258, _255, _252, _249, _245, _244, _243, _201, _197, _186, _156, _150, _75, _74, _66, _11, _10;
 
-static Var _330, _327, _323, _318, _317, _313, _311, _309, _302, _299, _295, _294, _293, _292, _291, _290, _289, _282, _279, _277, _272, _269, _266, _264, _262, _261, _259, _256, _253, _250, _248, _246, _238, _235, _231, _227, _223, _220, _216, _213, _209, _206, _202, _200, _198, _193, _189, _187, _182, _179, _175, _171, _169, _168, _164, _161, _157, _155, _154, _153, _151, _146, _141, _140, _136, _132, _128, _124, _118, _114, _112, _111, _107, _104, _102, _99, _98, _96, _92, _91, _90, _87, _82, _81, _80, _79, _78, _76, _70, _67, _62, _57, _56, _55, _51, _47, _46, _45, _44, _40, _37, _36, _32, _29, _28, _24, _21, _17, _14, _13, _12, _6, _3, _2, _1, _0;
+static Var _303, _300, _296, _291, _290, _286, _284, _282, _275, _272, _268, _267, _266, _265, _264, _263, _262, _261, _259, _256, _253, _250, _248, _246, _238, _235, _231, _227, _223, _220, _216, _213, _209, _206, _202, _200, _198, _193, _189, _187, _182, _179, _175, _171, _169, _168, _164, _161, _157, _155, _154, _153, _151, _146, _141, _140, _136, _132, _128, _124, _118, _114, _112, _111, _107, _104, _102, _99, _98, _96, _92, _91, _90, _87, _82, _81, _80, _79, _78, _76, _70, _67, _62, _57, _56, _55, _51, _47, _46, _45, _44, _40, _37, _36, _32, _29, _28, _24, _21, _17, _14, _13, _12, _6, _3, _2, _1, _0;
 
 #include "type.h"
 #include "var.h"
@@ -16,7 +16,6 @@ static Var _330, _327, _323, _318, _317, _313, _311, _309, _302, _299, _295, _29
 #include "varconvert.h"
 #include "datum.h"
 #include <limits.h>
-#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -44,19 +43,9 @@ static Var _joined_constant(Compiler c, Var left, Var right);
 
 static void _refuse(Compiler c, Var value, Token site);
 
-static Type _value_type(Var value);
-
 static List _string_literal(Compiler c, Type declared, Type type, Var value);
 
 static List _number_literal(Compiler c, Type declared, Type type, Var value);
-
-static List _int_literal(Type result, Var value);
-
-static List _bits_literal(Var value);
-
-static String _float_text(long double n);
-
-static String _hex_float(long double n);
 
 static List _data_literal(Compiler c, Type declared, Var value, Token site);
 
@@ -372,78 +361,51 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _259 = String_var(_258);
   _260 = cons(_259, NULL);
   _261 = List_var(_260);
-  _262 = Symbol_var(1294430536);
-  _263 = cons(_262, _236);
-  _264 = Symbol_var(1474468213064);
-  _265 = cons(_264, _236);
-  _266 = Symbol_var(40402088);
-  _267 = cons(_266, NULL);
-  _268 = cons(_264, _267);
-  _269 = Symbol_var(19368);
-  _270 = cons(_269, NULL);
-  _271 = cons(_264, NULL);
-  _272 = Symbol_var(818062);
+  _262 = List_var(_257);
+  _263 = List_var(_251);
+  _264 = Symbol_var(3313778);
+  _265 = Symbol_var(28692473357490);
+  _266 = List_var(_254);
+  _267 = Symbol_var(26720);
+  _268 = Symbol_var(61737802);
+  _269 = cons(_268, NULL);
+  _270 = cons(_1, _269);
+  _271 = cons(_155, _270);
+  _272 = List_var(_271);
   _273 = cons(_272, NULL);
-  _274 = cons(_264, _273);
-  _275 = cons(_272, _273);
-  _276 = cons(_264, _275);
-  _277 = Symbol_var(13400168);
-  _278 = cons(_277, NULL);
-  _279 = Symbol_var(301273866);
-  _280 = cons(_279, NULL);
-  _281 = cons(_272, _280);
-  _282 = List_var(_270);
-  _283 = String_new("%lluULL");
-  _284 = String_new("__builtin_nanl(\"\")");
-  _285 = String_new("(-__builtin_infl())");
-  _286 = String_new("__builtin_infl()");
-  _287 = String_new("%s0x0p+0L");
-  _288 = String_new("%s0x1%s%sp%+dL");
-  _289 = List_var(_257);
-  _290 = List_var(_251);
-  _291 = Symbol_var(3313778);
-  _292 = Symbol_var(28692473357490);
-  _293 = List_var(_254);
-  _294 = Symbol_var(26720);
-  _295 = Symbol_var(61737802);
-  _296 = cons(_295, NULL);
-  _297 = cons(_1, _296);
-  _298 = cons(_155, _297);
-  _299 = List_var(_298);
-  _300 = cons(_299, NULL);
-  _301 = cons(_67, _300);
-  _302 = List_var(_301);
-  _303 = cons(_302, NULL);
-  _304 = cons(_1, _303);
-  _305 = cons(_0, _304);
-  _306 = String_new("\'");
-  _307 = String_new("\' can only be called at compile time");
-  _308 = String_new("reason: it reaches a compiler operation, so no unit emits a");
-  _309 = String_var(_308);
-  _310 = String_new("definition for it; call it from a macro or another meta");
-  _311 = String_var(_310);
-  _312 = String_new("function");
-  _313 = String_var(_312);
-  _314 = cons(_313, NULL);
-  _315 = cons(_311, _314);
-  _316 = cons(_309, _315);
-  _317 = Symbol_var(458361162716);
-  _318 = Symbol_var(150408);
-  _319 = cons(_102, NULL);
-  _320 = cons(_81, _319);
-  _321 = cons(_295, _320);
-  _322 = cons(_79, _321);
-  _323 = List_var(_322);
-  _324 = cons(_323, NULL);
-  _325 = cons(_1, _324);
-  _326 = cons(_155, _325);
-  _327 = List_var(_326);
-  _328 = cons(_327, _38);
-  _329 = cons(_318, _328);
-  _330 = List_var(_329);
-  _331 = cons(_330, _68);
-  _332 = cons(_1, _331);
-  _333 = cons(_317, _332);
+  _274 = cons(_67, _273);
+  _275 = List_var(_274);
+  _276 = cons(_275, NULL);
+  _277 = cons(_1, _276);
+  _278 = cons(_0, _277);
+  _279 = String_new("\'");
+  _280 = String_new("\' can only be called at compile time");
+  _281 = String_new("reason: it reaches a compiler operation, so no unit emits a");
+  _282 = String_var(_281);
+  _283 = String_new("definition for it; call it from a macro or another meta");
+  _284 = String_var(_283);
+  _285 = String_new("function");
+  _286 = String_var(_285);
+  _287 = cons(_286, NULL);
+  _288 = cons(_284, _287);
+  _289 = cons(_282, _288);
+  _290 = Symbol_var(458361162716);
+  _291 = Symbol_var(150408);
+  _292 = cons(_102, NULL);
+  _293 = cons(_81, _292);
+  _294 = cons(_268, _293);
+  _295 = cons(_79, _294);
+  _296 = List_var(_295);
+  _297 = cons(_296, NULL);
+  _298 = cons(_1, _297);
+  _299 = cons(_155, _298);
+  _300 = List_var(_299);
+  _301 = cons(_300, _38);
+  _302 = cons(_291, _301);
+  _303 = List_var(_302);
+  _304 = cons(_303, _68);
+  _305 = cons(_1, _304);
+  _306 = cons(_290, _305);
 }
 
 int List_truth(List);
@@ -659,15 +621,16 @@ Var literal_text_value(String spelling){
   return String_var(spelling);
 }
 
+Type List_type(List);
+List Macro_number_type(Var);
 List Compiler_macro_value_literal(Compiler, List);
 Var List_caddr(List);
-Type List_type(List);
 Symbol Sym_var_tag_for_type(Sym, Type, Type *);
 int Var_is(Var, Symbol);
 String Symbol_str(Symbol);
 Symbol Var_symbol(Var);
 List Compiler_meta_value_expression(Compiler c, Type declared, Var value, Token site){
-  if(! _init_guard_) _file_init_();  if(! Var_is_row(value, 9, 7, 4)) _refuse(c, value, site);  Type type = List_truth(Type_list(declared)) ? declared : _value_type(value);  if(Var_is_row(value, 9, 7, 4) && Sym_is_named_value_type(c -> sym, declared, _244)){
+  if(! _init_guard_) _file_init_();  if(! Var_is_row(value, 9, 7, 4)) _refuse(c, value, site);  Type type = List_truth(Type_list(declared)) ? declared : List_type(Macro_number_type(value));  if(Var_is_row(value, 9, 7, 4) && Sym_is_named_value_type(c -> sym, declared, _244)){
     List expression = Compiler_macro_value_literal(c, Var_list(value));  return cons(_0, cons(_248, cons(List_caddr(expression), NULL)));
   }
   if(Sym_is_var_type(c -> sym, type)) type = List_type(_199);  else Sym_var_tag_for_type(c -> sym, type, &(type));  if((Var_is_integer(value) || Var_is_floating(value)) && type != _199) return _number_literal(c, declared, type, value);  Type kind = List_type(Var_is(value, 3313778) ? _251 : Var_is(value, 26720) ? _254 : Var_is_row(value, 9, 7, 4) ? _257 : NULL);  if(List_truth(Type_list(declared)) ? type == _199 || type == kind : List_truth(Type_list(kind)) && kind != _257) return _data_literal(c, declared, value, site);  if(Var_is_row(value, 11, 7, 1)) return _string_literal(c, declared, type, value);  if(Var_is(value, 1328354264) &&(! List_truth(Type_list(declared)) || type == _260)) return cons(_0, cons(_261, cons(List_var(({
@@ -696,18 +659,6 @@ static void _refuse(Compiler c, Var value, Token site){
 
 }
 
-Symbol Var_tag(Var);
-long Var_integer(Var);
-static Type _value_type(Var value){
-  switch(Var_tag(value)){
-    case 26993 : return List_type(_263);  case 30065 : return List_type(_265);  case 3453293 : return List_type(_267);  case 3846509 : return List_type(_268);  case 3453797 : return List_type(_270);  case 3847013 : return List_type(_271);  case 818062 : return List_type(_273);  case 44858254 : return List_type(_274);  case 25983886 : return List_type(_275);  case 1435270030 : return List_type(_276);  case 3355493 : return List_type(_278);  case 26071077642 : return List_type(_281);
-  }
-  if(Var_is_floating(value)) return List_type(_280);  if(Var_is_integer(value)){
-    long n = Var_integer(value);  return List_type(n ==(int) n ? _270 : _275);
-  }
-  return NULL;
-}
-
 String Var_repr(Var);
 List Compiler_cache(Compiler, List);
 static List _string_literal(Compiler c, Type declared, Type type, Var value){
@@ -717,52 +668,9 @@ static List _string_literal(Compiler c, Type declared, Type type, Var value){
   );
 }
 
-Type Type_scalar(Type);
+List Macro_number_literal(List, List, Var);
 static List _number_literal(Compiler c, Type declared, Type type, Var value){
-  type = Sym_resolve_numeric_type(c -> sym, type);  Symbol tag = List_truth(Type_list(type)) ? Type_scalar_tag(type) : 0;  if(! tag) return NULL;  value = Var_convert(value, tag);  Type result = List_truth(Type_list(declared)) ? declared : type;  if(Type_scalar(type) == _270) return _int_literal(result, value);  List literal = _bits_literal(value);  return({
-    Var _x2c_literal_part_6 = List_var(result);  Var _x2c_literal_part_7 = List_var(cons(_13, cons(List_var(({
-      Var _x2c_literal_part_4 = List_var(result);  Var _x2c_literal_part_5 = List_var(cons(_104, cons(List_var(type), cons(List_var(literal), NULL))));  cons(_0, cons(_x2c_literal_part_4, cons(_x2c_literal_part_5, NULL)));
-    }
-    )), NULL)));  cons(_0, cons(_x2c_literal_part_6, cons(_x2c_literal_part_7, NULL)));
-  }
-  );
-}
-
-String Var_str(Var);
-static List _int_literal(Type result, Var value){
-  long n = Var_integer(value);  List literal =({
-    Var _x2c_literal_part_8 = List_var(result);  Var _x2c_literal_part_9 = List_var(cons(_140, cons(_282, cons(String_var(Var_str(value)), NULL))));  cons(_0, cons(_x2c_literal_part_8, cons(_x2c_literal_part_9, NULL)));
-  }
-  );  if(n == INT_MIN) return({
-    Var _x2c_literal_part_12 = List_var(result);  Var _x2c_literal_part_13 = List_var(cons(_13, cons(List_var(({
-      Var _x2c_literal_part_10 = List_var(result);  Var _x2c_literal_part_11 = List_var(cons(_104, cons(_282, cons(List_var(literal), NULL))));  cons(_0, cons(_x2c_literal_part_10, cons(_x2c_literal_part_11, NULL)));
-    }
-    )), NULL)));  cons(_0, cons(_x2c_literal_part_12, cons(_x2c_literal_part_13, NULL)));
-  }
-  );  return n < 0 ?({
-    Var _x2c_literal_part_14 = List_var(result);  Var _x2c_literal_part_15 = List_var(cons(_13, cons(List_var(literal), NULL)));  cons(_0, cons(_x2c_literal_part_14, cons(_x2c_literal_part_15, NULL)));
-  }
-  ) : literal;
-}
-
-void Var_numeric_decode(Var, X2CVarNumeric *);
-String String_printf(String, ...);
-static List _bits_literal(Var value){
-  X2CVarNumeric number;  Var_numeric_decode(value, &(number));  Type literal_type = List_type(number.floating ? _281 : _276);  String text = number.floating ? _float_text(number.floating_value) : String_printf(_283, number.raw);  return({
-    Var _x2c_literal_part_16 = List_var(literal_type);  Var _x2c_literal_part_17 = List_var(cons(_140, cons(List_var(literal_type), cons(String_var(text), NULL))));  cons(_0, cons(_x2c_literal_part_16, cons(_x2c_literal_part_17, NULL)));
-  }
-  );
-}
-
-static String _float_text(long double n){
-  if(isnan(n)) return _284;  if(isinf(n)) return n < 0 ? _285 : _286;  return _hex_float(n);
-}
-
-static String _hex_float(long double n){
-  const char * sign = signbit(n) ? "-" : "";  if(n == 0) return String_printf(_287, sign);  int exponent;  long double fraction = frexpl(fabsl(n), & exponent) * 2 - 1;  char digits[32];  int count = 0;  for(;  fraction != 0;  count ++){
-    fraction *= 16;  int digit =(int) fraction;  fraction -= digit;  digits[count] = "0123456789abcdef"[digit];
-  }
-  digits[count] = 0;  return String_printf(_288, sign, count ? "." : "", digits, exponent - 1);
+  type = Sym_resolve_numeric_type(c -> sym, type);  Symbol tag = List_truth(Type_list(type)) ? Type_scalar_tag(type) : 0;  if(! tag) return NULL;  return Macro_number_literal(Type_list(List_truth(Type_list(declared)) ? declared : type), Type_list(type), Var_convert(value, tag));
 }
 
 List Compiler_convert_expression(Compiler, List, Type);
@@ -799,7 +707,7 @@ static List _list_form(Compiler c, Var value){
   List tail = _97; {
     Var item;  List _x2c_macro_object_1 = List_reverse(Var_list(value));  List _x2c_macro_cursor_1 = _x2c_macro_object_1;  Var _x2c_macro_cursor_output_1;  while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
       item = _x2c_macro_cursor_output_1; {
-        List head = _data_form(c, item);  if(! List_truth(head)) return NULL;  tail = cons(_0, cons(_289, cons(List_var(cons(_90, cons(List_var(head), cons(List_var(tail), NULL)))), NULL)));
+        List head = _data_form(c, item);  if(! List_truth(head)) return NULL;  tail = cons(_0, cons(_262, cons(List_var(cons(_90, cons(List_var(head), cons(List_var(tail), NULL)))), NULL)));
       }
 
     }
@@ -838,7 +746,7 @@ static List _array_form(Compiler c, Var value){
 
       }
       {
-        List _x2c_return_value_1 = cons(_0, cons(_290, cons(List_var(cons(_291, List_append(Array_list(items), NULL))), NULL))); {
+        List _x2c_return_value_1 = cons(_0, cons(_263, cons(List_var(cons(_264, List_append(Array_list(items), NULL))), NULL))); {
           x2c_cleanup_leave(& _x2c_defer_record_1);  return _x2c_return_value_1;
         }
 
@@ -886,14 +794,14 @@ static List _map_form(Compiler c, Var value){
                   }
 
                 }
-                Array_push(entries, List_var(cons(_292, cons(List_var(key_code), cons(List_var(value_code), NULL)))));
+                Array_push(entries, List_var(cons(_265, cons(List_var(key_code), cons(List_var(value_code), NULL)))));
               }
 
             }
 
           }
           {
-            List _x2c_return_value_3 = cons(_0, cons(_293, cons(List_var(cons(_294, List_append(Array_list(Array_sort(entries)), NULL))), NULL))); {
+            List _x2c_return_value_3 = cons(_0, cons(_266, cons(List_var(cons(_267, List_append(Array_list(Array_sort(entries)), NULL))), NULL))); {
               x2c_cleanup_leave(& _x2c_defer_record_3);  x2c_cleanup_leave(& _x2c_defer_record_2);  return _x2c_return_value_3;
             }
 
@@ -917,8 +825,8 @@ void Compiler_check_meta_call(Compiler c, List callee, Token origin){
     List _x2c_match_expr = callee;
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (Var_symbol(car(_x2c_match_expr))) {
-      case 377892: ;  static MatchCaptureSite _x2c_match_site_21;  if (x2c_match_site_try_capture(& _x2c_match_site_21, _x2c_match_expr, List_var(_305), &_x2c_match_capture)) {Var name = _x2c_match_values[0];  if(Var_is_row(name, 11, 7, 1) && Map_contains(c -> meta_comptime, name)){
-    Compiler_report_error(c, 27335838, String_join(NULL, cons(String_var(_306), cons(String_var(Var_str(name)), cons(String_var(_307), NULL)))), origin, _316);  break;
+      case 377892: ;  static MatchCaptureSite _x2c_match_site_21;  if (x2c_match_site_try_capture(& _x2c_match_site_21, _x2c_match_expr, List_var(_278), &_x2c_match_capture)) {Var name = _x2c_match_values[0];  if(Var_is_row(name, 11, 7, 1) && Map_contains(c -> meta_comptime, name)){
+    Compiler_report_error(c, 27335838, String_join(NULL, cons(String_var(_279), cons(String_var(Var_str(name)), cons(String_var(_280), NULL)))), origin, _289);  break;
   }
 
 }
@@ -933,7 +841,7 @@ int Compiler_meta_is_comptime_only(Compiler c, List fn){
     List _x2c_match_expr = fn;
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (Var_symbol(car(_x2c_match_expr))) {
-      case 458361162716: ;  static MatchCaptureSite _x2c_match_site_22;  if (x2c_match_site_try_capture(& _x2c_match_site_22, _x2c_match_expr, List_var(_333), &_x2c_match_capture)) {Var name = _x2c_match_values[0]; {
+      case 458361162716: ;  static MatchCaptureSite _x2c_match_site_22;  if (x2c_match_site_try_capture(& _x2c_match_site_22, _x2c_match_expr, List_var(_306), &_x2c_match_capture)) {Var name = _x2c_match_values[0]; {
     Var _x2c_match_value_1 = name; {
       String name = Var_string(_x2c_match_value_1);  return Map_contains(c -> meta_comptime, String_var(name));
     }

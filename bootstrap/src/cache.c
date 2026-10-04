@@ -1123,15 +1123,13 @@ List _initializer_function(Compiler c, Type type, List name, List body){
   )), NULL))))), NULL))), NULL))));
 }
 
-List Macro_typed(List, List);
-
-Var Macro_inserted(Var, int, int);
+List Macro_typed(List, Var);
 
 List Compiler_rebuild_statement(Compiler, List);
 
 List _run_once(Compiler c, List guard){
   if(! _init_guard_) _file_init_();
-  List flag = Macro_typed(_76, Var_list(Macro_inserted(List_var(guard), 1, 1)));
+  List flag = Macro_typed(_76, List_var(guard));
   return List_cdr(Compiler_rebuild_statement(c, cons(_5, cons(_6, cons(List_var(({
     Var _x2c_literal_part_3 = List_var(cons(_77, cons(List_var(cons(_13, cons(_84, cons(_85, cons(List_var(flag), NULL))))), _89)));  Var _x2c_literal_part_4 = List_var(cons(_90, cons(List_var(cons(_78, cons(_93, cons(List_var(cons(_94, cons(_95, cons(List_var(cons(_13, cons(_84, cons(_85, cons(List_var(flag), NULL))))), _108)))), NULL)))), NULL)));  cons(_7, cons(_x2c_literal_part_3, cons(_x2c_literal_part_4, NULL)));
   }
@@ -1276,7 +1274,7 @@ case 992: ;  static MatchCaptureSite _x2c_match_site_6;  if (x2c_match_site_try_
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 7656885669130: ;  static MatchCaptureSite _x2c_match_site_5;  if (x2c_match_site_try_capture(& _x2c_match_site_5, _x2c_match_expr, List_var(_207), &_x2c_match_capture)) {List items = Var_list(_x2c_match_values[0]); {
-      List target = Macro_typed(Type_list(declared), Var_list(Macro_inserted(name, 1, 1)));  List assign = Compiler__array_block(c, target, resolved, items);  List binding = _record_deferred(Var_list(name), Var_list(mods), assign, initializers);  List zero = Compiler__zero_initializer(c, Var_list(value));  return({
+      List target = Macro_typed(Type_list(declared), name);  List assign = Compiler__array_block(c, target, resolved, items);  List binding = _record_deferred(Var_list(name), Var_list(mods), assign, initializers);  List zero = Compiler__zero_initializer(c, Var_list(value));  return({
         Var _x2c_literal_part_9 = List_var(binding);  Var _x2c_literal_part_10 = List_var(cons(_78, cons(type, cons(List_var(zero), NULL))));  cons(_94, cons(_95, cons(_x2c_literal_part_9, cons(_x2c_literal_part_10, NULL))));
       }
       );
@@ -1344,6 +1342,7 @@ static List _assignment(List binding, List type, List rhs){
 List Ast_initializer_cases(Ast, List *);
 Type Var_type(Var);
 int Type_is_aggregate(Type);
+Var Macro_inserted(Var, int, int);
 static List Compiler__zero_initializer(Compiler c, List value){
   List zero = _228;
   {
@@ -1670,7 +1669,7 @@ List Compiler_initialization_guard(Compiler c, List guard){
 List Compiler_rebuild_function(Compiler, List, List);
 List Macro_apply(Macro, List);
 List _patch_initialized_entry(Compiler c, List function, List body, List guard, List entry){
-  if(! _init_guard_) _file_init_();  Macro shape = _673;  List condition = Macro_typed(_76, Var_list(Macro_inserted(List_var(guard), 1, 1)));  List callee = cons(_78, cons(_121, cons(List_var(cons(_122, cons(List_var(entry), NULL))), NULL)));  return Compiler_rebuild_function(c, function, Macro_apply(shape, cons(List_var(condition), cons(List_var(callee), cons(List_var(body), NULL)))));
+  if(! _init_guard_) _file_init_();  Macro shape = _673;  List condition = Macro_typed(_76, List_var(guard));  List callee = cons(_78, cons(_121, cons(List_var(cons(_122, cons(List_var(entry), NULL))), NULL)));  return Compiler_rebuild_function(c, function, Macro_apply(shape, cons(List_var(condition), cons(List_var(callee), cons(List_var(body), NULL)))));
 }
 
 int String_equal(String, String);

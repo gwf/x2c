@@ -4048,8 +4048,7 @@ static List Compiler__process_raw_segment(Compiler c, List seg){
 
 #endif
 #ifndef X2C_TRANSFORM_SOURCE
-List Macro_typed(List, List);
-Var Macro_inserted(Var, int, int);
+List Macro_typed(List, Var);
 List Compiler_convert_initializer(Compiler, List, Type, List);
 Var Map_setindex(Map, Var, Var);
 static List Compiler__declaration(Compiler c, List ast){
@@ -4071,7 +4070,7 @@ static List Compiler__declaration(Compiler c, List ast){
             Type target_type = List_type_from_ast(({
               Var _x2c_literal_part_23 = target;  Var _x2c_literal_part_24 = List_var(cons(_440, cons(List_var(cons(_15, cons(var, cons(mods, NULL)))), NULL)));  cons(_433, cons(_x2c_literal_part_23, cons(_x2c_literal_part_24, NULL)));
             }
-            ));  List native_target = Macro_typed(Type_list(target_type), Var_list(Macro_inserted(var, 1, 1)));  List converted = Compiler_convert_initializer(c, Var_list(rhs), target_type, native_target);  new_bind =({
+            ));  List native_target = Macro_typed(Type_list(target_type), var);  List converted = Compiler_convert_initializer(c, Var_list(rhs), target_type, native_target);  new_bind =({
               Var _x2c_literal_part_25 = List_var(cons(_15, cons(var, cons(mods, NULL))));  cons(_147, cons(_760, cons(_x2c_literal_part_25, cons(List_var(converted), NULL))));
             }
             );  if(Type_is_static(List_type(Type_list(target_type))))
@@ -4192,7 +4191,7 @@ static List Compiler__destructure_value(Compiler c, List ast){
     Var _x2c_match_values[3];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 3 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 317060127196: ;  static MatchCaptureSite _x2c_match_site_48;  if (x2c_match_site_try_capture(& _x2c_match_site_48, _x2c_match_expr, List_var(_842), &_x2c_match_capture)) {List targets = Var_list(_x2c_match_values[0]);  Var source = _x2c_match_values[1];  Var type = _x2c_match_values[2]; {
-    List result = Sym_introduce(c -> sym, Compiler_fresh_name(c, _843));  List temporary = Sym_introduce(c -> sym, Compiler_fresh_name(c, _822));  List result_expr = Macro_typed(Var_list(type), Var_list(Macro_inserted(List_var(result), 1, 1)));  List converted = Compiler__destructure_source(c, result_expr, Var_type(type));  List assignments = Compiler__destructure_assignments(c, targets, temporary);  Macro shape = _1211;  List bound = Compiler_bind_syntax(c, List_var(Macro_apply(shape, ({
+    List result = Sym_introduce(c -> sym, Compiler_fresh_name(c, _843));  List temporary = Sym_introduce(c -> sym, Compiler_fresh_name(c, _822));  List result_expr = Macro_typed(Var_list(type), List_var(result));  List converted = Compiler__destructure_source(c, result_expr, Var_type(type));  List assignments = Compiler__destructure_assignments(c, targets, temporary);  Macro shape = _1211;  List bound = Compiler_bind_syntax(c, List_var(Macro_apply(shape, ({
       Var _x2c_literal_part_33 = type;  Var _x2c_literal_part_34 = List_var(result);  Var _x2c_literal_part_35 = List_var(cons(_1212, cons(_1214, cons(source, _1215))));  cons(_x2c_literal_part_33, cons(_x2c_literal_part_34, cons(_x2c_literal_part_35, cons(List_var(temporary), cons(List_var(converted), cons(List_var(assignments), NULL))))));
     }
     ))), AST_EXPRESSION, NULL);  return Var_list(List_caddr(bound));
@@ -4228,7 +4227,7 @@ static List Compiler__named_destructure(Compiler c, Type type, List targets, Lis
   List temporary = Sym_introduce(c -> sym, Compiler_fresh_name(c, _822));  Array declarations = Array_new(), expressions = Array_new(); {
     List ident;  List _x2c_macro_object_9 = targets;  List _x2c_macro_cursor_10 = _x2c_macro_object_9;  Var _x2c_macro_cursor_output_9;  while(List_try_next(_x2c_macro_object_9, &(_x2c_macro_cursor_10), &(_x2c_macro_cursor_output_9))){
       ident = Var_list(_x2c_macro_cursor_output_9); {
-        Array_push(declarations, List_var(cons(_15, cons(List_var(ident), _1215))));  Array_push(expressions, List_var(Macro_typed(Type_list(type), Var_list(Macro_inserted(List_var(ident), 1, 1)))));
+        Array_push(declarations, List_var(cons(_15, cons(List_var(ident), _1215))));  Array_push(expressions, List_var(Macro_typed(Type_list(type), List_var(ident))));
       }
 
     }
@@ -4814,8 +4813,9 @@ return ast;
 
 #endif
 #ifndef X2C_TRANSFORM_SOURCE
+Var Macro_inserted(Var, int, int);
 static List Compiler__truthy_expression(Compiler c, List expr){
-  if(! List_truth(expr)) return expr;  List resolved = Compiler_resolve_protocol_member(c, Var_type(List_cadr(expr)), _2523);  if(! List_truth(resolved)) return expr;  List _x2c_destructure_4 = resolved;  List binding = Var_list(List_getindex(_x2c_destructure_4, 0));  Type signature = Var_type(List_getindex(_x2c_destructure_4, 1));  List callee = Macro_typed(Type_list(signature), Var_list(Macro_inserted(List_var(binding), 1, 1)));  return cons(_31, cons(_135, cons(List_var(({
+  if(! List_truth(expr)) return expr;  List resolved = Compiler_resolve_protocol_member(c, Var_type(List_cadr(expr)), _2523);  if(! List_truth(resolved)) return expr;  List _x2c_destructure_4 = resolved;  List binding = Var_list(List_getindex(_x2c_destructure_4, 0));  Type signature = Var_type(List_getindex(_x2c_destructure_4, 1));  List callee = Macro_typed(Type_list(signature), List_var(binding));  return cons(_31, cons(_135, cons(List_var(({
     Var _x2c_literal_part_67 = Macro_inserted(List_var(callee), 1, 1);  Var _x2c_literal_part_68 = List_var(cons(_141, cons(Macro_inserted(List_var(expr), 1, 1), NULL)));  cons(_142, cons(_x2c_literal_part_67, cons(_x2c_literal_part_68, NULL)));
   }
   )), NULL)));
@@ -5047,13 +5047,13 @@ static Symbol Compiler__indexed_builtin_helper(Compiler c, Type type){
 #endif
 #ifndef X2C_TRANSFORM_SOURCE
 static List Compiler__indexed_call_expr(Compiler c, List resolved, List arguments){
-  List _x2c_destructure_5 = resolved;  List binding = Var_list(List_getindex(_x2c_destructure_5, 0));  Type signature = Var_type(List_getindex(_x2c_destructure_5, 1));  Macro called = _1870;  List callee = Macro_typed(Type_list(signature), Var_list(Macro_inserted(List_var(binding), 1, 1)));  return Compiler_rebuild_expression(c, List_cdr(signature), Macro_apply(called, cons(List_var(callee), cons(List_var(arguments), NULL))));
+  List _x2c_destructure_5 = resolved;  List binding = Var_list(List_getindex(_x2c_destructure_5, 0));  Type signature = Var_type(List_getindex(_x2c_destructure_5, 1));  Macro called = _1870;  List callee = Macro_typed(Type_list(signature), List_var(binding));  return Compiler_rebuild_expression(c, List_cdr(signature), Macro_apply(called, cons(List_var(callee), cons(List_var(arguments), NULL))));
 }
 
 #endif
 #ifndef X2C_TRANSFORM_SOURCE
 static List Compiler__sequenced(Compiler c, List value, String stem, Array declarations){
-  Type type = Var_type(List_cadr(value));  List temporary = Sym_introduce(c -> sym, Compiler_fresh_name(c, stem));  Array_push(declarations, List_var(_value_declaration(type, temporary, value)));  return Macro_typed(Type_list(type), Var_list(Macro_inserted(List_var(temporary), 1, 1)));
+  Type type = Var_type(List_cadr(value));  List temporary = Sym_introduce(c -> sym, Compiler_fresh_name(c, stem));  Array_push(declarations, List_var(_value_declaration(type, temporary, value)));  return Macro_typed(Type_list(type), List_var(temporary));
 }
 
 #endif
