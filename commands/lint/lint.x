@@ -16,13 +16,13 @@
 #include <string.h>
 
 /** One rule: its code, its `<language>` or `<style>` family, whether a
-    finding is a `<violation>` or a review `<candidate>`, and the section of
-    `agents/x2c-coding-style-guide.md` that owns it.
+    finding is a `<violation>` or a review `<candidate>`, and the rule ID in
+    `agents/x2c-code-standard.md` that owns it.
 */
 typedef struct Rule:
   String code
   Symbol family, kind
-  String section
+  String rule
 Rule
 
 /** One file under lint. `partner` maps each bracket or interpolated-string
@@ -50,80 +50,74 @@ typedef struct Lint:
 #pragma private
 
 static const Rule rules[] = {
-  {"forward-declaration", <language>, <violation>, "forward-declarations"},
-  {"same-file-forward-declaration", <language>, <candidate>,
-   "forward-declarations"},
-  {"negated-is", <language>, <violation>, "control-flow"},
-  {"src-forward-declaration", <style>, <violation>, "forward-declarations"},
-  {"runtime-forward-declaration", <style>, <candidate>,
-   "forward-declarations"},
-  {"tab", <style>, <violation>, "indentation-width-and-text"},
-  {"trailing-whitespace", <style>, <violation>, "indentation-width-and-text"},
-  {"non-ascii", <style>, <violation>, "indentation-width-and-text"},
-  {"operator-spacing", <style>, <violation>, "indentation-width-and-text"},
-  {"over-width", <style>, <violation>, "indentation-width-and-text"},
-  {"over-width-literal", <style>, <candidate>, "indentation-width-and-text"},
-  {"over-width-table-row", <style>, <candidate>,
-   "indentation-width-and-text"},
-  {"blank-line-stack", <style>, <violation>, "vertical-space"},
-  {"decorated-ruler", <style>, <candidate>, "vertical-space"},
-  {"wrapped-opening-line", <style>, <violation>, "signatures-and-calls"},
-  {"continuation-indent", <style>, <violation>, "signatures-and-calls"},
-  {"standalone-closer", <style>, <violation>, "signatures-and-calls"},
-  {"horizontal-form", <style>, <candidate>, "signatures-and-calls"},
-  {"one-statement-braces", <style>, <violation>, "control-flow"},
-  {"short-control-flow", <style>, <candidate>, "control-flow"},
-  {"deferred-initialization", <style>, <violation>, "declarations"},
-  {"repeated-accessor", <style>, <candidate>, "declarations"},
-  {"subject-parameter-name", <style>, <violation>, "names-expose-ownership"},
-  {"reference-parameter", <style>, <candidate>, "required-aliases"},
-  {"narration", <style>, <candidate>, "local-comments-explain-decisions"},
-  {"prohibited-prose", <style>, <candidate>, "prose"},
-  {"constant-output-run", <style>, <candidate>,
-   "literals-strings-and-formatting"},
-  {"member-arrow", <style>, <candidate>, "reach-members-with-"},
-  {"contains-in", <style>, <candidate>, "let-x2c-carry-the-syntax"},
-  {"expression-body", <style>, <candidate>, "let-x2c-carry-the-syntax"},
-  {"plain-string", <style>, <candidate>, "trust-supported-conversions"},
-  {"return-after-report-error", <style>, <violation>, "status-results"},
-  {"return-after-raise", <style>, <violation>, "status-results"},
-  {"fallback-shared-cause", <style>, <violation>, "status-results"},
-  {"fresh-literal-null-guard", <style>, <violation>, "status-results"},
-  {"growth-check", <style>, <violation>, "status-results"},
-  {"shape-diagnostics", <style>, <candidate>, "pattern-matching"},
-  {"manual-shape-checks", <style>, <candidate>, "pattern-matching"},
-  {"validator-diagnostics", <style>, <candidate>, "pattern-matching"},
-  {"validator-shape", <style>, <candidate>, "pattern-matching"},
-  {"recursive-validator", <style>, <candidate>, "pattern-matching"},
-  {"validation-framework", <style>, <candidate>, "pattern-matching"},
-  {"silent-shape-guard", <style>, <candidate>, "pattern-matching"},
-  {"static-match-capture", <style>, <candidate>, "pattern-matching"},
-  {"struct-copy", <style>, <candidate>, "delete-before-rearranging"},
-  {"manual-bookkeeping", <style>, <candidate>, "delete-before-rearranging"},
-  {"repeated-routes", <style>, <candidate>, "delete-before-rearranging"},
-  {"lifecycle-pair", <style>, <candidate>, "delete-before-rearranging"},
-  {"enum-table-switch", <style>, <candidate>, "closed-identities"},
-  {"internal-type", <style>, <candidate>, "delete-before-rearranging"},
-  {"duplicate-function-body", <style>, <candidate>,
-   "delete-before-rearranging"},
-  {"long-function", <style>, <candidate>, "shape"},
-  {"deep-nesting", <style>, <candidate>, "shape"},
-  {"long-parameter-list", <style>, <candidate>, "shape"},
-  {"long-name", <style>, <candidate>, "shape"},
-  {"comment-history", <style>, <violation>, "comments-describe-the-present"},
-  {"comment-null-guard", <style>, <violation>,
-   "local-comments-explain-decisions"},
-  {"section-label", <style>, <violation>, "vertical-space"},
-  {"catalog-label", <style>, <candidate>, "vertical-space"},
-  {"restates-name", <style>, <violation>, "internal-functions-and-contracts"},
-  {"restates-code", <style>, <violation>, "local-comments-explain-decisions"},
-  {"module-header-inventory", <style>, <candidate>, "module-headers"},
-  {"doc-comment-tier", <style>, <violation>, "public-api-documentation"},
-  {"doc-boilerplate", <style>, <violation>, "public-api-documentation"},
-  {"doc-on-static", <style>, <violation>, "internal-functions-and-contracts"},
-  {"detached-doc", <style>, <violation>, "public-api-documentation"},
-  {"stacked-doc", <style>, <violation>, "public-api-documentation"},
-  {"repeated-prose", <style>, <candidate>, "comments-earn-their-space"},
+  {"forward-declaration", <language>, <violation>, "FI-6"},
+  {"same-file-forward-declaration", <language>, <candidate>, "FI-6"},
+  {"negated-is", <language>, <violation>, "ST-5"},
+  {"src-forward-declaration", <style>, <violation>, "FI-6"},
+  {"runtime-forward-declaration", <style>, <candidate>, "FI-6"},
+  {"tab", <style>, <violation>, "LY-1"},
+  {"trailing-whitespace", <style>, <violation>, "LY-1"},
+  {"non-ascii", <style>, <violation>, "LY-1"},
+  {"operator-spacing", <style>, <violation>, "LY-5"},
+  {"over-width", <style>, <violation>, "LY-2"},
+  {"over-width-literal", <style>, <candidate>, "LY-2"},
+  {"over-width-table-row", <style>, <candidate>, "LY-2"},
+  {"blank-line-stack", <style>, <violation>, "LY-6"},
+  {"decorated-ruler", <style>, <candidate>, "FI-5"},
+  {"wrapped-opening-line", <style>, <violation>, "LY-3"},
+  {"continuation-indent", <style>, <violation>, "LY-4"},
+  {"standalone-closer", <style>, <violation>, "LY-4"},
+  {"horizontal-form", <style>, <candidate>, "LY-3"},
+  {"one-statement-braces", <style>, <violation>, "ST-1"},
+  {"short-control-flow", <style>, <candidate>, "ST-2"},
+  {"deferred-initialization", <style>, <violation>, "ST-7"},
+  {"repeated-accessor", <style>, <candidate>, "ST-10"},
+  {"subject-parameter-name", <style>, <violation>, "NM-2"},
+  {"reference-parameter", <style>, <candidate>, "FN-8"},
+  {"narration", <style>, <candidate>, "CM-2"},
+  {"prohibited-prose", <style>, <candidate>, "CM-8"},
+  {"constant-output-run", <style>, <candidate>, "EX-11"},
+  {"member-arrow", <style>, <candidate>, "EX-6"},
+  {"contains-in", <style>, <candidate>, "ST-11"},
+  {"expression-body", <style>, <candidate>, "FN-7"},
+  {"plain-string", <style>, <candidate>, "EX-3"},
+  {"return-after-report-error", <style>, <violation>, "ER-4"},
+  {"return-after-raise", <style>, <violation>, "ER-4"},
+  {"fallback-shared-cause", <style>, <violation>, "ER-4"},
+  {"fresh-literal-null-guard", <style>, <violation>, "ER-4"},
+  {"growth-check", <style>, <violation>, "ER-4"},
+  {"shape-diagnostics", <style>, <candidate>, "PR-4"},
+  {"manual-shape-checks", <style>, <candidate>, "MA-7"},
+  {"validator-diagnostics", <style>, <candidate>, "PR-4"},
+  {"validator-shape", <style>, <candidate>, "PR-4"},
+  {"recursive-validator", <style>, <candidate>, "FA-9"},
+  {"validation-framework", <style>, <candidate>, "FA-9"},
+  {"silent-shape-guard", <style>, <candidate>, "PR-4"},
+  {"static-match-capture", <style>, <candidate>, "MA-7"},
+  {"struct-copy", <style>, <candidate>, "FA-3"},
+  {"manual-bookkeeping", <style>, <candidate>, "LT-1"},
+  {"repeated-routes", <style>, <candidate>, "FA-5"},
+  {"lifecycle-pair", <style>, <candidate>, "LT-1"},
+  {"enum-table-switch", <style>, <candidate>, "FA-6"},
+  {"internal-type", <style>, <candidate>, "FA-8"},
+  {"duplicate-function-body", <style>, <candidate>, "FA-5"},
+  {"long-function", <style>, <candidate>, "FN-2"},
+  {"deep-nesting", <style>, <candidate>, "FN-5"},
+  {"long-parameter-list", <style>, <candidate>, "FN-6"},
+  {"long-name", <style>, <candidate>, "NM-3"},
+  {"comment-history", <style>, <violation>, "CM-4"},
+  {"comment-null-guard", <style>, <violation>, "CM-2"},
+  {"section-label", <style>, <violation>, "FI-5"},
+  {"catalog-label", <style>, <candidate>, "FI-5"},
+  {"restates-name", <style>, <violation>, "CM-2"},
+  {"restates-code", <style>, <violation>, "CM-2"},
+  {"module-header-inventory", <style>, <candidate>, "FI-2"},
+  {"doc-comment-tier", <style>, <violation>, "CM-5"},
+  {"doc-boilerplate", <style>, <violation>, "CM-5"},
+  {"doc-on-static", <style>, <violation>, "CM-5"},
+  {"detached-doc", <style>, <violation>, "CM-5"},
+  {"stacked-doc", <style>, <violation>, "CM-5"},
+  {"repeated-prose", <style>, <candidate>, "CM-7"},
 }
 
 static const int rule_count = sizeof(rules) / sizeof(rules[0])
@@ -144,7 +138,7 @@ void Rule.print_table(void):
   for (int at = 0; at < rule_count; at++):
     Rule rule = rules[at]
     printf("%-31s %-9s %-10s %s\n", rule.code, rule.family.str(),
-           rule.kind.str(), rule.section)
+           rule.kind.str(), rule.rule)
 
 /** Whether `ch` continues a word: a letter, digit, or `_`. */
 int lint_word_char(int ch) => isalnum(ch) || ch == '_'
@@ -308,5 +302,5 @@ void Lint.print(Lint l):
   foreach List finding in l.findings:
     Var (line, code, message) = finding
     const Rule *rule = Rule.find(code)
-    printf("%s:%d: %s %s: %s\n", l.path, line.int(), rule.kind.str(),
-           code, message)
+    printf("%s:%d: %s %s %s: %s\n", l.path, line.int(), rule.kind.str(),
+           code, rule.rule, message)

@@ -5,10 +5,10 @@
            x2c-lint --fmt-check [--fmt-diff] FILE...
            x2c-lint --rules
 
-    Prints one line per finding, `FILE:LINE: KIND CODE: MESSAGE`, in line
+    Prints each finding as `FILE:LINE: KIND CODE RULE-ID: MESSAGE`, in line
     order. The language rules run unless `--all` or `--rule` selects rules;
-    `--rules` prints the table of codes, families, kinds, and style-guide
-    sections. Each file is scanned for the token rules and parsed by the
+    `--rules` prints the table of codes, families, kinds, and standard rule
+    IDs. Each file is scanned for the token rules and parsed by the
     compiler for the declaration and member-arrow rules. The compiler's
     diagnostics go to standard error; a file that does not parse gets the
     token rules only and makes the exit status 1. Findings alone leave the
