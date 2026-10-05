@@ -97,87 +97,118 @@ static List Emitter._emit(Emitter &e, List ast) {
   }
   match (ast) {
     case %(at ?origin ?inner): return e._emit_at(origin, inner);
-    case %(cons ?item ?tail):
-      return %("cons(" @{e._emit(%($item))} ", " @{e._emit(%($tail))} ")");
-    case %(append ?head_list ?tail):
-      return %("List_append(" @{e._emit(%($head_list))} ", "
-               @{e._emit(%($tail))} ")");
-    case %(c-assert ?condition ?message):
-      return %("_Static_assert(" @{e._emit(%($condition))} ","
-               @{e._emit(%($message))} ");");
-    case %(initcode ?input ?body):
-      return %(@{e._initializer_macro(input, body)} ";");
-    case %(localinit ?declaration (block *body)):
-      return e._local_static(declaration, body);
-    case %(sourceinit ?function):
-      return e._source_initializer(function);
+    case %(cons ?item ?tail): return e._emit_cons(item, tail);
+    case %(append ?head ?tail): return e._emit_append(head, tail);
+    case %(c-assert ?test ?message): return e._emit_c_assert(test, message);
+    case %(initcode ?input ?body): return e._emit_initcode(input, body);
+    case %(localinit ?decl (block *body)): return e._local_static(decl, body);
+    case %(sourceinit ?fn): return e._source_initializer(fn);
     case %(initval *): return e._initializer_value(ast);
     case %(indexinit ?index ?value): return e._emit_index_init(index, value);
     case %(dotinit ?field ?value): return e._emit_dot_init(field, value);
-    case %(cast ?type ?expression):
-      return %("(" @{e._semantic_type(type)} ")"
-               @{e._operand(expression, EMIT_UNARY)});
-    case %(cache ?id):
-      return e.cache_bindings ? e._emit_ident(e.cache_bindings[id])
-                              : %("_$id");
+    case %(cast ?type ?expr): return e._emit_cast(type, expr);
+    case %(cache ?id): return e._emit_cache(id);
     case %(expr ? ?content): return e._emit(%($content));
-    case %(postfix ?operator ?argument):
-      return e._emit_postfix(operator, argument);
-    case %(generic ?control *associations):
-      return e._emit_generic(control, associations);
-    case %(va-arg ?expression ?declaration):
-      return %("va_arg(" @{e._emit(%($expression))} ", "
-               @{e._emit(%($declaration))} ")");
-    case %(offsetof ?type ?member):
-      return %("offsetof(" @{e._semantic_type(type)} ", " @{e._emit(member)}
-               ")");
-    case %(call ?function ?arguments):
-      return e._emit_call(function, arguments);
-    case %(index ?array ?index):
-      return %(@{e._operand(array, EMIT_POSTFIX)} "[" @{e._emit(%($index))}
-               "]");
-    case %(op ?operator ?argument): return e._emit_unary(operator, argument);
-    case %(op ?operator ?left ?right):
-      return e._emit_binary(operator, left, right);
-    /* Between `?` and `:` C accepts a complete expression, so only the
-       condition and the false arm can regroup. */
-    case %(op ? ?condition ?ontrue ?onfalse):
-      return %(@{e._operand(condition, EMIT_CONDITIONAL + 1)} "?"
-               @{e._emit(%($ontrue))} ":"
-               @{e._operand(onfalse, EMIT_CONDITIONAL)});
+    case %(postfix ?op ?argument): return e._emit_postfix(op, argument);
+    case %(generic ?control *rows): return e._emit_generic(control, rows);
+    case %(va-arg ?expr ?decl): return e._emit_va_arg(expr, decl);
+    case %(offsetof ?type ?member): return e._emit_offsetof(type, member);
+    case %(call ?fn ?args): return e._emit_call(fn, args);
+    case %(index ?array ?index): return e._emit_index(array, index);
+    case %(op ?op ?argument): return e._emit_unary(op, argument);
+    case %(op ?op ?left ?right): return e._emit_binary(op, left, right);
+    case %(op ? ?test ?yes ?no): return e._emit_conditional(test, yes, no);
     case %(break): return %("break;");
     case %(continue): return %("continue;");
-    case %(if ?condition ?ontrue):
-      return %("if" "(" @{e._emit(%($condition))} ")" @{e._emit(%($ontrue))});
-    case %(if ?condition ?ontrue ?onfalse):
-      return %("if" "(" @{e._emit(%($condition))} ")" @{e._emit(%($ontrue))}
-               "else" @{e._emit(%($onfalse))});
-    case %(while ?condition ?body):
-      return %("while" "(" @{e._emit(%($condition))} ")"
-               @{e._emit(%($body))});
-    case %(do ?body ?condition):
-      return %("do" @{e._emit(%($body))} "while"
-               "(" @{e._emit(%($condition))} ")" ";");
-    case %(for ?initial ?condition ?increment ?body):
-      return %("for" "(" @{e._emit(%($initial))} ";"
-               @{e._emit(%($condition))} ";" @{e._emit(%($increment))} ")"
-               @{e._emit(%($body))});
-    case %(switch ?expression ?body):
-      return %("switch" "(" @{e._emit(%($expression))} ")"
-               @{e._emit(%($body))});
+    case %(if ?test ?yes): return e._emit_if(test, yes);
+    case %(if ?test ?yes ?no): return e._emit_if_else(test, yes, no);
+    case %(while ?test ?body): return e._emit_while(test, body);
+    case %(do ?body ?test): return e._emit_do(body, test);
+    case %(for ? ? ? ?): return e._emit_for(ast);
+    case %(switch ?expr ?body): return e._emit_switch(expr, body);
     case %(return): return %("return;");
-    case %(return (!set ?expression (expr ? ?))):
-      return e._emit_return(expression);
-    case %(goto ?label): return %("goto" @{e._emit(%($label))} ";");
-    case %(raise ?cause (args *arguments)):
-      return e._raise(ast, cause, arguments);
-    case %((!or fnmod func) ?parameters):
-      return e._emit_parameters(parameters);
+    case %(return (!set ?expr (expr ? ?))): return e._emit_return(expr);
+    case %(goto ?label): return e._emit_goto(label);
+    case %(raise ?cause (args *args)): return e._raise(ast, cause, args);
+    case %((!or fnmod func) ?params): return e._emit_parameters(params);
     case %(label ?name): return e._emit_label(name);
     case %(ident ?binding): return e._emit_ident(binding);
   }
   return e._emit_leaf(ast);
 }
+
+static List Emitter._emit_cons(Emitter &e, Var item, Var tail) =>
+  %("cons(" @{e._emit(%($item))} ", " @{e._emit(%($tail))} ")");
+
+static List Emitter._emit_append(Emitter &e, Var head_list, Var tail) =>
+  %("List_append(" @{e._emit(%($head_list))} ", "
+    @{e._emit(%($tail))} ")");
+
+static List Emitter._emit_c_assert(Emitter &e, Var condition, Var message) =>
+  %("_Static_assert(" @{e._emit(%($condition))} ","
+    @{e._emit(%($message))} ");");
+
+static List Emitter._emit_initcode(Emitter &e, List input, List body) =>
+  %(@{e._initializer_macro(input, body)} ";");
+
+static List Emitter._emit_cast(Emitter &e, Type type, Var expression) =>
+  %("(" @{e._semantic_type(type)} ")"
+    @{e._operand(expression, EMIT_UNARY)});
+
+static List Emitter._emit_cache(Emitter &e, Var id) =>
+  e.cache_bindings ? e._emit_ident(e.cache_bindings[id])
+                   : %("_$id");
+
+static List Emitter._emit_va_arg(
+  Emitter &e, Var expression, Var declaration) =>
+  %("va_arg(" @{e._emit(%($expression))} ", "
+    @{e._emit(%($declaration))} ")");
+
+static List Emitter._emit_offsetof(Emitter &e, Type type, List member) =>
+  %("offsetof(" @{e._semantic_type(type)} ", " @{e._emit(member)}
+    ")");
+
+static List Emitter._emit_index(Emitter &e, Var array, Var index) =>
+  %(@{e._operand(array, EMIT_POSTFIX)} "[" @{e._emit(%($index))}
+    "]");
+
+/* Between `?` and `:` C accepts a complete expression, so only the
+   condition and the false arm can regroup. */
+static List Emitter._emit_conditional(
+  Emitter &e, Var condition, Var ontrue, Var onfalse) =>
+  %(@{e._operand(condition, EMIT_CONDITIONAL + 1)} "?"
+    @{e._emit(%($ontrue))} ":"
+    @{e._operand(onfalse, EMIT_CONDITIONAL)});
+
+static List Emitter._emit_if(Emitter &e, Var condition, Var ontrue) =>
+  %("if" "(" @{e._emit(%($condition))} ")" @{e._emit(%($ontrue))});
+
+static List Emitter._emit_if_else(
+  Emitter &e, Var condition, Var ontrue, Var onfalse) =>
+  %("if" "(" @{e._emit(%($condition))} ")" @{e._emit(%($ontrue))}
+    "else" @{e._emit(%($onfalse))});
+
+static List Emitter._emit_while(Emitter &e, Var condition, Var body) =>
+  %("while" "(" @{e._emit(%($condition))} ")"
+    @{e._emit(%($body))});
+
+static List Emitter._emit_do(Emitter &e, Var body, Var condition) =>
+  %("do" @{e._emit(%($body))} "while"
+    "(" @{e._emit(%($condition))} ")" ";");
+
+static List Emitter._emit_for(Emitter &e, List ast) {
+  Var (initial, condition, increment, body) = ast.cdr();
+  return %("for" "(" @{e._emit(%($initial))} ";"
+    @{e._emit(%($condition))} ";" @{e._emit(%($increment))} ")"
+    @{e._emit(%($body))});
+}
+
+static List Emitter._emit_switch(Emitter &e, Var expression, Var body) =>
+  %("switch" "(" @{e._emit(%($expression))} ")"
+    @{e._emit(%($body))});
+
+static List Emitter._emit_goto(Emitter &e, Var label) =>
+  %("goto" @{e._emit(%($label))} ";");
 
 static List Emitter._emit_sequence(Emitter &e, List ast) {
   Array emitted = $auto([]);
@@ -223,8 +254,7 @@ static List Emitter._emit_leaf(Emitter &e, List ast) {
     case <typedef>:    return e._typedef(ast);
     case <union>:      return e._aggregate(ast);
     case <args>:       return e._args(ast);
-    case <bindings>: case <params>:
-      return _commas(e._emit(ast.cdr()));
+    case <bindings>: case <params>: return _commas(e._emit(ast.cdr()));
     case <fields>:     return e._emit(ast.cdr());
     case <block>:      return e._block(ast);
     case <group>:      return e._emit(ast.cdr());
@@ -966,26 +996,9 @@ static List Emitter._binding(Emitter &e, List ast) =>
 static List Emitter._declarator(Emitter &e, List decl, List mods) {
   int typedefs = 0;
   while (mods) {
-    match (mods) {
-      case %((fnmod ?parameters *) *remaining): {
-        decl = e._function_declarator(decl, parameters);
-        mods = remaining;
-        continue;
-      }
-      case %((fnmod) *remaining): {
-        decl = e._function_declarator(decl, NULL);
-        mods = remaining;
-        continue;
-      }
-    }
     Var first = mods.car();
     if (first is <list>) {
-      Type mod = first;
-      if (mod.car() is <string>) decl = %(@decl @mod);
-      else if (mod.is_array())
-        decl = e._array_declarator(decl, mod.cadr());
-      else
-        decl = %(@decl ":" @{e._emit(mod.cadr())});
+      decl = e._list_declarator(decl, first);
       mods = mods.cdr();
       continue;
     }
@@ -996,18 +1009,26 @@ static List Emitter._declarator(Emitter &e, List decl, List mods) {
       case <*>: decl = cons(first, decl); break;
       case <typedef>: typedefs++; break;
       case <bitfield>: decl = e._emit(mods.cdr()); mods = NULL; continue;
-      default:
-        if (sym.is_type_qualifier()) decl = cons(first, decl);
-        else {
-          decl = %(@mods @decl);
-          mods = NULL;
-          continue;
-        }
+      default: decl = _native_declarator(decl, mods, sym); break;
     }
     mods = mods.cdr();
   }
   while (typedefs--) decl = cons(<typedef>, decl);
   return decl;
+}
+
+static List Emitter._list_declarator(Emitter &e, List decl, Type mod) {
+  if (mod.car() == <fnmod>) return e._function_declarator(decl, mod.cadr());
+  if (mod.car() is <string>) return %(@decl @mod);
+  if (mod.is_array()) return e._array_declarator(decl, mod.cadr());
+  return %(@decl ":" @{e._emit(mod.cadr())});
+}
+
+static List _native_declarator(List decl, List &mods, Symbol sym) {
+  if (sym.is_type_qualifier()) return cons(sym, decl);
+  List tokens = %(@mods @decl);
+  mods = NULL;
+  return tokens;
 }
 
 static List Emitter._array_declarator(Emitter &e, List decl, List dimension) {
