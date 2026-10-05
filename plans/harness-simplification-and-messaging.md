@@ -2,8 +2,9 @@
 
 > Status: active
 > Implementation authorized, 2026-10-05. Tool repairs, guidance simplification,
-> and the host messaging pilot are implemented. External runtime repairs remain
-> open; publication uses the existing gate.
+> and the host messaging pilot were delivered to dev at 3459d664 on 2026-10-05.
+> External runtime repairs and a real-PR messaging trial remain open.
+> Continuation requires no original worktree or pilot session.
 > Planning baseline: origin/dev fe7123f3bb659b3e6624bdfb1e356d1999d38a5c.
 
 ## Intended result
@@ -23,10 +24,9 @@ discarded benchmark reproductions, incorrect starting revisions, repeated
 checks, correction-handling failures, and incomplete metrics. Full raw session
 history remains outside the repository. Current source still confirms the
 benchmark cleanup and metrics defects.
-The local [audit report](../.context/harness-review-2026-10-05.md) contains
-the transcript paths and lines. It is ignored workspace evidence; preserve
-that report with the implementation handoff rather than assume another
-checkout contains it.
+The tracked [evidence record](harness-evidence-2026-10-05.md) preserves the
+observations, validation, transport limits, and external reproduction reports.
+Private raw transcripts are supporting evidence, not a continuation dependency.
 
 ## Decisions
 
@@ -353,7 +353,7 @@ logs and focused results are retained.
 The three external runtime defects remain unresolved. No supported editable
 owner was found for handoff enforcement, isolation classification, or active
 permission synchronization. Redacted reproduction notes and acceptance cases
-are retained in the workspace. No binary was patched, protection weakened,
+are preserved in the tracked evidence record. No binary was patched, protection weakened,
 or external issue posted. The plan remains active for these external repairs.
 
 ## Plan review
@@ -380,3 +380,39 @@ or external issue posted. The plan remains active for these external repairs.
   dedicated language diagnostic,
   or recurring negative fixture is proposed. Parser tests cover observed
   telemetry omissions without creating another product gate.
+
+## Continue from any checkout
+
+Read this plan and the linked evidence record from current origin/dev. The
+repository implementation is delivered; do not rerun it or recreate the pilot.
+No action from Gary is required to preserve or deliver this handoff.
+
+1. The next integrator and PR author can run the real messaging trial through
+   the existing integration skill and optional submit --contact-file interface.
+   The author joins with fresh Postbag names inside the assigned session.
+   Use a real human-authorized PR and existing blocker; do not invent a defect.
+   When a blocker exists, retain and park the candidate, send one scoped repair
+   request, observe the substantive reply and resubmitted head, and follow
+   ordinary review and publication. Record the outcome here. If no blocker
+   exists, no repair trial is due. There is no new recurring requirement.
+2. A runtime maintainer must replay reports 1 and 2 from the evidence record
+   in the supported incident environment, or establish the current equivalent.
+   Confirm the owner before submitting; no external issue has been posted.
+   The original isolation command and a real disallowed cross-worktree Git
+   write must both be tested. The reduced harmless input alone is insufficient.
+3. Report 3 needs an optional joint experiment because an agent cannot change
+   the app access setting for Gary. Use disposable parent/worker sessions and
+   scratch writes; capture effective policy before and after Gary changes
+   access through the UI. Until arranged, mark the cause and repair unverified.
+
+The live GitHub check on 2026-10-05 found no open PRs targeting dev. The
+persistent integrator queue had no active batch or ready submission. Historical
+parked batches are preserved; that history does not authorize reopening closed
+PRs. A future agent checks current queue state rather than trusting this snapshot.
+
+Host messaging registration survives removal of this worktree. Pilot contacts
+are withdrawn and sessions archived. Private evidence is preserved outside the
+worktree as described in the evidence record. After this documentation is
+published and remote ancestry verified, this worktree holds no unique required
+handoff. Remove it through the normal managed-worktree interface when desired;
+check for subsequent work before deletion.

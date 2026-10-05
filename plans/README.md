@@ -48,7 +48,9 @@ execution.
   authorized corrections to existing tools and guidance, a small
   cross-platform integrator messaging pilot, and separate external runtime
   repairs. Tool repairs and native messaging are implemented; external
-  runtime repairs remain open.
+  runtime repairs remain open. Its tracked
+  [evidence and reproduction reports](harness-evidence-2026-10-05.md) support
+  continuation from another checkout.
 - [x2c code standard](x2c-code-standard.md): stage 1 landed; Gary accepted
   the standard
   and decisions D1-D5 on 2026-10-05. Stage 1 (authority) and stage 2
