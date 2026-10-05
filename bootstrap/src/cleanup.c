@@ -5133,11 +5133,15 @@ List child;  List _x2c_macro_original_4 = ast;  Array _x2c_macro_rewritten_4 = N
 return(void *) _x2c_macro_rewritten_4 ? Array_list_free(_x2c_macro_rewritten_4) : _x2c_macro_original_4;
 }
 
+List Compiler_rebuild_statement(Compiler, List);
 List Compiler_capture_environment(Compiler, List, List);
 static List Compiler__defer_environment(Compiler c, List env_binding, List records){
   Array fields = Array_new(); {
     List record;  List _x2c_macro_object_29 = records;  List _x2c_macro_cursor_39 = _x2c_macro_object_29;  Var _x2c_macro_cursor_output_28;  while(List_try_next(_x2c_macro_object_29, &(_x2c_macro_cursor_39), &(_x2c_macro_cursor_output_28))){
-      record = Var_list(_x2c_macro_cursor_output_28);  Array_push(fields, List_var(cons(_29, cons(_2538, cons(List_var(cons(_28, cons(List_var(cons(_83, cons(List_caddr(record), _72))), NULL))), NULL)))));
+      record = Var_list(_x2c_macro_cursor_output_28);  Array_push(fields, List_cadr(Compiler_rebuild_statement(c, ({
+        Var _x2c_hole_6 = List_caddr(record);  cons(_1390, cons(_272, cons(List_var(cons(_414, cons(List_var(cons(_29, cons(_2538, cons(List_var(cons(_28, cons(List_var(cons(_83, cons(List_var(cons(_1404, cons(_2258, cons(_352, cons(_x2c_hole_6, NULL))))), _72))), NULL))), NULL)))), NULL))), NULL)));
+      }
+      ))));
     }
 
   }

@@ -1,0 +1,5 @@
+./unittest/compiler-fixtures/macro-import-relative/missing.x:4:1: macro: cannot open macro import
+  $(import "missing.xmacro")
+  ^^
+  note: path: ./unittest/compiler-fixtures/macro-import-relative/missing.xmacro
+

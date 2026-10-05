@@ -9,10 +9,16 @@
 #include "common.h"
 #include "scope.h"
 #include "var.h"
-#include "map.h"
+typedef struct PoolTable{
+  Scope scope;
+  Bytes hashes, entries;
+  unsigned used, capacity, mask;
+}
+* PoolTable;
+
 typedef struct Pool{
   Scope scope;
-  Map table;
+  PoolTable table;
   struct Pool * up;
   pthread_mutex_t mutex;
   unsigned child_capacity;

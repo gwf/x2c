@@ -11,6 +11,7 @@ The compiler surface a `meta` function calls.
 | --- | --- |
 | [`type_base_suffix`](#type_base_suffix) | Returns the suffix of `type` that begins at its typedef name or base keyword, sharing `type`, or `NULL` when it has none. |
 | [`type_declaration_parts`](#type_declaration_parts) | Returns `(base modifiers)` for reconstructing a declaration of `type`. |
+| [`type_name_error`](#type_name_error) | Returns the diagnostic for a `type` that names its type with an Atom other than a C type keyword, as `%(String)` and `%(* Point)` do, or `NULL`. |
 | [`x2c_block_make`](#x2c_block_make) | Returns a block containing `items` in order. |
 | [`x2c_expr_call`](#x2c_expr_call) | Returns the expression calling `callee` with `arguments`, a `List` of expressions. |
 | [`x2c_expr_composite`](#x2c_expr_composite) | Returns the comma-separated composite initializer holding `items`, a `List` of expressions. |
@@ -43,7 +44,18 @@ Returns `(base modifiers)` for reconstructing a declaration of `type`.
 Function modifiers hold parameter syntax, and modifier order retains C
 declarator precedence.
 
-Source: `lib/meta.x:361`
+Source: `lib/meta.x:379`
+
+#### type_name_error
+
+`String type_name_error(List type)`
+
+Returns the diagnostic for a `type` that names its type with an Atom
+other than a C type keyword, as `%(String)` and `%(* Point)` do, or
+`NULL`. A type name is a String, as in `%("String")` and `%(* "Point")`;
+neither a short Symbol nor a long Atom supplies that representation.
+
+Source: `lib/meta.x:362`
 
 #### x2c_block_make
 

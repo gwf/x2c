@@ -865,7 +865,7 @@ compiler must construct code representing that value.
 | Native integers and floating values | Preserves the numeric Var family, including width, signedness and floating precision. |
 | Computed string | Inserts a quoted C string literal. |
 | `Symbol` | Inserts a Symbol literal. |
-| Identifier or nonempty code `List` | Binds the returned code through normal compiler binding and typing, in ordinary code and in macro bodies alike. A List is code when it is an expression node, a macro application, a quotation, or an identifier. A data List is not automatically an expression, and a result used as a `case` pattern stays data. |
+| Identifier or nonempty code `List` | Binds the returned code through normal compiler binding and typing, in ordinary code and in macro bodies alike. A List is code when it is an expression node, a macro application, a quotation, or an identifier; inside a macro expansion every List is code. A call written as a whole statement may also return a statement, while a call inside a larger expression must return an expression. A data List is not automatically an expression, and a result used as a `case` pattern stays data. |
 | Boxed `Var` | Insertion follows the contained value. |
 | `{}` stored in a `Var` | A fresh empty Map, as in compiled code; inserted like any other Map. |
 | `Array` or `Map`, nested at any depth | Constructs fresh collections through the ordinary literal constructors. |
@@ -989,6 +989,42 @@ and its type, as `shape_reads` does below.
 What the function returns decides what the expansion is. A `List` one of the
 compiler operations built represents code. `x2c_literal_int`, `x2c_literal_string`
 and `x2c_literal_symbol` each return an expression holding a value.
+
+A `Stmt` macro can use the same arrow form. Its body is then the statement
+`$helper(args);`, and the helper may return any statement that fits where
+the macro is invoked, not only an expression:
+
+```x2c
+#include "x2c.x"
+#include "meta.x"
+
+meta static List repeated(List code) => %(block $code $code);
+
+macro Stmt $twice(Stmt $code) => $repeated($code);
+
+int main(void) {
+  int n = 0;
+  $twice(n += 2;);
+  $twice(if (n == 4) puts("four"););
+  printf("%d\n", n);
+  return 0;
+}
+```
+
+```text
+four
+four
+4
+```
+
+`repeated` receives each captured statement as code and returns a block
+that holds it twice. The second invocation passes an `if` statement, which
+an expression position could not accept. A `$helper(args);` statement in
+an ordinary function may also return a statement. There, only an expression
+node, a macro application, a quotation, or an identifier is code. A
+`%(block ...)` such as the one `repeated` builds is data there and becomes a
+runtime `List` value. A helper for ordinary code therefore returns
+statements as a `$!{ ... }` quotation.
 
 ## Source templates from meta functions
 
@@ -1155,6 +1191,12 @@ meta static List counter(String name) {
 }
 ```
 
+A `Type` spells C type keywords such as `unsigned` and `char`, and the `*`
+of a pointer, as Symbols. It spells every other type name as a String:
+`%("String")`, `%(* "Point")`, `%(struct "Tag")`. A Symbol does not keep
+the case of its spelling, so `%(String)` is an error where it fills a
+type.
+
 ### Holes that name an expression
 
 A `$name` hole needs a local. When the value is a field, an element, or the
@@ -1262,12 +1304,16 @@ differences:
 - Nothing is bound. Holes keep the syntax their locals hold, a binding
   becomes a reference to it, and a number, String, or Symbol becomes a
   literal. A number keeps its exact value and type, and a String is a
-  String literal when `T` is `String`. A name the expression reads without
+  String literal when `T` is `String`. A `$items...` sequence makes each
+  number, String, or Symbol it holds a literal in the same way. A name the
+  expression reads without
   declaring stays a name and is bound wherever the code is bound, if it is
   bound at all.
 - The code declares nothing. A typed quotation has no expansion to keep
-  names private to, so a name it needs comes from a hole. For the same
-  reason it applies no template; build that code first and insert it.
+  names private to, so a name it needs comes from a hole, such as a local
+  that holds `x2c_ident("total")`. For the same reason it applies no
+  template; build that code first and insert it. Inside another quotation,
+  write a typed quotation as a hole: `${$!int{ $b }}`.
 
 Only the outermost expression receives `T`. Inner expressions carry no type
 until something binds them. Write `T` exactly: the compiler trusts it as it
@@ -1275,6 +1321,81 @@ trusts the type a typed call already carries.
 
 A typed reference to a binding the function holds is the shortest form:
 `$!($type){ $binding }` is the expression that reads `binding` as a `type`.
+
+### Types and parameters
+
+A quotation can also build a type or one parameter. `$!Type{ ... }` holds a
+type written as a cast writes it. It builds the `Type` List that a `Type`
+local holds:
+
+```x2c
+~#include "x2c.x"
+~#include "meta.x"
+~
+typedef struct Point { int x; int y; } Point;
+
+meta static String point_types(void) {
+  Type point = $!Type{ Point };
+  Type pointer = $!Type{ const $point * };
+  Type reader = $!Type{ int (*)($point *) };
+  return point.repr() + " " + pointer.repr() + " " + reader.repr();
+}
+~
+~int main(void) {
+~  printf("%s\n", $point_types());
+~  return 0;
+~}
+```
+
+```text
+("Point") (* const "Point") (* (func ((* "Point"))) int)
+```
+
+A `Type` local or a `${...}` hole of type `Type` stands for a type in the
+braces. The declarator around it builds a new type from it, so
+`$!Type{ const $point * }` is a pointer to a constant `Point`. A type name
+keeps its spelling: `$!Type{ String }` is `%("String")`.
+
+`$!Param{ ... }` holds one parameter declaration. Put the parameters in a
+function with a sequence hole:
+
+```x2c
+~#include "x2c.x"
+~#include "meta.x"
+~
+meta static List sum_function(String name, int count) {
+  Array params = [];
+  List total = $!( 0.0 );
+  for (int i = 0; i < count; i++) {
+    List x = x2c_ident(%"x$i");
+    params.push($!Param{ double $x });
+    total = $!( $total + $x );
+  }
+  List declared = params.list_free();
+  List function = $!Unit{ double $name($declared...) { return $total; } };
+  return %($function);
+}
+macro Unit $define_sum(Literal $name, Literal $count) {
+  $sum_function($name, $count)...
+}
+$define_sum("sum3", 3);   // sum3(1.0, 2.0, 3.5) is 6.5
+~
+~int main(void) {
+~  printf("%g\n", sum3(1.0, 2.0, 3.5));
+~  return 0;
+~}
+```
+
+```text
+6.5
+```
+
+Both build their List where they are written, as a typed quotation does.
+Nothing binds them until the function that holds them is bound. The braces
+may not declare a name of their own. A parameter takes its name from a hole,
+so the body reads it through the same `x2c_ident(...)` local. There is no
+`$!Decl{ ... }`, because `$!{ ... }` and `$!Unit{ ... }` already build
+declarations.
 
 ## What the compiler answers
 
@@ -1538,6 +1659,8 @@ for the `meta` functions it calls at run time, and a declaration only for
 the values and prototypes its run-time code uses. The storage class says
 what it emits: `static` gives that unit its own copy, and a public name is
 the one copy the program links, exported by the reaching unit's header.
+Units that never include one another may each reach a public function, so
+each emits it as a weak definition and the linker keeps one.
 
 ## Lisp interoperability
 

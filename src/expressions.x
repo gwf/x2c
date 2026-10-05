@@ -1142,6 +1142,7 @@ static List Compiler._resolve_source(
 static List Compiler._resolve_meta_call(
   Compiler c, List input, Token origin) {
   if (c.meta_body || c.macro_holes) return input;
+  if (origin == c.meta_statement && c.peek(0) == <;>) return input;
   return c.evaluate_meta_expression(input, origin);
 }
 
@@ -3267,7 +3268,7 @@ static int _expr_is_raw_string_literal(List expr) {
     case %(expr ? ${$grouped(?inner)}):
       return _expr_is_raw_string_literal(inner);
     case %(expr ? ${$source_literal_content(%(?type ?))}):
-      return _type_is_char_pointer_like(type);
+      return Type.is_char_pointer_like(type);
     case %(expr ? ${$source_operator_content(
         %(? ? ?ontrue ?onfalse))}):
       return _expr_is_raw_string_literal(ontrue) &&
@@ -3276,17 +3277,11 @@ static int _expr_is_raw_string_literal(List expr) {
   return 0;
 }
 
-static inline int _type_is_char_pointer_like(List type) {
-  if (!type) return 0;
-  return type.match(%((!or (dim *) (!quote *)) char)) ||
-    type.match(%((!or (dim *) (!quote *)) const char));
-}
-
 static inline int Compiler._expr_is_string_like(Compiler c, List expr) {
   if (!expr) return 0;
-  List type = expr.cadr();
+  Type type = expr.cadr();
   return c.sym.is_string_type(type) ||
-         _type_is_char_pointer_like(type);
+         type.is_char_pointer_like();
 }
 
 /** Converts a C string literal to `String` where no C meaning applies: as a
@@ -3694,12 +3689,13 @@ static List Compiler._converter_owned_call(
   List callee = %(expr $cvrtrtype (ident $converter_binding));
   List argument = expr.cadr() == owner
     ? expr : %(expr $owner $expr);
-  /* The relaxed form exists so a converter may spell its parameter as a
-     typedef of the source type, which the exact comparison rejects. It
-     still takes exactly one argument: matching a longer parameter list
-     emitted a call with the arguments missing. */
+  /* A return typedef may name the same declared type as the target. The
+     relaxed form still takes one source argument and must return that type;
+     a lowercased method name alone does not establish the result type. */
   if (!cvrtrtype.equal(%((func ($owner)) @target)) &&
-      !cvrtrtype.match(%((func (($typename))) ?)))
+      (!cvrtrtype.match(%((func (($typename))) ?)) ||
+       !c.sym.normalize_declared_type(cvrtrtype.cdr()).equal(
+         c.sym.normalize_declared_type(target))))
     return NULL;
   Macro called = $called;
   List call = c.rebuild_expression(target, called(callee, %($argument)));

@@ -36,7 +36,7 @@ definite pattern binders. Returns their capture-token/binding pairs.
 The caller must pop the scope after parsing or binding the arm body;
 binder diagnostics use `start`.
 
-Source: `src/statements.x:601`
+Source: `src/statements.x:610`
 
 <a id="Compiler.begin_match_arm"></a>
 #### Compiler.begin_match_arm
@@ -47,7 +47,7 @@ Opens a `Sym` scope for one match arm and optionally defines its definite
 pattern binders. The caller must pop the scope after parsing or binding the
 arm body; binder diagnostics use `start`.
 
-Source: `src/statements.x:437`
+Source: `src/statements.x:446`
 
 <a id="Compiler.finish_return_statement"></a>
 #### Compiler.finish_return_statement
@@ -58,7 +58,7 @@ Builds a return node for an optional expression without consuming tokens.
 A present expression is resolved in the current `Sym` scope and includes
 the current `return_type` for later conversion.
 
-Source: `src/statements.x:260`
+Source: `src/statements.x:269`
 
 <a id="Compiler.parse_block_item"></a>
 #### Compiler.parse_block_item
@@ -69,7 +69,7 @@ Parses one block-position declaration, statement, or macro insertion.
 The caller owns the surrounding scope; a macro insertion may return a
 `(seq ...)` node containing several block items.
 
-Source: `src/statements.x:701`
+Source: `src/statements.x:710`
 
 <a id="Compiler.parse_block_items"></a>
 #### Compiler.parse_block_items
@@ -79,7 +79,7 @@ Source: `src/statements.x:701`
 Parses block items after an already-consumed opening brace through `}` in
 a new lexical scope. `anchor_items` records statement origins.
 
-Source: `src/statements.x:744`
+Source: `src/statements.x:753`
 
 <a id="Compiler.parse_callable_body"></a>
 #### Compiler.parse_callable_body
@@ -88,7 +88,7 @@ Source: `src/statements.x:744`
 
 Parses a callable's outer block in its active parameter scope.
 
-Source: `src/statements.x:751`
+Source: `src/statements.x:760`
 
 <a id="Compiler.parse_compound_statement"></a>
 #### Compiler.parse_compound_statement
@@ -98,7 +98,7 @@ Source: `src/statements.x:751`
 Parses a compound body after its opening brace and consumes the closing
 `}`, returning an origin-anchored `(block ...)` node.
 
-Source: `src/statements.x:739`
+Source: `src/statements.x:748`
 
 <a id="Compiler.parse_governed"></a>
 #### Compiler.parse_governed
@@ -114,7 +114,7 @@ statement macro that wraps its body in braces keeps the whole group
 inside them. A later statement in the same arm follows the governed one,
 as in C.
 
-Source: `src/statements.x:619`
+Source: `src/statements.x:628`
 
 <a id="Compiler.parse_match_row_argument"></a>
 #### Compiler.parse_match_row_argument
@@ -123,7 +123,7 @@ Source: `src/statements.x:619`
 
 Parses one MatchRow macro argument with the ordinary match-arm owner.
 
-Source: `src/statements.x:387`
+Source: `src/statements.x:396`
 
 <a id="Compiler.parse_statement"></a>
 #### Compiler.parse_statement
@@ -144,7 +144,7 @@ Source: `src/statements.x:28`
 Returns the binding of the current identifier when it names a live
 `with` expression, or NULL.
 
-Source: `src/statements.x:155`
+Source: `src/statements.x:164`
 
 ## Design notes
 

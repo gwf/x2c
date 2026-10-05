@@ -8,11 +8,11 @@
 
 #include "exception.h"
 
-static List _66, _65, _61, _60, _58, _56, _52, _51, _50, _49, _33, _32, _26, _25, _24, _13;
+static List _68, _67, _63, _62, _60, _58, _54, _53, _52, _51, _33, _32, _26, _25, _24, _13;
 
-static String _63, _54, _47, _45, _43, _41, _40, _39, _38, _36, _35, _34, _30, _28, _27, _22, _20, _18, _17, _16, _15, _14, _11, _10, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _65, _56, _49, _47, _45, _43, _42, _41, _40, _39, _38, _36, _35, _34, _30, _28, _27, _22, _20, _18, _17, _16, _15, _14, _11, _10, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
-static Var _64, _62, _59, _57, _55, _53, _48, _46, _44, _42, _37, _31, _29, _23, _21, _19, _12, _9;
+static Var _66, _64, _61, _59, _57, _55, _50, _48, _46, _44, _37, _31, _29, _23, _21, _19, _12, _9;
 
 #include <limits.h>
 #include <stdio.h>
@@ -64,6 +64,8 @@ static Token _first_directive(Compiler c);
 
 static Compiler _run_cpp(Frontend frontend, ParsedUnit * unit);
 
+static String _take_line_markers(Compiler cpp, String text);
+
 static void _tokenize_cpp(Compiler cpp, String text);
 
 static void _share_session(Compiler cpp, Compiler c);
@@ -103,7 +105,7 @@ static Func _x2c_func_handle_0;
 
 Func x2c_func_shared(FuncAdapter, List);
 
-_x2c_initializer_choice_1A2A7247_0((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _66)))
+_x2c_initializer_choice_1A2A7247_0((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _68)))
 Var String_var(String);
 
 List cons(Var, List);
@@ -155,34 +157,36 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _36 = String_new("stage: preprocess");
   _37 = String_var(_36);
   _38 = String_new("status: ");
-  _39 = String_new("/lib/meta.x");
-  _40 = String_new("x2c_");
-  _41 = String_new("x2c_expr_ident");
-  _42 = String_var(_41);
-  _43 = String_new("x2c_expr_index");
+  _39 = String_new("#");
+  _40 = String_new("<");
+  _41 = String_new("/lib/meta.x");
+  _42 = String_new("x2c_");
+  _43 = String_new("x2c_expr_ident");
   _44 = String_var(_43);
-  _45 = String_new("x2c_expr_call");
+  _45 = String_new("x2c_expr_index");
   _46 = String_var(_45);
-  _47 = String_new("x2c_expr_cast");
+  _47 = String_new("x2c_expr_call");
   _48 = String_var(_47);
-  _49 = cons(_48, NULL);
-  _50 = cons(_46, _49);
-  _51 = cons(_44, _50);
-  _52 = cons(_42, _51);
-  _53 = Symbol_var(437126);
-  _54 = String_new("String");
-  _55 = String_var(_54);
-  _56 = cons(_55, NULL);
-  _57 = List_var(_56);
+  _49 = String_new("x2c_expr_cast");
+  _50 = String_var(_49);
+  _51 = cons(_50, NULL);
+  _52 = cons(_48, _51);
+  _53 = cons(_46, _52);
+  _54 = cons(_44, _53);
+  _55 = Symbol_var(437126);
+  _56 = String_new("String");
+  _57 = String_var(_56);
   _58 = cons(_57, NULL);
   _59 = List_var(_58);
   _60 = cons(_59, NULL);
-  _61 = cons(_53, _60);
-  _62 = List_var(_61);
-  _63 = String_new("Var");
-  _64 = String_var(_63);
-  _65 = cons(_64, NULL);
-  _66 = cons(_62, _65);
+  _61 = List_var(_60);
+  _62 = cons(_61, NULL);
+  _63 = cons(_55, _62);
+  _64 = List_var(_63);
+  _65 = String_new("Var");
+  _66 = String_var(_65);
+  _67 = cons(_66, NULL);
+  _68 = cons(_64, _67);
   _x2c_static_initialize_0();
 }
 
@@ -764,7 +768,7 @@ static Compiler _run_cpp(Frontend frontend, ParsedUnit * unit){
   String text = NULL, errors = NULL, dependency_text = NULL;
   String runtime = c -> prelude ? String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_34), NULL))) : NULL;
   int status = Toolchain_preprocess(frontend -> toolchain, c -> filename, c -> include_dirs, runtime, &(text), &(errors), &(dependency_text));
-  (* unit).preprocessor_output = text;
+  (* unit).preprocessor_output = String_truth(text) ? _take_line_markers(cpp, text) : NULL;
   (* unit).preprocessor_errors = errors;
   if(String_truth(errors) && frontend -> preprocessor_errors) frontend -> preprocessor_errors(errors);
   if(status) Compiler_report_error(c, 306819428, _35, _first_directive(c), cons(_37, cons(String_var(String_join(NULL, cons(String_var(_38), cons(String_var(int_str(status)), NULL)))), NULL)));
@@ -780,6 +784,46 @@ static Compiler _run_cpp(Frontend frontend, ParsedUnit * unit){
 
   }
   return cpp;
+}
+
+List String_split(String, String);
+
+String preproc_marker_file(String, int *);
+
+Var Array_push(Array, Var);
+
+Var int_var(int);
+
+String String_join(String, List);
+
+List Array_list_free(Array);
+
+static String _take_line_markers(Compiler cpp, String text){
+  Array kept = Array_new(), markers = Array_new();
+  int position = 0, text_line = 1;
+  {
+    String line;
+    List _x2c_macro_object_2 = String_split(text, _14);
+    List _x2c_macro_cursor_2 = _x2c_macro_object_2;
+    Var _x2c_macro_cursor_output_2;
+    while(List_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
+      line = Var_string(_x2c_macro_cursor_output_2);
+      {
+        int number = 0;
+        String file = String_startswith(line, _39) ? preproc_marker_file(line, &(number)) : NULL;
+        if(! String_truth(file)){
+          Array_push(kept, String_var(line));
+          position += String_len(line) + 1;
+          text_line ++;
+        }
+        else if(! String_startswith(file, _40)) Array_push(markers, List_var(cons(int_var(position), cons(int_var(text_line), cons(String_var(file), cons(int_var(number), NULL))))));
+      }
+
+    }
+
+  }
+  cpp -> line_markers = markers;
+  return String_join(_14, Array_list_free(kept));
 }
 
 static void _tokenize_cpp(Compiler cpp, String text){
@@ -825,8 +869,6 @@ Context Context_open_named(const char *);
 
 Iter Map_keys(Map, Iter);
 
-Var int_var(int);
-
 int Iter_try_next(Iter, Var *);
 
 int Lisp_try_get(Lisp, String, Var *);
@@ -840,7 +882,7 @@ static int _preload_meta_surface(Frontend frontend, Lisp shared){
   struct Frontend session = * frontend;
   session.request = & request;
   ParsedUnit unit;
-  String path = String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_39), NULL)));
+  String path = String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_41), NULL)));
   Context context = Context_open_named("shared translation unit");
   int started = _start(& session, path, &(unit), context, NULL);
   Compiler c = unit.compiler;
@@ -859,40 +901,38 @@ static int _preload_meta_surface(Frontend frontend, Lisp shared){
     x2c_cleanup_push(& _x2c_defer_record_2);
     {
       _declare_builders(c, shared);
-      if(! started || ! ParsedUnit_collect(&(unit), & session) || ! ParsedUnit_parse(&(unit))){
-        {
-          List diagnostic;
-          List _x2c_macro_object_2 = Compiler_diagnostics(c);
-          List _x2c_macro_cursor_2 = _x2c_macro_object_2;
-          Var _x2c_macro_cursor_output_2;
-          while(List_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
-            diagnostic = Var_list(_x2c_macro_cursor_output_2);
-            Compiler_print_diagnostic(c, diagnostic);
-          }
-
+      if(started) Compiler_own_diagnostics(c);
+      else{
+        Var entry;
+        List _x2c_macro_object_3 = Compiler_diagnostics(c);
+        List _x2c_macro_cursor_3 = _x2c_macro_object_3;
+        Var _x2c_macro_cursor_output_3;
+        while(List_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_3))){
+          entry = _x2c_macro_cursor_output_3;
+          Compiler_print_diagnostic(c, Var_list(entry));
         }
-        {
-          int _x2c_return_value_4 = 0;
-          {
-            x2c_cleanup_leave(& _x2c_defer_record_2);
-            return _x2c_return_value_4;
-          }
 
+      }
+      if(! started || ! ParsedUnit_collect(&(unit), & session) || ! ParsedUnit_parse(&(unit))){
+        int _x2c_return_value_4 = 0;
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_2);
+          return _x2c_return_value_4;
         }
 
       }
       {
         String name;
-        Iter _x2c_macro_iterator_3 = Map_keys(c -> meta_hashes, &(struct Iter){
+        Iter _x2c_macro_iterator_4 = Map_keys(c -> meta_hashes, &(struct Iter){
           int_var(0)
         }
         );
-        Var _x2c_macro_item_3;
-        while(Iter_try_next(_x2c_macro_iterator_3, &(_x2c_macro_item_3))){
-          name = Var_string(_x2c_macro_item_3);
+        Var _x2c_macro_item_4;
+        while(Iter_try_next(_x2c_macro_iterator_4, &(_x2c_macro_item_4))){
+          name = Var_string(_x2c_macro_item_4);
           {
             Var function;
-            if(String_startswith(name, _40) && Lisp_try_get(shared, name, &(function))) Compiler_bind_meta_operation(shared, name, function);
+            if(String_startswith(name, _42) && Lisp_try_get(shared, name, &(function))) Compiler_bind_meta_operation(shared, name, function);
           }
 
         }
@@ -916,14 +956,14 @@ static int _preload_meta_surface(Frontend frontend, Lisp shared){
 void Lisp_set_global(Lisp, String, Var);
 
 static void _declare_builders(Compiler c, Lisp shared){
-  List names = _52;
+  List names = _54;
   {
     String name;
-    List _x2c_macro_object_4 = names;
-    List _x2c_macro_cursor_4 = _x2c_macro_object_4;
-    Var _x2c_macro_cursor_output_3;
-    while(List_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_3))){
-      name = Var_string(_x2c_macro_cursor_output_3);
+    List _x2c_macro_object_5 = names;
+    List _x2c_macro_cursor_5 = _x2c_macro_object_5;
+    Var _x2c_macro_cursor_output_4;
+    while(List_try_next(_x2c_macro_object_5, &(_x2c_macro_cursor_5), &(_x2c_macro_cursor_output_4))){
+      name = Var_string(_x2c_macro_cursor_output_4);
       {
         Lisp_set_global(shared, name, List_var(NULL));
         Map_setindex(c -> meta_comptime, String_var(name), int_var(1));

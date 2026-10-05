@@ -30,8 +30,6 @@ List Type_declaration_ast(Type type, List binding);
 
 List Type_parameter_ast(Type type, List binding);
 
-List ast_prototype_declarator(List declarator);
-
 int Symbol_is_storage_class(Symbol sym);
 
 int Symbol_is_inline(Symbol sym);
@@ -96,6 +94,8 @@ Type Type_declared(Type type);
 
 int Type_discards_qualifiers(Type source, Type target);
 
+int Type_is_char_pointer_like(Type type);
+
 int Type_is_builtin(Type type);
 
 int Type_is_typedef_name(Type type);
@@ -123,12 +123,6 @@ Type Type_numeric_literal(String text, int floating);
 Var Type_numeric_literal_value(Type type, String text);
 
 int Type_integer_literal_magnitude(Type type, String text, unsigned long long * value);
-
-String ast_addressed_identifier(Var value);
-
-String ast_direct_identifier(Var value);
-
-String ast_indirect_identifier(Var value);
 
 Symbol Type_var_tag(Type type);
 

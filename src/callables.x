@@ -189,8 +189,7 @@ static void CaptureBuild._field(CaptureBuild &b, Array fields, List capture) {
                         ? source_type.cdr().type().reference()
                         : %("Var");
       List field = c.sym.introduce(c.fresh_name("lambda_capture"));
-      List (field_base, field_mods) = storage_type.declaration_parts();
-      fields.push(%(declare $field_base (bindings (bind $field $field_mods))));
+      fields.push(c.rebuild_statement($!{ $storage_type $field; }).cadr());
       b.field_types.push(storage_type);
       b.slots[binding] = %($field $storage_type);
 
@@ -709,7 +708,7 @@ static List Compiler._direct_func_value(
         %("Func"), bridge, parameters.cdr(),
         c._func_return_body(handle)));
   }
-  Type getter_type = %((func ((void))) "Func");
+  Type getter_type = $!Type{ Func (void) };
   return c._func_bridge_call(bridge, parameters, getter_type, NULL);
 }
 
@@ -864,16 +863,16 @@ static List Compiler._build_indirect_func_adapter(
    `value_type` record. */
 static List Compiler._context_local(
   Compiler c, Type value_type, List local, List fn) {
-  Type pointer = %(* const @value_type);
+  Type pointer = $!Type{ const $value_type * };
   Type helper_type = NULL;
   List helper = c._adapter_helper("Func_context", helper_type);
   List call = c._func_call(
-    %(* const void), _func_bound(helper_type, helper),
+    $!Type{ const void * }, _func_bound(helper_type, helper),
     %(${_func_bound(%("Func"), fn)}));
   List cast = %(expr $pointer (cast $pointer $call));
   Macro shape = $func_local;
-  return c.rebuild_statement(
-    shape(%(const @value_type), %(op = (bind $local (*)) $cast))).cadr();
+  return c.rebuild_statement(shape(
+    $!Type{ const $value_type }, %(op = (bind $local (*)) $cast))).cadr();
 }
 
 static void Compiler._func_pointer_context(
@@ -1126,7 +1125,7 @@ static List FuncReaders._reference(
   Compiler c = r.c;
   Type target = parameter_type.cdr(), pointer = target.reference();
   List picked = r._call(
-    %(* void), r.reference, index,
+    $!Type{ void * }, r.reference, index,
     %(${c.cache_literal_list(target)} ${c._type_literal(target)}));
   storage_type = pointer;
   return c.convert_expression(picked, pointer);
@@ -1142,7 +1141,7 @@ static List FuncReaders._pointer(
   List pointer_helper = c._adapter_helper(
     "x2c_func_pointer_argument", pointer_type);
   List picked = r._call(
-    %(* void), _func_bound(pointer_type, pointer_helper), index, NULL);
+    $!Type{ void * }, _func_bound(pointer_type, pointer_helper), index, NULL);
   storage_type = parameter_type;
   if (resolved.is_pointer())
     return c.convert_expression(picked, parameter_type);

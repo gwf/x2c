@@ -81,6 +81,22 @@ List x2c_type_members(List type) {
   return rows.reverse();
 }
 
+/* --- src/fields.xmacro --------------------------------------------------- */
+
+static List _field_copies(List to, List from, List fields) {
+  if (!fields) return NULL;
+  Var field = fields.car();
+  return %(${$!{ $to.$field = $from.$field; }}
+           @{_field_copies(to, from, fields.cdr())});
+}
+
+static List _field_sets(List to, List value, List fields) {
+  if (!fields) return NULL;
+  Var field = fields.car();
+  return %(${$!{ $to.$field = $value; }}
+           @{_field_sets(to, value, fields.cdr())});
+}
+
 /* --- src/grammar.xmacro -------------------------------------------------- */
 
 static List source_return_type(List node) {
@@ -168,6 +184,41 @@ static List retain_catch_handle(List rebuilt, List handle) {
   return rebuilt.search_replace(%(!quote $marker), handle);
 }
 
+/* --- lib/list-selectors.xmacro ------------------------------------------- */
+
+static List _selector_chain(String spelling, List value) {
+  for (int i = spelling.len() - 2; i >= 1; i--)
+    value = spelling[i] == 'a' ? $!( car($value) ) : $!( cdr($value) );
+  return value;
+}
+
+static List _selector_double(List steps) {
+  if (!steps) return NULL;
+  String rest = steps.car(), a = %"a$rest", d = %"d$rest";
+  return %($a $d @{_selector_double(steps.cdr())});
+}
+
+static List _selector_middles(void) {
+  List level = %(""), middles = NULL;
+  for (int length = 1; length <= 4; length++) {
+    level = _selector_double(level);
+    if (length > 1) middles = middles.append(level);
+  }
+  return middles;
+}
+
+static List _selector_units(List middles, Macro car, Macro cdr) {
+  if (!middles) return NULL;
+  String middle = middles.car();
+  List rest = _selector_units(middles.cdr(), car, cdr);
+  if (middle in %("aa" "ad" "dd" "add")) return rest;
+  String name = %"c${middle}r";
+  return %(${middle.startswith("a") ? car(name) : cdr(name)} @rest);
+}
+
+static List _selector_definitions(Macro car, Macro cdr) =>
+  _selector_units(_selector_middles(), car, cdr);
+
 /* --- lib/native-scalar-types.xmacro -------------------------------------- */
 
 static Map native_scalar_types(void) => {
@@ -188,6 +239,16 @@ static Map native_scalar_types(void) => {
   %(long double):
     %(ldouble "Var_long_double" "x2c_var_update_long_double"),
 };
+
+static List _scalar_access_units(Macro access) {
+  Array units = [];
+  List rows = native_scalar_types().list().sort();
+  foreach (List row, rows) {
+    Type type = row.car();
+    units.push(access(type));
+  }
+  return units.list_free();
+}
 
 /* --- src/operator-ledger.xmacro ------------------------------------------ */
 
@@ -529,9 +590,9 @@ static int _tag_constant_row(List row) {
 }
 
 static List _tag_list(List items) {
-  List built = %(expr ("List") (nil));
+  List built = $!List{ 0 };
   for (int i = items.len() - 1; i >= 0; i--)
-    built = %(expr ("List") (cons ${items[i]} $built));
+    built = $!(cons(${items[i]}, $built));
   return built;
 }
 
@@ -615,11 +676,16 @@ static Map _tag_types(List native) {
 
 /* --- lib/var-unbox.xmacro ------------------------------------------------ */
 
-static int var_tag_top(List tag) =>
-  (int) Var_tag_top(List_last((List) List_last(tag)));
+static Symbol _literal_tag(List tag) {
+  match (tag)
+    case %(expr ? (literal ? ? ?key)): return key;
+  return 0;
+}
+
+static int var_tag_top(List tag) => (int) Var_tag_top(_literal_tag(tag));
 
 static int var_tag_bottom(List tag) =>
-  (int) Var_tag_bottom(List_last((List) List_last(tag)));
+  (int) Var_tag_bottom(_literal_tag(tag));
 
 /* --- lib/varops.xmacro --------------------------------------------------- */
 
@@ -704,6 +770,8 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_meta_fail", _meta_fail);
   $linked.row(rows, "_meta_member", _meta_member);
   $linked.row(rows, "x2c_type_members", x2c_type_members);
+  $linked.row(rows, "_field_copies", _field_copies);
+  $linked.row(rows, "_field_sets", _field_sets);
   $linked.row(rows, "source_return_type", source_return_type);
   $linked.row(rows, "source_conditional_statement", source_conditional_statement);
   $linked.row(rows, "source_any_lambda", source_any_lambda);
@@ -728,7 +796,13 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "source_expression", source_expression);
   $linked.row(rows, "catch_handle", catch_handle);
   $linked.row(rows, "retain_catch_handle", retain_catch_handle);
+  $linked.row(rows, "_selector_chain", _selector_chain);
+  $linked.row(rows, "_selector_double", _selector_double);
+  $linked.row(rows, "_selector_middles", _selector_middles);
+  $linked.row(rows, "_selector_units", _selector_units);
+  $linked.row(rows, "_selector_definitions", _selector_definitions);
   $linked.row(rows, "native_scalar_types", native_scalar_types);
+  $linked.row(rows, "_scalar_access_units", _scalar_access_units);
   $linked.row(rows, "_operator_rows", _operator_rows);
   $linked.row(rows, "_operator_cases", _operator_cases);
   $linked.row(rows, "_dedent_expand", _dedent_expand);
@@ -773,6 +847,7 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_tag_decode_groups", _tag_decode_groups);
   $linked.row(rows, "_tag_id_checks", _tag_id_checks);
   $linked.row(rows, "_tag_types", _tag_types);
+  $linked.row(rows, "_literal_tag", _literal_tag);
   $linked.row(rows, "var_tag_top", var_tag_top);
   $linked.row(rows, "var_tag_bottom", var_tag_bottom);
   $linked.row(rows, "_update_rows", _update_rows);

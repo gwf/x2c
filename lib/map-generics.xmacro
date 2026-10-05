@@ -356,7 +356,6 @@ macro Unit $map.typed.operations(Type $map, Type $key, Type $value, Name $update
   Name $bad_op,
   Name $capacity_valid,
   Name $value_at,
-  Name $unbox,
   Literal $zero,
   Literal $one,
   Literal $postfix,
@@ -688,10 +687,7 @@ macro Unit $map.core.observe(
   }
 }
 
-macro Unit $map.typed.observation(
-  Type $map, Type $key, Type $value,
-  Name $box_key, Name $box_value
-) {
+macro Unit $map.typed.observation(Type $map) {
   int $map.compare($map, $map);
   String $map.str($map);
   String $map.repr($map);
@@ -741,38 +737,36 @@ macro Unit $map.typed.iterate(Type $map, Type $key, Type $value,
   Iter $map.iter($map, Iter);
   Iter $map.keys($map, Iter);
   Iter $map.enumerate($map, Iter);
-  static int next(Iter iter, Var *out) {
+  /* Advances `iter` to its next key and value, or returns 0 at the end. */
+  static int step(Iter iter, $key &key, $value &val) {
     $map map = iter.obj.$unbox();
-    if ((void *) map == 0 || !out) return 0;
+    if ((void *) map == 0) return 0;
     unsigned cursor = iter.state;
-    $key key;
-    $value val;
     if (!map.try_next(cursor, key, val)) return 0;
     iter.state = cursor;
+    return 1;
+  }
+
+  static int next(Iter iter, Var *out) {
+    $key key;
+    $value val;
+    if (!out || !step(iter, key, val)) return 0;
     *out = $box_value(val);
     return 1;
   }
 
   static int keys_next(Iter iter, Var *out) {
-    $map map = iter.obj.$unbox();
-    if ((void *) map == 0 || !out) return 0;
-    unsigned cursor = iter.state;
     $key key;
     $value val;
-    if (!map.try_next(cursor, key, val)) return 0;
-    iter.state = cursor;
+    if (!out || !step(iter, key, val)) return 0;
     *out = $box_key(key);
     return 1;
   }
 
   static int enumerate_next(Iter iter, Var *out) {
-    $map map = iter.obj.$unbox();
-    if ((void *) map == 0 || !out) return 0;
-    unsigned cursor = iter.state;
     $key key;
     $value val;
-    if (!map.try_next(cursor, key, val)) return 0;
-    iter.state = cursor;
+    if (!out || !step(iter, key, val)) return 0;
     Var boxed_key = $box_key(key), boxed_value = $box_value(val);
     *out = List_var(cons(boxed_key, cons(boxed_value, NULL)));
     return 1;
@@ -950,12 +944,12 @@ macro Unit $map.typed.family(Type $family, Type $key, Type $value,
   Literal $postfix, Literal $owner) {
   $map.typed.operations(
     $family, $key, $value, $update, $bad_arg, $bad_op, $capacity_valid,
-    $value_at, $unbox, $zero, $one, $postfix, $owner, 0);
+    $value_at, $zero, $one, $postfix, $owner, 0);
   $map.typed.convert($family, $unbox);
 }
 
 macro Unit $map.typed.observe(Type $family, Type $key, Type $value,
   Name $box_key, Name $box_value) {
-  $map.typed.observation($family, $key, $value, $box_key, $box_value);
+  $map.typed.observation($family);
   $map.typed.box($family, $key, $value, $box_key, $box_value);
 }

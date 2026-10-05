@@ -2331,9 +2331,10 @@ static List Compiler._guard_rendering(
       c.set_fact(%(type $path), %("RenderPath"));
       Macro addressed = $addressed;
       List address = c.rebuild_expression(
-        %(* "RenderPath"),
+        $!Type{ RenderPath * },
         addressed($!RenderPath{ $path }));
-      List pointer = c._helper_call(%(* void), "Var_pointer", %($value));
+      List pointer =
+        c._helper_call($!Type{ void * }, "Var_pointer", %($value));
       List enter = c._helper_call(
         %(int), "RenderPath_enter", %($address $pointer));
       List leave = c._helper_call(%(void), "RenderPath_leave", %($address));

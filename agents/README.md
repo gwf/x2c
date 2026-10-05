@@ -68,6 +68,9 @@ Skills have one canonical copy in `agents/skills/`, exposed through
 
 ## Open references when relevant
 
+- [Code standard](x2c-code-standard.md) - the consolidated definition of
+  good x2c source at every level, with rule IDs, detection signals, and
+  repair procedures; a draft under review.
 - [Quick start](quick-start.md) - setup, commands, and repository orientation.
 - [Philosophy](x2c-philosophy.md) - design principles, implementation facts,
   and the evidence supporting them; read the section relevant to the task.

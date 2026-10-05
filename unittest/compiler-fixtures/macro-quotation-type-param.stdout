@@ -1,0 +1,12 @@
+(* unsigned long)
+(* const "Point")
+(* (func ((* "Point"))) int)
+("Point")
+(* * "Point")
+((func ((int))) int)
+("String")
+(param (double) (bind ("x") ()))
+(param ("Point") (bind ("x") (*)))
+(param (double) (bind ("grad") (*)))
+(param (int) (bind ("x") (* (fnmod (params (param (int) (bind () ())))))))
+6.5

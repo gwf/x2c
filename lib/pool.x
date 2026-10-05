@@ -19,7 +19,16 @@ $(import "private-keywords.xmacro")
 #include "common.x"
 #include "scope.x"
 #include "var.x"
-#include "map.x"
+
+/** Maps each canonical value of one `Pool` level to itself.
+    A bucket stores the value once, beside its 32-bit hash, so the table costs
+    12 bytes per bucket where a `Map` costs 20. It belongs to the level's
+    `Scope`.
+*/
+typedef struct PoolTable {
+  Scope scope, Bytes hashes, entries;
+  unsigned used, capacity, mask;
+} *PoolTable;
 
 /** Holds one level of canonical values and their backing storage.
     Pools are released from child to parent. Their handles and unpromoted
@@ -27,7 +36,7 @@ $(import "private-keywords.xmacro")
     pointers under the parent.
 */
 typedef struct Pool {
-  Scope scope, Map table, struct Pool *up, pthread_mutex_t mutex;
+  Scope scope, PoolTable table, struct Pool *up, pthread_mutex_t mutex;
   unsigned child_capacity;  // last released direct child's table capacity
   size_t interned, promoted, void *blocks, *current[10], *promotions;
 } *Pool;
@@ -49,8 +58,43 @@ typedef struct PoolStats {
 #include <stdlib.h>
 #include <string.h>
 
+#include "block.x"
 #include "exception.x"
 #include "mutex.x"
+$(import "map-generics.xmacro")
+
+/* table
+
+   `PoolTable` is the `Map` family over one-`Var` records: every entry maps a
+   value to itself, so `key` and `val` name the same `Var`. */
+
+struct PoolRecord { union { Var key, val; }; };
+
+$map.scaffold(
+  PoolTable, struct PoolRecord, Var, Var,
+  _record_key, _record_value, _reinsert_error, _insert_error,
+  "PoolTable.reinsert", "PoolTable.insert");
+
+$map.var.family(
+  _table_hash, _table_key_equal, _table_value_equal, _table_value_valid);
+
+$map.core.family(
+  PoolTable, struct PoolTable, Var, Var, unsigned, struct PoolRecord,
+  _table_hash, _table_key_equal, _table_value_equal, _table_value_valid,
+  _record_key, _record_value, _reinsert_error, _insert_error);
+
+/* The stored value equal to `key`, which hashes to `key_hash`, or `void`. */
+static Var PoolTable._get_hashed(
+  PoolTable table, Var key, unsigned key_hash) {
+  long index = table._core_find_hashed(&key, key_hash);
+  return index < 0 ? void : *_record_key(table, (unsigned) index);
+}
+
+/* The stored value equal to `object`, which is installed when absent. */
+static Var PoolTable._setdefault(
+  PoolTable table, Var object, int &inserted) {
+  return *table._core_get_or_insert(&object, &object, &inserted);
+}
 
 /* storage
 
@@ -153,23 +197,23 @@ Var Pool.lookup(Pool inner, Var key) {
      measured 3% of a translation's instructions. */
   if (pool_multithreaded) return inner._lookup_locked(key, key_hash);
   for (Pool pool = inner; pool; pool = pool.up) {
-    Var found = pool.table.get_hashed(key, key_hash);
+    Var found = pool.table._get_hashed(key, key_hash);
     if (found is not void) return found;
   }
   return void;
 }
 
-/* `Map.get_hashed` raises for any cause from custom equality, so the branch
-   mutex is released through one hoisted `defer`. A per-iteration `defer`
-   measured 4% of a translation against 3% for this form. `locked` is the
-   level whose mutex this call still holds. */
+/* `PoolTable._get_hashed` raises for any cause from custom equality, so the
+   branch mutex is released through one hoisted `defer`. A per-iteration
+   `defer` measured 4% of a translation against 3% for this form. `locked` is
+   the level whose mutex this call still holds. */
 static Var Pool._lookup_locked(Pool inner, Var key, unsigned key_hash) {
   Pool locked = NULL;
   defer locked._unlock();
   for (Pool pool = inner; pool; pool = pool.up) {
     pool._lock();
     locked = pool;
-    Var found = pool.table.get_hashed(key, key_hash);
+    Var found = pool.table._get_hashed(key, key_hash);
     pool._unlock();
     locked = NULL;
     if (found is not void) return found;
@@ -183,12 +227,12 @@ static Var Pool._lookup_locked(Pool inner, Var key, unsigned key_hash) {
     leaves the candidate owned by the caller so its existing cleanup boundary
     runs.
 
-    Ancestors are checked before the innermost fused `Map` operation. `Pool`'s
+    Ancestors are checked before the innermost fused table operation. `Pool`'s
     single-canonical-pointer invariant makes that order equivalent to outward
     shadowing while allowing the innermost table to be probed exactly once.
     A caller that has already searched the chain uses `Pool.intern_new`.
 
-    Raises: `<bad-arg>` when `inner` or `alloc` is NULL. `Map` lookup and
+    Raises: `<bad-arg>` when `inner` or `alloc` is NULL. Table lookup and
     insertion causes propagate.
 */
 Var Pool.intern(Pool inner, Var object, void *alloc) {
@@ -213,9 +257,9 @@ Var Pool.intern(Pool inner, Var object, void *alloc) {
 /* Probes and installs in `inner` alone, with the pool locked. Sets `discard`
    when a concurrent equal entry already holds the level. */
 static Var Pool._intern_locked(Pool inner, Var object, int &discard) {
-  unsigned before = inner.table.len();
-  Var stored = inner.table.setdefault(object, object);
-  if (inner.table.len() != before) inner.interned++;
+  int inserted;
+  Var stored = inner.table._setdefault(object, inserted);
+  if (inserted) inner.interned++;
   else discard = 1;
   return stored;
 }
@@ -223,11 +267,11 @@ static Var Pool._intern_locked(Pool inner, Var object, int &discard) {
 /** Returns the canonical value equal to `object`, installing it in `inner`.
     This is `Pool.intern` for a caller that has already searched the whole
     chain from `inner` outward and found nothing, so only the innermost level
-    is probed. The fused `Map` operation still decides the identity, which
+    is probed. The fused table operation still decides the identity, which
     keeps one canonical pointer per equal value in `inner` even when another
     worker interns the same value first.
 
-    Raises: `<bad-arg>` when `inner` or `alloc` is NULL. `Map` insertion
+    Raises: `<bad-arg>` when `inner` or `alloc` is NULL. Table insertion
     causes propagate and leave the object unregistered.
 */
 Var Pool.intern_new(Pool inner, Var object, void *alloc) {
@@ -249,7 +293,7 @@ Var Pool.intern_new(Pool inner, Var object, void *alloc) {
     The caller must have ruled out an equal identity in this pool chain; this
     primitive neither searches ancestors nor takes ownership of separate
     object storage.
-    Raises: `<bad-arg>` when `inner` is NULL. Map insertion causes propagate
+    Raises: `<bad-arg>` when `inner` is NULL. Table insertion causes propagate
     and leave the object unregistered.
 */
 void Pool.insert(Pool inner, Var object) {
@@ -259,9 +303,9 @@ void Pool.insert(Pool inner, Var object) {
   inner._insert_locked(object);
 }
 
-/* Map insertion causes propagate and leave the object unregistered. */
+/* Table insertion causes propagate and leave the object unregistered. */
 static void Pool._insert_locked(Pool inner, Var object) {
-  inner.table.setindex(object, object);
+  inner.table._core_set(&object, &object);
   inner.interned++;
 }
 
@@ -276,7 +320,7 @@ int Pool.owns(Pool pool, Var key) {
 }
 
 static int Pool._owns_locked(Pool pool, Var key) {
-  Var found = pool.table[key];
+  Var found = pool.table._get_hashed(key, key.hash());
   return found is not void && found === key;
 }
 
@@ -632,9 +676,9 @@ static int Pool._promote_level(
   Pool up = inner.up;
   up._lock();
   defer up._unlock();
-  unsigned before = up.table.len();
-  up.table.setdefault(object, object);
-  if (up.table.len() != before) up.interned++;
+  int inserted;
+  up.table._setdefault(object, inserted);
+  if (inserted) up.interned++;
   if (block && block.owner == inner) block._mark_slot(slot);
   else if (promotion) inner._push_promotion(promotion);
   else Scope.move(alloc, &up.scope);
@@ -777,7 +821,7 @@ PoolStats Pool.stats(Pool inner) {
 // lifecycle
 
 /** Returns a new named child of `inner` without making it thread-active.
-    The child owns its control `Scope`, `Map`, and mutex and must be released
+    The child owns its control `Scope`, table, and mutex and must be released
     before `inner`. Use `Pool.open_named` instead to open a bracket that the
     canonical `String` and `List` operations allocate into.
     Raises: `<alloc-fail>` while building the child. A transfer destroys
@@ -798,7 +842,8 @@ Pool Pool.retain_named(Pool inner, const char *name) {
   Mutex.recursive_initialize(
     &pool.mutex, "Pool: could not initialize branch mutex");
   mutex_ready = 1;
-  $scope(&pool.scope) pool.table = Map.new_capacity(capacity);
+  $scope(&pool.scope)
+    pool.table = PoolTable._core_new_capacity(NULL, capacity);
   finished = 1;
   return pool;
 }

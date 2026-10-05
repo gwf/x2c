@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/import-package-own-exports.x:8:13: parse: unknown or forward-referenced macro 'own.value'
+  int early = $own.value();
+              ^
+

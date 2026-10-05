@@ -11,8 +11,6 @@ static const double mg_pi = 3.25;
 static int mg_counter;
 
 _x2c_initializer_choice_F164D642_0((mg_counter = 10))
-typedef int meta;
-
 meta ordinary_meta = 7;
 
 static int _init_guard_ = 0;

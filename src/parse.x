@@ -142,10 +142,10 @@ static List Compiler._top_level_lisp(Compiler c, int skip_body) {
   return NULL;
 }
 
-/* `export` marks a file-scope import, unless a declaration names a type
-   `export`. */
+/* `export` marks the compile-time form that follows it. Before anything
+   else it is an ordinary identifier, such as a C macro's name. */
 static int Compiler._at_export(Compiler c) =>
-  c.at_word("export") && !c.sym.get(%("export")).type().is_typedef();
+  c.at_word("export") && c.peek(1) == <"$(">;
 
 /* `export $(import "...")` gives the import to every file that includes
    this one, so collection records it in the file's interface. The full
@@ -803,14 +803,15 @@ static int Compiler._group_comma(Compiler c) {
 
 // destructuring declarations
 
-// Distinguish '(ident, ...)' from an ordinary parenthesized declarator.
+/* Distinguish '(ident, ...)' from an ordinary parenthesized declarator and
+   from the parameters of a type name such as `Var (Var, Var)`. */
 static int Compiler._destructure_starts(Compiler c) {
   Token token = c.token;
   if (token.type != <(>) return 0;
   token = Token.skip_trivia(token + 1);
   if (token.type != <ident>) return 0;
   token = Token.skip_trivia(token + 1);
-  return token.type == <,>;
+  return token.type == <,> && !c._parameters_follow();
 }
 
 static List Compiler._destructure_declaration(
@@ -1705,6 +1706,7 @@ static List Compiler._direct_declarator(
   Token &source_after) {
   // A member keeps its spelling in a template: C scopes it to its aggregate.
   int member = context.is_aggregate();
+  if (c.peek(0) == <(> && c._parameters_follow()) return %(bind () ());
   if (c.peek(0) == <(>)
     return c._parenthesized(
       member ? context : NULL, method_identity, source_first,
@@ -1720,6 +1722,20 @@ static List Compiler._direct_declarator(
   source_first = first;
   source_after = c.token;
   return %(bind $ident ());
+}
+
+/* Whether the `(` at the cursor opens the parameters of a declarator with
+   no name, as in the type name `int (int)`: a `)`, or a type that is no
+   name to declare, follows it. As in C, a typedef name there is a type. */
+static int Compiler._parameters_follow(Compiler c) {
+  Token head = c.token;
+  c.next();
+  Symbol next = c.peek(0);
+  Type lookup = c.sym.get(%(${c.token.text}));
+  int named = next == <ident> && !lookup.is_typedef();
+  int parameters = next == <)> || (!named && c.test_declaration());
+  c.token = head;
+  return parameters;
 }
 
 // Carries the source span across a nested declarator.
@@ -2642,7 +2658,7 @@ static List Compiler._bind_form(
     case %((!set ?tag (!or goto label)) ?name):
       if (statement) return %($tag $name);
     case expression_statement(?expression):
-      if (statement) return %(stmnt ${c._resolve(expression)});
+      if (statement) return c._bind_expression_statement(expression, context);
     case deferred(?body):
       if (statement) return %(defer ${c._bind_statement(body)});
     case do_loop(?body, ?condition):
@@ -2678,6 +2694,15 @@ static List Compiler._bind_form(
    `report_error` never returns, so a caller may return this call. */
 static List Compiler._construction_error(Compiler c) {
   $report.parse.syntax_position(c, c.token);
+}
+
+/* A meta call written as a whole statement may return a statement. */
+static List Compiler._bind_expression_statement(
+  Compiler c, List expression, AstPos context) {
+  match (expression) case %(expr ? (meta-call *)):
+    if (!c.meta_body && !c.macro_holes)
+      return c.evaluate_meta_statement(expression, context, c.token);
+  return %(stmnt ${c._resolve(expression)});
 }
 
 static List Compiler._resolve(Compiler c, List expr) =>

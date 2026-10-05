@@ -37,10 +37,11 @@ typedef struct Compiler{
   String filename, text, root_dir;
   String package;
   List package_dirs;
-  Map package_roots, package_aliases, package_members;
+  Map package_roots, package_aliases, package_members, package_exports;
   Token token;
   Token input_boundary;
   Tokenizer tokenizer;
+  Array line_markers;
   List return_type, include_dirs;
   Map deps;
   List aggregate_type, macro_stack, declaration_effects;
@@ -81,6 +82,7 @@ typedef struct Compiler{
   int runtime_inc, runtime_hdrs, collect_protocols, shallow, source_private;
   int layout;
   int meta_body;
+  Token meta_statement;
   int import_protocols;
   int in_pattern, match_is, runtime_literals, inline_header;
   int builtin_defs, in_proto, macro_count, recovery_depth;

@@ -47,6 +47,8 @@ List x2c_parameters_arguments(List value);
 
 List type_base_suffix(List type);
 
+String type_name_error(List type);
+
 List type_declaration_parts(List type);
 
 

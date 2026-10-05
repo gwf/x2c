@@ -68,7 +68,7 @@ String String_join(String, List);
 
 List String_split(String, String);
 
-String mi_flatten(String path, String sep){
+__attribute__((weak)) String mi_flatten(String path, String sep){
   if(! _init_guard_) _file_init_();
   return String_join(sep, String_split(path, _7));
 }

@@ -1122,6 +1122,26 @@ A name that a quotation declares is private to it, so another quotation
 cannot refer to it. An `x2c_ident` hole declares and refers to one exact
 name.
 
+When a `meta` function builds one statement, the macro can hand it the work
+in one line. Write the `Stmt` macro with an arrow body and return the
+statement itself:
+
+```x2c
+#include "meta.x"
+meta static List traced(List body) =>
+  $!{ { puts("enter"); $body puts("leave"); } };
+
+macro Stmt $trace(Stmt $body) => $traced($body);
+
+int main(void) {
+  $trace(puts("work"););
+  return 0;
+}
+```
+
+Keep the braced `{ $helper(...)... }` form for a function that returns
+several block items as a `List`.
+
 ## Choose collections by mutation and identity
 
 Use `List` for immutable sequences that share structure, `Array` for mutable
@@ -1297,7 +1317,11 @@ begins source-private output, except that a typedef after it still belongs
 to the header when a later public prototype names it. An include of x2c
 source below `#pragma private` also moves to the header when a later public
 prototype names a type it declares. Functions that a class
-or another declaration producer generates do not begin it. Every translated header
+or another declaration producer generates do not begin it. A public object
+definition gets an `extern` declaration in the header even after a function
+definition or a `static` declaration; only `#pragma private` keeps it in the
+source. An object of an anonymous `struct`, `union`, or `enum` type has no
+such declaration. Every translated header
 starts with `#pragma once` and also carries a conventional include guard, so
 `.x` programs do not need to write either one.
 
@@ -1565,10 +1589,12 @@ An import exposes:
 
 It also installs the macro imports that the package's entry source and
 public include surface `export`, as described under
-[exported imports](https://x2c-lang.dev/docs/reference/language.html#exported-imports). Includes below `#pragma private` do
-not contribute exports. Other macros, private declarations, and the
-package's other imports are not exposed. Packages have no re-exports or
-hierarchy. One program uses one version of a package.
+[exported imports](https://x2c-lang.dev/docs/reference/language.html#exported-imports), in the order an `#include` of the
+entry source would deliver them. Includes below `#pragma private` do not
+contribute exports, and neither do the consumer's own files. Other macros,
+private declarations, and the package's other imports are not exposed.
+Packages have no re-exports or hierarchy. One program uses one version of a
+package.
 
 A public bodyless `meta` prototype crosses the import like any function
 declaration. When the package has built its native module,
@@ -2147,7 +2173,33 @@ remains legal as an ordinary typedef, variable, parameter, field, or function
 name everywhere else. A braced definition places `{ ... }` directly after the
 signature. An expression definition places `=> expression;` after it,
 including the trailing semicolon. A `Stmt` macro may also use the expression
-form; its body is then the single statement `expression;`.
+form; its body is then one statement. That statement is an invocation of a
+`Stmt` macro or a statement decorator, such as `=> $other(args);`, or else
+the expression statement `expression;`. When that expression is a `meta`
+call, the call may return a statement, as described under
+[Macro-visible syntax](https://x2c-lang.dev/docs/reference/language.html#macro-visible-syntax).
+
+Here `guarded` returns an `if` statement, which an expression position
+would reject:
+
+```x2c
+#include "meta.x"
+meta static List guarded(List condition, List body) =>
+  $!{ if ($condition) $body };
+
+macro Stmt $when(Expr $condition, Stmt $body) =>
+  $guarded($condition, $body);
+
+int main(void) {
+  int n = 3;
+  $when(n > 2, printf("%d\n", n););
+  return 0;
+}
+```
+
+```text
+3
+```
 
 For source compatibility, the compiler also accepts the former `=> { ... }`
 braced form and a complete parenthesized expression body written as
@@ -2399,7 +2451,7 @@ A macro has one result kind as well as argument kinds:
 | Annotation | Body | Legal invocation position |
 | --- | --- | --- |
 | `Expression` | `=>` expression `;` | expression |
-| `Stmt` | braced block items | statement |
+| `Stmt` | braced block items, or `=>` one statement | statement |
 | `Field` | braced field declarations | struct or union body |
 | `Entry` | braced, comma-separated `key: value` rows | `Map` literal |
 | `Enumerator` | braced, comma-separated enumerators | enum body |
@@ -2408,9 +2460,11 @@ A macro has one result kind as well as argument kinds:
 
 The result kind is required between `macro` and the `$` name. `Stmt` is
 the canonical spelling for block-item results and `Expression` for expression
-results; `Expr` is a synonym. Arrow-expression bodies require
-`Expression`; braced bodies require `Stmt`, `Field`, `Entry`,
-`Enumerator`, `Unit`, or `Declaration`.
+results; `Expr` is a synonym. An arrow body requires `Expression` or
+`Stmt`. A `Stmt` arrow body is one statement: a `Stmt` macro invocation or
+an expression statement, and a `meta` call written there may return any
+statement that fits where the macro is invoked. Braced bodies require
+`Stmt`, `Field`, `Entry`, `Enumerator`, `Unit`, or `Declaration`.
 Inside a compound statement, a `Stmt` macro may produce zero or
 more block items. Where the grammar requires one statement, such as an `if`,
 `else`, or loop body, the expansion must contain exactly one statement. An
@@ -2767,7 +2821,11 @@ whose kind its position gives, and the quotation applies to the locals'
 values in that order. `$name...` is a sequence. A local declared `Type`,
 which `lib/meta.x` declares as a `List` of type syntax such as
 `%(double)`, fills a type hole, so `$!{ $type value = $initial; }`
-declares `value` with the type the local holds. A `String` local fills an
+declares `value` with the type the local holds. Type syntax spells C type
+keywords and `*` as Symbols and every other type name as a String, as in
+`%(unsigned long)`, `%("String")`, and `%(* "Point")`. A type whose name
+is a Symbol, such as `%(String)`, is an error where it fills a type.
+A `String` local fills an
 expression hole as a string literal and an `int` local as an integer
 literal. A `$name` that names no local is a macro invocation or a `meta`
 call, as in a template, so `$rows($items)...` splices a `meta` function's
@@ -2803,16 +2861,28 @@ typed quotation builds `(expr T CONTENT)` where it is written. It binds
 nothing, counts no expansion, and opens no transaction. Its holes take the
 values a rebuild gives them: syntax unchanged, a binding identity or
 `x2c.ident` spelling as an identifier expression, an `x2c.ident` in a
-member position as its spelling, a number as a literal of its own type with
-its exact value, and a String or Symbol as a literal. A String is a String
+member position as its spelling and in a declarator as the name it
+declares, a number as a literal of its own type with its exact value, and
+a String or Symbol as a literal. Each number, String, or Symbol item of an
+expression sequence also becomes its literal. A String is a String
 literal when the whole expression is the hole and `T` is `String`; elsewhere
 it is a C string literal. Inner nodes keep the placeholder type of unbound
 syntax, and free names stay names that bind where the code is bound. A
-typed quotation may not declare a name or apply a template. The compiler
+typed quotation may not declare a name that its own code spells or apply a
+template, and inside
+another quotation it is written as a hole, `${$!T{ ... }}`. The compiler
 accepts `T` as the expression's type without checking it. A typed quotation
 states the type the code has; it converts nothing, so write a cast inside
 the braces when the code needs one. See
 [Code that knows its type](https://x2c-lang.dev/docs/guide/meta-functions.html#code-that-knows-its-type).
+
+`$!Type{ T }` builds the type `T`, written as a cast writes a type name.
+`$!Param{ P }` builds one parameter declaration. A `Type` local or a
+`${...}` hole of type `Type` may stand for a type or for the base a
+declarator modifies. Both build where they are written: they bind nothing,
+declare no name the braces spell, and apply no template. `Type` and `Param`
+after `$!` always name these kinds. `Decl` names a hole kind only. See
+[Types and parameters](https://x2c-lang.dev/docs/guide/meta-functions.html#types-and-parameters).
 
 When one `Name` hole appears in a declaration, a reference, and a member
 selection, its case checks that the declaration and reference use the same
@@ -2825,7 +2895,9 @@ A template can call a `meta` function in a slot and pass it a sequence
 hole written without `...`; the function receives the captured items as
 one `List`. Applying a macro value with one `List` of syntax as the last
 argument passes that List as the whole trailing sequence, so
-`outer(head, items)` and `outer(head, a, b)` build the same code. A `case`
+`outer(head, items)` and `outer(head, a, b)` build the same code. A `List`
+of numbers or Strings, such as `%(1 2 3)`, passes the whole sequence too,
+and each item becomes its literal. A `case`
 on a macro value captures what a spliced slot built under the sequence
 hole the slot was given, one element per statement, so each element can
 be recognized with a `case` on the macro that built it. The pattern a
@@ -3323,12 +3395,13 @@ decorators, its `keyword` aliases, its `meta` functions and `meta static`
 values, its top-level Lisp forms, and the files it imports. An exported
 `.xlisp` import delivers its Lisp definitions.
 
-`export` applies only to a file-scope `$(import ...)` in a `.x` file. A
-macro, `keyword`, `meta` function, or Lisp definition written in the `.x`
-file stays in that file. To share one, move it to an `.xmacro` file and
-export that import. An `.xmacro` file needs no `export`, because its imports
-already reach the file that imports it. An import without `export` stays in
-its file.
+`export` applies only to a file-scope `$(import ...)` in a `.x` file.
+Unless `$(` follows it, `export` is an ordinary identifier, such as the
+name of a C macro. A macro, `keyword`, `meta` function, or Lisp definition
+written in the `.x` file stays in that file. To share one, move it to an
+`.xmacro` file and export that import. An `.xmacro` file needs no `export`,
+because its imports already reach the file that imports it. An import
+without `export` stays in its file.
 
 The usual import rules apply at the include line. A delivered definition
 that collides with a visible macro is an error. A later definition in the
@@ -3604,12 +3677,20 @@ target; arbitrary AST `List`s do not acquire source text by structural
 equality. Diagnostics retain the definition, invocation, import, and generated
 ancestry even after a macro returns a new `List`. Returned syntax must be valid
 for its expression, field, enumerator, block-item, or translation-unit
-position. Protocol declarations, macro definitions, preprocessor nodes, and
-other compile-time-only source items are retained at translation-unit position
-and apply their source-order effect. The compiler rejects forms that are
-malformed or invalid in that position. As with other constructed ASTs, it does
-not recursively verify annotations or check where a handwritten `List` came
-from.
+position. A `meta` call written as a whole expression statement holds that
+statement's block-item or statement position, so it may return a statement
+as well as an expression. This holds in an ordinary function and in an
+expansion alike, such as the body of `macro Stmt $same(Stmt $code) =>
+$same_of($code);`. A `meta` call inside a larger expression holds an
+expression position. Inside an expansion every `List` result is code.
+Elsewhere a `List` result is code when it is an expression node, a macro
+application, a quotation, or an identifier; any other `List` remains a
+runtime value. Protocol declarations, macro definitions, preprocessor nodes,
+and other compile-time-only source items are retained at translation-unit
+position and apply their source-order effect. The compiler rejects forms that
+are malformed or invalid in that position. As with other constructed ASTs, it
+does not recursively verify annotations or check where a handwritten `List`
+came from.
 
 ### Named types and declaration production
 
@@ -4769,14 +4850,23 @@ binders inside `!not` operands are not definitely assigned; binders under
 opaque.
 Arm binders are semantic `Var` or `List` locals and support method syntax.
 
-`?(Type name)` declares a native typed capture. Its exact `Var` tag must
-match the tag tested by `value is Type`; mismatches fail the pattern without
+`?(typename name)` declares a native typed capture. Its exact `Var` tag must
+match the tag tested by `value is typename`; mismatches fail the pattern without
 conversion. The type applies to every unquoted occurrence of that binder in
 the arm, including `?name` and alternative branches. Repeated names retain
 their equality constraint. The shorthand lowers to existing `!is` predicates
 and ordinary local declarations; explicit `!is` captures remain `Var` locals.
 The opener `?(` is adjacent; `? (String text)` is a wildcard followed by
 a sublist pattern.
+
+Inside `?(`, `typename` is ordinary source type syntax rather than literal
+List data: write `?(String text)` or `?(List payload)`. The compiler stores
+named types such as `String` as Strings in type syntax. The type List
+`%("String")` therefore differs from `%(String)`, which contains an `Atom`;
+see [macro values](https://x2c-lang.dev/docs/reference/language.html#macro-values). Typedefs use their underlying `Var` tag,
+so `?(Type type)`, with `typedef List Type`, tests for a List payload without
+validating its contents as type syntax. The tag test precedes the native
+local declaration.
 
 An arm may place `if (expression)` before its colon. The expression runs
 after matching, with captures visible, and uses ordinary truth conversion.

@@ -294,13 +294,26 @@ void Compiler.print_diagnostic(Compiler compiler, List entry) {
 static void Compiler._write_heading(
   Compiler c, Symbol code, String message, List location) {
   match (location)
-    case %((file ?file) (line ?line) (column ?column) (length ?length) ?): {
+    case %((file ?file) (line ?line) (column ?column) (length ?length)
+           (position ?position)): {
       String place = %"$file:$line:$column";
       fprintf(stderr, "%s: %s: %s\n", place, code.str(), message);
+      if (c.line_markers) line = c._text_line(position);
       c._show_source_context(line, column, length);
       return;
     }
   fprintf(stderr, "%s: %s\n", code.str(), message);
+}
+
+/* A merged text's location names a line of the file it came from, and the
+   context shows the line of the text that holds its byte position. */
+static int Compiler._text_line(Compiler c, int position) {
+  int line = 0;
+  foreach (Var start, c._line_starts()) {
+    if (start.int() > position) break;
+    line++;
+  }
+  return line;
 }
 
 /** Resolves a recorded occurrence through generated ancestry to its source.
@@ -361,11 +374,32 @@ List Compiler.token_location(Compiler compiler, Token token) {
   if (!token) token = compiler.token;
   if (!token)
     return %( (file $file) (line 1) (column 1) (length 0) (position 0) );
+  int line = token.line;
+  if (compiler.line_markers) file = compiler.token_source(token, line);
   file = compiler.display_path(file);
-  return %( (file $file) (line ${token.line})
+  return %( (file $file) (line $line)
             (column ${token.col}) (length ${token.len})
             (position ${token.pos})
           );
+}
+
+/** Returns the file that the line markers of a merged text give `token`,
+    and sets `line` to the token's line in that file. A token outside the
+    marked regions keeps the compiler's own file and its line. */
+String Compiler.token_source(Compiler c, Token token, int &?line) {
+  if (line) line = token.line;
+  if (!c.line_markers) return c.filename;
+  Token base = c.tokenizer.tokens;
+  if (token < base || token >= base + c.tokenizer.tokens.len())
+    return c.filename;
+  String file = c.filename;
+  foreach (List row, c.line_markers) {
+    (int position, int text_line, String marked, int marked_line) = row;
+    if (position > token.pos) break;
+    file = marked;
+    if (line) line = marked_line + token.line - text_line;
+  }
+  return file;
 }
 
 static List _compiler_location(Compiler compiler, Token token) {

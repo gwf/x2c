@@ -16,6 +16,7 @@ $(import "../src/ast-rewrite.xmacro")
 #include "compiler.x"
 #pragma private
 $(import "../src/adapter-memo.xmacro")
+$(import "../src/fields.xmacro")
 #include "expressions.x"
 #include "builtins.x"
 #include "linked-meta.x"
@@ -586,12 +587,16 @@ static void Definition.body(Definition &d) {
   }
 }
 
-/* A Stmt result's body after `=>` is one expression statement, whose `;`
-   an anonymous macro omits. */
+/* A Stmt result's body after `=>` is one statement: a Stmt macro
+   invocation, or else an expression statement, whose `;` an anonymous
+   macro omits. */
 static List Definition.read_body(Definition &d) {
   Compiler c = d.c;
+  if (d.kind == <type> || d.kind == <param>) return d.part_body();
   if (d.has_expression_body()) return d.expression_body();
   if (c.peek(0) == <"{">) return c._parse_body(d.body_kind(), d.using);
+  if (!d.anonymous && c.macro_starts_target_at(AST_STATEMENT))
+    return c.try_parse_macro_target_at(AST_STATEMENT);
   List expression = c.parse_expression();
   if (!d.anonymous) c.expect(<;>);
   return %(seq (stmnt $expression));
@@ -612,6 +617,21 @@ static List Definition.expression_body(Definition &d) {
   List replacement = c.parse_expression();
   if (!d.anonymous) c.expect(<;>);
   return replacement;
+}
+
+/* A Type quotation's body is a type name, and a Param quotation's body is
+   one parameter. */
+static List Definition.part_body(Definition &d) {
+  Compiler c = d.c;
+  c.expect(<"{">);
+  List body = NULL;
+  if (d.kind == <param>) {
+    body = c.try_parse_macro_slot(<param>);
+    if (!body) body = c.parse_parameter();
+  }
+  else c.parse_type_operand(&body);
+  c.expect(<"}">);
+  return body;
 }
 
 /* A decorator's body produces what its target is, and a Function or
@@ -672,9 +692,10 @@ static List Definition.wrap(Definition &d) {
   return replacement;
 }
 
-/* Each `(macro-bind BINDER)` slot becomes its binder. A body that is one
-   expression slot keeps the `expr` around its binder. */
+/* Each nested `(macro-bind BINDER)` slot becomes its binder. A whole slot
+   keeps a List shell: `expr` for an expression, `macro-bind` otherwise. */
 static List _slot_binders(List replacement) {
+  match (replacement) case %(macro-bind ?): return replacement;
   List bindings;
   Var expression_slot = %(
     expr (<macro-expr>) (macro-bind ?binder)
@@ -1161,7 +1182,7 @@ static const SymbolSet sequence_roles =
   %<<argument block field enumerator map-entry param unit catch match-row
      decl-row>>;
 static const SymbolSet untyped_roles = %<<expression argument type>>;
-static const SymbolSet quoted_roles = %<<statement block name>>;
+static const SymbolSet quoted_roles = %<<statement block name param>>;
 
 /* Consumes a `...` after a slot. It is legal only where the role takes a
    sequence. */
@@ -1202,7 +1223,8 @@ Token Compiler.after_hole(Compiler c) {
    applies to that local's value. A `${expression}` is a hole for a hidden
    local that the quotation declares before it builds its code. A typed
    quotation, `$!T{ expression }` or `$!(T){ expression }`, builds its code
-   where it is written (see "typed quotations"). */
+   where it is written (see "typed quotations"), and so do
+   `$!Type{ type-name }` and `$!Param{ parameter }`. */
 
 /** Parses a quotation at `$!` into the code it builds from the locals its
     body names. */
@@ -1213,7 +1235,7 @@ List Compiler.parse_macro_quotation(Compiler c) {
   int typed = c._typed_quotation();
   Symbol kind = typed || c.peek(0) == <(> ? <expression> : <block-item>;
   if (!typed && c.peek(0) == <ident>) {
-    kind = c._result_kind_token(c.token);
+    kind = c._quotation_kind(c.token);
     c.next();
   }
   c.sym.push_new_scope();
@@ -1221,6 +1243,8 @@ List Compiler.parse_macro_quotation(Compiler c) {
   Map holes = {};
   List locals = NULL, type = NULL;
   if (typed) {
+    if (c.macro_holes && %(quotation) in c.macro_holes)
+      $report.parse.typed_quotation_nested(c, start);
     if (c.macro_holes) $report.parse.typed_quotation(c, start);
     if (c.peek(0) == <(>) locals = c._expression_holes(holes);
     type = c._quoted_type(holes);
@@ -1230,6 +1254,15 @@ List Compiler.parse_macro_quotation(Compiler c) {
   return locals
        ? %(expr ("List") (parens (block @locals (stmnt $built))))
        : built;
+}
+
+/* The kind a quotation builds: one a result kind names, or a type or one
+   parameter, which only a hole kind names. */
+static Symbol Compiler._quotation_kind(Compiler c, Token token) {
+  const MacroCategory *category = _category(token.text);
+  if (category && (category.hole == <type> || category.hole == <param>))
+    return category.hole;
+  return c._result_kind_token(token);
 }
 
 /* Whether the quotation after `$!` states its type: `T{` where the
@@ -1312,11 +1345,26 @@ static List Compiler._quoted_type(Compiler c, Map holes) {
              ? holes[%(expression ${c.token.pos})]
              : Token.skip_trivia(c.token + 1).text;
     c.token = c.after_hole();
-    type = c.resolve_expression(%(expr () (ident ${name.str()})), origin);
+    type = c._checked_type(
+      c.resolve_expression(%(expr () (ident ${name.str()})), origin), origin);
   }
   else type = c._quoted_type_name();
   c.expect(<)>);
   return type;
+}
+
+/* The `Type` expression `type`, which a `meta` function checks names its
+   type with a String before a typed quotation inserts it:
+   `type_name_error(type) ? (x2c_diagnostic_fail(...), type) : type`. */
+static List Compiler._checked_type(Compiler c, List type, Token origin) {
+  if (!c.meta_body) return type;
+  List error = c._runtime_call("type_name_error", %($type), origin);
+  List fail = c._runtime_call(
+    "x2c_diagnostic_fail", %($error (expr ("List") (nil))), origin);
+  return c.resolve_expression(
+    %(expr () (op ? $error
+      (expr ("Type") ${source_commas_content(%($fail $type))}) $type)),
+    origin);
 }
 
 static List Compiler._quoted_type_name(Compiler c) {
@@ -1373,6 +1421,7 @@ static List Compiler._quoted_cons(
 static List Definition.construction(Definition &d) {
   Compiler c = d.c;
   if (d.type) return d.typed_construction();
+  if (d.kind == <type> || d.kind == <param>) return d.part_construction();
   if (!d.rebuild || d.nested || d.kind == <decl-unit> || c.runtime_literals)
     return NULL;
   Map keys = {}, file_locals = {};
@@ -1455,11 +1504,7 @@ static List Compiler._built_hole(
 
 static List Definition.typed_construction(Definition &d) {
   Compiler c = d.c;
-  if (!d.rebuild || d.fresh) $report.parse.typed_quotation(c, d.start);
-  Map keys = {};
-  foreach (List hole, d.parameters)
-    foreach (Symbol projection, %(source value expression splice member))
-      keys[_hole_key(hole, projection)] = %($hole $projection);
+  Map keys = d.written_keys();
   match (d.rebuild.car()) case %(expr ? *content):
     return c.literal_cell(c.cache_literal_var(<expr>),
       c.literal_cell(d.type, c._typed_cells(content, keys, d.start)));
@@ -1471,6 +1516,27 @@ static List Definition.typed_construction(Definition &d) {
   List value = c._hole_value(hole, d.start);
   return c.resolve_expression(
     %(expr ("List") (call $callee (args ${d.type} $value))), d.start);
+}
+
+/* `$!Type{ type-name }` and `$!Param{ parameter }` build their List where
+   they are written, as a typed quotation builds its expression. */
+static List Definition.part_construction(Definition &d) {
+  Map keys = d.written_keys();
+  match (d.rebuild.car()) case %(macro-bind ?binder):
+    return d.c._typed_hole(keys[binder], d.start);
+  return %(expr ("List") ${d.c._typed_cells(d.rebuild.car(), keys, d.start)});
+}
+
+/* The hole projections a quotation built where it is written fills. Such a
+   quotation binds nothing, so it may declare no name and apply no
+   template. */
+static Map Definition.written_keys(Definition &d) {
+  if (!d.rebuild || d.fresh) $report.parse.typed_quotation(d.c, d.start);
+  Map keys = {};
+  foreach (List hole, d.parameters)
+    foreach (Symbol projection, %(source value expression splice member))
+      keys[_hole_key(hole, projection)] = %($hole $projection);
+  return keys;
 }
 
 /* The List cells that build `items`. A sequence or splice hole
@@ -1495,23 +1561,34 @@ static List Compiler._typed_cells(
 
 /* One use of a hole: its local, which `Macro.inserted` lifts in an
    expression hole, makes an identifier where code takes an expression, and
-   makes a spelling in a Name hole's member position. A sequence and a
-   type insert their syntax as it is. */
+   makes a spelling in a Name hole's member position. A Name hole that
+   declares inserts the name `Macro.declared` makes. An expression sequence
+   lifts each item as `Macro.inserted_items` does. A type inserts its
+   syntax once it is checked, and other syntax inserts as it is. */
 static List Compiler._typed_hole(Compiler c, List row, Token start) {
   (List hole, Symbol projection) = row;
   List local = c._hole_value(hole, start);
   Symbol kind = hole.assoc(<kind>);
   int lifts = kind == <expr>;
   int expression = projection == <expression>;
-  if (hole.assoc(<sequence>).int() ||
-      (!lifts && !expression && kind != <name>))
-    return local;
-  List callee = c.resolve_expression(
-    %(expr () (ident "Macro_inserted")), start);
-  return c.resolve_expression(
-    %(expr ("Var") (call $callee (args $local ${x2c_literal_int(lifts)}
-                                       ${x2c_literal_int(expression)}))),
+  if (kind == <type>) return c._checked_type(local, start);
+  if (hole.assoc(<sequence>).int())
+    return lifts ? c._runtime_call("Macro_inserted_items", %($local), start)
+                 : local;
+  if (kind == <name> && projection == <value>)
+    return c._runtime_call("Macro_declared", %($local), start);
+  if (!lifts && !expression && kind != <name>) return local;
+  return c._runtime_call("Macro_inserted",
+    %($local ${x2c_literal_int(lifts)} ${x2c_literal_int(expression)}),
     start);
+}
+
+/* The call of the runtime operation `name` with `arguments`. */
+static List Compiler._runtime_call(
+  Compiler c, String name, List arguments, Token start) {
+  List callee = c.resolve_expression(%(expr () (ident $name)), start);
+  return c.resolve_expression(
+    %(expr () (call $callee (args @arguments))), start);
 }
 
 /* The local that holds a quotation hole's value. */
@@ -1519,13 +1596,16 @@ static List Compiler._hole_value(Compiler c, List hole, Token start) =>
   c.resolve_expression(%(expr () (ident ${_hole_name(hole).str()})), start);
 
 /* A quotation's hole takes its kind from a name position, or from a
-   statement position where it stands alone, which no annotation can give
-   it. A hole that an operator, `;`, or a postfix form follows is an
+   parameter or statement position where it stands alone, which no
+   annotation can give it. A hole that a declarator follows is a parameter's
+   type, and one that an operator, `;`, or a postfix form follows is an
    expression. */
 static int Compiler._quoted_role(Compiler c, Symbol role) {
   if (!(%(quotation) in c.macro_holes) || !(role in quoted_roles)) return 0;
   if (role == <name>) return 1;
   Token after = c.after_hole();
+  if (role == <param>)
+    return after.type == <,> || after.type == <)> || after.type == <"}">;
   return after.type != <;> && !_extends_expression(after);
 }
 
@@ -3181,10 +3261,15 @@ static List Compiler._template_arguments(
 }
 
 /* One hole's capture row of `value`. Each scalar Lisp value an Expr hole
-   or sequence holds lifts to an expression first. */
+   or sequence holds lifts to an expression first. A Type hole's type names
+   its type with a String. */
 static List Compiler._hole_row(
   Compiler c, List hole, Var value, Token invocation, int retain_syntax) {
-  int lifts = hole.assoc(<kind>) == <expr>;
+  Symbol kind = hole.assoc(<kind>);
+  int lifts = kind == <expr>;
+  String error = kind == <type> && value is <list>
+               ? type_name_error(value) : NULL;
+  if (error) $report.macro.type_name(c, error, invocation);
   if (!hole.assoc(<sequence>).int())
     return c._capture_row_project(
       hole, %(${lifts ? c._lifted(value, invocation) : value}), retain_syntax);
@@ -3845,7 +3930,7 @@ void Compiler.record_macro_export(Compiler c) {
   String requested = NULL;
   c._import_path(requested);
   String source = home_portable_path(Path.absolute(c.filename));
-  String path = home_portable_path(c._canonical_path(requested));
+  String path = home_portable_path(c._canonical_path(requested, c.token));
   c.sym.set(
     %("source-node" (macro-export $source ${c.token.pos})),
     %(macro-export $path));
@@ -3896,6 +3981,31 @@ List Compiler.lift_macro_lisp_expression(
   $report.macro.lisp_expr(c, invocation, value);
 }
 
+/** Binds a compile-time Lisp code `value` returned to a statement at
+    `context`. */
+List Compiler.bind_macro_lisp_statement(
+  Compiler c, List value, AstPos context) {
+  value = c._helper_result(value);
+  return c._statement_expression(value)
+    ? %(stmnt ${c.lift_macro_lisp_expression(value, c.token)})
+    : c.bind_syntax(value, context, c.return_type);
+}
+
+/* The root inside a carrier determines whether the statement discards an
+   expression or binds a statement. Ordinary binding consumes the carrier. */
+static int Compiler._statement_expression(Compiler c, List value) {
+  loop match (value) {
+    case %((!or "x2c.quoted" src at) ? ?root): value = root;
+    case %("x2c.at" ?root): value = root;
+    case %(code-value ? ?root ?): value = root;
+    case %(macro-invoke ?stored ? ?site):
+      return _result_kind(c._stored_definition(
+        stored, c.macro_invocation_site(site))) == <expression>;
+    case %(expr *): return 1;
+    default: return _sdk_identifier_result(value) is not void;
+  }
+}
+
 static Var _sdk_identifier_result(Var value) {
   match (value)
     case %("x2c.ident" (!is ?spelling type string)): return spelling;
@@ -3932,7 +4042,7 @@ typedef struct Import {
 
 static List Compiler._import(Compiler c, String requested, Token invocation) {
   c.ensure_macro_lisp();
-  String path = c._canonical_path(requested);
+  String path = c._canonical_path(requested, invocation);
   c.add_translation_dependency(path);
   if (library_filling) library_imports[path] = 1;
   Var cached;
@@ -4068,19 +4178,12 @@ static void Import.borrow(Import &in, Compiler child) {
   Compiler c = in.c;
   child.borrow_diagnostics(c);
   child.borrow_unit_semantics(c);
-  child.macros = c.macros;
-  child.kw_aliases = c.kw_aliases;
-  child.kw_seen = c.kw_seen;
-  child.macro_lisp = c.macro_lisp;
-  child.meta_group = c.meta_group;
-  child.meta_group_bound = c.meta_group_bound;
-  child.unit_nodes = c.unit_nodes;
+  $copy_fields(child, c, macros, kw_aliases, kw_seen, macro_lisp,
+               meta_group, meta_group_bound, unit_nodes, imports,
+               import_stack, declaration_effects);
   child.borrowed_lisp = 1;
   child.import_src = in.path;
   child.inherited_lisp = Compiler.inherits_import(in.path);
-  child.imports = c.imports;
-  child.import_stack = c.import_stack;
-  child.declaration_effects = c.declaration_effects;
 }
 
 static void Import.form(Import &in, Compiler child) {
@@ -4151,47 +4254,36 @@ static void Compiler._reference_bindings(
 }
 
 /** Loads the macro imports that the sources of package `name` export at
-    this consumer's import position. */
+    this consumer's import position, in the order the package's include walk
+    reaches them. */
 void Compiler.import_package_macros(
   Compiler c, String name, Token invocation) {
-  foreach (List entry, c._package_exports(name)) {
-    List imported = c._import(home_absolute_path(entry.caddr()), invocation);
+  Var exports = c.package_exports[name];
+  if (exports is void) return;
+  foreach (String path, exports.list()) {
+    List imported = c._import(home_absolute_path(path), invocation);
     if (imported)
       foreach (Var definition, imported.cdr()) c.meta_defs.push(definition);
   }
 }
 
-/* The macro imports the sources of package `name` export, in source
-   order. */
-static Array Compiler._package_exports(Compiler c, String name) {
-  String root = %"${c.canonical_path(c.package_roots[name])}/";
-  Array exports = [];
-  foreach (Var (key, value), c.sym.unit_symbols())
-    match (%($key $value))
-      case %(("source-node" (macro-export ?(String source) ?position))
-             (macro-export ?path)):
-        if (home_absolute_path(source).startswith(root))
-          exports.push(%($source $position $path));
-  exports.sort();
-  return exports;
-}
-
 // source files
 
-/* A relative import names a file beside the importing source, or else one
-   under the home's `lib/`. */
-static String Compiler._canonical_path(Compiler c, String path) {
+/* A relative import names a file beside the source that writes it at
+   `site`, or else one under the home's `lib/`. */
+static String Compiler._canonical_path(Compiler c, String path, Token site) {
   if (!path || path[0] == '/') return c.canonical_path(path);
-  String local = %"${c._source_dir()}/$path";
+  String local = %"${c._source_dir(site)}/$path";
   String system = %"${c.root_dir}/lib/$path";
   int use_system = !c.sources.exists(local) && c.sources.exists(system);
   return c.canonical_path(use_system ? system : local);
 }
 
-static String Compiler._source_dir(Compiler c) {
+/* The importing macro file, or the file whose lines hold `site`. */
+static String Compiler._source_dir(Compiler c, Token site) {
   String filename = c.import_stack.len()
                   ? c.import_stack[-1]
-                  : c.filename;
+                  : c.token_source(site ? site : c.token, NULL);
   return filename ? Path.dirname(filename) : ".";
 }
 

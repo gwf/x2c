@@ -11,7 +11,7 @@ Named report macros collect wording and diagnostic construction separately
 from the algorithm that selects a case. Small groups appear near the top of
 their source file; larger groups live in a sibling `*-reports.xmacro` imported
 there. Compiler and driver calls use `$report.<category>.<case>`. Runtime
-formatting and Regex catalogues also provide named expression macros for
+formatting and Regex catalogues also provide `$reason` expression macros for
 reason strings, leaving their shared failure helpers responsible for payloads.
 Runtime, package, and command `*-errors.xmacro` files define one macro per
 condition. Only the raising unit imports such a file, so a name carries no

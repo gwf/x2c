@@ -7,6 +7,20 @@
 
 #include "x2c.h"
 #include <stdio.h>
+struct Named{
+  int count;
+}
+;
+
+extern const struct Named named;
+
+struct Shared{
+  int level;
+}
+;
+
+extern struct Shared shared;
+
 int main(void);
 
 

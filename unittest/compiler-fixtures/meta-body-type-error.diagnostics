@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/meta-body-type-error.x:13:16: macro: this function cannot run at compile time
+    List items = $wrong();
+                 ^
+  note: function: wrong reason: unittest/compiler-fixtures/meta-body-type-error.x:8:3: type: cannot convert (* char) to ("List"); the pointer types are unrelated: cast the expression to say so on purpose
+

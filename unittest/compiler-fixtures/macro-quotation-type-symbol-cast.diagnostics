@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/macro-quotation-type-symbol-cast.x:12:11: macro: type name 'Var' must be a String: write %("Var")
+    Var v = $var_of(3);
+            ^
+

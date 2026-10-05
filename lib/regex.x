@@ -142,7 +142,7 @@ static Regex Regex.new(String pattern) {
   Parser p = {regex, regex.pattern, 0, regex.pattern.len()};
   p.flags();
   regex.program = p.alternation();
-  if (p.pos < p.len) p.fail($regex.reason.unmatched_close());
+  if (p.pos < p.len) p.fail($reason.unmatched_close());
   return regex;
 }
 
@@ -199,7 +199,7 @@ static _RegexNode Parser.quantified(Parser &p, _RegexNode atom) {
   if (!p.bounds(min, max)) return atom;
   if (atom.kind == <bol> || atom.kind == <eol> || atom.kind == <wordb> ||
       atom.kind == <nwordb>)
-    p.fail($regex.reason.no_repeat());
+    p.fail($reason.no_repeat());
   p.pos++;
   _RegexNode node = _node(<repeat>);
   node.min = min;
@@ -207,7 +207,7 @@ static _RegexNode Parser.quantified(Parser &p, _RegexNode atom) {
   node.greedy = p.peek() != '?';
   node.child = atom;
   if (!node.greedy) p.pos++;
-  if (_is_quantifier(p.peek())) p.fail($regex.reason.no_repeat());
+  if (_is_quantifier(p.peek())) p.fail($reason.no_repeat());
   return node;
 }
 
@@ -244,11 +244,11 @@ static int Parser.braces(Parser &p, int &min, int &max) {
   }
   if (low > INT_MAX || high > INT_MAX) {
     p.pos++;
-    p.fail($regex.reason.repeat_count());
+    p.fail($reason.repeat_count());
   }
   if (high >= 0 && high < low) {
     p.pos++;
-    p.fail($regex.reason.repeat_range());
+    p.fail($reason.repeat_range());
   }
   min = (int) low;
   max = (int) high;
@@ -273,7 +273,7 @@ static int Parser.peek(Parser &p) =>
   p.pos < p.len ? (unsigned char) p.text[p.pos] : -1;
 
 static void Parser.fail(Parser &p, String why) {
-  $regex.error.compile(why, p.regex.pattern, p.pos);
+  $error.compile(why, p.regex.pattern, p.pos);
 }
 
 // atoms
@@ -281,7 +281,7 @@ static void Parser.fail(Parser &p, String why) {
 /* One atom. A quantifier here has nothing before it to repeat. */
 static _RegexNode Parser.atom(Parser &p) {
   int byte = (unsigned char) p.text[p.pos];
-  if (_is_quantifier(byte)) p.fail($regex.reason.no_repeat());
+  if (_is_quantifier(byte)) p.fail($reason.no_repeat());
   p.pos++;
   switch (byte) {
     case '.':  return _node(<any>);
@@ -318,7 +318,7 @@ static _RegexNode Parser.literal(Parser &p, int byte) {
 static _RegexNode Parser.group(Parser &p) {
   int index = p.peek() == '?' ? p.group_syntax() : p.add_capture(NULL);
   _RegexNode body = p.alternation();
-  if (p.peek() != ')') p.fail($regex.reason.missing_close());
+  if (p.peek() != ')') p.fail($reason.missing_close());
   p.pos++;
   return _group_node(index, index < 0 ? body : _close_capture(body, index));
 }
@@ -334,7 +334,7 @@ static int Parser.group_syntax(Parser &p) {
   }
   if (marker != '<') {
     p.pos--;
-    p.fail($regex.reason.group_syntax());
+    p.fail($reason.group_syntax());
   }
   p.pos++;
   return p.add_capture(p.name());
@@ -347,7 +347,7 @@ static String Parser.name(Parser &p) {
   while (_is_word(p.peek())) p.pos++;
   if (p.pos == start || scan_ascii_digit(p.text[start]) || p.peek() != '>') {
     p.pos = start;
-    p.fail($regex.reason.group_name());
+    p.fail($reason.group_name());
   }
   String name = p.regex.pattern[start:p.pos];
   p.pos++;
@@ -380,7 +380,7 @@ static _RegexNode Parser.set(Parser &p) {
   if (negate) p.pos++;
   int first = p.pos;
   while (p.pos == first || p.peek() != ']') {
-    if (p.pos >= p.len) p.fail($regex.reason.unterminated_class());
+    if (p.pos >= p.len) p.fail($reason.unterminated_class());
     p.member(node);
   }
   p.pos++;
@@ -407,14 +407,14 @@ static int Parser.range_end(Parser &p, int low) {
   p.pos++;
   int high = (unsigned char) p.text[p.pos++];
   if (high == '\\') high = p.escape();
-  if (high < low) p.fail($regex.reason.character_range());
+  if (high < low) p.fail($reason.character_range());
   return high;
 }
 
 /* Reads the byte after a backslash and returns the byte it stands for, or
    the negated letter of a `\d`, `\w`, or `\s` class or its capital. */
 static int Parser.escape(Parser &p) {
-  if (p.pos >= p.len) p.fail($regex.reason.trailing_backslash());
+  if (p.pos >= p.len) p.fail($reason.trailing_backslash());
   int byte = (unsigned char) p.text[p.pos++];
   switch (byte) {
     case 't': return '\t';
@@ -427,7 +427,7 @@ static int Parser.escape(Parser &p) {
   }
   if (!_is_word(byte) && byte < 128) return byte;
   p.pos--;
-  p.fail($regex.reason.unknown_escape());
+  p.fail($reason.unknown_escape());
 }
 
 /* matching
@@ -614,7 +614,7 @@ static int Matcher.iterate(
 }
 
 static void Matcher.too_deep(Matcher &m) {
-  $regex.error.depth(m.regex.pattern, _DEPTH_LIMIT);
+  $error.depth(m.regex.pattern, _DEPTH_LIMIT);
 }
 
 /* Runs the body again or goes on with the rest, in greedy or lazy order.

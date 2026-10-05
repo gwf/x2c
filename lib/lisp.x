@@ -22,6 +22,7 @@
 $(import "private-keywords.xmacro")
 $(import "cleanup.xmacro")
 #include "x2c.x"
+#include "macro-value.x"
 
 /** Reads one exact C scalar from `bytes`; a wide result is boxed in
     `owner`. */
@@ -40,20 +41,7 @@ typedef struct NativeScalarAccess {
 } *NativeScalarAccess;
 
 $(import "native-scalar-types.xmacro")
-$native.scalar.access(char);
-$native.scalar.access(signed char);
-$native.scalar.access(unsigned char);
-$native.scalar.access(short);
-$native.scalar.access(unsigned short);
-$native.scalar.access(int);
-$native.scalar.access(unsigned);
-$native.scalar.access(long);
-$native.scalar.access(unsigned long);
-$native.scalar.access(long long);
-$native.scalar.access(unsigned long long);
-$native.scalar.access(float);
-$native.scalar.access(double);
-$native.scalar.access(long double);
+$native.scalar.access.all();
 
 static Map native_scalars = %{ ${$native.scalar.access.entries()} };
 
@@ -975,20 +963,20 @@ static void _not_procedure(Var callable) {
    `source` at EOF; a failure raises with `cursor` at the form's first
    token. */
 static Symbol _read_form(
-  Tokenizer tokenizer, String source, unsigned base, unsigned *cursor,
-  Var *out) {
+  Tokenizer tokenizer, String source, unsigned base, unsigned &cursor,
+  Var &?out) {
   Token token = tokenizer.next();
   if (!token || token.type == <eof>) {
-    *cursor = source.len();
+    cursor = source.len();
     return <eof>;
   }
   unsigned start = base + token.pos;
-  *cursor = start;
+  cursor = start;
   LispReader r = {tokenizer, source, base, 0};
   Var form = r.form(token, 0);
   if (form is void) _incomplete(source, start);
-  if (out) *out = form;
-  *cursor = base + r.end;
+  if (out) out = form;
+  cursor = base + r.end;
   return <value>;
 }
 
@@ -1391,8 +1379,8 @@ typedef struct LispCallback {
   unsigned arity;
 } LispCallback;
 
-static List unary_signature = %((func (("Var"))) "Var");
-static List binary_signature = %((func (("Var") ("Var"))) "Var");
+static List unary_signature = $!Type{ Var (Var) };
+static List binary_signature = $!Type{ Var (Var, Var) };
 
 static Func _unary_callback(Var callable) =>
   _callback(callable, _call, 1, "Lisp callback");
@@ -1653,7 +1641,7 @@ Lisp Lisp.kernel(void) {
 static void Lisp._install_specials(Lisp lisp) {
   for (int i = 0; i < LISP_SPECIAL_COUNT; i++) {
     const LispCanonicalName *info = _special_name(i);
-    lisp.specials[i] = Func.new(_special_stub, %((func ((void))) "Var"));
+    lisp.specials[i] = Func.new(_special_stub, $!Type{ Var (void) });
     Atom name = Atom.intern(info.spelling);
     lisp.reserved[name] = lisp.specials[i];
   }
@@ -1757,7 +1745,7 @@ Symbol Lisp.read(Lisp lisp, String source, unsigned &?cursor, Var &?out) {
   unsigned base = cursor;
   Scope tokens_scope = $auto(Scope.new_named("Lisp tokens"));
   Tokenizer tokenizer = _scan_lisp_tokens(source + base, &tokens_scope);
-  return _read_form(tokenizer, source, base, &cursor, out);
+  return _read_form(tokenizer, source, base, cursor, out);
 }
 
 /** Evaluates one Lisp form in `lisp`.
@@ -1810,7 +1798,7 @@ Var Lisp.eval_string(Lisp lisp, String source) {
   Var result = %();
   loop {
     Var form = void;
-    if (_read_form(tokenizer, source, 0, &cursor, &form) == <eof>) break;
+    if (_read_form(tokenizer, source, 0, cursor, form) == <eof>) break;
     result = lisp._eval(form, NULL);
   }
   return result;

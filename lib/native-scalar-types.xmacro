@@ -2,8 +2,8 @@
 
     These are the native C scalar spellings the compiler can carry through a
     Var.  The compiler projects its Type lookup from these rows, and
-    `lib/lisp.x` invokes `$native.scalar.access` for each row's type to get
-    its native size, alignment, load, and store for compile-time code that
+    `lib/lisp.x` invokes `$native.scalar.access.all` to get each row's
+    native size, alignment, load, and store for compile-time code that
     keeps C objects in bytes.  Var's i48/u48 numeric payload families are
     deliberately absent: neither is an exact C type.
 
@@ -77,6 +77,20 @@ macro Unit $native.scalar.access(Type $type) {
     };
 }
 
+meta static List _scalar_access_units(Macro access) {
+  Array units = [];
+  List rows = native_scalar_types().list().sort();
+  foreach (List row, rows) {
+    Type type = row.car();
+    units.push(access(type));
+  }
+  return units.list_free();
+}
+
+macro Unit $native.scalar.access.all() {
+  $_scalar_access_units($native.scalar.access)...
+}
+
 $(defun native.scalar.access-entry (entry)
   `(map-entry ,(native.scalar.list (map x2c.literal.symbol (car entry)))
     ,(x2c.expr.cast '(* void) `(expr () (op &
@@ -85,7 +99,7 @@ $(defun native.scalar.access-entry (entry)
 
 /* `native_scalar_access`'s lookup, in sorted order so emission does not
    depend on hash layout: each row's type to its access record,
-   which the row's `$native.scalar.access` invocation defines first. */
+   which `$native.scalar.access.all` defines first. */
 macro Entry $native.scalar.access.entries() {
   $(map native.scalar.access-entry
         (List.sort (Map.list (native_scalar_types))))...

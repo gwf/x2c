@@ -548,17 +548,18 @@ MatchCache MatchCache.new(int capacity) {
     raise %(size-limit (owner "MatchCache.new") (capacity $capacity));
 
   Scope owner = Scope.new_named("Match plan cache");
-  Scope.push(&owner);
-  MatchCache cache = Scope.calloc(1, sizeof(struct MatchCache));
-  cache.scope = owner;
-  cache.capacity = capacity;
-  cache.bucket_count = capacity * 2 + 1;
-  cache.lru_head = -1;
-  cache.pool_epoch = Pool.epoch();
-  cache.entries = Scope.calloc(capacity, sizeof(MatchCacheEntry));
-  cache.buckets = Scope.malloc(sizeof(int) * cache.bucket_count);
-  for (int i = 0; i < cache.bucket_count; i++) cache.buckets[i] = -1;
-  Scope.pop();
+  MatchCache cache;
+  $scope(&owner) {
+    cache = Scope.calloc(1, sizeof(struct MatchCache));
+    cache.scope = owner;
+    cache.capacity = capacity;
+    cache.bucket_count = capacity * 2 + 1;
+    cache.lru_head = -1;
+    cache.pool_epoch = Pool.epoch();
+    cache.entries = Scope.calloc(capacity, sizeof(MatchCacheEntry));
+    cache.buckets = Scope.malloc(sizeof(int) * cache.bucket_count);
+    for (int i = 0; i < cache.bucket_count; i++) cache.buckets[i] = -1;
+  }
   return cache;
 }
 

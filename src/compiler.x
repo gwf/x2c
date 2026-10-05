@@ -74,14 +74,18 @@ typedef struct Compiler {
   /* Package-mode unit: NULL outside. package_dirs holds the registered
      --package-dir roots, package_roots the directory of every package this
      unit has already collected, package_aliases the resolution-only
-     spelling alias -> package name, and package_members each `with` local
-     spelling -> (package member). */
+     spelling alias -> package name, package_members each `with` local
+     spelling -> (package member), and package_exports each collected
+     package's exported macro imports in its include order. */
   String package, List package_dirs;
-  Map package_roots, package_aliases, package_members;
+  Map package_roots, package_aliases, package_members, package_exports;
   Token token;
   // Optional end of supplied input; NULL keeps ordinary file diagnostics.
   Token input_boundary;
   Tokenizer tokenizer;
+  /* For the host preprocessor's merged output, the file each region came
+     from, as `(position text-line file line)` rows; NULL otherwise. */
+  Array line_markers;
   List return_type, include_dirs;
   // Canonical dependency path -> content hash for compile-time text reads,
   // or 1 for dependencies whose contents are not embedded in generated C.
@@ -180,6 +184,9 @@ typedef struct Compiler {
      what lets a call to a compile-time-only one be refused everywhere
      else. */
   int meta_body;
+  /* Where the expression statement being parsed starts. A meta call there
+     that the statement's `;` ends is evaluated as the statement. */
+  Token meta_statement;
   /* A collection pass or macro import whose protocol registries are
      installed from the collected symbols on first use;
      `Compiler._install_imports` owns the installation. */
@@ -260,6 +267,7 @@ $(import "../src/grammar.xmacro")
 #include <string.h>
 
 $(import "../src/compiler-reports.xmacro")
+$(import "../src/fields.xmacro")
 
 // shallow collection
 
@@ -353,9 +361,9 @@ int Compiler.collect_compile_time_definition(Compiler c, int keyword) {
 */
 void Compiler.finish_collected_declaration(
   Compiler c, List declaration, Token meta, int native) {
-  /* Collection records the runtime function a `meta` marker precedes, and
-     the native binding a bodyless or `native` marker advertises; the
-     compile-time form is installed by the full parse. */
+  /* Collection records the runtime function a `meta` marker precedes, the
+     native binding a bodyless or `native` marker advertises, and the stub
+     of a bodied one; the full parse installs the compile-time form. */
   c.record_declaration_visibility(declaration);
   /* Lexical privacy also marks a name in Sym.statics, so a static function
      is marked again as `(function name)`. File collection reads that key to
@@ -376,6 +384,7 @@ void Compiler.finish_collected_declaration(
 static void Compiler._skip_body(
   Compiler c, List declaration, Token meta, int native) {
   if (native) c.record_native_meta_effect(declaration, meta);
+  else if (meta) c.install_collected_meta_function(declaration, meta);
   match (declaration)
     case %(declare ? (bindings (bind ?binding ?))):
       c._note_function_body(declaration.type_from_ast(), binding);
@@ -1624,9 +1633,21 @@ static void Compiler._append_meta_definitions(Compiler c, Array nodes) {
   foreach (List definition, c.meta_defs)
     if (_meta_identity(definition) in reached &&
         !c.meta_is_comptime_only(definition)) {
-      c._record_top_level(definition, NULL);
-      nodes.push(definition);
+      List emitted = _linked_once(definition);
+      c._record_top_level(emitted, NULL);
+      nodes.push(emitted);
     }
+}
+
+/* Every unit that calls a public `meta` function at run time emits it, and
+   units that never include one another cannot tell which of them does, so
+   each copy is weak and the program links one. */
+static List _linked_once(List definition) {
+  match (definition)
+    case %(function ?type ?declarator ?body):
+      if (!type.type().is_static())
+        return %(function ("__attribute__((weak))" @type) $declarator $body);
+  return definition;
 }
 
 /* The binding an imported `meta` function or declaration introduces. */
@@ -2467,28 +2488,16 @@ void Compiler.close_child(Compiler c, Compiler child) {
     state.
 */
 void Compiler.borrow_unit_semantics(Compiler c, Compiler owner) {
-  c.sym = owner.sym;
-  c.fn_defs = owner.fn_defs;
-  c.id_keys = owner.id_keys;
-  c.key_ids = owner.key_ids;
-  c.protocols = owner.protocols;
-  c.adoptions = owner.adoptions;
-  c.conforms = owner.conforms;
-  c.protocol_helpers = owner.protocol_helpers;
-  c.proto_cache = owner.proto_cache;
-  c.meta_comptime = owner.meta_comptime;
-  c.meta_regions = owner.meta_regions;
-  c.meta_hashes = owner.meta_hashes;
-  c.meta_calls = owner.meta_calls;
-  c.native_meta = owner.native_meta;
+  $copy_fields(c, owner, sym, fn_defs, id_keys, key_ids, protocols,
+               adoptions, conforms, protocol_helpers, proto_cache,
+               meta_comptime, meta_regions, meta_hashes, meta_calls,
+               native_meta);
 }
 
 /** Shares `owner`'s pending `meta` group and the definitions it reads, which
     belong with the Lisp session that holds the group's stubs. */
 void Compiler.share_meta_group(Compiler c, Compiler owner) {
-  c.meta_group = owner.meta_group;
-  c.meta_group_bound = owner.meta_group_bound;
-  c.meta_defs = owner.meta_defs;
+  $copy_fields(c, owner, meta_group, meta_group_bound, meta_defs);
 }
 
 /** Takes over `owner`'s macro, object-like `#define`, import, keyword,
@@ -2497,15 +2506,8 @@ void Compiler.share_meta_group(Compiler c, Compiler owner) {
     unit's literal cache and use its Lisp environment.
 */
 void Compiler.take_unit_state(Compiler c, Compiler owner) {
-  c.id_keys = owner.id_keys;
-  c.key_ids = owner.key_ids;
-  c.macros = owner.macros;
-  c.object_macros = owner.object_macros;
-  c.imports = owner.imports;
-  c.kw_aliases = owner.kw_aliases;
-  c.kw_seen = owner.kw_seen;
-  c.macro_lisp = owner.macro_lisp;
-  c.declaration_effects = owner.declaration_effects;
+  $copy_fields(c, owner, id_keys, key_ids);
+  $segment_state(c, owner);
   c.borrowed_lisp = c.macro_lisp != NULL;
   c.share_meta_group(owner);
 }
@@ -2515,13 +2517,7 @@ void Compiler.take_unit_state(Compiler c, Compiler owner) {
     the shadow is released.
 */
 void Compiler.return_unit_state(Compiler c, Compiler owner) {
-  owner.macros = c.macros;
-  owner.object_macros = c.object_macros;
-  owner.imports = c.imports;
-  owner.kw_aliases = c.kw_aliases;
-  owner.kw_seen = c.kw_seen;
-  owner.macro_lisp = c.macro_lisp;
-  owner.declaration_effects = c.declaration_effects;
+  $segment_state(owner, c);
   owner.declaration_produced |= c.declaration_produced;
   c.borrowed_lisp = c.macro_lisp != NULL;
 }
@@ -2661,66 +2657,36 @@ static Compiler _new(Compiler owner) {
 
 static void Compiler._init_tables(Compiler c) {
   c.id_keys = [];
-  c.key_ids = {};
-  c.deps = {};
-  c.macros = {};
-  c.kw_aliases = {};
-  c.kw_seen = {};
-  c.object_macros = {};
-  c.proto_cache = {};
-  c.imports = {};
-  c.init_tokens = {};
-  c.static_init_deps = {};
-  c.fn_defs = {};
-  c.meta_comptime = {};
-  c.meta_regions = {};
-  c.meta_hashes = {};
-  c.meta_calls = {};
-  c.native_meta = {};
+  $set_fields(c, {}, key_ids, deps, macros, kw_aliases, kw_seen,
+              object_macros, proto_cache, imports, init_tokens,
+              static_init_deps, fn_defs, meta_comptime, meta_regions,
+              meta_hashes, meta_calls, native_meta);
 }
 
 /* A child compiler owns its tokens, symbols, and diagnostics. Package
    registries and generated-name state belong to the whole translation
    unit, so every child must mutate the owner's exact objects. */
 static void Compiler._share_unit(Compiler c, Compiler owner) {
-  c.package = owner.package;
-  c.package_dirs = owner.package_dirs;
-  c.package_roots = owner.package_roots;
-  c.package_aliases = owner.package_aliases;
-  c.package_members = owner.package_members;
-  c.names = owner.names;
-  c.source_map = owner.source_map;
-  c.recovery_depth = owner.recovery_depth;
-  c.sources = owner.sources;
-  c.declaration_produced = owner.declaration_produced;
-  c.source_facts = owner.source_facts;
-  c.source_occurrences = owner.source_occurrences;
-  c.source_definitions = owner.source_definitions;
-  c.source_declarations = owner.source_declarations;
-  c.source_texts = owner.source_texts;
-  c.unit_script = owner.unit_script;
-  c.include_dirs = owner.include_dirs;
-  c.meta_build = owner.meta_build;
+  $copy_fields(c, owner, package, package_dirs, package_roots,
+               package_aliases, package_members, package_exports, names,
+               source_map, recovery_depth, sources, declaration_produced,
+               source_facts, source_occurrences, source_definitions,
+               source_declarations, source_texts, unit_script, include_dirs,
+               meta_build);
 }
 
 /* The first compiler of a unit creates the state its children share and
    starts from the shared session's compile-time-only definitions. */
 static void Compiler._own_unit(Compiler c) {
   c.inherit_library_comptime();
-  c.package_roots = {};
-  c.package_aliases = {};
-  c.package_members = {};
+  $set_fields(c, {}, package_roots, package_aliases, package_members,
+              package_exports);
   c.names = Scope.calloc(1, sizeof(struct GenNames));
-  c.names.counters = {};
-  c.names.adapters = {};
-  c.names.file_scope_owners = {};
+  $set_fields(c.names, {}, counters, adapters, file_scope_owners);
 }
 
 static void Compiler._init_queues(Compiler c) {
-  c.inits = [];
-  c.early_decls = [];
-  c.meta_defs = [];
-  c.meta_group = [];
+  $set_fields(c, [], inits, early_decls, meta_defs, meta_group);
   c.meta_group_bound = {};
 }
 

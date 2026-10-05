@@ -32,7 +32,7 @@ pool are reclaimed unless promoted; ancestor-owned values remain live.
 **Raises:** `<bad-state>` when no bracket is open. The failure leaves the
 active pool unchanged.
 
-Source: `lib/pool.x:958`
+Source: `lib/pool.x:1003`
 
 <a id="Pool.current"></a>
 #### Pool.current
@@ -43,7 +43,7 @@ Returns the borrowed canonical-value pool active on this thread.
 The process root is installed lazily on first use, so the result is never
 NULL. The pool is borrowed: do not release it with `Pool.release`.
 
-Source: `lib/pool.x:891`
+Source: `lib/pool.x:936`
 
 <a id="Pool.detach"></a>
 #### Pool.detach
@@ -58,7 +58,7 @@ explicit `Pool.release`.
 **Raises:** `<bad-state>` when no bracket is open. The failure leaves the
 active pool unchanged.
 
-Source: `lib/pool.x:970`
+Source: `lib/pool.x:1015`
 
 <a id="Pool.epoch"></a>
 #### Pool.epoch
@@ -71,7 +71,7 @@ entry: a released level's addresses can be reused, so identities admitted
 under an earlier value prove nothing. The counter only advances, so a
 reader needs no lock to tell that something was released.
 
-Source: `lib/pool.x:989`
+Source: `lib/pool.x:1034`
 
 <a id="Pool.intern_new"></a>
 #### Pool.intern_new
@@ -81,14 +81,14 @@ Source: `lib/pool.x:989`
 Returns the canonical value equal to `object`, installing it in `inner`.
 This is `Pool.intern` for a caller that has already searched the whole
 chain from `inner` outward and found nothing, so only the innermost level
-is probed. The fused `Map` operation still decides the identity, which
+is probed. The fused table operation still decides the identity, which
 keeps one canonical pointer per equal value in `inner` even when another
 worker interns the same value first.
 
-**Raises:** `<bad-arg>` when `inner` or `alloc` is NULL. `Map` insertion
+**Raises:** `<bad-arg>` when `inner` or `alloc` is NULL. Table insertion
 causes propagate and leave the object unregistered.
 
-Source: `lib/pool.x:233`
+Source: `lib/pool.x:277`
 
 <a id="Pool.open"></a>
 #### Pool.open
@@ -107,7 +107,7 @@ this with one `Pool.close` or detach it for transfer.
 **See:** [`Pool.close`](#Pool.close), [`Pool.open_named`](#Pool.open_named),
 [`List.promote`](list.md#List.promote)
 
-Source: `lib/pool.x:950`
+Source: `lib/pool.x:995`
 
 <a id="Pool.open_named"></a>
 #### Pool.open_named
@@ -124,7 +124,7 @@ diagnostics.
 
 **See:** [`Pool.open`](#Pool.open), [`Pool.close`](#Pool.close)
 
-Source: `lib/pool.x:935`
+Source: `lib/pool.x:980`
 
 <a id="Pool.stats"></a>
 #### Pool.stats
@@ -135,7 +135,7 @@ Returns this level's canonical counts plus process-wide storage counters.
 A null pool reports depth and per-level counts as zero. The counters are a
 snapshot; nothing in the result stays live with the pool.
 
-Source: `lib/pool.x:756`
+Source: `lib/pool.x:800`
 
 ## Advanced and interop API
 
@@ -159,7 +159,7 @@ invalid. Children must already be released, and no caller may use `inner`
 afterward. Use `Pool.close` instead to end a bracket opened with
 `Pool.open`.
 
-Source: `lib/pool.x:837`
+Source: `lib/pool.x:882`
 
 <a id="Pool.retain"></a>
 #### Pool.retain
@@ -170,7 +170,7 @@ Returns an unnamed child of `inner`, without making it thread-active.
 Ownership, failures, and the comparison with `Pool.open` follow
 `Pool.retain_named`.
 
-Source: `lib/pool.x:828`
+Source: `lib/pool.x:873`
 
 <a id="Pool.retain_named"></a>
 #### Pool.retain_named
@@ -178,7 +178,7 @@ Source: `lib/pool.x:828`
 `Pool Pool.retain_named(Pool inner, const char *name)`
 
 Returns a new named child of `inner` without making it thread-active.
-The child owns its control `Scope`, `Map`, and mutex and must be released
+The child owns its control `Scope`, table, and mutex and must be released
 before `inner`. Use `Pool.open_named` instead to open a bracket that the
 canonical `String` and `List` operations allocate into.
 
@@ -186,7 +186,7 @@ canonical `String` and `List` operations allocate into.
 partial child resources and leaves `inner` unchanged; native mutex
 initialization failure aborts.
 
-Source: `lib/pool.x:787`
+Source: `lib/pool.x:831`
 
 ## Runtime-internal callables
 
@@ -223,7 +223,7 @@ freed this way. A null allocation does nothing.
 
 **Raises:** `<bad-arg>` when `inner` is NULL and `alloc` is not.
 
-Source: `lib/pool.x:377`
+Source: `lib/pool.x:421`
 
 <a id="Pool.initialize"></a>
 #### Pool.initialize
@@ -236,7 +236,7 @@ Creates the process-wide canonical-value root and makes it active here.
 **Raises:** `<alloc-fail>` if the root cannot be constructed. Native mutex
 initialization failure aborts.
 
-Source: `lib/pool.x:901`
+Source: `lib/pool.x:946`
 
 <a id="Pool.insert"></a>
 #### Pool.insert
@@ -248,10 +248,10 @@ The caller must have ruled out an equal identity in this pool chain; this
 primitive neither searches ancestors nor takes ownership of separate
 object storage.
 
-**Raises:** `<bad-arg>` when `inner` is NULL. Map insertion causes propagate
+**Raises:** `<bad-arg>` when `inner` is NULL. Table insertion causes propagate
 and leave the object unregistered.
 
-Source: `lib/pool.x:255`
+Source: `lib/pool.x:299`
 
 <a id="Pool.intern"></a>
 #### Pool.intern
@@ -264,15 +264,15 @@ a hit releases that losing candidate immediately. A failed insertion
 leaves the candidate owned by the caller so its existing cleanup boundary
 runs.
 
-Ancestors are checked before the innermost fused `Map` operation. `Pool`'s
+Ancestors are checked before the innermost fused table operation. `Pool`'s
 single-canonical-pointer invariant makes that order equivalent to outward
 shadowing while allowing the innermost table to be probed exactly once.
 A caller that has already searched the chain uses `Pool.intern_new`.
 
-**Raises:** `<bad-arg>` when `inner` or `alloc` is NULL. `Map` lookup and
+**Raises:** `<bad-arg>` when `inner` or `alloc` is NULL. Table lookup and
 insertion causes propagate.
 
-Source: `lib/pool.x:194`
+Source: `lib/pool.x:238`
 
 <a id="Pool.is_permanent"></a>
 #### Pool.is_permanent
@@ -283,7 +283,7 @@ Reports whether the process root owns `value` as its canonical identity.
 Nothing is promoted, and no open bracket can reclaim a value that answers
 one.
 
-Source: `lib/pool.x:981`
+Source: `lib/pool.x:1026`
 
 <a id="Pool.lookup"></a>
 #### Pool.lookup
@@ -293,7 +293,7 @@ Source: `lib/pool.x:981`
 Returns the first value equal to `key` from `inner` outward, or `void`.
 The returned identity remains owned by the level where it was found.
 
-Source: `lib/pool.x:145`
+Source: `lib/pool.x:189`
 
 <a id="Pool.malloc"></a>
 #### Pool.malloc
@@ -308,7 +308,7 @@ ordinary `Scope` ownership.
 request overflows `Scope` storage, or `<alloc-fail>` when storage cannot
 be allocated.
 
-Source: `lib/pool.x:293`
+Source: `lib/pool.x:337`
 
 <a id="Pool.own"></a>
 #### Pool.own
@@ -327,7 +327,7 @@ one, though `Pool.is_permanent` answers zero for its surviving copy.
 
 **Raises:** `<alloc-fail>` when promotion metadata cannot be allocated.
 
-Source: `lib/pool.x:600`
+Source: `lib/pool.x:644`
 
 <a id="Pool.owns"></a>
 #### Pool.owns
@@ -337,7 +337,7 @@ Source: `lib/pool.x:600`
 Reports whether this exact level stores `key` as its canonical identity.
 Ancestors are not searched, and a null pool reports zero.
 
-Source: `lib/pool.x:271`
+Source: `lib/pool.x:315`
 
 <a id="Pool.promote"></a>
 #### Pool.promote
@@ -353,7 +353,7 @@ null allocation.
 **Raises:** `<alloc-fail>`, `<size-limit>`, or `<invariant>` while recording
 the promotion; that transfer may happen before storage is marked or moved.
 
-Source: `lib/pool.x:583`
+Source: `lib/pool.x:627`
 
 <a id="Pool.shutdown"></a>
 #### Pool.shutdown
@@ -364,7 +364,7 @@ Releases this thread's open brackets and then the process root.
 Call it only after every worker has stopped and no canonical value is
 still in use. A repeat call after the root is gone does nothing.
 
-Source: `lib/pool.x:920`
+Source: `lib/pool.x:965`
 
 <a id="Pool.thread_initialize"></a>
 #### Pool.thread_initialize
@@ -374,7 +374,7 @@ Source: `lib/pool.x:920`
 Installs the existing process root in a newly created worker thread.
 The root must already exist; otherwise the process aborts.
 
-Source: `lib/pool.x:910`
+Source: `lib/pool.x:955`
 
 <a id="Pool.thread_start"></a>
 #### Pool.thread_start
@@ -384,7 +384,7 @@ Source: `lib/pool.x:910`
 Makes `Pool` lock from here on, for a process about to start a worker.
 `Thread.start` calls this before `pthread_create`. It never clears.
 
-Source: `lib/pool.x:712`
+Source: `lib/pool.x:756`
 
 ## Public types
 
@@ -392,18 +392,19 @@ Source: `lib/pool.x:712`
 | --- | --- | --- |
 | [`Pool`](#Pool) | struct | Holds one level of canonical values and their backing storage. |
 | [`PoolStats`](#PoolStats) | struct | Reports one pool level's activity and process-wide storage counters. |
+| [`PoolTable`](#PoolTable) | struct | Maps each canonical value of one `Pool` level to itself. |
 
 <a id="Pool"></a>
 ### Pool
 
-`typedef struct Pool { Scope scope, Map table, struct Pool *up, pthread_mutex_t mutex; unsigned child_capacity; size_t interned, promoted, void *blocks, *current[10], *promotions; } *Pool`
+`typedef struct Pool { Scope scope, PoolTable table, struct Pool *up, pthread_mutex_t mutex; unsigned child_capacity; size_t interned, promoted, void *blocks, *current[10], *promotions; } *Pool`
 
 Holds one level of canonical values and their backing storage.
 Pools are released from child to parent. Their handles and unpromoted
 allocations become invalid at release; promoted identities retain their
 pointers under the parent.
 
-Source: `lib/pool.x:29`
+Source: `lib/pool.x:38`
 
 <a id="PoolStats"></a>
 ### PoolStats
@@ -413,7 +414,19 @@ Source: `lib/pool.x:29`
 Reports one pool level's activity and process-wide storage counters.
 The snapshot owns no storage; `requested_bytes` saturates at `SIZE_MAX`.
 
-Source: `lib/pool.x:38`
+Source: `lib/pool.x:47`
+
+<a id="PoolTable"></a>
+### PoolTable
+
+`typedef struct PoolTable { Scope scope, Bytes hashes, entries; unsigned used, capacity, mask; } *PoolTable`
+
+Maps each canonical value of one `Pool` level to itself.
+A bucket stores the value once, beside its 32-bit hash, so the table costs
+12 bytes per bucket where a `Map` costs 20. It belongs to the level's
+`Scope`.
+
+Source: `lib/pool.x:28`
 
 ## Design notes
 

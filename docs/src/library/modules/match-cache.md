@@ -125,7 +125,7 @@ invalidates every alias.
 **Raises:** `<bad-state>` when a lease remains active. The failure leaves the
 cache intact.
 
-Source: `lib/match-cache.x:571`
+Source: `lib/match-cache.x:572`
 
 <a id="MatchCache.flush_default"></a>
 #### MatchCache.flush_default

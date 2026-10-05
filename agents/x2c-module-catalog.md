@@ -21,11 +21,13 @@ shared helpers for x2c compiler AST nodes.
 Public functions:
 
 `binding_identity_new`, `binding_identity_try_parts`,
-`binding_identity_spelling`, `Ast.designated`, `Ast.lvalue_binding`,
-`Ast.written_operand`, `Ast.rewrite_children`, `ast_contains_head`,
-`ast_collect_binding_references`, `Ast.without_origin`, `Ast.rewrap_origin`,
-`Ast.never_returns`, `Symbol.is_assignment_op`, `ast_changes_left_operand`,
-`Ast.initializer_cases`, `Ast.initializer_functions`
+`binding_identity_spelling`, `ast_prototype_declarator`, `Ast.designated`,
+`Ast.lvalue_binding`, `ast_addressed_identifier`, `ast_direct_identifier`,
+`ast_indirect_identifier`, `Ast.written_operand`, `Ast.rewrite_children`,
+`ast_contains_head`, `ast_collect_binding_references`, `Ast.without_origin`,
+`Ast.rewrap_origin`, `Ast.never_returns`, `Symbol.is_assignment_op`,
+`ast_changes_left_operand`, `Ast.initializer_cases`,
+`Ast.initializer_functions`
 
 ### [src/build.x](../src/build.x)
 
@@ -165,7 +167,7 @@ Public functions:
 `Diagnostics.release`, `Diagnostics.entries`, `Diagnostics.reached_limit`,
 `Diagnostics.report`, `diagnostics_write_json`, `Compiler.print_diagnostic`,
 `Compiler.origin_location`, `Compiler.display_path`, `Compiler.token_location`,
-`Compiler.report_error`, `Compiler.report_warning`,
+`Compiler.token_source`, `Compiler.report_error`, `Compiler.report_warning`,
 `Compiler.report_warning_at`, `Compiler.take_diagnostics`,
 `Compiler.error_count`, `Compiler.diagnostics`, `Compiler.dump_tokens`,
 `Compiler.dump_symbol_table`, `Compiler.dump_cache`
@@ -317,14 +319,14 @@ Public functions:
 `Compiler.keep_imported_meta`, `Compiler.at_import`,
 `Compiler.record_macro_export`, `Compiler.import_exported`,
 `Compiler.evaluate_declaration_effect`, `Compiler.parse_macro_lisp_expression`,
-`Compiler.lift_macro_lisp_expression`, `Compiler.import_package_macros`,
-`Compiler.source_path`, `Compiler.open_macro_library`,
-`Compiler.publish_macro_library`, `Compiler.inherits_import`,
-`Compiler.record_comptime`, `Compiler.inherit_library_comptime`,
-`macro_library_filling`, `Compiler.shared_definitions`,
-`Compiler.shares_meta_definition`, `Compiler.install_builtin_macros`,
-`Compiler.bind_meta_operation`, `Compiler.report_lisp_failure`,
-`macro_library_reset`
+`Compiler.lift_macro_lisp_expression`, `Compiler.bind_macro_lisp_statement`,
+`Compiler.import_package_macros`, `Compiler.source_path`,
+`Compiler.open_macro_library`, `Compiler.publish_macro_library`,
+`Compiler.inherits_import`, `Compiler.record_comptime`,
+`Compiler.inherit_library_comptime`, `macro_library_filling`,
+`Compiler.shared_definitions`, `Compiler.shares_meta_definition`,
+`Compiler.install_builtin_macros`, `Compiler.bind_meta_operation`,
+`Compiler.report_lisp_failure`, `macro_library_reset`
 
 ### [src/main.x](../src/main.x)
 
@@ -363,8 +365,9 @@ meta functions and the native code they call.
 
 Public functions:
 
-`Compiler.install_meta_function`, `Compiler.install_meta_declaration`,
-`Compiler.evaluate_meta_expression`, `Compiler.run_meta_call`,
+`Compiler.install_meta_function`, `Compiler.install_collected_meta_function`,
+`Compiler.install_meta_declaration`, `Compiler.evaluate_meta_expression`,
+`Compiler.evaluate_meta_statement`, `Compiler.run_meta_call`,
 `Compiler.record_native_meta_effect`, `Compiler.install_native_meta_effects`,
 `Compiler.bind_native_meta`, `Compiler.install_native_meta_function`,
 `Compiler.native_meta_accepts`, `Compiler.native_meta_module`,
@@ -451,9 +454,9 @@ Public functions:
 
 `preproc_directive`, `preproc_conditional_kind`, `preproc_open_state`,
 `preproc_branch_state`, `preproc_visibility`, `preproc_include_target`,
-`Compiler.scan_conditionals`, `Compiler.leading_preproc`,
-`Compiler.update_source_visibility`, `Compiler.note_object_macro`,
-`preproc_track_arms`, `preproc_within_arms`
+`preproc_marker_file`, `Compiler.scan_conditionals`,
+`Compiler.leading_preproc`, `Compiler.update_source_visibility`,
+`Compiler.note_object_macro`, `preproc_track_arms`, `preproc_within_arms`
 
 ### [src/project.x](../src/project.x)
 
@@ -611,25 +614,23 @@ Public functions:
 
 `Var.type`, `Type.list`, `List.type`, `List.type_from_ast`,
 `Type.declaration_parts`, `Type.declaration_ast`, `Type.parameter_ast`,
-`ast_prototype_declarator`, `Symbol.is_storage_class`, `Symbol.is_inline`,
-`Symbol.is_type_qualifier`, `Symbol.is_type_modifier`,
-`Symbol.is_builtin_type`, `Type.is_aggregate`, `Type.is_aggregate_tag`,
-`Type.is_aggregate_tag_body`, `Type.is_enum`, `Type.is_enum_tag`,
-`Type.is_enum_tag_body`, `Type.tag`, `Type.body`, `Type.is_pointer`,
-`Type.is_reference`, `Type.is_array`, `Type.is_function`, `Type.is_bitfield`,
-`Type.dereference`, `Type.qualify`, `Type.reference`, `Type.apply`,
-`Type.function_parts`, `Type.is_static`, `Type.is_inline`, `Type.is_extern`,
-`Type.is_threaded`, `Type.is_typedef`, `Type.base_type`, `Type.canonicalize`,
-`Type.declared`, `Type.discards_qualifiers`, `Type.is_builtin`,
-`Type.is_typedef_name`, `Type.is_bare_typedef_name`, `Type.is_number`,
-`Type.is_integral`, `Type.scalar`, `Type.scalar_tag`,
-`Type.var_numeric_extractor`, `Type.var_numeric_update_helper`, `Type.promote`,
-`Type.widest`, `Type.numeric_literal`, `Type.numeric_literal_value`,
-`Type.integer_literal_magnitude`, `ast_addressed_identifier`,
-`ast_direct_identifier`, `ast_indirect_identifier`, `Type.var_tag`,
-`Type.fixed_var_tag`, `Type.var_converter`, `Type.var_tag_row`,
-`Type.register_var_tag`, `Type.register_var_adoption`, `Type.begin_unit`,
-`Type.end_unit`
+`Symbol.is_storage_class`, `Symbol.is_inline`, `Symbol.is_type_qualifier`,
+`Symbol.is_type_modifier`, `Symbol.is_builtin_type`, `Type.is_aggregate`,
+`Type.is_aggregate_tag`, `Type.is_aggregate_tag_body`, `Type.is_enum`,
+`Type.is_enum_tag`, `Type.is_enum_tag_body`, `Type.tag`, `Type.body`,
+`Type.is_pointer`, `Type.is_reference`, `Type.is_array`, `Type.is_function`,
+`Type.is_bitfield`, `Type.dereference`, `Type.qualify`, `Type.reference`,
+`Type.apply`, `Type.function_parts`, `Type.is_static`, `Type.is_inline`,
+`Type.is_extern`, `Type.is_threaded`, `Type.is_typedef`, `Type.base_type`,
+`Type.canonicalize`, `Type.declared`, `Type.discards_qualifiers`,
+`Type.is_char_pointer_like`, `Type.is_builtin`, `Type.is_typedef_name`,
+`Type.is_bare_typedef_name`, `Type.is_number`, `Type.is_integral`,
+`Type.scalar`, `Type.scalar_tag`, `Type.var_numeric_extractor`,
+`Type.var_numeric_update_helper`, `Type.promote`, `Type.widest`,
+`Type.numeric_literal`, `Type.numeric_literal_value`,
+`Type.integer_literal_magnitude`, `Type.var_tag`, `Type.fixed_var_tag`,
+`Type.var_converter`, `Type.var_tag_row`, `Type.register_var_tag`,
+`Type.register_var_adoption`, `Type.begin_unit`, `Type.end_unit`
 
 ### [src/utils.x](../src/utils.x)
 
@@ -952,16 +953,16 @@ optional compound `List` selectors.
 
 Public functions:
 
-`List.cdar`, `List.caaar`, `List.caadr`, `List.cadar`, `List.cdaar`,
-`List.cdadr`, `List.cddar`, `List.cdddr`, `List.caaaar`, `List.caaadr`,
-`List.caadar`, `List.caaddr`, `List.cadaar`, `List.cadadr`, `List.caddar`,
-`List.cadddr`, `List.cdaaar`, `List.cdaadr`, `List.cdadar`, `List.cdaddr`,
-`List.cddaar`, `List.cddadr`, `List.cdddar`, `List.cddddr`, `Var.cdar`,
-`Var.caaar`, `Var.caadr`, `Var.cadar`, `Var.cdaar`, `Var.cdadr`, `Var.cddar`,
-`Var.cdddr`, `Var.caaaar`, `Var.caaadr`, `Var.caadar`, `Var.caaddr`,
-`Var.cadaar`, `Var.cadadr`, `Var.caddar`, `Var.cadddr`, `Var.cdaaar`,
-`Var.cdaadr`, `Var.cdadar`, `Var.cdaddr`, `Var.cddaar`, `Var.cddadr`,
-`Var.cdddar`, `Var.cddddr`
+`List.cdar`, `Var.cdar`, `List.caaar`, `Var.caaar`, `List.cdaar`, `Var.cdaar`,
+`List.cadar`, `Var.cadar`, `List.cddar`, `Var.cddar`, `List.caadr`,
+`Var.caadr`, `List.cdadr`, `Var.cdadr`, `List.cdddr`, `Var.cdddr`,
+`List.caaaar`, `Var.caaaar`, `List.cdaaar`, `Var.cdaaar`, `List.cadaar`,
+`Var.cadaar`, `List.cddaar`, `Var.cddaar`, `List.caadar`, `Var.caadar`,
+`List.cdadar`, `Var.cdadar`, `List.caddar`, `Var.caddar`, `List.cdddar`,
+`Var.cdddar`, `List.caaadr`, `Var.caaadr`, `List.cdaadr`, `Var.cdaadr`,
+`List.cadadr`, `Var.cadadr`, `List.cddadr`, `Var.cddadr`, `List.caaddr`,
+`Var.caaddr`, `List.cdaddr`, `Var.cdaddr`, `List.cadddr`, `Var.cadddr`,
+`List.cddddr`, `Var.cddddr`
 
 ### [lib/list.x](../lib/list.x)
 
@@ -1018,9 +1019,10 @@ macros as values that build and recognize code.
 
 Public functions:
 
-`Macro_close`, `Macro_apply`, `Macro.inserted`, `Macro.typed`, `Macro.subject`,
-`Macro.use_subject`, `Macro_pattern`, `Macro.binder`, `Macro.number_type`,
-`Macro.number_literal`, `Macro_case_pattern`, `Macro_case_capture_at`
+`Macro_close`, `Macro_apply`, `Macro.inserted`, `Macro.declared`,
+`Macro.inserted_items`, `Macro.typed`, `Macro.subject`, `Macro.use_subject`,
+`Macro_pattern`, `Macro.binder`, `Macro.number_type`, `Macro.number_literal`,
+`Macro_case_pattern`, `Macro_case_capture_at`
 
 ### [lib/map.x](../lib/map.x)
 
@@ -1100,7 +1102,8 @@ Public functions:
 `x2c_literal_string`, `x2c_literal_int`, `x2c_literal_symbol`,
 `x2c_expr_ident`, `x2c_expr_index`, `x2c_expr_call`, `x2c_expr_composite`,
 `x2c_stmnt_make`, `x2c_stmnt_return`, `x2c_block_make`, `x2c_function_body`,
-`x2c_parameters_arguments`, `type_base_suffix`, `type_declaration_parts`
+`x2c_parameters_arguments`, `type_base_suffix`, `type_name_error`,
+`type_declaration_parts`
 
 ### [lib/mutex.x](../lib/mutex.x)
 

@@ -4,13 +4,15 @@ typedef List converter_inherit_Base;
 typedef converter_inherit_Base converter_inherit_Leaf;
 typedef converter_inherit_Leaf converter_inherit_Override;
 typedef int converter_inherit_Count;
+typedef String converter_inherit_Text;
 
 converter_inherit_Count converter_inherit_Base.converter_inherit_count(
   converter_inherit_Base values) {
   return values.len();
 }
 
-String converter_inherit_Override.str(converter_inherit_Override values) {
+converter_inherit_Text converter_inherit_Override.str(
+  converter_inherit_Override values) {
   return values ? "override" : "empty";
 }
 

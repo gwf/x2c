@@ -1,6 +1,9 @@
 #include "x2c.x"
 
 typedef String Text;
+typedef String Long;
+typedef List ExtremelyLongCamelCaseCaptureType;
+typedef String extremelylongcamelcasecapturetype;
 
 static void bad_guard(void) { raise %(failed); }
 
@@ -77,6 +80,22 @@ int main(void) {
     case %(!or ?(List pair) (left ?) (right ?)): optional = pair.len();
   printf("aliases %d %d\n", alias, optional);
 
+  int list_name = 0, string_name = 0, capital_name = 0;
+  match (%((1 2)))
+    case %(?(ExtremelyLongCamelCaseCaptureType value)):
+      list_name = value.len();
+  match (%("text"))
+    case %(?(extremelylongcamelcasecapturetype value)):
+      string_name = value.len();
+  match (%("named")) {
+    case %(?(long value)): capital_name = -1;
+    case %(?(Long value)): capital_name = value.len();
+  }
+  Var boxed_name = "direct";
+  Long direct_name = boxed_name;
+  printf("type names %d %d %d %d\n",
+         list_name, string_name, capital_name, direct_name.len());
+
   void *raw = "raw";
   int pointer = 0;
   match (%(${raw})) {
@@ -131,6 +150,8 @@ int main(void) {
   return spaced == 1 && result == 4 && guards == 2 && text == "outer" &&
          repeated == 4 && alternative == 5 && nested == 6 && quoted == 1 &&
          alias == 4 && optional == 2 && pointer == 1 && numeric == 1 &&
+         list_name == 2 && string_name == 4 && capital_name == 5 &&
+         direct_name.len() == 6 &&
          dynamic == 5 && evaluations == 1 &&
          cleanup == 2 && final == 2 &&
          visited == 3 && continued == 2 && caught == 1 &&

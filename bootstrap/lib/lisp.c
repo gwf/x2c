@@ -110,130 +110,130 @@ static Var _x2c_macro_load_1(const void * _x2c_macro_bytes_2, Scope * _x2c_macro
 
 static void _x2c_macro_store_1(void * _x2c_macro_bytes_3, Var _x2c_macro_value_3);
 
-static struct NativeScalarAccess _native_scalar_access_signed_char;
+static struct NativeScalarAccess _native_scalar_access_double;
 
-_x2c_initializer_choice_D09CF48E_1((_native_scalar_access_signed_char =(struct NativeScalarAccess){
-  26993, sizeof(signed char), _Alignof(signed char), _x2c_macro_load_1, _x2c_macro_store_1
+_x2c_initializer_choice_D09CF48E_1((_native_scalar_access_double =(struct NativeScalarAccess){
+  3356265, sizeof(double), _Alignof(double), _x2c_macro_load_1, _x2c_macro_store_1
 }
 ))
 static Var _x2c_macro_load_2(const void * _x2c_macro_bytes_4, Scope * _x2c_macro_owner_2);
 
 static void _x2c_macro_store_2(void * _x2c_macro_bytes_5, Var _x2c_macro_value_5);
 
-static struct NativeScalarAccess _native_scalar_access_unsigned_char;
+static struct NativeScalarAccess _native_scalar_access_float;
 
-_x2c_initializer_choice_D09CF48E_2((_native_scalar_access_unsigned_char =(struct NativeScalarAccess){
-  30065, sizeof(unsigned char), _Alignof(unsigned char), _x2c_macro_load_2, _x2c_macro_store_2
+_x2c_initializer_choice_D09CF48E_2((_native_scalar_access_float =(struct NativeScalarAccess){
+  3355493, sizeof(float), _Alignof(float), _x2c_macro_load_2, _x2c_macro_store_2
 }
 ))
 static Var _x2c_macro_load_3(const void * _x2c_macro_bytes_6, Scope * _x2c_macro_owner_3);
 
 static void _x2c_macro_store_3(void * _x2c_macro_bytes_7, Var _x2c_macro_value_7);
 
-static struct NativeScalarAccess _native_scalar_access_short;
+static struct NativeScalarAccess _native_scalar_access_int;
 
-_x2c_initializer_choice_D09CF48E_3((_native_scalar_access_short =(struct NativeScalarAccess){
-  3453293, sizeof(short), _Alignof(short), _x2c_macro_load_3, _x2c_macro_store_3
+_x2c_initializer_choice_D09CF48E_3((_native_scalar_access_int =(struct NativeScalarAccess){
+  3453797, sizeof(int), _Alignof(int), _x2c_macro_load_3, _x2c_macro_store_3
 }
 ))
 static Var _x2c_macro_load_4(const void * _x2c_macro_bytes_8, Scope * _x2c_macro_owner_4);
 
 static void _x2c_macro_store_4(void * _x2c_macro_bytes_9, Var _x2c_macro_value_9);
 
-static struct NativeScalarAccess _native_scalar_access_unsigned_short;
+static struct NativeScalarAccess _native_scalar_access_long;
 
-_x2c_initializer_choice_D09CF48E_4((_native_scalar_access_unsigned_short =(struct NativeScalarAccess){
-  3846509, sizeof(unsigned short), _Alignof(unsigned short), _x2c_macro_load_4, _x2c_macro_store_4
+_x2c_initializer_choice_D09CF48E_4((_native_scalar_access_long =(struct NativeScalarAccess){
+  818062, sizeof(long), _Alignof(long), _x2c_macro_load_4, _x2c_macro_store_4
 }
 ))
 static Var _x2c_macro_load_5(const void * _x2c_macro_bytes_10, Scope * _x2c_macro_owner_5);
 
 static void _x2c_macro_store_5(void * _x2c_macro_bytes_11, Var _x2c_macro_value_11);
 
-static struct NativeScalarAccess _native_scalar_access_int;
+static struct NativeScalarAccess _native_scalar_access_long_double;
 
-_x2c_initializer_choice_D09CF48E_5((_native_scalar_access_int =(struct NativeScalarAccess){
-  3453797, sizeof(int), _Alignof(int), _x2c_macro_load_5, _x2c_macro_store_5
+_x2c_initializer_choice_D09CF48E_5((_native_scalar_access_long_double =(struct NativeScalarAccess){
+  26071077642, sizeof(long double), _Alignof(long double), _x2c_macro_load_5, _x2c_macro_store_5
 }
 ))
 static Var _x2c_macro_load_6(const void * _x2c_macro_bytes_12, Scope * _x2c_macro_owner_6);
 
 static void _x2c_macro_store_6(void * _x2c_macro_bytes_13, Var _x2c_macro_value_13);
 
-static struct NativeScalarAccess _native_scalar_access_unsigned;
+static struct NativeScalarAccess _native_scalar_access_long_long;
 
-_x2c_initializer_choice_D09CF48E_6((_native_scalar_access_unsigned =(struct NativeScalarAccess){
-  3847013, sizeof(unsigned), _Alignof(unsigned), _x2c_macro_load_6, _x2c_macro_store_6
+_x2c_initializer_choice_D09CF48E_6((_native_scalar_access_long_long =(struct NativeScalarAccess){
+  25983886, sizeof(long long), _Alignof(long long), _x2c_macro_load_6, _x2c_macro_store_6
 }
 ))
 static Var _x2c_macro_load_7(const void * _x2c_macro_bytes_14, Scope * _x2c_macro_owner_7);
 
 static void _x2c_macro_store_7(void * _x2c_macro_bytes_15, Var _x2c_macro_value_15);
 
-static struct NativeScalarAccess _native_scalar_access_long;
+static struct NativeScalarAccess _native_scalar_access_short;
 
-_x2c_initializer_choice_D09CF48E_7((_native_scalar_access_long =(struct NativeScalarAccess){
-  818062, sizeof(long), _Alignof(long), _x2c_macro_load_7, _x2c_macro_store_7
+_x2c_initializer_choice_D09CF48E_7((_native_scalar_access_short =(struct NativeScalarAccess){
+  3453293, sizeof(short), _Alignof(short), _x2c_macro_load_7, _x2c_macro_store_7
 }
 ))
 static Var _x2c_macro_load_8(const void * _x2c_macro_bytes_16, Scope * _x2c_macro_owner_8);
 
 static void _x2c_macro_store_8(void * _x2c_macro_bytes_17, Var _x2c_macro_value_17);
 
-static struct NativeScalarAccess _native_scalar_access_unsigned_long;
+static struct NativeScalarAccess _native_scalar_access_signed_char;
 
-_x2c_initializer_choice_D09CF48E_8((_native_scalar_access_unsigned_long =(struct NativeScalarAccess){
-  44858254, sizeof(unsigned long), _Alignof(unsigned long), _x2c_macro_load_8, _x2c_macro_store_8
+_x2c_initializer_choice_D09CF48E_8((_native_scalar_access_signed_char =(struct NativeScalarAccess){
+  26993, sizeof(signed char), _Alignof(signed char), _x2c_macro_load_8, _x2c_macro_store_8
 }
 ))
 static Var _x2c_macro_load_9(const void * _x2c_macro_bytes_18, Scope * _x2c_macro_owner_9);
 
 static void _x2c_macro_store_9(void * _x2c_macro_bytes_19, Var _x2c_macro_value_19);
 
-static struct NativeScalarAccess _native_scalar_access_long_long;
+static struct NativeScalarAccess _native_scalar_access_unsigned;
 
-_x2c_initializer_choice_D09CF48E_9((_native_scalar_access_long_long =(struct NativeScalarAccess){
-  25983886, sizeof(long long), _Alignof(long long), _x2c_macro_load_9, _x2c_macro_store_9
+_x2c_initializer_choice_D09CF48E_9((_native_scalar_access_unsigned =(struct NativeScalarAccess){
+  3847013, sizeof(unsigned), _Alignof(unsigned), _x2c_macro_load_9, _x2c_macro_store_9
 }
 ))
 static Var _x2c_macro_load_10(const void * _x2c_macro_bytes_20, Scope * _x2c_macro_owner_10);
 
 static void _x2c_macro_store_10(void * _x2c_macro_bytes_21, Var _x2c_macro_value_21);
 
-static struct NativeScalarAccess _native_scalar_access_unsigned_long_long;
+static struct NativeScalarAccess _native_scalar_access_unsigned_char;
 
-_x2c_initializer_choice_D09CF48E_10((_native_scalar_access_unsigned_long_long =(struct NativeScalarAccess){
-  1435270030, sizeof(unsigned long long), _Alignof(unsigned long long), _x2c_macro_load_10, _x2c_macro_store_10
+_x2c_initializer_choice_D09CF48E_10((_native_scalar_access_unsigned_char =(struct NativeScalarAccess){
+  30065, sizeof(unsigned char), _Alignof(unsigned char), _x2c_macro_load_10, _x2c_macro_store_10
 }
 ))
 static Var _x2c_macro_load_11(const void * _x2c_macro_bytes_22, Scope * _x2c_macro_owner_11);
 
 static void _x2c_macro_store_11(void * _x2c_macro_bytes_23, Var _x2c_macro_value_23);
 
-static struct NativeScalarAccess _native_scalar_access_float;
+static struct NativeScalarAccess _native_scalar_access_unsigned_long;
 
-_x2c_initializer_choice_D09CF48E_11((_native_scalar_access_float =(struct NativeScalarAccess){
-  3355493, sizeof(float), _Alignof(float), _x2c_macro_load_11, _x2c_macro_store_11
+_x2c_initializer_choice_D09CF48E_11((_native_scalar_access_unsigned_long =(struct NativeScalarAccess){
+  44858254, sizeof(unsigned long), _Alignof(unsigned long), _x2c_macro_load_11, _x2c_macro_store_11
 }
 ))
 static Var _x2c_macro_load_12(const void * _x2c_macro_bytes_24, Scope * _x2c_macro_owner_12);
 
 static void _x2c_macro_store_12(void * _x2c_macro_bytes_25, Var _x2c_macro_value_25);
 
-static struct NativeScalarAccess _native_scalar_access_double;
+static struct NativeScalarAccess _native_scalar_access_unsigned_long_long;
 
-_x2c_initializer_choice_D09CF48E_12((_native_scalar_access_double =(struct NativeScalarAccess){
-  3356265, sizeof(double), _Alignof(double), _x2c_macro_load_12, _x2c_macro_store_12
+_x2c_initializer_choice_D09CF48E_12((_native_scalar_access_unsigned_long_long =(struct NativeScalarAccess){
+  1435270030, sizeof(unsigned long long), _Alignof(unsigned long long), _x2c_macro_load_12, _x2c_macro_store_12
 }
 ))
 static Var _x2c_macro_load_13(const void * _x2c_macro_bytes_26, Scope * _x2c_macro_owner_13);
 
 static void _x2c_macro_store_13(void * _x2c_macro_bytes_27, Var _x2c_macro_value_27);
 
-static struct NativeScalarAccess _native_scalar_access_long_double;
+static struct NativeScalarAccess _native_scalar_access_unsigned_short;
 
-_x2c_initializer_choice_D09CF48E_13((_native_scalar_access_long_double =(struct NativeScalarAccess){
-  26071077642, sizeof(long double), _Alignof(long double), _x2c_macro_load_13, _x2c_macro_store_13
+_x2c_initializer_choice_D09CF48E_13((_native_scalar_access_unsigned_short =(struct NativeScalarAccess){
+  3846509, sizeof(unsigned short), _Alignof(unsigned short), _x2c_macro_load_13, _x2c_macro_store_13
 }
 ))
 static Map native_scalars;
@@ -1080,171 +1080,171 @@ static void _x2c_macro_store_0(void * _x2c_macro_bytes_1, Var _x2c_macro_value_1
   memcpy(_x2c_macro_bytes_1, & _x2c_macro_native_1, sizeof _x2c_macro_native_1);
 }
 
+Var double_var(double);
+
 static Var _x2c_macro_load_1(const void * _x2c_macro_bytes_2, Scope * _x2c_macro_owner_1){
-  signed char _x2c_macro_native_2;
+  double _x2c_macro_native_2;
   memcpy(& _x2c_macro_native_2, _x2c_macro_bytes_2, sizeof _x2c_macro_native_2);
-  Var _x2c_macro_value_2 = Var_new(26993, _x2c_macro_native_2);
+  Var _x2c_macro_value_2 = double_var(_x2c_macro_native_2);
   return Var_move_wide_to(_x2c_macro_value_2, _x2c_macro_owner_1);
 }
 
 static void _x2c_macro_store_1(void * _x2c_macro_bytes_3, Var _x2c_macro_value_3){
-  signed char _x2c_macro_native_3 = Var_char(Var_convert(_x2c_macro_value_3, 26993));
+  double _x2c_macro_native_3 = Var_floating(Var_convert(_x2c_macro_value_3, 3356265));
   memcpy(_x2c_macro_bytes_3, & _x2c_macro_native_3, sizeof _x2c_macro_native_3);
-}
-
-static Var _x2c_macro_load_2(const void * _x2c_macro_bytes_4, Scope * _x2c_macro_owner_2){
-  unsigned char _x2c_macro_native_4;
-  memcpy(& _x2c_macro_native_4, _x2c_macro_bytes_4, sizeof _x2c_macro_native_4);
-  Var _x2c_macro_value_4 = Var_new(30065, _x2c_macro_native_4);
-  return Var_move_wide_to(_x2c_macro_value_4, _x2c_macro_owner_2);
-}
-
-static void _x2c_macro_store_2(void * _x2c_macro_bytes_5, Var _x2c_macro_value_5){
-  unsigned char _x2c_macro_native_5 = Var_uchar(Var_convert(_x2c_macro_value_5, 30065));
-  memcpy(_x2c_macro_bytes_5, & _x2c_macro_native_5, sizeof _x2c_macro_native_5);
-}
-
-Var short_var(short);
-
-static Var _x2c_macro_load_3(const void * _x2c_macro_bytes_6, Scope * _x2c_macro_owner_3){
-  short _x2c_macro_native_6;
-  memcpy(& _x2c_macro_native_6, _x2c_macro_bytes_6, sizeof _x2c_macro_native_6);
-  Var _x2c_macro_value_6 = short_var(_x2c_macro_native_6);
-  return Var_move_wide_to(_x2c_macro_value_6, _x2c_macro_owner_3);
-}
-
-static void _x2c_macro_store_3(void * _x2c_macro_bytes_7, Var _x2c_macro_value_7){
-  short _x2c_macro_native_7 = Var_short(Var_convert(_x2c_macro_value_7, 3453293));
-  memcpy(_x2c_macro_bytes_7, & _x2c_macro_native_7, sizeof _x2c_macro_native_7);
-}
-
-static Var _x2c_macro_load_4(const void * _x2c_macro_bytes_8, Scope * _x2c_macro_owner_4){
-  unsigned short _x2c_macro_native_8;
-  memcpy(& _x2c_macro_native_8, _x2c_macro_bytes_8, sizeof _x2c_macro_native_8);
-  Var _x2c_macro_value_8 = Var_new(3846509, _x2c_macro_native_8);
-  return Var_move_wide_to(_x2c_macro_value_8, _x2c_macro_owner_4);
-}
-
-static void _x2c_macro_store_4(void * _x2c_macro_bytes_9, Var _x2c_macro_value_9){
-  unsigned short _x2c_macro_native_9 = Var_ushort(Var_convert(_x2c_macro_value_9, 3846509));
-  memcpy(_x2c_macro_bytes_9, & _x2c_macro_native_9, sizeof _x2c_macro_native_9);
-}
-
-Var int_var(int);
-
-static Var _x2c_macro_load_5(const void * _x2c_macro_bytes_10, Scope * _x2c_macro_owner_5){
-  int _x2c_macro_native_10;
-  memcpy(& _x2c_macro_native_10, _x2c_macro_bytes_10, sizeof _x2c_macro_native_10);
-  Var _x2c_macro_value_10 = int_var(_x2c_macro_native_10);
-  return Var_move_wide_to(_x2c_macro_value_10, _x2c_macro_owner_5);
-}
-
-static void _x2c_macro_store_5(void * _x2c_macro_bytes_11, Var _x2c_macro_value_11){
-  int _x2c_macro_native_11 = Var_int(Var_convert(_x2c_macro_value_11, 3453797));
-  memcpy(_x2c_macro_bytes_11, & _x2c_macro_native_11, sizeof _x2c_macro_native_11);
-}
-
-Var unsigned_var(unsigned);
-
-static Var _x2c_macro_load_6(const void * _x2c_macro_bytes_12, Scope * _x2c_macro_owner_6){
-  unsigned _x2c_macro_native_12;
-  memcpy(& _x2c_macro_native_12, _x2c_macro_bytes_12, sizeof _x2c_macro_native_12);
-  Var _x2c_macro_value_12 = unsigned_var(_x2c_macro_native_12);
-  return Var_move_wide_to(_x2c_macro_value_12, _x2c_macro_owner_6);
-}
-
-static void _x2c_macro_store_6(void * _x2c_macro_bytes_13, Var _x2c_macro_value_13){
-  unsigned _x2c_macro_native_13 = Var_uint(Var_convert(_x2c_macro_value_13, 3847013));
-  memcpy(_x2c_macro_bytes_13, & _x2c_macro_native_13, sizeof _x2c_macro_native_13);
-}
-
-Var long_var(long);
-
-static Var _x2c_macro_load_7(const void * _x2c_macro_bytes_14, Scope * _x2c_macro_owner_7){
-  long _x2c_macro_native_14;
-  memcpy(& _x2c_macro_native_14, _x2c_macro_bytes_14, sizeof _x2c_macro_native_14);
-  Var _x2c_macro_value_14 = long_var(_x2c_macro_native_14);
-  return Var_move_wide_to(_x2c_macro_value_14, _x2c_macro_owner_7);
-}
-
-static void _x2c_macro_store_7(void * _x2c_macro_bytes_15, Var _x2c_macro_value_15){
-  long _x2c_macro_native_15 = Var_long(Var_convert(_x2c_macro_value_15, 818062));
-  memcpy(_x2c_macro_bytes_15, & _x2c_macro_native_15, sizeof _x2c_macro_native_15);
-}
-
-static Var _x2c_macro_load_8(const void * _x2c_macro_bytes_16, Scope * _x2c_macro_owner_8){
-  unsigned long _x2c_macro_native_16;
-  memcpy(& _x2c_macro_native_16, _x2c_macro_bytes_16, sizeof _x2c_macro_native_16);
-  Var _x2c_macro_value_16 = Var_box_ulong(_x2c_macro_native_16);
-  return Var_move_wide_to(_x2c_macro_value_16, _x2c_macro_owner_8);
-}
-
-static void _x2c_macro_store_8(void * _x2c_macro_bytes_17, Var _x2c_macro_value_17){
-  unsigned long _x2c_macro_native_17 = Var_ulong(Var_convert(_x2c_macro_value_17, 44858254));
-  memcpy(_x2c_macro_bytes_17, & _x2c_macro_native_17, sizeof _x2c_macro_native_17);
-}
-
-static Var _x2c_macro_load_9(const void * _x2c_macro_bytes_18, Scope * _x2c_macro_owner_9){
-  long long _x2c_macro_native_18;
-  memcpy(& _x2c_macro_native_18, _x2c_macro_bytes_18, sizeof _x2c_macro_native_18);
-  Var _x2c_macro_value_18 = Var_box_long_long(_x2c_macro_native_18);
-  return Var_move_wide_to(_x2c_macro_value_18, _x2c_macro_owner_9);
-}
-
-static void _x2c_macro_store_9(void * _x2c_macro_bytes_19, Var _x2c_macro_value_19){
-  long long _x2c_macro_native_19 = Var_long_long(Var_convert(_x2c_macro_value_19, 25983886));
-  memcpy(_x2c_macro_bytes_19, & _x2c_macro_native_19, sizeof _x2c_macro_native_19);
-}
-
-static Var _x2c_macro_load_10(const void * _x2c_macro_bytes_20, Scope * _x2c_macro_owner_10){
-  unsigned long long _x2c_macro_native_20;
-  memcpy(& _x2c_macro_native_20, _x2c_macro_bytes_20, sizeof _x2c_macro_native_20);
-  Var _x2c_macro_value_20 = Var_box_ulong_long(_x2c_macro_native_20);
-  return Var_move_wide_to(_x2c_macro_value_20, _x2c_macro_owner_10);
-}
-
-static void _x2c_macro_store_10(void * _x2c_macro_bytes_21, Var _x2c_macro_value_21){
-  unsigned long long _x2c_macro_native_21 = Var_ulong_long(Var_convert(_x2c_macro_value_21, 1435270030));
-  memcpy(_x2c_macro_bytes_21, & _x2c_macro_native_21, sizeof _x2c_macro_native_21);
 }
 
 Var float_var(float);
 
+static Var _x2c_macro_load_2(const void * _x2c_macro_bytes_4, Scope * _x2c_macro_owner_2){
+  float _x2c_macro_native_4;
+  memcpy(& _x2c_macro_native_4, _x2c_macro_bytes_4, sizeof _x2c_macro_native_4);
+  Var _x2c_macro_value_4 = float_var(_x2c_macro_native_4);
+  return Var_move_wide_to(_x2c_macro_value_4, _x2c_macro_owner_2);
+}
+
+static void _x2c_macro_store_2(void * _x2c_macro_bytes_5, Var _x2c_macro_value_5){
+  float _x2c_macro_native_5 = Var_float(Var_convert(_x2c_macro_value_5, 3355493));
+  memcpy(_x2c_macro_bytes_5, & _x2c_macro_native_5, sizeof _x2c_macro_native_5);
+}
+
+Var int_var(int);
+
+static Var _x2c_macro_load_3(const void * _x2c_macro_bytes_6, Scope * _x2c_macro_owner_3){
+  int _x2c_macro_native_6;
+  memcpy(& _x2c_macro_native_6, _x2c_macro_bytes_6, sizeof _x2c_macro_native_6);
+  Var _x2c_macro_value_6 = int_var(_x2c_macro_native_6);
+  return Var_move_wide_to(_x2c_macro_value_6, _x2c_macro_owner_3);
+}
+
+static void _x2c_macro_store_3(void * _x2c_macro_bytes_7, Var _x2c_macro_value_7){
+  int _x2c_macro_native_7 = Var_int(Var_convert(_x2c_macro_value_7, 3453797));
+  memcpy(_x2c_macro_bytes_7, & _x2c_macro_native_7, sizeof _x2c_macro_native_7);
+}
+
+Var long_var(long);
+
+static Var _x2c_macro_load_4(const void * _x2c_macro_bytes_8, Scope * _x2c_macro_owner_4){
+  long _x2c_macro_native_8;
+  memcpy(& _x2c_macro_native_8, _x2c_macro_bytes_8, sizeof _x2c_macro_native_8);
+  Var _x2c_macro_value_8 = long_var(_x2c_macro_native_8);
+  return Var_move_wide_to(_x2c_macro_value_8, _x2c_macro_owner_4);
+}
+
+static void _x2c_macro_store_4(void * _x2c_macro_bytes_9, Var _x2c_macro_value_9){
+  long _x2c_macro_native_9 = Var_long(Var_convert(_x2c_macro_value_9, 818062));
+  memcpy(_x2c_macro_bytes_9, & _x2c_macro_native_9, sizeof _x2c_macro_native_9);
+}
+
+static Var _x2c_macro_load_5(const void * _x2c_macro_bytes_10, Scope * _x2c_macro_owner_5){
+  long double _x2c_macro_native_10;
+  memcpy(& _x2c_macro_native_10, _x2c_macro_bytes_10, sizeof _x2c_macro_native_10);
+  Var _x2c_macro_value_10 = Var_box_long_double(_x2c_macro_native_10);
+  return Var_move_wide_to(_x2c_macro_value_10, _x2c_macro_owner_5);
+}
+
+static void _x2c_macro_store_5(void * _x2c_macro_bytes_11, Var _x2c_macro_value_11){
+  long double _x2c_macro_native_11 = Var_long_double(Var_convert(_x2c_macro_value_11, 26071077642));
+  memcpy(_x2c_macro_bytes_11, & _x2c_macro_native_11, sizeof _x2c_macro_native_11);
+}
+
+static Var _x2c_macro_load_6(const void * _x2c_macro_bytes_12, Scope * _x2c_macro_owner_6){
+  long long _x2c_macro_native_12;
+  memcpy(& _x2c_macro_native_12, _x2c_macro_bytes_12, sizeof _x2c_macro_native_12);
+  Var _x2c_macro_value_12 = Var_box_long_long(_x2c_macro_native_12);
+  return Var_move_wide_to(_x2c_macro_value_12, _x2c_macro_owner_6);
+}
+
+static void _x2c_macro_store_6(void * _x2c_macro_bytes_13, Var _x2c_macro_value_13){
+  long long _x2c_macro_native_13 = Var_long_long(Var_convert(_x2c_macro_value_13, 25983886));
+  memcpy(_x2c_macro_bytes_13, & _x2c_macro_native_13, sizeof _x2c_macro_native_13);
+}
+
+Var short_var(short);
+
+static Var _x2c_macro_load_7(const void * _x2c_macro_bytes_14, Scope * _x2c_macro_owner_7){
+  short _x2c_macro_native_14;
+  memcpy(& _x2c_macro_native_14, _x2c_macro_bytes_14, sizeof _x2c_macro_native_14);
+  Var _x2c_macro_value_14 = short_var(_x2c_macro_native_14);
+  return Var_move_wide_to(_x2c_macro_value_14, _x2c_macro_owner_7);
+}
+
+static void _x2c_macro_store_7(void * _x2c_macro_bytes_15, Var _x2c_macro_value_15){
+  short _x2c_macro_native_15 = Var_short(Var_convert(_x2c_macro_value_15, 3453293));
+  memcpy(_x2c_macro_bytes_15, & _x2c_macro_native_15, sizeof _x2c_macro_native_15);
+}
+
+static Var _x2c_macro_load_8(const void * _x2c_macro_bytes_16, Scope * _x2c_macro_owner_8){
+  signed char _x2c_macro_native_16;
+  memcpy(& _x2c_macro_native_16, _x2c_macro_bytes_16, sizeof _x2c_macro_native_16);
+  Var _x2c_macro_value_16 = Var_new(26993, _x2c_macro_native_16);
+  return Var_move_wide_to(_x2c_macro_value_16, _x2c_macro_owner_8);
+}
+
+static void _x2c_macro_store_8(void * _x2c_macro_bytes_17, Var _x2c_macro_value_17){
+  signed char _x2c_macro_native_17 = Var_char(Var_convert(_x2c_macro_value_17, 26993));
+  memcpy(_x2c_macro_bytes_17, & _x2c_macro_native_17, sizeof _x2c_macro_native_17);
+}
+
+Var unsigned_var(unsigned);
+
+static Var _x2c_macro_load_9(const void * _x2c_macro_bytes_18, Scope * _x2c_macro_owner_9){
+  unsigned _x2c_macro_native_18;
+  memcpy(& _x2c_macro_native_18, _x2c_macro_bytes_18, sizeof _x2c_macro_native_18);
+  Var _x2c_macro_value_18 = unsigned_var(_x2c_macro_native_18);
+  return Var_move_wide_to(_x2c_macro_value_18, _x2c_macro_owner_9);
+}
+
+static void _x2c_macro_store_9(void * _x2c_macro_bytes_19, Var _x2c_macro_value_19){
+  unsigned _x2c_macro_native_19 = Var_uint(Var_convert(_x2c_macro_value_19, 3847013));
+  memcpy(_x2c_macro_bytes_19, & _x2c_macro_native_19, sizeof _x2c_macro_native_19);
+}
+
+static Var _x2c_macro_load_10(const void * _x2c_macro_bytes_20, Scope * _x2c_macro_owner_10){
+  unsigned char _x2c_macro_native_20;
+  memcpy(& _x2c_macro_native_20, _x2c_macro_bytes_20, sizeof _x2c_macro_native_20);
+  Var _x2c_macro_value_20 = Var_new(30065, _x2c_macro_native_20);
+  return Var_move_wide_to(_x2c_macro_value_20, _x2c_macro_owner_10);
+}
+
+static void _x2c_macro_store_10(void * _x2c_macro_bytes_21, Var _x2c_macro_value_21){
+  unsigned char _x2c_macro_native_21 = Var_uchar(Var_convert(_x2c_macro_value_21, 30065));
+  memcpy(_x2c_macro_bytes_21, & _x2c_macro_native_21, sizeof _x2c_macro_native_21);
+}
+
 static Var _x2c_macro_load_11(const void * _x2c_macro_bytes_22, Scope * _x2c_macro_owner_11){
-  float _x2c_macro_native_22;
+  unsigned long _x2c_macro_native_22;
   memcpy(& _x2c_macro_native_22, _x2c_macro_bytes_22, sizeof _x2c_macro_native_22);
-  Var _x2c_macro_value_22 = float_var(_x2c_macro_native_22);
+  Var _x2c_macro_value_22 = Var_box_ulong(_x2c_macro_native_22);
   return Var_move_wide_to(_x2c_macro_value_22, _x2c_macro_owner_11);
 }
 
 static void _x2c_macro_store_11(void * _x2c_macro_bytes_23, Var _x2c_macro_value_23){
-  float _x2c_macro_native_23 = Var_float(Var_convert(_x2c_macro_value_23, 3355493));
+  unsigned long _x2c_macro_native_23 = Var_ulong(Var_convert(_x2c_macro_value_23, 44858254));
   memcpy(_x2c_macro_bytes_23, & _x2c_macro_native_23, sizeof _x2c_macro_native_23);
 }
 
-Var double_var(double);
-
 static Var _x2c_macro_load_12(const void * _x2c_macro_bytes_24, Scope * _x2c_macro_owner_12){
-  double _x2c_macro_native_24;
+  unsigned long long _x2c_macro_native_24;
   memcpy(& _x2c_macro_native_24, _x2c_macro_bytes_24, sizeof _x2c_macro_native_24);
-  Var _x2c_macro_value_24 = double_var(_x2c_macro_native_24);
+  Var _x2c_macro_value_24 = Var_box_ulong_long(_x2c_macro_native_24);
   return Var_move_wide_to(_x2c_macro_value_24, _x2c_macro_owner_12);
 }
 
 static void _x2c_macro_store_12(void * _x2c_macro_bytes_25, Var _x2c_macro_value_25){
-  double _x2c_macro_native_25 = Var_floating(Var_convert(_x2c_macro_value_25, 3356265));
+  unsigned long long _x2c_macro_native_25 = Var_ulong_long(Var_convert(_x2c_macro_value_25, 1435270030));
   memcpy(_x2c_macro_bytes_25, & _x2c_macro_native_25, sizeof _x2c_macro_native_25);
 }
 
 static Var _x2c_macro_load_13(const void * _x2c_macro_bytes_26, Scope * _x2c_macro_owner_13){
-  long double _x2c_macro_native_26;
+  unsigned short _x2c_macro_native_26;
   memcpy(& _x2c_macro_native_26, _x2c_macro_bytes_26, sizeof _x2c_macro_native_26);
-  Var _x2c_macro_value_26 = Var_box_long_double(_x2c_macro_native_26);
+  Var _x2c_macro_value_26 = Var_new(3846509, _x2c_macro_native_26);
   return Var_move_wide_to(_x2c_macro_value_26, _x2c_macro_owner_13);
 }
 
 static void _x2c_macro_store_13(void * _x2c_macro_bytes_27, Var _x2c_macro_value_27){
-  long double _x2c_macro_native_27 = Var_long_double(Var_convert(_x2c_macro_value_27, 26071077642));
+  unsigned short _x2c_macro_native_27 = Var_ushort(Var_convert(_x2c_macro_value_27, 3846509));
   memcpy(_x2c_macro_bytes_27, & _x2c_macro_native_27, sizeof _x2c_macro_native_27);
 }
 
@@ -1321,14 +1321,14 @@ List List_cdr(List);
 
 static Var Lisp__eval(Lisp lisp, Var expr, LispEnv * env){
   if(Var_is_void(expr)){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/lisp.x",.function = "Lisp__eval",.line = 232};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/lisp.x",.function = "Lisp__eval",.line = 220};
     x2c_error_raise_n(& _x2c_error_site_0, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("eval")), NULL))));
     __builtin_unreachable();
   }
   if(Var_is_atom(expr)){
     Var value;
     if(! Lisp__lookup(lisp, env, expr, &(value))){
-      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/lisp.x",.function = "Lisp__eval",.line = 235};
+      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/lisp.x",.function = "Lisp__eval",.line = 223};
       x2c_error_raise_n(& _x2c_error_site_1, 46041901960, 1, Symbol_var(920394), expr);
       __builtin_unreachable();
     }
@@ -1365,7 +1365,7 @@ void x2c_exception_landed(ExceptionFrame *);
 static Var Lisp__apply(Lisp lisp, Var callable, List raw, LispEnv * env){
   if(Var_is_row(callable, 9, 7, 3)) return Lisp__apply_lambda(lisp, Var_lambda(callable), raw, env);
   if(! Var_is_row(callable, 9, 7, 1)){
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/lisp.x",.function = "Lisp__apply",.line = 254};
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/lisp.x",.function = "Lisp__apply",.line = 242};
     x2c_error_raise_n(& _x2c_error_site_2, 995692317464, 1, Symbol_var(74754136), Symbol_var(Var_kind(callable)));
     __builtin_unreachable();
   }
@@ -1439,7 +1439,7 @@ static Var Lisp__apply_values(Lisp lisp, Var callable, List values, LispEnv * en
     return Lisp__call_lambda(lisp, lambda, values);
   }
   if(! Var_is_row(callable, 9, 7, 1)){
-    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/lisp.x",.function = "Lisp__apply_values",.line = 285};
+    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/lisp.x",.function = "Lisp__apply_values",.line = 273};
     x2c_error_raise_n(& _x2c_error_site_3, 995692317464, 1, Symbol_var(74754136), Symbol_var(Var_kind(callable)));
     __builtin_unreachable();
   }
@@ -1540,7 +1540,7 @@ static Var Lisp__special_def(Lisp lisp, List args, LispEnv * env){
     {
       Var _x2c_literal_part_14 = String_var(String_join(NULL, cons(String_var(String_new("def")), NULL)));
       {
-        static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/lisp.x",.function = "Lisp__special_def",.line = 336};
+        static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/lisp.x",.function = "Lisp__special_def",.line = 324};
         x2c_error_raise_n(& _x2c_error_site_4, 4477439593778, 4, Symbol_var(34096809266140), _x2c_literal_part_14, Symbol_var(396221456712), int_var(2), Symbol_var(74754136), int_var(actual), Symbol_var(46228810), List_var(args));
         __builtin_unreachable();
       }
@@ -1551,7 +1551,7 @@ static Var Lisp__special_def(Lisp lisp, List args, LispEnv * env){
   if(lisp -> protect_x2c && String_startswith(Var_str(name), _2)){
     Var _x2c_literal_part_15 = String_var(String_join(NULL, cons(String_var(String_new("def")), NULL)));
     {
-      static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/lisp.x",.function = "Lisp__special_def",.line = 338};
+      static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/lisp.x",.function = "Lisp__special_def",.line = 326};
       x2c_error_raise_n(& _x2c_error_site_5, 4477477457162, 2, Symbol_var(34096809266140), _x2c_literal_part_15, Symbol_var(920394), name);
       __builtin_unreachable();
     }
@@ -1561,7 +1561,7 @@ static Var Lisp__special_def(Lisp lisp, List args, LispEnv * env){
     Var _x2c_literal_part_16 = String_var(String_join(NULL, cons(String_var(String_new("def")), NULL)));
     Var _x2c_literal_part_17 = String_var(String_join(NULL, cons(String_var(String_new("inherited")), NULL)));
     {
-      static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/lisp.x",.function = "Lisp__special_def",.line = 340};
+      static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/lisp.x",.function = "Lisp__special_def",.line = 328};
       x2c_error_raise_n(& _x2c_error_site_6, 4477477457162, 3, Symbol_var(34096809266140), _x2c_literal_part_16, Symbol_var(47666), _x2c_literal_part_17, Symbol_var(920394), name);
       __builtin_unreachable();
     }
@@ -1571,7 +1571,7 @@ static Var Lisp__special_def(Lisp lisp, List args, LispEnv * env){
     Var _x2c_literal_part_18 = String_var(String_join(NULL, cons(String_var(String_new("def")), NULL)));
     Var _x2c_literal_part_19 = String_var(String_join(NULL, cons(String_var(String_new("frozen")), NULL)));
     {
-      static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/lisp.x",.function = "Lisp__special_def",.line = 345};
+      static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/lisp.x",.function = "Lisp__special_def",.line = 333};
       x2c_error_raise_n(& _x2c_error_site_7, 4477477457162, 3, Symbol_var(34096809266140), _x2c_literal_part_18, Symbol_var(47666), _x2c_literal_part_19, Symbol_var(920394), name);
       __builtin_unreachable();
     }
@@ -1594,7 +1594,7 @@ int Var_truth(Var);
 
 static Var Lisp__cond_select(Lisp lisp, List args, LispEnv * env){
   if(! List_truth(args)){
-    static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/lisp.x",.function = "Lisp__cond_select",.line = 362};
+    static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/lisp.x",.function = "Lisp__cond_select",.line = 350};
     x2c_error_raise_n(& _x2c_error_site_8, 4477439593778, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("cond")), NULL))), Symbol_var(396221456712), int_var(1), Symbol_var(74754136), int_var(0));
     __builtin_unreachable();
   }
@@ -1625,7 +1625,7 @@ static List _cond_clause(Var clause){
     Var _x2c_literal_part_21 = clause;
     Var _x2c_literal_part_22 = String_var(String_join(NULL, cons(String_var(String_new("List")), NULL)));
     {
-      static const X2CErrorSite _x2c_error_site_9 = {.file = "../../lib/lisp.x",.function = "_cond_clause",.line = 372};
+      static const X2CErrorSite _x2c_error_site_9 = {.file = "../../lib/lisp.x",.function = "_cond_clause",.line = 360};
       x2c_error_raise_n(& _x2c_error_site_9, 4477479911782, 3, Symbol_var(34096809266140), _x2c_literal_part_20, Symbol_var(46228810), _x2c_literal_part_21, Symbol_var(1510312), _x2c_literal_part_22);
       __builtin_unreachable();
     }
@@ -1637,7 +1637,7 @@ static List _cond_clause(Var clause){
     {
       Var _x2c_literal_part_23 = String_var(String_join(NULL, cons(String_var(String_new("cond-clause")), NULL)));
       {
-        static const X2CErrorSite _x2c_error_site_10 = {.file = "../../lib/lisp.x",.function = "_cond_clause",.line = 377};
+        static const X2CErrorSite _x2c_error_site_10 = {.file = "../../lib/lisp.x",.function = "_cond_clause",.line = 365};
         x2c_error_raise_n(& _x2c_error_site_10, 4477439593778, 4, Symbol_var(34096809266140), _x2c_literal_part_23, Symbol_var(396221456712), int_var(2), Symbol_var(74754136), int_var(actual), Symbol_var(46228810), clause);
         __builtin_unreachable();
       }
@@ -1672,7 +1672,7 @@ static Var Lisp__special_bind(Lisp lisp, List args, LispEnv * env){
   if(! Var_is_row(signature, 9, 7, 4)){
     Var _x2c_literal_part_24 = String_var(String_join(NULL, cons(String_var(String_new("bind")), NULL)));
     {
-      static const X2CErrorSite _x2c_error_site_11 = {.file = "../../lib/lisp.x",.function = "Lisp__special_bind",.line = 401};
+      static const X2CErrorSite _x2c_error_site_11 = {.file = "../../lib/lisp.x",.function = "Lisp__special_bind",.line = 389};
       x2c_error_raise_n(& _x2c_error_site_11, 4372535886, 2, Symbol_var(34096809266140), _x2c_literal_part_24, Symbol_var(46228810), signature);
       __builtin_unreachable();
     }
@@ -1682,7 +1682,7 @@ static Var Lisp__special_bind(Lisp lisp, List args, LispEnv * env){
   List native_signature = Var_list(signature);
   Func fn = _native_target(native_name);
   if(! fn){
-    static const X2CErrorSite _x2c_error_site_12 = {.file = "../../lib/lisp.x",.function = "Lisp__special_bind",.line = 405};
+    static const X2CErrorSite _x2c_error_site_12 = {.file = "../../lib/lisp.x",.function = "Lisp__special_bind",.line = 393};
     x2c_error_raise_n(& _x2c_error_site_12, 31885018076120, 2, Symbol_var(920394), String_var(native_name), Symbol_var(39502), List_var(native_signature));
     __builtin_unreachable();
   }
@@ -1753,7 +1753,7 @@ static Var Lisp__qq(Lisp l, Var expr, LispEnv * env, int depth){
   if(List_len(form) != 2){
     Var _x2c_literal_part_25 = String_var(String_join(NULL, cons(String_var(String_new("quasiquote")), NULL)));
     {
-      static const X2CErrorSite _x2c_error_site_13 = {.file = "../../lib/lisp.x",.function = "Lisp__qq",.line = 446};
+      static const X2CErrorSite _x2c_error_site_13 = {.file = "../../lib/lisp.x",.function = "Lisp__qq",.line = 434};
       x2c_error_raise_n(& _x2c_error_site_13, 4477439593778, 2, Symbol_var(34096809266140), _x2c_literal_part_25, Symbol_var(46228810), expr);
       __builtin_unreachable();
     }
@@ -1765,7 +1765,7 @@ static Var Lisp__qq(Lisp l, Var expr, LispEnv * env, int depth){
     Var _x2c_literal_part_26 = String_var(String_join(NULL, cons(String_var(String_new("quasiquote-splice")), NULL)));
     Var _x2c_literal_part_27 = Symbol_var(Var_kind(expr));
     {
-      static const X2CErrorSite _x2c_error_site_14 = {.file = "../../lib/lisp.x",.function = "Lisp__qq",.line = 450};
+      static const X2CErrorSite _x2c_error_site_14 = {.file = "../../lib/lisp.x",.function = "Lisp__qq",.line = 438};
       x2c_error_raise_n(& _x2c_error_site_14, 4477479911782, 2, Symbol_var(34096809266140), _x2c_literal_part_26, Symbol_var(74754136), _x2c_literal_part_27);
       __builtin_unreachable();
     }
@@ -1845,7 +1845,7 @@ static List Lisp__splice(Lisp lisp, Var expr, LispEnv * env){
   if(List_len(form) != 2){
     Var _x2c_literal_part_28 = String_var(String_join(NULL, cons(String_var(String_new("quasiquote")), NULL)));
     {
-      static const X2CErrorSite _x2c_error_site_15 = {.file = "../../lib/lisp.x",.function = "Lisp__splice",.line = 471};
+      static const X2CErrorSite _x2c_error_site_15 = {.file = "../../lib/lisp.x",.function = "Lisp__splice",.line = 459};
       x2c_error_raise_n(& _x2c_error_site_15, 4477439593778, 2, Symbol_var(34096809266140), _x2c_literal_part_28, Symbol_var(46228810), expr);
       __builtin_unreachable();
     }
@@ -1856,7 +1856,7 @@ static List Lisp__splice(Lisp lisp, Var expr, LispEnv * env){
     Var _x2c_literal_part_29 = String_var(String_join(NULL, cons(String_var(String_new("quasiquote-splice")), NULL)));
     Var _x2c_literal_part_30 = Symbol_var(Var_kind(value));
     {
-      static const X2CErrorSite _x2c_error_site_16 = {.file = "../../lib/lisp.x",.function = "Lisp__splice",.line = 474};
+      static const X2CErrorSite _x2c_error_site_16 = {.file = "../../lib/lisp.x",.function = "Lisp__splice",.line = 462};
       x2c_error_raise_n(& _x2c_error_site_16, 4477479911782, 2, Symbol_var(34096809266140), _x2c_literal_part_29, Symbol_var(74754136), _x2c_literal_part_30);
       __builtin_unreachable();
     }
@@ -1871,7 +1871,7 @@ static Var Lisp__make_lambda(Lisp lisp, List args, LispEnv * env, int macro){
   if(List_len(args) != 2 || ! Var_is_row(List_car(args), 9, 7, 4)){
     Symbol operation = macro ? 27335838 : 808259842;
     {
-      static const X2CErrorSite _x2c_error_site_17 = {.file = "../../lib/lisp.x",.function = "Lisp__make_lambda",.line = 489};
+      static const X2CErrorSite _x2c_error_site_17 = {.file = "../../lib/lisp.x",.function = "Lisp__make_lambda",.line = 477};
       x2c_error_raise_n(& _x2c_error_site_17, 4372535886, 2, Symbol_var(34096809266140), Symbol_var(operation), Symbol_var(46228810), List_var(args));
       __builtin_unreachable();
     }
@@ -2287,7 +2287,7 @@ static List _value_list(const Var * values, int count){
     if(Var_is_void(values[i])){
       Var _x2c_literal_part_31 = String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL)));
       {
-        static const X2CErrorSite _x2c_error_site_18 = {.file = "../../lib/lisp.x",.function = "_value_list",.line = 662};
+        static const X2CErrorSite _x2c_error_site_18 = {.file = "../../lib/lisp.x",.function = "_value_list",.line = 650};
         x2c_error_raise_n(& _x2c_error_site_18, 48270474208, 2, Symbol_var(34096809266140), _x2c_literal_part_31, Symbol_var(19800432), int_var(i));
         __builtin_unreachable();
       }
@@ -2308,7 +2308,7 @@ static void _bind_params(Scope * frame, Lambda lambda, List args, Map bindings){
       if(! List_truth(List_cdr(p))){
         Var _x2c_literal_part_32 = String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL)));
         {
-          static const X2CErrorSite _x2c_error_site_19 = {.file = "../../lib/lisp.x",.function = "_bind_params",.line = 676};
+          static const X2CErrorSite _x2c_error_site_19 = {.file = "../../lib/lisp.x",.function = "_bind_params",.line = 664};
           x2c_error_raise_n(& _x2c_error_site_19, 4372535886, 2, Symbol_var(34096809266140), _x2c_literal_part_32, Symbol_var(46228810), body);
           __builtin_unreachable();
         }
@@ -2320,7 +2320,7 @@ static void _bind_params(Scope * frame, Lambda lambda, List args, Map bindings){
     if(! List_truth(args)){
       Var _x2c_literal_part_33 = String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL)));
       {
-        static const X2CErrorSite _x2c_error_site_20 = {.file = "../../lib/lisp.x",.function = "_bind_params",.line = 680};
+        static const X2CErrorSite _x2c_error_site_20 = {.file = "../../lib/lisp.x",.function = "_bind_params",.line = 668};
         x2c_error_raise_n(& _x2c_error_site_20, 4477439593778, 2, Symbol_var(34096809266140), _x2c_literal_part_33, Symbol_var(46228810), body);
         __builtin_unreachable();
       }
@@ -2332,7 +2332,7 @@ static void _bind_params(Scope * frame, Lambda lambda, List args, Map bindings){
   if(List_truth(args)){
     Var _x2c_literal_part_34 = String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL)));
     {
-      static const X2CErrorSite _x2c_error_site_21 = {.file = "../../lib/lisp.x",.function = "_bind_params",.line = 684};
+      static const X2CErrorSite _x2c_error_site_21 = {.file = "../../lib/lisp.x",.function = "_bind_params",.line = 672};
       x2c_error_raise_n(& _x2c_error_site_21, 4477439593778, 2, Symbol_var(34096809266140), _x2c_literal_part_34, Symbol_var(46228810), body);
       __builtin_unreachable();
     }
@@ -2345,7 +2345,7 @@ static void LispEnv__bind_values(LispEnv * local, Lambda lambda, const Var * val
   if(count != List_len(lambda -> params)){
     Var _x2c_literal_part_35 = String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL)));
     {
-      static const X2CErrorSite _x2c_error_site_22 = {.file = "../../lib/lisp.x",.function = "LispEnv__bind_values",.line = 689};
+      static const X2CErrorSite _x2c_error_site_22 = {.file = "../../lib/lisp.x",.function = "LispEnv__bind_values",.line = 677};
       x2c_error_raise_n(& _x2c_error_site_22, 4477439593778, 2, Symbol_var(34096809266140), _x2c_literal_part_35, Symbol_var(46228810), lambda -> body);
       __builtin_unreachable();
     }
@@ -2526,7 +2526,7 @@ static void _cell_store(Var cell, Var value){
 static void Lisp__spend_call(Lisp lisp){
   if(lisp -> call_exhausted || ++ lisp -> call_steps > lisp -> call_step_max){
     if(lisp -> interrupted){
-      static const X2CErrorSite _x2c_error_site_23 = {.file = "../../lib/lisp.x",.function = "Lisp__spend_call",.line = 849};
+      static const X2CErrorSite _x2c_error_site_23 = {.file = "../../lib/lisp.x",.function = "Lisp__spend_call",.line = 837};
       x2c_error_raise_n(& _x2c_error_site_23, 20796606164008, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL))));
       __builtin_unreachable();
     }
@@ -2535,7 +2535,7 @@ static void Lisp__spend_call(Lisp lisp){
       Var _x2c_literal_part_36 = String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL)));
       Var _x2c_literal_part_37 = String_var(String_join(NULL, cons(String_var(String_new("steps")), NULL)));
       {
-        static const X2CErrorSite _x2c_error_site_24 = {.file = "../../lib/lisp.x",.function = "Lisp__spend_call",.line = 851};
+        static const X2CErrorSite _x2c_error_site_24 = {.file = "../../lib/lisp.x",.function = "Lisp__spend_call",.line = 839};
         x2c_error_raise_n(& _x2c_error_site_24, 214157780846806, 2, Symbol_var(34096809266140), _x2c_literal_part_36, Symbol_var(47666), _x2c_literal_part_37);
         __builtin_unreachable();
       }
@@ -2555,7 +2555,7 @@ static void Lisp__check_stack(Lisp lisp, Lambda lambda, unsigned long at){
   if(used > lisp -> stack_allowance){
     Var _x2c_literal_part_38 = String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL)));
     {
-      static const X2CErrorSite _x2c_error_site_25 = {.file = "../../lib/lisp.x",.function = "Lisp__check_stack",.line = 864};
+      static const X2CErrorSite _x2c_error_site_25 = {.file = "../../lib/lisp.x",.function = "Lisp__check_stack",.line = 852};
       x2c_error_raise_n(& _x2c_error_site_25, 214157780846806, 2, Symbol_var(34096809266140), _x2c_literal_part_38, Symbol_var(46228810), lambda -> body);
       __builtin_unreachable();
     }
@@ -2604,7 +2604,7 @@ static void Lisp__open_call_budget(Lisp lisp){
 static void _arity(List args, int expected, String operation){
   int actual = List_len(args);
   if(actual != expected){
-    static const X2CErrorSite _x2c_error_site_26 = {.file = "../../lib/lisp.x",.function = "_arity",.line = 947};
+    static const X2CErrorSite _x2c_error_site_26 = {.file = "../../lib/lisp.x",.function = "_arity",.line = 935};
     x2c_error_raise_n(& _x2c_error_site_26, 4477439593778, 3, Symbol_var(34096809266140), String_var(operation), Symbol_var(396221456712), int_var(expected), Symbol_var(74754136), int_var(actual));
     __builtin_unreachable();
   }
@@ -2617,7 +2617,7 @@ static void _string_argument(Var value, String operation){
     Var _x2c_literal_part_40 = Symbol_var(Var_kind(value));
     Var _x2c_literal_part_41 = String_var(String_join(NULL, cons(String_var(String_new("String")), NULL)));
     {
-      static const X2CErrorSite _x2c_error_site_27 = {.file = "../../lib/lisp.x",.function = "_string_argument",.line = 952};
+      static const X2CErrorSite _x2c_error_site_27 = {.file = "../../lib/lisp.x",.function = "_string_argument",.line = 940};
       x2c_error_raise_n(& _x2c_error_site_27, 4477479911782, 3, Symbol_var(34096809266140), _x2c_literal_part_39, Symbol_var(74754136), _x2c_literal_part_40, Symbol_var(1510312), _x2c_literal_part_41);
       __builtin_unreachable();
     }
@@ -2632,7 +2632,7 @@ static List _list_argument(Var values){
     Var _x2c_literal_part_43 = Symbol_var(Var_kind(values));
     Var _x2c_literal_part_44 = String_var(String_join(NULL, cons(String_var(String_new("List")), NULL)));
     {
-      static const X2CErrorSite _x2c_error_site_28 = {.file = "../../lib/lisp.x",.function = "_list_argument",.line = 958};
+      static const X2CErrorSite _x2c_error_site_28 = {.file = "../../lib/lisp.x",.function = "_list_argument",.line = 946};
       x2c_error_raise_n(& _x2c_error_site_28, 4477479911782, 3, Symbol_var(34096809266140), _x2c_literal_part_42, Symbol_var(74754136), _x2c_literal_part_43, Symbol_var(1510312), _x2c_literal_part_44);
       __builtin_unreachable();
     }
@@ -2646,7 +2646,7 @@ _Noreturn static void _not_procedure(Var callable){
     Var _x2c_literal_part_45 = String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL)));
     Var _x2c_literal_part_46 = Symbol_var(Var_kind(callable));
     {
-      static const X2CErrorSite _x2c_error_site_29 = {.file = "../../lib/lisp.x",.function = "_not_procedure",.line = 964};
+      static const X2CErrorSite _x2c_error_site_29 = {.file = "../../lib/lisp.x",.function = "_not_procedure",.line = 952};
       x2c_error_raise_n(& _x2c_error_site_29, 995692317464, 2, Symbol_var(34096809266140), _x2c_literal_part_45, Symbol_var(74754136), _x2c_literal_part_46);
       __builtin_unreachable();
     }
@@ -2662,19 +2662,19 @@ int String_len(String);
 static Symbol _read_form(Tokenizer tokenizer, String source, unsigned base, unsigned * cursor, Var * out){
   Token token = Tokenizer_next(tokenizer);
   if(! token || token -> type == 11212){
-    * cursor = String_len(source);
+    (* cursor) = String_len(source);
     return 11212;
   }
   unsigned start = base + token -> pos;
-  * cursor = start;
+  (* cursor) = start;
   LispReader r ={
     tokenizer, source, base, 0
   }
   ;
   Var form = LispReader_form(&(r), token, 0);
   if(Var_is_void(form)) _incomplete(source, start);
-  if(out) * out = form;
-  * cursor = base + r.end;
+  if(out)(* out) = form;
+  (* cursor) = base + r.end;
   return 46228810;
 }
 
@@ -2712,7 +2712,7 @@ static Var LispReader_list(LispReader * r, int depth){
   if(depth >= LISP_READ_DEPTH_MAX){
     Var _x2c_literal_part_47 = String_var(String_join(NULL, cons(String_var(String_new("Lisp.read")), NULL)));
     {
-      static const X2CErrorSite _x2c_error_site_30 = {.file = "../../lib/lisp.x",.function = "LispReader_list",.line = 1036};
+      static const X2CErrorSite _x2c_error_site_30 = {.file = "../../lib/lisp.x",.function = "LispReader_list",.line = 1024};
       x2c_error_raise_n(& _x2c_error_site_30, 1358596898646632, 2, Symbol_var(34096809266140), _x2c_literal_part_47, Symbol_var(8750352), int_var(depth));
       __builtin_unreachable();
     }
@@ -2818,7 +2818,7 @@ _Noreturn static Var _malformed(String source, unsigned at){
   int line = 1, column = 1;
   scan_next_line_col(source, (int) at, & line, & column);
   {
-    static const X2CErrorSite _x2c_error_site_31 = {.file = "../../lib/lisp.x",.function = "_malformed",.line = 1099};
+    static const X2CErrorSite _x2c_error_site_31 = {.file = "../../lib/lisp.x",.function = "_malformed",.line = 1087};
     x2c_error_raise_n(& _x2c_error_site_31, 28682226919752, 3, Symbol_var(1307939018), String_var(source), Symbol_var(805770), int_var(line), Symbol_var(233614172), int_var(column));
     __builtin_unreachable();
   }
@@ -2829,7 +2829,7 @@ _Noreturn static Var _incomplete(String source, unsigned at){
   int line = 1, column = 1;
   scan_next_line_col(source, (int) at, & line, & column);
   {
-    static const X2CErrorSite _x2c_error_site_32 = {.file = "../../lib/lisp.x",.function = "_incomplete",.line = 1105};
+    static const X2CErrorSite _x2c_error_site_32 = {.file = "../../lib/lisp.x",.function = "_incomplete",.line = 1093};
     x2c_error_raise_n(& _x2c_error_site_32, 664344300629258, 3, Symbol_var(1307939018), String_var(source), Symbol_var(805770), int_var(line), Symbol_var(233614172), int_var(column));
     __builtin_unreachable();
   }
@@ -2888,7 +2888,7 @@ Var lisp_car(Var value){
     Var _x2c_literal_part_48 = String_var(String_join(NULL, cons(String_var(String_new("car")), NULL)));
     Var _x2c_literal_part_49 = Symbol_var(Var_kind(value));
     {
-      static const X2CErrorSite _x2c_error_site_33 = {.file = "../../lib/lisp.x",.function = "lisp_car",.line = 1138};
+      static const X2CErrorSite _x2c_error_site_33 = {.file = "../../lib/lisp.x",.function = "lisp_car",.line = 1126};
       x2c_error_raise_n(& _x2c_error_site_33, 4477479911782, 2, Symbol_var(34096809266140), _x2c_literal_part_48, Symbol_var(740232), _x2c_literal_part_49);
       __builtin_unreachable();
     }
@@ -2905,7 +2905,7 @@ Var lisp_cdr(Var value){
     Var _x2c_literal_part_50 = String_var(String_join(NULL, cons(String_var(String_new("cdr")), NULL)));
     Var _x2c_literal_part_51 = Symbol_var(Var_kind(value));
     {
-      static const X2CErrorSite _x2c_error_site_34 = {.file = "../../lib/lisp.x",.function = "lisp_cdr",.line = 1147};
+      static const X2CErrorSite _x2c_error_site_34 = {.file = "../../lib/lisp.x",.function = "lisp_cdr",.line = 1135};
       x2c_error_raise_n(& _x2c_error_site_34, 4477479911782, 2, Symbol_var(34096809266140), _x2c_literal_part_50, Symbol_var(740232), _x2c_literal_part_51);
       __builtin_unreachable();
     }
@@ -2997,7 +2997,7 @@ Var lisp_compare(Var a, Var b){
     Var _x2c_literal_part_53 = Symbol_var(Var_kind(a));
     Var _x2c_literal_part_54 = Symbol_var(Var_kind(b));
     {
-      static const X2CErrorSite _x2c_error_site_35 = {.file = "../../lib/lisp.x",.function = "lisp_compare",.line = 1217};
+      static const X2CErrorSite _x2c_error_site_35 = {.file = "../../lib/lisp.x",.function = "lisp_compare",.line = 1205};
       x2c_error_raise_n(& _x2c_error_site_35, 4477479911782, 3, Symbol_var(34096809266140), _x2c_literal_part_52, Symbol_var(26746169281416), _x2c_literal_part_53, Symbol_var(1286928228633480), _x2c_literal_part_54);
       __builtin_unreachable();
     }
@@ -3038,7 +3038,7 @@ Var lisp_plus(List values){
 Var lisp_minus(List values){
   if(! _init_guard_) _file_init_();
   if(! List_truth(values)){
-    static const X2CErrorSite _x2c_error_site_36 = {.file = "../../lib/lisp.x",.function = "lisp_minus",.line = 1242};
+    static const X2CErrorSite _x2c_error_site_36 = {.file = "../../lib/lisp.x",.function = "lisp_minus",.line = 1230};
     x2c_error_raise_n(& _x2c_error_site_36, 4477439593778, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("-")), NULL))), Symbol_var(396221456712), int_var(1), Symbol_var(74754136), int_var(0));
     __builtin_unreachable();
   }
@@ -3081,7 +3081,7 @@ Var lisp_times(List values){
 Var lisp_divide(List values){
   if(! _init_guard_) _file_init_();
   if(! List_truth(values)){
-    static const X2CErrorSite _x2c_error_site_37 = {.file = "../../lib/lisp.x",.function = "lisp_divide",.line = 1263};
+    static const X2CErrorSite _x2c_error_site_37 = {.file = "../../lib/lisp.x",.function = "lisp_divide",.line = 1251};
     x2c_error_raise_n(& _x2c_error_site_37, 4477439593778, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("/")), NULL))), Symbol_var(396221456712), int_var(1), Symbol_var(74754136), int_var(0));
     __builtin_unreachable();
   }
@@ -3107,7 +3107,7 @@ Var lisp_divide(List values){
 static Var _chain(List values, String operation, int want, int expect){
   int actual = List_len(values);
   if(actual < 2){
-    static const X2CErrorSite _x2c_error_site_38 = {.file = "../../lib/lisp.x",.function = "_chain",.line = 1278};
+    static const X2CErrorSite _x2c_error_site_38 = {.file = "../../lib/lisp.x",.function = "_chain",.line = 1266};
     x2c_error_raise_n(& _x2c_error_site_38, 4477439593778, 3, Symbol_var(34096809266140), String_var(operation), Symbol_var(396221456712), int_var(2), Symbol_var(74754136), int_var(actual));
     __builtin_unreachable();
   }
@@ -3264,7 +3264,7 @@ static Func _callback(Var callable, FuncAdapter adapter, unsigned arity, String 
     Var _x2c_literal_part_57 = String_var(operation);
     Var _x2c_literal_part_58 = String_var(String_join(NULL, cons(String_var(String_new("no session")), NULL)));
     {
-      static const X2CErrorSite _x2c_error_site_39 = {.file = "../../lib/lisp.x",.function = "_callback",.line = 1421};
+      static const X2CErrorSite _x2c_error_site_39 = {.file = "../../lib/lisp.x",.function = "_callback",.line = 1409};
       x2c_error_raise_n(& _x2c_error_site_39, 4477477457162, 2, Symbol_var(34096809266140), _x2c_literal_part_57, Symbol_var(47666), _x2c_literal_part_58);
       __builtin_unreachable();
     }
@@ -3301,7 +3301,7 @@ static LispCallback * _callback_context(Func fn){
     Var _x2c_literal_part_59 = String_var(context -> operation);
     Var _x2c_literal_part_60 = String_var(String_join(NULL, cons(String_var(String_new("wrong session")), NULL)));
     {
-      static const X2CErrorSite _x2c_error_site_40 = {.file = "../../lib/lisp.x",.function = "_callback_context",.line = 1447};
+      static const X2CErrorSite _x2c_error_site_40 = {.file = "../../lib/lisp.x",.function = "_callback_context",.line = 1435};
       x2c_error_raise_n(& _x2c_error_site_40, 4477477457162, 2, Symbol_var(34096809266140), _x2c_literal_part_59, Symbol_var(47666), _x2c_literal_part_60);
       __builtin_unreachable();
     }
@@ -3686,7 +3686,7 @@ void Lisp_freeze(Lisp lisp){
 
 _Noreturn static Var _bad_session(String operation){
   {
-    static const X2CErrorSite _x2c_error_site_41 = {.file = "../../lib/lisp.x",.function = "_bad_session",.line = 1724};
+    static const X2CErrorSite _x2c_error_site_41 = {.file = "../../lib/lisp.x",.function = "_bad_session",.line = 1712};
     x2c_error_raise_n(& _x2c_error_site_41, 4372499598, 1, Symbol_var(34096809266140), String_var(operation));
     __builtin_unreachable();
   }
@@ -3714,7 +3714,7 @@ Symbol Lisp_read(Lisp lisp, String source, unsigned * cursor, Var * out){
     {
       Tokenizer tokenizer = _scan_lisp_tokens(source + base, & tokens_scope);
       {
-        Symbol _x2c_return_value_15 = _read_form(tokenizer, source, base, &(* cursor), out);
+        Symbol _x2c_return_value_15 = _read_form(tokenizer, source, base, &((* cursor)), out);
         {
           x2c_cleanup_leave(& _x2c_defer_record_19);
           return _x2c_return_value_15;
@@ -3873,7 +3873,7 @@ Var Lisp_eval_string(Lisp lisp, String source){
               Var result = List_var(NULL);
               while(1){
                 Var form =((void) 0, Void);
-                if(_read_form(tokenizer, source, 0, & cursor, & form) == 11212) break;
+                if(_read_form(tokenizer, source, 0, &(cursor), &(form)) == 11212) break;
                 result = Lisp__eval(lisp, form, NULL);
               }
               {
@@ -3908,7 +3908,7 @@ FileReadStatus File_read_into(File, Block);
 Var Lisp_eval_file(Lisp l, File source){
   if(! _init_guard_) _file_init_();
   if(! source){
-    static const X2CErrorSite _x2c_error_site_42 = {.file = "../../lib/lisp.x",.function = "Lisp_eval_file",.line = 1830};
+    static const X2CErrorSite _x2c_error_site_42 = {.file = "../../lib/lisp.x",.function = "Lisp_eval_file",.line = 1818};
     x2c_error_raise_n(& _x2c_error_site_42, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp.eval_file")), NULL))));
     __builtin_unreachable();
   }
@@ -3940,7 +3940,7 @@ Var Lisp_eval_file(Lisp l, File source){
           Var _x2c_literal_part_61 = String_var(String_join(NULL, cons(String_var(String_new("Lisp.eval_file")), NULL)));
           Var _x2c_literal_part_62 = Var_box_ulong(size);
           {
-            static const X2CErrorSite _x2c_error_site_43 = {.file = "../../lib/lisp.x",.function = "Lisp_eval_file",.line = 1835};
+            static const X2CErrorSite _x2c_error_site_43 = {.file = "../../lib/lisp.x",.function = "Lisp_eval_file",.line = 1823};
             x2c_error_raise_n(& _x2c_error_site_43, 1358596898646632, 3, Symbol_var(34096809266140), _x2c_literal_part_61, Symbol_var(1265290), _x2c_literal_part_62, Symbol_var(25782888), int_var(limit));
             __builtin_unreachable();
           }
@@ -3952,7 +3952,7 @@ Var Lisp_eval_file(Lisp l, File source){
         Var _x2c_literal_part_63 = String_var(String_join(NULL, cons(String_var(String_new("Lisp.eval_file")), NULL)));
         Var _x2c_literal_part_64 = String_var(String_join(NULL, cons(String_var(String_new("embedded NUL")), NULL)));
         {
-          static const X2CErrorSite _x2c_error_site_44 = {.file = "../../lib/lisp.x",.function = "Lisp_eval_file",.line = 1838};
+          static const X2CErrorSite _x2c_error_site_44 = {.file = "../../lib/lisp.x",.function = "Lisp_eval_file",.line = 1826};
           x2c_error_raise_n(& _x2c_error_site_44, 4372499598, 2, Symbol_var(34096809266140), _x2c_literal_part_63, Symbol_var(47666), _x2c_literal_part_64);
           __builtin_unreachable();
         }
@@ -3982,7 +3982,7 @@ int Lisp_try_get(Lisp lisp, String name, Var * out){
 void Lisp_set_global(Lisp lisp, String name, Var value){
   if(! _init_guard_) _file_init_();
   if(! lisp || ! String_truth(name)){
-    static const X2CErrorSite _x2c_error_site_45 = {.file = "../../lib/lisp.x",.function = "Lisp_set_global",.line = 1866};
+    static const X2CErrorSite _x2c_error_site_45 = {.file = "../../lib/lisp.x",.function = "Lisp_set_global",.line = 1854};
     x2c_error_raise_n(& _x2c_error_site_45, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp.set_global")), NULL))));
     __builtin_unreachable();
   }
@@ -3990,7 +3990,7 @@ void Lisp_set_global(Lisp lisp, String name, Var value){
     Var _x2c_literal_part_65 = String_var(String_join(NULL, cons(String_var(String_new("Lisp.set_global")), NULL)));
     Var _x2c_literal_part_66 = String_var(String_join(NULL, cons(String_var(String_new("frozen")), NULL)));
     {
-      static const X2CErrorSite _x2c_error_site_46 = {.file = "../../lib/lisp.x",.function = "Lisp_set_global",.line = 1867};
+      static const X2CErrorSite _x2c_error_site_46 = {.file = "../../lib/lisp.x",.function = "Lisp_set_global",.line = 1855};
       x2c_error_raise_n(& _x2c_error_site_46, 4477477457162, 2, Symbol_var(34096809266140), _x2c_literal_part_65, Symbol_var(47666), _x2c_literal_part_66);
       __builtin_unreachable();
     }
@@ -4012,7 +4012,7 @@ void Lisp_set_global(Lisp lisp, String name, Var value){
               Var _x2c_literal_part_67 = String_var(String_join(NULL, cons(String_var(String_new("Lisp.set_global")), NULL)));
               Var _x2c_literal_part_68 = String_var(String_join(NULL, cons(String_var(String_new("inherited")), NULL)));
               {
-                static const X2CErrorSite _x2c_error_site_47 = {.file = "../../lib/lisp.x",.function = "Lisp_set_global",.line = 1871};
+                static const X2CErrorSite _x2c_error_site_47 = {.file = "../../lib/lisp.x",.function = "Lisp_set_global",.line = 1859};
                 x2c_error_raise_n(& _x2c_error_site_47, 4477477457162, 3, Symbol_var(34096809266140), _x2c_literal_part_67, Symbol_var(47666), _x2c_literal_part_68, Symbol_var(920394), interned);
                 __builtin_unreachable();
               }
@@ -4037,7 +4037,7 @@ void Func_move(Func, Scope *);
 void Lisp_bind(Lisp lisp, String name, Func function){
   if(! _init_guard_) _file_init_();
   if(! lisp || ! String_truth(name) || ! function){
-    static const X2CErrorSite _x2c_error_site_48 = {.file = "../../lib/lisp.x",.function = "Lisp_bind",.line = 1889};
+    static const X2CErrorSite _x2c_error_site_48 = {.file = "../../lib/lisp.x",.function = "Lisp_bind",.line = 1877};
     x2c_error_raise_n(& _x2c_error_site_48, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp.bind")), NULL))));
     __builtin_unreachable();
   }
@@ -4072,7 +4072,7 @@ Var lisp_source_function(Var callable){
     Var _x2c_literal_part_70 = String_var(String_join(NULL, cons(String_var(String_new("Lambda")), NULL)));
     Var _x2c_literal_part_71 = Symbol_var(Var_kind(callable));
     {
-      static const X2CErrorSite _x2c_error_site_49 = {.file = "../../lib/lisp.x",.function = "lisp_source_function",.line = 1909};
+      static const X2CErrorSite _x2c_error_site_49 = {.file = "../../lib/lisp.x",.function = "lisp_source_function",.line = 1897};
       x2c_error_raise_n(& _x2c_error_site_49, 4477479911782, 3, Symbol_var(34096809266140), _x2c_literal_part_69, Symbol_var(1510312), _x2c_literal_part_70, Symbol_var(74754136), _x2c_literal_part_71);
       __builtin_unreachable();
     }
