@@ -1,14 +1,14 @@
 # language rules
-commands/lint/tests/src/style.x:7: violation forward-declaration FI-6: the unit defines this function and x2c collects the whole unit
+commands/lint/tests/src/style.x:7: violation forward-declaration FI-6: retain only for a required same-unit binding boundary
 commands/lint/tests/src/style.x:35: violation negated-is ST-5: spell the test `is not`
-commands/lint/tests/src/indent.x:5: violation forward-declaration FI-6: the unit defines this function and x2c collects the whole unit
+commands/lint/tests/src/indent.x:5: violation forward-declaration FI-6: retain only for a required same-unit binding boundary
 commands/lint/tests/src/indent.x:11: violation negated-is ST-5: spell the test `is not`
 commands/lint/tests/lib/runtime.x:5: candidate same-file-forward-declaration FI-6: retain only for genuine co-recursion or literal shallow collection
 exit 0
 # all rules
 commands/lint/tests/src/style.x:2: candidate prohibited-prose CM-8: stock phrase
-commands/lint/tests/src/style.x:7: violation forward-declaration FI-6: the unit defines this function and x2c collects the whole unit
-commands/lint/tests/src/style.x:8: violation src-forward-declaration FI-6: user-space src code must rely on complete-unit collection
+commands/lint/tests/src/style.x:7: violation forward-declaration FI-6: retain only for a required same-unit binding boundary
+commands/lint/tests/src/style.x:8: violation src-forward-declaration FI-6: retain only for a required implementation or binding boundary
 commands/lint/tests/src/style.x:15: candidate over-width-table-row LY-2: verify that indivisible literal fields require this stable row
 commands/lint/tests/src/style.x:18: candidate decorated-ruler FI-5: decorated ruler
 commands/lint/tests/src/style.x:18: violation section-label FI-5: decorative or all-capitals label
@@ -33,7 +33,7 @@ commands/lint/tests/src/style.x:57: candidate constant-output-run EX-11: 2 adjac
 commands/lint/tests/src/style.x:59: violation over-width LY-2: 80 columns
 commands/lint/tests/src/style.x:60: candidate over-width-literal LY-2: verify that preserving observable literal text requires this width
 commands/lint/tests/src/clean.x:10: violation restates-code CM-2: translates the next statement
-commands/lint/tests/src/indent.x:5: violation forward-declaration FI-6: the unit defines this function and x2c collects the whole unit
+commands/lint/tests/src/indent.x:5: violation forward-declaration FI-6: retain only for a required same-unit binding boundary
 commands/lint/tests/src/indent.x:11: violation negated-is ST-5: spell the test `is not`
 commands/lint/tests/src/indent.x:19: violation over-width LY-2: 80 columns
 commands/lint/tests/lib/runtime.x:5: candidate same-file-forward-declaration FI-6: retain only for genuine co-recursion or literal shallow collection

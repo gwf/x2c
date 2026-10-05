@@ -638,11 +638,17 @@ static List _address_of(String spelling, List binding) {
    the catch site's initial state, the lowered arms, and the patterns of
    the filtered arms, which precede the default arm. */
 
-/* The template names must be bound before builtins registers their slots. */
+/* The four helpers below are defined here; placement is defined in builtins.x.
+   Template names must be bound before builtins registers their native slots. */
+// lint: allow forward-declaration FI-6: template binding
 List builtin_try_catch_site(List frame, List clause);
+// lint: allow forward-declaration FI-6: template binding
 List builtin_catch_patterns(List patterns, List items);
+// lint: allow forward-declaration FI-6: template binding
 List builtin_try_landing(List frame, List clause, List cleanup);
+// lint: allow forward-declaration FI-6: template binding
 List builtin_catch_cases(List selected, List arms);
+// lint: allow src-forward-declaration FI-6: native target binding
 List builtin_try_cleanup_placement(Var cleanup);
 
 /* A try region pushes its frame and lands on it when something raises. */

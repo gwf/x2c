@@ -18,6 +18,7 @@ $(import "../src/grammar.xmacro")
 
 /* The `lib/meta.x` builder that reaches the compiler runs here as the copy
    `src/linked-meta.x` links. */
+// lint: allow src-forward-declaration FI-6: linked native copy
 List x2c_param_make(List type, Var name);
 
 // $scope

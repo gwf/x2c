@@ -18,7 +18,7 @@ Use that failure as a hard check:
 - do not let identifier frequency choose the subsystem;
 - do not let ease or certainty outrank the amount of machinery that can
   disappear;
-- do not run final gates until a second architectural pass is empty; and
+- review the completed authored diff after deletion-before-reshape; and
 - if no connected mechanism can be removed, report that result instead of
   promoting dead fields and `calloc` conversions into the main result.
 

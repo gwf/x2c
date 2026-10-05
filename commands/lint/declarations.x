@@ -33,10 +33,9 @@ static int _prototype_line(Compiler c, int start, int end):
     if tokens[at].type == <"(">: return tokens[at].line
   return tokens[start].line
 
-/* x2c collects the whole unit, so a prototype of a function the unit
-   defines is redundant; `lib/` keeps the style guide's runtime exceptions
-   for review. A prototype of another unit's function is repository policy:
-   `src/` relies on complete-unit collection. */
+/* Complete-unit collection removes ordinary prototypes. Required separate
+   implementation and binding boundaries use explained local allowances;
+   runtime co-recursion and shallow collection remain review candidates. */
 static void _prototype(Lint l, int line, int defined):
   if defined && _under(l.path, "lib"):
     l.add("same-file-forward-declaration", line,
@@ -44,10 +43,10 @@ static void _prototype(Lint l, int line, int defined):
           "collection")
   else if defined:
     l.add("forward-declaration", line,
-          "the unit defines this function and x2c collects the whole unit")
+          "retain only for a required same-unit binding boundary")
   else if _under(l.path, "src"):
     l.add("src-forward-declaration", line,
-          "user-space src code must rely on complete-unit collection")
+          "retain only for a required implementation or binding boundary")
   else:
     l.add("runtime-forward-declaration", line,
           "retain only for cross-unit co-recursion or literal shallow "

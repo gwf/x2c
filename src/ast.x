@@ -300,10 +300,14 @@ static int _contains_return(List items) {
 
 // operators
 
+/* operator-ledger.x defines these methods in a separate implementation unit. */
+// lint: allow src-forward-declaration FI-6: leaf ledger binding
 Symbol Symbol.compound_operator(Symbol op);
 
+// lint: allow src-forward-declaration FI-6: leaf ledger binding
 Symbol Symbol.compound_assignment(Symbol op);
 
+// lint: allow src-forward-declaration FI-6: leaf ledger binding
 int Symbol.binary_precedence(Symbol op);
 
 /** Returns whether `op` is plain or compound assignment. */
