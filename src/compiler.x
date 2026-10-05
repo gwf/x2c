@@ -88,7 +88,7 @@ typedef struct Compiler {
   Array line_markers;
   List return_type, include_dirs;
   // File paths map to content hashes or 1 when text is not embedded.
-  // Search directory spellings map to directory identity and time.
+  // Include-search candidates map to absence or their resolved identity.
   Map deps;
   List aggregate_type, macro_stack, declaration_effects, Sym sym;
   /* The last frozen `macro_stack`, reused while that List and every pool
