@@ -304,6 +304,8 @@ static List _data_literal(Compiler c, Type declared, Var value, Token site) {
    cache; each Array or Map becomes a literal that builds a fresh
    collection every time it runs. */
 static List _data_form(Compiler c, Var value) {
+  if (value.is_null())
+    return %(expr ("Var") (call "Var_null" (args)));
   if (_immutable(value)) {
     if (value is <list>) return c.cache_literal_list(value);
     return %(expr ("Var") ${c.cache_literal_var(value)});
