@@ -36,7 +36,7 @@ Drops the entries collected without declaration defaults while the shared
 compile-time session was filled, or by a project meta build. Call once
 that session is published, and after the meta build's parses.
 
-Source: `src/collect.x:1386`
+Source: `src/collect.x:1411`
 
 #### collect_resolve_include
 
@@ -45,7 +45,7 @@ Source: `src/collect.x:1386`
 The file the include of `target` from `includer_dir` names, searched as
 collection searches `dirs`, or NULL.
 
-Source: `src/collect.x:575`
+Source: `src/collect.x:582`
 
 #### interface_configure
 
@@ -58,7 +58,7 @@ stage directory when it runs from `<home>/builds/`, otherwise under the
 home. A `cold` process reads no interface and still writes its own. Call
 it before opening any translation unit's Context.
 
-Source: `src/collect.x:1109`
+Source: `src/collect.x:1118`
 
 #### interface_prelude
 
@@ -68,7 +68,7 @@ Returns the path of the first prelude interface this compiler wrote, or
 NULL when there is none or the compiler's identity is unknown. Its
 source hashes are not checked.
 
-Source: `src/collect.x:1299`
+Source: `src/collect.x:1311`
 
 #### interface_text
 
@@ -80,7 +80,7 @@ identity is unknown, since no compiler could replay that interface. A
 contribution that the interface grammar cannot spell is reported as an
 `emit` diagnostic.
 
-Source: `src/collect.x:1321`
+Source: `src/collect.x:1333`
 
 ### `Compiler`
 
@@ -98,7 +98,7 @@ protocol rows enter the current symbol state, and dependencies enter the
 importing compiler. Replay also merges recorded function definitions.
 `token` locates lookup and public-surface errors.
 
-Source: `src/collect.x:795`
+Source: `src/collect.x:804`
 
 <a id="Compiler.collect_symbols"></a>
 #### Compiler.collect_symbols
@@ -115,7 +115,7 @@ is `globs`. Collection also updates dependencies, function definitions,
 and macro state. Keyword alias maps and seen-name state are file-local
 and restored when each file walk ends.
 
-Source: `src/collect.x:156`
+Source: `src/collect.x:161`
 
 <a id="Compiler.import_included_exports"></a>
 #### Compiler.import_included_exports
@@ -126,7 +126,7 @@ Installs, at each include among the directives before the cursor, the
 macro imports that the included file exports, as the unit's own imports
 written there would be installed.
 
-Source: `src/collect.x:1063`
+Source: `src/collect.x:1072`
 
 <a id="Compiler.include_typedef_names"></a>
 #### Compiler.include_typedef_names
@@ -140,7 +140,7 @@ is skipped with the files it reaches, and each file reached is added to
 `seen`. NULL when the include does not resolve to x2c source; a runtime
 module adds nothing the prelude has not declared.
 
-Source: `src/collect.x:589`
+Source: `src/collect.x:596`
 
 <a id="Compiler.record_generated_symbol"></a>
 #### Compiler.record_generated_symbol
@@ -152,7 +152,7 @@ current file's collected entry contributes, which is the map its
 interface publishes. A file without a collected declaration map records
 nothing. The cache retains `signature`.
 
-Source: `src/collect.x:725`
+Source: `src/collect.x:734`
 
 <a id="Compiler.replay_included_package_imports"></a>
 #### Compiler.replay_included_package_imports
@@ -165,7 +165,7 @@ source sites. Returns the macro imports the included files export, by
 the canonical path of each file the unit includes, for the full parse
 to install at that include.
 
-Source: `src/collect.x:1025`
+Source: `src/collect.x:1034`
 
 <a id="Compiler.replay_package_imports"></a>
 #### Compiler.replay_package_imports
@@ -178,7 +178,7 @@ borrows the unit's macro state and shared package registries. The full
 parse passes `exports`, which takes the exported imports for the include
 line, and leaves the unit's own imports at their source sites.
 
-Source: `src/collect.x:967`
+Source: `src/collect.x:976`
 
 ### `Sym`
 
@@ -192,7 +192,7 @@ file-scope imports added and the file did not write again, and their
 unit-static markers. An including unit receives an import's
 declarations only by replaying an exported import itself.
 
-Source: `src/collect.x:394`
+Source: `src/collect.x:400`
 
 ## Design notes
 
