@@ -121,11 +121,11 @@ static void Job._close_streams(Job job, Stdio stdio) {
 static void Job._open_streams(Job job, Stdio &stdio) {
   if (job.launch.has_input) stdio.input = _input(job.launch.input);
   stdio.output =
-    _stream(job.output_file, job.launch.capture_output,
-            job.launch.stdout_path);
+    _stream(
+      job.output_file, job.launch.capture_output, job.launch.stdout_path);
   stdio.errors =
-    _stream(job.errors_file, job.launch.capture_errors,
-            job.launch.stderr_path);
+    _stream(
+      job.errors_file, job.launch.capture_errors, job.launch.stderr_path);
 }
 
 /* The first stage reads a copy of the descriptor of a capture file that
