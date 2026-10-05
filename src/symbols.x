@@ -705,7 +705,7 @@ Var Compiler.aggregate_name(
   return binding ? binding : s.declare(NULL, type, type);
 }
 
-// declaration visibility
+// privacy boundaries
 
 /** Records the visibility of one parsed top-level declaration.
     Lexical privacy and static storage mark bindings in `Sym`; typedef rows are
