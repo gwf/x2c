@@ -359,7 +359,8 @@ static void Build._link_packages(Build b, String input, String directory) {
   foreach (String dependency, _depfile_inputs(depfile)) {
     // A unit under a package directory that is not the package's own
     // source, such as a script kept beside it, consumes nothing by itself.
-    if (dependency.startswith("search:") || dependency == self || dependency == input)
+    if (dependency.startswith("search:") || dependency == self ||
+        dependency == input)
       continue;
     String package = package_directory(roots, dependency);
     if (package && !b._package_built_here(roots, package))
@@ -1144,8 +1145,9 @@ static uint64_t _script_fingerprint(
   return hash;
 }
 
-/* A directory entry ends in `/` and adds its modification time; a header or
-   library added where a search would now find it changes that time. */
+/* Include-search facts track absence and resolved identity. Native search
+   directories end in `/` and use their modification time, which changes
+   when a header or library is added. */
 static uint64_t _state_entry(uint64_t hash, String path, int &ok) {
   if (path.startswith("search:")) {
     String candidate = path[7:];
