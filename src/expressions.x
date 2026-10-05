@@ -1197,19 +1197,24 @@ static List Compiler._resolve_identifier(
   if (!type && require_type)
     $report.type.ident_semantic(c, value, origin);
   List result = %(expr $type (ident $binding));
-  if (c.lambda_scopes && !c.macro_holes) {
-    result = c.capture_lambda_identifier(binding, type);
-    match (result)
-      case %(expr ?captured_type ${$source_identifier_content(
-          %(?captured))}): {
-        if (type.car() != <&> && captured_type.car() == <&>)
-          read_reference = 1;
-        type = captured_type;
-        binding = captured;
-      }
-  }
+  result = c._capture_lambda_value(result, binding, type, read_reference);
   return c._read_bound_reference(
     result, binding, type, read_reference, binding_facts);
+}
+
+static List Compiler._capture_lambda_value(
+  Compiler c, List result, List &binding, Type &type, int &read_reference) {
+  if (!c.lambda_scopes || c.macro_holes) return result;
+  result = c.capture_lambda_identifier(binding, type);
+  match (result)
+    case %(expr ?captured_type ${$source_identifier_content(
+        %(?captured))}): {
+      if (type.car() != <&> && captured_type.car() == <&>)
+        read_reference = 1;
+      type = captured_type;
+      binding = captured;
+    }
+  return result;
 }
 
 /* Parsed identifiers arrive as spellings, while constructed syntax may carry
