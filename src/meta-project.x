@@ -11,8 +11,8 @@
     files. Meta code under the x2c root's `lib`, `src`, and `etc` is the
     compiler's own, linked into it.
 
-    Each input that reaches any, and each included file that defines its
-    own, gets a table of its own, parsed from the file itself so its
+    Each input or included file that reaches any gets a table of its
+    own, parsed from the file itself so its
     imports see the declarations they are used with. Each table's object
     keeps only its entry global, so copies of one import in several
     tables link together. The helper is cached under the x2c cache root,
@@ -135,7 +135,7 @@ static void Helper.use(Helper &h, List manifest) {
 
 /* The scan of one input. `imports` collects each project `.xmacro` file
    that holds meta code, after the files it imports, and `units` each
-   included file that holds its own; `seen` holds each file read, and
+   included file that reaches it; `seen` holds each file's result bits, and
    `packages` the root of each package imported. */
 typedef struct Scan {
   CliRequest request, Array imports, units, Map seen, packages;
@@ -143,7 +143,7 @@ typedef struct Scan {
 
 /* Each input that reaches meta code becomes an owner. One without meta
    code of its own keeps the files it imports, for a group of those alone.
-   An included file with meta code of its own becomes an owner too, so the
+   An included file that reaches meta code becomes an owner too, so the
    constants it computes run in its own table when a unit collects it.
    Its path is canonical, as collection spells it. */
 static void Helper.scan(Helper &h, List inputs) {
@@ -153,9 +153,9 @@ static void Helper.scan(Helper &h, List inputs) {
     Scan s = {
       .request = h.frontend.request, .imports = [], .units = [], .seen = {},
       .packages = h.packages};
-    int own = s.file(path);
+    int meta = s.file(path), own = meta & 1;
     Array reached = s.imports;
-    if (own || reached.len()) h.own(path, owned);
+    if (meta) h.own(path, owned);
     if (!own && reached.len()) h.reaches[path] = reached.list();
     foreach (String unit, s.units) h.own(unit, owned);
     foreach (String file, reached)
@@ -172,18 +172,22 @@ static void Helper.own(Helper &h, String path, Map owned) {
   h.owners.push(path);
 }
 
-/* Reads the file at `path` once per scan, and returns whether it holds a
-   file-scope `meta` marker other than `meta native`. */
+/* Reads each file once. Bit 1 marks its own file-scope meta code; bit 2
+   marks project meta code its imports, includes, or packages reach. An
+   unfinished scan has neither bit, so cycles stop at their open file. */
 static int Scan.file(Scan &s, String path) {
-  if (path in s.seen) return 0;
-  s.seen[path] = 1;
+  Var found;
+  if (s.seen.try_get(path, found)) return found;
+  s.seen[path] = 0;
   String text = NULL;
   try text = Path.read_text(path);
   catch %((!or not-found io-fail) *): return 0;
   Tokenizer tokens = Tokenizer.new(text, <x2c>);
   tokens.layout = is_layout_file(path);
   tokens.scan();
-  return s.file_scope(tokens, Path.dirname(path));
+  int meta = s.file_scope(tokens, Path.dirname(path));
+  s.seen[path] = meta;
+  return meta;
 }
 
 /* Only file-scope tokens count. Each arm reads the tokens that follow its
@@ -201,9 +205,11 @@ static int Scan.file_scope(Scan &s, Tokenizer tokens, String directory) {
     }
     if (depth) continue;
     if (word == "meta") meta |= _marker(tokens);
-    else if (word == "$(") s.macro_import(tokens, directory);
-    else if (word == "import") s.package(tokens);
-    else if (token.type == <preproc>) s.include(word, directory);
+    else if (word == "$(")
+      meta |= s.macro_import(tokens, directory) ? 2 : 0;
+    else if (word == "import") meta |= s.package(tokens) ? 2 : 0;
+    else if (token.type == <preproc>)
+      meta |= s.include(word, directory) ? 2 : 0;
   }
   return meta;
 }
@@ -219,37 +225,40 @@ static int _marker(Tokenizer tokens) {
 
 /* A project `.xmacro` or `.xpmacro` file that `$(import` names joins
    `imports` after the files it imports, when it holds meta code. */
-static void Scan.macro_import(Scan &s, Tokenizer tokens, String directory) {
-  if (tokens.next().text != "import") return;
+static int Scan.macro_import(Scan &s, Tokenizer tokens, String directory) {
+  if (tokens.next().text != "import") return 0;
   String spelling = _quoted(tokens.next());
   String file = spelling ? _resolve(directory, spelling) : NULL;
-  if (file && (file.endswith(".xmacro") || file.endswith(".xpmacro")) &&
-      !_compiler_owns(file) && s.file(file))
-    s.imports.push(file);
+  if (!file || !(file.endswith(".xmacro") || file.endswith(".xpmacro")) ||
+      _compiler_owns(file)) return 0;
+  int seen = file in s.seen, meta = s.file(file);
+  if (!seen && (meta & 1)) s.imports.push(file);
+  return !!meta;
 }
 
 /* An imported package's entry is read for imports like an input. */
-static void Scan.package(Scan &s, Tokenizer tokens) {
+static int Scan.package(Scan &s, Tokenizer tokens) {
   String name = _quoted(tokens.next()), root = NULL;
   String entry = name ? package_entry(
     s.request.sources, s.request.package_roots(), name, root) : NULL;
-  if (!entry) return;
+  if (!entry) return 0;
   s.packages[root] = 1;
-  s.file(entry);
+  return !!s.file(entry);
 }
 
 /* An included project `.x` or `.xp` file is read for imports too, and
-   joins `units` when it holds meta code of its own. */
-static void Scan.include(Scan &s, String directive, String directory) {
+   joins `units` when it reaches project meta code. */
+static int Scan.include(Scan &s, String directive, String directory) {
   int angle = 0;
   String target = preproc_include_target(directive, angle);
-  if (!target || !(target.endswith(".x") || target.endswith(".xp"))) return;
+  if (!target || !(target.endswith(".x") || target.endswith(".xp"))) return 0;
   String file = collect_resolve_include(
     s.request.sources, s.request.include_dirs, directory, target, angle);
-  if (!file) return;
+  if (!file) return 0;
   String path = Path.absolute(file);
-  if (!_compiler_owns(path) && s.file(path))
-    s.units.push(absolute_path(path));
+  if (_compiler_owns(path) || !s.file(path)) return 0;
+  s.units.push(absolute_path(path));
+  return 1;
 }
 
 /* The text between a string token's quotes. */

@@ -1,3 +1,5 @@
+( meta_cells_imported ) ==> (( dim ( 40 )) int )
 ( meta_cells_included ) ==> (( dim ( 30 )) int )
 ( meta_cells_limit ) ==> ( enum ( gensym unittest/compiler-fixtures/meta-included-file-constants/cells.x           1 ))
 ( meta_cells_own ) ==> (( dim ( 31 )) int )
+( meta_cells_own_imported ) ==> (( dim ( 41 )) int )

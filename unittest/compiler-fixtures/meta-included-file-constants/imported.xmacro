@@ -1,0 +1,1 @@
+meta static int forty(void) => 40;
