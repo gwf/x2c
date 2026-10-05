@@ -33,8 +33,11 @@ standard, and this plan's decisions.
 4. The standard is the only place rule text may change. A guide, skill, or
    tool that disagrees with it is updated to match it, unless step 3
    applies.
-5. Change public behavior only where D2 and D3 authorize it. Any other
-   observable change is a defect in the work.
+5. Change public behavior only where D2 and D3 authorize it. Gary also
+   approved reviewed retained macro-definition position changes for source
+   reshapes on 2026-10-05. Those positions follow their new authored
+   locations; diagnostic wording, origin ancestry, and all other behavior
+   stay unchanged. Other observable changes are defects in the work.
 6. Never rebaseline a stage diff, fixture expectation, or lint baseline to
    make a change pass, except where a step below names the rebaseline and
    its review.
@@ -790,7 +793,7 @@ No stage expectation, lint baseline, or bootstrap file changed.
 Options for Gary: retain this violation, or permit a reviewed generated
 refresh for this diagnostic location. No padding was added to offset it.
 
-### Stage 4: label collector reshape changes retained positions
+### Stage 4: label collector positions approved; reshape pending
 
 The complete `Walk.collect_labels` trial replaces its multi-line dispatch
 arms with named private steps for expression blocks, labels, try regions,
@@ -826,9 +829,11 @@ bootstrap; its logs are `label-steps-baseline-safe.log`,
 `label-steps-baseline-refresh.log`, and
 `label-steps-baseline-converged.log`.
 
-Options for Gary: permit reviewed retained definition position changes for
-this reshape, or retain this candidate while seeking another implementation.
-This evidence rejects the tested spelling, not every possible reshape.
+Gary approved reviewed retained macro-definition position changes for
+source reshapes on 2026-10-05. Positions must follow their new authored
+locations, with diagnostic wording, origin ancestry, and all other behavior
+preserved. The restored collector trial can now be reconsidered under that
+decision; its implementation and remaining proofs are still pending.
 No padding or invented replacement comment was added to force equality.
 
 ## Progress
