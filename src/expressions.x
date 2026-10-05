@@ -500,7 +500,7 @@ static List Compiler._parse_slice(Compiler c, List expr, List start) {
     if (c.test(<:>) && c.peek(0) != <]>) step = c.parse_expression();
   }
   if (step && step.match(
-      %(expr ? ${$source_literal_content(%(? "0"))})))
+    %(expr ? ${$source_literal_content(%(? "0"))})))
     $report.parse.slice_zero(c);
   c.expect(<]>);
   return %(expr $type ${source_slice_content(
