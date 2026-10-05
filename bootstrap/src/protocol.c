@@ -2018,11 +2018,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_3(void){
   _1563 = cons(_1562, NULL);
   _1564 = cons(_671, _1563);
   _1565 = List_var(_1564);
-  _1566 = int_var(2432);
+  _1566 = int_var(2433);
   _1567 = cons(_1566, NULL);
   _1568 = cons(_707, _1567);
   _1569 = List_var(_1568);
-  _1570 = int_var(89390);
+  _1570 = int_var(89469);
   _1571 = cons(_1570, NULL);
   _1572 = cons(_720, _1571);
   _1573 = List_var(_1572);

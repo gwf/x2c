@@ -531,8 +531,6 @@ static Token Compiler__previous_source_token(Compiler c, Token after);
 
 static void Compiler__bind_name_arguments(Compiler c, List definition, List arguments);
 
-static List Compiler__capture_row(Compiler c, List hole, List sources);
-
 static List Compiler__capture_row_project(Compiler c, List hole, List sources, int retain);
 
 static List Compiler__sequence_row(Compiler c, List sources, int retain);
@@ -2476,7 +2474,7 @@ static List Expansion_fresh_names(Expansion * x, List old_stack){
         if(Var_int(lisp)){
           List binding = Compiler__introduced_binding(c, Var_str(spelling), owner);
           List hole = _hole(binder, 920394, 0);
-          Array_push(fresh_values, List_var(Compiler__capture_row(c, hole, cons(List_var(binding), NULL))));
+          Array_push(fresh_values, List_var(Compiler__capture_row_project(c, hole, cons(List_var(binding), NULL), 0)));
         }
         else(* x).direct = cons(List_var(({
           Var _x2c_literal_part_8 = binder;  Var _x2c_literal_part_9 = List_var(Compiler__private_name(c, Var_str(spelling), owner));  cons(_x2c_literal_part_8, cons(_x2c_literal_part_9, NULL));
@@ -4040,7 +4038,7 @@ static List Compiler__argument_row(Compiler c, List hole, Symbol kind){
   int sequence = Var_int(Var_convert(List_assoc(hole, Symbol_var(1317592723658)), 3453797));  Array captured = Array_new();  if(Compiler_peek(c, 0) == 83 && ! sequence) Compiler_report_error(c, 33658058, _452, c -> token, NULL);  if(Compiler_peek(c, 0) != 83) while(1){
     Compiler__row_directives(c, kind, captured);  Token first = c -> token;  Var argument = Compiler__parse_argument(c, kind);  if(kind != 920394) argument = Compiler__capture_source(c, argument, first, c -> token);  Array_push(captured, argument);  if(! sequence || ! Compiler_test(c, 89)) break;
   }
-  Compiler__row_directives(c, kind, captured);  return Compiler__capture_row(c, hole, Array_list_free(captured));
+  Compiler__row_directives(c, kind, captured);  return Compiler__capture_row_project(c, hole, Array_list_free(captured), 0);
 }
 
 static void Compiler__row_directives(Compiler c, Symbol kind, Array captured){
@@ -4111,10 +4109,6 @@ static void Compiler__bind_name_arguments(Compiler c, List definition, List argu
     parameters = List_cdr(parameters);  captures = List_cdr(captures);
   }
 
-}
-
-static List Compiler__capture_row(Compiler c, List hole, List sources){
-  return Compiler__capture_row_project(c, hole, sources, 0);
 }
 
 static List Compiler__capture_row_project(Compiler c, List hole, List sources, int retain){
@@ -4439,7 +4433,7 @@ static List Decoration_capture(Decoration * d, List target){
     }
 
   }
-  List captured = Array_list_free(captured_targets);  List target_capture = Compiler__capture_row(c, Var_list(List_assoc((* d).definition, Symbol_var(43055000864))), captured);  if((* d).kind == 1405544 && ! Compiler__private_target(c, target) && List_truth(captured) && ! List_truth(List_cdr(captured))) target_capture = List_append(target_capture, cons(List_var(cons(_509, cons(List_car(captured), NULL))), NULL));  return target_capture;
+  List captured = Array_list_free(captured_targets);  List target_capture = Compiler__capture_row_project(c, Var_list(List_assoc((* d).definition, Symbol_var(43055000864))), captured, 0);  if((* d).kind == 1405544 && ! Compiler__private_target(c, target) && List_truth(captured) && ! List_truth(List_cdr(captured))) target_capture = List_append(target_capture, cons(List_var(cons(_509, cons(List_car(captured), NULL))), NULL));  return target_capture;
 }
 
 static int Compiler__private_target(Compiler c, List target){
@@ -4637,7 +4631,7 @@ static List Compiler__expression_decorator(Compiler c, List definition, Token in
     String spelling = Var_str(List_assoc(definition, Symbol_var(920394)));  Compiler_report_error(c, 27335838, String_join(NULL, cons(String_var(_499), cons(String_var(spelling), cons(String_var(_539), NULL)))), invocation, cons(String_var(_definition_note(definition)), NULL));
   }
   List target = Compiler_parse_macro_expression_target(c);  List input =({
-    Var _x2c_literal_part_92 = List_var(arguments);  Var _x2c_literal_part_93 = List_var(Compiler__capture_row(c, Var_list(List_assoc(definition, Symbol_var(43055000864))), cons(List_var(target), NULL)));  cons(_31, cons(_x2c_literal_part_92, cons(_x2c_literal_part_93, NULL)));
+    Var _x2c_literal_part_92 = List_var(arguments);  Var _x2c_literal_part_93 = List_var(Compiler__capture_row_project(c, Var_list(List_assoc(definition, Symbol_var(43055000864))), cons(List_var(target), NULL), 0));  cons(_31, cons(_x2c_literal_part_92, cons(_x2c_literal_part_93, NULL)));
   }
   );  List node = Compiler__invocation_node(c, definition, input, invocation);  return cons(_202, cons(_205, cons(List_var(node), NULL)));
 }
@@ -5717,7 +5711,7 @@ static Var Compiler__eval_string(Compiler c, String source, Token invocation){
                     x2c_exception_landed(& _x2c_exception_frame_0);  if(x2c_exception_is_error_target(& _x2c_exception_frame_0)){
                       int _x2c_macro_selected_0 = x2c_error_catch_selected(_x2c_error_handler_0);  x2c_error_catch_detach(_x2c_error_handler_0);  x2c_exception_mark_handled(& _x2c_exception_frame_0);  if(_x2c_macro_selected_0 == 0){
                         Var volatile category;  category = x2c_error_catch_capture(_x2c_error_handler_0, 0); {
-                          static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/macros.x",.function = "Compiler__eval_string",.line = 3862};  x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(209659067570), category);  __builtin_unreachable();
+                          static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/macros.x",.function = "Compiler__eval_string",.line = 3859};  x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(209659067570), category);  __builtin_unreachable();
                         }
 
                       }
@@ -5892,7 +5886,7 @@ return Var_is_row(value, 9, 7, 4) && binding_identity_try_parts(Var_list(value),
 
 static Var _lisp_import_hook(String path){
   MetaContext * context = MetaContext_current();  Compiler c = context -> evaluator;  if(! c){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/macros.x",.function = "_lisp_import_hook",.line = 4041};  x2c_error_raise_n(& _x2c_error_site_1, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("compile-time import")), NULL))));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/macros.x",.function = "_lisp_import_hook",.line = 4038};  x2c_error_raise_n(& _x2c_error_site_1, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("compile-time import")), NULL))));  __builtin_unreachable();
   }
   Compiler__import(c, path, context -> site);  return List_var(NULL);
 }
