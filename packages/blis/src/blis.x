@@ -29,7 +29,7 @@ $cleanup.by(BlisObject, free);
 #include <math.h>
 #include <string.h>
 
-$(import "blis-reports.xmacro")
+$(import "blis-errors.xmacro")
 
 struct BlisObject {
   obj_t native;
@@ -55,7 +55,7 @@ static void _blis_bad_type(String operation, num_t storage) {
 static void _blis_precision_mismatch(
   String operation, num_t destination, num_t source) {
   int destination_datatype = destination, source_datatype = source;
-  $report.blis.precision(operation, destination_datatype, source_datatype);
+  $error.blis.precision(operation, destination_datatype, source_datatype);
 }
 
 static double _blis_numeric_value(Var value, String operation) {
@@ -71,13 +71,13 @@ static double _blis_numeric_value(Var value, String operation) {
 static void _blis_bad_shape(
   String operation, int left_rows, int left_columns, int right_rows,
   int right_columns) {
-  $report.blis.shape(
+  $error.blis.shape(
     operation, left_rows, left_columns, right_rows, right_columns);
 }
 
 static void _blis_bad_index(
   String operation, int row, int column, int rows, int columns) {
-  $report.blis.index(operation, row, column, rows, columns);
+  $error.blis.index(operation, row, column, rows, columns);
 }
 
 static int _blis_supported_storage(num_t storage) {
@@ -407,7 +407,7 @@ BlisObject BlisObject.set_computation_precision(
   _blis_live(object, "set_computation_precision");
   if (precision != BLIS_SINGLE_PREC && precision != BLIS_DOUBLE_PREC) {
     int value = precision;
-    $report.blis.computation_precision(value);
+    $error.blis.computation_precision(value);
   }
   bli_obj_set_comp_prec(precision, &object.native);
   return object;

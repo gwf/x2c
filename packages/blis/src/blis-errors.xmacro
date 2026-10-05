@@ -1,6 +1,6 @@
 /* BLIS structured reports. Callers retain native-to-x2c conversions. */
 
-macro Stmt $report.blis.precision(
+macro Stmt $error.blis.precision(
   Expr $operation, Expr $destination_datatype, Expr $source_datatype) {
   raise %(bad-types (library "BLIS") (operation ${$operation})
           (reason "storage precisions differ")
@@ -8,7 +8,7 @@ macro Stmt $report.blis.precision(
           (src-type ${$source_datatype}));
 }
 
-macro Stmt $report.blis.shape(
+macro Stmt $error.blis.shape(
   Expr $operation, Expr $left_rows, Expr $left_columns,
   Expr $right_rows, Expr $right_columns) {
   raise %(bad-arg (library "BLIS") (operation ${$operation})
@@ -17,7 +17,7 @@ macro Stmt $report.blis.shape(
           (right-rows ${$right_rows}) (right-cols ${$right_columns}));
 }
 
-macro Stmt $report.blis.index(
+macro Stmt $error.blis.index(
   Expr $operation, Expr $row, Expr $column, Expr $rows, Expr $columns) {
   raise %(bad-arg (library "BLIS") (operation ${$operation})
           (reason "index outside the object")
@@ -25,7 +25,7 @@ macro Stmt $report.blis.index(
           (rows ${$rows}) (columns ${$columns}));
 }
 
-macro Stmt $report.blis.computation_precision(Expr $value) {
+macro Stmt $error.blis.computation_precision(Expr $value) {
   raise %(bad-arg (library "BLIS")
           (operation "set_computation_precision")
           (precision ${$value}));
