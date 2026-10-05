@@ -2,7 +2,7 @@
 
 > Status: active - needs Gary's review of the standard and decisions D1-D5.
 > [agents/x2c-code-standard.md](../agents/x2c-code-standard.md) was written
-> on 2026-10-04 against `dev` at `4107b60a`. It is the consolidated
+> on 2026-10-04 against `dev` at `4107b60a`. It is the proposed consolidated
 > definition. The older guides and skills still hold their own copies of
 > the rules until phase 1 reduces them to links and examples.
 
@@ -76,10 +76,11 @@ runtime modules (ER-2).
 **D4. A lint ratchet in the gate.** The whole-tree lint run takes 4 seconds
 over `src/` and `lib/`. A ratchet would fail publication when a
 `violation` count rises above a checked-in baseline. The process ceiling in
-`AGENTS.md` requires Gary's approval and an offsetting removal. The offset
-proposed is the separate `commands-check` run of lint fixtures, which the
-ratchet would subsume for violations. Recommended only after phase 2 adds
-suppressions.
+`AGENTS.md` requires Gary's approval and an offsetting removal. The proposed
+offset is the lint-fixture portion of `commands-check`, but a
+whole-tree count does not establish detector or fixer correctness. Equivalent
+coverage and comparable cost still need evidence before that replacement
+can be approved. Recommended only after phase 2 adds suppressions.
 
 **D5. Non-static `builtin_*` slot functions.** NM-6 limits non-static names
 to the C interface. The lowering slot functions in `src/builtins.x` are
@@ -230,7 +231,7 @@ and fix.
 - Reuse and deletion: phase 1 deletes duplicate rule text from about ten
   files. Phase 2 extends the existing lint engine and graph. No new tool,
   gate, or representation is proposed except the D4 ratchet, which needs
-  Gary's approval and offsets `commands-check`.
+  Gary's approval and a verified comparable-cost offset.
 - Idiom: the rules describe x2c as written on `dev` after the 2026-09
   campaigns, including the corrections those campaigns made.
 - Validators, diagnostics, negative fixtures: none proposed. The lint

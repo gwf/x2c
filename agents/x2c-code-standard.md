@@ -17,7 +17,9 @@ guide, organization guide, philosophy working rules, AST and lowering guides,
 diagnostics guide, the source-quality skills, the book's prescriptive text,
 and the 2026-09-17 to 2026-10-04 cleanup campaigns. Adoption, tool coverage,
 and the decisions still open are tracked in
-[plans/x2c-code-standard.md](../plans/x2c-code-standard.md).
+[plans/x2c-code-standard.md](../plans/x2c-code-standard.md). This draft does
+not replace current guidance or expand validation requirements. Adoption and
+any process expansion require Gary's review under `AGENTS.md`.
 
 ## How to read this standard
 
@@ -165,10 +167,11 @@ in a read loop such as `while ((count = fread(...)) > 0)`.
 **ST-5** Spell a negative tag test `value is not T`. Never write
 `!(value is T)`.
 
-**ST-6** Rely on protocol truth for `String`, `List`, `Array`, `Map`,
-`Buffer`, and `Var`: `if (items)` means present and non-empty. Compare with
-`NULL` only when the question is about the pointer. An `Iter` is true even
-when exhausted. Never use `void` as a condition; test `is void`.
+**ST-6** Rely on protocol truth: `if (items)` tests whether a container
+is present and non-empty. A `Var` follows its value's truth, including false
+numeric zero and registered truth callbacks. Compare with `NULL` only when
+the question is about the pointer. A nonnull `Iter` is true even when
+exhausted. Never use `void` as a condition; test `is void`.
 
 **ST-7** Declare a value in the narrowest scope that owns it, initialized
 where it becomes meaningful. Never declare at the top and assign later; a
@@ -224,10 +227,11 @@ values included: `""`, `[]`, `{}`, `[a, b]`, `{name: value}`. A bare `[]` or
 `String.new("")`, `Array.new()`, or `Map.new()`.
 
 **EX-2** Use `%(...)`, `%[...]`, and `%{...}` for quoted data, where names
-are content: AST shapes, patterns, configuration trees. Write names bare
-inside `%(...)`; do not repeat `%` on nested values, since a nested
-`"text $name"` already interpolates; write `${f(x)}` for a computed
-insertion. Keep `%{ ${...} }` where a constructed row supplies the entry.
+are content: AST shapes, patterns, configuration trees. Write Symbol names
+bare inside `%(...)`; type syntax uses Strings for non-keyword names, as
+in `%("String")` and `%(* "Point")`. Do not repeat `%` on nested values,
+since a nested `"text $name"` already interpolates; write `${f(x)}` for a
+computed insertion. Keep `%{ ${...} }` for a constructed entry row.
 
 **EX-3** Write a plain `"..."` wherever a String or `Var` destination
 requests it. Keep `%"..."` for interpolation, multiline text, or escape
@@ -521,7 +525,8 @@ needs a public contract that fixes it.
 role names, and the only abbreviations, are in the
 [glossary](#appendix-b-role-names). Never use `tmp`, `data`, `result`, or
 `value` for a role that stays ambiguous across a nontrivial function.
-`old_`, `saved_`, and `previous_` locals become `$let`.
+Locals used only to save and restore state become `$let`, including
+`old_`, `saved_`, and `previous_` locals with that role.
 
 **NM-5** Name a helper for the semantic action it performs. Avoid
 `process`, `handle`, `request`, `do`, and `check` as whole names.
@@ -673,7 +678,9 @@ owns; never use it to swallow failures, never raise from cleanup, and never
 convert to an immutable List or String once, at the phase or API boundary
 that promises a snapshot. Never maintain two live representations.
 
-**LT-6** Never mutate a Map while iterating it; collect the keys first.
+**LT-6** Never structurally mutate a Map while iterating it; collect keys
+first before insertion, removal, or growth. Updating existing values does
+not invalidate traversal.
 Pass a `Block` handle across growth; never cache its byte pointer.
 
 **LT-7** Bracket large temporary List and String construction with
@@ -889,8 +896,9 @@ macro expansion and compile-time code inside) -> region analysis
 changes.
 
 **AR-2** Parsing preserves source order and attaches types as the tree is
-built: every expression is `(expr TYPE CONTENT)`. Later phases read types;
-they never infer them again.
+built: every expression is `(expr TYPE CONTENT)`. Later phases preserve
+existing types and bind newly constructed syntax through the same typing
+owner.
 
 **AR-3** Transforms own runtime crossings and normalization. A transform
 helper rewrites its node and returns the replacement; the fixed-point driver
@@ -915,9 +923,9 @@ downstream workaround.
 existing runtime owner from the compiler (`Path.make_dirs`) instead of
 writing a compiler-local copy.
 
-**AR-8** Diagnostics and emission work from the original positioned token
-stream. No later phase rescans String contents or replaces the user's
-source with a declaration stream.
+**AR-8** Diagnostics retain positioned tokens and origin ancestry; emission
+consumes the normalized AST. No later phase rescans String contents or
+replaces the user's source with a declaration stream.
 
 **AR-9** Never hand-edit `bootstrap/`, `lib/x2c.x`, or generated
 documentation; regenerate through the documented targets. A new compiler
@@ -1028,13 +1036,15 @@ compiler's recursive walkers.
 **HP-1** Change a hot path only with a paired measurement: retired
 instructions under `/usr/bin/time -l`, base and candidate run alternately
 from checkout paths of equal length. Prepare each tree with
-`make bootstrap-refresh && make build-safe`. Report the delta with its
-cause; a cost Gary has not accepted needs a fix.
-[Performance checkpoints](performance-checkpoints.md) owns the method.
+`make bootstrap-refresh && make build-safe`. Report the delta and its
+supported cause. The checkpoint remains advisory during the baseline period;
+[performance checkpoints](performance-checkpoints.md) owns the method and
+acceptance policy.
 
-**HP-2** On a hot path, add no `defer`, `$scope`, `$let`, `$auto`,
-allocation, lock, or extra pass to a helper, and keep the number and order
-of calls.
+**HP-2** On a hot path, measure additions of `defer`, `$scope`, `$let`,
+`$auto`, allocation, locks, passes, or calls before accepting them. An
+absolute ban or a new acceptance requirement is a proposal for Gary's
+review, not a current publication gate.
 
 **HP-3** Keep a hot helper foldable: no fallback `return` after a switch
 that makes clang compute every arm, no raise inside a function that should
@@ -1165,8 +1175,8 @@ build for the rows marked "none", ordered by value and cost.
 
 ## Turning bad code into good code
 
-Every repair follows the same order, because each step makes the next one
-smaller:
+A full beautification follows this order. Local cleanup keeps its selected
+scope and does not require reshaping or reordering:
 
 1. **Delete.** Remove dead code, checks of established facts, and machinery
    the language or an existing owner makes unnecessary (PR-3, FI-7, ER-4).
@@ -1184,10 +1194,15 @@ smaller:
 
 ### Proof obligations
 
+Select evidence for the task under its current skill and `AGENTS.md`. The
+per-file stage comparison belongs to the existing beautification workflow;
+this draft does not extend it to all cleanup. Any broader requirement needs
+Gary's approval under the process ceiling.
+
 | Change | Proof |
 | --- | --- |
-| Respelling, rename, reorder, receiver, `=>`, `in`, `.` in any source | its generated C is byte-identical: `make stage-diff-0` against a current bootstrap |
-| Behavior-neutral rewrite of compiler source | the compiler's output is unchanged: `make stage-1 && make stage-diff-1` once per file; driver files also run their probes |
+| Neutral respelling, rename, reorder, receiver, `=>`, `in`, `.` | compare affected generated output before and after where needed; `stage-diff-0` compares bootstrap with stage 0, not the pre-edit tree |
+| Compiler beautification | existing beautify proof: `make stage-1 && make stage-diff-1` once per file; use relevant driver probes |
 | A pure move | the multiset of non-blank lines is unchanged except section labels |
 | Adopting `$auto`, `$let`, `$scope`, quotations | emission changes: refresh bootstrap through its target, then the focused fixtures and suites |
 | Deletion of a check or mechanism | the observable result of valid input is unchanged; invalid input is still rejected before wrong output, corrupt state, or an unsafe crossing |
