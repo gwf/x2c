@@ -68,7 +68,8 @@ static List _without_trivia(List ast) =>
 /* The header and source of `ast` as `(hfile htext cfile ctext)`, named from
    `basename`. */
 static List Compiler._generated_code(Compiler c, List ast, String basename) {
-  List (header, source, macros) = c._header_and_source(ast);
+  Map inline_bodies = $auto({});
+  List (header, source) = c._header_and_source(ast, inline_bodies);
   String hash = filename_hash(c.filename);
   Map bindings;
   (header, source, bindings) = c.setup_cache_init(
@@ -76,7 +77,7 @@ static List Compiler._generated_code(Compiler c, List ast, String basename) {
     %"_x2c_hcache_init_$hash");
   defer bindings.cleanup();
   List hcode = c._emit_header(header);
-  List ccode = c._emit_source(source, header, bindings, macros);
+  List ccode = c._emit_source(source, bindings, inline_bodies);
   String hfile = %"$basename.h", cfile = %"$basename.c";
   return %(
     $hfile ${c.code_pretty_string(hcode, hfile)}
@@ -87,11 +88,11 @@ static List Compiler._generated_code(Compiler c, List ast, String basename) {
 static List Compiler._emit_header(Compiler c, List header) =>
   c.emit(c._include_guard(_vertical_spacing(header)), NULL);
 
-/* Static prototypes see the header's declarations as already declared. */
+/* Each source use follows the declarations it needs. */
 static List Compiler._emit_source(
-  Compiler c, List source, List header, Map bindings, List macros) {
-  source = c._static_prototypes(c._file_init(source), header);
-  source = c._primary_include(_vertical_spacing(source), macros);
+  Compiler c, List source, Map bindings, Map inline_bodies) {
+  source = c._static_prototypes(c._file_init(source), inline_bodies);
+  source = c._primary_include(source);
   return c.emit(c._patch_main(source), bindings);
 }
 
@@ -119,15 +120,48 @@ typedef struct Partition {
 
 /* Partition a normalized unit without changing source order. Non-inline
    public functions publish a header declaration and keep their body in the
-   source; public inline definitions remain header-only. Static functions
-   and objects stay in the source. Only `#pragma private` hides any other
-   declaration from the header. */
-static List Compiler._header_and_source(Compiler c, List ast) {
+   source; public inline definitions also publish their bodies. Static
+   functions and objects stay in the source. Only `#pragma private` hides
+   any other declaration from the header. */
+static List Compiler._header_and_source(
+  Compiler c, List ast, Map inline_bodies) {
   Partition p = {
     .c = c, .header = [], .source = [], .pending = [], .opened = [],
     .open = [], .forwarded = {}, .included = {}, .statics = {}};
   foreach (Ast node, ast) p.add(node);
-  return p.finish();
+  return %(${p.finish()} ${c._source_projection(ast, inline_bodies)});
+}
+
+/* The unit consumes its declarations where they were written, independently
+   of the public projection. In particular, a promoted include must not
+   change the native macro state before its source position. */
+static List Compiler._source_projection(
+  Compiler c, List ast, Map inline_bodies) {
+  Array source = [];
+  foreach (List node, ast) {
+    match (node) {
+      case %((!or protocol adopt macrodef) *): continue;
+      case %(preproc ?(String content)):
+        if (_is_pragma_once(content) || preproc_visibility(content) >= 0)
+          continue;
+      case %(import ?unit *):
+        node = %(preproc "#include \"${unit.string()}.x\"");
+      case %(function ?type (!set ?declarator (bind ?binding *)) ?body): {
+        type = _with_attributes(c.semantic_binding_facts(), type, binding);
+        type = _noreturn(type, declarator, body);
+        Type function_type = type;
+        if (function_type.is_inline() && !function_type.is_static()) {
+          inline_bodies[binding] = 1;
+          node = _header_function(type, declarator, body);
+        }
+        else node = %(function $type $declarator $body);
+      }
+      case %(declare ? (bindings (bind ?binding ?))):
+        if (c._completed_prototype(binding)) continue;
+    }
+    source.push(node);
+  }
+  return _typedef_forwards(source.list_free(), NULL);
 }
 
 static void Partition.add(Partition &p, Ast node) {
@@ -141,8 +175,7 @@ static void Partition.add(Partition &p, Ast node) {
       p.add_declaration(decl, type, bindings);
     case %(!set ?alias (falias (declare (!set ?type (*)) ?) ?)):
       p.add_alias(alias, type);
-    /* The consumer's types name the package's, so the include belongs to
-       the header; the source reaches it through the generated header. */
+    /* The public projection exposes the imported package's types. */
     case %(import ?unit *):
       p.header.push(%(preproc "#include \"${unit.string()}.x\""));
     case %(preproc ?content): p.add_preproc(node, content);
@@ -213,21 +246,16 @@ static void Partition.mark(Partition &p, List marker) {
   p.source.push(marker);
 }
 
-/* Once the whole unit is seen, the pending typedefs settle, then the
-   replayed directives, then the conditional groups, then the typedef
-   forwards each file needs. */
+/* Settle pending typedefs and conditional groups in the public projection.
+   The source partition records which groups contain private items. */
 static List Partition.finish(Partition &p) {
   _promote_typedefs(p.header, p.pending);
   List header = _place_typedefs(p.header, p.pending, 1);
-  List (source, macros) =
-    _replay_directives(_place_typedefs(p.source, p.pending, 0));
+  List source = _place_typedefs(p.source, p.pending, 0);
   Map header_filled = _filled_groups(header);
   Map source_filled = _filled_groups(source);
   header = _place_groups(header, header_filled, source_filled, p.opened, 1);
-  source = _place_groups(source, source_filled, header_filled, p.opened, 0);
-  header = _typedef_forwards(header, NULL);
-  source = _typedef_forwards(source, header);
-  return %($header $source $macros);
+  return _typedef_forwards(header, NULL);
 }
 
 /* private typedefs
@@ -357,38 +385,6 @@ static List _place_typedefs(Array items, Array pending, int header) {
     out.push(item);
   }
   return out.list_free();
-}
-
-/* replayed directives
-
-   The source includes the header, so it starts with the macros the
-   header's directives leave at its end. When a public directive follows an
-   item the source holds, that directive may change what the item sees, so
-   the source repeats every public directive in order. The source saves
-   their macro names before its header include and restores them afterward,
-   so earlier source sees the incoming definitions, including `-D` values. */
-
-static List _replay_directives(List source) {
-  int held = 0, replay = 0;
-  foreach (List item, source)
-    match (item) {
-      case %(replay ?): replay = replay || held;
-      case %(conditional *): continue;
-      default: held = 1;
-    }
-  Array out = [];
-  Map names = $auto({});
-  foreach (List item, source)
-    match (item) {
-      case %(replay (!set ?node (preproc ?content))): {
-        if (!replay) continue;
-        String name = preproc_macro_name(content);
-        if (name) names[name] = 1;
-        out.push(node);
-      }
-      default: out.push(item);
-    }
-  return %( ${out.list_free()} ${names.keys().list()} );
 }
 
 // functions
@@ -639,20 +635,16 @@ static void Partition.place_directive(
   else p.publish_directive(node);
 }
 
-/* A public directive belongs to the header, and waits in the source as a
-   `replay` marker. */
+/* A public directive belongs to the header. */
 static void Partition.publish_directive(Partition &p, List node) {
   p.header.push(node);
-  p.source.push(%(replay $node));
 }
 
 /* An include of x2c source below `#pragma private` waits, as a private
    typedef does, under the typedef names of the files it reaches that no
-   earlier header include reaches. The source sees the header from its
-   start, so a public include that follows an item the source holds would
-   apply its macros to that item. Such an include waits as a private one
-   does, staying in the source at its place unless the header needs one of
-   its typedefs. */
+   earlier header include reaches. A late public include follows the same
+   rule: promote it only when a later public declaration needs its types.
+   The independent source projection keeps either include at its position. */
 static void Partition.add_include(
   Partition &p, List node, String target, int angle) {
   if (!p.private && !_holds_item(p.source)) {
@@ -669,7 +661,7 @@ static void Partition.add_include(
 static int _holds_item(Array source) {
   foreach (List item, source)
     match (item) {
-      case %((!or pending conditional replay) *): continue;
+      case %((!or pending conditional) *): continue;
       default: return 1;
     }
   return 0;
@@ -836,14 +828,34 @@ static void Init.prepare(Init &i, List source) {
   if (c._cache_only()) i.reachable = _cache_reachable(source);
 }
 
-/* The position of the first function definition in `source`, or of the
+/** Places generated `declarations` after source types and includes, before
+    the first function or captured initializer that can use them. An outer
+    conditional containing that first use follows the declarations.
+*/
+List Compiler.place_source_prelude(
+  Compiler c, List source, List declarations) {
+  (void) c;
+  Array out = [];
+  int prelude = _prelude_position(source), position = 0;
+  foreach (List node, source) {
+    if (position++ == prelude)
+      foreach (List declaration, declarations) out.push(declaration);
+    out.push(node);
+  }
+  if (prelude < 0)
+    foreach (List declaration, declarations) out.push(declaration);
+  return out.list_free();
+}
+
+/* The position of the first function or captured initializer, or of the
    directive opening the outermost conditional group around it, so the
    prelude is declared whichever arms the C compiler selects. A unit without
-   a function definition gives -1. */
+   a function or captured initializer gives -1. */
 static int _prelude_position(List source) {
   int position = 0, depth = 0, opening = 0;
   foreach (List item, source) {
-    match (item) case %(function (*) (bind (binding ? ?) ?) (block *)):
+    List function = item.car() == <sourceinit> ? item.cadr() : item;
+    match (function) case %(function (*) (bind (binding ? ?) ?) (block *)):
       return depth ? opening : position;
     match (item) case %(preproc ?(String content)): {
       Symbol kind = preproc_conditional_kind(content);
@@ -1063,12 +1075,12 @@ static int _record_calls(Var value, Var caller, Map callers) {
 
 /* Each static function's prototype takes its definition's place, and each
    node follows the forward declarations it needs. */
-static List Compiler._static_prototypes(Compiler c, List source, List header) {
-  source = _move_bodies(source);
+static List Compiler._static_prototypes(
+  Compiler c, List source, Map inline_bodies) {
+  source = _move_bodies(source, inline_bodies);
   Forward f = {
     .c = c, .available = {}, .statics = {}, .seen = {}, .out = []};
-  _collect_declared(header, f.available);
-  _static_declarations(source, f.statics);
+  _source_declarations(source, f.statics);
   foreach (List node, source) {
     if (node.car() == <typedef> && node in f.seen) continue;
     _collect_declared(node, f.available);
@@ -1079,12 +1091,13 @@ static List Compiler._static_prototypes(Compiler c, List source, List header) {
 }
 
 /* Native directives and initializer inputs keep their source order.
+   Public inline definitions keep their macro state at their positions.
    Ordinary function bodies follow the file's declarations and directives,
    preserving their existing access to later private includes and macros,
    but precede a later `#undef` and any conditional group containing one,
    as C requires of a body that uses the macro. Source initializer helpers
    stay at their capture positions. */
-static List _move_bodies(List source) {
+static List _move_bodies(List source, Map inline_bodies) {
   Array out = [], bodies = $auto([]);
   Map undefs = $auto(_undef_positions(source)), List arms = NULL;
   int position = 0;
@@ -1092,6 +1105,10 @@ static List _move_bodies(List source) {
     if (position in undefs) _place_bodies(out, bodies, arms);
     position++;
     match (node) case %(function ?type ?signature ?): {
+      if (signature.cadr() in inline_bodies) {
+        out.push(node);
+        continue;
+      }
       bodies.push(%($node @arms));
       if (type.list().type().is_static())
         out.push(_prototype(type, signature));
@@ -1189,21 +1206,20 @@ static List _declaration_binding(List declarator) {
   return NULL;
 }
 
-/* Records each static declaration by binding: a static function's
-   prototype, also under its native spelling, a static object's declaration
-   without its initializer, and a typedef, also under its spelling. */
-static void _static_declarations(Var value, Map statics) {
+/* Records source declarations by binding: every defined function's
+   prototype, also under its native spelling, static objects without their
+   initializers, and typedefs, also under their spellings. */
+static void _source_declarations(Var value, Map statics) {
   if (value is not <list>) return;
   List node = value;
   match (node) {
     case %(function ?type (!set ?signature (bind ?binding ?)) ?):
-      if (type.list().type().is_static())
-        _set_function(statics, binding, _prototype(type, signature));
+      _set_function(statics, binding, _prototype(type, signature));
     case %((!or declare typedef) ?base (bindings *declarators)):
       if (base.list().type().is_static() || node.car() == <typedef>)
         foreach (List declarator, declarators)
           _set_static(statics, node, declarator);
-    default: foreach (Var child, node) _static_declarations(child, statics);
+    default: foreach (Var child, node) _source_declarations(child, statics);
   }
 }
 
@@ -1315,9 +1331,9 @@ static void Forward.types(Forward &f, Type type) {
 
 /* file text
 
-   Both files open with the generated banner. The header wraps its
-   declarations in its guard, and the source includes its own header and
-   the runtime headers it needs. */
+   Both files open with the generated banner. The header guards its public
+   declarations; the source suppresses cyclic includes of that header and
+   consumes its own ordered declarations. */
 
 static List _vertical_spacing(List code) {
   Array out = [];
@@ -1366,23 +1382,29 @@ static List _header_guard(List content, String guard) => %(
     (space "\n")
   );
 
-/* The source includes its own header, then `error.h` when it raises. A
-   cleanup region spells `X2CCleanup` and its push and leave calls, which
-   `exception.x` declares. */
+/* Suppress a cyclic include of this unit's completed header. Its own
+   declarations occur in order below. Add the runtime headers that lowering
+   needs. */
 static List Compiler._primary_include(
-  Compiler c, List content, List macros) {
-  List own = _include_directive(%"${Path.stem(c.filename)}.h");
+  Compiler c, List content) {
+  String guard = filename_hash(c.filename);
+  List own = %((preproc "#define __GUARD_0x${guard}__"));
+  List runtime = c.runtime_inc ? _include_directive("x2c.x") : NULL;
   List error =
     ast_contains_head(content, <raise>) ? _include_directive("error.h") : NULL;
   List exception =
     c.needs_exception ? _include_directive("exception.h") : NULL;
-  Array before = [], after = [];
-  foreach (String name, macros) {
-    before.push(%(preproc "#pragma push_macro(\"$name\")"));
-    after.push(%(preproc "#pragma pop_macro(\"$name\")"));
+  Array ordered = [];
+  int prelude = _prelude_position(content), position = 0;
+  foreach (List node, content) {
+    if (position++ == prelude) {
+      foreach (List include, error) ordered.push(include);
+      foreach (List include, exception) ordered.push(include);
+    }
+    ordered.push(node);
   }
-  return %(@{_banner()} @{before.list_free()} @own @{after.list_free()}
-           @error @exception @content);
+  return %(@{_banner()} @own @runtime
+           @{_vertical_spacing(ordered.list_free())});
 }
 
 static List _include_directive(String fname) =>

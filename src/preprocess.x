@@ -134,14 +134,6 @@ static Token _macro_directive(String content, int &undefined) {
   return token.type == <ident> ? token : NULL;
 }
 
-/** Returns the macro name a `#define` or `#undef` line names, or NULL
-    for any other directive. */
-String preproc_macro_name(String text) {
-  int undefined;
-  Token name = _macro_directive(text, undefined);
-  return name ? name.text : NULL;
-}
-
 /* conditional arms
 
    x2c output is always compiled as C by a GNU-style compiler, so an arm

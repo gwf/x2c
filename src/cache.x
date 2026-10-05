@@ -25,6 +25,7 @@ $(import "../src/ast-rewrite.xmacro")
 #include "transform.x"
 #include "cleanup.x"
 #include "expressions.x"
+#include "generate.x"
 #include "logger.x"
 #include <stdio.h>
 #include <stdint.h>
@@ -573,7 +574,7 @@ static List Compiler._source_cache(
     c.add_init(<late>, stmt);
   c._queue_statics(initializers, deferred_kind);
   ids.free();
-  return declarations.list_free().append(source);
+  return c.place_source_prelude(source, declarations.list_free());
 }
 
 /* Large literal graphs otherwise become one enormous native basic block.
