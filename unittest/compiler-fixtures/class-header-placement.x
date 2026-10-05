@@ -4,4 +4,4 @@ typedef struct Uses { After a; } *Uses;
 
 int Box.twice(Box box) { return box.v * 2; }
 
-typedef struct Hidden { int h; } Hidden;
+typedef struct Later { int h; } Later;

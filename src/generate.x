@@ -68,7 +68,7 @@ static List _without_trivia(List ast) =>
 /* The header and source of `ast` as `(hfile htext cfile ctext)`, named from
    `basename`. */
 static List Compiler._generated_code(Compiler c, List ast, String basename) {
-  List (header, source) = c._header_and_source(ast);
+  List (header, source, macros) = c._header_and_source(ast);
   String hash = filename_hash(c.filename);
   Map bindings;
   (header, source, bindings) = c.setup_cache_init(
@@ -76,7 +76,7 @@ static List Compiler._generated_code(Compiler c, List ast, String basename) {
     %"_x2c_hcache_init_$hash");
   defer bindings.cleanup();
   List hcode = c._emit_header(header);
-  List ccode = c._emit_source(source, header, bindings);
+  List ccode = c._emit_source(source, header, bindings, macros);
   String hfile = %"$basename.h", cfile = %"$basename.c";
   return %(
     $hfile ${c.code_pretty_string(hcode, hfile)}
@@ -89,9 +89,9 @@ static List Compiler._emit_header(Compiler c, List header) =>
 
 /* Static prototypes see the header's declarations as already declared. */
 static List Compiler._emit_source(
-  Compiler c, List source, List header, Map bindings) {
+  Compiler c, List source, List header, Map bindings, List macros) {
   source = c._static_prototypes(c._file_init(source), header);
-  source = c._primary_include(_vertical_spacing(source));
+  source = c._primary_include(_vertical_spacing(source), macros);
   return c.emit(c._patch_main(source), bindings);
 }
 
@@ -106,27 +106,26 @@ static void Compiler._publish(Compiler c, List outputs) {
 
 // header and source
 
-/* One unit's split into header and source. `private` is the visibility at
-   the current node and `lexical` the one the last visibility pragma set;
-   `pending` holds each private typedef or x2c include as
-   `(names node promoted)`, `opened` the visibility each conditional group
-   opened at, `open` the groups still open, `forwarded` the struct and union
-   tags the header declares, and `included` the files its includes reach. */
+/* One unit's split into header and source. `private` is the visibility the
+   last visibility pragma set; `pending` holds each private typedef or x2c
+   include as `(names node promoted)`, `opened` the visibility each
+   conditional group opened at, `open` the groups still open, `forwarded`
+   the struct and union tags the header declares, `included` the files its
+   includes reach, and `statics` the bindings static declarations declare. */
 typedef struct Partition {
   Compiler c, Array header, source, pending, opened, open;
-  Map forwarded, included, int private, lexical;
+  Map forwarded, included, statics, int private;
 } Partition;
 
 /* Partition a normalized unit without changing source order. Non-inline
    public functions publish a header declaration and keep their body in the
-   source; public inline definitions remain header-only. A function
-   definition, static declaration, or foreign alias begins source-private
-   output until an explicit public pragma changes visibility; only a
-   visibility pragma hides a public object definition. */
+   source; public inline definitions remain header-only. Static functions
+   and objects stay in the source. Only `#pragma private` hides any other
+   declaration from the header. */
 static List Compiler._header_and_source(Compiler c, List ast) {
   Partition p = {
     .c = c, .header = [], .source = [], .pending = [], .opened = [],
-    .open = [], .forwarded = {}, .included = {}};
+    .open = [], .forwarded = {}, .included = {}, .statics = {}};
   foreach (Ast node, ast) p.add(node);
   return p.finish();
 }
@@ -147,12 +146,66 @@ static void Partition.add(Partition &p, Ast node) {
     case %(import ?unit *):
       p.header.push(%(preproc "#include \"${unit.string()}.x\""));
     case %(preproc ?content): p.add_preproc(node, content);
-    default: p.side().push(node);
+    default: p.place(node);
   }
 }
 
-/* The file that takes a node at the current visibility. */
-static Array Partition.side(Partition &p) => p.private ? p.source : p.header;
+/* Places a node at the current visibility. */
+static void Partition.place(Partition &p, List node) {
+  if (p.private) p.source.push(node);
+  else p.publish(node);
+}
+
+/* A public node that names a static declaration could not compile in the
+   header, so it stays in the source, and what it declares stays there as
+   if it were static. */
+static void Partition.publish(Partition &p, List node) {
+  if (!_names_static(node, p.statics)) {
+    p.header.push(node);
+    return;
+  }
+  _add_declared(node, p.statics);
+  p.source.push(node);
+}
+
+/* Both walks keep pending parts off the C stack, since an expression can
+   nest deeply. */
+static int _names_static(List node, Map statics) {
+  if (!statics.len()) return 0;
+  Array pending = $auto([node]);
+  while (pending.len()) {
+    Var item = pending.take_last();
+    if (item is not <list>) continue;
+    match (item) {
+      case %(binding ? ?): if (item in statics) return 1;
+      default: foreach (Var part, item) pending.push(part);
+    }
+  }
+  return 0;
+}
+
+/* Adds to `statics` each binding `node` declares: each one it holds other
+   than through an `ident` reference. */
+static void _add_declared(List node, Map statics) {
+  Array pending = $auto([node]);
+  while (pending.len()) {
+    Var item = pending.take_last();
+    if (item is not <list>) continue;
+    match (item) {
+      case %(ident *): continue;
+      case %(binding ? ?): statics[item] = 1;
+      default: foreach (Var part, item) pending.push(part);
+    }
+  }
+}
+
+/* Records the objects or function a static declaration declares. */
+static void Partition.add_statics(Partition &p, List declarators) {
+  foreach (List declarator, declarators) {
+    List binding = _declaration_binding(declarator);
+    if (binding) p.statics[binding] = 1;
+  }
+}
 
 /* A marker holds a node's place in both files until the partition ends. */
 static void Partition.mark(Partition &p, List marker) {
@@ -161,23 +214,25 @@ static void Partition.mark(Partition &p, List marker) {
 }
 
 /* Once the whole unit is seen, the pending typedefs settle, then the
-   conditional groups, then the typedef forwards each file needs. */
+   replayed directives, then the conditional groups, then the typedef
+   forwards each file needs. */
 static List Partition.finish(Partition &p) {
   _promote_typedefs(p.header, p.pending);
   List header = _place_typedefs(p.header, p.pending, 1);
-  List source = _place_typedefs(p.source, p.pending, 0);
+  List (source, macros) =
+    _replay_directives(_place_typedefs(p.source, p.pending, 0));
   Map header_filled = _filled_groups(header);
   Map source_filled = _filled_groups(source);
   header = _place_groups(header, header_filled, source_filled, p.opened, 1);
   source = _place_groups(source, source_filled, header_filled, p.opened, 0);
   header = _typedef_forwards(header, NULL);
   source = _typedef_forwards(source, header);
-  return %($header $source);
+  return %($header $source $macros);
 }
 
 /* private typedefs
 
-   A typedef that follows a function definition is source-private unless a
+   A typedef below `#pragma private` is source-private unless a
    later header item names it and no earlier header typedef already declares
    that name; a public prototype must be able to spell its parameter types,
    while an opaque forward typedef keeps a private body private. A private
@@ -192,7 +247,7 @@ static void Partition.add_typedef(Partition &p, List node) =>
    takes the current side. */
 static void Partition.hold(Partition &p, List names, List node) {
   if (!names) {
-    p.side().push(node);
+    p.place(node);
     return;
   }
   p.mark(%(pending ${p.pending.len()}));
@@ -304,21 +359,45 @@ static List _place_typedefs(Array items, Array pending, int header) {
   return out.list_free();
 }
 
+/* replayed directives
+
+   The source includes the header, so it starts with the macros the
+   header's directives leave at its end. When a public directive follows an
+   item the source holds, that directive may change what the item sees, so
+   the source repeats every public directive in order. The source saves
+   their macro names before its header include and restores them afterward,
+   so earlier source sees the incoming definitions, including `-D` values. */
+
+static List _replay_directives(List source) {
+  int held = 0, replay = 0;
+  foreach (List item, source)
+    match (item) {
+      case %(replay ?): replay = replay || held;
+      case %(conditional *): continue;
+      default: held = 1;
+    }
+  Array out = [];
+  Map names = $auto({});
+  foreach (List item, source)
+    match (item) {
+      case %(replay (!set ?node (preproc ?content))): {
+        if (!replay) continue;
+        String name = preproc_macro_name(content);
+        if (name) names[name] = 1;
+        out.push(node);
+      }
+      default: out.push(item);
+    }
+  return %( ${out.list_free()} ${names.keys().list()} );
+}
+
 // functions
 
-/* A function definition makes the rest of the unit private, unless it is a
-   generated declaration default. */
 static void Partition.add_function(
   Partition &p, List type, List declarator, Ast body) {
-  int generated = 0;
-  match (declarator) case %(bind ?binding *): {
-    Map facts = p.c.semantic_binding_facts();
-    type = _with_attributes(facts, type, binding);
-    String name = binding_identity_spelling(binding);
-    generated = %(declaration-default $name) in facts;
-  }
+  match (declarator) case %(bind ?binding *):
+    type = _with_attributes(p.c.semantic_binding_facts(), type, binding);
   p.place_function(type, declarator, body);
-  if (!generated) p.private = 1;
 }
 
 static List _with_attributes(Map facts, List type, Var binding) {
@@ -335,6 +414,7 @@ static void Partition.place_function(
   type = _noreturn(type, declarator, body);
   List function = %(function $type $declarator $body);
   if (type.is_static()) {
+    p.add_statics(%($declarator));
     p.source.push(function);
     return;
   }
@@ -380,19 +460,19 @@ static void Partition.forward_tags(Partition &p, List node) {
 
 // declarations
 
-/* A static declaration makes the rest of the unit private. A public object
-   definition stays public until `#pragma private`, since an including unit
-   sees it. A public struct or union declaration puts its tag in the header,
-   so no prototype forwards it again. */
+/* A declaration above `#pragma private` belongs to the header, except
+   what no other unit can name: a static declaration, apart from the tag
+   body it declares, and an object of an anonymous type. A public struct or
+   union declaration puts its tag in the header, so no prototype forwards it
+   again. */
 static void Partition.add_declaration(
   Partition &p, List decl, Type type, List bindings) {
+  if (type.is_static()) p.add_statics(bindings.cdr());
   match (bindings)
     case %(bindings (bind (!set ?binding (*)) ?))
       if (p.c._completed_prototype(binding)): return;
-  if (type.is_static()) p.private = 1;
-  int object = !type.is_static() && !type.is_extern() &&
-    !_anonymous_body(type) && _declares_object(bindings);
-  if (object ? p.lexical : p.private) {
+  if (p.private || (type.is_static() && !_body_tag(type)) ||
+      (_anonymous_body(type) && _declares_object(bindings))) {
     p.source.push(decl);
     return;
   }
@@ -400,7 +480,7 @@ static void Partition.add_declaration(
     case %((!or struct union) ?(String tag) *): p.forwarded[tag] = 1;
   if (!p.place_tagged_object(decl, type, bindings) &&
       !p.place_object(decl, type, bindings))
-    p.header.push(_header_declaration(decl, type, bindings));
+    p.publish(_header_declaration(decl, type, bindings));
 }
 
 /* A positioned prototype remains visible to symbol collection, but the
@@ -414,20 +494,26 @@ static int Compiler._completed_prototype(Compiler c, List binding) {
 }
 
 /* `struct b { ... } g;` at public file scope publishes the body, without
-   the qualifiers of `g`, and an `extern` declaration of `g`, and defines
-   `g` in the source. */
+   the qualifiers of `g`, and an `extern` declaration of `g` unless `g` is
+   static, and defines `g` in the source. */
 static int Partition.place_tagged_object(
   Partition &p, List decl, Type type, List bindings) {
-  Type core = type.base_type();
-  String tag = NULL;
-  match (core)
-    case %((!or struct union enum) ?(String found) (*)): tag = found;
+  String tag = _body_tag(type);
   if (!tag || !_declares_object(bindings)) return 0;
+  Type core = type.base_type();
   List tagged = _tag_only(type, core, tag);
-  p.header.push(%(declare $core (bindings (bind () ()))));
-  p.header.push(p.object_header(decl, tagged, bindings));
+  p.publish(%(declare $core (bindings (bind () ()))));
+  if (!type.is_static())
+    p.publish(p.object_header(decl, tagged, bindings));
   p.source.push(%(declare $tagged $bindings));
   return 1;
+}
+
+/* The tag of the named struct, union, or enum body `type` declares. */
+static String _body_tag(Type type) {
+  match (type.base_type())
+    case %((!or struct union enum) ?(String tag) (*)): return tag;
+  return NULL;
 }
 
 /* `type` with its tag body `core` replaced by the bare tag `name`. */
@@ -442,7 +528,7 @@ static List _tag_only(Type type, Type core, Var name) =>
 static int Partition.place_object(
   Partition &p, List decl, Type type, List bindings) {
   if (type.is_extern() || !_declares_object(bindings)) return 0;
-  p.header.push(p.object_header(decl, type, bindings));
+  p.publish(p.object_header(decl, type, bindings));
   p.source.push(decl);
   return 1;
 }
@@ -512,11 +598,8 @@ static List _header_declaration(List node, Type type, List bindings) {
   return node;
 }
 
-/* A foreign alias makes the rest of the unit private. */
-static void Partition.add_alias(Partition &p, List alias, Type type) {
+static void Partition.add_alias(Partition &p, List alias, Type type) =>
   (type.is_static() ? p.source : p.header).push(alias);
-  p.private = 1;
-}
 
 /* directives
 
@@ -543,27 +626,53 @@ static void Partition.mark_conditional(Partition &p, List node, Symbol kind) {
 
 /* The generator writes the header guard. Source pragmas serve only the CPP
    compatibility path and must not duplicate the generated directive. The
-   visibility pragmas switch sides, and any other directive stays on the
-   current side. */
+   visibility pragmas switch sides, `Partition.add_include` places an
+   include, and any other private directive stays in the source. */
 static void Partition.place_directive(
   Partition &p, List node, String content) {
   if (_is_pragma_once(content)) return;
-  int visibility = preproc_visibility(content);
-  if (visibility >= 0) p.private = p.lexical = visibility;
-  else p.hold(p.include_names(content), node);
+  int visibility = preproc_visibility(content), angle = 0;
+  String target = preproc_include_target(content, angle);
+  if (visibility >= 0) p.private = visibility;
+  else if (target) p.add_include(node, target, angle);
+  else if (p.private) p.source.push(node);
+  else p.publish_directive(node);
+}
+
+/* A public directive belongs to the header, and waits in the source as a
+   `replay` marker. */
+static void Partition.publish_directive(Partition &p, List node) {
+  p.header.push(node);
+  p.source.push(%(replay $node));
 }
 
 /* An include of x2c source below `#pragma private` waits, as a private
    typedef does, under the typedef names of the files it reaches that no
-   earlier header include reaches. Any other directive names nothing. */
-static List Partition.include_names(Partition &p, String content) {
-  int angle = 0;
-  String target = preproc_include_target(content, angle);
-  if (!target) return NULL;
-  if (p.private)
-    return p.c.include_typedef_names(target, angle, p.included.copy());
-  p.c.include_typedef_names(target, angle, p.included);
-  return NULL;
+   earlier header include reaches. The source sees the header from its
+   start, so a public include that follows an item the source holds would
+   apply its macros to that item. Such an include waits as a private one
+   does, staying in the source at its place unless the header needs one of
+   its typedefs. */
+static void Partition.add_include(
+  Partition &p, List node, String target, int angle) {
+  if (!p.private && !_holds_item(p.source)) {
+    p.c.include_typedef_names(target, angle, p.included);
+    p.header.push(node);
+    return;
+  }
+  List names = p.c.include_typedef_names(target, angle, p.included.copy());
+  if (names) p.hold(names, node);
+  else p.source.push(node);
+}
+
+/* Whether `source` holds an item other than a marker. */
+static int _holds_item(Array source) {
+  foreach (List item, source)
+    match (item) {
+      case %((!or pending conditional replay) *): continue;
+      default: return 1;
+    }
+  return 0;
 }
 
 static int _is_pragma_once(String content) =>
@@ -1260,13 +1369,20 @@ static List _header_guard(List content, String guard) => %(
 /* The source includes its own header, then `error.h` when it raises. A
    cleanup region spells `X2CCleanup` and its push and leave calls, which
    `exception.x` declares. */
-static List Compiler._primary_include(Compiler c, List content) {
+static List Compiler._primary_include(
+  Compiler c, List content, List macros) {
   List own = _include_directive(%"${Path.stem(c.filename)}.h");
   List error =
     ast_contains_head(content, <raise>) ? _include_directive("error.h") : NULL;
   List exception =
     c.needs_exception ? _include_directive("exception.h") : NULL;
-  return %(@{_banner()} @own @error @exception @content);
+  Array before = [], after = [];
+  foreach (String name, macros) {
+    before.push(%(preproc "#pragma push_macro(\"$name\")"));
+    after.push(%(preproc "#pragma pop_macro(\"$name\")"));
+  }
+  return %(@{_banner()} @{before.list_free()} @own @{after.list_free()}
+           @error @exception @content);
 }
 
 static List _include_directive(String fname) =>

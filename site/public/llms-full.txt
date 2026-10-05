@@ -1311,17 +1311,20 @@ header and a C source file.
 A source file whose first line begins with `#!` is a
 [script unit](https://x2c-lang.dev/docs/reference/language.html#script-units); every other file is an ordinary unit.
 
-`#pragma private` marks the start of implementation-only content. Declarations
-before it may be emitted to the generated header. A function definition also
-begins source-private output, except that a typedef after it still belongs
-to the header when a later public prototype names it. An include of x2c
-source below `#pragma private` also moves to the header when a later public
-prototype names a type it declares. Functions that a class
-or another declaration producer generates do not begin it. A public object
-definition gets an `extern` declaration in the header even after a function
-definition or a `static` declaration; only `#pragma private` keeps it in the
-source. An object of an anonymous `struct`, `union`, or `enum` type has no
-such declaration. Every translated header
+`#pragma private` marks the start of implementation-only content. Everything
+before it belongs to the generated header, including types, enumerators,
+and `#define` and `#undef` directives that follow a function definition or
+a `static` declaration. A public function definition contributes its
+prototype, or its whole body when inline, and a `static` function or object
+stays in the source. A typedef below `#pragma private` still belongs to the
+header when a later public prototype names it. An `#include` that follows
+an item the source holds, such as a function definition, stays in the
+source at its place, so the macros it defines do not reach earlier items.
+Such an include, or an include below `#pragma private`, moves to the header
+only when it reaches x2c source declaring a type that a later public
+prototype names. A public object definition gets an
+`extern` declaration in the header. An object of an anonymous `struct`,
+`union`, or `enum` type has no such declaration. Every translated header
 starts with `#pragma once` and also carries a conventional include guard, so
 `.x` programs do not need to write either one.
 
@@ -1338,8 +1341,8 @@ may call the functions it declares.
 
 `#pragma public` ends implementation-only content. Until the next
 `#pragma private`, what follows it is handled like the top of the file.
-Declarations there may be emitted to the generated header, and files that
-include this one or import its package can use them. A file can use the two
+Declarations there belong to the generated header, and files that include
+this one or import its package can use them. A file can use the two
 pragmas to place a private include or type between public declarations.
 
 The advanced `--cpp-symbols` and `--live-symbols` modes run the host
@@ -2461,9 +2464,11 @@ A macro has one result kind as well as argument kinds:
 The result kind is required between `macro` and the `$` name. `Stmt` is
 the canonical spelling for block-item results and `Expression` for expression
 results; `Expr` is a synonym. An arrow body requires `Expression` or
-`Stmt`. A `Stmt` arrow body is one statement: a `Stmt` macro invocation or
-an expression statement, and a `meta` call written there may return any
-statement that fits where the macro is invoked. Braced bodies require
+`Stmt`. A `Stmt` arrow body is one statement: a `Stmt` macro or decorator
+invocation or an expression statement, and a `meta` call written there may
+return any statement that fits where the macro is invoked. An anonymous
+macro's arrow body omits that statement's final `;`, as in
+`macro Stmt(Expr $v) => $again() $hit($v)`. Braced bodies require
 `Stmt`, `Field`, `Entry`, `Enumerator`, `Unit`, or `Declaration`.
 Inside a compound statement, a `Stmt` macro may produce zero or
 more block items. Where the grammar requires one statement, such as an `if`,
@@ -3401,7 +3406,11 @@ name of a C macro. A macro, `keyword`, `meta` function, or Lisp definition
 written in the `.x` file stays in that file. To share one, move it to an
 `.xmacro` file and export that import. An `.xmacro` file needs no `export`,
 because its imports already reach the file that imports it. An import
-without `export` stays in its file.
+without `export` stays in its file. That includes its `meta` functions. The
+importing file can call them at compile time and at run time, but a file
+that includes it receives no declaration of them. To call one from the
+including file, export the import or import the `.xmacro` there. The
+including unit then emits its own weak copy.
 
 The usual import rules apply at the include line. A delivered definition
 that collides with a visible macro is an error. A later definition in the

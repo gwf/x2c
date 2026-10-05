@@ -45,6 +45,7 @@ int main(void){
   Block_free(array);
   return 0;
 }
+#pragma private
 static inline int _x2c_proto_macroarrayint_equal_0(Var a0, Var a1){
   return MacroArrayInt_equal(Var_macroarrayint(a0), Var_macroarrayint(a1));
 }

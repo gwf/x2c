@@ -80,9 +80,11 @@ macro Stmt $report.emit.interface_write(Expr $c) {
    process_cache_scope. */
 static Map process_cache = NULL, static Scope process_cache_scope = NULL;
 
-/* Paths whose entries were collected without their declaration defaults
-   while the shared compile-time session was being filled. */
-static List preload_deferred = NULL;
+/* Paths whose entries a later unit collects again: those collected without
+   their declaration defaults while the shared compile-time session was
+   being filled, and those a project meta build collected with placeholders
+   for its meta calls. */
+static Map provisional_entries = NULL;
 
 static Map _process_cache(void) {
   if (process_cache != NULL) return process_cache;
@@ -97,7 +99,7 @@ static void _cache_shutdown(void) {
   process_cache_scope.destroy();
   process_cache_scope = NULL;
   process_cache = NULL;
-  preload_deferred = NULL;
+  provisional_entries = NULL;
 }
 
 static Map _cache_map(void) {
@@ -379,6 +381,20 @@ static void FileWalk.merge(FileWalk &w, Compiler shadow, Map overlay) {
   Map statics = shadow.sym.file_statics();
   if (w.private) _keep_published_rows(statics, overlay);
   if (w.unit) _publish_unit_statics(statics, overlay, w.path);
+  shadow.sym.withhold_import_rows(overlay);
+}
+
+/** Removes from `published` the declaration rows that this file's
+    file-scope imports added and the file did not write again, and their
+    unit-static markers. An including unit receives an import's
+    declarations only by replaying an exported import itself. */
+void Sym.withhold_import_rows(Sym s, Map published) {
+  foreach (Var (key, value), s.file_statics())
+    match (%($key)) case %((import-row ?row)): {
+      published.del(row);
+      match (row)
+        case %(?(String name)): published.del(%("unit-static" $name));
+    }
 }
 
 /* Below `#pragma private`, an including unit sees only functions with
@@ -649,8 +665,10 @@ static void FileWalk.publish(FileWalk &w) {
   _require_retained(entry.try_own());
   if (w.path in _process_cache()) return;
   _process_cache()[w.path] = entry;
-  if (w.deferred) $scope(&process_cache_scope)
-    preload_deferred = cons(w.path, preload_deferred);
+  if (w.deferred || w.c.meta_build) {
+    if (!provisional_entries) provisional_entries = _cache_map();
+    provisional_entries[w.path] = 1;
+  }
 }
 
 /* Sorted so that an entry does not depend on Map order. */
@@ -1327,8 +1345,11 @@ static List _renumber_bindings(List node, Map identities) {
 // cache lifecycle
 
 /** Drops the entries collected without declaration defaults while the shared
-    compile-time session was filled. Call once that session is published. */
-void collect_forget_preload_entries(void) {
-  foreach (String path, preload_deferred) (void) _process_cache().del(path);
-  preload_deferred = NULL;
+    compile-time session was filled, or by a project meta build. Call once
+    that session is published, and after the meta build's parses. */
+void collect_forget_provisional_entries(void) {
+  if (!provisional_entries) return;
+  foreach (Var path, provisional_entries.keys())
+    (void) _process_cache().del(path);
+  provisional_entries = NULL;
 }

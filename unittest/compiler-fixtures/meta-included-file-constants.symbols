@@ -1,0 +1,2 @@
+( meta_cells_included ) ==> (( dim ( 30 )) int )
+( meta_cells_limit ) ==> ( enum ( gensym unittest/compiler-fixtures/meta-included-file-constants/cells.x           1 ))

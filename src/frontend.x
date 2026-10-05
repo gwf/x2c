@@ -339,7 +339,11 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit &unit) {
   if (request.live_symbols) cpp.shallow_parse(globs);
   else $let(c.names.counters, c.names.counters.copy())
     cpp.shallow_parse(globs);
-  return cpp.sym.global_symbols();
+  /* The flattened text repeats an included file's imports. Rows that raw
+     collection lacked came from an import the included file kept. */
+  Map symbols = cpp.sym.global_symbols();
+  cpp.sym.withhold_import_rows(symbols);
+  return symbols;
 }
 
 static Map _collect_input(Frontend frontend, Compiler c) {
@@ -450,11 +454,11 @@ int Frontend.preload_macro_libraries(Frontend frontend) {
   if (shared && !_preload_meta_surface(frontend, shared)) {
     shared.destroy();
     c.publish_macro_library(NULL);
-    collect_forget_preload_entries();
+    collect_forget_provisional_entries();
     return 0;
   }
   c.publish_macro_library(shared);
-  collect_forget_preload_entries();
+  collect_forget_provisional_entries();
   return 1;
 }
 

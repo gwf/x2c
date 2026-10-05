@@ -587,18 +587,24 @@ static void Definition.body(Definition &d) {
   }
 }
 
-/* A Stmt result's body after `=>` is one statement: a Stmt macro
-   invocation, or else an expression statement, whose `;` an anonymous
-   macro omits. */
+/* A Stmt result's body after `=>` is one arrow statement. */
 static List Definition.read_body(Definition &d) {
   Compiler c = d.c;
   if (d.kind == <type> || d.kind == <param>) return d.part_body();
   if (d.has_expression_body()) return d.expression_body();
   if (c.peek(0) == <"{">) return c._parse_body(d.body_kind(), d.using);
-  if (!d.anonymous && c.macro_starts_target_at(AST_STATEMENT))
-    return c.try_parse_macro_target_at(AST_STATEMENT);
+  return c._arrow_statement(d.anonymous);
+}
+
+/* A Stmt arrow's statement is a Stmt macro or decorator invocation, or else
+   an expression statement. An anonymous macro's statement omits its `;`,
+   which ends the enclosing declaration, and so does a decorator's target
+   there. */
+static List Compiler._arrow_statement(Compiler c, int open) {
+  List macro = c._target_at(AST_STATEMENT, open);
+  if (macro) return macro;
   List expression = c.parse_expression();
-  if (!d.anonymous) c.expect(<;>);
+  if (!open) c.expect(<;>);
   return %(seq (stmnt $expression));
 }
 
@@ -2600,19 +2606,20 @@ static Var _source_unwrap(Var value) {
     deferred `(seq (macro-invoke ...))`, and ordinary parsing returns the bound
     expansion.
 */
-List Compiler.try_parse_macro_target_at(Compiler c, AstPos position) {
+List Compiler.try_parse_macro_target_at(Compiler c, AstPos position) =>
+  c._target_at(position, 0);
+
+/* An `open` statement omits its final `;`, as an anonymous Stmt arrow's
+   statement does. */
+static List Compiler._target_at(Compiler c, AstPos position, int open) {
   if (c.macro_holes && c.peek_macro_hole()) return NULL;
   Token invocation = c.token;
   List definition = c._take_invocation(position);
-  return definition ? c._invoke_at(definition, invocation, position) : NULL;
-}
-
-static List Compiler._invoke_at(
-  Compiler c, List definition, Token invocation, AstPos position) {
+  if (!definition) return NULL;
   if (definition.assoc(<kind>) == <decorator>)
-    return c._decorate(definition, invocation, position);
+    return c._decorate(definition, invocation, position, open);
   c._check_position(definition, invocation, position);
-  return c._invoke_definition(definition, invocation, position);
+  return c._invoke_definition(definition, invocation, position, open);
 }
 
 /* A macro's result must fit where it is invoked; a Declaration result also
@@ -2634,12 +2641,12 @@ static void Compiler._check_position(
    generated syntax and raised diagnostics therefore cannot leave provisional
    bindings, enumerators, statics, or generated-name state behind. */
 static List Compiler._invoke_definition(
-  Compiler c, List definition, Token invocation, AstPos position) {
+  Compiler c, List definition, Token invocation, AstPos position, int open) {
   int deferred = !!c.macro_holes;
   SymTxn transaction = c.begin_semantic_transaction();
   defer transaction.rollback();
   List input = c._invocation_arguments(definition, invocation);
-  if (_position(position).semicolon) c.expect(<;>);
+  if (_position(position).semicolon && !open) c.expect(<;>);
   List node = c._invocation_node(definition, input, invocation);
   List result = deferred ? %(seq $node) :
     c.bind_syntax(node, position, c.return_type);
@@ -2685,14 +2692,14 @@ static Var Compiler._stored_reference(Compiler c, List definition) {
    then. */
 typedef struct Decoration {
   Compiler c, List definition, function, Token invocation, start;
-  AstPos position, Symbol kind;
+  AstPos position, Symbol kind, int open;
 } Decoration;
 
 static List Compiler._decorate(
-  Compiler c, List definition, Token invocation, AstPos position) {
+  Compiler c, List definition, Token invocation, AstPos position, int open) {
   Decoration d = {
     .c = c, .definition = definition, .invocation = invocation,
-    .position = position, .kind = definition.assoc(<target>)};
+    .position = position, .kind = definition.assoc(<target>), .open = open};
   int deferred = !!c.macro_holes;
   if (!d.on_body() && _result_kind(definition) != _position(position).kind)
     d.misplaced();
@@ -2763,6 +2770,7 @@ static List Decoration.target(Decoration &d) {
   }
   if (d.kind == <function>) return c.parse_function_target();
   if (d.kind == <named-type>) return c.parse_named_type();
+  if (d.open) return c._arrow_statement(1);
   return c._positional_target(d.position);
 }
 
@@ -3898,7 +3906,7 @@ List Compiler.parse_macro_lisp_top_level(Compiler c) {
     full parsing keeps the ordinary source-order evaluation. */
 void Compiler.parse_macro_lisp_shallow(Compiler c) {
   if (c._import_path(NULL)) {
-    c.keep_imported_meta(c.parse_macro_lisp_top_level());
+    c._collect_import();
     return;
   }
   Token first = c.token;
@@ -3907,6 +3915,19 @@ void Compiler.parse_macro_lisp_shallow(Compiler c) {
      import's forms, and running one again would rebind an ancestor's name. */
   if (c.inherited_lisp) return;
   c.queue_declaration_effect(form, first, c.token);
+}
+
+/* The declarations a file-scope import adds stay in the importing file, as
+   its macros do. Each is marked `(import-row KEY)` among the file statics
+   until a declaration outside an import writes the row again.
+   `Sym.withhold_import_rows` removes the remaining rows from publication. */
+static void Compiler._collect_import(Compiler c) {
+  Sym sym = c.sym;
+  int mark = sym.begin_import();
+  defer sym.end_import();
+  c.keep_imported_meta(c.parse_macro_lisp_top_level());
+  foreach (Var (key, value), sym.added_globals(mark))
+    sym.put(sym.file_statics(), %(import-row $key), value);
 }
 
 /** Keeps the runtime `meta` declarations that a compile-time import

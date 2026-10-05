@@ -12,7 +12,7 @@ typedef struct Sym{
   Map globals, statics, binding_facts;
   int base_scopes, local_macro_names;
   Block undo;
-  int transactions;
+  int transactions, import_depth;
   Compiler c;
 }
 * Sym;
@@ -158,6 +158,14 @@ Type Sym_delegate_aggregate(Sym s, Type type);
 SymTxn Compiler_begin_semantic_transaction(Compiler c);
 
 int SymTxn_local_macros_changed(SymTxn * s);
+
+int Sym_begin_import(Sym s);
+
+void Sym_end_import(Sym s);
+
+Map Sym_added_globals(Sym s, int mark);
+
+void Sym_end_log(Sym s);
 
 void SymTxn_commit(SymTxn * s);
 

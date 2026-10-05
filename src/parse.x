@@ -2905,9 +2905,6 @@ static List Compiler._bind_collected_function(
   Compiler c, List input, Var return_type, Var declarator, Var body,
   Var construction) {
   if (c.shallow) return input;
-  match (declarator) case %(bind ?binding *):
-    c.set_fact(
-      %(declaration-default ${binding_identity_spelling(binding)}), 1);
   c._land_collected_bindings(body);
   $let(c.macro_stack, c.thaw_declaration_syntax(construction)) {
     return c.bind_syntax(

@@ -15,7 +15,7 @@ The compiler's side of the project meta helper.
 | [`Compiler.begin_meta_unit`](#Compiler.begin_meta_unit) | Selects the table of the unit at `filename` for the calls that follow, and resets the unit's `meta static` values before the first one. |
 | [`Compiler.meta_helper_call`](#Compiler.meta_helper_call) | Calls the project `meta` function `name` in the helper with the values `arguments`, for the call at `site`, and returns its result. |
 | [`Compiler.stop_meta_helper`](#Compiler.stop_meta_helper) | Stops the helper this process runs, which a translation worker does when its units are done and every process does as it ends. |
-| [`Compiler.use_meta_helper`](#Compiler.use_meta_helper) | Uses the helper at `path`, or none when it is NULL, whose tables named in `failures` could not be built, each with why, and whose table for each input path is in `units`. |
+| [`Compiler.use_meta_helper`](#Compiler.use_meta_helper) | Uses the helper at `path`, or none when it is NULL, whose tables named in `failures` could not be built, each with why, and whose table for each input or included file path is in `units`. |
 
 ### `Compiler`
 
@@ -27,7 +27,7 @@ The compiler's side of the project meta helper.
 Selects the table of the unit at `filename` for the calls that follow,
 and resets the unit's `meta static` values before the first one.
 
-Source: `src/meta-helper-client.x:386`
+Source: `src/meta-helper-client.x:394`
 
 <a id="Compiler.meta_helper_call"></a>
 #### Compiler.meta_helper_call
@@ -39,9 +39,11 @@ Calls the project `meta` function `name` in the helper with the values
 the body makes is reported at `site` and a failure it reports is the
 call's failure. A body that crashes, exits, or passes the deadline ends
 the helper, which is reported at `site` and started again for the next
-call.
+call. The call runs in the table of the file that wrote it: an included
+file's own, which runs the constants it computes as its own translation
+does, or else the unit's.
 
-Source: `src/meta-helper-client.x:75`
+Source: `src/meta-helper-client.x:79`
 
 <a id="Compiler.stop_meta_helper"></a>
 #### Compiler.stop_meta_helper
@@ -51,7 +53,7 @@ Source: `src/meta-helper-client.x:75`
 Stops the helper this process runs, which a translation worker does
 when its units are done and every process does as it ends.
 
-Source: `src/meta-helper-client.x:395`
+Source: `src/meta-helper-client.x:408`
 
 <a id="Compiler.use_meta_helper"></a>
 #### Compiler.use_meta_helper
@@ -60,9 +62,9 @@ Source: `src/meta-helper-client.x:395`
 
 Uses the helper at `path`, or none when it is NULL, whose tables named
 in `failures` could not be built, each with why, and whose table for
-each input path is in `units`.
+each input or included file path is in `units`.
 
-Source: `src/meta-helper-client.x:373`
+Source: `src/meta-helper-client.x:381`
 
 ## Design notes
 

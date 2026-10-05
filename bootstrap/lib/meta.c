@@ -12,61 +12,7 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
-String x2c_source_text(Var syntax);
-
-String x2c_binding_spelling(Var syntax);
-
-List x2c_syntax_type(List value);
-
-Var x2c_literal_value(Var syntax);
-
-String x2c_function_name(List function);
-
-List x2c_function_parameter(List function, String wanted);
-
-List x2c_type_fields(List value);
-
-List x2c_type_layout(List value);
-
-List x2c_type_parts(List value);
-
-List x2c_type_resolve(List value);
-
 static Var _meta_initializer(List node);
-
-int x2c_type_is_value(List value);
-
-int x2c_type_is_integral(List value);
-
-int x2c_type_is_pointer(List value);
-
-List x2c_type_element(List value);
-
-List x2c_type_parameters(List value);
-
-List x2c_type_return(List value);
-
-Symbol x2c_type_tag_name(String name);
-
-String x2c_type_reverse_name(String base, String participant);
-
-List x2c_method_resolve(List type, String name);
-
-List x2c_protocol_member(List participant, List base, String member);
-
-String x2c_invocation_file(void);
-
-int x2c_invocation_line(void);
-
-int x2c_invocation_column(void);
-
-String x2c_embed_text(Var path);
-
-void x2c_diagnostic_fail(String message, List notes);
-
-void x2c_diagnostic_warn(String message, List notes);
-
-Map x2c_meta_definition_hashes(void);
 
 static const SymbolSet _base_keywords =(SymbolSet) "\001\000\000\000\015\000\000\000\007\000\000\000\025\174\112\177\271\171\067\236\000\006\001\007\002\016\000\000\000\016\000\000\000\000\000\000\006\000\000\006\003\007\013\012\114\041\005\146\012\000\000\000\350\250\222\116\000\000\000\000\334\113\256\002\000\000\000\000\132\165\005\000\000\000\000\000\250\113\000\000\000\000\000\000\216\173\014\000\000\000\000\000\250\174\150\002\000\000\000\000\144\100\003\000\000\000\000\000\110\161\047\115\000\000\000\000\110\161\047\115\127\001\000\000\110\172\026\000\000\000\000\000\150\170\314\000\000\000\000\000\012\023\365\021\000\000\000\000";
 

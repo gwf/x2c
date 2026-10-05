@@ -16,18 +16,9 @@ static inline Var Row_var(Row value);
 
 static inline Row Var_row(Var value);
 
-typedef List PlainRow;
-
 static inline Var PlainRow_var(PlainRow value);
 
 static inline PlainRow Var_plainrow(Var value);
-
-typedef PlainRow PlainRowChild;
-
-typedef struct Cell{
-  int value;
-}
-* Cell;
 
 static inline Var Cell_var(Cell value);
 

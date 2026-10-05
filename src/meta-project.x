@@ -7,17 +7,18 @@
     which the translation then calls (`src/meta-helper-client.x`). They
     come from each project `.xmacro` file an input imports, directly,
     through an included header, or through a package, and from an input
-    that defines its own until those move to `.xmacro` files. Meta code
-    under the x2c root's `lib`, `src`, and `etc` is the compiler's own,
-    linked into it.
+    or included file that defines its own until those move to `.xmacro`
+    files. Meta code under the x2c root's `lib`, `src`, and `etc` is the
+    compiler's own, linked into it.
 
-    Each input that reaches any gets a table of its own, parsed from the
-    input itself so its imports see the declarations they are used with.
-    Each table's object keeps only its entry global, so copies of one
-    import in several tables link together. The helper is cached
-    under the x2c cache root, keyed by the SHA-256 of those sources, the
-    compiler stamp, the C compiler's identity, and the flags, and is built
-    again when a file its build read, x2c source or C header, changes.
+    Each input that reaches any, and each included file that defines its
+    own, gets a table of its own, parsed from the file itself so its
+    imports see the declarations they are used with. Each table's object
+    keeps only its entry global, so copies of one import in several
+    tables link together. The helper is cached under the x2c cache root,
+    keyed by the SHA-256 of those sources, the compiler stamp, the C
+    compiler's identity, and the flags, and is built again when a file its
+    build read, x2c source or C header, changes.
 */
 
 #pragma once
@@ -133,32 +134,42 @@ static void Helper.use(Helper &h, List manifest) {
 // reaching meta code
 
 /* The scan of one input. `imports` collects each project `.xmacro` file
-   that holds meta code, after the files it imports; `seen` holds each file
-   read, and `packages` the root of each package imported. */
+   that holds meta code, after the files it imports, and `units` each
+   included file that holds its own; `seen` holds each file read, and
+   `packages` the root of each package imported. */
 typedef struct Scan {
-  CliRequest request, Array imports, Map seen, packages;
+  CliRequest request, Array imports, units, Map seen, packages;
 } Scan;
 
 /* Each input that reaches meta code becomes an owner. One without meta
    code of its own keeps the files it imports, for a group of those alone.
-*/
+   An included file with meta code of its own becomes an owner too, so the
+   constants it computes run in its own table when a unit collects it.
+   Its path is canonical, as collection spells it. */
 static void Helper.scan(Helper &h, List inputs) {
-  Map known = {};
+  Map known = {}, owned = {};
   foreach (String input, inputs) {
     String path = Path.absolute(input);
     Scan s = {
-      .request = h.frontend.request, .imports = [], .seen = {},
+      .request = h.frontend.request, .imports = [], .units = [], .seen = {},
       .packages = h.packages};
     int own = s.file(path);
     Array reached = s.imports;
-    if (own || reached.len()) h.owners.push(path);
+    if (own || reached.len()) h.own(path, owned);
     if (!own && reached.len()) h.reaches[path] = reached.list();
+    foreach (String unit, s.units) h.own(unit, owned);
     foreach (String file, reached)
       if (!(file in known)) {
         known[file] = 1;
         h.imports.push(file);
       }
   }
+}
+
+static void Helper.own(Helper &h, String path, Map owned) {
+  if (path in owned) return;
+  owned[path] = 1;
+  h.owners.push(path);
 }
 
 /* Reads the file at `path` once per scan, and returns whether it holds a
@@ -227,7 +238,8 @@ static void Scan.package(Scan &s, Tokenizer tokens) {
   s.file(entry);
 }
 
-/* An included project `.x` or `.xp` file is read for imports too. */
+/* An included project `.x` or `.xp` file is read for imports too, and
+   joins `units` when it holds meta code of its own. */
 static void Scan.include(Scan &s, String directive, String directory) {
   int angle = 0;
   String target = preproc_include_target(directive, angle);
@@ -236,7 +248,8 @@ static void Scan.include(Scan &s, String directive, String directory) {
     s.request.sources, s.request.include_dirs, directory, target, angle);
   if (!file) return;
   String path = Path.absolute(file);
-  if (!_compiler_owns(path)) s.file(path);
+  if (!_compiler_owns(path) && s.file(path))
+    s.units.push(absolute_path(path));
 }
 
 /* The text between a string token's quotes. */
@@ -338,7 +351,9 @@ static String _directory(
 
 /* Parses each owner into the group of its table, compiles the groups, and
    links the helper, keeping what an earlier build left when it is
-   unchanged. Returns the manifest the build writes. */
+   unchanged. The parses collect included files with placeholders for
+   their meta calls, so translation collects those files again. Returns
+   the manifest the build writes. */
 static List Helper.build(Helper &h) {
   int count = h.owners.len() + 1;
   for (int index = 0; index < count; index++) {
@@ -353,6 +368,7 @@ static List Helper.build(Helper &h) {
   int index = 1;
   foreach (String owner, h.owners) h.group(owner, index++);
   Compiler.use_meta_build_directory(NULL);
+  collect_forget_provisional_entries();
   return h.write_manifest(h.link(count));
 }
 

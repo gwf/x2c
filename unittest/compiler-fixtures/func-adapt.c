@@ -22,8 +22,6 @@ static void discard(int value);
 
 static Var nothing(void);
 
-Var Var_binary(Var lhs, Symbol op, Var rhs);
-
 static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0);
 
 static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func_argv_1);

@@ -9,12 +9,12 @@
     arrive on descriptor 3 and replies leave on descriptor 4, so a body
     that prints still reaches the terminal.
 
-      (reset K)             select table K and run its `meta static`
-                            initializers again; no reply
-      (call NAME (ARG ...) (GLOBAL ...))
-                            call NAME in the selected table; each GLOBAL
-                            is `(SPELLING BINDING)`, the unit's binding
-                            that a macro value's free reference recognizes
+      (reset)               begin a unit, whose first call of each table
+                            runs its `meta static` initializers; no reply
+      (call K NAME (ARG ...) (GLOBAL ...))
+                            call NAME in table K; each GLOBAL is
+                            `(SPELLING BINDING)`, the unit's binding that a
+                            macro value's free reference recognizes
       (quit)
 
     A call replies with a `(warning MESSAGE (NOTE ...))` frame for each
@@ -61,8 +61,11 @@ static Map helper_modules = NULL;
 static Scope helper_module_scope = NULL;
 
 /* What the unit's `meta static` initializers allocate, a Job one starts
-   included, which lasts until the next unit's reset or the helper's end. */
+   included, which lasts until the next unit's reset or the helper's end,
+   and each table whose initializers ran in the unit, with the failure its
+   calls reply with when they raised. */
 static Scope helper_unit_scope = NULL;
+static Map helper_started = NULL;
 
 /* Raises the failure a body reports, which the call replies with. */
 static void _fail(String message, List notes) {
@@ -324,12 +327,28 @@ $scope() static void _apply(Var target, String name, List arguments) {
         ("function: $name")));
 }
 
-/* Runs the `meta static` initializers of `table` again, in a new unit
-   Scope once the last unit's has ended. Returns the failure that the next
-   call replies with, or NULL. */
-static List _reset(Map table) {
+/* Ends the last unit's Scope and begins the next unit's. */
+static void _reset(void) {
   helper_unit_scope.destroy();
   helper_unit_scope = NULL;
+  $scope(&helper_unit_scope) helper_started = {};
+}
+
+/* Runs the `meta static` initializers of table `index` once per unit, in
+   the unit's Scope. Returns the failure that its calls reply with, or
+   NULL. */
+static List _start(int index, Map table) {
+  Var state;
+  if (!helper_started.try_get(index, state)) {
+    List failure = _initialize(table);
+    if (failure) state = failure;
+    else state = 0;
+    helper_started[index] = state;
+  }
+  return state is <list> ? state.list() : NULL;
+}
+
+static List _initialize(Map table) {
   Var reset;
   if (!table || !table.try_get("x2c_module_reset", reset)) return NULL;
   $scope(&helper_unit_scope) {
@@ -366,20 +385,18 @@ int main(void) {
     Map table = x2c_meta_helper_table(i);
     if (table) tables[i] = table;
   }
-  Map current = NULL;
-  /* A failed reset is the reply to the next call it prepared. */
-  List reset_failure = NULL;
+  _reset();
   for (;;) {
-    Var request = _request(3, input), table;
+    Var request = _request(3, input), found;
     match (request) {
-      case %(reset ?(int index)): {
-        current = tables.try_get(index, table) ? table : NULL;
-        reset_failure = _reset(current);
-      }
-      case %(call ?(String name) ?(List arguments) ?(List globals)): {
+      case %(reset): _reset();
+      case %(call ?(int index) ?(String name) ?(List arguments)
+             ?(List globals)): {
         Macro.use_subject(globals);
-        if (reset_failure) _reply(reset_failure);
-        else _call(current, name, arguments);
+        Map table = tables.try_get(index, found) ? found : NULL;
+        List failure = _start(index, table);
+        if (failure) _reply(failure);
+        else _call(table, name, arguments);
       }
       default: {
         helper_unit_scope.destroy();

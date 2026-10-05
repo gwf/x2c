@@ -595,6 +595,8 @@
      (cast (void) (expr ("Var") (ident (binding 81 "lambda_value"))))))) 
   (at 59 (return (expr (int) (literal (int) "0"))))))
 
+(preproc "#pragma private")
+
 (typedef 
  (struct (binding 84 "_x2c_defer_env_0") 
   (fields 

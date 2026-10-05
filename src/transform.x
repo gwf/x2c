@@ -45,8 +45,9 @@ $(import "../src/transform-reports.xmacro")
     emission. `c` must own the AST's bindings, origins, and conversion
     state. Current-node rewrites finish before child traversal; containing
     blocks absorb cleanup markers produced by declaration rewrites. Early
-    declarations are lowered and appended after the input units. The call
-    may add generated origins or diagnostics to `c`.
+    declarations are lowered and appended after the input units, below a
+    `#pragma private`, since no other unit can name them. The call may add
+    generated origins or diagnostics to `c`.
 */
 List Compiler.transform(Compiler c, List ast) {
   /* Regions are read before lowering, while `$scope`, `$auto`, and the
@@ -61,7 +62,9 @@ List Compiler.transform(Compiler c, List ast) {
     List lowered = c._sequence(items, 0);
     foreach (Var sibling, lowered) generated.push(sibling);
   }
-  if (generated.len()) newast = newast.append(generated.list_free());
+  if (generated.len())
+    newast = newast.append(
+      %((preproc "#pragma private") @{generated.list_free()}));
   return newast;
 }
 

@@ -100,11 +100,12 @@ macro Stmt $report.type.typedef_depth(Expr $c, Expr $origin) {
 
 /* A compiler's symbol table: a stack of scopes whose lowest `base_scopes`
    hold file-scope declarations. While `transactions` are active, `undo`
-   holds a `SymUndo` for each row a write replaced. */
+   holds a `SymUndo` for each row a write replaced. `import_depth` keeps
+   imported writes from claiming a row as an authored declaration. */
 typedef struct Sym {
   Block scopes, Map globals, statics, binding_facts;
   int base_scopes, local_macro_names;
-  Block undo, int transactions;
+  Block undo, int transactions, import_depth;
   // Owning compiler, so type resolution can report its own diagnostics.
   Compiler c;
 } *Sym;
@@ -129,6 +130,10 @@ Sym Sym.new(Compiler c) {
 void Sym.put(Sym s, Map map, Var key, Var value) {
   s._remember(map, key);
   map[key] = value;
+  if (!s.import_depth && _same(map, s.globals) && s.statics.len()) {
+    List imported = %(import-row $key);
+    if (imported in s.statics) s.drop(s.statics, imported);
+  }
 }
 
 /** Deletes `key` from `map` so that an active transaction can restore it. */
@@ -1312,6 +1317,42 @@ int SymTxn.local_macros_changed(SymTxn &s) {
   return 0;
 }
 
+/** Starts collecting an import's semantic writes and returns the log
+    position that `Sym.added_globals` reads from. Imported writes keep
+    existing import markers. `Sym.end_import` ends the collection. */
+int Sym.begin_import(Sym s) {
+  s.transactions++;
+  s.import_depth++;
+  return s.undo.len();
+}
+
+/** Ends the import collection that `Sym.begin_import` started. */
+void Sym.end_import(Sym s) {
+  s.import_depth--;
+  s.end_log();
+}
+
+/** Returns the global rows written since `mark` that were absent before
+    it, with their current values. */
+Map Sym.added_globals(Sym s, int mark) {
+  SymUndo *rows = s.undo.bytes;
+  Map seen = {}, added = {};
+  for (int i = mark; i < (int) s.undo.len(); i++) {
+    SymUndo row = rows[i];
+    if (!_same(row.map, s.globals) || row.key in seen) continue;
+    seen[row.key] = 1;
+    Var value;
+    if (row.value is void && s.globals.try_get(row.key, value))
+      added[row.key] = value;
+  }
+  return added;
+}
+
+/** Stops one import or transaction's semantic write log. */
+void Sym.end_log(Sym s) {
+  if (!--s.transactions) s.undo.clear();
+}
+
 // commit and rollback
 
 /** Publishes an active semantic transaction and makes rollback a no-op.
@@ -1333,10 +1374,8 @@ void SymTxn.commit(SymTxn &?s) {
 
 /* Completing the outermost transaction empties the undo log. */
 static void SymTxn._finish(SymTxn &s) {
-  Sym sym = s.c.sym;
   s.active = 0;
-  sym.transactions--;
-  if (!sym.transactions) sym.undo.clear();
+  s.c.sym.end_log();
 }
 
 /** Commits an active transaction, retaining the original counters map.

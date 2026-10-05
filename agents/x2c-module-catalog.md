@@ -99,12 +99,12 @@ source-ordered shallow symbol collection and replay.
 
 Public functions:
 
-`Compiler.collect_symbols`, `collect_resolve_include`,
-`Compiler.include_typedef_names`, `Compiler.record_generated_symbol`,
-`Compiler.collect_package`, `Compiler.replay_package_imports`,
-`Compiler.replay_included_package_imports`, `Compiler.import_included_exports`,
-`interface_configure`, `interface_prelude`, `interface_text`,
-`collect_forget_preload_entries`
+`Compiler.collect_symbols`, `Sym.withhold_import_rows`,
+`collect_resolve_include`, `Compiler.include_typedef_names`,
+`Compiler.record_generated_symbol`, `Compiler.collect_package`,
+`Compiler.replay_package_imports`, `Compiler.replay_included_package_imports`,
+`Compiler.import_included_exports`, `interface_configure`, `interface_prelude`,
+`interface_text`, `collect_forget_provisional_entries`
 
 ### [src/compiler.x](../src/compiler.x)
 
@@ -454,7 +454,7 @@ Public functions:
 
 `preproc_directive`, `preproc_conditional_kind`, `preproc_open_state`,
 `preproc_branch_state`, `preproc_visibility`, `preproc_include_target`,
-`preproc_marker_file`, `Compiler.scan_conditionals`,
+`preproc_marker_file`, `preproc_macro_name`, `Compiler.scan_conditionals`,
 `Compiler.leading_preproc`, `Compiler.update_source_visibility`,
 `Compiler.note_object_macro`, `preproc_track_arms`, `preproc_within_arms`
 
@@ -573,7 +573,8 @@ Public functions:
 `Sym.is_map_type`, `Sym.is_named_value_type`, `Sym.lookup_field`,
 `Sym.declare_field_order`, `Sym.field_order`, `Sym.declare_delegate_field`,
 `Sym.delegate_aggregate`, `Compiler.begin_semantic_transaction`,
-`SymTxn.local_macros_changed`, `SymTxn.commit`, `SymTxn.commit_transient`,
+`SymTxn.local_macros_changed`, `Sym.begin_import`, `Sym.end_import`,
+`Sym.added_globals`, `Sym.end_log`, `SymTxn.commit`, `SymTxn.commit_transient`,
 `SymTxn.rollback`
 
 ### [src/toolchain.x](../src/toolchain.x)

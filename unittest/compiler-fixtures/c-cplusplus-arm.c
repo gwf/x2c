@@ -12,8 +12,6 @@ static int power(int base);
 static int power(int base);
 
 #endif
-#if 0
-#endif
 #if defined(__cplusplus) && __cplusplus >= 201103L || defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
 static int modern(void);
 

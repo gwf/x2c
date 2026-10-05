@@ -1,5 +1,6 @@
 #include "x2c.x"
 
+#pragma private
 static int barrier(int Chain) => Chain;
 typedef struct Holder { int Chain; char label[sizeof("Chain")]; } Holder;
 typedef struct Chain { int n; } ChainBase;

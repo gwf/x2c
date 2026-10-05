@@ -58,6 +58,8 @@
                  (ident (binding 11 "Scope_release"))) (args (expr (void) ())))))) 
   (at 13 (return (expr (int) (literal (int) "0"))))))
 
+(preproc "#pragma private")
+
 (function (static "String") 
  (bind (binding 12 "_x2c_proto_string_add_update") 
   ((fnmod 

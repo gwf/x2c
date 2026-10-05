@@ -12,6 +12,11 @@
 #define FORMAT(a, b) __attribute__((format(printf, a, b)))
 __attribute__((format(printf, 1, 2))) int report(const char * format, ...);
 
+struct box{
+  __attribute__((aligned(8))) int value;
+}
+;
+
 int main(void);
 
 

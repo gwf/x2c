@@ -22,11 +22,7 @@ static struct{
 }
 L;
 
-static struct Table{
-  int(* fn)(int);
-  int arr[4];
-}
-T;
+static struct Table T;
 
 _x2c_initializer_choice_3B5F69A4_0((T =(struct Table){
   twice, {
