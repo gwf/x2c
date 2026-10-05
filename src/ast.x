@@ -269,63 +269,32 @@ Ast Ast.rewrap_origin(Ast original, Ast replacement) {
     `_Noreturn`.
 */
 int Ast.never_returns(Ast ast) {
-  List node = _unwrap_origin(ast);
-  if (!node || node.car() is not <symbol>) return 0;
-  Symbol head = node.car();
-  if (head == <raise>) return _raise_never_returns(node);
-  if (head == <stmnt>) return _call_never_returns(node);
-  if (head != <block> || _contains_return(node)) return 0;
-  Var last = node.last();
-  if (last is not <list>) return 0;
-  Ast terminal = last;
-  return terminal.never_returns();
-}
-
-static Ast _unwrap_origin(Ast node) {
-  while (node && node.car() == <at>) {
-    match (node)
-      case %(at ?origin (!is type list)) if (origin.is_integer()): {
-        node = node.caddr();
-        continue;
-      }
-    return NULL;
+  match (Ast.without_origin(ast)) {
+    case %(raise (expr ("Symbol") ${$source_literal_content(
+              %(("Symbol") ? ?code))}) *):
+      return code in nonreturning_error_causes;
+    case %(stmnt (expr ? ${$called(%(expr () (ident ?binding)), %(*))})):
+      return binding_identity_spelling(binding) in terminating_calls;
+    case %(block *items):
+      return items && !_contains_return(items) &&
+             items.last() is <list> && ((Ast) items.last()).never_returns();
   }
-  return node;
+  return 0;
 }
 
 static const SymbolSet nonreturning_error_causes =
   $error.nonreturning.causes();
 
-/* A literal raise names its cause in place, so emission can tell whether the
-   Error runtime can let that raise resume. */
-static int _raise_never_returns(Ast node) {
-  Var code_ast = node.cadr();
-  if (code_ast is not <list>) return 0;
-  match (code_ast)
-    case %(expr ("Symbol") ${$source_literal_content(
-        %(("Symbol") ? ?code))}):
-      return code in nonreturning_error_causes;
-  return 0;
-}
+static List terminating_calls =
+  %("abort" "exit" "_Exit" "_exit" "quick_exit");
 
-static int _call_never_returns(Ast node) {
-  match (node)
-    case %(stmnt (expr ? ${$called(%(expr () (ident ?binding)), %(*))})): {
-      String name = binding_identity_spelling(binding);
-      return name == "abort" || name == "exit" || name == "_Exit" ||
-             name == "_exit" || name == "quick_exit";
-    }
-  return 0;
-}
-
-static int _contains_return(Ast node) {
-  Var head = node.car();
-  if (head is <symbol>) {
-    if (head == <return>) return 1;
-    if (head == <function>) return 0;
+/* A `return` anywhere in `items`, outside a nested function. */
+static int _contains_return(List items) {
+  List node;
+  $ast.walk(items, node) {
+    if (node.car() == <function>) continue;
+    if (node.car() == <return>) return 1;
   }
-  foreach (Var child, node)
-    if (child is <list> && _contains_return(child)) return 1;
   return 0;
 }
 
