@@ -7,14 +7,14 @@ macro Stmt $error.boolean.type(Expr $tag) {
 
 macro Stmt $error.read.file(
   Expr $path, Expr $why, Expr $offset, Expr $line, Expr $column) {
-  raise %(bad-arg (operation "Json.read_file") (path ${$path})
+  raise %(malformed (operation "Json.read_file") (path ${$path})
           (why ${$why}) (offset ${$offset})
           (line ${$line}) (column ${$column}));
 }
 
 macro Stmt $error.read.text(
   Expr $why, Expr $offset, Expr $line, Expr $column) {
-  raise %(bad-arg (operation "Json.parse") (why ${$why})
+  raise %(malformed (operation "Json.parse") (why ${$why})
           (offset ${$offset}) (line ${$line}) (column ${$column}));
 }
 

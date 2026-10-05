@@ -184,7 +184,7 @@ static void regex_rejects_bad_patterns(void) {
     String pattern = row.car();
     int caught = 0;
     try Regex.compile(pattern);
-    catch %(bad-arg *detail): {
+    catch %(malformed *detail): {
       caught = 1;
       EXPECT_STR_EQ(detail.assoc(<why>).string(), row.cadr().string());
       EXPECT_STR_EQ(detail.assoc(<pattern>).string(), pattern);

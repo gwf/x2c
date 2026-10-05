@@ -129,7 +129,7 @@ static void _RegexNode._fold(_RegexNode node) {
 /* parsing
 
    The parser reads the pattern once from left to right and builds the
-   node tree. A malformed pattern raises `<bad-arg>` at the byte offset
+   node tree. A malformed pattern raises `<malformed>` at the byte offset
    where the parser stands. */
 
 typedef struct Parser {
@@ -689,7 +689,7 @@ static int _reference(Buffer out, RegexMatch found, String text, int i) {
 // patterns
 
 /** Compiles `pattern` and returns the `Regex`, owned by the current scope.
-    Raises: `<bad-arg>` with `why`, the `pattern`, and the byte `offset`
+    Raises: `<malformed>` with `why`, the `pattern`, and the byte `offset`
     of the problem when the pattern does not parse.
 */
 Regex Regex.compile(String pattern) => Regex.new(pattern);

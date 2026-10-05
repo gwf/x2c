@@ -66,7 +66,7 @@ without a fraction or exponent is an `int` `Var` when it fits, then a
 null is the all-zero `Var`, and true and false are `JsonBool`s. A
 repeated object name keeps its last value.
 
-**Raises:** `<bad-arg>` with `why`, `offset`, `line`, and `column` details
+**Raises:** `<malformed>` with `why`, `offset`, `line`, and `column` details
 when `source` is not one JSON value surrounded only by whitespace, nests
 arrays and objects more than 512 deep, or contains a number too large for
 a `double`, an unpaired surrogate escape, or `\u0000`.
@@ -80,7 +80,7 @@ Source: `lib/json.x:115`
 
 Returns the x2c value of the JSON file at `path`, as `Json.parse` does.
 
-**Raises:** the causes of `Path.read_text`, or `<bad-arg>` as
+**Raises:** the causes of `Path.read_text`, or `<malformed>` as
 `Json.parse` does, with a `path` detail added.
 
 Source: `lib/json.x:121`

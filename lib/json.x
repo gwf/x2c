@@ -107,7 +107,7 @@ typedef struct Reader {
     `long`, then an `unsigned long`; any other number is a `double`. JSON
     null is the all-zero `Var`, and true and false are `JsonBool`s. A
     repeated object name keeps its last value.
-    Raises: `<bad-arg>` with `why`, `offset`, `line`, and `column` details
+    Raises: `<malformed>` with `why`, `offset`, `line`, and `column` details
     when `source` is not one JSON value surrounded only by whitespace, nests
     arrays and objects more than 512 deep, or contains a number too large for
     a `double`, an unpaired surrogate escape, or `\u0000`.
@@ -115,7 +115,7 @@ typedef struct Reader {
 meta native Var Json.parse(String source) => _parse(source, NULL);
 
 /** Returns the x2c value of the JSON file at `path`, as `Json.parse` does.
-    Raises: the causes of `Path.read_text`, or `<bad-arg>` as
+    Raises: the causes of `Path.read_text`, or `<malformed>` as
     `Json.parse` does, with a `path` detail added.
 */
 Var Json.read_file(Path path) => _parse(path.read_text(), path);

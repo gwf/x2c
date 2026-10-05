@@ -7,10 +7,10 @@ $(import "test-macros.xmacro")
 #include <limits.h>
 #include <math.h>
 
-/* Returns the `<bad-arg>` details raised for `text`, or NULL if it parsed. */
+/* Returns the `<malformed>` details for `text`, or NULL if it parsed. */
 static List _rejection(String text) {
   try Json.parse(text);
-  catch %(bad-arg *detail): return detail;
+  catch %(malformed *detail): return detail;
   return NULL;
 }
 
@@ -281,7 +281,7 @@ static void json_files_read_and_write(void) {
   path.write_text("{\n\"a\": nope}");
   int caught = 0;
   try Json.read_file(path);
-  catch %(bad-arg *detail): {
+  catch %(malformed *detail): {
     caught++;
     EXPECT_STR_EQ(detail.assoc(<operation>).string(), "Json.read_file");
     EXPECT_STR_EQ(detail.assoc(<path>).string(), path);
@@ -304,7 +304,7 @@ static void json_failed_string_releases_decoder(void) {
   for (int i = 0; i < 6; i++) {
     ScopeStats before = Scope.stats();
     try Json.parse("\"a\\nb\\q\"");
-    catch %(bad-arg *): {}
+    catch %(malformed *): {}
     if (i) {
       EXPECT_INT_EQ(Scope.stats().live_allocations, before.live_allocations);
       EXPECT_INT_EQ(

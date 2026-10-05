@@ -478,8 +478,8 @@ has all of those and Unicode. Its types are `Regexp`, `RegexpMatch`, and
 with those names, rename the types, and add the options argument to
 `compile`.
 
-A pattern that does not parse raises `<bad-arg>` with `why`, the `pattern`,
-and the zero-based byte `offset` of the problem. So does a repetition count
+A pattern that does not parse raises `<malformed>` with `why`, the
+`pattern`, and the zero-based byte `offset` of the problem. So does a count
 above `INT_MAX`, 2147483647.
 
 ### Matching
@@ -630,7 +630,7 @@ Json.write_file(report, "/tmp/report.json");
 ~}
 ```
 
-Text that is not JSON raises `<bad-arg>` with `why`, a zero-based byte
+Text that is not JSON raises `<malformed>` with `why`, a zero-based byte
 `offset`, and one-based `line` and `column` details; `Json.read_file` adds
 the `path`. Parsing raises the same cause for nesting deeper than 512 arrays
 and objects, a number too large for a `double`, an unpaired surrogate
@@ -640,7 +640,7 @@ escape, and `\u0000`, which a `String` cannot hold:
 ~#include "json.x"
 ~int main(void) {
 try Json.read_file("settings.json");
-catch %(bad-arg *detail):
+catch %(malformed *detail):
   printf("settings.json:%ld:%ld: %s\n", detail.assoc(<line>),
          detail.assoc(<column>), detail.assoc(<why>));
 ~  return 0;
