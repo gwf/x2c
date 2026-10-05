@@ -33,6 +33,11 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
 
 Var List_getindex(List, int);
 
+#include "error.h"
+
+
+
+
 int x2c_error_catch_site_pending(ErrorCatchSite *);
 
 ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);

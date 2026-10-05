@@ -11,6 +11,7 @@
 #include "compiler.x"
 #pragma private
 $(import "../src/grammar.xmacro")
+$(import "../src/ast-rewrite.xmacro")
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -356,19 +357,15 @@ static int HeaderNeeds.spelled_after(HeaderNeeds &n, int i, String name) {
    single-string type atom such as `("Point")`, alone or after qualifiers
    and storage, as in `(extern "Point")`. */
 static void _spelled_types(List node, Map names) {
-  if (!node) return;
-  Var head = node.car();
-  if (head is <string> && !node.cdr()) {
-    names[head] = 1;
-    return;
+  List item;
+  $ast.walk(node, item) {
+    List base = item;
+    while (base.car() is <symbol> &&
+           (base.car().symbol().is_type_qualifier() ||
+            base.car().symbol().is_storage_class()))
+      base = base.cdr();
+    if (base.car() is <string> && !base.cdr()) names[base.car()] = 1;
   }
-  if (head is <symbol> && (head.symbol().is_type_qualifier() ||
-                           head.symbol().is_storage_class())) {
-    _spelled_types(node.cdr(), names);
-    return;
-  }
-  foreach (Var part, node)
-    if (part is <list>) _spelled_types(part, names);
 }
 
 /* Each remaining marker becomes its typedef in the file the typedef settled
