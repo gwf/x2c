@@ -985,7 +985,7 @@ Later candidates below remain private until submitted to the integrator.
 | `Compiler._record_meta_hash` | 50 | 18 | length repaired; focused proof passes |
 | `Compiler._bind_form` | 118 | 102 | partial; 37 arms still span lines |
 | `Compiler.protocol_update_helper` | 51 | 39 | signature/publication steps; focused proof passes |
-| `Compiler._step` | 54 | 40 | one grammar match; focused proof passes |
+| `Compiler._step` | 54 | 26 | typed patterns and tag step; stack proof passes |
 | `Compiler._sequence` | 44 | 10 | normalization/splice steps; focused proof passes |
 
 These counts address function length. They do not establish whole-file
@@ -1109,6 +1109,18 @@ cleanup expression chains. Its authored source delta is +109/-107 lines.
 emit, expressions, parse, protocol, and transform. All changed generated
 lines are Source references; no other audit error is reported. Final
 regeneration and publication validation remain the integrator's work.
+
+The PR #174 integration gate exposed a 256-KiB stack regression in
+`var-chain-stack`: the combined match compiled with a 368-byte recursive
+`_step` frame, compared with 304 bytes before the batch. The original
+compiler passes; the candidate exits 139. A `noinline` expression-boundary
+trial did not repair it and was removed. The final source keeps the
+original typed-pattern scope and moves the original tag switch into
+`_step_tag`. The compiler inlines that step and restores the 304-byte frame.
+The unchanged `var-chain-stack` fixture passes. `_step` has 26 lines and
+`_step_tag` has 30 lines. Sequence normalization and splice steps remain.
+No fixture expectation or stack limit was changed. Final integration
+validation and regenerated-position review remain pending.
 
 Integration of `3459d664` exposed a link to an ignored local audit report.
 Commit `fef7cb88` keeps that explicitly local reference as a plain path.

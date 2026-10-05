@@ -76,40 +76,58 @@ Ast Compiler.normalize(Compiler c, Ast ast) => c._step(ast);
 
 static Ast Compiler._step(Compiler c, Ast ast) {
   if (!ast) return NULL;
-  Ast next = ast;
+  match (ast)
+    case %(managed-init ?):
+      $report.parse.init_incomplete(c);
+  Var head = ast.car();
+  if (head is not <symbol>) return c._children(ast);
   match (ast) {
     case %(at ?origin ?inner): return c._at_node(ast, origin, inner);
-    case %(function ?type (!set ?decl (bind ?binding ?)) ?body):
-      return c._function_node(type, decl, binding, body);
-    case %(getindex (!set ?value (expr ?type ?)) ?index):
-      return c._getindex_node(value, type, index);
-    case %(setindex (!set ?value (expr ?type ?)) ?index ?item):
-      return c._setindex_node(value, type, index, item);
-    case %(slice (!set ?value (expr (!set ?type (*)) ?)) ?start ?stop ?step):
-      return c._slice_node(value, type, start, stop, step);
-    case %(expr *): return c._expression_node(ast);
-    case %(cast *): next = c._cast(ast);
-    case %(index *): next = c._index(ast);
-    case %(var *): next = c._to_var(ast.cadr());
-    case %(segments *): next = c._string_segments(ast);
-    case %(dstrdecl *): next = c._destructure_declaration(ast);
-    case %(stmnt *): next = c._destructure_statement(ast);
-    case %(dstrasgn *): next = c._destructure_value(ast);
-    case %(match *): next = c._match_cases(ast);
-    case %(defer *): next = c._defer_node(ast);
-    case %(return *): next = c._return(ast);
-    case %(raise *): return c._raise_node(ast);
-    case %(call *): next = c._call(ast);
-    case %(op *): next = c._operator(ast);
-    case %(postfix *): next = c._postfix(ast);
-    case %((!or protocol adopt macrodef literal) *): return ast;
-    case %((!or array varray) *): next = transform_array_literal(c, ast);
-    case %((!or map vmap) *): next = transform_map_literal(c, ast);
-    case %((!or cons append) *): return c._ordered_list(ast);
-    case %((!or declare decl) *): next = c._declaration(ast);
-    case %((!or if while do for) *): next = c._truthy(ast);
-    case %(managed-init ?): $report.parse.init_incomplete(c);
-    default: if (ast.car() is not <symbol>) return c._children(ast);
+    case %(function ?return_type
+           (!set ?declarator (bind ?binding ?)) ?body):
+      return c._function_node(return_type, declarator, binding, body);
+    case %(getindex
+           (!set ?expression (expr ?matched_type ?)) ?index):
+      return c._getindex_node(expression, matched_type, index);
+    case %(setindex
+           (!set ?expression (expr ?matched_type ?)) ?index ?value):
+      return c._setindex_node(expression, matched_type, index, value);
+    case %(slice
+           (!set ?expression
+             (expr (!set ?matched_type (*)) ?))
+           ?start ?stop ?step):
+      return c._slice_node(expression, matched_type, start, stop, step);
+  }
+  return c._step_tag(ast, head);
+}
+
+// Tag-only lowering does not retain the typed-pattern capture buffer.
+static Ast Compiler._step_tag(Compiler c, Ast ast, Symbol tag) {
+  Ast next = ast;
+  switch (tag) {
+    case <protocol>: case <adopt>: case <macrodef>: case <literal>:
+      return ast;
+    case <expr>: return c._expression_node(ast);
+    case <array>: case <varray>: next = transform_array_literal(c, ast); break;
+    case <map>: case <vmap>: next = transform_map_literal(c, ast); break;
+    case <cast>: next = c._cast(ast); break;
+    case <index>: next = c._index(ast); break;
+    case <cons>: case <append>: return c._ordered_list(ast);
+    case <var>: next = c._to_var(ast.cadr()); break;
+    case <segments>: next = c._string_segments(ast); break;
+    case <declare>: case <decl>: next = c._declaration(ast); break;
+    case <dstrdecl>: next = c._destructure_declaration(ast); break;
+    case <stmnt>: next = c._destructure_statement(ast); break;
+    case <dstrasgn>: next = c._destructure_value(ast); break;
+    case <match>: next = c._match_cases(ast); break;
+    case <defer>: next = c._defer_node(ast); break;
+    case <return>: next = c._return(ast); break;
+    case <raise>: return c._raise_node(ast);
+    case <if>: case <while>: case <do>: case <for>:
+      next = c._truthy(ast); break;
+    case <call>: next = c._call(ast); break;
+    case <op>: next = c._operator(ast); break;
+    case <postfix>: next = c._postfix(ast); break;
   }
   if (next != ast) return c._step(next);
   return c._finish(ast);
