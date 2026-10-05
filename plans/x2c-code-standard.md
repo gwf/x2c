@@ -542,6 +542,7 @@ preserved in `.context/` in that worktree. No bootstrap was refreshed.
 | 4.process | `e70355e7` | 2026-10-05 | 3 -> 1; +4/-4 .x |
 | 4.emission | `5f8e5484` | 2026-10-05 | 6 -> 0; +16/-14 .x |
 | 4.match | `33c6f09e` | 2026-10-05 | 5 -> 2; +3/-3 .x |
+| 4.targets | `a731b530` | 2026-10-05 | 1 -> 0; +1/-1 .x |
 | D2 held | `a7c271f` | 2026-10-05 | +197/-192 .x; 4 raises held |
 | D3 | `f7f886ad` | 2026-10-05 | 9/9 autodiff; +9/-9 .x |
 | D3 held | `9511153f` | 2026-10-05 | +9/-9 .x; package check fails |
@@ -552,7 +553,7 @@ book outputs (101), commands, and packages pass. Autodiff passes all nine
 fixtures and 19 artifacts. No fixture or lint baseline changed.
 
 Stage 4 rows record violation counts and authored `.x` line changes.
-Process and Match repairs compare all 220 C/H files with the bootstrap.
+Process, Match, and target repairs compare all 220 C/H with the bootstrap.
 Emission repairs also compare stage 0 with stage 1. Emission commits:
 `5fc3fe75`, `5f8e5484`. Match commits: `7fcd0023`, `c5a66fc7`, `33c6f09e`.
 
