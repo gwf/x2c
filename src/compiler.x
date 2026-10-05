@@ -96,6 +96,9 @@ typedef struct Compiler {
   List frozen_stack_key;
   Var frozen_stack;
   unsigned long frozen_stack_epoch;
+  /* Each macro definition frozen in this pool epoch, by its identity. */
+  Map frozen_macros;
+  unsigned long frozen_macros_epoch;
   /* The last binding identity issued before the outermost active expansion
      began; a later identity was introduced by that expansion. */
   int expansion_floor;
@@ -566,7 +569,7 @@ static List Compiler._replay_bundle(Compiler c) {
 Var Compiler.freeze_declaration_syntax(Compiler c, Var syntax) {
   if (syntax is not <list> || syntax.is_nil()) return _freeze_leaf(syntax);
   match (syntax) {
-    case %(macrodef *rows): return c._declaration_macro(rows, 0);
+    case %(macrodef *rows): return c._frozen_macro(syntax, rows);
     case %(src (source ?path ?begin ?end) ?node):
       return %(src (source ${_declaration_path(path, 0)} $begin $end)
         ${c.freeze_declaration_syntax(node)});
@@ -661,6 +664,24 @@ static List Compiler._thaw_origin(Compiler c, List location, Var node) {
            (position ?position)):
       c.origins.push(%(source $file $line $column $length $position));
   return %(at ${c.origins.len()} ${c.thaw_declaration_syntax(node)});
+}
+
+/* A definition is immutable, so it freezes once per pool epoch. A template
+   that invokes others carries their definitions, which would otherwise be
+   frozen again for every retained declaration it produces. */
+static List Compiler._frozen_macro(Compiler c, List definition, List rows) {
+  unsigned long epoch = Pool.epoch();
+  if (!c.frozen_macros || epoch != c.frozen_macros_epoch) {
+    c.frozen_macros = {};
+    c.frozen_macros_epoch = epoch;
+  }
+  ulong key = (ulong) definition;
+  Var frozen = void;
+  if (!c.frozen_macros.try_get(key, frozen)) {
+    frozen = c._declaration_macro(rows, 0);
+    c.frozen_macros[key] = frozen;
+  }
+  return frozen;
 }
 
 static List Compiler._declaration_macro(Compiler c, List rows, int thaw) {
