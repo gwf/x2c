@@ -786,7 +786,7 @@ static int _defers_directly(List items) {
   return 0;
 }
 
-/* Reference reads are already resolved; keep the final expression's type. */
+/* Reference reads retain their resolved type through the last expression. */
 static Type _final_value_type(List items) {
   List last = items ? Ast.without_origin(items.last()) : NULL;
   match (last)
