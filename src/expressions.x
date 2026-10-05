@@ -2543,13 +2543,14 @@ static List Compiler._binary_op_type_addsub(
     return %("String");
   Type lscalar = c.sym.resolve_numeric_type(ltype);
   Type rscalar = c.sym.resolve_numeric_type(rtype);
+  int rpointer = c.sym.resolve_key(rtype).is_pointer();
   if (lscalar) {
     if (rscalar) return lscalar.widest(rscalar);
-    else if (op == <+> && rtype.is_pointer()) return rtype;
+    else if (op == <+> && rpointer) return rtype;
   }
-  else if (ltype.is_pointer()) {
-    if (rscalar)                  return ltype;
-    else if (rtype.is_pointer())  return %(int);
+  else if (c.sym.resolve_key(ltype).is_pointer()) {
+    if (rscalar)        return ltype;
+    else if (rpointer)  return %(int);
   }
   return NULL;
 }

@@ -451,7 +451,7 @@ meta native int String.find_within(
   if (!str) return -1;
   const char *p = _find_bytes(str + start, end - start, sub, m);
   if (!p) return -1;
-  return (int) (p - str);
+  return p - str;
 }
 
 static int _clamp(int index, int n) {
@@ -518,7 +518,7 @@ static int _count_matches(String str, String sub, int limit) {
     const char *found = _find_bytes(str + pos, str_len - pos, sub, sub_len);
     if (!found) break;
     count++;
-    pos = (int) (found - str) + sub_len;
+    pos = found - str + sub_len;
   }
   return count;
 }
@@ -599,14 +599,14 @@ meta native String String.replace_n(
   while (copied <= str_len - old_len && replaced < count) {
     const char *found = _find_bytes(
       str + copied, str_len - copied, old, old_len);
-    int prefix_len = (int) (found - (str + copied));
+    int prefix_len = found - (str + copied);
     memcpy(dst, str + copied, prefix_len);
     dst += prefix_len;
     if (replacement_len) {
       memcpy(dst, replacement, replacement_len);
       dst += replacement_len;
     }
-    copied = (int) (found - str) + old_len;
+    copied = found - str + old_len;
     replaced++;
   }
   memcpy(dst, str + copied, str_len - copied);

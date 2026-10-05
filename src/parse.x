@@ -1652,7 +1652,7 @@ static List Compiler._initialized(
   List binding = bind.cadr();
   if (binding_identity_try_parts(binding, NULL, NULL)) {
     Token tokens = c.tokenizer.tokens;
-    c.init_tokens[binding] = (int) (origin - tokens);
+    c.init_tokens[binding] = origin - tokens;
   }
   if (c.shallow) {
     c._skip_shallow_expression(1);
