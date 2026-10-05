@@ -51,11 +51,12 @@ execution.
   runtime repairs remain open. Its tracked
   [evidence and reproduction reports](harness-evidence-2026-10-05.md) support
   continuation from another checkout.
-- [x2c code standard](x2c-code-standard.md): stage 1 landed; Gary accepted
-  the standard
-  and decisions D1-D5 on 2026-10-05. Stage 1 (authority) and stage 2
-  (Error keys, `<malformed>`, `builtin_*` linkage) are ready; stage 3
-  (lint) follows stage 1, then repeated scan-and-fix cycles.
+- [x2c code standard](x2c-code-standard.md): stages 1 and 3 are complete.
+  D3 and D5 are delivered; D2 retains four Array raises for a decision.
+  Stage 4 repaired 59 of 106 violations; 47 findings remain recorded.
+  Package Error packs and the first import-helper deletion are delivered.
+  Candidate cycles remain active; 12 length candidates and the broader
+  macro ownership review remain unfinished.
 - [x2c self-expression](x2c-self-expression.md): Phase 0, language work,
   three waves, and the retained prototypes are on dev. The recorded
   follow-ups and unresolved language questions remain active.
