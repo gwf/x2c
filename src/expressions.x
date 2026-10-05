@@ -1427,16 +1427,12 @@ static List Compiler._typedef_index(
       return %(expr ($rtype) (getindex $expr $index));
     }
   }
-  // Resolve the outer aliases without reducing the indexed element type.
-  Type native = expr.cadr();
-  int hops = 0;
-  loop {
-    Type key = native.canonicalize();
-    if (!key.is_bare_typedef_name() && !key.is_typedef()) break;
-    Type next = c.sym.next_typedef(key, hops);
-    if (!next) break;
-    native = next.qualify(native);
-  }
+  return c._native_index(expr, index, type);
+}
+
+static List Compiler._native_index(
+  Compiler c, List expr, List index, Type type) {
+  Type native = c._index_native_type(expr.cadr());
   Type shape = native.canonicalize();
   // A boxable handle to a record has no C array reading.
   if (shape.is_pointer() && shape.dereference().is_aggregate() &&
@@ -1448,6 +1444,19 @@ static List Compiler._typedef_index(
       (shape.is_pointer() && !c.sym.is_string_type(type)))
     return %(expr ${native.dereference()} (index $expr $index));
   return NULL;
+}
+
+// Resolve the outer aliases without reducing the indexed element type.
+static Type Compiler._index_native_type(Compiler c, Type native) {
+  int hops = 0;
+  loop {
+    Type key = native.canonicalize();
+    if (!key.is_bare_typedef_name() && !key.is_typedef()) break;
+    Type next = c.sym.next_typedef(key, hops);
+    if (!next) break;
+    native = next.qualify(native);
+  }
+  return native;
 }
 
 static List Compiler._resolve_getindex(
