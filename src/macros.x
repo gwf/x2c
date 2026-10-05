@@ -4069,7 +4069,8 @@ static List Compiler._import(Compiler c, String requested, Token invocation) {
   Var cached;
   if (c.imports.try_get(path, cached) && !c._reuse_import(path, cached))
     return NULL;
-  if (path in c.import_stack) c._import_cycle(path, invocation);
+  if (path in c.import_stack)
+    $report.macro.import_cycle(c, path, invocation);
   Import in = {.c = c, .path = path, .invocation = invocation};
   return in.read();
 }
@@ -4103,10 +4104,6 @@ static void Compiler._replay_import(
     c.macros[name] = c._rebind_imported(definition);
   if (aliases is <map>) c.kw_aliases.merge(aliases);
   c.kw_seen[path] = 1;
-}
-
-static void Compiler._import_cycle(Compiler c, String path, Token invocation) {
-  $report.macro.import_cycle(c, path, invocation);
 }
 
 /* Reads the file and caches what it added: macros, dependencies, aliases,
