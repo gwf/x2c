@@ -204,6 +204,10 @@ static List Compiler__postfix_index_expression(Compiler c, List expr, List index
 
 static List Compiler__typedef_index(Compiler c, List expr, List index, Type type);
 
+static List Compiler__native_index(Compiler c, List expr, List index, Type type);
+
+static Type Compiler__index_native_type(Compiler c, Type native);
+
 static List Compiler__resolve_getindex(Compiler c, Type input_type, List receiver, List selector, Token origin);
 
 static List Compiler__resolve_slice(Compiler c, Type input_type, List slice, Token origin);
@@ -2782,11 +2786,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2187 = cons(_2186, NULL);
   _2188 = cons(_252, _2187);
   _2189 = List_var(_2188);
-  _2190 = int_var(2070);
+  _2190 = int_var(2079);
   _2191 = cons(_2190, NULL);
   _2192 = cons(_258, _2191);
   _2193 = List_var(_2192);
-  _2194 = int_var(78601);
+  _2194 = int_var(78842);
   _2195 = cons(_2194, NULL);
   _2196 = cons(_271, _2195);
   _2197 = List_var(_2196);
@@ -2977,11 +2981,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2382 = cons(_2381, NULL);
   _2383 = cons(_218, _2382);
   _2384 = List_var(_2383);
-  _2385 = int_var(2078);
+  _2385 = int_var(2087);
   _2386 = cons(_2385, NULL);
   _2387 = cons(_258, _2386);
   _2388 = List_var(_2387);
-  _2389 = int_var(78956);
+  _2389 = int_var(79197);
   _2390 = cons(_2389, NULL);
   _2391 = cons(_271, _2390);
   _2392 = List_var(_2391);
@@ -3092,11 +3096,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2497 = cons(_2496, NULL);
   _2498 = cons(_218, _2497);
   _2499 = List_var(_2498);
-  _2500 = int_var(2089);
+  _2500 = int_var(2098);
   _2501 = cons(_2500, NULL);
   _2502 = cons(_258, _2501);
   _2503 = List_var(_2502);
-  _2504 = int_var(79361);
+  _2504 = int_var(79602);
   _2505 = cons(_2504, NULL);
   _2506 = cons(_271, _2505);
   _2507 = List_var(_2506);
@@ -3193,11 +3197,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_5(void){
   _2595 = cons(_2594, NULL);
   _2596 = cons(_218, _2595);
   _2597 = List_var(_2596);
-  _2598 = int_var(2091);
+  _2598 = int_var(2100);
   _2599 = cons(_2598, NULL);
   _2600 = cons(_258, _2599);
   _2601 = List_var(_2600);
-  _2602 = int_var(79436);
+  _2602 = int_var(79677);
   _2603 = cons(_2602, NULL);
   _2604 = cons(_271, _2603);
   _2605 = List_var(_2604);
@@ -3285,11 +3289,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_5(void){
   _2687 = cons(_2686, NULL);
   _2688 = cons(_218, _2687);
   _2689 = List_var(_2688);
-  _2690 = int_var(2095);
+  _2690 = int_var(2104);
   _2691 = cons(_2690, NULL);
   _2692 = cons(_258, _2691);
   _2693 = List_var(_2692);
-  _2694 = int_var(79636);
+  _2694 = int_var(79877);
   _2695 = cons(_2694, NULL);
   _2696 = cons(_271, _2695);
   _2697 = List_var(_2696);
@@ -3496,11 +3500,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_5(void){
   _2898 = List_var(_2897);
   _2899 = cons(_218, _100);
   _2900 = List_var(_2899);
-  _2901 = int_var(2144);
+  _2901 = int_var(2153);
   _2902 = cons(_2901, NULL);
   _2903 = cons(_258, _2902);
   _2904 = List_var(_2903);
-  _2905 = int_var(81758);
+  _2905 = int_var(81999);
   _2906 = cons(_2905, NULL);
   _2907 = cons(_271, _2906);
   _2908 = List_var(_2907);
@@ -5461,13 +5465,6 @@ int Sym_is_array_type(Sym, Type);
 int Sym_is_map_type(Sym, Type);
 Var Var_cadr(Var);
 int Type_is_integral(Type);
-int Type_is_bare_typedef_name(Type);
-int Type_is_typedef(Type);
-Type Sym_next_typedef(Sym, Type, int *);
-Type Type_qualify(Type, Type);
-int Type_is_aggregate(Type);
-Symbol Type_var_tag(Type);
-int Sym_is_string_type(Sym, Type);
 static List Compiler__typedef_index(Compiler c, List expr, List index, Type type){
   String owner = Var_string(List_car(Type_list(type)));  Type receiver = type;  if(Sym_is_array_type(c -> sym, type)){
     owner = _1685;  receiver = List_type(_842);
@@ -5491,13 +5488,28 @@ static List Compiler__typedef_index(Compiler c, List expr, List index, Type type
 
     }
   }
-Type native = Var_type(List_cadr(expr));  int hops = 0;  while(1){
-  Type key = Type_canonicalize(native);  if(! Type_is_bare_typedef_name(key) && ! Type_is_typedef(key)) break;  Type next = Sym_next_typedef(c -> sym, key, &(hops));  if(! List_truth(Type_list(next))) break;  native = Type_qualify(next, native);
+return Compiler__native_index(c, expr, index, type);
 }
-Type shape = Type_canonicalize(native);  if(Type_is_pointer(shape) && Type_is_aggregate(Type_dereference(shape)) && Type_var_tag(type)) Compiler_report_error(c, 1362954, String_join(NULL, cons(String_var(Var_str(List_car(Type_list(type)))), cons(String_var(_1694), NULL))), c -> token, NULL);  if(Type_is_array(shape) ||(Type_is_pointer(shape) && ! Sym_is_string_type(c -> sym, type))) return({
-  Var _x2c_literal_part_47 = List_var(Type_dereference(native));  Var _x2c_literal_part_48 = List_var(cons(_569, cons(List_var(expr), cons(List_var(index), NULL))));  cons(_0, cons(_x2c_literal_part_47, cons(_x2c_literal_part_48, NULL)));
+
+int Type_is_aggregate(Type);
+Symbol Type_var_tag(Type);
+int Sym_is_string_type(Sym, Type);
+static List Compiler__native_index(Compiler c, List expr, List index, Type type){
+  Type native = Compiler__index_native_type(c, Var_type(List_cadr(expr)));  Type shape = Type_canonicalize(native);  if(Type_is_pointer(shape) && Type_is_aggregate(Type_dereference(shape)) && Type_var_tag(type)) Compiler_report_error(c, 1362954, String_join(NULL, cons(String_var(Var_str(List_car(Type_list(type)))), cons(String_var(_1694), NULL))), c -> token, NULL);  if(Type_is_array(shape) ||(Type_is_pointer(shape) && ! Sym_is_string_type(c -> sym, type))) return({
+    Var _x2c_literal_part_47 = List_var(Type_dereference(native));  Var _x2c_literal_part_48 = List_var(cons(_569, cons(List_var(expr), cons(List_var(index), NULL))));  cons(_0, cons(_x2c_literal_part_47, cons(_x2c_literal_part_48, NULL)));
+  }
+  );  return NULL;
 }
-);  return NULL;
+
+int Type_is_bare_typedef_name(Type);
+int Type_is_typedef(Type);
+Type Sym_next_typedef(Sym, Type, int *);
+Type Type_qualify(Type, Type);
+static Type Compiler__index_native_type(Compiler c, Type native){
+  int hops = 0;  while(1){
+    Type key = Type_canonicalize(native);  if(! Type_is_bare_typedef_name(key) && ! Type_is_typedef(key)) break;  Type next = Sym_next_typedef(c -> sym, key, &(hops));  if(! List_truth(Type_list(next))) break;  native = Type_qualify(next, native);
+  }
+  return native;
 }
 
 static List Compiler__resolve_getindex(Compiler c, Type input_type, List receiver, List selector, Token origin){
