@@ -661,7 +661,7 @@ static int _context_line(Compiler c, int line, char * * line_start, char * * lin
 }
 
 static Array Compiler__line_starts(Compiler c){
-  if(c -> lines_text == c -> text) return c -> line_starts;  c -> lines_text = c -> text;  Array_clear(c -> line_starts);  Array_push(c -> line_starts, int_var(0));  for(char * p = c -> text;  * p;  p ++) if(* p == '\n') Array_push(c -> line_starts, int_var(p + 1 -(char *) c -> text));  return c -> line_starts;
+  if(c -> lines_text == c -> text) return c -> line_starts;  c -> lines_text = c -> text;  Array_clear(c -> line_starts);  Array_push(c -> line_starts, int_var(0));  for(char * p = c -> text;  * p;  p ++) if(* p == '\n') Array_push(c -> line_starts, Var_box_long(p + 1 -(char *) c -> text));  return c -> line_starts;
 }
 
 static void _context_caret(char * line_start, char * line_end, int column, int length){

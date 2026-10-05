@@ -19,11 +19,11 @@ static const SymbolSet meta_operators =(SymbolSet) "\001\000\000\000\020\000\000
 
 static const SymbolSet meta_comparisons =(SymbolSet) "\001\000\000\000\006\000\000\000\003\000\000\000\025\174\112\177\271\171\067\236\000\001\002\006\002\004\000\002\000\000\000\000\171\000\000\000\000\000\000\000\175\000\000\000\000\000\000\000\173\074\000\000\000\000\000\000\173\076\000\000\000\000\000\000\173\075\000\000\000\000\000\000\173\041\000\000\000\000\000\000";
 
-static List _306, _305, _304, _302, _301, _299, _298, _297, _295, _294, _293, _292, _289, _288, _287, _278, _277, _276, _274, _273, _271, _270, _269, _260, _257, _254, _251, _247, _242, _241, _240, _239, _237, _236, _234, _233, _232, _230, _229, _228, _226, _225, _224, _222, _221, _219, _218, _217, _215, _214, _212, _211, _210, _208, _207, _205, _204, _203, _199, _196, _195, _194, _192, _191, _190, _188, _185, _184, _183, _181, _180, _178, _177, _176, _174, _173, _172, _170, _167, _166, _165, _163, _162, _160, _159, _158, _152, _149, _148, _147, _145, _144, _143, _142, _139, _138, _137, _135, _134, _133, _131, _130, _129, _127, _126, _125, _123, _122, _121, _120, _119, _117, _116, _115, _113, _110, _109, _108, _106, _105, _103, _101, _100, _97, _95, _94, _93, _89, _88, _86, _85, _84, _83, _77, _73, _72, _71, _69, _68, _65, _64, _63, _61, _60, _59, _58, _54, _53, _52, _50, _49, _48, _43, _42, _41, _39, _38, _35, _34, _33, _31, _30, _27, _26, _25, _23, _22, _20, _19, _18, _16, _15, _9, _8, _7, _5, _4;
+static List _317, _316, _315, _313, _312, _310, _309, _308, _306, _305, _304, _303, _300, _299, _298, _289, _288, _287, _285, _284, _282, _281, _280, _272, _271, _270, _268, _267, _266, _264, _260, _257, _254, _251, _247, _242, _241, _240, _239, _237, _236, _234, _233, _232, _230, _229, _228, _226, _225, _224, _222, _221, _219, _218, _217, _215, _214, _212, _211, _210, _208, _207, _205, _204, _203, _199, _196, _195, _194, _192, _191, _190, _188, _185, _184, _183, _181, _180, _178, _177, _176, _174, _173, _172, _170, _167, _166, _165, _163, _162, _160, _159, _158, _152, _149, _148, _147, _145, _144, _143, _142, _139, _138, _137, _135, _134, _133, _131, _130, _129, _127, _126, _125, _123, _122, _121, _120, _119, _117, _116, _115, _113, _110, _109, _108, _106, _105, _103, _101, _100, _97, _95, _94, _93, _89, _88, _86, _85, _84, _83, _77, _73, _72, _71, _69, _68, _65, _64, _63, _61, _60, _59, _58, _54, _53, _52, _50, _49, _48, _43, _42, _41, _39, _38, _35, _34, _33, _31, _30, _27, _26, _25, _23, _22, _20, _19, _18, _16, _15, _9, _8, _7, _5, _4;
 
-static String _285, _283, _281, _280, _279, _258, _255, _252, _249, _245, _244, _243, _201, _197, _186, _156, _150, _75, _74, _66, _11, _10;
+static String _296, _294, _292, _291, _290, _262, _258, _255, _252, _249, _245, _244, _243, _201, _197, _186, _156, _150, _75, _74, _66, _11, _10;
 
-static Var _303, _300, _296, _291, _290, _286, _284, _282, _275, _272, _268, _267, _266, _265, _264, _263, _262, _261, _259, _256, _253, _250, _248, _246, _238, _235, _231, _227, _223, _220, _216, _213, _209, _206, _202, _200, _198, _193, _189, _187, _182, _179, _175, _171, _169, _168, _164, _161, _157, _155, _154, _153, _151, _146, _141, _140, _136, _132, _128, _124, _118, _114, _112, _111, _107, _104, _102, _99, _98, _96, _92, _91, _90, _87, _82, _81, _80, _79, _78, _76, _70, _67, _62, _57, _56, _55, _51, _47, _46, _45, _44, _40, _37, _36, _32, _29, _28, _24, _21, _17, _14, _13, _12, _6, _3, _2, _1, _0;
+static Var _314, _311, _307, _302, _301, _297, _295, _293, _286, _283, _279, _278, _277, _276, _275, _274, _273, _269, _265, _263, _261, _259, _256, _253, _250, _248, _246, _238, _235, _231, _227, _223, _220, _216, _213, _209, _206, _202, _200, _198, _193, _189, _187, _182, _179, _175, _171, _169, _168, _164, _161, _157, _155, _154, _153, _151, _146, _141, _140, _136, _132, _128, _124, _118, _114, _112, _111, _107, _104, _102, _99, _98, _96, _92, _91, _90, _87, _82, _81, _80, _79, _78, _76, _70, _67, _62, _57, _56, _55, _51, _47, _46, _45, _44, _40, _37, _36, _32, _29, _28, _24, _21, _17, _14, _13, _12, _6, _3, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
@@ -368,51 +368,62 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _259 = String_var(_258);
   _260 = cons(_259, NULL);
   _261 = List_var(_260);
-  _262 = List_var(_257);
-  _263 = List_var(_251);
-  _264 = Symbol_var(3313778);
-  _265 = Symbol_var(28692473357490);
-  _266 = List_var(_254);
-  _267 = Symbol_var(26720);
-  _268 = Symbol_var(61737802);
-  _269 = cons(_268, NULL);
-  _270 = cons(_1, _269);
-  _271 = cons(_155, _270);
-  _272 = List_var(_271);
-  _273 = cons(_272, NULL);
-  _274 = cons(_67, _273);
-  _275 = List_var(_274);
-  _276 = cons(_275, NULL);
-  _277 = cons(_1, _276);
-  _278 = cons(_0, _277);
-  _279 = String_new("\'");
-  _280 = String_new("\' can only be called at compile time");
-  _281 = String_new("reason: it reaches a compiler operation, so no unit emits a");
-  _282 = String_var(_281);
-  _283 = String_new("definition for it; call it from a macro or another meta");
-  _284 = String_var(_283);
-  _285 = String_new("function");
-  _286 = String_var(_285);
+  _262 = String_new("Var_null");
+  _263 = String_var(_262);
+  _264 = cons(_169, NULL);
+  _265 = List_var(_264);
+  _266 = cons(_265, NULL);
+  _267 = cons(_263, _266);
+  _268 = cons(_154, _267);
+  _269 = List_var(_268);
+  _270 = cons(_269, NULL);
+  _271 = cons(_200, _270);
+  _272 = cons(_0, _271);
+  _273 = List_var(_257);
+  _274 = List_var(_251);
+  _275 = Symbol_var(3313778);
+  _276 = Symbol_var(28692473357490);
+  _277 = List_var(_254);
+  _278 = Symbol_var(26720);
+  _279 = Symbol_var(61737802);
+  _280 = cons(_279, NULL);
+  _281 = cons(_1, _280);
+  _282 = cons(_155, _281);
+  _283 = List_var(_282);
+  _284 = cons(_283, NULL);
+  _285 = cons(_67, _284);
+  _286 = List_var(_285);
   _287 = cons(_286, NULL);
-  _288 = cons(_284, _287);
-  _289 = cons(_282, _288);
-  _290 = Symbol_var(458361162716);
-  _291 = Symbol_var(150408);
-  _292 = cons(_102, NULL);
-  _293 = cons(_81, _292);
-  _294 = cons(_268, _293);
-  _295 = cons(_79, _294);
-  _296 = List_var(_295);
-  _297 = cons(_296, NULL);
-  _298 = cons(_1, _297);
-  _299 = cons(_155, _298);
-  _300 = List_var(_299);
-  _301 = cons(_300, _38);
-  _302 = cons(_291, _301);
-  _303 = List_var(_302);
-  _304 = cons(_303, _68);
-  _305 = cons(_1, _304);
-  _306 = cons(_290, _305);
+  _288 = cons(_1, _287);
+  _289 = cons(_0, _288);
+  _290 = String_new("\'");
+  _291 = String_new("\' can only be called at compile time");
+  _292 = String_new("reason: it reaches a compiler operation, so no unit emits a");
+  _293 = String_var(_292);
+  _294 = String_new("definition for it; call it from a macro or another meta");
+  _295 = String_var(_294);
+  _296 = String_new("function");
+  _297 = String_var(_296);
+  _298 = cons(_297, NULL);
+  _299 = cons(_295, _298);
+  _300 = cons(_293, _299);
+  _301 = Symbol_var(458361162716);
+  _302 = Symbol_var(150408);
+  _303 = cons(_102, NULL);
+  _304 = cons(_81, _303);
+  _305 = cons(_279, _304);
+  _306 = cons(_79, _305);
+  _307 = List_var(_306);
+  _308 = cons(_307, NULL);
+  _309 = cons(_1, _308);
+  _310 = cons(_155, _309);
+  _311 = List_var(_310);
+  _312 = cons(_311, _38);
+  _313 = cons(_302, _312);
+  _314 = List_var(_313);
+  _315 = cons(_314, _68);
+  _316 = cons(_1, _315);
+  _317 = cons(_301, _316);
 }
 
 int List_truth(List);
@@ -688,10 +699,11 @@ static List _data_literal(Compiler c, Type declared, Var value, Token site){
   _refuse(c, value, site);  List expression = _data_form(c, value);  return List_truth(expression) && List_truth(Type_list(declared)) ? Compiler_convert_expression(c, expression, declared) : expression;
 }
 
+int Var_is_null(Var);
 List Compiler_cache_literal_list(Compiler, List);
 List Compiler_cache_literal_var(Compiler, Var);
 static List _data_form(Compiler c, Var value){
-  if(_immutable(value)){
+  if(Var_is_null(value)) return _272;  if(_immutable(value)){
     if(Var_is_row(value, 9, 7, 4)) return Compiler_cache_literal_list(c, Var_list(value));  return cons(_0, cons(_200, cons(List_var(Compiler_cache_literal_var(c, value)), NULL)));
   }
   if(Var_is_row(value, 9, 7, 4)) return _list_form(c, value);  if(Var_is(value, 3313778)) return _array_form(c, value);  if(! Var_is(value, 26720)) return NULL;  return _map_form(c, value);
@@ -717,7 +729,7 @@ static List _list_form(Compiler c, Var value){
   List tail = _97; {
     Var item;  List _x2c_macro_object_1 = List_reverse(Var_list(value));  List _x2c_macro_cursor_1 = _x2c_macro_object_1;  Var _x2c_macro_cursor_output_1;  while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
       item = _x2c_macro_cursor_output_1; {
-        List head = _data_form(c, item);  if(! List_truth(head)) return NULL;  tail = cons(_0, cons(_262, cons(List_var(cons(_90, cons(List_var(head), cons(List_var(tail), NULL)))), NULL)));
+        List head = _data_form(c, item);  if(! List_truth(head)) return NULL;  tail = cons(_0, cons(_273, cons(List_var(cons(_90, cons(List_var(head), cons(List_var(tail), NULL)))), NULL)));
       }
 
     }
@@ -756,7 +768,7 @@ static List _array_form(Compiler c, Var value){
 
       }
       {
-        List _x2c_return_value_1 = cons(_0, cons(_263, cons(List_var(cons(_264, List_append(Array_list(items), NULL))), NULL))); {
+        List _x2c_return_value_1 = cons(_0, cons(_274, cons(List_var(cons(_275, List_append(Array_list(items), NULL))), NULL))); {
           x2c_cleanup_leave(& _x2c_defer_record_1);  return _x2c_return_value_1;
         }
 
@@ -804,14 +816,14 @@ static List _map_form(Compiler c, Var value){
                   }
 
                 }
-                Array_push(entries, List_var(cons(_265, cons(List_var(key_code), cons(List_var(value_code), NULL)))));
+                Array_push(entries, List_var(cons(_276, cons(List_var(key_code), cons(List_var(value_code), NULL)))));
               }
 
             }
 
           }
           {
-            List _x2c_return_value_3 = cons(_0, cons(_266, cons(List_var(cons(_267, List_append(Array_list(Array_sort(entries)), NULL))), NULL))); {
+            List _x2c_return_value_3 = cons(_0, cons(_277, cons(List_var(cons(_278, List_append(Array_list(Array_sort(entries)), NULL))), NULL))); {
               x2c_cleanup_leave(& _x2c_defer_record_3);  x2c_cleanup_leave(& _x2c_defer_record_2);  return _x2c_return_value_3;
             }
 
@@ -835,8 +847,8 @@ void Compiler_check_meta_call(Compiler c, List callee, Token origin){
     List _x2c_match_expr = callee;
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (Var_symbol(car(_x2c_match_expr))) {
-      case 377892: ;  static MatchCaptureSite _x2c_match_site_21;  if (x2c_match_site_try_capture(& _x2c_match_site_21, _x2c_match_expr, List_var(_278), &_x2c_match_capture)) {Var name = _x2c_match_values[0];  if(Var_is_row(name, 11, 7, 1) && Map_contains(c -> meta_comptime, name)){
-    Compiler_report_error(c, 27335838, String_join(NULL, cons(String_var(_279), cons(String_var(Var_str(name)), cons(String_var(_280), NULL)))), origin, _289);  break;
+      case 377892: ;  static MatchCaptureSite _x2c_match_site_21;  if (x2c_match_site_try_capture(& _x2c_match_site_21, _x2c_match_expr, List_var(_289), &_x2c_match_capture)) {Var name = _x2c_match_values[0];  if(Var_is_row(name, 11, 7, 1) && Map_contains(c -> meta_comptime, name)){
+    Compiler_report_error(c, 27335838, String_join(NULL, cons(String_var(_290), cons(String_var(Var_str(name)), cons(String_var(_291), NULL)))), origin, _300);  break;
   }
 
 }
@@ -851,7 +863,7 @@ int Compiler_meta_is_comptime_only(Compiler c, List fn){
     List _x2c_match_expr = fn;
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (Var_symbol(car(_x2c_match_expr))) {
-      case 458361162716: ;  static MatchCaptureSite _x2c_match_site_22;  if (x2c_match_site_try_capture(& _x2c_match_site_22, _x2c_match_expr, List_var(_306), &_x2c_match_capture)) {Var name = _x2c_match_values[0]; {
+      case 458361162716: ;  static MatchCaptureSite _x2c_match_site_22;  if (x2c_match_site_try_capture(& _x2c_match_site_22, _x2c_match_expr, List_var(_317), &_x2c_match_capture)) {Var name = _x2c_match_values[0]; {
     Var _x2c_match_value_1 = name; {
       String name = Var_string(_x2c_match_value_1);  return Map_contains(c -> meta_comptime, String_var(name));
     }

@@ -4,11 +4,11 @@
 #include "x2c.h"
 #include <stdio.h>
 #include <stdlib.h>
-static List _55, _53, _48, _47, _45, _27, _26, _25, _24, _23, _22, _21, _20, _19;
+static List _59, _57, _52, _51, _49, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21;
 
-static String _51, _50, _49, _43, _41, _40, _39, _38, _37, _36, _35, _34, _33, _32, _31, _30, _29, _28, _17, _15, _13, _11, _9, _7, _5, _3, _1, _0;
+static String _55, _54, _53, _47, _45, _44, _43, _42, _41, _40, _39, _38, _37, _36, _35, _34, _33, _32, _31, _19, _17, _15, _13, _11, _9, _7, _5, _3, _1, _0;
 
-static Var _54, _52, _46, _44, _42, _18, _16, _14, _12, _10, _8, _6, _4, _2;
+static Var _58, _56, _50, _48, _46, _20, _18, _16, _14, _12, _10, _8, _6, _4, _2;
 
 static int _init_guard_ = 0;
 
@@ -61,59 +61,63 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _0 = String_new("x2c.");
   _1 = String_new("x2c.void");
   _2 = String_var(_1);
-  _3 = String_new("x2c.symbol0");
+  _3 = String_new("x2c.null");
   _4 = String_var(_3);
-  _5 = String_new("x2c.atom");
+  _5 = String_new("x2c.symbol0");
   _6 = String_var(_5);
-  _7 = String_new("x2c.symbol");
+  _7 = String_new("x2c.atom");
   _8 = String_var(_7);
-  _9 = String_new("x2c.number");
+  _9 = String_new("x2c.symbol");
   _10 = String_var(_9);
-  _11 = String_new("x2c.array");
+  _11 = String_new("x2c.number");
   _12 = String_var(_11);
-  _13 = String_new("x2c.map");
+  _13 = String_new("x2c.array");
   _14 = String_var(_13);
-  _15 = String_new("x2c.token");
+  _15 = String_new("x2c.map");
   _16 = String_var(_15);
-  _17 = String_new("x2c.quote");
+  _17 = String_new("x2c.token");
   _18 = String_var(_17);
-  _19 = cons(_18, NULL);
-  _20 = cons(_16, _19);
-  _21 = cons(_14, _20);
-  _22 = cons(_12, _21);
-  _23 = cons(_10, _22);
-  _24 = cons(_8, _23);
-  _25 = cons(_6, _24);
-  _26 = cons(_4, _25);
-  _27 = cons(_2, _26);
-  _28 = String_new("x2c.void");
-  _29 = String_new("x2c.symbol0");
-  _30 = String_new("x2c.atom");
-  _31 = String_new("x2c.symbol");
-  _32 = String_new("x2c.number");
-  _33 = String_new("x2c.token");
-  _34 = String_new("x2c.quote");
-  _35 = String_new("x2c.array");
-  _36 = String_new("f");
-  _37 = String_new("ldouble");
-  _38 = String_new("u");
-  _39 = String_new("\n");
-  _40 = String_new("\n");
-  _41 = String_new("compile-time result is a compiler address");
-  _42 = String_var(_41);
-  _43 = String_new("return data built from the pointed-to values instead");
-  _44 = String_var(_43);
-  _45 = cons(_44, NULL);
-  _46 = List_var(_45);
-  _47 = cons(_46, NULL);
-  _48 = cons(_42, _47);
-  _49 = String_new("compile-time result contains itself");
-  _50 = String_new("compile-time result holds one collection twice");
-  _51 = String_new("each Array and Map in a result is built separately");
-  _52 = String_var(_51);
-  _53 = cons(_52, NULL);
-  _54 = List_var(_53);
-  _55 = cons(_54, NULL);
+  _19 = String_new("x2c.quote");
+  _20 = String_var(_19);
+  _21 = cons(_20, NULL);
+  _22 = cons(_18, _21);
+  _23 = cons(_16, _22);
+  _24 = cons(_14, _23);
+  _25 = cons(_12, _24);
+  _26 = cons(_10, _25);
+  _27 = cons(_8, _26);
+  _28 = cons(_6, _27);
+  _29 = cons(_4, _28);
+  _30 = cons(_2, _29);
+  _31 = String_new("x2c.void");
+  _32 = String_new("x2c.null");
+  _33 = String_new("x2c.symbol0");
+  _34 = String_new("x2c.atom");
+  _35 = String_new("x2c.symbol");
+  _36 = String_new("x2c.number");
+  _37 = String_new("x2c.token");
+  _38 = String_new("x2c.quote");
+  _39 = String_new("x2c.array");
+  _40 = String_new("f");
+  _41 = String_new("ldouble");
+  _42 = String_new("u");
+  _43 = String_new("\n");
+  _44 = String_new("\n");
+  _45 = String_new("compile-time result is a compiler address");
+  _46 = String_var(_45);
+  _47 = String_new("return data built from the pointed-to values instead");
+  _48 = String_var(_47);
+  _49 = cons(_48, NULL);
+  _50 = List_var(_49);
+  _51 = cons(_50, NULL);
+  _52 = cons(_46, _51);
+  _53 = String_new("compile-time result contains itself");
+  _54 = String_new("compile-time result holds one collection twice");
+  _55 = String_new("each Array and Map in a result is built separately");
+  _56 = String_var(_55);
+  _57 = cons(_56, NULL);
+  _58 = List_var(_57);
+  _59 = cons(_58, NULL);
 }
 
 int List_truth(List);
@@ -140,7 +144,7 @@ static int _tag_headed(List list){
   if(! String_startswith(text, _0)) return 0;
   {
     String tag;
-    List _x2c_macro_object_0 = _27;
+    List _x2c_macro_object_0 = _30;
     List _x2c_macro_cursor_0 = _x2c_macro_object_0;
     Var _x2c_macro_cursor_output_0;
     while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
@@ -156,9 +160,11 @@ int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 
 List Var_list(Var);
 
-int Var_is_void(Var);
+int Var_is_null(Var);
 
 Buffer Buffer_write(Buffer, const char *);
+
+int Var_is_void(Var);
 
 int Var_is(Var, Symbol);
 
@@ -183,7 +189,8 @@ Map Var_map(Var);
 int datum_write(Buffer out, Var value, int tagged){
   if(! _init_guard_) _file_init_();
   if(Var_is_row(value, 9, 7, 4)) return _write_list(out, Var_list(value), tagged);
-  if(tagged && Var_is_void(value)) Buffer_write(out, "(x2c.void)");
+  if(tagged && Var_is_null(value)) Buffer_write(out, "(x2c.null)");
+  else if(tagged && Var_is_void(value)) Buffer_write(out, "(x2c.void)");
   else if(tagged && Var_is(value, 1328354264) && ! Var_symbol(value)) Buffer_write(out, "(x2c.symbol0)");
   else if(Var_is_atom(value)) return _write_atom(out, value, tagged);
   else if(Var_is_row(value, 11, 7, 1)) Buffer_write(out, Var_repr(value));
@@ -302,6 +309,8 @@ int datum_read(String text, unsigned * cursor, Var * out){
 
 int Var_is_nil(Var);
 
+Var Var_null(void);
+
 Var Symbol_var(Symbol);
 
 Atom Atom_intern(String);
@@ -325,14 +334,15 @@ static Var _decode(Var value){
   if(! _tag_headed(Var_list(value))) return List_var(_decode_list(Var_list(value)));
   List list = Var_list(value);
   String tag = Var_str(List_car(list));
-  if(String_equal(tag, _28)) return((void) 0, Void);
-  if(String_equal(tag, _29)) return Symbol_var((Symbol) 0);
-  if(String_equal(tag, _30)) return Atom_intern(Var_str(List_cadr(list)));
-  if(String_equal(tag, _31)) return Symbol_var(Symbol_new(Var_str(List_cadr(list))));
-  if(String_equal(tag, _32)) return _decode_number(Var_str(List_cadr(list)), Var_str(List_caddr(list)));
-  if(String_equal(tag, _33)) return Var_new(42948956, (void *)(ulong) Var_integer(List_cadr(list)));
-  if(String_equal(tag, _34)) return List_var(_decode_list(Var_list(List_cadr(list))));
-  if(String_equal(tag, _35)) return Array_var(List_array(_decode_list(List_cdr(list))));
+  if(String_equal(tag, _31)) return((void) 0, Void);
+  if(String_equal(tag, _32)) return Var_null();
+  if(String_equal(tag, _33)) return Symbol_var((Symbol) 0);
+  if(String_equal(tag, _34)) return Atom_intern(Var_str(List_cadr(list)));
+  if(String_equal(tag, _35)) return Symbol_var(Symbol_new(Var_str(List_cadr(list))));
+  if(String_equal(tag, _36)) return _decode_number(Var_str(List_cadr(list)), Var_str(List_caddr(list)));
+  if(String_equal(tag, _37)) return Var_new(42948956, (void *)(ulong) Var_integer(List_cadr(list)));
+  if(String_equal(tag, _38)) return List_var(_decode_list(Var_list(List_cadr(list))));
+  if(String_equal(tag, _39)) return Array_var(List_array(_decode_list(List_cdr(list))));
   return Map_var(_decode_map(List_cdr(list)));
 }
 
@@ -362,11 +372,11 @@ Var Var_convert(Var, Symbol);
 
 static Var _decode_number(String tag, String text){
   Symbol target = Symbol_new(tag);
-  if(String_startswith(tag, _36) || String_equal(tag, _37)){
+  if(String_startswith(tag, _40) || String_equal(tag, _41)){
     long double value = strtold(text, NULL);
     return Var_convert(Var_box_long_double(value), target);
   }
-  if(String_startswith(tag, _38)){
+  if(String_startswith(tag, _42)){
     unsigned long long value = strtoull(text, NULL, 10);
     return Var_convert(Var_box_ulong_long(value), target);
   }
@@ -428,7 +438,7 @@ int datum_frame(Buffer out, Var value){
 
       }
       Buffer_write(out, ({
-        Var _x2c_literal_part_0 = String_var(Var_str(Var_box_ulong(Buffer_len(body))));  Var _x2c_literal_part_1 = String_var(Buffer_str(body));  String_join(NULL, cons(_x2c_literal_part_0, cons(String_var(_39), cons(_x2c_literal_part_1, NULL))));
+        Var _x2c_literal_part_0 = String_var(Var_str(Var_box_ulong(Buffer_len(body))));  Var _x2c_literal_part_1 = String_var(Buffer_str(body));  String_join(NULL, cons(_x2c_literal_part_0, cons(String_var(_43), cons(_x2c_literal_part_1, NULL))));
       }
       ));
       {
@@ -459,7 +469,7 @@ String String_new_len(const char *, int);
 
 int datum_unframe(String input, size_t * used, Var * value){
   if(! _init_guard_) _file_init_();
-  int newline = String_find(input, _40);
+  int newline = String_find(input, _44);
   if(newline <= 0) return 0;
   size_t length = strtoul(input, NULL, 10);
   if(String_len(input) < newline + 1 + length) return 0;
@@ -467,7 +477,7 @@ int datum_unframe(String input, size_t * used, Var * value){
   unsigned cursor = 0;
   (* value) =((void) 0, Void);
   if(! datum_read(frame, &(cursor), &((* value)))){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/datum.x",.function = "datum_unframe",.line = 217};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/datum.x",.function = "datum_unframe",.line = 220};
     x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(13765450), String_var(frame));
     __builtin_unreachable();
   }
@@ -487,11 +497,11 @@ Var int_var(int);
 
 List datum_result_problem(Var value, Map marks){
   if(! _init_guard_) _file_init_();
-  if(Var_is_pointer(value) && value.u64) return _48;
+  if(Var_is_pointer(value) && value.u64) return _52;
   if(Var_is_row(value, 9, 7, 4)) return _items_problem(value, marks);
   if(! Var_is(value, 3313778) && ! Var_is(value, 26720)) return NULL;
   ulong address =(ulong) value.u64;
-  if(Map_contains(marks, ulong_var(address))) return cons(String_var(Var_equal(Map_getindex(marks, ulong_var(address)), int_var(1)) ? _49 : _50), _55);
+  if(Map_contains(marks, ulong_var(address))) return cons(String_var(Var_equal(Map_getindex(marks, ulong_var(address)), int_var(1)) ? _53 : _54), _59);
   Map_setindex(marks, ulong_var(address), int_var(1));
   List problem = _items_problem(value, marks);
   if(! List_truth(problem)) Map_setindex(marks, ulong_var(address), int_var(2));
