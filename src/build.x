@@ -359,7 +359,7 @@ static void Build._link_packages(Build b, String input, String directory) {
   foreach (String dependency, _depfile_inputs(depfile)) {
     // A unit under a package directory that is not the package's own
     // source, such as a script kept beside it, consumes nothing by itself.
-    if (dependency.endswith("/") || dependency == self || dependency == input)
+    if (dependency.startswith("search:") || dependency == self || dependency == input)
       continue;
     String package = package_directory(roots, dependency);
     if (package && !b._package_built_here(roots, package))
@@ -1018,7 +1018,8 @@ List Build.script_helpers(Build b) {
   String depfile = _unit_file(b._unit_dir(script), script, ".d");
   Array helpers = [];
   foreach (String path, _depfile_inputs(depfile)) {
-    if (!is_source_file(path) || path == script || path in helpers) continue;
+    if (path.startswith("search:") || !is_source_file(path) ||
+        path == script || path in helpers) continue;
     if (excluded.any(%!(String prefix) => path.startswith(prefix))) continue;
     helpers.push(path);
     b.xlat_n++;
@@ -1071,7 +1072,8 @@ static List Build._script_directories(Build b, List prerequisites) {
   directories.push(b.toolchain.include_dir);
   _add_option_dirs(directories, b.toolchain.cc_args);
   _add_option_dirs(directories, b.toolchain.ld_args);
-  foreach (String path, prerequisites) directories.push(Path.dirname(path));
+  foreach (String path, prerequisites)
+    if (!path.startswith("search:")) directories.push(Path.dirname(path));
   foreach (Var directory, b.toolchain.search_directories())
     directories.push(directory);
   return b._search_entries(directories);
@@ -1145,10 +1147,15 @@ static uint64_t _script_fingerprint(
 /* A directory entry ends in `/` and adds its modification time; a header or
    library added where a search would now find it changes that time. */
 static uint64_t _state_entry(uint64_t hash, String path, int &ok) {
+  if (path.startswith("search:")) {
+    String candidate = path[7:];
+    String found = SourceView.exists(NULL, candidate) ?
+      Path.absolute(candidate) : "absent";
+    return _state_text(_state_text(hash, path), found);
+  }
   if (!path.endswith("/")) return _state_file(hash, path, ok);
   String time =
     Path.is_dir(path) ? "%.9f".printf(Path.modified_time(path)) : "absent";
-  hash = _state_text(hash, Path.absolute(path));
   return _state_text(_state_text(hash, path), time);
 }
 
@@ -1220,7 +1227,8 @@ static List _depfile_inputs(String depfile) {
   List paths = translation_depfile_parse(text);
   long search = text.find("\n# x2c-search:");
   if (search >= 0)
-    paths = paths.append(translation_depfile_parse(text[search + 1:]));
+    foreach (String candidate, translation_depfile_parse(text[search + 1:]))
+      paths = cons(%"search:$candidate", paths);
   return paths;
 }
 
@@ -1262,8 +1270,9 @@ static void _state_write_lines(String path, uint64_t hash, List lines) {
 static int Build._files_unchanged(Build b, List files) {
   String work = %"${Path.absolute(b.work_dir)}/";
   foreach (String path, files) {
+    if (path.startswith("search:")) path = path[7:];
     if (Path.absolute(path).startswith(work)) continue;
-    if (Path.exists(path) && Path.modified_time(path) >= b.started_wall)
+    if (Path.is_file(path) && Path.modified_time(path) >= b.started_wall)
       return 0;
   }
   return 1;

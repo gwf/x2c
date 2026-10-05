@@ -650,15 +650,12 @@ static List _current(String directory) {
   return manifest;
 }
 
-/* Files use their SHA-256; include-search directories use identity and time.
-   Returns NULL when the path cannot be read. */
+/* Hash readable contents and resolved identity; an absent candidate has a
+   stable fact too, so adding it invalidates a cached helper. */
 static String _digest(String path) {
-  if (path.endswith("/"))
-    return Path.is_dir(path) ?
-      %"${Path.absolute(path)}:${"%.9f".printf(Path.modified_time(path))}" :
-      NULL;
+  if (!SourceView.exists(NULL, path)) return "search:absent";
   File input = fopen(path, "rb");
   if (!input) return NULL;
   defer input.close();
-  return input.sha256();
+  return %"${Path.absolute(path)}:${input.sha256()}";
 }

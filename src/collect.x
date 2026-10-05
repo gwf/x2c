@@ -469,24 +469,22 @@ static void FileWalk.include(FileWalk &w, String target, int angle) {
   w.parts.push(canonical);
 }
 
-/* Include lookup depends on absent candidates too. Record each searched
-   candidate's parent, or its nearest existing ancestor, so adding a file or
-   nested directory invalidates both translation and stored interfaces. */
+/* Preserve absent candidates and alias identity, not directory timestamps.
+   Canonical selected files already carry their ordinary content hashes. */
 static void FileWalk._include_search_dependency(
   FileWalk &w, String candidate) {
-  String parent = Path.dirname(candidate);
-  while (!Path.is_dir(parent)) {
-    String ancestor = Path.dirname(parent);
-    if (ancestor == parent) break;
-    parent = ancestor;
-  }
-  // Keep the spelling: a symlinked search root can change its target.
-  if (!parent.startswith("/")) parent = %"${Path.absolute(".")}/$parent";
-  String dependency = parent.endswith("/") ? parent : %"$parent/";
-  String hash = w.c._source_hash(dependency);
-  _cache_dependency(w.dependencies, dependency, hash);
-  w.c.deps.merge_translation_dependency(dependency, hash);
+  if (!candidate.startswith("/"))
+    candidate = %"${Path.absolute(".")}/$candidate";
+  if (w.c.sources.exists(candidate) &&
+      candidate.equal(_canonical_path(candidate))) return;
+  String hash = w.c._include_search_hash(candidate);
+  _cache_dependency(w.dependencies, candidate, hash);
+  w.c.deps.merge_translation_dependency(candidate, hash);
 }
+
+static String Compiler._include_search_hash(Compiler c, String path) =>
+  c.sources.exists(path) ?
+    %"search:${home_portable_path(_canonical_path(path))}" : "search:absent";
 
 /* A file still being walked, as in an include cycle, has no entry yet. */
 static String Compiler._walked_hash(
@@ -1204,7 +1202,8 @@ static int Compiler._interface_current(
 
 static int Compiler._hash_matches(Compiler c, String path, Var expected) {
   if (expected is not <string>) return 0;
-  String hash = c._source_hash(path);
+  String hash = String.startswith(expected, "search:") ?
+    c._include_search_hash(path) : c._source_hash(path);
   return hash && String.equal(hash, expected);
 }
 
@@ -1212,11 +1211,6 @@ static int Compiler._hash_matches(Compiler c, String path, Var expected) {
 static String Compiler._source_hash(Compiler c, String path) {
   Var cached = source_hashes[path];
   if (cached is not void) return cached;
-  if (path.endswith("/"))
-    return Path.is_dir(path) ?
-      %"${home_portable_path(Path.absolute(path))}:".add(
-        "%.9f".printf(Path.modified_time(path))) :
-      NULL;
   String text = NULL;
   try {
     if (!c.read_source(path, text)) return NULL;
@@ -1285,7 +1279,8 @@ static Map Compiler._read_dependencies(Compiler c, List stored) {
     if (dependency is not <list>) return NULL;
     match (dependency.list())
       case %(?(String name) ?hash): {
-        String path = name.endswith("/") ? home_absolute_path(name) :
+        String path = hash is <string> && String.startswith(hash, "search:") ?
+          home_absolute_path(name) :
           _canonical_path(home_absolute_path(name));
         int unhashed = hash.is_integer() && hash.integer() == 1;
         if (!unhashed && !c._hash_matches(path, hash)) return NULL;

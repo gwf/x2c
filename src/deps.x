@@ -54,7 +54,8 @@ static String _contents(
   CliRequest request, Compiler compiler, String input, String output_dir) {
   Array paths = $auto([]), searches = $auto([]);
   foreach (Var (path, content_hash), compiler.deps)
-    (String.endswith(path, "/") ? searches : paths).push(path);
+    (content_hash is <string> && String.startswith(content_hash, "search:") ?
+      searches : paths).push(path);
   if (!paths.len()) paths.push(input);
   paths.sort();
   Buffer out = $auto(Buffer.new(0));

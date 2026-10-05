@@ -322,7 +322,8 @@ static Array Compiler._runtime_includes(Compiler c, String lib) {
   Array ordered = [];
   foreach (String header, %("x2c.x" "meta.x"))
     ordered.push(%(preproc ${%"#include \"$header\""}));
-  foreach (Var (path, _), c.deps) {
+  foreach (Var (path, hash), c.deps) {
+    if (hash is <string> && String.startswith(hash, "search:")) continue;
     String dependency = path;
     if (dependency.startswith(lib) && dependency.endswith(".x") &&
         !dependency[lib.len():].contains("/"))
