@@ -16,8 +16,8 @@ negated-is 0
 non-ascii 0
 one-statement-braces 16
 operator-spacing 0
-over-width 4
-restates-code 1
+over-width 3
+restates-code 0
 restates-name 1
 return-after-raise 0
 return-after-report-error 0

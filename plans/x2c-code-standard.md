@@ -810,6 +810,7 @@ refresh for this diagnostic location. No padding was added to offset it.
 | 4.lowering | `ca52c661` | 2026-10-05 | 26 -> 17; +20/-18 .x |
 | 4.binding | `2efad5a6` | 2026-10-05 | 5 -> 2; +2/-3 .x |
 | 4.meta | `e7dabbee` | 2026-10-05 | 2 -> 0; +5/-4 .x |
+| 4.cli | `37eababa` | 2026-10-05 | 2 -> 0; +3/-2 .x |
 | D2 partial | `14973621` | 2026-10-05 | +197/-192 .x; four raises held |
 | D2 held | `a7c271f` | 2026-10-05 | +197/-192 .x; 4 raises held |
 | D3 | `f7f886ad` | 2026-10-05 | 9/9 autodiff; +9/-9 .x |
@@ -836,6 +837,9 @@ The complete census now has 52 violations.
 
 Meta repairs pass complete 220-file stage comparisons.
 The complete census now has 50 violations.
+
+Cli repairs pass complete 220-file stage comparisons.
+The complete census now has 48 violations.
 
 Stage 3.5 census: 108 compiler and runtime files. The baseline took
 10.63 seconds; the candidate took 10.61 seconds. All 1,599 original
