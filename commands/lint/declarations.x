@@ -324,11 +324,71 @@ static void _reference_parameters(Lint l, Compiler c, List ast):
                       "as a `&` reference parameter")
           index++
 
+/* Origin anchors locate declarations, including all comma-separated binders
+   and for-loop initializers. A declaration's type and initializer are not
+   traversed as new declarations. */
+static void _saved_bindings(Lint l, Compiler c, List node, int line):
+  match node:
+    case %(at ?origin ?child):
+      List location = c.origin_location(origin.int())
+      if location: line = location.assoc(<line>).int()
+      _saved_bindings(l, c, child, line)
+      return
+    case %((!or declare decl) ? (bindings *items)):
+      foreach List item in items:
+        match item:
+          case %(op = ?left ?): item = left
+        match item:
+          case %(bind (binding ? ?name) ?):
+            String word = name
+            if word.startswith("old_") || word.startswith("saved_") ||
+               word.startswith("previous_"):
+              l.add("saved-local", line,
+                    %"review $word as a scoped override")
+      return
+    case %(typedef *): return
+  foreach Var child in node:
+    if child is <list>: _saved_bindings(l, c, child, line)
+
+static void _saved_locals(Lint l, Compiler c, List ast):
+  Map lines = {}
+  foreach List row in c.definition_rows(ast):
+    match row:
+      case %(function ?name ? ? ? ?line ? ? source *): lines[name] = line
+  foreach List node in ast:
+    match node:
+      case %(function ? (bind (binding ? ?name) ?) ?body):
+        if name in lines: _saved_bindings(l, c, body, lines[name].int())
+
+/* Bound references include calls and function values. Source spans keep
+   corpus spelling guards outside the authored definition. */
+static void _unused_statics(Lint l, Compiler c, List ast):
+  Map referenced = {}, absent = {}
+  ast_collect_binding_references(ast, referenced)
+  foreach List node in ast:
+    match node:
+      case %(function ?modifiers (bind (binding ?id ?name) ?) ?):
+        if <static> in modifiers && !(id in referenced):
+          absent[name] = c.emitted_binding_name(%(binding $id $name))
+  foreach List row in c.definition_rows(ast):
+    match row:
+      case %(function ?name ?display ? ? ?line ? ? source (?(int start) ?)
+             (? ?(int end) *)):
+        if name in absent:
+          if start < 0 || end <= start || end >= c.tokenizer.tokens.len():
+            continue
+          struct Token *tokens = c.tokenizer.tokens
+          int first = tokens[start].line, last = tokens[end - 1].line
+          l.unused.push(%($name $display ${absent[name]} $line $first $last))
+
 /** Runs the rules that read the compiler's parse of the unit: `ast` and
     the facts `c` recorded while parsing it.
 */
 void Lint.declaration_rules(Lint l, Compiler c, List ast):
   _prototypes(l, c, ast)
+  if "saved-local" in l.selected: _saved_locals(l, c, ast)
+  if "uncalled-static-function" in l.selected:
+    _unused_statics(l, c, ast)
   if l.selected.contains("reference-parameter"):
     _reference_parameters(l, c, ast)
   foreach List row in c.definition_rows(ast):

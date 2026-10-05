@@ -1088,10 +1088,10 @@ that is not selected is not checked for a matching finding.
 | Nesting depth | 5 or more, body counts 1 | FN-5 | `deep-nesting` |
 | Parameters | 7 or more (band up to 4) | FN-6, FA-2 | `long-parameter-list` |
 | Name length | 25 or more characters | NM-3 | `long-name` |
-| Section | over 400 lines or two concepts | FI-5 | none |
-| File | over 1,500 lines | FI-1, MO-3 | none |
+| Section | over 400 lines or two concepts | FI-5 | `long-section` (>400) |
+| File | over 1,500 lines | FI-1, MO-3 | `long-file` |
 | Neighbor disproportion | element far larger than peers | PR-8 | none |
-| Dispatcher arm | over 3 lines | FN-3 | none |
+| Dispatcher arm | over 3 lines | FN-3 | `long-dispatch-arm` |
 | Purpose sentence needs "and" | judgment | FN-1 | review |
 
 ### Statement and layout signals
@@ -1103,15 +1103,17 @@ that is not selected is not checked for a matching finding.
 | continuation aligned to `(`; lone closer | LY-4 | `continuation-indent`, `standalone-closer` |
 | operator spacing | LY-5 | `operator-spacing` (partial) |
 | stacked blank lines | LY-6 | `blank-line-stack` |
-| braces on one statement; `} else` | ST-1 | `one-statement-braces`; none for `} else` |
+| braces on one statement | ST-1 | `one-statement-braces` |
+| `} else` | ST-1 | `same-line-else` |
 | short construct spread over lines | ST-2 | `short-control-flow` |
 | `!(x is T)` | ST-5 | `negated-is` |
 | declare then assign | ST-7 | `deferred-initialization` |
 | repeated stable accessor | ST-10 | `repeated-accessor` |
 | `.contains(` | ST-11 | `contains-in` (proven fix) |
-| `if ((x = f()))` | ST-4 | none |
+| `if ((x = f()))` | ST-4 | `assignment-condition` |
 | nested ternary | EX-8 | none |
-| `String.new("")`, `Array.new()`, `Map.new()` | EX-1 | none |
+| `String.new("")` | EX-1 | `empty-constructor` |
+| `Array.new()`, `Map.new()` | EX-1 | `empty-constructor` |
 | `%"..."` without interpolation | EX-3 | `plain-string` (proven fix) |
 | converter at a converting destination | EX-4 | compiler `conversion` warning |
 | `p->x` on a parsed layout | EX-6 | `member-arrow` (proven fix) |
@@ -1131,9 +1133,9 @@ that is not selected is not checked for a matching finding.
 | fields copied into locals or statics | FA-3 | `struct-copy` |
 | private type translated back to an existing value | FA-8 | `internal-type` |
 | one-use wrapper; forwarding chain | FN-2, FA-7 | none (graph has the data) |
-| uncalled static function | FI-7 | none (graph has the data) |
+| uncalled static function | FI-7 | `uncalled-static-function` |
 | acquire with a hand-written release | LT-1 | `lifecycle-pair`, `manual-bookkeeping` |
-| `old_`, `saved_` locals | NM-4 | none |
+| `old_`, `saved_`, `previous_` locals | NM-4 | `saved-local` |
 | subject parameter name that wraps lines | NM-2 | `subject-parameter-name` |
 | forward declaration | FI-6 | `forward-declaration`, `src-forward-declaration`, `runtime-forward-declaration`, `same-file-forward-declaration` |
 | non-static `x2c_*` without a C caller | NM-6 | none |
@@ -1178,12 +1180,21 @@ guards trustworthy.
 | `x2c_expr_*` or `x2c_literal_*` builders whose result is not inspected before it is returned | MA-5 | none |
 | a macro used once through `Macro shape = $m;` | MA-5 | none |
 | raw `case %(` on a head with a grammar form | MA-7 | none |
-| new `.xlisp` or `$(defun` in `src/` or `lib/` | LI-1 | none |
-| `$(x2c.ident` in meta code | LI-2 | none |
-| `report_error(` with literal wording outside report macros | DG-1 | none |
+| new `.xlisp` | LI-1 | none |
+| `$(defun` in `src/` or `lib/` | LI-1 | `lisp-defun` |
+| `$(x2c.ident` in meta code | LI-2 | `x2c-ident` |
+| literal `report_error(` wording | DG-1 | `literal-report-error` |
 | string-keyed diagnostic dispatch | DG-1 | none |
 | `Var` local with one static type | VT-1 | none |
 | protocol adoption whose members only forward | VT-8 | none |
+
+`long-section` measures plain lower-case top-level line labels separated
+from other text by blank lines. `uncalled-static-function` uses bound AST
+references, including function values, and excludes spellings present
+elsewhere in the input corpus. Computed names, protocols, native consumers,
+and files outside that corpus still need review. The new codes are
+candidates except `same-line-else`: its compiler and runtime census is
+zero, so it is a violation.
 
 The [adoption plan](../plans/x2c-code-standard.md) lists the detectors to
 build for the rows marked "none", ordered by value and cost.
