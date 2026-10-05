@@ -1917,14 +1917,7 @@ String Compiler.protocol_update_helper(
   List resolved = c.resolve_protocol_member(participant, member);
   if (!resolved) return NULL;
   List (source_binding, source_type) = resolved;
-  List parameters = source_type.car().list().cadr();
-  Type result = source_type.cdr();
-  Type rhs_type = NULL;
-  match (parameters)
-    case %(?receiver ?rhs):
-      if (List.equal(receiver, participant) &&
-          result.equal(participant))
-        rhs_type = rhs;
+  Type rhs_type = _update_rhs(participant, source_type);
   if (!rhs_type) return NULL;
 
   String suffix = postfix ? "postfix" : "update";
@@ -1950,14 +1943,28 @@ String Compiler.protocol_update_helper(
           return lhs[0];
         }
       };
-  List function = c._generated_function(helper, update);
+  c._publish_update(helper, update);
+  c.protocol_helpers[key] = name;
+  return name;
+}
+
+static Type _update_rhs(Type participant, Type signature) {
+  List parameters = signature.car().list().cadr();
+  Type result = signature.cdr();
+  match (parameters)
+    case %(?receiver ?rhs):
+      if (List.equal(receiver, participant) && result.equal(participant))
+        return rhs;
+  return NULL;
+}
+
+static void Compiler._publish_update(Compiler c, List helper, List syntax) {
+  List function = c._generated_function(helper, syntax);
   match (function)
     case %(function ?result ?declarator (block *body)):
       function = %(function $result $declarator
                     (block (at ${c.origin} (seq @body))));
   c.add_early(function);
-  c.protocol_helpers[key] = name;
-  return name;
 }
 
 // discard helpers
