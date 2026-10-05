@@ -136,8 +136,9 @@ macro Stmt $report.parse.splice_position(Expr $c) =>
 
 macro Stmt $report.parse.typed_quotation(Expr $c, Expr $origin) =>
   $c.report_error(
-    <parse>, "typed quotation cannot declare a name or apply a template",
-    $origin, %("a typed quotation builds its code where it is written"));
+    <parse>, "this quotation cannot declare a name or apply a template",
+    $origin,
+    %("a typed, Type, or Param quotation builds its code where it is written"));
 
 macro Stmt $report.parse.typed_quotation_nested(Expr $c, Expr $origin) {
   {
