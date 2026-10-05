@@ -229,6 +229,7 @@ clean:							## Remove ordinary generated output
 	$(MAKE) -C examples clean
 	$(MAKE) -C unittest clean
 
+help: export PRINT_HELP_PYSCRIPT := $(PRINT_HELP_PYSCRIPT)
 help:							## Show grouped Make targets
 	@python3 -c "$$PRINT_HELP_PYSCRIPT" < $(firstword $(MAKEFILE_LIST))
 

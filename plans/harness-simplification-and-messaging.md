@@ -341,13 +341,14 @@ focused recheck used one sequence for the coherent change. Both style variants
 still produced unsupported performance claims in some probes. No improvement
 in long-history correction handling is claimed.
 
-The first publication attempt observed a segmentation fault in the existing
-`var-chain-stack` fixture. Its expected compile status is zero; the observed
-status was 139. The same fixture then passed singly and in 24 translations
-with eight concurrent processes. Compiler, runtime, bootstrap, and fixture
-sources match the integrated upstream revision. The cause remains unknown;
-the failed gate log and focused results are retained, and `unittest/STATUS.md`
-records the observation. No expectation was changed.
+Two publication attempts exposed an existing harness defect: Make exported
+its help-rendering Python script into every child process. The extra environment
+payload caused `var-chain-stack` to fail under its requested 256 KiB stack.
+A focused nested-Make probe reproduced the failure; removing only that variable
+made it pass. The export now belongs only to `help`. Six repeated nested-Make
+probes passed, and `make help` output matches the original byte for byte.
+The stack limit and checked-in expectations remain unchanged. Failed gate
+logs and focused results are retained.
 
 The three external runtime defects remain unresolved. No supported editable
 owner was found for handoff enforcement, isolation classification, or active

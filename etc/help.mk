@@ -36,4 +36,3 @@ for kind, name, description in entries:
     output.extend(" " * description_column + line for line in wrapped[1:])
 print("\n".join(output))
 endef
-export PRINT_HELP_PYSCRIPT

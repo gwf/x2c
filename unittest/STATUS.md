@@ -171,15 +171,12 @@ captures, expression and block bodies, and typed parameter sequences.
   seams behind protocol adoption. A fixture locks `@{...}` inside `%""` as
   literal segment text; List-context rejection has its own fixture.
 
-## Outstanding Items
+The 2026-10-05 publication probes found that exporting the Make help script
+to unrelated child processes caused `var-chain-stack` to fail at its 256 KiB
+stack limit. The export now belongs only to `help`. The unchanged fixture
+passed six repeated nested-Make probes, and help output remains byte-identical.
 
-On 2026-10-05, `agent-pr-check` observed one translation segmentation fault
-in `var-chain-stack` at candidate `2ad827e1`, with compile status 139 instead
-of zero. Compiler, runtime, bootstrap, and fixture sources matched integrated
-`origin/dev` `40200f44`. The unchanged fixture subsequently passed singly and
-in 24 translations with eight concurrent processes. The cause is unknown.
-The failed gate log and focused results are retained in the workspace's
-`debug/`; checked-in expectations remain unchanged.
+## Outstanding Items
 
 Adding `List cached = %("stack-check"); (void) cached;` at the start of
 `static-local-flat-chain`'s `main` makes translation of its 4,000 additions
