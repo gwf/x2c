@@ -574,8 +574,8 @@ Public functions:
 `Sym.declare_field_order`, `Sym.field_order`, `Sym.declare_delegate_field`,
 `Sym.delegate_aggregate`, `Compiler.begin_semantic_transaction`,
 `SymTxn.local_macros_changed`, `Sym.begin_import`, `Sym.end_import`,
-`Sym.added_globals`,
-`Sym.end_log`, `SymTxn.commit`, `SymTxn.commit_transient`, `SymTxn.rollback`
+`Sym.added_globals`, `Sym.end_log`, `SymTxn.commit`, `SymTxn.commit_transient`,
+`SymTxn.rollback`
 
 ### [src/toolchain.x](../src/toolchain.x)
 

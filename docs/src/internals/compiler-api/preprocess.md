@@ -14,9 +14,9 @@ C preprocessor directives in x2c source.
 | --- | --- |
 | [`preproc_branch_state`](#preproc_branch_state) | Returns a group's hidden-arm state after its `#elif` or `#else`: 2 when the group's state was 1, and 0 otherwise. |
 | [`preproc_conditional_kind`](#preproc_conditional_kind) | Classifies the preprocessor line `text` as a conditional directive: `<open>` for `#if`, `#ifdef`, and `#ifndef`, `<branch>` for `#elif` and `#else` forms, `<close>` for `#endif`, or 0 for any other line. |
-| [`preproc_defined_name`](#preproc_defined_name) | Returns the name the `#define` line `text` defines, or NULL for any other directive. |
 | [`preproc_directive`](#preproc_directive) | Returns the preprocessor line `text` without its `#` and the blanks around the directive. |
 | [`preproc_include_target`](#preproc_include_target) | Returns the file named by the `#include` line `text`, or `NULL` for any other line. |
+| [`preproc_macro_name`](#preproc_macro_name) | Returns the macro name a `#define` or `#undef` line names, or NULL for any other directive. |
 | [`preproc_marker_file`](#preproc_marker_file) | Returns the file that the host preprocessor's line marker `text`, `# N "file" flags`, names and sets `line` to N, or returns `NULL` for any other line. |
 | [`preproc_open_state`](#preproc_open_state) | Returns the hidden-arm state of the conditional group that `text` opens: 2 when C never takes its first arm, because the condition requires a never-defined name or is `0`; 1 when C never takes the arms after its first `#else`, because the condition is exactly `!defined(NAME)`; and 0 otherwise. |
 | [`preproc_track_arms`](#preproc_track_arms) | Follows the conditional groups open after the preprocessor line `text`. |
@@ -48,15 +48,6 @@ and `#else` forms, `<close>` for `#endif`, or 0 for any other line.
 
 Source: `src/preprocess.x:30`
 
-#### preproc_defined_name
-
-`String preproc_defined_name(String text)`
-
-Returns the name the `#define` line `text` defines, or NULL for any
-other directive.
-
-Source: `src/preprocess.x:139`
-
 #### preproc_directive
 
 `String preproc_directive(String text)`
@@ -75,6 +66,15 @@ other line. `angle` is 1 for a `<...>` name and 0 otherwise. Text after
 the name, such as a comment, is ignored.
 
 Source: `src/preprocess.x:97`
+
+#### preproc_macro_name
+
+`String preproc_macro_name(String text)`
+
+Returns the macro name a `#define` or `#undef` line names, or NULL
+for any other directive.
+
+Source: `src/preprocess.x:139`
 
 #### preproc_marker_file
 
