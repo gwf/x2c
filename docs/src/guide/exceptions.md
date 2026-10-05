@@ -37,7 +37,7 @@ values are rejected. The compiler diagnoses invalid statically known values; a
 bad value hidden in a dynamic `Var` terminates with `<bad-types>` without
 re-entering error handling.
 
-Array failures from shared sequence methods keep two details: `operation`
+When an Array failure reports both a type and a method action, `operation`
 is the Array type String, and `action` is the method Symbol. For example,
 a push to a null `ArrayInt` raises
 `(bad-arg (operation "ArrayInt") (action push))`. The action `<take-last>`
