@@ -1386,7 +1386,7 @@ static List Compiler._defer_environment(
   Array fields = [];
   foreach (List record, records)
     fields.push(
-      %(declare (const void) (bindings (bind ${record.caddr()} (*)))));
+      c.rebuild_statement($!{ const void *${record.caddr()}; }).cadr());
   return c.capture_environment(env_binding, fields.list_free());
 }
 

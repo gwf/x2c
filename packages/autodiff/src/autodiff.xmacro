@@ -171,9 +171,9 @@ meta static List ad_pure(List e) {
 
 /* Syntax constructors shared by the forward and reverse transformations. */
 
-meta static List ad_zero(void) => %(expr (double) (literal (double) "0.0"));
+meta static List ad_zero(void) => $!double{ 0.0 };
 
-meta static List ad_one(void) => %(expr (double) (literal (double) "1.0"));
+meta static List ad_one(void) => $!double{ 1.0 };
 
 meta static int ad_is_zero(List e) => e.equal(ad_zero());
 
@@ -595,8 +595,8 @@ meta static List ad_fwd_params(List params) {
   foreach (List param, params) {
     match (param) {
       case %(param (double) (bind (binding ? ?n) ())): {
-        out.push(%(param (double) (bind ($n) ())));
-        out.push(%(param (double) (bind (${ad_dot(n)}) ())));
+        out.push($!Param{ double ${x2c_ident(n)} });
+        out.push($!Param{ double ${x2c_ident(ad_dot(n))} });
         continue;
       }
     }
@@ -1064,7 +1064,7 @@ meta static List ad_grad_slots_params(List params) {
   foreach (List param, params) {
     match (param) {
       case %(param (double) (bind (binding ? ?n) ())):
-        slots.push(%(param (double) (bind (${ad_grad(n)}) (*))));
+        slots.push($!Param{ double *${x2c_ident(ad_grad(n))} });
     }
   }
   return slots;

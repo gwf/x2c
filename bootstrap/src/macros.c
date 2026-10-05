@@ -181,6 +181,8 @@ static List Definition_read_body(Definition * d);
 
 static List Definition_expression_body(Definition * d);
 
+static List Definition_part_body(Definition * d);
+
 static Symbol Definition_body_kind(Definition * d);
 
 static List _recorded(Map m);
@@ -352,9 +354,11 @@ static const SymbolSet sequence_roles =(SymbolSet) "\001\000\000\000\012\000\000
 
 static const SymbolSet untyped_roles =(SymbolSet) "\001\000\000\000\003\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\000\001\000\000\001\002\334\113\163\026\011\161\001\000\250\053\255\036\031\000\000\000\012\314\024\000\000\000\000\000";
 
-static const SymbolSet quoted_roles =(SymbolSet) "\001\000\000\000\003\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\000\001\000\000\002\001\250\053\255\320\100\047\000\000\326\170\114\000\000\000\000\000\112\013\016\000\000\000\000\000";
+static const SymbolSet quoted_roles =(SymbolSet) "\001\000\000\000\004\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\001\003\003\000\003\000\250\053\255\320\100\047\000\000\326\170\114\000\000\000\000\000\112\013\016\000\000\000\000\000\132\220\001\002\000\000\000\000";
 
 static int Compiler__slot_splice(Compiler c, int allowed);
+
+static Symbol Compiler__quotation_kind(Compiler c, Token token);
 
 static int Compiler__typed_quotation(Compiler c);
 
@@ -383,6 +387,10 @@ static List Compiler__built_item(Compiler c, Var item, Map keys, Token start);
 static List Compiler__built_hole(Compiler c, List row, int shell, Token start);
 
 static List Definition_typed_construction(Definition * d);
+
+static List Definition_part_construction(Definition * d);
+
+static Map Definition_written_keys(Definition * d);
 
 static List Compiler__typed_cells(Compiler c, List items, Map keys, Token start);
 
@@ -1560,8 +1568,8 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_0(void){
   _322 = cons(_321, NULL);
   _323 = String_new("write ${$!T{ ... }} to insert the code it builds");
   _324 = String_new("typed quotation inside a quotation must be written as a hole");
-  _325 = String_new("typed quotation cannot declare a name or apply a template");
-  _326 = String_new("a typed quotation builds its code where it is written");
+  _325 = String_new("this quotation cannot declare a name or apply a template");
+  _326 = String_new("a typed, Type, or Param quotation builds where it is written");
   _327 = String_var(_326);
   _328 = cons(_327, NULL);
   _329 = String_new("List");
@@ -2897,7 +2905,7 @@ static void Definition_body(Definition * d){
 
 List Compiler_parse_expression(Compiler);
 static List Definition_read_body(Definition * d){
-  Compiler c =(* d).c;  if(Definition_has_expression_body(&((* d)))) return Definition_expression_body(&((* d)));  if(Compiler_peek(c, 0) == 247) return Compiler__parse_body(c, Definition_body_kind(&((* d))), (* d).using);  if(!(* d).anonymous && Compiler_macro_starts_target_at(c, AST_STATEMENT)) return Compiler_try_parse_macro_target_at(c, AST_STATEMENT);  List expression = Compiler_parse_expression(c);  if(!(* d).anonymous) Compiler_expect(c, 119);  return cons(_77, cons(List_var(cons(_201, cons(List_var(expression), NULL))), NULL));
+  Compiler c =(* d).c;  if((* d).kind == 1362954 ||(* d).kind == 33656922) return Definition_part_body(&((* d)));  if(Definition_has_expression_body(&((* d)))) return Definition_expression_body(&((* d)));  if(Compiler_peek(c, 0) == 247) return Compiler__parse_body(c, Definition_body_kind(&((* d))), (* d).using);  if(!(* d).anonymous && Compiler_macro_starts_target_at(c, AST_STATEMENT)) return Compiler_try_parse_macro_target_at(c, AST_STATEMENT);  List expression = Compiler_parse_expression(c);  if(!(* d).anonymous) Compiler_expect(c, 119);  return cons(_77, cons(List_var(cons(_201, cons(List_var(expression), NULL))), NULL));
 }
 
 static List Definition_expression_body(Definition * d){
@@ -2905,6 +2913,12 @@ static List Definition_expression_body(Definition * d){
     int braced =(* d).quotation && Compiler_peek(c, 0) == 247;  Compiler_expect(c, braced ? 247 : 81);  List replacement = Compiler_parse_expression(c);  Compiler_expect(c, braced ? 251 : 83);  return replacement;
   }
   List replacement = Compiler_parse_expression(c);  if(!(* d).anonymous) Compiler_expect(c, 119);  return replacement;
+}
+
+List Compiler_parse_parameter(Compiler);
+List Compiler_parse_type_operand(Compiler, Type *);
+static List Definition_part_body(Definition * d){
+  Compiler c =(* d).c;  Compiler_expect(c, 247);  List body = NULL;  if((* d).kind == 33656922) body = Compiler_parse_parameter(c);  else Compiler_parse_type_operand(c, & body);  Compiler_expect(c, 251);  return body;
 }
 
 static Symbol Definition_body_kind(Definition * d){
@@ -3323,7 +3337,7 @@ Token Compiler_after_hole(Compiler c){
 
 List Compiler_parse_macro_quotation(Compiler c){
   if(! _init_guard_) _file_init_();  Token start = c -> token;  Compiler_expect(c, 73);  Compiler_expect(c, 60);  int typed = Compiler__typed_quotation(c);  Symbol kind = typed || Compiler_peek(c, 0) == 81 ? 405758822009820 : 168163805864282;  if(! typed && Compiler_peek(c, 0) == 19147688){
-    kind = Compiler__result_kind_token(c, c -> token);  Compiler_next(c);
+    kind = Compiler__quotation_kind(c, c -> token);  Compiler_next(c);
   }
   Sym_push_new_scope(c -> sym); {
     _x2c_defer_env_13 _x2c_macro_environment_13 ={
@@ -3353,6 +3367,10 @@ List Compiler_parse_macro_quotation(Compiler c){
     x2c_cleanup_leave(& _x2c_defer_record_13);
   }
 
+}
+
+static Symbol Compiler__quotation_kind(Compiler c, Token token){
+  const MacroCategory * category = _category(token -> text);  if(category &&(category -> hole == 1362954 || category -> hole == 33656922)) return category -> hole;  return Compiler__result_kind_token(c, token);
 }
 
 int String_is_identifier(String);
@@ -3406,7 +3424,6 @@ static List Compiler__checked_type(Compiler c, List type, Token origin){
   )), NULL))), origin);
 }
 
-List Compiler_parse_type_operand(Compiler, Type *);
 List Compiler_cache_literal_list(Compiler, List);
 List Type_list(Type);
 static List Compiler__quoted_type_name(Compiler c){
@@ -3451,7 +3468,7 @@ static List Compiler__quoted_cons(Compiler c, List head, List tail, Token origin
 }
 
 static List Definition_construction(Definition * d){
-  Compiler c =(* d).c;  if(List_truth((* d).type)) return Definition_typed_construction(&((* d)));  if(! List_truth((* d).rebuild) ||(* d).nested ||(* d).kind == 9147004580456 || c -> runtime_literals) return NULL;  Map keys = Map_new(), file_locals = Map_new();  _file_scope_locals(cons(List_var((* d).template), NULL), file_locals);  Array fresh = Array_new(); {
+  Compiler c =(* d).c;  if(List_truth((* d).type)) return Definition_typed_construction(&((* d)));  if((* d).kind == 1362954 ||(* d).kind == 33656922) return Definition_part_construction(&((* d)));  if(! List_truth((* d).rebuild) ||(* d).nested ||(* d).kind == 9147004580456 || c -> runtime_literals) return NULL;  Map keys = Map_new(), file_locals = Map_new();  _file_scope_locals(cons(List_var((* d).template), NULL), file_locals);  Array fresh = Array_new(); {
     List row;  List _x2c_macro_object_21 =(* d).fresh;  List _x2c_macro_cursor_23 = _x2c_macro_object_21;  Var _x2c_macro_cursor_output_21;  while(List_try_next(_x2c_macro_object_21, &(_x2c_macro_cursor_23), &(_x2c_macro_cursor_output_21))){
       row = Var_list(_x2c_macro_cursor_output_21); {
         Var binder = List_car(row);  Map_setindex(keys, binder, int_var(1));  Array_push(fresh, List_var(({
@@ -3527,19 +3544,7 @@ static List Compiler__built_hole(Compiler c, List row, int shell, Token start){
 }
 
 static List Definition_typed_construction(Definition * d){
-  Compiler c =(* d).c;  if(! List_truth((* d).rebuild) || List_truth((* d).fresh)) Compiler_report_error(c, 33658058, _325, (* d).start, _328);  Map keys = Map_new(); {
-    List hole;  List _x2c_macro_object_26 =(* d).parameters;  List _x2c_macro_cursor_28 = _x2c_macro_object_26;  Var _x2c_macro_cursor_output_26;  while(List_try_next(_x2c_macro_object_26, &(_x2c_macro_cursor_28), &(_x2c_macro_cursor_output_26))){
-      hole = Var_list(_x2c_macro_cursor_output_26); {
-        Symbol projection;  List _x2c_macro_object_25 = _366;  List _x2c_macro_cursor_27 = _x2c_macro_object_25;  Var _x2c_macro_cursor_output_25;  while(List_try_next(_x2c_macro_object_25, &(_x2c_macro_cursor_27), &(_x2c_macro_cursor_output_25))){
-          projection = Var_symbol(_x2c_macro_cursor_output_25);  Map_setindex(keys, _hole_key(hole, Symbol_str(projection)), List_var(cons(List_var(hole), cons(Symbol_var(projection), NULL))));
-        }
-
-      }
-
-    }
-
-  }
-
+  Compiler c =(* d).c;  Map keys = Definition_written_keys(&((* d)));
   {
     List _x2c_match_expr = Var_list(List_car((* d).rebuild));
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
@@ -3556,6 +3561,26 @@ List hole = Var_list(List_car(Var_list(Map_getindex(keys, List_last((* d).templa
   ));  cons(_396, cons(_x2c_literal_part_59, cons(_x2c_literal_part_60, NULL)));
 }
 )), NULL))), (* d).start);
+}
+
+static List Definition_part_construction(Definition * d){
+  Map keys = Definition_written_keys(&((* d)));  return cons(_202, cons(_332, cons(List_var(Compiler__typed_cells((* d).c, Var_list(List_car((* d).rebuild)), keys, (* d).start)), NULL)));
+}
+
+static Map Definition_written_keys(Definition * d){
+  if(! List_truth((* d).rebuild) || List_truth((* d).fresh)) Compiler_report_error((* d).c, 33658058, _325, (* d).start, _328);  Map keys = Map_new(); {
+    List hole;  List _x2c_macro_object_26 =(* d).parameters;  List _x2c_macro_cursor_28 = _x2c_macro_object_26;  Var _x2c_macro_cursor_output_26;  while(List_try_next(_x2c_macro_object_26, &(_x2c_macro_cursor_28), &(_x2c_macro_cursor_output_26))){
+      hole = Var_list(_x2c_macro_cursor_output_26); {
+        Symbol projection;  List _x2c_macro_object_25 = _366;  List _x2c_macro_cursor_27 = _x2c_macro_object_25;  Var _x2c_macro_cursor_output_25;  while(List_try_next(_x2c_macro_object_25, &(_x2c_macro_cursor_27), &(_x2c_macro_cursor_output_25))){
+          projection = Var_symbol(_x2c_macro_cursor_output_25);  Map_setindex(keys, _hole_key(hole, Symbol_str(projection)), List_var(cons(List_var(hole), cons(Symbol_var(projection), NULL))));
+        }
+
+      }
+
+    }
+
+  }
+  return keys;
 }
 
 static List Compiler__typed_cells(Compiler c, List items, Map keys, Token start){
@@ -3582,7 +3607,7 @@ static List Compiler__hole_value(Compiler c, List hole, Token start){
 }
 
 static int Compiler__quoted_role(Compiler c, Symbol role){
-  if(!(Map_contains(c -> macro_holes, List_var(_322))) || !(SymbolSet_contains(quoted_roles, role))) return 0;  if(role == 920394) return 1;  Token after = Compiler_after_hole(c);  return after -> type != 119 && ! _extends_expression(after);
+  if(!(Map_contains(c -> macro_holes, List_var(_322))) || !(SymbolSet_contains(quoted_roles, role))) return 0;  if(role == 920394) return 1;  Token after = Compiler_after_hole(c);  if(role == 33656922) return after -> type == 89 || after -> type == 83;  return after -> type != 119 && ! _extends_expression(after);
 }
 
 List Sym_lookup(Sym, List, Type *);
@@ -3990,7 +4015,6 @@ List Compiler_parse_named_type(Compiler);
 List Compiler_parse_declaration_argument(Compiler);
 List Compiler_parse_declarator_argument(Compiler);
 List Compiler_parse_function_definition(Compiler);
-List Compiler_parse_parameter(Compiler);
 List Compiler_parse_block_item(Compiler);
 List Compiler_parse_field(Compiler, List);
 List Compiler_parse_enumerator(Compiler, Type);
@@ -5635,7 +5659,7 @@ static Var Compiler__eval_string(Compiler c, String source, Token invocation){
                     x2c_exception_landed(& _x2c_exception_frame_0);  if(x2c_exception_is_error_target(& _x2c_exception_frame_0)){
                       int _x2c_macro_selected_0 = x2c_error_catch_selected(_x2c_error_handler_0);  x2c_error_catch_detach(_x2c_error_handler_0);  x2c_exception_mark_handled(& _x2c_exception_frame_0);  if(_x2c_macro_selected_0 == 0){
                         Var volatile category;  category = x2c_error_catch_capture(_x2c_error_handler_0, 0); {
-                          static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/macros.x",.function = "Compiler__eval_string",.line = 3806};  x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(209659067570), category);  __builtin_unreachable();
+                          static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/macros.x",.function = "Compiler__eval_string",.line = 3847};  x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(209659067570), category);  __builtin_unreachable();
                         }
 
                       }
@@ -5782,7 +5806,7 @@ return Var_is_row(value, 9, 7, 4) && binding_identity_try_parts(Var_list(value),
 
 static Var _lisp_import_hook(String path){
   MetaContext * context = MetaContext_current();  Compiler c = context -> evaluator;  if(! c){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/macros.x",.function = "_lisp_import_hook",.line = 3971};  x2c_error_raise_n(& _x2c_error_site_1, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("compile-time import")), NULL))));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/macros.x",.function = "_lisp_import_hook",.line = 4012};  x2c_error_raise_n(& _x2c_error_site_1, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("compile-time import")), NULL))));  __builtin_unreachable();
   }
   Compiler__import(c, path, context -> site);  return List_var(NULL);
 }

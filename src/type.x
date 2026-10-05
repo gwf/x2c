@@ -372,7 +372,7 @@ Type Type.qualify(Type type, Type source) {
 }
 
 /** Returns the pointer `Type` formed by prefixing `type` with `*`. */
-Type Type.reference(Type type) => %(* @type);
+Type Type.reference(Type type) => $!Type{ $type * };
 
 /** Returns the result `Type` of a function `Type`, following pointer and array
     modifiers, or `NULL` when the chain does not end at a function.

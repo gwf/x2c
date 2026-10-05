@@ -384,8 +384,10 @@ static void Helper.group(Helper &h, String owner, int index) {
 }
 
 /* Parses the unit at `path` for the group of table `index`, which the
-   parse writes into the build directory. Diagnostics are the translation's
-   to report; a unit that does not parse leaves the part it reached. */
+   parse writes into the build directory, adding the files it read to
+   `deps`. Diagnostics are the translation's to report; a unit that does
+   not parse leaves the part it reached, and the files it read decide when
+   it parses again. */
 static void Helper.parse(Helper &h, String path, int index) {
   Frontend f = h.frontend;
   ParsedUnit unit;
@@ -399,16 +401,15 @@ static void Helper.parse(Helper &h, String path, int index) {
   unit.collect(f);
   unit.compiler.diagnostics.reset();
   unit.parse();
+  foreach (Var (read, _), unit.compiler.deps) h.deps[read] = 1;
 }
 
-/* Compiles the group a parse left for table `index`, adding the files it
+/* Compiles the group a parse left for table `index`, adding the headers it
    read to `deps`. A quoted include resolves from the directory of `unit`.
    Returns NULL when its object is built, or else why not. */
 static String Helper.compile(Helper &h, int index, String unit) {
   String base = h.base(index);
   if (!Path.is_file(%"$base.deps")) return "the unit has no group";
-  foreach (String path, Path.read_text(%"$base.deps").split("\n"))
-    if (path) h.deps[path] = 1;
   if (Path.is_file(%"$base.failure")) return Path.read_text(%"$base.failure");
   Toolchain t = h.toolchain;
   String failure = Compiler.meta_cc_run(

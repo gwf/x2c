@@ -199,6 +199,8 @@ static List Compiler__pointer(Compiler c);
 
 static List Compiler__direct_declarator(Compiler c, Type context, List * method_identity, Token * source_first, Token * source_after);
 
+static int Compiler__parameters_follow(Compiler c);
+
 static List Compiler__parenthesized(Compiler c, List context, List * method_identity, Token * source_first, Token * source_after);
 
 static List Compiler__declarator_suffix(Compiler c);
@@ -3841,7 +3843,7 @@ static int Compiler__group_comma(Compiler c){
 }
 
 static int Compiler__destructure_starts(Compiler c){
-  Token token = c -> token;  if(token -> type != 81) return 0;  token = Token_skip_trivia(token + 1);  if(token -> type != 19147688) return 0;  token = Token_skip_trivia(token + 1);  return token -> type == 89;
+  Token token = c -> token;  if(token -> type != 81) return 0;  token = Token_skip_trivia(token + 1);  if(token -> type != 19147688) return 0;  token = Token_skip_trivia(token + 1);  return token -> type == 89 && ! Compiler__parameters_follow(c);
 }
 
 List Compiler_anchor_origin(Compiler, List, Token);
@@ -4601,10 +4603,14 @@ static List Compiler__pointer(Compiler c){
 
 int Type_is_aggregate(Type);
 static List Compiler__direct_declarator(Compiler c, Type context, List * method_identity, Token * source_first, Token * source_after){
-  int member = Type_is_aggregate(context);  if(Compiler_peek(c, 0) == 81) return Compiler__parenthesized(c, member ? Type_list(context) : NULL, &((* method_identity)), &((* source_first)), &((* source_after)));  if(Map_truth(c -> macro_holes)){
+  int member = Type_is_aggregate(context);  if(Compiler_peek(c, 0) == 81 && Compiler__parameters_follow(c)) return _315;  if(Compiler_peek(c, 0) == 81) return Compiler__parenthesized(c, member ? Type_list(context) : NULL, &((* method_identity)), &((* source_first)), &((* source_after)));  if(Map_truth(c -> macro_holes)){
     List bind = Compiler__template_declarator(c, member);  if(List_truth(bind)) return bind;
   }
   if(! String_is_identifier(c -> token -> text)) return _315;  Token first = c -> token;  List ident = Compiler__complex_identifier(c, &((* method_identity))); (* source_first) = first; (* source_after) = c -> token;  return cons(_30, cons(List_var(ident), _182));
+}
+
+static int Compiler__parameters_follow(Compiler c){
+  Token head = c -> token;  Compiler_next(c);  Symbol next = Compiler_peek(c, 0);  Type lookup = List_type(Sym_get(c -> sym, cons(String_var(c -> token -> text), NULL)));  int named = next == 19147688 && ! Type_is_typedef(lookup);  int parameters = next == 83 ||(! named && Compiler_test_declaration(c));  c -> token = head;  return parameters;
 }
 
 static List Compiler__parenthesized(Compiler c, List context, List * method_identity, Token * source_first, Token * source_after){

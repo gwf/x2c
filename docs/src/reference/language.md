@@ -1582,6 +1582,14 @@ states the type the code has; it converts nothing, so write a cast inside
 the braces when the code needs one. See
 [Code that knows its type](../guide/meta-functions.md#code-that-knows-its-type).
 
+`$!Type{ T }` builds the type `T`, written as a cast writes a type name.
+`$!Param{ P }` builds one parameter declaration. A `Type` local or a
+`${...}` hole of type `Type` may stand for a type or for the base a
+declarator modifies. Both build where they are written: they bind nothing,
+declare no name the braces spell, and apply no template. `Type` and `Param`
+after `$!` always name these kinds. `Decl` names a hole kind only. See
+[Types and parameters](../guide/meta-functions.md#types-and-parameters).
+
 When one `Name` hole appears in a declaration, a reference, and a member
 selection, its case checks that the declaration and reference use the same
 binding and that the member has the binding's source spelling. This also
