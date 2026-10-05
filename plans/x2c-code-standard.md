@@ -480,6 +480,7 @@ or leave stage 2 publication pending. Continue the independent stages.
 | Stage 1 | `4cfa524f` | 2026-10-05 | 384 samples; 101 outputs pass |
 | 3.1 | `83bbb850` | 2026-10-05 | 68 IDs; 98 ID-only finding changes |
 | 3.2 | `99781621` | 2026-10-05 | 24/25 name boundaries pass |
+| 3.3 | `814684bb` | 2026-10-05 | 10 codes; 11 positive findings pass |
 | D2 held | `a7c271f` | 2026-10-05 | +197/-192 .x; 4 raises held |
 | D3 held | `9511153f` | 2026-10-05 | +9/-9 .x; package check fails |
 
