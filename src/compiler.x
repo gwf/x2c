@@ -1856,9 +1856,8 @@ static void Compiler._update_brace_stack(Compiler c, Token consumed) {
       break;
     case <"}">:
       if (c.braces.len()) c.braces.take_last();
-      else {
+      else
         $report.parse.brace_unexpected(c, consumed);
-      }
       break;
   }
 }
