@@ -1178,7 +1178,7 @@ static const SymbolSet sequence_roles =
   %<<argument block field enumerator map-entry param unit catch match-row
      decl-row>>;
 static const SymbolSet untyped_roles = %<<expression argument type>>;
-static const SymbolSet quoted_roles = %<<statement block name>>;
+static const SymbolSet quoted_roles = %<<statement block name param>>;
 
 /* Consumes a `...` after a slot. It is legal only where the role takes a
    sequence. */
@@ -1590,13 +1590,15 @@ static List Compiler._hole_value(Compiler c, List hole, Token start) =>
   c.resolve_expression(%(expr () (ident ${_hole_name(hole).str()})), start);
 
 /* A quotation's hole takes its kind from a name position, or from a
-   statement position where it stands alone, which no annotation can give
-   it. A hole that an operator, `;`, or a postfix form follows is an
+   parameter or statement position where it stands alone, which no
+   annotation can give it. A hole that a declarator follows is a parameter's
+   type, and one that an operator, `;`, or a postfix form follows is an
    expression. */
 static int Compiler._quoted_role(Compiler c, Symbol role) {
   if (!(%(quotation) in c.macro_holes) || !(role in quoted_roles)) return 0;
   if (role == <name>) return 1;
   Token after = c.after_hole();
+  if (role == <param>) return after.type == <,> || after.type == <)>;
   return after.type != <;> && !_extends_expression(after);
 }
 
