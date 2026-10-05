@@ -901,25 +901,23 @@ static int _preload_meta_surface(Frontend frontend, Lisp shared){
     x2c_cleanup_push(& _x2c_defer_record_2);
     {
       _declare_builders(c, shared);
-      if(! started || ! ParsedUnit_collect(&(unit), & session) || ! ParsedUnit_parse(&(unit))){
-        {
-          List diagnostic;
-          List _x2c_macro_object_3 = Compiler_diagnostics(c);
-          List _x2c_macro_cursor_3 = _x2c_macro_object_3;
-          Var _x2c_macro_cursor_output_3;
-          while(List_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_3))){
-            diagnostic = Var_list(_x2c_macro_cursor_output_3);
-            Compiler_print_diagnostic(c, diagnostic);
-          }
-
+      if(started) Compiler_own_diagnostics(c);
+      else{
+        Var entry;
+        List _x2c_macro_object_3 = Compiler_diagnostics(c);
+        List _x2c_macro_cursor_3 = _x2c_macro_object_3;
+        Var _x2c_macro_cursor_output_3;
+        while(List_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_3))){
+          entry = _x2c_macro_cursor_output_3;
+          Compiler_print_diagnostic(c, Var_list(entry));
         }
-        {
-          int _x2c_return_value_4 = 0;
-          {
-            x2c_cleanup_leave(& _x2c_defer_record_2);
-            return _x2c_return_value_4;
-          }
 
+      }
+      if(! started || ! ParsedUnit_collect(&(unit), & session) || ! ParsedUnit_parse(&(unit))){
+        int _x2c_return_value_4 = 0;
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_2);
+          return _x2c_return_value_4;
         }
 
       }
