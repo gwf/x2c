@@ -4,6 +4,8 @@
 > D2 retains four Array raises for Gary's decision. Stage 4 repaired 59
 > of 106 violations; 47 findings and later shape work remain. The package
 > Error-pack migrations and first import-helper deletion are delivered.
+> The original 12 long-function candidates have repaired lengths or
+> reviewed dispatcher exceptions. Full-file shape work remains.
 > Gary accepted the standard and decisions D1-D5 on 2026-10-05.
 > See [Progress](#progress). The single standard is
 > [agents/x2c-code-standard.md](../agents/x2c-code-standard.md).
@@ -793,7 +795,7 @@ No stage expectation, lint baseline, or bootstrap file changed.
 Options for Gary: retain this violation, or permit a reviewed generated
 refresh for this diagnostic location. No padding was added to offset it.
 
-### Stage 4: label collector positions approved; reshape pending
+### Stage 4: label collector positions approved; reshape delivered
 
 The complete `Walk.collect_labels` trial replaces its multi-line dispatch
 arms with named private steps for expression blocks, labels, try regions,
@@ -828,6 +830,11 @@ Evidence in `/tmp/x2c-standard-lint/debug/`: `label-steps-build.log`,
 bootstrap; its logs are `label-steps-baseline-safe.log`,
 `label-steps-baseline-refresh.log`, and
 `label-steps-baseline-converged.log`.
+
+The later cleanup candidate `5c912611` supersedes this restored trial.
+It repairs both label collection and rewriting, passes focused behavior,
+depth, self-host, coordinate, and performance checks, and merged through
+PR #173. Its final proof and function lengths are recorded below.
 
 Gary approved reviewed retained macro-definition position changes for
 source reshapes on 2026-10-05. Positions must follow their new authored
@@ -979,7 +986,7 @@ Later candidates below remain private until submitted to the integrator.
 | `Walk.rewrite` | 42 | 36 | length repaired; focused proof passes |
 | `Emitter._emit` | 94 | 52 | one-line dispatcher exception reviewed |
 | `Emitter._declarator` | 46 | 23 | length repaired; focused proof passes |
-| `Compiler._resolve_content` | 104 | 104 | retained-grammar trial resumed; proof pending |
+| `Compiler._resolve_content` | 104 | 5 + 69 | context entry and dispatcher exception reviewed |
 | `Compiler._resolve_identifier` | 44 | 34 | capture step; focused proof passes |
 | `Compiler._typedef_index` | 43 | 24 | length repaired; focused proof passes |
 | `Compiler._record_meta_hash` | 50 | 18 | length repaired; focused proof passes |
@@ -1120,6 +1127,43 @@ Four interfaces differ only in compiler fingerprint. Retained quotation
 positions are unchanged, and generated parse C has no runtime ErrorSite.
 Both optimized parent functions retain 1,377 ordered instruction mnemonics,
 including calls. No new operation or automatic HP repeat is introduced.
+
+Accepted Resolve candidate `3d03c154` supersedes the restored trial.
+It replaces 33 single-consumer Compiler handlers with methods on a
+four-field borrowed context. The 5-line entry owns that context's stack
+lifetime; the 69-line dispatcher has one-line actions. Whole-file source
+changes by +255/-294 lines. Existing grammar owners, input/content phases,
+prefix guards, operator field matching, and fallback remain unchanged.
+All 33 handler bodies are exact after binding-aware context substitution.
+The context neither allocates nor retains or frees Compiler/input/type/origin.
+It avoids shared mutable state during nested resolution. The private-type
+lint candidate is reviewed on those facts; no exception or baseline changes.
+
+Nine fixtures and the 220-file stage-1 comparison pass. Thirty-eight fixed
+raw clients include 29 forced-resolution constructed forms. All C/H,
+diagnostics, statuses, and stdout match; 32 successful interfaces differ
+only in compiler identity. Six retained Func definitions move -15 lines
+and -1,074 bytes to their actual authored locations, with other fields exact.
+Both runtime ErrorSites remain exact at parser arrow/dot lines 564 and 578.
+Seven alternating pairs after one warm pair give compiler-source median
+instructions 17,624,697,844 to 17,641,935,522 and operator-client medians
+4,703,433,421 to 4,700,971,137. Both ranges overlap, and all 16 measured
+raw C/H/diagnostic pairs match. No throughput improvement is claimed.
+
+The original 12 long-function candidates now have repaired lengths or
+reviewed dispatcher exceptions. That result does not establish full-file
+conformance, settle all strict named-step actions, or close the remaining
+held findings and public Error-detail decisions.
+
+PR #174 has merged. The next combined parent passes build and the
+220-file stage-1 comparison. Five fixtures pass: class-runtime,
+macro-declaration-constructed, ast-leaf-contract, sizeof-expression-operand,
+and macro-construction-regressions. Its authored source delta is +257/-297.
+A refreshed census over all 108 hand-authored src/lib files reports
+1,801 findings and 47 violations: 15 declarations, 16 braces, six subjects,
+three widths, and seven opening-line wraps. Those violation counts match
+the existing baseline exactly; no baseline update is needed. Advisory
+candidates require individual review and are not all established defects.
 
 The second combined parent passes build, stage-1, and the 220-file stage
 comparison. Six fixtures pass across lambda capture, protocol direct
