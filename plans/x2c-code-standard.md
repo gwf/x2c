@@ -485,6 +485,37 @@ Evidence in `/tmp/x2c-standard-docs/debug/`:
 binding-only C changes and the normal bootstrap refresh, or leave this
 NM-2 finding pending. This trial does not reject other possible repairs.
 
+### Stage 4: runtime renames and a macro body change generated output
+
+The pre-edit `make build-safe` and `make stage-diff-0` at `ff68eaaa`
+pass, comparing 220 C/H files. Three violation repairs fail that exact
+comparison and have been restored:
+
+- `lib/match-cache.x:323`: renaming the `MatchLease._plan` subject from
+  `lease` to `m` changes its C prototype, definition, and member accesses.
+- `lib/match.x:759`: renaming the `MatchWalk._first` subject from `walk`
+  to `m` changes its C prototype, definition, and four receiver accesses.
+  No Error-site position changes in this attempt.
+- `lib/varconvert.x:92`: removing a single-statement body's braces removes
+  a nested generated C block around `$error.source.numeric` and shifts
+  nine later Error-site line numbers by one. The macro expands to a local
+  declaration and a raising block.
+
+Stage 4 requires a byte-exact stage comparison without rebaselining. These
+two subject renames do not preserve generated C parameter spellings. The direct brace repair also changes
+reported source positions. No replacement algorithm, new helper, or padding
+was introduced to hide a delta; five independent comment and width repairs
+pass their per-file comparisons.
+
+Gary must decide whether reviewed identifier-only C changes and source
+position changes can use a different neutral proof, or whether these three
+violations remain pending. The source and lint baseline retain them.
+
+Evidence in `/tmp/x2c-standard-d2/debug/`: `runtime-baseline-stage-diff-0.log`,
+`runtime-match-cache-diff.log`, `runtime-match-name-diff.log`, and
+`runtime-varconvert-diff.log`. Pre-edit C/H and rejected patches and C are
+preserved in `.context/` in that worktree. No bootstrap was refreshed.
+
 ## Progress
 
 | Stage | Commit | Date | Result |
@@ -501,6 +532,7 @@ NM-2 finding pending. This trial does not reject other possible repairs.
 | 3.6 | `9542ea14` | 2026-10-05 | 32 codes; 106 violations |
 | 4.process | `e70355e7` | 2026-10-05 | 3 -> 1 violations; +4/-4 .x; 220 C/H identical |
 | 4.emission | `5fc3fe75`, `5f8e5484` | 2026-10-05 | 6 -> 0 violations; +16/-14 .x; both stages identical |
+| 4.match | `7fcd0023`, `c5a66fc7`, `33c6f09e` | 2026-10-05 | 5 -> 2 violations; +3/-3 .x; 220 C/H identical |
 | D2 held | `a7c271f` | 2026-10-05 | +197/-192 .x; 4 raises held |
 | D3 held | `9511153f` | 2026-10-05 | +9/-9 .x; package check fails |
 
