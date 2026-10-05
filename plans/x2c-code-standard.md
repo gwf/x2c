@@ -500,6 +500,7 @@ NM-2 finding pending. This trial does not reject other possible repairs.
 | 3.5 | `f7b1b6a6` | 2026-10-05 | 11 codes; 287 new candidates |
 | 3.6 | `9542ea14` | 2026-10-05 | 32 codes; 106 violations |
 | 4.process | `e70355e7` | 2026-10-05 | 3 -> 1 violations; +4/-4 .x; 220 C/H identical |
+| 4.emission | `5fc3fe75`, `5f8e5484` | 2026-10-05 | 6 -> 0 violations; +16/-14 .x; both stages identical |
 | D2 held | `a7c271f` | 2026-10-05 | +197/-192 .x; 4 raises held |
 | D3 held | `9511153f` | 2026-10-05 | +9/-9 .x; package check fails |
 
