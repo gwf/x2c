@@ -1,103 +1,104 @@
 # language rules
-commands/lint/tests/src/style.x:7: violation forward-declaration: the unit defines this function and x2c collects the whole unit
-commands/lint/tests/src/style.x:35: violation negated-is: spell the test `is not`
-commands/lint/tests/src/indent.x:5: violation forward-declaration: the unit defines this function and x2c collects the whole unit
-commands/lint/tests/src/indent.x:11: violation negated-is: spell the test `is not`
-commands/lint/tests/lib/runtime.x:5: candidate same-file-forward-declaration: retain only for genuine co-recursion or literal shallow collection
+commands/lint/tests/src/style.x:7: violation forward-declaration FI-6: the unit defines this function and x2c collects the whole unit
+commands/lint/tests/src/style.x:35: violation negated-is ST-5: spell the test `is not`
+commands/lint/tests/src/indent.x:5: violation forward-declaration FI-6: the unit defines this function and x2c collects the whole unit
+commands/lint/tests/src/indent.x:11: violation negated-is ST-5: spell the test `is not`
+commands/lint/tests/lib/runtime.x:5: candidate same-file-forward-declaration FI-6: retain only for genuine co-recursion or literal shallow collection
 exit 0
 # all rules
-commands/lint/tests/src/style.x:2: candidate prohibited-prose: stock phrase
-commands/lint/tests/src/style.x:7: violation forward-declaration: the unit defines this function and x2c collects the whole unit
-commands/lint/tests/src/style.x:8: violation src-forward-declaration: user-space src code must rely on complete-unit collection
-commands/lint/tests/src/style.x:15: candidate over-width-table-row: verify that indivisible literal fields require this stable row
-commands/lint/tests/src/style.x:18: candidate decorated-ruler: decorated ruler
-commands/lint/tests/src/style.x:18: violation section-label: decorative or all-capitals label
-commands/lint/tests/src/style.x:19: candidate narration: narrates the code; state a decision
-commands/lint/tests/src/style.x:20: violation operator-spacing: doubled operator spacing
-commands/lint/tests/src/style.x:27: violation subject-parameter-name: name the Compiler subject c to save 1 line (found compiler)
-commands/lint/tests/src/style.x:35: violation negated-is: spell the test `is not`
-commands/lint/tests/src/style.x:38: violation deferred-initialization: initialize value where it becomes meaningful
-commands/lint/tests/src/style.x:39: candidate horizontal-form: complete call or signature appears to fit horizontally
-commands/lint/tests/src/style.x:39: violation wrapped-opening-line: move all arguments or parameters to the continuation line
-commands/lint/tests/src/style.x:41: candidate horizontal-form: complete call or signature appears to fit horizontally
-commands/lint/tests/src/style.x:42: violation continuation-indent: arguments or parameters use a two-space continuation
-commands/lint/tests/src/style.x:43: candidate horizontal-form: complete call or signature appears to fit horizontally
-commands/lint/tests/src/style.x:46: violation standalone-closer: keep the close and trailer with the final argument or parameter
-commands/lint/tests/src/style.x:47: violation one-statement-braces: omit braces around one executable statement
-commands/lint/tests/src/style.x:50: candidate short-control-flow: the header and its one statement fit on one line
-commands/lint/tests/src/style.x:52: candidate repeated-accessor: c.size() repeats three times; cache only if pure and stable
-commands/lint/tests/src/style.x:53: violation tab: tab character
-commands/lint/tests/src/style.x:54: violation trailing-whitespace: trailing whitespace
-commands/lint/tests/src/style.x:56: violation blank-line-stack: consecutive blank line
-commands/lint/tests/src/style.x:57: candidate constant-output-run: 2 adjacent static output calls; preserve emitted bytes
-commands/lint/tests/src/style.x:59: violation over-width: 80 columns
-commands/lint/tests/src/style.x:60: candidate over-width-literal: verify that preserving observable literal text requires this width
-commands/lint/tests/src/clean.x:10: violation restates-code: translates the next statement
-commands/lint/tests/src/indent.x:5: violation forward-declaration: the unit defines this function and x2c collects the whole unit
-commands/lint/tests/src/indent.x:11: violation negated-is: spell the test `is not`
-commands/lint/tests/src/indent.x:19: violation over-width: 80 columns
-commands/lint/tests/lib/runtime.x:5: candidate same-file-forward-declaration: retain only for genuine co-recursion or literal shallow collection
-commands/lint/tests/lib/runtime.x:6: candidate runtime-forward-declaration: retain only for cross-unit co-recursion or literal shallow collection
+commands/lint/tests/src/style.x:2: candidate prohibited-prose CM-8: stock phrase
+commands/lint/tests/src/style.x:7: violation forward-declaration FI-6: the unit defines this function and x2c collects the whole unit
+commands/lint/tests/src/style.x:8: violation src-forward-declaration FI-6: user-space src code must rely on complete-unit collection
+commands/lint/tests/src/style.x:15: candidate over-width-table-row LY-2: verify that indivisible literal fields require this stable row
+commands/lint/tests/src/style.x:18: candidate decorated-ruler FI-5: decorated ruler
+commands/lint/tests/src/style.x:18: violation section-label FI-5: decorative or all-capitals label
+commands/lint/tests/src/style.x:19: candidate narration CM-2: narrates the code; state a decision
+commands/lint/tests/src/style.x:20: violation operator-spacing LY-5: doubled operator spacing
+commands/lint/tests/src/style.x:27: violation subject-parameter-name NM-2: name the Compiler subject c to save 1 line (found compiler)
+commands/lint/tests/src/style.x:35: violation negated-is ST-5: spell the test `is not`
+commands/lint/tests/src/style.x:38: violation deferred-initialization ST-7: initialize value where it becomes meaningful
+commands/lint/tests/src/style.x:39: candidate horizontal-form LY-3: complete call or signature appears to fit horizontally
+commands/lint/tests/src/style.x:39: violation wrapped-opening-line LY-3: move all arguments or parameters to the continuation line
+commands/lint/tests/src/style.x:41: candidate horizontal-form LY-3: complete call or signature appears to fit horizontally
+commands/lint/tests/src/style.x:42: violation continuation-indent LY-4: arguments or parameters use a two-space continuation
+commands/lint/tests/src/style.x:43: candidate horizontal-form LY-3: complete call or signature appears to fit horizontally
+commands/lint/tests/src/style.x:46: violation standalone-closer LY-4: keep the close and trailer with the final argument or parameter
+commands/lint/tests/src/style.x:47: violation one-statement-braces ST-1: omit braces around one executable statement
+commands/lint/tests/src/style.x:50: candidate short-control-flow ST-2: the header and its one statement fit on one line
+commands/lint/tests/src/style.x:52: candidate repeated-accessor ST-10: c.size() repeats three times; cache only if pure and stable
+commands/lint/tests/src/style.x:53: violation tab LY-1: tab character
+commands/lint/tests/src/style.x:54: violation trailing-whitespace LY-1: trailing whitespace
+commands/lint/tests/src/style.x:56: violation blank-line-stack LY-6: consecutive blank line
+commands/lint/tests/src/style.x:57: candidate constant-output-run EX-11: 2 adjacent static output calls; preserve emitted bytes
+commands/lint/tests/src/style.x:59: violation over-width LY-2: 80 columns
+commands/lint/tests/src/style.x:60: candidate over-width-literal LY-2: verify that preserving observable literal text requires this width
+commands/lint/tests/src/clean.x:10: violation restates-code CM-2: translates the next statement
+commands/lint/tests/src/indent.x:5: violation forward-declaration FI-6: the unit defines this function and x2c collects the whole unit
+commands/lint/tests/src/indent.x:11: violation negated-is ST-5: spell the test `is not`
+commands/lint/tests/src/indent.x:19: violation over-width LY-2: 80 columns
+commands/lint/tests/lib/runtime.x:5: candidate same-file-forward-declaration FI-6: retain only for genuine co-recursion or literal shallow collection
+commands/lint/tests/lib/runtime.x:6: candidate runtime-forward-declaration FI-6: retain only for cross-unit co-recursion or literal shallow collection
 exit 0
 # selected rules
-commands/lint/tests/src/style.x:35: violation negated-is: spell the test `is not`
-commands/lint/tests/src/style.x:53: violation tab: tab character
+commands/lint/tests/src/style.x:35: violation negated-is ST-5: spell the test `is not`
+commands/lint/tests/src/style.x:53: violation tab LY-1: tab character
 exit 0
 # a unit that does not parse
-commands/lint/tests/broken.x:3: violation negated-is: spell the test `is not`
+commands/lint/tests/broken.x:3: violation negated-is ST-5: spell the test `is not`
 exit 1
 # non-ASCII text
-ascii.x:1: violation non-ascii: non-ASCII character
+ascii.x:1: violation non-ascii LY-1: non-ASCII character
 exit 0
 # comment rules
-commands/lint/tests/src/comments.x:1: candidate module-header-inventory: the module header inventories the implementation
-commands/lint/tests/src/comments.x:5: violation comment-history: history or unfinished work
-commands/lint/tests/src/comments.x:8: violation section-label: decorative or all-capitals label
-commands/lint/tests/src/comments.x:11: candidate catalog-label: catalog-style section label
-commands/lint/tests/src/comments.x:14: candidate narration: narrates the code; state a decision
-commands/lint/tests/src/comments.x:14: violation restates-name: restates the name _parse_value
-commands/lint/tests/src/comments.x:17: candidate narration: narrates the code; state a decision
-commands/lint/tests/src/comments.x:21: violation comment-null-guard: narrates an obvious null guard
-commands/lint/tests/src/comments.x:23: violation restates-code: translates the next statement
-commands/lint/tests/src/comments.x:28: violation doc-boilerplate: parameter or return boilerplate
-commands/lint/tests/src/comments.x:34: violation detached-doc: doc comment detached from its declaration
-commands/lint/tests/src/comments.x:38: violation stacked-doc: stacked doc comments
-commands/lint/tests/src/comments.x:42: violation doc-on-static: doc comment on a private static helper
-commands/lint/tests/src/comments.x:45: candidate repeated-prose: repeats prose elsewhere in the file
-commands/lint/tests/src/comments.x:48: candidate repeated-prose: repeats prose elsewhere in the file
+commands/lint/tests/src/comments.x:1: candidate module-header-inventory FI-2: the module header inventories the implementation
+commands/lint/tests/src/comments.x:5: violation comment-history CM-4: history or unfinished work
+commands/lint/tests/src/comments.x:8: violation section-label FI-5: decorative or all-capitals label
+commands/lint/tests/src/comments.x:11: candidate catalog-label FI-5: catalog-style section label
+commands/lint/tests/src/comments.x:14: candidate narration CM-2: narrates the code; state a decision
+commands/lint/tests/src/comments.x:14: violation restates-name CM-2: restates the name _parse_value
+commands/lint/tests/src/comments.x:17: candidate narration CM-2: narrates the code; state a decision
+commands/lint/tests/src/comments.x:21: violation comment-null-guard CM-2: narrates an obvious null guard
+commands/lint/tests/src/comments.x:23: violation restates-code CM-2: translates the next statement
+commands/lint/tests/src/comments.x:28: violation doc-boilerplate CM-5: parameter or return boilerplate
+commands/lint/tests/src/comments.x:34: violation detached-doc CM-5: doc comment detached from its declaration
+commands/lint/tests/src/comments.x:38: violation stacked-doc CM-5: stacked doc comments
+commands/lint/tests/src/comments.x:42: violation doc-on-static CM-5: doc comment on a private static helper
+commands/lint/tests/src/comments.x:45: candidate repeated-prose CM-7: repeats prose elsewhere in the file
+commands/lint/tests/src/comments.x:48: candidate repeated-prose CM-7: repeats prose elsewhere in the file
 exit 0
 # structure and validation rules
-commands/lint/tests/src/review.x:4: candidate internal-type: struct Checker has 1 members and no use outside its file
-commands/lint/tests/src/review.x:6: candidate internal-type: struct Pair has 1 members and no use outside its file
-commands/lint/tests/src/review.x:8: candidate internal-type: enum Color has 2 members and no use outside its file
-commands/lint/tests/src/review.x:20: violation return-after-report-error: return follows non-returning report_error in Checker.check_pair
-commands/lint/tests/src/review.x:20: candidate shape-diagnostics: diagnostics are built around manual List or AST shape checks in Checker.check_pair
-commands/lint/tests/src/review.x:20: candidate validator-diagnostics: validator-like helper emits diagnostics in Checker.check_pair
-commands/lint/tests/src/review.x:25: candidate silent-shape-guard: impossible shape can silently return fallback in Checker.check_pair
-commands/lint/tests/src/review.x:33: violation return-after-raise: return follows a non-returning shared Error cause in raise_then_return
-commands/lint/tests/src/review.x:41: candidate struct-copy: 1 field transfers and 1 whole copies in copy_pair
-commands/lint/tests/src/review.x:46: candidate manual-bookkeeping: 5 statistics sites and 0 cleanup calls in count_everything
-commands/lint/tests/src/review.x:54: candidate lifecycle-pair: paired acquire/release functions acquire_slot and release_slot
-commands/lint/tests/src/review.x:62: candidate repeated-accessor: node.car() repeats three times; cache only if pure and stable
-commands/lint/tests/src/review.x:68: candidate repeated-routes: 3 functions share at least 80% of control and call tokens: route_one, route_two, route_three
-commands/lint/tests/src/review.x:89: candidate silent-shape-guard: impossible shape can silently continue in skip_other
+commands/lint/tests/src/review.x:4: candidate internal-type FA-8: struct Checker has 1 members and no use outside its file
+commands/lint/tests/src/review.x:6: candidate internal-type FA-8: struct Pair has 1 members and no use outside its file
+commands/lint/tests/src/review.x:8: candidate internal-type FA-8: enum Color has 2 members and no use outside its file
+commands/lint/tests/src/review.x:20: violation return-after-report-error ER-4: return follows non-returning report_error in Checker.check_pair
+commands/lint/tests/src/review.x:20: candidate shape-diagnostics PR-4: diagnostics are built around manual List or AST shape checks in Checker.check_pair
+commands/lint/tests/src/review.x:20: candidate validator-diagnostics PR-4: validator-like helper emits diagnostics in Checker.check_pair
+commands/lint/tests/src/review.x:25: candidate silent-shape-guard PR-4: impossible shape can silently return fallback in Checker.check_pair
+commands/lint/tests/src/review.x:33: violation return-after-raise ER-4: return follows a non-returning shared Error cause in raise_then_return
+commands/lint/tests/src/review.x:41: candidate struct-copy FA-3: 1 field transfers and 1 whole copies in copy_pair
+commands/lint/tests/src/review.x:46: candidate manual-bookkeeping LT-1: 5 statistics sites and 0 cleanup calls in count_everything
+commands/lint/tests/src/review.x:54: candidate lifecycle-pair LT-1: paired acquire/release functions acquire_slot and release_slot
+commands/lint/tests/src/review.x:62: candidate repeated-accessor ST-10: node.car() repeats three times; cache only if pure and stable
+commands/lint/tests/src/review.x:68: candidate repeated-routes FA-5: 3 functions share at least 80% of control and call tokens: route_one, route_two, route_three
+commands/lint/tests/src/review.x:89: candidate silent-shape-guard PR-4: impossible shape can silently continue in skip_other
 exit 0
 # shared Error causes outside the repository
-review.x:33: violation return-after-raise: return follows a non-returning shared Error cause in raise_then_return
+review.x:33: violation return-after-raise ER-4: return follows a non-returning shared Error cause in raise_then_return
 exit 0
 # shape rules
-commands/lint/tests/src/shape.x:6: candidate long-function: function spans 41 lines; review above 40
-commands/lint/tests/src/shape.x:89: candidate deep-nesting: brace depth reaches 5; review at 5
-commands/lint/tests/src/shape.x:122: candidate long-parameter-list: function takes 7 parameters; group shared context in a record or receiver
-commands/lint/tests/src/shape.x:128: candidate long-name: name has 30 characters; review at 30
+commands/lint/tests/src/shape.x:6: candidate long-function FN-2: function spans 41 lines; review above 40
+commands/lint/tests/src/shape.x:89: candidate deep-nesting FN-5: brace depth reaches 5; review at 5
+commands/lint/tests/src/shape.x:122: candidate long-parameter-list FN-6: function takes 7 parameters; group shared context in a record or receiver
+commands/lint/tests/src/shape.x:128: candidate long-name NM-3: name has 25 characters; review at 25
+commands/lint/tests/src/shape.x:132: candidate long-name NM-3: name has 25 characters; review at 25
 exit 0
 # a script unit
 exit 0
 # a preloaded macro library
 exit 0
 # reference parameters
-commands/lint/tests/src/references.x:10: candidate reference-parameter: `count` aliases one caller variable; declare it as a `&` reference parameter
-commands/lint/tests/src/references.x:10: candidate reference-parameter: `pair` aliases one caller variable; declare it as a `&` reference parameter
+commands/lint/tests/src/references.x:10: candidate reference-parameter FN-8: `count` aliases one caller variable; declare it as a `&` reference parameter
+commands/lint/tests/src/references.x:10: candidate reference-parameter FN-8: `pair` aliases one caller variable; declare it as a `&` reference parameter
 exit 0
 # spacing that formatting changes
 spacing.x: 4 lines to format
@@ -105,14 +106,14 @@ spacing.x: 4 lines to format
 exit 1
 exit 0
 # idiom fixes proven by the generated C
-idioms.x:5: candidate internal-type: struct Point has 1 members and no use outside its file
-idioms.x:11: candidate member-arrow: reach the member with `.`
-idioms.x:20: candidate contains-in: write the membership test with `in`
-idioms.x:25: candidate contains-in: write the membership test with `in`
-idioms.x:28: candidate plain-string: a plain literal needs no interpolation
-idioms.x:30: candidate plain-string: a plain literal needs no interpolation
-idioms.x:33: candidate expression-body: write the one returned value with `=>`
-idioms.x:43: violation negated-is: spell the test `is not`
-idioms.x:43: candidate silent-shape-guard: impossible shape can silently return 0 in negated
+idioms.x:5: candidate internal-type FA-8: struct Point has 1 members and no use outside its file
+idioms.x:11: candidate member-arrow EX-6: reach the member with `.`
+idioms.x:20: candidate contains-in ST-11: write the membership test with `in`
+idioms.x:25: candidate contains-in ST-11: write the membership test with `in`
+idioms.x:28: candidate plain-string EX-3: a plain literal needs no interpolation
+idioms.x:30: candidate plain-string EX-3: a plain literal needs no interpolation
+idioms.x:33: candidate expression-body FN-7: write the one returned value with `=>`
+idioms.x:43: violation negated-is ST-5: spell the test `is not`
+idioms.x:43: candidate silent-shape-guard PR-4: impossible shape can silently return 0 in negated
 idioms.x: fixed 5 of 6
 exit 0
