@@ -625,7 +625,10 @@ static List Definition.part_body(Definition &d) {
   Compiler c = d.c;
   c.expect(<"{">);
   List body = NULL;
-  if (d.kind == <param>) body = c.parse_parameter();
+  if (d.kind == <param>) {
+    body = c.try_parse_macro_slot(<param>);
+    if (!body) body = c.parse_parameter();
+  }
   else c.parse_type_operand(&body);
   c.expect(<"}">);
   return body;
@@ -689,9 +692,10 @@ static List Definition.wrap(Definition &d) {
   return replacement;
 }
 
-/* Each `(macro-bind BINDER)` slot becomes its binder. A body that is one
-   expression slot keeps the `expr` around its binder. */
+/* Each nested `(macro-bind BINDER)` slot becomes its binder. A whole slot
+   keeps a List shell: `expr` for an expression, `macro-bind` otherwise. */
 static List _slot_binders(List replacement) {
+  match (replacement) case %(macro-bind ?): return replacement;
   List bindings;
   Var expression_slot = %(
     expr (<macro-expr>) (macro-bind ?binder)
@@ -1518,6 +1522,8 @@ static List Definition.typed_construction(Definition &d) {
    they are written, as a typed quotation builds its expression. */
 static List Definition.part_construction(Definition &d) {
   Map keys = d.written_keys();
+  match (d.rebuild.car()) case %(macro-bind ?binder):
+    return d.c._typed_hole(keys[binder], d.start);
   return %(expr ("List") ${d.c._typed_cells(d.rebuild.car(), keys, d.start)});
 }
 
@@ -1598,7 +1604,8 @@ static int Compiler._quoted_role(Compiler c, Symbol role) {
   if (!(%(quotation) in c.macro_holes) || !(role in quoted_roles)) return 0;
   if (role == <name>) return 1;
   Token after = c.after_hole();
-  if (role == <param>) return after.type == <,> || after.type == <)>;
+  if (role == <param>)
+    return after.type == <,> || after.type == <)> || after.type == <"}">;
   return after.type != <;> && !_extends_expression(after);
 }
 
