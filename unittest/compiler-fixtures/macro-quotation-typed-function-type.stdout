@@ -1,0 +1,4 @@
+((func ((int))) int)
+((func ((void))) "Func")
+((func (("String") ("String"))) * void)
+(* (func ((int))) int)
