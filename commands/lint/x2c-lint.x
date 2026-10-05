@@ -37,6 +37,7 @@
 #include "comments.x"
 #include "validation.x"
 #include "structure.x"
+#include "policy.x"
 #include "fix.x"
 #include "format.x"
 #include "diff.x"
@@ -77,6 +78,7 @@ static int _parse(Lint l, Frontend frontend, String path):
   foreach List finding in l.findings: finding.promote()
   foreach List edit in l.edits: edit.promote()
   foreach List function in l.functions: function.promote()
+  foreach List function in l.unused: function.promote()
   parsed.close()
   return 1
 
@@ -166,7 +168,9 @@ int main(int argc, char **argv):
     l.comment_rules()
     if !_parse(l, frontend, file): status = 1
     l.structure_rules()
+    l.policy_rules()
   lint_corpus_rules(lints, count)
+  lint_unused_rules(lints, count)
   for (int at = 0; at < count; at++):
     Lint l = lints[at]
     l.suppression_rules()

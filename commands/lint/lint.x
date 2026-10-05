@@ -37,6 +37,8 @@ Rule
     token indexes, for a unit in brace syntax, whose compiler tokens are
     the tokens `Lint` scanned. `allowances` maps a source line to its
     `(CODE MATCHED)` Array, updated when that finding is suppressed.
+    `unused` holds static definitions without bound references as
+    `(NAME DISPLAY EMITTED LINE FIRST-LINE LAST-LINE)` for corpus review.
 */
 typedef struct Lint:
   String path, text
@@ -45,12 +47,23 @@ typedef struct Lint:
   int *partner, *first
   char *quoted
   Map selected, allowances
-  Array findings, edits, functions
+  Array findings, edits, functions, unused
 *Lint
 
 #pragma private
 
 static const Rule rules[] = {
+  {"same-line-else", <style>, <violation>, "ST-1"},
+  {"empty-constructor", <style>, <candidate>, "EX-1"},
+  {"saved-local", <style>, <candidate>, "NM-4"},
+  {"x2c-ident", <style>, <candidate>, "LI-2"},
+  {"lisp-defun", <style>, <candidate>, "LI-1"},
+  {"literal-report-error", <style>, <candidate>, "DG-1"},
+  {"assignment-condition", <style>, <candidate>, "ST-4"},
+  {"long-file", <style>, <candidate>, "FI-1"},
+  {"long-section", <style>, <candidate>, "FI-5"},
+  {"long-dispatch-arm", <style>, <candidate>, "FN-3"},
+  {"uncalled-static-function", <style>, <candidate>, "FI-7"},
   {"bad-suppression", <language>, <violation>, "CM-2"},
   {"forward-declaration", <language>, <violation>, "FI-6"},
   {"same-file-forward-declaration", <language>, <candidate>, "FI-6"},
@@ -228,7 +241,7 @@ Lint Lint.new(String path, String text, Map selected):
   int total = scanner.tokens.len() - 1
   Lint l = Scope.calloc(1, sizeof(struct Lint))
   l.path = path, l.text = text, l.selected = selected
-  l.findings = [], l.edits = [], l.functions = []
+  l.findings = [], l.edits = [], l.functions = [], l.unused = []
   l.allowances = {}
   l.layout = scanner.layout || path.endswith(".xp")
   l.tokens = Scope.calloc(total + 1, sizeof(struct Token))

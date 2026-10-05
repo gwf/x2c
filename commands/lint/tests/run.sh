@@ -18,6 +18,22 @@ printf '// caf\303\251\n' >"$work/ascii.x"
 # Formatting input that the fixtures would otherwise have to hold.
 printf '/* spacing.x */\nint add(int a,int b) {\n  int total = a + b ;\n\n\n  if(total) return total;\n  for (;;) break;\n  return 0;\n}\n' >"$work/spacing.x"
 
+# Generate exact metric boundaries without storing padding in the fixtures.
+for lines in 1500 1501; do
+  awk -v lines="$lines" 'BEGIN {
+    print "int metric(void) => 1;"
+    for (i = 1; i < lines; i++) print "// filler"
+  }' >"$work/file-$lines.x"
+done
+for lines in 400 401; do
+  awk -v lines="$lines" 'BEGIN {
+    print "// metric section\n\nint metric(void) => 1;"
+    for (i = 3; i < lines; i++) print "// filler"
+  }' >"$work/section-$lines.x"
+done
+cp "$tests/src/standard-tokens.x" "$work/outside.x"
+cp "$tests/src/standard-report.x" "$work/fixture-reports.xmacro"
+
 run() {
   status=0
   "$tool" "$@" 2>/dev/null || status=$?
@@ -74,6 +90,32 @@ run() {
   echo "# idiom fixes proven by the generated C"
   cp "$tests/src/idioms.x" "$work/idioms.x"
   (cd "$work" && run --all --fix idioms.x)
+  echo "# standard adoption token and declaration signals"
+  run --rule same-line-else --rule empty-constructor --rule saved-local \
+    --rule x2c-ident --rule lisp-defun --rule literal-report-error \
+    --rule assignment-condition "$tests/src/standard-tokens.x"
+  echo "# Lisp outside compiler and runtime"
+  (cd "$work" && run --rule lisp-defun outside.x)
+  echo "# diagnostic wording owned by report macros"
+  run --rule literal-report-error "$tests/src/standard-report.x"
+  (cd "$work" && run --rule literal-report-error fixture-reports.xmacro)
+  echo "# dispatcher arm boundaries"
+  run --rule long-dispatch-arm "$tests/src/standard-arms.x"
+  echo "# static definitions and referenced functions"
+  run --rule uncalled-static-function "$tests/src/standard-static.x" \
+    "$tests/src/standard-cross.x"
+  echo "# layout dispatcher and static definition"
+  run --rule long-dispatch-arm --rule uncalled-static-function \
+    "$tests/src/standard-layout.x"
+  echo "# file and section metric boundaries"
+  (cd "$work" && run --rule long-file file-1500.x file-1501.x)
+  (cd "$work" && run --rule long-section section-400.x section-401.x)
+  echo "# malformed trailing identifiers"
+  for word in String Array Map x2c report_error; do
+    printf '%s\n' "$word" >"$work/trailing.x"
+    (cd "$work" && run --rule empty-constructor --rule x2c-ident \
+      --rule literal-report-error trailing.x)
+  done
 } >"$out"
 diff -u "$tests/expected.txt" "$out"
 diff -u "$tests/fixed/idioms.x" "$work/idioms.x"
