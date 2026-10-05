@@ -337,6 +337,14 @@ def comparable_metrics(row: dict[str, object]) -> dict[str, float]:
   key = build_scaling_key(build_scaling)
   if key:
     metrics[key] = float(build_scaling["score"])
+  for field, label in (
+    ("cpu_seconds", "build-scaling sequential stage build CPU seconds"),
+    ("cpu_seconds_per_authored_line", "build-scaling CPU seconds/authored line"),
+    ("authored_source_lines", "build-scaling authored source lines"),
+  ):
+    value = build_scaling.get(field)
+    if isinstance(value, (int, float)):
+      metrics[label] = float(value)
   for key, value in (row.get("compiler_median_seconds") or {}).items():
     metrics[f"compiler {key} seconds"] = float(value)
   for key, value in (row.get("shootout_median") or {}).items():
@@ -371,31 +379,49 @@ def render_report(
     lines.append(f"- {score_key}: {score:.1f}{change}")
   if previous is None:
     lines.extend(["", "This is the first successful retained snapshot."])
-    return "\n".join(lines) + "\n"
 
-  old = comparable_metrics(previous)
+  old = comparable_metrics(previous or {})
+  old_scaling = (previous or {}).get("build_scaling") or {}
+  new_scaling = current.get("build_scaling") or {}
+  if not all(new_scaling.get(field) and
+             new_scaling[field] == old_scaling.get(field)
+             for field in ("metric_id", "baseline_id")):
+    old = {key: value for key, value in old.items()
+           if not key.startswith("build-scaling ")}
   new = comparable_metrics(current)
-  shared = sorted(set(old) & set(new))
-  headline = [key for key in shared if not key.startswith("runtime ")]
+  headline = sorted(key for key in new if not key.startswith("runtime "))
   runtime = sorted(
-    (key for key in shared if key.startswith("runtime ")),
-    key=lambda key: abs((new[key] - old[key]) / old[key]) if old[key] else 0,
+    (key for key in new if key.startswith("runtime ")),
+    key=lambda key: abs((new[key] - old[key]) / old[key])
+      if old.get(key) else 0,
     reverse=True,
   )[:10]
+  if previous is not None:
+    lines.extend([
+      "", f"Compared with `{previous['run_id']}` at `{previous['commit']}`.",
+    ])
   lines.extend([
     "",
-    f"Compared with `{previous['run_id']}` at `{previous['commit']}`.",
+    "Stage-3 seconds measure elapsed builds through compiler stage 3.",
+    "Compiler rows measure elapsed translation of six compiler sources plus",
+    "the tokenizer, not native compilation or a full compiler translation.",
+    "Build-scaling CPU seconds measure a sequential stage build, including",
+    "translation and native compilation; seconds/authored line normalizes it.",
+    "Shootout rows are elapsed-time ratios to C, not absolute build times.",
     "Lower is better for the stage, compiler, and shootout timing rows.",
-    "Runtime-suite rows are the ten largest changes and retain their original",
-    "metric names; interpret non-timing counters by their documented meaning.",
+    "Runtime-suite rows show up to ten metrics, ordered by comparable change.",
+    "They retain metric names; units are not recorded in the snapshot. Interpret",
+    "them by their source benchmark, without treating counters as timings.",
     "",
     "| Metric | Previous | Current | Change |",
     "| --- | ---: | ---: | ---: |",
   ])
   for key in [*headline, *runtime]:
+    before = old.get(key)
+    before_text = "n/a" if before is None else f"{before:.6g}"
+    change = "n/a" if before is None else percent_change(new[key], before)
     lines.append(
-      f"| {key} | {old[key]:.6g} | {new[key]:.6g} | "
-      f"{percent_change(new[key], old[key])} |"
+      f"| {key} | {before_text} | {new[key]:.6g} | {change} |"
     )
   return "\n".join(lines) + "\n"
 
@@ -532,14 +558,15 @@ def run_snapshot(
 
 
 def run_ref(args: argparse.Namespace, output_root: Path) -> int:
-  if args.fetch:
-    subprocess.run(
-      ["git", "fetch", "origin", "dev"], cwd=ROOT, check=True,
-    )
   temporary = Path(tempfile.mkdtemp(prefix="x2c-performance-"))
   worktree = temporary / "worktree"
   added = False
+  succeeded = False
   try:
+    if args.fetch:
+      subprocess.run(
+        ["git", "fetch", "origin", "dev"], cwd=ROOT, check=True,
+      )
     subprocess.run(
       ["git", "worktree", "add", "--detach", str(worktree), args.ref],
       cwd=ROOT, check=True,
@@ -552,14 +579,34 @@ def run_ref(args: argparse.Namespace, output_root: Path) -> int:
     ]
     if args.skip_if_success_today:
       command.append("--skip-if-success-today")
-    return subprocess.run(command, cwd=worktree).returncode
+    returncode = subprocess.run(command, cwd=worktree).returncode
+    succeeded = returncode == 0
+    return returncode
   finally:
-    if added:
-      subprocess.run(
-        ["git", "worktree", "remove", "--force", str(worktree)],
-        cwd=ROOT, check=False,
-      )
-    shutil.rmtree(temporary, ignore_errors=True)
+    # A cancelled add can leave a registered checkout before returning.
+    added = added or (worktree / ".git").exists()
+    if not added:
+      shutil.rmtree(temporary, ignore_errors=True)
+      print("performance snapshot setup failed before worktree creation",
+            file=sys.stderr)
+    elif succeeded:
+      try:
+        removed = subprocess.run(
+          ["git", "worktree", "remove", "--force", str(worktree)],
+          cwd=ROOT, check=False,
+        )
+      except BaseException:
+        print(f"snapshot cleanup interrupted; retained worktree: {worktree}",
+              file=sys.stderr)
+        raise
+      if removed.returncode == 0:
+        shutil.rmtree(temporary, ignore_errors=True)
+      else:
+        print(f"snapshot cleanup failed; retained worktree: {worktree}",
+              file=sys.stderr)
+    else:
+      print(f"performance snapshot retained worktree: {worktree}",
+            file=sys.stderr)
 
 
 def parse_args() -> argparse.Namespace:

@@ -171,6 +171,11 @@ captures, expression and block bodies, and typed parameter sequences.
   seams behind protocol adoption. A fixture locks `@{...}` inside `%""` as
   literal segment text; List-context rejection has its own fixture.
 
+The 2026-10-05 publication probes found that exporting the Make help script
+to unrelated child processes caused `var-chain-stack` to fail at its 256 KiB
+stack limit. The export now belongs only to `help`. The unchanged fixture
+passed six repeated nested-Make probes, and help output remains byte-identical.
+
 ## Outstanding Items
 
 Adding `List cached = %("stack-check"); (void) cached;` at the start of

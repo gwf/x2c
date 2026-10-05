@@ -22,7 +22,8 @@ Establish `orchestrator` context with `direct` or `pr` delivery through
 [AGENTS.md](../../../AGENTS.md#select-integration-ownership). Pass that choice
 to workers, while setting each isolated worker to `worker`/`private` before it
 starts. Context setup and private handoffs use common repository tools and
-Git revisions across providers; no provider-specific messaging API is needed.
+Git revisions. Optional PR contacts support repairs across platforms; native
+worker orchestration remains the worker communication path.
 
 ## Split the work
 
@@ -40,17 +41,14 @@ editing shared files, and tell it when a shared file is clear again.
 
 Launch each worker with worktree isolation. Tell it to:
 
-- branch from the orchestrator-selected starting revision: current dev for
-  independent work, or a local capability commit for dependent work. Record
-  that exact revision for the handoff;
+- branch from the requested remote ref, resolved once to its full SHA, or a
+  local capability commit for dependent work. Pass that SHA to worktree
+  creation and record it for the handoff;
 - initialize a fresh compiler with `make build-safe` before using `builds/0`,
   then choose focused builds or tests that answer its implementation questions;
-- prove its change with the cheapest complete check. For a refactor, move, or
-  rename, `make build && make stage-1 && make stage-diff-1` byte equality is
-  the proof. Add the suites or fixtures that exercise changed runtime or
-  diagnostic behavior, and before/after instruction counts on a hot path. Do
-  not run `make verify` or `make commands-check` unless the change touches
-  what only they cover; the integration gate runs them once for the batch;
+- run named focused checks for the changed behavior, using the task skill's
+  proof obligations. Do not copy a full publication sequence into each brief;
+  the integration owner runs the gate once for the completed batch;
 - split a file as a move commit with no edits inside the moved text, then a
   commit that settles crossings, the header, and section order;
 - stop and report, with evidence, when the assigned change would break a

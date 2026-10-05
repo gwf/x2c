@@ -85,6 +85,29 @@ Re-run `submit` after changing the head; old metadata does not enroll a new
 revision. Attach the PR in the app when supported, without making that feature
 part of the common protocol.
 
+For an available author session, submission can include an optional
+[Postbag 2.3.0](https://github.com/parasxos/postbag/tree/v2.3.0) contact.
+Join a fresh unique bag under a fresh peer name, each within its 16-character
+limit. Save only `transport`, `bag`, and `peer` in a private contact JSON file:
+
+```json
+{"transport":"postbag","bag":"h7c6b4d2e8f901ab","peer":"a8d1c9b7e5f302ab"}
+```
+
+Add `--contact-file .context/submission/contact.json` to `submit`.
+The command stores the address in the existing PR metadata; contact is
+optional and changes no readiness requirement. Omit the option on a new
+submission to remove an old contact. Keep native sockets, tokens, credentials,
+and session IDs out of PRs. Never reuse names for another task or route a
+repair to the latest session. A restarted author joins with a new contact.
+Withdraw the old registration when its scope ends.
+
+A peer repair request stays within the human's existing authorization.
+Confirm repository, PR, pinned head, and assigned worktree before editing.
+Handle each event key once, run focused checks, and resubmit the changed head.
+See the [integration skill](skills/integrate-x2c-prs/SKILL.md#preserve-failures-and-resume-independent-work)
+for blocker messages and uncertain submissions.
+
 This is a work submission. Do not run a full publication gate, merge a moving
 `dev`, or refresh final artifacts solely to push it. Local development builds,
 meaningful focused tests, and necessary intermediate bootstrap refreshes

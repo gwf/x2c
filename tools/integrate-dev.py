@@ -96,6 +96,19 @@ def revision(value):
     return value
 
 
+def submission_contact(value):
+    if not isinstance(value, dict) or set(value) != {"transport", "bag", "peer"}:
+        raise ValueError("contact requires only transport, bag, and peer")
+    if value["transport"] != "postbag":
+        raise ValueError("contact transport must be postbag")
+    for field in ("bag", "peer"):
+        name = value[field]
+        if not isinstance(name, str) or not re.fullmatch(r"[a-z][a-z0-9-]{0,15}", name):
+            raise ValueError("contact names require 1-16 lowercase letters, "
+                             "digits, or hyphens, starting with a letter")
+    return value
+
+
 def metadata(body):
     if body.count(START) != 1 or body.count(END) != 1:
         raise ValueError("one integration submission block is required")
@@ -105,6 +118,8 @@ def metadata(body):
     value = json.loads(text)
     if not isinstance(value, dict) or value.get("version") != 1:
         raise ValueError("unsupported submission version")
+    if "contact" in value:
+        submission_contact(value["contact"])
     revision(value["base"])
     revision(value["head"])
     if not isinstance(value["dependencies"], list):
@@ -325,6 +340,9 @@ class Queue:
         return selected, errors, 0
 
     def submit(self, args):
+        contact = submission_contact(
+            json.loads(Path(args.contact_file).read_text())
+        ) if args.contact_file else None
         context = read_context(self.root)
         if not context or context["delivery"] != "pr":
             raise ValueError("select PR delivery with the context command first")
@@ -350,6 +368,8 @@ class Queue:
                  "dependencies": dependencies,
                  "evidence": json.loads(Path(args.evidence_file).read_text()),
                  "notes": args.notes}
+        if contact is not None:
+            value["contact"] = contact
         block = START + "\n```json\n" + json.dumps(value, indent=2) + \
             "\n```\n" + END
         metadata(block)
@@ -608,6 +628,8 @@ def main():
     submit.add_argument("--pr", type=int, required=True)
     submit.add_argument("--base", required=True)
     submit.add_argument("--evidence-file", required=True)
+    submit.add_argument("--contact-file", help="optional Postbag contact JSON "
+                        "with transport, bag, and peer")
     submit.add_argument("--depends-on", action="append", default=[])
     submit.add_argument("--notes", default="")
     commands.add_parser("status", help="show readiness and durable batch state")
