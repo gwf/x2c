@@ -26,7 +26,7 @@ X2c AST transformation pipeline.
 Converts an array literal to source-ordered Var arguments for its
 counted constructor.
 
-Source: `src/transform.x:409`
+Source: `src/transform.x:417`
 
 #### transform_map_literal
 
@@ -35,7 +35,7 @@ Source: `src/transform.x:409`
 Converts a map literal to alternating Var key/value arguments for its
 counted constructor.
 
-Source: `src/transform.x:423`
+Source: `src/transform.x:431`
 
 ### `Compiler`
 
