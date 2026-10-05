@@ -17,6 +17,7 @@ The generated header and source of one unit.
 | [`Compiler.definition_rows`](#Compiler.definition_rows) | Returns one row for each function, foreign alias, and typedef that the lowered unit `ast` defines, in source order: `(function NAME DISPLAY TYPE PARAMETERS LINE DOC STATIC ORIGIN DECLARATOR SPAN)` or `(typedef NAME BASE MODIFIERS SPAN)`. |
 | [`Compiler.dump_definitions`](#Compiler.dump_definitions) | Prints the `--dump-definitions` projection of the lowered unit `ast`: `(unit PATH)`, the module comment as `(module TEXT)` when the file opens with one, then one row per `Compiler.definition_rows` entry. |
 | [`Compiler.init_statements`](#Compiler.init_statements) | Returns the statements queued for `phase`, in the order they were added. |
+| [`Compiler.place_source_prelude`](#Compiler.place_source_prelude) | Places generated `declarations` after source types and includes, before the first function or captured initializer that can use them. |
 
 ### Functions
 
@@ -64,7 +65,7 @@ token range and privacy of the top-level form that produced the
 definition; either is empty when the compiler made the definition.
 `LINE` is 1 and `DOC` empty for a definition without authored source.
 
-Source: `src/generate.x:1418`
+Source: `src/generate.x:1440`
 
 <a id="Compiler.dump_definitions"></a>
 #### Compiler.dump_definitions
@@ -76,7 +77,7 @@ Prints the `--dump-definitions` projection of the lowered unit `ast`:
 with one, then one row per `Compiler.definition_rows` entry. The
 command-line reference in the book describes the fields.
 
-Source: `src/generate.x:1521`
+Source: `src/generate.x:1543`
 
 <a id="Compiler.init_statements"></a>
 #### Compiler.init_statements
@@ -85,7 +86,18 @@ Source: `src/generate.x:1521`
 
 Returns the statements queued for `phase`, in the order they were added.
 
-Source: `src/generate.x:1003`
+Source: `src/generate.x:1015`
+
+<a id="Compiler.place_source_prelude"></a>
+#### Compiler.place_source_prelude
+
+`List Compiler.place_source_prelude( Compiler c, List source, List declarations)`
+
+Places generated `declarations` after source types and includes, before
+the first function or captured initializer that can use them. An outer
+conditional containing that first use follows the declarations.
+
+Source: `src/generate.x:835`
 
 ## Design notes
 

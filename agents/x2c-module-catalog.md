@@ -232,8 +232,9 @@ the generated header and source of one unit.
 
 Public functions:
 
-`generate_code`, `generate_code_text`, `Compiler.init_statements`,
-`Compiler.definition_rows`, `Compiler.dump_definitions`
+`generate_code`, `generate_code_text`, `Compiler.place_source_prelude`,
+`Compiler.init_statements`, `Compiler.definition_rows`,
+`Compiler.dump_definitions`
 
 ### [src/initializers.x](../src/initializers.x)
 
@@ -454,7 +455,7 @@ Public functions:
 
 `preproc_directive`, `preproc_conditional_kind`, `preproc_open_state`,
 `preproc_branch_state`, `preproc_visibility`, `preproc_include_target`,
-`preproc_marker_file`, `preproc_macro_name`, `Compiler.scan_conditionals`,
+`preproc_marker_file`, `Compiler.scan_conditionals`,
 `Compiler.leading_preproc`, `Compiler.update_source_visibility`,
 `Compiler.note_object_macro`, `preproc_track_arms`, `preproc_within_arms`
 

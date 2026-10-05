@@ -39,8 +39,8 @@ or included file that defines its own until those move to `.xmacro`
 files. Meta code under the x2c root's `lib`, `src`, and `etc` is the
 compiler's own, linked into it.
 
-Each input that reaches any, and each included file that defines its
-own, gets a table of its own, parsed from the file itself so its
+Each input or included file that reaches any gets a table of its
+own, parsed from the file itself so its
 imports see the declarations they are used with. Each table's object
 keeps only its entry global, so copies of one import in several
 tables link together. The helper is cached under the x2c cache root,
