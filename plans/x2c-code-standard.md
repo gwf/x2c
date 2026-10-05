@@ -1,12 +1,12 @@
 # x2c code standard: authority, enforcement, and improvement
 
-> Status: active. Stages 1 and 3 are complete. D3 and D5 are delivered;
-> D2 retains four Array raises for Gary's decision. The latest census has
-> 26 of the original 106 violations: 13 declarations and 13 braces. The package
-> Error-pack migrations and first import-helper deletion are delivered.
-> The original 12 long-function candidates have repaired lengths or
-> reviewed dispatcher exceptions. Full-file shape work remains.
-> Gary accepted the standard and decisions D1-D5 on 2026-10-05.
+> Status: active. Stages 1 and 3 are complete. D2, D3, and D5 are
+> implemented. The initial violation cycle now reports zero violations
+> across 108 hand-authored src/lib files; all five held decisions are
+> approved and implemented. Original long-function candidates have
+> repaired lengths or reviewed dispatcher exceptions. Broader candidate
+> cycles remain; this is not whole-file or whole-campaign certification.
+> Source `f4b65aea` is ready for shared-integrator submission.
 > See [Progress](#progress). The single standard is
 > [agents/x2c-code-standard.md](../agents/x2c-code-standard.md).
 
@@ -923,7 +923,8 @@ No padding or invented replacement comment was added to force equality.
 | 4.pattern/context | `5ee83e40` | 2026-10-05 | PR #175 merged; +257/-297 .x |
 | 4.held repairs | `aaf3ad5f` | 2026-10-05 | PR #176 merged; 47 -> 27; +60/-56 .x |
 | 4.macro boundary | `aa8be759` | 2026-10-05 | PR #177 merged at `b600eab4`; 27 -> 26; +5/-7 .x |
-| 4.named steps | `1eade8ae` | 2026-10-05 | source checkpoint; four actions; +32/-16 .x |
+| 4.named steps | `1eade8ae` | 2026-10-05 | PR #178 merged at `b37110f0`; four actions; +32/-16 .x |
+| 4.approved decisions | `f4b65aea` | 2026-10-05 | source ready; 26 -> 0; src/lib +32/-29 .x |
 
 D3 retry on `e4d22fc7`: safe rebuild, verify (940 tests and 1,082 compiler
 fixtures), CLI probes, book examples (384 samples and 101 outputs), separate
@@ -1371,6 +1372,57 @@ whole-file, and whole-campaign conformity are not claimed. The required
 declaration, implementation-scope, Array detail, and extra empty-pass decisions
 also remain pending. Plan Stage 4 feedback requires Gary's agreement before
 changing a rule that this evidence shows is too strict.
+
+### Approved decisions implemented
+
+Source `f4b65aea` implements all five recommendations Gary approved.
+Thirteen required declarations stay intact with producer/binding explanations
+and existing local lint allowances. FI-6 and detector messages now distinguish
+required boundaries from redundant declarations; the ordinary fixture findings
+still fail, with only their owned explanatory messages updated. FN-3 permits
+the seventeen reviewed direct actions without source changes. The extra
+second-empty-architectural-pass prerequisite is retired; deletion-before-reshape
+and authored-diff review remain. No process or gate was added.
+
+Thirteen redundant caller brace pairs are removed. Complete generated proofs
+preserve local lifetime, identifiers, calls, evaluation order, quoted AST,
+error causes/details, wording, and ancestry. Nine removals touch expressions/
+transform; two touch literals/symbols; two touch compiler/varconvert. The
+quoted protocol fallback block remains intact. Six expression macro records
+move -1 line/-6 bytes. Ten runtime ErrorSite lines move -1. Declaration comments
+move seventeen source-backed generated scalar coordinates; each is mapped to
+its actual authored source. No unrelated generated change remains.
+
+D2's four Array producers now use operation for the type String and action
+for the existing Symbol, preserving values and pair order. Four owned reader
+assertions and the guide example follow those keys. A runtime probe observes
+exactly the approved migration. All 464 worker-generated ErrorSites remain
+exact. Two generator interfaces also move three retained adoption byte
+positions each, 1024 -> 1025, to the actual publication invocation after the
+one-byte authored line growth. Other interface data stays exact apart from
+compiler/source identity.
+
+The combined build, stage-1, and 220-file self-host comparison pass. All eight
+worker-changed C files are exact in the parent; two parent C files differ only
+in the seventeen verified coordinate scalars; all other 210 C/H are baseline
+exact. Eight combined fixtures and existing lint smoke pass. Worker evidence
+adds twelve guard fixtures/16 raw clients, four conversion/parser fixtures/
+16 exact artifacts and 15 tests/6,499 assertions, and ten Array/guard fixtures/
+19 typed tests/322 assertions/96 adjudicated artifacts. No broad gate was run.
+
+The 108-file census reports 1,773 advisory findings and zero violations.
+Lower only the observed forward-declaration 4 -> 0, src-forward-declaration
+9 -> 0, and one-statement-braces 13 -> 0 baselines. Source/runtime scope changes
+preserve optimized report operations; metadata constants and the two approved
+Array key immediates change. No added hot operation or speed improvement is
+claimed. Source lines: src/lib +32/-29, plus six added/six removed test .x lines.
+
+Doc-check reports stale generated API references only: 548 Source rows and four
+prior description rows. The integrator owns final documentation/bootstrap
+refresh and the publication gate. These five decisions and the initial
+violation cycle have no remaining implementation work. Advisory candidate
+cycles remain bounded future work; zero violations does not establish
+whole-file or whole-campaign conformity.
 
 ## Plan review
 
