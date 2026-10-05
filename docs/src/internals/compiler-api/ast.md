@@ -49,7 +49,7 @@ Source: `src/ast.x:140`
 
 Returns whether `op` writes its left operand.
 
-Source: `src/ast.x:314`
+Source: `src/ast.x:318`
 
 #### ast_collect_binding_references
 
@@ -150,7 +150,7 @@ Source: `src/ast.x:113`
 
 Returns initializer alternatives and their optional native macro input.
 
-Source: `src/ast.x:320`
+Source: `src/ast.x:324`
 
 <a id="Ast.initializer_functions"></a>
 #### Ast.initializer_functions
@@ -161,7 +161,7 @@ Returns function alternatives when every initializer arm calls one shared
 input, and stores that input expression in `source`. Other forms return
 NULL.
 
-Source: `src/ast.x:334`
+Source: `src/ast.x:338`
 
 <a id="Ast.lvalue_binding"></a>
 #### Ast.lvalue_binding
@@ -241,7 +241,7 @@ Source: `src/ast.x:194`
 
 Returns whether `op` is plain or compound assignment.
 
-Source: `src/ast.x:310`
+Source: `src/ast.x:314`
 
 ## Public types
 
