@@ -1,5 +1,5 @@
 unittest/compiler-fixtures/macro-quotation-param-named.x:6:33: parse: this quotation cannot declare a name or apply a template
   meta static List named(void) => $!Param{ double x };
                                   ^
-  note: a typed, Type, or Param quotation builds its code where it is written
+  note: a typed, Type, or Param quotation builds where it is written
 

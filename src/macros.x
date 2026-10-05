@@ -624,7 +624,7 @@ static List Definition.expression_body(Definition &d) {
 static List Definition.part_body(Definition &d) {
   Compiler c = d.c;
   c.expect(<"{">);
-  Type body = NULL;
+  List body = NULL;
   if (d.kind == <param>) body = c.parse_parameter();
   else c.parse_type_operand(&body);
   c.expect(<"}">);
