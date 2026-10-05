@@ -643,6 +643,8 @@ void x2c_cleanup_leave(X2CCleanup *);
 
 Map Sym_global_symbols(Sym);
 
+void Sym_withhold_import_rows(Sym, Map);
+
 static Map _preprocess_input(Frontend frontend, ParsedUnit * unit){
   Compiler c =(* unit).compiler;
   CliRequest request = frontend -> request;
@@ -682,7 +684,9 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit * unit){
     }
 
   }
-  return Sym_global_symbols(cpp -> sym);
+  Map symbols = Sym_global_symbols(cpp -> sym);
+  Sym_withhold_import_rows(cpp -> sym, symbols);
+  return symbols;
 }
 
 Map Compiler_collect_symbols(Compiler, Map);
@@ -848,7 +852,7 @@ void Lisp_destroy(Lisp);
 
 void Compiler_publish_macro_library(Compiler, Lisp);
 
-void collect_forget_preload_entries(void);
+void collect_forget_provisional_entries(void);
 
 int Frontend_preload_macro_libraries(Frontend frontend){
   if(! _init_guard_) _file_init_();
@@ -857,11 +861,11 @@ int Frontend_preload_macro_libraries(Frontend frontend){
   if(shared && ! _preload_meta_surface(frontend, shared)){
     Lisp_destroy(shared);
     Compiler_publish_macro_library(c, NULL);
-    collect_forget_preload_entries();
+    collect_forget_provisional_entries();
     return 0;
   }
   Compiler_publish_macro_library(c, shared);
-  collect_forget_preload_entries();
+  collect_forget_provisional_entries();
   return 1;
 }
 

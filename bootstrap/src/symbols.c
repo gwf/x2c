@@ -1225,6 +1225,21 @@ int SymTxn_local_macros_changed(SymTxn * s){
   return 0;
 }
 
+int Sym_log_writes(Sym s){
+  s -> transactions ++;  return Block_len(s -> undo);
+}
+
+Map Sym_added_globals(Sym s, int mark){
+  SymUndo * rows = s -> undo -> bytes;  Map seen = Map_new(), added = Map_new();  for(int i = mark;  i <(int) Block_len(s -> undo);  i ++){
+    SymUndo row = rows[i];  if(! _same(row.map, s -> globals) || Map_contains(seen, row.key)) continue;  Map_setindex(seen, row.key, int_var(1));  Var value;  if(Var_is_void(row.value) && Map_try_get(s -> globals, row.key, &(value))) Map_setindex(added, row.key, value);
+  }
+  return added;
+}
+
+void Sym_end_log(Sym s){
+  if(! -- s -> transactions) Block_clear(s -> undo);
+}
+
 void SymTxn_commit(SymTxn * s){
   if(! s) return;  if(!(* s).active) return;  if((* s).extended){
     Compiler c =(* s).c;  Map adapters = c -> names -> adapters;  c -> names -> adapters =(* s).adapters;  Map_merge((* s).adapters, adapters);
@@ -1233,7 +1248,7 @@ void SymTxn_commit(SymTxn * s){
 }
 
 static void SymTxn__finish(SymTxn * s){
-  Sym sym =(* s).c -> sym; (* s).active = 0;  sym -> transactions --;  if(! sym -> transactions) Block_clear(sym -> undo);
+  (* s).active = 0;  Sym_end_log((* s).c -> sym);
 }
 
 void SymTxn_commit_transient(SymTxn * s){
