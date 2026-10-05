@@ -525,8 +525,8 @@ static List Compiler._parse_postfix_apply(Compiler c, List expr) {
   Macro called = $called;
   List result = c.resolve_expression(
     c.rebuild_expression(NULL, called(expr, supplied)), origin);
-  int method = !!expr.match(%(expr () ${$source_operator_content(
-    %(. ? (?)))}));
+  int method = !!expr.match(
+    %(expr () ${$source_operator_content(%(. ? (?)))}));
   c._check_converter_args(result, method, notes.list_free());
   if (method && supplied === %((expr (void) ())))
     match (expr) case %(expr () ${$source_operator_content(
@@ -1391,8 +1391,8 @@ static List Compiler._resolve_indexed(
   Type receiver_type = receiver.cadr();
   // A field of a foreign struct has no x2c type; C indexes it alone.
   if (!receiver_type &&
-      List.match(receiver, %(expr () ${$source_operator_content(
-        %((!or . ->) * *))})))
+      List.match(
+        receiver, %(expr () ${$source_operator_content(%((!or . ->) * *))})))
     return %(expr () (index $receiver $selector));
   $report.parse.index_unsupported(c, receiver_type, origin);
 }
@@ -2096,8 +2096,8 @@ macro Expression $func_apply(Expr $callee) => Func_apply($callee, 0, 0);
 
 static int _null_literal(List expr) =>
   _integer_literal_kind(expr, NULL) == <zero> ||
-  expr.match(%(expr ? ${$source_identifier_content(
-    %((binding ? "NULL")))}));
+  expr.match(
+    %(expr ? ${$source_identifier_content(%((binding ? "NULL")))}));
 
 /** Returns one `$func_argument` or `$func_null_argument` application for
     each of `arguments`, preparing it into `storage` for the call through
@@ -2442,10 +2442,10 @@ static int Compiler._convert_string_addition(
   /* Bare `%(ident *)` also matches literal data ending in <ident>. */
   int constant =
     !c.needs_resolution(lhs) && !c.needs_resolution(rhs) &&
-    !lhs.try_search($source_identifier_content(%((*))),
-      matched, bindings) &&
-    !rhs.try_search($source_identifier_content(%((*))),
-      matched, bindings);
+    !lhs.try_search(
+      $source_identifier_content(%((*))), matched, bindings) &&
+    !rhs.try_search(
+      $source_identifier_content(%((*))), matched, bindings);
   lhs = c.convert_expression(lhs, %("String"));
   rhs = c.convert_expression(rhs, %("String"));
   return constant;
@@ -3062,9 +3062,9 @@ static List Compiler._resolve_va_arg(
   Compiler c, Type input_type, List argument, List declaration,
   Token origin) {
   return %(expr $input_type
-           ${source_va_arg_content(%(
-             ${c.resolve_expression(argument, origin)}
-             ${c.resolve_expression(declaration, origin)}))});
+           ${source_va_arg_content(
+             %(${c.resolve_expression(argument, origin)}
+               ${c.resolve_expression(declaration, origin)}))});
 }
 
 /* explicit converter calls
@@ -3464,8 +3464,8 @@ static List Compiler._convert_untyped(
   Compiler c, List expr, Type declared_target, int target_is_var) {
   List generic = c._convert_generic_arms(expr, declared_target);
   if (generic) return generic;
-  if (target_is_var && expr.match(%(expr () ${$source_identifier_content(
-      %((binding ? ?)))}))) {
+  if (target_is_var && expr.match(
+    %(expr () ${$source_identifier_content(%((binding ? ?)))}))) {
     List binding = expr.caddr().cadr();
     if (binding_identity_spelling(binding) == "NULL")
       return %(expr ("Var") (call "Var_null" (args)));
@@ -3764,8 +3764,8 @@ static void Compiler._check_null_reference(
   Compiler c, List expr, Type target) {
   if (target.car() != <&>) return;
   if (_integer_literal_kind(expr, NULL) == <zero> ||
-      (expr.match(%(expr () ${$source_identifier_content(
-        %((binding ? ?)))})) &&
+      (expr.match(
+        %(expr () ${$source_identifier_content(%((binding ? ?)))})) &&
        binding_identity_spelling(expr.caddr().cadr()) == "NULL"))
     $report.type.ref_null(c, target);
 }
