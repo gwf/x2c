@@ -638,7 +638,7 @@ static char * * _argv(List stage){
     Var _x2c_literal_part_1 = String_var(String_join(NULL, cons(String_var(String_new("empty command")), NULL)));
     {
       static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/process.x",.function = "_argv",.line = 191};
-      x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 2, Symbol_var(34096809266140), _x2c_literal_part_0, Symbol_var(47666), _x2c_literal_part_1);
+      x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 2, Symbol_var(34096809266140), _x2c_literal_part_0, Symbol_var(1218550748), _x2c_literal_part_1);
       __builtin_unreachable();
     }
 
@@ -939,7 +939,7 @@ static Job Job__unstarted(Job job, String operation){
     Var _x2c_literal_part_7 = String_var(String_join(NULL, cons(String_var(String_new("the job has started")), NULL)));
     {
       static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/process.x",.function = "Job__unstarted",.line = 397};
-      x2c_error_raise_n(& _x2c_error_site_6, 4372499598, 2, Symbol_var(34096809266140), _x2c_literal_part_6, Symbol_var(47666), _x2c_literal_part_7);
+      x2c_error_raise_n(& _x2c_error_site_6, 4372499598, 2, Symbol_var(34096809266140), _x2c_literal_part_6, Symbol_var(1218550748), _x2c_literal_part_7);
       __builtin_unreachable();
     }
 
@@ -969,7 +969,7 @@ Job Job_options(Job job, Map options){
           Var _x2c_literal_part_9 = String_var(String_join(NULL, cons(String_var(String_new("option keys are atoms")), NULL)));
           {
             static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/process.x",.function = "Job_options",.line = 425};
-            x2c_error_raise_n(& _x2c_error_site_7, 4372499598, 2, Symbol_var(34096809266140), _x2c_literal_part_8, Symbol_var(47666), _x2c_literal_part_9);
+            x2c_error_raise_n(& _x2c_error_site_7, 4372499598, 2, Symbol_var(34096809266140), _x2c_literal_part_8, Symbol_var(1218550748), _x2c_literal_part_9);
             __builtin_unreachable();
           }
 
@@ -1103,7 +1103,7 @@ static String _text(String text, int nul, String operation){
     Var _x2c_literal_part_12 = String_var(String_join(NULL, cons(String_var(String_new("embedded NUL")), NULL)));
     {
       static const X2CErrorSite _x2c_error_site_13 = {.file = "../../lib/process.x",.function = "_text",.line = 529};
-      x2c_error_raise_n(& _x2c_error_site_13, 4372499598, 2, Symbol_var(34096809266140), _x2c_literal_part_11, Symbol_var(47666), _x2c_literal_part_12);
+      x2c_error_raise_n(& _x2c_error_site_13, 4372499598, 2, Symbol_var(34096809266140), _x2c_literal_part_11, Symbol_var(1218550748), _x2c_literal_part_12);
       __builtin_unreachable();
     }
 
@@ -1161,7 +1161,7 @@ Job Job_wait_any(Array jobs){
         Var _x2c_literal_part_14 = String_var(String_join(NULL, cons(String_var(String_new("a job has not started")), NULL)));
         {
           static const X2CErrorSite _x2c_error_site_14 = {.file = "../../lib/process.x",.function = "Job_wait_any",.line = 580};
-          x2c_error_raise_n(& _x2c_error_site_14, 4372499598, 2, Symbol_var(34096809266140), _x2c_literal_part_13, Symbol_var(47666), _x2c_literal_part_14);
+          x2c_error_raise_n(& _x2c_error_site_14, 4372499598, 2, Symbol_var(34096809266140), _x2c_literal_part_13, Symbol_var(1218550748), _x2c_literal_part_14);
           __builtin_unreachable();
         }
 

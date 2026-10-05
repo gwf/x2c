@@ -5,7 +5,7 @@ macro Unit $define_increment() {
     int $(x2c.ident "value")
   ) {
     if ($(x2c.ident "value") < 0)
-      raise %(bad-arg (owner "generated_increment"));
+      raise %(bad-arg (operation "generated_increment"));
     return $(x2c.ident "value") + 1;
   }
 }

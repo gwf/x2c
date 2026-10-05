@@ -60,7 +60,7 @@ Source: `lib/regex.x:706`
 
 Compiles `pattern` and returns the `Regex`, owned by the current scope.
 
-**Raises:** `<malformed>` with `why`, the `pattern`, and the byte `offset`
+**Raises:** `<malformed>` with `reason`, the `pattern`, and the byte `offset`
 of the problem when the pattern does not parse.
 
 Source: `lib/regex.x:695`

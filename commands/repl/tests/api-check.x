@@ -360,7 +360,7 @@ static void _interpreter_ownership(ReplSession s) {
   s.evaluator.call_budget(20);
   int exhausted = 0;
   try s.evaluator.eval_string("(budget_loop 40)");
-  catch %(call-stack (operation "apply") (why "steps")): exhausted = 1;
+  catch %(call-stack (operation "apply") (reason "steps")): exhausted = 1;
   s.evaluator.call_budget(1000000);
   if (!exhausted) {
     fputs("nested callback renewed the evaluation budget\n", stderr);

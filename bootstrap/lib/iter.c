@@ -156,7 +156,7 @@ int Iter_try_next(Iter iter, Var * out){
   }
   if(Var_is_void((* out))){
     static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/iter.x",.function = "Iter_try_next",.line = 184};
-    x2c_error_raise_n(& _x2c_error_site_0, 48270474208, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Iter.try_next")), NULL))));
+    x2c_error_raise_n(& _x2c_error_site_0, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Iter.try_next")), NULL))));
     __builtin_unreachable();
   }
   return 1;
@@ -180,7 +180,7 @@ Iter range(int start, int end, int step, Iter iter){
     Var _x2c_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("range")), NULL)));
     {
       static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/iter.x",.function = "range",.line = 228};
-      x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 2, Symbol_var(32993636), _x2c_literal_part_0, Symbol_var(1286496), int_var(step));
+      x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 2, Symbol_var(34096809266140), _x2c_literal_part_0, Symbol_var(1286496), int_var(step));
       __builtin_unreachable();
     }
 
@@ -527,7 +527,7 @@ static void _unzip_buffer_push(UnzipShared * shared, Var pair){
     Var _x2c_literal_part_2 = String_var(String_join(NULL, cons(String_var(String_new("two-element List")), NULL)));
     {
       static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/iter.x",.function = "_unzip_buffer_push",.line = 701};
-      x2c_error_raise_n(& _x2c_error_site_2, 4477479911782, 3, Symbol_var(32993636), _x2c_literal_part_1, Symbol_var(1510312), _x2c_literal_part_2, Symbol_var(46228810), pair);
+      x2c_error_raise_n(& _x2c_error_site_2, 4477479911782, 3, Symbol_var(34096809266140), _x2c_literal_part_1, Symbol_var(1510312), _x2c_literal_part_2, Symbol_var(46228810), pair);
       __builtin_unreachable();
     }
 
@@ -538,7 +538,7 @@ static void _unzip_buffer_push(UnzipShared * shared, Var pair){
     Var _x2c_literal_part_4 = String_var(String_join(NULL, cons(String_var(String_new("two-element List")), NULL)));
     {
       static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/iter.x",.function = "_unzip_buffer_push",.line = 705};
-      x2c_error_raise_n(& _x2c_error_site_3, 4372499598, 3, Symbol_var(32993636), _x2c_literal_part_3, Symbol_var(1510312), _x2c_literal_part_4, Symbol_var(46228810), pair);
+      x2c_error_raise_n(& _x2c_error_site_3, 4372499598, 3, Symbol_var(34096809266140), _x2c_literal_part_3, Symbol_var(1510312), _x2c_literal_part_4, Symbol_var(46228810), pair);
       __builtin_unreachable();
     }
 

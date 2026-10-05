@@ -324,7 +324,7 @@ Var Symbol_var(Symbol);
 String String_withindex(String str, int index, char value){
   if(! String_truth(str) || ! * str) return str;  if(value == '\0'){
     Var _x2c_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("String.withindex")), NULL))); {
-      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/string.x",.function = "String_withindex",.line = 687};  x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 2, Symbol_var(32993636), _x2c_literal_part_0, Symbol_var(19800432), int_var(index));  __builtin_unreachable();
+      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/string.x",.function = "String_withindex",.line = 687};  x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 2, Symbol_var(34096809266140), _x2c_literal_part_0, Symbol_var(19800432), int_var(index));  __builtin_unreachable();
     }
 
   }
@@ -367,14 +367,14 @@ String String_new_fill(char fill, int count){
   if(count <= 0) return NULL;
   if(fill == '\0'){
     static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/string.x",.function = "String_new_fill",.line = 761};
-    x2c_error_raise_n(& _x2c_error_site_2, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("String.new_fill")), NULL))));
+    x2c_error_raise_n(& _x2c_error_site_2, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.new_fill")), NULL))));
     __builtin_unreachable();
   }
   if(count == INT_MAX){
     Var _x2c_literal_part_1 = String_var(String_join(NULL, cons(String_var(String_new("String.new_fill")), NULL)));
     {
       static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/string.x",.function = "String_new_fill",.line = 762};
-      x2c_error_raise_n(& _x2c_error_site_3, 1358596898646632, 2, Symbol_var(32993636), _x2c_literal_part_1, Symbol_var(7318440), int_var(count));
+      x2c_error_raise_n(& _x2c_error_site_3, 1358596898646632, 2, Symbol_var(34096809266140), _x2c_literal_part_1, Symbol_var(7318440), int_var(count));
       __builtin_unreachable();
     }
 
@@ -465,7 +465,7 @@ String String_pad_center(String str, int width, char fill){
 static String _pad(String str, int width, char fill, int side){
   if(fill == '\0'){
     static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/string.x",.function = "_pad",.line = 849};
-    x2c_error_raise_n(& _x2c_error_site_4, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("String.pad")), NULL))));
+    x2c_error_raise_n(& _x2c_error_site_4, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.pad")), NULL))));
     __builtin_unreachable();
   }
   int length = String_len(str);
@@ -474,7 +474,7 @@ static String _pad(String str, int width, char fill, int side){
     Var _x2c_literal_part_2 = String_var(String_join(NULL, cons(String_var(String_new("String.pad")), NULL)));
     {
       static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/string.x",.function = "_pad",.line = 852};
-      x2c_error_raise_n(& _x2c_error_site_5, 1358596898646632, 2, Symbol_var(32993636), _x2c_literal_part_2, Symbol_var(48833808), int_var(width));
+      x2c_error_raise_n(& _x2c_error_site_5, 1358596898646632, 2, Symbol_var(34096809266140), _x2c_literal_part_2, Symbol_var(48833808), int_var(width));
       __builtin_unreachable();
     }
 
@@ -717,7 +717,7 @@ String String_map(String str, Func fn){
           Var _x2c_literal_part_3 = String_var(String_join(NULL, cons(String_var(String_new("String.map")), NULL)));
           {
             static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/string.x",.function = "String_map",.line = 1149};
-            x2c_error_raise_n(& _x2c_error_site_6, 143279181245224, 2, Symbol_var(32993636), _x2c_literal_part_3, Symbol_var(19800432), int_var(i));
+            x2c_error_raise_n(& _x2c_error_site_6, 143279181245224, 2, Symbol_var(34096809266140), _x2c_literal_part_3, Symbol_var(19800432), int_var(i));
             __builtin_unreachable();
           }
 

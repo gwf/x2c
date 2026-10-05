@@ -90,7 +90,7 @@ char x2c_var_update_i8(volatile char * lhs, Symbol op, Var rhs){
   if(! lhs){
     {
       static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/varops.x",.function = "x2c_var_update_i8",.line = 55};
-      x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("x2c_var_update_i8")), NULL))));
+      x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("x2c_var_update_i8")), NULL))));
       __builtin_unreachable();
     }
 
@@ -106,7 +106,7 @@ signed char x2c_var_update_schar(volatile signed char * lhs, Symbol op, Var rhs)
   if(! lhs){
     {
       static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/varops.x",.function = "x2c_var_update_schar",.line = 56};
-      x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("x2c_var_update_schar")), NULL))));
+      x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("x2c_var_update_schar")), NULL))));
       __builtin_unreachable();
     }
 
@@ -124,7 +124,7 @@ uchar x2c_var_update_u8(volatile uchar * lhs, Symbol op, Var rhs){
   if(! lhs){
     {
       static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/varops.x",.function = "x2c_var_update_u8",.line = 57};
-      x2c_error_raise_n(& _x2c_error_site_2, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("x2c_var_update_u8")), NULL))));
+      x2c_error_raise_n(& _x2c_error_site_2, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("x2c_var_update_u8")), NULL))));
       __builtin_unreachable();
     }
 
@@ -142,7 +142,7 @@ short x2c_var_update_i16(volatile short * lhs, Symbol op, Var rhs){
   if(! lhs){
     {
       static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/varops.x",.function = "x2c_var_update_i16",.line = 58};
-      x2c_error_raise_n(& _x2c_error_site_3, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("x2c_var_update_i16")), NULL))));
+      x2c_error_raise_n(& _x2c_error_site_3, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("x2c_var_update_i16")), NULL))));
       __builtin_unreachable();
     }
 
@@ -160,7 +160,7 @@ ushort x2c_var_update_u16(volatile ushort * lhs, Symbol op, Var rhs){
   if(! lhs){
     {
       static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/varops.x",.function = "x2c_var_update_u16",.line = 59};
-      x2c_error_raise_n(& _x2c_error_site_4, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("x2c_var_update_u16")), NULL))));
+      x2c_error_raise_n(& _x2c_error_site_4, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("x2c_var_update_u16")), NULL))));
       __builtin_unreachable();
     }
 
@@ -178,7 +178,7 @@ int x2c_var_update_i32(volatile int * lhs, Symbol op, Var rhs){
   if(! lhs){
     {
       static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/varops.x",.function = "x2c_var_update_i32",.line = 60};
-      x2c_error_raise_n(& _x2c_error_site_5, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("x2c_var_update_i32")), NULL))));
+      x2c_error_raise_n(& _x2c_error_site_5, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("x2c_var_update_i32")), NULL))));
       __builtin_unreachable();
     }
 
@@ -196,7 +196,7 @@ uint x2c_var_update_u32(volatile uint * lhs, Symbol op, Var rhs){
   if(! lhs){
     {
       static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/varops.x",.function = "x2c_var_update_u32",.line = 61};
-      x2c_error_raise_n(& _x2c_error_site_6, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("x2c_var_update_u32")), NULL))));
+      x2c_error_raise_n(& _x2c_error_site_6, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("x2c_var_update_u32")), NULL))));
       __builtin_unreachable();
     }
 
@@ -216,7 +216,7 @@ long x2c_var_update_long(volatile long * lhs, Symbol op, Var rhs){
   if(! lhs){
     {
       static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/varops.x",.function = "x2c_var_update_long",.line = 62};
-      x2c_error_raise_n(& _x2c_error_site_7, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("x2c_var_update_long")), NULL))));
+      x2c_error_raise_n(& _x2c_error_site_7, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("x2c_var_update_long")), NULL))));
       __builtin_unreachable();
     }
 
@@ -236,7 +236,7 @@ ulong x2c_var_update_ulong(volatile ulong * lhs, Symbol op, Var rhs){
   if(! lhs){
     {
       static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/varops.x",.function = "x2c_var_update_ulong",.line = 63};
-      x2c_error_raise_n(& _x2c_error_site_8, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("x2c_var_update_ulong")), NULL))));
+      x2c_error_raise_n(& _x2c_error_site_8, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("x2c_var_update_ulong")), NULL))));
       __builtin_unreachable();
     }
 
@@ -256,7 +256,7 @@ long long x2c_var_update_long_long(volatile long long * lhs, Symbol op, Var rhs)
   if(! lhs){
     {
       static const X2CErrorSite _x2c_error_site_9 = {.file = "../../lib/varops.x",.function = "x2c_var_update_long_long",.line = 64};
-      x2c_error_raise_n(& _x2c_error_site_9, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("x2c_var_update_long_long")), NULL))));
+      x2c_error_raise_n(& _x2c_error_site_9, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("x2c_var_update_long_long")), NULL))));
       __builtin_unreachable();
     }
 
@@ -276,7 +276,7 @@ unsigned long long x2c_var_update_ulong_long(volatile unsigned long long * lhs, 
   if(! lhs){
     {
       static const X2CErrorSite _x2c_error_site_10 = {.file = "../../lib/varops.x",.function = "x2c_var_update_ulong_long",.line = 65};
-      x2c_error_raise_n(& _x2c_error_site_10, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("x2c_var_update_ulong_long")), NULL))));
+      x2c_error_raise_n(& _x2c_error_site_10, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("x2c_var_update_ulong_long")), NULL))));
       __builtin_unreachable();
     }
 
@@ -296,7 +296,7 @@ float x2c_var_update_f32(volatile float * lhs, Symbol op, Var rhs){
   if(! lhs){
     {
       static const X2CErrorSite _x2c_error_site_11 = {.file = "../../lib/varops.x",.function = "x2c_var_update_f32",.line = 66};
-      x2c_error_raise_n(& _x2c_error_site_11, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("x2c_var_update_f32")), NULL))));
+      x2c_error_raise_n(& _x2c_error_site_11, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("x2c_var_update_f32")), NULL))));
       __builtin_unreachable();
     }
 
@@ -316,7 +316,7 @@ double x2c_var_update_f64(volatile double * lhs, Symbol op, Var rhs){
   if(! lhs){
     {
       static const X2CErrorSite _x2c_error_site_12 = {.file = "../../lib/varops.x",.function = "x2c_var_update_f64",.line = 67};
-      x2c_error_raise_n(& _x2c_error_site_12, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("x2c_var_update_f64")), NULL))));
+      x2c_error_raise_n(& _x2c_error_site_12, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("x2c_var_update_f64")), NULL))));
       __builtin_unreachable();
     }
 
@@ -336,7 +336,7 @@ long double x2c_var_update_long_double(volatile long double * lhs, Symbol op, Va
   if(! lhs){
     {
       static const X2CErrorSite _x2c_error_site_13 = {.file = "../../lib/varops.x",.function = "x2c_var_update_long_double",.line = 68};
-      x2c_error_raise_n(& _x2c_error_site_13, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("x2c_var_update_long_double")), NULL))));
+      x2c_error_raise_n(& _x2c_error_site_13, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("x2c_var_update_long_double")), NULL))));
       __builtin_unreachable();
     }
 
@@ -557,7 +557,7 @@ Var Var_neg(Var value){
   _valid_operand(value);
   if(Var_is_void(value)){
     static const X2CErrorSite _x2c_error_site_20 = {.file = "../../lib/varops.x",.function = "Var_neg",.line = 227};
-    x2c_error_raise_n(& _x2c_error_site_20, 48270474208, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.neg")), NULL))));
+    x2c_error_raise_n(& _x2c_error_site_20, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.neg")), NULL))));
     __builtin_unreachable();
   }
   Var result;
@@ -783,7 +783,7 @@ int Var_fallback_truth(Var value){
   _valid_operand(value);
   if(Var_is_void(value)){
     static const X2CErrorSite _x2c_error_site_29 = {.file = "../../lib/varops.x",.function = "Var_fallback_truth",.line = 436};
-    x2c_error_raise_n(& _x2c_error_site_29, 48270474208, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.truth")), NULL))));
+    x2c_error_raise_n(& _x2c_error_site_29, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.truth")), NULL))));
     __builtin_unreachable();
   }
   X2CVarNumericInfo info;
@@ -822,7 +822,7 @@ Var Var_convert(Var, Symbol);
 Var x2c_var_update_volatile(volatile Var * lhs, Symbol op, Var rhs){
   if(! lhs){
     static const X2CErrorSite _x2c_error_site_31 = {.file = "../../lib/varops.x",.function = "x2c_var_update_volatile",.line = 473};
-    x2c_error_raise_n(& _x2c_error_site_31, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.update")), NULL))));
+    x2c_error_raise_n(& _x2c_error_site_31, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.update")), NULL))));
     __builtin_unreachable();
   }
   _valid_operands((* lhs), rhs);
@@ -867,7 +867,7 @@ Var Var_postfix(Var * lhs, Symbol op){
 Var x2c_var_postfix_volatile(volatile Var * lhs, Symbol op){
   if(! lhs){
     static const X2CErrorSite _x2c_error_site_34 = {.file = "../../lib/varops.x",.function = "x2c_var_postfix_volatile",.line = 519};
-    x2c_error_raise_n(& _x2c_error_site_34, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.postfix")), NULL))));
+    x2c_error_raise_n(& _x2c_error_site_34, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.postfix")), NULL))));
     __builtin_unreachable();
   }
   _valid_operand((* lhs));

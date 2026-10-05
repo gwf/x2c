@@ -390,7 +390,7 @@ void MachineBuilder.set_target(MachineBuilder &b, int site, int target) {
   if (target == b.length && b.length == MACHINE_CODE_MAX)
     b._fail("code-capacity");
   else if (target < 0 || target >= MACHINE_CODE_MAX)
-    raise %(bad-arg (owner "MachineBuilder.set_target") (target $target));
+    raise %(bad-arg (operation "MachineBuilder.set_target") (target $target));
   else if (site >= 0)
     b.code[site].target = target;
 }

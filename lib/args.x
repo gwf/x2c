@@ -79,9 +79,9 @@ typedef struct Spec {
     ~}
     ```
 
-    Raises: `<bad-arg>` with `why` and the offending `option` or `operand`
+    Raises: `<bad-arg>` with `reason` and the offending `option` or `operand`
     for an unknown option, a missing or unexpected value, an unexpected
-    operand, or a `required` row that was not given; and with `why` and the
+    operand, or a `required` row that was not given; and with `reason` and the
     offending `spec` entry for a property or word it cannot read.
 */
 Map Args.parse(List args, List spec) {
@@ -276,16 +276,16 @@ static void Spec._assign_operands(Spec &s, Map result, List operands) {
 // errors
 
 static void _bad_option(String why, String option) {
-  raise %(bad-arg (operation "Args.parse") (why $why) (option $option));
+  raise %(bad-arg (operation "Args.parse") (reason $why) (option $option));
 }
 
 static void _bad_operand(String why, String operand) {
-  raise %(bad-arg (operation "Args.parse") (why $why)
+  raise %(bad-arg (operation "Args.parse") (reason $why)
           (operand $operand));
 }
 
 static void _bad_spec(String why, Var entry) {
-  raise %(bad-arg (operation "Args.parse") (why $why) (spec $entry));
+  raise %(bad-arg (operation "Args.parse") (reason $why) (spec $entry));
 }
 
 // usage text

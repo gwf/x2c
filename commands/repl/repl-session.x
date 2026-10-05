@@ -74,7 +74,7 @@ static void _interrupt(int signal) {
 ReplSession ReplSession.new(Compiler compiler) {
   if (compiler.source_facts)
     raise %(bad-arg (operation "ReplSession.new")
-                   (why "source facts retain temporary symbol maps"));
+                   (reason "source facts retain temporary symbol maps"));
   ReplSession session = Scope.calloc(1, sizeof(struct ReplSession));
   session.compiler = compiler;
   session.names = {};
@@ -275,7 +275,7 @@ static List _thunk(List items) =>
     (bind (binding -1 "__repl_eval") ((fnmod (params))))
     (block @items));
 
-static void _refuse(String why) { raise %(repl (why $why)); }
+static void _refuse(String why) { raise %(repl (reason $why)); }
 
 static int _type_submission_names(List node, Array added) {
   match (node) {
@@ -507,7 +507,7 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
     result.diagnostics = c.diagnostics();
     return result;
   }
-  catch %(repl (why ?why)): {
+  catch %(repl (reason ?why)): {
     result.diagnostics = c.diagnostics();
     result.message = why;
     return result;

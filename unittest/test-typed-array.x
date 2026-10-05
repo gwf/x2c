@@ -533,7 +533,7 @@ static void typed_array_double_raise_paths_transfer(void) {
   try values.getslice(0, 1, 0);
   catch %(bad-arg *detail): {
     caught++;
-    EXPECT_STR_EQ(detail.assoc(<owner>).string(), "ArrayDbl");
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "ArrayDbl");
   }
 
   ArrayDbl empty = ArrayDbl.new();

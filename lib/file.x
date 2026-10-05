@@ -134,7 +134,7 @@ String File.readline(File file) {
     `<alloc-fail>` while constructing the result.
 */
 String File.readblock(File file, long size) {
-  if (size < 0) raise %(bad-arg (owner "File.readblock") (size $size));
+  if (size < 0) raise %(bad-arg (operation "File.readblock") (size $size));
   size_t requested = (size_t) size;
   String buffer = String.malloc(_string_allocation(requested));
   defer if (buffer != NULL) buffer.free();
@@ -211,7 +211,7 @@ static void _append_text(Block content, const void *bytes, size_t count) {
 
 static String _text(const void *bytes, size_t length) {
   if (!length) return NULL;
-  if (!bytes) raise %(bad-arg (owner "File.text") (why "null bytes"));
+  if (!bytes) raise %(bad-arg (operation "File.text") (reason "null bytes"));
   int allocation = _string_allocation(length);
   String copy = String.malloc(allocation);
   memcpy(copy, bytes, length);
@@ -230,9 +230,9 @@ static String _finish_text(String text, size_t length) {
 
 static void _validate_text(const void *bytes, size_t length) {
   if (!length) return;
-  if (!bytes) raise %(bad-arg (owner "File.text") (why "null bytes"));
+  if (!bytes) raise %(bad-arg (operation "File.text") (reason "null bytes"));
   if (memchr(bytes, '\0', length))
-    raise %(bad-arg (owner "File.text") (why "embedded NUL"));
+    raise %(bad-arg (operation "File.text") (reason "embedded NUL"));
 }
 
 // raw reads

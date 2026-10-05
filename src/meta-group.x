@@ -285,8 +285,8 @@ static void Compiler._native_lookups(Compiler c, Array units) {
   Type lookup_type = $!Type{ void *(String, String) };
   List lookup_binding = c.sym.introduce("x2c_meta_native_symbol");
   List lookup = %(expr $lookup_type (ident $lookup_binding));
-  units.push(c.rebuild_statement(
-    $!{ void *$lookup_binding(String, String); }).cadr());
+  units.push(
+    c.rebuild_statement($!{ void *$lookup_binding(String, String); }).cadr());
   for (int i = 0; i < (int) units.len(); i++)
     units[i] = c._native_targets(units[i], lookup);
 }

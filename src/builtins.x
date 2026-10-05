@@ -557,11 +557,12 @@ static List _fields_equal(List fields) {
   List left = _ref("left"), right = _ref("right");
   Array body = [];
   foreach (List field, fields) {
-    body.push($!{
-      if (!Var_equal((Var)${_field_on(field, left)},
-                     (Var)${_field_on(field, right)}))
-        return 0;
-    });
+    body.push(
+      $!{
+        if (!Var_equal(
+          (Var)${_field_on(field, left)}, (Var)${_field_on(field, right)}))
+          return 0;
+      });
   }
   body.push($!{ return 1; });
   return body.list_free();
@@ -582,9 +583,9 @@ static List _fields_hash(List fields) {
   List hash = x2c_ident("hash");
   Array body = [$!{ unsigned $hash = 0; }];
   foreach (List field, fields)
-    body.push($!{
-      $hash = x2c_hash_word($hash ^ Var_hash((Var)${_field_value(field)}));
-    });
+    body.push(
+      $!{ $hash = x2c_hash_word(
+        $hash ^ Var_hash((Var)${_field_value(field)})); });
   body.push($!{ return $hash; });
   return body.list_free();
 }

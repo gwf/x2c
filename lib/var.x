@@ -134,7 +134,8 @@ static void *_address(Var value) =>
 /** Returns the top encoding field of built-in `tag`. */
 meta native unsigned long Var.tag_top(Symbol tag) {
   TagId id = _tag2id(tag);
-  if (id == _invalid_) raise %(bad-target (owner "Var.tag_top") (target $tag));
+  if (id == _invalid_)
+    raise %(bad-target (operation "Var.tag_top") (target $tag));
   return x2c_var_taginfo[id].top;
 }
 
@@ -142,7 +143,7 @@ meta native unsigned long Var.tag_top(Symbol tag) {
 meta native unsigned long Var.tag_bottom(Symbol tag) {
   TagId id = _tag2id(tag);
   if (id == _invalid_)
-    raise %(bad-target (owner "Var.tag_bottom") (target $tag));
+    raise %(bad-target (operation "Var.tag_bottom") (target $tag));
   return x2c_var_taginfo[id].bottom;
 }
 
@@ -494,7 +495,7 @@ Var Var.new(Symbol tag, ...) {
   VarDescriptor *descriptor = NULL;
   int row = id == _invalid_ ? _custom_row(tag, descriptor) : -1;
   if (id == _invalid_ && row < 0)
-    raise %(bad-target (owner "Var.new") (target $tag));
+    raise %(bad-target (operation "Var.new") (target $tag));
   va_start(ap, tag);
   if (row >= 0) {
     void *pointer = va_arg(ap, void *);
@@ -516,7 +517,7 @@ static inline void _require_aligned(Symbol tag, void *address, unsigned mask) {
 }
 
 static void _misaligned(Symbol tag) {
-  raise %(bad-enc (owner "Var.new") (target $tag));
+  raise %(bad-enc (operation "Var.new") (target $tag));
 }
 
 /* The row's kind names the C type of the one variadic payload. */
@@ -529,7 +530,7 @@ static Var _new_builtin(TagId id, Symbol tag, va_list ap) {
     case <symbol>:   return _new_symbol(va_arg(ap, unsigned long));
     case <void>:     return void;
   }
-  raise %(invariant (owner "Var.new") (target $tag));
+  raise %(invariant (operation "Var.new") (target $tag));
 }
 
 /* Pointer families store only the low 48 address bits and reclaim the
@@ -541,7 +542,7 @@ static Var _new_pointer(TagId id, void *ptr) {
   unsigned long top = x2c_var_taginfo[id].top;
   if ((id == _array_ || id == _map_) && !ptr) {
     Symbol tag = x2c_var_taginfo[id].tag;
-    raise %(bad-arg (owner "Var.new") (target $tag));
+    raise %(bad-arg (operation "Var.new") (target $tag));
   }
   if ((uintptr_t) ptr & 0x7) {
     unsigned mask = x2c_var_decode_groups[_group_slot(top)].mask;
@@ -597,7 +598,7 @@ static Var _integer_arg(TagId id, Symbol tag, va_list ap) {
     case <llong>:  return Var.box_long_long(va_arg(ap, long long));
     case <ullong>: return Var.box_ulong_long(va_arg(ap, unsigned long long));
   }
-  raise %(invariant (owner "Var.new") (target $tag));
+  raise %(invariant (operation "Var.new") (target $tag));
 }
 
 /* An immediate integer keeps its tag's width of payload bits. The 48-bit
@@ -606,7 +607,7 @@ static Var _new_integer(TagId id, long value) {
   unsigned bits = _integer_width(id);
   if (!_integer_fits(id, value, bits)) {
     Symbol target = x2c_var_taginfo[id].tag;
-    raise %(conv-range (owner "Var.new") (target $target));
+    raise %(conv-range (operation "Var.new") (target $target));
   }
   Var v = { .u64 = (unsigned long) value & _bitmask(bits) };
   v.u64 |= x2c_var_taginfo[id].top << 48;
@@ -620,7 +621,7 @@ static unsigned _integer_width(TagId id) {
     case _u16_: case _i16_: return 16;
     case _u32_: case _i32_: return 32;
     case _u48_: case _i48_: return 48;
-    default: raise %(invariant (owner "Var.new"));
+    default: raise %(invariant (operation "Var.new"));
   }
 }
 
@@ -633,7 +634,8 @@ static int _integer_fits(TagId id, long value, unsigned bits) {
 }
 
 static Var _new_symbol(unsigned long u) {
-  if (u >= (1ul << 51)) raise %(conv-range (owner "Var.new") (target symbol));
+  if (u >= (1ul << 51))
+    raise %(conv-range (operation "Var.new") (target symbol));
   return (Var) { .u64 = u + VAR_SYMBOL_OFFSET };
 }
 
@@ -696,7 +698,7 @@ meta native Var Var.parse(String str, Symbol kind) {
 Var Var.box_record(Symbol tag, const void *record, size_t size) {
   VarDescriptor *descriptor = NULL;
   int row = _custom_row(tag, descriptor);
-  if (row < 0) raise %(bad-target (owner "Var.box_record") (target $tag));
+  if (row < 0) raise %(bad-target (operation "Var.box_record") (target $tag));
   if (row < VAR_DIRECT_ROWS)
     return _new_custom_pointer(row, Scope.memdup(record, size));
   char *copy = Scope.malloc(RECORD_PREFIX + size);
@@ -771,7 +773,7 @@ static Var _new_wide(TagId id, VarWideValue value) {
   uintptr_t raw = (uintptr_t) box;
   if ((raw & 0x7) != 0 || raw >= (1ul << 48)) {
     Scope.free(box);
-    raise %(bad-enc (owner "Var.box"));
+    raise %(bad-enc (operation "Var.box"));
   }
   Var v = { .u64 = raw };
   v.u64 |= x2c_var_taginfo[id].top << 48;
@@ -872,7 +874,7 @@ meta native Var Var.clone_wide(Var value) {
   uintptr_t raw = (uintptr_t) box;
   if ((raw & 0x7) != 0 || raw >= (1ul << 48)) {
     Scope.free(box);
-    raise %(bad-enc (owner "Var.clone_wide"));
+    raise %(bad-enc (operation "Var.clone_wide"));
   }
   unsigned long pointer_mask = _bitmask(48) - 0x7;
   Var clone = value;
@@ -1251,7 +1253,7 @@ int Var.register_object_tag(Symbol tag) {
   x2c_descriptor_thread_start_begin();
   defer x2c_descriptor_thread_start_end(0);
   if (x2c_descriptor_registration_frozen())
-    raise %(bad-state (owner "Var.register_object_tag"));
+    raise %(bad-state (operation "Var.register_object_tag"));
   if (!tag) return -1;
   if (_tag2id(tag) != _invalid_) return -1;
   x2c_var_declare(tag);

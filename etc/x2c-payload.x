@@ -18,7 +18,7 @@ static String INSTALL_MANIFEST = ".x2c-install-manifest";
 static Path root;
 
 static void fail(String message) {
-  raise %(bad-arg (why $message));
+  raise %(bad-arg (reason $message));
 }
 
 static uint64_t fnv64(uint64_t value, const unsigned char *bytes, size_t n) {
@@ -83,7 +83,7 @@ static void copy_support(Path destination) {
       if (!matches) {
         String message =
           %"no $pattern under $folder; run 'make build' first";
-        raise %(not-found (why $message));
+        raise %(not-found (reason $message));
       }
       foreach (Path source, matches)
         foreach (Var output, row.caddr())
@@ -266,7 +266,7 @@ static void uninstall(Path prefix) {
     fail("PREFIX must be an absolute dedicated x2c prefix");
   if (!prefix.join(INSTALL_MANIFEST).is_file()) {
     String message = %"no x2c installation at $prefix";
-    raise %(not-found (why $message));
+    raise %(not-found (reason $message));
   }
   foreach (String relative, sorted_names(owned_files(prefix)))
     installed_path(prefix, relative).remove_file();
@@ -297,7 +297,7 @@ if (!spec) {
 Map options = NULL;
 try options = Args.parse(args.cdr(), spec);
 catch %(bad-arg *detail): {
-  String why = detail.assoc(<why>), subject = detail[2].cadr();
+  String why = detail.assoc(<reason>), subject = detail[2].cadr();
   Stderr.printf("%sx2c: %s: %s\n", Args.usage(%"$program $command", spec),
                 why, subject);
   return 2;
@@ -309,7 +309,7 @@ try {
   else uninstall(normal(options["prefix"]));
 }
 catch %(?code *detail): {
-  Var why = detail.assoc(<why>);
+  Var why = detail.assoc(<reason>);
   if (why is void) Stderr.printf("x2c: %s %s\n", code.str(), detail.repr());
   else Stderr.printf("x2c: %s\n", why.str());
   return 1;

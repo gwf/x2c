@@ -76,34 +76,34 @@ static unsigned _flat_hash(int key) {
 }
 
 static void _flat_reinsert_error(unsigned capacity, int probe) {
-  raise %(invariant (owner "MapFlatIntInt.reinsert") (capacity $capacity)
+  raise %(invariant (operation "MapFlatIntInt.reinsert") (capacity $capacity)
           (probe $probe));
 }
 
 static void _flat_insert_error(unsigned capacity) {
-  raise %(invariant (owner "MapFlatIntInt.insert") (capacity $capacity));
+  raise %(invariant (operation "MapFlatIntInt.insert") (capacity $capacity));
 }
 
 static void _wide_reinsert_error(unsigned capacity, int probe) {
-  raise %(invariant (owner "MapWideIntInt.reinsert") (capacity $capacity)
+  raise %(invariant (operation "MapWideIntInt.reinsert") (capacity $capacity)
           (probe $probe));
 }
 
 static void _wide_insert_error(unsigned capacity) {
-  raise %(invariant (owner "MapWideIntInt.insert") (capacity $capacity));
+  raise %(invariant (operation "MapWideIntInt.insert") (capacity $capacity));
 }
 
 static void _meta_reinsert_error(unsigned capacity, int probe) {
-  raise %(invariant (owner "MapMetaIntInt.reinsert") (capacity $capacity)
+  raise %(invariant (operation "MapMetaIntInt.reinsert") (capacity $capacity)
           (probe $probe));
 }
 
 static void _meta_insert_error(unsigned capacity) {
-  raise %(invariant (owner "MapMetaIntInt.insert") (capacity $capacity));
+  raise %(invariant (operation "MapMetaIntInt.insert") (capacity $capacity));
 }
 
 static void _flat_bad_arg(String owner) {
-  raise %(bad-arg (owner $owner));
+  raise %(bad-arg (operation $owner));
 }
 
 static void _flat_bad_op(Symbol op) {
@@ -738,12 +738,12 @@ int MapMetaIntInt.try_next(
 #define _ORDER_GONE (~0u)
 
 static void _order_reinsert_error(unsigned capacity, int probe) {
-  raise %(invariant (owner "MapOrderIntInt.reinsert") (capacity $capacity)
+  raise %(invariant (operation "MapOrderIntInt.reinsert") (capacity $capacity)
           (probe $probe));
 }
 
 static void _order_insert_error(unsigned capacity) {
-  raise %(invariant (owner "MapOrderIntInt.insert") (capacity $capacity));
+  raise %(invariant (operation "MapOrderIntInt.insert") (capacity $capacity));
 }
 
 static void MapOrderIntInt._free(MapOrderIntInt map) {

@@ -9,7 +9,7 @@ int main(void) {
   Error.policy_set(<collected>, <collect>);
   Error.policy_set(<raise-prob>, <collect>);
   int bytes = 64, mark = Error.mark();
-  raise %(collected (bytes $bytes) (owner "raise-probe"));
+  raise %(collected (bytes $bytes) (operation "raise-probe"));
   List entry = Error.since(mark).car();
   List detail = entry.assoc(<detail>);
   List location = entry.assoc(<location>);

@@ -685,7 +685,7 @@ meta native String String.getslice(String s, int start, int stop, int step) {
 meta native String String.withindex(String str, int index, char value) {
   if (!str || !*str) return str;
   if (value == '\0')
-    raise %(bad-arg (owner "String.withindex") (index $index));
+    raise %(bad-arg (operation "String.withindex") (index $index));
   int n = str.len();
   if (index < 0) index += n;
   if (index < 0 || index >= n) return str;
@@ -758,9 +758,9 @@ meta native String String.repeat(String str, int count) {
 */
 meta native String String.new_fill(char fill, int count) {
   if (count <= 0) return NULL;
-  if (fill == '\0') raise %(bad-arg (owner "String.new_fill"));
+  if (fill == '\0') raise %(bad-arg (operation "String.new_fill"));
   if (count == INT_MAX)
-    raise %(size-limit (owner "String.new_fill") (count $count));
+    raise %(size-limit (operation "String.new_fill") (count $count));
   String string = String.malloc(count + 1);
   memset(string, fill, count);
   return _finish(string, count);
@@ -846,11 +846,11 @@ meta native String String.pad_center(String str, int width, char fill) =>
 /* `side` puts the padding on the left when 1, on the right when 0, and on
    both sides when -1, with an odd byte on the right. */
 static String _pad(String str, int width, char fill, int side) {
-  if (fill == '\0') raise %(bad-arg (owner "String.pad"));
+  if (fill == '\0') raise %(bad-arg (operation "String.pad"));
   int length = str.len();
   if (width <= length) return str;
   if (width == INT_MAX)
-    raise %(size-limit (owner "String.pad") (width $width));
+    raise %(size-limit (operation "String.pad") (width $width));
   int padding = width - length, left = side ? padding : 0;
   if (side < 0) left = padding / 2;
   int right = padding - left, String string = String.malloc(width + 1);
@@ -1146,7 +1146,7 @@ String String.map(String str, Func fn) {
   char *out = string, const char *src = str;
   for (int i = 0; i < n; i++) {
     char ch = (char) fn.apply_value(src[i]);
-    if (!ch) raise %(bad-result (owner "String.map") (index $i));
+    if (!ch) raise %(bad-result (operation "String.map") (index $i));
     out[i] = ch;
   }
   String result = _finish(string, n);

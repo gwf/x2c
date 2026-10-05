@@ -45,7 +45,7 @@ typedef List ListString;
 typedef List ListSymbol;
 
 static void _no_convert(String owner, int index, Symbol tag) {
-  raise %(no-convert (owner $owner) (index $index) (tag $tag));
+  raise %(no-convert (operation $owner) (index $index) (tag $tag));
 }
 
 /* Reports whether `value` decodes as the element type `tag` names.

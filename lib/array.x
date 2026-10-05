@@ -62,11 +62,11 @@ static void _bad_operation(String owner, Symbol operation) {
 }
 static void _bad_index(String owner, int index, size_t size) {
   (void) owner;
-  raise %(bad-arg (owner "Array") (index $index) (size $size));
+  raise %(bad-arg (operation "Array") (index $index) (size $size));
 }
 static void _bad_step(String owner, int step) {
   (void) owner;
-  raise %(bad-arg (owner "Array.getslice") (step $step));
+  raise %(bad-arg (operation "Array.getslice") (step $step));
 }
 
 $array.typed.operations(Array, Var, void, 0, 1);
@@ -130,13 +130,13 @@ Self Array.update_n(Self array, unsigned element_count, ...) {
 
 /** Updates one boxed element while preserving its Var tag. */
 Var Array.updateindex(Array array, int index, Symbol op, Var rhs) {
-  if (array == NULL) raise %(bad-arg (owner "Array.updateindex"));
+  if (array == NULL) raise %(bad-arg (operation "Array.updateindex"));
   int requested = index, length = _int_length(array);
   index = x2c_normalize_index(index, length);
   if (index < 0)
-    raise %(bad-arg (owner "Array.updateindex") (index $requested));
+    raise %(bad-arg (operation "Array.updateindex") (index $requested));
   if (rhs is void)
-    raise %(void-op (owner "Array.updateindex") (index $requested));
+    raise %(void-op (operation "Array.updateindex") (index $requested));
   Var *arr = (Var *) array.bytes;
   return Var.update(arr[index], op, rhs);
 }
@@ -150,11 +150,11 @@ Var Array.updateindex(Array array, int index, Symbol op, Var rhs) {
     is unchanged on failure.
 */
 Var Array.postfixindex(Array array, int index, Symbol op) {
-  if (array == NULL) raise %(bad-arg (owner "Array.postfixindex"));
+  if (array == NULL) raise %(bad-arg (operation "Array.postfixindex"));
   int requested = index, length = _int_length(array);
   index = x2c_normalize_index(index, length);
   if (index < 0)
-    raise %(bad-arg (owner "Array.postfixindex") (index $requested));
+    raise %(bad-arg (operation "Array.postfixindex") (index $requested));
   Var *arr = (Var *) array.bytes;
   return Var.postfix(arr[index], op);
 }

@@ -1345,7 +1345,7 @@ static String _callee_of(Var value, List &arguments) {
   return NULL;
 }
 
-/* The parameter types of a direct call's bound callee. */
+/* Direct calls retain their callee's resolved signature. */
 static List _parameter_types(Var call) {
   match (_source_call(_unwrap(call)))
     case %((expr ((func ?parameters) *) ?) *): return parameters;

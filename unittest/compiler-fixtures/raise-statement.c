@@ -75,7 +75,7 @@ int main(void){
     Var _x2c_literal_part_1 = String_var(String_join(NULL, cons(String_var(String_new("raise-probe")), NULL)));
     {
       static const X2CErrorSite _x2c_error_site_1 = {.file = "unittest/compiler-fixtures/raise-statement.x",.function = "main",.line = 12};
-      x2c_error_raise_n(& _x2c_error_site_1, 7654447751496, 2, Symbol_var(5874022), _x2c_literal_part_0, Symbol_var(32993636), _x2c_literal_part_1);
+      x2c_error_raise_n(& _x2c_error_site_1, 7654447751496, 2, Symbol_var(5874022), _x2c_literal_part_0, Symbol_var(34096809266140), _x2c_literal_part_1);
     }
 
   }

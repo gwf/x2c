@@ -344,7 +344,8 @@ static void _file_scope_locals(List rows, Map locals) {
     case %((!or at src) ? ?inner): _file_scope_locals(%($inner), locals);
     case %(api-source ? ? ?inner): _file_scope_locals(%($inner), locals);
     case %(seq *inner): _file_scope_locals(inner, locals);
-    case %(macro-invoke ((!quote !quote) ?(List definition)) ?(List input) ?): {
+    case %(macro-invoke ((!quote !quote) ?(List definition))
+           ?(List input) ?): {
       Map declared = {};
       _file_scope_locals(%(${definition.assoc(<template>)}), declared);
       List bindings = NULL;
@@ -497,7 +498,6 @@ static void Definition.take_target(Definition &d, List hole) {
   c.macro_holes[%(source ${hole.assoc(<binder>)})] = 1;
   c.macro_holes[%(target)] = hole;
 }
-
 
 /* A local macro produces no file-scope syntax, directly or through the
    target it decorates. */
@@ -1021,7 +1021,6 @@ static int _decorator_target(Symbol hole) {
   return 0;
 }
 
-/* The spelling that names a hole or result kind. */
 static String _kind_spelling(Symbol kind) {
   for (int i = 0; i < MACRO_CATEGORY_COUNT; i++) {
     const MacroCategory *category = &macro_categories[i];
@@ -1328,7 +1327,7 @@ static List Compiler._hole_local(Compiler c, Map holes, int position) {
     AST_BLOCK, c.return_type);
 }
 
-/* The hole a quotation recorded for the `${expression}` at `dollar`. */
+/* Returns NULL if the quotation registered no expression at this offset. */
 static List Compiler._expression_hole(Compiler c, Token dollar) {
   Var name;
   if (!c.macro_holes ||
@@ -1407,9 +1406,9 @@ static List Compiler._quotation(
       %(expr () (ident ${_hole_name(hole).str()})), values, start);
   List definition = c.capture_macro_value(d.publish());
   List empty = %(expr ("List") (nil));
-  return c._quoted_cons(x2c_literal_string("x2c.template"),
-    c._quoted_cons(definition, c._quoted_cons(values, empty, start), start),
-    start);
+  return c._quoted_cons(
+    x2c_literal_string("x2c.template"), c._quoted_cons(
+      definition, c._quoted_cons(values, empty, start), start), start);
 }
 
 /* `head` consed onto the List expression `tail`. */
@@ -1485,8 +1484,9 @@ static List Compiler._built_item(
 static List Compiler._built_hole(
   Compiler c, List row, int shell, Token start) {
   (List hole, Symbol projection) = row;
-  List local = c.convert_expression(c.resolve_expression(
-    %(expr () (ident ${_hole_name(hole).str()})), start), %("Var"));
+  List local = c.convert_expression(
+    c.resolve_expression(
+      %(expr () (ident ${_hole_name(hole).str()})), start), %("Var"));
   List cells = c.literal_cell(local, %(nil));
   Symbol selected = shell ? <shell> : projection;
   List shape = %(
@@ -1512,7 +1512,8 @@ static List Definition.typed_construction(Definition &d) {
   Compiler c = d.c;
   Map keys = d.written_keys();
   match (d.rebuild.car()) case %(expr ? *content):
-    return c.literal_cell(c.cache_literal_var(<expr>),
+    return c.literal_cell(
+      c.cache_literal_var(<expr>),
       c.literal_cell(d.type, c._typed_cells(content, keys, d.start)));
   /* The rebuild template of an expression that is one hole is empty; the
      definition's template names the hole, which `Macro.typed` inserts. */
@@ -1584,12 +1585,11 @@ static List Compiler._typed_hole(Compiler c, List row, Token start) {
   if (kind == <name> && projection == <value>)
     return c._runtime_call("Macro_declared", %($local), start);
   if (!lifts && !expression && kind != <name>) return local;
-  return c._runtime_call("Macro_inserted",
-    %($local ${x2c_literal_int(lifts)} ${x2c_literal_int(expression)}),
-    start);
+  return c._runtime_call(
+    "Macro_inserted",
+    %($local ${x2c_literal_int(lifts)} ${x2c_literal_int(expression)}), start);
 }
 
-/* The call of the runtime operation `name` with `arguments`. */
 static List Compiler._runtime_call(
   Compiler c, String name, List arguments, Token start) {
   List callee = c.resolve_expression(%(expr () (ident $name)), start);
@@ -1597,7 +1597,6 @@ static List Compiler._runtime_call(
     %(expr () (call $callee (args @arguments))), start);
 }
 
-/* The local that holds a quotation hole's value. */
 static List Compiler._hole_value(Compiler c, List hole, Token start) =>
   c.resolve_expression(%(expr () (ident ${_hole_name(hole).str()})), start);
 
@@ -2673,7 +2672,8 @@ static List Compiler._invocation_node(
    definition published where it lands, with that expansion's names. */
 static Var Compiler._stored_reference(Compiler c, List definition) {
   Atom name = definition.assoc(<name>);
-  if (definition.assoc(<local>).int() && c.sym.lookup_macro(name) == definition)
+  if (definition.assoc(<local>).int() &&
+      c.sym.lookup_macro(name) == definition)
     return %(local-macro $name);
   if (definition.assoc(<template>)) return %(!quote $definition);
   return name;
@@ -3368,8 +3368,9 @@ static List Compiler._rebuild(
   (List template, List keys) = rebuild;
   List rows = c._template_arguments(definition, values, c.token, 1).cdr();
   if (target)
-    rows = rows.append(%(${c._capture_row_project(
-      definition.assoc(<targetp>), %($target), 1)}));
+    rows = rows.append(
+      %(${c._capture_row_project(
+        definition.assoc(<targetp>), %($target), 1)}));
   List bindings = NULL;
   foreach (List row, rows) {
     bindings = _row_bindings(keys.car(), row, bindings);
@@ -3378,7 +3379,6 @@ static List Compiler._rebuild(
   return template.replace(bindings);
 }
 
-/* `bindings` with each projection of a capture `row` that `keys` names. */
 static List _row_bindings(List keys, List row, List bindings) {
   List fields = _row_fields(row);
   foreach (Var binder, keys) {

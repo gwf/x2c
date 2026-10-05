@@ -236,7 +236,7 @@ static Var Pool._lookup_locked(Pool inner, Var key, unsigned key_hash) {
     insertion causes propagate.
 */
 Var Pool.intern(Pool inner, Var object, void *alloc) {
-  if (!inner || !alloc) raise %(bad-arg (owner "Pool.intern"));
+  if (!inner || !alloc) raise %(bad-arg (operation "Pool.intern"));
   Var canonical;
   int discard = 0;
   {
@@ -275,7 +275,7 @@ static Var Pool._intern_locked(Pool inner, Var object, int &discard) {
     causes propagate and leave the object unregistered.
 */
 Var Pool.intern_new(Pool inner, Var object, void *alloc) {
-  if (!inner || !alloc) raise %(bad-arg (owner "Pool.intern_new"));
+  if (!inner || !alloc) raise %(bad-arg (operation "Pool.intern_new"));
   Var canonical;
   int discard = 0;
   {
@@ -297,7 +297,7 @@ Var Pool.intern_new(Pool inner, Var object, void *alloc) {
     and leave the object unregistered.
 */
 void Pool.insert(Pool inner, Var object) {
-  if (!inner) raise %(bad-arg (owner "Pool.insert"));
+  if (!inner) raise %(bad-arg (operation "Pool.insert"));
   inner._lock();
   defer inner._unlock();
   inner._insert_locked(object);
@@ -335,7 +335,7 @@ static int Pool._owns_locked(Pool pool, Var key) {
     be allocated.
 */
 void *Pool.malloc(Pool inner, size_t size) {
-  if (!inner) raise %(bad-arg (owner "Pool.malloc"));
+  if (!inner) raise %(bad-arg (operation "Pool.malloc"));
   int class_index = _size_class(size);
   if (class_index >= 0) return inner._small_malloc(class_index, size);
   _storage_lock();
@@ -408,7 +408,7 @@ static PoolBlock Pool._fresh_block(Pool inner, int class_index) {
   PoolBlock fresh = malloc(inner._block_bytes(class_index));
   if (fresh) return fresh;
   if (x2c_error_runtime_ready)
-    raise %(alloc-fail (owner "Pool backing block"));
+    raise %(alloc-fail (operation "Pool backing block"));
   _fatal("backing block allocation failed");
 }
 
@@ -420,7 +420,7 @@ static PoolBlock Pool._fresh_block(Pool inner, int class_index) {
 */
 void Pool.free(Pool inner, void *alloc) {
   if (!alloc) return;
-  if (!inner) raise %(bad-arg (owner "Pool.free"));
+  if (!inner) raise %(bad-arg (operation "Pool.free"));
   _storage_lock();
   defer _storage_unlock();
   inner._lock();
@@ -1001,7 +1001,7 @@ Pool Pool.open(void) => Pool.open_named(NULL);
     active pool unchanged.
 */
 void Pool.close(void) {
-  if (!Pool.current().up) raise %(bad-state (owner "Pool.close"));
+  if (!Pool.current().up) raise %(bad-state (operation "Pool.close"));
   value_thread.current = value_thread.current.release();
 }
 
@@ -1014,7 +1014,7 @@ void Pool.close(void) {
 */
 Pool Pool.detach(void) {
   Pool detached = Pool.current();
-  if (!detached.up) raise %(bad-state (owner "Pool.detach"));
+  if (!detached.up) raise %(bad-state (operation "Pool.detach"));
   value_thread.current = detached.up;
   return detached;
 }

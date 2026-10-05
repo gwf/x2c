@@ -799,7 +799,8 @@ static List Compiler._destructure_value(Compiler c, List ast) {
         $result;
       });
       List bound = c.bind_syntax(
-        shape(type, result, %(code-value "bound" $source ()),
+        shape(
+          type, result, %(code-value "bound" $source ()),
           temporary, converted, assignments),
         AST_EXPRESSION, NULL);
       return bound.caddr();

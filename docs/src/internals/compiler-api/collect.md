@@ -36,7 +36,7 @@ Drops the entries collected without declaration defaults while the shared
 compile-time session was filled, or by a project meta build. Call once
 that session is published, and after the meta build's parses.
 
-Source: `src/collect.x:1413`
+Source: `src/collect.x:1412`
 
 #### collect_resolve_include
 
@@ -58,7 +58,7 @@ stage directory when it runs from `<home>/builds/`, otherwise under the
 home. A `cold` process reads no interface and still writes its own. Call
 it before opening any translation unit's Context.
 
-Source: `src/collect.x:1119`
+Source: `src/collect.x:1118`
 
 #### interface_prelude
 
@@ -68,7 +68,7 @@ Returns the path of the first prelude interface this compiler wrote, or
 NULL when there is none or the compiler's identity is unknown. Its
 source hashes are not checked.
 
-Source: `src/collect.x:1312`
+Source: `src/collect.x:1311`
 
 #### interface_text
 
@@ -80,7 +80,7 @@ identity is unknown, since no compiler could replay that interface. A
 contribution that the interface grammar cannot spell is reported as an
 `emit` diagnostic.
 
-Source: `src/collect.x:1334`
+Source: `src/collect.x:1333`
 
 ### `Compiler`
 
@@ -126,7 +126,7 @@ Installs, at each include among the directives before the cursor, the
 macro imports that the included file exports, as the unit's own imports
 written there would be installed.
 
-Source: `src/collect.x:1073`
+Source: `src/collect.x:1072`
 
 <a id="Compiler.include_typedef_names"></a>
 #### Compiler.include_typedef_names
@@ -165,7 +165,7 @@ source sites. Returns the macro imports the included files export, by
 the canonical path of each file the unit includes, for the full parse
 to install at that include.
 
-Source: `src/collect.x:1035`
+Source: `src/collect.x:1034`
 
 <a id="Compiler.replay_package_imports"></a>
 #### Compiler.replay_package_imports
@@ -178,7 +178,7 @@ borrows the unit's macro state and shared package registries. The full
 parse passes `exports`, which takes the exported imports for the include
 line, and leaves the unit's own imports at their source sites.
 
-Source: `src/collect.x:977`
+Source: `src/collect.x:976`
 
 ### `Sym`
 

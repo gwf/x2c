@@ -689,7 +689,7 @@ static int _reference(Buffer out, RegexMatch found, String text, int i) {
 // patterns
 
 /** Compiles `pattern` and returns the `Regex`, owned by the current scope.
-    Raises: `<malformed>` with `why`, the `pattern`, and the byte `offset`
+    Raises: `<malformed>` with `reason`, the `pattern`, and the byte `offset`
     of the problem when the pattern does not parse.
 */
 Regex Regex.compile(String pattern) => Regex.new(pattern);

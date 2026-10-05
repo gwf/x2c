@@ -88,7 +88,7 @@ List List.cons_in(Pool pool, Var head, List tail) {
     installed.
 */
 List cons(Var head, List tail) {
-  if (head is void) raise %(void-op (owner "List.cons"));
+  if (head is void) raise %(void-op (operation "List.cons"));
   return List.cons_in(Pool.current(), head, tail);
 }
 
@@ -382,7 +382,7 @@ List List.concat_n(unsigned list_count, ...) {
 }
 
 static List _concat_va(unsigned n, va_list ap) {
-  if (n > INT_MAX) raise %(size-limit (owner "List.concat_n") (count $n));
+  if (n > INT_MAX) raise %(size-limit (operation "List.concat_n") (count $n));
   Array lists = $auto([]);
   for (unsigned i = 0; i < n; i++) lists.push(va_arg(ap, List));
   return _concat_lists(lists);
@@ -416,7 +416,7 @@ static List _list_va(unsigned n, va_list ap) {
   Array values = $auto([]);
   for (unsigned i = 0; i < n; i++) {
     Var value = va_arg(ap, Var);
-    if (value is void) raise %(void-op (owner "List.list_n") (index $i));
+    if (value is void) raise %(void-op (operation "List.list_n") (index $i));
     values.push(value);
   }
   return values;
@@ -556,7 +556,7 @@ meta native Self List.tail(Self list, unsigned count) {
     constructing the result.
 */
 meta native Self List.subseq(Self list, int start, int stop, int step) {
-  if (step < 1) raise %(bad-arg (owner "List.subseq") (step $step));
+  if (step < 1) raise %(bad-arg (operation "List.subseq") (step $step));
   int span = x2c_normalize_slice(&start, &stop, step, list.len());
   return _collect_subseq(list, start, step, span);
 }
@@ -581,7 +581,7 @@ static List _collect_subseq(List list, int start, int step, int span) {
     `<size-limit>` while constructing the result.
 */
 meta native Self List.getslice(Self list, int start, int stop, int step) {
-  if (!step) raise %(bad-arg (owner "List.getslice") (step $step));
+  if (!step) raise %(bad-arg (operation "List.getslice") (step $step));
   int len = list.len(), span = x2c_normalize_slice(&start, &stop, step, len);
   if (step == 1 && start == 0 && span == len &&
       (!list || _is_active_canonical(list))) return list;
@@ -853,7 +853,7 @@ int List.unpack_vars_n(List src, unsigned destination_count, ...) {
 /* Reads each destination from `ap` as a `List *` when `lists` is set, and as
    a `Var *` otherwise. */
 static int _unpack_va(List src, unsigned n, va_list ap, int lists) {
-  if (n > INT_MAX) raise %(size-limit (owner "List.unpack_n") (count $n));
+  if (n > INT_MAX) raise %(size-limit (operation "List.unpack_n") (count $n));
   int count = 0;
   for (; src && count < n; src = src.cdr(), count++) {
     if (lists) {

@@ -59,8 +59,9 @@ static List Compiler._convert_composite(
     List row_condition = excess_check
       ? _initializer_and(parent_condition, excess_check) : parent_condition;
     excess_check = NULL;
-    elements.push(c._convert_composite_row(
-      row, native_target, row_condition, parent_condition, native_used));
+    elements.push(
+      c._convert_composite_row(
+        row, native_target, row_condition, parent_condition, native_used));
   }
   List converted = elements.list_free();
   return $!($target){ { $converted... } };
@@ -124,7 +125,7 @@ static List _composite_excess_check(List parent_condition) {
   return %(expr (int) (op + $one (expr (int) (op * $zero $count))));
 }
 
-// initializer rows
+// subobject choices
 
 /** Returns (original cases) rows; each case is
     (native-condition path destination value). Explicit braces start a nested
@@ -309,8 +310,8 @@ static int Compiler._initializer_whole(Compiler c, Type type, List value) {
 
 static int Compiler._initializer_string_array(
   Compiler c, Type type, List value) {
-  if (!value.match(%(expr (* char) ${$source_literal_content(
-      %((* char) ?))}))) return 0;
+  if (!value.match(
+    %(expr (* char) ${$source_literal_content(%((* char) ?))}))) return 0;
   Type array = c.sym.resolve_key(type);
   if (!array.is_array()) return 0;
   Type element = c.sym.resolve_key(array.cdr()).scalar();
@@ -477,8 +478,9 @@ static int Compiler._scalar_inputs(Compiler c, List items, List &string) {
       }
       default: return 0;
     }
-    if (value.match(%(expr (* char) ${$source_literal_content(
-        %((* char) ?))}))) string = value;
+    if (value.match(
+      %(expr (* char)
+        ${$source_literal_content(%((* char) ?))}))) string = value;
   }
   return 1;
 }
@@ -929,9 +931,10 @@ static List Compiler._initializer_adapter(
     List input = $!(${source.cadr()}){ $parameter };
     body = body.search_replace(%(!quote $formal), input);
     List binding = c.sym.introduce(c.fresh_name("initializer_adapt"));
-    c.add_early(c.wrapper_function(
-      %(static @result), binding, %(${from.parameter_ast(parameter)}),
-      %((return $result $body))));
+    c.add_early(
+      c.wrapper_function(
+        %(static @result), binding, %(${from.parameter_ast(parameter)}),
+        %((return $result $body))));
     Type callable = %((func ($from)) @result);
     adapter = $!($callable){ $binding };
   }

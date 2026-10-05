@@ -38,7 +38,7 @@ macro Unit $native.update(Type $type, Name $function, Literal $row) {
     volatile $type *$(x2c.ident "lhs"), Symbol $(x2c.ident "op"),
     Var $(x2c.ident "rhs")) {
     if (!$(x2c.ident "lhs")) {
-      raise %(bad-arg (owner ${
+      raise %(bad-arg (operation ${
         $(x2c.literal.string (x2c.binding.spelling $function))
       }));
     }
@@ -224,7 +224,7 @@ static Var _protocol_arithmetic(Var lhs, Symbol member, Symbol op, Var rhs) {
 */
 meta native Var Var.neg(Var value) {
   _valid_operand(value);
-  if (value is void) raise %(void-op (owner "Var.neg"));
+  if (value is void) raise %(void-op (operation "Var.neg"));
   Var result;
   if (value.try_dispatch_unary(<neg>, result)) return result;
   if (value.kind() == <object>) {
@@ -433,7 +433,7 @@ meta native int Var.truth(Var value) {
 */
 int Var.fallback_truth(Var value) {
   _valid_operand(value);
-  if (value is void) raise %(void-op (owner "Var.truth"));
+  if (value is void) raise %(void-op (operation "Var.truth"));
   X2CVarNumericInfo info;
   if (Var.numeric_info(value.tag(), info)) return _numeric_truth(value);
   Symbol kind = value.kind();
@@ -470,7 +470,7 @@ Var Var.update(Var &?lhs, Symbol op, Var rhs) =>
     thread synchronization.
 */
 Var x2c_var_update_volatile(volatile Var &?lhs, Symbol op, Var rhs) {
-  if (!lhs) raise %(bad-arg (owner "Var.update"));
+  if (!lhs) raise %(bad-arg (operation "Var.update"));
   _valid_operands(lhs, rhs);
   if (lhs is void || rhs is void) raise %(void-op (op $op));
   if (!_update_operator(op)) raise %(bad-op (op $op));
@@ -516,7 +516,7 @@ Var Var.postfix(Var &?lhs, Symbol op) => x2c_var_postfix_volatile(lhs, op);
     providing thread synchronization.
 */
 Var x2c_var_postfix_volatile(volatile Var &?lhs, Symbol op) {
-  if (!lhs) raise %(bad-arg (owner "Var.postfix"));
+  if (!lhs) raise %(bad-arg (operation "Var.postfix"));
   _valid_operand(lhs);
   if (lhs is void) raise %(void-op (op $op));
   Symbol binary_op;

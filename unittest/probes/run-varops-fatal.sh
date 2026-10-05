@@ -52,15 +52,33 @@ check_case() {
 }
 
 check_case convert \
-  $'<elapsed> error/err-report start_time="<wall-time>" code=<void-op> detail=\n((owner "Var.convert")) location=\n((file "../../lib/varconvert.x") (line <line>)\x20\n (function "Var_convert"))\nx2c error floor: <void-op>: non-returning error was not caught'
+  $'<elapsed> error/err-report start_time="<wall-time>" code=<void-op>'\
+$' detail=\n((operation "Var.convert")) location=\n((file'\
+$' "../../lib/varconvert.x") (line <line>)\x20\n (function'\
+$' "Var_convert"))\nx2c error floor: <void-op>: non-returning error was'\
+$' not caught'
 check_case truth \
-  $'<elapsed> error/err-report start_time="<wall-time>" code=<void-op> detail=\n((owner "Var.truth")) location=\n((file "../../lib/varops.x") (line <line>) (function "Var_fallback_truth"))\nx2c error floor: <void-op>: non-returning error was not caught'
+  $'<elapsed> error/err-report start_time="<wall-time>" code=<void-op>'\
+$' detail=\n((operation "Var.truth")) location=\n((file'\
+$' "../../lib/varops.x") (line <line>) (function'\
+$' "Var_fallback_truth"))\nx2c error floor: <void-op>: non-returning error'\
+$' was not caught'
 check_case hash \
-  $'<elapsed> error/err-report start_time="<wall-time>" code=<void-op> detail=\n((owner "Var.hash")) location=\n((file "../../lib/dispatch.x") (line <line>)\x20\n (function "Var_hash"))\nx2c error floor: <void-op>: non-returning error was not caught'
+  $'<elapsed> error/err-report start_time="<wall-time>" code=<void-op>'\
+$' detail=\n((operation "Var.hash")) location=\n((file'\
+$' "../../lib/dispatch.x") (line <line>)\x20\n (function "Var_hash"))\nx2c'\
+$' error floor: <void-op>: non-returning error was not caught'
 check_case compare \
-  $'<elapsed> error/err-report start_time="<wall-time>" code=<void-op> detail=\n((owner "Var.compare")) location=\n((file "../../lib/dispatch.x") (line <line>)\x20\n (function "Var_compare"))\nx2c error floor: <void-op>: non-returning error was not caught'
+  $'<elapsed> error/err-report start_time="<wall-time>" code=<void-op>'\
+$' detail=\n((operation "Var.compare")) location=\n((file'\
+$' "../../lib/dispatch.x") (line <line>)\x20\n (function'\
+$' "Var_compare"))\nx2c error floor: <void-op>: non-returning error was'\
+$' not caught'
 check_case iter \
-  $'<elapsed> error/err-report start_time="<wall-time>" code=<void-op> detail=\n((owner "Var.iter")) location=\n((file "../../lib/dispatch.x") (line <line>)\x20\n (function "Var_iter"))\nx2c error floor: <void-op>: non-returning error was not caught'
+  $'<elapsed> error/err-report start_time="<wall-time>" code=<void-op>'\
+$' detail=\n((operation "Var.iter")) location=\n((file'\
+$' "../../lib/dispatch.x") (line <line>)\x20\n (function "Var_iter"))\nx2c'\
+$' error floor: <void-op>: non-returning error was not caught'
 check_case binary \
   $'<elapsed> error/err-report start_time="<wall-time>" code=<void-op> detail=\n((op +)) location=\n((file "../../lib/varops.x") (line <line>) (function "_protocol_arithmetic"))\nx2c error floor: <void-op>: non-returning error was not caught'
 check_case update \

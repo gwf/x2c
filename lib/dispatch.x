@@ -328,7 +328,7 @@ void RenderPath.leave(RenderPath *path) {
     Raises: `<void-op>` for `void`.
 */
 unsigned Var.hash(Var v) {
-  if (v.u64 == VAR_VOID_BITS) raise %(void-op (owner "Var.hash"));
+  if (v.u64 == VAR_VOID_BITS) raise %(void-op (operation "Var.hash"));
   if (v.is_wide()) return v.wide_hash();
   /* Canonical `List`s are most of what the pool tables hash, and both these
      hashes are constant time. Unboxing a known tag is one mask and compare,
@@ -351,7 +351,7 @@ static unsigned _nonzero(unsigned hash) => hash ? hash : -1;
     Raises: `<void-op>` for `void`.
 */
 unsigned Var.fallback_hash(Var v) {
-  if (v.u64 == VAR_VOID_BITS) raise %(void-op (owner "Var.fallback_hash"));
+  if (v.u64 == VAR_VOID_BITS) raise %(void-op (operation "Var.fallback_hash"));
   if (v.is_wide()) return v.wide_hash();
   return _default_hash(v);
 }
@@ -406,7 +406,7 @@ meta native int Var.same(Var a, Var b) => a.u64 == b.u64;
 */
 meta native int Var.compare(Var a, Var b) {
   if (a.u64 == VAR_VOID_BITS || b.u64 == VAR_VOID_BITS)
-    raise %(void-op (owner "Var.compare"));
+    raise %(void-op (operation "Var.compare"));
   if (a.u64 == b.u64) return 0;
   Symbol ak = a.kind(), bk = b.kind(), atag = a.tag(), btag = b.tag();
   int ag = _group(ak, atag), bg = _group(bk, btag);
@@ -423,7 +423,7 @@ meta native int Var.compare(Var a, Var b) {
 */
 int Var.fallback_compare(Var a, Var b) {
   if (a.u64 == VAR_VOID_BITS || b.u64 == VAR_VOID_BITS)
-    raise %(void-op (owner "Var.compare"));
+    raise %(void-op (operation "Var.compare"));
   if (a.u64 == b.u64) return 0;
   Symbol ak = a.kind(), bk = b.kind(), atag = a.tag(), btag = b.tag();
   int ag = _group(ak, atag), bg = _group(bk, btag);
@@ -535,7 +535,7 @@ static int _numeric_rank(Symbol tag) {
     raising.
 */
 meta native Iter Var.iter(Var x, Iter dest) {
-  if (x.u64 == VAR_VOID_BITS) raise %(void-op (owner "Var.iter"));
+  if (x.u64 == VAR_VOID_BITS) raise %(void-op (operation "Var.iter"));
   if (!dest) return NULL;
   VarDescriptor *descriptor = _descriptor(x);
   if (descriptor && descriptor.methods.iter)
@@ -548,7 +548,7 @@ meta native Iter Var.iter(Var x, Iter dest) {
     raising.
 */
 Iter Var.fallback_iter(Var x, Iter dest) {
-  if (x.u64 == VAR_VOID_BITS) raise %(void-op (owner "Var.iter"));
+  if (x.u64 == VAR_VOID_BITS) raise %(void-op (operation "Var.iter"));
   if (!dest) return NULL;
   return dest.init((Var) {0}, NULL, (Var) { .u64 = 0 });
 }
@@ -737,7 +737,7 @@ void x2c_register_type(String name) {
   _lock();
   defer _unlock();
   if (descriptor_registration_frozen)
-    raise %(bad-state (owner "x2c_register_type"));
+    raise %(bad-state (operation "x2c_register_type"));
   _reserve(name);
 }
 
@@ -754,7 +754,7 @@ int x2c_register_builtin_descriptor(Symbol tag, VarMethods methods) {
   _lock();
   defer _unlock();
   if (descriptor_registration_frozen)
-    raise %(bad-state (owner "x2c_register_builtin_descriptor"));
+    raise %(bad-state (operation "x2c_register_builtin_descriptor"));
   VarDescriptor *descriptor = _tag_row(tag);
   if (!descriptor) return 0;
   descriptor.value_dispatch = 1;
@@ -779,7 +779,7 @@ int x2c_try_register_descriptor(String name, VarMethods methods) {
   _lock();
   defer _unlock();
   if (descriptor_registration_frozen)
-    raise %(bad-state (owner "x2c_try_register_descriptor"));
+    raise %(bad-state (operation "x2c_try_register_descriptor"));
   VarDescriptor *descriptor = _reserve(name);
   if (!descriptor) return 0;
   _install_methods(descriptor, methods);
@@ -817,7 +817,7 @@ int x2c_try_register_tagged_descriptor(
   _lock();
   defer _unlock();
   if (descriptor_registration_frozen)
-    raise %(bad-state (owner "x2c_try_register_tagged_descriptor"));
+    raise %(bad-state (operation "x2c_try_register_tagged_descriptor"));
   VarDescriptor *descriptor = _reserve_tagged(tag, name);
   if (!descriptor) return 0;
   _install_methods(descriptor, methods);
@@ -831,7 +831,7 @@ int x2c_try_register_tagged_descriptor(
 void x2c_register_tagged_descriptor(
   Symbol tag, String name, VarMethods methods) {
   if (!x2c_try_register_tagged_descriptor(tag, name, methods))
-    raise %(bad-state (owner "x2c_register_tagged_descriptor")
+    raise %(bad-state (operation "x2c_register_tagged_descriptor")
                      (tag $tag) (name $name));
 }
 

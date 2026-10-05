@@ -669,7 +669,7 @@ _Noreturn static void Parser_fail(Parser * p, String why){
     Var _x2c_literal_part_3 = int_var((* p).pos);
     {
       static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/regex.x",.function = "Parser_fail",.line = 276};
-      x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 4, Symbol_var(34096809266140), _x2c_literal_part_0, Symbol_var(47666), _x2c_literal_part_1, Symbol_var(34470112412), _x2c_literal_part_2, Symbol_var(1019648360), _x2c_literal_part_3);
+      x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 4, Symbol_var(34096809266140), _x2c_literal_part_0, Symbol_var(1218550748), _x2c_literal_part_1, Symbol_var(34470112412), _x2c_literal_part_2, Symbol_var(1019648360), _x2c_literal_part_3);
       __builtin_unreachable();
     }
 
@@ -1009,7 +1009,7 @@ _Noreturn static void Matcher_too_deep(Matcher * m){
     Var _x2c_literal_part_6 = String_var(String_join(NULL, cons(String_var(String_new("a group repeated more times than one match allows")), NULL)));
     {
       static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/regex.x",.function = "Matcher_too_deep",.line = 617};
-      x2c_error_raise_n(& _x2c_error_site_1, 1358596898646632, 4, Symbol_var(34096809266140), _x2c_literal_part_4, Symbol_var(34470112412), _x2c_literal_part_5, Symbol_var(47666), _x2c_literal_part_6, Symbol_var(25782888), int_var(_DEPTH_LIMIT));
+      x2c_error_raise_n(& _x2c_error_site_1, 1358596898646632, 4, Symbol_var(34096809266140), _x2c_literal_part_4, Symbol_var(34470112412), _x2c_literal_part_5, Symbol_var(1218550748), _x2c_literal_part_6, Symbol_var(25782888), int_var(_DEPTH_LIMIT));
       __builtin_unreachable();
     }
 

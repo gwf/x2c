@@ -693,7 +693,7 @@ _Noreturn void MatchPlan_raise_ineligible(const char * reason, const char * owne
   String fence = String_new(reason), site = String_new(owner);
   {
     static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/match.x",.function = "MatchPlan_raise_ineligible",.line = 456};
-    x2c_error_raise_n(& _x2c_error_site_0, 1358596898646632, 2, Symbol_var(32993636), String_var(site), Symbol_var(12939466), String_var(fence));
+    x2c_error_raise_n(& _x2c_error_site_0, 1358596898646632, 2, Symbol_var(34096809266140), String_var(site), Symbol_var(12939466), String_var(fence));
     __builtin_unreachable();
   }
 

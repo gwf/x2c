@@ -89,7 +89,7 @@ static String _publish_page(String page):
     else: lines.push(line_text)
   if language:
     raise %(llms-fatal
-            (why ${%"docs/src/$page: unterminated code fence"}))
+            (reason ${%"docs/src/$page: unterminated code fence"}))
   return String.join("\n", lines.list_free()).strip(NULL) + "\n"
 
 static List _book_summary(void):
@@ -117,7 +117,7 @@ static List _render(void):
     if !entries.contains(page): missing.push(page)
   if missing.len():
     raise %(llms-fatal
-            (why ${%"docs/src/SUMMARY.md has no entry for " +
+            (reason ${%"docs/src/SUMMARY.md has no entry for " +
                     String.join(", ", missing.list_free())}))
 
   Array chapters = []
@@ -217,7 +217,7 @@ Map options = NULL
 try options = Args.parse(args, spec)
 catch %(bad-arg *detail):
   Stderr.printf("%s%s: error: %s\n", usage, self.basename(),
-                detail.assoc(<why>))
+                detail.assoc(<reason>))
   return 2
 if options["write"].integer() && options["check"].integer():
   Stderr.printf("%s%s: error: argument --check: not allowed with argument "
@@ -230,5 +230,5 @@ try:
   if options["check"].integer(): return _check_outputs(outputs)
   printf("%s", outputs.car().list().cadr())
 catch %(llms-fatal *detail):
-  Stderr.printf("llms.txt: %s\n", detail.assoc(<why>))
+  Stderr.printf("llms.txt: %s\n", detail.assoc(<reason>))
   return 1

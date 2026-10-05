@@ -1870,7 +1870,7 @@ binds therefore cannot call itself by that name, and the self-call reports
 
 The session that translates a unit inherits the compile-time library and
 cannot replace one of its definitions. `def` on an inherited name raises
-`(bad-state (operation "def") (why "inherited") (name NAME))`, which the
+`(bad-state (operation "def") (reason "inherited") (name NAME))`, which the
 compiler reports as a failed compile-time evaluation at the defining form.
 This covers `defun` and `defmacro`, which are `def`. The library defines
 many ordinary words, including `filter`, `last`, `map`, `search`, `len` and

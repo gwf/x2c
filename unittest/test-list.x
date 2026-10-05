@@ -240,7 +240,7 @@ static void list_predicate_shape_is_shared(void) {
 }
 
 static int reject_three(Var value) {
-  if (value.integer() == 3) raise %(bad-arg (owner "reject_three"));
+  if (value.integer() == 3) raise %(bad-arg (operation "reject_three"));
   return 1;
 }
 

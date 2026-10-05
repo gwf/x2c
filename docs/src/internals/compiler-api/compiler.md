@@ -1059,7 +1059,7 @@ Holds one reversible semantic transaction in caller storage.
 The zero value is inactive. Keep an active transaction in one object;
 copying it does not coordinate completion. The symbol table's undo log
 holds the rows it may restore from `mark`; the staged generated-name
-counters and other snapshots live in the Scope used to begin it.
+counters and other snapshots live in its initial Scope.
 
 Source: `src/compiler.x:228`
 

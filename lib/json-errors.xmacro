@@ -8,19 +8,19 @@ macro Stmt $error.boolean.type(Expr $tag) {
 macro Stmt $error.read.file(
   Expr $path, Expr $why, Expr $offset, Expr $line, Expr $column) {
   raise %(malformed (operation "Json.read_file") (path ${$path})
-          (why ${$why}) (offset ${$offset})
+          (reason ${$why}) (offset ${$offset})
           (line ${$line}) (column ${$column}));
 }
 
 macro Stmt $error.read.text(
   Expr $why, Expr $offset, Expr $line, Expr $column) {
-  raise %(malformed (operation "Json.parse") (why ${$why})
+  raise %(malformed (operation "Json.parse") (reason ${$why})
           (offset ${$offset}) (line ${$line}) (column ${$column}));
 }
 
 macro Stmt $error.write.depth() {
   raise %(size-limit (operation "Var.json")
-          (why "nesting exceeds 512 levels"));
+          (reason "nesting exceeds 512 levels"));
 }
 
 macro Stmt $error.write.type(Expr $tag) {
@@ -33,13 +33,13 @@ macro Stmt $error.write.key(Expr $tag) {
 }
 
 macro Stmt $error.write.duplicate(Expr $text) {
-  raise %(bad-arg (operation "Var.json") (why "duplicate object name")
+  raise %(bad-arg (operation "Var.json") (reason "duplicate object name")
           (name ${$text}));
 }
 
 macro Stmt $error.write.nonfinite() {
   raise %(conv-range (operation "Var.json")
-          (why "JSON has no NaN or infinity"));
+          (reason "JSON has no NaN or infinity"));
 }
 
 macro Stmt $error.read.trailing(Expr $reader) =>

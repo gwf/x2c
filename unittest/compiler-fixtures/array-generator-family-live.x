@@ -6,7 +6,7 @@ $(import "../../lib/array-generics.xmacro")
 typedef Block ProbeArrayInt;
 
 static void _bad_index(String owner, int index, size_t size) {
-  raise %(bad-arg (owner $owner) (index $index) (size $size));
+  raise %(bad-arg (operation $owner) (index $index) (size $size));
 }
 
 static void _bad_operation(String owner, Symbol operation) {
@@ -14,11 +14,11 @@ static void _bad_operation(String owner, Symbol operation) {
 }
 
 static void _size_limit(String owner, size_t size) {
-  raise %(size-limit (owner $owner) (size $size));
+  raise %(size-limit (operation $owner) (size $size));
 }
 
 static void _bad_step(String owner, int step) {
-  raise %(bad-arg (owner $owner) (step $step));
+  raise %(bad-arg (operation $owner) (step $step));
 }
 
 static int _compare_int(int a, int b) => (a > b) - (a < b);

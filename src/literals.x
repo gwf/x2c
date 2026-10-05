@@ -107,8 +107,8 @@ static List Compiler._cache_if_stable(Compiler c, List elem) {
   /* A reference is `(ident <binding-list>)`. The binding sublist has to be
      part of the search: `%(ident *)` also matches the final cell of a
      literal node ending in the Symbol <ident>. */
-  if (elem.try_search($source_identifier_content(%((*))),
-      matched, bindings)) return elem;
+  if (elem.try_search(
+    $source_identifier_content(%((*))), matched, bindings)) return elem;
   if (c.runtime_literals || c.needs_resolution(elem)) return elem;
   /* Each evaluation builds a fresh Array or Map, so a List that holds one,
      at any depth, is built at runtime too. */
@@ -612,7 +612,7 @@ static List _set_expression(Array symbols) {
   }
 }
 
-/* The bytes as octal escapes in one C string literal. */
+/* Three-digit escapes preserve each byte inside one quoted C string. */
 static String _octal_literal(Block bytes) {
   unsigned char *data = bytes.bytes;
   Buffer output = Buffer.new(0);

@@ -68,7 +68,7 @@ int scan_white_space(char *s) {
    Raises: `<bad-arg>` for NULL or a non-comment prefix. */
 int scan_line_comment(char *s) {
   if (!s || s[0] != '/' || s[1] != '/')
-    raise %(bad-arg (owner "scan_line_comment"));
+    raise %(bad-arg (operation "scan_line_comment"));
   int n = 2;
   while (s[n] && s[n] != '\n') n++;
   return n;
@@ -79,7 +79,7 @@ int scan_line_comment(char *s) {
    `<bad-arg>` for NULL or a non-comment prefix. */
 int scan_block_comment_status(char *s, Symbol *status) {
   if (!s || s[0] != '/' || s[1] != '*')
-    raise %(bad-arg (owner "scan_block_comment_status"));
+    raise %(bad-arg (operation "scan_block_comment_status"));
   if (status) *status = <ok>;
   int n = 2;
   while (s[n]) {
@@ -322,7 +322,7 @@ static int _float_suffix(char *s) {
    or a non-identifier start. */
 int scan_identifier(char *s) {
   if (!s || (!scan_ascii_alpha((unsigned char) s[0]) && s[0] != '_'))
-    raise %(bad-arg (owner "scan_identifier"));
+    raise %(bad-arg (operation "scan_identifier"));
   int n = 1;
   while (!_token_break((unsigned char) s[n])) n++;
   return n;

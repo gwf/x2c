@@ -47,12 +47,12 @@ macro Unit $map.scaffold(
   Literal $reinsert_owner, Literal $insert_owner
 ) {
   static void $reinsert_error(unsigned capacity, int probe) {
-    raise %(invariant (owner ${$reinsert_owner}) (capacity $capacity)
+    raise %(invariant (operation ${$reinsert_owner}) (capacity $capacity)
             (probe $probe));
   }
 
   static void $insert_error(unsigned capacity) {
-    raise %(invariant (owner ${$insert_owner}) (capacity $capacity));
+    raise %(invariant (operation ${$insert_owner}) (capacity $capacity));
   }
 
   static $key *$key_at($map map, unsigned index) {
@@ -392,7 +392,7 @@ macro Unit $map.typed.operations(Type $map, Type $key, Type $value, Name $update
   */
   $map $map.new_capacity(unsigned capacity) {
     if (!$capacity_valid(capacity)) {
-      if ($boxed) raise %(bad-arg (owner "Map.new_capacity")
+      if ($boxed) raise %(bad-arg (operation "Map.new_capacity")
                          (capacity $capacity));
       (void) $bad_arg($owner);
     }

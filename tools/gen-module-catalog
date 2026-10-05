@@ -71,7 +71,7 @@ Map options = NULL
 try options = Args.parse(args, %((--write) (--check)))
 catch %(bad-arg *detail):
   Stderr.printf("%s%s: error: %s\n", usage, self.basename(),
-                detail.assoc(<why>))
+                detail.assoc(<reason>))
   return 2
 int write = options["write"].integer(), check = options["check"].integer()
 if write && check:

@@ -36,7 +36,7 @@
   (at 6 (raise (expr ("Symbol") (literal ("Symbol") "collected" collected)) 
          (args (expr ("Symbol") (literal ("Symbol") "bytes" bytes)) 
           (expr (int) (ident (binding 5 "bytes"))) 
-          (expr ("Symbol") (literal ("Symbol") "owner" owner)) 
+          (expr ("Symbol") (literal ("Symbol") "operation" operation)) 
           (expr ("String") 
            (segments 
             (segexp (expr ("String") (literal ("String") "raise-probe")))))))) 

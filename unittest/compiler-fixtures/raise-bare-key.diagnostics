@@ -1,5 +1,5 @@
 unittest/compiler-fixtures/raise-bare-key.x:4:22: parse: raise detail key must be a bare Symbol
-    raise %(invariant (<owner> "probe"));
-                       ^^^^^^^
+    raise %(invariant (<operation> "probe"));
+                       ^^^^^^^^^^^
   note: use raise %(code (key value)...);
 

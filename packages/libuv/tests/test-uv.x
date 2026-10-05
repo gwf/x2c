@@ -268,7 +268,7 @@ typedef struct AsyncNotifyState {
 
 static Var _notify_loop(const void *input, size_t size) {
   if (size != sizeof(AsyncNotifyInput)) {
-    raise %(bad-arg (owner "libuv async test worker"));
+    raise %(bad-arg (operation "libuv async test worker"));
   }
   const AsyncNotifyInput *notify = input;
   int answer = notify.answer;

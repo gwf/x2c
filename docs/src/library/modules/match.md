@@ -509,7 +509,7 @@ compiles to no program, so answering "no match" would be wrong and no
 caller could tell it from a real miss. `reason` is the plan's static
 category string.
 
-**Raises:** `<size-limit>` naming `owner` and the fence.
+**Raises:** `<size-limit>` with `operation` and the fence.
 
 Source: `lib/match.x:454`
 

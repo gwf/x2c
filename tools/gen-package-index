@@ -49,14 +49,14 @@ static void source_rows(
 static String field(Map identity, String name):
   Var value
   if !identity.try_get(name, value):
-    raise %(bad-arg (why "BUNDLE.json has no $name"))
+    raise %(bad-arg (reason "BUNDLE.json has no $name"))
   return value.str()
 
 static String bundle_row(Path tarball, Path output, String base):
   String member = NULL
   foreach String entry in %(tar -tzf $tarball).job().lines():
     if !member && entry.endswith("/BUNDLE.json"): member = entry
-  if !member: raise %(bad-arg (why "$tarball has no BUNDLE.json"))
+  if !member: raise %(bad-arg (reason "$tarball has no BUNDLE.json"))
   Map identity = Json.parse(%(tar -xOzf $tarball $member).job().output())
   String package = field(identity, "package")
   String platform =
@@ -91,7 +91,7 @@ if args.contains("-h") || args.contains("--help"):
 Map options = NULL
 try options = Args.parse(args, spec)
 catch %(bad-arg *detail):
-  String why = detail.assoc(<why>), subject = detail[2].cadr()
+  String why = detail.assoc(<reason>), subject = detail[2].cadr()
   Stderr.printf("%sx2c: %s: %s\n", Args.usage(program, spec), why, subject)
   return 2
 
@@ -117,7 +117,7 @@ try:
   index.write_text(%"${lines.join("\n")}\n")
   printf("x2c: wrote %s (%d rows)\n", index, (int) rows.len())
 catch %(?code *detail):
-  Var why = detail.assoc(<why>)
+  Var why = detail.assoc(<reason>)
   if why is void: Stderr.printf("x2c: %s %s\n", code, detail.repr())
   else: Stderr.printf("x2c: %s\n", why)
   return 1

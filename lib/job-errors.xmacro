@@ -6,7 +6,7 @@ macro Stmt $error.start.alloc() {
 }
 
 macro Stmt $error.start.empty() {
-  raise %(bad-arg (operation "Job.start") (why "empty command"));
+  raise %(bad-arg (operation "Job.start") (reason "empty command"));
 }
 
 macro Stmt $error.start.missing(Expr $program, Expr $error) {
@@ -28,11 +28,11 @@ macro Stmt $error.start.io(Expr $error) {
 }
 
 macro Stmt $error.job.started(Expr $operation) {
-  raise %(bad-arg (operation ${$operation}) (why "the job has started"));
+  raise %(bad-arg (operation ${$operation}) (reason "the job has started"));
 }
 
 macro Stmt $error.options.key() {
-  raise %(bad-arg (operation "Job.options") (why "option keys are atoms"));
+  raise %(bad-arg (operation "Job.options") (reason "option keys are atoms"));
 }
 
 macro Stmt $error.options.unknown(Expr $name) {
@@ -60,9 +60,9 @@ macro Stmt $error.check.status(Expr $command, Expr $status) {
 }
 
 macro Stmt $error.text.nul(Expr $operation) {
-  raise %(bad-arg (operation ${$operation}) (why "embedded NUL"));
+  raise %(bad-arg (operation ${$operation}) (reason "embedded NUL"));
 }
 
 macro Stmt $error.wait.unstarted() {
-  raise %(bad-arg (operation "Job.wait_any") (why "a job has not started"));
+  raise %(bad-arg (operation "Job.wait_any") (reason "a job has not started"));
 }
