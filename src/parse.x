@@ -458,41 +458,48 @@ static void Compiler._reject_expanded_meta(Compiler c, List decl, Token meta) {
 static void Compiler._record_meta_hash(
   Compiler c, List definition, Token first, int collected_body) {
   match (definition) {
-    case %(seq *rows): {
-      foreach (List row, rows)
-        c._record_meta_hash(row, first, collected_body);
-      return;
-    }
-    case %(declare ?spec (bindings ?one *more)):
-      if (more) {
-        foreach (Var bind, definition.caddr().list().cdr())
-          c._record_meta_hash(
-            %(declare $spec (bindings $bind)), first, collected_body);
-        return;
-      }
+    case %(seq *rows):
+      c._record_meta_rows(rows, first, collected_body);
+    case %(declare ?spec (bindings ?one *more)) if (more):
+      c._record_meta_bindings(
+        spec, definition.caddr().list().cdr(), first, collected_body);
+    case %(function ? (bind (binding ? ?(String own)) *) ?content):
+      c._store_meta_hash(own, content, first);
+    case %(declare ?spec (bindings
+             (op = (bind (binding ? ?(String own)) *) ?init))):
+      c._store_static_meta(spec, own, init, first);
+    case %(declare ?spec (bindings
+             (bind (!set ?binding (binding ? ?(String own))) *))):
+      c._store_collected_meta(spec, binding, first, collected_body);
   }
-  String name = NULL;
-  Var body = void;
-  match (definition) {
-    case %(function ? (bind (binding ? ?(String own)) *) ?content): {
-      name = own;
-      body = content;
-    }
-    case %(declare ?spec
-             (bindings (op = (bind (binding ? ?(String own)) *)
-                             ?initializer))): {
-      if (!spec.type().is_static()) return;
-      name = own;
-      body = initializer;
-    }
-    case %(declare ?spec
-             (bindings (bind (!set ?binding (binding ? ?(String own))) *))): {
-      if (!c.shallow || (!collected_body &&
-          (!spec.type().is_static() || !(binding in c.init_tokens))))
-        return;
-      name = own;
-    }
-  }
+}
+
+static void Compiler._record_meta_rows(
+  Compiler c, List rows, Token first, int collected_body) {
+  foreach (List row, rows) c._record_meta_hash(row, first, collected_body);
+}
+
+static void Compiler._record_meta_bindings(
+  Compiler c, Var spec, List bindings, Token first, int collected_body) {
+  foreach (Var bind, bindings)
+    c._record_meta_hash(
+      %(declare $spec (bindings $bind)), first, collected_body);
+}
+
+static void Compiler._store_static_meta(
+  Compiler c, Var spec, String name, Var body, Token first) {
+  if (spec.type().is_static()) c._store_meta_hash(name, body, first);
+}
+
+static void Compiler._store_collected_meta(
+  Compiler c, Var spec, List binding, Token first, int collected_body) {
+  if (!c.shallow || (!collected_body &&
+      (!spec.type().is_static() || !(binding in c.init_tokens)))) return;
+  c._store_meta_hash(binding_identity_spelling(binding), void, first);
+}
+
+static void Compiler._store_meta_hash(
+  Compiler c, String name, Var body, Token first) {
   if (!name) return;
   uint64_t hash = FNV_OFFSET_BASIS;
   for (Token token = first; token < c.token; token++)
@@ -2583,109 +2590,95 @@ static List Compiler._bind_form(
   int unit = context == AST_UNIT, block = context == AST_BLOCK;
   int statement = block || context == AST_STATEMENT;
   match (input) {
-    case %(macro-invoke ?definition ?arguments ?invocation):
-      return c._bind_invocation(
-        definition, arguments, invocation, context, pending);
-    case %(macro-slot ? ? *): if (c.macro_holes) return input;
+    case %(macro-invoke ?def ?args ?site):
+      return c._bind_invocation(def, args, site, context, pending);
+    case %(macro-slot ? ? *) if (c.macro_holes): return input;
     case %(src ? ?syntax):
       return c.bind_syntax(syntax, context, c.return_type);
-    case %(api-source ?line ?doc ?syntax):
-      if (unit) return c._bind_api_source(line, doc, syntax);
-    case %(named-type ?(String name) ?type):
-      if (unit) return c._bind_named_type(name, type);
-    case %(declaration-bundle (rows *rows)):
-      if (unit) return c._bind_bundle(rows);
-    case %(syntax-recipe ?callback ?arguments):
-      return c._bind_recipe(callback, arguments, context);
-    case %(declaration-recipe ?callback ?arguments):
-      if (unit) return c._bind_decl_recipe(callback, arguments);
-    case %(default-forward ?child ?parent ?member *fallback):
-      if (unit) return %(declaration-forward $child $parent $member
-                         $fallback ${c.source_private});
-    case %(default ?function): if (unit) return c._bind_default(function);
+    case %(api-source ?line ?doc ?syntax) if (unit):
+      return c._bind_api_source(line, doc, syntax);
+    case %(named-type ?(String name) ?type) if (unit):
+      return c._bind_named_type(name, type);
+    case %(declaration-bundle (rows *rows)) if (unit):
+      return c._bind_bundle(rows);
+    case %(syntax-recipe ?callback ?args):
+      return c._bind_recipe(callback, args, context);
+    case %(declaration-recipe ?callback ?args) if (unit):
+      return c._bind_decl_recipe(callback, args);
+    case %(default-forward ?child ?parent ?member *fallback) if (unit):
+      return c._bind_forward(child, parent, member, fallback);
+    case %(default ?function) if (unit): return c._bind_default(function);
     case %(declaration-function
-             (declare ?return_type (bindings ?declarator))
-             ?body ?construction):
-      if (unit) return c._bind_collected_function(
-        input, return_type, declarator, body, construction);
-    case %(declaration-initialized ?declaration ?construction):
-      if (unit)
-        return c._bind_collected_initializers(
-          input, declaration, construction);
+             (declare ?type (bindings ?decl)) ?body ?source) if (unit):
+      return c._bind_collected_function(input, type, decl, body, source);
+    case %(declaration-initialized ?decl ?source) if (unit):
+      return c._bind_collected_initializers(input, decl, source);
     case %(seq *items): return c._bind_items(items, context);
-    case %(args *arguments):
-      if (context == AST_EXPRESSION) return c._bind_args(arguments);
-    case %(c-assert ?condition ?message):
-      if (unit || block || context == AST_FIELD)
-        return c._bind_assert(condition, message);
-    case %(falias ?declaration ?native_syntax):
-      if (unit) return c._bind_alias(declaration, native_syntax);
-    case %(!set ?initializer (managed-init ?)):
-      if (context == AST_EXPRESSION)
-        return c._resolve(%(expr () $initializer));
-    case %(!set ?expression (expr *)):
-      if (context == AST_EXPRESSION) return c._resolve(expression);
+    case %(args *args) if (context == AST_EXPRESSION):
+      return c._bind_args(args);
+    case %(c-assert ?test ?message) if (unit || block || context == AST_FIELD):
+      return c._bind_assert(test, message);
+    case %(falias ?decl ?native_syntax) if (unit):
+      return c._bind_alias(decl, native_syntax);
+    case %(!set ?initializer (managed-init ?)) if (context == AST_EXPRESSION):
+      return c._resolve(%(expr () $initializer));
+    case %(!set ?expr (expr *)) if (context == AST_EXPRESSION):
+      return c._resolve(expr);
     case %((!set ?tag (!or declare decl typedef))
            ?base (bindings *declarators)):
       return c._bind_declaration(tag, base, declarators, context);
-    case %(dstrdecl ?base (targets *targets) ?source):
-      if (block) return c._bind_targets(base, targets, source);
-    case %(dstrdecl (params *parameters) ?source):
-      if (block) return c._bind_typed_targets(parameters, source);
-    case %(!set ?function
-           (function ?return_type
-             (bind ?function_name
-               ((fnmod (params *parameter_values)) *return_modifiers))
-             ?body)):
-      if (unit)
-        return c._bind_function(
-          return_type, function_name, parameter_values,
-          return_modifiers, body);
-    case %(!set ?node ((!or protocol adopt meta-protocol) *)):
-      if (unit) return c.publish_protocol_node(node, c.token, NULL);
-    case %(!set ?definition (macrodef *)):
-      return c._bind_macrodef(definition, context);
-    case %(preproc ?(String directive)):
-      if (unit || block) return c._bind_preproc(input);
+    case %(dstrdecl ?base (targets *targets) ?source) if (block):
+      return c._bind_targets(base, targets, source);
+    case %(dstrdecl (params *parameters) ?source) if (block):
+      return c._bind_typed_targets(parameters, source);
+    case %(function ?type
+             (bind ?name ((fnmod (params *params)) *mods)) ?body) if (unit):
+      return c._bind_function(type, name, params, mods, body);
+    case %(!set ?node ((!or protocol adopt meta-protocol) *)) if (unit):
+      return c.publish_protocol_node(node, c.token, NULL);
+    case %(!set ?def (macrodef *)):
+      return c._bind_macrodef(def, context);
+    case %(preproc ?(String directive)) if (unit || block):
+      return c._bind_preproc(input);
     case %(at ?origin ?node):
       return c._anchor(origin, c.bind_syntax(node, context, c.return_type));
-    case return_empty(): if (statement) return c.finish_return_statement(NULL);
-    case return_value(?expression):
-      if (statement) return c.finish_return_statement(expression);
-    case %((!or break continue default empty)): if (statement) return input;
-    case %(case ?expression):
-      if (statement) return %(case ${c._resolve(expression)});
-    case %((!set ?tag (!or goto label)) ?name):
-      if (statement) return %($tag $name);
-    case expression_statement(?expression):
-      if (statement) return c._bind_expression_statement(expression, context);
-    case deferred(?body):
-      if (statement) return %(defer ${c._bind_statement(body)});
-    case do_loop(?body, ?condition):
-      if (statement) return c._bind_do(body, condition);
-    case while_loop(?condition, ?body):
-      if (statement) return c._bind_while(condition, body);
-    case switched(?expression, ?body):
-      if (statement) return c._bind_switch(expression, body);
-    case if_then(?condition, ?ontrue):
-      if (statement) return c._bind_if(condition, ontrue);
-    case if_else(?condition, ?ontrue, ?onfalse):
-      if (statement) return c._bind_if_else(condition, ontrue, onfalse);
-    case for_loop(?init, ?condition, ?increment, ?body):
-      if (statement) return c._bind_for(init, condition, increment, body);
-    case %(raise ?code (args *details)):
-      if (statement) return c._bind_raise(code, details);
-    case %(catchcases ?arms *handler):
-      if (context == AST_STATEMENT) return c._bind_catchcases(arms, handler);
-    case caught(?body, ?cleanup, *arms):
-      if (statement) return c._bind_try(body, input.caddr(), cleanup);
-    case tried(?body, ?cleanup):
-      if (statement) return c._bind_try(body, NULL, cleanup);
-    case matched(?subject, *cases):
-      if (statement) return c._bind_match(subject, cases);
-    case $source_block_content(%(*children)):
-      if (statement) return c._bind_block(input);
-    case %(group *children): if (statement) return c._bind_group(children);
+    case return_empty() if (statement): return c.finish_return_statement(NULL);
+    case return_value(?expr) if (statement):
+      return c.finish_return_statement(expr);
+    case %((!or break continue default empty)) if (statement): return input;
+    case %(case ?expr) if (statement):
+      return %(case ${c._resolve(expr)});
+    case %((!set ?tag (!or goto label)) ?name) if (statement):
+      return %($tag $name);
+    case expression_statement(?expr) if (statement):
+      return c._bind_expression_statement(expr, context);
+    case deferred(?body) if (statement):
+      return %(defer ${c._bind_statement(body)});
+    case do_loop(?body, ?test) if (statement):
+      return c._bind_do(body, test);
+    case while_loop(?test, ?body) if (statement):
+      return c._bind_while(test, body);
+    case switched(?expr, ?body) if (statement):
+      return c._bind_switch(expr, body);
+    case if_then(?test, ?ontrue) if (statement):
+      return c._bind_if(test, ontrue);
+    case if_else(?test, ?ontrue, ?onfalse) if (statement):
+      return c._bind_if_else(test, ontrue, onfalse);
+    case for_loop(?init, ?test, ?next, ?body) if (statement):
+      return c._bind_for(init, test, next, body);
+    case %(raise ?code (args *details)) if (statement):
+      return c._bind_raise(code, details);
+    case %(catchcases ?arms *handler) if (context == AST_STATEMENT):
+      return c._bind_catchcases(arms, handler);
+    case caught(?body, ?cleanup, *arms) if (statement):
+      return c._bind_try(body, input.caddr(), cleanup);
+    case tried(?body, ?cleanup) if (statement):
+      return c._bind_try(body, NULL, cleanup);
+    case matched(?subject, *cases) if (statement):
+      return c._bind_match(subject, cases);
+    case $source_block_content(%(*children)) if (statement):
+      return c._bind_block(input);
+    case %(group *children) if (statement): return c._bind_group(children);
   }
   return c._construction_error();
 }
@@ -2863,6 +2856,11 @@ static List Compiler._bind_decl_recipe(
               ${c.freeze_macro_stack()} ${c.source_private});
   return c._bind_recipe(callback, arguments, AST_UNIT);
 }
+
+static List Compiler._bind_forward(
+  Compiler c, Var child, Var parent, Var member, List fallback) =>
+  %(declaration-forward $child $parent $member
+    $fallback ${c.source_private});
 
 static List Compiler._bind_default(Compiler c, Var function) {
   if (c.shallow)
