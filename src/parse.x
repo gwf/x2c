@@ -2606,9 +2606,8 @@ static List Compiler._bind_form(
       return c._bind_recipe(callback, args, context);
     case %(declaration-recipe ?callback ?args) if (unit):
       return c._bind_decl_recipe(callback, args);
-    case %(default-forward ?child ?parent ?member *fallback) if (unit):
-      return %(declaration-forward $child $parent $member
-               $fallback ${c.source_private});
+    case %(default-forward ?own ?base ?name *form) if (unit):
+      return %(declaration-forward $own $base $name $form ${c.source_private});
     case %(default ?function) if (unit): return c._bind_default(function);
     case %(declaration-function
              (declare ?type (bindings ?decl)) ?body ?source) if (unit):

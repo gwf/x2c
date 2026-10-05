@@ -4,6 +4,8 @@
 > D2 retains four Array raises for Gary's decision. Stage 4 repaired 59
 > of 106 violations; 47 findings and later shape work remain. The package
 > Error-pack migrations and first import-helper deletion are delivered.
+> The original 12 long-function candidates have repaired lengths or
+> reviewed dispatcher exceptions. Full-file shape work remains.
 > Gary accepted the standard and decisions D1-D5 on 2026-10-05.
 > See [Progress](#progress). The single standard is
 > [agents/x2c-code-standard.md](../agents/x2c-code-standard.md).
@@ -793,7 +795,7 @@ No stage expectation, lint baseline, or bootstrap file changed.
 Options for Gary: retain this violation, or permit a reviewed generated
 refresh for this diagnostic location. No padding was added to offset it.
 
-### Stage 4: label collector positions approved; reshape pending
+### Stage 4: label collector positions approved; reshape delivered
 
 The complete `Walk.collect_labels` trial replaces its multi-line dispatch
 arms with named private steps for expression blocks, labels, try regions,
@@ -828,6 +830,11 @@ Evidence in `/tmp/x2c-standard-lint/debug/`: `label-steps-build.log`,
 bootstrap; its logs are `label-steps-baseline-safe.log`,
 `label-steps-baseline-refresh.log`, and
 `label-steps-baseline-converged.log`.
+
+The later cleanup candidate `5c912611` supersedes this restored trial.
+It repairs both label collection and rewriting, passes focused behavior,
+depth, self-host, coordinate, and performance checks, and merged through
+PR #173. Its final proof and function lengths are recorded below.
 
 Gary approved reviewed retained macro-definition position changes for
 source reshapes on 2026-10-05. Positions must follow their new authored
@@ -979,11 +986,11 @@ Later candidates below remain private until submitted to the integrator.
 | `Walk.rewrite` | 42 | 36 | length repaired; focused proof passes |
 | `Emitter._emit` | 94 | 52 | one-line dispatcher exception reviewed |
 | `Emitter._declarator` | 46 | 23 | length repaired; focused proof passes |
-| `Compiler._resolve_content` | 104 | 104 | trial restored; grammar-arm width decision pending |
+| `Compiler._resolve_content` | 104 | 5 + 69 | context entry and dispatcher exception reviewed |
 | `Compiler._resolve_identifier` | 44 | 34 | capture step; focused proof passes |
 | `Compiler._typedef_index` | 43 | 24 | length repaired; focused proof passes |
 | `Compiler._record_meta_hash` | 50 | 18 | length repaired; focused proof passes |
-| `Compiler._bind_form` | 118 | 102 | partial; 37 arms still span lines |
+| `Compiler._bind_form` | 118 | 101 | one-line actions; dispatcher exception reviewed |
 | `Compiler.protocol_update_helper` | 51 | 39 | signature/publication steps; focused proof passes |
 | `Compiler._step` | 54 | 26 | typed patterns and tag step; stack proof passes |
 | `Compiler._sequence` | 44 | 10 | normalization/splice steps; focused proof passes |
@@ -1010,7 +1017,8 @@ fixtures and the 220-file stage-1 comparison. Three fixed client inputs
 produce six exact C/H files in each of eight warm/measured pairs. Median
 instructions are 7,669,323,827 to 7,693,171,945, with overlapping ranges.
 The final helper uses the original captured spelling, without another
-binding validation. The binder's length and one-line-arm work remains.
+binding validation. The later action review settles the binder's length
+exception under the approved pattern-wrapping rule.
 
 Index candidate `ca0c36c9` names native-index fallback and the outer alias
 walk without reducing element types. Six fixtures and the 220-file stage-1
@@ -1086,20 +1094,76 @@ alternating triples after one warm triple give fixture medians 7,788,948,860
 to 7,802,902,226 and fixed-source medians 14,698,137,202 to 14,734,838,342.
 Both ranges overlap; 48 fixture and 16 source C/H pairs match exactly.
 Final capture spelling leaves optimized operations unchanged; subsequent
-self-host and raw-client checks pass. Four two-line typed-pattern arms and
-two multiline sequence arms remain. Full FN-3 conformance is not claimed.
+self-host and raw-client checks pass. After approved pattern wrapping,
+all 28 `_step` actions and all three `_sequence_item` actions occupy one
+line. `_sequence_tail` retains a nested-match action. Direct returns,
+assignments, and the guarded default also remain outside strict named-step
+wording. Full FN-3 conformance is not claimed; no wrapper is added merely
+to name a trivial action.
 
 The `Resolve` trial replaces 33 single-consumer expression handlers with
 a four-field stack context and removes 43 source lines. Parent review
 restores existing grammar owners after rejecting raw duplicate patterns.
 Eight retained grammar arms then measure 80 to 109 columns. The trial is
 preserved privately and tracked source is restored at `262441eb`.
-No compiler checks or measurement were run. Gary has been asked whether
-FN-2 through FN-4 may permit wrapped grammar patterns with one-line named
-actions. No answer or exception is assumed. This rejects the current trial,
-not every possible resolution design. Identifier, index, and lambda owners
+No compiler checks or measurement were run for that restored trial.
+Gary approves wrapped grammar patterns with one-line named actions on
+2026-10-05. FN-2 through FN-4 now distinguish patterns from actions.
+The worker resumes the retained-grammar trial under that rule. Identifier,
+index, and lambda owners
 are byte-exact in the preserved trial. Original malformed-form prefix and
 fallback behavior still require proof before any revived trial is accepted.
+
+Binder action candidate `bcb1bd82` changes only four local capture names
+and their existing declaration-forward projection's wrapping (+2/-3 lines).
+All 46 actions now occupy one line. The 101-line dispatcher qualifies
+for FN-2's exception under the corrected rule. Its 37 multiline arms
+contain wrapped patterns or separate pattern/action lines. Six existing
+literal or passthrough actions still limit strict FN-3 named-step wording.
+No forwarding helper is added to hide those actions. Four fixtures and
+the 220-file stage-1 comparison pass. Four raw clients preserve eight
+C/H files with maps, four dependency files, diagnostics, and status.
+Four interfaces differ only in compiler fingerprint. Retained quotation
+positions are unchanged, and generated parse C has no runtime ErrorSite.
+Both optimized parent functions retain 1,377 ordered instruction mnemonics,
+including calls. No new operation or automatic HP repeat is introduced.
+
+Accepted Resolve candidate `3d03c154` supersedes the restored trial.
+It replaces 33 single-consumer Compiler handlers with methods on a
+four-field borrowed context. The 5-line entry owns that context's stack
+lifetime; the 69-line dispatcher has one-line actions. Whole-file source
+changes by +255/-294 lines. Existing grammar owners, input/content phases,
+prefix guards, operator field matching, and fallback remain unchanged.
+All 33 handler bodies are exact after binding-aware context substitution.
+The context neither allocates nor retains or frees Compiler/input/type/origin.
+It avoids shared mutable state during nested resolution. The private-type
+lint candidate is reviewed on those facts; no exception or baseline changes.
+
+Nine fixtures and the 220-file stage-1 comparison pass. Thirty-eight fixed
+raw clients include 29 forced-resolution constructed forms. All C/H,
+diagnostics, statuses, and stdout match; 32 successful interfaces differ
+only in compiler identity. Six retained Func definitions move -15 lines
+and -1,074 bytes to their actual authored locations, with other fields exact.
+Both runtime ErrorSites remain exact at parser arrow/dot lines 564 and 578.
+Seven alternating pairs after one warm pair give compiler-source median
+instructions 17,624,697,844 to 17,641,935,522 and operator-client medians
+4,703,433,421 to 4,700,971,137. Both ranges overlap, and all 16 measured
+raw C/H/diagnostic pairs match. No throughput improvement is claimed.
+
+The original 12 long-function candidates now have repaired lengths or
+reviewed dispatcher exceptions. That result does not establish full-file
+conformance, settle all strict named-step actions, or close the remaining
+held findings and public Error-detail decisions.
+
+PR #174 has merged. The next combined parent passes build and the
+220-file stage-1 comparison. Five fixtures pass: class-runtime,
+macro-declaration-constructed, ast-leaf-contract, sizeof-expression-operand,
+and macro-construction-regressions. Its authored source delta is +257/-297.
+A refreshed census over all 108 hand-authored src/lib files reports
+1,801 findings and 47 violations: 15 declarations, 16 braces, six subjects,
+three widths, and seven opening-line wraps. Those violation counts match
+the existing baseline exactly; no baseline update is needed. Advisory
+candidates require individual review and are not all established defects.
 
 The second combined parent passes build, stage-1, and the 220-file stage
 comparison. Six fixtures pass across lambda capture, protocol direct

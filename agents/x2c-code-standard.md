@@ -285,18 +285,21 @@ reads as a sequence of named steps. If its one-sentence purpose needs
 "and", split it.
 
 **FN-2** Aim for 3 to 25 lines. A function over 40 lines is a defect unless
-it is a table or a dispatcher whose arms are each one line. A one-use
+it is a table or a dispatcher whose actions are each one line. Patterns
+may wrap to fit the line width. A one-use
 function that owns no name, failure spelling, cleanup, or concept is also a
 defect: inline it.
 
-**FN-3** A dispatcher only dispatches. Each `match` or `switch` arm is one
-line that calls a named step; an arm over three lines moves into a step.
+**FN-3** A dispatcher only dispatches. Each `match` or `switch` action is
+one line that calls a named step. Patterns may wrap to fit the line width;
+an action over three lines moves into a step.
 Shared error handling at the end of a dispatcher has one owner, never a
 `goto` from many arms.
 
 **FN-4** Keep one dispatcher per grammar. Never split a dispatcher into a
 chain of partial dispatchers that pass a `matched` flag; one `match` with
-one-line arms is in band at any length.
+one-line actions is in band at any length. Wrapped patterns do not change
+that exception.
 
 **FN-5** Keep nesting at depth 3 or less, counting the body as 1; depth 5
 is a defect. Flatten with guards, early returns, `continue`, and steps.
@@ -1091,7 +1094,7 @@ that is not selected is not checked for a matching finding.
 | Section | over 400 lines or two concepts | FI-5 | `long-section` (>400) |
 | File | over 1,500 lines | FI-1, MO-3 | `long-file` |
 | Neighbor disproportion | element far larger than peers | PR-8 | none |
-| Dispatcher arm | over 3 lines | FN-3 | `long-dispatch-arm` |
+| Dispatcher action | over 3 lines | FN-3 | `long-dispatch-arm` (counts the whole arm; review wrapped patterns) |
 | Purpose sentence needs "and" | judgment | FN-1 | review |
 
 ### Statement and layout signals
@@ -1209,7 +1212,7 @@ scope and does not require reshaping or reordering:
 2. **Reuse.** Replace repeated work with calls to the existing owner, and
    give each remaining repeated fact one owner (PR-2, FA-5 to FA-8).
 3. **Reshape.** Settle the file boundary, then split functions into named
-   steps, group shared context into records, and make dispatch arms one
+   steps, group shared context into records, and make dispatch actions one
    line (MO-3, FN-1 to FN-6, FA-2, FA-3).
 4. **Adopt idioms.** Use system macros, receivers, references, literals,
    quotations, and grammar forms (LT-1, EX-1 to EX-6, FN-8, MA-5, MA-7).
