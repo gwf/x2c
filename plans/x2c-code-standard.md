@@ -1119,8 +1119,8 @@ original typed-pattern scope and moves the original tag switch into
 `_step_tag`. The compiler inlines that step and restores the 304-byte frame.
 The unchanged `var-chain-stack` fixture passes. `_step` has 26 lines and
 `_step_tag` has 30 lines. Sequence normalization and splice steps remain.
-No fixture expectation or stack limit was changed. Final integration
-validation and regenerated-position review remain pending.
+No fixture expectation or stack limit was changed. Final gate evidence
+and regenerated-position review belong to the integration record.
 
 Integration of `3459d664` exposed a link to an ignored local audit report.
 Commit `fef7cb88` keeps that explicitly local reference as a plain path.
