@@ -2550,7 +2550,7 @@ static List Compiler._binary_op_type_addsub(
   }
   else if (c.sym.resolve_key(ltype).is_pointer()) {
     if (rscalar)        return ltype;
-    else if (rpointer)  return %("ptrdiff_t");
+    else if (rpointer) return op == <-> ? %("ptrdiff_t") : %(int);
   }
   return NULL;
 }
