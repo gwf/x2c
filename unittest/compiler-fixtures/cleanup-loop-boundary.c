@@ -18,11 +18,6 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
-#include "error.h"
-
-
-
-
 #include "exception.h"
 
 
@@ -67,6 +62,11 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
 static void record_step(int value){
   order = order * 10 + value;
 }
+
+#include "error.h"
+
+
+
 
 int x2c_error_catch_site_pending(ErrorCatchSite *);
 

@@ -19,11 +19,6 @@ static Symbol _observe_relabel(List errors, Var data);
 
 static void _relabel_nested_pattern(void);
 
-#include "error.h"
-
-
-
-
 #include "exception.h"
 
 
@@ -54,6 +49,11 @@ static Symbol _observe_relabel(List errors, Var data){
   }
   return 285842436424;
 }
+
+#include "error.h"
+
+
+
 
 int x2c_error_catch_site_pending(ErrorCatchSite *);
 

@@ -23,11 +23,6 @@ List cons(Var, List);
 
 Var List_var(List);
 
-#include "error.h"
-
-
-
-
 #include "exception.h"
 
 
@@ -106,6 +101,11 @@ void x2c_exception_push(ExceptionFrame *);
 void x2c_exception_landed(ExceptionFrame *);
 int x2c_exception_claim(ExceptionFrame *);
 void x2c_exception_leave(ExceptionFrame *);
+#include "error.h"
+
+
+
+
 int x2c_error_catch_site_pending(ErrorCatchSite *);
 ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
 Var int_var(int);

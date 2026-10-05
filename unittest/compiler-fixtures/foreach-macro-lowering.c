@@ -41,11 +41,6 @@ List cons(Var, List);
 
 Var String_var(String);
 
-#include "error.h"
-
-
-
-
 #include "exception.h"
 
 
@@ -128,6 +123,11 @@ void x2c_cleanup_push(X2CCleanup *);
 int String_truth(String);
 
 void x2c_cleanup_leave(X2CCleanup *);
+
+#include "error.h"
+
+
+
 
 int x2c_error_catch_site_pending(ErrorCatchSite *);
 

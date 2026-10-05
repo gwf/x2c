@@ -800,7 +800,7 @@ static List Compiler._file_init(Compiler c, List source) {
   if (!c.inits.len() && !c.fini_fn && !c.init_fn) return source;
   Init init = {.c = c, .initializer = c.init_fn};
   init.prepare(source);
-  int prelude = _prelude_position(source), position = 0;
+  int prelude = _prelude_position(source, 0), position = 0;
   List out = NULL;
   foreach (List item, source) {
     if (position++ == prelude) out = init.prelude(out);
@@ -836,7 +836,7 @@ List Compiler.place_source_prelude(
   Compiler c, List source, List declarations) {
   (void) c;
   Array out = [];
-  int prelude = _prelude_position(source), position = 0;
+  int prelude = _prelude_position(source, 0), position = 0;
   foreach (List node, source) {
     if (position++ == prelude)
       foreach (List declaration, declarations) out.push(declaration);
@@ -850,13 +850,22 @@ List Compiler.place_source_prelude(
 /* The position of the first function or captured initializer, or of the
    directive opening the outermost conditional group around it, so the
    prelude is declared whichever arms the C compiler selects. A unit without
-   a function or captured initializer gives -1. */
-static int _prelude_position(List source) {
+   a matching use gives -1. With `errors`, find the first raise or
+   declaration that needs the lowered catch ABI instead. */
+static int _prelude_position(List source, int errors) {
   int position = 0, depth = 0, opening = 0;
   foreach (List item, source) {
     List function = item.car() == <sourceinit> ? item.cadr() : item;
-    match (function) case %(function (*) (bind (binding ? ?) ?) (block *)):
-      return depth ? opening : position;
+    if (errors) {
+      Map types = $auto({});
+      _spelled_types(item, types);
+      if (ast_contains_head(item, <raise>) ||
+          "ErrorCatchSite" in types || "ErrorHandler" in types)
+        return depth ? opening : position;
+    }
+    else match (function)
+      case %(function (*) (bind (binding ? ?) ?) (block *)):
+        return depth ? opening : position;
     match (item) case %(preproc ?(String content)): {
       Symbol kind = preproc_conditional_kind(content);
       if (kind == <open> && !depth) opening = position;
@@ -1390,17 +1399,17 @@ static List Compiler._primary_include(
   String guard = filename_hash(c.filename);
   List own = %((preproc "#define __GUARD_0x${guard}__"));
   List runtime = c.runtime_inc ? _include_directive("x2c.x") : NULL;
-  List error =
-    ast_contains_head(content, <raise>) ? _include_directive("error.h") : NULL;
+  int error_at = _prelude_position(content, 1);
+  List error = error_at >= 0 ? _include_directive("error.h") : NULL;
   List exception =
     c.needs_exception ? _include_directive("exception.h") : NULL;
   Array ordered = [];
-  int prelude = _prelude_position(content), position = 0;
+  int exception_at = _prelude_position(content, 0), position = 0;
   foreach (List node, content) {
-    if (position++ == prelude) {
+    if (position == error_at)
       foreach (List include, error) ordered.push(include);
+    if (position++ == exception_at)
       foreach (List include, exception) ordered.push(include);
-    }
     ordered.push(node);
   }
   return %(@{_banner()} @own @runtime

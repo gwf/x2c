@@ -7,6 +7,11 @@
 #include <signal.h>
 void Error_initialize(void);
 
+#include "error.h"
+
+
+
+
 int x2c_error_catch_site_pending(ErrorCatchSite *);
 
 Var List_var(List);
@@ -30,11 +35,6 @@ int x2c_error_catch_selected(ErrorHandler);
 void x2c_error_catch_detach(ErrorHandler);
 
 void x2c_exception_mark_handled(ExceptionFrame *);
-
-#include "error.h"
-
-
-
 
 #include "exception.h"
 

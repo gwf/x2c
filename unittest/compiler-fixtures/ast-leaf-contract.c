@@ -64,11 +64,6 @@ List cons(Var, List);
 
 Var Symbol_var(Symbol);
 
-#include "error.h"
-
-
-
-
 #include "exception.h"
 
 
@@ -120,6 +115,11 @@ int List_try_next(List, List *, Var *);
 void x2c_cleanup_push(X2CCleanup *);
 
 void x2c_cleanup_leave(X2CCleanup *);
+
+#include "error.h"
+
+
+
 
 int x2c_error_catch_site_pending(ErrorCatchSite *);
 

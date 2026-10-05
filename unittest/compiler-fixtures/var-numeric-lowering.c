@@ -32,11 +32,6 @@ static Var counted_rhs(int value);
 
 static Var skipped_rhs(void);
 
-#include "error.h"
-
-
-
-
 #include "exception.h"
 
 
@@ -74,6 +69,11 @@ Var double_var(double);
 Var String_var(String);
 
 int Var_truth(Var);
+
+#include "error.h"
+
+
+
 
 int x2c_error_catch_site_pending(ErrorCatchSite *);
 

@@ -32,11 +32,6 @@ static int frozen_after_redefinition(void);
 
 static int direct_unit;
 
-#include "error.h"
-
-
-
-
 _x2c_initializer_choice_279F17D4_0((direct_unit = 3))
 static int aliased_unit;
 
@@ -131,6 +126,11 @@ int main(void){
   printf("%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n", before_alias(), first_alias(), second_alias(), frozen_before_redefinition(), frozen_after_redefinition(), (2 + 1), (3 * 2), statements, conditional, direct_unit, aliased_unit, stacked_unit, record.direct_field, record.aliased_field, direct_function(), aliased_function(), stacked_function(), imported);
   return 0;
 }
+
+#include "error.h"
+
+
+
 
 static void direct_captured_raise(void){
   {

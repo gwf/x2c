@@ -14,11 +14,6 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
-#include "error.h"
-
-
-
-
 #include "exception.h"
 
 
@@ -47,6 +42,11 @@ static void record_cleanup(void){
 Var Symbol_var(Symbol);
 
 Var int_var(int);
+
+#include "error.h"
+
+
+
 
 _Noreturn static void raise_from_callee(void){
   {

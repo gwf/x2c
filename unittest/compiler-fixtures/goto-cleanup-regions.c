@@ -28,11 +28,6 @@ void x2c_cleanup_push(X2CCleanup *);
 
 void x2c_cleanup_leave(X2CCleanup *);
 
-#include "error.h"
-
-
-
-
 #include "exception.h"
 
 
@@ -143,6 +138,11 @@ static int same_region(void){
   }
   return value;
 }
+
+#include "error.h"
+
+
+
 
 int x2c_error_catch_site_pending(ErrorCatchSite *);
 

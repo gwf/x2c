@@ -8,14 +8,14 @@ static void bump(int * value, int amount);
 
 static int fallback_probe(int fail);
 
+static void bump(int * value, int amount){
+  * value += amount;
+}
+
 #include "error.h"
 
 
 
-
-static void bump(int * value, int amount){
-  * value += amount;
-}
 
 static int fallback_probe(int fail){
   if(fail){

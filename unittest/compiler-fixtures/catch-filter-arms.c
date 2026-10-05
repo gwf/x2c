@@ -4,6 +4,11 @@
 #include "x2c.h"
 
 #include "x2c.h"
+#include "error.h"
+
+
+
+
 int x2c_error_catch_site_pending(ErrorCatchSite *);
 
 Var List_var(List);
@@ -35,11 +40,6 @@ void x2c_error_catch_close(ErrorHandler);
 void x2c_exception_leave(ExceptionFrame *);
 
 int List_len(List);
-
-#include "error.h"
-
-
-
 
 #include "exception.h"
 

@@ -12,11 +12,6 @@ _Noreturn static void advance(const char * * cursor);
 
 static void parameter(int n);
 
-#include "error.h"
-
-
-
-
 #include "exception.h"
 
 
@@ -25,6 +20,11 @@ static void parameter(int n);
 static void bump(int * n){
   (* n) =(* n) + 1;
 }
+
+#include "error.h"
+
+
+
 
 _Noreturn static void set_and_raise(int * n, int value){
   (* n) = value;

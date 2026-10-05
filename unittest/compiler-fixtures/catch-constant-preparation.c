@@ -18,11 +18,6 @@ static void fixed(void);
 
 static void dynamic(int value);
 
-#include "error.h"
-
-
-
-
 #include "exception.h"
 
 
@@ -39,6 +34,11 @@ static int pattern_value(int value){
   pattern_calls ++;
   return value;
 }
+
+#include "error.h"
+
+
+
 
 int x2c_error_catch_site_pending(ErrorCatchSite *);
 
