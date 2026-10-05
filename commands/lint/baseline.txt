@@ -14,7 +14,7 @@ fresh-literal-null-guard 0
 growth-check 0
 negated-is 0
 non-ascii 0
-one-statement-braces 14
+one-statement-braces 13
 operator-spacing 0
 over-width 0
 restates-code 0
