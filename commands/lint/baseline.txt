@@ -1,6 +1,6 @@
 bad-suppression 0
 blank-line-stack 0
-comment-history 1
+comment-history 0
 comment-null-guard 0
 continuation-indent 0
 deferred-initialization 0
@@ -18,7 +18,7 @@ one-statement-braces 16
 operator-spacing 0
 over-width 4
 restates-code 1
-restates-name 3
+restates-name 1
 return-after-raise 0
 return-after-report-error 0
 same-line-else 0

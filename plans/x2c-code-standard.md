@@ -808,6 +808,7 @@ refresh for this diagnostic location. No padding was added to offset it.
 | 4.targets | `a731b530` | 2026-10-05 | 1 -> 0; +1/-1 .x |
 | 4.parser | `351486a6` | 2026-10-05 | 39 -> 9; +55/-52 .x |
 | 4.lowering | `ca52c661` | 2026-10-05 | 26 -> 17; +20/-18 .x |
+| 4.binding | `2efad5a6` | 2026-10-05 | 5 -> 2; +2/-3 .x |
 | D2 partial | `14973621` | 2026-10-05 | +197/-192 .x; four raises held |
 | D2 held | `a7c271f` | 2026-10-05 | +197/-192 .x; 4 raises held |
 | D3 | `f7f886ad` | 2026-10-05 | 9/9 autodiff; +9/-9 .x |
@@ -828,6 +829,9 @@ The complete 108-file census falls from 94 violations to 64.
 
 Lowering repairs pass complete 220-file stage comparisons.
 The complete census now has 55 violations.
+
+Binding repairs pass complete 220-file stage comparisons.
+The complete census now has 52 violations.
 
 Stage 3.5 census: 108 compiler and runtime files. The baseline took
 10.63 seconds; the candidate took 10.61 seconds. All 1,599 original
