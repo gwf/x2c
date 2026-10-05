@@ -975,7 +975,7 @@ publication validation. The source candidates below are not yet published.
 | Owner at `db8f20ed` | Original lines | Candidate lines | State |
 | --- | ---: | ---: | --- |
 | `Walk.collect_labels` | 46 | 16 | length repaired; focused proof passes |
-| `Walk.rewrite` | 42 | 37 | length repaired; focused proof passes |
+| `Walk.rewrite` | 42 | 36 | length repaired; focused proof passes |
 | `Emitter._emit` | 94 | 52 | one-line dispatcher exception reviewed |
 | `Emitter._declarator` | 46 | 23 | length repaired; focused proof passes |
 | `Compiler._resolve_content` | 104 | 104 | reshape remains |
