@@ -285,6 +285,7 @@ def session_records(paths, agent, session_id, workspace, since, until,
     active = False
     supported = set()
     born = None
+    replaying = False
     if agent == "codex":
         for record in records(paths[0]):
             if record.get("type") == "session_meta":
@@ -307,11 +308,21 @@ def session_records(paths, agent, session_id, workspace, since, until,
 
     for record in merged_records(paths, coverage):
         stamp = timestamp(record.get("timestamp"))
+        payload = record.get("payload") or {}
+        if born and payload.get("type") == "task_started":
+            started = payload.get("started_at")
+            if isinstance(started, (int, float)):
+                replaying = started < int(born.timestamp())
+        if (payload.get("type") == "thread_settings_applied"
+                and payload.get("thread_id") == session_id):
+            replaying = False
+        if replaying:
+            coverage["replayed_records"] += 1
+            continue
         if born and stamp and stamp < born:
             coverage["replayed_records"] += 1
             continue
         selected = in_window(record, since, until)
-        payload = record.get("payload") or {}
         kind = payload.get("type")
         if agent == "claude":
             reply = text_of(record)

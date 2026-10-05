@@ -123,6 +123,26 @@ class HarnessMetricsTests(unittest.TestCase):
         self.assertEqual(sessions[0]["counts"]["replies"], 1)
         self.assertEqual(coverage["codex"]["replayed_records"], 2)
 
+    def test_replayed_outer_timestamps_do_not_become_worker_actions(self):
+        own = meta("worker-id")
+        own["timestamp"] = "2026-10-01T12:00:00Z"
+        own["payload"]["timestamp"] = "2026-10-01T12:00:00Z"
+        old_start = int(metrics.timestamp("2026-10-01T11:00:00Z").timestamp())
+        own_start = int(metrics.timestamp(DAY).timestamp())
+        path = self.write("rewritten.jsonl", [own,
+            item("event_msg", {"type": "task_started", "started_at": old_start}),
+            final("Inherited answer."),
+            item("response_item", {"type": "function_call", "name": "exec_command",
+                "arguments": json.dumps({"cmd": "make check"})}),
+            item("event_msg", {"type": "thread_settings_applied",
+                               "thread_id": "worker-id"}),
+            item("event_msg", {"type": "task_started", "started_at": own_start}),
+            final("Worker answer.", "2026-10-01T12:01:00Z")])
+        sessions, coverage = self.scan([(path, "codex")])
+        self.assertEqual(sessions[0]["counts"]["replies"], 1)
+        self.assertNotIn("tool_calls", sessions[0]["counts"])
+        self.assertEqual(coverage["codex"]["replayed_records"], 3)
+
     def test_recursive_discovery_finds_archive_and_older_active_worker(self):
         live = self.write("sessions/2026/09/01/rollout-old.jsonl", [
             meta("older"), final()])
