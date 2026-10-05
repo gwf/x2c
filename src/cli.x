@@ -617,7 +617,7 @@ static Symbol _target_kind(String value) {
   return kind;
 }
 
-// target kinds
+// native products
 
 static TargetKind target_kinds[] = {
   { <executable>, "executable",     "executable",     "",    ""    },
