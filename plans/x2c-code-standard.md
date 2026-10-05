@@ -860,6 +860,7 @@ No padding or invented replacement comment was added to force equality.
 | 4.termbox | `8785bd09` | 2026-10-05 | 10 macros; +11/-11 .x |
 | 4.curl | `1ab22788` | 2026-10-05 | 19 macros; +20/-20 .x |
 | 4.uv | `64e31517` | 2026-10-05 | 106 macros; +2/-2 .x |
+| Status | `70ff341c` | 2026-10-05 | 2 entries; packages pass |
 | D2 partial | `14973621` | 2026-10-05 | +197/-192 .x; four raises held |
 | D2 held | `a7c271f` | 2026-10-05 | +197/-192 .x; 4 raises held |
 | D3 | `f7f886ad` | 2026-10-05 | 9/9 autodiff; +9/-9 .x |
