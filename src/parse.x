@@ -803,14 +803,15 @@ static int Compiler._group_comma(Compiler c) {
 
 // destructuring declarations
 
-// Distinguish '(ident, ...)' from an ordinary parenthesized declarator.
+/* Distinguish '(ident, ...)' from an ordinary parenthesized declarator and
+   from the parameters of a type name such as `Var (Var, Var)`. */
 static int Compiler._destructure_starts(Compiler c) {
   Token token = c.token;
   if (token.type != <(>) return 0;
   token = Token.skip_trivia(token + 1);
   if (token.type != <ident>) return 0;
   token = Token.skip_trivia(token + 1);
-  return token.type == <,>;
+  return token.type == <,> && !c._parameters_follow();
 }
 
 static List Compiler._destructure_declaration(

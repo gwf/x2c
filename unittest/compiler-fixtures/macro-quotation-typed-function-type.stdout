@@ -2,3 +2,4 @@
 ((func ((void))) "Func")
 ((func (("String") ("String"))) * void)
 (* (func ((int))) int)
+((func (("Var") ("Var"))) "Var")
