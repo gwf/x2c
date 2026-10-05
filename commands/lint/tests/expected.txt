@@ -89,7 +89,8 @@ exit 0
 commands/lint/tests/src/shape.x:6: candidate long-function FN-2: function spans 41 lines; review above 40
 commands/lint/tests/src/shape.x:89: candidate deep-nesting FN-5: brace depth reaches 5; review at 5
 commands/lint/tests/src/shape.x:122: candidate long-parameter-list FN-6: function takes 7 parameters; group shared context in a record or receiver
-commands/lint/tests/src/shape.x:128: candidate long-name NM-3: name has 30 characters; review at 30
+commands/lint/tests/src/shape.x:128: candidate long-name NM-3: name has 25 characters; review at 25
+commands/lint/tests/src/shape.x:132: candidate long-name NM-3: name has 25 characters; review at 25
 exit 0
 # a script unit
 exit 0

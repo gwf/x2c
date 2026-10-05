@@ -119,7 +119,7 @@ static int _parameter_count(Lint l, int start, int body):
   return count
 
 /* A function over 40 lines, with braces 5 deep, with 7 or more
-   parameters, or whose name without its owner has 30 or more
+   parameters, or whose name without its owner has 25 or more
    characters. */
 static void _shape(Lint l, List function):
   Var (key, start, body, end) = function
@@ -136,9 +136,9 @@ static void _shape(Lint l, List function):
     l.add("long-parameter-list", line,
           %"function takes $parameters parameters; group shared context " +
           "in a record or receiver")
-  if name.len() >= 30:
+  if name.len() >= 25:
     l.add("long-name", line,
-          %"name has ${name.len()} characters; review at 30")
+          %"name has ${name.len()} characters; review at 25")
 
 /* The id of `word` in `ids`, which numbers words as they first appear. */
 static int _id(Map ids, String word):

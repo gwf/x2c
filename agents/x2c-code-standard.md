@@ -1071,7 +1071,7 @@ proof. Tool codes are `x2c lint` codes unless named otherwise.
 | Function length | over 40 lines (band 3-25) | FN-2 | `long-function` (>40) |
 | Nesting depth | 5 or more, body counts 1 | FN-5 | `deep-nesting` |
 | Parameters | 7 or more (band up to 4) | FN-6, FA-2 | `long-parameter-list` |
-| Name length | 25 or more characters | NM-3 | `long-name` (at 30 today) |
+| Name length | 25 or more characters | NM-3 | `long-name` |
 | Section | over 400 lines or two concepts | FI-5 | none |
 | File | over 1,500 lines | FI-1, MO-3 | none |
 | Neighbor disproportion | element far larger than peers | PR-8 | none |

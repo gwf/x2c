@@ -125,6 +125,8 @@ int add_seven(int a, int b, int c, int d, int e, int f, int g) =>
 int apply_six(int a, int b, int c, int d, int e, int (*op)(int, int)) =>
   op(a + b + c, d + e);
 
-int parse_every_argument_in_a_list(void) => 30;
+int parse_argument_list_items(void) => 25;
 
-int Shape.parse_each_argument_in_a_list(Shape s) => 29;
+int Shape.parse_argument_list_item(Shape s) => 24;
+
+int Shape.parse_argument_list_items(Shape s) => 25;
