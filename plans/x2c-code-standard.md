@@ -901,7 +901,8 @@ No padding or invented replacement comment was added to force equality.
 | 4.shape batch | `238e1d28` | 2026-10-05 | PR #173 merged; +320/-283 .x |
 | 4.shape follow-up | `6abfdd01` | 2026-10-05 | PR #174 merged; +109/-107 .x |
 | 4.pattern/context | `5ee83e40` | 2026-10-05 | PR #175 merged; +257/-297 .x |
-| 4.held repairs | `3efec9a2` | 2026-10-05 | private source; 47 -> 27; +60/-56 .x |
+| 4.held repairs | `aaf3ad5f` | 2026-10-05 | PR #176 merged; 47 -> 27; +60/-56 .x |
+| 4.macro boundary | `aa8be759` | 2026-10-05 | private source; 27 -> 26; +5/-7 .x |
 
 D3 retry on `e4d22fc7`: safe rebuild, verify (940 tests and 1,082 compiler
 fixtures), CLI probes, book examples (384 samples and 101 outputs), separate
@@ -969,9 +970,10 @@ Focused checks pass: 79 tests/837 assertions; six applications.
 Worker `make packages-check` passes; no expectations changed.
 The private import and all Error causes, values, and sites are preserved.
 
-All 12 compiler length candidates were reviewed; none is established as
-an FN-2 table or one-line dispatcher exception. Deletion/reuse discovery
-found no additional supported removal inside them. Shape work remains.
+At the earlier audit, all 12 compiler length candidates were reviewed; none
+was established as an FN-2 table or one-line dispatcher exception.
+Deletion/reuse discovery found no additional supported removal inside them.
+The later verified shape batches below supersede that earlier status.
 The complete `macros.x` ownership crossing census is now reviewed at
 `db8f20ed`. It covers all 32 subjects and 318 functions, including public
 entry operations and shared state. Eleven candidate boundaries have
@@ -988,8 +990,9 @@ and 4040 to 4037. That trial is restored. The approved retained-definition
 position changes do not cover runtime ErrorSite changes. Restored source
 passes the 220-file stage-1 comparison. It has no function over 40 lines,
 ordinary brace depth at most four, and at most six parameters. One LY-3
-violation remains. No source split or forwarder deletion is delivered.
-Private review evidence commit: `cd8b2682`.
+violation remains. No source split or forwarder deletion was delivered by that earlier audit.
+The broader coordinate approval and verified follow-up below supersede the
+forwarder hold. Private review evidence commit: `cd8b2682`.
 
 The label-collector candidate (+45/-39 trial lines) compiles but changes
 retained positions; it is restored. Its fixtures, self-host comparisons,
@@ -1261,15 +1264,63 @@ No HP measurement is repeated because generated operations are unchanged.
 `make doc-check` reports stale generated API references: 214 changed Source
 lines and four changed description lines from comment compaction. No other
 audit failure is reported. The shared integrator owns final generated refresh
-and publication validation. This source head is prepared for shared-integrator
-submission.
+and publication validation. The completed head `aaf3ad5f` merged through
+PR #176.
 
 The thirteen declarations have a separate FI-6 proposal: six current
 passing-baseline/failing-removal probes, and seven historical failures with
 unchanged declaration and producer evidence. The fourteen brace findings
-include thirteen implementation scopes being trialled and one quoted client
-AST block retained pending its separate shape decision. D2's four Array
+included thirteen implementation scopes and one quoted client AST block.
+The next allowance preserves the quoted block without an AST-shape change. D2's four Array
 raises and the simplification calibration stopping rule remain open.
+
+### Macro boundary follow-up
+
+Combined source `aa8be759` removes the private `_capture_row` forwarding
+helper and changes its four callers to the existing `_capture_row_project`
+owner with retain 0. Retain 1 and variable retain-syntax callers remain.
+The wrapper deletion changes authored source by +4/-7 lines. Both actual
+runtime ErrorSites follow their new authored locations: eval-string
+3862 -> 3859 and import-hook 4041 -> 4038. The generated header and all other
+retained AST, API-source, origin, and diagnostic data are exact.
+
+The baseline optimizer already removes that wrapper. All 253 native functions,
+26,485 instruction operations/operands, and 7,132 function-relative relocation
+entries agree after relocation; only two function placement addresses differ.
+No hot-path operation or speed improvement is claimed. Eight worker fixtures
+and 36 raw client artifacts pass unchanged. This existing operation proof
+avoids an automatic repeat of paired measurements.
+
+One existing local ST-1 allowance preserves the protocol fallback quotation's
+block. Its quoted client AST remains verbatim. Only the later helper-call macro
+line and byte positions move by the one inserted comment. Two focused worker
+fixtures pass; successful client C/H/dependencies and refusal diagnostics are
+exact, with only compiler identity changing in the interface.
+
+The combined build, 220-file stage comparison, and five parent fixtures pass:
+macro-construction-regressions, macro-source-parity,
+macro-decorator-expression-body, protocol-conform, and
+protocol-var-fallback-not-static. The complete 108-file census reports
+1,786 findings and 26 violations: nine src declarations, four other
+declarations, and thirteen implementation braces. Lower only the observed
+ST-1 count from 14 to 13. The existing lint smoke test passes. No detector
+or fixture expectation changes.
+
+The remaining source decisions are now fully prepared proposals. All thirteen
+caller-brace trials build and preserve report-local lifetime, identifiers,
+operations, quoted AST, causes/details, and client diagnostic behavior. Generated
+differences remove redundant C scope pairs and approved actual coordinates.
+The conversion trial also passes 15 existing tests and 6,499 assertions.
+The direct unmatched-closing-brace branch has source/generated review rather
+than a new forced execution fixture; existing brace/recovery fixtures pass.
+Those proposals remain restored and undelivered pending Gary's scope-proof
+choice. Required FI-6 declarations, Array detail vocabulary, and the extra
+empty-second-pass stopping rule also remain pending. No decision is inferred
+from time or silence.
+
+`make doc-check` reports stale generated references only: 272 changed Source
+lines and four description lines from the prior comment compaction. The
+integrator owns final derived refresh and publication validation.
 
 ## Plan review
 
