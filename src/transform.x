@@ -80,7 +80,7 @@ static Ast Compiler._step(Compiler c, Ast ast) {
     case %(managed-init ?):
       $report.parse.init_incomplete(c);
   Var head = ast.car();
-  if (head is not <symbol>) return c._children(ast);
+  if (head is not <symbol>) return c._default_node(ast);
   match (ast) {
     case %(at ?origin ?inner): return c._at_node(ast, origin, inner);
     case %(function ?return_type
@@ -128,10 +128,14 @@ static Ast Compiler._step_tag(Compiler c, Ast ast, Symbol tag) {
     case <call>: next = c._call(ast); break;
     case <op>: next = c._operator(ast); break;
     case <postfix>: next = c._postfix(ast); break;
+    default: return c._default_node(ast);
   }
   if (next != ast) return c._step(next);
   return c._finish(ast);
 }
+
+static Ast Compiler._default_node(Compiler c, Ast ast) =>
+  ast.car() is not <symbol> ? c._children(ast) : c._finish(ast);
 
 /* Normalize synthesized sequences before their containing block absorbs
    pending defer markers. Matches retain their specialized record driver. */
@@ -185,13 +189,17 @@ static Ast Compiler._statement_value(Compiler c, Ast value, Var expression) {
 }
 
 static Ast Compiler._sequence_tail(Compiler c, Ast node, Ast tail) {
-  List payload = Ast.without_origin(node);
-  match (node)
-    case %(at ?parent ?):
-      match (payload)
-        case %(seq *items): return c._splice_items(items, parent).append(tail);
-  match (node)
+  match (node) {
+    case %(at ?parent ?): return c._anchored_sequence(node, tail, parent);
     case %(seq *items): return items.append(tail);
+  }
+  return cons(node, tail);
+}
+
+static Ast Compiler._anchored_sequence(
+  Compiler c, Ast node, Ast tail, Var parent) {
+  match (Ast.without_origin(node))
+    case %(seq *items): return c._splice_items(items, parent).append(tail);
   return cons(node, tail);
 }
 

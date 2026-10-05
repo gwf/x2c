@@ -1417,15 +1417,18 @@ static List Compiler._typedef_index(
   }
   String fnname = %"${owner}_getindex";
   List fntype = c.sym.get(%($fnname));
-  match (fntype) {
-    case %((func (!set ?params ($receiver ?))) ?rtype): {
-      Type key = params.cadr(), supplied = index.cadr();
-      if (key.is_integral() && c.sym.is_named_value_type(supplied, "Symbol"))
-        $report.type.index_symbol(c);
-      return %(expr ($rtype) (getindex $expr $index));
-    }
-  }
+  match (fntype)
+    case %((func (!set ?params ($receiver ?))) ?rtype):
+      return c._getindex_expression(expr, index, params, rtype);
   return c._native_index(expr, index, type);
+}
+
+static List Compiler._getindex_expression(
+  Compiler c, List expr, List index, Var params, Var rtype) {
+  Type key = params.cadr(), supplied = index.cadr();
+  if (key.is_integral() && c.sym.is_named_value_type(supplied, "Symbol"))
+    $report.type.index_symbol(c);
+  return %(expr ($rtype) (getindex $expr $index));
 }
 
 static List Compiler._native_index(
