@@ -896,6 +896,7 @@ static int Flow.check(
   String exit = f.exit(target, region);
   if (!exit) return 0;
   if (report) {
+    // lint: allow one-statement-braces ST-1: macro emits declaration and call
     if (region == f.w.frame) {
       $report.region.local_escape(f, subject, exit);
     }

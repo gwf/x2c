@@ -1313,6 +1313,7 @@ static void Callback.split(Callback &c) {
 
 static void Callback.check_signature(Callback &cb) {
   int target_count = cb.params.len(), source_count = cb.source_params.len();
+  // lint: allow one-statement-braces ST-1: macro emits declaration and call
   if (target_count != source_count) {
     $report.callback.arity(cb, target_count, source_count);
   }
