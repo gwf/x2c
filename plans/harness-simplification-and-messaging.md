@@ -301,13 +301,13 @@ The repository repairs are implemented. Publication validation is pending.
 The existing nightly automation now retains failed or uncertain clones.
 Snapshot checks cover real disposable worktrees, failure, signals, exceptions,
 setup failure, successful cleanup, absolute measurements, and metric identity.
-Nineteen snapshot tests, fifteen metrics fixtures, and forty-two offline
+Nineteen snapshot tests, sixteen metrics fixtures, and forty-two offline
 integration tests pass. None was added to a recurring gate.
 
 The repaired metrics scan uses the original half-open audit window,
-2026-09-28T07:00:00Z through 2026-10-05T14:46:21Z. It finds 390 active Desktop
-session identities and 283 active terminal session identities for x2c. Workers
-and parent histories are distinguished. These are transcript identities, not
+2026-09-28T07:00:00Z through 2026-10-05T14:46:21Z. It scans live, archived, and nested worker files. Forked parent records can
+carry rewritten timestamps; recorded task-start boundaries now exclude those
+replays. Final corpus totals await a scan with that correction. These are transcript identities, not
 independent tasks or a quality score. Successful execution, wasted time, and
 arbitrary shell edits remain unavailable fields.
 
