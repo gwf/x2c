@@ -54,6 +54,14 @@ run() {
   (cd "$work" && run --rule doc-comment-tier lib/scan.x)
   echo "# shape rules"
   run --all "$tests/src/shape.x"
+  echo "# accepted and invalid suppressions"
+  run --rule contains-in --rule plain-string --rule long-name \
+    "$tests/src/suppression-accepted.x" "$tests/src/suppressions.x"
+  echo "# allowance for a nonselected rule"
+  run --rule long-name "$tests/src/suppression-accepted.x"
+  echo "# suppression also prevents fixes"
+  cp "$tests/src/suppression-accepted.x" "$work/suppression.x"
+  (cd "$work" && run --rule contains-in --fix suppression.x)
   echo "# a script unit"
   run --all "$tests/src/script.x"
   echo "# a preloaded macro library"
@@ -69,6 +77,7 @@ run() {
 } >"$out"
 diff -u "$tests/expected.txt" "$out"
 diff -u "$tests/fixed/idioms.x" "$work/idioms.x"
+cmp "$tests/src/suppression-accepted.x" "$work/suppression.x"
 
 # Expanded catalogues and direct diagnostics use the same existing rules.
 "$tool" -I src --rule return-after-raise --rule return-after-report-error \
