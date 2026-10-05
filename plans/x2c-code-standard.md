@@ -1,8 +1,8 @@
 # x2c code standard: authority, enforcement, and improvement
 
 > Status: active. Stages 1 and 3 are complete. D3 and D5 are delivered;
-> D2 retains four Array raises for Gary's decision. Stage 4 repaired 59
-> of 106 violations; 47 findings and later shape work remain. The package
+> D2 retains four Array raises for Gary's decision. The latest census has
+> 26 of the original 106 violations: 13 declarations and 13 braces. The package
 > Error-pack migrations and first import-helper deletion are delivered.
 > The original 12 long-function candidates have repaired lengths or
 > reviewed dispatcher exceptions. Full-file shape work remains.
@@ -902,7 +902,8 @@ No padding or invented replacement comment was added to force equality.
 | 4.shape follow-up | `6abfdd01` | 2026-10-05 | PR #174 merged; +109/-107 .x |
 | 4.pattern/context | `5ee83e40` | 2026-10-05 | PR #175 merged; +257/-297 .x |
 | 4.held repairs | `aaf3ad5f` | 2026-10-05 | PR #176 merged; 47 -> 27; +60/-56 .x |
-| 4.macro boundary | `aa8be759` | 2026-10-05 | private source; 27 -> 26; +5/-7 .x |
+| 4.macro boundary | `aa8be759` | 2026-10-05 | PR #177 merged at `b600eab4`; 27 -> 26; +5/-7 .x |
+| 4.named steps | `1eade8ae` | 2026-10-05 | source checkpoint; four actions; +32/-16 .x |
 
 D3 retry on `e4d22fc7`: safe rebuild, verify (940 tests and 1,082 compiler
 fixtures), CLI probes, book examples (384 samples and 101 outputs), separate
@@ -1309,6 +1310,47 @@ from time or silence.
 `make doc-check` reports stale generated references only: 272 changed Source
 lines and four description lines from the prior comment compaction. The
 integrator owns final derived refresh and publication validation.
+
+### Final bounded dispatcher actions
+
+Combined source `1eade8ae` extracts four actions into existing-file named
+steps: bitfield emission and cursor clearing, indexed typedef validation and
+construction, default transform child selection, and anchored sequence
+splicing. Source changes are +32/-16 lines across emit, expressions, and
+transform. No public contract, cause/detail value, diagnostic wording, or
+origin ancestry changes. Nested origin wrappers retain their outer parent.
+The sequence helper avoids the pure origin walk for non-anchored nodes.
+
+The bitfield change produces a byte-identical optimized emit object.
+The indexing and anchored-sequence helpers inline; default child selection
+has an optimized local call. Two fixed workloads received one warm pair and
+seven alternating measured pairs with matching native interfaces and nonempty
+compiler-generated preludes at identical paths. Compiler-source median retired
+instructions are 14,826,046,261 before and 14,808,522,871 after. Sequence/index
+medians are 5,784,642,211 before and 5,779,617,752 after. Both ranges overlap.
+All 16 output/status/diagnostic pairs agree; interface changes identify the
+compiler only. No distinguishable cost increase or speed improvement is claimed.
+
+Fixed generated differences contain the four named-step moves, existing
+prototype placement, and ten actual macro-definition coordinate tuples:
+expressions has six definitions shifted +3 lines/+143 bytes; transform has
+four shifted +7 lines/+221 bytes. Runtime ErrorSites and all unrelated generated
+content are exact. Parent build and the 220-file self-host comparison pass.
+All 220 parent C/H match the union of the workers' reviewed candidate outputs.
+Six combined fixtures and the existing lint smoke pass without expectation
+changes. Census: 1,783 findings, 26 violations; baseline unchanged.
+Doc-check reports stale generated references only: 282 Source rows and four
+prior description rows. The integrator owns final derived refresh and gate.
+
+The strict FN-3 review covers the original twelve historical owners plus the
+moved Resolve dispatcher: 190 written action groups. This batch repairs three
+of their nineteen non-call actions and one immediate sequence-helper nested
+action. Sixteen historical actions and one sequence-helper identity action
+remain unchanged pending Gary's terminal-data/fact decision. Full FN-3,
+whole-file, and whole-campaign conformity are not claimed. The required
+declaration, implementation-scope, Array detail, and extra empty-pass decisions
+also remain pending. Plan Stage 4 feedback requires Gary's agreement before
+changing a rule that this evidence shows is too strict.
 
 ## Plan review
 
