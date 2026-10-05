@@ -930,7 +930,6 @@ static void Surface.install(Surface &s) {
 static int _keeps_spellings(String path) =>
   !is_source_file(path) || _in_runtime(path);
 
-/* A canonical path in the runtime's `lib/` or `include/x2c`. */
 static int _in_runtime(String path) =>
   path.startswith(%"${_canonical_lib()}/") ||
   path.startswith(%"${_canonical_include()}/");
