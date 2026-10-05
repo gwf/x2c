@@ -24,7 +24,7 @@ inline int scan_ascii_alpha(int c) => (unsigned) ((c | 32) - 'a') < 26;
 /* Reports an ASCII decimal digit without consulting the process locale. */
 inline int scan_ascii_digit(int c) => (unsigned) (c - '0') < 10;
 
-/* Returns an ASCII hexadecimal digit's value, or -1 for another byte. */
+/* Non-hexadecimal bytes return -1. */
 inline int scan_ascii_hex_value(int c) {
   if (scan_ascii_digit(c)) return c - '0';
   c |= 32;
