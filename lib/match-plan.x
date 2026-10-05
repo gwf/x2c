@@ -371,7 +371,7 @@ static int MatchLower._compile_set(MatchLower &l, List args) {
        ? l._finish(entry, base) : -1;
 }
 
-/* `(!set BINDER TEST)`, rather than a set of alternatives. */
+/* An anonymous atom binder also selects capture; stars do not. */
 static int _set_binds(List args) =>
   args && args.cdr() && !args.cddr() && args.car().is_atom_binder();
 
