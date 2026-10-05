@@ -2100,7 +2100,11 @@ name of a C macro. A macro, `keyword`, `meta` function, or Lisp definition
 written in the `.x` file stays in that file. To share one, move it to an
 `.xmacro` file and export that import. An `.xmacro` file needs no `export`,
 because its imports already reach the file that imports it. An import
-without `export` stays in its file.
+without `export` stays in its file. That includes its `meta` functions. The
+importing file can call them at compile time and at run time, but a file
+that includes it receives no declaration of them. To call one from the
+including file, export the import or import the `.xmacro` there. The
+including unit then emits its own weak copy.
 
 The usual import rules apply at the include line. A delivered definition
 that collides with a visible macro is an error. A later definition in the

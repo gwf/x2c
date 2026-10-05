@@ -16,3 +16,37 @@ int from_xmacro = 11;
 
 int from_xlisp = 13;
 
+int runtime_sum(void){
+  return m_sum(2);
+}
+
+int main(void){
+  x2c_initialize();
+  printf("%d %d\n", summed, runtime_sum());
+  return 0;
+}
+
+Array Array_update_n(Array, unsigned, ...);
+
+Array Array_new(void);
+
+Var int_var(int);
+
+int Array_try_next(Array, int *, Var *);
+
+__attribute__((weak)) int m_sum(int n){
+  int total = 0;
+  {
+    int i;
+    Array _x2c_mmacro_object_1 = Array_update_n(Array_new(), 3, int_var(1), int_var(2), int_var(3));
+    int _x2c_mmacro_cursor_1 = 0;
+    Var _x2c_mmacro_cursor_output_1;
+    while(Array_try_next(_x2c_mmacro_object_1, &(_x2c_mmacro_cursor_1), &(_x2c_mmacro_cursor_output_1))){
+      i = Var_int(Var_convert(_x2c_mmacro_cursor_output_1, 3453797));
+      total += i * n;
+    }
+
+  }
+  return total;
+}
+

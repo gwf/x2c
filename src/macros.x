@@ -3858,7 +3858,7 @@ List Compiler.parse_macro_lisp_top_level(Compiler c) {
     full parsing keeps the ordinary source-order evaluation. */
 void Compiler.parse_macro_lisp_shallow(Compiler c) {
   if (c._import_path(NULL)) {
-    c.keep_imported_meta(c.parse_macro_lisp_top_level());
+    c._collect_import();
     return;
   }
   Token first = c.token;
@@ -3867,6 +3867,19 @@ void Compiler.parse_macro_lisp_shallow(Compiler c) {
      import's forms, and running one again would rebind an ancestor's name. */
   if (c.inherited_lisp) return;
   c.queue_declaration_effect(form, first, c.token);
+}
+
+/* The declarations a file-scope import adds stay in the importing file, as
+   its macros do. Each is marked `(import-row KEY)` among the file statics
+   with the value the import gave it; `Sym.withhold_import_rows` removes the
+   rows that still hold that value from what the file publishes. */
+static void Compiler._collect_import(Compiler c) {
+  Sym sym = c.sym;
+  int mark = sym.log_writes();
+  defer sym.end_log();
+  c.keep_imported_meta(c.parse_macro_lisp_top_level());
+  foreach (Var (key, value), sym.added_globals(mark))
+    sym.put(sym.file_statics(), %(import-row $key), value);
 }
 
 /** Keeps the runtime `meta` declarations that a compile-time import

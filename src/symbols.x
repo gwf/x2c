@@ -1322,6 +1322,35 @@ int SymTxn.local_macros_changed(SymTxn &s) {
   return 0;
 }
 
+/** Starts logging semantic writes, as a transaction does, and returns the
+    log position that `Sym.added_globals` reads from. `Sym.end_log` stops
+    the log. */
+int Sym.log_writes(Sym s) {
+  s.transactions++;
+  return s.undo.len();
+}
+
+/** Returns the global rows written since `mark` that were absent before
+    it, with their current values. */
+Map Sym.added_globals(Sym s, int mark) {
+  SymUndo *rows = s.undo.bytes;
+  Map seen = {}, added = {};
+  for (int i = mark; i < (int) s.undo.len(); i++) {
+    SymUndo row = rows[i];
+    if (!_same(row.map, s.globals) || row.key in seen) continue;
+    seen[row.key] = 1;
+    Var value;
+    if (row.value is void && s.globals.try_get(row.key, value))
+      added[row.key] = value;
+  }
+  return added;
+}
+
+/** Stops the log that `Sym.log_writes` started. */
+void Sym.end_log(Sym s) {
+  if (!--s.transactions) s.undo.clear();
+}
+
 // commit and rollback
 
 /** Publishes an active semantic transaction and makes rollback a no-op.
@@ -1343,10 +1372,8 @@ void SymTxn.commit(SymTxn &?s) {
 
 /* Completing the outermost transaction empties the undo log. */
 static void SymTxn._finish(SymTxn &s) {
-  Sym sym = s.c.sym;
   s.active = 0;
-  sym.transactions--;
-  if (!sym.transactions) sym.undo.clear();
+  s.c.sym.end_log();
 }
 
 /** Commits an active transaction, retaining the original counters map.

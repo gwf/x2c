@@ -1240,4 +1240,25 @@ printf '%s\n' '#include "lib.x"' 'int other_value(void);' \
 [[ $("$shared/run") == '3 9 12 15' ]] ||
   fail "a shared public meta function computed the wrong value"
 
+# Case 16: the declarations of an unexported import stay in the importing
+# file. Its interface publishes none of its pack's `meta` functions, so an
+# includer that replays it emits no prototype for one, as a cold walk does.
+kept="$BUILD/kept-import"
+mkdir -p "$kept/cold" "$kept/warm"
+printf '%s\n' 'meta int kept_meta(int n) => n + 1;' \
+  'meta static int kept_static(int n) => n * 3;' >"$kept/pack.xmacro"
+printf '%s\n' '#include "x2c.x"' '$(import "pack.xmacro")' \
+  'int lib_value(void) => 3;' >"$kept/lib.x"
+printf '%s\n' '#include "lib.x"' 'int unit_value(void) => kept_meta(1);' \
+  'int unit_static(void) => kept_static(1);' >"$kept/unit.x"
+(cd "$kept" && "$X2C" translate -q --out-dir cold unit.x)
+(cd "$kept" && "$X2C" translate -q --out-dir warm lib.x)
+! grep -q 'kept_' "$kept/warm/lib.xi" ||
+  fail "an interface published an unexported import's declarations"
+(cd "$kept" && "$X2C" translate -q --out-dir warm unit.x)
+cmp -s "$kept/cold/unit.c" "$kept/warm/unit.c" ||
+  fail "unexported import replay diverged from cold compile"
+! grep -q 'int kept_' "$kept/warm/unit.c" ||
+  fail "an includer declared an unexported import's meta function"
+
 echo "header cache probes passed"

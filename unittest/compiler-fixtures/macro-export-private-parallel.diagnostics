@@ -3,10 +3,9 @@ unittest/compiler-fixtures/macro-export-private-parallel.x:6:12: macro: compile-
              ^^
   note: form: (p_lisp) error: (unbound (name p_lisp))
 
-unittest/compiler-fixtures/macro-export-private-parallel.x:7:12: macro: explicit meta call cannot be resolved
+unittest/compiler-fixtures/macro-export-private-parallel.x:7:12: parse: unknown or forward-referenced macro 'p_meta'
   int meta = $p_meta(1);
              ^
-  note: no binding for p_meta
 
 unittest/compiler-fixtures/macro-export-private-parallel.x:8:18: parse: unknown or forward-referenced macro 'p.value'
   int expression = $p.value();
