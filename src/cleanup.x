@@ -1106,8 +1106,8 @@ static List Preserve._declaration(Preserve &p, List declaration, Map escaped) {
   foreach (List binding, bindings.cdr())
     match (binding) {
       case %(op = ?bind ?value):
-        preserved.push(%(op = ${p._binding(bind, escaped)}
-          ${p.rewrite(value)}));
+        preserved.push(
+          %(op = ${p._binding(bind, escaped)} ${p.rewrite(value)}));
       case %(bind * ): preserved.push(p._binding(binding, escaped));
     }
   return %($head $type (bindings @{preserved.list_free()}));
@@ -1191,9 +1191,10 @@ static void Preserve._escape_declared(Preserve &p, Array output, List binds) {
       case $source_declarator_row(%(?name ?)): {
         String spelling = binding_identity_spelling(name);
         if (spelling && spelling in p.escaped) {
-          output.push(c.bind_syntax(
-            $!{ x2c_exception_escaped = &$name; }, AST_BLOCK,
-            c.return_type));
+          output.push(
+            c.bind_syntax(
+              $!{ x2c_exception_escaped = &$name; }, AST_BLOCK,
+              c.return_type));
         }
       }
 }
@@ -1224,7 +1225,6 @@ typedef struct DeferCaptures {
   Array records;
   int unsupported;
 } DeferCaptures;
-
 
 /** Returns `stmts` with each `defer` statement and the statements after
     it replaced by one region; a list without `defer` returns unchanged. */
@@ -1396,8 +1396,8 @@ static List Compiler._defer_callback(
   List body = %(code-value "lowered" (seq $rewritten) ());
   if (env_binding) {
     Type type = %(${binding_identity_spelling(env_binding)});
-    return c.bind_syntax($!Unit{
-      static void $callback(void *$opaque) {
+    return c.bind_syntax(
+      $!Unit{ static void $callback(void *$opaque) {
         $type *$env_local = ($type *)$opaque;
         $body
       }
