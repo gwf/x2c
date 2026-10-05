@@ -639,7 +639,7 @@ static List _address_of(String spelling, List binding) {
    the filtered arms, which precede the default arm. */
 
 /* Four helpers below are defined here; placement is defined in builtins.x.
-   Template names must be bound before builtins registers their native slots. */
+   Bind template names before builtins registers their native slots. */
 // lint: allow forward-declaration FI-6: template binding
 List builtin_try_catch_site(List frame, List clause);
 // lint: allow forward-declaration FI-6: template binding

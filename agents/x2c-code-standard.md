@@ -782,9 +782,9 @@ public operation as `"Type.method"`, `op` for an operator, `reason` for a
 short lower-case reason, `index`, `key`, `want`, `actual`, `expected`,
 `path`, `offset`, `line`, `column`, `sig`, `cause` for a lower-level cause,
 `library`, `code`, `message` for a native library's own status, and `note`,
-`at`, `check` for invariant failures. Shared Array failure helpers retain
-the Array type String as `operation` and the existing method-action Symbol
-as `action`.
+`at`, `check` for invariant failures. Shared Array method-action failure
+helpers retain the Array type String as `operation` and the existing
+method-action Symbol as `action`.
 
 **DG-8** Report macro misuse at the invocation with `x2c_diagnostic_fail`
 (fatal) or `x2c_diagnostic_warn`, with notes. Add a diagnostic only under

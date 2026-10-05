@@ -9,12 +9,12 @@ doc-boilerplate 0
 doc-comment-tier 0
 doc-on-static 0
 fallback-shared-cause 0
-forward-declaration 4
+forward-declaration 0
 fresh-literal-null-guard 0
 growth-check 0
 negated-is 0
 non-ascii 0
-one-statement-braces 13
+one-statement-braces 0
 operator-spacing 0
 over-width 0
 restates-code 0
@@ -23,7 +23,7 @@ return-after-raise 0
 return-after-report-error 0
 same-line-else 0
 section-label 0
-src-forward-declaration 9
+src-forward-declaration 0
 stacked-doc 0
 standalone-closer 0
 subject-parameter-name 0
