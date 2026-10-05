@@ -1064,6 +1064,22 @@ mechanical; a `candidate` needs the source read before acting. A zero
 coverage count, a low caller count, size, or recency is a candidate, never
 proof. Tool codes are `x2c lint` codes unless named otherwise.
 
+A local exception uses a standalone line comment directly before the
+finding's source line (CM-2):
+
+```x2c
+// lint: allow CODE RULE-ID: reason
+```
+
+The code must name the finding, the rule ID must match that code's rule,
+and the reason must contain text. A matching finding and its proposed fix
+are suppressed. Other findings on that line remain visible. Malformed
+comments, wrong rule IDs, and allowances without a matching finding for a
+selected code report `bad-suppression`, a CM-2 violation. Text in strings
+and block comments does not declare an allowance. An allowance for a code
+that is not selected is not checked for a matching finding.
+`bad-suppression` itself cannot be suppressed.
+
 ### Shape signals
 
 | Signal | Threshold | Rules | Tool |
@@ -1152,6 +1168,7 @@ guards trustworthy.
 | header that inventories functions | FI-2 | `module-header-inventory` |
 | repeated paragraph | CM-7 | `repeated-prose` |
 | stock phrase | CM-8 | `prohibited-prose` (partial) |
+| invalid local allowance | CM-2 | `bad-suppression` |
 | `/**` on static, detached, stacked, boilerplate, wrong tier | CM-5 | `doc-on-static`, `detached-doc`, `stacked-doc`, `doc-boilerplate`, `doc-comment-tier` |
 
 ### Macro, interop, and diagnostic signals

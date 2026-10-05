@@ -35,7 +35,8 @@ Rule
     propose, as `(START END TEXT)` byte ranges of `text`, and `functions`
     the authored functions the compiler parsed, as `(NAME START BODY END)`
     token indexes, for a unit in brace syntax, whose compiler tokens are
-    the tokens `Lint` scanned.
+    the tokens `Lint` scanned. `allowances` maps a source line to its
+    `(CODE MATCHED)` Array, updated when that finding is suppressed.
 */
 typedef struct Lint:
   String path, text
@@ -43,13 +44,14 @@ typedef struct Lint:
   int count, lines, layout
   int *partner, *first
   char *quoted
-  Map selected
+  Map selected, allowances
   Array findings, edits, functions
 *Lint
 
 #pragma private
 
 static const Rule rules[] = {
+  {"bad-suppression", <language>, <violation>, "CM-2"},
   {"forward-declaration", <language>, <violation>, "FI-6"},
   {"same-file-forward-declaration", <language>, <candidate>, "FI-6"},
   {"negated-is", <language>, <violation>, "ST-5"},
@@ -193,6 +195,31 @@ static int _quoting(Lint l, int at, int outer):
   if text == "${" || text == "{" && after_at: return 0
   return outer
 
+/* Invalid directives remain visible even when another rule is selected. */
+static void _bad_suppression(Lint l, int line, String message):
+  l.findings.push(%($line "bad-suppression" $message))
+
+/* Only standalone line-comment tokens can qualify the next source line. */
+static void _allowances(Lint l):
+  for (int at = 0; at < l.count; at++):
+    Token t = l.at(at)
+    if t.type != <comment> || !t.text.startswith("//"): continue
+    String text = t.text[2:].strip(" \t\r\n")
+    if !text.startswith("lint:"): continue
+    String directive = text[5:].strip(" \t\r\n")
+    String (header, colon, reason) = directive.partition(":")
+    Array words = []
+    foreach String word in header.words(): words.push(word)
+    const Rule *rule = words.len() == 3 ? Rule.find(words[1]) : NULL
+    if l.first[t.line] != at || l.line_end(at) != at ||
+       !colon || !reason.strip(" \t\r\n") || !rule ||
+       words[0] != "allow" || words[2] != rule.rule ||
+       words[1] == "bad-suppression":
+      _bad_suppression(l, t.line,
+        "expected // lint: allow CODE RULE-ID: non-empty reason")
+      continue
+    l.allowances[t.line + 1] = [words[1], 0]
+
 /** Scans `text` and indexes its brackets, quoting, and lines. */
 Lint Lint.new(String path, String text, Map selected):
   Tokenizer scanner = Tokenizer.new(text, <x2c>)
@@ -202,6 +229,7 @@ Lint Lint.new(String path, String text, Map selected):
   Lint l = Scope.calloc(1, sizeof(struct Lint))
   l.path = path, l.text = text, l.selected = selected
   l.findings = [], l.edits = [], l.functions = []
+  l.allowances = {}
   l.layout = scanner.layout || path.endswith(".xp")
   l.tokens = Scope.calloc(total + 1, sizeof(struct Token))
   for (int at = 0; at < total; at++):
@@ -230,6 +258,7 @@ Lint Lint.new(String path, String text, Map selected):
       int match = open.take_last().int()
       l.partner[match] = at, l.partner[at] = match
       quoted = states.take_last().int()
+  _allowances(l)
   return l
 
 /** Returns the token at index `at`. */
@@ -272,17 +301,30 @@ int Lint.end_line(Lint l, int at):
 int Lint.indent(Lint l, int line) =>
   l.first[line] < 0 ? -1 : l.tokens[l.first[line]].col - 1
 
-/** Reports a finding of `code` at `line` when the rule is selected. */
-void Lint.add(Lint l, String code, int line, String message):
-  if code in l.selected: l.findings.push(%($line $code $message))
+/** Reports a selected, unsuppressed finding and returns 1, otherwise 0. */
+int Lint.add(Lint l, String code, int line, String message):
+  if !(code in l.selected): return 0
+  Array allowance = l.allowances[line]
+  if allowance && allowance[0] == code:
+    allowance[1] = 1
+    return 0
+  l.findings.push(%($line $code $message))
+  return 1
+
+/** Reports allowances for selected codes with no matching finding. */
+void Lint.suppression_rules(Lint l):
+  foreach Var line in l.allowances.keys():
+    Array allowance = l.allowances[line]
+    if allowance[0] in l.selected && !allowance[1]:
+      _bad_suppression(l, line.int() - 1,
+        "suppression code has no matching finding on the next line")
 
 /** Reports a finding of `code` at `line` whose fix replaces the text from
     the start of the token at `from` to the end of the token at `to` with
     `replacement`. `from` past `to` inserts before `from`. */
 void Lint.fix(Lint l, String code, int line, String message, int from,
               int to, String replacement):
-  if !l.selected.contains(code): return
-  l.add(code, line, message)
+  if !l.add(code, line, message): return
   int start = l.tokens[from].pos
   int end = to < from ? start : l.tokens[to].pos + l.tokens[to].len
   l.edits.push(%($start $end $replacement))

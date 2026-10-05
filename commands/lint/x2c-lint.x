@@ -169,6 +169,7 @@ int main(int argc, char **argv):
   lint_corpus_rules(lints, count)
   for (int at = 0; at < count; at++):
     Lint l = lints[at]
+    l.suppression_rules()
     l.print()
     if !fix || !l.edits.len(): continue
     int proposed = l.edits.len()

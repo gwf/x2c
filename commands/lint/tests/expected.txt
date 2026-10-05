@@ -85,12 +85,49 @@ exit 0
 # shared Error causes outside the repository
 review.x:33: violation return-after-raise ER-4: return follows a non-returning shared Error cause in raise_then_return
 exit 0
+# missing rule fixtures
+commands/lint/tests/src/signals.x:2: violation fresh-literal-null-guard ER-4: null guard checks a fresh Array or Map literal in check_node
+commands/lint/tests/src/signals.x:2: candidate manual-shape-checks MA-7: manual List or AST shape checks may be one static match in check_node
+commands/lint/tests/src/signals.x:2: candidate validator-shape PR-4: validator-like helper inspects structural shape in check_node
+commands/lint/tests/src/signals.x:11: violation growth-check ER-4: checks whether a non-returning growth operation succeeded in grow_items
+commands/lint/tests/src/signals.x:19: candidate static-match-capture MA-7: 1 local assoc read(s) unpack static List.match bindings
+commands/lint/tests/src/signals.x:24: candidate enum-table-switch FA-6: 3 identifiers recur in enum Color, table colors, and a switch
+commands/lint/tests/src/signals.x:36: candidate recursive-validator FA-9: diagnostic validator recursively walks its input in validate_tree
+commands/lint/tests/src/signals.x:36: candidate validation-framework FA-9: 40 lines of connected validators: validate_tree
+commands/lint/tests/src/duplicate-a.x:1: candidate duplicate-function-body FA-5: 2 functions in 2 files have the same body as duplicate_a
+commands/lint/tests/src/duplicate-b.x:1: candidate duplicate-function-body FA-5: 2 functions in 2 files have the same body as duplicate_b
+exit 0
+# internal module documentation
+lib/scan.x:1: violation doc-comment-tier CM-5: doc comment in a internal module
+exit 0
 # shape rules
 commands/lint/tests/src/shape.x:6: candidate long-function FN-2: function spans 41 lines; review above 40
 commands/lint/tests/src/shape.x:89: candidate deep-nesting FN-5: brace depth reaches 5; review at 5
 commands/lint/tests/src/shape.x:122: candidate long-parameter-list FN-6: function takes 7 parameters; group shared context in a record or receiver
 commands/lint/tests/src/shape.x:128: candidate long-name NM-3: name has 25 characters; review at 25
 commands/lint/tests/src/shape.x:132: candidate long-name NM-3: name has 25 characters; review at 25
+exit 0
+# accepted and invalid suppressions
+commands/lint/tests/src/suppression-accepted.x:2: candidate long-name NM-3: name has 25 characters; review at 25
+commands/lint/tests/src/suppressions.x:1: violation bad-suppression CM-2: expected // lint: allow CODE RULE-ID: non-empty reason
+commands/lint/tests/src/suppressions.x:2: candidate contains-in ST-11: write the membership test with `in`
+commands/lint/tests/src/suppressions.x:4: violation bad-suppression CM-2: expected // lint: allow CODE RULE-ID: non-empty reason
+commands/lint/tests/src/suppressions.x:5: candidate contains-in ST-11: write the membership test with `in`
+commands/lint/tests/src/suppressions.x:7: violation bad-suppression CM-2: suppression code has no matching finding on the next line
+commands/lint/tests/src/suppressions.x:8: candidate contains-in ST-11: write the membership test with `in`
+commands/lint/tests/src/suppressions.x:10: violation bad-suppression CM-2: expected // lint: allow CODE RULE-ID: non-empty reason
+commands/lint/tests/src/suppressions.x:11: candidate contains-in ST-11: write the membership test with `in`
+commands/lint/tests/src/suppressions.x:14: candidate contains-in ST-11: write the membership test with `in`
+commands/lint/tests/src/suppressions.x:17: candidate contains-in ST-11: write the membership test with `in`
+commands/lint/tests/src/suppressions.x:19: violation bad-suppression CM-2: suppression code has no matching finding on the next line
+commands/lint/tests/src/suppressions.x:21: candidate contains-in ST-11: write the membership test with `in`
+commands/lint/tests/src/suppressions.x:23: violation bad-suppression CM-2: expected // lint: allow CODE RULE-ID: non-empty reason
+commands/lint/tests/src/suppressions.x:24: candidate contains-in ST-11: write the membership test with `in`
+exit 0
+# allowance for a nonselected rule
+commands/lint/tests/src/suppression-accepted.x:2: candidate long-name NM-3: name has 25 characters; review at 25
+exit 0
+# suppression also prevents fixes
 exit 0
 # a script unit
 exit 0

@@ -9,7 +9,10 @@ tests=commands/lint/tests
 work=${TMPDIR:-/tmp}/x2c-lint-tests.$$
 out=$work/findings
 trap 'rm -rf "$work"' EXIT HUP INT TERM
-mkdir -p "$work"
+mkdir -p "$work/docs" "$work/lib"
+# The internal-module fixture uses the current library documentation tier.
+cp docs/library-manifest.txt "$work/docs/library-manifest.txt"
+cp "$tests/src/doc-tier.x" "$work/lib/scan.x"
 # Repository files stay ASCII, so the non-ASCII case is written here.
 printf '// caf\303\251\n' >"$work/ascii.x"
 # Formatting input that the fixtures would otherwise have to hold.
@@ -40,8 +43,25 @@ run() {
   echo "# shared Error causes outside the repository"
   cp "$tests/src/review.x" "$work/review.x"
   (cd "$work" && run --rule return-after-raise review.x)
+  echo "# missing rule fixtures"
+  run --rule fresh-literal-null-guard --rule growth-check \
+    --rule manual-shape-checks --rule validator-shape \
+    --rule recursive-validator --rule validation-framework \
+    --rule static-match-capture --rule enum-table-switch \
+    --rule duplicate-function-body "$tests/src/signals.x" \
+    "$tests/src/duplicate-a.x" "$tests/src/duplicate-b.x"
+  echo "# internal module documentation"
+  (cd "$work" && run --rule doc-comment-tier lib/scan.x)
   echo "# shape rules"
   run --all "$tests/src/shape.x"
+  echo "# accepted and invalid suppressions"
+  run --rule contains-in --rule plain-string --rule long-name \
+    "$tests/src/suppression-accepted.x" "$tests/src/suppressions.x"
+  echo "# allowance for a nonselected rule"
+  run --rule long-name "$tests/src/suppression-accepted.x"
+  echo "# suppression also prevents fixes"
+  cp "$tests/src/suppression-accepted.x" "$work/suppression.x"
+  (cd "$work" && run --rule contains-in --fix suppression.x)
   echo "# a script unit"
   run --all "$tests/src/script.x"
   echo "# a preloaded macro library"
@@ -57,6 +77,7 @@ run() {
 } >"$out"
 diff -u "$tests/expected.txt" "$out"
 diff -u "$tests/fixed/idioms.x" "$work/idioms.x"
+cmp "$tests/src/suppression-accepted.x" "$work/suppression.x"
 
 # Expanded catalogues and direct diagnostics use the same existing rules.
 "$tool" -I src --rule return-after-raise --rule return-after-report-error \
