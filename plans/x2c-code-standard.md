@@ -1,9 +1,11 @@
 # x2c code standard: authority, enforcement, and improvement
 
-> Status: active - Gary accepted the standard and decisions D1-D5 on
-> 2026-10-05. Execution starts at stage 1 from `origin/dev`; stages 1 and 2
-> are independent and may run in parallel. Record each landed stage in
-> [Progress](#progress). The standard is
+> Status: active. Stages 1 and 3 are complete. D3 and D5 are delivered;
+> D2 retains four Array raises for Gary's decision. Stage 4 repaired 59
+> of 106 violations; 47 findings and later shape work remain. The package
+> Error-pack migrations and first import-helper deletion are delivered.
+> Gary accepted the standard and decisions D1-D5 on 2026-10-05.
+> See [Progress](#progress). The single standard is
 > [agents/x2c-code-standard.md](../agents/x2c-code-standard.md).
 
 ## The result
@@ -944,6 +946,11 @@ Commit `fef7cb88` keeps that explicitly local reference as a plain path.
 The failed gate is preserved in `debug/land-dev-4in735kx/attempt-1/gate.log`;
 component output: `debug/stage4-blis-doc-link-failure.log`.
 Focused `make doc-check` and the corrected publication gate pass.
+
+Parent `make packages-check` passes on integrated code head `7354c81e`.
+All 118 affected package C/H files remain byte-exact after that full check.
+Final package evidence: `debug/stage4-packages-integrated-final.log`.
+No fixture or baseline was changed by any package migration.
 
 Stage 3.5 census: 108 compiler and runtime files. The baseline took
 10.63 seconds; the candidate took 10.61 seconds. All 1,599 original
