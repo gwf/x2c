@@ -419,7 +419,7 @@ static List Compiler._parse_sizeof(Compiler c) {
     c.expect(<)>);
     arg = %(parens $arg);
   }
-  return %(expr (unsigned) (sizeof $arg));
+  return %(expr ("size_t") (sizeof $arg));
 }
 
 /* `offsetof` names its member with a C member designator: a field, then
@@ -440,7 +440,7 @@ static List Compiler._parse_offsetof(Compiler c) {
     else break;
   }
   c.expect(<)>);
-  return %(expr (unsigned) (offsetof $type $member));
+  return %(expr ("size_t") (offsetof $type $member));
 }
 
 // postfix operators
@@ -2550,7 +2550,7 @@ static List Compiler._binary_op_type_addsub(
   }
   else if (c.sym.resolve_key(ltype).is_pointer()) {
     if (rscalar)        return ltype;
-    else if (rpointer)  return %(int);
+    else if (rpointer)  return %("ptrdiff_t");
   }
   return NULL;
 }
