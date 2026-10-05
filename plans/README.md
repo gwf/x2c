@@ -44,6 +44,9 @@ execution.
 
 ### Current work
 
+- [x2c code standard](x2c-code-standard.md): the consolidated standard is
+  drafted in `agents/x2c-code-standard.md`; Gary's review and decisions
+  D1-D5 come before the guide, lint, and skill phases.
 - [x2c self-expression](x2c-self-expression.md): Phase 0, language work,
   three waves, and the retained prototypes are on dev. The recorded
   follow-ups and unresolved language questions remain active.
