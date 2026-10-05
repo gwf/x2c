@@ -18,7 +18,7 @@ one-statement-braces 16
 operator-spacing 0
 over-width 3
 restates-code 0
-restates-name 1
+restates-name 0
 return-after-raise 0
 return-after-report-error 0
 same-line-else 0
