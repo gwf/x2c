@@ -44,7 +44,8 @@ execution.
 
 ### Current work
 
-- [x2c code standard](x2c-code-standard.md): Gary accepted the standard
+- [x2c code standard](x2c-code-standard.md): stage 1 landed; Gary accepted
+  the standard
   and decisions D1-D5 on 2026-10-05. Stage 1 (authority) and stage 2
   (Error keys, `<malformed>`, `builtin_*` linkage) are ready; stage 3
   (lint) follows stage 1, then repeated scan-and-fix cycles.

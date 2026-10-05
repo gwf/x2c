@@ -61,7 +61,7 @@ the generic templates that own published definitions:
   with `_` or contain `__`; public types are declared before the first
   `#pragma private`. The path-scoped compiler audit requires documentation for
   both. The exact writing standard is in
-  `agents/x2c-coding-style-guide.md`.
+  CM-5 in `agents/x2c-code-standard.md`.
 - The first sentence becomes the index-table entry and must read on its own.
   Further sentences follow directly; use an empty line only for a real
   paragraph boundary, list, example, or other Markdown block. Sentence

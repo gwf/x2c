@@ -15,6 +15,7 @@ static Regex link, flag, whitespace
 
 /* Pages whose repository paths and cited line numbers are audited. */
 static List _path_audit(void) => %(
+  "agents/x2c-code-standard.md"
   "AGENTS.md"
   "README.md"
   "agents/AGENTS.md"

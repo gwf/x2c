@@ -47,10 +47,9 @@ operation that binds, types, places, or emits it. The optional
 `compare` can establish parsed-source paths; they do not establish semantic
 equivalence or the absence of runtime paths.
 
-Compare proposed machinery with deletion, reuse, and composition of existing
-x2c features. Trace proposed checks to the code that establishes the relevant
-fact. Apply the root validation rule: an earlier or more specific failure
-alone does not justify another validator or negative fixture.
+Apply PR-2, PR-3, PR-4, PR-10, FA-7, and TE-2 in
+[the standard](../../x2c-code-standard.md). Trace proposed checks to the
+operation that establishes the relevant fact.
 
 ## Record a decision-complete plan
 

@@ -47,16 +47,13 @@ emission. The optional [source graph commands](../../../commands/graph/README.md
 `flows` and `compare` investigate unclear parsed-source paths; reachability
 differences require source review, and missing paths do not establish safety.
 
-Prefer deletion, direct use of existing code, then one shared operation.
-Compile-time generation helps when it replaces real implementations sharing
-storage, ownership, failure, and lifetime behavior. Prototype the connected
+Apply PR-2, PR-3, FA-3, FA-5, FA-7, FA-8, FA-9, and MA-2 in
+[the standard](../../x2c-code-standard.md). Prototype the connected
 change and run focused translation, generated-C, compilation, or runtime
 checks that distinguish it. Keep only adapters with necessary behavior;
 recreating old distinctions through modes and callbacks may defeat the goal.
 
-Apply root validation rules: a more specific error alone does not justify
-keeping a validator. Ask before changing public behavior, API, ABI, or caller
-obligations beyond the request.
+Apply PR-4 and PR-10 in the standard to validation and compatibility.
 
 ## Complete and verify the removal
 

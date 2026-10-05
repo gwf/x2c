@@ -76,9 +76,8 @@ passing tests support that result rather than replace it.
 - Choose representations and scopes by their actual identity and lifetime
   behavior. Consult the relevant section of `agents/x2c-philosophy.md` for
   technical facts and their evidence.
-- Follow `agents/x2c-coding-style-guide.md`: 2-space indentation, 79 columns,
-  separate `else`, exported `Struct.method` operations, private `_snake_case`
-  helpers. Update the book when documented behavior changes.
+- Follow `agents/x2c-code-standard.md`, the single definition of x2c source
+  style. Update the book when documented behavior changes.
 
 Review a design before implementation and the completed authored diff before
 publication validation. Look for existing code to reuse or delete, checks

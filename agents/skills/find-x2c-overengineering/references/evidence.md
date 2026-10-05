@@ -1,5 +1,8 @@
 # Evidence record
 
+Apply PR-2, PR-3, PR-4, PR-10, FA-7, and TE-2 in
+[the standard](../../../x2c-code-standard.md) to this evidence.
+
 Each external run contains deterministic `inventory.json`, `selection.json`,
 `attempts.jsonl`, `commands.txt`, and a human-reviewed `report.md`.
 

@@ -565,7 +565,7 @@ processing of the returned call arguments.
 
 Generated identifiers belong to one compiler translation session shared by
 the original-source and shallow declaration compilers. The reserved space is
-whatever `_is_reserved_spelling` (`src/compiler.x`) accepts: the `_x2c_`
+whatever `_is_reserved_spelling` (`src/symbols.x`) accepts: the `_x2c_`
 prefix, `_init_guard_`, `_file_init_`, and `_` followed only by digits. A
 source declaration whose spelling falls in that space is rejected with a
 located diagnostic — one check per declaration in
@@ -671,8 +671,9 @@ saved value.
 
 ### Pooled interning
 
-A `Pool` pairs a `Scope` that owns storage with a `Map` that owns canonical
-identities, linked to an enclosing parent pool. `lib/pool.x` owns lookup
+A `Pool` pairs a `Scope` that owns storage with a private `PoolTable`
+that stores canonical identities, linked to an enclosing parent pool.
+`lib/pool.x` owns lookup
 (shadowing outward through the parent chain), creation (always landing in the
 innermost pool), and release. `Pool.retain`/`Pool.retain_named`
 establish a pooling scope for the shared `String` and `List`
@@ -961,7 +962,7 @@ Exemplars endorse a property, not every line in a file:
 - `examples/magic/system-macros.x` - `class`, `$let`, and `$lock` in one
   runnable program.
 
-Related guides: `agents/x2c-coding-style-guide.md` for mechanical style,
+Related guides: `agents/x2c-code-standard.md` for mechanical style,
 `agents/skills/execute-x2c-plan` for ordinary development,
 `agents/skills/simplify-x2c-source` for systematic audits, and
 `plans/README.md` for durable planning.

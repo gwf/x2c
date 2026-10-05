@@ -422,8 +422,16 @@ against current source and probes followed.
 
 ## Open questions
 
-None recorded. Add each question with its stage, the rule, the evidence,
-and the options.
+### Stage 1: simplification calibration adds a stronger stopping rule
+
+PR-3 requires deletion before rearranging. The calibration reference
+`agents/skills/simplify-x2c-source/references/removal-patterns.md` also says
+"do not run final gates until a second architectural pass is empty".
+The standard's repair procedure and root process ceiling contain no such
+empty-pass prerequisite. That sentence remains unchanged pending Gary's
+choice. Options: retain it as historical calibration, retire it, or add an
+explicit bounded review requirement to the standard. Other stage 1 work
+continues.
 
 ## Progress
 

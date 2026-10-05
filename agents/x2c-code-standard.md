@@ -12,14 +12,9 @@ to it for meaning. Correctness and published contracts come before every rule
 here. A local representation, ABI, or measured cost may require an exception;
 state that constraint beside the exception and keep the rule.
 
-Status: draft of 2026-10-04 for Gary's review. It consolidates the style
-guide, organization guide, philosophy working rules, AST and lowering guides,
-diagnostics guide, the source-quality skills, the book's prescriptive text,
-and the 2026-09-17 to 2026-10-04 cleanup campaigns. Adoption, tool coverage,
-and the decisions still open are tracked in
-[plans/x2c-code-standard.md](../plans/x2c-code-standard.md). This draft does
-not replace current guidance or expand validation requirements. Adoption and
-any process expansion require Gary's review under `AGENTS.md`.
+Status: accepted as of 2026-10-05. This is the single definition of x2c
+source style. [The adoption plan](../plans/x2c-code-standard.md) tracks its
+adoption.
 
 ## How to read this standard
 
@@ -45,7 +40,7 @@ The [signal catalog](#finding-bad-code) gives each rule's detection signal,
 threshold, and tool. The [procedures](#turning-bad-code-into-good-code) give
 the repair order and the proof each repair needs. Rules are terse; the
 [source style guide](x2c-coding-style-guide.md) holds the worked
-prefer/avoid examples until the adoption plan folds them in.
+prefer/avoid examples, filed under rule IDs.
 
 ## Principles
 
@@ -772,9 +767,7 @@ public operation as `"Type.method"`, `op` for an operator, `reason` for a
 short lower-case reason, `index`, `key`, `want`, `actual`, `expected`,
 `path`, `offset`, `line`, `column`, `sig`, `cause` for a lower-level cause,
 `library`, `code`, `message` for a native library's own status, and `note`,
-`at`, `check` for invariant failures. Open decision D2 in the adoption plan
-covers the current splits: `owner` beside `operation`, and `why` beside
-`reason`.
+`at`, `check` for invariant failures.
 
 **DG-8** Report macro misuse at the invocation with `x2c_diagnostic_fail`
 (fatal) or `x2c_diagnostic_warn`, with notes. Add a diagnostic only under

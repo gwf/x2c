@@ -1,77 +1,13 @@
-# x2c Code Organization Guide
+# x2c Module Maps
 
-This guide describes the current module boundaries. Mechanical formatting
-rules remain in `agents/x2c-coding-style-guide.md`.
-
-## One owner per concern
-
-Put a contract where it can be enforced completely and let downstream code
-rely on it. A module should expose a small public surface above
-`#pragma private`; its implementation and private dependencies belong below
-that boundary. Compiler and runtime modules that other modules include
-retain `#pragma once` because `--cpp-symbols` and `--live-symbols` hand
-their raw `.x` include graph to the host preprocessor, and that graph is
-co-recursive. A unit no module includes, such as `src/type-ledger.x` or
-`lib/var-ledger.x`, omits it. Nothing else needs it: the
-default path resolves includes itself and terminates cycles on its own, so
-tests, examples, packages, and user programs omit it unless their own `.x`
-includes form a cycle. Generated headers receive their own compiler-owned
-`#pragma once` automatically.
-
-```c
-#pragma once
-#include "common.x"
-
-/* public types and functions */
-
-#pragma private
-#include <stdlib.h>
-
-/* implementation */
-```
-
-Do not create a new helper file solely to shorten an existing coherent module.
-Split a module only when the new file has a distinct owner, dependency
-direction, and test surface.
-
-### Large files
-
-A file over 1,500 lines is a review trigger, not a split order. The review
-lists the file's subjects and measures each candidate boundary by the
-private helpers that would cross it in each direction. A part becomes its
-own unit when it has a distinct owner, depends on the rest in one direction,
-and has its own tests. A file with no such boundary keeps its size: its
-header names its one subject, and its sections follow the reading order in
-the style guide, each under 400 lines. A helper that crosses a new boundary
-becomes a method of the owner that establishes its fact; it never becomes a
-new `x2c_*` export. A split lands as a move with no edits inside the moved
-text, followed by the change that settles its crossings, header, and order.
-
-### Context records
-
-A private record that carries the state of one operation owns that
-operation: its steps are `Record.step(Record &r, ...)` methods. Declare its
-local context as a value, and use a reference receiver to update it. A record
-whose fields are copied into locals on entry is a parameter list; it goes
-back to parameters or becomes a receiver. One concept has one record.
-
-Within a coherent module, put state-bearing private helpers on their dominant
-implicit-class receiver. Keep stateless helpers free. This makes ownership
-visible without creating a wrapper type or another module. Prefer one typed
-metadata ledger per existing owner over parallel switches or a cross-module
-registry.
-
-Reserve non-static `x2c_*` functions for the intentional C interface used by
-generated code, native callers, or process-wide setup. Ordinary public x2c
-operations use type methods. Private helpers are `static`; an `x2c_*` spelling
-below `#pragma private` still leaks into generated headers. Verify the
-generated-code and native callers of a retained C entry before renaming it.
-Test-only access does not make a helper public; test the behavior through the
-real public operation.
+[The code standard](x2c-code-standard.md) owns module rules (MO), file
+organization (FI), compiler boundaries (AR), and runtime ownership (RT).
+These maps list the current owners. The generated
+[module catalog](x2c-module-catalog.md) inventories their declarations.
 
 ## Compiler organization
 
-The compiler is consolidated by phase rather than filename prefixes:
+Files below are relative to `src/` unless a path is shown.
 
 - entry and shared state: `main.x`, `cli.x`, `frontend.x`, `compiler.x`,
   `symbols.x`, `diagnostics.x`, `sourceview.x`, `collect.x`, `report.x`,
@@ -84,126 +20,47 @@ The compiler is consolidated by phase rather than filename prefixes:
   `builtins.x`, `linked-meta.x`, `meta-group.x`, `meta-project.x`,
   `meta-helper-client.x`;
 - semantic representation and lowering: `type.x`, `type-ledger.x`,
-  `protocol.x`, `transform.x`, `callables.x`, `cleanup.x`,
+  `protocol.x`, `operator-ledger.x`, `transform.x`, `callables.x`, `cleanup.x`,
   `adapter-memo.xmacro`, `regions.x`;
 - output: `cache.x`, `generate.x`, `emit.x`, `format.x`;
 - native and project driver: `build.x`, `project.x`, `toolchain.x`,
   `install.x`, `script.x`, `editor.x`.
 
-Runtime modules never depend on compiler modules. Parser modules produce the
-annotated AST consumed by transforms; transforms produce the normalized AST
-consumed by generation and emission. Cross-phase helpers belong to the phase
-that establishes their contract, not the first caller that happens to need
-them.
-
-Compiler phase state may use mutable storage internally even when its output
-is an immutable List. Compiler scope and brace stacks and initialization
-queues use Arrays, and the symbol table's scope stack is a Block;
-Diagnostics stores chronological entries in an Array and
-returns a List snapshot; the cleanup pass keeps its open regions in an
-Array. Convert at the phase boundary rather than maintaining two live
-representations.
-
-When adding compiler behavior:
-
-1. identify the phase that owns its invariant;
-2. add the smallest implementation at that owner;
-3. prove the phase boundary with an exact compiler fixture when representation
-   or diagnostics matter;
-4. use runtime unit tests when the behavior belongs to a library owner;
-5. update the philosophy ledger if contract status changes.
+- shared source fields: `fields.xmacro`;
+- report wording: `src/*-reports.xmacro`, beside their reporting owners.
 
 ## Runtime organization
 
-Runtime files are capability owners, not a hierarchy of wrappers:
+Files below are relative to `lib/`.
 
 ```text
 common, scope, pool,          shared representation, lifetime, interning,
 static-init                   and static initialization
-var, varconvert, varops       tagged values, conversions, operations
+var, varconvert, varops,      tagged values, conversions, operations
+var-ledger
 dispatch, protocols           dynamic behavior and protocol adoption
 string, string-classify,      canonical immutable values, string
 string-number, string-format, classification, numeric parsing, checked
 string-escape, split,         formatting, escaped spelling, splitting, and
 symbol, symbolset, atom, list closed vocabularies
 block, buffer, array, map     mutable storage and builders
+typed-array, typed-map,       typed collection families and their
+typed-list                    typed views
 iter, match, match-plan,      traversal, pattern matching, plan lowering
 match-cache, machine,         and caching, and the Match wordcode machine
 match-machine
 macro-value                   macros as values that build and recognize code
 error, error_init, exception  ambient errors and structured control flow
-file, logger                  system boundaries
+file, logger, path, process   system boundaries
 context, thread, thread-state bounded runtime state, native workers, and
 mutex                         their coordination primitive
 scan, tokenizer               lexical scanners and the shared tokenizer
-func, lisp                    native callable binding and embedded Lisp
+func, lisp, lisp-targets,     native callable binding, embedded Lisp,
+lisp-init, meta               its environment, and compile-time SDK
 clibc, cmath                  C prototypes declared for compile-time calls
                               and Var unboxing
 lib                           DisjointSet utility
 ```
 
-More modules ship with the runtime but stay out of the implicit prelude.
-`lib/Makefile` lists them in `OPTIONAL_SOURCES`. A client names an
-`optional` module of `docs/library-manifest.txt` in an explicit include;
-the `internal` ones outside the prelude serve other runtime units. The
-manifest owns every module's visibility in the generated library
-reference.
-
-`lib/x2c.x` is generated from the standard modules by `lib/Makefile`. Never
-edit it by hand. `.xmacro` files beside the modules own shared macro
-definitions (ledgers, adapters, result-flow forms); each is imported by the
-modules that consume it and is a module kind of its own, not a header.
-
-Status-bearing operations should own recoverable failure. Convenience
-adapters may fail fast, but they should delegate rather than duplicate the
-owner's mutation logic. Canonical values should be established once by their
-constructor or interning boundary.
-
-The runtime's unit interfaces are part of the runtime organization contract.
-A private-looking runtime struct field, typedef, or helper can still be
-observable to every unit through the prelude. Representation cleanup that
-changes that surface changes what consumers see; do not disguise it as an
-internal-only edit.
-
-## Dependencies and includes
-
-- Include only the public modules required by the public declarations above
-  `#pragma private`.
-- Put private standard-library and sibling includes below `#pragma private`.
-- Avoid compiler-to-runtime callbacks that make a runtime module aware of AST
-  or code-generation details.
-- Treat generated `.c`, `.h`, dependency files, and `lib/x2c.x` as build
-  artifacts, not source.
-
-## Tests, docs, and plans
-
-Runtime suites are in `unittest/test-<feature>.x`. Compiler representation,
-diagnostic, and native-output contracts are in
-`unittest/compiler-fixtures/`. Curated programs are in
-`examples/manifest.txt`.
-
-The generated module catalog is refreshed with `make doc-generate`; do not edit
-its API inventory manually. Active plans remain under `plans/` as execution
-logs. Create an archive subdirectory there for plans that are complete,
-rejected, or superseded.
-
-Before creating a module or compatibility layer, check the philosophy ledger
-and current catalog. The usual correction for drift is to strengthen the
-existing owner, not add another place that partially enforces the same rule.
-
-## Adding or changing a feature
-
-Change only the boundaries the feature actually crosses:
-
-1. tokenizer, when new lexical structure is required;
-2. one parser owner, to build a documented AST shape;
-3. type owner, only when a new type fact is required;
-4. transform/generate/emit owner, to lower the shape;
-5. runtime owner, only when emitted C needs a new primitive;
-6. the smallest fixture that proves each changed boundary;
-7. unit or checked-example evidence for observable behavior.
-
-These are contract limits, not suggestions. Do not add a downstream workaround
-or describe a feature as complete without moving the owning implementation and
-its proof together. A parser branch does not prove runtime support, and a
-runtime helper does not make syntax supported.
+`docs/library-manifest.txt` records visibility. `lib/Makefile` records the
+prelude and optional sources; it generates `lib/x2c.x`. See RT-6 and AR-9.

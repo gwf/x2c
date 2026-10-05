@@ -18,3 +18,5 @@ editing it by hand.
 x2c does not expand C macros: declarations must be visible without `#if` or
 macros that expand to declarations. See
 [Preprocessing](../agents/x2c-development-guide.md#preprocessing).
+
+Follow [the code standard](../agents/x2c-code-standard.md).

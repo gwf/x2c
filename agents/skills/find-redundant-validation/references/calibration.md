@@ -1,5 +1,8 @@
 # Calibration cases
 
+Apply PR-2, PR-3, PR-4, PR-10, FA-7, and TE-2 in
+[the standard](../../../x2c-code-standard.md) to this evidence.
+
 These revisions show the patterns the lint rules are intended to surface.
 They do not make a current finding removable; inspect current behavior before
 editing. To check a revision, add a worktree for it and run the current

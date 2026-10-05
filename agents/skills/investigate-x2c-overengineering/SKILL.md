@@ -19,11 +19,9 @@ side effects, generated output, tests, documentation, and history. When commit
 provenance points to an agent session, inspect the raw session and distinguish
 what it states from what the code history merely suggests.
 
-First apply the purpose test: name the abstraction's independent current
-purpose. If it owns wanted behavior, reject it. A valid candidate is inward-
-facing bookkeeping that can disappear while every intended capability remains.
-Present the preserved behavior and existing owner before line counts, internal
-architecture, and the removal hypothesis.
+Apply PR-2, PR-3, PR-4, PR-10, FA-7, and TE-2 in
+[the standard](../../x2c-code-standard.md) to the purpose test. Present the
+retained behavior and existing owner before counts and the removal hypothesis.
 
 Choose exactly one disposition:
 
@@ -34,11 +32,8 @@ Choose exactly one disposition:
 - `removed`: the region is absent from the current tree; or
 - `open`: one named, bounded proof is still missing.
 
-If deletion intentionally removes a working capability, the mechanism is not a
-candidate; record the search as rejected. `open` is reserved for a bounded
-uncertainty about whether the abstraction has an independent purpose or whether
-the existing owner preserves behavior. No in-tree adopter is evidence about
-adoption, not evidence that the behavior has no value.
+Use `open` for one bounded uncertainty about purpose or retained behavior.
+Apply PR-10 before treating absent in-tree callers as evidence.
 
 Update the candidate row with exact current lines, evidence, the strongest
 counterargument, confidence, and next proof. Add the investigation to the

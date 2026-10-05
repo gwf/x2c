@@ -5,6 +5,8 @@ source before applying any old result.
 
 ## Reject a leftovers-only campaign
 
+Calibration for PR-3 in [the standard](../../../x2c-code-standard.md).
+
 A failed broad pass searched the repository for low-use fields and private
 names, removed redundant flags and allocation zeroing, ran the final build
 gates, and declared success. A second invocation immediately found more of the
@@ -21,6 +23,8 @@ Use that failure as a hard check:
   promoting dead fields and `calloc` conversions into the main result.
 
 ## Do not merge paths with different ownership
+
+Calibration for FA-5 in [the standard](../../../x2c-code-standard.md).
 
 A rejected `Error` cleanup tried to make `Error.snapshot`, `Error.since`,
 their explicit-owner variants, and handler views use one recursive copier.
@@ -42,6 +46,8 @@ is carrying real policy and should remain separate.
 
 ## Delete the second owner
 
+Calibration for PR-2 in [the standard](../../../x2c-code-standard.md).
+
 Commit `d78c641a` removed 571 net lines of hand-authored production source from
 the protocol implementation. The important change was not shorter syntax. It
 removed duplicate readers, indexes, scans, and reconstructed views after the
@@ -57,6 +63,8 @@ Questions to reuse:
 
 ## Keep the original instead of mirroring it
 
+Calibration for FA-3 in [the standard](../../../x2c-code-standard.md).
+
 Commit `d2a51d85` stopped `src/main.x` from copying 18 fields out of a parsed
 `CliRequest` into file statics. Consumers retained the request they actually
 needed. The copied fields, assignments, and implicit synchronization rule all
@@ -67,6 +75,8 @@ available later. Passing or retaining the original often deletes both data
 and lifecycle code.
 
 ## Remove an internal language nobody needs
+
+Calibration for FA-8, FA-9 in [the standard](../../../x2c-code-standard.md).
 
 Commit `d7d9a95e` removed `CliOptionId`, `CliGroup`, and related routing
 machinery. The option spellings already carried the identity callers needed,
@@ -84,6 +94,8 @@ back into an existing value or operation, delete the private language.
 
 ## Strengthen one guarantee and remove defenses
 
+Calibration for PR-2, PR-4 in [the standard](../../../x2c-code-standard.md).
+
 The allocation and size failure work in `97c2a9e1` and `c4fee817` established
 that those failures do not return to the raising call. That made downstream
 null checks and fallback braces unreachable. The useful campaign was the
@@ -94,6 +106,8 @@ Making its result precise may delete checks, recovery branches, status
 propagation code, tests, and documentation everywhere downstream.
 
 ## Generate implementations, not abbreviations
+
+Calibration for FA-5, MA-2 in [the standard](../../../x2c-code-standard.md).
 
 Commit `d2a51d85` used existing compile-time rows and macros to remove 415 net
 hand-authored production lines. It generated the 14 native Var update
@@ -112,6 +126,8 @@ fixed-fact projections, or a large family of full definitions.
 
 ## Remove runtime work with the source machinery
 
+Calibration for PR-3 in [the standard](../../../x2c-code-standard.md).
+
 The `SymbolSet` Var-tag change replaced two generated 109-case switches with
 one indexed representation. It removed generated code and changed lookup from
 18 ns to 3 ns. The best simplifications often improve performance because the
@@ -123,6 +139,8 @@ runtime work; a larger source rewrite can be a clear win when generated output
 and execution shrink.
 
 ## Keep pulling after the first deletion
+
+Calibration for PR-3 in [the standard](../../../x2c-code-standard.md).
 
 Commit `3b2a5dd8` removed 214 net hand-authored production lines by simplifying
 compiler probes across many modules. Commit `d2a51d85` combined generated
@@ -136,6 +154,8 @@ deleted adapter may expose a dead type; a deleted mirror may expose a dead
 lifecycle; a shared table may expose redundant switches.
 
 ## Finish expected symbol changes instead of restoring dead code
+
+Calibration for FA-7 in [the standard](../../../x2c-code-standard.md).
 
 The Map generator cleanup removed standard allocation, scope, and byte-storage
 forwarders from `lib/map.x`, `lib/typed-map.x`, and its fixtures. The first

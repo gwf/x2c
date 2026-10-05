@@ -240,8 +240,8 @@ int main(void) {
     Array values = range(1, 8, 1)
       .map(double_value)
       .filter(divisible_by_four);
-    for (size_t i = 0; i < values.len(); i++)
-      printf("%d\n", values[i].int());
+    foreach(int value, values)
+      printf("%d\n", value);
   }
   return 0;
 }
@@ -287,9 +287,8 @@ storage, and any dynamic or captured callback must outlive the returned
 value.
 
 The iterators need no cleanup. A collected `List` or `Array` is scope-owned
-data, so the first program brackets its work with `Scope.retain` and
-`Scope.release`. See [scopes and lifetime](memory.md) for what that pair
-does.
+data, so the first program brackets its work with `$scope()`. See
+[scopes and lifetime](memory.md) for the region lifetime.
 
 ## Pipeline operations
 

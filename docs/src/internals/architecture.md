@@ -336,8 +336,8 @@ constant and the AST refers to it by slot:
 Consumes the parsed AST, produces a lowered AST that the emitter can walk
 without knowing about x2c. `src/transform.x` normalizes each node until its
 identity stops changing, because lowering one construct can expose another.
-Functions complete their cleanup lowering within this shared driver. It also
-handles lambdas, which
+`src/cleanup.x` places function cleanup within the shared driver.
+`src/callables.x` handles lambdas, which
 need additional declarations. A noncapturing lambda becomes a static helper
 function, plus an adapter when the receiving callback type differs from the
 helper's signature. When a `Func` is expected, a direct function or
@@ -444,7 +444,7 @@ Consumes the lowered AST, produces a flat `List` of C tokens. `src/emit.x`
 does this with one stack-local `Emitter` per translation unit, which holds
 the current function's name and static objects. Emission is therefore
 reentrant, and a unit that fails cannot contaminate the next one.
-`src/transform.x` has already placed each region's cleanup statements on every
+`src/cleanup.x` has already placed each region's cleanup statements on every
 exit that leaves the region, so emission prints frames, records, and
 statements where the AST puts them. Preprocessor nodes are re-emitted here too, with `.x` include targets rewritten
 to the generated `.h` they correspond to.

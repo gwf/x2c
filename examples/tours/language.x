@@ -24,8 +24,8 @@ int main(void) {
     input.rewind();
     Map counts = {};
     foreach(String line, input)
-      foreach(String word, line.strip(" \n").split(" "))
-        counts[word] = counts.getdefault(word, 0).integer() + 1;
+      foreach(String word, line.words())
+        counts[word] += 1;
     printf("beta=%ld\n", counts["beta"].integer());
 
     List numbers = %(1 2 3 4), doubled = numbers.map(%!(item) => item * 2);

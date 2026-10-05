@@ -227,7 +227,5 @@ gives the gap after the lowered block a zero count. Error, diagnostic, and
 fatal paths legitimately stay unexecuted, and so does code that only other
 workloads reach: `x2c build`, `run`, `script`, `env`, `new`, `install`,
 project manifests, packages, and external commands such as the REPL. A zero
-count is a candidate, not proof. Every deletion still needs a caller check
-across `src`, `lib`, `commands`, `packages`, `tools`, `etc`, `unittest`,
-and `examples`, including macro templates, compile-time Lisp, protocol
-hooks, and function pointers.
+count is a candidate under the standard's "Finding bad code" section.
+Apply FI-7 in [the standard](../../../x2c-code-standard.md) to deletions.

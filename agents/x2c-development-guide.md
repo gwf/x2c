@@ -110,7 +110,7 @@ after changing the option; ordinary builds keep `BUILD_LTO=0`.
 ## Further references
 
 - `agents/x2c-philosophy.md` - current design facts and their evidence.
-- `agents/x2c-coding-style-guide.md` - mechanical source style.
+- `agents/x2c-code-standard.md` - mechanical source style.
 - `agents/x2c-code-organization-guide.md` - where code belongs.
 - `agents/x2c-debugging-guide.md` - phase dumps and miscompile isolation.
 - `docs/src/internals/implementation-map.md` - feature routing.

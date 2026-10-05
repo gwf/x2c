@@ -263,7 +263,7 @@ shapes. `Array`s, `Map`s, and `String`s are not `match` subjects.
 
 A `Var` subject works because the compiler inserts the conversion to `List`
 for you. The conversion does not check the tag, so only `match` a `Var` you
-already know holds a `List`; test `Var_is(v, <list>)` at the boundary if you do
+already know holds a `List`; test `value is <list>` at the boundary if you do
 not. See [values and Var](values.md) for the tag rules and
 [symbols and atoms](symbols.md) for what a bare pattern spelling means.
 

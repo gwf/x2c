@@ -1,5 +1,10 @@
 # Compile-time Lisp SDK completion and system-wide macros
 
+Historical citations below refer to files that have been removed:
+`etc/builtin-macros.xlisp`, `lib/varops.xlisp`, `lib/system-macros.xlisp`,
+`src/comptime.x`, and `etc/comptime.xlisp`. They describe the earlier tree.
+
+
 > Status: reference - diagnostic-location and enum-consumer follow-ups remain
 > open; no current dispatch recorded. Phases 1 and 3 and most of Phase 4 are
 > shipped. Phase 1 landed in four commits, `f3623b66` through `765e2cdc`:

@@ -1,5 +1,8 @@
 # Candidate adjudication
 
+Apply PR-2, PR-3, PR-4, PR-10, FA-7, and TE-2 in
+[the standard](../../../x2c-code-standard.md) to this evidence.
+
 Answer these questions from current source and history:
 
 1. What independent current purpose does this abstraction serve? If it owns a

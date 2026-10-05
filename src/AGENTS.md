@@ -12,3 +12,5 @@ for recursive descent, captures, output templates, and transform recursion.
 The fixed-point transform driver relies on Lists created through `cons`
 having stable structural identity. Keep identity-dependent behavior within
 that verified List representation.
+
+Follow [the code standard](../agents/x2c-code-standard.md).

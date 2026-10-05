@@ -1,5 +1,10 @@
 # Meta follow-ups
 
+Historical citations below refer to files that have been removed:
+`etc/builtin-macros.xlisp`, `lib/varops.xlisp`, `lib/system-macros.xlisp`,
+`src/comptime.x`, and `etc/comptime.xlisp`. They describe the earlier tree.
+
+
 > Status: reference with selected follow-ups. A and C shipped, B was
 > measured and declined, and F's selected-root lifetime proof is done.
 > Track E's Iter adoptions and track G's loadable modules shipped; the

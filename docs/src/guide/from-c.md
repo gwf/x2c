@@ -321,15 +321,15 @@ bindings visible:
 
 ```x2c
 ~
-macro Expression $minutes(Expr $value) => $value * 60;
+macro Expression $sample.minutes(Expr $value) => $value * 60;
 ~
 ~int main(void) {
-~  int seconds = $minutes(2);
+~  int seconds = $sample.minutes(2);
 ~  return seconds == 120 ? 0 : 1;
 ~}
 ```
 
-Here `$minutes` is the qualified macro name, `Expr $value` declares one
+Here `$sample.minutes` is the qualified macro name, `Expr $value` declares one
 expression hole, and `$value` inserts the caller's expression into the
 replacement. Other result kinds cover statements, fields, enum members,
 translation-unit items, and decorators.

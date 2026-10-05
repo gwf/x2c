@@ -126,8 +126,9 @@ contract.
 ## Diagnostics contract
 
 `Diagnostics.new(printer, limit)` creates a store; a NULL printer collects
-without streaming. It records entries newest-first internally and
-`Diagnostics.entries` returns them in report order. Each entry has these
+without streaming. It stores entries in chronological order in an Array;
+`Diagnostics.entries` returns a List snapshot in that order. Each entry has
+these
 associative-list fields:
 
 | Field | Value |

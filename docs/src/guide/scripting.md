@@ -343,7 +343,7 @@ List spec = %(
   (inputs repeated required (help "Files to read")));
 Map options = Args.parse(Args.from_argv(argc, argv), spec);
 String output = options["output"].str();
-foreach (String input, options["inputs"].list())
+foreach (String input, options["inputs"])
   if (options["verbose"]) printf("%s: %s\n", output, input);
 ~  return 0;
 ~}

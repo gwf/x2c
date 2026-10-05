@@ -73,47 +73,17 @@ every downstream consumer, the relevant Error or compiler-stage behavior, and
 the commit that added the check. Ask what observable result would change if
 the check disappeared.
 
-Recommend deletion only when the existing path still:
-
-- preserves every valid program's generated output and runtime behavior;
-- rejects invalid input before it can become silently wrong output, corrupt
-  compiler state, or cross an unsafe native boundary; and
-- preserves any diagnostic that the language or public API deliberately
-  promises.
-
-It is acceptable for invalid source to fail later or with a different message
-when neither diagnostic is promised and the later failure is safe. A negative
-fixture written only for the candidate validator is evidence of that
-validator, not an independent production consumer.
-
-Keep checks for untrusted external input, documented null or absent values,
-resumable user-defined Error causes, callbacks, I/O status that can return,
-overflow before an operation, and public behavior that would otherwise accept
-an invalid program or value.
+Apply PR-4, ER-4, ER-5, and FA-9 in
+[the standard](../../x2c-code-standard.md). Read its trust-boundary paragraph
+under "Validation signals" together with the calibration reference.
 
 ## Check the shape before writing another check
 
-Trust the value published by each compiler stage. The scanner establishes
-token boundaries and spelling, the tokenizer establishes token class, parsing
-and macro binding establish canonical AST shapes, and transforms establish
-their output shapes. Use the ordinary consuming operation to handle source
-bytes, Lisp values, files, and serialized data. Once it establishes an internal
-fact, its consumers can rely on it. Canonical AST Lists are accepted by
-structure, as
-documented in `docs/src/reference/language.md` under "Macro-visible syntax".
-
-When code inspects one static List or AST shape with `car`, `cdr`, `len`, and
-type tests, first decide whether failure needs its own behavior:
-
-- use direct access or flat destructuring when an earlier phase guarantees the
-  shape;
-- use a source `match` when success selects a local branch and failure can use
-  the existing path; and
-- keep explicit checks when each rejection has intentional behavior that the
-  surrounding compiler would not otherwise provide.
-
-Do not replace a redundant validator with a shorter validator or add a
-catch-all match arm solely to preserve its diagnostic.
+Apply PR-4 and the standard's trust-boundary paragraph to the producer and
+its consumers. For canonical AST construction, consult "Macro-visible
+syntax" in `docs/src/reference/language.md`. Apply EX-9 and MA-7 when a
+shape can be recognized or destructured; apply FA-9 before proposing a
+replacement checker.
 
 ## Hand off an authorized deletion
 

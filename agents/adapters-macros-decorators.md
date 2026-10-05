@@ -74,10 +74,9 @@ adapter pattern.
 Caller ownership does not disqualify the same pattern. Ownership answers where
 the pointee lives and how long it remains valid; protocol participation answers
 how its pointer crosses a typed boundary. `lib/iter.x` keeps every pipeline
-state struct in caller storage, but stores twelve known state-pointer types in
-`Iter.obj`, which is a `Var`. Private `StateRef` aliases and `Var(StateRef)`
-rows therefore name real crossings without allocating, copying, or extending
-the state lifetime. A survey must inspect what enters and leaves each `Var`
+state struct in caller storage. Its `UnzipColumnRef` and `UnzipSharedRef`
+aliases cross through `Iter.obj`, a `Var`, with `Var` protocol rows. These
+crossings do not allocate, copy, or extend the state lifetime. A survey must inspect what enters and leaves each `Var`
 field, not reject the field because the pointed-to storage is native or
 caller-owned.
 
@@ -132,15 +131,15 @@ campaign.
 
 Current proven shapes include:
 
-- Uniform method or function families in `lib/logger.x:733-738` and `775-780`
-  and in `lib/common.x:494-505`. Names and types vary; behavior does not.
+- Uniform method or function families in `lib/logger.x:739-744` and `755-760`
+  and in `lib/common.x:590-599`. Names and types vary; behavior does not.
 - Private pointer conversion pairs in `lib/var-adapters.xmacro`. The tagged
   form preserves `Var.new` and `Var.pointer`; the raw form preserves the
   direct `p64` store and load used by iterator callbacks.
-- The native adapter family in `lib/varops.x:72-86`. Each invocation supplies
+- The native adapter family in `lib/varops.x:55-68`. Each invocation supplies
   the facts that differ.
 - Local resource setup in `$match.machine` in `lib/match.x` and
-  `$match.lease` in `lib/match-cache.x`. The macro hides stack-storage
+  `$match.plan` in `lib/match-cache.x`. The macro hides stack-storage
   mechanics while release and fallback policy stay visible.
 - Test registration in `unittest/test-macros.xmacro:1`. The macro removes a
   mechanical name-to-registration conversion.
@@ -150,7 +149,8 @@ Current proven shapes include:
 
 `lib/map-generics.xmacro` also shows how to remove fake adapters without
 discarding real ones. Its generated families call ordinary `Scope`, `Bytes`,
-and `Block` operations through exact `x2c.ident` references; passing those
+and `Block` operations directly as `Scope_malloc` and sibling C entries.
+Passing those
 operations through one wrapper per consumer would add no policy or conversion.
 The Map boxing and pair-building adapters remain because their declared types
 are required at the `Var` crossings. A failed direct spelling is evidence
@@ -209,7 +209,7 @@ clearest possible ledger: the enum itself.
 
 Do not make a reader reverse-engineer public function names, C types, or
 failure modes from clever Lisp. The native update macro in
-`lib/varops.x:41` explicitly receives both the native type and public
+`lib/varops.x:25` explicitly receives both the native type and public
 function name at each invocation. That repetition is useful documentation at
 the call site.
 
@@ -431,8 +431,8 @@ Proof: the Map suite checks ordinary Map behavior,
 expand unwinding, and the `map-generator-family` compiler fixtures compare
 normal and live symbol collection on an internal family that also exercises
 the publication stage.
-The generator names allocation, `Scope`, and `Bytes` operations directly with
-`x2c.ident`. Map boxing and pair construction stay explicit because their
+The generator calls allocation, `Scope`, and `Bytes` C entries directly.
+Map boxing and pair construction stay explicit because their
 typed signatures select the required `Var` conversions.
 Limits or counterexample: key hashing, equality, value validity, record
 layout, boxing, and error policy remain visible inputs. Those are actual

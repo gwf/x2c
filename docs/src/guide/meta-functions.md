@@ -1006,12 +1006,12 @@ the macro is invoked, not only an expression:
 
 meta static List repeated(List code) => %(block $code $code);
 
-macro Stmt $twice(Stmt $code) => $repeated($code);
+macro Stmt $sample.twice(Stmt $code) => $repeated($code);
 
 int main(void) {
   int n = 0;
-  $twice(n += 2;);
-  $twice(if (n == 4) puts("four"););
+  $sample.twice(n += 2;);
+  $sample.twice(if (n == 4) puts("four"););
   printf("%d\n", n);
   return 0;
 }
@@ -1041,18 +1041,18 @@ program, using ordinary macro substitution, scope and binding rules.
 Expression macros retain their usual expansion behavior.
 
 ```x2c
-macro Unit $make_function(Name $name, Expr $result) {
+macro Unit $sample.make_function(Name $name, Expr $result) {
   int $name(void) { return $result; }
 }
 
 meta static List build_function(String name, int n) {
-  List node = $make_function(name, n * 2);
+  List node = $sample.make_function(name, n * 2);
   return %($node);
 }
 
-macro Unit $make_answer() { $build_function("answer", 21)... }
+macro Unit $sample.make_answer() { $build_function("answer", 21)... }
 
-$make_answer();
+$sample.make_answer();
 int main(void) {
   printf("%d\n", answer());
   return 0;
@@ -1078,30 +1078,30 @@ inserts the selected invocation into the function body:
 
 static int calls = 0;
 
-macro Stmt $counted(Stmt $body...) {
+macro Stmt $sample.counted(Stmt $body...) {
   calls++;
   $body...
 }
 
-macro Stmt $plain(Stmt $body...) {
+macro Stmt $sample.plain(Stmt $body...) {
   $body...
 }
 
 meta static List choose_body(List function) {
   List body = x2c_function_body(function);
   String name = x2c_function_name(function);
-  List node = name == "tracked" ? $counted(body) : $plain(body);
+  List node = name == "tracked" ? $sample.counted(body) : $sample.plain(body);
   return %($node);
 }
 
-macro Decorator $count_if_tracked(Function $function) {
+macro Decorator $sample.count_if_tracked(Function $function) {
   $choose_body($function)...
 }
 
-$count_if_tracked()
+$sample.count_if_tracked()
 static int tracked(void) { return 7; }
 
-$count_if_tracked()
+$sample.count_if_tracked()
 static int ordinary(void) { return 9; }
 
 int main(void) {
@@ -1155,13 +1155,13 @@ meta static List numbered(List subject, List arms) {
   return cases.list_free();
 }
 
-macro Stmt $choose(Expr $subject, Stmt $arms...) {
+macro Stmt $sample.choose(Expr $subject, Stmt $arms...) {
   $numbered($subject, $arms)...
 }
 
 int main(void) {
   int pick = 1;
-  $choose(pick, printf("zero\n");, printf("one\n");, printf("two\n"););
+  $sample.choose(pick, printf("zero\n");, printf("one\n");, printf("two\n"););
   return 0;
 }
 ```
@@ -1222,13 +1222,13 @@ meta static List scaled_call(List callee, List a, List b) {
   }) );
 }
 
-macro Expression $scaled(Expr $f, Expr $a, Expr $b) =>
+macro Expression $sample.scaled(Expr $f, Expr $a, Expr $b) =>
   $scaled_call($f, $a, $b);
 
 static int sum(int a, int b) => a + b;
 
 int main(void) {
-  printf("%d\n", $scaled(sum, 2, 5));
+  printf("%d\n", $sample.scaled(sum, 2, 5));
   return 0;
 }
 ```
@@ -1381,10 +1381,10 @@ meta static List sum_function(String name, int count) {
   List function = $!Unit{ double $name($declared...) { return $total; } };
   return %($function);
 }
-macro Unit $define_sum(Literal $name, Literal $count) {
+macro Unit $sample.define_sum(Literal $name, Literal $count) {
   $sum_function($name, $count)...
 }
-$define_sum("sum3", 3);   // sum3(1.0, 2.0, 3.5) is 6.5
+$sample.define_sum("sum3", 3);   // sum3(1.0, 2.0, 3.5) is 6.5
 ~
 ~int main(void) {
 ~  printf("%g\n", sum3(1.0, 2.0, 3.5));
@@ -1686,13 +1686,13 @@ that reads it during expansion, without a second copy of its rows:
 ```x2c
 meta static Map widths(void) => { %(char): 1, %(short): 2, %(int): 4 };
 
-macro Expression $width(Type $type) =>
+macro Expression $sample.width(Type $type) =>
   $(x2c.literal.int (Map.getindex (widths) $type));
 
 static Map table = $widths();
 
 int main(void) {
-  printf("%d %d\n", $width(short), table[%(int)].int());
+  printf("%d %d\n", $sample.width(short), table[%(int)].int());
   return 0;
 }
 ```

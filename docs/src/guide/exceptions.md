@@ -320,7 +320,6 @@ static void render(String text, int width) {
     char *line = Scope.malloc(width + 1);
     if (!text) {
       raise %(bad-arg (operation "render"));
-      return;
     }
     line[0] = 0;
   }

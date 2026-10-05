@@ -11,8 +11,11 @@ description: >-
 # Find x2c overengineering
 
 Find connected internal machinery whose removal may simplify the current
-program. Public APIs without in-tree callers are not evidence of waste. Treat
-mechanical scores as a queue, not a verdict.
+program. Apply PR-10 to public APIs and the standard's "Finding bad code"
+section to mechanical scores.
+
+Apply PR-2, PR-3, PR-4, PR-10, FA-7, and TE-2 in
+[the standard](../../x2c-code-standard.md) when judging a candidate.
 
 ## Start or resume the cumulative audit
 
@@ -62,21 +65,8 @@ region; do not preserve an old verdict across changed code without review.
 
 - Inspect only `src/**/*.x` and hand-authored `lib/**/*.x`; exclude
   `lib/x2c.x`, examples, packages, tools, tests, generated files, and modules.
-- Do not penalize a public API for having no repository consumer.
-- Do not treat an intentionally open or documented capability as waste because
-  current `src/` and `lib/` do not exercise it.
-- Reject an abstraction that owns a real semantic decision, even when it is
-  large, private, complicated, or reached through only one caller.
-- A test written for machinery is evidence of its behavior, not an independent
-  production requirement.
-- Prefer private duplicate facts, replay/reconciliation, registries, ledgers,
-  derived state, parallel analysis, and bookkeeping whose deletion removes a
-  connected mechanism.
-- Look specifically for layers of delegation: wrappers, routers, dispatchers,
-  adapters, callbacks, or coordinators that only pass the same values to the
-  next layer and own no policy, transformation, lifetime, failure handling, or
-  representation boundary. Count the whole forwarding chain, not each helper
-  as a separate candidate.
+- Apply PR-10 to public operations, PR-2 and PR-3 to duplicate owners,
+  and FA-7 to forwarding chains. Apply PR-4 and TE-2 to test evidence.
 - Separate direct session evidence from inference. Flag review becoming
   implementation, post-hoc plan expansion, and an edge case becoming an
   unbounded completeness obligation.

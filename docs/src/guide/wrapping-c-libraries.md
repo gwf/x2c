@@ -283,15 +283,15 @@ goes:
 ~struct Feed { feed_parser *native; };
 ~static void _feed_error(String operation, int code) { raise %(malformed (code $code)); }
 List Feed.titles(Feed feed) {
-  List titles = NULL;
+  Array titles = [];
   const char *title = NULL;
   unsigned long length = 0;
   int status;
 
   while ((status = feed_next(feed.native, &title, &length)) > 0)
-    titles = cons(String.new_len(title, (int) length), titles);
+    titles.push(String.new_len(title, (int) length));
   if (status < 0) _feed_error("next", status);
-  return titles.reverse();
+  return titles.list_free();
 }
 ```
 

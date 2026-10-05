@@ -58,11 +58,10 @@ numeric parsing. Its operations work on bytes, not Unicode characters.
 Use [Buffer](modules/buffer.md) for incremental text:
 
 ```x2c
-Buffer output = Buffer.new(0);
+Buffer output = $auto(Buffer.new(0));
 output.write("count=");
 output.printf("%d", 4);
 String text = output;
-output.free();
 printf("%s\n", text);
 ```
 
@@ -122,11 +121,11 @@ runtime matching functions when the patterns are themselves data.
 [Scope](modules/scope.md) groups runtime allocations:
 
 ```x2c
-Scope.retain();
-String text = "temporary";
-Array values = [text, 1, 2, 3];
-printf("%s\n", values.repr());
-Scope.release();
+$scope() {
+  String text = "temporary";
+  Array values = [text, 1, 2, 3];
+  printf("%s\n", values.repr());
+}
 ```
 
 Use [Block](modules/block.md) for fixed-width growable storage and `Buffer` for

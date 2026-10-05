@@ -130,12 +130,12 @@ A macro should replace repeated source with a call whose meaning is obvious:
 
 ```x2c
 ~
-macro Stmt $guard(Expr $condition) {
+macro Stmt $sample.guard(Expr $condition) {
   if (!$condition) return 0;
 }
 ~
 ~int positive(int value) {
-~  $guard(value > 0);
+~  $sample.guard(value > 0);
 ~  return value;
 ~}
 ```
@@ -175,10 +175,10 @@ statement itself:
 meta static List traced(List body) =>
   $!{ { puts("enter"); $body puts("leave"); } };
 
-macro Stmt $trace(Stmt $body) => $traced($body);
+macro Stmt $sample.trace(Stmt $body) => $traced($body);
 ~
 ~int main(void) {
-~  $trace(puts("work"););
+~  $sample.trace(puts("work"););
 ~  return 0;
 ~}
 ```

@@ -35,12 +35,11 @@ existing production and canonical AST operations.
 
 Fix the cause with the smallest coherent change that preserves surrounding
 behavior. Follow necessary work across modules; keep unrelated cleanup
-separate. Apply root compatibility and validation rules.
+separate. Apply PR-2, PR-3, PR-4, PR-10, and FA-7 in
+[the standard](../../x2c-code-standard.md).
 
-Add regression coverage for the observable defect in the existing suites or
-fixtures. Demonstrate that the reproduction and relevant regression checks
-fail against the unfixed code and pass with the repair. Use enough cases to
-cover distinct affected behavior; test count and patch size are not targets.
+Apply TE-2 in the standard through the existing suites or fixtures. Cover
+distinct affected behavior with meaningful regression checks.
 Prefer actual diagnostics and runtime behavior when those are what failed;
 inspect generated C or ABI details when they are the relevant behavior.
 

@@ -21,30 +21,14 @@ delivered source-family coverage and retained boundaries.
 
 ## The rules
 
-Each rule is a property a reviewer can check by reading the code.
+Apply MA-5 to MA-8 in [the standard](x2c-code-standard.md). A loop or a
+choice among C shapes can use a slot function or ordinary code around
+quotations, as MA-8 specifies.
 
-1. A lowering recognizes its input with a source-form macro or metafunction
-   from `src/grammar.xmacro` and builds its output with a template. Primitive
-   parsers produce canonical nodes; downstream source recognition shares
-   their grammar owner. Bound semantic facts and normalized backend forms
-   retain their documented stage-specific operations.
-2. Every loop and every choice among C shapes is in a slot function the
-   template calls, not in the client. A slot function takes the facts it
-   needs as arguments and applies one macro per element.
-3. A lowering function fits on a screen and makes one application.
-4. No `code-value` literal appears outside a producer. A typed expression
-   is bound already and passes to a hole as it is; lowered code is marked
-   by the operation that lowered it.
-5. Templates sit beside the lowering that applies them. Shared input forms
-   live in `src/grammar.xmacro`; native builtin producers keep their output
-   templates beside their scope, loop, and class algorithms.
-
-The callable-defer environment is a narrow exception to the second rule's
-slot placement: its producer supplies canonical `const void *` field rows to
-the adjacent typedef template. Binding a `Field` template separately before
-binding that typedef loses the member type in the transform tree. Keep these
-rows in the producer until a direct field projection retains the type fact;
-capture selection and type checking remain with the existing transform pass.
+The callable-defer producer supplies canonical `const void *` field rows
+to its adjacent typedef template. Binding a `Field` template separately
+loses the member type in the transform tree. Capture selection and type
+checking remain with the transform owner.
 
 ## Recognition
 
@@ -70,33 +54,31 @@ records the position for reports.
 
 ```x2c
     case caught(?body, ?finalizer, *arms):
-      return _lower_try(walk, node, body, arms, finalizer);
+      return w._lower_try(node, body, arms, finalizer);
     case tried(?body, ?finalizer):
-      return _lower_try(walk, node, body, NULL, finalizer);
+      return w._lower_try(node, body, NULL, finalizer);
 ```
 
 ## The lowering
 
-`_lower_try` reports a finalizer label, allocates the frame, lowers the
+`Walk._lower_try` reports a finalizer label, allocates the frame, lowers the
 exits and the body, and applies one template. `catch_handle` reads the
 handler the parser introduced, which no source form writes.
 
 ```x2c
 /* Lowers the parsed try `node`: its body, its catch arms, which may be
    NULL, and its finalizer, which may be NULL. */
-static List _lower_try(
-  Walk walk, List node, List body, List arms, List finalizer) {
-  Compiler c = walk.compiler;
-  _check_finalizer_label(walk, finalizer);
-  List frame = _region_binding(c, "exception_frame");
+static List Walk._lower_try(
+  Walk &w, List node, List body, List arms, List finalizer) {
+  Compiler c = w.c;
+  w._check_finalizer_label(finalizer);
+  List frame = c._region_binding("exception_frame");
   List handle = arms ? catch_handle(node) : NULL;
-  List cleanup = _try_cleanup(
-    frame, handle, _rewrite(walk, finalizer), !!arms);
-  List lowered = _try_region(walk, cleanup, body);
+  List cleanup = c._try_cleanup(frame, handle, w.rewrite(finalizer), !!arms);
+  List lowered = w._try_region(cleanup, body);
   Macro shape = $compiler_try;
   return c.bind_syntax(
-    shape(frame, _catch_clause(walk, handle, cleanup, arms), lowered,
-          cleanup),
+    shape(frame, w._catch_clause(handle, cleanup, arms), lowered, cleanup),
     AST_BLOCK, c.return_type);
 }
 ```
@@ -109,19 +91,19 @@ the templates are written from.
    or NULL for a try without catches. Each arm is its own region, which a
    jump from the body may not enter, and leaves `cleanup` on its exits. A
    pattern with a dynamic part is prepared again on each entry. */
-static List _catch_clause(
-  Walk walk, List handle, List cleanup, List records) {
+static List Walk._catch_clause(
+  Walk &w, List handle, List cleanup, List records) {
   if (!records) return NULL;
   String state = "ERROR_CATCH_PENDING";
   Array arms = [], patterns = [];
   foreach (List record, records) {
     List pattern = record.car();
     if (pattern) {
-      if (!walk.compiler.match_pattern_is_static(pattern))
+      if (!w.c.match_pattern_is_static(pattern))
         state = "ERROR_CATCH_TRANSIENT";
       patterns.push(pattern);
     }
-    arms.push(_try_region(walk, cleanup, record.cadr()));
+    arms.push(w._try_region(cleanup, record.cadr()));
   }
   return %($handle $state ${arms.list_free()} @{patterns.list_free()});
 }
