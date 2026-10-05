@@ -29,7 +29,7 @@ A NULL input or no parsed prerequisites returns NULL.
 Returned cells and path `String`s follow the current canonical `List` and
 `String` pool lifetimes.
 
-Source: `src/deps.x:124`
+Source: `src/deps.x:125`
 
 #### translation_depfile_write
 
