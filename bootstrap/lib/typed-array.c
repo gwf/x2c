@@ -1403,7 +1403,7 @@ _Noreturn static void _bad_index(String owner, int index, size_t size){
 _Noreturn static void _bad_operation(String owner, Symbol operation){
   {
     static const X2CErrorSite _x2c_error_site_45 = {.file = "../../lib/typed-array.x",.function = "_bad_operation",.line = 66};
-    x2c_error_raise_n(& _x2c_error_site_45, 4372499598, 2, Symbol_var(32993636), String_var(owner), Symbol_var(34096809266140), Symbol_var(operation));
+    x2c_error_raise_n(& _x2c_error_site_45, 4372499598, 2, Symbol_var(34096809266140), String_var(owner), Symbol_var(74730460), Symbol_var(operation));
     __builtin_unreachable();
   }
 

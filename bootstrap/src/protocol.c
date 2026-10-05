@@ -934,7 +934,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_0(void){
   _488 = String_var(_487);
   _489 = List_var(NULL);
   _490 = Symbol_var(106239471489226);
-  _491 = int_var(1868);
+  _491 = int_var(1871);
   _492 = String_new("");
   _493 = String_var(_492);
   _494 = String_new("x2c.hole");
@@ -1233,7 +1233,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_1(void){
   _784 = cons(_776, _783);
   _785 = cons(_770, _784);
   _786 = List_var(_785);
-  _787 = int_var(1933);
+  _787 = int_var(1936);
   _788 = Symbol_var(1544849476362);
   _789 = List_var(_145);
   _790 = cons(_789, NULL);
@@ -1332,7 +1332,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_1(void){
   _883 = cons(_776, _882);
   _884 = cons(_770, _883);
   _885 = List_var(_884);
-  _886 = int_var(1940);
+  _886 = int_var(1943);
   _887 = cons(_809, NULL);
   _888 = cons(_839, _876);
   _889 = cons(_594, _888);
@@ -1937,11 +1937,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void){
   _1485 = cons(_1484, NULL);
   _1486 = cons(_701, _1485);
   _1487 = List_var(_1486);
-  _1488 = int_var(2306);
+  _1488 = int_var(2309);
   _1489 = cons(_1488, NULL);
   _1490 = cons(_707, _1489);
   _1491 = List_var(_1490);
-  _1492 = int_var(84489);
+  _1492 = int_var(84699);
   _1493 = cons(_1492, NULL);
   _1494 = cons(_720, _1493);
   _1495 = List_var(_1494);
@@ -2018,11 +2018,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_3(void){
   _1563 = cons(_1562, NULL);
   _1564 = cons(_671, _1563);
   _1565 = List_var(_1564);
-  _1566 = int_var(2433);
+  _1566 = int_var(2436);
   _1567 = cons(_1566, NULL);
   _1568 = cons(_707, _1567);
   _1569 = List_var(_1568);
-  _1570 = int_var(89469);
+  _1570 = int_var(89679);
   _1571 = cons(_1570, NULL);
   _1572 = cons(_720, _1571);
   _1573 = List_var(_1572);

@@ -2791,11 +2791,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2174 = cons(_2173, NULL);
   _2175 = cons(_252, _2174);
   _2176 = List_var(_2175);
-  _2177 = int_var(2073);
+  _2177 = int_var(2072);
   _2178 = cons(_2177, NULL);
   _2179 = cons(_258, _2178);
   _2180 = List_var(_2179);
-  _2181 = int_var(78119);
+  _2181 = int_var(78113);
   _2182 = cons(_2181, NULL);
   _2183 = cons(_271, _2182);
   _2184 = List_var(_2183);
@@ -2986,11 +2986,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2369 = cons(_2368, NULL);
   _2370 = cons(_218, _2369);
   _2371 = List_var(_2370);
-  _2372 = int_var(2081);
+  _2372 = int_var(2080);
   _2373 = cons(_2372, NULL);
   _2374 = cons(_258, _2373);
   _2375 = List_var(_2374);
-  _2376 = int_var(78474);
+  _2376 = int_var(78468);
   _2377 = cons(_2376, NULL);
   _2378 = cons(_271, _2377);
   _2379 = List_var(_2378);
@@ -3103,11 +3103,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2486 = cons(_2485, NULL);
   _2487 = cons(_218, _2486);
   _2488 = List_var(_2487);
-  _2489 = int_var(2092);
+  _2489 = int_var(2091);
   _2490 = cons(_2489, NULL);
   _2491 = cons(_258, _2490);
   _2492 = List_var(_2491);
-  _2493 = int_var(78879);
+  _2493 = int_var(78873);
   _2494 = cons(_2493, NULL);
   _2495 = cons(_271, _2494);
   _2496 = List_var(_2495);
@@ -3204,11 +3204,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_5(void){
   _2584 = cons(_2583, NULL);
   _2585 = cons(_218, _2584);
   _2586 = List_var(_2585);
-  _2587 = int_var(2094);
+  _2587 = int_var(2093);
   _2588 = cons(_2587, NULL);
   _2589 = cons(_258, _2588);
   _2590 = List_var(_2589);
-  _2591 = int_var(78954);
+  _2591 = int_var(78948);
   _2592 = cons(_2591, NULL);
   _2593 = cons(_271, _2592);
   _2594 = List_var(_2593);
@@ -3296,11 +3296,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_5(void){
   _2676 = cons(_2675, NULL);
   _2677 = cons(_218, _2676);
   _2678 = List_var(_2677);
-  _2679 = int_var(2098);
+  _2679 = int_var(2097);
   _2680 = cons(_2679, NULL);
   _2681 = cons(_258, _2680);
   _2682 = List_var(_2681);
-  _2683 = int_var(79154);
+  _2683 = int_var(79148);
   _2684 = cons(_2683, NULL);
   _2685 = cons(_271, _2684);
   _2686 = List_var(_2685);
@@ -3507,11 +3507,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_5(void){
   _2887 = List_var(_2886);
   _2888 = cons(_218, _100);
   _2889 = List_var(_2888);
-  _2890 = int_var(2147);
+  _2890 = int_var(2146);
   _2891 = cons(_2890, NULL);
   _2892 = cons(_258, _2891);
   _2893 = List_var(_2892);
-  _2894 = int_var(81276);
+  _2894 = int_var(81270);
   _2895 = cons(_2894, NULL);
   _2896 = cons(_271, _2895);
   _2897 = List_var(_2896);
@@ -4689,10 +4689,7 @@ String List_str(List);
 String Symbol_str(Symbol);
 static List Compiler__parse_field_name(Compiler c, Symbol op_sym, List lhs_opt){
   Compiler_require_input(c);  List slot = Compiler_try_parse_macro_member(c);  if(List_truth(slot)) return cons(List_var(slot), NULL);  String field_name = c -> token -> text;  if(! String_truth(field_name) || ! String_is_identifier(field_name)){
-    {
-      List _x2c_macro_notes_0 = cons(_781, cons(String_var(c -> token -> text), NULL));  if(List_truth(lhs_opt)) _x2c_macro_notes_0 = cons(List_var(cons(_783, cons(String_var(List_str(lhs_opt)), NULL))), _x2c_macro_notes_0);  String _x2c_macro_msg_0 = String_join(NULL, cons(String_var(_784), cons(String_var(Symbol_str(op_sym)), cons(String_var(_785), NULL))));  Compiler_report_error(c, 33658058, _x2c_macro_msg_0, c -> token, _x2c_macro_notes_0);
-    }
-
+    List _x2c_macro_notes_0 = cons(_781, cons(String_var(c -> token -> text), NULL));  if(List_truth(lhs_opt)) _x2c_macro_notes_0 = cons(List_var(cons(_783, cons(String_var(List_str(lhs_opt)), NULL))), _x2c_macro_notes_0);  String _x2c_macro_msg_0 = String_join(NULL, cons(String_var(_784), cons(String_var(Symbol_str(op_sym)), cons(String_var(_785), NULL))));  Compiler_report_error(c, 33658058, _x2c_macro_msg_0, c -> token, _x2c_macro_notes_0);
   }
   List field = cons(String_var(field_name), NULL);  Compiler_next(c);  return field;
 }
@@ -6615,10 +6612,7 @@ static List Compiler__constant_row_test(Compiler c, List lhs, Symbol tag, Token 
 
 Symbol Compiler_require_var_tag(Compiler c, Type target, Token origin){
   if(! _init_guard_) _file_init_();  Type resolved = NULL;  Symbol vartag = Sym_var_tag_for_type(c -> sym, target, &(resolved));  if(List_truth(Type_list(resolved)) && Type_is_enum(resolved)){
-    {
-      String _x2c_macro_note_0 = _3057;  Compiler_report_error(c, 1362954, String_join(NULL, cons(String_var(_3058), cons(String_var(List_repr(Type_list(target))), cons(String_var(_3059), NULL)))), origin, cons(String_var(_x2c_macro_note_0), NULL));
-    }
-
+    String _x2c_macro_note_0 = _3057;  Compiler_report_error(c, 1362954, String_join(NULL, cons(String_var(_3058), cons(String_var(List_repr(Type_list(target))), cons(String_var(_3059), NULL)))), origin, cons(String_var(_x2c_macro_note_0), NULL));
   }
   if(! vartag) Compiler_report_error(c, 1362954, String_join(NULL, cons(String_var(_1671), cons(String_var(List_repr(Type_list(target))), cons(String_var(_3060), NULL)))), origin, NULL);  return vartag;
 }
@@ -7542,22 +7536,16 @@ static void Compiler__check_object_pointer(Compiler c, Type type, Type target, i
 
 static void Compiler__check_native_crossing(Compiler c, List expr, Type type, Type target, Type declared_source, Type declared_target){
   String integer = Compiler__not_null_pointer_constant(c, expr);  if(String_truth(integer) && Type_is_pointer(Sym_resolve_key(c -> sym, target))){
-    {
-      String _x2c_macro_message_6 =({
-        Var _x2c_literal_part_221 = String_var(integer);  Var _x2c_literal_part_222 = String_var(List_repr(Type_list(target)));  String_join(NULL, cons(String_var(_3519), cons(_x2c_literal_part_221, cons(String_var(_3520), cons(_x2c_literal_part_222, NULL)))));
-      }
-      );  List _x2c_macro_hint_2 = _3523;  Compiler_report_error(c, 1362954, _x2c_macro_message_6, NULL, _x2c_macro_hint_2);
+    String _x2c_macro_message_6 =({
+      Var _x2c_literal_part_221 = String_var(integer);  Var _x2c_literal_part_222 = String_var(List_repr(Type_list(target)));  String_join(NULL, cons(String_var(_3519), cons(_x2c_literal_part_221, cons(String_var(_3520), cons(_x2c_literal_part_222, NULL)))));
     }
-
+    );  List _x2c_macro_hint_2 = _3523;  Compiler_report_error(c, 1362954, _x2c_macro_message_6, NULL, _x2c_macro_hint_2);
   }
   if(Compiler__unrelated_pointers(c, type, target)){
-    {
-      String _x2c_macro_message_7 =({
-        Var _x2c_literal_part_223 = String_var(List_repr(Type_list(declared_source)));  Var _x2c_literal_part_224 = String_var(List_repr(Type_list(declared_target)));  String_join(NULL, cons(String_var(_3476), cons(_x2c_literal_part_223, cons(String_var(_3507), cons(_x2c_literal_part_224, NULL)))));
-      }
-      );  Compiler_report_error(c, 1362954, _x2c_macro_message_7, NULL, _3526);
+    String _x2c_macro_message_7 =({
+      Var _x2c_literal_part_223 = String_var(List_repr(Type_list(declared_source)));  Var _x2c_literal_part_224 = String_var(List_repr(Type_list(declared_target)));  String_join(NULL, cons(String_var(_3476), cons(_x2c_literal_part_223, cons(String_var(_3507), cons(_x2c_literal_part_224, NULL)))));
     }
-
+    );  Compiler_report_error(c, 1362954, _x2c_macro_message_7, NULL, _3526);
   }
   if(Type_is_bare_typedef_name(declared_source) && Type_is_bare_typedef_name(declared_target) && ! List_equal(Type_list(declared_source), Type_list(declared_target)) && Type_is_pointer(Sym_resolve_key(c -> sym, declared_target)) && Type_base_type(Sym_resolve_key(c -> sym, declared_source)) != _475 && ! Array_contains(Compiler__typedef_names(c, declared_source), List_var(declared_target)) && ! Array_contains(Compiler__typedef_names(c, declared_target), List_var(declared_source))){
     {

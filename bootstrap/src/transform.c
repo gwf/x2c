@@ -4945,10 +4945,7 @@ static List _symbol_expression(Symbol value){
 static List Compiler__assignment(Compiler c, Symbol op, List lhs, List rhs){
   if(List_truth(({ static MatchCaptureSite _x2c_match_site_61;  x2c_match_site_match(& _x2c_match_site_61, lhs, List_var(_2536)); }))) Compiler_report_error(c, 50756762, _2537, NULL, _2540);  List base, index;  Type base_type;  if(_resolved_index_parts(lhs, &(base), &(base_type), &(index))){
     if(Sym_is_string_type(c -> sym, base_type)){
-      {
-        String _x2c_macro_note_0 = _2541;  Compiler_report_error(c, 50756762, _2542, NULL, cons(String_var(_x2c_macro_note_0), NULL));
-      }
-
+      String _x2c_macro_note_0 = _2541;  Compiler_report_error(c, 50756762, _2542, NULL, cons(String_var(_x2c_macro_note_0), NULL));
     }
     if(! List_truth(Compiler_resolve_protocol_member(c, base_type, _123))) Compiler_report_error(c, 50756762, String_join(NULL, cons(String_var(_121), cons(String_var(List_str(base_type)), cons(String_var(_124), NULL)))), NULL, _2545);  return cons(_50, cons(List_var(base), cons(List_var(index), cons(List_var(rhs), NULL))));
   }
@@ -5041,10 +5038,7 @@ static List Compiler__dynamic_binary(Compiler c, List ast, Symbol op, List lhs, 
 #ifndef X2C_TRANSFORM_SOURCE
 static List Compiler__dynamic_compound(Compiler c, List ast, Symbol op, List lhs, Type lhs_type, List rhs, Type rhs_type){
   int lhs_is_var = Sym_is_var_type(c -> sym, lhs_type);  int rhs_is_var = Sym_is_var_type(c -> sym, rhs_type);  if(Compiler__indexed_builtin_helper(c, lhs_type)){
-    {
-      String _x2c_macro_type_0 = List_repr(Type_list(lhs_type));  Compiler_report_error(c, 50756762, String_join(NULL, cons(String_var(_2602), cons(String_var(_x2c_macro_type_0), cons(String_var(_2603), NULL)))), NULL, _2606);
-    }
-
+    String _x2c_macro_type_0 = List_repr(Type_list(lhs_type));  Compiler_report_error(c, 50756762, String_join(NULL, cons(String_var(_2602), cons(String_var(_x2c_macro_type_0), cons(String_var(_2603), NULL)))), NULL, _2606);
   }
   Type member_type = lhs_type;  if(Sym_is_string_type(c -> sym, lhs_type)){
     if(op != 56 || ! Compiler__string_operand(c, rhs_type)) Compiler_report_error(c, 50756762, _2607, NULL, NULL);  member_type = List_type(_708);
@@ -5060,10 +5054,7 @@ static List Compiler__dynamic_compound(Compiler c, List ast, Symbol op, List lhs
 int Type_is_bitfield(Type);
 static void Compiler__dynamic_rhs(Compiler c, Symbol op, Type lhs_type, Type rhs_type, int rhs_is_var){
   if(Type_is_bitfield(lhs_type)) Compiler_report_error(c, 50756762, _2608, NULL, NULL);  if(! rhs_is_var && ! Compiler__scalar_operand(c, op, rhs_type)){
-    {
-      String _x2c_macro_details_1 = String_join(NULL, cons(String_var(_2609), cons(String_var(List_repr(Type_list(rhs_type))), NULL)));  Compiler_report_error(c, 50756762, op == 56 ? _2610 : _2611, NULL, cons(String_var(_x2c_macro_details_1), NULL));
-    }
-
+    String _x2c_macro_details_1 = String_join(NULL, cons(String_var(_2609), cons(String_var(List_repr(Type_list(rhs_type))), NULL)));  Compiler_report_error(c, 50756762, op == 56 ? _2610 : _2611, NULL, cons(String_var(_x2c_macro_details_1), NULL));
   }
 
 }
@@ -5080,10 +5071,7 @@ int Type_is_enum(Type);
 String Type_var_numeric_update_helper(Type);
 static String Compiler__dynamic_helper(Compiler c, Type lhs_type){
   Type scalar = Sym_resolve_numeric_type(c -> sym, lhs_type);  if(List_truth(Type_list(scalar)) && Type_is_enum(scalar)) Compiler_report_error(c, 50756762, _2612, NULL, NULL);  String helper = List_truth(Type_list(scalar)) ? Type_var_numeric_update_helper(scalar) : NULL;  if(! String_truth(helper)){
-    {
-      String _x2c_macro_details_2 = String_join(NULL, cons(String_var(_2613), cons(String_var(List_repr(Type_list(lhs_type))), NULL)));  Compiler_report_error(c, 50756762, _2614, NULL, cons(String_var(_x2c_macro_details_2), NULL));
-    }
-
+    String _x2c_macro_details_2 = String_join(NULL, cons(String_var(_2613), cons(String_var(List_repr(Type_list(lhs_type))), NULL)));  Compiler_report_error(c, 50756762, _2614, NULL, cons(String_var(_x2c_macro_details_2), NULL));
   }
   return helper;
 }
@@ -5108,10 +5096,7 @@ static List Compiler__indexed_change(Compiler c, List target, Symbol op, List rh
 #ifndef X2C_TRANSFORM_SOURCE
 static List Compiler__indexed_resolution(Compiler c, Type base_type, Symbol owner, Symbol op, List rhs){
   int postfix = ! List_truth(rhs);  List resolved = Compiler_resolve_protocol_member(c, base_type, postfix ? _2619 : _2620);  if(! List_truth(resolved)){
-    {
-      String _x2c_macro_type_1 = List_repr(Type_list(base_type));  String _x2c_macro_message_0 = postfix ? String_join(NULL, cons(String_var(_121), cons(String_var(_x2c_macro_type_1), cons(String_var(_2621), NULL)))) : String_join(NULL, cons(String_var(_121), cons(String_var(_x2c_macro_type_1), cons(String_var(_2622), NULL))));  Compiler_report_error(c, 50756762, _x2c_macro_message_0, NULL, NULL);
-    }
-
+    String _x2c_macro_type_1 = List_repr(Type_list(base_type));  String _x2c_macro_message_0 = postfix ? String_join(NULL, cons(String_var(_121), cons(String_var(_x2c_macro_type_1), cons(String_var(_2621), NULL)))) : String_join(NULL, cons(String_var(_121), cons(String_var(_x2c_macro_type_1), cons(String_var(_2622), NULL))));  Compiler_report_error(c, 50756762, _x2c_macro_message_0, NULL, NULL);
   }
   if(owner && ! postfix){
     Type rhs_type = Var_type(List_cadr(rhs));  if(! Sym_is_var_type(c -> sym, rhs_type) && ! Compiler__scalar_operand(c, op, rhs_type)){

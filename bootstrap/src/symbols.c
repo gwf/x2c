@@ -844,10 +844,7 @@ static String _declared_spelling(List key){
 
 void Compiler_report_error(Compiler, Symbol, String, Token, List);
 static void Compiler__check_spelling(Compiler c, String spelling){
-  if(! c -> shallow && _is_reserved_spelling(spelling)){
-    Compiler_report_error(c, 33658058, String_join(NULL, cons(String_var(_71), cons(String_var(spelling), cons(String_var(_72), NULL)))), c -> token, NULL);
-  }
-  String owner = Compiler__package_reserved_owner(c, spelling);  if(String_truth(owner)) Compiler_report_error(c, 33658058, String_join(NULL, cons(String_var(_71), cons(String_var(spelling), cons(String_var(_73), cons(String_var(owner), cons(String_var(_71), NULL)))))), c -> token, NULL);
+  if(! c -> shallow && _is_reserved_spelling(spelling)) Compiler_report_error(c, 33658058, String_join(NULL, cons(String_var(_71), cons(String_var(spelling), cons(String_var(_72), NULL)))), c -> token, NULL);  String owner = Compiler__package_reserved_owner(c, spelling);  if(String_truth(owner)) Compiler_report_error(c, 33658058, String_join(NULL, cons(String_var(_71), cons(String_var(spelling), cons(String_var(_73), cons(String_var(owner), cons(String_var(_71), NULL)))))), c -> token, NULL);
 }
 
 int String_startswith(String, String);

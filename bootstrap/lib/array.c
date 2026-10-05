@@ -398,7 +398,7 @@ _Noreturn static void _bad_operation(String owner, Symbol operation){
     Var _x2c_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("Array")), NULL)));
     {
       static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/array.x",.function = "_bad_operation",.line = 61};
-      x2c_error_raise_n(& _x2c_error_site_2, 4372499598, 2, Symbol_var(32993636), _x2c_literal_part_0, Symbol_var(34096809266140), Symbol_var(operation));
+      x2c_error_raise_n(& _x2c_error_site_2, 4372499598, 2, Symbol_var(34096809266140), _x2c_literal_part_0, Symbol_var(74730460), Symbol_var(operation));
       __builtin_unreachable();
     }
 

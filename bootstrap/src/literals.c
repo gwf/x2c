@@ -752,12 +752,9 @@ List Compiler_parse_variable(Compiler);
 static List Compiler__parse_named_reference(Compiler c, Symbol sigil){
   Compiler_expect(c, sigil);
   if(Compiler_peek(c, 0) != 19147688){
-    {
-      String _x2c_macro_message_0 = String_join(NULL, cons(String_var(_62), cons(String_var(Symbol_str(sigil)), cons(String_var(_63), NULL))));
-      String _x2c_macro_hint_0 = sigil == 129 ? _64 : _65;
-      Compiler_report_error(c, 33658058, _x2c_macro_message_0, c -> token, cons(String_var(_x2c_macro_hint_0), NULL));
-    }
-
+    String _x2c_macro_message_0 = String_join(NULL, cons(String_var(_62), cons(String_var(Symbol_str(sigil)), cons(String_var(_63), NULL))));
+    String _x2c_macro_hint_0 = sigil == 129 ? _64 : _65;
+    Compiler_report_error(c, 33658058, _x2c_macro_message_0, c -> token, cons(String_var(_x2c_macro_hint_0), NULL));
   }
   return Compiler_parse_variable(c);
 }

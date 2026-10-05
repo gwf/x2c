@@ -3175,10 +3175,7 @@ void Compiler_next(Compiler c){
 Var Array_take_last(Array);
 static void Compiler__update_brace_stack(Compiler c, Token consumed){
   if(! consumed) return;  switch(consumed -> type){
-    case 247 : case 9719 : case 9463 : case 16631 : Array_push(c -> braces, Token_var(consumed));  break;  case 251 : if(Array_len(c -> braces)) Array_take_last(c -> braces);  else{
-      Compiler_report_error(c, 33658058, _498, consumed, _501);
-    }
-    break;
+    case 247 : case 9719 : case 9463 : case 16631 : Array_push(c -> braces, Token_var(consumed));  break;  case 251 : if(Array_len(c -> braces)) Array_take_last(c -> braces);  else Compiler_report_error(c, 33658058, _498, consumed, _501);  break;
   }
 
 }
@@ -3226,7 +3223,7 @@ int Compiler_at_completion(Compiler c){
 
 void Compiler___complete_here(Compiler c, Symbol role, List keywords){
   if(! _init_guard_) _file_init_();  if(! Compiler_at_completion(c)) return;  List rows = Sym_visible_symbols(c -> sym); {
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../src/compiler.x",.function = "Compiler___complete_here",.line = 1946};  x2c_error_raise_n(& _x2c_error_site_2, 1248787135328, 3, Symbol_var(740232), Symbol_var(role), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(keywords));
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../src/compiler.x",.function = "Compiler___complete_here",.line = 1945};  x2c_error_raise_n(& _x2c_error_site_2, 1248787135328, 3, Symbol_var(740232), Symbol_var(role), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(keywords));
   }
 
 }
