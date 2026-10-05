@@ -4602,7 +4602,7 @@ int binding_identity_try_parts(List, int *, String *);
 void Compiler_check_explicit_converter(Compiler, List, Type, int);
 static List Compiler__initialized(Compiler c, List type, List bind, Token origin){
   List binding = Var_list(List_cadr(bind));  if(binding_identity_try_parts(binding, NULL, NULL)){
-    Token tokens = c -> tokenizer -> tokens;  Map_setindex(c -> init_tokens, List_var(binding), int_var(origin - tokens));
+    Token tokens = c -> tokenizer -> tokens;  Map_setindex(c -> init_tokens, List_var(binding), Var_box_long(origin - tokens));
   }
   if(c -> shallow){
     Compiler__skip_shallow_expression(c, 1);  return bind;

@@ -8,6 +8,29 @@ import { x2cDarkTheme, x2cLang } from "../shiki-x2c.mjs";
 
 const slides = new URL("../src/content/slides/", import.meta.url);
 
+test("recognizes quotation sigils and kinds in the shared grammar", async () => {
+  const highlighter = await createHighlighter({
+    themes: [x2cDarkTheme],
+    langs: [x2cLang]
+  });
+  for (const body of ["Type{ int * }", "Param{ int $name }",
+    "Unit{ int $name; }", "int{ $value }", "(int){ $value }",
+    "( $value + 1 )", "{ return $value; }"]) {
+    const result = highlighter.codeToTokens(`List code = $!${body};`, {
+      lang: "x2c", theme: x2cDarkTheme.name, includeExplanation: true
+    });
+    const parts = result.tokens[0].flatMap((token) => token.explanation);
+    assert.ok(parts.some((part) => part.content === "$!" &&
+      part.scopes.some(({ scopeName }) =>
+        scopeName === "punctuation.definition.macro.sigil.x2c")), body);
+    const kind = body.match(/^(Type|Param|Unit)\b/)?.[1];
+    if (kind) assert.ok(parts.some((part) => part.content === kind &&
+      part.scopes.some(({ scopeName }) =>
+        scopeName === "storage.type.macro.result.x2c")), body);
+  }
+  highlighter.dispose();
+});
+
 function sourceCode(name) {
   const markdown = readFileSync(new URL(name, slides), "utf8");
   return markdown.match(/```x2c(?:,ignore)?\n([\s\S]*?)\n```/)?.[1];

@@ -75,14 +75,17 @@ test("a kept macro declaration retains its included source definition", async (t
   assert.ok(result.definition);
   assert.equal(path.basename(result.definition.file), "kept.x");
   assert.equal(result.definition.start, byteOffset(included, included.indexOf("supplied")));
-  // Collection intentionally skips local Unit expansions without protocol
-  // rows. Such a forward spelling has no declaration location to invent.
-  service.update(header, macro + "$keep(int supplied);\n", 2);
-  const skipped = await service.analyze(file, "definition", byteOffset(text, text.indexOf("supplied")));
-  assert.equal(skipped.error, undefined);
-  assert.equal(skipped.definition, undefined);
-  const unknown = await service.analyze(file, "hover", byteOffset(text, text.indexOf("supplied")));
-  assert.equal(unknown.hover, undefined);
+  // File-defined Unit macros also contribute declarations when collection
+  // can expand them, even without protocol rows.
+  const fileDefined = macro + "$keep(int supplied);\n";
+  service.update(header, fileDefined, 2);
+  const collected = await service.analyze(file, "definition", byteOffset(text, text.indexOf("supplied")));
+  assert.equal(collected.error, undefined);
+  assert.equal(path.basename(collected.definition.file), "kept.x");
+  assert.equal(collected.definition.start,
+    byteOffset(fileDefined, fileDefined.indexOf("supplied")));
+  const hover = await service.analyze(file, "hover", byteOffset(text, text.indexOf("supplied")));
+  assert.match(hover.hover.text, /int\s+supplied/);
 });
 
 test("a discarded macro declaration cannot navigate to a later reused binding", async (t) => {

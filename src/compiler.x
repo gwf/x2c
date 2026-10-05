@@ -87,8 +87,8 @@ typedef struct Compiler {
      from, as `(position text-line file line)` rows; NULL otherwise. */
   Array line_markers;
   List return_type, include_dirs;
-  // Canonical dependency path -> content hash for compile-time text reads,
-  // or 1 for dependencies whose contents are not embedded in generated C.
+  // File paths map to content hashes or 1 when text is not embedded.
+  // Include-search candidates map to absence or their resolved identity.
   Map deps;
   List aggregate_type, macro_stack, declaration_effects, Sym sym;
   /* The last frozen `macro_stack`, reused while that List and every pool

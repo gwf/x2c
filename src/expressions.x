@@ -368,9 +368,9 @@ static void Compiler._warn_unnecessary_cast(
 
 /* Whether C gives an operand the type x2c records. A character constant is
    `int` in C; `sizeof`, `offsetof`, and a pointer difference have `size_t`
-   and `ptrdiff_t` identities x2c does not model; an enum's compatible
-   integer type is implementation-defined; and C compilers type a bitfield
-   differently. */
+   and `ptrdiff_t` identities selected by the native toolchain; an enum's
+   compatible integer type is implementation-defined; C compilers type a
+   bitfield differently. */
 static int Compiler._c_type_known(Compiler c, List operand) {
   match (operand) {
     case %(expr ? ${$grouped(?inner)}):
@@ -419,7 +419,7 @@ static List Compiler._parse_sizeof(Compiler c) {
     c.expect(<)>);
     arg = %(parens $arg);
   }
-  return %(expr (unsigned) (sizeof $arg));
+  return %(expr ("size_t") (sizeof $arg));
 }
 
 /* `offsetof` names its member with a C member designator: a field, then
@@ -440,7 +440,7 @@ static List Compiler._parse_offsetof(Compiler c) {
     else break;
   }
   c.expect(<)>);
-  return %(expr (unsigned) (offsetof $type $member));
+  return %(expr ("size_t") (offsetof $type $member));
 }
 
 // postfix operators
@@ -2550,7 +2550,7 @@ static List Compiler._binary_op_type_addsub(
   }
   else if (c.sym.resolve_key(ltype).is_pointer()) {
     if (rscalar)        return ltype;
-    else if (rpointer)  return %(int);
+    else if (rpointer) return op == <-> ? %("ptrdiff_t") : %(int);
   }
   return NULL;
 }

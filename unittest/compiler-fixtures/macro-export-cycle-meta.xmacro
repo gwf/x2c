@@ -1,0 +1,1 @@
+meta static int cycle_two(void) => 2;

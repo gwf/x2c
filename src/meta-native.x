@@ -718,6 +718,10 @@ static Map _linked_module(void) {
   if (!Compiler.native_module_loaded(linked_supplier)) {
     Compiler.add_native_module(linked_supplier, linked_meta_targets);
     $scope(&native_module_scope) linked_hashes = linked_meta_hashes();
+    foreach (Var (name, row), linked_hashes) {
+      name.string().try_own();
+      row.list().try_own();
+    }
   }
   return native_modules[linked_supplier];
 }

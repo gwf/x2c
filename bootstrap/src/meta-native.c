@@ -1694,6 +1694,8 @@ void Compiler_add_native_module(String path, Map(* entry)(void));
 Map linked_meta_targets(void);
 void Scope_push(Scope *);
 Map linked_meta_hashes(void);
+int String_try_own(String);
+int List_try_own(List);
 static Map _linked_module(void){
   if(! Compiler_native_module_loaded(linked_supplier)){
     Compiler_add_native_module(linked_supplier, linked_meta_targets); {
@@ -1706,6 +1708,15 @@ static Map _linked_module(void){
             linked_hashes = linked_meta_hashes();
           }
           x2c_cleanup_leave(& _x2c_defer_record_1);
+        }
+
+      }
+
+    }
+    {
+      Var name, row;  Map _x2c_macro_object_15 = linked_hashes;  unsigned _x2c_macro_cursor_15 = 0;  Var _x2c_macro_cursor_output_19;  Var _x2c_macro_cursor_output_20;  while(Map_try_next(_x2c_macro_object_15, &(_x2c_macro_cursor_15), &(_x2c_macro_cursor_output_19), &(_x2c_macro_cursor_output_20))){
+        name = _x2c_macro_cursor_output_19;  row = _x2c_macro_cursor_output_20; {
+          String_try_own(Var_string(name));  List_try_own(Var_list(row));
         }
 
       }
@@ -1728,8 +1739,8 @@ static int Compiler__linked_texts_match(Compiler c, String name, Map linked, Map
     List row = Var_list(hash);  hash = List_car(row);  names = List_cadr(row);  if(! Var_equal(hash, own)) return 0;
   }
   else if(!(Map_contains(linked, String_var(name))) && !(Map_contains(c -> native_meta, String_var(name)))) return 0;  Map_try_get(c -> meta_calls, String_var(name), &(names));  if(Var_is_row(names, 9, 7, 4)){
-    String callee;  List _x2c_macro_object_15 = Var_list(names);  List _x2c_macro_cursor_15 = _x2c_macro_object_15;  Var _x2c_macro_cursor_output_19;  while(List_try_next(_x2c_macro_object_15, &(_x2c_macro_cursor_15), &(_x2c_macro_cursor_output_19))){
-      callee = Var_string(_x2c_macro_cursor_output_19);  if(! Compiler__linked_texts_match(c, callee, linked, reached)) return 0;
+    String callee;  List _x2c_macro_object_16 = Var_list(names);  List _x2c_macro_cursor_16 = _x2c_macro_object_16;  Var _x2c_macro_cursor_output_21;  while(List_try_next(_x2c_macro_object_16, &(_x2c_macro_cursor_16), &(_x2c_macro_cursor_output_21))){
+      callee = Var_string(_x2c_macro_cursor_output_21);  if(! Compiler__linked_texts_match(c, callee, linked, reached)) return 0;
     }
 
   }
@@ -1750,7 +1761,6 @@ static void _load_compiler_module(void){
   if(! Compiler_native_module_loaded(compiler_supplier)) Compiler_add_native_module(compiler_supplier, _compiler_targets);
 }
 
-int List_try_own(List);
 void Compiler_select_native_modules(List paths){
   if(! _init_guard_) _file_init_();  _load_compiler_module();  Array linked = Array_new();  for(struct _Extension * e = extensions;  e;  e = e -> next){
     String key = String_join(NULL, cons(String_var(_412), cons(String_var(String_new(e -> name)), cons(String_var(_183), NULL))));  if(! Compiler_native_module_loaded(key)) Compiler_add_native_module(key, e -> targets);  Array_push(linked, String_var(key));
@@ -1844,7 +1854,6 @@ static void _open_native_module(String path){
 
 void Scope_shutdown_hook(void(*)(void));
 Var Map_var(Map);
-int String_try_own(String);
 void Compiler_add_native_module(String path, Map(* entry)(void)){
   if(! _init_guard_) _file_init_();  Map targets = NULL; {
     Scope_push(& native_module_scope); {
@@ -1868,8 +1877,8 @@ void Compiler_add_native_module(String path, Map(* entry)(void)){
 
   }
   String_try_own(path); {
-    Var name, target;  Map _x2c_macro_object_16 = targets;  unsigned _x2c_macro_cursor_16 = 0;  Var _x2c_macro_cursor_output_20;  Var _x2c_macro_cursor_output_21;  while(Map_try_next(_x2c_macro_object_16, &(_x2c_macro_cursor_16), &(_x2c_macro_cursor_output_20), &(_x2c_macro_cursor_output_21))){
-      name = _x2c_macro_cursor_output_20;  target = _x2c_macro_cursor_output_21; {
+    Var name, target;  Map _x2c_macro_object_17 = targets;  unsigned _x2c_macro_cursor_17 = 0;  Var _x2c_macro_cursor_output_22;  Var _x2c_macro_cursor_output_23;  while(Map_try_next(_x2c_macro_object_17, &(_x2c_macro_cursor_17), &(_x2c_macro_cursor_output_22), &(_x2c_macro_cursor_output_23))){
+      name = _x2c_macro_cursor_output_22;  target = _x2c_macro_cursor_output_23; {
         String_try_own(Var_string(name));  List_try_own(Func_signature((Var_pointer(target))));
       }
 

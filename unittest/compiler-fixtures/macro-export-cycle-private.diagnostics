@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/macro-export-cycle-private-b.x:3:27: parse: unknown or forward-referenced macro 'cycle.forty'
+  typedef char PrivateCells[$cycle.forty()];
+                            ^
+

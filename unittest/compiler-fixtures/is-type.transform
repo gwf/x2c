@@ -290,7 +290,7 @@
       (expr (* void) 
        (call (expr ((func (("size_t"))) * void) 
               (ident (binding 61 "Scope_malloc"))) 
-        (args (expr (unsigned) 
+        (args (expr ("size_t") 
                (sizeof 
                 (parens (decl (struct "IsWidgetData") (bindings (bind () ()))))))))))))) 
   (at 33 

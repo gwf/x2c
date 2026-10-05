@@ -224,10 +224,11 @@ and embedded-text files the walk read with their hashes. A declaration map
 below a `private` marker holds only what that region publishes, so an
 including unit never sees a private type or static helper, and a package's
 surface stops at that marker. The file holds one
-`(interface 4 "compiler" "path" "hash" (PARTS...) (DEFINITIONS...)
-(SELECTED-DEFINITIONS...) (DEPENDENCIES...))` form in `%()` List syntax,
-with bare Atoms for its structural words and Strings for identifiers; the
-reader reads that one form without evaluating it. Selected definitions carry
+`(interface 5 "compiler" "path" "hash" (PARTS...) (DEFINITIONS...)
+(SELECTED-DEFINITIONS...) (DEPENDENCIES...) (INCLUDE-DIRS...))` form in
+`%()` List syntax, with bare Atoms for its structural words and Strings for
+identifiers; the reader reads that one form without evaluating it. Selected
+definitions carry
 the local function's native and source names, canonical type, parameter
 spellings, source line, and documentation. They include macro output and
 compiler-only `meta` definitions, while prototypes and imported functions
@@ -236,8 +237,12 @@ joins authored prose to them. Before walking a file's source, collection looks
 for its interface in the output directory, then in the directory that mirrors
 the file's home-relative path under the compiler's stage directory (or under
 an installed home), then in a package's `builds/`. An interface is used only
-when its recorded compiler, path, and every hash still match; otherwise
-collection walks the source. The compiler identity is a digest of the
+when its recorded compiler, path, include search roots, and every hash still
+match; otherwise collection walks the source. Include search roots retain
+their order and distinguish home-relative, absolute, and cwd-relative
+spellings.
+Search candidates with cwd-relative spellings are checked in the current
+working directory. The compiler identity is a digest of the
 executable's contents, so a changed compiler never replays rows an earlier
 build collected. The prelude is the runtime `x2c.xi` interface from the
 library batch, so a stage build produces the prelude the next batch and the

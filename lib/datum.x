@@ -21,9 +21,10 @@
 /* tagged spellings
 
    A tagged datum spells the other values as Lists: `(x2c.void)`,
-   `(x2c.symbol0)`, `(x2c.atom "text")` and `(x2c.symbol "text")` for a
-   spelling that is not bare, `(x2c.number TAG "text")` for a number the
-   reader would not give back with its own family, `(x2c.array ITEM ...)`,
+   `(x2c.null)`, `(x2c.symbol0)`, `(x2c.atom "text")` and
+   `(x2c.symbol "text")` for a spelling that is not bare,
+   `(x2c.number TAG "text")` for a number the reader would not give back
+   with its own family, `(x2c.array ITEM ...)`,
    `(x2c.map (KEY VALUE) ...)`, and `(x2c.token N)`, a compiler Token
    passed by address. A List whose head is one of these tags is written as
    `(x2c.quote LIST)`. */
@@ -36,9 +37,9 @@ static int _tag_headed(List list) {
   if (!head.is_atom()) return 0;
   String text = head.str();
   if (!text.startswith("x2c.")) return 0;
-  foreach (String tag, %("x2c.void" "x2c.symbol0" "x2c.atom" "x2c.symbol"
-                         "x2c.number" "x2c.array" "x2c.map" "x2c.token"
-                         "x2c.quote"))
+  foreach (String tag, %("x2c.void" "x2c.null" "x2c.symbol0" "x2c.atom"
+                         "x2c.symbol" "x2c.number" "x2c.array" "x2c.map"
+                         "x2c.token" "x2c.quote"))
     if (text == tag) return 1;
   return 0;
 }
@@ -50,7 +51,8 @@ static int _tag_headed(List list) {
    written too; without it, only plain data is. */
 int datum_write(Buffer out, Var value, int tagged) {
   if (value is <list>) return _write_list(out, value, tagged);
-  if (tagged && value is void) out.write("(x2c.void)");
+  if (tagged && value.is_null()) out.write("(x2c.null)");
+  else if (tagged && value is void) out.write("(x2c.void)");
   else if (tagged && value is <symbol> && !value.symbol())
     out.write("(x2c.symbol0)");
   else if (value.is_atom()) return _write_atom(out, value, tagged);
@@ -150,6 +152,7 @@ static Var _decode(Var value) {
   List list = value;
   String tag = list.car().str();
   if (tag == "x2c.void") return void;
+  if (tag == "x2c.null") return Var.null();
   if (tag == "x2c.symbol0") return (Symbol) 0;
   if (tag == "x2c.atom") return Atom.intern(list.cadr().str());
   if (tag == "x2c.symbol") return Symbol.new(list.cadr().str());

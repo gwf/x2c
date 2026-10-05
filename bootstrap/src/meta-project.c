@@ -34,11 +34,11 @@ typedef struct Helper{
 }
 Helper;
 
-static List _130, _128, _127, _125, _123, _120, _118, _117, _115, _113, _101, _60, _59, _58, _44, _43, _22, _21, _20;
+static List _133, _131, _130, _128, _126, _123, _121, _120, _118, _116, _101, _60, _59, _58, _44, _43, _22, _21, _20;
 
-static String _121, _111, _108, _107, _105, _99, _97, _96, _95, _94, _93, _92, _91, _89, _87, _86, _85, _84, _83, _82, _81, _79, _78, _76, _74, _73, _72, _71, _69, _67, _65, _63, _62, _61, _56, _54, _52, _51, _50, _49, _48, _46, _45, _41, _39, _38, _37, _36, _35, _34, _33, _32, _31, _30, _29, _28, _27, _25, _24, _23, _18, _16, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _124, _114, _111, _110, _109, _108, _107, _105, _99, _97, _96, _95, _94, _93, _92, _91, _89, _87, _86, _85, _84, _83, _82, _81, _79, _78, _76, _74, _73, _72, _71, _69, _67, _65, _63, _62, _61, _56, _54, _52, _51, _50, _49, _48, _46, _45, _41, _39, _38, _37, _36, _35, _34, _33, _32, _31, _30, _29, _28, _27, _25, _24, _23, _18, _16, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
-static Var _129, _126, _124, _122, _119, _116, _114, _112, _110, _109, _106, _104, _103, _102, _100, _98, _90, _88, _80, _77, _75, _70, _68, _66, _64, _57, _55, _53, _47, _42, _40, _26, _19, _17, _15;
+static Var _132, _129, _127, _125, _122, _119, _117, _115, _113, _112, _106, _104, _103, _102, _100, _98, _90, _88, _80, _77, _75, _70, _68, _66, _64, _57, _55, _53, _47, _42, _40, _26, _19, _17, _15;
 
 static int _init_guard_ = 0;
 
@@ -151,14 +151,14 @@ Func x2c_func_shared(FuncAdapter, List);
 
 
 
-_x2c_initializer_choice_D04FB246_0((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _120)))
+_x2c_initializer_choice_D04FB246_0((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _123)))
 static Var _x2c_lambda_1(String path);
 
 static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func_argv_1);
 
 static Func _x2c_func_handle_1;
 
-_x2c_initializer_choice_D04FB246_1((_x2c_func_handle_1 = x2c_func_shared(_x2c_func_adapt_1, _130)))
+_x2c_initializer_choice_D04FB246_1((_x2c_func_handle_1 = x2c_func_shared(_x2c_func_adapt_1, _133)))
 typedef struct _x2c_defer_env_1{
   const void * _x2c_defer_capture_1;
 }
@@ -307,29 +307,32 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _105 = String_new("");
   _106 = Symbol_var(273446);
   _107 = String_new("/manifest");
-  _108 = String_new("-I");
-  _109 = String_var(_108);
-  _110 = Symbol_var(437126);
-  _111 = String_new("Var");
+  _108 = String_new("cwd:");
+  _109 = String_new("search:absent");
+  _110 = String_new(":");
+  _111 = String_new("-I");
   _112 = String_var(_111);
-  _113 = cons(_112, NULL);
-  _114 = List_var(_113);
-  _115 = cons(_114, NULL);
-  _116 = List_var(_115);
-  _117 = cons(_116, NULL);
-  _118 = cons(_110, _117);
+  _113 = Symbol_var(437126);
+  _114 = String_new("Var");
+  _115 = String_var(_114);
+  _116 = cons(_115, NULL);
+  _117 = List_var(_116);
+  _118 = cons(_117, NULL);
   _119 = List_var(_118);
-  _120 = cons(_119, _113);
-  _121 = String_new("String");
-  _122 = String_var(_121);
-  _123 = cons(_122, NULL);
-  _124 = List_var(_123);
-  _125 = cons(_124, NULL);
-  _126 = List_var(_125);
-  _127 = cons(_126, NULL);
-  _128 = cons(_110, _127);
+  _120 = cons(_119, NULL);
+  _121 = cons(_113, _120);
+  _122 = List_var(_121);
+  _123 = cons(_122, _116);
+  _124 = String_new("String");
+  _125 = String_var(_124);
+  _126 = cons(_125, NULL);
+  _127 = List_var(_126);
+  _128 = cons(_127, NULL);
   _129 = List_var(_128);
-  _130 = cons(_129, _113);
+  _130 = cons(_129, NULL);
+  _131 = cons(_113, _130);
+  _132 = List_var(_131);
+  _133 = cons(_132, _116);
   _x2c_static_initialize_0();
   _x2c_static_initialize_1();
 }
@@ -1469,9 +1472,13 @@ static List _current(String directory){
   return manifest;
 }
 
+int SourceView_exists(SourceView, String);
+
 String File_sha256(File);
 
 static String _digest(String path){
+  if(String_startswith(path, _108)) path = String_getslice(path, 4, -2147483648, 1);
+  if(! SourceView_exists(NULL, path)) return _109;
   File input = fopen(path, "rb");
   if(! input) return NULL;
   {
@@ -1487,7 +1494,10 @@ static String _digest(String path){
     x2c_cleanup_push(& _x2c_defer_record_4);
     {
       {
-        String _x2c_return_value_7 = File_sha256(input);
+        String _x2c_return_value_7 =({
+          Var _x2c_literal_part_55 = String_var(Path_absolute(path));  Var _x2c_literal_part_56 = String_var(File_sha256(input));  String_join(NULL, cons(_x2c_literal_part_55, cons(String_var(_110), cons(_x2c_literal_part_56, NULL))));
+        }
+        );
         {
           x2c_cleanup_leave(& _x2c_defer_record_4);
           return _x2c_return_value_7;
@@ -1507,7 +1517,7 @@ static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
 }
 
 static Var _x2c_lambda_0(Var dir){
-  return List_var(cons(_109, cons(dir, NULL)));
+  return List_var(cons(_112, cons(dir, NULL)));
   ;
 }
 
