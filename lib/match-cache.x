@@ -319,7 +319,7 @@ void MatchLease.release(MatchLease *lease) {
   lease.active = 0;
 }
 
-/* The plan a lease holds while its acquisition stays active. */
+/* Acquisition must remain active while reading the retained program. */
 static MatchPlan MatchLease._plan(MatchLease *lease) =>
   lease.transient_plan ? lease.transient_plan
                        : lease.cache.entries[lease.slot].plan;
