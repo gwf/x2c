@@ -650,9 +650,13 @@ static List _current(String directory) {
   return manifest;
 }
 
-/* The SHA-256 of the bytes of the file at `path`, or NULL when it cannot
-   be read. */
+/* Files use their SHA-256; include-search directories use identity and time.
+   Returns NULL when the path cannot be read. */
 static String _digest(String path) {
+  if (path.endswith("/"))
+    return Path.is_dir(path) ?
+      %"${Path.absolute(path)}:${"%.9f".printf(Path.modified_time(path))}" :
+      NULL;
   File input = fopen(path, "rb");
   if (!input) return NULL;
   defer input.close();

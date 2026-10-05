@@ -52,8 +52,9 @@ int translation_depfile_write(
    paths are sorted to write the same depfile from both routes. */
 static String _contents(
   CliRequest request, Compiler compiler, String input, String output_dir) {
-  Array paths = $auto([]);
-  foreach (Var (path, content_hash), compiler.deps) paths.push(path);
+  Array paths = $auto([]), searches = $auto([]);
+  foreach (Var (path, content_hash), compiler.deps)
+    (String.endswith(path, "/") ? searches : paths).push(path);
   if (!paths.len()) paths.push(input);
   paths.sort();
   Buffer out = $auto(Buffer.new(0));
@@ -68,6 +69,16 @@ static String _contents(
      newline so build fingerprints never treat following phony targets as
      prerequisites. */
   if (!request.no_phony_deps) _write_phony(out, paths, Path.absolute(input));
+  // Make sees files only; retained x2c builds also check include searches.
+  if (searches.len()) {
+    out.write("# x2c-search:");
+    searches.sort();
+    foreach (String path, searches) {
+      out.write_char(' ');
+      _write_word(out, path);
+    }
+    out.write_char('\n');
+  }
   return out;
 }
 

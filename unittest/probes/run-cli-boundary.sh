@@ -737,6 +737,72 @@ EOF
   "$bindings/main.x" >"$bindings/build.stdout" 2>"$bindings/build.stderr"
 "$bindings/app"
 
+# Retained translation must follow newly selected x2c includes too.
+for case in build:. build:nested script:nested; do
+  kind=${case%%:*}
+  suffix=${case#*:}
+  python3 - "$X2C" "$BUILD/translation-reuse/$kind/$suffix" "$suffix" "$kind" <<'PY_XLAT_REUSE'
+from pathlib import Path
+import os
+import subprocess
+import sys
+
+compiler, directory, suffix, kind = sys.argv[1:]
+suffix = Path(suffix)
+root = Path(directory).resolve()
+for name in ('first', 'second', 'source'):
+    (root / name).mkdir(parents=True, exist_ok=True)
+source = root / 'source/main.x'
+source.write_text('#include "meta.x"\n'
+                  f'#include "{suffix / "choice.x"}"\n'
+                  'meta static List name(TypeInfo type) {\n'
+                  '  return x2c_literal_string('
+                  'type.assoc(<fields>).car().car());\n}\n'
+                  'macro Expression $pick.name(Expr $p) => $name($p);\n'
+                  'int main(void) { Pick p = {1};\n'
+                  '  printf("%s\\n", $pick.name(p)); return 0; }\n')
+(root / 'second' / suffix).mkdir(parents=True, exist_ok=True)
+choice = root / 'first' / suffix / 'choice.x'
+def write_choice(directory, field):
+    text = f'typedef struct Pick {{ int {field}; }} Pick;\n'
+    for extension in ('.x', '.h'):
+        (directory / ('choice' + extension)).write_text(text)
+write_choice(root / 'second' / suffix, 'first')
+args = [compiler, 'build', '-v', '--build-dir', str(root / 'cache'),
+        '--output', str(root / 'app'), '-I', str(root / 'first'),
+        '-I', str(root / 'second'), str(source)]
+env = dict(os.environ, X2C_CACHE_DIR=str(root / 'script-cache'))
+if kind == 'script':
+    text = source.read_text().replace('int main(void) { ', '')
+    source.write_text('#!/usr/bin/env -S x2c script\n' +
+                      text.replace(' return 0; }', ''))
+    args = [compiler, 'script', '-v', '-I', str(root / 'first'),
+            '-I', str(root / 'second'), str(source)]
+def check(name, expected, cached):
+    result = subprocess.run(args, env=env, text=True, capture_output=True)
+    (root / (name + '.stderr')).write_text(result.stderr)
+    assert result.returncode == 0, result.stderr
+    if kind == 'script':
+        output = result.stdout.strip()
+        hit = 'x2c: translate ' not in result.stderr
+    else:
+        output = subprocess.check_output([str(root / 'app')], text=True).strip()
+        hit = 'up-to-date translate ' in result.stderr
+    assert output == expected, (name, output, expected)
+    assert hit == cached, (name, result.stderr)
+check('initial', 'first', False)
+check('unchanged', 'first', True)
+(root / 'first' / suffix).mkdir(parents=True, exist_ok=True)
+write_choice(root / 'first' / suffix, 'second')
+check('shadow', 'second', False)
+check('shadow-unchanged', 'second', True)
+choice.unlink()
+(root / 'first' / suffix / 'choice.h').unlink()
+check('removed', 'first', False)
+check('removed-unchanged', 'first', True)
+PY_XLAT_REUSE
+done
+
 # Reuse follows the native preprocessor, including newly selected headers
 # and availability tests that do not add an included file to the depfile.
 python3 - "$X2C" "$BUILD/native-reuse" <<'PY_NATIVE_REUSE'
