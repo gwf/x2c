@@ -431,6 +431,7 @@ and the options.
 | --- | --- | --- | --- |
 | Standard written | `43ff6c34`, `fd88fae4` | 2026-10-04 | PR #164 merged |
 | Plan made executable | this commit | 2026-10-05 | decisions accepted |
+| D5 | `aab9edd4` | 2026-10-05 | static fails; restored build passes |
 
 ## Plan review
 
