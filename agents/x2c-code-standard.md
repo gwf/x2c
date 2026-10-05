@@ -1235,6 +1235,10 @@ Gary's approval under the process ceiling.
 | Hot-path change | HP-1 paired instruction counts |
 | Defect fix | TE-2 fail-before and pass-after |
 
+Gary approved source reshapes that move retained macro-definition line
+and byte positions to their reviewed new authored locations on 2026-10-05.
+Diagnostic wording, origin ancestry, and all other behavior stay unchanged.
+
 Never rebaseline a stage diff or a fixture to make a neutral rewrite pass;
 a difference is a behavior change to fix or to report. Report each neutral
 tweak a rewrite makes, such as `$let` now restoring on an error exit.

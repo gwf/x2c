@@ -33,8 +33,11 @@ standard, and this plan's decisions.
 4. The standard is the only place rule text may change. A guide, skill, or
    tool that disagrees with it is updated to match it, unless step 3
    applies.
-5. Change public behavior only where D2 and D3 authorize it. Any other
-   observable change is a defect in the work.
+5. Change public behavior only where D2 and D3 authorize it. Gary also
+   approved reviewed retained macro-definition position changes for source
+   reshapes on 2026-10-05. Those positions follow their new authored
+   locations; diagnostic wording, origin ancestry, and all other behavior
+   stay unchanged. Other observable changes are defects in the work.
 6. Never rebaseline a stage diff, fixture expectation, or lint baseline to
    make a change pass, except where a step below names the rebaseline and
    its review.
@@ -790,7 +793,7 @@ No stage expectation, lint baseline, or bootstrap file changed.
 Options for Gary: retain this violation, or permit a reviewed generated
 refresh for this diagnostic location. No padding was added to offset it.
 
-### Stage 4: label collector reshape changes retained positions
+### Stage 4: label collector positions approved; reshape pending
 
 The complete `Walk.collect_labels` trial replaces its multi-line dispatch
 arms with named private steps for expression blocks, labels, try regions,
@@ -826,9 +829,11 @@ bootstrap; its logs are `label-steps-baseline-safe.log`,
 `label-steps-baseline-refresh.log`, and
 `label-steps-baseline-converged.log`.
 
-Options for Gary: permit reviewed retained definition position changes for
-this reshape, or retain this candidate while seeking another implementation.
-This evidence rejects the tested spelling, not every possible reshape.
+Gary approved reviewed retained macro-definition position changes for
+source reshapes on 2026-10-05. Positions must follow their new authored
+locations, with diagnostic wording, origin ancestry, and all other behavior
+preserved. The restored collector trial can now be reconsidered under that
+decision; its implementation and remaining proofs are still pending.
 No padding or invented replacement comment was added to force equality.
 
 ## Progress
@@ -935,12 +940,107 @@ The private import and all Error causes, values, and sites are preserved.
 All 12 compiler length candidates were reviewed; none is established as
 an FN-2 table or one-line dispatcher exception. Deletion/reuse discovery
 found no additional supported removal inside them. Shape work remains.
-The broader `macros.x` ownership crossing census remains unfinished.
+The complete `macros.x` ownership crossing census is now reviewed at
+`db8f20ed`. It covers all 32 subjects and 318 functions, including public
+entry operations and shared state. Eleven candidate boundaries have
+private-helper crossing counts and caller inventories. No large split is
+supported by the current owners. The 65-line category vocabulary is a
+leaf, but extracting it would remove no duplicate operation or state.
+Imports share library-session state; ordinary parsing and quotations both
+construct the same Definition. A split based only on section size would
+retain these crossings and add declarations.
+
+The capture-row forwarder has four callers. A +4/-7 deletion trial builds
+and keeps the header equal, but moves runtime ErrorSite lines 3862 to 3859
+and 4040 to 4037. That trial is restored. The approved retained-definition
+position changes do not cover runtime ErrorSite changes. Restored source
+passes the 220-file stage-1 comparison. It has no function over 40 lines,
+ordinary brace depth at most four, and at most six parameters. One LY-3
+violation remains. No source split or forwarder deletion is delivered.
+Private review evidence commit: `cd8b2682`.
 
 The label-collector candidate (+45/-39 trial lines) compiles but changes
 retained positions; it is restored. Its fixtures, self-host comparisons,
 depth coverage, and HP-1 measurement were not attempted after that stop.
 Private evidence commit: `93bf6189`; see its Open question above.
+
+### Continuation candidates
+
+The pending status documentation merged through PR #172 at `83d76717`.
+Its focused `make doc-check` passed: 156 audit files, 357 links, and
+20 paths. Subsequent source work uses shared-integrator delivery. Workers
+return private source commits; the integrator owns final artifacts and
+publication validation. The source candidates below are not yet published.
+
+| Owner at `db8f20ed` | Original lines | Candidate lines | State |
+| --- | ---: | ---: | --- |
+| `Walk.collect_labels` | 46 | 16 | length repaired; focused proof passes |
+| `Walk.rewrite` | 42 | 36 | length repaired; focused proof passes |
+| `Emitter._emit` | 94 | 52 | one-line dispatcher exception reviewed |
+| `Emitter._declarator` | 46 | 23 | length repaired; focused proof passes |
+| `Compiler._resolve_content` | 104 | 104 | reshape remains |
+| `Compiler._resolve_identifier` | 44 | 44 | later capture-step trial unverified |
+| `Compiler._typedef_index` | 43 | 24 | length repaired; focused proof passes |
+| `Compiler._record_meta_hash` | 50 | 18 | length repaired; focused proof passes |
+| `Compiler._bind_form` | 118 | 102 | partial; 37 arms still span lines |
+| `Compiler.protocol_update_helper` | 51 | 51 | later signature-step trial unverified |
+| `Compiler._step` | 54 | 54 | reshape remains |
+| `Compiler._sequence` | 44 | 44 | later sequence-step trial unverified |
+
+These counts address function length. They do not establish whole-file
+conformance or one-line arms in every shorter match. No standard exception,
+fixture expectation, or lint baseline was changed to accept partial work.
+
+Emitter candidate `99ba409c` adds local Expression templates instead of
+out-of-line emission helpers. The initial function-helper trial increased
+compiler-emission median instructions from 13,663,650,514 to 13,745,011,944,
+with disjoint ranges. An `inline` spelling retained those calls and their
+cost. The final templates remove all 17 new emission functions. Seven
+alternating measured pairs after one warm pair give compiler-emission
+medians 13,725,777,916 to 13,741,685,514 and array-declarator medians
+9,678,191,165 to 9,664,249,724. Final ranges overlap. No distinguishable
+instruction increase or speed improvement is claimed. All 16 paired C/H
+outputs match. Eight fixtures and four existing stack limits pass; 18
+fixed clients match raw C/H, source maps, diagnostics, and exit status.
+
+Parser candidate `6c02c70f` keeps one 46-alternative binder and extracts
+meta-hash traversal, eligibility, and storage steps. It passes 26 focused
+fixtures and the 220-file stage-1 comparison. Three fixed client inputs
+produce six exact C/H files in each of eight warm/measured pairs. Median
+instructions are 7,669,323,827 to 7,693,171,945, with overlapping ranges.
+The final helper uses the original captured spelling, without another
+binding validation. The binder's length and one-line-arm work remains.
+
+Index candidate `ca0c36c9` names native-index fallback and the outer alias
+walk without reducing element types. Six fixtures and the 220-file stage-1
+comparison pass. Six retained-definition positions move to their authored
+locations; no runtime ErrorSite changes. Both measured compilers translate
+the same external sources, with nonempty preludes and equal-length homes.
+All 16 paired C/H and diagnostic outputs match. Compiler-source median
+instructions are 17,539,848,075 to 17,471,187,849, with disjoint ranges;
+the focused index client is 4,606,143,921 to 4,615,937,389, with overlapping
+ranges. No general speed improvement is claimed.
+
+Cleanup candidate `5c912611` preserves captured nodes, region identities,
+traversal order, and existing paired-state owners. The 220-file stage-1
+comparison and 17 fixtures pass. Defer and exception suites pass 50 tests
+and 236 assertions. Fixed client outputs and protected-region probes at
+depths 8, 32, 64, and 128 match without normalization under a 512-KiB stack
+limit. Retained-definition positions move +12 lines and +538 bytes to
+their authored locations. Other definition fields and ancestry are exact;
+generated cleanup C contains no runtime ErrorSites. Seven alternating
+measured pairs after one warm pair give cleanup-source median instructions
+14,546,307,031 to 14,578,188,483 and depth-128 medians 7,261,196,698 to
+7,269,428,176. Both ranges overlap, and all 16 paired C/H and diagnostic
+outputs match. No distinguishable instruction increase is claimed.
+
+The combined parent tree passes a fresh safe build, the 220-file stage-1
+comparison, and four fixtures across the changed owners:
+macro-construction-regressions, buffer-getindex, goto-cleanup-regions,
+and static-local-switch. `make doc-check` reports only stale generated
+API Source locations for cleanup and parse. Its other audits report no
+errors. Final documentation and bootstrap regeneration belong to the
+shared integrator; no derived output was hand-edited or rebaselined.
 
 Integration of `3459d664` exposed a link to an ignored local audit report.
 Commit `fef7cb88` keeps that explicitly local reference as a plain path.
