@@ -443,6 +443,12 @@ Four raises already carry both `owner` and `operation`:
 Renaming `owner` to `operation` would create two entries with the same key.
 These four raises retain their current details while the other D2 keys move.
 
+The unaffected key migration is `14973621`: 105 files, `.x` +197/-192.
+The four raises and their retained Array reader are byte-identical.
+Current-tree focused verification passes 940 tests, 1,082 fixtures,
+CLI probes, 384 book samples, 101 outputs, commands, and packages.
+The migration changes no Error cause or existing detail value.
+
 Gary must choose the resulting detail shape: combine type and action into
 one `operation` String, or retain the type as `operation` and name the action
 with another key. The first option changes the current action value; the
@@ -543,6 +549,7 @@ preserved in `.context/` in that worktree. No bootstrap was refreshed.
 | 4.emission | `5f8e5484` | 2026-10-05 | 6 -> 0; +16/-14 .x |
 | 4.match | `33c6f09e` | 2026-10-05 | 5 -> 2; +3/-3 .x |
 | 4.targets | `a731b530` | 2026-10-05 | 1 -> 0; +1/-1 .x |
+| D2 partial | `14973621` | 2026-10-05 | +197/-192 .x; four raises held |
 | D2 held | `a7c271f` | 2026-10-05 | +197/-192 .x; 4 raises held |
 | D3 | `f7f886ad` | 2026-10-05 | 9/9 autodiff; +9/-9 .x |
 | D3 held | `9511153f` | 2026-10-05 | +9/-9 .x; package check fails |
