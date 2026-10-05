@@ -136,6 +136,11 @@ FuncArg FuncArg_value(Var);
 
 Var int_var(int);
 
+#include "error.h"
+
+
+
+
 int x2c_error_catch_site_pending(ErrorCatchSite *);
 
 ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);

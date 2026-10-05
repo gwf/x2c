@@ -96,9 +96,9 @@ grep -q "List_len" "$BUILD/solo/unit.c" ||
   fail "cold walk resolved Foo to the wrong declaration"
 grep -q '^int cache_external(int value);' "$BUILD/solo/unit.h" ||
   fail "public function declaration is missing from the generated header"
-if grep -q '^int cache_external(' "$BUILD/solo/unit.c"; then
-  fail "source repeats a function declaration supplied by its own header"
-fi
+# The source consumes its own declaration independently of the header.
+[ "$(grep -c '^int cache_external(int value);' "$BUILD/solo/unit.c")" = 1 ] ||
+  fail "source must retain exactly one explicit function declaration"
 
 # Translating an owner replaces its artifact entry with collected source.
 # Its generated protocol callables must survive that replacement for later
