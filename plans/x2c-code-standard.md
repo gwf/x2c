@@ -502,8 +502,9 @@ comparison and have been restored:
   declaration and a raising block.
 
 Stage 4 requires a byte-exact stage comparison without rebaselining. These
-two subject renames do not preserve generated C parameter spellings. The direct brace repair also changes
-reported source positions. No replacement algorithm, new helper, or padding
+two subject renames do not preserve generated C parameter spellings.
+The direct brace repair also changes reported source positions.
+No replacement algorithm, new helper, or padding
 was introduced to hide a delta; five independent comment and width repairs
 pass their per-file comparisons.
 
@@ -530,11 +531,16 @@ preserved in `.context/` in that worktree. No bootstrap was refreshed.
 | 3.4 | `b7719c78` | 2026-10-05 | 6 invalid cases; suppressed fix unchanged |
 | 3.5 | `f7b1b6a6` | 2026-10-05 | 11 codes; 287 new candidates |
 | 3.6 | `9542ea14` | 2026-10-05 | 32 codes; 106 violations |
-| 4.process | `e70355e7` | 2026-10-05 | 3 -> 1 violations; +4/-4 .x; 220 C/H identical |
-| 4.emission | `5fc3fe75`, `5f8e5484` | 2026-10-05 | 6 -> 0 violations; +16/-14 .x; both stages identical |
-| 4.match | `7fcd0023`, `c5a66fc7`, `33c6f09e` | 2026-10-05 | 5 -> 2 violations; +3/-3 .x; 220 C/H identical |
+| 4.process | `e70355e7` | 2026-10-05 | 3 -> 1; +4/-4 .x |
+| 4.emission | `5f8e5484` | 2026-10-05 | 6 -> 0; +16/-14 .x |
+| 4.match | `33c6f09e` | 2026-10-05 | 5 -> 2; +3/-3 .x |
 | D2 held | `a7c271f` | 2026-10-05 | +197/-192 .x; 4 raises held |
 | D3 held | `9511153f` | 2026-10-05 | +9/-9 .x; package check fails |
+
+Stage 4 rows record violation counts and authored `.x` line changes.
+Process and Match repairs compare all 220 C/H files with the bootstrap.
+Emission repairs also compare stage 0 with stage 1. Emission commits:
+`5fc3fe75`, `5f8e5484`. Match commits: `7fcd0023`, `c5a66fc7`, `33c6f09e`.
 
 Stage 3.5 census: 108 compiler and runtime files. The baseline took
 10.63 seconds; the candidate took 10.61 seconds. All 1,599 original
