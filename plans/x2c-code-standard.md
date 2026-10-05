@@ -813,6 +813,7 @@ refresh for this diagnostic location. No padding was added to offset it.
 | 4.cli | `37eababa` | 2026-10-05 | 2 -> 0; +3/-2 .x |
 | 4.scan | `4b1f51af` | 2026-10-05 | 1 -> 0; +1/-1 .x |
 | 4.import | `bf01f633` | 2026-10-05 | 1 -> 0 helper; +2/-5 .x |
+| 4.blis | `5333a287` | 2026-10-05 | 4 macros; +5/-5 .x |
 | D2 partial | `14973621` | 2026-10-05 | +197/-192 .x; four raises held |
 | D2 held | `a7c271f` | 2026-10-05 | +197/-192 .x; 4 raises held |
 | D3 | `f7f886ad` | 2026-10-05 | 9/9 autodiff; +9/-9 .x |
@@ -863,6 +864,11 @@ instructions on normal import: 4,591,417,957 -> 4,591,140,101; cycle error:
 4,544,272,961 -> 4,541,204,854. Sample ranges overlap; no distinguishable
 cost increase or improvement is claimed. All 16 output pairs are exact.
 Evidence: `/tmp/x2c-standard-lint/debug/import-forwarder-hp1*`.
+
+blis Error-pack migration: 18 generated C/H files are byte-exact.
+Focused checks pass: 12 wrapper tests/186 assertions; 4 raw/16.
+Worker `make packages-check` passes; no expectations changed.
+The private import and all Error causes, values, and sites are preserved.
 
 Stage 3.5 census: 108 compiler and runtime files. The baseline took
 10.63 seconds; the candidate took 10.61 seconds. All 1,599 original
