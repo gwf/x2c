@@ -190,7 +190,7 @@ static int MatchPlan__all(MatchPlan plan, List input, List * out_results);
 
 static int MatchPlan__replace_all(MatchPlan plan, List input, Var template, List * out);
 
-static int MatchWalk__test(MatchWalk * walk, Var node);
+static int MatchWalk__test(MatchWalk * m, Var node);
 
 static List MatchWalk__hit(MatchWalk * walk, Var node);
 
@@ -927,8 +927,8 @@ static int MatchPlan__replace_all(MatchPlan plan, List input, Var template, List
   return 1;
 }
 
-static int MatchWalk__test(MatchWalk * walk, Var node){
-  return MatchPlan_admits((* walk).plan, node, NULL) ? _run_capture((* walk).view, &(*(* walk).m), node, (* walk).captures) : 0;
+static int MatchWalk__test(MatchWalk * m, Var node){
+  return MatchPlan_admits((* m).plan, node, NULL) ? _run_capture((* m).view, &(*(* m).m), node, (* m).captures) : 0;
 }
 
 static List MatchWalk__hit(MatchWalk * walk, Var node){

@@ -1307,7 +1307,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_1(void){
   _881 = cons(_878, _880);
   _882 = List_var(_881);
   _883 = Symbol_var(1133019155420);
-  _884 = int_var(24566);
+  _884 = int_var(24554);
   _885 = cons(_884, NULL);
   _886 = cons(_883, _885);
   _887 = List_var(_886);
@@ -1854,7 +1854,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void){
   _1425 = cons(_1424, NULL);
   _1426 = cons(_869, _1425);
   _1427 = List_var(_1426);
-  _1428 = int_var(24970);
+  _1428 = int_var(24958);
   _1429 = cons(_1428, NULL);
   _1430 = cons(_883, _1429);
   _1431 = List_var(_1430);
@@ -2149,7 +2149,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_3(void){
   _1717 = cons(_1716, NULL);
   _1718 = cons(_869, _1717);
   _1719 = List_var(_1718);
-  _1720 = int_var(25491);
+  _1720 = int_var(25479);
   _1721 = cons(_1720, NULL);
   _1722 = cons(_883, _1721);
   _1723 = List_var(_1722);
@@ -2492,7 +2492,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2057 = cons(_2056, NULL);
   _2058 = cons(_550, _2057);
   _2059 = List_var(_2058);
-  _2060 = int_var(908);
+  _2060 = int_var(904);
   _2061 = cons(_2060, NULL);
   _2062 = cons(_869, _2061);
   _2063 = List_var(_2062);
@@ -2502,7 +2502,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2067 = List_var(_2066);
   _2068 = cons(_878, _875);
   _2069 = List_var(_2068);
-  _2070 = int_var(34004);
+  _2070 = int_var(33841);
   _2071 = cons(_2070, NULL);
   _2072 = cons(_883, _2071);
   _2073 = List_var(_2072);
@@ -2804,14 +2804,14 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2369 = cons(_3, _2106);
   _2370 = List_var(_2369);
   _2371 = Symbol_var(106239471489226);
-  _2372 = int_var(1412);
+  _2372 = int_var(1408);
   _2373 = String_new("");
   _2374 = String_var(_2373);
   _2375 = cons(_408, _1848);
   _2376 = List_var(_2375);
   _2377 = cons(_1178, _1761);
   _2378 = List_var(_2377);
-  _2379 = int_var(1419);
+  _2379 = int_var(1415);
   _2380 = cons(_67, _244);
   _2381 = cons(_241, _2380);
   _2382 = List_var(_2381);

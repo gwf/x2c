@@ -216,7 +216,7 @@ typedef struct Callback{
 }
 Callback;
 
-static void Callback_split(Callback * cb);
+static void Callback_split(Callback * c);
 
 static void Callback_check_signature(Callback * cb);
 
@@ -1193,11 +1193,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_1(void){
   _862 = cons(_861, NULL);
   _863 = cons(_166, _862);
   _864 = List_var(_863);
-  _865 = int_var(335);
+  _865 = int_var(336);
   _866 = cons(_865, NULL);
   _867 = cons(_197, _866);
   _868 = List_var(_867);
-  _869 = int_var(12869);
+  _869 = int_var(12880);
   _870 = cons(_869, NULL);
   _871 = cons(_210, _870);
   _872 = List_var(_871);
@@ -1349,14 +1349,14 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_1(void){
   _1018 = cons(_1017, NULL);
   _1019 = cons(_166, _1018);
   _1020 = List_var(_1019);
-  _1021 = int_var(357);
+  _1021 = int_var(358);
   _1022 = cons(_1021, NULL);
   _1023 = cons(_197, _1022);
 }
 
 __attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void){
   _1024 = List_var(_1023);
-  _1025 = int_var(13630);
+  _1025 = int_var(13641);
   _1026 = cons(_1025, NULL);
   _1027 = cons(_210, _1026);
   _1028 = List_var(_1027);
@@ -1584,11 +1584,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void){
   _1250 = List_var(_1249);
   _1251 = cons(_187, _48);
   _1252 = List_var(_1251);
-  _1253 = int_var(349);
+  _1253 = int_var(350);
   _1254 = cons(_1253, NULL);
   _1255 = cons(_197, _1254);
   _1256 = List_var(_1255);
-  _1257 = int_var(13379);
+  _1257 = int_var(13390);
   _1258 = cons(_1257, NULL);
   _1259 = cons(_210, _1258);
   _1260 = List_var(_1259);
@@ -1679,11 +1679,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void){
   _1345 = cons(_1344, NULL);
   _1346 = cons(_166, _1345);
   _1347 = List_var(_1346);
-  _1348 = int_var(353);
+  _1348 = int_var(354);
   _1349 = cons(_1348, NULL);
   _1350 = cons(_197, _1349);
   _1351 = List_var(_1350);
-  _1352 = int_var(13523);
+  _1352 = int_var(13534);
   _1353 = cons(_1352, NULL);
   _1354 = cons(_210, _1353);
   _1355 = List_var(_1354);
@@ -2024,11 +2024,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_3(void){
   _1687 = cons(_1686, NULL);
   _1688 = cons(_166, _1687);
   _1689 = List_var(_1688);
-  _1690 = int_var(960);
+  _1690 = int_var(962);
   _1691 = cons(_1690, NULL);
   _1692 = cons(_197, _1691);
   _1693 = List_var(_1692);
-  _1694 = int_var(35869);
+  _1694 = int_var(35887);
   _1695 = cons(_1694, NULL);
   _1696 = cons(_210, _1695);
   _1697 = List_var(_1696);
@@ -3493,8 +3493,8 @@ default: break;
 return expression;
 }
 
-static void Callback_split(Callback * cb){
-  Type source =(* cb).source;  if(! List_truth((* cb).source_binding) || ! List_truth(Type_list(source)) || Type_is_pointer(source) || ! Type_is_function(source)) Callback__fail(&((* cb)), _1929, _1570);  if(! Type_function_parts((* cb).target, &((* cb).params), &((* cb).result))) Callback__fail(&((* cb)), _1930, NULL);  if(! Type_function_parts(source, &((* cb).source_params), &((* cb).source_result))) Callback__fail(&((* cb)), _1931, NULL);  if(_typed_params_variadic((* cb).params) || _typed_params_variadic((* cb).source_params)) Callback__fail(&((* cb)), _1932, NULL);
+static void Callback_split(Callback * c){
+  Type source =(* c).source;  if(! List_truth((* c).source_binding) || ! List_truth(Type_list(source)) || Type_is_pointer(source) || ! Type_is_function(source)) Callback__fail(&((* c)), _1929, _1570);  if(! Type_function_parts((* c).target, &((* c).params), &((* c).result))) Callback__fail(&((* c)), _1930, NULL);  if(! Type_function_parts(source, &((* c).source_params), &((* c).source_result))) Callback__fail(&((* c)), _1931, NULL);  if(_typed_params_variadic((* c).params) || _typed_params_variadic((* c).source_params)) Callback__fail(&((* c)), _1932, NULL);
 }
 
 static void Callback_check_signature(Callback * cb){

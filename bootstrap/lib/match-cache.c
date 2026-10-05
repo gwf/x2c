@@ -71,7 +71,7 @@ static void MatchCache__remove(MatchCache cache, int slot);
 
 static void MatchCache__activate(MatchCache m, int slot, MatchLease * lease);
 
-static MatchPlan MatchLease__plan(MatchLease * lease);
+static MatchPlan MatchLease__plan(MatchLease * m);
 
 static MatchCacheEntry * MatchLease__entry(MatchLease * lease);
 
@@ -386,8 +386,8 @@ void MatchLease_release(MatchLease * lease){
   lease -> active = 0;
 }
 
-static MatchPlan MatchLease__plan(MatchLease * lease){
-  return lease -> transient_plan ? lease -> transient_plan : lease -> cache -> entries[lease -> slot].plan;
+static MatchPlan MatchLease__plan(MatchLease * m){
+  return m -> transient_plan ? m -> transient_plan : m -> cache -> entries[m -> slot].plan;
 }
 
 static MatchCacheEntry * MatchLease__entry(MatchLease * lease){

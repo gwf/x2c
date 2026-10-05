@@ -67,7 +67,7 @@ static void Job__open_table(Job job);
 
 static void Job__close_streams(Job job, Stdio stdio);
 
-static void Job__open_streams(Job job, Stdio * stdio);
+static void Job__open_streams(Job j, Stdio * stdio);
 
 static int _input(String text);
 
@@ -497,10 +497,10 @@ static void Job__close_streams(Job job, Stdio stdio){
   if(! job -> errors_file) _close(stdio.errors);
 }
 
-static void Job__open_streams(Job job, Stdio * stdio){
-  if(job -> launch.has_input)(* stdio).input = _input(job -> launch.input);
-  (* stdio).output = _stream(&(job -> output_file), job -> launch.capture_output, job -> launch.stdout_path);
-  (* stdio).errors = _stream(&(job -> errors_file), job -> launch.capture_errors, job -> launch.stderr_path);
+static void Job__open_streams(Job j, Stdio * stdio){
+  if(j -> launch.has_input)(* stdio).input = _input(j -> launch.input);
+  (* stdio).output = _stream(&(j -> output_file), j -> launch.capture_output, j -> launch.stdout_path);
+  (* stdio).errors = _stream(&(j -> errors_file), j -> launch.capture_errors, j -> launch.stderr_path);
 }
 
 int File_write_all(File, const void *, size_t);

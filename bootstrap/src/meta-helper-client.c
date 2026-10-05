@@ -115,7 +115,7 @@ Call;
 
 static void Call_check(Call * call);
 
-static void Call_send(Call * call, List arguments);
+static void Call_send(Call * c, List arguments);
 
 static void Call_send_frame(Call * call, List message);
 
@@ -147,7 +147,7 @@ static int _read_input(double deadline);
 
 static void Call_refuse(Call * call, String why);
 
-static void Call_overdue(Call * call);
+static void Call_overdue(Call * c);
 
 static void Call_stopped(Call * call, String reason);
 
@@ -370,12 +370,12 @@ static void Call_check(Call * call){
 }
 
 Var Macro_subject(void);
-static void Call_send(Call * call, List arguments){
+static void Call_send(Call * c, List arguments){
   if(helper_reset){
-    Call_send_frame(&((* call)), _54);  helper_reset = 0;
+    Call_send_frame(&((* c)), _54);  helper_reset = 0;
   }
-  Call_send_frame(&((* call)), ({
-    Var _x2c_literal_part_0 = int_var((* call).table);  Var _x2c_literal_part_1 = String_var((* call).name);  Var _x2c_literal_part_2 = List_var(arguments);  Var _x2c_literal_part_3 = Macro_subject();  cons(_55, cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, cons(_x2c_literal_part_2, cons(_x2c_literal_part_3, NULL)))));
+  Call_send_frame(&((* c)), ({
+    Var _x2c_literal_part_0 = int_var((* c).table);  Var _x2c_literal_part_1 = String_var((* c).name);  Var _x2c_literal_part_2 = List_var(arguments);  Var _x2c_literal_part_3 = Macro_subject();  cons(_55, cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, cons(_x2c_literal_part_2, cons(_x2c_literal_part_3, NULL)))));
   }
   ));
 }
@@ -655,9 +655,9 @@ static void Call_refuse(Call * call, String why){
 
 String String_printf(String, ...);
 
-static void Call_overdue(Call * call){
+static void Call_overdue(Call * c){
   _helper_stop(SIGKILL);
-  Compiler_report_error((* call).compiler, 27335838, String_printf(_63, "this meta call ran longer than ", (* call).limit), (* call).site, cons(String_var(String_join(NULL, cons(String_var(_64), cons(String_var((* call).name), NULL)))), _67));
+  Compiler_report_error((* c).compiler, 27335838, String_printf(_63, "this meta call ran longer than ", (* c).limit), (* c).site, cons(String_var(String_join(NULL, cons(String_var(_64), cons(String_var((* c).name), NULL)))), _67));
 }
 
 static void Call_stopped(Call * call, String reason){
