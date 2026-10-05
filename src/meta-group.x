@@ -812,9 +812,8 @@ static String Compiler._stage(Compiler c, String &failure) {
   Map targets = Compiler.native_module_targets(module);
   if (!(module in c.meta_group_bound)) {
     c.meta_group_bound[module] = 1;
-    Scope.push(&session_meta_scope);
-    ((Func) targets["x2c_module_reset"].pointer()).apply(0, NULL);
-    Scope.pop();
+    $scope(&session_meta_scope)
+      ((Func) targets["x2c_module_reset"].pointer()).apply(0, NULL);
   }
   foreach (List entry, c.meta_group)
     match (entry) case %(function ? ?(String target) ?(Type type) *): {

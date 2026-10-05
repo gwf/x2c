@@ -240,6 +240,16 @@ static Map native_scalar_types(void) => {
     %(ldouble "Var_long_double" "x2c_var_update_long_double"),
 };
 
+static List _scalar_access_units(Macro access) {
+  Array units = [];
+  List rows = native_scalar_types().list().sort();
+  foreach (List row, rows) {
+    Type type = row.car();
+    units.push(access(type));
+  }
+  return units.list_free();
+}
+
 /* --- src/operator-ledger.xmacro ------------------------------------------ */
 
 static List _operator_rows(void) => %(
@@ -580,9 +590,9 @@ static int _tag_constant_row(List row) {
 }
 
 static List _tag_list(List items) {
-  List built = %(expr ("List") (nil));
+  List built = $!List{ 0 };
   for (int i = items.len() - 1; i >= 0; i--)
-    built = %(expr ("List") (cons ${items[i]} $built));
+    built = $!(cons(${items[i]}, $built));
   return built;
 }
 
@@ -666,11 +676,16 @@ static Map _tag_types(List native) {
 
 /* --- lib/var-unbox.xmacro ------------------------------------------------ */
 
-static int var_tag_top(List tag) =>
-  (int) Var_tag_top(List_last((List) List_last(tag)));
+static Symbol _literal_tag(List tag) {
+  match (tag)
+    case %(expr ? (literal ? ? ?key)): return key;
+  return 0;
+}
+
+static int var_tag_top(List tag) => (int) Var_tag_top(_literal_tag(tag));
 
 static int var_tag_bottom(List tag) =>
-  (int) Var_tag_bottom(List_last((List) List_last(tag)));
+  (int) Var_tag_bottom(_literal_tag(tag));
 
 /* --- lib/varops.xmacro --------------------------------------------------- */
 
@@ -787,6 +802,7 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_selector_units", _selector_units);
   $linked.row(rows, "_selector_definitions", _selector_definitions);
   $linked.row(rows, "native_scalar_types", native_scalar_types);
+  $linked.row(rows, "_scalar_access_units", _scalar_access_units);
   $linked.row(rows, "_operator_rows", _operator_rows);
   $linked.row(rows, "_operator_cases", _operator_cases);
   $linked.row(rows, "_dedent_expand", _dedent_expand);
@@ -831,6 +847,7 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_tag_decode_groups", _tag_decode_groups);
   $linked.row(rows, "_tag_id_checks", _tag_id_checks);
   $linked.row(rows, "_tag_types", _tag_types);
+  $linked.row(rows, "_literal_tag", _literal_tag);
   $linked.row(rows, "var_tag_top", var_tag_top);
   $linked.row(rows, "var_tag_bottom", var_tag_bottom);
   $linked.row(rows, "_update_rows", _update_rows);

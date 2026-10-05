@@ -8,16 +8,20 @@
 /* Object rows carry their payload pointer in the low 48 bits with the
    bottom three bits reserved for the row selector, so reading one back is
    the row's top and bottom columns and a mask. */
-meta Var List_last(List lst);
 meta unsigned long Var_tag_top(Symbol tag);
 meta unsigned long Var_tag_bottom(Symbol tag);
 
 /* A `Literal` tag argument arrives as its resolved Symbol expression,
    `(expr TYPE (literal TYPE TEXT SYMBOL))`; the tables read the Symbol. */
-meta static int var_tag_top(List tag) =>
-  (int) Var_tag_top(List_last((List) List_last(tag)));
+meta static Symbol _literal_tag(List tag) {
+  match (tag)
+    case %(expr ? (literal ? ? ?key)): return key;
+  return 0;
+}
+
+meta static int var_tag_top(List tag) => (int) Var_tag_top(_literal_tag(tag));
 meta static int var_tag_bottom(List tag) =>
-  (int) Var_tag_bottom(List_last((List) List_last(tag)));
+  (int) Var_tag_bottom(_literal_tag(tag));
 
 macro Unit $var.tag.unbox(Type $type, Name $method, Literal $tag) {
   $type Var.$method(Var);

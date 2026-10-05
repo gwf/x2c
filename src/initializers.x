@@ -32,16 +32,16 @@ List Compiler.convert_initializer(
 
 static List Compiler._convert_initializer(
   Compiler c, List value, Type type, List target, int &?native_used) {
-  if (value.match(%(expr ? (composite ?))))
-    return c._convert_composite(
-      value, type.canonicalize(), target, NULL, native_used);
+  match (value)
+    case %(expr ? (composite ?payload)):
+      return c._convert_composite(
+        payload.cdr(), type.canonicalize(), target, NULL, native_used);
   return c.convert_expression(value, type.declared());
 }
 
 static List Compiler._convert_composite(
-  Compiler c, List expr, Type target, List native_target,
+  Compiler c, List items, Type target, List native_target,
   List parent_condition, int &?native_used) {
-  List items = expr.caddr().cadr().cdr();
   if (!items) {
     List fresh = c._empty_collection(target);
     if (fresh) return fresh;
@@ -740,10 +740,13 @@ static List Compiler._speculate(
     }
     c.recovery_depth = depth + 1;
     try {
-      result = value.match(%(expr ? (composite ?)))
-        ? c._convert_composite(
-          value, type.canonicalize(), target, condition, native_used)
-        : c.convert_expression(value, type);
+      match (value) {
+        case %(expr ? (composite ?payload)):
+          result = c._convert_composite(
+            payload.cdr(), type.canonicalize(), target, condition,
+            native_used);
+        default: result = c.convert_expression(value, type);
+      }
       transaction.commit();
       completed = 1;
     }

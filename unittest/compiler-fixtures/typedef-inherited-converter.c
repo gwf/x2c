@@ -40,7 +40,7 @@ converter_inherit_Count converter_inherit_Base_converter_inherit_count(converter
 
 int List_truth(List);
 
-String converter_inherit_Override_str(converter_inherit_Override values){
+converter_inherit_Text converter_inherit_Override_str(converter_inherit_Override values){
   if(! _init_guard_) _file_init_();
   return List_truth(values) ? _0 : _1;
 }

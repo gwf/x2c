@@ -60,8 +60,8 @@ Compiler Compiler.expanding(void) =>
 List x2c_syntax_type(List value) {
   _sdk_guard("x2c.syntax.type");
   match (value) {
-    case %(expr ? ?): {
-      Type type = value.cadr();
+    case %(expr ?matched_type ?): {
+      Type type = matched_type;
       if (type === %(<macro-expr>))
         type = active.expander.resolve_expression(value, active.site).cadr();
       return type.canonicalize();
@@ -74,9 +74,9 @@ List x2c_syntax_type(List value) {
   if (binding_identity_try_parts(value, NULL, NULL)) binding = value;
   else
     match (value) {
-      case $source_identifier_content(%((*) *)):
-        binding = value.cadr();
-      case %(bind (*) *): binding = value.cadr();
+      case $source_identifier_content(%((!set ?captured (*)) *)):
+        binding = captured;
+      case %(bind (!set ?captured (*)) *): binding = captured;
     }
   if (binding) return _sdk_binding_type(binding).canonicalize();
   return value.type().canonicalize();
@@ -256,11 +256,11 @@ String x2c_binding_spelling(Var syntax) {
     $report.sdk.binding_syntax(syntax);
   List value = syntax;
   match (value)
-    case %(expr ? (? *)): value = value.caddr();
+    case %(expr ? (!set ?content (? *))): value = content;
   match (value) {
-    case $source_identifier_content(%((*))):
-      value = value.cadr();
-    case %(bind (*) ?):    value = value.cadr();
+    case $source_identifier_content(%((!set ?captured (*)))):
+      value = captured;
+    case %(bind (!set ?captured (*)) ?): value = captured;
   }
   match (value)
     case %((!is ?name type string)): return name;

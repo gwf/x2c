@@ -131,6 +131,8 @@ static String Compiler__module(Compiler c, String * failure);
 
 static String _build_module(String directory, String module, List code);
 
+static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
+
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -1840,15 +1842,31 @@ void Compiler_bind_meta_group(Compiler c, String name, Token site){
 String Compiler_load_native_module(String);
 Map Compiler_native_module_targets(String);
 void Scope_push(Scope *);
+void x2c_cleanup_push(X2CCleanup *);
 Var Func_apply(Func, unsigned, const FuncArg *);
 void * Var_pointer(Var);
 Var Map_getindex(Map, Var);
-void Scope_pop(void);
+void x2c_cleanup_leave(X2CCleanup *);
 int Compiler_native_meta_accepts(Compiler, Var, List);
 void Lisp_set_global(Lisp, String, Var);
 static String Compiler__stage(Compiler c, String * failure){
   (* failure) = Compiler_groups_meta(c) ? Compiler__unbound(c) : _622;  String module = String_truth((* failure)) ? NULL : Compiler__module(c, &((* failure)));  if(! String_truth(module)) return NULL;  module = Compiler_load_native_module(module);  Map targets = Compiler_native_module_targets(module);  if(!(Map_contains(c -> meta_group_bound, String_var(module)))){
-    Map_setindex(c -> meta_group_bound, String_var(module), int_var(1));  Scope_push(& session_meta_scope);  Func_apply((Var_pointer(Map_getindex(targets, String_var(_623)))), 0, NULL);  Scope_pop();
+    Map_setindex(c -> meta_group_bound, String_var(module), int_var(1)); {
+      Scope_push(& session_meta_scope); {
+        {
+          X2CCleanup _x2c_defer_record_0 ={
+            .fn = _x2c_defer_cleanup_0, .env = 0
+          }
+          ;  x2c_cleanup_push(& _x2c_defer_record_0); {
+            Func_apply((Var_pointer(Map_getindex(targets, String_var(_623)))), 0, NULL);
+          }
+          x2c_cleanup_leave(& _x2c_defer_record_0);
+        }
+
+      }
+
+    }
+
   }
   {
     List entry;  Array _x2c_macro_object_27 = c -> meta_group;  int _x2c_macro_cursor_29 = 0;  Var _x2c_macro_cursor_output_29;  while(Array_try_next(_x2c_macro_object_27, &(_x2c_macro_cursor_29), &(_x2c_macro_cursor_output_29))){
@@ -1903,6 +1921,11 @@ static String _build_module(String directory, String module, List code){
     Var _x2c_literal_part_63 = String_var(directory);  Var _x2c_literal_part_64 = String_var(meta_include_dir);  Var _x2c_literal_part_65 = String_var(String_join(NULL, cons(String_var(directory), cons(String_var(_620), cons(String_var(cfile), NULL)))));  cons(_636, cons(_638, cons(_640, cons(_642, cons(_x2c_literal_part_63, cons(_642, cons(_x2c_literal_part_64, cons(_x2c_literal_part_65, NULL))))))));
   }
   )) -> arguments;  String failure = Compiler_meta_cc_run(arguments, directory);  if(! String_truth(failure)) Path_move_to(output, module);  return failure;
+}
+
+void Scope_pop(void);
+static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
+  Scope_pop();
 }
 
 #undef _x2c_initializer_choice_BF7298EC_0_expanded

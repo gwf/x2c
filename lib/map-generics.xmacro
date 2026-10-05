@@ -356,7 +356,6 @@ macro Unit $map.typed.operations(Type $map, Type $key, Type $value, Name $update
   Name $bad_op,
   Name $capacity_valid,
   Name $value_at,
-  Name $unbox,
   Literal $zero,
   Literal $one,
   Literal $postfix,
@@ -688,10 +687,7 @@ macro Unit $map.core.observe(
   }
 }
 
-macro Unit $map.typed.observation(
-  Type $map, Type $key, Type $value,
-  Name $box_key, Name $box_value
-) {
+macro Unit $map.typed.observation(Type $map) {
   int $map.compare($map, $map);
   String $map.str($map);
   String $map.repr($map);
@@ -948,12 +944,12 @@ macro Unit $map.typed.family(Type $family, Type $key, Type $value,
   Literal $postfix, Literal $owner) {
   $map.typed.operations(
     $family, $key, $value, $update, $bad_arg, $bad_op, $capacity_valid,
-    $value_at, $unbox, $zero, $one, $postfix, $owner, 0);
+    $value_at, $zero, $one, $postfix, $owner, 0);
   $map.typed.convert($family, $unbox);
 }
 
 macro Unit $map.typed.observe(Type $family, Type $key, Type $value,
   Name $box_key, Name $box_value) {
-  $map.typed.observation($family, $key, $value, $box_key, $box_value);
+  $map.typed.observation($family);
   $map.typed.box($family, $key, $value, $box_key, $box_value);
 }

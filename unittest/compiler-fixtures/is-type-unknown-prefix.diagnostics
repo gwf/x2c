@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/is-type-unknown-prefix.x:4:16: type: type ("uint64_trick") has no supported Var tag for operator 'is'
+    return value is uint64_trick;
+                 ^^
+

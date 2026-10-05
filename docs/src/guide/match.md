@@ -51,11 +51,22 @@ Arm order is also cost order, so put cheap, common shapes first.
 
 ### Typed captures and expression guards
 
-Write `?(Type name)` to capture a value as a native typed local. The pattern
+Write `?(typename name)` to capture a value as a native typed local. The pattern
 tests the value's `Var` tag; a different tag fails the pattern without
-converting the value. The supported types are the same as for `value is Type`.
+converting the value. The tag test precedes the native local declaration.
+The supported types are the same as for `value is typename`.
 The `?(` opener must be adjacent; `? (String text)` remains a wildcard
 followed by a sublist pattern.
+
+Inside `?(`, `typename` uses ordinary source type syntax, so write
+`?(String text)` or `?(List payload)`. This is an exception to the pattern's
+bare-spelling rule. The compiler represents a named type such as `String`
+with the type List `%("String")`; `%(String)` instead contains an `Atom`.
+See [type syntax in macro values](../reference/language.md#macro-values).
+
+Typedefs use their underlying `Var` tag. Since `Type` is a typedef for
+`List`, `?(Type type)` tests for a List payload. It does not check whether
+the List contains valid type syntax.
 
 ```x2c
 List reply = %(message "ready");

@@ -107,7 +107,7 @@ performs the conversion implicitly; an unsupported x2c conversion reports
 a type error through `c`. Synthesized operations may add generated
 bindings or immutable literal entries to compiler state.
 
-Source: `src/expressions.x:3345`
+Source: `src/expressions.x:3339`
 
 <a id="Compiler.convert_segment_to_string"></a>
 #### Compiler.convert_segment_to_string
@@ -126,7 +126,7 @@ not equivalent: it
 extracts only a `String` payload and yields empty `String` for every other
 tag.
 
-Source: `src/expressions.x:3538`
+Source: `src/expressions.x:3532`
 
 <a id="Compiler.converter_call"></a>
 #### Compiler.converter_call
@@ -137,7 +137,7 @@ The call to the converter that `type`, or the first of its typedef names
 that declares one, provides for `target`, applied to `expr`, or NULL
 when none declares one.
 
-Source: `src/expressions.x:3673`
+Source: `src/expressions.x:3667`
 
 <a id="Compiler.func_call_parts"></a>
 #### Compiler.func_call_parts
@@ -161,7 +161,7 @@ Source: `src/expressions.x:2176`
 The global builtin boxers and scalar formatters only observe their
 arguments. A custom converter or a shadowed callee may change state.
 
-Source: `src/expressions.x:3725`
+Source: `src/expressions.x:3720`
 
 <a id="Compiler.needs_resolution"></a>
 #### Compiler.needs_resolution
@@ -287,7 +287,7 @@ method receiver, a `foreach` collection, or a raise detail. Parentheses
 and a conditional whose arms are both literals count as the literal; any
 other expression is returned unchanged.
 
-Source: `src/expressions.x:3297`
+Source: `src/expressions.x:3291`
 
 <a id="Compiler.require_var_tag"></a>
 #### Compiler.require_var_tag
