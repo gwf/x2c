@@ -452,7 +452,7 @@ Public functions:
 
 `preproc_directive`, `preproc_conditional_kind`, `preproc_open_state`,
 `preproc_branch_state`, `preproc_visibility`, `preproc_include_target`,
-`preproc_marker_file`, `preproc_defined_name`, `Compiler.scan_conditionals`,
+`preproc_marker_file`, `preproc_macro_name`, `Compiler.scan_conditionals`,
 `Compiler.leading_preproc`, `Compiler.update_source_visibility`,
 `Compiler.note_object_macro`, `preproc_track_arms`, `preproc_within_arms`
 
@@ -571,7 +571,8 @@ Public functions:
 `Sym.is_map_type`, `Sym.is_named_value_type`, `Sym.lookup_field`,
 `Sym.declare_field_order`, `Sym.field_order`, `Sym.declare_delegate_field`,
 `Sym.delegate_aggregate`, `Compiler.begin_semantic_transaction`,
-`SymTxn.local_macros_changed`, `Sym.log_writes`, `Sym.added_globals`,
+`SymTxn.local_macros_changed`, `Sym.begin_import`, `Sym.end_import`,
+`Sym.added_globals`,
 `Sym.end_log`, `SymTxn.commit`, `SymTxn.commit_transient`, `SymTxn.rollback`
 
 ### [src/toolchain.x](../src/toolchain.x)

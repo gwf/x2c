@@ -1261,4 +1261,23 @@ cmp -s "$kept/cold/unit.c" "$kept/warm/unit.c" ||
 ! grep -q 'int kept_' "$kept/warm/unit.c" ||
   fail "an includer declared an unexported import's meta function"
 
+# A declaration written after an import belongs to the file, even when its
+# type is identical to the imported declaration. Both collection paths
+# retain its return type for an including unit's method call.
+redeclared="$BUILD/redeclared-import"
+mkdir -p "$redeclared/cold" "$redeclared/warm"
+echo 'meta String kept_text(String value) => value;' \
+  >"$redeclared/pack.xmacro"
+printf '%s\n' '#include "x2c.x"' '$(import "pack.xmacro")' \
+  'String kept_text(String value);' >"$redeclared/lib.x"
+printf '%s\n' '#include "lib.x"' \
+  'int unit_value(void) => kept_text("hello").len();' >"$redeclared/unit.x"
+(cd "$redeclared" && "$X2C" translate -q --out-dir cold unit.x) ||
+  fail "an explicit declaration after an import lost its return type"
+(cd "$redeclared" && "$X2C" translate -q --out-dir warm lib.x)
+(cd "$redeclared" && "$X2C" translate -q --out-dir warm unit.x) ||
+  fail "a replayed declaration after an import lost its return type"
+cmp -s "$redeclared/cold/unit.c" "$redeclared/warm/unit.c" ||
+  fail "a declaration after an import replayed differently"
+
 echo "header cache probes passed"

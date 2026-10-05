@@ -134,12 +134,12 @@ static Token _macro_directive(String content, int &undefined) {
   return token.type == <ident> ? token : NULL;
 }
 
-/** Returns the name the `#define` line `text` defines, or NULL for any
-    other directive. */
-String preproc_defined_name(String text) {
+/** Returns the macro name a `#define` or `#undef` line names, or NULL
+    for any other directive. */
+String preproc_macro_name(String text) {
   int undefined;
   Token name = _macro_directive(text, undefined);
-  return name && !undefined ? name.text : NULL;
+  return name ? name.text : NULL;
 }
 
 /* conditional arms

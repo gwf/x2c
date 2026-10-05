@@ -68,7 +68,7 @@ static List _without_trivia(List ast) =>
 /* The header and source of `ast` as `(hfile htext cfile ctext)`, named from
    `basename`. */
 static List Compiler._generated_code(Compiler c, List ast, String basename) {
-  List (header, source) = c._header_and_source(ast);
+  List (header, source, macros) = c._header_and_source(ast);
   String hash = filename_hash(c.filename);
   Map bindings;
   (header, source, bindings) = c.setup_cache_init(
@@ -76,7 +76,7 @@ static List Compiler._generated_code(Compiler c, List ast, String basename) {
     %"_x2c_hcache_init_$hash");
   defer bindings.cleanup();
   List hcode = c._emit_header(header);
-  List ccode = c._emit_source(source, header, bindings);
+  List ccode = c._emit_source(source, header, bindings, macros);
   String hfile = %"$basename.h", cfile = %"$basename.c";
   return %(
     $hfile ${c.code_pretty_string(hcode, hfile)}
@@ -89,9 +89,9 @@ static List Compiler._emit_header(Compiler c, List header) =>
 
 /* Static prototypes see the header's declarations as already declared. */
 static List Compiler._emit_source(
-  Compiler c, List source, List header, Map bindings) {
+  Compiler c, List source, List header, Map bindings, List macros) {
   source = c._static_prototypes(c._file_init(source), header);
-  source = c._primary_include(_vertical_spacing(source));
+  source = c._primary_include(_vertical_spacing(source), macros);
   return c.emit(c._patch_main(source), bindings);
 }
 
@@ -219,14 +219,15 @@ static void Partition.mark(Partition &p, List marker) {
 static List Partition.finish(Partition &p) {
   _promote_typedefs(p.header, p.pending);
   List header = _place_typedefs(p.header, p.pending, 1);
-  List source = _replay_directives(_place_typedefs(p.source, p.pending, 0));
+  List (source, macros) =
+    _replay_directives(_place_typedefs(p.source, p.pending, 0));
   Map header_filled = _filled_groups(header);
   Map source_filled = _filled_groups(source);
   header = _place_groups(header, header_filled, source_filled, p.opened, 1);
   source = _place_groups(source, source_filled, header_filled, p.opened, 0);
   header = _typedef_forwards(header, NULL);
   source = _typedef_forwards(source, header);
-  return %($header $source);
+  return %($header $source $macros);
 }
 
 /* private typedefs
@@ -363,9 +364,9 @@ static List _place_typedefs(Array items, Array pending, int header) {
    The source includes the header, so it starts with the macros the
    header's directives leave at its end. When a public directive follows an
    item the source holds, that directive may change what the item sees, so
-   the source repeats every public directive in order. A repeated
-   definition first undefines its name, which the header may leave defined
-   differently. */
+   the source repeats every public directive in order. The source saves
+   their macro names before its header include and restores them afterward,
+   so earlier source sees the incoming definitions, including `-D` values. */
 
 static List _replay_directives(List source) {
   int held = 0, replay = 0;
@@ -376,17 +377,18 @@ static List _replay_directives(List source) {
       default: held = 1;
     }
   Array out = [];
+  Map names = $auto({});
   foreach (List item, source)
     match (item) {
       case %(replay (!set ?node (preproc ?content))): {
         if (!replay) continue;
-        String name = preproc_defined_name(content);
-        if (name) out.push(%(preproc "#undef $name"));
+        String name = preproc_macro_name(content);
+        if (name) names[name] = 1;
         out.push(node);
       }
       default: out.push(item);
     }
-  return out.list_free();
+  return %( ${out.list_free()} ${names.keys().list()} );
 }
 
 // functions
@@ -1349,13 +1351,20 @@ static List _header_guard(List content, String guard) => %(
 /* The source includes its own header, then `error.h` when it raises. A
    cleanup region spells `X2CCleanup` and its push and leave calls, which
    `exception.x` declares. */
-static List Compiler._primary_include(Compiler c, List content) {
+static List Compiler._primary_include(
+  Compiler c, List content, List macros) {
   List own = _include_directive(%"${Path.stem(c.filename)}.h");
   List error =
     ast_contains_head(content, <raise>) ? _include_directive("error.h") : NULL;
   List exception =
     c.needs_exception ? _include_directive("exception.h") : NULL;
-  return %(@{_banner()} @own @error @exception @content);
+  Array before = [], after = [];
+  foreach (String name, macros) {
+    before.push(%(preproc "#pragma push_macro(\"$name\")"));
+    after.push(%(preproc "#pragma pop_macro(\"$name\")"));
+  }
+  return %(@{_banner()} @{before.list_free()} @own @{after.list_free()}
+           @error @exception @content);
 }
 
 static List _include_directive(String fname) =>

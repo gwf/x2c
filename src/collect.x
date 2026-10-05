@@ -391,8 +391,6 @@ static void FileWalk.merge(FileWalk &w, Compiler shadow, Map overlay) {
 void Sym.withhold_import_rows(Sym s, Map published) {
   foreach (Var (key, value), s.file_statics())
     match (%($key)) case %((import-row ?row)): {
-      Var current;
-      if (published.try_get(row, current) && current != value) continue;
       published.del(row);
       match (row)
         case %(?(String name)): published.del(%("unit-static" $name));

@@ -3871,12 +3871,12 @@ void Compiler.parse_macro_lisp_shallow(Compiler c) {
 
 /* The declarations a file-scope import adds stay in the importing file, as
    its macros do. Each is marked `(import-row KEY)` among the file statics
-   with the value the import gave it; `Sym.withhold_import_rows` removes the
-   rows that still hold that value from what the file publishes. */
+   until a declaration outside an import writes the row again.
+   `Sym.withhold_import_rows` removes the remaining rows from publication. */
 static void Compiler._collect_import(Compiler c) {
   Sym sym = c.sym;
-  int mark = sym.log_writes();
-  defer sym.end_log();
+  int mark = sym.begin_import();
+  defer sym.end_import();
   c.keep_imported_meta(c.parse_macro_lisp_top_level());
   foreach (Var (key, value), sym.added_globals(mark))
     sym.put(sym.file_statics(), %(import-row $key), value);
