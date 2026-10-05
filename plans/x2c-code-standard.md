@@ -531,6 +531,263 @@ Evidence in `/tmp/x2c-standard-d2/debug/`: `runtime-baseline-stage-diff-0.log`,
 `runtime-varconvert-diff.log`. Pre-edit C/H and rejected patches and C are
 preserved in `.context/` in that worktree. No bootstrap was refreshed.
 
+### Stage 4: one report-macro statement has a generated C scope (ST-1)
+
+At `ff68eaaa`, `src/literals.x:229` encloses
+`$report.parse.insert_name` in explicit `if` braces. Removing those braces
+changes only the generated `Compiler__parse_named_reference` C block and
+scopes of its two report-macro locals. The attempt fails `make stage-diff-0`;
+its header is unchanged. The braces are restored. Search wrapping and the
+encoding comment pass both stage comparisons across all 220 C/H files.
+
+Evidence in `/tmp/x2c-standard-lint/debug/`:
+`stage4-literals-attempt1.c.diff`, `stage4-literals-attempt1.h.diff`,
+`stage4-literals-after-diff0.log`, `stage4-literals-indent-diff0.log`, and
+`stage4-literals-indent-diff1.log`. No bootstrap expectation changed.
+
+Gary must choose whether this explicit macro scope is an ST-1 exception,
+or permit the reviewed scope-only C delta. This attempt does not establish
+that every alternate spelling changes C. Other violations continue.
+
+### Stage 4: expression cleanup changes retained source coordinates
+
+All eight remaining findings after the initial expression delivery were
+tested independently at the fixed worker base. Every probe builds.
+The CM-2 comment at original line 789 now explains resolved reference
+reads without repeating `_final_value_type`; the ordinary wording happens
+to retain the original byte length. Both complete 220-file C/H comparisons
+pass. Expression violations now fall from the original 16 to seven.
+
+- LY-3 at 128 adds one to six retained macro lines and seven to their
+  byte offsets, and changes two `X2CErrorSite` lines 564/578 to 565/579.
+- LY-3 at 502 keeps line counts but adds one to each of those six macro
+  byte offsets. LY-2 shortening at 963 subtracts ten from those offsets.
+- Each ST-1 brace removal at 595, 2816, 3815, and 3818 changes a nested
+  C scope around report-macro locals; the first also changes retained
+  coordinates. The macro owners in `src/expressions-reports.xmacro`
+  at 31, 173, 301, and 289 explicitly contain a nested block. Unlike
+  the callables and regions expansions, these are valid single
+  statement expansions and all four brace removals build.
+
+All seven failed comparison edits are restored; their headers remain
+unchanged. Gary must choose coordinate and expansion-scope exceptions
+or authorize the separately reviewed generated changes. No expectation
+was changed. A failed spelling does not reject every possible alternative.
+
+Evidence in `/tmp/x2c-standard-lint/debug/` includes
+`stage4-expressions-isolated-results.txt`, the separate
+`stage4-expressions-isolated-*`
+build logs and C/H diffs, and `stage4-expressions-isolated-final-*`
+proof logs. The earlier combined attempt remains preserved in
+`stage4-expressions-attempt1.{c,h}.diff`, but is superseded by these
+individual results.
+
+### Stage 4: leaf-ledger accessors require declarations (FI-6, MO-6)
+
+Deleting the three `Symbol` declarations at `src/ast.x:303-307` fails
+`make build`: `ast`, `emit`, `macros`, and `transform` cannot resolve
+`compound_operator`, `binary_precedence`, or `compound_assignment`.
+Their definitions live in the separate `src/operator-ledger.x` unit,
+which includes `compiler.x`. Deleting the two `Type` table accessors at
+`src/type.x:803-804` also fails `make build`: `fixed_var_tag` and
+`var_tag_row` see untyped table calls and cannot index their results.
+Their definitions live in `src/type-ledger.x`, which includes `type.x`.
+The initial grouped removals and all five subsequent individual removals
+are restored. Each individual removal fails `make build` with the
+corresponding missing method or untyped table indexing result.
+
+FI-6 disallows these declarations in `src/`. MO-6 requires large ledgers
+in units nothing includes. Importing either implementation into its
+consumer would change that ownership boundary and is not attempted.
+Gary must choose a leaf-accessor exception or another dependency design.
+Continue unrelated repairs; no bootstrap or fixture expectation changed.
+
+Full failure logs in `/tmp/x2c-standard-lint/debug/`:
+`stage4-ast-build.log` and `stage4-type-remove-build.log`. Individual
+evidence is in `stage4-ast-individual-{compound,assignment,precedence}`
+build logs, `stage4-type-individual-{builtin-tags,tag-rows}` build logs,
+and the individual results files. Restored `make build` and the complete
+220-file `stage-diff-0` pass in `stage4-ledger-individual-restored-*`.
+
+### Stage 4: linked compile-time builder needs a native declaration (FI-6)
+
+Removing `src/builtins.x:21` and its ownership comment fails `make build`.
+The included `lib/meta.x` declares `x2c_param_make` as compile-time-only;
+without the native declaration, ordinary built-in implementation calls
+report that it can only be called at compile time. The native definition
+is the generated copy in `src/linked-meta.x`. The declaration and comment
+are restored. Changing that compiler/native boundary is not attempted.
+
+Gary must choose whether this linked copy permits an FI-6 exception or
+requires another explicit dependency design. Evidence:
+`/tmp/x2c-standard-lint/debug/stage4-builtins-declaration-build.log`.
+Continue unrelated wrapping repairs; no generated expectation changed.
+
+### Stage 4: cleanup declaration and coordinate constraints
+
+Each of the seven `cleanup.x` declarations was removed independently.
+The four try/catch slot declarations at lines 630-633 cause unknown or
+forward-referenced macro errors at their templates. Removing line 634
+(`builtin_try_cleanup_placement`) fails native binding resolution in
+`builtins.x`. Removing `builtin_defer_record` (859-860) or
+`builtin_defer_captures` (861) builds but changes only retained line and
+byte coordinates in `cleanup.c`; each header is identical. All seven
+removals are restored. FI-6's collection-before-expansion exception names
+`lib/` only; Gary must choose whether these `src/` slots also qualify.
+
+Wrapping the width-81 comment at line 51 and the call at 871 independently
+builds but changes only retained coordinates in `cleanup.c`; headers are
+identical. Both edits are restored pending the coordinate-only choice.
+Three other calls and the repeated blank line are repaired. A readable
+quotation opening preserves the callback's source line; all 220 C/H files
+are identical through stages 0 and 1.
+
+Evidence in `/tmp/x2c-standard-lint/debug/`: the seven
+`stage4-cleanup-builtin_*` build, comparison, and C/H diff logs;
+`stage4-cleanup-declaration-results.txt`; `stage4-cleanup-width*`;
+`stage4-cleanup-defer-wrap*`; and `stage4-cleanup-final-diff0.log` and
+`stage4-cleanup-final-diff1.log`. No expectation changed.
+
+### Stage 4: transform coordinates and report-macro scopes
+
+- The LY-3 wrapping at original `src/transform.x:771` builds, but changes
+  the retained anonymous macro line 793 to 794 and byte offset 29257 to
+  29276. Its header is unchanged. Restore that isolated edit. Gary must
+  choose a source-coordinate exception or authorize this generated delta.
+- Each ST-1 report invocation at original lines 1436, 1533, 1566, 1580,
+  and 1623 was tested separately. Each builds, but removes one nested C
+  scope around report-macro locals. Headers remain unchanged. Restore
+  all five edits. Gary must choose an ST-1 exception for these expansion
+  scopes or authorize their separately reviewed generated differences.
+- The shape argument wrapping at original line 802 passes both complete
+  220-file C/H comparisons. Transform violations fall from seven to six.
+- Evidence: `debug/stage4-transform-probe-results.txt`, the separate
+  `stage4-transform-{statement-wrap,string,numeric,container,operand,index}`
+  build logs and C/H diffs, and `stage4-transform-final-*` proof logs.
+
+### Stage 4: callables source coordinates, names, and macro statements
+
+- All four `src/callables.x` violations were tested independently.
+  Wrapping at 297 changes retained macro lines 335, 357, 349, 353,
+  and 960 by one and their byte offsets by 11. Wrapping at 874 changes
+  macro line 960 by one and byte offset 35869 to 35876. Headers are
+  unchanged. Restore both edits; Gary must choose a coordinate exception
+  or authorize these generated differences.
+- Renaming only the `Callback.split` subject binding from `cb` to `c`
+  builds, but changes its generated parameter declaration and uses.
+  Restore that isolated edit. Gary must choose an NM-2 exception or
+  authorize this binding-preserving generated spelling change.
+- Removing the braces at 1314 fails `make build`: `parse: expected one
+  statement`. `$report.callback.arity` expands a local declaration and
+  call, not one statement. Restore the edit. Gary should review a
+  detector false positive under ST-1, which requires braces for two or
+  more statements, or authorize a macro change. The owner is
+  `src/callable-reports.xmacro:60`: a `String detail` declaration and
+  a `_fail` call. The book rule is
+  `docs/src/guide/macros.md:404-408`: a direct guarded body must be one
+  statement; an unwrapped sequence does not qualify.
+- No callables source edit remains. Violations stay at four. Restored
+  `make build`, `stage-diff-0`, `stage-1`, and `stage-diff-1` pass, with
+  all 220 C/H files equal. Evidence: the separate
+  `debug/stage4-callables-{factory-wrap,shape-wrap,subject,arity}` build
+  logs and C/H diffs, `stage4-callables-probe-results.txt`, and final
+  proof logs.
+
+### Stage 4: region report-macro statement count
+
+- Removing only the ST-1 braces at original `src/regions.x:899` fails
+  `make build` with `parse: expected one statement`. The report macro
+  expands a `String message` declaration and a `warn` call; the owner is
+  `src/region-reports.xmacro:26`. The same book rule in
+  `docs/src/guide/macros.md:404-408` excludes an unwrapped sequence from
+  direct guarded bodies. Restore that edit. Gary should review
+  whether this is a detector false positive under ST-1, which requires
+  braces for two or more statements, or authorize a macro change.
+- The CM-2 comment at 1348 now explains the resolved direct-call
+  signature instead of repeating `_parameter_types`. Violations fall
+  from two to one; all 220 C/H files match in both comparisons.
+- Evidence: `debug/stage4-regions-escape-build.log`, the before/final
+  census files, and `stage4-regions-final-*` proof logs.
+
+### Stage 4: protocol ledger declarations and quoted block
+
+- Removing each FI-6 declaration at original `src/protocol.x:1632` and
+  1634 separately fails `make build`; compiler consumers lose the
+  corresponding `Compiler.operator_member` or `derived_member` method.
+  Both definitions are in `src/operator-ledger.x:32` and 42. That leaf
+  includes `compiler.x`; adding a reverse include conflicts with MO-6.
+  Restore both removals. Gary must choose a leaf-ledger declaration
+  exception or authorize another ownership boundary.
+- Removing only the ST-1 braces inside the quotation at 2422 builds,
+  but changes the retained AST from a block to a statement and a later
+  macro byte offset 89180 to 89176. Headers are unchanged. Restore the
+  edit. Gary must choose a quotation exception or authorize the reviewed
+  AST and coordinate changes. No protocol source edit remains; all
+  three violations remain.
+- Evidence: `debug/stage4-protocol-probe-results.txt`, separate
+  `stage4-protocol-{operator-declaration,derived-declaration,fallback}`
+  logs and diffs. Restored final four-target proof logs compare all
+  220 C/H files unchanged.
+
+### Stage 4: compiler support respellings change generated bytes
+
+The support slice starts at `ff68eaaa`. Its unedited
+`make stage-diff-0` passes for all 220 C/H files. Five violations remain
+held after focused attempts; the affected edits were restored.
+
+- `src/symbols.x:589`, ST-1: removing the single-statement braces in
+  `_check_spelling` changes the emitted `if` body from a C block to a bare
+  statement, and joins the following declaration in the generated layout.
+- `src/compiler.x:1859`, ST-1: removing the `else` braces in
+  `_update_brace_stack` changes the C block and moves the later completion
+  error's `X2CErrorSite.line` from 1946 to 1944.
+- `src/meta-helper-client.x:120` and `:365`, NM-2: shortening the two
+  `Call` subject bindings from `call` to `c` changes only their generated
+  prototype and body parameter spellings, but fails byte comparison.
+- `src/meta-sdk.x:307`, LY-2: wrapping the 80-column `foreach` header and
+  body changes only `MetaContext_reject`'s later error site from line 633
+  to 634. A layout-form alternative is not accepted inside this brace-style
+  file; ordinary wrapping builds successfully but fails the comparison.
+
+The failed command for each built attempt is `make stage-diff-0`.
+Evidence is under `debug/` in the private compiler-support worktree:
+`symbols-stage-diff-0.log`, `compiler-stage-diff-0.log`,
+`meta-helper-client-stage-diff-0.log`, and
+`meta-sdk-stage-diff-0-wrapped.log`. Exact helper and SDK generated deltas
+are in `meta-helper-client-generated.diff` and `meta-sdk-generated.diff`.
+Successful edits in these and other files pass the original stage-0 and
+stage-1 comparisons. No bootstrap, fixture, or lint baseline was changed.
+
+Gary must decide how byte-identical proof applies to these respellings:
+authorize these reviewed generated differences with a fresh bootstrap,
+or retain the five violations. Changing the proof rule or accepting a
+source-location difference requires his decision. Other violations continue.
+
+### Stage 4: macro expression wrap changes a diagnostic location
+
+One violation remains at `src/macros.x:4023`: `wrapped-opening-line`
+(LY-3), in `Compiler._statement_expression`. Moving the outer call's
+arguments to a continuation adds one source line. The generated
+`src/macros.c` then changes only `_lisp_import_hook`'s ErrorSite line
+from 4040 to 4041. `make build` passes, but `make stage-diff-0` fails.
+The attempted wrap was restored. A two-line form with all arguments on
+its continuation would use 85 columns, exceeding LY-2.
+
+Evidence is in the private parser worker's `debug/`:
+`macros-wrap4023-build.log`, `macros-wrap4023-diff0.log`, and
+`macros-wrap4023-generated.diff`. This rejects the tested wrap under the
+required byte comparison; it does not reject all possible repairs.
+
+Other existing findings admit neutral repairs. Two line-preserving wraps,
+a paired width and stacked-blank repair, and deletion of four redundant
+name-restating comments with four wraps reduce macros from 14 violations
+to one. The parse repair reduces one violation to zero. Both complete
+stage comparisons pass for the retained changes, covering 220 C/H files.
+No stage expectation, lint baseline, or bootstrap file changed.
+
+Options for Gary: retain this violation, or permit a reviewed generated
+refresh for this diagnostic location. No padding was added to offset it.
+
 ## Progress
 
 | Stage | Commit | Date | Result |
@@ -549,6 +806,7 @@ preserved in `.context/` in that worktree. No bootstrap was refreshed.
 | 4.emission | `5f8e5484` | 2026-10-05 | 6 -> 0; +16/-14 .x |
 | 4.match | `33c6f09e` | 2026-10-05 | 5 -> 2; +3/-3 .x |
 | 4.targets | `a731b530` | 2026-10-05 | 1 -> 0; +1/-1 .x |
+| 4.parser | `351486a6` | 2026-10-05 | 39 -> 9; +55/-52 .x |
 | D2 partial | `14973621` | 2026-10-05 | +197/-192 .x; four raises held |
 | D2 held | `a7c271f` | 2026-10-05 | +197/-192 .x; 4 raises held |
 | D3 | `f7f886ad` | 2026-10-05 | 9/9 autodiff; +9/-9 .x |
@@ -563,6 +821,9 @@ Stage 4 rows record violation counts and authored `.x` line changes.
 Process, Match, and target repairs compare all 220 C/H with the bootstrap.
 Emission repairs also compare stage 0 with stage 1. Emission commits:
 `5fc3fe75`, `5f8e5484`. Match commits: `7fcd0023`, `c5a66fc7`, `33c6f09e`.
+
+Parser repairs compare all 220 C/H files at stages 0 and 1.
+The complete 108-file census falls from 94 violations to 64.
 
 Stage 3.5 census: 108 compiler and runtime files. The baseline took
 10.63 seconds; the candidate took 10.61 seconds. All 1,599 original
