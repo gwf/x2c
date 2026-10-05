@@ -245,7 +245,10 @@ static void Compiler._walk_file(
       .c = c, .path = path, .text = text, .dir = dir, .globs = globs,
       .visited = visited, .parts = [], .definitions = {},
       .dependencies = _cache_map(), .unit = is_source_file(path), .line = 1};
+    // A cycle sees only the exports collected before its include.
+    visited[path] = w.parts;
     w.split(tokenizer.tokens);
+    visited[path] = 1;
     w.add_defaults();
     w.publish();
   }
@@ -459,6 +462,8 @@ static void FileWalk.include(FileWalk &w, String target, int angle) {
     if (!entry) entry = w.c._walk_cold(target, canonical, w.globs, w.visited);
     w.c._replay_cached(entry, w.globs, w.visited);
   }
+  else if (w.visited[canonical] is <array>)
+    w.c._replay_included(w.globs, canonical, {}, NULL, w.visited);
   _cache_dependency(
     w.dependencies, canonical, w.c._walked_hash(target, canonical));
   w.parts.push(canonical);
@@ -1003,23 +1008,28 @@ Map Compiler.replay_included_package_imports(Compiler c, Map globs) {
     Array exports = [];
     if (part is <map>) c.replay_package_imports(globs, part, exports);
     else if (part is <string>) {
-      c._replay_included(globs, part, visited, exports);
+      c._replay_included(globs, part, visited, exports, NULL);
       if (exports.len()) delivered[part] = exports;
     }
   }
   return delivered;
 }
 
+/* Active walks supply their recorded prefix instead of a completed entry.
+   Replaying only import rows keeps an ancestor's private macros isolated. */
 static void Compiler._replay_included(
-  Compiler c, Map globs, String path, Map visited, Array exports) {
+  Compiler c, Map globs, String path, Map visited, Array exports,
+  Map active) {
   if (path in visited) return;
   visited[path] = 1;
-  List entry = c._entry(path);
-  if (!entry) return; // An unresolved C include has no collection entry.
-  foreach (Var part, entry.car()) {
+  Var prefix = active ? active[path] : void;
+  List entry = prefix is <array> ? NULL : c._entry(path);
+  if (!entry && prefix is not <array>) return;
+  List parts = prefix is <array> ? prefix.array().list() : entry.car();
+  foreach (Var part, parts) {
     if (part is <map>) c.replay_package_imports(globs, part, exports);
     else if (part is <string>)
-      c._replay_included(globs, part, visited, exports);
+      c._replay_included(globs, part, visited, exports, active);
   }
 }
 
