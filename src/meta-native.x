@@ -325,8 +325,9 @@ void Compiler.record_native_meta_effect(
   String path = home_portable_path(absolute_path(c.filename));
   Type type = declaration.type_from_ast().canonicalize();
   String name = c._native_meta_name(declaration, marker);
-  c.sym.set(%("source-node" (declaration $path ${marker.pos})),
-            %(native-meta $name ${c.func_signature(type)}));
+  c.sym.set(
+    %("source-node" (declaration $path ${marker.pos})),
+    %(native-meta $name ${c.func_signature(type)}));
 }
 
 static String Compiler._native_meta_name(
