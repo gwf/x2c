@@ -7,7 +7,7 @@ import "libuv" with UvTcp;
 
 #pragma private
 
-$(import "../src/errors.xmacro")
+$(import "../src/libuv-errors.xmacro")
 $(import "../../../unittest/test-macros.xmacro")
 
 static List seen_detail, seen_location;

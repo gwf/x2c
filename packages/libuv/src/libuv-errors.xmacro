@@ -1,4 +1,4 @@
-/*  errors.xmacro -- package-private libuv error conditions
+/*  libuv-errors.xmacro -- package-private libuv error conditions
 
     Each macro names one condition and raises its Error cause and ordered
     payload at its invocation site.
