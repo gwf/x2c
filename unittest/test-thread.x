@@ -71,7 +71,7 @@ static Var _thread_join_competitor_worker(
 static Var _thread_test_worker(const void *input, size_t input_size) {
   const ThreadTestInput *data = input;
   if (input_size != sizeof(ThreadTestInput))
-    raise %(bad-arg (owner "thread test worker"));
+    raise %(bad-arg (operation "thread test worker"));
   int caught = 0;
   try raise %(worker-loc);
   catch %(worker-loc): caught = 1;
@@ -130,7 +130,7 @@ static Var _thread_logged_error_worker(const void *input, size_t input_size) {
 static Var _thread_private_result_worker(
   const void *input, size_t input_size) {
   if (input_size != sizeof(int))
-    raise %(bad-arg (owner "private result worker"));
+    raise %(bad-arg (operation "private result worker"));
   int value = *((const int *) input);
   String text = String.printf("sealed-worker-result-%d", value);
   return %((value $value) (text $text));
@@ -199,7 +199,7 @@ static Var _thread_void_result_worker(const void *input, size_t input_size) {
 
 static Var _thread_private_error_worker(const void *input, size_t input_size) {
   if (input_size != sizeof(int))
-    raise %(bad-arg (owner "private error worker"));
+    raise %(bad-arg (operation "private error worker"));
   int value = *((const int *) input);
   String text = String.printf("sealed-worker-error-%d", value);
   List detail = %((text $text) (value $value));
@@ -364,7 +364,7 @@ static void thread_ignored_policy_resumes_in_worker(void) {
 static Var _thread_shared_cause_worker(const void *input, size_t input_size) {
   (void) input;
   (void) input_size;
-  raise %(bad-state (owner "shared cause worker"));
+  raise %(bad-state (operation "shared cause worker"));
   return 5;
 }
 
@@ -677,9 +677,9 @@ static void _thread_race_arrive(atomic_int *arrived) {
 /* This site is registered first by the racing workers below. */
 static int _thread_race_classify(int which) {
   try {
-    if (which == 0) raise %(bad-state (owner "race"));
-    if (which == 1) raise %(conv-range (owner "race"));
-    raise %(void-op (owner "race"));
+    if (which == 0) raise %(bad-state (operation "race"));
+    if (which == 1) raise %(conv-range (operation "race"));
+    raise %(void-op (operation "race"));
   }
   catch %(bad-state *): return 10;
   catch %(conv-range *): return 11;

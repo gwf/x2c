@@ -16,7 +16,7 @@ Var String_var(String);
 int generated_increment(int value){
   if(value < 0){
     static const X2CErrorSite _x2c_error_site_0 = {.file = "unittest/compiler-fixtures/macro-prototype-completion.x",.function = "generated_increment",.line = 14};
-    x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("generated_increment")), NULL))));
+    x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("generated_increment")), NULL))));
     __builtin_unreachable();
   }
   return value + 1;

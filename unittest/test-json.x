@@ -20,7 +20,7 @@ static void _expect_rejected(String text, const char *why) {
     printf("  accepted: %s\n", text);
     return;
   }
-  EXPECT_STR_EQ(detail.assoc(<why>).string(), why);
+  EXPECT_STR_EQ(detail.assoc(<reason>).string(), why);
 }
 
 static void json_parse_builds_ordinary_values(void) {
@@ -124,7 +124,7 @@ static void json_rejects_malformed_text_with_position(void) {
   List detail = _rejection("{\n  \"a\": [1,\n  2,]\n}");
   if (EXPECT_NOT_NULL(detail)) {
     EXPECT_STR_EQ(detail.assoc(<operation>).string(), "Json.parse");
-    EXPECT_STR_EQ(detail.assoc(<why>).string(), "unexpected character");
+    EXPECT_STR_EQ(detail.assoc(<reason>).string(), "unexpected character");
     EXPECT_INT_EQ(detail.assoc(<offset>).integer(), 17);
     EXPECT_INT_EQ(detail.assoc(<line>).integer(), 3);
     EXPECT_INT_EQ(detail.assoc(<column>).integer(), 5);

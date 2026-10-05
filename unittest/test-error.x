@@ -10,8 +10,8 @@ static const SymbolSet nonreturning_error_causes =
 /* A plain C string literal is an immutable raise detail. */
 static void error_plain_literal_detail(void) {
   String detail = NULL;
-  try raise %(bad-arg (why ${"plain"}));
-  catch %(bad-arg (why ?why)): detail = why;
+  try raise %(bad-arg (reason ${"plain"}));
+  catch %(bad-arg (reason ?why)): detail = why;
   EXPECT_STR_EQ(detail, "plain");
 }
 
@@ -129,7 +129,7 @@ static void error_catch_arm_leaves_its_registration(void) {
 static Symbol _transfer_from_handler(List errors, Var data) {
   (void) errors;
   (void) data;
-  raise %(bad-state (owner "observer"));
+  raise %(bad-state (operation "observer"));
   return <declined>;
 }
 
@@ -240,7 +240,7 @@ static void error_counted_bridge_records_site_and_pairs(void) {
   x2c_error_raise_n(
     &site, code, 2,
     <bytes>.var(), bytes.var(),
-    <owner>.var(), "probe".var()
+    <operation>.var(), "probe".var()
   );
   List entry = Error.since(mark).car();
   List detail = entry.assoc(<detail>);

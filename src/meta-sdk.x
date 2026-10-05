@@ -630,7 +630,7 @@ List builtin_foreach_collection(List expression) {
 void MetaContext.reject(String message, List notes) {
   Compiler c = active.evaluator;
   if (c) c.report_error(<macro>, message, active.site, notes);
-  raise %(bad-state (operation "x2c SDK rejection") (why $message));
+  raise %(bad-state (operation "x2c SDK rejection") (reason $message));
 }
 
 // SDK operations reject use outside an active expansion.

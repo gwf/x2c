@@ -645,9 +645,9 @@ void Error.policy_set(Symbol code, Symbol disposition) {
   if (!Error.ready()) return;
   if (disposition != <abort> && disposition != <log> &&
       disposition != <collect> && disposition != <ignore>)
-    raise %(bad-arg (owner "Error.policy_set") (dispositio $disposition));
+    raise %(bad-arg (operation "Error.policy_set") (dispositio $disposition));
   if (_never_returns(code) && disposition != <abort>)
-    raise %(bad-arg (owner "Error.policy_set") (code $code)
+    raise %(bad-arg (operation "Error.policy_set") (code $code)
                    (dispositio $disposition));
   ErrorThreadState state = _thread();
   state.floor_only++;
@@ -714,7 +714,7 @@ void *Error.policy_capture(void) {
   capacity *= 2;
   ErrorPolicyCapture capture = malloc(
     sizeof(struct ErrorPolicyCapture) + (size_t) capacity * sizeof(Symbol));
-  if (!capture) raise %(alloc-fail (owner "Error.policy_capture"));
+  if (!capture) raise %(alloc-fail (operation "Error.policy_capture"));
   capture.pairs = (Symbol *) (capture + 1);
   int written = _fill_pairs(state.policy, capture.pairs, 0, capacity);
   capture.count =
@@ -923,7 +923,7 @@ ErrorHandler x2c_error_catch_site_push(
   if (fenced) {
     h._free();
     String fence = String.new(fenced);
-    raise %(size-limit (owner "catch") (arm $arm) (fence $fence));
+    raise %(size-limit (operation "catch") (arm $arm) (fence $fence));
   }
   state.handler_top = h;
   return h;

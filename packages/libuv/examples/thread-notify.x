@@ -17,7 +17,7 @@ typedef struct NotifyState {
 
 static Var add(const void *input, size_t input_size) {
   if (input_size != sizeof(NotifyWork)) {
-    raise %(bad-arg (owner "thread-notify worker"));
+    raise %(bad-arg (operation "thread-notify worker"));
   }
   const NotifyWork *work = input;
   String result = %"${work.left} + ${work.right} = ${work.left + work.right}";

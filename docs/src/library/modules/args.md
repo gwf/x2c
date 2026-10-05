@@ -68,9 +68,9 @@ Map options = Args.parse(%(-vI src -Ilib main.x), spec);
 ~}
 ```
 
-**Raises:** `<bad-arg>` with `why` and the offending `option` or `operand`
+**Raises:** `<bad-arg>` with `reason` and the offending `option` or `operand`
 for an unknown option, a missing or unexpected value, an unexpected
-operand, or a `required` row that was not given; and with `why` and the
+operand, or a `required` row that was not given; and with `reason` and the
 offending `spec` entry for a property or word it cannot read.
 
 Source: `lib/args.x:87`

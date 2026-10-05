@@ -52,7 +52,7 @@ static String _render(List form) {
     case %(title ?value): return value.str().capitalize();
     case %(script *forms): return "".join(forms.map(_render));
   }
-  raise %(bad-arg (owner "_render"));
+  raise %(bad-arg (operation "_render"));
 }
 
 static void _list_dsl(void) {

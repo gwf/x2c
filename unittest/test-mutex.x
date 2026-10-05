@@ -40,7 +40,7 @@ static void mutex_system_lock_failed_acquisition(void) {
   try {
     $lock((Mutex) NULL) { TEST_FAIL("failed lock entered body"); }
   }
-  catch %(bad-state (owner ?owner)): {
+  catch %(bad-state (operation ?owner)): {
     EXPECT_STR_EQ(owner.str(), "Mutex.lock");
     caught = 1;
   }

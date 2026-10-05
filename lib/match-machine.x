@@ -439,8 +439,8 @@ static List MatchMachine._cons_scratch(MatchMachine &m, int length) {
 
 // errors and statistics
 
-/* A code reaches the caller as the `why` detail of the Machine invariant and
-   is told apart by comparison. Each one stays within the ten alphabet
+/* A code reaches the caller as the `reason` detail of the Machine invariant
+   and is told apart by comparison. Each one stays within the ten alphabet
    characters a compact Symbol holds. */
 static void MatchMachine._error(MatchMachine &m, Symbol code) {
   m._rollback(0);
@@ -513,7 +513,7 @@ void MatchMachine.begin(MatchMachine &m, MachineView program, Var input) {
 
    Raises: `<bad-state>` when execution is still running. */
 void MatchMachine.finish(MatchMachine &m) {
-  if (m.running) raise %(bad-state (owner "MatchMachine.finish"));
+  if (m.running) raise %(bad-state (operation "MatchMachine.finish"));
   m._clear_slots();
   m._clear_frames();
   m.slot_count = 0;
@@ -566,7 +566,7 @@ MatchMachine *MatchMachine.acquire(MachineStats *stats) {
   MatchMachine *m = machine_thread.count
     ? machine_thread.spares[--machine_thread.count]
     : calloc(1, sizeof(MatchMachine));
-  if (!m) raise %(alloc-fail (owner "MatchMachine.acquire"));
+  if (!m) raise %(alloc-fail (operation "MatchMachine.acquire"));
   (*m).open();
   m.stats = stats;
   return m;

@@ -128,7 +128,7 @@ meta native String String.unescape(String str) {
   String string = String.malloc(n + 1);
   if (_unescape_into(string, str) < 0) {
     string.free();
-    raise %(bad-arg (owner "String.unescape"));
+    raise %(bad-arg (operation "String.unescape"));
   }
   return string.intern_free();
 }

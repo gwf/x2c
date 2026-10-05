@@ -90,7 +90,7 @@ Map options = NULL
 try options = Args.parse(args, %((--update)))
 catch %(bad-arg *detail):
   Stderr.printf("%s%s: error: %s\n", usage, self.basename(),
-                detail.assoc(<why>))
+                detail.assoc(<reason>))
   return 2
 
 Path slides = root.join("site/src/content/slides")

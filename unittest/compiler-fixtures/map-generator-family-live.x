@@ -17,11 +17,11 @@ struct ProbeMapShortLongRecord { short key; long val; };
 static int probe_hash_calls;
 
 static int _probe_reinsert_error(unsigned capacity, int probe) {
-  raise %(invariant (owner "ProbeMapShortLong.reinsert")
+  raise %(invariant (operation "ProbeMapShortLong.reinsert")
           (capacity $capacity) (probe $probe));
 }
 static void _probe_insert_error(unsigned capacity) {
-  raise %(invariant (owner "ProbeMapShortLong.insert")
+  raise %(invariant (operation "ProbeMapShortLong.insert")
           (capacity $capacity));
 }
 
@@ -65,7 +65,7 @@ static int _probe_value_valid(long *value) {
 }
 
 static void _probe_bad_arg(String owner) {
-  raise %(bad-arg (owner $owner));
+  raise %(bad-arg (operation $owner));
 }
 
 static void _probe_bad_op(Symbol op) {

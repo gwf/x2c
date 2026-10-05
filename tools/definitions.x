@@ -134,7 +134,7 @@ static Var _target(List rest) => rest.cdr() ? rest : rest.car()
 static String _render(Var node, String declarator):
   if node is not <list>: return _joined(node.str(), declarator)
   List parts = node
-  if !parts: raise %(api-fatal (why "empty type node"))
+  if !parts: raise %(api-fatal (reason "empty type node"))
   if !parts.cdr(): return _render(parts.car(), declarator)
   int words = 1
   foreach Var part in parts:
@@ -158,7 +158,7 @@ static String _render(Var node, String declarator):
     return _joined(%"$head ${rest.car()}", declarator)
   List form = head is <list> ? head : NULL
   if !form || (form.car() != <func> && form.car() != <dim>):
-    raise %(api-fatal (why ${%"unknown type node: ${node.repr()}"}))
+    raise %(api-fatal (reason ${%"unknown type node: ${node.repr()}"}))
   if form.car() == <func>:
     return _render(_target(rest),
                    %"$declarator(${_parameters(form.cadr())})")

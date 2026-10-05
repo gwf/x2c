@@ -14,12 +14,12 @@ macro Expression $reason.trailing_backslash() => "pattern ends in a backslash";
 macro Expression $reason.unknown_escape() => "unknown escape";
 
 macro Stmt $error.compile(Expr $why, Expr $pattern, Expr $offset) {
-  raise %(malformed (operation "Regex.compile") (why ${$why})
+  raise %(malformed (operation "Regex.compile") (reason ${$why})
           (pattern ${$pattern}) (offset ${$offset}));
 }
 
 macro Stmt $error.depth(Expr $pattern, Expr $limit) {
   raise %(size-limit (operation "Regex.match") (pattern ${$pattern})
-          (why "a group repeated more times than one match allows")
+          (reason "a group repeated more times than one match allows")
           (limit ${$limit}));
 }

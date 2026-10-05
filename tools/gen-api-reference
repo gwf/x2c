@@ -48,7 +48,7 @@ static String _tier_heading(String tier):
   return "Runtime-internal callables"
 
 static void _fatal(String why):
-  raise %(api-fatal (why $why))
+  raise %(api-fatal (reason $why))
 
 static String _flat(String text) =>
   text ? whitespace.replace_all(text, " ").strip(NULL) : NULL
@@ -844,7 +844,7 @@ if !x2c.exists():
 if requested.len():
   try return _check_paths(requested)
   catch %(api-fatal *detail):
-    Stderr.printf("source documentation: %s\n", detail.assoc(<why>))
+    Stderr.printf("source documentation: %s\n", detail.assoc(<reason>))
     return 1
 try:
   (List pages, String summary) = _build()
@@ -852,5 +852,5 @@ try:
   if check: return _check(pages, summary)
   foreach List entry in pages: printf("--- %s\n", _relative(entry.car()))
 catch %(api-fatal *detail):
-  Stderr.printf("API reference: %s\n", detail.assoc(<why>))
+  Stderr.printf("API reference: %s\n", detail.assoc(<reason>))
   return 1

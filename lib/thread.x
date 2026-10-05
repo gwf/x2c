@@ -98,7 +98,7 @@ static void *_input(Thread thread) =>
 */
 Thread Thread.start(ThreadFn function, const void *input, size_t input_size) {
   if (!function || (input_size && !input))
-    raise %(bad-arg (owner "Thread.start"));
+    raise %(bad-arg (operation "Thread.start"));
   Thread thread = _new_handle(function, input, input_size);
   if (pthread_once(&thread_shutdown_once, _register_shutdown)) {
     Error.policy_release(thread.policy);
@@ -264,7 +264,7 @@ static Symbol _capture_errors(List errors, Var data) {
   if (Error.policy_get(code) != <abort>) return <declined>;
   thread.errors = Error.snapshot_in(
     errors, &thread.result_scope, thread.result_pool);
-  raise %(join-fail (owner "Thread callback"));
+  raise %(join-fail (operation "Thread callback"));
 }
 
 /* Records what escaped the callback so `Thread.join` can report `<join-fail>`.
@@ -292,12 +292,12 @@ static void _worker_failed(Thread thread, int mark) {
     failure transfers instead of returning a sentinel.
 */
 Var Thread.join(Thread t) {
-  if (!t) raise %(bad-arg (owner "Thread.join"));
+  if (!t) raise %(bad-arg (operation "Thread.join"));
   int expected = THREAD_RUNNING;
   if (!__atomic_compare_exchange_n(
     &t.state, &expected, THREAD_JOINING, 0,
     __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST)) {
-    raise %(bad-state (owner "Thread.join"));
+    raise %(bad-state (operation "Thread.join"));
   }
   int error = pthread_join(t.native, NULL);
   if (error) {
@@ -333,6 +333,6 @@ static void _finish_join(Thread thread) {
 */
 void Thread.free(Thread t) {
   if (!t || __atomic_load_n(&t.state, __ATOMIC_SEQ_CST) != THREAD_JOINED)
-    raise %(bad-state (owner "Thread.free"));
+    raise %(bad-state (operation "Thread.free"));
   free(t);
 }

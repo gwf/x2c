@@ -12,7 +12,7 @@ typedef struct Work {
 static Var count(const void *input, size_t input_size) {
   const Work *work = input;
   if (input_size != sizeof(Work))
-    raise %(bad-arg (owner "count worker"));
+    raise %(bad-arg (operation "count worker"));
 
   for (int i = 0; i < work.iterations; i++) {
     String scratch = %"${work.name}-$i";

@@ -24,7 +24,7 @@ int main(int argc, char **argv) {
   }
   Map parsed = NULL;
   try parsed = Args.parse(args, spec);
-  catch %(bad-arg (operation "Args.parse") (why ?why) *): {
+  catch %(bad-arg (operation "Args.parse") (reason ?why) *): {
     Stderr.printf("x2c repl: %s\n", why);
     return 2;
   }

@@ -15,7 +15,7 @@
 #include <unistd.h>
 
 static void fail(String message) {
-  raise %(bad-arg (why $message));
+  raise %(bad-arg (reason $message));
 }
 
 static String expand(String text, Map variables) {

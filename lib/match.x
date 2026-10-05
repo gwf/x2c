@@ -449,11 +449,11 @@ static int _capture_bit(unsigned long bits, int index) =>
     compiles to no program, so answering "no match" would be wrong and no
     caller could tell it from a real miss. `reason` is the plan's static
     category string.
-    Raises: `<size-limit>` naming `owner` and the fence.
+    Raises: `<size-limit>` with `operation` and the fence.
 */
 void MatchPlan.raise_ineligible(const char *reason, const char *owner) {
   String fence = String.new(reason), site = String.new(owner);
-  raise %(size-limit (owner $site) (fence $fence));
+  raise %(size-limit (operation $site) (fence $fence));
 }
 
 /* Entry-point guard over an already prepared plan; `plan` stays owned by

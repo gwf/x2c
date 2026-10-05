@@ -330,7 +330,8 @@ static LogSink _new_sink(
 /* Emission walks the sink list, so changing it from inside an emitter raises,
    as freeing the Logger during delivery does. */
 static void _require_quiescent(Logger logger, String owner) {
-  if (logger && logger.emission_depth != 0) raise %(bad-state (owner $owner));
+  if (logger && logger.emission_depth != 0)
+    raise %(bad-state (operation $owner));
 }
 
 static void _append_sink(Logger logger, LogSink sink) {

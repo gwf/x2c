@@ -1824,7 +1824,7 @@ Var Lisp.eval_file(Lisp l, File source) {
                        (limit $limit));
   }
   if (memchr(content.bytes, '\0', content.length))
-    raise %(bad-arg (operation "Lisp.eval_file") (why "embedded NUL"));
+    raise %(bad-arg (operation "Lisp.eval_file") (reason "embedded NUL"));
   String text = String.new_len(content.bytes, (int) content.length);
   return l.eval_string(text);
 }

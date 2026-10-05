@@ -166,7 +166,7 @@ static void _valid_string(String *value) {
 }
 
 static void _bad_arg(String owner) {
-  raise %(bad-arg (owner $owner));
+  raise %(bad-arg (operation $owner));
 }
 
 static void _bad_op(Symbol op) {

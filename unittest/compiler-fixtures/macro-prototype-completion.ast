@@ -16,7 +16,7 @@
              (op < (expr (int) (ident (binding 3 "value"))) 
               (expr (int) (literal (int) "0")))) 
          (raise (expr ("Symbol") (literal ("Symbol") "bad-arg" bad-arg)) 
-          (args (expr ("Symbol") (literal ("Symbol") "owner" owner)) 
+          (args (expr ("Symbol") (literal ("Symbol") "operation" operation)) 
            (expr ("String") 
             (segments 
              (segexp 

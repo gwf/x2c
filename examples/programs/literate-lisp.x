@@ -881,7 +881,8 @@ static Var _import_file(Interp &self, String path) {
     $fail(<size-limit>, "Lisp.eval_file", <size>, size, <limit>, limit);       // Integers box into the error List.
   }
   if (memchr(content.bytes, '\0', content.length))                              // C library scans the raw bytes.
-    $fail(<bad-arg>, "Lisp.eval_file", <why>, "embedded NUL");                // String details in generated error.
+    // String details in generated error.
+    $fail(<bad-arg>, "Lisp.eval_file", <reason>, "embedded NUL");
   return _eval_text(self, String.new_len(content.bytes, (int) content.length)); // C bytes converted to x2c String.
 }
 

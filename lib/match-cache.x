@@ -297,12 +297,12 @@ static void MatchCache._activate(MatchCache m, int slot, MatchLease *lease) {
     entry state is inconsistent. The failure leaves the lease active.
 */
 void MatchLease.release(MatchLease *lease) {
-  if (!lease) raise %(bad-arg (owner "MatchLease.release"));
+  if (!lease) raise %(bad-arg (operation "MatchLease.release"));
 
   if (!lease.active) return;
   if (lease.transient_plan) {
     if (!lease.cache || lease.cache.active_leases <= 0)
-      raise %(bad-state (owner "MatchLease.release"));
+      raise %(bad-state (operation "MatchLease.release"));
 
     lease.transient_plan.free();
     lease.transient_plan = NULL;
@@ -312,7 +312,7 @@ void MatchLease.release(MatchLease *lease) {
   }
   MatchCacheEntry *entry = lease._entry();
   if (!entry || lease.cache.active_leases <= 0 || entry.pin_count <= 0)
-    raise %(bad-state (owner "MatchLease.release"));
+    raise %(bad-state (operation "MatchLease.release"));
 
   lease.cache.active_leases--;
   entry.pin_count--;
@@ -511,7 +511,7 @@ void MatchCache.context_close(void *token) {
   MatchContextState state = token;
   if (!state) return;
   if (match_thread.context_top != state)
-    raise %(bad-state (owner "MatchCache.context_close"));
+    raise %(bad-state (operation "MatchCache.context_close"));
 
   if (state.cache) state.cache.dispose();
   match_thread.context_top = state.prev;
@@ -543,9 +543,9 @@ void x2c_match_thread_release(void) {
 */
 MatchCache MatchCache.new(int capacity) {
   if (capacity <= 0)
-    raise %(bad-arg (owner "MatchCache.new") (capacity $capacity));
+    raise %(bad-arg (operation "MatchCache.new") (capacity $capacity));
   if (capacity > (INT_MAX - 1) / 2)
-    raise %(size-limit (owner "MatchCache.new") (capacity $capacity));
+    raise %(size-limit (operation "MatchCache.new") (capacity $capacity));
 
   Scope owner = Scope.new_named("Match plan cache");
   MatchCache cache;
@@ -571,7 +571,7 @@ MatchCache MatchCache.new(int capacity) {
 */
 void MatchCache.dispose(MatchCache cache) {
   if (!cache) return;
-  if (cache.active_leases) raise %(bad-state (owner "MatchCache.dispose"));
+  if (cache.active_leases) raise %(bad-state (operation "MatchCache.dispose"));
 
   for (int i = 0; i < cache.capacity; i++) {
     assert(!cache.entries[i].pin_count);

@@ -77,7 +77,7 @@ static Var _why(List args, List spec, Symbol subject) {
   Var result = (String) NULL;
   try Args.parse(args, spec);
   catch %(bad-arg *detail): {
-    String why = detail.assoc(<why>).str();
+    String why = detail.assoc(<reason>).str();
     String text = detail.assoc(subject).str();
     result = %"$why: $text";
   }

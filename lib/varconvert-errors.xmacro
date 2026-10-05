@@ -6,7 +6,7 @@ macro Stmt $error.encoding.bad(Expr $bits) {
 }
 
 macro Stmt $error.convert.void() {
-  raise %(void-op (owner "Var.convert"));
+  raise %(void-op (operation "Var.convert"));
 }
 
 macro Stmt $error.target.invalid(Expr $target) {
@@ -26,11 +26,11 @@ macro Stmt $error.target.numeric(Expr $source_tag, Expr $target) {
 }
 
 macro Stmt $error.decode.output() {
-  raise %(bad-arg (owner "Var.numeric_decode"));
+  raise %(bad-arg (operation "Var.numeric_decode"));
 }
 
 macro Stmt $error.decode.void() {
-  raise %(void-op (owner "Var.numeric_decode"));
+  raise %(void-op (operation "Var.numeric_decode"));
 }
 
 macro Stmt $error.decode.type(Expr $tag) {

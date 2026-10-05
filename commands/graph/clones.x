@@ -36,7 +36,7 @@ static uint64_t _clone_hash(uint64_t head, uint64_t tail) {
 static void CloneIndex._rehash(CloneIndex &index, size_t count) {
   free(index.slots);
   index.slots = calloc(count, sizeof(uint64_t));
-  if (!index.slots) raise %(alloc-fail (owner "graph clones"));
+  if (!index.slots) raise %(alloc-fail (operation "graph clones"));
   index.slot_count = count;
   for (size_t i = 1; i <= index.count; i++) {
     CloneCell cell = index.cells[i];
@@ -61,16 +61,16 @@ static uint64_t CloneIndex._cons(
     slot = (slot + 1) & (index.slot_count - 1);
   }
   if (index.count >= INT_MAX / 2)
-    raise %(size-limit (owner "graph clones"));
+    raise %(size-limit (operation "graph clones"));
   if (index.count + 1 >= index.capacity) {
     index.capacity = index.capacity ? index.capacity * 2 : 1024;
     CloneCell *cells = realloc(
       index.cells, index.capacity * sizeof(CloneCell));
-    if (!cells) raise %(alloc-fail (owner "graph clones"));
+    if (!cells) raise %(alloc-fail (operation "graph clones"));
     index.cells = cells;
     uint64_t *sizes = realloc(
       index.sizes, index.capacity * sizeof(uint64_t));
-    if (!sizes) raise %(alloc-fail (owner "graph clones"));
+    if (!sizes) raise %(alloc-fail (operation "graph clones"));
     index.sizes = sizes;
     index.sizes[0] = 0;
   }
@@ -88,7 +88,7 @@ static uint64_t CloneIndex._atom(CloneIndex &index, Var value) {
   Var found;
   if (index.atoms.try_get(value, found)) return found.integer();
   if (index.atoms.len() >= INT_MAX / 2)
-    raise %(size-limit (owner "graph clones"));
+    raise %(size-limit (operation "graph clones"));
   uint64_t id = index.atoms.len() * 2 + 1;
   value = index.parsed.context.export(value);
   index.atoms[value] = (int) id;
@@ -154,7 +154,7 @@ static uint64_t CloneIndex._list(CloneIndex &index, List node, int origin) {
 
 static uint64_t CloneIndex._value(CloneIndex &index, Var value, int origin) {
   if (index.sequence == INT_MAX)
-    raise %(size-limit (owner "graph clones"));
+    raise %(size-limit (operation "graph clones"));
   int start = index.sequence++;
   if (value is not <list>) return index._atom(value);
   List node = value;

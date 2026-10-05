@@ -177,7 +177,7 @@ void Atom.initialize(void) {
     .write_repr = Atom.write_repr
   };
   if (!x2c_try_register_descriptor("lsym", methods))
-    raise %(init-fail (owner "Atom"));
+    raise %(init-fail (operation "Atom"));
   initialized = 1;
 }
 
@@ -217,7 +217,7 @@ static int _decodes_to(Symbol compact, String canonical, int length) {
     pointer cannot be boxed.
 */
 Atom Atom.intern(String spelling) {
-  if (!spelling || !*spelling) raise %(bad-arg (owner "Atom.intern"));
+  if (!spelling || !*spelling) raise %(bad-arg (operation "Atom.intern"));
   String canonical = String.new(spelling), int length = canonical.len();
   Symbol compact = Symbol.new_len(canonical, length);
   if (_decodes_to(compact, canonical, length))

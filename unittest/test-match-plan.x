@@ -1022,7 +1022,7 @@ static void source_site_reports_a_fence_like_the_operation(void) {
   int caught = 0;
   for (int round = 0; round < 2; round++) {
     try x2c_match_site_search(&fenced_site, %(x), fenced);
-    catch %(size-limit (owner ?who) (fence ?seen)): {
+    catch %(size-limit (operation ?who) (fence ?seen)): {
       caught++;
       EXPECT_STR_EQ(seen.str(), "segment-width");
       EXPECT_STR_EQ(who.str(), "List.search");

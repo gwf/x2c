@@ -375,7 +375,7 @@ else zero, an empty `List`, or a NULL `String`, all of which test false.
 Values stay `String`s; convert one to a number where a number is needed.
 
 An unknown option, a missing or unexpected value, an extra operand, or a
-missing `required` row raises `<bad-arg>` with `why` and the offending
+missing `required` row raises `<bad-arg>` with `reason` and the offending
 `option` or `operand`. The script chooses the message and the exit status.
 `Args.usage` returns help text generated from the same spec:
 
@@ -478,7 +478,7 @@ has all of those and Unicode. Its types are `Regexp`, `RegexpMatch`, and
 with those names, rename the types, and add the options argument to
 `compile`.
 
-A pattern that does not parse raises `<malformed>` with `why`, the
+A pattern that does not parse raises `<malformed>` with `reason`, the
 `pattern`, and the zero-based byte `offset` of the problem. So does a count
 above `INT_MAX`, 2147483647.
 
@@ -630,7 +630,7 @@ Json.write_file(report, "/tmp/report.json");
 ~}
 ```
 
-Text that is not JSON raises `<malformed>` with `why`, a zero-based byte
+Text that is not JSON raises `<malformed>` with `reason`, a zero-based byte
 `offset`, and one-based `line` and `column` details; `Json.read_file` adds
 the `path`. Parsing raises the same cause for nesting deeper than 512 arrays
 and objects, a number too large for a `double`, an unpaired surrogate
@@ -642,7 +642,7 @@ escape, and `\u0000`, which a `String` cannot hold:
 try Json.read_file("settings.json");
 catch %(malformed *detail):
   printf("settings.json:%ld:%ld: %s\n", detail.assoc(<line>),
-         detail.assoc(<column>), detail.assoc(<why>));
+         detail.assoc(<column>), detail.assoc(<reason>));
 ~  return 0;
 ~}
 ```

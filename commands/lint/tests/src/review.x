@@ -13,7 +13,7 @@ static int count, hits, total;
 
 void Checker.report_error(Checker c, String why) {
   c.errors++;
-  raise %(bad-arg (why $why));
+  raise %(bad-arg (reason $why));
 }
 
 /* A return after an operation that never returns. */
@@ -32,7 +32,7 @@ int Checker.check_pair(Checker c, List node) {
 
 int raise_then_return(int value) {
   if (value < 0) {
-    raise %(bad-state (why "negative"));
+    raise %(bad-state (reason "negative"));
     return 0;
   }
   return value;

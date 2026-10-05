@@ -107,7 +107,7 @@ typedef struct Reader {
     `long`, then an `unsigned long`; any other number is a `double`. JSON
     null is the all-zero `Var`, and true and false are `JsonBool`s. A
     repeated object name keeps its last value.
-    Raises: `<malformed>` with `why`, `offset`, `line`, and `column` details
+    Raises: `<malformed>` with `reason`, `offset`, `line`, and `column` details
     when `source` is not one JSON value surrounded only by whitespace, nests
     arrays and objects more than 512 deep, or contains a number too large for
     a `double`, an unpaired surrogate escape, or `\u0000`.

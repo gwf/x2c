@@ -181,7 +181,7 @@ int Iter.try_next(Iter iter, Var &?out) {
     iter.next = NULL;
     return 0;
   }
-  if (out is void) raise %(void-op (owner "Iter.try_next"));
+  if (out is void) raise %(void-op (operation "Iter.try_next"));
   return 1;
 }
 
@@ -225,7 +225,7 @@ Iter Iter.iter(Iter x, Iter dest) {
 */
 meta native Iter range(int start, int end, int step, Iter iter) {
   if (!iter) return NULL;
-  if (!step) raise %(bad-arg (owner "range") (step $step));
+  if (!step) raise %(bad-arg (operation "range") (step $step));
   if (step == 1)
     return iter.init(
       _range_raw_int(end), _range_up_next, _range_raw_int(start));
@@ -699,11 +699,11 @@ static int _unzip_ensure(UnzipShared *shared, int column) {
 
 static void _unzip_buffer_push(UnzipShared *shared, Var pair) {
   if (pair is not <list>)
-    raise %(bad-types (owner "Iter.unzip") (want "two-element List")
+    raise %(bad-types (operation "Iter.unzip") (want "two-element List")
             (value $pair));
   List list = pair;
   if (!list || !list.cdr() || list.cdr().cdr())
-    raise %(bad-arg (owner "Iter.unzip") (want "two-element List")
+    raise %(bad-arg (operation "Iter.unzip") (want "two-element List")
             (value $pair));
   Var (first, second) = list;
   shared.buffers[0].push(first);

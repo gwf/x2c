@@ -167,7 +167,7 @@ typedef struct ReplCallbackContext {
 static Var _lisp_func_adapter(Func function, const FuncArg *arguments) {
   ReplCallbackContext *context = (void *) function.context();
   if (!Lisp.active() || Lisp.active() != context.lisp)
-    raise %(bad-state (operation "Lisp callback") (why "wrong session"));
+    raise %(bad-state (operation "Lisp callback") (reason "wrong session"));
   Var argv = Var.new(<p48>, arguments);
   return context.lisp.apply(context.callable, %($function $argv));
 }

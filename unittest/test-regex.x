@@ -186,7 +186,7 @@ static void regex_rejects_bad_patterns(void) {
     try Regex.compile(pattern);
     catch %(malformed *detail): {
       caught = 1;
-      EXPECT_STR_EQ(detail.assoc(<why>).string(), row.cadr().string());
+      EXPECT_STR_EQ(detail.assoc(<reason>).string(), row.cadr().string());
       EXPECT_STR_EQ(detail.assoc(<pattern>).string(), pattern);
       EXPECT_INT_EQ(detail.assoc(<offset>).integer(),
                     row.caddr().integer());

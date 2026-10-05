@@ -466,7 +466,7 @@ static void filtered_catch_selects_exact_and_later_arms(void) {
   Error.initialize();
   int selected = 0, count = 0;
   try {
-    raise %(alloc-fail (bytes 42) (owner "fixture"));
+    raise %(alloc-fail (bytes 42) (operation "fixture"));
   }
   catch %(invariant): selected = 1;
   catch %(alloc-fail * (bytes ?bytes) *): {

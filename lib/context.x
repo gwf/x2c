@@ -73,7 +73,7 @@ static ContextThreadState _thread(void) => &context_thread;
     allocation, hashing, equality, or custom export. */
 meta native Var Context.export(Context context, Var value) {
   if (!context || _thread().current != context)
-    raise %(bad-state (owner "Context.export"));
+    raise %(bad-state (operation "Context.export"));
   return context._export_value(value);
 }
 
@@ -116,7 +116,7 @@ static Var Context._export_value(Context c, Var v) {
   Var custom;
   if (v.try_export_context(c, custom)) return custom;
   Symbol tag = v.tag();
-  raise %(bad-types (owner "Context.export") (tag $tag));
+  raise %(bad-types (operation "Context.export") (tag $tag));
 }
 
 static Var Context._export_wide(Context c, Var v) {
@@ -331,7 +331,8 @@ meta native Context Context.current(void) => _thread().current;
     `Match`
     cache has an active lease. The failure leaves the `Context` active. */
 meta native void Context.close(Context c) {
-  if (!c || _thread().current != c) raise %(bad-state (owner "Context.close"));
+  if (!c || _thread().current != c)
+    raise %(bad-state (operation "Context.close"));
 
   /* Match and Error teardown can still use Context-owned values. Release the
      private canonical pool before its Scope, restore the destination Scope

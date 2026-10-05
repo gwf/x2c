@@ -831,7 +831,7 @@ void x2c_initialize(void) {
 /** Normalizes one element index against `length`. */
 int x2c_normalize_index(int index, int length) {
   if (length < 0)
-    raise %(bad-arg (owner "x2c_normalize_index") (length $length));
+    raise %(bad-arg (operation "x2c_normalize_index") (length $length));
   if (index < 0) index += length;
   if (index < 0 || index >= length) return -1;
   return index;
@@ -851,7 +851,7 @@ int x2c_normalize_index(int index, int length) {
 /** Normalizes slice bounds and returns the resulting element count. */
 int x2c_normalize_slice(int *start, int *stop, int step, int length) {
   if (!start || !stop || !step || length < 0)
-    raise %(bad-arg (owner "x2c_normalize_slice"));
+    raise %(bad-arg (operation "x2c_normalize_slice"));
   int orig_stop = *stop;
   if (*start == INT_MIN) *start = (step > 0) ? 0 : length - 1;
   if (*stop == INT_MIN) *stop = -1;

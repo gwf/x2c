@@ -68,7 +68,7 @@ int x2c_static_acquire(
   while (!__atomic_load_n(&guard.ready, __ATOMIC_RELAXED) && guard.owner) {
     if (_cycle(guard, self)) {
       _unlock();
-      raise %(bad-state (owner "static initialization")
+      raise %(bad-state (operation "static initialization")
               (reason "recursive or cyclic initialization"));
     }
     self.waiting = guard;
@@ -87,7 +87,7 @@ int x2c_static_acquire(
     void *payload = NULL;
     if (posix_memalign(&payload, alignment, size ? size : 1)) {
       x2c_static_abort(guard);
-      raise %(alloc-fail (owner "static initialization"));
+      raise %(alloc-fail (operation "static initialization"));
     }
     _lock();
     guard.payload = payload;

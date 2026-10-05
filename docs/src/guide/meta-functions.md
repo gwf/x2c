@@ -1718,7 +1718,7 @@ sample.x:2:1: macro: compile-time Lisp evaluation failed
   $(defun filter (a b) 42)
   ^^
   note: form: (defun filter (a b) 42) error: (bad-state (operation "def")
-  (why "inherited") (name filter))
+  (reason "inherited") (name filter))
 ```
 
 The library holds many ordinary words, so the name to avoid is often one you

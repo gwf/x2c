@@ -23,11 +23,11 @@ macro Stmt $error.def.protected(Expr $name) {
 }
 
 macro Stmt $error.def.inherited(Expr $name) {
-  raise %(bad-state (operation "def") (why "inherited") (name ${$name}));
+  raise %(bad-state (operation "def") (reason "inherited") (name ${$name}));
 }
 
 macro Stmt $error.def.frozen(Expr $name) {
-  raise %(bad-state (operation "def") (why "frozen") (name ${$name}));
+  raise %(bad-state (operation "def") (reason "frozen") (name ${$name}));
 }
 
 macro Stmt $error.cond.empty() {
@@ -81,7 +81,7 @@ macro Stmt $error.apply.interrupted() {
 }
 
 macro Stmt $error.apply.steps() {
-  raise %(call-stack (operation "apply") (why "steps"));
+  raise %(call-stack (operation "apply") (reason "steps"));
 }
 
 macro Stmt $error.apply.stack(Expr $body) {
