@@ -3843,7 +3843,7 @@ static int Compiler__group_comma(Compiler c){
 }
 
 static int Compiler__destructure_starts(Compiler c){
-  Token token = c -> token;  if(token -> type != 81) return 0;  token = Token_skip_trivia(token + 1);  if(token -> type != 19147688) return 0;  token = Token_skip_trivia(token + 1);  return token -> type == 89;
+  Token token = c -> token;  if(token -> type != 81) return 0;  token = Token_skip_trivia(token + 1);  if(token -> type != 19147688) return 0;  token = Token_skip_trivia(token + 1);  return token -> type == 89 && ! Compiler__parameters_follow(c);
 }
 
 List Compiler_anchor_origin(Compiler, List, Token);
