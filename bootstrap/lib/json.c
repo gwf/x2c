@@ -612,7 +612,7 @@ _Noreturn static void Reader__fail(Reader * r, String why){
     Var _x2c_literal_part_2 = String_var((* r).path);
     {
       static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/json.x",.function = "Reader__fail",.line = 352};
-      x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 6, Symbol_var(34096809266140), _x2c_literal_part_1, Symbol_var(1051920), _x2c_literal_part_2, Symbol_var(47666), String_var(why), Symbol_var(1019648360), int_var(offset), Symbol_var(805770), int_var(line), Symbol_var(233614172), int_var(column));
+      x2c_error_raise_n(& _x2c_error_site_1, 28682226919752, 6, Symbol_var(34096809266140), _x2c_literal_part_1, Symbol_var(1051920), _x2c_literal_part_2, Symbol_var(47666), String_var(why), Symbol_var(1019648360), int_var(offset), Symbol_var(805770), int_var(line), Symbol_var(233614172), int_var(column));
       __builtin_unreachable();
     }
 
@@ -621,7 +621,7 @@ _Noreturn static void Reader__fail(Reader * r, String why){
     Var _x2c_literal_part_3 = String_var(String_join(NULL, cons(String_var(String_new("Json.parse")), NULL)));
     {
       static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/json.x",.function = "Reader__fail",.line = 354};
-      x2c_error_raise_n(& _x2c_error_site_2, 4372499598, 5, Symbol_var(34096809266140), _x2c_literal_part_3, Symbol_var(47666), String_var(why), Symbol_var(1019648360), int_var(offset), Symbol_var(805770), int_var(line), Symbol_var(233614172), int_var(column));
+      x2c_error_raise_n(& _x2c_error_site_2, 28682226919752, 5, Symbol_var(34096809266140), _x2c_literal_part_3, Symbol_var(47666), String_var(why), Symbol_var(1019648360), int_var(offset), Symbol_var(805770), int_var(line), Symbol_var(233614172), int_var(column));
       __builtin_unreachable();
     }
 
