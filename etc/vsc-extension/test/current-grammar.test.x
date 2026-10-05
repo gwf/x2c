@@ -272,6 +272,23 @@ macro expression $project.make(expr $value, type $kind) => ($value) + 1;
 //                                          ^^^^ storage.type.macro.hole.x2c
 //                                               ^ punctuation.definition.macro.sigil.x2c
 //                                                      ^^ keyword.operator.arrow.x2c
+List type_code = $!Type{ int * };
+//               ^^ punctuation.definition.macro.sigil.x2c
+//                 ^^^^ storage.type.macro.result.x2c
+List param_code = $!Param{ int $name };
+//                ^^ punctuation.definition.macro.sigil.x2c
+//                  ^^^^^ storage.type.macro.result.x2c
+List unit_code = $!Unit{ int $name; };
+//               ^^ punctuation.definition.macro.sigil.x2c
+//                 ^^^^ storage.type.macro.result.x2c
+List typed_code = $!int{ $value };
+//                ^^ punctuation.definition.macro.sigil.x2c
+List paren_code = $!(int){ $value };
+//                ^^ punctuation.definition.macro.sigil.x2c
+List expr_code = $!( $value + 1 );
+//               ^^ punctuation.definition.macro.sigil.x2c
+List stmt_code = $!{ return $value; };
+//               ^^ punctuation.definition.macro.sigil.x2c
 static int local_macro_grammar(void) {
   macro Expression local_value(Expr $value) => $value;
 //^^^^^ keyword.declaration.macro.x2c

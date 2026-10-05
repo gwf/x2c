@@ -56,7 +56,8 @@ artifacts, which do not retain declaration locations. Binding locations pass
 through actual symbol contributions and scope identities. They are not
 reconstructed by matching source spellings or by parsing another AST.
 Definitions and types are unavailable when the compiler has not collected the
-declaration, such as a local `Unit` macro expansion in an included file.
+declaration. File-defined `Unit` macros contribute declarations when the
+compiler can expand them during collection.
 
 Native CPP modes read disk through the selected native toolchain. A changed
 primary is rejected before preprocessing; actual dependency/source reads are

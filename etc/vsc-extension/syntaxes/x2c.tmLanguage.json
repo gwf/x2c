@@ -3947,6 +3947,13 @@
 		"x2c_literals": {
 			"patterns": [
 				{
+					"match": "(\\$!)(?:(Type|Param|Unit)\\b)?",
+					"captures": {
+						"1": { "name": "punctuation.definition.macro.sigil.x2c" },
+						"2": { "name": "storage.type.macro.result.x2c" }
+					}
+				},
+				{
 					"include": "#x2c_current_symbol_set_literal"
 				},
 				{
