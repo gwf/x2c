@@ -47,6 +47,8 @@ static Ast Compiler__step(Compiler c, Ast ast);
 
 static Ast Compiler__step_tag(Compiler c, Ast ast, Symbol tag);
 
+static Ast Compiler__default_node(Compiler c, Ast ast);
+
 static Ast Compiler__finish(Compiler c, Ast ast);
 
 static Ast Compiler__sequence(Compiler c, Ast ast, int value_tail);
@@ -56,6 +58,8 @@ static Ast Compiler__sequence_item(Compiler c, Ast value, int value_tail);
 static Ast Compiler__statement_value(Compiler c, Ast value, Var expression);
 
 static Ast Compiler__sequence_tail(Compiler c, Ast node, Ast tail);
+
+static Ast Compiler__anchored_sequence(Compiler c, Ast node, Ast tail, Var parent);
 
 static List Compiler__splice_items(Compiler c, List items, Var parent);
 
@@ -1604,7 +1608,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void){
   _1168 = cons(_1167, NULL);
   _1169 = cons(_626, _1168);
   _1170 = List_var(_1169);
-  _1171 = int_var(802);
+  _1171 = int_var(810);
   _1172 = cons(_1171, NULL);
   _1173 = cons(_632, _1172);
   _1174 = List_var(_1173);
@@ -1612,7 +1616,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void){
   _1176 = cons(_1175, NULL);
   _1177 = cons(_637, _1176);
   _1178 = List_var(_1177);
-  _1179 = int_var(29618);
+  _1179 = int_var(29912);
   _1180 = cons(_1179, NULL);
   _1181 = cons(_645, _1180);
   _1182 = List_var(_1181);
@@ -1725,11 +1729,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void){
   _1289 = cons(_1288, NULL);
   _1290 = cons(_596, _1289);
   _1291 = List_var(_1290);
-  _1292 = int_var(710);
+  _1292 = int_var(718);
   _1293 = cons(_1292, NULL);
   _1294 = cons(_632, _1293);
   _1295 = List_var(_1294);
-  _1296 = int_var(26073);
+  _1296 = int_var(26367);
   _1297 = cons(_1296, NULL);
   _1298 = cons(_645, _1297);
   _1299 = List_var(_1298);
@@ -1813,11 +1817,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void){
   _1377 = cons(_1376, NULL);
   _1378 = cons(_596, _1377);
   _1379 = List_var(_1378);
-  _1380 = int_var(706);
+  _1380 = int_var(714);
   _1381 = cons(_1380, NULL);
   _1382 = cons(_632, _1381);
   _1383 = List_var(_1382);
-  _1384 = int_var(26007);
+  _1384 = int_var(26301);
   _1385 = cons(_1384, NULL);
   _1386 = cons(_645, _1385);
   _1387 = List_var(_1386);
@@ -1954,11 +1958,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void){
   _1518 = cons(_1517, NULL);
   _1519 = cons(_596, _1518);
   _1520 = List_var(_1519);
-  _1521 = int_var(701);
+  _1521 = int_var(709);
   _1522 = cons(_1521, NULL);
   _1523 = cons(_632, _1522);
   _1524 = List_var(_1523);
-  _1525 = int_var(25892);
+  _1525 = int_var(26186);
   _1526 = cons(_1525, NULL);
   _1527 = cons(_645, _1526);
   _1528 = List_var(_1527);
@@ -3159,7 +3163,7 @@ static Ast Compiler__step(Compiler c, Ast ast){
 
     }
   }
-Var head = List_car(ast);  if(! Var_is(head, 1328354264)) return Compiler__children(c, ast);
+Var head = List_car(ast);  if(! Var_is(head, 1328354264)) return Compiler__default_node(c, ast);
   {
     List _x2c_match_expr = ast;
     Var _x2c_match_values[5];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 5 };
@@ -3186,9 +3190,15 @@ Var List_cadr(List);
 int List_equal(List, List);
 static Ast Compiler__step_tag(Compiler c, Ast ast, Symbol tag){
   Ast next = ast;  switch(tag){
-    case 1139215899608 : case 2391080 : case 895740748108 : case 26416091224 : return ast;  case 377892 : return Compiler__expression_node(c, ast);  case 3313778 : case 1479708786 : next = transform_array_literal(c, ast);  break;  case 26720 : case 1468512 : next = transform_map_literal(c, ast);  break;  case 199912 : next = Compiler__cast(c, ast);  break;  case 19800432 : next = Compiler__index(c, ast);  break;  case 228262 : case 101723016 : return Compiler__ordered_list(c, ast);  case 45156 : next = Compiler__to_var(c, Var_list(List_cadr(ast)));  break;  case 1316904858918 : next = Compiler__string_segments(c, ast);  break;  case 8932560010 : case 272600 : next = Compiler__declaration(c, ast);  break;  case 317060294872 : next = Compiler__destructure_declaration(c, ast);  break;  case 41184168 : next = Compiler__destructure_statement(c, ast);  break;  case 317060127196 : next = Compiler__destructure_value(c, ast);  break;  case 27369680 : next = Compiler__match_cases(c, ast);  break;  case 8728932 : next = Compiler__defer_node(c, ast);  break;  case 1219800220 : next = Compiler__return(c, ast);  break;  case 37833930 : return Compiler__raise_node(c, ast);  case 588 : case 48777994 : case 286 : case 13284 : next = Compiler__truthy(c, ast);  break;  case 199448 : next = Compiler__call(c, ast);  break;  case 992 : next = Compiler__operator(c, ast);  break;  case 35407540848 : next = Compiler__postfix(c, ast);  break;
+    case 1139215899608 : case 2391080 : case 895740748108 : case 26416091224 : return ast;  case 377892 : return Compiler__expression_node(c, ast);  case 3313778 : case 1479708786 : next = transform_array_literal(c, ast);  break;  case 26720 : case 1468512 : next = transform_map_literal(c, ast);  break;  case 199912 : next = Compiler__cast(c, ast);  break;  case 19800432 : next = Compiler__index(c, ast);  break;  case 228262 : case 101723016 : return Compiler__ordered_list(c, ast);  case 45156 : next = Compiler__to_var(c, Var_list(List_cadr(ast)));  break;  case 1316904858918 : next = Compiler__string_segments(c, ast);  break;  case 8932560010 : case 272600 : next = Compiler__declaration(c, ast);  break;  case 317060294872 : next = Compiler__destructure_declaration(c, ast);  break;  case 41184168 : next = Compiler__destructure_statement(c, ast);  break;  case 317060127196 : next = Compiler__destructure_value(c, ast);  break;  case 27369680 : next = Compiler__match_cases(c, ast);  break;  case 8728932 : next = Compiler__defer_node(c, ast);  break;  case 1219800220 : next = Compiler__return(c, ast);  break;  case 37833930 : return Compiler__raise_node(c, ast);  case 588 : case 48777994 : case 286 : case 13284 : next = Compiler__truthy(c, ast);  break;  case 199448 : next = Compiler__call(c, ast);  break;  case 992 : next = Compiler__operator(c, ast);  break;  case 35407540848 : next = Compiler__postfix(c, ast);  break;  default: return Compiler__default_node(c, ast);
   }
   if(! List_equal(next, ast)) return Compiler__step(c, next);  return Compiler__finish(c, ast);
+}
+
+#endif
+#ifndef X2C_TRANSFORM_SOURCE
+static Ast Compiler__default_node(Compiler c, Ast ast){
+  return ! Var_is(List_car(ast), 1328354264) ? Compiler__children(c, ast) : Compiler__finish(c, ast);
 }
 
 #endif
@@ -3279,32 +3289,30 @@ static Ast Compiler__statement_value(Compiler c, Ast value, Var expression){
 #endif
 #ifndef X2C_TRANSFORM_SOURCE
 static Ast Compiler__sequence_tail(Compiler c, Ast node, Ast tail){
-  List payload = Ast_without_origin(node);
-  {
-    List _x2c_match_expr = node;
-    Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
-    switch (Var_symbol(car(_x2c_match_expr))) {
-      case 104: ;  static MatchCaptureSite _x2c_match_site_11;  if (x2c_match_site_try_capture(& _x2c_match_site_11, _x2c_match_expr, List_var(_108), &_x2c_match_capture)) {Var parent = _x2c_match_values[0];
-  {
-    List _x2c_match_expr = payload;
-    Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
-    switch (Var_symbol(car(_x2c_match_expr))) {
-      case 39266: ;  static MatchCaptureSite _x2c_match_site_10;  if (x2c_match_site_try_capture(& _x2c_match_site_10, _x2c_match_expr, List_var(_82), &_x2c_match_capture)) {List items = Var_list(_x2c_match_values[0]);  return List_append(Compiler__splice_items(c, items, parent), tail);  break;
-}
-default: break;
-    }
-  }
-break;
-}
-default: break;
-    }
-  }
 
   {
     List _x2c_match_expr = node;
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (Var_symbol(car(_x2c_match_expr))) {
-      case 39266: ;  static MatchCaptureSite _x2c_match_site_12;  if (x2c_match_site_try_capture(& _x2c_match_site_12, _x2c_match_expr, List_var(_82), &_x2c_match_capture)) {List items = Var_list(_x2c_match_values[0]);  return List_append(items, tail);  break;
+      case 104: ;  static MatchCaptureSite _x2c_match_site_10;  if (x2c_match_site_try_capture(& _x2c_match_site_10, _x2c_match_expr, List_var(_108), &_x2c_match_capture)) {Var parent = _x2c_match_values[0];  return Compiler__anchored_sequence(c, node, tail, parent);  break;
+}
+case 39266: ;  static MatchCaptureSite _x2c_match_site_11;  if (x2c_match_site_try_capture(& _x2c_match_site_11, _x2c_match_expr, List_var(_82), &_x2c_match_capture)) {List items = Var_list(_x2c_match_values[0]);  return List_append(items, tail);  break;
+}
+default: break;
+    }
+  }
+return cons(List_var(node), tail);
+}
+
+#endif
+#ifndef X2C_TRANSFORM_SOURCE
+static Ast Compiler__anchored_sequence(Compiler c, Ast node, Ast tail, Var parent){
+
+  {
+    List _x2c_match_expr = Ast_without_origin(node);
+    Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
+    switch (Var_symbol(car(_x2c_match_expr))) {
+      case 39266: ;  static MatchCaptureSite _x2c_match_site_12;  if (x2c_match_site_try_capture(& _x2c_match_site_12, _x2c_match_expr, List_var(_82), &_x2c_match_capture)) {List items = Var_list(_x2c_match_values[0]);  return List_append(Compiler__splice_items(c, items, parent), tail);  break;
 }
 default: break;
     }

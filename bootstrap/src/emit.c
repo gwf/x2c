@@ -162,6 +162,8 @@ static List Emitter__declarator(Emitter * e, List decl, List mods);
 
 static List Emitter__list_declarator(Emitter * e, List decl, Type mod);
 
+static List Emitter__bitfield_declarator(Emitter * e, List * mods);
+
 static List _native_declarator(List decl, List * mods, Symbol sym);
 
 static List Emitter__array_declarator(Emitter * e, List decl, List dimension);
@@ -2243,7 +2245,7 @@ static List Emitter__declarator(Emitter * e, List decl, List mods){
       decl = Emitter__list_declarator(&((* e)), decl, Var_type(first));  mods = List_cdr(mods);  continue;
     }
     Symbol sym = Var_symbol(first);  switch(sym){
-      case 8794 : decl = Emitter__array_declarator(&((* e)), decl, NULL);  break;  case 77 : case 33330008396 : decl = cons(Symbol_var(54), decl);  break;  case 54 : decl = cons(first, decl);  break;  case 44661285196 : typedefs ++;  break;  case 158121667336 : decl = Emitter__emit(&((* e)), List_cdr(mods));  mods = NULL;  continue;  default: decl = _native_declarator(decl, &(mods), sym);  break;
+      case 8794 : decl = Emitter__array_declarator(&((* e)), decl, NULL);  break;  case 77 : case 33330008396 : decl = cons(Symbol_var(54), decl);  break;  case 54 : decl = cons(first, decl);  break;  case 44661285196 : typedefs ++;  break;  case 158121667336 : decl = Emitter__bitfield_declarator(&((* e)), &(mods));  continue;  default: decl = _native_declarator(decl, &(mods), sym);  break;
     }
     mods = List_cdr(mods);
   }
@@ -2259,6 +2261,10 @@ static List Emitter__list_declarator(Emitter * e, List decl, Type mod){
     List _x2c_literal_part_102 = decl;  List _x2c_literal_part_103 = Emitter__emit(&((* e)), Var_list(List_cadr(Type_list(mod))));  List_append(_x2c_literal_part_102, cons(_154, List_append(_x2c_literal_part_103, NULL)));
   }
   );
+}
+
+static List Emitter__bitfield_declarator(Emitter * e, List * mods){
+  List tokens = Emitter__emit(&((* e)), List_cdr((* mods))); (* mods) = NULL;  return tokens;
 }
 
 static List _native_declarator(List decl, List * mods, Symbol sym){
