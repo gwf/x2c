@@ -1587,14 +1587,9 @@ static String Compiler._dynamic_helper(Compiler c, Type lhs_type) {
   return helper;
 }
 
-static int _raw_string_type(Type type) {
-  type = type ? type.canonicalize() : NULL;
-  return type && type.match(%((!or (dim *) (!quote *)) char));
-}
-
 static int Compiler._string_operand(Compiler c, Type type) =>
   c.sym.is_string_type(type)
-      || _raw_string_type(type);
+      || type.canonicalize().is_char_pointer_like();
 
 // indexed updates
 

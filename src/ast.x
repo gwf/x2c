@@ -65,6 +65,46 @@ String binding_identity_spelling(List binding) {
   return binding_identity_try_parts(binding, NULL, spelling) ? spelling : NULL;
 }
 
+// declarators
+
+/** Returns `declarator` with the outermost `volatile` removed from each of
+    its parameters. C ignores a parameter's top-level qualifier when it
+    compares a prototype with its definition, and the qualifier the error
+    transfer requires belongs to the definition that writes the parameter,
+    not to the declaration its callers read.
+*/
+List ast_prototype_declarator(List declarator) {
+  Array modifiers = [], int changed = 0;
+  foreach (Var modifier, declarator.caddr()) {
+    match (modifier)
+      case %(fnmod (params *parameters)):
+        modifier = _prototype_params(parameters, changed);
+    modifiers.push(modifier);
+  }
+  if (!changed) {
+    modifiers.free();
+    return declarator;
+  }
+  return %(bind ${declarator.cadr()} ${modifiers.list_free()});
+}
+
+/* The function modifier for `parameters`, each without its outermost
+   `volatile`; `changed` becomes 1 when one had it. */
+static List _prototype_params(List parameters, int &changed) {
+  Array rebuilt = [];
+  foreach (List parameter, parameters) {
+    match (parameter)
+      case %(param ?type (bind ?name (volatile *rest))): {
+        parameter = %(param $type (bind $name (@rest)));
+        changed = 1;
+      }
+    rebuilt.push(parameter);
+  }
+  return %(fnmod (params @{rebuilt.list_free()}));
+}
+
+// designated nodes
+
 /** Returns the innermost node `value` designates, past the forms that still
     name the same object: an `expr` wrapper, parentheses, a member, and an
     index into an array. What remains is a name, a designation through a
@@ -93,6 +133,57 @@ List Ast.lvalue_binding(Ast ast) {
   List designated = Ast.designated(ast);
   match (designated)
     case $source_identifier_content(%(?binding)): return binding;
+  return NULL;
+}
+
+/** Returns the name whose address an expression takes, or `NULL`. */
+String ast_addressed_identifier(Var value) {
+  if (value is not <list>) return NULL;
+  List ast = value;
+  match (ast) {
+    case %(expr ? ?inner): return ast_addressed_identifier(inner);
+    case ${$grouped(?inner)}:
+      return ast_addressed_identifier(inner);
+    case ${$addressed(?inner)}:
+      return ast_direct_identifier(inner);
+  }
+  return NULL;
+}
+
+/** Returns the name an expression designates directly, following the forms
+    that still name the same object - parentheses, a member, an array index,
+    a dereference - or `NULL` when the expression designates no single name.
+    A declaration qualifier that must reach one object, such as the `volatile`
+    an error transfer requires, applies to this name.
+*/
+String ast_direct_identifier(Var value) {
+  List designated = Ast.designated(value);
+  match (designated) {
+    case $source_identifier_content(%(?binding)):
+      return binding_identity_spelling(binding);
+    case $source_operator_content(%((!quote ->) ?base *)):
+      return ast_addressed_identifier(base);
+    case ${$dereferenced(?base)}:
+      return ast_addressed_identifier(base);
+  }
+  return NULL;
+}
+
+/** Returns the name of the pointer an expression designates through, or
+    `NULL` when it designates no object through a single name. `*pointer`,
+    `pointer[index]`, and `pointer->member` all change the object the pointer
+    holds, which `ast_direct_identifier` reports as no name at all.
+*/
+String ast_indirect_identifier(Var value) {
+  List designated = Ast.designated(value);
+  match (designated) {
+    case ${$indexed(%(!set ?base (expr ? ?)), ?)}:
+      return ast_direct_identifier(base);
+    case $source_operator_content(%((!quote ->) ?base *)):
+      return ast_direct_identifier(base);
+    case ${$dereferenced(?base)}:
+      return ast_direct_identifier(base);
+  }
   return NULL;
 }
 

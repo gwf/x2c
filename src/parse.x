@@ -803,14 +803,15 @@ static int Compiler._group_comma(Compiler c) {
 
 // destructuring declarations
 
-// Distinguish '(ident, ...)' from an ordinary parenthesized declarator.
+/* Distinguish '(ident, ...)' from an ordinary parenthesized declarator and
+   from the parameters of a type name such as `Var (Var, Var)`. */
 static int Compiler._destructure_starts(Compiler c) {
   Token token = c.token;
   if (token.type != <(>) return 0;
   token = Token.skip_trivia(token + 1);
   if (token.type != <ident>) return 0;
   token = Token.skip_trivia(token + 1);
-  return token.type == <,>;
+  return token.type == <,> && !c._parameters_follow();
 }
 
 static List Compiler._destructure_declaration(
@@ -1705,6 +1706,7 @@ static List Compiler._direct_declarator(
   Token &source_after) {
   // A member keeps its spelling in a template: C scopes it to its aggregate.
   int member = context.is_aggregate();
+  if (c.peek(0) == <(> && c._parameters_follow()) return %(bind () ());
   if (c.peek(0) == <(>)
     return c._parenthesized(
       member ? context : NULL, method_identity, source_first,
@@ -1720,6 +1722,20 @@ static List Compiler._direct_declarator(
   source_first = first;
   source_after = c.token;
   return %(bind $ident ());
+}
+
+/* Whether the `(` at the cursor opens the parameters of a declarator with
+   no name, as in the type name `int (int)`: a `)`, or a type that is no
+   name to declare, follows it. As in C, a typedef name there is a type. */
+static int Compiler._parameters_follow(Compiler c) {
+  Token head = c.token;
+  c.next();
+  Symbol next = c.peek(0);
+  Type lookup = c.sym.get(%(${c.token.text}));
+  int named = next == <ident> && !lookup.is_typedef();
+  int parameters = next == <)> || (!named && c.test_declaration());
+  c.token = head;
+  return parameters;
 }
 
 // Carries the source span across a nested declarator.

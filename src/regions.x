@@ -1383,9 +1383,7 @@ static int Walk.copies(Walk &w, Type type, Var value) {
   if (w.value_class(type) == <canonical>) return 1;
   if (!type || !w.c.sym.is_var_type(type)) return 0;
   Type source = _expression_type(value);
-  return source &&
-         (source.match(%((!or (dim *) (!quote *)) char)) ||
-          source.match(%((!or (dim *) (!quote *)) const char)));
+  return source.is_char_pointer_like();
 }
 
 /* Whether `value` or a destination of `type` is a number: an integer,

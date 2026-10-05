@@ -1587,6 +1587,14 @@ states the type the code has; it converts nothing, so write a cast inside
 the braces when the code needs one. See
 [Code that knows its type](../guide/meta-functions.md#code-that-knows-its-type).
 
+`$!Type{ T }` builds the type `T`, written as a cast writes a type name.
+`$!Param{ P }` builds one parameter declaration. A `Type` local or a
+`${...}` hole of type `Type` may stand for a type or for the base a
+declarator modifies. Both build where they are written: they bind nothing,
+declare no name the braces spell, and apply no template. `Type` and `Param`
+after `$!` always name these kinds. `Decl` names a hole kind only. See
+[Types and parameters](../guide/meta-functions.md#types-and-parameters).
+
 When one `Name` hole appears in a declaration, a reference, and a member
 selection, its case checks that the declaration and reference use the same
 binding and that the member has the binding's source spelling. This also
@@ -3557,14 +3565,23 @@ binders inside `!not` operands are not definitely assigned; binders under
 opaque.
 Arm binders are semantic `Var` or `List` locals and support method syntax.
 
-`?(Type name)` declares a native typed capture. Its exact `Var` tag must
-match the tag tested by `value is Type`; mismatches fail the pattern without
+`?(typename name)` declares a native typed capture. Its exact `Var` tag must
+match the tag tested by `value is typename`; mismatches fail the pattern without
 conversion. The type applies to every unquoted occurrence of that binder in
 the arm, including `?name` and alternative branches. Repeated names retain
 their equality constraint. The shorthand lowers to existing `!is` predicates
 and ordinary local declarations; explicit `!is` captures remain `Var` locals.
 The opener `?(` is adjacent; `? (String text)` is a wildcard followed by
 a sublist pattern.
+
+Inside `?(`, `typename` is ordinary source type syntax rather than literal
+List data: write `?(String text)` or `?(List payload)`. The compiler stores
+named types such as `String` as Strings in type syntax. The type List
+`%("String")` therefore differs from `%(String)`, which contains an `Atom`;
+see [macro values](#macro-values). Typedefs use their underlying `Var` tag,
+so `?(Type type)`, with `typedef List Type`, tests for a List payload without
+validating its contents as type syntax. The tag test precedes the native
+local declaration.
 
 An arm may place `if (expression)` before its colon. The expression runs
 after matching, with captures visible, and uses ordinary truth conversion.

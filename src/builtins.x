@@ -495,7 +495,7 @@ static List _finish_new(
 static List _class_initializer(String owner, Var heap_value) {
   int heap = !heap_value.equal(%());
   List type = %($owner);
-  List receiver = heap ? type : %(* @type);
+  List receiver = heap ? type : $!Type{ $type * };
   List method = x2c_method_resolve(type, "init");
   if (method) {
     List signature = x2c_syntax_type(method);

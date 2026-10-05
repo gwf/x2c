@@ -163,6 +163,23 @@ echo '#define ANSWER 42' > missing/config.h
   fail "a failed helper build was reused: $(cat out.log)"
 grep -q "return 42;" missing/prog.c || fail "missing header: wrong value"
 
+# A unit whose meta code did not parse is parsed again when a file it read
+# changes: here, an include that later exports the macro the code calls.
+mkdir -p unparsed
+echo 'macro Expression $four() => 4;' > unparsed/four.xmacro
+echo '$(import "four.xmacro")' > unparsed/bridge.x
+cat > unparsed/prog.x <<'EOF'
+#include "bridge.x"
+meta static int ten(void) => $four() + 6;
+int value(void) { return $ten(); }
+EOF
+"$X2C" translate --out-dir unparsed unparsed/prog.x >out.log 2>&1 &&
+  fail "an unexported macro translated"
+echo 'export $(import "four.xmacro")' > unparsed/bridge.x
+"$X2C" translate --out-dir unparsed unparsed/prog.x >out.log 2>&1 ||
+  fail "a helper without the unparsed unit was reused: $(cat out.log)"
+grep -q "return 10;" unparsed/prog.c || fail "unparsed unit: wrong value"
+
 # A header found through -I or spelled with spaces or tabs reaches the
 # meta code it exports.
 mkdir -p spell/inc

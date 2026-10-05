@@ -1072,47 +1072,37 @@ Type Sym.resolve_numeric_type(Sym s, Type type) {
   return _builtin_typedef_scalar(resolved);
 }
 
-/* Angle-included system typedefs have no collected binding. These canonical
-   forms match Type.scalar and are consulted only after source typedef
-   resolution, so a source declaration wins. A 64-bit or pointer-width name
-   maps to long where long has that width, retaining the native long Var
-   identity, and to long long on a host such as LLP64 Windows where it does
-   not.
+/* System numeric aliases use exact String keys; Symbol encodings lose parts
+   of some names. This private table and its canonical Type Lists have process
+   lifetime. Source typedef resolution precedes this fallback. Width-dependent
+   aliases use long when the host gives it the required width. */
+static Map builtin_typedef_scalars = {
+  "u8": %(unsigned char),       "uint8_t": %(unsigned char),
+  "i8": %(signed char),         "int8_t": %(signed char),
+  "u16": %(unsigned short),     "uint16_t": %(unsigned short),
+  "i16": %(short),              "int16_t": %(short),
+  "u32": %(unsigned),           "uint32_t": %(unsigned),
+  "i32": %(int),                "int32_t": %(int),
+  "wchar_t": %(int),
+  "u64": sizeof(long) == 8 ? %(unsigned long) : %(unsigned long long),
+  "uint64_t": sizeof(long) == 8 ? %(unsigned long) : %(unsigned long long),
+  "uintptr_t": sizeof(long) == sizeof(void *)
+             ? %(unsigned long) : %(unsigned long long),
+  "size_t": sizeof(long) == sizeof(void *)
+          ? %(unsigned long) : %(unsigned long long),
+  "i64": sizeof(long) == 8 ? %(long) : %(long long),
+  "int64_t": sizeof(long) == 8 ? %(long) : %(long long),
+  "intptr_t": sizeof(long) == sizeof(void *) ? %(long) : %(long long),
+  "ptrdiff_t": sizeof(long) == sizeof(void *) ? %(long) : %(long long),
+  "ssize_t": sizeof(long) == sizeof(void *) ? %(long) : %(long long),
+  "off_t": %(long),             "time_t": %(long),
+  "u128": %(unsigned long long), "i128": %(long long),
+  "f32": %(float), "f64": %(double), "f128": %(long double)
+};
 
-   The labels are encoded Symbols, not the C spellings, and the subject is
-   `name.symbol()`, the same encoding applied to the source identifier.
-   A C name that outruns the Symbol capacity therefore appears here in the
-   form it encodes to: `size_t` is `<size-t>`, since the 5-bit alphabet
-   folds the separator, and `uint16_t` is `<uint16_>`, since a digit forces
-   the seven-byte form. `uint8_t` and `int16_t` fit and keep their
-   spelling. */
 static Type _builtin_typedef_scalar(Type key) {
   if (!key.is_bare_typedef_name()) return NULL;
-  String name = key.car();
-  switch (name.symbol()) {
-    case <u8>: case <uint8_t>: return %(unsigned char);
-    case <i8>: case <int8_t>: return %(signed char);
-    case <u16>: case <uint16_>: return %(unsigned short);
-    case <i16>: case <int16_t>: return %(short);
-    case <u32>: case <uint32_>: return %(unsigned);
-    case <i32>: case <int32_t>: case <wchar-t>: return %(int);
-    case <u64>: case <uint64_>:
-      return sizeof(long) == 8 ? %(unsigned long) : %(unsigned long long);
-    case <uintptr-t>: case <size-t>:
-      return sizeof(long) == sizeof(void *)
-           ? %(unsigned long) : %(unsigned long long);
-    case <i64>: case <int64_t>:
-      return sizeof(long) == 8 ? %(long) : %(long long);
-    case <intptr-t>: case <ptrdiff-t>: case <ssize-t>:
-      return sizeof(long) == sizeof(void *) ? %(long) : %(long long);
-    case <off-t>: case <time-t>: return %(long);
-    case <u128>: return %(unsigned long long);
-    case <i128>: return %(long long);
-    case <f32>: return %(float);
-    case <f64>: return %(double);
-    case <f128>: return %(long double);
-  }
-  return NULL;
+  return builtin_typedef_scalars.getdefault(key.car(), (List) NULL);
 }
 
 // value types
@@ -1195,7 +1185,7 @@ Type Sym.lookup_field(Sym s, Type type, List field) {
 void Sym.declare_field_order(Sym s, Type type, List fields) {
   Array rows = [];
   foreach (List declaration, fields) {
-    while (declaration.car() == <at>) declaration = declaration.caddr();
+    declaration = Ast.without_origin(declaration);
     if (declaration.car() == <c-assert>) continue;
     List bindings = declaration.caddr();
     foreach (List declarator, bindings.cdr())

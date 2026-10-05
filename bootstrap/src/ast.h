@@ -19,9 +19,17 @@ int binding_identity_try_parts(List binding, int * identity, String * spelling);
 
 String binding_identity_spelling(List binding);
 
+List ast_prototype_declarator(List declarator);
+
 List Ast_designated(Var value);
 
 List Ast_lvalue_binding(Ast ast);
+
+String ast_addressed_identifier(Var value);
+
+String ast_direct_identifier(Var value);
+
+String ast_indirect_identifier(Var value);
 
 List Ast_written_operand(Ast node);
 

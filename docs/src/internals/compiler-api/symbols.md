@@ -26,7 +26,6 @@ The compiler's semantic symbol table.
 | [`Compiler.register_package_member`](#Compiler.register_package_member) | Registers one package member under a bare local spelling. |
 | [`Compiler.semantic_binding_facts`](#Compiler.semantic_binding_facts) | Returns the borrowed semantic-facts map indexed by binding. |
 | [`Compiler.set_fact`](#Compiler.set_fact) | Sets one semantic binding fact. |
-| [`Sym.added_globals`](#Sym.added_globals) | Returns the global rows written since `mark` that were absent before it, with their current values. |
 | [`Sym.at_file_scope`](#Sym.at_file_scope) | Returns whether declarations currently bind at file scope. |
 | [`Sym.base_symbols`](#Sym.base_symbols) | Copies all base-scope symbols into a fresh map in source order. |
 | [`Sym.bind_identity`](#Sym.bind_identity) | Installs an existing binding with `ast`'s qualifier-preserving type. |
@@ -43,7 +42,6 @@ The compiler's semantic symbol table.
 | [`Sym.define_macro`](#Sym.define_macro) | Defines or replaces a macro in the active lexical scope. |
 | [`Sym.delegate_aggregate`](#Sym.delegate_aggregate) | Resolves typedefs or one pointer layer to an aggregate tag, or `NULL`. |
 | [`Sym.drop`](#Sym.drop) | Deletes `key` from `map` so that an active transaction can restore it. |
-| [`Sym.end_log`](#Sym.end_log) | Stops the log that `Sym.log_writes` started. |
 | [`Sym.enumerator_owner`](#Sym.enumerator_owner) | Returns the current scope's enum owner for `key`, or zero. |
 | [`Sym.field_order`](#Sym.field_order) | Returns recorded fields in source order, or `NULL`. |
 | [`Sym.file_statics`](#Sym.file_statics) | Returns the borrowed set of file-static declaration keys. |
@@ -58,7 +56,6 @@ The compiler's semantic symbol table.
 | [`Sym.is_string_type`](#Sym.is_string_type) | Reports whether `type` reaches the named `String` value type. |
 | [`Sym.is_var_type`](#Sym.is_var_type) | Reports whether `type` reaches the named `Var` value type. |
 | [`Sym.local_type`](#Sym.local_type) | Resolves a block-local typedef to the type saved at its declaration. |
-| [`Sym.log_writes`](#Sym.log_writes) | Starts logging semantic writes, as a transaction does, and returns the log position that `Sym.added_globals` reads from. |
 | [`Sym.lookup`](#Sym.lookup) | Resolves an existing key and optionally stores its semantic type. |
 | [`Sym.lookup_field`](#Sym.lookup_field) | Returns an aggregate field's declared type, or `NULL`. |
 | [`Sym.lookup_macro`](#Sym.lookup_macro) | Returns the innermost visible local macro named `name`, or `NULL`. |
@@ -115,7 +112,7 @@ The transaction restores the current scope maps, file-static and binding
 facts, binding and generated-name counters, and initializer names. It
 does not snapshot parser position or other compiler state.
 
-Source: `src/symbols.x:1246`
+Source: `src/symbols.x:1236`
 
 <a id="Compiler.drop_fact"></a>
 #### Compiler.drop_fact
@@ -249,16 +246,6 @@ Source: `src/symbols.x:429`
 
 ### `Sym`
 
-<a id="Sym.added_globals"></a>
-#### Sym.added_globals
-
-`Map Sym.added_globals(Sym s, int mark)`
-
-Returns the global rows written since `mark` that were absent before
-it, with their current values.
-
-Source: `src/symbols.x:1335`
-
 <a id="Sym.at_file_scope"></a>
 #### Sym.at_file_scope
 
@@ -348,7 +335,7 @@ Source: `src/symbols.x:530`
 
 Marks one named aggregate field as a delegate.
 
-Source: `src/symbols.x:1215`
+Source: `src/symbols.x:1205`
 
 <a id="Sym.declare_enumerator"></a>
 #### Sym.declare_enumerator
@@ -369,7 +356,7 @@ Records declaration AST fields in source order after binding finishes.
 `Field` types already use member keys. Unnamed rows retain their type
 and an empty name so initializer traversal preserves anonymous subobjects.
 
-Source: `src/symbols.x:1190`
+Source: `src/symbols.x:1180`
 
 <a id="Sym.define"></a>
 #### Sym.define
@@ -413,7 +400,7 @@ Source: `src/symbols.x:855`
 
 Resolves typedefs or one pointer layer to an aggregate tag, or `NULL`.
 
-Source: `src/symbols.x:1220`
+Source: `src/symbols.x:1210`
 
 <a id="Sym.drop"></a>
 #### Sym.drop
@@ -423,15 +410,6 @@ Source: `src/symbols.x:1220`
 Deletes `key` from `map` so that an active transaction can restore it.
 
 Source: `src/symbols.x:135`
-
-<a id="Sym.end_log"></a>
-#### Sym.end_log
-
-`void Sym.end_log(Sym s)`
-
-Stops the log that `Sym.log_writes` started.
-
-Source: `src/symbols.x:1350`
 
 <a id="Sym.enumerator_owner"></a>
 #### Sym.enumerator_owner
@@ -449,7 +427,7 @@ Source: `src/symbols.x:399`
 
 Returns recorded fields in source order, or `NULL`.
 
-Source: `src/symbols.x:1212`
+Source: `src/symbols.x:1202`
 
 <a id="Sym.file_statics"></a>
 #### Sym.file_statics
@@ -512,7 +490,7 @@ Source: `src/symbols.x:389`
 
 Reports whether `type` reaches the named `Array` value type.
 
-Source: `src/symbols.x:1148`
+Source: `src/symbols.x:1138`
 
 <a id="Sym.is_map_type"></a>
 #### Sym.is_map_type
@@ -521,7 +499,7 @@ Source: `src/symbols.x:1148`
 
 Reports whether `type` reaches the named `Map` value type.
 
-Source: `src/symbols.x:1152`
+Source: `src/symbols.x:1142`
 
 <a id="Sym.is_named_value_type"></a>
 #### Sym.is_named_value_type
@@ -530,7 +508,7 @@ Source: `src/symbols.x:1152`
 
 Reports whether `type` reaches a named value type before its definition.
 
-Source: `src/symbols.x:1155`
+Source: `src/symbols.x:1145`
 
 <a id="Sym.is_string_type"></a>
 #### Sym.is_string_type
@@ -539,7 +517,7 @@ Source: `src/symbols.x:1155`
 
 Reports whether `type` reaches the named `String` value type.
 
-Source: `src/symbols.x:1144`
+Source: `src/symbols.x:1134`
 
 <a id="Sym.is_var_type"></a>
 #### Sym.is_var_type
@@ -548,7 +526,7 @@ Source: `src/symbols.x:1144`
 
 Reports whether `type` reaches the named `Var` value type.
 
-Source: `src/symbols.x:1141`
+Source: `src/symbols.x:1131`
 
 <a id="Sym.local_type"></a>
 #### Sym.local_type
@@ -561,17 +539,6 @@ are resolved before they are installed, so one lookup crosses the whole
 local chain without consulting names shadowed since its declaration.
 
 Source: `src/symbols.x:1024`
-
-<a id="Sym.log_writes"></a>
-#### Sym.log_writes
-
-`int Sym.log_writes(Sym s)`
-
-Starts logging semantic writes, as a transaction does, and returns the
-log position that `Sym.added_globals` reads from. `Sym.end_log` stops
-the log.
-
-Source: `src/symbols.x:1328`
 
 <a id="Sym.lookup"></a>
 #### Sym.lookup
@@ -595,7 +562,7 @@ A member of an anonymous struct or union belongs to its enclosing
 aggregate in C, so unnamed rows are searched the way a designated
 initializer already reaches them.
 
-Source: `src/symbols.x:1170`
+Source: `src/symbols.x:1160`
 
 <a id="Sym.lookup_macro"></a>
 #### Sym.lookup_macro
@@ -825,7 +792,7 @@ Returns a type's `Var` tag and optionally stores its resolved type.
 `resolved` receives the final type even when the result is zero because no
 `Var` tag is registered. A null input stores `NULL` and returns zero.
 
-Source: `src/symbols.x:1120`
+Source: `src/symbols.x:1110`
 
 <a id="Sym.visible_symbols"></a>
 #### Sym.visible_symbols
@@ -849,7 +816,7 @@ Its writes are already in the scope maps, so code holding a borrowed
 map observes a committed expansion. An absent or inactive transaction
 has no effect.
 
-Source: `src/symbols.x:1361`
+Source: `src/symbols.x:1322`
 
 <a id="SymTxn.commit_transient"></a>
 #### SymTxn.commit_transient
@@ -860,7 +827,7 @@ Commits an active transaction, retaining the original counters map.
 The caller may then release the transaction's construction scope.
 Parsing and evaluation must allocate outside that temporary scope.
 
-Source: `src/symbols.x:1383`
+Source: `src/symbols.x:1346`
 
 <a id="SymTxn.local_macros_changed"></a>
 #### SymTxn.local_macros_changed
@@ -869,7 +836,7 @@ Source: `src/symbols.x:1383`
 
 Returns whether the transaction's active scope changed its macro map.
 
-Source: `src/symbols.x:1309`
+Source: `src/symbols.x:1299`
 
 <a id="SymTxn.rollback"></a>
 #### SymTxn.rollback
@@ -879,7 +846,7 @@ Source: `src/symbols.x:1309`
 Restores every semantic value captured by an active transaction.
 An absent or inactive transaction has no effect.
 
-Source: `src/symbols.x:1403`
+Source: `src/symbols.x:1366`
 
 ## Design notes
 

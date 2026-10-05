@@ -686,15 +686,15 @@ int MatchPlan.try_search(
 }
 
 static int MatchPlan._first(
-  MatchPlan plan, List input, Var *out_match, List *out_bindings) {
+  MatchPlan plan, List input, Var &out_match, List &out_bindings) {
   $match.machine(machine, NULL);
   $match.walk(plan, machine, walk);
   int result = walk._first(input, 1);
   walk.spine.free();
   machine.release();
   if (result == 1) {
-    *out_match = walk.found;
-    *out_bindings = walk.bindings;
+    out_match = walk.found;
+    out_bindings = walk.bindings;
   }
   return result;
 }
@@ -739,7 +739,7 @@ int MatchPlan.search_replace(
 }
 
 static int MatchPlan._replace_all(
-  MatchPlan plan, List input, Var template, List *out) {
+  MatchPlan plan, List input, Var template, List &out) {
   $match.machine(machine, NULL);
   $match.walk(plan, machine, walk);
   walk.template = template;
@@ -747,7 +747,7 @@ static int MatchPlan._replace_all(
   walk.spine.free();
   machine.release();
   if (walk.error) return -1;
-  *out = result;
+  out = result;
   return 1;
 }
 
@@ -919,13 +919,13 @@ typedef struct ReplacementSource {
 } ReplacementSource;
 
 static int MatchPlan._replace(
-  MatchPlan plan, List input, Var template, Var *out) {
+  MatchPlan plan, List input, Var template, Var &out) {
   Var values[MACHINE_BINDER_MAX];
   MatchCaptureBuffer captures = { values, 0, MACHINE_BINDER_MAX };
   int result = plan._capture(input, &captures, NULL);
   if (result != 1) return result;
   ReplacementSource source = { plan.layout, &captures, NULL };
-  *out = _replace(template, source);
+  out = _replace(template, source);
   return 1;
 }
 

@@ -50,14 +50,12 @@ static void Helper_use(Helper * h, List manifest);
 
 typedef struct Scan{
   CliRequest request;
-  Array imports, units;
+  Array imports;
   Map seen, packages;
 }
 Scan;
 
 static void Helper_scan(Helper * h, List inputs);
-
-static void Helper_own(Helper * h, String path, Map owned);
 
 static int Scan_file(Scan * s, String path);
 
@@ -496,47 +494,36 @@ int List_try_next(List, List *, Var *);
 
 Path Path_absolute(Path);
 
-List Array_list(Array);
-
 Var Array_push(Array, Var);
 
+List Array_list(Array);
+
 static void Helper_scan(Helper * h, List inputs){
-  Map known = Map_new(), owned = Map_new();
+  Map known = Map_new();
   {
     String input;
-    List _x2c_macro_object_5 = inputs;
-    List _x2c_macro_cursor_5 = _x2c_macro_object_5;
-    Var _x2c_macro_cursor_output_3;
-    while(List_try_next(_x2c_macro_object_5, &(_x2c_macro_cursor_5), &(_x2c_macro_cursor_output_3))){
-      input = Var_string(_x2c_macro_cursor_output_3);
+    List _x2c_macro_object_4 = inputs;
+    List _x2c_macro_cursor_4 = _x2c_macro_object_4;
+    Var _x2c_macro_cursor_output_2;
+    while(List_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_2))){
+      input = Var_string(_x2c_macro_cursor_output_2);
       {
         String path = Path_absolute(input);
         Scan s ={
-          .request =(* h).frontend -> request, .imports = Array_new(), .units = Array_new(), .seen = Map_new(), .packages =(* h).packages
+          .request =(* h).frontend -> request, .imports = Array_new(), .seen = Map_new(), .packages =(* h).packages
         }
         ;
         int own = Scan_file(&(s), path);
         Array reached = s.imports;
-        if(own || Array_len(reached)) Helper_own(&((* h)), path, owned);
+        if(own || Array_len(reached)) Array_push((* h).owners, String_var(path));
         if(! own && Array_len(reached)) Map_setindex((* h).reaches, String_var(path), List_var(Array_list(reached)));
         {
-          String unit;
-          Array _x2c_macro_object_3 = s.units;
+          String file;
+          Array _x2c_macro_object_3 = reached;
           int _x2c_macro_cursor_3 = 0;
           Var _x2c_macro_cursor_output_1;
           while(Array_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_1))){
-            unit = Var_string(_x2c_macro_cursor_output_1);
-            Helper_own(&((* h)), unit, owned);
-          }
-
-        }
-        {
-          String file;
-          Array _x2c_macro_object_4 = reached;
-          int _x2c_macro_cursor_4 = 0;
-          Var _x2c_macro_cursor_output_2;
-          while(Array_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_2))){
-            file = Var_string(_x2c_macro_cursor_output_2);
+            file = Var_string(_x2c_macro_cursor_output_1);
             if(!(Map_contains(known, String_var(file)))){
               Map_setindex(known, String_var(file), int_var(1));
               Array_push((* h).imports, String_var(file));
@@ -552,12 +539,6 @@ static void Helper_scan(Helper * h, List inputs){
 
   }
 
-}
-
-static void Helper_own(Helper * h, String path, Map owned){
-  if(Map_contains(owned, String_var(path))) return;
-  Map_setindex(owned, String_var(path), int_var(1));
-  Array_push((* h).owners, String_var(path));
 }
 
 int x2c_error_catch_site_pending(ErrorCatchSite *);
@@ -701,8 +682,6 @@ String preproc_include_target(String, int *);
 
 String collect_resolve_include(SourceView, List, String, String, int);
 
-String absolute_path(String);
-
 static void Scan_include(Scan * s, String directive, String directory){
   int angle = 0;
   String target = preproc_include_target(directive, &(angle));
@@ -710,7 +689,7 @@ static void Scan_include(Scan * s, String directive, String directory){
   String file = collect_resolve_include((* s).request -> sources, (* s).request -> include_dirs, directory, target, angle);
   if(! String_truth(file)) return;
   String path = Path_absolute(file);
-  if(! _compiler_owns(path) && Scan_file(&((* s)), path)) Array_push((* s).units, String_var(absolute_path(path)));
+  if(! _compiler_owns(path)) Scan_file(&((* s)), path);
 }
 
 int String_getindex(String, int);
@@ -743,11 +722,11 @@ static int _compiler_owns(String path){
   String root = x2c_get_root();
   {
     String directory;
-    List _x2c_macro_object_6 = _22;
-    List _x2c_macro_cursor_6 = _x2c_macro_object_6;
-    Var _x2c_macro_cursor_output_4;
-    while(List_try_next(_x2c_macro_object_6, &(_x2c_macro_cursor_6), &(_x2c_macro_cursor_output_4))){
-      directory = Var_string(_x2c_macro_cursor_output_4);
+    List _x2c_macro_object_5 = _22;
+    List _x2c_macro_cursor_5 = _x2c_macro_object_5;
+    Var _x2c_macro_cursor_output_3;
+    while(List_try_next(_x2c_macro_object_5, &(_x2c_macro_cursor_5), &(_x2c_macro_cursor_output_3))){
+      directory = Var_string(_x2c_macro_cursor_output_3);
       if(String_startswith(path, String_join(NULL, cons(String_var(root), cons(String_var(_12), cons(String_var(directory), cons(String_var(_12), NULL))))))) return 1;
     }
 
@@ -771,13 +750,13 @@ static List _group_flags(CliRequest request, Map packages){
   );
   {
     Var root, _;
-    Map _x2c_macro_object_7 = packages;
-    unsigned _x2c_macro_cursor_7 = 0;
+    Map _x2c_macro_object_6 = packages;
+    unsigned _x2c_macro_cursor_6 = 0;
+    Var _x2c_macro_cursor_output_4;
     Var _x2c_macro_cursor_output_5;
-    Var _x2c_macro_cursor_output_6;
-    while(Map_try_next(_x2c_macro_object_7, &(_x2c_macro_cursor_7), &(_x2c_macro_cursor_output_5), &(_x2c_macro_cursor_output_6))){
-      root = _x2c_macro_cursor_output_5;
-      _ = _x2c_macro_cursor_output_6;
+    while(Map_try_next(_x2c_macro_object_6, &(_x2c_macro_cursor_6), &(_x2c_macro_cursor_output_4), &(_x2c_macro_cursor_output_5))){
+      root = _x2c_macro_cursor_output_4;
+      _ = _x2c_macro_cursor_output_5;
       flags =({
         List _x2c_literal_part_3 = flags;  Var _x2c_literal_part_4 = String_var(String_join(NULL, cons(String_var(Var_str(root)), cons(String_var(_23), NULL))));
         Var _x2c_literal_part_5 = String_var(String_join(NULL, cons(String_var(Var_str(root)), cons(String_var(_24), NULL))));
@@ -822,13 +801,13 @@ static Array _modules(CliRequest request, Map packages){
   Array modules = List_array(List_map(request -> native_modules, _x2c_func_handle_1));
   {
     Var root, _;
-    Map _x2c_macro_object_8 = packages;
-    unsigned _x2c_macro_cursor_8 = 0;
+    Map _x2c_macro_object_7 = packages;
+    unsigned _x2c_macro_cursor_7 = 0;
+    Var _x2c_macro_cursor_output_6;
     Var _x2c_macro_cursor_output_7;
-    Var _x2c_macro_cursor_output_8;
-    while(Map_try_next(_x2c_macro_object_8, &(_x2c_macro_cursor_8), &(_x2c_macro_cursor_output_7), &(_x2c_macro_cursor_output_8))){
-      root = _x2c_macro_cursor_output_7;
-      _ = _x2c_macro_cursor_output_8;
+    while(Map_try_next(_x2c_macro_object_7, &(_x2c_macro_cursor_7), &(_x2c_macro_cursor_output_6), &(_x2c_macro_cursor_output_7))){
+      root = _x2c_macro_cursor_output_6;
+      _ = _x2c_macro_cursor_output_7;
       {
         String name = Path_basename(Var_string(root));
         String module =({
@@ -877,14 +856,14 @@ static String _directory(String root, String identity, Array imports, Array owne
   Array key = Array_update_n(Array_new(), 1, String_var(identity));
   {
     String path;
-    List _x2c_macro_object_9 =({
+    List _x2c_macro_object_8 =({
       List _x2c_literal_part_14 = Array_list(imports);  List _x2c_literal_part_15 = Array_list(owners);  List_append(_x2c_literal_part_14, cons(_47, List_append(_x2c_literal_part_15, NULL)));
     }
     );
-    List _x2c_macro_cursor_9 = _x2c_macro_object_9;
-    Var _x2c_macro_cursor_output_9;
-    while(List_try_next(_x2c_macro_object_9, &(_x2c_macro_cursor_9), &(_x2c_macro_cursor_output_9))){
-      path = Var_string(_x2c_macro_cursor_output_9);
+    List _x2c_macro_cursor_8 = _x2c_macro_object_8;
+    Var _x2c_macro_cursor_output_8;
+    while(List_try_next(_x2c_macro_object_8, &(_x2c_macro_cursor_8), &(_x2c_macro_cursor_output_8))){
+      path = Var_string(_x2c_macro_cursor_output_8);
       Array_push(key, String_var(path));
     }
 
@@ -897,8 +876,6 @@ static String _directory(String root, String identity, Array imports, Array owne
 
 void Compiler_use_meta_build_directory(String);
 
-void collect_forget_provisional_entries(void);
-
 static List Helper_build(Helper * h){
   int count = Array_len((* h).owners) + 1;
   for(int index = 0;  index < count;  index ++){
@@ -909,14 +886,14 @@ static List Helper_build(Helper * h){
   String loop = _loop_source();
   {
     String path;
-    List _x2c_macro_object_10 =({
+    List _x2c_macro_object_9 =({
       List _x2c_literal_part_18 = Array_list((* h).imports);  List _x2c_literal_part_19 = Array_list((* h).owners);  List _x2c_literal_part_20 = Array_list((* h).modules);  List_append(_x2c_literal_part_18, List_append(_x2c_literal_part_19, List_append(_x2c_literal_part_20, cons(String_var(loop), NULL))));
     }
     );
-    List _x2c_macro_cursor_10 = _x2c_macro_object_10;
-    Var _x2c_macro_cursor_output_10;
-    while(List_try_next(_x2c_macro_object_10, &(_x2c_macro_cursor_10), &(_x2c_macro_cursor_output_10))){
-      path = Var_string(_x2c_macro_cursor_output_10);
+    List _x2c_macro_cursor_9 = _x2c_macro_object_9;
+    Var _x2c_macro_cursor_output_9;
+    while(List_try_next(_x2c_macro_object_9, &(_x2c_macro_cursor_9), &(_x2c_macro_cursor_output_9))){
+      path = Var_string(_x2c_macro_cursor_output_9);
       Map_setindex((* h).deps, String_var(path), int_var(1));
     }
 
@@ -925,17 +902,16 @@ static List Helper_build(Helper * h){
   int index = 1;
   {
     String owner;
-    Array _x2c_macro_object_11 =(* h).owners;
-    int _x2c_macro_cursor_11 = 0;
-    Var _x2c_macro_cursor_output_11;
-    while(Array_try_next(_x2c_macro_object_11, &(_x2c_macro_cursor_11), &(_x2c_macro_cursor_output_11))){
-      owner = Var_string(_x2c_macro_cursor_output_11);
+    Array _x2c_macro_object_10 =(* h).owners;
+    int _x2c_macro_cursor_10 = 0;
+    Var _x2c_macro_cursor_output_10;
+    while(Array_try_next(_x2c_macro_object_10, &(_x2c_macro_cursor_10), &(_x2c_macro_cursor_output_10))){
+      owner = Var_string(_x2c_macro_cursor_output_10);
       Helper_group(&((* h)), owner, index ++);
     }
 
   }
   Compiler_use_meta_build_directory(NULL);
-  collect_forget_provisional_entries();
   return Helper_write_manifest(&((* h)), Helper_link(&((* h)), count));
 }
 
@@ -955,11 +931,11 @@ void Path_remove_file(Path);
 static void _clear(String base){
   {
     String suffix;
-    List _x2c_macro_object_12 = _60;
-    List _x2c_macro_cursor_12 = _x2c_macro_object_12;
-    Var _x2c_macro_cursor_output_12;
-    while(List_try_next(_x2c_macro_object_12, &(_x2c_macro_cursor_12), &(_x2c_macro_cursor_output_12))){
-      suffix = Var_string(_x2c_macro_cursor_output_12);
+    List _x2c_macro_object_11 = _60;
+    List _x2c_macro_cursor_11 = _x2c_macro_object_11;
+    Var _x2c_macro_cursor_output_11;
+    while(List_try_next(_x2c_macro_object_11, &(_x2c_macro_cursor_11), &(_x2c_macro_cursor_output_11))){
+      suffix = Var_string(_x2c_macro_cursor_output_11);
       {
         String file = String_join(NULL, cons(String_var(base), cons(String_var(suffix), NULL)));
         if(Path_exists(file)) Path_remove_file(file);
@@ -1018,30 +994,31 @@ static void Helper_parse(Helper * h, String path, int index){
       ParsedUnit_collect(&(unit), f);
       Diagnostics_reset(unit.compiler -> diagnostics);
       ParsedUnit_parse(&(unit));
+      {
+        Var read, _;
+        Map _x2c_macro_object_12 = unit.compiler -> deps;
+        unsigned _x2c_macro_cursor_12 = 0;
+        Var _x2c_macro_cursor_output_12;
+        Var _x2c_macro_cursor_output_13;
+        while(Map_try_next(_x2c_macro_object_12, &(_x2c_macro_cursor_12), &(_x2c_macro_cursor_output_12), &(_x2c_macro_cursor_output_13))){
+          read = _x2c_macro_cursor_output_12;
+          _ = _x2c_macro_cursor_output_13;
+          Map_setindex((* h).deps, read, int_var(1));
+        }
+
+      }
+
     }
     x2c_cleanup_leave(& _x2c_defer_record_1);
   }
 
 }
 
-List String_split(String, String);
-
 String Compiler_meta_cc_run(List, String);
 
 static String Helper_compile(Helper * h, int index, String unit){
   String base = Helper_base(&((* h)), index);
   if(! Path_is_file(String_join(NULL, cons(String_var(base), cons(String_var(_54), NULL))))) return _61;
-  {
-    String path;
-    List _x2c_macro_object_13 = String_split(Path_read_text(String_join(NULL, cons(String_var(base), cons(String_var(_54), NULL)))), _48);
-    List _x2c_macro_cursor_13 = _x2c_macro_object_13;
-    Var _x2c_macro_cursor_output_13;
-    while(List_try_next(_x2c_macro_object_13, &(_x2c_macro_cursor_13), &(_x2c_macro_cursor_output_13))){
-      path = Var_string(_x2c_macro_cursor_output_13);
-      if(String_truth(path)) Map_setindex((* h).deps, String_var(path), int_var(1));
-    }
-
-  }
   if(Path_is_file(String_join(NULL, cons(String_var(base), cons(String_var(_56), NULL))))) return Path_read_text(String_join(NULL, cons(String_var(base), cons(String_var(_56), NULL))));
   Toolchain t =(* h).toolchain;
   String failure = Compiler_meta_cc_run(({
@@ -1082,10 +1059,10 @@ static void _add_depfile(String path, Map deps){
   if(! Path_is_file(path)) return;
   {
     String dependency;
-    List _x2c_macro_object_14 = translation_depfile_parse(Path_read_text(path));
-    List _x2c_macro_cursor_14 = _x2c_macro_object_14;
+    List _x2c_macro_object_13 = translation_depfile_parse(Path_read_text(path));
+    List _x2c_macro_cursor_13 = _x2c_macro_object_13;
     Var _x2c_macro_cursor_output_14;
-    while(List_try_next(_x2c_macro_object_14, &(_x2c_macro_cursor_14), &(_x2c_macro_cursor_output_14))){
+    while(List_try_next(_x2c_macro_object_13, &(_x2c_macro_cursor_13), &(_x2c_macro_cursor_output_14))){
       dependency = Var_string(_x2c_macro_cursor_output_14);
       Map_setindex(deps, String_var(Path_absolute(dependency)), int_var(1));
     }
@@ -1106,10 +1083,10 @@ static String _imports_unit(String base, List reached){
   Array lines = Array_new();
   {
     String path;
-    List _x2c_macro_object_15 = reached;
-    List _x2c_macro_cursor_15 = _x2c_macro_object_15;
+    List _x2c_macro_object_14 = reached;
+    List _x2c_macro_cursor_14 = _x2c_macro_object_14;
     Var _x2c_macro_cursor_output_15;
-    while(List_try_next(_x2c_macro_object_15, &(_x2c_macro_cursor_15), &(_x2c_macro_cursor_output_15))){
+    while(List_try_next(_x2c_macro_object_14, &(_x2c_macro_cursor_14), &(_x2c_macro_cursor_output_15))){
       path = Var_string(_x2c_macro_cursor_output_15);
       Array_push(lines, String_var(String_add(String_add(String_new("$(import "), String_repr(path)), _81)));
     }
@@ -1249,10 +1226,10 @@ static String _tables(Array built, int count){
   Buffer_write(out, "#include \"x2c.h\"\n");
   {
     int index;
-    Array _x2c_macro_object_16 = built;
-    int _x2c_macro_cursor_16 = 0;
+    Array _x2c_macro_object_15 = built;
+    int _x2c_macro_cursor_15 = 0;
     Var _x2c_macro_cursor_output_16;
-    while(Array_try_next(_x2c_macro_object_16, &(_x2c_macro_cursor_16), &(_x2c_macro_cursor_output_16))){
+    while(Array_try_next(_x2c_macro_object_15, &(_x2c_macro_cursor_15), &(_x2c_macro_cursor_output_16))){
       index = Var_int(Var_convert(_x2c_macro_cursor_output_16, 3453797));
       Buffer_printf(out, "Map x2c_module_targets_%d(void);\n", index);
     }
@@ -1261,10 +1238,10 @@ static String _tables(Array built, int count){
   Buffer_write(out, "Map x2c_meta_helper_table(int index) {\n  switch (index) {\n");
   {
     int index;
-    Array _x2c_macro_object_17 = built;
-    int _x2c_macro_cursor_17 = 0;
+    Array _x2c_macro_object_16 = built;
+    int _x2c_macro_cursor_16 = 0;
     Var _x2c_macro_cursor_output_17;
-    while(Array_try_next(_x2c_macro_object_17, &(_x2c_macro_cursor_17), &(_x2c_macro_cursor_output_17))){
+    while(Array_try_next(_x2c_macro_object_16, &(_x2c_macro_cursor_16), &(_x2c_macro_cursor_output_17))){
       index = Var_int(Var_convert(_x2c_macro_cursor_output_17, 3453797));
       Buffer_printf(out, "    case %d: return x2c_module_targets_%d();\n", index, index);
     }
@@ -1342,11 +1319,11 @@ static List _digests(Map paths){
   Array rows = Array_new();
   {
     Var path, _;
-    Map _x2c_macro_object_18 = paths;
-    unsigned _x2c_macro_cursor_18 = 0;
+    Map _x2c_macro_object_17 = paths;
+    unsigned _x2c_macro_cursor_17 = 0;
     Var _x2c_macro_cursor_output_18;
     Var _x2c_macro_cursor_output_19;
-    while(Map_try_next(_x2c_macro_object_18, &(_x2c_macro_cursor_18), &(_x2c_macro_cursor_output_18), &(_x2c_macro_cursor_output_19))){
+    while(Map_try_next(_x2c_macro_object_17, &(_x2c_macro_cursor_17), &(_x2c_macro_cursor_output_18), &(_x2c_macro_cursor_output_19))){
       path = _x2c_macro_cursor_output_18;
       _ = _x2c_macro_cursor_output_19;
       {
@@ -1428,13 +1405,13 @@ static List _current(String directory){
   if(Var_truth(List_assoc(manifest, Symbol_var(415094903142))) || String_len((Var_string(List_assoc(manifest, Symbol_var(12971715722)))))) return NULL;
   {
     List row;
-    Iter _x2c_macro_iterator_19 = Var_iter(List_assoc(manifest, Symbol_var(273446)), &(struct Iter){
+    Iter _x2c_macro_iterator_18 = Var_iter(List_assoc(manifest, Symbol_var(273446)), &(struct Iter){
       int_var(0)
     }
     );
-    Var _x2c_macro_item_19;
-    while(Iter_try_next(_x2c_macro_iterator_19, &(_x2c_macro_item_19))){
-      row = Var_list(_x2c_macro_item_19);
+    Var _x2c_macro_item_18;
+    while(Iter_try_next(_x2c_macro_iterator_18, &(_x2c_macro_item_18))){
+      row = Var_list(_x2c_macro_item_18);
       {
         List _x2c_destructure_0 = row;
         String file = Var_string(List_getindex(_x2c_destructure_0, 0));

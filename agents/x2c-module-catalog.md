@@ -21,11 +21,13 @@ shared helpers for x2c compiler AST nodes.
 Public functions:
 
 `binding_identity_new`, `binding_identity_try_parts`,
-`binding_identity_spelling`, `Ast.designated`, `Ast.lvalue_binding`,
-`Ast.written_operand`, `Ast.rewrite_children`, `ast_contains_head`,
-`ast_collect_binding_references`, `Ast.without_origin`, `Ast.rewrap_origin`,
-`Ast.never_returns`, `Symbol.is_assignment_op`, `ast_changes_left_operand`,
-`Ast.initializer_cases`, `Ast.initializer_functions`
+`binding_identity_spelling`, `ast_prototype_declarator`, `Ast.designated`,
+`Ast.lvalue_binding`, `ast_addressed_identifier`, `ast_direct_identifier`,
+`ast_indirect_identifier`, `Ast.written_operand`, `Ast.rewrite_children`,
+`ast_contains_head`, `ast_collect_binding_references`, `Ast.without_origin`,
+`Ast.rewrap_origin`, `Ast.never_returns`, `Symbol.is_assignment_op`,
+`ast_changes_left_operand`, `Ast.initializer_cases`,
+`Ast.initializer_functions`
 
 ### [src/build.x](../src/build.x)
 
@@ -613,25 +615,23 @@ Public functions:
 
 `Var.type`, `Type.list`, `List.type`, `List.type_from_ast`,
 `Type.declaration_parts`, `Type.declaration_ast`, `Type.parameter_ast`,
-`ast_prototype_declarator`, `Symbol.is_storage_class`, `Symbol.is_inline`,
-`Symbol.is_type_qualifier`, `Symbol.is_type_modifier`,
-`Symbol.is_builtin_type`, `Type.is_aggregate`, `Type.is_aggregate_tag`,
-`Type.is_aggregate_tag_body`, `Type.is_enum`, `Type.is_enum_tag`,
-`Type.is_enum_tag_body`, `Type.tag`, `Type.body`, `Type.is_pointer`,
-`Type.is_reference`, `Type.is_array`, `Type.is_function`, `Type.is_bitfield`,
-`Type.dereference`, `Type.qualify`, `Type.reference`, `Type.apply`,
-`Type.function_parts`, `Type.is_static`, `Type.is_inline`, `Type.is_extern`,
-`Type.is_threaded`, `Type.is_typedef`, `Type.base_type`, `Type.canonicalize`,
-`Type.declared`, `Type.discards_qualifiers`, `Type.is_builtin`,
-`Type.is_typedef_name`, `Type.is_bare_typedef_name`, `Type.is_number`,
-`Type.is_integral`, `Type.scalar`, `Type.scalar_tag`,
-`Type.var_numeric_extractor`, `Type.var_numeric_update_helper`, `Type.promote`,
-`Type.widest`, `Type.numeric_literal`, `Type.numeric_literal_value`,
-`Type.integer_literal_magnitude`, `ast_addressed_identifier`,
-`ast_direct_identifier`, `ast_indirect_identifier`, `Type.var_tag`,
-`Type.fixed_var_tag`, `Type.var_converter`, `Type.var_tag_row`,
-`Type.register_var_tag`, `Type.register_var_adoption`, `Type.begin_unit`,
-`Type.end_unit`
+`Symbol.is_storage_class`, `Symbol.is_inline`, `Symbol.is_type_qualifier`,
+`Symbol.is_type_modifier`, `Symbol.is_builtin_type`, `Type.is_aggregate`,
+`Type.is_aggregate_tag`, `Type.is_aggregate_tag_body`, `Type.is_enum`,
+`Type.is_enum_tag`, `Type.is_enum_tag_body`, `Type.tag`, `Type.body`,
+`Type.is_pointer`, `Type.is_reference`, `Type.is_array`, `Type.is_function`,
+`Type.is_bitfield`, `Type.dereference`, `Type.qualify`, `Type.reference`,
+`Type.apply`, `Type.function_parts`, `Type.is_static`, `Type.is_inline`,
+`Type.is_extern`, `Type.is_threaded`, `Type.is_typedef`, `Type.base_type`,
+`Type.canonicalize`, `Type.declared`, `Type.discards_qualifiers`,
+`Type.is_char_pointer_like`, `Type.is_builtin`, `Type.is_typedef_name`,
+`Type.is_bare_typedef_name`, `Type.is_number`, `Type.is_integral`,
+`Type.scalar`, `Type.scalar_tag`, `Type.var_numeric_extractor`,
+`Type.var_numeric_update_helper`, `Type.promote`, `Type.widest`,
+`Type.numeric_literal`, `Type.numeric_literal_value`,
+`Type.integer_literal_magnitude`, `Type.var_tag`, `Type.fixed_var_tag`,
+`Type.var_converter`, `Type.var_tag_row`, `Type.register_var_tag`,
+`Type.register_var_adoption`, `Type.begin_unit`, `Type.end_unit`
 
 ### [src/utils.x](../src/utils.x)
 

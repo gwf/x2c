@@ -9,8 +9,6 @@
 #include "compiler.h"
 Map Compiler_collect_symbols(Compiler c, Map globs);
 
-void Sym_withhold_import_rows(Sym s, Map published);
-
 String collect_resolve_include(SourceView sources, List dirs, String includer_dir, String target, int angle);
 
 List Compiler_include_typedef_names(Compiler c, String target, int angle, Map seen);
@@ -31,7 +29,7 @@ String interface_prelude(void);
 
 String interface_text(Compiler c, List selected);
 
-void collect_forget_provisional_entries(void);
+void collect_forget_preload_entries(void);
 
 
 #endif /* __GUARD_0xAB8728A9__ */

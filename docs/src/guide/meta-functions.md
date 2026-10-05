@@ -1328,6 +1328,81 @@ trusts the type a typed call already carries.
 A typed reference to a binding the function holds is the shortest form:
 `$!($type){ $binding }` is the expression that reads `binding` as a `type`.
 
+### Types and parameters
+
+A quotation can also build a type or one parameter. `$!Type{ ... }` holds a
+type written as a cast writes it. It builds the `Type` List that a `Type`
+local holds:
+
+```x2c
+~#include "x2c.x"
+~#include "meta.x"
+~
+typedef struct Point { int x; int y; } Point;
+
+meta static String point_types(void) {
+  Type point = $!Type{ Point };
+  Type pointer = $!Type{ const $point * };
+  Type reader = $!Type{ int (*)($point *) };
+  return point.repr() + " " + pointer.repr() + " " + reader.repr();
+}
+~
+~int main(void) {
+~  printf("%s\n", $point_types());
+~  return 0;
+~}
+```
+
+```text
+("Point") (* const "Point") (* (func ((* "Point"))) int)
+```
+
+A `Type` local or a `${...}` hole of type `Type` stands for a type in the
+braces. The declarator around it builds a new type from it, so
+`$!Type{ const $point * }` is a pointer to a constant `Point`. A type name
+keeps its spelling: `$!Type{ String }` is `%("String")`.
+
+`$!Param{ ... }` holds one parameter declaration. Put the parameters in a
+function with a sequence hole:
+
+```x2c
+~#include "x2c.x"
+~#include "meta.x"
+~
+meta static List sum_function(String name, int count) {
+  Array params = [];
+  List total = $!( 0.0 );
+  for (int i = 0; i < count; i++) {
+    List x = x2c_ident(%"x$i");
+    params.push($!Param{ double $x });
+    total = $!( $total + $x );
+  }
+  List declared = params.list_free();
+  List function = $!Unit{ double $name($declared...) { return $total; } };
+  return %($function);
+}
+macro Unit $define_sum(Literal $name, Literal $count) {
+  $sum_function($name, $count)...
+}
+$define_sum("sum3", 3);   // sum3(1.0, 2.0, 3.5) is 6.5
+~
+~int main(void) {
+~  printf("%g\n", sum3(1.0, 2.0, 3.5));
+~  return 0;
+~}
+```
+
+```text
+6.5
+```
+
+Both build their List where they are written, as a typed quotation does.
+Nothing binds them until the function that holds them is bound. The braces
+may not declare a name of their own. A parameter takes its name from a hole,
+so the body reads it through the same `x2c_ident(...)` local. There is no
+`$!Decl{ ... }`, because `$!{ ... }` and `$!Unit{ ... }` already build
+declarations.
+
 ## What the compiler answers
 
 `lib/meta.x` declares the compiler operations. The code builders and

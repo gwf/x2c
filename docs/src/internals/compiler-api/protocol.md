@@ -186,7 +186,7 @@ Existing rows, helper decisions, and lookup caches are discarded; a null
 map leaves those registries empty. Conformance reset and resolution belong
 to `resolve_protocols`.
 
-Source: `src/protocol.x:2520`
+Source: `src/protocol.x:2521`
 
 <a id="Compiler.record_source_typedef"></a>
 #### Compiler.record_source_typedef
@@ -196,7 +196,7 @@ Source: `src/protocol.x:2520`
 Remembers a source typedef's declaration and visibility, which native
 alias insertion reads for its participant.
 
-Source: `src/protocol.x:2443`
+Source: `src/protocol.x:2444`
 
 <a id="Compiler.resolve_protocol_member"></a>
 #### Compiler.resolve_protocol_member

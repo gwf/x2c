@@ -590,6 +590,7 @@ static void Definition.body(Definition &d) {
 /* A Stmt result's body after `=>` is one arrow statement. */
 static List Definition.read_body(Definition &d) {
   Compiler c = d.c;
+  if (d.kind == <type> || d.kind == <param>) return d.part_body();
   if (d.has_expression_body()) return d.expression_body();
   if (c.peek(0) == <"{">) return c._parse_body(d.body_kind(), d.using);
   return c._arrow_statement(d.anonymous);
@@ -622,6 +623,21 @@ static List Definition.expression_body(Definition &d) {
   List replacement = c.parse_expression();
   if (!d.anonymous) c.expect(<;>);
   return replacement;
+}
+
+/* A Type quotation's body is a type name, and a Param quotation's body is
+   one parameter. */
+static List Definition.part_body(Definition &d) {
+  Compiler c = d.c;
+  c.expect(<"{">);
+  List body = NULL;
+  if (d.kind == <param>) {
+    body = c.try_parse_macro_slot(<param>);
+    if (!body) body = c.parse_parameter();
+  }
+  else c.parse_type_operand(&body);
+  c.expect(<"}">);
+  return body;
 }
 
 /* A decorator's body produces what its target is, and a Function or
@@ -682,9 +698,10 @@ static List Definition.wrap(Definition &d) {
   return replacement;
 }
 
-/* Each `(macro-bind BINDER)` slot becomes its binder. A body that is one
-   expression slot keeps the `expr` around its binder. */
+/* Each nested `(macro-bind BINDER)` slot becomes its binder. A whole slot
+   keeps a List shell: `expr` for an expression, `macro-bind` otherwise. */
 static List _slot_binders(List replacement) {
+  match (replacement) case %(macro-bind ?): return replacement;
   List bindings;
   Var expression_slot = %(
     expr (<macro-expr>) (macro-bind ?binder)
@@ -1171,7 +1188,7 @@ static const SymbolSet sequence_roles =
   %<<argument block field enumerator map-entry param unit catch match-row
      decl-row>>;
 static const SymbolSet untyped_roles = %<<expression argument type>>;
-static const SymbolSet quoted_roles = %<<statement block name>>;
+static const SymbolSet quoted_roles = %<<statement block name param>>;
 
 /* Consumes a `...` after a slot. It is legal only where the role takes a
    sequence. */
@@ -1212,7 +1229,8 @@ Token Compiler.after_hole(Compiler c) {
    applies to that local's value. A `${expression}` is a hole for a hidden
    local that the quotation declares before it builds its code. A typed
    quotation, `$!T{ expression }` or `$!(T){ expression }`, builds its code
-   where it is written (see "typed quotations"). */
+   where it is written (see "typed quotations"), and so do
+   `$!Type{ type-name }` and `$!Param{ parameter }`. */
 
 /** Parses a quotation at `$!` into the code it builds from the locals its
     body names. */
@@ -1223,7 +1241,7 @@ List Compiler.parse_macro_quotation(Compiler c) {
   int typed = c._typed_quotation();
   Symbol kind = typed || c.peek(0) == <(> ? <expression> : <block-item>;
   if (!typed && c.peek(0) == <ident>) {
-    kind = c._result_kind_token(c.token);
+    kind = c._quotation_kind(c.token);
     c.next();
   }
   c.sym.push_new_scope();
@@ -1242,6 +1260,15 @@ List Compiler.parse_macro_quotation(Compiler c) {
   return locals
        ? %(expr ("List") (parens (block @locals (stmnt $built))))
        : built;
+}
+
+/* The kind a quotation builds: one a result kind names, or a type or one
+   parameter, which only a hole kind names. */
+static Symbol Compiler._quotation_kind(Compiler c, Token token) {
+  const MacroCategory *category = _category(token.text);
+  if (category && (category.hole == <type> || category.hole == <param>))
+    return category.hole;
+  return c._result_kind_token(token);
 }
 
 /* Whether the quotation after `$!` states its type: `T{` where the
@@ -1400,6 +1427,7 @@ static List Compiler._quoted_cons(
 static List Definition.construction(Definition &d) {
   Compiler c = d.c;
   if (d.type) return d.typed_construction();
+  if (d.kind == <type> || d.kind == <param>) return d.part_construction();
   if (!d.rebuild || d.nested || d.kind == <decl-unit> || c.runtime_literals)
     return NULL;
   Map keys = {}, file_locals = {};
@@ -1482,11 +1510,7 @@ static List Compiler._built_hole(
 
 static List Definition.typed_construction(Definition &d) {
   Compiler c = d.c;
-  if (!d.rebuild || d.fresh) $report.parse.typed_quotation(c, d.start);
-  Map keys = {};
-  foreach (List hole, d.parameters)
-    foreach (Symbol projection, %(source value expression splice member))
-      keys[_hole_key(hole, projection)] = %($hole $projection);
+  Map keys = d.written_keys();
   match (d.rebuild.car()) case %(expr ? *content):
     return c.literal_cell(c.cache_literal_var(<expr>),
       c.literal_cell(d.type, c._typed_cells(content, keys, d.start)));
@@ -1498,6 +1522,27 @@ static List Definition.typed_construction(Definition &d) {
   List value = c._hole_value(hole, d.start);
   return c.resolve_expression(
     %(expr ("List") (call $callee (args ${d.type} $value))), d.start);
+}
+
+/* `$!Type{ type-name }` and `$!Param{ parameter }` build their List where
+   they are written, as a typed quotation builds its expression. */
+static List Definition.part_construction(Definition &d) {
+  Map keys = d.written_keys();
+  match (d.rebuild.car()) case %(macro-bind ?binder):
+    return d.c._typed_hole(keys[binder], d.start);
+  return %(expr ("List") ${d.c._typed_cells(d.rebuild.car(), keys, d.start)});
+}
+
+/* The hole projections a quotation built where it is written fills. Such a
+   quotation binds nothing, so it may declare no name and apply no
+   template. */
+static Map Definition.written_keys(Definition &d) {
+  if (!d.rebuild || d.fresh) $report.parse.typed_quotation(d.c, d.start);
+  Map keys = {};
+  foreach (List hole, d.parameters)
+    foreach (Symbol projection, %(source value expression splice member))
+      keys[_hole_key(hole, projection)] = %($hole $projection);
+  return keys;
 }
 
 /* The List cells that build `items`. A sequence or splice hole
@@ -1557,13 +1602,16 @@ static List Compiler._hole_value(Compiler c, List hole, Token start) =>
   c.resolve_expression(%(expr () (ident ${_hole_name(hole).str()})), start);
 
 /* A quotation's hole takes its kind from a name position, or from a
-   statement position where it stands alone, which no annotation can give
-   it. A hole that an operator, `;`, or a postfix form follows is an
+   parameter or statement position where it stands alone, which no
+   annotation can give it. A hole that a declarator follows is a parameter's
+   type, and one that an operator, `;`, or a postfix form follows is an
    expression. */
 static int Compiler._quoted_role(Compiler c, Symbol role) {
   if (!(%(quotation) in c.macro_holes) || !(role in quoted_roles)) return 0;
   if (role == <name>) return 1;
   Token after = c.after_hole();
+  if (role == <param>)
+    return after.type == <,> || after.type == <)> || after.type == <"}">;
   return after.type != <;> && !_extends_expression(after);
 }
 

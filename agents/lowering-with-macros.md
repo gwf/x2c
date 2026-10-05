@@ -353,6 +353,10 @@ examples are excerpts from current source.
    return c.rebuild_statement($!{ if ($flag) return; $flag = 1; }).cdr();
    ```
 
+   A declaration of a bound name rebuilds the same way, so
+   `c.rebuild_statement($!{ $storage_type $field; }).cadr()` needs no
+   `declaration_parts`; `$!Type{ ... }` builds a constant type at once.
+
    [Retained template construction](#retained-template-construction)
    explains why the lambda producers use it.
 
