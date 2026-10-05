@@ -916,11 +916,12 @@ static List Emitter._function(Emitter &e, List ast) {
   type = e._emit(%( $type ));
   bindings = %( $bindings );
   body = %( $body );
-  Map old_statics = e.static_objects;
-  e.static_objects = {};
-  List decl = e._emit(bindings), body_code = e._emit(body);
+  List decl, body_code;
+  $let(e.static_objects, {}) {
+    decl = e._emit(bindings);
+    body_code = e._emit(body);
+  }
   e.fn_name = old_fn;
-  e.static_objects = old_statics;
   return %(@type @decl @body_code);
 }
 

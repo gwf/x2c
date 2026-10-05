@@ -1260,12 +1260,10 @@ List Compiler.lower_defer_region(Compiler c, List body, List finalizer) {
 }
 
 static int _defer_needs_landing(List ast) {
-  if (!ast) return 0;
-  match (ast)
+  List node;
+  $ast.walk(ast, node) match (node)
     case %((!or return break continue goto try catchcases
                  match matchcases) *): return 1;
-  foreach (Var child, ast)
-    if (child is <list> && _defer_needs_landing(child)) return 1;
   return 0;
 }
 

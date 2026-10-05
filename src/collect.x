@@ -507,9 +507,8 @@ static List Compiler._walk_cold(
    the file's interface, so it numbers its own bindings the same either way. */
 static void Compiler._walk_apart(
   Compiler c, String path, String text, Map globs, Map visited) {
-  int next_binding = c.names.next_binding;
-  c._walk_file(path, text, Path.dirname(path), globs, visited);
-  c.names.next_binding = next_binding;
+  $let(c.names.next_binding, c.names.next_binding)
+    c._walk_file(path, text, Path.dirname(path), globs, visited);
 }
 
 /* `covered` is 1 when the file is in the runtime's `lib/` or

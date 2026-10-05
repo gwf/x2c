@@ -241,20 +241,17 @@ static Ast Compiler._function_node(
   Var stored_owner;
   if (c.semantic_binding_facts().try_get(%(defer-ownr $binding), stored_owner))
     owner = stored_owner;
-  String previous = c.fn_name;
-  int previous_inline = c.inline_header;
-  c.fn_name = owner;
   Type function_type = return_type;
-  c.inline_header = function_type.is_inline() &&
-                    !function_type.is_static();
-  List new_return = c._step(return_type);
-  List new_decl = c._step(declarator);
-  List prepared_body = c._lower_lambda_destructuring(body);
-  prepared_body = c.prepare_lambda_cells(declarator, prepared_body);
-  List new_body = c._step(prepared_body);
-  List transformed = %(function $new_return $new_decl $new_body);
-  c.fn_name = previous;
-  c.inline_header = previous_inline;
+  int inline_header = function_type.is_inline() && !function_type.is_static();
+  List transformed;
+  $let(c.fn_name, owner) $let(c.inline_header, inline_header) {
+    List new_return = c._step(return_type);
+    List new_decl = c._step(declarator);
+    List prepared_body = c._lower_lambda_destructuring(body);
+    prepared_body = c.prepare_lambda_cells(declarator, prepared_body);
+    List new_body = c._step(prepared_body);
+    transformed = %(function $new_return $new_decl $new_body);
+  }
   return transformed;
 }
 
@@ -385,16 +382,15 @@ static Ast Compiler._block_node(
 
 static Ast Compiler._raise_node(Compiler c, Ast ast) {
   // Raise details intern at raise time, never in constructors.
-  int old_runtime = c.runtime_literals;
-  c.runtime_literals = 1;
-  match (ast)
-    case %(raise ?cause (args *arguments)):
-      ast = c._raise(ast, cause, arguments);
-  ast = c._children(ast);
-  match (ast)
-    case %(raise ?cause (args *arguments)):
-      ast = c._ordered_raise(cause, arguments);
-  c.runtime_literals = old_runtime;
+  $let(c.runtime_literals, 1) {
+    match (ast)
+      case %(raise ?cause (args *arguments)):
+        ast = c._raise(ast, cause, arguments);
+    ast = c._children(ast);
+    match (ast)
+      case %(raise ?cause (args *arguments)):
+        ast = c._ordered_raise(cause, arguments);
+  }
   return ast;
 }
 
