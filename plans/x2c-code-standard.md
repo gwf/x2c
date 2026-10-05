@@ -470,6 +470,21 @@ Evidence in `/tmp/x2c-standard-d3/debug/`: `d3-packages-check.log`,
 Options for Gary: authorize a reviewed update of these include expectations,
 or leave stage 2 publication pending. Continue the independent stages.
 
+### Stage 4: subject spelling and generated C (NM-2)
+
+Renaming `Job._open_streams`'s subject from `job` to `j` changes only
+its generated C parameter and four bound references in `lib/process.c`.
+The native build passes, but `make stage-diff-0` fails because the plan
+requires byte-identical C/H against the current bootstrap. The other 219
+files remain identical. The rename is restored; two call wraps pass the
+same comparison over all 220 files.
+
+Evidence in `/tmp/x2c-standard-docs/debug/`:
+`stage4-process-name-c.diff`, `stage4-process-name-all-diffs.txt`, and
+`stage4-process-restored-diff.log`. Gary can authorize review of these
+binding-only C changes and the normal bootstrap refresh, or leave this
+NM-2 finding pending. This trial does not reject other possible repairs.
+
 ## Progress
 
 | Stage | Commit | Date | Result |
@@ -484,6 +499,7 @@ or leave stage 2 publication pending. Continue the independent stages.
 | 3.4 | `b7719c78` | 2026-10-05 | 6 invalid cases; suppressed fix unchanged |
 | 3.5 | `f7b1b6a6` | 2026-10-05 | 11 codes; 287 new candidates |
 | 3.6 | `9542ea14` | 2026-10-05 | 32 codes; 106 violations |
+| 4.process | `e70355e7` | 2026-10-05 | 3 -> 1 violations; +4/-4 .x; 220 C/H identical |
 | D2 held | `a7c271f` | 2026-10-05 | +197/-192 .x; 4 raises held |
 | D3 held | `9511153f` | 2026-10-05 | +9/-9 .x; package check fails |
 
