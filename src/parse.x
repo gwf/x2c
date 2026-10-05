@@ -466,8 +466,8 @@ static void Compiler._record_meta_hash(
     case %(declare ?spec (bindings ?one *more)):
       if (more) {
         foreach (Var bind, definition.caddr().list().cdr())
-          c._record_meta_hash(%(declare $spec (bindings $bind)),
-            first, collected_body);
+          c._record_meta_hash(
+            %(declare $spec (bindings $bind)), first, collected_body);
         return;
       }
   }
