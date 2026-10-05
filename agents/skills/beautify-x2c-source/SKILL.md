@@ -4,7 +4,7 @@ description: >-
   Rewrite one hand-authored x2c source file to the Shape standard in
   agents/x2c-code-standard.md while keeping its behavior, algorithms,
   and data structures: split long functions into named steps, make each
-  dispatch arm one line, group shared context into records, call existing
+  dispatch action one line, group shared context into records, call existing
   owners instead of repeating their work, give incidental work one place,
   rename with the glossary, and put the file in reading order. Use for any
   request to make a src/ or lib/ file readable at the function and file

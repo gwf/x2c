@@ -979,7 +979,7 @@ Later candidates below remain private until submitted to the integrator.
 | `Walk.rewrite` | 42 | 36 | length repaired; focused proof passes |
 | `Emitter._emit` | 94 | 52 | one-line dispatcher exception reviewed |
 | `Emitter._declarator` | 46 | 23 | length repaired; focused proof passes |
-| `Compiler._resolve_content` | 104 | 104 | trial restored; grammar-arm width decision pending |
+| `Compiler._resolve_content` | 104 | 104 | retained-grammar trial resumed; proof pending |
 | `Compiler._resolve_identifier` | 44 | 34 | capture step; focused proof passes |
 | `Compiler._typedef_index` | 43 | 24 | length repaired; focused proof passes |
 | `Compiler._record_meta_hash` | 50 | 18 | length repaired; focused proof passes |
@@ -1086,18 +1086,23 @@ alternating triples after one warm triple give fixture medians 7,788,948,860
 to 7,802,902,226 and fixed-source medians 14,698,137,202 to 14,734,838,342.
 Both ranges overlap; 48 fixture and 16 source C/H pairs match exactly.
 Final capture spelling leaves optimized operations unchanged; subsequent
-self-host and raw-client checks pass. Four two-line typed-pattern arms and
-two multiline sequence arms remain. Full FN-3 conformance is not claimed.
+self-host and raw-client checks pass. After approved pattern wrapping,
+all 28 `_step` actions and all three `_sequence_item` actions occupy one
+line. `_sequence_tail` retains a nested-match action. Direct returns,
+assignments, and the guarded default also remain outside strict named-step
+wording. Full FN-3 conformance is not claimed; no wrapper is added merely
+to name a trivial action.
 
 The `Resolve` trial replaces 33 single-consumer expression handlers with
 a four-field stack context and removes 43 source lines. Parent review
 restores existing grammar owners after rejecting raw duplicate patterns.
 Eight retained grammar arms then measure 80 to 109 columns. The trial is
 preserved privately and tracked source is restored at `262441eb`.
-No compiler checks or measurement were run. Gary has been asked whether
-FN-2 through FN-4 may permit wrapped grammar patterns with one-line named
-actions. No answer or exception is assumed. This rejects the current trial,
-not every possible resolution design. Identifier, index, and lambda owners
+No compiler checks or measurement were run for that restored trial.
+Gary approves wrapped grammar patterns with one-line named actions on
+2026-10-05. FN-2 through FN-4 now distinguish patterns from actions.
+The worker resumes the retained-grammar trial under that rule. Identifier,
+index, and lambda owners
 are byte-exact in the preserved trial. Original malformed-form prefix and
 fallback behavior still require proof before any revived trial is accepted.
 
