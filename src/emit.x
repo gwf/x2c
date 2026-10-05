@@ -57,12 +57,12 @@ macro Expression $emit.cache(Expr $e, Expr $id) =>
   $e.cache_bindings ? $e._emit_ident($e.cache_bindings[$id])
                    : %("_${$id}");
 
-macro Expression $emit.va_arg(
+macro Expression $emit.vararg(
   Expr $e, Expr $expression, Expr $declaration) =>
   %("va_arg(" @{$e._emit(%(${$expression}))} ", "
     @{$e._emit(%(${$declaration}))} ")");
 
-macro Expression $emit.offsetof(Expr $e, Expr $type, Expr $member) =>
+macro Expression $emit.member_offset(Expr $e, Expr $type, Expr $member) =>
   %("offsetof(" @{$e._semantic_type($type)} ", " @{$e._emit($member)}
     ")");
 
@@ -187,8 +187,8 @@ static List Emitter._emit(Emitter &e, List ast) {
     case %(expr ? ?content): return e._emit(%($content));
     case %(postfix ?op ?argument): return e._emit_postfix(op, argument);
     case %(generic ?control *rows): return e._emit_generic(control, rows);
-    case %(va-arg ?expr ?decl): return $emit.va_arg(e, expr, decl);
-    case %(offsetof ?type ?member): return $emit.offsetof(e, type, member);
+    case %(va-arg ?expr ?decl): return $emit.vararg(e, expr, decl);
+    case %(offsetof ?type ?member): return $emit.member_offset(e, type, member);
     case %(call ?fn ?args): return e._emit_call(fn, args);
     case %(index ?array ?index): return $emit.index(e, array, index);
     case %(op ?op ?argument): return e._emit_unary(op, argument);
