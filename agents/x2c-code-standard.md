@@ -536,6 +536,11 @@ generated code calls, native callers, and process setup. Ordinary public
 operations are type methods; private helpers are `static`. An `x2c_*` name
 below `#pragma private` still leaks into generated headers. Verify the
 generated-code and native callers of a retained C entry before renaming it.
+The `builtin_*` functions in `src/builtins.x` stay non-static because
+`src/cleanup.x` calls the lowering slot `builtin_try_cleanup_placement`
+and `src/macros.x` calls the registry `builtin_targets` across units.
+Making the slot static fails native linking; making the registry static
+fails translation of `src/macros.x`.
 
 ### Module sets
 
