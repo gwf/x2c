@@ -56,13 +56,16 @@ commands/lint/tests/src/comments.x:8: violation section-label FI-5: decorative o
 commands/lint/tests/src/comments.x:11: candidate catalog-label FI-5: catalog-style section label
 commands/lint/tests/src/comments.x:14: candidate narration CM-2: narrates the code; state a decision
 commands/lint/tests/src/comments.x:14: violation restates-name CM-2: restates the name _parse_value
+commands/lint/tests/src/comments.x:15: candidate uncalled-static-function FI-7: _parse_value has no bound reference in this parsed unit; review macro, protocol, native, and other-file uses
 commands/lint/tests/src/comments.x:17: candidate narration CM-2: narrates the code; state a decision
+commands/lint/tests/src/comments.x:18: candidate uncalled-static-function FI-7: _parse_other has no bound reference in this parsed unit; review macro, protocol, native, and other-file uses
 commands/lint/tests/src/comments.x:21: violation comment-null-guard CM-2: narrates an obvious null guard
 commands/lint/tests/src/comments.x:23: violation restates-code CM-2: translates the next statement
 commands/lint/tests/src/comments.x:28: violation doc-boilerplate CM-5: parameter or return boilerplate
 commands/lint/tests/src/comments.x:34: violation detached-doc CM-5: doc comment detached from its declaration
 commands/lint/tests/src/comments.x:38: violation stacked-doc CM-5: stacked doc comments
 commands/lint/tests/src/comments.x:42: violation doc-on-static CM-5: doc comment on a private static helper
+commands/lint/tests/src/comments.x:43: candidate uncalled-static-function FI-7: _helper has no bound reference in this parsed unit; review macro, protocol, native, and other-file uses
 commands/lint/tests/src/comments.x:45: candidate repeated-prose CM-7: repeats prose elsewhere in the file
 commands/lint/tests/src/comments.x:48: candidate repeated-prose CM-7: repeats prose elsewhere in the file
 exit 0
@@ -73,7 +76,9 @@ commands/lint/tests/src/review.x:8: candidate internal-type FA-8: enum Color has
 commands/lint/tests/src/review.x:20: violation return-after-report-error ER-4: return follows non-returning report_error in Checker.check_pair
 commands/lint/tests/src/review.x:20: candidate shape-diagnostics PR-4: diagnostics are built around manual List or AST shape checks in Checker.check_pair
 commands/lint/tests/src/review.x:20: candidate validator-diagnostics PR-4: validator-like helper emits diagnostics in Checker.check_pair
+commands/lint/tests/src/review.x:22: candidate literal-report-error DG-1: move the literal diagnostic to its report macro owner
 commands/lint/tests/src/review.x:25: candidate silent-shape-guard PR-4: impossible shape can silently return fallback in Checker.check_pair
+commands/lint/tests/src/review.x:27: candidate literal-report-error DG-1: move the literal diagnostic to its report macro owner
 commands/lint/tests/src/review.x:33: violation return-after-raise ER-4: return follows a non-returning shared Error cause in raise_then_return
 commands/lint/tests/src/review.x:41: candidate struct-copy FA-3: 1 field transfers and 1 whole copies in copy_pair
 commands/lint/tests/src/review.x:46: candidate manual-bookkeeping LT-1: 5 statistics sites and 0 cleanup calls in count_everything
@@ -81,6 +86,7 @@ commands/lint/tests/src/review.x:54: candidate lifecycle-pair LT-1: paired acqui
 commands/lint/tests/src/review.x:62: candidate repeated-accessor ST-10: node.car() repeats three times; cache only if pure and stable
 commands/lint/tests/src/review.x:68: candidate repeated-routes FA-5: 3 functions share at least 80% of control and call tokens: route_one, route_two, route_three
 commands/lint/tests/src/review.x:89: candidate silent-shape-guard PR-4: impossible shape can silently continue in skip_other
+commands/lint/tests/src/review.x:106: candidate literal-report-error DG-1: move the literal diagnostic to its report macro owner
 exit 0
 # shared Error causes outside the repository
 review.x:33: violation return-after-raise ER-4: return follows a non-returning shared Error cause in raise_then_return
@@ -154,3 +160,46 @@ idioms.x:43: violation negated-is ST-5: spell the test `is not`
 idioms.x:43: candidate silent-shape-guard PR-4: impossible shape can silently return 0 in negated
 idioms.x: fixed 5 of 6
 exit 0
+# standard adoption token and declaration signals
+commands/lint/tests/src/standard-tokens.x:14: candidate same-line-else ST-1: put else on its own line
+commands/lint/tests/src/standard-tokens.x:15: candidate empty-constructor EX-1: use the empty value literal
+commands/lint/tests/src/standard-tokens.x:16: candidate empty-constructor EX-1: use the empty value literal
+commands/lint/tests/src/standard-tokens.x:17: candidate empty-constructor EX-1: use the empty value literal
+commands/lint/tests/src/standard-tokens.x:18: candidate saved-local NM-4: review old_ready as a scoped override
+commands/lint/tests/src/standard-tokens.x:19: candidate saved-local NM-4: review saved_ready as a scoped override
+commands/lint/tests/src/standard-tokens.x:20: candidate saved-local NM-4: review previous_ready as a scoped override
+commands/lint/tests/src/standard-tokens.x:26: candidate assignment-condition ST-4: review assignment in a condition outside a read loop
+commands/lint/tests/src/standard-tokens.x:26: candidate literal-report-error DG-1: move the literal diagnostic to its report macro owner
+commands/lint/tests/src/standard-tokens.x:27: candidate assignment-condition ST-4: review assignment in a condition outside a read loop
+commands/lint/tests/src/standard-tokens.x:28: candidate assignment-condition ST-4: review assignment in a condition outside a read loop
+commands/lint/tests/src/standard-tokens.x:29: candidate assignment-condition ST-4: review assignment in a condition outside a read loop
+commands/lint/tests/src/standard-tokens.x:35: candidate x2c-ident LI-2: review compile-time name construction
+commands/lint/tests/src/standard-tokens.x:36: candidate lisp-defun LI-1: review Lisp work in compiler or runtime
+exit 0
+# Lisp outside compiler and runtime
+exit 0
+# diagnostic wording owned by report macros
+exit 0
+exit 0
+# dispatcher arm boundaries
+commands/lint/tests/src/standard-arms.x:7: candidate long-dispatch-arm FN-3: dispatcher arm spans 4 lines; review above 3
+commands/lint/tests/src/standard-arms.x:20: candidate long-dispatch-arm FN-3: dispatcher arm spans 4 lines; review above 3
+exit 0
+# static definitions and referenced functions
+commands/lint/tests/src/standard-static.x:2: candidate uncalled-static-function FI-7: _unused_signal has no bound reference in this parsed unit; review macro, protocol, native, and other-file uses
+exit 0
+# layout dispatcher and static definition
+commands/lint/tests/src/standard-layout.x:3: candidate uncalled-static-function FI-7: _layout_unused has no bound reference in this parsed unit; review macro, protocol, native, and other-file uses
+commands/lint/tests/src/standard-layout.x:10: candidate long-dispatch-arm FN-3: dispatcher arm spans 4 lines; review above 3
+exit 0
+# file and section metric boundaries
+file-1501.x:1: candidate long-file FI-1: file spans 1501 lines; review above 1500
+exit 0
+section-401.x:1: candidate long-section FI-5: labeled section spans 401 lines
+exit 0
+# malformed trailing identifiers
+exit 1
+exit 1
+exit 1
+exit 1
+exit 1
