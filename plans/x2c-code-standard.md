@@ -812,6 +812,7 @@ refresh for this diagnostic location. No padding was added to offset it.
 | 4.meta | `e7dabbee` | 2026-10-05 | 2 -> 0; +5/-4 .x |
 | 4.cli | `37eababa` | 2026-10-05 | 2 -> 0; +3/-2 .x |
 | 4.scan | `4b1f51af` | 2026-10-05 | 1 -> 0; +1/-1 .x |
+| 4.import | `bf01f633` | 2026-10-05 | 1 -> 0 helper; +2/-5 .x |
 | D2 partial | `14973621` | 2026-10-05 | +197/-192 .x; four raises held |
 | D2 held | `a7c271f` | 2026-10-05 | +197/-192 .x; 4 raises held |
 | D3 | `f7f886ad` | 2026-10-05 | 9/9 autodiff; +9/-9 .x |
@@ -844,6 +845,24 @@ The complete census now has 48 violations.
 
 Scan repairs pass complete 220-file stage comparisons.
 The complete census now has 47 violations.
+
+First violation cycle: all 106 findings were attempted. The 59 repairs
+in 24 files leave 47 recorded findings. Authored `.x`: +110/-102.
+No failed spelling or declaration removal was kept. Remaining counts:
+15 declarations, 16 braces, six subjects, three widths, seven wraps.
+
+Import candidate `bf01f633` removes one forwarding helper. Both parent
+stage-1 comparison and all 12 import fixtures pass without expectation
+changes. Generated C removes the helper, moves the same report into its
+guard, and reorders typed literal-cache initialization; header unchanged.
+No retained source coordinate or diagnostic output changes were found.
+
+HP-1 uses seven alternating pairs after one warm pair, matching staged
+preludes and equal-length paths in the same checkout. Median retired
+instructions on normal import: 4,591,417,957 -> 4,591,140,101; cycle error:
+4,544,272,961 -> 4,541,204,854. Sample ranges overlap; no distinguishable
+cost increase or improvement is claimed. All 16 output pairs are exact.
+Evidence: `/tmp/x2c-standard-lint/debug/import-forwarder-hp1*`.
 
 Stage 3.5 census: 108 compiler and runtime files. The baseline took
 10.63 seconds; the candidate took 10.61 seconds. All 1,599 original
