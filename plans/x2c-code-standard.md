@@ -940,7 +940,24 @@ The private import and all Error causes, values, and sites are preserved.
 All 12 compiler length candidates were reviewed; none is established as
 an FN-2 table or one-line dispatcher exception. Deletion/reuse discovery
 found no additional supported removal inside them. Shape work remains.
-The broader `macros.x` ownership crossing census remains unfinished.
+The complete `macros.x` ownership crossing census is now reviewed at
+`db8f20ed`. It covers all 32 subjects and 318 functions, including public
+entry operations and shared state. Eleven candidate boundaries have
+private-helper crossing counts and caller inventories. No large split is
+supported by the current owners. The 65-line category vocabulary is a
+leaf, but extracting it would remove no duplicate operation or state.
+Imports share library-session state; ordinary parsing and quotations both
+construct the same Definition. A split based only on section size would
+retain these crossings and add declarations.
+
+The capture-row forwarder has four callers. A +4/-7 deletion trial builds
+and keeps the header equal, but moves runtime ErrorSite lines 3862 to 3859
+and 4040 to 4037. That trial is restored. The approved retained-definition
+position changes do not cover runtime ErrorSite changes. Restored source
+passes the 220-file stage-1 comparison. It has no function over 40 lines,
+ordinary brace depth at most four, and at most six parameters. One LY-3
+violation remains. No source split or forwarder deletion is delivered.
+Private review evidence commit: `cd8b2682`.
 
 The label-collector candidate (+45/-39 trial lines) compiles but changes
 retained positions; it is restored. Its fixtures, self-host comparisons,
