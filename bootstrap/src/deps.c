@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "buffer.h"
-static String _4, _3, _2, _1, _0;
+static String _5, _4, _3, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
@@ -59,8 +59,9 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _0 = String_new("/");
   _1 = String_new(".d");
   _2 = String_new("search:");
-  _3 = String_new(".c");
-  _4 = String_new(".h");
+  _3 = String_new("cwd:");
+  _4 = String_new(".c");
+  _5 = String_new(".h");
 }
 
 int CliRequest_inspects(CliRequest);
@@ -179,13 +180,13 @@ void x2c_cleanup_push(X2CCleanup *);
 
 int Map_try_next(Map, unsigned *, Var *, Var *);
 
-Var Array_push(Array, Var);
-
 int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 
 int String_startswith(String, String);
 
 String Var_string(Var);
+
+Var Array_push(Array, Var);
 
 Array Array_sort(Array);
 
@@ -239,7 +240,14 @@ static String _contents(CliRequest request, Compiler compiler, String input, Str
             while(Map_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0), &(_x2c_macro_cursor_output_1))){
               path = _x2c_macro_cursor_output_0;
               content_hash = _x2c_macro_cursor_output_1;
-              Array_push((Var_is_row(content_hash, 11, 7, 1) && String_startswith(Var_string(content_hash), _2) ? searches : paths), path);
+              {
+                if(Var_is_row(content_hash, 11, 7, 1) && String_startswith(Var_string(content_hash), _2)){
+                  String candidate = Var_string(path);
+                  Array_push(searches, String_var(String_startswith(candidate, _3) ? String_getslice(candidate, 4, -2147483648, 1) : candidate));
+                }
+                else Array_push(paths, path);
+              }
+
             }
 
           }
@@ -327,10 +335,10 @@ static void _write_targets(Buffer out, CliRequest request, String input, String 
     Var _x2c_literal_part_4 = String_var(String_rstrip(output_dir, "/"));  Var _x2c_literal_part_5 = String_var(Path_stem(input));  String_join(NULL, cons(_x2c_literal_part_4, cons(String_var(_0), cons(_x2c_literal_part_5, NULL))));
   }
   );
-  _write_word(out, String_truth(request -> dep_target) ? request -> dep_target : String_join(NULL, cons(String_var(base), cons(String_var(_3), NULL))));
+  _write_word(out, String_truth(request -> dep_target) ? request -> dep_target : String_join(NULL, cons(String_var(base), cons(String_var(_4), NULL))));
   if(String_truth(request -> dep_target)) return;
   Buffer_write_char(out, ' ');
-  _write_word(out, String_join(NULL, cons(String_var(base), cons(String_var(_4), NULL))));
+  _write_word(out, String_join(NULL, cons(String_var(base), cons(String_var(_5), NULL))));
 }
 
 int String_equal(String, String);
