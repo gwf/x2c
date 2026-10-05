@@ -76,7 +76,8 @@ the pointee lives and how long it remains valid; protocol participation answers
 how its pointer crosses a typed boundary. `lib/iter.x` keeps every pipeline
 state struct in caller storage. Its `UnzipColumnRef` and `UnzipSharedRef`
 aliases cross through `Iter.obj`, a `Var`, with `Var` protocol rows. These
-crossings do not allocate, copy, or extend the state lifetime. A survey must inspect what enters and leaves each `Var`
+crossings do not allocate, copy, or extend the state lifetime. A survey must
+inspect what enters and leaves each `Var`
 field, not reject the field because the pointed-to storage is native or
 caller-owned.
 
