@@ -36,7 +36,7 @@ replaces none of them. It appends generated bindings and initialization
 work to the compiler and is not idempotent. Failures are reported as
 `emit` diagnostics.
 
-Source: `src/generate.x:49`
+Source: `src/generate.x:50`
 
 #### generate_code_text
 
@@ -46,7 +46,7 @@ Returns the generated header and source of the lowered `ast` as `(hfile
 htext cfile ctext)`, named from `basename`, without writing them. It
 affects the compiler as `generate_code` does.
 
-Source: `src/generate.x:62`
+Source: `src/generate.x:63`
 
 ### `Compiler`
 
@@ -65,7 +65,7 @@ token range and privacy of the top-level form that produced the
 definition; either is empty when the compiler made the definition.
 `LINE` is 1 and `DOC` empty for a definition without authored source.
 
-Source: `src/generate.x:1449`
+Source: `src/generate.x:1446`
 
 <a id="Compiler.dump_definitions"></a>
 #### Compiler.dump_definitions
@@ -77,7 +77,7 @@ Prints the `--dump-definitions` projection of the lowered unit `ast`:
 with one, then one row per `Compiler.definition_rows` entry. The
 command-line reference in the book describes the fields.
 
-Source: `src/generate.x:1552`
+Source: `src/generate.x:1549`
 
 <a id="Compiler.init_statements"></a>
 #### Compiler.init_statements
@@ -86,7 +86,7 @@ Source: `src/generate.x:1552`
 
 Returns the statements queued for `phase`, in the order they were added.
 
-Source: `src/generate.x:1024`
+Source: `src/generate.x:1021`
 
 <a id="Compiler.place_source_prelude"></a>
 #### Compiler.place_source_prelude
@@ -97,7 +97,7 @@ Places generated `declarations` after source types and includes, before
 the first function or captured initializer that can use them. An outer
 conditional containing that first use follows the declarations.
 
-Source: `src/generate.x:835`
+Source: `src/generate.x:832`
 
 ## Design notes
 
