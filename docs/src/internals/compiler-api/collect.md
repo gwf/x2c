@@ -12,7 +12,7 @@ Source-ordered shallow symbol collection and replay.
 
 | Function | Summary |
 | --- | --- |
-| [`collect_forget_preload_entries`](#collect_forget_preload_entries) | Drops the entries collected without declaration defaults while the shared compile-time session was filled. |
+| [`collect_forget_provisional_entries`](#collect_forget_provisional_entries) | Drops the entries collected without declaration defaults while the shared compile-time session was filled, or by a project meta build. |
 | [`collect_resolve_include`](#collect_resolve_include) | The file the include of `target` from `includer_dir` names, searched as collection searches `dirs`, or NULL. |
 | [`interface_configure`](#interface_configure) | Creates the process cache and names the directories searched for `.xi` interfaces. |
 | [`interface_prelude`](#interface_prelude) | Returns the path of the first prelude interface this compiler wrote, or NULL when there is none or the compiler's identity is unknown. |
@@ -24,17 +24,19 @@ Source-ordered shallow symbol collection and replay.
 | [`Compiler.record_generated_symbol`](#Compiler.record_generated_symbol) | Records one generated public callable in the declaration map that the current file's collected entry contributes, which is the map its interface publishes. |
 | [`Compiler.replay_included_package_imports`](#Compiler.replay_included_package_imports) | Repeats included package imports after full parsing resets macros, in the cache's original include order. |
 | [`Compiler.replay_package_imports`](#Compiler.replay_package_imports) | Replays the import operations retained by this declaration contribution: its package imports and the macro imports its file exports. |
+| [`Sym.withhold_import_rows`](#Sym.withhold_import_rows) | Removes from `published` the declaration rows that this file's file-scope imports added and the file did not write again, and their unit-static markers. |
 
 ### Functions
 
-#### collect_forget_preload_entries
+#### collect_forget_provisional_entries
 
-`void collect_forget_preload_entries(void)`
+`void collect_forget_provisional_entries(void)`
 
 Drops the entries collected without declaration defaults while the shared
-compile-time session was filled. Call once that session is published.
+compile-time session was filled, or by a project meta build. Call once
+that session is published, and after the meta build's parses.
 
-Source: `src/collect.x:1331`
+Source: `src/collect.x:1352`
 
 #### collect_resolve_include
 
@@ -43,7 +45,7 @@ Source: `src/collect.x:1331`
 The file the include of `target` from `includer_dir` names, searched as
 collection searches `dirs`, or NULL.
 
-Source: `src/collect.x:532`
+Source: `src/collect.x:550`
 
 #### interface_configure
 
@@ -56,7 +58,7 @@ stage directory when it runs from `<home>/builds/`, otherwise under the
 home. A `cold` process reads no interface and still writes its own. Call
 it before opening any translation unit's Context.
 
-Source: `src/collect.x:1058`
+Source: `src/collect.x:1078`
 
 #### interface_prelude
 
@@ -66,7 +68,7 @@ Returns the path of the first prelude interface this compiler wrote, or
 NULL when there is none or the compiler's identity is unknown. Its
 source hashes are not checked.
 
-Source: `src/collect.x:1245`
+Source: `src/collect.x:1265`
 
 #### interface_text
 
@@ -78,7 +80,7 @@ identity is unknown, since no compiler could replay that interface. A
 contribution that the interface grammar cannot spell is reported as an
 `emit` diagnostic.
 
-Source: `src/collect.x:1267`
+Source: `src/collect.x:1287`
 
 ### `Compiler`
 
@@ -96,7 +98,7 @@ protocol rows enter the current symbol state, and dependencies enter the
 importing compiler. Replay also merges recorded function definitions.
 `token` locates lookup and public-surface errors.
 
-Source: `src/collect.x:749`
+Source: `src/collect.x:769`
 
 <a id="Compiler.collect_symbols"></a>
 #### Compiler.collect_symbols
@@ -113,7 +115,7 @@ is `globs`. Collection also updates dependencies, function definitions,
 and macro state. Keyword alias maps and seen-name state are file-local
 and restored when each file walk ends.
 
-Source: `src/collect.x:154`
+Source: `src/collect.x:156`
 
 <a id="Compiler.import_included_exports"></a>
 #### Compiler.import_included_exports
@@ -124,7 +126,7 @@ Installs, at each include among the directives before the cursor, the
 macro imports that the included file exports, as the unit's own imports
 written there would be installed.
 
-Source: `src/collect.x:1012`
+Source: `src/collect.x:1032`
 
 <a id="Compiler.include_typedef_names"></a>
 #### Compiler.include_typedef_names
@@ -138,7 +140,7 @@ is skipped with the files it reaches, and each file reached is added to
 `seen`. NULL when the include does not resolve to x2c source; a runtime
 module adds nothing the prelude has not declared.
 
-Source: `src/collect.x:545`
+Source: `src/collect.x:563`
 
 <a id="Compiler.record_generated_symbol"></a>
 #### Compiler.record_generated_symbol
@@ -150,7 +152,7 @@ current file's collected entry contributes, which is the map its
 interface publishes. A file without a collected declaration map records
 nothing. The cache retains `signature`.
 
-Source: `src/collect.x:679`
+Source: `src/collect.x:699`
 
 <a id="Compiler.replay_included_package_imports"></a>
 #### Compiler.replay_included_package_imports
@@ -163,7 +165,7 @@ source sites. Returns the macro imports the included files export, by
 the canonical path of each file the unit includes, for the full parse
 to install at that include.
 
-Source: `src/collect.x:979`
+Source: `src/collect.x:999`
 
 <a id="Compiler.replay_package_imports"></a>
 #### Compiler.replay_package_imports
@@ -176,7 +178,21 @@ borrows the unit's macro state and shared package registries. The full
 parse passes `exports`, which takes the exported imports for the include
 line, and leaves the unit's own imports at their source sites.
 
-Source: `src/collect.x:921`
+Source: `src/collect.x:941`
+
+### `Sym`
+
+<a id="Sym.withhold_import_rows"></a>
+#### Sym.withhold_import_rows
+
+`void Sym.withhold_import_rows(Sym s, Map published)`
+
+Removes from `published` the declaration rows that this file's
+file-scope imports added and the file did not write again, and their
+unit-static markers. An including unit receives an import's
+declarations only by replaying an exported import itself.
+
+Source: `src/collect.x:391`
 
 ## Design notes
 

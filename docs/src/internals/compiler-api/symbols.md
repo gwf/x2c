@@ -26,6 +26,7 @@ The compiler's semantic symbol table.
 | [`Compiler.register_package_member`](#Compiler.register_package_member) | Registers one package member under a bare local spelling. |
 | [`Compiler.semantic_binding_facts`](#Compiler.semantic_binding_facts) | Returns the borrowed semantic-facts map indexed by binding. |
 | [`Compiler.set_fact`](#Compiler.set_fact) | Sets one semantic binding fact. |
+| [`Sym.added_globals`](#Sym.added_globals) | Returns the global rows written since `mark` that were absent before it, with their current values. |
 | [`Sym.at_file_scope`](#Sym.at_file_scope) | Returns whether declarations currently bind at file scope. |
 | [`Sym.base_symbols`](#Sym.base_symbols) | Copies all base-scope symbols into a fresh map in source order. |
 | [`Sym.bind_identity`](#Sym.bind_identity) | Installs an existing binding with `ast`'s qualifier-preserving type. |
@@ -42,6 +43,7 @@ The compiler's semantic symbol table.
 | [`Sym.define_macro`](#Sym.define_macro) | Defines or replaces a macro in the active lexical scope. |
 | [`Sym.delegate_aggregate`](#Sym.delegate_aggregate) | Resolves typedefs or one pointer layer to an aggregate tag, or `NULL`. |
 | [`Sym.drop`](#Sym.drop) | Deletes `key` from `map` so that an active transaction can restore it. |
+| [`Sym.end_log`](#Sym.end_log) | Stops the log that `Sym.log_writes` started. |
 | [`Sym.enumerator_owner`](#Sym.enumerator_owner) | Returns the current scope's enum owner for `key`, or zero. |
 | [`Sym.field_order`](#Sym.field_order) | Returns recorded fields in source order, or `NULL`. |
 | [`Sym.file_statics`](#Sym.file_statics) | Returns the borrowed set of file-static declaration keys. |
@@ -56,6 +58,7 @@ The compiler's semantic symbol table.
 | [`Sym.is_string_type`](#Sym.is_string_type) | Reports whether `type` reaches the named `String` value type. |
 | [`Sym.is_var_type`](#Sym.is_var_type) | Reports whether `type` reaches the named `Var` value type. |
 | [`Sym.local_type`](#Sym.local_type) | Resolves a block-local typedef to the type saved at its declaration. |
+| [`Sym.log_writes`](#Sym.log_writes) | Starts logging semantic writes, as a transaction does, and returns the log position that `Sym.added_globals` reads from. |
 | [`Sym.lookup`](#Sym.lookup) | Resolves an existing key and optionally stores its semantic type. |
 | [`Sym.lookup_field`](#Sym.lookup_field) | Returns an aggregate field's declared type, or `NULL`. |
 | [`Sym.lookup_macro`](#Sym.lookup_macro) | Returns the innermost visible local macro named `name`, or `NULL`. |
@@ -246,6 +249,16 @@ Source: `src/symbols.x:429`
 
 ### `Sym`
 
+<a id="Sym.added_globals"></a>
+#### Sym.added_globals
+
+`Map Sym.added_globals(Sym s, int mark)`
+
+Returns the global rows written since `mark` that were absent before
+it, with their current values.
+
+Source: `src/symbols.x:1335`
+
 <a id="Sym.at_file_scope"></a>
 #### Sym.at_file_scope
 
@@ -411,6 +424,15 @@ Deletes `key` from `map` so that an active transaction can restore it.
 
 Source: `src/symbols.x:135`
 
+<a id="Sym.end_log"></a>
+#### Sym.end_log
+
+`void Sym.end_log(Sym s)`
+
+Stops the log that `Sym.log_writes` started.
+
+Source: `src/symbols.x:1350`
+
 <a id="Sym.enumerator_owner"></a>
 #### Sym.enumerator_owner
 
@@ -539,6 +561,17 @@ are resolved before they are installed, so one lookup crosses the whole
 local chain without consulting names shadowed since its declaration.
 
 Source: `src/symbols.x:1024`
+
+<a id="Sym.log_writes"></a>
+#### Sym.log_writes
+
+`int Sym.log_writes(Sym s)`
+
+Starts logging semantic writes, as a transaction does, and returns the
+log position that `Sym.added_globals` reads from. `Sym.end_log` stops
+the log.
+
+Source: `src/symbols.x:1328`
 
 <a id="Sym.lookup"></a>
 #### Sym.lookup
@@ -816,7 +849,7 @@ Its writes are already in the scope maps, so code holding a borrowed
 map observes a committed expansion. An absent or inactive transaction
 has no effect.
 
-Source: `src/symbols.x:1332`
+Source: `src/symbols.x:1361`
 
 <a id="SymTxn.commit_transient"></a>
 #### SymTxn.commit_transient
@@ -827,7 +860,7 @@ Commits an active transaction, retaining the original counters map.
 The caller may then release the transaction's construction scope.
 Parsing and evaluation must allocate outside that temporary scope.
 
-Source: `src/symbols.x:1356`
+Source: `src/symbols.x:1383`
 
 <a id="SymTxn.local_macros_changed"></a>
 #### SymTxn.local_macros_changed
@@ -846,7 +879,7 @@ Source: `src/symbols.x:1309`
 Restores every semantic value captured by an active transaction.
 An absent or inactive transaction has no effect.
 
-Source: `src/symbols.x:1376`
+Source: `src/symbols.x:1403`
 
 ## Design notes
 
