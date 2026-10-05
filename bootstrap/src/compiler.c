@@ -75,6 +75,8 @@ static Token _thaw_token(Var type, Var text, Var line, Var column, Var length, V
 
 static List Compiler__thaw_origin(Compiler c, List location, Var node);
 
+static List Compiler__frozen_macro(Compiler c, List definition, List rows);
+
 static List Compiler__declaration_macro(Compiler c, List rows, int thaw);
 
 static List Compiler__macro_row(Compiler c, List row, int thaw);
@@ -1583,7 +1585,7 @@ Var Compiler_freeze_declaration_syntax(Compiler c, Var syntax){
     List _x2c_match_expr = Var_list(syntax);
     Var _x2c_match_values[4];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 4 };
     switch (Var_symbol(car(_x2c_match_expr))) {
-      case 895740748108: ;  static MatchCaptureSite _x2c_match_site_5;  if (x2c_match_site_try_capture(& _x2c_match_site_5, _x2c_match_expr, List_var(_86), &_x2c_match_capture)) {List rows = Var_list(_x2c_match_values[0]);  return List_var(Compiler__declaration_macro(c, rows, 0));  break;
+      case 895740748108: ;  static MatchCaptureSite _x2c_match_site_5;  if (x2c_match_site_try_capture(& _x2c_match_site_5, _x2c_match_expr, List_var(_86), &_x2c_match_capture)) {List rows = Var_list(_x2c_match_values[0]);  return List_var(Compiler__frozen_macro(c, Var_list(syntax), rows));  break;
 }
 case 40070: ;  static MatchCaptureSite _x2c_match_site_6;  if (x2c_match_site_try_capture(& _x2c_match_site_6, _x2c_match_expr, List_var(_98), &_x2c_match_capture)) {Var path = _x2c_match_values[0];  Var begin = _x2c_match_values[1];  Var end = _x2c_match_values[2];  Var node = _x2c_match_values[3];  return List_var(({
   Var _x2c_literal_part_9 = List_var(({
@@ -1728,6 +1730,18 @@ return({
   Var _x2c_literal_part_17 = Var_box_ulong(Array_len(c -> origins));  Var _x2c_literal_part_18 = Compiler_thaw_declaration_syntax(c, node);  cons(_99, cons(_x2c_literal_part_17, cons(_x2c_literal_part_18, NULL)));
 }
 );
+}
+
+int Map_truth(Map);
+int Map_try_get(Map, Var, Var *);
+static List Compiler__frozen_macro(Compiler c, List definition, List rows){
+  unsigned long epoch = Pool_epoch();  if(! Map_truth(c -> frozen_macros) || epoch != c -> frozen_macros_epoch){
+    c -> frozen_macros = Map_new();  c -> frozen_macros_epoch = epoch;
+  }
+  uintptr_t key =(uintptr_t) definition;  Var frozen =((void) 0, Void);  if(! Map_try_get(c -> frozen_macros, Var_box_ulong(key), &(frozen))){
+    frozen = List_var(Compiler__declaration_macro(c, rows, 0));  Map_setindex(c -> frozen_macros, Var_box_ulong(key), frozen);
+  }
+  return Var_list(frozen);
 }
 
 static List Compiler__declaration_macro(Compiler c, List rows, int thaw){
@@ -2591,7 +2605,6 @@ static void Compiler__record_objects(Compiler c, List bindings, Token site){
 }
 }
 
-int Map_try_get(Map, Var, Var *);
 static void Compiler__report_redefinition(Compiler c, String kind, List binding, Token site){
   Var arms;  if(! Map_try_get(Compiler_semantic_binding_facts(c), List_var(cons(_390, cons(List_var(binding), NULL))), &(arms)) || ! List_equal(Var_list(arms), c -> arms)) return;  String spelling = binding_identity_spelling(binding);  Compiler_report_error(c, 1362954, String_join(NULL, cons(String_var(kind), cons(String_var(_391), cons(String_var(spelling), cons(String_var(_392), NULL))))), site, cons(String_var(String_join(NULL, cons(String_var(_393), cons(String_var(spelling), cons(String_var(_261), NULL))))), NULL));
 }
@@ -2946,7 +2959,7 @@ List Sym_visible_symbols(Sym);
 Symbol Compiler_peek(Compiler c, int steps){
   if(! _init_guard_) _file_init_();  Token token = c -> token;  if(! steps && Compiler_at_completion(c)){
     List rows = Sym_visible_symbols(c -> sym); {
-      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/compiler.x",.function = "Compiler_peek",.line = 1760};  x2c_error_raise_n(& _x2c_error_site_0, 1248787135328, 3, Symbol_var(740232), Symbol_var(29452646), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
+      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/compiler.x",.function = "Compiler_peek",.line = 1781};  x2c_error_raise_n(& _x2c_error_site_0, 1248787135328, 3, Symbol_var(740232), Symbol_var(29452646), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
     }
 
   }
@@ -2981,7 +2994,7 @@ static Token _skip_backward(Token token, Token origin){
 
 void Compiler_require_input(Compiler c){
   if(! _init_guard_) _file_init_();  if(c -> input_boundary && c -> token >= c -> input_boundary){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/compiler.x",.function = "Compiler_require_input",.line = 1801};  x2c_error_raise_n(& _x2c_error_site_1, 664344300629258, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/compiler.x",.function = "Compiler_require_input",.line = 1822};  x2c_error_raise_n(& _x2c_error_site_1, 664344300629258, 0);  __builtin_unreachable();
   }
 
 }
@@ -3051,7 +3064,7 @@ int Compiler_at_completion(Compiler c){
 
 void Compiler___complete_here(Compiler c, Symbol role, List keywords){
   if(! _init_guard_) _file_init_();  if(! Compiler_at_completion(c)) return;  List rows = Sym_visible_symbols(c -> sym); {
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../src/compiler.x",.function = "Compiler___complete_here",.line = 1925};  x2c_error_raise_n(& _x2c_error_site_2, 1248787135328, 3, Symbol_var(740232), Symbol_var(role), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(keywords));
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../src/compiler.x",.function = "Compiler___complete_here",.line = 1946};  x2c_error_raise_n(& _x2c_error_site_2, 1248787135328, 3, Symbol_var(740232), Symbol_var(role), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(keywords));
   }
 
 }
@@ -3061,7 +3074,6 @@ int Compiler_record_origin(Compiler c, Token token){
   if(! _init_guard_) _file_init_();  if(! token) return 0;  String file = String_truth(c -> filename) ? c -> filename : _506;  if(! c -> source_map) file = Compiler_display_path(c, file);  Array_push(c -> origins, List_var(cons(_88, cons(String_var(file), cons(int_var(token -> line), cons(int_var(token -> col), cons(int_var(token -> len), cons(int_var(token -> pos), NULL))))))));  return Array_len(c -> origins);
 }
 
-int Map_truth(Map);
 List Compiler_anchor_origin(Compiler c, List node, Token token){
   if(! _init_guard_) _file_init_();  if(! List_truth(node)) return node;  if(Map_truth(c -> macro_holes)) return cons(_99, cons(_112, cons(List_var(node), NULL)));  int occurrence = Compiler_record_origin(c, token);  if(! occurrence) return node;  return cons(_99, cons(int_var(occurrence), cons(List_var(node), NULL)));
 }

@@ -49,6 +49,8 @@ typedef struct Compiler{
   List frozen_stack_key;
   Var frozen_stack;
   unsigned long frozen_stack_epoch;
+  Map frozen_macros;
+  unsigned long frozen_macros_epoch;
   int expansion_floor;
   SymScope params;
   Map key_ids, macros, kw_aliases;
