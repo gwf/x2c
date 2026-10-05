@@ -6328,11 +6328,11 @@ static Type Compiler__arithmetic_type(Compiler c, Type lhs, Type rhs){
 }
 
 static List Compiler__binary_op_type_addsub(Compiler c, Symbol op, List lhs, List rhs){
-  Type ltype = Var_type(List_cadr(lhs)), rtype = Var_type(List_cadr(rhs));  if(op == 56 && Compiler__expr_is_string_like(c, lhs) && Compiler__expr_is_string_like(c, rhs)) return _778;  Type lscalar = Sym_resolve_numeric_type(c -> sym, ltype);  Type rscalar = Sym_resolve_numeric_type(c -> sym, rtype);  if(List_truth(Type_list(lscalar))){
-    if(List_truth(Type_list(rscalar))) return Type_list(Type_widest(lscalar, rscalar));  else if(op == 56 && Type_is_pointer(rtype)) return Type_list(rtype);
+  Type ltype = Var_type(List_cadr(lhs)), rtype = Var_type(List_cadr(rhs));  if(op == 56 && Compiler__expr_is_string_like(c, lhs) && Compiler__expr_is_string_like(c, rhs)) return _778;  Type lscalar = Sym_resolve_numeric_type(c -> sym, ltype);  Type rscalar = Sym_resolve_numeric_type(c -> sym, rtype);  int rpointer = Type_is_pointer(Sym_resolve_key(c -> sym, rtype));  if(List_truth(Type_list(lscalar))){
+    if(List_truth(Type_list(rscalar))) return Type_list(Type_widest(lscalar, rscalar));  else if(op == 56 && rpointer) return Type_list(rtype);
   }
-  else if(Type_is_pointer(ltype)){
-    if(List_truth(Type_list(rscalar))) return Type_list(ltype);  else if(Type_is_pointer(rtype)) return _2288;
+  else if(Type_is_pointer(Sym_resolve_key(c -> sym, ltype))){
+    if(List_truth(Type_list(rscalar))) return Type_list(ltype);  else if(rpointer) return _2288;
   }
   return NULL;
 }

@@ -79,7 +79,7 @@ static inline int _end(String str, String sep, int start, int * next){
     (* next) = - 1;
     return length;
   }
-  int end =(int)(found - str);
+  int end = found - str;
   (* next) = end + String_len(sep);
   return end;
 }
