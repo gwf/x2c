@@ -1391,8 +1391,8 @@ typedef struct LispCallback {
   unsigned arity;
 } LispCallback;
 
-static List unary_signature = %((func (("Var"))) "Var");
-static List binary_signature = %((func (("Var") ("Var"))) "Var");
+static List unary_signature = $!Type{ Var (Var) };
+static List binary_signature = $!Type{ Var (Var, Var) };
 
 static Func _unary_callback(Var callable) =>
   _callback(callable, _call, 1, "Lisp callback");
@@ -1653,7 +1653,7 @@ Lisp Lisp.kernel(void) {
 static void Lisp._install_specials(Lisp lisp) {
   for (int i = 0; i < LISP_SPECIAL_COUNT; i++) {
     const LispCanonicalName *info = _special_name(i);
-    lisp.specials[i] = Func.new(_special_stub, %((func ((void))) "Var"));
+    lisp.specials[i] = Func.new(_special_stub, $!Type{ Var (void) });
     Atom name = Atom.intern(info.spelling);
     lisp.reserved[name] = lisp.specials[i];
   }

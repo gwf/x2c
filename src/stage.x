@@ -270,7 +270,7 @@ static void _refuse(Compiler c, Var value, Token site) {
 }
 
 static List _string_literal(Compiler c, Type declared, Type type, Var value) {
-  if (!declared || type === %(* char))
+  if (!declared || type === $!Type{ char * })
     return %(expr (* char) (literal (* char) ${value.repr()}));
   if (type !== %("String")) return NULL;
   List literal = %(expr ("String") (literal ("String") $value));

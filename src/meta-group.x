@@ -266,17 +266,14 @@ static void Compiler._isolate(
 static List Compiler._lower(
   Compiler c, Array units, String stamp, String suffix) {
   List binding = c.sym.introduce("x2c_template_call");
-  Type type = %((func (("Var") ("List"))) "List");
+  Type type = $!Type{ List (Var, List) };
   List callee = %(expr $type (ident $binding));
   for (int i = 0; i < (int) units.len(); i++)
     units[i] = c._template_calls(units[i], callee);
   if (c.meta_build) c._native_lookups(units);
   int after = _after_directives(units);
   units.insert(
-    after,
-    %(declare ("List") (bindings (bind $binding
-      ((fnmod (params (param ("Var") (bind () ()))
-                      (param ("List") (bind () ())))))))));
+    after, c.rebuild_statement($!{ List $binding(Var, List); }).cadr());
   Map initials = c._initial_copies(units);
   foreach (Var unit, c._entry(stamp, initials, suffix)) units.push(unit);
   return units.list_free();
@@ -285,11 +282,11 @@ static List Compiler._lower(
 /* A meta build calls a native module's function through the address
    `x2c_meta_native_symbol` finds in the module. */
 static void Compiler._native_lookups(Compiler c, Array units) {
-  Type lookup_type = %((func (("String") ("String"))) * void);
+  Type lookup_type = $!Type{ void *(String, String) };
   List lookup_binding = c.sym.introduce("x2c_meta_native_symbol");
   List lookup = %(expr $lookup_type (ident $lookup_binding));
-  List (base, mods) = lookup_type.declaration_parts();
-  units.push(%(declare $base (bindings (bind $lookup_binding $mods))));
+  units.push(c.rebuild_statement(
+    $!{ void *$lookup_binding(String, String); }).cadr());
   for (int i = 0; i < (int) units.len(); i++)
     units[i] = c._native_targets(units[i], lookup);
 }
