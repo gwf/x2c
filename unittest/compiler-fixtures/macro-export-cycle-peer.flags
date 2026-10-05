@@ -1,0 +1,1 @@
+-j 1 unittest/compiler-fixtures/macro-export-cycle-b.x unittest/compiler-fixtures/macro-export-cycle-a.x unittest/compiler-fixtures/macro-export-cycle-prefix.x

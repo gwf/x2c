@@ -359,7 +359,8 @@ static void Build._link_packages(Build b, String input, String directory) {
   foreach (String dependency, _depfile_inputs(depfile)) {
     // A unit under a package directory that is not the package's own
     // source, such as a script kept beside it, consumes nothing by itself.
-    if (dependency == self || dependency == input) continue;
+    if (dependency.endswith("/") || dependency == self || dependency == input)
+      continue;
     String package = package_directory(roots, dependency);
     if (package && !b._package_built_here(roots, package))
       b._link_package(package);
@@ -1147,6 +1148,7 @@ static uint64_t _state_entry(uint64_t hash, String path, int &ok) {
   if (!path.endswith("/")) return _state_file(hash, path, ok);
   String time =
     Path.is_dir(path) ? "%.9f".printf(Path.modified_time(path)) : "absent";
+  hash = _state_text(hash, Path.absolute(path));
   return _state_text(_state_text(hash, path), time);
 }
 
@@ -1205,7 +1207,7 @@ static uint64_t _state_tool(uint64_t hash, String tool, int &ok) {
 static uint64_t _state_dependencies(uint64_t hash, String depfile, int &ok) {
   List inputs = _depfile_inputs(depfile);
   if (!inputs) ok = 0;
-  foreach (String input, inputs) hash = _state_file(hash, input, ok);
+  foreach (String input, inputs) hash = _state_entry(hash, input, ok);
   return hash;
 }
 
@@ -1215,7 +1217,11 @@ static List _depfile_inputs(String depfile) {
   String text = NULL;
   try text = input.string_close();
   catch %(io-fail *): return NULL;
-  return translation_depfile_parse(text);
+  List paths = translation_depfile_parse(text);
+  long search = text.find("\n# x2c-search:");
+  if (search >= 0)
+    paths = paths.append(translation_depfile_parse(text[search + 1:]));
+  return paths;
 }
 
 // state records
@@ -1257,7 +1263,7 @@ static int Build._files_unchanged(Build b, List files) {
   String work = %"${Path.absolute(b.work_dir)}/";
   foreach (String path, files) {
     if (Path.absolute(path).startswith(work)) continue;
-    if (Path.is_file(path) && Path.modified_time(path) >= b.started_wall)
+    if (Path.exists(path) && Path.modified_time(path) >= b.started_wall)
       return 0;
   }
   return 1;

@@ -884,12 +884,13 @@ expression allocates fresh collections in the current Scope, at every depth;
 assigning the result to another variable still aliases it. Array order and
 element types are preserved. Map keys use their ordinary runtime key
 semantics, but reconstruction does not promise the same traversal order.
-A boxed Var may contain the result.
+A boxed Var may contain the result. Collection items, including Map keys,
+can contain raw `Null`, distinct from the empty List `%()` and `void`.
 
-Scalars, Strings, Symbols, and Lists that hold no Array or Map are immutable
-and are emitted once as constants, as the same values written in source
-would be. A List inside a result is data. A List that holds an Array or Map
-is built at runtime like one written in source.
+Scalars, Strings, Symbols, and Lists that hold only those values are
+immutable and are emitted once as constants, as the same values written in
+source would be. A List inside a result is data. A List that holds raw
+`Null`, an Array, or a Map is built at runtime like one written in source.
 
 Each Array and Map in a result must appear once. A result that contains
 itself, or holds the same collection in two places, is diagnosed rather than

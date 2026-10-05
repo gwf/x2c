@@ -43,7 +43,7 @@
   (at 7 (stmnt 
          (expr (void) 
           (cast (decl (void) (bindings (bind () ()))) 
-           (expr (unsigned) 
+           (expr ("size_t") 
             (sizeof (parens (decl (void) (bindings (bind () ())))))))))) 
   (at 18 
    (declare (int) 

@@ -1,0 +1,7 @@
+#include "x2c.x"
+#include "macro-export-cycle-a.x"
+
+int main(void) {
+  printf("%zu\n", sizeof(CycleCells));
+  return 0;
+}

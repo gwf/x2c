@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/macro-export-cycle-late-b.x:3:24: parse: unknown or forward-referenced macro 'cycle.forty'
+  typedef char LateCells[$cycle.forty()];
+                         ^
+
