@@ -173,6 +173,14 @@ captures, expression and block bodies, and typed parameter sequences.
 
 ## Outstanding Items
 
+On 2026-10-05, `agent-pr-check` observed one translation segmentation fault
+in `var-chain-stack` at candidate `2ad827e1`, with compile status 139 instead
+of zero. Compiler, runtime, bootstrap, and fixture sources matched integrated
+`origin/dev` `40200f44`. The unchanged fixture subsequently passed singly and
+in 24 translations with eight concurrent processes. The cause is unknown.
+The failed gate log and focused results are retained in the workspace's
+`debug/`; checked-in expectations remain unchanged.
+
 Adding `List cached = %("stack-check"); (void) cached;` at the start of
 `static-local-flat-chain`'s `main` makes translation of its 4,000 additions
 crash with a 256 KiB stack limit. The same augmented source fails before

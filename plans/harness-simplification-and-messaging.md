@@ -1,9 +1,9 @@
 # Harness simplification and cross-platform collaboration
 
 > Status: active
-> Implementation authorized, 2026-10-05. Tool repairs and guidance
-> simplification are in progress. Messaging adoption depends on the host pilot;
-> external runtime repairs remain unverified.
+> Implementation authorized, 2026-10-05. Tool repairs, guidance simplification,
+> and the host messaging pilot are implemented. External runtime repairs remain
+> open; publication uses the existing gate.
 > Planning baseline: origin/dev fe7123f3bb659b3e6624bdfb1e356d1999d38a5c.
 
 ## Intended result
@@ -297,7 +297,7 @@ separately; do not declare the whole plan complete with external gaps open.
 
 ## Implementation evidence, 2026-10-05
 
-The repository repairs are implemented. Publication validation is pending.
+The repository repairs are implemented. Publication uses the existing gate.
 The existing nightly automation now retains failed or uncertain clones.
 Snapshot checks cover real disposable worktrees, failure, signals, exceptions,
 setup failure, successful cleanup, absolute measurements, and metric identity.
@@ -305,9 +305,10 @@ Nineteen snapshot tests, sixteen metrics fixtures, and forty-two offline
 integration tests pass. None was added to a recurring gate.
 
 The repaired metrics scan uses the original half-open audit window,
-2026-09-28T07:00:00Z through 2026-10-05T14:46:21Z. It scans live, archived, and nested worker files. Forked parent records can
-carry rewritten timestamps; recorded task-start boundaries now exclude those
-replays. Final corpus totals await a scan with that correction. These are transcript identities, not
+2026-09-28T07:00:00Z through 2026-10-05T14:46:21Z. Full recursive discovery finds 390 active Desktop identities and 283 active
+terminal identities for x2c. Forked parent records can carry rewritten
+timestamps; recorded task-start boundaries now exclude those replays. The
+validated aggregate records discovery, deduplication, and field coverage. These are transcript identities, not
 independent tasks or a quality score. Successful execution, wasted time, and
 arbitrary shell edits remain unavailable fields.
 
@@ -339,6 +340,14 @@ answers. A discovered per-file build interpretation was corrected and the
 focused recheck used one sequence for the coherent change. Both style variants
 still produced unsupported performance claims in some probes. No improvement
 in long-history correction handling is claimed.
+
+The first publication attempt observed a segmentation fault in the existing
+`var-chain-stack` fixture. Its expected compile status is zero; the observed
+status was 139. The same fixture then passed singly and in 24 translations
+with eight concurrent processes. Compiler, runtime, bootstrap, and fixture
+sources match the integrated upstream revision. The cause remains unknown;
+the failed gate log and focused results are retained, and `unittest/STATUS.md`
+records the observation. No expectation was changed.
 
 The three external runtime defects remain unresolved. No supported editable
 owner was found for handoff enforcement, isolation classification, or active

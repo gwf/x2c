@@ -47,8 +47,8 @@ execution.
 - [Harness simplification and messaging](harness-simplification-and-messaging.md):
   authorized corrections to existing tools and guidance, a small
   cross-platform integrator messaging pilot, and separate external runtime
-  repairs. Tool repairs and native messaging are implemented; publication
-  validation and external runtime repairs remain.
+  repairs. Tool repairs and native messaging are implemented; external
+  runtime repairs remain open.
 - [x2c code standard](x2c-code-standard.md): stage 1 landed; Gary accepted
   the standard
   and decisions D1-D5 on 2026-10-05. Stage 1 (authority) and stage 2
