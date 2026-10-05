@@ -1297,18 +1297,18 @@ List Compiler.lower_typed_adapter_expr(Compiler c, List expression) {
 
 /* The source is a direct function, and both signatures are complete and
    fixed. */
-static void Callback.split(Callback &cb) {
-  Type source = cb.source;
-  if (!cb.source_binding || !source || source.is_pointer() ||
+static void Callback.split(Callback &c) {
+  Type source = c.source;
+  if (!c.source_binding || !source || source.is_pointer() ||
       !source.is_function())
-    $report.callback.direct(cb);
-  if (!cb.target.function_parts(cb.params, cb.result))
-    $report.callback.target(cb);
-  if (!source.function_parts(cb.source_params, cb.source_result))
-    $report.callback.source(cb);
-  if (_typed_params_variadic(cb.params) ||
-      _typed_params_variadic(cb.source_params))
-    $report.callback.variadic(cb);
+    $report.callback.direct(c);
+  if (!c.target.function_parts(c.params, c.result))
+    $report.callback.target(c);
+  if (!source.function_parts(c.source_params, c.source_result))
+    $report.callback.source(c);
+  if (_typed_params_variadic(c.params) ||
+      _typed_params_variadic(c.source_params))
+    $report.callback.variadic(c);
 }
 
 static void Callback.check_signature(Callback &cb) {

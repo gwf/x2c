@@ -117,13 +117,13 @@ static void Call.check(Call &call) {
 }
 
 /* Sends the call, after the unit's reset when that is still to be sent. */
-static void Call.send(Call &call, List arguments) {
+static void Call.send(Call &c, List arguments) {
   if (helper_reset) {
-    call.send_frame(%(reset));
+    c.send_frame(%(reset));
     helper_reset = 0;
   }
-  call.send_frame(
-    %(call ${call.table} ${call.name} $arguments ${Macro.subject()}));
+  c.send_frame(
+    %(call ${c.table} ${c.name} $arguments ${Macro.subject()}));
 }
 
 static void Call.send_frame(Call &call, List message) {
@@ -362,11 +362,11 @@ static void Call.refuse(Call &call, String why) =>
 
 /* Kills the helper, which passed the call's deadline, and reports the
    call. */
-static void Call.overdue(Call &call) {
+static void Call.overdue(Call &c) {
   _helper_stop(SIGKILL);
   $report.macro.helper_timeout(
-    call.compiler,
-    call.site, call.limit, call.name);
+    c.compiler,
+    c.site, c.limit, c.name);
 }
 
 static void Call.stopped(Call &call, String reason) {
