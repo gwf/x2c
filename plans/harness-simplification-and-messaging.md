@@ -23,7 +23,7 @@ discarded benchmark reproductions, incorrect starting revisions, repeated
 checks, correction-handling failures, and incomplete metrics. Full raw session
 history remains outside the repository. Current source still confirms the
 benchmark cleanup and metrics defects.
-The local [audit report](../.context/harness-review-2026-10-05.md) contains
+The local audit report, `.context/harness-review-2026-10-05.md`, contains
 the transcript paths and lines. It is ignored workspace evidence; preserve
 that report with the implementation handoff rather than assume another
 checkout contains it.
