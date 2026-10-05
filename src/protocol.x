@@ -2426,6 +2426,7 @@ static List Compiler._fallback_registration(
   List table = $!VarMethods{ $methods };
   List fallback = c._helper_call(
     %(void), "x2c_register_descriptor", %(${_string_literal(name)} $table));
+  // lint: allow one-statement-braces ST-1: preserves initialization AST block
   return c.rebuild_statement($!{ if (!$early_call) { $fallback; } }).cadr();
 }
 
