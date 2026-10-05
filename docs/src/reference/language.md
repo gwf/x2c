@@ -19,12 +19,16 @@ A source file whose first line begins with `#!` is a
 
 `#pragma private` marks the start of implementation-only content. Everything
 before it belongs to the generated header, including types, enumerators,
-and directives that follow a function definition or a `static` declaration.
-A public function definition contributes its prototype, or its whole body
-when inline, and a `static` function or object stays in the source. A typedef below `#pragma private` still belongs
-to the header when a later public prototype names it. An include of x2c
-source below `#pragma private` also moves to the header when a later public
-prototype names a type it declares. A public object definition gets an
+and `#define` and `#undef` directives that follow a function definition or
+a `static` declaration. A public function definition contributes its
+prototype, or its whole body when inline, and a `static` function or object
+stays in the source. A typedef below `#pragma private` still belongs to the
+header when a later public prototype names it. An `#include` that follows
+an item the source holds, such as a function definition, stays in the
+source at its place, so the macros it defines do not reach earlier items.
+Such an include, or an include below `#pragma private`, moves to the header
+only when it reaches x2c source declaring a type that a later public
+prototype names. A public object definition gets an
 `extern` declaration in the header. An object of an anonymous `struct`,
 `union`, or `enum` type has no such declaration. Every translated header
 starts with `#pragma once` and also carries a conventional include guard, so

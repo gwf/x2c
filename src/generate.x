@@ -626,15 +626,15 @@ static void Partition.mark_conditional(Partition &p, List node, Symbol kind) {
 
 /* The generator writes the header guard. Source pragmas serve only the CPP
    compatibility path and must not duplicate the generated directive. The
-   visibility pragmas switch sides, an include takes the current side, and
-   any other private directive stays in the source. */
+   visibility pragmas switch sides, `Partition.add_include` places an
+   include, and any other private directive stays in the source. */
 static void Partition.place_directive(
   Partition &p, List node, String content) {
   if (_is_pragma_once(content)) return;
   int visibility = preproc_visibility(content), angle = 0;
   String target = preproc_include_target(content, angle);
   if (visibility >= 0) p.private = visibility;
-  else if (target) p.hold(p.include_names(target, angle), node);
+  else if (target) p.add_include(node, target, angle);
   else if (p.private) p.source.push(node);
   else p.publish_directive(node);
 }
@@ -648,13 +648,31 @@ static void Partition.publish_directive(Partition &p, List node) {
 
 /* An include of x2c source below `#pragma private` waits, as a private
    typedef does, under the typedef names of the files it reaches that no
-   earlier header include reaches. */
-static List Partition.include_names(
-  Partition &p, String target, int angle) {
-  if (p.private)
-    return p.c.include_typedef_names(target, angle, p.included.copy());
-  p.c.include_typedef_names(target, angle, p.included);
-  return NULL;
+   earlier header include reaches. The source sees the header from its
+   start, so a public include that follows an item the source holds would
+   apply its macros to that item. Such an include waits as a private one
+   does, staying in the source at its place unless the header needs one of
+   its typedefs. */
+static void Partition.add_include(
+  Partition &p, List node, String target, int angle) {
+  if (!p.private && !_holds_item(p.source)) {
+    p.c.include_typedef_names(target, angle, p.included);
+    p.header.push(node);
+    return;
+  }
+  List names = p.c.include_typedef_names(target, angle, p.included.copy());
+  if (names) p.hold(names, node);
+  else p.source.push(node);
+}
+
+/* Whether `source` holds an item other than a marker. */
+static int _holds_item(Array source) {
+  foreach (List item, source)
+    match (item) {
+      case %((!or pending conditional replay) *): continue;
+      default: return 1;
+    }
+  return 0;
 }
 
 static int _is_pragma_once(String content) =>

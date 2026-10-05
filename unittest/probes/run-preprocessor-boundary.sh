@@ -246,4 +246,17 @@ set -e
 [[ $owned_status == 2 && ! -e "$tool_log" ]]
 grep -Fq 'C dependency option is driver-owned' "$BUILD/tool-owned.stderr"
 
+# A public directive after an item the source holds goes to the header,
+# which the source includes first. The item still sees the command-line
+# macros of its own position.
+printf '%s\n' '#include "x2c.x"' '#ifdef ENABLE' \
+  'static const int enabled = 1;' '#else' 'static const int enabled = 0;' \
+  '#endif' '#undef ENABLE' 'static int saved = INITIAL;' '#undef INITIAL' \
+  '#define INITIAL 42' \
+  'int main(void) { printf("%d %d %d\n", enabled, saved, INITIAL); }' \
+  >"$BUILD/later-directives.x"
+"$X2C" run -q --build-dir "$BUILD/later-directives" -D ENABLE \
+  -D INITIAL=7 "$BUILD/later-directives.x" >"$BUILD/later-directives.stdout"
+grep -Fxq '1 7 42' "$BUILD/later-directives.stdout"
+
 echo "Preprocessor and toolchain boundary probes passed"
