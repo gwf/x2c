@@ -331,15 +331,15 @@ bindings visible:
 
 ```x2c
 
-macro Expression $minutes(Expr $value) => $value * 60;
+macro Expression $sample.minutes(Expr $value) => $value * 60;
 
 int main(void) {
-  int seconds = $minutes(2);
+  int seconds = $sample.minutes(2);
   return seconds == 120 ? 0 : 1;
 }
 ```
 
-Here `$minutes` is the qualified macro name, `Expr $value` declares one
+Here `$sample.minutes` is the qualified macro name, `Expr $value` declares one
 expression hole, and `$value` inserts the caller's expression into the
 replacement. Other result kinds cover statements, fields, enum members,
 translation-unit items, and decorators.
@@ -1086,12 +1086,12 @@ A macro should replace repeated source with a call whose meaning is obvious:
 
 ```x2c
 
-macro Stmt $guard(Expr $condition) {
+macro Stmt $sample.guard(Expr $condition) {
   if (!$condition) return 0;
 }
 
 int positive(int value) {
-  $guard(value > 0);
+  $sample.guard(value > 0);
   return value;
 }
 ```
@@ -1131,10 +1131,10 @@ statement itself:
 meta static List traced(List body) =>
   $!{ { puts("enter"); $body puts("leave"); } };
 
-macro Stmt $trace(Stmt $body) => $traced($body);
+macro Stmt $sample.trace(Stmt $body) => $traced($body);
 
 int main(void) {
-  $trace(puts("work"););
+  $sample.trace(puts("work"););
   return 0;
 }
 ```
