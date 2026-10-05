@@ -488,7 +488,7 @@ or leave stage 2 publication pending. Continue the independent stages.
 
 Stage 3.5 census: 108 compiler and runtime files. The baseline took
 10.63 seconds; the candidate took 10.61 seconds. All 1,599 original
-findings remain byte-exact. Authored `.x` changes: +402/-2.
+findings remain byte-exact. Authored `.x` changes: +403/-2.
 
 Later detector work: typed-AST builders and `Type.method(x)` receivers
 remain deferred, as stage 3.5 specifies.

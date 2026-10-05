@@ -93,7 +93,8 @@ static void _conditions(Lint l):
       String word = l.tokens[k].text
       if (word == "read" || word.startswith("read_") ||
           word in %("fread" "fgets" "getline" "getdelim" "getc"
-                    "getc_unlocked" "fgetc" "getchar" "readdir" "readdir_r")) &&
+                    "getc_unlocked" "fgetc" "getchar" "readdir"
+                    "readdir_r")) &&
          l.token_is(l.next(k), "("): read = 1
     if assign && !(t.text != "if" && read):
       l.add("assignment-condition", t.line,
