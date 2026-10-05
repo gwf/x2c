@@ -868,10 +868,6 @@ List builtin_catch_cases(List selected, List arms) {
 
    Registration and its captured addresses share the body's region scope. */
 
-List builtin_defer_record(
-  List record, List callback, List environment, List records);
-List builtin_defer_captures(List environment, List records);
-
 /* Lowers a defer: its record is pushed before the body and left on each
    of the body's exits. */
 static List Walk._lower_defer(
