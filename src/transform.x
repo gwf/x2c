@@ -758,12 +758,13 @@ static List Compiler._destructure_statement(Compiler c, List ast) {
              (dstrasgn (targets *targets)
                        (!set ?source (expr ?source_type ?))))): {
       List temporary = c.sym.introduce(c.fresh_name("destructure"));
-      return c.bind_syntax($!{
-        {
-          List $temporary = ${c._destructure_source(source, source_type)};
-          ${c._destructure_assignments(targets, temporary)}...
-        }
-      }, AST_BLOCK, c.return_type);
+      return c.bind_syntax(
+        $!{
+          {
+            List $temporary = ${c._destructure_source(source, source_type)};
+            ${c._destructure_assignments(targets, temporary)}...
+          }
+        }, AST_BLOCK, c.return_type);
     }
   }
   return ast;

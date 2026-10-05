@@ -499,8 +499,8 @@ static List Compiler._parse_slice(Compiler c, List expr, List start) {
     stop = c.parse_expression();
     if (c.test(<:>) && c.peek(0) != <]>) step = c.parse_expression();
   }
-  if (step && step.match(%(expr ?
-      ${$source_literal_content(%(? "0"))})))
+  if (step && step.match(
+      %(expr ? ${$source_literal_content(%(? "0"))})))
     $report.parse.slice_zero(c);
   c.expect(<]>);
   return %(expr $type ${source_slice_content(
@@ -960,7 +960,7 @@ List Compiler.resolve_expression(Compiler c, List input, Token origin) {
   return input;
 }
 
-/** True when syntax still depends on ordinary binding or macro substitution. */
+/** True when syntax still needs ordinary binding or macro substitution. */
 int Compiler.needs_resolution(Compiler c, Var value) {
   Macro lambda = $lambda_expression, captured = $lambda_captured;
   List syntax;
