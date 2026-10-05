@@ -983,7 +983,7 @@ Later candidates below remain private until submitted to the integrator.
 | `Compiler._resolve_identifier` | 44 | 34 | capture step; focused proof passes |
 | `Compiler._typedef_index` | 43 | 24 | length repaired; focused proof passes |
 | `Compiler._record_meta_hash` | 50 | 18 | length repaired; focused proof passes |
-| `Compiler._bind_form` | 118 | 102 | partial; 37 arms still span lines |
+| `Compiler._bind_form` | 118 | 101 | one-line actions; dispatcher exception reviewed |
 | `Compiler.protocol_update_helper` | 51 | 39 | signature/publication steps; focused proof passes |
 | `Compiler._step` | 54 | 40 | one grammar match; focused proof passes |
 | `Compiler._sequence` | 44 | 10 | normalization/splice steps; focused proof passes |
@@ -1010,7 +1010,8 @@ fixtures and the 220-file stage-1 comparison. Three fixed client inputs
 produce six exact C/H files in each of eight warm/measured pairs. Median
 instructions are 7,669,323,827 to 7,693,171,945, with overlapping ranges.
 The final helper uses the original captured spelling, without another
-binding validation. The binder's length and one-line-arm work remains.
+binding validation. The later action review settles the binder's length
+exception under the approved pattern-wrapping rule.
 
 Index candidate `ca0c36c9` names native-index fallback and the outer alias
 walk without reducing element types. Six fixtures and the 220-file stage-1
@@ -1105,6 +1106,20 @@ The worker resumes the retained-grammar trial under that rule. Identifier,
 index, and lambda owners
 are byte-exact in the preserved trial. Original malformed-form prefix and
 fallback behavior still require proof before any revived trial is accepted.
+
+Binder action candidate `bcb1bd82` changes only four local capture names
+and their existing declaration-forward projection's wrapping (+2/-3 lines).
+All 46 actions now occupy one line. The 101-line dispatcher qualifies
+for FN-2's exception under the corrected rule. Its 37 multiline arms
+contain wrapped patterns or separate pattern/action lines. Six existing
+literal or passthrough actions still limit strict FN-3 named-step wording.
+No forwarding helper is added to hide those actions. Four fixtures and
+the 220-file stage-1 comparison pass. Four raw clients preserve eight
+C/H files with maps, four dependency files, diagnostics, and status.
+Four interfaces differ only in compiler fingerprint. Retained quotation
+positions are unchanged, and generated parse C has no runtime ErrorSite.
+Both optimized parent functions retain 1,377 ordered instruction mnemonics,
+including calls. No new operation or automatic HP repeat is introduced.
 
 The second combined parent passes build, stage-1, and the 220-file stage
 comparison. Six fixtures pass across lambda capture, protocol direct
