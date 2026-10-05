@@ -452,7 +452,7 @@ rm -f "$BUILD/deps/out/root.d"
   --out-dir "$BUILD/deps/out" -I "$BUILD/deps/src" \
   "$BUILD/deps/src/root.x"
 grep -Fq "custom\\ target:" "$BUILD/deps/custom.d"
-[[ $(wc -l <"$BUILD/deps/custom.d" | tr -d ' ') == 1 ]]
+[[ $(grep -c '^[^#]' "$BUILD/deps/custom.d") == 1 ]]
 
 # Escaped target colons must preserve translation reuse on an unchanged build.
 python3 - "$X2C" "$BUILD/deps/reuse" <<'PY_DEP_REUSE'
