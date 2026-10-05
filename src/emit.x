@@ -1011,7 +1011,7 @@ static List Emitter._declarator(Emitter &e, List decl, List mods) {
       case <&>: case <opt-ref>: decl = cons(<*>, decl); break;
       case <*>: decl = cons(first, decl); break;
       case <typedef>: typedefs++; break;
-      case <bitfield>: decl = e._emit(mods.cdr()); mods = NULL; continue;
+      case <bitfield>: decl = e._bitfield_declarator(mods); continue;
       default: decl = _native_declarator(decl, mods, sym); break;
     }
     mods = mods.cdr();
@@ -1025,6 +1025,12 @@ static List Emitter._list_declarator(Emitter &e, List decl, Type mod) {
   if (mod.car() is <string>) return %(@decl @mod);
   if (mod.is_array()) return e._array_declarator(decl, mod.cadr());
   return %(@decl ":" @{e._emit(mod.cadr())});
+}
+
+static List Emitter._bitfield_declarator(Emitter &e, List &mods) {
+  List tokens = e._emit(mods.cdr());
+  mods = NULL;
+  return tokens;
 }
 
 static List _native_declarator(List decl, List &mods, Symbol sym) {
