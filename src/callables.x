@@ -294,10 +294,11 @@ static List CaptureBuild.bridged(CaptureBuild &b) {
     factory_values.push(_func_bound(field_type, parameter));
   }
   List context = c.sym.introduce(c.fresh_name("lambda_context"));
-  List factory_body = c.rebuild_statement($!{
-    ${b._storage(context, factory_values.list_free())}
-    return ${b._construct(context)};
-  });
+  List factory_body = c.rebuild_statement(
+    $!{
+      ${b._storage(context, factory_values.list_free())}
+      return ${b._construct(context)};
+    });
   List declaration_params = %(params @{parameters.list_free()});
   c.add_early(
     c.wrapper_function(
@@ -871,8 +872,9 @@ static List Compiler._context_local(
     %(${_func_bound(%("Func"), fn)}));
   List cast = %(expr $pointer (cast $pointer $call));
   Macro shape = $func_local;
-  return c.rebuild_statement(shape(
-    $!Type{ const $value_type }, %(op = (bind $local (*)) $cast))).cadr();
+  return c.rebuild_statement(
+    shape(
+      $!Type{ const $value_type }, %(op = (bind $local (*)) $cast))).cadr();
 }
 
 static void Compiler._func_pointer_context(
