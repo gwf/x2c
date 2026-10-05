@@ -226,9 +226,8 @@ static List Compiler._parse_insertion(Compiler c) {
 
 static List Compiler._parse_named_reference(Compiler c, Symbol sigil) {
   c.expect(sigil);
-  if (c.peek(0) != <ident>) {
+  if (c.peek(0) != <ident>)
     $report.parse.insert_name(c, sigil);
-  }
   return c.parse_variable();
 }
 

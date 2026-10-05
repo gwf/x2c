@@ -494,12 +494,12 @@ static void typed_array_int_raise_paths_transfer(void) {
   try empty.take_last();
   catch %(bad-arg *detail): {
     caught++;
-    EXPECT_TRUE(detail.assoc(<operation>).symbol() == <take-last>);
+    EXPECT_TRUE(detail.assoc(<action>).symbol() == <take-last>);
   }
   try empty.shift();
   catch %(bad-arg *detail): {
     caught++;
-    EXPECT_TRUE(detail.assoc(<operation>).symbol() == <shift>);
+    EXPECT_TRUE(detail.assoc(<action>).symbol() == <shift>);
   }
   try empty.remove(0);
   catch %(bad-arg *detail): {
@@ -518,8 +518,8 @@ static void typed_array_int_raise_paths_transfer(void) {
   try missing.push(7);
   catch %(bad-arg *detail): {
     caught++;
-    EXPECT_TRUE(detail.assoc(<operation>).symbol() == <push>);
-    EXPECT_STR_EQ(detail.assoc(<owner>).string(), "ArrayInt");
+    EXPECT_TRUE(detail.assoc(<action>).symbol() == <push>);
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "ArrayInt");
   }
   EXPECT_INT_EQ(caught, 6);
 }

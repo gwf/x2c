@@ -1629,8 +1629,11 @@ static void _dump_member(
 
 // operators
 
+/* operator-ledger.x defines these methods outside the shared include graph. */
+// lint: allow src-forward-declaration FI-6: leaf ledger binding
 Symbol Compiler.operator_member(Compiler c, Symbol op);
 
+// lint: allow src-forward-declaration FI-6: leaf ledger binding
 Symbol Compiler.derived_member(Compiler c, Symbol op);
 
 // member resolution

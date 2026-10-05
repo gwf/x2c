@@ -800,7 +800,9 @@ static Type _integer_literal_type(
 
 /* Only the leaf unit `src/type-ledger.x` imports the Var tag ledger, so it
    defines these two tables' accessors and includes this unit. */
+// lint: allow src-forward-declaration FI-6: leaf ledger binding
 Map Type.builtin_var_tags(void);
+// lint: allow src-forward-declaration FI-6: leaf ledger binding
 Map Type.var_tag_rows(void);
 
 /* Source-declared rows are rebuilt for each translation unit because their

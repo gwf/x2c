@@ -593,9 +593,8 @@ static List Compiler._parse_field_name(
   List slot = c.try_parse_macro_member();
   if (slot) return %($slot);
   String field_name = c.token.text;
-  if (!field_name || !field_name.is_identifier()) {
+  if (!field_name || !field_name.is_identifier())
     $report.parse.member_ident(c, op_sym, lhs_opt);
-  }
   List field = %( $field_name );
   c.next();
   return field;
@@ -2810,9 +2809,8 @@ Symbol Compiler.require_var_tag(
   Compiler c, Type target, Token origin) {
   Type resolved = NULL;
   Symbol vartag = c.sym.var_tag_for_type(target, resolved);
-  if (resolved && resolved.is_enum()) {
+  if (resolved && resolved.is_enum())
     $report.type.is_enum(c, target, origin);
-  }
   if (!vartag)
     $report.type.is_tag(c, target, origin);
   return vartag;
@@ -3791,12 +3789,10 @@ static void Compiler._check_native_crossing(
   Compiler c, List expr, Type type, Type target,
   Type declared_source, Type declared_target) {
   String integer = c._not_null_pointer_constant(expr);
-  if (integer && c.sym.resolve_key(target).is_pointer()) {
+  if (integer && c.sym.resolve_key(target).is_pointer())
     $report.type.pointer_integer(c, integer, target);
-  }
-  if (c._unrelated_pointers(type, target)) {
+  if (c._unrelated_pointers(type, target))
     $report.type.pointer_unrelated(c, declared_source, declared_target);
-  }
   if (declared_source.is_bare_typedef_name() &&
       declared_target.is_bare_typedef_name() &&
       !declared_source.equal(declared_target) &&

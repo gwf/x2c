@@ -37,6 +37,12 @@ values are rejected. The compiler diagnoses invalid statically known values; a
 bad value hidden in a dynamic `Var` terminates with `<bad-types>` without
 re-entering error handling.
 
+When an Array failure reports both a type and a method action, `operation`
+is the Array type String, and `action` is the method Symbol. For example,
+a push to a null `ArrayInt` raises
+`(bad-arg (operation "ArrayInt") (action push))`. The action `<take-last>`
+names the public method `take_last`.
+
 Choose codes in this order when several seem plausible: callable shape,
 dynamic operation, resource or external operation, API contract, then
 `<invariant>` for an impossible internal state. The shared codes are:

@@ -58,7 +58,7 @@ static void _size_limit(String owner, size_t size) {
 }
 static void _bad_operation(String owner, Symbol operation) {
   (void) owner;
-  raise %(bad-arg (owner "Array") (operation $operation));
+  raise %(bad-arg (operation "Array") (action $operation));
 }
 static void _bad_index(String owner, int index, size_t size) {
   (void) owner;

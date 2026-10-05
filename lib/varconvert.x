@@ -89,9 +89,8 @@ meta native Var Var.convert(Var value, Symbol target) {
        source_tag == <+inf>) && target == <f64>)
     return value;
   X2CVarNumericInfo info;
-  if (!Var.numeric_info(source_tag, info)) {
+  if (!Var.numeric_info(source_tag, info))
     $error.source.numeric(source_tag, target);
-  }
   X2CVarNumeric source;
   _numeric_decode(value, info, source);
   if (!Var.numeric_info(target, info))
