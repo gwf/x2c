@@ -178,6 +178,8 @@ static List Compiler__resolve_macro_slot(Compiler c, List input, List content, T
 
 static List Compiler__resolve_identifier(Compiler c, Var value, Type type, Token origin);
 
+static List Compiler__capture_lambda_value(Compiler c, List result, List * binding, Type * type, int * read_reference);
+
 static List Compiler__identifier_binding(Compiler c, Var value, Type * type, Token origin, int * require_type);
 
 static int Compiler__template_free_name(Compiler c, List binding);
@@ -2786,11 +2788,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2187 = cons(_2186, NULL);
   _2188 = cons(_252, _2187);
   _2189 = List_var(_2188);
-  _2190 = int_var(2079);
+  _2190 = int_var(2084);
   _2191 = cons(_2190, NULL);
   _2192 = cons(_258, _2191);
   _2193 = List_var(_2192);
-  _2194 = int_var(78842);
+  _2194 = int_var(79049);
   _2195 = cons(_2194, NULL);
   _2196 = cons(_271, _2195);
   _2197 = List_var(_2196);
@@ -2981,11 +2983,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2382 = cons(_2381, NULL);
   _2383 = cons(_218, _2382);
   _2384 = List_var(_2383);
-  _2385 = int_var(2087);
+  _2385 = int_var(2092);
   _2386 = cons(_2385, NULL);
   _2387 = cons(_258, _2386);
   _2388 = List_var(_2387);
-  _2389 = int_var(79197);
+  _2389 = int_var(79404);
   _2390 = cons(_2389, NULL);
   _2391 = cons(_271, _2390);
   _2392 = List_var(_2391);
@@ -3096,11 +3098,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2497 = cons(_2496, NULL);
   _2498 = cons(_218, _2497);
   _2499 = List_var(_2498);
-  _2500 = int_var(2098);
+  _2500 = int_var(2103);
   _2501 = cons(_2500, NULL);
   _2502 = cons(_258, _2501);
   _2503 = List_var(_2502);
-  _2504 = int_var(79602);
+  _2504 = int_var(79809);
   _2505 = cons(_2504, NULL);
   _2506 = cons(_271, _2505);
   _2507 = List_var(_2506);
@@ -3197,11 +3199,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_5(void){
   _2595 = cons(_2594, NULL);
   _2596 = cons(_218, _2595);
   _2597 = List_var(_2596);
-  _2598 = int_var(2100);
+  _2598 = int_var(2105);
   _2599 = cons(_2598, NULL);
   _2600 = cons(_258, _2599);
   _2601 = List_var(_2600);
-  _2602 = int_var(79677);
+  _2602 = int_var(79884);
   _2603 = cons(_2602, NULL);
   _2604 = cons(_271, _2603);
   _2605 = List_var(_2604);
@@ -3289,11 +3291,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_5(void){
   _2687 = cons(_2686, NULL);
   _2688 = cons(_218, _2687);
   _2689 = List_var(_2688);
-  _2690 = int_var(2104);
+  _2690 = int_var(2109);
   _2691 = cons(_2690, NULL);
   _2692 = cons(_258, _2691);
   _2693 = List_var(_2692);
-  _2694 = int_var(79877);
+  _2694 = int_var(80084);
   _2695 = cons(_2694, NULL);
   _2696 = cons(_271, _2695);
   _2697 = List_var(_2696);
@@ -3500,11 +3502,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_5(void){
   _2898 = List_var(_2897);
   _2899 = cons(_218, _100);
   _2900 = List_var(_2899);
-  _2901 = int_var(2153);
+  _2901 = int_var(2158);
   _2902 = cons(_2901, NULL);
   _2903 = cons(_258, _2902);
   _2904 = List_var(_2903);
-  _2905 = int_var(81999);
+  _2905 = int_var(82206);
   _2906 = cons(_2905, NULL);
   _2907 = cons(_271, _2906);
   _2908 = List_var(_2907);
@@ -5287,7 +5289,6 @@ return Compiler_resolve_expression(c, Compiler_lift_macro_lisp_expression(c, val
 Var Map_getindex(Map, Var);
 int Var_is_binder(Var);
 String Var_repr(Var);
-List Compiler_capture_lambda_identifier(Compiler, List, Type);
 static List Compiler__resolve_identifier(Compiler c, Var value, Type type, Token origin){
   if(type == _468) type = NULL;  int read_reference = ! List_truth(Type_list(type));  int require_type = 0;  List binding = Compiler__identifier_binding(c, value, &(type), origin, &(require_type));  if(Map_truth(c -> macro_holes) && List_truth(binding)){
     String name = binding_identity_spelling(binding);  if(Var_is_row(Map_getindex(c -> macro_holes, List_var(cons(_1578, cons(String_var(name), NULL)))), 9, 7, 4)) return cons(_0, cons(_752, cons(List_var(cons(_37, cons(List_var(cons(_1579, cons(String_var(name), NULL))), NULL))), NULL)));  if(Compiler__template_free_name(c, binding)) return cons(_0, cons(_752, cons(List_var(cons(_37, cons(List_var(cons(_1580, cons(String_var(name), NULL))), NULL))), NULL)));
@@ -5305,22 +5306,25 @@ static List Compiler__resolve_identifier(Compiler c, Var value, Type type, Token
 if(Compiler__shadow_identifier(c, &(binding), type, spelling, binding_facts, kept)) type = NULL;  if(! List_truth(Type_list(type))) type = Compiler__identifier_type(c, binding, spelling, binding_facts, origin);  if(! List_truth(Type_list(type)) && require_type) Compiler_report_error(c, 1362954, String_join(NULL, cons(String_var(_1584), cons(String_var(Var_repr(value)), cons(String_var(_1585), NULL)))), origin, NULL);  List result =({
   Var _x2c_literal_part_37 = List_var(type);  Var _x2c_literal_part_38 = List_var(cons(_37, cons(List_var(binding), NULL)));  cons(_0, cons(_x2c_literal_part_37, cons(_x2c_literal_part_38, NULL)));
 }
-);  if(List_truth(c -> lambda_scopes) && ! Map_truth(c -> macro_holes)){
-  result = Compiler_capture_lambda_identifier(c, binding, type);
+);  result = Compiler__capture_lambda_value(c, result, &(binding), &(type), &(read_reference));  return Compiler__read_bound_reference(c, result, binding, type, read_reference, binding_facts);
+}
+
+List Compiler_capture_lambda_identifier(Compiler, List, Type);
+static List Compiler__capture_lambda_value(Compiler c, List result, List * binding, Type * type, int * read_reference){
+  if(! List_truth(c -> lambda_scopes) || Map_truth(c -> macro_holes)) return result;  result = Compiler_capture_lambda_identifier(c, (* binding), (* type));
   {
     List _x2c_match_expr = result;
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 377892: ;  static MatchCaptureSite _x2c_match_site_59;  if (x2c_match_site_try_capture(& _x2c_match_site_59, _x2c_match_expr, List_var(_1593), &_x2c_match_capture)) {Var captured_type = _x2c_match_values[0];  Var captured = _x2c_match_values[1]; {
-    if(! Var_equal(List_car(Type_list(type)), Symbol_var(77)) && Var_equal(Var_car(captured_type), Symbol_var(77))) read_reference = 1;  type = Var_type(captured_type);  binding = Var_list(captured);
+    if(! Var_equal(List_car(Type_list((* type))), Symbol_var(77)) && Var_equal(Var_car(captured_type), Symbol_var(77)))(* read_reference) = 1; (* type) = Var_type(captured_type); (* binding) = Var_list(captured);
   }
   break;
 }
 default: break;
     }
   }
-}
-return Compiler__read_bound_reference(c, result, binding, type, read_reference, binding_facts);
+return result;
 }
 
 List Sym_reference(Sym, List, Type *);
