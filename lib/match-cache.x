@@ -322,7 +322,7 @@ void MatchLease.release(MatchLease *lease) {
 /* Acquisition must remain active while reading the retained program. */
 static MatchPlan MatchLease._plan(MatchLease *m) =>
   m.transient_plan ? m.transient_plan
-                       : m.cache.entries[m.slot].plan;
+    : m.cache.entries[m.slot].plan;
 
 /* The entry an active cached lease pins, or NULL once the slot is empty or
    recycled under a newer generation. */
