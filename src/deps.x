@@ -53,9 +53,13 @@ int translation_depfile_write(
 static String _contents(
   CliRequest request, Compiler compiler, String input, String output_dir) {
   Array paths = $auto([]), searches = $auto([]);
-  foreach (Var (path, content_hash), compiler.deps)
-    (content_hash is <string> && String.startswith(content_hash, "search:") ?
-      searches : paths).push(path);
+  foreach (Var (path, content_hash), compiler.deps) {
+    if (content_hash is <string> && String.startswith(content_hash, "search:")) {
+      String candidate = path;
+      searches.push(candidate.startswith("cwd:") ? candidate[4:] : candidate);
+    }
+    else paths.push(path);
+  }
   if (!paths.len()) paths.push(input);
   paths.sort();
   Buffer out = $auto(Buffer.new(0));

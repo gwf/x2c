@@ -653,6 +653,7 @@ static List _current(String directory) {
 /* Hash readable contents and resolved identity; an absent candidate has a
    stable fact too, so adding it invalidates a cached helper. */
 static String _digest(String path) {
+  if (path.startswith("cwd:")) path = path[4:];
   if (!SourceView.exists(NULL, path)) return "search:absent";
   File input = fopen(path, "rb");
   if (!input) return NULL;
