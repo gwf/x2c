@@ -126,6 +126,8 @@ _x2c_defer_env_5;
 
 static void _x2c_defer_cleanup_6(void * _x2c_defer_opaque_6);
 
+static void _x2c_defer_cleanup_7(void * _x2c_defer_opaque_7);
+
 int MatchCache_acquire(MatchCache m, Var pattern, MatchLease * lease, const char * owner){
   (* lease) =(MatchLease){
     .slot = - 1
@@ -646,8 +648,6 @@ Scope Scope_new_named(const char *);
 
 void * Scope_calloc(size_t, size_t);
 
-void Scope_pop(void);
-
 MatchCache MatchCache_new(int capacity){
   if(capacity <= 0){
     Var _x2c_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("MatchCache.new")), NULL)));
@@ -668,17 +668,36 @@ MatchCache MatchCache_new(int capacity){
 
   }
   Scope owner = Scope_new_named("Match plan cache");
-  Scope_push(& owner);
-  MatchCache cache = Scope_calloc(1, sizeof(struct MatchCache));
-  cache -> scope = owner;
-  cache -> capacity = capacity;
-  cache -> bucket_count = capacity * 2 + 1;
-  cache -> lru_head = - 1;
-  cache -> pool_epoch = Pool_epoch();
-  cache -> entries = Scope_calloc(capacity, sizeof(MatchCacheEntry));
-  cache -> buckets = Scope_malloc(sizeof(int) * cache -> bucket_count);
-  for(int i = 0;  i < cache -> bucket_count;  i ++) cache -> buckets[i] = - 1;
-  Scope_pop();
+  MatchCache cache;
+  {
+    Scope_push(& owner);
+    {
+      {
+        X2CCleanup _x2c_defer_record_7 ={
+          .fn = _x2c_defer_cleanup_7, .env = 0
+        }
+        ;
+        x2c_cleanup_push(& _x2c_defer_record_7);
+        {
+          {
+            cache = Scope_calloc(1, sizeof(struct MatchCache));
+            cache -> scope = owner;
+            cache -> capacity = capacity;
+            cache -> bucket_count = capacity * 2 + 1;
+            cache -> lru_head = - 1;
+            cache -> pool_epoch = Pool_epoch();
+            cache -> entries = Scope_calloc(capacity, sizeof(MatchCacheEntry));
+            cache -> buckets = Scope_malloc(sizeof(int) * cache -> bucket_count);
+            for(int i = 0;  i < cache -> bucket_count;  i ++) cache -> buckets[i] = - 1;
+          }
+
+        }
+        x2c_cleanup_leave(& _x2c_defer_record_7);
+      }
+
+    }
+
+  }
   return cache;
 }
 
@@ -687,7 +706,7 @@ void Scope_destroy(Scope);
 void MatchCache_dispose(MatchCache cache){
   if(! cache) return;
   if(cache -> active_leases){
-    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/match-cache.x",.function = "MatchCache_dispose",.line = 573};
+    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/match-cache.x",.function = "MatchCache_dispose",.line = 574};
     x2c_error_raise_n(& _x2c_error_site_6, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("MatchCache.dispose")), NULL))));
     __builtin_unreachable();
   }
@@ -697,6 +716,8 @@ void MatchCache_dispose(MatchCache cache){
   }
   Scope_destroy(cache -> scope);
 }
+
+void Scope_pop(void);
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   Scope_pop();
@@ -730,5 +751,9 @@ static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5){
 static void _x2c_defer_cleanup_6(void * _x2c_defer_opaque_6){
   _x2c_defer_env_5 * _x2c_defer_data_5 =(_x2c_defer_env_5 *) _x2c_defer_opaque_6;
   MatchLease_release((*(MatchLease * *) _x2c_defer_data_5->_x2c_defer_capture_5));
+}
+
+static void _x2c_defer_cleanup_7(void * _x2c_defer_opaque_7){
+  Scope_pop();
 }
 

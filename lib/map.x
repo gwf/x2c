@@ -92,7 +92,7 @@ static Var _update_var(Var *slot, Symbol op, Var rhs) =>
   Var.update(slot[0], op, rhs);
 $map.typed.operations(
   Map, Var, Var, _update_var, _bad_arg, _bad_op, _capacity_valid,
-  _record_value, map, void, 1, 1, 0, 1);
+  _record_value, void, 1, 1, 0, 1);
 meta native Map Map.new_capacity(unsigned);
 meta native unsigned Map.len(Map);
 meta native Var Map.getdefault(Map, Var, Var);
@@ -191,7 +191,7 @@ static Var _box_var(Var value) => value;
 static int _compare_var(Var a, Var b) => a.compare(b);
 $map.core.observe(Map, Var, Var, struct MapRecord,
   _box_var, _box_var, _compare_var, _compare_var);
-$map.typed.observation(Map, Var, Var, _box_var, _box_var);
+$map.typed.observation(Map);
 $map.typed.iterate(Map, Var, Var, map, _box_var, _box_var);
 meta native Iter Map.keys(Map, Iter);
 meta native Iter Map.enumerate(Map, Iter);

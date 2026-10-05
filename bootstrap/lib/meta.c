@@ -330,7 +330,7 @@ String Var_str(Var);
 String List_repr(List);
 List Array_list_free(Array);
 String type_name_error(List type){
-  if(! _init_guard_) _file_init_();  Var name = List_last(type);  if(! Var_is(name, 1328354264) || Var_equal(name, Symbol_var(54)) || SymbolSet_contains(_base_keywords, Var_symbol(name)) || SymbolSet_contains(_type_qualifiers, Var_symbol(name))) return NULL;  Array fixed = Array_new();  for(List rest = type;  List_truth(List_cdr(rest));  rest = List_cdr(rest)) Array_push(fixed, List_car(rest));  Array_push(fixed, String_var(Var_str(name)));  String wanted = List_repr(Array_list_free(fixed));  return({
+  if(! _init_guard_) _file_init_();  Var name = List_last(type);  if(! Var_is(name, 826970) &&(! Var_is(name, 1328354264) || Var_equal(name, Symbol_var(54)) || SymbolSet_contains(_base_keywords, Var_symbol(name)) || SymbolSet_contains(_type_qualifiers, Var_symbol(name)))) return NULL;  Array fixed = Array_new();  for(List rest = type;  List_truth(List_cdr(rest));  rest = List_cdr(rest)) Array_push(fixed, List_car(rest));  Array_push(fixed, String_var(Var_str(name)));  String wanted = List_repr(Array_list_free(fixed));  return({
     Var _x2c_literal_part_3 = String_var(Var_str(name));  String_join(NULL, cons(String_var(_70), cons(_x2c_literal_part_3, cons(String_var(_71), cons(String_var(wanted), NULL)))));
   }
   );

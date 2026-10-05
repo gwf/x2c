@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/macro-quotation-type-long-atom.x:13:46: macro: type name 'ExtremelyLongCamelCaseCaptureType' must be a String: write %("ExtremelyLongCamelCaseCaptureType")
+    ExtremelyLongCamelCaseCaptureType values = $list_of(%(1 2));
+                                               ^
+

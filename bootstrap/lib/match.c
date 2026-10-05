@@ -817,8 +817,8 @@ static int MatchPlan__first(MatchPlan plan, List input, Var * out_match, List * 
   Block_free(walk.spine);
   MatchMachine_release(machine);
   if(result == 1){
-    * out_match = walk.found;
-    * out_bindings = walk.bindings;
+    (* out_match) = walk.found;
+    (* out_bindings) = walk.bindings;
   }
   return result;
 }
@@ -870,7 +870,7 @@ static int MatchPlan__replace_all(MatchPlan plan, List input, Var template, List
   Block_free(walk.spine);
   MatchMachine_release(machine);
   if(walk.error) return - 1;
-  * out = Var_list(result);
+  (* out) = Var_list(result);
   return 1;
 }
 
@@ -1015,7 +1015,7 @@ static int MatchPlan__replace(MatchPlan plan, List input, Var template, Var * ou
     plan -> layout, & captures, NULL
   }
   ;
-  * out = _replace(template, &(source));
+  (* out) = _replace(template, &(source));
   return 1;
 }
 

@@ -4850,14 +4850,23 @@ binders inside `!not` operands are not definitely assigned; binders under
 opaque.
 Arm binders are semantic `Var` or `List` locals and support method syntax.
 
-`?(Type name)` declares a native typed capture. Its exact `Var` tag must
-match the tag tested by `value is Type`; mismatches fail the pattern without
+`?(typename name)` declares a native typed capture. Its exact `Var` tag must
+match the tag tested by `value is typename`; mismatches fail the pattern without
 conversion. The type applies to every unquoted occurrence of that binder in
 the arm, including `?name` and alternative branches. Repeated names retain
 their equality constraint. The shorthand lowers to existing `!is` predicates
 and ordinary local declarations; explicit `!is` captures remain `Var` locals.
 The opener `?(` is adjacent; `? (String text)` is a wildcard followed by
 a sublist pattern.
+
+Inside `?(`, `typename` is ordinary source type syntax rather than literal
+List data: write `?(String text)` or `?(List payload)`. The compiler stores
+named types such as `String` as Strings in type syntax. The type List
+`%("String")` therefore differs from `%(String)`, which contains an `Atom`;
+see [macro values](https://x2c-lang.dev/docs/reference/language.html#macro-values). Typedefs use their underlying `Var` tag,
+so `?(Type type)`, with `typedef List Type`, tests for a List payload without
+validating its contents as type syntax. The tag test precedes the native
+local declaration.
 
 An arm may place `if (expression)` before its colon. The expression runs
 after matching, with captures visible, and uses ordinary truth conversion.

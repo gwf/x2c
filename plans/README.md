@@ -68,6 +68,7 @@ execution.
 
 | Record | What remains |
 | --- | --- |
+| [Idiom synthesis, October 4](idiom-synthesis-2026-10-04.md) | Private implementation against origin/dev fd88fae4. Binder syntax clarified; three adjacent defects repaired. Fifteen issue families, four research records, selected rewrites, retained contracts, and bounded composition experiments. Delivery authorized only to codex/idiom-synthesis-refresh; PR and integration held. |
 | [Post-integration fix list, October 2](post-integration-fix-list-2026-10-02.md) | Active orchestrated campaign: 42 scopes, three prior delivered repairs, and every review finding accounted for. Sol workers implement private batches, including the named-macro catalogue replacement and its literal-lowering prerequisite. |
 | [Quotation adoption audit](quotation-adoption-audit-2026-10-03.md) | Param, Type, and Decl quotations; a structural rebuild for Unit, Field, and declarator syntax; and the retained autodiff review. Its other follow-ups landed through PRs #131, #142, and #143. |
 | [SDK and system macros](macro-sdk-and-system-macros.md) | Captured-code diagnostic locations and enum consumers; the removed varops Lisp file is no longer work. |
