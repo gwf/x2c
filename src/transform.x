@@ -1432,9 +1432,8 @@ static List Compiler._assignment(Compiler c, Symbol op, List lhs, List rhs) {
        would mutate shared storage and leave its cached header hash
        stale. A raw write bypasses that invariant, while generic
        setindex returns a copy that this assignment would discard. */
-    if (c.sym.is_string_type(base_type)) {
+    if (c.sym.is_string_type(base_type))
       $report.xform.string_assignment(c);
-    }
     if (!c.resolve_protocol_member(base_type, "setindex"))
       $report.xform.index_copy(c, base_type);
     return %(setindex $base $index $rhs);
@@ -1529,9 +1528,8 @@ static List Compiler._dynamic_compound(
   Type rhs_type) {
   int lhs_is_var = c.sym.is_var_type(lhs_type);
   int rhs_is_var = c.sym.is_var_type(rhs_type);
-  if (c._indexed_builtin_helper(lhs_type)) {
+  if (c._indexed_builtin_helper(lhs_type))
     $report.xform.container_compound(c, lhs_type);
-  }
   /* Without this rejection a nonmatching String compound falls through to
      native pointer arithmetic on an interned String. Concatenation itself
      lowers through the protocol member below like any adopter, resolved
@@ -1562,9 +1560,8 @@ static void Compiler._dynamic_rhs(
   Compiler c, Symbol op, Type lhs_type, Type rhs_type, int rhs_is_var) {
   if (lhs_type.is_bitfield())
     $report.xform.compound_bitfield(c);
-  if (!rhs_is_var && !c._scalar_operand(op, rhs_type)) {
+  if (!rhs_is_var && !c._scalar_operand(op, rhs_type))
     $report.xform.compound_operand(c, op, rhs_type);
-  }
 }
 
 /* A number, or text added to text, updates a Var or container element. */
@@ -1576,9 +1573,8 @@ static String Compiler._dynamic_helper(Compiler c, Type lhs_type) {
   if (scalar && scalar.is_enum())
     $report.xform.compound_enum(c);
   String helper = scalar ? scalar.var_numeric_update_helper() : NULL;
-  if (!helper) {
+  if (!helper)
     $report.xform.compound_lvalue(c, lhs_type);
-  }
   return helper;
 }
 
@@ -1619,9 +1615,8 @@ static List Compiler._indexed_resolution(
   int postfix = !rhs;
   List resolved = c.resolve_protocol_member(
     base_type, postfix ? "postfixindex" : "updateindex");
-  if (!resolved) {
+  if (!resolved)
     $report.xform.index_update(c, base_type, postfix);
-  }
   if (owner && !postfix) {
     Type rhs_type = rhs.cadr();
     if (!c.sym.is_var_type(rhs_type) && !c._scalar_operand(op, rhs_type))
