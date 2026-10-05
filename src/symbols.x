@@ -586,9 +586,8 @@ static String _declared_spelling(List key) {
    in an imported package's space. A shallow parse reads emitted C, whose
    generated spellings are the compiler's own output. */
 static void Compiler._check_spelling(Compiler c, String spelling) {
-  if (!c.shallow && _is_reserved_spelling(spelling)) {
+  if (!c.shallow && _is_reserved_spelling(spelling))
     $report.parse.name_reserved(c, spelling);
-  }
   String owner = c._package_reserved_owner(spelling);
   if (owner)
     $report.parse.name_package(c, spelling, owner);

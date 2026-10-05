@@ -63,7 +63,7 @@ static void _bad_index(String owner, int index, size_t size) {
 }
 
 static void _bad_operation(String owner, Symbol operation) {
-  raise %(bad-arg (owner $owner) (operation $operation));
+  raise %(bad-arg (operation $owner) (action $operation));
 }
 
 static void _size_limit(String owner, size_t size) {
