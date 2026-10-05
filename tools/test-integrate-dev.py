@@ -224,7 +224,8 @@ class IntegrationProbe(unittest.TestCase):
             self.state_path.write_text(json.dumps(value))
         return value
 
-    def pr(self,number,path=None,content=None,base=None,depends=(),ready=True):
+    def pr(self,number,path=None,content=None,base=None,depends=(),ready=True,
+           contact=None):
         self.git('checkout','-q','-B',f'work-{number}',base or self.base)
         self.write(self.root/(path or f'src/change-{number}.x'),content or f'change {number}\n')
         self.git('add','.')
@@ -235,6 +236,7 @@ class IntegrationProbe(unittest.TestCase):
         metadata={'version':1,'base':base or self.base,'head':head,
                   'dependencies':[{'pr':n,'head':h} for n,h in depends],
                   'evidence':[{'command':'fixture focused check','result':'passes'}],'notes':''}
+        if contact is not None: metadata['contact']=contact
         body='Authored explanation.\n<!-- x2c-integration:start -->\n```json\n'+json.dumps(metadata)+'\n```\n<!-- x2c-integration:end -->\n'
         pull={'number':number,'state':'open','draft':False,'body':body,
               'html_url':f'https://example.invalid/fixture/x2c/pull/{number}',
@@ -335,6 +337,7 @@ class IntegrationProbe(unittest.TestCase):
         self.assertTrue(pull['body'].startswith('Authored explanation.'))
         self.assertEqual(pull['body'].count('<!-- x2c-integration:start -->'),1)
         self.assertIn(head,pull['body'])
+        self.assertNotIn('"contact"',pull['body'])
         self.assertEqual(pull['labels'],[{'name':'integration-ready'}])
         calls=state['gh_calls']
         delete=next(i for i,c in enumerate(calls) if 'DELETE' in c)
@@ -342,6 +345,92 @@ class IntegrationProbe(unittest.TestCase):
         add=max(i for i,c in enumerate(calls) if 'POST' in c)
         self.assertLess(delete,patch); self.assertLess(patch,add)
         self.assertEqual(state.get('gates',[]),[])
+
+    def test_submit_reads_replaces_and_removes_optional_contact(self):
+        head=self.pr(1)
+        self.git('checkout','-q','work-1')
+        self.cli('context','--role','individual','--delivery','pr')
+        evidence=self.root/'debug'/'evidence.json'
+        self.write(evidence,json.dumps([{'command':'focused check','result':'pass'}]))
+        contact_file=self.root/'debug'/'contact.json'
+        contacts=[{'transport':'postbag','bag':'x2c-audit','peer':'author-one'},
+                  {'transport':'postbag','bag':'b123456789012345','peer':'a'},
+                  None]
+        for contact in contacts:
+            with self.subTest(contact=contact):
+                arguments=['submit','--pr','1','--base',self.base,
+                           '--evidence-file',evidence]
+                if contact is not None:
+                    self.write(contact_file,json.dumps(contact))
+                    arguments.extend(['--contact-file',contact_file])
+                self.cli(*arguments)
+                status=json.loads(self.cli('status').stdout)
+                entry=status['ready'][0]
+                self.assertEqual(entry['head'],head)
+                self.assertEqual(entry.get('contact'),contact)
+                if contact is None: self.assertNotIn('contact',entry)
+                pull=self.state()['pulls']['1']
+                self.assertEqual(pull['labels'],[{'name':'integration-ready'}])
+                self.assertTrue(pull['body'].startswith('Authored explanation.'))
+        self.assertEqual(self.state().get('gates',[]),[])
+        context=json.loads((self.root/'debug'/'agent-context.json').read_text())
+        self.assertEqual(context,{'role':'individual','delivery':'pr'})
+
+    def test_malformed_contact_is_rejected_before_remote_mutation(self):
+        self.pr(1)
+        self.git('checkout','-q','work-1')
+        self.cli('context','--role','individual','--delivery','pr')
+        evidence=self.root/'debug'/'evidence.json'
+        self.write(evidence,json.dumps([{'command':'focused check','result':'pass'}]))
+        contact_file=self.root/'debug'/'contact.json'
+        valid={'transport':'postbag','bag':'x2c-audit','peer':'author-one'}
+        invalid=[None,[],{}, {**valid,'transport':'other'},
+                 {'transport':'postbag','bag':'x2c-audit'}]
+        for name in ('','A','1author','a'*17,'a_b','a.b','a/b','a\n',123):
+            invalid.append({**valid,'peer':name})
+            invalid.append({**valid,'bag':name})
+        for field in ('token','secret','socket','session_id','session_link'):
+            invalid.append({**valid,field:'must not be published'})
+        original=self.state()
+        for contact in invalid:
+            with self.subTest(contact=contact):
+                self.write(contact_file,json.dumps(contact))
+                result=self.cli('submit','--pr','1','--base',self.base,
+                                '--evidence-file',evidence,
+                                '--contact-file',contact_file,ok=False)
+                self.assertEqual(result.returncode,1,result.stdout+result.stderr)
+                state=self.state()
+                self.assertEqual(state['pulls'],original['pulls'])
+                self.assertEqual(state.get('gh_calls'),original.get('gh_calls'))
+                self.assertNotIn('must not be published',result.stdout+result.stderr)
+
+    def test_prepare_and_park_keep_pinned_contact_and_reason(self):
+        contact={'transport':'postbag','bag':'x2c-audit','peer':'author-one'}
+        head=self.pr(1,contact=contact)
+        batch=self.prepare()
+        original=self.record(batch)
+        self.assertEqual(original['prs'][0]['contact'],contact)
+        self.cli('park',batch,'--reason','reproduce the authored regression')
+        parked=self.record(batch)
+        self.assertEqual(parked['state'],'parked')
+        self.assertEqual(parked['reason'],'reproduce the authored regression')
+        self.assertEqual(parked['prs'][0]['head'],head)
+        self.assertEqual(parked['prs'][0]['contact'],contact)
+        self.assertEqual(parked['worktree'],original['worktree'])
+        self.assertEqual(self.tip(),self.base)
+        self.assertEqual(self.state().get('gates',[]),[])
+
+    def test_malformed_contact_metadata_does_not_block_older_submissions(self):
+        self.pr(1,contact={'transport':'postbag','bag':'bad/name','peer':'author'})
+        head=self.pr(2)
+        status=json.loads(self.cli('status').stdout)
+        self.assertEqual([entry['number'] for entry in status['ready']],[2])
+        self.assertEqual(status['ready'][0]['head'],head)
+        self.assertNotIn('contact',status['ready'][0])
+        self.assertEqual(status['pending'][0]['number'],1)
+        self.assertIn('contact names',status['pending'][0]['reason'])
+        record=self.record(self.prepare())
+        self.assertEqual([entry['number'] for entry in record['prs']],[2])
 
     def test_submission_notes_are_ignored_but_authored_files_are_not(self):
         self.pr(1)
