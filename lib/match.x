@@ -129,7 +129,7 @@ meta native int Var.is_match_op(Var atom) {
 }
 
 /* The valid binder's sigil, -1 for a malformed sigil-leading Atom, or 0
-   for other values. Compact bytes use stack storage; long bytes are borrowed. */
+   otherwise. Compact bytes use stack storage; long bytes are borrowed. */
 static int _binder_kind(Var atom) {
   char sigil = Atom.first(atom);
   if (sigil != '?' && sigil != '*') return 0;
