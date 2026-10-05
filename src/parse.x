@@ -2636,8 +2636,7 @@ static List Compiler._bind_form(
       return c._bind_function(type, name, params, mods, body);
     case %(!set ?node ((!or protocol adopt meta-protocol) *)) if (unit):
       return c.publish_protocol_node(node, c.token, NULL);
-    case %(!set ?def (macrodef *)):
-      return c._bind_macrodef(def, context);
+    case %(!set ?def (macrodef *)): return c._bind_macrodef(def, context);
     case %(preproc ?(String directive)) if (unit || block):
       return c._bind_preproc(input);
     case %(at ?origin ?node):
@@ -2646,16 +2645,14 @@ static List Compiler._bind_form(
     case return_value(?expr) if (statement):
       return c.finish_return_statement(expr);
     case %((!or break continue default empty)) if (statement): return input;
-    case %(case ?expr) if (statement):
-      return %(case ${c._resolve(expr)});
+    case %(case ?expr) if (statement): return %(case ${c._resolve(expr)});
     case %((!set ?tag (!or goto label)) ?name) if (statement):
       return %($tag $name);
     case expression_statement(?expr) if (statement):
       return c._bind_expression_statement(expr, context);
     case deferred(?body) if (statement):
       return %(defer ${c._bind_statement(body)});
-    case do_loop(?body, ?test) if (statement):
-      return c._bind_do(body, test);
+    case do_loop(?body, ?test) if (statement): return c._bind_do(body, test);
     case while_loop(?test, ?body) if (statement):
       return c._bind_while(test, body);
     case switched(?expr, ?body) if (statement):
