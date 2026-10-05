@@ -470,7 +470,7 @@ static void Compiler._record_meta_hash(
       c._store_static_meta(spec, own, init, first);
     case %(declare ?spec (bindings
              (bind (!set ?binding (binding ? ?(String own))) *))):
-      c._store_collected_meta(spec, binding, first, collected_body);
+      c._store_collected_meta(spec, binding, own, first, collected_body);
   }
 }
 
@@ -492,10 +492,11 @@ static void Compiler._store_static_meta(
 }
 
 static void Compiler._store_collected_meta(
-  Compiler c, Var spec, List binding, Token first, int collected_body) {
+  Compiler c, Var spec, List binding, String name,
+  Token first, int collected_body) {
   if (!c.shallow || (!collected_body &&
       (!spec.type().is_static() || !(binding in c.init_tokens)))) return;
-  c._store_meta_hash(binding_identity_spelling(binding), void, first);
+  c._store_meta_hash(name, void, first);
 }
 
 static void Compiler._store_meta_hash(
@@ -2606,7 +2607,8 @@ static List Compiler._bind_form(
     case %(declaration-recipe ?callback ?args) if (unit):
       return c._bind_decl_recipe(callback, args);
     case %(default-forward ?child ?parent ?member *fallback) if (unit):
-      return c._bind_forward(child, parent, member, fallback);
+      return %(declaration-forward $child $parent $member
+               $fallback ${c.source_private});
     case %(default ?function) if (unit): return c._bind_default(function);
     case %(declaration-function
              (declare ?type (bindings ?decl)) ?body ?source) if (unit):
@@ -2853,11 +2855,6 @@ static List Compiler._bind_decl_recipe(
               ${c.freeze_macro_stack()} ${c.source_private});
   return c._bind_recipe(callback, arguments, AST_UNIT);
 }
-
-static List Compiler._bind_forward(
-  Compiler c, Var child, Var parent, Var member, List fallback) =>
-  %(declaration-forward $child $parent $member
-    $fallback ${c.source_private});
 
 static List Compiler._bind_default(Compiler c, Var function) {
   if (c.shallow)
