@@ -32,7 +32,7 @@ $cleanup.by(CurlBatch, free);
 #include <string.h>
 #include <strings.h>
 
-$(import "libcurl-reports.xmacro")
+$(import "libcurl-errors.xmacro")
 
 typedef enum CurlBufferFailure {
   CURL_BUFFER_OK,
@@ -223,7 +223,7 @@ static void _curl_raise(CurlEasy easy, String operation, CURLcode code) {
   }
   String effective_url = native_url ? String.new(native_url) : NULL;
   int native_code = (int) code;
-  $report.curl.native_failed(
+  $error.curl.native_failed(
     operation, native_code, message, url, response_code, effective_url);
 }
 
@@ -280,21 +280,21 @@ static void _curl_buffer_failure(
   CurlEasy easy, CurlBuffer &buffer, String channel, String operation) {
   size_t limit = buffer.limit, attempted = buffer.attempted;
   if (buffer.failure == CURL_BUFFER_LIMIT) {
-    $report.curl.buffer_limit(operation, channel, limit, attempted, easy.url);
+    $error.curl.buffer_limit(operation, channel, limit, attempted, easy.url);
   }
   if (buffer.failure == CURL_BUFFER_ALLOC) {
-    $report.curl.buffer_alloc(operation, channel, attempted, easy.url);
+    $error.curl.buffer_alloc(operation, channel, attempted, easy.url);
   }
-  $report.curl.buffer_overflow(operation, channel, easy.url);
+  $error.curl.buffer_overflow(operation, channel, easy.url);
 }
 
 static String _curl_header_text(
   const unsigned char *bytes, size_t length, String operation) {
   if (length > INT_MAX) {
-    $report.curl.header_size(operation, length);
+    $error.curl.header_size(operation, length);
   }
   if (length && memchr(bytes, '\0', length)) {
-    $report.curl.header_nul(operation);
+    $error.curl.header_nul(operation);
   }
   return String.new_len((char *) bytes, (int) length);
 }
@@ -384,7 +384,7 @@ CURL *CurlEasy.native(CurlEasy easy) {
 CurlEasy CurlEasy.free(CurlEasy easy) {
   if (!easy) return NULL;
   if (easy.performing) {
-    $report.curl.cleanup_busy();
+    $error.curl.cleanup_busy();
   }
   if (easy.native) {
     curl_easy_cleanup(easy.native);
@@ -532,7 +532,7 @@ String CurlEasy.unescape(String value) {
   }
   defer curl_free(plain);
   if (memchr(plain, '\0', length)) {
-    $report.curl.decode_nul();
+    $error.curl.decode_nul();
   }
   return String.new_len(plain, length);
 }
@@ -546,7 +546,7 @@ static void _curl_transfer_begin(
     raise %(bad-arg (library "libcurl") (operation "request"));
   }
   if (easy.performing) {
-    $report.curl.request_busy();
+    $error.curl.request_busy();
   }
   easy.performing = 1;
   transfer.easy = easy;
@@ -612,7 +612,7 @@ static CurlResponse _curl_transfer_finish(
     _curl_buffer_failure(easy, transfer.headers, "headers", operation);
   if (transfer.sink.failed ||
       (transfer.sink.file && fflush(transfer.sink.file))) {
-    $report.curl.download_write(path, easy.url);
+    $error.curl.download_write(path, easy.url);
   }
   if (transfer.stream.cause) {
     Symbol cause = transfer.stream.cause;
@@ -713,7 +713,7 @@ static void _curl_multi_check(String operation, CURLMcode result) {
   if (result == CURLM_OK) return;
   int code = (int) result;
   String message = String.new(curl_multi_strerror(result));
-  $report.curl.multi_failed(operation, code, message);
+  $error.curl.multi_failed(operation, code, message);
 }
 
 /** Releases every response owned by the batch. Repeated calls are harmless.
@@ -728,7 +728,7 @@ CurlBatch CurlBatch.free(CurlBatch batch) {
 
 static void _curl_batch_live(CurlBatch batch, String operation) {
   if (batch && !batch.released) return;
-  $report.curl.batch_released(operation);
+  $error.curl.batch_released(operation);
 }
 
 /** Returns the number of input URLs, including failed transfers. */
@@ -745,7 +745,7 @@ int CurlBatch.len(CurlBatch batch) {
 CurlResponse CurlBatch.response(CurlBatch batch, int index) {
   _curl_batch_live(batch, "batch.response");
   if (index < 0 || index >= batch.count)
-    $report.curl.batch_index(index);
+    $error.curl.batch_index(index);
   CurlBatchItem *item = &batch.items[index];
   if (item.cause) Error.raise(item.cause, item.detail);
   return item.response;
@@ -773,7 +773,7 @@ CurlBatch CurlEasy.request_all(
   if (!easy || !easy.native || !method || maximum <= 0)
     raise %(bad-arg (library "libcurl") (operation "request_all"));
   if (easy.performing)
-    $report.curl.batch_busy();
+    $error.curl.batch_busy();
   easy.performing = 1;
   defer _curl_transfer_end(easy);
   CurlBatch batch = Scope.calloc(1, sizeof(struct CurlBatch));
@@ -862,16 +862,16 @@ CurlBatch CurlEasy.get_all(CurlEasy easy, List urls, int maximum) =>
 
 static void _curl_response_live(CurlResponse response, String operation) {
   if (response && !response.released) return;
-  $report.curl.response_released(operation);
+  $error.curl.response_released(operation);
 }
 
 static void _curl_response_buffered(CurlResponse response, String operation) {
   _curl_response_live(response, operation);
   if (!response.file && !response.streamed) return;
   if (response.file) {
-    $report.curl.response_file(operation, response.file);
+    $error.curl.response_file(operation, response.file);
   }
-  $report.curl.response_streamed(operation);
+  $error.curl.response_streamed(operation);
 }
 
 CurlResponse CurlResponse.free(CurlResponse response) {
@@ -929,10 +929,10 @@ String CurlResponse.text(CurlResponse response) {
   _curl_response_buffered(response, "text");
   size_t length = response.body_size;
   if (length && memchr(response.body, '\0', length)) {
-    $report.curl.body_nul();
+    $error.curl.body_nul();
   }
   if (length > INT_MAX) {
-    $report.curl.body_size(length);
+    $error.curl.body_size(length);
   }
   return String.new_len(response.body, (int) length);
 }
