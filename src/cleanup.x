@@ -47,8 +47,8 @@ typedef struct Preserve {
   int expression_tries;
 } Preserve;
 
-/* Expressions may nest one level per operator. Visit their blocks without
-   recursing through the expression spine; each block keeps its cleanup owner. */
+/* Expressions may nest one level per operator. Visit blocks without
+   recursing through the expression spine; each keeps its cleanup owner. */
 static Array _expression_blocks(List expression) {
   Array blocks = [];
   List node;
@@ -880,8 +880,8 @@ static List Walk._lower_defer(
   c.needs_exception = 1;
   List record = c._region_binding("defer_record");
   List cleanup = c._defer_cleanup(record);
-  return c.bind_syntax($!{
-    {
+  return c.bind_syntax(
+    $!{ {
       ${builtin_defer_record(record, callback, env, records)}
       x2c_cleanup_push(&$record);
       ${w._try_region(cleanup, body)}
