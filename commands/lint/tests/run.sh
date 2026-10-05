@@ -9,7 +9,10 @@ tests=commands/lint/tests
 work=${TMPDIR:-/tmp}/x2c-lint-tests.$$
 out=$work/findings
 trap 'rm -rf "$work"' EXIT HUP INT TERM
-mkdir -p "$work"
+mkdir -p "$work/docs" "$work/lib"
+# The internal-module fixture uses the current library documentation tier.
+cp docs/library-manifest.txt "$work/docs/library-manifest.txt"
+cp "$tests/src/doc-tier.x" "$work/lib/scan.x"
 # Repository files stay ASCII, so the non-ASCII case is written here.
 printf '// caf\303\251\n' >"$work/ascii.x"
 # Formatting input that the fixtures would otherwise have to hold.
@@ -40,6 +43,15 @@ run() {
   echo "# shared Error causes outside the repository"
   cp "$tests/src/review.x" "$work/review.x"
   (cd "$work" && run --rule return-after-raise review.x)
+  echo "# missing rule fixtures"
+  run --rule fresh-literal-null-guard --rule growth-check \
+    --rule manual-shape-checks --rule validator-shape \
+    --rule recursive-validator --rule validation-framework \
+    --rule static-match-capture --rule enum-table-switch \
+    --rule duplicate-function-body "$tests/src/signals.x" \
+    "$tests/src/duplicate-a.x" "$tests/src/duplicate-b.x"
+  echo "# internal module documentation"
+  (cd "$work" && run --rule doc-comment-tier lib/scan.x)
   echo "# shape rules"
   run --all "$tests/src/shape.x"
   echo "# a script unit"
