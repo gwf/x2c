@@ -448,9 +448,9 @@ one `operation` String, or retain the type as `operation` and name the action
 with another key. The first option changes the current action value; the
 second needs a vocabulary decision. No conflicting raise was changed.
 
-### Stage 2 D3: autodiff fixture expectations
+### Stage 2 D3: autodiff fixture expectations (resolved)
 
-The required `make packages-check` fails on the generated C expectations of
+The original `make packages-check` failed on the generated C expectations of
 `autodiff-forward`, `autodiff-control-flow`, and `autodiff-reverse`.
 Each delta replaces the fixture header include with a generated guard and
 direct runtime and native includes. No Error cause differs in these deltas.
@@ -465,10 +465,18 @@ expectations to make the check pass.
 
 Evidence in `/tmp/x2c-standard-d3/debug/`: `d3-packages-check.log`,
 `d3-autodiff-baseline.log`, `d3-baseline-build-safe.log`, and
-`d3-baseline-env.log`. The expectations remain unchanged.
+`d3-baseline-env.log`. The original candidate left expectations unchanged.
 
-Options for Gary: authorize a reviewed update of these include expectations,
-or leave stage 2 publication pending. Continue the independent stages.
+Independent commit `fb7004db` corrected the three expectations. The D3
+retry starts from `origin/dev` at `e4d22fc7` and replays only D3 as
+`0b9c45b0`. `make packages-check` passes, including all 9 autodiff
+fixtures and 19 checked artifacts. This worker changed no expectation.
+The package blocker is resolved. D3 delivery commit: `f7f886ad`.
+The D2 detail-key collision remains open.
+
+Retry evidence is in the managed `standard-d3-retry/x2c` worktree under
+`debug/d3-retry-packages-check.log`. The initial book-example failure was
+a missing local PCRE2 archive, resolved by the existing package targets.
 
 ### Stage 4: subject spelling and generated C (NM-2)
 
@@ -535,7 +543,13 @@ preserved in `.context/` in that worktree. No bootstrap was refreshed.
 | 4.emission | `5f8e5484` | 2026-10-05 | 6 -> 0; +16/-14 .x |
 | 4.match | `33c6f09e` | 2026-10-05 | 5 -> 2; +3/-3 .x |
 | D2 held | `a7c271f` | 2026-10-05 | +197/-192 .x; 4 raises held |
+| D3 | `f7f886ad` | 2026-10-05 | 9/9 autodiff; +9/-9 .x |
 | D3 held | `9511153f` | 2026-10-05 | +9/-9 .x; package check fails |
+
+D3 retry on `e4d22fc7`: safe rebuild, verify (940 tests and 1,082 compiler
+fixtures), CLI probes, book examples (384 samples and 101 outputs), separate
+book outputs (101), commands, and packages pass. Autodiff passes all nine
+fixtures and 19 artifacts. No fixture or lint baseline changed.
 
 Stage 4 rows record violation counts and authored `.x` line changes.
 Process and Match repairs compare all 220 C/H files with the bootstrap.
