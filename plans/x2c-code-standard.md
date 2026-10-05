@@ -970,7 +970,8 @@ The pending status documentation merged through PR #172 at `83d76717`.
 Its focused `make doc-check` passed: 156 audit files, 357 links, and
 20 paths. Subsequent source work uses shared-integrator delivery. Workers
 return private source commits; the integrator owns final artifacts and
-publication validation. The source candidates below are not yet published.
+publication validation. The first source batch merged through PR #173.
+Later candidates below remain private until submitted to the integrator.
 
 | Owner at `db8f20ed` | Original lines | Candidate lines | State |
 | --- | ---: | ---: | --- |
@@ -978,14 +979,14 @@ publication validation. The source candidates below are not yet published.
 | `Walk.rewrite` | 42 | 36 | length repaired; focused proof passes |
 | `Emitter._emit` | 94 | 52 | one-line dispatcher exception reviewed |
 | `Emitter._declarator` | 46 | 23 | length repaired; focused proof passes |
-| `Compiler._resolve_content` | 104 | 104 | reshape remains |
-| `Compiler._resolve_identifier` | 44 | 44 | later capture-step trial unverified |
+| `Compiler._resolve_content` | 104 | 104 | trial restored; grammar-arm width decision pending |
+| `Compiler._resolve_identifier` | 44 | 34 | capture step; focused proof passes |
 | `Compiler._typedef_index` | 43 | 24 | length repaired; focused proof passes |
 | `Compiler._record_meta_hash` | 50 | 18 | length repaired; focused proof passes |
 | `Compiler._bind_form` | 118 | 102 | partial; 37 arms still span lines |
-| `Compiler.protocol_update_helper` | 51 | 51 | later signature-step trial unverified |
-| `Compiler._step` | 54 | 54 | reshape remains |
-| `Compiler._sequence` | 44 | 44 | later sequence-step trial unverified |
+| `Compiler.protocol_update_helper` | 51 | 39 | signature/publication steps; focused proof passes |
+| `Compiler._step` | 54 | 40 | one grammar match; focused proof passes |
+| `Compiler._sequence` | 44 | 10 | normalization/splice steps; focused proof passes |
 
 These counts address function length. They do not establish whole-file
 conformance or one-line arms in every shorter match. No standard exception,
@@ -1041,6 +1042,73 @@ and static-local-switch. `make doc-check` reports only stale generated
 API Source locations for cleanup and parse. Its other audits report no
 errors. Final documentation and bootstrap regeneration belong to the
 shared integrator; no derived output was hand-edited or rebaselined.
+
+Lambda candidate `262441eb` names the existing capture eligibility,
+binding/type projection, and reference-read adjustment. Original locals
+pass by reference; no validation or retained state is added. The compiler
+inlines the helper. Ten lambda/binding fixtures and the 220-file stage-1
+comparison pass. Ten raw source-map client comparisons preserve 36 artifacts,
+eight successes, and two refusals. Six retained-definition positions move
+to their authored locations; no runtime ErrorSite changes. Seven alternating
+measured pairs after one warm pair give compiler-source median instructions
+17,443,298,642 to 17,482,766,764 and lambda-client medians 4,780,764,782
+to 4,776,840,876. Both ranges overlap; all 16 paired C/H and diagnostic
+outputs match. No distinguishable performance change is claimed.
+
+Protocol candidate `ce5219a1` names direct-update signature eligibility
+and generated-function publication. Binding, current-origin anchoring,
+early declaration publication, and cache order remain unchanged. Four
+protocol fixtures and the 220-file stage-1 comparison pass. Seven raw
+source-map clients preserve 20 artifacts, three successes, and four
+refusals. Two quote locations move to their authored positions; their
+bodies and ancestry remain exact. Runtime ErrorSite expressions are
+unchanged. Seven alternating measured pairs after one warm pair give
+direct-update median instructions 4,682,445,611 to 4,686,918,685 and
+compiler-emission medians 7,747,242,390 to 7,737,320,119. Both ranges
+overlap; all 16 paired C/H and diagnostic outputs match. Existing FI-6
+and ST-1 findings remain; full-file conformance is not claimed.
+
+Transform candidate `b0bd8ff8` uses one grammar match and names sequence
+normalization and splicing steps. Original traversal, capture types, origin
+construction, and tag fallback remain unchanged. Constant-head alternatives
+precede disjoint grouped alternatives, preserving a real generated switch.
+The 220-file stage-1 comparison passes. Thirteen fixtures pass before the
+final capture spelling correction; fourteen final raw clients preserve
+20 C/H files with embedded maps, ten dependency files, diagnostics, and
+statuses. Ten interface files differ only in the compiler fingerprint.
+Four retained-definition positions move -10 lines and -165 bytes to their
+authored tokens. No runtime ErrorSite constants occur in transform C.
+
+The first compact match emitted sequential tests and increased fixed-source
+median instructions from 14,663,267,188 to 14,851,424,753, with disjoint
+ranges. That implementation is rejected. The reordered candidate's seven
+alternating triples after one warm triple give fixture medians 7,788,948,860
+to 7,802,902,226 and fixed-source medians 14,698,137,202 to 14,734,838,342.
+Both ranges overlap; 48 fixture and 16 source C/H pairs match exactly.
+Final capture spelling leaves optimized operations unchanged; subsequent
+self-host and raw-client checks pass. Four two-line typed-pattern arms and
+two multiline sequence arms remain. Full FN-3 conformance is not claimed.
+
+The `Resolve` trial replaces 33 single-consumer expression handlers with
+a four-field stack context and removes 43 source lines. Parent review
+restores existing grammar owners after rejecting raw duplicate patterns.
+Eight retained grammar arms then measure 80 to 109 columns. The trial is
+preserved privately and tracked source is restored at `262441eb`.
+No compiler checks or measurement were run. Gary has been asked whether
+FN-2 through FN-4 may permit wrapped grammar patterns with one-line named
+actions. No answer or exception is assumed. This rejects the current trial,
+not every possible resolution design. Identifier, index, and lambda owners
+are byte-exact in the preserved trial. Original malformed-form prefix and
+fallback behavior still require proof before any revived trial is accepted.
+
+The second combined parent passes build, stage-1, and the 220-file stage
+comparison. Six fixtures pass across lambda capture, protocol direct
+update, statement-expression defer, constructed macros, list order, and
+cleanup expression chains. Its authored source delta is +109/-107 lines.
+`make doc-check` fails only on generated API Source locations for cleanup,
+emit, expressions, parse, protocol, and transform. All changed generated
+lines are Source references; no other audit error is reported. Final
+regeneration and publication validation remain the integrator's work.
 
 Integration of `3459d664` exposed a link to an ignored local audit report.
 Commit `fef7cb88` keeps that explicitly local reference as a plain path.
