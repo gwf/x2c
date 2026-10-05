@@ -304,7 +304,8 @@ Map x2c_meta_definition_hashes(void) {
   _sdk_guard("x2c.meta.definition.hashes");
   Compiler c = active.expander;
   Map hashes = {};
-  foreach (String name, c.meta_calls.keys()) hashes[name] = c.meta_hashes[name];
+  foreach (String name, c.meta_calls.keys())
+    hashes[name] = c.meta_hashes[name];
   return hashes;
 }
 

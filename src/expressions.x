@@ -125,8 +125,9 @@ static List Compiler._parse_conditional_tail(Compiler c, List condition) {
   if (!c.test(<?>)) return condition;
   List ontrue = c.parse_expression();
   c.expect(<:>);
-  return c.resolve_expression(source_operator_expression(
-    NULL, %(? $condition $ontrue ${c.parse_conditional()})), origin);
+  return c.resolve_expression(
+    source_operator_expression(
+      NULL, %(? $condition $ontrue ${c.parse_conditional()})), origin);
 }
 
 static List Compiler._parse_binary_ops(Compiler c) =>
