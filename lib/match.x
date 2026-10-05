@@ -756,9 +756,9 @@ static int MatchPlan._replace_all(
    A walk runs the plan at each node of one traversal, sharing one machine,
    one capture buffer, and one cell stack. */
 
-static int MatchWalk._test(MatchWalk &walk, Var node) =>
-  walk.plan.admits(node, NULL)
-    ? _run_capture(walk.view, *walk.m, node, walk.captures) : 0;
+static int MatchWalk._test(MatchWalk &m, Var node) =>
+  m.plan.admits(node, NULL)
+    ? _run_capture(m.view, *m.m, node, m.captures) : 0;
 
 /* One search result: `(* node)` followed by the node's bindings. */
 static List MatchWalk._hit(MatchWalk &walk, Var node) =>

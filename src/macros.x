@@ -4020,8 +4020,9 @@ static int Compiler._statement_expression(Compiler c, List value) {
     case %("x2c.at" ?root): value = root;
     case %(code-value ? ?root ?): value = root;
     case %(macro-invoke ?stored ? ?site):
-      return _result_kind(c._stored_definition(
-        stored, c.macro_invocation_site(site))) == <expression>;
+      return _result_kind(
+        c._stored_definition(
+          stored, c.macro_invocation_site(site))) == <expression>;
     case %(expr *): return 1;
     default: return _sdk_identifier_result(value) is not void;
   }

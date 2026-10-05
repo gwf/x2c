@@ -118,14 +118,14 @@ static void Job._close_streams(Job job, Stdio stdio) {
 /* The first stage reads the `input` text, the last writes the `stdout`
    stream, and every stage writes the `stderr` stream. Each descriptor
    reaches `stdio` as it opens, so the launch closes it on every exit. */
-static void Job._open_streams(Job job, Stdio &stdio) {
-  if (job.launch.has_input) stdio.input = _input(job.launch.input);
+static void Job._open_streams(Job j, Stdio &stdio) {
+  if (j.launch.has_input) stdio.input = _input(j.launch.input);
   stdio.output =
     _stream(
-      job.output_file, job.launch.capture_output, job.launch.stdout_path);
+      j.output_file, j.launch.capture_output, j.launch.stdout_path);
   stdio.errors =
     _stream(
-      job.errors_file, job.launch.capture_errors, job.launch.stderr_path);
+      j.errors_file, j.launch.capture_errors, j.launch.stderr_path);
 }
 
 /* The first stage reads a copy of the descriptor of a capture file that
