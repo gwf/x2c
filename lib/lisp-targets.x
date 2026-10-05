@@ -195,7 +195,7 @@ macro Expression $lisp.native.target.map() =>
 
 static Map native_targets = $lisp.native.target.map();
 
-// The evaluator targets that `lisp.x` reaches after its session callbacks.
+// Session callbacks take precedence over this table.
 Map lisp_native_targets(void) => native_targets;
 
 // adapters
