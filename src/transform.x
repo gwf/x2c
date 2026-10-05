@@ -175,7 +175,7 @@ static Ast Compiler._sequence_item(Compiler c, Ast value, int value_tail) {
   return lowered;
 }
 
-static Ast Compiler._statement_value(Compiler c, Ast value, Ast expression) {
+static Ast Compiler._statement_value(Compiler c, Ast value, Var expression) {
   Ast result = c._step(Ast.rewrap_origin(value, expression));
   return Ast.rewrap_origin(result, %(stmnt ${Ast.without_origin(result)}));
 }
@@ -191,7 +191,7 @@ static Ast Compiler._sequence_tail(Compiler c, Ast node, Ast tail) {
   return cons(node, tail);
 }
 
-static List Compiler._splice_items(Compiler c, List items, int parent) {
+static List Compiler._splice_items(Compiler c, List items, Var parent) {
   Array anchored = [];
   foreach (List item, items) {
     c.origins.push(%(generated $parent splice));
