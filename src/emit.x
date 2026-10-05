@@ -282,7 +282,8 @@ static List Emitter._initializer_macro(Emitter &e, List input, List body) {
     replacement = formatted.rstrip("\n").replace("\n", "\\\n");
   }
   String expanded = %"${name}_expanded";
-  String definition = $emit.initializer.expanded(expanded, formal, replacement);
+  String definition =
+    $emit.initializer.expanded(expanded, formal, replacement);
   e.native_macros.push(%($expanded $definition));
   String forwarding = $emit.initializer.forwarding(name, formal, expanded);
   e.native_macros.push(%($name $forwarding));
@@ -1183,8 +1184,8 @@ static List Emitter._match_arm(
   if (macro_case) {
     List declarations = _make_local_binders(binders, "_x2c_match_values");
     String site = macro_case[1];
-    return $emit.match.macro_arm(site, macro_case, declarations, body,
-      implicit_break);
+    return $emit.match.macro_arm(
+      site, macro_case, declarations, body, implicit_break);
   }
   if (flat_head) {
     List condition = _flat_match_condition(flat_head, flat_tags);
@@ -1239,8 +1240,8 @@ static List Emitter._match_capture_arm(
     ? %("x2c_match_site_try_capture(&" $site_name ",")
     : %("x2c_match_try_capture(");
   List declarations = _make_local_binders(binders, "_x2c_match_values");
-  return $emit.match.capture_arm(site_declaration, entry, pattern,
-    declarations, body, implicit_break);
+  return $emit.match.capture_arm(
+    site_declaration, entry, pattern, declarations, body, implicit_break);
 }
 
 /* Declare the named binders of a match case in source order. The wildcard

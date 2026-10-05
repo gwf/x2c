@@ -502,7 +502,7 @@ static int Partition.place_tagged_object(
   return 1;
 }
 
-/* The tag of the named struct, union, or enum body `type` declares. */
+/* Anonymous or bare tags return NULL; named bodies yield their tag. */
 static String _body_tag(Type type) {
   match (type.base_type())
     case %((!or struct union enum) ?(String tag) (*)): return tag;
@@ -654,7 +654,7 @@ static void Partition.add_include(
   else p.source.push(node);
 }
 
-/* Whether `source` holds an item other than a marker. */
+/* Pending and conditional nodes are skipped as items. */
 static int _holds_item(Array source) {
   foreach (List item, source)
     match (item) {
@@ -1422,13 +1422,14 @@ static List Compiler._patch_main(Compiler c, List source) {
   List setup = %((stmnt (expr (void) (call
     (expr ((func ((void))) void) (ident $initializer))
     (args (expr (void) ()))))));
-  return source.map(%!(List node) => {
-    match (node)
-      case %(function ? (bind (!set ?binding (*)) ?) (block *body)):
-        if (binding_identity_spelling(binding) == "main")
-          return c._replace_body(node, setup.append(body));
-    return node;
-  });
+  return source.map(
+    %!(List node) => {
+      match (node)
+        case %(function ? (bind (!set ?binding (*)) ?) (block *body)):
+          if (binding_identity_spelling(binding) == "main")
+            return c._replace_body(node, setup.append(body));
+      return node;
+    });
 }
 
 // definition rows
