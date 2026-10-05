@@ -788,6 +788,47 @@ No stage expectation, lint baseline, or bootstrap file changed.
 Options for Gary: retain this violation, or permit a reviewed generated
 refresh for this diagnostic location. No padding was added to offset it.
 
+### Stage 4: label collector reshape changes retained positions
+
+The complete `Walk.collect_labels` trial replaces its multi-line dispatch
+arms with named private steps for expression blocks, labels, try regions,
+catch arms, local initialization, and child traversal. It retains one match,
+its pattern domains, traversal order, and region identity expressions.
+The trial changes `src/cleanup.x` by +45/-39 lines. It makes the collector
+13 lines instead of 46, but adds six helpers; FN-2 work remains unresolved.
+
+The trial builds successfully. Its generated header is byte-identical, but
+its generated C changes retained macro definition origins. The existing
+`$compiler_try` definition moves from line 637 and byte offset 24028 to
+line 643 and byte offset 24440. Later retained positions also move:
+652 to 658, 665 to 671, 896 to 902, 1400 to 1406, and 1407 to 1413.
+These are actual retained integer values, not only renamed literal IDs.
+`src/macros.x` `_definition_note` reads the retained `origin` line to form
+public compile-time failure notes. The source-position contract therefore
+changes even though the collector's traversal is intended to remain equal.
+
+The source trial is restored. No bootstrap, fixture expectation, or lint
+baseline was refreshed. Fixtures, stage comparisons, depth probes, and
+HP-1 measurements were not attempted after this stopping evidence.
+The initial spelling also failed to parse because a match arm accepts one
+statement; the succeeding trial uses a default child-traversal arm and
+falls out after the match. A void-return spelling was rejected after a
+focused C probe produced a new pedantic warning.
+
+Evidence in `/tmp/x2c-standard-lint/debug/`: `label-steps-build.log`,
+`label-steps-build2.log`, `label-steps-trial2.patch`,
+`label-steps-before.c`, `label-steps-after.c`,
+`label-steps-generated.c.diff`, `label-steps-generated.h.diff`, and
+`label-steps-void-cc.log`. Baseline convergence passed without changing
+bootstrap; its logs are `label-steps-baseline-safe.log`,
+`label-steps-baseline-refresh.log`, and
+`label-steps-baseline-converged.log`.
+
+Options for Gary: permit reviewed retained definition position changes for
+this reshape, or retain this candidate while seeking another implementation.
+This evidence rejects the tested spelling, not every possible reshape.
+No padding or invented replacement comment was added to force equality.
+
 ## Progress
 
 | Stage | Commit | Date | Result |
@@ -813,6 +854,10 @@ refresh for this diagnostic location. No padding was added to offset it.
 | 4.cli | `37eababa` | 2026-10-05 | 2 -> 0; +3/-2 .x |
 | 4.scan | `4b1f51af` | 2026-10-05 | 1 -> 0; +1/-1 .x |
 | 4.import | `bf01f633` | 2026-10-05 | 1 -> 0 helper; +2/-5 .x |
+| 4.blis | `5333a287` | 2026-10-05 | 4 macros; +5/-5 .x |
+| 4.termbox | `8785bd09` | 2026-10-05 | 10 macros; +11/-11 .x |
+| 4.curl | `1ab22788` | 2026-10-05 | 19 macros; +20/-20 .x |
+| 4.uv | `64e31517` | 2026-10-05 | 106 macros; +2/-2 .x |
 | D2 partial | `14973621` | 2026-10-05 | +197/-192 .x; four raises held |
 | D2 held | `a7c271f` | 2026-10-05 | +197/-192 .x; 4 raises held |
 | D3 | `f7f886ad` | 2026-10-05 | 9/9 autodiff; +9/-9 .x |
@@ -863,6 +908,42 @@ instructions on normal import: 4,591,417,957 -> 4,591,140,101; cycle error:
 4,544,272,961 -> 4,541,204,854. Sample ranges overlap; no distinguishable
 cost increase or improvement is claimed. All 16 output pairs are exact.
 Evidence: `/tmp/x2c-standard-lint/debug/import-forwarder-hp1*`.
+
+blis Error-pack migration: 18 generated C/H files are byte-exact.
+Focused checks pass: 12 wrapper tests/186 assertions; 4 raw/16.
+Worker `make packages-check` passes; no expectations changed.
+The private import and all Error causes, values, and sites are preserved.
+
+termbox Error-pack migration: 18 generated C/H files are byte-exact.
+Focused checks pass: 12 wrapper tests/148 assertions; 3 raw/15.
+Worker `make packages-check` passes; no expectations changed.
+The private import and all Error causes, values, and sites are preserved.
+
+curl Error-pack migration: 20 generated C/H files are byte-exact.
+Focused checks pass: 29 wrapper tests/203 assertions; 2 raw/16.
+Worker `make packages-check` passes; no expectations changed.
+The private import and all Error causes, values, and sites are preserved.
+
+uv Error-pack migration: 62 generated C/H files are byte-exact.
+Focused checks pass: 79 tests/837 assertions; six applications.
+Worker `make packages-check` passes; no expectations changed.
+The private import and all Error causes, values, and sites are preserved.
+
+All 12 compiler length candidates were reviewed; none is established as
+an FN-2 table or one-line dispatcher exception. Deletion/reuse discovery
+found no additional supported removal inside them. Shape work remains.
+The broader `macros.x` ownership crossing census remains unfinished.
+
+The label-collector candidate (+45/-39 trial lines) compiles but changes
+retained positions; it is restored. Its fixtures, self-host comparisons,
+depth coverage, and HP-1 measurement were not attempted after that stop.
+Private evidence commit: `93bf6189`; see its Open question above.
+
+Integration of `3459d664` exposed a link to an ignored local audit report.
+Commit `fef7cb88` keeps that explicitly local reference as a plain path.
+The failed gate is preserved in `debug/land-dev-4in735kx/attempt-1/gate.log`;
+component output: `debug/stage4-blis-doc-link-failure.log`.
+Focused `make doc-check` and the corrected publication gate pass.
 
 Stage 3.5 census: 108 compiler and runtime files. The baseline took
 10.63 seconds; the candidate took 10.61 seconds. All 1,599 original

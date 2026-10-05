@@ -22,7 +22,7 @@ The October 5 session audit supplies the evidence. It found 20 rejected
 terminal handoff calls across five workers, isolation false positives,
 discarded benchmark reproductions, incorrect starting revisions, repeated
 checks, correction-handling failures, and incomplete metrics. Full raw session
-history remains outside the repository. Current source still confirms the
+history remains outside the repository. The delivered tool changes repair the observed
 benchmark cleanup and metrics defects.
 The tracked [evidence record](harness-evidence-2026-10-05.md) preserves the
 observations, validation, transport limits, and external reproduction reports.

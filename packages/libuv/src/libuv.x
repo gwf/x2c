@@ -38,7 +38,7 @@ $cleanup.by(UvProcess, free);
 
 #include "meta.x"
 
-$(import "errors.xmacro")
+$(import "libuv-errors.xmacro")
 
 #include <limits.h>
 #include <signal.h>

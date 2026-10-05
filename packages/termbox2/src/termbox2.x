@@ -42,7 +42,7 @@ $cleanup.by(Termbox, close);
 #include <wchar.h>
 #include <wctype.h>
 
-$(import "termbox2-reports.xmacro")
+$(import "termbox2-errors.xmacro")
 
 /*  One cell holds one grapheme cluster, and eight codepoints is well past a
     base character plus its combining marks. */
@@ -83,20 +83,20 @@ static void _termbox_native_error(
   int error_number = _termbox_errno_code(code) ? tb_last_errno() : 0;
   if (restore_errno) {
     String restore_message = String.new(strerror(restore_errno));
-    $report.termbox.native_restore(
+    $error.termbox.native_restore(
       operation, code, message, restore_errno, restore_message);
   }
   if (error_number) {
     String errno_message = String.new(strerror(error_number));
-    $report.termbox.native_errno(
+    $error.termbox.native_errno(
       operation, code, message, error_number, errno_message);
   }
-  $report.termbox.native_failed(operation, code, message);
+  $error.termbox.native_failed(operation, code, message);
 }
 
 static void _termbox_signal_error(String operation, int error_number) {
   String message = String.new(strerror(error_number));
-  $report.termbox.signal_failed(operation, error_number, message);
+  $error.termbox.signal_failed(operation, error_number, message);
 }
 
 static void _termbox_save_winch(TermboxSignal &previous) {
@@ -112,12 +112,12 @@ static int _termbox_restore_winch(TermboxSignal &previous) {
 
 static void _termbox_require(Termbox terminal, String operation) {
   if (terminal && terminal.open && terminal == _termbox_active) return;
-  $report.termbox.inactive(operation);
+  $error.termbox.inactive(operation);
 }
 
 Termbox Termbox.open(void) {
   if (_termbox_active) {
-    $report.termbox.owned();
+    $error.termbox.owned();
   }
 
   Termbox terminal = Scope.calloc(1, sizeof(struct Termbox));
@@ -138,7 +138,7 @@ Termbox Termbox.open(void) {
 Termbox Termbox.close(Termbox terminal) {
   if (!terminal || !terminal.open) return NULL;
   if (terminal != _termbox_active) {
-    $report.termbox.shutdown_inactive();
+    $error.termbox.shutdown_inactive();
   }
 
   int result = tb_shutdown();
@@ -266,7 +266,7 @@ Termbox Termbox.fill(
     character, "fill", cluster, TERMBOX_CLUSTER_MAX, &count
   );
   if (step < 1 || count < 1 || count > TERMBOX_CLUSTER_MAX) {
-    $report.termbox.fill_cluster(character);
+    $error.termbox.fill_cluster(character);
   }
 
   int columns = terminal.width(), rows = terminal.height();
@@ -289,7 +289,7 @@ Termbox Termbox.box(
   uintattr_t background) {
   _termbox_require(terminal, "box");
   if (width < 2 || height < 2) {
-    $report.termbox.box_size(width, height);
+    $error.termbox.box_size(width, height);
   }
 
   int right = x + width - 1, bottom = y + height - 1;
@@ -376,7 +376,7 @@ static long long _termbox_monotonic_ns(void) {
   }
   int error_number = errno;
   String message = String.new(strerror(error_number));
-  $report.termbox.clock_failed(error_number, message);
+  $error.termbox.clock_failed(error_number, message);
 }
 
 static TermboxEvent _termbox_read(Termbox terminal, int wait, int timeout_ms) {
