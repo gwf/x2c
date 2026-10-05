@@ -483,12 +483,17 @@ or leave stage 2 publication pending. Continue the independent stages.
 | 3.3 | `814684bb` | 2026-10-05 | 10 codes; 11 positive findings pass |
 | 3.4 | `b7719c78` | 2026-10-05 | 6 invalid cases; suppressed fix unchanged |
 | 3.5 | `f7b1b6a6` | 2026-10-05 | 11 codes; 287 new candidates |
+| 3.6 | `9542ea14` | 2026-10-05 | 32 codes; 106 violations |
 | D2 held | `a7c271f` | 2026-10-05 | +197/-192 .x; 4 raises held |
 | D3 held | `9511153f` | 2026-10-05 | +9/-9 .x; package check fails |
 
 Stage 3.5 census: 108 compiler and runtime files. The baseline took
 10.63 seconds; the candidate took 10.61 seconds. All 1,599 original
 findings remain byte-exact. Authored `.x` changes: +403/-2.
+
+Stage 3.6 measured `/usr/bin/time -l make commands-check`: 17.44 seconds
+before the ratchet, 26.99 seconds after it. The observed increase is
+9.55 seconds. Higher counts fail; lower counts print the proposed line.
 
 Later detector work: typed-AST builders and `Type.method(x)` receivers
 remain deferred, as stage 3.5 specifies.

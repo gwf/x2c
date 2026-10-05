@@ -121,6 +121,40 @@ diff -u "$tests/expected.txt" "$out"
 diff -u "$tests/fixed/idioms.x" "$work/idioms.x"
 cmp "$tests/src/suppression-accepted.x" "$work/suppression.x"
 
+# The violation census includes zero-count rules from the current catalog.
+"$tool" --rules >"$work/rules"
+git ls-files -z -- 'src/*.x' 'lib/*.x' \
+  ':(exclude)lib/x2c.x' ':(exclude)src/linked-meta.x' >"$work/census.files"
+xargs -0 "$tool" --all -I src -I lib <"$work/census.files" \
+  >"$work/census"
+awk '
+  FILENAME == ARGV[1] {
+    if ($3 == "violation") counts[$1] = 0
+    next
+  }
+  $2 == "violation" { counts[$3]++ }
+  END { for (code in counts) print code, counts[code] }
+' "$work/rules" "$work/census" >"$work/counts.unsorted"
+LC_ALL=C sort "$work/counts.unsorted" >"$work/counts"
+awk '
+  FILENAME == ARGV[1] { baseline[$1] = $2; next }
+  {
+    code = $1; count = $2
+    if (!(code in baseline)) {
+      printf "lint baseline missing: %s current %d\n", code, count
+      failed = 1
+    }
+    else if (count > baseline[code]) {
+      printf "lint baseline exceeded: %s baseline %d current %d\n", \
+        code, baseline[code], count
+      failed = 1
+    }
+    else if (count < baseline[code])
+      printf "lower lint baseline to: %s %d\n", code, count
+  }
+  END { exit failed }
+' commands/lint/baseline.txt "$work/counts"
+
 # Expanded catalogues and direct diagnostics use the same existing rules.
 "$tool" -I src --rule return-after-raise --rule return-after-report-error \
   --rule fallback-shared-cause --rule shape-diagnostics \
