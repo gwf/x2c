@@ -354,46 +354,56 @@ static void Walk.collect_labels(Walk &w, Var value, List path) {
   if (value is not <list> || value.is_nil()) return;
   List node = value;
   match (node) {
-    case %(expr *): {
-      Array blocks = $auto(_expression_blocks(node));
-      foreach (List block, blocks) w.collect_labels(block, path);
-      return;
-    }
-    case %(label ?name *rest): {
-      String spelling = _label_spelling(name);
-      if (spelling) w.labels[spelling] = path;
-      foreach (Var child, rest) w.collect_labels(child, path);
-      return;
-    }
-    /* Each region a construct opens has its own identity: a `try` protects
-       its body and each catch arm separately, while its guards and its
-       finalizer run outside the region and keep the enclosing path. */
-    case %(try ?body ?clause ?finalizer *): {
-      w.collect_labels(body, cons(body, path));
-      match (clause)
-        case %(catchcases ?records ?handle):
-          foreach (List record, records) {
-            w.collect_labels(record.car(), path);
-            List arm = record.cadr();
-            w.collect_labels(arm, cons(arm, path));
-          }
-      w.collect_labels(finalizer, path);
-      return;
-    }
-    case %(defer ?body *): {
-      w.collect_labels(body, cons(body, path));
-      return;
-    }
-    case %(localinit ?guard ?body): {
-      w.collect_labels(guard, path);
-      w.collect_labels(body, cons(node, path));
-      return;
-    }
-    case %(staticinit ? ?initial): {
+    case %(expr *): w._collect_blocks(node, path);
+    case %(label ?name *rest): w._collect_label(name, rest, path);
+    case %(try ?body ?clause ?finalizer *):
+      w._collect_try(body, clause, finalizer, path);
+    case %(defer ?body *): w.collect_labels(body, cons(body, path));
+    case %(localinit ?guard ?body):
+      w._collect_local(node, guard, body, path);
+    case %(staticinit ? ?initial):
       w.collect_labels(initial, cons(node, path));
-      return;
-    }
+    default: w._collect_children(node, path);
   }
+}
+
+static void Walk._collect_blocks(Walk &w, List node, List path) {
+  Array blocks = $auto(_expression_blocks(node));
+  foreach (List block, blocks) w.collect_labels(block, path);
+}
+
+static void Walk._collect_label(Walk &w, Var name, List rest, List path) {
+  String spelling = _label_spelling(name);
+  if (spelling) w.labels[spelling] = path;
+  w._collect_children(rest, path);
+}
+
+/* Each region a construct opens has its own identity: a `try` protects
+   its body and each catch arm separately, while its guards and its
+   finalizer run outside the region and keep the enclosing path. */
+static void Walk._collect_try(
+  Walk &w, Var body, Var clause, Var finalizer, List path) {
+  w.collect_labels(body, cons(body, path));
+  w._collect_catches(clause, path);
+  w.collect_labels(finalizer, path);
+}
+
+static void Walk._collect_catches(Walk &w, Var clause, List path) {
+  match (clause) case %(catchcases ?records ?handle):
+    foreach (List record, records) {
+      w.collect_labels(record.car(), path);
+      List arm = record.cadr();
+      w.collect_labels(arm, cons(arm, path));
+    }
+}
+
+static void Walk._collect_local(
+  Walk &w, List node, Var guard, Var body, List path) {
+  w.collect_labels(guard, path);
+  w.collect_labels(body, cons(node, path));
+}
+
+static void Walk._collect_children(Walk &w, List node, List path) {
   foreach (Var child, node) w.collect_labels(child, path);
 }
 
@@ -421,19 +431,14 @@ static String _label_spelling(Var label) {
 static Var Walk.rewrite(Walk &w, Var value) {
   if (value is not <list> || value.is_nil()) return value;
   List node = value;
-  match (node) case %(expr *):
-    return _rewrite_expression(
-      node, %!(List block) using &w => w.rewrite(block));
-  Macro caught = $caught, tried = $tried;
-  Macro while_loop = $while_loop, do_loop = $do_loop;
-  Macro switched = $switched;
   match (node) {
+    case %(expr *): return w._rewrite_blocks(node);
     case %(at ?(int origin) ?inner): return w._lower_at(origin, inner);
     case %(defer ?body ?env ?callback ?records ?):
       return w._lower_defer(body, env, callback, records);
-    case caught(?body, ?finalizer, *arms):
+    case ${$caught(?body, ?finalizer, *arms)}:
       return w._lower_try(node, body, arms, finalizer);
-    case tried(?body, ?finalizer):
+    case ${$tried(?body, ?finalizer)}:
       return w._lower_try(node, body, NULL, finalizer);
     case %(localinit ?guard ?body):
       return w._rewrite_localinit(node, guard, body);
@@ -445,18 +450,25 @@ static Var Walk.rewrite(Walk &w, Var value) {
     case %(break): return w._transfer(w.break_stop, node);
     case %(continue): return w._transfer(w.continue_stop, node);
     case %(goto ?label): return w._transfer(w._goto_stop(label), node);
-    case while_loop(?condition, ?body):
+    case ${$while_loop(?condition, ?body)}:
       return w._rewrite_while(condition, body);
-    case do_loop(?body, ?condition):
+    case ${$do_loop(?body, ?condition)}:
       return w._rewrite_do(body, condition);
     case ${$for_loop(?initial, ?condition, ?increment, ?body)}:
       return w._rewrite_for(initial, condition, increment, body);
-    case switched(?subject, ?body):
+    case ${$switched(?subject, ?body)}:
       return w._rewrite_switch(subject, body);
     case %(matchcases ?subject ?records):
       return w._rewrite_matchcases(subject, records);
     case %(function *): return w.c._lower_function(node);
+    default: return w._rewrite_children(node);
   }
+}
+
+static List Walk._rewrite_blocks(Walk &w, List node) =>
+  _rewrite_expression(node, %!(List block) using &w => w.rewrite(block));
+
+static List Walk._rewrite_children(Walk &w, List node) {
   Var child;
   $ast.rewrite_children(node, child, w.rewrite(child));
 }
