@@ -300,7 +300,7 @@ static int _contains_return(List items) {
 
 // operators
 
-/* operator-ledger.x defines these methods in a separate implementation unit. */
+/* operator-ledger.x owns these methods in a separate implementation unit. */
 // lint: allow src-forward-declaration FI-6: leaf ledger binding
 Symbol Symbol.compound_operator(Symbol op);
 
