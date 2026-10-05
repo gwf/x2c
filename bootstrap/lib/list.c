@@ -348,7 +348,7 @@ Pool Pool_current(void);
 List cons(Var head, List tail){
   if(Var_is_void(head)){
     static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/list.x",.function = "cons",.line = 91};
-    x2c_error_raise_n(& _x2c_error_site_0, 48270474208, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("List.cons")), NULL))));
+    x2c_error_raise_n(& _x2c_error_site_0, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("List.cons")), NULL))));
     __builtin_unreachable();
   }
   return List_cons_in(Pool_current(), head, tail);
@@ -673,7 +673,7 @@ static List _concat_va(unsigned n, va_list ap){
     Var _x2c_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("List.concat_n")), NULL)));
     {
       static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/list.x",.function = "_concat_va",.line = 385};
-      x2c_error_raise_n(& _x2c_error_site_1, 1358596898646632, 2, Symbol_var(32993636), _x2c_literal_part_0, Symbol_var(7318440), unsigned_var(n));
+      x2c_error_raise_n(& _x2c_error_site_1, 1358596898646632, 2, Symbol_var(34096809266140), _x2c_literal_part_0, Symbol_var(7318440), unsigned_var(n));
       __builtin_unreachable();
     }
 
@@ -746,7 +746,7 @@ static List _list_va(unsigned n, va_list ap){
           Var _x2c_literal_part_1 = String_var(String_join(NULL, cons(String_var(String_new("List.list_n")), NULL)));
           {
             static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/list.x",.function = "_list_va",.line = 419};
-            x2c_error_raise_n(& _x2c_error_site_2, 48270474208, 2, Symbol_var(32993636), _x2c_literal_part_1, Symbol_var(19800432), unsigned_var(i));
+            x2c_error_raise_n(& _x2c_error_site_2, 48270474208, 2, Symbol_var(34096809266140), _x2c_literal_part_1, Symbol_var(19800432), unsigned_var(i));
             __builtin_unreachable();
           }
 
@@ -933,7 +933,7 @@ List List_subseq(List list, int start, int stop, int step){
     Var _x2c_literal_part_2 = String_var(String_join(NULL, cons(String_var(String_new("List.subseq")), NULL)));
     {
       static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/list.x",.function = "List_subseq",.line = 559};
-      x2c_error_raise_n(& _x2c_error_site_3, 4372499598, 2, Symbol_var(32993636), _x2c_literal_part_2, Symbol_var(1286496), int_var(step));
+      x2c_error_raise_n(& _x2c_error_site_3, 4372499598, 2, Symbol_var(34096809266140), _x2c_literal_part_2, Symbol_var(1286496), int_var(step));
       __builtin_unreachable();
     }
 
@@ -982,7 +982,7 @@ List List_getslice(List list, int start, int stop, int step){
     Var _x2c_literal_part_3 = String_var(String_join(NULL, cons(String_var(String_new("List.getslice")), NULL)));
     {
       static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/list.x",.function = "List_getslice",.line = 584};
-      x2c_error_raise_n(& _x2c_error_site_4, 4372499598, 2, Symbol_var(32993636), _x2c_literal_part_3, Symbol_var(1286496), int_var(step));
+      x2c_error_raise_n(& _x2c_error_site_4, 4372499598, 2, Symbol_var(34096809266140), _x2c_literal_part_3, Symbol_var(1286496), int_var(step));
       __builtin_unreachable();
     }
 
@@ -1519,7 +1519,7 @@ static int _unpack_va(List src, unsigned n, va_list ap, int lists){
     Var _x2c_literal_part_4 = String_var(String_join(NULL, cons(String_var(String_new("List.unpack_n")), NULL)));
     {
       static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/list.x",.function = "_unpack_va",.line = 856};
-      x2c_error_raise_n(& _x2c_error_site_5, 1358596898646632, 2, Symbol_var(32993636), _x2c_literal_part_4, Symbol_var(7318440), unsigned_var(n));
+      x2c_error_raise_n(& _x2c_error_site_5, 1358596898646632, 2, Symbol_var(34096809266140), _x2c_literal_part_4, Symbol_var(7318440), unsigned_var(n));
       __builtin_unreachable();
     }
 

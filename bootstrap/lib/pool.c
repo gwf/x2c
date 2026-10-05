@@ -473,7 +473,7 @@ Var int_var(int);
 _Noreturn static void _reinsert_error(unsigned _x2c_macro_capacity_0, int _x2c_macro_probe_0){
   {
     Var _x2c_literal_part_0 = String_var(String_new("PoolTable.reinsert")); {
-      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/pool.x",.function = "_reinsert_error",.line = 73};  x2c_error_raise_n(& _x2c_error_site_0, 20800632064936, 3, Symbol_var(32993636), _x2c_literal_part_0, Symbol_var(209381969202), unsigned_var(_x2c_macro_capacity_0), Symbol_var(34764938), int_var(_x2c_macro_probe_0));  __builtin_unreachable();
+      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/pool.x",.function = "_reinsert_error",.line = 73};  x2c_error_raise_n(& _x2c_error_site_0, 20800632064936, 3, Symbol_var(34096809266140), _x2c_literal_part_0, Symbol_var(209381969202), unsigned_var(_x2c_macro_capacity_0), Symbol_var(34764938), int_var(_x2c_macro_probe_0));  __builtin_unreachable();
     }
 
   }
@@ -483,7 +483,7 @@ _Noreturn static void _reinsert_error(unsigned _x2c_macro_capacity_0, int _x2c_m
 _Noreturn static void _insert_error(unsigned _x2c_macro_capacity_1){
   {
     Var _x2c_literal_part_1 = String_var(String_new("PoolTable.insert")); {
-      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/pool.x",.function = "_insert_error",.line = 73};  x2c_error_raise_n(& _x2c_error_site_1, 20800632064936, 2, Symbol_var(32993636), _x2c_literal_part_1, Symbol_var(209381969202), unsigned_var(_x2c_macro_capacity_1));  __builtin_unreachable();
+      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/pool.x",.function = "_insert_error",.line = 73};  x2c_error_raise_n(& _x2c_error_site_1, 20800632064936, 2, Symbol_var(34096809266140), _x2c_literal_part_1, Symbol_var(209381969202), unsigned_var(_x2c_macro_capacity_1));  __builtin_unreachable();
     }
 
   }
@@ -781,7 +781,7 @@ Var Pool_intern(Pool inner, Var object, void * alloc){
   if(! _init_guard_) Pool_initialize();
   if(! inner || ! alloc){
     static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/pool.x",.function = "Pool_intern",.line = 239};
-    x2c_error_raise_n(& _x2c_error_site_4, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Pool.intern")), NULL))));
+    x2c_error_raise_n(& _x2c_error_site_4, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Pool.intern")), NULL))));
     __builtin_unreachable();
   }
   Var canonical;
@@ -827,7 +827,7 @@ Var Pool_intern_new(Pool inner, Var object, void * alloc){
   if(! _init_guard_) Pool_initialize();
   if(! inner || ! alloc){
     static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/pool.x",.function = "Pool_intern_new",.line = 278};
-    x2c_error_raise_n(& _x2c_error_site_5, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Pool.intern_new")), NULL))));
+    x2c_error_raise_n(& _x2c_error_site_5, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Pool.intern_new")), NULL))));
     __builtin_unreachable();
   }
   Var canonical;
@@ -860,7 +860,7 @@ void Pool_insert(Pool inner, Var object){
   if(! _init_guard_) Pool_initialize();
   if(! inner){
     static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/pool.x",.function = "Pool_insert",.line = 300};
-    x2c_error_raise_n(& _x2c_error_site_6, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Pool.insert")), NULL))));
+    x2c_error_raise_n(& _x2c_error_site_6, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Pool.insert")), NULL))));
     __builtin_unreachable();
   }
   Pool__lock(inner);
@@ -930,7 +930,7 @@ void * Pool_malloc(Pool inner, size_t size){
   if(! _init_guard_) Pool_initialize();
   if(! inner){
     static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/pool.x",.function = "Pool_malloc",.line = 338};
-    x2c_error_raise_n(& _x2c_error_site_7, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Pool.malloc")), NULL))));
+    x2c_error_raise_n(& _x2c_error_site_7, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Pool.malloc")), NULL))));
     __builtin_unreachable();
   }
   int class_index = _size_class(size);
@@ -1023,7 +1023,7 @@ static PoolBlock Pool__fresh_block(Pool inner, int class_index){
   if(fresh) return fresh;
   if(x2c_error_runtime_ready){
     static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/pool.x",.function = "Pool__fresh_block",.line = 410};
-    x2c_error_raise_n(& _x2c_error_site_8, 97614135954008, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Pool backing block")), NULL))));
+    x2c_error_raise_n(& _x2c_error_site_8, 97614135954008, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Pool backing block")), NULL))));
     __builtin_unreachable();
   }
   _fatal("backing block allocation failed");
@@ -1034,7 +1034,7 @@ void Pool_free(Pool inner, void * alloc){
   if(! alloc) return;
   if(! inner){
     static const X2CErrorSite _x2c_error_site_9 = {.file = "../../lib/pool.x",.function = "Pool_free",.line = 423};
-    x2c_error_raise_n(& _x2c_error_site_9, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Pool.free")), NULL))));
+    x2c_error_raise_n(& _x2c_error_site_9, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Pool.free")), NULL))));
     __builtin_unreachable();
   }
   _storage_lock();
@@ -1660,7 +1660,7 @@ void Pool_close(void){
   if(! _init_guard_) Pool_initialize();
   if(! Pool_current() -> up){
     static const X2CErrorSite _x2c_error_site_10 = {.file = "../../lib/pool.x",.function = "Pool_close",.line = 1004};
-    x2c_error_raise_n(& _x2c_error_site_10, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Pool.close")), NULL))));
+    x2c_error_raise_n(& _x2c_error_site_10, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Pool.close")), NULL))));
     __builtin_unreachable();
   }
   value_thread.current = Pool_release(value_thread.current);
@@ -1671,7 +1671,7 @@ Pool Pool_detach(void){
   Pool detached = Pool_current();
   if(! detached -> up){
     static const X2CErrorSite _x2c_error_site_11 = {.file = "../../lib/pool.x",.function = "Pool_detach",.line = 1017};
-    x2c_error_raise_n(& _x2c_error_site_11, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Pool.detach")), NULL))));
+    x2c_error_raise_n(& _x2c_error_site_11, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Pool.detach")), NULL))));
     __builtin_unreachable();
   }
   value_thread.current = detached -> up;

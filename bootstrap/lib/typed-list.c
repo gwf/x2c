@@ -194,7 +194,7 @@ Var int_var(int);
 _Noreturn static void _no_convert(String owner, int index, Symbol tag){
   {
     static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/typed-list.x",.function = "_no_convert",.line = 48};
-    x2c_error_raise_n(& _x2c_error_site_0, 1020285550996648, 3, Symbol_var(32993636), String_var(owner), Symbol_var(19800432), int_var(index), Symbol_var(41038), Symbol_var(tag));
+    x2c_error_raise_n(& _x2c_error_site_0, 1020285550996648, 3, Symbol_var(34096809266140), String_var(owner), Symbol_var(19800432), int_var(index), Symbol_var(41038), Symbol_var(tag));
     __builtin_unreachable();
   }
 

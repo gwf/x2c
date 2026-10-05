@@ -197,7 +197,7 @@ void Atom_initialize(void){
   ;
   if(! x2c_try_register_descriptor(_0, methods)){
     static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/atom.x",.function = "Atom_initialize",.line = 179};
-    x2c_error_raise_n(& _x2c_error_site_0, 20774016911960, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Atom")), NULL))));
+    x2c_error_raise_n(& _x2c_error_site_0, 20774016911960, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Atom")), NULL))));
     __builtin_unreachable();
   }
   initialized = 1;
@@ -247,7 +247,7 @@ Atom Atom_intern(String spelling){
   if(! _init_guard_) Atom_initialize();
   if(! String_truth(spelling) || ! * spelling){
     static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/atom.x",.function = "Atom_intern",.line = 220};
-    x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Atom.intern")), NULL))));
+    x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Atom.intern")), NULL))));
     __builtin_unreachable();
   }
   String canonical = String_new(spelling);

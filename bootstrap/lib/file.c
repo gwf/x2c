@@ -283,7 +283,7 @@ String String_malloc(int);
 String File_readblock(File file, long size){
   if(! _init_guard_) File_initialize();  if(size < 0){
     Var _x2c_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("File.readblock")), NULL))); {
-      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/file.x",.function = "File_readblock",.line = 137};  x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 2, Symbol_var(32993636), _x2c_literal_part_0, Symbol_var(1265290), long_var(size));  __builtin_unreachable();
+      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/file.x",.function = "File_readblock",.line = 137};  x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 2, Symbol_var(34096809266140), _x2c_literal_part_0, Symbol_var(1265290), long_var(size));  __builtin_unreachable();
     }
 
   }
@@ -394,7 +394,7 @@ static void _append_text(Block content, const void * bytes, size_t count){
 static String _text(const void * bytes, size_t length){
   if(! length) return NULL;  if(! bytes){
     Var _x2c_literal_part_1 = String_var(String_join(NULL, cons(String_var(String_new("File.text")), NULL)));  Var _x2c_literal_part_2 = String_var(String_join(NULL, cons(String_var(String_new("null bytes")), NULL))); {
-      static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/file.x",.function = "_text",.line = 214};  x2c_error_raise_n(& _x2c_error_site_4, 4372499598, 2, Symbol_var(32993636), _x2c_literal_part_1, Symbol_var(47666), _x2c_literal_part_2);  __builtin_unreachable();
+      static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/file.x",.function = "_text",.line = 214};  x2c_error_raise_n(& _x2c_error_site_4, 4372499598, 2, Symbol_var(34096809266140), _x2c_literal_part_1, Symbol_var(1218550748), _x2c_literal_part_2);  __builtin_unreachable();
     }
 
   }
@@ -409,13 +409,13 @@ static String _finish_text(String text, size_t length){
 static void _validate_text(const void * bytes, size_t length){
   if(! length) return;  if(! bytes){
     Var _x2c_literal_part_3 = String_var(String_join(NULL, cons(String_var(String_new("File.text")), NULL)));  Var _x2c_literal_part_4 = String_var(String_join(NULL, cons(String_var(String_new("null bytes")), NULL))); {
-      static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/file.x",.function = "_validate_text",.line = 233};  x2c_error_raise_n(& _x2c_error_site_5, 4372499598, 2, Symbol_var(32993636), _x2c_literal_part_3, Symbol_var(47666), _x2c_literal_part_4);  __builtin_unreachable();
+      static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/file.x",.function = "_validate_text",.line = 233};  x2c_error_raise_n(& _x2c_error_site_5, 4372499598, 2, Symbol_var(34096809266140), _x2c_literal_part_3, Symbol_var(1218550748), _x2c_literal_part_4);  __builtin_unreachable();
     }
 
   }
   if(memchr(bytes, '\0', length)){
     Var _x2c_literal_part_5 = String_var(String_join(NULL, cons(String_var(String_new("File.text")), NULL)));  Var _x2c_literal_part_6 = String_var(String_join(NULL, cons(String_var(String_new("embedded NUL")), NULL))); {
-      static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/file.x",.function = "_validate_text",.line = 234};  x2c_error_raise_n(& _x2c_error_site_6, 4372499598, 2, Symbol_var(32993636), _x2c_literal_part_5, Symbol_var(47666), _x2c_literal_part_6);  __builtin_unreachable();
+      static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/file.x",.function = "_validate_text",.line = 234};  x2c_error_raise_n(& _x2c_error_site_6, 4372499598, 2, Symbol_var(34096809266140), _x2c_literal_part_5, Symbol_var(1218550748), _x2c_literal_part_6);  __builtin_unreachable();
     }
 
   }

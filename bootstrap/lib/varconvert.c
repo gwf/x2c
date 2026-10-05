@@ -88,7 +88,7 @@ Var Var_convert(Var value, Symbol target){
   }
   if(Var_is_void(value)){
     static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/varconvert.x",.function = "Var_convert",.line = 82};
-    x2c_error_raise_n(& _x2c_error_site_1, 48270474208, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.convert")), NULL))));
+    x2c_error_raise_n(& _x2c_error_site_1, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.convert")), NULL))));
     __builtin_unreachable();
   }
   if(! target || ! Var_known_tag(target) || target == 1473096 || target == 28764 || target == 2050956 || target == 1854348){
@@ -136,7 +136,7 @@ int Var_numeric_info(Symbol tag, X2CVarNumericInfo * out){
 void Var_numeric_decode(Var value, X2CVarNumeric * out){
   if(! out){
     static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/varconvert.x",.function = "Var_numeric_decode",.line = 125};
-    x2c_error_raise_n(& _x2c_error_site_5, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.numeric_decode")), NULL))));
+    x2c_error_raise_n(& _x2c_error_site_5, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.numeric_decode")), NULL))));
     __builtin_unreachable();
   }
   if(! Var_encoding_valid(value)){
@@ -150,7 +150,7 @@ void Var_numeric_decode(Var value, X2CVarNumeric * out){
   }
   if(Var_is_void(value)){
     static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/varconvert.x",.function = "Var_numeric_decode",.line = 130};
-    x2c_error_raise_n(& _x2c_error_site_7, 48270474208, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.numeric_decode")), NULL))));
+    x2c_error_raise_n(& _x2c_error_site_7, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.numeric_decode")), NULL))));
     __builtin_unreachable();
   }
   X2CVarNumericInfo info;

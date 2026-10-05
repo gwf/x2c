@@ -416,7 +416,7 @@ _Noreturn static void _bad_index(String owner, int index, size_t size){
     Var _x2c_literal_part_3 = Var_box_ulong(size);
     {
       static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/array.x",.function = "_bad_index",.line = 65};
-      x2c_error_raise_n(& _x2c_error_site_3, 4372499598, 3, Symbol_var(32993636), _x2c_literal_part_1, Symbol_var(19800432), _x2c_literal_part_2, Symbol_var(1265290), _x2c_literal_part_3);
+      x2c_error_raise_n(& _x2c_error_site_3, 4372499598, 3, Symbol_var(34096809266140), _x2c_literal_part_1, Symbol_var(19800432), _x2c_literal_part_2, Symbol_var(1265290), _x2c_literal_part_3);
       __builtin_unreachable();
     }
 
@@ -430,7 +430,7 @@ _Noreturn static void _bad_step(String owner, int step){
     Var _x2c_literal_part_4 = String_var(String_join(NULL, cons(String_var(String_new("Array.getslice")), NULL)));
     {
       static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/array.x",.function = "_bad_step",.line = 69};
-      x2c_error_raise_n(& _x2c_error_site_4, 4372499598, 2, Symbol_var(32993636), _x2c_literal_part_4, Symbol_var(1286496), int_var(step));
+      x2c_error_raise_n(& _x2c_error_site_4, 4372499598, 2, Symbol_var(34096809266140), _x2c_literal_part_4, Symbol_var(1286496), int_var(step));
       __builtin_unreachable();
     }
 
@@ -666,7 +666,7 @@ Var Var_update(Var *, Symbol, Var);
 Var Array_updateindex(Array array, int index, Symbol op, Var rhs){
   if(array == NULL){
     static const X2CErrorSite _x2c_error_site_11 = {.file = "../../lib/array.x",.function = "Array_updateindex",.line = 133};
-    x2c_error_raise_n(& _x2c_error_site_11, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Array.updateindex")), NULL))));
+    x2c_error_raise_n(& _x2c_error_site_11, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Array.updateindex")), NULL))));
     __builtin_unreachable();
   }
   int requested = index, length = _int_length(array);
@@ -675,7 +675,7 @@ Var Array_updateindex(Array array, int index, Symbol op, Var rhs){
     Var _x2c_literal_part_5 = String_var(String_join(NULL, cons(String_var(String_new("Array.updateindex")), NULL)));
     {
       static const X2CErrorSite _x2c_error_site_12 = {.file = "../../lib/array.x",.function = "Array_updateindex",.line = 136};
-      x2c_error_raise_n(& _x2c_error_site_12, 4372499598, 2, Symbol_var(32993636), _x2c_literal_part_5, Symbol_var(19800432), int_var(requested));
+      x2c_error_raise_n(& _x2c_error_site_12, 4372499598, 2, Symbol_var(34096809266140), _x2c_literal_part_5, Symbol_var(19800432), int_var(requested));
       __builtin_unreachable();
     }
 
@@ -684,7 +684,7 @@ Var Array_updateindex(Array array, int index, Symbol op, Var rhs){
     Var _x2c_literal_part_6 = String_var(String_join(NULL, cons(String_var(String_new("Array.updateindex")), NULL)));
     {
       static const X2CErrorSite _x2c_error_site_13 = {.file = "../../lib/array.x",.function = "Array_updateindex",.line = 138};
-      x2c_error_raise_n(& _x2c_error_site_13, 48270474208, 2, Symbol_var(32993636), _x2c_literal_part_6, Symbol_var(19800432), int_var(requested));
+      x2c_error_raise_n(& _x2c_error_site_13, 48270474208, 2, Symbol_var(34096809266140), _x2c_literal_part_6, Symbol_var(19800432), int_var(requested));
       __builtin_unreachable();
     }
 
@@ -698,7 +698,7 @@ Var Var_postfix(Var *, Symbol);
 Var Array_postfixindex(Array array, int index, Symbol op){
   if(array == NULL){
     static const X2CErrorSite _x2c_error_site_14 = {.file = "../../lib/array.x",.function = "Array_postfixindex",.line = 153};
-    x2c_error_raise_n(& _x2c_error_site_14, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Array.postfixindex")), NULL))));
+    x2c_error_raise_n(& _x2c_error_site_14, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Array.postfixindex")), NULL))));
     __builtin_unreachable();
   }
   int requested = index, length = _int_length(array);
@@ -707,7 +707,7 @@ Var Array_postfixindex(Array array, int index, Symbol op){
     Var _x2c_literal_part_7 = String_var(String_join(NULL, cons(String_var(String_new("Array.postfixindex")), NULL)));
     {
       static const X2CErrorSite _x2c_error_site_15 = {.file = "../../lib/array.x",.function = "Array_postfixindex",.line = 156};
-      x2c_error_raise_n(& _x2c_error_site_15, 4372499598, 2, Symbol_var(32993636), _x2c_literal_part_7, Symbol_var(19800432), int_var(requested));
+      x2c_error_raise_n(& _x2c_error_site_15, 4372499598, 2, Symbol_var(34096809266140), _x2c_literal_part_7, Symbol_var(19800432), int_var(requested));
       __builtin_unreachable();
     }
 

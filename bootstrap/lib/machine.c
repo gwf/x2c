@@ -510,7 +510,7 @@ void MachineBuilder_set_target(MachineBuilder * b, int site, int target){
     Var _x2c_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("MachineBuilder.set_target")), NULL)));
     {
       static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/machine.x",.function = "MachineBuilder_set_target",.line = 390};
-      x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 2, Symbol_var(32993636), _x2c_literal_part_0, Symbol_var(1345468776), int_var(target));
+      x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 2, Symbol_var(34096809266140), _x2c_literal_part_0, Symbol_var(1345468776), int_var(target));
       __builtin_unreachable();
     }
 

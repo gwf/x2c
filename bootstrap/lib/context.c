@@ -128,7 +128,7 @@ Var Context_export(Context context, Var value){
   if(! _init_guard_) Context_initialize();
   if(! context || _thread() -> current != context){
     static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/context.x",.function = "Context_export",.line = 75};
-    x2c_error_raise_n(& _x2c_error_site_0, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Context.export")), NULL))));
+    x2c_error_raise_n(& _x2c_error_site_0, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Context.export")), NULL))));
     __builtin_unreachable();
   }
   return Context__export_value(context, value);
@@ -188,7 +188,7 @@ static Var Context__export_value(Context c, Var v){
     Var _x2c_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("Context.export")), NULL)));
     {
       static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/context.x",.function = "Context__export_value",.line = 119};
-      x2c_error_raise_n(& _x2c_error_site_1, 4477479911782, 2, Symbol_var(32993636), _x2c_literal_part_0, Symbol_var(41038), Symbol_var(tag));
+      x2c_error_raise_n(& _x2c_error_site_1, 4477479911782, 2, Symbol_var(34096809266140), _x2c_literal_part_0, Symbol_var(41038), Symbol_var(tag));
       __builtin_unreachable();
     }
 
@@ -526,7 +526,7 @@ void Context_close(Context c){
   if(! _init_guard_) Context_initialize();
   if(! c || _thread() -> current != c){
     static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/context.x",.function = "Context_close",.line = 334};
-    x2c_error_raise_n(& _x2c_error_site_2, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Context.close")), NULL))));
+    x2c_error_raise_n(& _x2c_error_site_2, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Context.close")), NULL))));
     __builtin_unreachable();
   }
   MatchCache_context_close(c -> match_state);

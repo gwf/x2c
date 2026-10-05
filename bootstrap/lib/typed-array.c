@@ -1392,7 +1392,7 @@ _Noreturn static void _bad_index(String owner, int index, size_t size){
     Var _x2c_literal_part_2 = Var_box_ulong(size);
     {
       static const X2CErrorSite _x2c_error_site_44 = {.file = "../../lib/typed-array.x",.function = "_bad_index",.line = 62};
-      x2c_error_raise_n(& _x2c_error_site_44, 4372499598, 3, Symbol_var(32993636), _x2c_literal_part_0, Symbol_var(19800432), _x2c_literal_part_1, Symbol_var(1265290), _x2c_literal_part_2);
+      x2c_error_raise_n(& _x2c_error_site_44, 4372499598, 3, Symbol_var(34096809266140), _x2c_literal_part_0, Symbol_var(19800432), _x2c_literal_part_1, Symbol_var(1265290), _x2c_literal_part_2);
       __builtin_unreachable();
     }
 
@@ -1415,7 +1415,7 @@ _Noreturn static void _size_limit(String owner, size_t size){
     Var _x2c_literal_part_4 = Var_box_ulong(size);
     {
       static const X2CErrorSite _x2c_error_site_46 = {.file = "../../lib/typed-array.x",.function = "_size_limit",.line = 70};
-      x2c_error_raise_n(& _x2c_error_site_46, 1358596898646632, 2, Symbol_var(32993636), _x2c_literal_part_3, Symbol_var(1265290), _x2c_literal_part_4);
+      x2c_error_raise_n(& _x2c_error_site_46, 1358596898646632, 2, Symbol_var(34096809266140), _x2c_literal_part_3, Symbol_var(1265290), _x2c_literal_part_4);
       __builtin_unreachable();
     }
 
@@ -1426,7 +1426,7 @@ _Noreturn static void _size_limit(String owner, size_t size){
 _Noreturn static void _bad_step(String owner, int step){
   {
     static const X2CErrorSite _x2c_error_site_47 = {.file = "../../lib/typed-array.x",.function = "_bad_step",.line = 74};
-    x2c_error_raise_n(& _x2c_error_site_47, 4372499598, 2, Symbol_var(32993636), String_var(owner), Symbol_var(1286496), int_var(step));
+    x2c_error_raise_n(& _x2c_error_site_47, 4372499598, 2, Symbol_var(34096809266140), String_var(owner), Symbol_var(1286496), int_var(step));
     __builtin_unreachable();
   }
 

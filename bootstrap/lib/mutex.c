@@ -85,7 +85,7 @@ Mutex Mutex_new(void){
 void Mutex_lock(Mutex mutex){
   if(! mutex){
     static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/mutex.x",.function = "Mutex_lock",.line = 99};
-    x2c_error_raise_n(& _x2c_error_site_1, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Mutex.lock")), NULL))));
+    x2c_error_raise_n(& _x2c_error_site_1, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Mutex.lock")), NULL))));
     __builtin_unreachable();
   }
   int error = pthread_mutex_lock(& mutex -> native);
@@ -95,7 +95,7 @@ void Mutex_lock(Mutex mutex){
 int Mutex_try_lock(Mutex mutex){
   if(! mutex){
     static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/mutex.x",.function = "Mutex_try_lock",.line = 109};
-    x2c_error_raise_n(& _x2c_error_site_2, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Mutex.try_lock")), NULL))));
+    x2c_error_raise_n(& _x2c_error_site_2, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Mutex.try_lock")), NULL))));
     __builtin_unreachable();
   }
   int error = pthread_mutex_trylock(& mutex -> native);
@@ -107,7 +107,7 @@ int Mutex_try_lock(Mutex mutex){
 void Mutex_unlock(Mutex mutex){
   if(! mutex){
     static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/mutex.x",.function = "Mutex_unlock",.line = 120};
-    x2c_error_raise_n(& _x2c_error_site_3, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Mutex.unlock")), NULL))));
+    x2c_error_raise_n(& _x2c_error_site_3, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Mutex.unlock")), NULL))));
     __builtin_unreachable();
   }
   int error = pthread_mutex_unlock(& mutex -> native);
@@ -117,7 +117,7 @@ void Mutex_unlock(Mutex mutex){
 void Mutex_free(Mutex mutex){
   if(! mutex){
     static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/mutex.x",.function = "Mutex_free",.line = 132};
-    x2c_error_raise_n(& _x2c_error_site_4, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Mutex.free")), NULL))));
+    x2c_error_raise_n(& _x2c_error_site_4, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Mutex.free")), NULL))));
     __builtin_unreachable();
   }
   int error = pthread_mutex_destroy(& mutex -> native);
