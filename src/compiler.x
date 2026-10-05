@@ -675,7 +675,7 @@ static List Compiler._frozen_macro(Compiler c, List definition, List rows) {
     c.frozen_macros = {};
     c.frozen_macros_epoch = epoch;
   }
-  ulong key = (ulong) definition;
+  uintptr_t key = (uintptr_t) definition;
   Var frozen = void;
   if (!c.frozen_macros.try_get(key, frozen)) {
     frozen = c._declaration_macro(rows, 0);
