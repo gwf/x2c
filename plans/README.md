@@ -44,6 +44,10 @@ execution.
 
 ### Current work
 
+- [Harness simplification and messaging](harness-simplification-and-messaging.md):
+  authorized corrections to existing tools and guidance, a small
+  cross-platform integrator messaging pilot, and separate external runtime
+  repairs. Implementation is in progress.
 - [x2c code standard](x2c-code-standard.md): stage 1 landed; Gary accepted
   the standard
   and decisions D1-D5 on 2026-10-05. Stage 1 (authority) and stage 2
@@ -54,7 +58,7 @@ execution.
   follow-ups and unresolved language questions remain active.
 - [Source consolidation research](source-consolidation-research.md): working
   typed-family, lowering, runtime, transaction, and package prototypes, with
-  all original proposals tracked separately. Publication is held for review.
+  all original proposals tracked separately. Publication is implementation authorized.
   The earlier [first-wave record](archive/evaluator-and-source-consolidation.md)
   remains as corrected historical evidence.
 - [Public release workflow](public-release-workflow.md): staging is live at

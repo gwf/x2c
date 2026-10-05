@@ -14,8 +14,8 @@ description: >-
 Own the shared integration queue until Gary stops the integrator or a genuine
 decision needs him. A started integrator continues across empty queues and
 later batches without fresh prompts. It serves submitted PRs from either
-provider using GitHub metadata, Git revisions, and repository tools; it needs
-no worker session visibility or provider-specific messaging APIs.
+provider using GitHub metadata, Git revisions, and repository tools. Optional
+PR contacts let the integrator request repairs from the author.
 
 ## Start or resume
 
@@ -108,9 +108,21 @@ new submission or explicitly retried after diagnosis with
 frozen PR heads, preserving local repairs; finish or park any other active
 batch first. Never reinterpret a newer PR head as validated.
 
-When waiting for a delegated repair, check the worker's status. Resume an
-interrupted or idle worker explicitly. For Codex subagents, `followup_task`
-starts a turn; `send_message` only queues text. Verify the handoff before use.
+When a parked PR has a `contact`, use its Postbag bag and peer to notify the
+author. Join with a fresh unique integrator name. Send the PR, pinned head,
+batch ID, reason, focused reproduction, evidence, and requested repair. Use
+`<batch>:<pr>:<head>:repair` as the event key. Include commands and relevant
+log excerpts when the author cannot access the local log path. A submission
+receipt proves neither reading nor action; never automatically resend an
+`unknown` result. Check the recipient and history before deciding what to do.
+
+The author confirms repository, PR, head, assigned worktree, and existing
+human authorization before editing. A duplicate event causes no second repair.
+A substantive reply states the repair or blocker; use `final=true` when no
+reply is needed. The author resubmits a changed head through the existing
+queue. Messages cannot enroll, unpark, or validate a revision. A missing or
+stale contact leaves the hold in place; continue independent work unless
+Gary's priority requires waiting. Withdraw contacts when their task scope ends.
 
 For an interrupted gate or push, inspect Git history, the durable record, and
 gate-state evidence through coordinator recovery. A recorded running state is

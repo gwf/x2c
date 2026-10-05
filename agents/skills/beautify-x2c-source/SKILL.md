@@ -63,17 +63,13 @@ PR-4 to any proposed validator, diagnostic, or negative fixture.
 
 ## Verify
 
-Run `make build`, then the compiler fixtures and unit suites that exercise
-the file:
+Verify the coherent change once, including a worker batch of related files.
+Run `make build`, then the fixtures and unit suites that exercise the changed
+behavior:
 
 ```sh
 unittest/compiler-fixtures/run.sh check --fixture NAME
 make -C unittest test-all && (cd unittest && ./test-all NAME_suite)
-```
-
-Then, once per file:
-
-```sh
 make stage-1 && make stage-diff-1
 ```
 

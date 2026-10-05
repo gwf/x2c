@@ -163,6 +163,19 @@ class PerformanceSnapshotTests(unittest.TestCase):
     row = {"build_scaling": {"score": 100.0}}
     self.assertEqual(snapshot.comparable_metrics(row), {})
 
+  def test_absolute_cpu_rows_require_compatible_metric_identities(self):
+    previous = {"run_id": "old", "commit": "a", "status": "success",
+                "build_scaling": {"cpu_seconds": 12.0,
+                                  "metric_id": "cpu/v1", "baseline_id": "a"}}
+    current = {"run_id": "new", "commit": "b", "status": "success",
+               "build_scaling": {"cpu_seconds": 9.0,
+                                 "metric_id": "cpu/v2", "baseline_id": "a"}}
+    report = snapshot.render_report(current, previous)
+    self.assertIn("sequential stage build CPU seconds | n/a | 9 | n/a", report)
+    current["build_scaling"]["metric_id"] = "cpu/v1"
+    report = snapshot.render_report(current, previous)
+    self.assertIn("sequential stage build CPU seconds | 12 | 9 | -25.00%", report)
+
   def test_first_report_keeps_absolute_measurements_and_workload(self):
     current = {
       "run_id": "first", "commit": "a", "status": "success",

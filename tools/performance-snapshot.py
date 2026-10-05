@@ -381,6 +381,13 @@ def render_report(
     lines.extend(["", "This is the first successful retained snapshot."])
 
   old = comparable_metrics(previous or {})
+  old_scaling = (previous or {}).get("build_scaling") or {}
+  new_scaling = current.get("build_scaling") or {}
+  if not all(new_scaling.get(field) and
+             new_scaling[field] == old_scaling.get(field)
+             for field in ("metric_id", "baseline_id")):
+    old = {key: value for key, value in old.items()
+           if not key.startswith("build-scaling ")}
   new = comparable_metrics(current)
   headline = sorted(key for key in new if not key.startswith("runtime "))
   runtime = sorted(
