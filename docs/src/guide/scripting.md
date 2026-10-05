@@ -641,8 +641,8 @@ escape, and `\u0000`, which a `String` cannot hold:
 ~int main(void) {
 try Json.read_file("settings.json");
 catch %(bad-arg *detail):
-  printf("settings.json:%ld:%ld: %s\n", detail.assoc(<line>).integer(),
-         detail.assoc(<column>).integer(), detail.assoc(<why>).string());
+  printf("settings.json:%ld:%ld: %s\n", detail.assoc(<line>),
+         detail.assoc(<column>), detail.assoc(<why>));
 ~  return 0;
 ~}
 ```

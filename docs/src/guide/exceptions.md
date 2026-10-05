@@ -102,7 +102,7 @@ try {
   block.reserve(requested);
 }
 catch %(size-limit * (bytes ?count) *): {
-  printf("could not reserve %ld bytes\n", count.integer());
+  printf("could not reserve %ld bytes\n", count);
 }
 catch %(bad-arg *detail):
   report_bad_argument(detail);

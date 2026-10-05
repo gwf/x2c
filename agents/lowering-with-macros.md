@@ -48,7 +48,7 @@ macro Stmt $caught(Stmt $body, Stmt $finalizer,
 }
 ```
 
-`_rewrite` recognizes a try with them and makes one call. The `at` case
+`Walk.rewrite` recognizes a try with them and makes one call. The `at` case
 comes first: recognition looks through a position wrapper, and that case
 records the position for reports.
 
@@ -83,7 +83,7 @@ static List Walk._lower_try(
 }
 ```
 
-The region driver lowers each arm, and `_catch_clause` gathers the facts
+The region driver lowers each arm, and `Walk._catch_clause` gathers the facts
 the templates are written from.
 
 ```x2c
@@ -236,9 +236,9 @@ List builtin_catch_cases(List selected, List arms) {
 
 - A bound `defer` carries the environment, callback and records binding
   computed, and a bound `return` has no declared-type slot while a template
-  writes one. No source-form macro matches either, so `_rewrite` recognizes
+  writes one. No source-form macro matches either, so `Walk.rewrite` recognizes
   them with a `%()` pattern and says why beside it.
-- Lowering an arm needs the walk's region stack, so `_catch_clause` lowers
+- Lowering an arm needs the walk's region stack, so `Walk._catch_clause` lowers
   the arms in a loop before the application; the slot functions number and
   place them.
 - A slot argument in an expression position inside a `meta` body is an
@@ -345,7 +345,7 @@ examples are excerpts from current source.
 A hand-built `%(...)` List is still right in these cases:
 
 - **Patterns and data.** `case` patterns are not code. Neither are fact
-  rows, such as the one `_catch_clause` returns above.
+  rows, such as the one `Walk._catch_clause` returns above.
 - **Parser productions.** The parser assembles nodes from children it has
   already parsed and bound, as in `%(while $cond $body)` in
   `src/statements.x`. A quotation would bind them again.
@@ -418,7 +418,7 @@ outer position wrappers before rebuilding the typed expression within them.
 
 ## Defer registration
 
-The defer source macro recognizes the cleanup statement. `_lower_defer`
+The defer source macro recognizes the cleanup statement. `Walk._lower_defer`
 keeps region ownership and exit placement, then binds one statement
 quotation. Its template visibly declares the cleanup record, pushes
 it, runs the lowered body and leaves the region. The record slot chooses

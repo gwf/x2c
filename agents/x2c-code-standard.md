@@ -39,7 +39,7 @@ Retired rules keep their number and are marked retired.
 The [signal catalog](#finding-bad-code) gives each rule's detection signal,
 threshold, and tool. The [procedures](#turning-bad-code-into-good-code) give
 the repair order and the proof each repair needs. Rules are terse; the
-[source style guide](x2c-coding-style-guide.md) holds the worked
+[source style examples](x2c-coding-style-guide.md) holds the worked
 prefer/avoid examples, filed under rule IDs.
 
 ## Principles
@@ -1189,7 +1189,7 @@ scope and does not require reshaping or reordering:
 
 Select evidence for the task under its current skill and `AGENTS.md`. The
 per-file stage comparison belongs to the existing beautification workflow;
-this draft does not extend it to all cleanup. Any broader requirement needs
+this standard does not extend it to all cleanup. Any broader requirement needs
 Gary's approval under the process ceiling.
 
 | Change | Proof |

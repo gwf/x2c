@@ -28,7 +28,7 @@ Var value = 42;
 value = "forty-two";
 
 if (value is String)
-  printf("%s\n", value.string());
+  printf("%s\n", value);
 ```
 
 Dynamic arithmetic and truthiness are in
@@ -109,7 +109,7 @@ The language `match` statement and [Match](modules/match.md) use the same
 List event = %(ready 42);
 match (event) {
   case %(ready ?value):
-    printf("%ld\n", value.integer());
+    printf("%ld\n", value);
 }
 ```
 

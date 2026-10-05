@@ -17,7 +17,7 @@ int main(void) {
     Map facts = {name: language};
     facts[<values>] = values.len();
     printf("values=%ld name=%s\n",
-           facts[<values>].integer(), facts[<name>].string());
+           facts[<values>], facts[<name>]);
 
     File input = $auto(tmpfile());
     input.puts("alpha beta\nbeta gamma\n");
@@ -26,13 +26,13 @@ int main(void) {
     foreach(String line, input)
       foreach(String word, line.words())
         counts[word] += 1;
-    printf("beta=%ld\n", counts["beta"].integer());
+    printf("beta=%ld\n", counts["beta"]);
 
     List numbers = %(1 2 3 4), doubled = numbers.map(%!(item) => item * 2);
     printf("doubled=%s\n", doubled.repr());
 
     match (packet) {
-      case %(build ?amount fast): printf("match=ready %ld\n", amount.integer());
+      case %(build ?amount fast): printf("match=ready %ld\n", amount);
     }
 
     Lisp lisp = $auto(Lisp.new());
