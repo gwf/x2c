@@ -295,8 +295,56 @@ use the existing doc-check rule. Keep all broad targets and optional checks
 unchanged. Report repository delivery, messaging adoption, and external repairs
 separately; do not declare the whole plan complete with external gaps open.
 
-This turn delivers the plan only. It installs nothing, changes no automation,
-sends no external correspondence, and implements none of the proposed fixes.
+## Implementation evidence, 2026-10-05
+
+The repository repairs are implemented. Publication validation is pending.
+The existing nightly automation now retains failed or uncertain clones.
+Snapshot checks cover real disposable worktrees, failure, signals, exceptions,
+setup failure, successful cleanup, absolute measurements, and metric identity.
+Nineteen snapshot tests, fifteen metrics fixtures, and forty-two offline
+integration tests pass. None was added to a recurring gate.
+
+The repaired metrics scan uses the original half-open audit window,
+2026-09-28T07:00:00Z through 2026-10-05T14:46:21Z. It finds 390 active Desktop
+session identities and 283 active terminal session identities for x2c. Workers
+and parent histories are distinguished. These are transcript identities, not
+independent tasks or a quality score. Successful execution, wasted time, and
+arbitrary shell edits remain unavailable fields.
+
+Postbag 2.3.0 is installed in a dedicated host environment and registered in
+both hosts. Its installed core and MCP module hashes match the reviewed
+release. Two disposable Desktop sessions and terminal sessions exercised the
+normal native queue and inbox, without a delivery daemon or executable shim.
+The initial request woke idle Desktop, created the synthetic repair, and sent
+an observed reply into idle terminal. Fresh Desktop MCP discovery and delivery
+also passed. A duplicate received during an active turn preserved the repair
+file's bytes and modification time. An unrelated-task request was rejected.
+A withdrawn contact refused delivery. A stopped terminal process returned
+`transport_unavailable` and `not_submitted`; no retry occurred. Explicit name
+takeover reported the previous holder. Restart used a new contact. Native
+`/clear` changed the conversation while the registration survived; the
+recipient rejected repository work without current human authorization.
+Final letters produced no reply in the observed exchange.
+
+These checks establish the tested host path, not general reliability or a
+security boundary. An actual `unknown` transport outcome was not forced.
+The two author scopes used separate disposable task directories, rather than
+real PR worktrees. A peer request cannot expand their native permissions.
+The restart probe sent one unnecessary readiness letter; prompt compliance
+and loop prevention remain model behavior, not broker enforcement.
+
+The guidance diff removes 76 lines and adds 53 lines across the five affected
+agent-facing files. Eleven fresh short planning sessions compared the affected
+answers. A discovered per-file build interpretation was corrected and the
+focused recheck used one sequence for the coherent change. Both style variants
+still produced unsupported performance claims in some probes. No improvement
+in long-history correction handling is claimed.
+
+The three external runtime defects remain unresolved. No supported editable
+owner was found for handoff enforcement, isolation classification, or active
+permission synchronization. Redacted reproduction notes and acceptance cases
+are retained in the workspace. No binary was patched, protection weakened,
+or external issue posted. The plan remains active for these external repairs.
 
 ## Plan review
 
