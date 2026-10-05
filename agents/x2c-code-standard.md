@@ -1094,7 +1094,7 @@ that is not selected is not checked for a matching finding.
 | Section | over 400 lines or two concepts | FI-5 | `long-section` (>400) |
 | File | over 1,500 lines | FI-1, MO-3 | `long-file` |
 | Neighbor disproportion | element far larger than peers | PR-8 | none |
-| Dispatcher arm | over 3 lines | FN-3 | `long-dispatch-arm` |
+| Dispatcher action | over 3 lines | FN-3 | `long-dispatch-arm` (counts the whole arm; review wrapped patterns) |
 | Purpose sentence needs "and" | judgment | FN-1 | review |
 
 ### Statement and layout signals
@@ -1212,7 +1212,7 @@ scope and does not require reshaping or reordering:
 2. **Reuse.** Replace repeated work with calls to the existing owner, and
    give each remaining repeated fact one owner (PR-2, FA-5 to FA-8).
 3. **Reshape.** Settle the file boundary, then split functions into named
-   steps, group shared context into records, and make dispatch arms one
+   steps, group shared context into records, and make dispatch actions one
    line (MO-3, FN-1 to FN-6, FA-2, FA-3).
 4. **Adopt idioms.** Use system macros, receivers, references, literals,
    quotations, and grammar forms (LT-1, EX-1 to EX-6, FN-8, MA-5, MA-7).
