@@ -154,47 +154,51 @@ static Ast Compiler._finish(Compiler c, Ast ast) {
    order while allocating generated splice origins from right to left. */
 static Ast Compiler._sequence(Compiler c, Ast ast, int value_tail) {
   Array transformed = $auto([]);
-  for (List cursor = ast; cursor; cursor = cursor.cdr()) {
-    List value = cursor.car();
-    List source = Ast.without_origin(value);
-    List lowered;
-    match (source) {
-      case %(stmnt ?expression) if (value_tail && !cursor.cdr()): {
-        List result = c._step(Ast.rewrap_origin(value, expression));
-        lowered = Ast.rewrap_origin(
-          result, %(stmnt ${Ast.without_origin(result)}));
-      }
-      case %(defer ?): lowered = value;
-      default: lowered = c._step(value);
-    }
-    if (!c.fn_name) lowered = c.lower_cleanup(lowered);
-    transformed.push(lowered);
-  }
+  for (List cursor = ast; cursor; cursor = cursor.cdr())
+    transformed.push(c._sequence_item(
+      cursor.car(), value_tail && !cursor.cdr()));
   Ast tail = NULL;
-  for (int i = (int) transformed.len() - 1; i >= 0; i--) {
-    Ast node = transformed[i];
-    List payload = Ast.without_origin(node);
-    match (node)
-      case %(at ?parent ?):
-        match (payload)
-          case %(seq *items): {
-            Array anchored = [];
-            foreach (List item, items) {
-              c.origins.push(%(generated $parent splice));
-              int generated = c.origins.len();
-              anchored.push(%(at $generated $item));
-            }
-            tail = anchored.list_free().append(tail);
-            continue;
-          }
-    match (node)
-      case %(seq *items): {
-        tail = items.append(tail);
-        continue;
-      }
-    tail = cons(node, tail);
-  }
+  for (int i = (int) transformed.len() - 1; i >= 0; i--)
+    tail = c._sequence_tail(transformed[i], tail);
   return tail;
+}
+
+static Ast Compiler._sequence_item(Compiler c, Ast value, int value_tail) {
+  Ast lowered;
+  match (Ast.without_origin(value)) {
+    case %(stmnt ?expr) if (value_tail):
+      lowered = c._statement_value(value, expr);
+    case %(defer ?): lowered = value;
+    default: lowered = c._step(value);
+  }
+  if (!c.fn_name) lowered = c.lower_cleanup(lowered);
+  return lowered;
+}
+
+static Ast Compiler._statement_value(Compiler c, Ast value, Ast expression) {
+  Ast result = c._step(Ast.rewrap_origin(value, expression));
+  return Ast.rewrap_origin(result, %(stmnt ${Ast.without_origin(result)}));
+}
+
+static Ast Compiler._sequence_tail(Compiler c, Ast node, Ast tail) {
+  List payload = Ast.without_origin(node);
+  match (node)
+    case %(at ?parent ?):
+      match (payload)
+        case %(seq *items): return c._splice_items(items, parent).append(tail);
+  match (node)
+    case %(seq *items): return items.append(tail);
+  return cons(node, tail);
+}
+
+static List Compiler._splice_items(Compiler c, List items, int parent) {
+  Array anchored = [];
+  foreach (List item, items) {
+    c.origins.push(%(generated $parent splice));
+    int generated = c.origins.len();
+    anchored.push(%(at $generated $item));
+  }
+  return anchored.list_free();
 }
 
 static Ast Compiler._children(Compiler c, Ast ast) {
