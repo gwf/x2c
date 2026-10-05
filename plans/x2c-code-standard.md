@@ -433,13 +433,53 @@ choice. Options: retain it as historical calibration, retire it, or add an
 explicit bounded review requirement to the standard. Other stage 1 work
 continues.
 
+### Stage 2 D2: Array detail-key collision (DG-7)
+
+Four raises already carry both `owner` and `operation`:
+`lib/array.x:61`, `lib/typed-array.x:66`, and line 13 of
+`unittest/compiler-fixtures/array-generator-family.x` and
+`array-generator-family-live.x`. `owner` identifies the Array type;
+`operation` is an action Symbol such as `<push>` or `<take-last>`.
+Renaming `owner` to `operation` would create two entries with the same key.
+These four raises retain their current details while the other D2 keys move.
+
+Gary must choose the resulting detail shape: combine type and action into
+one `operation` String, or retain the type as `operation` and name the action
+with another key. The first option changes the current action value; the
+second needs a vocabulary decision. No conflicting raise was changed.
+
+### Stage 2 D3: autodiff fixture expectations
+
+The required `make packages-check` fails on the generated C expectations of
+`autodiff-forward`, `autodiff-control-flow`, and `autodiff-reverse`.
+Each delta replaces the fixture header include with a generated guard and
+direct runtime and native includes. No Error cause differs in these deltas.
+
+The candidate at `9511153f` completed 9/9 autodiff fixtures with three
+failures. Restoring every D3 file to `7e382f738`, running `make build-safe`,
+and running `make -C packages/autodiff fixtures` reproduces the same three
+C deltas, completing 3/9 fixtures before stopping. The baseline compiler
+reports its shipped `lib/x2c.xi` prelude.
+The failure therefore predates D3. Rule 6 forbids changing these fixture
+expectations to make the check pass.
+
+Evidence in `/tmp/x2c-standard-d3/debug/`: `d3-packages-check.log`,
+`d3-autodiff-baseline.log`, `d3-baseline-build-safe.log`, and
+`d3-baseline-env.log`. The expectations remain unchanged.
+
+Options for Gary: authorize a reviewed update of these include expectations,
+or leave stage 2 publication pending. Continue the independent stages.
+
 ## Progress
 
 | Stage | Commit | Date | Result |
 | --- | --- | --- | --- |
 | Standard written | `43ff6c34`, `fd88fae4` | 2026-10-04 | PR #164 merged |
-| Plan made executable | this commit | 2026-10-05 | decisions accepted |
+| Plan made executable | `7e382f73` | 2026-10-05 | decisions accepted |
 | D5 | `aab9edd4` | 2026-10-05 | static fails; restored build passes |
+| Stage 1 | `4cfa524f` | 2026-10-05 | 384 samples; 101 outputs pass |
+| D2 held | `a7c271f` | 2026-10-05 | +197/-192 .x; 4 raises held |
+| D3 held | `9511153f` | 2026-10-05 | +9/-9 .x; package check fails |
 
 ## Plan review
 
