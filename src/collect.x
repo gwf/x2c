@@ -115,7 +115,8 @@ static Map _cache_copy(Map map) {
 static List Compiler._entry(Compiler c, String canonical) {
   Var cached = _process_cache()[canonical];
   if (cached is <list>) {
-    if (List.equal(cached.list()[4], c._interface_include_dirs())) return cached;
+    if (List.equal(cached.list()[4], c._interface_include_dirs()))
+      return cached;
     (void) _process_cache().del(canonical);
   }
   return c._interface_read(canonical);
@@ -1363,7 +1364,8 @@ static List Compiler._interface_include_dirs(Compiler c) {
   Array dirs = [];
   foreach (String dir, c.include_dirs) {
     String portable = home_portable_path(dir);
-    dirs.push(dir == x2c_get_root() ? %(home "") :
+    dirs.push(
+      dir == x2c_get_root() ? %(home "") :
       portable != dir ? %(home $portable) :
       dir.startswith("/") ? %(absolute $dir) : %(relative $dir));
   }
