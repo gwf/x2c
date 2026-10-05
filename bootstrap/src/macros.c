@@ -1569,7 +1569,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_0(void){
   _323 = String_new("write ${$!T{ ... }} to insert the code it builds");
   _324 = String_new("typed quotation inside a quotation must be written as a hole");
   _325 = String_new("this quotation cannot declare a name or apply a template");
-  _326 = String_new("a typed, Type, or Param quotation builds its code where it is written");
+  _326 = String_new("a typed, Type, or Param quotation builds where it is written");
   _327 = String_var(_326);
   _328 = cons(_327, NULL);
   _329 = String_new("List");
@@ -2917,9 +2917,8 @@ static List Definition_expression_body(Definition * d){
 
 List Compiler_parse_parameter(Compiler);
 List Compiler_parse_type_operand(Compiler, Type *);
-List Type_list(Type);
 static List Definition_part_body(Definition * d){
-  Compiler c =(* d).c;  Compiler_expect(c, 247);  Type body = NULL;  if((* d).kind == 33656922) body = List_type(Compiler_parse_parameter(c));  else Compiler_parse_type_operand(c, & body);  Compiler_expect(c, 251);  return Type_list(body);
+  Compiler c =(* d).c;  Compiler_expect(c, 247);  List body = NULL;  if((* d).kind == 33656922) body = Compiler_parse_parameter(c);  else Compiler_parse_type_operand(c, & body);  Compiler_expect(c, 251);  return body;
 }
 
 static Symbol Definition_body_kind(Definition * d){
@@ -3426,6 +3425,7 @@ static List Compiler__checked_type(Compiler c, List type, Token origin){
 }
 
 List Compiler_cache_literal_list(Compiler, List);
+List Type_list(Type);
 static List Compiler__quoted_type_name(Compiler c){
   Type parsed = NULL;  Compiler_parse_type_operand(c, & parsed);  return Compiler_cache_literal_list(c, Type_list(parsed));
 }
