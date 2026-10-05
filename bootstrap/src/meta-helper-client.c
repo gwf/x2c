@@ -52,11 +52,11 @@
 
 #include "exception.h"
 
-static List _66, _57, _50, _49, _47, _46, _42, _40, _39, _38, _36, _35, _32, _31, _28, _26, _24, _23, _20, _19, _18, _16, _15, _14, _13, _9, _8, _7, _6;
+static List _67, _58, _54, _50, _49, _47, _46, _42, _40, _39, _38, _36, _35, _32, _31, _28, _26, _24, _23, _20, _19, _18, _16, _15, _14, _13, _9, _8, _7, _6;
 
-static String _68, _67, _64, _63, _62, _61, _60, _59, _58, _55, _52, _51, _0;
+static String _69, _68, _65, _64, _63, _62, _61, _60, _59, _56, _52, _51, _0;
 
-static Var _65, _56, _54, _53, _48, _45, _44, _43, _41, _37, _34, _33, _30, _29, _27, _25, _22, _21, _17, _12, _11, _10, _5, _4, _3, _2, _1;
+static Var _66, _57, _55, _53, _48, _45, _44, _43, _41, _37, _34, _33, _30, _29, _27, _25, _22, _21, _17, _12, _11, _10, _5, _4, _3, _2, _1;
 
 #include "meta-group.h"
 #include "datum.h"
@@ -99,6 +99,7 @@ typedef struct Call{
   Compiler compiler;
   String name;
   Token site;
+  int table;
   double limit, deadline;
 }
 Call;
@@ -144,6 +145,8 @@ static void Call_refuse(Call * call, String why);
 static void Call_overdue(Call * call);
 
 static void Call_stopped(Call * call, String reason);
+
+static int _table_of(String path, int otherwise);
 
 static void _helper_shutdown(void);
 
@@ -222,21 +225,22 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _51 = String_new("the helper sent an unknown reply");
   _52 = String_new("the project meta module was not built");
   _53 = Symbol_var(38115688);
-  _54 = Symbol_var(199448);
-  _55 = String_new("X2C_META_TIMEOUT");
-  _56 = Symbol_var(1157736);
-  _57 = cons(_56, NULL);
-  _58 = String_new("the body exited with status ");
-  _59 = String_new("the body crashed or overflowed the stack (signal ");
-  _60 = String_new(": ");
-  _61 = String_new(")");
-  _62 = String_new("%s%g s");
-  _63 = String_new("function: ");
-  _64 = String_new("set X2C_META_TIMEOUT to a larger limit in seconds, or 0 for none");
-  _65 = String_var(_64);
-  _66 = cons(_65, NULL);
-  _67 = String_new("this meta call stopped the compile-time helper");
-  _68 = String_new("reason: ");
+  _54 = cons(_53, NULL);
+  _55 = Symbol_var(199448);
+  _56 = String_new("X2C_META_TIMEOUT");
+  _57 = Symbol_var(1157736);
+  _58 = cons(_57, NULL);
+  _59 = String_new("the body exited with status ");
+  _60 = String_new("the body crashed or overflowed the stack (signal ");
+  _61 = String_new(": ");
+  _62 = String_new(")");
+  _63 = String_new("%s%g s");
+  _64 = String_new("function: ");
+  _65 = String_new("set X2C_META_TIMEOUT to a larger limit in seconds, or 0 for none");
+  _66 = String_var(_65);
+  _67 = cons(_66, NULL);
+  _68 = String_new("this meta call stopped the compile-time helper");
+  _69 = String_new("reason: ");
   _x2c_static_initialize_0();
   _x2c_static_initialize_1();
   _x2c_static_initialize_2();
@@ -250,6 +254,10 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _x2c_static_initialize_10();
   _x2c_static_initialize_11();
 }
+
+String real_path(String);
+
+String Compiler_token_source(Compiler, Token, int *);
 
 List Var_list(Var);
 
@@ -267,8 +275,9 @@ Symbol Error_raise(Symbol, List);
 
 Var Compiler_meta_helper_call(Compiler c, String name, Token site, List arguments){
   if(! _init_guard_) _file_init_();
+  String file = real_path(Compiler_token_source(c, site, NULL));
   Call call ={
-    .compiler = c, .name = name, .site = site
+    .compiler = c, .name = name, .site = site, .table = _table_of(file, helper_table)
   }
   ;
   Call_check(&(call));
@@ -352,16 +361,16 @@ int Map_try_get(Map, Var, Var *);
 Var int_var(int);
 void Compiler_refuse_record_meta_call(Compiler, String, Token);
 static void Call_check(Call * call){
-  Var failure;  if(! String_truth(helper_path) && Map_truth(helper_failures) && Map_try_get(helper_failures, int_var(- 1), &(failure))) Call_refuse(&((* call)), Var_string(failure));  if(! String_truth(helper_path)) Call_refuse(&((* call)), _52);  if(Map_truth(helper_failures) && Map_try_get(helper_failures, int_var(helper_table), &(failure))) Call_refuse(&((* call)), Var_string(failure));  Compiler_refuse_record_meta_call((* call).compiler, (* call).name, (* call).site);
+  Var failure;  if(! String_truth(helper_path) && Map_truth(helper_failures) && Map_try_get(helper_failures, int_var(- 1), &(failure))) Call_refuse(&((* call)), Var_string(failure));  if(! String_truth(helper_path)) Call_refuse(&((* call)), _52);  if(Map_truth(helper_failures) && Map_try_get(helper_failures, int_var((* call).table), &(failure))) Call_refuse(&((* call)), Var_string(failure));  Compiler_refuse_record_meta_call((* call).compiler, (* call).name, (* call).site);
 }
 
 Var Macro_subject(void);
 static void Call_send(Call * call, List arguments){
   if(helper_reset){
-    Call_send_frame(&((* call)), cons(_53, cons(int_var(helper_table), NULL)));  helper_reset = 0;
+    Call_send_frame(&((* call)), _54);  helper_reset = 0;
   }
   Call_send_frame(&((* call)), ({
-    Var _x2c_literal_part_0 = String_var((* call).name);  Var _x2c_literal_part_1 = List_var(arguments);  Var _x2c_literal_part_2 = Macro_subject();  cons(_54, cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, cons(_x2c_literal_part_2, NULL))));
+    Var _x2c_literal_part_0 = int_var((* call).table);  Var _x2c_literal_part_1 = String_var((* call).name);  Var _x2c_literal_part_2 = List_var(arguments);  Var _x2c_literal_part_3 = Macro_subject();  cons(_55, cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, cons(_x2c_literal_part_2, cons(_x2c_literal_part_3, NULL)))));
   }
   ));
 }
@@ -373,7 +382,7 @@ static void Call_send_frame(Call * call, List message){
 String Env_get(String);
 double atof(const char *);
 static void Call_set_deadline(Call * call){
-  String text = Env_get(_55); (* call).limit = String_truth(text) ? atof(text) : 60.0; (* call).deadline =(* call).limit > 0 ? _now() +(* call).limit : 0;
+  String text = Env_get(_56); (* call).limit = String_truth(text) ? atof(text) : 60.0; (* call).deadline =(* call).limit > 0 ? _now() +(* call).limit : 0;
 }
 
 static double _now(void){
@@ -416,7 +425,7 @@ static int _helper_reaped(void){
 
 static int _helper_stop(int signal){
   int status = 0;  if(_helper_running()){
-    if(signal) killpg(helper_pid, signal);  else _helper_send(_57, 0);  close(helper_to);  close(helper_from);  if(helper_status < 0) waitpid(helper_pid, & helper_status, 0);  killpg(helper_pid, SIGKILL);  status = helper_status;
+    if(signal) killpg(helper_pid, signal);  else _helper_send(_58, 0);  close(helper_to);  close(helper_from);  if(helper_status < 0) waitpid(helper_pid, & helper_status, 0);  killpg(helper_pid, SIGKILL);  status = helper_status;
   }
   helper_pid = 0;  helper_status = - 1;  helper_to = helper_from = - 1;  if(Buffer_truth(helper_input)) Buffer_clear(helper_input);  return status;
 }
@@ -425,7 +434,7 @@ int shell_status(int, int *);
 String int_str(int);
 String String_new(const char *);
 static String _helper_ending(void){
-  int signal, code = shell_status(_helper_stop(0), &(signal));  if(! signal) return String_join(NULL, cons(String_var(_58), cons(String_var(int_str(code)), NULL)));  String name = String_new(strsignal(signal));  return String_join(NULL, cons(String_var(_59), cons(String_var(int_str(signal)), cons(String_var(_60), cons(String_var(name), cons(String_var(_61), NULL))))));
+  int signal, code = shell_status(_helper_stop(0), &(signal));  if(! signal) return String_join(NULL, cons(String_var(_59), cons(String_var(int_str(code)), NULL)));  String name = String_new(strsignal(signal));  return String_join(NULL, cons(String_var(_60), cons(String_var(int_str(signal)), cons(String_var(_61), cons(String_var(name), cons(String_var(_62), NULL))))));
 }
 
 Buffer Buffer_new(size_t);
@@ -638,13 +647,13 @@ String String_printf(String, ...);
 
 static void Call_overdue(Call * call){
   _helper_stop(SIGKILL);
-  Compiler_report_error((* call).compiler, 27335838, String_printf(_62, "this meta call ran longer than ", (* call).limit), (* call).site, cons(String_var(String_join(NULL, cons(String_var(_63), cons(String_var((* call).name), NULL)))), _66));
+  Compiler_report_error((* call).compiler, 27335838, String_printf(_63, "this meta call ran longer than ", (* call).limit), (* call).site, cons(String_var(String_join(NULL, cons(String_var(_64), cons(String_var((* call).name), NULL)))), _67));
 }
 
 static void Call_stopped(Call * call, String reason){
-  Compiler_report_error((* call).compiler, 27335838, _67, (* call).site, ({
-    Var _x2c_literal_part_3 = String_var(String_join(NULL, cons(String_var(_63), cons(String_var((* call).name), NULL))));  Var _x2c_literal_part_4 = String_var(String_join(NULL, cons(String_var(_68), cons(String_var(reason), NULL))));
-    cons(_x2c_literal_part_3, cons(_x2c_literal_part_4, NULL));
+  Compiler_report_error((* call).compiler, 27335838, _68, (* call).site, ({
+    Var _x2c_literal_part_4 = String_var(String_join(NULL, cons(String_var(_64), cons(String_var((* call).name), NULL))));  Var _x2c_literal_part_5 = String_var(String_join(NULL, cons(String_var(_69), cons(String_var(reason), NULL))));
+    cons(_x2c_literal_part_4, cons(_x2c_literal_part_5, NULL));
   }
   ));
 }
@@ -688,13 +697,17 @@ void Compiler_use_meta_helper(String path, Map failures, Map units){
 
 Path Path_absolute(Path);
 
-long Var_integer(Var);
-
 void Compiler_begin_meta_unit(String filename){
   if(! _init_guard_) _file_init_();
-  Var table;
-  helper_table = Map_truth(helper_units) && String_truth(filename) && Map_try_get(helper_units, String_var(Path_absolute(filename)), &(table)) ? Var_integer(table) : 0;
+  helper_table = String_truth(filename) ? _table_of(Path_absolute(filename), 0) : 0;
   helper_reset = 1;
+}
+
+long Var_integer(Var);
+
+static int _table_of(String path, int otherwise){
+  Var table;
+  return Map_truth(helper_units) && String_truth(path) && Map_try_get(helper_units, String_var(path), &(table)) ? Var_integer(table) : otherwise;
 }
 
 void Compiler_stop_meta_helper(void){

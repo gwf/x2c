@@ -257,6 +257,13 @@ static Token _macro_directive(String content, int * undefined){
   return token -> type == 19147688 ? token : NULL;
 }
 
+String preproc_macro_name(String text){
+  if(! _init_guard_) _file_init_();
+  int undefined;
+  Token name = _macro_directive(text, &(undefined));
+  return name ? name -> text : NULL;
+}
+
 void x2c_cleanup_push(X2CCleanup *);
 
 Map Map_new(void);
