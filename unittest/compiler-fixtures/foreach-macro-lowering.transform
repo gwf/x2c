@@ -2074,6 +2074,8 @@
                (expr (int) (literal (int) "7")))))) 
       (expr (int) (literal (int) "0")) (expr (int) (literal (int) "1"))))))))
 
+(preproc "#pragma private")
+
 (function (static void) 
  (bind (binding 92 "_x2c_defer_cleanup_0") 
   ((fnmod (params (param (void) (bind (binding 226 "_x2c_defer_opaque_0") (*))))))) 

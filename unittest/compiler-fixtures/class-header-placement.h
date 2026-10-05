@@ -47,5 +47,10 @@ typedef struct Uses{
 
 int Box_twice(Box box);
 
+typedef struct Later{
+  int h;
+}
+Later;
+
 
 #endif /* __GUARD_0x18D00FB4__ */

@@ -529,6 +529,8 @@
        (expr (int) (ident (binding 8 "rhs_calls")))))))) 
   (at 68 (return (expr (int) (literal (int) "0"))))))
 
+(preproc "#pragma private")
+
 (function (static "String") 
  (bind (binding 51 "_x2c_proto_string_add_update") 
   ((fnmod 

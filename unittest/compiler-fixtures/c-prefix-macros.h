@@ -34,6 +34,11 @@ static inline int tripled(int value){
 
 extern int weak_value;
 
+struct text{
+  char * body;
+}
+;
+
 const char * label(void);
 
 int main(void);

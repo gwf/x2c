@@ -10,42 +10,8 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
-typedef enum DirectKind{
-  DIRECT_KIND = 3
-}
-DirectKind;
+static void _x2c_static_initialize_0(void);
 
-typedef struct DirectRecord{
-  int value;
-}
-DirectRecord;
-
-typedef union DirectUnion{
-  int integer;
-  float floating;
-}
-DirectUnion;
-
-#define GENERATED_SOURCE_FLAG 1
-typedef enum GeneratedKind{
-  GENERATED_KIND = 3
-}
-GeneratedKind;
-
-typedef struct GeneratedRecord{
-  int value;
-}
-GeneratedRecord;
-
-typedef union GeneratedUnion{
-  int integer;
-  float floating;
-}
-GeneratedUnion;
-
-static int generated_global;
-
-_x2c_initializer_choice_052F45D8_0((generated_global = 4))
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -63,6 +29,11 @@ int direct_function(int value){
   return value + DIRECT_KIND;
 }
 
+#undef GENERATED_SOURCE_FLAG
+#define GENERATED_SOURCE_FLAG 1
+static int generated_global;
+
+_x2c_initializer_choice_052F45D8_0((generated_global = 4))
 int generated_function(int _x2c_macro_value_2){
   if(! _init_guard_) _file_init_();
   return _x2c_macro_value_2 + 3;

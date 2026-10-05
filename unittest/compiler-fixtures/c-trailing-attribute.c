@@ -14,11 +14,6 @@ static _Noreturn void finish(int status);
 
 inline static int fourth(int w);
 
-struct box{
-  __attribute__((aligned(8))) int value;
-}
-;
-
 __attribute__((format(printf, 1, 2))) int report(const char * format, ...){
   va_list args;
   va_start(args, format);

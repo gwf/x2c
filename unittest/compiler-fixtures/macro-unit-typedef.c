@@ -4,12 +4,6 @@
 
 static const size_t _x2c_macro_cell_size_0 = sizeof(_x2c_macro_Cell_eab11d52);
 
-typedef struct{
-  _x2c_macro_S_087602a2 value;
-  const _x2c_macro_S_087602a2 * next;
-}
-_x2c_macro_Cell_1b39b679;
-
 static const size_t _x2c_macro_cell_size_1 = sizeof(_x2c_macro_Cell_1b39b679);
 
 size_t int_width(void){

@@ -39,12 +39,6 @@ _x2c_initializer_choice_279F17D4_1((aliased_unit = 4))
 static int stacked_unit;
 
 _x2c_initializer_choice_279F17D4_2((stacked_unit = 5))
-typedef struct KeywordRecord{
-  int direct_field;
-  int aliased_field;
-}
-KeywordRecord;
-
 static int direct_function(void);
 
 static int aliased_function(void);

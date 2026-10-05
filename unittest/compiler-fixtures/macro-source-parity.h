@@ -13,11 +13,44 @@ DirectValue;
 
 int DirectValue_read(DirectValue value);
 
+typedef enum DirectKind{
+  DIRECT_KIND = 3
+}
+DirectKind;
+
+typedef struct DirectRecord{
+  int value;
+}
+DirectRecord;
+
+typedef union DirectUnion{
+  int integer;
+  float floating;
+}
+DirectUnion;
+
 static inline int direct_inline(int value){
   return value + 1;
 }
 
 int direct_function(int value);
+
+#define GENERATED_SOURCE_FLAG 1
+typedef enum GeneratedKind{
+  GENERATED_KIND = 3
+}
+GeneratedKind;
+
+typedef struct GeneratedRecord{
+  int value;
+}
+GeneratedRecord;
+
+typedef union GeneratedUnion{
+  int integer;
+  float floating;
+}
+GeneratedUnion;
 
 static inline int generated_inline(int _x2c_macro_value_1){
   return _x2c_macro_value_1 + 1;

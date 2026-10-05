@@ -193,6 +193,8 @@
       (args (expr (void) ())))))) 
   (at 27 (return (expr (int) (literal (int) "0"))))))
 
+(preproc "#pragma private")
+
 (function (static "String") 
  (bind (binding 13 "_x2c_callback_adapt_0") 
   ((fnmod (params (param ("Var") (bind (binding 42 "a0") ())))))) 

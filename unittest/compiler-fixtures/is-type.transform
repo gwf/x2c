@@ -2118,5 +2118,7 @@
      (op ? (expr (int) (ident (binding 66 "ok"))) 
       (expr (int) (literal (int) "0")) (expr (int) (literal (int) "1"))))))))
 
+(preproc "#pragma private")
+
 (declare (static "VarMethods") 
  (bindings (bind (binding 70 "_x2c__x2c_protocol_methods_0") ())))

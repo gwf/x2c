@@ -474,6 +474,8 @@
              (expr (int) (ident (binding 23 "caught"))))) 
       (expr (int) (literal (int) "0")) (expr (int) (literal (int) "1"))))))))
 
+(preproc "#pragma private")
+
 (typedef 
  (struct (binding 44 "_x2c_defer_env_0") 
   (fields 

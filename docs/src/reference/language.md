@@ -17,17 +17,16 @@ header and a C source file.
 A source file whose first line begins with `#!` is a
 [script unit](#script-units); every other file is an ordinary unit.
 
-`#pragma private` marks the start of implementation-only content. Declarations
-before it may be emitted to the generated header. A function definition also
-begins source-private output, except that a typedef after it still belongs
+`#pragma private` marks the start of implementation-only content. Everything
+before it belongs to the generated header, including types, enumerators,
+and directives that follow a function definition or a `static` declaration.
+A public function definition contributes its prototype, or its whole body
+when inline, and a `static` function or object stays in the source. A typedef below `#pragma private` still belongs
 to the header when a later public prototype names it. An include of x2c
 source below `#pragma private` also moves to the header when a later public
-prototype names a type it declares. Functions that a class
-or another declaration producer generates do not begin it. A public object
-definition gets an `extern` declaration in the header even after a function
-definition or a `static` declaration; only `#pragma private` keeps it in the
-source. An object of an anonymous `struct`, `union`, or `enum` type has no
-such declaration. Every translated header
+prototype names a type it declares. A public object definition gets an
+`extern` declaration in the header. An object of an anonymous `struct`,
+`union`, or `enum` type has no such declaration. Every translated header
 starts with `#pragma once` and also carries a conventional include guard, so
 `.x` programs do not need to write either one.
 
@@ -44,8 +43,8 @@ may call the functions it declares.
 
 `#pragma public` ends implementation-only content. Until the next
 `#pragma private`, what follows it is handled like the top of the file.
-Declarations there may be emitted to the generated header, and files that
-include this one or import its package can use them. A file can use the two
+Declarations there belong to the generated header, and files that include
+this one or import its package can use them. A file can use the two
 pragmas to place a private include or type between public declarations.
 
 The advanced `--cpp-symbols` and `--live-symbols` modes run the host

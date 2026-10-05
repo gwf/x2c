@@ -636,6 +636,8 @@
                   (expr (int) (literal (int) "0"))))))))))))) 
   (at 24 (return (expr (int) (literal (int) "0"))))))
 
+(preproc "#pragma private")
+
 (typedef 
  (struct (binding 62 "_x2c_lambda_context_0") 
   (fields 

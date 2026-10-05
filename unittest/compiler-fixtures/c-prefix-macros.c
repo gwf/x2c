@@ -18,11 +18,6 @@ static int quintupled(int value);
 
 const static int bound = 6;
 
-struct text{
-  char * body;
-}
-;
-
 static int quadrupled(int value){
   return value * 4;
 }

@@ -14,50 +14,9 @@ static DelegatePart DelegatePart_concrete(DelegatePart part);
 
 static int DelegatePart_shadow(DelegatePart part);
 
-typedef struct DelegateValueOwner{
-  DelegatePart part;
-}
-DelegateValueOwner;
-
-typedef DelegateValueOwner DelegateValueOwnerLeaf;
-
 static int DelegateValueOwner_shadow(DelegateValueOwner owner);
 
-typedef struct DelegatePointerOwner{
-  DelegatePart part;
-}
-* DelegatePointerOwner;
-
-typedef struct DelegatePointerFieldOwner{
-  DelegatePart * part;
-}
-DelegatePointerFieldOwner;
-
-typedef struct DelegateChain{
-  DelegatePointerOwner owner;
-}
-* DelegateChain;
-
-typedef struct DelegateChoice{
-  DelegatePart left, right;
-}
-DelegateChoice;
-
 static int DelegateChoice_read(DelegateChoice choice);
-
-typedef struct DelegateCycleA * DelegateCycleA;
-
-typedef struct DelegateCycleB * DelegateCycleB;
-
-struct DelegateCycleA{
-  DelegateCycleB b;
-}
-;
-
-struct DelegateCycleB{
-  DelegateCycleA a;
-}
-;
 
 static int DelegateCycleA_read(DelegateCycleA value);
 

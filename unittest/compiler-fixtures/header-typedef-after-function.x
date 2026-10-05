@@ -5,8 +5,9 @@ typedef struct Opaque *Opaque;
 
 int before_size(Before value) => value.value;
 
-/* A typedef after a function definition is source-private unless a public
+/* A typedef below `#pragma private` is source-private unless a public
    prototype names it; the header must then be able to spell it. */
+#pragma private
 typedef struct After { int value; } After;
 typedef struct Hidden { int value; } Hidden;
 typedef struct Item { int value; } Item, *ItemPtr;
