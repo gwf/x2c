@@ -478,10 +478,11 @@ static int _preload_meta_surface(Frontend frontend, Lisp shared) {
   c.borrowed_lisp = 1;
   defer unit.close();
   _declare_builders(c, shared);
-  if (!started || !unit.collect(&session) || !unit.parse()) {
-    foreach (List diagnostic, c.diagnostics()) c.print_diagnostic(diagnostic);
-    return 0;
-  }
+  /* As in `Frontend.open_reporting`, the compiler that reports a diagnostic
+     prints it, so an imported file's location shows that file's line. */
+  if (started) c.own_diagnostics();
+  else foreach (Var entry, c.diagnostics()) c.print_diagnostic(entry);
+  if (!started || !unit.collect(&session) || !unit.parse()) return 0;
   foreach (String name, c.meta_hashes.keys()) {
     Var function;
     if (name.startswith("x2c_") && shared.try_get(name, function))
