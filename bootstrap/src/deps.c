@@ -58,7 +58,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _init_guard_ = 1;
   _0 = String_new("/");
   _1 = String_new(".d");
-  _2 = String_new("/");
+  _2 = String_new("search:");
   _3 = String_new(".c");
   _4 = String_new(".h");
 }
@@ -181,7 +181,9 @@ int Map_try_next(Map, unsigned *, Var *, Var *);
 
 Var Array_push(Array, Var);
 
-int String_endswith(String, String);
+int Var_is_row(Var, unsigned, unsigned long, unsigned long);
+
+int String_startswith(String, String);
 
 String Var_string(Var);
 
@@ -237,7 +239,7 @@ static String _contents(CliRequest request, Compiler compiler, String input, Str
             while(Map_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0), &(_x2c_macro_cursor_output_1))){
               path = _x2c_macro_cursor_output_0;
               content_hash = _x2c_macro_cursor_output_1;
-              Array_push((String_endswith(Var_string(path), _2) ? searches : paths), path);
+              Array_push((Var_is_row(content_hash, 11, 7, 1) && String_startswith(Var_string(content_hash), _2) ? searches : paths), path);
             }
 
           }

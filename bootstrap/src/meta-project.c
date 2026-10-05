@@ -307,7 +307,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _105 = String_new("");
   _106 = Symbol_var(273446);
   _107 = String_new("/manifest");
-  _108 = String_new("%.9f");
+  _108 = String_new("search:absent");
   _109 = String_new(":");
   _110 = String_new("-I");
   _111 = String_var(_110);
@@ -1471,17 +1471,12 @@ static List _current(String directory){
   return manifest;
 }
 
-int Path_is_dir(Path);
-
-double Path_modified_time(Path);
+int SourceView_exists(SourceView, String);
 
 String File_sha256(File);
 
 static String _digest(String path){
-  if(String_endswith(path, _11)) return Path_is_dir(path) ?({
-    Var _x2c_literal_part_55 = String_var(Path_absolute(path));  Var _x2c_literal_part_56 = String_var(String_printf(_108, Path_modified_time(path)));  String_join(NULL, cons(_x2c_literal_part_55, cons(String_var(_109), cons(_x2c_literal_part_56, NULL))));
-  }
-  ) : NULL;
+  if(! SourceView_exists(NULL, path)) return _108;
   File input = fopen(path, "rb");
   if(! input) return NULL;
   {
@@ -1497,7 +1492,10 @@ static String _digest(String path){
     x2c_cleanup_push(& _x2c_defer_record_4);
     {
       {
-        String _x2c_return_value_7 = File_sha256(input);
+        String _x2c_return_value_7 =({
+          Var _x2c_literal_part_55 = String_var(Path_absolute(path));  Var _x2c_literal_part_56 = String_var(File_sha256(input));  String_join(NULL, cons(_x2c_literal_part_55, cons(String_var(_109), cons(_x2c_literal_part_56, NULL))));
+        }
+        );
         {
           x2c_cleanup_leave(& _x2c_defer_record_4);
           return _x2c_return_value_7;
