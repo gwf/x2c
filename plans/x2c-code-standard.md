@@ -815,6 +815,7 @@ refresh for this diagnostic location. No padding was added to offset it.
 | 4.import | `bf01f633` | 2026-10-05 | 1 -> 0 helper; +2/-5 .x |
 | 4.blis | `5333a287` | 2026-10-05 | 4 macros; +5/-5 .x |
 | 4.termbox | `8785bd09` | 2026-10-05 | 10 macros; +11/-11 .x |
+| 4.curl | `1ab22788` | 2026-10-05 | 19 macros; +20/-20 .x |
 | D2 partial | `14973621` | 2026-10-05 | +197/-192 .x; four raises held |
 | D2 held | `a7c271f` | 2026-10-05 | +197/-192 .x; 4 raises held |
 | D3 | `f7f886ad` | 2026-10-05 | 9/9 autodiff; +9/-9 .x |
@@ -873,6 +874,11 @@ The private import and all Error causes, values, and sites are preserved.
 
 termbox Error-pack migration: 18 generated C/H files are byte-exact.
 Focused checks pass: 12 wrapper tests/148 assertions; 3 raw/15.
+Worker `make packages-check` passes; no expectations changed.
+The private import and all Error causes, values, and sites are preserved.
+
+curl Error-pack migration: 20 generated C/H files are byte-exact.
+Focused checks pass: 29 wrapper tests/203 assertions; 2 raw/16.
 Worker `make packages-check` passes; no expectations changed.
 The private import and all Error causes, values, and sites are preserved.
 
