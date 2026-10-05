@@ -190,7 +190,7 @@ static List Expansion.fresh_names(Expansion &x, List old_stack) {
     if (lisp.int()) {
       List binding = c._introduced_binding(spelling.str(), owner);
       List hole = _hole(binder, <name>, 0);
-      fresh_values.push(c._capture_row(hole, %($binding)));
+      fresh_values.push(c._capture_row_project(hole, %($binding), 0));
     }
     else
       x.direct = cons(
@@ -2332,7 +2332,7 @@ static List Compiler._argument_row(Compiler c, List hole, Symbol kind) {
     if (!sequence || !c.test(<,>)) break;
   }
   c._row_directives(kind, captured);
-  return c._capture_row(hole, captured.list_free());
+  return c._capture_row_project(hole, captured.list_free(), 0);
 }
 
 static void Compiler._row_directives(Compiler c, Symbol kind, Array captured) {
@@ -2445,9 +2445,6 @@ static void Compiler._bind_name_arguments(
    projections. Forwarding a template's own projection rebuilds the row it
    came from, with its Unit construction requirements, and assigns no
    source text to generated syntax. */
-
-static List Compiler._capture_row(Compiler c, List hole, List sources) =>
-  c._capture_row_project(hole, sources, 0);
 
 /* `retain` keeps each source as the syntax it is and forwards nothing. */
 static List Compiler._capture_row_project(
@@ -2796,7 +2793,7 @@ static List Decoration.capture(Decoration &d, List target) {
     captured_targets.push(c._capture_source(item, d.start, c.token));
   List captured = captured_targets.list_free();
   List target_capture =
-    c._capture_row(d.definition.assoc(<targetp>), captured);
+    c._capture_row_project(d.definition.assoc(<targetp>), captured, 0);
   if (d.kind == <unit> && !c._private_target(target) &&
       captured && !captured.cdr())
     target_capture = target_capture.append(%((construct ${captured.car()})));
@@ -2996,7 +2993,7 @@ static List Compiler._expression_decorator(
   List target = c.parse_macro_expression_target();
   List input = %(
     target $arguments
-    ${c._capture_row(definition.assoc(<targetp>), %($target))}
+    ${c._capture_row_project(definition.assoc(<targetp>), %($target), 0)}
   );
   List node = c._invocation_node(definition, input, invocation);
   return %(expr (<macro-expr>) $node);
