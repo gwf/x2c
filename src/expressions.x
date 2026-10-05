@@ -368,9 +368,9 @@ static void Compiler._warn_unnecessary_cast(
 
 /* Whether C gives an operand the type x2c records. A character constant is
    `int` in C; `sizeof`, `offsetof`, and a pointer difference have `size_t`
-   and `ptrdiff_t` identities x2c does not model; an enum's compatible
-   integer type is implementation-defined; and C compilers type a bitfield
-   differently. */
+   and `ptrdiff_t` identities selected by the native toolchain; an enum's
+   compatible integer type is implementation-defined; C compilers type a
+   bitfield differently. */
 static int Compiler._c_type_known(Compiler c, List operand) {
   match (operand) {
     case %(expr ? ${$grouped(?inner)}):
