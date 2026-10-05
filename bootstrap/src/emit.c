@@ -245,6 +245,14 @@ _x2c_defer_env_6;
 
 static void _x2c_defer_cleanup_6(void * _x2c_defer_opaque_6);
 
+typedef struct _x2c_defer_env_7{
+  const void * _x2c_defer_capture_9;
+  const void * _x2c_defer_capture_10;
+}
+_x2c_defer_env_7;
+
+static void _x2c_defer_cleanup_7(void * _x2c_defer_opaque_7);
+
 #include "exception.h"
 
 
@@ -2165,7 +2173,25 @@ static List Emitter__args(Emitter * e, List ast){
 Map Compiler_semantic_binding_facts(Compiler);
 Map Map_new(void);
 static List Emitter__function(Emitter * e, List ast){
-  List type, bindings, body;  List _x2c_destructure_9 = List_cdr(ast);  type = Var_list(List_getindex(_x2c_destructure_9, 0));  bindings = Var_list(List_getindex(_x2c_destructure_9, 1));  body = Var_list(List_getindex(_x2c_destructure_9, 2));  String old_fn =(* e).fn_name;  List function_binding = Var_list(List_cadr(bindings)); (* e).fn_name = binding_identity_spelling(function_binding);  Var defer_owner;  if(Map_try_get(Compiler_semantic_binding_facts((* e).c), List_var(cons(_686, cons(List_var(function_binding), NULL))), &(defer_owner)))(* e).fn_name = Var_string(defer_owner);  type = Emitter__emit(&((* e)), cons(List_var(type), NULL));  bindings = cons(List_var(bindings), NULL);  body = cons(List_var(body), NULL);  Map old_statics =(* e).static_objects; (* e).static_objects = Map_new();  List decl = Emitter__emit(&((* e)), bindings), body_code = Emitter__emit(&((* e)), body); (* e).fn_name = old_fn; (* e).static_objects = old_statics;  return List_append(type, List_append(decl, List_append(body_code, NULL)));
+  List type, bindings, body;  List _x2c_destructure_9 = List_cdr(ast);  type = Var_list(List_getindex(_x2c_destructure_9, 0));  bindings = Var_list(List_getindex(_x2c_destructure_9, 1));  body = Var_list(List_getindex(_x2c_destructure_9, 2));  String old_fn =(* e).fn_name;  List function_binding = Var_list(List_cadr(bindings)); (* e).fn_name = binding_identity_spelling(function_binding);  Var defer_owner;  if(Map_try_get(Compiler_semantic_binding_facts((* e).c), List_var(cons(_686, cons(List_var(function_binding), NULL))), &(defer_owner)))(* e).fn_name = Var_string(defer_owner);  type = Emitter__emit(&((* e)), cons(List_var(type), NULL));  bindings = cons(List_var(bindings), NULL);  body = cons(List_var(body), NULL);  List decl, body_code; {
+    Map * _x2c_macro_address_1 = &(* e).static_objects;  Map _x2c_macro_previous_1 = * _x2c_macro_address_1; {
+      _x2c_defer_env_6 _x2c_macro_environment_6 ={
+        0
+      }
+      ;  _x2c_macro_environment_6._x2c_defer_capture_7 =(const void *) & _x2c_macro_address_1;  _x2c_macro_environment_6._x2c_defer_capture_8 =(const void *) & _x2c_macro_previous_1;  X2CCleanup _x2c_defer_record_6 ={
+        .fn = _x2c_defer_cleanup_6, .env = & _x2c_macro_environment_6
+      }
+      ;  x2c_cleanup_push(& _x2c_defer_record_6); {
+        * _x2c_macro_address_1 = Map_new(); {
+          decl = Emitter__emit(&((* e)), bindings);  body_code = Emitter__emit(&((* e)), body);
+        }
+
+      }
+      x2c_cleanup_leave(& _x2c_defer_record_6);
+    }
+
+  }
+  (* e).fn_name = old_fn;  return List_append(type, List_append(decl, List_append(body_code, NULL)));
 }
 
 Var Var_cadr(Var);
@@ -2193,23 +2219,23 @@ static List Emitter__typedef(Emitter * e, List ast){
 
 static List Emitter__block(Emitter * e, List ast){
   {
-    List * _x2c_macro_address_1 = &(* e).native_aliases;  List _x2c_macro_previous_1 = * _x2c_macro_address_1; {
-      _x2c_defer_env_6 _x2c_macro_environment_6 ={
+    List * _x2c_macro_address_2 = &(* e).native_aliases;  List _x2c_macro_previous_2 = * _x2c_macro_address_2; {
+      _x2c_defer_env_7 _x2c_macro_environment_7 ={
         0
       }
-      ;  _x2c_macro_environment_6._x2c_defer_capture_7 =(const void *) & _x2c_macro_address_1;  _x2c_macro_environment_6._x2c_defer_capture_8 =(const void *) & _x2c_macro_previous_1;  X2CCleanup _x2c_defer_record_6 ={
-        .fn = _x2c_defer_cleanup_6, .env = & _x2c_macro_environment_6
+      ;  _x2c_macro_environment_7._x2c_defer_capture_9 =(const void *) & _x2c_macro_address_2;  _x2c_macro_environment_7._x2c_defer_capture_10 =(const void *) & _x2c_macro_previous_2;  X2CCleanup _x2c_defer_record_7 ={
+        .fn = _x2c_defer_cleanup_7, .env = & _x2c_macro_environment_7
       }
-      ;  x2c_cleanup_push(& _x2c_defer_record_6); {
-        * _x2c_macro_address_1 =(* e).native_aliases; {
+      ;  x2c_cleanup_push(& _x2c_defer_record_7); {
+        * _x2c_macro_address_2 =(* e).native_aliases; {
           List _x2c_return_value_6 = cons(_257, List_append(Emitter__emit(&((* e)), List_cdr(ast)), _260)); {
-            x2c_cleanup_leave(& _x2c_defer_record_6);  return _x2c_return_value_6;
+            x2c_cleanup_leave(& _x2c_defer_record_7);  return _x2c_return_value_6;
           }
 
         }
 
       }
-      x2c_cleanup_leave(& _x2c_defer_record_6);
+      x2c_cleanup_leave(& _x2c_defer_record_7);
     }
 
   }
@@ -2490,6 +2516,10 @@ static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5){
 }
 
 static void _x2c_defer_cleanup_6(void * _x2c_defer_opaque_6){
-  _x2c_defer_env_6 * _x2c_defer_data_6 =(_x2c_defer_env_6 *) _x2c_defer_opaque_6;  *(*(List * *) _x2c_defer_data_6->_x2c_defer_capture_7) =(*(List *) _x2c_defer_data_6->_x2c_defer_capture_8);
+  _x2c_defer_env_6 * _x2c_defer_data_6 =(_x2c_defer_env_6 *) _x2c_defer_opaque_6;  *(*(Map * *) _x2c_defer_data_6->_x2c_defer_capture_7) =(*(Map *) _x2c_defer_data_6->_x2c_defer_capture_8);
+}
+
+static void _x2c_defer_cleanup_7(void * _x2c_defer_opaque_7){
+  _x2c_defer_env_7 * _x2c_defer_data_7 =(_x2c_defer_env_7 *) _x2c_defer_opaque_7;  *(*(List * *) _x2c_defer_data_7->_x2c_defer_capture_9) =(*(List *) _x2c_defer_data_7->_x2c_defer_capture_10);
 }
 
