@@ -192,14 +192,13 @@ need the information it omits.
 
 ## Choose who owns the native build
 
-Four of the driver's commands decide who owns the native build; the
+Three of the driver's commands decide who owns the native build; the
 [CLI reference](../reference/cli.md) lists the rest:
 
 ```sh
 x2c translate --out-dir generated src/main.x
 x2c build --output build/app src/main.x
 x2c run src/main.x -- argument
-x2c.com bootstrap --prefix /usr/local
 ```
 
 Use `translate` when Make, Ninja, CMake, or another native build owns

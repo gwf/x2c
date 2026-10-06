@@ -3,7 +3,7 @@
 After building the repository, `./x2c` links to the development compiler;
 `./bin/x2c` is the bootstrap compiler until `make build-install` links it to
 a copy of the development compiler. Every invocation begins with a command:
-`translate`, `build`, `run`, `new`, `script`, `bootstrap`, `env`, `install`,
+`translate`, `build`, `run`, `new`, `script`, `env`, `install`,
 `remove`, `list`, or `help`.
 
 The generated help is the short option reference:
@@ -760,7 +760,7 @@ and `--quiet` suppress successful progress and receipts without suppressing
 diagnostics or a run program's output.
 `--color=auto|always|never` controls color; `NO_COLOR` disables automatic
 color. `--debug` enables compiler debug logging; `translate`, `build`, and
-`run` accept it, and `bootstrap` does not.
+`run` accept it.
 
 `--verbose` prints each command as it runs. `-###` prints the same commands
 without running them. Use them first when checking runtime selection, include
