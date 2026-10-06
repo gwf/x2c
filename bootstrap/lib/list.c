@@ -1829,12 +1829,12 @@ static void _open(List lst, Buffer out){
   Buffer_push(out);
 }
 
-char Buffer_get(Buffer, ptrdiff_t);
+int Buffer_getindex(Buffer, int);
 
 Buffer Buffer_pop(Buffer);
 
 static void _close(Buffer out){
-  if(Buffer_get(out, - 1) != ')') Buffer_pad(out);
+  if(Buffer_getindex(out, - 1) != ')') Buffer_pad(out);
   Buffer_write(out, ")");
   Buffer_pop(out);
 }

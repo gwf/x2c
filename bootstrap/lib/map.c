@@ -843,7 +843,7 @@ Map Map_update_n(Map map, unsigned pair_count, ...){
   va_start(ap, pair_count);
   for(unsigned i = 0;  i < pair_count;  i ++){
     Var key = va_arg(ap, Var), val = va_arg(ap, Var);
-    Map_set(map, key, val);
+    Map_setindex(map, key, val);
   }
   va_end(ap);
   return map;

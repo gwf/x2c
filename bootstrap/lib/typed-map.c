@@ -1749,7 +1749,10 @@ MapIntInt Map_mapintint(Map _x2c_macro_entries_4){
     {
       unsigned _x2c_macro_cursor_5 = 0;
       Var _x2c_macro_key_25, _x2c_macro_val_8;
-      while(Map_try_next(_x2c_macro_entries_4, &(_x2c_macro_cursor_5), &(_x2c_macro_key_25), &(_x2c_macro_val_8))) MapIntInt_set(_x2c_macro_packed_0, Var_int(Var_convert(_x2c_macro_key_25, 3453797)), Var_int(Var_convert(_x2c_macro_val_8, 3453797)));
+      while(Map_try_next(_x2c_macro_entries_4, &(_x2c_macro_cursor_5), &(_x2c_macro_key_25), &(_x2c_macro_val_8)))({
+        MapIntInt _x2c_protocol_arg_0 = _x2c_macro_packed_0;  int _x2c_protocol_arg_1 = Var_int(Var_convert(_x2c_macro_key_25, 3453797));  int _x2c_protocol_arg_2 = Var_int(Var_convert(_x2c_macro_val_8, 3453797));  MapIntInt_setindex(_x2c_protocol_arg_0, _x2c_protocol_arg_1, _x2c_protocol_arg_2);
+      }
+      );
       _x2c_macro_finished_0 = _x2c_macro_packed_0;
       {
         MapIntInt _x2c_return_value_2 = _x2c_macro_packed_0;
@@ -2643,7 +2646,10 @@ MapLongDouble Map_maplongdouble(Map _x2c_macro_entries_9){
     {
       unsigned _x2c_macro_cursor_15 = 0;
       Var _x2c_macro_key_58, _x2c_macro_val_21;
-      while(Map_try_next(_x2c_macro_entries_9, &(_x2c_macro_cursor_15), &(_x2c_macro_key_58), &(_x2c_macro_val_21))) MapLongDouble_set(_x2c_macro_packed_1, Var_long(Var_convert(_x2c_macro_key_58, 818062)), Var_floating(Var_convert(_x2c_macro_val_21, 3356265)));
+      while(Map_try_next(_x2c_macro_entries_9, &(_x2c_macro_cursor_15), &(_x2c_macro_key_58), &(_x2c_macro_val_21)))({
+        MapLongDouble _x2c_protocol_arg_3 = _x2c_macro_packed_1;  long _x2c_protocol_arg_4 = Var_long(Var_convert(_x2c_macro_key_58, 818062));  double _x2c_protocol_arg_5 = Var_floating(Var_convert(_x2c_macro_val_21, 3356265));  MapLongDouble_setindex(_x2c_protocol_arg_3, _x2c_protocol_arg_4, _x2c_protocol_arg_5);
+      }
+      );
       _x2c_macro_finished_2 = _x2c_macro_packed_1;
       {
         MapLongDouble _x2c_return_value_10 = _x2c_macro_packed_1;
@@ -3501,7 +3507,10 @@ MapStringString Map_mapstringstring(Map _x2c_macro_entries_14){
     {
       unsigned _x2c_macro_cursor_25 = 0;
       Var _x2c_macro_key_91, _x2c_macro_val_34;
-      while(Map_try_next(_x2c_macro_entries_14, &(_x2c_macro_cursor_25), &(_x2c_macro_key_91), &(_x2c_macro_val_34))) MapStringString_set(_x2c_macro_packed_2, Var_string(_x2c_macro_key_91), Var_string(_x2c_macro_val_34));
+      while(Map_try_next(_x2c_macro_entries_14, &(_x2c_macro_cursor_25), &(_x2c_macro_key_91), &(_x2c_macro_val_34)))({
+        MapStringString _x2c_protocol_arg_6 = _x2c_macro_packed_2;  String _x2c_protocol_arg_7 = Var_string(_x2c_macro_key_91);  String _x2c_protocol_arg_8 = Var_string(_x2c_macro_val_34);  MapStringString_setindex(_x2c_protocol_arg_6, _x2c_protocol_arg_7, _x2c_protocol_arg_8);
+      }
+      );
       _x2c_macro_finished_4 = _x2c_macro_packed_2;
       {
         MapStringString _x2c_return_value_18 = _x2c_macro_packed_2;
@@ -3729,7 +3738,10 @@ static MapStringString _prepare_string_export(MapStringString map, Context sourc
           {
             key = Var_string(Context_export_nested(source, String_var(key)));
             value = Var_string(Context_export_nested(source, String_var(value)));
-            MapStringString_set(staged, key, value);
+            ({
+              MapStringString _x2c_protocol_arg_9 = staged;  String _x2c_protocol_arg_10 = key;  String _x2c_protocol_arg_11 = value;  MapStringString_setindex(_x2c_protocol_arg_9, _x2c_protocol_arg_10, _x2c_protocol_arg_11);
+            }
+            );
           }
 
         }
@@ -4408,7 +4420,10 @@ MapStringInt Map_mapstringint(Map _x2c_macro_entries_19){
     {
       unsigned _x2c_macro_cursor_36 = 0;
       Var _x2c_macro_key_124, _x2c_macro_val_47;
-      while(Map_try_next(_x2c_macro_entries_19, &(_x2c_macro_cursor_36), &(_x2c_macro_key_124), &(_x2c_macro_val_47))) MapStringInt_set(_x2c_macro_packed_3, Var_string(_x2c_macro_key_124), Var_int(Var_convert(_x2c_macro_val_47, 3453797)));
+      while(Map_try_next(_x2c_macro_entries_19, &(_x2c_macro_cursor_36), &(_x2c_macro_key_124), &(_x2c_macro_val_47)))({
+        MapStringInt _x2c_protocol_arg_12 = _x2c_macro_packed_3;  String _x2c_protocol_arg_13 = Var_string(_x2c_macro_key_124);  int _x2c_protocol_arg_14 = Var_int(Var_convert(_x2c_macro_val_47, 3453797));  MapStringInt_setindex(_x2c_protocol_arg_12, _x2c_protocol_arg_13, _x2c_protocol_arg_14);
+      }
+      );
       _x2c_macro_finished_6 = _x2c_macro_packed_3;
       {
         MapStringInt _x2c_return_value_27 = _x2c_macro_packed_3;
@@ -4627,7 +4642,10 @@ static MapStringInt _prepare_string_int_export(MapStringInt map, Context source)
       int value;
       while(MapStringInt_try_next(map, &(cursor), &(key), &(value))){
         key = Var_string(Context_export_nested(source, String_var(key)));
-        MapStringInt_set(staged, key, value);
+        ({
+          MapStringInt _x2c_protocol_arg_15 = staged;  String _x2c_protocol_arg_16 = key;  int _x2c_protocol_arg_17 = value;  MapStringInt_setindex(_x2c_protocol_arg_15, _x2c_protocol_arg_16, _x2c_protocol_arg_17);
+        }
+        );
       }
       {
         MapStringInt _x2c_return_value_32 = result = staged;

@@ -115,7 +115,7 @@ List Compiler_origin_location(Compiler, int);
 
 size_t Buffer_len(Buffer);
 
-char Buffer_get(Buffer, ptrdiff_t);
+int Buffer_getindex(Buffer, int);
 
 Buffer Buffer_unwrite(Buffer, size_t);
 
@@ -137,9 +137,9 @@ String int_str(int);
 
 static void Pretty_source_marker(Pretty * p, Var value){
   List location = Compiler_origin_location((* p).c, Var_int(Var_convert(value, 3453797)));
-  while(Buffer_len((* p).buff) > 0 && Buffer_get((* p).buff, - 1) == ' ') Buffer_unwrite((* p).buff, 1);
-  if(Buffer_len((* p).buff) > 0 && Buffer_get((* p).buff, - 1) != '\n') _write_newline((* p).buff);
-  while((* p).scanned < Buffer_len((* p).buff)) if(Buffer_get((* p).buff, (* p).scanned ++) == '\n')(* p).output_line ++;
+  while(Buffer_len((* p).buff) > 0 && Buffer_getindex((* p).buff, - 1) == ' ') Buffer_unwrite((* p).buff, 1);
+  if(Buffer_len((* p).buff) > 0 && Buffer_getindex((* p).buff, - 1) != '\n') _write_newline((* p).buff);
+  while((* p).scanned < Buffer_len((* p).buff)) if(Buffer_getindex((* p).buff, (* p).scanned ++) == '\n')(* p).output_line ++;
   String file = Var_string(List_truth(location) ? List_assoc(location, Symbol_var(412426)) : String_var((* p).output_file));
   if(! String_truth(file)) file = _0;
   int line = Var_int(Var_convert(List_truth(location) ? List_assoc(location, Symbol_var(805770)) : int_var((* p).output_line + 1), 3453797));
@@ -153,8 +153,8 @@ static void Pretty_source_marker(Pretty * p, Var value){
 }
 
 static void Pretty_directive(Pretty * p, String token){
-  while(Buffer_len((* p).buff) > 0 && Buffer_get((* p).buff, - 1) == ' ') Buffer_unwrite((* p).buff, 1);
-  if(Buffer_len((* p).buff) > 0 && Buffer_get((* p).buff, - 1) != '\n') _write_newline((* p).buff);
+  while(Buffer_len((* p).buff) > 0 && Buffer_getindex((* p).buff, - 1) == ' ') Buffer_unwrite((* p).buff, 1);
+  if(Buffer_len((* p).buff) > 0 && Buffer_getindex((* p).buff, - 1) != '\n') _write_newline((* p).buff);
   _write_token((* p).buff, token, 0);
   _write_newline((* p).buff);
   if((* p).indent > 0) _write_indent((* p).buff, (* p).indent);
@@ -177,7 +177,7 @@ static void Pretty_ordinary(Pretty * p, String token, List rest){
 static void Pretty_before(Pretty * p, String token){
   if(_token_is(token, '}')){
     if((* p).indent >= 2)(* p).indent -= 2;
-    if(Buffer_len((* p).buff) > 0 && Buffer_get((* p).buff, - 1) != '\n') _write_mapped_newline((* p).buff, (* p).source_line);
+    if(Buffer_len((* p).buff) > 0 && Buffer_getindex((* p).buff, - 1) != '\n') _write_mapped_newline((* p).buff, (* p).source_line);
     if((* p).indent > 0) _write_indent((* p).buff, (* p).indent);
     (* p).prev_token = NULL;
   }
@@ -254,7 +254,7 @@ static void _write_indent(Buffer buff, int indent){
 Buffer Buffer_newline(Buffer);
 
 static void _write_newline(Buffer buff){
-  while(Buffer_len(buff) > 0 && Buffer_get(buff, - 1) == ' ') Buffer_unwrite(buff, 1);
+  while(Buffer_len(buff) > 0 && Buffer_getindex(buff, - 1) == ' ') Buffer_unwrite(buff, 1);
   Buffer_newline(buff);
 }
 
