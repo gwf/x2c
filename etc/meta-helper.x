@@ -66,6 +66,7 @@ static Scope helper_module_scope = NULL;
    calls reply with when they raised. */
 static Scope helper_unit_scope = NULL;
 static Map helper_started = NULL;
+static Map helper_tables = NULL;
 
 /* Raises the failure a body reports, which the call replies with. */
 static void _fail(String message, List notes) {
@@ -340,12 +341,22 @@ static void _reset(void) {
 static List _start(int index, Map table) {
   Var state;
   if (!helper_started.try_get(index, state)) {
+    helper_started[index] = 0;
     List failure = _initialize(table);
     if (failure) state = failure;
     else state = 0;
     helper_started[index] = state;
   }
   return state is <list> ? state.list() : NULL;
+}
+
+/* Native calls between providers use the same unit initialization as a
+   call through the protocol. Recursive provider dependencies start once. */
+void x2c_meta_helper_start(int index) {
+  Var found;
+  Map table = helper_tables.try_get(index, found) ? found : NULL;
+  List failure = _start(index, table);
+  match (failure) case %(failure (?code *detail)): Error.raise(code, detail);
 }
 
 static List _initialize(Map table) {
@@ -380,10 +391,10 @@ int main(void) {
   pthread_create(&watcher, NULL, _watch, (void *) (long) getppid());
   helper_modules = {};
   Buffer input = Buffer.new(0);
-  Map tables = {};
+  helper_tables = {};
   for (int i = 0; i < x2c_meta_helper_count(); i++) {
     Map table = x2c_meta_helper_table(i);
-    if (table) tables[i] = table;
+    if (table) helper_tables[i] = table;
   }
   _reset();
   for (;;) {
@@ -393,7 +404,7 @@ int main(void) {
       case %(call ?(int index) ?(String name) ?(List arguments)
              ?(List globals)): {
         Macro.use_subject(globals);
-        Map table = tables.try_get(index, found) ? found : NULL;
+        Map table = helper_tables.try_get(index, found) ? found : NULL;
         List failure = _start(index, table);
         if (failure) _reply(failure);
         else _call(table, name, arguments);

@@ -77,8 +77,9 @@ typedef struct Call {
     file's own, which runs the constants it computes as its own translation
     does, or else the unit's. */
 Var Compiler.meta_helper_call(
-  Compiler c, String name, Token site, List arguments) {
-  String file = real_path(c.token_source(site, NULL));
+  Compiler c, String name, Token site, List arguments, String provider) {
+  String file = provider ? real_path(home_absolute_path(provider))
+                         : real_path(c.token_source(site, NULL));
   Call call = {
     .compiler = c, .name = name, .site = site,
     .table = _table_of(file, helper_table)};

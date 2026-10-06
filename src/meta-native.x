@@ -51,12 +51,14 @@ void Compiler.install_meta_function(Compiler c, List fn, Token marker) {
   c.check_meta_regions(fn);
   match (fn)
     case %(function ? (bind (binding ? ?(String name)) *) ?): {
+      c.native_meta.del(name);
+      c.meta_group_bound.del(%"<unbound $name>");
       if (c.meta_reaches_compile_time(fn)) c.record_comptime(name);
       if (c.macro_holes) return;
       c.group_meta_function(fn);
       if (c.meta_build) return;
       if (!macro_library_filling() && !c.shares_meta_definition(name))
-        c._install_stub(name, ((List) c.meta_group[-1]).last(), marker);
+        c._install_stub(name, ((List) c.meta_group[-1]).last(), NULL, marker);
     }
 }
 
@@ -75,17 +77,18 @@ void Compiler.install_collected_meta_function(
   c.ensure_macro_lisp();
   if (c.macro_lisp.try_get(name, bound)) return;
   c._install_stub(
-    name, declaration.type_from_ast().canonicalize(), marker);
+    name, declaration.type_from_ast().canonicalize(), NULL, marker);
 }
 
 /* A session refuses to replace a name an ancestor binds, which reaches the
    developer here, at the marker. */
 static void Compiler._install_stub(
-  Compiler c, String name, Type type, Token marker) {
+  Compiler c, String name, Type type, String provider, Token marker) {
+  String context = %"$name\n${provider ? provider : ""}";
   try c.macro_lisp.set_global(
     name,
     Func.new_context(
-      _meta_stub, c.func_signature(type), (char *) name, name.len() + 1));
+      _meta_stub, c.func_signature(type), (char *) context, context.len() + 1));
   catch %(?code *detail): {
     List cause = cons(code, detail);
     $report.macro.function_install(c, marker, cause);
@@ -98,7 +101,9 @@ static void Compiler._install_stub(
    call stages and binds under the name. */
 static Var _meta_stub(Func function, const FuncArg *argv) {
   Array values = _stub_arguments(function, argv);
-  String name = String.new((const char *) Func.context(function));
+  String context = String.new((const char *) Func.context(function));
+  int split = context.find("\n");
+  String name = context[:split], provider = context[split + 1:];
   Compiler c = Compiler.expanding();
   if (!c) $report.macro.outside_compilation(name);
   Token site = MetaContext.current().site;
@@ -108,7 +113,7 @@ static Var _meta_stub(Func function, const FuncArg *argv) {
   Macro.use_subject(rows);
   defer Macro.use_subject(previous);
   if (!c.groups_meta())
-    return c.meta_helper_call(name, site, values.list_free());
+    return c.meta_helper_call(name, site, values.list_free(), provider);
   c.bind_meta_group(name, site);
   Var bound;
   c.macro_lisp.try_get(name, bound);
@@ -302,12 +307,49 @@ static Array Compiler._meta_values(
    call to a project function there is left for the translation. */
 static Var Compiler._meta_function(Compiler c, String name, Token site) {
   Var function = void;
+  if (!c.macro_lisp.try_get(name, function) && c.bind_project_meta(name))
+    c.macro_lisp.try_get(name, function);
   if (!c.macro_lisp.try_get(name, function) && c.bind_native_meta(name))
     c.macro_lisp.try_get(name, function);
   if (function is void && c.meta_build) raise %(meta-later (name $name));
   if (function is void)
     $report.macro.call_binding(c, site, name);
   return function;
+}
+
+/** Records the provider of a public bodied meta function in its interface.
+    The provider owns both its native body and its compile-time state. */
+void Compiler.record_project_meta_effect(
+  Compiler c, List declaration, Token marker) {
+  Type type = declaration.type_from_ast().canonicalize();
+  if (type.is_static() || c.import_src) return;
+  String path = home_portable_path(absolute_path(c.filename));
+  String name = c._native_meta_name(declaration, marker);
+  c.sym.set(
+    %("source-node" (declaration $path ${marker.pos})),
+    %(project-meta $name ${c.func_signature(type)} $path));
+}
+
+/** Installs an included meta function's evaluator advertisement. */
+void Compiler.install_project_meta_effect(Compiler c, List row) {
+  match (row) case %(project-meta ?name ?signature ?provider): {
+    c.project_meta[name] = %($signature $provider);
+    c.native_meta.del(name);
+    c.meta_group_bound.del(%"<unbound $name>");
+  }
+}
+
+/* An evaluator stub carries its provider so a call from any consumer uses
+   the provider's existing helper table, including its private helpers. */
+int Compiler.bind_project_meta(Compiler c, String name) {
+  if (!c.project_meta.len())
+    c.install_native_meta_effects(c.sym.unit_symbols());
+  Var target;
+  if (!c.project_meta.try_get(name, target)) return 0;
+  if (c.meta_build) return 0;
+  Var (signature, provider) = target;
+  c._install_stub(name, signature, provider, NULL);
+  return 1;
 }
 
 /* native meta functions
@@ -324,6 +366,7 @@ void Compiler.record_native_meta_effect(
   if (!declaration.type_from_ast().is_function()) return;
   String path = home_portable_path(absolute_path(c.filename));
   Type type = declaration.type_from_ast().canonicalize();
+  if (type.is_static()) return;
   String name = c._native_meta_name(declaration, marker);
   c.sym.set(
     %("source-node" (declaration $path ${marker.pos})),
@@ -347,8 +390,13 @@ void Compiler.install_native_meta_effects(Compiler c, Map globs) {
   List unit = %(${absolute_path(c.filename)});
   foreach (Var (key, value), globs) {
     if (_declared_in(key, unit)) continue;
+    if (value is <list>) c.install_project_meta_effect(value);
+  }
+  foreach (Var (key, value), globs) {
+    if (_declared_in(key, unit)) continue;
     foreach (List row, c._native_meta_rows(value)) {
       (String name, List signature) = row;
+      if (name in c.project_meta) continue;
       c.native_meta[name] = signature;
       c._certify_native_meta(name, signature, NULL);
     }
@@ -361,6 +409,7 @@ void Compiler.install_native_meta_effects(Compiler c, Map globs) {
     the parse installs the advertisements, so the first lookup there
     installs the ones visible so far. */
 int Compiler.bind_native_meta(Compiler c, String name) {
+  if (c.bind_project_meta(name)) return 1;
   Var signature, bound;
   if (!c.native_meta.len())
     c.install_native_meta_effects(c.sym.unit_symbols());
@@ -379,6 +428,7 @@ void Compiler.install_native_meta_function(
   if (!c.collect_protocols) c.run_declaration_effects();
   c.ensure_macro_lisp();
   List signature = c.func_signature(type);
+  if (c.bind_project_meta(name)) return;
   c.native_meta[name] = signature;
   c._bind_native_meta(name, signature, marker);
 }

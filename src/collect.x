@@ -74,8 +74,8 @@ macro Stmt $report.emit.interface_write(Expr $c) {
 
 /* Process cache: canonical path ->
    `(ordered-parts hash definitions dependencies include-roots)`.
-   A part is a declaration Map, an included source path, or a visibility
-   marker. Dependencies map macro, Lisp, and embedded-text paths to a
+   A part is a declaration Map or an included source path. Dependencies
+   map macro, Lisp, and embedded-text paths to a
    content hash or 1. Entries
    outlive per-unit scopes, so every retained key and value belongs to
    process_cache_scope. */
@@ -218,25 +218,20 @@ static void Compiler._merge_rows(Compiler c, Map globs, Map rows) {
 
 // file walks
 
-/* One cold walk of a file. Each segment of the text ends before an include
-   or a visibility pragma, and `line` and `pos` locate the current segment's
+/* One cold walk of a file. Each segment of the text ends before an include,
+   and `line` and `pos` locate the current segment's
    first token. `deferred` marks an entry collected without its declaration
    defaults. */
 typedef struct FileWalk {
   Compiler c, String path, text, dir, Map globs, visited;
-  Array parts, Map definitions, dependencies;
-  int unit, private, linkage, line, pos, deferred;
+  Array parts, Map definitions, dependencies, statics;
+  int unit, linkage, line, pos, deferred;
 } FileWalk;
 
-/* Record a cold walk under canonical path identity. Published segment rows,
-   included canonical paths, and visibility pragmas enter parts in source
-   order, while source-private state carries only between segments of this
-   file; every included file starts its own visibility state. An including
-   unit replays private includes too, since it may call their functions, but
-   a package publishes only the includes above its private boundary. The
-   first cold visit fixes a header's contribution for later units, so its
-   public declarations must not depend on unit-local names visible before
-   the include. */
+/* Record declaration segments and include edges under canonical path
+   identity. The first cold visit fixes a file's contribution for later
+   units, so its declarations must not depend on unit-local names visible
+   before the include. */
 static void Compiler._walk_file(
   Compiler c, String path, String text, String dir, Map globs,
   Map visited) {
@@ -251,12 +246,14 @@ static void Compiler._walk_file(
     FileWalk w = {
       .c = c, .path = path, .text = text, .dir = dir, .globs = globs,
       .visited = visited, .parts = [], .definitions = {},
-      .dependencies = _cache_map(), .unit = is_source_file(path), .line = 1};
+      .dependencies = _cache_map(), .statics = {},
+      .unit = is_source_file(path), .line = 1};
     // A cycle sees only the exports collected before its include.
     visited[path] = w.parts;
     w.split(tokenizer.tokens);
     visited[path] = 1;
     w.add_defaults();
+    w.select_public();
     w.publish();
   }
 }
@@ -270,18 +267,13 @@ static void FileWalk.split(FileWalk &w, Token first) {
   w.flush(w.text[w.pos:]);
 }
 
-/* An include or a visibility pragma ends the current segment. An include
-   in an arm that C never takes is not read. */
+/* An include ends the segment unless its conditional arm is never taken. */
 static void FileWalk.directive(FileWalk &w, Token token, int hidden) {
-  int angle = 0, visibility = preproc_visibility(token.text);
+  int angle = 0;
   String target = hidden ? NULL : preproc_include_target(token.text, angle);
-  if (!target && visibility < 0) return;
+  if (!target) return;
   w.flush(w.text[w.pos:token.pos]);
-  if (target) w.include(target, angle);
-  else {
-    w.private = visibility;
-    w.parts.push(visibility ? <private> : <public>);
-  }
+  w.include(target, angle);
   Token next = token + 1;
   w.line = next.line;
   w.pos = next.pos;
@@ -347,7 +339,7 @@ static void FileWalk.prepare(FileWalk &w, Compiler shadow, String segment) {
   if (w.path == _canonical_path(w.c.filename))
     shadow.meta_hashes = w.c.meta_hashes;
   shadow.layout = w.c.layout;
-  shadow.source_private = w.private;
+  shadow.source_private = 0;
   shadow.open_linkage = w.linkage;
   shadow.take_unit_state(w.c);
   shadow.tokenize(segment);
@@ -375,8 +367,8 @@ static int Compiler._package_owns(Compiler c, String path) {
     path.startswith(%"${_canonical_path(root)}/");
 }
 
-/* The file takes every row the segment declared. What stays in the overlay
-   afterwards is what the file publishes to an including unit. */
+/* The file takes every row the segment declared. Selection after the last
+   segment can promote a static type needed by a later public declaration. */
 static void FileWalk.merge(FileWalk &w, Compiler shadow, Map overlay) {
   if (w.unit) {
     w.c.fn_defs.merge(shadow.fn_defs);
@@ -389,53 +381,91 @@ static void FileWalk.merge(FileWalk &w, Compiler shadow, Map overlay) {
   w.c.merge_translation_dependencies(shadow.deps);
   w.c._merge_rows(w.globs, overlay);
   Map statics = shadow.sym.file_statics();
-  if (w.private) _keep_published_rows(statics, overlay);
+  w.statics.merge(statics);
   if (w.unit) _publish_unit_statics(statics, overlay, w.path);
-  shadow.sym.withhold_import_rows(overlay);
 }
 
-/** Removes from `published` the declaration rows that this file's
-    file-scope imports added and the file did not write again, and their
-    unit-static markers. An including unit receives an import's
-    declarations only by replaying an exported import itself. */
-void Sym.withhold_import_rows(Sym s, Map published) {
-  foreach (Var (key, value), s.file_statics())
-    match (%($key)) case %((import-row ?row)): {
-      published.del(row);
-      match (row)
-        case %(?(String name)): published.del(%("unit-static" $name));
-    }
-}
-
-/* Below `#pragma private`, an including unit sees only functions with
-   external linkage and the protocol and declaration rows keyed by source
-   position. Types, enumerators, objects, and static functions stay in the
-   file, as they stay out of its generated header. */
-static void _keep_published_rows(Map statics, Map overlay) {
-  Array dropped = $auto([]);
-  foreach (Var (key, value), overlay)
-    if (!_crosses(statics, key, value)) dropped.push(key);
-  foreach (Var key, dropped) overlay.del(key);
-}
-
-static int _crosses(Map statics, Var key, Var value) {
-  match (%($key)) {
-    case %(("source-node" *)): return 1;
-    case %((?(String name))): return _external_function(statics, name, value);
-    case %((self ?(String name))):
-      return _external_function(statics, name, value);
+/* Type rows keep their complete family: the tag, its fields and field
+   order, or a typedef and its ordinary-name row. A public declaration can
+   require an otherwise static family, including through an alias chain. */
+static List _type_family(List key) {
+  match (key) {
+    case %((!set ?kind (!or typedef struct union enum)) ?name *):
+      return %($kind $name);
   }
-  return 0;
+  return NULL;
 }
 
-/* A private function row names a function that an including unit may call
-   through the prototype x2c emits, unless it has internal linkage. */
-static int _external_function(Map statics, String name, Var type) =>
-  type is <list> && type.list().type().is_function() &&
-  !(%(function $name) in statics);
+static List _row_type_family(Map rows, Map statics, List key, Var value) {
+  List family = _type_family(key);
+  if (family) return family;
+  match (key) case %(?(String name)):
+    if (%(typedef $name) in rows) return %(typedef $name);
+  if (!(key in statics) && value is <list>) {
+    Type type = value.list();
+    if (type.is_enum()) return _type_family(type.base_type());
+  }
+  return NULL;
+}
 
-/* A `static` function belongs to the file that defines it, above and below
-   `#pragma private` alike, so its declaration row never crosses an include.
+static int _private_row(Map statics, List key, List family) {
+  if (family && family in statics) return 1;
+  match (key) case %(self ?name): return %(function $name) in statics;
+  return key in statics;
+}
+
+/* Only names that this file declares are candidates. Includes already
+   contribute their selected interface at their recorded source position. */
+static void _needed_types(List syntax, Map rows, Map needed) {
+  Array pending = $auto([syntax]);
+  while (pending.len()) {
+    Var item = pending.take_last();
+    if (item is not <list>) continue;
+    List type = item;
+    while (type.car() is <symbol> &&
+           (type.car().symbol().is_type_qualifier() ||
+            type.car().symbol().is_storage_class())) type = type.cdr();
+    List family = _type_family(type);
+    if (family && family in rows) needed[family] = 1;
+    match (type) case %(?(String name)):
+      if (%(typedef $name) in rows) needed[%(typedef $name)] = 1;
+    foreach (Var part, item) pending.push(part);
+  }
+}
+
+static void FileWalk.select_public(FileWalk &w) {
+  if (!w.unit) return;
+  Map rows = {}, needed = {}, selected = {};
+  foreach (Var part, w.parts) if (part is <map>) rows.merge(part);
+  foreach (Var (key, value), rows) {
+    List family = _row_type_family(rows, w.statics, key, value);
+    if (_private_row(w.statics, key, family)) continue;
+    selected[key] = 1;
+    if (family) needed[family] = 1;
+    if (value is <list>) _needed_types(value, rows, needed);
+  }
+  int changed;
+  do {
+    changed = 0;
+    foreach (Var (key, value), rows) {
+      List family = _row_type_family(rows, w.statics, key, value);
+      if (!family || !(family in needed) || key in selected) continue;
+      selected[key] = 1;
+      if (value is <list>) _needed_types(value, rows, needed);
+      changed = 1;
+    }
+  } while (changed);
+  foreach (Var part, w.parts) {
+    if (part is not <map>) continue;
+    Array dropped = $auto([]);
+    foreach (Var key, part.map().keys())
+      if (!(key in selected)) dropped.push(key);
+    foreach (Var key, dropped) part.map().del(key);
+  }
+}
+
+/* A `static` function belongs to the file that defines it, so its
+   declaration row never crosses an include.
    The published marker names the defining file, which lets an including unit
    report a reference to the name instead of emitting a prototype that no
    object defines. The file is spelled home-portably, as interfaces spell
@@ -512,9 +542,8 @@ static String Compiler._include_text(Compiler c, String target, String path) {
 /* Walk one included file cold and return its entry. The walk reads the
    includer's names through copies, so its private rows and includes stay
    there. It runs in a compiler of its own, with the macro, import, keyword,
-   and Lisp state the file's own translation starts with, so an import that
-   the file does not export stays in it. The includer replays the entry as
-   any later unit would. */
+   and Lisp state the file's own translation starts with. The includer
+   replays the selected public definitions as any later unit would. */
 static List Compiler._walk_cold(
   Compiler c, String target, String canonical, Map globs, Map visited) {
   String text = c._include_text(target, canonical);
@@ -589,8 +618,8 @@ String collect_resolve_include(
 }
 
 /** The typedef names published by the files that the current unit's
-    include of `target` reaches: the included file and, transitively, the
-    includes above each file's `#pragma private`. A file already in `seen`
+    include of `target` reaches, including its transitive includes.
+    A file already in `seen`
     is skipped with the files it reaches, and each file reached is added to
     `seen`. NULL when the include does not resolve to x2c source; a runtime
     module adds nothing the prelude has not declared. */
@@ -609,7 +638,6 @@ static void Compiler._add_typedef_names(
   if (path in seen || _in_runtime(path)) return;
   seen[path] = 1;
   List entry = c._entry(path);
-  int private = 0;
   if (entry)
     foreach (Var part, entry.car())
       match (%($part)) {
@@ -617,10 +645,8 @@ static void Compiler._add_typedef_names(
           foreach (Var key, rows.keys())
             match (%($key)) case %((typedef ?(String name))):
               names.push(name);
-        case %(private): private = 1;
-        case %(public): private = 0;
         case %(?(String include)):
-          if (!private) c._add_typedef_names(names, include, seen);
+          c._add_typedef_names(names, include, seen);
       }
 }
 
@@ -850,25 +876,20 @@ static void Compiler._walk_package(
   package._walk_apart(entry, text, globs, visited);
 }
 
-/* Replay one cached entry for its declarations only, recording each package
-   file as a dependency of the importing unit. An include below the file's
-   private boundary is not part of the package surface. */
+/* Replay each package include once and record its dependencies. */
 static void Surface.gather(Surface &s, String path, List entry) {
   s.c.merge_translation_dependencies(entry[3]);
-  int private = 0;
   foreach (Var part, entry.car())
     match (%($part)) {
       case %(?(Map rows)): s.merge(path, rows);
-      case %(private): private = 1;
-      case %(public): private = 0;
-      case %(?(String include)): s.include(include, private);
+      case %(?(String include)): s.include(include);
       default: __builtin_unreachable();
     }
 }
 
-static void Surface.include(Surface &s, String path, int private) {
+static void Surface.include(Surface &s, String path) {
   s.c.add_translation_dependency(path);
-  if (private || path in s.visited) return;
+  if (path in s.visited) return;
   s.visited[path] = 1;
   s.gather(path, _process_cache()[path]);
 }
@@ -884,7 +905,7 @@ static void Surface.merge(Surface &s, String path, Map rows) {
   String prefix = %"${s.name}__";
   int keeps = _keeps_spellings(path);
   int foreign = !path.startswith(%"${s.root}/");
-  if (!foreign) s.take_exports(rows);
+  s.take_exports(rows);
   foreach (Var (key, value), rows) {
     if (key is not <list> || key.is_nil()) continue;
     String spelling = _package_key_spelling(key);
@@ -895,14 +916,14 @@ static void Surface.merge(Surface &s, String path, Map rows) {
   }
 }
 
-/* A file's exported macro imports follow the package's include walk, and
-   source order within the file. */
+/* Compile-time definitions follow the package's ordinary include walk. */
 static void Surface.take_exports(Surface &s, Map rows) {
   Array found = $auto([]);
   foreach (Var (key, value), rows)
     match (%($key $value))
-      case %(("source-node" (macro-export ? ?position)) (macro-export ?path)):
-        found.push(%($position $path));
+      case %(("source-node" (? ? ?position))
+             (!set ?effect ((!or compile-time project-meta) *))):
+        found.push(%($position $effect));
   found.sort();
   foreach (List entry, found) s.exports.push(entry.cadr());
 }
@@ -914,7 +935,7 @@ static void Surface.take(Surface &s, Map rows, List key, Var value) {
 
 static void Surface.reject(Surface &s, String path, String spelling) {
   String name = s.name, unit = path.split("/").last();
-  String fix = %"below #pragma private, or move it into '$name/src'";
+  String fix = %"directly, or move it into '$name/src'";
   $report.driver.package_prefix(s.c, s.token, name, spelling, unit, fix);
 }
 
@@ -962,16 +983,15 @@ static int _package_protocol_row(List key, Var value) {
   List row = value;
   return row && row.car() in
     %(protocol adopt meta-protocol declaration-source native-meta
-      macro-export package-import);
+      compile-time project-meta interface-types package-import);
 }
 
 // import replay
 
-/** Replays the import operations retained by this declaration contribution:
-    its package imports and the macro imports its file exports. The shadow
-    borrows the unit's macro state and shared package registries. The full
-    parse passes `exports`, which takes the exported imports for the include
-    line, and leaves the unit's own imports at their source sites.
+/** Replays package imports and public compile-time definitions in source
+    order. The shadow borrows the unit's macro state and package registries.
+    The full parse collects effects for the include line and leaves the
+    unit's own definitions at their source sites.
 */
 void Compiler.replay_package_imports(
   Compiler c, Map globs, Map rows, Array exports) {
@@ -979,12 +999,15 @@ void Compiler.replay_package_imports(
   defer if (imports) imports.free();
   foreach (Var (key, value), rows)
     match (key)
-      case %("source-node"
-             ((!or package-import macro-export) ?path ?position)):
+      case %("source-node" (? ?path ?position)): {
+        if (value is not <list> || !value.list() ||
+            !(value.list().car() in
+              %(package-import compile-time project-meta))) continue;
         if (exports == NULL || !c._imported_here(path)) {
           if (!imports) imports = [];
           imports.push(%($path $position $value));
         }
+      }
   if (!imports.len()) return;
   imports.sort();
   c._import_all(globs, imports, exports);
@@ -1006,30 +1029,33 @@ static void Compiler._import_all(
     match (entry) {
       case %(?(String path) ?
              (package-import ?(String name) ?(String alias) ?members)):
-        shadow._import_package(path, name, alias, members);
-      case %(? ? (macro-export ?(String file))):
-        if (exports != NULL) exports.push(file);
-        else shadow.import_exported(file, NULL);
+        shadow._import_package(path, name, alias, members, exports);
+      case %(? ? (!set ?effect ((!or compile-time project-meta) *))):
+        if (exports != NULL) exports.push(effect);
+        else shadow.install_compile_time_effects(%($effect));
     }
   shadow.return_unit_state(c);
   c.merge_translation_dependencies(shadow.deps);
 }
 
 static void Compiler._import_package(
-  Compiler c, String path, String name, String alias, List members) {
+  Compiler c, String path, String name, String alias, List members,
+  Array effects) {
   c.filename = home_absolute_path(path);
   c.collect_package(name, NULL);
   c.register_package_alias(name, alias, NULL);
   foreach (List member, members)
     c.register_package_member(name, member.car(), member.cadr(), NULL, NULL);
-  c.import_package_macros(name, NULL);
+  if (effects != NULL) {
+    foreach (Var effect, c.package_exports[name]) effects.push(effect);
+  }
+  else c.import_package_macros(name, NULL);
 }
 
-/** Repeats included package imports after full parsing resets macros, in
-    the cache's original include order. The unit's own imports stay at their
-    source sites. Returns the macro imports the included files export, by
-    the canonical path of each file the unit includes, for the full parse
-    to install at that include.
+/** Prepares included compile-time effects after full parsing resets macros.
+    The ordered cache walk counts each file once and groups effects by the
+    canonical path of the unit's direct include. The parser installs those
+    effects when it reaches that include.
 */
 Map Compiler.replay_included_package_imports(Compiler c, Map globs) {
   Map visited = {}, delivered = {};
@@ -1042,14 +1068,13 @@ Map Compiler.replay_included_package_imports(Compiler c, Map globs) {
     if (part is <map>) c.replay_package_imports(globs, part, exports);
     else if (part is <string>) {
       c._replay_included(globs, part, visited, exports, NULL);
-      if (exports.len()) delivered[part] = exports;
+      if (exports.len()) delivered[part] = exports.list_free();
     }
   }
   return delivered;
 }
 
-/* Active walks supply their recorded prefix instead of a completed entry.
-   Replaying only import rows keeps an ancestor's private macros isolated. */
+/* Active walks supply their public recorded prefix during an include cycle. */
 static void Compiler._replay_included(
   Compiler c, Map globs, String path, Map visited, Array exports,
   Map active) {
@@ -1066,9 +1091,8 @@ static void Compiler._replay_included(
   }
 }
 
-/** Installs, at each include among the directives before the cursor, the
-    macro imports that the included file exports, as the unit's own imports
-    written there would be installed. */
+/** Installs the definitions of each include among the directives before
+    the cursor. */
 void Compiler.import_included_exports(Compiler c) {
   Token first = c.token, tokens = c.tokenizer.tokens;
   for (Token token = first; token > tokens;) {
@@ -1089,7 +1113,7 @@ void Compiler.import_included_exports(Compiler c) {
     Var exports = c.included_exports[canonical];
     if (exports is void) continue;
     c.included_exports.del(canonical);
-    foreach (String file, exports) c.import_exported(file, token);
+    c.install_compile_time_effects(exports);
   }
 }
 
@@ -1253,13 +1277,11 @@ static List Compiler._interface_entry(
   return entry;
 }
 
-/* A stored part is an include path, a visibility marker, or a list of
-   rows. */
+/* A stored part is an include path or a list of rows. */
 static int _read_parts(Array parts, List stored) {
   foreach (Var part, stored) {
     if (part is <string>)
       parts.push(_canonical_path(home_absolute_path(part)));
-    else if (part == <private> || part == <public>) parts.push(part);
     else if (part is not <list>) return 0;
     else {
       Map rows = _read_rows(part);
@@ -1371,10 +1393,9 @@ static List Compiler._interface_include_dirs(Compiler c) {
   return dirs.list_free();
 }
 
-/* A stored part is a visibility marker, a home-portable include path, or
-   the sorted rows of a declaration map with bindings renumbered. */
+/* A stored part is a home-portable include path or the sorted rows of a
+   declaration map with bindings renumbered. */
 static Var _stored_part(Var part, Map identities) {
-  if (part is <symbol>) return part;
   if (part is not <map>) return home_portable_path(part);
   Array rows = [];
   foreach (Var (key, value), part.map()) rows.push(%($key $value));

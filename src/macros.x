@@ -388,7 +388,7 @@ typedef struct Definition {
   Atom name, Symbol kind;
   List target, parameters, template, fresh, captures, pattern, rebuild, type;
   List origin, String file, Map locals, Array using;
-  int anonymous, local, nested, quotation, leaf;
+  int anonymous, local, nested, quotation, leaf, storage;
 } Definition;
 
 /** Parses the macro definition at the current token into a `macrodef` `List`.
@@ -397,6 +397,7 @@ typedef struct Definition {
 */
 List Compiler.parse_macro_definition(Compiler c) {
   Definition d = {.c = c, .start = c.token};
+  d.storage = c.test(<static>) || c.source_private;
   c.expect(<ident>);
   d.head();
   d.naming();
@@ -847,7 +848,7 @@ static int Definition.uses_holes_once(Definition &d, Map uses) {
 /* Makes the finished definition visible in place of its signature. */
 static List Definition.publish(Definition &d) {
   List node = d.node();
-  d.show(node);
+  $let(d.c.token, d.start) d.show(node);
   return node;
 }
 
@@ -878,6 +879,7 @@ static List Definition.node(Definition &d) {
     (imported ${c.import_src != NULL})
     (builtin ${c.builtin_defs})
     (local ${d.local})
+    (static ${d.storage})
   );
   return definition;
 }
@@ -1989,18 +1991,69 @@ static List _capture_layout(
 */
 List Compiler.publish_macro_definition_node(Compiler c, List node) {
   c.macros[node.assoc(<name>)] = node;
+  if (c.shallow && !c.macro_holes &&
+      !node.assoc(<static>).int() && !node.assoc(<local>).int())
+    c.record_compile_time_effect(
+      %(compile-time macrodef ${c.freeze_declaration_syntax(node)}), c.token);
   return node;
+}
+
+/** Records a public source effect where its completed definition stands. */
+void Compiler.record_compile_time_effect(
+  Compiler c, List row, Token start) {
+  if (!c.shallow || c.source_private || c.macro_holes ||
+      !c.sym.at_file_scope() ||
+      c.builtin_defs || c.import_src || !c.filename ||
+      c.filename.startswith("<builtin:")) return;
+  String source = home_portable_path(Path.absolute(c.filename));
+  List key = %("source-node" (compile-time $source ${start.pos}));
+  List previous = c.sym.get(key);
+  if (previous) row = %(compile-time effects $previous $row);
+  c.sym.set(key, row);
+}
+
+/** Installs included compile-time definitions in their source order.
+    Keyword aliases retain the definition visible when their source declared
+    them, even if a later macro definition uses the same name.
+*/
+void Compiler.install_compile_time_effects(Compiler c, List rows) {
+  foreach (List row, rows) match (row) {
+    case %(compile-time effects *effects):
+      c.install_compile_time_effects(effects);
+    case %(compile-time macrodef ?definition): {
+      List node = c._rebind_imported(c.thaw_declaration_syntax(definition));
+      c.macros[node.assoc(<name>)] = node;
+    }
+    case %(compile-time keyword ?alias ?definition):
+      c.kw_aliases[alias] =
+        c._rebind_imported(c.thaw_declaration_syntax(definition));
+    case %(compile-time lisp ?form (source ?path ?site)): {
+      Token token = c.thaw_declaration_syntax(site);
+      $let(c.filename, home_absolute_path(path)) {
+        if (c.shallow) c.queue_declaration_effect(form, token, token);
+        else c.evaluate_declaration_effect(form, token);
+      }
+    }
+    case %(compile-time import ?path ?site): {
+      Token token = c.thaw_declaration_syntax(site);
+      c.keep_imported_meta(c._import(home_absolute_path(path), token));
+    }
+    case %(project-meta ? ? ?): c.install_project_meta_effect(row);
+  }
 }
 
 /** Returns whether the current tokens have macro-definition introducer form.
     This query does not consume tokens.
 */
 int Compiler.macro_form_is_definition(Compiler c) {
-  if (c.peek(0) != <ident> || c.token.text != "macro") return 0;
-  if (c.peek(1) == <$>) return 1;
-  return c.peek(1) == <ident> &&
-    (c.peek(2) == <$> ||
-     (c.peek(2) == <ident> && c.peek(3) == <$>));
+  Token token = c.token;
+  int offset = c.peek(0) == <static>;
+  if (offset) token = Token.skip_trivia(token + 1);
+  if (c.peek(offset) != <ident> || token.text != "macro") return 0;
+  if (c.peek(offset + 1) == <$>) return 1;
+  return c.peek(offset + 1) == <ident> &&
+    (c.peek(offset + 2) == <$> ||
+     (c.peek(offset + 2) == <ident> && c.peek(offset + 3) == <$>));
 }
 
 /** Returns whether the current tokens begin a local macro definition.
@@ -2016,8 +2069,13 @@ int Compiler.local_macro_form_is_definition(Compiler c) {
 /** Returns whether the current tokens begin a `keyword NAME $macro` alias.
     This query does not consume tokens.
 */
-int Compiler.keyword_form_is_definition(Compiler c) =>
-  c.at_word("keyword") && c.peek(2) == <$>;
+int Compiler.keyword_form_is_definition(Compiler c) {
+  Token token = c.token;
+  int offset = c.peek(0) == <static>;
+  if (offset) token = Token.skip_trivia(token + 1);
+  return c.peek(offset) == <ident> && token.text == "keyword" &&
+         c.peek(offset + 2) == <$>;
+}
 
 /** Parses and installs one source-local `keyword` alias.
     The named macro must already be visible; the alias captures that definition
@@ -2025,6 +2083,7 @@ int Compiler.keyword_form_is_definition(Compiler c) =>
 */
 void Compiler.parse_keyword_definition(Compiler c) {
   Token declaration = c.token;
+  int storage = c.test(<static>) || c.source_private;
   c.expect(<ident>);
   if (c.peek(0) != <ident>)
     $report.parse.keyword_name(c);
@@ -2043,6 +2102,10 @@ void Compiler.parse_keyword_definition(Compiler c) {
   }
   c.expect(<;>);
   c.kw_aliases[alias] = definition;
+  if (!storage)
+    c.record_compile_time_effect(
+      %(compile-time keyword $alias
+        ${c.freeze_declaration_syntax(definition)}), declaration);
 }
 
 /* Only the built-in sources define `with` or replace a built-in alias. */
@@ -2059,7 +2122,9 @@ static const SymbolSet alias_kinds =
 
 /* Parses one keyword alias of `c`'s source into `aliases`. */
 static void Compiler._record_alias(Compiler c, Map aliases) {
-  Token token = Token.skip_trivia(c.token + 1);
+  Token token = c.token;
+  if (token.type == <static>) token = Token.skip_trivia(token + 1);
+  token = Token.skip_trivia(token + 1);
   Atom alias = Atom.intern(token.text);
   c.parse_keyword_definition();
   aliases[alias] = c.kw_aliases[alias];
@@ -3893,8 +3958,7 @@ List Compiler.parse_macro_lisp_top_level(Compiler c) {
      every unit inherits them, so evaluating this one again would only try to
      replace a name an ancestor binds. */
   if (c.inherited_lisp) return NULL;
-  c.ensure_macro_lisp();
-  c._eval_string(form, invocation);
+  c.evaluate_declaration_effect(form, invocation);
   return NULL;
 }
 
@@ -3902,7 +3966,14 @@ List Compiler.parse_macro_lisp_top_level(Compiler c) {
     Declaration projection forces preceding effects exactly once; otherwise
     full parsing keeps the ordinary source-order evaluation. */
 void Compiler.parse_macro_lisp_shallow(Compiler c) {
-  if (c._import_path(NULL)) {
+  String requested = NULL;
+  if (c._import_path(requested)) {
+    if (!c.source_private) {
+      String path = home_portable_path(c._canonical_path(requested, c.token));
+      c.record_compile_time_effect(
+        %(compile-time import $path
+          ${c.freeze_declaration_syntax(c.token)}), c.token);
+    }
     c._collect_import();
     return;
   }
@@ -3911,6 +3982,12 @@ void Compiler.parse_macro_lisp_shallow(Compiler c) {
   /* As in full parsing, the shared session already holds an inherited
      import's forms, and running one again would rebind an ancestor's name. */
   if (c.inherited_lisp) return;
+  if (!c.source_private) {
+    String path = home_portable_path(Path.absolute(c.filename));
+    c.record_compile_time_effect(
+      %(compile-time lisp $form
+        (source $path ${c.freeze_declaration_syntax(first)})), first);
+  }
   c.queue_declaration_effect(form, first, c.token);
 }
 
@@ -3963,10 +4040,14 @@ void Compiler.import_exported(Compiler c, String path, Token invocation) {
 /** Evaluates a queued source Lisp form with its original diagnostic site. */
 void Compiler.evaluate_declaration_effect(
   Compiler c, String form, Token invocation) {
+  List key = %(${home_portable_path(Path.absolute(c.filename))}
+               ${invocation.pos} $form);
+  if (key in c.evaluated_effects) return;
   $let(c.collect_protocols, 1) {
     c.ensure_macro_lisp();
     c._eval_string(form, invocation);
   }
+  c.evaluated_effects[key] = 1;
 }
 
 /** Parses a compile-time Lisp form in an expression position.

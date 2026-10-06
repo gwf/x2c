@@ -91,6 +91,7 @@ typedef struct Compiler {
   // Include-search candidates map to absence or their resolved identity.
   Map deps;
   List aggregate_type, macro_stack, declaration_effects, Sym sym;
+  Map evaluated_effects;
   /* The last frozen `macro_stack`, reused while that List and every pool
      level live; one expansion's declarations share one stack. */
   List frozen_stack_key;
@@ -164,6 +165,8 @@ typedef struct Compiler {
      holding each declared signature. A function binds into the macro
      session the first time compile-time code calls it. */
   Map native_meta;
+  // Public project meta signatures and their defining source files.
+  Map project_meta;
   /* The unit's top-level nodes parsed so far, and its `meta` group in
      source order: each bodied `meta` function as `(function FN NAME
      TYPE)`, and while the project meta build parses the unit or the REPL
@@ -387,10 +390,15 @@ void Compiler.finish_collected_declaration(
 static void Compiler._skip_body(
   Compiler c, List declaration, Token meta, int native) {
   if (native) c.record_native_meta_effect(declaration, meta);
-  else if (meta) c.install_collected_meta_function(declaration, meta);
+  else if (meta) {
+    c.record_project_meta_effect(declaration, meta);
+    c.install_collected_meta_function(declaration, meta);
+  }
   match (declaration)
     case %(declare ? (bindings (bind ?binding ?))):
       c._note_function_body(declaration.type_from_ast(), binding);
+  Type type = declaration.type_from_ast();
+  Token first = c.token;
   if (c._at_function_arrow()) {
     c.next();
     c.next();
@@ -398,6 +406,8 @@ static void Compiler._skip_body(
     c.expect(<;>);
   }
   else c._shallow_block();
+  if (!meta && type.is_inline() && !type.is_static())
+    c.collect_inline_type_dependencies(declaration, first, c.token);
 }
 
 // `fn_defs` holds each non-static function the unit defines.
@@ -569,6 +579,8 @@ static List Compiler._replay_bundle(Compiler c) {
 Var Compiler.freeze_declaration_syntax(Compiler c, Var syntax) {
   if (syntax is not <list> || syntax.is_nil()) return _freeze_leaf(syntax);
   match (syntax) {
+    case %(cache ?(int id)):
+      return %(declaration-cache ${c._freeze_cache_key(c.id_keys[id])});
     case %(macrodef *rows): return c._frozen_macro(syntax, rows);
     case %(src (source ?path ?begin ?end) ?node):
       return %(src (source ${_declaration_path(path, 0)} $begin $end)
@@ -605,7 +617,8 @@ static List Compiler._freeze_rows(Compiler c, List syntax) {
   foreach (Var row, syntax) rows.push(c.freeze_declaration_syntax(row));
   match (syntax)
     case %((!or declaration-void declaration-empty-symbol declaration-atom
-                declaration-token declaration-origin declaration-list) *):
+                declaration-token declaration-origin declaration-list
+                declaration-cache declaration-cache-binding) *):
       return %(declaration-list @{rows.list_free()});
   return rows.list_free();
 }
@@ -626,6 +639,8 @@ Var Compiler.freeze_macro_stack(Compiler c) {
 Var Compiler.thaw_declaration_syntax(Compiler c, Var syntax) {
   if (syntax is not <list> || syntax.is_nil()) return syntax;
   match (syntax) {
+    case %(declaration-cache ?key):
+      return c.cache(c._thaw_cache_key(key));
     case %(declaration-list *rows): return c._thaw_rows(rows);
     case %(macrodef *rows): return c._declaration_macro(rows, 1);
     case %(src (source ?path ?begin ?end) ?node):
@@ -640,6 +655,33 @@ Var Compiler.thaw_declaration_syntax(Compiler c, Var syntax) {
       return c._thaw_origin(location, node);
   }
   return c._thaw_rows(syntax);
+}
+
+/* Literal conversion calls refer to the consumer's global bindings. */
+static Var Compiler._freeze_cache_key(Compiler c, Var key) {
+  String name = NULL;
+  if (binding_identity_try_parts(key, NULL, name))
+    return %(declaration-cache-binding $name);
+  if (key is not <list>) return _freeze_leaf(key);
+  match (key) case %(cache ?): return c.freeze_declaration_syntax(key);
+  Array out = [];
+  foreach (Var child, key.list()) out.push(c._freeze_cache_key(child));
+  return out.list_free();
+}
+
+static Var Compiler._thaw_cache_key(Compiler c, Var key) {
+  if (key is not <list>) return key;
+  match (key) {
+    case %(declaration-cache-binding ?name):
+      return c.sym.reference_global(%($name));
+    case %(declaration-cache ?): return c.thaw_declaration_syntax(key);
+    case %((!or declaration-void declaration-empty-symbol declaration-atom
+                declaration-token declaration-origin declaration-list) *):
+      return c.thaw_declaration_syntax(key);
+  }
+  Array out = [];
+  foreach (Var child, key.list()) out.push(c._thaw_cache_key(child));
+  return out.list_free();
 }
 
 static List Compiler._thaw_rows(Compiler c, List rows) {
@@ -691,9 +733,11 @@ static List Compiler._declaration_macro(Compiler c, List rows, int thaw) {
 }
 
 static List Compiler._macro_row(Compiler c, List row, int thaw) {
-  match (row)
+  match (row) {
     case %(origin ?location):
       return %(origin ${_declaration_location(location, thaw)});
+    case %(file ?path): return %(file ${_declaration_path(path, thaw)});
+  }
   return thaw ? c.thaw_declaration_syntax(row)
               : c.freeze_declaration_syntax(row);
 }
@@ -1037,6 +1081,7 @@ static void Compiler._reset_parse(Compiler c, Map globs, int generated) {
   c.meta_comptime = {};
   c.meta_regions = {};
   c.native_meta = {};
+  c.project_meta = {};
   c.inherit_library_comptime();
   c.init_tokens = {};
   c.static_init_deps = {};
@@ -2511,7 +2556,7 @@ void Compiler.borrow_unit_semantics(Compiler c, Compiler owner) {
   $copy_fields(c, owner, sym, fn_defs, id_keys, key_ids, protocols,
                adoptions, conforms, protocol_helpers, proto_cache,
                meta_comptime, meta_regions, meta_hashes, meta_calls,
-               native_meta);
+               native_meta, project_meta);
 }
 
 /** Shares `owner`'s pending `meta` group and the definitions it reads, which
@@ -2680,7 +2725,8 @@ static void Compiler._init_tables(Compiler c) {
   $set_fields(c, {}, key_ids, deps, macros, kw_aliases, kw_seen,
               object_macros, proto_cache, imports, init_tokens,
               static_init_deps, fn_defs, meta_comptime, meta_regions,
-              meta_hashes, meta_calls, native_meta);
+              meta_hashes, meta_calls, native_meta, project_meta,
+              evaluated_effects);
 }
 
 /* A child compiler owns its tokens, symbols, and diagnostics. Package
@@ -2692,7 +2738,7 @@ static void Compiler._share_unit(Compiler c, Compiler owner) {
                source_map, recovery_depth, sources, declaration_produced,
                source_facts, source_occurrences, source_definitions,
                source_declarations, source_texts, unit_script, include_dirs,
-               meta_build);
+               meta_build, evaluated_effects);
 }
 
 /* The first compiler of a unit creates the state its children share and

@@ -5,17 +5,13 @@
     Before a translation starts, the bodied `meta` functions its inputs
     reach are compiled into one helper program linked against the runtime,
     which the translation then calls (`src/meta-helper-client.x`). They
-    come from each project `.xmacro` file an input imports, directly,
-    through an included header, or through a package, and from an input
-    or included file that defines its own until those move to `.xmacro`
-    files. Meta code under the x2c root's `lib`, `src`, and `etc` is the
+    come from ordinary source units reached directly, by includes, or by
+    packages. Meta code under the x2c root's `lib`, `src`, and `etc` is the
     compiler's own, linked into it.
 
-    Each input or included file that reaches any gets a table of its
-    own, parsed from the file itself so its
-    imports see the declarations they are used with. Each table's object
-    keeps only its entry global, so copies of one import in several
-    tables link together. The helper is cached under the x2c cache root,
+    Each source unit with meta code gets its own table and native object.
+    Public functions link between units; static helpers stay with their
+    provider. The helper is cached under the x2c cache root,
     keyed by the SHA-256 of those sources, the compiler stamp, the C
     compiler's identity, and the flags, and is built again when a file its
     build read, x2c source or C header, changes.
@@ -64,12 +60,11 @@ macro Stmt $output.helper.count(Expr $out, Expr $count) {
 
 // preparing the helper
 
-/* One project meta build. The Kth owner, an input that reaches meta code,
-   parses into table K, and `reaches` holds the imports of an owner without
-   meta code of its own. A build records the files it reads in `deps` and
+/* One project meta build. The Kth owner parses into table K.
+   A build records the files it reads in `deps` and
    the result of each table in the fields after it. */
 typedef struct Helper {
-  Frontend frontend, Array imports, owners, Map reaches, packages;
+  Frontend frontend, Array owners, Map packages;
   Toolchain toolchain, String include, identity, directory;
   List flags, Array modules;
   Map deps, before, Array groups, built, failures, objects, int changed;
@@ -81,7 +76,7 @@ typedef struct Helper {
     does not build is reported at the first call that needs it. */
 void Frontend.prepare_meta(Frontend f, List inputs) {
   Helper h = {
-    .frontend = f, .imports = [], .owners = [], .reaches = {},
+    .frontend = f, .owners = [],
     .packages = {}, .deps = {}, .before = {}, .groups = [], .built = [],
     .failures = [], .objects = []};
   h.scan(inputs);
@@ -97,7 +92,7 @@ void Frontend.prepare_meta(Frontend f, List inputs) {
   h.flags = _group_flags(f.request, h.packages);
   h.modules = _modules(f.request, h.packages);
   h.identity = h.identify(stamp, compiler);
-  h.directory = _directory(root, h.identity, h.imports, h.owners);
+  h.directory = _directory(root, h.identity, h.owners);
   h.use(h.manifest());
 }
 
@@ -133,36 +128,25 @@ static void Helper.use(Helper &h, List manifest) {
 
 // reaching meta code
 
-/* The scan of one input. `imports` collects each project `.xmacro` file
-   that holds meta code, after the files it imports, and `units` each
-   included file that reaches it; `seen` holds each file's result bits, and
+/* The scan of one input. `units` collects included meta providers;
+   `seen` holds each file's result bits, and
    `packages` the root of each package imported. */
 typedef struct Scan {
-  CliRequest request, Array imports, units, Map seen, packages;
+  CliRequest request, Array units, Map seen, packages;
 } Scan;
 
-/* Each input that reaches meta code becomes an owner. One without meta
-   code of its own keeps the files it imports, for a group of those alone.
-   An included file that reaches meta code becomes an owner too, so the
+/* Each input or included file with meta code becomes an owner, so the
    constants it computes run in its own table when a unit collects it.
    Its path is canonical, as collection spells it. */
 static void Helper.scan(Helper &h, List inputs) {
-  Map known = {}, owned = {};
+  Map owned = {};
   foreach (String input, inputs) {
     String path = Path.absolute(input);
     Scan s = {
-      .request = h.frontend.request, .imports = [], .units = [], .seen = {},
+      .request = h.frontend.request, .units = [], .seen = {},
       .packages = h.packages};
-    int meta = s.file(path), own = meta & 1;
-    Array reached = s.imports;
-    if (meta) h.own(path, owned);
-    if (!own && reached.len()) h.reaches[path] = reached.list();
+    if (s.file(path) & 1) h.own(path, owned);
     foreach (String unit, s.units) h.own(unit, owned);
-    foreach (String file, reached)
-      if (!(file in known)) {
-        known[file] = 1;
-        h.imports.push(file);
-      }
   }
 }
 
@@ -173,7 +157,7 @@ static void Helper.own(Helper &h, String path, Map owned) {
 }
 
 /* Reads each file once. Bit 1 marks its own file-scope meta code; bit 2
-   marks project meta code its imports, includes, or packages reach. An
+   marks project meta code its includes or packages reach. An
    unfinished scan has neither bit, so cycles stop at their open file. */
 static int Scan.file(Scan &s, String path) {
   Var found;
@@ -205,8 +189,6 @@ static int Scan.file_scope(Scan &s, Tokenizer tokens, String directory) {
     }
     if (depth) continue;
     if (word == "meta") meta |= _marker(tokens);
-    else if (word == "$(")
-      meta |= s.macro_import(tokens, directory) ? 2 : 0;
     else if (word == "import") meta |= s.package(tokens) ? 2 : 0;
     else if (token.type == <preproc>)
       meta |= s.include(word, directory) ? 2 : 0;
@@ -223,31 +205,19 @@ static int _marker(Tokenizer tokens) {
   return tokens.next().text == "(";
 }
 
-/* A project `.xmacro` or `.xpmacro` file that `$(import` names joins
-   `imports` after the files it imports, when it holds meta code. */
-static int Scan.macro_import(Scan &s, Tokenizer tokens, String directory) {
-  if (tokens.next().text != "import") return 0;
-  String spelling = _quoted(tokens.next());
-  String file = spelling ? _resolve(directory, spelling) : NULL;
-  if (!file || !(file.endswith(".xmacro") || file.endswith(".xpmacro")) ||
-      _compiler_owns(file)) return 0;
-  int seen = file in s.seen, meta = s.file(file);
-  if (!seen && (meta & 1)) s.imports.push(file);
-  return !!meta;
-}
-
-/* An imported package's entry is read for imports like an input. */
+/* A package entry is read as an ordinary source provider. */
 static int Scan.package(Scan &s, Tokenizer tokens) {
   String name = _quoted(tokens.next()), root = NULL;
   String entry = name ? package_entry(
     s.request.sources, s.request.package_roots(), name, root) : NULL;
   if (!entry) return 0;
   s.packages[root] = 1;
-  return !!s.file(entry);
+  int meta = s.file(entry);
+  if (meta & 1) s.units.push(absolute_path(entry));
+  return !!meta;
 }
 
-/* An included project `.x` or `.xp` file is read for imports too, and
-   joins `units` when it reaches project meta code. */
+/* An included source is read once; each meta provider joins `units`. */
 static int Scan.include(Scan &s, String directive, String directory) {
   int angle = 0;
   String target = preproc_include_target(directive, angle);
@@ -256,24 +226,16 @@ static int Scan.include(Scan &s, String directive, String directory) {
     s.request.sources, s.request.include_dirs, directory, target, angle);
   if (!file) return 0;
   String path = Path.absolute(file);
-  if (_compiler_owns(path) || !s.file(path)) return 0;
-  s.units.push(absolute_path(path));
-  return 1;
+  if (_compiler_owns(path)) return 0;
+  int meta = s.file(path);
+  if (meta & 1) s.units.push(absolute_path(path));
+  return !!meta;
 }
 
 /* The text between a string token's quotes. */
 static String _quoted(Token token) =>
   token.len >= 2 && token.text[0] == '"'
     ? String.new_len(token.text + 1, token.len - 2).unescape() : NULL;
-
-/* The file the quoted `spelling` names from `directory`, or else from the
-   runtime's `lib`, as an import resolves it, or NULL. */
-static String _resolve(String directory, String spelling) {
-  String local = spelling.startswith("/") ? spelling : %"$directory/$spelling";
-  if (Path.is_file(local)) return Path.absolute(local);
-  String system = %"${x2c_get_root()}/lib/$spelling";
-  return Path.is_file(system) ? system : NULL;
-}
 
 static int _compiler_owns(String path) {
   String root = x2c_get_root();
@@ -350,9 +312,9 @@ static String _loop_source(void) => %"${x2c_get_root()}/etc/meta-helper.x";
    sources. A changed source builds the same directory again, which keeps
    the helper when no group object changes. */
 static String _directory(
-  String root, String identity, Array imports, Array owners) {
+  String root, String identity, Array owners) {
   Array key = [identity];
-  foreach (String path, %(@imports "--" @owners)) key.push(path);
+  foreach (String path, owners) key.push(path);
   return %"$root/meta/project-${String.sha256("\n".join(key))}";
 }
 
@@ -371,12 +333,17 @@ static List Helper.build(Helper &h) {
     _clear(base);
   }
   String loop = _loop_source();
-  foreach (String path, %(@{h.imports} @{h.owners} @{h.modules} $loop))
+  foreach (String path, %(@{h.owners} @{h.modules} $loop))
     h.deps[path] = 1;
-  Compiler.use_meta_build_directory(h.directory);
+  Compiler.use_meta_build_directory(h.directory, h.owners);
   int index = 1;
-  foreach (String owner, h.owners) h.group(owner, index++);
-  Compiler.use_meta_build_directory(NULL);
+  foreach (String owner, h.owners) h.parse(owner, index++);
+  Compiler.use_meta_build_directory(NULL, NULL);
+  index = 1;
+  foreach (String owner, h.owners) {
+    String failure = h.compile(index, owner);
+    h.record(index++, failure);
+  }
   collect_forget_provisional_entries();
   return h.write_manifest(h.link(count));
 }
@@ -391,21 +358,6 @@ static void _clear(String base) {
     String file = %"$base$suffix";
     if (Path.exists(file)) Path.remove_file(file);
   }
-}
-
-/* Builds the group of table `index` from the input `owner`. An input that
-   only imports its meta code, and whose own group does not build, gets
-   the group of its imports alone. */
-static void Helper.group(Helper &h, String owner, int index) {
-  h.parse(owner, index);
-  String failure = h.compile(index, owner);
-  List reached = h.reaches[owner];
-  if (reached && failure) {
-    _clear(h.base(index));
-    h.parse(_imports_unit(h.base(index), reached), index);
-    failure = h.compile(index, owner);
-  }
-  h.record(index, failure);
 }
 
 /* Parses the unit at `path` for the group of table `index`, which the
@@ -442,29 +394,7 @@ static String Helper.compile(Helper &h, int index, String unit) {
       "-iquote" ${Path.dirname(unit)} "-iquote" ${h.include} @{h.flags}
       "-MD" "-MF" ${%"$base.d"} "-c" ${%"$base.c"} "-o" ${%"$base.o"}),
     h.directory);
-  if (!failure) failure = _localize(t, base, index);
   _add_depfile(%"$base.d", h.deps);
-  return failure;
-}
-
-/* Leaves `x2c_module_targets_K` the only global symbol of the object
-   `base.o` of table K, so the groups of several units, each holding its own
-   copy of what it imports, link into one program. */
-static String _localize(Toolchain t, String base, int index) {
-  String entry = %"x2c_module_targets_$index", object = %"$base.o";
-  String merged = %"$base.r.o";
-#ifdef __APPLE__
-  String failure = Compiler.meta_cc_run(
-    %(${t.cc} "-r" "-nostdlib" ${%"-Wl,-exported_symbol,_$entry"} $object
-      "-o" $merged), NULL);
-#else
-  String failure = Compiler.meta_cc_run(
-    %(${t.cc} "-r" "-nostdlib" $object "-o" $merged), NULL);
-  if (!failure)
-    failure = Compiler.meta_cc_run(
-      %("objcopy" ${%"--keep-global-symbol=$entry"} $merged), NULL);
-#endif
-  if (!failure) Path.move_to(merged, object);
   return failure;
 }
 
@@ -473,17 +403,6 @@ static void _add_depfile(String path, Map deps) {
   if (!Path.is_file(path)) return;
   foreach (String dependency, translation_depfile_parse(Path.read_text(path)))
     deps[Path.absolute(dependency)] = 1;
-}
-
-/* Writes a unit that imports each of `reached` beside the group files at
-   `base`, and returns its path. */
-static String _imports_unit(String base, List reached) {
-  Array lines = [];
-  foreach (String path, reached)
-    lines.push(String.new("$(import ").add(path.repr()).add(")"));
-  String source = %"$base-imports.x";
-  Path.write_text(source, "\n".join(lines.list_free()).add("\n"));
-  return source;
 }
 
 /* A table whose parse left a group joins the groups, with why it does not

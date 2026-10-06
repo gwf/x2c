@@ -274,8 +274,15 @@ static List Compiler._lower(
   int after = _after_directives(units);
   units.insert(
     after, c.rebuild_statement($!{ List $binding(Var, List); }).cadr());
+  if (c.meta_build) {
+    List start = c.sym.introduce("x2c_meta_helper_start");
+    units.insert(
+      after, c.rebuild_statement($!{ void $start(int); }).cadr());
+  }
   Map initials = c._initial_copies(units);
-  foreach (Var unit, c._entry(stamp, initials, suffix)) units.push(unit);
+  List providers = c._provider_resets(units);
+  foreach (Var unit, c._entry(stamp, initials, providers, suffix))
+    units.push(unit);
   return units.list_free();
 }
 
@@ -342,8 +349,10 @@ static void Compiler._source_order(Compiler c, Array ordered, String lib) {
   int flushed = 0, count = c.unit_nodes ? c.unit_nodes.len() : 0;
   for (int i = 0; i <= count; i++) {
     c._imports_at(ordered, i, flushed);
-    if (i < count && !_local_include(c.unit_nodes[i], lib))
-      ordered.push(_uninitialized(c.unit_nodes[i], placeholders));
+    if (i < count) {
+      Var node = c._group_include(c.unit_nodes[i], lib);
+      if (node is not void) ordered.push(_uninitialized(node, placeholders));
+    }
   }
   for (; flushed < (int) c.meta_defs.len(); flushed++)
     ordered.push(c.meta_defs[flushed]);
@@ -370,16 +379,22 @@ static void Compiler._imports_at(
           for (; flushed < end; flushed++) ordered.push(c.meta_defs[flushed]);
 }
 
-/* Whether `node` includes an x2c unit outside the runtime in `lib`, whose
-   header its own translation writes: a group compiles without it. */
-static int _local_include(Var node, String lib) {
-  match (node)
-    case %(preproc ?(String text)):
-      if (text.startswith("#include \"") && text.endswith(".x\"")) {
-        String name = text[10:text.len() - 1];
-        return !Path.is_file(%"$lib$name");
-      }
-  return 0;
+/* A project's included provider uses its group header, which declares the
+   types and native functions shared by the provider objects. */
+static Var Compiler._group_include(Compiler c, Var node, String lib) {
+  match (node) case %(preproc ?(String text)): {
+    int angle = 0;
+    String target = preproc_include_target(text, angle);
+    if (!target || !is_source_file(target) || Path.is_file(%"$lib$target"))
+      break;
+    String path = collect_resolve_include(
+      c.sources, c.include_dirs, Path.dirname(c.filename), target, angle);
+    Var index;
+    if (path && meta_build_tables.try_get(Path.absolute(path), index))
+      return %(preproc ${%"#include \"meta_group_$index.h\""});
+    return void;
+  }
+  return node;
 }
 
 /* `node`, a declaration whose initializer holds a placeholder, without
@@ -615,8 +630,8 @@ static int _braced(Var node) {
    exported names end in `suffix`, so several groups link into one
    program. */
 static List Compiler._entry(
-  Compiler c, String stamp, Map initials, String suffix) {
-  List resets = c._resets(initials);
+  Compiler c, String stamp, Map initials, List providers, String suffix) {
+  List resets = providers.append(c._resets(initials));
   List reset = _initializer_function(
     c, %(void), c.sym.introduce(%"x2c_module_reset$suffix"), resets);
   List table = c._targets(c._named(reset));
@@ -630,6 +645,40 @@ static List Compiler._entry(
     ${_initializer_function(
       c, %("Map"), c.sym.introduce(%"x2c_module_targets$suffix"),
       %((return ("Map") $table)))});
+}
+
+/* A reached native function in another provider needs that provider's
+   initializers before this group's bodies can call it. */
+static List Compiler._provider_resets(Compiler c, Array units) {
+  if (!c.meta_build) return NULL;
+  Map providers = {};
+  foreach (Var unit, units) c._provider_references(unit, providers);
+  Array resets = [];
+  List start = c.sym.introduce("x2c_meta_helper_start");
+  foreach (Var (index, _), providers)
+    resets.push(c.rebuild_statement($!{ $start($index); }).cadr());
+  return resets.list_free();
+}
+
+static void Compiler._provider_references(
+  Compiler c, Var node, Map providers) {
+  if (node is not <list>) return;
+  match (node) case $source_identifier_content(
+      %((binding ?identity ?name))): {
+    if (name is not <string>) return;
+    Var target, index;
+    List global = c.sym.resolve_global(%($name), NULL);
+    if (global.equal(%(binding $identity $name)) &&
+        c.project_meta.try_get(name, target)) {
+      (List signature, String provider) = target;
+      if (meta_build_tables.try_get(
+            Path.absolute(home_absolute_path(provider)), index) &&
+          (int) index != c.meta_build - 1)
+        providers[index] = 1;
+    }
+    return;
+  }
+  foreach (Var child, node.list()) c._provider_references(child, providers);
 }
 
 /* An assignment of each mutable `meta static` value's initializer, or of
@@ -752,11 +801,15 @@ static String Compiler._unbound_callee(Compiler c, Var node) {
 
 /* Where the project meta build writes each unit's group, while it runs. */
 static String meta_build_directory = NULL;
+static Map meta_build_tables = NULL;
 
 /** Directs the group of each unit the project meta build parses into
     `directory`, or stops that when it is NULL. */
-void Compiler.use_meta_build_directory(String directory) {
+void Compiler.use_meta_build_directory(String directory, Array owners) {
   meta_build_directory = directory;
+  meta_build_tables = {};
+  int index = 1;
+  foreach (String owner, owners) meta_build_tables[owner] = index++;
 }
 
 /** Writes the group of a unit the project meta build parsed into the build

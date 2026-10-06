@@ -339,11 +339,7 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit &unit) {
   if (request.live_symbols) cpp.shallow_parse(globs);
   else $let(c.names.counters, c.names.counters.copy())
     cpp.shallow_parse(globs);
-  /* The flattened text repeats an included file's imports. Rows that raw
-     collection lacked came from an import the included file kept. */
-  Map symbols = cpp.sym.global_symbols();
-  cpp.sym.withhold_import_rows(symbols);
-  return symbols;
+  return cpp.sym.global_symbols();
 }
 
 static Map _collect_input(Frontend frontend, Compiler c) {

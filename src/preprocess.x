@@ -307,20 +307,10 @@ List Compiler.leading_preproc(Compiler c) {
   return noncode;
 }
 
-/** Applies public and private pragma directives to source visibility state
-    and records each object-like `#define` name, less those `#undef` drops,
-    for the literal warning.
-
-    A negative visibility state disables pragma tracking for this token
-    stream; macro names are recorded regardless.
-*/
+/** Records object-like `#define` names and removes names after `#undef`.
+    Source storage determines visibility independently of directives. */
 void Compiler.update_source_visibility(Compiler c, List directives) {
-  foreach (List directive, directives) {
-    c.note_object_macro(directive.cadr());
-    int visibility = c.source_private < 0 ? -1
-                   : preproc_visibility(directive.cadr());
-    if (visibility >= 0) c.source_private = visibility;
-  }
+  foreach (List directive, directives) c.note_object_macro(directive.cadr());
 }
 
 /** Records the name of the `#define` line `content` so a bare atom spelled

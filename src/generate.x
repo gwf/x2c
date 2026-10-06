@@ -108,26 +108,25 @@ static void Compiler._publish(Compiler c, List outputs) {
 
 // header and source
 
-/* One unit's split into header and source. `private` is the visibility the
-   last visibility pragma set; `pending` holds each private typedef or x2c
-   include as `(names node promoted)`, `opened` the visibility each
-   conditional group opened at, `open` the groups still open, `forwarded`
+/* One unit's split into header and source. `pending` holds each static
+   type or late native include as `(names node promoted)`, `open` the
+   conditional groups still open, `forwarded`
    the struct and union tags the header declares, `included` the files its
    includes reach, and `statics` the bindings static declarations declare. */
 typedef struct Partition {
-  Compiler c, Array header, source, pending, opened, open;
-  Map forwarded, included, statics, int private;
+  Compiler c, Array header, source, pending, open;
+  Map forwarded, included, statics;
 } Partition;
 
 /* Partition a normalized unit without changing source order. Non-inline
    public functions publish a header declaration and keep their body in the
    source; public inline definitions also publish their bodies. Static
-   functions and objects stay in the source. Only `#pragma private` hides
-   any other declaration from the header. */
+   functions and objects stay in the source. Static types enter the header
+   when a public declaration or inline body needs them. */
 static List Compiler._header_and_source(
   Compiler c, List ast, Map inline_bodies) {
   Partition p = {
-    .c = c, .header = [], .source = [], .pending = [], .opened = [],
+    .c = c, .header = [], .source = [], .pending = [],
     .open = [], .forwarded = {}, .included = {}, .statics = {}};
   foreach (Ast node, ast) p.add(node);
   return %(${p.finish()} ${c._source_projection(ast, inline_bodies)});
@@ -160,6 +159,7 @@ static List Compiler._source_projection(
       case %(declare ? (bindings (bind ?binding ?))):
         if (c._completed_prototype(binding)) continue;
     }
+    node = _without_static_type(node);
     source.push(node);
   }
   return _typedef_forwards(source.list_free(), NULL);
@@ -180,14 +180,8 @@ static void Partition.add(Partition &p, Ast node) {
     case %(import ?unit *):
       p.header.push(%(preproc "#include \"${unit.string()}.x\""));
     case %(preproc ?content): p.add_preproc(node, content);
-    default: p.place(node);
+    default: p.publish(node);
   }
-}
-
-/* Places a node at the current visibility. */
-static void Partition.place(Partition &p, List node) {
-  if (p.private) p.source.push(node);
-  else p.publish(node);
 }
 
 /* A public node that names a static declaration could not compile in the
@@ -255,28 +249,40 @@ static List Partition.finish(Partition &p) {
   List source = _place_typedefs(p.source, p.pending, 0);
   Map header_filled = _filled_groups(header);
   Map source_filled = _filled_groups(source);
-  header = _place_groups(header, header_filled, source_filled, p.opened, 1);
+  header = _place_groups(header, header_filled, source_filled);
   return _typedef_forwards(header, NULL);
 }
 
-/* private typedefs
+/* Static types stay in the source unless a later header item needs them.
+   Late native includes follow the same rule for the types they declare. */
 
-   A typedef below `#pragma private` is source-private unless a
-   later header item names it and no earlier header typedef already declares
-   that name; a public prototype must be able to spell its parameter types,
-   while an opaque forward typedef keeps a private body private. A private
-   include of x2c source follows the same rule for the typedefs it
-   declares. */
+static void Partition.add_typedef(Partition &p, List node) {
+  Type type = node.cadr();
+  p.hold(type.is_static() ? _typedef_names(node) : NULL,
+    _without_static_type(node));
+}
 
-static void Partition.add_typedef(Partition &p, List node) =>
-  p.hold(p.private ? _typedef_names(node) : NULL, node);
+/* Static type declarations have no C storage. Static objects keep it. */
+static List _without_static_type(List node) {
+  match (node) {
+    case %(typedef ?type ?bindings):
+      return %(typedef ${_without_static(type)} $bindings);
+    case %(declare ?type (!set ?bindings (bindings *))):
+      if (!_declares_object(bindings))
+        return %(declare ${_without_static(type)} $bindings);
+  }
+  return node;
+}
+
+static List _without_static(List type) =>
+  type.filter(%!(specifier) => specifier != <static>);
 
 /* A private node declaring `names` waits as a `pending` marker in both
    files until the whole unit has been partitioned. A node without names
    takes the current side. */
 static void Partition.hold(Partition &p, List names, List node) {
   if (!names) {
-    p.place(node);
+    p.publish(node);
     return;
   }
   p.mark(%(pending ${p.pending.len()}));
@@ -294,6 +300,17 @@ static List _typedef_names(List node) {
         }
       return names.list_free();
     }
+  return NULL;
+}
+
+static List _declared_type_names(List node) {
+  List names = _typedef_names(node);
+  if (names) return names;
+  match (node) case %(declare ?type ?): {
+    List base = type.list().type().base_type();
+    match (base) case %((!set ?kind (!or struct union enum)) ?name (*)):
+      return %(($kind $name));
+  }
   return NULL;
 }
 
@@ -323,20 +340,20 @@ static void _promote_typedefs(Array header, Array pending) {
 /* A header item after position `i` spells one of `names` that no header
    typedef before `i` declares. */
 static int HeaderNeeds.at(HeaderNeeds &n, int i, List names) {
-  foreach (String name, names)
+  foreach (Var name, names)
     if (!n.declared_before(i, name) && n.spelled_after(i, name)) return 1;
   return 0;
 }
 
 /* Only positions after the marker being decided have changed, so the first
    declarations come from the header as it is when first needed. */
-static int HeaderNeeds.declared_before(HeaderNeeds &n, int i, String name) {
+static int HeaderNeeds.declared_before(HeaderNeeds &n, int i, Var name) {
   if (!n.declared) {
     n.declared = {};
     int count = n.header.len();
     for (int j = 0; j < count; j++)
       if (n.header[j] is <list>)
-        foreach (String declared, _typedef_names(n.header[j]))
+        foreach (Var declared, _declared_type_names(n.header[j]))
           if (!(declared in n.declared)) n.declared[declared] = j;
   }
   Var first;
@@ -344,7 +361,7 @@ static int HeaderNeeds.declared_before(HeaderNeeds &n, int i, String name) {
 }
 
 /* Every item after `i` is decided, so each is read once, as it stands. */
-static int HeaderNeeds.spelled_after(HeaderNeeds &n, int i, String name) {
+static int HeaderNeeds.spelled_after(HeaderNeeds &n, int i, Var name) {
   if (!n.spelled) n.spelled = {};
   while (n.walked > i + 1) {
     Var item = n.header[--n.walked];
@@ -365,6 +382,9 @@ static void _spelled_types(List node, Map names) {
             base.car().symbol().is_storage_class()))
       base = base.cdr();
     if (base.car() is <string> && !base.cdr()) names[base.car()] = 1;
+    match (base)
+      case %((!set ?kind (!or struct union enum)) ?name *):
+        names[%($kind $name)] = 1;
   }
 }
 
@@ -453,9 +473,9 @@ static void Partition.forward_tags(Partition &p, List node) {
 
 // declarations
 
-/* A declaration above `#pragma private` belongs to the header, except
-   what no other unit can name: a static declaration, apart from the tag
-   body it declares, and an object of an anonymous type. A public struct or
+/* A nonstatic declaration belongs to the header, apart from an object of
+   an anonymous type. A static aggregate body waits for type promotion.
+   A public struct or
    union declaration puts its tag in the header, so no prototype forwards it
    again. */
 static void Partition.add_declaration(
@@ -464,9 +484,18 @@ static void Partition.add_declaration(
   match (bindings)
     case %(bindings (bind (!set ?binding (*)) ?))
       if (p.c._completed_prototype(binding)): return;
-  if (p.private || (type.is_static() && !_body_tag(type)) ||
+  if ((type.is_static() && !_body_tag(type)) ||
       (_anonymous_body(type) && _declares_object(bindings))) {
     p.source.push(decl);
+    return;
+  }
+  if (type.is_static() && _body_tag(type)) {
+    List core = type.base_type();
+    p.hold(_declared_type_names(decl),
+      %(declare $core (bindings (bind () ()))));
+    if (_declares_object(bindings))
+      p.source.push(%(declare ${_tag_only(type, core, _body_tag(type))}
+                       $bindings));
     return;
   }
   match (type.base_type())
@@ -600,14 +629,10 @@ static void Partition.add_alias(Partition &p, List alias, Type type) =>
    marker in both files. Once the unit is partitioned, the group's
    directives go to each file that holds one of its items. */
 
-/* A group records the visibility at which it opened. A conditional
-   directive outside every group is placed as any other directive is. */
+/* Each conditional group takes the position where its first marker opens. */
 static void Partition.add_preproc(Partition &p, List node, String content) {
   Symbol kind = preproc_conditional_kind(content);
-  if (kind == <open>) {
-    p.open.push(p.opened.len());
-    p.opened.push(p.private);
-  }
+  if (kind == <open>) p.open.push(p.header.len());
   if (kind && p.open.len()) p.mark_conditional(node, kind);
   else p.place_directive(node, content);
 }
@@ -617,18 +642,15 @@ static void Partition.mark_conditional(Partition &p, List node, Symbol kind) {
   if (kind == <close>) p.open.take_last();
 }
 
-/* The generator writes the header guard. Source pragmas serve only the CPP
-   compatibility path and must not duplicate the generated directive. The
-   visibility pragmas switch sides, `Partition.add_include` places an
-   include, and any other private directive stays in the source. */
+/* The generator writes the header guard and ignores old visibility
+   pragmas. Includes follow their source position in each projection. */
 static void Partition.place_directive(
   Partition &p, List node, String content) {
   if (_is_pragma_once(content)) return;
   int visibility = preproc_visibility(content), angle = 0;
   String target = preproc_include_target(content, angle);
-  if (visibility >= 0) p.private = visibility;
+  if (visibility >= 0) return;
   else if (target) p.add_include(node, target, angle);
-  else if (p.private) p.source.push(node);
   else p.publish_directive(node);
 }
 
@@ -637,14 +659,14 @@ static void Partition.publish_directive(Partition &p, List node) {
   p.header.push(node);
 }
 
-/* An include of x2c source below `#pragma private` waits, as a private
-   typedef does, under the typedef names of the files it reaches that no
-   earlier header include reaches. A late public include follows the same
-   rule: promote it only when a later public declaration needs its types.
-   The independent source projection keeps either include at its position. */
+/* x2c includes publish their whole selected interface. A late native
+   include waits under its typedef names and is promoted when a later
+   public declaration needs one. The source keeps either at its position. */
 static void Partition.add_include(
   Partition &p, List node, String target, int angle) {
-  if (!p.private && !_holds_item(p.source)) {
+  String path = collect_resolve_include(
+    p.c.sources, p.c.include_dirs, Path.dirname(p.c.filename), target, angle);
+  if ((path && is_source_file(path)) || !_holds_item(p.source)) {
     p.c.include_typedef_names(target, angle, p.included);
     p.header.push(node);
     return;
@@ -684,18 +706,15 @@ static Map _filled_groups(List items) {
   return filled;
 }
 
-/* A group's directives go to each file that holds one of its items, so a
-   group whose items divide between header and source stays balanced in
-   both. A group without items stays on the side it opened on, as `opened`
-   records. */
+/* A group enters the header when it contains a public item, or no item.
+   The independent source projection keeps its original conditional groups. */
 static List _place_groups(
-  List items, Map filled, Map other, Array opened, int header) {
+  List items, Map filled, Map other) {
   Array out = [];
   foreach (List item, items) {
     match (item)
       case %(conditional ?group ? ?node): {
-        int placed = opened[group].int() != header;
-        if (group in filled || (!other.contains(group) && placed))
+        if (group in filled || !other.contains(group))
           out.push(node);
         continue;
       }

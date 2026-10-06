@@ -724,6 +724,11 @@ void Compiler.record_declaration_visibility(Compiler c, List declaration) {
       (!set ?kind (!or typedef declare)) ?type (bindings *rows)
     ): {
       int mark = private || type.type().is_static();
+      if (mark) {
+        Type base = type.type().base_type();
+        match (base) case %((!set ?tag (!or struct union enum)) ?name *):
+          if (name is <string>) c.sym.mark_static(%($tag $name));
+      }
       c._record_rows_visibility(declaration, kind, private, mark, rows);
     }
   }
@@ -742,8 +747,10 @@ static void _record_declaration_binding_visibility(
   Compiler c, List declaration, Symbol kind, int private, int mark,
   List identity) {
   String name = binding_identity_spelling(identity);
-  if (kind == <typedef> && name)
-    c.record_source_typedef(name, declaration, private);
+  if (kind == <typedef> && name) {
+    c.record_source_typedef(name, declaration, mark);
+    if (mark) c.sym.mark_static(%(typedef $name));
+  }
   if (mark && name) c.sym.mark_static(%($name));
 }
 

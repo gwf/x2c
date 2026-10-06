@@ -46,6 +46,10 @@ List Compiler.parse_top_level_mode(Compiler c, int skip_body) {
   List slot = skip_body ? NULL : c.try_parse_macro_slot(<unit>);
   if (slot) return slot;
   if (c.keyword_form_is_definition()) return c._keyword_definition(skip_body);
+  if (c._static_interface_form()) {
+    c.next();
+    $let(c.source_private, 1) return c.parse_top_level_mode(skip_body);
+  }
   if (skip_body) {
     if (c.protocol_form_starts()) return c.parse_protocol_declaration();
     if (c._skip_collected_form()) return NULL;
@@ -61,6 +65,14 @@ List Compiler.parse_top_level_mode(Compiler c, int skip_body) {
   }
   if (c.macro_form_is_definition()) return c.parse_macro_definition();
   return c._declaration_form(skip_body);
+}
+
+/* Static storage also applies to source types and compile-time effects. */
+static int Compiler._static_interface_form(Compiler c) {
+  if (c.peek(0) != <static>) return 0;
+  Token next = Token.skip_trivia(c.token + 1);
+  return c.peek(1) == <typedef> || c.peek(1) == <"$("> ||
+         c.peek(1) == <protocol> || next.text == "class";
 }
 
 /* The directives before a form set its visibility and, in the full parse,
@@ -882,6 +894,8 @@ void Compiler.check_reference_placement(Compiler c, Type type) {
 static List Compiler._finish_declaration(
   Compiler c, Symbol tag, List base, List declarators,
   int preserved_self) {
+  if (tag == <typedef> && c.source_private > 0 &&
+      !base.type().is_static()) base = %(static @base);
   List modifiers = NULL;
   base = _declaration_base(base, modifiers);
   if (modifiers) {
@@ -899,6 +913,34 @@ static List Compiler._finish_declaration(
   return tag == <declare> && !preserved_self
     ? c._lower_self_declaration(declaration)
     : declaration;
+}
+
+/** Retains type dependency candidates from a skipped public inline body.
+    Typing the body waits until the full parse has all declarations. */
+void Compiler.collect_inline_type_dependencies(
+  Compiler c, List declaration, Token first, Token end) {
+  Array types = [];
+  for (Token token = first; token < end; token++) {
+    if (token.type != <ident>) continue;
+    String name = String.new_len(token.text, token.len);
+    types.push(%($name));
+    Token previous = token - 1;
+    while (previous >= first &&
+           (previous.type == <space> || previous.type == <comment>))
+      previous--;
+    if (previous >= first &&
+        (previous.type == <struct> || previous.type == <union> ||
+         previous.type == <enum>))
+      types.push(%(${previous.type} $name));
+  }
+  String path = home_portable_path(Path.absolute(c.filename));
+  String name = NULL;
+  match (declaration)
+    case %(declare ? (bindings (bind (binding ? ?spelling) *))):
+      name = spelling;
+  c.sym.set(
+    %("source-node" (interface-types $path ${first.pos} $name)),
+    %(interface-types $name ${types.list_free()}));
 }
 
 /* An expanded alias may contribute pointer, array, or function modifiers.
@@ -1950,6 +1992,13 @@ static List Compiler._install_declarator(
   if (binding && !exact) c._bind_identity(context, binding, declaration);
   if (binding)
     c._method_facts(binding, method, self_signature, preserved_self);
+  if (binding && method && !declared_type.is_static()) {
+    String path = home_portable_path(Path.absolute(c.filename));
+    String owner = c.package_spelling(method.car());
+    c.sym.set(
+      %("source-node" (interface-types $path ${c.token.pos} $exact)),
+      %(interface-types $exact (($owner))));
+  }
   List bound = %(bind $binding $mods);
   if (initializer && !c.shallow)
     initializer = c.resolve_expression(initializer, c.token);
