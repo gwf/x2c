@@ -189,7 +189,8 @@ static void Compiler._add_prelude(Compiler c, Map globs, Map visited) {
       visited);
   else
     c._replay_cached(
-      c._prelude_entry(runtime, canonical), globs, visited, NULL, NULL);
+      c._prelude_entry(runtime, canonical), canonical, globs, visited,
+      NULL, NULL);
 }
 
 /* The prelude contribution is `lib/x2c.x`'s entry: cached in this process,
@@ -512,7 +513,8 @@ static void FileWalk.include(FileWalk &w, String target, int angle) {
   if (!(canonical in w.visited)) {
     w.visited[canonical] = 1;
     if (!entry) entry = w.c._walk_cold(target, canonical, w.globs, w.visited);
-    w.c._replay_cached(entry, w.globs, w.visited, NULL, NULL);
+    w.c._replay_cached(
+      entry, canonical, w.globs, w.visited, NULL, NULL);
   }
   else if (w.visited[canonical] is <array>)
     w.c._replay_included(w.globs, canonical, {}, NULL, w.visited);
@@ -977,19 +979,21 @@ static Map Compiler.signature_lookahead(
 
 /* Each provider binds its header bodies in its own original session.
    Included signatures come from the completed graph; effects still install
-   at the provider's ordinary include positions. */
+   at the provider's ordinary include positions. Remove the work before
+   replay, because a cold dependency can complete more pending providers. */
 static void Compiler.bind_pending_inline_bodies(
   Compiler c, Map globs, String unit, Map signatures, Map active) {
   Array pending = c.pending_inline_bodies;
   if (!pending.len()) return;
-  for (int i = 0; i < pending.len(); i++) {
+  while (pending.len()) {
     (Compiler body, String path, String text, Map symbols, Map own,
-     Map statics, Map hashes) = pending[i];
+     Map statics, Map hashes) = pending.shift();
     Map visited = {};
     visited[path] = 1;
     Array effects = [];
     if (signatures) symbols.merge(signatures);
-    body._replay_cached(body._entry(path), symbols, visited, effects, active);
+    body._replay_cached(
+      body._entry(path), path, symbols, visited, effects, active);
     body.filename = path;
     body.meta_hashes = hashes;
     body.interface_active = active;
@@ -1003,12 +1007,11 @@ static void Compiler.bind_pending_inline_bodies(
     body.public_bodies = 0;
     c.close_child(body);
   }
-  pending.clear();
   Map visited = {};
   visited[unit] = 1;
   Array effects = [];
   List entry = c._entry(unit);
-  if (entry) c._replay_cached(entry, globs, visited, effects, active);
+  if (entry) c._replay_cached(entry, unit, globs, visited, effects, active);
 }
 
 static int FileWalk.produces(FileWalk &w) {
@@ -1180,10 +1183,14 @@ void Compiler.record_generated_symbol(
 /* Replay declaration maps and includes in their recorded source order.
    visited counts each included file's declarations, dependencies, and
    function definitions once per translation unit. In-memory and interface
-   entries have the same shape and take this same path. */
+   entries have the same shape and take this same path. Source traversal
+   keeps its processed prefix as a cold walk does. An effects array marks
+   completed-provider replay for full parsing. */
 static void Compiler._replay_cached(
-  Compiler c, List entry, Map globs, Map visited, Array effects,
-  Map active) {
+  Compiler c, List entry, String path, Map globs, Map visited,
+  Array effects, Map active) {
+  Array prefix = effects != NULL ? NULL : [];
+  if (prefix != NULL) visited[path] = prefix;
   foreach (Var name, entry.caddr()) c.fn_defs[name] = 1;
   /* Parsing this file read these macro and Lisp files. They are
      prerequisites of every unit that reaches it, not only of the one that
@@ -1194,8 +1201,11 @@ static void Compiler._replay_cached(
       c._merge_rows(globs, part);
       c.replay_package_imports(globs, part, effects);
     }
-    else if (part is <string>) c._replay_include(part, globs, visited, effects, active);
+    else if (part is <string>)
+      c._replay_include(part, globs, visited, effects, active);
+    if (prefix != NULL) prefix.push(part);
   }
+  if (prefix != NULL) visited[path] = 1;
 }
 
 /* An included file replays once per unit, from its entry or a cold walk. */
@@ -1208,7 +1218,7 @@ static void Compiler._replay_include(
   List entry = c._entry(path);
   if (!entry && active && active[path] is <array>) return;
   if (!entry) entry = c._walk_cold(path, path, globs, visited);
-  c._replay_cached(entry, globs, visited, effects, active);
+  c._replay_cached(entry, path, globs, visited, effects, active);
 }
 
 // package imports
@@ -1270,7 +1280,7 @@ static void Compiler._walk_package(
   visited[entry] = 1;
   List cached = package._entry(entry);
   if (cached) {
-    package._replay_cached(cached, globs, visited, NULL, NULL);
+    package._replay_cached(cached, entry, globs, visited, NULL, NULL);
     return;
   }
   String text = NULL;
