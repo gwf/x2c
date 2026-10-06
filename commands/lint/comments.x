@@ -130,12 +130,16 @@ static int _collect(Lint l, Comment *all):
 /* The name of the function whose declarator starts on `line`: the last
    `name(` or `Owner.name(` before a `{` or `=>` within eight lines, or
    NULL when a `;` comes first. */
-static String _declared(Lint l, int line):
+static String _declared(Lint l, int line, Map declarations):
+  int first = line <= l.lines ? l.first[line] : -1
+  if first < 0 || l.tokens[first].type == <comment> ||
+     l.tokens[first].type == <preproc>: return NULL
   String name = NULL
-  for (int at = line <= l.lines ? l.first[line] : -1;
+  for (int at = first;
        at >= 0 && at < l.count && l.tokens[at].line < line + 8;
        at = l.next(at)):
     Token t = l.at(at)
+    if declarations[t.line] == <macro>: return NULL
     if t.type == <;>: return NULL
     if t.type == <"{"> || t.text == "=" && l.tokens[at + 1].text == ">":
       return name
@@ -178,12 +182,36 @@ static String _tier(String path):
       List fields = row.split("|")
       if row && row[0] != '#' && fields.len() >= 2:
         tiers[fields.car()] = fields.cadr()
+    if Context.current(): tiers = Context.current().export(tiers)
   Var tier
   return tiers.try_get(path, tier) ? tier : NULL
 
+/* Parser facts that locate macros, published types, and function templates. */
+static Map _documented_declarations(Compiler c, List ast):
+  Map declarations = {}
+  if !c: return declarations
+  struct Token *tokens = c.tokenizer.tokens
+  foreach List row in c.definition_rows(ast):
+    match row:
+      case %(typedef ?name ? ? (?(int start) *)):
+        if c.publishes_typedef(name):
+          declarations[tokens[start].line] = <type>
+  foreach List node in ast:
+    if node.car() != <macrodef>: continue
+    List origin = node.assoc(<origin>)
+    declarations[origin.assoc(<line>)] = <macro>
+    if node.assoc(<kind>) != <unit>: continue
+    List template = node.assoc(<template>)
+    foreach List row in template.search(
+      %(api-source ?line ?doc (function ?type *))):
+      if row.assoc(<?doc>) && !(<static> in row.assoc(<?type>).list()):
+        declarations[row.assoc(<?line>)] = <template>
+  return declarations
+
 /* Rules that read one comment, the line after it, and the next function
    name. `next` is the first non-blank line after the comment. */
-static void _comment(Lint l, Comment c, Array lines, int next):
+static void _comment(
+  Lint l, Comment c, Array lines, int next, Map declarations):
   String text = _normal(c.text), lower = text.lower()
   Array words = _words(text)
   int count = words.len(), reason = 0
@@ -191,7 +219,7 @@ static void _comment(Lint l, Comment c, Array lines, int next):
     if word in reason_words: reason = 1
   String code = next <= lines.len() ? lines[next - 1] : NULL
   code = code.strip(NULL)
-  String name = _declared(l, next)
+  String name = _declared(l, next, declarations)
   if _mentions(lower, history_phrases):
     l.add("comment-history", c.start, "history or unfinished work")
   if lower.contains("prevent null pointer dereference") ||
@@ -229,13 +257,14 @@ static void _comment(Lint l, Comment c, Array lines, int next):
             "the module header inventories the implementation")
   if c.kind != <doc>: return
   String tier = _tier(l.path)
-  if tier == "contract" || tier == "internal":
+  if (tier == "contract" || tier == "internal") &&
+     declarations[next] != <template>:
     l.add("doc-comment-tier", c.start, %"doc comment in a $tier module")
   if text.contains("@param") || text.contains("@return") ||
      lint_phrase(text, "Parameters:") || lint_phrase(text, "Returns:"):
     l.add("doc-boilerplate", c.start, "parameter or return boilerplate")
-  if code && code.startswith("static") && !isalnum((unsigned char) code[6]) &&
-     code[6] != '_':
+  if declarations[next] != <type> && code && code.startswith("static") &&
+     !isalnum((unsigned char) code[6]) && code[6] != '_':
     l.add("doc-on-static", c.start, "doc comment on a private static helper")
   if next > c.end + 1:
     l.add("detached-doc", c.start, "doc comment detached from its declaration")
@@ -261,7 +290,8 @@ static void _repeated_prose(Lint l, Comment *all, int n):
             "repeats prose elsewhere in the file")
 
 /** Runs the comment rules over `l`. */
-void Lint.comment_rules(Lint l):
+void Lint.comment_rules(Lint l, Compiler c, List ast):
+  Map declarations = _documented_declarations(c, ast)
   Comment *all = Scope.calloc(l.count + 1, sizeof(Comment))
   int n = _collect(l, all)
   Array lines = []
@@ -272,7 +302,7 @@ void Lint.comment_rules(Lint l):
     for (; next <= lines.len(); next++):
       String text = lines[next - 1]
       if text.strip(NULL): break
-    _comment(l, all[at], lines, next)
+    _comment(l, all[at], lines, next, declarations)
     if at + 1 < n && all[at].kind == <doc> && all[at + 1].kind == <doc> &&
        l.prev(all[at + 1].first) == all[at].last:
       l.add("stacked-doc", all[at].start, "stacked doc comments")

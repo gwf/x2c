@@ -72,6 +72,7 @@ static int _read(Path path, String &text):
 static int _parse(Lint l, Frontend frontend, String path):
   ParsedUnit parsed
   if !frontend.open_reporting(path, parsed): return 0
+  l.comment_rules(parsed.compiler, parsed.ast)
   l.declaration_rules(parsed.compiler, parsed.ast)
   l.member_arrows(parsed.compiler, parsed.ast)
   l.validation_rules(parsed.compiler, parsed.ast)
@@ -165,8 +166,9 @@ int main(int argc, char **argv):
     Lint l = lints[count++] = Lint.new(file, source, selected)
     l.token_rules()
     l.idiom_rules()
-    l.comment_rules()
-    if !_parse(l, frontend, file): status = 1
+    if !_parse(l, frontend, file):
+      l.comment_rules(NULL, NULL)
+      status = 1
     l.structure_rules()
     l.policy_rules()
   lint_corpus_rules(lints, count)
