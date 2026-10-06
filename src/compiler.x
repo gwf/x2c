@@ -570,7 +570,16 @@ void Compiler.run_declaration_effects(Compiler c) {
   c.declaration_effects = NULL;
   foreach (List effect, effects) {
     (List key, int end, String form, Var site, String context) = effect;
-    $let(c.filename, c._effect_file(key)) {
+    String file = c._effect_file(key), text = c.text;
+    Array markers = c.line_markers;
+    if (c.canonical_path(file) != c.canonical_path(c.filename)) {
+      text = NULL;
+      c.read_source(file, text);
+      markers = NULL;
+    }
+    $let(c.filename, file)
+    $let(c.text, text)
+    $let(c.line_markers, markers) {
       c.import_stack.push(context);
       defer c.import_stack.take_last();
       Token token = c.thaw_declaration_syntax(site);

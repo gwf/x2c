@@ -2350,14 +2350,23 @@ void Compiler.install_compile_time_effects(Compiler c, List rows) {
     }
     case %(compile-time lisp ?form (source ?path ?site)): {
       Token token = c.thaw_declaration_syntax(site);
-      $let(c.filename, home_absolute_path(path)) {
+      String file = home_absolute_path(path), text = NULL;
+      c.read_source(file, text);
+      $let(c.filename, file)
+      $let(c.text, text)
+      $let(c.line_markers, NULL) {
         if (c.shallow) c.queue_declaration_effect(form, token, NULL);
         else c.evaluate_declaration_effect(form, token);
       }
     }
-    case %(compile-time import ?path ?site): {
+    case %(compile-time import ?path (source ?source ?site)): {
       Token token = c.thaw_declaration_syntax(site);
-      c._import(home_absolute_path(path), token);
+      String file = home_absolute_path(source), text = NULL;
+      c.read_source(file, text);
+      $let(c.filename, file)
+      $let(c.text, text)
+      $let(c.line_markers, NULL)
+        c._import(home_absolute_path(path), token);
     }
     case %(project-meta *): c.install_project_meta_effect(row);
   }
@@ -4285,9 +4294,11 @@ void Compiler.parse_macro_lisp_shallow(Compiler c) {
   if (c._import_path(requested)) {
     if (!c.source_private) {
       String path = home_portable_path(c._canonical_path(requested, c.token));
+      String source = home_portable_path(Path.absolute(c.filename));
       c.record_compile_time_effect(
         %(compile-time import $path
-          ${c.freeze_declaration_syntax(c.token)}), c.token);
+          (source $source ${c.freeze_declaration_syntax(c.token)})),
+        c.token);
     }
     c.parse_macro_lisp_top_level();
     return;
