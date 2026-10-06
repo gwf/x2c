@@ -799,7 +799,7 @@ static void lisp_eval_list_literal_reader_prefixes(void) {
   EXPECT_STR_EQ(quoted_name.str(), "x");
   List ordinary = %("a" 1, "b" 2);
   EXPECT_INT_EQ(ordinary.len(), 4);
-  EXPECT_STR_EQ(Var.list(ordinary.get(2)).car().str(), "unquote");
+  EXPECT_STR_EQ(Var.list(ordinary[2]).car().str(), "unquote");
   List leading = %(`x y);
   EXPECT_INT_EQ(leading.len(), 2);
   (List leading_form, Symbol trailing) = leading;

@@ -1022,7 +1022,7 @@ static void _open(List lst, Buffer out) {
 }
 
 static void _close(Buffer out) {
-  if (out.get(-1) != ')') out.pad();
+  if (out[-1] != ')') out.pad();
   out.write(")");
   out.pop();
 }

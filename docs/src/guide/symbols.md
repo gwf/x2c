@@ -205,7 +205,7 @@ because the compiler chose them.
 
 ```x2c
 Map config = {host: "localhost", port: 8080};
-printf("%s:%d\n", config.get(<host>).string(), config.get(<port>).int());
+printf("%s:%d\n", config[<host>].string(), config[<port>].int());
 ```
 
 Keep numeric enums where the number is the point: indexes, packed fields,
