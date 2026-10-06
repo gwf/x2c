@@ -559,6 +559,8 @@ EOF
 cat >"$BUILD/keyword/src/child-keywords.x" <<'EOF'
 macro Expression $cache.child(Expr $value) => 99;
 static keyword child $cache.child;
+#include "nested.x"
+int cached_child_alias(void) { return child(1); }
 EOF
 cat >"$BUILD/keyword/src/nested.x" <<'EOF'
 int child(int value) { return value; }
@@ -581,9 +583,9 @@ outer int cached_keyword_probe(void) {
 EOF
 for order in alias-first main-first; do
   if [ "$order" = alias-first ]; then
-    inputs=(src/alias.x src/main.x)
+    inputs=(src/child-keywords.x src/alias.x src/main.x)
   else
-    inputs=(src/main.x src/alias.x)
+    inputs=(src/main.x src/alias.x src/child-keywords.x)
   fi
   (cd "$BUILD/keyword" && "$X2C" translate --out-dir "$order" \
     "${inputs[@]}")
@@ -595,8 +597,13 @@ grep -q "child(4)" "$BUILD/keyword/alias-first/main.c" ||
   fail "included keyword alias leaked into its caller"
 grep -q "cached_keyword_probe" "$BUILD/keyword/alias-first/main.h" ||
   fail "outer keyword alias was lost across an include"
-grep -q "return 99" "$BUILD/keyword/alias-first/alias.c" ||
-  fail "imported keyword alias was lost across an include"
+grep -q "return child(1)" "$BUILD/keyword/alias-first/alias.c" ||
+  fail "static keyword alias leaked into its including file"
+grep -q "return 99" "$BUILD/keyword/alias-first/child-keywords.c" ||
+  fail "source-local keyword alias was lost across an include"
+cmp -s "$BUILD/keyword/alias-first/child-keywords.c" \
+  "$BUILD/keyword/main-first/child-keywords.c" ||
+  fail "source-local keyword alias changed with cache order"
 for output in alias-first/main.d main-first/main.d; do
   grep -q "private-keywords.x" "$BUILD/keyword/$output" ||
     fail "included keyword pack is missing from $output"

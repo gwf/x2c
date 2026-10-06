@@ -817,7 +817,8 @@ static List Compiler._thaw_origin(Compiler c, List location, Var node) {
     case %((file ?file) (line ?line) (column ?column) (length ?length)
            (position ?position)):
       c.origins.push(%(source $file $line $column $length $position));
-  return %(at ${c.origins.len()} ${c.thaw_declaration_syntax(node)});
+  int occurrence = c.origins.len();
+  return %(at $occurrence ${c.thaw_declaration_syntax(node)});
 }
 
 /* A definition is immutable, so it freezes once per pool epoch. A template
