@@ -334,7 +334,7 @@ static int Compiler._static_interface_form(Compiler c) {
    conditional groups around the form. A template's forms have neither. */
 static void Compiler._leading_directives(Compiler c, int skip_body) {
   if (c.macro_holes) return;
-  c.update_source_visibility(c.leading_preproc());
+  c.note_preprocessor_macros(c.leading_preproc());
   if (!skip_body) c._track_conditional_arms();
 }
 
@@ -3146,7 +3146,7 @@ static List Compiler._bind_macrodef(
 }
 
 static List Compiler._bind_preproc(Compiler c, List directive) {
-  c.update_source_visibility(%($directive));
+  c.note_preprocessor_macros(%($directive));
   return directive;
 }
 

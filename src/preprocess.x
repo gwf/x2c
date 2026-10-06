@@ -277,8 +277,8 @@ static int _attribute_layout(Token token) {
 
 /* leading directives
 
-   The directives before a form set source visibility and record the unit's
-   `#define` names, which literals and declaration prefixes read. */
+   Directives before a form record the unit's `#define` names, which literals
+   and declaration prefixes read. */
 
 /** Returns source-ordered preprocessor nodes in the preceding trivia.
 
@@ -297,7 +297,7 @@ List Compiler.leading_preproc(Compiler c) {
 
 /** Records object-like `#define` names and removes names after `#undef`.
     Source storage determines visibility independently of directives. */
-void Compiler.update_source_visibility(Compiler c, List directives) {
+void Compiler.note_preprocessor_macros(Compiler c, List directives) {
   foreach (List directive, directives) c.note_object_macro(directive.cadr());
 }
 

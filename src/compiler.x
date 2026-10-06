@@ -828,7 +828,7 @@ static List Compiler._macro_row(Compiler c, List row, int thaw) {
   match (row) {
     case %(origin ?location):
       return %(origin ${_declaration_location(location, thaw)});
-    case %(file ?path): return %(file ${_declaration_path(path, thaw)});
+    case %(file ?path): return %(file ${home_portable_path(path)});
   }
   return thaw ? c.thaw_declaration_syntax(row)
               : c.freeze_declaration_syntax(row);
@@ -1292,7 +1292,7 @@ static long Compiler._end_index(Compiler c, Token tokens) =>
    macro names and includes deliver their public compile-time effects. */
 static void Compiler._append_preproc(Compiler c, Array nodes) {
   List directives = c.leading_preproc();
-  c.update_source_visibility(directives);
+  c.note_preprocessor_macros(directives);
   if (c.included_effects.len()) c.install_included_effects();
   foreach (Var directive, directives) nodes.push(directive);
 }
