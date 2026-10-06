@@ -102,6 +102,7 @@ static void Format.conversion(Format &f) {
 }
 
 static void Format.write_literal(Format &f) {
+  if (f.cursor == f.literal) return;
   f.out.write_len(f.fmt + f.literal, (size_t) (f.cursor - f.literal));
 }
 
