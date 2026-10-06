@@ -227,7 +227,7 @@ static void _tokenize_session(Frontend frontend, Compiler c, String source) {
 
 /* A unit compiles in package mode only when it is one of that package's own
    files below `<root>/<name>/src/` or the single-file `<root>/<name>/<name>.x`
-   under a registered --package-dir root. The comparison uses the canonical
+   under an explicit --package-dir root. The comparison uses the canonical
    path, so symlinked or relative spellings of one file agree; a test or
    example elsewhere in the package directory is a consumer and reaches the
    package through `import`. */
@@ -235,7 +235,7 @@ static void _configure_package(
   Compiler c, CliRequest request, String filename) {
   c.package_dirs = request.package_roots();
   String source = Path.absolute(filename);
-  String package = package_directory(c.package_dirs, source);
+  String package = package_directory(request.package_dirs, source);
   if (!package || !package_source(package, source)) return;
   String name = Path.basename(package);
   c.package = name;

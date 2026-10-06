@@ -305,6 +305,8 @@ static String Helper.identify(Helper &h, String stamp, String compiler) {
   return %"$stamp\n$compiler\n${_cc_flags().repr()}\n"
     + %"${h.flags.repr()}\n${h.include}\n${h.toolchain.runtime_lib}\n"
     + %"${h.modules.list().repr()}\n"
+    + %"${h.frontend.request.package_dirs.repr()}\n"
+    + %"${h.packages.keys().list().sort().repr()}\n"
     + (Path.is_file(loop) ? Path.read_text(loop).sha256() : "");
 }
 
@@ -373,6 +375,16 @@ static void _clear(String base) {
    it parses again. */
 static void Helper.parse(Helper &h, String path, int index) {
   Frontend f = h.frontend;
+  $let(f.request.package_dirs, f.request.package_dirs) {
+    foreach (Var (root, _), h.packages)
+      f.request.package_dirs = f.request.package_dirs.append(
+        %(${Path.dirname(root)}));
+    h.parse_source(f, path, index);
+  }
+}
+
+static void Helper.parse_source(
+  Helper &h, Frontend f, String path, int index) {
   ParsedUnit unit;
   int started = f.start(path, unit);
   defer unit.close();

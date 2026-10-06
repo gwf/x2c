@@ -114,7 +114,7 @@ static Map _cache_copy(Map map) {
 static List Compiler._entry(Compiler c, String canonical) {
   Var cached = _process_cache()[canonical];
   if (cached is <list>) {
-    if (List.equal(cached.list()[4], c._interface_include_dirs()))
+    if (List.equal(cached.list()[4], c._interface_include_dirs(canonical)))
       return cached;
     (void) _process_cache().del(canonical);
   }
@@ -1017,7 +1017,7 @@ static void FileWalk.publish(FileWalk &w) {
   }
   String hash = _content_hash(w.text);
   List definitions = _sorted_names(w.definitions);
-  List roots = w.c._interface_include_dirs();
+  List roots = w.c._interface_include_dirs(w.path);
   List entry = %($parts $hash $definitions ${w.dependencies} $roots);
   _require_retained(entry.try_own());
   Var prior = _process_cache()[w.path];
@@ -1244,7 +1244,7 @@ static void Compiler._walk_package(
   Compiler c, Compiler package, String entry, Token token) {
   Map globs = c.sym.base_symbols(), visited = {};
   visited[entry] = 1;
-  List cached = c._entry(entry);
+  List cached = package._entry(entry);
   if (cached) {
     package._replay_cached(cached, globs, visited, NULL, NULL);
     return;
@@ -1568,7 +1568,7 @@ static List Compiler._interface_load(
            ?(List parts) ?(List definitions) ? ?(List dependencies)
            ?(List include_dirs)):
       if (c._interface_current(canonical, compiler, owner, hash) &&
-          c._interface_include_dirs() == include_dirs)
+          c._interface_include_dirs(canonical) == include_dirs)
         return c._interface_entry(
           canonical, hash, parts, definitions, dependencies, include_dirs);
   return NULL;
@@ -1786,8 +1786,9 @@ static int _write_interface_entry(
   return 1;
 }
 
-/* Preserve each search root's order, spelling, and home-relative identity. */
-static List Compiler._interface_include_dirs(Compiler c) {
+/* Search roots and the file's package mode must match before replay. */
+static List Compiler._interface_include_dirs(
+  Compiler c, String canonical) {
   Array dirs = [];
   foreach (String dir, c.include_dirs) {
     String portable = home_portable_path(dir);
@@ -1796,6 +1797,8 @@ static List Compiler._interface_include_dirs(Compiler c) {
       portable != dir ? %(home $portable) :
       dir.startswith("/") ? %(absolute $dir) : %(relative $dir));
   }
+  dirs.push(is_source_file(canonical) && c._package_owns(canonical)
+    ? %(package ${c.package}) : %(package));
   return dirs.list_free();
 }
 
