@@ -152,6 +152,7 @@ static void Helper.scan(Helper &h, List inputs) {
     if (meta & 1) h.own(path, owned);
     foreach (String unit, s.units) h.own(unit, owned);
   }
+  collect_forget_provisional_entries();
 }
 
 static void Helper.own(Helper &h, String path, Map owned) {

@@ -18,7 +18,20 @@ OrdinaryPayload;
 
 typedef OrdinaryPayload OrdinaryAlias;
 
+typedef struct OrdinaryInlineOnly{
+  int value;
+}
+OrdinaryInlineOnly;
+
 OrdinaryAlias ordinary_copy(OrdinaryAlias value);
+
+static inline int ordinary_inline_value(int value){
+  OrdinaryInlineOnly item ={
+    value
+  }
+  ;
+  return item.value;
+}
 
 int main(void);
 

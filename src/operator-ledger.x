@@ -1,14 +1,12 @@
-/*  operator-ledger.x -- compiler lookups from one binary operator ledger */
-
-#include "compiler.x"
-
 /*  operator-ledger.x -- binary operator facts and case projections
 
     Each row gives the operator, precedence, compound assignment, protocol
     member, and whether that member derives a comparison. Zero denotes an
-    absent compound assignment or member. Only operator-ledger.x imports
-    this file, so consumers of the lookup declarations do not load it.
+    absent compound assignment or member. Private case projections generate
+    the public operator lookups below.
 */
+
+#include "compiler.x"
 
 meta static List _operator_rows(void) => %(
   (<||>       1 0        0         0)

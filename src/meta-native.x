@@ -172,7 +172,7 @@ void Compiler.install_meta_function(Compiler c, List fn, Token marker) {
 void Compiler.install_collected_meta_function(
   Compiler c, List declaration, Token marker) {
   if (c.source_private < 0) return;
-  if (c.macro_holes || c.groups_meta() || macro_library_filling()) return;
+  if (c.macro_holes || macro_library_filling()) return;
   String name = c._native_meta_name(declaration, marker);
   if (c.shares_meta_definition(name)) return;
   c.ensure_macro_lisp();
@@ -180,6 +180,7 @@ void Compiler.install_collected_meta_function(
   if (name in linked && c._linked_copy(name, linked) &&
       c._bind_linked_target(name, c.func_signature(declaration.type_from_ast())))
     return;
+  if (c.groups_meta()) return;
   c._install_stub(
     name, declaration.type_from_ast().canonicalize(), NULL, marker);
 }
@@ -489,11 +490,13 @@ int Compiler.project_meta_uses_linked(
 int Compiler.meta_provider_hashes_current(
   Compiler c, Map hashes, Map native) {
   Map linked = _linked_module();
+  Map reached = {};
   $let(c.meta_hashes, hashes) $let(c.meta_calls, {})
     foreach (String name, hashes.keys()) {
       if (name in native) continue;
-      if (!(name in linked_hashes) ||
-          !c._linked_texts_match(name, linked, {})) return 0;
+      String key = %"${home_portable_path(c.canonical_path(c.filename))}:$name";
+      if (!(key in linked_hashes) && !(name in linked_hashes)) return 0;
+      if (!c._linked_texts_match(name, linked, reached)) return 0;
     }
   return 1;
 }
@@ -956,7 +959,9 @@ static int Compiler._linked_texts_match(
   Var hash, own, names = void;
   if (name in reached || !c.meta_hashes.try_get(name, own)) return 1;
   reached[name] = 1;
-  if (linked_hashes.try_get(name, hash)) {
+  String key = %"${home_portable_path(c.canonical_path(c.filename))}:$name";
+  if (linked_hashes.try_get(key, hash) ||
+      linked_hashes.try_get(name, hash)) {
     List row = hash;
     hash = row.car();
     names = row.cadr();

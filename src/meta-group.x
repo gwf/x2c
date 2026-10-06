@@ -320,8 +320,8 @@ static int _after_directives(Array units) {
 // what the group reaches
 
 /* The unit's definitions so far that the group can reach, in source order:
-   every directive and declaration, included providers at their source sites, each function the group reaches, and the group's
-   compile-time-only functions, which the unit itself never emits. */
+   directives, declarations, included providers, reached functions, and
+   compile-time-only functions that the unit itself never emits. */
 static Array Compiler._units(Compiler c) {
   String lib = %"${x2c_get_root()}/lib/";
   Array ordered = c._runtime_includes(lib);
@@ -341,11 +341,16 @@ static Array Compiler._runtime_includes(Compiler c, String lib) {
     ordered.push(%(preproc ${%"#include \"$header\""}));
   foreach (Var (path, hash), c.deps) {
     if (hash is <string> && String.startswith(hash, "search:")) continue;
+    if (c.canonical_path(path) == c.canonical_path(c.filename)) continue;
     String dependency = path;
     if (dependency.startswith(lib) && dependency.endswith(".x") &&
-        !("/" in dependency[lib.len():]))
-      ordered.push(
-        %(preproc ${%"#include \"${Path.basename(dependency)}\""}));
+        !("/" in dependency[lib.len():])) {
+      String header = Path.basename(dependency);
+      Var index;
+      if (meta_build_tables.try_get(Path.absolute(dependency), index))
+        header = %"meta_group_$index.h";
+      ordered.push(%(preproc ${%"#include \"$header\""}));
+    }
   }
   return ordered;
 }
@@ -375,13 +380,13 @@ static Var Compiler._group_include(Compiler c, Var node, String lib) {
   match (node) case %(preproc ?(String text)): {
     int angle = 0;
     String target = preproc_include_target(text, angle);
-    if (!target || !is_source_file(target) || Path.is_file(%"$lib$target"))
-      break;
+    if (!target || !is_source_file(target)) break;
     String path = collect_resolve_include(
       c.sources, c.include_dirs, Path.dirname(c.filename), target, angle);
     Var index;
     if (path && meta_build_tables.try_get(Path.absolute(path), index))
       return %(preproc ${%"#include \"meta_group_$index.h\""});
+    if (Path.is_file(%"$lib$target")) break;
     return void;
   }
   return node;

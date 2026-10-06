@@ -3261,8 +3261,13 @@ static List Compiler._collected_function(
       if (method)
         declaration = %(declare $type
           (bindings (bind ((${method.car()}) ${method.cadr()}) $modifiers)));
-      else
-        declaration = %(declare $type (bindings (bind $name $modifiers)));
+      else {
+        /* Renamed locals keep their identity; exact names complete prototypes. */
+        Var source;
+        if (!c.semantic_binding_facts().try_get(
+              %(source-spelling $binding), source) || source == name)
+          declaration = %(declare $type (bindings (bind $name $modifiers)));
+      }
     }
   return %(declaration-function $declaration $body ${c.freeze_macro_stack()});
 }

@@ -434,6 +434,7 @@ static Map _sdk_linked_hashes(void) {
   _sdk_guard("_x2c.meta.linked.hashes");
   Compiler c = active.expander;
   Map rows = {};
+  c.add_linked_meta_provider_hashes(rows);
   foreach (Var (_, source), c.project_meta)
     match (source) case %(? ? ?(Map hashes)): {
       List names = hashes.keys().list().sort();

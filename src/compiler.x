@@ -166,14 +166,13 @@ typedef struct Compiler {
      TYPE)`, and while the project meta build parses the unit or the REPL
      stages it, each `meta static` value as `(static DECLARATION)`, and while
      the project meta build parses it, each placeholder for a call left for
-     the translation
-     as `(later PLACEHOLDER)`. `meta_group_bound` holds the
+     the translation as `(later PLACEHOLDER)`. `meta_group_bound` holds the
      names the REPL bound to staged native code, the modules it reset, and
      each bodyless `meta` prototype nothing supplies. */
   Array unit_nodes, meta_group;
   Map meta_group_bound;
-  /* One more than the helper table whose group the project meta build is
-     parsing this unit for, or zero for an ordinary parse. */
+  /* Zero for ordinary parsing, one for metadata collection, or the
+     project helper table index plus one. */
   int meta_build;
   int runtime_inc, runtime_hdrs, collect_protocols, shallow, source_private;
   int public_bodies;  // Cold interfaces bind only exposed inline bodies.
@@ -576,7 +575,8 @@ static String Compiler._effect_file(Compiler c, List key) {
 */
 int Compiler.collect_unit_macro(Compiler c) {
   Symbol collection = c.macro_invocation_collection();
-  if (collection == <tried>) return c._try_unit_macro();
+  if (collection == <tried> || (collection && c.meta_build == 1))
+    return c._try_unit_macro();
   if (collection == <required>) c._expand_unit_macro();
   return collection == <required>;
 }

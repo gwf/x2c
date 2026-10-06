@@ -29,7 +29,7 @@ needed by a public declaration becomes public automatically. Its complete
 definition and field types are published when the interface requires that
 layout, such as for a value type or field access in a public inline body.
 A public forward pointer type can keep a static aggregate body private.
-A type used only by static functions remains private.
+A static type used only by static functions remains private.
 The `static` marker on a type controls publication and emits no C storage.
 
 An ordinary `#include "module.x"` makes that module's public declarations,
@@ -2085,6 +2085,11 @@ Nonstatic macros, decorators, keyword aliases, and meta functions become
 available at the include line. They also reach files that include this one.
 Each canonical include path contributes once per translation unit, including
 when an include cycle reaches a file again.
+
+Public inline bodies can use ordinary function signatures declared later in
+an include cycle. If a declaration producer creates a required signature,
+place that production before the include that needs it. Looking ahead does
+not execute later Lisp forms or declaration producers.
 
 A definition marked `static` stays in its declaring source file. For example,
 `static macro Expression $helper(...)` declares a private macro, and

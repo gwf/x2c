@@ -143,7 +143,8 @@ builds/test-%: tests/test-%.x $(PACKAGE_ARCHIVE) | builds
 	"$(X2C)" build --output $@ --build-dir builds/$* \
 	  $(PACKAGE_X_FLAGS) $(PACKAGE_C_FLAGS) \
 	  --x-include-dir $(ROOT)/unittest \
-	  $< $(ROOT)/unittest/test-support.x $(ROOT)/unittest/match-recursive.x
+	  $< $(ROOT)/unittest/test-support.x $(ROOT)/unittest/match-recursive.x \
+	  $(ROOT)/unittest/test-macros.x
 
 builds/%: examples/%.x $(PACKAGE_ARCHIVE) | builds
 	"$(X2C)" build --output $@ --build-dir builds/$*-build \

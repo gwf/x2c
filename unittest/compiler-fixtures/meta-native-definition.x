@@ -1,7 +1,5 @@
 #include <stdio.h>
 
-typedef int native;
-
 /* A native definition is an ordinary runtime function, so its body may use
    forms a lowered `meta` body declines, such as a function-local static. */
 meta native int next_ticket(void) {

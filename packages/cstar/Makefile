@@ -28,7 +28,8 @@ COMPILER_OBJECTS = $(filter-out $(ROOT)/builds/0/src/main.o,\
 	$(wildcard $(ROOT)/builds/0/src/*.o))
 TOOL_X_FLAGS := --x-include-dir tools --x-include-dir $(ROOT)/src \
 	--c-include-dir $(ROOT)/builds/0/src
-TOOL_SOURCES := tools/cstar-verify.x tools/adapter.x
+TOOL_SOURCES := tools/cstar-verify.x tools/adapter.x \
+  tools/adapter-templates.x tools/proof-source.x
 
 CSTAR_HOME ?= $(PACKAGE_DEPS)
 CSTAR_VERIFY := X2C=$(abspath $(X2C)) X2C_PACKAGES=$(abspath $(PACKAGE_ROOT)) \
@@ -66,9 +67,9 @@ builds/cstar-verify: $(TOOL_SOURCES) $(DEV_ARCHIVE) $(X2C) \
 # archive, no verification runtime, and no proof declarations. The first
 # line cancels the package.mk example rule, which links the archive.
 builds/%: examples/%.x $(PACKAGE_ARCHIVE) | builds
-builds/%: examples/%.x | builds
-	$(X2C) build --output $@ --build-dir builds/$*-cc \
-	  --x-include-dir src $<
+builds/%: examples/%.x src/cstar-macros.x | builds
+	$(X2C) build --plain --output $@ --build-dir builds/$*-cc \
+	  --x-include-dir src $< src/cstar-macros.x
 
 examples: $(EXAMPLE_PROGRAMS)
 

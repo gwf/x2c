@@ -19,6 +19,7 @@ magic/compile-time|showcase|run||expected/magic-compile-time.stdout|Standalone m
 magic/decorators|showcase|run||expected/magic-decorators.stdout|Standalone magic decorators gallery example.
 magic/file-policy|showcase|run|../../../examples/magic/policy.xlisp|expected/inline-lisp.stdout|Inline Lisp policy with inferred native bindings and typed results.
 magic/imported-macros|showcase|run||expected/compile-time-macros.stdout|Imported X2C macros with a compile-time Lisp helper.
+magic/support/answer|probe|none||-|Compile-time provider for imported-macros.
 magic/keywords|showcase|run||expected/magic-keywords.stdout|Standalone magic keywords gallery example.
 magic/lambdas|showcase|run||expected/lambdas.stdout|Expression lambdas, captured values, and inferred Var results.
 magic/macros|showcase|run||expected/magic-macros.stdout|Standalone magic macros gallery example.

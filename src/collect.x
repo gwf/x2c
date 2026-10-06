@@ -702,7 +702,16 @@ static void Compiler._add_type_dependencies(
 /** Reports whether the cached meta provider matches linked code.
     The scanner uses the same retained hashes as evaluator installation. */
 int Compiler.linked_meta_provider_current(Compiler c, String path) {
-  List entry = c._entry(_canonical_path(path));
+  String canonical = _canonical_path(path);
+  List entry = c._entry(canonical);
+  if (!entry) {
+    DiagnosticsHold hold = c.diagnostics.hold();
+    $let(c.meta_build, 1) $let(c.recovery_depth, c.recovery_depth + 1) {
+      try entry = c._walk_cold(path, canonical, {}, {});
+      catch %(malformed *): entry = NULL;
+    }
+    c.diagnostics.release(hold, 0);
+  }
   if (!entry) return 0;
   Map hashes = {}, native = {};
   foreach (Var part, entry.car()) {
@@ -714,7 +723,29 @@ int Compiler.linked_meta_provider_current(Compiler c, String path) {
         if (!c.project_meta_uses_linked(name, provider, own)) return 0;
     }
   }
-  return c.meta_provider_hashes_current(hashes, native);
+  $let(c.filename, canonical)
+    return c.meta_provider_hashes_current(hashes, native);
+}
+
+/* The linked hash inventory also retains ordinary private callees and
+   native-only providers. Provider-qualified keys keep file-private names
+   distinct without advertising more callable targets. */
+void Compiler.add_linked_meta_provider_hashes(Compiler c, Map rows) {
+  foreach (String path, c.deps.keys()) {
+    if (!is_source_file(path)) continue;
+    List entry = c._entry(_canonical_path(path));
+    if (!entry) continue;
+    foreach (Var part, entry.car()) {
+      if (part is not <map>) continue;
+      foreach (Var value, part.map()) match (value) {
+        case %(meta-hashes ?(String provider) ?(Map hashes)): {
+          List names = hashes.keys().list().sort();
+          foreach (Var (name, hash), hashes)
+            rows[%"$provider:$name"] = %($hash $names);
+        }
+      }
+    }
+  }
 }
 
 /** Selects helper C spellings for public definitions owned by `path`.

@@ -323,7 +323,7 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit &unit) {
   if (request.no_cpp) return NULL;
   int use_cpp = request.cpp_symbols || request.live_symbols ||
                 request.dump in cpp_dumps;
-  if (!use_cpp) return _collect_input(frontend, c);
+  if (!use_cpp) return _collect_input(frontend, unit);
   _check_cpp_unit(c);
   Compiler cpp = _run_cpp(frontend, unit);
   String text = unit.preprocessor_output;
@@ -331,7 +331,7 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit &unit) {
   _tokenize_cpp(cpp, text);
   if (request.dump == <cpp-tokens>) return NULL;
   if (request.live_symbols) c.runtime_hdrs = 1;
-  Map globs = _collect_input(frontend, c);
+  Map globs = _collect_input(frontend, unit);
   List private_rows = _unit_private_rows(c, globs);
   _share_session(cpp, c);
   /* Owning-source collection already counted declaration names. CPP adds
@@ -367,10 +367,14 @@ static List _unit_private_row(Map globs, List key) {
   return value is void ? %($key) : %($key $value);
 }
 
-static Map _collect_input(Frontend frontend, Compiler c) {
+/* A helper parse continues after a declaration producer fails before its
+   helper exists. Keep the collected prefix for that recovery parse. */
+static Map _collect_input(Frontend frontend, ParsedUnit &unit) {
+  Compiler c = unit.compiler;
+  unit.globals = {};
   $let(c.package, c.package) {
     _enter_package(frontend, c);
-    return c.collect_symbols(NULL);
+    return c.collect_symbols(unit.globals);
   }
 }
 
