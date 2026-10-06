@@ -1399,17 +1399,17 @@ static void Forward.binding(Forward &f, Var binding) {
   else f.global(binding, spelling);
 }
 
-/* A generated protocol symbol is declared by the header that published it.
-   A native alias among them is a macro over the host function, and newlib
-   spells some of those as function-like macros, so a prototype of the alias
-   would not even parse. */
+/* A helper group omits its provider's runtime header, so forward the
+   ordinary adapters its typed bodies call. Native aliases still come from
+   their defining headers; a host function-like macro cannot be prototyped. */
 static void Forward.global(Forward &f, Var binding, String spelling) {
   Compiler c = f.c;
   Type type = NULL;
   List global = spelling ? c.sym.resolve_global(%($spelling), type) : NULL;
   if (!global || !global.equal(binding) || !type.is_function()) return;
   if (global in f.available || global in f.seen) return;
-  if (c.sym.get(%("generated-protocol" $spelling))) return;
+  if (c.sym.get(%("generated-protocol" $spelling)) &&
+      (!c.meta_build || c.native_protocol_alias(spelling))) return;
   f.seen[global] = 1;
   f.types(type);
   List declaration = ast_prototype_declarator(type.declaration_ast(global));

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "x2c.x"
+
 /*  autodiff-macros.x -- dual-number families for forward-mode differentiation
 
     Copyright (c) 2026 Gary William Flake

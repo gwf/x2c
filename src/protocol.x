@@ -2372,6 +2372,19 @@ static void Compiler._install_generated(
   c.sym.define_global(%($generated), signature);
 }
 
+/** Reports whether a generated member names a native protocol host function.
+    Its defining header supplies the alias instead of a C prototype. */
+int Compiler.native_protocol_alias(Compiler c, String name) {
+  foreach (Var conformance, c.conforms)
+    match (conformance)
+      case %(protocol-conformance ? ?(Type participant) ? ? ? ?
+             (members *rows)):
+        if (_native_rows(rows))
+          foreach (List row, rows)
+            if (_member_spelling(participant, row.car()) == name) return 1;
+  return 0;
+}
+
 // Numeric participants other than Symbol keep their native operators.
 static int Compiler._numeric_participant(Compiler c, Type participant) =>
   c.sym.resolve_numeric_type(participant) && participant !== %("Symbol");

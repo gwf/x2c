@@ -162,6 +162,49 @@ int Compiler.meta_reaches_compile_time(Compiler c, Var node) {
   return 0;
 }
 
+/** Closes compile-time-only calls across later meta definitions.
+    Retained group bodies hold the bound calls, including literal insertions.
+    Select runtime definitions only after that relation is complete. */
+void Compiler.finish_meta_functions(Compiler c, Array nodes) {
+  int grew = 1;
+  while (grew) {
+    grew = 0;
+    foreach (List entry, c.meta_group)
+      match (entry) case %(function ?fn ?(String name) ?):
+        if (!(name in c.meta_comptime) && c.meta_reaches_compile_time(fn)) {
+          c.record_comptime(name);
+          grew = 1;
+        }
+  }
+  Map staged = {};
+  foreach (List entry, c.meta_group)
+    match (entry) case %(function ?fn ?(String name) ?):
+      if (name in c.meta_comptime) staged[fn] = 1;
+  if (!staged.len()) return;
+  int retained = 0;
+  foreach (List node, nodes) {
+    if (node in staged) continue;
+    c._check_runtime_meta_calls(node);
+    nodes[retained++] = node;
+  }
+  nodes.resize(retained);
+}
+
+/* Reuse the ordinary call check with the parsed statement's origin after
+   closure. Native and ordinary copies are absent from the staged group. */
+static void Compiler._check_runtime_meta_calls(Compiler c, Var root) {
+  List node;
+  $ast.walk(root, node) {
+    match (node) {
+      case %(at ?(int origin) ?inner): {
+        $let(c.origin, origin) c._check_runtime_meta_calls(inner);
+        continue;
+      }
+      case %(call ?(List callee) ?): c.check_meta_call(callee, NULL);
+    }
+  }
+}
+
 // emitting the group
 
 /* Emits the group through the ordinary backend as `(hfile htext cfile

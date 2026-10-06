@@ -7,7 +7,7 @@
 #include "x2c.x"
 #include "typed-array.x"
 #include <math.h>
-#include "../src/autodiff-macros.x"
+#include "autodiff-macros.x"
 
 $ad.forward()
 static double square(double x) {

@@ -35,6 +35,11 @@ builds/example-%: examples/%.x | builds
 	"$(X2C)" build --output $@ --build-dir builds/$*-build \
 	  $(PACKAGE_X_FLAGS) $(PACKAGE_C_FLAGS) $<
 
+# This example includes the macro module directly and needs no package archive.
+builds/example-autodiff: examples/autodiff.x src/autodiff-macros.x | builds
+	"$(X2C)" build --plain --output $@ --build-dir builds/autodiff-build \
+	  --x-include-dir src $(PACKAGE_C_FLAGS) $< src/autodiff-macros.x
+
 benchmark: builds/autodiff-checkpoint
 
 builds/autodiff-checkpoint: benchmarks/autodiff-checkpoint.x | builds

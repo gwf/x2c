@@ -727,9 +727,9 @@ int Compiler.linked_meta_provider_current(Compiler c, String path) {
     return c.meta_provider_hashes_current(hashes, native);
 }
 
-/* The linked hash inventory also retains ordinary private callees and
-   native-only providers. Provider-qualified keys keep file-private names
-   distinct without advertising more callable targets. */
+/** Adds retained hashes of ordinary private callees and native-only providers.
+    Provider-qualified keys keep file-private names distinct without
+    advertising more callable targets. */
 void Compiler.add_linked_meta_provider_hashes(Compiler c, Map rows) {
   foreach (String path, c.deps.keys()) {
     if (!is_source_file(path)) continue;

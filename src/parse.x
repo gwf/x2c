@@ -3167,9 +3167,8 @@ static List Compiler._bind_collected_function(
   Type type = %(declare $return_type (bindings $declarator)).type_from_ast();
   if (c.public_bodies &&
       (!type.is_inline() || type.is_static() || c.source_private)) return NULL;
-  c.land_retained_bindings(declarator);
-  c.land_retained_bindings(body);
-  c.land_retained_bindings(construction);
+  List landed = c.land_retained_bindings(%($declarator $body $construction));
+  (declarator, body, construction) = landed;
   $let(c.macro_stack, c.thaw_declaration_syntax(construction)) {
     Token invocation = c.macro_stack ? c.macro_stack.last().list()[3] : NULL;
     $let(c.origin, invocation ? c.record_origin(invocation) : c.origin)
@@ -3184,29 +3183,46 @@ static List Compiler._bind_collected_function(
 static List Compiler._bind_collected_initializers(
   Compiler c, List input, Var declaration, Var construction) {
   if (c.shallow) return input;
-  c.land_retained_bindings(declaration);
-  c.land_retained_bindings(construction);
+  List landed = c.land_retained_bindings(%($declaration $construction));
+  (declaration, construction) = landed;
   $let(c.macro_stack, c.thaw_declaration_syntax(construction)) {
     return c.bind_syntax(declaration, AST_UNIT, c.return_type);
   }
 }
 
-/** Records the spellings of bindings retained by collection for replay.
-    A retained declaration, body, or capture can name an old identity; its
-    spelling resolves in the scope where the retained syntax lands. */
-void Compiler.land_retained_bindings(Compiler c, Var syntax) {
-  if (syntax is not <list>) return;
+/** Lands retained bindings without changing a live identity's spelling.
+    Collection-local numbers can collide with bindings full parsing issued.
+    One relocation map keeps declarations, bodies, and captures consistent. */
+Var Compiler.land_retained_bindings(Compiler c, Var syntax) =>
+  c._land_retained_bindings(syntax, {});
+
+static Var Compiler._land_retained_bindings(
+  Compiler c, Var syntax, Map identities) {
+  if (syntax is not <list>) return syntax;
   int identity = 0;
   String spelling = NULL;
   if (!binding_identity_try_parts(syntax, identity, spelling)) {
-    foreach (Var child, syntax.list()) c.land_retained_bindings(child);
-    return;
+    List node = syntax, Var child;
+    $ast.rewrite_children(
+      node, child, c._land_retained_bindings(child, identities));
   }
+  Var landed;
+  if (identities.try_get(syntax, landed)) return landed;
   if (c.names.next_binding < identity) c.names.next_binding = identity;
-  if (!(%(known $identity) in c.semantic_binding_facts()))
+  Var issued;
+  if (c.semantic_binding_facts().try_get(%(known $identity), issued) &&
+      issued != spelling)
+    landed = c.sym.introduce(spelling);
+  else {
+    landed = syntax;
     c.set_fact(%(known $identity), spelling);
-  if (!(%(source-spelling $syntax) in c.semantic_binding_facts()))
-    c.set_fact(%(source-spelling $syntax), spelling);
+  }
+  identities[syntax] = landed;
+  Var source;
+  if (!c.semantic_binding_facts().try_get(%(source-spelling $syntax), source))
+    source = spelling;
+  c.set_fact(%(source-spelling $landed), source);
+  return landed;
 }
 
 /* Binds a constructed function's parameters in a fresh prototype scope,

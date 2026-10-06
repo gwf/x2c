@@ -125,3 +125,10 @@ include instead encounters the unavailable #define. This change does not
 add preprocessing evaluation or promise to support that cycle. The reduced
 baseline and candidate evidence is retained in
 /tmp/x2c-publication-failure/type-cycle-native-state/baseline/.
+
+Editing `_selector_middles` in the shipped selector producer also fails cold
+on origin/dev 0bba0aed, before this migration. The unchanged consumer compiles
+and prints `1 1`; the edited producer fails its compile-time address result.
+The migration does not add a helper bootstrap phase for that existing cycle.
+Comparable source, fresh-cache logs, and native control evidence are retained
+in /tmp/x2c-legacy-selector-baseline/.

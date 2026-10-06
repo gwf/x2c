@@ -638,8 +638,8 @@ List Compiler.replay_declaration_source(Compiler c) {
   List source = c.sym.get(c._declaration_source_key(c.token));
   match (source)
     case %(declaration-source ?(int end) ?syntax): {
-      List thawed = c.thaw_declaration_syntax(syntax);
-      c.land_retained_bindings(thawed);
+      List thawed = c.land_retained_bindings(
+        c.thaw_declaration_syntax(syntax));
       List bound = c.bind_syntax(thawed, AST_UNIT, NULL);
       while (c.peek(0) != <eof> && c.token.pos < end) c.next();
       return bound;
@@ -1325,6 +1325,7 @@ static void Compiler._sync_top_level(Compiler c, Token start, int braces) {
 }
 
 static List Compiler._finish_parse(Compiler c, Array nodes) {
+  c.finish_meta_functions(nodes);
   if (c.meta_build) c.write_meta_build();
   c.unit_nodes = NULL;
   List ast = nodes.list_free();

@@ -2,7 +2,7 @@
 #include "typed-array.x"
 #include <stdio.h>
 #include <math.h>
-#include "../src/autodiff-macros.x"
+#include "autodiff-macros.x"
 
 $ad.reverse()
 static double walk(double x, double y, int n) {
