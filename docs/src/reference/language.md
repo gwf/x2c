@@ -3244,6 +3244,12 @@ result exists or an operation applies. Failure causes still use the ambient
 Native C arrays and pointers retain C indexing. `Array`, `List`, `String`, and
 `Map` also define indexed access.
 
+A typedef of one of these four collections inherits its bracket reads. An
+exact `getindex` method on the alias takes precedence over the inherited
+getter. A typedef of an ordinary C pointer keeps native indexing unless it
+defines its own `getindex` method. Indexed writes and updates continue to use
+the collection's mutation operations; a read override does not replace them.
+
 - `Array`, `List`, and `String` accept negative indices.
 - An out-of-range `Array` or `List` read returns `void`.
 - An out-of-range `String` read returns `-1`; its indexed result is a byte

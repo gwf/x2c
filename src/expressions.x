@@ -1405,21 +1405,35 @@ static List Compiler._postfix_index_expression(
 
 static List Compiler._typedef_index(
   Compiler c, List expr, List index, Type type) {
-  String owner = type.car(), Type receiver = type;
-  if (c.sym.is_array_type(type)) {
-    owner = "Array";
-    receiver = %("Array");
-  }
-  else if (c.sym.is_map_type(type)) {
-    owner = "Map";
-    receiver = %("Map");
-  }
-  String fnname = %"${owner}_getindex";
-  List fntype = c.sym.get(%($fnname));
-  match (fntype)
-    case %((func (!set ?params ($receiver ?))) ?rtype):
-      return c._getindex_expression(expr, index, params, rtype);
+  int collection = c._collection_index_type(type);
+  List resolved = c._nominal_getindex(type);
+  if (!resolved && collection)
+    resolved = c.resolve_protocol_member(type, "getindex");
+  Type signature = resolved ? resolved.cadr() : NULL;
+  match (signature)
+    case %((func (!set ?params (?receiver ?))) ?rtype):
+      if (collection || receiver == type)
+        return c._getindex_expression(expr, index, params, rtype);
   return c._native_index(expr, index, type);
+}
+
+static int Compiler._collection_index_type(Compiler c, Type type) =>
+  c.sym.is_named_value_type(type, "List") || c.sym.is_string_type(type) ||
+  c.sym.is_array_type(type) || c.sym.is_map_type(type);
+
+// Keep bracket admission and lowering on the same exact getter.
+List Compiler._nominal_getindex(Compiler c, Type type) {
+  if (!type.is_typedef_name()) return NULL;
+  match (type)
+    case %(?(String nominal)): {
+      String source = %"${nominal}_getindex";
+      if (source == c.fn_name && c._collection_index_type(type)) return NULL;
+      Type signature = c.sym.get(%($source));
+      match (signature)
+        case %((func ($type ?)) ?):
+          return %(${c.sym.reference(%($source), NULL)} $signature);
+    }
+  return NULL;
 }
 
 static List Compiler._getindex_expression(
@@ -2325,6 +2339,8 @@ static List Resolve._unary(Resolve &r, Var operator, List operand) {
       break;
     }
   }
+  if ((operator == <++> || operator == <-->) &&
+      r.c._builtin_index_lvalue(lhs)) type = %("Var");
   return source_operator_expression(type, %($operator $lhs));
 }
 
@@ -2336,6 +2352,7 @@ static List Resolve._postfix(Resolve &r, Var operator, List operand) {
   if (operand_type === %(<macro-expr>))
     return source_postfix_expression(
       %(<macro-expr>), %($operator $operand));
+  if (r.c._builtin_index_lvalue(operand)) operand_type = %("Var");
   return source_postfix_expression(
     operand_type, %($operator $operand));
 }
@@ -2390,9 +2407,11 @@ static List Compiler._binary_expression(
       %(<macro-expr>), %($operator $lhs $rhs));
   if (operator.is_assignment_op()) {
     Type type = lhs_type;
+    int builtin_index = c._builtin_index_lvalue(lhs);
+    if (builtin_index) type = %("Var");
     /* Meta lowering adapts a callable stored to a Func itself; converting
        here would lift a function name to a hidden global first. */
-    if (operator == <=> &&
+    if (operator == <=> && !builtin_index &&
         !(c.meta_body && c.sym.is_named_value_type(type, "Func")))
       rhs = c.convert_expression(rhs, type);
     return source_operator_expression(type, %($operator $lhs $rhs));
@@ -2415,6 +2434,21 @@ static List Compiler._binary_expression(
       lhs_type ? rhs : lhs, origin);
   c._check_matmul(operator, lhs_type, rhs_type, origin);
   return c._native_binary_expression(operator, lhs, rhs, origin);
+}
+
+// Built-in indexed mutation returns Var, independently of a read override.
+static int Compiler._builtin_index_lvalue(Compiler c, List expression) {
+  match (expression)
+    case %(expr ? (getindex (expr ?receiver_type ?) ?)):
+      return !!c._indexed_builtin_helper(receiver_type);
+  return 0;
+}
+
+// Identify only the built-in mutation helper family.
+Symbol Compiler._indexed_builtin_helper(Compiler c, Type type) {
+  if (c.sym.is_array_type(type)) return <array>;
+  if (c.sym.is_map_type(type)) return <map>;
+  return 0;
 }
 
 static void Compiler._convert_string_comparison(
