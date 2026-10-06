@@ -4,10 +4,10 @@
     Discovery (unittest/test-*.x) and execution (the $test.suite calls in
     test-all.x) can drift: a new test-foo.x compiles and links but is never
     called. The suites the test files define must be the suites test-all.x
-    calls. test-all.x and test-support.x are the driver and shared support,
-    not suites. Run from the repository root.
+    calls. test-all.x is the driver; test-support.x and test-macros.x supply
+    shared harness definitions. Run from the repository root.
 */
-List exceptions = %("test-all.x" "test-support.x");
+List exceptions = %("test-all.x" "test-support.x" "test-macros.x");
 Regex definition = Regex.compile("(?m)^void (\\w+_suite)\\(void\\) *\\{");
 Regex call = Regex.compile("\\$test\\.suite\\((\\w+)\\)");
 Array defined = [];
