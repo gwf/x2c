@@ -28,7 +28,6 @@ static $(import "../etc/lisp-bindings.xlisp")
 #include <stdlib.h>
 #include <string.h>
 
-
 /* meta-native diagnostics. */
 
 static macro Stmt $report.macro.function_install(
@@ -130,7 +129,6 @@ static macro Stmt $report.native.module_read(Expr $path, Expr $cause) =>
 
 static macro Stmt $report.native.module_load(Expr $path, Expr $cause) =>
   driver_error(%"cannot load native module '${$path}': ${$cause}");
-
 
 /* meta functions
 

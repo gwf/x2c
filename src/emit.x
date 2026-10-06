@@ -167,7 +167,6 @@ static macro Expression $emit.match.list_binder(Expr $name, Expr $value) =>
 static macro Expression $emit.match.value_binder(Expr $name, Expr $value) =>
   %"Var ${$name} = ${$value};";
 
-
 // diagnostics
 
 static macro Stmt $report.emit.static_switch(Expr $c) {

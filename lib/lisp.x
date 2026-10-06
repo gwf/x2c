@@ -173,7 +173,6 @@ static macro Stmt $error.apply.procedure(Expr $callable) {
   raise %(not-call (operation "apply") (actual ${$callable.kind()}));
 }
 
-
 /* Lisp session error conditions. Runtime operands retain their original
    detail types, order and source helper ownership. */
 
@@ -205,7 +204,6 @@ static macro Stmt $error.source.callable(Expr $callable) {
   raise %(bad-types (operation "lisp_source_function") (want "Lambda")
           (actual ${$callable.kind()}));
 }
-
 
 #include <signal.h>
 
@@ -282,7 +280,6 @@ static typedef struct Lambda {
   Map captures;
   int macro, source_function;
 } *Lambda;
-
 
 #include "var-adapters.x"
 $var.pointer(Lambda, lambda, <lambda>);

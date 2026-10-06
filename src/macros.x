@@ -363,7 +363,6 @@ static macro Stmt $report.parse.variable_unbound(
     <parse>, %"unbound replacement variable '${$spelling}'",
     $origin, NULL);
 
-
 /* expansion
 
    Expanding an invocation node matches its capture rows against the

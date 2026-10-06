@@ -657,8 +657,6 @@ static macro Unit $var.tag.unbox(Type $type, Name $method, Literal $tag) {
   }
 }
 
-
-
 $var.tag.unbox(Array, array, <array>);
 $var.tag.unbox(Block, block, <block>);
 $var.tag.unbox(Buffer, buffer, <buffer>);
@@ -922,7 +920,6 @@ int x2c_normalize_slice(int *start, int *stop, int step, int length) {
     newlen = (*stop - *start - 1) / step + 1;
   return newlen;
 }
-
 
 #include "dispatch.x"
 #include <limits.h>

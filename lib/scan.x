@@ -31,7 +31,6 @@ inline int scan_ascii_hex_value(int c) {
   return (unsigned) (c - 'a') < 6 ? c - 'a' + 10 : -1;
 }
 
-
 #include <string.h>
 
 static inline int _ascii_hex(int c) => scan_ascii_hex_value(c) >= 0;

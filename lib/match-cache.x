@@ -37,7 +37,6 @@ typedef struct MatchLease {
   int slot, active;
 } MatchLease;
 
-
 #include <assert.h>
 #include <string.h>
 #include "pool.x"

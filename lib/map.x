@@ -37,7 +37,6 @@ typedef struct Map {
 
 protocol Cleanup(Map);
 
-
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdio.h>

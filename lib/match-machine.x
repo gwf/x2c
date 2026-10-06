@@ -12,7 +12,6 @@
 
 #include "machine.x"
 
-
 #include <assert.h>
 #include <string.h>
 #include "scope.x"

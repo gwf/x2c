@@ -17,7 +17,6 @@
 
 protocol Cleanup(Context);
 
-
 #include "array.x"
 #include "atom.x"
 #include "block.x"

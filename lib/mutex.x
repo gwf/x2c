@@ -21,7 +21,6 @@ typedef struct Mutex *Mutex;
 
 $cleanup.by(Mutex, free);
 
-
 #include "scope.x"
 
 #include <errno.h>

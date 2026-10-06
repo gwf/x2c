@@ -16,7 +16,6 @@
 #include "private-keywords.x"
 #include "x2c.x"
 
-
 #include "diff.x"
 #include "digest.x"
 #include "json.x"

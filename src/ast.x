@@ -23,7 +23,6 @@ typedef enum AstPos {
   AST_EXPRESSION
 } AstPos;
 
-
 #include "../lib/error-macros.x"
 #include "ast-rewrite.x"
 #include "grammar.x"

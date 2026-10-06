@@ -83,7 +83,6 @@ typedef struct MatchCaptureSite {
   int refused;
 } MatchCaptureSite;
 
-
 #include <pthread.h>
 #include <stdlib.h>
 #include <stddef.h>

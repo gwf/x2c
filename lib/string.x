@@ -36,7 +36,6 @@ protocol const char *(T) {
 
 protocol const char *(String);
 
-
 #include <stdlib.h>
 #include <ctype.h>
 #include <assert.h>

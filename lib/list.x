@@ -55,7 +55,6 @@ List List.cons_in(Pool pool, Var head, List tail) {
   return pool.intern_new(cell, cell);
 }
 
-
 #include "symbol.x"
 #include "atom.x"
 #include "block.x"

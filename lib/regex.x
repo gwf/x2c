@@ -46,9 +46,7 @@ protocol RegexMatchIndex(T) {
 
 protocol RegexMatchIndex(RegexMatch);
 
-
 #include <string.h>
-
 
 /* regex diagnostic messages. Payload owners retain failure policy. */
 
@@ -75,7 +73,6 @@ static macro Stmt $error.depth(Expr $pattern, Expr $limit) {
           (reason "a group repeated more times than one match allows")
           (limit ${$limit}));
 }
-
 
 // nodes
 

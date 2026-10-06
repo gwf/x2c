@@ -124,7 +124,6 @@ static macro Unit $list.typed.family(Type $list, Type $element,
   }
 }
 
-
 #include <string.h>
 
 /** Typed view of canonical `List` cells whose cars are `<i8>` char values. */

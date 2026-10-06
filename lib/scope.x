@@ -51,7 +51,6 @@ typedef struct ScopeStats {
 #include <stdlib.h>
 protocol Cleanup(Scope);
 
-
 #include <limits.h>
 #include <stdint.h>
 #include <stdio.h>

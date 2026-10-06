@@ -87,7 +87,6 @@ meta static List _update_decode(List id, List value) {
   return decoded;
 }
 
-
 /* Each row supplies the storage boxer and decoder for its type, and
    `_native_update` performs the operation and the conversion back. Keeping
    both here makes compiler-lowered native lvalues and direct Var compound
@@ -136,7 +135,6 @@ $native.update(unsigned long long, x2c_var_update_ulong_long, <ullong>);
 $native.update(float, x2c_var_update_f32, <f32>);
 $native.update(double, x2c_var_update_f64, <f64>);
 $native.update(long double, x2c_var_update_long_double, <ldouble>);
-
 
 #include "var.x"
 #include "dispatch.x"

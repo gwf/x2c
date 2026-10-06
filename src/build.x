@@ -33,7 +33,6 @@ typedef struct Build {
   int xlat_n, xlat_done, xlat_cached, cc_n, cc_done, cc_cached, final_cached;
 } *Build;
 
-
 #include <errno.h>
 #include <stdio.h>
 #include <stdint.h>
@@ -44,7 +43,6 @@ typedef struct Build {
 
 #include "json.x"
 #include "report.x"
-
 
 /* build command reports. */
 
@@ -119,7 +117,6 @@ static macro Stmt $report.build.cleanup_failed(Expr $directory) =>
 
 static macro Stmt $report.build.output_ambiguous() =>
   driver_error("--output is ambiguous with multiple compile-only inputs");
-
 
 // source templates
 

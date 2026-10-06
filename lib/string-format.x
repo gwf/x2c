@@ -13,7 +13,6 @@
 
 #include "string.x"
 
-
 #include <limits.h>
 #include <stdio.h>
 #include <string.h>
@@ -22,7 +21,6 @@
 #include "list.x"
 #include "buffer.x"
 #include "exception.x"
-
 
 /* string-format diagnostic messages. Payload owners retain failure policy. */
 
@@ -46,7 +44,6 @@ static macro Expression $reason.character_nul() =>
 static macro Expression $reason.string() => "string conversion failed";
 static macro Expression $reason.value() => "value conversion failed";
 static macro Expression $reason.range(Expr $label) => %"${$label} exceeds int range";
-
 
 // representation
 

@@ -14,7 +14,6 @@
 
 #include "string.x"
 
-
 #include <limits.h>
 
 #include "buffer.x"

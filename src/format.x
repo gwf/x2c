@@ -10,7 +10,6 @@
 #pragma once
 #include "compiler.x"
 
-
 // pretty print formatting
 
 /* State for one formatting pass. `scanned` tracks the last byte counted in

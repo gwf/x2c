@@ -9,7 +9,6 @@
 
 #include "string.x"
 
-
 #include <ctype.h>
 
 /** Reports whether `str` contains a decimal digit.

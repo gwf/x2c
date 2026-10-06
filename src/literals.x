@@ -17,7 +17,6 @@
 #include <stdint.h>
 #include <string.h>
 
-
 /* literals diagnostics. */
 
 static macro Stmt $report.parse.macro_pattern_static(Expr $c, Expr $origin) =>
@@ -91,7 +90,6 @@ static macro Stmt $report.parse.symbol_truncated(
     <parse>, "Symbol literal does not round-trip",
     $origin, %("source spelling: ${$spelling}"
       "encoded spelling: ${$lossy}"));
-
 
 /* list literals
 

@@ -10,7 +10,6 @@
 
 #include "common.x"
 
-
 threaded int x2c_error_runtime_ready;
 
 /*  Every module keeps its own per-thread state in a `threaded` object.

@@ -38,7 +38,6 @@ typedef struct ToolRun {
   ToolAction action, Job job, String start_error;
 } *ToolRun;
 
-
 #include <ctype.h>
 #include <errno.h>
 #include <stdio.h>

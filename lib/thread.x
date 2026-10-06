@@ -26,7 +26,6 @@ typedef Var (*ThreadFn)(const void *input, size_t input_size);
 */
 typedef struct Thread *Thread;
 
-
 #include "context.x"
 #include "dispatch.x"
 #include "error.x"

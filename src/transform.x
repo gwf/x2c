@@ -36,7 +36,6 @@
 #include "callables.x"
 #include "cleanup.x"
 
-
 /* transform diagnostics. */
 
 static macro Stmt $report.parse.init_incomplete(Expr $c) =>
@@ -169,7 +168,6 @@ static macro Stmt $report.xform.index_update(
     $c.report_error(<xform>, message, NULL, NULL);
   }
 }
-
 
 // normalization
 

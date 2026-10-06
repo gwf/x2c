@@ -16,7 +16,6 @@
 #include "literals.x"
 #include "macros.x"
 
-
 /* statements diagnostics. */
 
 static macro Stmt $report.parse.with_body(Expr $c) =>
@@ -77,7 +76,6 @@ static macro Stmt $report.parse.catch_pattern(Expr $c) =>
   $c.report_error(
     <parse>, "catch filter requires a %() pattern literal",
     $c.token, %("use catch %(code (key pattern)...):"));
-
 
 // statements
 

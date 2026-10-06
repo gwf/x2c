@@ -22,7 +22,6 @@ typedef struct ProjectBuild {
   struct ProjectBuild *next;
 } *ProjectBuild;
 
-
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>

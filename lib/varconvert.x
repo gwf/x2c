@@ -35,7 +35,6 @@ float X2CVarNumeric.f32(X2CVarNumeric &value);
 double X2CVarNumeric.f64(X2CVarNumeric &value);
 long double X2CVarNumeric.ldouble(X2CVarNumeric &value);
 
-
 #include "meta.x"
 
 /* Var numeric conversion error conditions.
@@ -80,7 +79,6 @@ static macro Stmt $error.decode.type(Expr $tag) {
 static macro Stmt $error.convert.range(Expr $source_tag, Expr $target) {
   raise %(conv-range (source ${$source_tag}) (target ${$target}));
 }
-
 
 #include "var.x"
 #include "error.x"

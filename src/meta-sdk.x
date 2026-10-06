@@ -38,7 +38,6 @@ typedef struct MetaContext {
 #include <stdint.h>
 #include <sys/stat.h>
 
-
 /* Compile-time SDK rejection messages and notes. */
 
 static macro Stmt $report.sdk.method_name(Expr $name) =>
@@ -158,7 +157,6 @@ static macro Expression $report.sdk.path_notes(Expr $c, Expr $path) =>
 
 static macro Expression $report.sdk.value_notes(Expr $value) =>
   %("value: ${$value.repr()}");
-
 
 // the running call
 

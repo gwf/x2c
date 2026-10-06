@@ -37,7 +37,6 @@
 #include "format.x"
 #include "protocol.x"
 
-
 /* main command reports. */
 
 static macro Stmt $report.main.stem_collision(
@@ -81,7 +80,6 @@ static macro Stmt $report.main.external_failed(Expr $path) =>
 
 static macro Stmt $report.main.diagnostics_unwritable(Expr $diagnostics) =>
   driver_error(%"cannot open diagnostics file '${$diagnostics}'");
-
 
 // translating a unit
 

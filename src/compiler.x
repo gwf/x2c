@@ -267,7 +267,6 @@ protocol Var(Compiler) as void *;
 #include <stdlib.h>
 #include <string.h>
 
-
 /* compiler diagnostics. */
 
 static macro Stmt $report.parse.token_eof(Expr $c) =>

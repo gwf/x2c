@@ -60,7 +60,6 @@ struct UnzipShared {
   struct Iter column_iters[2];
 };
 
-
 #include "list.x"
 #include "var.x"
 #include "symbol.x"

@@ -45,7 +45,6 @@ typedef struct TargetKind {
   Symbol kind, String spelling, noun, prefix, suffix;
 } TargetKind;
 
-
 #include "../lib/system-macros.x"
 
 #include <ctype.h>
@@ -60,7 +59,6 @@ typedef struct TargetKind {
 #include "buffer.x"
 #include "report.x"
 #include "utils.x"
-
 
 /* cli command reports. */
 
@@ -99,7 +97,6 @@ static macro Stmt $report.cli.native_unsupported(Expr $arg) =>
 
 static macro Stmt $report.cli.option_unknown(Expr $arg) =>
   driver_error(%"unknown option '${$arg}'");
-
 
 // commands and options
 

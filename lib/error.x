@@ -64,7 +64,6 @@ typedef struct ErrorCatchSite {
 #define ERROR_CATCH_STATIC 1
 #define ERROR_CATCH_TRANSIENT 2
 
-
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>

@@ -24,7 +24,6 @@
 #include "protocol.x"
 #include "utils.x"
 
-
 /* parse diagnostics. */
 
 static macro Stmt $report.parse.decorator_top(Expr $c) =>
@@ -273,7 +272,6 @@ static macro Stmt $report.type.reference_placement(Expr $c) =>
   $c.report_error(
     <type>, "transparent references are only supported on parameters",
     NULL, NULL);
-
 
 // top-level forms
 

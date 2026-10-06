@@ -18,7 +18,6 @@ class SourceView struct {
   Map overlays, dirty_paths;
 } *;
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

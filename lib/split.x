@@ -34,7 +34,6 @@ Split Var.split(Var value) => (Split) value.pointer();
 
 protocol Var(Split);
 
-
 #include <ctype.h>
 #include <string.h>
 

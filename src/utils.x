@@ -18,7 +18,6 @@
 /* The 64-bit FNV-1a offset basis, which starts every FNV hash. */
 #define FNV_OFFSET_BASIS 0xcbf29ce484222325ULL
 
-
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>

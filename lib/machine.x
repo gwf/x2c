@@ -309,7 +309,6 @@ inline int MachineSlot.final_equal(
   return length == slot.span.length && expected == slot.span.end && !candidate;
 }
 
-
 #include <string.h>
 #include "exception.x"
 

@@ -78,7 +78,6 @@ Buffer Atom.write_repr(Atom value, Buffer out) {
   return out;
 }
 
-
 #include "buffer.x"
 #include "dispatch.x"
 #include "scan.x"

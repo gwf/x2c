@@ -10,7 +10,6 @@
 
 #pragma once
 
-
 #include "frontend.x"
 #include "meta-project.x"
 #include "project.x"

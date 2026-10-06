@@ -20,7 +20,6 @@
 #include "parse.x"
 #include "meta.x"
 
-
 /* protocol diagnostics. */
 
 static macro Stmt $report.protocols.tag_var(Expr $c, Expr $origin) =>
@@ -266,7 +265,6 @@ static macro Expression $report.protocols.collision_source_notes(
     "${$first} default source: ${$first_value}"
     "${$second} default source: ${$second_value}"
   );
-
 
 // registry rows
 

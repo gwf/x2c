@@ -39,7 +39,6 @@ typedef struct ParsedUnit {
   int source_lines, generated_symbols;
 } ParsedUnit;
 
-
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>

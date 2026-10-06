@@ -87,7 +87,6 @@ static macro Expression $region.reason.outer() =>
 static macro Expression $region.reason.moved() => "Scope.realloc moved it";
 static macro Expression $region.reason.freed() => "it was freed";
 
-
 #include "ast.x"
 #include "stage.x"
 #include "type.x"

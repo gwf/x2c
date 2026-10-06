@@ -47,7 +47,6 @@ typedef struct FuncArg {
 */
 typedef Var (*FuncAdapter)(Func fn, const FuncArg *argv);
 
-
 #include "varconvert.x"
 #include "error.x"
 #include "exception.x"

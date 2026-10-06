@@ -19,7 +19,6 @@ typedef enum Args {
   ARGS_NAMESPACE
 } Args;
 
-
 /* One spec row after its properties are read. An option is named by its
    first long spelling, or else its short one, without the dashes; `value`
    is the placeholder of an option that takes one, and `spellings` joins

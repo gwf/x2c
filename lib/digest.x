@@ -10,7 +10,6 @@
 #pragma once
 #include "x2c.x"
 
-
 #include <errno.h>
 #include <stdint.h>
 #include <stdio.h>

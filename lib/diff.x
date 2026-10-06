@@ -17,7 +17,6 @@ typedef enum Diff {
   DIFF_NAMESPACE
 } Diff;
 
-
 // line edits
 
 static const int _LIMIT = 2000;

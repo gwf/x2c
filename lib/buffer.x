@@ -29,7 +29,6 @@ typedef struct Buffer {
 
 $cleanup.by(Buffer, free);
 
-
 #include "exception.x"
 #include "scope.x"
 #include "string.x"

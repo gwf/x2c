@@ -12,7 +12,6 @@
 #include "../lib/private-keywords.x"
 #include "build.x"
 
-
 #include <stdio.h>
 #include <string.h>
 #include <sys/utsname.h>
@@ -20,7 +19,6 @@
 
 #include "digest.x"
 #include "json.x"
-
 
 /* install command reports. */
 
@@ -97,7 +95,6 @@ static macro Stmt $report.install.removed(Expr $target) =>
 static macro Expression $report.install.start_failed(Expr $program, Expr $error) =>
   %"x2c: unable to execute ${$program}: ${
     String.new(strerror((int) $error))}\n";
-
 
 // the packages lock
 

@@ -70,7 +70,6 @@ typedef enum FileReadStatus {
 
 $cleanup.by(File, close);
 
-
 #include "string.x"
 #include "block.x"
 #include "buffer.x"

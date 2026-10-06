@@ -27,7 +27,6 @@ typedef struct JsonBool *JsonBool;
 
 protocol Var(JsonBool);
 
-
 #include "meta.x"
 
 /* Json reading and writing error conditions.
@@ -121,7 +120,6 @@ static macro Stmt $error.read.number(Expr $reader) =>
 
 static macro Stmt $error.read.range(Expr $reader) =>
   $reader._fail("number out of range");
-
 
 #include <errno.h>
 #include <limits.h>

@@ -24,7 +24,6 @@
 */
 class Path String;
 
-
 #include <dirent.h>
 #include <errno.h>
 #include <limits.h>

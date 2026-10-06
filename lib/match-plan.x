@@ -12,7 +12,6 @@
 
 #include "match.x"
 
-
 #include <assert.h>
 #include "scope.x"
 #include "list.x"

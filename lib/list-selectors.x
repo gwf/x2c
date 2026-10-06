@@ -80,5 +80,4 @@ static macro Unit $selectors() {
   $_selector_definitions($selector.car, $selector.cdr)...
 }
 
-
 $selectors();

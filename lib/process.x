@@ -50,7 +50,6 @@ typedef enum Env {
   ENV_NAMESPACE
 } Env;
 
-
 #include "meta.x"
 
 /* Job launch and result error conditions.
@@ -121,7 +120,6 @@ static macro Stmt $error.text.nul(Expr $operation) {
 static macro Stmt $error.wait.unstarted() {
   raise %(bad-arg (operation "Job.wait_any") (reason "a job has not started"));
 }
-
 
 #include <errno.h>
 #include <fcntl.h>

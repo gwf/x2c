@@ -106,7 +106,6 @@ static macro Expression $callable.note.source(Expr $source) =>
   $source ? %"source signature: ${$source.repr()}"
           : "source signature: unresolved";
 
-
 #include "ast.x"
 #include "type.x"
 #include "parse.x"

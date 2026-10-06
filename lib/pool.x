@@ -50,7 +50,6 @@ typedef struct PoolStats {
   size_t backing_bytes, active_blocks, active_bytes, depot_blocks, depot_bytes;
 } PoolStats;
 
-
 #include <stdint.h>
 #include <pthread.h>
 #include <stdio.h>

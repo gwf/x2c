@@ -20,7 +20,6 @@
 #pragma once
 #include "frontend.x"
 
-
 #include "datum.x"
 #include "digest.x"
 #include "deps.x"

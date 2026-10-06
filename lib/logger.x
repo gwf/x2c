@@ -50,7 +50,6 @@ typedef void (*LogEmitter)(Logger logger, const LogEvent *event, Var data);
 */
 typedef void (*LogFlusher)(Logger logger, Var data);
 
-
 #include <assert.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -99,7 +98,6 @@ static typedef struct LogMemorySink {
   List *destination, Pool pool, Scope *destination_scope, values;
   Block wide_values;
 } *LogMemorySink;
-
 
 #include "var-adapters.x"
 $var.pointer(LogTextSink, logtextsink, <p48>);

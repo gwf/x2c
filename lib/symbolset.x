@@ -19,7 +19,6 @@
 protocol Iter(SymbolSet);
 protocol Contains(SymbolSet);
 
-
 #include <limits.h>
 #include <stdint.h>
 
