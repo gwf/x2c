@@ -236,7 +236,7 @@ static void _allowances(Lint l):
 Lint Lint.new(String path, String text, Map selected):
   Tokenizer scanner = Tokenizer.new(text, <x2c>)
   scanner.scan()
-  static struct Token *all = (struct Token *) scanner.tokens
+  struct Token *all = (struct Token *) scanner.tokens
   int total = scanner.tokens.len() - 1
   Lint l = Scope.calloc(1, sizeof(struct Lint))
   l.path = path, l.text = text, l.selected = selected
