@@ -690,7 +690,7 @@ static void AdoptionDraft.check_previous(AdoptionDraft &a) {
   }
   List row = previous;
   if (_adoption_representation(row) == a.representation &&
-      _adoption_tag(row).equal(a.tag_expression)) return;
+      (_adoption_tag(row) == a.tag_expression)) return;
   String first = %"first: ${_location_string(_adoption_location(row))}";
   String second = %"second: ${_location_string(a.location)}";
   c.diagnostics.report(
@@ -1213,8 +1213,8 @@ static List _inherited_parameters(
 static int Compiler._default_completes(
   Compiler c, String name, Type declared, String forward) =>
   forward && declared.is_function() && forward in c.fn_defs &&
-  !c.fn_defs.contains(name) &&
-  !c.sym.file_statics().contains(%(function $name));
+  !(name in c.fn_defs) &&
+  !(%(function $name) in c.sym.file_statics());
 
 static List MemberResolution.complete(MemberResolution &r, List row) {
   match (row)
@@ -1530,7 +1530,7 @@ List Compiler.protocol_member_names(Compiler c, Type participant) {
     $adopted_rows(c, protocols, current, base, rows) {
       foreach (List row, rows) {
         String name = row.car();
-        if (name && !seen.contains(name)) {
+        if (name && !(name in seen)) {
           seen[name] = 1;
           names.push(name);
         }
@@ -1705,7 +1705,7 @@ static List Compiler._base_alias(
 }
 
 static int _base_in_ancestry(Type base, Type participant, List ancestry) {
-  if (base.equal(participant)) return 1;
+  if (base == participant) return 1;
   for (List row = ancestry ? ancestry.cdr() : NULL; row; row = row.cdr())
     if (base.equal(row.car())) return 1;
   return 0;
@@ -1823,7 +1823,7 @@ static void Compiler._report_collision(
   String first_repr = _type_spelling(first_base);
   String second_repr = _type_spelling(second_base);
   String participant_repr = _type_spelling(participant);
-  int incompatible_signatures = !first_expected.equal(second_expected);
+  int incompatible_signatures = first_expected != second_expected;
   String message = $report.protocols.collision_prefix(
     member, participant_repr);
   String owners =
@@ -1851,7 +1851,7 @@ static List _collision_notes(Symbol kind, List first, List second) {
   if (kind == <linkage>)
     return $report.protocols.collision_linkage_notes(
       first_repr, second_repr, first_storage, second_storage);
-  if (!first_expected.equal(second_expected))
+  if (first_expected != second_expected)
     return $report.protocols.collision_signature_notes(
       first_repr, second_repr, first_expected, second_expected);
   return $report.protocols.collision_source_notes(
@@ -1956,7 +1956,7 @@ static Type _update_rhs(Type participant, Type signature) {
   Type result = signature.cdr();
   match (parameters)
     case %(?receiver ?rhs):
-      if (List.equal(receiver, participant) && result.equal(participant))
+      if (List.equal(receiver, participant) && result == participant)
         return rhs;
   return NULL;
 }
@@ -1999,7 +1999,7 @@ List Compiler.discard_helper(
   Type result = signature.cdr();
   Type resolved_result = c.sym.resolve_key(result);
   long callee_identity = (long) binding;
-  int fresh = c.protocol_helpers.contains(%"fresh-callee $callee_identity");
+  int fresh = %"fresh-callee $callee_identity" in c.protocol_helpers;
   /* An ordinary call may return its input or a view into it. Without a
      fresh-result contract, keep that input alive in its enclosing scope. */
   if (!fresh && (resolved_result.is_pointer() ||
@@ -2042,7 +2042,7 @@ static List DiscardCall.emit(DiscardCall &d) {
   List call = d.c.bind_syntax(
     $!( ${d.binding}(${d.arguments}...) ), AST_EXPRESSION, d.result);
   List drops = d.discards.list_free();
-  List shape = d.result.equal(%(void))
+  List shape = d.result == %(void)
     ? $!{ $call; $drops... return; }
     : $!{ ${d.result} $value = $call; $drops... return $value; };
   List body = d.c.bind_syntax(shape, AST_BLOCK, d.result);
@@ -2110,7 +2110,7 @@ void Compiler.install_generated_protocol_symbols(Compiler c) {
                 c._install_generated(participant, member, signature);
           continue;
         }
-        if (!c.fn_defs.contains(forward)) continue;
+        if (!(forward in c.fn_defs)) continue;
         if (c._numeric_participant(participant)) continue;
         foreach (List row, rows)
           match (row)

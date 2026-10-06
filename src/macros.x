@@ -110,7 +110,7 @@ static void Expansion.check(Expansion &x) {
     foreach (List active, c.macro_stack) {
       (List prior, List prior_input, Var bindings, Var site) = active;
       (void) bindings, (void) site;
-      if (prior.equal(x.definition) && prior_input.equal(x.input))
+      if (prior == x.definition && prior_input == x.input)
         x.recursion();
     }
   if (c.macro_stack.len() >= 64) x.too_deep();
@@ -1107,7 +1107,7 @@ static int Compiler._legacy_expression_body(Compiler c) {
 static int _extends_expression(Token token) {
   Symbol type = token.type;
   return type.binary_precedence() || type.is_assignment_op() ||
-         operand_continuations.contains(type) ||
+         type in operand_continuations ||
          (type == <ident> && (token.text == "is" || token.text == "in"));
 }
 
@@ -1170,7 +1170,7 @@ static List Compiler._hole_slot(Compiler c, Symbol role) {
       (role == <statement> && c.after_hole().type == <(>)) return NULL;
   if (role == <expression> && hole.assoc(<sequence>).int())
     $report.parse.splice_expr(c);
-  if (!untyped_roles.contains(role)) {
+  if (!(role in untyped_roles)) {
     Symbol kind = hole.assoc(<kind>);
     if (!kind && c.after_hole().type != <...> && !c._quoted_role(role))
       return NULL;
@@ -2035,7 +2035,7 @@ void Compiler.parse_keyword_definition(Compiler c) {
   Token reference = c.token;
   List definition = c._lookup(c._name(), reference);
   Symbol kind = definition.assoc(<kind>);
-  if (!alias_kinds.contains(kind)) {
+  if (!(kind in alias_kinds)) {
     String spelling = _kind_spelling(kind);
     $report.macro.keyword_internal(
       c,
