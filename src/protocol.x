@@ -690,7 +690,7 @@ static void AdoptionDraft.check_previous(AdoptionDraft &a) {
   }
   List row = previous;
   if (_adoption_representation(row) == a.representation &&
-      (_adoption_tag(row) == a.tag_expression)) return;
+      _adoption_tag(row) == a.tag_expression) return;
   String first = %"first: ${_location_string(_adoption_location(row))}";
   String second = %"second: ${_location_string(a.location)}";
   c.diagnostics.report(
