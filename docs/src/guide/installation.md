@@ -14,24 +14,6 @@ Running the script again upgrades the prefix and keeps installed packages.
 `tools/check-install-script.sh` exercises the same script against a
 release layout built from the current tree.
 
-### Upgrading from 0.14.0
-
-Version 0.15.0 reads package native arguments from `<name>.native.rsp` instead
-of `<name>.link`. The installer keeps existing packages, so rebuild source
-packages and reinstall native bundles built for 0.14.0 after upgrading.
-
-The SQLite package calls its prepared-statement type `Prepared` instead of
-`Statement`; change imports and typed variables, and use `Var.prepared` in
-place of `Var.statement`. Automatic differentiation moved from
-`lib/autodiff.x` and `lib/autodiff.xmacro` to the optional `autodiff` package.
-Build or install that package and use
-`import "autodiff"` for its runtime types and macros.
-
-The removed `List.pool_*` operations now belong to `Pool`. The removed
-`List.reduce`, `Array.reduce`, and `Iter.reduce` operations have no matching
-method; use `Iter.foldl` when an explicit seed fits. Use `Var.truth` in place
-of `Var.truthy`.
-
 From a source checkout:
 
 ```sh
@@ -47,6 +29,24 @@ interfaces written by the installed compiler, runnable examples, an empty
 package directory, and license. With no `PREFIX`, `make
 install` keeps its development behavior: it installs into the checkout's
 `bin/` under the current branch name.
+
+### Upgrading from 0.14.0
+
+Version 0.15.0 reads package native arguments from `<name>.native.rsp` instead
+of `<name>.link`. The installer keeps existing packages, so rebuild source
+packages and replace old native bundles with bundles built for 0.15.0.
+
+The SQLite package calls its prepared-statement type `Prepared` instead of
+`Statement`; change imports and typed variables, and use `Var.prepared` in
+place of `Var.statement`. Automatic differentiation moved from
+`lib/autodiff.x` and `lib/autodiff.xmacro` to the optional `autodiff` package.
+Build or install that package and use `import "autodiff"` for its runtime types
+and macros.
+
+The removed `List.pool_*` operations now belong to `Pool`. The removed
+`List.reduce`, `Array.reduce`, and `Iter.reduce` operations have no matching
+method; use `Iter.foldl` when an explicit seed fits. Use `Var.truth` in place
+of `Var.truthy`.
 
 ## The x2c home
 
