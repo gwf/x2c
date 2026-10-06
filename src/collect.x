@@ -32,14 +32,16 @@ static macro Stmt $report.driver.runtime_read(Expr $c, Expr $runtime) {
     $c.token, %("path: ${$runtime}"));
 }
 
-static macro Stmt $report.driver.include_read(Expr $c, Expr $target, Expr $path) {
+static macro Stmt $report.driver.include_read(
+  Expr $c, Expr $target, Expr $path) {
   $c.report_error(
     <driver>,
     "cannot read include",
     $c.token, %("stage: collect" "include: ${$target}" "path: ${$path}"));
 }
 
-static macro Stmt $report.driver.package_unknown(Expr $c, Expr $site, Expr $name) {
+static macro Stmt $report.driver.package_unknown(
+  Expr $c, Expr $site, Expr $name) {
   $c.report_error(
     <driver>,
     %"unknown package '${$name}'",
@@ -1461,9 +1463,8 @@ static void Compiler._import_package(
   c.register_package_alias(name, alias, NULL);
   foreach (List member, members)
     c.register_package_member(name, member.car(), member.cadr(), NULL, NULL);
-  if (effects != NULL) {
+  if (effects != NULL)
     foreach (Var effect, c.package_effects[name]) effects.push(effect);
-  }
   else c.install_compile_time_effects(c.package_effects[name]);
 }
 
@@ -1831,8 +1832,9 @@ static List Compiler._interface_include_dirs(
       portable != dir ? %(home $portable) :
       dir.startswith("/") ? %(absolute $dir) : %(relative $dir));
   }
-  dirs.push(is_source_file(canonical) && c._package_owns(canonical)
-    ? %(package ${c.package}) : %(package));
+  dirs.push(
+    is_source_file(canonical) && c._package_owns(canonical)
+      ? %(package ${c.package}) : %(package));
   return dirs.list_free();
 }
 

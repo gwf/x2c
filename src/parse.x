@@ -124,7 +124,8 @@ static macro Stmt $report.parse.enum_name(Expr $c) =>
     <parse>, "expected enumerator identifier",
     $c.token, NULL);
 
-static macro Stmt $report.parse.enum_bound(Expr $c, Expr $spelling, Expr $origin) =>
+static macro Stmt $report.parse.enum_bound(
+  Expr $c, Expr $spelling, Expr $origin) =>
   $c.report_error(
     <parse>, %"enumerator '${$spelling}' is already bound in this scope",
     $origin, %("prior binding: '${$spelling}'"));
@@ -278,8 +279,9 @@ static macro Stmt $report.type.reference_placement(Expr $c) =>
 /** Parses one top-level form and applies its source-ordered compiler effects.
     Returns its AST, or NULL when a keyword definition, top-level Lisp form,
     linkage brace, or compile-time-only `meta` function only updates compiler
-    state, with the first following token current. With `skip_body`, collection uses
-    the same classifier and bound declarations but skips runtime bodies.
+    state, with the first following token current. With `skip_body`,
+    collection uses the same classifier and bound declarations but skips
+    runtime bodies.
     This continuation is independent of the compiler's shallow-parse state.
 */
 List Compiler.parse_top_level_mode(Compiler c, int skip_body) {
@@ -3282,10 +3284,11 @@ static List Compiler._collected_function(
         declaration = %(declare $type
           (bindings (bind ((${method.car()}) ${method.cadr()}) $modifiers)));
       else {
-        /* Renamed locals keep their identity; exact names complete prototypes. */
+        /* Renamed locals keep their identity; exact names complete
+           prototypes. */
         Var source;
         if (!c.semantic_binding_facts().try_get(
-              %(source-spelling $binding), source) || source == name)
+          %(source-spelling $binding), source) || source == name)
           declaration = %(declare $type (bindings (bind $name $modifiers)));
       }
     }

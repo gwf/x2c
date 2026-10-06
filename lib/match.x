@@ -215,7 +215,9 @@ static typedef struct MatchLayoutBuilder {
 } MatchLayoutBuilder;
 
 /* The slots a pattern binds on every match and on some match. */
-static typedef struct MatchSlots { unsigned long definite, possible; } MatchSlots;
+static typedef struct MatchSlots {
+  unsigned long definite, possible;
+} MatchSlots;
 
 /** Analyzes one `Match` pattern into its canonical positional layout.
     Distinct named binders receive slots in lexical preorder. `!quote` is

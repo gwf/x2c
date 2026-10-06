@@ -42,8 +42,8 @@ macro Unit $array.typed.postfix(Type $array, Type $element) {
 }
 
 /*  Generates `updateindex` and `postfixindex` for a signed integer element.
-    `$unsigned` is the same-width unsigned type used to hold raw operands and
-    results. The C operators still apply integer promotions, so this does not
+    The same-width unsigned type `$unsigned` holds raw operands and results.
+    The C operators apply integer promotions, so this does not
     promise narrow-width wrapping. Division and shift raise before storing
     anything, so a failed update leaves the element as it was.
 */
@@ -181,8 +181,9 @@ macro Unit $array.core.family(Type $array, Type $element) {
     $element *data = ($element *) array.bytes;
     *out = data[index];
     if (index < n - 1)
-      memmove(data + index, data + index + 1,
-              (n - index - 1) * sizeof($element));
+      memmove(
+        data + index, data + index + 1,
+        (n - index - 1) * sizeof($element));
     array.length = n - 1;
     return 1;
   }
@@ -201,9 +202,9 @@ macro Unit $array.core.family(Type $array, Type $element) {
     int newlen = x2c_normalize_slice(&start, &end, step, (int) array.length);
     if (newlen <= 0) return slice;
     if (step == 1) {
-      Block_append((Block) slice,
-        (unsigned char *) array.bytes + start * sizeof($element), newlen
-      );
+      Block_append(
+        (Block) slice,
+        (unsigned char *) array.bytes + start * sizeof($element), newlen);
       return slice;
     }
     $element *data = ($element *) array.bytes;

@@ -90,7 +90,8 @@ static macro Stmt $report.sdk.unique_stem(Expr $stem) =>
   _sdk_reject_value(
     "_x2c.name.unique requires an identifier stem", $stem);
 
-static macro Stmt $report.sdk.parameter_missing(Expr $function, Expr $wanted) =>
+static macro Stmt $report.sdk.parameter_missing(
+  Expr $function, Expr $wanted) =>
   MetaContext.reject(
     %"x2c.function.parameter cannot find '${$wanted}'",
     %("function: ${x2c_function_name($function).repr()}"));
@@ -99,7 +100,8 @@ static macro Stmt $report.sdk.symbol_set_value(Expr $value) =>
   MetaContext.reject(
     "_x2c.symbol-set requires Symbols", %("value:" ${$value.repr()}));
 
-static macro Stmt $report.sdk.symbol_set_duplicate(Expr $values, Expr $duplicate) =>
+static macro Stmt $report.sdk.symbol_set_duplicate(
+  Expr $values, Expr $duplicate) =>
   MetaContext.reject(
     "_x2c.symbol-set requires distinct Symbols",
     %("symbol:" ${$values[$duplicate].repr()}));

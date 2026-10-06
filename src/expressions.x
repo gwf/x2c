@@ -2102,7 +2102,8 @@ static macro Stmt $func_null_argument(Expr $function, Expr $storage,
 
 /* The by-value alternative: the argument boxed, or the diagnostic call for
    a type with no Var form. */
-static macro Expression $func_value(Expr $argument) => FuncArg_value($argument);
+static macro Expression $func_value(Expr $argument) =>
+  FuncArg_value($argument);
 
 static macro Expression $func_opaque(Expr $function, Expr $index,
     Expr $type) => x2c_func_unrepresentable_argument($function, $index, $type);

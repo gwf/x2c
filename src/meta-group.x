@@ -335,7 +335,7 @@ static List Compiler._lower(
   }
   Map initials = c._initial_copies(units);
   foreach (Var unit, c._entry(
-      stamp, initials, c._public_functions(units), suffix))
+    stamp, initials, c._public_functions(units), suffix))
     units.push(unit);
   return units.list_free();
 }
@@ -398,7 +398,6 @@ static Array Compiler._runtime_includes(Compiler c, String lib) {
   return ordered;
 }
 
-/* Appends the provider's directives and declarations in source order. */
 static void Compiler._source_order(Compiler c, Array ordered, String lib) {
   Map placeholders = c._placeholders();
   foreach (Var unit, c.unit_nodes) {
@@ -765,8 +764,9 @@ static List Compiler._named(Compiler c, List reset) {
 static List Compiler._targets(Compiler c, List named, List functions) {
   Array entries = [];
   if (c.meta_build)
-    entries.push(%(map-entry ${x2c_literal_symbol(<functions>)}
-                   ${c.cache_literal_list(functions)}));
+    entries.push(
+      %(map-entry ${x2c_literal_symbol(<functions>)}
+        ${c.cache_literal_list(functions)}));
   foreach (List row, named) {
     (String name, List binding, Type type) = row;
     List function = NULL;

@@ -168,7 +168,8 @@ meta List source_postfix_expression(List type, List parts) =>
 meta List source_content_pattern(Macro shape, List names) =>
   shape.pattern(names).caddr();
 
-/** Returns bare call content with the supplied callee and argument patterns. */
+/** Returns bare call content with the supplied callee and argument
+    patterns. */
 meta List source_call_content(
   Macro call, List callee, List arguments) {
   List pattern = call.pattern(%(?callee *arguments));
@@ -196,7 +197,8 @@ meta List source_literal_content(List fields) =>
 meta List source_declarator_row(List fields) =>
   %(!or (bind @fields) (op = (bind @fields) ?));
 
-/** Returns the source expression beneath casts and parentheses with its type. */
+/** Returns the source expression beneath casts and parentheses with
+    its type. */
 meta Var source_expression(Var value) {
   while (1) {
     match (value) {

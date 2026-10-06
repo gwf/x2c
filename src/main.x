@@ -51,7 +51,8 @@ static macro Stmt $report.main.workers_started(Expr $jobs, Expr $total) =>
     stderr, "x2c: translate with %d workers over %d files\n",
     $jobs, $total);
 
-static macro Stmt $report.main.translation_verbose(Expr $directory, Expr $input) =>
+static macro Stmt $report.main.translation_verbose(
+  Expr $directory, Expr $input) =>
   fprintf(stderr, "x2c: translate --out-dir %s %s\n", $directory, $input);
 
 static macro Stmt $report.main.input_not_x(Expr $input) =>
@@ -68,7 +69,8 @@ static macro Stmt $report.main.directory_unwritable(Expr $out_dir) =>
 
 static macro Stmt $report.main.translated(
   Expr $n, Expr $noun, Expr $out_dir, Expr $duration) =>
-  report_line(<success>, %"Translated ${$n} x2c ${$noun} to ${$out_dir} in ${
+  report_line(
+    <success>, %"Translated ${$n} x2c ${$noun} to ${$out_dir} in ${
       $duration}");
 
 static macro Stmt $report.main.env_unknown(Expr $wanted) =>

@@ -43,7 +43,8 @@ static macro Stmt $report.parse.meta_decl(Expr $c, Expr $site) =>
     "meta requires a function or one initialized static value",
     $site, NULL);
 
-static macro Stmt $report.parse.meta_storage(Expr $c, Expr $site, Expr $name) =>
+static macro Stmt $report.parse.meta_storage(
+  Expr $c, Expr $site, Expr $name) =>
   $c.report_error(
     <parse>,
     "a meta value must have file-static storage",
@@ -67,7 +68,8 @@ static macro Stmt $report.macro.call_target(Expr $c, Expr $site) =>
     "explicit meta call cannot be resolved",
     $site, %("only a call to a meta function runs at compile time"));
 
-static macro Stmt $report.macro.call_binding(Expr $c, Expr $site, Expr $name) =>
+static macro Stmt $report.macro.call_binding(
+  Expr $c, Expr $site, Expr $name) =>
   $c.report_error(
     <macro>,
     "explicit meta call cannot be resolved",
@@ -188,7 +190,8 @@ static void Compiler._install_stub(
   try c.macro_lisp.set_global(
     name,
     Func.new_context(
-      _meta_stub, c.func_signature(type), (char *) context, context.len() + 1));
+      _meta_stub, c.func_signature(type),
+      (char *) context, context.len() + 1));
   catch %(?code *detail): {
     List cause = cons(code, detail);
     $report.macro.function_install(c, marker, cause);

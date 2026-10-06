@@ -99,12 +99,14 @@ static macro Stmt $error.check.both(
           (output ${$output}) (errors ${$errors}));
 }
 
-static macro Stmt $error.check.output(Expr $command, Expr $status, Expr $output) {
+static macro Stmt $error.check.output(
+  Expr $command, Expr $status, Expr $output) {
   raise %(cmd-fail (command ${$command}) (status ${$status})
           (output ${$output}));
 }
 
-static macro Stmt $error.check.errors(Expr $command, Expr $status, Expr $errors) {
+static macro Stmt $error.check.errors(
+  Expr $command, Expr $status, Expr $errors) {
   raise %(cmd-fail (command ${$command}) (status ${$status})
           (errors ${$errors}));
 }

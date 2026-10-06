@@ -148,7 +148,8 @@ static macro Stmt $report.xform.compound_enum(Expr $c) =>
     <xform>, "dynamic compound assignment cannot target an enum",
     NULL, NULL);
 
-static macro Stmt $report.xform.index_operand(Expr $c, Expr $op, Expr $rhs_type) {
+static macro Stmt $report.xform.index_operand(
+  Expr $c, Expr $op, Expr $rhs_type) {
   {
     String details = %"right type: ${$rhs_type.repr()}";
     String message = $op == <+>

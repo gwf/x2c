@@ -26,7 +26,6 @@ meta static List _selector_chain(String spelling, List value) {
   return value;
 }
 
-/* A selector whose last step is car. */
 static macro Unit $selector.car(Name $name) {
   /** Returns the element that `$name` selects from `value`. */
   inline Var List.$name(List value) => $_selector_chain($name, value);
@@ -34,7 +33,6 @@ static macro Unit $selector.car(Name $name) {
   inline Var Var.$name(Var value) => $_selector_chain($name, value);
 }
 
-/* A selector whose last step is cdr. */
 static macro Unit $selector.cdr(Name $name) {
   /** Returns the tail that `$name` selects from `value`. */
   inline Self List.$name(Self value) => $_selector_chain($name, value);

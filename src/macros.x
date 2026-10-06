@@ -115,7 +115,8 @@ static macro Stmt $report.parse.decorator_kind(Expr $c, Expr $origin) =>
     $origin, %("expected Expression, Function, Stmt, Field, Unit,"
       "or NamedType"));
 
-static macro Stmt $report.macro.local_target(Expr $c, Expr $target, Expr $origin) =>
+static macro Stmt $report.macro.local_target(
+  Expr $c, Expr $target, Expr $origin) =>
   $c.report_error(
     <macro>, %"local decorators cannot target ${$target} syntax",
     $origin, NULL);
@@ -313,15 +314,18 @@ static macro Stmt $report.parse.lisp_unclosed(Expr $c, Expr $origin) =>
     <parse>, "unterminated compile-time Lisp form",
     $origin, NULL);
 
-static macro Stmt $report.macro.lisp_expr(Expr $c, Expr $origin, Expr $value) =>
+static macro Stmt $report.macro.lisp_expr(
+  Expr $c, Expr $origin, Expr $value) =>
   $c.report_error(
     <macro>, "compile-time Lisp result cannot fill an expression slot",
     $origin, %( "value:" ${$value.repr()} ));
 
-static macro Stmt $report.macro.type_name(Expr $c, Expr $message, Expr $origin) =>
+static macro Stmt $report.macro.type_name(
+  Expr $c, Expr $message, Expr $origin) =>
   $c.report_error(<macro>, $message, $origin, NULL);
 
-static macro Stmt $report.macro.import_cycle(Expr $c, Expr $path, Expr $origin) {
+static macro Stmt $report.macro.import_cycle(
+  Expr $c, Expr $path, Expr $origin) {
   {
     String display = $c.display_path($path);
     Array notes = [ %"import: $display" ];

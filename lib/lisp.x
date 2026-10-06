@@ -154,7 +154,8 @@ static macro Stmt $error.apply.stack(Expr $body) {
   raise %(call-stack (operation "apply") (value ${$body}));
 }
 
-static macro Stmt $error.form.arity(Expr $operation, Expr $expected, Expr $actual) {
+static macro Stmt $error.form.arity(
+  Expr $operation, Expr $expected, Expr $actual) {
   raise %(bad-arity (operation ${$operation}) (expected ${$expected})
           (actual ${$actual}));
 }

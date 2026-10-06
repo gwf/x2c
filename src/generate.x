@@ -86,8 +86,8 @@ static List Compiler._generated_code(Compiler c, List ast, String basename) {
 }
 
 static List Compiler._emit_header(Compiler c, List header) =>
-  c.emit(c._include_guard(_vertical_spacing(c._header_prototypes(header))),
-    NULL);
+  c.emit(
+    c._include_guard(_vertical_spacing(c._header_prototypes(header))), NULL);
 
 /* Each source use follows the declarations it needs. */
 static List Compiler._emit_source(
@@ -283,7 +283,8 @@ static int Partition.publishes_typedefs(Partition &p, List names) {
   return 0;
 }
 
-/* Static type declarations have no C storage. Static objects keep it. */
+/* `static` on a type has no C storage role. Objects retain the specifier
+   because it controls their storage. */
 static List _without_static_type(List node) {
   match (node) {
     case %(typedef ?type ?bindings):
@@ -517,8 +518,8 @@ static void Partition.add_declaration(
     if (p.c.publishes_type_family(family)) p.publish(body);
     else p.source.push(body);
     if (_declares_object(bindings))
-      p.source.push(%(declare ${_tag_only(type, core, _body_tag(type))}
-                       $bindings));
+      p.source.push(
+        %(declare ${_tag_only(type, core, _body_tag(type))} $bindings));
     return;
   }
   match (type.base_type())
@@ -765,7 +766,8 @@ static List _typedef_forwards(List items, List earlier, Compiler c) {
       case %(preproc ?(String text)) if (c): {
         int angle = 0;
         String target = preproc_include_target(text, angle);
-        if (target) _add_forwards(out, candidates, first, available,
+        if (target) _add_forwards(
+          out, candidates, first, available,
           c.include_type_dependencies(target, angle, included), moved);
       }
     }

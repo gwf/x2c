@@ -743,7 +743,8 @@ $logger.method(warn, <warn>);
 $logger.method(error, <error>);
 $logger.method(fatal, <fatal>);
 
-static macro Unit $logger.global(Name $method, Name $function, Literal $level) {
+static macro Unit $logger.global(
+  Name $method, Name $function, Literal $level) {
   /** Logs borrowed `fields` globally at $method level under `category`.
       Delivery and failure behavior follow `log_event`.
   */

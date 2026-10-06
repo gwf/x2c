@@ -93,8 +93,8 @@ static macro Stmt $report.build.translation_cached(Expr $input) =>
   fprintf(stderr, "x2c: up-to-date translate %s\n", $input);
 
 static macro Stmt $report.build.database_unwritable(Expr $path) =>
-  fprintf(stderr, "x2c: error: cannot write compilation database: %s\n",
-    $path);
+  fprintf(
+    stderr, "x2c: error: cannot write compilation database: %s\n", $path);
 
 static macro Stmt $report.build.compilation_cached(Expr $source) =>
   fprintf(stderr, "x2c: up-to-date compile %s\n", $source);

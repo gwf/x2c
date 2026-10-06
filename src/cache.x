@@ -32,7 +32,8 @@
 
 // diagnostics
 
-static macro Stmt $report.cache.init_cycle(Expr $c, Expr $origin, Expr $notes) {
+static macro Stmt $report.cache.init_cycle(
+  Expr $c, Expr $origin, Expr $notes) {
   $c.report_error(
     <cache>, "file-static x2c initializer dependency cycle",
     $origin, $notes);

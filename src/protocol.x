@@ -42,7 +42,8 @@ static macro Stmt $report.protocols.static_adoption(Expr $c, Expr $origin) =>
     <protocol>, "'static' applies only to a concrete protocol adoption",
     $origin, %("remove 'static' from the reusable protocol body"));
 
-static macro Stmt $report.protocols.participant_expected(Expr $c, Expr $origin) =>
+static macro Stmt $report.protocols.participant_expected(
+  Expr $c, Expr $origin) =>
   $c.report_error(
     <protocol>, "expected protocol participant name",
     $origin, NULL);
@@ -151,7 +152,8 @@ static macro Expression $report.protocols.conformance_prefix(
   Expr $participant, Expr $owner) =>
   %"${$participant} does not satisfy ${$owner}: ";
 
-static macro Expression $report.protocols.native_alias(Expr $prefix, Expr $base) =>
+static macro Expression $report.protocols.native_alias(
+  Expr $prefix, Expr $base) =>
   %"${$prefix}its typedef is not a native alias of ${$base}";
 
 static macro Expression $report.protocols.forward_conversion(
@@ -1746,8 +1748,9 @@ static List Compiler._ordered_occurrences(Compiler c) {
 /* Runs visit once for each conformance participant adopts, in protocols
    order, after setting the caller's base to the protocol and rows to its
    member rows. */
-static macro Decorator $adopted_rows(Stmt $visit, Expr $compiler, Expr $protocols,
-    Expr $participant, Name $base, Name $rows) {
+static macro Decorator $adopted_rows(
+  Stmt $visit, Expr $compiler, Expr $protocols,
+  Expr $participant, Name $base, Name $rows) {
   foreach (List entry, $protocols) {
     $base = entry.car();
     if (!$compiler._is_adopted($base, $participant)) continue;

@@ -74,7 +74,8 @@ static macro Stmt $report.driver.indent_symbols(Expr $c, Expr $site) {
     "an indented unit"));
 }
 
-static macro Stmt $report.driver.cpp_failed(Expr $c, Expr $site, Expr $status) {
+static macro Stmt $report.driver.cpp_failed(
+  Expr $c, Expr $site, Expr $status) {
   $c.report_error(
     <driver>,
     "failed to run C preprocessor",

@@ -617,11 +617,15 @@ static void Tokenizer._layout(Tokenizer t) {
 }
 
 /* One logical line of significant tokens, as indices into `sig`. */
-static typedef struct _LayoutLine { int first, last, indent, directive; } _LayoutLine;
+static typedef struct _LayoutLine {
+  int first, last, indent, directive;
+} _LayoutLine;
 
 /* Edits the layout pass applies to one source token: punctuation inserted
    before and after it, and a replacement type. */
-static typedef struct _LayoutEdit { String before, after; Symbol type; } _LayoutEdit;
+static typedef struct _LayoutEdit {
+  String before, after; Symbol type;
+} _LayoutEdit;
 
 /* What a block header's words say: an aggregate or enum header names no
    parameters, unlike a function's, and a label keeps its colon. */

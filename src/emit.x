@@ -48,17 +48,20 @@ static macro Expression $emit.alias.checked(
 
 // static objects
 
-static macro Expression $emit.object.inferred_alias(Expr $formal, Expr $alias) =>
+static macro Expression $emit.object.inferred_alias(
+  Expr $formal, Expr $alias) =>
   %("typedef __typeof__(" ${$formal} ")" ${$alias} ";");
 
-static macro Expression $emit.object.fixed_alias(Expr $declaration, Expr $alias) =>
+static macro Expression $emit.object.fixed_alias(
+  Expr $declaration, Expr $alias) =>
   %(
     "typedef" @{$declaration} ";"
     "_Static_assert(__builtin_constant_p(sizeof(" ${$alias} ")),"
       "\"static object size must be constant\");"
   );
 
-static macro Expression $emit.object.acquire(Expr $r, Expr $threaded, Expr $copy) =>
+static macro Expression $emit.object.acquire(
+  Expr $r, Expr $threaded, Expr $copy) =>
   %(
     @{$r.prefix}
     ${$r.storage} "X2CStatic" ${$r.guard} "= {0};"

@@ -131,7 +131,9 @@ static ErrorThreadState _thread(void) {
 
 /* One raise in progress: its cause, the record count before it, and its
    dispatch depth. */
-static typedef struct ErrorRaise { Symbol code, int raised_at, depth; } ErrorRaise;
+static typedef struct ErrorRaise {
+  Symbol code, int raised_at, depth;
+} ErrorRaise;
 
 /** Raises one cause with optional structured detail.
     This functional entry records and dispatches like the `raise` statement

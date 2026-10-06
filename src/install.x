@@ -92,7 +92,8 @@ static macro Stmt $report.install.installed(Expr $packages, Expr $name) =>
 static macro Stmt $report.install.removed(Expr $target) =>
   fprintf(stderr, "x2c: removed %s\n", $target);
 
-static macro Expression $report.install.start_failed(Expr $program, Expr $error) =>
+static macro Expression $report.install.start_failed(
+  Expr $program, Expr $error) =>
   %"x2c: unable to execute ${$program}: ${
     String.new(strerror((int) $error))}\n";
 

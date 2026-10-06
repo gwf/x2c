@@ -345,15 +345,15 @@ macro Unit $map.core.family(Type $map, Type $storage, Type $key, Type $value,
     unsigned cursor = 0;
     $key key;
     $value avalue, bvalue;
-    while (a._core_try_next(&cursor, &key, &avalue)) {
+    while (a._core_try_next(&cursor, &key, &avalue))
       if (!b._core_try_get(&key, &bvalue) ||
           !$value_equal(&avalue, &bvalue)) return 0;
-    }
     return 1;
   }
 }
 
-macro Unit $map.typed.operations(Type $map, Type $key, Type $value, Name $update,
+macro Unit $map.typed.operations(
+  Type $map, Type $key, Type $value, Name $update,
   Name $bad_arg,
   Name $bad_op,
   Name $capacity_valid,
@@ -825,7 +825,8 @@ macro Unit $map.typed.iterate(Type $map, Type $key, Type $value,
 
 }
 
-macro Unit $map.typed.publish(Type $family, Type $key, Type $value, Name $unbox,
+macro Unit $map.typed.publish(
+  Type $family, Type $key, Type $value, Name $unbox,
   Literal $tag,
   Name $box_key,
   Name $box_value,

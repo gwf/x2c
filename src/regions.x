@@ -45,7 +45,8 @@ static macro Stmt $report.region.read_ended(Expr $w, Expr $name) =>
     <region>, $w.origin,
     %"'${$name}' is read after its owning region ended", NULL);
 
-static macro Stmt $report.region.after_free(Expr $w, Expr $name, Expr $ended) =>
+static macro Stmt $report.region.after_free(
+  Expr $w, Expr $name, Expr $ended) =>
   $w.warn(
     <after-free>, $w.origin, %"'${$name}' is used after ${$ended}", NULL);
 

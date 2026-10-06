@@ -288,9 +288,10 @@ meta Map _tag_sibling_counts(List rows) {
 
 meta List _tag_row_entry(List row, Map counts) =>
   %(map-entry ${x2c_literal_symbol(row[0])}
-    ${_tag_list([x2c_literal_int(_tag_top(row)),
-                 x2c_literal_int(_tag_group_mask(counts[_tag_top(row)])),
-                 x2c_literal_int(_tag_bottom(row))])});
+    ${_tag_list(
+      [x2c_literal_int(_tag_top(row)),
+       x2c_literal_int(_tag_group_mask(counts[_tag_top(row)])),
+       x2c_literal_int(_tag_bottom(row))])});
 
 meta List _tag_constant_rows(void) {
   List rows = _tag_decode_rows();
@@ -343,10 +344,12 @@ meta List _tag_id_checks(void) {
   Array checks = [];
   int index = 0;
   foreach (List row, _tag_rows()) {
-    checks.push($!Unit{
-      _Static_assert(${x2c_ident(_tag_id(row))} == $index,
-                     "TagId matches the var tag ledger");
-    });
+    checks.push(
+      $!Unit{
+        _Static_assert(
+          ${x2c_ident(_tag_id(row))} == $index,
+          "TagId matches the var tag ledger");
+      });
     index++;
   }
   return checks;
