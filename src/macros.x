@@ -4277,7 +4277,7 @@ List Compiler.parse_macro_lisp_top_level(Compiler c) {
   return NULL;
 }
 
-/** Imports immediate dependencies and queues other source Lisp effects.
+/** Loads import dependencies and queues source Lisp effects.
     Declaration projection forces preceding effects exactly once; otherwise
     full parsing keeps the ordinary source-order evaluation. */
 void Compiler.parse_macro_lisp_shallow(Compiler c) {
@@ -4415,6 +4415,12 @@ static List Compiler._import(Compiler c, String requested, Token invocation) {
   Map before = c.deps.copy();
   String text = c._read_source(
     path, "cannot open compile-time Lisp import", invocation);
+  /* Collection queues the import itself, so only evaluation fills imports.
+     A nested import runs while its importing effect is on import_stack. */
+  if (c.shallow && !c.import_stack.len() && !library_filling) {
+    c.queue_declaration_effect(%"(import ${path.repr()})", invocation, NULL);
+    return NULL;
+  }
   if (!Compiler.inherits_import(path)) {
     c.import_stack.push(path);
     defer c.import_stack.take_last();

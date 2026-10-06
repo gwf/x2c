@@ -798,11 +798,11 @@ for mode in default live cpp; do
     live) options+=(--live-symbols) ;;
     cpp) options+=(--cpp-symbols) ;;
   esac
-  # One serial process shares the import between both units; parallel
-  # workers would each run its effects once per unit.
+  # Each unit evaluates public imports and Lisp in its own session.
+  # Declaration and field production remain retained across both units.
   "$X2C" translate -j 1 "${options[@]}" --out-dir "$declarations/$mode" \
     "$declarations/src/provider.x" "$declarations/src/consumer.x"
-  [ "$(cat "$declarations/effects")" = imxf ] ||
+  [ "$(cat "$declarations/effects")" = imxfim ] ||
     fail "declaration import, producer, or field ran twice in $mode mode"
   for file in provider.c provider.h consumer.c consumer.h; do
     cmp -s "$declarations/default/$file" "$declarations/$mode/$file" ||
@@ -868,10 +868,12 @@ $(def write-file
   (bind "lisp_write_file" '((func (("String") ("String"))) "Var")))
 $(write-file "effects" (string-append (read-file "effects") "x"))
 macro Declaration $projection.persist() {
-  $(quote (
-    (default (function (int) (bind ("persisted_answer") ((fnmod (params))))
-      (block (return () (expr (int) (literal (int) "13"))))))
-  ))...
+  $(begin
+    (write-file "effects" (string-append (read-file "effects") "p"))
+    (quote (
+      (default (function (int) (bind ("persisted_answer") ((fnmod (params))))
+        (block (return () (expr (int) (literal (int) "13"))))))
+    )))...
 }
 EOF2
 cat >"$declaration_root/src/provider.x" <<'EOF2'
@@ -885,20 +887,21 @@ EOF2
 : >"$declaration_root/effects"
 (cd "$declaration_root" && ./builds/0/x2c translate --out-dir out \
   src/provider.x)
-[ "$(cat "$declaration_root/effects")" = x ] ||
+[ "$(cat "$declaration_root/effects")" = xp ] ||
   fail "persisted declaration producer did not run exactly once"
 : >"$declaration_root/effects"
 (cd "$declaration_root" && ./builds/0/x2c translate --out-dir out src/consumer.x)
-[ ! -s "$declaration_root/effects" ] ||
-  fail "warm declaration interface reran its producer"
+[ "$(cat "$declaration_root/effects")" = x ] ||
+  fail "warm declaration interface reran its producer or public Lisp"
 sed 's/persisted_answer/changed_answer/g' \
   "$declaration_root/src/producer.x" >"$declaration_root/src/changed"
 mv "$declaration_root/src/changed" "$declaration_root/src/producer.x"
 sed 's/persisted_answer/changed_answer/g' \
   "$declaration_root/src/consumer.x" >"$declaration_root/src/changed"
 mv "$declaration_root/src/changed" "$declaration_root/src/consumer.x"
+: >"$declaration_root/effects"
 (cd "$declaration_root" && ./builds/0/x2c translate --out-dir out src/consumer.x)
-[ "$(cat "$declaration_root/effects")" = x ] ||
+[ "$(cat "$declaration_root/effects")" = xpx ] ||
   fail "changed declaration macro did not invalidate its interface"
 grep -q 'changed_answer' "$declaration_root/out/consumer.c" ||
   fail "consumer retained a stale declaration signature"
