@@ -280,7 +280,7 @@ static List _operator_rows(void) => %(
 static List _operator_cases(int key, int value, int derived) {
   Array cases = [];
   foreach (List row, _operator_rows()) {
-    if (!row[key].truth() || !row[value].truth()) continue;
+    if (!row[key] || !row[value]) continue;
     if (derived >= 0 && row[4] != derived) continue;
     Symbol label = row[key];
     Var result = row[value];
@@ -298,8 +298,8 @@ static List _dedent_expand(List node) {
     open = 2;
   else if (length >= 2 && source.startswith("\""))
     open = 1;
-  if (open == 0 || !source.endswith("\"") || source.contains("\\") ||
-      source.contains("$"))
+  if (open == 0 || !source.endswith("\"") || "\\" in source ||
+      "$" in source)
     return $!( $node.dedent() );
   String body = source.getslice(open, length - 1, 1);
   return x2c_literal_string(body.dedent());
@@ -585,7 +585,7 @@ static List _tag_validated_ids(void) => %(
   "_u8_" "_i8_" "_u16_" "_i16_" "_nan_" "_neginf_" "_posinf_");
 
 static int _tag_constant_row(List row) {
-  if (_tag_validated_ids().contains(_tag_id(row))) return 0;
+  if (_tag_id(row) in _tag_validated_ids()) return 0;
   return _tag_top(row) != 0x8002 && _tag_top(row) != 0x8003;
 }
 
