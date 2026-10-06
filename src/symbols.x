@@ -357,10 +357,10 @@ static List Sym._scope_binding(Sym s, SymScope &scope, List key) {
   }
   (Var binding_tag, int identity, String spelling) = binding;
   (void) binding_tag;
-  if (!s.binding_facts.contains(%(known $identity)))
+  if (!(%(known $identity) in s.binding_facts))
     s.put(s.binding_facts, %(known $identity), spelling);
   List self_key = %(self $binding);
-  if (!s.binding_facts.contains(self_key)) {
+  if (!(self_key in s.binding_facts)) {
     Var relative;
     if (scope.symbols.try_get(%(self $spelling), relative))
       s.put(s.binding_facts, self_key, relative);
@@ -650,7 +650,7 @@ static void Sym._local_object(Sym s, List key, List binding, Type type) {
   Type global_type = NULL;
   s.resolve_global(key, global_type);
   if (_var_converter_owner(key, global_type) &&
-      !s.binding_facts.contains(%(emitted $binding)))
+      !(%(emitted $binding) in s.binding_facts))
     s.put(
       s.binding_facts, %(emitted $binding),
       s.c.fresh_name("var_converter_shadow"));
@@ -859,7 +859,7 @@ String Compiler.imported_spelling(Compiler c, String name) {
 void Sym.define_macro(Sym s, Atom name, List definition) {
   SymScope *scope = s._scope_at(-1);
   if (scope.macros == NULL) scope.macros = {};
-  if (!scope.macros.contains(name)) s.local_macro_names++;
+  if (!(name in scope.macros)) s.local_macro_names++;
   s.put(scope.macros, name, definition);
 }
 
@@ -1169,7 +1169,7 @@ Type Sym.lookup_field(Sym s, Type type, List field) {
   if (found) return found.qualify(object);
   foreach (List row, s.field_order(type).cdr()) {
     Type member = row.cadr();
-    if (row.car().truth() || !s.resolve_key(member).is_aggregate()) continue;
+    if (row.car() || !s.resolve_key(member).is_aggregate()) continue;
     found = s.lookup_field(member, field);
     if (found) return found.qualify(object);
   }
@@ -1394,7 +1394,7 @@ void SymTxn.commit_transient(SymTxn &s) {
    designation. */
 static void _replace_map(Map original, Map staged) {
   Array keys = $auto(original.keys());
-  foreach (Var key, keys) if (!staged.contains(key)) original.del(key);
+  foreach (Var key, keys) if (!(key in staged)) original.del(key);
   original.merge(staged);
 }
 

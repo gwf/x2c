@@ -117,7 +117,7 @@ static Var _meta_stub(Func function, const FuncArg *argv) {
 
 static Array _stub_arguments(Func function, const FuncArg *argv) {
   List parameters = Func.signature(function).car().list().cadr();
-  if (parameters.equal(%((void)))) parameters = NULL;
+  if (parameters == %((void))) parameters = NULL;
   Array values = [];
   int count = parameters.len();
   for (int i = 0; i < count; i++) values.push(argv[i].data.value);
@@ -444,7 +444,7 @@ static Var NativeBinding.module_target(NativeBinding &n) {
 static void NativeBinding.check(NativeBinding &n, Var function) {
   Compiler c = n.c;
   List suppliers = n.suppliers;
-  if (suppliers.cdr() && function.equal(n.module_target()))
+  if (suppliers.cdr() && function == n.module_target())
     c.report_warning(
       <native>, "more than one native module defines this function",
       n.marker, %("name: ${n.name}" "supplied by: ${suppliers.car()}"
@@ -476,8 +476,8 @@ int Compiler.native_meta_accepts(Compiler c, Var function, List signature) {
   match (signature)
     case %((func ?(List parameters)) *result): {
       List boxed = parameters.search_replace(%("Func"), %("Var"));
-      return target.equal(c._native_signature_type(signature)) ||
-             target.equal(c._native_signature_type(%((func $boxed) @result)));
+      return target == c._native_signature_type(signature) ||
+             target == c._native_signature_type(%((func $boxed) @result));
     }
   return 0;
 }
@@ -513,7 +513,7 @@ String Compiler.native_meta_module(Compiler c, String name, Type &type) {
   if (!path.startswith("/")) return NULL;
   Var target = ((Map) native_modules[path])[name];
   Var bound;
-  if (!c.macro_lisp.try_get(name, bound) || !bound.equal(target)) return NULL;
+  if (!c.macro_lisp.try_get(name, bound) || bound != target) return NULL;
   type = ((Func) target.pointer()).signature();
   return path;
 }
@@ -567,7 +567,7 @@ static List Compiler._native_meta_summary(Compiler c, List signature) {
 static int Compiler._native_handle(Compiler c, List type, int parameter) {
   match (type) {
     case %((!quote *) *pointee) if (parameter):
-      return pointee.equal(%(void)) || c._native_handle(pointee, 0);
+      return pointee == %(void) || c._native_handle(pointee, 0);
     case %((!or "Var" "Symbol" "String" "List" "Array" "Map" "Func")):
       return 0;
   }
@@ -674,7 +674,7 @@ static int _takes_callback(List signature) {
 static int _iterator_operation(List signature) {
   match (signature)
     case %((func ?(List parameters)) "Iter"):
-      return parameters && parameters.last().equal(%("Iter"));
+      return parameters && parameters.last() == %("Iter");
   return 0;
 }
 
@@ -707,7 +707,7 @@ int Compiler.bind_linked_meta(Compiler c, List fn, Type type) {
   if (!c.native_meta_accepts(function, c.func_signature(type))) return 0;
   /* The shared session binds the copy once for every unit that imports the
      same file. */
-  if (!c.macro_lisp.try_get(name, bound) || bound.equal(%()))
+  if (!c.macro_lisp.try_get(name, bound) || bound == %())
     c.macro_lisp.set_global(name, function);
   if (c.meta_reaches_compile_time(fn)) c.record_comptime(name);
   return 1;
@@ -749,7 +749,7 @@ static int Compiler._linked_texts_match(
     List row = hash;
     hash = row.car();
     names = row.cadr();
-    if (!hash.equal(own)) return 0;
+    if (hash != own) return 0;
   }
   else if (!(name in linked) && !(name in c.native_meta)) return 0;
   c.meta_calls.try_get(name, names);

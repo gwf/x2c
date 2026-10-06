@@ -829,7 +829,7 @@ static int Build._publish(Build b, List inputs) {
   int status = b._replace(b._final_action(staged, inputs), staged);
   Path.remove_tree(staging);
   if (status < 0 && b.request.verbose)
-    $report.build.link_unchanged(b.output.str());
+    $report.build.link_unchanged(b.output);
   return status;
 }
 
@@ -841,15 +841,15 @@ static int Build._replace(Build b, ToolAction action, String staged) {
   if (b.request.kind == <module> && _same_file_bytes(staged, b.output))
     return -1;
   if (!rename(staged, b.output)) return 0;
-  $report.build.replace_failed(b.output.str(), strerror(errno));
+  $report.build.replace_failed(b.output, strerror(errno));
   return 1;
 }
 
 static int _same_file_bytes(String first, String second) {
-  FILE *left = fopen(first.str(), "rb");
+  FILE *left = fopen(first, "rb");
   if (!left) return 0;
   defer fclose(left);
-  FILE *right = fopen(second.str(), "rb");
+  FILE *right = fopen(second, "rb");
   if (!right) return 0;
   defer fclose(right);
   unsigned char a[16384], b[16384];

@@ -1512,9 +1512,9 @@ static void Compiler._complete_prototype(
   Compiler c, List binding, List prior_contract, List contract, Token site) {
   match (prior_contract)
     case %(function-contract ?a ?b static ?d)
-      if (contract.equal(%(function-contract $a $b extern $d))):
+      if (contract == %(function-contract $a $b extern $d)):
         contract = prior_contract;
-  if (!List.equal(prior_contract, contract)) {
+  if (prior_contract != contract) {
     String spelling = binding_identity_spelling(binding);
     $report.type.decl_prototype(c, site, spelling, prior_contract, contract);
   }
@@ -1598,7 +1598,7 @@ static void _collect_references(Var value, Map references, Array ordered) {
     case %(expr (!set ?type (*)) ${$source_identifier_content(
         %((!set ?binding (binding ? ?))))}): {
       if (!type.type().is_function()) {
-        if (!references.contains(binding)) ordered.push(binding);
+        if (!(binding in references)) ordered.push(binding);
         references[binding] = 1;
       }
       return;
@@ -2005,7 +2005,7 @@ static List Compiler._source_range(Compiler c, Token first, Token after) {
          (last.type == <space> || last.type == <comment> ||
           last.type == <preproc>)) last--;
   String path = absolute_path(c.filename);
-  if (!c.source_texts.contains(path)) c.source_texts[path] = c.text;
+  if (!(path in c.source_texts)) c.source_texts[path] = c.text;
   return %($path ${first.pos} ${last.pos + last.len});
 }
 

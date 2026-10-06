@@ -656,7 +656,7 @@ static int _run_env(CliRequest request) {
   foreach (List row, _env_rows(request)) {
     String (name, value) = row;
     const char *text = value ? value : "";
-    if (!wanted) printf("%s = %s\n", name.str(), text);
+    if (!wanted) printf("%s = %s\n", name, text);
     else if (name == wanted) {
       printf("%s\n", text);
       return 0;

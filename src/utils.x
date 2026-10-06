@@ -112,7 +112,7 @@ static String _executable(const char *argv0) {
   }
   String name = String.new(argv0);
   // A bare name came from PATH; only a path resolves against the cwd.
-  if (name && !name.contains("/")) name = find_program(name);
+  if (name && !("/" in name)) name = find_program(name);
   return Path.exists(name) ? Path.absolute(name) : NULL;
 }
 
