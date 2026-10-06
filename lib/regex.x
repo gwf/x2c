@@ -800,22 +800,22 @@ String RegexMatch.getindex(RegexMatch found, Var key) {
 }
 
 /** Returns the capture number, with 0 for the whole match. */
-int RegexCapture.index(RegexCapture capture) => capture.getindex(0).int();
+int RegexCapture.index(RegexCapture capture) => capture[0].int();
 
 /** Returns the capture's name, or NULL. */
-String RegexCapture.name(RegexCapture capture) => capture.getindex(1);
+String RegexCapture.name(RegexCapture capture) => capture[1];
 
 /** Reports whether the capture took part in the match. */
-int RegexCapture.matched(RegexCapture capture) => !!capture.getindex(2);
+int RegexCapture.matched(RegexCapture capture) => !!capture[2];
 
 /** Returns the matched text, or NULL for a capture that did not take part. */
-String RegexCapture.text(RegexCapture capture) => capture.getindex(3);
+String RegexCapture.text(RegexCapture capture) => capture[3];
 
 /** Returns the byte offset where the capture starts, or -1. */
-int RegexCapture.start(RegexCapture capture) => capture.getindex(4).int();
+int RegexCapture.start(RegexCapture capture) => capture[4].int();
 
 /** Returns the byte offset after the capture, or -1. */
-int RegexCapture.end(RegexCapture capture) => capture.getindex(5).int();
+int RegexCapture.end(RegexCapture capture) => capture[5].int();
 
 /** Reads a `RegexCapture` back out of a `Var`, as `foreach` does. */
 meta native RegexCapture Var.regexcapture(Var v) => (RegexCapture) v.list();

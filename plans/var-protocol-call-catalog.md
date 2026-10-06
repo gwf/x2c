@@ -1,11 +1,70 @@
 > Status: reference
 > Reviewed 2026-10-06 at dev cb67de5ec658af4f9108433f24f062543c6087d4.
-> Implementation completed: 164 candidates changed; 25 retained with evidence.
+> Follow-ups completed: collection alias reads and linked-meta rebuilding.
+> The CSV records 175 changed calls, five regenerated copies, and retained cases.
 > The shared integration agent owns final validation and dev publication.
 
 # Explicit protocol-call catalog
 
-## Implementation outcome
+## Alias and linked-meta follow-up
+
+Collection aliases now admit bracket reads through the same exact-getter and
+inherited-protocol lookup used during lowering. Exact alias getters take
+precedence. Ordinary native pointer aliases keep C indexing unless they define
+an exact getter. Getter bodies can reach their base collection implementation
+without recursive dispatch. The six RegexCapture getters now use brackets.
+
+A read override does not change Array or Map mutation operations. Their indexed
+assignment, compound assignment, prefix, and postfix results remain Var. The
+new fixture includes a String-returning Map getter while assigning an integer;
+it verifies that the stored value remains an integer, mutation results retain
+their type, and the read still invokes the override. String alias writes reach
+the existing immutable-String diagnostic.
+
+The five remaining authoritative meta operator substitutions are implemented.
+The earlier claim that these operators were unsupported at compile time was
+incorrect. The reproducible failure was a changed compiler-only macro body
+losing its matching linked implementation. Its project-meta fallback could not
+use the compiler-only source-text SDK. The generic address-result diagnostic
+was not an adequate cause for the earlier failures.
+
+The completed one-off transition preserved linked-definition hash checks:
+
+1. Generate revised `src/linked-meta.x` with `tools/gen-linked-meta.sh`.
+2. Temporarily restore the prior imported macro bodies and build the compiler
+   with `make -C builds x2c`. This executable contains the revised linked bodies.
+3. Restore the revised macro bodies and rebuild with
+   `make -C builds x2c X2C_COMPILER=./x2c` so definitions and linked hashes match.
+4. Run `make bootstrap-refresh`, then prove the shipped seed with
+   `make build-safe`, `make stage-1`, and `make stage-diff-0`.
+
+The refreshed bootstrap is included. Ordinary builds need no source swap.
+No hash verification was weakened, and no recurring build target or gate was
+added. The alias compiler was likewise built and its bootstrap refreshed before
+adopting brackets in the runtime's RegexCapture methods. Generated bootstrap
+files were produced by the existing target, never edited by hand.
+
+Two fixtures cover collection inheritance, nominal overrides, native-pointer
+fallback, getter-body dispatch, side-effect counts, and mutation result types.
+The existing String alias assignment diagnostic was intentionally updated.
+
+The final combined tree passed a clean seed rebuild, bootstrap/stage-0
+comparison (220 generated C/H files), stage-0/stage-1 comparison, all 940 unit
+tests (24,988 assertions), 13 focused compiler fixtures, and `make doc-build`.
+The compiler change required a second normal bootstrap refresh to settle linked
+metadata; the final clean comparison passed. Complete local logs are under
+`debug/alias-index-meta/`. The shared integrator still owns the publication gate.
+
+One adjacent limitation remains: general dotted lookup can bypass an
+intermediate alias's own getter. Bracket and dot access now agree in that case;
+the parity fixture does not freeze the particular selected result. Changing
+general method inheritance was not part of this read-resolution correction.
+
+The remainder describes the original audit and first cleanup batch. The CSV's
+implementation outcomes and this follow-up supersede their retained-site
+recommendations.
+
+## Initial implementation outcome
 
 All 189 proposed or conditional candidates were investigated. The implementation
 changes 164 occurrences in 38 hand-authored source files. The CSV retains its
