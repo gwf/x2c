@@ -1,4 +1,4 @@
 <elapsed> error/err-report start_time="<wall-time>" code=<bad-enc> detail=
 ((operation "Var.new") (target fixture)) location=
-((file "lib/var.x") (line <line>) (function "_misaligned"))
+((file "../../lib/var.x") (line <line>) (function "_misaligned"))
 x2c error floor: <bad-enc>: non-returning error was not caught

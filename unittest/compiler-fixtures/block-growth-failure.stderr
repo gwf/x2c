@@ -1,4 +1,4 @@
 <elapsed> error/err-report start_time="<wall-time>" code=<size-limit> detail=
 ((width 1ul) (cap 18446744073709551615ul)) location=
-((file "lib/block.x") (line <line>) (function "Block_reserve"))
+((file "../../lib/block.x") (line <line>) (function "Block_reserve"))
 x2c error floor: <size-limit>: non-returning error was not caught
