@@ -3,7 +3,7 @@
 import "torch" with Torch, Tensor, Module, Optimizer;
 #include "test-support.x"
 #include <math.h>
-$(import "../../../unittest/test-macros.xmacro")
+#include "../../../unittest/test-macros.x"
 
 static void devices_cpu(void) {
   $test.scoped();

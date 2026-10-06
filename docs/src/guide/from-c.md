@@ -255,9 +255,8 @@ Private records can also adopt a protocol without exposing the type or its
 adapters:
 
 ```x2c
-~#pragma private
 ~
-~typedef struct LocalJob {
+~static typedef struct LocalJob {
 ~  int id;
 ~} *LocalJob;
 ~

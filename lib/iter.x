@@ -9,8 +9,8 @@
 */
 
 #pragma once
-$(import "error-macros.xmacro")
-$(import "private-keywords.xmacro")
+#include "error-macros.x"
+#include "private-keywords.x"
 #include "common.x"
 
 /** Caller-owned handle to single-pass iterator state.
@@ -60,7 +60,6 @@ struct UnzipShared {
   struct Iter column_iters[2];
 };
 
-#pragma private
 
 #include "list.x"
 #include "var.x"
@@ -74,17 +73,19 @@ struct UnzipShared {
 
 #define UNZIP_COMPACT_THRESHOLD 256
 
-typedef UnzipColumn *UnzipColumnRef;
-typedef UnzipShared *UnzipSharedRef;
+static typedef UnzipColumn *UnzipColumnRef;
+static typedef UnzipShared *UnzipSharedRef;
 
 /* Unzip state remains caller-owned. These definitions only name the pointers
    crossing through Iter.obj and preserve their raw <p48> bits. */
-$(import "var-adapters.xmacro")
+
+#include "var-adapters.x"
+
 $var.raw.pointer(UnzipColumnRef, unzipcolumnref);
 $var.raw.pointer(UnzipSharedRef, unzipsharedref);
 
-protocol Var(UnzipColumnRef) as void *;
-protocol Var(UnzipSharedRef) as void *;
+static protocol Var(UnzipColumnRef) as void *;
+static protocol Var(UnzipSharedRef) as void *;
 
 // traversal
 

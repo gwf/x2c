@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-$(import "macro-method-resolve-import.xmacro")
+#include "macro-method-resolve-import.x"
 
 int main(void) {
   String value = "method";

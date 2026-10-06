@@ -333,30 +333,33 @@ All `using` directives must precede the body's ordinary items. The older
 signature `using` form remains accepted for compatibility; lambdas separately
 use `using &name` for reference capture.
 
-## Put reusable macros in imports
+## Put reusable macros in ordinary source modules
 
-An `.xmacro` file may contain macro definitions, meta functions and top-level
-compile-time Lisp. Imports currently use `$(import "...")`; authoring the
-macros and meta functions inside the imported file does not require Lisp:
+An ordinary `.x` file may hold runtime code, macro definitions, keyword
+aliases, meta functions, and top-level compile-time Lisp. Include the module
+wherever its public definitions are needed:
 
-<!-- ignore: project-macros.xmacro is the external file being illustrated -->
+<!-- ignore: project-macros.x is the external file being illustrated -->
 ```x2c,ignore
-$(import "project-macros.xmacro")
+#include "project-macros.x"
 ```
 
-Imports resolve relative to the importing file, become tracked translation
-dependencies, load once, and reject cycles. A normal `.xlisp` import executes
-in the same translation-unit Lisp session but does not contain macro
-definitions.
+Nonstatic definitions become available at the include line, including through
+transitive includes. Use `static macro` or `static keyword` for helpers that
+belong only to the declaring file. Ordinary includes are tracked translation
+dependencies and each canonical file contributes once per unit; include
+cycles terminate without loading a second copy.
 
-A package may publish a pack through a direct `$(import "name.xmacro")` in
-the public part of its entry source. Then `import "name";` also installs the
-pack at that point in the consumer. Imports below `#pragma private` and
-imports in other package sources do not publish macros. Explicit `.xmacro`
-imports remain useful when the macros do not need the package.
+`$(import "helpers.xlisp")` remains the loading form for Lisp files. A Lisp
+import executes in the translation-unit Lisp session and rejects import
+cycles.
+
+A package publishes the nonstatic macros and aliases its entry source and
+ordinary includes define. `import "name";` makes that syntax available at the
+import position.
 
 Prefer a qualified name such as `$test.run` or `$project.logging.trace` in a
-shared import. It identifies the project or library at each call and avoids
+shared module. It identifies the project or library at each call and avoids
 ambiguous short global names.
 
 ## Decorators transform one target
@@ -500,44 +503,20 @@ initializer, or flat destructuring with two or more simple identifier targets.
 For example, `foreach(int value, values)` supplies `int value` as one `Decl`
 argument.
 
-The declaration and uses are source ordered and local to one `.x` file. An
-included `.x` file may declare and use its own aliases, including across its
-own includes, but those aliases do not leak into the including source.
+The declaration and uses are source ordered. A public alias in an included
+module becomes available at that include; a `static keyword` declaration
+stays in its source file. A module may keep an alias beside its macro:
 
-A `.xmacro` import may package macro definitions with their aliases:
-
-<!-- ignore: compiler-keywords.xmacro is the external file being illustrated -->
+<!-- ignore: compiler-keywords.x is the external file being illustrated -->
 ```x2c,ignore
-$(import "compiler-keywords.xmacro")
+#include "compiler-keywords.x"
 
 swap(left, right);
 ```
 
-The aliases become visible at the import in that `.x` file only. Every source
-file that wants them imports the pack explicitly; including a file that uses
-the pack does not import its aliases. This lets a project use private keyword
-spellings without placing them in `x2c.x` or another consumer prelude.
-
-An alias is a contextual parser match, not a globally reserved word. An
-ordinary or parameterized alias is claimed only as `ALIAS(...)`, so the name
-may still be a type, declaration, field, label, or uncalled function. Its
-direct call or cast spelling is claimed by the macro. A zero-argument bare
-decorator is broader: the parser claims its name at every position compatible
-with its target, which can overlap an expression read or a declaration
-beginning with a same-named typedef. Prefer parenthesized aliases in shared
-packs and introduce bare decorators only after checking those positions.
-
-Aliases do not create arbitrary grammar. The lexical `with expression { ... }`
-statement is contextual grammar built into the language, not a macro alias.
-Other forms such as `loop item in values` or a semicolon-separated control
-header would require separate parser support. Result positions, decorator
-targets, terminators, hygiene, expansion limits, and compile-time restrictions
-remain those of the aliased macro.
-
-Use a decorator to place checking, tracing, validation, or checked foreign
-binding directly beside the expression or source item it affects.
-Do not use a decorator for type registration, protocol participation, or
-receiverless startup and shutdown. Those have their own declarations.
+A later alias does not reinterpret an earlier macro template. Use
+`static keyword swap $swap;` when the short spelling is private, while the
+qualified macro remains public.
 
 ## Compute with meta functions
 
@@ -693,21 +672,19 @@ working through the generator. Keep unrelated outputs as direct source.
 
 ## Declare methods and converters before adoption
 
-Shallow collection loads `.xmacro` imports and expands file-scope unit
-macros, both imported ones and those the source file defines. A local macro
-whose expansion fails during collection, for example because it reads a
-top-level `$(def ...)` value that collection has not evaluated, contributes
-nothing until the full parse. Generated private helpers remain available to
-later macro invocations in the same source file, while generated public
-declarations and protocol rows remain visible to earlier code and importing
-units. A generated public function definition may
-complete a prototype earlier in the same expansion when both have the same
-canonical signature and ownership.
+Shallow collection loads included macro definitions and expands file-scope
+`Unit` macros. It evaluates preceding top-level Lisp contributions when the
+producer needs them. Generated private helpers stay available in their source
+module. Public declarations and protocol rows reach includers. The full parse
+binds the retained result without running its producer again.
+
+A generated public function definition can complete a preceding prototype in
+the same expansion when their canonical signature and ownership agree.
 
 Put converter and public method prototypes before an adoption so shallow
 collection can classify the conformance and downstream code can discover the
-functions. Imported macro definitions survive intervening preprocessor
-includes, so a definition can be imported before the headers its invocations
+functions. Included macro definitions survive intervening preprocessor
+includes, so a definition can be included before the headers its invocations
 need.
 
 ## Choosing the smallest tool

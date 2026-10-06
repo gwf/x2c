@@ -19,7 +19,6 @@
 protocol Iter(SymbolSet);
 protocol Contains(SymbolSet);
 
-#pragma private
 
 #include <limits.h>
 #include <stdint.h>
@@ -151,19 +150,19 @@ Iter SymbolSet.iter(SymbolSet x, Iter dest) {
    values at an edge's vertices then XOR to its index. */
 
 /* A seeded table of `3 * span` vertex values. An empty set has none. */
-typedef struct Hash {
+static typedef struct Hash {
   uint32_t span, *table;
   uint64_t seed;
   int vertices;
 } Hash;
 
-typedef struct Edge {
+static typedef struct Edge {
   uint32_t vertices[3];
 } Edge;
 
 /* One seed's graph and its peeling order: each removed edge and the vertex
    that freed it. */
-typedef struct Graph {
+static typedef struct Graph {
   Edge *edges;
   int count, vertices, *degree, *edge_xor, *queue;
   int *order_edges, *order_vertices;

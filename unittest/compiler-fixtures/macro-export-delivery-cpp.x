@@ -1,5 +1,4 @@
-// An included file's exported import reaches the includer whole with
-// preprocessor symbol collection.
+// Public compile-time definitions reach consumers through includes.
 #include "macro-export-lib.x"
 
 $m.decl(declared);

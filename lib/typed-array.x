@@ -21,7 +21,7 @@
 
 #pragma once
 #include "x2c.x"
-$(import "array-generics.xmacro")
+#include "array-generics.x"
 
 #include <limits.h>
 #include <string.h>

@@ -11,7 +11,6 @@
 #include "compiler.x"
 #include "utils.x"
 
-#pragma private
 #include "collect.x"
 
 #include <stdio.h>

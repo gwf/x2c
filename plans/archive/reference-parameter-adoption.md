@@ -42,8 +42,8 @@ Probes with `builds/0/x2c` on 2026-09-25:
    `bootstrap/` apart from line positions.
 
 2. **The `try_get` family.** Change these to `&?` out-parameters:
-   `Map.try_get` (`lib/map.x`), `$map.try_get` (`lib/map-generics.xmacro`),
-   `$array.try_get` (`lib/array-generics.xmacro`), `Lisp.try_get`
+   `Map.try_get` (`lib/map.x`), `$map.try_get` (`lib/map-generics.x`),
+   `$array.try_get` (`lib/array-generics.x`), `Lisp.try_get`
    (`lib/lisp.x`), and `Buffer.try_get` (`lib/buffer.x`). They stay
    optional because `unittest/test-typed-map.x` passes `NULL`. Callers that
    write `&x`: src 123, lib 17, commands 27, unittest 29, examples 8,

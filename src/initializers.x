@@ -11,13 +11,12 @@
 */
 
 #pragma once
-$(import "../lib/private-keywords.xmacro")
+#include "../lib/private-keywords.x"
 #include "compiler.x"
 #include "type.x"
 
-#pragma private
-$(import "../src/grammar.xmacro")
-$(import "../src/adapter-memo.xmacro")
+#include "grammar.x"
+#include "adapter-memo.x"
 #include "ast.x"
 #include "expressions.x"
 #include "macros.x"
@@ -619,7 +618,7 @@ static void _ordinal_field(
 
 // row conversion
 
-typedef struct RowSelection {
+static typedef struct RowSelection {
   Type type;
   List path, applicable;
   int homogeneous, excess;

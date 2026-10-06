@@ -396,7 +396,7 @@ static void context_exports_long_list_without_c_stack_growth(void) {
   outer.close();
 }
 
-$(import "test-macros.xmacro")
+#include "test-macros.x"
 
 void context_suite(void) {
   $test.run(context_open_close_restores_scope);

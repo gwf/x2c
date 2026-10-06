@@ -150,7 +150,7 @@ Each was reproduced at 2685655f.
    That is the `lisp.x` split in Phase 4, so it lands there.
 2. `lib/meta.x`'s header and its manifest row say it is outside the
    prelude, but every unit reaches it through `varops.x:14`, and the
-   documented one-line import of `system-macros.xmacro`
+   documented one-line import of `system-macros.x`
    (`docs/src/guide/system-macros.md:416-423`) depends on that, because its
    `meta` functions call `x2c_literal_string` and its neighbors. Correct
    the header and the manifest row to say how the module is reached. No
@@ -259,8 +259,8 @@ argued against size-driven splits, which this plan does not make. Workers within
   `agents/x2c-code-organization-guide.md`, `agents/x2c-coding-style-guide.md`,
   and `agents/skills/beautify-x2c-source/SKILL.md`.
 - Correct the organization guide's module lists (missing `clibc`, `cmath`,
-  `match-machine`, `static-init`, `adapter-memo.xmacro`,
-  `ast-rewrite.xmacro`), its `OPTIONAL_SOURCES` sentence, its
+  `match-machine`, `static-init`, `adapter-memo.x`,
+  `ast-rewrite.x`), its `OPTIONAL_SOURCES` sentence, its
   `#pragma once` sentence, and "scope stacks use Arrays" (`Sym.scopes` is a
   Block). Fix `BUILD_LDFLAGS` in the development guide, `Var.box_i64` in
   `adapters-macros-decorators.md:478`, `Emitter._var_collection` in the

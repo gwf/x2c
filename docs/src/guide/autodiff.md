@@ -1,6 +1,6 @@
 # Automatic Differentiation
 
-`autodiff.xmacro` differentiates ordinary `double` code four ways:
+`autodiff-macros.x` differentiates ordinary `double` code four ways:
 
 - **Dual numbers** carry a derivative through operators at runtime.
 - **`$ad.forward()`** generates a tangent function beside a decorated
@@ -16,8 +16,8 @@ protocol and decorator machinery. Nothing in the compiler knows about
 derivatives. Both files belong to the optional `autodiff` package in
 `packages/autodiff`, which has no native dependency. `import "autodiff";`
 gives a unit the macros and the runtime tape, because the package's
-`autodiff.x` exports its macro import. A unit can also import the macros
-alone by their path, as `$(import "../src/autodiff.xmacro")` does in the
+`autodiff.x` includes its macro module. A unit can also include that module
+directly by its path, as `#include "../src/autodiff-macros.x"` does in the
 package's fixtures; the listings below write the short name. The
 package's [README](https://github.com/gwf/x2c/blob/main/packages/autodiff/README.md)
 lists its files and checks.
@@ -29,10 +29,10 @@ Declare a struct with `value` and `tangent` fields and let `$ad.dual`
 generate its arithmetic. The scalar type and the primitives it lifts are
 holes, so the same family nests:
 
-<!-- ignore: the macros import from the autodiff package path. -->
+<!-- ignore: the macros need the autodiff package source path. -->
 ```x2c,ignore
 ~#include <math.h>
-$(import "autodiff.xmacro")
+#include "autodiff-macros.x"
 
 typedef struct Dual { double value; double tangent; } Dual;
 typedef struct Dual2 { Dual value; Dual tangent; } Dual2;
@@ -75,10 +75,10 @@ perturbation confusion silently.
 emits `NAME_dot` beside it. Every `double` parameter `p` is followed by a
 tangent parameter `p_dot`, and the result is the directional derivative:
 
-<!-- ignore: the macros import from the autodiff package path. -->
+<!-- ignore: the macros need the autodiff package source path. -->
 ```x2c,ignore
 ~#include <math.h>
-$(import "autodiff.xmacro")
+#include "autodiff-macros.x"
 
 $ad.forward()
 static double scale(double a, int k) => a * (double) k;
@@ -125,11 +125,11 @@ value, and each slot receives the partial derivative of that result. The
 unit must include `typed-array.x` because the generated function records
 a tape on an `ArrayDbl`:
 
-<!-- ignore: the macros import from the autodiff package path. -->
+<!-- ignore: the macros need the autodiff package source path. -->
 ```x2c,ignore
 ~#include "typed-array.x"
 ~#include <math.h>
-$(import "autodiff.xmacro")
+#include "autodiff-macros.x"
 
 $ad.reverse()
 static double model(double x, double y, int n) {
@@ -188,11 +188,11 @@ is one block's tape plus one snapshot per block, so it still grows with
 the trip count, divided by `K`. `break` and `continue` replay exactly as
 before; a checkpointed loop cannot contain `return`.
 
-<!-- ignore: the macros import from the autodiff package path. -->
+<!-- ignore: the macros need the autodiff package source path. -->
 ```x2c,ignore
 ~#include "typed-array.x"
 ~#include <math.h>
-$(import "autodiff.xmacro")
+#include "autodiff-macros.x"
 
 $ad.checkpoint(64)
 static double relax(double x, double y, int steps) {

@@ -8,7 +8,7 @@ import "libuv" with UvFile, UvFs, UvLoop, UvStat;
 #include <sys/stat.h>
 #include <unistd.h>
 
-$(import "../../../unittest/test-macros.xmacro")
+#include "../../../unittest/test-macros.x"
 
 static String _fs_path(String name) {
   int pid = (int) getpid();

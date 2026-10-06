@@ -8,7 +8,6 @@
 
 #include "string.x"
 
-#pragma private
 
 #include <ctype.h>
 #include <errno.h>

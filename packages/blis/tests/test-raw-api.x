@@ -5,7 +5,7 @@
 #include <math.h>
 #include <string.h>
 
-$(import "../../../unittest/test-macros.xmacro")
+#include "../../../unittest/test-macros.x"
 
 static void blis_raw_object_and_view_api(void) {
   obj_t matrix;

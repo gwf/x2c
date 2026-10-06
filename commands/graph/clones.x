@@ -4,17 +4,16 @@
 #include "frontend.x"
 #include "targets.x"
 
-#pragma private
 #include <stdint.h>
 #include <limits.h>
 #include <stdlib.h>
 #include <time.h>
 
-typedef struct CloneCell {
+static typedef struct CloneCell {
   uint64_t head, tail, occurrences;
 } CloneCell;
 
-typedef struct CloneIndex {
+static typedef struct CloneIndex {
   CloneCell *cells;
   uint64_t *slots, *sizes;
   size_t count, capacity, slot_count;

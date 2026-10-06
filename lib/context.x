@@ -11,13 +11,12 @@
 
 #pragma once
 
-$(import "error-macros.xmacro")
+#include "error-macros.x"
 
 #include "common.x"
 
 protocol Cleanup(Context);
 
-#pragma private
 
 #include "array.x"
 #include "atom.x"
@@ -40,12 +39,12 @@ protocol Cleanup(Context);
    Scope and optional canonical pool own work performed inside the Context;
    the destination Scope slot and pool are borrowed from the state captured
    before that work is installed. */
-struct Context {
+static struct Context {
   Context parent, Scope scope, *destination_scope, Pool pool;
   Pool destination_pool, void *error_state, *match_state;
 };
 
-typedef struct ContextThreadState {
+static typedef struct ContextThreadState {
   Context current;
 } *ContextThreadState;
 

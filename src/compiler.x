@@ -13,7 +13,7 @@
     boundary is active.
 */
 #pragma once
-$(import "../lib/private-keywords.xmacro")
+#include "../lib/private-keywords.x"
 #include "tokenizer.x"
 #include "ast.x"
 #include "type.x"
@@ -75,10 +75,10 @@ typedef struct Compiler {
      --package-dir roots, package_roots the directory of every package this
      unit has already collected, package_aliases the resolution-only
      spelling alias -> package name, package_members each `with` local
-     spelling -> (package member), and package_exports each collected
-     package's exported macro imports in its include order. */
+     spelling -> (package member), and package_effects each collected
+     package's public compile-time definitions in its include order. */
   String package, List package_dirs;
-  Map package_roots, package_aliases, package_members, package_exports;
+  Map package_roots, package_aliases, package_members, package_effects;
   Token token;
   // Optional end of supplied input; NULL keeps ordinary file diagnostics.
   Token input_boundary;
@@ -123,7 +123,6 @@ typedef struct Compiler {
      which the following item must not read again. */
   Token directives_taken;
   // Import paths already applied to this .x file's alias map.
-  Map kw_seen;
   Map protocols, conforms, protocol_helpers;
   // Answers derived from the occurrence and adoption tables. Publishing a
   // protocol or an adoption changes what these would say, so the whole map
@@ -140,18 +139,13 @@ typedef struct Compiler {
   Array match_types;
   // Import path -> declared alias map, or 1 when no aliases need replay.
   Map imports;
-  /* While the full parse runs, the imports each file the unit includes
+  /* While the full parse runs, the effects each file the unit includes
      delivers at its include line, by the file's canonical path. */
-  Map included_exports;
+  Map included_effects;
   Map init_tokens, static_init_deps, fn_defs;
   Array id_keys, inits;
   String init_fn, fini_fn;
   Array early_decls, int prelude;
-  /* `meta` function definitions the unit's macro imports contributed. Their
-     compile-time forms are already installed; these are the runtime forms,
-     kept until the unit is parsed and only then emitted where it reaches
-     them. */
-  Array meta_defs;
   /* `meta_comptime` names the `meta` functions that reach a `Meta`
      operation and so have no runtime form at all: no unit emits one.
      `meta_regions` maps each installed one to its region summary, which
@@ -170,10 +164,9 @@ typedef struct Compiler {
   /* The unit's top-level nodes parsed so far, and its `meta` group in
      source order: each bodied `meta` function as `(function FN NAME
      TYPE)`, and while the project meta build parses the unit or the REPL
-     stages it, each `meta static` value as `(static DECLARATION)` and each
-     compile-time import as `(import NODES META-DEFS)`, the counts of
-     `unit_nodes` and `meta_defs` after it, and while the project meta
-     build parses it, each placeholder for a call left for the translation
+     stages it, each `meta static` value as `(static DECLARATION)`, and while
+     the project meta build parses it, each placeholder for a call left for
+     the translation
      as `(later PLACEHOLDER)`. `meta_group_bound` holds the
      names the REPL bound to staged native code, the modules it reset, and
      each bodyless `meta` prototype nothing supplies. */
@@ -211,7 +204,7 @@ typedef struct Compiler {
   // The unit's script record, and the same record on the compiler whose own
   // file is that script; both NULL for an ordinary unit.
   ScriptUnit unit_script, script;
-  Lisp macro_lisp, String import_src, int borrowed_lisp;
+  Lisp macro_lisp, int borrowed_lisp;
   int inherited_lisp;   // the shared session evaluated this import
   GenNames names;
   Array origins, int origin, source_map;
@@ -257,8 +250,7 @@ Var Compiler.var(Compiler c) => (Var) { .p64 = c };
 Compiler Var.compiler(Var value) => value.p64;
 
 protocol Var(Compiler) as void *;
-#pragma private
-$(import "../src/grammar.xmacro")
+#include "grammar.x"
 
 #include "utils.x"
 #include "parse.x"
@@ -272,8 +264,100 @@ $(import "../src/grammar.xmacro")
 #include <stdlib.h>
 #include <string.h>
 
-$(import "../src/compiler-reports.xmacro")
-$(import "../src/fields.xmacro")
+
+/* compiler diagnostics. */
+
+static macro Stmt $report.parse.token_eof(Expr $c) =>
+  $c.report_error(
+    <parse>,
+    "unexpected end of file",
+    $c.token, NULL);
+
+static macro Stmt $report.type.ctor_parent(Expr $c) =>
+  $c.report_error(
+    <type>,
+    "a forwarded class constructor has no completed parent constructor",
+    $c.token, NULL);
+
+static macro Stmt $report.type.ctor_variadic(Expr $c, Expr $name) =>
+  $c.report_error(
+    <type>,
+    %"'${$name}' requires an explicit variadic constructor",
+    $c.token, NULL);
+
+static macro Stmt $report.parse.script_main(Expr $c) =>
+  $c.report_error(
+    <parse>,
+    "a script that defines main cannot have top-level statements",
+    $c.token, %("move the statement into main, or remove main so the statements run"));
+
+static macro Stmt $report.type.script_local(Expr $c, Expr $name) =>
+  $c.report_error(
+    <type>,
+    %"'${$name}' is declared among the script's statements",
+    NULL, %("functions cannot see those locals;"
+    "declare it static to share it"));
+
+static macro Stmt $report.type.decl_duplicate(
+  Expr $c, Expr $site, Expr $kind, Expr $spelling) =>
+  $c.report_error(
+    <type>,
+    %"${$kind} '${$spelling}' is already defined in this scope",
+    $site, %("prior definition: '${$spelling}'"));
+
+static macro Stmt $report.type.decl_prototype(
+  Expr $c, Expr $site, Expr $spelling, Expr $prior_contract, Expr $contract) =>
+  $c.report_error(
+    <type>,
+    %"definition '${$spelling}' does not match prior prototype",
+    $site, %(
+    "prototype: ${$prior_contract.repr()}"
+    "definition: ${$contract.repr()}"
+    ));
+
+static macro Stmt $report.parse.static_dependency(
+  Expr $c, Expr $site, Expr $name, Expr $target) =>
+  $c.report_error(
+    <parse>,
+    %"file-static x2c initializer depends on non-static '${$name}'",
+    $site, $target ? %("initializer: ${$target}") : NULL);
+
+static macro Stmt $report.parse.token_malformed(
+  Expr $c, Expr $site, Expr $status) =>
+  $c.report_error(
+    <parse>,
+    $status == <indent> ? "inconsistent indentation" : "invalid token",
+    $site, NULL);
+
+static macro Stmt $report.parse.token_expected(Expr $c, Expr $type) =>
+  $c.report_error(
+    <parse>,
+    %"expected '${$type}'",
+    $c.token, NULL);
+
+static macro Stmt $report.parse.brace_unexpected(Expr $c, Expr $site) =>
+  $c.report_error(
+    <parse>,
+    "unexpected '}'",
+    $site, %("encountered '}' without matching '{'"));
+
+static macro Stmt $report.parse.brace_missing(Expr $c, Expr $site) =>
+  $c.report_error(
+    <parse>,
+    "missing '}'",
+    $site, %( "'{' opened here" ));
+
+static macro Stmt $report.debug.token(Expr $token) =>
+  log_debug(
+    <tokenizer>, %(
+    (func "tokenize")
+    (type ${$token.type})
+    (text ${$token.text})
+    (line ${$token.line})
+    (col  ${$token.col})
+  ));
+
+#include "fields.x"
 
 // shallow collection
 
@@ -281,7 +365,6 @@ $(import "../src/fields.xmacro")
 void Compiler.shallow_parse(Compiler c, Map globals) {
   c.macros = {};
   c.kw_aliases = {};
-  c.kw_seen = {};
   c.import_stack.clear();
   c.sym.reset(globals);
   c._shallow_parse_loop();
@@ -305,7 +388,6 @@ void Compiler.shallow_parse_overlay(Compiler c, Map base, Map overlay) {
 static void Compiler._start_macros(Compiler c) {
   c.macros = {};
   if (c.kw_aliases == NULL) c.kw_aliases = {};
-  if (c.kw_seen == NULL) c.kw_seen = {};
   c.imports = {};
   c.import_stack.clear();
 }
@@ -392,12 +474,12 @@ static void Compiler._skip_body(
   if (native) c.record_native_meta_effect(declaration, meta);
   else if (meta) {
     c.record_project_meta_effect(declaration, meta);
-    c.install_collected_meta_function(declaration, meta);
   }
   match (declaration)
     case %(declare ? (bindings (bind ?binding ?))):
       c._note_function_body(declaration.type_from_ast(), binding);
   Type type = declaration.type_from_ast();
+  c.record_inline_function(declaration);
   Token first = c.token;
   if (c._at_function_arrow()) {
     c.next();
@@ -408,6 +490,18 @@ static void Compiler._skip_body(
   else c._shallow_block();
   if (!meta && type.is_inline() && !type.is_static())
     c.collect_inline_type_dependencies(declaration, first, c.token);
+}
+
+/** Records the header linkage of a public inline definition. Semantic
+    function types discard storage, so this declaration fact survives there. */
+void Compiler.record_inline_function(Compiler c, List declaration) {
+  Type type = declaration.type_from_ast();
+  if (!type.is_inline() || type.is_static() || c.source_private) return;
+  match (declaration)
+    case %(declare ? (bindings (bind ?binding ?))): {
+      String name = binding_identity_spelling(binding);
+      c.sym.set(%("function-inline" $name), %(inline));
+    }
 }
 
 // `fn_defs` holds each non-static function the unit defines.
@@ -452,13 +546,16 @@ static void Compiler._shallow_block(Compiler c) {
    token span, and the full parse replays that bundle. */
 
 /** Queues a source Lisp form until declaration production needs its state.
-    Files without declaration producers keep ordinary full-parse evaluation. */
+    Files without declaration producers keep ordinary full-parse evaluation.
+    A null `after` replays an included effect without an owning source span.
+*/
 void Compiler.queue_declaration_effect(
   Compiler c, String form, Token first, Token after) {
   List key = c._declaration_source_key(first);
   String context = c.import_stack.len() ? c.import_stack[-1] : c.filename;
   c.declaration_effects = cons(
-    %($key ${after.pos} $form ${c.freeze_declaration_syntax(first)} $context),
+    %($key ${after ? after.pos : -1} $form
+      ${c.freeze_declaration_syntax(first)} $context),
     c.declaration_effects);
 }
 
@@ -478,7 +575,7 @@ void Compiler.run_declaration_effects(Compiler c) {
       defer c.import_stack.take_last();
       Token token = c.thaw_declaration_syntax(site);
       c.evaluate_declaration_effect(form, token);
-      if (c.collect_protocols)
+      if (c.collect_protocols && end >= 0)
         c.sym.set(key, %(declaration-source $end (declaration-bundle (rows))));
     }
   }
@@ -554,7 +651,7 @@ static int Compiler._retain_bundle(
   return 0;
 }
 
-static List Compiler._replay_bundle(Compiler c) {
+List Compiler.replay_declaration_source(Compiler c) {
   List source = c.sym.get(c._declaration_source_key(c.token));
   match (source)
     case %(declaration-source ?(int end) ?syntax): {
@@ -770,7 +867,7 @@ static String _declaration_path(String path, int thaw) {
    `(declarations key end rows)` entry per production, and `pending` the
    children whose forwarded constructors wait for their parent's
    constructor. */
-typedef struct Defaults {
+static typedef struct Defaults {
   Compiler c, Array parts, sources;
   Map definitions, pending;
 } Defaults;
@@ -1046,7 +1143,7 @@ static void Defaults.store(Defaults &d, Map symbols) {
    past-the-end token index, `runs` counts the runs, `first` is where the
    first one starts, and `gap` is the index after the last form, where the
    next form's conditional directives begin. */
-typedef struct FullParse {
+static typedef struct FullParse {
   Compiler c, Array nodes, statements;
   int hoisting, gap, runs, first;
 } FullParse;
@@ -1077,7 +1174,6 @@ static void Compiler._reset_parse(Compiler c, Map globs, int generated) {
   c.meta_group.clear();
   c.meta_group_bound = {};
   c.origins.clear();
-  c.meta_defs.clear();
   c.meta_comptime = {};
   c.meta_regions = {};
   c.native_meta = {};
@@ -1094,13 +1190,12 @@ static void Compiler._reset_parse(Compiler c, Map globs, int generated) {
   c.resolve_protocols();
   if (generated) c.install_generated_protocol_symbols();
   c.install_native_meta_effects(globs);
-  c.included_exports = c.replay_included_package_imports(globs);
+  c.included_effects = c.included_compile_time_effects(globs);
 }
 
 static void Compiler._reset_macros(Compiler c) {
   c.macros = {};
   c.kw_aliases = {};
-  c.kw_seen = {};
   c.install_builtin_macros();
   if (!c.declaration_produced) c.imports = {};
   c.import_stack.clear();
@@ -1174,7 +1269,7 @@ static void FullParse.hoist(FullParse &p, int begin, Token tokens) {
 static void FullParse.top_level(FullParse &p, int begin, Token tokens) {
   Compiler c = p.c;
   c._reject_statement();
-  Ast node = c._replay_bundle();
+  Ast node = c.replay_declaration_source();
   if (!node) node = c.parse_top_level();
   int end = c._end_index(tokens);
   if (node && node.car() == <seq>)
@@ -1193,13 +1288,12 @@ static void FullParse.add(FullParse &p, List node, int begin, int end) {
 static long Compiler._end_index(Compiler c, Token tokens) =>
   _skip_backward(c.token - 1, tokens) + 1 - tokens;
 
-/* The directives before the cursor join the nodes in source order, after
-   they update source visibility and the unit's macro names and an include
-   delivers the imports its file exports. */
+/* Directives join the nodes in source order, after they record native
+   macro names and includes deliver their public compile-time effects. */
 static void Compiler._append_preproc(Compiler c, Array nodes) {
   List directives = c.leading_preproc();
   c.update_source_visibility(directives);
-  if (c.included_exports.len()) c.import_included_exports();
+  if (c.included_effects.len()) c.install_included_effects();
   foreach (Var directive, directives) nodes.push(directive);
 }
 
@@ -1232,7 +1326,6 @@ static void Compiler._sync_top_level(Compiler c, Token start, int braces) {
 
 static List Compiler._finish_parse(Compiler c, Array nodes) {
   if (c.meta_build) c.write_meta_build();
-  c._append_meta_definitions(nodes);
   c.unit_nodes = NULL;
   List ast = nodes.list_free();
   if (c.script && !c.script.defines_main && !c.error_count())
@@ -1672,61 +1765,6 @@ static Token Compiler._init_token(Compiler c, List binding) {
 }
 
 // meta definitions
-
-/* Emits the runtime form of each imported `meta` function or value this
-   unit reaches, in import order. A `meta` declaration has two lifetimes:
-   every importing unit installs its compile-time form, and the runtime
-   declaration belongs where it is used. A unit that uses one only during
-   translation emits nothing for it, and a declaration an emitted one uses
-   comes with it. A compile-time-only function has no runtime form to emit,
-   so a unit that calls it at run time reaches the link error that names
-   it. */
-static void Compiler._append_meta_definitions(Compiler c, Array nodes) {
-  if (!c.meta_defs.len()) return;
-  Map referenced = {}, reached = {};
-  foreach (List node, nodes) ast_collect_binding_references(node, referenced);
-  /* A `meta` declaration uses only ones declared before it, so one pass
-     from the last declaration back reaches every one an emitted one
-     needs. */
-  for (size_t i = c.meta_defs.len(); i; i--) {
-    List definition = c.meta_defs[i - 1];
-    Var identity = _meta_identity(definition);
-    if (identity in referenced) {
-      reached[identity] = 1;
-      ast_collect_binding_references(definition, referenced);
-    }
-  }
-  foreach (List definition, c.meta_defs)
-    if (_meta_identity(definition) in reached &&
-        !c.meta_is_comptime_only(definition)) {
-      List emitted = _linked_once(definition);
-      c._record_top_level(emitted, NULL);
-      nodes.push(emitted);
-    }
-}
-
-/* Every unit that calls a public `meta` function at run time emits it, and
-   units that never include one another cannot tell which of them does, so
-   each copy is weak and the program links one. */
-static List _linked_once(List definition) {
-  match (definition)
-    case %(function ?type ?declarator ?body):
-      if (!type.type().is_static())
-        return %(function ("__attribute__((weak))" @type) $declarator $body);
-  return definition;
-}
-
-/* The binding an imported `meta` function or declaration introduces. */
-static Var _meta_identity(List definition) {
-  match (definition) {
-    case %(function ? (bind (binding ?identity ?) *) ?): return identity;
-    case %(declare ? (bindings (op = (bind (binding ?identity ?) *) ?))):
-      return identity;
-    case %(declare ? (bindings (bind (binding ?identity ?) *))):
-      return identity;
-  }
-  return void;
-}
 
 // tokenizing
 
@@ -2203,7 +2241,7 @@ int reference_guard_exits(List arm) {
     an `m` before the stem, so they cannot collide with the unit's.
 */
 String Compiler.fresh_name(Compiler c, String stem) {
-  String key = c.import_src ? %"m$stem" : stem;
+  String key = stem;
   Var stored;
   int count = c.names.counters.try_get(key, stored) ? stored : 0;
   String name = %"_x2c_${key}_${count++}";
@@ -2562,7 +2600,7 @@ void Compiler.borrow_unit_semantics(Compiler c, Compiler owner) {
 /** Shares `owner`'s pending `meta` group and the definitions it reads, which
     belong with the Lisp session that holds the group's stubs. */
 void Compiler.share_meta_group(Compiler c, Compiler owner) {
-  $copy_fields(c, owner, meta_group, meta_group_bound, meta_defs);
+  $copy_fields(c, owner, meta_group, meta_group_bound);
 }
 
 /** Takes over `owner`'s macro, object-like `#define`, import, keyword,
@@ -2722,7 +2760,7 @@ static Compiler _new(Compiler owner) {
 
 static void Compiler._init_tables(Compiler c) {
   c.id_keys = [];
-  $set_fields(c, {}, key_ids, deps, macros, kw_aliases, kw_seen,
+  $set_fields(c, {}, key_ids, deps, macros, kw_aliases,
               object_macros, proto_cache, imports, init_tokens,
               static_init_deps, fn_defs, meta_comptime, meta_regions,
               meta_hashes, meta_calls, native_meta, project_meta,
@@ -2734,7 +2772,7 @@ static void Compiler._init_tables(Compiler c) {
    unit, so every child must mutate the owner's exact objects. */
 static void Compiler._share_unit(Compiler c, Compiler owner) {
   $copy_fields(c, owner, package, package_dirs, package_roots,
-               package_aliases, package_members, package_exports, names,
+               package_aliases, package_members, package_effects, names,
                source_map, recovery_depth, sources, declaration_produced,
                source_facts, source_occurrences, source_definitions,
                source_declarations, source_texts, unit_script, include_dirs,
@@ -2746,13 +2784,13 @@ static void Compiler._share_unit(Compiler c, Compiler owner) {
 static void Compiler._own_unit(Compiler c) {
   c.inherit_library_comptime();
   $set_fields(c, {}, package_roots, package_aliases, package_members,
-              package_exports);
+              package_effects);
   c.names = Scope.calloc(1, sizeof(struct GenNames));
   $set_fields(c.names, {}, counters, adapters, file_scope_owners);
 }
 
 static void Compiler._init_queues(Compiler c) {
-  $set_fields(c, [], inits, early_decls, meta_defs, meta_group);
+  $set_fields(c, [], inits, early_decls, meta_group);
   c.meta_group_bound = {};
 }
 

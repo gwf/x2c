@@ -14,20 +14,20 @@ Files below are relative to `src/` unless a path is shown.
   `deps.x`, `utils.x`;
 - shared runtime tokenization: `lib/tokenizer.x`; compiler parsing:
   `preprocess.x`, `parse.x`, `expressions.x`, `initializers.x`,
-  `statements.x`, `literals.x`, `lambdas.x`, `macros.x`, `grammar.xmacro`,
-  `ast-rewrite.xmacro`, `ast.x`;
+  `statements.x`, `literals.x`, `lambdas.x`, `macros.x`, `grammar.x`,
+  `ast-rewrite.x`, `ast.x`;
 - compile-time code: `stage.x`, `meta-sdk.x`, `meta-native.x`,
   `builtins.x`, `linked-meta.x`, `meta-group.x`, `meta-project.x`,
   `meta-helper-client.x`;
 - semantic representation and lowering: `type.x`, `type-ledger.x`,
   `protocol.x`, `operator-ledger.x`, `transform.x`, `callables.x`, `cleanup.x`,
-  `adapter-memo.xmacro`, `regions.x`;
+  `adapter-memo.x`, `regions.x`;
 - output: `cache.x`, `generate.x`, `emit.x`, `format.x`;
 - native and project driver: `build.x`, `project.x`, `toolchain.x`,
   `install.x`, `script.x`, `editor.x`.
 
-- shared source fields: `fields.xmacro`;
-- report wording: `src/*-reports.xmacro`, beside their reporting owners.
+- shared source fields: `fields.x`;
+- report wording: static macros in their owner or shared `src/*-reports.x`.
 
 ## Runtime organization
 

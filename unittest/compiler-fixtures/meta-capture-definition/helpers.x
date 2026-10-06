@@ -1,0 +1,4 @@
+#pragma once
+
+meta String capture_notice(Source path) => x2c_embed_text(path);
+macro Expression $capture.notice(Literal $path) => $capture_notice($path);

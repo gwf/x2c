@@ -32,8 +32,7 @@ void ReplLower.free(ReplLower self) {
 }
 
 String ReplLower.declined(ReplLower self) => self.reason;
-#pragma private
-$(import "decline-errors.xmacro")
+#include "decline-errors.x"
 #include "type.x"
 #include "transform.x"
 #include "var.x"
@@ -57,7 +56,7 @@ static int _lower_bool_type(Sym sym, Type type) =>
    `on_break` and `on_continue` are the continuations the nearest enclosing
    loop or `switch` gave, or nothing outside one. `pending` is the innermost
    block cleanup the current point runs inside, or NULL. */
-typedef struct Lowering {
+static typedef struct Lowering {
   Compiler compiler;
   ReplLower owner;
   Scope scratch;
@@ -78,7 +77,7 @@ typedef struct Lowering {
    continues in; `exits` holds each exit's code by tag; `returns` records a
    `return` inside, whose value leaves in a cell; `depth` counts the
    wrappers down to the function. */
-typedef struct LowerCleanup {
+static typedef struct LowerCleanup {
   Map env;
   Array exits;
   int depth, returns;
@@ -174,7 +173,7 @@ static void _lower_scan_each(Lowering &l, List items) {
 
 /* The ordinary cursor calls emitted by the foreach expansion. Their
    cursor and outputs can occupy frame slots instead of addressed cells. */
-struct LowerCursor {
+static struct LowerCursor {
   Symbol kind;
   int object, cursor, item, value;
 };
@@ -543,7 +542,7 @@ static int _lower_object_pointer_type(Lowering &l, Type type) {
   (void) l.compiler.sym.var_tag_for_type(type, represented);
   /* A semantic handle such as List or Array owns a non-pointer Type at the
      Var boundary even though its native typedef later resolves to a pointer.
-     This fact is process-stable during shallow xmacro lowering, unlike the
+     This fact is process-stable during shallow macro lowering, unlike the
      unit-local converter registry. Raw pointer typedefs resolve to a pointer
      here and remain eligible. */
   if (represented && !represented.is_pointer()) return 0;

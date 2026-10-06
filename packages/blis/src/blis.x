@@ -5,7 +5,7 @@
 */
 
 #include "blis-21.h"
-$(import "cleanup.xmacro")
+#include "cleanup.x"
 
 typedef enum Blis {
   BLIS_NAMESPACE
@@ -24,14 +24,13 @@ protocol Blis(BlisObject);
 
 $cleanup.by(BlisObject, free);
 
-#pragma private
 
 #include <math.h>
 #include <string.h>
 
-$(import "blis-errors.xmacro")
+#include "blis-errors.x"
 
-struct BlisObject {
+static struct BlisObject {
   obj_t native;
   BlisObject owner;
   int owns_buffer;

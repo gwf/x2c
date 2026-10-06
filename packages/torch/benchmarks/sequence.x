@@ -31,10 +31,9 @@ import "torch" with Torch, Tensor, Module, Optimizer, Checkpoint;
 #define LR 0.001
 #define WARMUP 50
 
-#pragma private
 
 /* The surviving hidden state and the scope that owns it. */
-typedef struct Carry {
+static typedef struct Carry {
   Scope owner;
   Tensor state;
 } Carry;
@@ -441,7 +440,6 @@ static int _diagnose(String artifacts, String out, int count) {
   return 0;
 }
 
-#pragma public
 
 int main(int argc, char **argv) {
   $scope() {

@@ -57,16 +57,16 @@ deletions.
 
 | File | Total lines | Relevant range | Range lines | Finding |
 | --- | ---: | --- | ---: | --- |
-| [map-generics.xmacro](../lib/map-generics.xmacro) | 961 | 354-618 | 265 | One operations generator mixes native and boxed policies through constant holes. Its `unbox` slot is never read. |
-| [map-generics.xmacro](../lib/map-generics.xmacro) | 961 | 691-736 | 46 | The observation generator accepts five arguments but uses only `map`. |
-| [map-generics.xmacro](../lib/map-generics.xmacro) | 961 | 503-556 | 54 | Update and postfix functions carry boxed/native admission, missing-key, numeric, and postfix policy branches. |
-| [map-generics.xmacro](../lib/map-generics.xmacro) | 961 | 69-352 | 284 | Fourteen slots supply actual storage layout, callbacks, and error owners. These are not all incidental parameters. |
-| [array-generics.xmacro](../lib/array-generics.xmacro) | 911 | 27-152 | 126 | Integer, floating, and String update generators state different native arithmetic policies separately. |
-| [array-generics.xmacro](../lib/array-generics.xmacro) | 911 | 345-628 | 284 | Array also uses a boxed flag in common operations. It is not uniformly a policy-free counterpart to Map. |
-| [array-generics.xmacro](../lib/array-generics.xmacro) | 911 | 668-708 | 41 | The observer already takes only the three facts it uses and calls ordinary Buffer owners. |
+| [map-generics.x](../lib/map-generics.x) | 961 | 354-618 | 265 | One operations generator mixes native and boxed policies through constant holes. Its `unbox` slot is never read. |
+| [map-generics.x](../lib/map-generics.x) | 961 | 691-736 | 46 | The observation generator accepts five arguments but uses only `map`. |
+| [map-generics.x](../lib/map-generics.x) | 961 | 503-556 | 54 | Update and postfix functions carry boxed/native admission, missing-key, numeric, and postfix policy branches. |
+| [map-generics.x](../lib/map-generics.x) | 961 | 69-352 | 284 | Fourteen slots supply actual storage layout, callbacks, and error owners. These are not all incidental parameters. |
+| [array-generics.x](../lib/array-generics.x) | 911 | 27-152 | 126 | Integer, floating, and String update generators state different native arithmetic policies separately. |
+| [array-generics.x](../lib/array-generics.x) | 911 | 345-628 | 284 | Array also uses a boxed flag in common operations. It is not uniformly a policy-free counterpart to Map. |
+| [array-generics.x](../lib/array-generics.x) | 911 | 668-708 | 41 | The observer already takes only the three facts it uses and calls ordinary Buffer owners. |
 | [typed-map.x](../lib/typed-map.x) | 356 | 225-338 | 114 | Four built-in families repeat mechanical wiring, but String export bodies interrupt that family wiring for a real ownership reason. |
 | [typed-array.x](../lib/typed-array.x) | 189 | 103-165 | 63 | Seven typed families compose storage, public operations, observation, update, publication, and iteration. |
-| [list-generics.xmacro](../lib/list-generics.xmacro) | 102 | 23-102 | 80 | A typed List retains canonical List representation and inherits operations instead of generating storage algorithms. |
+| [typed-list.x](../lib/typed-list.x) | 102 | 23-102 | 80 | A typed List retains canonical List representation and inherits operations instead of generating storage algorithms. |
 | [typed-list.x](../lib/typed-list.x) | 123 | 97-123 | 27 | Seven typed-list invocations state codecs and element tags explicitly. |
 | [regions.x](../src/regions.x) | 1,455 | 165-180 | 16 | Four ordinary wrappers and eleven typed-container conversion pairs are explicit effects keyed by emitted C name. |
 
@@ -269,7 +269,7 @@ for a larger experiment, while leaving the small cleanup selected.
 
 ### Field lists already compose templates and meta projections
 
-[fields.xmacro](../src/fields.xmacro) is 32 lines. Its helpers at lines 4-17
+[fields.x](../src/fields.x) is 32 lines. Its helpers at lines 4-17
 build assignment statements with source quotations. `copy_fields` and
 `set_fields` at lines 19-25 splice their results. `segment_state` at 29-32
 names one repeated seven-field relationship using the same copy primitive.
@@ -294,7 +294,7 @@ The earlier binding concern therefore remains an exact separate boundary.
 
 ### Selector generation makes policy choice inspectable
 
-[list-selectors.xmacro](../lib/list-selectors.xmacro) is 67 lines and
+[list-selectors.x](../lib/list-selectors.x) is 67 lines and
 [list-selectors.x](../lib/list-selectors.x) is now 16 lines. Previously the
 module alone was 113 lines. These two authoritative files total 83 lines,
 30 fewer physical lines, excluding generated output and documentation.
@@ -382,18 +382,18 @@ not claim a fresh whole-repository review, a build, or test results.
 | Boundary | Current fact to preserve | Owner / evidence |
 | --- | --- | --- |
 | Key storage | Native Maps copy concrete key/value fields; boxed Map copies Var bits without retaining pointees. | map.x header; typed-map.x public type comments |
-| Key identity | Boxed mutable Array/Map keys compare by identity. Canonical String keys can compare pointer identity. | map-generics.xmacro:17-29; typed-map.x:131-142 |
-| Native absence | Zero is valid data. Status readers use an out slot; failing direct readers raise instead of manufacturing zero. | map-generics.xmacro:418-442, 558-578; typed-map tests |
-| Boxed absence | `get` and `del` return `void`; status readers report no write. Update/postfix failures follow their current source branches. | map-generics.xmacro:430-436, 503-556, 573-578 |
-| Admission | Boxed void keys/values are prohibited. Native null String is valid empty String. | map-generics.xmacro:454-484; typed-map.x:155-162 |
-| Update insertion | Native `+` inserts rhs on absence, including String concatenation. Boxed insertion depends on valid numeric rhs. | map-generics.xmacro:503-526 |
-| Integer arithmetic | Native Map int update uses 32-bit raw arithmetic and validates shift counts before writing. Narrow typed Arrays follow their documented generated C promotions. | typed-map.x:175-192; integer-ops.xmacro; array-generics.xmacro:27-84 |
+| Key identity | Boxed mutable Array/Map keys compare by identity. Canonical String keys can compare pointer identity. | map-generics.x:17-29; typed-map.x:131-142 |
+| Native absence | Zero is valid data. Status readers use an out slot; failing direct readers raise instead of manufacturing zero. | map-generics.x:418-442, 558-578; typed-map tests |
+| Boxed absence | `get` and `del` return `void`; status readers report no write. Update/postfix failures follow their current source branches. | map-generics.x:430-436, 503-556, 573-578 |
+| Admission | Boxed void keys/values are prohibited. Native null String is valid empty String. | map-generics.x:454-484; typed-map.x:155-162 |
+| Update insertion | Native `+` inserts rhs on absence, including String concatenation. Boxed insertion depends on valid numeric rhs. | map-generics.x:503-526 |
+| Integer arithmetic | Native Map int update uses 32-bit raw arithmetic and validates shift counts before writing. Narrow typed Arrays follow their documented generated C promotions. | typed-map.x:175-192; integer-ops.x; array-generics.x:27-84 |
 | Floating arithmetic | Map floating update accepts four arithmetic operators; comparison delegates to Var ordering. | typed-map.x:139, 194-206 |
 | Failure atomicity | Native update calculates before storing; allocation/growth stages before installed storage changes. Callback retry and displacement boundaries remain as documented. | typed-map.x:175-220; map.x:71-78 |
 | Volatile access | Existing native update callbacks take volatile pointers and preserve their loads/stores. Public Var.update/postfix retain the published Var-pointer ABI. | typed-map.x:175-220; varops.x; research readiness correction |
-| Iteration | Map bucket order and mutation invalidation differ from Array index traversal. Long-key boxing has Scope lifetime. | map-generics.xmacro:739-830; array-generics.xmacro:710-737 |
-| Publication | Typed publication supplies boxing, cleanup, Iter and tagged Var conformance. Boxed owners avoid duplicate converters. | map-generics.xmacro:832-899; array-generics.xmacro:760-833 |
-| Export | Numeric Maps move existing storage; String-keyed Maps stage a rebuilt table and preserve identity. Later source bucket wins canonical-key collapse. | typed-map.x:284-338; map-generics.xmacro:863-892 |
+| Iteration | Map bucket order and mutation invalidation differ from Array index traversal. Long-key boxing has Scope lifetime. | map-generics.x:739-830; array-generics.x:710-737 |
+| Publication | Typed publication supplies boxing, cleanup, Iter and tagged Var conformance. Boxed owners avoid duplicate converters. | map-generics.x:832-899; array-generics.x:760-833 |
+| Export | Numeric Maps move existing storage; String-keyed Maps stage a rebuilt table and preserve identity. Later source bucket wins canonical-key collapse. | typed-map.x:284-338; map-generics.x:863-892 |
 | Representation | Array is Block-backed contiguous storage; Map owns parallel hash/entry Blocks and a Scope value; List remains canonical immutable cells. | family type declarations and headers |
 | Meta exposure | The literal meta prototypes after family composition stay explicit. Do not assume unit macros can generate their availability contract. | typed-array.x:167-189; typed-map.x:343-356 |
 
@@ -411,7 +411,7 @@ used Type. Remove unbox from the operations generator. Keep typed.family
 and typed.observe's original source forms because their other composed
 operations use those facts.
 
-The direct consumers are map.x and the wrappers at map-generics.xmacro:947-961.
+The direct consumers are map.x and the wrappers at map-generics.x:947-961.
 No hash, update, boxing, or export policy changes. No new runtime helper,
 record, traversal, cache, validator, or protocol is necessary.
 

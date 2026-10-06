@@ -1,18 +1,17 @@
 #include "x2c.x"
 
-#pragma private
 static int barrier(int Chain) => Chain;
-typedef struct Holder { int Chain; char label[sizeof("Chain")]; } Holder;
-typedef struct Chain { int n; } ChainBase;
-typedef struct Chain ChainOther;
-typedef ChainBase Chain;
-typedef const Chain QualifiedChain;
-typedef union Choice { int n; } ChoiceBase;
-typedef ChoiceBase Choice;
-typedef enum Shade { LIGHT, DARK } ShadeBase;
-typedef ShadeBase Shade;
-typedef Chain (*ReadChain)(QualifiedChain);
-typedef ReadChain (*ReadFactory)(void);
+static typedef struct Holder { int Chain; char label[sizeof("Chain")]; } Holder;
+static typedef struct Chain { int n; } ChainBase;
+static typedef struct Chain ChainOther;
+static typedef ChainBase Chain;
+static typedef const Chain QualifiedChain;
+static typedef union Choice { int n; } ChoiceBase;
+static typedef ChoiceBase Choice;
+static typedef enum Shade { LIGHT, DARK } ShadeBase;
+static typedef ShadeBase Shade;
+static typedef Chain (*ReadChain)(QualifiedChain);
+static typedef ReadChain (*ReadFactory)(void);
 
 static Chain read_chain(QualifiedChain value) => value;
 static ReadChain read_factory(void) => read_chain;

@@ -5,7 +5,7 @@ import "pcre2" with Regexp, RegexpCapture, RegexpLisp, RegexpMatch;
 #include "test-support.x"
 #include <string.h>
 
-$(import "../../../unittest/test-macros.xmacro")
+#include "../../../unittest/test-macros.x"
 
 static void regexp_named_and_optional_captures(void) {
   Regexp words = $auto(

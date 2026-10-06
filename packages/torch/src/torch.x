@@ -41,20 +41,19 @@ protocol Torch(T) {
   void T.discard(T);
 }
 
-#pragma private
 
 #include <math.h>
 #include <string.h>
 
-struct Tensor {
+static struct Tensor {
   xt_tensor native;
 };
 
-struct Module {
+static struct Module {
   xt_module native;
 };
 
-struct Optimizer {
+static struct Optimizer {
   xt_optim native;
 };
 
@@ -65,7 +64,7 @@ struct Optimizer {
 #define SCHEDULE_WARMUP 2
 #define SCHEDULE_MULTISTEP 3
 
-struct Scheduler {
+static struct Scheduler {
   xt_scheduler native;
   Optimizer optimizer;
   int kind;
@@ -77,20 +76,20 @@ struct Scheduler {
   List milestones;
 };
 
-struct JitModule {
+static struct JitModule {
   xt_jit_module native;
 };
 
 /* A grad-mode guard lives in the scope that installed it, so the previous
    mode is restored by Scope.release, including the release a `defer` runs
    while an Error transfers out. */
-typedef struct TorchGuard *TorchGuard;
+static typedef struct TorchGuard *TorchGuard;
 
-struct TorchGuard {
+static struct TorchGuard {
   int active;
 };
 
-typedef struct TorchCallbackError {
+static typedef struct TorchCallbackError {
   Symbol cause;
   List detail;
 } TorchCallbackError;
@@ -120,7 +119,7 @@ static void _torch_failed(String operation) {
 /* Each handle record owns one libtorch handle. `drop` releases it once,
    so the Scope finalizer and an early `free` share it; `wrap` adopts the
    handle a raw call returned, raising `<bad-state>` for NULL. */
-macro Unit $torch.handle(Type $T, Type $native, Name $free, Literal $tag,
+static macro Unit $torch.handle(Type $T, Type $native, Name $free, Literal $tag,
                          Name $drop, Name $wrap, Name $unbox) {
   static void $drop(void *ptr) {
     $T handle = ptr;
@@ -226,7 +225,6 @@ static void _expect_filled(int64_t count, int64_t total) {
                               (reason "fewer values than the shape holds"));
 }
 
-#pragma public
 
 /** Reports whether this libtorch build can use the host's MPS device. */
 int Torch.mps_available(void) {
@@ -1040,7 +1038,6 @@ void Optimizer.load_python(Optimizer optimizer, String path) {
 
 /* Custom functions borrow Funcs; the native graph owns saved tensor
    references. The callback Context reclaims all temporary x2c state. */
-#pragma private
 
 static Var _custom_invoke(Func function, AutogradContext context, Var value) {
   FuncArg arguments[] = { FuncArg.value(AutogradContext.var(context)),
@@ -1092,7 +1089,6 @@ static int _custom_call(void *pointer, xt_autograd_context native,
   return failed;
 }
 
-#pragma public
 
 /** Applies one custom function. `forward(context, inputs)` returns a Tensor;
     `backward(context, output_gradient)` returns one Tensor or Null per input.
@@ -1368,7 +1364,6 @@ protocol Torch(Tensor);
 
 /* Lisp calls allocate in the existing session Scope. Releasing a native
    handle early leaves its wrapper until session destruction. */
-#pragma private
 
 static Tensor _lisp_tensor_arg(Var value) {
   if (value is not Tensor)
@@ -1507,7 +1502,6 @@ static int _lisp_free(Var value) {
   return 1;
 }
 
-#pragma public
 
 /** Installs tensor, model and optimizer operations over ordinary Lisp values.
     Results belong to the Lisp session. `torch-free` releases a native handle

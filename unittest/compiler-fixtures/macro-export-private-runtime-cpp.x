@@ -1,7 +1,4 @@
-// An import that an included file does not export keeps its meta functions
-// in that file with preprocessor symbol collection, which reads the import
-// again in the flattened text. The includer's run-time call has no
-// prototype.
+// Static meta functions stay private at runtime and compile time.
 #include "macro-export-lib.x"
 
 int rt(void) => p_meta(1);

@@ -13,7 +13,7 @@ other program.
 ```text
 packages/greet/
   Makefile          PACKAGE := greet, then include ../package.mk
-  src/greet.x       the entry unit; public surface above #pragma private
+  src/greet.x       the entry unit; nonstatic definitions are public
   tests/            consumers that import the package
   examples/
 ```
@@ -32,8 +32,6 @@ typedef struct GreetingData {
 
 Greeting Greeting.new(String subject);
 String Greeting.line(Greeting greeting);
-
-#pragma private
 
 Greeting Greeting.new(String subject) {
   Greeting greeting = Scope.malloc(sizeof(struct GreetingData));
@@ -201,19 +199,13 @@ That compiler then calls `tally`'s `meta` functions through
 and compiles its `src/*.c` with the compiler, so only a package without a
 native dependency links in this way.
 
-A package can publish macros with its compile-time functions. Export the
-`.xmacro` import from one of its sources:
+A package can publish macros beside its compile-time functions in ordinary
+source:
 
-<!-- ignore: these are files in a package named tally. -->
+<!-- ignore: this is a source file in a package named tally. -->
 ```x2c,ignore
 // src/tally.x
 meta int tally_sum(int n);
-export $(import "tally.xmacro")
-#pragma private
-```
-
-```x2c,ignore
-// src/tally.xmacro
 macro Expression $tally.sum4() => tally__tally_sum(4);
 ```
 
@@ -224,38 +216,27 @@ import "tally";
 meta static int ten(void) => $tally.sum4();
 ```
 
-The import loads the package's declarations, compile-time module or linked
-extension, and the macro imports its entry source and public include
-surface [export](../reference/language.md#exported-imports). An include below
-`#pragma private` does not contribute the included file's exports. The
-`export` marker itself works on either side of the exporting file's private
-boundary. An import without `export` stays private, wherever it is written.
+The import loads the package's public declarations, compile-time module or
+linked extension, and its nonstatic macros and keyword aliases. Ordinary
+includes propagate those definitions through the entry source. Static
+helpers stay in their declaring files.
+
 Macros keep their declared names; `as` changes the package alias, not macro
-spellings. A macro pack may still be imported explicitly without importing
-its package.
+spellings. An ordinary source module can also be included directly when the
+consumer wants that module's flat namespace instead of a package alias.
 
 ### Expose macros through one import
 
-Before, an autodiff consumer wrote:
-
-<!-- ignore: an import needs a registered --package-dir root. -->
-```x2c,ignore
-#include "typed-array.x"
-import "autodiff" with AdTape, AdNode;
-$(import "<path>/autodiff/src/autodiff.xmacro")
-```
-
-`src/autodiff.x` now exports its macro pack and includes what the macros
-need:
+The `autodiff` entry source includes its runtime dependencies and macro module:
 
 <!-- ignore: this is a fragment of the package source. -->
 ```x2c,ignore
 #include "typed-array.x"
-export $(import "autodiff.xmacro")
+#include "autodiff-macros.x"
 ```
 
-A consumer writes one line, `import "autodiff" with AdTape, AdNode;`. A
-source library works the same way through `#include`.
+A consumer writes one line, `import "autodiff" with AdTape, AdNode;`. The
+same include rules apply to macros and ordinary runtime declarations.
 
 ## Packages that wrap a C library
 

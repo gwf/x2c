@@ -11,12 +11,11 @@
 */
 
 #pragma once
-$(import "../lib/private-keywords.xmacro")
+#include "../lib/private-keywords.x"
 #include "compiler.x"
 #include "type.x"
-#pragma private
-$(import "../src/parse-report-macros.xmacro")
-$(import "../src/grammar.xmacro")
+#include "parse-report-macros.x"
+#include "grammar.x"
 #include "statements.x"
 #include "expressions.x"
 #include "literals.x"
@@ -25,16 +24,263 @@ $(import "../src/grammar.xmacro")
 #include "protocol.x"
 #include "utils.x"
 
-$(import "../src/parse-reports.xmacro")
+
+/* parse diagnostics. */
+
+static macro Stmt $report.parse.decorator_top(Expr $c) =>
+  $c.report_error(
+    <parse>, "top-level decorators are not supported",
+    $c.token, %( "module initialization: void TYPE.initialize(void)" ));
+
+static macro Stmt $report.parse.body_expected(Expr $c, Expr $unexpected) =>
+  $c.report_error(
+    <parse>, "expected ';', '{', or '=>'",
+    $c.token, %("token:" ${$c.token.text} "symbol:" ${$unexpected.str()}));
+
+static macro Stmt $report.parse.meta_function(Expr $c, Expr $origin) =>
+  $c.report_error(
+    <parse>, "a native meta declaration must be a function",
+    $origin, NULL);
+
+static macro Stmt $report.parse.unit_single(Expr $c) =>
+  $c.report_error(
+    <parse>, "submit one top-level item at a time",
+    $c.token, NULL);
+
+static macro Stmt $report.parse.package_identifier(Expr $c, Expr $origin) =>
+  $c.report_error(
+    <parse>, "package name must be a C identifier",
+    $origin, NULL);
+
+static macro Stmt $report.parse.import_name(Expr $c) =>
+  $c.report_error(
+    <parse>, "expected a quoted package name after 'import'",
+    $c.token, NULL);
+
+static macro Stmt $report.parse.import_local(Expr $c) =>
+  $c.report_error(
+    <parse>, "expected a local name after 'as'",
+    $c.token, NULL);
+
+static macro Stmt $report.parse.import_member(Expr $c) =>
+  $c.report_error(
+    <parse>, "expected a package member name after 'with'",
+    $c.token, NULL);
+
+static macro Stmt $report.parse.function_row(Expr $c) =>
+  $c.report_error(
+    <parse>, "a function definition cannot share a declaration row",
+    $c.token, NULL);
+
+static macro Stmt $report.parse.meta_constructed(
+  Expr $c, Expr $name, Expr $origin) =>
+  $c.report_error(
+    <parse>, %"meta function '${$name}' cannot be produced by a macro",
+    $origin, %( "move it to a source file and call it from the macro" ));
+
+static macro Stmt $report.parse.decl_function(Expr $c) =>
+  $c.report_error(
+    <parse>, "Decl macro argument cannot be a function declaration",
+    $c.token, NULL);
+
+static macro Stmt $report.parse.decl_typedef(Expr $c) =>
+  $c.report_error(
+    <parse>, "Decl macro argument cannot be a typedef",
+    $c.token, NULL);
+
+static macro Stmt $report.parse.destructure_init(Expr $c) =>
+  $c.report_error(
+    <parse>, "destructuring declaration requires an initializer",
+    $c.token, NULL);
+
+static macro Stmt $report.parse.destructure_name(Expr $c) =>
+  $c.report_error(
+    <parse>, "expected identifier in destructuring declaration",
+    $c.token, %("destructuring targets must be simple identifiers"));
+
+static macro Stmt $report.type.scalar_invalid(
+  Expr $c, Expr $source, Expr $origin) =>
+  $c.report_error(
+    <type>, $source ? %"invalid scalar type ${$source}"
+                 : "expected scalar type",
+    $origin, NULL);
+
+static macro Stmt $report.parse.attribute_packed(Expr $c, Expr $origin) =>
+  $c.report_error(
+    <parse>, "packed attributes are unsupported",
+    $origin, NULL);
+
+static macro Stmt $report.parse.delegate_name(Expr $c) =>
+  $c.report_error(
+    <parse>, "delegate field requires a name",
+    $c.token, NULL);
+
+static macro Stmt $report.parse.named_type_abstract(Expr $c, Expr $origin) =>
+  $c.report_error(
+    <parse>, "named type requires an abstract type after its name",
+    $origin, NULL);
+
+static macro Stmt $report.parse.enum_name(Expr $c) =>
+  $c.report_error(
+    <parse>, "expected enumerator identifier",
+    $c.token, NULL);
+
+static macro Stmt $report.parse.enum_bound(Expr $c, Expr $spelling, Expr $origin) =>
+  $c.report_error(
+    <parse>, %"enumerator '${$spelling}' is already bound in this scope",
+    $origin, %("prior binding: '${$spelling}'"));
+
+static macro Stmt $report.parse.syntax_position(Expr $c, Expr $origin) =>
+  $c.report_error(
+    <parse>, "syntax cannot be constructed at this position",
+    $origin, NULL);
+
+static macro Stmt $report.parse.paren_unclosed(Expr $c) =>
+  $c.report_error(
+    <parse>, "missing closing parenthesis",
+    $c.token, NULL);
+
+static macro Stmt $report.parse.type_unknown(Expr $c, Expr $first) =>
+  $c.report_error(
+    <parse>, %"unknown type name '${$first.text}'",
+    $first, %("name an imported package type through its alias"));
+
+static macro Stmt $report.parse.dimension_close(
+  Expr $c, Expr $expr, Expr $unexpected) =>
+  $c.report_error(
+    <parse>, "expected ']'",
+    $c.token, %("dimension:" ${$expr.str()} "symbol:" ${$unexpected.str()}));
+
+static macro Stmt $report.parse.method_name(Expr $c) =>
+  $c.report_error(
+    <parse>, "expected method name",
+    $c.token, NULL);
+
+static macro Stmt $report.parse.macro_member(Expr $c) =>
+  $c.report_error(
+    <parse>, "macro method declaration requires a member name",
+    $c.token, NULL);
+
+static macro Stmt $report.type.method_owner(Expr $c) =>
+  $c.report_error(
+    <type>, "method name has no concrete owner",
+    $c.token, NULL);
+
+static macro Stmt $report.parse.decl_bound(Expr $c, Expr $exact) =>
+  $c.report_error(
+    <parse>, %"declaration '${$exact}' is already bound",
+    $c.token, %("prior binding: '${$exact}'"));
+
+static macro Stmt $report.parse.params_close(
+  Expr $c, Expr $params, Expr $unexpected) =>
+  $c.report_error(
+    <parse>, "expected ')'",
+    $c.token, %("parameters:" ${$params.str()}
+      "symbol:" ${$unexpected.str()}));
+
+static macro Stmt $report.parse.params_empty(Expr $c) =>
+  $c.report_error(
+    <parse>, "empty parameter list; use (void)",
+    $c.token, NULL);
+
+static macro Stmt $report.parse.method_member(Expr $c, Expr $owner) =>
+  $c.report_error(
+    <parse>, "expected method name after dot",
+    $c.token, %( "typedef:" ${$owner} "token:" ${$c.token.text}  ));
+
+static macro Stmt $report.parse.function_body(Expr $c) =>
+  $c.report_error(
+    <parse>, "Function macro argument requires a function body",
+    $c.token, NULL);
+
+static macro Stmt $report.parse.shutdown_duplicate(Expr $c, Expr $name) =>
+  $c.report_error(
+    <parse>, "translation unit has more than one type shutdown",
+    $c.token, %( "shutdown:" ${$name} ));
+
+static macro Stmt $report.parse.init_duplicate(Expr $c, Expr $name) =>
+  $c.report_error(
+    <parse>, "translation unit has more than one type initializer",
+    $c.token, %( "initializer:" ${$name} ));
+
+static macro Stmt $report.parse.lifecycle_signature(
+  Expr $c, Expr $role, Expr $name) {
+  {
+    String message = $role == "initializer"
+      ? "type initializer must have signature void TYPE.initialize(void)"
+      : "type shutdown must have signature void TYPE.shutdown(void)";
+    $c.report_error(<parse>, message, $c.token, %("${$role}: ${$name}"));
+  }
+}
+
+static macro Stmt $report.protocols.managed_cleanup(
+  Expr $c, Expr $origin, Expr $type) =>
+  $c.report_error(
+    <protocol>, "managed initializer requires Cleanup participation",
+    $origin, %("type: ${$type.repr()}"));
+
+static macro Stmt $report.parse.managed_storage(Expr $c, Expr $origin) =>
+  $c.report_error(
+    <parse>, "managed initializer requires automatic local storage",
+    $origin, NULL);
+
+static macro Stmt $report.parse.syntax_expected(Expr $c) =>
+  $c.report_error(
+    <parse>, "expected syntax",
+    $c.token, NULL);
+
+static macro Stmt $report.parse.statement_single(Expr $c) =>
+  $c.report_error(
+    <parse>, "expected one statement",
+    $c.token, NULL);
+
+static macro Stmt $report.parse.alias_target(Expr $c) =>
+  $c.report_error(
+    <parse>, "foreign alias target must be one direct function declaration",
+    $c.token, NULL);
+
+static macro Stmt $report.parse.alias_body(Expr $c) =>
+  $c.report_error(
+    <parse>, "foreign alias declaration cannot have a body",
+    $c.token, NULL);
+
+static macro Stmt $report.parse.alias_storage(Expr $c) =>
+  $c.report_error(
+    <parse>, "foreign alias has invalid storage class",
+    $c.token, %("allowed storage: static or inline"));
+
+static macro Stmt $report.parse.alias_variadic(Expr $c) =>
+  $c.report_error(
+    <parse>, "foreign alias cannot be variadic",
+    $c.token, NULL);
+
+static macro Stmt $report.parse.alias_identifier(Expr $c) =>
+  $c.report_error(
+    <parse>, "foreign alias native target must be a direct identifier",
+    $c.token, NULL);
+
+static macro Stmt $report.parse.alias_self(Expr $c) =>
+  $c.report_error(
+    <parse>, "foreign alias cannot name itself",
+    $c.token, NULL);
+
+static macro Stmt $report.type.alias_function(Expr $c, Expr $native_type) =>
+  $c.report_error(
+    <type>, "foreign alias native target is not a function",
+    $c.token, %("type: ${$native_type.repr()}"));
+
+static macro Stmt $report.type.reference_placement(Expr $c) =>
+  $c.report_error(
+    <type>, "transparent references are only supported on parameters",
+    NULL, NULL);
+
 
 // top-level forms
 
 /** Parses one top-level form and applies its source-ordered compiler effects.
     Returns its AST, or NULL when a keyword definition, top-level Lisp form,
     linkage brace, or compile-time-only `meta` function only updates compiler
-    state, with the first following token current. A macro import whose
-    `.xmacro` makes `meta` declarations retains their runtime forms, which
-    the unit emits where it reaches them. With `skip_body`, collection uses
+    state, with the first following token current. With `skip_body`, collection uses
     the same classifier and bound declarations but skips runtime bodies.
     This continuation is independent of the compiler's shallow-parse state.
 */
@@ -48,7 +294,10 @@ List Compiler.parse_top_level_mode(Compiler c, int skip_body) {
   if (c.keyword_form_is_definition()) return c._keyword_definition(skip_body);
   if (c._static_interface_form()) {
     c.next();
-    $let(c.source_private, 1) return c.parse_top_level_mode(skip_body);
+    $let(c.source_private, 1) {
+      List retained = skip_body ? NULL : c.replay_declaration_source();
+      return retained ? retained : c.parse_top_level_mode(skip_body);
+    }
   }
   if (skip_body) {
     if (c.protocol_form_starts()) return c.parse_protocol_declaration();
@@ -57,7 +306,6 @@ List Compiler.parse_top_level_mode(Compiler c, int skip_body) {
   List macro = skip_body ? NULL : c.try_parse_macro_target_at(AST_UNIT);
   if (macro) return macro;
   if (c.protocol_form_starts()) return c.parse_protocol_declaration();
-  if (c._at_export()) return c._exported_import(skip_body);
   switch (c.peek(0)) {
     case <import>: return c.parse_import_declaration();
     case <"$(">:   return c._top_level_lisp(skip_body);
@@ -75,8 +323,8 @@ static int Compiler._static_interface_form(Compiler c) {
          c.peek(1) == <protocol> || next.text == "class";
 }
 
-/* The directives before a form set its visibility and, in the full parse,
-   the conditional groups it is in. A template's forms have neither. */
+/* Directives record native macro names and, in the full parse, the
+   conditional groups around the form. A template's forms have neither. */
 static void Compiler._leading_directives(Compiler c, int skip_body) {
   if (c.macro_holes) return;
   c.update_source_visibility(c.leading_preproc());
@@ -150,27 +398,8 @@ static int Compiler._skip_collected_form(Compiler c) {
    macro import keep their runtime forms for the unit to emit. */
 static List Compiler._top_level_lisp(Compiler c, int skip_body) {
   if (skip_body) c.parse_macro_lisp_shallow();
-  else c.keep_imported_meta(c.parse_macro_lisp_top_level());
+  else c.parse_macro_lisp_top_level();
   return NULL;
-}
-
-/* `export` marks the compile-time form that follows it. Before anything
-   else it is an ordinary identifier, such as a C macro's name. */
-static int Compiler._at_export(Compiler c) =>
-  c.at_word("export") && c.peek(1) == <"$(">;
-
-/* `export $(import "...")` gives the import to every file that includes
-   this one, so collection records it in the file's interface. The full
-   parse reports `export` before any other form. */
-static List Compiler._exported_import(Compiler c, int skip_body) {
-  Token marker = c.token;
-  c.next();
-  if (!c.at_import()) {
-    if (!skip_body) $report.parse.export_form(c, marker);
-    return NULL;
-  }
-  if (skip_body) c.record_macro_export();
-  return c._top_level_lisp(skip_body);
 }
 
 static List Compiler._top_level_decorator(Compiler c) {
@@ -189,6 +418,8 @@ static List Compiler._declaration_form(Compiler c, int skip_body) {
     int body = c.peek(0) == <"{"> || c._at_function_arrow();
     c.finish_collected_declaration(decl, meta, native);
     c._record_meta_hash(decl, first, body);
+    if (meta && !native && body)
+      c.install_collected_meta_function(decl, meta);
     return NULL;
   }
   if (native && !decl.type_from_ast().is_function())
@@ -350,7 +581,7 @@ List Compiler.parse_import_declaration(Compiler c) {
   c.collect_package(name, start);
   c.register_package_alias(name, alias, start);
   List members = c.take_word("with") ? c._import_members(name) : NULL;
-  c.import_package_macros(name, start);
+  c.install_compile_time_effects(c.package_effects[name]);
   c.expect(<;>);
   if (c.shallow)
     c.sym.set(
@@ -1992,7 +2223,7 @@ static List Compiler._install_declarator(
   if (binding && !exact) c._bind_identity(context, binding, declaration);
   if (binding)
     c._method_facts(binding, method, self_signature, preserved_self);
-  if (binding && method && !declared_type.is_static()) {
+  if (binding && method && c.token && !declared_type.is_static()) {
     String path = home_portable_path(Path.absolute(c.filename));
     String owner = c.package_spelling(method.car());
     c.sym.set(
@@ -3017,6 +3248,7 @@ static List Compiler._bind_parameters(Compiler c, List values) {
    body for the full parse. */
 static List Compiler._collected_function(
   Compiler c, List declaration, Var body) {
+  c.record_inline_function(declaration);
   match (declaration)
     case %(declare ?type (bindings (bind ?binding ?))): {
       String name = binding_identity_spelling(binding);
@@ -3345,6 +3577,19 @@ List Compiler.bind_callable_body(Compiler c, List syntax, Type return_type) {
 // constructed types
 
 static List Compiler._finish_type(Compiler c, List type) {
+  List base = type;
+  Array storage = [];
+  while (base.car() is <symbol> &&
+         (base.car().symbol().is_type_qualifier() ||
+          base.car().symbol().is_storage_class())) {
+    storage.push(base.car());
+    base = base.cdr();
+  }
+  if (base != type &&
+      (base.car() == <struct> || base.car() == <union> ||
+       base.car() == <enum>))
+    return c.sym.local_type(%(@{storage.list_free()} @{c._finish_type(base)}));
+  storage.free();
   Var whole = c._finish_type_spec(type);
   // Binding an already constructed aggregate can preserve its whole form.
   if (whole != type || type.car() == <struct> ||

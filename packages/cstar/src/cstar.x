@@ -13,10 +13,9 @@
 
 typedef struct Cstar *Cstar;
 
-#pragma private
 
 
-struct Cstar {
+static struct Cstar {
   int expected, done;
   String file;
   String conditions;

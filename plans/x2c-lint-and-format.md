@@ -485,10 +485,10 @@ imports (3,238 lines of Python). Parity on `src/` and `lib/` (and
 | return after `report_error` | 21 | 21 | 21 | - |
 | shape-check diagnostics | 43 | 43 | 43 | - |
 | validator diagnostics | 4 | 4 | 4 | - |
-| recursive validator | 19 | 14 | 14 | 5 compile-time `meta` functions in `autodiff.xmacro`, which have no definition rows |
+| recursive validator | 19 | 14 | 14 | 5 compile-time `meta` functions in `autodiff-macros.x`, which have no definition rows |
 | validation framework | 4 | 4 | 4 | - |
 | static match capture | 1 | 1 | 1 | - |
-| silent shape guard | 336 | 367 | 334 | 2 in `autodiff.xmacro` meta functions; 33 new in `lib/lisp.x` functions the regex never found |
+| silent shape guard | 336 | 367 | 334 | 2 in `autodiff-macros.x` meta functions; 33 new in `lib/lisp.x` functions the regex never found |
 | return after raise | 0 | 1 | 0 | the old reader looked for `<cause>` and found no shared causes; the rule now reads the atoms and skips a raise that is a braceless body |
 | struct copy | 188 | 188 | 185 | 3 are the first function of a file, which the regex started after the includes |
 | manual bookkeeping | 9 | 9 | 9 | - |

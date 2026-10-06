@@ -37,13 +37,12 @@ typedef struct ReplCompletion {
   List candidates;
 } ReplCompletion;
 
-#pragma private
 #include "parse.x"
 #include "diagnostics.x"
 #include "lisp.x"
 #include "scope.x"
 #include "meta.x"
-$(import "refusal-errors.xmacro")
+#include "refusal-errors.x"
 #include <errno.h>
 #include <signal.h>
 #include <stdio.h>
@@ -110,7 +109,7 @@ List ReplSession.inspect(ReplSession session, String name) {
    with its own text and restores on every exit. The caller restores
    `braces` in its own `defer`, where the region check sees the scratch
    Array it installs put back. */
-struct _ParserInput {
+static struct _ParserInput {
   Tokenizer tokenizer;
   Token token, boundary, directives;
   String text;

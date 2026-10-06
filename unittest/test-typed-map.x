@@ -3,7 +3,7 @@
 #include <limits.h>
 #include "typed-map.x"
 #include "test-support.x"
-$(import "test-macros.xmacro")
+#include "test-macros.x"
 
 /* Mirrors x2c_hash_word as used by lib/typed-map.x. The collision tests below
    choose keys by bucket, so the two must agree. */

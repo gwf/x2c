@@ -706,7 +706,7 @@ static void filtered_catch_replacement_releases_previous_captures(void) {
 }
 
 
-$(import "test-macros.xmacro")
+#include "test-macros.x"
 
 void exception_suite(void) {
   $test.run(exception_try_cleanup_on_return);

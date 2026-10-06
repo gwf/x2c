@@ -270,7 +270,7 @@ Verification: `make build`, then diff the generated C under `builds/0/src` and
 ## Phase 7 - arrows and percent literals in src, lib, tools, unittest (landed)
 
 Converted 59 arrows - `lib/var.x` 22, `lib/iter.x` 5, `lib/lisp.x` 1,
-`lib/map-generics.xmacro` 2, `src/expressions.x` 3, `src/transform.x` 5,
+`lib/map-generics.x` 2, `src/expressions.x` 3, `src/transform.x` 5,
 `tools/x2c-graph` 4, `unittest/test-logger.x` 11, `test-pool.x` 5,
 `test-iter.x` 1 - all byte-identical in the generated C, and 13 percent sites.
 
@@ -288,7 +288,7 @@ where `%""` emits the null String directly, so that one is not a spelling
 change.
 
 The original scope follows. 76 arrows after exclusions: `lib/var.x` 22, `lib/iter.x` 5, `lib/lisp.x` 1,
-`lib/map-generics.xmacro` 2 (the only macro template with a hole-typed
+`lib/map-generics.x` 2 (the only macro template with a hole-typed
 receiver, verified through its instantiation), `src/expressions.x` and
 `src/transform.x` 8, `tools/x2c-graph` 5, `unittest` 17. About 40 percent
 sites, the better half of which is under-use: eight `%"$buffer"` conversions

@@ -1132,7 +1132,7 @@ static void plan_keys_refuse_only_unmatchable_inputs(void) {
 }
 
 
-$(import "test-macros.xmacro")
+#include "test-macros.x"
 
 void match_plan_suite(void) {
   $test.run(plan_literals_and_quotes);

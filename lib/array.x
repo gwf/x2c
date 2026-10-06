@@ -20,9 +20,9 @@
 
 #pragma once
 
-$(import "error-macros.xmacro")
-$(import "array-generics.xmacro")
-$(import "private-keywords.xmacro")
+#include "error-macros.x"
+#include "array-generics.x"
+#include "private-keywords.x"
 #include "common.x"
 
 /** Holds a mutable identity-bearing sequence of non-`void` `Var` elements.
@@ -36,7 +36,6 @@ typedef Block Array;
 
 protocol Cleanup(Array);
 
-#pragma private
 #include <string.h>
 #include <stdarg.h>
 #include <stdlib.h>
@@ -278,7 +277,7 @@ Self Array.sort_with(Self array, Func compare) {
   return array;
 }
 
-struct ArraySortEntry {
+static struct ArraySortEntry {
   Var key, value;
   size_t index;
 };

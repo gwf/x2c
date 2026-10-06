@@ -10,7 +10,6 @@
 #pragma once
 #include "compiler.x"
 
-#pragma private
 #include "meta-group.x"
 #include "datum.x"
 #include <errno.h>
@@ -25,7 +24,7 @@
 
 // diagnostics
 
-macro Stmt $report.macro.helper_timeout(
+static macro Stmt $report.macro.helper_timeout(
   Expr $c, Expr $site, Expr $limit, Expr $name) {
   $c.report_error(
     <macro>,
@@ -33,7 +32,7 @@ macro Stmt $report.macro.helper_timeout(
     $site, %("function: ${$name}" "set X2C_META_TIMEOUT to a larger limit in seconds, or 0 for none"));
 }
 
-macro Stmt $report.macro.helper_stopped(
+static macro Stmt $report.macro.helper_stopped(
   Expr $c, Expr $site, Expr $name, Expr $reason) {
   $c.report_error(
     <macro>,
@@ -63,7 +62,7 @@ static Buffer helper_input = NULL;
    failures are reported at `site`. Starting the helper, sending the request
    and receiving its reply take at most `limit` seconds, or any time when
    `deadline` is 0. */
-typedef struct Call {
+static typedef struct Call {
   Compiler compiler, String name, Token site, int table;
   double limit, deadline;
 } Call;

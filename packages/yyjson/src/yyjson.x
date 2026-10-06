@@ -8,13 +8,13 @@
     place the distinctions above are lost.
 
     This unit is the `yyjson` package entry: `import "yyjson"` reaches every
-    name above `#pragma private` as `yyjson__*`. The vendored
+    nonstatic name as `yyjson__*`. The vendored
     `yyjson-0.12.h` stays public because the options methods take yyjson's
     own flag types.
  */
 
 #include "yyjson-0.12.h"
-$(import "cleanup.xmacro")
+#include "cleanup.x"
 
 typedef enum Json {
   JSON_NAMESPACE
@@ -65,11 +65,10 @@ protocol Iter(JsonObject);
 
 $cleanup.by(JsonDocument, free);
 
-#pragma private
 
 #include "meta.x"
 
-$(import "json-api.xmacro")
+#include "json-api.x"
 
 #include <limits.h>
 #include <stdint.h>
@@ -78,26 +77,26 @@ $(import "json-api.xmacro")
 
 #define JSON_MAX_DEPTH 512
 
-struct JsonDocument {
+static struct JsonDocument {
   yyjson_doc *native;
 };
 
-struct JsonValue {
+static struct JsonValue {
   JsonDocument document;
   yyjson_val *native;
 };
 
-struct JsonArray {
+static struct JsonArray {
   JsonDocument document;
   yyjson_val *native;
 };
 
-struct JsonObject {
+static struct JsonObject {
   JsonDocument document;
   yyjson_val *native;
 };
 
-typedef struct JsonObjectCursor {
+static typedef struct JsonObjectCursor {
   JsonObject object;
   yyjson_obj_iter iterator;
 } *JsonObjectCursor;
@@ -197,7 +196,7 @@ static String _json_string(
 /* Defines `$reader`, which converts a native tree to Map and Array values
    through the `$prefix` API family and names `$operation` in its errors.
    The family's node and iterator types follow. */
-macro Unit $json.reader(
+static macro Unit $json.reader(
   Name $reader, Literal $prefix, Literal $operation,
   Type $node, Type $array_iter, Type $object_iter) {
   static Var $reader($node *value, unsigned depth) {

@@ -40,12 +40,11 @@ CYAN = "\033[36m"
 BOLD = "\033[1m"
 RESET = "\033[0m"
 LISP_PATTERNS = ("src/*.xlisp", "lib/*.xlisp", "etc/*.xlisp")
-MACRO_PATTERNS = ("src/*.xmacro", "lib/*.xmacro", "etc/*.xmacro")
 SUMMARY_GROUPS = {
     "src": "src/*.x",
     "lib": "lib/*.x",
     "xlisp": "**/*.xlisp",
-    "xmacro": "**/*.xmacro",
+    "etc": "etc/*.x",
 }
 
 
@@ -57,7 +56,7 @@ class Fatal(Exception):
 SOURCE_GROUPS = [
     ("compiler", "src/*.x", "module"),
     ("runtime", "lib/*.x", "module"),
-    ("macros", MACRO_PATTERNS, "macro file"),
+    ("support", "etc/*.x", "module"),
     ("lisp", LISP_PATTERNS, "Lisp file"),
     ("tests", "unittest/test-*.x", "suite"),
     ("examples", "examples/**/*.x", "example"),
@@ -336,7 +335,7 @@ def render_summary(record: dict, color: bool) -> str:
         f"{_paint('Source        ', CYAN, color)}  Code  Comments",
     ]
     for name, title in (("src", "src/"), ("lib", "lib/"),
-                        ("xlisp", "X Lisp"), ("xmacro", "X macros")):
+                        ("xlisp", "X Lisp"), ("etc", "etc/")):
         label = _paint(title.ljust(14), CYAN, color)
         lines.append(
             f"{label}{source[name]['code']:8,}{source[name]['comments']:10,}"

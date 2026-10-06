@@ -2,7 +2,7 @@
 
 #include "regex.x"
 #include "test-support.x"
-$(import "test-macros.xmacro")
+#include "test-macros.x"
 
 static void regex_matches_literals_and_sets(void) {
   $test.scoped();

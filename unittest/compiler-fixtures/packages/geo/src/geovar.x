@@ -4,7 +4,6 @@
 
 double roundtrip_norm(double x, double y);
 
-#pragma private
 
 double roundtrip_norm(double x, double y) {
   Vec v = Vec.new(x, y);

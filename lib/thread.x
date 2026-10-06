@@ -26,7 +26,6 @@ typedef Var (*ThreadFn)(const void *input, size_t input_size);
 */
 typedef struct Thread *Thread;
 
-#pragma private
 
 #include "context.x"
 #include "dispatch.x"
@@ -47,13 +46,13 @@ typedef struct Thread *Thread;
 #include <stdlib.h>
 #include <string.h>
 
-enum ThreadState {
+static enum ThreadState {
   THREAD_RUNNING,
   THREAD_JOINING,
   THREAD_JOINED
 };
 
-struct Thread {
+static struct Thread {
   pthread_t native, ThreadFn function, size_t input_size, Scope result_scope;
   Pool result_pool;
   Var result;

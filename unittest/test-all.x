@@ -59,7 +59,7 @@ void machine_suite(void);
 void match_plan_suite(void);
 void match_cache_suite(void);
 
-$(import "test-macros.xmacro")
+#include "test-macros.x"
 
 int main(int argc, char **argv) {
   TestHarness_begin();

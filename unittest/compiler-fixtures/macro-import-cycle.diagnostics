@@ -1,5 +1,5 @@
-unittest/compiler-fixtures/macro-import-cycle-b.xmacro:1:1: macro: compile-time import cycle
-  $(import "macro-import-cycle-a.xmacro")
+unittest/compiler-fixtures/macro-import-cycle.x:3:1: macro: compile-time import cycle
+  $(import "macro-import-cycle-a.xlisp")
   ^^
-  note: import: unittest/compiler-fixtures/macro-import-cycle-a.xmacro from: unittest/compiler-fixtures/macro-import-cycle-a.xmacro from: unittest/compiler-fixtures/macro-import-cycle-b.xmacro
+  note: import: unittest/compiler-fixtures/macro-import-cycle-a.xlisp from: unittest/compiler-fixtures/macro-import-cycle-a.xlisp from: unittest/compiler-fixtures/macro-import-cycle-b.xlisp
 

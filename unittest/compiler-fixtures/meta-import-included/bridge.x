@@ -1,1 +1,1 @@
-export $(import "defs.xmacro")
+#include "defs.x"

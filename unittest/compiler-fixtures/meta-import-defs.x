@@ -1,0 +1,78 @@
+#pragma once
+
+/*  meta-import-defs.x -- macros whose implementation is x2c
+
+    A `meta` declaration in a macro import installs its compile-time form in
+    every consuming unit's macro session, so the macro bodies below call x2c
+    rather than Lisp. The runtime form is separate: a unit emits only the
+    definitions it reaches, and the storage class written here says what it
+    emits. `static` gives that unit its own copy; public names the one copy
+    the program links, which the reaching unit's header exports. See
+    `plans/meta-functions.md`.
+*/
+
+#include "meta-import-nested.x"
+
+/* A dotted path spelled as one identifier. This is the string and list work
+   a shipped macro family writes in Lisp today. Public, and no unit calls it
+   directly, so it is emitted by the unit that reaches it through the two
+   below. */
+meta String mi_flatten(String path, String sep) =>
+  sep.join(path.split("."));
+
+/* Both spellings the macros below need. Each calls the function above, so
+   one meta function reaches another in the same import. */
+meta String mi_constant(String path) => mi_flatten(path, "_").upper();
+
+meta String mi_accessor(String path) =>
+  %"get_${mi_flatten(path, "_").lower()}";
+
+meta int mi_depth(String path) => path.split(".").len();
+
+/* A `foreach` over a `List`, which is the loop a macro body writes, and the
+   collection pass parses this body although it parses no other. The lowering
+   turns the loop into a session global of its own, and a unit installs the
+   definition once while collecting and once while parsing, the second time
+   from the lowering the first one cached, so the two columns `$probe.score`
+   prints disagree if a reused lowering is not the same program. */
+meta int mi_score(String path) {
+  int score = 0;
+  foreach (Var part, path.split(".")) score = score + String.len(part);
+  return score;
+}
+
+/* A value is compile-time state of each consuming unit, which starts from
+   the initializer. A unit that reaches it at run time also emits its own
+   runtime copy, as it does for the functions above. */
+meta static int mi_count = 0;
+
+meta int mi_next(void) {
+  mi_count += 1;
+  return mi_count;
+}
+
+/* Only `$probe.tag` calls this one, and a macro call is a compile-time use,
+   so no unit emits a runtime definition for it. */
+meta String mi_tag(String path) => %"<${path.replace(".", "/")}>";
+
+macro Expression $probe.constant(Expr $path) =>
+  $(x2c.literal.string (mi_constant (x2c.source.text $path)));
+
+macro Expression $probe.accessor(Expr $path) =>
+  $(x2c.literal.string (mi_accessor (x2c.source.text $path)));
+
+macro Expression $probe.depth(Expr $path) =>
+  $(x2c.literal.int (mi_depth (x2c.source.text $path)));
+
+macro Expression $probe.score(Expr $path) =>
+  $(x2c.literal.int (mi_score (x2c.source.text $path)));
+
+macro Expression $probe.tag(Expr $path) =>
+  $(x2c.literal.string (mi_tag (x2c.source.text $path)));
+
+macro Expression $probe.next() => $mi_next();
+
+/* `mi_dashed` arrives through this file's own import, so the nested
+   definition has to reach the consuming unit too. */
+macro Expression $probe.dashed(Expr $path) =>
+  $(x2c.literal.string (mi_dashed (x2c.source.text $path)));

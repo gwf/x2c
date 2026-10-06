@@ -1,4 +1,3 @@
-#pragma private
 
 static int answer(void) { return NATIVE_LATE; }
 

@@ -7,7 +7,7 @@ import "libcurl" with CurlBatch, CurlEasy, CurlHeader, CurlLisp, CurlResponse,
 #include <stdio.h>
 #include <string.h>
 
-$(import "../../../unittest/test-macros.xmacro")
+#include "../../../unittest/test-macros.x"
 
 static String fixture_url;
 

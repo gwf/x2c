@@ -1,6 +1,6 @@
 #include "x2c.x"
-$(import "macro-import-literal-cache.xmacro")
-$(import "macro-import-literal-cache.xmacro")
+#include "macro-import-literal-cache-defs.x"
+#include "macro-import-literal-cache-defs.x"
 
 int main(void) {
   List other = %("untouched");

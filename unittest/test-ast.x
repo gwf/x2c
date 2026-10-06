@@ -2,7 +2,7 @@
 
 #include "test-support.x"
 #include "ast.x"
-$(import "test-macros.xmacro")
+#include "test-macros.x"
 
 static void ast_bindings_separate_identity_from_spelling(void) {
   List captured = binding_identity_new(17, "value");

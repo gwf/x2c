@@ -38,7 +38,6 @@ typedef struct ToolRun {
   ToolAction action, Job job, String start_error;
 } *ToolRun;
 
-#pragma private
 
 #include <ctype.h>
 #include <errno.h>
@@ -52,7 +51,7 @@ typedef struct ToolRun {
 
 // command reports
 
-macro Stmt $report.toolchain.tool_failed(Expr $phase, Expr $status) {
+static macro Stmt $report.toolchain.tool_failed(Expr $phase, Expr $status) {
   fprintf(
     stderr, "x2c: %s failed with status %d\n", $phase, $status);
 }

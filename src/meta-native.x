@@ -11,12 +11,11 @@
 */
 
 #pragma once
-$(import "../lib/private-keywords.xmacro")
+#include "../lib/private-keywords.x"
 #include "compiler.x"
 
-#pragma private
-$(import "../src/grammar.xmacro")
-$(import "../etc/lisp-bindings.xlisp")
+#include "grammar.x"
+static $(import "../etc/lisp-bindings.xlisp")
 #include "macros.x"
 #include "meta-group.x"
 #include "meta-sdk.x"
@@ -29,7 +28,109 @@ $(import "../etc/lisp-bindings.xlisp")
 #include <stdlib.h>
 #include <string.h>
 
-$(import "../src/meta-native-reports.xmacro")
+
+/* meta-native diagnostics. */
+
+static macro Stmt $report.macro.function_install(
+  Expr $c, Expr $site, Expr $cause) =>
+  $c.report_error(
+    <macro>,
+    "this meta function could not be installed",
+    $site, %("reason: ${$cause.repr()}"));
+
+static macro Stmt $report.parse.meta_decl(Expr $c, Expr $site) =>
+  $c.report_error(
+    <parse>,
+    "meta requires a function or one initialized static value",
+    $site, NULL);
+
+static macro Stmt $report.parse.meta_storage(Expr $c, Expr $site, Expr $name) =>
+  $c.report_error(
+    <parse>,
+    "a meta value must have file-static storage",
+    $site, %("declaration: '${$name}'"));
+
+static macro Stmt $report.macro.call_depth(Expr $c, Expr $site) =>
+  $c.report_error(
+    <macro>,
+    "explicit meta call was stopped",
+    $site, %("reason: its compile-time form nested too deep"));
+
+static macro Stmt $report.macro.call_deferred(Expr $c, Expr $site) =>
+  $c.report_error(
+    <macro>,
+    "this meta call is left for the translation",
+    $site, NULL);
+
+static macro Stmt $report.macro.call_target(Expr $c, Expr $site) =>
+  $c.report_error(
+    <macro>,
+    "explicit meta call cannot be resolved",
+    $site, %("only a call to a meta function runs at compile time"));
+
+static macro Stmt $report.macro.call_binding(Expr $c, Expr $site, Expr $name) =>
+  $c.report_error(
+    <macro>,
+    "explicit meta call cannot be resolved",
+    $site, %("no binding for ${$name}"));
+
+static macro Stmt $report.parse.meta_name(Expr $c, Expr $site) =>
+  $c.report_error(
+    <parse>,
+    "native meta function requires one direct name",
+    $site, NULL);
+
+static macro Stmt $report.type.meta_signature(Expr $c, Expr $site, Expr $n) =>
+  $c.report_error(
+    <type>,
+    "native meta function declaration does not match its target",
+    $site, %("name: ${$n.name}" "signature: ${$n.signature.repr()}"));
+
+static macro Stmt $report.type.meta_lifetime(
+  Expr $c, Expr $site, Expr $name, Expr $signature) =>
+  $c.report_error(
+    <type>,
+    "unproved native meta lifetime",
+    $site, %("name: ${$name}" "signature: ${$signature.repr()}"
+    "it might return or keep its argument; ownership cannot be inferred"));
+
+static macro Stmt $report.driver.module_platform(
+  Expr $c, Expr $site, Expr $name, Expr $module) =>
+  $c.report_error(
+    <driver>,
+    "native modules are not supported on this platform",
+    $site, %("package: ${$name}" "module: ${$module}"));
+
+static macro Stmt $report.driver.module_compiler(
+  Expr $c, Expr $site, Expr $name, Expr $module) =>
+  $c.report_error(
+    <driver>,
+    %"package '${$name}' was built by another compiler; rebuild it",
+    $site, %("module: ${$module}"));
+
+static macro Stmt $report.macro.outside_compilation(Expr $name) =>
+  MetaContext.reject(%"${$name} used outside compilation", NULL);
+
+static macro Stmt $report.native.module_platform() =>
+  driver_error("native modules are not supported on this platform");
+
+static macro Stmt $report.native.module_invalid(Expr $path) =>
+  driver_error(%"not an x2c native module: ${$path}");
+
+static macro Stmt $report.native.module_compiler(Expr $path) =>
+  driver_error(
+    %"native module '${$path}' was built by another compiler; rebuild it");
+
+static macro Stmt $report.native.compiler_read(Expr $path) =>
+  driver_error(
+    %"cannot read the running compiler to check native module '${$path}'");
+
+static macro Stmt $report.native.module_read(Expr $path, Expr $cause) =>
+  driver_error(%"cannot read native module '${$path}': ${$cause}");
+
+static macro Stmt $report.native.module_load(Expr $path, Expr $cause) =>
+  driver_error(%"cannot load native module '${$path}': ${$cause}");
+
 
 /* meta functions
 
@@ -64,24 +165,27 @@ void Compiler.install_meta_function(Compiler c, List fn, Token marker) {
 
 /** Installs the stub of the bodied `meta` definition `declaration` whose
     body collection skips, so a file-scope constant after it can call it in
-    the project's helper. The full parse installs it again. A name the
-    session already binds, or the compiler's linked copy answers, keeps
-    that binding, and a group that stages in process waits for the full
-    parse. */
+    the project's helper. The full parse installs it again. The
+    compiler's linked copy answers while its source hashes agree; otherwise
+    the definition replaces an earlier binding with a helper stub. A group
+    that stages in process waits for the full parse. */
 void Compiler.install_collected_meta_function(
   Compiler c, List declaration, Token marker) {
+  if (c.source_private < 0) return;
   if (c.macro_holes || c.groups_meta() || macro_library_filling()) return;
   String name = c._native_meta_name(declaration, marker);
-  Var bound;
-  if (c.shares_meta_definition(name) || name in _linked_module()) return;
+  if (c.shares_meta_definition(name)) return;
   c.ensure_macro_lisp();
-  if (c.macro_lisp.try_get(name, bound)) return;
+  Map linked = _linked_module();
+  if (name in linked && c._linked_copy(name, linked) &&
+      c._bind_linked_target(name, c.func_signature(declaration.type_from_ast())))
+    return;
   c._install_stub(
     name, declaration.type_from_ast().canonicalize(), NULL, marker);
 }
 
-/* A session refuses to replace a name an ancestor binds, which reaches the
-   developer here, at the marker. */
+/* A host binding remains in this session; installation failures report at
+   the declaration marker. */
 static void Compiler._install_stub(
   Compiler c, String name, Type type, String provider, Token marker) {
   String context = %"$name\n${provider ? provider : ""}";
@@ -321,21 +425,27 @@ static Var Compiler._meta_function(Compiler c, String name, Token site) {
     The provider owns both its native body and its compile-time state. */
 void Compiler.record_project_meta_effect(
   Compiler c, List declaration, Token marker) {
+  if (c.source_private < 0) return;
   Type type = declaration.type_from_ast().canonicalize();
-  if (type.is_static() || c.import_src) return;
+  if (type.is_static()) return;
   String path = home_portable_path(absolute_path(c.filename));
   String name = c._native_meta_name(declaration, marker);
+  if (%(function $name) in c.sym.file_statics()) return;
   c.sym.set(
     %("source-node" (declaration $path ${marker.pos})),
-    %(project-meta $name ${c.func_signature(type)} $path));
+    %(project-meta $name ${c.func_signature(type)} $path ${c.meta_hashes}));
 }
 
 /** Installs an included meta function's evaluator advertisement. */
 void Compiler.install_project_meta_effect(Compiler c, List row) {
-  match (row) case %(project-meta ?name ?signature ?provider): {
-    c.project_meta[name] = %($signature $provider);
+  match (row) case %(project-meta ?name ?signature ?provider ?hashes): {
+    c.project_meta[name] = %($signature $provider $hashes);
     c.native_meta.del(name);
     c.meta_group_bound.del(%"<unbound $name>");
+    if (!c.meta_build) {
+      c.ensure_macro_lisp();
+      c._bind_project_meta(name, 1);
+    }
   }
 }
 
@@ -344,11 +454,45 @@ void Compiler.install_project_meta_effect(Compiler c, List row) {
 int Compiler.bind_project_meta(Compiler c, String name) {
   if (!c.project_meta.len())
     c.install_native_meta_effects(c.sym.unit_symbols());
+  return c._bind_project_meta(name, 0);
+}
+
+/* An include installs its provider at that position. Later lookups keep
+   any Lisp definition the unit installs after the include. */
+static int Compiler._bind_project_meta(
+  Compiler c, String name, int install) {
   Var target;
   if (!c.project_meta.try_get(name, target)) return 0;
   if (c.meta_build) return 0;
-  Var (signature, provider) = target;
+  Var bound;
+  if (!install && c.macro_lisp.try_get(name, bound)) return 1;
+  Var (signature, provider, hashes) = target;
+  if (c._project_linked_copy(name, provider, hashes) &&
+      c._bind_linked_target(name, signature)) return 1;
   c._install_stub(name, signature, provider, NULL);
+  return 1;
+}
+
+/* Included providers keep their own definition hashes, including private
+   callees. A linked copy answers only while those source texts agree. */
+static int Compiler._project_linked_copy(
+  Compiler c, String name, String provider, Map hashes) {
+  Map linked = _linked_module();
+  if (!(name in linked)) return 0;
+  $let(c.filename, home_absolute_path(provider))
+  $let(c.meta_hashes, hashes) $let(c.meta_calls, {})
+    return c._linked_copy(name, linked);
+}
+
+/* Shipped meta definitions already have Func adapters in their linked
+   inventory, separately from the ordinary native prototype registry. */
+static int Compiler._bind_linked_target(
+  Compiler c, String name, List signature) {
+  Var function = _linked_module()[name];
+  if (!c.native_meta_accepts(function, signature)) return 0;
+  Var bound;
+  if (!c.macro_lisp.try_get(name, bound) || !bound.equal(function))
+    c.macro_lisp.set_global(name, function);
   return 1;
 }
 
@@ -363,11 +507,13 @@ int Compiler.bind_project_meta(Compiler c, String name) {
     without repeating the marker in every translation unit. */
 void Compiler.record_native_meta_effect(
   Compiler c, List declaration, Token marker) {
+  if (c.source_private < 0) return;
   if (!declaration.type_from_ast().is_function()) return;
   String path = home_portable_path(absolute_path(c.filename));
   Type type = declaration.type_from_ast().canonicalize();
   if (type.is_static()) return;
   String name = c._native_meta_name(declaration, marker);
+  if (%(function $name) in c.sym.file_statics()) return;
   c.sym.set(
     %("source-node" (declaration $path ${marker.pos})),
     %(native-meta $name ${c.func_signature(type)}));
@@ -436,7 +582,7 @@ void Compiler.install_native_meta_function(
 /* One declared native function while it binds. An iterator operation's
    `target` is `NAME_into`, and `suppliers` lists the selected modules that
    define the target. */
-typedef struct NativeBinding {
+static typedef struct NativeBinding {
   Compiler c, String name, target, List signature, suppliers, Token marker;
   int iterator;
 } NativeBinding;
@@ -744,6 +890,7 @@ static Map linked_hashes = NULL;
     definition is staged as user code.
 */
 int Compiler.bind_linked_meta(Compiler c, List fn, Type type) {
+  if (c.meta_build) return 0;
   String name = NULL;
   match (fn)
     case %(function ? (bind (binding ? ?(String own)) *) ?): name = own;
@@ -755,9 +902,9 @@ int Compiler.bind_linked_meta(Compiler c, List fn, Type type) {
   if (!c.collect_protocols) c.run_declaration_effects();
   c.ensure_macro_lisp();
   if (!c.native_meta_accepts(function, c.func_signature(type))) return 0;
-  /* The shared session binds the copy once for every unit that imports the
-     same file. */
-  if (!c.macro_lisp.try_get(name, bound) || bound.equal(%()))
+  /* Shared preload keeps private helpers in the native code alone. */
+  if (!(macro_library_filling() && fn.cadr().type().is_static()) &&
+      (!c.macro_lisp.try_get(name, bound) || !bound.equal(function)))
     c.macro_lisp.set_global(name, function);
   if (c.meta_reaches_compile_time(fn)) c.record_comptime(name);
   return 1;
@@ -826,7 +973,7 @@ static Scope native_module_scope = NULL;
 /* The compiler supplies the operations `lib/meta.x` declares with a bodyless
    `meta` prototype, the `x2c_` targets, as the native module
    `compiler_supplier`, which every request selects first. */
-macro Expression $compiler.targets() => $(lisp.native.targets
+static macro Expression $compiler.targets() => $(lisp.native.targets
   (filter (lambda (row) (not (eq? (String.startswith (car row) "x2c_") 0)))
     (_x2c.native-meta.targets)));
 

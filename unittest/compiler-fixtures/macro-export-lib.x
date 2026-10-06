@@ -1,6 +1,6 @@
 #include "x2c.x"
-export $(import "macro-export.xmacro")
-export $(import "macro-export.xlisp")
-$(import "macro-export-hidden.xmacro")
+#include "macro-export.x"
+$(import "macro-export.xlisp")
+#include "macro-export-hidden.x"
 
-int lib_value = $m.value() + $p.value();
+int lib_value = $m.value() + 1;

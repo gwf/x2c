@@ -71,19 +71,19 @@ succeed, with byte-identical generated C/H.
 
 The optional `make proof-raw-symbols` compared 651 of 652 required sources.
 Its one failure was `unittest/test-diagnostics.x`: the CPP invocation cannot
-open `grammar.xmacro` because it looks under `unittest/`; the raw invocation
+open `grammar.x` because it looks under `unittest/`; the raw invocation
 succeeds. Running that source alone reproduces the same CPP/raw result. The
 source and import owner are outside this prototype move, so the sweep was
 still red at that checkpoint. No exclusions or sweep flags changed.
 
 That failure also reproduces on an unmodified `89da87d0` archive built with
 `make build-safe`: focused CPP translation exits 1 with path
-`unittest/grammar.xmacro`, while raw translation exits 0. The import is in
+`unittest/grammar.x`, while raw translation exits 0. The import is in
 `src/literals.x`, reached through the included compiler source.
 `_canonical_path` resolves a relative macro import against the
 current compiler filename or import stack. The CPP-flattened input therefore
 uses the `unittest/` unit directory. Changing that one import to the canonical
-`../src/grammar.xmacro` spelling already used by the other compiler clients
+`../src/grammar.x` spelling already used by the other compiler clients
 fixes the focused CPP translation. In the disposable baseline archive, raw
 and CPP then produced byte-identical C/H, and the raw C/H did not change from
 before the path correction. On the authored tree, the same focused parity

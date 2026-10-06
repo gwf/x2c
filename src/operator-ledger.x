@@ -1,7 +1,59 @@
 /*  operator-ledger.x -- compiler lookups from one binary operator ledger */
 
 #include "compiler.x"
-$(import "../src/operator-ledger.xmacro")
+
+/*  operator-ledger.x -- binary operator facts and case projections
+
+    Each row gives the operator, precedence, compound assignment, protocol
+    member, and whether that member derives a comparison. Zero denotes an
+    absent compound assignment or member. Only operator-ledger.x imports
+    this file, so consumers of the lookup declarations do not load it.
+*/
+
+meta static List _operator_rows(void) => %(
+  (<||>       1 0        0         0)
+  (<&&>       2 0        0         0)
+  (<|>        3 <|=>     0         0)
+  (<^>        4 <^=>     0         0)
+  (<&>        5 <&=>     0         0)
+  (<"==">     6 0        <equal>   0)
+  (<!=>       6 0        <equal>   1)
+  (<"===">    6 0        0         0)
+  (<!==>      6 0        0         0)
+  (<"<">      7 0        <compare> 1)
+  (<"<=">     7 0        <compare> 1)
+  (<">">      7 0        <compare> 1)
+  (<">=">     7 0        <compare> 1)
+  (<in>       7 0        0         0)
+  (<"<<">     8 <"<<=">  0         0)
+  (<">>">     8 <">>=">  0         0)
+  (<+>        9 <+=>     <add>     0)
+  (<->        9 <-=>     <sub>     0)
+  (<*>       10 <*=>     <mul>     0)
+  (</>       10 </=>     <div>     0)
+  (<%>       10 <%=>     <mod>     0)
+  (<@>       10 <@=>     <matmul>  0)
+);
+
+/* Select key and value columns; -1 includes both direct and derived rows. */
+meta static List _operator_cases(int key, int value, int derived) {
+  Array cases = [];
+  foreach (List row, _operator_rows()) {
+    if (!row[key].truth() || !row[value].truth()) continue;
+    if (derived >= 0 && row[4] != derived) continue;
+    Symbol label = row[key];
+    Var result = row[value];
+    cases.push($!{ case $label: return $result; });
+  }
+  return cases.list_free();
+}
+
+static macro Stmt $operator.precedence() { $_operator_cases(0, 1, -1)... }
+static macro Stmt $operator.binary() { $_operator_cases(2, 0, -1)... }
+static macro Stmt $operator.compound() { $_operator_cases(0, 2, -1)... }
+static macro Stmt $operator.direct() { $_operator_cases(0, 3, 0)... }
+static macro Stmt $operator.derived() { $_operator_cases(0, 3, 1)... }
+
 
 /** Returns a binary operator's precedence level, or zero for any other
     `Symbol`. Levels run from 1 for `||` to 10 for the multiplicative

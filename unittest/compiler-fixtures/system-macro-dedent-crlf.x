@@ -1,4 +1,4 @@
-$(import "system-macros.xmacro")
+#include "system-macros.x"
 #include <stdio.h>
 
 int main(void) {

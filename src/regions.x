@@ -28,10 +28,65 @@
 #pragma once
 #include "compiler.x"
 
-#pragma private
 #include "meta.x"
-$(import "../src/grammar.xmacro")
-$(import "../src/region-reports.xmacro")
+#include "grammar.x"
+
+/* Deferred region findings. The walk owns collection and severity. */
+
+static macro Stmt $report.region.bad_free(Expr $w, Expr $op, Expr $subject) =>
+  $w.warn(
+    <bad-free>, $w.origin,
+    %"${$op} is given ${$subject}, which no Scope allocator returned",
+    %("only Scope.malloc, calloc, memdup, and realloc storage can be"
+      "freed or reallocated"));
+
+static macro Stmt $report.region.read_ended(Expr $w, Expr $name) =>
+  $w.warn(
+    <region>, $w.origin,
+    %"'${$name}' is read after its owning region ended", NULL);
+
+static macro Stmt $report.region.after_free(Expr $w, Expr $name, Expr $ended) =>
+  $w.warn(
+    <after-free>, $w.origin, %"'${$name}' is used after ${$ended}", NULL);
+
+static macro Stmt $report.region.use_ended(
+  Expr $f, Expr $subject, Expr $region) =>
+  (*$f.w).warn(
+    <region>, $f.w.origin,
+    %"${$subject} is used after the region that allocated it ended",
+    (*$f.w).opened($region));
+
+static macro Stmt $report.region.local_escape(
+  Expr $f, Expr $subject, Expr $exit) {
+  String message =
+    %"${$subject} can outlive the local storage it points into when ${$exit}";
+  (*$f.w).warn(
+    <region>, $f.w.origin, message,
+    %("local storage ends when the function returns"));
+}
+
+static macro Stmt $report.region.escape(
+  Expr $f, Expr $subject, Expr $exit, Expr $region) =>
+  (*$f.w).warn(
+    <region>, $f.w.origin,
+    %"${$subject} can outlive the region it was allocated in when ${$exit}",
+    (*$f.w).opened($region));
+
+static macro Expression $region.reason.returned() => "returned";
+static macro Expression $region.reason.static_store() => "stored into a static";
+static macro Expression $region.reason.local() =>
+  "assigned to a local declared outside the region";
+static macro Expression $region.reason.pointer() =>
+  "stored through an unknown pointer";
+static macro Expression $region.reason.parameter() => "stored through a parameter";
+static macro Expression $region.reason.other() =>
+  "stored into an object of another region";
+static macro Expression $region.reason.outer() =>
+  "stored into an object of an outer region";
+
+static macro Expression $region.reason.moved() => "Scope.realloc moved it";
+static macro Expression $region.reason.freed() => "it was freed";
+
 
 #include "ast.x"
 #include "stage.x"
@@ -44,7 +99,7 @@ $(import "../src/region-reports.xmacro")
    storage of the function's locals and parameters. `depth` is the
    block depth it belongs to, `origin` the statement that opened it, `slot`
    the Scope local a pushed slot names, and `outer` the next open region. */
-typedef struct Region {
+static typedef struct Region {
   Symbol kind;
   int depth, origin, closed;
   struct Fact *slot;
@@ -59,7 +114,7 @@ typedef struct Region {
    own storage forms, and for a pointer taken
    with `&`, the local and place it names. `born` records a scoped or pooled
    result, including when the allocation has no local region. */
-typedef struct Fact {
+static typedef struct Fact {
   int depth, origin, param, born;
   Symbol dead, ending;
   struct Region *region, *other, *owner;
@@ -69,7 +124,7 @@ typedef struct Fact {
 
 static Var Fact.var(Fact fact) => Var.new(<p48>, fact);
 static Fact Var.fact(Var value) => value.pointer();
-protocol Var(Fact) as void *;
+static protocol Var(Fact) as void *;
 
 /* The walk state for one unit. `facts` maps a binding to its Fact, `open`
    is the innermost open region, `frame` is the region of the function's
@@ -81,7 +136,7 @@ protocol Var(Fact) as void *;
    summary, `stale` marks the positions to walk again, and `current` is the
    position being walked. `meta` is set while a `meta` definition is
    walked. */
-typedef struct Walk {
+static typedef struct Walk {
   Compiler c;
   Map summaries, facts, sinks, restored, effects, readers;
   Array warnings, pending, freed, stale;
@@ -805,7 +860,7 @@ static void Walk.declare(Walk &w, Var specifiers, List bindings) {
 
 /* One value on its way to a sink: what the walk knows about it as `fact`,
    and the local it names as `named`. */
-typedef struct Flow {
+static typedef struct Flow {
   Walk *w;
   Var value;
   Type type;

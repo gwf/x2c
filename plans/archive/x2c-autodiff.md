@@ -61,15 +61,15 @@ compiler rebinds and retypes them; no binding IDs are forged.
 ### Placement and naming
 
 - `lib/autodiff.xlisp` holds the transformation (derivative rules,
-  statement rewriting, function construction). `lib/autodiff.xmacro`
+  statement rewriting, function construction). `lib/autodiff-macros.x`
   imports it and defines the macros. `lib/autodiff.x` holds the runtime
   tape. The macro namespace is `$ad.*`.
 - No new compiler surface, no new protocol, no new Var tag beyond the
   dual family's own tags.
 - Open decision for Gary: today `import` resolves only relative to the
   importing file, which is why every `lib/*.x` import of
-  `error-macros.xmacro` works and why a user program outside `lib/`
-  cannot name `autodiff.xmacro` without a path. Either (a) document an
+  `error-macros.x` works and why a user program outside `lib/`
+  cannot name `autodiff-macros.x` without a path. Either (a) document an
   explicit relative or absolute path in the book, or (b) let `import`
   fall back to the toolchain `lib/` directory when the relative path is
   absent. (b) is a small change in `src/macros.x` and a public semantics
@@ -195,7 +195,7 @@ expected diagnostic includes the name.
 
 ### Phase 1: dual family
 
-`$ad.dual` in `lib/autodiff.xmacro`, the primitive list, and a book
+`$ad.dual` in `lib/autodiff-macros.x`, the primitive list, and a book
 section under Compile-time macros or a new library module page. Unit test
 `unittest/test-autodiff.x` covering each operator against finite
 differences and `Dual2` second derivatives.
@@ -238,7 +238,7 @@ one function; a guide page describing when to use which; the module page.
 
 - `import` already resolves a bare file name against `${root}/lib/` when
   the relative path is absent (`_canonical_path` in `src/macros.x`), so
-  `$(import "autodiff.xmacro")` works from any unit and no compiler change
+  `$(import "autodiff-macros.x")` works from any unit and no compiler change
   was needed.
 - Phase 0 landed as `afd5785`: the macro diagnostic now appends
   `error: (unbound (name caddr))` style detail from the caught `Error`.
@@ -319,7 +319,7 @@ checkpointed Euler integrator.
 - **Reuse and deletion.** The transformation reuses `match-case`,
   quasiquote, the `x2c.expr.*` constructors, and the existing decorator
   and Unit-splice machinery. The dual family reuses protocol operator
-  rows and `Type`-hole generics exactly as `lib/list-generics.xmacro`
+  rows and `Type`-hole generics exactly as `lib/typed-list.x`
   does. The runtime tape reuses `Func`, `Scope`, and `protocol Var`.
   Nothing existing is deleted. New lasting mechanisms: one Lisp file, one
   xmacro, one runtime module, and the Phase 0 diagnostic route. Each is

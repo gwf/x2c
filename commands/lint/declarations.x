@@ -12,7 +12,6 @@
 #include <ctype.h>
 #include <string.h>
 
-#pragma private
 
 static const SymbolSet qualifier_words =
   %<<const volatile restrict register struct union enum>>
@@ -25,7 +24,7 @@ static int _under(String path, String name) =>
    Returns 0 for a macro invocation, whose declarations are generated, and
    for a `meta` declaration, which declares a compile-time operation. */
 static int _prototype_line(Compiler c, int start, int end):
-  struct Token *tokens = c.tokenizer.tokens
+  static struct Token *tokens = c.tokenizer.tokens
   while tokens[start].type == <space> || tokens[start].type == <comment>:
     start++
   if tokens[start].text == "meta" || tokens[start].text[0] == '$': return 0
@@ -78,7 +77,7 @@ static void _prototypes(Lint l, Compiler c, List ast):
    first code character, whether the code ends a statement, opens a
    continuation, or closes with `)`, and whether the line starts a control
    header. */
-typedef struct Lines:
+static typedef struct Lines:
   int count
   int *delta, *comment, *code, *ends, *opener, *closer, *control
   char *lead
@@ -376,7 +375,7 @@ static void _unused_statics(Lint l, Compiler c, List ast):
         if name in absent:
           if start < 0 || end <= start || end >= c.tokenizer.tokens.len():
             continue
-          struct Token *tokens = c.tokenizer.tokens
+          static struct Token *tokens = c.tokenizer.tokens
           int first = tokens[start].line, last = tokens[end - 1].line
           l.unused.push(%($name $display ${absent[name]} $line $first $last))
 

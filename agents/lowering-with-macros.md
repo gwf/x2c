@@ -32,7 +32,7 @@ checking remain with the transform owner.
 
 ## Recognition
 
-`src/grammar.xmacro` writes each form as its source. A `Catch` sequence hole
+`src/grammar.x` writes each form as its source. A `Catch` sequence hole
 holds a try's catch arms, each a pattern and a body.
 
 ```x2c

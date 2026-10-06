@@ -1,7 +1,7 @@
 /*  parenthesized.x -- grouping preserves arithmetic meaning. */
 
 #include "x2c.x"
-$(import "../src/cstar.xmacro")
+#include "../src/cstar-macros.x"
 
 $cstar.verify("fact(0i <= x && x <= 10i)",
               "fact(__return == (x + 1i) * 2i)")

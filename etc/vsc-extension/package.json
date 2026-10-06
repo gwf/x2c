@@ -53,9 +53,7 @@
           ".xh",
           ".x2c",
           ".x",
-          ".xmacro",
-          ".xp",
-          ".xpmacro"
+          ".xp"
         ],
         "configuration": "./language-configuration.json"
       },

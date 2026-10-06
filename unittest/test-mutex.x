@@ -47,7 +47,7 @@ static void mutex_system_lock_failed_acquisition(void) {
   EXPECT_INT_EQ(caught, 1);
 }
 
-$(import "test-macros.xmacro")
+#include "test-macros.x"
 
 void mutex_suite(void) {
   $test.run(mutex_system_lock_evaluation_and_transfer);

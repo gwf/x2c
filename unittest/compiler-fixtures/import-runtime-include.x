@@ -8,7 +8,6 @@ import "runtimeinc" as r;
 
 int runtime_include(void);
 
-#pragma private
 
 int runtime_include(void) {
   Path home = r.home_path();

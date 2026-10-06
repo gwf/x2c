@@ -10,7 +10,6 @@
 
 #pragma once
 
-#pragma private
 
 #include <errno.h>
 #include <fcntl.h>
@@ -91,7 +90,7 @@ int report_make_owned(void) {
 
 // the progress line
 
-enum { BAR_WIDTH = 14 };
+static enum { BAR_WIDTH = 14 };
 
 /** Updates the terminal's transient progress line when transient mode is
     active. Updates start after 125 ms and incomplete work is limited to one

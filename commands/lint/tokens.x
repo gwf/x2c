@@ -9,7 +9,6 @@
 #include <ctype.h>
 #include <string.h>
 
-#pragma private
 
 static const SymbolSet type_words =
   %<<void char short int long float double signed unsigned>>

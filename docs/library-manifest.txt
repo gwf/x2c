@@ -71,7 +71,19 @@ lib/process.x|optional|Commands, pipelines, and background jobs without a shell;
 lib/typed-array.x|optional|Packed typed storage with a raw native bracket; explicitly include `typed-array.x` to use it.
 lib/typed-list.x|optional|Typed views over canonical `List` cells; explicitly include `typed-list.x` to use them.
 lib/typed-map.x|optional|Typed maps over native numeric or canonical `String` fields; explicitly include `typed-map.x` to use them.
-lib/var-ledger.x|internal|The `Var` tag tables and decoder table projected from `lib/var-tags.xmacro`, in the one runtime unit that imports the ledger.
+lib/var-ledger.x|internal|The `Var` tag tables and decoder table projected from `lib/var-tags.x`, in the one runtime unit that includes the ledger.
 lib/var.x|api|
 lib/varconvert.x|api|
 lib/varops.x|api|
+lib/array-generics.x|internal|Shared declaration templates for typed array operations.
+lib/cleanup.x|internal|Cleanup adoption templates used by runtime owners.
+lib/error-macros.x|internal|Structured Error causes shared by runtime modules.
+lib/error-private.x|internal|Error transfer templates used by the exception machinery.
+lib/func-errors.x|internal|Structured callable errors shared by runtime modules.
+lib/integer-ops.x|internal|Integer conversion and arithmetic templates shared by runtime owners.
+lib/map-generics.x|internal|Shared declaration templates for typed map operations.
+lib/native-scalar-types.x|internal|The exact C scalar ledger and its compile-time projections.
+lib/private-keywords.x|internal|Keyword aliases used by runtime implementation code.
+lib/system-macros.x|optional|Compile-time convenience macros; explicitly include system-macros.x to use them.
+lib/var-adapters.x|internal|Pointer converter templates shared by runtime owners.
+lib/var-tags.x|internal|The Var tag ledger shared by runtime and compiler projections.

@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-$(import "keyword-aliases-import.xmacro")
+#include "keyword-aliases-import.x"
 
 keyword imported $fixture.imported;
 

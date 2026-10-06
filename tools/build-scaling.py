@@ -24,7 +24,7 @@ ROOT = Path(__file__).resolve().parent.parent
 BASELINE = ROOT / "unittest/benchmarks/build-scaling-baseline.json"
 METRIC_ID = "child-cpu-seconds-per-authored-line/v1"
 GENERATED = {Path("src/linked-meta.x"), Path("lib/x2c.x")}
-SOURCE_SUFFIXES = {".x", ".xmacro", ".xlisp"}
+SOURCE_SUFFIXES = {".x", ".xp", ".xlisp"}
 
 
 def extract(work: Path, commit: str) -> Path:

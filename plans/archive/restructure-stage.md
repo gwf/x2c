@@ -54,7 +54,7 @@ Findings:
   table, reset flag) populated only by `meta-project.x`
   (`use_meta_helper`). Its producer and consumer are split across units.
 - `_helper_now` repeats `clock_gettime(CLOCK_MONOTONIC)` that
-  `lib/logger.x:327` and the `$time` macro in `lib/system-macros.xmacro:63`
+  `lib/logger.x:327` and the `$time` macro in `lib/system-macros.x:63`
   already use; there is no exported monotonic-seconds operation to reuse,
   so keep it (6 lines), but move it with the client.
 - `lib/process.x` `Job` covers one-way capture, kill, and wait. It has no

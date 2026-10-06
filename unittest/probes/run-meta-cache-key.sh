@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # The project meta helper's cache: a change to any input of its build (a
-# meta .xmacro, a member of its import chain, a header meta code includes
+# meta module, a member of its include chain, a header meta code includes
 # by relative, absolute, or angle spelling, -D or -U, the compiler, the
 # host C compiler, or the meta C compiler flags) builds the helper again,
 # and a change to program code alone does not. The target --cc is never
@@ -38,12 +38,15 @@ chmod +x bin/fail-cc bin/host-cc
 echo '#define REL_K 1' > cfg.h
 echo '#define ABS_K 10' > abs/abs.h
 echo '#define NAT_K 100' > inc/nat.h
-cat > chain.xmacro <<EOF
-meta static int chained(void) => REL_K + ABS_K + NAT_K;
+cat > chain.x <<EOF
+#include "cfg.h"
+#include "$BUILD/abs/abs.h"
+#include <nat.h>
+meta int chained(void) => REL_K + ABS_K + NAT_K;
 EOF
-cat > top.xmacro <<'EOF'
-$(import "chain.xmacro")
-meta static int total(void) {
+cat > top.x <<'EOF'
+#include "chain.x"
+meta int total(void) {
 #ifdef EXTRA
   return chained() + 1000;
 #else
@@ -51,12 +54,12 @@ meta static int total(void) {
 #endif
 }
 EOF
-# Meta code sees the headers of the unit that imports it.
+# Each meta provider includes the headers its own code needs.
 cat > prog.x <<EOF
 #include "cfg.h"
 #include "$BUILD/abs/abs.h"
 #include <nat.h>
-\$(import "top.xmacro")
+#include "top.x"
 int value(void) { return \$total(); }
 EOF
 
@@ -97,13 +100,13 @@ sed -i.bak 's/return 7;/return 8;/' prog.x
 kept "a program function body change"
 expect 111 "program change"
 
-sed -i.bak 's/return chained();/return chained() + 5000;/' top.xmacro
-rebuilt "a meta .xmacro change"
-expect 5111 "meta .xmacro"
+sed -i.bak 's/return chained();/return chained() + 5000;/' top.x
+rebuilt "a meta module change"
+expect 5111 "meta module"
 
-sed -i.bak 's/NAT_K;/NAT_K + 20000;/' chain.xmacro
-rebuilt "an imported .xmacro change"
-expect 25111 "imported .xmacro"
+sed -i.bak 's/NAT_K;/NAT_K + 20000;/' chain.x
+rebuilt "an included meta module change"
+expect 25111 "included meta module"
 
 echo '#define REL_K 2' > cfg.h
 rebuilt "a relative header change"
@@ -152,10 +155,10 @@ grep -q "return 25222;" "$(find bd -name prog.c | head -1)" ||
 mkdir -p missing
 cat > missing/prog.x <<'EOF'
 #include "config.h"
-$(import "defs.xmacro")
+#include "defs.x"
 int value(void) { return $answer(); }
 EOF
-echo 'meta int answer(void) => ANSWER;' > missing/defs.xmacro
+printf '#include "config.h"\nmeta int answer(void) => ANSWER;\n' > missing/defs.x
 "$X2C" translate --out-dir missing missing/prog.x >out.log 2>&1 &&
   fail "a missing header translated"
 echo '#define ANSWER 42' > missing/config.h
@@ -164,18 +167,18 @@ echo '#define ANSWER 42' > missing/config.h
 grep -q "return 42;" missing/prog.c || fail "missing header: wrong value"
 
 # A unit whose meta code did not parse is parsed again when a file it read
-# changes: here, an include that later exports the macro the code calls.
+# changes: here, a static macro becomes public in an included module.
 mkdir -p unparsed
-echo 'macro Expression $four() => 4;' > unparsed/four.xmacro
-echo '$(import "four.xmacro")' > unparsed/bridge.x
+echo 'static macro Expression $four() => 4;' > unparsed/four.x
+echo '#include "four.x"' > unparsed/bridge.x
 cat > unparsed/prog.x <<'EOF'
 #include "bridge.x"
 meta static int ten(void) => $four() + 6;
 int value(void) { return $ten(); }
 EOF
 "$X2C" translate --out-dir unparsed unparsed/prog.x >out.log 2>&1 &&
-  fail "an unexported macro translated"
-echo 'export $(import "four.xmacro")' > unparsed/bridge.x
+  fail "a static macro reached an includer"
+echo 'macro Expression $four() => 4;' > unparsed/four.x
 "$X2C" translate --out-dir unparsed unparsed/prog.x >out.log 2>&1 ||
   fail "a helper without the unparsed unit was reused: $(cat out.log)"
 grep -q "return 10;" unparsed/prog.c || fail "unparsed unit: wrong value"
@@ -183,8 +186,8 @@ grep -q "return 10;" unparsed/prog.c || fail "unparsed unit: wrong value"
 # A header found through -I or spelled with spaces or tabs reaches the
 # meta code it exports.
 mkdir -p spell/inc
-echo 'meta int twice(int n) => n*2;' > spell/inc/defs.xmacro
-echo 'export $(import "defs.xmacro")' > spell/inc/bridge.x
+echo 'meta int twice(int n) => n*2;' > spell/inc/defs.x
+echo '#include "defs.x"' > spell/inc/bridge.x
 printf '#include "bridge.x"\nint value(void) { return $twice(4); }\n' \
   > spell/via.x
 printf '#  include\t"bridge.x"\nint value(void) { return $twice(4); }\n' \
@@ -211,10 +214,10 @@ fi
 # A home laid out as `make install` lays it out carries the helper's
 # protocol loop.
 mkdir -p home/bin home/lib home/include/x2c home/etc
-cp "$ROOT"/lib/*.x "$ROOT"/lib/*.xmacro home/lib/
-cp "$ROOT"/lib/*.x "$ROOT"/lib/*.xmacro "$(dirname "$X2C")"/lib/*.h \
+cp "$ROOT"/lib/*.x home/lib/
+cp "$ROOT"/lib/*.x "$(dirname "$X2C")"/lib/*.h \
   home/include/x2c/
-cp "$ROOT"/etc/*.xlisp "$ROOT"/etc/*.xmacro "$ROOT/etc/meta-helper.x" \
+cp "$ROOT"/etc/*.xlisp "$ROOT"/etc/*.x \
   home/etc/
 cp "$X2C" home/bin/x2c
 cp "$(dirname "$X2C")/libx2c.a" home/lib/

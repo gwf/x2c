@@ -68,7 +68,6 @@ typedef struct ReplInputCompletion {
 typedef ReplInputCompletion (*ReplInputComplete)(
   void *context, String text, size_t cursor);
 
-#pragma private
 #include <stdint.h>
 #include <errno.h>
 #include <stdio.h>
@@ -86,7 +85,7 @@ typedef ReplInputCompletion (*ReplInputComplete)(
 #define REPL_HISTORY_MAX 100
 #define LINENOISE_MAX_FOLDS 16
 
-struct ReplInput {
+static struct ReplInput {
   Scope storage;
   char **history;
   int history_len, open;
@@ -94,7 +93,7 @@ struct ReplInput {
   int raw, ifd, ofd;
 };
 
-typedef struct EditState {
+static typedef struct EditState {
   ReplInput input;
   char *buf, **history;
   size_t buflen, buflen_max;
@@ -435,7 +434,7 @@ static size_t _display_width(const char *s, size_t len) {
   return width;
 }
 
-enum KEY_ACTION {
+static enum KEY_ACTION {
   KEY_NULL = 0,
   CTRL_A = 1,
   CTRL_B = 2,
@@ -594,14 +593,14 @@ static void _beep(void) {
 /* A fold is a display-only replacement for a range in l.buf. The edited
  * buffer always keeps the real bytes; refresh code asks l._render_buffer()
  * for a temporary printable version plus the cursor position inside it. */
-typedef struct EditFold {
+static typedef struct EditFold {
   size_t start;
   size_t end;
   char display[64];
   size_t displaylen;
 } EditFold;
 
-typedef struct EditFolds {
+static typedef struct EditFolds {
   int count;
   EditFold fold[LINENOISE_MAX_FOLDS];
 } EditFolds;

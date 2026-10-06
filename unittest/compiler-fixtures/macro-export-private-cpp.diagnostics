@@ -1,4 +1,4 @@
-unittest/compiler-fixtures/macro-export-private-cpp.x:5:12: macro: compile-time Lisp evaluation failed
+unittest/compiler-fixtures/macro-export-private-cpp.x:4:12: macro: compile-time Lisp evaluation failed
   int lisp = $(h_lisp);
              ^^
   note: form: (h_lisp) error: (unbound (name h_lisp))

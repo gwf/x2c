@@ -11,7 +11,7 @@
 
 #pragma once
 
-$(import "error-macros.xmacro")
+#include "error-macros.x"
 #include "common.x"
 #include "dispatch.x"
 
@@ -22,7 +22,7 @@ $(import "error-macros.xmacro")
 #include <assert.h>
 #include <limits.h>
 
-/** Names the built-in `Var` tags in `var-tags.xmacro` ledger order, which
+/** Names the built-in `Var` tags in `var-tags.x` ledger order, which
     is the order of `x2c_var_taginfo`; `lib/var-ledger.x` checks the two
     agree. */
 typedef enum TagId {
@@ -62,7 +62,6 @@ typedef struct VarDecodeGroup {
 int Var.known_tag(Symbol tag) =>
   _tag2id(tag) != _invalid_ || _declared(tag) != NULL;
 
-#pragma private
 #include <string.h>
 #include "symbol.x"
 #include "map.x"
@@ -111,8 +110,8 @@ int Var.known_tag(Symbol tag) =>
 */
 
 /* `lib/var-ledger.x` projects the tag tables and the decoder's group table
-   from the ledger in `var-tags.xmacro`. */
-typedef struct VarDecoded {
+   from the ledger in `var-tags.x`. */
+static typedef struct VarDecoded {
   TagId id, int custom_id, valid;
 } VarDecoded;
 
@@ -147,7 +146,7 @@ meta native unsigned long Var.tag_bottom(Symbol tag) {
   return x2c_var_taginfo[id].bottom;
 }
 
-typedef union VarWideValue {
+static typedef union VarWideValue {
   long long_value;
   unsigned long ulong_value;
   long long long_long_value;
@@ -160,7 +159,7 @@ typedef union VarWideValue {
    reuses the three alignment bits for the family; the tag stored in the box
    prevents one wide family from being decoded through another. Copying a Var
    aliases its box, while `Var.clone_wide` creates a distinct identity. */
-typedef struct VarWideBox {
+static typedef struct VarWideBox {
   Symbol tag;
   VarWideValue value;
 } *VarWideBox;
@@ -193,7 +192,7 @@ static unsigned row_count;
 /* An overflow heap class boxes the one process-lifetime cell for its class
    and address, so boxing an object twice gives identical bits. `cells` maps
    an address to its cells, one per class, chained through `next`. */
-typedef struct VarCell {
+static typedef struct VarCell {
   VarDescriptor *descriptor;
   void *pointer;
   struct VarCell *next;
@@ -1137,7 +1136,7 @@ int Var.wide_equal(Var a, Var b) {
 
 // ordering
 
-typedef struct VarIntegerParts {
+static typedef struct VarIntegerParts {
   int negative, unsigned long long magnitude;
 } VarIntegerParts;
 

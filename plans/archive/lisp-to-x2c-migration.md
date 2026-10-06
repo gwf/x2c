@@ -14,7 +14,7 @@ Lisp examples and x2c macro templates are not migration targets.
 
 ## Production autodiff
 
-Complete the 106-function pilot against lib/autodiff.xmacro: checkpoint
+Complete the 106-function pilot against lib/autodiff-macros.x: checkpoint
 snapshot/replay, sibling differentiation, reverse do loops, and production
 rejections. Preserve all five decorators, generated interfaces, declaration
 order, and errors. Pass per-derivation state explicitly; thin Lisp wrappers
@@ -100,13 +100,13 @@ framework is outside this plan. The prototype was not integrated.
   and operation names, not duplicate compile-time algorithm bodies.
 - `etc/lisp-extras.xlisp`: optional runtime Lisp range/fib/subst and aliases;
   outside this compile-time migration, as are runtime Lisp examples/tests.
-- `lib/autodiff.xmacro`: thin entry wrappers own the two sibling
+- `lib/autodiff-macros.x`: thin entry wrappers own the two sibling
   registries for the existing unit-session lifetime. Registration ordering
   stays at that boundary; derivative algorithms and per-derivation state
   live in x2c. Nine forward-name placeholders let mutually recursive
   helpers lower before their definitions; every placeholder is replaced
   before the decorators run.
-- `lib/var-tags.xmacro`: the measured port remains parked; its existing
+- `lib/var-tags.x`: the measured port remains parked; its existing
   acceptance condition is unchanged and no unsuccessful candidate is revived.
 - `lib/system-macros.xlisp`: dedent and location adapters. Dedent already calls
   the x2c folding algorithm; replacing this short boundary would require extra

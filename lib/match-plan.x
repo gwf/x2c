@@ -12,7 +12,6 @@
 
 #include "match.x"
 
-#pragma private
 
 #include <assert.h>
 #include "scope.x"
@@ -32,7 +31,7 @@
 
 /* Owns the builder and failure sites the enclosing block has yet to patch,
    with the call-frame depth of the block under construction. */
-typedef struct MatchLower {
+static typedef struct MatchLower {
   MachineBuilder b;
   int *sites, site_count, site_capacity, depth;
 } MatchLower;
@@ -277,7 +276,7 @@ static int MatchLower._stopped(MatchLower &l) =>
 /* The operands of one guard, or the fixed prefix of one segment, with each
    element's entry: -1 for an atom tested inline, -2 for a sublist that
    descends inline, or else the entry of its child block. */
-typedef struct MatchParts {
+static typedef struct MatchParts {
   Var elements[MATCH_SEGMENT_MAX];
   int entries[MATCH_SEGMENT_MAX], count;
 } MatchParts;
@@ -467,7 +466,7 @@ static int MatchLower._never(MatchLower &l) {
 
 /* Child blocks framed inside inline sublists, compiled in traversal order
    so that emission consumes them in the same order. */
-typedef struct MatchInlinePlan {
+static typedef struct MatchInlinePlan {
   int entries[MATCH_INLINE_MAX], count, used;
 } MatchInlinePlan;
 
@@ -476,7 +475,7 @@ typedef struct MatchInlinePlan {
    span only once the tail succeeds. The tail is the child block at `entry`,
    and `anchor` is its first element that a scan can compare as one value,
    `offset` elements in. */
-typedef struct MatchStar {
+static typedef struct MatchStar {
   List cell, tail;
   int slot, delayed, entry, anchored, offset;
   Var anchor;
@@ -484,7 +483,7 @@ typedef struct MatchStar {
 
 /* One segment under lowering: its prefix, the framed children nested in
    its inline sublists, and its star. */
-typedef struct MatchSegment {
+static typedef struct MatchSegment {
   MatchParts prefix;
   MatchInlinePlan nested;
   MatchStar star;
@@ -833,9 +832,9 @@ static int MatchLower._star_retry(MatchLower &l, MatchStar &star, int loop) {
 
 /* What a pattern constrains: the current value itself, the first element
    of a List, or that element with one later element. */
-enum { MATCH_KEY_VALUE, MATCH_KEY_LIST, MATCH_KEY_INPUT };
+static enum { MATCH_KEY_VALUE, MATCH_KEY_LIST, MATCH_KEY_INPUT };
 
-typedef struct MatchKeys {
+static typedef struct MatchKeys {
   MatchKey keys[MATCH_KEY_MAX];
   int count;
 } MatchKeys;

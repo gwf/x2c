@@ -16,7 +16,7 @@
 
 #pragma once
 
-$(import "error-macros.xmacro")
+#include "error-macros.x"
 #include "common.x"
 #include "var.x"
 
@@ -55,7 +55,6 @@ List List.cons_in(Pool pool, Var head, List tail) {
   return pool.intern_new(cell, cell);
 }
 
-#pragma private
 
 #include "symbol.x"
 #include "atom.x"
@@ -878,7 +877,7 @@ static const int _WIDTH = 80;
 
 /* One rendering: the output Buffer and whether elements write their `str`
    or their `repr`. */
-typedef struct Render {
+static typedef struct Render {
   Buffer out;
   Symbol mode;
 } Render;

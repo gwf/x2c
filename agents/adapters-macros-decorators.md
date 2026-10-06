@@ -134,7 +134,7 @@ Current proven shapes include:
 
 - Uniform method or function families in `lib/logger.x:739-744` and `755-760`
   and in `lib/common.x:590-599`. Names and types vary; behavior does not.
-- Private pointer conversion pairs in `lib/var-adapters.xmacro`. The tagged
+- Private pointer conversion pairs in `lib/iter.x`. The tagged
   form preserves `Var.new` and `Var.pointer`; the raw form preserves the
   direct `p64` store and load used by iterator callbacks.
 - The native adapter family in `lib/varops.x:55-68`. Each invocation supplies
@@ -142,13 +142,13 @@ Current proven shapes include:
 - Local resource setup in `$match.machine` in `lib/match.x` and
   `$match.plan` in `lib/match-cache.x`. The macro hides stack-storage
   mechanics while release and fallback policy stay visible.
-- Test registration in `unittest/test-macros.xmacro:1`. The macro removes a
+- Test registration in `unittest/test-macros.x:1`. The macro removes a
   mechanical name-to-registration conversion.
-- One ledger in `lib/var-tags.xmacro` with mechanical projections in
+- One ledger in `lib/var-tags.x` with mechanical projections in
   `lib/var-ledger.x` and `src/type-ledger.x`. One row supplies the tag
   tables, the decoder table, the `TagId` check, and the compiler's lookups.
 
-`lib/map-generics.xmacro` also shows how to remove fake adapters without
+`lib/map-generics.x` also shows how to remove fake adapters without
 discarding real ones. Its generated families call ordinary `Scope`, `Bytes`,
 and `Block` operations directly as `Scope_malloc` and sibling C entries.
 Passing those
@@ -181,17 +181,13 @@ artifacts. Each projection should be small and unsurprising.
 
 Keep fixed policy in the module whose behavior it defines, as
 `lib/dispatch.x` does with direct switches for primitive rendering. A
-substantial xmacro may keep AST projection mechanics out of the runtime
-source, as `lib/var-tags.xmacro` does. When two modules must read the same rows
-the xmacro holds them instead, because a compile-time definition does not
-cross an `#include`: `lib/var-ledger.x` and `src/type-ledger.x` both read the
-tag ledger, so it is in `lib/var-tags.xmacro`. Import a large ledger only in a
-unit nothing includes. An import in an included file runs in every unit that
-includes it, so the tag tables live in those two leaf units and `lib/var.x`
-declares them `extern`. A single three-row table does not justify five one-use
+shared source module may keep AST projection mechanics beside its ledger,
+as `lib/var-tags.x` does. `lib/var-ledger.x` and `src/type-ledger.x` both
+include that tag ledger. The runtime tables belong to those two units;
+`lib/var.x` declares them `extern`. A single three-row table does not justify five one-use
 macros: direct aligns,
 offsets, and copies keep a frozen program's byte layout visible.
-A one-use data-only xmacro adds a file boundary without sharing an
+A one-use data-only module adds a file boundary without sharing an
 implementation;
 `lib/lisp-targets.x` therefore declares its native target rows directly. Its
 local expression macro remains necessary because `x2c.ident` is valid only
@@ -233,7 +229,7 @@ documentation:
 ```x2c
 typedef LocalState *LocalStateRef;
 
-$(import "var-adapters.xmacro")
+$(import "iter.x")
 $var.raw.pointer(LocalStateRef, localstateref);
 
 protocol Var(LocalStateRef);
@@ -337,7 +333,7 @@ facts easiest to inspect.
 
 Status: proven as a statement macro; rejected as a function decorator
 Checked: 2026-07-30 at `9d762c97`
-Owner: `unittest/test-macros.xmacro`
+Owner: `unittest/test-macros.x`
 
 Problem: 156 tests repeated `Scope.retain()` at entry and `Scope.release()` at
 the sole exit. Direct form used 312 statements. `$test.scoped();` plus its
@@ -388,7 +384,7 @@ second set lookup to remove a second switch — widen the indexed row instead.
 
 Status: proven
 Checked: 2026-08-03 at `66448562`
-Owner: `lib/array-generics.xmacro`, `lib/array.x`, and `lib/typed-array.x`
+Owner: `lib/array-generics.x`, `lib/array.x`, and `lib/typed-array.x`
 
 Problem: packed typed arrays over six scalar element types would repeat one
 ~300-line module per type, the shape drifting independently six ways.
@@ -413,7 +409,7 @@ or over-aligned elements, and `%[...]` still constructs ordinary `Array`.
 
 Status: proven
 Checked: 2026-08-08 at `f83edbdb`
-Owner: `lib/map-generics.xmacro`, `lib/map.x`, and `lib/typed-map.x`
+Owner: `lib/map-generics.x`, `lib/map.x`, and `lib/typed-map.x`
 
 Problem: a second Robin Hood table for native key and value types would
 repeat the probing, record reuse, growth, deletion, and traversal algorithms
@@ -443,7 +439,7 @@ family differences, not leftover forwarding code.
 
 Status: proven
 Checked: 2026-08-07 at `b2970c0f`
-Owner: `lib/list-generics.xmacro` and `lib/typed-list.x`
+Owner: `lib/typed-list.x` and `lib/typed-list.x`
 
 Problem: seven typed cons chains over `List` would restate the structural
 walk and a per-tag car read seven times, even though the interning pool,
@@ -543,7 +539,7 @@ Owner: `etc/compiler-sdk.xlisp` compile-time Lisp SDK
 Problem: a macro that generates code has to build AST nodes, and the SDK
 shipped constructors only for a String literal, a cast, and a call — the last
 two private. Every generator that needed anything else wrote the node shape by
-hand. `lib/var-tags.xmacro` defined its own `var.tag.int-expr` and
+hand. `lib/var-tags.x` defined its own `var.tag.int-expr` and
 `var.tag.symbol-expr`; `lib/varops.x` spelled a three-level index node inline;
 the `(expr () (composite (commas ...)))` initializer wrapper appeared four
 times across two files. The shapes are only discoverable by reading

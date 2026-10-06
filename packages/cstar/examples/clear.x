@@ -14,7 +14,7 @@
 */
 
 #include "x2c.x"
-$(import "../src/cstar.xmacro")
+#include "../src/cstar-macros.x"
 
 #include <stdio.h>
 

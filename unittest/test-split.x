@@ -245,7 +245,7 @@ static void split_cursor_allocation_and_nesting(void) {
   Pool.close();
 }
 
-$(import "test-macros.xmacro")
+#include "test-macros.x"
 
 void split_suite(void) {
   $test.run(split_eager_and_join);

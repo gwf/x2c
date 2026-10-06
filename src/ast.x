@@ -23,11 +23,10 @@ typedef enum AstPos {
   AST_EXPRESSION
 } AstPos;
 
-#pragma private
 
-$(import "../lib/error-macros.xmacro")
-$(import "../src/ast-rewrite.xmacro")
-$(import "../src/grammar.xmacro")
+#include "../lib/error-macros.x"
+#include "ast-rewrite.x"
+#include "grammar.x"
 #include "symbolset.x"
 
 /* binding nodes

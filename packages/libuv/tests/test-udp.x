@@ -6,7 +6,7 @@ import "libuv" with UvAddress, UvLoop, UvTimer, UvUdp;
 #include <stdlib.h>
 #include <string.h>
 
-$(import "../../../unittest/test-macros.xmacro")
+#include "../../../unittest/test-macros.x"
 
 static void _udp_timeout(UvTimer timer, Var value) {
   (void) timer;

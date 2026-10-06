@@ -1,0 +1,7 @@
+#pragma once
+
+macro Decorator $project.imported(
+  Function $function
+) {
+  $(x2c.function.body $function)...
+}

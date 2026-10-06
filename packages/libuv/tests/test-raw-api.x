@@ -6,7 +6,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-$(import "../../../unittest/test-macros.xmacro")
+#include "../../../unittest/test-macros.x"
 
 static void raw_loop_and_version_surface(void) {
   EXPECT_STR_EQ(String.new(uv_version_string()), "1.52.1");

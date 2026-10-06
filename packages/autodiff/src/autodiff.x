@@ -8,13 +8,13 @@
     operands, so a data-dependent computation that `$ad.reverse()` cannot
     transform statically still yields a gradient. Values box through `Var`
     and each operation allocates a node, so the static decorators in
-    `autodiff.xmacro` remain the fast path.
+    `autodiff-macros.x` remain the fast path.
 */
 
 #include "x2c.x"
 #include "typed-array.x"
 #include <math.h>
-export $(import "autodiff.xmacro")
+#include "autodiff-macros.x"
 
 /** A recording of `AdNode` operations; see the struct below.
     The [Automatic Differentiation guide](../../guide/autodiff.md) explains

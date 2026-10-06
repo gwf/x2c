@@ -1,7 +1,7 @@
 /*  test-symbol.x -- unit tests for symbol encoding */
 
 #include "test-support.x"
-$(import "test-macros.xmacro")
+#include "test-macros.x"
 #include <string.h>
 
 static void symbol_interning_and_var(void) {

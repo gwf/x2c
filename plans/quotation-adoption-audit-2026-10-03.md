@@ -21,7 +21,7 @@ individual `%(` openings outside comments; their unit is explicit.
 | --- | ---: | ---: | ---: |
 | lib generators, operations | 4 | 2 | 11 public builder operations |
 | builtins, operations | 6 | 0 | 4 conditional/already quoted operations |
-| grammar.xmacro, List literal openings | 0 | 0 | 15 |
+| grammar.x, List literal openings | 0 | 0 | 15 |
 | meta-sdk.x, List literal openings | 0 | 0 | 78 |
 | REPL, construction operations | 0 | 0 | 2 |
 | packages, candidate operations/families | 1 | 1 | 17 |
@@ -53,15 +53,15 @@ lib/meta.x and imported macros; it is not a second authored opportunity.
 
 | Rank | Site on audited base | Before | After sketch | Risk/cost |
 | --- | --- | --- | --- | --- |
-| 1 | lib/var-tags.xmacro `_tag_id_checks` | equality + c-assert + message AST | `$!Unit{ _Static_assert($id == $index, "..."); }` | low; cold ledger projection |
-| 2 | lib/var-tags.xmacro `_tag_bits_expr` | nested sizeof declaration/operator AST | `Type type = bits; $!( sizeof($type) * CHAR_BIT )` | low; verify width and spelling |
-| 3 | lib/varops.xmacro `_update_box` | index/cast/call builders | quoted index, optional cast, then `$!( $boxer($value) )` | low; keep existing identifier child |
-| 4 | lib/varops.xmacro `_update_decode` | call and optional cast builders | `$!( $decoder($value) )`, optionally `$!( ($back)$decoded )` | low; Type cast hole |
+| 1 | lib/var-tags.x `_tag_id_checks` | equality + c-assert + message AST | `$!Unit{ _Static_assert($id == $index, "..."); }` | low; cold ledger projection |
+| 2 | lib/var-tags.x `_tag_bits_expr` | nested sizeof declaration/operator AST | `Type type = bits; $!( sizeof($type) * CHAR_BIT )` | low; verify width and spelling |
+| 3 | lib/varops.x `_update_box` | index/cast/call builders | quoted index, optional cast, then `$!( $boxer($value) )` | low; keep existing identifier child |
+| 4 | lib/varops.x `_update_decode` | call and optional cast builders | `$!( $decoder($value) )`, optionally `$!( ($back)$decoded )` | low; Type cast hole |
 | 5 | src/builtins.x `_assign` | statement wrapping operator builder | `$!{ $target = $value; }` | caller-stage and cost review |
 | 6 | src/builtins.x `_declare` | bind/modifier/initializer Lists | initialized/uninitialized declaration quotations | shared-name and Type-hole review |
 | 7 | src/builtins.x Foreach.with_cursor | block List around assignments/body | `$!{ { $assignments... $body } }` | expansion-cost measurement |
 | 8 | src/builtins.x Foreach.with_iter | same block assembly | same quotation | expansion-cost measurement |
-| 9 | packages/yyjson/src/json-api.xmacro | nested identifier/call builders | `$!( $callee($argument) )` | low; package-specific check |
+| 9 | packages/yyjson/src/json-api.x | nested identifier/call builders | `$!( $callee($argument) )` | low; package-specific check |
 | 10 | examples/magic/meta-functions.x field_reads | dynamic member builder | `$!( $receiver.$member )` | low; name-hole check |
 
 Two more builtin candidates are `_call` and `_binding_call`; both can use
@@ -72,7 +72,7 @@ conditional families are `_iter_call` (explicit Iter root type),
 
 ## Findings beyond the shortlist
 
-- src/grammar.xmacro's 15 List literal sites comprise three exact
+- src/grammar.x's 15 List literal sites comprise three exact
   constructors, ten structural patterns, and two pattern-binding Lists.
   The content helpers deliberately preserve arbitrary operator tokens,
   type shells, omitted fields, and parser-introduced data.
@@ -83,7 +83,7 @@ conditional families are `_iter_call` (explicit Iter root type),
   builders return inspectable canonical syntax. Changing them to pending
   quotations changes their contracts. Adopt quotations at callers instead.
 - etc/meta-helper.x duplicates four such builders. Preserve their output.
-  etc/builtin-macros.xmacro constructs falias, tadapt, and managed-init;
+  etc/builtin-macros.x constructs falias, tadapt, and managed-init;
   these are internal operations, not C fragments.
 - etc/compiler-sdk.xlisp delegates to canonical builders. Other .xlisp
   files build Lisp forms or runtime data, not replacement C syntax.
@@ -105,7 +105,7 @@ conditional families are `_iter_call` (explicit Iter root type),
 
 1. Sequence holes in List and composite literal quotations. Two concrete
    producer operations are `_tag_list` and `_tag_composite` in
-   lib/var-tags.xmacro. `$!( [$items...] )` and `$!( { $items... } )` both
+   lib/var-tags.x. `$!( [$items...] )` and `$!( { $items... } )` both
    fail with sequence insertion illegal in an expression slot. This proves
    those spellings fail; it does not rule out another representation.
    Reuse literal element/comma parsers and produce the same canonical AST.
@@ -209,7 +209,7 @@ quotations: `(T){ $first, $rest... }`, `$!( { $items... } )`, and
 `T v = { $items... };`. A Lisp slot or meta call inside braces stays one
 element.
 
-Converted with it: the lib/var-tags.xmacro tag, numeric, and decode tables
+Converted with it: the lib/var-tags.x tag, numeric, and decode tables
 (deleting `_tag_composite`; the generated tables are unchanged apart from
 `0x8000` keeping its spelling), the protocol descriptor table (deleting
 `$methods_table` and `$methods_value`), `CaptureBuild._storage`, builtins

@@ -1,6 +1,6 @@
 #include "x2c.x"
 #include "meta.x"
-$(import "../../src/grammar.xmacro")
+#include "../../src/grammar.x"
 
 static List projected_call(Var value) {
   match (value)

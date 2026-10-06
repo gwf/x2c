@@ -16,7 +16,7 @@ Historical citations below refer to files that have been removed:
 > because `$switch` showed that captured syntax is an ordinary walkable List.
 > `$table` is dropped. What remains is the diagnostic location argument and
 > enum consumers. The old `lib/varops.xlisp` row-accessor task was superseded
-> by ed863ce0, which replaced that file with `lib/varops.xmacro`.
+> by ed863ce0, which replaced that file with `lib/varops.x`.
 > Scoped 2026-09-17 from a read of
 > `etc/compiler-sdk.xlisp`, `etc/lisp-bindings.xlisp`, `etc/builtin-macros.xlisp`,
 > the 33 `$lisp.bind` calls at `src/macros.x:894`, and the shipped generator in
@@ -120,7 +120,7 @@ runtime static declaration, and lets two cases declare the same name.
 Shipped. 13 bind targets renamed in `src/macros.x`, 7 of them promoted to
 public names, with callers switched in `etc/compiler-sdk.xlisp`,
 `etc/lisp-bindings.xlisp`, `etc/builtin-macros.xlisp`,
-`etc/builtin-macros.xmacro`, `lib/error-macros.xmacro`, `lib/var-tags.xmacro`,
+`etc/builtin-macros.x`, `lib/error-macros.x`, `lib/var-tags.x`,
 and `lib/lisp.x`. The 52 shipped-macro helpers left `x2c.` for `foreach.`,
 `class.`, and `scope.`. The promoted operations are published in
 `docs/src/reference/language.md` with the naming rule itself.
@@ -136,7 +136,7 @@ bootstrap compiler binding old names against renamed Lisp. So both spellings
 bound first and landed in `bootstrap/`; the callers switched and the old rows
 went in the next change.
 
-`etc/builtin-macros.xmacro` is embedded in the compiler binary by
+`etc/builtin-macros.x` is embedded in the compiler binary by
 `src/macros.x:40`, while `etc/builtin-macros.xlisp` beside it is read from
 disk. Renaming an entry point breaks the build under the compiler that still
 embeds the old macro text, so `foreach.expand`, `scope.expand`, `class.expand`,
@@ -170,7 +170,7 @@ the requirement lives.
 Follow-ups from the original scope:
 
 - The `lib/varops.xlisp:32` row-accessor change is obsolete: ed863ce0
-  replaced that file with meta functions in `lib/varops.xmacro`. No bootstrap
+  replaced that file with meta functions in `lib/varops.x`. No bootstrap
   wait for this edit remains.
 - The location argument on `x2c.diagnostic.fail` and `.warn` is not built. A
   diagnostic location comes from a `Token` (`src/diagnostics.x:351`) while a

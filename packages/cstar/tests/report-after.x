@@ -1,7 +1,7 @@
 /*  report-after.x -- later queries retain an earlier function's obligation. */
 
 #include "x2c.x"
-$(import "../src/cstar.xmacro")
+#include "../src/cstar-macros.x"
 
 $cstar.verify("fact(x <= 2147483647i)", "fact(__return == --x)")
 static int negate(int x) {

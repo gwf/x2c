@@ -12,11 +12,10 @@
 
 #pragma once
 #include "compiler.x"
-#pragma private
 
-$(import "../src/ast-rewrite.xmacro")
+#include "ast-rewrite.x"
 #include "meta.x"
-$(import "../src/grammar.xmacro")
+#include "grammar.x"
 
 #include "ast.x"
 #include "type.x"
@@ -30,7 +29,7 @@ static String _handler_type = "ErrorHandler";
 
 /* The walk state for one function body: the open regions, the depths a
    `break` and `continue` unwind to, and each label's region ancestry. */
-typedef struct Walk {
+static typedef struct Walk {
   Compiler c;
   Array regions;
   int break_stop, continue_stop, origin;
@@ -41,7 +40,7 @@ typedef struct Walk {
 /* The locals of one function that a transfer may leave stale: the names to
    qualify `volatile`, the pointers written through and those whose pointee
    needs the qualifier too, and the locals whose address escapes instead. */
-typedef struct Preserve {
+static typedef struct Preserve {
   Compiler c;
   Map names, holders, pointers, escaped;
   int expression_tries;
@@ -232,7 +231,7 @@ static int Compiler._runtime_static_declaration(
 /* The pending nodes of one static initializer, each read as a value or as
    an address. `runtime` holds the function-local statics already known to
    run at runtime, or is `NULL` at file scope. */
-typedef struct RuntimeScan {
+static typedef struct RuntimeScan {
   Compiler c;
   Map runtime;
   Array pending, modes;
@@ -652,7 +651,7 @@ List builtin_catch_cases(List selected, List arms);
 List builtin_try_cleanup_placement(Var cleanup);
 
 /* A try region pushes its frame and lands on it when something raises. */
-macro Stmt $compiler_try(Name $frame, Expr $clause,
+static macro Stmt $compiler_try(Name $frame, Expr $clause,
     Stmt $body, Stmt $cleanup) {
   {
     ExceptionFrame $frame;
@@ -667,7 +666,7 @@ macro Stmt $compiler_try(Name $frame, Expr $clause,
   }
 }
 
-macro Stmt $catch_site(Name $frame, Name $handle, Expr $count,
+static macro Stmt $catch_site(Name $frame, Name $handle, Expr $count,
     Expr $fallback, Expr $state, Expr $patterns...) {
   static MatchCaptureSite arms[$count];
   Var patterns[$count];
@@ -680,7 +679,7 @@ macro Stmt $catch_site(Name $frame, Name $handle, Expr $count,
 }
 
 /* A landing that hands a raised error to the arm its handler selected. */
-macro Stmt $catch_landing(Name $frame, Name $handle,
+static macro Stmt $catch_landing(Name $frame, Name $handle,
     Stmt $unhandled, Stmt $arms...) {
   if (x2c_exception_is_error_target(&$frame)) {
     int selected = x2c_error_catch_selected($handle);
@@ -1232,7 +1231,7 @@ static List Preserve.escape_parameters(Preserve &p, List body, List bindings) {
 /* The automatic objects a callable defer's finalizer reads: each one's
    environment field, the bindings the finalizer declares itself, and the
    captured ones it writes. */
-typedef struct DeferCaptures {
+static typedef struct DeferCaptures {
   Compiler c;
   List declared, written;
   Map captures;

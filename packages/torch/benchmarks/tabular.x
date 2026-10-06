@@ -36,7 +36,6 @@ import "torch" with Torch, Tensor, Module, Optimizer, Scheduler, Checkpoint;
 #define PREDICT_REQUESTS 256
 #define RETAIN_CAP_BYTES (128 * 1024 * 1024)
 
-#pragma private
 
 /* One artifact, with its version checked before anything reads a tensor.
    A stale dataset compared against a fresh one is a wrong answer, not a
@@ -753,7 +752,6 @@ static int _memory(String artifacts, String out, int profile, int steps,
   return 0;
 }
 
-#pragma public
 
 int main(int argc, char **argv) {
   $scope() {

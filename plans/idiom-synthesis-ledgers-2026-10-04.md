@@ -36,7 +36,7 @@ now has 1003 lines; its compiler target producer moved from 745 to 780.
 ### New working compositions strengthen L1 and refine L2
 
 The compound selector family now generates both declarations and spellings.
-list-selectors.xmacro:9-29 builds a chain through quotations and two named
+list-selectors.x:9-29 builds a chain through quotations and two named
 Unit templates. Lines 33-66 enumerate depths two through four, omit the four
 prelude selectors, and pass the two Macro values into a meta producer.
 There are 24 generated spellings with List and Var forms, or 48 operations.
@@ -52,7 +52,7 @@ as the implementation exemplar for L1. It settles that deferred Unit
 application and generated name enumeration are current capabilities; the
 scalar-specific equivalence checks still remain unrun.
 
-fields.xmacro, 32 lines, supplies _field_copies/_field_sets and their source
+fields.x, 32 lines, supplies _field_copies/_field_sets and their source
 Stmt templates. Compiler consumers now select groups of fields instead of
 repeating assignment statements. The helper evaluates its value expression
 once for each generated assignment, not once for the whole set. Its segment
@@ -83,7 +83,7 @@ therefore remains necessary; do not claim the new scalar lifting removes it.
 ### New set representations are justified distinctions
 
 efc7f318 replaces the Lisp nonreturning-cause list/constructor with a direct
-SymbolSet literal in error-macros.xmacro:1-8. All 31 cause names are retained.
+SymbolSet literal in error-macros.x:1-8. All 31 cause names are retained.
 The declaration in ast.x:205-206 and its membership consumer are unchanged.
 The family changes from 43 to 15 authored lines, 28 fewer. This is a newer
 idiom to adopt for a closed Symbol membership vocabulary: the source states
@@ -119,11 +119,11 @@ Ranges describe existing code, not deletion estimates.
 
 | Family | Files, total lines | Relevant ranges | Verdict |
 | --- | --- | --- | --- |
-| Native scalar facts/access | lib/native-scalar-types.xmacro, 92; lib/lisp.x, 1913; src/type.x, 976 | ledger 21-38; access template 60-78; Lisp invocations 43-56; lookup 58-63; Type lookup 604-645 | Remove repeated type enumeration; retain the existing meta Map representation initially. |
+| Native scalar facts/access | lib/native-scalar-types.x, 92; lib/lisp.x, 1913; src/type.x, 976 | ledger 21-38; access template 60-78; Lisp invocations 43-56; lookup 58-63; Type lookup 604-645 | Remove repeated type enumeration; retain the existing meta Map representation initially. |
 | Lisp callback declarations/registration | lib/lisp.x, 1913; lib/lisp-targets.x, 230 | context and makers 1388-1451; wrappers 1457-1549; registrations 1568-1608; target resolution 1612-1617 | Prototype one explicit source catalogue; do not collapse truth or ownership policies. |
-| Literal tag extraction | lib/var-unbox.xmacro, 31; lib/varops.xmacro, 77 | positional readers 17-20; structural reader 47-51; common.x invocations 625-633 | Adopt structural capture locally; keep ledger confinement. |
-| List-expression construction | lib/native-scalar-types.xmacro, 92; lib/var-tags.xmacro, 395 | Lisp recursive builder 40-43; meta iterative builder 267-272 | Coordinate with sequence quotation work; current forms need canonical AST construction. |
-| Fixed/runtime/generated tables | src/operator-ledger.xmacro, 51; src/type-ledger.x, 42; src/meta-native.x, 1003; lib/var-tags.xmacro, 395 | operator rows 9-32; type tables 16-36; compiler target producer 780; tag type construction 357-370 | Classify by stage, mutation, and ownership; do not mechanically rewrite every Map. |
+| Literal tag extraction | lib/common.x, 31; lib/varops.x, 77 | positional readers 17-20; structural reader 47-51; common.x invocations 625-633 | Adopt structural capture locally; keep ledger confinement. |
+| List-expression construction | lib/native-scalar-types.x, 92; lib/var-tags.x, 395 | Lisp recursive builder 40-43; meta iterative builder 267-272 | Coordinate with sequence quotation work; current forms need canonical AST construction. |
+| Fixed/runtime/generated tables | src/operator-ledger.x, 51; src/type-ledger.x, 42; src/meta-native.x, 1003; lib/var-tags.x, 395 | operator rows 9-32; type tables 16-36; compiler target producer 780; tag type construction 357-370 | Classify by stage, mutation, and ownership; do not mechanically rewrite every Map. |
 
 ### L1. The scalar ledger is authoritative, but access declarations repeat it
 
@@ -168,7 +168,7 @@ Adopt the first choice. A meta helper iterates `List.sort(Map.list(
 native_scalar_types()))`, calls the existing Unit template as a deferred value
 for each row's Type, and returns the sequence. A small Unit macro inserts it.
 The existing template, access record names, sorted lookup, and alignment
-builder stay unchanged. Current list-selectors.xmacro demonstrates the
+builder stay unchanged. Current list-selectors.x demonstrates the
 deferred Unit/Macro-value composition directly. The book section "Source
 templates from meta functions" specifies it independently.
 
@@ -241,12 +241,12 @@ moving the full Var ledger into leaf units. The newer code improved module
 ownership; its positional extraction is not therefore a preferable idiom.
 Preserve the ownership improvement and adopt the existing structural reader.
 
-Add one private meta Symbol extraction operation inside var-unbox.xmacro.
+Add one private meta Symbol extraction operation inside common.x.
 Capture the Symbol with `%(expr ? (literal ? ? ?key))`, then call Var_tag_top
 and Var_tag_bottom from the existing integer helpers. Remove its List_last
 meta prototype if no longer used. Keep Var_tag_top/Var_tag_bottom prototypes,
 the unbox mask, return types, nine common.x accessors, and compiled ledger
-lookups unchanged. Do not import var-tags.xmacro or introduce a shared public
+lookups unchanged. Do not import var-tags.x or introduce a shared public
 SDK helper for two small consumers.
 
 The helper may return `(Symbol) 0` on an impossible structural miss. This is

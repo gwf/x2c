@@ -101,7 +101,7 @@ rather than ending with `;`:
 
 ```x2c
 #pragma indent
-$(import "system-macros.xmacro")
+#include "system-macros.x"
 #include <time.h>
 
 int main(void):
@@ -127,6 +127,6 @@ leaves a file unchanged when they differ, as they do when indentation
 misrepresents which statement an `else` or a body belongs to. `--check`
 reports without writing.
 
-A `.xpmacro` file writes macros the same way. The
+A `.xp` file writes macros the same way. The
 [language reference](../reference/language.md#indentation-syntax) lists
 every layout rule. `examples/tours/indentation.xp` is a complete program.

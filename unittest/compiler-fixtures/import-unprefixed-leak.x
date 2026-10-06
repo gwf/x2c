@@ -7,6 +7,5 @@ import "leak";
 
 int consume(void);
 
-#pragma private
 
 int consume(void) { return leak.leak_total(); }

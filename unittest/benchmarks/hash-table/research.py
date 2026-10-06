@@ -78,7 +78,7 @@ static uint32_t *U32Map.value(U32Map map, U32MapItr itr) {
 }
 """
 ACCESS_NEW = """\
-macro Unit $u32.record_accessor(
+static macro Unit $u32.record_accessor(
   Name $method, Param $map, Param $itr, Expr $body
 ) {
   static inline uint32_t *U32Map.$method($map, $itr) {
@@ -130,9 +130,7 @@ RECORD_INDEX_OLD = "  uint32_t record = slot.index;\n"
 
 PRIVATE_OLD = "#pragma private\n"
 PRIVATE_HINT_NEW = """\
-#pragma private
-
-macro Expression $u32.unlikely(Expr $condition) =>
+static macro Expression $u32.unlikely(Expr $condition) =>
   __builtin_expect(!!($condition), 0);
 """
 GROWTH_OLD = "if (map.used >= map.capacity / 2)"
@@ -1153,6 +1151,8 @@ def compile_variant(
     generated = variant / "generated"
     generated.mkdir(parents=True)
     x_source = variant / f"{name}.x"
+    # Retained baselines already mark implementation functions static.
+    source_text = source_text.replace(PRIVATE_OLD, "\n")
     x_source.write_text(source_text, encoding="utf-8")
     run(
         [COMPILER, "translate", "--out-dir", generated, x_source],

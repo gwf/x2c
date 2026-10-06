@@ -151,21 +151,21 @@ are pinned to the baseline; implementations must search current owners.
 
 | Issue | Files and baseline size | Mechanism / relevant span | Synthesis and disposition |
 | --- | --- | --- | --- |
-| I01 | [native-scalar-types.xmacro](../lib/native-scalar-types.xmacro#L21) 92; [lisp.x](../lib/lisp.x#L43) 1,913 | 14 rows and 14 access invocations, Lisp 43-56 | Rewrite declaration projection from the existing meta Map; keep exact scalar/native access policy. Correct stale signature-column prose in type.x. |
+| I01 | [native-scalar-types.x](../lib/native-scalar-types.x#L21) 92; [lisp.x](../lib/lisp.x#L43) 1,913 | 14 rows and 14 access invocations, Lisp 43-56 | Rewrite declaration projection from the existing meta Map; keep exact scalar/native access policy. Correct stale signature-column prose in type.x. |
 | I02 | [lisp.x](../lib/lisp.x#L1457) 1,913 | 36 wrappers/36 registrations; 1457-1549 and 1568-1608 | Bounded explicit source catalogue experiment. Generate bodies and binding rows together without another signature, truth, or lifetime model. |
-| I03 | [map-generics.xmacro](../lib/map-generics.xmacro#L354) 961; [array-generics.xmacro](../lib/array-generics.xmacro#L668) 911 | Map operations 354-618; observation 691-736 | Delete unused internal slots first. Observation needs 1 of 5 arguments; operations does not use unbox. Keep original outer family forms and core callbacks. |
+| I03 | [map-generics.x](../lib/map-generics.x#L354) 961; [array-generics.x](../lib/array-generics.x#L668) 911 | Map operations 354-618; observation 691-736 | Delete unused internal slots first. Observation needs 1 of 5 arguments; operations does not use unbox. Keep original outer family forms and core callbacks. |
 | I04 | [transform.x](../src/transform.x#L74) 1,757; [emit.x](../src/emit.x#L98) 1,261 | normalizer 74-127 | Narrow the finding: retain dispatcher and meaningful whole-node pipelines. A source-shaped match/defer comparison is conditional, not a wholesale rewrite order. |
 | I05 | [meta-sdk.x](../src/meta-sdk.x#L59) 658; [ast.x](../src/ast.x#L153) 302 | SDK 59-85 and 247-268 | Adopt named captures under the same patterns. Preserve template-type resolution, known binding checks, and native SDK identities. |
 | I06 | [initializers.x](../src/initializers.x#L33) 1,097 | conversion 33-68; speculative caller 721-755 | Capture composite payload at both callers and pass its items once. Preserve the subobject algorithm, transactions, native alternatives, and empty-container freshness. |
 | I07 | [type.x](../src/type.x#L144) 976; [symbols.x](../src/symbols.x#L1190) 1,431; [ast.x](../src/ast.x#L153) 302 | type 144-152; symbols 1190-1200; ast 153-161 | Adopt Ast.without_origin for two inspection-only loops. Retain strict termination classification and origin-changing emission. |
 | I08 | [expressions.x](../src/expressions.x#L3279) 3,930; [regions.x](../src/regions.x#L1382) 1,455; [transform.x](../src/transform.x#L1587) 1,757 | expressions 3279-3283; regions 1382-1389; transform 1587-1594 | Add one exact Type.is_char_pointer_like predicate. Keep normalization explicit at the transform caller and typedef-aware String identity separate. |
 | I09 | [macro-value.x](../lib/macro-value.x#L67) 834 | five Macro_* native entries amid dotted operations | Retain exact names/signatures. Explain the boundary through the role convention; do not add cosmetic aliases or change method/reflection facts silently. |
-| I10 | [var-unbox.xmacro](../lib/var-unbox.xmacro#L17) 31; [varops.xmacro](../lib/varops.xmacro#L47) 77 | unbox 17-20; varops 47-51 | Adopt structural Literal capture locally while preserving leaf-ledger confinement and existing compiled tag queries. |
+| I10 | [common.x](../lib/common.x#L17) 31; [varops.x](../lib/varops.x#L47) 77 | unbox 17-20; varops 47-51 | Adopt structural Literal capture locally while preserving leaf-ledger confinement and existing compiled tag queries. |
 | I11 | [type.x](../src/type.x#L217) 976; [ast.x](../src/ast.x#L153) 302 | prototype family 217-245; designated-name family 831-879 | Move structural AST families into ast.x, retaining exported flat names and algorithms. Keep semantic Type conversion in type.x. |
 | I12 | [match.x](../lib/match.x#L688) 1,402; [lisp.x](../lib/lisp.x#L977) 1,913; [scan.x](../lib/scan.x#L234) 725 | four private output helpers versus published/native pointers | Adopt references in Match _first/_replace_all/_replace and Lisp _read_form. Keep native callbacks, arrays, retained addresses, public scanner and parser signatures. |
 | I13 | [match-cache.x](../lib/match-cache.x#L550) 580; [meta-group.x](../src/meta-group.x#L813) 871 | constructor 550-562; reset bracket 813-818 | Adopt lexical $scope destination brackets after checking unwind restoration. Keep Error floor, Thread sealing, Context lifecycle, and existing entry decorator brackets. |
 | I14 | [regions.x](../src/regions.x#L165) 1,455; [typed-array.x](../lib/typed-array.x#L1) 189; [typed-map.x](../lib/typed-map.x#L1) 356 | 11 paired typed-container conversion rows | Retain explicit effects. Defer a name projection until one ledger replaces actual declarations and makes effects explicit as well. |
-| I15 | [native-scalar-types.xmacro](../lib/native-scalar-types.xmacro#L40) 92; [var-tags.xmacro](../lib/var-tags.xmacro#L267) 395 | List builders 40-43 and 267-272 | Compare current List-producing quotation forms at the cold consumers. Sequence lifting is available; canonical List insertion equivalence remains unproved. Retain builders unless the comparison preserves stage and identity. |
+| I15 | [native-scalar-types.x](../lib/native-scalar-types.x#L40) 92; [var-tags.x](../lib/var-tags.x#L267) 395 | List builders 40-43 and 267-272 | Compare current List-producing quotation forms at the cold consumers. Sequence lifting is available; canonical List insertion equivalence remains unproved. Retain builders unless the comparison preserves stage and identity. |
 
 The detailed records give exact consumers, competing choices, implementation
 steps, edge cases, and existing validation for every row. Related pointer and
@@ -196,7 +196,7 @@ $native.scalar.access.all();
 ```
 
 Its producer belongs beside the existing template in
-native-scalar-types.xmacro. The intended shape is:
+native-scalar-types.x. The intended shape is:
 
 ```x2c
 meta static List _scalar_access_units(Macro access) {
@@ -682,17 +682,17 @@ the current implementation after the bounded comparisons below.
 
 | Item | Current location and physical file size | Concrete result |
 | --- | --- | --- |
-| I01 | [lib/native-scalar-types.xmacro](../lib/native-scalar-types.xmacro#L80), 106 lines | Scalar declarations derive from the existing Map; all 14 records are preserved. |
-| I03 | [lib/map-generics.xmacro](../lib/map-generics.xmacro#L690), 955 lines | Unused internal parameters removed; outer family contracts preserved. |
+| I01 | [lib/native-scalar-types.x](../lib/native-scalar-types.x#L80), 106 lines | Scalar declarations derive from the existing Map; all 14 records are preserved. |
+| I03 | [lib/map-generics.x](../lib/map-generics.x#L690), 955 lines | Unused internal parameters removed; outer family contracts preserved. |
 | I05 | [src/meta-sdk.x](../src/meta-sdk.x#L60), 658 lines | Named captures retain original wildcard patterns and SDK checks. |
 | I06 | [src/initializers.x](../src/initializers.x#L33), 1,100 lines | Both callers pass captured composite items; transactions and fresh containers remain. |
 | I07 | [src/type.x](../src/type.x#L144), 894 lines | Inspection uses Ast.without_origin; reconstruction keeps original origins. |
 | I08 | [src/type.x](../src/type.x#L472), 894 lines | One compiled predicate; transform alone explicitly canonicalizes first. |
-| I10 | [lib/var-unbox.xmacro](../lib/var-unbox.xmacro#L16), 35 lines | Literal field captured structurally; compiled tag queries remain. |
+| I10 | [lib/common.x](../lib/common.x#L16), 35 lines | Literal field captured structurally; compiled tag queries remain. |
 | I11 | [src/ast.x](../src/ast.x#L76), 393 lines | Four exported structural functions and one private helper relocate unchanged. |
 | I12 | [lib/match.x](../lib/match.x#L688), 1,402 lines | Three private Match outputs and Lisp reader cursor use references. |
 | I13 | [lib/match-cache.x](../lib/match-cache.x#L544), 581 lines | Two complete allocation destination brackets use $scope. |
-| I15 | [lib/var-tags.xmacro](../lib/var-tags.xmacro#L267), 395 lines | Two quotation expressions replace repeated canonical AST field spellings. |
+| I15 | [lib/var-tags.x](../lib/var-tags.x#L267), 395 lines | Two quotation expressions replace repeated canonical AST field spellings. |
 | Binder repair | [src/expressions.x](../src/expressions.x#L3680), 3,925 lines | Normalized return types prevent Long selecting Var_long. |
 | Builtin repair | [src/symbols.x](../src/symbols.x#L1074), 1,421 lines | One private String-keyed Map resolves all 29 exact aliases. |
 | Quotation repair | [lib/meta.x](../lib/meta.x#L362), 407 lines | The existing String-name requirement also rejects long Atoms. |

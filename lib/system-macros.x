@@ -1,0 +1,123 @@
+#pragma once
+#include "common.x"
+
+// System macros that remove boilerplate C leaves to every caller.
+// Include this file to use them: #include "system-macros.x"
+
+/* Dedents the literal `node` was written as when its spelling is exact.
+   Escaped, interpolated and computed values keep their meaning by calling
+   String.dedent at run time. */
+meta List _dedent_expand(List node) {
+  String source = x2c_source_text(node);
+  int length = source.len(), open = 0;
+  if (length >= 3 && source.startswith("%\""))
+    open = 2;
+  else if (length >= 2 && source.startswith("\""))
+    open = 1;
+  if (open == 0 || !source.endswith("\"") || source.contains("\\") ||
+      source.contains("$"))
+    return $!( $node.dedent() );
+  String body = source.getslice(open, length - 1, 1);
+  return x2c_literal_string(body.dedent());
+}
+
+/* Normalizes the indentation a block of text was written with. The literal
+   is dedented during translation when its spelling carries no escape and no
+   interpolation hole; every other form calls String.dedent at run time, so
+   both spellings mean the same thing. */
+macro Expression $dedent(Expr $text) => $(_dedent_expand $text);
+
+/* Reports how long the following statement took on stderr. The caller
+   includes <time.h>. The stop clock and the report run from a `defer`, so
+   they still run when the decorated statement is a function body that
+   returns or a body a raise transfers out of. */
+macro Decorator $time(Stmt $target, Literal $label) {
+  {
+    struct timespec started, stopped;
+    clock_gettime(CLOCK_MONOTONIC, &started);
+    defer {
+      clock_gettime(CLOCK_MONOTONIC, &stopped);
+      double elapsed =
+        (stopped.tv_sec - started.tv_sec) * 1000.0 +
+        (stopped.tv_nsec - started.tv_nsec) / 1000000.0;
+      Stderr.printf("[time] %s %.3f ms\n", $label, elapsed);
+    }
+    $target
+  }
+}
+
+meta int _cases_label(List item) {
+  match (item) {
+    case %(at ? (case ?)): return 1;
+    case %(at ? (default)): return 1;
+  }
+  return 0;
+}
+
+meta int _cases_transfers(List item) {
+  match (item) {
+    case %(at ? (break)): return 1;
+    case %(at ? (continue)): return 1;
+    case %(at ? (goto ?)): return 1;
+    case %(at ? (return ? ?)): return 1;
+    case %(at ? (return ?)): return 1;
+  }
+  return 0;
+}
+
+meta List _cases_split(List items, int labelled) {
+  if (!items) return %();
+  List item = items.car();
+  if (_cases_label(item))
+    return %($item @{_cases_split(items.cdr(), 1)});
+  if (!labelled)
+    return %($item @{_cases_split(items.cdr(), 0)});
+  Array run = [];
+  while (items && !_cases_label(items.car())) {
+    run.push(items.car());
+    items = items.cdr();
+  }
+  if (!_cases_transfers(run[-1])) run.push(%(break));
+  return %((block @run) @{_cases_split(items, 0)});
+}
+
+meta List _cases_switch(List condition, List body) {
+  List selected =
+    $!{ switch ($condition) { ${_cases_split(body.cdr(), 0)}... } };
+  return %($selected);
+}
+
+/* Gives every case run its own block and its own break. Deliberate
+   fallthrough is written by nesting an ordinary switch. */
+macro Decorator $switch(Stmt $body, Expr $condition) {
+  $(_cases_switch $condition $body)...
+}
+
+meta List _macros_location(void) =>
+  x2c_literal_string(
+    x2c_invocation_file() + ":" + x2c_invocation_line().str());
+
+/* Marks a path that is not written yet. Reaching it raises `<invariant>`
+   naming the note and the source line the macro was written on. */
+macro Stmt $todo(Expr $note) {
+  raise %(invariant (note ${$note})
+    (at ${$(_macros_location)}));
+}
+
+/* Marks a path the surrounding logic excludes. */
+macro Stmt $unreachable() {
+  raise %(invariant (note "unreachable")
+    (at ${$(_macros_location)}));
+}
+
+/* Checks an invariant and reports the failing expression as it was written.
+   Unlike C `assert` this transfers to a catch and is not compiled out. */
+macro Stmt $assert(Expr $check) {
+  {
+    if (!($check)) {
+      raise %(invariant
+        (check ${$(x2c.literal.string (x2c.source.text $check))})
+        (at ${$(_macros_location)}));
+    }
+  }
+}

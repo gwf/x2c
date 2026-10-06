@@ -376,7 +376,7 @@ its char predicate now starts at 3279. All I04-I08 and I11 decisions remain.
 Generate's prototype consumers moved to lines 365 and 1182.
 
 The new compiler field macros supply a concrete composition example.
-src/fields.xmacro:3-24 constructs assignment statements with source
+src/fields.x:3-24 constructs assignment statements with source
 quotations and expands a Name sequence. The compiler uses $copy_fields for
 shared state and $set_fields for fresh tables and queues. $set_fields
 explicitly evaluates its value once per field, preserving distinct fresh

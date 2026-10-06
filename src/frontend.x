@@ -39,7 +39,6 @@ typedef struct ParsedUnit {
   int source_lines, generated_symbols;
 } ParsedUnit;
 
-#pragma private
 
 #include <limits.h>
 #include <stdio.h>
@@ -52,14 +51,14 @@ typedef struct ParsedUnit {
 
 // diagnostics
 
-macro Stmt $report.driver.input_read(Expr $c, Expr $filename) {
+static macro Stmt $report.driver.input_read(Expr $c, Expr $filename) {
   $c.report_error(
     <driver>,
     "cannot read input file",
     NULL, %("stage: driver" "file: ${$filename}" "reason: cannot open"));
 }
 
-macro Stmt $report.driver.script_symbols(Expr $c, Expr $site) {
+static macro Stmt $report.driver.script_symbols(Expr $c, Expr $site) {
   $c.report_error(
     <driver>,
     "script units use the default symbol collection",
@@ -67,7 +66,7 @@ macro Stmt $report.driver.script_symbols(Expr $c, Expr $site) {
     "--live-symbols, and the --dump-cpp modes cannot read a script"));
 }
 
-macro Stmt $report.driver.indent_symbols(Expr $c, Expr $site) {
+static macro Stmt $report.driver.indent_symbols(Expr $c, Expr $site) {
   $c.report_error(
     <driver>,
     "indented units use the default symbol collection",
@@ -76,7 +75,7 @@ macro Stmt $report.driver.indent_symbols(Expr $c, Expr $site) {
     "an indented unit"));
 }
 
-macro Stmt $report.driver.cpp_failed(Expr $c, Expr $site, Expr $status) {
+static macro Stmt $report.driver.cpp_failed(Expr $c, Expr $site, Expr $status) {
   $c.report_error(
     <driver>,
     "failed to run C preprocessor",
@@ -333,13 +332,39 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit &unit) {
   if (request.dump == <cpp-tokens>) return NULL;
   if (request.live_symbols) c.runtime_hdrs = 1;
   Map globs = _collect_input(frontend, c);
+  List private_rows = _unit_private_rows(c, globs);
   _share_session(cpp, c);
   /* Owning-source collection already counted declaration names. CPP adds
      host declarations without counting the same source's names again. */
   if (request.live_symbols) cpp.shallow_parse(globs);
   else $let(c.names.counters, c.names.counters.copy())
     cpp.shallow_parse(globs);
-  return cpp.sym.global_symbols();
+  Map symbols = cpp.sym.global_symbols();
+  foreach (List row, private_rows) {
+    if (row.len() == 1) symbols.del(row.car());
+    else symbols[row.car()] = row.cadr();
+  }
+  return symbols;
+}
+
+/* Host preprocessing sees included function bodies, but source collection
+   already established which unit owns each static function. */
+static List _unit_private_rows(Compiler c, Map globs) {
+  Array rows = [];
+  String unit = c.canonical_path(c.filename);
+  foreach (Var (key, owner), globs)
+    match (key) case %("unit-static" ?name): {
+      String path = home_absolute_path(owner.list().car());
+      if (c.canonical_path(path) == unit) continue;
+      rows.push(_unit_private_row(globs, %($name)));
+      rows.push(_unit_private_row(globs, %(self $name)));
+    }
+  return rows.list_free();
+}
+
+static List _unit_private_row(Map globs, List key) {
+  Var value = globs[key];
+  return value is void ? %($key) : %($key $value);
 }
 
 static Map _collect_input(Frontend frontend, Compiler c) {

@@ -5,7 +5,6 @@ import "geo" with Vec, span;
 
 double local_span(double x, double y);
 
-#pragma private
 
 double local_span(double x, double y) {
   Vec v = Vec.new(x, y);

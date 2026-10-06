@@ -67,7 +67,7 @@ passing tests support that result rather than replace it.
   dedicated diagnostic only to preserve deliberate public behavior or prevent
   wrong output, corrupted state, or an unsafe native crossing. Earlier or
   more specific rejection alone does not justify another check or fixture.
-- Every shared Error cause in `lib/error-macros.xmacro` transfers to a matching
+- Every shared Error cause in `lib/error-macros.x` transfers to a matching
   catch or terminates; it never returns to the raising call. Rely on that
   behavior after valid allocation, growth, open, read, write, format, and
   binding operations. Keep checks for documented null inputs, absence,

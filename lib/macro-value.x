@@ -49,7 +49,6 @@ typedef struct MacroCaseSite {
   int ready;
 } MacroCaseSite;
 
-#pragma private
 
 #include "array.x"
 #include "atom.x"

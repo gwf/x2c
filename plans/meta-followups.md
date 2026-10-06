@@ -18,9 +18,9 @@ Historical citations below refer to files that have been removed:
 
 Gary's review of `db86d4b7`:
 
-- `lib/native-scalar-types.xmacro` builds about 130 lines of x2c syntax by
+- `lib/native-scalar-types.x` builds about 130 lines of x2c syntax by
   hand in Lisp. Replace that with an x2c-bodied template, as in
-  `$var.tag.unbox` (`lib/var-tags.xmacro`), and turn the chain of
+  `$var.tag.unbox` (`lib/var-tags.x`), and turn the chain of
   `List.equal` tests in `native_scalar_access` into a lookup built once from
   the rows. First check whether the row list can drive the template
   directly; if not, list the 14 invocations as `lib/common.x` does.

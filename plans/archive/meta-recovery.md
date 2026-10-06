@@ -40,7 +40,7 @@ constant. The runtime in `lib/lisp.x` only moves bytes: `lisp_bytes`,
 `lisp_session_copy`. A record reads as its own address; assignment copies
 into the destination's bytes, so earlier addresses stay valid. Exact C
 scalars load and store through the one ledger in
-`lib/native-scalar-types.xmacro`, which the compiler's Type lookup also
+`lib/native-scalar-types.x`, which the compiler's Type lookup also
 uses.
 
 Automatic bytes belong to the Scope of the running source function's Lisp

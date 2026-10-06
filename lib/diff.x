@@ -17,7 +17,6 @@ typedef enum Diff {
   DIFF_NAMESPACE
 } Diff;
 
-#pragma private
 
 // line edits
 
@@ -25,7 +24,7 @@ static const int _LIMIT = 2000;
 
 /* The lines of both texts and the edits so far, newest first. The texts
    differ only in old[lo..lo + n) and new[lo..lo + m). */
-typedef struct Script {
+static typedef struct Script {
   Array old, new, List edits, int lo, n, m;
 } Script;
 
@@ -77,7 +76,7 @@ static int Script.same(Script &s, int i, int j) =>
 
 /* The frontiers of every step in one buffer: step `s` starts at `s * s`
    and has `2s + 1` entries, indexed by `k + s`. */
-typedef int *Trace;
+static typedef int *Trace;
 
 /* Myers' greedy search over the middle. Returns the edit count after
    emitting the edits, or -1 past `_LIMIT`. */
@@ -171,7 +170,7 @@ static const int _CONTEXT = 3;
 
 /* One hunk: its end in the edits, where it starts in each text, how many
    lines of each text it covers, and its marked lines, newest first. */
-typedef struct Hunk {
+static typedef struct Hunk {
   int end, old_start, old_count, new_start, new_count, List lines;
 } Hunk;
 

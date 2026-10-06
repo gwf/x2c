@@ -68,7 +68,7 @@ need no source adoption.
   reference; the implementing session confirms the emitted `common.h`
   still carries the assertions that guard the public ABI.
 - **Typed-array `sort_by`/`sort_with` is out of scope.** The survey found
-  that `lib/array-generics.xmacro` has no sort; that is a new feature, not
+  that `lib/array-generics.x` has no sort; that is a new feature, not
   adoption, and is recorded here as a follow-on candidate only.
 
 ## Implementation

@@ -10,8 +10,7 @@
 #pragma once
 #include "x2c.x"
 #include "meta.x"
-#pragma private
-$(import "../src/grammar.xmacro")
+#include "grammar.x"
 #include "lisp.x"
 #include "macros.x"
 #include "transform.x"
@@ -40,7 +39,7 @@ static List _scope_expand(List body, List destinations) {
 /* One `foreach` expansion: its declaration, collection, and body, the
    expressions the declaration binds, the collection's type, and the fresh
    names the macro supplies for the loop's own variables. */
-typedef struct Foreach {
+static typedef struct Foreach {
   List declaration, collection, body, targets, type;
   Var iterator, item, pair, object, cursor;
 } Foreach;
@@ -245,7 +244,7 @@ static List _class_expand(List capture) {
    one other type, an aggregate is a struct or union, and a positional
    class is a struct whose fields all have Var forms. The defaults share
    one `value` parameter and Var tag. */
-typedef struct Shape {
+static typedef struct Shape {
   String owner, List type, location, pointee, representation, named;
   int heap, alias, aggregate, positional;
   List parameter, Symbol tag;
@@ -830,7 +829,7 @@ static List _binding_name_signature(String name) =>
    name its callers use, as are the slot functions that the try templates
    in `src/transform.x` call. */
 
-macro Stmt $builtin.row(Expr $rows, Expr $name, Expr $function) {
+static macro Stmt $builtin.row(Expr $rows, Expr $name, Expr $function) {
   $rows[$name] = Func.new(
     $function, $(_x2c.literal.list (_x2c.function.native-type $function)));
 }

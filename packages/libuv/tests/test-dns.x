@@ -6,7 +6,7 @@ import "libuv" with UvAddress, UvLookup, UvLoop;
 #include <netdb.h>
 #include <stdlib.h>
 
-$(import "../../../unittest/test-macros.xmacro")
+#include "../../../unittest/test-macros.x"
 
 typedef struct LookupState {
   uv_getaddrinfo_t *native;

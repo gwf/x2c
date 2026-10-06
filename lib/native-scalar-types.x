@@ -1,0 +1,110 @@
+#pragma once
+#include "common.x"
+#include "macro-value.x"
+
+/*  native-scalar-types.x -- exact C scalar ledger
+
+    These are the native C scalar spellings the compiler can carry through a
+    Var.  The compiler projects its Type lookup from these rows, and
+    `lib/lisp.x` invokes `$native.scalar.access.all` to get each row's
+    native size, alignment, load, and store for compile-time code that
+    keeps C objects in bytes.  Var's i48/u48 numeric payload families are
+    deliberately absent: neither is an exact C type.
+
+    `native_scalar_types` is the one table. Each key is Type.scalar's
+    canonical spelling, and each value is:
+
+      (TAG C-EXTRACTOR C-UPDATE)
+
+    C-EXTRACTOR and C-UPDATE retain the existing compiler emission
+    spellings. `src/type.x` inserts the table with
+    `$native_scalar_types()`, and the Lisp helpers below call it during
+    expansion.
+*/
+
+meta Map native_scalar_types(void) => {
+  %(char): %(i8 "Var_char" "x2c_var_update_i8"),
+  %(signed char): %(i8 "Var_char" "x2c_var_update_schar"),
+  %(unsigned char): %(u8 "Var_uchar" "x2c_var_update_u8"),
+  %(short): %(i16 "Var_short" "x2c_var_update_i16"),
+  %(unsigned short): %(u16 "Var_ushort" "x2c_var_update_u16"),
+  %(int): %(i32 "Var_int" "x2c_var_update_i32"),
+  %(unsigned): %(u32 "Var_uint" "x2c_var_update_u32"),
+  %(long): %(long "Var_long" "x2c_var_update_long"),
+  %(unsigned long): %(ulong "Var_ulong" "x2c_var_update_ulong"),
+  %(long long): %(llong "Var_long_long" "x2c_var_update_long_long"),
+  %(unsigned long long):
+    %(ullong "Var_ulong_long" "x2c_var_update_ulong_long"),
+  %(float): %(f32 "Var_float" "x2c_var_update_f32"),
+  %(double): %(f64 "Var_floating" "x2c_var_update_f64"),
+  %(long double):
+    %(ldouble "Var_long_double" "x2c_var_update_long_double"),
+};
+
+$(defun native.scalar.list (items)
+  (if (null? items) '(expr ("List") (nil))
+      `(expr ("List")
+        (cons ,(car items) ,(native.scalar.list (cdr items))))))
+
+/* The access record for TYPE is `_native_scalar_access` followed by each
+   word of TYPE, so `(unsigned long)` names
+   `_native_scalar_access_unsigned_long`. */
+$(defun native.scalar.access-name (type)
+  (apply string-append (cons "_native_scalar_access"
+    (map (lambda (word) (string-append "_" (str word))) type))))
+
+/* x2c has no `_Alignof(type-name)` syntax, so a Type hole cannot be its
+   argument. */
+$(defun native.scalar.alignment (type)
+  `(expr (unsigned long)
+    (call "_Alignof" (args (decl ,type (bindings (bind () ())))))))
+
+/* Native size, alignment, load, and store for one row's type. The
+   importing unit declares NativeScalarAccess first. */
+macro Unit $native.scalar.access(Type $type) {
+  static Var load(const void *bytes, Scope *owner) {
+    $type native;
+    memcpy(&native, bytes, sizeof native);
+    Var value = native;
+    return value.move_wide_to(owner);
+  }
+
+  static void store(void *bytes, Var value) {
+    $type native = value;
+    memcpy(bytes, &native, sizeof native);
+  }
+
+  static struct NativeScalarAccess
+    $(x2c.ident (native.scalar.access-name $type)) = {
+      $(x2c.literal.symbol (car (Map.getindex (native_scalar_types) $type))),
+      sizeof($type), $(native.scalar.alignment $type), load, store
+    };
+}
+
+meta List _scalar_access_units(Macro access) {
+  Array units = [];
+  List rows = native_scalar_types().list().sort();
+  foreach (List row, rows) {
+    Type type = row.car();
+    units.push(access(type));
+  }
+  return units.list_free();
+}
+
+macro Unit $native.scalar.access.all() {
+  $_scalar_access_units($native.scalar.access)...
+}
+
+$(defun native.scalar.access-entry (entry)
+  `(map-entry ,(native.scalar.list (map x2c.literal.symbol (car entry)))
+    ,(x2c.expr.cast '(* void) `(expr () (op &
+      ,(x2c.expr.ident
+        (x2c.ident (native.scalar.access-name (car entry)))))))))
+
+/* `native_scalar_access`'s lookup, in sorted order so emission does not
+   depend on hash layout: each row's type to its access record,
+   which `$native.scalar.access.all` defines first. */
+macro Entry $native.scalar.access.entries() {
+  $(map native.scalar.access-entry
+        (List.sort (Map.list (native_scalar_types))))...
+}

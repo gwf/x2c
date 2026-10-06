@@ -1,0 +1,5 @@
+#pragma once
+
+macro Decorator $fixture.imported(Function $target) {
+  $(x2c.function.body $target)...
+}

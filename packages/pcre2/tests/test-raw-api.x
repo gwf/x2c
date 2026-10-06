@@ -4,7 +4,7 @@
 #include "test-support.x"
 #include <string.h>
 
-$(import "../../../unittest/test-macros.xmacro")
+#include "../../../unittest/test-macros.x"
 
 static void pcre2_raw_core(void) {
   char version[32] = { 0 };

@@ -1,9 +1,9 @@
 #include "x2c.x"
 
-$(import "macro-import-defs.xmacro")
+#include "macro-import-defs.x"
 $(import "macro-import-helper.xlisp")
 $(import "macro-import-helper.xlisp")
-$(import "macro-import-defs.xmacro")
+#include "macro-import-defs.x"
 
 int main(void) {
   printf(

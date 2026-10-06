@@ -9,12 +9,10 @@ inline int Alias.absolute(int value);
 $x2c.foreign.alias(abs)
 inline int alias_absolute(int value);
 
-#pragma private
 
 $x2c.foreign.alias(labs)
 static long private_absolute(long value);
 
-#pragma public
 
 int main(void) {
   int same_receiver = Alias.absolute == abs;

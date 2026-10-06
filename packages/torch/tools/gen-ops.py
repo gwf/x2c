@@ -596,8 +596,6 @@ X_PRELUDE = '''\
 #include "torch.x"
 #include "xt_ops.h"
 
-#pragma private
-
 static xt_tensor _native(Tensor t) => t ? t.native() : NULL;
 
 static int64_t *_dims(List sizes, int64_t &count) {
@@ -640,7 +638,6 @@ static List _pair(xt_tensor a, xt_tensor b, String operation) {
   return %($first $second);
 }
 
-#pragma public
 '''
 
 

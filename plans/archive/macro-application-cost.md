@@ -33,7 +33,7 @@ runs of instructions retired; noise about 1%.
 | of which the two `search_replace` walks over the template | 17.9 G | 7.6% |
 
 The largest `_rebuild` site is the `$called` template in
-`src/grammar.xmacro`: 172,745 applications and 28.6 G. The largest
+`src/grammar.x`: 172,745 applications and 28.6 G. The largest
 transaction site is `compiler_wrapper` in `src/protocol.x`: 1,161
 transactions at 6.8 M instructions each.
 

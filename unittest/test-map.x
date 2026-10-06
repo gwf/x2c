@@ -3,7 +3,7 @@
 #include <string.h>
 
 #include "test-support.x"
-$(import "test-macros.xmacro")
+#include "test-macros.x"
 
 
 typedef struct MapProbe {

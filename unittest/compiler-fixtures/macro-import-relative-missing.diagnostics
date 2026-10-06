@@ -1,5 +1,5 @@
-./unittest/compiler-fixtures/macro-import-relative/missing.x:4:1: macro: cannot open macro import
-  $(import "missing.xmacro")
+unittest/compiler-fixtures/macro-import-relative/missing.x:4:1: macro: cannot open compile-time Lisp import
+  $(import "missing.xlisp")
   ^^
-  note: path: ./unittest/compiler-fixtures/macro-import-relative/missing.xmacro
+  note: path: unittest/compiler-fixtures/macro-import-relative/missing.xlisp
 

@@ -87,7 +87,7 @@ remains a separate decision.
 ### Parked
 
 **Delivered 2026-09-25.** The var-tags ledger is `meta` code in
-`lib/var-tags.xmacro`, imported only by the leaf units `lib/var-ledger.x`
+`lib/var-tags.x`, imported only by the leaf units `lib/var-ledger.x`
 and `src/type-ledger.x`. `lib/var.x` declares the tables `extern`, decodes
 through a projected group table, and reads `Var.tag_top`/`Var.tag_bottom`
 natively for the unbox accessors. A clean `lib/` plus `src/` translation
@@ -292,7 +292,7 @@ that owns the runtime copies, with prototypes emitted in the others. It buys
 "once for everyone" *within* the import set, and it costs a new compile-time
 form, per-unit designation state, synthesized prototype emission, and two
 failure modes the compiler still cannot catch (nobody designates, two units
-designate). Nothing in the repository wants it yet: `lib/autodiff.xmacro` is
+designate). Nothing in the repository wants it yet: `lib/autodiff-macros.x` is
 Lisp, and every meta function in the fixtures is either `static` or reached
 by one unit. Add it when a `.xmacro` ships a runtime helper several units
 call, not before.
@@ -347,7 +347,7 @@ answer beside the same function's run-time answer: `65 65  10 10  1 1`.
 Measured 2026-09-18 on branch `meta-install-cost`, after M2. A `.xmacro`
 holding 44 one-line definitions, imported by a unit that calls none of them
 at run time, made an imported `meta` function cost about fifteen times what a
-Lisp `defun` costs, paid by every importing unit. `lib/var-tags.xmacro` has 32
+Lisp `defun` costs, paid by every importing unit. `lib/var-tags.x` has 32
 importers, which is what made Phase 5 of
 `plans/archive/comptime-x2c-generalization.md` a net loss.
 
@@ -433,7 +433,7 @@ registries are left alone, since the full parse rebuilds and resolves them
 anyway. The first arrangement tried resolved every visible adoption instead of
 the one asked for, and cost a third of a translation - more than the whole
 feature - so both halves are on demand. `List`, `Array` and `Map` all iterate
-now; `meta-import-defs.xmacro` covers the `List` case.
+now; `meta-import-defs.x` covers the `List` case.
 
 A `Var` collection still declines, with "no binding for Iter_try_next". That
 is not a missing entry in `etc/comptime.xlisp`: the `Var` branch of `foreach`
@@ -1068,7 +1068,7 @@ because the repository root it discovers decides whether it replays
 in an example and it keeps working. `Meta` becomes a reserved type name only in
 a unit that includes `lib/meta.x`, which is not in the implicit prelude. The decorator spelling keeps working
 through M1-M3 and is removed only when the plan's own fixtures use `meta`.
-`lib/autodiff.xmacro` is untouched. Whether the ported autodiff replaces it
+`lib/autodiff-macros.x` is untouched. Whether the ported autodiff replaces it
 remains Gary's call and is not part of this plan.
 
 ## Validation
@@ -1190,7 +1190,7 @@ passed, `make verify` 924 passed, and the documentation audit passes.
   in the fixture and answer correctly, which was the shape M8 needs.
 - A `Map` of thunks lowers, which is what Phase 6 gave back 149 ms for. Whether
   `ad_partial` recovers it is not measured here.
-- A general `lib/var-tags.xmacro` port no longer needs `var.tag.map` and
+- A general `lib/var-tags.x` port no longer needs `var.tag.map` and
   `var.tag.filter` rewritten as `List.map` and `List.filter`.
 
 ### Two dictionary gaps this found, not fixed here

@@ -2,7 +2,7 @@
 
 #include "typed-array.x"
 #include "test-support.x"
-$(import "test-macros.xmacro")
+#include "test-macros.x"
 
 static void typed_array_keeps_array_unchanged(void) {
   $test.scoped();

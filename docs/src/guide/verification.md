@@ -22,7 +22,7 @@ result.
 
 <!-- ignore: needs the cstar package and a running prover. -->
 ```x2c,ignore
-$(import "../src/cstar.xmacro")
+#include "../src/cstar-macros.x"
 
 $cstar.verify("fact(x >= --2147483647i)",
               "fact(x >= 0i && __return == x || x < 0i && __return == --x)")

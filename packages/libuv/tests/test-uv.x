@@ -8,7 +8,7 @@ import "libuv" with UvAsync, UvCheck, UvIdle, UvLoop, UvPrepare,
 #include <sys/stat.h>
 #include <unistd.h>
 
-$(import "../../../unittest/test-macros.xmacro")
+#include "../../../unittest/test-macros.x"
 
 static String _scratch(String name) {
   String path = %"/tmp/x2c-libuv-$name";

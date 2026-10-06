@@ -154,7 +154,7 @@ Packages use the following layout:
 - `src/<name>.x` is the entry unit named for the package. It contains the
   hand-written x2c methods, protocols, values, operators, and callback
   boundary used by normal applications, and `import "<name>"` reaches
-  everything above its `#pragma private`.
+  its nonstatic declarations and their required type definitions.
 - `src/<library>-<version>.h` includes the real pinned upstream header. This is
   the complete raw API, not a copied declaration or list of aliases.
 - `examples/` contains both short showcases and broader applications when the

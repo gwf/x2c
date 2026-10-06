@@ -9,9 +9,8 @@
 */
 #pragma once
 #include "compiler.x"
-#pragma private
-$(import "../src/grammar.xmacro")
-$(import "../src/ast-rewrite.xmacro")
+#include "grammar.x"
+#include "ast-rewrite.x"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -25,7 +24,7 @@ $(import "../src/ast-rewrite.xmacro")
 
 // diagnostics
 
-macro Stmt $report.emit.file_write(Expr $c, Expr $failure) {
+static macro Stmt $report.emit.file_write(Expr $c, Expr $failure) {
   {
     String reason = String.new(strerror((int) $failure.assoc(<"errno">)));
     $c.report_error(
@@ -87,7 +86,8 @@ static List Compiler._generated_code(Compiler c, List ast, String basename) {
 }
 
 static List Compiler._emit_header(Compiler c, List header) =>
-  c.emit(c._include_guard(_vertical_spacing(header)), NULL);
+  c.emit(c._include_guard(_vertical_spacing(c._header_prototypes(header))),
+    NULL);
 
 /* Each source use follows the declarations it needs. */
 static List Compiler._emit_source(
@@ -113,7 +113,7 @@ static void Compiler._publish(Compiler c, List outputs) {
    conditional groups still open, `forwarded`
    the struct and union tags the header declares, `included` the files its
    includes reach, and `statics` the bindings static declarations declare. */
-typedef struct Partition {
+static typedef struct Partition {
   Compiler c, Array header, source, pending, open;
   Map forwarded, included, statics;
 } Partition;
@@ -142,8 +142,7 @@ static List Compiler._source_projection(
     match (node) {
       case %((!or protocol adopt macrodef) *): continue;
       case %(preproc ?(String content)):
-        if (_is_pragma_once(content) || preproc_visibility(content) >= 0)
-          continue;
+        if (_is_pragma_once(content)) continue;
       case %(import ?unit *):
         node = %(preproc "#include \"${unit.string()}.x\"");
       case %(function ?type (!set ?declarator (bind ?binding *)) ?body): {
@@ -162,12 +161,12 @@ static List Compiler._source_projection(
     node = _without_static_type(node);
     source.push(node);
   }
-  return _typedef_forwards(source.list_free(), NULL);
+  return _typedef_forwards(source.list_free(), NULL, c);
 }
 
 static void Partition.add(Partition &p, Ast node) {
   match (node) {
-    case %((!or protocol adopt macrodef) *): return;
+    case %((!or protocol adopt macrodef c-assert) *): return;
     case %(typedef ? (bindings *)): p.add_typedef(node);
     case %(function (!set ?type (*)) ?declarator (!set ?body (block *))):
       p.add_function(type, declarator, body);
@@ -250,16 +249,24 @@ static List Partition.finish(Partition &p) {
   Map header_filled = _filled_groups(header);
   Map source_filled = _filled_groups(source);
   header = _place_groups(header, header_filled, source_filled);
-  return _typedef_forwards(header, NULL);
+  return _typedef_forwards(header, NULL, p.c);
 }
 
-/* Static types stay in the source unless a later header item needs them.
-   Late native includes follow the same rule for the types they declare. */
+/* The collected interface selects static types for both projections.
+   Late native includes wait for the header's spelling dependencies. */
 
 static void Partition.add_typedef(Partition &p, List node) {
   Type type = node.cadr();
-  p.hold(type.is_static() ? _typedef_names(node) : NULL,
-    _without_static_type(node));
+  node = _without_static_type(node);
+  if (type.is_static() && !p.publishes_typedefs(_typedef_names(node)))
+    p.source.push(node);
+  else p.publish(node);
+}
+
+static int Partition.publishes_typedefs(Partition &p, List names) {
+  foreach (String name, names)
+    if (p.c.publishes_typedef(name)) return 1;
+  return 0;
 }
 
 /* Static type declarations have no C storage. Static objects keep it. */
@@ -317,7 +324,7 @@ static List _declared_type_names(List node) {
 /* The header items the markers are decided against. `declared` maps each
    typedef name to the first header position declaring it, and `spelled`
    holds the type names the items from position `walked` on spell. */
-typedef struct HeaderNeeds {
+static typedef struct HeaderNeeds {
   Array header;
   Map declared, spelled;
   int walked;
@@ -491,8 +498,10 @@ static void Partition.add_declaration(
   }
   if (type.is_static() && _body_tag(type)) {
     List core = type.base_type();
-    p.hold(_declared_type_names(decl),
-      %(declare $core (bindings (bind () ()))));
+    List body = %(declare $core (bindings (bind () ())));
+    List family = %(${core.car()} ${core.cadr()});
+    if (p.c.publishes_type_family(family)) p.publish(body);
+    else p.source.push(body);
     if (_declares_object(bindings))
       p.source.push(%(declare ${_tag_only(type, core, _body_tag(type))}
                        $bindings));
@@ -642,15 +651,14 @@ static void Partition.mark_conditional(Partition &p, List node, Symbol kind) {
   if (kind == <close>) p.open.take_last();
 }
 
-/* The generator writes the header guard and ignores old visibility
-   pragmas. Includes follow their source position in each projection. */
+/* The generator writes the header guard. Includes follow their source
+   position in each projection. */
 static void Partition.place_directive(
   Partition &p, List node, String content) {
   if (_is_pragma_once(content)) return;
-  int visibility = preproc_visibility(content), angle = 0;
+  int angle = 0;
   String target = preproc_include_target(content, angle);
-  if (visibility >= 0) return;
-  else if (target) p.add_include(node, target, angle);
+  if (target) p.add_include(node, target, angle);
   else p.publish_directive(node);
 }
 
@@ -729,15 +737,24 @@ static List _place_groups(
    field needs it. The forward uses the final declarator, preserving pointer
    and value identity; an incomplete by-value field remains a native error. */
 
-static List _typedef_forwards(List items, List earlier) {
-  Array candidates = _forward_candidates(items), out = [];
-  Map available = {}, first = {};
+static List _typedef_forwards(List items, List earlier, Compiler c) {
+  Array candidates = _forward_candidates(items, c != NULL), out = [];
+  Map available = {}, first = {}, included = {}, moved = {};
   foreach (List node, earlier) _add_names(available, node);
   for (int i = candidates.len() - 1; i >= 0; i--)
     first[candidates[i].car()] = i;
   foreach (List node, items) {
-    match (node) case %(typedef ?base ?):
-      _add_forwards(out, candidates, first, available, base);
+    if (node in moved) continue;
+    match (node) {
+      case %(typedef ?base ?):
+        _add_forwards(out, candidates, first, available, base, moved);
+      case %(preproc ?(String text)) if (c): {
+        int angle = 0;
+        String target = preproc_include_target(text, angle);
+        if (target) _add_forwards(out, candidates, first, available,
+          c.include_type_dependencies(target, angle, included), moved);
+      }
+    }
     out.push(node);
     _add_names(available, node);
   }
@@ -745,13 +762,16 @@ static List _typedef_forwards(List items, List earlier) {
   return out.list_free();
 }
 
-/* Each alias of a named struct or union typedef, paired with the forward
-   typedef that declares it. */
-static Array _forward_candidates(List items) {
+/* Each alias is paired with its tag-only typedef. A header must declare
+   an enum completely before an included field can use it by value. */
+static Array _forward_candidates(List items, int complete_enums) {
   Array candidates = [];
   foreach (List node, items)
     match (node) case %(typedef ?base ?bindings): {
       List forward = _typedef_forward(base, bindings);
+      if (!forward && complete_enums)
+        match (base.list().type().base_type())
+          case %(enum ? (*)): forward = node;
       if (!forward) continue;
       foreach (String alias, _typedef_names(node))
         candidates.push(%($alias $forward));
@@ -775,7 +795,8 @@ static List _typedef_forward(Type type, List bindings) {
    first candidate; a later one for the same alias always finds it
    declared. */
 static void _add_forwards(
-  Array out, Array candidates, Map first, Map available, Var base) {
+  Array out, Array candidates, Map first, Map available, Var base,
+  Map moved) {
   Map spelled = {};
   _spelled_types(base, spelled);
   Array found = [];
@@ -787,6 +808,7 @@ static void _add_forwards(
     (String name, List forward) = candidates[at];
     if (name in available) continue;
     out.push(forward);
+    if (forward.cadr().list().type().is_enum()) moved[forward] = 1;
     _add_names(available, forward);
   }
 }
@@ -806,7 +828,7 @@ static void _add_names(Map available, List node) {
    `synthetic` is the synthetic initializer or NULL, and `entry` names the
    function a patched entry calls. `reachable` holds the entries a
    cache-only file patches, or is NULL when every public entry is patched. */
-typedef struct Init {
+static typedef struct Init {
   Compiler c, String initializer, entry, List guard, shutdown;
   List synthetic, Map reachable;
 } Init;
@@ -934,7 +956,7 @@ static int _protocol_bootstrap(String name) =>
 
 // initializers
 
-macro Decorator $initializer_body(Function $function,
+static macro Decorator $initializer_body(Function $function,
     Stmt $body...) {
   $body...
 }
@@ -1107,6 +1129,7 @@ static List Compiler._static_prototypes(
     .c = c, .available = {}, .statics = {}, .seen = {}, .out = []};
   _source_declarations(source, f.statics);
   foreach (List node, source) {
+    node = c._inline_prototype(node);
     if (node.car() == <typedef> && node in f.seen) continue;
     _collect_declared(node, f.available);
     f.dependencies(node);
@@ -1114,6 +1137,52 @@ static List Compiler._static_prototypes(
   }
   return f.out.list_free();
 }
+
+/* A cyclic include can reach an inline body before the called function's
+   header resumes. Forward its actual typed dependencies at the body. */
+static List Compiler._header_prototypes(Compiler c, List header) {
+  Forward f = {
+    .c = c, .available = {}, .statics = {}, .seen = {}, .out = []};
+  _source_declarations(header, f.statics);
+  foreach (List node, header) {
+    node = c._inline_prototype(node);
+    _collect_declared(node, f.available);
+    f.dependencies(node);
+    f.out.push(node);
+  }
+  return f.out.list_free();
+}
+
+/* Every public inline definition has C internal linkage, including the
+   authored prototypes in a file that reaches its defining source. */
+static List Compiler._inline_prototype(Compiler c, List node) {
+  match (node) {
+    case %(declare ?type (!set ?declarator
+             (bind ?binding ((fnmod *) *)))):
+      if (!type.type().is_static() && c._inline_binding(binding))
+        return %(declare (static @type) $declarator);
+    case %(declare ?type (bindings *declarators))
+      if (!type.type().is_static()): {
+      Array rows = [], int changed = 0;
+      foreach (List declarator, declarators) {
+        List base = type;
+        match (declarator) case %(bind ?binding ((fnmod *) *)):
+          if (c._inline_binding(binding)) {
+            base = %(static @type);
+            changed = 1;
+          }
+        rows.push(%(declare $base (bindings $declarator)));
+      }
+      if (changed) return rows.list_free();
+      rows.free();
+    }
+  }
+  return node;
+}
+
+static int Compiler._inline_binding(Compiler c, List binding) =>
+  c.sym.get(%("function-inline" ${binding_identity_spelling(binding)}))
+    != NULL;
 
 /* Native directives and initializer inputs keep their source order.
    Public inline definitions keep their macro state at their positions.
@@ -1267,7 +1336,7 @@ static void _set_static(Map statics, List node, List declarator) {
 /* `available` holds what is already declared, `statics` each static
    declaration by binding and spelling, `seen` what is already forwarded,
    and `out` the ordered source. */
-typedef struct Forward {
+static typedef struct Forward {
   Compiler c, Map available, statics, seen, Array out;
 } Forward;
 
@@ -1329,7 +1398,8 @@ static void Forward.global(Forward &f, Var binding, String spelling) {
   if (c.sym.get(%("generated-protocol" $spelling))) return;
   f.seen[global] = 1;
   f.types(type);
-  f.out.push(ast_prototype_declarator(type.declaration_ast(global)));
+  List declaration = ast_prototype_declarator(type.declaration_ast(global));
+  f.out.push(c._inline_prototype(declaration));
 }
 
 /* Forwards the static declaration under `key` once, after what it needs. */
@@ -1609,7 +1679,7 @@ static void Compiler._print_type(Compiler c, Token tokens, List row) {
           kind = _type_kind(tokens + start, base, modifiers);
           String written = c.definition_doc(tokens + start);
           if (written) doc = written;
-          privacy = %((private $private));
+          privacy = %((private ${!c.publishes_typedef(name)}));
         }
       printf(
         "%s\n",

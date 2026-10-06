@@ -2,7 +2,7 @@
 
 #include "digest.x"
 #include "test-support.x"
-$(import "test-macros.xmacro")
+#include "test-macros.x"
 #include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>

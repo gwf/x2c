@@ -24,7 +24,7 @@ static void string_classification(void) {
   EXPECT_FALSE(bytes.is_alpha());
 }
 
-$(import "test-macros.xmacro")
+#include "test-macros.x"
 
 void string_classify_suite(void) {
   $test.run(string_classification);

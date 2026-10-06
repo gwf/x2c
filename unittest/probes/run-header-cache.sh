@@ -21,7 +21,7 @@ fail() {
 
 copy_runtime_sources() {
   local destination=$1 source
-  cp "$ROOT"/lib/*.x "$ROOT"/lib/*.xmacro "$destination"
+  cp "$ROOT"/lib/*.x "$destination"
   for source in "$ROOT"/lib/*.xlisp; do
     [[ -e "$source" ]] && cp "$source" "$destination"
   done
@@ -173,7 +173,7 @@ FAKE="$BUILD/fake-root"
 mkdir -p "$FAKE/src" "$FAKE/include" "$FAKE/lib" "$FAKE/etc" \
   "$FAKE/builds/0"
 cp "$X2C" "$FAKE/builds/0/x2c"
-cp "$ROOT/etc/"*.xlisp "$ROOT/etc/"*.xmacro "$FAKE/etc/"
+cp "$ROOT/etc/"*.xlisp "$ROOT/etc/"*.x "$FAKE/etc/"
 # Staging a meta group compiles it against the runtime headers.
 cp -RL "$ROOT/include/." "$FAKE/include/"
 copy_runtime_sources "$FAKE/lib/"
@@ -270,14 +270,14 @@ cmp -s "$FAKE/extout/uses-ext-twice.c" "$FAKE/extwarm/uses-ext-twice.c" ||
 # generates, so an including unit types their calls from a cold walk and
 # from the owner's interface alike. A generated static stays in its unit.
 mkdir -p "$FAKE/gencold" "$FAKE/genwarm"
-cat >"$FAKE/src/gen.xmacro" <<'EOF'
+cat >"$FAKE/src/gen.x" <<'EOF'
 macro Unit $gen(Type $type, name $next) {
   static $type step($type value) => value + 1;
   $type $next($type value) => step(value);
 }
 EOF
 cat >"$FAKE/src/gen-owner.x" <<'EOF'
-$(import "gen.xmacro")
+#include "gen.x"
 $gen(long, gen_next);
 EOF
 cat >"$FAKE/src/gen-use.x" <<'EOF'
@@ -302,7 +302,7 @@ cmp -s "$FAKE/gencold/gen-use.c" "$FAKE/genwarm/gen-use.c" ||
 # invocation, so a unit that includes another and expands the same macro
 # links, and each expansion's typedef keeps its own interface row.
 mkdir -p "$FAKE/cellcold" "$FAKE/cellwarm"
-cat >"$FAKE/src/cell.xmacro" <<'EOF'
+cat >"$FAKE/src/cell.x" <<'EOF'
 macro Unit $cell(Type $type, name $get) {
   $type counter = 1;
   typedef $type S;
@@ -311,13 +311,13 @@ macro Unit $cell(Type $type, name $get) {
 }
 EOF
 cat >"$FAKE/src/cell-a.x" <<'EOF'
-$(import "cell.xmacro")
+#include "cell.x"
 $cell(int, cell_int);
 $cell(long, cell_long);
 EOF
 cat >"$FAKE/src/cell-b.x" <<'EOF'
 #include "cell-a.x"
-$(import "cell.xmacro")
+#include "cell.x"
 $cell(short, cell_short);
 int main(void) { return cell_int() + cell_long() + cell_short() == 3 ? 0 : 1; }
 EOF
@@ -479,11 +479,11 @@ cmp -s "$BUILD/macro-stability/before.names" \
 # replays the second unit's copy of the header out of the cache and must
 # include the header's own imports in the depfile.
 mkdir -p "$BUILD/imports/src" "$BUILD/imports/out"
-cat >"$BUILD/imports/src/probe.xmacro" <<'EOF'
+cat >"$BUILD/imports/src/probe.x" <<'EOF'
 $(def probe.step 3)
 EOF
 cat >"$BUILD/imports/src/hdr.x" <<'EOF'
-$(import "probe.xmacro")
+#include "probe.x"
 int probe_step(int n);
 EOF
 cat >"$BUILD/imports/src/first.x" <<'EOF'
@@ -495,9 +495,9 @@ cat >"$BUILD/imports/src/second.x" <<'EOF'
 int probe_twice(int n) { return probe_step(n) + 2; }
 EOF
 (cd "$BUILD/imports" && "$X2C" translate --out-dir out src/first.x src/second.x)
-grep -q "probe.xmacro" "$BUILD/imports/out/first.d" ||
+grep -q "probe.x" "$BUILD/imports/out/first.d" ||
   fail "imports probe is vacuous: even a cold walk omits the macro file"
-grep -q "probe.xmacro" "$BUILD/imports/out/second.d" ||
+grep -q "probe.x" "$BUILD/imports/out/second.d" ||
   fail "a replayed header's macro import is missing from the depfile"
 
 # A package's own compile-time imports belong to every importing unit. The
@@ -505,19 +505,18 @@ grep -q "probe.xmacro" "$BUILD/imports/out/second.d" ||
 # import is resolved, so both dependencies must survive that replay.
 mkdir -p "$BUILD/package-import/packages/depcache/src" \
   "$BUILD/package-import/src" "$BUILD/package-import/out"
-cat >"$BUILD/package-import/packages/depcache/src/helper.xmacro" <<'EOF'
+cat >"$BUILD/package-import/packages/depcache/src/helper.x" <<'EOF'
 macro Expression $depcache.answer() => 7;
 EOF
 cat >"$BUILD/package-import/packages/depcache/src/helper.xlisp" <<'EOF'
 (def depcache-helper 1)
 EOF
 cat >"$BUILD/package-import/packages/depcache/src/depcache.x" <<'EOF'
-$(import "helper.xmacro")
+#include "helper.x"
 $(import "helper.xlisp")
 typedef int Value;
 class CachedValue { int value; };
-#pragma private
-class HiddenValue { int value; };
+static class HiddenValue { int value; };
 EOF
 cat >"$BUILD/package-import/src/consumer.x" <<'EOF'
 import "depcache" as dep;
@@ -531,7 +530,7 @@ EOF
 (cd "$BUILD/package-import" && "$X2C" translate \
   --package-dir packages --out-dir out src/consumer.x \
   packages/depcache/src/depcache.x)
-grep -q "helper.xmacro" "$BUILD/package-import/out/consumer.d" ||
+grep -q "helper.x" "$BUILD/package-import/out/consumer.d" ||
   fail "a package's macro import is missing from the consumer depfile"
 grep -q "helper.xlisp" "$BUILD/package-import/out/consumer.d" ||
   fail "a package's Lisp import is missing from the consumer depfile"
@@ -541,13 +540,12 @@ grep -q 'depcache__Var_cachedvalue' \
 ! grep -q 'HiddenValue' "$BUILD/package-import/out/depcache.h" ||
   fail "private package class escaped through generated defaults"
 
-# Case 10: aliases belong to one .x file. An included file may use its own
-# aliases to contribute symbols, the including file keeps its aliases across
-# the include, and neither file receives the other's aliases. Warm cache
-# order must not change the generated result.
+# Case 10: public aliases reach includers, and static aliases stay in their
+# source module. An including file keeps its aliases across another include.
+# Warm cache order must not change the generated result.
 mkdir -p "$BUILD/keyword/src" "$BUILD/keyword/alias-first" \
   "$BUILD/keyword/main-first"
-cat >"$BUILD/keyword/src/private-keywords.xmacro" <<'EOF'
+cat >"$BUILD/keyword/src/private-keywords.x" <<'EOF'
 macro Decorator $cache.identity(Function $target) {
   $(x2c.function.body $target)...
 }
@@ -557,24 +555,24 @@ macro Decorator $cache.outer(Function $target) {
 keyword identity $cache.identity;
 keyword outer $cache.outer;
 EOF
-cat >"$BUILD/keyword/src/child-keywords.xmacro" <<'EOF'
+cat >"$BUILD/keyword/src/child-keywords.x" <<'EOF'
 macro Expression $cache.child(Expr $value) => 99;
-keyword child $cache.child;
+static keyword child $cache.child;
 EOF
 cat >"$BUILD/keyword/src/nested.x" <<'EOF'
 int child(int value) { return value; }
 EOF
 cat >"$BUILD/keyword/src/alias.x" <<'EOF'
 #include "x2c.x"
-$(import "private-keywords.xmacro")
-$(import "child-keywords.xmacro")
+#include "private-keywords.x"
+#include "child-keywords.x"
 identity List cached_values(void) { return %[]; }
 #include "nested.x"
 static int child_local(void) { return child(1); }
 EOF
 cat >"$BUILD/keyword/src/main.x" <<'EOF'
 #include "x2c.x"
-$(import "private-keywords.xmacro")
+#include "private-keywords.x"
 #include "alias.x"
 outer int cached_keyword_probe(void) {
   return cached_values().len() + child(4);
@@ -599,9 +597,9 @@ grep -q "cached_keyword_probe" "$BUILD/keyword/alias-first/main.h" ||
 grep -q "return 99" "$BUILD/keyword/alias-first/alias.c" ||
   fail "imported keyword alias was lost across an include"
 for output in alias-first/main.d main-first/main.d; do
-  grep -q "private-keywords.xmacro" "$BUILD/keyword/$output" ||
+  grep -q "private-keywords.x" "$BUILD/keyword/$output" ||
     fail "included keyword pack is missing from $output"
-  grep -q "child-keywords.xmacro" "$BUILD/keyword/$output" ||
+  grep -q "child-keywords.x" "$BUILD/keyword/$output" ||
     fail "included child keyword pack is missing from $output"
 done
 
@@ -612,9 +610,9 @@ mkdir -p "$BUILD/embed/out"
 (cd "$ROOT" && "$X2C" translate --out-dir \
   "$BUILD/embed/out" unittest/compiler-fixtures/macro-embed-text.x)
 embed_dep="$BUILD/embed/out/macro-embed-text.d"
-grep -Fq "macro-embed-text-definition/embed.xmacro" "$embed_dep" ||
+grep -Fq "macro-embed-text-definition/embed.x" "$embed_dep" ||
   fail "outer macro import is missing from the embed depfile"
-grep -Fq "macro-embed-text-definition/helper.xmacro" "$embed_dep" ||
+grep -Fq "macro-embed-text-definition/helper.x" "$embed_dep" ||
   fail "nested macro import is missing from the embed depfile"
 grep -Fq "macro-embed-text-definition/macro-embed-text-data.txt" \
   "$embed_dep" || fail "definition-relative text is missing from the depfile"
@@ -622,7 +620,7 @@ grep -Fq "macro-embed-text-data.txt" "$embed_dep" ||
   fail "caller-relative text is missing from the depfile"
 
 mkdir -p "$BUILD/embed-invalid/src" "$BUILD/embed-invalid/out"
-cat >"$BUILD/embed-invalid/src/embed.xmacro" <<'EOF'
+cat >"$BUILD/embed-invalid/src/embed.x" <<'EOF'
 macro Expression $probe.embed(Literal $path) =>
   $(x2c.literal.string (x2c.embed.text $path));
 EOF
@@ -631,11 +629,11 @@ printf 'bad\0text' >"$BUILD/embed-invalid/src/nul.txt"
 dd if=/dev/null of="$BUILD/embed-invalid/src/huge.txt" \
   bs=1 seek=2147483647 2>/dev/null
 cat >"$BUILD/embed-invalid/src/nul.x" <<'EOF'
-$(import "embed.xmacro")
+#include "embed.x"
 String value = $probe.embed("nul.txt");
 EOF
 cat >"$BUILD/embed-invalid/src/huge.x" <<'EOF'
-$(import "embed.xmacro")
+#include "embed.x"
 String value = $probe.embed("huge.txt");
 EOF
 if "$X2C" translate --out-dir "$BUILD/embed-invalid/out" \
@@ -657,7 +655,7 @@ grep -Fq "embedded text exceeds the String size limit" \
   "$BUILD/embed-invalid/huge.stderr" ||
   fail "oversized embedded text died without its diagnostic"
 cat >"$BUILD/embed-invalid/src/absolute.x" <<EOF
-\$(import "embed.xmacro")
+#include "embed.x"
 String value = \$probe.embed("$BUILD/embed-invalid/src/plain.txt");
 EOF
 "$X2C" translate --out-dir "$BUILD/embed-invalid/out" \
@@ -673,15 +671,15 @@ mkdir -p "$embed_root/src" "$embed_root/include" "$embed_root/lib" \
   "$embed_root/etc" "$embed_root/builds/0" "$embed_root/cold" \
   "$embed_root/warm"
 cp "$X2C" "$embed_root/builds/0/x2c"
-cp "$ROOT/etc/"*.xlisp "$ROOT/etc/"*.xmacro "$embed_root/etc/"
+cp "$ROOT/etc/"*.xlisp "$ROOT/etc/"*.x "$embed_root/etc/"
 copy_runtime_sources "$embed_root/lib/"
-cat >"$embed_root/src/embed.xmacro" <<'EOF'
+cat >"$embed_root/src/embed.x" <<'EOF'
 macro Unit $cache.declare() {
   int $(x2c.ident (x2c.embed.text "name.txt"))(void);
 }
 EOF
 cat >"$embed_root/src/hdr.x" <<'EOF'
-$(import "embed.xmacro")
+#include "embed.x"
 $cache.declare();
 EOF
 printf 'cold_name' >"$embed_root/src/name.txt"
@@ -731,7 +729,7 @@ cat >"$declarations/src/effects.xlisp" <<EOF2
       (string-append (read-file "$declarations/effects") "f"))
     (x2c.ident "value")))
 EOF2
-cat >"$declarations/src/producer.xmacro" <<'EOF2'
+cat >"$declarations/src/producer.x" <<'EOF2'
 $(import "effects.xlisp")
 $(write-file projection-effect-path
   (string-append (read-file projection-effect-path) "m"))
@@ -750,7 +748,7 @@ macro Declaration $projection.outer(Expr $value) {
 }
 EOF2
 cat >"$declarations/src/provider.x" <<'EOF2'
-$(import "producer.xmacro")
+#include "producer.x"
 $(def projection-local-count 0)
 $(defun projection-local-name ()
   (begin
@@ -828,10 +826,9 @@ macro Declaration $projection.data() {
     (block (syntax-recipe projection-data ((declaration-void)))))))...
 }
 $projection.data();
-#pragma private
-class Hidden { int value; };
-class HiddenAlias Hidden;
-int private_answer(void) { return HiddenAlias.new(5).value; }
+static class Hidden { int value; };
+static class HiddenAlias Hidden;
+static int private_answer(void) { return HiddenAlias.new(5).value; }
 EOF2
 "$X2C" translate --out-dir "$declarations/default" \
   "$declarations/src/private.x"
@@ -853,9 +850,9 @@ mkdir -p "$declaration_root/src" "$declaration_root/etc" \
   "$declaration_root/include" "$declaration_root/lib" \
   "$declaration_root/builds/0" "$declaration_root/out"
 cp "$X2C" "$declaration_root/builds/0/x2c"
-cp "$ROOT/etc/"*.xlisp "$ROOT/etc/"*.xmacro "$declaration_root/etc/"
+cp "$ROOT/etc/"*.xlisp "$ROOT/etc/"*.x "$declaration_root/etc/"
 copy_runtime_sources "$declaration_root/lib/"
-cat >"$declaration_root/src/producer.xmacro" <<'EOF2'
+cat >"$declaration_root/src/producer.x" <<'EOF2'
 $(def read-file (bind "lisp_read_file" '((func (("String"))) "Var")))
 $(def write-file
   (bind "lisp_write_file" '((func (("String") ("String"))) "Var")))
@@ -868,7 +865,7 @@ macro Declaration $projection.persist() {
 }
 EOF2
 cat >"$declaration_root/src/provider.x" <<'EOF2'
-$(import "producer.xmacro")
+#include "producer.x"
 $projection.persist();
 EOF2
 cat >"$declaration_root/src/consumer.x" <<'EOF2'
@@ -885,8 +882,8 @@ EOF2
 [ ! -s "$declaration_root/effects" ] ||
   fail "warm declaration interface reran its producer"
 sed 's/persisted_answer/changed_answer/g' \
-  "$declaration_root/src/producer.xmacro" >"$declaration_root/src/changed"
-mv "$declaration_root/src/changed" "$declaration_root/src/producer.xmacro"
+  "$declaration_root/src/producer.x" >"$declaration_root/src/changed"
+mv "$declaration_root/src/changed" "$declaration_root/src/producer.x"
 sed 's/persisted_answer/changed_answer/g' \
   "$declaration_root/src/consumer.x" >"$declaration_root/src/changed"
 mv "$declaration_root/src/changed" "$declaration_root/src/consumer.x"
@@ -929,27 +926,21 @@ for name in a b; do
     fail "hist-$name.xi depends on which unit first walked it"
 done
 
-# Case 13: below #pragma private, only functions with external linkage reach
-# the generated header, and only they reach an including unit; a private
-# include still splices, because the includer may call its functions through
-# the prototypes x2c emits. The includer walks the file cold in its batch or
-# replays its interface; either way x2c reports each other private name. A
-# static function publishes only a marker naming its file, which is what
-# turns a call from an including unit into a diagnostic.
+# Case 13: nonstatic functions reach includers. Static declarations stay
+# private in cold collection and interface replay. A static function marker
+# retains the diagnostic that identifies its owning source module.
 private="$BUILD/private"
 mkdir -p "$private/src" "$private/cold" "$private/warm"
 cat >"$private/src/hidden.x" <<'EOF'
 int hidden_value(void);
-#pragma private
 int hidden_value(void) => 1;
 EOF
 cat >"$private/src/owner.x" <<'EOF'
 int public_value(void);
-#pragma private
 #include "hidden.x"
-enum Hidden { H_ONE = 1, H_TWO };
+static enum Hidden { H_ONE = 1, H_TWO };
 static const int SECRET = 9;
-typedef struct Inner { int a; } Inner;
+static typedef struct Inner { int a; } Inner;
 static int helper(int x) => x + SECRET + hidden_value();
 int public_value(void) => helper(H_TWO);
 int defined_value(void) => 3;
@@ -963,18 +954,18 @@ Var use_public(void) {
 EOF
 (cd "$private" && "$X2C" translate --out-dir warm src/owner.x src/hidden.x)
 grep -q '"defined_value"' "$private/warm/owner.xi" ||
-  fail "private external definition is missing from its interface"
+  fail "public external definition is missing from its interface"
 grep -q 'src/hidden.x' "$private/warm/owner.xi" ||
-  fail "private include is missing from its interface"
+  fail "ordinary include is missing from its interface"
 ! grep -q 'H_TWO\|SECRET\|Inner\|int helper' "$private/warm/owner.xi" ||
   fail "a private declaration was written to its interface"
 grep -q '"unit-static" "helper"' "$private/warm/owner.xi" ||
   fail "a static function is missing its interface marker"
 (cd "$private" && "$X2C" translate --out-dir cold src/public.x src/owner.x &&
   "$X2C" translate --out-dir warm src/public.x) ||
-  fail "an includer lost the public part of a private-region file"
+  fail "an includer lost the public part of a static-declaration file"
 cmp -s "$private/cold/public.c" "$private/warm/public.c" ||
-  fail "private-region replay diverged from its cold walk"
+  fail "static-declaration replay diverged from its cold walk"
 cat >"$private/src/call-helper.x" <<'EOF'
 #include "owner.x"
 int call_helper(void) { return helper(1); }
@@ -1096,15 +1087,15 @@ mkdir -p "$root/packages/first/src" "$root/packages/last/src" \
   "$root/src" "$root/cold" "$root/warm"
 cat > "$root/packages/first/src/first.x" <<'SRC'
 int sum(int n) => n + 1;
-export $(import "first.xmacro")
+#include "first-defs.x"
 SRC
-cat > "$root/packages/first/src/first.xmacro" <<'SRC'
+cat > "$root/packages/first/src/first-defs.x" <<'SRC'
 $(def package-order 1)
 SRC
 cat > "$root/packages/last/src/last.x" <<'SRC'
-export $(import "last.xmacro")
+#include "last-defs.x"
 SRC
-cat > "$root/packages/last/src/last.xmacro" <<'SRC'
+cat > "$root/packages/last/src/last-defs.x" <<'SRC'
 $(def package-order 2)
 macro Expression $last.order() => $(x2c.literal.int package-order);
 SRC
@@ -1160,7 +1151,6 @@ for name, start in (("first", 0), ("second", 2000)):
 values = " ".join(str(4000 + i) for i in range(1200))
 (directory / "use.x").write_text('''#include "first.x"
 #include "second.x"
-#pragma private
 static List source_values(void) { return %(''' + values + '''); }
 int main(void) {
   List a = first(), b = second(), c = source_values();
@@ -1190,94 +1180,98 @@ PY_LITERAL_BOUNDS
 [[ $("$literal/run") == '1200 1200 1200 1199 3199 5199' ]] ||
   fail "literal initialization lost dependencies across helper batches"
 
-# Case 14: an exported macro import is part of its file's interface. A unit
-# that replays the interface receives the import as a cold walk delivers
-# it, and an edit to the exported file rejects the stale interface.
-exported="$BUILD/exported"
+# Case 14: public macro definitions survive persisted interface replay.
+# Changing their source module rejects the stale interface.
+exported="$BUILD/public-macros"
 mkdir -p "$exported/cold" "$exported/warm"
-echo 'macro Expression $exported.value() => 7;' >"$exported/value.xmacro"
-echo 'macro Expression $exported.value() => 9;' >"$exported/other.xmacro"
-printf 'export $(import "value.xmacro")\nint lib_value(void);\n' \
-  >"$exported/lib.x"
+echo 'macro Expression $exported.value() => 7;' >"$exported/value.x"
+printf '#include "value.x"\nint lib_value(void);\n' >"$exported/lib.x"
 printf '#include "lib.x"\nint unit_value(void) => $exported.value();\n' \
   >"$exported/unit.x"
 (cd "$exported" && "$X2C" translate -q --out-dir cold unit.x)
-(cd "$exported" && "$X2C" translate -q --out-dir warm lib.x)
-grep -q '(macro-export ' "$exported/warm/lib.xi" ||
-  fail "interface is missing the exported import"
+(cd "$exported" && "$X2C" translate -q --out-dir warm lib.x value.x)
+grep -q 'value.x' "$exported/warm/lib.xi" ||
+  fail "interface is missing its included source module"
 (cd "$exported" && "$X2C" translate -q --out-dir warm unit.x)
 cmp -s "$exported/cold/unit.c" "$exported/warm/unit.c" ||
-  fail "exported import replay diverged from cold compile"
-sed 's/value\.xmacro/other.xmacro/' "$exported/warm/lib.xi" \
-  >"$exported/lib.tampered"
-mv "$exported/lib.tampered" "$exported/warm/lib.xi"
+  fail "public macro replay diverged from cold compile"
+# Retain the source fingerprint but change the retained macro definition.
+sed 's/\"7\"/\"9\"/g' "$exported/warm/value.xi" \
+  >"$exported/value.tampered"
+mv "$exported/value.tampered" "$exported/warm/value.xi"
 (cd "$exported" && "$X2C" translate -q --out-dir warm unit.x)
 grep -q 'return 9;' "$exported/warm/unit.c" ||
-  fail "a tampered exported import did not reach replay (test is vacuous)"
-echo 'macro Expression $exported.value() => 8;' >"$exported/value.xmacro"
+  fail "a tampered public definition did not reach replay"
+echo 'macro Expression $exported.value() => 8;' >"$exported/value.x"
 (cd "$exported" && "$X2C" translate -q --out-dir warm unit.x)
 grep -q 'return 8;' "$exported/warm/unit.c" ||
-  fail "an edited exported import kept its stale interface"
+  fail "an edited public macro kept its stale interface"
 
-# Case 15: every unit that calls a pack's public `meta` function at run
-# time emits it: the exporting unit, a unit that includes it, and a unit
-# that imports the pack on its own. The program links one copy.
+# Case 15: public meta functions have one runtime body in their provider.
+# Included declarations support compile-time and runtime calls from all units.
 shared="$BUILD/shared-meta"
 mkdir -p "$shared"
-echo 'meta int shared_twice(int n) => n * 2;' >"$shared/base.xmacro"
-printf '%s\n' '$(import "base.xmacro")' \
-  'meta int shared_sum(int n) => n + shared_twice(n);' >"$shared/pack.xmacro"
-printf '%s\n' '#include "x2c.x"' 'export $(import "pack.xmacro")' \
+echo 'meta int shared_twice(int n) => n * 2;' >"$shared/base.x"
+printf '%s\n' '#include "base.x"' \
+  'meta int shared_sum(int n) => n + shared_twice(n);' >"$shared/pack.x"
+printf '%s\n' '#include "x2c.x"' '#include "pack.x"' \
   'int lib_value(void) => shared_sum(4);' >"$shared/lib.x"
-printf '%s\n' '#include "x2c.x"' '$(import "pack.xmacro")' \
+printf '%s\n' '#include "x2c.x"' '#include "pack.x"' \
   'int other_value(void) => shared_sum(5);' >"$shared/other.x"
 printf '%s\n' '#include "lib.x"' 'int other_value(void);' \
   'int main(void) {' \
   '  printf("%d %d %d %d\n", $shared_sum(1), shared_sum(3), lib_value(),' \
   '         other_value());' '  return 0;' '}' >"$shared/main.x"
-(cd "$shared" && "$X2C" build -q --output run main.x lib.x other.x) ||
-  fail "units that share a pack's public meta function did not link"
+(cd "$shared" && "$X2C" build -q --output run \
+  main.x lib.x other.x pack.x base.x) ||
+  fail "units that share a public meta provider did not link"
 [[ $("$shared/run") == '3 9 12 15' ]] ||
   fail "a shared public meta function computed the wrong value"
 
-# Case 16: the declarations of an unexported import stay in the importing
-# file. Its interface publishes none of its pack's `meta` functions, so an
-# includer that replays it emits no prototype for one, as a cold walk does.
-kept="$BUILD/kept-import"
+# Case 16: a public meta definition reaches transitive includers. A static
+# meta definition stays private under both cold collection and warm replay.
+kept="$BUILD/static-meta"
 mkdir -p "$kept/cold" "$kept/warm"
 printf '%s\n' 'meta int kept_meta(int n) => n + 1;' \
-  'meta static int kept_static(int n) => n * 3;' >"$kept/pack.xmacro"
-printf '%s\n' '#include "x2c.x"' '$(import "pack.xmacro")' \
+  'meta static int kept_static(int n) => n * 3;' >"$kept/pack.x"
+printf '%s\n' '#include "x2c.x"' '#include "pack.x"' \
   'int lib_value(void) => 3;' >"$kept/lib.x"
-printf '%s\n' '#include "lib.x"' 'int unit_value(void) => kept_meta(1);' \
-  'int unit_static(void) => kept_static(1);' >"$kept/unit.x"
+printf '%s\n' '#include "lib.x"' \
+  'int unit_value(void) => kept_meta(1) + $kept_meta(1);' >"$kept/unit.x"
 (cd "$kept" && "$X2C" translate -q --out-dir cold unit.x)
-(cd "$kept" && "$X2C" translate -q --out-dir warm lib.x)
-! grep -q 'kept_' "$kept/warm/lib.xi" ||
-  fail "an interface published an unexported import's declarations"
+(cd "$kept" && "$X2C" translate -q --out-dir warm lib.x pack.x)
+grep -q '"kept_meta"' "$kept/warm/pack.xi" ||
+  fail "an interface omitted its public meta definition"
 (cd "$kept" && "$X2C" translate -q --out-dir warm unit.x)
 cmp -s "$kept/cold/unit.c" "$kept/warm/unit.c" ||
-  fail "unexported import replay diverged from cold compile"
-! grep -q 'int kept_' "$kept/warm/unit.c" ||
-  fail "an includer declared an unexported import's meta function"
+  fail "public meta replay diverged from cold compile"
+printf '%s\n' '#include "lib.x"' \
+  'int unit_static(void) => $kept_static(1);' >"$kept/private.x"
+for out in cold-private warm; do
+  mkdir -p "$kept/$out"
+  if (cd "$kept" && "$X2C" translate -q --out-dir "$out" private.x) \
+      >"$kept/$out-private.log" 2>&1; then
+    fail "a static meta definition reached an includer ($out)"
+  fi
+done
 
-# A declaration written after an import belongs to the file, even when its
-# type is identical to the imported declaration. Both collection paths
+# A declaration written after an include belongs to the file, even when its
+# type is identical to the included declaration. Both collection paths
 # retain its return type for an including unit's method call.
 redeclared="$BUILD/redeclared-import"
 mkdir -p "$redeclared/cold" "$redeclared/warm"
 echo 'meta String kept_text(String value) => value;' \
-  >"$redeclared/pack.xmacro"
-printf '%s\n' '#include "x2c.x"' '$(import "pack.xmacro")' \
+  >"$redeclared/pack.x"
+printf '%s\n' '#include "x2c.x"' '#include "pack.x"' \
   'String kept_text(String value);' >"$redeclared/lib.x"
 printf '%s\n' '#include "lib.x"' \
   'int unit_value(void) => kept_text("hello").len();' >"$redeclared/unit.x"
 (cd "$redeclared" && "$X2C" translate -q --out-dir cold unit.x) ||
-  fail "an explicit declaration after an import lost its return type"
+  fail "an explicit declaration after an include lost its return type"
 (cd "$redeclared" && "$X2C" translate -q --out-dir warm lib.x)
 (cd "$redeclared" && "$X2C" translate -q --out-dir warm unit.x) ||
-  fail "a replayed declaration after an import lost its return type"
+  fail "a replayed declaration after an include lost its return type"
 cmp -s "$redeclared/cold/unit.c" "$redeclared/warm/unit.c" ||
-  fail "a declaration after an import replayed differently"
+  fail "a declaration after an include replayed differently"
 
 echo "header cache probes passed"

@@ -9,7 +9,7 @@ meta native int next_ticket(void) {
   return ++ticket;
 }
 
-$(import "meta-native-definition.xmacro")
+#include "meta-native-definition-defs.x"
 
 int main(void) {
   next_ticket();

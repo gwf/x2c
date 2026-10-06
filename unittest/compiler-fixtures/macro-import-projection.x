@@ -1,7 +1,7 @@
 #include <stdlib.h>
 
 int answer(void) { return 42; }
-$(import "macro-import-projection.xmacro")
+#include "macro-import-projection-defs.x"
 class Projected { int value; };
 
 int main(void) {

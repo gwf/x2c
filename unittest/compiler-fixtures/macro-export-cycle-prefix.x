@@ -1,2 +1,2 @@
 #pragma once
-export $(import "macro-export-cycle-meta.xmacro")
+#include "macro-export-cycle-meta.x"

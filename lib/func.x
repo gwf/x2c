@@ -47,7 +47,6 @@ typedef struct FuncArg {
 */
 typedef Var (*FuncAdapter)(Func fn, const FuncArg *argv);
 
-#pragma private
 
 #include "varconvert.x"
 #include "error.x"
@@ -57,7 +56,7 @@ typedef Var (*FuncAdapter)(Func fn, const FuncArg *argv);
 #include "scope.x"
 #include "meta.x"
 
-$(import "func-errors.xmacro")
+#include "func-errors.x"
 
 #include <stddef.h>
 #include <stdint.h>
@@ -72,7 +71,7 @@ $(import "func-errors.xmacro")
    List its adapter expects. A `shared` binding is the file-static handle
    that every conversion of one direct function reuses; it lives for the
    program, so `Func.move` leaves it in place. */
-struct Func {
+static struct Func {
   List sig, params, FuncAdapter adapter;
   unsigned nparams;
   int rest, shared;

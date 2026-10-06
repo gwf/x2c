@@ -508,7 +508,7 @@ static void default_cache_releases_with_native_thread_state(void) {
 }
 
 
-$(import "test-macros.xmacro")
+#include "test-macros.x"
 
 static unsigned _raising_hash(Var value) => 7;
 

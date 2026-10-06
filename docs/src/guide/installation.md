@@ -38,8 +38,8 @@ packages and replace old native bundles with bundles built for 0.15.0.
 
 The SQLite package calls its prepared-statement type `Prepared` instead of
 `Statement`; change imports and typed variables, and use `Var.prepared` in
-place of `Var.statement`. Automatic differentiation moved from
-`lib/autodiff.x` and `lib/autodiff.xmacro` to the optional `autodiff` package.
+place of `Var.statement`. Automatic differentiation moved from the runtime
+to the optional `autodiff` package.
 Build or install that package and use `import "autodiff"` for its runtime types
 and macros.
 

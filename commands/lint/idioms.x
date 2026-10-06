@@ -10,7 +10,6 @@
 #include "lint.x"
 #include <string.h>
 
-#pragma private
 
 /* The token types of neighbors that bind no tighter than a relational
    operator, so an operand placed between them needs no parentheses. The

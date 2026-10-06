@@ -34,7 +34,6 @@ Split Var.split(Var value) => (Split) value.pointer();
 
 protocol Var(Split);
 
-#pragma private
 
 #include <ctype.h>
 #include <string.h>
@@ -45,7 +44,7 @@ protocol Var(Split);
 #include "iter.x"
 #include "scope.x"
 
-struct Split {
+static struct Split {
   String str, sep;
   int (*next)(Split split, int *cursor, String *out);
 };

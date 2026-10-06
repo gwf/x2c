@@ -1,6 +1,6 @@
 /*  meta-import.x -- a macro whose implementation arrives with the import
 
-    `meta-import-defs.xmacro` declares `meta` functions beside the macros that
+    `meta-import-defs.x` declares `meta` functions beside the macros that
     call them. Importing it installs their compile-time forms in this unit's
     macro session, so the first column below is what x2c computed during
     translation and the second is what the same bodies compute at run time.
@@ -17,11 +17,11 @@
 
 #include "x2c.x"
 
-$(import "meta-import-defs.xmacro")
+#include "meta-import-defs.x"
 
 /* A second import of the same file contributes one copy of each definition,
    not two. */
-$(import "meta-import-defs.xmacro")
+#include "meta-import-defs.x"
 
 int main(void) {
   printf("constant %s %s\n",

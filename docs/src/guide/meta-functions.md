@@ -38,8 +38,8 @@ translation as well as to the finished program. You can use it for an
 ordinary calculation; it does not have to inspect types or generate code.
 
 A `meta` function with a body can sit beside the code that calls it, as
-in the samples of this chapter, or in a `.xmacro` file that several units
-import; see
+in the samples of this chapter, or in an ordinary `.x` module that several
+units include; see
 [Sharing a `meta` function between units](#sharing-a-meta-function-between-units).
 
 ## Call it in the program
@@ -693,9 +693,8 @@ no Scope allocator returned.
 
 A translation runs in two phases. Before any unit is translated, the
 compiler gathers the bodied `meta` functions the inputs reach: those of
-each `.xmacro` file an input imports, directly, through an included
-header, or through a package, and those an input or an included `.x`
-file defines itself. It emits them, with the declarations they use, as C through the ordinary
+each ordinary source module an input reaches, directly, through includes,
+or through a package. It emits them, with the declarations they use, as C through the ordinary
 backend, compiles them with the host C compiler (`--meta-cc`, default
 `cc`, never the target `--cc`), and links them with the host runtime into
 one helper program, the project meta module. A group sees the headers its
@@ -708,8 +707,8 @@ reach no `meta` function builds nothing extra.
 A call runs with the functions of the file that wrote it. An included
 `.x` file computes its file-scope constants, such as an enumerator or an
 array size, with its own `meta` functions, as its own translation does.
-Those functions stay in that file: the including unit receives the
-constants, and cannot call the functions.
+The including unit also receives nonstatic meta functions and can call them
+at compile time. Static meta functions remain private to their provider.
 
 The helper is kept under the cache directory (`$X2C_CACHE_DIR`,
 `$XDG_CACHE_HOME/x2c`, or `~/.cache/x2c`), named by a hash of the meta
@@ -717,7 +716,7 @@ source paths, the compiler, the C compiler, and the flags, including `-D`
 and `-U`. It is built again when any file its build read changes, x2c
 source or C header; a change to program code alone recompiles the groups
 but keeps the helper when no group object changes. The
-shipped meta code of the compiler's own `.xmacro` files and of
+shipped meta code of the compiler's own source modules and of
 `lib/meta.x` is linked into the compiler and runs without a helper. The
 REPL evaluates its supported submissions through Lisp. It accepts bodyless
 `meta` prototypes for linked or explicitly loaded native functions; user
@@ -1122,7 +1121,7 @@ capture becomes the function's statements; `calls++` runs only when `tracked`
 is called at runtime. The template names are known in source, while `meta`
 chooses which one to use for each function.
 
-The reverse gradient generator in `packages/autodiff/src/autodiff.xmacro`
+The reverse gradient generator in `packages/autodiff/src/autodiff-macros.x`
 uses this pattern.
 Its `ad_reverse_with` returns an invocation of the `ad.gradient` source
 macro. The macro contains the generated function declaration, tape storage,
@@ -1411,7 +1410,7 @@ declarations.
 `x2c_diagnostic_warn` work in every `meta` function. The queries that read
 the compiler's symbol table, such as `x2c_syntax_type`,
 `x2c_type_fields` and `x2c_type_resolve`, run only in the compiler's own
-`meta` code: the `.xmacro` files and `lib/meta.x` that are linked into
+`meta` code: the source modules and `lib/meta.x` that are linked into
 the compiler. A project `meta` function receives those answers as `TypeInfo`
 and `Source` parameters instead; calling such a query from the project
 meta module reports that it is not available to project meta code. Each
@@ -1552,8 +1551,8 @@ sample.x:19:22: macro: 'one_word' can only be called at compile time
   definition for it; call it from a macro or another meta function
 ```
 
-In the complete shape example below, the generated C mentions none of `shape_fields`,
-`shape_names` or `shape_reads`.
+In the complete shape example below, `shape_names` and `shape_reads` construct
+source code and have no runtime forms. The consumer uses their returned code.
 
 A `meta` function that needs no compiler query, like `poly` above,
 keeps both forms and is emitted normally.
@@ -1564,24 +1563,26 @@ constants, captured syntax, a `TypeInfo`, or a `Source`.
 
 ## A complete example
 
-Two files. The first is a `.xmacro` holding the `meta` functions and the
+Two ordinary source files. `shape.x` holds the `meta` functions and the
 macros that call them. `shape_fields` reads the fields from the `TypeInfo` the
 compiler sends. `shape_names` and `shape_reads` turn them into code.
 
-<!-- ignore: shape.xmacro is the external file being illustrated -->
+<!-- ignore: shape.x is the external file being illustrated -->
 ```x2c,ignore
+#include "meta.x"
+
 /* The named fields of a struct-typed expression, in declaration order. */
 meta static List shape_fields(TypeInfo type) => type.assoc(<fields>);
 
 /* One `String` literal holding those field names, comma separated. */
-meta static List shape_names(TypeInfo type) {
+meta List shape_names(TypeInfo type) {
   Array names = [];
   foreach (List field, shape_fields(type)) names.push(field.car());
   return x2c_literal_string(String.join(", ", names));
 }
 
 /* `{ p.x, p.y, p.z }`, built from the fields rather than written out. */
-meta static List shape_reads(List receiver, TypeInfo type) {
+meta List shape_reads(List receiver, TypeInfo type) {
   Array reads = [];
   foreach (List field, shape_fields(type)) {
     String member = field.car();
@@ -1596,16 +1597,15 @@ macro Expression $shape.names(Expr $value) => $shape_names($value);
 macro Expression $shape.reads(Expr $value) => $shape_reads($value, $value);
 ```
 
-The second file imports it and uses the macros. Imports still use the
-compiler's `$(import "...")` form; this is a loading operation, not a meta
-function call.
+The second file includes `shape.x` and uses its public macros. The include
+also makes its nonstatic meta functions available.
 
-<!-- ignore: this program imports the shape.xmacro file above -->
+<!-- ignore: this program includes the shape.x file above -->
 ```x2c,ignore
 #include "x2c.x"
 #include "meta.x"
 
-$(import "shape.xmacro")
+#include "shape.x"
 
 typedef struct Point { int x, y, z; } Point;
 
@@ -1628,46 +1628,29 @@ the `meta` functions built `"x, y, z"` and `{ p.x, p.y, p.z }` from them.
 
 ## Sharing a `meta` function between units
 
-A bodied `meta` function may be defined in an ordinary `.x` file or in a
-`.xmacro` file. Either way the project meta build copies it into the
-project meta module. It must be written in a source file: a `meta`
-function inside a macro template, or one produced by a `$` call, is
-reported where it is written.
+Define a shared `meta` function in an ordinary `.x` module, beside any macros
+and runtime code that use it. The project meta build compiles the provider's
+meta code into the project meta module. A meta function must be written in
+source: a definition inside a macro template, or one produced by a `$` call,
+is reported where it is written.
 
-To share a `meta` function between units, put it in a `.xmacro` that each
-unit imports, or that a file each unit includes
-[exports](../reference/language.md#exported-imports). A `.xmacro` file
-may hold `meta` functions beside the macros that call them, and importing it
-installs their compile-time forms in the importing unit. The unit that imports
-the file includes `meta.x`, because a `.xmacro` borrows the consuming unit's
-symbol table:
+The provider includes its own dependencies. A consumer includes the provider:
 
 ```text
-#include "x2c.x"
-#include "meta.x"
-
-$(import "shape.xmacro")
+#include "shape.x"
 ```
 
-Importing the same file twice contributes one copy of each definition. A
-`.xmacro` may import another `.xmacro`, and a `meta` function two levels
-down reaches the consuming unit the same way.
+Nonstatic meta functions become callable during translation at the include
+position, including through transitive includes. A `meta static` helper and
+its static state remain in the provider. Public meta functions can use those
+helpers inside the provider's compiled group. The caller does not receive a
+second definition of the helper.
 
-Besides `meta` functions and bodyless `meta` prototypes, a `.xmacro` may
-hold `meta static` values. Each importing unit gets its own compile-time
-copy of a value, initialized from the declaration, so state that helpers
-keep there never carries from one unit to the next. A unit that defines a
-variable of the same name reports a redefinition. Automatic
-Differentiation keeps its registries of differentiated functions and its
-reverse-mode working state this way.
-
-The run-time forms are separate from this. A unit emits a definition only
-for the `meta` functions it calls at run time, and a declaration only for
-the values and prototypes its run-time code uses. The storage class says
-what it emits: `static` gives that unit its own copy, and a public name is
-the one copy the program links, exported by the reaching unit's header.
-Units that never include one another may each reach a public function, so
-each emits it as a weak definition and the linker keeps one.
+Repeated includes contribute one public declaration per canonical path. For a
+meta function with a runtime form, ordinary linkage applies: the provider
+owns its runtime definition and including sources receive its declaration.
+Compile and link that provider as you would any other source module. The
+compile-time helper build and the runtime build are separate.
 
 ## Lisp interoperability
 
@@ -1702,7 +1685,7 @@ int main(void) {
 2 4
 ```
 
-`lib/native-scalar-types.xmacro` keeps the compiler's exact C scalar table
+`lib/native-scalar-types.x` keeps the compiler's exact C scalar table
 this way: `src/type.x` inserts it, and the `lib/lisp.x` access records read
 their tags from it.
 

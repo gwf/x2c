@@ -12,8 +12,7 @@
 
 #pragma once
 
-$(import "error-macros.xmacro")
-$(import "var-unbox.xmacro")
+#include "error-macros.x"
 
 #include <float.h>
 #include <limits.h>
@@ -614,13 +613,51 @@ inline String long.repr(long l)          => l.var().repr();
 /** Reports whether `value` occupies the encoding row at `top`/`bottom`.
     `mask` selects the bits the decoder discriminates on within `top`'s
     group, so a caller that already knows the row tests it with two
-    compares instead of a decode. `var-tags.xmacro` projects the rows that
+    compares instead of a decode. `var-tags.x` projects the rows that
     qualify; a row whose decoded form carries a validity clause is not one
     of them and must ask `Var.is`.
 */
 inline int Var.is_row(
   Var value, unsigned top, unsigned long mask, unsigned long bottom) =>
   value.u64 >> 48 == top && (value.u64 & mask) == bottom;
+
+/*  common.x -- `Var` accessors for the boxed runtime classes
+
+    `lib/common.x` projects one accessor per class. Each reads its tag's
+    encoding fields from the compiled ledger table through `Var.tag_top` and
+    `Var.tag_bottom`, so this file does not carry the ledger.
+*/
+
+/* Object rows carry their payload pointer in the low 48 bits with the
+   bottom three bits reserved for the row selector, so reading one back is
+   the row's top and bottom columns and a mask. */
+meta unsigned long Var_tag_top(Symbol tag);
+meta unsigned long Var_tag_bottom(Symbol tag);
+
+/* A `Literal` tag argument arrives as its resolved Symbol expression,
+   `(expr TYPE (literal TYPE TEXT SYMBOL))`; the tables read the Symbol. */
+meta static Symbol _literal_tag(List tag) {
+  match (tag)
+    case %(expr ? (literal ? ? ?key)): return key;
+  return 0;
+}
+
+meta static int var_tag_top(List tag) => (int) Var_tag_top(_literal_tag(tag));
+meta static int var_tag_bottom(List tag) =>
+  (int) Var_tag_bottom(_literal_tag(tag));
+
+static macro Unit $var.tag.unbox(Type $type, Name $method, Literal $tag) {
+  $type Var.$method(Var);
+
+  /** Extracts the `$type` payload of `value`, or NULL for another tag. */
+  inline $type Var.$method(Var value) {
+    if (value.u64 >> 48 != $var_tag_top($tag) ||
+        (value.u64 & 0x7) != $var_tag_bottom($tag)) return NULL;
+    return ($type) (value.u64 & 0x0000FFFFFFFFFFF8ul);
+  }
+}
+
+
 
 $var.tag.unbox(Array, array, <array>);
 $var.tag.unbox(Block, block, <block>);
@@ -886,7 +923,6 @@ int x2c_normalize_slice(int *start, int *stop, int step, int length) {
   return newlen;
 }
 
-#pragma private
 
 #include "dispatch.x"
 #include <limits.h>

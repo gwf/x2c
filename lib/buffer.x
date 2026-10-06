@@ -9,8 +9,8 @@
 */
 
 #pragma once
-$(import "error-macros.xmacro")
-$(import "cleanup.xmacro")
+#include "error-macros.x"
+#include "cleanup.x"
 #include "common.x"
 #include "block.x"
 
@@ -29,7 +29,6 @@ typedef struct Buffer {
 
 $cleanup.by(Buffer, free);
 
-#pragma private
 
 #include "exception.x"
 #include "scope.x"
@@ -42,7 +41,7 @@ $cleanup.by(Buffer, free);
 #include <string.h>
 
 /* The line state a write leaves: `pos` and `_indent` of the final line. */
-typedef struct _LineState { size_t pos, indent; } _LineState;
+static typedef struct _LineState { size_t pos, indent; } _LineState;
 
 // writing
 

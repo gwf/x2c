@@ -1,2 +1,2 @@
 #include "x2c.x"
-$(import "macro-export.xlisp")
+static $(import "macro-export.xlisp")

@@ -9,7 +9,7 @@ import "termbox2" with Termbox, TermboxCell, TermboxEvent;
 #include <locale.h>
 #include <stdlib.h>
 
-$(import "../../../unittest/test-macros.xmacro")
+#include "../../../unittest/test-macros.x"
 
 static void failed_init_restores_sigwinch(void) {
   EXPECT_INT_EQ(termbox_test_install_winch(), 0);

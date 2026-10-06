@@ -8,21 +8,91 @@
 
 #pragma once
 
-$(import "error-macros.xmacro")
-$(import "integer-ops.xmacro")
+#include "error-macros.x"
+#include "integer-ops.x"
 #include "common.x"
 #include "meta.x"
 #include "varconvert.x"
 
-// After the includes: a `.xmacro` borrows this unit's symbol table, and the
-// `meta` functions in it call the compiler surface `meta.x` declares.
-$(import "varops.xmacro")
+/* One row per native integer and floating family. Each $native.update
+   invocation reads its Var tag, boxing operations, delegated zero, and
+   the casts for its two representation crossings. */
+
+/* Keyed by the tag the invocation names. A row is the `Var` tag, the boxer,
+   the decoder, the zero expression, and the cast pair: into the boxer's
+   parameter type and back to the storage type, each empty where the two
+   types already agree. */
+meta static List _update_rows(void) => %(
+  (char    (i8 "Var_box_i8" "Var_integer"
+            (expr (int) (literal (int) "0")) (() (char))))
+  (schar   (i8 "Var_box_i8" "Var_integer"
+            (expr (int) (literal (int) "0")) ((char) (signed char))))
+  (u8      (u8 "Var_box_u8" "Var_integer"
+            (expr (int) (literal (int) "0")) (() ("uchar"))))
+  (i16     (i16 "Var_box_i16" "Var_integer"
+            (expr (int) (literal (int) "0")) (() (short))))
+  (u16     (u16 "Var_box_u16" "Var_integer"
+            (expr (int) (literal (int) "0")) (() ("ushort"))))
+  (i32     (i32 "Var_box_i32_bits" "Var_integer"
+            (expr (int) (literal (int) "0")) ((unsigned) (int))))
+  (u32     (u32 "Var_box_u32" "Var_integer"
+            (expr (int) (literal (int) "0")) (() ("uint"))))
+  (long    (long "Var_box_long" "Var_long_value"
+            (expr (int) (literal (int) "0")) (() ())))
+  (ulong   (ulong "Var_box_ulong" "Var_ulong_value"
+            (expr (int) (literal (int) "0")) (() ())))
+  (llong   (llong "Var_box_long_long" "Var_long_long_value"
+            (expr (int) (literal (int) "0")) (() ())))
+  (ullong  (ullong "Var_box_ulong_long" "Var_ulong_long_value"
+            (expr (int) (literal (int) "0")) (() ())))
+  (f32     (f32 "Var_box_f32" "Var_decode_f32"
+            (expr (float) (literal (float) "0.0f")) (() ())))
+  (f64     (f64 "Var_box_f64" "Var_decode_f64"
+            (expr (double) (literal (double) "0.0")) (() ())))
+  (ldouble (ldouble "Var_box_long_double" "Var_long_double_value"
+            (expr (long double) (literal (long double) "0.0L")) (() ())))
+);
+
+/* The row the invocation's `<tag>` literal names. The capture is a literal,
+   so its Symbol value is its last part. */
+meta static List _update_row(List id) {
+  match (id)
+    case %(expr ? (literal ? ? ?key)): return _update_rows().assoc(key);
+  return %();
+}
+
+meta static Symbol _update_tag(List id)     => _update_row(id)[0];
+meta static String _update_boxer(List id)   => _update_row(id)[1];
+meta static String _update_decoder(List id) => _update_row(id)[2];
+meta static List _update_zero(List id)      => _update_row(id)[3];
+
+/* Empty stands for "no cast", so these two tests read emptiness rather than
+   absence, which is what an empty entry in the row's cast pair means. */
+meta static List _update_cast_in(List id)  => _update_row(id)[4].car();
+meta static List _update_cast_out(List id) => _update_row(id)[4].cdr().car();
+
+/* The destination's current value, boxed in the family the row names. */
+meta static List _update_box(List id, List lhs) {
+  List value = $!( $lhs[0] );
+  Type into = _update_cast_in(id);
+  if (into) value = $!( ($into)$value );
+  return $!( ${x2c_ident(_update_boxer(id))}($value) );
+}
+
+/* The converted result read back as the storage type. */
+meta static List _update_decode(List id, List value) {
+  List decoded = $!( ${x2c_ident(_update_decoder(id))}($value) );
+  Type back = _update_cast_out(id);
+  if (back) return $!( ($back)$decoded );
+  return decoded;
+}
+
 
 /* Each row supplies the storage boxer and decoder for its type, and
    `_native_update` performs the operation and the conversion back. Keeping
    both here makes compiler-lowered native lvalues and direct Var compound
    updates behave the same way. */
-macro Unit $native.update(Type $type, Name $function, Literal $row) {
+static macro Unit $native.update(Type $type, Name $function, Literal $row) {
   using $converted;
   /** Applies a dynamic compound `op` to a native `$type` lvalue.
       The current value is boxed in its declared family, combined with `rhs`,
@@ -67,7 +137,6 @@ $native.update(float, x2c_var_update_f32, <f32>);
 $native.update(double, x2c_var_update_f64, <f64>);
 $native.update(long double, x2c_var_update_long_double, <ldouble>);
 
-#pragma private
 
 #include "var.x"
 #include "dispatch.x"
@@ -79,7 +148,7 @@ $integer.raw(_integer_raw);
 
 /* One arithmetic step in a floating family. Callers pass `+`, `-`, `*`, or
    `/`, so any other operator divides. */
-macro Unit $floating.step(Type $type, Name $name) {
+static macro Unit $floating.step(Type $type, Name $name) {
   static $type $name(Symbol op, $type a, $type b) {
     switch (op) {
       case <+>: return a + b;

@@ -1,7 +1,7 @@
 /*  test-match-logic.x -- advanced pattern logic tests for match statement */
 
 #include "test-support.x"
-$(import "test-macros.xmacro")
+#include "test-macros.x"
 
 static void match_or_not_quote(void) {
   $test.scoped();

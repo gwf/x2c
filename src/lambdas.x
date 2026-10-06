@@ -8,37 +8,36 @@
     leave here resolved and in first-use order; `callables.x` lowers them.
 */
 #pragma once
-$(import "../lib/private-keywords.xmacro")
+#include "../lib/private-keywords.x"
 #include "compiler.x"
-#pragma private
-$(import "../src/ast-rewrite.xmacro")
-$(import "../src/grammar.xmacro")
+#include "ast-rewrite.x"
+#include "grammar.x"
 #include "parse.x"
 #include "type.x"
 #include "expressions.x"
 
 // diagnostics
 
-macro Stmt $report.parse.param_ident(Expr $c) {
+static macro Stmt $report.parse.param_ident(Expr $c) {
   $c.report_error(
     <parse>, "expected identifier in parameter list",
     $c.token, NULL);
 }
 
-macro Stmt $report.type.ident_untyped(
+static macro Stmt $report.type.ident_untyped(
   Expr $c, Expr $spelling, Expr $origin) {
   $c.report_error(
     <type>, %"identifier '${$spelling}' has no semantic type",
     $origin, NULL);
 }
 
-macro Stmt $report.type.capture_enclosing(Expr $c, Expr $original) {
+static macro Stmt $report.type.capture_enclosing(Expr $c, Expr $original) {
   $c.report_error(
     <type>, "reference capture requires an enclosing reference capture",
     $c.token, %("binding: ${binding_identity_spelling($original)}"));
 }
 
-macro Stmt $report.type.capture_ref(Expr $c, Expr $binding) {
+static macro Stmt $report.type.capture_ref(Expr $c, Expr $binding) {
   $c.report_error(
     <type>, "captured value requires 'using &name' for reference access",
     $c.token, %("binding: ${binding_identity_spelling($binding)}"));
@@ -400,7 +399,7 @@ List Compiler.capture_lambda_identifier(Compiler c, List binding, Type type) {
 /* One binding's capture through one lambda frame: the frame's fields, the
    binding and type that the frame sees, and the identifier's source
    binding. `facts` is read before a supplied value resolves. */
-typedef struct Capture {
+static typedef struct Capture {
   Compiler c;
   Map facts;
   List frame, key, prescribed, binding, original;

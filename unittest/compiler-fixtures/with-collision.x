@@ -7,6 +7,5 @@ import "geo" with Vec as Grid;
 
 double zero(void);
 
-#pragma private
 
 double zero(void) { return 0.0; }

@@ -8,7 +8,7 @@ import "libuv" with UvLoop, UvPipe, UvTimer;
 #include <string.h>
 #include <unistd.h>
 
-$(import "../../../unittest/test-macros.xmacro")
+#include "../../../unittest/test-macros.x"
 
 static String _pipe_path(String label) {
   int pid = (int) getpid();

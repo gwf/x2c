@@ -15,7 +15,7 @@
 
 #pragma once
 
-$(import "error-macros.xmacro")
+#include "error-macros.x"
 #include "common.x"
 #include "machine.x"
 
@@ -83,7 +83,6 @@ typedef struct MatchCaptureSite {
   int refused;
 } MatchCaptureSite;
 
-#pragma private
 
 #include <pthread.h>
 #include <stdlib.h>
@@ -181,7 +180,7 @@ static List _normalize_pattern(List pattern) {
   return %(!set $binder ${_normalize_pattern(%($op @rest))});
 }
 
-typedef struct NormalizedCell {
+static typedef struct NormalizedCell {
   List original;
   Var head;
 } NormalizedCell;
@@ -211,13 +210,13 @@ static List _normalize_elements(List elements) {
    guard, or more than MACHINE_BINDER_MAX binders makes a pattern MALFORMED,
    and its layout has no slots. */
 
-typedef struct MatchLayoutBuilder {
+static typedef struct MatchLayoutBuilder {
   Atom binders[MACHINE_BINDER_MAX];
   int count, malformed_binder, leading_list_binder, past_capacity;
 } MatchLayoutBuilder;
 
 /* The slots a pattern binds on every match and on some match. */
-typedef struct MatchSlots { unsigned long definite, possible; } MatchSlots;
+static typedef struct MatchSlots { unsigned long definite, possible; } MatchSlots;
 
 /** Analyzes one `Match` pattern into its canonical positional layout.
     Distinct named binders receive slots in lexical preorder. `!quote` is
@@ -472,7 +471,7 @@ static int MatchCaptureLayout._buffer_valid(
 }
 
 /* Declares `$instance`, an open machine of this thread. */
-macro Stmt $match.machine(Name $instance, Expr $stats) {
+static macro Stmt $match.machine(Name $instance, Expr $stats) {
   MatchMachine *$instance = MatchMachine.acquire($stats);
 }
 
@@ -648,7 +647,7 @@ static List MatchCaptureLayout._publish(
    allocation serves the whole traversal. The first-match walk writes
    `found` and `bindings`, the search walk `results`, and the replacing walk
    reads `template` and sets `error`. */
-typedef struct MatchWalk {
+static typedef struct MatchWalk {
   MatchPlan plan;
   MachineView view;
   MatchCaptureBuffer *captures;
@@ -661,7 +660,7 @@ typedef struct MatchWalk {
 
 /* Declares `$walk` over `$plan` and `$machine` with its own capture buffer
    and an empty cell stack. */
-macro Stmt $match.walk(Expr $plan, Expr $machine, Name $walk) {
+static macro Stmt $match.walk(Expr $plan, Expr $machine, Name $walk) {
   Var values[MACHINE_BINDER_MAX];
   MatchCaptureBuffer captures = { values, 0, MACHINE_BINDER_MAX };
   MatchWalk $walk = {
@@ -912,7 +911,7 @@ int MatchPlan.try_match_replace(
 
 /* Where a named binder finds its value: the committed `captures` of a plan,
    or the association List `bindings` when `captures` is null. */
-typedef struct ReplacementSource {
+static typedef struct ReplacementSource {
   MatchCaptureLayout layout;
   MatchCaptureBuffer *captures;
   List bindings;
@@ -960,7 +959,7 @@ meta native List List.replace(List template, List bindings) {
   return _replace(template, source);
 }
 
-typedef struct ReplacementCell {
+static typedef struct ReplacementCell {
   Var value;
   int splice;
 } ReplacementCell;

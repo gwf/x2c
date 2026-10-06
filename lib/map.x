@@ -16,8 +16,8 @@
 */
 
 #pragma once
-$(import "error-macros.xmacro")
-$(import "private-keywords.xmacro")
+#include "error-macros.x"
+#include "private-keywords.x"
 #include "common.x"
 #include "iter.x"
 
@@ -37,7 +37,6 @@ typedef struct Map {
 
 protocol Cleanup(Map);
 
-#pragma private
 
 #include <stdlib.h>
 #include <stdarg.h>
@@ -49,13 +48,13 @@ protocol Cleanup(Map);
 #include "block.x"
 #include "buffer.x"
 #include "varconvert.x"
-$(import "map-generics.xmacro")
+#include "map-generics.x"
 
 // buckets
 
 /* A record and its parallel nonzero hash occupy the same bucket. Both Vars are
    shallow copies; insertion never adopts storage reachable through them. */
-struct MapRecord {  Var key, val; };
+static struct MapRecord {  Var key, val; };
 
 $map.scaffold(
   Map, struct MapRecord, Var, Var,

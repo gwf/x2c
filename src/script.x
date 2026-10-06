@@ -12,7 +12,6 @@
 #pragma once
 #include "build.x"
 
-#pragma private
 
 #include <errno.h>
 #include <string.h>
@@ -20,11 +19,11 @@
 
 // command reports
 
-macro Stmt $report.script.source_missing(Expr $script) {
+static macro Stmt $report.script.source_missing(Expr $script) {
   driver_error(%"script does not exist: ${$script}");
 }
 
-macro Stmt $report.script.execute_failed(Expr $executable) {
+static macro Stmt $report.script.execute_failed(Expr $executable) {
   driver_error(%"cannot run ${$executable}: ${String.new(strerror(errno))}");
 }
 

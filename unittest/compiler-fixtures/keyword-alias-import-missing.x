@@ -1,3 +1,3 @@
 #include "x2c.x"
 
-$(import "keyword-alias-import-missing.xmacro")
+#include "keyword-alias-import-missing-defs.x"

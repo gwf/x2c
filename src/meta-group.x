@@ -18,9 +18,8 @@
 #define X2C_NATIVE_MODULES 1
 #endif
 
-#pragma private
-$(import "../src/grammar.xmacro")
-$(import "../src/ast-rewrite.xmacro")
+#include "grammar.x"
+#include "ast-rewrite.x"
 #include "type.x"
 #include "generate.x"
 #include "macros.x"
@@ -32,7 +31,7 @@ $(import "../src/ast-rewrite.xmacro")
 
 // diagnostics
 
-macro Stmt $report.macro.function_unavailable(
+static macro Stmt $report.macro.function_unavailable(
   Expr $c, Expr $site, Expr $name, Expr $why) {
   $c.report_error(
     <macro>,
@@ -126,8 +125,7 @@ void Compiler.stage_meta_in_process(void) { meta_in_process = 1; }
 
 /** Answers whether a `meta` function or value belongs to the unit's group:
     a parse meets it outside a macro definition while the project meta build
-    parses the unit or a session stages it. A `.xmacro` import, and each
-    compiler that collects a segment of the unit, shares the unit's group. */
+    parses the unit or a session stages it. */
 int Compiler.groups_meta(Compiler c) =>
   meta_cc && !c.macro_holes && (void *) c.meta_group &&
   (c.meta_build || (X2C_NATIVE_MODULES && meta_in_process));
@@ -141,15 +139,6 @@ void Compiler.group_meta_function(Compiler c, List fn) {
                     .canonicalize();
       c.meta_group.push(%(function $fn $name $type));
     }
-}
-
-/** Records the point where a compile-time import added its `meta`
-    definitions to the unit, so the group places them where the import
-    stands. */
-void Compiler.record_meta_import(Compiler c) {
-  if (c.groups_meta())
-    c.meta_group.push(
-      %(import ${c.unit_nodes ? c.unit_nodes.len() : 0} ${c.meta_defs.len()}));
 }
 
 /** Answers whether a `meta` body reaches the compiler itself: it names a
@@ -277,11 +266,12 @@ static List Compiler._lower(
   if (c.meta_build) {
     List start = c.sym.introduce("x2c_meta_helper_start");
     units.insert(
-      after, c.rebuild_statement($!{ void $start(int); }).cadr());
+      after, c.rebuild_statement($!{ void $start(String); }).cadr());
+    c._native_entries(units, start);
   }
   Map initials = c._initial_copies(units);
-  List providers = c._provider_resets(units);
-  foreach (Var unit, c._entry(stamp, initials, providers, suffix))
+  foreach (Var unit, c._entry(
+      stamp, initials, c._public_functions(units), suffix))
     units.push(unit);
   return units.list_free();
 }
@@ -309,8 +299,7 @@ static int _after_directives(Array units) {
 // what the group reaches
 
 /* The unit's definitions so far that the group can reach, in source order:
-   every directive and declaration, the imported `meta` definitions where
-   their import stands, each function the group reaches, and the group's
+   every directive and declaration, included providers at their source sites, each function the group reaches, and the group's
    compile-time-only functions, which the unit itself never emits. */
 static Array Compiler._units(Compiler c) {
   String lib = %"${x2c_get_root()}/lib/";
@@ -340,22 +329,13 @@ static Array Compiler._runtime_includes(Compiler c, String lib) {
   return ordered;
 }
 
-/* Appends the unit's directives and declarations with each import's `meta`
-   definitions where the import stands, then the imports' remaining
-   definitions. Collection parses no bodies, so its group holds only
-   imports. */
+/* Appends the provider's directives and declarations in source order. */
 static void Compiler._source_order(Compiler c, Array ordered, String lib) {
   Map placeholders = c._placeholders();
-  int flushed = 0, count = c.unit_nodes ? c.unit_nodes.len() : 0;
-  for (int i = 0; i <= count; i++) {
-    c._imports_at(ordered, i, flushed);
-    if (i < count) {
-      Var node = c._group_include(c.unit_nodes[i], lib);
-      if (node is not void) ordered.push(_uninitialized(node, placeholders));
-    }
+  foreach (Var unit, c.unit_nodes) {
+    Var node = c._group_include(unit, lib);
+    if (node is not void) ordered.push(_uninitialized(node, placeholders));
   }
-  for (; flushed < (int) c.meta_defs.len(); flushed++)
-    ordered.push(c.meta_defs[flushed]);
 }
 
 /* The values the project meta build's parse put in place of calls left for
@@ -366,17 +346,6 @@ static Map Compiler._placeholders(Compiler c) {
     match (entry) case %(later ?(List placeholder)):
       placeholders[%"${(long) (void *) placeholder}"] = 1;
   return placeholders;
-}
-
-/* Appends the imported definitions of each import that stands before unit
-   node `i`; `flushed` counts the definitions appended so far. */
-static void Compiler._imports_at(
-  Compiler c, Array ordered, int i, int &flushed) {
-  foreach (List entry, c.meta_group)
-    match (entry)
-      case %(import ?(int at) ?(int end)):
-        if (at == i)
-          for (; flushed < end; flushed++) ordered.push(c.meta_defs[flushed]);
 }
 
 /* A project's included provider uses its group header, which declares the
@@ -430,7 +399,11 @@ static Map Compiler._roots(Compiler c, Array ordered) {
   Map present = {}, reached = {};
   Var identity, String name;
   foreach (List item, ordered)
-    if (_function_identity(item, identity, name)) present[identity] = 1;
+    if (_function_identity(item, identity, name)) {
+      present[identity] = 1;
+      if (c.meta_build && c._public_native(item, name))
+        reached[identity] = 1;
+    }
   foreach (List entry, c.meta_group)
     match (entry) case %(function ?fn *): {
       ast_collect_binding_references(fn, reached);
@@ -630,11 +603,11 @@ static int _braced(Var node) {
    exported names end in `suffix`, so several groups link into one
    program. */
 static List Compiler._entry(
-  Compiler c, String stamp, Map initials, List providers, String suffix) {
-  List resets = providers.append(c._resets(initials));
+  Compiler c, String stamp, Map initials, List functions, String suffix) {
+  List resets = c._resets(initials);
   List reset = _initializer_function(
     c, %(void), c.sym.introduce(%"x2c_module_reset$suffix"), resets);
-  List table = c._targets(c._named(reset));
+  List table = c._targets(c._named(reset), functions);
   List stamp_binding = c.sym.introduce(%"x2c_module_stamp$suffix");
   String literal = %"\"$stamp\"";
   return %(
@@ -647,39 +620,39 @@ static List Compiler._entry(
       %((return ("Map") $table)))});
 }
 
-/* A reached native function in another provider needs that provider's
-   initializers before this group's bodies can call it. */
-static List Compiler._provider_resets(Compiler c, Array units) {
-  if (!c.meta_build) return NULL;
-  Map providers = {};
-  foreach (Var unit, units) c._provider_references(unit, providers);
-  Array resets = [];
-  List start = c.sym.introduce("x2c_meta_helper_start");
-  foreach (Var (index, _), providers)
-    resets.push(c.rebuild_statement($!{ $start($index); }).cadr());
-  return resets.list_free();
+/* Public native calls enter their own provider before the body runs. The
+   protocol does the same for direct evaluator calls, including private
+   functions. Unused provider objects do not start their tables. */
+static void Compiler._native_entries(Compiler c, Array units, List start) {
+  Var identity, String name;
+  for (int i = 0; i < (int) units.len(); i++) {
+    List item = units[i];
+    if (!_function_identity(item, identity, name) ||
+        !c._public_native(item, name)) continue;
+    match (item) case %(function ?type ?declarator (block *body)): {
+      List argument = x2c_literal_string(name);
+      List enter = c.rebuild_statement($!{ $start($argument); }).cadr();
+      units[i] = %(function $type $declarator (block $enter @body));
+    }
+  }
 }
 
-static void Compiler._provider_references(
-  Compiler c, Var node, Map providers) {
-  if (node is not <list>) return;
-  match (node) case $source_identifier_content(
-      %((binding ?identity ?name))): {
-    if (name is not <string>) return;
-    Var target, index;
-    List global = c.sym.resolve_global(%($name), NULL);
-    if (global.equal(%(binding $identity $name)) &&
-        c.project_meta.try_get(name, target)) {
-      (List signature, String provider) = target;
-      if (meta_build_tables.try_get(
-            Path.absolute(home_absolute_path(provider)), index) &&
-          (int) index != c.meta_build - 1)
-        providers[index] = 1;
-    }
-    return;
-  }
-  foreach (Var child, node.list()) c._provider_references(child, providers);
+/* Native provider ownership includes functions whose signatures cannot
+   cross the evaluator boundary. Their names stay separate from Funcs. */
+static List Compiler._public_functions(Compiler c, Array units) {
+  Array functions = [];
+  Var identity, String name;
+  foreach (List item, units)
+    if (_function_identity(item, identity, name) &&
+        c._public_native(item, name))
+      functions.push(name);
+  return functions.list_free();
 }
+
+static int Compiler._public_native(Compiler c, List function, String name) =>
+  name != "main" && !(%(function $name) in c.sym.file_statics()) &&
+  !%(declare ${function.cadr()} (bindings ${function.caddr()}))
+     .type_from_ast().is_static();
 
 /* An assignment of each mutable `meta static` value's initializer, or of
    the unchanging copy `initials` holds for a braced one. */
@@ -715,8 +688,11 @@ static List Compiler._named(Compiler c, List reset) {
 /* The Map `x2c_module_targets` returns, with a Func for each of `named`.
    A function whose values have no Var form, such as C's `bool` or a
    record pointer, is called only from other group code. */
-static List Compiler._targets(Compiler c, List named) {
+static List Compiler._targets(Compiler c, List named, List functions) {
   Array entries = [];
+  if (c.meta_build)
+    entries.push(%(map-entry ${x2c_literal_symbol(<functions>)}
+                   ${c.cache_literal_list(functions)}));
   foreach (List row, named) {
     (String name, List binding, Type type) = row;
     List function = NULL;
@@ -803,8 +779,8 @@ static String Compiler._unbound_callee(Compiler c, Var node) {
 static String meta_build_directory = NULL;
 static Map meta_build_tables = NULL;
 
-/** Directs the group of each unit the project meta build parses into
-    `directory`, or stops that when it is NULL. */
+/** Directs each provider group into `directory`, using `owners` to name
+    their headers by table, or stops that when `directory` is NULL. */
 void Compiler.use_meta_build_directory(String directory, Array owners) {
   meta_build_directory = directory;
   meta_build_tables = {};
@@ -815,12 +791,11 @@ void Compiler.use_meta_build_directory(String directory, Array owners) {
 /** Writes the group of a unit the project meta build parsed into the build
     directory as `group-K.c` and `group-K.h`, K being its table, with the
     x2c sources it read in `group-K.deps`, or its failure in
-    `group-K.failure`. A unit without `meta` functions writes nothing. */
+    `group-K.failure`. Included native and type providers use the same
+    group header and object even when they have no `meta` functions. */
 void Compiler.write_meta_build(Compiler c) {
-  int index = c.meta_build - 1, functions = 0;
-  foreach (List entry, c.meta_group)
-    match (entry) case %(function *): functions++;
-  if (!functions || !meta_build_directory) return;
+  int index = c.meta_build - 1;
+  if (!meta_build_directory) return;
   String base = %"$meta_build_directory/group-$index";
   String failure = c._unbound();
   List code = failure ? NULL : c._emit(

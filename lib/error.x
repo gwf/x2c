@@ -64,7 +64,6 @@ typedef struct ErrorCatchSite {
 #define ERROR_CATCH_STATIC 1
 #define ERROR_CATCH_TRANSIENT 2
 
-#pragma private
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -82,8 +81,8 @@ typedef struct ErrorCatchSite {
 #include "symbolset.x"
 #include "var.x"
 
-$(import "error-macros.xmacro")
-$(import "error-private.xmacro")
+#include "error-macros.x"
+#include "error-private.x"
 
 Atom Atom.intern(String spelling);
 String Atom.str(Atom atom);
@@ -91,14 +90,14 @@ String Atom.str(Atom atom);
 /* thread state
 
    Each thread owns its handlers, records, and policies. A record pairs one
-   entry List with the region that owns its values; error-private.xmacro
+   entry List with the region that owns its values; error-private.x
    declares the record and handler layouts, which a unit test shares. */
 
 $error.private.types();
 
 /* One `Context`'s overlay: the policies and bound it sets, and the handler
    depth and record height its close returns to. */
-typedef struct ErrorContextState {
+static typedef struct ErrorContextState {
   struct ErrorContextState *prev, Map policy, int bound, handler_depth;
   int stack_height;
 } *ErrorContextState;
@@ -112,7 +111,7 @@ typedef struct ErrorContextState {
    complete chain and `dispatch_running` the handler offered the error. A
    raise reaches the floor while `floor_only` is nonzero, and
    `rendered[depth]` marks a dispatch whose error Logger rendered. */
-typedef struct ErrorThreadState {
+static typedef struct ErrorThreadState {
   Scope scope, Block stack, Map policy, int shutdown_done;
   ErrorHandler handler_top, dispatch_saved, dispatch_running, running_top;
   int bound, ErrorContextState context_top, int depth, floor_only, rendered[5];
@@ -133,7 +132,7 @@ static ErrorThreadState _thread(void) {
 
 /* One raise in progress: its cause, the record count before it, and its
    dispatch depth. */
-typedef struct ErrorRaise { Symbol code, int raised_at, depth; } ErrorRaise;
+static typedef struct ErrorRaise { Symbol code, int raised_at, depth; } ErrorRaise;
 
 /** Raises one cause with optional structured detail.
     This functional entry records and dispatches like the `raise` statement
@@ -251,7 +250,7 @@ static void _record_n(
   state.floor_only--;
 }
 
-typedef struct ErrorPair { Var key, value; } ErrorPair;
+static typedef struct ErrorPair { Var key, value; } ErrorPair;
 
 /* Copies `count` key-value arguments into `region` as a detail List in
    argument order. The pairs wait in a Block because the List is built from
@@ -693,7 +692,7 @@ void Error.bound_set(int bound) {
 /* A capture holds only `Symbol` pairs and its own allocation, so it crosses a
    thread boundary without borrowing `Error`, `Scope`, or `Pool` storage. The
    pairs follow the header in the same block. */
-typedef struct ErrorPolicyCapture {
+static typedef struct ErrorPolicyCapture {
   int count, Symbol *pairs;
 } *ErrorPolicyCapture;
 

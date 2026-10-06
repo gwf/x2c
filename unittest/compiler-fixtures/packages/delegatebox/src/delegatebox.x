@@ -8,7 +8,6 @@ typedef struct Box {
 
 int Part.read(Part value);
 
-#pragma private
 
 int Part.read(Part value) {
   return value.value;

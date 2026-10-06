@@ -1,4 +1,4 @@
-$(import "macro-import-segment-family.xmacro")
+#include "macro-import-segment-family.x"
 #include "x2c.x"
 
 $project.imports.segment(imported_segment_answer);

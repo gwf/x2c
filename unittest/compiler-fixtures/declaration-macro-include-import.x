@@ -1,5 +1,5 @@
 #include "declaration-macro-include-scope/provider.x"
-$(import "declaration-macro-include-scope/answer.xmacro")
+#include "declaration-macro-include-scope/answer.x"
 
 // An includer that imports the macros an included unit also imports uses
 // them after a serial translation of that unit, which it then replays.

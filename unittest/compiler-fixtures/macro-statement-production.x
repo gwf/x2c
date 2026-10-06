@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-$(import "../../lib/error-macros.xmacro")
+#include "../../lib/error-macros.x"
 
 static void bump(int *value, int amount) {
   *value += amount;

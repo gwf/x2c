@@ -1,5 +1,5 @@
 #include "x2c.x"
-$(import "macro-import-string-add.xmacro")
+#include "macro-import-string-add-defs.x"
 
 /* A declaration produced during collection lets the full parse reuse the
    import that collection read, so collection resolves its String `+`. */

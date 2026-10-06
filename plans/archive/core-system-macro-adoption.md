@@ -48,7 +48,7 @@ The evidence is split for review:
 
 The [guide](../../docs/src/guide/system-macros.md),
 [archived implementation plan](system-macros-and-classes.md),
-[built-in macros](../../etc/builtin-macros.xmacro), and
+[built-in macros](../../etc/builtin-macros.x), and
 [construction helpers](../../src/builtins.x) own feature contracts.
 Ordinary binding, Cleanup protocols, defer lowering and Scope own execution.
 

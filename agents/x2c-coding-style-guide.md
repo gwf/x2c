@@ -535,8 +535,6 @@ Example:
 
 typedef Block Widget;
 
-#pragma private
-
 #include <limits.h>
 #include <string.h>
 

@@ -21,9 +21,8 @@ Span Reading.span(Reading reading);
 
 protocol SpanSum(Span);
 
-#pragma private
 
-struct Reading { Span span; };
+static struct Reading { Span span; };
 
 double Span.width(Span span) { return span.hi - span.lo; }
 

@@ -3,7 +3,7 @@
 #include "typed-list.x"
 #include "list-selectors.x"
 #include "test-support.x"
-$(import "test-macros.xmacro")
+#include "test-macros.x"
 
 static int _typed_list_odd(Var value) {
   return value.integer() % 2;

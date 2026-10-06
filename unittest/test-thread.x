@@ -794,7 +794,7 @@ static void thread_stack_reaches_library_recursion_limits(void) {
   limited.free();
 }
 
-$(import "test-macros.xmacro")
+#include "test-macros.x"
 
 void thread_suite(void) {
   $test.run(thread_failed_start_does_not_freeze_registration);

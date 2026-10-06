@@ -1,6 +1,4 @@
-// An import that an included file does not export stays in that file beside
-// a parallel translation of that file: its Lisp definitions, meta
-// functions, and macros.
+// Static compile-time definitions stay private to their source file.
 #include "macro-export-lib.x"
 
 int lisp = $(p_lisp);

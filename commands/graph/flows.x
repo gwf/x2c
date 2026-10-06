@@ -11,7 +11,6 @@
 #include "compiler.x"
 #include "targets.x"
 
-#pragma private
 
 #include <string.h>
 

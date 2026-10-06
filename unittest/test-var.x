@@ -10,7 +10,7 @@
 #include <time.h>
 
 #include "test-support.x"
-$(import "test-macros.xmacro")
+#include "test-macros.x"
 
 static double absd(double value) { return value < 0 ? -value : value; }
 

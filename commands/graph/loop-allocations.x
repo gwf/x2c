@@ -9,7 +9,6 @@ typedef struct LoopAllocations *LoopAllocations;
 
 enum { LOOP_ALLOCATION_LIMIT = 25 };
 
-#pragma private
 
 static void _loop_collect(
   Compiler compiler, Map definitions, Var value, String path, String function,

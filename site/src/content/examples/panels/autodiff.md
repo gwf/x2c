@@ -16,7 +16,7 @@ title: Fit a growth curve.
 ~#include "typed-array.x"
 ~#include <stdio.h>
 ~#include <math.h>
-$(import "autodiff.xmacro")
+#include "autodiff-macros.x"
 
 ~// The observations come from the same model with rate 0.9 and capacity 50.
 ~static double observed(double t) => 50.0 / (1.0 + 49.0 * exp(-0.9 * t));
@@ -84,6 +84,6 @@ The full program also compares the generated gradient with finite
 differences before fitting.
 
 [Full example](https://github.com/gwf/x2c/blob/main/packages/autodiff/examples/autodiff-fit.x)
-/ <a href="https://github.com/gwf/x2c/blob/main/packages/autodiff/src/autodiff.xmacro" data-example-action="source">Autodiff macros</a>
+/ <a href="https://github.com/gwf/x2c/blob/main/packages/autodiff/src/autodiff-macros.x" data-example-action="source">Autodiff macros</a>
 
 </section>

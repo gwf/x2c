@@ -14,7 +14,6 @@ Var Point.var(Point point) => (Var) { .p64 = point };
 Point Var.point(Var value) => value.p64;
 
 protocol Var(Point);
-#pragma private
 
 int main(void) {
   struct Point storage = { 7 };

@@ -1,6 +1,6 @@
 /*  meta-import-second.x -- a second unit importing the same macro file
 
-    This unit installs every compile-time form `meta-import-defs.xmacro`
+    This unit installs every compile-time form `meta-import-defs.x`
     declares, and reaches only `mi_depth` and `mi_dashed` at run time, so its
     generated C defines those two and nothing else. In particular it emits no
     copy of public `mi_flatten`, which `meta-import.x` owns, so the two units
@@ -10,7 +10,7 @@
 
 #include "x2c.x"
 
-$(import "meta-import-defs.xmacro")
+#include "meta-import-defs.x"
 
 int main(void) {
   printf("depth  %d %d\n", $probe.depth(a.b.c.d), mi_depth("a.b.c.d"));

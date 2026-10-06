@@ -32,7 +32,7 @@ for lines in 400 401; do
   }' >"$work/section-$lines.x"
 done
 cp "$tests/src/standard-tokens.x" "$work/outside.x"
-cp "$tests/src/standard-report.x" "$work/fixture-reports.xmacro"
+cp "$tests/src/standard-report.x" "$work/fixture-reports.x"
 
 run() {
   status=0
@@ -81,7 +81,7 @@ run() {
   echo "# a script unit"
   run --all "$tests/src/script.x"
   echo "# a preloaded macro library"
-  run --rule negated-is lib/error-macros.xmacro
+  run --rule negated-is lib/error-macros.x
   echo "# reference parameters"
   run --rule reference-parameter "$tests/src/references.x"
   echo "# spacing that formatting changes"
@@ -98,7 +98,7 @@ run() {
   (cd "$work" && run --rule lisp-defun outside.x)
   echo "# diagnostic wording owned by report macros"
   run --rule literal-report-error "$tests/src/standard-report.x"
-  (cd "$work" && run --rule literal-report-error fixture-reports.xmacro)
+  (cd "$work" && run --rule literal-report-error fixture-reports.x)
   echo "# dispatcher arm boundaries"
   run --rule long-dispatch-arm "$tests/src/standard-arms.x"
   echo "# static definitions and referenced functions"

@@ -585,7 +585,7 @@ static void match_binder_bytes_keep_identifier_rules(void) {
 }
 
 
-$(import "test-macros.xmacro")
+#include "test-macros.x"
 
 static void replace_flat_width_and_quote_suffix(void) {
   $test.scoped();

@@ -2,7 +2,7 @@
 
 #include "test-support.x"
 
-$(import "../lib/error-private.xmacro")
+#include "../lib/error-private.x"
 $error.private.types();
 
 static long _add_longs(long a, long b) {
@@ -758,7 +758,7 @@ static void func_var_boxes_as_func_tag(void) {
   EXPECT_PTR_EQ(boxed.pointer(), fn);
 }
 
-$(import "test-macros.xmacro")
+#include "test-macros.x"
 
 void func_suite(void) {
   $test.run(func_new_direct_pointer);

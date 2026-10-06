@@ -3,5 +3,4 @@
 static int above_boundary(int value) => value + 1;
 int shared_value(int value) => above_boundary(value) + below_boundary(value);
 
-#pragma private
 static int below_boundary(int value) => value + 2;

@@ -1,7 +1,7 @@
 /* Direct and expanded diagnostics share the established lint rules. */
 #include "diagnostics.x"
-$(import "../../../../lib/error-macros.xmacro")
-$(import "../../../../lib/func-errors.xmacro")
+#include "../../../../lib/error-macros.x"
+#include "../../../../lib/func-errors.x"
 
 macro Stmt $user.error() { printf("returning\n"); }
 macro Stmt $user.warning(Expr $c) {

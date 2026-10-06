@@ -11,7 +11,7 @@
 */
 
 #include "uv-152.h"
-$(import "cleanup.xmacro")
+#include "cleanup.x"
 
 typedef struct UvLoop *UvLoop;
 typedef struct UvProcess *UvProcess;
@@ -34,11 +34,10 @@ typedef struct UvWatch *UvWatch;
 $cleanup.by(UvLoop, free);
 $cleanup.by(UvProcess, free);
 
-#pragma private
 
 #include "meta.x"
 
-$(import "libuv-errors.xmacro")
+#include "libuv-errors.x"
 
 #include <limits.h>
 #include <signal.h>
@@ -46,25 +45,25 @@ $(import "libuv-errors.xmacro")
 #include <stdlib.h>
 #include <string.h>
 
-typedef void (*UvTimerFn)(UvTimer, Var);
-typedef void (*UvAsyncFn)(UvAsync, Var);
-typedef void (*UvLookupFn)(UvLookup, Var);
-typedef void (*UvUdpReceiveFn)(UvUdp, Bytes, UvAddress, unsigned, Var);
-typedef void (*UvFsFn)(UvFs, Var);
-typedef void (*UvSignalFn)(UvSignal, Var);
-typedef void (*UvWatchFn)(UvWatch, Var);
-typedef struct UvWrite *UvWrite;
-typedef struct UvStream *UvStream;
-typedef struct UvStreamWrite *UvStreamWrite;
-typedef struct UvUdpSend *UvUdpSend;
-typedef struct UvDirEntry *UvDirEntry;
+static typedef void (*UvTimerFn)(UvTimer, Var);
+static typedef void (*UvAsyncFn)(UvAsync, Var);
+static typedef void (*UvLookupFn)(UvLookup, Var);
+static typedef void (*UvUdpReceiveFn)(UvUdp, Bytes, UvAddress, unsigned, Var);
+static typedef void (*UvFsFn)(UvFs, Var);
+static typedef void (*UvSignalFn)(UvSignal, Var);
+static typedef void (*UvWatchFn)(UvWatch, Var);
+static typedef struct UvWrite *UvWrite;
+static typedef struct UvStream *UvStream;
+static typedef struct UvStreamWrite *UvStreamWrite;
+static typedef struct UvUdpSend *UvUdpSend;
+static typedef struct UvDirEntry *UvDirEntry;
 
-typedef UvStream (*UvStreamAcceptFn)(UvStream);
-typedef void (*UvStreamConnectFn)(UvStream);
-typedef void (*UvStreamListenFn)(UvStream, UvStream);
-typedef void (*UvStreamReadFn)(UvStream, Bytes);
+static typedef UvStream (*UvStreamAcceptFn)(UvStream);
+static typedef void (*UvStreamConnectFn)(UvStream);
+static typedef void (*UvStreamListenFn)(UvStream, UvStream);
+static typedef void (*UvStreamReadFn)(UvStream, Bytes);
 
-typedef struct UvCapture {
+static typedef struct UvCapture {
   uv_pipe_t pipe;
   char *bytes;
   size_t length;
@@ -75,19 +74,19 @@ typedef struct UvCapture {
   int enabled;
 } UvCapture;
 
-typedef enum UvStdioMode {
+static typedef enum UvStdioMode {
   UV_STDIO_PIPE,
   UV_STDIO_INHERIT,
   UV_STDIO_IGNORE
 } UvStdioMode;
 
-struct UvWrite {
+static struct UvWrite {
   uv_write_t request;
   UvProcess process;
   char *bytes;
 };
 
-struct UvLoop {
+static struct UvLoop {
   uv_loop_t loop;
   size_t pending_requests;
   size_t open_files;
@@ -97,7 +96,7 @@ struct UvLoop {
   List callback_detail;
 };
 
-struct UvAddress {
+static struct UvAddress {
   struct sockaddr_storage address;
   socklen_t length;
   String host;
@@ -106,7 +105,7 @@ struct UvAddress {
   int protocol;
 };
 
-struct UvLookup {
+static struct UvLookup {
   uv_getaddrinfo_t request;
   UvLoop loop;
   Scope owner_scope;
@@ -124,7 +123,7 @@ struct UvLookup {
   int cancelled;
 };
 
-struct UvStream {
+static struct UvStream {
   uv_stream_t *native;
   UvLoop loop;
   Scope owner_scope;
@@ -148,13 +147,13 @@ struct UvStream {
   int closed;
 };
 
-struct UvStreamWrite {
+static struct UvStreamWrite {
   uv_write_t request;
   UvStream stream;
   char *bytes;
 };
 
-struct UvUdp {
+static struct UvUdp {
   uv_udp_t udp;
   UvLoop loop;
   Scope owner_scope;
@@ -167,21 +166,21 @@ struct UvUdp {
   int closed;
 };
 
-struct UvUdpSend {
+static struct UvUdpSend {
   uv_udp_send_t request;
   UvUdp udp;
   char *bytes;
   struct sockaddr_storage address;
 };
 
-typedef enum UvFsPhase {
+static typedef enum UvFsPhase {
   UV_FS_PHASE_SINGLE,
   UV_FS_PHASE_OPEN,
   UV_FS_PHASE_TRANSFER,
   UV_FS_PHASE_CLOSE
 } UvFsPhase;
 
-struct UvFile {
+static struct UvFile {
   UvLoop loop;
   Scope owner_scope;
   uv_file descriptor;
@@ -190,16 +189,16 @@ struct UvFile {
   int closed;
 };
 
-struct UvStat {
+static struct UvStat {
   uv_stat_t value;
 };
 
-struct UvDirEntry {
+static struct UvDirEntry {
   String name;
   uv_dirent_type_t type;
 };
 
-struct UvFs {
+static struct UvFs {
   uv_fs_t request;
   uv_fs_t close_request;
   UvLoop loop;
@@ -231,7 +230,7 @@ struct UvFs {
   int limit_exceeded;
 };
 
-struct UvAsync {
+static struct UvAsync {
   uv_async_t async;
   UvLoop loop;
   Var value;
@@ -239,14 +238,14 @@ struct UvAsync {
   int stopped;
 };
 
-struct UvTimer {
+static struct UvTimer {
   uv_timer_t timer;
   UvLoop loop;
   Var value;
   UvTimerFn handler;
 };
 
-struct UvSignal {
+static struct UvSignal {
   uv_signal_t signal;
   UvLoop loop;
   Var value;
@@ -254,7 +253,7 @@ struct UvSignal {
   int number;
 };
 
-struct UvWatch {
+static struct UvWatch {
   uv_fs_event_t event;
   UvLoop loop;
   Var value;
@@ -264,7 +263,7 @@ struct UvWatch {
   int status;
 };
 
-struct UvProcess {
+static struct UvProcess {
   uv_process_t process;
   uv_pipe_t input;
   uv_timer_t deadline;
@@ -1177,7 +1176,7 @@ uv_getaddrinfo_t *UvLookup.native(UvLookup lookup) =>
     accepts each pending connection before invoking `fn`, and the accepted
     handle belongs to the caller, independent of the listener.
 */
-macro Unit $uv.stream(
+static macro Unit $uv.stream(
   Type $endpoint, Type $native, Name $method, Name $ready,
   Literal $operation, Literal $label, Literal $required,
   Literal $init_operation, Expr $init, Expr $init_arguments...
@@ -2504,7 +2503,7 @@ uv_async_t *UvAsync.native(UvAsync async) => async ? &async.async : NULL;
     idempotent. A failed start closes the handle. A callback that raises
     stops only its own handle, and UvLoop.run reports the error.
 */
-macro Unit $uv.phase(
+static macro Unit $uv.phase(
   Type $phase, Type $native, Name $method, Expr $init, Expr $start,
   Expr $stop, Literal $operation, Literal $init_operation,
   Literal $start_operation

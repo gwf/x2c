@@ -366,7 +366,7 @@ static void managed_local_allows_constructed_syntax(void) {
   EXPECT_INT_EQ(defer_log[1], 5);
 }
 
-$(import "test-macros.xmacro")
+#include "test-macros.x"
 
 void defer_suite(void) {
   $test.run(system_scope_loop_lifetimes);

@@ -157,7 +157,7 @@ Fixtures in `unittest/compiler-fixtures/`, shaped on
   `2 @ 3` and a struct without `matmul`.
 - `var-matmul-numeric` (stdout): `Var.binary(2, <@>, 3)` caught as `bad-op`.
 
-Not touched, by decision: `lib/array-generics.xmacro:52` and
+Not touched, by decision: `lib/array-generics.x:52` and
 `lib/typed-map.x:249` numeric container arithmetic; `etc/*.xlisp` and
 `src/macros.x` enumerate no operators.
 
@@ -228,7 +228,7 @@ Three layers, each with one owner:
    `forward` as a `Func` or a `$torch.module` decorated struct, parameter
    and buffer enumeration returning Lists of named tensors; `Optimizer`,
    `Scheduler`, `Checkpoint.save/load` over the pickle-dict format; errors
-   raised through `lib/error-macros.xmacro` with the first line of the
+   raised through `lib/error-macros.x` with the first line of the
    torch message.
 
 Reimplemented in x2c, each justified:

@@ -454,7 +454,7 @@ static void scope_finalizer_realloc_and_scratch(void) {
     after.peak_live_requested_bytes >= before.live_requested_bytes + 4112);
 }
 
-$(import "test-macros.xmacro")
+#include "test-macros.x"
 
 void scope_suite(void) {
   $test.run(scope_alloc_release);

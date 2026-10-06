@@ -352,11 +352,16 @@ static List _start(int index, Map table) {
 
 /* Native calls between providers use the same unit initialization as a
    call through the protocol. Recursive provider dependencies start once. */
-void x2c_meta_helper_start(int index) {
-  Var found;
-  Map table = helper_tables.try_get(index, found) ? found : NULL;
-  List failure = _start(index, table);
-  match (failure) case %(failure (?code *detail)): Error.raise(code, detail);
+void x2c_meta_helper_start(String name) {
+  foreach (Var (index, value), helper_tables) {
+    Map table = value;
+    Var functions;
+    if (!table.try_get(<functions>, functions) ||
+        !(name in functions.list())) continue;
+    List failure = _start(index, table);
+    match (failure) case %(failure (?code *detail)): Error.raise(code, detail);
+    return;
+  }
 }
 
 static List _initialize(Map table) {

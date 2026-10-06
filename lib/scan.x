@@ -14,7 +14,7 @@
 
 #pragma once
 
-$(import "error-macros.xmacro")
+#include "error-macros.x"
 
 #include "symbol.x"
 
@@ -31,7 +31,6 @@ inline int scan_ascii_hex_value(int c) {
   return (unsigned) (c - 'a') < 6 ? c - 'a' + 10 : -1;
 }
 
-#pragma private
 
 #include <string.h>
 

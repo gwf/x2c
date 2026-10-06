@@ -1,7 +1,7 @@
 /*  test-tokenizer.x -- semantic token-stream contract tests */
 
 #include "test-support.x"
-$(import "test-macros.xmacro")
+#include "test-macros.x"
 #include <stdint.h>
 
 static Tokenizer _lisp_tokens(char *source) {

@@ -1,0 +1,3 @@
+#pragma once
+
+macro Expression $tally.sum4() => tally__tally_sum(4);

@@ -57,13 +57,13 @@ careful preservation of the policies around those facts.
 | --- | --- | --- | --- |
 | Handwritten value rows in `typetags` | [src/type.x](https://github.com/gwf/x2c/blob/f28fc36fd11116666cf21962c66c5b27dda66d0b/src/type.x#L528) | 528-542 | Name each of 28 builtin value types and its Var tag |
 | Handwritten pointer rows | [src/type.x](https://github.com/gwf/x2c/blob/f28fc36fd11116666cf21962c66c5b27dda66d0b/src/type.x#L543) | 543-557 | Repeat those 28 members for pointer tags |
-| Authoritative object/symbol rows | [lib/var-tags.xmacro](https://github.com/gwf/x2c/blob/f28fc36fd11116666cf21962c66c5b27dda66d0b/lib/var-tags.xmacro#L70) | 70-99 | Define the same builtin tag membership |
-| Authoritative reference rows | [lib/var-tags.xmacro](https://github.com/gwf/x2c/blob/f28fc36fd11116666cf21962c66c5b27dda66d0b/lib/var-tags.xmacro#L102) | 102-131 | Define their reference tags |
+| Authoritative object/symbol rows | [lib/var-tags.x](https://github.com/gwf/x2c/blob/f28fc36fd11116666cf21962c66c5b27dda66d0b/lib/var-tags.x#L70) | 70-99 | Define the same builtin tag membership |
+| Authoritative reference rows | [lib/var-tags.x](https://github.com/gwf/x2c/blob/f28fc36fd11116666cf21962c66c5b27dda66d0b/lib/var-tags.x#L102) | 102-131 | Define their reference tags |
 
 **Shared owner:** the existing Var ledger. `var.tag.filter` (168-170) and
 `var.tag.descriptor?` (198-199) already select rows. The nearby `varrows`
 projection at src/type.x:564 demonstrates the existing mechanism; its producer
-is lib/var-tags.xmacro:366-375. The ledger is already imported at type.x:21.
+is lib/var-tags.x:366-375. The ledger is already imported at type.x:21.
 
 **Connected edit:** replace the 56 manual entries with a compiler-facing Entry
 projection. Make source-type spelling explicit: all 28 current names use the
@@ -97,7 +97,7 @@ compiler entry, passing the **current signature data unchanged**. Redirect:
 
 | Consumer | File | Lines |
 | --- | --- | --- |
-| Direct `$lisp.bind` | [etc/lisp-bindings.xmacro](https://github.com/gwf/x2c/blob/f28fc36fd11116666cf21962c66c5b27dda66d0b/etc/lisp-bindings.xmacro#L4) | 4-9 |
+| Direct `$lisp.bind` | [etc/lisp-bindings.x](https://github.com/gwf/x2c/blob/f28fc36fd11116666cf21962c66c5b27dda66d0b/etc/lisp-bindings.x#L4) | 4-9 |
 | Grouped `lisp.binding.call` | [etc/lisp-bindings.xlisp](https://github.com/gwf/x2c/blob/f28fc36fd11116666cf21962c66c5b27dda66d0b/etc/lisp-bindings.xlisp#L81) | 81-88 |
 | Builtin `lisp.native._target` | [etc/lisp-bindings.xlisp](https://github.com/gwf/x2c/blob/f28fc36fd11116666cf21962c66c5b27dda66d0b/etc/lisp-bindings.xlisp#L104) | 104-108 |
 
@@ -132,7 +132,7 @@ removal of an entire duplicate operation even if no bug is found.
 | Existing declared-type normalization | [src/compiler.x](https://github.com/gwf/x2c/blob/f28fc36fd11116666cf21962c66c5b27dda66d0b/src/compiler.x#L3241) | 3241-3258 | Canonical alias operation used for ordinary reference parameters |
 
 Callers: ordinary handles at lambda.x:610 and 701; private callback registration
-at macros.x:931-933; direct macro at lisp-bindings.xmacro:6-8; grouped reflection
+at macros.x:931-933; direct macro at lisp-bindings.x:6-8; grouped reflection
 at lisp-bindings.xlisp:59-79; builtin reflection at 41-43.
 
 **Direction (Gary, 2026-09-24):** retain declared aliases in stored signatures

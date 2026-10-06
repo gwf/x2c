@@ -1,7 +1,7 @@
 /* unbraced-invariant.x -- loop annotations in single-statement positions. */
 
 #include "x2c.x"
-$(import "../src/cstar.xmacro")
+#include "../src/cstar-macros.x"
 
 $cstar.verify("fact(0i <= x && x <= 100i)", "fact(__return == 0i)")
 static int countdown(int x) {

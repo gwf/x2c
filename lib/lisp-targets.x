@@ -13,10 +13,9 @@
 */
 
 #pragma once
-$(import "private-keywords.xmacro")
+#include "private-keywords.x"
 #include "x2c.x"
 
-#pragma private
 
 #include "diff.x"
 #include "digest.x"
@@ -32,8 +31,8 @@ $(import "private-keywords.xmacro")
 /* The direct targets let the compiler generate their call adapters and
    read each signature from the declared prototype. The `x2c_` operations
    `meta.x` declares exist only inside a compiler, which supplies them. */
-$(import "../etc/lisp-bindings.xlisp")
-$(def lisp.native.target.rows (append '(
+static $(import "../etc/lisp-bindings.xlisp")
+static $(def lisp.native.target.rows (append '(
   (Var_is_void)
   (Func_apply)
   (Func_signature)
@@ -190,7 +189,7 @@ $(def lisp.native.target.rows (append '(
   (_lisp_Buffer_write_len (as Buffer_write_len))
 )))
 
-macro Expression $lisp.native.target.map() =>
+static macro Expression $lisp.native.target.map() =>
   $(lisp.native.targets lisp.native.target.rows);
 
 static Map native_targets = $lisp.native.target.map();

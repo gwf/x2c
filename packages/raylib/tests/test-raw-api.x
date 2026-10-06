@@ -8,7 +8,7 @@ import "raylib";
 
 #include "test-support.x"
 
-$(import "../../../unittest/test-macros.xmacro")
+#include "../../../unittest/test-macros.x"
 
 static void raylib_raw_header(void) {
   EXPECT_INT_EQ(RAYLIB_VERSION_MAJOR, 6);

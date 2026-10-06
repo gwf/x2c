@@ -12,7 +12,6 @@ import "vendored" with Reading;
 
 double span_total(double lo, double hi);
 
-#pragma private
 
 double span_total(double lo, double hi) {
   Span first = { lo, hi };

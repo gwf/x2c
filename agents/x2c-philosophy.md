@@ -286,7 +286,7 @@ an internal absent or not-yet-initialized state, but it is not an empty
 container value.
 
 Successful allocation with satisfied preconditions returns initialized
-storage. Every cause in `lib/error-macros.xmacro`'s shared table may transfer
+storage. Every cause in `lib/error-macros.x`'s shared table may transfer
 to a matching filtered catch, but none of them return to the call that raised
 them. Error locks their policies to `<abort>` and rejects `<collect>`, `<log>`,
 or `<ignore>`; an observing handler also cannot consume one with `<handled>`.
@@ -810,7 +810,7 @@ owner.
 Policy accepts only `<abort>`, `<log>`, `<collect>`, and `<ignore>`; an invalid
 disposition raises `<bad-arg>` without mutating prior policy, while unknown
 codes remain legal and default to `<abort>`. Every cause in
-`lib/error-macros.xmacro`'s shared table is the exception to configurable
+`lib/error-macros.x`'s shared table is the exception to configurable
 policy: each remains `<abort>`, cannot be consumed by an observing handler,
 and either transfers to a filtered catch or enters the fatal floor. Error
 initializes before Logger
@@ -949,10 +949,10 @@ Exemplars endorse a property, not every line in a file:
   every strategy is a short named function.
 - `src/deps.x` - a header that states ownership, four short functions with
   one idea each, and decision comments at the point of use.
-- `lib/array-generics.xmacro` - one imported implementation shared by ordinary
+- `lib/array-generics.x` - one imported implementation shared by ordinary
   `Array` and six explicitly instantiated packed numeric families; `%[...]`
   remains the ordinary `Var` Array path.
-- `lib/map-generics.xmacro` - one Robin Hood implementation shared by ordinary
+- `lib/map-generics.x` - one Robin Hood implementation shared by ordinary
   `Map` and explicitly instantiated native numeric families; hashing, equality,
   errors, boxing, and iteration remain visible per-family choices.
 - `examples/programs/literate-lisp.x` - the current language written the way

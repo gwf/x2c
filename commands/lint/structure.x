@@ -14,7 +14,6 @@
 #include <ctype.h>
 #include <string.h>
 
-#pragma private
 
 static const List pair_words = %(
   ("acquire" "release") ("begin" "commit") ("begin" "rollback")

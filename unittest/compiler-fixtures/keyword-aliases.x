@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-$(import "keyword-aliases-import.xmacro")
+#include "keyword-aliases-import.x"
 
 macro Decorator $fixture.increment(Expr $target) => $target + 1;
 

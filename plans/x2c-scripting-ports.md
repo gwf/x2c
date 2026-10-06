@@ -159,7 +159,7 @@ appears.
 1. **Clock and time: declined.** A script includes `<time.h>` and calls
    `clock_gettime` and `strftime` directly, as `src/report.x`,
    `src/build.x` and `lib/logger.x` do, and `$time` in
-   `lib/system-macros.xmacro` already times a statement. The listed
+   `lib/system-macros.x` already times a statement. The listed
    consumers mostly do not need it: the seven `run-*.sh` drivers take
    timings from the benchmark binaries, `tools/harness-metrics.py` reads
    timestamps from its records, `tools/agent-failure.py` needs one ISO date,

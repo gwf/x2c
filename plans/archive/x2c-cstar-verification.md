@@ -242,7 +242,7 @@ Suggested ownership:
 
 - `packages/cstar/src/cstar.x` and `cstar-0.5.7.h`: small public
   proof/context operations and the pinned shim C surface.
-- `packages/cstar/src/cstar.xmacro` and companion `.xlisp`: annotation
+- `packages/cstar/src/cstar-macros.x` and companion `.xlisp`: annotation
   templates, capture records, and erasure, with a declaration-only
   `cstar-annotations.x` supplying the marker.
 - The extractor, one backend adapter, and the verification driver.

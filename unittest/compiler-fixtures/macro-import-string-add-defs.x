@@ -1,0 +1,6 @@
+#pragma once
+
+macro Stmt $greet() {
+  String greeting = "hello, " + "world";
+  printf("%s\n", greeting);
+}

@@ -10,7 +10,6 @@
 #pragma once
 #include "x2c.x"
 
-#pragma private
 
 #include <errno.h>
 #include <stdint.h>
@@ -35,7 +34,7 @@ static const uint32_t _ROUND[64] = {
 
 /* `block` holds the `used` bytes not yet compressed; `length` counts every
    byte absorbed. */
-typedef struct _Sha256 {
+static typedef struct _Sha256 {
   uint32_t state[8];
   uint64_t length;
   unsigned char block[64];

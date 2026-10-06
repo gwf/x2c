@@ -1,7 +1,7 @@
 /*  test-buffer.x -- unit tests for the text Buffer contract */
 
 #include "test-support.x"
-$(import "test-macros.xmacro")
+#include "test-macros.x"
 #include <limits.h>
 #include <wchar.h>
 

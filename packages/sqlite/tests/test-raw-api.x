@@ -7,7 +7,7 @@ import "sqlite";
 #include <limits.h>
 #include <string.h>
 
-$(import "../../../unittest/test-macros.xmacro")
+#include "../../../unittest/test-macros.x"
 
 static void sqlite_raw_values_and_profile(void) {
   EXPECT_INT_EQ(sqlite3_libversion_number(), SQLITE_VERSION_NUMBER);

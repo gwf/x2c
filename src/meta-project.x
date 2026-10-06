@@ -9,7 +9,7 @@
     packages. Meta code under the x2c root's `lib`, `src`, and `etc` is the
     compiler's own, linked into it.
 
-    Each source unit with meta code gets its own table and native object.
+    Each reached source unit gets its own table and native object.
     Public functions link between units; static helpers stay with their
     provider. The helper is cached under the x2c cache root,
     keyed by the SHA-256 of those sources, the compiler stamp, the C
@@ -20,7 +20,6 @@
 #pragma once
 #include "frontend.x"
 
-#pragma private
 
 #include "datum.x"
 #include "digest.x"
@@ -33,28 +32,28 @@
 
 // helper table source
 
-macro Stmt $output.helper.header(Expr $out) {
+static macro Stmt $output.helper.header(Expr $out) {
   $out.write("#include \"x2c.h\"\n");
 }
 
-macro Stmt $output.helper.target(Expr $out, Expr $index) {
+static macro Stmt $output.helper.target(Expr $out, Expr $index) {
   $out.printf("Map x2c_module_targets_%d(void);\n", $index);
 }
 
-macro Stmt $output.helper.dispatch_begin(Expr $out) {
+static macro Stmt $output.helper.dispatch_begin(Expr $out) {
   $out.write("Map x2c_meta_helper_table(int index) {\n  switch (index) {\n");
 }
 
-macro Stmt $output.helper.dispatch_case(Expr $out, Expr $index) {
+static macro Stmt $output.helper.dispatch_case(Expr $out, Expr $index) {
   $out.printf(
     "    case %d: return x2c_module_targets_%d();\n", $index, $index);
 }
 
-macro Stmt $output.helper.dispatch_end(Expr $out) {
+static macro Stmt $output.helper.dispatch_end(Expr $out) {
   $out.write("  }\n  return NULL;\n}\n");
 }
 
-macro Stmt $output.helper.count(Expr $out, Expr $count) {
+static macro Stmt $output.helper.count(Expr $out, Expr $count) {
   $out.printf("int x2c_meta_helper_count(void) { return %d; }\n", $count);
 }
 
@@ -63,7 +62,7 @@ macro Stmt $output.helper.count(Expr $out, Expr $count) {
 /* One project meta build. The Kth owner parses into table K.
    A build records the files it reads in `deps` and
    the result of each table in the fields after it. */
-typedef struct Helper {
+static typedef struct Helper {
   Frontend frontend, Array owners, Map packages;
   Toolchain toolchain, String include, identity, directory;
   List flags, Array modules;
@@ -131,7 +130,7 @@ static void Helper.use(Helper &h, List manifest) {
 /* The scan of one input. `units` collects included meta providers;
    `seen` holds each file's result bits, and
    `packages` the root of each package imported. */
-typedef struct Scan {
+static typedef struct Scan {
   CliRequest request, Array units, Map seen, packages;
 } Scan;
 
@@ -145,7 +144,9 @@ static void Helper.scan(Helper &h, List inputs) {
     Scan s = {
       .request = h.frontend.request, .units = [], .seen = {},
       .packages = h.packages};
-    if (s.file(path) & 1) h.own(path, owned);
+    int meta = s.file(path);
+    if (!meta) continue;
+    if (meta & 1) h.own(path, owned);
     foreach (String unit, s.units) h.own(unit, owned);
   }
 }
@@ -213,7 +214,7 @@ static int Scan.package(Scan &s, Tokenizer tokens) {
   if (!entry) return 0;
   s.packages[root] = 1;
   int meta = s.file(entry);
-  if (meta & 1) s.units.push(absolute_path(entry));
+  s.units.push(absolute_path(entry));
   return !!meta;
 }
 
@@ -228,7 +229,7 @@ static int Scan.include(Scan &s, String directive, String directory) {
   String path = Path.absolute(file);
   if (_compiler_owns(path)) return 0;
   int meta = s.file(path);
-  if (meta & 1) s.units.push(absolute_path(path));
+  s.units.push(absolute_path(path));
   return !!meta;
 }
 

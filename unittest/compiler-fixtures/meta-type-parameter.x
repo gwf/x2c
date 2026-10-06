@@ -11,7 +11,7 @@ struct Pair { int a; double b; };
 union Number { int i; float f; };
 enum Color { RED, GREEN };
 
-$(import "meta-type-parameter.xmacro")
+#include "meta-type-parameter-defs.x"
 
 int main(void) {
   struct Response response = { 1, "x" };

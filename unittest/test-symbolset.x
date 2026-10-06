@@ -1,7 +1,7 @@
 /*  test-symbolset.x -- runtime tests for SymbolSet literals */
 
 #include "test-support.x"
-$(import "test-macros.xmacro")
+#include "test-macros.x"
 
 static const SymbolSet colors = %<<red green blue violet>>;
 static const SymbolSet empty_set = %<<>>;

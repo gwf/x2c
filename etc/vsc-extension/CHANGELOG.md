@@ -10,7 +10,8 @@ first.
   `NamedType`, `Catch`, `Captures`, and `MatchRow` are recognized.
 - Highlight contextual `meta native` function definitions and distinguish
   always available `$auto`, `$scope`, `$let`, and `$lock` calls.
-- Associate `.xp` and `.xpmacro` indentation syntax files with x2c.
+- Associate ordinary `.xp` indentation syntax files with x2c.
+- Highlight `static keyword` aliases; macros use ordinary source modules.
 
 ## 0.3.0
 

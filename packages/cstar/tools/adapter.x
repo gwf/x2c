@@ -23,11 +23,10 @@ typedef struct Adapter {
   int line, column, arrays;
 } Adapter;
 
-#pragma private
 
 #include <stdlib.h>
 
-$(import "adapter-templates.xmacro")
+#include "adapter-templates.x"
 
 static Map _binary_operators = %{
   <"*">: BINOP_MULTIPLY, <"/">: BINOP_DIVIDE, <"%">: BINOP_MODULO,

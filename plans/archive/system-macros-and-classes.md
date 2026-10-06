@@ -44,7 +44,7 @@ syntax and declaration-prefix cleanup to value classes and RHS `$auto`.
 
 | Responsibility | Owner |
 | --- | --- |
-| Shipped macro definitions and `keyword class` | `etc/builtin-macros.xmacro` |
+| Shipped macro definitions and `keyword class` | `etc/builtin-macros.x` |
 | Nontrivial canonical syntax construction | `etc/builtin-macros.xlisp` |
 | General Lisp syntax helpers | `etc/compiler-sdk.xlisp`, when genuinely reusable |
 | Compiler-dependent macro operations and installation | `src/macros.x` |
@@ -73,7 +73,7 @@ user packs keep source-local aliases and normal dependency tracking.
 macro. Its alias substitutes the source expression on each use and creates no
 runtime temporary. Group it with the system conveniences in the book, but do
 not change its evaluation behavior or rewrite it as `$let`. Keep private `loop`
-in `lib/private-keywords.xmacro`, and keep Logger's synchronized decorator with
+in `lib/private-keywords.x`, and keep Logger's synchronized decorator with
 Logger's private lock/error policy. This work does not make every private macro
 globally available.
 

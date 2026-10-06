@@ -1,0 +1,72 @@
+#pragma once
+
+/*  repl-output.x -- runtime statistics display */
+
+macro Stmt $output.repl.session(
+  Expr $out, Expr $definitions) {
+  $out.printf(
+    "session: definitions=%u\n",
+    $definitions);
+}
+
+macro Stmt $output.repl.scope_live(
+  Expr $out, Expr $objects, Expr $object_sign, Expr $object_delta, Expr $bytes,
+  Expr $byte_sign, Expr $byte_delta) {
+  $out.printf(
+    "scope (process): live-allocation-objects=%zu "
+    "delta-since-open=%c%zu live-requested-bytes=%zu "
+    "byte-delta-since-open=%c%zu\n",
+    $objects, $object_sign, $object_delta, $bytes, $byte_sign, $byte_delta);
+}
+
+macro Stmt $output.repl.scope_traffic(
+  Expr $out, Expr $allocations, Expr $frees, Expr $reallocations,
+  Expr $requested) {
+  $out.printf(
+    "scope (process, since REPL open): allocation-calls=%zu "
+    "free-calls=%zu reallocation-calls=%zu requested-traffic-bytes=%zu\n",
+    $allocations, $frees, $reallocations, $requested);
+}
+
+macro Stmt $output.repl.pool_identities(
+  Expr $out, Expr $interned, Expr $promoted) {
+  $out.printf(
+    "pool (current level, since REPL open): "
+    "interned-identities=%zu promotions=%zu\n",
+    $interned, $promoted);
+}
+
+macro Stmt $output.repl.pool_storage(
+  Expr $out, Expr $capacity, Expr $active, Expr $blocks, Expr $depot,
+  Expr $depot_blocks) {
+  $out.printf(
+    "pool (process): backing-capacity-bytes=%zu active-bytes=%zu "
+    "active-blocks=%zu depot-bytes=%zu depot-blocks=%zu\n",
+    $capacity, $active, $blocks, $depot, $depot_blocks);
+}
+
+macro Stmt $output.repl.pool_reuse(
+  Expr $out, Expr $allocated, Expr $reused, Expr $slots) {
+  $out.printf(
+    "pool (process, since REPL open): block-allocations=%zu "
+    "block-reuses=%zu slot-reuses=%zu\n",
+    $allocated, $reused, $slots);
+}
+
+macro Stmt $output.repl.scope_verbose(
+  Expr $out, Expr $scopes, Expr $created, Expr $destroyed, Expr $largest,
+  Expr $peak) {
+  $out.printf(
+    "scope (process, verbose): live-scopes=%zu "
+    "scope-creations=%zu scope-destructions=%zu largest-request-bytes=%zu "
+    "peak-live-requested-bytes=%zu\n",
+    $scopes, $created, $destroyed, $largest, $peak);
+}
+
+macro Stmt $output.repl.pool_verbose(
+  Expr $out, Expr $depth, Expr $allocations, Expr $frees, Expr $requested) {
+  $out.printf(
+    "pool (verbose): depth=%d allocation-calls=%zu free-calls=%zu "
+    "requested-traffic-bytes=%zu\n",
+    $depth, $allocations, $frees, $requested);
+}

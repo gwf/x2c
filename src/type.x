@@ -18,10 +18,9 @@
 */
 typedef List Type;
 
-#pragma private
-$(import "../src/grammar.xmacro")
-$(import "../src/ast-rewrite.xmacro")
-$(import "../lib/native-scalar-types.xmacro")
+#include "grammar.x"
+#include "ast-rewrite.x"
+#include "../lib/native-scalar-types.x"
 #include <limits.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -511,7 +510,7 @@ int Type.is_integral(Type type) {
 
 /* The count of each scalar specifier in one type. `sign` is -1 after
    `signed` and 1 after `unsigned`, and `signs` counts both. */
-typedef struct Specifiers {
+static typedef struct Specifiers {
   int sign, signs, shorts, longs, ints, chars, floats, doubles, voids, count;
 } Specifiers;
 

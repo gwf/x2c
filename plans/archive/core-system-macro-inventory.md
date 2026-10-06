@@ -39,7 +39,7 @@ unimplemented migration passed full integration tests.
 
 ## Expanded src cleanup inventory
 
-All 30 src/*.x files and src/ast-rewrite.xmacro were screened with comments
+All 30 src/*.x files and src/ast-rewrite.x were screened with comments
 and strings masked. Every executable defer has an individual row in the
 separate defer audit. AST construction containing the symbol defer is not an
 executing cleanup in the compiler. Native functions and parent-aware helper
@@ -220,7 +220,7 @@ Raw screening: 211 comment-stripped source lines containing a free/destroy/
 close/cleanup operation or helper, excluding declarations, direct Cleanup
 adapters, and the misleading `_cache_free_slot` lookup. The complete list is
 the per-file count table and named families below. Add TWO indirect consuming calls in
-array-generics.xmacro:722,729, traced through `_array_finish_buffer` in
+array-generics.x:722,729, traced through `_array_finish_buffer` in
 typed-array.x:85: **213 raw screening lines**. These are not 213 independent
 resources: e.g. success/failure cleanup for one local is two lines; field
 teardown and native helpers are deliberately included. Macro definitions count
@@ -242,8 +242,8 @@ to these authored counts.
 | array.x | 7 | 2 | 1 | 4 |
 | file.x | 11 | 2 | 0 | 9 |
 | lisp.x | 12 | 5 | 1 | 6 |
-| map-generics.xmacro | 14 | 3 | 2 | 9 |
-| array-generics.xmacro | 7 | 0 | 2 | 5 |
+| map-generics.x | 14 | 3 | 2 | 9 |
+| array-generics.x | 7 | 0 | 2 | 5 |
 | atom.x + symbol.x | 2 | 0 | 2 | 0 |
 | split.x | 2 | 0 | 2 | 0 |
 | string.x | 12 | 0 | 1 | 11 |
@@ -270,7 +270,7 @@ to these authored counts.
 - lisp.x:1603: eval_string tokens Scope; direct initialized local and immediate
   destroy; returned canonical evaluation values retain current owners.
 - lisp.x:1630: eval_file content Block; direct initializer/immediate free.
-- map-generics.xmacro:132,135: `_core_expand` staged_hashes/staged_entries
+- map-generics.x:132,135: `_core_expand` staged_hashes/staged_entries
   Bytes, found through Bytes_free aliases rather than method spelling.
   $auto(Bytes_new(...)) follows existing Bytes Cleanup. Preserve assignment of
   Bytes_append's possibly relocated pointer. Both locals become zero after
@@ -279,7 +279,7 @@ to these authored counts.
   unlike the failure-only staged exports elsewhere. Acquisition registration
   is already individual and properly ordered. Existing explicit frees of old
   hashes/entries stay explicit; those aliases are map-owned before commit.
-- map-generics.xmacro:580: comparison scratch Scope, existing direct defer.
+- map-generics.x:580: comparison scratch Scope, existing direct defer.
 
 The last three generic sites were absent from the original plan. They are
 three authored sites shared across map families; count three, not the number
@@ -327,8 +327,8 @@ strict error-lifetime equivalents and require explicit review of that choice.
 | array.x:714-723 | Buffer buf | buf.str_free() | $auto; buf.str() |
 | atom.x:139-142 | Buffer out | out.str_free() | $auto; out.str() |
 | symbol.x:195-198 | Buffer out | out.str_free() | $auto; out.str() |
-| map-generics.xmacro:679-688 | Buffer out (2) | out.str_free() | $auto; out.str() |
-| array-generics.xmacro:720-729 | Buffer out (2) | $finish_buffer(out) | see below |
+| map-generics.x:679-688 | Buffer out (2) | out.str_free() | $auto; out.str() |
+| array-generics.x:720-729 | Buffer out (2) | $finish_buffer(out) | see below |
 
 The consuming calls already defer destruction *inside* list_free/str_free;
 $auto moves registration earlier than the element/render construction loop,
@@ -427,7 +427,7 @@ seven types remain only two source candidates.
   interval to abbreviate. Existing Cleanup adapters are excluded from counts.
   Custom destroy callback invocation is not a type cleanup method.
 
-Inspection-only negative coverage: error-macros.xmacro contains no matching
+Inspection-only negative coverage: error-macros.x contains no matching
 resource release operations; cleanup behavior is in error.x and exception.x.
 All unmatched files contributed zero cleanup screen hits; that does not claim
 absence of every imaginable new lifetime policy, only no handwritten release
@@ -938,26 +938,26 @@ destroy src1/lib17, malloc_in src0/lib8; AST producers remain separate.
 
 All additional sites and treatment:
 
-- lib/autodiff.xmacro:34, $ad.dual generated boxing: Scope.malloc then copy
+- lib/autodiff-macros.x:34, $ad.dual generated boxing: Scope.malloc then copy
   the value and box it with the supplied tag. The allocation must survive
   return; no lexical cleanup. Class adoption would alter the selected tag,
   generated members and registration, so this is not a bracket opportunity.
-- lib/map-generics.xmacro:47, $map._core_free: Scope_free follows both
+- lib/map-generics.x:47, $map._core_free: Scope_free follows both
   Bytes_free calls; preserve recursive backing-storage reclamation.
-- lib/map-generics.xmacro:52-53, $map._core_new_capacity: Scope_malloc plus
+- lib/map-generics.x:52-53, $map._core_new_capacity: Scope_malloc plus
   Scope_top captures the owning destination slot. Preserve the object and
   two backing arrays and their growth destination contract.
-- lib/map-generics.xmacro:149-152, core growth: four Scope_move calls move
+- lib/map-generics.x:149-152, core growth: four Scope_move calls move
   staged hashes/entries control objects and backing allocations to map.scope
   only after reinsertion succeeds. Replacing with $scope changes allocation
   timing and rollback ownership; keep the staged transaction.
-- lib/map-generics.xmacro:579-582, $map._core_compare in $map.core.observe:
+- lib/map-generics.x:579-582, $map._core_compare in $map.core.observe:
   independent scratch Scope, deferred destroy, two malloc_in arrays. Strong
   additional $auto candidate: `Scope scratch = $auto(Scope.new());` removes
   the destroy statement. Keep both _in allocations; compare/qsort callbacks
   execute with the original active Scope, so `$scope()` around the routine
   would change callback allocation destinations. This is ONE template edit.
-- lib/map-generics.xmacro:817, $map.export_context: move map to export
+- lib/map-generics.x:817, $map.export_context: move map to export
   destination before installing/moving backing storage. Keep transaction
   ordering and staged conditional cleanup; not a temporary destination.
 - src/generate.x:108, _make_shutdown_registration: AST emits native
@@ -972,18 +972,18 @@ Native declarations/implementation/callback references are separate:
 lib/common.x:161 declares Scope_shutdown_hook; lib/scope.x:983 implements
 Scope_shutdown; lib/scope.x:171 registers Scope_shutdown with atexit.
 They are not extra ordinary native calls, but the atexit registration is
-another process-lifetime mutation that must remain. lib/error-private.xmacro
-declares an ErrorRegion Scope field, and array-generics.xmacro:806 captures
+another process-lifetime mutation that must remain. lib/error-private.x
+declares an ErrorRegion Scope field, and array-generics.x:806 captures
 Context.export_destination; neither calls a Scope operation.
 
 The complete managed-independent-Scope shortlist is FOUR sites: three Lisp
-sites above plus map-generics.xmacro:579-580. Retain/push inventory counts
+sites above plus map-generics.x:579-580. Retain/push inventory counts
 remain unchanged because no additional retain/release/push/pop templates or
 native aliases exist in these files.
 
 ## Additional macro-template exclusions
 
-`lib/autodiff.xmacro:723-728` saves/restores `ad._loop-step` inside compile-time
+`lib/autodiff-macros.x:723-728` saves/restores `ad._loop-step` inside compile-time
 Lisp using def/let*. This is not an addressable x2c runtime place; system $let
 cannot replace it. Generic array/map old_* storage is transferred to a staged
 object, not restored to the same location. RenderPath enter/leave remains a
@@ -1039,7 +1039,7 @@ ToolAction-shaped fields, borrowed List identity, canonical List survival,
 swapped Array cleanup, Scope allocation balance, generated Scope.memdup and
 eager tagged initialization without boxing.
 
-Expanded probe: /tmp/x2c-adoption-expanded/map-generics.xmacro is a copy with
+Expanded probe: /tmp/x2c-adoption-expanded/map-generics.x is a copy with
 only the two staged Bytes initializers and comparison Scope initializer changed
 to auto. /tmp/x2c-adoption-expanded/maps.x embeds the current typed-map provider
 and imports that temporary macro. It compiled and ran, exercising 2,000 keys,

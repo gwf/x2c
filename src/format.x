@@ -10,13 +10,12 @@
 #pragma once
 #include "compiler.x"
 
-#pragma private
 
 // pretty print formatting
 
 /* State for one formatting pass. `scanned` tracks the last byte counted in
    `output_line`; source markers need that physical line after prior writes. */
-typedef struct Pretty {
+static typedef struct Pretty {
   Compiler c;
   Buffer buff;
   String output_file, prev_token;

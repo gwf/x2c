@@ -1,7 +1,7 @@
 /*  test-iter.x -- unit tests for iterator helpers */
 
 #include "test-support.x"
-$(import "test-macros.xmacro")
+#include "test-macros.x"
 
 #include <limits.h>
 

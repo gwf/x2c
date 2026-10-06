@@ -1,7 +1,7 @@
 /*  test-block.x -- unit tests for checked Block and Bytes storage */
 
 #include "test-support.x"
-$(import "test-macros.xmacro")
+#include "test-macros.x"
 #include <stdint.h>
 #include <string.h>
 

@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-$(import "macro-embed-text-definition/embed.xmacro")
+#include "macro-embed-text-definition/embed.x"
 
 int main(void) {
   printf("[%s]\n", $embed.definition());

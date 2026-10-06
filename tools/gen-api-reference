@@ -19,7 +19,7 @@
 #include "definitions.x"
 
 static Path root, pages_dir, compiler_dir, summary_path, x2c
-static Regex whitespace, plain_id, private_pragma
+static Regex whitespace, plain_id
 static Map see_index, evidence
 static const String library_section = "# Libraries and Packages"
 static const String compiler_section = "# Compiler API (provisional)"
@@ -149,23 +149,14 @@ static Map _item(List definition, String tier, String label):
 static int _future_public(String name) =>
   !name.startswith("_") && !name.contains("__")
 
-/* The public types written in `unit`, as the reference has always listed
-   them: typedef and class statements before the first `#pragma private`,
-   a class completion replacing its forward declaration. */
+/* Public authored types use the compiler's effective publication flag.
+   A class completion replaces its forward declaration. */
 static List _declarations(Unit unit):
-  Path source = root.join(unit["path"])
-  int cut = 0, number = 0
-  foreach String line in source.read_text().split("\n"):
-    number++
-    if private_pragma.match(line):
-      cut = number
-      break
   Array found = []
   Map classes = {}
   foreach Map row in unit["types"].array():
     String text = row["text"]
-    int line = row["line"].integer()
-    if !row["span"] || (cut && line > cut): continue
+    if !row["span"] || row["private"].integer(): continue
     if row["name"].str().startswith("x2c_var_abi_"): continue
     if row["kind"] != <class>:
       found.push(row)
@@ -174,7 +165,8 @@ static List _declarations(Unit unit):
     if !classes.contains(name):
       classes[name] = found.len()
       found.push(row)
-    else if text != %"class $name": found[classes[name].integer()] = row
+    else if text != %"class $name" && text != %"static class $name":
+      found[classes[name].integer()] = row
   return found.list_free()
 
 /* Validates and returns the public callables and types of one unit. */
@@ -804,7 +796,6 @@ summary_path = root.join("docs/src/SUMMARY.md")
 x2c = root.join("builds/0/x2c")
 whitespace = Regex.compile("\\s+")
 plain_id = Regex.compile("^[a-z0-9_-]+$")
-private_pragma = Regex.compile("^[ \\t]*#[ \\t]*pragma[ \\t]+private\\b")
 evidence = {}
 for (int at = 0; evidence_rows[at][0]; at++):
   evidence[String.new(evidence_rows[at][0])] =

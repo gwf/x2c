@@ -5,7 +5,6 @@ import "geo";
 
 double diagonal(double x, double y);
 
-#pragma private
 
 double diagonal(double x, double y) {
   geo.Vec v = geo.Vec.new(x, y);

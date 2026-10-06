@@ -1,7 +1,7 @@
 /*  test-match-stmt.x -- unit tests for match statement lowering */
 
 #include "test-support.x"
-$(import "test-macros.xmacro")
+#include "test-macros.x"
 
 static List _runtime_match(List input, List pattern) {
   return input.match(pattern);

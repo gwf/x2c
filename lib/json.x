@@ -11,7 +11,7 @@
 */
 
 #pragma once
-$(import "private-keywords.xmacro")
+#include "private-keywords.x"
 #include "x2c.x"
 #include "path.x"
 
@@ -27,10 +27,101 @@ typedef struct JsonBool *JsonBool;
 
 protocol Var(JsonBool);
 
-#pragma private
 
 #include "meta.x"
-$(import "json-errors.xmacro")
+
+/* Json reading and writing error conditions.
+   Reports expand at their existing owners. */
+
+static macro Stmt $error.boolean.type(Expr $tag) {
+  raise %(bad-types (operation "Json.boolean") (tag ${$tag}));
+}
+
+static macro Stmt $error.read.file(
+  Expr $path, Expr $why, Expr $offset, Expr $line, Expr $column) {
+  raise %(malformed (operation "Json.read_file") (path ${$path})
+          (reason ${$why}) (offset ${$offset})
+          (line ${$line}) (column ${$column}));
+}
+
+static macro Stmt $error.read.text(
+  Expr $why, Expr $offset, Expr $line, Expr $column) {
+  raise %(malformed (operation "Json.parse") (reason ${$why})
+          (offset ${$offset}) (line ${$line}) (column ${$column}));
+}
+
+static macro Stmt $error.write.depth() {
+  raise %(size-limit (operation "Var.json")
+          (reason "nesting exceeds 512 levels"));
+}
+
+static macro Stmt $error.write.type(Expr $tag) {
+  raise %(bad-types (operation "Var.json") (tag ${$tag}));
+}
+
+static macro Stmt $error.write.key(Expr $tag) {
+  raise %(bad-types (operation "Var.json") (want "String object key")
+          (tag ${$tag}));
+}
+
+static macro Stmt $error.write.duplicate(Expr $text) {
+  raise %(bad-arg (operation "Var.json") (reason "duplicate object name")
+          (name ${$text}));
+}
+
+static macro Stmt $error.write.nonfinite() {
+  raise %(conv-range (operation "Var.json")
+          (reason "JSON has no NaN or infinity"));
+}
+
+static macro Stmt $error.read.trailing(Expr $reader) =>
+  $reader._fail("unexpected text after the value");
+
+static macro Stmt $error.read.depth(Expr $reader) =>
+  $reader._fail("nesting exceeds 512 levels");
+
+static macro Stmt $error.read.end(Expr $reader) =>
+  $reader._fail("unexpected end of input");
+
+static macro Stmt $error.read.char(Expr $reader) =>
+  $reader._fail("unexpected character");
+
+static macro Stmt $error.read.key(Expr $reader) =>
+  $reader._fail("expected a string key");
+
+static macro Expression $reason.read.colon() => "expected ':'";
+
+static macro Expression $reason.read.object.sep() => "expected ',' or '}'";
+
+static macro Expression $reason.read.array.sep() => "expected ',' or ']'";
+
+static macro Stmt $error.read.string.end(Expr $reader) =>
+  $reader._fail("unterminated string");
+
+static macro Stmt $error.read.control(Expr $reader) =>
+  $reader._fail("control character in string");
+
+static macro Stmt $error.read.utf8(Expr $reader) =>
+  $reader._fail("invalid UTF-8");
+
+static macro Stmt $error.read.escape(Expr $reader) =>
+  $reader._fail("invalid escape");
+
+static macro Stmt $error.read.surrogate(Expr $reader) =>
+  $reader._fail("unpaired surrogate");
+
+static macro Stmt $error.read.nul(Expr $reader) =>
+  $reader._fail("U+0000 cannot appear in a String");
+
+static macro Stmt $error.read.unicode(Expr $reader) =>
+  $reader._fail("invalid \\u escape");
+
+static macro Stmt $error.read.number(Expr $reader) =>
+  $reader._fail("invalid number");
+
+static macro Stmt $error.read.range(Expr $reader) =>
+  $reader._fail("number out of range");
+
 
 #include <errno.h>
 #include <limits.h>
@@ -43,7 +134,7 @@ $(import "json-errors.xmacro")
 
 // booleans
 
-struct JsonBool {
+static struct JsonBool {
   unsigned long value;
 };
 
@@ -95,7 +186,7 @@ int Json.boolean(Var value) {
 
 /* One parse of `text`: `at` is the byte being read, `depth` counts the open
    arrays and objects, and `path` names a file for the error details. */
-typedef struct Reader {
+static typedef struct Reader {
   const char *text;
   String path;
   int at, depth;
@@ -364,7 +455,7 @@ static void Reader._fail(Reader &r, String why) {
 */
 
 /* One write: the output Buffer and whether it is indented. */
-typedef struct Writer {
+static typedef struct Writer {
   Buffer out;
   int pretty;
 } Writer;

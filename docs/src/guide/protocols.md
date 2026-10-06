@@ -129,16 +129,14 @@ A private type can therefore participate in the public `Var(T)` protocol
 without becoming public itself:
 
 ```x2c
-#pragma private
-typedef struct LocalPlan *LocalPlan;
-Var LocalPlan.var(LocalPlan);
-LocalPlan Var.localplan(Var);
+static typedef struct LocalPlan *LocalPlan;
+static Var LocalPlan.var(LocalPlan plan) => Var.new(<localplan>, plan);
+static LocalPlan Var.localplan(Var value) => (LocalPlan) value.pointer();
 protocol Var(LocalPlan);
 ```
 
-A protocol body can be private below `#pragma private`.
-`static protocol Prepared(T) { ... }` is invalid because `static` modifies
-only adoptions. A local ordinary adapter is emitted as `static inline` in the
+A protocol body declared as `static protocol Prepared(T) { ... }` is private
+to its source file. A concrete adoption may also be static. A local ordinary adapter is emitted as `static inline` in the
 participant's C file. Local native aliases and their signature checks also
 stay in that file; none of these names appears in the generated header.
 

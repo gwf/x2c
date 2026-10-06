@@ -25,7 +25,7 @@ Code can itself be a List value passed between meta functions.
 Two equal top priorities:
 
 1. Call source-code templates from meta functions, starting with the generated
-   gradient function in `lib/autodiff.xmacro`'s `ad_reverse_function`.
+   gradient function in `lib/autodiff-macros.x`'s `ad_reverse_function`.
 2. Insert every representable literal result of compile-time evaluation with
    the correct type and value, starting with native scalar literals and strings.
 

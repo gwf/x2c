@@ -621,7 +621,7 @@ static void string_padding_removal_and_partition(void) {
   expect_string_item(empty, 2, "abc");
 }
 
-$(import "test-macros.xmacro")
+#include "test-macros.x"
 
 static void string_dedent_normalizes_written_indentation(void) {
   String block = %"

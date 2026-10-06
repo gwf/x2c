@@ -12,7 +12,7 @@ The following notes describe the implementation at the time of this plan.
 Current disposition is the status above.
 
 > Design decided and built. `src/comptime.x` is the compiled pass and
-> `etc/comptime.xlisp` its runtime; the whole of `lib/autodiff.xmacro`'s
+> `etc/comptime.xlisp` its runtime; the whole of `lib/autodiff-macros.x`'s
 > forward and reverse modes is ported and exact. Work happens on the isolated
 > branch `x2c-lowers-to-lisp` and does not reach `main` without Gary's
 > explicit green light. Measurements from 2026-09-17 against `82bd746b`
@@ -51,13 +51,13 @@ anyone has to write to support macros.
 Two arguments, one from cost and one from fit.
 
 The cost is visible in the tree: about 1,000 lines of Lisp under `etc/`
-plus roughly 700 more inside `lib/autodiff.xmacro`, most of it
+plus roughly 700 more inside `lib/autodiff-macros.x`, most of it
 re-deriving in Lisp what x2c already does. The
 [compile-time value surface](../../etc/lisp-values.xlisp) shipped on
 2026-09-17 is the clearest evidence: 69 names whose only purpose is to let
 Lisp stop reimplementing the x2c library.
 
-The fit argument is stronger. `autodiff.xmacro` is AST rewriting written in
+The fit argument is stronger. `autodiff-macros.x` is AST rewriting written in
 the one language worse at it than the host. x2c's `match` has typed
 captures, `!set`, `!or`, and literal output templates the compiler checks;
 Lisp's `match-case` has none of that. Moving that code to x2c makes it
@@ -207,7 +207,7 @@ operations.
 **Out for now**, each because it needs a decision rather than more typing:
 `goto` and labels; `struct` declarations and field access; `defer`;
 `foreach`; `match`; `try`/`catch`. `struct` and `match` are the two that
-matter for porting `autodiff.xmacro` and are the first extensions.
+matter for porting `autodiff-macros.x` and are the first extensions.
 
 ### Isolation
 
@@ -315,7 +315,7 @@ the direction pays, so the fixture waits for that.
 
 ### M2 - `match` and templates
 
-Reading `autodiff.xmacro` corrected the target: what it needs is `match`
+Reading `autodiff-macros.x` corrected the target: what it needs is `match`
 over ASTs and `%(...)` templates, not `struct`. Both are how it does its
 work, and `struct` barely appears.
 
@@ -438,7 +438,7 @@ consumer has to remember.
 
 ### M3 groundwork - lambdas  (DONE 2026-09-17)
 
-Surveying `autodiff.xmacro` first changed what M3 needs. Its 754 lines of
+Surveying `autodiff-macros.x` first changed what M3 needs. Its 754 lines of
 Lisp use 65 lambdas, 52 templates, 24 `match-case` and 19 mutable globals.
 Templates and `match` were M2. Lambdas were not supported at all, and at 65
 uses they are the largest single dependency.
@@ -484,7 +484,7 @@ collects an id and still descends.
 
 All eight spike programs agree with native execution.
 
-### M3 - port `autodiff.xmacro`  (SLICE DONE 2026-09-17)
+### M3 - port `autodiff-macros.x`  (SLICE DONE 2026-09-17)
 
 `.context/spike/autodiff-slice.x` ports the forward-mode arithmetic core:
 `ad_zero`, `ad_one`, the four simplifying constructors, the two predicates,
@@ -573,7 +573,7 @@ that generate a derivative function, which then compiles to C and runs:
 
 ### Size and speed against the original
 
-Same work, same two derivatives, measured against `lib/autodiff.xmacro`.
+Same work, same two derivatives, measured against `lib/autodiff-macros.x`.
 
 **Size: the port is larger.** 236 lines of x2c against 191 lines of Lisp
 for the equivalent functions, plus one `$comptime()` marker each. About 24%
@@ -747,7 +747,7 @@ because the call table became a `Map`, not because of the machine; the
 machine is what makes the one-time lowering affordable.
 
 The reason the port is faster is the same `match-case` cost measured above,
-from the other side: `autodiff.xmacro` uses `match-case` throughout, so it
+from the other side: `autodiff-macros.x` uses `match-case` throughout, so it
 re-expands a macro on every call, while the lowering emits a direct
 `(match subject 'pattern)` against the native matcher. Lowering from x2c
 produced Lisp that avoids a trap the handwritten Lisp falls into.
@@ -782,7 +782,7 @@ Two ways to fix it, and they are not exclusive:
 - **In the interpreter**, memoize a macro expansion per call site. The raw
   argument forms at a site do not change, so the expansion does not either.
   This would speed every macro in compile-time Lisp, including
-  `autodiff.xmacro`'s own `match-case` uses, and it is the fix that belongs
+  `autodiff-macros.x`'s own `match-case` uses, and it is the fix that belongs
   in the compiler rather than in one caller. It needs care over macro
   redefinition and over macros that read mutable globals.
 
@@ -835,7 +835,7 @@ consumer rechecks any of these.
 **What this deletes or reuses.** It reuses the parser, binder, typer,
 Lisp evaluator, word machine, native table, and `etc/lisp-values.xlisp`
 unchanged; the only new lasting mechanism is the lowering pass itself. It
-is expected to delete roughly 700 lines of Lisp in `autodiff.xmacro` and,
+is expected to delete roughly 700 lines of Lisp in `autodiff-macros.x` and,
 if that succeeds, most of the Lisp under `etc/`. The one constant change
 replaces no code but removes a cliff that would otherwise force a second
 lowering strategy for functions with many locals.
@@ -896,7 +896,7 @@ The smaller declaration slice measures the same way: 0.80s against 0.08s.
 
 ## Reverse mode through the compiled pass
 
-`unittest/compiler-fixtures/comptime-autodiff.x` carries the whole of `lib/autodiff.xmacro`'s
+`unittest/compiler-fixtures/comptime-autodiff.x` carries the whole of `lib/autodiff-macros.x`'s
 forward and reverse modes as compile-time x2c: the primitive derivative
 table, the tangent rules, the adjoint rules, the tape, exit codes, the loop
 trip counter and its dispatch, and both decorators. Every derivative it

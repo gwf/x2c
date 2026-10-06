@@ -4,7 +4,7 @@
 #include "test-support.x"
 #include <string.h>
 
-$(import "../../../unittest/test-macros.xmacro")
+#include "../../../unittest/test-macros.x"
 
 static void raw_profile_and_status(void) {
   EXPECT_STR_EQ(String.new((char *) tb_version()), "2.5.0");

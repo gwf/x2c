@@ -617,7 +617,7 @@ static void list_optional_compound_selectors(void) {
   EXPECT_TRUE(boxed.cddddr() == %(i));
 }
 
-$(import "test-macros.xmacro")
+#include "test-macros.x"
 
 void list_suite(void) {
   $test.run(list_canonical_identity);

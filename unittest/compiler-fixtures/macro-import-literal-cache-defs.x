@@ -1,0 +1,9 @@
+#pragma once
+
+macro Stmt $imported_literal(Name $name) {
+  List $name = %("abc" "de");
+}
+
+macro Expression $imported_nested_literal() => %(("abc" "de") "tail");
+
+macro Expression $imported_string_literal() => %"imported";

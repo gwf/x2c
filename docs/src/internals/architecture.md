@@ -101,7 +101,6 @@ it produces `greet.h`:
 #include "x2c.h"
 String greet(String name);
 
-
 #endif /* __GUARD_0x10E936D3__ */
 ```
 
@@ -115,8 +114,6 @@ and `greet.c`:
 static String _0;
 
 static int _init_guard_ = 0;
-
-
 
 
 
@@ -218,12 +215,14 @@ generation; it adds no public library callable or separate stored inventory.
 A file's contribution is collected once per process. Translating a unit
 also writes it beside the generated C as a unit interface, `<stem>.xi`: the
 identity of the compiler that wrote it, the ordered declaration maps,
-include placeholders, and `private` and `public` markers for the visibility
-pragmas, the source content hash, function definitions, and the macro, Lisp,
-and embedded-text files the walk read with their hashes. A declaration map
-below a `private` marker holds only what that region publishes, so an
-including unit never sees a private type or static helper, and a package's
-surface stops at that marker. The file holds one
+include placeholders, the source content hash, function definitions, and the
+macro, Lisp, and embedded-text files the walk read with their hashes. Each
+declaration map holds its public rows: nonstatic declarations and complete
+type families needed by public declarations. Source-position rows also retain
+public macro and keyword definitions, Lisp effects, and provider meta-function
+identities. Cold collection and interface replay use the same ordered parts,
+while the full parser installs included compile-time definitions at their
+include positions. Static helpers remain in their provider. The file holds one
 `(interface 5 "compiler" "path" "hash" (PARTS...) (DEFINITIONS...)
 (SELECTED-DEFINITIONS...) (DEPENDENCIES...) (INCLUDE-DIRS...))` form in
 `%()` List syntax, with bare Atoms for its structural words and Strings for
@@ -283,7 +282,7 @@ forms, including initializer recognition and the function-body boundary,
 `src/literals.x` for collection, interpolated `String`, and lambda literals.
 `src/meta-group.x` stages a unit's bodied `meta` functions as native code,
 and `src/stage.x` carries values across that boundary. The built-in source macro
-in `src/macros.x`, `etc/builtin-macros.xmacro`, and the algorithms in
+in `src/macros.x`, `etc/builtin-macros.x`, and the algorithms in
 `src/builtins.x` expand `foreach` during this pass. `src/type.x`
 owns the `List`-backed `Type` representation those modules consult; `src/ast.x`
 owns sequence placement and binding helpers; `src/symbols.x` owns lexical

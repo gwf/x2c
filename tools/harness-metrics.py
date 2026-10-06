@@ -114,7 +114,7 @@ PUSH_REFSPEC = re.compile(r"git push\s+.*(HEAD:refs/heads/|:refs/heads/)")
 PUSH_PLAIN = re.compile(r"git push(?!\s+.*refs/heads/)")
 REWORK = {
     "stash": re.compile(r"\bgit stash\b"),
-    "revert_file": re.compile(r"\bgit checkout\s+(--\s+)?[a-z]\S*\.(x|xmacro|md|py|sh)"),
+    "revert_file": re.compile(r"\bgit checkout\s+(--\s+)?[a-z]\S*\.(x|md|py|sh)"),
     "reset": re.compile(r"\bgit reset\b"),
     "amend": re.compile(r"\bgit commit\b.*--amend"),
     "force_push": re.compile(r"\bgit push\b.*(--force|-f\b)"),

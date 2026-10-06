@@ -1,4 +1,4 @@
 #include "x2c.x"
-$(import "answer.xmacro")
+#include "answer.x"
 
 $answer(provider_answer);

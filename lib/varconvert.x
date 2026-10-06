@@ -8,7 +8,7 @@
 
 #pragma once
 
-$(import "error-macros.xmacro")
+#include "error-macros.x"
 #include "common.x"
 
 /** Describes one numeric `Var` family without holding a value.
@@ -35,10 +35,52 @@ float X2CVarNumeric.f32(X2CVarNumeric &value);
 double X2CVarNumeric.f64(X2CVarNumeric &value);
 long double X2CVarNumeric.ldouble(X2CVarNumeric &value);
 
-#pragma private
 
 #include "meta.x"
-$(import "varconvert-errors.xmacro")
+
+/* Var numeric conversion error conditions.
+   Reports expand at their existing owners. */
+
+static macro Stmt $error.encoding.bad(Expr $bits) {
+  raise %(bad-enc (value ${$bits}));
+}
+
+static macro Stmt $error.convert.void() {
+  raise %(void-op (operation "Var.convert"));
+}
+
+static macro Stmt $error.target.invalid(Expr $target) {
+  raise %(bad-target (target ${$target}));
+}
+
+static macro Stmt $error.source.numeric(Expr $source_tag, Expr $target) {
+  using $lower;
+  {
+    List $lower = %(bad-types (source ${$source_tag}));
+    raise %(no-convert (target ${$target}) (cause ${$lower}));
+  }
+}
+
+static macro Stmt $error.target.numeric(Expr $source_tag, Expr $target) {
+  raise %(no-convert (source ${$source_tag}) (target ${$target}));
+}
+
+static macro Stmt $error.decode.output() {
+  raise %(bad-arg (operation "Var.numeric_decode"));
+}
+
+static macro Stmt $error.decode.void() {
+  raise %(void-op (operation "Var.numeric_decode"));
+}
+
+static macro Stmt $error.decode.type(Expr $tag) {
+  raise %(bad-types (source ${$tag}));
+}
+
+static macro Stmt $error.convert.range(Expr $source_tag, Expr $target) {
+  raise %(conv-range (source ${$source_tag}) (target ${$target}));
+}
+
 
 #include "var.x"
 #include "error.x"

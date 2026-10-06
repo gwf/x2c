@@ -235,7 +235,7 @@ static void atom_bare_spelling_owns_writer_contract(void) {
   EXPECT_FALSE(Atom.bare_spelling("a//b"));
 }
 
-$(import "test-macros.xmacro")
+#include "test-macros.x"
 
 void atom_suite(void) {
   $test.run(atom_compact_and_long_representations);

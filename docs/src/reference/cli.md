@@ -175,7 +175,7 @@ produced, prints a `function` row, and each `typedef` or `class` prints a
 - `type` and `params` give a function's canonical type and parameter names,
   as its unit interface records them.
 - `kind` is `alias`, `struct`, `union`, `enum`, `callback`, or `class`, and
-  `private` is 1 for a type declared in a `#pragma private` region.
+  `private` is 1 for a type declared with `static`.
 
 Compile-time-only `meta` functions are not part of the translated unit and
 are not listed.

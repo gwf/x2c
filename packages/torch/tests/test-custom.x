@@ -4,7 +4,7 @@ import "torch" with Torch, Tensor, AutogradContext;
 #include "test-support.x"
 #include <math.h>
 #include <pthread.h>
-$(import "../../../unittest/test-macros.xmacro")
+#include "../../../unittest/test-macros.x"
 
 static pthread_t caller;
 static int calls;

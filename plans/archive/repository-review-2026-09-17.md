@@ -76,13 +76,13 @@ Files: `src/parse.x`, `src/statements.x`, `src/expressions.x`,
 > Fixed 2026-09-17. Generated C is unchanged across `src/` and `lib/`.
 > Group 16 removes the per-producer grouping this added.
 
-Files: `src/macros.x` (hole substitution), `lib/autodiff.xmacro`.
+Files: `src/macros.x` (hole substitution), `lib/autodiff-macros.x`.
 
 | Defect | Reproduction | Cause | R |
 | --- | --- | --- | --- |
 | Macro `Expr` holes lose their grouping; the book's own guard is wrong. | `idioms.md:42` and `macros.md:249`: `$guard(value > 0)` emits `if(! value > 0)`, so `positive(-3)` returns -3. `$show(1 + 2)` with `$c * 2, -$c, !$c` prints `5 1 2`. `language.md:703` says a hole binds parsed syntax. | Substitution splices the hole's tokens without grouping. | me |
-| Autodiff drops parentheses around operands. | `$ad.both() static double f(double x) => log(x + 1.0);` gives d/dx 2 at 1 (exact 0.5); `s *= x + 1.0` gives forward 4, reverse 3; `acosh`, `log2`, `pow`, `/=` likewise. | `ad._raw` (`autodiff.xmacro:163`) and `ad._typed` (`:322`) build `v OP rhs` without grouping operands. | me |
-| Forward mode returns NaN where reverse returns the derivative at 0. | `pow(x, 2)` at 0, `sqrt(x) + y` d/dy at 0. | 0 times inf in the table at `autodiff.xmacro:266-272`. | agent |
+| Autodiff drops parentheses around operands. | `$ad.both() static double f(double x) => log(x + 1.0);` gives d/dx 2 at 1 (exact 0.5); `s *= x + 1.0` gives forward 4, reverse 3; `acosh`, `log2`, `pow`, `/=` likewise. | `ad._raw` (`autodiff-macros.x:163`) and `ad._typed` (`:322`) build `v OP rhs` without grouping operands. | me |
+| Forward mode returns NaN where reverse returns the derivative at 0. | `pow(x, 2)` at 0, `sqrt(x) + y` d/dy at 0. | 0 times inf in the table at `autodiff-macros.x:266-272`. | agent |
 
 ## Group 3: declarations and generated C
 
@@ -170,13 +170,13 @@ Files: `lib/common.x` (slice count), `lib/string.x` (except escapes),
 > Fixed 2026-09-17. Row 1 needed no String-side change, and row 7 is
 > documentation only, as decided.
 
-Files: `lib/array.x`, `lib/array-generics.xmacro`, `lib/list.x`,
-`lib/list-generics.xmacro`, `lib/dispatch.x`, `lib/map.x` (docs).
+Files: `lib/array.x`, `lib/array-generics.x`, `lib/list.x`,
+`lib/typed-list.x`, `lib/dispatch.x`, `lib/map.x` (docs).
 
 | Defect | Reproduction | Cause | R |
 | --- | --- | --- | --- |
 | `Array.join` aborts on an empty String element. | `["", "a", ""].join(",")` raises uncaught `<bad-arg>` from `Buffer_write`. | `array.x:716` passes `elem.string()`, NULL for `""`. | me |
-| `setslice` and `remslice` read the end bound differently from `getslice`. | `a[1:-1]` is `[1, 2, 3, 4]`; `setslice(1, -1, [9])` leaves `[0, 9, 4]`; `remslice(1, -1)` removes `[1, 2, 3]`. Applies to typed arrays and `splice`. | `_core_normalize_bound` (`array-generics.xmacro:222-228`). | me |
+| `setslice` and `remslice` read the end bound differently from `getslice`. | `a[1:-1]` is `[1, 2, 3, 4]`; `setslice(1, -1, [9])` leaves `[0, 9, 4]`; `remslice(1, -1)` removes `[1, 2, 3]`. Applies to typed arrays and `splice`. | `_core_normalize_bound` (`array-generics.x:222-228`). | me |
 | Numeric repr prints wrong text and does not read back. | `<u32>` 0xFFFFFFFF prints `-1`; `<i16>` -1 prints `0xFFFFFFFF`; `1e-9` prints `0.000000l`; `<u8>` 0 embeds NUL. `collections.md:89` says the form round-trips. | `dispatch.x:500-509` and the copy at `:624-640` use `%d`, `%04X` on a widened value, and `%lfl`. | me |
 | `List` equality and hash compare element bits; the book says content. | `%(${Var.box_long(5l)})` built twice: `==` 0, `compare` 0, Map lookup misses; equal Arrays inside Lists: `<=` and `>=` 1, `==` 0. `map.x:255,280` say Array/Map keys compare structurally. | `list.x:889-908`. Needs a decision (below). | me |
 | `List.get` truncates a large integer key. | `%(1 2 3).get(Var.box_long(4294967296l))` returns 1. | `list.x:749` narrows to `int`. | me |
@@ -365,7 +365,7 @@ Files: `docs/`, `agents/`, `plans/`, `site/src/`, `examples/`,
 > four NaN-boxing top words and raising it consumes encoding space.
 
 Files: `src/expressions.x`, `src/parse.x`, `lib/error.x`, `lib/dispatch.x`,
-`src/compiler.x`, `etc/builtin-macros.xmacro`, `unittest/test-file.x`.
+`src/compiler.x`, `etc/builtin-macros.x`, `unittest/test-file.x`.
 
 Found by the 2026-09-17 dogfooding survey, which
 [x2c-dogfooding-remediation](x2c-dogfooding-remediation.md) carries; these
@@ -405,7 +405,7 @@ that interval.
 | Defect | Reproduction | Cause | R |
 | --- | --- | --- | --- |
 | A bare-binder template left unbound by a successful match raises, then aborts. | `%(outer (b)).search_replace(%(!or (a *x) (b)), <"*x">)` raises `<void-op>` from `List.cons` on both engines, and the process then aborts with "raise re-entered or after shutdown" although both raises were caught. `try_match_replace` writes `void` for the same input. Predates Group 9. | `_apply_capture_template` and the reference's `bindings.assoc(template)`. | agent |
-| A forward `class` declaration never followed by a definition disappears silently. | `class Color;` produces no registration and no diagnostic. It is the documented forward form, so this may be intentional. | `etc/builtin-macros.xmacro` class decorator. | agent |
+| A forward `class` declaration never followed by a definition disappears silently. | `class Color;` produces no registration and no diagnostic. It is the documented forward form, so this may be intentional. | `etc/builtin-macros.x` class decorator. | agent |
 | `binder?` misses binders of ten or more characters, so `match-case` silently does not bind them. | The threshold counts the `?` or `*` prefix: `?abcdefghi` binds, `?abcdefghij` does not. A long name reads as an `lsym`, and `symbol?` is false for it, while `match` binds it. The AST-to-Lisp spike reverted its own fix because it broke that spike's translation; cause unknown, so the fix is unproven rather than wrong. | `etc/init.xlisp`. Note the checked-in bootstrap compiler reads that file during stage 0, so a change there needs a bootstrap round. | agent |
 | `Build._place_unit_headers` copies generated headers into shared paths without an atomic publish. | Not reproduced; 48 parallel two-source builds stayed green. A latent version of the concurrent-build row Group 11 fixed. | `src/build.x`. | agent |
 
@@ -450,18 +450,18 @@ held by parallel sessions; take it with whichever of the two lands last.
 > `src/macros.x`: it is redundant for emission but is a documented AST
 > guarantee in `docs/src/reference/language.md`.
 
-Files: `src/emit.x`, then `lib/autodiff.xmacro` and `src/macros.x` cleanup.
+Files: `src/emit.x`, then `lib/autodiff-macros.x` and `src/macros.x` cleanup.
 
 Nothing inserts parentheses by precedence, so every producer of canonical AST
 must remember grouping for itself. Group 2 fixed macro holes (`src/macros.x`)
-and autodiff (`lib/autodiff.xmacro`) separately; a third case is still open:
+and autodiff (`lib/autodiff-macros.x`) separately; a third case is still open:
 the book's `macro Expression $twice($value) => ($value + $value)` drops its
 parenthesized body at definition, so `$twice(21) * 2` emits `21 + 21 * 2` and
 gives 63 instead of 84. Compile-time Lisp forms have the same exposure.
 
 Decided 2026-09-17: one precedence-aware `parens` insertion in `src/emit.x`
 (the `op`, `cast`, and postfix cases and `_op_spine`) owns grouping, and the
-per-producer bookkeeping Group 2 added to `lib/autodiff.xmacro` comes back out.
+per-producer bookkeeping Group 2 added to `lib/autodiff-macros.x` comes back out.
 Sequence it after Group 1 and Group 2 land, since Group 1 owns
 `src/expressions.x`. Verify with `make stage-1` plus
 `tools/check-generated-stages.sh builds/0 builds/1`: Group 2 changed no
@@ -542,7 +542,7 @@ Open questions with no owner yet, recorded so they are not lost:
 - **A namespace call does not resolve inside a macro template.**
   `Block.new(...)`, `Var.new(...)`, `Bytes.new(...)` and the `Scope.*` calls
   are reported as `type () has no method new` at
-  `lib/array-generics.xmacro:193`, so the generics templates must keep the
+  `lib/array-generics.x:193`, so the generics templates must keep the
   C-style `Block_new(...)` spelling for the twelve calls that have no
   receiver. Reproduced by a Phase 8 agent at that site; not rerun by the
   review author. A dotted call on a *receiver* inside a template works, which

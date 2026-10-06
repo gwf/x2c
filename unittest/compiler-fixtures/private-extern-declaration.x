@@ -4,7 +4,6 @@
    declaration in the generated source; a definition would shadow the
    process environment with a null tentative definition. */
 
-#pragma private
 
 extern char **environ;
 

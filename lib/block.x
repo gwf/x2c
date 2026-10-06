@@ -16,8 +16,8 @@
 */
 
 #pragma once
-$(import "error-macros.xmacro")
-$(import "cleanup.xmacro")
+#include "error-macros.x"
+#include "cleanup.x"
 #include "common.x"
 
 #include <stdint.h>
@@ -37,7 +37,6 @@ typedef struct Block {
 $cleanup.by(Block, free);
 $cleanup.by(Bytes, free);
 
-#pragma private
 
 #include "exception.x"
 #include "scope.x"

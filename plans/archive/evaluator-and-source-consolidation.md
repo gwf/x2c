@@ -67,7 +67,7 @@ merge dev, commit, push, run a publication gate, or run tools/land-dev.
 | Initial worker | Work | Exclusive authored files |
 | --- | --- | --- |
 | Evaluator | E1, then E2 experiment | lib/lisp.x, unittest/test-lisp.x, unittest/test-lisp-auto.x, relevant authored Lisp documentation |
-| Runtime | R1, then R2; R3 may follow while other lanes run | lib/error.x, lib/error-private.xmacro, lib/mutex.x or its narrow internal companion, lib/logger.x, lib/dispatch.x, lib/context.x; corresponding existing tests/comments |
+| Runtime | R1, then R2; R3 may follow while other lanes run | lib/error.x, lib/error-private.x, lib/mutex.x or its narrow internal companion, lib/logger.x, lib/dispatch.x, lib/context.x; corresponding existing tests/comments |
 | Compiler | P1, then P2 and P3 in order | src/compiler.x, src/parse.x, src/transform.x, src/lambda.x, src/cleanup.x, src/emit.x, src/cache.x; focused existing fixtures |
 
 When a slot frees, start P5 MatchCache on lib/match.x and its existing tests

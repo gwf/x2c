@@ -25,7 +25,6 @@ import "torch" with Torch, Tensor, Checkpoint;
 
 #define ARTIFACT_VERSION 1
 
-#pragma private
 
 static const int interop_elements[4] = { 1, 64, 4096, 65536 };
 static const int interop_operations[3] = { 16, 128, 512 };
@@ -293,7 +292,6 @@ static int _memory(String artifacts, String out, int profile, int requests) {
   return 0;
 }
 
-#pragma public
 
 int main(int argc, char **argv) {
   $scope() {

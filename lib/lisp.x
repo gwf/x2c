@@ -19,8 +19,8 @@
 
 #pragma once
 
-$(import "private-keywords.xmacro")
-$(import "cleanup.xmacro")
+#include "private-keywords.x"
+#include "cleanup.x"
 #include "x2c.x"
 #include "macro-value.x"
 
@@ -40,7 +40,7 @@ typedef struct NativeScalarAccess {
   NativeScalarStore store;
 } *NativeScalarAccess;
 
-$(import "native-scalar-types.xmacro")
+#include "native-scalar-types.x"
 $native.scalar.access.all();
 
 static Map native_scalars = %{ ${$native.scalar.access.entries()} };
@@ -62,16 +62,156 @@ macro Expression $lisp._standard.source() =>
 
 $cleanup.by(Lisp, destroy);
 
-#pragma private
 #include "meta.x"
-$(import "lisp-form-errors.xmacro")
-$(import "lisp-session-errors.xmacro")
+
+/* Lisp form error conditions. Runtime operands retain their original
+   detail types, order and source helper ownership. */
+
+static macro Stmt $error.eval.void() {
+  raise %(void-op (operation "eval"));
+}
+
+static macro Stmt $error.eval.unbound(Expr $expr) {
+  raise %(unbound (name ${$expr}));
+}
+
+static macro Stmt $error.call.type(Expr $callable) {
+  raise %(not-call (actual ${$callable.kind()}));
+}
+
+static macro Stmt $error.def.arity(Expr $actual, Expr $args) {
+  raise %(bad-arity (operation "def") (expected 2) (actual ${$actual})
+          (value ${$args}));
+}
+
+static macro Stmt $error.def.protected(Expr $name) {
+  raise %(bad-state (operation "def") (name ${$name}));
+}
+
+static macro Stmt $error.def.inherited(Expr $name) {
+  raise %(bad-state (operation "def") (reason "inherited") (name ${$name}));
+}
+
+static macro Stmt $error.def.frozen(Expr $name) {
+  raise %(bad-state (operation "def") (reason "frozen") (name ${$name}));
+}
+
+static macro Stmt $error.cond.empty() {
+  raise %(bad-arity (operation "cond") (expected 1) (actual 0));
+}
+
+static macro Stmt $error.cond.type(Expr $clause) {
+  raise %(bad-types (operation "cond") (value ${$clause}) (want "List"));
+}
+
+static macro Stmt $error.cond.arity(Expr $actual, Expr $clause) {
+  raise %(bad-arity (operation "cond-clause") (expected 2)
+          (actual ${$actual}) (value ${$clause}));
+}
+
+static macro Stmt $error.bind.signature(Expr $signature) {
+  raise %(bad-sig (operation "bind") (value ${$signature}));
+}
+
+static macro Stmt $error.bind.missing(Expr $name, Expr $sig) {
+  raise %(no-symbol (name ${$name}) (sig ${$sig}));
+}
+
+static macro Stmt $error.quote.shape(Expr $expr) {
+  raise %(bad-arity (operation "quasiquote") (value ${$expr}));
+}
+
+static macro Stmt $error.splice.type(Expr $value) {
+  raise %(bad-types (operation "quasiquote-splice")
+          (actual ${$value.kind()}));
+}
+
+static macro Stmt $error.lambda.signature(Expr $operation, Expr $args) {
+  raise %(bad-sig (operation ${$operation}) (value ${$args}));
+}
+
+static macro Stmt $error.apply.void(Expr $index) {
+  raise %(void-op (operation "apply") (index ${$index}));
+}
+
+static macro Stmt $error.apply.rest(Expr $body) {
+  raise %(bad-sig (operation "apply") (value ${$body}));
+}
+
+static macro Stmt $error.apply.arity(Expr $body) {
+  raise %(bad-arity (operation "apply") (value ${$body}));
+}
+
+static macro Stmt $error.apply.interrupted() {
+  raise %(interrupt (operation "apply"));
+}
+
+static macro Stmt $error.apply.steps() {
+  raise %(call-stack (operation "apply") (reason "steps"));
+}
+
+static macro Stmt $error.apply.stack(Expr $body) {
+  raise %(call-stack (operation "apply") (value ${$body}));
+}
+
+static macro Stmt $error.form.arity(Expr $operation, Expr $expected, Expr $actual) {
+  raise %(bad-arity (operation ${$operation}) (expected ${$expected})
+          (actual ${$actual}));
+}
+
+static macro Stmt $error.form.string(Expr $operation, Expr $value) {
+  raise %(bad-types (operation ${$operation}) (actual ${$value.kind()})
+          (want "String"));
+}
+
+static macro Stmt $error.apply.list(Expr $values) {
+  raise %(bad-types (operation "apply") (actual ${$values.kind()})
+          (want "List"));
+}
+
+static macro Stmt $error.apply.procedure(Expr $callable) {
+  raise %(not-call (operation "apply") (actual ${$callable.kind()}));
+}
+
+
+/* Lisp session error conditions. Runtime operands retain their original
+   detail types, order and source helper ownership. */
+
+static macro Stmt $error.callback.absent(Expr $operation) {
+  raise %(bad-state (operation ${$operation}) (reason "no session"));
+}
+
+static macro Stmt $error.callback.wrong(Expr $operation) {
+  raise %(bad-state (operation ${$operation}) (reason "wrong session"));
+}
+
+static macro Stmt $error.entry.null(Expr $operation) {
+  raise %(bad-arg (operation ${$operation}));
+}
+
+static macro Stmt $error.global.args() {
+  raise %(bad-arg (operation "Lisp.set_global"));
+}
+
+static macro Stmt $error.global.frozen() {
+  raise %(bad-state (operation "Lisp.set_global") (reason "frozen"));
+}
+
+static macro Stmt $error.bind.args() {
+  raise %(bad-arg (operation "Lisp.bind"));
+}
+
+static macro Stmt $error.source.callable(Expr $callable) {
+  raise %(bad-types (operation "lisp_source_function") (want "Lambda")
+          (actual ${$callable.kind()}));
+}
+
 
 #include <signal.h>
 
 // session state
 
-enum LispSpecial {
+static enum LispSpecial {
   LISP_BIND, LISP_EVAL, LISP_QUOTE, LISP_COND, LISP_DEF,
   LISP_LAMBDA, LISP_MACRO, LISP_QUASIQUOTE, LISP_IMPORT,
   LISP_APPLY, LISP_SPECIAL_COUNT
@@ -82,13 +222,13 @@ enum LispSpecial {
    its Lambda's session-owned capture Map. Parameter names, captured
    Vars, argument arrays, and parent records are borrowed for the activation,
    and the environment records stay on the C stack until the call returns. */
-typedef struct LispEnv {
+static typedef struct LispEnv {
   Map bindings, List params;
   const Var *values;
   int value_count, struct LispEnv *parent;
 } LispEnv;
 
-struct Lisp {
+static struct Lisp {
   Scope scope;          // semantic session scope
   /* The slot user code allocates in while the session evaluates. Code that
      retains, releases, pushes, or pops a Scope acts on this slot, so it
@@ -98,8 +238,8 @@ struct Lisp {
   Scope *automatic_owner, *result_owner;
   /* A session may read a parent's globals, reserved names and special
      forms. The parent holds definitions built once, before any child
-     exists. A child may define new names but cannot replace inherited
-     names, and nothing a child writes reaches another child.
+     exists. Lisp definitions cannot replace inherited names. A host
+     binding shadows a name only in the child that receives it.
      A parent outlives every child that names it. */
   Lisp parent;
   /* Set once the parent is complete. Nothing a child does may produce a
@@ -136,16 +276,18 @@ static threaded Lisp lisp_active;
    Parameter and body Lists and captured Var referents are borrowed: capture
    copies Var identity, not the referenced object or canonical graph. Their
    owners must outlive the Lambda. */
-typedef struct Lambda {
+static typedef struct Lambda {
   List params;
   Var body;
   Map captures;
   int macro, source_function;
 } *Lambda;
 
-$(import "var-adapters.xmacro") $var.pointer(Lambda, lambda, <lambda>);
 
-protocol Var(Lambda);
+#include "var-adapters.x"
+$var.pointer(Lambda, lambda, <lambda>);
+
+static protocol Var(Lambda);
 
 /* canonical names
 
@@ -160,7 +302,7 @@ static pthread_once_t lisp_initialize_once =
   (pthread_once_t) PTHREAD_ONCE_INIT;
 static int lisp_initialize_success;
 
-typedef struct LispCanonicalName {
+static typedef struct LispCanonicalName {
   int special, const char *spelling;
   Var *value;
 } LispCanonicalName;
@@ -502,7 +644,7 @@ static void Lisp._capture(Lisp lisp, LispEnv *env, Lambda lambda) {
 
 /* One capture analysis: the session and environment that resolve call
    heads, and the free names found so far. */
-typedef struct FreeNames {
+static typedef struct FreeNames {
   Lisp lisp, LispEnv *env, Array out;
 } FreeNames;
 
@@ -982,7 +1124,7 @@ static Symbol _read_form(
 
 /* One read over scanned tokens: `source` holds their text from byte `base`,
    and `end` is the offset past the last token a form used. */
-typedef struct LispReader {
+static typedef struct LispReader {
   Tokenizer tokenizer, char *source, unsigned base, end;
 } LispReader;
 
@@ -1372,7 +1514,7 @@ Var lisp_write_file(String path, String text) {
    interpreted callable through a Func whose context holds the session and
    the callable. A callback runs only inside the session that made it. */
 
-typedef struct LispCallback {
+static typedef struct LispCallback {
   Lisp lisp;
   Var callable;
   String operation;
@@ -1543,7 +1685,7 @@ static Var _lisp_Lisp_Iter_find(Iter iter, Var callable) =>
    the evaluator binds, which the implicit prelude must not carry, so this
    C-only declaration reaches its table without entering the x2c interface. */
 
-macro Unit $lisp.native.declarations() {
+static macro Unit $lisp.native.declarations() {
   $(quote ((preproc "extern Map lisp_native_targets(void);")))...
 }
 
@@ -1552,8 +1694,8 @@ $lisp.native.declarations();
 $x2c.foreign.alias(lisp_native_targets)
 static Map _library_targets(void);
 
-$(import "../etc/lisp-bindings.xlisp")
-macro Expression $lisp.callback.target.map() => $(lisp.native.targets '(
+static $(import "../etc/lisp-bindings.xlisp")
+static macro Expression $lisp.callback.target.map() => $(lisp.native.targets '(
   (_lisp_List_map (as List_map))
   (_lisp_List_filter (as List_filter))
   (_lisp_List_any (as List_any))
@@ -1675,9 +1817,10 @@ void Lisp.destroy(Lisp lisp) {
 
 /** Makes `lisp` read `parent`'s definitions for names it does not bind.
 
-    A child may define new names but cannot replace names supplied by an
-    ancestor. Writes to child-owned names remain in that child. The
-    child also takes the parent's special forms in place of its own, because
+    Lisp definitions cannot replace names supplied by an ancestor.
+    `Lisp.set_global` may shadow them in the child. Child writes never
+    reach the parent or another child. The child also takes the parent's
+    special forms in place of its own, because
     the evaluator recognizes a special form by the identity of the `Func` a
     name resolves to, and the child resolves reserved names in the parent.
 
@@ -1712,7 +1855,7 @@ static Var _bad_session(String operation) {
   $error.entry.null(operation);
 }
 
-macro Decorator $lisp.entry(Function $function, Expr $operation) {
+static macro Decorator $lisp.entry(Function $function, Expr $operation) {
   if (!$(x2c.function.parameter $function "lisp"))
     return _bad_session($operation);
   Scope.push(&$(x2c.function.parameter $function "lisp").user);
@@ -1844,7 +1987,10 @@ int Lisp.try_get(Lisp lisp, String name, Var &?out) =>
     The session stores the value in a raw slot, so `void` remains distinct
     from Lisp `nil`. The binding does not take ownership of value referents;
     their canonical graphs or other owners must outlive the binding or
-    session. Binding an `x2c.` name protects that namespace from later Lisp
+    session. A host binding may shadow an inherited name in this session;
+    it does not change the ancestor. Lisp `def` still rejects inherited
+    names, including a name the host has shadowed locally.
+    Binding an `x2c.` name protects that namespace from later Lisp
     `def` forms, but direct calls to this function may replace such a
     binding.
     Raises: `<bad-arg>` for a null session or name, or `<alloc-fail>`,
@@ -1856,8 +2002,6 @@ void Lisp.set_global(Lisp lisp, String name, Var value) {
     $error.global.frozen();
   $scope(&lisp.scope) {
     Var interned = Atom.intern(name);
-    if (lisp._inherited(interned))
-      $error.global.inherited(interned);
     _binding_set(&lisp.scope, lisp.globals, interned, value);
     if (name.startswith("x2c.")) lisp.protect_x2c = 1;
   }

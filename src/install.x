@@ -9,10 +9,9 @@
 */
 
 #pragma once
-$(import "../lib/private-keywords.xmacro")
+#include "../lib/private-keywords.x"
 #include "build.x"
 
-#pragma private
 
 #include <stdio.h>
 #include <string.h>
@@ -22,7 +21,83 @@ $(import "../lib/private-keywords.xmacro")
 #include "digest.x"
 #include "json.x"
 
-$(import "install-reports.xmacro")
+
+/* install command reports. */
+
+static macro Stmt $report.install.version_pinned(
+  Expr $name, Expr $resolved, Expr $version) =>
+  _error(%"the index has ${$name} ${$resolved}, not the pinned ${$version}");
+
+static macro Stmt $report.install.spec_unknown(Expr $spec) =>
+  _error(%"unknown package spec '${$spec}'");
+
+static macro Stmt $report.install.name_invalid(Expr $name) =>
+  _error(%"'${$name}' is not a package name");
+
+static macro Stmt $report.install.target_unmanaged(Expr $target) =>
+  _error(%"${$target} exists and is not an installed package");
+
+static macro Stmt $report.install.bundle_version_missing(Expr $name) =>
+  _error(%"bundle ${$name} has no readable BUNDLE.json version");
+
+static macro Stmt $report.install.bundle_version_wrong(
+  Expr $name, Expr $built, Expr $current) =>
+  _error(
+    %"bundle ${$name} was built for '${$built}', not '${
+      $current}'; use --force");
+
+static macro Stmt $report.install.bundle_archive_missing(Expr $name) =>
+  _error(%"bundle ${$name} has no builds/lib${$name}.a");
+
+static macro Stmt $report.install.entry_missing(Expr $spec, Expr $name) =>
+  _error(%"${$spec} has no src/${$name}.x entry unit");
+
+static macro Stmt $report.install.dependencies_missing(Expr $name) =>
+  _error(%"${$name} needs native dependencies; install its bundle");
+
+static macro Stmt $report.install.index_missing(Expr $location) =>
+  _error(%"no package index at ${$location}");
+
+static macro Stmt $report.install.package_missing(
+  Expr $name, Expr $platform, Expr $location) =>
+  _error(%"no package '${$name}' for ${$platform} in ${$location}");
+
+static macro Stmt $report.install.home_missing(Expr $command) =>
+  driver_error(
+    %"${$command}: no x2c home: install the compiler or set X2C_HOME");
+
+static macro Stmt $report.install.tool_failed(
+  Expr $what, Expr $arguments, Expr $errors) =>
+  _error(%"${$what} failed (${$arguments.car()}): ${$errors.strip(" \n")}");
+
+static macro Stmt $report.install.digest_mismatch(
+  Expr $p, Expr $expected, Expr $actual) =>
+  _error(%"sha256 mismatch for ${$p}: expected ${$expected}, got ${$actual}");
+
+static macro Stmt $report.install.archive_shape(Expr $tarball) =>
+  _error(%"${$tarball} must contain one package directory");
+
+static macro Stmt $report.install.remove_missing(Expr $name) =>
+  driver_error(%"remove: no installed package '${$name}'");
+
+static macro Stmt $report.install.remove_unmanaged(Expr $target) =>
+  driver_error(
+    %"remove: ${$target} is not an installed package; remove it by hand");
+
+static macro Stmt $report.install.lock_waiting(Expr $packages) =>
+  fprintf(
+    stderr, "x2c: waiting for another install or removal in %s\n", $packages);
+
+static macro Stmt $report.install.installed(Expr $packages, Expr $name) =>
+  fprintf(stderr, "x2c: installed %s/%s\n", $packages, $name);
+
+static macro Stmt $report.install.removed(Expr $target) =>
+  fprintf(stderr, "x2c: removed %s\n", $target);
+
+static macro Expression $report.install.start_failed(Expr $program, Expr $error) =>
+  %"x2c: unable to execute ${$program}: ${
+    String.new(strerror((int) $error))}\n";
+
 
 // the packages lock
 
@@ -94,7 +169,7 @@ static void _host_error(List detail) {
    checks a download or a tarball. `spec` is the operand that named the
    package, and `version` the version it resolved to. `packages` is the
    home's packages directory and `work` the staging directory. */
-typedef struct Install {
+static typedef struct Install {
   CliRequest request, String spec, source, url, sha256, version;
   String packages, work;
 } Install;

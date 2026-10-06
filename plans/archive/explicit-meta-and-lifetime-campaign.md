@@ -84,7 +84,7 @@ estimates from reading source.
    `comptime` tables. What remains open is the bare Lisp spellings in
    `etc/init.x` (`caaar`..`cdddr`). Runtime Lisp and compile-time Lisp share
    them, they raise on exhausted input, and their only depth-3 user in the
-   repository is `cdddr` in `lib/native-scalar-types.xmacro`.
+   repository is `cdddr` in `lib/native-scalar-types.x`.
 4. **Cross-unit region tool (~260).** Delete `Compiler.region_escapes`,
    `_located`, and the `seed` parameter of `_fixpoint` in `src/regions.x`;
    `_region_seed`, `_region_pass`, `_parse_region_units`, and the CLI flag in
@@ -230,11 +230,11 @@ context decide.
 
 ## 5. Bounded internal adoption
 
-- Replace `lib/native-scalar-types.xmacro`'s construction of `scalartypes`
+- Replace `lib/native-scalar-types.x`'s construction of `scalartypes`
   (`src/type.x` ~341) with a meta function returning a Map. The Lisp
   accessors that read the same rows must read the new owner; do not keep two.
   `varrows` (`src/type.x` ~581) is the fallback candidate.
-- Convert the throwaway Arrays in `lib/autodiff.xmacro` meta helpers to
+- Convert the throwaway Arrays in `lib/autodiff-macros.x` meta helpers to
   `$scope` with the returned value exported.
 - Record lines removed and the before/after translation time and peak
   memory of the affected units.
@@ -242,7 +242,7 @@ context decide.
 
 Result (September 23):
 
-- `native_scalar_types()` in `lib/native-scalar-types.xmacro` is the one
+- `native_scalar_types()` in `lib/native-scalar-types.x` is the one
   table, a `meta` function returning a Map from each exact C scalar Type to
   `(TAG C-EXTRACTOR C-UPDATE SIGNATURE-TYPE)`. `src/type.x` inserts it with
   `$native_scalar_types()`. The Lisp helpers that build the `lib/lisp.x`
@@ -251,7 +251,7 @@ Result (September 23):
   invocations in `lib/lisp.x` stay: a Lisp form inside a template built by
   a meta function sees the hole's placeholder, not its value, so a meta
   function cannot generate them.
-- The 23 `lib/autodiff.xmacro` scratch Arrays use `$auto([])`; none
+- The 23 `lib/autodiff-macros.x` scratch Arrays use `$auto([])`; none
   escapes, because each return converts the Array to a new List. The two in
   `ad_rev_checkpoint` followed once a destructured local could hold a cell
   in a function that holds a cleanup.

@@ -10,6 +10,5 @@
     `cstar_marker` instead of an implicit-declaration compile error.
 */
 
-#pragma private
 
 void cstar_marker(int id);

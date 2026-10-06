@@ -122,13 +122,13 @@ after that unit, so a package called `feedparse` already produces
 unreachable. `pcre2-8.h` and `yyjson-0.12.h` are the two spellings here.
 
 Publish the shim when a public method takes one of the library's own types.
-Generated C hoists type definitions above the private include block, so a
-private struct over a foreign type will not compile otherwise.
+The generated header needs that foreign declaration before it can publish a
+wrapper type that uses it.
 
 ## The entry unit and its two halves
 
-Everything above `#pragma private` is the package's public surface. The wrapper
-struct and the native calls are below it.
+The entry unit holds the public types and method definitions together.
+Nonstatic declarations are public; static helpers stay in the source.
 
 ```x2c
 ~typedef struct feed_parser feed_parser;
@@ -140,16 +140,16 @@ Feed Feed.open(String text);
 Feed Feed.close(Feed feed);
 List Feed.titles(Feed feed);
 
-#pragma private
-
-struct Feed {
+static struct Feed {
   feed_parser *native;
   String source;
 };
 ```
 
-`Feed` is opaque to consumers: they hold the pointer and call methods on it,
-and only this file knows there is a `feed_parser` inside.
+`Feed` is opaque to consumers: they hold the pointer and call methods on it.
+The public forward type does not require its static body, so only this source
+file needs the layout. A public value type or inline field access would require
+that definition in the header.
 
 For functions with no receiver, a package can declare a type used only as a
 namespace. yyjson does this for `Json.parse`:
@@ -204,7 +204,7 @@ field, so an early release leaves the finalizer nothing to do. See
 
 Adopt `Cleanup(T)` beside the type so a caller can write `$auto`. Without it
 the managed initializer is refused and every caller repeats the release.
-When one method releases the handle, `$cleanup.by` from `cleanup.xmacro`
+When one method releases the handle, `$cleanup.by` from `cleanup.x`
 defines `Feed.cleanup` to call it and adopts the protocol:
 
 ```x2c
@@ -213,12 +213,12 @@ defines `Feed.cleanup` to call it and adopts the protocol:
 ~typedef struct Feed *Feed;
 ~struct Feed { feed_parser *native; String source; };
 ~Feed Feed.close(Feed feed) { return NULL; }
-$(import "cleanup.xmacro")
+#include "cleanup.x"
 $cleanup.by(Feed, close);
 ```
 
-Put the adoption above `#pragma private` so the package exports it; the
-release method may be defined later with the other private definitions. A
+Keep the public adoption beside its converters. The release method may be
+defined later; its nonstatic declaration remains public. A
 cleanup that does more than one call is written as `void Feed.cleanup(Feed)`
 with `protocol Cleanup(Feed);`. A borrowed view over storage another handle
 owns adopts nothing.
@@ -354,8 +354,6 @@ protocol FeedItemIndex(T) {
 }
 
 protocol FeedItemIndex(FeedItem);
-
-#pragma private
 
 String FeedItem.getindex(FeedItem item, Var key) {
   return key.is_integer()
@@ -499,8 +497,6 @@ other importing programs.
 typedef enum FeedLisp {
   FEEDLISP_NAMESPACE
 } FeedLisp;
-
-#pragma private
 
 $lisp.binding(feed_lisp, "feed-titles")
 static List _lisp_feed_titles(String document) {

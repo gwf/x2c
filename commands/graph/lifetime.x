@@ -7,11 +7,10 @@
 
 typedef struct Lifetime Lifetime;
 
-#pragma private
 
 #include <string.h>
 
-struct Lifetime {
+static struct Lifetime {
   Compiler compiler;
   String path, function;
   List target;

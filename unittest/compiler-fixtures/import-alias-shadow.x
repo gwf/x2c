@@ -7,7 +7,6 @@ typedef struct Grid { double span; } Grid;
 
 double local_span(void);
 
-#pragma private
 
 double local_span(void) {
   Grid g;

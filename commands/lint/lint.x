@@ -50,7 +50,6 @@ typedef struct Lint:
   Array findings, edits, functions, unused
 *Lint
 
-#pragma private
 
 static const Rule rules[] = {
   {"same-line-else", <style>, <violation>, "ST-1"},
@@ -237,7 +236,7 @@ static void _allowances(Lint l):
 Lint Lint.new(String path, String text, Map selected):
   Tokenizer scanner = Tokenizer.new(text, <x2c>)
   scanner.scan()
-  struct Token *all = (struct Token *) scanner.tokens
+  static struct Token *all = (struct Token *) scanner.tokens
   int total = scanner.tokens.len() - 1
   Lint l = Scope.calloc(1, sizeof(struct Lint))
   l.path = path, l.text = text, l.selected = selected

@@ -3,7 +3,7 @@
 */
 
 #include "x2c.x"
-$(import "../src/cstar.xmacro")
+#include "../src/cstar-macros.x"
 
 macro Decorator $demo.append(Function $function) {
   $(x2c.function.body $function)...

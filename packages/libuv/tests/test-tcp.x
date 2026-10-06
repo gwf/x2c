@@ -5,7 +5,7 @@ import "libuv" with UvAddress, UvLoop, UvTcp, UvTimer;
 #include "test-support.x"
 #include <string.h>
 
-$(import "../../../unittest/test-macros.xmacro")
+#include "../../../unittest/test-macros.x"
 
 enum { TCP_CLIENTS = 3 };
 

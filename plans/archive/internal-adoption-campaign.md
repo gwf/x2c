@@ -88,7 +88,7 @@ The campaign explicitly holds the following work:
   target registry;
 - no meta exposure of resources or callbacks before lifetime certification;
   and
-- no `lib/var-tags.xmacro` rewrite. The current experiment remains below its
+- no `lib/var-tags.x` rewrite. The current experiment remains below its
   recorded translation-cost acceptance condition.
 
 ## Ready tranche
@@ -99,7 +99,7 @@ These deliveries depend only on capabilities already on dev.
 
 Move `dedent.expand` and `macros.location` from
 `lib/system-macros.xlisp` into `meta static` helpers in
-`lib/system-macros.xmacro`, using the existing source-text and invocation
+`lib/system-macros.x`, using the existing source-text and invocation
 file/line operations. Remove the Lisp import and delete the `.xlisp` file.
 Keep the existing macro names, literal/fallback behavior and source-location
 attribution.

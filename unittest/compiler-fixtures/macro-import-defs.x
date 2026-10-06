@@ -1,0 +1,5 @@
+#pragma once
+
+$(import "macro-import-helper.xlisp")
+
+macro Expression $project.imports.increment($value) => $value + 1;

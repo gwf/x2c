@@ -13,7 +13,6 @@
 
 #include "string.x"
 
-#pragma private
 
 #include <limits.h>
 #include <stdio.h>
@@ -24,32 +23,55 @@
 #include "buffer.x"
 #include "exception.x"
 
-$(import "string-format-errors.xmacro")
+
+/* string-format diagnostic messages. Payload owners retain failure policy. */
+
+static macro Expression $reason.excess_values() => "excess values";
+static macro Expression $reason.missing_value() => "missing value";
+static macro Expression $reason.incomplete() => "incomplete conversion";
+static macro Expression $reason.width_range() => "width exceeds int range";
+static macro Expression $reason.missing_star() => "missing star value";
+static macro Expression $reason.length() => "unsupported length modifier";
+static macro Expression $reason.positional() => "positional formats are unsupported";
+static macro Expression $reason.conversion() => "unsupported conversion";
+static macro Expression $reason.integer_length() => "unsupported integer length";
+static macro Expression $reason.floating_length() => "unsupported floating length";
+static macro Expression $reason.wide_text() =>
+  "wide strings and characters are unsupported";
+static macro Expression $reason.flag() => "unsupported flag for conversion";
+static macro Expression $reason.character_precision() =>
+  "unsupported precision for %c";
+static macro Expression $reason.character_nul() =>
+  "%c cannot produce an embedded NUL";
+static macro Expression $reason.string() => "string conversion failed";
+static macro Expression $reason.value() => "value conversion failed";
+static macro Expression $reason.range(Expr $label) => %"${$label} exceeds int range";
+
 
 // representation
 
 /* One conversion specification: the flag bits, the width or zero for
    none, the precision or a negative value for none, a length modifier, and
    the conversion byte. */
-typedef struct Spec {
+static typedef struct Spec {
   int flags, width, precision, modifier;
   char conversion;
 } Spec;
 
 // A flag's bit is its position here, so `-` is `FORMAT_LEFT`.
 static const char _format_flags[] = "-+ #0";
-enum { FORMAT_LEFT = 1 };
+static enum { FORMAT_LEFT = 1 };
 
 // The length modifiers, spelled at their values; zero is none.
 static const char *const _format_modifiers[] = {"", "hh", "h", "l", "ll", "L"};
-enum {
+static enum {
   FORMAT_HH = 1, FORMAT_H = 2, FORMAT_L = 3, FORMAT_LL = 4, FORMAT_CAP_L = 5
 };
 
 /* One pass of `String.format`. The bytes from `literal` to `cursor` are
    text not yet written, `offset` is the `%` of the conversion being read,
    which its errors report, and `args` holds the values still to take. */
-typedef struct Format {
+static typedef struct Format {
   String fmt, int length, literal, cursor, offset, List args, Buffer out;
 } Format;
 

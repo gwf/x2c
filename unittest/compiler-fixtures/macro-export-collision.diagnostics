@@ -1,5 +1,0 @@
-unittest/compiler-fixtures/macro-export.xmacro:1:1: macro: imported macro 'm.value' collides with a visible macro
-  macro Expression $m.value() => 7;
-  ^^^^^
-  note: definition: unittest/compiler-fixtures/macro-export-collision.x:3:1 import: unittest/compiler-fixtures/macro-export.xmacro
-

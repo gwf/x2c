@@ -12,8 +12,7 @@
 #pragma once
 #include "compiler.x"
 
-#pragma private
-$(import "../src/grammar.xmacro")
+#include "grammar.x"
 #include "type.x"
 #include "var.x"
 #include "string.x"
@@ -26,14 +25,14 @@ $(import "../src/grammar.xmacro")
 
 // diagnostics
 
-macro Stmt $report.macro.argument_constant(Expr $c, Expr $site) {
+static macro Stmt $report.macro.argument_constant(Expr $c, Expr $site) {
   $c.report_error(
     <macro>,
     "explicit meta call cannot be resolved",
     $site, %("an argument must be a constant, captured syntax, or a meta call"));
 }
 
-macro Stmt $report.macro.function_only(Expr $c, Expr $site, Expr $name) {
+static macro Stmt $report.macro.function_only(Expr $c, Expr $site, Expr $name) {
   $c.report_error(
     <macro>,
     %"'${$name}' can only be called at compile time",
@@ -43,7 +42,7 @@ macro Stmt $report.macro.function_only(Expr $c, Expr $site, Expr $name) {
 }
 
 /* Evaluates a nested `$` call among a call's arguments. */
-typedef Var (*MetaCall)(Compiler c, List expression, Token site);
+static typedef Var (*MetaCall)(Compiler c, List expression, Token site);
 
 // arguments of a `$` call
 

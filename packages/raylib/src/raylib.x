@@ -10,13 +10,13 @@
     written by index. Vector2 keeps raylib's arithmetic behind operators.
 
     This unit is the `raylib` package entry: `import "raylib"` reaches every
-    name above `#pragma private` as `raylib__*`. The vendored `raylib-6.0.h`
+    nonstatic name as `raylib__*`. The vendored `raylib-6.0.h`
     stays public because these methods take raylib's own record types, and it
     is also the raw API for everything below.
  */
 
 #include "raylib-6.0.h"
-$(import "cleanup.xmacro")
+#include "cleanup.x"
 #include <math.h>
 
 typedef enum RaylibText {
@@ -393,7 +393,6 @@ $cleanup.by(ImagePixels, free);
 $cleanup.by(RaylibWindow, close);
 $cleanup.by(Image, free);
 
-#pragma private
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -411,7 +410,7 @@ static char _raylib_trace_message[1024];
 
 /*  RaylibWindow is the same process-global window under a caller's control,
     so there is one of it and closing it releases the texture it uploaded. */
-struct RaylibWindow {
+static struct RaylibWindow {
   Texture2D texture;
   int opened;
   int uploaded;

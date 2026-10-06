@@ -1,0 +1,4 @@
+#pragma once
+
+macro Expression $imported.source(Expr $syntax) =>
+  $(x2c.literal.string (x2c.source.text $syntax));

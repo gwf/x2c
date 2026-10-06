@@ -1,5 +1,5 @@
 #include "x2c.x"
-$(import "../../commands/repl/decline-errors.xmacro")
+#include "../../commands/repl/decline-errors.x"
 
 typedef struct DeclineState {
   int declined, calls;

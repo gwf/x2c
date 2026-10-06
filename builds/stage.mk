@@ -120,7 +120,7 @@ X2C_TRANSLATE_DEPS = $(X2C_COMPILER) $(LIB_X_FILES) \
 		$(ROOT)/etc/lisp-bindings.xlisp \
 		$(ROOT)/etc/lisp-values.xlisp) \
 	$(wildcard $(LIB_SOURCE)/*.xlisp) \
-	$(wildcard $(LIB_SOURCE)/*.xmacro) $(wildcard $(BIN_SOURCE)/*.xmacro)
+	$(wildcard $(ROOT)/etc/*.x)
 LIB_MISSING_GENERATED = $(filter-out \
 	$(wildcard $(LIB_BUILD)/*.c $(LIB_BUILD)/*.h $(LIB_BUILD)/*.xi), \
 	$(LIB_C_FILES) $(LIB_H_FILES) $(LIB_XI_FILES))

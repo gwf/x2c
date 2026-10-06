@@ -1,3 +1,3 @@
 #include "x2c.x"
 
-$(import "macro-import-cycle-a.xmacro")
+$(import "macro-import-cycle-a.xlisp")

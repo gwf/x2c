@@ -5,8 +5,8 @@ Use the [agent directory](../agents/README.md) for task routing and the
 
 ## Harness
 
-- Suites are `test-<feature>.x`. Tests are `static void` functions. Import
-  `test-macros.xmacro` before its first use. Use `$test.scoped();` when a test
+- Suites are `test-<feature>.x`. Tests are `static void` functions. Include
+  `test-macros.x` before its first use. Use `$test.scoped();` when a test
   owns one whole-function retained Scope, and `$test.run(function_name)` when
   the label is the exact function name. Keep intentionally descriptive labels
   as explicit `TestHarness_run` calls.

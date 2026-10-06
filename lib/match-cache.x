@@ -10,7 +10,7 @@
 
 #pragma once
 
-$(import "error-macros.xmacro")
+#include "error-macros.x"
 #include "match.x"
 
 /** Cache pressure is the acquire status beyond MachinePrepare: every slot is
@@ -37,7 +37,6 @@ typedef struct MatchLease {
   int slot, active;
 } MatchLease;
 
-#pragma private
 
 #include <assert.h>
 #include <string.h>
@@ -62,14 +61,14 @@ typedef struct MatchLease {
 
 #define MATCH_ADMITTED_MEMO 256
 
-typedef struct MatchCacheEntry {
+static typedef struct MatchCacheEntry {
   unsigned long key;
   MatchPlan plan;
   unsigned long generation;
   int occupied, pin_count, bucket_next, lru_prev, lru_next;
 } MatchCacheEntry;
 
-struct MatchCache {
+static struct MatchCache {
   Scope scope;
   MatchCacheEntry *entries;
   int *buckets;
@@ -341,7 +340,7 @@ static MatchCacheEntry *MatchLease._entry(MatchLease *lease) {
 
 /* Declares `$plan`, the program `$cache` prepared for `$pattern`, leased
    until the scope exits, or NULL when acquisition prepared none. */
-macro Stmt $match.plan(
+static macro Stmt $match.plan(
   Name $plan, Expr $cache, Expr $pattern, Expr $owner) {
   MatchLease storage;
   MatchLease *lease = &storage;
@@ -448,7 +447,7 @@ int MatchCache.search_replace(
    runtime canonical identities, so a flush must precede the release of a
    pool that owns an admitted pattern. */
 
-typedef struct MatchContextState {
+static typedef struct MatchContextState {
   struct MatchContextState *prev, MatchCache cache;
 } *MatchContextState;
 

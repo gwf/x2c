@@ -14,7 +14,7 @@ links:
 <!-- ignore: source excerpt; the complete example requires its optional package and setup. -->
 ```x2c,ignore
 #include "x2c.x"
-$(import "../src/cstar.xmacro")
+#include "../src/cstar-macros.x"
 
 $cstar.verify(
   "fact(x >= --2147483647i)",

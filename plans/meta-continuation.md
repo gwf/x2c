@@ -66,13 +66,13 @@ Relevant evidence at the baseline:
 
 | Subject | Source or executable example |
 | --- | --- |
-| Shared source recognition | `src/grammar.xmacro` |
+| Shared source recognition | `src/grammar.x` |
 | Quotation construction and landing | `src/macros.x`, `Definition.construction`, `Compiler.land_quotation` |
 | Expression-hole semantics | `docs/src/reference/language.md`, quotations section |
 | Hole composition and evaluation order | `unittest/compiler-fixtures/macro-quotation-expression-holes.x` |
 | Reflection-driven generation | `examples/magic/meta-functions.x` |
-| Existing meta ledger projections | `lib/var-tags.xmacro` |
-| Literal computation with runtime fallback | `lib/system-macros.xmacro`, `$dedent` |
+| Existing meta ledger projections | `lib/var-tags.x` |
+| Literal computation with runtime fallback | `lib/system-macros.x`, `$dedent` |
 
 The dev records `plans/x2c-metalanguage.md`,
 `plans/quotation-adoption-audit-2026-10-03.md`, and
@@ -232,7 +232,7 @@ table rewrite or broaden it into a general matcher redesign.
 
 ### 2. Finish native scalar projections in x2c
 
-`lib/native-scalar-types.xmacro` already has an x2c meta ledger. Naming,
+`lib/native-scalar-types.x` already has an x2c meta ledger. Naming,
 access entries, and alignment construction still use Lisp projections.
 
 Move naming and table projection into ordinary meta functions and quotations.
@@ -322,7 +322,7 @@ already exists. Keep it only if it removes repeated work or a source owner.
 A descriptor that merely adds storage beside unchanged analysis does not
 meet the objective.
 
-The operator ledger is now implemented locally. `src/operator-ledger.xmacro`
+The operator ledger is now implemented locally. `src/operator-ledger.x`
 owns 22 binary operators, including 11 compound pairs, seven direct protocol
 mappings, and five derived mappings. One helper projects switch cases, and
 `src/operator-ledger.x` imports it once inside ordinary lookup function bodies.

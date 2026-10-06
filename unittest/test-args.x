@@ -2,7 +2,7 @@
 
 #include "args.x"
 #include "test-support.x"
-$(import "test-macros.xmacro")
+#include "test-macros.x"
 
 static List _spec(void) => %(
   (-v --verbose (help "Report each step"))

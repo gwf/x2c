@@ -14,7 +14,7 @@
 */
 
 #pragma once
-$(import "error-macros.xmacro")
+#include "error-macros.x"
 #include <stddef.h>
 #include <stdatomic.h>
 
@@ -51,7 +51,6 @@ typedef struct ScopeStats {
 #include <stdlib.h>
 protocol Cleanup(Scope);
 
-#pragma private
 
 #include <limits.h>
 #include <stdint.h>
@@ -64,21 +63,21 @@ protocol Cleanup(Scope);
    head, `prev` stores the owning Scope with that bit set; every other `prev`
    is the untagged preceding ScopeAlloc. Free, move, realloc, and owner lookup
    all rely on relinking without losing this one in-band ownership marker. */
-macro Expression $scope.ptr_alloc(Expr $p) =>
+static macro Expression $scope.ptr_alloc(Expr $p) =>
   ((ScopeAlloc) ((char *) ($p) - sizeof(struct ScopeAlloc)));
-macro Expression $scope.alloc_ptr(Expr $a) =>
+static macro Expression $scope.alloc_ptr(Expr $a) =>
   ((void *) ((char *) ($a) + sizeof(struct ScopeAlloc)));
-macro Expression $scope.tag_pointer(Expr $p) =>
+static macro Expression $scope.tag_pointer(Expr $p) =>
   ((void *) ((uintptr_t) ($p) | (uintptr_t) 1));
-macro Expression $scope.untag_pointer(Expr $p) =>
+static macro Expression $scope.untag_pointer(Expr $p) =>
   ((void *) ((uintptr_t) ($p) & ~((uintptr_t) 1)));
-macro Expression $scope.is_tagged(Expr $p) =>
+static macro Expression $scope.is_tagged(Expr $p) =>
   ((uintptr_t) ($p) & (uintptr_t) 1);
 
 /* Every allocation keeps its requested payload size and optional destructor
    before the public header. ScopeAlloc remains immediately before the payload
    and the combined prefix preserves native allocation alignment. */
-typedef struct ScopeMetadata {
+static typedef struct ScopeMetadata {
   size_t requested_size;
   void (*drop)(void *);
 } ScopeMetadata;
@@ -88,7 +87,7 @@ _Static_assert(
     _Alignof(max_align_t) == 0,
   "Scope allocation prefix must preserve payload alignment");
 
-macro Expression $scope.alloc_meta(Expr $a) =>
+static macro Expression $scope.alloc_meta(Expr $a) =>
   (((ScopeMetadata *) ($a)) - 1);
 
 /* scope records
@@ -97,15 +96,15 @@ macro Expression $scope.alloc_meta(Expr $a) =>
    stack of pushed slots, and one record per open retain. Named scopes share
    one process-wide registry. */
 
-typedef struct ScopeName {
+static typedef struct ScopeName {
   Scope scope, char *name, struct ScopeName *next;
 } *ScopeName;
 
-typedef struct ScopeRetain {
+static typedef struct ScopeRetain {
   Scope scope, *slot;
 } ScopeRetain;
 
-typedef struct ScopeThreadState {
+static typedef struct ScopeThreadState {
   Scope root, *active, **stack, int stack_size, stack_capacity;
   ScopeRetain *retains;
   int retain_count, retain_capacity;

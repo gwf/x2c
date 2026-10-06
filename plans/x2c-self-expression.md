@@ -75,7 +75,7 @@ owns the behavior.
 | `offsetof(struct P, b)` does not parse | lib/scan.x never produces `<offsetof>`; the parse, resolve, and type rows are unreachable; the emitter has no case | Recognize by spelling beside `va_arg`; add the emitter case |
 | `case %((!not ?x foo))` rejected | `MatchCaptureLayout.analyze` (lib/match.x:231) computes slots from the raw pattern after normalizing it (H4) | Compute slots from the normalized pattern |
 | `Lisp.bind` with a direct function crashes on the second session | `Lisp.bind` moves the shared file-static `Func` into the session, which frees it | Static `Func` handles are never moved or freed |
-| `x2c-lint` drops two rules outside the repo root | commands/lint/validation.x:41 reads `lib/error-macros.xmacro` from the working directory | Use `$error.nonreturning.causes()` (decision 3) |
+| `x2c-lint` drops two rules outside the repo root | commands/lint/validation.x:41 reads `lib/error-macros.x` from the working directory | Use `$error.nonreturning.causes()` (decision 3) |
 
 The `Lisp.bind` fix marks the compiler's direct-conversion handle through
 an internal `x2c_func_shared` constructor; `Func.move` owns the rule and is
@@ -145,7 +145,7 @@ Equivalence is obvious or by construction. Focused fixtures per item.
 - H17 One table per closed vocabulary: target kinds (cli.x and project.x
   plus four projections), help groups, library load order (macros.x),
   match-site entries (emit.x:811).
-- H18 Named patterns in src/grammar.xmacro: `source_any_lambda`,
+- H18 Named patterns in src/grammar.x: `source_any_lambda`,
   `source_declarator_row`; `source_pattern` delegates to
   `source_pattern_with`; `Type.is_reference` replaces 13 copies of
   `car() == <&> || car() == <opt-ref>`.
@@ -243,7 +243,7 @@ Wave 3 results (submitted as one PR):
   flag, since libuv's stop is a no-op on an inactive handle); `$torch.handle`
   (torch.x 1607 -> 1525; public symbols unchanged); `$curl.setopt` (26
   sites; it takes the option's source text because CURLOPT_* have no x2c
-  type); `$cleanup.by` in a new lib/cleanup.xmacro (13 package and 6 lib
+  type); `$cleanup.by` in a new lib/cleanup.x (13 package and 6 lib
   forwards; -70 net); `$json.reader` for yyjson (-16 net, helper in a
   package .xmacro); the unreachable snapshot catch arms in libcurl and
   libuv.

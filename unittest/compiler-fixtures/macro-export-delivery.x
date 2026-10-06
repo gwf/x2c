@@ -1,6 +1,4 @@
-// An included file's exported import reaches the includer whole: its
-// macros, keyword aliases, meta functions and values, and Lisp
-// definitions.
+// Public compile-time definitions reach consumers through includes.
 #include "macro-export-lib.x"
 
 $m.decl(declared);

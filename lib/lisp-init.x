@@ -12,7 +12,7 @@
 */
 
 #pragma once
-$(import "private-keywords.xmacro")
+#include "private-keywords.x"
 #include "x2c.x"
 #include "lisp.x"
 

@@ -1,5 +1,5 @@
 #include "x2c.x"
-$(import "macro-declaration-helper.xmacro")
+#include "macro-declaration-helper.x"
 
 macro Stmt $sum_lengths(Name $out) {
   $declare_list(items);

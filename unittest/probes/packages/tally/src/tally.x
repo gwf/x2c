@@ -5,9 +5,8 @@
 class Tally { int count; int total; };
 
 meta int tally_sum(int n);
-export $(import "tally.xmacro")
+#include "tally-defs.x"
 
-#pragma private
 
 int tally_sum(int n) {
   Func triangle = %!(int value) => value * (value + 1) / 2;

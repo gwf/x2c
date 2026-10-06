@@ -12,7 +12,7 @@ links:
 ~#include "typed-array.x"
 ~#include <assert.h>
 ~#include <math.h>
-$(import "autodiff.xmacro")
+#include "autodiff-macros.x"
 
 $ad.reverse()
 static double energy(double x, double y, int n) {

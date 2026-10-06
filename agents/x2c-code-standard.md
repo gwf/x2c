@@ -382,7 +382,7 @@ unifying needs modes or callbacks, keep the paths separate.
 **FA-6** Replace a run of three or more parallel statements that differ
 only in a literal or a field name with a table or a `foreach` over rows.
 The table is the owner FA-5 asks for, because it holds the facts. In the
-compiler, `$copy_fields` from `src/fields.xmacro` states a field list.
+compiler, `$copy_fields` from `src/fields.x` states a field list.
 Replace parallel switches or sets over one vocabulary with one ledger row
 per member.
 
@@ -417,9 +417,9 @@ elsewhere.
 
 **FI-3** Keep the prologue order: header; `#pragma once` in a module other
 modules include; includes needed by public declarations; public types and
-declarations; `#pragma private`; private system and repository includes;
-private representation, state, and definitions. Move a declaration across
-`#pragma private` only to change its visibility.
+declarations; implementation includes; private representation, state, and
+definitions. Use `static` for private declarations. Types needed by public
+interfaces are promoted automatically.
 
 **FI-4** Order the file so it reads top to bottom: representation and
 owner state; the central operation; the concepts it uses, in the order it
@@ -539,7 +539,7 @@ Locals used only to save and restore state become `$let`, including
 **NM-6** Use an `x2c_*` name only for the intentional C interface: functions
 generated code calls, native callers, and process setup. Ordinary public
 operations are type methods; private helpers are `static`. An `x2c_*` name
-below `#pragma private` still leaks into generated headers. Verify the
+without `static` enters generated headers. Verify the
 generated-code and native callers of a retained C entry before renaming it.
 The `builtin_*` functions in `src/builtins.x` stay non-static because
 `src/cleanup.x` calls the lowering slot `builtin_try_cleanup_placement`
@@ -550,9 +550,8 @@ fails translation of `src/macros.x`.
 ### Module sets
 
 **MO-1** Put a contract where it can be enforced completely. A module
-exposes a small public surface above `#pragma private`; implementation and
-private dependencies go below it. Include only the public modules the
-public declarations need.
+exposes a small public surface; static declarations belong to its
+implementation. Include the modules its declarations and definitions need.
 
 **MO-2** Keep `#pragma once` only in compiler and runtime modules that other
 modules include, because `--cpp-symbols` and `--live-symbols` hand their
@@ -575,10 +574,10 @@ order.
 contract. Runtime modules never include compiler modules, and runtime code
 never calls back into compiler knowledge of ASTs or code generation.
 
-**MO-6** Put macro definitions two or more modules share in an `.xmacro`
-beside them; each consumer imports it. An `.xmacro` is its own module kind,
-never a header. Import a large ledger only in a unit nothing includes, and
-declare its tables `extern` elsewhere.
+**MO-6** Put shared macro definitions in an ordinary `.x` module beside their
+consumers. Each consumer includes it. Keep single-owner macros with their
+owner and declare private macros `static`. A ledger's runtime tables belong
+to its implementation; other modules use ordinary declarations.
 
 **MO-7** Before creating a module or compatibility layer, check the
 philosophy ledger and the module catalog. Strengthen the existing owner
@@ -745,9 +744,9 @@ guarantee. Make callback-only objects invalid outside the callback.
 
 **DG-1** Put diagnostic wording in named report macros near their callers:
 `$report.<category>.<case>(c, ...)` for compiler and driver reports, in a
-group at the top of the file or a sibling `*-reports.xmacro`; one
+group at the top of the file or a sibling `*-reports.x`; one
 `$error.<area>.<condition>` macro per runtime, package, or command
-condition in the raising unit's `*-errors.xmacro`, with `$refusal`,
+condition in the raising unit or a shared `*-errors.x`, with `$refusal`,
 `$decline`, and `$reason` for those verbs. A short structured raise such as
 `raise %(bad-state (operation "Pool.close"));` stays at its call site.
 Never dispatch diagnostics on string keys at compile time.
@@ -846,7 +845,7 @@ measured hot paths. Never parse code from a String.
 
 **MA-7** Recognize a source form with its grammar macro when one exists:
 `case if_then(?condition, ?ontrue):`. Shared input forms live in
-`src/grammar.xmacro`. Keep raw `case %(...)` patterns for internal nodes,
+`src/grammar.x`. Keep raw `case %(...)` patterns for internal nodes,
 typed shells, resolved forms, and measured hot paths.
 
 **MA-8** A lowering recognizes its input with a source form, gathers facts
@@ -879,8 +878,9 @@ evaluator core, the shared initial environment, the name tables that bind
 Lisp names to x2c operations, and the REPL. Port an algorithm that does not
 need to be Lisp to a `meta` function.
 
-**LI-2** Use `$(import "...")` for macro imports and `$(...)` only to call
-existing Lisp or change the Lisp session. Prefer `x2c_ident(...)` in meta
+**LI-2** Include ordinary `.x` modules for shared macros. Use
+`$(import "helpers.xlisp")` to load Lisp and `$(...)` to call existing Lisp
+or change the Lisp session. Prefer `x2c_ident(...)` in meta
 code to `$(x2c.ident ...)`, and `$f(...)` meta calls to Lisp helpers.
 
 **LI-3** Keep Lisp surfaces thin: a binding file names an x2c operation and
@@ -959,7 +959,7 @@ logic. `void` stays out of collections and iterator domains.
 type reuses them.
 
 **RT-5** Share one implementation across typed families through an
-imported generic `.xmacro` only when the families obey the same operation,
+included generic `.x` module only when the families obey the same operation,
 failure, representation, and lifetime rules. Keep each family's hashing,
 equality, layout, boxing, and error policy visible as inputs.
 
@@ -997,9 +997,9 @@ helper takes its caller's operation name. Keep expected absence on the return
 value.
 
 **PK-6** Lay out a package as `packages/<name>/` with `src/<name>.x` as its
-entry unit, public surface above `#pragma private`, and names spelled bare;
-consumers write `import "<name>"`. Export a package's macros through
-`export $(import "...")` in the entry unit. Add an operator, protocol, or
+entry unit and names spelled bare; consumers write `import "<name>"`.
+Non-static declarations, including macros, form the package interface.
+Include shared macro modules in the entry unit. Add an operator, protocol, or
 wrapper type only when it removes work from the application. An operator
 that creates native resources gives its intermediate results automatic
 cleanup.

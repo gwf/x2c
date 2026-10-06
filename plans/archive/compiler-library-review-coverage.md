@@ -49,7 +49,7 @@ baseline probes and integrated mitigation validation are separate.
 | [src/meta-project.x](../../src/meta-project.x) | 607 | Owner discovery, include/import/package/source kind boundary, host flags, group/helper build/support/link/manifest/cache lifecycle | No cross-compilation or failure/concurrency campaign |
 | [src/meta-helper-client.x](../../src/meta-helper-client.x) | 358 | Complete request/reset/send/frame/receive/deadline/process/reaping/lifecycle ownership | Earlier bounded send-deadline fix is already separate delivered work; no shutdown redesign |
 | [src/linked-meta.x](../../src/linked-meta.x) | 817 | Generated inventory and representative emitted bodies, binding/hash consumers and authoritative generator wiring | Generated bodies are derived source, not independently maintained copies; no regeneration here |
-| [src/ast-rewrite.xmacro](../../src/ast-rewrite.xmacro) | 19 | Complete conditional prefix copy/order/return macro and Macro walk caller eligibility | Candidate usage effect/allocation identity controls remain required |
+| [src/ast-rewrite.x](../../src/ast-rewrite.x) | 19 | Complete conditional prefix copy/order/return macro and Macro walk caller eligibility | Candidate usage effect/allocation identity controls remain required |
 
 ## Compiler semantics
 
@@ -63,7 +63,7 @@ baseline probes and integrated mitigation validation are separate.
 | [src/transform.x](../../src/transform.x) | 4968 | All source; typed callback and checked Func readers, direct/indirect/context and inline bridges, lambda cells/snapshots/capture environments, cleanup labels/goto/volatile roots, static initializer classification, try/defer lowering, printf Var boundary, call/declaration/destructuring conversions, indexed/protocol operations, literals/segments, local normalizer and generated sibling drain. | Source-only signature and return-cleanup proposals. No full typed callback, volatile/static/goto/printf/destructuring matrix rerun. Existing cast and metadata stage boundaries retained. |
 | [src/regions.x](../../src/regions.x) | 1398 | All source; runtime effects versus result ownership, expression projections, lexical region/fact and borrowed place identity, two-owner flows, parameter sinks, worklist ordering, frees/moves, restored writes/defer lifetimes, blocks and path limitations, per-unit fixed point, ordinary warnings/meta errors/audit consumers. | No whole region rewrite, project certify run, raw C/callback provenance extension or scratch-scope ownership proof. The existing diagnostic limitations remain explicit. |
 | [src/builtins.x](../../src/builtins.x) | 1022 | All source; scope macro, typed cursor versus Iter foreach selection and outputs, class Shape/defaults/new/init/refusal/drop/boxing/equal/hash/writers/render paths, native Lisp group records and target registration. | Source-only constructor argument accumulation candidate; no rewritten class generator, broad class/layout/refusal/cycle corpus rerun. Lisp binding and class builder name validation differences retained. |
-| [src/adapter-memo.xmacro](../../src/adapter-memo.xmacro) | 9 | All source; one conditional create-and-publish operation for named adapter keys in the Compiler's existing names owner. Creation precedes cache publication; hit reuses the canonical value. | Keep the delivered macro; no new generic cache/transaction framework. |
+| [src/adapter-memo.x](../../src/adapter-memo.x) | 9 | All source; one conditional create-and-publish operation for named adapter keys in the Compiler's existing names owner. Creation precedes cache publication; hit reuses the canonical value. | Keep the delivered macro; no new generic cache/transaction framework. |
 
 ## Compiler parser and backend
 
@@ -80,7 +80,7 @@ baseline probes and integrated mitigation validation are separate.
 | [src/expressions.x](../../src/expressions.x) | 4952 | C precedence, postfix receiver/delegate/completion lookup, calls/Func carrier preparation, conversion warnings, protocol/discard selection, identifier binding/capture, resolver dispatch, literal promotion, native initializer rows/layout/adapters, speculative conversion and final target conversion order. Retain semantic continuations and native ICE/layout ownership. | No complete candidate or branch matrix. |
 | [src/format.x](../../src/format.x) | 211 | Entire Pretty token scan, directive/ordinary formatting, indentation, mapped newlines, generated/source line accounting and origin-aware token output. | No complete candidate or branch matrix. |
 | [src/generate.x](../../src/generate.x) | 1397 | Complete partition/publication operation, typedef promotion/forwards, conditional groups, public object/function placement, file-init/guards/shutdown, cache reachability, native #undef body movement, declaration dependencies, C/H generation, definition/interface/dump rows. Existing decorator reuse proposal. | No complete candidate or branch matrix. |
-| [src/grammar.xmacro](../../src/grammar.xmacro) | 224 | Shared source macro content projections, fixed source patterns, canonical expression/block/literal/slice/composite/call forms; stage and semantic operations stay separate. | No complete candidate or branch matrix. |
+| [src/grammar.x](../../src/grammar.x) | 224 | Shared source macro content projections, fixed source patterns, canonical expression/block/literal/slice/composite/call forms; stage and semantic operations stay separate. | No complete candidate or branch matrix. |
 | [src/literals.x](../../src/literals.x) | 1483 | List/Array/Map/String/SymbolSet production and quoting, newline/interpolation normalization, native perfect-hash generation, lambda parse/bind/capture state, exact Symbol/binder/number rules. Executed bounded SymbolSet extraction. | No complete candidate or branch matrix. |
 | [src/parse.x](../../src/parse.x) | 3337 | Top-level dispatch, meta/class/protocol declarations, keyword aliases, specifier/declarator/params, parsed and constructed binding, source definitions, pragma/package surfaces, source positions. Full declarator producer trace; no recovery redesign. | No complete candidate or branch matrix. |
 | [src/sourceview.x](../../src/sourceview.x) | 74 | Overlay canonical path identity, source existence/read, sticky changed paths, disk fallback and query boundaries. | No complete candidate or branch matrix. |
@@ -95,24 +95,24 @@ baseline probes and integrated mitigation validation are separate.
 | [lib/var.x](../../lib/var.x) | 1291 | encoding, constructors, registry/direct and overflow object dispatch, equality/identity, wide boxes, native readers | Keep exact tag/pointer/wide identities; numeric consumer proposal P4; enum projection remains unproved |
 | [lib/varconvert.x](../../lib/varconvert.x) | 289 | fifteen-family decode/metadata; checked float-to-int and modular int conversion; target casts | One decoded-to-native owner P4; no numeric record ABI merge |
 | [lib/varops.x](../../lib/varops.x) | 583 | fast i32/f64 paths; promotion; shifts/overflow policy; general floating reboxing; truth | Delete promotion intermediate P4; full family parity and timing unrun |
-| [lib/varops.xmacro](../../lib/varops.xmacro) | 79 | operator row/template projection and update routing | Small shared policy owner already; no new generic operator framework |
+| [lib/varops.x](../../lib/varops.x) | 79 | operator row/template projection and update routing | Small shared policy owner already; no new generic operator framework |
 | [lib/var-ledger.x](../../lib/var-ledger.x) | 24 | generated table invocations from tag ledger | One tag projection owner already; no independent duplicate table removal |
-| [lib/var-tags.xmacro](../../lib/var-tags.xmacro) | 414 | ledger rows and AST projections: descriptors, unbox, numeric, IDs/checks | TagId redundancy candidate unproved due declaration collection/bootstrap |
-| [lib/var-unbox.xmacro](../../lib/var-unbox.xmacro) | 31 | checked numeric unbox readers projected from native scalar ledger | Keep numeric conversion owner, do not substitute raw decode |
-| [lib/var-adapters.xmacro](../../lib/var-adapters.xmacro) | 23 | fixed signature adapters from source scalar types | Generated native boundary intentional; no blanket wrapper deletion |
-| [lib/native-scalar-types.xmacro](../../lib/native-scalar-types.xmacro) | 92 | native names, widths, Var tag/read/box ledger | Existing fact owner; platform width must remain native |
-| [lib/integer-ops.xmacro](../../lib/integer-ops.xmacro) | 45 | native integer update policy, bit arithmetic and shifts | TypedMap modular policy differs native typedArray C operations; retain distinction |
+| [lib/var-tags.x](../../lib/var-tags.x) | 414 | ledger rows and AST projections: descriptors, unbox, numeric, IDs/checks | TagId redundancy candidate unproved due declaration collection/bootstrap |
+| [lib/common.x](../../lib/common.x) | 31 | checked numeric unbox readers projected from native scalar ledger | Keep numeric conversion owner, do not substitute raw decode |
+| [lib/iter.x](../../lib/iter.x) | 23 | fixed signature adapters from source scalar types | Generated native boundary intentional; no blanket wrapper deletion |
+| [lib/native-scalar-types.x](../../lib/native-scalar-types.x) | 92 | native names, widths, Var tag/read/box ledger | Existing fact owner; platform width must remain native |
+| [lib/integer-ops.x](../../lib/integer-ops.x) | 45 | native integer update policy, bit arithmetic and shifts | TypedMap modular policy differs native typedArray C operations; retain distinction |
 | [lib/datum.x](../../lib/datum.x) | 264 | write/read tagged values, nested containers, frame protocol and result rejection | decode-list scratch candidate P2 follow-up; malformed/cycle corpus not executed |
 | [lib/string.x](../../lib/string.x) | 1842 | all constructors, Pool ownership, byte operations, replace/slice/join, callbacks, format, escapes, conversions and cursors | find-all/render scratch and Symbol roundtrip follow-ups; callback construction guards already present |
 | [lib/string-classify.x](../../lib/string-classify.x) | 98 | byte classification and whole-string predicates | Locale/byte policy explicit; no duplicate-owner deletion established |
 | [lib/string-number.x](../../lib/string-number.x) | 98 | checked number parsing and native formatting conversions | Parse vs scan distinction intentional; no alternate parser consolidation proposed |
 | [lib/list.x](../../lib/list.x) | 1037 | canonical cells, ownership, builders, selectors, functional loops, conversions, sorts and iteration | List.array producer guard then sort copy-walk deletion; shared kernels already |
 | [lib/list-selectors.x](../../lib/list-selectors.x) | 113 | optional compound selector projections and receiver behavior | Optional surface intentional, not obsolete aliases without caller inventory |
-| [lib/list-generics.xmacro](../../lib/list-generics.xmacro) | 102 | typed List view helpers/methods and value transforms | Zero-copy validated view differs packed arrays; keep |
+| [lib/typed-list.x](../../lib/typed-list.x) | 102 | typed List view helpers/methods and value transforms | Zero-copy validated view differs packed arrays; keep |
 | [lib/array.x](../../lib/array.x) | 455 | Var-array instantiations, functional and heap operations, observers/exports | Producer and managed-render follow-ups; no wholesale typed-family replay |
-| [lib/array-generics.xmacro](../../lib/array-generics.xmacro) | 912 | all shared storage mutation/copy/slice/sort/observe/typed publish/update/iterate kernels | Guarded typed publish is model P2; native bracket/update behavior deliberate |
+| [lib/array-generics.x](../../lib/array-generics.x) | 912 | all shared storage mutation/copy/slice/sort/observe/typed publish/update/iterate kernels | Guarded typed publish is model P2; native bracket/update behavior deliberate |
 | [lib/map.x](../../lib/map.x) | 226 | boxed Map instantiations, public observations, cycle-aware export staging | Rehash callback/cycle owner mandatory; render/result follow-ups |
-| [lib/map-generics.xmacro](../../lib/map-generics.xmacro) | 930 | Robin Hood insertion/backshift/growth, facade policies, observe/iterate/typed convert/export/box | P2 proved; setindex and insertion-tail cleanup source-only; staged growth already guarded |
+| [lib/map-generics.x](../../lib/map-generics.x) | 930 | Robin Hood insertion/backshift/growth, facade policies, observe/iterate/typed convert/export/box | P2 proved; setindex and insertion-tail cleanup source-only; staged growth already guarded |
 | [lib/typed-array.x](../../lib/typed-array.x) | 205 | all native family instantiations, comparators, exports and literal meta prototypes | Literal meta prototypes/shallow collection boundary retained; guards already present |
 | [lib/typed-list.x](../../lib/typed-list.x) | 123 | all view families and conversion/iteration publication | Typed storage/identity deliberate; wide element limitations remain |
 | [lib/typed-map.x](../../lib/typed-map.x) | 402 | four native key/value families, hashing, width/update policies, staged exports | P2 owns shared conversion; no native policy unification |
@@ -134,7 +134,7 @@ baseline probes and integrated mitigation validation are separate.
 | [lib/symbol.x](../../lib/symbol.x) | 281 | 5/7-bit encodings, exact try_new, decode/format/parse and conversions | Stack roundtrip proposal source-only; do not change folding/truncation or zero-decode contract |
 | [lib/symbolset.x](../../lib/symbolset.x) | 130 | packed immutable literal storage, membership/index/traversal | Single immutable representation; arbitrary set replacement not proposed |
 | [lib/atom.x](../../lib/atom.x) | 230 | short exact and long canonical name construction, promotion, strings/repr/iteration | Symbol vs Atom semantics deliberate; managed-repr follow-up |
-| [lib/private-keywords.xmacro](../../lib/private-keywords.xmacro) | 5 | single __ guard for private embedded translation keyword | Tiny syntax boundary; no alternate metadata owner needed |
+| [lib/private-keywords.x](../../lib/private-keywords.x) | 5 | single __ guard for private embedded translation keyword | Tiny syntax boundary; no alternate metadata owner needed |
 
 ## Library lifetimes, io and threads
 
@@ -148,8 +148,8 @@ baseline probes and integrated mitigation validation are separate.
 | [lib/buffer.x](../../lib/buffer.x) | 357 | Text/line Blocks, alias growth, indents/status, formatting, canonical consumption, ownership | buffer suite; JSON and Regex probes; source proposal not built |
 | [lib/error.x](../../lib/error.x) | 1401 | Record regions, snapshot copying, visible/hidden/running handlers, capture/retain/landing/reset/pop/shutdown | error/exception/thread/logger suites; custom callback full fault matrix not run |
 | [lib/error_init.x](../../lib/error_init.x) | 27 | Separate startup wrapper avoids automatic emitter-facing initialization | Startup through all probes; boundary retained; preinit subprocess fixture not rerun |
-| [lib/error-private.xmacro](../../lib/error-private.xmacro) | 27 | Complete generated private record/view/handler storage shapes | error suite; fields traced to consumers; not flattened |
-| [lib/error-macros.xmacro](../../lib/error-macros.xmacro) | 41 | Complete nonreturning ledger and custom fallback decorator | error/exception suites; ledger/return distinction retained |
+| [lib/error-private.x](../../lib/error-private.x) | 27 | Complete generated private record/view/handler storage shapes | error suite; fields traced to consumers; not flattened |
+| [lib/error-macros.x](../../lib/error-macros.x) | 41 | Complete nonreturning ledger and custom fallback decorator | error/exception suites; ledger/return distinction retained |
 | [lib/exception.x](../../lib/exception.x) | 267 | Frame state, cleanup draining, cleanup-error dominance, longjmp/landing restoration, floors/shutdown | exception/error suites; no standalone fatal-subprocess matrix rerun |
 | [lib/diff.x](../../lib/diff.x) | 243 | Bounded edit frontier/backtrack, operation generation, unified hunk rendering, scratch lifetimes | three diff tests pass; existing scratch repair acknowledged, not rediscovered as new |
 | [lib/digest.x](../../lib/digest.x) | 130 | Full SHA-256 block/padding/ring arithmetic, raw File streaming/errors and String wrappers | digest suite/NIST vectors; no additional cryptographic certification claimed |
@@ -169,7 +169,7 @@ baseline probes and integrated mitigation validation are separate.
 | [lib/clibc.x](../../lib/clibc.x) | 27 | All current compile-time C scalar/string declarations | Parsed through baseline library; each individual C call not reprobed |
 | [lib/cmath.x](../../lib/cmath.x) | 129 | All native math meta declarations including pointer-out functions | Declaration surface read; no full numeric-domain/native-symbol sweep |
 | [lib/static-init.x](../../lib/static-init.x) | 147 | Acquire/retry storage, ready publication, wait/owner cycle, commit/abort and thread/process shutdown | Source coverage; runtime compiler statics exercised indirectly; static-init suite not run separately |
-| [lib/system-macros.xmacro](../../lib/system-macros.xmacro) | 146 | Complete dedent/fold boundary, case grouping/transfer, source locations, assert/todo/unreachable/time decorators | Six-case actual dedent parity; other macro suite not run separately here |
+| [lib/system-macros.x](../../lib/system-macros.x) | 146 | Complete dedent/fold boundary, case grouping/transfer, source locations, assert/todo/unreachable/time decorators | Six-case actual dedent parity; other macro suite not run separately here |
 
 ## Other requested areas and limits
 

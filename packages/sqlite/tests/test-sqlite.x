@@ -10,7 +10,7 @@ import "sqlite" with Database, Prepared;
 #include <string.h>
 #include <stdio.h>
 
-$(import "../../../unittest/test-macros.xmacro")
+#include "../../../unittest/test-macros.x"
 
 static long count_rows(Database db) {
   Prepared query = $auto(db.prepare("SELECT count(*) FROM item"));

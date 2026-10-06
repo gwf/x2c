@@ -1,0 +1,38 @@
+#pragma once
+
+macro Stmt $ast.rewrite_children(
+  Expr $input, Name $child, Expr $replacement) {
+  List original = $input;
+  Array rewritten = NULL;
+  for (List cursor = original; cursor; cursor = cursor.cdr()) {
+    Var item = cursor.car(), value = item;
+    if (item is <list>) {
+      $child = item;
+      value = $replacement;
+    }
+    if (!(void *) rewritten && value != item) {
+      rewritten = [];
+      for (List prefix = original; prefix != cursor; prefix = prefix.cdr())
+        rewritten.push(prefix.car());
+    }
+    if ((void *) rewritten) rewritten.push(value);
+  }
+  return (void *) rewritten ? rewritten.list_free() : original;
+}
+
+/* Runs the following statement on `$root` and on every list beneath it in
+   preorder, assigning each visited list to the caller's `$node`. `continue`
+   skips that node's children and `return` leaves the caller. The worklist
+   keeps deep operator chains off the C stack, and the inline body costs no
+   call per node. */
+macro Decorator $ast.walk(Stmt $body, Expr $root, Name $node) {
+  Array pending = $auto([$root]);
+  while (pending.len()) {
+    Var current = pending.take_last();
+    if (current is not <list> || current.is_nil()) continue;
+    $node = current;
+    $body
+    for (List cursor = $node; cursor; cursor = cursor.cdr())
+      if (cursor.car() is <list>) pending.push(cursor.car());
+  }
+}

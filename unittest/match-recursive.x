@@ -10,9 +10,8 @@
 #pragma once
 #include "x2c.x"
 
-#pragma private
 
-typedef struct RecursiveMatchState {
+static typedef struct RecursiveMatchState {
   MatchCaptureLayout layout;
   Var values[MACHINE_BINDER_MAX];
   List span_begin[MACHINE_BINDER_MAX], span_end[MACHINE_BINDER_MAX];
@@ -337,7 +336,6 @@ static Var _replace_all(
   return _replace_template(template, bindings);
 }
 
-#pragma public
 
 /** Matches `input` against `layout` with the recursive reference engine.
     Returns 1 and publishes positional captures on success. A null or

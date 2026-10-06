@@ -10,13 +10,12 @@
 */
 
 #pragma once
-$(import "../lib/private-keywords.xmacro")
-$(import "../src/grammar.xmacro")
-$(import "../src/ast-rewrite.xmacro")
+#include "../lib/private-keywords.x"
+#include "grammar.x"
+#include "ast-rewrite.x"
 #include "compiler.x"
-#pragma private
-$(import "../src/adapter-memo.xmacro")
-$(import "../src/fields.xmacro")
+#include "adapter-memo.x"
+#include "fields.x"
 #include "expressions.x"
 #include "builtins.x"
 #include "linked-meta.x"
@@ -42,8 +41,328 @@ $(import "../src/fields.xmacro")
 #include <string.h>
 #include <sys/stat.h>
 
-$(import "../src/expressions-reports.xmacro")
-$(import "../src/macros-reports.xmacro")
+#include "expressions-reports.x"
+
+/* macros diagnostics. */
+
+static macro Stmt $report.macro.expansion_count(Expr $c, Expr $origin) =>
+  $c.report_error(
+    <macro>, "macro expansion count exceeds 10000",
+    $origin, NULL);
+
+static macro Stmt $report.macro.expansion_recursive(
+  Expr $c, Expr $spelling, Expr $origin,
+  Expr $definition_note, Expr $shown) =>
+  $c.report_error(
+    <macro>, %"identical recursive expansion of '${$spelling}'",
+    $origin, %(${$definition_note} "input: ${$shown.repr()}"));
+
+static macro Stmt $report.macro.expansion_depth(
+  Expr $c, Expr $origin, Expr $definition_note, Expr $first_note) {
+  {
+    String first_note = %"first expansion: ${$first_note}";
+    $c.report_error(
+      <macro>, "macro expansion depth exceeds 64", $origin,
+      %(${$definition_note} $first_note));
+  }
+}
+
+static macro Stmt $report.parse.macro_kind(Expr $c) =>
+  $c.report_error(
+    <parse>, "expected macro result kind before '$'",
+    $c.token, NULL);
+
+static macro Stmt $report.parse.macro_result(Expr $c) =>
+  $c.report_error(
+    <parse>, "macro definition requires a result kind before '$'",
+    $c.token, %("write the result kind between 'macro' and the macro name"));
+
+static macro Stmt $report.parse.macro_unknown_kind(
+  Expr $c, Expr $spelling, Expr $origin) =>
+  $c.report_error(
+    <parse>, %"unknown macro result kind '${$spelling}'",
+    $origin, NULL);
+
+static macro Stmt $report.parse.macro_reserved(
+  Expr $c, Expr $spelling, Expr $origin) =>
+  $c.report_error(
+    <parse>, %"macro name '${$spelling}' is reserved",
+    $origin, %("x2c.* is reserved for compiler facilities"));
+
+static macro Stmt $report.macro.name_with(Expr $c, Expr $origin) =>
+  $c.report_error(
+    <macro>, "'with' cannot be a local macro name",
+    $origin, NULL);
+
+static macro Stmt $report.parse.macro_kind_order(Expr $c) =>
+  $c.report_error(
+    <parse>, "macro result kind belongs after 'macro', before the '$' name",
+    $c.token, NULL);
+
+static macro Stmt $report.parse.hole_final(Expr $c) =>
+  $c.report_error(
+    <parse>, "sequence macro hole must be the final argument",
+    $c.token, NULL);
+
+static macro Stmt $report.parse.decorator_singular(Expr $c, Expr $origin) =>
+  $c.report_error(
+    <parse>, "decorator target parameter must be singular",
+    $origin, NULL);
+
+static macro Stmt $report.parse.decorator_kind(Expr $c, Expr $origin) =>
+  $c.report_error(
+    <parse>, "decorator first parameter has invalid target kind",
+    $origin, %("expected Expression, Function, Stmt, Field, Unit,"
+      "or NamedType"));
+
+static macro Stmt $report.macro.local_target(Expr $c, Expr $target, Expr $origin) =>
+  $c.report_error(
+    <macro>, %"local decorators cannot target ${$target} syntax",
+    $origin, NULL);
+
+static macro Stmt $report.macro.local_result(
+  Expr $c, Expr $result_spelling, Expr $origin) =>
+  $c.report_error(
+    <macro>, %"local macros cannot have ${$result_spelling} results",
+    $origin, NULL);
+
+static macro Stmt $report.parse.decorator_target(Expr $c, Expr $origin) =>
+  $c.report_error(
+    <parse>, "decorator requires a first target parameter",
+    $origin, NULL);
+
+static macro Stmt $report.parse.macro_paren_body(Expr $c) =>
+  $c.report_error(
+    <parse>, "parenthesized macro body requires Expression result or target",
+    $c.token, NULL);
+
+static macro Stmt $report.parse.macro_body(Expr $c, Expr $kind, Expr $form) =>
+  $c.report_error(
+    <parse>, %"${$kind} macro body requires ${$form}", $c.token, NULL);
+
+static macro Stmt $report.parse.hole_untyped(
+  Expr $c, Expr $hole_spelling, Expr $origin) =>
+  $c.report_error(
+    <parse>, %"macro hole '${$hole_spelling}' has no inferred kind",
+    $origin, %("annotate holes used only by compile-time Lisp"));
+
+static macro Stmt $report.parse.hole_unknown_kind(Expr $c, Expr $spelling) =>
+  $c.report_error(
+    <parse>, %"unknown macro hole kind '${$spelling}'",
+    $c.token, NULL);
+
+static macro Stmt $report.parse.hole_name(Expr $c) =>
+  $c.report_error(
+    <parse>, "expected macro hole name after '$'",
+    $c.token, NULL);
+
+static macro Stmt $report.parse.hole_duplicate(
+  Expr $c, Expr $spelling, Expr $origin) =>
+  $c.report_error(
+    <parse>, %"duplicate macro hole '${$spelling}'",
+    $origin, NULL);
+
+static macro Stmt $report.parse.splice_expr(Expr $c) =>
+  $c.report_error(
+    <parse>, "sequence insertion is not legal in an expression slot",
+    $c.token, NULL);
+
+static macro Stmt $report.parse.splice_position(Expr $c) =>
+  $c.report_error(
+    <parse>, "sequence insertion is not legal in this syntax slot",
+    $c.token, NULL);
+
+static macro Stmt $report.parse.typed_quotation(Expr $c, Expr $origin) =>
+  $c.report_error(
+    <parse>, "this quotation cannot declare a name or apply a template",
+    $origin,
+    %("a typed, Type, or Param quotation builds where it is written"));
+
+static macro Stmt $report.parse.typed_quotation_nested(Expr $c, Expr $origin) {
+  {
+    String note = "write ${$!T{ ... }} to insert the code it builds";
+    $c.report_error(
+      <parse>, "typed quotation inside a quotation must be written as a hole",
+      $origin, %($note));
+  }
+}
+
+static macro Stmt $report.parse.hole_ambiguous(
+  Expr $c, Expr $spelling, Expr $origin, Expr $first, Expr $also) =>
+  $c.report_error(
+    <parse>, %"macro hole '${$spelling}' has ambiguous kind",
+    $origin, %("first: ${$first}"
+      "also: ${$also}"));
+
+static macro Stmt $report.parse.hole_cardinality(
+  Expr $c, Expr $sequence, Expr $spelling, Expr $origin) {
+  {
+    String message = $sequence
+      ? %"singular macro hole '${$spelling}' cannot be spliced"
+      : %"sequence macro hole '${$spelling}' requires '...'";
+    $c.report_error(<parse>, message, $origin, NULL);
+  }
+}
+
+static macro Stmt $report.macro.keyword_internal(
+  Expr $c, Expr $spelling, Expr $origin, Expr $definition_note) =>
+  $c.report_error(
+    <macro>, %"keyword alias cannot name internal macro kind '${$spelling}'",
+    $origin, %(${$definition_note}));
+
+static macro Stmt $report.macro.keyword_builtin(Expr $c, Expr $origin) =>
+  $c.report_error(
+    <macro>, "built-in keyword alias cannot be replaced",
+    $origin, NULL);
+
+static macro Stmt $report.parse.keyword_name(Expr $c) =>
+  $c.report_error(
+    <parse>, "keyword alias requires an identifier",
+    $c.token, NULL);
+
+static macro Stmt $report.parse.macro_name(Expr $c, Expr $origin) =>
+  $c.report_error(
+    <parse>, $c.peek(1) == <ident>
+      ? "expected macro name component after '.'"
+      : "expected macro name after '$'",
+    $origin, NULL);
+
+static macro Stmt $report.parse.macro_unbound(
+  Expr $c, Expr $spelling, Expr $origin) =>
+  $c.report_error(
+    <parse>, %"unknown or forward-referenced macro '${$spelling}'",
+    $origin, NULL);
+
+static macro Stmt $report.parse.macro_extra_args(Expr $c) =>
+  $c.report_error(
+    <parse>, "macro invocation has too many arguments",
+    $c.token, NULL);
+
+static macro Stmt $report.parse.macro_missing_args(Expr $c) =>
+  $c.report_error(
+    <parse>, "macro invocation has too few arguments",
+    $c.token, NULL);
+
+static macro Stmt $report.macro.argument_contract(Expr $c) =>
+  $c.report_error(
+    <macro>, "macro argument has no parsing contract",
+    $c.token, NULL);
+
+static macro Stmt $report.parse.name_identifier(Expr $c) =>
+  $c.report_error(
+    <parse>, "Name macro argument requires an identifier",
+    $c.token, NULL);
+
+static macro Stmt $report.macro.result_position(
+  Expr $c, Expr $spelling, Expr $result,
+  Expr $description, Expr $origin) {
+  {
+    String message =
+      %"macro '${$spelling}' has result kind ${$result} and cannot be " +
+      %"invoked at ${$description}";
+    $c.report_error(<macro>, message, $origin, NULL);
+  }
+}
+
+static macro Stmt $report.macro.decorator_position(
+  Expr $c, Expr $name, Expr $kind, Expr $origin) =>
+  $c.report_error(
+    <macro>,
+    %"decorator '${$name}' targets ${$kind} syntax and cannot be used here",
+    $origin, NULL);
+
+static macro Stmt $report.macro.decorator_target(
+  Expr $c, Expr $spelling, Expr $origin, Expr $definition_note) =>
+  $c.report_error(
+    <macro>, %"decorator '${$spelling}' requires a following target",
+    $origin, %(${$definition_note}));
+
+static macro Stmt $report.macro.decorator_semicolon(
+  Expr $c, Expr $origin, Expr $definition_note) =>
+  $c.report_error(
+    <macro>, "decorator application must not end with ';'",
+    $origin, %(${$definition_note}));
+
+static macro Stmt $report.macro.result_expr(
+  Expr $c, Expr $kind, Expr $spelling, Expr $origin, Expr $definition_note) {
+  {
+    String subject = $kind == <decorator>
+      ? %"decorator '${$spelling}'"
+      : %"macro '${$spelling}'";
+    $c.report_error(
+      <macro>, %"$subject cannot be invoked in an expression", $origin,
+      $kind == <decorator> ? %(${$definition_note}) : NULL);
+  }
+}
+
+static macro Stmt $report.macro.decorator_expr(
+  Expr $c, Expr $spelling, Expr $origin, Expr $definition_note) =>
+  $c.report_error(
+    <macro>, %"decorator '${$spelling}' requires a following expression",
+    $origin, %(${$definition_note}));
+
+static macro Stmt $report.parse.macro_pattern_arity(
+  Expr $c, Expr $name, Expr $expected, Expr $origin) =>
+  $c.report_error(
+    <parse>,
+    %"macro pattern '${$name}' takes ${$expected} argument patterns",
+    $origin, NULL);
+
+static macro Stmt $report.parse.lisp_unclosed(Expr $c, Expr $origin) =>
+  $c.report_error(
+    <parse>, "unterminated compile-time Lisp form",
+    $origin, NULL);
+
+static macro Stmt $report.macro.lisp_expr(Expr $c, Expr $origin, Expr $value) =>
+  $c.report_error(
+    <macro>, "compile-time Lisp result cannot fill an expression slot",
+    $origin, %( "value:" ${$value.repr()} ));
+
+static macro Stmt $report.macro.type_name(Expr $c, Expr $message, Expr $origin) =>
+  $c.report_error(<macro>, $message, $origin, NULL);
+
+static macro Stmt $report.macro.import_cycle(Expr $c, Expr $path, Expr $origin) {
+  {
+    String display = $c.display_path($path);
+    Array notes = [ %"import: $display" ];
+    Array parents = $c.import_stack;
+    for (int i = 0; i < parents.len(); i++) {
+      Var parent = parents[i];
+      notes.push(%"from: ${$c.display_path(parent)}");
+    }
+    $c.report_error(
+      <macro>, "compile-time import cycle", $origin, notes.list_free());
+  }
+}
+
+static macro Stmt $report.macro.import_extension(
+  Expr $c, Expr $origin, Expr $path_note) =>
+  $c.report_error(
+    <macro>, "compile-time import requires .xlisp",
+    $origin, $path_note);
+
+static macro Stmt $report.macro.builtin_form(Expr $c) =>
+  $c.report_error(
+    <macro>, "unexpected form in built-in macro source",
+    $c.token, NULL);
+
+static macro Stmt $report.macro.lisp_failed(
+  Expr $c, Expr $origin, Expr $source, Expr $error) {
+  {
+    String form_note = %"form: ${$source}",
+      error_note = %"error: ${$error.repr()}";
+    $c.report_error(
+      <macro>, "compile-time Lisp evaluation failed", $origin,
+      %($form_note $error_note));
+  }
+}
+
+static macro Stmt $report.parse.variable_unbound(
+  Expr $c, Expr $spelling, Expr $origin) =>
+  $c.report_error(
+    <parse>, %"unbound replacement variable '${$spelling}'",
+    $origin, NULL);
+
 
 /* expansion
 
@@ -54,7 +373,7 @@ $(import "../src/macros-reports.xmacro")
 
 /* One expansion. `direct` holds the bindings that fresh names and member
    holes add to the pattern's captures. */
-typedef struct Expansion {
+static typedef struct Expansion {
   Compiler c, List definition, input, template, direct, Token invocation;
 } Expansion;
 
@@ -383,7 +702,7 @@ static void _file_scope_declarators(List declarators, Map locals) {
    template, which stays syntax until the template's expansion binds it.
    `locals` holds the template's own declarations, newest first under
    `<order>`, and `captures` the outer names a local macro's body reads. */
-typedef struct Definition {
+static typedef struct Definition {
   Compiler c, Token start;
   Atom name, Symbol kind;
   List target, parameters, template, fresh, captures, pattern, rebuild, type;
@@ -454,11 +773,6 @@ static void Definition.naming(Definition &d) {
     $report.macro.name_with(c, d.start);
   if (spelling.startswith("x2c.") && !c.builtin_defs)
     $report.parse.macro_reserved(c, spelling, d.start);
-  Var existing;
-  if (c.import_src && c.macros.try_get(d.name, existing))
-    $report.macro.import_collision(
-      c,
-      spelling, d.start, _definition_note(existing));
 }
 
 /* Reads the parameter holes, then a `using` clause. A decorator's first
@@ -876,7 +1190,6 @@ static List Definition.node(Definition &d) {
     (leaf ${d.leaf})
     (origin ${d.origin})
     (file ${d.file})
-    (imported ${c.import_src != NULL})
     (builtin ${c.builtin_defs})
     (local ${d.local})
     (static ${d.storage})
@@ -975,9 +1288,9 @@ static Atom _hole_name(List hole) {
    Spellings match without regard to case. `named` marks the row whose
    spelling names its hole or result kind in diagnostics. */
 
-enum { CATEGORY_HOLE_NAME = 1, CATEGORY_RESULT_NAME = 2 };
+static enum { CATEGORY_HOLE_NAME = 1, CATEGORY_RESULT_NAME = 2 };
 
-typedef struct MacroCategory {
+static typedef struct MacroCategory {
   const char *spelling;
   Symbol hole, result;
   int target, named;
@@ -2003,7 +2316,7 @@ void Compiler.record_compile_time_effect(
   Compiler c, List row, Token start) {
   if (!c.shallow || c.source_private || c.macro_holes ||
       !c.sym.at_file_scope() ||
-      c.builtin_defs || c.import_src || !c.filename ||
+      c.builtin_defs || !c.filename ||
       c.filename.startswith("<builtin:")) return;
   String source = home_portable_path(Path.absolute(c.filename));
   List key = %("source-node" (compile-time $source ${start.pos}));
@@ -2024,21 +2337,23 @@ void Compiler.install_compile_time_effects(Compiler c, List rows) {
       List node = c._rebind_imported(c.thaw_declaration_syntax(definition));
       c.macros[node.assoc(<name>)] = node;
     }
-    case %(compile-time keyword ?alias ?definition):
+    case %(compile-time keyword ?alias ?definition): {
+      if (!c.kw_aliases) c.kw_aliases = {};
       c.kw_aliases[alias] =
         c._rebind_imported(c.thaw_declaration_syntax(definition));
+    }
     case %(compile-time lisp ?form (source ?path ?site)): {
       Token token = c.thaw_declaration_syntax(site);
       $let(c.filename, home_absolute_path(path)) {
-        if (c.shallow) c.queue_declaration_effect(form, token, token);
+        if (c.shallow) c.queue_declaration_effect(form, token, NULL);
         else c.evaluate_declaration_effect(form, token);
       }
     }
     case %(compile-time import ?path ?site): {
       Token token = c.thaw_declaration_syntax(site);
-      c.keep_imported_meta(c._import(home_absolute_path(path), token));
+      c._import(home_absolute_path(path), token);
     }
-    case %(project-meta ? ? ?): c.install_project_meta_effect(row);
+    case %(project-meta *): c.install_project_meta_effect(row);
   }
 }
 
@@ -2166,7 +2481,7 @@ static int Compiler._claims(Compiler c, List definition, AstPos position) {
      !definition.assoc(<local>).int());
 }
 
-typedef struct MacroPos {
+static typedef struct MacroPos {
   Symbol kind, const char *description, int semicolon;
 } MacroPos;
 
@@ -2294,7 +2609,7 @@ static int Compiler._try_definition(
 // shallow collection
 
 /** Returns how collection treats the macro invocation at the cursor.
-    `<required>` covers every imported `Unit` macro, declaration-unit macro,
+    `<required>` covers every file-scope `Unit` macro, declaration-unit macro,
     named-type decorator, and local `Unit` macro whose template contains
     protocol or adoption rows. `<tried>` covers any other local `Unit`
     macro. Other invocations return zero.
@@ -2307,7 +2622,7 @@ static Symbol _collection(List definition) {
   if (definition.assoc(<kind>) == <decl-unit> ||
       definition.assoc(<target>) == <named-type>) return <required>;
   if (definition.assoc(<kind>) != <unit>) return 0;
-  if (definition.assoc(<imported>).int()) return <required>;
+  if (!definition.assoc(<local>).int()) return <required>;
   List template = definition.assoc(<template>), bindings;
   Var matched;
   if (template.try_search(%(!or (protocol *) (adopt *)), matched, bindings))
@@ -2752,7 +3067,7 @@ static Var Compiler._stored_reference(Compiler c, List definition) {
    file-scope function decorates that function's body, so one spelling
    covers a statement and a whole function; `function` holds the function
    then. */
-typedef struct Decoration {
+static typedef struct Decoration {
   Compiler c, List definition, function, Token invocation, start;
   AstPos position, Symbol kind, int open;
 } Decoration;
@@ -2865,7 +3180,7 @@ static List Decoration.capture(Decoration &d, List target) {
   return target_capture;
 }
 
-/* Visibility comes from a private section or from a static declaration,
+/* Visibility comes from a static declaration,
    seen through a lone `seq` and a foreign alias. */
 static int Compiler._private_target(Compiler c, List target) {
   int private_target = c.source_private > 0;
@@ -3486,7 +3801,7 @@ static List _row_fields(List row) {
 
 /* One landing of quoted syntax. `retain` keeps each hole's value as the
    syntax it is, as a rebuild does. */
-typedef struct Landing {
+static typedef struct Landing {
   Compiler c, Map names, Token site, int anchored, retain;
 } Landing;
 
@@ -3898,8 +4213,7 @@ static Var _carrier_binder(Var value) {
    lifts into syntax. */
 
 /** Opens the unit's compile-time Lisp session when it has none. An
-    `.xmacro` import parser borrows its parent's session; the parent
-    Compiler frees it. Every use records the library files as dependencies,
+    Each use records the library files as dependencies,
     and a session loads them once. */
 void Compiler.ensure_macro_lisp(Compiler c) {
   int loaded = c.macro_lisp != NULL;
@@ -3939,15 +4253,7 @@ static String Compiler._lisp_form(Compiler c) {
   return %"(${String.new_len(c.text + begin, close.pos - begin)})";
 }
 
-/** Consumes and evaluates one top-level compile-time Lisp form.
-    `$(import ...)` loads a tracked `.xlisp` or `.xmacro` dependency; other
-    results are discarded in the translation unit's Lisp session.
-    Returns a `%(seq ...)` of the runtime `meta` declarations a macro import
-    contributed, or NULL when the import declared nothing `meta` at all.
-    The consuming unit retains them and emits the ones it reaches. An import
-    whose `meta` functions are all compile-time only answers an empty `seq`,
-    because the next pass still has to read it to install them.
-*/
+/** Evaluates one source Lisp form or imports an .xlisp dependency. */
 List Compiler.parse_macro_lisp_top_level(Compiler c) {
   Token invocation = c.token;
   String import_path = NULL;
@@ -3974,7 +4280,7 @@ void Compiler.parse_macro_lisp_shallow(Compiler c) {
         %(compile-time import $path
           ${c.freeze_declaration_syntax(c.token)}), c.token);
     }
-    c._collect_import();
+    c.parse_macro_lisp_top_level();
     return;
   }
   Token first = c.token;
@@ -3991,63 +4297,22 @@ void Compiler.parse_macro_lisp_shallow(Compiler c) {
   c.queue_declaration_effect(form, first, c.token);
 }
 
-/* The declarations a file-scope import adds stay in the importing file, as
-   its macros do. Each is marked `(import-row KEY)` among the file statics
-   until a declaration outside an import writes the row again.
-   `Sym.withhold_import_rows` removes the remaining rows from publication. */
-static void Compiler._collect_import(Compiler c) {
-  Sym sym = c.sym;
-  int mark = sym.begin_import();
-  defer sym.end_import();
-  c.keep_imported_meta(c.parse_macro_lisp_top_level());
-  foreach (Var (key, value), sym.added_globals(mark))
-    sym.put(sym.file_statics(), %(import-row $key), value);
-}
-
-/** Keeps the runtime `meta` declarations that a compile-time import
-    contributed, `imported` or NULL, where the import stands. */
-void Compiler.keep_imported_meta(Compiler c, List imported) {
-  if (imported)
-    foreach (Var definition, imported.cdr()) c.meta_defs.push(definition);
-  c.record_meta_import();
-}
-
-/** Answers whether the cursor is at a compile-time import,
-    `$(import "path")`. */
-int Compiler.at_import(Compiler c) =>
-  c.peek(0) == <"$("> && c._import_path(NULL);
-
-/** Records the compile-time import at the cursor in this file's interface,
-    which every file that includes this one replays at its include, and a
-    package's consumer where it imports the package. Paths are spelled
-    home-portably, as interfaces spell them. */
-void Compiler.record_macro_export(Compiler c) {
-  String requested = NULL;
-  c._import_path(requested);
-  String source = home_portable_path(Path.absolute(c.filename));
-  String path = home_portable_path(c._canonical_path(requested, c.token));
-  c.sym.set(
-    %("source-node" (macro-export $source ${c.token.pos})),
-    %(macro-export $path));
-}
-
-/** Installs the macro file at the home-portable `path` that an included
-    file exports, as the unit's own import of it at `invocation` would. */
-void Compiler.import_exported(Compiler c, String path, Token invocation) {
-  c.keep_imported_meta(c._import(home_absolute_path(path), invocation));
-}
-
 /** Evaluates a queued source Lisp form with its original diagnostic site. */
 void Compiler.evaluate_declaration_effect(
   Compiler c, String form, Token invocation) {
   List key = %(${home_portable_path(Path.absolute(c.filename))}
                ${invocation.pos} $form);
-  if (key in c.evaluated_effects) return;
+  if (key in c.evaluated_effects ||
+      (!library_filling && library_imports && key in library_imports)) return;
   $let(c.collect_protocols, 1) {
     c.ensure_macro_lisp();
     c._eval_string(form, invocation);
   }
   c.evaluated_effects[key] = 1;
+  if (library_filling) {
+    key.try_own();
+    $scope(&library_scope) library_imports[key] = 1;
+  }
 }
 
 /** Parses a compile-time Lisp form in an expression position.
@@ -4121,194 +4386,37 @@ static Var _lisp_import_hook(String path) {
   return %();
 }
 
-/* imports
-
-   `$(import "file")` evaluates an `.xlisp` file in the unit's session or
-   reads an `.xmacro` file's definitions, aliases, and `meta` declarations.
-   An import is cached only after it completes. Cached `.xmacro` aliases are
-   replayed once per source alias map, while definitions and the Lisp session
-   remain shared by the translation unit. CPP reads definitions and aliases;
-   imported Lisp stays pending until a declaration needs its evaluation. */
-
-/* One import while its file is read. `meta` records that the file
-   contributed a `meta` declaration, which is what makes the next pass read
-   it again instead of replaying a cached entry. A compile-time-only
-   function installs and contributes no runtime definition, so the two are
-   counted separately. */
-typedef struct Import {
-  Compiler c, String path, Token invocation;
-  Map aliases, Array metas, int meta;
-} Import;
+/* Lisp files use the translation session and ordinary dependency tracking.
+   Source declarations travel through #include and the selected interface. */
 
 static List Compiler._import(Compiler c, String requested, Token invocation) {
   c.ensure_macro_lisp();
   String path = c._canonical_path(requested, invocation);
   c.add_translation_dependency(path);
   if (library_filling) library_imports[path] = 1;
-  Var cached;
-  if (c.imports.try_get(path, cached) && !c._reuse_import(path, cached))
+  Var dependencies;
+  if (c.imports.try_get(path, dependencies)) {
+    c.merge_translation_dependencies(dependencies);
     return NULL;
+  }
   if (path in c.import_stack)
     $report.macro.import_cycle(c, path, invocation);
-  Import in = {.c = c, .path = path, .invocation = invocation};
-  return in.read();
-}
-
-/* Applies a completed import's cache entry to this pass and answers whether
-   the file must be read again. A `meta` definition is bound in the current
-   symbol table and emitted where its import stands, so a pass that has not
-   seen the path yet reads a `meta` file again instead of replaying it. */
-static int Compiler._reuse_import(Compiler c, String path, Var cached) {
-  match (cached)
-    case %(imported ?aliases ?definitions ?dependencies ?(int meta)): {
-      c.merge_translation_dependencies(dependencies);
-      if (meta) return c._forget_import(path, definitions);
-      if (!(path in c.kw_seen)) c._replay_import(path, aliases, definitions);
-    }
-  return 0;
-}
-
-/* The re-read defines this import's macros again, so the ones the previous
-   pass left behind are dropped first; Definition.naming would otherwise
-   report the second definition as a collision with another import. */
-static int Compiler._forget_import(Compiler c, String path, Var definitions) {
-  if (path in c.kw_seen) return 0;
-  foreach (Var (name, definition), definitions.map()) c.macros.del(name);
-  return 1;
-}
-
-static void Compiler._replay_import(
-  Compiler c, String path, Var aliases, Var definitions) {
-  foreach (Var (name, definition), definitions.map())
-    c.macros[name] = c._rebind_imported(definition);
-  if (aliases is <map>) c.kw_aliases.merge(aliases);
-  c.kw_seen[path] = 1;
-}
-
-/* Reads the file and caches what it added: macros, dependencies, aliases,
-   and whether it contributed `meta` declarations, which the import returns
-   as a `seq`. */
-static List Import.read(Import &in) {
-  Compiler c = in.c;
-  Map previous_definitions = c.macros.copy();
-  Map previous_dependencies = c.deps.copy();
-  c.import_stack.push(in.path);
-  in.metas = [];
-  {
+  if (!path.endswith(".xlisp"))
+    $report.macro.import_extension(c, invocation, c._path_note(path));
+  Map before = c.deps.copy();
+  String text = c._read_source(
+    path, "cannot open compile-time Lisp import", invocation);
+  if (!Compiler.inherits_import(path)) {
+    c.import_stack.push(path);
     defer c.import_stack.take_last();
-    in.file();
+    if (c.collect_protocols) c.evaluate_declaration_effect(text, invocation);
+    else c.queue_declaration_effect(text, invocation, invocation);
   }
-  Map definitions = _changed(c.macros, previous_definitions);
-  Map dependencies = _changed(c.deps, previous_dependencies);
-  Var aliases = in.aliases ? in.aliases : %();
-  c.imports[in.path] =
-    %(imported $aliases $definitions $dependencies ${in.meta});
-  c.kw_seen[in.path] = 1;
-  if (!in.meta) {
-    in.metas.free();
-    return NULL;
-  }
-  List forms = in.metas.list_free();
-  return %(seq @forms);
-}
-
-/* The entries of `now` whose values differ from `before`'s. */
-static Map _changed(Map now, Map before) {
-  Map changed = {};
-  foreach (Var (key, value), now)
-    if (before[key] != value) changed[key] = value;
-  return changed;
-}
-
-static void Import.file(Import &in) {
-  String path = in.path;
-  if (path.endswith(".xlisp")) in.lisp();
-  else if (path.endswith(".xmacro") || path.endswith(".xpmacro"))
-    in.macros();
-  else
-    $report.macro.import_extension(
-      in.c, in.invocation, in.c._path_note(path));
-}
-
-/* The shared session evaluated this file once for the target, and a session
-   cannot replace a name an ancestor binds. The read still reports a file
-   that has gone missing. */
-static void Import.lisp(Import &in) {
-  Compiler c = in.c;
-  String text = c._read_source(
-    in.path, "cannot open compile-time Lisp import", in.invocation);
-  if (Compiler.inherits_import(in.path)) return;
-  if (c.collect_protocols) c._eval_string(text, in.invocation);
-  else c.queue_declaration_effect(text, in.invocation, in.invocation);
-}
-
-/* The import parser borrows the caller's semantic maps and Lisp. Its
-   diagnostics are returned to the caller before release; lasting effects
-   enter the shared definitions, aliases, dependencies, literal cache, and
-   Lisp session. */
-static void Import.macros(Import &in) {
-  Compiler c = in.c;
-  in.aliases = {};
-  String text = c._read_source(
-    in.path, "cannot open macro import", in.invocation);
-  Compiler child = Compiler.new_shared(c);
-  defer c.close_child(child);
-  child.filename = in.path;
-  child.collect_protocols = c.collect_protocols;
-  /* As the caller's collection pass does, an import read during
-     collection installs the protocols visible to it when its templates
-     or `meta` bodies first ask for one. */
-  child.import_protocols = c.shallow;
-  $let(c.diagnostics.printer, c.diagnostics.printer) {
-    in.borrow(child);
-    child.tokenize(text);
-    while (child.peek(0) != <eof>) in.form(child);
-    c.merge_translation_dependencies(child.deps);
-    c.declaration_effects = child.declaration_effects;
-  }
-}
-
-/* A `meta` definition the import returns is emitted by the caller when the
-   caller reaches it, so its `(cache id)` references index the caller's
-   keys. */
-static void Import.borrow(Import &in, Compiler child) {
-  Compiler c = in.c;
-  child.borrow_diagnostics(c);
-  child.borrow_unit_semantics(c);
-  $copy_fields(child, c, macros, kw_aliases, kw_seen, macro_lisp,
-               meta_group, meta_group_bound, unit_nodes, imports,
-               import_stack, declaration_effects);
-  child.borrowed_lisp = 1;
-  child.import_src = in.path;
-  child.inherited_lisp = Compiler.inherits_import(in.path);
-}
-
-static void Import.form(Import &in, Compiler child) {
-  if (child.keyword_form_is_definition()) child._record_alias(in.aliases);
-  else if (child.macro_form_is_definition()) child.parse_macro_definition();
-  else if (child.meta_form_is_declaration()) in.meta_declaration(child);
-  else if (child.peek(0) == <"$(">) in.lisp_form(child);
-  else
-    $report.macro.import_form(child);
-}
-
-static void Import.meta_declaration(Import &in, Compiler child) {
-  in.meta = 1;
-  List definition = child.parse_top_level();
-  if (definition) in.metas.push(definition);
-}
-
-/* A nested import's own `meta` definitions belong to the same consuming
-   unit. */
-static void Import.lisp_form(Import &in, Compiler child) {
-  if (!in.c.collect_protocols && !child._import_path(NULL)) {
-    child.parse_macro_lisp_shallow();
-    return;
-  }
-  List nested = child.parse_macro_lisp_top_level();
-  if (!nested) return;
-  in.meta = 1;
-  foreach (Var form, nested.cdr()) in.metas.push(form);
+  Map added = {};
+  foreach (Var (key, value), c.deps)
+    if (before[key] != value) added[key] = value;
+  c.imports[path] = added;
+  return NULL;
 }
 
 static int Compiler._import_path(Compiler c, String &?path) {
@@ -4348,20 +4456,6 @@ static void Compiler._reference_bindings(
     }
   foreach (Var child, syntax)
     if (child is <list>) c._reference_bindings(child, replacements);
-}
-
-/** Loads the macro imports that the sources of package `name` export at
-    this consumer's import position, in the order the package's include walk
-    reaches them. */
-void Compiler.import_package_macros(
-  Compiler c, String name, Token invocation) {
-  Var exports = c.package_exports[name];
-  if (exports is void) return;
-  foreach (String path, exports.list()) {
-    List imported = c._import(home_absolute_path(path), invocation);
-    if (imported)
-      foreach (Var definition, imported.cdr()) c.meta_defs.push(definition);
-  }
 }
 
 // source files
@@ -4572,11 +4666,11 @@ int Compiler.shares_meta_definition(Compiler c, String name) {
    first use. A unit parses each source once and keeps its aliases under a
    marker. */
 
-macro Expression $_embed_lisp_binding_macros() =>
-  $(x2c.literal.string (x2c.embed.text "../etc/lisp-bindings.xmacro"));
+static macro Expression $_embed_lisp_binding_macros() =>
+  $(x2c.literal.string (x2c.embed.text "../etc/lisp-bindings.x"));
 
-macro Expression $_embed_builtin_macros() =>
-  $(x2c.literal.string (x2c.embed.text "../etc/builtin-macros.xmacro"));
+static macro Expression $_embed_builtin_macros() =>
+  $(x2c.literal.string (x2c.embed.text "../etc/builtin-macros.x"));
 
 static String lisp_binding_macros = $_embed_lisp_binding_macros();
 static String lisp_bindings_marker = NULL;

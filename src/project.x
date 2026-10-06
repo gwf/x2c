@@ -8,7 +8,7 @@
 */
 
 #pragma once
-$(import "../lib/private-keywords.xmacro")
+#include "../lib/private-keywords.x"
 #include "build.x"
 
 /** Links native build requests in dependency-first order.
@@ -22,7 +22,6 @@ typedef struct ProjectBuild {
   struct ProjectBuild *next;
 } *ProjectBuild;
 
-#pragma private
 
 #include <ctype.h>
 #include <stdio.h>
@@ -34,12 +33,12 @@ typedef struct ProjectBuild {
 
 // source templates
 
-macro Expression $source.project.manifest(Expr $name) =>
+static macro Expression $source.project.manifest(Expr $name) =>
   %"[target.${$name}]
 sources = [\"src/*.x\"]
 ";
 
-macro Expression $source.project.main() =>
+static macro Expression $source.project.main() =>
   %"/*  main.x -- greet the name given on the command line */
 
 #include <stdio.h>
@@ -51,27 +50,27 @@ int main(int argc, char **argv) {
 }
 ";
 
-macro Expression $source.project.ignore() =>
+static macro Expression $source.project.ignore() =>
   ".x2c-build/\n";
 
 // command reports
 
-macro Stmt $report.project.source_excluded(Expr $path, Expr $target) {
+static macro Stmt $report.project.source_excluded(Expr $path, Expr $target) {
   fprintf(
     stderr, "x2c: excluded %s from target %s\n", $path, $target);
 }
 
-macro Stmt $report.project.created(Expr $directory) {
+static macro Stmt $report.project.created(Expr $directory) {
   fprintf(stderr, "x2c: created %s\n", $directory);
 }
 
-macro Stmt $report.project.name_invalid(Expr $name) {
+static macro Stmt $report.project.name_invalid(Expr $name) {
   driver_error(
     %"new: '${
       $name}' is not a target name; use letters, digits, '_', and '-'");
 }
 
-macro Stmt $report.project.directory_occupied(Expr $dir) {
+static macro Stmt $report.project.directory_occupied(Expr $dir) {
   driver_error(%"new: ${$dir} exists and is not an empty directory");
 }
 
@@ -80,12 +79,12 @@ macro Stmt $report.project.directory_occupied(Expr $dir) {
 /* A target or profile exists from its first mention. `declared` records
    that its own section appeared, and `seen` holds the keys that section
    set. */
-typedef struct ProjectProfile {
+static typedef struct ProjectProfile {
   String name, optimization, int debug, List defines, c_flags, link_flags;
   Map seen, int declared, struct ProjectProfile *next;
 } *ProjectProfile;
 
-typedef struct ProjectTarget {
+static typedef struct ProjectTarget {
   String name, Symbol kind, String output, List sources, exclude, dependencies;
   List native_modules, include_dirs, package_dirs, defines, c_flags;
   List library_dirs, libraries, link_flags;
@@ -94,14 +93,14 @@ typedef struct ProjectTarget {
   struct ProjectTarget *next;
 } *ProjectTarget;
 
-typedef struct ProjectDependency {
+static typedef struct ProjectDependency {
   String name, version;
   struct ProjectDependency *next;
 } *ProjectDependency;
 
 /* A project holds its manifest's settings, the command request it serves,
    and, while it plans, the selected target and the build list. */
-typedef struct Project {
+static typedef struct Project {
   String path, root, text, default_target, build_dir, build_root, Map seen;
   ProjectDependency dependencies;
   Map dependency_seen;
@@ -188,7 +187,7 @@ static String _build_root(Project p) {
 
 // manifest lines
 
-typedef enum ManifestSection {
+static typedef enum ManifestSection {
   NONE, PROJECT, TARGET, PROFILE, DEPENDENCIES
 } ManifestSection;
 
@@ -196,7 +195,7 @@ typedef enum ManifestSection {
    line belongs to, with the section's target or profile. A field whose
    array spans lines keeps its key, its value so far, and the line it starts
    on until a bracket closes the array. */
-typedef struct Manifest {
+static typedef struct Manifest {
   Project project, int line, ManifestSection section;
   ProjectTarget target, ProjectProfile profile;
   String key, value, int start;

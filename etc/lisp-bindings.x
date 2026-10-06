@@ -1,0 +1,22 @@
+#pragma once
+
+macro Stmt $lisp.bind(
+  Expr $lisp, Expr $name, Expr $function
+) {
+  Func callable = Func.new(
+    $function,
+    $(_x2c.literal.list (_x2c.function.native-type $function))
+  );
+  Lisp.bind($lisp, $name, callable);
+}
+
+macro Decorator $lisp.binding(
+  Function $function, Name $group, Literal $name
+) {
+  $(lisp.binding.record $group $name $function)...
+  $(x2c.function.body $function)...
+}
+
+macro Stmt $lisp.install(Expr $lisp, Name $group) {
+  $(lisp.binding.install $lisp $group)...
+}

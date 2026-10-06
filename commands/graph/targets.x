@@ -4,7 +4,6 @@
 
 #include "compiler.x"
 
-#pragma private
 
 Map project_function_targets(Compiler compiler, List ast, String path) {
   Map definitions = {};

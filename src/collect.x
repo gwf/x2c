@@ -11,8 +11,7 @@
 #pragma once
 #include "compiler.x"
 
-#pragma private
-$(import "../src/ast-rewrite.xmacro")
+#include "ast-rewrite.x"
 #include "buffer.x"
 #include "datum.x"
 #include "utils.x"
@@ -26,28 +25,28 @@ $(import "../src/ast-rewrite.xmacro")
 
 // diagnostics
 
-macro Stmt $report.driver.runtime_read(Expr $c, Expr $runtime) {
+static macro Stmt $report.driver.runtime_read(Expr $c, Expr $runtime) {
   $c.report_error(
     <driver>,
     "cannot read runtime source",
     $c.token, %("path: ${$runtime}"));
 }
 
-macro Stmt $report.driver.include_read(Expr $c, Expr $target, Expr $path) {
+static macro Stmt $report.driver.include_read(Expr $c, Expr $target, Expr $path) {
   $c.report_error(
     <driver>,
     "cannot read include",
     $c.token, %("stage: collect" "include: ${$target}" "path: ${$path}"));
 }
 
-macro Stmt $report.driver.package_unknown(Expr $c, Expr $site, Expr $name) {
+static macro Stmt $report.driver.package_unknown(Expr $c, Expr $site, Expr $name) {
   $c.report_error(
     <driver>,
     %"unknown package '${$name}'",
     $site, %( "searched: <root>/${$name}/src/${$name}.x, <root>/${$name}/${$name}.x" ));
 }
 
-macro Stmt $report.driver.package_read(
+static macro Stmt $report.driver.package_read(
   Expr $c, Expr $site, Expr $package, Expr $entry) {
   $c.report_error(
     <driver>,
@@ -55,7 +54,7 @@ macro Stmt $report.driver.package_read(
     $site, %( "path: ${$entry}" ));
 }
 
-macro Stmt $report.driver.package_prefix(
+static macro Stmt $report.driver.package_prefix(
   Expr $c, Expr $site, Expr $name, Expr $spelling, Expr $unit, Expr $fix) {
   $c.report_error(
     <driver>,
@@ -63,7 +62,7 @@ macro Stmt $report.driver.package_prefix(
     $site, %( "'${$unit}' is x2c source outside the package; include it ${$fix}" ));
 }
 
-macro Stmt $report.emit.interface_write(Expr $c) {
+static macro Stmt $report.emit.interface_write(Expr $c) {
   $c.report_error(
     <emit>,
     "failed to write interface file",
@@ -161,8 +160,7 @@ static void _require_retained(int owned) {
 */
 Map Compiler.collect_symbols(Compiler c, Map globs) {
   if (globs == NULL) globs = {};
-  c.kw_aliases = NULL;
-  c.kw_seen = NULL;
+  c.kw_aliases = {};
   Map visited = {}, String canonical = _canonical_path(c.filename);
   c.deps = {};
   c.add_translation_dependency(canonical);
@@ -222,9 +220,9 @@ static void Compiler._merge_rows(Compiler c, Map globs, Map rows) {
    and `line` and `pos` locate the current segment's
    first token. `deferred` marks an entry collected without its declaration
    defaults. */
-typedef struct FileWalk {
+static typedef struct FileWalk {
   Compiler c, String path, text, dir, Map globs, visited;
-  Array parts, Map definitions, dependencies, statics;
+  Array parts, Map definitions, dependencies, statics, hashes;
   int unit, linkage, line, pos, deferred;
 } FileWalk;
 
@@ -242,12 +240,13 @@ static void Compiler._walk_file(
   /* Keyword aliases are file-local, and every segment parses in the syntax
      the whole file selected. */
   $let(c.declaration_effects, NULL) $let(c.kw_aliases, {})
-  $let(c.kw_seen, {}) $let(c.layout, tokenizer.layout) {
+  $let(c.layout, tokenizer.layout) {
     FileWalk w = {
       .c = c, .path = path, .text = text, .dir = dir, .globs = globs,
       .visited = visited, .parts = [], .definitions = {},
-      .dependencies = _cache_map(), .statics = {},
+      .dependencies = _cache_map(), .statics = {}, .hashes = _cache_map(),
       .unit = is_source_file(path), .line = 1};
+    if (path == _canonical_path(c.filename)) c.meta_hashes = w.hashes;
     // A cycle sees only the exports collected before its include.
     visited[path] = w.parts;
     w.split(tokenizer.tokens);
@@ -335,9 +334,8 @@ static void FileWalk.parse(FileWalk &w, String segment, Map overlay) {
 static void FileWalk.prepare(FileWalk &w, Compiler shadow, String segment) {
   if (!w.unit || !w.c._package_owns(w.path)) shadow.package = NULL;
   shadow.filename = w.path;
-  // Included bodies belong to their own units; only this unit hashes ahead.
-  if (w.path == _canonical_path(w.c.filename))
-    shadow.meta_hashes = w.c.meta_hashes;
+  // Every segment hashes its provider, including its private helpers.
+  shadow.meta_hashes = w.hashes;
   shadow.layout = w.c.layout;
   shadow.source_private = 0;
   shadow.open_linkage = w.linkage;
@@ -402,7 +400,7 @@ static List _row_type_family(Map rows, Map statics, List key, Var value) {
   match (key) case %(?(String name)):
     if (%(typedef $name) in rows) return %(typedef $name);
   if (!(key in statics) && value is <list>) {
-    Type type = value.list();
+    Type type = value;
     if (type.is_enum()) return _type_family(type.base_type());
   }
   return NULL;
@@ -427,7 +425,10 @@ static void _needed_types(List syntax, Map rows, Map needed) {
             type.car().symbol().is_storage_class())) type = type.cdr();
     List family = _type_family(type);
     if (family && family in rows) needed[family] = 1;
-    match (type) case %(?(String name)):
+    /* A typedef spelling is needed through any declarator. Aggregate
+       completeness remains attached to the direct tag demand above. */
+    Type base = type.type().base_type();
+    match (base) case %(?(String name)):
       if (%(typedef $name) in rows) needed[%(typedef $name)] = 1;
     foreach (Var part, item) pending.push(part);
   }
@@ -555,7 +556,13 @@ static List Compiler._walk_cold(
     file.macro_lisp = c.macro_lisp;
     file.borrowed_lisp = 1;
   }
-  file._walk_apart(canonical, text, globs.copy(), visited.copy());
+  else file.evaluated_effects = {};
+  /* A fresh file installs its own includes in its own macro state. Only
+     active walks cross into that state, to preserve a cycle's prefix. */
+  Map own_visited = {};
+  foreach (Var (path, state), visited)
+    if (state is <array>) own_visited[path] = state;
+  file._walk_apart(canonical, text, globs.copy(), own_visited);
   c.merge_translation_dependencies(file.deps);
   c.declaration_produced |= file.declaration_produced;
   return _process_cache()[canonical];
@@ -631,6 +638,57 @@ List Compiler.include_typedef_names(
   Array names = [];
   c._add_typedef_names(names, _canonical_path(path), seen);
   return names.list_free();
+}
+
+/** The semantic type rows reached by an ordinary source include. Each
+    file contributes once to `seen`; the current unit does not contribute
+    through a cycle back to its own still-open header. */
+List Compiler.include_type_dependencies(
+  Compiler c, String target, int angle, Map seen) {
+  String path = collect_resolve_include(
+    c.sources, c.include_dirs, Path.dirname(c.filename), target, angle);
+  if (!path || !is_source_file(path)) return NULL;
+  seen[_canonical_path(c.filename)] = 1;
+  Array types = [];
+  c._add_type_dependencies(types, _canonical_path(path), seen);
+  return types.list_free();
+}
+
+static void Compiler._add_type_dependencies(
+  Compiler c, Array types, String path, Map seen) {
+  if (path in seen) return;
+  seen[path] = 1;
+  List entry = c._entry(path);
+  if (!entry) return;
+  foreach (Var part, entry.car())
+    match (%($part)) {
+      case %(?(Map rows)):
+        foreach (Var (key, value), rows) {
+          if (value is not <list> ||
+              (!_type_family(key) && key.list().cdr())) continue;
+          List item;
+          $ast.walk(value, item) {
+            Type base = item.type().base_type();
+            if (base.is_bare_typedef_name()) types.push(base);
+          }
+        }
+      case %(?(String include)):
+        c._add_type_dependencies(types, include, seen);
+    }
+}
+
+/** Reports whether this unit's selected interface publishes `name`. */
+int Compiler.publishes_typedef(Compiler c, String name) {
+  return c.publishes_type_family(%(typedef $name));
+}
+
+/** Reports whether this unit's interface publishes the type `family`. */
+int Compiler.publishes_type_family(Compiler c, List family) {
+  List entry = c._entry(_canonical_path(c.filename));
+  if (!entry) return 0;
+  foreach (Var part, entry.car())
+    if (part is <map> && family in part.map()) return 1;
+  return 0;
 }
 
 static void Compiler._add_typedef_names(
@@ -721,6 +779,10 @@ static void FileWalk.publish(FileWalk &w) {
   List parts = w.parts.list_free();
   _retain(w.path);
   _retain_rows(parts);
+  foreach (Var (name, hash), w.hashes) {
+    _retain(name);
+    _retain(hash);
+  }
   String hash = _content_hash(w.text);
   List definitions = _sorted_names(w.definitions);
   List roots = w.c._interface_include_dirs();
@@ -814,7 +876,7 @@ static void Compiler._replay_include(
 /* One package's public surface while it is gathered: the package's name
    and root, the rows merged so far, the files already visited, and the
    token that locates errors. */
-typedef struct Surface {
+static typedef struct Surface {
   Compiler c, String name, root, Map merged, visited, Token token;
   Array exports;
 } Surface;
@@ -849,7 +911,7 @@ void Compiler.collect_package(Compiler c, String name, Token token) {
   c.add_translation_dependency(entry);
   s.gather(entry, _process_cache()[entry]);
   s.install();
-  c.package_exports[name] = s.exports.list_free();
+  c.package_effects[name] = s.exports.list_free();
 }
 
 static String Compiler._find_package(
@@ -960,6 +1022,7 @@ static int _in_runtime(String path) =>
    prefixed aggregate crosses with it. Source-node and helper rows carry no C
    spelling of their own. */
 static String _package_key_spelling(List key) {
+  match (key) case %("function-inline" ?(String name)): return name;
   Var (head, spelling_value) = key;
   if (head is <string>) {
     String spelling = head;
@@ -1047,9 +1110,9 @@ static void Compiler._import_package(
   foreach (List member, members)
     c.register_package_member(name, member.car(), member.cadr(), NULL, NULL);
   if (effects != NULL) {
-    foreach (Var effect, c.package_exports[name]) effects.push(effect);
+    foreach (Var effect, c.package_effects[name]) effects.push(effect);
   }
-  else c.import_package_macros(name, NULL);
+  else c.install_compile_time_effects(c.package_effects[name]);
 }
 
 /** Prepares included compile-time effects after full parsing resets macros.
@@ -1057,7 +1120,7 @@ static void Compiler._import_package(
     canonical path of the unit's direct include. The parser installs those
     effects when it reaches that include.
 */
-Map Compiler.replay_included_package_imports(Compiler c, Map globs) {
+Map Compiler.included_compile_time_effects(Compiler c, Map globs) {
   Map visited = {}, delivered = {};
   String unit = _canonical_path(c.filename);
   visited[unit] = 1;
@@ -1093,7 +1156,7 @@ static void Compiler._replay_included(
 
 /** Installs the definitions of each include among the directives before
     the cursor. */
-void Compiler.import_included_exports(Compiler c) {
+void Compiler.install_included_effects(Compiler c) {
   Token first = c.token, tokens = c.tokenizer.tokens;
   for (Token token = first; token > tokens;) {
     token--;
@@ -1110,9 +1173,9 @@ void Compiler.import_included_exports(Compiler c) {
       c.sources, c.include_dirs, Path.dirname(c.filename), target, angle);
     if (!path) continue;
     String canonical = _canonical_path(path);
-    Var exports = c.included_exports[canonical];
+    Var exports = c.included_effects[canonical];
     if (exports is void) continue;
-    c.included_exports.del(canonical);
+    c.included_effects.del(canonical);
     c.install_compile_time_effects(exports);
   }
 }
@@ -1300,9 +1363,27 @@ static Map _read_rows(List stored) {
     List pair = row;
     _require_retained(pair.try_own());
     Var (key, value) = pair;
+    if (value is <list>) {
+      int valid = 1;
+      value = _restore_meta_hashes(value, valid);
+      if (!valid) return NULL;
+      _retain(value);
+    }
     rows[key] = value;
   }
   return rows;
+}
+
+/* A combined source effect can hold several provider advertisements. */
+static List _restore_meta_hashes(List node, int &valid) {
+  match (node)
+    case %(project-meta ?name ?signature ?provider ?(List stored)): {
+      Map hashes = _read_rows(stored);
+      if (hashes == NULL) { valid = 0; return NULL; }
+      return %(project-meta $name $signature $provider $hashes);
+    }
+  Var child;
+  $ast.rewrite_children(node, child, _restore_meta_hashes(child, valid));
 }
 
 /* Each dependency still hashes as it did when the interface was written; a
@@ -1415,6 +1496,13 @@ static List _stored_dependencies(Map dependencies) {
    depends on the files walked before it. An interface renumbers them in order
    of first appearance, keeping equal bindings equal. */
 static List _renumber_bindings(List node, Map identities) {
+  match (node)
+    case %(project-meta ?name ?signature ?provider ?(Map hashes)): {
+      Array rows = [];
+      foreach (Var (spelling, hash), hashes) rows.push(%($spelling $hash));
+      rows.sort();
+      return %(project-meta $name $signature $provider ${rows.list_free()});
+    }
   String spelling = NULL;
   if (binding_identity_try_parts(node, NULL, spelling)) {
     Var identity = identities.setdefault(node, identities.len() + 1);

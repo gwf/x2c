@@ -5,7 +5,6 @@ import "geo" with Vec as Xvec;
 
 double diagonal(double x, double y);
 
-#pragma private
 
 double diagonal(double x, double y) {
   Xvec v = Xvec.new(x, y);

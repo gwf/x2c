@@ -9,10 +9,9 @@ typedef struct ReplOptions {
   int dump, stats, verbose_stats;
 } ReplOptions;
 
-#pragma private
 #include "repl-session.x"
 
-$(import "repl-output.xmacro")
+#include "repl-output.x"
 #include "repl-input.x"
 #include "diagnostics.x"
 #include "lisp.x"
@@ -20,14 +19,14 @@ $(import "repl-output.xmacro")
 #include <stdio.h>
 #include <unistd.h>
 
-$(import "repl-reports.xmacro")
+#include "repl-reports.x"
 
-struct ReplCompleteContext {
+static struct ReplCompleteContext {
   ReplSession session;
   String pending;
 };
 
-struct ReplCommand {
+static struct ReplCommand {
   String spelling, synopsis, description;
   Symbol argument, dispatch;
 };
@@ -124,13 +123,13 @@ static ReplInputCompletion _complete_input(
   };
 }
 
-typedef struct ReplStatsSnapshot {
+static typedef struct ReplStatsSnapshot {
   unsigned definitions;
   ScopeStats scope;
   PoolStats pool;
 } ReplStatsSnapshot;
 
-typedef struct ReplSizeDelta {
+static typedef struct ReplSizeDelta {
   char sign;
   size_t magnitude;
 } ReplSizeDelta;

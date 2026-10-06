@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-$(import "../../../unittest/test-macros.xmacro")
+#include "../../../unittest/test-macros.x"
 
 static void yyjson_raw_read_iterate_and_write(void) {
   char source[] = "{\"values\":[2,3,5],\"valid\":true}";

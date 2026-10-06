@@ -9,7 +9,6 @@
 
 #include "string.x"
 
-#pragma private
 
 #include <ctype.h>
 
@@ -27,7 +26,7 @@ meta native int String.contains_digit(String str) {
     `$reject` holds. Naming the cursor lets each predicate write its own test
     against the C classifiers.
 */
-macro Stmt $string.classify(Expr $value, Name $byte, Expr $reject) {
+static macro Stmt $string.classify(Expr $value, Name $byte, Expr $reject) {
   if (!$value) return 0;
   for (unsigned char *$byte = (unsigned char *) $value; *$byte; $byte++)
     if ($reject) return 0;

@@ -1,0 +1,1405 @@
+#pragma once
+
+/*  autodiff-macros.x -- dual-number families for forward-mode differentiation
+
+    Copyright (c) 2026 Gary William Flake
+
+    `$ad.dual` gives one caller-declared struct the arithmetic of a dual
+    number: `value` carries the primal and `tangent` carries its derivative
+    along one direction. Every operation is an ordinary protocol row, so a
+    dual value uses `+ - * / <` and dotted calls such as `x.sin()` directly.
+
+    The scalar type is a hole. Instantiating the family over its own result
+    makes the next order of derivative a distinct C type, so a nested
+    derivative cannot confuse its perturbation with an outer one.
+
+    `$ad.forward()` and `$ad.reverse()` decorate a `double` function and emit
+    a sibling next to it: `f_dot` carries a tangent through the same
+    statements, and `f_grad` records the forward sweep on a typed array tape
+    and accumulates adjoints in reverse. Both read the typed AST, so `int`
+    control flow is copied and only `double` arithmetic is differentiated.
+    The transformations are meta functions. Their per-unit state is
+    `meta static`: one registry per mode records the functions differentiated
+    so far, so a later function can call their siblings, and a struct holds
+    the reverse derivation in progress.
+*/
+
+/** Generates the dual-number members of `$D` over the scalar type `$S`.
+
+    `$D` is a complete typedef `struct { $S value; $S tangent; }` declared
+    before the invocation. `$d` names the `Var` converters (`Var.$d`,
+    `$S.$d`) and `$tag` is the fresh Var tag. The remaining holes spell the
+    scalar primitives the family lifts: for `double` they are the C library
+    functions, and for a dual scalar they are that family's methods.
+*/
+macro Unit $ad.dual(
+  Type $D, Name $d, Literal $tag, Type $S,
+  Expr $sin, Expr $cos, Expr $exp, Expr $log, Expr $sqrt, Expr $tanh
+) {
+  Var $D.var($D value) {
+    $D *boxed = Scope.malloc(sizeof($D));
+    *boxed = value;
+    return Var.new($tag, boxed);
+  }
+
+  $D Var.$d(Var value) => *($D *) value.pointer();
+
+  $D $S.$d($S value) {
+    $D result = { value };
+    return result;
+  }
+
+  $D $D.add($D a, $D b) {
+    $D result = { a.value + b.value, a.tangent + b.tangent };
+    return result;
+  }
+
+  $D $D.sub($D a, $D b) {
+    $D result = { a.value - b.value, a.tangent - b.tangent };
+    return result;
+  }
+
+  $D $D.mul($D a, $D b) {
+    $D result = {
+      a.value * b.value, a.tangent * b.value + a.value * b.tangent
+    };
+    return result;
+  }
+
+  $D $D.div($D a, $D b) {
+    $D result = {
+      a.value / b.value,
+      (a.tangent * b.value - a.value * b.tangent) / (b.value * b.value)
+    };
+    return result;
+  }
+
+  $D $D.neg($D a) {
+    $D result = { -a.value, -a.tangent };
+    return result;
+  }
+
+  int $D.compare($D a, $D b) =>
+    a.value < b.value ? -1 : a.value > b.value;
+
+  $D $D.sin($D a) {
+    $D result = { $sin(a.value), $cos(a.value) * a.tangent };
+    return result;
+  }
+
+  $D $D.cos($D a) {
+    $D result = { $cos(a.value), -($sin(a.value) * a.tangent) };
+    return result;
+  }
+
+  $D $D.exp($D a) {
+    $S value = $exp(a.value);
+    $D result = { value, value * a.tangent };
+    return result;
+  }
+
+  $D $D.log($D a) {
+    $D result = { $log(a.value), a.tangent / a.value };
+    return result;
+  }
+
+  $D $D.sqrt($D a) {
+    $S value = $sqrt(a.value);
+    $D result = { value, a.tangent / (value + value) };
+    return result;
+  }
+
+  $D $D.tanh($D a) {
+    $S value = $tanh(a.value);
+    $D result = { value, a.tangent - a.tangent * value * value };
+    return result;
+  }
+
+  $D $D.fabs($D a) {
+    $S zero = 0.0;
+    $D result = { a.value, a.tangent };
+    if (a.value < zero) {
+      result.value = -a.value;
+      result.tangent = -a.tangent;
+    }
+    return result;
+  }
+
+  /* exp(b log a): defined for a positive base, unlike C `pow`. */
+  $D $D.pow($D a, $D b) {
+    $S logarithm = $log(a.value);
+    $S value = $exp(b.value * logarithm);
+    $D result = {
+      value,
+      value * (b.tangent * logarithm + b.value * a.tangent / a.value)
+    };
+    return result;
+  }
+
+  protocol Var($D);
+}
+
+$(def ad_tangent (lambda (. rest) 0))
+$(def ad_grad_slots (lambda (. rest) 0))
+$(def ad_adjoint (lambda (. rest) 0))
+$(def ad_loop (lambda (. rest) 0))
+$(def ad_rev_do (lambda (. rest) 0))
+$(def ad_rev_item (lambda (. rest) 0))
+$(def ad_fwd_for (lambda (. rest) 0))
+$(def ad_fwd_item (lambda (. rest) 0))
+$(def ad_declared_join (lambda (. rest) 0))
+
+meta void ad_fail(String message, Var form) {
+  x2c_diagnostic_fail("ad: " + message, %(${form.repr()}));
+}
+
+meta int ad_mutates(Var form) {
+  if (!form.is(<list>)) return 0;
+  List node = form;
+  match (node) {
+    case %(op ?op (expr ? ?) *rest):
+      if (%(= += -= *= /= %= ++ --).contains(op)) return 1;
+    case %(postfix ?op *rest):
+      if (%(++ --).contains(op)) return 1;
+  }
+  foreach (Var child, node) if (ad_mutates(child)) return 1;
+  return 0;
+}
+
+meta List ad_pure(List e) {
+  if (ad_mutates(e)) ad_fail("assignment inside an expression", e);
+  return e;
+}
+
+/* Syntax constructors shared by the forward and reverse transformations. */
+
+meta List ad_zero(void) => $!double{ 0.0 };
+
+meta List ad_one(void) => $!double{ 1.0 };
+
+meta int ad_is_zero(List e) => e.equal(ad_zero());
+
+meta int ad_is_one(List e) => e.equal(ad_one());
+
+meta List ad_raw(Var op, List a, List b) => %(expr () (op $op $a $b));
+
+meta List ad_neg(List a) {
+  if (ad_is_zero(a)) return a;
+  return %(expr () (op - $a));
+}
+
+meta List ad_add(List a, List b) {
+  if (ad_is_zero(a)) return b;
+  if (ad_is_zero(b)) return a;
+  return ad_raw(<+>, a, b);
+}
+
+meta List ad_sub(List a, List b) {
+  if (ad_is_zero(b)) return a;
+  if (ad_is_zero(a)) return ad_neg(b);
+  return ad_raw(<->, a, b);
+}
+
+meta List ad_mul(List a, List b) {
+  if (ad_is_zero(a)) return a;
+  if (ad_is_zero(b)) return b;
+  if (ad_is_one(a)) return b;
+  if (ad_is_one(b)) return a;
+  return ad_raw(<*>, a, b);
+}
+
+meta List ad_div(List a, List b) {
+  if (ad_is_zero(a)) return a;
+  if (ad_is_one(b)) return a;
+  return ad_raw(</>, a, b);
+}
+
+meta int ad_is_double(List e) => !!e.match(%(expr (double) ?));
+
+meta int ad_is_double_spec(List type) {
+  return type.equal(%(double)) || type.equal(%(const double));
+}
+
+meta String ad_dot(String name) => name + "_dot";
+
+meta List ad_id(Var name) {
+  return name.is(<list>) ? %(expr () (ident $name))
+                        : %(expr () (ident ($name)));
+}
+
+meta Var ad_unbind(Var form) {
+  if (!form.is(<list>)) return form;
+  List items = form;
+  if (!items) return items;
+  match (items) {
+    case %(binding ? ?name): return %($name);
+    case %(at ? ?node): return ad_unbind(node);
+  }
+  return items.map(%!(Var part) => ad_unbind(part));
+}
+
+meta Var ad_var_name(List e) {
+  match (e) {
+    case %(expr ? (ident (binding ? ?n))): return n;
+    case %(expr ? (ident (?n))):
+      if (n.is(<string>)) return n;
+  }
+  return %();
+}
+
+meta List ad_assign(String name, List value) {
+  return %(stmnt (expr () (op = ${ad_id(name)} $value)));
+}
+
+/* Math primitive derivatives. */
+
+meta List ad_lit(String text) =>
+  %(expr (double) (literal (double) $text));
+
+meta List ad_int(String text) => %(expr (int) (literal (int) $text));
+
+meta List ad_call(String name, List args) {
+  return %(expr () (call (expr () (ident ($name))) (args @args)));
+}
+
+meta List ad_call1(String name, List a) => ad_call(name, %($a));
+
+meta List ad_select(List test, List a, List b) {
+  return %(expr () (op ? $test $a $b));
+}
+
+meta List ad_less(List a, List b) => %(expr () (op < $a $b));
+
+meta List ad_less_eq(List a, List b) => %(expr () (op <= $a $b));
+
+meta List ad_square(List a) => ad_mul(a, a);
+
+meta List ad_recip(List e) => ad_div(ad_lit("1.0"), e);
+
+meta List ad_plus_one(List e) => ad_add(ad_lit("1.0"), e);
+
+meta List ad_minus_one(List e) => ad_sub(ad_lit("1.0"), e);
+
+meta List ad_sum_squares(List a) {
+  return ad_add(ad_square(a[0]), ad_square(a[1]));
+}
+
+/* Build only the requested partial of a known math primitive. Callers pass
+   its typed arguments and their zero-based position; an unknown name has no
+   primitive derivative. */
+meta List ad_partial(String name, int i, List a) {
+  List x = a[0];
+  List y = a[1];
+  if (name == "sin") return ad_call("cos", a);
+  if (name == "cos") return ad_neg(ad_call("sin", a));
+  if (name == "tan") return ad_recip(ad_square(ad_call("cos", a)));
+  if (name == "asin")
+    return ad_recip(ad_call1("sqrt", ad_minus_one(ad_square(x))));
+  if (name == "acos")
+    return ad_neg(ad_recip(ad_call1("sqrt", ad_minus_one(ad_square(x)))));
+  if (name == "atan") return ad_recip(ad_plus_one(ad_square(x)));
+  if (name == "atan2") return i == 0 ? ad_div(y, ad_sum_squares(a))
+                    : ad_neg(ad_div(x, ad_sum_squares(a)));
+  if (name == "sinh") return ad_call("cosh", a);
+  if (name == "cosh") return ad_call("sinh", a);
+  if (name == "tanh") return ad_minus_one(ad_square(ad_call("tanh", a)));
+  if (name == "asinh")
+    return ad_recip(ad_call1("sqrt", ad_plus_one(ad_square(x))));
+  if (name == "acosh")
+    return ad_recip(ad_call1("sqrt",
+      ad_sub(ad_square(x), ad_lit("1.0"))));
+  if (name == "atanh") return ad_recip(ad_minus_one(ad_square(x)));
+  if (name == "exp") return ad_call("exp", a);
+  if (name == "exp2")
+    return ad_mul(ad_call("exp2", a), ad_lit("0.6931471805599453"));
+  if (name == "expm1") return ad_call("exp", a);
+  if (name == "log") return ad_recip(x);
+  if (name == "log2")
+    return ad_recip(ad_mul(x, ad_lit("0.6931471805599453")));
+  if (name == "log10")
+    return ad_recip(ad_mul(x, ad_lit("2.302585092994046")));
+  if (name == "log1p") return ad_recip(ad_plus_one(x));
+  if (name == "sqrt") return ad_div(ad_lit("0.5"), ad_call("sqrt", a));
+  if (name == "cbrt")
+    return ad_recip(ad_mul(ad_lit("3.0"), ad_square(ad_call("cbrt", a))));
+  if (name == "hypot") return ad_div(i == 0 ? x : y, ad_call("hypot", a));
+  if (name == "fabs") return ad_select(ad_less(x, ad_lit("0.0")),
+                       ad_lit("-1.0"), ad_lit("1.0"));
+  if (name == "fmin") return i == 0
+               ? ad_select(ad_less_eq(x, y), ad_lit("1.0"), ad_lit("0.0"))
+               : ad_select(ad_less(y, x), ad_lit("1.0"), ad_lit("0.0"));
+  if (name == "fmax") return i == 0
+               ? ad_select(ad_less_eq(y, x), ad_lit("1.0"), ad_lit("0.0"))
+               : ad_select(ad_less(x, y), ad_lit("1.0"), ad_lit("0.0"));
+  if (name == "pow") return i == 0
+               ? ad_mul(y, ad_call("pow",
+                   %($x ${ad_sub(y, ad_lit("1.0"))})))
+               : ad_mul(ad_call("pow", a), ad_call1("log", x));
+  return %();
+}
+
+/* The functions each mode has differentiated in this unit, newest first. A
+   later function can call their siblings. */
+meta static List ad_forward_siblings = %();
+meta static List ad_reverse_siblings = %();
+
+/* Adds a decorated function's name to one mode's registry. */
+meta List ad_register(List registry, List fn) {
+  match (fn) {
+    case %(function (* double) (bind (binding ? ?name) ?) ?):
+      return %($name @registry);
+    case %(function ? (bind (binding ? ?) ?) ?):
+      ad_fail("function must return double", fn);
+  }
+  return registry;
+}
+
+/* The chain rule over a primitive's arguments. */
+meta List ad_call_tangent(
+  String name, List ftype, List args, List names) {
+  List unbound = ad_unbind(args);
+  List partial = ad_partial(name, 0, unbound);
+  if (partial) {
+    List total = ad_zero();
+    int i = 0;
+    foreach (List argument, args) {
+      List da = ad_tangent(argument, names);
+      if (!ad_is_zero(da)) {
+        List term = ad_select(%(expr () (op == $da ${ad_zero()})),
+          ad_zero(), ad_mul(da, ad_partial(name, i, unbound)));
+        total = ad_add(total, term);
+      }
+      i++;
+    }
+    return total;
+  }
+  if (name in ad_forward_siblings) {
+    List ptypes = ((List) ftype[0])[1];
+    Array out = $auto([]);
+    foreach (List argument, args) {
+      out.push(ad_unbind(argument));
+      if (((List) ptypes.car()).equal(%(double)))
+        out.push(ad_tangent(argument, names));
+      ptypes = ptypes.cdr();
+    }
+    return ad_call(ad_dot(name), out);
+  }
+  ad_fail("call to a function without a derivative", name);
+}
+
+/* The tangent of an expression, given the names being differentiated. */
+meta List ad_tangent(List e, List names) {
+  if (!ad_is_double(e)) return ad_zero();
+  match (e) {
+    case %(expr ? (literal ? ?)): return ad_zero();
+    case %(expr ? (ident ?)): {
+      Var n = ad_var_name(e);
+      if (n)
+        if (n in names) return ad_id(ad_dot(n));
+      return ad_zero();
+    }
+    case %(expr ? (parens ?a)): return ad_tangent(a, names);
+    case %(expr ? (cast ? ?a)): return ad_tangent(a, names);
+    case %(expr ? (op - ?a)):   return ad_neg(ad_tangent(a, names));
+    case %(expr ? (op + ?a)):   return ad_tangent(a, names);
+    case %(expr ? (call (expr ?ft (ident (binding ? ?fname))) (args *cargs))):
+      return ad_call_tangent(fname, ft, cargs, names);
+    case %(expr ? (op ?o ?c ?a ?b)): {
+      if (o != <"?">) ad_fail("unsupported expression", e);
+      return ad_select(ad_unbind(ad_pure(c)),
+        ad_tangent(a, names), ad_tangent(b, names));
+    }
+    case %(expr ? (op ?o ?a ?b)): {
+      List da = ad_tangent(a, names);
+      List db = ad_tangent(b, names);
+      List ua = ad_unbind(a);
+      List ub = ad_unbind(b);
+      if (o == <+>) return ad_add(da, db);
+      if (o == <->) return ad_sub(da, db);
+      if (o == <*>) return ad_add(ad_mul(da, ub), ad_mul(ua, db));
+      if (o == </>)
+        return ad_div(ad_sub(ad_mul(da, ub), ad_mul(ua, db)),
+                      ad_mul(ub, ub));
+      ad_fail("unsupported operator", e);
+    }
+  }
+  ad_fail("unsupported expression", e);
+}
+
+/* An assignment, compound assignment, or step, normalised to (name rhs). */
+meta List ad_step(List e, Var op, List target) {
+  Var n = ad_var_name(target);
+  if (!n) return %();
+  List one = ad_is_double(target) ? ad_lit("1.0") : ad_int("1");
+  return %($n (expr ${e[1]} (op $op $target $one)));
+}
+
+meta List ad_update(List e) {
+  match (e) {
+    case %(expr ? (op ++ ?target)):      return ad_step(e, <+>, target);
+    case %(expr ? (op -- ?target)):      return ad_step(e, <->, target);
+    case %(expr ? (postfix ++ ?target)): return ad_step(e, <+>, target);
+    case %(expr ? (postfix -- ?target)): return ad_step(e, <->, target);
+    case %(expr ? (op = ?target ?rhs)): {
+      Var n = ad_var_name(target);
+      if (!n) return %();
+      return %($n $rhs);
+    }
+    case %(expr ?t (op += ?target ?rhs)): {
+      Var n = ad_var_name(target);
+      if (!n) return %();
+      return %($n (expr $t (op + $target $rhs)));
+    }
+    case %(expr ?t (op -= ?target ?rhs)): {
+      Var n = ad_var_name(target);
+      if (!n) return %();
+      return %($n (expr $t (op - $target $rhs)));
+    }
+    case %(expr ?t (op ?op ?target ?rhs)): {
+      Var n = ad_var_name(target);
+      if (!n) return %();
+      if (op == <"*=">) return %($n (expr $t (op * $target $rhs)));
+      if (op == <"/=">) return %($n (expr $t (op / $target $rhs)));
+    }
+  }
+  return %();
+}
+
+meta List ad_fwd_decl(List declarator, List names) {
+  match (declarator) {
+    case %(op = (bind (binding ? ?name) ()) ?init):
+      return %(declare (double)
+                (bindings (op = (bind (${ad_dot(name)}) ())
+                           ${ad_tangent(ad_pure(init), names)})));
+    case %(bind (binding ? ?name) ()):
+      return %(declare (double)
+                (bindings (op = (bind (${ad_dot(name)}) ()) ${ad_zero()})));
+  }
+  ad_fail("unsupported declarator", declarator);
+}
+
+meta List ad_fwd_update(List s, List update, List names) {
+  if (!update) return %(${ad_unbind(ad_pure(s))});
+  Var n = update[0];
+  ad_pure(update[1]);
+  if (!names.contains(n)) return %(${ad_unbind(s)});
+  List tangent = ad_assign(ad_dot(n), ad_tangent(update[1], names));
+  return %($tangent ${ad_unbind(s)});
+}
+
+/* One source item can contribute several generated statements. */
+meta List ad_fwd_items(List items, List names) {
+  List out = %();
+  foreach (List item, items) out = %(@out @{ad_fwd_item(item, names)});
+  return out;
+}
+
+meta List ad_fwd_body(List s, List names) {
+  match (s) {
+    case %(block *items):
+      return %(block @{ad_fwd_items(items, names)});
+  }
+  return %(block @{ad_fwd_item(s, names)});
+}
+
+meta List ad_fwd_item(List s, List names) {
+  match (s) {
+    case %(at ? ?node): return ad_fwd_item(node, names);
+    case %(declare ?type (bindings *decls)): {
+      List out = %(${ad_unbind(s)});
+      if (!ad_is_double_spec(type)) { ad_pure(s); return out; }
+      foreach (List d, decls)
+        out = %(@out ${ad_fwd_decl(d, names)});
+      return out;
+    }
+    case %(stmnt ?e): return ad_fwd_update(s, ad_update(e), names);
+    case %(if ?c ?then):
+      return %((if ${ad_unbind(ad_pure(c))}
+        ${ad_fwd_body(then, names)}));
+    case %(if ?c ?then ?alt):
+      return %((if ${ad_unbind(ad_pure(c))}
+        ${ad_fwd_body(then, names)}
+        ${ad_fwd_body(alt, names)}));
+    case %(while ?c ?body):
+      return %((while ${ad_unbind(ad_pure(c))}
+        ${ad_fwd_body(body, names)}));
+    case %(do ?body ?c):
+      return %((do ${ad_fwd_body(body, names)}
+        ${ad_unbind(ad_pure(c))}));
+    case %(for ?init ?c ?step ?body):
+      return ad_fwd_for(init, c, step, body, names);
+    case %(block *items):
+      return %((block @{ad_fwd_items(items, names)}));
+    case %(return (double) ?e):
+      return %((return (double) ${ad_tangent(ad_pure(e), names)}));
+    case %(return ? ?): ad_fail("return must produce double", s);
+    case %(empty): return %();
+    case %(break): return %($s);
+    case %(continue): return %($s);
+  }
+  ad_fail("unsupported statement", s);
+}
+
+/* A declarator's name, for the declared-double scan. */
+meta List ad_declarator_names(List decls) {
+  Array names = $auto([]);
+  foreach (List d, decls) {
+    match (d) {
+      case %(op = (bind (binding ? ?n) ()) ?): names.push(n);
+      case %(bind (binding ? ?n) ()): names.push(n);
+    }
+  }
+  return names;
+}
+
+/* Every plain double declaration in the body is differentiated too; any
+   other double identifier is a constant. This pair walks the whole
+   tree, so it stays recursive; concatenating once per node, which is what a
+   loop would do here, costs more than the recursion it replaces. */
+meta List ad_declared_doubles(Var form) {
+  if (!form.is(<list>)) return %();
+  List items = form;
+  if (!items) return %();
+  match (items) {
+    case %(declare ?type (bindings *decls)): {
+      if (ad_is_double_spec(type)) return ad_declarator_names(decls);
+      return %();
+    }
+    case %(decl ?type (bindings *decls)): {
+      if (ad_is_double_spec(type)) return ad_declarator_names(decls);
+      return %();
+    }
+  }
+  return ad_declared_join(items);
+}
+
+meta List ad_declared_join(List items) {
+  if (!items) return %();
+  List head = ad_declared_doubles(items.car());
+  List tail = ad_declared_join(items.cdr());
+  return %(@head @tail);
+}
+
+/* Every double parameter is a name to differentiate. */
+meta List ad_param_doubles(List params) {
+  Array names = $auto([]);
+  foreach (List param, params) {
+    match (param) {
+      case %(param (double) (bind (binding ? ?n) ())): names.push(n);
+    }
+  }
+  return names;
+}
+
+/* A double parameter is followed by its tangent. */
+meta List ad_fwd_params(List params) {
+  Array out = $auto([]);
+  foreach (List param, params) {
+    match (param) {
+      case %(param (double) (bind (binding ? ?n) ())): {
+        out.push($!Param{ double ${x2c_ident(n)} });
+        out.push($!Param{ double ${x2c_ident(ad_dot(n))} });
+        continue;
+      }
+    }
+    out.push(ad_unbind(param));
+  }
+  return out;
+}
+
+meta List ad_forward(List fn) {
+  ad_forward_siblings = ad_register(ad_forward_siblings, fn);
+  match (fn) {
+    case %(function ?spec (bind (binding ? ?name)
+                            ((fnmod (params *params)))) ?body): {
+      List params_doubles = ad_param_doubles(params);
+      List body_doubles = ad_declared_doubles(body);
+      List names = %(@params_doubles @body_doubles);
+      Type result = spec;
+      String dot = ad_dot(name);
+      List tangents = ad_fwd_params(params);
+      List items = ad_fwd_body(body, names).cdr();
+      List one = $!Unit{ $result $dot($tangents...) { $items... } };
+      return %($one);
+    }
+  }
+  ad_fail("expected a function definition", fn);
+}
+
+
+/* --- reverse mode ------------------------------------------------------- */
+
+/* The reverse derivation in progress. The gradient template's helpers
+   expand after `ad_reverse_with` returns, so `ad_reverse_prepare` starts
+   each derivation and `ad_reverse_finish` completes it. */
+meta static struct AdState {
+  List checkpoint;  /* the checkpoint block size, or empty */
+  List locals;      /* `(name type)` for each local, newest first */
+  int counter;      /* numbers fresh names and exit codes */
+  List loop_step;   /* the innermost loop's step, which `continue` runs */
+  Var function;     /* the function's name, for diagnostics */
+  Var tape, result, seed, code, reverse;  /* the template's names */
+  List returns, inputs;  /* from the forward sweep, for the reverse */
+} ad_state = { 0 };
+
+meta String ad_bar(Var name) => name + "_bar";
+
+meta String ad_grad(Var name) => name + "_grad";
+
+meta List ad_stmnt(List e) => %(stmnt $e);
+
+meta List ad_accum(Var name, List value) {
+  return ad_stmnt(%(expr () (op += ${ad_id(name)} $value)));
+}
+
+meta List ad_set(Var name, List value) {
+  return ad_stmnt(%(expr () (op = ${ad_id(name)} $value)));
+}
+
+meta List ad_cast(List type, List e) {
+  return %(expr () (cast (decl $type (bindings (bind () ()))) $e));
+}
+
+macro Stmt $ad.local(Type $type, Name $name, Expr $initial) {
+  $type $name = $initial;
+}
+
+meta List ad_zero_of(List type) {
+  if (ad_is_double_spec(type)) return ad_zero();
+  return ad_int("0");
+}
+
+meta Var ad_local(List type, Var name) {
+  foreach (List prior, ad_state.locals)
+    if (prior[0] == name) ad_fail("duplicate local name", name);
+  List entry = %($name $type);
+  ad_state.locals = %($entry @{ad_state.locals});
+  return name;
+}
+
+meta Var ad_fresh(String stem, List type) {
+  ad_state.counter += 1;
+  return ad_local(type, %"$stem${ad_state.counter}");
+}
+
+meta String ad_code(void) {
+  ad_state.counter += 1;
+  return %"${ad_state.counter}.0";
+}
+
+meta List ad_local_type(Var name) {
+  foreach (List entry, ad_state.locals)
+    if (entry[0] == name) return entry[1];
+  ad_fail("assignment to an undeclared name", name);
+}
+
+meta List ad_push(List e) {
+  return ad_stmnt(ad_call("ArrayDbl_push", %(${ad_id(ad_state.tape)} $e)));
+}
+
+meta List ad_pop(void) {
+  return ad_call("ArrayDbl_take_last", %(${ad_id(ad_state.tape)}));
+}
+
+meta List ad_restore(Var name, List type) {
+  if (ad_is_double_spec(type)) return ad_set(name, ad_pop());
+  return ad_set(name, ad_cast(type, ad_pop()));
+}
+
+/* An item's forward statements, its reverse statements, and one entry per
+   exit inside it. */
+meta List ad_triple(List fwd, List rev, List exits) {
+  return %($fwd $rev $exits);
+}
+
+meta List ad_none(void) => %(() () ());
+
+meta List ad_fwd_of(List t) => t[0];
+
+meta List ad_rev_of(List t) => t[1];
+
+meta List ad_exits_of(List t) => t[2];
+
+meta List ad_exit(Var code, Var kind, List pruned) {
+  return %($code $kind $pruned);
+}
+
+meta Var ad_exit_code(List x) => x[0];
+
+meta Var ad_exit_kind(List x) => x[1];
+
+meta List ad_exit_pruned(List x) => x[2];
+
+meta List ad_with_pruned(List x, List pruned) {
+  return ad_exit(ad_exit_code(x), ad_exit_kind(x), pruned);
+}
+
+/* An exit inside item i has run items 1..i-1 completely, so its pruned
+   reverse gains everything already reversed. */
+meta List ad_move_exits(List exits, List rev) {
+  Array out = $auto([]);
+  foreach (List x, exits)
+    out.push(ad_with_pruned(x, %(@{ad_exit_pruned(x)} @rev)));
+  return out;
+}
+
+meta List ad_sequence(List triples) {
+  List fwd = %();
+  List rev = %();
+  List exits = %();
+  foreach (List t, triples) {
+    exits = %(@exits @{ad_move_exits(ad_exits_of(t), rev)});
+    fwd = %(@fwd @{ad_fwd_of(t)});
+    rev = %(@{ad_rev_of(t)} @rev);
+  }
+  return ad_triple(fwd, rev, exits);
+}
+
+/* --- adjoints ----------------------------------------------------------- */
+
+meta List ad_call_adjoint(
+  String name, List ftype, List args, List seed, List names) {
+  List unbound = ad_unbind(args);
+  if (ad_partial(name, 0, unbound)) {
+    List out = %();
+    int i = 0;
+    foreach (List argument, args) {
+      List partial = ad_partial(name, i, unbound);
+      out = %(@out @{ad_adjoint(argument,
+        ad_mul(seed, partial), names)});
+      i++;
+    }
+    return out;
+  }
+  if (name in ad_reverse_siblings) {
+    List ptypes = ((List) ftype[0])[1];
+    List slots = ad_grad_slots(ptypes, args);
+    Var value = ad_fresh("_ad_call", %(double));
+    Array addresses = $auto([]);
+    foreach (List slot, slots)
+      addresses.push(%(expr () (op & ${ad_id(slot[0])})));
+    List out = %(${ad_set(value,
+      ad_call(ad_grad(name), %(@unbound @addresses)))});
+    foreach (List slot, slots)
+      out = %(@out @{ad_adjoint(slot[1],
+        ad_mul(seed, ad_id(slot[0])), names)});
+    return out;
+  }
+  ad_fail("call to a function without a gradient", name);
+}
+
+meta List ad_binary_adjoint(
+  Var o, List x, List y, List seed, List names) {
+  List a = ad_unbind(x);
+  List b = ad_unbind(y);
+  if (o == <+>) {
+    List da = ad_adjoint(x, seed, names);
+    List db = ad_adjoint(y, seed, names);
+    return %(@da @db);
+  }
+  if (o == <->) {
+    List da = ad_adjoint(x, seed, names);
+    List db = ad_adjoint(y, ad_neg(seed), names);
+    return %(@da @db);
+  }
+  if (o == <*>) {
+    List da = ad_adjoint(x, ad_mul(seed, b), names);
+    List db = ad_adjoint(y, ad_mul(seed, a), names);
+    return %(@da @db);
+  }
+  if (o == </>) {
+    List da = ad_adjoint(x, ad_div(seed, b), names);
+    List db =
+      ad_adjoint(y, ad_neg(ad_div(ad_mul(seed, a), ad_mul(b, b))), names);
+    return %(@da @db);
+  }
+  ad_fail("unsupported operator", o);
+}
+
+/* The adjoint statements for `e` scaled by `seed`. */
+meta List ad_adjoint(List e, List seed, List names) {
+  if (!ad_is_double(e)) return %();
+  match (e) {
+    case %(expr ? (literal ? ?)): return %();
+    case %(expr ? (ident ?)): {
+      Var n = ad_var_name(e);
+      if (n)
+        if (n in names) return %(${ad_accum(ad_bar(n), seed)});
+      return %();
+    }
+    case %(expr ? (parens ?a)): return ad_adjoint(a, seed, names);
+    case %(expr ? (cast ? ?a)): return ad_adjoint(a, seed, names);
+    case %(expr ? (op - ?a)):
+      return ad_adjoint(a, ad_neg(seed), names);
+    case %(expr ? (op + ?a)):   return ad_adjoint(a, seed, names);
+    case %(expr ? (op ?o ?c ?a ?b)): {
+      if (o != <"?">) ad_fail("unsupported expression", e);
+      List then = ad_adjoint(a, seed, names);
+      List alt = ad_adjoint(b, seed, names);
+      return %((if ${ad_unbind(ad_pure(c))} (block @then) (block @alt)));
+    }
+    case %(expr ? (call (expr ?ft (ident (binding ? ?fname))) (args *cargs))):
+      return ad_call_adjoint(fname, ft, cargs, seed, names);
+    case %(expr ? (op ?o ?a ?b)):
+      return ad_binary_adjoint(o, a, b, seed, names);
+  }
+  ad_fail("unsupported expression", e);
+}
+
+/* --- statements --------------------------------------------------------- */
+
+meta List ad_rev_assign(Var name, List rhs, List names) {
+  List type = ad_local_type(name);
+  List fwd = %(${ad_push(ad_id(name))}
+    ${ad_set(name, ad_unbind(ad_pure(rhs)))});
+  if (ad_is_double_spec(type))
+    if (name in names) {
+      List back = ad_adjoint(rhs, ad_id(ad_state.seed), names);
+      return ad_triple(fwd,
+        %(${ad_restore(name, type)}
+          ${ad_set(ad_state.seed, ad_id(ad_bar(name)))}
+          ${ad_set(ad_bar(name), ad_zero())} @back), %());
+    }
+  return ad_triple(fwd, %(${ad_restore(name, type)}), %());
+}
+
+meta List ad_rev_decl(List type, List d, List names) {
+  if (<const> in type)
+    ad_fail("const locals are not supported in reverse mode", d);
+  match (d) {
+    case %(op = (bind (binding ? ?n) ()) ?init): {
+      ad_local(type, n);
+      return ad_rev_assign(n, init, names);
+    }
+    case %(bind (binding ? ?n) ()): {
+      ad_local(type, n);
+      return ad_none();
+    }
+  }
+  ad_fail("unsupported declarator", d);
+}
+
+meta List ad_rev_decls(List type, List decls, List names) {
+  Array out = $auto([]);
+  foreach (List d, decls) out.push(ad_rev_decl(type, d, names));
+  return out;
+}
+
+meta List ad_rev_items(List items, List names) {
+  Array out = $auto([]);
+  foreach (List item, items) out.push(ad_rev_item(item, names));
+  return out;
+}
+
+meta List ad_rev_block(List items, List names) {
+  return ad_sequence(ad_rev_items(items, names));
+}
+
+meta List ad_rev_body(List s, List names) {
+  match (s) {
+    case %(block *items): return ad_rev_block(items, names);
+  }
+  return ad_rev_item(s, names);
+}
+
+/* A branch pushes its flag after the body, so a completed `if` pops it
+   first. */
+meta List ad_rev_if(List c, List then, List alt, List names) {
+  List t = ad_rev_body(then, names);
+  List e = alt ? ad_rev_body(alt, names) : ad_none();
+  List taken = %(@{ad_fwd_of(t)} ${ad_push(ad_lit("1.0"))});
+  List other = %(@{ad_fwd_of(e)} ${ad_push(ad_lit("0.0"))});
+  List back = %((if (expr () (op != ${ad_pop()} ${ad_lit("0.0")}))
+                    (block @{ad_rev_of(t)}) (block @{ad_rev_of(e)})));
+  return ad_triple(
+    %((if ${ad_unbind(ad_pure(c))} (block @taken) (block @other))), back,
+    %(@{ad_exits_of(t)} @{ad_exits_of(e)}));
+}
+
+meta List ad_code_is(Var code) {
+  return %(expr () (op == ${ad_id(ad_state.code)} ${ad_lit(code)}));
+}
+
+/* The dispatch after popping one region's exit code. */
+meta List ad_dispatch(List normal, List exits) {
+  List chain = %(block @normal);
+  foreach (List x, exits.reverse())
+    chain = %(if ${ad_code_is(ad_exit_code(x))}
+                 (block @{ad_exit_pruned(x)}) $chain);
+  return chain;
+}
+
+meta int ad_is_loop_exit(List x) {
+  Var kind = ad_exit_kind(x);
+  return kind == <break> || kind == <continue>;
+}
+
+meta List ad_loop_exits(List exits, int want) {
+  Array out = $auto([]);
+  foreach (List x, exits)
+    if (ad_is_loop_exit(x) == want) out.push(x);
+  return out;
+}
+
+meta List ad_return_exits(List exits) {
+  Array out = $auto([]);
+  foreach (List x, exits)
+    if (ad_exit_kind(x) == <return>) out.push(x);
+  return out;
+}
+
+meta List ad_count(Var n, Var op) {
+  return ad_set(n, ad_raw(op, ad_id(n), ad_int("1")));
+}
+
+meta List ad_countdown(Var n, List dispatch) {
+  return %(while (expr () (op > ${ad_id(n)} ${ad_int("0")}))
+                 (block @dispatch));
+}
+
+/* `continue` also runs the step, so its pruned reverse begins with the
+   step's reverse. */
+meta List ad_pruned_exit(List x, List s) {
+  if (ad_exit_kind(x) != <continue>) return x;
+  return ad_with_pruned(x, %(@{ad_rev_of(s)} @{ad_exit_pruned(x)}));
+}
+
+/* One iteration: count, body, step, then the exit code. */
+meta List ad_pruned_exits(List exits, List s) {
+  Array out = $auto([]);
+  foreach (List x, exits) out.push(ad_pruned_exit(x, s));
+  return out;
+}
+
+meta List ad_loop_parts(List c, List body, List step, List names) {
+  List saved = ad_state.loop_step;
+  ad_state.loop_step = %();
+  List s = step ? ad_rev_item(step, names) : ad_none();
+  ad_state.loop_step = ad_fwd_of(s);
+  List b = ad_rev_body(body, names);
+  ad_state.loop_step = saved;
+  Var n = ad_fresh("_ad_trip", %(int));
+  List own = ad_loop_exits(ad_exits_of(b), 1);
+  List through = ad_loop_exits(ad_exits_of(b), 0);
+  List iteration = %(${ad_count(n, <+>)} @{ad_fwd_of(b)} @{ad_fwd_of(s)}
+                     ${ad_push(ad_lit("0.0"))});
+  List pruned = ad_pruned_exits(own, s);
+  List normal = %(@{ad_rev_of(s)} @{ad_rev_of(b)});
+  List dispatch = %(${ad_set(ad_state.code, ad_pop())}
+                    ${ad_dispatch(normal, pruned)} ${ad_count(n, <->)});
+  return %($n $iteration $dispatch $through ${ad_unbind(ad_pure(c))});
+}
+
+meta List ad_through_exits(List exits, Var n, List dispatch) {
+  Array out = $auto([]);
+  foreach (List x, exits)
+    out.push(ad_with_pruned(x, %(@{ad_exit_pruned(x)} ${ad_count(n, <->)}
+                                 ${ad_countdown(n, dispatch)})));
+  return out;
+}
+
+meta List ad_rev_loop(
+  List init, List c, List step, List body, List names) {
+  List head = init ? ad_rev_item(init, names) : ad_none();
+  (Var n, List iteration, List dispatch, List through, List condition) =
+    ad_loop_parts(c, body, step, names);
+  List fwd = %(${ad_set(n, ad_int("0"))}
+               (while $condition (block @iteration)) ${ad_push(ad_id(n))});
+  List rev = %(${ad_restore(n, %(int))} ${ad_countdown(n, dispatch)});
+  List exits = ad_through_exits(through, n, dispatch);
+  List loop = ad_triple(fwd, rev, exits);
+  return ad_sequence(%($head $loop));
+}
+
+meta List ad_rev_item(List s, List names) {
+  match (s) {
+    case %(at ? ?node): return ad_rev_item(node, names);
+    case %(declare ?type (bindings *decls)):
+      return ad_sequence(ad_rev_decls(type, %(@decls), names));
+    case %(decl ?type (bindings *decls)):
+      return ad_sequence(ad_rev_decls(type, %(@decls), names));
+    case %(stmnt ?e): {
+      List update = ad_update(e);
+      if (update)
+        return ad_rev_assign(update[0], update[1], names);
+      return ad_triple(%(${ad_unbind(ad_pure(s))}), %(), %());
+    }
+    case %(expr ? ?):         return ad_rev_item(%(stmnt $s), names);
+    case %(if ?c ?then):      return ad_rev_if(c, then, %(), names);
+    case %(if ?c ?then ?alt): return ad_rev_if(c, then, alt, names);
+    case %(while ?c ?body):
+      return ad_loop(%(), c, %(), body, names);
+    case %(do ?body ?c): return ad_rev_do(body, c, names);
+    case %(for ?init ?c ?step ?body):
+      return ad_loop(init, c, step, body, names);
+    case %(block *items):     return ad_rev_block(items, names);
+    case %(break): {
+      String code = ad_code();
+      return ad_triple(%(${ad_push(ad_lit(code))} $s), %(),
+                       %(${ad_exit(code, <break>, %())}));
+    }
+    case %(continue): {
+      String code = ad_code();
+      List step = ad_state.loop_step;
+      return ad_triple(%(@step ${ad_push(ad_lit(code))} $s), %(),
+                       %(${ad_exit(code, <continue>, %())}));
+    }
+    case %(return (double) ?e): {
+      String code = ad_code();
+      List back = ad_adjoint(e, ad_lit("1.0"), names);
+      return ad_triple(
+        %(${ad_set(ad_state.result, ad_unbind(ad_pure(e)))}
+          ${ad_push(ad_lit(code))}
+          (goto ${ad_state.reverse})), %(),
+        %(${ad_exit(code, <return>, back)}));
+    }
+    case %(return ? ?): ad_fail("return must produce double", s);
+    case %(empty): return ad_none();
+  }
+  ad_fail("unsupported statement in reverse mode", s);
+}
+
+/* --- the emitted sibling ------------------------------------------------ */
+
+meta List ad_grad_slots_params(List params) {
+  Array slots = $auto([]);
+  foreach (List param, params) {
+    match (param) {
+      case %(param (double) (bind (binding ? ?n) ())):
+        slots.push($!Param{ double *${x2c_ident(ad_grad(n))} });
+    }
+  }
+  return slots;
+}
+
+meta List ad_grad_params(List params) {
+  List unbound = ad_unbind(params);
+  List slots = ad_grad_slots_params(params);
+  return %(@unbound @slots);
+}
+
+meta List ad_param_locals(List params) {
+  Array locals = $auto([]);
+  foreach (List param, params) {
+    match (param) {
+      case %(param ?type (bind (binding ? ?n) ())): {
+        locals.push(%($n $type));
+        continue;
+      }
+    }
+    ad_fail("unsupported parameter", param);
+  }
+  return locals;
+}
+
+meta List ad_param_names(List params) {
+  Array names = $auto([]);
+  foreach (List param, params) {
+    match (param) {
+      case %(param ? (bind (binding ? ?n) ?)): {
+        names.push(n);
+        continue;
+      }
+    }
+    ad_fail("unsupported parameter", param);
+  }
+  return names;
+}
+
+macro Stmt $ad.write_slot(Name $gradient, Name $value) {
+  *$gradient = $value;
+}
+
+meta List ad_hoisted(List locals, List params) {
+  Array out = $auto([]);
+  foreach (List entry, locals)
+    if (!(entry[0] in params)) out.push(entry);
+  return out;
+}
+
+meta List ad_declare_locals(List locals) {
+  Array out = $auto([]);
+  foreach (List entry, locals) {
+    List type = entry[1];
+    out.push($ad.local(type, entry[0], ad_zero_of(type)));
+  }
+  return out;
+}
+
+meta List ad_declare_bars(List names) {
+  Array out = $auto([]);
+  foreach (Var name, names)
+    out.push($ad.local(%(double), ad_bar(name), ad_zero()));
+  return out;
+}
+
+meta List ad_write_slots(List inputs) {
+  Array out = $auto([]);
+  foreach (Var name, inputs)
+    out.push($ad.write_slot(ad_grad(name), ad_bar(name)));
+  return out;
+}
+
+meta List ad_reverse_prepare(
+  List params, List items, List checkpoint, Var name, Var tape, Var result,
+  Var seed, Var code, Var reverse) {
+  ad_state.checkpoint = checkpoint;
+  ad_state.locals = ad_param_locals(params);
+  ad_state.counter = 0;
+  ad_state.loop_step = %();
+  ad_state.function = name;
+  ad_state.tape = tape;
+  ad_state.result = result;
+  ad_state.seed = seed;
+  ad_state.code = code;
+  ad_state.reverse = reverse;
+  List inputs = ad_param_doubles(params);
+  List declared = ad_declared_doubles(%(block @items));
+  List names = %(@inputs @declared);
+  List sweep = ad_rev_block(items, names);
+  List returns = ad_return_exits(ad_exits_of(sweep));
+  foreach (List exit, ad_exits_of(sweep))
+    if (ad_exit_kind(exit) != <return>)
+      ad_fail("break or continue outside a loop", ad_state.function);
+  if (!returns) ad_fail("function has no return", ad_state.function);
+  ad_state.returns = returns;
+  ad_state.inputs = inputs;
+  List hoisted =
+    ad_hoisted(ad_state.locals.reverse(), ad_param_names(params));
+  List decls = ad_declare_locals(hoisted);
+  List bars = ad_declare_bars(names);
+  return %(@decls @bars @{ad_fwd_of(sweep)});
+}
+
+meta List ad_reverse_finish(void) {
+  List writes = ad_write_slots(ad_state.inputs);
+  return %(${ad_dispatch(%(), ad_state.returns)} @writes);
+}
+
+macro Unit $ad.gradient(
+  Type $spec, Name $name, Type $tape_type, Name $tape_new,
+  Expr $params, Expr $items, Expr $checkpoint, Name $function
+) {
+  using $tape, $result, $seed, $code, $reverse;
+  $spec $name($ad_grad_params($params)...) {
+    $tape_type $tape = $tape_new();
+    double $result = 0.0, $seed = 0.0, $code = 0.0;
+    $ad_reverse_prepare($params, $items, $checkpoint, $function,
+                        $tape, $result, $seed, $code, $reverse)...
+    $reverse:
+    $code = $tape.take_last();
+    $ad_reverse_finish()...
+    $tape.free();
+    return $result;
+  }
+}
+
+meta List ad_reverse_with(List fn, List checkpoint) {
+  ad_reverse_siblings = ad_register(ad_reverse_siblings, fn);
+  match (fn) {
+    case %(function ?spec (bind (binding ? ?name) ((fnmod (params *params))))
+                    (block *items)): {
+      List one = $ad.gradient(spec, ad_grad(name), %("ArrayDbl"),
+                              "ArrayDbl_new", params, items, checkpoint,
+                              name);
+      return %($one);
+    }
+  }
+  ad_fail("expected a function definition", fn);
+}
+
+
+meta List ad_fwd_clause(List e, List names) {
+  if (!e) return e;
+  match (e) {
+    case %(expr ? (commas *items)): {
+      Array out = $auto([]);
+      foreach (List item, items) out.push(ad_fwd_clause(item, names));
+      return %(expr () (commas @out));
+    }
+  }
+  List updates = ad_fwd_update(ad_stmnt(e), ad_update(e), names);
+  if (!updates.cdr()) return ((List) updates.car())[1];
+  Array out = $auto([]);
+  foreach (List update, updates) out.push(update[1]);
+  return %(expr () (commas @out));
+}
+
+meta List ad_fwd_for(
+  List init, List c, List step, List body, List names) {
+  List condition = ad_unbind(ad_pure(c));
+  List tail = ad_fwd_clause(step, names);
+  List inside = ad_fwd_body(body, names);
+  match (init) {
+    case %(decl ?type (bindings *decls)): {
+      if (ad_is_double_spec(type))
+        return %((block
+          @{ad_fwd_item(%(declare $type (bindings @decls)), names)}
+          (for () $condition $tail $inside)));
+      return %((for ${ad_unbind(init)} $condition $tail $inside));
+    }
+  }
+  return %((for ${ad_fwd_clause(init, names)}
+    $condition $tail $inside));
+}
+
+
+meta List ad_grad_slots(List ptypes, List args) {
+  if (!args) return %();
+  List rest = ad_grad_slots(ptypes.cdr(), args.cdr());
+  if (((List) ptypes.car()).equal(%(double))) {
+    Var slot = ad_fresh("_ad_partial", %(double));
+    return %(($slot ${args.car()}) @rest);
+  }
+  return rest;
+}
+
+meta List ad_assigned(Var form, List acc) {
+  if (!form.is(<list>)) return acc;
+  List node = form;
+  match (node) {
+    case %(expr ? ?): {
+      List update = ad_update(node);
+      if (update && !(update.car() in acc))
+        return ad_assigned(node.cdr(), %(${update.car()} @acc));
+    }
+  }
+  foreach (Var child, node) acc = ad_assigned(child, acc);
+  return acc;
+}
+
+meta List ad_declared_names(Var form, List acc) {
+  if (!form.is(<list>)) return acc;
+  List node = form;
+  match (node) {
+    case %(declare ? (bindings *decls)):
+      return %(@{ad_declarator_names(decls)} @acc);
+    case %(decl ? (bindings *decls)):
+      return %(@{ad_declarator_names(decls)} @acc);
+  }
+  foreach (Var child, node) acc = ad_declared_names(child, acc);
+  return acc;
+}
+
+meta List ad_items(List body) {
+  match (body) { case %(block *items): return items; }
+  return %($body);
+}
+
+meta List ad_rev_checkpoint(
+  List init, List c, List step, List body, List names) {
+  List head = init ? ad_rev_item(init, names) : ad_none();
+  (Var n, List iteration, List dispatch, List through, List condition) =
+    ad_loop_parts(c, body, step, names);
+  List inner = ad_declared_names(%($body $step), %());
+  Array changed = $auto([]);
+  foreach (Var name, ad_assigned(%($body $step), %()))
+    if (!(name in inner)) changed.push(name);
+  Var total = ad_fresh("_ad_total", %(int));
+  Var blocks = ad_fresh("_ad_blocks", %(int));
+  Var remaining = ad_fresh("_ad_remaining", %(int));
+  Var replay = ad_fresh("_ad_replay", %(int));
+  List size = ad_state.checkpoint;
+  Array snapshot = $auto([]);
+  List recover = %();
+  foreach (Var name, changed) {
+    snapshot.push(ad_push(ad_id(name)));
+    recover = %(${ad_restore(name, ad_local_type(name))} @recover);
+  }
+  if (through) ad_fail("a checkpointed loop cannot contain return", body);
+  List fwd = %(${ad_set(total, ad_int("0"))}
+    ${ad_set(blocks, ad_int("0"))}
+    (for () $condition ${ad_unbind(step)}
+      (block
+        (if (expr () (op == (expr () (op % ${ad_id(total)} $size))
+                           ${ad_int("0")}))
+          (block @snapshot ${ad_count(blocks, <+>)}))
+        ${ad_count(total, <+>)} @{ad_unbind(ad_items(body))}))
+    ${ad_push(ad_id(total))} ${ad_push(ad_id(blocks))});
+  List rev = %(${ad_restore(blocks, %(int))}
+    ${ad_restore(total, %(int))}
+    (while (expr () (op > ${ad_id(blocks)} ${ad_int("0")}))
+      (block @recover
+        ${ad_set(remaining, ad_raw(<->, ad_id(total),
+          ad_raw(<*>, ad_raw(<->, ad_id(blocks), ad_int("1")), size)))}
+        ${ad_set(replay, ad_int("0"))} ${ad_set(n, ad_int("0"))}
+        (while (expr () (op < ${ad_id(replay)} ${ad_id(remaining)}))
+          (block ${ad_count(replay, <+>)} @iteration))
+        ${ad_countdown(n, dispatch)}
+        ${ad_set(total, ad_raw(<->, ad_id(total), ad_id(remaining)))}
+        ${ad_count(blocks, <->)})));
+  return ad_sequence(%($head ${ad_triple(fwd, rev, %())}));
+}
+
+meta List ad_loop(List init, List c, List step, List body, List names) {
+  if (ad_state.checkpoint)
+    return ad_rev_checkpoint(init, c, step, body, names);
+  return ad_rev_loop(init, c, step, body, names);
+}
+
+meta List ad_rev_do(List body, List c, List names) {
+  Var first = ad_fresh("_ad_first", %(int));
+  List head = ad_triple(%(${ad_set(first, ad_int("1"))}), %(), %());
+  List loop = ad_loop(%(),
+    %(expr (int) (op || (expr (int) (ident ($first))) $c)), %(),
+    %(block ${ad_set(first, ad_int("0"))} $body), names);
+  return ad_sequence(%($head $loop));
+}
+
+meta String ad_literal_text(List form) {
+  match (form) {
+    case %(expr ? (literal ? ?text)): return text;
+    case %(expr (macro-expr) ?inner): return ad_literal_text(inner);
+  }
+  ad_fail("expected an integer literal", form);
+}
+
+meta List ad_reverse(List fn) => ad_reverse_with(fn, %());
+
+meta List ad_checkpoint(List fn, List block) =>
+  ad_reverse_with(fn, ad_int(ad_literal_text(block)));
+
+/** Emits `NAME_dot` beside a `double` function: every `double` parameter `p`
+    is followed by `p_dot`, and the result is the directional derivative.
+    Statements, `if`, loops, casts, the supported math primitives, and
+    calls to earlier `$ad.forward()` functions are supported; anything else
+    is a diagnostic at the invocation.
+*/
+macro Decorator $ad.forward(Unit $fn) {
+  $fn
+  $ad_forward($fn)...
+}
+
+/** Emits `NAME_grad` beside a `double` function: the original parameters
+    are followed by one `double *p_grad` per `double` parameter, the result
+    is the primal value, and each gradient slot receives d result / d p. The
+    unit must include `typed-array.x` for the tape. Every local is hoisted, so
+    names must be unique within the function. Loops, `break`, `continue`,
+    and `return` anywhere in the body replay from recorded exit codes.
+*/
+macro Decorator $ad.reverse(Unit $fn) {
+  $fn
+  $ad_reverse($fn)...
+}
+
+/** Like `$ad.reverse()`, but every loop runs without recording and pushes a
+    snapshot of the variables it assigns once per `$block` iterations; the
+    reverse sweep replays each block from its snapshot with recording and
+    then reverses it. Tape memory is bounded by one block plus one snapshot
+    per block, and the loop runs twice. A checkpointed loop cannot contain
+    `return`.
+*/
+macro Decorator $ad.checkpoint(Unit $fn, Literal $block) {
+  $fn
+  $ad_checkpoint($fn, $block)...
+}
+
+/** Emits both `NAME_dot` and `NAME_grad`. Decorators cannot stack when each
+    produces several items, so this is the spelling for a function that
+    needs both derivatives.
+*/
+macro Decorator $ad.both(Unit $fn) {
+  $fn
+  $ad_forward($fn)...
+  $ad_reverse($fn)...
+}

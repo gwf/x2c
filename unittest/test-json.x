@@ -3,7 +3,7 @@
 #include "json.x"
 #include "path.x"
 #include "test-support.x"
-$(import "test-macros.xmacro")
+#include "test-macros.x"
 #include <limits.h>
 #include <math.h>
 

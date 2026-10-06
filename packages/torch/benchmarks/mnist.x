@@ -38,7 +38,6 @@ import "torch" with Torch, Tensor, Module, Optimizer, Checkpoint;
 #define STD 0.3081
 #define WARMUP 50
 
-#pragma private
 
 static Map _artifact(String directory, String name) {
   String path = %"$directory/$name";
@@ -345,7 +344,6 @@ static int _diagnose(String artifacts, String out, String root, int count) {
   return 0;
 }
 
-#pragma public
 
 int main(int argc, char **argv) {
   $scope() {

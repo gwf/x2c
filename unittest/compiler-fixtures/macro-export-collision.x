@@ -1,5 +1,4 @@
-// A delivered macro that collides with a visible one is an error, as the
-// includer's own import of the file would be.
+// An included public macro replaces the preceding visible definition.
 macro Expression $m.value() => 8;
 
 #include "macro-export-lib.x"

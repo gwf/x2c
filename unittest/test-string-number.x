@@ -113,7 +113,7 @@ static void string_numeric_double_edges(void) {
   EXPECT_TRUE(integer == LONG_MAX);
 }
 
-$(import "test-macros.xmacro")
+#include "test-macros.x"
 
 void string_number_suite(void) {
   $test.run(string_numeric_parsing);

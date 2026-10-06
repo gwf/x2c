@@ -152,7 +152,7 @@ hard. Gate: `doc-check`.
 6. Reduce `agents/x2c-code-organization-guide.md` to the compiler module
    map and the runtime module map, updated for the current files. Add the
    files the maps omit: `src/operator-ledger.x`, `src/*-reports.xmacro`,
-   `src/grammar.xmacro`, `src/fields.xmacro`, and the runtime modules for
+   `src/grammar.x`, `src/fields.x`, and the runtime modules for
    typed collections, `path`, `process`, `var-ledger`, `lisp-targets`,
    `lisp-init`, and `meta`. Move its rules to citations of MO, FI, AR, and
    RT rule IDs. Keep it in the `tools/check-docs` path audit.
@@ -184,7 +184,7 @@ hard. Gate: `doc-check`.
      in a slot function) becomes a choice, per MA-8.
    - `agents/adapters-macros-decorators.md`: `$match.lease` is now
      `$match.plan` (`lib/match-cache.x`); `lib/iter.x` keeps only
-     `UnzipColumnRef` and `UnzipSharedRef`; `lib/map-generics.xmacro`
+     `UnzipColumnRef` and `UnzipSharedRef`; `lib/map-generics.x`
      calls `Scope_malloc` and friends directly, without `x2c.ident`;
      re-cite the moved line ranges in `lib/logger.x`, `lib/common.x`, and
      `lib/varops.x`.
@@ -259,7 +259,7 @@ Code. Skill: `execute-x2c-plan`. Three independent deliveries. Gate:
 
 ### D3: `<malformed>` for external text
 
-1. In `lib/json-errors.xmacro` and `lib/regex-errors.xmacro`, change the
+1. In `lib/json.x` and `lib/regex.x`, change the
    cause of the macros that report text that is not JSON and a pattern that
    does not parse from `bad-arg` to `malformed`. Keep the cause of
    argument errors that are not about the text, such as the
@@ -612,7 +612,7 @@ pass. Expression violations now fall from the original 16 to seven.
   byte offsets. LY-2 shortening at 963 subtracts ten from those offsets.
 - Each ST-1 brace removal at 595, 2816, 3815, and 3818 changes a nested
   C scope around report-macro locals; the first also changes retained
-  coordinates. The macro owners in `src/expressions-reports.xmacro`
+  coordinates. The macro owners in `src/expressions-reports.x`
   at 31, 173, 301, and 289 explicitly contain a nested block. Unlike
   the callables and regions expansions, these are valid single
   statement expansions and all four brace removals build.
@@ -730,7 +730,7 @@ Evidence in `/tmp/x2c-standard-lint/debug/`: the seven
   call, not one statement. Restore the edit. Gary should review a
   detector false positive under ST-1, which requires braces for two or
   more statements, or authorize a macro change. The owner is
-  `src/callable-reports.xmacro:60`: a `String detail` declaration and
+  `src/callables.x:60`: a `String detail` declaration and
   a `_fail` call. The book rule is
   `docs/src/guide/macros.md:404-408`: a direct guarded body must be one
   statement; an unwrapped sequence does not qualify.
@@ -746,7 +746,7 @@ Evidence in `/tmp/x2c-standard-lint/debug/`: the seven
 - Removing only the ST-1 braces at original `src/regions.x:899` fails
   `make build` with `parse: expected one statement`. The report macro
   expands a `String message` declaration and a `warn` call; the owner is
-  `src/region-reports.xmacro:26`. The same book rule in
+  `src/regions.x:26`. The same book rule in
   `docs/src/guide/macros.md:404-408` excludes an unwrapped sequence from
   direct guarded bodies. Restore that edit. Gary should review
   whether this is a detector false positive under ST-1, which requires

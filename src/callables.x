@@ -13,13 +13,99 @@
 
 #pragma once
 #include "compiler.x"
-#pragma private
 
-$(import "../src/adapter-memo.xmacro")
-$(import "../src/ast-rewrite.xmacro")
+#include "adapter-memo.x"
+#include "ast-rewrite.x"
 #include "meta.x"
-$(import "../src/grammar.xmacro")
-$(import "../src/callable-reports.xmacro")
+#include "grammar.x"
+
+/* Callable conversion failures retain the shared signature-note owner. */
+
+static macro Stmt $report.callable.shared(Expr $c, Expr $source) =>
+  $c._adapter_error(
+    "function conversion needs x2c_func_shared from lib/func.x",
+    %("Func"), $source, NULL);
+
+static macro Stmt $report.callable.context(Expr $c, Expr $source) =>
+  $c._adapter_error(
+    "function pointer conversion needs Func.new_context from lib/func.x",
+    %("Func"), $source, NULL);
+
+static macro Stmt $report.callable.native_context(
+  Expr $c, Expr $target, Expr $source) =>
+  $c._adapter_error(
+    "native binding needs Func.context from lib/func.x",
+    $target, $source, NULL);
+
+static macro Stmt $report.callable.direct(
+  Expr $c, Expr $target, Expr $source) =>
+  $c._adapter_error(
+    "native binding target must be a direct function",
+    $target, $source,
+    %("supported: a free function or Type.method designator"));
+
+static macro Stmt $report.callable.variadic(
+  Expr $c, Expr $target, Expr $source, Expr $func_type) {
+  String message = $c.sym.resolve_key($target).equal($func_type)
+    ? "function conversion to Func cannot be variadic"
+    : "native binding target cannot be variadic";
+  $c._adapter_error(message, $target, $source, NULL);
+}
+
+static macro Stmt $report.callable.readers(
+  Expr $c, Expr $target, Expr $source) =>
+  $c._adapter_error(
+    "native binding needs Func argument readers from lib/func.x",
+    $target, $source, NULL);
+
+static macro Stmt $report.callable.parameter(
+  Expr $c, Expr $target, Expr $source) =>
+  $c._adapter_error(
+    "native binding parameter type has no Var representation",
+    $target, $source, NULL);
+
+static macro Stmt $report.callback.direct(Expr $cb) =>
+  $cb._fail(
+    "typed callback adapter source must be a direct function",
+    %("supported: a free function or Type.method designator"));
+
+static macro Stmt $report.callback.target(Expr $cb) =>
+  $cb._fail("typed callback adapter target is incomplete", NULL);
+
+static macro Stmt $report.callback.source(Expr $cb) =>
+  $cb._fail("typed callback adapter source is incomplete", NULL);
+
+static macro Stmt $report.callback.variadic(Expr $cb) =>
+  $cb._fail("typed callback adapter cannot be variadic", NULL);
+
+static macro Stmt $report.callback.arity(
+  Expr $cb, Expr $target_count, Expr $source_count) {
+  String detail = "target has %d parameters; source has %d".printf(
+    $target_count, $source_count);
+  $cb._fail("typed callback adapter arity mismatch", %($detail));
+}
+
+static macro Stmt $report.callback.void_return(Expr $cb) =>
+  $cb._fail("typed callback adapter does not support void return", NULL);
+
+static macro Stmt $report.callback.result(Expr $cb) =>
+  $cb._fail("typed callback adapter return type mismatch", NULL);
+
+static macro Stmt $report.callback.parameter(
+  Expr $cb, Expr $index, Expr $target, Expr $source) {
+  String detail = "parameter %d: %s cannot adapt to %s".printf(
+    $index + 1, $target.repr(), $source.repr());
+  $cb._fail("typed callback adapter parameter mismatch", %($detail));
+}
+
+static macro Expression $callable.note.target(Expr $target) =>
+  $target ? %"target signature: ${$target.repr()}"
+          : "target signature: unresolved";
+
+static macro Expression $callable.note.source(Expr $source) =>
+  $source ? %"source signature: ${$source.repr()}"
+          : "source signature: unresolved";
+
 
 #include "ast.x"
 #include "type.x"
@@ -32,13 +118,13 @@ $(import "../src/callable-reports.xmacro")
 /* Helper syntax shared by every lowering below. A declarator row reuses an
    issued binding without binding it again. */
 
-macro Stmt $func_local(Type $type, DeclaratorRow $row) {
+static macro Stmt $func_local(Type $type, DeclaratorRow $row) {
   $type $row;
 }
 
-macro Expression $func_address(Expr $value) => &$value;
+static macro Expression $func_address(Expr $value) => &$value;
 
-macro Expression $func_size(Expr $value) => sizeof $value;
+static macro Expression $func_size(Expr $value) => sizeof $value;
 
 // lambda lowering
 
@@ -136,7 +222,7 @@ static List _no_value_return(void) => %(
    resolved and in first-use order from `lambdas.x`. Their locals run
    before the context aggregate; value fields are snapshots and reference
    fields retain caller or cell addresses. */
-typedef struct CaptureBuild {
+static typedef struct CaptureBuild {
   Compiler c;
   List adapter, environment, signature;
   Type value_type, pointer_type;
@@ -177,7 +263,8 @@ static void CaptureBuild.declare(
 */
 List Compiler.capture_environment(Compiler c, List name, List fields) {
   return c.bind_syntax(
-    $!Unit{ typedef struct $name { $fields... } $name; }, AST_UNIT, NULL);
+    $!Unit{ static typedef struct $name { $fields... } $name; },
+    AST_UNIT, NULL);
 }
 
 static void CaptureBuild._field(CaptureBuild &b, Array fields, List capture) {
@@ -333,7 +420,7 @@ static List CaptureBuild._construct(CaptureBuild &b, List context) {
 }
 
 /* A value computed after its setup statements. */
-macro Expression $statement_value(Expr $value, Stmt $setup...) =>
+static macro Expression $statement_value(Expr $value, Stmt $setup...) =>
   ({ $setup... $value; });
 
 static List CaptureBuild._result(CaptureBuild &b, List storage, List value) {
@@ -347,19 +434,19 @@ static List CaptureBuild._result(CaptureBuild &b, List storage, List value) {
 
 /* A shared lambda cell: Scope storage for one automatic binding, copied
    from its initializer or left for a later assignment. */
-macro Stmt $compiler_cell(Type $type, Name $cell, Expr $value) {
+static macro Stmt $compiler_cell(Type $type, Name $cell, Expr $value) {
   $type *$cell = Scope_memdup((const void *)&($type)$value, sizeof($type));
 }
 
-macro Stmt $compiler_empty_cell(Type $type, Name $cell) {
+static macro Stmt $compiler_empty_cell(Type $type, Name $cell) {
   $type *$cell = Scope_malloc(sizeof($type));
 }
 
-macro Expression $compiler_cell_value(Name $cell) => (*$cell);
+static macro Expression $compiler_cell_value(Name $cell) => (*$cell);
 
 /* One callable region's cells: the automatic bindings the region owns, in
    declaration order, and the cell each shared binding moves to. */
-typedef struct CellRegion {
+static typedef struct CellRegion {
   Compiler c;
   Map owned, cells, values;
   Array order;
@@ -887,7 +974,7 @@ static void Compiler._func_pointer_context(
   c.add_early(
     %(
     typedef
-      (struct $context_name
+      (static struct $context_name
         (fields
           (declare $field_base
             (bindings (bind $field_binding $field_mods)))))
@@ -959,7 +1046,7 @@ static List Compiler._deref_func_lift(
 // Func adapters
 
 /* A record result is copied into a Var after the native call completes. */
-macro Stmt $func_record_result(
+static macro Stmt $func_record_result(
     Type $type, DeclaratorRow $row, Expr $boxed) {
   {
     $type $row;
@@ -969,7 +1056,7 @@ macro Stmt $func_record_result(
 
 /* The argument readers of one adapter, with its `Func` and argument vector
    parameters. */
-typedef struct FuncReaders {
+static typedef struct FuncReaders {
   Compiler c;
   Type diagnostic_type;
   List value, reference, fn, argv;
@@ -1265,7 +1352,7 @@ static List _named_decl_params(List types, List names) {
 /* A direct function adapted to a callback signature. The helper converts
    each callback argument to the source parameter type, calls the source,
    and converts its result to the callback result. */
-typedef struct Callback {
+static typedef struct Callback {
   Compiler c;
   Type target, source, result, source_result;
   List params, source_params, source_binding;

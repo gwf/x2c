@@ -79,7 +79,7 @@ Confirmed with both pinned chats on 2026-09-29:
    is outside Wave 5, but aggregate checkpoints remain unpublished meanwhile.
 2. **Execute dual-macro migration plan** has no active edits or upcoming
    publication. It releases `lib/meta.x`, `src/macros.x`, and
-   `src/grammar.xmacro` to this batch and agrees not to publish competing work.
+   `src/grammar.x` to this batch and agrees not to publish competing work.
 3. **x2c meta-language aggregate source forms** is the sole publisher for the
    subsequent aggregate batch. Fetch the announced landing SHA, replay the
    changes onto the released, beautified owners, and announce ready/base SHAs

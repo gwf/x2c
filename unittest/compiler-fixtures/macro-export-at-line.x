@@ -1,5 +1,5 @@
-// The includer receives an exported import at its include line, so source
-// above the include cannot use it.
+// Public macros become visible at the include line. Earlier source cannot
+// use them.
 #include "x2c.x"
 
 int early = $m.value();

@@ -2,7 +2,7 @@
 #include "typed-array.x"
 #include <stdio.h>
 #include <math.h>
-$(import "../src/autodiff.xmacro")
+#include "../src/autodiff-macros.x"
 
 $ad.reverse()
 static double scale(double a, double b) => a * b + exp(a);

@@ -98,7 +98,7 @@ not the later projections that passed focused checks.
 
 | Concern | Target owner | What changes or disappears |
 | --- | --- | --- |
-| Language shape and recognition projection | grammar.xmacro | Shared source macros replace per-pass literal patterns. Recognition-only macros are legitimate. Derived fields use narrow existing or grammar-owned accessors. |
+| Language shape and recognition projection | grammar.x | Shared source macros replace per-pass literal patterns. Recognition-only macros are legitimate. Derived fields use narrow existing or grammar-owned accessors. |
 | Token consumption, precedence, source locations | Existing parser entry points | Parsing remains authoritative. Grammar macros reuse it; they are not a second parser or closed AST validator. |
 | Binding and type resolution | Existing semantic operations | Callers request semantic facts instead of reconstructing declarations or interpreting Type lists independently. |
 | Generated program shapes | Templates beside their transformation | C skeletons leave procedural List construction. Meta slot functions own loops and choices among those skeletons. |
@@ -107,7 +107,7 @@ not the later projections that passed focused checks.
 | Internal stage/effect representation | Macro application and named producers | Clients pass code/facts. They do not spell carriers, effect rows or compiler-internal node layouts. |
 | Emission and interfaces | Existing output owners | Source-form inspection migrates where applicable; formatting, cache identity and wire formats remain their own responsibilities. |
 
-`Ast.rewrite_children` delegates to `ast-rewrite.xmacro`; cache, collect,
+`Ast.rewrite_children` delegates to `ast-rewrite.x`; cache, collect,
 type and transform already share that operation. The rewrite must preserve
 unchanged-node identity, which the normalizer uses. Region analysis walks
 typed source before transformation and reaches a function-summary fixpoint
@@ -438,7 +438,7 @@ not only expressions/statements.
 
 For parallel work, assign semantic families with disjoint authored files;
 the orchestrator owns shared grammar and plan integration. Do not dispatch
-two migrations that both change transform.x or grammar.xmacro concurrently.
+two migrations that both change transform.x or grammar.x concurrently.
 The two read-only survey workers finished. Their isolated worktrees are now
 assigned to the construction capability and the parameter-redeclaration
 repair, with disjoint source ownership. The orchestrator collects results

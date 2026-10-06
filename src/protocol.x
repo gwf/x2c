@@ -11,9 +11,8 @@
 */
 #pragma once
 #include "compiler.x"
-#pragma private
-$(import "../src/grammar.xmacro")
-$(import "../src/adapter-memo.xmacro")
+#include "grammar.x"
+#include "adapter-memo.x"
 
 #include <string.h>
 #include "collect.x"
@@ -21,7 +20,253 @@ $(import "../src/adapter-memo.xmacro")
 #include "parse.x"
 #include "meta.x"
 
-$(import "../src/protocol-reports.xmacro")
+
+/* protocol diagnostics. */
+
+static macro Stmt $report.protocols.tag_var(Expr $c, Expr $origin) =>
+  $c.report_error(
+    <protocol>, "'tag' applies only to a Var adoption",
+    $origin, NULL);
+
+static macro Stmt $report.protocols.modifier_conflict(Expr $c, Expr $origin) =>
+  $c.report_error(
+    <protocol>, "a Var adoption cannot use both 'as' and 'tag'",
+    $origin, NULL);
+
+static macro Stmt $report.protocols.as_var(Expr $c, Expr $origin) =>
+  $c.report_error(
+    <protocol>, "'as' applies only to a Var adoption",
+    $origin, NULL);
+
+static macro Stmt $report.protocols.static_adoption(Expr $c, Expr $origin) =>
+  $c.report_error(
+    <protocol>, "'static' applies only to a concrete protocol adoption",
+    $origin, %("remove 'static' from the reusable protocol body"));
+
+static macro Stmt $report.protocols.participant_expected(Expr $c, Expr $origin) =>
+  $c.report_error(
+    <protocol>, "expected protocol participant name",
+    $origin, NULL);
+
+static macro Stmt $report.protocols.modifier_adoption(
+  Expr $c, Expr $representation, Expr $origin) =>
+  $c.report_error(
+    <protocol>, $representation
+      ? "'as' applies only to a concrete protocol adoption"
+      : "'tag' applies only to a concrete protocol adoption",
+    $origin, NULL);
+
+static macro Stmt $report.protocols.meta_adoption(Expr $c, Expr $origin) =>
+  $c.report_error(
+    <protocol>, "'meta' applies only to a concrete protocol adoption",
+    $origin, %("mark each adoption: meta protocol BASE(TYPE);"));
+
+static macro Stmt $report.protocols.assoc_order(Expr $c) =>
+  $c.report_error(
+    <protocol>, "associated types must precede protocol members",
+    $c.token, NULL);
+
+static macro Stmt $report.protocols.type_duplicate(Expr $c, Expr $name) =>
+  $c.report_error(
+    <protocol>, %"duplicate protocol type variable '${$name}'",
+    $c.token, NULL);
+
+static macro Stmt $report.protocols.assoc_expected(Expr $c) =>
+  $c.report_error(
+    <protocol>, "expected associated type name",
+    $c.token, NULL);
+
+static macro Stmt $report.protocols.member_duplicate(Expr $c, Expr $name) =>
+  $c.report_error(
+    <protocol>, %"duplicate protocol member '${$name}'",
+    $c.token, NULL);
+
+static macro Stmt $report.protocols.member_function(Expr $c, Expr $name) =>
+  $c.report_error(
+    <protocol>, "protocol member must be a function",
+    $c.token, %("member:" ${$name}));
+
+static macro Stmt $report.protocols.member_owner(Expr $c, Expr $participant) =>
+  $c.report_error(
+    <protocol>, "protocol member must be owned by its participant",
+    $c.token, %("expected receiver:" ${$participant}));
+
+static macro Stmt $report.protocols.member_single(Expr $c) =>
+  $c.report_error(
+    <protocol>, "protocol member must declare one function",
+    $c.token, NULL);
+
+static macro Stmt $report.protocols.native_ident(Expr $c) =>
+  $c.report_error(
+    <protocol>, "native protocol member requires an identifier",
+    $c.token, NULL);
+
+static macro Stmt $report.macro.protocol_invalid(Expr $c) =>
+  $c.report_error(
+    <macro>, "constructed protocol syntax is invalid",
+    $c.token, NULL);
+
+static macro Stmt $report.protocols.decl_conflict(
+  Expr $c, Expr $base, Expr $first_location, Expr $second_location) {
+  {
+    String first = %"first: ${$first_location}";
+    String second = %"second: ${$second_location}";
+    $c.report_error(
+      <protocol>, %"conflicting protocol declarations for ${$base.repr()}",
+      $c.token, %($first $second));
+  }
+}
+
+static macro Stmt $report.protocols.type_undeclared(
+  Expr $c, Expr $spelling, Expr $origin) =>
+  $c.report_error(
+    <protocol>,
+    %"adoption participant '${$spelling}' does not name a declared type",
+    $origin, NULL);
+
+static macro Stmt $report.protocols.adoption_conflict(
+  Expr $c, Expr $adoption, Expr $first_location) {
+  {
+    String first = %"first: ${_location_string($first_location)}";
+    String second = %"second: ${_location_string($adoption.location)}";
+    $c.report_error(
+      <protocol>,
+      %"conflicting adoption declarations for ${$adoption.spelling()}",
+      $c.token, %($first $second));
+  }
+}
+
+static macro Stmt $report.shadow.protocol_binder(
+  Expr $c, Expr $participant, Expr $token) {
+  {
+    String hint = %"hint: a bodyless `protocol BASE(${$participant});` " +
+      "declares an adoption; a body introduces a fresh type variable";
+    $c.report_warning(
+      <shadow>,
+      %"protocol binder '${$participant}' shadows a visible type name",
+      $token, %($hint));
+  }
+}
+
+static macro Expression $report.protocols.conformance_prefix(
+  Expr $participant, Expr $owner) =>
+  %"${$participant} does not satisfy ${$owner}: ";
+
+static macro Expression $report.protocols.native_alias(Expr $prefix, Expr $base) =>
+  %"${$prefix}its typedef is not a native alias of ${$base}";
+
+static macro Expression $report.protocols.forward_conversion(
+  Expr $prefix, Expr $forward) =>
+  %"${$prefix}no forward conversion '${$forward}'";
+
+static macro Expression $report.protocols.reverse_conversion(
+  Expr $prefix, Expr $base, Expr $lowered) =>
+  %"${$prefix}no reverse conversion '${$base}.${$lowered}' " +
+    %"or '${$base}.as_${$lowered}'";
+
+static macro Expression $report.protocols.fallback_nested(
+  Expr $prefix, Expr $member, Expr $position) =>
+  %"${$prefix}member '${$member}' uses T inside a compound " +
+    %"${$position} type, which protocol fallback adapters " +
+    "do not support";
+
+static macro Expression $report.protocols.fallback_reverse(
+  Expr $prefix, Expr $member, Expr $owner, Expr $base, Expr $lowered) =>
+  %"${$prefix}member '${$member}' returns T, so ${$owner} needs " +
+    %"'${$base}.${$lowered}' or '${$base}.as_${$lowered}'";
+
+static macro Expression $report.protocols.fallback_forward(
+  Expr $prefix, Expr $member, Expr $participant, Expr $base) =>
+  %"${$prefix}member '${$member}' fallback requires forward " +
+    %"conversion '${$participant}.${$base.lower()}'";
+
+static macro Expression $report.protocols.thunk_nested(
+  Expr $prefix, Expr $member, Expr $position) =>
+  %"${$prefix}member '${$member}' uses T inside a compound " +
+    %"${$position} type, which protocol descriptor thunks " +
+    "do not support";
+
+static macro Expression $report.protocols.thunk_parameter(
+  Expr $prefix, Expr $member, Expr $owner, Expr $base, Expr $lowered) =>
+  %"${$prefix}member '${$member}' has a T parameter, so " +
+    %"${$owner} needs '${$base}.${$lowered}' or '${$base}.as_${$lowered}'";
+
+static macro Expression $report.protocols.thunk_result(
+  Expr $prefix, Expr $member, Expr $owner, Expr $participant, Expr $base) =>
+  %"${$prefix}member '${$member}' returns T, so ${$owner} needs " +
+    %"'${$participant}.${$base.lower()}'";
+
+static macro Expression $report.protocols.native_parameter(
+  Expr $prefix, Expr $member, Expr $base) =>
+  %"${$prefix}native member '${$member}' has a T parameter " +
+    %"that is not implicitly convertible to ${$base}";
+
+static macro Expression $report.protocols.native_result(
+  Expr $prefix, Expr $member, Expr $base) =>
+  %"${$prefix}native member '${$member}' returns T, which is " +
+    %"not implicitly convertible from ${$base}";
+
+static macro Expression $report.protocols.native_member_alias(
+  Expr $prefix, Expr $member) =>
+  %"${$prefix}native member '${$member}' cannot be aliased";
+
+static macro Stmt $report.protocols.signature_conflict(
+  Expr $c, Expr $member, Expr $owner, Expr $declaration_site,
+  Expr $binding, Expr $actual, Expr $expected, Expr $location) {
+  {
+    String protocol_note =
+      %"protocol member '${$member}' declared by ${$owner}";
+    if ($declaration_site)
+      protocol_note = %"$protocol_note at ${$declaration_site}";
+    String actual_repr = $actual.repr();
+    String conflict_note =
+      %"conflicting definition '${$binding}': $actual_repr";
+    String expected_note = %"expected: ${$expected.repr()}";
+    $c.diagnostics.report(
+      <protocol>,
+      %"'${$binding}' has a signature incompatible " +
+        %"with ${$owner} member '${$member}'",
+      $location,
+      %($protocol_note $conflict_note $expected_note));
+  }
+}
+
+static macro Expression $report.protocols.collision_prefix(
+  Expr $member, Expr $participant) =>
+  %"member '${$member}' of '${$participant}' ";
+
+static macro Expression $report.protocols.collision_linkage(Expr $owners) =>
+  %"has mixed static and external generated ownership in ${$owners}";
+
+static macro Expression $report.protocols.collision_signature(Expr $owners) =>
+  %"has incompatible generated signatures in ${$owners}";
+
+static macro Expression $report.protocols.collision_ambiguous(
+  Expr $owners, Expr $participant, Expr $member) =>
+  %"would be generated by both ${$owners}; implement '" +
+    %"${$participant}.${$member}' to choose its semantics";
+
+static macro Expression $report.protocols.collision_linkage_notes(
+  Expr $first, Expr $second, Expr $first_value, Expr $second_value) =>
+  %(
+    "${$first} adoption: ${$first_value}"
+    "${$second} adoption: ${$second_value}"
+  );
+
+static macro Expression $report.protocols.collision_signature_notes(
+  Expr $first, Expr $second, Expr $first_value, Expr $second_value) =>
+  %(
+    "${$first} signature: ${$first_value.repr()}"
+    "${$second} signature: ${$second_value.repr()}"
+  );
+
+static macro Expression $report.protocols.collision_source_notes(
+  Expr $first, Expr $second, Expr $first_value, Expr $second_value) =>
+  %(
+    "${$first} default source: ${$first_value}"
+    "${$second} default source: ${$second_value}"
+  );
+
 
 // registry rows
 
@@ -108,7 +353,7 @@ static int Compiler._owns_adoption(Compiler c, Type base, Type participant) {
   return row && c._canonical_file(_adoption_location(row)) == c._path();
 }
 
-typedef struct AdoptionDraft {
+static typedef struct AdoptionDraft {
   Compiler c;
   Type base, participant, representation;
   Symbol storage, tag;
@@ -209,7 +454,7 @@ static Type Compiler._declared(Compiler c, String name) {
 
 /* One protocol declaration while it is parsed: the tokens diagnostics
    point at, the base and participant, and the adoption modifiers. */
-typedef struct ProtocolSyntax {
+static typedef struct ProtocolSyntax {
   Compiler c;
   Token start, meta, participant_token, modifier_token;
   Type base, participant_type, representation;
@@ -725,7 +970,7 @@ static void AdoptionDraft.install(AdoptionDraft &a) {
    row carries base, participant, converters, type-variable maps, and member
    rows of `(name status source expected default-kind template)`. Consumers
    dispatch on `status`; a non-list cache value records failed resolution. */
-typedef struct ProtocolRequirements {
+static typedef struct ProtocolRequirements {
   String binder;
   List associations, templates;
 } ProtocolRequirements;
@@ -878,7 +1123,7 @@ static String Compiler._definition_location(Compiler c, Type base) {
 
 // native conformance
 
-typedef struct NativeResolution {
+static typedef struct NativeResolution {
   Type base, participant, definition;
   String binder;
   Map variables, bindings;
@@ -1018,7 +1263,7 @@ static int _native_rows(List rows) {
 
 // ordinary conformance
 
-typedef struct MemberResolution {
+static typedef struct MemberResolution {
   Compiler c;
   Type base, participant, representation;
   String binder, forward;
@@ -1251,7 +1496,7 @@ static List MemberResolution.complete(MemberResolution &r, List row) {
 
 /* The adapters one conformance needs. Resolution fills the base, binder,
    and converters; generation fills the rest. */
-typedef struct ProtocolAdapters {
+static typedef struct ProtocolAdapters {
   Compiler c;
   Type base, participant;
   String forward, reverse, binder;
@@ -1507,7 +1752,7 @@ static List Compiler._ordered_occurrences(Compiler c) {
 /* Runs visit once for each conformance participant adopts, in protocols
    order, after setting the caller's base to the protocol and rows to its
    member rows. */
-macro Decorator $adopted_rows(Stmt $visit, Expr $compiler, Expr $protocols,
+static macro Decorator $adopted_rows(Stmt $visit, Expr $compiler, Expr $protocols,
     Expr $participant, Name $base, Name $rows) {
   foreach (List entry, $protocols) {
     $base = entry.car();
@@ -1743,7 +1988,7 @@ static List Compiler._adopted_member(
    A base default is generated for a participant by exactly one adopted
    protocol. Two candidates are a collision, reported once per member. */
 
-typedef struct GeneratedOwners {
+static typedef struct GeneratedOwners {
   Type participant;
   String member;
   Array candidates;
@@ -1972,7 +2217,7 @@ static void Compiler._publish_update(Compiler c, List helper, List syntax) {
 
 // discard helpers
 
-typedef struct DiscardCall {
+static typedef struct DiscardCall {
   Compiler c;
   List binding, key;
   Type signature, result;
@@ -2145,7 +2390,7 @@ static int Compiler._defines_function(Compiler c, String name) {
   return state == <definition> || state == <completed>;
 }
 
-typedef struct AdapterFunction {
+static typedef struct AdapterFunction {
   Compiler c;
   String name, source, reverse, binder;
   Type target, signature, template;
@@ -2306,7 +2551,7 @@ static List AdapterFunction.generate(AdapterFunction &a) {
     storage, a.binding, declarations, %((return $target_result $call)));
 }
 
-macro Decorator $guard_value_rendering(
+static macro Decorator $guard_value_rendering(
   Function $function, Name $path, Expr $enter, Expr $fallback,
   Expr $leave, Stmt $body...) {
   RenderPath $path;
@@ -2433,7 +2678,7 @@ static List Compiler._fallback_registration(
   return c.rebuild_statement($!{ if (!$early_call) { $fallback; } }).cadr();
 }
 
-macro Expression $helper_call(
+static macro Expression $helper_call(
     Name $callee, Expr $arguments...) => $callee($arguments...);
 
 static List Compiler._helper_call(
@@ -2517,7 +2762,6 @@ static int _starts_private_region(List node) {
   match (node) {
     case %((!or function falias) *): return 1;
     case %(declare ?type *): return type.type().is_static();
-    case %(preproc ?text *): return preproc_visibility(text) == 1;
   }
   return 0;
 }

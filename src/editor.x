@@ -10,7 +10,6 @@
 
 #pragma once
 
-#pragma private
 
 #include "frontend.x"
 #include "meta-project.x"
@@ -32,7 +31,7 @@
    source snapshots, and what the editor asks, a kind at a byte offset.
    While the reply is built, `needed` holds each file a location in it
    names. */
-typedef struct Query {
+static typedef struct Query {
   String response, source, kind, int offset, SourceView sources;
   Compiler compiler, Map reply, needed;
 } Query;

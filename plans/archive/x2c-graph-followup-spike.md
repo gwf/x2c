@@ -36,7 +36,7 @@ The SymbolSet helper remains the single expression for the ordered-table
 offset. Change its private signature to `(SymbolSet x, uint32_t span)`;
 `index` passes `span`, and `getindex` passes `_u32(x, 8) + 1`. Do not duplicate
 the layout formula or change the byte readers. For Type, use the established
-relative import `$(import "../src/ast-rewrite.xmacro")`, not the absolute path
+relative import `$(import "../src/ast-rewrite.x")`, not the absolute path
 used to isolate the temporary probe.
 
 ## Measurements and checks

@@ -8,16 +8,76 @@
 */
 
 #pragma once
-$(import "../lib/private-keywords.xmacro")
+#include "../lib/private-keywords.x"
 #include "compiler.x"
-#pragma private
-$(import "../src/parse-report-macros.xmacro")
+#include "parse-report-macros.x"
 #include "parse.x"
 #include "expressions.x"
 #include "literals.x"
 #include "macros.x"
 
-$(import "../src/statements-reports.xmacro")
+
+/* statements diagnostics. */
+
+static macro Stmt $report.parse.with_body(Expr $c) =>
+  $c.report_error(
+    <parse>, "with requires a braced body",
+    $c.token, NULL);
+
+static macro Stmt $report.parse.with_expr(Expr $c) =>
+  $c.report_error(
+    <parse>, "with requires an expression",
+    $c.token, NULL);
+
+static macro Stmt $report.parse.raise_payload(Expr $c) =>
+  $c.report_error(
+    <parse>, "raise requires a %() payload literal",
+    $c.token, %("use raise %(code (key value)...);"));
+
+static macro Stmt $report.parse.match_default(Expr $c) =>
+  $c.report_error(
+    <parse>, "match default arm must be last",
+    $c.token, %("move default after every case arm"));
+
+static macro Stmt $report.parse.match_arm(Expr $c) =>
+  $c.report_error(
+    <parse>, "expected 'case' or 'default' in match statement",
+    $c.token, %( "token:" ${$c.token.text} ));
+
+static macro Stmt $report.parse.match_pattern(
+  Expr $c, Expr $origin, Expr $pattern) =>
+  $c.report_error(
+    <parse>, "match case pattern must be a %() list literal",
+    $origin, %( "pattern:" ${$pattern.repr()} ));
+
+static macro Stmt $report.type.binder_conflict(
+  Expr $c, Expr $role, Expr $origin, Expr $name) =>
+  $c.report_error(
+    <type>, %"${$role} binder has conflicting capture kinds",
+    $origin, %( "binder:" ${$name} "use either '?' or '*' consistently"));
+
+static macro Stmt $report.type.binder_unassigned(
+  Expr $c, Expr $role, Expr $origin, Expr $binder) =>
+  $c.report_error(
+    <type>, %"${$role} binder is not definitely assigned",
+    $origin, %( "binder:" ${$binder.str()}
+                "bind it in every alternative and never under !not"));
+
+static macro Stmt $report.parse.try_handler(Expr $c) =>
+  $c.report_error(
+    <parse>, "expected 'catch' or 'finally' after try block",
+    $c.token, NULL);
+
+static macro Stmt $report.parse.catch_default(Expr $c) =>
+  $c.report_error(
+    <parse>, "catch default arm must be last",
+    $c.token, %("move catch: after every filtered arm"));
+
+static macro Stmt $report.parse.catch_pattern(Expr $c) =>
+  $c.report_error(
+    <parse>, "catch filter requires a %() pattern literal",
+    $c.token, %("use catch %(code (key pattern)...):"));
+
 
 // statements
 

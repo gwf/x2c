@@ -18,11 +18,10 @@
 #endif
 
 #include "compiler.x"
-#pragma private
 
-$(import "../src/ast-rewrite.xmacro")
+#include "ast-rewrite.x"
 #include "meta.x"
-$(import "../src/grammar.xmacro")
+#include "grammar.x"
 
 #include "ast.x"
 #include "type.x"
@@ -37,7 +36,140 @@ $(import "../src/grammar.xmacro")
 #include "callables.x"
 #include "cleanup.x"
 
-$(import "../src/transform-reports.xmacro")
+
+/* transform diagnostics. */
+
+static macro Stmt $report.parse.init_incomplete(Expr $c) =>
+  $c.report_error(
+    <parse>,
+    "managed initializer requires a complete block-local initializer",
+    NULL, NULL);
+
+static macro Stmt $report.xform.index_unsupported(Expr $c, Expr $type) =>
+  $c.report_error(
+    <xform>, %"type ${$type} does not support bracket indexing",
+    NULL, NULL);
+
+static macro Stmt $report.xform.index_assignment(Expr $c, Expr $type) =>
+  $c.report_error(
+    <xform>, %"type ${$type} does not support bracket assignment",
+    NULL, NULL);
+
+static macro Stmt $report.xform.slice_unsupported(
+  Expr $c, Expr $type, Expr $notes) =>
+  $c.report_error(
+    <xform>, %"type ${$type} does not support slicing",
+    NULL, $notes);
+
+static macro Stmt $report.type.destructure_list(Expr $c, Expr $source_type) =>
+  $c.report_error(
+    <type>, "destructuring requires a List source",
+    NULL, %(("source type" ${$source_type})));
+
+static macro Stmt $report.xform.unary_dynamic(Expr $c) =>
+  $c.report_error(
+    <xform>, "dynamic unary numeric operators are not supported",
+    NULL, %("use Var.binary with an explicit numeric operand"));
+
+static macro Stmt $report.xform.index_copy(Expr $c, Expr $type) =>
+  $c.report_error(
+    <xform>, %"type ${$type} does not support bracket assignment",
+    NULL, %("use an explicit copy-producing method where available"));
+
+static macro Stmt $report.xform.string_assignment(Expr $c) {
+  {
+    String note = "String is immutable: use the copy-producing "
+                  "String.withindex, or bind a char * to write a "
+                  "transient String.malloc buffer";
+    $c.report_error(
+      <xform>, "String does not support bracket assignment",
+      NULL, %($note));
+  }
+}
+
+static macro Stmt $report.xform.slice_assignment(Expr $c) =>
+  $c.report_error(
+    <xform>, "slice expressions are not assignable",
+    NULL, %("call the collection's setslice method explicitly"));
+
+static macro Stmt $report.xform.numeric_operands(
+  Expr $c, Expr $op, Expr $lhs_type, Expr $rhs_type) {
+  {
+    String left_type = $lhs_type.repr(), right_type = $rhs_type.repr();
+    String details =
+      %"operator: ${$op} left type: $left_type right type: $right_type";
+    $c.report_error(
+      <xform>, "dynamic numeric operators require numeric operands",
+      NULL, %($details));
+  }
+}
+
+static macro Stmt $report.xform.string_compound(Expr $c) =>
+  $c.report_error(
+    <xform>, "String compound assignment supports only String +=",
+    NULL, NULL);
+
+static macro Stmt $report.xform.container_compound(Expr $c, Expr $lhs_type) {
+  {
+    String type = $lhs_type.repr();
+    $c.report_error(
+      <xform>, %"container type $type does not support compound assignment",
+      NULL, %("update an indexed element instead"));
+  }
+}
+
+static macro Stmt $report.xform.compound_operand(
+  Expr $c, Expr $op, Expr $rhs_type) {
+  {
+    String details = %"right type: ${$rhs_type.repr()}";
+    $c.report_error(
+      <xform>, $op == <+>
+        ? "dynamic += requires a numeric, Var, or String operand"
+        : "dynamic compound assignment requires a numeric or Var operand",
+      NULL, %($details));
+  }
+}
+
+static macro Stmt $report.xform.compound_bitfield(Expr $c) =>
+  $c.report_error(
+    <xform>, "dynamic compound assignment cannot target a bitfield",
+    NULL, NULL);
+
+static macro Stmt $report.xform.compound_lvalue(Expr $c, Expr $lhs_type) {
+  {
+    String details = %"left type: ${$lhs_type.repr()}";
+    $c.report_error(
+      <xform>, "dynamic compound assignment requires a numeric lvalue",
+      NULL, %($details));
+  }
+}
+
+static macro Stmt $report.xform.compound_enum(Expr $c) =>
+  $c.report_error(
+    <xform>, "dynamic compound assignment cannot target an enum",
+    NULL, NULL);
+
+static macro Stmt $report.xform.index_operand(Expr $c, Expr $op, Expr $rhs_type) {
+  {
+    String details = %"right type: ${$rhs_type.repr()}";
+    String message = $op == <+>
+      ? "indexed += requires a numeric, Var, or String operand"
+      : "indexed compound assignment requires a numeric or Var operand";
+    $c.report_error(<xform>, message, NULL, %($details));
+  }
+}
+
+static macro Stmt $report.xform.index_update(
+  Expr $c, Expr $base_type, Expr $postfix) {
+  {
+    String type = $base_type.repr();
+    String message = $postfix
+      ? %"type $type does not support indexed increment or decrement"
+      : %"type $type does not support indexed compound assignment";
+    $c.report_error(<xform>, message, NULL, NULL);
+  }
+}
+
 
 // normalization
 
@@ -45,8 +177,8 @@ $(import "../src/transform-reports.xmacro")
     emission. `c` must own the AST's bindings, origins, and conversion
     state. Current-node rewrites finish before child traversal; containing
     blocks absorb cleanup markers produced by declaration rewrites. Early
-    declarations are lowered and appended after the input units, below a
-    `#pragma private`, since no other unit can name them. The call may add
+    declarations are lowered and appended after the input units. Their
+    storage determines their interface visibility. The call may add
     generated origins or diagnostics to `c`.
 */
 List Compiler.transform(Compiler c, List ast) {
@@ -62,9 +194,7 @@ List Compiler.transform(Compiler c, List ast) {
     List lowered = c._sequence(items, 0);
     foreach (Var sibling, lowered) generated.push(sibling);
   }
-  if (generated.len())
-    newast = newast.append(
-      %((preproc "#pragma private") @{generated.list_free()}));
+  if (generated.len()) newast = newast.append(generated.list_free());
   return newast;
 }
 
@@ -710,16 +840,16 @@ static List Compiler._process_raw_segment(Compiler c, List seg) {
 
 // declarations and statements
 
-macro Stmt $destructure_typed_target(
+static macro Stmt $destructure_typed_target(
     Type $type, DeclaratorRow $row, Expr $value) {
   $type $row = $value;
 }
 
-macro Stmt $destructure_sequence(Stmt $items...) {
+static macro Stmt $destructure_sequence(Stmt $items...) {
   $items...
 }
 
-macro Stmt $destructure_declarations(
+static macro Stmt $destructure_declarations(
     Name $temporary, Expr $source, Stmt $assignments...) {
   List $temporary = $source;
   $assignments...
@@ -1094,7 +1224,7 @@ static int _iter_immediate_consumer(String name) =>
 
 // printf formats
 
-typedef enum PrintfLength {
+static typedef enum PrintfLength {
   _printf_default,
   _printf_hh,
   _printf_h,
@@ -1107,7 +1237,7 @@ typedef enum PrintfLength {
 } PrintfLength;
 
 /* One static format read against the call's variadic arguments. */
-typedef struct PrintfWalk {
+static typedef struct PrintfWalk {
   Compiler c;
   Array values;
   String format, family;

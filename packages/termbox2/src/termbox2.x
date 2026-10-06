@@ -8,7 +8,7 @@
  */
 
 #include "termbox2-2.5.h"
-$(import "cleanup.xmacro")
+#include "cleanup.x"
 
 typedef struct Termbox *Termbox;
 
@@ -32,7 +32,6 @@ typedef struct TermboxCell {
 
 $cleanup.by(Termbox, close);
 
-#pragma private
 
 #include <errno.h>
 #include <signal.h>
@@ -42,15 +41,15 @@ $cleanup.by(Termbox, close);
 #include <wchar.h>
 #include <wctype.h>
 
-$(import "termbox2-errors.xmacro")
+#include "termbox2-errors.x"
 
 /*  One cell holds one grapheme cluster, and eight codepoints is well past a
     base character plus its combining marks. */
 #define TERMBOX_CLUSTER_MAX 8
 
-typedef struct sigaction TermboxSignal;
+static typedef struct sigaction TermboxSignal;
 
-struct Termbox {
+static struct Termbox {
   int open;
   int has_previous_winch;
   TermboxSignal previous_winch;

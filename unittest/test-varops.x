@@ -6,7 +6,7 @@
 #include <math.h>
 
 #include "test-support.x"
-$(import "test-macros.xmacro")
+#include "test-macros.x"
 
 
 static Var numeric_value_for_tag(Symbol tag, int value) {

@@ -8,7 +8,7 @@
     `initializers.x`.
 */
 #pragma once
-$(import "../lib/private-keywords.xmacro")
+#include "../lib/private-keywords.x"
 #include "compiler.x"
 #include "type.x"
 
@@ -20,9 +20,8 @@ typedef struct PrintfFn {
   const char *name, int fmt_arg, first_arg, unresolved;
 } PrintfFn;
 
-#pragma private
-$(import "../src/ast-rewrite.xmacro")
-$(import "../src/grammar.xmacro")
+#include "ast-rewrite.x"
+#include "grammar.x"
 #include "parse.x"
 #include "literals.x"
 #include "protocol.x"
@@ -31,7 +30,7 @@ $(import "../src/grammar.xmacro")
 #include "initializers.x"
 #include "macros.x"
 
-$(import "../src/expressions-reports.xmacro")
+#include "expressions-reports.x"
 
 /* expression grammar
 
@@ -1019,7 +1018,7 @@ static int _deferred_receiver(List expr) {
 
 /* The semantic context of one expression resolution; handlers share its
    original input, expected type and diagnostic origin. */
-typedef struct Resolve {
+static typedef struct Resolve {
   Compiler c;
   List input;
   Type type;
@@ -1487,7 +1486,7 @@ static List Resolve._native(Resolve &r, String callee, List supplied) {
 /* One call being resolved: its expected result type, the arguments it
    supplies, and its origin. A method call adds the receiver, its type, and
    the member it selects. */
-typedef struct CallSite {
+static typedef struct CallSite {
   Compiler c;
   Type result_type, type;
   List receiver, field, supplied;
@@ -1845,7 +1844,7 @@ static List Resolve._member(
    fields, searched depth first in field order. More than one path, or a
    cycle with no path, is an error. */
 
-typedef struct DelegateSearch {
+static typedef struct DelegateSearch {
   Compiler c;
   String member;
   Type outer;
@@ -2069,7 +2068,7 @@ static void _completion_add(Map seen, Array names, String name) {
 
 /* One argument, taken by reference when the callee's signature asks for a
    reference and by value otherwise. */
-macro Stmt $func_argument(Expr $function, Expr $storage,
+static macro Stmt $func_argument(Expr $function, Expr $storage,
     Expr $count, Expr $index, Expr $address, Expr $type, Expr $value) {
   if (x2c_func_reference_type($function, $count, $index))
     $storage[$index] = FuncArg_reference($address, $type);
@@ -2077,7 +2076,7 @@ macro Stmt $func_argument(Expr $function, Expr $storage,
 }
 
 /* A null argument: a reference takes it with the callee's own type. */
-macro Stmt $func_null_argument(Expr $function, Expr $storage,
+static macro Stmt $func_null_argument(Expr $function, Expr $storage,
     Expr $count, Expr $index, Expr $value) {
   {
     List reference = x2c_func_reference_type($function, $count, $index);
@@ -2088,13 +2087,13 @@ macro Stmt $func_null_argument(Expr $function, Expr $storage,
 
 /* The by-value alternative: the argument boxed, or the diagnostic call for
    a type with no Var form. */
-macro Expression $func_value(Expr $argument) => FuncArg_value($argument);
+static macro Expression $func_value(Expr $argument) => FuncArg_value($argument);
 
-macro Expression $func_opaque(Expr $function, Expr $index,
+static macro Expression $func_opaque(Expr $function, Expr $index,
     Expr $type) => x2c_func_unrepresentable_argument($function, $index, $type);
 
 /* A call with no arguments applies the callee directly. */
-macro Expression $func_apply(Expr $callee) => Func_apply($callee, 0, 0);
+static macro Expression $func_apply(Expr $callee) => Func_apply($callee, 0, 0);
 
 static int _null_literal(List expr) =>
   _integer_literal_kind(expr, NULL) == <zero> ||
@@ -2143,7 +2142,7 @@ List x2c_func_call_arguments(List function, List storage, List arguments) {
    an array from left to right, and applies the callee. Func_apply validates
    arity and dispatches; the selected adapter checks carrier, type and
    conversion. */
-macro Expression $func_call(Expr $callee, Expr $count,
+static macro Expression $func_call(Expr $callee, Expr $count,
     Expr $arguments...) => ({
   Func function = $callee;
   FuncArg storage[$count];

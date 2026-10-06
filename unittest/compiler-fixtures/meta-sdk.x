@@ -1,6 +1,6 @@
 /*  meta-sdk.x -- a macro whose implementation is x2c, not Lisp
 
-    `meta-sdk-defs.xmacro` implements each macro below as a `meta` function
+    `meta-sdk-defs.x` implements each macro below as a `meta` function
     that calls the compiler through `Meta`. The struct's fields, the field-read
     expressions and the captured spelling all come from the compiler, so none
     of these bodies could be written without that surface.
@@ -17,7 +17,7 @@
 #include "x2c.x"
 #include "meta.x"
 
-$(import "meta-sdk-defs.xmacro")
+#include "meta-sdk-defs.x"
 
 typedef struct Point {
   int x, y, z;

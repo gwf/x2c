@@ -302,7 +302,7 @@ registered through the `<compiler>` supplier (`$compiler.targets()`,
 inventory) under the derived Lisp names (`_meta_lisp_name`). A linked row
 carries the FNV hash of its definition's source span; an imported
 definition binds to the linked row only when the hashes match, otherwise
-the file is staged like user code, so editing `lib/autodiff.xmacro` still
+the file is staged like user code, so editing `lib/autodiff-macros.x` still
 works without a compiler rebuild. The E1 probe on this branch
 (`src/var-tag-rows.x`) is this route done by hand for one group.
 
@@ -360,7 +360,7 @@ Overestimates on purpose; each row names its gate. Lines are current
 | `lib/machine.x` Lisp half (`LispFrame`, `LispMachine`, `MACHINE_CALL_RESERVE`, `MACHINE_LOCAL_*`, `MW_L*`) | ~140 | delete; the file becomes Match-only | `machine_suite`, `match_suite` |
 | `lib/lisp.x` hand target rows (1607-1808) | ~100-150 | generate from the native-meta target table where a `meta native` spelling exists (the lifetime certifier, `src/macros.x:1926-1939`, bounds this) | `lisp_suite` |
 | `etc/lisp-values.xlisp` derivable rows | ~165 | generate from the target table | check-reference-lisp |
-| `etc/builtin-core.xlisp`, `etc/compiler-sdk.xlisp` argument checks | 34 + ~15 | aliases become template renames in `etc/builtin-macros.xmacro`; a native signature checks itself | fixtures |
+| `etc/builtin-core.xlisp`, `etc/compiler-sdk.xlisp` argument checks | 34 + ~15 | aliases become template renames in `etc/builtin-macros.x`; a native signature checks itself | fixtures |
 | `src/macros.x` shared-library lifecycle flags, `<lisp-late>` restart-by-exception (1000-1281), comptime install/evaluate plumbing (`install_meta_function`, `lower_meta_expression` callers) | ~370 | build the parent session eagerly in `Frontend.open` (~650 Lisp lines to evaluate instead of ~9,900), freeze, adopt per unit; delete the deferred fill, the restart, `collect_forget_preload_entries` (`src/frontend.x:288-339`), `DiagnosticsHold` (`src/diagnostics.x:77-108`), `main.x` restart paths (107-118, 174-182, 371-379) | translation of a small unit within 1.1x; `run-cli-boundary.sh` |
 | `src/macros.x` meta import replay (1350-1365), Lisp call-budget arms (2194-2201), `x2c_comptime_lower` (956) and its `lib/meta.x:315` declaration | ~60 | delete; lowered definitions are no longer session-bound; three callers were the generators | fixtures |
 | `src/regions.x` `lowered_meta_regions` replay (1239-1246) and `Compiler.meta_regions` fill from the lowering (`src/comptime.x:2970`) | ~15 | delete the replay; keep the analyzer and the meta hard error; the native-row summary path (`src/macros.x:1931`) still fills the map | `regions-*` fixtures |
@@ -396,7 +396,7 @@ Overestimates; each is a separate small change with its own gate.
 | `Context` export arms (`lib/context.x:194-284`) | 20 | fold identical arms |
 | `lib/match-recursive.x` | 445 | relocate under `unittest/` as the oracle (consumers: test-support.x, test-match-plan.x, the benchmark) |
 | `MatchCache` LRU, leases, generations (`lib/match.x:2002-2460`) | 80-480 | a private direct-mapped plan table; gate: `run-match-cache-benchmark.sh` hit <= 1.1x, cold <= 1.3x; the admission memos stay (measured 2.35x) |
-| `lib/autodiff.xmacro`, `lib/autodiff.x` | 1,566 relocated | to `packages/autodiff`; only reference is the include at `lib/lisp.x:36`; their fixtures leave `make check` (Gary's decision) |
+| `lib/autodiff-macros.x`, `lib/autodiff.x` | 1,566 relocated | to `packages/autodiff`; only reference is the include at `lib/lisp.x:36`; their fixtures leave `make check` (Gary's decision) |
 | `ScopeStats.largest_request`, `.peak_live_requested_bytes`; `Var.parse`; alias methods `List.subseq`, `Array.indexof`; public `Var.fallback_*`, `Var.wide_*` | ~200 | delete or make private; module pages change |
 | legacy macro body forms (`language.md:808-820`, `src/macros.x:3073-3096`) | 35 | retire; fixtures only |
 

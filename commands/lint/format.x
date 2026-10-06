@@ -13,7 +13,6 @@
 #include "diff.x"
 #include <string.h>
 
-#pragma private
 
 /* `text` with the space at the end of each line removed. */
 static String _trimmed(String text):

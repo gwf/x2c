@@ -14,7 +14,6 @@
 
 #include "string.x"
 
-#pragma private
 
 #include <limits.h>
 

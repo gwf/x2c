@@ -1,4 +1,0 @@
-unittest/compiler-fixtures/macro-export-form.x:7:1: parse: 'export' applies only to a file-scope macro import
-  export $(defun f () 1)
-  ^^^^^^
-

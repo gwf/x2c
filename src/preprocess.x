@@ -6,11 +6,10 @@
     so generated C keeps them where they were written. This module owns
     what x2c reads from those lines without running a preprocessor: which
     conditional arms C can reach, and what the directives before each form
-    say about visibility, layout, and the unit's `#define` names.
+    say about layout and the unit's `#define` names.
 */
 #pragma once
 #include "compiler.x"
-#pragma private
 #include <ctype.h>
 
 /* directive lines
@@ -79,17 +78,6 @@ static int _never_defined(String name) {
     the group's state was 1, and 0 otherwise. */
 int preproc_branch_state(int state) => state == 1 ? 2 : 0;
 
-/** Returns 1 when the preprocessor line `text` is `#pragma private`, 0 when
-    it is `#pragma public`, and -1 otherwise. A comment in the line reads as
-    a blank, as it does in C. */
-int preproc_visibility(String text) {
-  String directive = preproc_directive(text);
-  if (!directive.startswith("pragma")) return -1;
-  String line = _directive_line(directive);
-  if (line == "pragma private") return 1;
-  return line == "pragma public" ? 0 : -1;
-}
-
 /** Returns the file named by the `#include` line `text`, or `NULL` for any
     other line. `angle` is 1 for a `<...>` name and 0 otherwise. Text after
     the name, such as a comment, is ignored.
@@ -146,7 +134,7 @@ static Token _macro_directive(String content, int &undefined) {
    hidden, 1 when the arms after its first `#else` will be, and 0
    otherwise. `layout` maps each macro whose body can change a struct's
    layout to 1, or to 2 when the body packs. */
-typedef struct ArmScan {
+static typedef struct ArmScan {
   Compiler c, Array stack, Map layout;
   int hidden, serial;
 } ArmScan;

@@ -17,8 +17,7 @@
 */
 #pragma once
 #include "compiler.x"
-#pragma private
-$(import "../src/ast-rewrite.xmacro")
+#include "ast-rewrite.x"
 #include "type.x"
 #include "var.x"
 #include "string.x"
@@ -33,7 +32,7 @@ $(import "../src/ast-rewrite.xmacro")
 
 // diagnostics
 
-macro Stmt $report.cache.init_cycle(Expr $c, Expr $origin, Expr $notes) {
+static macro Stmt $report.cache.init_cycle(Expr $c, Expr $origin, Expr $notes) {
   $c.report_error(
     <cache>, "file-static x2c initializer dependency cycle",
     $origin, $notes);
@@ -437,7 +436,7 @@ static List Compiler._array_input(
 /* One translation-unit-local immutable cache in a generated header. The
    constructor eagerly establishes process-lifetime values; patched inline
    entries retain the same guard-based fallback as source-resident caches. */
-typedef struct HeaderCache {
+static typedef struct HeaderCache {
   Compiler c;
   String prefix;
   List guard, initializer;
@@ -526,7 +525,7 @@ static List Compiler._header_initializer(
 List Compiler.initialization_guard(Compiler c, List guard) =>
   c.rebuild_statement($!{ static int $guard = 0; }).cadr();
 
-macro Decorator $initialized_entry(
+static macro Decorator $initialized_entry(
   Function $function, Expr $guard, Expr $entry, Stmt $body...) {
   if (!$guard) $entry();
   $body...
@@ -614,7 +613,7 @@ static int Compiler._reaches_kind(Compiler c, List code, Symbol kind) {
 /* The file-static initializers of one region queue, by binding. `state` is
    1 while a binding's dependencies are visited and 2 once it is queued, and
    `phases` records the bindings queued late. */
-typedef struct StaticQueue {
+static typedef struct StaticQueue {
   Compiler c;
   Map pending, state, phases;
   Array initializers;

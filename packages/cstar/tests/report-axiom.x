@@ -1,7 +1,7 @@
 /*  report-axiom.x -- a trust obligation prevents a verified result. */
 
 #include "x2c.x"
-$(import "../src/cstar.xmacro")
+#include "../src/cstar-macros.x"
 
 $cstar.verify("fact(x <= 2147483647i)", "fact(__return == x + 0i)")
 static int identity_value(int x) {

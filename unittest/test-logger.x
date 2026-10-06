@@ -1,7 +1,7 @@
 /*  test-logger.x -- unit tests for logger filtering and delivery */
 
 #include "test-support.x"
-$(import "test-macros.xmacro")
+#include "test-macros.x"
 #include "logger.x"
 
 #include <fcntl.h>

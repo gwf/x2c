@@ -12,7 +12,7 @@
 */
 
 #pragma once
-$(import "../lib/private-keywords.xmacro")
+#include "../lib/private-keywords.x"
 #include "compiler.x"
 
 /** What the running compile-time call answers from. `expander` is the
@@ -31,15 +31,134 @@ typedef struct MetaContext {
   Token site;
 } MetaContext;
 
-#pragma private
-$(import "../src/grammar.xmacro")
+#include "grammar.x"
 #include "macros.x"
 #include "meta.x"
 #include <limits.h>
 #include <stdint.h>
 #include <sys/stat.h>
 
-$(import "../src/meta-sdk-reports.xmacro")
+
+/* Compile-time SDK rejection messages and notes. */
+
+static macro Stmt $report.sdk.method_name(Expr $name) =>
+  _sdk_reject_value(
+    "x2c.method.resolve requires an identifier String", $name);
+
+static macro Stmt $report.sdk.method_ambiguous(
+  Expr $type, Expr $name, Expr $packages) {
+  {
+    Array notes = [];
+    foreach (String package, $packages)
+      notes.push(%"package: '$package'");
+    String owner = $type.base_type().car().str();
+    MetaContext.reject(
+      %"method '$owner.${$name}' is provided by multiple imported packages",
+      notes.list_free());
+  }
+}
+
+static macro Stmt $report.sdk.fields_type(Expr $value) =>
+  _sdk_reject_value(
+    "x2c.type.fields requires a struct or union Type", $value);
+
+static macro Stmt $report.sdk.fields_complete(Expr $value) =>
+  _sdk_reject_value(
+    "x2c.type.fields requires a complete struct or union Type", $value);
+
+static macro Stmt $report.sdk.binding_spelling(Expr $syntax) =>
+  _sdk_reject_value(
+    "x2c.binding.spelling requires an identifier spelling", $syntax);
+
+static macro Stmt $report.sdk.binding_syntax(Expr $syntax) =>
+  _sdk_reject_value(
+    "x2c.binding.spelling requires binding syntax", $syntax);
+
+static macro Stmt $report.sdk.binding_known(Expr $value) =>
+  MetaContext.reject(
+    "x2c.binding.spelling requires a known binding",
+    %("binding: ${$value.repr()}"));
+
+static macro Stmt $report.sdk.binding_identifier(Expr $syntax) =>
+  _sdk_reject_value(
+    "x2c.binding.spelling requires an identifier or binding", $syntax);
+
+static macro Stmt $report.sdk.identifier(Expr $spelling) =>
+  _sdk_reject_value(
+    "x2c.ident requires an identifier spelling", $spelling);
+
+static macro Stmt $report.sdk.unique_stem(Expr $stem) =>
+  _sdk_reject_value(
+    "_x2c.name.unique requires an identifier stem", $stem);
+
+static macro Stmt $report.sdk.parameter_missing(Expr $function, Expr $wanted) =>
+  MetaContext.reject(
+    %"x2c.function.parameter cannot find '${$wanted}'",
+    %("function: ${x2c_function_name($function).repr()}"));
+
+static macro Stmt $report.sdk.symbol_set_value(Expr $value) =>
+  MetaContext.reject(
+    "_x2c.symbol-set requires Symbols", %("value:" ${$value.repr()}));
+
+static macro Stmt $report.sdk.symbol_set_duplicate(Expr $values, Expr $duplicate) =>
+  MetaContext.reject(
+    "_x2c.symbol-set requires distinct Symbols",
+    %("symbol:" ${$values.getindex($duplicate).repr()}));
+
+static macro Stmt $report.sdk.native_declarations() =>
+  MetaContext.reject(
+    "native module sources declare no meta function",
+    %("declare each exported function with a bodyless meta prototype"));
+
+static macro Stmt $report.sdk.source_capture(Expr $value) =>
+  MetaContext.reject(
+    "x2c.source.text requires complete captured syntax",
+    active.has_bindings ? NULL : %("value: ${$value.repr()}"));
+
+static macro Stmt $report.sdk.embed_path_empty() =>
+  MetaContext.reject("x2c.embed.text requires a non-empty path", NULL);
+
+static macro Stmt $report.sdk.embed_literal(Expr $requested) =>
+  _sdk_reject_value(
+    "x2c.embed.text requires a String or captured String literal",
+    $requested);
+
+static macro Stmt $report.sdk.embed_read(Expr $c, Expr $path) =>
+  $c._embed_reject("cannot read embedded text", $path);
+
+static macro Stmt $report.sdk.embed_nul(Expr $c, Expr $path) =>
+  $c._embed_reject("embedded text contains an embedded NUL", $path);
+
+static macro Stmt $report.sdk.embed_size(Expr $c, Expr $path) =>
+  $c._embed_reject("embedded text exceeds the String size limit", $path);
+
+static macro Stmt $report.sdk.embed_file(Expr $c, Expr $path) =>
+  $c._embed_reject("embedded text is not a regular file", $path);
+
+static macro Stmt $report.sdk.embed_open(Expr $c, Expr $path) =>
+  $c._embed_reject("cannot open embedded text", $path);
+
+static macro Stmt $report.sdk.literal_value(Expr $syntax) =>
+  MetaContext.reject(
+    "x2c.literal.value requires a String, int, or Symbol literal",
+    %("value: ${$syntax.repr()}"));
+
+static macro Stmt $report.sdk.invocation_missing() =>
+  MetaContext.reject(
+    "x2c invocation location used outside macro expansion", NULL);
+
+static macro Stmt $report.sdk.notes_string(Expr $operation, Expr $note) =>
+  _sdk_reject_value(%"${$operation} notes must be Strings", $note);
+
+static macro Stmt $report.sdk.expansion_required(Expr $operation) =>
+  MetaContext.reject(%"${$operation} used outside macro expansion", NULL);
+
+static macro Expression $report.sdk.path_notes(Expr $c, Expr $path) =>
+  %("path: ${$c.display_path($path)}");
+
+static macro Expression $report.sdk.value_notes(Expr $value) =>
+  %("value: ${$value.repr()}");
+
 
 // the running call
 

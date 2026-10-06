@@ -192,7 +192,7 @@ The code comes from `_build_mkdirs` and `_build_remove_tree`
 
 ### Shared cause
 
-Add `cmd-fail` to `lib/error-macros.xmacro`. Also update:
+Add `cmd-fail` to `lib/error-macros.x`. Also update:
 
 - the count in `unittest/test-error.x:205`
 - the table in `docs/src/guide/exceptions.md`

@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-$(import "keyword-alias-import-pack.xmacro")
+#include "keyword-alias-import-pack-defs.x"
 
 int main(void) {
   int private_scope = 0;

@@ -22,11 +22,10 @@ protocol Iter(Vec);
 Self Chain.rest(Self values);
 int ChainLeaf.leaf_len(ChainLeaf values);
 
-#pragma private
 
 #include <math.h>
 
-typedef double Magnitude;
+static typedef double Magnitude;
 
 Vec Vec.new(double x, double y) {
   Vec v = Scope.malloc(sizeof(struct VecData));

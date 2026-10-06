@@ -9,7 +9,6 @@ import "geo" with Vec;
 
 double diagonal(double x, double y);
 
-#pragma private
 
 double diagonal(double x, double y) {
   Vec v = Vec.new(x, y);

@@ -5,7 +5,7 @@ import "cstar" with Cstar;
 #include "test-support.x"
 #include <stdlib.h>
 
-$(import "../../../unittest/test-macros.xmacro")
+#include "../../../unittest/test-macros.x"
 
 static String run(String command, int expected_status) {
   String output = "builds/emit.out";

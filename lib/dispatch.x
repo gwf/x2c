@@ -14,11 +14,10 @@
 
 #pragma once
 
-$(import "error-macros.xmacro")
+#include "error-macros.x"
 #include "common.x"
 #include "map.x"
 
-#pragma private
 #include "var.x"
 #include "varconvert.x"
 #include "symbol.x"
@@ -61,15 +60,15 @@ static VarDescriptor *_row(int index) {
 
 // display text
 
-macro Expression $display.format.character() => "%c";
-macro Expression $display.format.sint() => "%d";
-macro Expression $display.format.slong() => "%ld";
-macro Expression $display.format.sllong() => "%lld";
-macro Expression $display.format.uint() => "%u";
-macro Expression $display.format.ulong() => "%lu";
-macro Expression $display.format.ullong() => "%llu";
-macro Expression $display.format.floating() => "%lf";
-macro Expression $display.format.extended() => "%Lf";
+static macro Expression $display.format.character() => "%c";
+static macro Expression $display.format.sint() => "%d";
+static macro Expression $display.format.slong() => "%ld";
+static macro Expression $display.format.sllong() => "%lld";
+static macro Expression $display.format.uint() => "%u";
+static macro Expression $display.format.ulong() => "%lu";
+static macro Expression $display.format.ullong() => "%llu";
+static macro Expression $display.format.floating() => "%lf";
+static macro Expression $display.format.extended() => "%Lf";
 
 /** Returns the display `String` of `Var`. */
 String Var.str(Var v) {

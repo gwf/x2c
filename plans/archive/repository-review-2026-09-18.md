@@ -50,7 +50,7 @@ Files: `lib/pool.x`, `lib/thread.x`, `lib/process.x`, `lib/path.x`,
 
 These four share one cause: a resource released by a plain call rather than a
 `defer`, on a path a shared `Error` cause can transfer past. Every shared
-cause in `lib/error-macros.xmacro` transfers, so the release never runs.
+cause in `lib/error-macros.x` transfers, so the release never runs.
 
 | Defect | Reproduction | Cause and repair | R |
 | --- | --- | --- | --- |
@@ -135,12 +135,12 @@ and `exception-signal-mask` are byte-identical to `dbfc9cfc` again.
 
 ## Group 3: runtime value contracts
 
-Files: `lib/list-generics.xmacro`, `lib/string.x`,
+Files: `lib/typed-list.x`, `lib/string.x`,
 `unittest/test-typed-list.x`, `unittest/test-string.x`.
 
 | Defect | Reproduction | Cause and repair | R |
 | --- | --- | --- | --- |
-| Typed-list `last` returns a plausible wrong value on nil while `car` returns zero. | `ListInt.last(NULL)` gives `-1`; `ListDbl.last(NULL)` gives a huge double. `ListInt.car(NULL)` gives 0. | `list-generics.xmacro:57` decodes `List.last`'s `void` (all-ones bits) through a raw mask. `car` at `:41` carries an explicit nil guard and a comment endorsing the drain-loop pattern this breaks. Give `last` the same `xs ?` guard returning `$zero`, and change its doc line from "in nonempty `xs`" to match `car`'s wording. Only `ListString` is safe today, because `Var.string` tag-checks. | me |
+| Typed-list `last` returns a plausible wrong value on nil while `car` returns zero. | `ListInt.last(NULL)` gives `-1`; `ListDbl.last(NULL)` gives a huge double. `ListInt.car(NULL)` gives 0. | `typed-list.x:57` decodes `List.last`'s `void` (all-ones bits) through a raw mask. `car` at `:41` carries an explicit nil guard and a comment endorsing the drain-loop pattern this breaks. Give `last` the same `xs ?` guard returning `$zero`, and change its doc line from "in nonempty `xs`" to match `car`'s wording. Only `ListString` is safe today, because `Var.string` tag-checks. | me |
 | `String.parse_char` accepts an octal escape above a byte. | `"'\\400'".parse_char()` returns 256. | `string.x:1322-1338` shares `_decode_escape_char` with `String.unescape`, which raises `<bad-arg>` above `\377` at `:1246-1249`. `parse_char` never raises and documents "one decoded byte" with "malformed and null input returns -1", so return -1 rather than adding a raise. Carried from the 2026-09-17 catalog, Group 19 row 5. | me |
 | `String.new_fill` overflows `count + 1`. | `String.new_fill('x', INT_MAX)`. Signed overflow is undefined; at both `-O0` and `-O2` on this host it allocates a 2 GiB `String` rather than the documented refusal. | `string.x:409-415` is the only `String.malloc(n + 1)` site in the file that does not bound its length first. `String.pad` (`:893-897`) raises `<size-limit>` for exactly this. The doc comment already states the precondition; make it enforced, matching `String.pad`. | me |
 
@@ -284,7 +284,7 @@ The original nine items follow, for the record.
    nowhere. Run them, or delete them.
 4. **`class Color;` produces no registration and no diagnostic.** It is the
    documented forward form, so silence may be intended. If it is not, the
-   decorator in `etc/builtin-macros.xmacro` should say so.
+   decorator in `etc/builtin-macros.x` should say so.
 5. **A `Stmt` decorator on a function body silently drops its trailing
    work.** `$time("work") static int work(int n) { return n * 2; }` compiles
    and runs, and the timing line never prints, because the body's `return`

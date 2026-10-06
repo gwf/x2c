@@ -1,1 +1,0 @@
-macro Expression $cycle.forty() => 40;

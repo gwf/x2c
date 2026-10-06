@@ -35,7 +35,6 @@ inline List header_list(void) {
   return %(header "nested");
 }
 
-#pragma private
 
 static String source_dual(void) {
   return "dual";

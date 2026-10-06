@@ -2,7 +2,7 @@
 
     Copyright (c) 2025 Gary William Flake
 
-    `var-tags.xmacro` holds the ledger. This optional module is the one
+    `var-tags.x` holds the ledger. This optional module is the one
     runtime unit that imports it, so other units include `var.x` and
     `varconvert.x` without loading the ledger. It defines the tag table, the
     tag sets, the numeric table, and the decoder table those modules
@@ -13,7 +13,7 @@
 #include "varconvert.x"
 #include "meta.x"
 
-$(import "var-tags.xmacro")
+#include "var-tags.x"
 
 $var.tag.id.checks();
 

@@ -203,5 +203,5 @@ the bare symbol `*=` is taken for a `*` sequence binder.
   the SDK parses digits itself. Decimal integers and floats with an
   exponent are about 40 lines; hex, octal, character literals, and suffixes
   are not written.
-- `autodiff.xmacro` is the working precedent for all of this and was the
+- `autodiff-macros.x` is the working precedent for all of this and was the
   most useful file to read first.

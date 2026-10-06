@@ -8,8 +8,8 @@
 
 #pragma once
 
-$(import "error-macros.xmacro")
-$(import "cleanup.xmacro")
+#include "error-macros.x"
+#include "cleanup.x"
 
 #include "common.x"
 
@@ -21,7 +21,6 @@ typedef struct Mutex *Mutex;
 
 $cleanup.by(Mutex, free);
 
-#pragma private
 
 #include "scope.x"
 
@@ -67,7 +66,7 @@ void Mutex.recursive_unlock(pthread_mutex_t *mutex, const char *failure) {
   }
 }
 
-struct Mutex {
+static struct Mutex {
   pthread_mutex_t native;
 };
 

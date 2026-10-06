@@ -33,7 +33,6 @@ typedef struct Build {
   int xlat_n, xlat_done, xlat_cached, cc_n, cc_done, cc_cached, final_cached;
 } *Build;
 
-#pragma private
 
 #include <errno.h>
 #include <stdio.h>
@@ -46,16 +45,90 @@ typedef struct Build {
 #include "json.x"
 #include "report.x"
 
-$(import "build-reports.xmacro")
+
+/* build command reports. */
+
+static macro Stmt $report.build.input_unsupported(Expr $input) =>
+  driver_error(%"unsupported build input: ${$input}");
+
+static macro Stmt $report.build.archive_nested(Expr $input) =>
+  driver_error(%"cannot nest an archive in a static library: ${$input}");
+
+static macro Stmt $report.build.input_not_file(Expr $input) =>
+  driver_error(%"input is not a regular file: ${$input}");
+
+static macro Stmt $report.build.runtime_missing(Expr $runtime) =>
+  driver_error(%"matching x2c runtime is unavailable: ${$runtime}");
+
+static macro Stmt $report.build.package_missing(Expr $name, Expr $path) =>
+  driver_error(%"package '${$name}' is not built: ${$path}");
+
+static macro Stmt $report.build.database_written(Expr $path) =>
+  report_line(<muted>, %"  Compilation database ${$path}");
+
+static macro Stmt $report.build.compiler_used(Expr $b, Expr $jobs) =>
+  report_line(<muted>, %"  Compiled with ${$b.toolchain.cc} using ${$jobs}");
+
+static macro Stmt $report.build.intermediates(Expr $b) =>
+  report_line(<muted>, %"  Intermediates ${$b.work_dir} (${$b._retention()})");
+
+static macro Stmt $report.build.output_size(Expr $b, Expr $size) =>
+  report_line(<muted>, %"  Output ${$b.output} (${$size})");
+
+static macro Stmt $report.build.debug_symbols(Expr $b) =>
+  report_line(<muted>, %"  Debug symbols ${$b.output}.dSYM");
+
+static macro Stmt $report.build.running(Expr $b) =>
+  report_line(<phase>, %"Running ${$b.output}");
+
+static macro Stmt $report.build.input_directory(Expr $input) {
+  fprintf(stderr, "x2c: error: input is a directory: %s\n", $input);
+  fputs(
+    "note: pass source files, use a shell wildcard, or define a "
+    "manifest target\n", stderr);
+}
+
+static macro Stmt $report.build.input_missing(Expr $input) =>
+  fprintf(stderr, "x2c: error: input does not exist: %s\n", $input);
+
+static macro Stmt $report.build.translation_cached(Expr $input) =>
+  fprintf(stderr, "x2c: up-to-date translate %s\n", $input);
+
+static macro Stmt $report.build.database_unwritable(Expr $path) =>
+  fprintf(stderr, "x2c: error: cannot write compilation database: %s\n",
+    $path);
+
+static macro Stmt $report.build.compilation_cached(Expr $source) =>
+  fprintf(stderr, "x2c: up-to-date compile %s\n", $source);
+
+static macro Stmt $report.build.final_cached(Expr $phase, Expr $output) =>
+  fprintf(stderr, "x2c: up-to-date %s %s\n", $phase, $output);
+
+static macro Stmt $report.build.link_unchanged(Expr $output) =>
+  fprintf(stderr, "x2c: unchanged link %s\n", $output);
+
+static macro Stmt $report.build.replace_failed(Expr $output, Expr $reason) =>
+  fprintf(
+    stderr, "x2c: error: cannot replace %s: %s\n",
+    $output, $reason);
+
+static macro Stmt $report.build.cleanup_failed(Expr $directory) =>
+  fprintf(
+    stderr, "x2c: warning: cannot remove temporary build directory: %s\n",
+    $directory);
+
+static macro Stmt $report.build.output_ambiguous() =>
+  driver_error("--output is ambiguous with multiple compile-only inputs");
+
 
 // source templates
 
-macro Expression $source.build.module(Expr $stamp) =>
+static macro Expression $source.build.module(Expr $stamp) =>
   %"const char x2c_module_stamp[] = \"${$stamp}\";
 Map x2c_module_targets(void) => \$module.targets();
 ";
 
-macro Expression $source.build.extension(Expr $name) =>
+static macro Expression $source.build.extension(Expr $name) =>
   %"void x2c_register_extension(const char *, Map (*)(void));
 static Map _targets(void) => \$module.targets();
 __attribute__((constructor)) static void _register(void) {
@@ -63,10 +136,10 @@ __attribute__((constructor)) static void _register(void) {
 }
 ";
 
-macro Expression $source.build.include(Expr $includes, Expr $source) =>
+static macro Expression $source.build.include(Expr $includes, Expr $source) =>
   %"${$includes}#include \"x2c-root${$source}\"\n";
 
-macro Expression $source.build.entry(
+static macro Expression $source.build.entry(
   Expr $includes, Expr $root, Expr $declared, Expr $exports) =>
   %"${$includes}\$(import \"${$root}/etc/lisp-bindings.xlisp\")
 macro Expression \$module.targets() =>
@@ -571,7 +644,7 @@ static void _place_header(
 /* One source's compile. A job with a state record first preprocesses into
    `preprocessed`, whose text completes its fingerprint, and compiles only
    when that fingerprint misses. */
-typedef struct CcJob {
+static typedef struct CcJob {
   ToolRun execution, ToolAction action;
   String source, object, depfile, state_path, preprocessed;
   uint64_t fingerprint;
@@ -579,7 +652,7 @@ typedef struct CcJob {
 } CcJob;
 
 /* The jobs one build has running, at most `request.jobs`. */
-typedef struct CcPool {
+static typedef struct CcPool {
   Build b;
   CcJob *running;
   int count;

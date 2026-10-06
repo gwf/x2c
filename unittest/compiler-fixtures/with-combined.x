@@ -5,7 +5,6 @@ import "geo" as g with Vec;
 
 double outline(double x, double y);
 
-#pragma private
 
 double outline(double x, double y) {
   Vec v = Vec.new(x, y);

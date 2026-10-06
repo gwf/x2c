@@ -21,7 +21,7 @@ For a broad compiler audit, start with values produced by one stage and
 silently rejected by a later consumer:
 
 ```sh
-builds/0/x2c lint --rule silent-shape-guard src/*.x lib/*.x lib/*.xmacro
+builds/0/x2c lint --rule silent-shape-guard src/*.x lib/*.x
 ```
 
 Each finding is a structural guard whose failure continues, returns null or
@@ -56,7 +56,7 @@ binding List crosses the local branch.
 builds/0/x2c lint --rule return-after-report-error --rule return-after-raise \
   --rule fallback-shared-cause --rule fresh-literal-null-guard \
   --rule growth-check --rule shape-diagnostics --rule recursive-validator \
-  --rule validator-diagnostics src/*.x lib/*.x lib/*.xmacro
+  --rule validator-diagnostics src/*.x lib/*.x
 ```
 
 A function's reasons are reported when its strongest reason is a

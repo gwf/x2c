@@ -282,7 +282,7 @@ static void scan_lisp_status_variants(void) {
 }
 
 
-$(import "test-macros.xmacro")
+#include "test-macros.x"
 
 void scan_suite(void) {
   $test.run(scan_prefix_failures_transfer);

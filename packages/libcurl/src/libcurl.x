@@ -6,7 +6,7 @@
  */
 
 #include "curl-822.h"
-$(import "cleanup.xmacro")
+#include "cleanup.x"
 
 typedef struct CurlEasy *CurlEasy;
 typedef struct CurlResponse *CurlResponse;
@@ -23,7 +23,6 @@ $cleanup.by(CurlEasy, free);
 $cleanup.by(CurlResponse, free);
 $cleanup.by(CurlBatch, free);
 
-#pragma private
 
 #include <limits.h>
 #include <stdint.h>
@@ -32,16 +31,16 @@ $cleanup.by(CurlBatch, free);
 #include <string.h>
 #include <strings.h>
 
-$(import "libcurl-errors.xmacro")
+#include "libcurl-errors.x"
 
-typedef enum CurlBufferFailure {
+static typedef enum CurlBufferFailure {
   CURL_BUFFER_OK,
   CURL_BUFFER_LIMIT,
   CURL_BUFFER_ALLOC,
   CURL_BUFFER_SIZE
 } CurlBufferFailure;
 
-typedef struct CurlBuffer {
+static typedef struct CurlBuffer {
   unsigned char *bytes;
   size_t length;
   size_t capacity;
@@ -53,7 +52,7 @@ typedef struct CurlBuffer {
 /*  A download writes the body straight to this stream instead of growing a
     CurlBuffer, so the transfer is not bounded by the in-memory body limit.
 */
-typedef struct CurlSink {
+static typedef struct CurlSink {
   File file;
   size_t written;
   int failed;
@@ -62,7 +61,7 @@ typedef struct CurlSink {
 /*  A streaming callback receives one copied chunk at a time. Any Error it
     raises is caught before control returns to libcurl and reported after the
     transfer has unwound back into x2c. */
-typedef struct CurlStream {
+static typedef struct CurlStream {
   CurlStreamFn consume;
   Var data;
   size_t written;
@@ -70,7 +69,7 @@ typedef struct CurlStream {
   List detail;
 } CurlStream;
 
-struct CurlEasy {
+static struct CurlEasy {
   CURL *native;
   String url;
   String user_agent;
@@ -83,7 +82,7 @@ struct CurlEasy {
   char error[CURL_ERROR_SIZE];
 };
 
-struct CurlResponse {
+static struct CurlResponse {
   long response_code;
   long elapsed_us;
   long upload_size;
@@ -96,7 +95,7 @@ struct CurlResponse {
   int released;
 };
 
-typedef struct CurlTransfer {
+static typedef struct CurlTransfer {
   CurlEasy easy;
   CurlBuffer body, headers;
   CurlSink sink;
@@ -105,18 +104,18 @@ typedef struct CurlTransfer {
   String path;
 } CurlTransfer;
 
-typedef struct CurlBatchItem {
+static typedef struct CurlBatchItem {
   CurlResponse response;
   Symbol cause;
   List detail;
 } CurlBatchItem;
 
-struct CurlBatch {
+static struct CurlBatch {
   CurlBatchItem *items;
   int count, released;
 };
 
-typedef struct CurlSlot {
+static typedef struct CurlSlot {
   CurlEasy easy;
   CurlTransfer transfer;
   int index, attached;
@@ -232,7 +231,7 @@ static void _curl_check(CurlEasy easy, String operation, CURLcode result) {
 }
 
 /* Sets one easy option, naming the option in a failure's operation. */
-macro Stmt $curl.setopt(Expr $easy, Expr $option, Expr $value) {
+static macro Stmt $curl.setopt(Expr $easy, Expr $option, Expr $value) {
   _curl_check($easy, $(x2c.literal.string (x2c.source.text $option)),
               curl_easy_setopt($easy.native, $option, $value));
 }

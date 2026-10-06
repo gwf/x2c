@@ -1,4 +1,0 @@
-macro Expression $p.value() => 1;
-meta int p_meta(int n) => n + 1;
-$(defun p_lisp () 2)
-meta static int p_static(int n) => n * 3;

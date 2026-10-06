@@ -46,11 +46,36 @@ protocol RegexMatchIndex(T) {
 
 protocol RegexMatchIndex(RegexMatch);
 
-#pragma private
 
 #include <string.h>
 
-$(import "regex-errors.xmacro")
+
+/* regex diagnostic messages. Payload owners retain failure policy. */
+
+static macro Expression $reason.unmatched_close() => "unmatched closing parenthesis";
+static macro Expression $reason.no_repeat() => "nothing to repeat";
+static macro Expression $reason.repeat_count() => "repetition count too large";
+static macro Expression $reason.repeat_range() => "repetition range out of order";
+static macro Expression $reason.missing_close() => "missing closing parenthesis";
+static macro Expression $reason.group_syntax() => "unknown group syntax";
+static macro Expression $reason.group_name() => "malformed group name";
+static macro Expression $reason.unterminated_class() =>
+  "unterminated character class";
+static macro Expression $reason.character_range() => "character range out of order";
+static macro Expression $reason.trailing_backslash() => "pattern ends in a backslash";
+static macro Expression $reason.unknown_escape() => "unknown escape";
+
+static macro Stmt $error.compile(Expr $why, Expr $pattern, Expr $offset) {
+  raise %(malformed (operation "Regex.compile") (reason ${$why})
+          (pattern ${$pattern}) (offset ${$offset}));
+}
+
+static macro Stmt $error.depth(Expr $pattern, Expr $limit) {
+  raise %(size-limit (operation "Regex.match") (pattern ${$pattern})
+          (reason "a group repeated more times than one match allows")
+          (limit ${$limit}));
+}
+
 
 // nodes
 
@@ -61,7 +86,7 @@ $(import "regex-errors.xmacro")
    A `<repeat>` runs its `child` `min` to `max` times, with -1 for no
    bound. An `<alt>` holds its first alternative in `child`, and
    alternatives follow each other through `sibling`. */
-struct _RegexNode {
+static struct _RegexNode {
   Symbol kind;
   unsigned char set[32];
   int index;
@@ -132,7 +157,7 @@ static void _RegexNode._fold(_RegexNode node) {
    node tree. A malformed pattern raises `<malformed>` at the byte offset
    where the parser stands. */
 
-typedef struct Parser {
+static typedef struct Parser {
   Regex regex, const char *text, int pos, len;
 } Parser;
 
@@ -438,7 +463,7 @@ static int Parser.escape(Parser &p) {
 /* One search of `text`: `end` is where the match ends, `depth` counts the
    iterations of repeated groups in progress, and `starts` and `ends` hold
    each capture's offsets, or -1. */
-typedef struct Matcher {
+static typedef struct Matcher {
   Regex regex, const char *text, int len, end, depth, int *starts, *ends;
 } Matcher;
 
@@ -489,7 +514,7 @@ static RegexMatch _next(Regex r, String subject, RegexMatch previous) {
 
 /* What runs once a sequence ends: the node after a group or alternation,
    or the next iteration of a repeated group. */
-typedef struct Rest {
+static typedef struct Rest {
   int repeat, _RegexNode node, int count, start, struct Rest *up;
 } Rest;
 

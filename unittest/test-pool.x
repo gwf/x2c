@@ -478,7 +478,7 @@ static void pool_release_and_parent_allocation_do_not_deadlock(void) {
   parent.release();
 }
 
-$(import "test-macros.xmacro")
+#include "test-macros.x"
 
 void pool_suite(void) {
   $test.run(pool_lookup_shadows_outward);

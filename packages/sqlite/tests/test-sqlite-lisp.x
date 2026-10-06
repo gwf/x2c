@@ -6,7 +6,7 @@ import "sqlite" with SqliteLisp;
 #include "sqlite-3.h"
 #include <stdio.h>
 
-$(import "../../../unittest/test-macros.xmacro")
+#include "../../../unittest/test-macros.x"
 
 static void lisp_reads_rows_null_and_binary(void) {
   Lisp lisp = $auto(Lisp.new());

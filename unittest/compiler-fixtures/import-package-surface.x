@@ -13,7 +13,6 @@ double first_component(double x, double y);
 g.ChainLeaf package_tail(g.ChainLeaf values);
 int package_tail_len(g.ChainLeaf values);
 
-#pragma private
 
 double first_component(double x, double y) {
   g.Vec v = g.Vec.new(x, y);

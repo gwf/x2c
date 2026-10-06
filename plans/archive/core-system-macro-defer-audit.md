@@ -29,7 +29,7 @@ that no other simplification is possible.
 Baseline 8eb27f4. All 81 executable defer statements in src/*.x were
 inspected individually, including each block body and its acquisition/state
 producer. The other 17 unquoted defer tokens are compiler AST tags/patterns,
-not executable defer statements. src/ast-rewrite.xmacro has no defer.
+not executable defer statements. src/ast-rewrite.x has no defer.
 
 A row is one written defer statement, even if it contains several actions.
 Auto = compatible initialized local; Auto-mixed = one cleanup can be replaced
@@ -136,11 +136,11 @@ Total **108 defer statements**, **28 confirmed $auto replacements**; the remaini
 
 | Source | Kind | Complete deferred action | $auto disposition |
 |---|---|---|---|
-| lib/array-generics.xmacro:248 | macro template | `defer if (copied) Block_free((Block) source);` | Reject auto: source aliases borrowed values unless self-overlap required copy; copied flag controls ownership. |
-| lib/array-generics.xmacro:658 | macro template | `defer path.leave();` | Reject auto: RenderPath.leave removes active recursion path after successful enter; path is not an owning Cleanup resource. |
-| lib/array-generics.xmacro:692 | macro template | `defer if ((void *) result == NULL) Block_free((Block) boxed);` | Reject direct auto: conditional rollback frees only unsuccessful staged/created value; success returns or publishes it. Preserve ownership flag and commit boundary. |
-| lib/array-generics.xmacro:771 | macro template | `defer if ((void *) result == NULL) packed.free();` | Reject direct auto: conditional rollback frees only unsuccessful staged/created value; success returns or publishes it. Preserve ownership flag and commit boundary. |
-| lib/array-generics.xmacro:804 | macro template | `defer if ((void *) staged != NULL && (void *) committed == NULL) staged.free();` | Reject direct auto: conditional rollback frees only unsuccessful staged/created value; success returns or publishes it. Preserve ownership flag and commit boundary. |
+| lib/array-generics.x:248 | macro template | `defer if (copied) Block_free((Block) source);` | Reject auto: source aliases borrowed values unless self-overlap required copy; copied flag controls ownership. |
+| lib/array-generics.x:658 | macro template | `defer path.leave();` | Reject auto: RenderPath.leave removes active recursion path after successful enter; path is not an owning Cleanup resource. |
+| lib/array-generics.x:692 | macro template | `defer if ((void *) result == NULL) Block_free((Block) boxed);` | Reject direct auto: conditional rollback frees only unsuccessful staged/created value; success returns or publishes it. Preserve ownership flag and commit boundary. |
+| lib/array-generics.x:771 | macro template | `defer if ((void *) result == NULL) packed.free();` | Reject direct auto: conditional rollback frees only unsuccessful staged/created value; success returns or publishes it. Preserve ownership flag and commit boundary. |
+| lib/array-generics.x:804 | macro template | `defer if ((void *) staged != NULL && (void *) committed == NULL) staged.free();` | Reject direct auto: conditional rollback frees only unsuccessful staged/created value; success returns or publishes it. Preserve ownership flag and commit boundary. |
 | lib/array.x:457 | authored function | `defer if ((void *) result == NULL) output.free();` | Reject direct auto: conditional rollback frees only unsuccessful staged/created value; success returns or publishes it. Preserve ownership flag and commit boundary. |
 | lib/array.x:474 | authored function | `defer if ((void *) result == NULL) output.free();` | Reject direct auto: conditional rollback frees only unsuccessful staged/created value; success returns or publishes it. Preserve ownership flag and commit boundary. |
 | lib/array.x:555 | authored function | `defer source.free();` | CONFIRMED auto: initialized local and existing Cleanup match current defer; preserve block and final binding. See ownership ledger for boundary details. |
@@ -211,13 +211,13 @@ Total **108 defer statements**, **28 confirmed $auto replacements**; the remaini
 | lib/logger.x:547 | authored function | `defer Scope.pop();` | Reject auto; retain explicit pop: nested scope decorator eagerly evaluates the outer SDK capture before substitution. Execution corrected this staging assumption. |
 | lib/logger.x:639 | authored function | `defer Scope.pop();` | Reject auto; retain explicit pop: nested scope decorator eagerly evaluates the outer SDK capture before substitution. Execution corrected this staging assumption. |
 | lib/logger.x:711 | authored function | `defer logger.emission_depth--;` | Reject auto: nesting/emission counter decrement, not resource cleanup; assess let separately against reentrant mutations. |
-| lib/map-generics.xmacro:132 | macro template | `defer Bytes_free(staged_hashes);` | CONFIRMED auto: initialized local and existing Cleanup match current defer; preserve block and final binding. See ownership ledger for boundary details. |
-| lib/map-generics.xmacro:135 | macro template | `defer Bytes_free(staged_entries);` | CONFIRMED auto: initialized local and existing Cleanup match current defer; preserve block and final binding. See ownership ledger for boundary details. |
-| lib/map-generics.xmacro:273 | macro template | `defer if ((void *) result == 0) copy._core_free();` | Reject direct auto: conditional rollback frees only unsuccessful staged/created value; success returns or publishes it. Preserve ownership flag and commit boundary. |
-| lib/map-generics.xmacro:286 | macro template | `defer if (created && !result) map._core_free();` | Reject direct auto: conditional rollback frees only unsuccessful staged/created value; success returns or publishes it. Preserve ownership flag and commit boundary. |
-| lib/map-generics.xmacro:580 | macro template | `defer Scope.destroy(scratch);` | CONFIRMED auto: initialized local and existing Cleanup match current defer; preserve block and final binding. See ownership ledger for boundary details. |
-| lib/map-generics.xmacro:606 | macro template | `defer path.leave();` | Reject auto: RenderPath.leave removes active recursion path after successful enter; path is not an owning Cleanup resource. |
-| lib/map-generics.xmacro:813 | macro template | `defer if ((void *) staged != 0 && (void *) committed == 0) staged._core_free();` | Reject direct auto: conditional rollback frees only unsuccessful staged/created value; success returns or publishes it. Preserve ownership flag and commit boundary. |
+| lib/map-generics.x:132 | macro template | `defer Bytes_free(staged_hashes);` | CONFIRMED auto: initialized local and existing Cleanup match current defer; preserve block and final binding. See ownership ledger for boundary details. |
+| lib/map-generics.x:135 | macro template | `defer Bytes_free(staged_entries);` | CONFIRMED auto: initialized local and existing Cleanup match current defer; preserve block and final binding. See ownership ledger for boundary details. |
+| lib/map-generics.x:273 | macro template | `defer if ((void *) result == 0) copy._core_free();` | Reject direct auto: conditional rollback frees only unsuccessful staged/created value; success returns or publishes it. Preserve ownership flag and commit boundary. |
+| lib/map-generics.x:286 | macro template | `defer if (created && !result) map._core_free();` | Reject direct auto: conditional rollback frees only unsuccessful staged/created value; success returns or publishes it. Preserve ownership flag and commit boundary. |
+| lib/map-generics.x:580 | macro template | `defer Scope.destroy(scratch);` | CONFIRMED auto: initialized local and existing Cleanup match current defer; preserve block and final binding. See ownership ledger for boundary details. |
+| lib/map-generics.x:606 | macro template | `defer path.leave();` | Reject auto: RenderPath.leave removes active recursion path after successful enter; path is not an owning Cleanup resource. |
+| lib/map-generics.x:813 | macro template | `defer if ((void *) staged != 0 && (void *) committed == 0) staged._core_free();` | Reject direct auto: conditional rollback frees only unsuccessful staged/created value; success returns or publishes it. Preserve ownership flag and commit boundary. |
 | lib/map.x:450 | authored function | `defer if (!rebuilt) rebuilt_hashes.free();` | Reject immediate auto: failure-only stage becomes installed map storage; individual initializer registration also changes second-acquisition failure behavior. |
 | lib/map.x:451 | authored function | `defer if (!rebuilt) rebuilt_entries.free();` | Reject immediate auto: failure-only stage becomes installed map storage; individual initializer registration also changes second-acquisition failure behavior. |
 | lib/match.x:1997 | authored function | `defer Scope.pop();` | Reject auto; retain explicit pop: nested scope decorator eagerly evaluates the outer SDK capture before substitution. Execution corrected this staging assumption. |

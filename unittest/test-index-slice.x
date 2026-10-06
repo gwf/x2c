@@ -1,7 +1,7 @@
 /*  test-index-slice.x -- language-level indexing and slice syntax tests */
 
 #include "test-support.x"
-$(import "test-macros.xmacro")
+#include "test-macros.x"
 
 #include <string.h>
 

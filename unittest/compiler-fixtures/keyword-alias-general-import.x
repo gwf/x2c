@@ -1,0 +1,5 @@
+#pragma once
+
+macro Unit $fixture.imported_type(Name $name) {
+  typedef int $name;
+}

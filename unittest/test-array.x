@@ -1,7 +1,7 @@
 /*  test-array.x -- unit tests for array helpers */
 
 #include "test-support.x"
-$(import "test-macros.xmacro")
+#include "test-macros.x"
 #include <limits.h>
 #include <stdint.h>
 

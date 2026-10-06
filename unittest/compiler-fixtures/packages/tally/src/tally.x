@@ -1,6 +1,6 @@
-// A package that exports one macro pack and keeps another.
+// A package with public and static macro definitions.
 #include "x2c.x"
-export $(import "tally.xmacro")
-$(import "hidden.xmacro")
+#include "tally-defs.x"
+#include "hidden.x"
 
 int base(void) => 1;

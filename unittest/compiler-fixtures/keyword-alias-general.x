@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-$(import "keyword-alias-general-import.xmacro")
+#include "keyword-alias-general-import.x"
 
 static int add(int left, int right) {
   return left + right;

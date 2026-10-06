@@ -5,7 +5,6 @@ import "geo" with Vec as Xvec, VecPair, span;
 
 double outline(double x, double y);
 
-#pragma private
 
 double outline(double x, double y) {
   Xvec v = Xvec.new(x, y);

@@ -1,6 +1,4 @@
-// An included file's exported import reaches the includer whole after a
-// serial translation of that file, which the includer then replays. A
-// run-time call to its meta function links the includer's own weak copy.
+// Public compile-time definitions reach consumers through includes.
 #include "macro-export-lib.x"
 
 $m.decl(declared);

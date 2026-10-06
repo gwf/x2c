@@ -1,5 +1,4 @@
-// An import that an included file does not export stays in that file with
-// preprocessor symbol collection.
+// Static compile-time definitions stay private to their source file.
 #include "macro-export-lisp.x"
 
 int lisp = $(h_lisp);

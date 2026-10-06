@@ -4,7 +4,7 @@
     Each rule reads the tokens of the functions the compiler parsed,
     `Lint.functions`. Five rules find a check after an operation that never
     returns on failure: a `return` after `report_error`, a `return` after
-    raising a shared Error cause from `lib/error-macros.xmacro`, a fallback
+    raising a shared Error cause from `lib/error-macros.x`, a fallback
     around such a raise, a null test of a fresh `[]` or `{}`, and a length
     test after growth. The scored rules weigh a function's manual List
     shape tests, diagnostics, and validator name; a function is reported
@@ -17,10 +17,9 @@
 #include <ctype.h>
 #include <string.h>
 
-#pragma private
 
-$(import "../../lib/error-macros.xmacro")
-$(import "../../src/grammar.xmacro")
+#include "../../lib/error-macros.x"
+#include "../../src/grammar.x"
 
 static Ast _raise_terminal(Ast statement):
   for (;;):
@@ -43,7 +42,7 @@ static const List trust_boundaries = %(
   "_transform_defer_stmt" "_transform_return"
 )
 
-/* The causes `lib/error-macros.xmacro` lists as never returning when this
+/* The causes `lib/error-macros.x` lists as never returning when this
    command is built. */
 static const SymbolSet shared_causes = $error.nonreturning.causes()
 

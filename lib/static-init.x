@@ -10,7 +10,6 @@
 
 #pragma once
 #include "common.x"
-#pragma private
 
 #include "exception.x"
 #include <pthread.h>
@@ -18,7 +17,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef struct StaticThread {
+static typedef struct StaticThread {
   X2CStatic *waiting, *values;
 } StaticThread;
 

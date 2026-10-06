@@ -11,7 +11,6 @@ import "raylib";
 /** Renders a 1200x675 Image and writes its series count when requested. */
 Image chart_image(int *series);
 
-#pragma private
 
 Image chart_image(int *series) {
   List days = %("Mon" "Tue" "Wed" "Thu" "Fri" "Sat" "Sun");

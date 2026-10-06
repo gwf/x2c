@@ -4,8 +4,7 @@
    header, whether a function definition or a static declaration precedes
    it, so an including unit can use it. The header drops initializers, and
    a definition whose initializer has to run loses `const`. Static objects,
-   objects of an anonymous type, and objects below `#pragma private` stay in
-   the source. */
+   and objects of an anonymous type stay in the source. */
 typedef int *IntRef;
 
 int before = 1;
@@ -23,9 +22,7 @@ Pair pair = {11, 12};
 const struct Point { int x, y; } origin = {square(3), 14};
 String const greeting = "hi";
 struct { int x; } anonymous = {15};
-#pragma private
 int secret = 16;
-#pragma public
 int reopened = 17;
 
 int main(void) {

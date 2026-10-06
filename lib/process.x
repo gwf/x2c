@@ -50,10 +50,78 @@ typedef enum Env {
   ENV_NAMESPACE
 } Env;
 
-#pragma private
 
 #include "meta.x"
-$(import "job-errors.xmacro")
+
+/* Job launch and result error conditions.
+   Reports expand at their existing owners. */
+
+static macro Stmt $error.start.alloc() {
+  raise %(alloc-fail);
+}
+
+static macro Stmt $error.start.empty() {
+  raise %(bad-arg (operation "Job.start") (reason "empty command"));
+}
+
+static macro Stmt $error.start.missing(Expr $program, Expr $error) {
+  raise %(not-found (operation "Job.start") (program ${$program})
+          (errno ${$error}));
+}
+
+static macro Stmt $error.start.program(Expr $program, Expr $error) {
+  raise %(io-fail (operation "Job.start") (program ${$program})
+          (errno ${$error}));
+}
+
+static macro Stmt $error.start.path(Expr $path, Expr $error) {
+  raise %(io-fail (operation "Job.start") (path ${$path}) (errno ${$error}));
+}
+
+static macro Stmt $error.start.io(Expr $error) {
+  raise %(io-fail (operation "Job.start") (errno ${$error}));
+}
+
+static macro Stmt $error.job.started(Expr $operation) {
+  raise %(bad-arg (operation ${$operation}) (reason "the job has started"));
+}
+
+static macro Stmt $error.options.key() {
+  raise %(bad-arg (operation "Job.options") (reason "option keys are atoms"));
+}
+
+static macro Stmt $error.options.unknown(Expr $name) {
+  raise %(bad-arg (operation "Job.options") (option ${$name}));
+}
+
+static macro Stmt $error.check.both(
+  Expr $command, Expr $status, Expr $output, Expr $errors) {
+  raise %(cmd-fail (command ${$command}) (status ${$status})
+          (output ${$output}) (errors ${$errors}));
+}
+
+static macro Stmt $error.check.output(Expr $command, Expr $status, Expr $output) {
+  raise %(cmd-fail (command ${$command}) (status ${$status})
+          (output ${$output}));
+}
+
+static macro Stmt $error.check.errors(Expr $command, Expr $status, Expr $errors) {
+  raise %(cmd-fail (command ${$command}) (status ${$status})
+          (errors ${$errors}));
+}
+
+static macro Stmt $error.check.status(Expr $command, Expr $status) {
+  raise %(cmd-fail (command ${$command}) (status ${$status}));
+}
+
+static macro Stmt $error.text.nul(Expr $operation) {
+  raise %(bad-arg (operation ${$operation}) (reason "embedded NUL"));
+}
+
+static macro Stmt $error.wait.unstarted() {
+  raise %(bad-arg (operation "Job.wait_any") (reason "a job has not started"));
+}
+
 
 #include <errno.h>
 #include <fcntl.h>
@@ -68,13 +136,13 @@ extern char **environ;
 
 /* The descriptors a stage reads and writes as its standard streams. -1
    leaves a stream inherited from the parent. */
-typedef struct Stdio { int input, output, errors; } Stdio;
+static typedef struct Stdio { int input, output, errors; } Stdio;
 
 /* What a child writes to its report pipe when a step fails: the step and
    its errno. */
-typedef struct Failure { int step, error; } Failure;
+static typedef struct Failure { int step, error; } Failure;
 
-enum { _STEP_DIR = 1, _STEP_EXEC = 2 };
+static enum { _STEP_DIR = 1, _STEP_EXEC = 2 };
 
 // launching
 

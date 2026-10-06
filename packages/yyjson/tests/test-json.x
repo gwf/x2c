@@ -6,7 +6,7 @@ import "yyjson" as json;
 #include "test-support.x"
 #include <limits.h>
 
-$(import "../../../unittest/test-macros.xmacro")
+#include "../../../unittest/test-macros.x"
 
 static void json_parse_uses_x2c_values(void) {
   Var value = json.Json.parse(

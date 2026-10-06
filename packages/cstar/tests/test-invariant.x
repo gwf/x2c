@@ -3,7 +3,7 @@
 #include "test-support.x"
 #include <stdlib.h>
 
-$(import "../../../unittest/test-macros.xmacro")
+#include "../../../unittest/test-macros.x"
 
 static void invariants_emit_under_an_unbraced_if(void) {
   int status = system("./builds/cstar-verify --emit "

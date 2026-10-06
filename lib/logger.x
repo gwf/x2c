@@ -50,7 +50,6 @@ typedef void (*LogEmitter)(Logger logger, const LogEvent *event, Var data);
 */
 typedef void (*LogFlusher)(Logger logger, Var data);
 
-#pragma private
 
 #include <assert.h>
 #include <stdarg.h>
@@ -76,36 +75,38 @@ typedef void (*LogFlusher)(Logger logger, Var data);
 #include "symbol.x"
 #include "var.x"
 
-typedef void (*LogDataDestructor)(Var data);
+static typedef void (*LogDataDestructor)(Var data);
 
-struct LogSink {
+static struct LogSink {
   Logger logger;
   struct LogSink *prev, *next, LogEmitter emit, LogFlusher flush;
   LogDataDestructor destroy;
   Var data;
 };
 
-struct Logger {
+static struct Logger {
   Symbol min_level, LogSink first_sink, last_sink, int emission_depth;
   unsigned long sequence;
   long long origin_monotonic_us;
   Scope owner_scope, Pool pool, Scope storage;
 };
 
-typedef struct LogTextSink {
+static typedef struct LogTextSink {
   File file, Block scratch, int color, flush_each, depth;
 } *LogTextSink;
 
-typedef struct LogMemorySink {
+static typedef struct LogMemorySink {
   List *destination, Pool pool, Scope *destination_scope, values;
   Block wide_values;
 } *LogMemorySink;
 
-$(import "var-adapters.xmacro") $var.pointer(LogTextSink, logtextsink, <p48>);
+
+#include "var-adapters.x"
+$var.pointer(LogTextSink, logtextsink, <p48>);
 $var.pointer(LogMemorySink, logmemorysink, <p48>);
 
-protocol Var(LogTextSink) as void *;
-protocol Var(LogMemorySink) as void *;
+static protocol Var(LogTextSink) as void *;
+static protocol Var(LogMemorySink) as void *;
 
 static Logger global_logger = NULL, default_logger = NULL;
 static ErrorHandler logger_error_handler = NULL;
@@ -127,13 +128,13 @@ static void _lock(void) =>
 static void _unlock(void) =>
   Mutex.recursive_unlock(&logger_mutex, "Logger: could not unlock mutex");
 
-macro Decorator $logger.synchronized(Function $function) {
+static macro Decorator $logger.synchronized(Function $function) {
   _lock();
   defer _unlock();
   $(x2c.function.body $function)...
 }
 
-keyword synchronized $logger.synchronized;
+static keyword synchronized $logger.synchronized;
 
 // delivery
 
@@ -725,7 +726,7 @@ Symbol Logger.error_handler(List errors, Var data) {
 
 // level shorthands
 
-macro Unit $logger.method(Name $method, Literal $level) {
+static macro Unit $logger.method(Name $method, Literal $level) {
   /** Logs borrowed `fields` synchronously at $method level under `category`.
       Delivery and failure behavior follow `Logger.log`.
   */
@@ -744,7 +745,7 @@ $logger.method(warn, <warn>);
 $logger.method(error, <error>);
 $logger.method(fatal, <fatal>);
 
-macro Unit $logger.global(Name $method, Name $function, Literal $level) {
+static macro Unit $logger.global(Name $method, Name $function, Literal $level) {
   /** Logs borrowed `fields` globally at $method level under `category`.
       Delivery and failure behavior follow `log_event`.
   */

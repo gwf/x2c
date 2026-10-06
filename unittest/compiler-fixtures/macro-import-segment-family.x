@@ -1,0 +1,9 @@
+#pragma once
+
+$(import "macro-import-segment-helper.xlisp")
+
+macro Unit $project.imports.segment(Name $function) {
+  int $function(void) {
+    return $(+ imported-segment-value 5);
+  }
+}

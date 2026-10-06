@@ -7,7 +7,6 @@
 */
 #include "lint.x"
 
-#pragma private
 
 static int _runtime(Lint l) =>
   l.path.startswith("src/") || l.path.contains("/src/") ||
@@ -61,7 +60,7 @@ static void _spellings(Lint l):
     if t.text == "defun" && l.token_is(l.prev(at), "$(") && _runtime(l):
       l.add("lisp-defun", t.line, "review Lisp work in compiler or runtime")
     if t.text == "report_error" && !l.quoted[at] && at > report_end &&
-       !l.path.endswith("-reports.xmacro") && l.token_is(next, "("):
+       !l.path.endswith("-reports.x") && l.token_is(next, "("):
       int stop = l.partner[next]
       for (int k = l.next(next); k < stop; k = l.next(k)):
         if l.tokens[k].type == <lit-char*> || lint_string(l.at(k)):

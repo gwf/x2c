@@ -1,7 +1,7 @@
 #include "x2c.x"
 #include "typed-array.x"
 #include <assert.h>
-$(import "../src/autodiff.xmacro")
+#include "../src/autodiff-macros.x"
 
 $ad.both()
 static double seed(double x) { return x * x; }

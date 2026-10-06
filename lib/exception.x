@@ -45,9 +45,8 @@ typedef struct ExceptionFrame {
   int error_stack_height, volatile int cleanup_active;
 } ExceptionFrame;
 
-#pragma private
 
-typedef struct ExceptionThreadState {
+static typedef struct ExceptionThreadState {
   ExceptionFrame *exception_top;
   X2CCleanup *cleanup_top;
 } *ExceptionThreadState;
@@ -56,7 +55,6 @@ static threaded struct ExceptionThreadState exception_thread;
 
 static ExceptionThreadState _thread(void) => &exception_thread;
 
-#pragma public
 
 /** Holds the address of a local that a `try` body hands to a callee.
     Compiler-generated code stores the address at the local's declaration.
@@ -218,7 +216,6 @@ void x2c_exception_leave(ExceptionFrame *frame) {
   if (should_unwind) ExceptionFrame.unwind(target);
 }
 
-#pragma private
 
 #include "error.x"
 

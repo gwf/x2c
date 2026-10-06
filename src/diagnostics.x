@@ -29,7 +29,6 @@ typedef struct DiagnosticsHold {
 } DiagnosticsHold;
 
 #include "type.x"
-#pragma private
 
 #include "json.x"
 #include "report.x"

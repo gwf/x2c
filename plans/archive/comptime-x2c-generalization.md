@@ -13,7 +13,7 @@ Current disposition is the status above.
 
 > Scoped 2026-09-18 on branch `x2c-lowers-to-lisp` after the autodiff port
 > landed. Phases 0-4, 6 and 7 are done or answered; 5 ported two of its three
-> files and declined `lib/var-tags.xmacro` on evidence.
+> files and declined `lib/var-tags.x` on evidence.
 > `plans/archive/meta-functions.md` carries the `meta` keyword work: M1, M2, M5, M6,
 > M7 and M8 built, M3 and M4 declined on evidence.
 > `tools/gate-state.py ensure agent-pr-check` passes on this branch. Nothing
@@ -62,7 +62,7 @@ compile-time function and see ordinary x2c, and that the remaining Lisp in
 the repository is there because it is the substrate (`etc/init.xlisp`), a
 name table (`etc/lisp-bindings.xlisp`, `etc/lisp-values.xlisp`,
 `etc/comptime.xlisp`), or a macro template with no Lisp body at all
-(`lib/array-generics.xmacro`, `lib/map-generics.xmacro`).
+(`lib/array-generics.x`, `lib/map-generics.x`).
 
 ## Where the work stands
 
@@ -78,7 +78,7 @@ loop-assigned locals, `foreach` over a `List`, pointer deref and store,
 interpolated strings, file-scope state, and the `List`/`Var`/`String`/
 `Symbol` operations named in `etc/comptime.xlisp`.
 
-The whole of forward and reverse mode from `lib/autodiff.xmacro` is ported
+The whole of forward and reverse mode from `lib/autodiff-macros.x` is ported
 in `unittest/compiler-fixtures/comptime-autodiff.x`: 111 compile-time
 functions, every derivative checked against a central finite difference, and
 751 ms to install them all and derive five siblings. Forward mode alone
@@ -89,9 +89,9 @@ Macro Lisp in the repository, measured 2026-09-18 by counting lines inside
 
 | file | Lisp lines | disposition |
 | --- | --- | --- |
-| `lib/autodiff.xmacro` | 754 | ported (Phase 6 decides whether it replaces the original) |
+| `lib/autodiff-macros.x` | 754 | ported (Phase 6 decides whether it replaces the original) |
 | `etc/builtin-macros.xlisp` | 504 | stays Lisp; Phase 7 answered it |
-| `lib/var-tags.xmacro` | 295 | ported and reverted on cost; see below |
+| `lib/var-tags.x` | 295 | ported and reverted on cost; see below |
 | `etc/init.xlisp` | 237 | substrate, stays |
 | `etc/comptime.xlisp` | 121 | name table, stays |
 | `etc/lisp-bindings.xlisp` | 119 | name table, stays |
@@ -100,9 +100,9 @@ Macro Lisp in the repository, measured 2026-09-18 by counting lines inside
 | `etc/lisp-extras.xlisp` | 34 | Phase 5 decides |
 | `lib/system-macros.xlisp` | 145 | Phase 5 |
 | `lib/varops.xlisp` | 57 | ported; the file is gone |
-| `lib/error-macros.xmacro` | 32 | a data table, not logic |
-| `lib/error-private.xmacro` | 20 | `x2c.ident` calls in a macro body |
-| `lib/system-macros.xmacro` | 8 | an import and two call sites |
+| `lib/error-macros.x` | 32 | a data table, not logic |
+| `lib/error-private.x` | 20 | `x2c.ident` calls in a macro body |
+| `lib/system-macros.x` | 8 | an import and two call sites |
 | `etc/lisp-io.xlisp` | 5 | stays |
 
 Counting lines overstates the three name tables. Of the 78 definitions in
@@ -435,7 +435,7 @@ longer true.
 ## Phase 5 - port the remaining macro Lisp (two of three)
 
 `lib/system-macros.xlisp` is ported: 12 of its 13 `dedent.*` definitions are
-now four `meta` functions in `lib/system-macros.xmacro`, the file went 145 to
+now four `meta` functions in `lib/system-macros.x`, the file went 145 to
 69 lines, and `unittest/test-system-macros.x` passes unchanged. Measured cost
 +19 ms, of which +12 ms is the `foreach` spelling over the `replace` spelling
 it replaced; the loop was kept because it reads better, which is the trade this
@@ -443,7 +443,7 @@ phase exists to make.
 
 `lib/varops.xlisp` is ported and the file is gone. Its 14 rows, five row
 accessors and two expression builders are ten `meta` functions in the new
-`lib/varops.xmacro`, and the one SDK shape it needed that M6 had left out,
+`lib/varops.x`, and the one SDK shape it needed that M6 had left out,
 `x2c.expr.cast`, is now `Meta.expr_cast`. The evidence is the generated C:
 `bootstrap/lib/varops.c` and `builds/0/lib/varops.c` differ only in
 error-site line numbers, every one by the same three lines the file grew, and
@@ -456,9 +456,9 @@ includes `lib/meta.x`, because the import borrows the unit's symbol table.
 And a `meta` function anywhere in `lib/` needs the checked-in bootstrap to
 carry the comptime lowering first; see "Capability before callers" below.
 
-`lib/var-tags.xmacro` was ported and reverted on cost, recorded below.
+`lib/var-tags.x` was ported and reverted on cost, recorded below.
 
-### `lib/var-tags.xmacro`: ported, measured, reverted
+### `lib/var-tags.x`: ported, measured, reverted
 
 Built and landed on 2026-09-18, then reverted the same day because it cost
 3.4x on `lib/`. The port itself was correct - `builds/0/lib/var.c` came out
@@ -520,7 +520,7 @@ rebuilt corpus of the same shape - a 104-row table of nested rows, scanned
 nine times per expansion through `List.assoc` - costs 23 ms per unit at
 `3e737e9a`, which is where the 760 ms row was measured, so the rebuilt corpus
 is not the same workload and nothing about the 760 ms row follows from it.
-Re-porting `lib/var-tags.xmacro` and translating `lib/` is the measurement
+Re-porting `lib/var-tags.x` and translating `lib/` is the measurement
 that would settle it.
 
 **So the ledger's row lookup has to stay Lisp**, because `lib/common.x` is
@@ -582,7 +582,7 @@ Established 2026-09-18, when Phase 5 first tried to put a `meta` function in
 uses to translate every `src/*.x` and `lib/*.x` into `builds/0` - reported
 `parse: missing closing parenthesis` on `meta static int f(int n)`. Nothing
 in `lib/` or `src/` had needed it before, because the only `meta` functions
-in the tree were in `lib/system-macros.xmacro`, which only
+in the tree were in `lib/system-macros.x`, which only
 `unittest/test-system-macros.x` imports.
 
 `make bootstrap-refresh && make build-safe` landed it as `e4db6c78`: ten
@@ -599,7 +599,7 @@ Landed on `comptime-phase6-fold`. `comptime-autodiff.x` goes from 1181 to
 1130 lines and from 111 to 106 compile-time functions;
 `comptime-autodiff.stdout` is unchanged, which is the check that the
 mathematics did not move. Gary has already decided the port stays a
-demonstration, so `lib/autodiff.xmacro` is untouched and the two unported
+demonstration, so `lib/autodiff-macros.x` is untouched and the two unported
 paths - checkpointed loops and calls to an earlier differentiated sibling -
 stay out of scope.
 
@@ -654,7 +654,7 @@ Depends on Phases 1-3. Rewrite
 `unittest/compiler-fixtures/comptime-autodiff.x` onto the constructs those
 phases add: the eighteen recursive list builders become
 loops over an `Array`, and `ad_partial` becomes a `Map`. Then decide, with
-Gary, whether the result replaces `lib/autodiff.xmacro` or stays a
+Gary, whether the result replaces `lib/autodiff-macros.x` or stays a
 demonstration. Two paths are still unported and that decision needs them:
 checkpointed loops (`$ad.checkpoint`) and calls to an earlier differentiated
 sibling.
@@ -693,7 +693,7 @@ buying the ordering costs more than the file is worth. Close this phase.
 ### What is actually in the file
 
 Not the macro templating system. That is `src/macros.x`, in x2c. This file is
-the Lisp body of three built-in macros declared in `etc/builtin-macros.xmacro`:
+the Lisp body of three built-in macros declared in `etc/builtin-macros.x`:
 `foreach`, `$scope`, and `class`. Nothing else uses it, and it holds no name
 table, so its lines are all work, unlike `etc/comptime.xlisp`.
 

@@ -65,7 +65,7 @@ Keep the three measured changes together as the useful increment, with no
 language, API, runtime, build-target, or graph-format change:
 
 1. Put the common lazy child-rewriting algorithm in
-   `src/ast-rewrite.xmacro`. Import it in ast.x and transform.x. Keep the
+   `src/ast-rewrite.x`. Import it in ast.x and transform.x. Keep the
    existing `Ast.rewrite_children(Ast, Func)` API as a wrapper; use the macro
    directly in `_children`, where the `_node` call is statically known.
    Each caller declares the child before passing its Name and replacement

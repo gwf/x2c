@@ -1,7 +1,7 @@
 /*  sqlite.x -- SQLite connections, prepared statements, and copied rows */
 
 #include "sqlite-3.h"
-$(import "cleanup.xmacro")
+#include "cleanup.x"
 
 typedef struct Database *Database;
 typedef struct Prepared *Prepared;
@@ -14,18 +14,17 @@ protocol Iter(Prepared);
 $cleanup.by(Database, close);
 $cleanup.by(Prepared, free);
 
-#pragma private
 
 #include <limits.h>
 #include <math.h>
 #include <stdint.h>
 #include <string.h>
 
-struct Database {
+static struct Database {
   sqlite3 *handle;
 };
 
-struct Prepared {
+static struct Prepared {
   Database database;
   sqlite3_stmt *handle;
   int result;

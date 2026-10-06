@@ -1,7 +1,7 @@
 #include "x2c.x"
 #include "meta.x"
 
-$(import "macro-value-file.xmacro")
+#include "macro-value-file-defs.x"
 
 /* A Macro value spells its defining file relative to the home, so the
    generated C is the same from every checkout. */

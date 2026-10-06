@@ -45,7 +45,7 @@ Follow-up inspection establishes these remaining details:
   A temporary generated-C probe using an exclusive chain with a final `else`
   passes `-Werror=return-type` and the example's assertions.
 - The documented NULL macro reproducer now succeeds. Its outstanding-item
-  entry is stale; the workaround in `src/ast-rewrite.xmacro` needs the exact
+  entry is stale; the workaround in `src/ast-rewrite.x` needs the exact
   internal-use check described below before removal.
 - `translate -j8` and `translate -Ilib` still suggest nonexistent `--j8` and
   `--Ilib`; the shared option parser already accepts attached forms for build.

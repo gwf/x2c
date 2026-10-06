@@ -1,7 +1,7 @@
 /*  cstar-verify.x -- verify the annotated functions of one x2c file.
 
     The tool parses the file with the real compiler frontend, reads the
-    annotation records `cstar.xmacro` left in the compile-time Lisp session,
+    annotation records `cstar-macros.x` left in the compile-time Lisp session,
     proves that each recorded body is the body the compiler kept, renders the
     admitted subset as a proof program, builds it with the ordinary x2c
     driver against the cstar package, and runs it against its own prover
@@ -24,7 +24,7 @@
 #include "path.x"
 #include "process.x"
 
-$(import "proof-source.xmacro")
+#include "proof-source.x"
 
 #include <signal.h>
 #include <stdio.h>
@@ -32,9 +32,8 @@ $(import "proof-source.xmacro")
 #include <string.h>
 #include <unistd.h>
 
-#pragma private
 
-typedef struct Options {
+static typedef struct Options {
   String input, root, x2c, packages, cstar_home;
   List include_dirs;
   int port, emit, keep, timeout;

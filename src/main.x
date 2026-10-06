@@ -7,7 +7,6 @@
 */
 
 #pragma once
-#pragma private
 #include "build.x"
 #include "project.x"
 #include "frontend.x"
@@ -38,7 +37,51 @@
 #include "format.x"
 #include "protocol.x"
 
-$(import "main-reports.xmacro")
+
+/* main command reports. */
+
+static macro Stmt $report.main.stem_collision(
+  Expr $stem, Expr $first, Expr $other, Expr $directory) =>
+  fprintf(
+    stderr, "x2c: error: inputs produce the same output stem '%s'\n"
+    "  first input: %s\n  other input: %s\n  output: %s/%s.c\n",
+    $stem, $first, $other, $directory, $stem);
+
+static macro Stmt $report.main.workers_started(Expr $jobs, Expr $total) =>
+  fprintf(
+    stderr, "x2c: translate with %d workers over %d files\n",
+    $jobs, $total);
+
+static macro Stmt $report.main.translation_verbose(Expr $directory, Expr $input) =>
+  fprintf(stderr, "x2c: translate --out-dir %s %s\n", $directory, $input);
+
+static macro Stmt $report.main.input_not_x(Expr $input) =>
+  driver_error(%"translation input is not an .x file: ${$input}");
+
+static macro Stmt $report.main.directory_missing(Expr $out_dir) =>
+  driver_error(%"output directory does not exist: ${$out_dir}");
+
+static macro Stmt $report.main.directory_not_dir(Expr $out_dir) =>
+  driver_error(%"output is not a directory: ${$out_dir}");
+
+static macro Stmt $report.main.directory_unwritable(Expr $out_dir) =>
+  driver_error(%"output directory is not writable: ${$out_dir}");
+
+static macro Stmt $report.main.translated(
+  Expr $n, Expr $noun, Expr $out_dir, Expr $duration) =>
+  report_line(<success>, %"Translated ${$n} x2c ${$noun} to ${$out_dir} in ${
+      $duration}");
+
+static macro Stmt $report.main.env_unknown(Expr $wanted) =>
+  driver_error(%"unknown env name '${$wanted}'");
+
+static macro Stmt $report.main.external_failed(Expr $path) =>
+  driver_error(
+    %"cannot run external command '${$path}': ${String.new(strerror(errno))}");
+
+static macro Stmt $report.main.diagnostics_unwritable(Expr $diagnostics) =>
+  driver_error(%"cannot open diagnostics file '${$diagnostics}'");
+
 
 // translating a unit
 
@@ -151,7 +194,7 @@ static String _node_repr(List node) {
 /* One request's units share a frontend. `unit_dirs` maps each input to its
    own output directory on the build path, where `build` reports progress;
    `x2c translate` has neither. */
-typedef struct Translation {
+static typedef struct Translation {
   CliRequest request, Frontend frontend, Map unit_dirs, Build build;
   int total;
 } Translation;
@@ -268,7 +311,7 @@ static void Translation.report(Translation &t, unsigned long started_at) {
    worker's pid, the index of the slice it carries, and the file that
    captures its standard error. `output` holds each ended slice's captured
    bytes until every earlier slice has shown its own. */
-typedef struct Workers {
+static typedef struct Workers {
   Translation *t, Array slices, long *pids, int *carried, File *captures;
   Block *output;
   int live, started, shown, failed, done;

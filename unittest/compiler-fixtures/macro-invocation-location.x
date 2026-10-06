@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-$(import "macro-invocation-location-import.xmacro")
+#include "macro-invocation-location-import.x"
 
 keyword LOCATION $fixture.location;
 

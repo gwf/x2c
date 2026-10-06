@@ -1,5 +1,4 @@
-// An import that an included file does not export stays in that file after
-// a serial translation of that file, which the includer then replays.
+// Static compile-time definitions stay private to their source file.
 #include "macro-export-lib.x"
 
 int lisp = $(p_lisp);

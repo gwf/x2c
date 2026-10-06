@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-$(import "macro-source-text-import.xmacro")
+#include "macro-source-text-import.x"
 
 macro Expression $source(Expr $syntax) =>
   $(x2c.literal.string (x2c.source.text $syntax));

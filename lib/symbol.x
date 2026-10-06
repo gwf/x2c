@@ -17,7 +17,6 @@
 #define SYMBOL_MAX_5BIT 10
 #define SYMBOL_MAX_7BIT 7
 
-#pragma private
 
 #include <stdint.h>
 #include <string.h>

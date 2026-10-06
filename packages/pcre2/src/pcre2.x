@@ -7,7 +7,7 @@
  */
 
 #include "pcre2-8.h"
-$(import "cleanup.xmacro")
+#include "cleanup.x"
 
 typedef struct Regexp *Regexp;
 typedef List RegexpCapture;
@@ -28,7 +28,6 @@ typedef enum RegexpLisp {
 
 $cleanup.by(Regexp, free);
 
-#pragma private
 
 #include <ctype.h>
 #include <limits.h>
@@ -36,7 +35,7 @@ $cleanup.by(Regexp, free);
 #include <stdlib.h>
 #include <string.h>
 
-struct Regexp {
+static struct Regexp {
   pcre2_code *code;
   pcre2_match_data *match_data;
   pcre2_match_context *match_context;

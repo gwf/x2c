@@ -1,0 +1,15 @@
+#pragma once
+
+/* Reports shared by package parsing, binding, and with aliases. */
+
+macro Stmt $report.parse.alias_name(Expr $c) =>
+  $c.report_error(
+    <parse>, "expected an alias identifier after 'as'",
+    $c.token, NULL);
+
+macro Stmt $report.parse.package_member(
+  Expr $c, Expr $site, Expr $name, Expr $member) =>
+  $c.report_error(
+    <parse>,
+    %"package '${$name}' has no public name '${$member}'",
+    $site, NULL);

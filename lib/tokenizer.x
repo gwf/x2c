@@ -30,7 +30,6 @@ class Tokenizer struct {
   Symbol scan_status, int line, col, pos, layout;
 } *;
 
-#pragma private
 #include "exception.x"
 #include <string.h>
 
@@ -39,9 +38,8 @@ inline Token Var.token(Var x) => x.pointer();
 /* Wraps a borrowed Token pointer without extending its storage lifetime. */
 inline Var Token.var(Token x) => Var.new(<token>, x);
 
-/* The converter pair is declared after `#pragma private`, so this Var
-   adoption stays local while its descriptor still registers globally. */
-protocol Var(Token);
+/* This adoption stays local while its descriptor registers globally. */
+static protocol Var(Token);
 
 /* Hashes a live Token's complete representation; it must be nonnull. */
 unsigned Token.hash(Token t) => x2c_hash_bytes(0, t, sizeof(struct Token));
@@ -619,15 +617,15 @@ static void Tokenizer._layout(Tokenizer t) {
 }
 
 /* One logical line of significant tokens, as indices into `sig`. */
-typedef struct _LayoutLine { int first, last, indent, directive; } _LayoutLine;
+static typedef struct _LayoutLine { int first, last, indent, directive; } _LayoutLine;
 
 /* Edits the layout pass applies to one source token: punctuation inserted
    before and after it, and a replacement type. */
-typedef struct _LayoutEdit { String before, after; Symbol type; } _LayoutEdit;
+static typedef struct _LayoutEdit { String before, after; Symbol type; } _LayoutEdit;
 
 /* What a block header's words say: an aggregate or enum header names no
    parameters, unlike a function's, and a label keeps its colon. */
-typedef struct _LayoutHeader {
+static typedef struct _LayoutHeader {
   int aggregate, enumeration, labeled;
 } _LayoutHeader;
 
@@ -636,7 +634,7 @@ typedef struct _LayoutHeader {
    that close a `?`. `edits` holds the rewrite of each token of `all`.
    `indents`, `closers`, and `enums` describe the blocks open up to `top`,
    and `error_at` is the first inconsistently indented token. */
-typedef struct _Layout {
+static typedef struct _Layout {
   struct Token *all, Token *sig, Token error_at;
   int *depths, *indents, char *ternary, *enums;
   _LayoutLine *lines, _LayoutEdit *edits, String *closers;

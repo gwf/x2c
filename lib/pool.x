@@ -12,8 +12,8 @@
 
 #pragma once
 
-$(import "error-macros.xmacro")
-$(import "private-keywords.xmacro")
+#include "error-macros.x"
+#include "private-keywords.x"
 
 #include <stddef.h>
 #include "common.x"
@@ -50,7 +50,6 @@ typedef struct PoolStats {
   size_t backing_bytes, active_blocks, active_bytes, depot_blocks, depot_bytes;
 } PoolStats;
 
-#pragma private
 
 #include <stdint.h>
 #include <pthread.h>
@@ -61,14 +60,14 @@ typedef struct PoolStats {
 #include "block.x"
 #include "exception.x"
 #include "mutex.x"
-$(import "map-generics.xmacro")
+#include "map-generics.x"
 
 /* table
 
    `PoolTable` is the `Map` family over one-`Var` records: every entry maps a
    value to itself, so `key` and `val` name the same `Var`. */
 
-struct PoolRecord { union { Var key, val; }; };
+static struct PoolRecord { union { Var key, val; }; };
 
 $map.scaffold(
   PoolTable, struct PoolRecord, Var, Var,
@@ -102,23 +101,23 @@ static Var PoolTable._setdefault(
    holds it. A block carries the slots of one class after a 64-byte header,
    and a released block waits in the depot for its next lease. */
 
-enum PoolStorageConstant {
+static enum PoolStorageConstant {
   POOL_CLASS_COUNT = 10,
   POOL_DEPOT_COUNT = 5,
   POOL_KEEP_WORDS = 1
 };
 
-typedef struct PoolBlock {
+static typedef struct PoolBlock {
   struct PoolBlock *next, *registry_next, struct Pool *owner, void *free;
   size_t used, unsigned class_index, keep_count, bytes;
   uint64_t keep[POOL_KEEP_WORDS];
 } *PoolBlock;
 
-typedef struct PoolPromotion {
+static typedef struct PoolPromotion {
   PoolBlock block, unsigned slot, struct PoolPromotion *next;
 } *PoolPromotion;
 
-enum PoolBlockConstant {
+static enum PoolBlockConstant {
   POOL_BLOCK_DATA_OFFSET = 64
 };
 
@@ -138,12 +137,12 @@ static const unsigned pool_block_sizes[POOL_CLASS_COUNT] = {
    the page a block occupies to the block. A block never moves and is freed
    only at shutdown, so entries are placed once and never removed; a block
    sitting in the depot is rejected by its null owner. */
-typedef struct PoolIndexSlot {
+static typedef struct PoolIndexSlot {
   uintptr_t page;
   PoolBlock block;
 } PoolIndexSlot;
 
-enum PoolIndexConstant {
+static enum PoolIndexConstant {
   POOL_INDEX_PAGE_SHIFT = 12,
   POOL_INDEX_FIRST_SLOTS = 256
 };
@@ -166,7 +165,7 @@ static pthread_mutex_t pool_storage_mutex =
 
 // process state
 
-typedef struct PoolValueThreadState {
+static typedef struct PoolValueThreadState {
   Pool current;
 } *PoolValueThreadState;
 

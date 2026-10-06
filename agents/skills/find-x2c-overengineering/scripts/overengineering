@@ -101,18 +101,6 @@ static int _line_at(String text, int offset):
     if text[at] == '\n': line++
   return line
 
-/* Whether the last code line before byte `start` is `#pragma public`. */
-static int _after_public(String text, int start):
-  String before = String.new_len(text, start)
-  List lines = before.split("\n")
-  int seen = 0
-  foreach String line in lines.reverse():
-    String stripped = line.strip(NULL)
-    if !stripped || stripped.startswith("/*") || stripped.startswith("*"):
-      continue
-    return stripped == "#pragma public"
-  return seen
-
 /* The first integer in `text` after `word`, or 0. */
 static int _number_after(String text, String word):
   int at = text.find(word)
@@ -243,7 +231,7 @@ static Array _regions(List units, Map texts, Map structure):
         score += overlap
         signals.push(%"structure-rule overlap +$overlap")
       if !signals.len(): signals.push("no mechanical signal")
-      int public = _after_public(raw, from) || !name.startswith("_")
+      int public = !row["static"].integer()
       regions.push(_region(path, name, "function", start, end, public, body,
                            score, signals))
     foreach Map row in unit["types"].array():

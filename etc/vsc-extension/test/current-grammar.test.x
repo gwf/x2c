@@ -175,6 +175,12 @@ keyword exchange $swap;
 keyword List $project.list;
 //      ^^^^ entity.name.function.macro-alias.x2c
 //      ^^^^ - support.type.prelude.x2c
+static keyword hidden_swap $swap;
+// <- storage.modifier.x2c
+//     ^^^^^^^ keyword.declaration.macro.x2c
+//             ^^^^^^^^^^^ entity.name.function.macro-alias.x2c
+//                         ^ punctuation.definition.macro.sigil.x2c
+//                          ^^^^ entity.name.function.macro.x2c
 int keyword = 0;
 //  ^^^^^^^ - keyword.declaration.macro.x2c
 
@@ -439,10 +445,10 @@ Var form = $(outer (inner "a ) string" /* ) */
 //                            ^ punctuation.definition.quote.lisp.x2c
 //                             ^ punctuation.definition.macro.sigil.x2c
 //                                   ^^^ constant.other.symbol.lisp.x2c
-$(import "helpers.xmacro")
+$(import "helpers.xlisp")
 // <- punctuation.definition.embedded.lisp.begin.x2c
 //^^^^^^ variable.other.lisp.x2c
-//       ^^^^^^^^^^^^^^^^ string.quoted.double.lisp.x2c
+//       ^^^^^^^^^^^^^^^ string.quoted.double.lisp.x2c
 $(def lisp.native.target.rows '(
   (Var_car ((func (("Var"))) "Var"))
   (Var_cons ((func (("Var") ("List"))) "List"))

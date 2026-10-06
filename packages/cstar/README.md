@@ -59,7 +59,7 @@ file; a compile-time import resolves against the importing file's directory,
 not the `--x-include-dir` list.
 
 ```x2c
-$(import "../src/cstar.xmacro")
+$(import "../src/cstar-macros.x")
 ```
 
 - `$cstar.verify(pre, post)` decorates a function, outermost. Both
@@ -277,7 +277,7 @@ corrupting its own in-process executor or report.
 - [src/cstar.x](src/cstar.x): `Cstar`, the proof session -- entry and exit,
   term parsing, program assertions, the arithmetic rules helpers use, the
   array proof steps, per-function completion, and the verdict.
-- [src/cstar.xmacro](src/cstar.xmacro): the annotations and their records.
+- [src/cstar-macros.x](src/cstar-macros.x): the annotations and their records.
 - [proof/x2c_array_helpers.c](proof/x2c_array_helpers.c): the array-fill
   proof steps, written in C* and compiled by `cstarc`.
 - [tools/adapter.x](tools/adapter.x): the admitted subset as builder calls.

@@ -2,7 +2,7 @@
 
 #include "path.x"
 #include "test-support.x"
-$(import "test-macros.xmacro")
+#include "test-macros.x"
 #include <errno.h>
 #include <sys/stat.h>
 #include <sys/time.h>

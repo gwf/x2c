@@ -10,7 +10,6 @@
 
 #include "common.x"
 
-#pragma private
 
 threaded int x2c_error_runtime_ready;
 

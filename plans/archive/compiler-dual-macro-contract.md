@@ -66,7 +66,7 @@ count, percentage of migratable code, or estimate of removable lines.
 
 Proposed boundaries to investigate, not yet decided file moves:
 
-- Shared grammar vocabulary in `src/grammar.xmacro`.
+- Shared grammar vocabulary in `src/grammar.x`.
 - Cohesive transformations with input recognition, output templates and
   supporting meta functions readable together.
 - Existing shared services for binding, types, traversal, lifetimes,
@@ -203,7 +203,7 @@ implementation choice already covered by the campaign's authorization.
   remains, failures and independent work. Report each batch in five lines:
   commit on dev; change as read; gate result; cost row; next work.
 
-On resumption read AGENTS.md, the lowering exemplar, grammar.xmacro,
+On resumption read AGENTS.md, the lowering exemplar, grammar.x,
 _lower_try/$compiler_try in transform.x, the Func templates in expressions.x,
 then this handoff, "Readable form" and the ledger. Verify checkout and remote
 state before acting; checkpoint hashes above are historical evidence, not
@@ -3059,7 +3059,7 @@ match (input) {
 }
 ```
 
-The macro is shared in `grammar.xmacro`; `parse.x` keeps the entire existing
+The macro is shared in `grammar.x`; `parse.x` keeps the entire existing
 row loop, scopes, guarded-body path, subject resolution, and error route.
 No raw fallback or row projection is added. `bind_syntax` continues to accept
 constructed canonical Lists by structure, without authenticating their
@@ -3287,7 +3287,7 @@ tree builds through stage 1 and yields 192 byte-identical stage C/H files.
 
 ### E40. Region call and expression-assignment families
 
-`source_call` and `source_assignment` in `src/grammar.xmacro` project both a
+`source_call` and `source_assignment` in `src/grammar.x` project both a
 typed expression and the raw inner node that region analysis visits. They
 preserve the original bound children and do not fabricate an expression type.
 `source_call` normalizes the parser's empty argument marker; the assignment
@@ -3349,7 +3349,7 @@ without rebinding. The private `retain_catch_handle` helper restores the
 already-bound handler identity, which has no source hole in the catch form.
 The raw try recognizer and constructor in `bind_syntax` are deleted; no raw
 try recognition or construction remains in that owner. The authored try diff
-is +28/-10 across `grammar.xmacro` and `parse.x`. Focused catch and defer
+is +28/-10 across `grammar.x` and `parse.x`. Focused catch and defer
 fixtures, a constructed bare-try execution/C/H comparison, and stage 2
 passed in the isolated worker checkout. These two families form one
 publication batch with a single combined gate.
@@ -3419,7 +3419,7 @@ The E43 deletion test did not fully classify the native macro producers in
 `builtins.x`. These functions emit user-program syntax before ordinary macro
 binding, so they are source-form candidates, not backend exceptions. Their
 Lisp entry points are in `etc/builtin-core.xlisp` and
-`etc/lisp-bindings.xlisp`; `etc/builtin-macros.xmacro` calls `$scope` and
+`etc/lisp-bindings.xlisp`; `etc/builtin-macros.x` calls `$scope` and
 `foreach` expansion. A bounded worker trial established these distinctions:
 
 | Family | Current source boundary | Disposition |
@@ -4452,7 +4452,7 @@ construct their effect/argument data privately.
 | `(localinit DECLARATION BODY)` | transform.x:2037-2057 inserts runtime static initialization region; emitter dispatch emit.x:1059. | Meta producer only for lowered stage. Source `static T name = value;` and block template owns public behavior; no new region keyword. Must not simply erase wrapper because entry/jump semantics matter. |
 | `(sourceinit FUNCTION)` | cache.x:451-468 generates file-static initialization helper; emit.x:1060-1061. | Meta producer only. Source file-static declaration remains user surface. It has source-placement/order semantics; recognition cannot treat generated helper as the original declaration without an explicit inverse/owner projection. |
 | `(guarded BODY)` in a Match case | statements.x:368-373 inserts guard-dependent break marker; parse.x:2877-2881; emit.x:586 removes marker to choose arm flow. | Meta-producer-only raw form for exact case-control IR; public `case PATTERN if (condition):` already exists. Source template should use guard syntax, not new guarded keyword. Do not erase in lowered recognition: fallthrough/retry distinction matters. |
-| `(tadapt TARGET SOURCE)` -> `(expr TARGET (tadapt ORIGIN SOURCE))` | etc/builtin-macros.xmacro:12 constructs `$adapt`; expressions.x:2420-2437 resolves; transform.x:165-255 emits typed helper. | Not wholly lowered-only: use existing `$adapt` public macro for source construction/recognition; use a private meta producer for resolved origin/helper details. Definition/invocation stages must be explicit. No duplicate adapter syntax or validator. |
+| `(tadapt TARGET SOURCE)` -> `(expr TARGET (tadapt ORIGIN SOURCE))` | etc/builtin-macros.x:12 constructs `$adapt`; expressions.x:2420-2437 resolves; transform.x:165-255 emits typed helper. | Not wholly lowered-only: use existing `$adapt` public macro for source construction/recognition; use a private meta producer for resolved origin/helper details. Definition/invocation stages must be explicit. No duplicate adapter syntax or validator. |
 | `(matchcases SUBJECT (BINDERS PATTERN BODY)...)` | transform.x:3076-3088; emit.x:1237. | Meta-producer-only lowered form; public `match` source form owns code. Derived BINDERS should come from existing MatchCaptureLayout, never a second capture analyzer. |
 | `(varray ...)`, `(vmap (vpair ...)...)` | transform.x:3528-3551 lowers array/map elements to Var; emit.x:1033-1041. | Meta-producer-only lowered form; public []/{} literal grammar. These are not source-preserving aliases if conversion calls or ordering changed. |
 | `(initval [input ...] (CONDITION PATH DESTINATION EXPRESSION)...)`, initcode | expressions.x:3922-4003 produces initializer alternatives; ast.x:241-249; cache.x:265; emit.x:759-764, 1057-1062. | Meta-producer-only raw form for alternative tables/emission macros. Public source expressions/initializers remain templates; exact derived initializer decisions require compiler context. Do not invent a new public conditional-init grammar. |

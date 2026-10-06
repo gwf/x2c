@@ -13,7 +13,6 @@
 #pragma once
 #include "x2c.x"
 
-#pragma private
 
 #include <stdio.h>
 #include <stdlib.h>

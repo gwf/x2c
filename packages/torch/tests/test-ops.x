@@ -8,7 +8,7 @@ import "torch" with Torch, Tensor;
 #include "test-support.x"
 #include <math.h>
 
-$(import "../../../unittest/test-macros.xmacro")
+#include "../../../unittest/test-macros.x"
 
 #define EXPECT_NEAR(actual, expected, tolerance) \
   EXPECT_TRUE(fabs((actual) - (expected)) < (tolerance))

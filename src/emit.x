@@ -10,7 +10,6 @@
 
 #pragma once
 #include "compiler.x"
-#pragma private
 #include <stdlib.h>
 #include <stdio.h>
 #include "string.x"
@@ -18,11 +17,160 @@
 #include "ast.x"
 #include "format.x"
 #include "cleanup.x"
-$(import "../src/emit-templates.xmacro")
+
+/*  emit.x -- generated C scaffolding */
+
+// initializer macros
+
+static macro Expression $emit.initializer.expanded(
+  Expr $name, Expr $formal, Expr $replacement) =>
+  %"#define ${$name}(${$formal}) ${$replacement}";
+
+static macro Expression $emit.initializer.forwarding(
+  Expr $name, Expr $formal, Expr $expanded) =>
+  %"#define ${$name}(${$formal}) ${$expanded}(${$formal})";
+
+// native aliases
+
+static macro Expression $emit.alias.definition(Expr $target, Expr $native) =>
+  %"#define ${$target} ${$native}";
+
+static macro Expression $emit.alias.checked(
+  Expr $native, Expr $pointer, Expr $message, Expr $definition) =>
+  %(
+    "#ifndef X2CCPP"
+    "_Static_assert("
+    "_Generic(&" @{$native} ", " @{$pointer} ": 1, default: 0), "
+    "\"${$message}\");"
+    "#endif"
+    ${$definition}
+  );
+
+// static objects
+
+static macro Expression $emit.object.inferred_alias(Expr $formal, Expr $alias) =>
+  %("typedef __typeof__(" ${$formal} ")" ${$alias} ";");
+
+static macro Expression $emit.object.fixed_alias(Expr $declaration, Expr $alias) =>
+  %(
+    "typedef" @{$declaration} ";"
+    "_Static_assert(__builtin_constant_p(sizeof(" ${$alias} ")),"
+      "\"static object size must be constant\");"
+  );
+
+static macro Expression $emit.object.acquire(Expr $r, Expr $threaded, Expr $copy) =>
+  %(
+    @{$r.prefix}
+    ${$r.storage} "X2CStatic" ${$r.guard} "= {0};"
+    ${$r.alias} "*" ${$r.pointer} ";"
+    "if (x2c_static_acquire(&" ${$r.guard} ", sizeof(" ${$r.alias} "),"
+        "_Alignof(" ${$r.alias} "),"
+        ${$threaded} ")) {"
+      ${$r.slot} "=" ${$r.guard} ".payload;"
+      "X2CCleanup" ${$r.cleanup} "= { .fn = x2c_static_abort,"
+                               ".env = &" ${$r.guard} "};"
+      "x2c_cleanup_push(&" ${$r.cleanup} ");"
+      @{$r.initial_copy}
+      @{$copy}
+      "x2c_static_commit(&" ${$r.guard} ");"
+      "x2c_cleanup_leave(&" ${$r.cleanup} ");"
+    "}"
+    "(void)(" ${$r.pointer} "=" ${$r.guard} ".payload);"
+  );
+
+static macro Expression $emit.object.copy(
+  Expr $alias, Expr $guard, Expr $source, Expr $object,
+  Expr $data, Expr $index) =>
+  %(
+    "if (_Generic((" ${$alias} "*)0, volatile" ${$alias} "*: 1, default: 0)) {"
+      "const volatile unsigned char *" ${$data} "="
+        "(const volatile unsigned char *)" @{$source} ";"
+      "for (size_t" ${$index} "= 0;" ${$index} "< sizeof(" ${$object} ");"
+           ${$index} "++)"
+        "((unsigned char *)" ${$guard} ".payload)[" ${$index} "] ="
+          ${$data} "[" ${$index} "];"
+    "} else memcpy(" ${$guard} ".payload, (const void *)" @{$source} ","
+                   "sizeof(" ${$object} "));"
+  );
+
+// match statements
+
+static macro Expression $emit.match.values(Expr $count) =>
+  %"Var _x2c_match_values[${$count}];";
+
+static macro Expression $emit.match.buffer(Expr $count) =>
+  "MatchCaptureBuffer _x2c_match_capture = { "
+      + %".values = _x2c_match_values, .capacity = ${$count} };";
+
+static macro Expression $emit.match.empty_buffer() =>
+  %("MatchCaptureBuffer _x2c_match_capture = { 0 };");
+
+static macro Expression $emit.match.dispatch(
+  Expr $subject, Expr $captures, Expr $selector, Expr $arms) =>
+  %("
+  {
+    List _x2c_match_expr = " ${$subject} ";
+    " @{$captures} "
+    switch (" @{$selector} ") {
+      " @{$arms} "
+    }
+  }
+");
+
+static macro Expression $emit.match.macro_arm(
+  Expr $site, Expr $condition, Expr $declarations, Expr $body,
+  Expr $implicit_break) =>
+  %("static MacroCaseSite" ${$site} ";"
+    "if (" @{$condition} ") {"
+      @{$declarations} @{$body} @{$implicit_break} "}");
+
+static macro Expression $emit.match.flat_arm(
+  Expr $condition, Expr $declarations, Expr $body, Expr $closing) =>
+  %("{ List _x2c_match_cursor;" "if (" @{$condition} ") {"
+      @{$declarations} @{$body} ${$closing});
+
+static macro Expression $emit.match.capture_arm(
+  Expr $site, Expr $entry, Expr $pattern, Expr $declarations,
+  Expr $body, Expr $implicit_break) =>
+  %(
+    @{$site}
+    "if (" @{$entry}
+      "_x2c_match_expr, List_var(" @{$pattern} "),"
+      "&_x2c_match_capture)) {"
+    @{$declarations} @{$body} @{$implicit_break} "}"
+  );
+
+static macro Expression $emit.match.head_condition(Expr $bits) =>
+  "_x2c_match_expr && "
+  + %"_x2c_match_expr->car.u64 == ${$bits}ULL && "
+  + "(_x2c_match_cursor = _x2c_match_expr->cdr, 1)";
+
+static macro Expression $emit.match.cursor_present() =>
+  "&& _x2c_match_cursor ";
+
+static macro Expression $emit.match.cursor_tag(Expr $tag) =>
+  "&& Var_is(_x2c_match_cursor->car, " + %"${$tag}) ";
+
+static macro Expression $emit.match.capture_value(Expr $index) =>
+  %"&& (_x2c_match_values[${$index}] = _x2c_match_cursor->car, "
+  + "_x2c_match_cursor = _x2c_match_cursor->cdr, 1)";
+
+static macro Expression $emit.match.cursor_empty() =>
+  "&& !_x2c_match_cursor";
+
+static macro Expression $emit.match.value_at(Expr $values, Expr $index) =>
+  %"${$values}[${$index}]";
+
+static macro Expression $emit.match.list_binder(Expr $name, Expr $value) =>
+  %"List ${$name} = Var_list(${$value});";
+
+static macro Expression $emit.match.value_binder(Expr $name, Expr $value) =>
+  %"Var ${$name} = ${$value};";
+
 
 // diagnostics
 
-macro Stmt $report.emit.static_switch(Expr $c) {
+static macro Stmt $report.emit.static_switch(Expr $c) {
   {
     String note = "place the declaration before the switch "
                 + "or within one case block";
@@ -34,78 +182,78 @@ macro Stmt $report.emit.static_switch(Expr $c) {
 
 // form templates
 
-macro Expression $emit.cons(Expr $e, Expr $item, Expr $tail) =>
+static macro Expression $emit.cons(Expr $e, Expr $item, Expr $tail) =>
   %("cons(" @{$e._emit(%(${$item}))} ", " @{$e._emit(%(${$tail}))} ")");
 
-macro Expression $emit.append(Expr $e, Expr $head_list, Expr $tail) =>
+static macro Expression $emit.append(Expr $e, Expr $head_list, Expr $tail) =>
   %("List_append(" @{$e._emit(%(${$head_list}))} ", "
     @{$e._emit(%(${$tail}))} ")");
 
-macro Expression $emit.c_assert(
+static macro Expression $emit.c_assert(
   Expr $e, Expr $condition, Expr $message) =>
   %("_Static_assert(" @{$e._emit(%(${$condition}))} ","
     @{$e._emit(%(${$message}))} ");");
 
-macro Expression $emit.initcode(Expr $e, Expr $input, Expr $body) =>
+static macro Expression $emit.initcode(Expr $e, Expr $input, Expr $body) =>
   %(@{$e._initializer_macro($input, $body)} ";");
 
-macro Expression $emit.cast(Expr $e, Expr $type, Expr $expression) =>
+static macro Expression $emit.cast(Expr $e, Expr $type, Expr $expression) =>
   %("(" @{$e._semantic_type($type)} ")"
     @{$e._operand($expression, EMIT_UNARY)});
 
-macro Expression $emit.cache(Expr $e, Expr $id) =>
+static macro Expression $emit.cache(Expr $e, Expr $id) =>
   $e.cache_bindings ? $e._emit_ident($e.cache_bindings[$id])
                    : %("_${$id}");
 
-macro Expression $emit.vararg(
+static macro Expression $emit.vararg(
   Expr $e, Expr $expression, Expr $declaration) =>
   %("va_arg(" @{$e._emit(%(${$expression}))} ", "
     @{$e._emit(%(${$declaration}))} ")");
 
-macro Expression $emit.offset(Expr $e, Expr $type, Expr $member) =>
+static macro Expression $emit.offset(Expr $e, Expr $type, Expr $member) =>
   %("offsetof(" @{$e._semantic_type($type)} ", " @{$e._emit($member)}
     ")");
 
-macro Expression $emit.index(Expr $e, Expr $array, Expr $index) =>
+static macro Expression $emit.index(Expr $e, Expr $array, Expr $index) =>
   %(@{$e._operand($array, EMIT_POSTFIX)} "[" @{$e._emit(%(${$index}))}
     "]");
 
 /* Between `?` and `:` C accepts a complete expression, so only the
    condition and the false arm can regroup. */
-macro Expression $emit.conditional(
+static macro Expression $emit.conditional(
   Expr $e, Expr $condition, Expr $ontrue, Expr $onfalse) =>
   %(@{$e._operand($condition, EMIT_CONDITIONAL + 1)} "?"
     @{$e._emit(%(${$ontrue}))} ":"
     @{$e._operand($onfalse, EMIT_CONDITIONAL)});
 
-macro Expression $emit.if(Expr $e, Expr $condition, Expr $ontrue) =>
+static macro Expression $emit.if(Expr $e, Expr $condition, Expr $ontrue) =>
   %("if" "(" @{$e._emit(%(${$condition}))} ")" @{$e._emit(%(${$ontrue}))});
 
-macro Expression $emit.if_else(
+static macro Expression $emit.if_else(
   Expr $e, Expr $condition, Expr $ontrue, Expr $onfalse) =>
   %("if" "(" @{$e._emit(%(${$condition}))} ")" @{$e._emit(%(${$ontrue}))}
     "else" @{$e._emit(%(${$onfalse}))});
 
-macro Expression $emit.while(Expr $e, Expr $condition, Expr $body) =>
+static macro Expression $emit.while(Expr $e, Expr $condition, Expr $body) =>
   %("while" "(" @{$e._emit(%(${$condition}))} ")"
     @{$e._emit(%(${$body}))});
 
-macro Expression $emit.do(Expr $e, Expr $body, Expr $condition) =>
+static macro Expression $emit.do(Expr $e, Expr $body, Expr $condition) =>
   %("do" @{$e._emit(%(${$body}))} "while"
     "(" @{$e._emit(%(${$condition}))} ")" ";");
 
-macro Expression $emit.for(Expr $e, Expr $ast) => ({
+static macro Expression $emit.for(Expr $e, Expr $ast) => ({
   Var (initial, condition, increment, body) = $ast.cdr();
   %("for" "(" @{$e._emit(%($initial))} ";"
     @{$e._emit(%($condition))} ";" @{$e._emit(%($increment))} ")"
     @{$e._emit(%($body))});
 });
 
-macro Expression $emit.switch(Expr $e, Expr $expression, Expr $body) =>
+static macro Expression $emit.switch(Expr $e, Expr $expression, Expr $body) =>
   %("switch" "(" @{$e._emit(%(${$expression}))} ")"
     @{$e._emit(%(${$body}))});
 
-macro Expression $emit.goto(Expr $e, Expr $label) =>
+static macro Expression $emit.goto(Expr $e, Expr $label) =>
   %("goto" @{$e._emit(%(${$label}))} ";");
 
 // emission
@@ -113,7 +261,7 @@ macro Expression $emit.goto(Expr $e, Expr $label) =>
 /* `native_macros` holds the `#define` rows initializer choices need, and
    `static_support` records that a runtime static was emitted, so the unit
    includes its runtime headers. */
-typedef struct Emitter {
+static typedef struct Emitter {
   delegate Compiler c;
   int origin, String fn_name, List native_aliases;
   Array native_macros;
@@ -404,7 +552,7 @@ static int _static_case_entry(List node) {
   return 0;
 }
 
-typedef struct StaticRuntime {
+static typedef struct StaticRuntime {
   Emitter *e;
   Array output;
   Type declared_base, type;
@@ -609,7 +757,7 @@ static int _source_type_definition(List value) {
    the conditional, and assignment. Level 0 means the emitter has no
    grouping rule for the operator, which leaves its text exactly as the
    other cases build it. */
-enum {
+static enum {
   EMIT_ASSIGNMENT  = 2,
   EMIT_CONDITIONAL = 3,
   EMIT_UNARY       = 14,

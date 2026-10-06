@@ -1,7 +1,7 @@
 /*  test-lambda.x -- unit tests for lambdas */
 
 #include "test-support.x"
-$(import "test-macros.xmacro")
+#include "test-macros.x"
 
 typedef struct LambdaCaptureProbe {
   int value, order;

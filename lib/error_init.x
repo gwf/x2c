@@ -12,7 +12,6 @@
 #include "common.x"
 typedef struct Error *Error;
 
-#pragma private
 #include "error.x"
 
 /* Initializes the current thread's Error runtime owner. Runtime startup

@@ -10,7 +10,7 @@
 */
 
 #pragma once
-$(import "../lib/private-keywords.xmacro")
+#include "../lib/private-keywords.x"
 #include "path.x"
 #include "process.x"
 #include "sourceview.x"
@@ -18,7 +18,6 @@ $(import "../lib/private-keywords.xmacro")
 /* The 64-bit FNV-1a offset basis, which starts every FNV hash. */
 #define FNV_OFFSET_BASIS 0xcbf29ce484222325ULL
 
-#pragma private
 
 #include <errno.h>
 #include <fcntl.h>
@@ -32,15 +31,15 @@ $(import "../lib/private-keywords.xmacro")
 
 // command reports
 
-macro Stmt $report.utils.identity_mismatch(Expr $detail) {
+static macro Stmt $report.utils.identity_mismatch(Expr $detail) {
   driver_error(%"compiler identity mismatch: ${$detail}");
 }
 
-macro Stmt $report.utils.lock_failed(Expr $p) {
+static macro Stmt $report.utils.lock_failed(Expr $p) {
   driver_error(%"cannot lock ${$p}");
 }
 
-macro Stmt $report.utils.host_failed(
+static macro Stmt $report.utils.host_failed(
   Expr $detail, Expr $subject, Expr $error) {
   driver_error(
     %"${$detail.assoc(<operation>)} ${$subject}: ${
@@ -236,7 +235,7 @@ int is_source_file(String path) {
 
 /** Reports whether `path` names a file in the indentation syntax. */
 int is_layout_file(String path) =>
-  path && (path.endswith(".xp") || path.endswith(".xpmacro"));
+  path && path.endswith(".xp");
 
 /** Returns the package directory that holds `path` below one of `roots`:
     the root's child on the way to `path`, compared by canonical path, when

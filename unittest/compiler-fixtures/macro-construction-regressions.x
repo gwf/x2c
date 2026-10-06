@@ -173,10 +173,8 @@ static int private_exact_target = 9;
 
 $nested_decorator_declarations();
 
-#pragma private
 $drop()
 int discarded_private = 2;
-#pragma public
 
 macro Stmt $bare_return() {
   $(quote ((return)))...

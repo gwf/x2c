@@ -13,8 +13,8 @@
 #include "clones.x"
 #include "args.x"
 
-$(import "graph-output.xmacro")
-$(import "dataset-output.xmacro")
+#include "graph-output.x"
+#include "dataset-output.x"
 
 #include <errno.h>
 #include <limits.h>

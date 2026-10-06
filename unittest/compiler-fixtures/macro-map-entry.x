@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-$(import "macro-map-entry-import.xmacro")
+#include "macro-map-entry-import.x"
 
 macro Entry $handler(Name $name) {
   $(x2c.literal.string (x2c.binding.spelling $name)): $name

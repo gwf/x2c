@@ -2,4 +2,6 @@
 
 macro Expression $project.collision($value) => $value;
 
-$(import "macro-import-collision.xmacro")
+#include "macro-import-collision-defs.x"
+
+int value = $project.collision(41);

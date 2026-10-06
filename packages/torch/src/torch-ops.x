@@ -25,7 +25,6 @@
 #include "torch.x"
 #include "xt_ops.h"
 
-#pragma private
 
 static xt_tensor _native(Tensor t) => t ? t.native() : NULL;
 
@@ -69,7 +68,6 @@ static List _pair(xt_tensor a, xt_tensor b, String operation) {
   return %($first $second);
 }
 
-#pragma public
 
 void Tensor.set_data(Tensor self, Tensor new_data) {
   Torch.check(xt_set_data(_native(self), _native(new_data)), "set_data");

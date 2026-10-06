@@ -1,4 +1,4 @@
 #include "x2c.x"
-export $(import "zpack.xmacro")
+#include "zpack.x"
 
 int zbase(void) => 2;

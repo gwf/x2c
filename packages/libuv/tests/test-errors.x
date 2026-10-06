@@ -5,10 +5,9 @@ import "libuv" with UvTcp;
 #include "meta.x"
 #include "test-support.x"
 
-#pragma private
 
-$(import "../src/libuv-errors.xmacro")
-$(import "../../../unittest/test-macros.xmacro")
+#include "../src/libuv-errors.x"
+#include "../../../unittest/test-macros.x"
 
 static List seen_detail, seen_location;
 static Symbol seen_cause;

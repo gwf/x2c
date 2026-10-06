@@ -9,7 +9,6 @@ import "geo" as g;
 
 int main(void);
 
-#pragma private
 
 #include <stdio.h>
 

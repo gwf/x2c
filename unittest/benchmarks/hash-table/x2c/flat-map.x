@@ -55,14 +55,13 @@ typedef struct MapOrderIntInt {
   unsigned mask;
 } *MapOrderIntInt;
 
-#pragma private
 
 #include <limits.h>
 #include <string.h>
 
-struct MapFlatBucket { unsigned hash; int key, val; };
-struct MapWideBucket { unsigned hash, reserved; int key, val; };
-struct MapMetaEntry { int key, val; };
+static struct MapFlatBucket { unsigned hash; int key, val; };
+static struct MapWideBucket { unsigned hash, reserved; int key, val; };
+static struct MapMetaEntry { int key, val; };
 
 static unsigned _flat_hash(int key) {
   uint64_t word = (unsigned) key;
@@ -159,7 +158,7 @@ static int _flat_update(volatile int *slot, Symbol op, int rhs) {
 /*  One combined-bucket family. The bucket width is the only difference
     between the two expansions below.
 */
-macro Unit $flat.family(
+static macro Unit $flat.family(
   Type $map, Type $storage, Type $bucket, Literal $owner,
   Name $reinsert_error, Name $insert_error
 ) {
@@ -585,7 +584,6 @@ retry:;
   (void) _meta_insert_error(cap);
 }
 
-#pragma public
 
 /** Creates an empty map with `capacity` buckets, a power of two at least 2. */
 MapMetaIntInt MapMetaIntInt.new_capacity(unsigned capacity) {
@@ -733,7 +731,6 @@ int MapMetaIntInt.try_next(
     Twelve bytes per slot become twenty. That is the trade being measured.
 */
 
-#pragma private
 
 #define _ORDER_GONE (~0u)
 
@@ -981,7 +978,6 @@ retry:;
   (void) _order_insert_error(cap);
 }
 
-#pragma public
 
 /** Creates an empty map with `capacity` buckets, a power of two at least 2. */
 MapOrderIntInt MapOrderIntInt.new_capacity(unsigned capacity) {

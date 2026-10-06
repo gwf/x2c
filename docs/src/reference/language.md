@@ -9,7 +9,7 @@ phase are in [compiler options](cli.md). If you have not built the compiler
 yet, the website's install page is the quickest route, and [building the
 compiler](../internals/building.md) covers the self-host stages behind it.
 
-## Source files and pragmas
+## Source files and visibility
 
 An `.x` file combines declarations and definitions. Translation produces a
 header and a C source file.
@@ -17,39 +17,34 @@ header and a C source file.
 A source file whose first line begins with `#!` is a
 [script unit](#script-units); every other file is an ordinary unit.
 
-`#pragma private` marks the start of implementation-only content. Everything
-before it belongs to the generated header, including types, enumerators,
-and `#define` and `#undef` directives that follow a function definition or
-a `static` declaration. A public function definition contributes its
-prototype, or its whole body when inline, and a `static` function or object
-stays in the source. A typedef below `#pragma private` still belongs to the
-header when a later public prototype names it. An `#include` that follows
-an item the source holds, such as a function definition, stays in the
-source at its place, so the macros it defines do not reach earlier items.
-Such an include, or an include below `#pragma private`, moves to the header
-only when it reaches x2c source declaring a type that a later public
-prototype names. A public object definition gets an
-`extern` declaration in the header. An object of an anonymous `struct`,
-`union`, or `enum` type has no such declaration. Every translated header
-starts with `#pragma once` and also carries a conventional include guard, so
-`.x` programs do not need to write either one.
+Declarations are public unless marked `static`. A public function contributes
+its prototype to the generated header, or its whole body when inline. A public
+object has one definition in the generated C and an `extern` declaration in
+the header. An object of an anonymous `struct`, `union`, or `enum` type has no
+repeatable declaration to publish.
 
-A file that includes another sees what that file's header declares: everything
-above its `#pragma private` and the functions with external linkage it defines
-below it. Its private types, enumerators, objects, and static functions belong
-to that file, and naming one of them is an error in the including unit. A
-`static` function is private wherever it appears, above the boundary as well
-as below it, and the error names the file that defines it. A C header is not
-a unit, so the `static inline` functions it defines still belong to every
-file that includes it. An
-`#include` below `#pragma private` still splices, because the including file
-may call the functions it declares.
+Standalone types are public by default. `static typedef`, `static struct`,
+`static union`, `static enum`, and `static class` declare private types. A type
+needed by a public declaration becomes public automatically. Its complete
+definition and field types are published when the interface requires that
+layout, such as for a value type or field access in a public inline body.
+A public forward pointer type can keep a static aggregate body private.
+A type used only by static functions remains private.
+The `static` marker on a type controls publication and emits no C storage.
 
-`#pragma public` ends implementation-only content. Until the next
-`#pragma private`, what follows it is handled like the top of the file.
-Declarations there belong to the generated header, and files that include
-this one or import its package can use them. A file can use the two
-pragmas to place a private include or type between public declarations.
+An ordinary `#include "module.x"` makes that module's public declarations,
+macro definitions, keyword aliases, and meta functions available. The same
+rule applies through transitive includes. Compile-time definitions become
+available at the include's source position. Static definitions belong to
+the declaring source file. A C header is not an x2c unit, so its
+`static inline` functions still belong to every C translation unit that
+includes it.
+
+Every translated header starts with `#pragma once` and also carries a
+conventional include guard, so ordinary `.x` programs need neither directive.
+The generated source preserves native includes at their source positions.
+A late native include enters the header when a later public declaration needs
+its types.
 
 The advanced `--cpp-symbols` and `--live-symbols` modes run the host
 preprocessor over raw `.x` include graphs. A module used with those modes needs
@@ -128,8 +123,8 @@ if (!args) return 1;
 
 A file can group statements by indentation and end them at line breaks
 instead of writing braces and semicolons. The file is in the indentation
-syntax when its name ends in `.xp`, a macro file's name ends in `.xpmacro`,
-or `#pragma indent` appears before its first line of code. Only comments,
+syntax when its name ends in `.xp`, or `#pragma indent` appears before its
+first line of code. Only comments,
 blank lines, and other directives may come before the pragma, and it does
 not reach the generated C. A `.xp` unit is otherwise an ordinary unit:
 `#include "shapes.xp"` includes its generated `shapes.h`, and builds,
@@ -230,8 +225,8 @@ indented unit.
 
 A package is a directory whose name is a valid C identifier. Its entry unit is
 `<dir>/src/<name>.x`, or `<dir>/<name>.x` for a single-file package. The
-package is everything that entry unit includes. Everything above
-`#pragma private` is public. There is no manifest and no export list.
+package is everything that entry unit includes. Nonstatic declarations and
+compile-time definitions are public. There is no manifest or export list.
 `--package-dir <root>` registers a directory of packages; a target in
 `x2c.toml` may set `package-dirs` instead.
 
@@ -291,19 +286,16 @@ and examples, are ordinary consumers that reach it through `import`.
 
 An import exposes:
 
-- every public declaration, type, and aggregate above `#pragma private`;
-- protocol declarations and adoptions the package makes; and
-- any header or runtime module the package's public part includes, such as a
-  vendored foreign header it publishes.
+- nonstatic functions, objects, standalone types, and types needed by public
+  declarations;
+- public macro definitions, keyword aliases, and meta functions;
+- public protocol declarations and adoptions; and
+- the public declarations of the files the package entry includes.
 
-It also installs the macro imports that the package's entry source and
-public include surface `export`, as described under
-[exported imports](#exported-imports), in the order an `#include` of the
-entry source would deliver them. Includes below `#pragma private` do not
-contribute exports, and neither do the consumer's own files. Other macros,
-private declarations, and the package's other imports are not exposed.
-Packages have no re-exports or hierarchy. One program uses one version of a
-package.
+Compile-time definitions arrive in the order an include of the entry source
+would deliver them. Static declarations remain in their source files. Macro
+names retain their declared spellings; a package alias changes C names, not
+macro names. One program uses one version of a package.
 
 A public bodyless `meta` prototype crosses the import like any function
 declaration. When the package has built its native module,
@@ -318,9 +310,9 @@ header directly. A package renames what it declares, not what it includes.
 
 An unprefixed public declaration from an x2c file outside the package directory
 would enter the consumer's namespace unchanged. The compiler rejects it as
-`package 'geo' exposes unprefixed top-level declaration '...'`. Including that
-file below `#pragma private` keeps it out of the package's surface, and a
-runtime module, like a C header, crosses unprefixed. A consumer that
+`package 'geo' exposes unprefixed top-level declaration '...'`. Including
+the foreign file directly in the consumer avoids that package-prefix conflict.
+A runtime module, like a C header, crosses unprefixed. A consumer that
 declares a name in an imported package's `geo__` space is reported as `'geo__x'
 is reserved for imported package 'geo'`.
 
@@ -649,7 +641,7 @@ Both forms are top-level compiler declarations and emit no program object.
 Associated declarations precede members. A declaration binder that shadows a
 visible type receives a warning; use the bodyless form to adopt that type.
 
-`static` applies only to a concrete adoption:
+`static` may mark a protocol body or a concrete adoption:
 
 ```text
 static protocol Prepared(LocalPlan);
@@ -662,8 +654,8 @@ same local relationship explicitly and does not change linkage.
 
 An adoption is local when its protocol body, participant typedef, required
 converter, required native target, or adoption row is private. A protocol
-body below lexical `#pragma private` is legal; `static protocol BASE(T) {
-... }` is not, because `static` applies only to concrete adoption. Local
+body declared as `static protocol BASE(T) { ... }` is private to its source
+file. `static` may also mark a concrete adoption. Local
 ordinary adapters are `static inline`, appear only in generated C, and are
 omitted from generated headers. Local native aliases and their signature
 checks are likewise source-only.
@@ -767,8 +759,9 @@ no field, binding, or runtime operation:
 _Static_assert(sizeof(int) >= 2, "int is at least 16 bits");
 ```
 
-The native compiler evaluates the condition and rejects a false or nonconstant
-assertion. Translation and source analysis alone do not perform that check.
+A file-scope assertion stays in its implementation. An aggregate assertion
+travels with the aggregate definition. The native compiler rejects a false or
+nonconstant assertion. Translation and source analysis alone do not perform that check.
 
 ### Generic selection
 
@@ -931,12 +924,10 @@ dot may be a keyword, as in `$error.arg.void`. The `x2c.*` and
 facilities; `$lisp.bind`, `$lisp.binding`, and `$lisp.install` are the shipped
 native-binding macros.
 
-Definitions and imports become visible in source order. A definition must
-precede its first use. A later same-file definition of the same name shadows
-the earlier definition for later invocations; it does not change expansions
-that already occurred. An imported definition may not collide with a
-definition already visible from the importing translation unit or another
-import.
+Definitions and includes become visible in source order. A definition must
+precede its first use. A later definition of the same name shadows the earlier
+definition for later invocations. Earlier expansions keep their original
+definition, including through transitive includes.
 
 ### Local definitions
 
@@ -961,7 +952,7 @@ A bare `name(...)` selects the innermost local macro before a file-local
 `keyword` alias or an ordinary call or typedef-style cast. A bare `name`
 without parentheses remains an ordinary identifier. `(name)(arguments)` is an
 explicit ordinary call, while `$name(arguments)` selects only the global or
-imported macro namespace. A local and global definition may therefore share a
+global macro namespace. A local and global definition may therefore share a
 name without ambiguity.
 
 A local definition follows the [hygiene](#hygiene-and-generated-names) rule
@@ -1073,18 +1064,17 @@ definitions. There is no runtime type argument, erased element representation,
 or parameterized type spelling such as `Box<T>`. A macro generates named
 concrete families such as `IntValue` and `DoubleValue`.
 
-During shallow symbol collection, the compiler expands every file-scope unit
-macro. An imported macro, or one whose template contains protocol
-declarations or adoptions, must expand there, and its errors stop the
-translation. Any other unit macro the source file defines is tried; a failed
-attempt keeps nothing, and the full parse expands the invocation and reports
-its errors. Collection does not evaluate the unit's own top-level Lisp, so an
-expansion that reads a `$(def ...)` value from the same file fails this
-attempt. If expansion succeeds, collection retains protocol rows and public
-declarations, then discards private declarations and function bodies. A
-public function definition may therefore follow its prototype inside the same
-expansion; earlier code in the unit and importing translation units discover
-the retained signature.
+During shallow symbol collection, every file-scope `Unit` macro must expand.
+Collection evaluates preceding top-level Lisp contributions before expanding
+that producer. Its result is retained for the full parse, which binds the
+retained function bodies without running the producer again. Static generated
+declarations stay in their owner; public declarations and protocol rows reach
+includers. A public function definition can follow its prototype inside the
+same expansion.
+
+A local `Unit` macro must expand during collection if it contains protocol or
+adoption rows. Other local `Unit` macros are tried. A failed attempt contributes
+nothing, and the full parse reports its errors at the invocation.
 
 Protocol declarations and adoption rows are collection-time compiler
 declarations rather than C declarations. A unit macro may emit them, and
@@ -1406,21 +1396,15 @@ position compatible with its target kind; a bare expression decorator can
 capture a same-named expression read, and a bare block or function decorator
 can overlap a declaration beginning with a same-named typedef.
 
-Aliases are local to the `.x` file that declares them, including when that file
-is included or is a package source. One alias map spans that file's
-include-separated segments, while a nested included `.x` file receives its
-own map. An alias a file declares never leaks into the including file.
+Aliases are source ordered. A nonstatic `keyword` declaration becomes
+available to including files at the include position, together with the macro
+it names. `static keyword ALIAS $macro;` keeps the alias in its declaring file.
+A reusable ordinary `.x` module may hold both macro definitions and aliases;
+include that module wherever its syntax is needed.
 
-An explicitly imported `.xmacro` file may contain macro definitions and
-`keyword` declarations. Its aliases become visible in the importing `.x` file
-at the import position. Every `.x` file that wants the spellings or the
-macros imports the pack itself, or includes a file that
-[exports](#exported-imports) the import. Any other import of an included
-file, like a macro the included file defines, does not expose them to its
-caller, and no pack is loaded implicitly by `x2c.x`. Macro templates are
-parsed when
-defined, so a later alias does not reinterpret an earlier template; generated
-`List`s and strings are not reparsed as alias-bearing source.
+Macro templates are parsed when defined, so a later alias does not reinterpret
+an earlier template. Generated `List`s and strings are not reparsed as
+alias-bearing source.
 
 An alias changes spelling, not decorator capability. x2c's current thread and
 lambda facilities cannot lift a local block with captured variables into a C
@@ -1475,7 +1459,7 @@ a complete function or declaration, but a public target must retain the same
 public binding and contract and cannot gain new public siblings. Private
 targets and hygienically private siblings may be rewritten freely.
 
-Shallow declaration collection loads macro imports so imported unit macros can
+Shallow declaration collection loads included macro definitions so unit macros can
 publish their declarations and protocol rows; unit macros the source file
 defines publish theirs when collection can expand them. It does not execute
 other top-level Lisp forms. `Decorator`-shaped adjacency still collects the unchanged
@@ -1841,16 +1825,16 @@ expression grammar: `${$helper(...)}` calls a meta function, while
 
 ```text
 $(import "helpers.xlisp")
-$(import "project-macros.xmacro")
+#include "project-macros.x"
 
 macro Expression $computed(Expr $value) => $(car (list $value));
 ```
 
-`.xlisp` files execute in the translation unit's Lisp session. `.xmacro`
-files may contain macro definitions, `meta` declarations and top-level Lisp forms. Import paths are
-relative to the importing file, canonicalized, loaded once, and checked for
-cycles. Direct Lisp file operations remain available but are not tracked as
-compiler dependencies.
+`.xlisp` files execute in the translation unit's Lisp session. `$(import ...)`
+is for Lisp files; ordinary `.x` modules containing macros and meta functions
+use `#include`. Lisp import paths are relative to the importing file,
+canonicalized, loaded once, and checked for cycles. Direct Lisp file operations
+remain available but are not tracked as compiler dependencies.
 
 A free name in a lambda or macro body reads the definitions the body was
 written next to, and then the session's globals. The environment the call was
@@ -1876,7 +1860,10 @@ This covers `defun` and `defmacro`, which are `def`. The library defines
 many ordinary words, including `filter`, `last`, `map`, `search`, `len` and
 `apply`, so a macro file needs its own names for its own definitions. A
 unit's own definitions live in its own session, so one unit never changes
-what another reads, and the compiler treats an inherited binding as final.
+what another reads. Lisp definitions treat an inherited binding as final.
+The host API `Lisp.set_global` can shadow an inherited name in the child's
+own bindings without changing the ancestor. Lisp `def` still rejects that
+name, including after a host binding shadows it.
 
 `eval` is an ordinary procedure. The form it is given is evaluated in the
 session's globals, not in the bindings around the call, so
@@ -1965,7 +1952,7 @@ AST rather than its source spelling.
 
 `x2c.invocation.file`, `.line`, and `.column` return the caller's x2c source
 location while a macro body is expanding. Lines and columns are one-based; an
-imported macro still names its caller rather than its definition or generated
+included macro still names its caller rather than its definition or generated
 C. For example, `$(x2c.invocation.line)` produces an integer expression for the
 invocation line.
 
@@ -2084,44 +2071,30 @@ comma-separated initializer. Compose a call to an existing spelling with
 Names under `x2c.*` or `_x2c.*` with a component beginning `_` are private
 implementation details.
 
-### Exported imports
+### Sharing compile-time definitions
 
-A `.x` file can give the files that include it one of its macro imports.
-Write `export` before the import:
+Keep runtime code and compile-time definitions in the same ordinary source
+module:
 
-<!-- ignore: the import names a file beside the sample. -->
+<!-- ignore: the include names a file beside the sample. -->
 ```x2c,ignore
-#include "x2c.x"
-export $(import "geometry.xmacro")
+#include "geometry.x"
 ```
 
-An exported import is part of the file's interface. Every file that includes
-this file receives the import at its `#include` line, as if it had written
-the import there. A file that reaches this one through other includes
-receives it too. Each path is imported once per unit, however many includes
-deliver it.
+Nonstatic macros, decorators, keyword aliases, and meta functions become
+available at the include line. They also reach files that include this one.
+Each canonical include path contributes once per translation unit, including
+when an include cycle reaches a file again.
 
-The import delivers everything the imported file provides: its macros and
-decorators, its `keyword` aliases, its `meta` functions and `meta static`
-values, its top-level Lisp forms, and the files it imports. An exported
-`.xlisp` import delivers its Lisp definitions.
+A definition marked `static` stays in its declaring source file. For example,
+`static macro Expression $helper(...)` declares a private macro, and
+`meta static int helper(int value)` declares a private meta function.
+Nonstatic top-level Lisp definitions and Lisp imports also follow the
+ordinary include interface; a `static $(...)` form stays in its file.
 
-`export` applies only to a file-scope `$(import ...)` in a `.x` file.
-Unless `$(` follows it, `export` is an ordinary identifier, such as the
-name of a C macro. A macro, `keyword`, `meta` function, or Lisp definition
-written in the `.x` file stays in that file. To share one, move it to an
-`.xmacro` file and export that import. An `.xmacro` file needs no `export`,
-because its imports already reach the file that imports it. An import
-without `export` stays in its file. That includes its `meta` functions. The
-importing file can call them at compile time and at run time, but a file
-that includes it receives no declaration of them. To call one from the
-including file, export the import or import the `.xmacro` there. The
-including unit then emits its own weak copy.
-
-The usual import rules apply at the include line. A delivered definition
-that collides with a visible macro is an error. A later definition in the
-including file replaces the delivered one for the source after it. `export`
-does not depend on `#pragma private`.
+Definition order determines which macro or alias later source uses. Macro
+bodies retain their definition-time syntax; free runtime names follow the
+expansion-site rules under [macro hygiene](#hygiene-and-generated-names).
 
 ### `meta` functions
 
@@ -2229,7 +2202,7 @@ Native execution replaced the earlier in-process staging and the Lisp
 lowering of `meta` bodies, with these consequences:
 
 - A `meta` function defined by a macro expansion or a `$` call is an
-  error; one written in an ordinary `.x` file or an `.xmacro` file joins
+  error; one written in an ordinary `.x` file joins
   the project meta module.
 - A project `meta` body receives compiler facts as arguments, such as
   `TypeInfo` and `Source` parameters, and does not query the compiler.
@@ -2241,12 +2214,11 @@ lowering of `meta` bodies, with these consequences:
 - The autodiff macros moved to the `autodiff` package; see
   [Automatic Differentiation](../guide/autodiff.md).
 
-A `meta` declaration in an imported `.xmacro` installs its compile-time form in
-every consuming unit; a `meta static` value gives each unit its own
-compile-time copy. The runtime forms are independent: a unit emits a
-definition only for those it reaches, and the storage class written on the
-declaration says what it emits. Importing the same file twice contributes one
-copy of each definition.
+A nonstatic `meta` function in an included `.x` module is callable during
+translation and has an ordinary runtime declaration. Its provider source owns
+the runtime definition. A `meta static` function stays in that provider, and
+its compile-time state belongs to the provider's compiled group. Repeated
+includes contribute the public declaration once.
 
 See [Meta Functions](../guide/meta-functions.md) for the authoring guide.
 
@@ -2283,9 +2255,9 @@ declarations.
 function or initialized file-static value the unit has defined so far to a
 String hash of its definition's code tokens, from the first token after any
 `meta` marker to the end of its body or initializer. The compiler carries
-native copies of the `meta` functions in the `.xmacro` files it ships
+native copies of the `meta` functions in the source modules it ships
 (`src/linked-meta.x`, generated from them) and
-records their hashes with it. An imported `meta` definition runs as its
+records their hashes with it. An included `meta` definition runs as its
 copy when its hash, and the hash of every definition of the unit that it
 reaches through references, matches the copy's; an edited one, or one
 that reaches an edited definition, is compiled with the unit's group like
@@ -2426,8 +2398,8 @@ ordinary typedef and aggregate declarations as the captured source.
 A `Declaration` macro, or a `NamedType` decorator, produces declarations once
 while the owning source's public declarations are collected. Its result is
 retained for full binding; the producer is not evaluated again to obtain its
-bodies. Nested declaration producers share this rule. The source's private
-boundary and ordinary dependency invalidation apply to the retained result.
+bodies. Nested declaration producers share this rule. Static publication and
+ordinary dependency invalidation apply to the retained result.
 Imported and cached declarations publish the selected signatures of their
 owning source.
 
@@ -2436,8 +2408,8 @@ include ordinary top-level syntax and these constructible forms:
 
 - `(default FUNCTION)` supplies a function candidate. An ordinary declaration
   of that exact function in the owning source wins, including a later one.
-  Only the selected body is bound. A candidate below `#pragma private` has
-  static linkage. Two ordinary definitions still conflict.
+  Only the selected body is bound. A candidate produced by a static type
+  declaration has static linkage. Two ordinary definitions still conflict.
 - `(declaration-recipe CALLBACK ARGUMENTS)` defers a Lisp producer until the
   owning source's declarations are available. It is evaluated once, and its
   declarations join the same bundle.
@@ -3426,7 +3398,7 @@ x2c accepts C-style `if`, `switch`, `while`, `do`, classic `for`, labels,
 
 ### System block decorators
 
-The built-in macro pack installs `$scope`, `$let`, and `$lock` without a
+The built-in macro module installs `$scope`, `$let`, and `$lock` without a
 per-source import. They retain the normal runtime declaration requirements
 and macro collision policy. None has a bare keyword alias.
 

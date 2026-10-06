@@ -4,7 +4,7 @@
 import "autodiff" with AdTape, AdNode;
 #include <math.h>
 #include "test-support.x"
-$(import "../../../unittest/test-macros.xmacro")
+#include "../../../unittest/test-macros.x"
 
 typedef struct Dual { double value; double tangent; } Dual;
 typedef struct Dual2 { Dual value; Dual tangent; } Dual2;

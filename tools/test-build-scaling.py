@@ -24,7 +24,7 @@ class BuildScalingTests(unittest.TestCase):
         (tree / name).mkdir()
       (tree / "src/author.x").write_text("a\nb\n", encoding="utf-8")
       (tree / "src/linked-meta.x").write_text("g\ng\ng\n", encoding="utf-8")
-      (tree / "lib/hand.xmacro").write_text("m\n", encoding="utf-8")
+      (tree / "lib/hand.x").write_text("m\n", encoding="utf-8")
       (tree / "lib/x2c.x").write_text("g\ng\n", encoding="utf-8")
       (tree / "lib/ignored.txt").write_text("x\n", encoding="utf-8")
       self.assertEqual(scaling.source_lines(tree), {

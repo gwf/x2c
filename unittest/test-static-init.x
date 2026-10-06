@@ -5,7 +5,7 @@
 #include <sched.h>
 #include <stdint.h>
 #include <unistd.h>
-$(import "test-macros.xmacro")
+#include "test-macros.x"
 
 static X2CStatic aligned_guard, retry_guard, recursive_guard;
 static X2CStatic concurrent_guard, cycle_guards[2];

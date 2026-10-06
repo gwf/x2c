@@ -1,6 +1,6 @@
 #include "x2c.x"
 #include "meta.x"
-$(import "meta-capture-definition/helpers.xmacro")
+#include "meta-capture-definition/helpers.x"
 
 meta static String capture_text(Source code) {
   Source saved = code;

@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-$(import "macro-decorator-import.xmacro")
+#include "macro-decorator-import-defs.x"
 
 $project.imported()
 int imported_decorated(void) {

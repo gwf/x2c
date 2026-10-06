@@ -49,7 +49,7 @@ Ask for the AST after parsing and macro expansion:
   (block ...)))
 ```
 
-The built-in source macro in `src/macros.x`, `etc/builtin-macros.xmacro`, and
+The built-in source macro in `src/macros.x`, `etc/builtin-macros.x`, and
 `src/builtins.x` has replaced `foreach` with declarations and a
 `while` loop that call `List_iter` and `Iter_try_next`. The final `List_iter`
 argument is a zero-initialized compound literal whose block lifetime holds the
@@ -119,7 +119,7 @@ is listed under [compiler options](../reference/cli.md).
   in-process staging: `src/meta-group.x`; the project helper:
   `src/meta-project.x` builds it, `src/meta-helper-client.x` calls it, and
   `etc/meta-helper.x` answers
-- Embedded native bindings: `etc/lisp-bindings.xmacro`,
+- Embedded native bindings: `etc/lisp-bindings.x`,
   `etc/lisp-bindings.xlisp`, `lib/lisp-targets.x`, `lib/lisp.x`, and
   `lib/func.x`
 - Tests: macro import, template, decorator, inline-Lisp, and inferred-binding
@@ -156,7 +156,7 @@ is listed under [compiler options](../reference/cli.md).
 ### Inline Lisp bindings
 
 - Parse and expand `$lisp.bind`, `$lisp.binding`, and `$lisp.install`:
-  `src/macros.x`, `etc/lisp-bindings.xmacro`, and
+  `src/macros.x`, `etc/lisp-bindings.x`, and
   `etc/lisp-bindings.xlisp`
 - Runtime call boundary: `lib/lisp.x`, `lib/func.x`
 - Tests: Lisp binding compiler fixtures, Lisp/`Func` suites, and the
@@ -219,7 +219,7 @@ inline-lisp example
 ### Foreach
 
 - Parse and expand: built-in source macro support in `src/macros.x` and
-  `etc/builtin-macros.xmacro`; the expansion algorithm in
+  `etc/builtin-macros.x`; the expansion algorithm in
   `src/builtins.x`
 - Lower/generate the expanded loop: `src/transform.x`, `src/emit.x`
 - Runtime: `lib/iter.x` and collection adapters; `Iter.try_next` owns status

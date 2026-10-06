@@ -1,3 +1,3 @@
 #include "x2c.x"
-$(import "pack.xmacro")
+#include "pack.x"
 int relative_plain = $relative.value();

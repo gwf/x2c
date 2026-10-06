@@ -11,13 +11,12 @@
 */
 #pragma once
 #include "compiler.x"
-#pragma private
-$(import "../src/parse-report-macros.xmacro")
-$(import "../src/grammar.xmacro")
+#include "parse-report-macros.x"
+#include "grammar.x"
 
 // diagnostics
 
-macro Stmt $report.parse.name_package(
+static macro Stmt $report.parse.name_package(
   Expr $c, Expr $spelling, Expr $owner) {
   $c.report_error(
     <parse>,
@@ -25,14 +24,14 @@ macro Stmt $report.parse.name_package(
     $c.token, NULL);
 }
 
-macro Stmt $report.parse.name_reserved(Expr $c, Expr $spelling) {
+static macro Stmt $report.parse.name_reserved(Expr $c, Expr $spelling) {
   $c.report_error(
     <parse>,
     %"'${$spelling}' is reserved for compiler-generated names",
     $c.token, NULL);
 }
 
-macro Stmt $report.parse.package_collision(
+static macro Stmt $report.parse.package_collision(
   Expr $c, Expr $site, Expr $kind, Expr $local) {
   $c.report_error(
     <parse>,
@@ -40,7 +39,7 @@ macro Stmt $report.parse.package_collision(
     $site, NULL);
 }
 
-macro Stmt $report.parse.package_bound(
+static macro Stmt $report.parse.package_bound(
   Expr $c, Expr $site, Expr $kind, Expr $local, Expr $bound) {
   $c.report_error(
     <parse>,
@@ -48,7 +47,7 @@ macro Stmt $report.parse.package_bound(
     $site, %( "bound to: ${$bound}" ));
 }
 
-macro Stmt $report.type.typedef_depth(Expr $c, Expr $origin) {
+static macro Stmt $report.type.typedef_depth(Expr $c, Expr $origin) {
   $c.report_error(
     <type>,
     %"typedef chain too deep (possible cycle) resolving ${$origin.repr()}",
@@ -100,18 +99,17 @@ macro Stmt $report.type.typedef_depth(Expr $c, Expr $origin) {
 
 /* A compiler's symbol table: a stack of scopes whose lowest `base_scopes`
    hold file-scope declarations. While `transactions` are active, `undo`
-   holds a `SymUndo` for each row a write replaced. `import_depth` keeps
-   imported writes from claiming a row as an authored declaration. */
-typedef struct Sym {
+   holds a `SymUndo` for each row a write replaced. */
+static typedef struct Sym {
   Block scopes, Map globals, statics, binding_facts;
   int base_scopes, local_macro_names;
-  Block undo, int transactions, import_depth;
+  Block undo, int transactions;
   // Owning compiler, so type resolution can report its own diagnostics.
   Compiler c;
 } *Sym;
 
 /* `map[key]` held `value` before a write, or nothing when it is void. */
-typedef struct SymUndo { Map map, Var key, value; } SymUndo;
+static typedef struct SymUndo { Map map, Var key, value; } SymUndo;
 
 /** Creates the empty symbol table that compiler `c` owns. */
 Sym Sym.new(Compiler c) {
@@ -130,10 +128,7 @@ Sym Sym.new(Compiler c) {
 void Sym.put(Sym s, Map map, Var key, Var value) {
   s._remember(map, key);
   map[key] = value;
-  if (!s.import_depth && _same(map, s.globals) && s.statics.len()) {
-    List imported = %(import-row $key);
-    if (imported in s.statics) s.drop(s.statics, imported);
-  }
+
 }
 
 /** Deletes `key` from `map` so that an active transaction can restore it. */
@@ -1321,37 +1316,6 @@ int SymTxn.local_macros_changed(SymTxn &s) {
     if (row.value is void || row.value != after[row.key]) return 1;
   }
   return 0;
-}
-
-/** Starts collecting an import's semantic writes and returns the log
-    position that `Sym.added_globals` reads from. Imported writes keep
-    existing import markers. `Sym.end_import` ends the collection. */
-int Sym.begin_import(Sym s) {
-  s.transactions++;
-  s.import_depth++;
-  return s.undo.len();
-}
-
-/** Ends the import collection that `Sym.begin_import` started. */
-void Sym.end_import(Sym s) {
-  s.import_depth--;
-  s.end_log();
-}
-
-/** Returns the global rows written since `mark` that were absent before
-    it, with their current values. */
-Map Sym.added_globals(Sym s, int mark) {
-  SymUndo *rows = s.undo.bytes;
-  Map seen = {}, added = {};
-  for (int i = mark; i < (int) s.undo.len(); i++) {
-    SymUndo row = rows[i];
-    if (!_same(row.map, s.globals) || row.key in seen) continue;
-    seen[row.key] = 1;
-    Var value;
-    if (row.value is void && s.globals.try_get(row.key, value))
-      added[row.key] = value;
-  }
-  return added;
 }
 
 /** Stops one import or transaction's semantic write log. */

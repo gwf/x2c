@@ -437,15 +437,15 @@ threaded storage, fields, assignment, returns, call arguments, for-header
 declarations, and wrappers nested inside arithmetic or conditionals do not
 supply this enclosing-block lifetime.
 
-## Import the rest of the set
+## Include the rest of the set
 
-`class`, `foreach`, `$scope`, `$let`, `$lock`, and `$auto` need no import. A
-second set ships in `lib/system-macros.xmacro` and becomes available with one
+`class`, `foreach`, `$scope`, `$let`, `$lock`, and `$auto` need no include. A
+second set ships in `lib/system-macros.x` and becomes available with one
 line:
 
-<!-- ignore: the import alone is not a translation unit -->
+<!-- ignore: the include illustrates the module name -->
 ```x2c,ignore
-$(import "system-macros.xmacro")
+#include "system-macros.x"
 ```
 
 ### Give every case its own block and its own break
@@ -456,7 +456,7 @@ of `case` and `default` labels where you wrote it, and turns the statements
 after a run into one block carrying that run's `break`:
 
 ```x2c
-~$(import "system-macros.xmacro")
+~#include "system-macros.x"
 int main(void) {
   int code = 2;
   String reached = "none";
@@ -491,7 +491,7 @@ LF or CRLF newline is dropped, so indentation past that prefix survives and
 the block renormalizes as a unit:
 
 ```x2c
-~$(import "system-macros.xmacro")
+~#include "system-macros.x"
 int main(void) {
   String usage = $dedent(%"
     usage: report [options]
@@ -515,7 +515,7 @@ the source line it was written on. It transfers to a catch like any other x2c
 error, and `NDEBUG` does not remove it:
 
 ```x2c
-~$(import "system-macros.xmacro")
+~#include "system-macros.x"
 int main(void) {
   int limit = 50;
   String written = NULL;
@@ -537,7 +537,7 @@ stderr. The caller includes `<time.h>`:
 
 ```x2c
 ~#include <time.h>
-~$(import "system-macros.xmacro")
+~#include "system-macros.x"
 int main(void) {
   long total = 0;
   $time("sum")

@@ -4,7 +4,7 @@ import "torch";
 
 #include "test-support.x"
 
-$(import "../../../unittest/test-macros.xmacro")
+#include "../../../unittest/test-macros.x"
 
 static void torch_raw_api(void) {
   int64_t shape[2] = { 2, 2 }, count = 0;

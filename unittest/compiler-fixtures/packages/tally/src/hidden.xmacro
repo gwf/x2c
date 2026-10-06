@@ -1,1 +1,0 @@
-macro Expression $tally.hidden() => 0;

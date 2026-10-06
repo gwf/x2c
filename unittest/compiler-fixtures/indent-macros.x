@@ -1,6 +1,6 @@
 #pragma indent
-// Indented macros from an .xpmacro import, decorators, and match.
-$(import "indent-macros.xpmacro")
+// Indented macros from an .xp include, decorators, and match.
+#include "indent-macros.xp"
 
 static List simplify(List node):
   match node:

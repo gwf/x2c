@@ -4,8 +4,8 @@
 #include "test-support.x"
 #include <time.h>
 #include <unistd.h>
-$(import "test-macros.xmacro")
-$(import "system-macros.xmacro")
+#include "test-macros.x"
+#include "system-macros.x"
 
 /* Stderr goes to a temporary file between the two calls, so a test reads
    exactly what $time streamed. */

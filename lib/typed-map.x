@@ -9,12 +9,12 @@
 
 #pragma once
 #include "x2c.x"
-$(import "error-macros.xmacro")
+#include "error-macros.x"
 
 #include <stdlib.h>
 #include <string.h>
-$(import "map-generics.xmacro")
-$(import "integer-ops.xmacro")
+#include "map-generics.x"
+#include "integer-ops.x"
 
 // representation
 

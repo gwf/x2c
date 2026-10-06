@@ -36,7 +36,6 @@ protocol const char *(T) {
 
 protocol const char *(String);
 
-#pragma private
 
 #include <stdlib.h>
 #include <ctype.h>
@@ -60,7 +59,7 @@ protocol const char *(String);
 /* `length` includes the trailing NUL. A zero hash marks an unfinished
    String.malloc buffer; canonical nonempty Strings have their content hash
    installed before entering a pool table. */
-typedef struct StringHeader {
+static typedef struct StringHeader {
   int length;
   unsigned hash;
 } *StringHeader;
@@ -76,7 +75,7 @@ _Static_assert(
 
 /* A short String and its header on the stack, so probing the pool chain
    for it allocates nothing. */
-typedef union StringQuery {
+static typedef union StringQuery {
   unsigned long align;
   char bytes[sizeof(struct StringHeader) + STRING_STACK_BYTES + 1];
 } StringQuery;
@@ -1050,7 +1049,7 @@ meta native List String.rpartition(String str, String sep) {
    source byte offered as `$byte` so each family member gives only its own C
    case mapping. A copy that changes nothing is released and `$subject`
    itself is returned. */
-macro Stmt $string.remap(
+static macro Stmt $string.remap(
   Expr $subject, Name $index, Name $byte, Expr $mapped) {
   if (!$subject || !*$subject) return $subject;
   int length = $subject.len(), changed = 0;
@@ -1100,7 +1099,7 @@ meta native String String.capitalize(String str) {
 }
 
 /* Builds a filtered copy, leaving each caller to give only its byte test. */
-macro Stmt $string.select(
+static macro Stmt $string.select(
   Expr $subject, Name $index, Expr $selected) {
   int length = $subject.len();
   String string = String.malloc(length + 1);

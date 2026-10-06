@@ -1,7 +1,7 @@
 /*  extern-local.x -- an external cell is not a fresh local allocation. */
 
 #include "x2c.x"
-$(import "../src/cstar.xmacro")
+#include "../src/cstar-macros.x"
 
 int count = 0;
 

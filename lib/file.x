@@ -19,8 +19,8 @@
 #include <stdio.h>
 #include "common.x"
 
-$(import "error-macros.xmacro")
-$(import "cleanup.xmacro")
+#include "error-macros.x"
+#include "cleanup.x"
 
 /** Names a native stdio stream handle.
     A successful open returns an owned stream. `Stdin`, `Stdout`, and `Stderr`
@@ -70,7 +70,6 @@ typedef enum FileReadStatus {
 
 $cleanup.by(File, close);
 
-#pragma private
 
 #include "string.x"
 #include "block.x"

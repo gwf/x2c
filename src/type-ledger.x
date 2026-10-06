@@ -2,14 +2,14 @@
 
     Copyright (c) 2025 Gary William Flake
 
-    `lib/var-tags.xmacro` holds the ledger. This unit is the one compiler
+    `lib/var-tags.x` holds the ledger. This unit is the one compiler
     unit that imports it, so the units that include `type.x` do not load
     the ledger. Both tables have process lifetime.
 */
 
 #include "type.x"
 
-$(import "../lib/var-tags.xmacro")
+#include "../lib/var-tags.x"
 
 /* Each native pointer type's tag; the ledger adds every boxed class and a
    pointer to it. */

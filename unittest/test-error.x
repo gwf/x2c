@@ -1,6 +1,6 @@
 /*  test-error.x -- unit tests for the error handler and accumulation stacks */
 
-$(import "../lib/error-macros.xmacro")
+#include "../lib/error-macros.x"
 #include "test-support.x"
 #include <string.h>
 
@@ -481,7 +481,7 @@ static void error_logger_handler_is_registered(void) {
   EXPECT_TRUE(Error.handler_depth() >= 1);
 }
 
-$(import "test-macros.xmacro")
+#include "test-macros.x"
 
 void error_suite(void) {
   $test.run(error_initialize_is_idempotent);

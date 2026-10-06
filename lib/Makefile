@@ -7,7 +7,11 @@ SHELL := /bin/sh
 OPTIONAL_SOURCES := args.x datum.x diff.x digest.x json.x list-selectors.x \
                     meta.x path.x process.x regex.x \
                     scripting.x typed-array.x typed-list.x typed-map.x \
-                    var-ledger.x lisp-init.x lisp-targets.x
+                    var-ledger.x lisp-init.x lisp-targets.x \
+                    array-generics.x cleanup.x error-macros.x error-private.x \
+                    func-errors.x integer-ops.x map-generics.x \
+                    native-scalar-types.x private-keywords.x system-macros.x \
+                    var-adapters.x var-tags.x
 SOURCES := $(sort $(filter-out x2c.x $(OPTIONAL_SOURCES),$(wildcard *.x)))
 
 .PHONY: FORCE

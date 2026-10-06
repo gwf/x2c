@@ -6,7 +6,7 @@ chapter explains how to use this package as an advanced topic.
 Automatic differentiation written entirely in x2c. It wraps no C library and
 has no native dependency.
 
-- [src/autodiff.xmacro](src/autodiff.xmacro): `$ad.dual` dual-number
+- [src/autodiff-macros.x](src/autodiff-macros.x): `$ad.dual` dual-number
   families and the `$ad.forward`, `$ad.reverse`, `$ad.checkpoint`, and
   `$ad.both` decorators. Its `meta` functions are staged for the importing
   unit on first use.
@@ -15,7 +15,7 @@ has no native dependency.
 
 A unit reaches both through `import "autodiff" with AdTape, AdNode;`. A unit
 that needs only the macros can import them by path, as
-`$(import "<path>/autodiff/src/autodiff.xmacro")`.
+`$(import "<path>/autodiff/src/autodiff-macros.x")`.
 
 Each runtime computation uses one tape, including its constants. Binary
 arithmetic operations and `backward` reject foreign nodes with `bad-arg` before changing

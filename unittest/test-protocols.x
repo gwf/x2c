@@ -9,7 +9,7 @@
 
 #include "typed-array.x"
 #include "test-support.x"
-$(import "test-macros.xmacro")
+#include "test-macros.x"
 
 static void protocols_block_defaults_reach_array(void) {
   $test.scoped();

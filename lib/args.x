@@ -19,14 +19,13 @@ typedef enum Args {
   ARGS_NAMESPACE
 } Args;
 
-#pragma private
 
 /* One spec row after its properties are read. An option is named by its
    first long spelling, or else its short one, without the dashes; `value`
    is the placeholder of an option that takes one, and `spellings` joins
    every spelling for the usage text. `owner` is the first row with the
    same name, and its `collected` holds that name's repeated values. */
-typedef struct Option {
+static typedef struct Option {
   String spelling, spellings, name, value, help;
   Var fallback;
   Array collected;
@@ -34,7 +33,7 @@ typedef struct Option {
   int operand, defaulted, required, repeated, given;
 } Option;
 
-typedef struct Spec {
+static typedef struct Spec {
   Option *options;
   int count;
   Map index;

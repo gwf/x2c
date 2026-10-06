@@ -1,5 +1,5 @@
 #include "x2c.x"
-$(import "../../lib/array-generics.xmacro")
+#include "../../lib/array-generics.x"
 
 #include <string.h>
 

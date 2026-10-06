@@ -45,14 +45,12 @@ typedef struct BenchSample {
   uint64_t handles_peak[XT_HANDLE_KINDS];
 } BenchSample;
 
-#pragma private
 
 static BenchSample *bench_samples = NULL;
 static int bench_capacity = 0;
 static int bench_count = 0;
 static double bench_origin = 0.0;
 
-#pragma public
 
 /** Monotonic seconds excluding system sleep. */
 double Bench.now(void) => xb_now();

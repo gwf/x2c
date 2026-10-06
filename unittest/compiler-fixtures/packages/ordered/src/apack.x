@@ -1,0 +1,5 @@
+#pragma once
+
+$(defun ordered_a () (add (ordered_z) 2))
+$(def ordered_a_value (ordered_a))
+macro Expression $ordered.a() => $(ordered_a);

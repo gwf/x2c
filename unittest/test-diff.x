@@ -2,7 +2,7 @@
 
 #include "diff.x"
 #include "test-support.x"
-$(import "test-macros.xmacro")
+#include "test-macros.x"
 
 static String script(List edits) {
   Buffer out = Buffer.new(0);

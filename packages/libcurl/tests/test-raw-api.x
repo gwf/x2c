@@ -4,7 +4,7 @@
 #include "test-support.x"
 #include <string.h>
 
-$(import "../../../unittest/test-macros.xmacro")
+#include "../../../unittest/test-macros.x"
 
 static String fixture_url;
 

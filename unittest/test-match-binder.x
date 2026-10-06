@@ -24,7 +24,7 @@ static void matcher_should_bind_ident_var(void) {
   TEST_FAIL("pattern did not match");
 }
 
-$(import "test-macros.xmacro")
+#include "test-macros.x"
 
 void match_binder_contract_suite(void) {
   $test.run(matcher_should_bind_ident_var);

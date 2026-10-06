@@ -11,7 +11,6 @@
 #include "path.x"
 #include "process.x"
 
-#pragma private
 
 /* Returns `text` with the sorted `(START END TEXT)` `edits` applied. An
    edit that overlaps an earlier one is dropped, for a later run. */

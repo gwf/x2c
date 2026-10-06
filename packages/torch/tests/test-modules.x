@@ -7,7 +7,7 @@ import "torch" with Torch, Tensor, Module, Optimizer, Scheduler, JitModule;
 #include <math.h>
 #include <sys/stat.h>
 
-$(import "../../../unittest/test-macros.xmacro")
+#include "../../../unittest/test-macros.x"
 
 #define EXPECT_NEAR(actual, expected, tolerance) \
   EXPECT_TRUE(fabs((actual) - (expected)) < (tolerance))

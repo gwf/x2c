@@ -54,7 +54,7 @@ R3. A meta definition imported through an included header must stay
 callable. Install the staged `Func` with the owning `Lisp.bind` instead
 of borrowing `Lisp.set_global` (`src/macros.x:2197`), then confirm the
 disposal chain. Reproducer: `/tmp/x2c-stage-review/normal.x`,
-`bridge.x`, `defs.xmacro`.
+`bridge.x`, `defs.x`.
 
 ### C. Project meta build (`src/meta-project.x`, `etc/x2c-payload.x`)
 

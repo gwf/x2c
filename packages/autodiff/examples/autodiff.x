@@ -4,7 +4,7 @@
 #include "typed-array.x"
 #include <stdio.h>
 #include <math.h>
-$(import "../src/autodiff.xmacro")
+#include "../src/autodiff-macros.x"
 
 typedef struct Dual { double value; double tangent; } Dual;
 $ad.dual(Dual, dual, <dual>, double, sin, cos, exp, log, sqrt, tanh);

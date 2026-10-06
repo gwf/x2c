@@ -1,7 +1,7 @@
 /*  test-atomic-container.x -- single-call container update ownership */
 
 #include "test-support.x"
-$(import "test-macros.xmacro")
+#include "test-macros.x"
 
 static void array_index_numeric_updates(void) {
   $test.scoped();

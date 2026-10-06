@@ -10,9 +10,8 @@
 #include <ctype.h>
 #include <string.h>
 
-#pragma private
 
-typedef struct Comment:
+static typedef struct Comment:
   Symbol kind
   int start, end, first, last
   String text

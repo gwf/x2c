@@ -1,5 +1,5 @@
 
-$(import "support/answer.xmacro")
+#include "support/answer.x"
 
 int main(void) {
   printf("%d\n", $example.answer(40));

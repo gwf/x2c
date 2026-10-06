@@ -144,8 +144,8 @@ size.
 - Convert the spike's test programs into fixtures. They are the demo
   program, `examples/power/match.x`, `examples/magic/range-and-swap.x`, a
   prefix of `examples/scripts/line-counts.x`, and an `.xpmacro` import
-  covering `lib/error-macros.xmacro` and `$dedent`/`$time` from
-  `lib/system-macros.xmacro`.
+  covering `lib/error-macros.x` and `$dedent`/`$time` from
+  `lib/system-macros.x`.
 - Add one executable example written in the indented form to
   `examples/manifest.txt`.
 - Delivery follows the root `AGENTS.md` with

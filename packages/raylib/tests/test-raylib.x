@@ -4,7 +4,7 @@ import "raylib" with ImagePixels, RaylibText, RaylibWindow;
 
 #include "test-support.x"
 
-$(import "../../../unittest/test-macros.xmacro")
+#include "../../../unittest/test-macros.x"
 
 static void raylib_vectors_use_methods_and_operators(void) {
   Vector2 first = { 2.0f, 3.0f };

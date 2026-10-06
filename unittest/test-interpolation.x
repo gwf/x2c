@@ -214,7 +214,7 @@ static void interp_string_var_alias_expr(void) {
   EXPECT_STR_EQ(%"v = ${string}", "v = text");
 }
 
-$(import "test-macros.xmacro")
+#include "test-macros.x"
 
 void interpolation_suite(void) {
   $test.run(interp_list_value);

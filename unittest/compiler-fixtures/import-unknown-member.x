@@ -5,6 +5,5 @@ import "geo" as g;
 
 double missing(void);
 
-#pragma private
 
 double missing(void) { return g.frobnicate(); }

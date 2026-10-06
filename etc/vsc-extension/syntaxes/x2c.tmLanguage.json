@@ -3629,12 +3629,13 @@
 			"match": "(\\\\'.+'|\\\\[^\\\\]{1,10}\\\\)"
 		},
 		"x2c_keyword_alias": {
-			"match": "^\\s*(keyword)(\\s+)([A-Za-z_][A-Za-z0-9_]*)(\\s+)(\\$)([A-Za-z_][A-Za-z0-9_]*(?:\\.[A-Za-z_][A-Za-z0-9_]*)*)(?=\\s*;)",
+			"match": "^\\s*(?:(static)(\\s+))?(keyword)(\\s+)([A-Za-z_][A-Za-z0-9_]*)(\\s+)(\\$)([A-Za-z_][A-Za-z0-9_]*(?:\\.[A-Za-z_][A-Za-z0-9_]*)*)(?=\\s*;)",
 			"captures": {
-				"1": { "name": "keyword.declaration.macro.x2c" },
-				"3": { "name": "entity.name.function.macro-alias.x2c" },
-				"5": { "name": "punctuation.definition.macro.sigil.x2c" },
-				"6": { "name": "entity.name.function.macro.x2c" }
+				"1": { "name": "storage.modifier.x2c" },
+				"3": { "name": "keyword.declaration.macro.x2c" },
+				"5": { "name": "entity.name.function.macro-alias.x2c" },
+				"7": { "name": "punctuation.definition.macro.sigil.x2c" },
+				"8": { "name": "entity.name.function.macro.x2c" }
 			}
 		},
 		"x2c_import_statement": {

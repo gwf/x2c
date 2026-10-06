@@ -16,13 +16,12 @@ int PublicBase.read(PublicBase value) {
   return value.value;
 }
 
-#pragma private
 
-typedef struct PrivateParticipant {
+static typedef struct PrivateParticipant {
   int value;
 } *PrivateParticipant;
 
-typedef struct PrivateBox {
+static typedef struct PrivateBox {
   int value;
 } *PrivateBox;
 
@@ -38,23 +37,23 @@ static String PrivateBox.str(PrivateBox value) {
   return %"private:${value.value}";
 }
 
-protocol Var(PrivateBox);
+static protocol Var(PrivateBox);
 
 static PublicBase PrivateParticipant.publicbase(PrivateParticipant value) {
   return (PublicBase) value;
 }
 
-macro Unit $adopt_private_participant() {
+static macro Unit $adopt_private_participant() {
   protocol PublicBase(PrivateParticipant);
 }
 
 $adopt_private_participant();
 
-typedef struct PrivateBase {
+static typedef struct PrivateBase {
   int value;
 } *PrivateBase;
 
-protocol PrivateBase(T) {
+static protocol PrivateBase(T) {
   T T.bump(T);
 }
 
@@ -71,17 +70,17 @@ static PrivateBase PrivateBase.bump(PrivateBase value) {
   return value;
 }
 
-protocol PrivateBase(PublicParticipant);
+static protocol PrivateBase(PublicParticipant);
 
-typedef struct PrivateLeft {
+static typedef struct PrivateLeft {
   int value;
 } *PrivateLeft;
 
-typedef struct PrivateRight {
+static typedef struct PrivateRight {
   int value;
 } *PrivateRight;
 
-protocol PrivateLeft(T) {
+static protocol PrivateLeft(T) {
   T T.shift(T);
 }
 

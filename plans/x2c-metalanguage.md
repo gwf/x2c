@@ -20,7 +20,7 @@ There is no formal grammar. The grammar exists in three places: the
 recursive-descent parser (`src/parse.x`, `src/expressions.x`,
 `src/statements.x`, `src/initializers.x`), the prose of
 `docs/src/reference/language.md`, and the source-form macros of
-`src/grammar.xmacro`, which cover part of the grammar. The AST has no
+`src/grammar.x`, which cover part of the grammar. The AST has no
 schema either. About 100-130 node heads are implied by the parser and by
 the code that matches them.
 
@@ -51,7 +51,7 @@ Counts are from `src/` and `lib/` on dev c70a008c.
 1. **Recognition falls back to raw AST shapes.** `src/` has 1,048 raw
    `case %(...)` patterns and 190 macro-based cases. The raw ones cluster in
    the lowering files: cleanup 69, regions 63, protocol 54, transform 56,
-   cache 36, callables 31. A further layer in `src/grammar.xmacro` splices
+   cache 36, callables 31. A further layer in `src/grammar.x` splices
    macro-derived patterns into raw ones: `source_content_pattern` (46 uses),
    `source_pattern` (13), `source_pattern_with` (4), `source_call_content`
    (7), and 15 one-line content builders (`source_operator_content`,
@@ -275,7 +275,7 @@ sub-pattern. M2 moves that operation into `Macro_pattern`'s binder rows
 (`lib/macro-value.x:129-170`) and into the `case` parser. The binder
 routing in `MacroPublishing` must publish the nested binders.
 
-Payoff: the derived-pattern layer of `src/grammar.xmacro` goes (about 70
+Payoff: the derived-pattern layer of `src/grammar.x` goes (about 70
 uses of `source_content_pattern`, `source_pattern`, `source_pattern_with`,
 and `source_call_content`), the 21 nested `match` statements collapse, and
 the raw `%(expr ...)` cases in the lowering files can be written as source
@@ -307,7 +307,7 @@ kind, a result kind, a decorator target, and a meta parameter or result
 type (a `typedef List` alias, as `Type` and `Source` already are). The
 `Expression`/`Block`/`Entry` spellings stay accepted as synonyms.
 
-The categories with their source-form macros in `src/grammar.xmacro` then
+The categories with their source-form macros in `src/grammar.x` then
 are the formal grammar: each category lists its productions as templates.
 The book gains one table, generated or checked from that file.
 

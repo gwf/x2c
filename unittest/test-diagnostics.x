@@ -1,7 +1,7 @@
 /*  test-diagnostics.x -- unit tests for diagnostics aggregation */
 
 #include "test-support.x"
-$(import "test-macros.xmacro")
+#include "test-macros.x"
 #include "diagnostics.x"
 #include <unistd.h>
 

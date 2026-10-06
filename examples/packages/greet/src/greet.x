@@ -1,7 +1,7 @@
 /*  greet.x -- the package the import example consumes.
 
-    A package needs no manifest and no export list: everything above
-    `#pragma private` reaches an importing unit as `greet__*`.
+    A package needs no manifest and no export list: non-static declarations
+    reach an importing unit as `greet__*`.
 */
 
 typedef struct GreetingData {
@@ -13,7 +13,6 @@ Greeting Greeting.new(String subject);
 String Greeting.line(Greeting greeting);
 String repeat(String text, int times);
 
-#pragma private
 
 Greeting Greeting.new(String subject) {
   Greeting greeting = Scope.malloc(sizeof(struct GreetingData));

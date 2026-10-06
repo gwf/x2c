@@ -1,0 +1,25 @@
+#pragma once
+
+/* Define private pointer converters before their protocol adoptions. */
+
+macro Unit $var.pointer(Type $type, Name $extractor, Literal $tag) {
+  static inline Var $type.var($type value) {
+    return Var.new($tag, value);
+  }
+
+  static inline $type Var.$extractor(Var value) {
+    return value.pointer();
+  }
+}
+
+macro Unit $var.raw.pointer(Type $type, Name $extractor) {
+  static inline Var $type.var($type pointer) {
+    Var value;
+    value.p64 = pointer;
+    return value;
+  }
+
+  static inline $type Var.$extractor(Var value) {
+    return value.p64;
+  }
+}

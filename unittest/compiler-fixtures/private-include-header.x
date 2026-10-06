@@ -1,9 +1,7 @@
-/* A public prototype below `#pragma private` that names a type from a
-   private include moves that include to the header, so the header compiles
-   on its own. */
+/* A public prototype names an included type, so the generated header
+   includes its provider and compiles on its own. */
 
 int a_value(void);
-#pragma private
 #include "private-include-header-types.x"
 
 Hidden a_make(int n) {

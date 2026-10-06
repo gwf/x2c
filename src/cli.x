@@ -45,9 +45,8 @@ typedef struct TargetKind {
   Symbol kind, String spelling, noun, prefix, suffix;
 } TargetKind;
 
-#pragma private
 
-$(import "../lib/system-macros.xmacro")
+#include "../lib/system-macros.x"
 
 #include <ctype.h>
 #include <errno.h>
@@ -62,11 +61,49 @@ $(import "../lib/system-macros.xmacro")
 #include "report.x"
 #include "utils.x"
 
-$(import "cli-reports.xmacro")
+
+/* cli command reports. */
+
+static macro Stmt $report.cli.command_unknown(Expr $first) =>
+  driver_error(%"unknown command or global option '${$first}'");
+
+static macro Stmt $report.cli.operand_required(Expr $name) =>
+  driver_error(%"${$name} requires exactly one operand");
+
+static macro Stmt $report.cli.operands_forbidden(Expr $name) =>
+  driver_error(%"${$name} accepts no operands");
+
+static macro Stmt $report.cli.help_unknown(Expr $name) =>
+  driver_error(%"unknown help command '${$name}'");
+
+static macro Stmt $report.cli.option_value_forbidden(Expr $arg) =>
+  driver_error(%"option takes no value '${$arg}'");
+
+static macro Stmt $report.cli.option_value_required(Expr $arg) =>
+  driver_error(%"option requires a value '${$arg}'");
+
+static macro Stmt $report.cli.color_invalid(Expr $value) =>
+  driver_error(%"invalid color mode '${$value}'");
+
+static macro Stmt $report.cli.target_unknown(Expr $value) =>
+  driver_error(%"unknown target kind '${$value}'");
+
+static macro Stmt $report.cli.value_invalid(Expr $noun, Expr $value) =>
+  driver_error(%"invalid ${$noun} '${$value}'");
+
+static macro Stmt $report.cli.dependency_owned(Expr $value) =>
+  driver_error(%"C dependency option is driver-owned '${$value}'");
+
+static macro Stmt $report.cli.native_unsupported(Expr $arg) =>
+  driver_error(%"unsupported package native argument '${$arg}'");
+
+static macro Stmt $report.cli.option_unknown(Expr $arg) =>
+  driver_error(%"unknown option '${$arg}'");
+
 
 // commands and options
 
-enum {
+static enum {
   CLI_TOP       = 1,
   CLI_TRANSLATE = 2,
   CLI_BUILD     = 4,
@@ -81,7 +118,7 @@ enum {
   CLI_NATIVE    = CLI_BUILD | CLI_RUN | CLI_SCRIPT
 };
 
-typedef struct CliCommand {
+static typedef struct CliCommand {
   Symbol name, int mask, const char *description;
 } CliCommand;
 
@@ -106,7 +143,7 @@ static CliCommand cli_commands[] = {
    `prefix` matches an option whose text continues in the same argument.
    An option with a request field sets it as `apply` says; each other
    option has an arm in Parse.apply. */
-typedef struct CliOption {
+static typedef struct CliOption {
   Symbol id, int commands, Symbol group, String spelling;
   const char *value, *description, int hidden;
   String alias, label, int prefix;
@@ -114,10 +151,10 @@ typedef struct CliOption {
   size_t offset;
 } CliOption;
 
-enum { FIELD_FLAG = 1, FIELD_TEXT, FIELD_LIST };
+static enum { FIELD_FLAG = 1, FIELD_TEXT, FIELD_LIST };
 
 /* A command's help lists its option groups in this order. */
-typedef struct CliGroup { Symbol group, const char *title; } CliGroup;
+static typedef struct CliGroup { Symbol group, const char *title; } CliGroup;
 
 static CliGroup cli_groups[] = {
   { <global>,     "Global options:" },
@@ -396,7 +433,7 @@ static void _read_arguments(Array args, int argc, char **argv) {
 /* One argument list read into a request. Options extend the argument lists
    in the order they are written. `operands` is set after `--`, and a
    script's words before `expanded` came from a response file. */
-typedef struct Parse {
+static typedef struct Parse {
   CliRequest request, Array args, int mask, operands, expanded;
   Array inputs, run_args, include_dirs, cpp_args, cc_args, ld_args;
 } Parse;
@@ -497,7 +534,7 @@ static void _help_command(Array args) {
 /* One option as written: its table row, its spelling up to any `=`, its
    value, and whether the value shares the spelling's word, as `-Idir`
    does. The C compiler and linker receive an option as it was written. */
-typedef struct Given {
+static typedef struct Given {
   CliOption *option, String spelling, value, int attached;
 } Given;
 
@@ -823,7 +860,7 @@ static int _valid_utf8(const unsigned char *text) {
    character of a line starts a comment. `blank` holds until a line's first
    nonspace character, and `started` marks a word begun, perhaps by empty
    quotes. */
-typedef struct Words {
+static typedef struct Words {
   Array out, String path, Buffer word;
   int line, blank, started, quote, escaped, comment;
 } Words;
@@ -972,7 +1009,7 @@ static void _print_external_commands(void) {
 
 /* A command's help page: its usage, its options, the rows for `@<file>` and,
    when the command reads it, `--`, then any closing notes. */
-typedef struct HelpPage {
+static typedef struct HelpPage {
   Symbol command, const char *usage, *response, *end, *notes;
 } HelpPage;
 

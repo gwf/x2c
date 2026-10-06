@@ -1,0 +1,6 @@
+#pragma once
+
+$(defun example-answer-offset () 2)
+
+macro Expression $example.answer(Expr $base) =>
+  $base + $(example-answer-offset);

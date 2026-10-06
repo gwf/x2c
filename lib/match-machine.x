@@ -12,7 +12,6 @@
 
 #include "machine.x"
 
-#pragma private
 
 #include <assert.h>
 #include <string.h>
@@ -551,7 +550,7 @@ void MatchMachine.dispose(MatchMachine &m) {
    and a match that runs another match, through a protocol method, takes a
    second. */
 
-enum { MACHINE_SPARES = 8 };
+static enum { MACHINE_SPARES = 8 };
 
 static threaded struct {
   MatchMachine *spares[MACHINE_SPARES];

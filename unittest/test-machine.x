@@ -450,7 +450,7 @@ static void machine_storage_reuse_and_dirty_begin(void) {
   binder.free();
 }
 
-$(import "test-macros.xmacro")
+#include "test-macros.x"
 
 void machine_suite(void) {
   $test.run(machine_program_is_exact_sized_and_immutable);

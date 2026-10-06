@@ -1,7 +1,7 @@
 /*  test-lisp.x -- unit tests for the Lisp runtime */
 
 #include "test-support.x"
-$(import "test-macros.xmacro")
+#include "test-macros.x"
 
 // reader - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -369,6 +369,25 @@ static void lisp_eval_def_and_globals(void) {
   EXPECT_INT_EQ(Var.integer(_ev(lisp, "y")), 5);
   EXPECT_INT_EQ(_raised_code(lisp, "unbound-name"), <unbound>);
   lisp.destroy();
+}
+
+static void lisp_host_binding_shadows_only_the_child(void) {
+  Lisp parent = Lisp.kernel();
+  parent.set_global("inherited", 1);
+  parent.freeze();
+  Lisp child = Lisp.kernel(), sibling = Lisp.kernel();
+  child.adopt(parent);
+  sibling.adopt(parent);
+  EXPECT_INT_EQ(_ev(child, "inherited").integer(), 1);
+  child.set_global("inherited", 2);
+  EXPECT_INT_EQ(_ev(child, "inherited").integer(), 2);
+  EXPECT_INT_EQ(_ev(parent, "inherited").integer(), 1);
+  EXPECT_INT_EQ(_ev(sibling, "inherited").integer(), 1);
+  EXPECT_INT_EQ(_raised_code(child, "(def inherited 3)"), <bad-state>);
+  EXPECT_INT_EQ(_ev(child, "inherited").integer(), 2);
+  child.destroy();
+  sibling.destroy();
+  parent.destroy();
 }
 
 static void lisp_transports_void_outside_collections(void) {
@@ -1878,6 +1897,7 @@ void lisp_suite(void) {
   $test.run(lisp_read_advances_cursor_across_forms);
   $test.run(lisp_eval_self_and_quote);
   $test.run(lisp_eval_def_and_globals);
+  $test.run(lisp_host_binding_shadows_only_the_child);
   $test.run(lisp_transports_void_outside_collections);
   $test.run(lisp_eval_cond_nil_only_false);
   $test.run(lisp_eval_lambda_application);
