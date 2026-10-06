@@ -73,7 +73,7 @@ done
 
 # The compiler modules the suites link, named once here and matching
 # COMPILER_OBJECTS in unittest/Makefile.
-compiler_modules=(ast diagnostics report sourceview)
+compiler_modules=(ast operator-ledger diagnostics report sourceview)
 linked_compiler_objects=()
 for name in "${compiler_modules[@]}"; do
   "$cc" "${sanitizer_flags[@]}" -c "$generated_compiler/$name.c" \
