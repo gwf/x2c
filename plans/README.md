@@ -44,6 +44,10 @@ execution.
 
 ### Current work
 
+- [Ordinary source modules and automatic interfaces](automatic-interfaces.md):
+  authorized replacement of visibility pragmas and macro packs with ordinary
+  includes, static storage, and public type dependency selection. Migration
+  and compiler validation are in progress.
 - [Harness simplification and messaging](harness-simplification-and-messaging.md):
   authorized corrections to existing tools and guidance, a small
   cross-platform integrator messaging pilot, and separate external runtime
@@ -175,7 +179,7 @@ Production promotion remains separately authorized under the release workflow.
 - [Indentation dogfooding](archive/indentation-dogfooding.md): done; the
   script tools use `#pragma indent`, converted by `tools/indent-convert`.
 - [Indentation syntax](archive/indentation-syntax.md): done; `.xp`,
-  `.xpmacro`, and `#pragma indent` select a tokenizer layout pass.
+  `.xp`, and `#pragma indent` select a tokenizer layout pass.
 - [Cleanup lowering](archive/emit-cleanup-lowering.md): done; phase 1
   shipped as `68eea0a`, phases 2 and 3 measured and declined 2026-09-24.
 - [Explicit meta calls, lifetimes, and computed values](archive/explicit-meta-and-lifetime-campaign.md):

@@ -1,3 +1,6 @@
+/*  func-errors.x -- structured Func binding and adapter errors
+*/
+
 #pragma once
 
 /* Func binding and adapter error conditions. Captures keep their original

@@ -53,7 +53,7 @@ static inline Func inline_noncapturing(void){
   );
 }
 
-Var long_var(long);
+static Var long_var(long);
 
 Func _x2c_func_from_capture_e915dee0_0(Var _x2c_lambda_capture_1);
 
@@ -95,13 +95,13 @@ _x2c_lambda_context_0;
 
 static Var _x2c_lambda_1(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0);
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
 List cons(Var, List);
 
-Var List_var(List);
+static Var List_var(List);
 
-Var String_var(String);
+static Var String_var(String);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -136,15 +136,15 @@ static long add(long left, long right){
 
 long Var_integer(Var);
 
-int List_truth(List);
+static int List_truth(List);
 
 List x2c_func_reference_type(Func, unsigned, unsigned);
 
-FuncArg FuncArg_reference(const void *, List);
+static FuncArg FuncArg_reference(const void *, List);
 
-FuncArg FuncArg_value(Var);
+static FuncArg FuncArg_value(Var);
 
-Var int_var(int);
+static Var int_var(int);
 
 Var Func_apply(Func, unsigned, const FuncArg *);
 

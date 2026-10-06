@@ -139,7 +139,7 @@ static void _prepare_include_dirs(void) {
   String include_dir = %"$root_path/include/x2c";
   String src_dir = %"$root_path/src", lib_dir = %"$root_path/lib";
   default_includes = cons(include_dir, NULL);
-  cpp_includes = Path.is_dir(src_dir) ? %($src_dir $lib_dir) : %($lib_dir);
+  cpp_includes = Path.is_dir(src_dir) ? %($lib_dir $src_dir) : %($lib_dir);
 }
 
 /** Overrides the repository root and rebuilds its default include `List`s.
@@ -197,7 +197,7 @@ String home_libexec(void) {
 */
 List default_include_dirs(void) => default_includes;
 
-/** Returns the borrowed preprocessor `List` `<root>/src`, then `<root>/lib`.
+/** Returns the borrowed preprocessor `List` `<root>/lib`, then `<root>/src`.
     `<root>/src` is present only when the home has that directory. Returns
     NULL before environment setup.
 */

@@ -34,7 +34,7 @@ The compiler surface a `meta` function calls.
 Returns the suffix of `type` that begins at its typedef name or base
 keyword, sharing `type`, or `NULL` when it has none.
 
-Source: `lib/meta.x:349`
+Source: `lib/meta.x:348`
 
 #### type_declaration_parts
 
@@ -44,7 +44,7 @@ Returns `(base modifiers)` for reconstructing a declaration of `type`.
 Function modifiers hold parameter syntax, and modifier order retains C
 declarator precedence.
 
-Source: `lib/meta.x:379`
+Source: `lib/meta.x:378`
 
 #### type_name_error
 
@@ -55,7 +55,7 @@ other than a C type keyword, as `%(String)` and `%(* Point)` do, or
 `NULL`. A type name is a String, as in `%("String")` and `%(* "Point")`;
 neither a short Symbol nor a long Atom supplies that representation.
 
-Source: `lib/meta.x:362`
+Source: `lib/meta.x:361`
 
 #### x2c_block_make
 
@@ -63,7 +63,7 @@ Source: `lib/meta.x:362`
 
 Returns a block containing `items` in order.
 
-Source: `lib/meta.x:128`
+Source: `lib/meta.x:127`
 
 #### x2c_expr_call
 
@@ -72,7 +72,7 @@ Source: `lib/meta.x:128`
 Returns the expression calling `callee` with `arguments`, a `List` of
 expressions.
 
-Source: `lib/meta.x:102`
+Source: `lib/meta.x:101`
 
 #### x2c_expr_composite
 
@@ -81,7 +81,7 @@ Source: `lib/meta.x:102`
 Returns the comma-separated composite initializer holding `items`, a
 `List` of expressions.
 
-Source: `lib/meta.x:107`
+Source: `lib/meta.x:106`
 
 #### x2c_expr_ident
 
@@ -90,7 +90,7 @@ Source: `lib/meta.x:107`
 Returns an expression reading the identifier `name`, which is the syntax
 `x2c_ident` returned or a binding the compiler resolved.
 
-Source: `lib/meta.x:88`
+Source: `lib/meta.x:87`
 
 #### x2c_expr_index
 
@@ -98,7 +98,7 @@ Source: `lib/meta.x:88`
 
 Returns the expression `base[subscript]`.
 
-Source: `lib/meta.x:91`
+Source: `lib/meta.x:90`
 
 #### x2c_function_body
 
@@ -106,7 +106,7 @@ Source: `lib/meta.x:91`
 
 Returns the statements in the body of `function`.
 
-Source: `lib/meta.x:182`
+Source: `lib/meta.x:181`
 
 #### x2c_literal_int
 
@@ -114,7 +114,7 @@ Source: `lib/meta.x:182`
 
 Returns an `int` expression holding `value`.
 
-Source: `lib/meta.x:72`
+Source: `lib/meta.x:71`
 
 #### x2c_literal_string
 
@@ -122,7 +122,7 @@ Source: `lib/meta.x:72`
 
 Returns a `String` expression holding `value`.
 
-Source: `lib/meta.x:67`
+Source: `lib/meta.x:66`
 
 #### x2c_literal_symbol
 
@@ -130,7 +130,7 @@ Source: `lib/meta.x:67`
 
 Returns a `Symbol` expression holding `value`.
 
-Source: `lib/meta.x:76`
+Source: `lib/meta.x:75`
 
 #### x2c_parameters_arguments
 
@@ -140,7 +140,7 @@ Returns the argument expressions that forward a parameter list, which is
 a `params` form or the parameters themselves. A `(void)` parameter list
 answers nothing.
 
-Source: `lib/meta.x:190`
+Source: `lib/meta.x:189`
 
 #### x2c_stmnt_make
 
@@ -148,7 +148,7 @@ Source: `lib/meta.x:190`
 
 Returns an expression statement.
 
-Source: `lib/meta.x:122`
+Source: `lib/meta.x:121`
 
 #### x2c_stmnt_return
 
@@ -156,7 +156,7 @@ Source: `lib/meta.x:122`
 
 Returns a return statement carrying `expression`.
 
-Source: `lib/meta.x:125`
+Source: `lib/meta.x:124`
 
 ## Public types
 
@@ -175,7 +175,7 @@ A `meta` parameter declared `Source` receives, at a `$` call, captured
 syntax with the source text it came from: `((text T) (file F) (syntax
 S))`. `x2c_source_text` and `x2c_embed_text` read it directly.
 
-Source: `lib/meta.x:52`
+Source: `lib/meta.x:51`
 
 <a id="Type"></a>
 ### Type
@@ -186,7 +186,7 @@ Type syntax, such as `%(double)` or `%((* char))`, the representation
 the compiler's own types use. A quotation fills a type position from a
 local declared `Type`.
 
-Source: `lib/meta.x:40`
+Source: `lib/meta.x:39`
 
 <a id="TypeInfo"></a>
 ### TypeInfo
@@ -197,7 +197,7 @@ A `meta` parameter declared `TypeInfo` receives, at a `$` call, the
 description of its argument's type: `((name N) (kind K) (type T)
 (fields F) (methods M))`. Read a part with `List.assoc`.
 
-Source: `lib/meta.x:47`
+Source: `lib/meta.x:46`
 
 ## Design notes
 
@@ -217,9 +217,8 @@ written.
 
 The library builds it as an optional module, but the prelude's
 `varops.x` includes it for its own `meta` rows, so every unit sees its
-declarations; the one-line import of `system-macros.xmacro` relies on
-that. Include it explicitly where `meta` functions are written: a
-`.xmacro` borrows the consuming unit's symbol table.
+declarations. Include it explicitly where `meta` functions are written.
+Shared compile-time definitions use ordinary source includes.
 
 ## Tests and examples
 

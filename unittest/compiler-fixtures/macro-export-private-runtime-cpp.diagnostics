@@ -1,0 +1,10 @@
+unittest/compiler-fixtures/macro-export-private-runtime-cpp.x:4:17: type: 'p_meta' is a static function private to its unit
+  int rt(void) => p_meta(1);
+                  ^^^^^^
+  note: it is defined in 'unittest/compiler-fixtures/macro-export-hidden.x'; remove 'static' so other units can call it
+
+unittest/compiler-fixtures/macro-export-private-runtime-cpp.x:5:24: type: 'p_static' is a static function private to its unit
+  int rt_static(void) => p_static(1);
+                         ^^^^^^^^
+  note: it is defined in 'unittest/compiler-fixtures/macro-export-hidden.x'; remove 'static' so other units can call it
+

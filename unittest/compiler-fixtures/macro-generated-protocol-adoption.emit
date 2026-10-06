@@ -39,13 +39,12 @@ int main(void){
     31
   }
   , 1);
-  MacroRow row = _1;
+  MacroRow row = _840;
   Var boxed_array = MacroArrayInt_var(array), boxed_row = MacroRow_var(row);
   printf("%d %d %d %d %d %d\n", MacroArrayInt_equal(array, array), MacroArrayInt_contains(array, 31), MacroArrayInt_getindex(array, 0), Var_is_row(boxed_row, 9, 7, 4), Var_is(boxed_array, 895705321586), Var_int(Var_getindex(boxed_array, int_var(0))));
   Block_free(array);
   return 0;
 }
-#pragma private
 static inline int _x2c_proto_macroarrayint_equal_0(Var a0, Var a1){
   return MacroArrayInt_equal(Var_macroarrayint(a0), Var_macroarrayint(a1));
 }

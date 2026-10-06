@@ -26,7 +26,7 @@ _x2c_initializer_choice_AED211B6_0((first = _17))
 static List second;
 
 _x2c_initializer_choice_AED211B6_1((second = _17))
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
 List cons(Var, List);
 

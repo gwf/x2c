@@ -9,7 +9,7 @@ static Var box_value(long value);
 
 static long unbox_value(Var value);
 
-Var long_var(long);
+static Var long_var(long);
 
 static Var box_value(long value){
   return long_var(value);

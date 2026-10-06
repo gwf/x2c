@@ -9,7 +9,7 @@
 static Path root, book, summary, public_dir, index_path, full_path
 static const String site = "https://x2c-lang.dev"
 static const String docs = "https://x2c-lang.dev/docs/"
-static Regex entry, fence, link, scheme, whitespace
+static Regex entry, fence, _link, scheme, whitespace
 
 static List _full_text(void) => %(
   "guide/from-c.md"
@@ -68,7 +68,7 @@ static String _absolute_links(String page, String line_text):
   Array parts = line_text.split("`")
   for (int at = 0; at < parts.len(); at += 2):
     String piece = parts[at]
-    parts[at] = link.replace_fn(piece, %!(RegexMatch found) =>
+    parts[at] = _link.replace_fn(piece, %!(RegexMatch found) =>
       found[1] + _link_url(page, found["target"]))
   return String.join("`", parts.list_free())
 
@@ -201,7 +201,7 @@ full_path = public_dir.join("llms-full.txt")
 entry = Regex.compile(
   "^(?<indent> *)- \\[(?<title>[^]]+)\\]\\((?<path>[^)]+)\\)")
 fence = Regex.compile("^\\s*```(?<info>[^`]*)$")
-link = Regex.compile("(\\]\\(|^\\[[^]]+\\]:\\s*)(?<target>[^)\\s]+)")
+_link = Regex.compile("(\\]\\(|^\\[[^]]+\\]:\\s*)(?<target>[^)\\s]+)")
 scheme = Regex.compile("(?i)^[a-z][a-z0-9+.-]*:")
 whitespace = Regex.compile("\\s+")
 

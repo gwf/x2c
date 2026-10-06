@@ -1,3 +1,6 @@
+/*  ast-rewrite.x -- rewrite immediate AST children through canonical Lists
+*/
+
 #pragma once
 
 macro Stmt $ast.rewrite_children(

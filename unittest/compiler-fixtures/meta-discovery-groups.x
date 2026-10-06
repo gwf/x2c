@@ -13,7 +13,7 @@ static int local_value(void) {
   return items[0].integer();
 }
 
-#include "meta-import-included/defs.x"
+#include "defs.x"
 
 meta static int seven(void) => 7;
 macro Expression $seven_value() => $seven();

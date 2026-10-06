@@ -49,9 +49,9 @@ static StaticDescriptor Var_staticdescriptor(Var value){
   return Var_pointer(value);
 }
 
-Var String_var(String);
+static Var String_var(String);
 
-String int_str(int);
+static String int_str(int);
 
 String StaticDescriptor_str(StaticDescriptor value){
   if(! _init_guard_) _file_init_();

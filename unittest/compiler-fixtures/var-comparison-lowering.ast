@@ -18,7 +18,8 @@
   ((fnmod (params (param ("Var") (bind (binding 6 "value") ())))))) 
  (block 
   (at 3 (stmnt 
-         (expr (int) (postfix ++ (expr (int) (ident (binding 2 "right_calls"))))))) 
+         (expr (int) 
+          (postfix ++ (expr (int) (ident (binding 2 "right_calls"))))))) 
   (at 4 (return ("Var") (expr ("Var") (ident (binding 6 "value")))))))
 
 (function (int) 
@@ -227,8 +228,8 @@
   (at 36 
    (declare ("Var") 
     (bindings 
-     (op = (bind (binding 34 "string_a") ()) (expr ("String") (cache 0))) 
-     (op = (bind (binding 35 "string_b") ()) (expr ("String") (cache 1)))))) 
+     (op = (bind (binding 34 "string_a") ()) (expr ("String") (cache 839))) 
+     (op = (bind (binding 35 "string_b") ()) (expr ("String") (cache 840)))))) 
   (at 37 
    (declare (int) 
     (bindings 

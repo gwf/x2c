@@ -147,7 +147,7 @@ Typed `Map`s generated from shared storage.
 <a id="Map.mapintint"></a>
 #### Map.mapintint
 
-`MapIntInt Map.mapintint(Map entries)`
+`MapIntInt Map.mapintint(Map _x2c_macro_entries_4)`
 
 Packs `entries` into a fresh typed map in the current `Scope`.
 A null input returns NULL. Each key and value goes through its `Var`
@@ -162,7 +162,7 @@ Source: `lib/typed-map.x:232`
 <a id="Map.maplongdouble"></a>
 #### Map.maplongdouble
 
-`MapLongDouble Map.maplongdouble(Map entries)`
+`MapLongDouble Map.maplongdouble(Map _x2c_macro_entries_9)`
 
 Packs `entries` into a fresh typed map in the current `Scope`.
 A null input returns NULL. Each key and value goes through its `Var`
@@ -177,7 +177,7 @@ Source: `lib/typed-map.x:252`
 <a id="Map.mapstringint"></a>
 #### Map.mapstringint
 
-`MapStringInt Map.mapstringint(Map entries)`
+`MapStringInt Map.mapstringint(Map _x2c_macro_entries_19)`
 
 Packs `entries` into a fresh typed map in the current `Scope`.
 A null input returns NULL. Each key and value goes through its `Var`
@@ -192,7 +192,7 @@ Source: `lib/typed-map.x:311`
 <a id="Map.mapstringstring"></a>
 #### Map.mapstringstring
 
-`MapStringString Map.mapstringstring(Map entries)`
+`MapStringString Map.mapstringstring(Map _x2c_macro_entries_14)`
 
 Packs `entries` into a fresh typed map in the current `Scope`.
 A null input returns NULL. Each key and value goes through its `Var`
@@ -209,7 +209,7 @@ Source: `lib/typed-map.x:273`
 <a id="MapIntInt.cleanup"></a>
 #### MapIntInt.cleanup
 
-`void MapIntInt.cleanup(MapIntInt map)`
+`void MapIntInt.cleanup(MapIntInt _x2c_macro_map_53)`
 
 Releases the record and its backing Blocks, borrowing stored values.
 
@@ -218,7 +218,7 @@ Source: `lib/typed-map.x:241`
 <a id="MapIntInt.compare"></a>
 #### MapIntInt.compare
 
-`int MapIntInt.compare(MapIntInt a, MapIntInt b)`
+`int MapIntInt.compare(MapIntInt _x2c_macro_a_5, MapIntInt _x2c_macro_b_5)`
 
 Compares typed Maps by size and then sorted native key/value contents.
 Identical handles compare equal and NULL sorts first. Neither Map is
@@ -230,7 +230,7 @@ Source: `lib/typed-map.x:240`
 <a id="MapIntInt.contains"></a>
 #### MapIntInt.contains
 
-`int MapIntInt.contains(MapIntInt map, int key)`
+`int MapIntInt.contains(MapIntInt _x2c_macro_map_34, int _x2c_macro_key_17)`
 
 Returns one when `key` is present, or zero for a null map.
 
@@ -239,7 +239,7 @@ Source: `lib/typed-map.x:232`
 <a id="MapIntInt.copy"></a>
 #### MapIntInt.copy
 
-`MapIntInt MapIntInt.copy(MapIntInt map)`
+`MapIntInt MapIntInt.copy(MapIntInt _x2c_macro_map_41)`
 
 Returns a fresh shallow copy in the current `Scope`.
 The result has independent table storage but copies native key and value
@@ -252,7 +252,7 @@ Source: `lib/typed-map.x:232`
 <a id="MapIntInt.del"></a>
 #### MapIntInt.del
 
-`int MapIntInt.del(MapIntInt map, int key)`
+`int MapIntInt.del(MapIntInt _x2c_macro_map_40, int _x2c_macro_key_23)`
 
 Removes `key` and returns its value.
 Successful removal invalidates live cursors and iterators.
@@ -264,7 +264,7 @@ Source: `lib/typed-map.x:232`
 <a id="MapIntInt.enumerate"></a>
 #### MapIntInt.enumerate
 
-`Iter MapIntInt.enumerate(MapIntInt map, Iter dest)`
+`Iter MapIntInt.enumerate(MapIntInt _x2c_macro_map_57, Iter _x2c_macro_dest_2)`
 
 Initializes `dest` to yield canonical `(key value)` `List`s in bucket
 order.
@@ -287,7 +287,7 @@ Source: `lib/typed-map.x:241`
 <a id="MapIntInt.equal"></a>
 #### MapIntInt.equal
 
-`int MapIntInt.equal(MapIntInt a, MapIntInt b)`
+`int MapIntInt.equal(MapIntInt _x2c_macro_a_2, MapIntInt _x2c_macro_b_2)`
 
 Reports key/value equality independent of bucket and insertion order.
 Two null maps compare equal; a null and a nonnull map compare unequal.
@@ -297,7 +297,7 @@ Source: `lib/typed-map.x:232`
 <a id="MapIntInt.get"></a>
 #### MapIntInt.get
 
-`int MapIntInt.get(MapIntInt map, int key)`
+`int MapIntInt.get(MapIntInt _x2c_macro_map_30, int _x2c_macro_key_13)`
 
 Returns the value for `key`.
 Prefer `try_get` when absence is an ordinary outcome. Boxed families
@@ -308,7 +308,7 @@ Source: `lib/typed-map.x:232`
 <a id="MapIntInt.getdefault"></a>
 #### MapIntInt.getdefault
 
-`int MapIntInt.getdefault(MapIntInt map, int key, int defval)`
+`int MapIntInt.getdefault(MapIntInt _x2c_macro_map_32, int _x2c_macro_key_15, int _x2c_macro_defval_0)`
 
 Returns the value for `key`, or `defval` without inserting it.
 A null map is treated as an empty one.
@@ -318,7 +318,7 @@ Source: `lib/typed-map.x:232`
 <a id="MapIntInt.getindex"></a>
 #### MapIntInt.getindex
 
-`int MapIntInt.getindex(MapIntInt map, int key)`
+`int MapIntInt.getindex(MapIntInt _x2c_macro_map_31, int _x2c_macro_key_14)`
 
 Returns the value selected by bracket indexing.
 This is the bracket-facing form of `MapIntInt.get`, with the same failure
@@ -329,7 +329,7 @@ Source: `lib/typed-map.x:232`
 <a id="MapIntInt.iter"></a>
 #### MapIntInt.iter
 
-`Iter MapIntInt.iter(MapIntInt map, Iter dest)`
+`Iter MapIntInt.iter(MapIntInt _x2c_macro_map_55, Iter _x2c_macro_dest_0)`
 
 Initializes `dest` as a single-pass iterator over boxed values.
 The caller owns `dest`, and the iterator borrows `map`; both must remain
@@ -342,7 +342,7 @@ Source: `lib/typed-map.x:241`
 <a id="MapIntInt.keys"></a>
 #### MapIntInt.keys
 
-`Iter MapIntInt.keys(MapIntInt map, Iter dest)`
+`Iter MapIntInt.keys(MapIntInt _x2c_macro_map_56, Iter _x2c_macro_dest_1)`
 
 Initializes `dest` as a single-pass iterator over boxed keys.
 The caller owns `dest`, and the iterator borrows `map`; both must remain
@@ -363,7 +363,7 @@ Source: `lib/typed-map.x:241`
 <a id="MapIntInt.len"></a>
 #### MapIntInt.len
 
-`unsigned MapIntInt.len(MapIntInt map)`
+`unsigned MapIntInt.len(MapIntInt _x2c_macro_map_28)`
 
 Returns the number of entries, or zero for a null map.
 
@@ -372,7 +372,7 @@ Source: `lib/typed-map.x:232`
 <a id="MapIntInt.map"></a>
 #### MapIntInt.map
 
-`Map MapIntInt.map(MapIntInt map)`
+`Map MapIntInt.map(MapIntInt _x2c_macro_map_50)`
 
 Returns a fresh ordinary Map containing boxed keys and values.
 A null input returns NULL. The typed Map and its storage are unchanged.
@@ -384,7 +384,7 @@ Source: `lib/typed-map.x:240`
 <a id="MapIntInt.merge"></a>
 #### MapIntInt.merge
 
-`MapIntInt MapIntInt.merge(MapIntInt map, MapIntInt other)`
+`MapIntInt MapIntInt.merge(MapIntInt _x2c_macro_map_42, MapIntInt _x2c_macro_other_2)`
 
 Copies every entry of `other` into `map` and returns the destination.
 `other` wins conflicts. A null `other` is a no-op; a null destination is
@@ -410,7 +410,7 @@ Source: `lib/typed-map.x:232`
 <a id="MapIntInt.new_capacity"></a>
 #### MapIntInt.new_capacity
 
-`MapIntInt MapIntInt.new_capacity(unsigned capacity)`
+`MapIntInt MapIntInt.new_capacity(unsigned _x2c_macro_capacity_10)`
 
 Returns a fresh empty map with exactly `capacity` buckets.
 The result and its backing arrays belong to the current `Scope`.
@@ -425,7 +425,7 @@ Source: `lib/typed-map.x:232`
 <a id="MapIntInt.postfixindex"></a>
 #### MapIntInt.postfixindex
 
-`int MapIntInt.postfixindex(MapIntInt map, int key, Symbol op)`
+`int MapIntInt.postfixindex(MapIntInt _x2c_macro_map_38, int _x2c_macro_key_21, Symbol _x2c_macro_op_2)`
 
 Applies postfix `++` or `--` and returns the previous value.
 The key must already exist, and only generated numeric families support
@@ -439,7 +439,7 @@ Source: `lib/typed-map.x:232`
 <a id="MapIntInt.repr"></a>
 #### MapIntInt.repr
 
-`String MapIntInt.repr(MapIntInt map)`
+`String MapIntInt.repr(MapIntInt _x2c_macro_map_49)`
 
 Returns the readable typed-Map representation.
 
@@ -448,7 +448,7 @@ Source: `lib/typed-map.x:240`
 <a id="MapIntInt.set"></a>
 #### MapIntInt.set
 
-`void MapIntInt.set(MapIntInt map, int key, int val)`
+`void MapIntInt.set(MapIntInt _x2c_macro_map_35, int _x2c_macro_key_18, int _x2c_macro_val_5)`
 
 Copies `key` and `val` into the table, replacing an existing value.
 Insertion invalidates live cursors and iterators; replacement does not.
@@ -462,7 +462,7 @@ Source: `lib/typed-map.x:232`
 <a id="MapIntInt.setdefault"></a>
 #### MapIntInt.setdefault
 
-`int MapIntInt.setdefault(MapIntInt map, int key, int defval)`
+`int MapIntInt.setdefault(MapIntInt _x2c_macro_map_33, int _x2c_macro_key_16, int _x2c_macro_defval_1)`
 
 Returns the value for `key`, inserting `defval` when absent.
 Insertion copies the native key and value fields and invalidates live
@@ -477,7 +477,7 @@ Source: `lib/typed-map.x:232`
 <a id="MapIntInt.setindex"></a>
 #### MapIntInt.setindex
 
-`int MapIntInt.setindex(MapIntInt map, int key, int val)`
+`int MapIntInt.setindex(MapIntInt _x2c_macro_map_36, int _x2c_macro_key_19, int _x2c_macro_val_6)`
 
 Stores `val` under `key` and returns `val`.
 This is the bracket-facing form of `MapIntInt.set`, with the same cursor
@@ -488,7 +488,7 @@ Source: `lib/typed-map.x:232`
 <a id="MapIntInt.str"></a>
 #### MapIntInt.str
 
-`String MapIntInt.str(MapIntInt map)`
+`String MapIntInt.str(MapIntInt _x2c_macro_map_48)`
 
 Returns the typed-Map display String.
 
@@ -497,7 +497,7 @@ Source: `lib/typed-map.x:240`
 <a id="MapIntInt.truth"></a>
 #### MapIntInt.truth
 
-`int MapIntInt.truth(MapIntInt map)`
+`int MapIntInt.truth(MapIntInt _x2c_macro_map_44)`
 
 Returns one when `map` contains an entry.
 
@@ -506,7 +506,7 @@ Source: `lib/typed-map.x:232`
 <a id="MapIntInt.try_del"></a>
 #### MapIntInt.try_del
 
-`int MapIntInt.try_del(MapIntInt map, int key, int &?out)`
+`int MapIntInt.try_del(MapIntInt _x2c_macro_map_39, int _x2c_macro_key_22, int &?_x2c_macro_out_7)`
 
 Removes `key`, writes its value to `out`, and returns one when present.
 A null map, null `out`, or absent key returns zero without writing or
@@ -517,7 +517,7 @@ Source: `lib/typed-map.x:232`
 <a id="MapIntInt.try_get"></a>
 #### MapIntInt.try_get
 
-`int MapIntInt.try_get(MapIntInt map, int key, int &?out)`
+`int MapIntInt.try_get(MapIntInt _x2c_macro_map_29, int _x2c_macro_key_12, int &?_x2c_macro_out_4)`
 
 Writes the value for `key` to `out` and returns one when present.
 A null map, null `out`, or absent key returns zero without writing.
@@ -527,7 +527,7 @@ Source: `lib/typed-map.x:232`
 <a id="MapIntInt.try_next"></a>
 #### MapIntInt.try_next
 
-`int MapIntInt.try_next(MapIntInt map, unsigned &?cursor, int &?key, int &?val)`
+`int MapIntInt.try_next(MapIntInt _x2c_macro_map_43, unsigned &?_x2c_macro_cursor_4, int &?_x2c_macro_key_24, int &?_x2c_macro_val_7)`
 
 Writes the next bucket's key and value, advances `cursor`, and returns
 one. Initialize the caller-owned cursor to zero. A null argument or
@@ -540,7 +540,7 @@ Source: `lib/typed-map.x:232`
 <a id="MapIntInt.updateindex"></a>
 #### MapIntInt.updateindex
 
-`int MapIntInt.updateindex(MapIntInt map, int key, Symbol op, int rhs)`
+`int MapIntInt.updateindex(MapIntInt _x2c_macro_map_37, int _x2c_macro_key_20, Symbol _x2c_macro_op_1, int _x2c_macro_rhs_0)`
 
 Applies `op` to the value for `key` and returns the stored result.
 `+` inserts `rhs` when the key is absent; other operations require an
@@ -556,7 +556,7 @@ Source: `lib/typed-map.x:232`
 <a id="MapIntInt.var"></a>
 #### MapIntInt.var
 
-`Var MapIntInt.var(MapIntInt map)`
+`Var MapIntInt.var(MapIntInt _x2c_macro_map_51)`
 
 Boxes `map` with its registered typed-map tag without copying it.
 The typed pointer and `Var` share the same mutable map identity.
@@ -566,7 +566,7 @@ Source: `lib/typed-map.x:241`
 <a id="MapIntInt.write_repr"></a>
 #### MapIntInt.write_repr
 
-`Buffer MapIntInt.write_repr(MapIntInt map, Buffer out)`
+`Buffer MapIntInt.write_repr(MapIntInt _x2c_macro_map_46, Buffer _x2c_macro_out_10)`
 
 Appends the readable typed-Map representation in bucket order.
 
@@ -575,7 +575,7 @@ Source: `lib/typed-map.x:240`
 <a id="MapIntInt.write_str"></a>
 #### MapIntInt.write_str
 
-`Buffer MapIntInt.write_str(MapIntInt map, Buffer out)`
+`Buffer MapIntInt.write_str(MapIntInt _x2c_macro_map_47, Buffer _x2c_macro_out_11)`
 
 Appends the typed-Map display text in bucket order.
 
@@ -586,7 +586,7 @@ Source: `lib/typed-map.x:240`
 <a id="MapLongDouble.cleanup"></a>
 #### MapLongDouble.cleanup
 
-`void MapLongDouble.cleanup(MapLongDouble map)`
+`void MapLongDouble.cleanup(MapLongDouble _x2c_macro_map_103)`
 
 Releases the record and its backing Blocks, borrowing stored values.
 
@@ -595,7 +595,7 @@ Source: `lib/typed-map.x:261`
 <a id="MapLongDouble.compare"></a>
 #### MapLongDouble.compare
 
-`int MapLongDouble.compare(MapLongDouble a, MapLongDouble b)`
+`int MapLongDouble.compare(MapLongDouble _x2c_macro_a_10, MapLongDouble _x2c_macro_b_10)`
 
 Compares typed Maps by size and then sorted native key/value contents.
 Identical handles compare equal and NULL sorts first. Neither Map is
@@ -607,7 +607,7 @@ Source: `lib/typed-map.x:260`
 <a id="MapLongDouble.contains"></a>
 #### MapLongDouble.contains
 
-`int MapLongDouble.contains(MapLongDouble map, long key)`
+`int MapLongDouble.contains(MapLongDouble _x2c_macro_map_84, long _x2c_macro_key_50)`
 
 Returns one when `key` is present, or zero for a null map.
 
@@ -616,7 +616,7 @@ Source: `lib/typed-map.x:252`
 <a id="MapLongDouble.copy"></a>
 #### MapLongDouble.copy
 
-`MapLongDouble MapLongDouble.copy(MapLongDouble map)`
+`MapLongDouble MapLongDouble.copy(MapLongDouble _x2c_macro_map_91)`
 
 Returns a fresh shallow copy in the current `Scope`.
 The result has independent table storage but copies native key and value
@@ -629,7 +629,7 @@ Source: `lib/typed-map.x:252`
 <a id="MapLongDouble.del"></a>
 #### MapLongDouble.del
 
-`double MapLongDouble.del(MapLongDouble map, long key)`
+`double MapLongDouble.del(MapLongDouble _x2c_macro_map_90, long _x2c_macro_key_56)`
 
 Removes `key` and returns its value.
 Successful removal invalidates live cursors and iterators.
@@ -641,7 +641,7 @@ Source: `lib/typed-map.x:252`
 <a id="MapLongDouble.enumerate"></a>
 #### MapLongDouble.enumerate
 
-`Iter MapLongDouble.enumerate(MapLongDouble map, Iter dest)`
+`Iter MapLongDouble.enumerate(MapLongDouble _x2c_macro_map_107, Iter _x2c_macro_dest_5)`
 
 Initializes `dest` to yield canonical `(key value)` `List`s in bucket
 order.
@@ -664,7 +664,7 @@ Source: `lib/typed-map.x:261`
 <a id="MapLongDouble.equal"></a>
 #### MapLongDouble.equal
 
-`int MapLongDouble.equal(MapLongDouble a, MapLongDouble b)`
+`int MapLongDouble.equal(MapLongDouble _x2c_macro_a_7, MapLongDouble _x2c_macro_b_7)`
 
 Reports key/value equality independent of bucket and insertion order.
 Two null maps compare equal; a null and a nonnull map compare unequal.
@@ -674,7 +674,7 @@ Source: `lib/typed-map.x:252`
 <a id="MapLongDouble.get"></a>
 #### MapLongDouble.get
 
-`double MapLongDouble.get(MapLongDouble map, long key)`
+`double MapLongDouble.get(MapLongDouble _x2c_macro_map_80, long _x2c_macro_key_46)`
 
 Returns the value for `key`.
 Prefer `try_get` when absence is an ordinary outcome. Boxed families
@@ -685,7 +685,7 @@ Source: `lib/typed-map.x:252`
 <a id="MapLongDouble.getdefault"></a>
 #### MapLongDouble.getdefault
 
-`double MapLongDouble.getdefault(MapLongDouble map, long key, double defval)`
+`double MapLongDouble.getdefault(MapLongDouble _x2c_macro_map_82, long _x2c_macro_key_48, double _x2c_macro_defval_2)`
 
 Returns the value for `key`, or `defval` without inserting it.
 A null map is treated as an empty one.
@@ -695,7 +695,7 @@ Source: `lib/typed-map.x:252`
 <a id="MapLongDouble.getindex"></a>
 #### MapLongDouble.getindex
 
-`double MapLongDouble.getindex(MapLongDouble map, long key)`
+`double MapLongDouble.getindex(MapLongDouble _x2c_macro_map_81, long _x2c_macro_key_47)`
 
 Returns the value selected by bracket indexing.
 This is the bracket-facing form of `MapLongDouble.get`, with the same failure
@@ -706,7 +706,7 @@ Source: `lib/typed-map.x:252`
 <a id="MapLongDouble.iter"></a>
 #### MapLongDouble.iter
 
-`Iter MapLongDouble.iter(MapLongDouble map, Iter dest)`
+`Iter MapLongDouble.iter(MapLongDouble _x2c_macro_map_105, Iter _x2c_macro_dest_3)`
 
 Initializes `dest` as a single-pass iterator over boxed values.
 The caller owns `dest`, and the iterator borrows `map`; both must remain
@@ -719,7 +719,7 @@ Source: `lib/typed-map.x:261`
 <a id="MapLongDouble.keys"></a>
 #### MapLongDouble.keys
 
-`Iter MapLongDouble.keys(MapLongDouble map, Iter dest)`
+`Iter MapLongDouble.keys(MapLongDouble _x2c_macro_map_106, Iter _x2c_macro_dest_4)`
 
 Initializes `dest` as a single-pass iterator over boxed keys.
 The caller owns `dest`, and the iterator borrows `map`; both must remain
@@ -740,7 +740,7 @@ Source: `lib/typed-map.x:261`
 <a id="MapLongDouble.len"></a>
 #### MapLongDouble.len
 
-`unsigned MapLongDouble.len(MapLongDouble map)`
+`unsigned MapLongDouble.len(MapLongDouble _x2c_macro_map_78)`
 
 Returns the number of entries, or zero for a null map.
 
@@ -749,7 +749,7 @@ Source: `lib/typed-map.x:252`
 <a id="MapLongDouble.map"></a>
 #### MapLongDouble.map
 
-`Map MapLongDouble.map(MapLongDouble map)`
+`Map MapLongDouble.map(MapLongDouble _x2c_macro_map_100)`
 
 Returns a fresh ordinary Map containing boxed keys and values.
 A null input returns NULL. The typed Map and its storage are unchanged.
@@ -761,7 +761,7 @@ Source: `lib/typed-map.x:260`
 <a id="MapLongDouble.merge"></a>
 #### MapLongDouble.merge
 
-`MapLongDouble MapLongDouble.merge(MapLongDouble map, MapLongDouble other)`
+`MapLongDouble MapLongDouble.merge(MapLongDouble _x2c_macro_map_92, MapLongDouble _x2c_macro_other_5)`
 
 Copies every entry of `other` into `map` and returns the destination.
 `other` wins conflicts. A null `other` is a no-op; a null destination is
@@ -787,7 +787,7 @@ Source: `lib/typed-map.x:252`
 <a id="MapLongDouble.new_capacity"></a>
 #### MapLongDouble.new_capacity
 
-`MapLongDouble MapLongDouble.new_capacity(unsigned capacity)`
+`MapLongDouble MapLongDouble.new_capacity(unsigned _x2c_macro_capacity_13)`
 
 Returns a fresh empty map with exactly `capacity` buckets.
 The result and its backing arrays belong to the current `Scope`.
@@ -802,7 +802,7 @@ Source: `lib/typed-map.x:252`
 <a id="MapLongDouble.postfixindex"></a>
 #### MapLongDouble.postfixindex
 
-`double MapLongDouble.postfixindex(MapLongDouble map, long key, Symbol op)`
+`double MapLongDouble.postfixindex(MapLongDouble _x2c_macro_map_88, long _x2c_macro_key_54, Symbol _x2c_macro_op_4)`
 
 Applies postfix `++` or `--` and returns the previous value.
 The key must already exist, and only generated numeric families support
@@ -816,7 +816,7 @@ Source: `lib/typed-map.x:252`
 <a id="MapLongDouble.repr"></a>
 #### MapLongDouble.repr
 
-`String MapLongDouble.repr(MapLongDouble map)`
+`String MapLongDouble.repr(MapLongDouble _x2c_macro_map_99)`
 
 Returns the readable typed-Map representation.
 
@@ -825,7 +825,7 @@ Source: `lib/typed-map.x:260`
 <a id="MapLongDouble.set"></a>
 #### MapLongDouble.set
 
-`void MapLongDouble.set(MapLongDouble map, long key, double val)`
+`void MapLongDouble.set(MapLongDouble _x2c_macro_map_85, long _x2c_macro_key_51, double _x2c_macro_val_18)`
 
 Copies `key` and `val` into the table, replacing an existing value.
 Insertion invalidates live cursors and iterators; replacement does not.
@@ -839,7 +839,7 @@ Source: `lib/typed-map.x:252`
 <a id="MapLongDouble.setdefault"></a>
 #### MapLongDouble.setdefault
 
-`double MapLongDouble.setdefault(MapLongDouble map, long key, double defval)`
+`double MapLongDouble.setdefault(MapLongDouble _x2c_macro_map_83, long _x2c_macro_key_49, double _x2c_macro_defval_3)`
 
 Returns the value for `key`, inserting `defval` when absent.
 Insertion copies the native key and value fields and invalidates live
@@ -854,7 +854,7 @@ Source: `lib/typed-map.x:252`
 <a id="MapLongDouble.setindex"></a>
 #### MapLongDouble.setindex
 
-`double MapLongDouble.setindex(MapLongDouble map, long key, double val)`
+`double MapLongDouble.setindex(MapLongDouble _x2c_macro_map_86, long _x2c_macro_key_52, double _x2c_macro_val_19)`
 
 Stores `val` under `key` and returns `val`.
 This is the bracket-facing form of `MapLongDouble.set`, with the same cursor
@@ -865,7 +865,7 @@ Source: `lib/typed-map.x:252`
 <a id="MapLongDouble.str"></a>
 #### MapLongDouble.str
 
-`String MapLongDouble.str(MapLongDouble map)`
+`String MapLongDouble.str(MapLongDouble _x2c_macro_map_98)`
 
 Returns the typed-Map display String.
 
@@ -874,7 +874,7 @@ Source: `lib/typed-map.x:260`
 <a id="MapLongDouble.truth"></a>
 #### MapLongDouble.truth
 
-`int MapLongDouble.truth(MapLongDouble map)`
+`int MapLongDouble.truth(MapLongDouble _x2c_macro_map_94)`
 
 Returns one when `map` contains an entry.
 
@@ -883,7 +883,7 @@ Source: `lib/typed-map.x:252`
 <a id="MapLongDouble.try_del"></a>
 #### MapLongDouble.try_del
 
-`int MapLongDouble.try_del(MapLongDouble map, long key, double &?out)`
+`int MapLongDouble.try_del(MapLongDouble _x2c_macro_map_89, long _x2c_macro_key_55, double &?_x2c_macro_out_24)`
 
 Removes `key`, writes its value to `out`, and returns one when present.
 A null map, null `out`, or absent key returns zero without writing or
@@ -894,7 +894,7 @@ Source: `lib/typed-map.x:252`
 <a id="MapLongDouble.try_get"></a>
 #### MapLongDouble.try_get
 
-`int MapLongDouble.try_get(MapLongDouble map, long key, double &?out)`
+`int MapLongDouble.try_get(MapLongDouble _x2c_macro_map_79, long _x2c_macro_key_45, double &?_x2c_macro_out_21)`
 
 Writes the value for `key` to `out` and returns one when present.
 A null map, null `out`, or absent key returns zero without writing.
@@ -904,7 +904,7 @@ Source: `lib/typed-map.x:252`
 <a id="MapLongDouble.try_next"></a>
 #### MapLongDouble.try_next
 
-`int MapLongDouble.try_next(MapLongDouble map, unsigned &?cursor, long &?key, double &?val)`
+`int MapLongDouble.try_next(MapLongDouble _x2c_macro_map_93, unsigned &?_x2c_macro_cursor_14, long &?_x2c_macro_key_57, double &?_x2c_macro_val_20)`
 
 Writes the next bucket's key and value, advances `cursor`, and returns
 one. Initialize the caller-owned cursor to zero. A null argument or
@@ -917,7 +917,7 @@ Source: `lib/typed-map.x:252`
 <a id="MapLongDouble.updateindex"></a>
 #### MapLongDouble.updateindex
 
-`double MapLongDouble.updateindex(MapLongDouble map, long key, Symbol op, double rhs)`
+`double MapLongDouble.updateindex(MapLongDouble _x2c_macro_map_87, long _x2c_macro_key_53, Symbol _x2c_macro_op_3, double _x2c_macro_rhs_1)`
 
 Applies `op` to the value for `key` and returns the stored result.
 `+` inserts `rhs` when the key is absent; other operations require an
@@ -933,7 +933,7 @@ Source: `lib/typed-map.x:252`
 <a id="MapLongDouble.var"></a>
 #### MapLongDouble.var
 
-`Var MapLongDouble.var(MapLongDouble map)`
+`Var MapLongDouble.var(MapLongDouble _x2c_macro_map_101)`
 
 Boxes `map` with its registered typed-map tag without copying it.
 The typed pointer and `Var` share the same mutable map identity.
@@ -943,7 +943,7 @@ Source: `lib/typed-map.x:261`
 <a id="MapLongDouble.write_repr"></a>
 #### MapLongDouble.write_repr
 
-`Buffer MapLongDouble.write_repr(MapLongDouble map, Buffer out)`
+`Buffer MapLongDouble.write_repr(MapLongDouble _x2c_macro_map_96, Buffer _x2c_macro_out_27)`
 
 Appends the readable typed-Map representation in bucket order.
 
@@ -952,7 +952,7 @@ Source: `lib/typed-map.x:260`
 <a id="MapLongDouble.write_str"></a>
 #### MapLongDouble.write_str
 
-`Buffer MapLongDouble.write_str(MapLongDouble map, Buffer out)`
+`Buffer MapLongDouble.write_str(MapLongDouble _x2c_macro_map_97, Buffer _x2c_macro_out_28)`
 
 Appends the typed-Map display text in bucket order.
 
@@ -963,7 +963,7 @@ Source: `lib/typed-map.x:260`
 <a id="MapStringInt.cleanup"></a>
 #### MapStringInt.cleanup
 
-`void MapStringInt.cleanup(MapStringInt map)`
+`void MapStringInt.cleanup(MapStringInt _x2c_macro_map_203)`
 
 Releases the record and its backing Blocks, borrowing stored values.
 
@@ -972,7 +972,7 @@ Source: `lib/typed-map.x:336`
 <a id="MapStringInt.compare"></a>
 #### MapStringInt.compare
 
-`int MapStringInt.compare(MapStringInt a, MapStringInt b)`
+`int MapStringInt.compare(MapStringInt _x2c_macro_a_20, MapStringInt _x2c_macro_b_20)`
 
 Compares typed Maps by size and then sorted native key/value contents.
 Identical handles compare equal and NULL sorts first. Neither Map is
@@ -984,7 +984,7 @@ Source: `lib/typed-map.x:319`
 <a id="MapStringInt.contains"></a>
 #### MapStringInt.contains
 
-`int MapStringInt.contains(MapStringInt map, String key)`
+`int MapStringInt.contains(MapStringInt _x2c_macro_map_184, String _x2c_macro_key_116)`
 
 Returns one when `key` is present, or zero for a null map.
 
@@ -993,7 +993,7 @@ Source: `lib/typed-map.x:311`
 <a id="MapStringInt.copy"></a>
 #### MapStringInt.copy
 
-`MapStringInt MapStringInt.copy(MapStringInt map)`
+`MapStringInt MapStringInt.copy(MapStringInt _x2c_macro_map_191)`
 
 Returns a fresh shallow copy in the current `Scope`.
 The result has independent table storage but copies native key and value
@@ -1006,7 +1006,7 @@ Source: `lib/typed-map.x:311`
 <a id="MapStringInt.del"></a>
 #### MapStringInt.del
 
-`int MapStringInt.del(MapStringInt map, String key)`
+`int MapStringInt.del(MapStringInt _x2c_macro_map_190, String _x2c_macro_key_122)`
 
 Removes `key` and returns its value.
 Successful removal invalidates live cursors and iterators.
@@ -1018,7 +1018,7 @@ Source: `lib/typed-map.x:311`
 <a id="MapStringInt.enumerate"></a>
 #### MapStringInt.enumerate
 
-`Iter MapStringInt.enumerate(MapStringInt map, Iter dest)`
+`Iter MapStringInt.enumerate(MapStringInt _x2c_macro_map_207, Iter _x2c_macro_dest_11)`
 
 Initializes `dest` to yield canonical `(key value)` `List`s in bucket
 order.
@@ -1041,7 +1041,7 @@ Source: `lib/typed-map.x:336`
 <a id="MapStringInt.equal"></a>
 #### MapStringInt.equal
 
-`int MapStringInt.equal(MapStringInt a, MapStringInt b)`
+`int MapStringInt.equal(MapStringInt _x2c_macro_a_17, MapStringInt _x2c_macro_b_17)`
 
 Reports key/value equality independent of bucket and insertion order.
 Two null maps compare equal; a null and a nonnull map compare unequal.
@@ -1051,7 +1051,7 @@ Source: `lib/typed-map.x:311`
 <a id="MapStringInt.get"></a>
 #### MapStringInt.get
 
-`int MapStringInt.get(MapStringInt map, String key)`
+`int MapStringInt.get(MapStringInt _x2c_macro_map_180, String _x2c_macro_key_112)`
 
 Returns the value for `key`.
 Prefer `try_get` when absence is an ordinary outcome. Boxed families
@@ -1062,7 +1062,7 @@ Source: `lib/typed-map.x:311`
 <a id="MapStringInt.getdefault"></a>
 #### MapStringInt.getdefault
 
-`int MapStringInt.getdefault(MapStringInt map, String key, int defval)`
+`int MapStringInt.getdefault(MapStringInt _x2c_macro_map_182, String _x2c_macro_key_114, int _x2c_macro_defval_6)`
 
 Returns the value for `key`, or `defval` without inserting it.
 A null map is treated as an empty one.
@@ -1072,7 +1072,7 @@ Source: `lib/typed-map.x:311`
 <a id="MapStringInt.getindex"></a>
 #### MapStringInt.getindex
 
-`int MapStringInt.getindex(MapStringInt map, String key)`
+`int MapStringInt.getindex(MapStringInt _x2c_macro_map_181, String _x2c_macro_key_113)`
 
 Returns the value selected by bracket indexing.
 This is the bracket-facing form of `MapStringInt.get`, with the same failure
@@ -1083,7 +1083,7 @@ Source: `lib/typed-map.x:311`
 <a id="MapStringInt.iter"></a>
 #### MapStringInt.iter
 
-`Iter MapStringInt.iter(MapStringInt map, Iter dest)`
+`Iter MapStringInt.iter(MapStringInt _x2c_macro_map_205, Iter _x2c_macro_dest_9)`
 
 Initializes `dest` as a single-pass iterator over boxed values.
 The caller owns `dest`, and the iterator borrows `map`; both must remain
@@ -1096,7 +1096,7 @@ Source: `lib/typed-map.x:336`
 <a id="MapStringInt.keys"></a>
 #### MapStringInt.keys
 
-`Iter MapStringInt.keys(MapStringInt map, Iter dest)`
+`Iter MapStringInt.keys(MapStringInt _x2c_macro_map_206, Iter _x2c_macro_dest_10)`
 
 Initializes `dest` as a single-pass iterator over boxed keys.
 The caller owns `dest`, and the iterator borrows `map`; both must remain
@@ -1117,7 +1117,7 @@ Source: `lib/typed-map.x:336`
 <a id="MapStringInt.len"></a>
 #### MapStringInt.len
 
-`unsigned MapStringInt.len(MapStringInt map)`
+`unsigned MapStringInt.len(MapStringInt _x2c_macro_map_178)`
 
 Returns the number of entries, or zero for a null map.
 
@@ -1126,7 +1126,7 @@ Source: `lib/typed-map.x:311`
 <a id="MapStringInt.map"></a>
 #### MapStringInt.map
 
-`Map MapStringInt.map(MapStringInt map)`
+`Map MapStringInt.map(MapStringInt _x2c_macro_map_200)`
 
 Returns a fresh ordinary Map containing boxed keys and values.
 A null input returns NULL. The typed Map and its storage are unchanged.
@@ -1138,7 +1138,7 @@ Source: `lib/typed-map.x:319`
 <a id="MapStringInt.merge"></a>
 #### MapStringInt.merge
 
-`MapStringInt MapStringInt.merge(MapStringInt map, MapStringInt other)`
+`MapStringInt MapStringInt.merge(MapStringInt _x2c_macro_map_192, MapStringInt _x2c_macro_other_11)`
 
 Copies every entry of `other` into `map` and returns the destination.
 `other` wins conflicts. A null `other` is a no-op; a null destination is
@@ -1164,7 +1164,7 @@ Source: `lib/typed-map.x:311`
 <a id="MapStringInt.new_capacity"></a>
 #### MapStringInt.new_capacity
 
-`MapStringInt MapStringInt.new_capacity(unsigned capacity)`
+`MapStringInt MapStringInt.new_capacity(unsigned _x2c_macro_capacity_19)`
 
 Returns a fresh empty map with exactly `capacity` buckets.
 The result and its backing arrays belong to the current `Scope`.
@@ -1179,7 +1179,7 @@ Source: `lib/typed-map.x:311`
 <a id="MapStringInt.postfixindex"></a>
 #### MapStringInt.postfixindex
 
-`int MapStringInt.postfixindex(MapStringInt map, String key, Symbol op)`
+`int MapStringInt.postfixindex(MapStringInt _x2c_macro_map_188, String _x2c_macro_key_120, Symbol _x2c_macro_op_8)`
 
 Applies postfix `++` or `--` and returns the previous value.
 The key must already exist, and only generated numeric families support
@@ -1193,7 +1193,7 @@ Source: `lib/typed-map.x:311`
 <a id="MapStringInt.repr"></a>
 #### MapStringInt.repr
 
-`String MapStringInt.repr(MapStringInt map)`
+`String MapStringInt.repr(MapStringInt _x2c_macro_map_199)`
 
 Returns the readable typed-Map representation.
 
@@ -1202,7 +1202,7 @@ Source: `lib/typed-map.x:319`
 <a id="MapStringInt.set"></a>
 #### MapStringInt.set
 
-`void MapStringInt.set(MapStringInt map, String key, int val)`
+`void MapStringInt.set(MapStringInt _x2c_macro_map_185, String _x2c_macro_key_117, int _x2c_macro_val_44)`
 
 Copies `key` and `val` into the table, replacing an existing value.
 Insertion invalidates live cursors and iterators; replacement does not.
@@ -1216,7 +1216,7 @@ Source: `lib/typed-map.x:311`
 <a id="MapStringInt.setdefault"></a>
 #### MapStringInt.setdefault
 
-`int MapStringInt.setdefault(MapStringInt map, String key, int defval)`
+`int MapStringInt.setdefault(MapStringInt _x2c_macro_map_183, String _x2c_macro_key_115, int _x2c_macro_defval_7)`
 
 Returns the value for `key`, inserting `defval` when absent.
 Insertion copies the native key and value fields and invalidates live
@@ -1231,7 +1231,7 @@ Source: `lib/typed-map.x:311`
 <a id="MapStringInt.setindex"></a>
 #### MapStringInt.setindex
 
-`int MapStringInt.setindex(MapStringInt map, String key, int val)`
+`int MapStringInt.setindex(MapStringInt _x2c_macro_map_186, String _x2c_macro_key_118, int _x2c_macro_val_45)`
 
 Stores `val` under `key` and returns `val`.
 This is the bracket-facing form of `MapStringInt.set`, with the same cursor
@@ -1242,7 +1242,7 @@ Source: `lib/typed-map.x:311`
 <a id="MapStringInt.str"></a>
 #### MapStringInt.str
 
-`String MapStringInt.str(MapStringInt map)`
+`String MapStringInt.str(MapStringInt _x2c_macro_map_198)`
 
 Returns the typed-Map display String.
 
@@ -1251,7 +1251,7 @@ Source: `lib/typed-map.x:319`
 <a id="MapStringInt.truth"></a>
 #### MapStringInt.truth
 
-`int MapStringInt.truth(MapStringInt map)`
+`int MapStringInt.truth(MapStringInt _x2c_macro_map_194)`
 
 Returns one when `map` contains an entry.
 
@@ -1260,7 +1260,7 @@ Source: `lib/typed-map.x:311`
 <a id="MapStringInt.try_del"></a>
 #### MapStringInt.try_del
 
-`int MapStringInt.try_del(MapStringInt map, String key, int &?out)`
+`int MapStringInt.try_del(MapStringInt _x2c_macro_map_189, String _x2c_macro_key_121, int &?_x2c_macro_out_58)`
 
 Removes `key`, writes its value to `out`, and returns one when present.
 A null map, null `out`, or absent key returns zero without writing or
@@ -1271,7 +1271,7 @@ Source: `lib/typed-map.x:311`
 <a id="MapStringInt.try_get"></a>
 #### MapStringInt.try_get
 
-`int MapStringInt.try_get(MapStringInt map, String key, int &?out)`
+`int MapStringInt.try_get(MapStringInt _x2c_macro_map_179, String _x2c_macro_key_111, int &?_x2c_macro_out_55)`
 
 Writes the value for `key` to `out` and returns one when present.
 A null map, null `out`, or absent key returns zero without writing.
@@ -1281,7 +1281,7 @@ Source: `lib/typed-map.x:311`
 <a id="MapStringInt.try_next"></a>
 #### MapStringInt.try_next
 
-`int MapStringInt.try_next(MapStringInt map, unsigned &?cursor, String &?key, int &?val)`
+`int MapStringInt.try_next(MapStringInt _x2c_macro_map_193, unsigned &?_x2c_macro_cursor_34, String &?_x2c_macro_key_123, int &?_x2c_macro_val_46)`
 
 Writes the next bucket's key and value, advances `cursor`, and returns
 one. Initialize the caller-owned cursor to zero. A null argument or
@@ -1294,7 +1294,7 @@ Source: `lib/typed-map.x:311`
 <a id="MapStringInt.updateindex"></a>
 #### MapStringInt.updateindex
 
-`int MapStringInt.updateindex(MapStringInt map, String key, Symbol op, int rhs)`
+`int MapStringInt.updateindex(MapStringInt _x2c_macro_map_187, String _x2c_macro_key_119, Symbol _x2c_macro_op_7, int _x2c_macro_rhs_3)`
 
 Applies `op` to the value for `key` and returns the stored result.
 `+` inserts `rhs` when the key is absent; other operations require an
@@ -1310,7 +1310,7 @@ Source: `lib/typed-map.x:311`
 <a id="MapStringInt.var"></a>
 #### MapStringInt.var
 
-`Var MapStringInt.var(MapStringInt map)`
+`Var MapStringInt.var(MapStringInt _x2c_macro_map_201)`
 
 Boxes `map` with its registered typed-map tag without copying it.
 The typed pointer and `Var` share the same mutable map identity.
@@ -1320,7 +1320,7 @@ Source: `lib/typed-map.x:336`
 <a id="MapStringInt.write_repr"></a>
 #### MapStringInt.write_repr
 
-`Buffer MapStringInt.write_repr(MapStringInt map, Buffer out)`
+`Buffer MapStringInt.write_repr(MapStringInt _x2c_macro_map_196, Buffer _x2c_macro_out_61)`
 
 Appends the readable typed-Map representation in bucket order.
 
@@ -1329,7 +1329,7 @@ Source: `lib/typed-map.x:319`
 <a id="MapStringInt.write_str"></a>
 #### MapStringInt.write_str
 
-`Buffer MapStringInt.write_str(MapStringInt map, Buffer out)`
+`Buffer MapStringInt.write_str(MapStringInt _x2c_macro_map_197, Buffer _x2c_macro_out_62)`
 
 Appends the typed-Map display text in bucket order.
 
@@ -1340,7 +1340,7 @@ Source: `lib/typed-map.x:319`
 <a id="MapStringString.cleanup"></a>
 #### MapStringString.cleanup
 
-`void MapStringString.cleanup(MapStringString map)`
+`void MapStringString.cleanup(MapStringString _x2c_macro_map_153)`
 
 Releases the record and its backing Blocks, borrowing stored values.
 
@@ -1349,7 +1349,7 @@ Source: `lib/typed-map.x:299`
 <a id="MapStringString.compare"></a>
 #### MapStringString.compare
 
-`int MapStringString.compare(MapStringString a, MapStringString b)`
+`int MapStringString.compare(MapStringString _x2c_macro_a_15, MapStringString _x2c_macro_b_15)`
 
 Compares typed Maps by size and then sorted native key/value contents.
 Identical handles compare equal and NULL sorts first. Neither Map is
@@ -1361,7 +1361,7 @@ Source: `lib/typed-map.x:281`
 <a id="MapStringString.contains"></a>
 #### MapStringString.contains
 
-`int MapStringString.contains(MapStringString map, String key)`
+`int MapStringString.contains(MapStringString _x2c_macro_map_134, String _x2c_macro_key_83)`
 
 Returns one when `key` is present, or zero for a null map.
 
@@ -1370,7 +1370,7 @@ Source: `lib/typed-map.x:273`
 <a id="MapStringString.copy"></a>
 #### MapStringString.copy
 
-`MapStringString MapStringString.copy(MapStringString map)`
+`MapStringString MapStringString.copy(MapStringString _x2c_macro_map_141)`
 
 Returns a fresh shallow copy in the current `Scope`.
 The result has independent table storage but copies native key and value
@@ -1383,7 +1383,7 @@ Source: `lib/typed-map.x:273`
 <a id="MapStringString.del"></a>
 #### MapStringString.del
 
-`String MapStringString.del(MapStringString map, String key)`
+`String MapStringString.del(MapStringString _x2c_macro_map_140, String _x2c_macro_key_89)`
 
 Removes `key` and returns its value.
 Successful removal invalidates live cursors and iterators.
@@ -1395,7 +1395,7 @@ Source: `lib/typed-map.x:273`
 <a id="MapStringString.enumerate"></a>
 #### MapStringString.enumerate
 
-`Iter MapStringString.enumerate(MapStringString map, Iter dest)`
+`Iter MapStringString.enumerate(MapStringString _x2c_macro_map_157, Iter _x2c_macro_dest_8)`
 
 Initializes `dest` to yield canonical `(key value)` `List`s in bucket
 order.
@@ -1418,7 +1418,7 @@ Source: `lib/typed-map.x:299`
 <a id="MapStringString.equal"></a>
 #### MapStringString.equal
 
-`int MapStringString.equal(MapStringString a, MapStringString b)`
+`int MapStringString.equal(MapStringString _x2c_macro_a_12, MapStringString _x2c_macro_b_12)`
 
 Reports key/value equality independent of bucket and insertion order.
 Two null maps compare equal; a null and a nonnull map compare unequal.
@@ -1428,7 +1428,7 @@ Source: `lib/typed-map.x:273`
 <a id="MapStringString.get"></a>
 #### MapStringString.get
 
-`String MapStringString.get(MapStringString map, String key)`
+`String MapStringString.get(MapStringString _x2c_macro_map_130, String _x2c_macro_key_79)`
 
 Returns the value for `key`.
 Prefer `try_get` when absence is an ordinary outcome. Boxed families
@@ -1439,7 +1439,7 @@ Source: `lib/typed-map.x:273`
 <a id="MapStringString.getdefault"></a>
 #### MapStringString.getdefault
 
-`String MapStringString.getdefault(MapStringString map, String key, String defval)`
+`String MapStringString.getdefault(MapStringString _x2c_macro_map_132, String _x2c_macro_key_81, String _x2c_macro_defval_4)`
 
 Returns the value for `key`, or `defval` without inserting it.
 A null map is treated as an empty one.
@@ -1449,7 +1449,7 @@ Source: `lib/typed-map.x:273`
 <a id="MapStringString.getindex"></a>
 #### MapStringString.getindex
 
-`String MapStringString.getindex(MapStringString map, String key)`
+`String MapStringString.getindex(MapStringString _x2c_macro_map_131, String _x2c_macro_key_80)`
 
 Returns the value selected by bracket indexing.
 This is the bracket-facing form of `MapStringString.get`, with the same failure
@@ -1460,7 +1460,7 @@ Source: `lib/typed-map.x:273`
 <a id="MapStringString.iter"></a>
 #### MapStringString.iter
 
-`Iter MapStringString.iter(MapStringString map, Iter dest)`
+`Iter MapStringString.iter(MapStringString _x2c_macro_map_155, Iter _x2c_macro_dest_6)`
 
 Initializes `dest` as a single-pass iterator over boxed values.
 The caller owns `dest`, and the iterator borrows `map`; both must remain
@@ -1473,7 +1473,7 @@ Source: `lib/typed-map.x:299`
 <a id="MapStringString.keys"></a>
 #### MapStringString.keys
 
-`Iter MapStringString.keys(MapStringString map, Iter dest)`
+`Iter MapStringString.keys(MapStringString _x2c_macro_map_156, Iter _x2c_macro_dest_7)`
 
 Initializes `dest` as a single-pass iterator over boxed keys.
 The caller owns `dest`, and the iterator borrows `map`; both must remain
@@ -1494,7 +1494,7 @@ Source: `lib/typed-map.x:299`
 <a id="MapStringString.len"></a>
 #### MapStringString.len
 
-`unsigned MapStringString.len(MapStringString map)`
+`unsigned MapStringString.len(MapStringString _x2c_macro_map_128)`
 
 Returns the number of entries, or zero for a null map.
 
@@ -1503,7 +1503,7 @@ Source: `lib/typed-map.x:273`
 <a id="MapStringString.map"></a>
 #### MapStringString.map
 
-`Map MapStringString.map(MapStringString map)`
+`Map MapStringString.map(MapStringString _x2c_macro_map_150)`
 
 Returns a fresh ordinary Map containing boxed keys and values.
 A null input returns NULL. The typed Map and its storage are unchanged.
@@ -1515,7 +1515,7 @@ Source: `lib/typed-map.x:281`
 <a id="MapStringString.merge"></a>
 #### MapStringString.merge
 
-`MapStringString MapStringString.merge(MapStringString map, MapStringString other)`
+`MapStringString MapStringString.merge(MapStringString _x2c_macro_map_142, MapStringString _x2c_macro_other_8)`
 
 Copies every entry of `other` into `map` and returns the destination.
 `other` wins conflicts. A null `other` is a no-op; a null destination is
@@ -1541,7 +1541,7 @@ Source: `lib/typed-map.x:273`
 <a id="MapStringString.new_capacity"></a>
 #### MapStringString.new_capacity
 
-`MapStringString MapStringString.new_capacity(unsigned capacity)`
+`MapStringString MapStringString.new_capacity(unsigned _x2c_macro_capacity_16)`
 
 Returns a fresh empty map with exactly `capacity` buckets.
 The result and its backing arrays belong to the current `Scope`.
@@ -1556,7 +1556,7 @@ Source: `lib/typed-map.x:273`
 <a id="MapStringString.postfixindex"></a>
 #### MapStringString.postfixindex
 
-`String MapStringString.postfixindex(MapStringString map, String key, Symbol op)`
+`String MapStringString.postfixindex(MapStringString _x2c_macro_map_138, String _x2c_macro_key_87, Symbol _x2c_macro_op_6)`
 
 Applies postfix `++` or `--` and returns the previous value.
 The key must already exist, and only generated numeric families support
@@ -1570,7 +1570,7 @@ Source: `lib/typed-map.x:273`
 <a id="MapStringString.repr"></a>
 #### MapStringString.repr
 
-`String MapStringString.repr(MapStringString map)`
+`String MapStringString.repr(MapStringString _x2c_macro_map_149)`
 
 Returns the readable typed-Map representation.
 
@@ -1579,7 +1579,7 @@ Source: `lib/typed-map.x:281`
 <a id="MapStringString.set"></a>
 #### MapStringString.set
 
-`void MapStringString.set(MapStringString map, String key, String val)`
+`void MapStringString.set(MapStringString _x2c_macro_map_135, String _x2c_macro_key_84, String _x2c_macro_val_31)`
 
 Copies `key` and `val` into the table, replacing an existing value.
 Insertion invalidates live cursors and iterators; replacement does not.
@@ -1593,7 +1593,7 @@ Source: `lib/typed-map.x:273`
 <a id="MapStringString.setdefault"></a>
 #### MapStringString.setdefault
 
-`String MapStringString.setdefault(MapStringString map, String key, String defval)`
+`String MapStringString.setdefault(MapStringString _x2c_macro_map_133, String _x2c_macro_key_82, String _x2c_macro_defval_5)`
 
 Returns the value for `key`, inserting `defval` when absent.
 Insertion copies the native key and value fields and invalidates live
@@ -1608,7 +1608,7 @@ Source: `lib/typed-map.x:273`
 <a id="MapStringString.setindex"></a>
 #### MapStringString.setindex
 
-`String MapStringString.setindex(MapStringString map, String key, String val)`
+`String MapStringString.setindex(MapStringString _x2c_macro_map_136, String _x2c_macro_key_85, String _x2c_macro_val_32)`
 
 Stores `val` under `key` and returns `val`.
 This is the bracket-facing form of `MapStringString.set`, with the same cursor
@@ -1619,7 +1619,7 @@ Source: `lib/typed-map.x:273`
 <a id="MapStringString.str"></a>
 #### MapStringString.str
 
-`String MapStringString.str(MapStringString map)`
+`String MapStringString.str(MapStringString _x2c_macro_map_148)`
 
 Returns the typed-Map display String.
 
@@ -1628,7 +1628,7 @@ Source: `lib/typed-map.x:281`
 <a id="MapStringString.truth"></a>
 #### MapStringString.truth
 
-`int MapStringString.truth(MapStringString map)`
+`int MapStringString.truth(MapStringString _x2c_macro_map_144)`
 
 Returns one when `map` contains an entry.
 
@@ -1637,7 +1637,7 @@ Source: `lib/typed-map.x:273`
 <a id="MapStringString.try_del"></a>
 #### MapStringString.try_del
 
-`int MapStringString.try_del(MapStringString map, String key, String &?out)`
+`int MapStringString.try_del(MapStringString _x2c_macro_map_139, String _x2c_macro_key_88, String &?_x2c_macro_out_41)`
 
 Removes `key`, writes its value to `out`, and returns one when present.
 A null map, null `out`, or absent key returns zero without writing or
@@ -1648,7 +1648,7 @@ Source: `lib/typed-map.x:273`
 <a id="MapStringString.try_get"></a>
 #### MapStringString.try_get
 
-`int MapStringString.try_get(MapStringString map, String key, String &?out)`
+`int MapStringString.try_get(MapStringString _x2c_macro_map_129, String _x2c_macro_key_78, String &?_x2c_macro_out_38)`
 
 Writes the value for `key` to `out` and returns one when present.
 A null map, null `out`, or absent key returns zero without writing.
@@ -1658,7 +1658,7 @@ Source: `lib/typed-map.x:273`
 <a id="MapStringString.try_next"></a>
 #### MapStringString.try_next
 
-`int MapStringString.try_next(MapStringString map, unsigned &?cursor, String &?key, String &?val)`
+`int MapStringString.try_next(MapStringString _x2c_macro_map_143, unsigned &?_x2c_macro_cursor_24, String &?_x2c_macro_key_90, String &?_x2c_macro_val_33)`
 
 Writes the next bucket's key and value, advances `cursor`, and returns
 one. Initialize the caller-owned cursor to zero. A null argument or
@@ -1671,7 +1671,7 @@ Source: `lib/typed-map.x:273`
 <a id="MapStringString.updateindex"></a>
 #### MapStringString.updateindex
 
-`String MapStringString.updateindex(MapStringString map, String key, Symbol op, String rhs)`
+`String MapStringString.updateindex(MapStringString _x2c_macro_map_137, String _x2c_macro_key_86, Symbol _x2c_macro_op_5, String _x2c_macro_rhs_2)`
 
 Applies `op` to the value for `key` and returns the stored result.
 `+` inserts `rhs` when the key is absent; other operations require an
@@ -1687,7 +1687,7 @@ Source: `lib/typed-map.x:273`
 <a id="MapStringString.var"></a>
 #### MapStringString.var
 
-`Var MapStringString.var(MapStringString map)`
+`Var MapStringString.var(MapStringString _x2c_macro_map_151)`
 
 Boxes `map` with its registered typed-map tag without copying it.
 The typed pointer and `Var` share the same mutable map identity.
@@ -1697,7 +1697,7 @@ Source: `lib/typed-map.x:299`
 <a id="MapStringString.write_repr"></a>
 #### MapStringString.write_repr
 
-`Buffer MapStringString.write_repr(MapStringString map, Buffer out)`
+`Buffer MapStringString.write_repr(MapStringString _x2c_macro_map_146, Buffer _x2c_macro_out_44)`
 
 Appends the readable typed-Map representation in bucket order.
 
@@ -1706,7 +1706,7 @@ Source: `lib/typed-map.x:281`
 <a id="MapStringString.write_str"></a>
 #### MapStringString.write_str
 
-`Buffer MapStringString.write_str(MapStringString map, Buffer out)`
+`Buffer MapStringString.write_str(MapStringString _x2c_macro_map_147, Buffer _x2c_macro_out_45)`
 
 Appends the typed-Map display text in bucket order.
 
@@ -1717,7 +1717,7 @@ Source: `lib/typed-map.x:281`
 <a id="Var.mapintint"></a>
 #### Var.mapintint
 
-`MapIntInt Var.mapintint(Var value)`
+`MapIntInt Var.mapintint(Var _x2c_macro_value_3)`
 
 Returns the typed-map pointer carried by `value`.
 `value` must carry this family's registered tag; the converter does
@@ -1728,7 +1728,7 @@ Source: `lib/typed-map.x:241`
 <a id="Var.maplongdouble"></a>
 #### Var.maplongdouble
 
-`MapLongDouble Var.maplongdouble(Var value)`
+`MapLongDouble Var.maplongdouble(Var _x2c_macro_value_7)`
 
 Returns the typed-map pointer carried by `value`.
 `value` must carry this family's registered tag; the converter does
@@ -1739,7 +1739,7 @@ Source: `lib/typed-map.x:261`
 <a id="Var.mapstringint"></a>
 #### Var.mapstringint
 
-`MapStringInt Var.mapstringint(Var value)`
+`MapStringInt Var.mapstringint(Var _x2c_macro_value_15)`
 
 Returns the typed-map pointer carried by `value`.
 `value` must carry this family's registered tag; the converter does
@@ -1750,7 +1750,7 @@ Source: `lib/typed-map.x:336`
 <a id="Var.mapstringstring"></a>
 #### Var.mapstringstring
 
-`MapStringString Var.mapstringstring(Var value)`
+`MapStringString Var.mapstringstring(Var _x2c_macro_value_11)`
 
 Returns the typed-map pointer carried by `value`.
 `value` must carry this family's registered tag; the converter does

@@ -26,7 +26,7 @@ X2c AST transformation pipeline.
 Converts an array literal to source-ordered Var arguments for its
 counted constructor.
 
-Source: `src/transform.x:421`
+Source: `src/transform.x:551`
 
 #### transform_map_literal
 
@@ -35,7 +35,7 @@ Source: `src/transform.x:421`
 Converts a map literal to alternating Var key/value arguments for its
 counted constructor.
 
-Source: `src/transform.x:435`
+Source: `src/transform.x:565`
 
 ### `Compiler`
 
@@ -48,7 +48,7 @@ Normalizes one bound and typed node. Newly constructed syntax is
 normalized where it is produced; children enter the same operation, so
 completed units do not require another unit walk.
 
-Source: `src/transform.x:75`
+Source: `src/transform.x:205`
 
 <a id="Compiler.transform"></a>
 #### Compiler.transform
@@ -59,11 +59,11 @@ Lowers a bound and typed top-level AST to the normalized form consumed by
 emission. `c` must own the AST's bindings, origins, and conversion
 state. Current-node rewrites finish before child traversal; containing
 blocks absorb cleanup markers produced by declaration rewrites. Early
-declarations are lowered and appended after the input units, below a
-`#pragma private`, since no other unit can name them. The call may add
+declarations are lowered and appended after the input units. Their
+storage determines their interface visibility. The call may add
 generated origins or diagnostics to `c`.
 
-Source: `src/transform.x:52`
+Source: `src/transform.x:184`
 
 ## Design notes
 

@@ -33,11 +33,11 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
 
 Var List_assoc(List, Var);
 
-List Var_list(Var);
+static List Var_list(Var);
 
 Var List_last(List);
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
 static Symbol _observe_relabel(List errors, Var data){
   (void) data;
@@ -57,9 +57,9 @@ static Symbol _observe_relabel(List errors, Var data){
 
 int x2c_error_catch_site_pending(ErrorCatchSite *);
 
-Var List_var(List);
+static Var List_var(List);
 
-Var String_var(String);
+static Var String_var(String);
 
 ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
 

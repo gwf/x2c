@@ -85,7 +85,7 @@ geo__Vec geo__Vec_mul(geo__Vec a, geo__Vec b){
   return geo__Vec_new(a -> x * b -> x, a -> y * b -> y);
 }
 
-List List_cdr(List);
+static List List_cdr(List);
 
 geo__Chain geo__Chain_rest(geo__Chain values){
   return List_cdr(values);
@@ -99,9 +99,9 @@ int geo__ChainLeaf_leaf_len(geo__ChainLeaf values){
 
 long Var_integer(Var);
 
-Var int_var(int);
+static Var int_var(int);
 
-Var double_var(double);
+static Var double_var(double);
 
 static int _vec_next(Iter iter, Var * out){
   int index = Var_integer(iter -> state);

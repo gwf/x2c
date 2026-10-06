@@ -357,17 +357,17 @@
         (declare ("List") 
          (bindings 
           (op = (bind (binding 42 "_x2c_macro_object_0") ()) 
-           (expr ("List") (expr ("List") (cache 5)))))) 
+           (expr ("List") (expr ("List") (cache 844)))))) 
         (declare ("List") 
          (bindings 
-          (op = (bind (binding 43 "_x2c_macro_cursor_0") ()) 
+          (op = (bind (binding 43 "_x2c_macro_cursor_13") ()) 
            (expr ("List") (ident (binding 42 "_x2c_macro_object_0")))))) 
         (stmnt 
          (expr (volatile * const volatile void) 
           (op = (expr (volatile * const volatile void) 
                  (ident (binding 44 "x2c_exception_escaped"))) 
            (expr (* "List") 
-            (op & (expr ("List") (ident (binding 43 "_x2c_macro_cursor_0")))))))) 
+            (op & (expr ("List") (ident (binding 43 "_x2c_macro_cursor_13")))))))) 
         (declare ("Var") 
          (bindings (bind (binding 45 "_x2c_macro_cursor_output_0") ()))) 
         (stmnt 
@@ -385,7 +385,7 @@
             (args (expr ("List") (ident (binding 42 "_x2c_macro_object_0"))) 
              (expr (opt-ref "List") 
               (op & (parens 
-                     (expr ("List") (ident (binding 43 "_x2c_macro_cursor_0")))))) 
+                     (expr ("List") (ident (binding 43 "_x2c_macro_cursor_13")))))) 
              (expr (opt-ref "Var") 
               (op & (parens 
                      (expr ("Var") 
@@ -723,8 +723,6 @@
               (op == (expr (int) (ident (binding 62 "from_switch_loop"))) 
                (expr (int) (literal (int) "546")))))) 
       (expr (int) (literal (int) "0")) (expr (int) (literal (int) "1"))))))))
-
-(preproc "#pragma private")
 
 (function (static void) 
  (bind (binding 30 "_x2c_defer_cleanup_0") 

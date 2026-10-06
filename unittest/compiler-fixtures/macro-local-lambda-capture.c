@@ -8,7 +8,7 @@ static Var _x2c_lambda_0(int base);
 
 static Var _x2c_lambda_1(Var base);
 
-Var int_var(int);
+static Var int_var(int);
 
 long Var_integer(Var);
 

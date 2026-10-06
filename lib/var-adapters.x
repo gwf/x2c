@@ -1,3 +1,6 @@
+/*  var-adapters.x -- pointer converter and protocol adoption templates
+*/
+
 #pragma once
 
 /* Define private pointer converters before their protocol adoptions. */

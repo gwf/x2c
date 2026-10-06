@@ -36,7 +36,7 @@ published on failure. Formatting follows the process locale.
 conversion failures are nested as `cause`. Allocation failures may also
 transfer while staging or canonicalizing the result.
 
-Source: `lib/string-format.x:76`
+Source: `lib/string-format.x:98`
 
 ## Design notes
 

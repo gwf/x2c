@@ -97,9 +97,9 @@ static macro Stmt $report.type.typedef_depth(Expr $c, Expr $origin) {
       other for x, which references the named anonymous struct definition.
 */
 
-/* A compiler's symbol table: a stack of scopes whose lowest `base_scopes`
-   hold file-scope declarations. While `transactions` are active, `undo`
-   holds a `SymUndo` for each row a write replaced. */
+/** Holds a compiler's declarations in nested scopes.
+    The lowest `base_scopes` contain file-scope declarations. Active
+    transactions retain the rows each write replaces in `undo`. */
 static typedef struct Sym {
   Block scopes, Map globals, statics, binding_facts;
   int base_scopes, local_macro_names;
@@ -722,9 +722,33 @@ void Compiler.record_declaration_visibility(Compiler c, List declaration) {
       if (mark) {
         Type base = type.type().base_type();
         match (base) case %((!set ?tag (!or struct union enum)) ?name *):
-          if (name is <string>) c.sym.mark_static(%($tag $name));
+          if (name) c.sym.mark_static(%($tag $name));
       }
       c._record_rows_visibility(declaration, kind, private, mark, rows);
+      if (kind == <declare> && !mark)
+        c._record_native_objects(type, rows);
+    }
+  }
+}
+
+/* A public object definition belongs to this source, including a tentative
+   definition. An extern declaration only names its native supplier. */
+static void Compiler._record_native_objects(
+  Compiler c, Type spec, List rows) {
+  if (!c.shallow || c.source_private < 0 || spec.is_extern() ||
+      !is_source_file(c.filename)) return;
+  String path = home_portable_path(c.canonical_path(c.filename));
+  foreach (List row, rows) {
+    List declarator = row;
+    match (row) case %(op = ?bound ?): declarator = bound;
+    match (declarator) case %(bind ?binding ?): {
+      List declaration = %(declare $spec (bindings $declarator));
+      if (declaration.type_from_ast().is_function()) continue;
+      String name = binding_identity_spelling(binding);
+      if (!name || !name.len()) continue;
+      c.sym.set(
+        %("source-node" (native-object $path ${c.token.pos} $name)),
+        %(native-object $name));
     }
   }
 }

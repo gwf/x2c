@@ -14,7 +14,7 @@ geo__Vec geo__Var_vec(Var);
 
 Iter geo__Vec_iter(geo__Vec, Iter);
 
-Var int_var(int);
+static Var int_var(int);
 
 int Iter_try_next(Iter, Var *);
 

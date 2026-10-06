@@ -4,15 +4,12 @@
 #include "x2c.h"
 
 #include "x2c.h"
-static String _5, _4, _3, _2, _1, _0;
+#include "meta-import-defs.h"
+static String _3, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
-
-static String mi_dashed(String path);
-
-static int mi_depth(String path);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -22,9 +19,11 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _1 = String_new("one-two");
   _2 = String_new("one.two");
   _3 = String_new("<net/http>");
-  _4 = String_new(".");
-  _5 = String_new("-");
 }
+
+int mi_depth(String);
+
+String mi_dashed(String);
 
 int main(void){
   x2c_initialize();
@@ -34,19 +33,5 @@ int main(void){
   printf("tag    %s\n", _3);
   printf("next   %d\n", 1);
   return 0;
-}
-
-String String_replace(String, String, String);
-
-static String mi_dashed(String path){
-  return String_replace(path, _4, _5);
-}
-
-int List_len(List);
-
-List String_split(String, String);
-
-static int mi_depth(String path){
-  return List_len(String_split(path, _4));
 }
 

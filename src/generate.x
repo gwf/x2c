@@ -258,9 +258,23 @@ static List Partition.finish(Partition &p) {
 static void Partition.add_typedef(Partition &p, List node) {
   Type type = node.cadr();
   node = _without_static_type(node);
-  if (type.is_static() && !p.publishes_typedefs(_typedef_names(node)))
+  List forward = type.is_static()
+    ? _typedef_forward(node.cadr(), node.caddr()) : NULL;
+  Type core = type.base_type();
+  int body = 0;
+  match (core) case %((!or struct union enum) ?name (*)):
+    body = p.c.publishes_type_family(%(${core.car()} $name));
+  if (type.is_static() && !p.publishes_typedefs(_typedef_names(node))) {
     p.source.push(node);
-  else p.publish(node);
+    if (body) p.publish(%(declare $core (bindings (bind () ()))));
+    return;
+  }
+  if (forward && !body) {
+    p.source.push(node);
+    p.publish(forward);
+    return;
+  }
+  p.publish(node);
 }
 
 static int Partition.publishes_typedefs(Partition &p, List names) {

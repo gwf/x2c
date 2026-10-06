@@ -23,13 +23,13 @@ Map Map_update_n(Map, unsigned, ...);
 
 Map Map_new(void);
 
-Var int_var(int);
+static Var int_var(int);
 
-Var String_var(String);
+static Var String_var(String);
 
-Block Bytes_block(Bytes);
+static Block Bytes_block(Bytes);
 
-String Var_string(Var);
+static String Var_string(Var);
 
 Var Map_getindex(Map, Var);
 

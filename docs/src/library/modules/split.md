@@ -40,7 +40,7 @@ input `String`s, and `dest` must remain live until iteration ends.
 Constructing the iterator does not raise. Pulling may raise
 `<alloc-fail>` as `Split.try_next` does. A null `dest` returns NULL.
 
-Source: `lib/split.x:280`
+Source: `lib/split.x:279`
 
 <a id="Split.try_next"></a>
 #### Split.try_next
@@ -69,7 +69,7 @@ boxing adapter for every other binder.
 **Raises:** `<alloc-fail>` while canonicalizing a nonempty field. `Null`
 arguments produce exhaustion without raising.
 
-Source: `lib/split.x:254`
+Source: `lib/split.x:253`
 
 <a id="Split.var"></a>
 #### Split.var
@@ -103,7 +103,7 @@ actual owning pool must remain live through traversal.
 **Raises:** `<alloc-fail>` when the cursor descriptor cannot be allocated.
 An empty `String` produces an exhausted cursor.
 
-Source: `lib/split.x:216`
+Source: `lib/split.x:215`
 
 <a id="String.split"></a>
 #### String.split
@@ -126,7 +126,7 @@ printf("%s\n", "a::b".split(":").repr());
 
 **Raises:** the same causes as `String.split_n`.
 
-Source: `lib/split.x:122`
+Source: `lib/split.x:121`
 
 <a id="String.split_lines"></a>
 #### String.split_lines
@@ -145,7 +145,7 @@ actual
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing fields or the
 result.
 
-Source: `lib/split.x:135`
+Source: `lib/split.x:134`
 
 <a id="String.split_n"></a>
 #### String.split_n
@@ -161,7 +161,7 @@ The canonical fields and `List` remain live until their actual `String` and
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the result.
 
-Source: `lib/split.x:92`
+Source: `lib/split.x:91`
 
 <a id="String.splits"></a>
 #### String.splits
@@ -181,7 +181,7 @@ temporary. The cursor borrows `str` and
 
 **Raises:** `<alloc-fail>` when the cursor descriptor cannot be allocated.
 
-Source: `lib/split.x:230`
+Source: `lib/split.x:229`
 
 <a id="String.words"></a>
 #### String.words
@@ -202,7 +202,7 @@ actual owning pool must remain live through traversal.
 **Raises:** `<alloc-fail>` when the cursor descriptor cannot be allocated.
 An empty `String` produces an exhausted cursor.
 
-Source: `lib/split.x:201`
+Source: `lib/split.x:200`
 
 ### `Var`
 

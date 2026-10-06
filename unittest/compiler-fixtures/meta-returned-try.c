@@ -17,11 +17,11 @@ static List same_items(List code);
 
 static List omit_second_capture(List code);
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
 List cons(Var, List);
 
-Var List_var(List);
+static Var List_var(List);
 
 #include "exception.h"
 
@@ -108,7 +108,7 @@ void x2c_exception_leave(ExceptionFrame *);
 
 int x2c_error_catch_site_pending(ErrorCatchSite *);
 ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
-Var int_var(int);
+static Var int_var(int);
 int x2c_exception_is_error_target(ExceptionFrame *);
 int x2c_error_catch_selected(ErrorHandler);
 void x2c_error_catch_detach(ErrorHandler);

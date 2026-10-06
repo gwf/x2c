@@ -69,21 +69,23 @@ macro Stmt $switched(Expr $subject, Stmt $body) {
 macro Stmt $return_empty() { return; }
 macro Stmt $return_value(Expr $value) { return $value; }
 
-/* A return's target type is supplied by its binder, not its source form. */
+/** Returns a return node's target type, or NULL for another form.
+    The binder supplies the type; the source form does not write it. */
 meta List source_return_type(List node) {
   match (node) case %(return ?type ?): return type;
   return NULL;
 }
 
-/* Control children run at a conditional depth. With is normally parsed
-   away; foreach and finally remain accepted canonical compatibility heads. */
+/** Returns the canonical pattern for conditional statements.
+    With is normally parsed away; foreach and finally remain accepted
+    canonical compatibility heads. */
 meta List source_conditional_statement(void) =>
   %((!or if while do for switch try match with foreach finally) *);
 
 /* One expression used as a statement, retaining its bound expression. */
 macro Stmt $expression_statement(Expr $value) { $value; }
 
-/* A lambda of either form, with or without capture rows. */
+/** Returns a pattern for either lambda form, with or without captures. */
 meta List source_any_lambda(void) => %(expr ? (lambda *));
 
 /* A noncapturing lambda expression: its parameters and body. */
@@ -124,47 +126,49 @@ macro Expression $sizeof_grouped(Expr $value) => sizeof($value);
 macro Expression $has_type(Expr $value, Type $target) => $value is $target;
 macro Expression $has_symbol(Expr $value, Expr $tag) => $value is $tag;
 
-/* Cast's first child is a declaration or a semantic type at different
-   stages, so its canonical content keeps both children unchanged. */
+/** Builds cast content with its children unchanged.
+    The first child is a declaration or a semantic type at different stages. */
 meta List source_cast_content(List parts) => cons(<cast>, parts);
 
-/* These source forms carry declaration or ordered row children that an
-   expression hole cannot represent without changing their canonical AST. */
+/** Builds generic selection content with its declaration and ordered rows. */
 meta List source_generic_content(List parts) => cons(<generic>, parts);
+/** Builds va-arg content with its declaration and operand. */
 meta List source_va_arg_content(List parts) => cons(<va-arg>, parts);
+/** Builds comma sequence content from its ordered rows. */
 meta List source_commas_content(List rows) => cons(<commas>, rows);
 
-/* Slice slots retain omitted bounds; a braced initializer owns its comma
-   sequence before later choice and placement records are introduced. */
+/** Builds slice content while retaining omitted bounds. */
 meta List source_slice_content(List parts) => cons(<slice>, parts);
+/** Builds braced initializer content from its ordered comma rows. */
 meta List source_composite_content(List rows) =>
   %(composite ${source_commas_content(rows)});
 
-/* String source content retains its ordered text, expression, and cache rows.
-   The parser and resolver share this shape without inventing a segment form. */
+/** Builds string content from its ordered text, expression, and cache rows.
+    The parser and resolver share this shape. */
 meta List source_string_content(List rows) => cons(<segments>, rows);
 
-/* Preserve the chosen operator token and source-ordered operands at every
-   parser and resolver stage, including constructed nonstandard operators. */
+/** Builds operator content with its token and source-ordered operands.
+    Constructed nonstandard operators retain the same form. */
 meta List source_operator_content(List parts) => cons(<op>, parts);
 
+/** Builds a typed operator expression from its content children. */
 meta List source_operator_expression(List type, List parts) =>
   %(expr $type ${source_operator_content(parts)});
 
-/* Postfix updates share their token and operand without choosing ++ or --. */
+/** Builds postfix update content with its token and operand. */
 meta List source_postfix_content(List parts) => cons(<postfix>, parts);
 
+/** Builds a typed postfix update expression from its content children. */
 meta List source_postfix_expression(List type, List parts) =>
   %(expr $type ${source_postfix_content(parts)});
 
-/* The exact content of an expression source form, without its typed shell,
-   for a bare-content dispatch arm whose fixed head the match emitter labels.
-   Inside a shell, write `%(expr ? ${$shape(...)})` instead. */
+/** Returns a source form's content pattern without its typed shell.
+    Bare-content dispatch arms retain the fixed head the match emitter labels.
+    Inside a shell, write `%(expr ? ${$shape(...)})` instead. */
 meta List source_content_pattern(Macro shape, List names) =>
   shape.pattern(names).caddr();
 
-/* Bare $called content with the consumer's callee and argument patterns,
-   for the same kind of dispatch arm. */
+/** Returns bare call content with the supplied callee and argument patterns. */
 meta List source_call_content(
   Macro call, List callee, List arguments) {
   List pattern = call.pattern(%(?callee *arguments));
@@ -172,26 +176,27 @@ meta List source_call_content(
     %((?callee $callee) (*arguments $arguments)));
 }
 
-/* Preserve all bound and normalized return fields in control summaries. */
+/** Builds return content with all bound and normalized fields. */
 meta List source_return_content(List fields) =>
   cons(<return>, fields);
 
-/* A block keeps its complete source-ordered statement sequence. */
+/** Builds block content with its complete source-ordered statements. */
 meta List source_block_content(List fields) =>
   cons(<block>, fields);
 
-/* Source names and literals keep their bound and typed child records. */
+/** Builds identifier content with its bound child records. */
 meta List source_identifier_content(List fields) =>
   cons(<ident>, fields);
 
+/** Builds literal content with its typed child records. */
 meta List source_literal_content(List fields) =>
   cons(<literal>, fields);
 
-/* A declarator row, bare or with its initializer. */
+/** Returns a pattern for a declarator row, with or without its initializer. */
 meta List source_declarator_row(List fields) =>
   %(!or (bind @fields) (op = (bind @fields) ?));
 
-/* The source expression beneath casts and parentheses, retaining its type. */
+/** Returns the source expression beneath casts and parentheses with its type. */
 meta Var source_expression(Var value) {
   while (1) {
     match (value) {
@@ -212,8 +217,8 @@ meta List catch_handle(List node) {
   return NULL;
 }
 
-/* Restore the binder's handler after a stage-preserving caught template
-   rebuild. The source form has no hole for this derived identity. */
+/** Restores the binder's handler after a caught template rebuild.
+    The source form has no hole for this derived identity. */
 meta List retain_catch_handle(List rebuilt, List handle) {
   Var marker = rebuilt.caddr().caddr();
   return rebuilt.search_replace(%(!quote $marker), handle);

@@ -14,9 +14,9 @@ void Error_initialize(void);
 
 int x2c_error_catch_site_pending(ErrorCatchSite *);
 
-Var List_var(List);
+static Var List_var(List);
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
 ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
 

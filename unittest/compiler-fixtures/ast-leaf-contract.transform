@@ -164,7 +164,7 @@
    (declare ("List") 
     (bindings 
      (op = (bind (binding 40 "values") ()) 
-      (expr ("List") (expr ("List") (cache 5))))))) 
+      (expr ("List") (expr ("List") (cache 844))))))) 
   (at 60 
    (declare ("Var") 
     (bindings (bind (binding 41 "left_value") ()) 
@@ -226,7 +226,7 @@
        (expr ("List") (ident (binding 40 "values")))))) 
     (declare ("List") 
      (bindings 
-      (op = (bind (binding 49 "_x2c_macro_cursor_0") ()) 
+      (op = (bind (binding 49 "_x2c_macro_cursor_13") ()) 
        (expr ("List") (ident (binding 48 "_x2c_macro_object_0")))))) 
     (declare ("Var") 
      (bindings (bind (binding 50 "_x2c_macro_cursor_output_0") ()))) 
@@ -238,7 +238,7 @@
         (args (expr ("List") (ident (binding 48 "_x2c_macro_object_0"))) 
          (expr (opt-ref "List") 
           (op & (parens 
-                 (expr ("List") (ident (binding 49 "_x2c_macro_cursor_0")))))) 
+                 (expr ("List") (ident (binding 49 "_x2c_macro_cursor_13")))))) 
          (expr (opt-ref "Var") 
           (op & (parens 
                  (expr ("Var") (ident (binding 50 "_x2c_macro_cursor_output_0"))))))))) 
@@ -304,7 +304,7 @@
                            (ident (binding 53 "_x2c_defer_record_0"))))))))))))))))) 
   (at 52 
    (matchcases (expr ("List") (ident (binding 40 "values"))) 
-    (((?head *tail) (expr ("List") (expr ("List") (cache 9))) 
+    (((?head *tail) (expr ("List") (expr ("List") (cache 848))) 
       (block 
        (at 26 
         (stmnt 
@@ -570,8 +570,7 @@
                (expr ((func (("Var"))) "Var") 
                 (ident (binding 82 "_x2c_lambda_0"))))) 
         (args (expr ("Var") 
-               (call (expr ((func ((int))) "Var") 
-                      (ident (binding 83 "int_var"))) 
+               (call (expr ((func ((int))) "Var") (ident (binding 83 "int_var"))) 
                 (args (expr (int) (literal (int) "2")))))))))))) 
   (at 35 
    (stmnt 
@@ -595,10 +594,8 @@
      (cast (void) (expr ("Var") (ident (binding 81 "lambda_value"))))))) 
   (at 59 (return (expr (int) (literal (int) "0"))))))
 
-(preproc "#pragma private")
-
 (typedef 
- (struct (binding 84 "_x2c_defer_env_0") 
+ (static struct (binding 84 "_x2c_defer_env_0") 
   (fields 
    (declare (const void) 
     (bindings (bind (binding 85 "_x2c_defer_capture_0") (*)))) 

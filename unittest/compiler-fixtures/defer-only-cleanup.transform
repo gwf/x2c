@@ -4,7 +4,8 @@
 (declare (static int) (bindings (bind (binding 1 "observed") ())))
 
 (function (static int) 
- (bind (binding 2 "local_latest") ((fnmod (params (param (void) (bind () ())))))) 
+ (bind (binding 2 "local_latest") 
+  ((fnmod (params (param (void) (bind () ())))))) 
  (block 
   (at 1 (declare (int) 
          (bindings 
@@ -125,8 +126,8 @@
          (bindings 
           (op = (bind (binding 15 "result") ()) 
            (expr (int) 
-            (call (expr ((func ((void))) int) (ident (binding 2 "local_latest"))) 
-             (args (expr (void) ()))))) 
+            (call (expr ((func ((void))) int) 
+                   (ident (binding 2 "local_latest"))) (args (expr (void) ()))))) 
           (op = (bind (binding 16 "before") ()) 
            (expr (int) 
             (call (expr ((func ((void))) int) (ident (binding 10 "global_only"))) 
@@ -156,10 +157,8 @@
                (expr (int) (literal (int) "43")))))) 
       (expr (int) (literal (int) "0")) (expr (int) (literal (int) "1"))))))))
 
-(preproc "#pragma private")
-
 (typedef 
- (struct (binding 18 "_x2c_defer_env_0") 
+ (static struct (binding 18 "_x2c_defer_env_0") 
   (fields 
    (declare (const void) 
     (bindings (bind (binding 19 "_x2c_defer_capture_0") (*)))))) 

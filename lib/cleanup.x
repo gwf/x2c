@@ -1,7 +1,9 @@
-#pragma once
+/*  cleanup.x -- Cleanup adoption for handles released by one method
 
-// Cleanup adoption for handles released by one method.
-// Import this file to use it: $(import "cleanup.x")
+    Include this module to define Cleanup through an existing release method.
+*/
+
+#pragma once
 
 /* Adopts `Cleanup` for `$type` by calling its `$release` method, so `$auto`
    can name the handle's lifetime. The release method may be defined later

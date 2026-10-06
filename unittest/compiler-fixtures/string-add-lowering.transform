@@ -3,7 +3,7 @@
 
 (function (static "String") 
  (bind (binding 1 "suffix") ((fnmod (params (param (void) (bind () ())))))) 
- (block (at 11 (return (expr ("String") (cache 0))))))
+ (block (at 11 (return (expr ("String") (cache 839))))))
 
 (function (int) 
  (bind (binding 2 "main") ((fnmod (params (param (void) (bind () ())))))) 
@@ -14,8 +14,8 @@
            (args (expr (void) ())))))) 
   (at 3 (declare ("String") 
          (bindings 
-          (op = (bind (binding 4 "left") ()) (expr ("String") (cache 1))) 
-          (op = (bind (binding 5 "right") ()) (expr ("String") (cache 2)))))) 
+          (op = (bind (binding 4 "left") ()) (expr ("String") (cache 840))) 
+          (op = (bind (binding 5 "right") ()) (expr ("String") (cache 841)))))) 
   (at 4 (declare ("String") 
          (bindings 
           (op = (bind (binding 6 "joined") ()) 
@@ -31,10 +31,10 @@
             (call (expr ((func (("String") ("String"))) "String") 
                    (ident (binding 7 "String_add"))) 
              (args (expr ("String") (ident (binding 4 "left"))) 
-              (expr ("String") (cache 3))))))))) 
+              (expr ("String") (cache 842))))))))) 
   (at 6 (declare ("String") 
          (bindings 
-          (op = (bind (binding 9 "constant") ()) (expr ("String") (cache 6)))))) 
+          (op = (bind (binding 9 "constant") ()) (expr ("String") (cache 845)))))) 
   (at 12 
    (stmnt 
     (expr ("String") 
@@ -57,8 +57,6 @@
           (call (expr ((func ((void))) void) 
                  (ident (binding 11 "Scope_release"))) (args (expr (void) ())))))) 
   (at 13 (return (expr (int) (literal (int) "0"))))))
-
-(preproc "#pragma private")
 
 (function (static "String") 
  (bind (binding 12 "_x2c_proto_string_add_update") 

@@ -65,7 +65,7 @@
            (args (expr (void) ())))))) 
   (at 9 (declare ("String") 
          (bindings 
-          (op = (bind (binding 21 "text") ()) (expr ("String") (cache 0)))))) 
+          (op = (bind (binding 21 "text") ()) (expr ("String") (cache 839)))))) 
   (at 22 
    (declare ("Var") 
     (bindings 
@@ -192,8 +192,6 @@
      (call (expr ((func ((void))) void) (ident (binding 41 "Scope_release"))) 
       (args (expr (void) ())))))) 
   (at 27 (return (expr (int) (literal (int) "0"))))))
-
-(preproc "#pragma private")
 
 (function (static "String") 
  (bind (binding 13 "_x2c_callback_adapt_0") 

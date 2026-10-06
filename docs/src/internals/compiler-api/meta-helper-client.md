@@ -32,7 +32,7 @@ Source: `src/meta-helper-client.x:394`
 <a id="Compiler.meta_helper_call"></a>
 #### Compiler.meta_helper_call
 
-`Var Compiler.meta_helper_call( Compiler c, String name, Token site, List arguments)`
+`Var Compiler.meta_helper_call( Compiler c, String name, Token site, List arguments, String provider)`
 
 Calls the project `meta` function `name` in the helper with the values
 `arguments`, for the call at `site`, and returns its result. A warning
@@ -43,7 +43,7 @@ call. The call runs in the table of the file that wrote it: an included
 file's own, which runs the constants it computes as its own translation
 does, or else the unit's.
 
-Source: `src/meta-helper-client.x:79`
+Source: `src/meta-helper-client.x:78`
 
 <a id="Compiler.stop_meta_helper"></a>
 #### Compiler.stop_meta_helper

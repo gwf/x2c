@@ -105,9 +105,9 @@ static PrivateBox Var_privatebox(Var value){
   return Var_pointer(value);
 }
 
-Var String_var(String);
+static Var String_var(String);
 
-String int_str(int);
+static String int_str(int);
 
 static String PrivateBox_str(PrivateBox value){
   return String_join(NULL, cons(String_var(_0), cons(String_var(int_str(value -> value)), NULL)));

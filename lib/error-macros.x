@@ -1,3 +1,6 @@
+/*  error-macros.x -- shared non-returning Error causes
+*/
+
 #pragma once
 
 /* The shared Error causes that never return to their raising call. */

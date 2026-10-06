@@ -37,6 +37,6 @@ Source: `src/type-ledger.x:42`
 
 ## Design notes
 
-`lib/var-tags.xmacro` holds the ledger. This unit is the one compiler
+`lib/var-tags.x` holds the ledger. This unit is the one compiler
 unit that imports it, so the units that include `type.x` do not load
 the ledger. Both tables have process lifetime.

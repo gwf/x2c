@@ -20,6 +20,7 @@ typedef List geo__Chain;
 
 typedef geo__Chain geo__ChainLeaf;
 
+#include <math.h>
 geo__Vec geo__Vec_new(double x, double y);
 
 double geo__Vec_norm(geo__Vec v);

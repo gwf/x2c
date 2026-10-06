@@ -42,13 +42,13 @@ static int pattern_value(int value){
 
 int x2c_error_catch_site_pending(ErrorCatchSite *);
 
-Var List_var(List);
+static Var List_var(List);
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
-Var int_var(int);
+static Var int_var(int);
 
-Var String_var(String);
+static Var String_var(String);
 
 ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
 

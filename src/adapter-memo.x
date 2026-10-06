@@ -1,3 +1,6 @@
+/*  adapter-memo.x -- memoized compiler adapter construction
+*/
+
 #pragma once
 
 /* Reads `value` from `table` at `key`, or runs `create` to set it and stores

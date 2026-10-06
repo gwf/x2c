@@ -13,9 +13,9 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
-Var int_var(int);
+static Var int_var(int);
 
 List cons(Var, List);
 

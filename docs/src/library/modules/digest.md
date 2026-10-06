@@ -24,7 +24,7 @@ Returns the SHA-256 digest of the bytes from the current position of
 
 **Raises:** `<io-fail>` on a stream read error.
 
-Source: `lib/digest.x:120`
+Source: `lib/digest.x:119`
 
 ### `String`
 
@@ -35,7 +35,7 @@ Source: `lib/digest.x:120`
 
 Returns the SHA-256 digest of the bytes of `text`; NULL is empty text.
 
-Source: `lib/digest.x:110`
+Source: `lib/digest.x:109`
 
 ## Design notes
 

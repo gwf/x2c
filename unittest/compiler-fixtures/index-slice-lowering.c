@@ -48,7 +48,7 @@ static Var next_value(int value);
 
 static int next_bound(int bound);
 
-Var int_var(int);
+static Var int_var(int);
 
 List cons(Var, List);
 
@@ -110,7 +110,7 @@ Map Map_update_n(Map, unsigned, ...);
 
 Map Map_new(void);
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
 String String_malloc(int);
 

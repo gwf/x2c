@@ -76,17 +76,17 @@ static String echo(String value){
 
 void Scope_retain(void);
 
-Var String_var(String);
+static Var String_var(String);
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
 Array Array_new(void);
 
 Var Array_push(Array, Var);
 
-Var int_var(int);
+static Var int_var(int);
 
-Var Array_var(Array);
+static Var Array_var(Array);
 
 int Iter_try_next(Iter, Var *);
 
@@ -117,7 +117,7 @@ int main(void){
 
 String String_str(String);
 
-String Var_string(Var);
+static String Var_string(Var);
 
 static String _x2c_callback_adapt_0(Var a0){
   return String_str(Var_string(a0));
@@ -135,7 +135,7 @@ static int _x2c_callback_adapt_2(Var a0, Var a1){
 
 int File_equal(File, File);
 
-File Var_file(Var);
+static File Var_file(Var);
 
 static int _x2c_callback_adapt_3(Var a0, Var a1){
   return File_equal(Var_file(a0), Var_file(a1));
@@ -143,7 +143,7 @@ static int _x2c_callback_adapt_3(Var a0, Var a1){
 
 Iter Array_iter(Array, Iter);
 
-Array Var_array(Var);
+static Array Var_array(Var);
 
 static Iter _x2c_callback_adapt_4(Var a0, Iter a1){
   return Array_iter(Var_array(a0), a1);

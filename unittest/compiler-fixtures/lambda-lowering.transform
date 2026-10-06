@@ -7,7 +7,7 @@
   (at 1 (declare ("List") 
          (bindings 
           (op = (bind (binding 2 "values") ()) 
-           (expr ("List") (expr ("List") (cache 5))))))) 
+           (expr ("List") (expr ("List") (cache 844))))))) 
   (at 8 (declare ("List") 
          (bindings 
           (op = (bind (binding 3 "doubled") ()) 
@@ -19,7 +19,7 @@
   (at 3 (declare ("List") 
          (bindings 
           (op = (bind (binding 6 "nested") ()) 
-           (expr ("List") (expr ("List") (cache 13))))))) 
+           (expr ("List") (expr ("List") (cache 852))))))) 
   (at 9 (declare ("List") 
          (bindings 
           (op = (bind (binding 7 "heads") ()) 
@@ -73,8 +73,6 @@
                        (expr (int) (literal (int) "1"))))))))))))) 
   (at 10 (return (expr (int) (literal (int) "0"))))))
 
-(preproc "#pragma private")
-
 (function (static "Var") 
  (bind (binding 12 "_x2c_lambda_0") 
   ((fnmod (params (param ("Var") (bind (binding 13 "value") ())))))) 
@@ -118,7 +116,7 @@
     (call (expr ((func (("FuncAdapter") ("List"))) "Func") 
            (ident (binding 20 "x2c_func_shared"))) 
      (args (expr ("FuncAdapter") (ident (binding 15 "_x2c_func_adapt_0"))) 
-      (expr ("List") (expr ("List") (cache 24)))))))))
+      (expr ("List") (expr ("List") (cache 859)))))))))
 
 (function (static "Var") 
  (bind (binding 21 "_x2c_lambda_1") 
@@ -163,4 +161,4 @@
     (call (expr ((func (("FuncAdapter") ("List"))) "Func") 
            (ident (binding 20 "x2c_func_shared"))) 
      (args (expr ("FuncAdapter") (ident (binding 24 "_x2c_func_adapt_1"))) 
-      (expr ("List") (expr ("List") (cache 24)))))))))
+      (expr ("List") (expr ("List") (cache 859)))))))))

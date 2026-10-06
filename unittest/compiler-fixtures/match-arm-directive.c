@@ -17,13 +17,13 @@ static void arms(List subject);
 
 static void defaults(List subject);
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
-Var int_var(int);
+static Var int_var(int);
 
 List cons(Var, List);
 
-Var List_var(List);
+static Var List_var(List);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -182,7 +182,7 @@ puts("default neither");  break;
 }
 
 int List_try_next(List, List *, Var *);
-List Var_list(Var);
+static List Var_list(Var);
 int main(void){
   x2c_initialize();  if(! _init_guard_) _file_init_(); {
     List subject;  List _x2c_macro_object_0 = _62;  List _x2c_macro_cursor_0 = _x2c_macro_object_0;  Var _x2c_macro_cursor_output_0;  while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){

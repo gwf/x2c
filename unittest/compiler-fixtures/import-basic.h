@@ -7,6 +7,7 @@
 
 #include "x2c.h"
 #include "geo.h"
+#include <stdio.h>
 int main(void);
 
 

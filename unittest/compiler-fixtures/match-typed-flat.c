@@ -16,15 +16,15 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static int classify(List form);
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
 List cons(Var, List);
 
-Var List_var(List);
+static Var List_var(List);
 
-Var String_var(String);
+static Var String_var(String);
 
-Var int_var(int);
+static Var int_var(int);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -88,7 +88,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _55 = cons(_0, _54);
 }
 
-String Var_string(Var);
+static String Var_string(Var);
 
 static int classify(List form){
 

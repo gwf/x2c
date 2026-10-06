@@ -50,7 +50,7 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
-Var String_var(String);
+static Var String_var(String);
 
 static String root;
 
@@ -74,7 +74,7 @@ Map Map_update_n(Map, unsigned, ...);
 
 Map Map_new(void);
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
 _x2c_initializer_choice_D1E0FCF3_4((lookup = Map_update_n(Map_new(), 2, Symbol_var(1211368), String_var(root), Symbol_var(1051920), String_var(path))))
 static Var boxed_string;
@@ -82,17 +82,17 @@ static Var boxed_string;
 _x2c_initializer_choice_D1E0FCF3_5((boxed_string = String_var(String_join(NULL, cons(String_var(_3), cons(String_var(path), NULL))))))
 static Var boxed_list;
 
-Var List_var(List);
+static Var List_var(List);
 
 _x2c_initializer_choice_D1E0FCF3_6((boxed_list = List_var(cons(_4, cons(String_var(root), NULL)))))
 static Var boxed_array;
 
-Var Array_var(Array);
+static Var Array_var(Array);
 
 _x2c_initializer_choice_D1E0FCF3_7((boxed_array = Array_var(Array_update_n(Array_new(), 1, String_var(path)))))
 static Var boxed_map;
 
-Var Map_var(Map);
+static Var Map_var(Map);
 
 _x2c_initializer_choice_D1E0FCF3_8((boxed_map = Map_var(Map_update_n(Map_new(), 1, Symbol_var(1051920), String_var(path)))))
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
@@ -121,13 +121,13 @@ String Array_repr(Array);
 
 String Map_repr(Map);
 
-String Var_string(Var);
+static String Var_string(Var);
 
-List Var_list(Var);
+static List Var_list(Var);
 
-Array Var_array(Var);
+static Array Var_array(Var);
 
-Map Var_map(Var);
+static Map Var_map(Var);
 
 int main(void){
   x2c_initialize();

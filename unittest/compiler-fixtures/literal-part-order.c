@@ -26,11 +26,11 @@ static int note(String name);
 
 static List items(String name);
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
 List cons(Var, List);
 
-Var String_var(String);
+static Var String_var(String);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -79,9 +79,9 @@ static List items(String name){
   return _1;
 }
 
-Var int_var(int);
+static Var int_var(int);
 
-String int_str(int);
+static String int_str(int);
 
 Array Array_update_n(Array, unsigned, ...);
 
@@ -91,7 +91,7 @@ Map Map_update_n(Map, unsigned, ...);
 
 Map Map_new(void);
 
-Var List_var(List);
+static Var List_var(List);
 
 int List_len(List);
 

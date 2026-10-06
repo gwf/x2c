@@ -68,7 +68,7 @@ static char * file_object_text;
 String String_new(const char *);
 
 _x2c_initializer_choice_EB67B464_4((file_object_text = String_new("xyz")))
-Var int_var(int);
+static Var int_var(int);
 
 List cons(Var, List);
 

@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/ordinary-interface-meta-static-lisp.x:2:21: macro: compile-time Lisp evaluation failed
+  int answer(void) => $(_meta_initializer '(3));
+                      ^^
+  note: form: (_meta_initializer '(3)) error: (unbound (name _meta_initializer))
+

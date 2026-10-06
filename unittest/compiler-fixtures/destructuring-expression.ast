@@ -9,7 +9,7 @@
   (at 1 (declare ("Values") 
          (bindings 
           (op = (bind (binding 3 "values") ()) 
-           (expr ("List") (expr ("List") (cache 3))))))) 
+           (expr ("List") (expr ("List") (cache 842))))))) 
   (at 2 (declare ("Var") 
          (bindings (bind (binding 4 "a") ()) (bind (binding 5 "b") ()) 
           (bind (binding 6 "c") ()) (bind (binding 7 "d") ())))) 

@@ -37,11 +37,11 @@ _x2c_defer_env_0;
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
 List cons(Var, List);
 
-Var List_var(List);
+static Var List_var(List);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -70,7 +70,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
 
 void x2c_cleanup_push(X2CCleanup *);
 
-List Var_list(Var);
+static List Var_list(Var);
 
 void x2c_cleanup_leave(X2CCleanup *);
 

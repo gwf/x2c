@@ -1459,11 +1459,11 @@ a complete function or declaration, but a public target must retain the same
 public binding and contract and cannot gain new public siblings. Private
 targets and hygienically private siblings may be rewritten freely.
 
-Shallow declaration collection loads included macro definitions so unit macros can
-publish their declarations and protocol rows; unit macros the source file
-defines publish theirs when collection can expand them. It does not execute
-other top-level Lisp forms. `Decorator`-shaped adjacency still collects the unchanged
-source target. A public target's captured source must participate in the
+Declaration collection loads included macro definitions and lets unit macros
+publish their declarations and protocol rows. A declaration producer evaluates
+preceding Lisp effects once when it needs them. Runtime function bodies wait
+for the full parse. `Decorator` adjacency still collects the unchanged source
+target. A public target's captured source must participate in the
 decorator's `Match` replacement, and dropping it makes the match fail. Imported
 decorators work without an extra prototype.
 
@@ -2197,6 +2197,9 @@ Compile-time objects belong to the compiler. A file-scope variable that a
 `meta` body reads is the compiled group's own instance, initialized from the
 same source initializer; it is never the program's variable. A `meta static`
 value says so explicitly, and each unit gets its own instance.
+The project helper runs mutable `meta static` initializers when a compile-time
+call first reaches their provider in each translation unit. Including an
+unused provider does not run those initializers.
 
 Native execution replaced the earlier in-process staging and the Lisp
 lowering of `meta` bodies, with these consequences:

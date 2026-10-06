@@ -3,12 +3,13 @@
 
 (declare (static "List") 
  (bindings 
-  (op = (bind (binding 1 "first") ()) (expr ("List") (expr ("List") (cache 17))))))
+  (op = (bind (binding 1 "first") ()) 
+   (expr ("List") (expr ("List") (cache 856))))))
 
 (declare (static "List") 
  (bindings 
   (op = (bind (binding 2 "second") ()) 
-   (expr ("List") (expr ("List") (cache 17))))))
+   (expr ("List") (expr ("List") (cache 856))))))
 
 (function (int) 
  (bind (binding 3 "main") ((fnmod (params (param (void) (bind () ())))))) 

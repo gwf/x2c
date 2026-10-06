@@ -39,11 +39,11 @@ static ulong_alias unbox_alias(Var value){
   return Var_ulong(Var_convert(value, 44858254));
 }
 
-Var long_var(long);
+static Var long_var(long);
 
-Var unsigned_var(unsigned);
+static Var unsigned_var(unsigned);
 
-Var float_var(float);
+static Var float_var(float);
 
 int Var_is(Var, Symbol);
 

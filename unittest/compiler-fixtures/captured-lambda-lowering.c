@@ -80,13 +80,13 @@ _x2c_lambda_context_12;
 
 static Var _x2c_lambda_6(Func _x2c_lambda_closure_6, const FuncArg * _x2c_lambda_argv_6);
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
 List cons(Var, List);
 
-Var List_var(List);
+static Var List_var(List);
 
-Var String_var(String);
+static Var String_var(String);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -117,7 +117,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _x2c_static_initialize_0();
 }
 
-Var int_var(int);
+static Var int_var(int);
 
 Func Func_new_context(FuncAdapter, List, const void *, size_t);
 
@@ -169,13 +169,13 @@ static Func counter(int value){
 
 Func Var_func(Var);
 
-int List_truth(List);
+static int List_truth(List);
 
 List x2c_func_reference_type(Func, unsigned, unsigned);
 
-FuncArg FuncArg_reference(const void *, List);
+static FuncArg FuncArg_reference(const void *, List);
 
-FuncArg FuncArg_value(Var);
+static FuncArg FuncArg_value(Var);
 
 Var Func_apply(Func, unsigned, const FuncArg *);
 

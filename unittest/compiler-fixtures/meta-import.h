@@ -6,9 +6,9 @@
 #define __GUARD_0x7A40B867__
 
 #include "x2c.h"
+#include "meta-import-defs.h"
+#include "meta-import-defs.h"
 int main(void);
-
-__attribute__((weak)) String mi_flatten(String path, String sep);
 
 
 #endif /* __GUARD_0x7A40B867__ */

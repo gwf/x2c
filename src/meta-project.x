@@ -131,7 +131,7 @@ static void Helper.use(Helper &h, List manifest) {
    `seen` holds each file's result bits, and
    `packages` the root of each package imported. */
 static typedef struct Scan {
-  CliRequest request, Array units, Map seen, packages;
+  CliRequest request, Compiler c, Array units, Map seen, packages;
 } Scan;
 
 /* Each input or included file with meta code becomes an owner, so the
@@ -139,10 +139,13 @@ static typedef struct Scan {
    Its path is canonical, as collection spells it. */
 static void Helper.scan(Helper &h, List inputs) {
   Map owned = {};
+  Compiler c = Compiler.new();
+  c.sources = h.frontend.request.sources;
+  c.include_dirs = h.frontend.include_dirs;
   foreach (String input, inputs) {
     String path = Path.absolute(input);
     Scan s = {
-      .request = h.frontend.request, .units = [], .seen = {},
+      .request = h.frontend.request, .c = c, .units = [], .seen = {},
       .packages = h.packages};
     int meta = s.file(path);
     if (!meta) continue;
@@ -227,9 +230,10 @@ static int Scan.include(Scan &s, String directive, String directory) {
     s.request.sources, s.request.include_dirs, directory, target, angle);
   if (!file) return 0;
   String path = Path.absolute(file);
-  if (_compiler_owns(path)) return 0;
+  int rooted = _compiler_owns(path);
+  if (rooted && s.c.linked_meta_provider_current(path)) return 0;
   int meta = s.file(path);
-  s.units.push(absolute_path(path));
+  if (!rooted || (meta & 1)) s.units.push(absolute_path(path));
   return !!meta;
 }
 

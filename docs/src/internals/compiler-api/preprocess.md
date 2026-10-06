@@ -19,12 +19,11 @@ C preprocessor directives in x2c source.
 | [`preproc_marker_file`](#preproc_marker_file) | Returns the file that the host preprocessor's line marker `text`, `# N "file" flags`, names and sets `line` to N, or returns `NULL` for any other line. |
 | [`preproc_open_state`](#preproc_open_state) | Returns the hidden-arm state of the conditional group that `text` opens: 2 when C never takes its first arm, because the condition requires a never-defined name or is `0`; 1 when C never takes the arms after its first `#else`, because the condition is exactly `!defined(NAME)`; and 0 otherwise. |
 | [`preproc_track_arms`](#preproc_track_arms) | Follows the conditional groups open after the preprocessor line `text`. |
-| [`preproc_visibility`](#preproc_visibility) | Returns 1 when the preprocessor line `text` is `#pragma private`, 0 when it is `#pragma public`, and -1 otherwise. |
 | [`preproc_within_arms`](#preproc_within_arms) | Returns `items` inside the conditional arms `arms` tracked by `preproc_track_arms`: the directives that reopen each group, outermost first, then `items`, then one `#endif` per group. |
 | [`Compiler.leading_preproc`](#Compiler.leading_preproc) | Returns source-ordered preprocessor nodes in the preceding trivia. |
 | [`Compiler.note_object_macro`](#Compiler.note_object_macro) | Records the name of the `#define` line `content` so a bare atom spelled the same way inside a literal can be flagged and a declaration prefix can be read. |
 | [`Compiler.scan_conditionals`](#Compiler.scan_conditionals) | Records the open groups after each conditional directive of the tokenized unit, and marks layout attributes where written or where a macro expands to one. |
-| [`Compiler.update_source_visibility`](#Compiler.update_source_visibility) | Applies public and private pragma directives to source visibility state and records each object-like `#define` name, less those `#undef` drops, for the literal warning. |
+| [`Compiler.update_source_visibility`](#Compiler.update_source_visibility) | Records object-like `#define` names and removes names after `#undef`. |
 
 ### Functions
 
@@ -35,7 +34,7 @@ C preprocessor directives in x2c source.
 Returns a group's hidden-arm state after its `#elif` or `#else`: 2 when
 the group's state was 1, and 0 otherwise.
 
-Source: `src/preprocess.x:80`
+Source: `src/preprocess.x:79`
 
 #### preproc_conditional_kind
 
@@ -45,7 +44,7 @@ Classifies the preprocessor line `text` as a conditional directive:
 `<open>` for `#if`, `#ifdef`, and `#ifndef`, `<branch>` for `#elif`
 and `#else` forms, `<close>` for `#endif`, or 0 for any other line.
 
-Source: `src/preprocess.x:30`
+Source: `src/preprocess.x:29`
 
 #### preproc_directive
 
@@ -54,7 +53,7 @@ Source: `src/preprocess.x:30`
 Returns the preprocessor line `text` without its `#` and the blanks
 around the directive.
 
-Source: `src/preprocess.x:23`
+Source: `src/preprocess.x:22`
 
 #### preproc_include_target
 
@@ -64,7 +63,7 @@ Returns the file named by the `#include` line `text`, or `NULL` for any
 other line. `angle` is 1 for a `<...>` name and 0 otherwise. Text after
 the name, such as a comment, is ignored.
 
-Source: `src/preprocess.x:97`
+Source: `src/preprocess.x:85`
 
 #### preproc_marker_file
 
@@ -74,7 +73,7 @@ Returns the file that the host preprocessor's line marker `text`,
 `# N "file" flags`, names and sets `line` to N, or returns `NULL` for
 any other line.
 
-Source: `src/preprocess.x:111`
+Source: `src/preprocess.x:99`
 
 #### preproc_open_state
 
@@ -86,7 +85,7 @@ never-defined name or is `0`; 1 when C never takes the arms after its
 first `#else`, because the condition is exactly `!defined(NAME)`; and 0
 otherwise.
 
-Source: `src/preprocess.x:43`
+Source: `src/preprocess.x:42`
 
 #### preproc_track_arms
 
@@ -96,17 +95,7 @@ Follows the conditional groups open after the preprocessor line `text`.
 `arms` holds one entry per open group, innermost first, listing the
 `preproc` nodes that select that group's current arm.
 
-Source: `src/preprocess.x:433`
-
-#### preproc_visibility
-
-`int preproc_visibility(String text)`
-
-Returns 1 when the preprocessor line `text` is `#pragma private`, 0 when
-it is `#pragma public`, and -1 otherwise. A comment in the line reads as
-a blank, as it does in C.
-
-Source: `src/preprocess.x:85`
+Source: `src/preprocess.x:411`
 
 #### preproc_within_arms
 
@@ -116,7 +105,7 @@ Returns `items` inside the conditional arms `arms` tracked by
 `preproc_track_arms`: the directives that reopen each group, outermost
 first, then `items`, then one `#endif` per group.
 
-Source: `src/preprocess.x:446`
+Source: `src/preprocess.x:424`
 
 ### `Compiler`
 
@@ -129,7 +118,7 @@ Returns source-ordered preprocessor nodes in the preceding trivia.
 
 Spaces and comments remain trivia rather than becoming AST nodes.
 
-Source: `src/preprocess.x:299`
+Source: `src/preprocess.x:287`
 
 <a id="Compiler.note_object_macro"></a>
 #### Compiler.note_object_macro
@@ -142,7 +131,7 @@ can be read. The directive after `#define` is scanned as x2c tokens. An
 `#undef` drops the name, so later source reads it as an ordinary
 identifier.
 
-Source: `src/preprocess.x:332`
+Source: `src/preprocess.x:310`
 
 <a id="Compiler.scan_conditionals"></a>
 #### Compiler.scan_conditionals
@@ -153,21 +142,17 @@ Records the open groups after each conditional directive of the
 tokenized unit, and marks layout attributes where written or where a
 macro expands to one.
 
-Source: `src/preprocess.x:158`
+Source: `src/preprocess.x:146`
 
 <a id="Compiler.update_source_visibility"></a>
 #### Compiler.update_source_visibility
 
 `void Compiler.update_source_visibility(Compiler c, List directives)`
 
-Applies public and private pragma directives to source visibility state
-and records each object-like `#define` name, less those `#undef` drops,
-for the literal warning.
+Records object-like `#define` names and removes names after `#undef`.
+Source storage determines visibility independently of directives.
 
-A negative visibility state disables pragma tracking for this token
-stream; macro names are recorded regardless.
-
-Source: `src/preprocess.x:317`
+Source: `src/preprocess.x:300`
 
 ## Design notes
 
@@ -175,4 +160,4 @@ Preprocessor lines stay in the token stream and become `preproc` nodes,
 so generated C keeps them where they were written. This module owns
 what x2c reads from those lines without running a preprocessor: which
 conditional arms C can reach, and what the directives before each form
-say about visibility, layout, and the unit's `#define` names.
+say about layout and the unit's `#define` names.

@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-#include "../../lib/error-macros.x"
+#include "error-macros.x"
 
 static void bump(int *value, int amount) {
   *value += amount;
@@ -61,10 +61,10 @@ int main(void) {
     value = 1000;
   else
     $add_three(value);
-  int loop = 1;
-  while (loop)
+  int remaining = 1;
+  while (remaining)
     $around(value)
-    loop = 0;
+    remaining = 0;
   if (1)
     $outer()
     $do_around(value)

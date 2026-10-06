@@ -57,9 +57,7 @@
 
 (function (inline "List") 
  (bind (binding 10 "header_list") ((fnmod (params (param (void) (bind () ())))))) 
- (block (at 9 (return ("List") (expr ("List") (expr ("List") (cache 4)))))))
-
-(preproc "#pragma private")
+ (block (at 9 (return ("List") (expr ("List") (expr ("List") (cache 843)))))))
 
 (function (static "String") 
  (bind (binding 11 "source_dual") ((fnmod (params (param (void) (bind () ())))))) 
@@ -80,7 +78,7 @@
    (stmnt 
     (expr ("String") 
      (op = (expr ("String") (ident (binding 15 "assigned"))) 
-      (expr ("String") (cache 5)))))) 
+      (expr ("String") (cache 844)))))) 
   (at 14 
    (declare ("String") 
     (bindings 

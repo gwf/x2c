@@ -173,6 +173,7 @@ int Compiler.meta_reaches_compile_time(Compiler c, Var node) {
 static List Compiler._emit(
   Compiler c, String stamp, String stem, String suffix, String &failure) {
   Array units = c._units();
+  String provider = c.filename;
   /* The backend reads more of the unit's compiler than a child from
      `Compiler.new_shared` inherits, such as its tokenizer, runtime header
      and literal policy, init names, origin, and Lisp session, so the
@@ -183,6 +184,7 @@ static List Compiler._emit(
   c._isolate(saved, names, stem);
   List code = NULL;
   try {
+    if (c.meta_build) c._name_provider_bindings(provider, units, saved.deps);
     List lowered = c._lower(units, stamp, suffix);
     /* The unit's protocol adapters and their registration belong to the
        program; group code reaches the runtime's own. */
@@ -199,6 +201,25 @@ static List Compiler._emit(
   *c.names = names;
   transaction.rollback();
   return code;
+}
+
+/* A helper owns replacement bodies separately from the linked runtime.
+   Included definitions take their provider's spelling; this file's public
+   definitions take its own. Evaluator names remain source spellings. */
+static void Compiler._name_provider_bindings(
+  Compiler c, String provider, Array units, Map dependencies) {
+  foreach (Var (path, index), meta_build_tables)
+    if (path != provider && path in dependencies)
+      c.name_meta_provider_bindings(path, index);
+  int index = c.meta_build - 1;
+  c.name_meta_provider_bindings(provider, index);
+  Var identity, String name;
+  foreach (List item, units)
+    if (_function_identity(item, identity, name) &&
+        c._public_native(item, name)) {
+      List binding = item.caddr().cadr();
+      c.set_fact(%(emitted $binding), %"_x2c_meta_group_${index}_$name");
+    }
 }
 
 /* A diagnostic the emission reported, as one line that names its place in
@@ -562,11 +583,10 @@ static List Compiler._native_symbol(
 
 // the group's entry
 
-/* A braced initializer may name a type C cannot spell again, such as an
-   anonymous struct, so each group static with one is declared beside an
-   unchanging copy that `x2c_module_reset` assigns from. Replaces those
-   declarations in `units` and returns each copy's expression by the
-   static's binding. */
+/* A project group's mutable meta values initialize only in its reset.
+   An anonymous aggregate needs a same-declaration copy because C cannot
+   spell its type in the later assignment. Ordinary native modules keep
+   their existing initializers and braced copies. */
 static Map Compiler._initial_copies(Compiler c, Array units) {
   Map copies = {};
   foreach (List entry, c.meta_group)
@@ -576,15 +596,21 @@ static Map Compiler._initial_copies(Compiler c, Array units) {
                                      ?initializer))))): {
         Type type =
           %(declare $spec (bindings $bound)).type_from_ast().declared();
-        if (<const> in type || type.is_array() || !_braced(initializer))
-          continue;
-        List copy = c.sym.introduce(%"${binding.list().last()}_x2c_initial");
+        if (<const> in type || type.is_array()) continue;
+        int copied = _braced(initializer) &&
+                     (!c.meta_build || type.tag().car() is <list>);
+        if (!c.meta_build && !copied) continue;
+        List copy = copied
+          ? c.sym.introduce(%"${binding.list().last()}_x2c_initial") : NULL;
         for (int i = 0; i < (int) units.len(); i++)
-          if (units[i].equal(declaration))
-            units[i] = %(declare $spec (bindings
-              (op = $bound $initializer)
-              (op = (bind $copy $mods) $initializer)));
-        copies[binding] = %(expr $type (ident $copy));
+          if (units[i].equal(declaration)) {
+            List original = c.meta_build ? bound : %(op = $bound $initializer);
+            List bindings = copied
+              ? %($original (op = (bind $copy $mods) $initializer))
+              : %($original);
+            units[i] = %(declare $spec (bindings @bindings));
+          }
+        if (copied) copies[binding] = %(expr $type (ident $copy));
       }
   return copies;
 }

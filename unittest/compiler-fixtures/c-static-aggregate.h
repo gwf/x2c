@@ -7,12 +7,6 @@
 
 #include "x2c.h"
 #include <stdio.h>
-struct Table{
-  int(* fn)(int);
-  int arr[4];
-}
-;
-
 struct Named{
   int count;
 }

@@ -61,15 +61,15 @@ static Var _x2c_func_adapt_2(Func _x2c_func_binding_2, const FuncArg * _x2c_func
 static Func _x2c_func_handle_1;
 
 _x2c_initializer_choice_EC4193E6_1((_x2c_func_handle_1 = x2c_func_shared(_x2c_func_adapt_2, _29)))
-Var int_var(int);
+static Var int_var(int);
 
 List cons(Var, List);
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
-Var String_var(String);
+static Var String_var(String);
 
-Var List_var(List);
+static Var List_var(List);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();

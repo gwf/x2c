@@ -1,5 +1,5 @@
 unittest/compiler-fixtures/meta-static-reset-fail.x:15:9: macro: compile-time Lisp evaluation failed
-  int n = $read();
+  int n = $meta_reset_read();
           ^
-  note: form: (read) error: (bad-init)
+  note: form: (meta_reset_read) error: (bad-init)
 

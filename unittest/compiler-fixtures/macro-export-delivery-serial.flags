@@ -1,1 +1,1 @@
--j 1 unittest/compiler-fixtures/macro-export-lib.x
+-j 1 unittest/compiler-fixtures/macro-export-lib.x unittest/compiler-fixtures/macro-export.x unittest/compiler-fixtures/macro-export-hidden.x

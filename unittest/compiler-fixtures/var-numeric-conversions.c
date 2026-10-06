@@ -4,7 +4,7 @@
 #include "x2c.h"
 
 #include "x2c.h"
-Var double_var(double);
+static Var double_var(double);
 
 int main(void){
   x2c_initialize();

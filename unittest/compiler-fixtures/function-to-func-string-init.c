@@ -38,13 +38,13 @@ static String identity(String value){
   return value;
 }
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
-Var String_var(String);
+static Var String_var(String);
 
 List cons(Var, List);
 
-Var List_var(List);
+static Var List_var(List);
 
 void String_initialize(void){
   if(_init_guard_) return;
@@ -64,7 +64,7 @@ void String_initialize(void){
   _x2c_static_initialize_0();
 }
 
-String Var_string(Var);
+static String Var_string(Var);
 
 Var x2c_func_value_argument(Func, const FuncArg *, unsigned, Symbol);
 

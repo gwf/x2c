@@ -428,10 +428,20 @@ Map x2c_meta_definition_hashes(void) {
   return hashes;
 }
 
-// Linked generation needs references from the same fully parsed definitions.
-static Map _sdk_definition_calls(void) {
-  _sdk_guard("_x2c.meta.definition.calls");
-  return active.expander.meta_calls;
+/* Linked runtime functions keep their provider's whole definition set.
+   Fully parsed copies retain their own hashes and precise references. */
+static Map _sdk_linked_hashes(void) {
+  _sdk_guard("_x2c.meta.linked.hashes");
+  Compiler c = active.expander;
+  Map rows = {};
+  foreach (Var (_, source), c.project_meta)
+    match (source) case %(? ? ?(Map hashes)): {
+      List names = hashes.keys().list().sort();
+      foreach (Var (name, hash), hashes) rows[name] = %($hash $names);
+    }
+  foreach (String name, c.meta_calls.keys())
+    rows[name] = %(${c.meta_hashes[name]} ${c.meta_calls[name]});
+  return rows;
 }
 
 /** Answers `x2c.function.name`, declared in `lib/meta.x`. */
@@ -768,7 +778,7 @@ static void _sdk_reject_value(String message, Var value) {
 /** Binds the internal primitives the compile-time SDK library wraps into
     `lisp`, under their `_x2c.` names. */
 void Compiler.bind_sdk_primitives(Lisp lisp) {
-  $lisp.bind(lisp, "_x2c.meta.definition.calls", _sdk_definition_calls);
+  $lisp.bind(lisp, "_x2c.meta.linked.hashes", _sdk_linked_hashes);
   $lisp.bind(lisp, "_x2c.function.reference", builtin_foreach_reference);
   $lisp.bind(lisp, "_x2c.function.native-type", binding_native_type);
   $lisp.bind(lisp, "_x2c.literal.list", binding_literal_list);

@@ -18,7 +18,7 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
-Var int_var(int);
+static Var int_var(int);
 
 List cons(Var, List);
 
@@ -34,7 +34,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _5 = cons(_0, _4);
 }
 
-List List_cdr(List);
+static List List_cdr(List);
 
 Iter List_iter(List, Iter);
 
@@ -44,7 +44,7 @@ int List_equal(List, List);
 
 int Var_int(Var);
 
-Var List_car(List);
+static Var List_car(List);
 
 int main(void){
   x2c_initialize();

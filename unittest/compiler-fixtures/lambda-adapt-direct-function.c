@@ -19,7 +19,7 @@ int main(void){
   return invoke(41, _x2c_lambda_adapt_0) != 42;
 }
 
-Var int_var(int);
+static Var int_var(int);
 
 int Var_int(Var);
 

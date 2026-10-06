@@ -22,7 +22,8 @@ enum { TABLE_SIZE = sizeof(table) / sizeof(table[0]) };
 _Static_assert(TABLE_SIZE == 3, "table size");
 struct Pair { int a, b; };
 enum { AFTER_OBJECT = 11 };
-static struct Tally { int total; } tally;
+struct Tally { int total; };
+static struct Tally tally;
 
 static enum { SECRET = 99 };
 static typedef struct Hidden { int h; } Hidden;

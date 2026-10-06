@@ -116,7 +116,7 @@
  (bind (binding 27 "generated_inline") 
   ((fnmod (params (param (int) (bind (binding 28 "_x2c_macro_value_1") ())))))) 
  (block 
-  (at 9 (return (int) 
+  (at 0 (return (int) 
          (expr (int) 
           (op + (expr (int) (ident (binding 28 "_x2c_macro_value_1"))) 
            (expr (int) (literal (int) "1"))))))))
@@ -125,7 +125,7 @@
  (bind (binding 25 "generated_function") 
   ((fnmod (params (param (int) (bind (binding 29 "_x2c_macro_value_2") ())))))) 
  (block 
-  (at 9 (return (int) 
+  (at 0 (return (int) 
          (expr (int) 
           (op + (expr (int) (ident (binding 29 "_x2c_macro_value_2"))) 
            (expr (int) (literal (int) "3"))))))))
@@ -135,19 +135,19 @@
 (function (int) 
  (bind (binding 30 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 11 
-   (declare ("DirectValue") 
-    (bindings 
-     (op = (bind (binding 31 "direct") ()) 
-      (expr () 
-       (composite (commas (dotinit ("value") (expr (int) (literal (int) "37")))))))))) 
-  (at 12 
-   (declare ("DirectRecord") 
-    (bindings 
-     (op = (bind (binding 32 "direct_record") ()) 
-      (expr () 
-       (composite (commas (dotinit ("value") (expr (int) (literal (int) "1")))))))))) 
-  (at 13 
+  (at 8 (declare ("DirectValue") 
+         (bindings 
+          (op = (bind (binding 31 "direct") ()) 
+           (expr () 
+            (composite 
+             (commas (dotinit ("value") (expr (int) (literal (int) "37")))))))))) 
+  (at 9 (declare ("DirectRecord") 
+         (bindings 
+          (op = (bind (binding 32 "direct_record") ()) 
+           (expr () 
+            (composite 
+             (commas (dotinit ("value") (expr (int) (literal (int) "1")))))))))) 
+  (at 10 
    (declare ("DirectUnion") 
     (bindings 
      (op = (bind (binding 33 "direct_union") ()) 
@@ -158,13 +158,13 @@
           (expr (int) 
            (op . (expr ("DirectRecord") (ident (binding 32 "direct_record"))) 
             ("value"))))))))))) 
-  (at 14 
+  (at 11 
    (declare ("GeneratedRecord") 
     (bindings 
      (op = (bind (binding 34 "generated_record") ()) 
       (expr () 
        (composite (commas (dotinit ("value") (expr (int) (literal (int) "1")))))))))) 
-  (at 15 
+  (at 12 
    (declare ("GeneratedUnion") 
     (bindings 
      (op = (bind (binding 35 "generated_union") ()) 
@@ -176,7 +176,7 @@
            (op . (expr ("GeneratedRecord") 
                   (ident (binding 34 "generated_record"))) 
             ("value"))))))))))) 
-  (at 16 
+  (at 13 
    (declare (int) 
     (bindings 
      (op = (bind (binding 36 "parity") ()) 
@@ -215,7 +215,7 @@
                         (args (expr (int) (literal (int) "0"))))))) 
                (expr (int) (ident (binding 24 "generated_global"))))) 
         (expr () (ident (binding 37 "GENERATED_SOURCE_FLAG"))))))))) 
-  (at 18 
+  (at 15 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 38 "printf"))) 
@@ -225,4 +225,4 @@
                (ident (binding 3 "DirectValue_read"))) 
          (args (expr ("DirectValue") (ident (binding 31 "direct")))))) 
        (expr (int) (ident (binding 36 "parity")))))))) 
-  (at 19 (return (int) (expr (int) (literal (int) "0"))))))
+  (at 16 (return (int) (expr (int) (literal (int) "0"))))))

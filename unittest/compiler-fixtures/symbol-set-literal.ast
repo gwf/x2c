@@ -34,7 +34,7 @@
   (at 3 (declare ("List") 
          (bindings 
           (op = (bind (binding 5 "ordinary") ()) 
-           (expr ("List") (expr ("List") (cache 3))))))) 
+           (expr ("List") (expr ("List") (cache 842))))))) 
   (at 4 (declare (int) 
          (bindings 
           (op = (bind (binding 6 "ordered") ()) 

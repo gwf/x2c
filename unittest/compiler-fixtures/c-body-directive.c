@@ -34,7 +34,7 @@ _x2c_defer_env_0;
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
-Var int_var(int);
+static Var int_var(int);
 
 List cons(Var, List);
 
@@ -145,9 +145,9 @@ static int sum(List items){
   {
     Var item;
     List _x2c_macro_object_0 = items;
-    List _x2c_macro_cursor_0 = _x2c_macro_object_0;
+    List _x2c_macro_cursor_13 = _x2c_macro_object_0;
     Var _x2c_macro_cursor_output_0;
-    while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
+    while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_13), &(_x2c_macro_cursor_output_0))){
       item = _x2c_macro_cursor_output_0;
 #ifndef NO_SUM
       total += Var_int(item);
@@ -178,9 +178,9 @@ void x2c_exception_leave(ExceptionFrame *);
 
 int x2c_error_catch_site_pending(ErrorCatchSite *);
 
-Var List_var(List);
+static Var List_var(List);
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
 ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
 

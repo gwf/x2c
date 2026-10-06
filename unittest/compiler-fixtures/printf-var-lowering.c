@@ -22,11 +22,11 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _1 = String_new("string:%hhd/%hu/%Lf/%s");
 }
 
-Var int_var(int);
+static Var int_var(int);
 
-Var String_var(String);
+static Var String_var(String);
 
-Var char_var(char);
+static Var char_var(char);
 
 String String_printf(String, ...);
 

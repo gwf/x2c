@@ -1,1 +1,2 @@
 ( Box_var ) ==> (( func (( Box ))) Var )
+( function-inline Box_var ) ==> ( inline )

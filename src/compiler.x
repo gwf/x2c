@@ -176,6 +176,10 @@ typedef struct Compiler {
      parsing this unit for, or zero for an ordinary parse. */
   int meta_build;
   int runtime_inc, runtime_hdrs, collect_protocols, shallow, source_private;
+  int public_bodies;  // Cold interfaces bind only exposed inline bodies.
+  int interface_provider, signature_only;
+  Map interface_active;
+  Array pending_inline_bodies;
   /* Whether the source is in the indentation syntax whatever its name, as
      when collection parses a segment of a file whose pragma it saw. */
   int layout;
@@ -186,7 +190,7 @@ typedef struct Compiler {
   /* Where the expression statement being parsed starts. A meta call there
      that the statement's `;` ends is evaluated as the statement. */
   Token meta_statement;
-  /* A collection pass or macro import whose protocol registries are
+  /* A collection pass whose protocol registries are
      installed from the collected symbols on first use;
      `Compiler._install_imports` owns the installation. */
   int import_protocols;
@@ -205,7 +209,7 @@ typedef struct Compiler {
   // file is that script; both NULL for an ordinary unit.
   ScriptUnit unit_script, script;
   Lisp macro_lisp, int borrowed_lisp;
-  int inherited_lisp;   // the shared session evaluated this import
+  int inherited_lisp;   // the shared session evaluated this file
   GenNames names;
   Array origins, int origin, source_map;
   // The request view outlives the unit; semantic stores die with this unit.
@@ -425,25 +429,6 @@ static void _debug_tokens(Token start, Token end) {
       $report.debug.token(tok);
 }
 
-/** Collects a macro or keyword definition while deferring its diagnostics.
-    Returns one on success; malformed syntax skips to end of file and returns
-    zero so the full parse can report it.
-*/
-int Compiler.collect_compile_time_definition(Compiler c, int keyword) {
-  int failed = 0;
-  DiagnosticsHold hold = c.diagnostics.hold();
-  $let(c.recovery_depth, c.recovery_depth + 1) {
-    try {
-      if (keyword) c.parse_keyword_definition();
-      else c.parse_macro_definition();
-    }
-    catch %(malformed *): failed = 1;
-  }
-  c.diagnostics.release(hold, 0);
-  if (failed) while (c.peek(0) != <eof>) c.next();
-  return !failed;
-}
-
 /** Records declaration visibility and meta facts, then skips its body.
     The declaration is already bound by the shared top-level parser.
 */
@@ -455,7 +440,7 @@ void Compiler.finish_collected_declaration(
   c.record_declaration_visibility(declaration);
   /* Lexical privacy also marks a name in Sym.statics, so a static function
      is marked again as `(function name)`. File collection reads that key to
-     keep the function out of what a private region publishes. */
+     keep the function out of an ordinary include's interface. */
   match (declaration)
     case %(declare ?type (bindings (bind ?binding ((fnmod *) *)))):
       if (type.type().is_static())
@@ -478,9 +463,7 @@ static void Compiler._skip_body(
   match (declaration)
     case %(declare ? (bindings (bind ?binding ?))):
       c._note_function_body(declaration.type_from_ast(), binding);
-  Type type = declaration.type_from_ast();
   c.record_inline_function(declaration);
-  Token first = c.token;
   if (c._at_function_arrow()) {
     c.next();
     c.next();
@@ -488,8 +471,6 @@ static void Compiler._skip_body(
     c.expect(<;>);
   }
   else c._shallow_block();
-  if (!meta && type.is_inline() && !type.is_static())
-    c.collect_inline_type_dependencies(declaration, first, c.token);
 }
 
 /** Records the header linkage of a public inline definition. Semantic
@@ -560,7 +541,7 @@ void Compiler.queue_declaration_effect(
 }
 
 static List Compiler._declaration_source_key(Compiler c, Token token) {
-  String path = home_portable_path(absolute_path(c.filename));
+  String path = home_portable_path(c.canonical_path(c.filename));
   return %("source-node" (declaration $path ${token.pos}));
 }
 
@@ -635,7 +616,7 @@ static void Compiler._expand_unit_macro(Compiler c) {
 
 /* The owning source records one declaration production, including its exact
    token span. Full parsing consumes that production instead of invoking its
-   compile-time producer again. Ordinary Unit macros retain their old path. */
+   compile-time producer again. */
 static int Compiler._retain_bundle(
   Compiler c, List syntax, Token first, Token after) {
   match (syntax) {
@@ -651,11 +632,14 @@ static int Compiler._retain_bundle(
   return 0;
 }
 
+/** Binds a retained declaration production at the cursor, then advances
+    past its source. Returns NULL when collection retained no production. */
 List Compiler.replay_declaration_source(Compiler c) {
   List source = c.sym.get(c._declaration_source_key(c.token));
   match (source)
     case %(declaration-source ?(int end) ?syntax): {
       List thawed = c.thaw_declaration_syntax(syntax);
+      c.land_retained_bindings(thawed);
       List bound = c.bind_syntax(thawed, AST_UNIT, NULL);
       while (c.peek(0) != <eof> && c.token.pos < end) c.next();
       return bound;
@@ -675,6 +659,12 @@ List Compiler.replay_declaration_source(Compiler c) {
 */
 Var Compiler.freeze_declaration_syntax(Compiler c, Var syntax) {
   if (syntax is not <list> || syntax.is_nil()) return _freeze_leaf(syntax);
+  String physical = NULL;
+  Var source = void;
+  if (binding_identity_try_parts(syntax, NULL, physical) &&
+      c.semantic_binding_facts().try_get(%(source-spelling $syntax), source) &&
+      source != physical)
+    return %(declaration-binding $syntax $source);
   match (syntax) {
     case %(cache ?(int id)):
       return %(declaration-cache ${c._freeze_cache_key(c.id_keys[id])});
@@ -715,7 +705,8 @@ static List Compiler._freeze_rows(Compiler c, List syntax) {
   match (syntax)
     case %((!or declaration-void declaration-empty-symbol declaration-atom
                 declaration-token declaration-origin declaration-list
-                declaration-cache declaration-cache-binding) *):
+                declaration-cache declaration-cache-binding
+                declaration-binding) *):
       return %(declaration-list @{rows.list_free()});
   return rows.list_free();
 }
@@ -736,6 +727,10 @@ Var Compiler.freeze_macro_stack(Compiler c) {
 Var Compiler.thaw_declaration_syntax(Compiler c, Var syntax) {
   if (syntax is not <list> || syntax.is_nil()) return syntax;
   match (syntax) {
+    case %(declaration-binding ?binding ?source): {
+      c.set_fact(%(source-spelling $binding), source);
+      return binding;
+    }
     case %(declaration-cache ?key):
       return c.cache(c._thaw_cache_key(key));
     case %(declaration-list *rows): return c._thaw_rows(rows);
@@ -878,7 +873,8 @@ static typedef struct Defaults {
     signatures for the caller to retain in the header-cache lifetime.
 */
 Map Compiler.select_declaration_defaults(
-  Compiler c, String path, Map symbols, Array parts, Map definitions) {
+  Compiler c, String path, Map symbols, Array parts, Map definitions,
+  Map statics) {
   Compiler shadow = Compiler.new_shared(c);
   defer c.close_child(shadow);
   shadow._prepare_shadow(c, path, symbols);
@@ -893,6 +889,7 @@ Map Compiler.select_declaration_defaults(
   d.store(symbols);
   Map additions = shadow.sym.current_symbols();
   symbols.merge(additions);
+  statics.merge(shadow.sym.file_statics());
   c.merge_source_declarations(symbols, additions);
   c.fn_defs.merge(shadow.fn_defs);
   definitions.merge(shadow.fn_defs);
@@ -1165,7 +1162,9 @@ List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) {
     c.token = conflict;
     c._report_script_statement();
   }
-  return c._finish_parse(nodes);
+  List ast = c._finish_parse(nodes);
+  if (!c.public_bodies) c.publish_inline_types(ast);
+  return ast;
 }
 
 /* A full parse starts from the unit's collected symbols, without the parse
@@ -1190,7 +1189,8 @@ static void Compiler._reset_parse(Compiler c, Map globs, int generated) {
   c.resolve_protocols();
   if (generated) c.install_generated_protocol_symbols();
   c.install_native_meta_effects(globs);
-  c.included_effects = c.included_compile_time_effects(globs);
+  c.included_effects = c.included_compile_time_effects(
+    globs, c.interface_active);
 }
 
 static void Compiler._reset_macros(Compiler c) {
@@ -2232,13 +2232,7 @@ int reference_guard_exits(List arm) {
 // generated names and initializers
 
 /** Allocates the next compiler-private C spelling for `stem`.
-
-    Related compilers increment the same per-stem counter, except while a
-    macro import is being parsed, which counts separately. An import's `meta`
-    bodies are parsed in every unit that imports the file and in none that is
-    built from the `.xi` prelude, so a name minted there must not move the
-    unit's own counter or the two modes emit different C. Those names carry
-    an `m` before the stem, so they cannot collide with the unit's.
+    Related compilers increment the same per-stem counter.
 */
 String Compiler.fresh_name(Compiler c, String stem) {
   String key = stem;
@@ -2576,26 +2570,10 @@ void Compiler.borrow_diagnostics(Compiler c, Compiler owner) {
 /** Retains a child's final diagnostics and closes its owned Lisp session. */
 void Compiler.close_child(Compiler c, Compiler child) {
   c.take_diagnostics(child);
-  child.free_lisp();
+  if (!child.public_bodies) child.free_lisp();
 }
 
 // related compilers
-
-/** Shares the symbol table, literal cache, and protocol registries of the
-    unit `owner` is translating, so a child that binds declarations binds
-    them into that unit. A `meta` definition in a macro import is bound here
-    and emitted by `owner`, so both compilers must read one table: its
-    `(cache id)` references index `owner`'s keys, and its operations resolve
-    through `owner`'s protocol rows. Both install into one macro session, so
-    they also read one record of which `meta` functions reach file-scope
-    state.
-*/
-void Compiler.borrow_unit_semantics(Compiler c, Compiler owner) {
-  $copy_fields(c, owner, sym, fn_defs, id_keys, key_ids, protocols,
-               adoptions, conforms, protocol_helpers, proto_cache,
-               meta_comptime, meta_regions, meta_hashes, meta_calls,
-               native_meta, project_meta);
-}
 
 /** Shares `owner`'s pending `meta` group and the definitions it reads, which
     belong with the Lisp session that holds the group's stubs. */
@@ -2603,7 +2581,7 @@ void Compiler.share_meta_group(Compiler c, Compiler owner) {
   $copy_fields(c, owner, meta_group, meta_group_bound);
 }
 
-/** Takes over `owner`'s macro, object-like `#define`, import, keyword,
+/** Takes over `owner`'s macro, object-like `#define`, include, keyword,
     literal cache, and Lisp state for one segment of a collected file.
     Segments are one translation unit, so retained macro bodies index the
     unit's literal cache and use its Lisp environment.
@@ -2776,12 +2754,13 @@ static void Compiler._share_unit(Compiler c, Compiler owner) {
                source_map, recovery_depth, sources, declaration_produced,
                source_facts, source_occurrences, source_definitions,
                source_declarations, source_texts, unit_script, include_dirs,
-               meta_build, evaluated_effects);
+               meta_build, evaluated_effects, pending_inline_bodies);
 }
 
 /* The first compiler of a unit creates the state its children share and
    starts from the shared session's compile-time-only definitions. */
 static void Compiler._own_unit(Compiler c) {
+  c.pending_inline_bodies = [];
   c.inherit_library_comptime();
   $set_fields(c, {}, package_roots, package_aliases, package_members,
               package_effects);

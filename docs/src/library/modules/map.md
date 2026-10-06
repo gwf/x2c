@@ -40,21 +40,21 @@ Hash table mapping `Var` keys to `Var` values.
 
 Releases this Map and both backing Blocks without freeing stored values.
 
-Source: `lib/map.x:200`
+Source: `lib/map.x:199`
 
 <a id="Map.contains"></a>
 #### Map.contains
 
-`int Map.contains(Map map, Var key)`
+`int Map.contains(Map _x2c_macro_map_45, Var _x2c_macro_key_28)`
 
 Returns one when `key` is present, or zero for a null map.
 
-Source: `lib/map.x:93`
+Source: `lib/map.x:92`
 
 <a id="Map.copy"></a>
 #### Map.copy
 
-`Map Map.copy(Map map)`
+`Map Map.copy(Map _x2c_macro_map_52)`
 
 Returns a fresh shallow copy in the current `Scope`.
 The result has independent table storage but copies native key and value
@@ -62,12 +62,12 @@ fields. A null input produces a fresh empty map.
 
 **Raises:** an allocation, size, or invariant cause while copying.
 
-Source: `lib/map.x:93`
+Source: `lib/map.x:92`
 
 <a id="Map.enumerate"></a>
 #### Map.enumerate
 
-`Iter Map.enumerate(Map map, Iter dest)`
+`Iter Map.enumerate(Map _x2c_macro_map_64, Iter _x2c_macro_dest_2)`
 
 Initializes `dest` to yield canonical `(key value)` `List`s in bucket
 order.
@@ -85,7 +85,7 @@ retaining it must not outlive that `Scope`.
 for MapLongDouble, `<alloc-fail>` or `<bad-enc>` while boxing its key.
 Shared causes do not return from the pull.
 
-Source: `lib/map.x:195`
+Source: `lib/map.x:194`
 
 <a id="Map.get_hashed"></a>
 #### Map.get_hashed
@@ -101,22 +101,22 @@ and is `Map.get` in every other respect. A null `Map` reports absence.
 **Raises:** a cause raised by custom key equality. Hashing happens in the
 caller, so a `void` key raises there instead.
 
-Source: `lib/map.x:112`
+Source: `lib/map.x:111`
 
 <a id="Map.getdefault"></a>
 #### Map.getdefault
 
-`Var Map.getdefault(Map map, Var key, Var defval)`
+`Var Map.getdefault(Map _x2c_macro_map_43, Var _x2c_macro_key_26, Var _x2c_macro_defval_0)`
 
 Returns the value for `key`, or `defval` without inserting it.
 A null map is treated as an empty one.
 
-Source: `lib/map.x:93`
+Source: `lib/map.x:92`
 
 <a id="Map.iter"></a>
 #### Map.iter
 
-`Iter Map.iter(Map map, Iter dest)`
+`Iter Map.iter(Map _x2c_macro_map_62, Iter _x2c_macro_dest_0)`
 
 Initializes `dest` as a single-pass iterator over boxed values.
 The caller owns `dest`, and the iterator borrows `map`; both must remain
@@ -124,12 +124,12 @@ live during traversal. A null `dest` returns NULL. Values follow bucket
 order, a null map is exhausted, and structural mutation invalidates the
 iterator.
 
-Source: `lib/map.x:195`
+Source: `lib/map.x:194`
 
 <a id="Map.keys"></a>
 #### Map.keys
 
-`Iter Map.keys(Map map, Iter dest)`
+`Iter Map.keys(Map _x2c_macro_map_63, Iter _x2c_macro_dest_1)`
 
 Initializes `dest` as a single-pass iterator over boxed keys.
 The caller owns `dest`, and the iterator borrows `map`; both must remain
@@ -145,21 +145,21 @@ not outlive that
 **Raises:** MapLongDouble iteration may raise `<alloc-fail>` or `<bad-enc>`
 while boxing a key.
 
-Source: `lib/map.x:195`
+Source: `lib/map.x:194`
 
 <a id="Map.len"></a>
 #### Map.len
 
-`unsigned Map.len(Map map)`
+`unsigned Map.len(Map _x2c_macro_map_39)`
 
 Returns the number of entries, or zero for a null map.
 
-Source: `lib/map.x:93`
+Source: `lib/map.x:92`
 
 <a id="Map.merge"></a>
 #### Map.merge
 
-`Map Map.merge(Map map, Map other)`
+`Map Map.merge(Map _x2c_macro_map_53, Map _x2c_macro_other_4)`
 
 Copies every entry of `other` into `map` and returns the destination.
 `other` wins conflicts. A null `other` is a no-op; a null destination is
@@ -168,7 +168,7 @@ entries already copied remain; a newly created destination is discarded.
 
 **Raises:** an allocation, size, or invariant cause while inserting.
 
-Source: `lib/map.x:93`
+Source: `lib/map.x:92`
 
 <a id="Map.new"></a>
 #### Map.new
@@ -180,12 +180,12 @@ The initial table has two buckets and grows automatically.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` when storage cannot be created.
 
-Source: `lib/map.x:93`
+Source: `lib/map.x:92`
 
 <a id="Map.postfixindex"></a>
 #### Map.postfixindex
 
-`Var Map.postfixindex(Map map, Var key, Symbol op)`
+`Var Map.postfixindex(Map _x2c_macro_map_49, Var _x2c_macro_key_32, Symbol _x2c_macro_op_1)`
 
 Applies postfix `++` or `--` and returns the previous value.
 The key must already exist, and only generated numeric families support
@@ -194,12 +194,12 @@ these operations.
 **Raises:** `<bad-arg>` for a null map or absent key, or `<bad-op>` for an
 unsupported operation. These failures leave the value unchanged.
 
-Source: `lib/map.x:93`
+Source: `lib/map.x:92`
 
 <a id="Map.set"></a>
 #### Map.set
 
-`void Map.set(Map map, Var key, Var val)`
+`void Map.set(Map _x2c_macro_map_46, Var _x2c_macro_key_29, Var _x2c_macro_val_9)`
 
 Copies `key` and `val` into the table, replacing an existing value.
 Insertion invalidates live cursors and iterators; replacement does not.
@@ -208,12 +208,12 @@ Insertion invalidates live cursors and iterators; replacement does not.
 cause while inserting. Allocation and size failures leave the table
 unchanged.
 
-Source: `lib/map.x:93`
+Source: `lib/map.x:92`
 
 <a id="Map.setdefault"></a>
 #### Map.setdefault
 
-`Var Map.setdefault(Map map, Var key, Var defval)`
+`Var Map.setdefault(Map _x2c_macro_map_44, Var _x2c_macro_key_27, Var _x2c_macro_defval_1)`
 
 Returns the value for `key`, inserting `defval` when absent.
 Insertion copies the native key and value fields and invalidates live
@@ -223,53 +223,53 @@ cursors and iterators; an existing-key read does not mutate the table.
 cause while inserting. Allocation and size failures leave the table
 unchanged.
 
-Source: `lib/map.x:93`
+Source: `lib/map.x:92`
 
 <a id="Map.setindex"></a>
 #### Map.setindex
 
-`Var Map.setindex(Map map, Var key, Var val)`
+`Var Map.setindex(Map _x2c_macro_map_47, Var _x2c_macro_key_30, Var _x2c_macro_val_10)`
 
 Stores `val` under `key` and returns `val`.
 This is the bracket-facing form of `Map.set`, with the same cursor
 invalidation and failure behavior.
 
-Source: `lib/map.x:93`
+Source: `lib/map.x:92`
 
 <a id="Map.truth"></a>
 #### Map.truth
 
-`int Map.truth(Map map)`
+`int Map.truth(Map _x2c_macro_map_55)`
 
 Returns one when `map` contains an entry.
 
-Source: `lib/map.x:93`
+Source: `lib/map.x:92`
 
 <a id="Map.try_del"></a>
 #### Map.try_del
 
-`int Map.try_del(Map map, Var key, Var &?out)`
+`int Map.try_del(Map _x2c_macro_map_50, Var _x2c_macro_key_33, Var &?_x2c_macro_out_9)`
 
 Removes `key`, writes its value to `out`, and returns one when present.
 A null map, null `out`, or absent key returns zero without writing or
 mutation. Successful removal invalidates live cursors and iterators.
 
-Source: `lib/map.x:93`
+Source: `lib/map.x:92`
 
 <a id="Map.try_get"></a>
 #### Map.try_get
 
-`int Map.try_get(Map map, Var key, Var &?out)`
+`int Map.try_get(Map _x2c_macro_map_40, Var _x2c_macro_key_23, Var &?_x2c_macro_out_6)`
 
 Writes the value for `key` to `out` and returns one when present.
 A null map, null `out`, or absent key returns zero without writing.
 
-Source: `lib/map.x:93`
+Source: `lib/map.x:92`
 
 <a id="Map.try_next"></a>
 #### Map.try_next
 
-`int Map.try_next(Map map, unsigned &?cursor, Var &?key, Var &?val)`
+`int Map.try_next(Map _x2c_macro_map_54, unsigned &?_x2c_macro_cursor_7, Var &?_x2c_macro_key_35, Var &?_x2c_macro_val_11)`
 
 Writes the next bucket's key and value, advances `cursor`, and returns
 one. Initialize the caller-owned cursor to zero. A null argument or
@@ -277,12 +277,12 @@ exhaustion returns zero without changing `key` or `val`. Traversal
 follows bucket order, not insertion order, and structural mutation
 invalidates the cursor.
 
-Source: `lib/map.x:93`
+Source: `lib/map.x:92`
 
 <a id="Map.updateindex"></a>
 #### Map.updateindex
 
-`Var Map.updateindex(Map map, Var key, Symbol op, Var rhs)`
+`Var Map.updateindex(Map _x2c_macro_map_48, Var _x2c_macro_key_31, Symbol _x2c_macro_op_0, Var _x2c_macro_rhs_0)`
 
 Applies `op` to the value for `key` and returns the stored result.
 `+` inserts `rhs` when the key is absent; other operations require an
@@ -293,16 +293,16 @@ the generated value operation, or an allocation, size, or invariant cause
 while inserting. Invalid operations leave an existing value unchanged.
 Allocation and size failures leave the table unchanged.
 
-Source: `lib/map.x:93`
+Source: `lib/map.x:92`
 
 <a id="Map.write_str"></a>
 #### Map.write_str
 
-`Buffer Map.write_str(Map map, Buffer out)`
+`Buffer Map.write_str(Map _x2c_macro_map_58, Buffer _x2c_macro_out_13)`
 
 Appends the typed-Map display text in bucket order.
 
-Source: `lib/map.x:194`
+Source: `lib/map.x:193`
 
 ## Advanced and interop API
 
@@ -320,42 +320,42 @@ Source: `lib/map.x:194`
 <a id="Map.compare"></a>
 #### Map.compare
 
-`int Map.compare(Map a, Map b)`
+`int Map.compare(Map _x2c_macro_a_9, Map _x2c_macro_b_9)`
 
 Compares typed Maps by size and then sorted native key/value contents.
 Identical handles compare equal and NULL sorts first. Neither Map is
 mutated. Raises: `<alloc-fail>` while creating temporary storage, or any
 cause from key or value comparison.
 
-Source: `lib/map.x:194`
+Source: `lib/map.x:193`
 
 <a id="Map.equal"></a>
 #### Map.equal
 
-`int Map.equal(Map a, Map b)`
+`int Map.equal(Map _x2c_macro_a_6, Map _x2c_macro_b_6)`
 
 Reports key/value equality independent of bucket and insertion order.
 Two null maps compare equal; a null and a nonnull map compare unequal.
 
-Source: `lib/map.x:93`
+Source: `lib/map.x:92`
 
 <a id="Map.repr"></a>
 #### Map.repr
 
-`String Map.repr(Map map)`
+`String Map.repr(Map _x2c_macro_map_60)`
 
 Returns the readable typed-Map representation.
 
-Source: `lib/map.x:194`
+Source: `lib/map.x:193`
 
 <a id="Map.str"></a>
 #### Map.str
 
-`String Map.str(Map map)`
+`String Map.str(Map _x2c_macro_map_59)`
 
 Returns the typed-Map display String.
 
-Source: `lib/map.x:194`
+Source: `lib/map.x:193`
 
 <a id="Map.update_n"></a>
 #### Map.update_n
@@ -370,16 +370,16 @@ value does not.
 
 **Raises:** the same causes as `Map.set`.
 
-Source: `lib/map.x:125`
+Source: `lib/map.x:124`
 
 <a id="Map.write_repr"></a>
 #### Map.write_repr
 
-`Buffer Map.write_repr(Map map, Buffer out)`
+`Buffer Map.write_repr(Map _x2c_macro_map_57, Buffer _x2c_macro_out_12)`
 
 Appends the readable typed-Map representation in bucket order.
 
-Source: `lib/map.x:194`
+Source: `lib/map.x:193`
 
 ## Convenience API
 
@@ -394,36 +394,36 @@ Source: `lib/map.x:194`
 <a id="Map.del"></a>
 #### Map.del
 
-`Var Map.del(Map map, Var key)`
+`Var Map.del(Map _x2c_macro_map_51, Var _x2c_macro_key_34)`
 
 Removes `key` and returns its value.
 Successful removal invalidates live cursors and iterators.
 Prefer `try_del` when absence is an ordinary outcome. Boxed families
 return `void` for absence; native families raise `<bad-arg>`.
 
-Source: `lib/map.x:93`
+Source: `lib/map.x:92`
 
 <a id="Map.get"></a>
 #### Map.get
 
-`Var Map.get(Map map, Var key)`
+`Var Map.get(Map _x2c_macro_map_41, Var _x2c_macro_key_24)`
 
 Returns the value for `key`.
 Prefer `try_get` when absence is an ordinary outcome. Boxed families
 return `void` for absence; native families raise `<bad-arg>`.
 
-Source: `lib/map.x:93`
+Source: `lib/map.x:92`
 
 <a id="Map.getindex"></a>
 #### Map.getindex
 
-`Var Map.getindex(Map map, Var key)`
+`Var Map.getindex(Map _x2c_macro_map_42, Var _x2c_macro_key_25)`
 
 Returns the value selected by bracket indexing.
 This is the bracket-facing form of `Map.get`, with the same failure
 behavior. Prefer bracket indexing in ordinary code.
 
-Source: `lib/map.x:93`
+Source: `lib/map.x:92`
 
 ## Runtime-internal callables
 
@@ -459,12 +459,12 @@ nothing. Raises: `<alloc-fail>`, `<size-limit>`, or `<invariant>` while
 rebuilding, or any cause from export, key hashing, or moving the rebuilt
 `Block`s.
 
-Source: `lib/map.x:153`
+Source: `lib/map.x:152`
 
 <a id="Map.new_capacity"></a>
 #### Map.new_capacity
 
-`Map Map.new_capacity(unsigned capacity)`
+`Map Map.new_capacity(unsigned _x2c_macro_capacity_8)`
 
 Returns a fresh empty map with exactly `capacity` buckets.
 The result and its backing arrays belong to the current `Scope`.
@@ -474,7 +474,7 @@ must be a power of two of at least two.
 **Raises:** `<bad-arg>` for another capacity, or `<alloc-fail>` /
 `<size-limit>` when storage cannot be created.
 
-Source: `lib/map.x:93`
+Source: `lib/map.x:92`
 
 ## Public types
 

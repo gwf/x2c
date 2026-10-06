@@ -1,5 +1,5 @@
 #include "x2c.x"
-#include "../../commands/repl/decline-errors.x"
+#include "decline-errors.x"
 
 typedef struct DeclineState {
   int declined, calls;

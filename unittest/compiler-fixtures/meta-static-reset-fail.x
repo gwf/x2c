@@ -5,11 +5,11 @@
 static int calls = 0;
 
 static int init(void) {
-  if (++calls > 1) raise %(bad-init);
+  if (++calls > 0) raise %(bad-init);
   return 7;
 }
 
 meta static int value = init();
-meta int read(void) => value;
+meta int meta_reset_read(void) => value;
 
-int n = $read();
+int n = $meta_reset_read();

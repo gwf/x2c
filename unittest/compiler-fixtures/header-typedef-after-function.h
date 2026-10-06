@@ -20,10 +20,9 @@ typedef struct After{
 }
 After;
 
-typedef struct Item{
-  int value;
-}
-Item, * ItemPtr;
+typedef struct Item Item, * ItemPtr;
+
+typedef struct Opaque * Opaque;
 
 int after_size(After value);
 

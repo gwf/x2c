@@ -20,7 +20,7 @@ int Var_is(Var, Symbol);
 
 int Var_equal(Var, Var);
 
-Var int_var(int);
+static Var int_var(int);
 
 int main(void){
   x2c_initialize();

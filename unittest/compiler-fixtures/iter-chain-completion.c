@@ -48,13 +48,13 @@ static Var _x2c_func_adapt_2(Func _x2c_func_binding_2, const FuncArg * _x2c_func
 static Func _x2c_func_handle_2;
 
 _x2c_initializer_choice_DC10D477_2((_x2c_func_handle_2 = x2c_func_shared(_x2c_func_adapt_2, _19)))
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
-Var String_var(String);
+static Var String_var(String);
 
 List cons(Var, List);
 
-Var List_var(List);
+static Var List_var(List);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -85,7 +85,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _x2c_static_initialize_2();
 }
 
-Var int_var(int);
+static Var int_var(int);
 
 static Var double_value(Var value){
   return Var_binary(value, 54, int_var(2));

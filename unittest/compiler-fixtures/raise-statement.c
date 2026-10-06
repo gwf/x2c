@@ -36,15 +36,15 @@ void Error_policy_set(Symbol, Symbol);
 
 int Error_mark(void);
 
-Var int_var(int);
+static Var int_var(int);
 
-Var String_var(String);
+static Var String_var(String);
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
-List Var_list(Var);
+static List Var_list(Var);
 
-Var List_car(List);
+static Var List_car(List);
 
 List Error_since(int);
 
@@ -52,15 +52,15 @@ Var List_assoc(List, Var);
 
 String Symbol_str(Symbol);
 
-Symbol Var_symbol(Var);
+static Symbol Var_symbol(Var);
 
 long Var_integer(Var);
 
-Var List_cadr(List);
+static Var List_cadr(List);
 
 Var List_getindex(List, int);
 
-String Var_string(Var);
+static String Var_string(Var);
 
 int List_len(List);
 
@@ -112,7 +112,7 @@ static void raise_after_return(int code){
 
 int x2c_error_catch_site_pending(ErrorCatchSite *);
 
-Var List_var(List);
+static Var List_var(List);
 
 ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
 

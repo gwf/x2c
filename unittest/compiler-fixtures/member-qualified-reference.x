@@ -17,7 +17,7 @@ static int Value.read_volatile(volatile Value &v) => v.n;
 static int VolatileValue.read_alias(VolatileValue &v) => v.n;
 static void Value.bump(Value &v) { v.n++; }
 static void increment(int &value) { value++; }
-static int read(const int &value) => value;
+static int _read(const int &value) => value;
 
 int main(void) {
   Value value = {7};
@@ -38,7 +38,7 @@ int main(void) {
   printf("%d %d %d %d %d %d\n", holder.value.read(),
     pointer->value.read(), changing.value.read_volatile(),
     qualified.read_alias(), value.n, rows.values[0]);
-  printf("%d %d %d\n", read(grid[1][0]), read(wrapped.row[1]),
+  printf("%d %d %d\n", _read(grid[1][0]), _read(wrapped.row[1]),
     wrapped.promoted.read());
   return 0;
 }

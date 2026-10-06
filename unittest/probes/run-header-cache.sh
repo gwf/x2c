@@ -266,7 +266,7 @@ grep -Fq "\"$BUILD/outside/ext.x\"" "$FAKE/extwarm/uses-ext.xi" ||
 cmp -s "$FAKE/extout/uses-ext-twice.c" "$FAKE/extwarm/uses-ext-twice.c" ||
   fail "out-of-home interface replay diverged from cold compile"
 
-# Case 4a: collection records the functions an imported Unit macro
+# Case 4a: collection records the functions an included Unit macro
 # generates, so an including unit types their calls from a cold walk and
 # from the owner's interface alike. A generated static stays in its unit.
 mkdir -p "$FAKE/gencold" "$FAKE/genwarm"
@@ -289,7 +289,7 @@ EOF
 grep -q '(("gen_next") ((func ((long))) long))' \
   "$FAKE/genwarm/gen-owner.xi" ||
   fail "interface is missing a macro-generated function"
-grep -q '(("unit-static" "_x2c_macro_step_0")' \
+grep -Eq '\(\("unit-static" "_x2c_macro_step_[0-9]+"\)' \
   "$FAKE/genwarm/gen-owner.xi" ||
   fail "interface publishes a macro-generated static function"
 (cd "$FAKE" && ./builds/0/x2c translate --out-dir genwarm src/gen-use.x)
@@ -322,7 +322,8 @@ $cell(short, cell_short);
 int main(void) { return cell_int() + cell_long() + cell_short() == 3 ? 0 : 1; }
 EOF
 "$X2C" build --output "$FAKE/cellcold/cells" "$FAKE/src/cell-b.x" \
-  "$FAKE/src/cell-a.x" >"$FAKE/cellcold/build.log" 2>&1 ||
+  "$FAKE/src/cell-a.x" "$FAKE/src/cell.x" \
+  >"$FAKE/cellcold/build.log" 2>&1 ||
   fail "units that expand one template with file-scope names did not link"
 "$FAKE/cellcold/cells" || fail "units with file-scope template names ran wrong"
 (cd "$FAKE" && ./builds/0/x2c translate --out-dir cellcold src/cell-b.x)

@@ -16,6 +16,12 @@ static Var _x2c_hcache_ADB89CC9_7, _x2c_hcache_ADB89CC9_5;
 
 static int _x2c_hcache_guard_ADB89CC9 = 0;
 
+static Var Symbol_var(Symbol);
+
+static Var String_var(String);
+
+List cons(Var, List);
+
 __attribute__((constructor)) static void _x2c_hcache_init_ADB89CC9(void){
   x2c_initialize_protocols();
   if(_x2c_hcache_guard_ADB89CC9) return;

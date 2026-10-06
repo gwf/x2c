@@ -39,7 +39,7 @@ static inline Cell Var_cell(Var value);
 
 static VarMethods _x2c__x2c_protocol_methods_0;
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
 List cons(Var, List);
 
@@ -67,15 +67,15 @@ static inline Var Row_var(Row value){
   return Var_new(806120, value);
 }
 
-List Var_list(Var);
+static List Var_list(Var);
 
 static inline Row Var_row(Var value){
   return Var_list(value);
 }
 
-Var String_var(String);
+static Var String_var(String);
 
-String int_str(int);
+static String int_str(int);
 
 int List_len(List);
 
@@ -106,7 +106,7 @@ void * Scope_malloc(size_t);
 
 String Var_str(Var);
 
-int Var_is_row(Var, unsigned, unsigned long, unsigned long);
+static int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 
 int Var_is(Var, Symbol);
 

@@ -1,5 +1,0 @@
-unittest/compiler-fixtures/protocol-static-abstract.x:3:1: protocol: 'static' applies only to a concrete protocol adoption
-  static protocol StaticAbstract(T) {
-  ^^^^^^
-  note: remove 'static' from the reusable protocol body
-

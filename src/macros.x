@@ -574,13 +574,14 @@ static List _lisp_bindings(List bindings, List &template_bindings) {
   return lisp.list_free();
 }
 
-/* The filled template. A Declaration result, or a NamedType decorator's,
-   becomes one declaration bundle. */
+/* Declaration results and collected Unit results retain their declarations
+   in one bundle, as does a NamedType decorator. */
 static Ast Expansion.construct(Expansion &x, List bindings) {
   List definition = x.definition;
   Ast constructed = x.template.replace(bindings);
   if (constructed &&
       (definition.assoc(<kind>) == <decl-unit> ||
+       (x.c.shallow && definition.assoc(<kind>) == <unit>) ||
        definition.assoc(<target>) == <named-type>)) {
     List rows = constructed.car() == <seq>
               ? constructed.cdr() : %($constructed);
@@ -2305,7 +2306,7 @@ static List _capture_layout(
 List Compiler.publish_macro_definition_node(Compiler c, List node) {
   c.macros[node.assoc(<name>)] = node;
   if (c.shallow && !c.macro_holes &&
-      !node.assoc(<static>).int() && !node.assoc(<local>).int())
+      !node.assoc(<static>).equal(1) && !node.assoc(<local>).int())
     c.record_compile_time_effect(
       %(compile-time macrodef ${c.freeze_declaration_syntax(node)}), c.token);
   return node;
@@ -2729,25 +2730,28 @@ static void Compiler._argument_separator(Compiler c, Symbol kind) {
 }
 
 static Var Compiler._parse_argument(Compiler c, Symbol kind) {
-  if (!kind) return c.parse_assignment();
-  switch (kind) {
-    case <expr>:       return c.parse_assignment();
-    case <type>:       return c.parse_type_name();
-    case <named-type>: return c.parse_named_type();
-    case <decl>:       return c.parse_declaration_argument();
-    case <decl-row>:   return c.parse_declarator_argument();
-    case <function>:   return c.parse_function_definition();
-    case <param>:      return c.parse_parameter();
-    case <block>:      return c.parse_block_item();
-    case <field>:      return c.parse_field(%(struct ()));
-    case <enumerator>: return c.parse_enumerator(c.aggregate_type);
-    case <map-entry>:  return c.parse_map_entry();
-    case <match-row>:  return c.parse_match_row_argument();
-    case <unit>:       return c.parse_top_level();
-    case <name>:       return c._name_argument();
-    case <literal>:    return c._literal_argument();
+  // Captures retain complete syntax even while collection skips other bodies.
+  $let(c.shallow, 0) {
+    if (!kind) return c.parse_assignment();
+    switch (kind) {
+      case <expr>:       return c.parse_assignment();
+      case <type>:       return c.parse_type_name();
+      case <named-type>: return c.parse_named_type();
+      case <decl>:       return c.parse_declaration_argument();
+      case <decl-row>:   return c.parse_declarator_argument();
+      case <function>:   return c.parse_function_definition();
+      case <param>:      return c.parse_parameter();
+      case <block>:      return c.parse_block_item();
+      case <field>:      return c.parse_field(%(struct ()));
+      case <enumerator>: return c.parse_enumerator(c.aggregate_type);
+      case <map-entry>:  return c.parse_map_entry();
+      case <match-row>:  return c.parse_match_row_argument();
+      case <unit>:       return c.parse_top_level();
+      case <name>:       return c._name_argument();
+      case <literal>:    return c._literal_argument();
+    }
+    $report.macro.argument_contract(c);
   }
-  $report.macro.argument_contract(c);
 }
 
 /* A caller's name is a spelling, resolved where the expansion places it.
@@ -3465,7 +3469,7 @@ static unsigned long template_serial = 0;
 static Var Compiler._eval_template_form(
   Compiler c, String form, List bindings, Token invocation,
   String source_file, Var construction) {
-  if (!c.collect_protocols) c.run_declaration_effects();
+  c.run_declaration_effects();
   c.ensure_macro_lisp();
   unsigned long serial = template_serial++;
   /* Provenance lookup uses captured Var identity. Structural equality must

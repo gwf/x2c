@@ -10,6 +10,8 @@ Functions and types exposed by each compiler module.
 
 | Module | Description |
 | --- | --- |
+| [`src/adapter-memo.x`](adapter-memo.md) | memoized compiler adapter construction. |
+| [`src/ast-rewrite.x`](ast-rewrite.md) | rewrite immediate AST children through canonical Lists. |
 | [`src/ast.x`](ast.md) | shared helpers for x2c compiler AST nodes. |
 | [`src/build.x`](build.md) | the native build of one target. |
 | [`src/builtins.x`](builtins.md) | the built-in macros' compile-time algorithms. |
@@ -23,10 +25,13 @@ Functions and types exposed by each compiler module.
 | [`src/diagnostics.x`](diagnostics.md) | compiler diagnostic storage and rendering. |
 | [`src/editor.x`](editor.md) | one-request semantic editor adapter. |
 | [`src/emit.x`](emit.md) | C tokens from normalized x2c ASTs. |
+| [`src/expressions-reports.x`](expressions-reports.md) | expression typing diagnostics. |
 | [`src/expressions.x`](expressions.md) | expression syntax and its resolution. |
+| [`src/fields.x`](fields.md) | statements that copy or set named fields. |
 | [`src/format.x`](format.md) | code formatting helpers for the x2c compiler. |
 | [`src/frontend.x`](frontend.md) | configured compiler sessions and sequential source units. |
 | [`src/generate.x`](generate.md) | the generated header and source of one unit. |
+| [`src/grammar.x`](grammar.md) | the source forms that lowering recognizes. |
 | [`src/initializers.x`](initializers.md) | brace initializer conversion. |
 | [`src/install.x`](install.md) | Package installation into the x2c home. |
 | [`src/lambdas.x`](lambdas.md) | lambda parsing and capture resolution. |
@@ -40,6 +45,7 @@ Functions and types exposed by each compiler module.
 | [`src/meta-project.x`](meta-project.md) | the project meta build. |
 | [`src/meta-sdk.x`](meta-sdk.md) | the compiler's answers to `lib/meta.x` operations. |
 | [`src/operator-ledger.x`](operator-ledger.md) | compiler lookups from one binary operator ledger. |
+| [`src/parse-report-macros.x`](parse-report-macros.md) | package, binding, and alias diagnostics. |
 | [`src/parse.x`](parse.md) | x2c declarations, parsed from source or constructed. |
 | [`src/preprocess.x`](preprocess.md) | C preprocessor directives in x2c source. |
 | [`src/project.x`](project.md) | x2c project manifests. |

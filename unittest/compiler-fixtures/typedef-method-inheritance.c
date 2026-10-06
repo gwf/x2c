@@ -42,13 +42,13 @@ static Func _x2c_func_handle_0;
 Func x2c_func_shared(FuncAdapter, List);
 
 _x2c_initializer_choice_9D320F3A_0((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _26)))
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
 List cons(Var, List);
 
-Var String_var(String);
+static Var String_var(String);
 
-Var List_var(List);
+static Var List_var(List);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -84,7 +84,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _x2c_static_initialize_0();
 }
 
-List List_cdr(List);
+static List List_cdr(List);
 
 method_inherit_Base method_inherit_Base_rest(method_inherit_Base value){
   if(! _init_guard_) _file_init_();
@@ -108,7 +108,7 @@ const method_self_Record * method_self_Record_choose(const method_self_Record * 
   return value -> value >= other -> value ? value : other;
 }
 
-int List_truth(List);
+static int List_truth(List);
 
 String method_inherit_Base_root(method_inherit_Base value){
   if(! _init_guard_) _file_init_();
@@ -156,7 +156,7 @@ String List_repr(List);
 
 String Var_repr(Var);
 
-Var List_car(List);
+static Var List_car(List);
 
 int main(void){
   x2c_initialize();

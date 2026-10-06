@@ -56,6 +56,7 @@ points used by generated code, native callers, and compiler setup.
 | [`lib/string.x`](string.md) | canonical byte strings and core text operations. |
 | [`lib/symbol.x`](symbol.md) | immediate encoded names. |
 | [`lib/symbolset.x`](symbolset.md) | immutable ordered sets of compact `Symbol`s. |
+| [`lib/system-macros.x`](system-macros.md) | convenience macros for text, timing, and processes. |
 | [`lib/thread.x`](thread.md) | `Context`-backed native worker threads. |
 | [`lib/typed-array.x`](typed-array.md) | packed typed `Array`s generated from shared methods. |
 | [`lib/typed-list.x`](typed-list.md) | typed cons chains generated from typed methods. |
@@ -79,6 +80,7 @@ prelude. Include one explicitly to use its declarations.
 - [`lib/process.x`](process.md) - Commands, pipelines, and background jobs without a shell; explicitly include `process.x` to use them.
 - [`lib/regex.x`](regex.md) - Regular expressions over the bytes of a `String`; explicitly include `regex.x` to use them.
 - [`lib/scripting.x`](scripting.md) - The `args.x`, `diff.x`, `digest.x`, `path.x`, `process.x`, and `regex.x` modules that every script unit includes; include `scripting.x` to use all six.
+- [`lib/system-macros.x`](system-macros.md) - Compile-time convenience macros; explicitly include system-macros.x to use them.
 - [`lib/typed-array.x`](typed-array.md) - Packed typed storage with a raw native bracket; explicitly include `typed-array.x` to use it.
 - [`lib/typed-list.x`](typed-list.md) - Typed views over canonical `List` cells; explicitly include `typed-list.x` to use them.
 - [`lib/typed-map.x`](typed-map.md) - Typed maps over native numeric or canonical `String` fields; explicitly include `typed-map.x` to use them.
@@ -87,17 +89,28 @@ prelude. Include one explicitly to use its declarations.
 
 These modules implement the runtime and are not public APIs.
 
+- `lib/array-generics.x` - Shared declaration templates for typed array operations.
+- `lib/cleanup.x` - Cleanup adoption templates used by runtime owners.
 - `lib/clibc.x` - C library prototypes for integer and string conversions, and string comparison, marked `meta` so compile-time code calls the native functions; it includes the C headers it declares from.
 - `lib/cmath.x` - C99 `<math.h>` prototypes, declared so a `Var` argument unboxes at a math call; the unit still includes `<math.h>`.
 - `lib/datum.x` - Values spelled as Lisp reader text, for interface files and the project meta helper's messages.
+- `lib/error-macros.x` - Structured Error causes shared by runtime modules.
+- `lib/error-private.x` - Error transfer templates used by the exception machinery.
 - `lib/error_init.x` - Type-owned initialization shim that preserves `Error`'s pre-initialization boundary.
+- `lib/func-errors.x` - Structured callable errors shared by runtime modules.
+- `lib/integer-ops.x` - Integer conversion and arithmetic templates shared by runtime owners.
 - `lib/lisp-init.x` - The standard Lisp algorithms `etc/init.xlisp` binds by name into every `Lisp` session.
 - `lib/lisp-targets.x` - The native operations a `Lisp` session can bind, built outside the implicit prelude so the optional modules that supply them stay out of it.
 - `lib/machine.x` - `Match` wordcode, builder, and execution-state definitions.
+- `lib/map-generics.x` - Shared declaration templates for typed map operations.
 - `lib/match-machine.x` - Private `Match` wordcode decoder.
+- `lib/native-scalar-types.x` - The exact C scalar ledger and its compile-time projections.
+- `lib/private-keywords.x` - Keyword aliases used by runtime implementation code.
 - `lib/protocols.x` - The built-in `Cleanup`, `Block`, `Iter`, and `Var` protocol declarations used to generate runtime dispatch adapters.
 - `lib/scan.x` - Allocation-free character scanners used by the tokenizer.
 - `lib/static-init.x` - Compiler-owned first-use static storage and initialization guards.
 - `lib/thread-state.x` - Native pthread-key storage for per-thread runtime state.
 - `lib/tokenizer.x` - Token stream used by the compiler and the Lisp reader.
-- `lib/var-ledger.x` - The `Var` tag tables and decoder table projected from `lib/var-tags.xmacro`, in the one runtime unit that imports the ledger.
+- `lib/var-adapters.x` - Pointer converter templates shared by runtime owners.
+- `lib/var-ledger.x` - The `Var` tag tables and decoder table projected from `lib/var-tags.x`, in the one runtime unit that includes the ledger.
+- `lib/var-tags.x` - The Var tag ledger shared by runtime and compiler projections.

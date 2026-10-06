@@ -386,8 +386,6 @@
       (args (expr (void) ())))))) 
   (at 50 (return (expr (int) (literal (int) "0"))))))
 
-(preproc "#pragma private")
-
 (function (static "Var") 
  (bind (binding 45 "_x2c_func_adapt_0") 
   ((fnmod 
@@ -418,7 +416,7 @@
     (call (expr ((func (("FuncAdapter") ("List"))) "Func") 
            (ident (binding 50 "x2c_func_shared"))) 
      (args (expr ("FuncAdapter") (ident (binding 45 "_x2c_func_adapt_0"))) 
-      (expr ("List") (expr ("List") (cache 12)))))))))
+      (expr ("List") (expr ("List") (cache 686)))))))))
 
 (function (static "Var") 
  (bind (binding 51 "_x2c_func_adapt_1") 
@@ -448,7 +446,7 @@
     (call (expr ((func (("FuncAdapter") ("List"))) "Func") 
            (ident (binding 50 "x2c_func_shared"))) 
      (args (expr ("FuncAdapter") (ident (binding 51 "_x2c_func_adapt_1"))) 
-      (expr ("List") (expr ("List") (cache 13)))))))))
+      (expr ("List") (expr ("List") (cache 687)))))))))
 
 (function (static "Var") 
  (bind (binding 55 "_x2c_func_adapt_2") 
@@ -489,4 +487,4 @@
     (call (expr ((func (("FuncAdapter") ("List"))) "Func") 
            (ident (binding 50 "x2c_func_shared"))) 
      (args (expr ("FuncAdapter") (ident (binding 55 "_x2c_func_adapt_2"))) 
-      (expr ("List") (expr ("List") (cache 19)))))))))
+      (expr ("List") (expr ("List") (cache 693)))))))))

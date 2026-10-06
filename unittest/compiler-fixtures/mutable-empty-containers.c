@@ -41,17 +41,17 @@ Array Array_new(void);
 
 Map Map_new(void);
 
-Var Array_var(Array);
+static Var Array_var(Array);
 
-Var Map_var(Map);
+static Var Map_var(Map);
 
 Var Array_push(Array, Var);
 
-Var int_var(int);
+static Var int_var(int);
 
 Var Map_setindex(Map, Var, Var);
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
 int Array_equal(Array, Array);
 
@@ -59,9 +59,9 @@ int Map_equal(Map, Map);
 
 unsigned Map_len(Map);
 
-Array Var_array(Var);
+static Array Var_array(Var);
 
-Map Var_map(Var);
+static Map Var_map(Var);
 
 void Scope_release(void);
 

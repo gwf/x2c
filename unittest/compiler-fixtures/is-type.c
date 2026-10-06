@@ -57,7 +57,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _0 = String_new("iswidget");
 }
 
-Var int_var(int);
+static Var int_var(int);
 
 static Var next_value(void){
   calls ++;
@@ -99,19 +99,19 @@ IsWidget Var_iswidget(Var value){
 
 void x2c_register_type(String);
 
-Var unsigned_var(unsigned);
+static Var unsigned_var(unsigned);
 
-Var float_var(float);
+static Var float_var(float);
 
-Var List_var(List);
+static Var List_var(List);
 
-Var String_var(String);
+static Var String_var(String);
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
 void * Scope_malloc(size_t);
 
-int Var_is_row(Var, unsigned, unsigned long, unsigned long);
+static int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 
 int Var_is_void(Var);
 

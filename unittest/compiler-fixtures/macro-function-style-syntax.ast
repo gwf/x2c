@@ -17,18 +17,17 @@
 
 (function (int) 
  (bind (binding 1 "generated") ((fnmod (params (param (void) (bind () ())))))) 
- (block (at 8 (return (int) (expr (int) (literal (int) "7"))))))
+ (block (at 0 (return (int) (expr (int) (literal (int) "7"))))))
 
 (function (static int) 
  (bind (binding 2 "local_macro") 
   ((fnmod (params (param (int) (bind (binding 3 "value") ())))))) 
  (block 
-  (at 10 
-   (stmnt 
-    (expr (void) 
-     (cast (decl (void) (bindings (bind () ()))) 
-      (expr (int) (parens (expr (int) (ident (binding 3 "value"))))))))) 
-  (at 12 
+  (at 9 (stmnt 
+         (expr (void) 
+          (cast (decl (void) (bindings (bind () ()))) 
+           (expr (int) (parens (expr (int) (ident (binding 3 "value"))))))))) 
+  (at 11 
    (return (int) 
     (expr (int) 
      (op + (expr (int) (ident (binding 3 "value"))) 
@@ -37,33 +36,33 @@
 (function (int) 
  (bind (binding 4 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 13 
+  (at 12 
    (declare (int) 
     (bindings 
      (op = (bind (binding 5 "result") ()) (expr (int) (literal (int) "0")))))) 
-  (at 15 
+  (at 14 
    (declare (int) 
     (bindings 
      (op = (bind (binding 6 "_x2c_macro_temporary_0") ()) 
       (expr (int) (literal (int) "5")))))) 
-  (at 16 
+  (at 15 
    (stmnt 
     (expr (int) 
      (op = (expr (int) (ident (binding 5 "result"))) 
       (expr (int) (ident (binding 6 "_x2c_macro_temporary_0"))))))) 
-  (at 18 
+  (at 17 
    (declare (int) 
     (bindings 
      (op = (bind (binding 7 "_x2c_macro_temporary_1") ()) 
       (expr (int) 
        (op + (expr (int) (ident (binding 5 "result"))) 
         (expr (int) (literal (int) "1")))))))) 
-  (at 19 
+  (at 18 
    (stmnt 
     (expr (int) 
      (op = (expr (int) (ident (binding 5 "result"))) 
       (expr (int) (ident (binding 7 "_x2c_macro_temporary_1"))))))) 
-  (at 24 
+  (at 23 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 8 "printf"))) 
@@ -87,4 +86,4 @@
        (expr (int) 
         (call (expr ((func ((int))) int) (ident (binding 2 "local_macro"))) 
          (args (expr (int) (literal (int) "4")))))))))) 
-  (at 25 (return (int) (expr (int) (literal (int) "0"))))))
+  (at 24 (return (int) (expr (int) (literal (int) "0"))))))

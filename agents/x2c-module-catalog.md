@@ -8,11 +8,27 @@ non-static function definition discovered in source order. It does
 not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
-- Compiler modules: 46
-- Runtime modules: 63
+- Compiler modules: 52
+- Runtime modules: 75
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
 ## Compiler modules
+
+### [src/adapter-memo.x](../src/adapter-memo.x)
+
+memoized compiler adapter construction.
+
+Public functions:
+
+None. This module has no non-static function definitions.
+
+### [src/ast-rewrite.x](../src/ast-rewrite.x)
+
+rewrite immediate AST children through canonical Lists.
+
+Public functions:
+
+None. This module has no non-static function definitions.
 
 ### [src/ast.x](../src/ast.x)
 
@@ -99,12 +115,14 @@ source-ordered shallow symbol collection and replay.
 
 Public functions:
 
-`Compiler.collect_symbols`, `Sym.withhold_import_rows`,
-`collect_resolve_include`, `Compiler.include_typedef_names`,
-`Compiler.record_generated_symbol`, `Compiler.collect_package`,
-`Compiler.replay_package_imports`, `Compiler.replay_included_package_imports`,
-`Compiler.import_included_exports`, `interface_configure`, `interface_prelude`,
-`interface_text`, `collect_forget_provisional_entries`
+`Compiler.collect_symbols`, `collect_resolve_include`,
+`Compiler.include_typedef_names`, `Compiler.include_type_dependencies`,
+`Compiler.name_meta_provider_bindings`, `Compiler.publishes_typedef`,
+`Compiler.publishes_type_family`, `Compiler.record_generated_symbol`,
+`Compiler.collect_package`, `Compiler.replay_package_imports`,
+`Compiler.included_compile_time_effects`, `Compiler.install_included_effects`,
+`interface_configure`, `interface_prelude`, `interface_text`,
+`collect_forget_provisional_entries`
 
 ### [src/compiler.x](../src/compiler.x)
 
@@ -115,9 +133,10 @@ Public functions:
 `Compiler.var`, `Var.compiler`, `Compiler.shallow_parse`,
 `Compiler.shallow_parse_overlay`, `Compiler.start_collection`,
 `Compiler.collect_compile_time_definition`,
-`Compiler.finish_collected_declaration`, `Compiler._at_function_arrow`,
-`Compiler._skip_shallow_expression`, `Compiler.queue_declaration_effect`,
-`Compiler.run_declaration_effects`, `Compiler.collect_unit_macro`,
+`Compiler.finish_collected_declaration`, `Compiler.record_inline_function`,
+`Compiler._at_function_arrow`, `Compiler._skip_shallow_expression`,
+`Compiler.queue_declaration_effect`, `Compiler.run_declaration_effects`,
+`Compiler.collect_unit_macro`, `Compiler.replay_declaration_source`,
 `Compiler.freeze_declaration_syntax`, `Compiler.freeze_macro_stack`,
 `Compiler.thaw_declaration_syntax`, `Compiler.select_declaration_defaults`,
 `Compiler.full_parse`, `Compiler.skip_collected_script_statement`,
@@ -141,11 +160,11 @@ Public functions:
 `Compiler.define_match_binders`, `Compiler.define_catch_binders`,
 `Compiler.catch_binder_declarations`, `Compiler.own_diagnostics`,
 `Compiler.borrow_diagnostics`, `Compiler.close_child`,
-`Compiler.borrow_unit_semantics`, `Compiler.share_meta_group`,
-`Compiler.take_unit_state`, `Compiler.return_unit_state`,
-`Compiler.read_source`, `Compiler.canonical_path`, `real_path`,
-`absolute_path`, `home_portable_path`, `home_absolute_path`,
-`Map.merge_translation_dependency`, `Compiler.add_translation_dependency`,
+`Compiler.share_meta_group`, `Compiler.take_unit_state`,
+`Compiler.return_unit_state`, `Compiler.read_source`,
+`Compiler.canonical_path`, `real_path`, `absolute_path`, `home_portable_path`,
+`home_absolute_path`, `Map.merge_translation_dependency`,
+`Compiler.add_translation_dependency`,
 `Compiler.merge_translation_dependencies`, `Compiler.new`,
 `Compiler.new_shared`, `Compiler.free_lisp`
 
@@ -188,6 +207,14 @@ Public functions:
 
 `Compiler.emit`
 
+### [src/expressions-reports.x](../src/expressions-reports.x)
+
+expression typing diagnostics.
+
+Public functions:
+
+None. This module has no non-static function definitions.
+
 ### [src/expressions.x](../src/expressions.x)
 
 expression syntax and its resolution.
@@ -207,6 +234,14 @@ Public functions:
 `Compiler.printf_static_format`, `Compiler.promote_string_literal`,
 `Compiler.convert_expression`, `Compiler.convert_segment_to_string`,
 `Compiler.converter_call`, `Compiler.is_builtin_converter_call`
+
+### [src/fields.x](../src/fields.x)
+
+statements that copy or set named fields.
+
+Public functions:
+
+`_field_copies`, `_field_sets`
 
 ### [src/format.x](../src/format.x)
 
@@ -235,6 +270,22 @@ Public functions:
 `generate_code`, `generate_code_text`, `Compiler.place_source_prelude`,
 `Compiler.init_statements`, `Compiler.definition_rows`,
 `Compiler.dump_definitions`
+
+### [src/grammar.x](../src/grammar.x)
+
+the source forms that lowering recognizes.
+
+Public functions:
+
+`source_return_type`, `source_conditional_statement`, `source_any_lambda`,
+`source_cast_content`, `source_generic_content`, `source_va_arg_content`,
+`source_commas_content`, `source_slice_content`, `source_composite_content`,
+`source_string_content`, `source_operator_content`,
+`source_operator_expression`, `source_postfix_content`,
+`source_postfix_expression`, `source_content_pattern`, `source_call_content`,
+`source_return_content`, `source_block_content`, `source_identifier_content`,
+`source_literal_content`, `source_declarator_row`, `source_expression`,
+`catch_handle`, `retain_catch_handle`
 
 ### [src/initializers.x](../src/initializers.x)
 
@@ -273,7 +324,9 @@ shipped `meta` code compiled into the compiler.
 Public functions:
 
 `x2c_expr_field`, `x2c_expr_cast`, `x2c_decl_make`, `x2c_param_make`,
-`x2c_type_members`, `linked_meta_targets`, `linked_meta_hashes`
+`x2c_type_members`, `_dedent_expand`, `_macros_location`, `_tag_decode_group`,
+`_tag_decode_groups`, `_tag_id_checks`, `linked_meta_targets`,
+`linked_meta_hashes`
 
 ### [src/literals.x](../src/literals.x)
 
@@ -302,6 +355,7 @@ Public functions:
 `Compiler.parse_macro_quotation`, `Compiler.macro_lisp_starts_declaration`,
 `Compiler.try_parse_macro_member`, `Compiler.macro_introduced_name`,
 `Compiler.macro_tag_name`, `Compiler.publish_macro_definition_node`,
+`Compiler.record_compile_time_effect`, `Compiler.install_compile_time_effects`,
 `Compiler.macro_form_is_definition`, `Compiler.local_macro_form_is_definition`,
 `Compiler.keyword_form_is_definition`, `Compiler.parse_keyword_definition`,
 `Compiler.macro_starts_target_at`, `Compiler.macro_invocation_collection`,
@@ -317,17 +371,15 @@ Public functions:
 `Compiler.try_parse_macro_subpattern`, `Compiler.capture_macro_value`,
 `Compiler.take_code_value`, `Compiler.ensure_macro_lisp`,
 `Compiler.parse_macro_lisp_top_level`, `Compiler.parse_macro_lisp_shallow`,
-`Compiler.keep_imported_meta`, `Compiler.at_import`,
-`Compiler.record_macro_export`, `Compiler.import_exported`,
 `Compiler.evaluate_declaration_effect`, `Compiler.parse_macro_lisp_expression`,
 `Compiler.lift_macro_lisp_expression`, `Compiler.bind_macro_lisp_statement`,
-`Compiler.import_package_macros`, `Compiler.source_path`,
-`Compiler.open_macro_library`, `Compiler.publish_macro_library`,
-`Compiler.inherits_import`, `Compiler.record_comptime`,
-`Compiler.inherit_library_comptime`, `macro_library_filling`,
-`Compiler.shared_definitions`, `Compiler.shares_meta_definition`,
-`Compiler.install_builtin_macros`, `Compiler.bind_meta_operation`,
-`Compiler.report_lisp_failure`, `macro_library_reset`
+`Compiler.source_path`, `Compiler.open_macro_library`,
+`Compiler.publish_macro_library`, `Compiler.inherits_import`,
+`Compiler.record_comptime`, `Compiler.inherit_library_comptime`,
+`macro_library_filling`, `Compiler.shared_definitions`,
+`Compiler.shares_meta_definition`, `Compiler.install_builtin_macros`,
+`Compiler.bind_meta_operation`, `Compiler.report_lisp_failure`,
+`macro_library_reset`
 
 ### [src/main.x](../src/main.x)
 
@@ -346,10 +398,10 @@ Public functions:
 `Compiler.use_meta_toolchain`, `Compiler.meta_cc`, `Compiler.meta_cc_identity`,
 `Compiler.meta_cc_run`, `Compiler.stage_meta_in_process`,
 `Compiler.groups_meta`, `Compiler.group_meta_function`,
-`Compiler.record_meta_import`, `Compiler.meta_reaches_compile_time`,
-`Compiler.meta_call_missing`, `Compiler.refuse_meta_call`,
-`Compiler.refuse_record_meta_call`, `Compiler.use_meta_build_directory`,
-`Compiler.write_meta_build`, `Compiler.bind_meta_group`
+`Compiler.meta_reaches_compile_time`, `Compiler.meta_call_missing`,
+`Compiler.refuse_meta_call`, `Compiler.refuse_record_meta_call`,
+`Compiler.use_meta_build_directory`, `Compiler.write_meta_build`,
+`Compiler.bind_meta_group`
 
 ### [src/meta-helper-client.x](../src/meta-helper-client.x)
 
@@ -369,16 +421,18 @@ Public functions:
 `Compiler.install_meta_function`, `Compiler.install_collected_meta_function`,
 `Compiler.install_meta_declaration`, `Compiler.evaluate_meta_expression`,
 `Compiler.evaluate_meta_statement`, `Compiler.run_meta_call`,
-`Compiler.record_native_meta_effect`, `Compiler.install_native_meta_effects`,
-`Compiler.bind_native_meta`, `Compiler.install_native_meta_function`,
-`Compiler.native_meta_accepts`, `Compiler.native_meta_module`,
-`Compiler.native_meta_targets`, `Compiler.bind_linked_meta`,
-`Compiler.compiler_targets`, `Compiler.select_native_modules`,
-`Compiler.select_package_module`, `Compiler.load_native_module`,
-`Compiler.preload_native_module`, `Compiler.add_native_module`,
-`Compiler.native_module_loaded`, `Compiler.native_module_targets`,
-`Compiler.supplies_native_meta`, `x2c_register_extension`,
-`Compiler.links_extension`, `Compiler.extension_archive`
+`Compiler.record_project_meta_effect`, `Compiler.install_project_meta_effect`,
+`Compiler.bind_project_meta`, `Compiler.record_native_meta_effect`,
+`Compiler.install_native_meta_effects`, `Compiler.bind_native_meta`,
+`Compiler.install_native_meta_function`, `Compiler.native_meta_accepts`,
+`Compiler.native_meta_module`, `Compiler.native_meta_targets`,
+`Compiler.bind_linked_meta`, `Compiler.compiler_targets`,
+`Compiler.select_native_modules`, `Compiler.select_package_module`,
+`Compiler.load_native_module`, `Compiler.preload_native_module`,
+`Compiler.add_native_module`, `Compiler.native_module_loaded`,
+`Compiler.native_module_targets`, `Compiler.supplies_native_meta`,
+`x2c_register_extension`, `Compiler.links_extension`,
+`Compiler.extension_archive`
 
 ### [src/meta-project.x](../src/meta-project.x)
 
@@ -420,6 +474,14 @@ Public functions:
 `Symbol.compound_assignment`, `Compiler.operator_member`,
 `Compiler.derived_member`
 
+### [src/parse-report-macros.x](../src/parse-report-macros.x)
+
+package, binding, and alias diagnostics.
+
+Public functions:
+
+None. This module has no non-static function definitions.
+
 ### [src/parse.x](../src/parse.x)
 
 x2c declarations, parsed from source or constructed.
@@ -436,15 +498,16 @@ Public functions:
 `Compiler.parse_type_operand`, `Compiler.parse_declaration_argument`,
 `Compiler.test_static_assert`, `Compiler.parse_static_assert`,
 `Compiler.test_declaration`, `Compiler.check_reference_placement`,
-`Compiler.parse_type_name`, `Compiler.parse_fields`, `Compiler.parse_field`,
-`Compiler.parse_named_type`, `Compiler.parse_enumerators`,
-`Compiler.parse_enumerator`, `Compiler.parse_declarator_argument`,
-`Compiler.bind_template_local`, `Compiler.parse_parameter_list`,
-`Compiler.parse_parameter`, `Compiler.bind_parameter`,
-`Compiler.parse_complex_identifier`, `Compiler.package_alias_spelling`,
-`Compiler.parse_basic_identifier`, `Compiler.parse_optional_identifier`,
-`Compiler.parse_function_definition`, `Compiler.parse_function_target`,
-`Compiler.finish_managed_declaration`, `Compiler.bind_syntax`,
+`Compiler.collect_inline_type_dependencies`, `Compiler.parse_type_name`,
+`Compiler.parse_fields`, `Compiler.parse_field`, `Compiler.parse_named_type`,
+`Compiler.parse_enumerators`, `Compiler.parse_enumerator`,
+`Compiler.parse_declarator_argument`, `Compiler.bind_template_local`,
+`Compiler.parse_parameter_list`, `Compiler.parse_parameter`,
+`Compiler.bind_parameter`, `Compiler.parse_complex_identifier`,
+`Compiler.package_alias_spelling`, `Compiler.parse_basic_identifier`,
+`Compiler.parse_optional_identifier`, `Compiler.parse_function_definition`,
+`Compiler.parse_function_target`, `Compiler.finish_managed_declaration`,
+`Compiler.bind_syntax`, `Compiler.land_retained_bindings`,
 `Compiler.bind_callable_body`, `Compiler.finish_foreign_alias`
 
 ### [src/preprocess.x](../src/preprocess.x)
@@ -454,10 +517,10 @@ C preprocessor directives in x2c source.
 Public functions:
 
 `preproc_directive`, `preproc_conditional_kind`, `preproc_open_state`,
-`preproc_branch_state`, `preproc_visibility`, `preproc_include_target`,
-`preproc_marker_file`, `Compiler.scan_conditionals`,
-`Compiler.leading_preproc`, `Compiler.update_source_visibility`,
-`Compiler.note_object_macro`, `preproc_track_arms`, `preproc_within_arms`
+`preproc_branch_state`, `preproc_include_target`, `preproc_marker_file`,
+`Compiler.scan_conditionals`, `Compiler.leading_preproc`,
+`Compiler.update_source_visibility`, `Compiler.note_object_macro`,
+`preproc_track_arms`, `preproc_within_arms`
 
 ### [src/project.x](../src/project.x)
 
@@ -574,9 +637,8 @@ Public functions:
 `Sym.is_map_type`, `Sym.is_named_value_type`, `Sym.lookup_field`,
 `Sym.declare_field_order`, `Sym.field_order`, `Sym.declare_delegate_field`,
 `Sym.delegate_aggregate`, `Compiler.begin_semantic_transaction`,
-`SymTxn.local_macros_changed`, `Sym.begin_import`, `Sym.end_import`,
-`Sym.added_globals`, `Sym.end_log`, `SymTxn.commit`, `SymTxn.commit_transient`,
-`SymTxn.rollback`
+`SymTxn.local_macros_changed`, `Sym.end_log`, `SymTxn.commit`,
+`SymTxn.commit_transient`, `SymTxn.rollback`
 
 ### [src/toolchain.x](../src/toolchain.x)
 
@@ -659,6 +721,14 @@ Public functions:
 
 `Args.parse`, `Args.usage`, `Args.from_argv`
 
+### [lib/array-generics.x](../lib/array-generics.x)
+
+fixed-width Array family generation.
+
+Public functions:
+
+None. This module has no non-static function definitions.
+
 ### [lib/array.x](../lib/array.x)
 
 dynamic contiguous arrays of `Var` elements.
@@ -712,6 +782,14 @@ Public functions:
 `Buffer.getindex`, `Buffer.len`, `Buffer.str`, `Buffer.str_free`,
 `Buffer.repr`, `Buffer.truth`, `Buffer.new`, `Buffer.reserve`, `Buffer.clear`,
 `Buffer.move_to`, `Buffer.free`
+
+### [lib/cleanup.x](../lib/cleanup.x)
+
+Cleanup adoption for handles released by one method.
+
+Public functions:
+
+None. This module has no non-static function definitions.
 
 ### [lib/clibc.x](../lib/clibc.x)
 
@@ -810,6 +888,22 @@ Public functions:
 `x2c_descriptor_thread_start_begin`, `x2c_descriptor_thread_start_end`,
 `x2c_descriptor_registration_frozen`
 
+### [lib/error-macros.x](../lib/error-macros.x)
+
+shared non-returning Error causes.
+
+Public functions:
+
+None. This module has no non-static function definitions.
+
+### [lib/error-private.x](../lib/error-private.x)
+
+private layouts for Error transfer state.
+
+Public functions:
+
+None. This module has no non-static function definitions.
+
 ### [lib/error.x](../lib/error.x)
 
 handler stack and accumulated errors.
@@ -862,6 +956,14 @@ Public functions:
 `File.path_error`, `String.open`, `File.open`, `File.fdopen`, `File.popen`,
 `File.reopen`, `File.initialize`
 
+### [lib/func-errors.x](../lib/func-errors.x)
+
+structured Func binding and adapter errors.
+
+Public functions:
+
+None. This module has no non-static function definitions.
+
 ### [lib/func.x](../lib/func.x)
 
 generic native function binding.
@@ -875,6 +977,14 @@ Public functions:
 `x2c_func_declared_reference_argument`, `Func.new`, `Func.new_rest`,
 `Func.new_context`, `x2c_func_shared`, `Func.signature`, `Func.context`,
 `Func.move`, `Func.var`, `Var.func`
+
+### [lib/integer-ops.x](../lib/integer-ops.x)
+
+shared raw integer arithmetic.
+
+Public functions:
+
+None. This module has no non-static function definitions.
 
 ### [lib/iter.x](../lib/iter.x)
 
@@ -1026,6 +1136,14 @@ Public functions:
 `Macro_pattern`, `Macro.binder`, `Macro.number_type`, `Macro.number_literal`,
 `Macro_case_pattern`, `Macro_case_capture_at`
 
+### [lib/map-generics.x](../lib/map-generics.x)
+
+shared Robin Hood Map family generation.
+
+Public functions:
+
+None. This module has no non-static function definitions.
+
 ### [lib/map.x](../lib/map.x)
 
 hash table mapping `Var` keys to `Var` values.
@@ -1117,6 +1235,14 @@ Public functions:
 `Mutex.recursive_unlock`, `Mutex.new`, `Mutex.lock`, `Mutex.try_lock`,
 `Mutex.unlock`, `Mutex.free`
 
+### [lib/native-scalar-types.x](../lib/native-scalar-types.x)
+
+exact C scalar ledger.
+
+Public functions:
+
+`native_scalar_types`, `_scalar_access_units`
+
 ### [lib/path.x](../lib/path.x)
 
 filesystem locations and the operations on them.
@@ -1143,6 +1269,14 @@ Public functions:
 `Pool.current`, `Pool.initialize`, `Pool.thread_initialize`, `Pool.shutdown`,
 `Pool.open_named`, `Pool.open`, `Pool.close`, `Pool.detach`,
 `Pool.is_permanent`, `Pool.epoch`
+
+### [lib/private-keywords.x](../lib/private-keywords.x)
+
+implementation loop keyword aliases.
+
+Public functions:
+
+None. This module has no non-static function definitions.
 
 ### [lib/process.x](../lib/process.x)
 
@@ -1308,6 +1442,14 @@ Public functions:
 
 `SymbolSet.len`, `SymbolSet.index`, `SymbolSet.contains`, `SymbolSet.getindex`,
 `SymbolSet.iter`, `SymbolSet.encode`
+
+### [lib/system-macros.x](../lib/system-macros.x)
+
+convenience macros for text, timing, and processes.
+
+Public functions:
+
+`_cases_label`, `_cases_transfers`, `_cases_split`, `_cases_switch`
 
 ### [lib/thread-state.x](../lib/thread-state.x)
 
@@ -1495,6 +1637,14 @@ Public functions:
 `MapStringInt.var`, `Var.mapstringint`, `MapStringInt.iter`,
 `MapStringInt.keys`, `MapStringInt.enumerate`, `MapStringInt.cleanup`
 
+### [lib/var-adapters.x](../lib/var-adapters.x)
+
+pointer converter and protocol adoption templates.
+
+Public functions:
+
+None. This module has no non-static function definitions.
+
 ### [lib/var-ledger.x](../lib/var-ledger.x)
 
 the runtime tables projected from the Var tag ledger.
@@ -1502,6 +1652,21 @@ the runtime tables projected from the Var tag ledger.
 Public functions:
 
 None. This module has no non-static function definitions.
+
+### [lib/var-tags.x](../lib/var-tags.x)
+
+the Var tag ledger and its projections.
+
+Public functions:
+
+`_tag_groups`, `_tag_rows`, `_tag_id`, `_tag_kind`, `_tag_top`, `_tag_middle`,
+`_tag_bottom`, `_tag_numeric`, `_tag_bits`, `_tag_rank`, `_tag_floating`,
+`_tag_unsigned`, `_tag_info_row`, `_tag_info_sentinel`, `_tag_info`,
+`_tag_descriptor`, `_tag_names`, `_tag_numeric_rows`, `_tag_numeric_names`,
+`_tag_bits_expr`, `_tag_numeric_row`, `_tag_numeric_table`, `_tag_decode_row`,
+`_tag_decode_rows`, `_tag_group_mask`, `_tag_validated_ids`,
+`_tag_constant_row`, `_tag_list`, `_tag_sibling_counts`, `_tag_row_entry`,
+`_tag_constant_rows`, `_tag_group_top`, `_tag_types`
 
 ### [lib/var.x](../lib/var.x)
 

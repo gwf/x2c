@@ -4,6 +4,7 @@
 #include "x2c.h"
 
 #include "declaration-macro-include-scope/provider.h"
+#include "declaration-macro-include-scope/answer.h"
 int includer_answer = 42;
 
 int main(void){

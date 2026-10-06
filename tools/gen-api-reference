@@ -317,8 +317,8 @@ static Array _collect(Map units):
                %"comment but $path is marked $visibility")
     modules.push(module)
   if remaining.len():
-    (String path, String name) =
-      remaining.keys().list().sort().car().str().partition("|")
+    List parts = remaining.keys().list().sort().car().str().partition("|")
+    String path = parts.car(), name = parts.caddr()
     _fatal(%"docs/library-api-tiers.txt classifies $name in $path, but " +
            "that name is not a published callable in that module")
   foreach Map module in modules:

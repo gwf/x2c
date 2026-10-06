@@ -22,11 +22,11 @@ static List bare_atom(void);
 
 static List reference(int n);
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
 List cons(Var, List);
 
-Var List_var(List);
+static Var List_var(List);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -66,7 +66,7 @@ static List bare_atom(void){
   return _13;
 }
 
-Var int_var(int);
+static Var int_var(int);
 
 static List reference(int n){
   return cons(_15, cons(int_var(n), NULL));

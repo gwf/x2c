@@ -516,7 +516,7 @@ static int _preload_meta_surface(Frontend frontend, Lisp shared) {
   return 1;
 }
 
-/* `lib/meta.x` includes `lib/varops.x`, whose imported helpers lower calls
+/* `lib/meta.x` includes `lib/varops.x`, whose included helpers lower calls
    to these builders before they are parsed. Until the parse installs them,
    each is a compile-time-only name. */
 static void _declare_builders(Compiler c, Lisp shared) {

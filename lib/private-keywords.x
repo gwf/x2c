@@ -1,3 +1,6 @@
+/*  private-keywords.x -- implementation loop keyword aliases
+*/
+
 #pragma once
 
 macro Decorator $private.loop(Stmt $body) {

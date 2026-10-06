@@ -29,7 +29,7 @@
      (op = (bind (binding 7 "answer") ()) 
       (expr ("Var") 
        (call (expr ((func (("String"))) "Var") (ident (binding 8 "String_var"))) 
-        (args (expr ("String") (cache 0))))))))) 
+        (args (expr ("String") (cache 839))))))))) 
   (at 21 
    (declare ("Var") 
     (bindings 
@@ -165,7 +165,7 @@
       (expr ("String") 
        (call (expr ((func (("String") (...))) ("String")) 
               (ident (binding 24 "String_printf"))) 
-        (args (expr ("String") (cache 1)) 
+        (args (expr ("String") (cache 840)) 
          (expr (int) 
           (call "Var_int" 
            (args (expr ("Var") 

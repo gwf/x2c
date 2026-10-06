@@ -1,6 +1,7 @@
-#pragma once
+/*  expressions-reports.x -- expression typing diagnostics
+*/
 
-/* expressions diagnostics. */
+#pragma once
 
 macro Stmt $report.type.optional_ref_assign(Expr $c, Expr $origin) =>
   $c.report_error(

@@ -5,15 +5,14 @@
     modules appear without their `meta` markers,
     so their functions and initializers execute as native code.
     `Compiler.bind_linked_meta` binds an included definition to its
-    copy only when the two texts hash the same. The
-    lib/meta.x builders with a run-time form bind to the runtime's
-    own definitions and have no copy here.
+    copy only when its source and provider hashes agree. Public
+    functions with a run-time form bind to their ordinary provider's
+    definitions and have no copy here.
 */
 
 #pragma once
 
 #include "x2c.x"
-#include "meta.x"
 #include "common.x"
 #include "list-selectors.x"
 #include "meta.x"
@@ -423,13 +422,9 @@ Map linked_meta_targets(void) {
   return rows;
 }
 
-macro Expression $linked.calls() => $(_x2c.meta.definition.calls);
+macro Expression $linked.hashes() => $(_x2c.meta.linked.hashes);
 
 /** Returns each linked definition's hash and referenced names. */
 Map linked_meta_hashes(void) {
-  Map hashes = $x2c_meta_definition_hashes();
-  Map calls = $linked.calls();
-  foreach (Var (name, hash), hashes)
-    hashes[name] = %($hash ${calls[name]});
-  return hashes;
+  return $linked.hashes();
 }

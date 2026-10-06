@@ -25,7 +25,7 @@ static int rejected(void(* action)(void)){
   return WIFSIGNALED(status) && WTERMSIG(status) == SIGABRT;
 }
 
-Var int_var(int);
+static Var int_var(int);
 
 Array Array_update_n(Array, unsigned, ...);
 

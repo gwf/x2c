@@ -54,12 +54,11 @@ with no package archive and no verification runtime linked.
 
 ## The annotation surface
 
-Import the macros from wherever the package sits relative to the annotated
-file; a compile-time import resolves against the importing file's directory,
-not the `--x-include-dir` list.
+Include the macro module using its path relative to the annotated file,
+or a path found through `--x-include-dir`.
 
 ```x2c
-$(import "../src/cstar-macros.x")
+#include "../src/cstar-macros.x"
 ```
 
 - `$cstar.verify(pre, post)` decorates a function, outermost. Both

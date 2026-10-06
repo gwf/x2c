@@ -35,13 +35,13 @@ static Func _x2c_func_handle_0;
 Func x2c_func_shared(FuncAdapter, List);
 
 _x2c_initializer_choice_BA788DBF_0((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _10)))
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
-Var String_var(String);
+static Var String_var(String);
 
 List cons(Var, List);
 
-Var List_var(List);
+static Var List_var(List);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -73,7 +73,7 @@ Iter Box_iter(Box box, Iter dest){
   return List_iter(box -> items, dest);
 }
 
-Var int_var(int);
+static Var int_var(int);
 
 Var twice(Var value){
   if(! _init_guard_) _file_init_();

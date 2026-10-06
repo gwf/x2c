@@ -76,10 +76,10 @@ int main(void) {
   int branch = 0;
   if (a) branch++;
 
-  Var loop = 2;
-  while (loop) {
+  Var remaining = 2;
+  while (remaining) {
     branch++;
-    loop -= 1;
+    remaining -= 1;
   }
 
   Var for_cond = 0;

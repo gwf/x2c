@@ -67,13 +67,13 @@ int LogFile_done(LogFile value){
   return value != NULL;
 }
 
-Bytes Bytes_push(Bytes, const void *);
+static Bytes Bytes_push(Bytes, const void *);
 
-Bytes Bytes_append_fill(Bytes, const void *, size_t);
+static Bytes Bytes_append_fill(Bytes, const void *, size_t);
 
-Bytes Bytes_append(Bytes, const void *, size_t);
+static Bytes Bytes_append(Bytes, const void *, size_t);
 
-Bytes Bytes_reserve(Bytes, size_t);
+static Bytes Bytes_reserve(Bytes, size_t);
 
 int bytes_chain(Packet value, const void * source){
   return Packet_done(Bytes_push(Bytes_append_fill(Bytes_append(Bytes_reserve(value, 8), source, 1), source, 1), source));
@@ -189,7 +189,7 @@ int var_chain(Dynamic value, Scope * scope){
 
 Iter Iter_init(Iter, Var, IterNextFn, Var);
 
-Var int_var(int);
+static Var int_var(int);
 
 int iter_chain(Cursor value, Var object, IterNextFn next, Cursor dest){
   (void) dest;

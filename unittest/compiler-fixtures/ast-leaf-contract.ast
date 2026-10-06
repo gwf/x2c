@@ -164,7 +164,7 @@
    (declare ("List") 
     (bindings 
      (op = (bind (binding 40 "values") ()) 
-      (expr ("List") (expr ("List") (cache 5))))))) 
+      (expr ("List") (expr ("List") (cache 844))))))) 
   (at 13 
    (at 12 
     (dstrdecl ("Var") 
@@ -202,7 +202,7 @@
        (expr ("List") (ident (binding 40 "values")))))) 
     (declare ("List") 
      (bindings 
-      (op = (bind (binding 47 "_x2c_macro_cursor_0") ()) 
+      (op = (bind (binding 47 "_x2c_macro_cursor_13") ()) 
        (expr ("List") (ident (binding 46 "_x2c_macro_object_0")))))) 
     (declare ("Var") 
      (bindings (bind (binding 48 "_x2c_macro_cursor_output_0") ()))) 
@@ -212,7 +212,7 @@
        (call (expr ((func (("List") (opt-ref "List") (opt-ref "Var"))) int) 
               (ident (binding 49 "List_try_next"))) 
         (args (expr ("List") (ident (binding 46 "_x2c_macro_object_0"))) 
-         (expr ("List") (ident (binding 47 "_x2c_macro_cursor_0"))) 
+         (expr ("List") (ident (binding 47 "_x2c_macro_cursor_13"))) 
          (expr ("Var") (ident (binding 48 "_x2c_macro_cursor_output_0")))))) 
       (block 
        (stmnt 
@@ -231,7 +231,7 @@
                (args (expr ("Var") (ident (binding 45 "value"))))))))))))))))) 
   (at 28 
    (match (expr ("List") (ident (binding 40 "values"))) 
-    (((expr ("List") (expr ("List") (cache 9))) 
+    (((expr ("List") (expr ("List") (cache 848))) 
       (block 
        (at 26 
         (stmnt 

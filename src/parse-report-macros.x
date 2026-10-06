@@ -1,6 +1,7 @@
-#pragma once
+/*  parse-report-macros.x -- package, binding, and alias diagnostics
+*/
 
-/* Reports shared by package parsing, binding, and with aliases. */
+#pragma once
 
 macro Stmt $report.parse.alias_name(Expr $c) =>
   $c.report_error(

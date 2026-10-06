@@ -108,9 +108,9 @@ static int apply_int(int(* fn)(int)){
 
 int x2c_error_catch_site_pending(ErrorCatchSite *);
 
-Var List_var(List);
+static Var List_var(List);
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
 ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
 
@@ -208,7 +208,7 @@ int main(void){
   return mapped == 2 && cleaned == 1 && sentinels == 27 ? 0 : 1;
 }
 
-Var int_var(int);
+static Var int_var(int);
 
 int Var_int(Var);
 

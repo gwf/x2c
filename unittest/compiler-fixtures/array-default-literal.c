@@ -21,15 +21,15 @@ Array Array_update_n(Array, unsigned, ...);
 
 Array Array_new(void);
 
-Var int_var(int);
+static Var int_var(int);
 
-Var String_var(String);
+static Var String_var(String);
 
 int Var_int(Var);
 
 Var Array_getindex(Array, int);
 
-String Var_string(Var);
+static String Var_string(Var);
 
 int main(void){
   x2c_initialize();

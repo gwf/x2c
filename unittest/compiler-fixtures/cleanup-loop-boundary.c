@@ -42,7 +42,7 @@ static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
 
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
 
-Var int_var(int);
+static Var int_var(int);
 
 List cons(Var, List);
 
@@ -70,9 +70,9 @@ static void record_step(int value){
 
 int x2c_error_catch_site_pending(ErrorCatchSite *);
 
-Var List_var(List);
+static Var List_var(List);
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
 ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
 
@@ -197,11 +197,11 @@ static int continue_inside_foreach(void){
       {
         Var volatile item;
         List _x2c_macro_object_0 = _5;
-        List _x2c_macro_cursor_0 = _x2c_macro_object_0;
-        x2c_exception_escaped = & _x2c_macro_cursor_0;
+        List _x2c_macro_cursor_13 = _x2c_macro_object_0;
+        x2c_exception_escaped = & _x2c_macro_cursor_13;
         Var _x2c_macro_cursor_output_0;
         x2c_exception_escaped = & _x2c_macro_cursor_output_0;
-        while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
+        while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_13), &(_x2c_macro_cursor_output_0))){
           item = _x2c_macro_cursor_output_0;
           {
             if(Var_int(item) == 1) continue;

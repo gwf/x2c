@@ -3,8 +3,8 @@
 # compiler, from the sources that define it. Bodied functions and initialized
 # static `meta` values from ordinary shipped sources are copied without
 # their `meta` markers, so their tokens, and
-# therefore their definition hashes, match the source. A lib/meta.x builder
-# with a run-time form is bound to the runtime's own definition: one that
+# therefore their definition hashes, match the source. A public function
+# with a run-time form is bound to its ordinary provider's definition: one that
 # is not static and reaches no compiler operation. The file is rewritten
 # only when its text changes.
 set -eu
@@ -110,9 +110,9 @@ END {
   print "    modules appear without their `meta` markers,"
   print "    so their functions and initializers execute as native code."
   print "    `Compiler.bind_linked_meta` binds an included definition to its"
-  print "    copy only when the two texts hash the same. The"
-  print "    lib/meta.x builders with a run-time form bind to the runtime\047s"
-  print "    own definitions and have no copy here."
+  print "    copy only when its source and provider hashes agree. Public"
+  print "    functions with a run-time form bind to their ordinary provider\047s"
+  print "    definitions and have no copy here."
   print "*/"
   print ""
   print "#pragma once"
@@ -153,15 +153,11 @@ END {
   print "  return rows;"
   print "}"
   print ""
-  print "macro Expression $linked.calls() => $(_x2c.meta.definition.calls);"
+  print "macro Expression $linked.hashes() => $(_x2c.meta.linked.hashes);"
   print ""
   print "/** Returns each linked definition\047s hash and referenced names. */"
   print "Map linked_meta_hashes(void) {"
-  print "  Map hashes = $x2c_meta_definition_hashes();"
-  print "  Map calls = $linked.calls();"
-  print "  foreach (Var (name, hash), hashes)"
-  print "    hashes[name] = %($hash ${calls[name]});"
-  print "  return hashes;"
+  print "  return $linked.hashes();"
   print "}"
 }
 ' $sources > "$tmp"

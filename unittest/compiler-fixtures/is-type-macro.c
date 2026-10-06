@@ -5,11 +5,11 @@
 
 #include "x2c.h"
 #include <stdio.h>
-Var int_var(int);
+static Var int_var(int);
 
 int Var_is(Var, Symbol);
 
-int Var_is_row(Var, unsigned, unsigned long, unsigned long);
+static int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 
 int main(void){
   x2c_initialize();

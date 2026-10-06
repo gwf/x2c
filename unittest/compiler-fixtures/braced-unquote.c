@@ -18,13 +18,13 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static int answer(int value);
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
 List cons(Var, List);
 
-Var List_var(List);
+static Var List_var(List);
 
-Var int_var(int);
+static Var int_var(int);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -69,9 +69,9 @@ static int answer(int value){
   return value;
 }
 
-Var String_var(String);
+static Var String_var(String);
 
-String int_str(int);
+static String int_str(int);
 
 Array Array_update_n(Array, unsigned, ...);
 
@@ -85,25 +85,25 @@ int Var_int(Var);
 
 Var Array_getindex(Array, int);
 
-Var Array_var(Array);
+static Var Array_var(Array);
 
-Var Map_var(Map);
+static Var Map_var(Map);
 
 int List_equal(List, List);
 
 int String_equal(String, String);
 
-String Var_string(Var);
+static String Var_string(Var);
 
 Var List_getindex(List, int);
 
 Var Map_getindex(Map, Var);
 
-List Var_list(Var);
+static List Var_list(Var);
 
-Array Var_array(Var);
+static Array Var_array(Var);
 
-Map Var_map(Var);
+static Map Var_map(Var);
 
 int main(void){
   x2c_initialize();

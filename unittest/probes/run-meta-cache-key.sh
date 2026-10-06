@@ -67,7 +67,8 @@ EOF
 # every helper in the cache: its directory and inode.
 helper_id=
 translate() {
-  "$X2C" build -c --build-dir bd -I . -I inc "$@" prog.x >out.log 2>&1 ||
+  "$X2C" build -c --build-dir bd -I . -I inc "$@" \
+    prog.x top.x chain.x >out.log 2>&1 ||
     fail "build failed: $(cat out.log)"
   helper_id=$(ls -i "$X2C_CACHE_DIR"/meta/project-*/helper | tr '\n' ' ')
 }

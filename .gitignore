@@ -28,7 +28,6 @@ unittest/*
 examples/*
 !unittest/*.[chx]
 !unittest/*.x[ch]
-!unittest/*.xmacro
 !unittest/*.xlisp
 !examples/*.[xch]
 !examples/*.x[ch]

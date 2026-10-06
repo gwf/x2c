@@ -474,10 +474,8 @@
              (expr (int) (ident (binding 23 "caught"))))) 
       (expr (int) (literal (int) "0")) (expr (int) (literal (int) "1"))))))))
 
-(preproc "#pragma private")
-
 (typedef 
- (struct (binding 44 "_x2c_defer_env_0") 
+ (static struct (binding 44 "_x2c_defer_env_0") 
   (fields 
    (declare (const void) 
     (bindings (bind (binding 45 "_x2c_defer_capture_0") (*)))))) 
@@ -515,7 +513,7 @@
        (expr (int) (literal (int) "2")))))))))
 
 (typedef 
- (struct (binding 48 "_x2c_defer_env_1") 
+ (static struct (binding 48 "_x2c_defer_env_1") 
   (fields 
    (declare (const void) 
     (bindings (bind (binding 49 "_x2c_defer_capture_1") (*)))))) 

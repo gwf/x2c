@@ -1,8 +1,10 @@
+/*  system-macros.x -- convenience macros for text, timing, and processes
+
+    Include this module to use its declarations.
+*/
+
 #pragma once
 #include "common.x"
-
-// System macros that remove boilerplate C leaves to every caller.
-// Include this file to use them: #include "system-macros.x"
 
 /* Dedents the literal `node` was written as when its spelling is exact.
    Escaped, interpolated and computed values keep their meaning by calling

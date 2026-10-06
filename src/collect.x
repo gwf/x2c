@@ -174,6 +174,7 @@ Map Compiler.collect_symbols(Compiler c, Map globs) {
   if (covered)
     foreach (Var part, c._entry(canonical).car())
       if (part is <map>) c._merge_rows(globs, part);
+  c.bind_pending_inline_bodies(globs, canonical, NULL, NULL);
   return globs;
 }
 
@@ -187,7 +188,8 @@ static void Compiler._add_prelude(Compiler c, Map globs, Map visited) {
       canonical, c._runtime_text(runtime), Path.dirname(runtime), globs,
       visited);
   else
-    c._replay_cached(c._prelude_entry(runtime, canonical), globs, visited);
+    c._replay_cached(
+      c._prelude_entry(runtime, canonical), globs, visited, NULL, NULL);
 }
 
 /* The prelude contribution is `lib/x2c.x`'s entry: cached in this process,
@@ -252,6 +254,7 @@ static void Compiler._walk_file(
     w.split(tokenizer.tokens);
     visited[path] = 1;
     w.add_defaults();
+    w.queue_public_bodies();
     w.select_public();
     w.publish();
   }
@@ -419,6 +422,15 @@ static void _needed_types(List syntax, Map rows, Map needed) {
   while (pending.len()) {
     Var item = pending.take_last();
     if (item is not <list>) continue;
+    match (item)
+      case %((!or declare typedef function) ?base *)
+        if (base.type().is_static()): continue;
+    match (item) case %(adopt ? ? static *): continue;
+    match (item) case %(declaration-function ?declaration *): {
+      if (!declaration.list().type_from_ast().is_static())
+        pending.push(declaration);
+      continue;
+    }
     List type = item;
     while (type.car() is <symbol> &&
            (type.car().symbol().is_type_qualifier() ||
@@ -498,13 +510,21 @@ static void FileWalk.include(FileWalk &w, String target, int angle) {
   if (!(canonical in w.visited)) {
     w.visited[canonical] = 1;
     if (!entry) entry = w.c._walk_cold(target, canonical, w.globs, w.visited);
-    w.c._replay_cached(entry, w.globs, w.visited);
+    w.c._replay_cached(entry, w.globs, w.visited, NULL, NULL);
   }
   else if (w.visited[canonical] is <array>)
     w.c._replay_included(w.globs, canonical, {}, NULL, w.visited);
   _cache_dependency(
     w.dependencies, canonical, w.c._walked_hash(target, canonical));
   w.parts.push(canonical);
+  if (w.c.pending_inline_bodies.len()) {
+    int needs = w.c.pending_inline_needs_signatures(w.visited);
+    Map signatures = needs
+                   ? w.c.signature_lookahead(w.globs, w.visited) : NULL;
+    if (!needs || signatures != NULL)
+      w.c.bind_pending_inline_bodies(
+        w.globs, w.path, signatures, w.visited);
+  }
 }
 
 /* Preserve absent candidates and alias identity, not directory timestamps.
@@ -550,6 +570,7 @@ static List Compiler._walk_cold(
   String text = c._include_text(target, canonical);
   Compiler file = Compiler.new_shared(c);
   defer c.close_child(file);
+  file.interface_provider = 1;
   file.filename = c.filename;
   // Every file the shared session preloads defines its Lisp there.
   if (macro_library_filling()) {
@@ -568,12 +589,13 @@ static List Compiler._walk_cold(
   return _process_cache()[canonical];
 }
 
-/* Walk a file other than the unit cold, then restore the unit's binding
-   counter. The unit keeps only the file's entry and replays it as it would
-   the file's interface, so it numbers its own bindings the same either way. */
+/* A cold included file has its own generated names. Restore the unit's
+   counters afterwards, so cold walks and cached interfaces give the unit
+   the same binding numbers and private spellings. */
 static void Compiler._walk_apart(
   Compiler c, String path, String text, Map globs, Map visited) {
   $let(c.names.next_binding, c.names.next_binding)
+  $let(c.names.counters, {})
     c._walk_file(path, text, Path.dirname(path), globs, visited);
 }
 
@@ -600,15 +622,15 @@ static String _resolve_include(
 }
 
 /* The search order: the including file's directory for a quoted include,
-   the working directory, the compiler's `src/` and `lib/`, then the
-   configured include directories. */
+   the working directory, the runtime's `lib/`, the compiler's `src/`,
+   then the configured include directories. */
 static Array _include_dirs(
   List extra_dirs, String includer_dir, int canonical) {
   Array dirs = [];
   if (includer_dir) dirs.push(_canonical_path(includer_dir));
   dirs.push(canonical ? _canonical_cwd() : ".");
-  dirs.push(_canonical_src());
   dirs.push(_canonical_lib());
+  dirs.push(_canonical_src());
   foreach (Var dir, extra_dirs)
     if (dir is <string>) dirs.push(canonical ? _canonical_path(dir) : dir);
   return dirs;
@@ -675,6 +697,48 @@ static void Compiler._add_type_dependencies(
       case %(?(String include)):
         c._add_type_dependencies(types, include, seen);
     }
+}
+
+/** Reports whether the cached meta provider matches linked code.
+    The scanner uses the same retained hashes as evaluator installation. */
+int Compiler.linked_meta_provider_current(Compiler c, String path) {
+  List entry = c._entry(_canonical_path(path));
+  if (!entry) return 0;
+  Map hashes = {}, native = {};
+  foreach (Var part, entry.car()) {
+    if (part is not <map>) continue;
+    foreach (Var value, part.map()) match (value) {
+      case %(meta-hashes ? ?(Map own)): hashes = own;
+      case %(native-meta ?(String name) ?): native[name] = 1;
+      case %(project-meta ?name ? ?provider ?(Map own)):
+        if (!c.project_meta_uses_linked(name, provider, own)) return 0;
+    }
+  }
+  return c.meta_provider_hashes_current(hashes, native);
+}
+
+/** Selects helper C spellings for public definitions owned by `path`.
+    Bindings, rather than source tokens, keep unrelated private names and
+    fields unchanged. Native supplier declarations retain their C names. */
+void Compiler.name_meta_provider_bindings(
+  Compiler c, String path, int index) {
+  List entry = c._entry(_canonical_path(path));
+  if (!entry) return;
+  foreach (String name, entry.caddr()) c._name_meta_provider(name, index);
+  foreach (Var part, entry.car()) {
+    if (part is not <map>) continue;
+    foreach (Var value, part.map())
+      match (value) case %(native-object ?(String name)):
+        c._name_meta_provider(name, index);
+  }
+}
+
+static void Compiler._name_meta_provider(
+  Compiler c, String name, int index) {
+  if (%($name) in c.sym.file_statics()) return;
+  List binding = c.sym.lookup(%($name), NULL);
+  if (binding)
+    c.set_fact(%(emitted $binding), %"_x2c_meta_group_${index}_$name");
 }
 
 /** Reports whether this unit's selected interface publishes `name`. */
@@ -758,8 +822,138 @@ static void FileWalk.add_defaults(FileWalk &w) {
   w.deferred = macro_library_filling();
   if (w.deferred) return;
   Map generated = w.c.select_declaration_defaults(
-    w.path, w.globs, w.parts, w.definitions);
+    w.path, w.globs, w.parts, w.definitions, w.statics);
+  if (w.unit && generated) _publish_unit_statics(w.statics, generated, w.path);
   if (generated) w.parts.push(_cache_copy(generated));
+}
+
+/* Retain a cold provider's context until every included signature is
+   collected. A cycle can refer to a declaration after its include. */
+static void FileWalk.queue_public_bodies(FileWalk &w) {
+  if (!w.unit || !w.c.interface_provider) return;
+  int private_types = 0;
+  foreach (Var key, w.statics.keys())
+    if (key is <list> && _type_family(key)) private_types = 1;
+  if (!private_types) return;
+  int exposed = 0;
+  foreach (Var part, w.parts) if (part is <map>)
+    foreach (Var key, part.map().keys())
+      match (key) case %("function-inline" ?): exposed = 1;
+  if (!exposed) return;
+  if (macro_library_filling() || w.c.meta_build) {
+    w.deferred = 1;
+    return;
+  }
+  Map own = {};
+  foreach (Var part, w.parts) if (part is <map>) own.merge(part);
+  w.c.public_bodies = 1;
+  w.c.pending_inline_bodies.push(
+    %(${w.c} ${w.path} ${w.text} ${w.globs} $own
+      ${w.statics} ${w.hashes}));
+}
+
+/* A completed provider binds immediately. Only a dependency on an active,
+   unpublished ancestor needs future ordinary signatures. */
+static int Compiler.pending_inline_needs_signatures(
+  Compiler c, Map active) {
+  foreach (List work, c.pending_inline_bodies) {
+    List entry = c._entry(work[1]);
+    Map dependencies = entry[3];
+    foreach (Var (path, state), active)
+      if (state is <array> && path in dependencies && !c._entry(path))
+        return 1;
+  }
+  return 0;
+}
+
+/* Read ordinary declarations of active ancestors without evaluating their
+   future Lisp, imports, or Unit producers. Macro maps remain local to this
+   lookahead; the real walk still applies effects at their source positions. */
+static Map Compiler.signature_lookahead(
+  Compiler c, Map globs, Map active) {
+  Map signatures = {};
+  Array paths = [];
+  foreach (Var (path, state), active)
+    if (state is <array>) paths.push(path);
+  paths.sort();
+  foreach (String path, paths) {
+    String text = c._include_text(path, path);
+    Compiler shadow = Compiler.new_shared(c);
+    defer c.close_child(shadow);
+    shadow.filename = path;
+    if (!shadow._package_owns(path)) shadow.package = NULL;
+    shadow.layout = is_layout_file(path);
+    shadow.take_unit_state(c);
+    shadow.signature_only = 1;
+    shadow.macros = shadow.macros.copy();
+    shadow.kw_aliases = shadow.kw_aliases.copy();
+    shadow.object_macros = shadow.object_macros.copy();
+    shadow.imports = shadow.imports.copy();
+    shadow.declaration_effects = NULL;
+    shadow.collect_protocols = 0;
+    shadow.tokenize(text);
+    Map overlay = {};
+    DiagnosticsHold hold = shadow.diagnostics.hold();
+    int failed = 0;
+    $let(c.names.next_binding, c.names.next_binding)
+    $let(c.names.counters, c.names.counters.copy())
+    $let(c.names.file_scope_owners, c.names.file_scope_owners.copy()) {
+      try shadow.shallow_parse_overlay(globs, overlay);
+      catch %(malformed *): failed = 1;
+    }
+    shadow.diagnostics.release(hold, 0);
+    if (failed) return NULL;
+    FileWalk lookahead = {
+      .c = shadow, .unit = 1, .path = path, .globs = globs,
+      .parts = [overlay], .statics = shadow.sym.file_statics()};
+    _publish_unit_statics(lookahead.statics, overlay, path);
+    lookahead.select_public();
+    foreach (Var (key, value), overlay) {
+      if (_type_family(key)) signatures[key] = value;
+      else match (key) {
+        case %(?(String name)): signatures[key] = value;
+        case %(self ?): signatures[key] = value;
+        case %("unit-static" ?): signatures[key] = value;
+      }
+    }
+  }
+  return signatures;
+}
+
+/* Each provider binds its header bodies in its own original session.
+   Included signatures come from the completed graph; effects still install
+   at the provider's ordinary include positions. */
+static void Compiler.bind_pending_inline_bodies(
+  Compiler c, Map globs, String unit, Map signatures, Map active) {
+  Array pending = c.pending_inline_bodies;
+  if (!pending.len()) return;
+  for (int i = 0; i < pending.len(); i++) {
+    (Compiler body, String path, String text, Map symbols, Map own,
+     Map statics, Map hashes) = pending[i];
+    Map visited = {};
+    visited[path] = 1;
+    Array effects = [];
+    if (signatures) symbols.merge(signatures);
+    body._replay_cached(body._entry(path), symbols, visited, effects, active);
+    body.filename = path;
+    body.meta_hashes = hashes;
+    body.interface_active = active;
+    body.tokenize(text);
+    List ast = body.full_parse(symbols, 0);
+    Map additions = body.inline_type_dependencies(ast);
+    body.publish_inline_dependencies(path, own, statics, additions);
+    foreach (Var part, body._entry(path).car())
+      if (part is <map>) c._merge_rows(globs, part);
+    c.merge_translation_dependencies(body.deps);
+    body.public_bodies = 0;
+    c.close_child(body);
+  }
+  pending.clear();
+  Map visited = {};
+  visited[unit] = 1;
+  Array effects = [];
+  List entry = c._entry(unit);
+  if (entry) c._replay_cached(entry, globs, visited, effects, active);
 }
 
 static int FileWalk.produces(FileWalk &w) {
@@ -776,6 +970,13 @@ static int FileWalk.produces(FileWalk &w) {
    as a unit whose text the prelude already covered, does not replace an
    entry that other units may already have replayed. */
 static void FileWalk.publish(FileWalk &w) {
+  if (w.unit && w.hashes.len()) {
+    Map metadata = _cache_map();
+    String provider = home_portable_path(w.path);
+    metadata[%("source-node" (meta-hashes $provider 0))] =
+      %(meta-hashes $provider ${w.hashes});
+    w.parts.push(metadata);
+  }
   List parts = w.parts.list_free();
   _retain(w.path);
   _retain_rows(parts);
@@ -815,6 +1016,87 @@ static void _retain_rows(List parts) {
   }
 }
 
+/** Records the actual type dependencies of typed public inline bodies. */
+Map Compiler.inline_type_dependencies(Compiler c, List ast) {
+  Map rows = {};
+  List function;
+  $ast.walk(ast, function) {
+    match (function)
+      case %(function ?base (bind ?binding ?) ?body): {
+        Type type = base;
+        if (!type.is_inline() || type.is_static()) continue;
+        Map types = {}, List node;
+        $ast.walk(body, node) {
+          match (node) {
+            case %(expr ?type ?): if (type) types[type] = 1;
+            case %((!set ?tag (!or declare decl typedef)) ?base
+                     (bindings *bindings)):
+              foreach (List binding, bindings) {
+                Type type = %(declare $base (bindings $binding))
+                  .type_from_ast();
+                if (type) types[type] = 1;
+              }
+            case %(offsetof ?type ?): types[type] = 1;
+            case %(op (!or . (!quote ->)) (expr ?receiver ?) ?): {
+              Type aggregate = c.sym.delegate_aggregate(receiver);
+              if (aggregate) types[aggregate] = 1;
+            }
+          }
+        }
+        Array ordered = [];
+        foreach (Var type, types.keys()) ordered.push(type);
+        String path = home_portable_path(Path.absolute(c.filename));
+        String name = binding_identity_spelling(binding);
+        rows[%("source-node" (interface-types $path -1 $name))] =
+          %(interface-types $name ${ordered.sort().list_free()});
+        continue;
+      }
+    match (function) {
+      case %((!or seq at api-source) *): ;
+      default: if (function.car() is <symbol>) continue;
+    }
+  }
+  return rows;
+}
+
+/** Promotes the selected type families after the owning ordinary full
+    parse. The header and Xi then use the same complete family selection. */
+void Compiler.publish_inline_types(Compiler c, List ast) {
+  Map additions = c.inline_type_dependencies(ast);
+  if (!additions.len()) return;
+  String path = _canonical_path(c.filename);
+  c.publish_inline_dependencies(
+    path, c.sym.unit_symbols(), c.sym.file_statics(), additions);
+}
+
+static void Compiler.publish_inline_dependencies(
+  Compiler c, String path, Map all, Map statics, Map additions) {
+  if (!additions.len()) return;
+  List entry = c._entry(path);
+  if (!entry) return;
+  Map needed = {}, selected = {};
+  foreach (Var value, additions) _needed_types(value, all, needed);
+  int changed;
+  do {
+    changed = 0;
+    foreach (Var (key, value), all) {
+      List family = _row_type_family(all, statics, key, value);
+      if (!family || !(family in needed) || key in selected) continue;
+      selected[key] = 1;
+      additions[key] = value;
+      if (value is <list>) _needed_types(value, all, needed);
+      changed = 1;
+    }
+  } while (changed);
+  Map retained = _cache_copy(additions);
+  List parts = entry.car().list().append(%($retained));
+  _retain_rows(%($retained));
+  _cache_dependencies(entry[3], c.deps);
+  List updated = %($parts @{entry.cdr()});
+  _require_retained(updated.try_own());
+  _process_cache()[path] = updated;
+}
+
 /** Records one generated public callable in the declaration map that the
     current file's collected entry contributes, which is the map its
     interface publishes. A file without a collected declaration map records
@@ -845,7 +1127,8 @@ void Compiler.record_generated_symbol(
    function definitions once per translation unit. In-memory and interface
    entries have the same shape and take this same path. */
 static void Compiler._replay_cached(
-  Compiler c, List entry, Map globs, Map visited) {
+  Compiler c, List entry, Map globs, Map visited, Array effects,
+  Map active) {
   foreach (Var name, entry.caddr()) c.fn_defs[name] = 1;
   /* Parsing this file read these macro and Lisp files. They are
      prerequisites of every unit that reaches it, not only of the one that
@@ -854,21 +1137,23 @@ static void Compiler._replay_cached(
   foreach (Var part, entry.car()) {
     if (part is <map>) {
       c._merge_rows(globs, part);
-      c.replay_package_imports(globs, part, NULL);
+      c.replay_package_imports(globs, part, effects);
     }
-    else if (part is <string>) c._replay_include(part, globs, visited);
+    else if (part is <string>) c._replay_include(part, globs, visited, effects, active);
   }
 }
 
 /* An included file replays once per unit, from its entry or a cold walk. */
 static void Compiler._replay_include(
-  Compiler c, String path, Map globs, Map visited) {
+  Compiler c, String path, Map globs, Map visited, Array effects,
+  Map active) {
   c.add_translation_dependency(path);
   if (path in visited) return;
   visited[path] = 1;
   List entry = c._entry(path);
+  if (!entry && active && active[path] is <array>) return;
   if (!entry) entry = c._walk_cold(path, path, globs, visited);
-  c._replay_cached(entry, globs, visited);
+  c._replay_cached(entry, globs, visited, effects, active);
 }
 
 // package imports
@@ -900,6 +1185,7 @@ void Compiler.collect_package(Compiler c, String name, Token token) {
   c.select_package_module(name, root, token);
   Compiler package = Compiler.new_shared(c);
   defer c.close_child(package);
+  package.interface_provider = 1;
   package.package = name;
   package.filename = entry;
   c._walk_package(package, entry, token);
@@ -929,7 +1215,7 @@ static void Compiler._walk_package(
   visited[entry] = 1;
   List cached = c._entry(entry);
   if (cached) {
-    package._replay_cached(cached, globs, visited);
+    package._replay_cached(cached, globs, visited, NULL, NULL);
     return;
   }
   String text = NULL;
@@ -1046,7 +1332,8 @@ static int _package_protocol_row(List key, Var value) {
   List row = value;
   return row && row.car() in
     %(protocol adopt meta-protocol declaration-source native-meta
-      compile-time project-meta interface-types package-import);
+      compile-time project-meta meta-hashes interface-types native-object
+      package-import);
 }
 
 // import replay
@@ -1120,7 +1407,8 @@ static void Compiler._import_package(
     canonical path of the unit's direct include. The parser installs those
     effects when it reaches that include.
 */
-Map Compiler.included_compile_time_effects(Compiler c, Map globs) {
+Map Compiler.included_compile_time_effects(
+  Compiler c, Map globs, Map active) {
   Map visited = {}, delivered = {};
   String unit = _canonical_path(c.filename);
   visited[unit] = 1;
@@ -1130,7 +1418,7 @@ Map Compiler.included_compile_time_effects(Compiler c, Map globs) {
     Array exports = [];
     if (part is <map>) c.replay_package_imports(globs, part, exports);
     else if (part is <string>) {
-      c._replay_included(globs, part, visited, exports, NULL);
+      c._replay_included(globs, part, visited, exports, active);
       if (exports.len()) delivered[part] = exports.list_free();
     }
   }
@@ -1376,12 +1664,18 @@ static Map _read_rows(List stored) {
 
 /* A combined source effect can hold several provider advertisements. */
 static List _restore_meta_hashes(List node, int &valid) {
-  match (node)
+  match (node) {
+    case %(meta-hashes ?provider ?(List stored)): {
+      Map hashes = _read_rows(stored);
+      if (hashes == NULL) { valid = 0; return NULL; }
+      return %(meta-hashes $provider $hashes);
+    }
     case %(project-meta ?name ?signature ?provider ?(List stored)): {
       Map hashes = _read_rows(stored);
       if (hashes == NULL) { valid = 0; return NULL; }
       return %(project-meta $name $signature $provider $hashes);
     }
+  }
   Var child;
   $ast.rewrite_children(node, child, _restore_meta_hashes(child, valid));
 }
@@ -1492,17 +1786,24 @@ static List _stored_dependencies(Map dependencies) {
   return rows.list_free();
 }
 
+static List _stored_meta_hashes(Map hashes) {
+  Array rows = [];
+  foreach (Var (spelling, hash), hashes) rows.push(%($spelling $hash));
+  rows.sort();
+  return rows.list_free();
+}
+
 /* A cold walk numbers bindings from wherever the shared counter stands, which
    depends on the files walked before it. An interface renumbers them in order
    of first appearance, keeping equal bindings equal. */
 static List _renumber_bindings(List node, Map identities) {
-  match (node)
-    case %(project-meta ?name ?signature ?provider ?(Map hashes)): {
-      Array rows = [];
-      foreach (Var (spelling, hash), hashes) rows.push(%($spelling $hash));
-      rows.sort();
-      return %(project-meta $name $signature $provider ${rows.list_free()});
-    }
+  match (node) {
+    case %(meta-hashes ?provider ?(Map hashes)):
+      return %(meta-hashes $provider ${_stored_meta_hashes(hashes)});
+    case %(project-meta ?name ?signature ?provider ?(Map hashes)):
+      return %(project-meta $name $signature $provider
+               ${_stored_meta_hashes(hashes)});
+  }
   String spelling = NULL;
   if (binding_identity_try_parts(node, NULL, spelling)) {
     Var identity = identities.setdefault(node, identities.len() + 1);

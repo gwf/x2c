@@ -37,7 +37,7 @@ progress additionally requires terminal stderr and non-plain output.
 Plain output disables color; automatic color respects terminal capability
 and `NO_COLOR`.
 
-Source: `src/report.x:49`
+Source: `src/report.x:48`
 
 #### report_duration
 
@@ -46,7 +46,7 @@ Source: `src/report.x:49`
 Formats microseconds as integer `us`, rounded whole `ms`, or seconds with
 two decimal places.
 
-Source: `src/report.x:268`
+Source: `src/report.x:267`
 
 #### report_file_bytes
 
@@ -55,7 +55,7 @@ Source: `src/report.x:268`
 Returns the size of a regular file.
 NULL, a failed `stat`, or a non-regular path returns zero.
 
-Source: `src/report.x:259`
+Source: `src/report.x:258`
 
 #### report_generated
 
@@ -64,7 +64,7 @@ Source: `src/report.x:259`
 Writes the muted receipt for `n` generated C files and as many headers,
 `bytes` in all, when receipts are enabled.
 
-Source: `src/report.x:203`
+Source: `src/report.x:202`
 
 #### report_line
 
@@ -74,7 +74,7 @@ Writes one newline-terminated receipt to stderr when receipts are enabled.
 In transient mode the receipt first clears the terminal line, which
 another process may be drawing, and `line` must be non-NULL.
 
-Source: `src/report.x:175`
+Source: `src/report.x:174`
 
 #### report_make_owned
 
@@ -84,7 +84,7 @@ Reports whether a parent Make recipe runs this process, which `MAKELEVEL`
 set to a positive count shows. Parallel recipes share one terminal and
 one job budget without sharing reporter state.
 
-Source: `src/report.x:87`
+Source: `src/report.x:86`
 
 #### report_now_us
 
@@ -93,7 +93,7 @@ Source: `src/report.x:87`
 Returns monotonic time in microseconds, or zero when the clock read fails.
 The value measures elapsed time; it is not a wall-clock timestamp.
 
-Source: `src/report.x:249`
+Source: `src/report.x:248`
 
 #### report_phase
 
@@ -103,7 +103,7 @@ Writes a muted phase receipt when receipts are enabled.
 A fully cached nonempty phase is marked up to date; a partial cache reports
 its cached count, and every receipt includes the elapsed time.
 
-Source: `src/report.x:186`
+Source: `src/report.x:185`
 
 #### report_progress
 
@@ -114,7 +114,7 @@ active. Updates start after 125 ms and incomplete work is limited to one
 update per 50 ms. `detail` may be NULL; output is clipped to the configured
 terminal width and has no newline.
 
-Source: `src/report.x:101`
+Source: `src/report.x:100`
 
 #### report_receipts
 
@@ -122,7 +122,7 @@ Source: `src/report.x:101`
 
 Returns whether stable completion receipts are currently enabled.
 
-Source: `src/report.x:81`
+Source: `src/report.x:80`
 
 #### report_size
 
@@ -131,7 +131,7 @@ Source: `src/report.x:81`
 Formats bytes as `B`, `KiB`, or `MiB` using binary unit boundaries.
 Byte counts are exact; larger units use one decimal place.
 
-Source: `src/report.x:277`
+Source: `src/report.x:276`
 
 #### report_suspend
 
@@ -140,7 +140,7 @@ Source: `src/report.x:277`
 Clears the active transient line from stderr, if this process drew one.
 Forked workers inherit the state but leave the line to their parent.
 
-Source: `src/report.x:163`
+Source: `src/report.x:162`
 
 ## Design notes
 

@@ -24,7 +24,7 @@ Frees a `Thread` handle after its consuming join has completed.
 
 **Raises:** `<bad-state>` for NULL, running, or joining handles.
 
-Source: `lib/thread.x:334`
+Source: `lib/thread.x:333`
 
 <a id="Thread.join"></a>
 #### Thread.join
@@ -44,7 +44,7 @@ fails, any cause from result or error export, and
 here. A callback that returns `void` joins as `void`; a handled worker
 failure transfers instead of returning a sentinel.
 
-Source: `lib/thread.x:294`
+Source: `lib/thread.x:293`
 
 <a id="Thread.start"></a>
 #### Thread.start
@@ -70,7 +70,7 @@ registration.
 `<io-fail>` when `pthread_create` fails. Failure during native once
 initialization or mutex setup aborts the process.
 
-Source: `lib/thread.x:99`
+Source: `lib/thread.x:98`
 
 ## Public types
 

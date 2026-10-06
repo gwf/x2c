@@ -15,7 +15,7 @@ MetaCount MetaCount_new(int initial){
   return value;
 }
 
-Var int_var(int);
+static Var int_var(int);
 
 Var MetaCount_var(MetaCount value){
   return int_var((int) value);

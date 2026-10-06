@@ -24,13 +24,13 @@ static int first_call(List form);
 
 static List dropped(List form, Var leaf);
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
 List cons(Var, List);
 
-Var int_var(int);
+static Var int_var(int);
 
-Var List_var(List);
+static Var List_var(List);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -104,11 +104,11 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
 
 List List_match(List, Var);
 
-int List_truth(List);
+static int List_truth(List);
 
 int List_len(List);
 
-List Var_list(Var);
+static List Var_list(Var);
 
 Var List_assoc(List, Var);
 

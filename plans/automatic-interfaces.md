@@ -101,3 +101,27 @@ The resulting source uses ordinary declarations, static storage, includes,
 canonical Lists, and existing compiler operations. Fixtures protect observable
 publication, binding, cache relocation, native linkage, and effect behavior.
 No additional defensive validator or diagnostic-only fixture is planned.
+
+## Evidence and boundaries
+
+Ordinary includes retain declaration maps, macro snapshots, public Lisp
+forms, provider meta advertisements, and source positions. Runtime bodies
+remain compiled from their defining .x modules. Build inputs must include
+those providers when their runtime declarations are used.
+
+The new interface rules preserve opaque pointers. Public inline bodies that
+access an opaque handle's fields require its layout, so their typed syntax
+must participate in the same type selection as public signatures.
+
+Cold included providers bind public inline bodies before collection continues.
+An active include cycle can inspect later plain source signatures without
+executing future Lisp or declaration producers. A cycle that requires a future
+producer-created signature must supply that signature before the include.
+
+A native enum cycle that depends on a later object-like #define was already
+unsupported at the pinned baseline. The baseline generated an included
+header with an unknown by-value enum type. Moving the enum before that
+include instead encounters the unavailable #define. This change does not
+add preprocessing evaluation or promise to support that cycle. The reduced
+baseline and candidate evidence is retained in
+/tmp/x2c-publication-failure/type-cycle-native-state/baseline/.

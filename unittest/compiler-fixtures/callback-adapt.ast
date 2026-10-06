@@ -82,7 +82,7 @@
            (args (expr (void) ())))))) 
   (at 9 (declare ("String") 
          (bindings 
-          (op = (bind (binding 20 "text") ()) (expr ("String") (cache 0)))))) 
+          (op = (bind (binding 20 "text") ()) (expr ("String") (cache 839)))))) 
   (at 10 
    (declare ("Var") 
     (bindings 

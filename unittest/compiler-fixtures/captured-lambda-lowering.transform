@@ -32,7 +32,7 @@
                       "Func") (ident (binding 7 "Func_new_context"))) 
           (args (expr (* (func (("Func") (* const "FuncArg"))) "Var") 
                  (ident (binding 8 "_x2c_lambda_0"))) 
-           (expr ("List") (expr ("List") (cache 12))) 
+           (expr ("List") (expr ("List") (cache 848))) 
            (expr (* "_x2c_lambda_context_0") 
             (op & (expr ("_x2c_lambda_context_0") 
                    (ident (binding 6 "_x2c_lambda_context_1"))))) 
@@ -78,7 +78,7 @@
                       "Func") (ident (binding 7 "Func_new_context"))) 
           (args (expr (* (func (("Func") (* const "FuncArg"))) "Var") 
                  (ident (binding 15 "_x2c_lambda_1"))) 
-           (expr ("List") (expr ("List") (cache 12))) 
+           (expr ("List") (expr ("List") (cache 848))) 
            (expr (* "_x2c_lambda_context_2") 
             (op & (expr ("_x2c_lambda_context_2") 
                    (ident (binding 14 "_x2c_lambda_context_3"))))) 
@@ -115,7 +115,7 @@
                       "Func") (ident (binding 7 "Func_new_context"))) 
           (args (expr (* (func (("Func") (* const "FuncArg"))) "Var") 
                  (ident (binding 20 "_x2c_lambda_2"))) 
-           (expr ("List") (expr ("List") (cache 12))) 
+           (expr ("List") (expr ("List") (cache 848))) 
            (expr (* "_x2c_lambda_context_4") 
             (op & (expr ("_x2c_lambda_context_4") 
                    (ident (binding 19 "_x2c_lambda_context_7"))))) 
@@ -171,7 +171,7 @@
                       "Func") (ident (binding 7 "Func_new_context"))) 
           (args (expr (* (func (("Func") (* const "FuncArg"))) "Var") 
                  (ident (binding 27 "_x2c_lambda_4"))) 
-           (expr ("List") (expr ("List") (cache 21))) 
+           (expr ("List") (expr ("List") (cache 854))) 
            (expr (* "_x2c_lambda_context_8") 
             (op & (expr ("_x2c_lambda_context_8") 
                    (ident (binding 26 "_x2c_lambda_context_9"))))) 
@@ -318,7 +318,7 @@
                           (ident (binding 7 "Func_new_context"))) 
                     (args (expr (* (func (("Func") (* const "FuncArg"))) "Var") 
                            (ident (binding 48 "_x2c_lambda_5"))) 
-                     (expr ("List") (expr ("List") (cache 12))) 
+                     (expr ("List") (expr ("List") (cache 848))) 
                      (expr (* "_x2c_lambda_context_10") 
                       (op & (expr ("_x2c_lambda_context_10") 
                              (ident (binding 47 "_x2c_lambda_context_11"))))) 
@@ -409,7 +409,7 @@
                             (ident (binding 7 "Func_new_context"))) 
                       (args (expr (* (func (("Func") (* const "FuncArg"))) 
                                    "Var") (ident (binding 53 "_x2c_lambda_6"))) 
-                       (expr ("List") (expr ("List") (cache 21))) 
+                       (expr ("List") (expr ("List") (cache 854))) 
                        (expr (* "_x2c_lambda_context_12") 
                         (op & (expr ("_x2c_lambda_context_12") 
                                (ident (binding 52 "_x2c_lambda_context_13"))))) 
@@ -636,10 +636,8 @@
                   (expr (int) (literal (int) "0"))))))))))))) 
   (at 24 (return (expr (int) (literal (int) "0"))))))
 
-(preproc "#pragma private")
-
 (typedef 
- (struct (binding 62 "_x2c_lambda_context_0") 
+ (static struct (binding 62 "_x2c_lambda_context_0") 
   (fields 
    (declare ("Var") (bindings (bind (binding 63 "_x2c_lambda_capture_0") ()))))) 
  (bindings (bind (binding 62 "_x2c_lambda_context_0") ())))
@@ -699,7 +697,7 @@
               (expr (int) (ident (binding 1 "live"))))))))))))
 
 (typedef 
- (struct (binding 70 "_x2c_lambda_context_2") 
+ (static struct (binding 70 "_x2c_lambda_context_2") 
   (fields 
    (declare ("Var") (bindings (bind (binding 71 "_x2c_lambda_capture_1") ()))) 
    (declare ("Var") (bindings (bind (binding 72 "_x2c_lambda_capture_2") ()))))) 
@@ -784,13 +782,13 @@
                          (expr ("Symbol") "3453797"))))))))))))))))
 
 (typedef 
- (struct (binding 77 "_x2c_lambda_context_4") 
+ (static struct (binding 77 "_x2c_lambda_context_4") 
   (fields 
    (declare ("Var") (bindings (bind (binding 78 "_x2c_lambda_capture_3") ()))))) 
  (bindings (bind (binding 77 "_x2c_lambda_context_4") ())))
 
 (typedef 
- (struct (binding 79 "_x2c_lambda_context_5") 
+ (static struct (binding 79 "_x2c_lambda_context_5") 
   (fields 
    (declare ("Var") (bindings (bind (binding 80 "_x2c_lambda_capture_4") ()))) 
    (declare ("Var") (bindings (bind (binding 81 "_x2c_lambda_capture_5") ()))))) 
@@ -943,7 +941,7 @@
                         (ident (binding 7 "Func_new_context"))) 
                   (args (expr (* (func (("Func") (* const "FuncArg"))) "Var") 
                          (ident (binding 82 "_x2c_lambda_3"))) 
-                   (expr ("List") (expr ("List") (cache 12))) 
+                   (expr ("List") (expr ("List") (cache 848))) 
                    (expr (* "_x2c_lambda_context_5") 
                     (op & (expr ("_x2c_lambda_context_5") 
                            (ident (binding 94 "_x2c_lambda_context_6"))))) 
@@ -953,7 +951,7 @@
                       (ident (binding 94 "_x2c_lambda_context_6")))))))))))))))))))
 
 (typedef 
- (struct (binding 95 "_x2c_lambda_context_8") 
+ (static struct (binding 95 "_x2c_lambda_context_8") 
   (fields 
    (declare (int) (bindings (bind (binding 96 "_x2c_lambda_capture_6") (*)))))) 
  (bindings (bind (binding 95 "_x2c_lambda_context_8") ())))
@@ -989,7 +987,7 @@
                          ("_x2c_lambda_capture_6"))))))))))))))))
 
 (typedef 
- (struct (binding 100 "_x2c_lambda_context_10") 
+ (static struct (binding 100 "_x2c_lambda_context_10") 
   (fields 
    (declare ("Var") (bindings (bind (binding 101 "_x2c_lambda_capture_7") ()))))) 
  (bindings (bind (binding 100 "_x2c_lambda_context_10") ())))
@@ -1046,7 +1044,7 @@
                          (expr ("Symbol") "3453797"))))))))))))))))
 
 (typedef 
- (struct (binding 106 "_x2c_lambda_context_12") 
+ (static struct (binding 106 "_x2c_lambda_context_12") 
   (fields 
    (declare ("Var") (bindings (bind (binding 107 "_x2c_lambda_capture_8") ()))))) 
  (bindings (bind (binding 106 "_x2c_lambda_context_12") ())))

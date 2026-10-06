@@ -32,7 +32,7 @@ static long take_alias(DynamicAlias value){
   return Var_long(Var_convert(value, 818062));
 }
 
-Var long_var(long);
+static Var long_var(long);
 
 int Var_equal(Var, Var);
 

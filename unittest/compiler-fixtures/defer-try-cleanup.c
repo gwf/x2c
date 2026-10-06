@@ -39,9 +39,9 @@ static void record_cleanup(void){
   cleanup ++;
 }
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
-Var int_var(int);
+static Var int_var(int);
 
 #include "error.h"
 
@@ -59,7 +59,7 @@ _Noreturn static void raise_from_callee(void){
 
 int x2c_error_catch_site_pending(ErrorCatchSite *);
 
-Var List_var(List);
+static Var List_var(List);
 
 ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
 

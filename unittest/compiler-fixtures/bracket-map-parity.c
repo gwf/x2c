@@ -8,9 +8,9 @@ Map Map_update_n(Map, unsigned, ...);
 
 Map Map_new(void);
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
-Var int_var(int);
+static Var int_var(int);
 
 Var Map_getindex(Map, Var);
 

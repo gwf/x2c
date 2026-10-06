@@ -1,0 +1,1 @@
+-I unittest/compiler-fixtures/macro-embed-text-definition unittest/compiler-fixtures/macro-embed-text-definition/embed.x unittest/compiler-fixtures/macro-embed-text-definition/helper.x

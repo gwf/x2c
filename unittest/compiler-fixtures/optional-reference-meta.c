@@ -23,11 +23,11 @@ static Func _x2c_func_handle_0;
 Func x2c_func_shared(FuncAdapter, List);
 
 _x2c_initializer_choice_842CEF8E_0((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _11)))
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
 List cons(Var, List);
 
-Var List_var(List);
+static Var List_var(List);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -57,11 +57,11 @@ int maybe(int * value){
 
 int Var_int(Var);
 
-int List_truth(List);
+static int List_truth(List);
 
 List x2c_func_reference_type(Func, unsigned, unsigned);
 
-FuncArg FuncArg_reference(const void *, List);
+static FuncArg FuncArg_reference(const void *, List);
 
 FuncArg x2c_func_unrepresentable_argument(Func, unsigned, List);
 
@@ -76,9 +76,9 @@ int forward(int * value){
   ));
 }
 
-FuncArg FuncArg_value(Var);
+static FuncArg FuncArg_value(Var);
 
-Var int_var(int);
+static Var int_var(int);
 
 int exercise(int n){
   if(! _init_guard_) _file_init_();

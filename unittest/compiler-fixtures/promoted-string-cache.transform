@@ -19,20 +19,21 @@
 (function (inline "String") 
  (bind (binding 3 "header_direct") 
   ((fnmod (params (param (void) (bind () ())))))) 
- (block (at 35 (return (expr ("String") (cache 6))))))
+ (block (at 35 (return (expr ("String") (cache 845))))))
 
 (function (inline "String") 
  (bind (binding 4 "header_same") ((fnmod (params (param (void) (bind () ())))))) 
- (block (at 36 (return (expr ("String") (cache 6))))))
+ (block (at 36 (return (expr ("String") (cache 845))))))
 
 (function (inline "String") 
  (bind (binding 5 "header_dual") ((fnmod (params (param (void) (bind () ())))))) 
- (block (at 37 (return (expr ("String") (cache 7))))))
+ (block (at 37 (return (expr ("String") (cache 846))))))
 
 (function (inline "String") 
  (bind (binding 6 "header_parens") 
   ((fnmod (params (param (void) (bind () ())))))) 
- (block (at 38 (return (expr ("String") (parens (expr ("String") (cache 8))))))))
+ (block 
+  (at 38 (return (expr ("String") (parens (expr ("String") (cache 847))))))))
 
 (function (inline "String") 
  (bind (binding 7 "header_conditional") 
@@ -42,7 +43,7 @@
    (return 
     (expr ("String") 
      (op ? (expr (int) (ident (binding 8 "literal"))) 
-      (expr ("String") (cache 9)) 
+      (expr ("String") (cache 848)) 
       (expr ("String") 
        (call "String_new" 
         (args (expr (* char) 
@@ -56,17 +57,15 @@
  (block 
   (at 40 
    (return 
-    (expr ("Var") (call "String_var" (args (expr ("String") (cache 10)))))))))
+    (expr ("Var") (call "String_var" (args (expr ("String") (cache 849)))))))))
 
 (function (inline "List") 
  (bind (binding 10 "header_list") ((fnmod (params (param (void) (bind () ())))))) 
- (block (at 41 (return (expr ("List") (expr ("List") (cache 4)))))))
-
-(preproc "#pragma private")
+ (block (at 41 (return (expr ("List") (expr ("List") (cache 843)))))))
 
 (function (static "String") 
  (bind (binding 11 "source_dual") ((fnmod (params (param (void) (bind () ())))))) 
- (block (at 42 (return (expr ("String") (cache 7))))))
+ (block (at 42 (return (expr ("String") (cache 846))))))
 
 (function (static "String") 
  (bind (binding 12 "take_string") 
@@ -81,7 +80,7 @@
    (stmnt 
     (expr ("String") 
      (op = (expr ("String") (ident (binding 15 "assigned"))) 
-      (expr ("String") (cache 5)))))) 
+      (expr ("String") (cache 844)))))) 
   (at 44 
    (declare ("String") 
     (bindings 
@@ -89,7 +88,7 @@
       (expr ("String") 
        (call (expr ((func (("String"))) "String") 
               (ident (binding 12 "take_string"))) 
-        (args (expr ("String") (cache 11))))))))) 
+        (args (expr ("String") (cache 850))))))))) 
   (at 15 
    (declare ("String") 
     (bindings 

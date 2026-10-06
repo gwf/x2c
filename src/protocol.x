@@ -1710,13 +1710,9 @@ List Compiler.protocol_members_for(Compiler c, Type participant, Type base) {
   return conformance;
 }
 
-/* A macro import parses its templates and `meta` bodies during the caller's
-   collection pass, which keeps its own registries empty because it parses no
-   bodies at all. A template the full parse reuses keeps the operators and
-   loops resolved here, so the protocols and adoptions visible to the import
-   are installed the first time one is asked for. Installing them for every
-   import, or resolving every conformance here rather than the one asked for,
-   each cost more than the feature. */
+/* Collection skips bodies and leaves protocol registries empty. A canonical
+   template can need protocols before full parsing, so install the visible
+   symbols on first use and resolve only the conformance requested. */
 static void Compiler._install_imports(Compiler c) {
   c.import_protocols = 0;
   c.rebuild_protocols(c.sym.unit_symbols());

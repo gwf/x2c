@@ -291,7 +291,7 @@ List Compiler.parse_top_level_mode(Compiler c, int skip_body) {
   if (c.test_static_assert()) return c.parse_static_assert();
   List slot = skip_body ? NULL : c.try_parse_macro_slot(<unit>);
   if (slot) return slot;
-  if (c.keyword_form_is_definition()) return c._keyword_definition(skip_body);
+  if (c.keyword_form_is_definition()) return c._keyword_definition();
   if (c._static_interface_form()) {
     c.next();
     $let(c.source_private, 1) {
@@ -307,7 +307,13 @@ List Compiler.parse_top_level_mode(Compiler c, int skip_body) {
   if (macro) return macro;
   if (c.protocol_form_starts()) return c.parse_protocol_declaration();
   switch (c.peek(0)) {
-    case <import>: return c.parse_import_declaration();
+    case <import>:
+      if (c.signature_only) {
+        c._skip_shallow_expression(0);
+        c.expect(<;>);
+        return NULL;
+      }
+      return c.parse_import_declaration();
     case <"$(">:   return c._top_level_lisp(skip_body);
     case <@>:      return c._top_level_decorator();
   }
@@ -319,7 +325,8 @@ List Compiler.parse_top_level_mode(Compiler c, int skip_body) {
 static int Compiler._static_interface_form(Compiler c) {
   if (c.peek(0) != <static>) return 0;
   Token next = Token.skip_trivia(c.token + 1);
-  return c.peek(1) == <typedef> || c.peek(1) == <"$("> ||
+  return c.peek(1) == <typedef> ||
+         (c.peek(1) == <"$("> && !c.macro_holes) ||
          c.peek(1) == <protocol> || next.text == "class";
 }
 
@@ -370,9 +377,8 @@ int Compiler.skip_linkage_brace(Compiler c) {
   return 1;
 }
 
-static List Compiler._keyword_definition(Compiler c, int skip_body) {
-  if (skip_body) c.collect_compile_time_definition(1);
-  else c.parse_keyword_definition();
+static List Compiler._keyword_definition(Compiler c) {
+  c.parse_keyword_definition();
   return NULL;
 }
 
@@ -381,7 +387,7 @@ static List Compiler._keyword_definition(Compiler c, int skip_body) {
    reports whether that finished the form. */
 static int Compiler._skip_collected_form(Compiler c) {
   if (c.macro_form_is_definition()) {
-    c.collect_compile_time_definition(0);
+    (void) c.parse_macro_definition();
     return 1;
   }
   if (!c.collect_protocols && c.skip_named_type_declaration()) return 1;
@@ -394,9 +400,12 @@ static int Compiler._skip_collected_form(Compiler c) {
   return 0;
 }
 
-/* Top-level Lisp updates compiler state only. The `meta` declarations of a
-   macro import keep their runtime forms for the unit to emit. */
+/* Top-level Lisp updates compiler state without emitting a runtime form. */
 static List Compiler._top_level_lisp(Compiler c, int skip_body) {
+  if (c.signature_only && !c.macro_holes) {
+    c.token = c.token.group_close().after_group();
+    return NULL;
+  }
   if (skip_body) c.parse_macro_lisp_shallow();
   else c.parse_macro_lisp_top_level();
   return NULL;
@@ -413,9 +422,15 @@ static List Compiler._declaration_form(Compiler c, int skip_body) {
   int native = 0;
   if (c.meta_form_is_declaration()) meta = c.take_meta_marker(native);
   Token first = c.token;
-  List decl = c.parse_declaration_row();
-  if (skip_body) {
-    int body = c.peek(0) == <"{"> || c._at_function_arrow();
+  List decl;
+  $let(c.shallow, c.shallow || c.public_bodies)
+  $let(c.macro_holes, c.signature_only && !c.macro_holes
+         ? {} : c.macro_holes)
+    decl = c.parse_declaration_row();
+  int body = c.peek(0) == <"{"> || c._at_function_arrow();
+  Type type = decl.type_from_ast();
+  if (skip_body || (c.public_bodies && body &&
+      (!type.is_inline() || type.is_static() || c.source_private))) {
     c.finish_collected_declaration(decl, meta, native);
     c._record_meta_hash(decl, first, body);
     if (meta && !native && body)
@@ -1144,34 +1159,6 @@ static List Compiler._finish_declaration(
   return tag == <declare> && !preserved_self
     ? c._lower_self_declaration(declaration)
     : declaration;
-}
-
-/** Retains type dependency candidates from a skipped public inline body.
-    Typing the body waits until the full parse has all declarations. */
-void Compiler.collect_inline_type_dependencies(
-  Compiler c, List declaration, Token first, Token end) {
-  Array types = [];
-  for (Token token = first; token < end; token++) {
-    if (token.type != <ident>) continue;
-    String name = String.new_len(token.text, token.len);
-    types.push(%($name));
-    Token previous = token - 1;
-    while (previous >= first &&
-           (previous.type == <space> || previous.type == <comment>))
-      previous--;
-    if (previous >= first &&
-        (previous.type == <struct> || previous.type == <union> ||
-         previous.type == <enum>))
-      types.push(%(${previous.type} $name));
-  }
-  String path = home_portable_path(Path.absolute(c.filename));
-  String name = NULL;
-  match (declaration)
-    case %(declare ? (bindings (bind (binding ? ?spelling) *))):
-      name = spelling;
-  c.sym.set(
-    %("source-node" (interface-types $path ${first.pos} $name)),
-    %(interface-types $name ${types.list_free()}));
 }
 
 /* An expanded alias may contribute pointer, array, or function modifiers.
@@ -3025,9 +3012,10 @@ static List Compiler._bind_api_source(
   List bound = c.bind_syntax(syntax, AST_UNIT, c.return_type);
   Token invocation = c.macro_stack ? c.macro_stack.last().list()[3] : NULL;
   String invocation_doc = invocation ? c.definition_doc(invocation) : NULL;
-  c._definition_source(
-    bound, invocation ? invocation.line : line,
-    invocation_doc ? invocation_doc : c._filled_doc(doc), NULL);
+  line = invocation ? invocation.line : line;
+  doc = invocation_doc ? invocation_doc : c._filled_doc(doc);
+  if (c.shallow) return %(api-source $line $doc $bound);
+  c._definition_source(bound, line, doc, NULL);
   return bound;
 }
 
@@ -3176,8 +3164,15 @@ static List Compiler._bind_collected_function(
   Compiler c, List input, Var return_type, Var declarator, Var body,
   Var construction) {
   if (c.shallow) return input;
-  c._land_collected_bindings(body);
+  Type type = %(declare $return_type (bindings $declarator)).type_from_ast();
+  if (c.public_bodies &&
+      (!type.is_inline() || type.is_static() || c.source_private)) return NULL;
+  c.land_retained_bindings(declarator);
+  c.land_retained_bindings(body);
+  c.land_retained_bindings(construction);
   $let(c.macro_stack, c.thaw_declaration_syntax(construction)) {
+    Token invocation = c.macro_stack ? c.macro_stack.last().list()[3] : NULL;
+    $let(c.origin, invocation ? c.record_origin(invocation) : c.origin)
     return c.bind_syntax(
       %(function $return_type $declarator $body), AST_UNIT, c.return_type);
   }
@@ -3189,27 +3184,29 @@ static List Compiler._bind_collected_function(
 static List Compiler._bind_collected_initializers(
   Compiler c, List input, Var declaration, Var construction) {
   if (c.shallow) return input;
-  c._land_collected_bindings(declaration);
+  c.land_retained_bindings(declaration);
+  c.land_retained_bindings(construction);
   $let(c.macro_stack, c.thaw_declaration_syntax(construction)) {
     return c.bind_syntax(declaration, AST_UNIT, c.return_type);
   }
 }
 
-/* A retained body or initializer names bindings by the identities that
-   collection issued, which the full parse does not know. Each reads its
-   spelling where the expansion lands, unless a declaration in scope binds
-   that identity, as one the retained syntax declares does. */
-static void Compiler._land_collected_bindings(Compiler c, Var syntax) {
+/** Records the spellings of bindings retained by collection for replay.
+    A retained declaration, body, or capture can name an old identity; its
+    spelling resolves in the scope where the retained syntax lands. */
+void Compiler.land_retained_bindings(Compiler c, Var syntax) {
   if (syntax is not <list>) return;
   int identity = 0;
   String spelling = NULL;
   if (!binding_identity_try_parts(syntax, identity, spelling)) {
-    foreach (Var child, syntax.list()) c._land_collected_bindings(child);
+    foreach (Var child, syntax.list()) c.land_retained_bindings(child);
     return;
   }
+  if (c.names.next_binding < identity) c.names.next_binding = identity;
   if (!(%(known $identity) in c.semantic_binding_facts()))
     c.set_fact(%(known $identity), spelling);
-  c.set_fact(%(source-spelling $syntax), spelling);
+  if (!(%(source-spelling $syntax) in c.semantic_binding_facts()))
+    c.set_fact(%(source-spelling $syntax), spelling);
 }
 
 /* Binds a constructed function's parameters in a fresh prototype scope,
@@ -3225,6 +3222,9 @@ static List Compiler._bind_function(
   List declaration = c.bind_syntax(
     %(declare $return_type (bindings $declarator)), AST_UNIT, c.return_type);
   if (c.shallow) return c._collected_function(declaration, body);
+  Type type = declaration.type_from_ast();
+  if (c.public_bodies &&
+      (!type.is_inline() || type.is_static() || c.source_private)) return NULL;
   return c._finish_function(declaration, body);
 }
 
@@ -3250,13 +3250,19 @@ static List Compiler._collected_function(
   Compiler c, List declaration, Var body) {
   c.record_inline_function(declaration);
   match (declaration)
-    case %(declare ?type (bindings (bind ?binding ?))): {
+    case %(declare ?type (bindings (bind ?binding ?modifiers))): {
       String name = binding_identity_spelling(binding);
       // A static definition stays in its unit, as in source.
       if (type.type().is_static())
         c.sym.mark_static(%(function $name));
       else c.fn_defs[name] = 1;
       c.record_declaration_visibility(declaration);
+      List method = c._method_identity(binding);
+      if (method)
+        declaration = %(declare $type
+          (bindings (bind ((${method.car()}) ${method.cadr()}) $modifiers)));
+      else
+        declaration = %(declare $type (bindings (bind $name $modifiers)));
     }
   return %(declaration-function $declaration $body ${c.freeze_macro_stack()});
 }
@@ -3292,6 +3298,9 @@ static List Compiler._bind_assert(Compiler c, Var condition, Var message) =>
    macro stack that constructed them. */
 static List Compiler._bind_declaration(
   Compiler c, Var tag, Var base, List declarators, AstPos context) {
+  int shallow = c.shallow;
+  if (c.public_bodies && context == AST_UNIT) c.shallow = 1;
+  defer c.shallow = shallow;
   if (!_declaration_legal(tag, context)) return c._construction_error();
   base = c._finish_type(base);
   List field_context = context == AST_FIELD ? c.aggregate_type : NULL;

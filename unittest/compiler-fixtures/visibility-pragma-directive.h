@@ -10,6 +10,8 @@
 #define VISIBILITY_NOTE "pragma private"
 extern int shown_value;
 
+extern int hidden_value;
+
 int greeting_length(void);
 
 

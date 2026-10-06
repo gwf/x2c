@@ -11,25 +11,25 @@ void Error_policy_set(Symbol, Symbol);
 
 int Error_mark(void);
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
-Var List_var(List);
+static Var List_var(List);
 
-Var String_var(String);
+static Var String_var(String);
 
-List Var_list(Var);
+static List Var_list(Var);
 
-Var List_car(List);
+static Var List_car(List);
 
 List Error_since(int);
 
 Var List_assoc(List, Var);
 
-Var List_cadr(List);
+static Var List_cadr(List);
 
 Var List_getindex(List, int);
 
-String Var_string(Var);
+static String Var_string(Var);
 
 String Symbol_str(Symbol);
 

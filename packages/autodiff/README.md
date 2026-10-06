@@ -11,11 +11,14 @@ has no native dependency.
   `$ad.both` decorators. Its `meta` functions are staged for the importing
   unit on first use.
 - [src/autodiff.x](src/autodiff.x): `AdTape` and `AdNode`, a runtime tape
-  for code whose shape the decorators reject. It exports the macro import.
+  for code whose shape the decorators reject. It includes the macro module.
 
 A unit reaches both through `import "autodiff" with AdTape, AdNode;`. A unit
-that needs only the macros can import them by path, as
-`$(import "<path>/autodiff/src/autodiff-macros.x")`.
+that needs only the macros can include their module by path:
+
+```x2c
+#include "<path>/autodiff/src/autodiff-macros.x"
+```
 
 Each runtime computation uses one tape, including its constants. Binary
 arithmetic operations and `backward` reject foreign nodes with `bad-arg` before changing

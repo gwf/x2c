@@ -10,6 +10,8 @@ typedef int MacroBoxFirst;
 
 typedef int MacroBoxSecond;
 
+Var Var_new(Symbol, ...);
+
 static inline Var MacroBoxFirst_var(MacroBoxFirst _x2c_macro_value_0){
   return Var_new(3453797, _x2c_macro_value_0);
 }

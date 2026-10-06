@@ -19,7 +19,7 @@
   ((fnmod 
     (params (param (int) (bind (binding 4 "_x2c_macro_parens_value_0") ())))))) 
  (block 
-  (at 4 (return (int) 
+  (at 0 (return (int) 
          (expr (int) 
           (call (expr ((func ((int))) int) 
                  (parens 
@@ -31,7 +31,7 @@
   ((fnmod 
     (params (param (int) (bind (binding 6 "_x2c_macro_direct_value_0") ())))))) 
  (block 
-  (at 4 (return (int) 
+  (at 0 (return (int) 
          (expr (int) 
           (call (expr ((func ((int))) int) (ident (binding 1 "increment"))) 
            (args (expr (int) (ident (binding 6 "_x2c_macro_direct_value_0"))))))))))
@@ -40,7 +40,7 @@
  (bind (binding 7 "ordinary_parens") 
   ((fnmod (params (param (int) (bind (binding 8 "value") ())))))) 
  (block 
-  (at 5 (return (int) 
+  (at 4 (return (int) 
          (expr (int) 
           (call (expr ((func ((int))) int) 
                  (parens 
@@ -50,7 +50,7 @@
 (function (int) 
  (bind (binding 9 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 7 (stmnt 
+  (at 6 (stmnt 
          (expr () 
           (call (expr () (ident (binding 10 "printf"))) 
            (args (expr (* char) (literal (* char) "\"%d %d %d %d\\n\"")) 
@@ -71,4 +71,4 @@
                     (parens 
                      (expr ((func ((int))) int) (ident (binding 1 "increment"))))) 
               (args (expr (int) (literal (int) "41")))))))))) 
-  (at 8 (return (int) (expr (int) (literal (int) "0"))))))
+  (at 7 (return (int) (expr (int) (literal (int) "0"))))))

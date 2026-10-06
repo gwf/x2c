@@ -41,7 +41,7 @@ static macro Stmt $report.macro.function_only(Expr $c, Expr $site, Expr $name) {
     "function"));
 }
 
-/* Evaluates a nested `$` call among a call's arguments. */
+/** Evaluates a nested `$` call among a call's arguments. */
 static typedef Var (*MetaCall)(Compiler c, List expression, Token site);
 
 // arguments of a `$` call

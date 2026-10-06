@@ -7,12 +7,12 @@
   (at 1 (declare ("List") 
          (bindings 
           (op = (bind (binding 2 "value") ()) 
-           (expr ("List") (expr ("List") (cache 1))))))) 
+           (expr ("List") (expr ("List") (cache 840))))))) 
   (at 2 (declare (int) 
          (bindings 
           (op = (bind (binding 3 "hit") ()) (expr (int) (literal (int) "0")))))) 
   (at 3 (match (expr ("List") (ident (binding 2 "value"))) 
-         (((expr ("List") (expr ("List") (cache 1))) 
+         (((expr ("List") (expr ("List") (cache 840))) 
            (stmnt 
             (expr (int) 
              (op = (expr (int) (ident (binding 3 "hit"))) 

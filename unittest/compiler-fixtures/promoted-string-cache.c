@@ -55,9 +55,9 @@ static String source_dual(void);
 
 static String take_string(String value);
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
-Var String_var(String);
+static Var String_var(String);
 
 List cons(Var, List);
 
@@ -110,9 +110,9 @@ int String_len(String);
 
 int String_getindex(String, int);
 
-String Var_string(Var);
+static String Var_string(Var);
 
-Var List_cadr(List);
+static Var List_cadr(List);
 
 int main(void){
   x2c_initialize();

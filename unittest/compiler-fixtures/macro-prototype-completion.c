@@ -4,9 +4,9 @@
 #include "x2c.h"
 
 #include "x2c.h"
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
-Var String_var(String);
+static Var String_var(String);
 
 #include "error.h"
 

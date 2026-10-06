@@ -45,51 +45,51 @@ static int bump(int * value){
   return ++ * value;
 }
 
-Var Array_var(Array);
+static Var Array_var(Array);
 
 Array Array_update_n(Array, unsigned, ...);
 
 Array Array_new(void);
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
-Var int_var(int);
+static Var int_var(int);
 
-Var Map_var(Map);
+static Var Map_var(Map);
 
 Map Map_update_n(Map, unsigned, ...);
 
 Map Map_new(void);
 
-Var String_var(String);
+static Var String_var(String);
 
-Var long_var(long);
+static Var long_var(long);
 
-Var char_var(char);
+static Var char_var(char);
 
-Var double_var(double);
+static Var double_var(double);
 
 long Var_integer(Var);
 
 Var Array_getindex(Array, int);
 
-Array Var_array(Var);
+static Array Var_array(Var);
 
 Var List_getindex(List, int);
 
 Var Map_getindex(Map, Var);
 
-Map Var_map(Var);
+static Map Var_map(Var);
 
 int String_equal(String, String);
 
 String Var_str(Var);
 
-String Var_string(Var);
+static String Var_string(Var);
 
 char Var_char(Var);
 
-Symbol Var_symbol(Var);
+static Symbol Var_symbol(Var);
 
 double Var_floating(Var);
 

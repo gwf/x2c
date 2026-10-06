@@ -19,12 +19,15 @@ Source-ordered shallow symbol collection and replay.
 | [`interface_text`](#interface_text) | Returns the compiler's own collected contribution as interface text, or NULL when the unit has not collected its symbols or the compiler's identity is unknown, since no compiler could replay that interface. |
 | [`Compiler.collect_package`](#Compiler.collect_package) | Collects a package once and installs its public surface in the current unit. |
 | [`Compiler.collect_symbols`](#Compiler.collect_symbols) | Collects the current translation unit's declarations into `globs`. |
-| [`Compiler.import_included_exports`](#Compiler.import_included_exports) | Installs, at each include among the directives before the cursor, the macro imports that the included file exports, as the unit's own imports written there would be installed. |
-| [`Compiler.include_typedef_names`](#Compiler.include_typedef_names) | The typedef names published by the files that the current unit's include of `target` reaches: the included file and, transitively, the includes above each file's `#pragma private`. |
+| [`Compiler.include_type_dependencies`](#Compiler.include_type_dependencies) | The semantic type rows reached by an ordinary source include. |
+| [`Compiler.include_typedef_names`](#Compiler.include_typedef_names) | The typedef names published by the files that the current unit's include of `target` reaches, including its transitive includes. |
+| [`Compiler.included_compile_time_effects`](#Compiler.included_compile_time_effects) | Prepares included compile-time effects after full parsing resets macros. |
+| [`Compiler.install_included_effects`](#Compiler.install_included_effects) | Installs the definitions of each include among the directives before the cursor. |
+| [`Compiler.name_meta_provider_bindings`](#Compiler.name_meta_provider_bindings) | Selects helper C spellings for public definitions owned by `path`. |
+| [`Compiler.publishes_type_family`](#Compiler.publishes_type_family) | Reports whether this unit's interface publishes the type `family`. |
+| [`Compiler.publishes_typedef`](#Compiler.publishes_typedef) | Reports whether this unit's selected interface publishes `name`. |
 | [`Compiler.record_generated_symbol`](#Compiler.record_generated_symbol) | Records one generated public callable in the declaration map that the current file's collected entry contributes, which is the map its interface publishes. |
-| [`Compiler.replay_included_package_imports`](#Compiler.replay_included_package_imports) | Repeats included package imports after full parsing resets macros, in the cache's original include order. |
-| [`Compiler.replay_package_imports`](#Compiler.replay_package_imports) | Replays the import operations retained by this declaration contribution: its package imports and the macro imports its file exports. |
-| [`Sym.withhold_import_rows`](#Sym.withhold_import_rows) | Removes from `published` the declaration rows that this file's file-scope imports added and the file did not write again, and their unit-static markers. |
+| [`Compiler.replay_package_imports`](#Compiler.replay_package_imports) | Replays package imports and public compile-time definitions in source order. |
 
 ### Functions
 
@@ -36,7 +39,7 @@ Drops the entries collected without declaration defaults while the shared
 compile-time session was filled, or by a project meta build. Call once
 that session is published, and after the meta build's parses.
 
-Source: `src/collect.x:1412`
+Source: `src/collect.x:1555`
 
 #### collect_resolve_include
 
@@ -45,7 +48,7 @@ Source: `src/collect.x:1412`
 The file the include of `target` from `includer_dir` names, searched as
 collection searches `dirs`, or NULL.
 
-Source: `src/collect.x:583`
+Source: `src/collect.x:628`
 
 #### interface_configure
 
@@ -58,7 +61,7 @@ stage directory when it runs from `<home>/builds/`, otherwise under the
 home. A `cold` process reads no interface and still writes its own. Call
 it before opening any translation unit's Context.
 
-Source: `src/collect.x:1118`
+Source: `src/collect.x:1239`
 
 #### interface_prelude
 
@@ -68,7 +71,7 @@ Returns the path of the first prelude interface this compiler wrote, or
 NULL when there is none or the compiler's identity is unknown. Its
 source hashes are not checked.
 
-Source: `src/collect.x:1311`
+Source: `src/collect.x:1448`
 
 #### interface_text
 
@@ -80,7 +83,7 @@ identity is unknown, since no compiler could replay that interface. A
 contribution that the interface grammar cannot spell is reported as an
 `emit` diagnostic.
 
-Source: `src/collect.x:1333`
+Source: `src/collect.x:1470`
 
 ### `Compiler`
 
@@ -98,7 +101,7 @@ protocol rows enter the current symbol state, and dependencies enter the
 importing compiler. Replay also merges recorded function definitions.
 `token` locates lookup and public-surface errors.
 
-Source: `src/collect.x:805`
+Source: `src/collect.x:927`
 
 <a id="Compiler.collect_symbols"></a>
 #### Compiler.collect_symbols
@@ -115,18 +118,18 @@ is `globs`. Collection also updates dependencies, function definitions,
 and macro state. Keyword alias maps and seen-name state are file-local
 and restored when each file walk ends.
 
-Source: `src/collect.x:162`
+Source: `src/collect.x:161`
 
-<a id="Compiler.import_included_exports"></a>
-#### Compiler.import_included_exports
+<a id="Compiler.include_type_dependencies"></a>
+#### Compiler.include_type_dependencies
 
-`void Compiler.import_included_exports(Compiler c)`
+`List Compiler.include_type_dependencies( Compiler c, String target, int angle, Map seen)`
 
-Installs, at each include among the directives before the cursor, the
-macro imports that the included file exports, as the unit's own imports
-written there would be installed.
+The semantic type rows reached by an ordinary source include. Each
+file contributes once to `seen`; the current unit does not contribute
+through a cycle back to its own still-open header.
 
-Source: `src/collect.x:1072`
+Source: `src/collect.x:655`
 
 <a id="Compiler.include_typedef_names"></a>
 #### Compiler.include_typedef_names
@@ -134,13 +137,64 @@ Source: `src/collect.x:1072`
 `List Compiler.include_typedef_names( Compiler c, String target, int angle, Map seen)`
 
 The typedef names published by the files that the current unit's
-include of `target` reaches: the included file and, transitively, the
-includes above each file's `#pragma private`. A file already in `seen`
+include of `target` reaches, including its transitive includes.
+A file already in `seen`
 is skipped with the files it reaches, and each file reached is added to
 `seen`. NULL when the include does not resolve to x2c source; a runtime
 module adds nothing the prelude has not declared.
 
-Source: `src/collect.x:597`
+Source: `src/collect.x:642`
+
+<a id="Compiler.included_compile_time_effects"></a>
+#### Compiler.included_compile_time_effects
+
+`Map Compiler.included_compile_time_effects(Compiler c, Map globs)`
+
+Prepares included compile-time effects after full parsing resets macros.
+The ordered cache walk counts each file once and groups effects by the
+canonical path of the unit's direct include. The parser installs those
+effects when it reaches that include.
+
+Source: `src/collect.x:1157`
+
+<a id="Compiler.install_included_effects"></a>
+#### Compiler.install_included_effects
+
+`void Compiler.install_included_effects(Compiler c)`
+
+Installs the definitions of each include among the directives before
+the cursor.
+
+Source: `src/collect.x:1193`
+
+<a id="Compiler.name_meta_provider_bindings"></a>
+#### Compiler.name_meta_provider_bindings
+
+`void Compiler.name_meta_provider_bindings( Compiler c, String path, int index)`
+
+Selects helper C spellings for public definitions owned by `path`.
+Bindings, rather than source tokens, keep unrelated private names and
+fields unchanged. Native supplier declarations retain their C names.
+
+Source: `src/collect.x:692`
+
+<a id="Compiler.publishes_type_family"></a>
+#### Compiler.publishes_type_family
+
+`int Compiler.publishes_type_family(Compiler c, List family)`
+
+Reports whether this unit's interface publishes the type `family`.
+
+Source: `src/collect.x:719`
+
+<a id="Compiler.publishes_typedef"></a>
+#### Compiler.publishes_typedef
+
+`int Compiler.publishes_typedef(Compiler c, String name)`
+
+Reports whether this unit's selected interface publishes `name`.
+
+Source: `src/collect.x:714`
 
 <a id="Compiler.record_generated_symbol"></a>
 #### Compiler.record_generated_symbol
@@ -152,47 +206,19 @@ current file's collected entry contributes, which is the map its
 interface publishes. A file without a collected declaration map records
 nothing. The cache retains `signature`.
 
-Source: `src/collect.x:735`
-
-<a id="Compiler.replay_included_package_imports"></a>
-#### Compiler.replay_included_package_imports
-
-`Map Compiler.replay_included_package_imports(Compiler c, Map globs)`
-
-Repeats included package imports after full parsing resets macros, in
-the cache's original include order. The unit's own imports stay at their
-source sites. Returns the macro imports the included files export, by
-the canonical path of each file the unit includes, for the full parse
-to install at that include.
-
-Source: `src/collect.x:1034`
+Source: `src/collect.x:857`
 
 <a id="Compiler.replay_package_imports"></a>
 #### Compiler.replay_package_imports
 
 `void Compiler.replay_package_imports( Compiler c, Map globs, Map rows, Array exports)`
 
-Replays the import operations retained by this declaration contribution:
-its package imports and the macro imports its file exports. The shadow
-borrows the unit's macro state and shared package registries. The full
-parse passes `exports`, which takes the exported imports for the include
-line, and leaves the unit's own imports at their source sites.
+Replays package imports and public compile-time definitions in source
+order. The shadow borrows the unit's macro state and package registries.
+The full parse collects effects for the include line and leaves the
+unit's own definitions at their source sites.
 
-Source: `src/collect.x:976`
-
-### `Sym`
-
-<a id="Sym.withhold_import_rows"></a>
-#### Sym.withhold_import_rows
-
-`void Sym.withhold_import_rows(Sym s, Map published)`
-
-Removes from `published` the declaration rows that this file's
-file-scope imports added and the file did not write again, and their
-unit-static markers. An including unit receives an import's
-declarations only by replaying an exported import itself.
-
-Source: `src/collect.x:401`
+Source: `src/collect.x:1093`
 
 ## Design notes
 

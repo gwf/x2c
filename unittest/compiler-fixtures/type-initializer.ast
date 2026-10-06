@@ -5,7 +5,8 @@
  (bindings (bind (binding 1 "InitializerFixture") (*))))
 
 (declare (static int) 
- (bindings (op = (bind (binding 2 "calls") ()) (expr (int) (literal (int) "0")))))
+ (bindings 
+  (op = (bind (binding 2 "calls") ()) (expr (int) (literal (int) "0")))))
 
 (declare (static int) 
  (bindings 
@@ -34,7 +35,7 @@
   (at 4 (stmnt 
          (expr ("String") 
           (op = (expr ("String") (ident (binding 4 "label"))) 
-           (expr ("String") (cache 0))))))))
+           (expr ("String") (cache 839))))))))
 
 (function (int) 
  (bind (binding 8 "main") ((fnmod (params (param (void) (bind () ())))))) 
@@ -67,5 +68,5 @@
                    (call (expr ((func (("String") ("String"))) int) 
                           (ident (binding 10 "String_equal"))) 
                     (args (expr ("String") (ident (binding 4 "label"))) 
-                     (expr ("String") (cache 0))))))) 
+                     (expr ("String") (cache 839))))))) 
            (expr (int) (literal (int) "0")) (expr (int) (literal (int) "1"))))))))

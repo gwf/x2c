@@ -42,6 +42,8 @@ extern struct Point origin;
 
 extern String greeting;
 
+extern int secret;
+
 extern int reopened;
 
 int main(void);

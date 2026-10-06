@@ -89,7 +89,7 @@ List public_list;
 _x2c_initializer_choice_F58507E7_4((public_list = _8))
 static int width(String s);
 
-Var String_var(String);
+static Var String_var(String);
 
 List cons(Var, List);
 

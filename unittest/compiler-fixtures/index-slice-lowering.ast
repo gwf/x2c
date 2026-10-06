@@ -115,10 +115,10 @@
    (declare ("List") 
     (bindings 
      (op = (bind (binding 26 "list") ()) 
-      (expr ("List") (expr ("List") (cache 7))))))) 
+      (expr ("List") (expr ("List") (cache 846))))))) 
   (at 19 
    (declare ("String") 
-    (bindings (op = (bind (binding 27 "text") ()) (expr ("String") (cache 8)))))) 
+    (bindings (op = (bind (binding 27 "text") ()) (expr ("String") (cache 847)))))) 
   (at 20 
    (stmnt 
     (expr ("Map") 

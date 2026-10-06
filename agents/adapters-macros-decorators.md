@@ -229,7 +229,7 @@ documentation:
 ```x2c
 typedef LocalState *LocalStateRef;
 
-$(import "iter.x")
+#include "iter.x"
 $var.raw.pointer(LocalStateRef, localstateref);
 
 protocol Var(LocalStateRef);

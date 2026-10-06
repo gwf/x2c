@@ -28,7 +28,7 @@ backslash is returned unchanged.
 **Raises:** `<bad-arg>` for an octal escape above `\377`, which does not fit
 a byte, or `<alloc-fail>` while constructing a changed result.
 
-Source: `lib/string-escape.x:124`
+Source: `lib/string-escape.x:123`
 
 ## Advanced and interop API
 
@@ -54,7 +54,7 @@ input or an oversized result returns NULL.
 
 **Raises:** `<alloc-fail>` while constructing the result.
 
-Source: `lib/string-escape.x:33`
+Source: `lib/string-escape.x:32`
 
 <a id="String.parse"></a>
 #### String.parse
@@ -68,7 +68,7 @@ input without backslashes is returned unchanged.
 
 **Raises:** `<alloc-fail>` while copying or decoding.
 
-Source: `lib/string-escape.x:232`
+Source: `lib/string-escape.x:231`
 
 <a id="String.parse_char"></a>
 #### String.parse_char
@@ -81,7 +81,7 @@ Text after that closing quote is ignored. A decoded NUL is returned as
 zero; malformed and null input returns -1, as does an octal escape above
 `\377`, which does not fit a byte.
 
-Source: `lib/string-escape.x:213`
+Source: `lib/string-escape.x:212`
 
 <a id="String.repr"></a>
 #### String.repr
@@ -93,7 +93,7 @@ Empty input returns the canonical literal spelling `"\"\""`.
 
 **Raises:** `<alloc-fail>` while escaping or formatting a nonempty `String`.
 
-Source: `lib/string-escape.x:92`
+Source: `lib/string-escape.x:91`
 
 <a id="String.write_repr"></a>
 #### String.write_repr
@@ -107,7 +107,7 @@ remains in the `Buffer`.
 
 **Raises:** any cause from `Buffer.write_char` or `Buffer.write_len`.
 
-Source: `lib/string-escape.x:103`
+Source: `lib/string-escape.x:102`
 
 ## Design notes
 

@@ -67,7 +67,7 @@
             (array (expr ("Symbol") (literal ("Symbol") "ready" ready)) 
              (expr ("Atom") 
               (literal ("Atom") "VeryLongIdentifierName" 
-               VeryLongIdentifierName)) (expr ("String") (cache 0)) 
+               VeryLongIdentifierName)) (expr ("String") (cache 839)) 
              (expr ("Array") 
               (array (expr ("Symbol") (literal ("Symbol") "nested" nested)) 
                (expr (int) (ident (binding 7 "count"))))) 
@@ -86,7 +86,7 @@
              (expr ("Symbol") (literal ("Symbol") "<1>" \x31)) 
              (expr ("Symbol") (literal ("Symbol") "<+>" +)) 
              (expr (double) (literal (double) "1.5")) 
-             (expr ("String") (cache 1)) (expr ("String") (cache 2)) 
+             (expr ("String") (cache 840)) (expr ("String") (cache 841)) 
              (expr (* char) (literal (* char) "\"c text\"")) 
              (expr (int) 
               (op . (expr ("Pair") (ident (binding 10 "pair"))) 
@@ -123,7 +123,7 @@
           (op = (bind (binding 16 "config") ()) 
            (expr ("Map") 
             (map (map-entry (expr ("Symbol") (literal ("Symbol") "name" name)) 
-                  (expr ("String") (cache 3))) 
+                  (expr ("String") (cache 842))) 
              (map-entry (expr ("Symbol") (literal ("Symbol") "runtime" runtime)) 
               (expr (int) (ident (binding 7 "count")))) 
              (map-entry 
@@ -191,7 +191,7 @@
                                (getindex 
                                 (expr ("Array") (ident (binding 14 "values"))) 
                                 (expr (int) (literal (int) "0"))))))) 
-                 (expr ("String") (cache 4))))))) 
+                 (expr ("String") (cache 843))))))) 
     (return (int) (expr (int) (literal (int) "2"))))) 
   (at 11 
    (if (expr (int) 
@@ -205,7 +205,7 @@
                                (getindex 
                                 (expr ("Array") (ident (binding 14 "values"))) 
                                 (expr (int) (literal (int) "1"))))))) 
-                 (expr ("String") (cache 5))))))) 
+                 (expr ("String") (cache 844))))))) 
     (return (int) (expr (int) (literal (int) "3"))))) 
   (at 12 
    (if (expr (int) 
@@ -219,7 +219,7 @@
                                (getindex 
                                 (expr ("Array") (ident (binding 14 "values"))) 
                                 (expr (int) (literal (int) "2"))))))) 
-                 (expr ("String") (cache 0))))))) 
+                 (expr ("String") (cache 839))))))) 
     (return (int) (expr (int) (literal (int) "4"))))) 
   (at 13 
    (if (expr (int) 
@@ -259,7 +259,7 @@
                                           (expr (int) (literal (int) "4"))))))) 
                                 (expr ("Symbol") 
                                  (literal ("Symbol") "<kind>" kind))))))) 
-                 (expr ("String") (cache 6))))))) 
+                 (expr ("String") (cache 845))))))) 
     (return (int) (expr (int) (literal (int) "6"))))) 
   (at 15 
    (if (expr (int) 
@@ -307,7 +307,7 @@
                                  (getindex 
                                   (expr ("Array") (ident (binding 14 "values"))) 
                                   (expr (int) (literal (int) "8"))))))) 
-                   (expr ("String") (cache 7))))))) 
+                   (expr ("String") (cache 846))))))) 
          (expr (int) 
           (op ! (expr (int) 
                  (call (expr ((func (("String") ("String"))) int) 
@@ -319,7 +319,7 @@
                                  (getindex 
                                   (expr ("Array") (ident (binding 14 "values"))) 
                                   (expr (int) (literal (int) "9"))))))) 
-                   (expr ("String") (cache 8))))))))) 
+                   (expr ("String") (cache 847))))))))) 
     (return (int) (expr (int) (literal (int) "9"))))) 
   (at 18 
    (if (expr (int) 
@@ -340,7 +340,7 @@
                                       (expr ("Array") 
                                        (ident (binding 14 "values"))) 
                                       (expr (int) (literal (int) "10"))))))) 
-                       (expr ("String") (cache 9))))))) 
+                       (expr ("String") (cache 848))))))) 
              (expr (int) 
               (op != 
                (expr ("Symbol") 
@@ -397,7 +397,7 @@
                                       (expr ("Array") 
                                        (ident (binding 14 "values"))) 
                                       (expr (int) (literal (int) "15"))))))) 
-                       (expr ("String") (cache 1))))))))) 
+                       (expr ("String") (cache 840))))))))) 
            (expr (int) 
             (op ! (expr (int) 
                    (call (expr ((func (("String") ("String"))) int) 
@@ -410,7 +410,7 @@
                                     (expr ("Array") 
                                      (ident (binding 14 "values"))) 
                                     (expr (int) (literal (int) "16"))))))) 
-                     (expr ("String") (cache 2))))))))) 
+                     (expr ("String") (cache 841))))))))) 
          (expr (int) 
           (op ! (expr (int) 
                  (call (expr ((func (("String") ("String"))) int) 
@@ -422,7 +422,7 @@
                                  (getindex 
                                   (expr ("Array") (ident (binding 14 "values"))) 
                                   (expr (int) (literal (int) "17"))))))) 
-                   (expr ("String") (cache 10))))))))) 
+                   (expr ("String") (cache 849))))))))) 
     (return (int) (expr (int) (literal (int) "11"))))) 
   (at 20 
    (if (expr (int) 
@@ -530,7 +530,7 @@
                                 (expr ("Map") (ident (binding 16 "config"))) 
                                 (expr ("Symbol") 
                                  (literal ("Symbol") "<name>" name))))))) 
-                 (expr ("String") (cache 3))))))) 
+                 (expr ("String") (cache 842))))))) 
     (return (int) (expr (int) (literal (int) "14"))))) 
   (at 23 
    (if (expr (int) 

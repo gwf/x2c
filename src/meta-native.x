@@ -449,8 +449,8 @@ void Compiler.install_project_meta_effect(Compiler c, List row) {
   }
 }
 
-/* An evaluator stub carries its provider so a call from any consumer uses
-   the provider's existing helper table, including its private helpers. */
+/** Binds an advertised meta function and reports whether it was found.
+    Its provider supplies the helper table and private helpers. */
 int Compiler.bind_project_meta(Compiler c, String name) {
   if (!c.project_meta.len())
     c.install_native_meta_effects(c.sym.unit_symbols());
@@ -467,21 +467,35 @@ static int Compiler._bind_project_meta(
   Var bound;
   if (!install && c.macro_lisp.try_get(name, bound)) return 1;
   Var (signature, provider, hashes) = target;
-  if (c._project_linked_copy(name, provider, hashes) &&
+  if (c.project_meta_uses_linked(name, provider, hashes) &&
       c._bind_linked_target(name, signature)) return 1;
   c._install_stub(name, signature, provider, NULL);
   return 1;
 }
 
-/* Included providers keep their own definition hashes, including private
-   callees. A linked copy answers only while those source texts agree. */
-static int Compiler._project_linked_copy(
+/** Answers whether a provider's function can use its linked body.
+    Provider hashes include private callees, so edited bodies stage instead. */
+int Compiler.project_meta_uses_linked(
   Compiler c, String name, String provider, Map hashes) {
   Map linked = _linked_module();
   if (!(name in linked)) return 0;
   $let(c.filename, home_absolute_path(provider))
   $let(c.meta_hashes, hashes) $let(c.meta_calls, {})
     return c._linked_copy(name, linked);
+}
+
+/** Answers whether the provider's own meta definitions match linked code.
+    Native advertisements keep their declared supplier semantics. */
+int Compiler.meta_provider_hashes_current(
+  Compiler c, Map hashes, Map native) {
+  Map linked = _linked_module();
+  $let(c.meta_hashes, hashes) $let(c.meta_calls, {})
+    foreach (String name, hashes.keys()) {
+      if (name in native) continue;
+      if (!(name in linked_hashes) ||
+          !c._linked_texts_match(name, linked, {})) return 0;
+    }
+  return 1;
 }
 
 /* Shipped meta definitions already have Func adapters in their linked
@@ -551,7 +565,7 @@ void Compiler.install_native_meta_effects(Compiler c, Map globs) {
 
 /** Binds an included native `meta` function the first time compile-time
     code calls `name`. Returns whether the macro session now binds it. A
-    macro import can call one during the caller's collection pass, before
+    declaration-producing macro can call one during collection, before
     the parse installs the advertisements, so the first lookup there
     installs the ones visible so far. */
 int Compiler.bind_native_meta(Compiler c, String name) {
