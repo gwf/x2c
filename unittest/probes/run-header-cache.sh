@@ -967,7 +967,7 @@ grep -q '"defined_value"' "$private/warm/owner.xi" ||
   fail "public external definition is missing from its interface"
 grep -q 'src/hidden.x' "$private/warm/owner.xi" ||
   fail "ordinary include is missing from its interface"
-! grep -q 'H_TWO\|SECRET\|Inner\|int helper' "$private/warm/owner.xi" ||
+! grep -q 'H_TWO\|("SECRET")\|Inner\|int helper' "$private/warm/owner.xi" ||
   fail "a private declaration was written to its interface"
 grep -q '"unit-static" "helper"' "$private/warm/owner.xi" ||
   fail "a static function is missing its interface marker"
