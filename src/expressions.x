@@ -2413,7 +2413,7 @@ static List Compiler._binary_expression(
     if (builtin_index) type = %("Var");
     /* Meta lowering adapts a callable stored to a Func itself; converting
        here would lift a function name to a hidden global first. */
-    if (operator == <=> && !builtin_index &&
+    if (operator == <=> &&
         !(c.meta_body && c.sym.is_named_value_type(type, "Func")))
       rhs = c.convert_expression(rhs, type);
     return source_operator_expression(type, %($operator $lhs $rhs));
