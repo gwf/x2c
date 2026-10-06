@@ -39,6 +39,20 @@ static List Compiler._convert_initializer(
   return c.convert_expression(value, type.declared());
 }
 
+/* A qualified alias can expose another typedef below its qualifier. */
+static Type Compiler._initializer_shape(Compiler c, Type type) {
+  if (!type) return type;
+  type = c.sym.resolve_key(type);
+  int hops = 0;
+  loop {
+    Type key = type.canonicalize();
+    if (key === type) return type;
+    Type next = c.sym.next_typedef(key, hops);
+    if (!next) return key;
+    type = c.sym.resolve_key(next);
+  }
+}
+
 static List Compiler._convert_composite(
   Compiler c, List items, Type target, List native_target,
   List parent_condition, int &?native_used) {
@@ -138,7 +152,7 @@ List Compiler.initializer_rows(
   if (scalar) return scalar;
   Array rows = [];
   List first_path = c._initializer_first(root, NULL);
-  Type resolved_root = c.sym.resolve_key(root);
+  Type resolved_root = c._initializer_shape(root);
   int available = !!first_path || resolved_root.scalar() ||
     resolved_root.is_pointer() || resolved_root.is_enum();
   List states = %((() $first_path $available));
@@ -201,7 +215,7 @@ static List Compiler._initializer_designated(
   List path = NULL, selectors = NULL;
   Type type = root;
   loop {
-    Type owner = c.sym.resolve_key(type);
+    Type owner = c._initializer_shape(type);
     match (node) {
       case %(dotinit ?field ?inner): {
         selectors = cons(%(dotinit $field), selectors);
@@ -231,14 +245,15 @@ static List Compiler._initializer_designated(
 
 static List Compiler._initializer_named(
   Compiler c, Type type, Var name, List parent) {
-  Type owner = c.sym.resolve_key(type);
+  Type owner = c._initializer_shape(type);
   List fields = c.sym.field_order(owner).cdr();
   while (fields) {
     List row = fields.car();
     List path = _initializer_field(owner, fields, parent);
     if (row.car() == name) return path;
     Type member = row.cadr();
-    if (!row.car().truth() && c.sym.resolve_key(member).is_aggregate()) {
+    if (!row.car().truth() &&
+        c._initializer_shape(member).is_aggregate()) {
       List nested = c._initializer_named(member, name, path);
       if (nested) return nested;
     }
@@ -301,8 +316,8 @@ static List _initializer_merge(Array states) {
 
 static int Compiler._initializer_whole(Compiler c, Type type, List value) {
   if (value.match(%(expr ? (composite *)))) return 1;
-  Type source = value.cadr(), resolved = c.sym.resolve_key(type);
-  if (c.sym.resolve_key(source).equal(resolved)) return 1;
+  Type source = value.cadr(), resolved = c._initializer_shape(type);
+  if (c._initializer_shape(source).equal(resolved)) return 1;
   if (c.sym.is_var_type(type)) return 1;
   if (c._initializer_string_array(type, value)) return 1;
   return !resolved.is_array() && !resolved.is_aggregate();
@@ -312,7 +327,7 @@ static int Compiler._initializer_string_array(
   Compiler c, Type type, List value) {
   if (!value.match(
     %(expr (* char) ${$source_literal_content(%((* char) ?))}))) return 0;
-  Type array = c.sym.resolve_key(type);
+  Type array = c._initializer_shape(type);
   if (!array.is_array()) return 0;
   Type element = c.sym.resolve_key(array.cdr()).scalar();
   return element === %(char) || element === %(signed char) ||
@@ -334,7 +349,7 @@ static Type _initializer_type(List path, Type root) {
 
 static List Compiler._initializer_first(
   Compiler c, Type type, List parent) {
-  Type owner = c.sym.resolve_key(type);
+  Type owner = c._initializer_shape(type);
   if (owner.is_array()) {
     List zero = x2c_literal_int(0);
     return cons(%($owner index $zero ${owner.cdr()} ()), parent);
@@ -451,7 +466,7 @@ static List Compiler._initializer_scalar_rows(
   if (!c._scalar_inputs(items, string)) return NULL;
   List layout = c._initializer_layout(root, target, string, symbolic);
   if (!layout || !symbolic) return NULL;
-  int array = c.sym.resolve_key(root).is_array();
+  int array = c._initializer_shape(root).is_array();
   Array rows = [];
   unsigned long long at = 0;
   foreach (List value, items) {
@@ -472,7 +487,7 @@ static int Compiler._scalar_inputs(Compiler c, List items, List &string) {
     match (value) {
       case %(expr ? (!or (composite *) (initval *))): return 0;
       case %(expr ?type ?): {
-        Type source = c.sym.resolve_key(type);
+        Type source = c._initializer_shape(type);
         if (!c.sym.is_var_type(type) &&
             (source.is_array() || source.is_aggregate())) return 0;
       }
@@ -487,7 +502,7 @@ static int Compiler._scalar_inputs(Compiler c, List items, List &string) {
 
 static List Compiler._initializer_layout(
   Compiler c, Type type, List target, List string, int &symbolic) {
-  Type owner = c.sym.resolve_key(type);
+  Type owner = c._initializer_shape(type);
   if (c.sym.is_var_type(type) ||
       (!owner.is_array() && !owner.is_aggregate()))
     return %($type ${_ull_literal(1)} ());
