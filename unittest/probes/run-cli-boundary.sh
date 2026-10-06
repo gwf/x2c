@@ -1718,11 +1718,11 @@ source_dir = root / 'source "quote\\ and space'
 source_dir.mkdir(parents=True)
 source = source_dir / 'mapped.x'
 helper = source_dir / 'included.x'
-(source_dir / 'where.xmacro').write_text(
+(source_dir / 'where.x').write_text(
     'macro Expression $imported_where() => __LINE__;\n')
 source.write_text(r'''#include "x2c.x"
 #include "included.x"
-$(import "where.xmacro")
+#include "where.x"
 macro Expression $where() => __LINE__;
 int main(void) {
   printf("source=%s:%d\n", __FILE__, __LINE__);
@@ -1788,10 +1788,10 @@ mkdir -p "$SCRIPT/bin"
 ln -s "$X2C" "$SCRIPT/bin/x2c"
 run_script() { X2C_CACHE_DIR="$SCRIPT/cache" "$X2C" script "$@"; }
 printf '%s\n' 'macro Expression $greeting() => "hello";' \
-  >"$SCRIPT/greeting.xmacro"
+  >"$SCRIPT/greeting.x"
 cat >"$SCRIPT/args.x" <<'EOF'
 #!/usr/bin/env -S x2c script
-$(import "greeting.xmacro")
+#include "greeting.x"
 int main(int argc, char **argv) {
   printf("%s", $greeting());
   for (int i = 1; i < argc; i++) printf(" [%s]", argv[i]);
@@ -1831,7 +1831,7 @@ grep -q '^x2c: run ' "$BUILD/script-warm.stderr"
 run_script -v "$SCRIPT/args.x" >/dev/null 2>"$BUILD/script-dir.stderr"
 grep -q '^x2c: link ' "$BUILD/script-dir.stderr"
 printf '%s\n' 'macro Expression $greeting() => "changed";' \
-  >"$SCRIPT/greeting.xmacro"
+  >"$SCRIPT/greeting.x"
 [[ $(run_script "$SCRIPT/args.x") == changed ]]
 run_script -v --rebuild "$SCRIPT/args.x" >/dev/null 2>"$SCRIPT/rebuild.stderr"
 grep -q '^x2c: link ' "$SCRIPT/rebuild.stderr"
@@ -1920,14 +1920,12 @@ mkdir -p "$SCRIPT/helpers/lib"
 cat >"$SCRIPT/helpers/lib/inner.x" <<'EOF'
 #pragma once
 int inner_value(void);
-#pragma private
 int inner_value(void) => 40;
 EOF
 cat >"$SCRIPT/helpers/greet.x" <<'EOF'
 #pragma once
 #include "lib/inner.x"
 String greeting(void);
-#pragma private
 String greeting(void) => %"answer ${inner_value() + 2}";
 EOF
 cat >"$SCRIPT/helpers/uses.x" <<'EOF'

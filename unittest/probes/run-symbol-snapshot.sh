@@ -7,7 +7,7 @@ X2C=${X2C:-"$ROOT/builds/0/x2c"}
 
 copy_runtime_sources() {
   local destination=$1 source
-  cp "$ROOT"/lib/*.x "$ROOT"/lib/*.xmacro "$destination"
+  cp "$ROOT"/lib/*.x "$destination"
   for source in "$ROOT"/lib/*.xlisp; do
     [[ -e "$source" ]] && cp "$source" "$destination"
   done
@@ -98,7 +98,7 @@ cold_root="$BUILD/cold-root"
 mkdir -p "$cold_root/etc" "$cold_root/lib" "$cold_root/include" \
   "$cold_root/bin"
 cp "$X2C" "$cold_root/bin/x2c"
-cp "$ROOT/etc/"*.xlisp "$ROOT/etc/"*.xmacro "$cold_root/etc/"
+cp "$ROOT/etc/"*.xlisp "$ROOT/etc/"*.x "$cold_root/etc/"
 # Staging a meta group compiles it against the runtime headers.
 cp -RL "$ROOT/include/." "$cold_root/include/"
 copy_runtime_sources "$cold_root/lib/"

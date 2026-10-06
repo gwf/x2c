@@ -17,7 +17,11 @@ import time
 compiler, directory = sys.argv[1:]
 build = Path(directory).resolve()
 environment = {**os.environ, "X2C_CACHE_DIR": str(build / "cache")}
-(build / "calls.xmacro").write_text('''
+(build / "calls.x").write_text('''#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+
 meta static int initialize(void) {
   FILE *out = fopen(getenv("META_TRANSPORT_PID"), "w");
   fprintf(out, "%ld\\n", (long) getpid());
@@ -34,15 +38,15 @@ meta static int initialize(void) {
   return 0;
 }
 meta static int state = initialize();
-meta static int text_length(String text) => text.len() + state;
-meta static int twice(int n) => n * 2;
+meta int text_length(String text) => text.len() + state;
+meta int twice(int n) => n * 2;
 ''')
 for name, size in (("small", 1), ("large", 200000)):
     (build / (name + ".x")).write_text('''#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
-$(import "calls.xmacro")
+#include "calls.x"
 int answer(void) => $text_length("''' + "a" * size + '''");
 int recovered(void) => $twice(21);
 ''')
@@ -92,7 +96,7 @@ def run(name, label, mode="", timeout="0", bound=20):
     return status, error
 
 
-# Warm both source-specific helpers outside the short call budget.
+# Warm both consumer requests outside the short call budget.
 for name in ("small", "large"):
     assert run(name, name + "-warm")[0] == 0
     status, error = run(name, name + "-timeout", "spin", "0.25", 5)

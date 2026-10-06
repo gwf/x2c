@@ -25,35 +25,37 @@ helpers() {
   pgrep -f "$X2C_CACHE_DIR/meta/project-" || true
 }
 
-cat > calls.xmacro <<'EOF'
-meta static int boom(int x) {
+cat > calls.x <<'EOF'
+#include <stdlib.h>
+
+meta int boom(int x) {
   volatile int *p = (volatile int *) (long) (x - 1);
   *p = x;
   return x;
 }
 
-meta static int bye(int x) {
+meta int bye(int x) {
   exit(x);
   return x;
 }
 
-meta static int deep(int x) {
+meta int deep(int x) {
   volatile char buf[4096];
   buf[0] = (char) x;
   return deep(x + 1) + buf[0];
 }
 
-meta static int spin(int x) {
+meta int spin(int x) {
   if (getenv("META_HELPER_SPIN")) for (;;) x++;
   return x;
 }
 
-meta static int twice(int x) => x * 2;
+meta int twice(int x) => x * 2;
 EOF
 
 cat > crash.x <<'EOF'
 #include <stdlib.h>
-$(import "calls.xmacro")
+#include "calls.x"
 
 int a = $boom(1);
 int b = $twice(1);
@@ -85,7 +87,7 @@ done
 # limit, where it loops and the helper has already run.
 cat > slow.x <<'EOF'
 #include <stdlib.h>
-$(import "calls.xmacro")
+#include "calls.x"
 
 int g = $spin(0);
 int h = $twice(4);
@@ -217,7 +219,7 @@ done
 [ -z "$(helpers)" ] || fail "helper left running after a killed translation"
 
 for i in 1 2 3 4 5 6 7 8 9 10 11 12; do
-  printf '#include <stdio.h>\n$(import "../calls.xmacro")\n' >"jobs/u$i.x"
+  printf '#include <stdio.h>\n#include "../calls.x"\n' >"jobs/u$i.x"
   printf 'int v%d(void) { return $twice(%d); }\n' "$i" "$i" >>"jobs/u$i.x"
 done
 "$X2C" translate -j 8 --out-dir out jobs/u*.x >jobs.out 2>&1 ||
@@ -226,10 +228,10 @@ grep -q "return 24;" out/u12.c || fail "parallel result missing"
 [ -z "$(helpers)" ] || fail "helper left running after -j 8"
 
 # An input whose own group does not compile falls back to the group of its
-# imports alone.
+# included providers alone.
 cat > clash.x <<'EOF'
 #include <stdio.h>
-$(import "calls.xmacro")
+#include "calls.x"
 static int List_len(int a) { return a; }
 int v = $twice(3) + List_len(0);
 EOF
@@ -251,7 +253,7 @@ grep -q '"diagnostics":\[\]' editor.json ||
 if [ "$(id -u)" != 0 ]; then
   cat > nofork.x <<'EOF'
 #include <stdlib.h>
-$(import "calls.xmacro")
+#include "calls.x"
 int b = $twice(1);
 EOF
   "$X2C" translate --out-dir out nofork.x >nofork.out 2>&1 ||

@@ -41,8 +41,6 @@ bundle() {
 cat >src/helpers.x <<'EOF'
 meta int triple(int);
 
-#pragma private
-
 int triple(int x) { return 3 * x; }
 EOF
 cat >src/main.x <<'EOF'
@@ -99,23 +97,19 @@ expect_error "not an x2c native module" \
 # Sources with one name stay distinct, however they are spelled.
 cat >a/util.x <<'EOF'
 meta int fa(int);
-#pragma private
 int fa(int x) { return x + 1; }
 EOF
 cat >b/util.x <<'EOF'
 meta int fb(int);
-#pragma private
 int fb(int x) { return x + 2; }
 EOF
 cat >c/fa.x <<'EOF'
 meta int fa(int);
-#pragma private
 int fa(int x) { return 100; }
 EOF
 cat >sets.x <<'EOF'
 #include "lib.x"
 meta int components(int);
-#pragma private
 int components(int n) { return DisjointSet.new(n).num_components(); }
 EOF
 cat >both.x <<'EOF'
@@ -140,7 +134,6 @@ grep -Fq "native: more than one native module defines" warn.out ||
 cat >rx.x <<'EOF'
 #include "regex.x"
 meta int groups(int);
-#pragma private
 int groups(int n) { return Regex.compile("(a)").capture_count() + n; }
 EOF
 cat >rx-main.x <<'EOF'
@@ -258,7 +251,6 @@ int external_value(void) { return 2; }
 EOF
 cat >link/helpers.x <<'EOF'
 meta int value(void);
-#pragma private
 int external_value(void);
 int value(void) { return external_value(); }
 EOF
@@ -354,7 +346,6 @@ grep -Fq "up-to-date translate" rebuilt.out &&
 # --native-module is selected before a package's module.
 cat >first.x <<'EOF'
 meta int tally__tally_sum(int);
-#pragma private
 int tally__tally_sum(int n) { return -n; }
 EOF
 "$X2C" build -q --kind meta-module first.x --output first.so
@@ -400,7 +391,6 @@ int value(void) => 1;
 EOF
 cat >shadow/second/tally/src/tally.x <<'EOF'
 meta int value(void);
-#pragma private
 int value(void) => 2;
 EOF
 cat >shadow/second/tally/src/trace.c <<'EOF'
@@ -437,7 +427,6 @@ expect_error "package 'tally' was built by another compiler; rebuild it" \
 mkdir -p packages/sibling/src
 cat >packages/sibling/src/sibling.x <<'EOF'
 meta int increment(int);
-#pragma private
 int increment(int n) => n + 1;
 EOF
 "$X2C" build -q -j 2 --extension packages/tally \

@@ -32,7 +32,7 @@ fail() {
 
 copy_runtime_sources() {
   local destination=$1 source
-  cp "$ROOT"/lib/*.x "$ROOT"/lib/*.xmacro "$destination"
+  cp "$ROOT"/lib/*.x "$destination"
   for source in "$ROOT"/lib/*.xlisp; do
     [[ -e "$source" ]] && cp "$source" "$destination"
   done
@@ -112,7 +112,7 @@ FAKE="$BUILD/fake-root"
 mkdir -p "$FAKE/src" "$FAKE/include" "$FAKE/lib" "$FAKE/etc" \
   "$FAKE/builds/0" "$FAKE/artifact-out" "$FAKE/conflict-out"
 cp "$X2C" "$FAKE/builds/0/x2c"
-cp "$ROOT/etc/"*.xlisp "$ROOT/etc/"*.xmacro "$FAKE/etc/"
+cp "$ROOT/etc/"*.xlisp "$ROOT/etc/"*.x "$FAKE/etc/"
 copy_runtime_sources "$FAKE/lib/"
 cp "$SOURCE"/protocol-conflict-{a,b,primer-a,primer-b,unit}.x "$FAKE/src/"
 (cd "$FAKE" && ./builds/0/x2c translate --out-dir conflict-out \

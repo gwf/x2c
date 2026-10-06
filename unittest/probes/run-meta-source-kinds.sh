@@ -9,22 +9,22 @@ export X2C_CACHE_DIR="$BUILD/cache"
 mkdir -p "$BUILD/out"
 cd "$BUILD"
 
-cat >plain.xmacro <<'EOF'
-meta static int twice(int n) => n * 2;
+cat >plain-meta.x <<'EOF'
+meta int twice(int n) => n * 2;
 EOF
-cat >indent.xpmacro <<'EOF'
-meta static int twice(int n):
+cat >indent-meta.xp <<'EOF'
+meta int twice(int n):
   if (n < 0):
     return -n
   return n * 2
 EOF
-printf 'export $(import "plain.xmacro")\n' >bridge.x
-printf 'export $(import "indent.xpmacro")\n' >bridge.xp
+printf '#include "plain-meta.x"\n' >bridge.x
+printf '#include "indent-meta.xp"\n' >bridge.xp
 
 for kind in plain indent included-plain included-indent; do
   case "$kind" in
-    plain) directive='$(import "plain.xmacro")' ;;
-    indent) directive='$(import "indent.xpmacro")' ;;
+    plain) directive='#include "plain-meta.x"' ;;
+    indent) directive='#include "indent-meta.xp"' ;;
     included-plain) directive='#include "bridge.x"' ;;
     included-indent) directive='#include "bridge.xp"' ;;
   esac
