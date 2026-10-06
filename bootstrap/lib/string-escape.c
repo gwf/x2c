@@ -134,7 +134,7 @@ String String_unescape(String str){
   if(! _init_guard_) _file_init_();
   int n = String_len(str);
   if(n == 0) return NULL;
-  if(! String_contains(str, _2)) return str;
+  if(!(String_contains(str, _2))) return str;
   String string = String_malloc(n + 1);
   if(_unescape_into(string, str) < 0){
     String_free(string);

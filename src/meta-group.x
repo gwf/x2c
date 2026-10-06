@@ -343,7 +343,7 @@ static Array Compiler._runtime_includes(Compiler c, String lib) {
     if (hash is <string> && String.startswith(hash, "search:")) continue;
     String dependency = path;
     if (dependency.startswith(lib) && dependency.endswith(".x") &&
-        !dependency[lib.len():].contains("/"))
+        !("/" in dependency[lib.len():]))
       ordered.push(
         %(preproc ${%"#include \"${Path.basename(dependency)}\""}));
   }
@@ -560,10 +560,10 @@ static List Compiler._native_call(
 /* Whether the compiler declares a parameter `Func` that the native module
    declares `Var`. */
 static int Compiler._boxes_func(Compiler c, List declared, List parameter) =>
-  c.sym.normalize_declared_type(declared).equal(
-    c.sym.normalize_declared_type(%("Func"))) &&
-  c.sym.normalize_declared_type(parameter).equal(
-    c.sym.normalize_declared_type(%("Var")));
+  c.sym.normalize_declared_type(declared) ==
+    c.sym.normalize_declared_type(%("Func")) &&
+  c.sym.normalize_declared_type(parameter) ==
+    c.sym.normalize_declared_type(%("Var"));
 
 /* The native function `name` of `type` read through its module's address,
    or NULL when no native module supplies it. The read keeps the function
@@ -603,7 +603,7 @@ static Map Compiler._initial_copies(Compiler c, Array units) {
         List copy = copied
           ? c.sym.introduce(%"${binding.list().last()}_x2c_initial") : NULL;
         for (int i = 0; i < (int) units.len(); i++)
-          if (units[i].equal(declaration)) {
+          if (units[i] == declaration) {
             List original = c.meta_build ? bound : %(op = $bound $initializer);
             List bindings = copied
               ? %($original (op = (bind $copy $mods) $initializer))

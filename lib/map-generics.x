@@ -25,9 +25,9 @@ macro Unit $map.var.family(
        operation. `nil`, the empty `String`, and two keys of different
        kinds unbox as NULL and take the general path unchanged. */
     List alist = a[0], blist = b[0];
-    if (alist && blist) return alist.equal(blist);
+    if (alist && blist) return alist == blist;
     String astr = a[0], bstr = b[0];
-    if (astr && bstr) return astr.equal(bstr);
+    if (astr && bstr) return astr == bstr;
     return a[0] is not <array> && a[0] is not <map> && a[0] == b[0];
   }
 
@@ -712,7 +712,7 @@ macro Unit $map.typed.observation(Type $map) {
 
   /** Appends the typed-Map display text in bucket order. */
   Buffer $map.write_str($map map, Buffer out) {
-    if (!map.truth()) return out.write("{ }");
+    if (!map) return out.write("{ }");
     return map._core_write(out, <str>);
   }
 
@@ -933,7 +933,7 @@ macro Unit $map.typed.box(Type $map, Type $key, Type $value,
     $key key;
     $value value;
     while (map.try_next(cursor, key, value))
-      boxed.setindex($box_key(key), $box_value(value));
+      boxed[$box_key(key)] = $box_value(value);
     finished = boxed;
     return boxed;
   }

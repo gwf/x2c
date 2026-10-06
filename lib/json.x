@@ -169,7 +169,7 @@ int Json.boolean(Var value) {
     Symbol tag = value.tag();
     $error.boolean.type(tag);
   }
-  return value.jsonbool().truth();
+  return !!value.jsonbool();
 }
 
 /*  reading

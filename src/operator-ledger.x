@@ -39,7 +39,7 @@ meta static List _operator_rows(void) => %(
 meta static List _operator_cases(int key, int value, int derived) {
   Array cases = [];
   foreach (List row, _operator_rows()) {
-    if (!row[key].truth() || !row[value].truth()) continue;
+    if (!row[key] || !row[value]) continue;
     if (derived >= 0 && row[4] != derived) continue;
     Symbol label = row[key];
     Var result = row[value];

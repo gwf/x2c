@@ -2974,7 +2974,7 @@ default: break;
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 377892: ;  static MatchCaptureSite _x2c_match_site_43;  if (x2c_match_site_try_capture(& _x2c_match_site_43, _x2c_match_expr, List_var(_465), &_x2c_match_capture)) {Var type = _x2c_match_values[0];  Var binding = _x2c_match_values[1]; {
   if(! Type_is_function(Var_type(type))){
-    if(! Map_contains(references, binding)) Array_push(ordered, binding);  Map_setindex(references, binding, int_var(1));
+    if(!(Map_contains(references, binding))) Array_push(ordered, binding);  Map_setindex(references, binding, int_var(1));
   }
   return;
 }
@@ -3246,7 +3246,7 @@ void Compiler_record_source_declaration(Compiler c, List binding, Token first, T
 }
 
 static List Compiler__source_range(Compiler c, Token first, Token after){
-  if(! first || ! after || first >= after || Map_truth(c -> macro_holes)) return NULL;  Token last = after - 1;  while(last > first &&(last -> type == 40896714 || last -> type == 7477210024 || last -> type == 35579270086)) last --;  String path = absolute_path(c -> filename);  if(! Map_contains(c -> source_texts, String_var(path))) Map_setindex(c -> source_texts, String_var(path), String_var(c -> text));  return({
+  if(! first || ! after || first >= after || Map_truth(c -> macro_holes)) return NULL;  Token last = after - 1;  while(last > first &&(last -> type == 40896714 || last -> type == 7477210024 || last -> type == 35579270086)) last --;  String path = absolute_path(c -> filename);  if(!(Map_contains(c -> source_texts, String_var(path)))) Map_setindex(c -> source_texts, String_var(path), String_var(c -> text));  return({
     Var _x2c_literal_part_53 = String_var(path);  Var _x2c_literal_part_54 = int_var(first -> pos);  Var _x2c_literal_part_55 = int_var(last -> pos + last -> len);  cons(_x2c_literal_part_53, cons(_x2c_literal_part_54, cons(_x2c_literal_part_55, NULL)));
   }
   );

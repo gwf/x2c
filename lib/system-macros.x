@@ -16,8 +16,8 @@ meta List _dedent_expand(List node) {
     open = 2;
   else if (length >= 2 && source.startswith("\""))
     open = 1;
-  if (open == 0 || !source.endswith("\"") || source.contains("\\") ||
-      source.contains("$"))
+  if (open == 0 || !source.endswith("\"") || "\\" in source ||
+      "$" in source)
     return $!( $node.dedent() );
   String body = source.getslice(open, length - 1, 1);
   return x2c_literal_string(body.dedent());

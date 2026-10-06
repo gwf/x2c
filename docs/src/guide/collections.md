@@ -1223,6 +1223,10 @@ fallback.
 Native C arrays and pointers keep C indexing. `Array`, `List`, `String`, and
 `Map` also define `value[...]`.
 
+Their typedef aliases inherit bracket reads, so `typedef List Row;` permits
+`row[0]`. An alias's own `getindex` overrides the inherited read. Native C
+pointer aliases keep C indexing unless they define their own getter.
+
 ```x2c
 Array digits = [0, 1, 2, 3, 4, 5];
 List letters = %(a b c d);

@@ -271,7 +271,7 @@ int Json_boolean(Var value){
     }
 
   }
-  return JsonBool_truth(Var_jsonbool(value));
+  return ! ! JsonBool_truth(Var_jsonbool(value));
 }
 
 Var Json_parse(String source){

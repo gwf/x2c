@@ -1532,8 +1532,6 @@ static String _input_noun(Symbol phase, int count){
 
 void Path_remove_tree(Path);
 
-String String_str(String);
-
 static int Build__publish(Build b, List inputs){
   String name = Path_basename(b -> output);
   String staging =({
@@ -1544,7 +1542,7 @@ static int Build__publish(Build b, List inputs){
   String staged = String_join(NULL, cons(String_var(staging), cons(String_var(_2), cons(String_var(name), NULL))));
   int status = Build__replace(b, Build__final_action(b, staged, inputs), staged);
   Path_remove_tree(staging);
-  if(status < 0 && b -> request -> verbose) fprintf(stderr, "x2c: unchanged link %s\n", String_str(b -> output));
+  if(status < 0 && b -> request -> verbose) fprintf(stderr, "x2c: unchanged link %s\n", b -> output);
   return status;
 }
 
@@ -1552,20 +1550,20 @@ static int Build__replace(Build b, ToolAction action, String staged){
   if(ToolAction_run(action)) return 1;
   if(b -> request -> kind == 904178442 && _same_file_bytes(staged, b -> output)) return - 1;
   if(! rename(staged, b -> output)) return 0;
-  fprintf(stderr, "x2c: error: cannot replace %s: %s\n", String_str(b -> output), strerror(errno));
+  fprintf(stderr, "x2c: error: cannot replace %s: %s\n", b -> output, strerror(errno));
   return 1;
 }
 
 int x2c_exception_claim(ExceptionFrame *);
 
 static int _same_file_bytes(String first, String second){
-  FILE * left = fopen(String_str(first), "rb");
+  FILE * left = fopen(first, "rb");
   if(! left) return 0;
   {
     ExceptionFrame _x2c_exception_frame_3;
     x2c_exception_push(& _x2c_exception_frame_3);
     if(! sigsetjmp(_x2c_exception_frame_3.env, 0)){
-      FILE * right = fopen(String_str(second), "rb");
+      FILE * right = fopen(second, "rb");
       if(! right){
         int _x2c_return_value_1 = 0;
         {

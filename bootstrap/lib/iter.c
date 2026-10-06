@@ -440,7 +440,7 @@ static int _unique_next(Iter iter, Var * out){
   while(1){
     Var value;
     if(! Iter_try_next(source, &(value))) return 0;
-    if(! Map_contains(seen, value)){
+    if(!(Map_contains(seen, value))){
       Map_setindex(seen, value, value);
       * out = value;
       return 1;

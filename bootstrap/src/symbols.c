@@ -711,7 +711,7 @@ static List Sym__scope_binding(Sym s, SymScope * scope, List key){
   Var found;  List binding;  if(Map_try_get((* scope).bindings, List_var(key), &(found))) binding = Var_list(found);  else{
     binding = Sym__new_binding(s, key);  Sym_put(s, (* scope).bindings, List_var(key), List_var(binding));
   }
-  List _x2c_destructure_0 = binding;  Var binding_tag = List_getindex(_x2c_destructure_0, 0);  int identity = Var_int(Var_convert(List_getindex(_x2c_destructure_0, 1), 3453797));  String spelling = Var_string(List_getindex(_x2c_destructure_0, 2)); (void) binding_tag;  if(! Map_contains(s -> binding_facts, List_var(cons(_66, cons(int_var(identity), NULL))))) Sym_put(s, s -> binding_facts, List_var(cons(_66, cons(int_var(identity), NULL))), String_var(spelling));  List self_key = cons(_67, cons(List_var(binding), NULL));  if(! Map_contains(s -> binding_facts, List_var(self_key))){
+  List _x2c_destructure_0 = binding;  Var binding_tag = List_getindex(_x2c_destructure_0, 0);  int identity = Var_int(Var_convert(List_getindex(_x2c_destructure_0, 1), 3453797));  String spelling = Var_string(List_getindex(_x2c_destructure_0, 2)); (void) binding_tag;  if(!(Map_contains(s -> binding_facts, List_var(cons(_66, cons(int_var(identity), NULL)))))) Sym_put(s, s -> binding_facts, List_var(cons(_66, cons(int_var(identity), NULL))), String_var(spelling));  List self_key = cons(_67, cons(List_var(binding), NULL));  if(!(Map_contains(s -> binding_facts, List_var(self_key)))){
     Var relative;  if(Map_try_get((* scope).symbols, List_var(cons(_67, cons(String_var(spelling), NULL))), &(relative))) Sym_put(s, s -> binding_facts, List_var(self_key), relative);
   }
   if(s -> c -> source_facts) Sym__note_source_key(s, &((* scope)), key, binding);  return binding;
@@ -887,7 +887,7 @@ static void Sym__local_typedef(Sym s, Type type, List binding){
 }
 
 static void Sym__local_object(Sym s, List key, List binding, Type type){
-  Sym__mark_automatic(s, binding, type);  Type global_type = NULL;  Sym_resolve_global(s, key, &(global_type));  if(String_truth(_var_converter_owner(key, Type_list(global_type))) && ! Map_contains(s -> binding_facts, List_var(cons(_79, cons(List_var(binding), NULL))))) Sym_put(s, s -> binding_facts, List_var(cons(_79, cons(List_var(binding), NULL))), String_var(Compiler_fresh_name(s -> c, _81)));
+  Sym__mark_automatic(s, binding, type);  Type global_type = NULL;  Sym_resolve_global(s, key, &(global_type));  if(String_truth(_var_converter_owner(key, Type_list(global_type))) && !(Map_contains(s -> binding_facts, List_var(cons(_79, cons(List_var(binding), NULL)))))) Sym_put(s, s -> binding_facts, List_var(cons(_79, cons(List_var(binding), NULL))), String_var(Compiler_fresh_name(s -> c, _81)));
 }
 
 static void Sym__mark_automatic(Sym s, List binding, Type type){
@@ -1015,7 +1015,7 @@ String Compiler_imported_spelling(Compiler c, String name){
 }
 
 void Sym_define_macro(Sym s, Atom name, List definition){
-  if(! _init_guard_) _file_init_();  SymScope * scope = Sym__scope_at(s, - 1);  if(scope -> macros == NULL) scope -> macros = Map_new();  if(! Map_contains(scope -> macros, name)) s -> local_macro_names ++;  Sym_put(s, scope -> macros, name, List_var(definition));
+  if(! _init_guard_) _file_init_();  SymScope * scope = Sym__scope_at(s, - 1);  if(scope -> macros == NULL) scope -> macros = Map_new();  if(!(Map_contains(scope -> macros, name))) s -> local_macro_names ++;  Sym_put(s, scope -> macros, name, List_var(definition));
 }
 
 int Sym_has_local_macros(Sym s){
@@ -1362,7 +1362,7 @@ static void _replace_map(Map original, Map staged){
     ;  x2c_cleanup_push(& _x2c_defer_record_0); {
       {
         Var key;  Array _x2c_macro_object_12 = keys;  int _x2c_macro_cursor_12 = 0;  Var _x2c_macro_cursor_output_19;  while(Array_try_next(_x2c_macro_object_12, &(_x2c_macro_cursor_12), &(_x2c_macro_cursor_output_19))){
-          key = _x2c_macro_cursor_output_19;  if(! Map_contains(staged, key)) Map_del(original, key);
+          key = _x2c_macro_cursor_output_19;  if(!(Map_contains(staged, key))) Map_del(original, key);
         }
 
       }

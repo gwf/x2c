@@ -123,7 +123,7 @@ Buffer String.write_repr(String str, Buffer out) {
 meta native String String.unescape(String str) {
   int n = str.len();
   if (n == 0) return NULL;
-  if (!str.contains("\\")) return str;
+  if (!("\\" in str)) return str;
   String string = String.malloc(n + 1);
   if (_unescape_into(string, str) < 0) {
     string.free();

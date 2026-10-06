@@ -1015,7 +1015,7 @@ static int Compiler._test_declaration_start(
      is a declaration wherever it is written. */
   Var definition;
   if (c.object_macros.try_get(c.token.text, definition) &&
-      (definition is <list> || definition.equal(<wrapper>)))
+      (definition is <list> || definition == <wrapper>))
     return 1;
   return c._type_name_starts(require_declarator);
 }
@@ -1300,7 +1300,7 @@ static int Compiler._attribute_starts(Compiler c) {
   return c.peek(0) == <ident> && c.peek(1) == <(> &&
          (c.token.text == "__attribute__" ||
           (c.object_macros.try_get(c.token.text, definition) &&
-           definition.equal(<annotation>)));
+           definition == <annotation>));
 }
 
 /* Source is read before preprocessing, so a macro whose body is declaration
@@ -1318,7 +1318,7 @@ static int Compiler._prefix_macro_words(Compiler c, int rank, Array words) {
     c.next();
     return 1;
   }
-  if (definition.equal(<wrapper>) && c.peek(1) == <(>) {
+  if (definition == <wrapper> && c.peek(1) == <(>) {
     /* `EXPORT(const char *) f(void);` wraps the type. The name and its
        parentheses contribute nothing; the closing one is hidden so the
        type and declarator between them parse as written. */
@@ -1489,7 +1489,7 @@ static void Compiler._skip_attributes(Compiler c) {
     if (c._attribute()) continue;
     if (c.peek(0) != <ident> ||
         !c.object_macros.try_get(c.token.text, definition) ||
-        !definition.equal(%()))
+        definition != %())
       return;
     c.next();
   }
@@ -1826,7 +1826,7 @@ static List Compiler._publish_enumerator(
   Symbol prior = c.sym.enumerator_owner(key);
   if (prior && binding) {
     List existing = c.sym.lookup(key, NULL);
-    if (existing && existing.equal(binding)) return input;
+    if (existing && existing == binding) return input;
   }
   if (prior)
     $report.parse.enum_bound(c, spelling, origin);
@@ -1854,7 +1854,7 @@ static int _enum_fits_int(List type, List members) {
 }
 
 static int _fits_int(Type value, List type) {
-  if (value.equal(type)) return 1;
+  if (value == type) return 1;
   X2CVarNumericInfo info;
   return Var.numeric_info(value.scalar_tag(), info) && !info.floating &&
          (info.bits < 32 || (info.bits == 32 && !info.unsigned_value));
@@ -2274,7 +2274,7 @@ static void Compiler._check_rebinding(
   Compiler c, String exact, int exact_name, List declaration) {
   List existing = exact ? c.sym.current_binding(%($exact)) : NULL;
   if (exact_name || (existing &&
-      c.semantic_binding_facts().contains(%(parameter $existing)))) {
+      %(parameter $existing) in c.semantic_binding_facts())) {
     Var prior = existing
               ? c.sym.current_symbols()[%($exact)] : void;
     if (prior is <list>) {

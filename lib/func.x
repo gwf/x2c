@@ -304,7 +304,7 @@ static void *Func._reference_argument(
   if (!source ||
       (!argv[i].data.reference && declared.car() != <opt-ref>) ||
       !signature_reference || !want ||
-      !target.equal(declared_target) ||
+      target != declared_target ||
       (!_reference_type_accepts(want, source) &&
        !_reference_type_accepts(declared_target, source))) {
     List sig = fn ? fn.sig : NULL;
@@ -320,7 +320,7 @@ static int _reference_type_accepts(List target, List source) {
   unsigned target_qualifiers = _type_qualifiers(target);
   unsigned source_qualifiers = _type_qualifiers(source);
   return !(source_qualifiers & ~target_qualifiers) &&
-         target.equal(source);
+         target == source;
 }
 
 static unsigned _type_qualifiers(List &cursor) {

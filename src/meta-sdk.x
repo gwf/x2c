@@ -103,7 +103,7 @@ static macro Stmt $report.sdk.symbol_set_value(Expr $value) =>
 static macro Stmt $report.sdk.symbol_set_duplicate(Expr $values, Expr $duplicate) =>
   MetaContext.reject(
     "_x2c.symbol-set requires distinct Symbols",
-    %("symbol:" ${$values.getindex($duplicate).repr()}));
+    %("symbol:" ${$values[$duplicate].repr()}));
 
 static macro Stmt $report.sdk.native_declarations() =>
   MetaContext.reject(
@@ -357,7 +357,7 @@ List x2c_type_fields(List value) {
   if (!metadata)
     $report.sdk.fields_complete(value);
   Array named = [];
-  foreach (List row, metadata.cdr()) if (row.car().truth()) named.push(row);
+  foreach (List row, metadata.cdr()) if (row.car()) named.push(row);
   return named.list_free();
 }
 
@@ -396,7 +396,7 @@ static String _binding_spelling(List value, Var syntax) {
     $report.sdk.binding_identifier(syntax);
   Var registered =
     active.expander.semantic_binding_facts()[%(known $identity)];
-  if (registered is not <string> || !registered.string().equal(spelling))
+  if (registered is not <string> || registered.string() != spelling)
     $report.sdk.binding_known(value);
   return spelling;
 }

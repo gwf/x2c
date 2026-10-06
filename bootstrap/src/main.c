@@ -1330,8 +1330,6 @@ static void _register_units(CliRequest request, Build b, List units, Map stale){
 
 Var List_getindex(List, int);
 
-String String_str(String);
-
 static int _run_env(CliRequest request){
   String wanted = NULL;
   if(List_truth(request -> inputs)) wanted = Var_string(List_car(request -> inputs));
@@ -1348,7 +1346,7 @@ static int _run_env(CliRequest request){
         name = Var_string(List_getindex(_x2c_destructure_0, 0));
         value = Var_string(List_getindex(_x2c_destructure_0, 1));
         const char * text = String_truth(value) ? value : "";
-        if(! String_truth(wanted)) printf("%s = %s\n", String_str(name), text);
+        if(! String_truth(wanted)) printf("%s = %s\n", name, text);
         else if(String_equal(name, wanted)){
           printf("%s\n", text);
           return 0;

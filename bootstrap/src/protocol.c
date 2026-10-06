@@ -1941,7 +1941,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void){
   _1489 = cons(_1488, NULL);
   _1490 = cons(_707, _1489);
   _1491 = List_var(_1490);
-  _1492 = int_var(84699);
+  _1492 = int_var(84646);
   _1493 = cons(_1492, NULL);
   _1494 = cons(_720, _1493);
   _1495 = List_var(_1494);
@@ -2022,7 +2022,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_3(void){
   _1567 = cons(_1566, NULL);
   _1568 = cons(_707, _1567);
   _1569 = List_var(_1568);
-  _1570 = int_var(89679);
+  _1570 = int_var(89626);
   _1571 = cons(_1570, NULL);
   _1572 = cons(_720, _1571);
   _1573 = List_var(_1572);
@@ -3324,7 +3324,7 @@ static List _inherited_parameters(List parameters, Type owner, Type participant)
 }
 
 static int Compiler__default_completes(Compiler c, String name, Type declared, String forward){
-  return String_truth(forward) && Type_is_function(declared) && Map_contains(c -> fn_defs, String_var(forward)) && ! Map_contains(c -> fn_defs, String_var(name)) && ! Map_contains(Sym_file_statics(c -> sym), List_var(cons(_366, cons(String_var(name), NULL))));
+  return String_truth(forward) && Type_is_function(declared) && Map_contains(c -> fn_defs, String_var(forward)) && !(Map_contains(c -> fn_defs, String_var(name))) && !(Map_contains(Sym_file_statics(c -> sym), List_var(cons(_366, cons(String_var(name), NULL)))));
 }
 
 static List MemberResolution_complete(MemberResolution * r, List row){
@@ -3580,7 +3580,7 @@ List Compiler_protocol_member_names(Compiler c, Type participant){
               {
                 List row;  List _x2c_macro_object_17 = rows;  List _x2c_macro_cursor_17 = _x2c_macro_object_17;  Var _x2c_macro_cursor_output_20;  while(List_try_next(_x2c_macro_object_17, &(_x2c_macro_cursor_17), &(_x2c_macro_cursor_output_20))){
                   row = Var_list(_x2c_macro_cursor_output_20); {
-                    String name = Var_string(List_car(row));  if(String_truth(name) && ! Map_contains(seen, String_var(name))){
+                    String name = Var_string(List_car(row));  if(String_truth(name) && !(Map_contains(seen, String_var(name)))){
                       Map_setindex(seen, String_var(name), int_var(1));  Array_push(names, String_var(name));
                     }
 
@@ -4197,7 +4197,7 @@ void Compiler_install_generated_protocol_symbols(Compiler c){
             }
             continue;
           }
-          if(! Map_contains(c -> fn_defs, String_var(forward))) continue;  if(Compiler__numeric_participant(c, participant)) continue; {
+          if(!(Map_contains(c -> fn_defs, String_var(forward)))) continue;  if(Compiler__numeric_participant(c, participant)) continue; {
             List row;  List _x2c_macro_object_38 = rows;  List _x2c_macro_cursor_38 = _x2c_macro_object_38;  Var _x2c_macro_cursor_output_43;  while(List_try_next(_x2c_macro_object_38, &(_x2c_macro_cursor_38), &(_x2c_macro_cursor_output_43))){
               row = Var_list(_x2c_macro_cursor_output_43);
   {

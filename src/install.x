@@ -346,7 +346,7 @@ static List _source_units(String src, String name, String spec) {
   List units = NULL;
   try units = _files_with(src, ".x").append(_files_with(src, ".xp"));
   catch %(not-found *): {}
-  if (!units.contains(%"$src/$name.x") && !units.contains(%"$src/$name.xp"))
+  if (!(%"$src/$name.x" in units) && !(%"$src/$name.xp" in units))
     $report.install.entry_missing(spec, name);
   return units;
 }

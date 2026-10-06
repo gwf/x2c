@@ -280,7 +280,7 @@ static int RuntimeScan._value(RuntimeScan &s, List node) {
         ${$indexed(?receiver, ?selector)})): {
       Type native = type;
       if (native.is_array()) return s._push(content, 1);
-      if (native.is_pointer() || !native.contains(<const>)) return 1;
+      if (native.is_pointer() || !(<const> in native)) return 1;
       break;
     }
     case %(expr ? ${$sizeof_expression(?operand)}):
@@ -295,7 +295,7 @@ static int RuntimeScan._identifier(RuntimeScan &s, Type type, List binding) {
   Type native = type;
   return native && !native.is_enum() && !native.is_function() &&
          !native.is_array() &&
-         (native.is_pointer() || !native.contains(<const>));
+         (native.is_pointer() || !(<const> in native));
 }
 
 static int RuntimeScan._address(RuntimeScan &s, List node) {
@@ -337,7 +337,7 @@ static int Compiler._automatic_static_input(Compiler c, List binding) {
   Var automatic, stored;
   Map facts = c.semantic_binding_facts();
   if (!facts.try_get(%(automatic $binding), automatic) ||
-      !automatic.truth()) return 0;
+      !automatic) return 0;
   if (!facts.try_get(%(type $binding), stored)) return 1;
   Type type = stored;
   return !type.is_static() && !type.is_extern() && !type.is_threaded();
@@ -1113,7 +1113,7 @@ static List Preserve._declaration(Preserve &p, List declaration, Map escaped) {
   Type type = declaration.cadr();
   List bindings = declaration.caddr();
   if (p._declares_pointee(bindings) &&
-      !type.type().flatten_all().contains(<volatile>))
+      !(<volatile> in type.type().flatten_all()))
     type = cons(<volatile>, type);
   Array preserved = [];
   foreach (List binding, bindings.cdr())
@@ -1133,7 +1133,7 @@ static List Preserve._binding(Preserve &p, List bind, Map escaped) {
     case %(bind ?name ?mods): {
       String spelling = binding_identity_spelling(name);
       if (spelling && spelling in p.names &&
-          !(escaped && spelling in escaped) && !mods.contains(<volatile>))
+          !(escaped && spelling in escaped) && !(<volatile> in mods))
         return %(bind $name ${cons(<volatile>, mods)});
     }
   return bind;
@@ -1316,7 +1316,7 @@ static void DeferCaptures.collect(DeferCaptures &d, List ast) {
   match (ast)
     case %(bind ?bound *): {
       List binding = bound, known = d.declared;
-      if (!known.contains(binding)) d.declared = cons(binding, known);
+      if (!(binding in known)) d.declared = cons(binding, known);
     }
   match (ast)
     case %(expr ? ${$source_identifier_content(%(?bound))}): {
@@ -1328,14 +1328,14 @@ static void DeferCaptures.collect(DeferCaptures &d, List ast) {
   Var field;
   List changed = d.written;
   if (modified && d.captures.try_get(modified, field) &&
-      !changed.contains(modified))
+      !(modified in changed))
     d.written = cons(modified, changed);
 }
 
 static void DeferCaptures._capture(DeferCaptures &d, List binding) {
   Compiler c = d.c;
   Map facts = c.semantic_binding_facts();
-  if (!binding || d.declared.contains(binding) ||
+  if (!binding || binding in d.declared ||
       !(%(automatic $binding) in facts) || binding in d.captures) return;
   Var stored_type = facts[%(type $binding)];
   if (!c._defer_type_hoistable(stored_type)) {
@@ -1376,7 +1376,7 @@ static List DeferCaptures._rewrite(
       String field_name = binding_identity_spelling(field_var);
       Type type = captured_type, target = type;
       if (binding in d.written &&
-          !type.flatten_all().contains(<volatile>))
+          !(<volatile> in type.flatten_all()))
         target = cons(<volatile>, type);
       Type pointer = cons(<*>, target);
       String reference = %"$env_name->$field_name";

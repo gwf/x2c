@@ -1173,7 +1173,7 @@ static Array Compiler__runtime_includes(Compiler c, String lib){
   {
     Var path, hash;  Map _x2c_macro_object_5 = c -> deps;  unsigned _x2c_macro_cursor_5 = 0;  Var _x2c_macro_cursor_output_5;  Var _x2c_macro_cursor_output_6;  while(Map_try_next(_x2c_macro_object_5, &(_x2c_macro_cursor_5), &(_x2c_macro_cursor_output_5), &(_x2c_macro_cursor_output_6))){
       path = _x2c_macro_cursor_output_5;  hash = _x2c_macro_cursor_output_6; {
-        if(Var_is_row(hash, 11, 7, 1) && String_startswith(Var_string(hash), _225)) continue;  String dependency = Var_string(path);  if(String_startswith(dependency, lib) && String_endswith(dependency, _226) && ! String_contains(String_getslice(dependency, String_len(lib), -2147483648, 1), _5)) Array_push(ordered, List_var(cons(_222, cons(String_var(String_join(NULL, cons(String_var(_223), cons(String_var(Path_basename(dependency)), cons(String_var(_224), NULL))))), NULL))));
+        if(Var_is_row(hash, 11, 7, 1) && String_startswith(Var_string(hash), _225)) continue;  String dependency = Var_string(path);  if(String_startswith(dependency, lib) && String_endswith(dependency, _226) && !(String_contains(String_getslice(dependency, String_len(lib), -2147483648, 1), _5))) Array_push(ordered, List_var(cons(_222, cons(String_var(String_join(NULL, cons(String_var(_223), cons(String_var(Path_basename(dependency)), cons(String_var(_224), NULL))))), NULL))));
       }
 
     }

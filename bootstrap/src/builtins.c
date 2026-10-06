@@ -1688,8 +1688,6 @@ List List_cdr(List);
 
 List x2c_type_return(List);
 
-int Var_equal(Var, Var);
-
 int x2c_type_is_pointer(List);
 
 List x2c_type_element(List);
@@ -2575,7 +2573,7 @@ static List _binding_record(Var group, Var name, List function, List all_rows, L
 
 Var x2c_literal_value(Var);
 static String _binding_name(Var node){
-  Var value = x2c_literal_value(node);  if(Var_is_row(value, 11, 7, 1)) return Var_str(value);  x2c_diagnostic_fail(_1102, cons(String_var(String_join(NULL, cons(String_var(_1103), cons(String_var(Var_repr(node)), NULL)))), NULL));
+  Var value = x2c_literal_value(node);  if(Var_is_row(value, 11, 7, 1)) return Var_string(value);  x2c_diagnostic_fail(_1102, cons(String_var(String_join(NULL, cons(String_var(_1103), cons(String_var(Var_repr(node)), NULL)))), NULL));
   return NULL;
 }
 

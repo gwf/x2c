@@ -165,8 +165,14 @@ static inline char ArrayChar_updateindex(ArrayChar _x2c_macro_array_42, int _x2c
 
 static inline char ArrayChar_postfixindex(ArrayChar _x2c_macro_array_43, int _x2c_macro_index_11, Symbol _x2c_macro_op_1){
   char _x2c_macro_old_0 = ArrayChar_getindex(_x2c_macro_array_43, _x2c_macro_index_11);
-  if(_x2c_macro_op_1 == 1848) ArrayChar_updateindex(_x2c_macro_array_43, _x2c_macro_index_11, 56, 1);
-  else if(_x2c_macro_op_1 == 2046) ArrayChar_updateindex(_x2c_macro_array_43, _x2c_macro_index_11, 62, 1);
+  if(_x2c_macro_op_1 == 1848)({
+    ArrayChar _x2c_protocol_arg_0 = _x2c_macro_array_43;  int _x2c_protocol_arg_1 = _x2c_macro_index_11;  Symbol _x2c_protocol_arg_2 = 56;  int _x2c_protocol_arg_3 = 1;  ArrayChar_updateindex(_x2c_protocol_arg_0, _x2c_protocol_arg_1, _x2c_protocol_arg_2, _x2c_protocol_arg_3);
+  }
+  );
+  else if(_x2c_macro_op_1 == 2046)({
+    ArrayChar _x2c_protocol_arg_4 = _x2c_macro_array_43;  int _x2c_protocol_arg_5 = _x2c_macro_index_11;  Symbol _x2c_protocol_arg_6 = 62;  int _x2c_protocol_arg_7 = 1;  ArrayChar_updateindex(_x2c_protocol_arg_4, _x2c_protocol_arg_5, _x2c_protocol_arg_6, _x2c_protocol_arg_7);
+  }
+  );
   else{
     static const X2CErrorSite _x2c_error_site_25 = {.file = "../../lib/typed-array.x",.function = "ArrayChar_postfixindex",.line = 107};
     x2c_error_raise_n(& _x2c_error_site_25, 136641504, 1, Symbol_var(992), Symbol_var(_x2c_macro_op_1));
@@ -296,8 +302,14 @@ static inline short ArrayShort_updateindex(ArrayShort _x2c_macro_array_91, int _
 
 static inline short ArrayShort_postfixindex(ArrayShort _x2c_macro_array_92, int _x2c_macro_index_24, Symbol _x2c_macro_op_3){
   short _x2c_macro_old_1 = ArrayShort_getindex(_x2c_macro_array_92, _x2c_macro_index_24);
-  if(_x2c_macro_op_3 == 1848) ArrayShort_updateindex(_x2c_macro_array_92, _x2c_macro_index_24, 56, 1);
-  else if(_x2c_macro_op_3 == 2046) ArrayShort_updateindex(_x2c_macro_array_92, _x2c_macro_index_24, 62, 1);
+  if(_x2c_macro_op_3 == 1848)({
+    ArrayShort _x2c_protocol_arg_8 = _x2c_macro_array_92;  int _x2c_protocol_arg_9 = _x2c_macro_index_24;  Symbol _x2c_protocol_arg_10 = 56;  int _x2c_protocol_arg_11 = 1;  ArrayShort_updateindex(_x2c_protocol_arg_8, _x2c_protocol_arg_9, _x2c_protocol_arg_10, _x2c_protocol_arg_11);
+  }
+  );
+  else if(_x2c_macro_op_3 == 2046)({
+    ArrayShort _x2c_protocol_arg_12 = _x2c_macro_array_92;  int _x2c_protocol_arg_13 = _x2c_macro_index_24;  Symbol _x2c_protocol_arg_14 = 62;  int _x2c_protocol_arg_15 = 1;  ArrayShort_updateindex(_x2c_protocol_arg_12, _x2c_protocol_arg_13, _x2c_protocol_arg_14, _x2c_protocol_arg_15);
+  }
+  );
   else{
     static const X2CErrorSite _x2c_error_site_29 = {.file = "../../lib/typed-array.x",.function = "ArrayShort_postfixindex",.line = 116};
     x2c_error_raise_n(& _x2c_error_site_29, 136641504, 1, Symbol_var(992), Symbol_var(_x2c_macro_op_3));
@@ -423,8 +435,14 @@ static inline int ArrayInt_updateindex(ArrayInt _x2c_macro_array_140, int _x2c_m
 
 static inline int ArrayInt_postfixindex(ArrayInt _x2c_macro_array_141, int _x2c_macro_index_37, Symbol _x2c_macro_op_5){
   int _x2c_macro_old_2 = ArrayInt_getindex(_x2c_macro_array_141, _x2c_macro_index_37);
-  if(_x2c_macro_op_5 == 1848) ArrayInt_updateindex(_x2c_macro_array_141, _x2c_macro_index_37, 56, 1);
-  else if(_x2c_macro_op_5 == 2046) ArrayInt_updateindex(_x2c_macro_array_141, _x2c_macro_index_37, 62, 1);
+  if(_x2c_macro_op_5 == 1848)({
+    ArrayInt _x2c_protocol_arg_16 = _x2c_macro_array_141;  int _x2c_protocol_arg_17 = _x2c_macro_index_37;  Symbol _x2c_protocol_arg_18 = 56;  int _x2c_protocol_arg_19 = 1;  ArrayInt_updateindex(_x2c_protocol_arg_16, _x2c_protocol_arg_17, _x2c_protocol_arg_18, _x2c_protocol_arg_19);
+  }
+  );
+  else if(_x2c_macro_op_5 == 2046)({
+    ArrayInt _x2c_protocol_arg_20 = _x2c_macro_array_141;  int _x2c_protocol_arg_21 = _x2c_macro_index_37;  Symbol _x2c_protocol_arg_22 = 62;  int _x2c_protocol_arg_23 = 1;  ArrayInt_updateindex(_x2c_protocol_arg_20, _x2c_protocol_arg_21, _x2c_protocol_arg_22, _x2c_protocol_arg_23);
+  }
+  );
   else{
     static const X2CErrorSite _x2c_error_site_33 = {.file = "../../lib/typed-array.x",.function = "ArrayInt_postfixindex",.line = 125};
     x2c_error_raise_n(& _x2c_error_site_33, 136641504, 1, Symbol_var(992), Symbol_var(_x2c_macro_op_5));
@@ -550,8 +568,14 @@ static inline long ArrayLong_updateindex(ArrayLong _x2c_macro_array_189, int _x2
 
 static inline long ArrayLong_postfixindex(ArrayLong _x2c_macro_array_190, int _x2c_macro_index_50, Symbol _x2c_macro_op_7){
   long _x2c_macro_old_3 = ArrayLong_getindex(_x2c_macro_array_190, _x2c_macro_index_50);
-  if(_x2c_macro_op_7 == 1848) ArrayLong_updateindex(_x2c_macro_array_190, _x2c_macro_index_50, 56, 1);
-  else if(_x2c_macro_op_7 == 2046) ArrayLong_updateindex(_x2c_macro_array_190, _x2c_macro_index_50, 62, 1);
+  if(_x2c_macro_op_7 == 1848)({
+    ArrayLong _x2c_protocol_arg_24 = _x2c_macro_array_190;  int _x2c_protocol_arg_25 = _x2c_macro_index_50;  Symbol _x2c_protocol_arg_26 = 56;  int _x2c_protocol_arg_27 = 1;  ArrayLong_updateindex(_x2c_protocol_arg_24, _x2c_protocol_arg_25, _x2c_protocol_arg_26, _x2c_protocol_arg_27);
+  }
+  );
+  else if(_x2c_macro_op_7 == 2046)({
+    ArrayLong _x2c_protocol_arg_28 = _x2c_macro_array_190;  int _x2c_protocol_arg_29 = _x2c_macro_index_50;  Symbol _x2c_protocol_arg_30 = 62;  int _x2c_protocol_arg_31 = 1;  ArrayLong_updateindex(_x2c_protocol_arg_28, _x2c_protocol_arg_29, _x2c_protocol_arg_30, _x2c_protocol_arg_31);
+  }
+  );
   else{
     static const X2CErrorSite _x2c_error_site_37 = {.file = "../../lib/typed-array.x",.function = "ArrayLong_postfixindex",.line = 134};
     x2c_error_raise_n(& _x2c_error_site_37, 136641504, 1, Symbol_var(992), Symbol_var(_x2c_macro_op_7));
@@ -636,8 +660,14 @@ static inline float ArrayFloat_updateindex(ArrayFloat _x2c_macro_array_238, int 
 
 static inline float ArrayFloat_postfixindex(ArrayFloat _x2c_macro_array_239, int _x2c_macro_index_63, Symbol _x2c_macro_op_9){
   float _x2c_macro_old_4 = ArrayFloat_getindex(_x2c_macro_array_239, _x2c_macro_index_63);
-  if(_x2c_macro_op_9 == 1848) ArrayFloat_updateindex(_x2c_macro_array_239, _x2c_macro_index_63, 56, 1);
-  else if(_x2c_macro_op_9 == 2046) ArrayFloat_updateindex(_x2c_macro_array_239, _x2c_macro_index_63, 62, 1);
+  if(_x2c_macro_op_9 == 1848)({
+    ArrayFloat _x2c_protocol_arg_32 = _x2c_macro_array_239;  int _x2c_protocol_arg_33 = _x2c_macro_index_63;  Symbol _x2c_protocol_arg_34 = 56;  int _x2c_protocol_arg_35 = 1;  ArrayFloat_updateindex(_x2c_protocol_arg_32, _x2c_protocol_arg_33, _x2c_protocol_arg_34, _x2c_protocol_arg_35);
+  }
+  );
+  else if(_x2c_macro_op_9 == 2046)({
+    ArrayFloat _x2c_protocol_arg_36 = _x2c_macro_array_239;  int _x2c_protocol_arg_37 = _x2c_macro_index_63;  Symbol _x2c_protocol_arg_38 = 62;  int _x2c_protocol_arg_39 = 1;  ArrayFloat_updateindex(_x2c_protocol_arg_36, _x2c_protocol_arg_37, _x2c_protocol_arg_38, _x2c_protocol_arg_39);
+  }
+  );
   else{
     static const X2CErrorSite _x2c_error_site_39 = {.file = "../../lib/typed-array.x",.function = "ArrayFloat_postfixindex",.line = 143};
     x2c_error_raise_n(& _x2c_error_site_39, 136641504, 1, Symbol_var(992), Symbol_var(_x2c_macro_op_9));
@@ -722,8 +752,14 @@ static inline double ArrayDbl_updateindex(ArrayDbl _x2c_macro_array_287, int _x2
 
 static inline double ArrayDbl_postfixindex(ArrayDbl _x2c_macro_array_288, int _x2c_macro_index_76, Symbol _x2c_macro_op_11){
   double _x2c_macro_old_5 = ArrayDbl_getindex(_x2c_macro_array_288, _x2c_macro_index_76);
-  if(_x2c_macro_op_11 == 1848) ArrayDbl_updateindex(_x2c_macro_array_288, _x2c_macro_index_76, 56, 1);
-  else if(_x2c_macro_op_11 == 2046) ArrayDbl_updateindex(_x2c_macro_array_288, _x2c_macro_index_76, 62, 1);
+  if(_x2c_macro_op_11 == 1848)({
+    ArrayDbl _x2c_protocol_arg_40 = _x2c_macro_array_288;  int _x2c_protocol_arg_41 = _x2c_macro_index_76;  Symbol _x2c_protocol_arg_42 = 56;  int _x2c_protocol_arg_43 = 1;  ArrayDbl_updateindex(_x2c_protocol_arg_40, _x2c_protocol_arg_41, _x2c_protocol_arg_42, _x2c_protocol_arg_43);
+  }
+  );
+  else if(_x2c_macro_op_11 == 2046)({
+    ArrayDbl _x2c_protocol_arg_44 = _x2c_macro_array_288;  int _x2c_protocol_arg_45 = _x2c_macro_index_76;  Symbol _x2c_protocol_arg_46 = 62;  int _x2c_protocol_arg_47 = 1;  ArrayDbl_updateindex(_x2c_protocol_arg_44, _x2c_protocol_arg_45, _x2c_protocol_arg_46, _x2c_protocol_arg_47);
+  }
+  );
   else{
     static const X2CErrorSite _x2c_error_site_41 = {.file = "../../lib/typed-array.x",.function = "ArrayDbl_postfixindex",.line = 152};
     x2c_error_raise_n(& _x2c_error_site_41, 136641504, 1, Symbol_var(992), Symbol_var(_x2c_macro_op_11));

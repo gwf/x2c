@@ -1327,7 +1327,7 @@ String RegexCapture_name(RegexCapture capture){
 int Var_truth(Var);
 
 int RegexCapture_matched(RegexCapture capture){
-  return Var_truth(List_getindex(capture, 2));
+  return ! ! Var_truth(List_getindex(capture, 2));
 }
 
 String RegexCapture_text(RegexCapture capture){

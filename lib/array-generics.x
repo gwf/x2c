@@ -32,8 +32,8 @@ macro Unit $array.typed.postfix(Type $array, Type $element) {
   */
   inline $element $array.postfixindex($array array, int index, Symbol op) {
     $element old = array[index];
-    if (op == <++>) array.updateindex(index, <+>, 1);
-    else if (op == <-->) array.updateindex(index, <->, 1);
+    if (op == <++>) array[index] += 1;
+    else if (op == <-->) array[index] -= 1;
     // no owner detail: a String literal here would put a lazy interning
     // guard at the top of every increment
     else raise %(bad-op (op $op));

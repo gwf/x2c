@@ -146,8 +146,8 @@ List _dedent_expand(List node) {
     open = 2;
   else if (length >= 2 && source.startswith("\""))
     open = 1;
-  if (open == 0 || !source.endswith("\"") || source.contains("\\") ||
-      source.contains("$"))
+  if (open == 0 || !source.endswith("\"") || "\\" in source ||
+      "$" in source)
     return $!( $node.dedent() );
   String body = source.getslice(open, length - 1, 1);
   return x2c_literal_string(body.dedent());
@@ -290,7 +290,7 @@ static List _operator_rows(void) => %(
 static List _operator_cases(int key, int value, int derived) {
   Array cases = [];
   foreach (List row, _operator_rows()) {
-    if (!row[key].truth() || !row[value].truth()) continue;
+    if (!row[key] || !row[value]) continue;
     if (derived >= 0 && row[4] != derived) continue;
     Symbol label = row[key];
     Var result = row[value];

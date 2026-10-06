@@ -45,7 +45,7 @@ int preproc_open_state(String text) {
   // A `||` gives the condition another way to hold, so the arm can be taken.
   if (line == "ifdef <never>" || line == "if 0" || line == "if ( 0 )" ||
       line == "if defined <never>" ||
-      (line.startswith("if defined <never> && ") && !line.contains(" || ")))
+      (line.startswith("if defined <never> && ") && !(" || " in line)))
     return 2;
   return line == "ifndef <never>" || line == "if ! defined <never>";
 }
@@ -261,7 +261,7 @@ static void ArmScan._note_layout_macro(ArmScan &s, String content) {
               : token.text in layout ? layout[token.text] : 0;
     if (level > value) value = level;
   }
-  if (value && (!layout.contains(name.text) || layout[name.text] < value))
+  if (value && (!(name.text in layout) || layout[name.text] < value))
     layout[name.text] = value;
 }
 
@@ -329,8 +329,8 @@ static void Compiler._note_function_macro(
   if (first.type == <ident> && Token.skip_trivia(first + 1).type == <)>)
     param = first.text;
   Var kind = c._macro_prefix(after, param);
-  if (kind.equal(%())) c.object_macros[name] = <annotation>;
-  else if (kind.equal(<wrapper>)) c.object_macros[name] = <wrapper>;
+  if (kind == %()) c.object_macros[name] = <annotation>;
+  else if (kind == <wrapper>) c.object_macros[name] = <wrapper>;
 }
 
 /* An object-like body is classified by `_macro_prefix`. A name another arm
@@ -340,7 +340,7 @@ static void Compiler._note_prefix_macro(Compiler c, String name, Token body) {
   Var definition = c._macro_prefix(body, NULL), existing;
   if (!c.object_macros.try_get(name, existing) ||
       _prefix_rank(definition) > _prefix_rank(existing) ||
-      (existing.equal(<string>) && !definition.equal(<string>)))
+      (existing == <string> && definition != <string>))
     c.object_macros[name] = definition;
 }
 
@@ -382,7 +382,7 @@ static int Compiler._is_annotation(Compiler c, String word) {
   Var definition;
   return word == "__attribute__" || word == "__declspec" ||
          (c.object_macros.try_get(word, definition) &&
-          definition.equal(<annotation>));
+          definition == <annotation>);
 }
 
 /* Ranks prefix classifications so a name defined differently in two

@@ -518,7 +518,7 @@ static void Compiler._check_binders(
   List possible = NULL;
   List definite = c.match_pattern_binders(pattern, possible);
   foreach (Var binder, possible) {
-    if (!definite.contains(binder))
+    if (!(binder in definite))
       $report.type.binder_unassigned(c, role, start, binder);
     String name = binder.str()[1:];
     foreach (Var other, possible) {

@@ -672,7 +672,7 @@ static List Emitter._capture_source(
     case %(expr ?type ?content): {
       int opaque = 0;
       match (content)
-        case %(call (expr ?callable ?) ?): opaque = !callable.truth();
+        case %(call (expr ?callable ?) ?): opaque = !callable;
       if (opaque || !_source_type_definition(content)) {
         String formal = e.fresh_name("static_input");
         inputs.push(%($formal $node));
@@ -931,7 +931,7 @@ static List Emitter._match_site_call(Emitter &e, Var function, Var arguments) {
   if (!entry) return NULL;
   Type type = NULL;
   List global = e.c.sym.resolve_global(%($name), type);
-  if (!global || !global.equal(binding) || !type.is_function())
+  if (!global || global != binding || !type.is_function())
     return NULL;
   List args = arguments;
   match (args)
