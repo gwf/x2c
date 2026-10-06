@@ -1231,7 +1231,7 @@ int cli_builtin_command(const char *word) =>
   !strcmp(word, "help") || _command_row(word) != NULL;
 
 /** Returns the version line `--version` prints, without a newline. */
-String cli_version(void) => "x2c 0.14.0";
+String cli_version(void) => "x2c 0.15.0";
 
 /** Returns whether `request` selects a terminating inspection or dump mode. */
 int CliRequest.inspects(CliRequest request) => request.dump != 0;

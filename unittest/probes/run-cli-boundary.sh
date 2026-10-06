@@ -48,8 +48,8 @@ cmp "$BUILD/build.help" "$BUILD/build-short.help"
 cmp "$BUILD/run.help" "$BUILD/run-short.help"
 cmp "$BUILD/script.help" "$BUILD/script-short.help"
 cmp "$BUILD/help.help" "$BUILD/help-short.help"
-[[ $("$X2C" --version) == "x2c 0.14.0" ]]
-[[ $("$X2C" -V) == "x2c 0.14.0" ]]
+[[ $("$X2C" --version) == "x2c 0.15.0" ]]
+[[ $("$X2C" -V) == "x2c 0.15.0" ]]
 set +e
 "$X2C" help '' >"$BUILD/help-empty.stdout" 2>"$BUILD/help-empty.stderr"
 help_empty_status=$?

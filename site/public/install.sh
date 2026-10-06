@@ -5,7 +5,7 @@ usage() {
 Install a released x2c into a dedicated prefix.
 
   curl -fsSL https://x2c-lang.dev/install.sh | sh
-  curl -fsSL https://x2c-lang.dev/install.sh | sh -s -- --version 0.14.0
+  curl -fsSL https://x2c-lang.dev/install.sh | sh -s -- --version 0.15.0
 
 Options:
   --version VERSION  install VERSION instead of the latest release
