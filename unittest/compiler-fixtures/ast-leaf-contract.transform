@@ -226,7 +226,7 @@
        (expr ("List") (ident (binding 40 "values")))))) 
     (declare ("List") 
      (bindings 
-      (op = (bind (binding 49 "_x2c_macro_cursor_13") ()) 
+      (op = (bind (binding 49 "_x2c_macro_cursor_0") ()) 
        (expr ("List") (ident (binding 48 "_x2c_macro_object_0")))))) 
     (declare ("Var") 
      (bindings (bind (binding 50 "_x2c_macro_cursor_output_0") ()))) 
@@ -238,7 +238,7 @@
         (args (expr ("List") (ident (binding 48 "_x2c_macro_object_0"))) 
          (expr (opt-ref "List") 
           (op & (parens 
-                 (expr ("List") (ident (binding 49 "_x2c_macro_cursor_13")))))) 
+                 (expr ("List") (ident (binding 49 "_x2c_macro_cursor_0")))))) 
          (expr (opt-ref "Var") 
           (op & (parens 
                  (expr ("Var") (ident (binding 50 "_x2c_macro_cursor_output_0"))))))))) 

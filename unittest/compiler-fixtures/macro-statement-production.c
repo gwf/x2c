@@ -4,6 +4,7 @@
 #include "x2c.h"
 
 #include "x2c.h"
+#include "error-macros.h"
 static void bump(int * value, int amount);
 
 static int fallback_probe(int fail);
@@ -40,10 +41,10 @@ int main(void){
     bump(& value, 3);
   }
   while(0);
-  int loop = 1;
-  while(loop){
+  int remaining = 1;
+  while(remaining){
     bump(& value, 5);
-    loop = 0;
+    remaining = 0;
     bump(& value, 7);
   }
   if(1){

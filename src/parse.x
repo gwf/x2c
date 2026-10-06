@@ -291,7 +291,7 @@ List Compiler.parse_top_level_mode(Compiler c, int skip_body) {
   if (c.test_static_assert()) return c.parse_static_assert();
   List slot = skip_body ? NULL : c.try_parse_macro_slot(<unit>);
   if (slot) return slot;
-  if (c.keyword_form_is_definition()) return c._keyword_definition();
+  if (c.keyword_form_is_definition()) return c._keyword_definition(skip_body);
   if (c._static_interface_form()) {
     c.next();
     $let(c.source_private, 1) {
@@ -377,8 +377,9 @@ int Compiler.skip_linkage_brace(Compiler c) {
   return 1;
 }
 
-static List Compiler._keyword_definition(Compiler c) {
-  c.parse_keyword_definition();
+static List Compiler._keyword_definition(Compiler c, int skip_body) {
+  if (skip_body) c.collect_compile_time_definition(1);
+  else c.parse_keyword_definition();
   return NULL;
 }
 
@@ -387,7 +388,7 @@ static List Compiler._keyword_definition(Compiler c) {
    reports whether that finished the form. */
 static int Compiler._skip_collected_form(Compiler c) {
   if (c.macro_form_is_definition()) {
-    (void) c.parse_macro_definition();
+    c.collect_compile_time_definition(0);
     return 1;
   }
   if ((!c.collect_protocols || c.signature_only) &&

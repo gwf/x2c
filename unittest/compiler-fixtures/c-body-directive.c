@@ -145,9 +145,9 @@ static int sum(List items){
   {
     Var item;
     List _x2c_macro_object_0 = items;
-    List _x2c_macro_cursor_13 = _x2c_macro_object_0;
+    List _x2c_macro_cursor_0 = _x2c_macro_object_0;
     Var _x2c_macro_cursor_output_0;
-    while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_13), &(_x2c_macro_cursor_output_0))){
+    while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
       item = _x2c_macro_cursor_output_0;
 #ifndef NO_SUM
       total += Var_int(item);

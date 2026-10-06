@@ -286,9 +286,10 @@
   (at 51 
    (declare ("Var") 
     (bindings 
-     (op = (bind (binding 45 "loop") ()) (expr (int) (literal (int) "2")))))) 
+     (op = (bind (binding 45 "remaining") ()) 
+      (expr (int) (literal (int) "2")))))) 
   (at 54 
-   (while (expr ("Var") (ident (binding 45 "loop"))) 
+   (while (expr ("Var") (ident (binding 45 "remaining"))) 
     (block 
      (at 52 
       (stmnt 
@@ -296,7 +297,7 @@
      (at 53 
       (stmnt 
        (expr ("Var") 
-        (op -= (expr ("Var") (ident (binding 45 "loop"))) 
+        (op -= (expr ("Var") (ident (binding 45 "remaining"))) 
          (expr (int) (literal (int) "1"))))))))) 
   (at 55 
    (declare ("Var") 

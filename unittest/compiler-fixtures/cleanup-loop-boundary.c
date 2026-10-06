@@ -197,11 +197,11 @@ static int continue_inside_foreach(void){
       {
         Var volatile item;
         List _x2c_macro_object_0 = _5;
-        List _x2c_macro_cursor_13 = _x2c_macro_object_0;
-        x2c_exception_escaped = & _x2c_macro_cursor_13;
+        List _x2c_macro_cursor_0 = _x2c_macro_object_0;
+        x2c_exception_escaped = & _x2c_macro_cursor_0;
         Var _x2c_macro_cursor_output_0;
         x2c_exception_escaped = & _x2c_macro_cursor_output_0;
-        while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_13), &(_x2c_macro_cursor_output_0))){
+        while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
           item = _x2c_macro_cursor_output_0;
           {
             if(Var_int(item) == 1) continue;

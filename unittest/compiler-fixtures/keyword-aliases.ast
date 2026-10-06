@@ -1,5 +1,11 @@
 
+(preproc "#pragma once")
+
+(macrodef <macro fixture.imported>)
+
 (preproc "#include \"x2c.x\"")
+
+(preproc "#include \"keyword-aliases-import.x\"")
 
 (macrodef <macro fixture.increment>)
 

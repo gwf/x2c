@@ -5,20 +5,19 @@
 
 #include "x2c.h"
 #include "meta.h"
+#include "meta-sdk-defs.h"
 typedef struct Point{
   int x, y, z;
 }
 Point;
 
-static String _3, _2, _1, _0;
+static String _2, _1, _0;
 
 static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static int ms_total(int a, int b, int c);
-
-static String ms_label(String name, int n);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -27,12 +26,13 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _0 = String_new("x, y, z");
   _1 = String_new("p.y + 1");
   _2 = String_new("row");
-  _3 = String_new("-");
 }
 
 static int ms_total(int a, int b, int c){
   return a + b + c;
 }
+
+String ms_label(String, int);
 
 int main(void){
   x2c_initialize();
@@ -52,13 +52,5 @@ int main(void){
   printf("spelling %s\n", _1);
   printf("label    %s\n", ms_label(_2, 7));
   return 0;
-}
-
-Var String_var(String);
-
-String int_str(int);
-
-static String ms_label(String name, int n){
-  return String_join(NULL, cons(String_var(name), cons(String_var(_3), cons(String_var(int_str(n)), NULL))));
 }
 

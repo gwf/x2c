@@ -342,6 +342,7 @@ static void FileWalk.prepare(FileWalk &w, Compiler shadow, String segment) {
   shadow.layout = w.c.layout;
   shadow.source_private = 0;
   shadow.signature_only = w.c.signature_only;
+  shadow.interface_provider = w.c.interface_provider;
   shadow.open_linkage = w.linkage;
   shadow.take_unit_state(w.c);
   shadow.tokenize(segment);

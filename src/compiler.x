@@ -428,6 +428,29 @@ static void _debug_tokens(Token start, Token end) {
       $report.debug.token(tok);
 }
 
+/** Collects macro definitions or keyword aliases before the full source parse.
+    The owning source reports malformed definitions during its full parse,
+    which can recover at later forms. Included providers reject them here.
+*/
+void Compiler.collect_compile_time_definition(Compiler c, int keyword) {
+  if (c.interface_provider) {
+    if (keyword) c.parse_keyword_definition();
+    else c.parse_macro_definition();
+    return;
+  }
+  int failed = 0;
+  DiagnosticsHold hold = c.diagnostics.hold();
+  $let(c.recovery_depth, c.recovery_depth + 1) {
+    try {
+      if (keyword) c.parse_keyword_definition();
+      else c.parse_macro_definition();
+    }
+    catch %(malformed *): failed = 1;
+  }
+  c.diagnostics.release(hold, 0);
+  if (failed) while (c.peek(0) != <eof>) c.next();
+}
+
 /** Records declaration visibility and meta facts, then skips its body.
     The declaration is already bound by the shared top-level parser.
 */

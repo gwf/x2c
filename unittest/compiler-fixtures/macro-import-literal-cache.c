@@ -4,6 +4,8 @@
 #include "x2c.h"
 
 #include "x2c.h"
+#include "macro-import-literal-cache-defs.h"
+#include "macro-import-literal-cache-defs.h"
 static List _13, _12, _8, _7, _2;
 
 static String _14, _10, _5, _3, _0;
@@ -14,11 +16,11 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
-Var String_var(String);
+static Var String_var(String);
 
 List cons(Var, List);
 
-Var List_var(List);
+static Var List_var(List);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -47,9 +49,9 @@ String List_repr(List);
 
 int List_equal(List, List);
 
-List Var_list(Var);
+static List Var_list(Var);
 
-Var List_car(List);
+static Var List_car(List);
 
 int main(void){
   x2c_initialize();

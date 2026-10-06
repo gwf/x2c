@@ -52,7 +52,7 @@ static int pick_index(void){
   return 1;
 }
 
-Var int_var(int);
+static Var int_var(int);
 
 static Var counted_rhs(int value){
   rhs_calls ++;
@@ -64,9 +64,9 @@ static Var skipped_rhs(void){
   return int_var(1);
 }
 
-Var double_var(double);
+static Var double_var(double);
 
-Var String_var(String);
+static Var String_var(String);
 
 int Var_truth(Var);
 
@@ -77,9 +77,9 @@ int Var_truth(Var);
 
 int x2c_error_catch_site_pending(ErrorCatchSite *);
 
-Var List_var(List);
+static Var List_var(List);
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
 ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
 
@@ -145,10 +145,10 @@ int main(void){
   int choice = Var_truth(empty) ? 1 : 2;
   int volatile branch = 0;
   if(Var_truth(a)) branch ++;
-  Var loop = int_var(2);
-  while(Var_truth(loop)){
+  Var remaining = int_var(2);
+  while(Var_truth(remaining)){
     branch ++;
-    x2c_var_update_volatile(&(loop), 62, int_var(1));
+    x2c_var_update_volatile(&(remaining), 62, int_var(1));
   }
   Var for_cond = int_var(0);
   for(for_cond = int_var(2);  Var_truth(for_cond);  x2c_var_update_volatile(&(for_cond), 62, int_var(1))) branch ++;

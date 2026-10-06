@@ -7,6 +7,7 @@
 #include "typed-array.h"
 #include <stdio.h>
 #include <math.h>
+#include "autodiff-macros.h"
 static double walk(double x, double y, int n);
 
 static double walk_grad(double x, double y, int n, double * x_grad, double * y_grad);

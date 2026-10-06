@@ -28,13 +28,13 @@ static Func _x2c_func_handle_0;
 Func x2c_func_shared(FuncAdapter, List);
 
 _x2c_initializer_choice_7300E546_0((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _12)))
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
-Var String_var(String);
+static Var String_var(String);
 
 List cons(Var, List);
 
-Var List_var(List);
+static Var List_var(List);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -66,28 +66,28 @@ List List_reverse(List);
 
 List List_append(List, List);
 
-List List_cdr(List);
+static List List_cdr(List);
 
 ListInt structural(ListInt left, ListInt right){
   if(! _init_guard_) _file_init_();
   return List_reverse(List_append(List_cdr(left), right));
 }
 
-int ListInt_car(ListInt);
+static int ListInt_car(ListInt);
 
 int second(ListInt values){
   if(! _init_guard_) _file_init_();
   return ListInt_car(List_cdr(values));
 }
 
-List List_cdddr(List);
+static List List_cdddr(List);
 
 ListInt after_three(ListInt values){
   if(! _init_guard_) _file_init_();
   return List_cdddr(values);
 }
 
-List List_cddddr(List);
+static List List_cddddr(List);
 
 ListInt after_four(ListInt values){
   if(! _init_guard_) _file_init_();
@@ -101,27 +101,27 @@ ListInt promoted(ListInt values){
   return List_promote(values);
 }
 
-List List_cdar(List);
+static List List_cdar(List);
 
-List List_cdaar(List);
+static List List_cdaar(List);
 
-List List_cdadr(List);
+static List List_cdadr(List);
 
-List List_cddar(List);
+static List List_cddar(List);
 
-List List_cdaaar(List);
+static List List_cdaaar(List);
 
-List List_cdaadr(List);
+static List List_cdaadr(List);
 
-List List_cdadar(List);
+static List List_cdadar(List);
 
-List List_cdaddr(List);
+static List List_cdaddr(List);
 
-List List_cddaar(List);
+static List List_cddaar(List);
 
-List List_cddadr(List);
+static List List_cddadr(List);
 
-List List_cdddar(List);
+static List List_cdddar(List);
 
 ListInt branch_tails(ListInt values){
   if(! _init_guard_) _file_init_();
@@ -151,7 +151,7 @@ ListInt flattened_all(ListInt values){
 
 Var x2c_func_value_argument(Func, const FuncArg *, unsigned, Symbol);
 
-Var int_var(int);
+static Var int_var(int);
 
 static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0){
   Var a0 = x2c_func_value_argument(_x2c_func_binding_0, _x2c_func_argv_0, 0, 45156);

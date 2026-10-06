@@ -16,6 +16,7 @@
 #include "x2c.h"
 
 #include "x2c.h"
+#include "keyword-aliases-import.h"
 static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);

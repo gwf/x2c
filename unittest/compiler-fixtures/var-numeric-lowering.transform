@@ -381,7 +381,7 @@
   (at 119 
    (declare ("Var") 
     (bindings 
-     (op = (bind (binding 49 "loop") ()) 
+     (op = (bind (binding 49 "remaining") ()) 
       (expr ("Var") 
        (call (expr ((func ((int))) "Var") (ident (binding 16 "int_var"))) 
         (args (expr (int) (literal (int) "2"))))))))) 
@@ -389,7 +389,7 @@
    (while 
     (expr (int) 
      (call (expr ((func (("Var"))) int) (ident (binding 43 "Var_truth"))) 
-      (args (expr ("Var") (ident (binding 49 "loop")))))) 
+      (args (expr ("Var") (ident (binding 49 "remaining")))))) 
     (block 
      (at 52 
       (stmnt 
@@ -399,7 +399,7 @@
        (expr ("Var") 
         (call "x2c_var_update_volatile" 
          (args (expr (* "Var") 
-                (op & (parens (expr ("Var") (ident (binding 49 "loop")))))) 
+                (op & (parens (expr ("Var") (ident (binding 49 "remaining")))))) 
           (expr ("Symbol") "62") 
           (expr ("Var") 
            (call (expr ((func ((int))) "Var") (ident (binding 16 "int_var"))) 

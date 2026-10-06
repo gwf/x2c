@@ -6,6 +6,7 @@
 #include "x2c.h"
 #include <stdio.h>
 #include <math.h>
+#include "autodiff-macros.h"
 static double scale(double a, int k);
 
 static double scale_dot(double a, double a_dot, int k);

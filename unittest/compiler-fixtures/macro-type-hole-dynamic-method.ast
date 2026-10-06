@@ -15,7 +15,7 @@
     (params 
      (param ("MacroDynamicOwner") (bind (binding 3 "_x2c_macro_value_0") ())))))) 
  (block 
-  (at 0 (return ("Var") 
+  (at 3 (return ("Var") 
          (expr ("Var") 
           (call (expr ((func (("Symbol") (...))) "Var") 
                  (ident (binding 4 "Var_new"))) 
@@ -28,7 +28,7 @@
     (params 
      (param ("MacroDynamicOwner") (bind (binding 6 "_x2c_macro_value_1") ())))))) 
  (block 
-  (at 0 (return ("Var") 
+  (at 4 (return ("Var") 
          (expr ("Var") 
           (call (expr ((func (("Symbol") (...))) "Var") 
                  (ident (binding 4 "Var_new"))) 
@@ -38,7 +38,7 @@
 (function (int) 
  (bind (binding 7 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 3 (declare ("Var") 
+  (at 5 (declare ("Var") 
          (bindings 
           (op = (bind (binding 8 "value") ()) 
            (expr ("Var") 
@@ -49,7 +49,7 @@
                      (expr ("MacroDynamicOwner") 
                       (cast (decl ("MacroDynamicOwner") (bindings (bind () ()))) 
                        (expr (int) (literal (int) "42"))))))))))))) 
-  (at 4 (declare ("Var") 
+  (at 6 (declare ("Var") 
          (bindings 
           (op = (bind (binding 9 "boxed") ()) 
            (expr ("Var") 
@@ -60,7 +60,7 @@
                      (expr ("MacroDynamicOwner") 
                       (cast (decl ("MacroDynamicOwner") (bindings (bind () ()))) 
                        (expr (int) (literal (int) "43"))))))))))))) 
-  (at 5 (stmnt 
+  (at 7 (stmnt 
          (expr () 
           (call (expr () (ident (binding 10 "printf"))) 
            (args (expr (* char) (literal (* char) "\"%d %d\\n\"")) 
@@ -70,7 +70,7 @@
             (expr (int) 
              (call (expr ((func (("Var"))) (int)) (ident (binding 11 "Var_int"))) 
               (args (expr ("Var") (ident (binding 9 "boxed"))))))))))) 
-  (at 6 (return (int) 
+  (at 8 (return (int) 
          (expr (int) 
           (op ? (expr (int) 
                  (op && 

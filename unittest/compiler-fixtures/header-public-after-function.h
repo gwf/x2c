@@ -42,6 +42,11 @@ enum{
 }
 ;
 
+struct Tally{
+  int total;
+}
+;
+
 enum{
   REOPENED = 13
 }

@@ -75,10 +75,11 @@ enum{
   AFTER_OBJECT = 11
 }
 ;
-static struct Tally{
+struct Tally{
   int total;
 }
-tally;
+;
+static struct Tally tally;
 enum{
   SECRET = 99
 }

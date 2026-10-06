@@ -194,9 +194,9 @@ int main(void){
   {
     int current;
     List _x2c_macro_object_0 = values;
-    List _x2c_macro_cursor_53 = _x2c_macro_object_0;
+    List _x2c_macro_cursor_0 = _x2c_macro_object_0;
     Var _x2c_macro_cursor_output_0;
-    while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_53), &(_x2c_macro_cursor_output_0))){
+    while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
       current = Var_int(Var_convert(_x2c_macro_cursor_output_0, 3453797));
       {
         existing = current;
@@ -210,10 +210,10 @@ int main(void){
   {
     Var volatile value;
     Map _x2c_macro_object_1 = counts;
-    unsigned _x2c_macro_cursor_54 = 0;
+    unsigned _x2c_macro_cursor_1 = 0;
     Var _x2c_macro_cursor_output_1;
     Var _x2c_macro_cursor_output_2;
-    while(Map_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_54), &(_x2c_macro_cursor_output_1), &(_x2c_macro_cursor_output_2))){
+    while(Map_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1), &(_x2c_macro_cursor_output_2))){
       value = _x2c_macro_cursor_output_2;
       value_total += Var_integer(value);
     }
@@ -223,10 +223,10 @@ int main(void){
   {
     int volatile value = initial_value();
     Map _x2c_macro_object_2 = counted_map(counts);
-    unsigned _x2c_macro_cursor_55 = 0;
+    unsigned _x2c_macro_cursor_2 = 0;
     Var _x2c_macro_cursor_output_3;
     Var _x2c_macro_cursor_output_4;
-    while(Map_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_55), &(_x2c_macro_cursor_output_3), &(_x2c_macro_cursor_output_4))){
+    while(Map_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_3), &(_x2c_macro_cursor_output_4))){
       value = Var_int(Var_convert(_x2c_macro_cursor_output_4, 3453797));
       typed_total += value;
     }
@@ -237,10 +237,10 @@ int main(void){
   {
     Var current;
     Map _x2c_macro_object_3 = counts;
-    unsigned _x2c_macro_cursor_56 = 0;
+    unsigned _x2c_macro_cursor_3 = 0;
     Var _x2c_macro_cursor_output_5;
     Var _x2c_macro_cursor_output_6;
-    while(Map_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_56), &(_x2c_macro_cursor_output_5), &(_x2c_macro_cursor_output_6))){
+    while(Map_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_5), &(_x2c_macro_cursor_output_6))){
       current = _x2c_macro_cursor_output_6;
       {
         entry = current;
@@ -254,10 +254,10 @@ int main(void){
   {
     Var name, count;
     Map _x2c_macro_object_4 = counts;
-    unsigned _x2c_macro_cursor_57 = 0;
+    unsigned _x2c_macro_cursor_4 = 0;
     Var _x2c_macro_cursor_output_7;
     Var _x2c_macro_cursor_output_8;
-    while(Map_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_57), &(_x2c_macro_cursor_output_7), &(_x2c_macro_cursor_output_8))){
+    while(Map_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_7), &(_x2c_macro_cursor_output_8))){
       name = _x2c_macro_cursor_output_7;
       count = _x2c_macro_cursor_output_8;
       {
@@ -273,10 +273,10 @@ int main(void){
   {
     int key, count;
     Map _x2c_macro_object_5 = numbers;
-    unsigned _x2c_macro_cursor_58 = 0;
+    unsigned _x2c_macro_cursor_5 = 0;
     Var _x2c_macro_cursor_output_9;
     Var _x2c_macro_cursor_output_10;
-    while(Map_try_next(_x2c_macro_object_5, &(_x2c_macro_cursor_58), &(_x2c_macro_cursor_output_9), &(_x2c_macro_cursor_output_10))){
+    while(Map_try_next(_x2c_macro_object_5, &(_x2c_macro_cursor_5), &(_x2c_macro_cursor_output_9), &(_x2c_macro_cursor_output_10))){
       key = Var_int(Var_convert(_x2c_macro_cursor_output_9, 3453797));
       count = Var_int(Var_convert(_x2c_macro_cursor_output_10, 3453797));
       converted_total += key + count;
@@ -300,10 +300,10 @@ int main(void){
   {
     Var volatile value;
     Map _x2c_macro_object_7 = counts;
-    unsigned _x2c_macro_cursor_60 = 0;
+    unsigned _x2c_macro_cursor_7 = 0;
     Var _x2c_macro_cursor_output_11;
     Var _x2c_macro_cursor_output_12;
-    while(Map_try_next(_x2c_macro_object_7, &(_x2c_macro_cursor_60), &(_x2c_macro_cursor_output_11), &(_x2c_macro_cursor_output_12))){
+    while(Map_try_next(_x2c_macro_object_7, &(_x2c_macro_cursor_7), &(_x2c_macro_cursor_output_11), &(_x2c_macro_cursor_output_12))){
       value = _x2c_macro_cursor_output_12;
       {
         if(Var_integer(value) == 2) continue;
@@ -316,10 +316,10 @@ int main(void){
   {
     Var volatile value;
     Map _x2c_macro_object_8 = counts;
-    unsigned _x2c_macro_cursor_61 = 0;
+    unsigned _x2c_macro_cursor_8 = 0;
     Var _x2c_macro_cursor_output_13;
     Var _x2c_macro_cursor_output_14;
-    while(Map_try_next(_x2c_macro_object_8, &(_x2c_macro_cursor_61), &(_x2c_macro_cursor_output_13), &(_x2c_macro_cursor_output_14))){
+    while(Map_try_next(_x2c_macro_object_8, &(_x2c_macro_cursor_8), &(_x2c_macro_cursor_output_13), &(_x2c_macro_cursor_output_14))){
       value = _x2c_macro_cursor_output_14;
       {
         if(Var_truth(value)) stopped ++;
@@ -334,10 +334,10 @@ int main(void){
     Var name;
     Var volatile value;
     Map _x2c_macro_object_9 = counts;
-    unsigned _x2c_macro_cursor_62 = 0;
+    unsigned _x2c_macro_cursor_9 = 0;
     Var _x2c_macro_cursor_output_15;
     Var _x2c_macro_cursor_output_16;
-    while(Map_try_next(_x2c_macro_object_9, &(_x2c_macro_cursor_62), &(_x2c_macro_cursor_output_15), &(_x2c_macro_cursor_output_16))){
+    while(Map_try_next(_x2c_macro_object_9, &(_x2c_macro_cursor_9), &(_x2c_macro_cursor_output_15), &(_x2c_macro_cursor_output_16))){
       name = _x2c_macro_cursor_output_15;
       value = _x2c_macro_cursor_output_16;
       {
@@ -362,18 +362,18 @@ int main(void){
   {
     Var outer;
     Map _x2c_macro_object_11 = counts;
-    unsigned _x2c_macro_cursor_64 = 0;
+    unsigned _x2c_macro_cursor_11 = 0;
     Var _x2c_macro_cursor_output_19;
     Var _x2c_macro_cursor_output_20;
-    while(Map_try_next(_x2c_macro_object_11, &(_x2c_macro_cursor_64), &(_x2c_macro_cursor_output_19), &(_x2c_macro_cursor_output_20))){
+    while(Map_try_next(_x2c_macro_object_11, &(_x2c_macro_cursor_11), &(_x2c_macro_cursor_output_19), &(_x2c_macro_cursor_output_20))){
       outer = _x2c_macro_cursor_output_20;
       {
         Var inner;
         Map _x2c_macro_object_10 = counts;
-        unsigned _x2c_macro_cursor_63 = 0;
+        unsigned _x2c_macro_cursor_10 = 0;
         Var _x2c_macro_cursor_output_17;
         Var _x2c_macro_cursor_output_18;
-        while(Map_try_next(_x2c_macro_object_10, &(_x2c_macro_cursor_63), &(_x2c_macro_cursor_output_17), &(_x2c_macro_cursor_output_18))){
+        while(Map_try_next(_x2c_macro_object_10, &(_x2c_macro_cursor_10), &(_x2c_macro_cursor_output_17), &(_x2c_macro_cursor_output_18))){
           inner = _x2c_macro_cursor_output_18;
           nested += Var_integer(outer) * Var_integer(inner);
         }
@@ -401,13 +401,13 @@ int main(void){
       {
         Var volatile value;
         Map _x2c_macro_object_12 = counts;
-        unsigned _x2c_macro_cursor_65 = 0;
-        x2c_exception_escaped = & _x2c_macro_cursor_65;
+        unsigned _x2c_macro_cursor_12 = 0;
+        x2c_exception_escaped = & _x2c_macro_cursor_12;
         Var _x2c_macro_cursor_output_21;
         x2c_exception_escaped = & _x2c_macro_cursor_output_21;
         Var _x2c_macro_cursor_output_22;
         x2c_exception_escaped = & _x2c_macro_cursor_output_22;
-        while(Map_try_next(_x2c_macro_object_12, &(_x2c_macro_cursor_65), &(_x2c_macro_cursor_output_21), &(_x2c_macro_cursor_output_22))){
+        while(Map_try_next(_x2c_macro_object_12, &(_x2c_macro_cursor_12), &(_x2c_macro_cursor_output_21), &(_x2c_macro_cursor_output_22))){
           value = _x2c_macro_cursor_output_22;
           {
             {
@@ -461,9 +461,9 @@ int main(void){
   {
     String word;
     Split _x2c_macro_object_13 = String_words(_9);
-    int _x2c_macro_cursor_66 = 0;
+    int _x2c_macro_cursor_13 = 0;
     String _x2c_macro_cursor_output_23;
-    while(Split_try_next(_x2c_macro_object_13, &(_x2c_macro_cursor_66), &(_x2c_macro_cursor_output_23))){
+    while(Split_try_next(_x2c_macro_object_13, &(_x2c_macro_cursor_13), &(_x2c_macro_cursor_output_23))){
       word = _x2c_macro_cursor_output_23;
       word_bytes += String_len(word);
     }
@@ -473,9 +473,9 @@ int main(void){
   {
     String line;
     Split _x2c_macro_object_14 = String_lines(_10);
-    int _x2c_macro_cursor_67 = 0;
+    int _x2c_macro_cursor_14 = 0;
     String _x2c_macro_cursor_output_24;
-    while(Split_try_next(_x2c_macro_object_14, &(_x2c_macro_cursor_67), &(_x2c_macro_cursor_output_24))){
+    while(Split_try_next(_x2c_macro_object_14, &(_x2c_macro_cursor_14), &(_x2c_macro_cursor_output_24))){
       line = _x2c_macro_cursor_output_24;
       {
         line_count ++;
@@ -489,9 +489,9 @@ int main(void){
   {
     String field;
     Split _x2c_macro_object_15 = String_splits(_11, _12);
-    int _x2c_macro_cursor_68 = 0;
+    int _x2c_macro_cursor_15 = 0;
     String _x2c_macro_cursor_output_25;
-    while(Split_try_next(_x2c_macro_object_15, &(_x2c_macro_cursor_68), &(_x2c_macro_cursor_output_25))){
+    while(Split_try_next(_x2c_macro_object_15, &(_x2c_macro_cursor_15), &(_x2c_macro_cursor_output_25))){
       field = _x2c_macro_cursor_output_25;
       {
         fields ++;
@@ -506,9 +506,9 @@ int main(void){
   {
     String current;
     Split _x2c_macro_object_16 = counted_words(_13);
-    int _x2c_macro_cursor_69 = 0;
+    int _x2c_macro_cursor_16 = 0;
     String _x2c_macro_cursor_output_26;
-    while(Split_try_next(_x2c_macro_object_16, &(_x2c_macro_cursor_69), &(_x2c_macro_cursor_output_26))){
+    while(Split_try_next(_x2c_macro_object_16, &(_x2c_macro_cursor_16), &(_x2c_macro_cursor_output_26))){
       current = _x2c_macro_cursor_output_26;
       {
         word = current;
@@ -522,16 +522,16 @@ int main(void){
   {
     String left;
     Split _x2c_macro_object_18 = String_words(_14);
-    int _x2c_macro_cursor_71 = 0;
+    int _x2c_macro_cursor_18 = 0;
     String _x2c_macro_cursor_output_28;
-    while(Split_try_next(_x2c_macro_object_18, &(_x2c_macro_cursor_71), &(_x2c_macro_cursor_output_28))){
+    while(Split_try_next(_x2c_macro_object_18, &(_x2c_macro_cursor_18), &(_x2c_macro_cursor_output_28))){
       left = _x2c_macro_cursor_output_28;
       {
         String right;
         Split _x2c_macro_object_17 = String_words(_15);
-        int _x2c_macro_cursor_70 = 0;
+        int _x2c_macro_cursor_17 = 0;
         String _x2c_macro_cursor_output_27;
-        while(Split_try_next(_x2c_macro_object_17, &(_x2c_macro_cursor_70), &(_x2c_macro_cursor_output_27))){
+        while(Split_try_next(_x2c_macro_object_17, &(_x2c_macro_cursor_17), &(_x2c_macro_cursor_output_27))){
           right = _x2c_macro_cursor_output_27;
           if(String_truth(left) && String_truth(right)) pairs ++;
         }
@@ -545,9 +545,9 @@ int main(void){
   {
     Var field;
     Split _x2c_macro_object_19 = String_words(_16);
-    int _x2c_macro_cursor_72 = 0;
+    int _x2c_macro_cursor_19 = 0;
     String _x2c_macro_cursor_output_29;
-    while(Split_try_next(_x2c_macro_object_19, &(_x2c_macro_cursor_72), &(_x2c_macro_cursor_output_29))){
+    while(Split_try_next(_x2c_macro_object_19, &(_x2c_macro_cursor_19), &(_x2c_macro_cursor_output_29))){
       field = String_var(_x2c_macro_cursor_output_29);
       boxed += String_len(Var_string(field));
     }
@@ -577,10 +577,10 @@ int main(void){
   {
     int volatile value;
     MapIntInt _x2c_macro_object_21 = counted;
-    unsigned _x2c_macro_cursor_74 = 0;
+    unsigned _x2c_macro_cursor_21 = 0;
     int _x2c_macro_cursor_output_30;
     int _x2c_macro_cursor_output_31;
-    while(MapIntInt_try_next(_x2c_macro_object_21, &(_x2c_macro_cursor_74), &(_x2c_macro_cursor_output_30), &(_x2c_macro_cursor_output_31))){
+    while(MapIntInt_try_next(_x2c_macro_object_21, &(_x2c_macro_cursor_21), &(_x2c_macro_cursor_output_30), &(_x2c_macro_cursor_output_31))){
       value = _x2c_macro_cursor_output_31;
       native_values += value;
     }
@@ -590,10 +590,10 @@ int main(void){
     int key;
     int volatile value;
     MapIntInt _x2c_macro_object_22 = counted;
-    unsigned _x2c_macro_cursor_75 = 0;
+    unsigned _x2c_macro_cursor_22 = 0;
     int _x2c_macro_cursor_output_32;
     int _x2c_macro_cursor_output_33;
-    while(MapIntInt_try_next(_x2c_macro_object_22, &(_x2c_macro_cursor_75), &(_x2c_macro_cursor_output_32), &(_x2c_macro_cursor_output_33))){
+    while(MapIntInt_try_next(_x2c_macro_object_22, &(_x2c_macro_cursor_22), &(_x2c_macro_cursor_output_32), &(_x2c_macro_cursor_output_33))){
       key = _x2c_macro_cursor_output_32;
       value = _x2c_macro_cursor_output_33;
       native_pairs += key * value;
@@ -606,10 +606,10 @@ int main(void){
   {
     String volatile value;
     MapStringString _x2c_macro_object_23 = named;
-    unsigned _x2c_macro_cursor_76 = 0;
+    unsigned _x2c_macro_cursor_23 = 0;
     String _x2c_macro_cursor_output_34;
     String _x2c_macro_cursor_output_35;
-    while(MapStringString_try_next(_x2c_macro_object_23, &(_x2c_macro_cursor_76), &(_x2c_macro_cursor_output_34), &(_x2c_macro_cursor_output_35))){
+    while(MapStringString_try_next(_x2c_macro_object_23, &(_x2c_macro_cursor_23), &(_x2c_macro_cursor_output_34), &(_x2c_macro_cursor_output_35))){
       value = _x2c_macro_cursor_output_35;
       native_bytes += String_len(value);
     }

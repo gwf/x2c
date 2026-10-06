@@ -7,6 +7,7 @@
 #include "typed-array.h"
 #include <stdio.h>
 #include <math.h>
+#include "autodiff-macros.h"
 static double scale(double a, double b);
 
 static double scale_grad(double a, double b, double * a_grad, double * b_grad);

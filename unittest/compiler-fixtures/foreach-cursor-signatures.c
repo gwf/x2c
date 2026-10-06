@@ -225,9 +225,9 @@ int main(void){
   {
     long value;
     DirectOne _x2c_macro_object_0 = direct_one;
-    unsigned _x2c_macro_cursor_13 = 0;
+    unsigned _x2c_macro_cursor_0 = 0;
     int _x2c_macro_cursor_output_0;
-    while(DirectOne_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_13, & _x2c_macro_cursor_output_0)){
+    while(DirectOne_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
       value = _x2c_macro_cursor_output_0;
       one_total += value;
     }
@@ -239,10 +239,10 @@ int main(void){
   {
     int key, value;
     DirectTwo _x2c_macro_object_1 = direct_two;
-    unsigned _x2c_macro_cursor_14 = 0;
+    unsigned _x2c_macro_cursor_1 = 0;
     int _x2c_macro_cursor_output_1;
     int _x2c_macro_cursor_output_2;
-    while(DirectTwo_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_14, & _x2c_macro_cursor_output_1, & _x2c_macro_cursor_output_2)){
+    while(DirectTwo_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1, & _x2c_macro_cursor_output_2)){
       key = _x2c_macro_cursor_output_1;
       value = _x2c_macro_cursor_output_2;
       two_total += key + value;
@@ -267,11 +267,11 @@ int main(void){
   {
     int value;
     DirectThree _x2c_macro_object_2 = direct_three;
-    unsigned _x2c_macro_cursor_15 = 0;
+    unsigned _x2c_macro_cursor_2 = 0;
     int _x2c_macro_cursor_output_3;
     int _x2c_macro_cursor_output_4;
     int _x2c_macro_cursor_output_5;
-    while(DirectThree_try_next(_x2c_macro_object_2, & _x2c_macro_cursor_15, & _x2c_macro_cursor_output_3, & _x2c_macro_cursor_output_4, & _x2c_macro_cursor_output_5)){
+    while(DirectThree_try_next(_x2c_macro_object_2, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_3, & _x2c_macro_cursor_output_4, & _x2c_macro_cursor_output_5)){
       value = _x2c_macro_cursor_output_5;
       three_total += value;
     }
