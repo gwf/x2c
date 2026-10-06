@@ -1107,7 +1107,7 @@ Map Compiler.inline_type_dependencies(Compiler c, List ast) {
         foreach (Var type, types.keys()) ordered.push(type);
         String path = home_portable_path(Path.absolute(c.filename));
         String name = binding_identity_spelling(binding);
-        rows[%("source-node" (interface-types $path -1 $name))] =
+        rows[%("source-node" (interface-types $path ${-1} $name))] =
           %(interface-types $name ${ordered.sort().list_free()});
         continue;
       }
@@ -1148,10 +1148,21 @@ static void Compiler.publish_inline_dependencies(
       changed = 1;
     }
   } while (changed);
+  Map published = {};
+  foreach (Var part, entry.car())
+    if (part is <map>) published.merge(part);
+  Array dropped = $auto([]);
+  foreach (Var key, additions.keys()) {
+    Var prior;
+    if (published.try_get(key, prior) && prior == additions[key])
+      dropped.push(key);
+  }
+  foreach (Var key, dropped) additions.del(key);
+  _cache_dependencies(entry[3], c.deps);
+  if (!additions.len()) return;
   Map retained = _cache_copy(additions);
   List parts = entry.car().list().append(%($retained));
   _retain_rows(%($retained));
-  _cache_dependencies(entry[3], c.deps);
   List updated = %($parts @{entry.cdr()});
   _require_retained(updated.try_own());
   _process_cache()[path] = updated;
