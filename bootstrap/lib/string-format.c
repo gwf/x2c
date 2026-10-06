@@ -223,6 +223,7 @@ static void Format_conversion(Format * f){
 Buffer Buffer_write_len(Buffer, const char *, size_t);
 
 static void Format_write_literal(Format * f){
+  if((* f).cursor ==(* f).literal) return;
   Buffer_write_len((* f).out, (* f).fmt +(* f).literal, (size_t)((* f).cursor -(* f).literal));
 }
 
@@ -532,7 +533,7 @@ Var int_var(int);
 
 _Noreturn static void _format_error(int offset, String reason){
   {
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/string-format.x",.function = "_format_error",.line = 311};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/string-format.x",.function = "_format_error",.line = 312};
     x2c_error_raise_n(& _x2c_error_site_0, 435316840, 2, Symbol_var(1019648360), int_var(offset), Symbol_var(1218550748), String_var(reason));
     __builtin_unreachable();
   }
@@ -550,7 +551,7 @@ _Noreturn static void Format_nested(Format * f, String reason, Var code, List de
   {
     Var _x2c_literal_part_0 = int_var((* f).offset);
     {
-      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/string-format.x",.function = "Format_nested",.line = 322};
+      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/string-format.x",.function = "Format_nested",.line = 323};
       x2c_error_raise_n(& _x2c_error_site_1, 435316840, 3, Symbol_var(1019648360), _x2c_literal_part_0, Symbol_var(1218550748), String_var(reason), Symbol_var(6401226), List_var(cause));
       __builtin_unreachable();
     }

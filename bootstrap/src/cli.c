@@ -1118,7 +1118,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _155 = String_new("one-dash long option \'");
   _156 = String_new("\' was removed");
   _157 = String_new("use \'");
-  _158 = String_new("x2c 0.14.0");
+  _158 = String_new("x2c 0.15.0");
   _x2c_static_initialize_0();
   _x2c_static_initialize_1();
   _x2c_static_initialize_2();

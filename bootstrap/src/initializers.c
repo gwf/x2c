@@ -24,6 +24,8 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_1(void);
 
 static List Compiler__convert_initializer(Compiler c, List value, Type type, List target, int * native_used);
 
+static Type Compiler__initializer_shape(Compiler c, Type type);
+
 static List Compiler__convert_composite(Compiler c, List items, Type target, List native_target, List parent_condition, int * native_used);
 
 static List Compiler__empty_collection(Compiler c, Type target);
@@ -1176,6 +1178,16 @@ return Compiler_convert_expression(c, value, Type_declared(type));
 }
 
 int List_truth(List);
+List Type_list(Type);
+Type Sym_resolve_key(Sym, Type);
+Type Sym_next_typedef(Sym, Type, int *);
+static Type Compiler__initializer_shape(Compiler c, Type type){
+  if(! List_truth(Type_list(type))) return type;  type = Sym_resolve_key(c -> sym, type);  int hops = 0;  while(1){
+    Type key = Type_canonicalize(type);  if(key == type) return type;  Type next = Sym_next_typedef(c -> sym, key, &(hops));  if(! List_truth(Type_list(next))) return key;  type = Sym_resolve_key(c -> sym, next);
+  }
+
+}
+
 Array Array_new(void);
 int List_try_next(List, List *, Var *);
 List Var_list(Var);
@@ -1206,8 +1218,6 @@ List Compiler_rebuild_expression(Compiler, Type, List);
 List Macro_apply(Macro, List);
 int Sym_is_var_type(Sym, Type);
 int List_equal(List, List);
-List Type_list(Type);
-Type Sym_resolve_key(Sym, Type);
 List Compiler_converter_call(Compiler, List, Type, Type);
 static List Compiler__empty_collection(Compiler c, Type target){
   for(int kind = 0;  kind < 2;  kind ++){
@@ -1286,7 +1296,7 @@ Type Type_scalar(Type);
 int Type_is_pointer(Type);
 int Type_is_enum(Type);
 List Compiler_initializer_rows(Compiler c, Type root, List items, List target){
-  if(! _init_guard_) _file_init_();  List scalar = Compiler__initializer_scalar_rows(c, root, items, target);  if(List_truth(scalar)) return scalar;  Array rows = Array_new();  List first_path = Compiler__initializer_first(c, root, NULL);  Type resolved_root = Sym_resolve_key(c -> sym, root);  int available = ! ! List_truth(first_path) || List_truth(Type_list(Type_scalar(resolved_root))) || Type_is_pointer(resolved_root) || Type_is_enum(resolved_root);  List states = cons(List_var(cons(_312, cons(List_var(first_path), cons(int_var(available), NULL)))), NULL);  int first = 1; {
+  if(! _init_guard_) _file_init_();  List scalar = Compiler__initializer_scalar_rows(c, root, items, target);  if(List_truth(scalar)) return scalar;  Array rows = Array_new();  List first_path = Compiler__initializer_first(c, root, NULL);  Type resolved_root = Compiler__initializer_shape(c, root);  int available = ! ! List_truth(first_path) || List_truth(Type_list(Type_scalar(resolved_root))) || Type_is_pointer(resolved_root) || Type_is_enum(resolved_root);  List states = cons(List_var(cons(_312, cons(List_var(first_path), cons(int_var(available), NULL)))), NULL);  int first = 1; {
     List original;  List _x2c_macro_object_3 = items;  List _x2c_macro_cursor_3 = _x2c_macro_object_3;  Var _x2c_macro_cursor_output_3;  while(List_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_3))){
       original = Var_list(_x2c_macro_cursor_output_3); {
         Array_push(rows, List_var(Compiler__initializer_row(c, root, original, target, &(states), first)));  first = 0;
@@ -1356,7 +1366,7 @@ Type Type_dereference(Type);
 List List_append(List, List);
 static List Compiler__initializer_designated(Compiler c, Type root, List node, List * value, List * normalized){
   List path = NULL, selectors = NULL;  Type type = root;  while(1){
-    Type owner = Sym_resolve_key(c -> sym, type);
+    Type owner = Compiler__initializer_shape(c, type);
   {
     List _x2c_match_expr = node;
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
@@ -1409,14 +1419,14 @@ int Var_equal(Var, Var);
 int Type_is_aggregate(Type);
 
 static List Compiler__initializer_named(Compiler c, Type type, Var name, List parent){
-  Type owner = Sym_resolve_key(c -> sym, type);
+  Type owner = Compiler__initializer_shape(c, type);
   List fields = List_cdr(Sym_field_order(c -> sym, owner));
   while(List_truth(fields)){
     List row = Var_list(List_car(fields));
     List path = _initializer_field(owner, fields, parent);
     if(Var_equal(List_car(row), name)) return path;
     Type member = Var_type(List_cadr(row));
-    if(! Var_truth(List_car(row)) && Type_is_aggregate(Sym_resolve_key(c -> sym, member))){
+    if(! Var_truth(List_car(row)) && Type_is_aggregate(Compiler__initializer_shape(c, member))){
       List nested = Compiler__initializer_named(c, member, name, path);
       if(List_truth(nested)) return nested;
     }
@@ -1495,12 +1505,12 @@ static List _initializer_merge(Array states){
 List List_match(List, Var);
 int Type_is_array(Type);
 static int Compiler__initializer_whole(Compiler c, Type type, List value){
-  if(List_truth(({ static MatchCaptureSite _x2c_match_site_3;  x2c_match_site_match(& _x2c_match_site_3, value, List_var(_379)); }))) return 1;  Type source = Var_type(List_cadr(value)), resolved = Sym_resolve_key(c -> sym, type);  if(List_equal(Type_list(Sym_resolve_key(c -> sym, source)), Type_list(resolved))) return 1;  if(Sym_is_var_type(c -> sym, type)) return 1;  if(Compiler__initializer_string_array(c, type, value)) return 1;  return ! Type_is_array(resolved) && ! Type_is_aggregate(resolved);
+  if(List_truth(({ static MatchCaptureSite _x2c_match_site_3;  x2c_match_site_match(& _x2c_match_site_3, value, List_var(_379)); }))) return 1;  Type source = Var_type(List_cadr(value)), resolved = Compiler__initializer_shape(c, type);  if(List_equal(Type_list(Compiler__initializer_shape(c, source)), Type_list(resolved))) return 1;  if(Sym_is_var_type(c -> sym, type)) return 1;  if(Compiler__initializer_string_array(c, type, value)) return 1;  return ! Type_is_array(resolved) && ! Type_is_aggregate(resolved);
 }
 
 static int Compiler__initializer_string_array(Compiler c, Type type, List value){
   if(! List_truth(({ static MatchCaptureSite _x2c_match_site_4;  x2c_match_site_match(& _x2c_match_site_4, value, List_var(_388)); }))) return 0;
-  Type array = Sym_resolve_key(c -> sym, type);
+  Type array = Compiler__initializer_shape(c, type);
   if(! Type_is_array(array)) return 0;
   Type element = Type_scalar(Sym_resolve_key(c -> sym, List_cdr(array)));
   return element == _306 || element == _390 || element == _391;
@@ -1518,7 +1528,7 @@ static Type _initializer_type(List path, Type root){
 }
 
 static List Compiler__initializer_first(Compiler c, Type type, List parent){
-  Type owner = Sym_resolve_key(c -> sym, type);
+  Type owner = Compiler__initializer_shape(c, type);
   if(Type_is_array(owner)){
     List zero = x2c_literal_int(0);
     return cons(List_var(({
@@ -1685,7 +1695,7 @@ static List Compiler__initializer_scalar_rows(Compiler c, Type root, List items,
   if(! Compiler__scalar_inputs(c, items, &(string))) return NULL;
   List layout = Compiler__initializer_layout(c, root, target, string, &(symbolic));
   if(! List_truth(layout) || ! symbolic) return NULL;
-  int array = Type_is_array(Sym_resolve_key(c -> sym, root));
+  int array = Type_is_array(Compiler__initializer_shape(c, root));
   Array rows = Array_new();
   unsigned long long at = 0;
   {
@@ -1738,7 +1748,7 @@ static int Compiler__scalar_inputs(Compiler c, List items, List * string){
         if (x2c_match_site_try_capture(& _x2c_match_site_5, _x2c_match_expr, List_var(_411), &_x2c_match_capture)) {return 0;  break;
       }
       static MatchCaptureSite _x2c_match_site_6;  if (x2c_match_site_try_capture(& _x2c_match_site_6, _x2c_match_expr, List_var(_414), &_x2c_match_capture)) {Var type = _x2c_match_values[0]; {
-        Type source = Sym_resolve_key(c -> sym, Var_type(type));  if(! Sym_is_var_type(c -> sym, Var_type(type)) &&(Type_is_array(source) || Type_is_aggregate(source))) return 0;
+        Type source = Compiler__initializer_shape(c, Var_type(type));  if(! Sym_is_var_type(c -> sym, Var_type(type)) &&(Type_is_array(source) || Type_is_aggregate(source))) return 0;
       }
       break;
     }
@@ -1754,7 +1764,7 @@ return 1;
 }
 
 static List Compiler__initializer_layout(Compiler c, Type type, List target, List string, int * symbolic){
-  Type owner = Sym_resolve_key(c -> sym, type);  if(Sym_is_var_type(c -> sym, type) ||(! Type_is_array(owner) && ! Type_is_aggregate(owner))) return({
+  Type owner = Compiler__initializer_shape(c, type);  if(Sym_is_var_type(c -> sym, type) ||(! Type_is_array(owner) && ! Type_is_aggregate(owner))) return({
     Var _x2c_literal_part_56 = List_var(type);  Var _x2c_literal_part_57 = List_var(_ull_literal(1));  cons(_x2c_literal_part_56, cons(_x2c_literal_part_57, _334));
   }
   );  if(Type_is_array(owner)) return Compiler__array_layout(c, type, owner, target, string, &((* symbolic)));  if(Var_equal(List_car(Type_list(owner)), Symbol_var(44977116))) return NULL;  return Compiler__record_layout(c, type, owner, target, string, &((* symbolic)));
