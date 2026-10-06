@@ -11,7 +11,7 @@
 */
 static Path root
 static Array docs, link_docs, errors
-static Regex link, flag, whitespace
+static Regex link_pattern, flag, whitespace
 
 /* Pages whose repository paths and cited line numbers are audited. */
 static List _path_audit(void) => %(
@@ -124,7 +124,7 @@ static void _check_links(void):
   foreach String relative in link_docs:
     String text = _read(relative)
     String directory = relative.rpartition("/").car()
-    foreach RegexMatch found in link.find_all(text):
+    foreach RegexMatch found in link_pattern.find_all(text):
       RegexMatch first = word.match(found[1].strip(NULL).strip("<>"))
       String target = first ? first[0] : ""
       if target.startswith("#") || target.startswith("http://") ||
@@ -376,7 +376,7 @@ static void _check_banned_name(void):
 static void _check_summary(void):
   String relative = "docs/src/SUMMARY.md", text = _read(relative)
   Map listed = {}
-  foreach RegexMatch found in link.find_all(text):
+  foreach RegexMatch found in link_pattern.find_all(text):
     String target = found[1].strip(NULL).partition("#").car()
     if !target || target.startswith("http://") ||
         target.startswith("https://"):
@@ -399,7 +399,7 @@ if !root.join("builds/0/x2c").exists():
   Stderr.printf("documentation audit needs the stage compiler "
                 "builds/0/x2c; run 'make build'\n")
   return 1
-link = Regex.compile("!?\\[[^]]*\\]\\(([^)]+)\\)")
+link_pattern = Regex.compile("!?\\[[^]]*\\]\\(([^)]+)\\)")
 flag = Regex.compile("--[a-zA-Z][a-zA-Z0-9-]*")
 whitespace = Regex.compile("\\s+")
 docs = ["README.md", "AGENTS.md"]
