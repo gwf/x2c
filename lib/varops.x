@@ -146,7 +146,7 @@ static Var _predicate(int holds) => Var.box_i32_bits((unsigned) !!holds);
 
 /* The direct API is eager: it reads both operands' truth, left first. */
 static int _logical(Var lhs, Symbol op, Var rhs) {
-  int left = lhs.truth(), right = rhs.truth();
+  int left = !!lhs, right = !!rhs;
   return op == <&&> ? left && right : left || right;
 }
 

@@ -90,7 +90,7 @@ static List Compiler._empty_collection(Compiler c, Type target) {
     List literal = c.rebuild_expression(source, shape(%()));
     if (!kind && c.sym.is_var_type(target))
       return c.convert_expression(literal, target);
-    if (c.sym.resolve_key(target).equal(c.sym.resolve_key(source)))
+    if (c.sym.resolve_key(target) == c.sym.resolve_key(source))
       return c.convert_expression(literal, target);
     List converted = c.converter_call(literal, source, target);
     if (converted) return converted;
@@ -116,7 +116,7 @@ static List Compiler._composite_rows(
     List cases = row.cadr();
     int available = 0;
     foreach (List choice, cases)
-      if (choice.caddr().truth()) { available = 1; break; }
+      if (choice.caddr()) { available = 1; break; }
     if (parent_condition && initialized && !available) {
       discarded = 1;
       continue;
@@ -252,7 +252,7 @@ static List Compiler._initializer_named(
     List path = _initializer_field(owner, fields, parent);
     if (row.car() == name) return path;
     Type member = row.cadr();
-    if (!row.car().truth() &&
+    if (!row.car() &&
         c._initializer_shape(member).is_aggregate()) {
       List nested = c._initializer_named(member, name, path);
       if (nested) return nested;
@@ -317,7 +317,7 @@ static List _initializer_merge(Array states) {
 static int Compiler._initializer_whole(Compiler c, Type type, List value) {
   if (value.match(%(expr ? (composite *)))) return 1;
   Type source = value.cadr(), resolved = c._initializer_shape(type);
-  if (c._initializer_shape(source).equal(resolved)) return 1;
+  if (c._initializer_shape(source) == resolved) return 1;
   if (c.sym.is_var_type(type)) return 1;
   if (c._initializer_string_array(type, value)) return 1;
   return !resolved.is_array() && !resolved.is_aggregate();
@@ -374,7 +374,7 @@ static List _next_initializer_field(List fields) {
   while (fields) {
     List row = fields.car();
     Type type = row.cadr();
-    if (row.car().truth() || !type.is_bitfield()) break;
+    if (row.car() || !type.is_bitfield()) break;
     fields = fields.cdr();
   }
   return fields;
@@ -446,7 +446,7 @@ List Compiler.initializer_slot(Compiler c, List target, List path) {
     (Type owner, Symbol kind, Var selector, Type selected, List rest) = frame;
     if (kind == <index>)
       target = %(expr $selected (index $target $selector));
-    else if (selector.truth())
+    else if (selector)
       target = %(expr $selected (op . $target ($selector)));
   }
   return target;

@@ -433,7 +433,7 @@ static void Walk.walk_return(Walk &w, Type type, Var result) {
 /* A free ends its local for the statements that follow it on the same path.
    Where that path ends, nothing it freed is known to be freed any more. */
 static void Walk.revive(Walk &w) {
-  foreach (Var known, w.facts.iter()) {
+  foreach (Var known, w.facts) {
     Fact fact = known;
     fact.dead = 0;
   }

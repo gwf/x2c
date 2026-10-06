@@ -635,7 +635,7 @@ List Compiler.lift_func_expression(Compiler c, List expression) {
     }
   if (!type) return c._deref_func_lift(expression, payload);
   Type func_type = c.sym.resolve_key(%("Func"));
-  if (c.sym.resolve_key(type).equal(func_type)) return expression;
+  if (c.sym.resolve_key(type) == func_type) return expression;
 
   Macro lambda = $lambda_expression;
   match (expression)
@@ -646,7 +646,7 @@ List Compiler.lift_func_expression(Compiler c, List expression) {
           type = lowered_type;
           payload = lowered_payload;
         }
-      if (c.sym.resolve_key(type).equal(func_type)) return expression;
+      if (c.sym.resolve_key(type) == func_type) return expression;
     }
 
   Type source_type = NULL;
@@ -1008,7 +1008,7 @@ static int Compiler._is_func_adapter(Compiler c, Type type) {
   if (!type) return 0;
   Type adapter = c.sym.resolve_key(%("FuncAdapter"));
   if (!adapter) return 0;
-  return c.sym.resolve_key(type).equal(adapter);
+  return c.sym.resolve_key(type) == adapter;
 }
 
 /* A function already written in the adapter's own shape needs no wrapper:
@@ -1018,7 +1018,7 @@ static int Compiler._is_func_adapter_target(Compiler c, Type type) {
   Type adapter = c.sym.resolve_key(%("FuncAdapter"));
   if (!adapter || !adapter.is_pointer()) return 0;
   Type pointee = adapter.dereference();
-  return type.canonicalize().equal(pointee.canonicalize());
+  return type.canonicalize() == pointee.canonicalize();
 }
 
 static List Compiler._direct_func_adapter(

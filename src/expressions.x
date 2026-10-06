@@ -338,8 +338,8 @@ static const SymbolSet primary_starts =
      lit-char lit-int lit-float lit-char* lit-atom lit-symbol>>;
 
 static int _cast_operand_follows(Symbol s) =>
-  primary_starts.contains(s) || s == <sizeof> || increments.contains(s) ||
-  unary_operators.contains(s);
+  s in primary_starts || s == <sizeof> || s in increments ||
+  s in unary_operators;
 
 /* A template typedef is named by the binding each expansion supplies, so a
    cast to it, qualified or not, is typed where the template expands. A
@@ -396,8 +396,8 @@ static List Compiler._parse_unary_op(Compiler c) {
   Symbol op = c.peek(0);
   Token origin = c.token;
   if (op == <sizeof>) return c._parse_sizeof();
-  int increment = increments.contains(op);
-  if (!increment && !unary_operators.contains(op)) return c._parse_postfix();
+  int increment = op in increments;
+  if (!increment && !(op in unary_operators)) return c._parse_postfix();
   c.next();
   List operand = increment ? c._parse_unary_op() : c._parse_cast();
   return c.resolve_expression(
@@ -677,7 +677,7 @@ List Compiler.parse_variable(Compiler c) {
   Var definition;
   // A macro defined to a string literal is that literal after preprocessing.
   if (c.object_macros.try_get(origin.text, definition) &&
-      definition.equal(<string>)) {
+      definition == <string>) {
     c.next();
     return c._join_c_string_literals(
       %(expr (* char) (literal (* char) ${origin.text})));
@@ -720,7 +720,7 @@ static int Compiler._string_word_follows(Compiler c) {
   if (c.peek(0) != <ident> || c.token.text == "in") return 0;
   Var definition;
   if (c.object_macros.try_get(c.token.text, definition))
-    return definition.equal(<string>);
+    return definition == <string>;
   return !c.sym.get(%(${c.token.text}));
 }
 
@@ -971,8 +971,8 @@ int Compiler.needs_resolution(Compiler c, Var value) {
       case captured(?body, *captures, *params): {
         foreach (List row, captures)
           match (row) case %(capture ?binding ? ?):
-            if (!c.semantic_binding_facts().contains(
-              %(lambda-depth $binding))) return 1;
+            if (!(%(lambda-depth $binding) in c.semantic_binding_facts()))
+              return 1;
         continue;
       }
       case lambda(?body, *params): return 1;
@@ -1228,7 +1228,7 @@ static List Compiler._identifier_binding(
     Map facts = c.semantic_binding_facts();
     Var issued, source;
     if (!facts.try_get(%(known $identity), issued) ||
-        issued is not <string> || !issued.string().equal(spelling))
+        issued is not <string> || issued.string() != spelling)
       $report.type.binding_unknown(c, name, origin);
     /* A template's private name that no declaration in scope reaches
        reads its source spelling where the expansion lands. A declared one
@@ -1276,7 +1276,7 @@ static void Compiler._capture_identifier(Compiler c, List binding) {
   if (c.local_macro_captures == NULL || !binding ||
       !c.sym.binding_is_local_before(
         binding, c.local_macro_capture_scopes) ||
-      c.local_macro_captures.contains(binding)) return;
+      binding in c.local_macro_captures) return;
   Var order = c.local_macro_captures[<order>];
   c.local_macro_captures[<order>] = cons(
     binding, order is <list> ? order : NULL);
@@ -1298,14 +1298,14 @@ static int Compiler._shadow_identifier(
   List visible = c.sym.lookup(%($spelling), visible_type);
   if (!visible || visible == binding) return 0;
   if ((c.sym.binding_is_local(binding) &&
-       !binding_facts.contains(%(lambda-depth $binding))) ||
+       !(%(lambda-depth $binding) in binding_facts)) ||
       (!kept && visible_type && c._expansion_introduced(visible))) {
     binding = visible;
     return 1;
   }
   if (visible_type &&
       (!type || c.sym.resolve_global(%($spelling), NULL)) &&
-      !binding_facts.contains(%(emitted $visible)))
+      !(%(emitted $visible) in binding_facts))
     c.set_fact(%(emitted $visible), c.fresh_name("binding_shadow"));
   return 0;
 }
@@ -1359,7 +1359,7 @@ static List Compiler._read_bound_reference(
 static int Compiler._expression_is_addressable(Compiler c, List expression) {
   match (expression) {
     case %(expr ? ${$source_identifier_content(%(?binding))}):
-      return !c.semantic_binding_facts().contains(%(lambda-snapshot $binding));
+      return !(%(lambda-snapshot $binding) in c.semantic_binding_facts());
     case %(expr ? ${$indexed(?receiver, ?selector)}): return 1;
     case %(expr ? ${$source_operator_content(
         %((!quote *) ?operand))}): return 1;
@@ -1509,7 +1509,7 @@ static List Resolve._call(Resolve &r, List function, List supplied) {
 static List CallSite._function(CallSite &k, List function) {
   List resolved = k.c.resolve_expression(function, k.origin);
   Type type = resolved.cadr(), func_type = k.c.sym.resolve_key(%("Func"));
-  if (type && k.c.sym.resolve_key(type).equal(func_type))
+  if (type && k.c.sym.resolve_key(type) == func_type)
     return k.c._resolve_func_call(resolved, k.supplied, k.origin);
   return k._finish(k.result_type, resolved, type, NULL);
 }
@@ -1600,8 +1600,7 @@ static List Compiler._discarding_callee(
   match (callee) case %(expr ? ${$source_identifier_content(
       %((!set ?bound (*))))}): binding = bound;
   if (!binding || !callee_type.match(%((func *) *)) ||
-      c.protocol_helpers.contains(
-        %"discard-helper ${(long) binding}"))
+      %"discard-helper ${(long) binding}" in c.protocol_helpers)
     return callee;
   int which = 0, index = 0;
   foreach (Var argument, arguments) {
@@ -2283,7 +2282,7 @@ static List Compiler._complete_iter_call(
 
 static int _exact_iter_type(Var value) {
   Type type = value is <list> ? value : %($value);
-  return type.canonicalize().equal(%("Iter"));
+  return type.canonicalize() == %("Iter");
 }
 
 static List _iter_destination(void) {
@@ -2727,8 +2726,7 @@ static int Compiler._is_operator_temporary(Compiler c, List expression) {
   match (expression)
     case $called(%(expr ? ${$source_identifier_content(
         %((!set ?binding (*))))}), *arguments):
-      return c.protocol_helpers.contains(
-        %"fresh-callee ${(long) binding.list()}");
+      return %"fresh-callee ${(long) binding.list()}" in c.protocol_helpers;
   return 0;
 }
 
@@ -3125,10 +3123,10 @@ static void Compiler._check_noted_converter(
   Compiler c, List noted, List parsed, Type target, int context) {
   if (!noted || !parsed || !target) return;
   (List call, String method, List location) = noted;
-  if (!call.equal(parsed)) return;
+  if (call != parsed) return;
   // A qualified target, such as `const char *`, is a different crossing.
   if (target.declared() != target.canonicalize() ||
-      !List.equal(c.sym.resolve_key(call.cadr()), c.sym.resolve_key(target)))
+      c.sym.resolve_key(call.cadr()) != c.sym.resolve_key(target))
     return;
   List receiver = call.caddr().caddr().cadr();
   Type source = receiver.cadr();
@@ -3160,7 +3158,7 @@ static int Compiler._implicit_converter(
   Compiler c, List receiver, Type source, Type target,
   int source_is_var) =>
   source_is_var || c.sym.is_var_type(target) ||
-  List.equal(c.sym.resolve_key(source), c.sym.resolve_key(target)) ||
+  c.sym.resolve_key(source) == c.sym.resolve_key(target) ||
   !!c.converter_call(receiver, source, target);
 
 /* The function being defined may be the implicit crossing itself, as a
@@ -3194,7 +3192,7 @@ const PrintfFn *List.printf_family(List l) {
       int count = sizeof(printf_family_info) / sizeof(printf_family_info[0]);
       for (int i = 0; i < count; i++) {
         const PrintfFn *info = &printf_family_info[i];
-        if (!String.equal(name, (String) info.name)) continue;
+        if (name != (String) info.name) continue;
         if (info.unresolved && type.list()) return NULL;
         return info;
       }
@@ -3366,11 +3364,11 @@ static List Compiler._adapt_lambda_value(
 static List Compiler._lift_func_value(
   Compiler c, List expr, Type type, Type target) {
   Type func_type = c.sym.resolve_key(%("Func"));
-  if (c.sym.resolve_key(target).equal(func_type)) {
+  if (c.sym.resolve_key(target) == func_type) {
     List lifted = c.lift_func_expression(expr);
     if (lifted != expr) return lifted;
   }
-  if (type && c.sym.resolve_key(type).equal(func_type) &&
+  if (type && c.sym.resolve_key(type) == func_type &&
       target.is_pointer() && target.dereference().is_function()) {
     $report.type.func_callback(c);
   }
@@ -3402,7 +3400,7 @@ static List Compiler._convert_conditional_arms(
     Type true_type = ontrue.cadr(), false_type = onfalse.cadr();
     if (ontrue.list().match(%(expr ? (composite *))) ||
         onfalse.list().match(%(expr ? (composite *))) ||
-        (!true_type.equal(false_type) &&
+        (true_type != false_type &&
          !(c.sym.resolve_numeric_type(true_type) &&
            c.sym.resolve_numeric_type(false_type)))) {
       List converted_true = c.convert_expression(ontrue, declared_target);
@@ -3586,7 +3584,7 @@ static List Compiler._var_exact_reader(Compiler c, List expr, Type target) {
   (Var function_tag, List parameters) = function;
   if (function_tag != <func> || !parameters || parameters.cdr() ||
       !List.equal(parameters.car(), %("Var")) ||
-      !readertype.cdr().equal(target))
+      readertype.cdr() != target)
     return NULL;
   List callee = %(expr $readertype (ident $binding));
   Macro called = $called;
@@ -3669,10 +3667,10 @@ static List Compiler._converter_owned_call(
   /* A return typedef may name the same declared type as the target. The
      relaxed form still takes one source argument and must return that type;
      a lowercased method name alone does not establish the result type. */
-  if (!cvrtrtype.equal(%((func ($owner)) @target)) &&
+  if (cvrtrtype != %((func ($owner)) @target) &&
       (!cvrtrtype.match(%((func (($typename))) ?)) ||
-       !c.sym.normalize_declared_type(cvrtrtype.cdr()).equal(
-         c.sym.normalize_declared_type(target))))
+       c.sym.normalize_declared_type(cvrtrtype.cdr()) !=
+         c.sym.normalize_declared_type(target)))
     return NULL;
   Macro called = $called;
   List call = c.rebuild_expression(target, called(callee, %($argument)));
@@ -3795,11 +3793,11 @@ static void Compiler._check_native_crossing(
     $report.type.pointer_unrelated(c, declared_source, declared_target);
   if (declared_source.is_bare_typedef_name() &&
       declared_target.is_bare_typedef_name() &&
-      !declared_source.equal(declared_target) &&
+      declared_source != declared_target &&
       c.sym.resolve_key(declared_target).is_pointer() &&
       c.sym.resolve_key(declared_source).base_type() !== %(void) &&
-      !c._typedef_names(declared_source).contains(declared_target) &&
-      !c._typedef_names(declared_target).contains(declared_source)) {
+      !(declared_target in c._typedef_names(declared_source)) &&
+      !(declared_source in c._typedef_names(declared_target))) {
     $report.type.typedef_crossing(c, declared_source, declared_target);
   }
 }

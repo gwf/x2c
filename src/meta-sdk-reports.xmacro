@@ -62,7 +62,7 @@ macro Stmt $report.sdk.symbol_set_value(Expr $value) =>
 macro Stmt $report.sdk.symbol_set_duplicate(Expr $values, Expr $duplicate) =>
   MetaContext.reject(
     "_x2c.symbol-set requires distinct Symbols",
-    %("symbol:" ${$values.getindex($duplicate).repr()}));
+    %("symbol:" ${$values[$duplicate].repr()}));
 
 macro Stmt $report.sdk.native_declarations() =>
   MetaContext.reject(

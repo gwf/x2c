@@ -480,9 +480,9 @@ static void _add_depfile(String path, Map deps) {
 static String _imports_unit(String base, List reached) {
   Array lines = [];
   foreach (String path, reached)
-    lines.push(String.new("$(import ").add(path.repr()).add(")"));
+    lines.push(String.new("$(import ") + path.repr() + ")");
   String source = %"$base-imports.x";
-  Path.write_text(source, "\n".join(lines.list_free()).add("\n"));
+  Path.write_text(source, "\n".join(lines.list_free()) + "\n");
   return source;
 }
 

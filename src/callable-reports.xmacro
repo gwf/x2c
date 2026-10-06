@@ -25,7 +25,7 @@ macro Stmt $report.callable.direct(
 
 macro Stmt $report.callable.variadic(
   Expr $c, Expr $target, Expr $source, Expr $func_type) {
-  String message = $c.sym.resolve_key($target).equal($func_type)
+  String message = $c.sym.resolve_key($target) == $func_type
     ? "function conversion to Func cannot be variadic"
     : "native binding target cannot be variadic";
   $c._adapter_error(message, $target, $source, NULL);

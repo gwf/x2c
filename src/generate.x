@@ -421,7 +421,7 @@ static void Partition.place_function(
    the type here reaches every generated form of the function. C forbids
    `_Noreturn` on `main`. */
 static Type _noreturn(Type type, List declarator, Ast body) {
-  if (body.never_returns() && !type.list().contains(%("_Noreturn")) &&
+  if (body.never_returns() && !(%("_Noreturn") in type.list()) &&
       binding_identity_spelling(declarator.cadr()) != "main")
     return %(("_Noreturn") @type);
   return type;
@@ -561,7 +561,7 @@ static int _declares_object(List bindings) {
     foreach (List declarator, declarators)
       match (declarator) {
         case %(bind ? ((fnmod *) *)): return 0;
-        case %(bind ?name *): if (name.truth()) return 1;
+        case %(bind ?name *): if (name) return 1;
         case %(op = * *): return 1;
       }
   return 0;
@@ -695,7 +695,7 @@ static List _place_groups(
     match (item)
       case %(conditional ?group ? ?node): {
         int placed = opened[group].int() != header;
-        if (group in filled || (!other.contains(group) && placed))
+        if (group in filled || (!(group in other) && placed))
           out.push(node);
         continue;
       }
@@ -746,7 +746,7 @@ static List _typedef_forward(Type type, List bindings) {
   Type core = type.base_type();
   match (core)
     case %((!or struct union) ?name (fields *)):
-      if (name.truth())
+      if (name)
         return %(typedef ${_tag_only(type, core, name)} $bindings);
   return NULL;
 }

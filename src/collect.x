@@ -291,7 +291,7 @@ static void FileWalk.directive(FileWalk &w, Token token, int hidden) {
 static int _starts_line(Token first, Token token) {
   while (token-- > first) {
     if (token.type != <space> && token.type != <comment>) return 0;
-    if (token.text.contains("\n")) return 1;
+    if ("\n" in token.text) return 1;
   }
   return 1;
 }
@@ -482,7 +482,7 @@ static void FileWalk._include_search_dependency(
   FileWalk &w, String candidate) {
   if (!candidate.startswith("/")) candidate = %"cwd:$candidate";
   if (!candidate.startswith("cwd:") && w.c.sources.exists(candidate) &&
-      candidate.equal(_canonical_path(candidate))) return;
+      candidate == _canonical_path(candidate)) return;
   String hash = w.c._include_search_hash(candidate);
   _cache_dependency(w.dependencies, candidate, hash);
   w.c.deps.merge_translation_dependency(candidate, hash);
@@ -1162,7 +1162,7 @@ static List Compiler._interface_load(
            ?(List parts) ?(List definitions) ? ?(List dependencies)
            ?(List include_dirs)):
       if (c._interface_current(canonical, compiler, owner, hash) &&
-          c._interface_include_dirs().equal(include_dirs))
+          c._interface_include_dirs() == include_dirs)
         return c._interface_entry(
           canonical, hash, parts, definitions, dependencies, include_dirs);
   return NULL;
@@ -1206,8 +1206,8 @@ static void _interface_shutdown(void) {
 static int Compiler._interface_current(
   Compiler c, String canonical, String compiler, String owner, String hash) {
   String identity = compiler_identity();
-  return identity && compiler.equal(identity) &&
-    home_absolute_path(owner).equal(canonical) &&
+  return identity && compiler == identity &&
+    home_absolute_path(owner) == canonical &&
     c._hash_matches(canonical, hash);
 }
 

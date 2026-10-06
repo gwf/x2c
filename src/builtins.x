@@ -51,7 +51,7 @@ static List _foreach_expand(
   collection = builtin_foreach_collection(collection);
   List targets = builtin_foreach_bindings(declaration);
   List type = x2c_syntax_type(collection);
-  int direct = type.equal(%("Iter"));
+  int direct = type == %("Iter");
   List converter = direct ? %() : _converter(type);
   List spec = direct ? %() : _cursor_spec(type);
   if (targets.len() != 1 && targets.len() != 2)
@@ -75,8 +75,8 @@ static List _foreach_expand(
 
 /* The function that makes an Iter of a `type` value. */
 static List _converter(List type) =>
-  type.equal(%("Var")) ? builtin_foreach_reference("Var_iter")
-                       : x2c_protocol_member(type, %("Iter"), "iter");
+  type == %("Var") ? builtin_foreach_reference("Var_iter")
+                    : x2c_protocol_member(type, %("Iter"), "iter");
 
 /* The cursor loop's `(function cursor-type output-types)` for a
    collection whose owner declares `int T_try_next(T, C *, O *...)` with an
@@ -92,12 +92,12 @@ static List _cursor_spec(List collection_type) {
   List rest = parameters.cdr();
   List cursor_parameter = rest ? rest.car() : %();
   List outputs = rest ? rest.cdr() : %();
-  if (!x2c_type_return(type).equal(%(int)) ||
-      !parameters.car().equal(collection_type) ||
+  if (x2c_type_return(type) != %(int) ||
+      parameters.car() != collection_type ||
       !x2c_type_is_pointer(cursor_parameter)) return %();
   List cursor_type = x2c_type_element(cursor_parameter);
   if (!x2c_type_is_integral(cursor_type) &&
-      !cursor_type.equal(collection_type)) return %();
+      cursor_type != collection_type) return %();
   if (!outputs) return %();
   if (!_valid_outputs(outputs)) return %();
   List output_types = outputs.map(%!(Var output) => x2c_type_element(output));
@@ -145,7 +145,7 @@ static List Foreach.with_cursor(Foreach &f, List spec) {
     $!( $function($object_expression, $cursor_argument, $addresses...) );
   List loop_body =
     $!{ { ${_cursor_assignments(f.targets, values)}... ${f.body} } };
-  List initial = cursor_type.equal(f.type) ? object_expression : $!( 0 );
+  List initial = cursor_type == f.type ? object_expression : $!( 0 );
   List setup = %(
     ${_declare(f.type, f.object, f.collection)}
     ${_declare(cursor_type, f.cursor, initial)}
@@ -194,7 +194,7 @@ static List Foreach.constructor(Foreach &f, List converter) {
   int atom = _atom_type(type);
   String owner = atom ? type.car().str() : "";
   List enumerate = %();
-  if (f.targets.len() == 2 && atom && !type.equal(%("Iter")))
+  if (f.targets.len() == 2 && atom && type != %("Iter"))
     enumerate = builtin_foreach_reference(owner + "_enumerate");
   return enumerate ? enumerate : converter;
 }
@@ -494,7 +494,7 @@ static List _finish_new(
    constructor's arguments. A heap class's `init` may return an int, and
    a zero frees the value and fails `new`. */
 static List _class_initializer(String owner, Var heap_value) {
-  int heap = !heap_value.equal(%());
+  int heap = heap_value != %();
   List type = %($owner);
   List receiver = heap ? type : $!Type{ $type * };
   List method = x2c_method_resolve(type, "init");
@@ -502,11 +502,11 @@ static List _class_initializer(String owner, Var heap_value) {
     List signature = x2c_syntax_type(method);
     List function = signature.car();
     List declared = function[1];
-    int reference = !heap && declared.car().equal(%(& @type));
+    int reference = !heap && declared.car() == %(& @type);
     if (reference) receiver = declared.car();
     List parameters = cons(receiver, declared.cdr());
-    int refusable = heap && signature.equal(%((func $parameters) int));
-    if (refusable || signature.equal(%((func $parameters) void))) {
+    int refusable = heap && signature == %((func $parameters) int);
+    if (refusable || signature == %((func $parameters) void)) {
       List init = _ref(x2c_binding_spelling(method));
       List arguments = _init_arguments(parameters);
       List call = heap || reference ? $!( $init(value, $arguments...) )
@@ -739,12 +739,12 @@ static List _binding_record(
   List type = binding_native_type(function);
   List rows = _binding_rows_for(group_name, all_rows);
   foreach (Var installed, sealed)
-    if (installed.equal(group_name))
+    if (installed == group_name)
       x2c_diagnostic_fail(
         "native Lisp binding appears after its group was installed",
         %("group: $group_name"));
   foreach (List row, rows)
-    if (row[1].equal(lisp_name))
+    if (row[1] == lisp_name)
       x2c_diagnostic_fail(
         "duplicate native Lisp binding name",
         %("group: $group_name" "name: $lisp_name"));
@@ -753,7 +753,7 @@ static List _binding_record(
 
 static String _binding_name(Var node) {
   Var value = x2c_literal_value(node);
-  if (value is <string>) return value.str();
+  if (value is <string>) return value;
   x2c_diagnostic_fail(
     "native Lisp binding name requires a String literal",
     %("value: ${node.repr()}"));
@@ -762,7 +762,7 @@ static String _binding_name(Var node) {
 
 static List _binding_rows_for(String group, List rows) {
   Array selected = [];
-  foreach (List row, rows) if (row.car().equal(group)) selected.push(row);
+  foreach (List row, rows) if (row.car() == group) selected.push(row);
   return selected.list_free();
 }
 

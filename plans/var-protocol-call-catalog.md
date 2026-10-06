@@ -1,9 +1,76 @@
 > Status: reference
 > Reviewed 2026-10-06 at dev cb67de5ec658af4f9108433f24f062543c6087d4.
-> Catalog and mitigation recommendations only. No production source changed.
-> Delivery uses the shared integration agent; implementation remains unperformed.
+> Implementation completed: 164 candidates changed; 25 retained with evidence.
+> The shared integration agent owns final validation and dev publication.
 
 # Explicit protocol-call catalog
+
+## Implementation outcome
+
+All 189 proposed or conditional candidates were investigated. The implementation
+changes 164 occurrences in 38 hand-authored source files. The CSV retains its
+audit locations and adds `implementation_status` and `implementation_reason`
+for every row. Its original classifications are historical findings, not final
+claims of equivalence.
+
+| Operation | Changed occurrences |
+| --- | ---: |
+| Equality | 80 |
+| Membership | 51 |
+| Truth | 15 |
+| Explicit string conversion | 7 |
+| Indexed assignment | 3 |
+| String concatenation | 3 |
+| Indexed compound update | 2 |
+| Indexed read | 2 |
+| Direct iteration | 1 |
+| Total | 164 |
+
+The requested five-method subset has 58 implemented replacements. Both
+conditional macro cases passed: the SDK duplicate-symbol diagnostic uses
+brackets, and typed Map boxing uses bracket assignment. Six initially proposed
+membership rewrites remain: three compile-time source calls and their three
+generated copies. The original 12 retained calls still remain explicit.
+
+The complete set of 25 retained candidates consists of:
+
+- Fourteen mixed-operand equality calls. Operators choose another dispatch or
+  omit an implicit conversion. Adding explicit conversions does not improve
+  the retained forms.
+- One JsonBool display call. Omitting `.str()` fails conversion to the native
+  string argument type.
+- Five authoritative compile-time calls: two truth calls in
+  `src/operator-ledger.xmacro`, two membership calls in
+  `lib/system-macros.xmacro`, and one in `lib/var-tags.xmacro`. Rewriting them
+  fails bootstrap compile-time evaluation; the calls remain explicit.
+- Five generated copies of those calls in `src/linked-meta.x`. Only their
+  authoritative sources were considered for implementation.
+
+No new protocol, wrapper, validation gate, or test requirement was added.
+Existing definitions and semantic conversions remain. The cleanup does not
+claim a runtime speedup. In particular, RegexCapture indexing keeps its
+explicit getters; no protocol adoption was added merely to change spelling.
+
+The runtime and compiler workers completed private source reviews and focused
+checks. Independent generated-C review confirmed eager left-then-right Var
+truth evaluation, typed-array updates, Map boxing, nominal conversion targets,
+and direct Map value iteration. The final combined build passed.
+
+The combined tree passed 18 selected unit suites: 322 tests and 14,000
+assertions. Twelve compiler fixtures passed, covering membership, indexing,
+foreach signatures, macro bindings, protocol collisions, converter warnings,
+SDK symbol diagnostics, variadic conversion diagnostics, and compile-time
+lowering. `git diff --check` passed. Complete logs remain in
+`debug/protocol-call-implementation/` in the implementation workspace.
+
+Implementation delivery is a separate ready PR through the existing shared
+integrator. The catalog PR is #181; that original audit alone contains no
+production changes. No direct dev push or publication gate was run here.
+
+## Audit scope and original findings
+
+The remainder records the original audit at the baseline above. Implementation
+outcomes take precedence over the original candidate labels.
 
 The most useful first cleanup is membership and indexed access. The requested
 narrower pattern covers 147 occurrences in 34 files when the trailing `.*;`
@@ -144,11 +211,11 @@ fixtures or new checks.
 | Static Symbol `%s` without `.str()` | Generated C passes the numeric Symbol directly. Inspected only; unsafe variant was not executed. |
 | `String.add(Var)` / `String + Var` | Generated targets differ: `String_add(a, Var_string(b))` versus `Var_string(Var_binary(String_var(a), 56, b))`. |
 
-These are representative semantic probes, not validation of every proposed
-replacement. No production diff, complete cleanup build, or performance
-comparison exists yet.
+These were representative audit probes, not validation of every proposed
+replacement. The implementation outcome above records the subsequent authored
+diff and validation. No performance comparison was performed.
 
-## Recommended mitigation
+## Original mitigation recommendation
 
 Start with the five-method subset above, then typed equality, truth conditions,
 and identity String conversions from the larger catalog. Review each receiver

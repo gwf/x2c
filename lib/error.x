@@ -654,7 +654,7 @@ void Error.policy_set(Symbol code, Symbol disposition) {
   int pushed = _scope_push(
     code, "could not enter error scope while setting policy");
   Map policy = state.context_top ? state.context_top.policy : state.policy;
-  policy.setindex(code, disposition);
+  policy[code] = disposition;
   if (pushed) Scope.pop();
   state.floor_only--;
 }
@@ -759,7 +759,7 @@ void Error.policy_adopt(void *capture) {
     int pushed = _scope_push(
       <invariant>, "could not enter error scope while adopting policy");
     for (int i = 0; i + 1 < adopted.count; i += 2)
-      policy.setindex(adopted.pairs[i], adopted.pairs[i + 1]);
+      policy[adopted.pairs[i]] = adopted.pairs[i + 1];
     if (pushed) Scope.pop();
     state.floor_only--;
   }
