@@ -341,6 +341,7 @@ static void FileWalk.prepare(FileWalk &w, Compiler shadow, String segment) {
   shadow.meta_hashes = w.hashes;
   shadow.layout = w.c.layout;
   shadow.source_private = 0;
+  shadow.signature_only = w.c.signature_only;
   shadow.open_linkage = w.linkage;
   shadow.take_unit_state(w.c);
   shadow.tokenize(segment);
@@ -571,6 +572,7 @@ static List Compiler._walk_cold(
   Compiler file = Compiler.new_shared(c);
   defer c.close_child(file);
   file.interface_provider = 1;
+  file.signature_only = c.signature_only;
   file.filename = c.filename;
   // Every file the shared session preloads defines its Lisp there.
   if (macro_library_filling()) {
@@ -703,15 +705,7 @@ static void Compiler._add_type_dependencies(
     The scanner uses the same retained hashes as evaluator installation. */
 int Compiler.linked_meta_provider_current(Compiler c, String path) {
   String canonical = _canonical_path(path);
-  List entry = c._entry(canonical);
-  if (!entry) {
-    DiagnosticsHold hold = c.diagnostics.hold();
-    $let(c.meta_build, 1) $let(c.recovery_depth, c.recovery_depth + 1) {
-      try entry = c._walk_cold(path, canonical, {}, {});
-      catch %(malformed *): entry = NULL;
-    }
-    c.diagnostics.release(hold, 0);
-  }
+  List entry = c._meta_provider_entry(canonical);
   if (!entry) return 0;
   Map hashes = {}, native = {};
   foreach (Var part, entry.car()) {
@@ -725,6 +719,35 @@ int Compiler.linked_meta_provider_current(Compiler c, String path) {
   }
   $let(c.filename, canonical)
     return c.meta_provider_hashes_current(hashes, native);
+}
+
+/* Metadata lookahead reads declarations and hashes without source effects. */
+static List Compiler._meta_provider_entry(Compiler c, String canonical) {
+  List entry = c._entry(canonical);
+  if (!entry) {
+    DiagnosticsHold hold = c.diagnostics.hold();
+    $let(c.meta_build, 1) $let(c.signature_only, 1)
+    $let(c.recovery_depth, c.recovery_depth + 1) {
+      try entry = c._walk_cold(canonical, canonical, {}, {});
+      catch %(malformed *): entry = NULL;
+    }
+    c.diagnostics.release(hold, 0);
+  }
+  return entry;
+}
+
+/** Completes a linked function's own source hashes before a shallow call.
+    A lookahead entry never replaces the file's ordinary contribution. */
+void Compiler.complete_meta_hashes(Compiler c) {
+  List entry = c._meta_provider_entry(_canonical_path(c.filename));
+  if (entry)
+    foreach (Var part, entry.car()) {
+      if (part is not <map>) continue;
+      foreach (Var value, part.map())
+        match (value) case %(meta-hashes ? ?(Map hashes)):
+          c.meta_hashes.merge(hashes);
+    }
+  collect_forget_provisional_entries();
 }
 
 /** Adds retained hashes of ordinary private callees and native-only providers.
@@ -849,7 +872,7 @@ static String _canonical_cwd(void) {
    file is dropped afterwards, so a later unit walks the file again with the
    builders. */
 static void FileWalk.add_defaults(FileWalk &w) {
-  if (!w.produces()) return;
+  if (w.c.signature_only || !w.produces()) return;
   w.deferred = macro_library_filling();
   if (w.deferred) return;
   Map generated = w.c.select_declaration_defaults(

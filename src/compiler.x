@@ -575,7 +575,7 @@ static String Compiler._effect_file(Compiler c, List key) {
 */
 int Compiler.collect_unit_macro(Compiler c) {
   Symbol collection = c.macro_invocation_collection();
-  if (collection == <tried> || (collection && c.meta_build == 1))
+  if (collection == <tried> || (collection && c.meta_build))
     return c._try_unit_macro();
   if (collection == <required>) c._expand_unit_macro();
   return collection == <required>;

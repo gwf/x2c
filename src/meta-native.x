@@ -172,15 +172,12 @@ void Compiler.install_meta_function(Compiler c, List fn, Token marker) {
 void Compiler.install_collected_meta_function(
   Compiler c, List declaration, Token marker) {
   if (c.source_private < 0) return;
-  if (c.macro_holes || macro_library_filling()) return;
+  if (c.signature_only || c.macro_holes || macro_library_filling()) return;
   String name = c._native_meta_name(declaration, marker);
   if (c.shares_meta_definition(name)) return;
   c.ensure_macro_lisp();
   Map linked = _linked_module();
-  if (name in linked && c._linked_copy(name, linked) &&
-      c._bind_linked_target(name, c.func_signature(declaration.type_from_ast())))
-    return;
-  if (c.groups_meta()) return;
+  if (c.groups_meta() && !(name in linked)) return;
   c._install_stub(
     name, declaration.type_from_ast().canonicalize(), NULL, marker);
 }
@@ -213,6 +210,15 @@ static Var _meta_stub(Func function, const FuncArg *argv) {
   if (!c) $report.macro.outside_compilation(name);
   Token site = MetaContext.current().site;
   if (!site) site = c.token;
+  if (!provider.len()) {
+    Map linked = _linked_module();
+    if (name in linked) {
+      if (c.shallow && !c._linked_copy(name, linked)) c.complete_meta_hashes();
+      if (c._linked_copy(name, linked))
+        return c._meta_apply(linked[name], values.list_free());
+    }
+  }
+  if (c.meta_build) raise %(meta-later (name $name));
   List rows = c._subject_rows(values);
   Var previous = Macro.subject();
   Macro.use_subject(rows);
@@ -957,9 +963,21 @@ static int Compiler._linked_copy(Compiler c, String name, Map linked) {
 static int Compiler._linked_texts_match(
   Compiler c, String name, Map linked, Map reached) {
   Var hash, own, names = void;
-  if (name in reached || !c.meta_hashes.try_get(name, own)) return 1;
-  reached[name] = 1;
   String key = %"${home_portable_path(c.canonical_path(c.filename))}:$name";
+  if (!c.meta_hashes.try_get(name, own)) {
+    Var advertisement;
+    if (c.project_meta.try_get(name, advertisement)) {
+      Var (_, provider, hashes) = advertisement;
+      Map dependency = hashes;
+      if (!(name in dependency)) return 0;
+      $let(c.filename, home_absolute_path(provider))
+      $let(c.meta_hashes, hashes) $let(c.meta_calls, {})
+        return c._linked_texts_match(name, linked, reached);
+    }
+    return !(key in linked_hashes) && !(name in linked_hashes);
+  }
+  if (key in reached) return 1;
+  reached[key] = 1;
   if (linked_hashes.try_get(key, hash) ||
       linked_hashes.try_get(name, hash)) {
     List row = hash;

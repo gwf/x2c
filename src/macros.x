@@ -1756,8 +1756,10 @@ static List Definition.construction(Definition &d) {
   foreach (List hole, d.parameters)
     foreach (Symbol projection, %(source value expression splice member))
       keys[_hole_key(hole, projection)] = %($hole $projection);
+  /* Cached pattern literals retain their values across producer sessions. */
   List quoted = %(
-    "x2c.quoted" ${fresh.list_free()} ${_macro_value_names(d.template)}
+    "x2c.quoted" ${fresh.list_free()}
+    ${c.freeze_declaration_syntax(_macro_value_names(d.template))}
   );
   List cells = c._built_cells(quoted, keys, d.start);
   return cells ? %(expr ("List") $cells) : NULL;
@@ -3823,7 +3825,7 @@ List Compiler.land_quotation(
       transaction = c.begin_semantic_transaction();
     defer transaction.rollback();
     landing.names = c._private_names(fresh);
-    Var filled = landing.fill(syntax);
+    Var filled = landing.fill(c.thaw_declaration_syntax(syntax));
     $let(c.token, site)
     $let(c.origin, c.record_origin(site))
       bound = c.bind_syntax(filled, position, return_type);

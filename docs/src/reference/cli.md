@@ -571,6 +571,14 @@ option applies to `translate`, `build`, and `run`, and repeats like `-I`.
 After the explicit and manifest directories, every command also searches
 `<home>/packages` when that directory exists.
 
+Explicit `--package-dir` directories, or a target's `package-dirs` in
+`x2c.toml`, also select ownership when compiling package sources. Sources
+under `<dir>/<name>/src/` compile with the `<name>__` public-name prefix.
+Automatic home search resolves imports; source compilation uses explicit
+package directories. Compile providers for direct `#include` as ordinary
+sources with flat names, and consume package-compiled providers through
+`import`.
+
 ## Packages
 
 `install`, `remove`, and `list` manage `<home>/packages`; see

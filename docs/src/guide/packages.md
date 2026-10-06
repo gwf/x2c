@@ -59,6 +59,13 @@ PACKAGE := greet
 include ../package.mk
 ```
 
+An explicit `--package-dir`, or a target's `package-dirs` in `x2c.toml`,
+selects package ownership when compiling that package's source files. For
+`packages/greet/src/greet.x`, pass `--package-dir packages`; its public names
+then use the `greet__` prefix. `package.mk` supplies this directory for you.
+The automatic `<home>/packages` search locates imports; source compilation
+uses explicit package directories.
+
 `make build` translates every `src/*.x` in package mode and produces:
 
 ```text
@@ -222,8 +229,9 @@ includes propagate those definitions through the entry source. Static
 helpers stay in their declaring files.
 
 Macros keep their declared names; `as` changes the package alias, not macro
-spellings. An ordinary source module can also be included directly when the
-consumer wants that module's flat namespace instead of a package alias.
+spellings. For a direct `#include`, compile the provider as ordinary source
+so its public names stay flat. Consume a provider compiled in package mode
+through `import`, which reaches its prefixed names through a package alias.
 
 ### Expose macros through one import
 

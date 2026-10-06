@@ -390,9 +390,11 @@ static int Compiler._skip_collected_form(Compiler c) {
     (void) c.parse_macro_definition();
     return 1;
   }
-  if (!c.collect_protocols && c.skip_named_type_declaration()) return 1;
+  if ((!c.collect_protocols || c.signature_only) &&
+      c.skip_named_type_declaration()) return 1;
   if (!c.macro_starts_target_at(AST_UNIT)) return 0;
-  if (c.collect_protocols && c.collect_unit_macro()) return 1;
+  if (!c.signature_only && c.collect_protocols &&
+      c.collect_unit_macro()) return 1;
   do {
     c.skip_macro_invocation();
     if (c.test(<;>)) return 1;
@@ -2000,7 +2002,8 @@ static int Compiler._parameters_follow(Compiler c) {
   c.next();
   Symbol next = c.peek(0);
   Type lookup = c.sym.get(%(${c.token.text}));
-  int named = next == <ident> && !lookup.is_typedef();
+  int named = next == <ident> && !lookup.is_typedef() &&
+              !(c.signature_only && c.test_declaration());
   int parameters = next == <)> || (!named && c.test_declaration());
   c.token = head;
   return parameters;
@@ -2427,7 +2430,9 @@ static List Compiler._complex_identifier(
   Type idtype = c.sym.get(%( $ident ));
   c.next();
   if ((toktype.is_builtin_type() || toktype.is_type_modifier() ||
-       (toktype == <ident> && idtype.is_typedef())) && c.test(<.>))
+       (toktype == <ident> &&
+        (idtype.is_typedef() || (c.signature_only && method_identity)))) &&
+      c.test(<.>))
     return c._member_name(ident, method_identity);
   return %($ident);
 }
