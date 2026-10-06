@@ -1421,7 +1421,9 @@ static int Compiler._collection_index_type(Compiler c, Type type) =>
   c.sym.is_named_value_type(type, "List") || c.sym.is_string_type(type) ||
   c.sym.is_array_type(type) || c.sym.is_map_type(type);
 
-// Keep bracket admission and lowering on the same exact getter.
+/** Resolves the exact nominal getter shared by bracket admission and lowering.
+    A collection getter's own body uses the inherited implementation instead.
+*/
 List Compiler._nominal_getindex(Compiler c, Type type) {
   if (!type.is_typedef_name()) return NULL;
   match (type)
@@ -2444,7 +2446,7 @@ static int Compiler._builtin_index_lvalue(Compiler c, List expression) {
   return 0;
 }
 
-// Identify only the built-in mutation helper family.
+/** Identifies the Array or Map helper family for built-in indexed mutation. */
 Symbol Compiler._indexed_builtin_helper(Compiler c, Type type) {
   if (c.sym.is_array_type(type)) return <array>;
   if (c.sym.is_map_type(type)) return <map>;
