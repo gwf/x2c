@@ -618,11 +618,13 @@ static String _resolve_include(
   }
   Array dirs = $auto(_include_dirs(
     extra_dirs, angle ? NULL : includer_dir, !walk));
-  foreach (String dir, dirs) {
-    String path = %"$dir/$target";
-    if (walk) walk._include_search_dependency(path);
-    if (!sources.exists(path)) continue;
+  for (int i = 0; i < dirs.len(); i++) {
+    String dir = dirs[i], path = %"$dir/$target";
     covered = dir == _canonical_lib() || dir == _canonical_include();
+    /* The final runtime header adds no symbols, generated or absent. */
+    if (i + 1 < dirs.len() || !covered || is_source_file(path))
+      if (walk) walk._include_search_dependency(path);
+    if (!sources.exists(path)) continue;
     return path;
   }
   return NULL;
