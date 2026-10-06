@@ -185,7 +185,7 @@ int main(void) {
          (long) words_per_scan * word_repeats);
 
   Map entries = {};
-  for (int i = 0; i < width; i++) entries.set(i, i + 1);
+  for (int i = 0; i < width; i++) entries[i] = i + 1;
   start = now_ns();
   for (int r = 0; r < repeats; r++)
     foreach(Var (key, map_value), entries)

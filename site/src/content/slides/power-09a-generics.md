@@ -24,8 +24,8 @@ for (ListInt rest = codes; rest; rest = rest.cdr()) {
   int code = rest.car();
   printf("%d: %d\n", code, counts.getdefault(code, 0));
 }
-~assert(counts.get(200) == 3 && counts.get(404) == 2);
-~assert(counts.get(500) == 1 && counts.getdefault(403, 0) == 0);
+~assert(counts[200] == 3 && counts[404] == 2);
+~assert(counts[500] == 1 && counts.getdefault(403, 0) == 0);
 ~assert(counts.len() == 3 && responses.len() == 6);
 ~assert(codes.car() == 200 && codes.last() == 500);
 ~return 0;

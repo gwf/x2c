@@ -291,7 +291,7 @@ static MapStringString _prepare_string_export(
   foreach (String (key, value), map) {
     key = source.export_nested(key);
     value = source.export_nested(value);
-    staged.set(key, value);
+    staged[key] = value;
   }
   return result = staged;
 }
@@ -328,7 +328,7 @@ static MapStringInt _prepare_string_int_export(
   int value;
   while (map.try_next(cursor, key, value)) {
     key = source.export_nested(key);
-    staged.set(key, value);
+    staged[key] = value;
   }
   return result = staged;
 }

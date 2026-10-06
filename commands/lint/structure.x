@@ -346,7 +346,7 @@ static String _body_text(Lint l, List function):
     Token t = l.at(at)
     int blank = t.type == <space> || t.type == <comment> || lint_text(t)
     if blank:
-      if out.len() && out.get(out.len() - 1) != ' ': out.write_char(' ')
+      if out.len() && out[-1] != ' ': out.write_char(' ')
       continue
     out.write_len(l.text + t.pos, t.len)
   return out.str().strip(NULL)

@@ -128,7 +128,7 @@ Self Map.update_n(Self map, unsigned pair_count, ...) {
   va_start(ap, pair_count);
   for (unsigned i = 0; i < pair_count; i++) {
     Var key = va_arg(ap, Var), val = va_arg(ap, Var);
-    map.set(key, val);
+    map[key] = val;
   }
   va_end(ap);
   return map;

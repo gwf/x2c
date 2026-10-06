@@ -909,7 +909,7 @@ macro Unit $map.typed.convert(Type $map, Name $unbox) {
     defer if ((void *) finished == 0) packed._core_free();
     unsigned cursor = 0;
     Var key, val;
-    while (entries.try_next(cursor, key, val)) packed.set(key, val);
+    while (entries.try_next(cursor, key, val)) packed[key] = val;
     finished = packed;
     return packed;
   }
