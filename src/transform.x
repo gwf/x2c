@@ -131,11 +131,15 @@ static Ast Compiler._step_tag(Compiler c, Ast ast, Symbol tag) {
     default: return c._default_node(ast);
   }
   if (next != ast) return c._step(next);
-  return c._finish(ast);
+  return c._default_node(ast);
 }
 
-static Ast Compiler._default_node(Compiler c, Ast ast) =>
-  ast.car() is not <symbol> ? c._children(ast) : c._finish(ast);
+static Ast Compiler._default_node(Compiler c, Ast ast) {
+  Var head = ast.car();
+  if (head == <seq> || head == <matchcases> ||
+      head == <parens> || head == <block>) return c._finish(ast);
+  return c._children(ast);
+}
 
 /* Normalize synthesized sequences before their containing block absorbs
    pending defer markers. Matches retain their specialized record driver. */
@@ -315,7 +319,7 @@ static Ast Compiler._expression_node(Compiler c, Ast ast) {
   expression = c.lower_lambda_expr(expression);
   if (_op_chain_first(expression)) return c._op_chain(expression);
   if (expression != ast) return c._step(expression);
-  return c._finish(expression);
+  return c._default_node(expression);
 }
 
 /* A left-leaning operator chain nests one (expr (op ...)) level per source
