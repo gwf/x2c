@@ -510,12 +510,16 @@ The modules under `src/` divide ownership as follows:
 - `src/deps.x` -- x2c dependency parsing and atomic depfile publication;
 - `src/compiler.x` -- shared compiler state, token navigation, generated
   names, phase entry points, and phase recovery;
+- `src/fields.x` -- macros that copy or set named fields and transfer a
+  segment's compile-time state;
 - `src/symbols.x` -- the symbol table: scopes, bindings, lookup, typedef
   resolution, and semantic transactions;
 - `src/preprocess.x` -- preprocessor directive lines, conditional arms, and
   the directives before each form;
 - `src/parse.x`, `src/expressions.x`, `src/statements.x`, `src/literals.x` --
   grammar and AST construction;
+- `src/parse-report-macros.x`, `src/expressions-reports.x` -- package and
+  alias diagnostics, and expression typing diagnostics;
 - `src/initializers.x` -- brace initializer conversion by C's
   initialization order;
 - `src/lambdas.x` -- lambda parsing and the capture resolution shared by
@@ -533,6 +537,9 @@ The modules under `src/` divide ownership as follows:
 - `src/builtins.x`, `src/linked-meta.x` -- the built-in macro algorithms and
   the shipped compile-time code compiled into the compiler;
 - `src/ast.x` -- AST sequence placement and binding helpers;
+- `src/ast-rewrite.x` -- AST child rewriting and iterative tree traversal;
+- `src/grammar.x` -- source-form patterns and parsed-node accessors used by
+  lowering;
 - `src/type.x`, `src/protocol.x` -- type representation, conversions, protocol
   declarations, conformance, and generated adapters;
 - `src/type-ledger.x` -- the `Var` tag lookups projected from the tag ledger,
@@ -543,6 +550,8 @@ The modules under `src/` divide ownership as follows:
 - `src/transform.x` -- lowering to emitter-ready AST;
 - `src/callables.x` -- lambdas, typed callback adapters, and `Func`
   conversions lowered to C helpers;
+- `src/adapter-memo.x` -- macros that cache compiler adapters and reuse
+  each result by key;
 - `src/cleanup.x` -- which exits leave a cleanup region and which locals an
   error transfer preserves;
 - `src/regions.x` -- per-function region summaries and the warnings for a

@@ -108,19 +108,25 @@ commits need not rebuild from their own bootstrap.
 - `src/` - the compiler: `main` (dispatch) -> `cli` (CLI) ->
   `frontend` (configured source units) -> `meta-project` (project meta
   helper build) and `meta-helper-client` (its calls) -> `compiler`
-  (translation state, + `symbols`, its symbol table) ->
+  (translation state, + `symbols`, its symbol table, and `fields`, which
+  copies named fields) ->
   shared runtime `lib/tokenizer.x` (+ `preprocess`, which reads its
   directives) ->
-  `parse`/`expressions` (+ `initializers`, which converts brace
-  initializers)/`statements`/`macros` (+ `meta-sdk`, which answers
+  `parse` (+ `parse-report-macros`, package and alias diagnostics)/
+  `expressions` (+ `expressions-reports`, typing diagnostics, and
+  `initializers`, which converts brace initializers)/`statements`/`macros`
+  (+ `meta-sdk`, which answers
   compile-time operations, `meta-native`, which runs meta functions and
   loads native modules, `meta-group`, which emits a unit's meta group,
   `stage`, which carries values across the compile-time boundary, and
   `builtins` and `linked-meta`, the compile-time code compiled into the
   compiler)/
-  `literals` (+ `lambdas`) -> `ast` -> `type` (+ `type-ledger`)/`protocol`
+  `literals` (+ `lambdas`) -> `ast` (+ `ast-rewrite`, AST traversal and
+  rewriting, and `grammar`, source forms used by lowering) ->
+  `type` (+ `type-ledger`)/`protocol`
   (+ `operator-ledger`, shared operator mappings)
-  -> `transform` (+ `callables`, `cleanup`, `regions`) ->
+  -> `transform` (+ `callables`, `adapter-memo` for cached adapter
+  construction, `cleanup`, `regions`) ->
   `generate`/`cache` -> `emit` -> `format`, with `diagnostics`, `collect`,
   `deps`, and `sourceview` in support; `project` lowers manifests
   to the same typed request that `build` owns, `toolchain` owns native actions,
