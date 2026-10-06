@@ -1629,6 +1629,9 @@ static List _interface_record(String path) {
   String source = NULL;
   try source = input.string_close();
   catch %(io-fail *): return NULL;
+  String identity = compiler_identity();
+  if (!identity || !source.startswith(%"(interface 5 \"$identity\" "))
+    return NULL;
   unsigned cursor = 0;
   Var record = void;
   Symbol status = 0;
