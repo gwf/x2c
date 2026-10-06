@@ -946,7 +946,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_1(void){
   _524 = cons(_521, _523);
   _525 = List_var(_524);
   _526 = Symbol_var(1133019155420);
-  _527 = int_var(34909);
+  _527 = int_var(34883);
   _528 = cons(_527, NULL);
   _529 = cons(_526, _528);
   _530 = List_var(_529);
@@ -1967,7 +1967,7 @@ int String_equal(String, String);
 String binding_identity_spelling(List);
 Var List_cadr(List);
 static Type _noreturn(Type type, List declarator, Ast body){
-  if(Ast_never_returns(body) && ! List_contains(Type_list(type), List_var(_150)) && ! String_equal(binding_identity_spelling(Var_list(List_cadr(declarator))), _151)) return List_type(cons(_152, List_append(Type_list(type), NULL)));  return type;
+  if(Ast_never_returns(body) && !(List_contains(Type_list(type), List_var(_150))) && ! String_equal(binding_identity_spelling(Var_list(List_cadr(declarator))), _151)) return List_type(cons(_152, List_append(Type_list(type), NULL)));  return type;
 }
 
 static List _header_function(Type type, List declarator, List body){
@@ -2323,7 +2323,7 @@ static List _place_groups(List items, Map filled, Map other, Array opened, int h
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
     switch (0) {
       default: ;  static MatchCaptureSite _x2c_match_site_31;  if (x2c_match_site_try_capture(& _x2c_match_site_31, _x2c_match_expr, List_var(_261), &_x2c_match_capture)) {Var group = _x2c_match_values[0];  Var node = _x2c_match_values[1]; {
-          int placed = Var_int(Array_getindex(opened, Var_int(Var_convert(group, 3453797)))) != header;  if(Map_contains(filled, group) ||(! Map_contains(other, group) && placed)) Array_push(out, node);  continue;
+          int placed = Var_int(Array_getindex(opened, Var_int(Var_convert(group, 3453797)))) != header;  if(Map_contains(filled, group) ||(!(Map_contains(other, group)) && placed)) Array_push(out, node);  continue;
         }
         break;
       }

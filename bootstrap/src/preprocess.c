@@ -165,7 +165,7 @@ int String_contains(String, String);
 int preproc_open_state(String text){
   if(! _init_guard_) _file_init_();
   String line = String_replace(_directive_line(preproc_directive(text)), _4, _5);
-  if(String_equal(line, _6) || String_equal(line, _7) || String_equal(line, _8) || String_equal(line, _9) ||(String_startswith(line, _10) && ! String_contains(line, _11))) return 2;
+  if(String_equal(line, _6) || String_equal(line, _7) || String_equal(line, _8) || String_equal(line, _9) ||(String_startswith(line, _10) && !(String_contains(line, _11)))) return 2;
   return String_equal(line, _12) || String_equal(line, _13);
 }
 
@@ -454,7 +454,7 @@ static void ArmScan__note_layout_macro(ArmScan * s, String content){
     int level = Var_int(Var_convert(String_equal(token -> text, _30) ? int_var(_attribute_layout(token)) : Map_contains(layout, String_var(token -> text)) ? Map_getindex(layout, String_var(token -> text)) : int_var(0), 3453797));
     if(level > value) value = level;
   }
-  if(value &&(! Map_contains(layout, String_var(name -> text)) || Var_compare(Map_getindex(layout, String_var(name -> text)), int_var(value)) < 0)) Map_setindex(layout, String_var(name -> text), int_var(value));
+  if(value &&(!(Map_contains(layout, String_var(name -> text))) || Var_compare(Map_getindex(layout, String_var(name -> text)), int_var(value)) < 0)) Map_setindex(layout, String_var(name -> text), int_var(value));
 }
 
 static int _attribute_layout(Token token){
@@ -516,8 +516,6 @@ void Compiler_note_object_macro(Compiler c, String content){
   else if(body -> type == 81) Compiler__note_function_macro(c, name, body);
   else Compiler__note_prefix_macro(c, name, Token_skip_trivia(body));
 }
-
-int Var_equal(Var, Var);
 
 static void Compiler__note_function_macro(Compiler c, String name, Token params){
   Token after = Token_after_group(params);

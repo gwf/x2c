@@ -3841,7 +3841,6 @@ int Compiler_test_declaration(Compiler c){
 int Compiler_macro_lisp_starts_declaration(Compiler);
 int Symbol_is_type_qualifier(Symbol);
 int Symbol_is_builtin_type(Symbol);
-int Var_equal(Var, Var);
 static int Compiler__test_declaration_start(Compiler c, int require_declarator){
   Symbol sym = Compiler_peek(c, 0);  if(Map_truth(c -> macro_holes) && sym == 9297) return Compiler_macro_lisp_starts_declaration(c);  if(Map_truth(c -> macro_holes) && sym == 73) return Compiler__hole_starts(c);  if(Symbol_is_storage_class(sym) || Symbol_is_type_qualifier(sym) || Symbol_is_builtin_type(sym) || sym == 634145674) return 1;  if(sym != 19147688) return 0;  if(String_equal(c -> token -> text, _172) && Compiler__attribute_starts(c)) return 1;  Var definition;  if(Map_try_get(c -> object_macros, String_var(c -> token -> text), &(definition)) &&(Var_is_row(definition, 9, 7, 4) || Var_equal(definition, Symbol_var(50603262308)))) return 1;  return Compiler__type_name_starts(c, require_declarator);
 }
@@ -6335,6 +6334,7 @@ static List Compiler__bind_catchcases(Compiler c, Var arms, List handler){
   );
 }
 
+int Var_equal(Var, Var);
 static int _declares_binders(List body, List bindings){
 
   {

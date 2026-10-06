@@ -1307,7 +1307,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_1(void){
   _881 = cons(_878, _880);
   _882 = List_var(_881);
   _883 = Symbol_var(1133019155420);
-  _884 = int_var(24923);
+  _884 = int_var(24905);
   _885 = cons(_884, NULL);
   _886 = cons(_883, _885);
   _887 = List_var(_886);
@@ -1854,7 +1854,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void){
   _1425 = cons(_1424, NULL);
   _1426 = cons(_869, _1425);
   _1427 = List_var(_1426);
-  _1428 = int_var(25327);
+  _1428 = int_var(25309);
   _1429 = cons(_1428, NULL);
   _1430 = cons(_883, _1429);
   _1431 = List_var(_1430);
@@ -2149,7 +2149,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_3(void){
   _1717 = cons(_1716, NULL);
   _1718 = cons(_869, _1717);
   _1719 = List_var(_1718);
-  _1720 = int_var(25848);
+  _1720 = int_var(25830);
   _1721 = cons(_1720, NULL);
   _1722 = cons(_883, _1721);
   _1723 = List_var(_1722);
@@ -2502,7 +2502,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2067 = List_var(_2066);
   _2068 = cons(_878, _875);
   _2069 = List_var(_2068);
-  _2070 = int_var(34210);
+  _2070 = int_var(34192);
   _2071 = cons(_2070, NULL);
   _2072 = cons(_883, _2071);
   _2073 = List_var(_2072);
@@ -3368,7 +3368,7 @@ static MatchCaptureSite _x2c_match_site_10;  if (x2c_match_site_try_capture(& _x
 static MatchCaptureSite _x2c_match_site_11;  if (x2c_match_site_try_capture(& _x2c_match_site_11, _x2c_match_expr, List_var(_129), &_x2c_match_capture)) {Var inner = _x2c_match_values[0];  return RuntimeScan__push(&((* s)), inner, 1);  break;
 }
 static MatchCaptureSite _x2c_match_site_12;  if (x2c_match_site_try_capture(& _x2c_match_site_12, _x2c_match_expr, List_var(_151), &_x2c_match_capture)) {Var type = _x2c_match_values[0];  Var content = _x2c_match_values[1];  Var receiver = _x2c_match_values[2];  Var selector = _x2c_match_values[3]; {
-  Type native = Var_type(type);  if(Type_is_array(native)) return RuntimeScan__push(&((* s)), content, 1);  if(Type_is_pointer(native) || ! List_contains(Type_list(native), Symbol_var(7304424))) return 1;  break;
+  Type native = Var_type(type);  if(Type_is_array(native)) return RuntimeScan__push(&((* s)), content, 1);  if(Type_is_pointer(native) || !(List_contains(Type_list(native), Symbol_var(7304424)))) return 1;  break;
 }
 break;
 }
@@ -3385,7 +3385,7 @@ Map Compiler_semantic_binding_facts(Compiler);
 int Type_is_enum(Type);
 int Type_is_function(Type);
 static int RuntimeScan__identifier(RuntimeScan * s, Type type, List binding){
-  if(RuntimeScan__input(&((* s)), binding)) return 1;  if(Map_contains(Compiler_semantic_binding_facts((* s).c), List_var(cons(_13, cons(List_var(binding), NULL))))) return 0;  Type native = type;  return List_truth(Type_list(native)) && ! Type_is_enum(native) && ! Type_is_function(native) && ! Type_is_array(native) &&(Type_is_pointer(native) || ! List_contains(Type_list(native), Symbol_var(7304424)));
+  if(RuntimeScan__input(&((* s)), binding)) return 1;  if(Map_contains(Compiler_semantic_binding_facts((* s).c), List_var(cons(_13, cons(List_var(binding), NULL))))) return 0;  Type native = type;  return List_truth(Type_list(native)) && ! Type_is_enum(native) && ! Type_is_function(native) && ! Type_is_array(native) &&(Type_is_pointer(native) || !(List_contains(Type_list(native), Symbol_var(7304424))));
 }
 
 static int RuntimeScan__address(RuntimeScan * s, List node){
@@ -4405,7 +4405,7 @@ static void Preserve__split(Preserve * p, Array output, int origin, List declara
 
 List List_flatten_all(List);
 static List Preserve__declaration(Preserve * p, List declaration, Map escaped){
-  if(! _is_automatic(declaration)) return declaration;  Symbol head = Var_symbol(List_car(declaration));  Type type = Var_type(List_cadr(declaration));  List bindings = Var_list(List_caddr(declaration));  if(Preserve__declares_pointee(&((* p)), bindings) && ! List_contains(Type_list(List_flatten_all(List_type(Type_list(type)))), Symbol_var(1544849476362))) type = List_type(cons(Symbol_var(1544849476362), Type_list(type)));  Array preserved = Array_new(); {
+  if(! _is_automatic(declaration)) return declaration;  Symbol head = Var_symbol(List_car(declaration));  Type type = Var_type(List_cadr(declaration));  List bindings = Var_list(List_caddr(declaration));  if(Preserve__declares_pointee(&((* p)), bindings) && !(List_contains(Type_list(List_flatten_all(List_type(Type_list(type)))), Symbol_var(1544849476362)))) type = List_type(cons(Symbol_var(1544849476362), Type_list(type)));  Array preserved = Array_new(); {
     List binding;  List _x2c_macro_object_21 = List_cdr(bindings);  List _x2c_macro_cursor_30 = _x2c_macro_object_21;  Var _x2c_macro_cursor_output_20;  while(List_try_next(_x2c_macro_object_21, &(_x2c_macro_cursor_30), &(_x2c_macro_cursor_output_20))){
       binding = Var_list(_x2c_macro_cursor_output_20);
   {
@@ -4438,7 +4438,7 @@ static List Preserve__binding(Preserve * p, List bind, Map escaped){
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 150408: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936761768840ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var name = _x2c_match_values[0];  Var mods = _x2c_match_values[1]; {
-    String spelling = binding_identity_spelling(Var_list(name));  if(String_truth(spelling) && Map_contains((* p).names, String_var(spelling)) && !(Map_truth(escaped) && Map_contains(escaped, String_var(spelling))) && ! Var_contains(mods, Symbol_var(1544849476362))) return({
+    String spelling = binding_identity_spelling(Var_list(name));  if(String_truth(spelling) && Map_contains((* p).names, String_var(spelling)) && !(Map_truth(escaped) && Map_contains(escaped, String_var(spelling))) && !(Var_contains(mods, Symbol_var(1544849476362)))) return({
       Var _x2c_literal_part_83 = name;  Var _x2c_literal_part_84 = List_var(cons(Symbol_var(1544849476362), Var_list(mods)));  cons(_83, cons(_x2c_literal_part_83, cons(_x2c_literal_part_84, NULL)));
     }
     );
@@ -4683,7 +4683,7 @@ static void DeferCaptures_collect(DeferCaptures * d, List ast){
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 150408: ;  static MatchCaptureSite _x2c_match_site_63;  if (x2c_match_site_try_capture(& _x2c_match_site_63, _x2c_match_expr, List_var(_2357), &_x2c_match_capture)) {Var bound = _x2c_match_values[0]; {
-    List binding = Var_list(bound), known =(* d).declared;  if(! List_contains(known, List_var(binding)))(* d).declared = cons(List_var(binding), known);
+    List binding = Var_list(bound), known =(* d).declared;  if(!(List_contains(known, List_var(binding))))(* d).declared = cons(List_var(binding), known);
   }
   break;
 }
@@ -4709,7 +4709,7 @@ List modified = Ast_lvalue_binding(Ast_written_operand(ast)); {
   }
 
 }
-Var field;  List changed =(* d).written;  if(List_truth(modified) && Map_try_get((* d).captures, List_var(modified), &(field)) && ! List_contains(changed, List_var(modified)))(* d).written = cons(List_var(modified), changed);
+Var field;  List changed =(* d).written;  if(List_truth(modified) && Map_try_get((* d).captures, List_var(modified), &(field)) && !(List_contains(changed, List_var(modified))))(* d).written = cons(List_var(modified), changed);
 }
 
 Var Map_getindex(Map, Var);
@@ -4733,7 +4733,7 @@ static List DeferCaptures__rewrite(DeferCaptures * d, List ast, String env_name)
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 377892: ;  static MatchCaptureSite _x2c_match_site_65;  if (x2c_match_site_try_capture(& _x2c_match_site_65, _x2c_match_expr, List_var(_2367), &_x2c_match_capture)) {Var captured_type = _x2c_match_values[0];  Var bound = _x2c_match_values[1]; {
-    List binding = Var_list(bound);  Var field_var;  if(! Map_try_get((* d).captures, List_var(binding), &(field_var))) return ast;  String field_name = binding_identity_spelling(Var_list(field_var));  Type type = Var_type(captured_type), target = type;  if(List_contains((* d).written, List_var(binding)) && ! List_contains(Type_list(List_flatten_all(type)), Symbol_var(1544849476362))) target = List_type(cons(Symbol_var(1544849476362), Type_list(type)));  Type pointer = List_type(cons(Symbol_var(54), Type_list(target)));  String reference = String_join(NULL, cons(String_var(env_name), cons(String_var(_2368), cons(String_var(field_name), NULL))));  List source = cons(_10, cons(_2370, cons(String_var(reference), NULL)));  List cast =({
+    List binding = Var_list(bound);  Var field_var;  if(! Map_try_get((* d).captures, List_var(binding), &(field_var))) return ast;  String field_name = binding_identity_spelling(Var_list(field_var));  Type type = Var_type(captured_type), target = type;  if(List_contains((* d).written, List_var(binding)) && !(List_contains(Type_list(List_flatten_all(type)), Symbol_var(1544849476362)))) target = List_type(cons(Symbol_var(1544849476362), Type_list(type)));  Type pointer = List_type(cons(Symbol_var(54), Type_list(target)));  String reference = String_join(NULL, cons(String_var(env_name), cons(String_var(_2368), cons(String_var(field_name), NULL))));  List source = cons(_10, cons(_2370, cons(String_var(reference), NULL)));  List cast =({
       Var _x2c_literal_part_85 = List_var(pointer);  Var _x2c_literal_part_86 = List_var(cons(_2103, cons(List_var(pointer), cons(List_var(source), NULL))));  cons(_10, cons(_x2c_literal_part_85, cons(_x2c_literal_part_86, NULL)));
     }
     );  List dereference =({

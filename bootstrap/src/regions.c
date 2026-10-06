@@ -1868,14 +1868,11 @@ static void Walk_walk_return(Walk * w, Type type, Var result){
   Walk_scan(&((* w)), result, 0);  Walk_flow(&((* w)), result, type, 1219800220, NULL);  Walk_revive(&((* w)));
 }
 
-Iter Map_iter(Map, Iter);
+int Map_try_next(Map, unsigned *, Var *, Var *);
 static void Walk_revive(Walk * w){
   {
-    Var known;  Iter _x2c_macro_iterator_11 = Map_iter((* w).facts, &(struct Iter){
-      int_var(0)
-    }
-    );  Var _x2c_macro_item_11;  while(Iter_try_next(_x2c_macro_iterator_11, &(_x2c_macro_item_11))){
-      known = _x2c_macro_item_11; {
+    Var known;  Map _x2c_macro_object_11 =(* w).facts;  unsigned _x2c_macro_cursor_11 = 0;  Var _x2c_macro_cursor_output_9;  Var _x2c_macro_cursor_output_10;  while(Map_try_next(_x2c_macro_object_11, &(_x2c_macro_cursor_11), &(_x2c_macro_cursor_output_9), &(_x2c_macro_cursor_output_10))){
+      known = _x2c_macro_cursor_output_10; {
         Fact fact = Var_fact(known);  fact -> dead = 0;
       }
 
@@ -1917,8 +1914,8 @@ return 1;
 
 static void Walk_walk_conditional(Walk * w, List children){
   Map restored =(* w).restored; (* w).depth += 1; {
-    Var child;  List _x2c_macro_object_12 = children;  List _x2c_macro_cursor_12 = _x2c_macro_object_12;  Var _x2c_macro_cursor_output_9;  while(List_try_next(_x2c_macro_object_12, &(_x2c_macro_cursor_12), &(_x2c_macro_cursor_output_9))){
-      child = _x2c_macro_cursor_output_9;  Walk_walk(&((* w)), child);
+    Var child;  List _x2c_macro_object_12 = children;  List _x2c_macro_cursor_12 = _x2c_macro_object_12;  Var _x2c_macro_cursor_output_11;  while(List_try_next(_x2c_macro_object_12, &(_x2c_macro_cursor_12), &(_x2c_macro_cursor_output_11))){
+      child = _x2c_macro_cursor_output_11;  Walk_walk(&((* w)), child);
     }
 
   }
@@ -1928,11 +1925,11 @@ static void Walk_walk_conditional(Walk * w, List children){
 List List_cdr(List);
 static void Walk_walk_rows(Walk * w, List rows){
   {
-    List row;  List _x2c_macro_object_14 = rows;  List _x2c_macro_cursor_14 = _x2c_macro_object_14;  Var _x2c_macro_cursor_output_11;  while(List_try_next(_x2c_macro_object_14, &(_x2c_macro_cursor_14), &(_x2c_macro_cursor_output_11))){
-      row = Var_list(_x2c_macro_cursor_output_11); {
+    List row;  List _x2c_macro_object_14 = rows;  List _x2c_macro_cursor_14 = _x2c_macro_object_14;  Var _x2c_macro_cursor_output_13;  while(List_try_next(_x2c_macro_object_14, &(_x2c_macro_cursor_14), &(_x2c_macro_cursor_output_13))){
+      row = Var_list(_x2c_macro_cursor_output_13); {
         Walk_scan(&((* w)), List_car(row), 0); {
-          Var statement;  List _x2c_macro_object_13 = List_cdr(row);  List _x2c_macro_cursor_13 = _x2c_macro_object_13;  Var _x2c_macro_cursor_output_10;  while(List_try_next(_x2c_macro_object_13, &(_x2c_macro_cursor_13), &(_x2c_macro_cursor_output_10))){
-            statement = _x2c_macro_cursor_output_10;  Walk_walk(&((* w)), statement);
+          Var statement;  List _x2c_macro_object_13 = List_cdr(row);  List _x2c_macro_cursor_13 = _x2c_macro_object_13;  Var _x2c_macro_cursor_output_12;  while(List_try_next(_x2c_macro_object_13, &(_x2c_macro_cursor_13), &(_x2c_macro_cursor_output_12))){
+            statement = _x2c_macro_cursor_output_12;  Walk_walk(&((* w)), statement);
           }
 
         }
@@ -2028,8 +2025,8 @@ static void Walk_note_deferred_stores(Walk * w, Var node){
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (0) {
       default: ;  static MatchCaptureSite _x2c_match_site_19;  if (x2c_match_site_try_capture(& _x2c_match_site_19, _x2c_match_expr, List_var(_384), &_x2c_match_capture)) {List children = Var_list(_x2c_match_values[0]); {
-  Var child;  List _x2c_macro_object_15 = children;  List _x2c_macro_cursor_15 = _x2c_macro_object_15;  Var _x2c_macro_cursor_output_12;  while(List_try_next(_x2c_macro_object_15, &(_x2c_macro_cursor_15), &(_x2c_macro_cursor_output_12))){
-    child = _x2c_macro_cursor_output_12;  Walk_note_deferred_stores(&((* w)), child);
+  Var child;  List _x2c_macro_object_15 = children;  List _x2c_macro_cursor_15 = _x2c_macro_object_15;  Var _x2c_macro_cursor_output_14;  while(List_try_next(_x2c_macro_object_15, &(_x2c_macro_cursor_15), &(_x2c_macro_cursor_output_14))){
+    child = _x2c_macro_cursor_output_14;  Walk_note_deferred_stores(&((* w)), child);
   }
 
 }
@@ -2160,8 +2157,8 @@ static void Walk_scan_cons(Walk * w, Var node, Var head, Var tail){
 
 static void Walk_scan_children(Walk * w, List children){
   int start = Array_len((* w).pending); {
-    Var child;  List _x2c_macro_object_17 = children;  List _x2c_macro_cursor_17 = _x2c_macro_object_17;  Var _x2c_macro_cursor_output_13;  while(List_try_next(_x2c_macro_object_17, &(_x2c_macro_cursor_17), &(_x2c_macro_cursor_output_13))){
-      child = _x2c_macro_cursor_output_13;  Array_push((* w).pending, child);
+    Var child;  List _x2c_macro_object_17 = children;  List _x2c_macro_cursor_17 = _x2c_macro_object_17;  Var _x2c_macro_cursor_output_15;  while(List_try_next(_x2c_macro_object_17, &(_x2c_macro_cursor_17), &(_x2c_macro_cursor_output_15))){
+      child = _x2c_macro_cursor_output_15;  Array_push((* w).pending, child);
     }
 
   }
@@ -2220,8 +2217,8 @@ Type Var_type(Var);
 static void Walk_declare(Walk * w, Var specifiers, List bindings){
   Map types = Compiler_semantic_binding_facts((* w).c);  if(Var_contains(specifiers, Symbol_var(1317118534)) || Var_contains(specifiers, Symbol_var(387198108))){
     {
-      List item;  List _x2c_macro_object_18 = bindings;  List _x2c_macro_cursor_18 = _x2c_macro_object_18;  Var _x2c_macro_cursor_output_14;  while(List_try_next(_x2c_macro_object_18, &(_x2c_macro_cursor_18), &(_x2c_macro_cursor_output_14))){
-        item = Var_list(_x2c_macro_cursor_output_14);
+      List item;  List _x2c_macro_object_18 = bindings;  List _x2c_macro_cursor_18 = _x2c_macro_object_18;  Var _x2c_macro_cursor_output_16;  while(List_try_next(_x2c_macro_object_18, &(_x2c_macro_cursor_18), &(_x2c_macro_cursor_output_16))){
+        item = Var_list(_x2c_macro_cursor_output_16);
   {
     List _x2c_match_expr = item;
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
@@ -2240,8 +2237,8 @@ static void Walk_declare(Walk * w, Var specifiers, List bindings){
   return;
 }
 {
-  Var item;  List _x2c_macro_object_19 = bindings;  List _x2c_macro_cursor_19 = _x2c_macro_object_19;  Var _x2c_macro_cursor_output_15;  while(List_try_next(_x2c_macro_object_19, &(_x2c_macro_cursor_19), &(_x2c_macro_cursor_output_15))){
-    item = _x2c_macro_cursor_output_15;
+  Var item;  List _x2c_macro_object_19 = bindings;  List _x2c_macro_cursor_19 = _x2c_macro_object_19;  Var _x2c_macro_cursor_output_17;  while(List_try_next(_x2c_macro_object_19, &(_x2c_macro_cursor_19), &(_x2c_macro_cursor_output_17))){
+    item = _x2c_macro_cursor_output_17;
   {
     List _x2c_match_expr = Var_list(item);
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
@@ -2452,8 +2449,8 @@ static Region Walk_summary_birth(Walk * w, String callee, int * born, Region * o
 
 static Region Walk_captured_birth(Walk * w, List captures, int * born, Region * other){
   {
-    Var capture;  List _x2c_macro_object_20 = captures;  List _x2c_macro_cursor_20 = _x2c_macro_object_20;  Var _x2c_macro_cursor_output_16;  while(List_try_next(_x2c_macro_object_20, &(_x2c_macro_cursor_20), &(_x2c_macro_cursor_output_16))){
-      capture = _x2c_macro_cursor_output_16;
+    Var capture;  List _x2c_macro_object_20 = captures;  List _x2c_macro_cursor_20 = _x2c_macro_object_20;  Var _x2c_macro_cursor_output_18;  while(List_try_next(_x2c_macro_object_20, &(_x2c_macro_cursor_20), &(_x2c_macro_cursor_output_18))){
+      capture = _x2c_macro_cursor_output_18;
   {
     List _x2c_match_expr = Var_list(capture);
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
@@ -2798,8 +2795,8 @@ void Compiler_check_regions(Compiler c, List ast){
     .c = c, .summaries = Map_new(), .pending = Array_new(), .freed = Array_new()
   }
   ;  Walk_fixpoint(&(w), ast);  int origin = c -> origin; {
-    List warning;  Array _x2c_macro_object_22 = w.warnings;  int _x2c_macro_cursor_22 = 0;  Var _x2c_macro_cursor_output_17;  while(Array_try_next(_x2c_macro_object_22, &(_x2c_macro_cursor_22), &(_x2c_macro_cursor_output_17))){
-      warning = Var_list(_x2c_macro_cursor_output_17); {
+    List warning;  Array _x2c_macro_object_22 = w.warnings;  int _x2c_macro_cursor_22 = 0;  Var _x2c_macro_cursor_output_19;  while(Array_try_next(_x2c_macro_object_22, &(_x2c_macro_cursor_22), &(_x2c_macro_cursor_output_19))){
+      warning = Var_list(_x2c_macro_cursor_output_19); {
         List _x2c_destructure_6 = warning;  Symbol code = Var_symbol(List_getindex(_x2c_destructure_6, 0));  int at = Var_int(Var_convert(List_getindex(_x2c_destructure_6, 1), 3453797));  String message = Var_string(List_getindex(_x2c_destructure_6, 2));  List notes = Var_list(List_getindex(_x2c_destructure_6, 3));  c -> origin = at;  Compiler_report_warning(c, code, message, NULL, notes);
       }
 
@@ -2858,8 +2855,8 @@ Map Compiler_audit_regions(Compiler c, List ast, Map seed, Map effects, Array fi
     .c = c, .summaries = Map_copy(seed), .effects = effects, .pending = Array_new(), .freed = Array_new(), .audit = 1
   }
   ;  Walk_fixpoint(&(w), ast); {
-    List finding;  Array _x2c_macro_object_23 = w.warnings;  int _x2c_macro_cursor_23 = 0;  Var _x2c_macro_cursor_output_18;  while(Array_try_next(_x2c_macro_object_23, &(_x2c_macro_cursor_23), &(_x2c_macro_cursor_output_18))){
-      finding = Var_list(_x2c_macro_cursor_output_18);  Array_push(findings, List_var(finding));
+    List finding;  Array _x2c_macro_object_23 = w.warnings;  int _x2c_macro_cursor_23 = 0;  Var _x2c_macro_cursor_output_20;  while(Array_try_next(_x2c_macro_object_23, &(_x2c_macro_cursor_23), &(_x2c_macro_cursor_output_20))){
+      finding = Var_list(_x2c_macro_cursor_output_20);  Array_push(findings, List_var(finding));
     }
 
   }

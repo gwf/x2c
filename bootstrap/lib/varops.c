@@ -485,7 +485,7 @@ static Var _predicate(int holds){
 int Var_truth(Var value);
 
 static int _logical(Var lhs, Symbol op, Var rhs){
-  int left = Var_truth(lhs), right = Var_truth(rhs);
+  int left = ! ! Var_truth(lhs), right = ! ! Var_truth(rhs);
   return op == 9805 ? left && right : left || right;
 }
 

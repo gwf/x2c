@@ -777,7 +777,7 @@ static List _source_units(String src, String name, String spec){
     _x2c_error_handler_3 = NULL;
     x2c_exception_leave(& _x2c_exception_frame_3);
   }
-  if(! List_contains(units, String_var(String_join(NULL, cons(String_var(src), cons(String_var(_2), cons(String_var(name), cons(String_var(_56), NULL))))))) && ! List_contains(units, String_var(String_join(NULL, cons(String_var(src), cons(String_var(_2), cons(String_var(name), cons(String_var(_57), NULL)))))))) _error(String_join(NULL, cons(String_var(spec), cons(String_var(_58), cons(String_var(name), cons(String_var(_59), NULL))))));
+  if(!(List_contains(units, String_var(String_join(NULL, cons(String_var(src), cons(String_var(_2), cons(String_var(name), cons(String_var(_56), NULL)))))))) && !(List_contains(units, String_var(String_join(NULL, cons(String_var(src), cons(String_var(_2), cons(String_var(name), cons(String_var(_57), NULL))))))))) _error(String_join(NULL, cons(String_var(spec), cons(String_var(_58), cons(String_var(name), cons(String_var(_59), NULL))))));
   return units;
 }
 

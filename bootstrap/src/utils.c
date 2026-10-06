@@ -193,7 +193,7 @@ static String _executable(const char * argv0){
     return String_new(buffer);
   }
   String name = String_new(argv0);
-  if(String_truth(name) && ! String_contains(name, _6)) name = find_program(name);
+  if(String_truth(name) && !(String_contains(name, _6))) name = find_program(name);
   return Path_exists(name) ? Path_absolute(name) : NULL;
 }
 

@@ -916,7 +916,7 @@ static void Compiler__check_binders(Compiler c, List pattern, Token start, Strin
   List possible = NULL;  List definite = Compiler_match_pattern_binders(c, pattern, &(possible)); {
     Var binder;  List _x2c_macro_object_2 = possible;  List _x2c_macro_cursor_2 = _x2c_macro_object_2;  Var _x2c_macro_cursor_output_2;  while(List_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
       binder = _x2c_macro_cursor_output_2; {
-        if(! List_contains(definite, binder)) Compiler_report_error(c, 1362954, String_join(NULL, cons(String_var(role), cons(String_var(_119), NULL))), start, cons(_121, cons(String_var(Var_str(binder)), _124)));  String name = String_getslice(Var_str(binder), 1, -2147483648, 1); {
+        if(!(List_contains(definite, binder))) Compiler_report_error(c, 1362954, String_join(NULL, cons(String_var(role), cons(String_var(_119), NULL))), start, cons(_121, cons(String_var(Var_str(binder)), _124)));  String name = String_getslice(Var_str(binder), 1, -2147483648, 1); {
           Var other;  List _x2c_macro_object_1 = possible;  List _x2c_macro_cursor_1 = _x2c_macro_object_1;  Var _x2c_macro_cursor_output_1;  while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
             other = _x2c_macro_cursor_output_1; {
               if(Var_equal(other, binder) || ! String_equal(String_getslice(Var_str(other), 1, -2147483648, 1), name)) continue;  Compiler_report_error(c, 1362954, String_join(NULL, cons(String_var(role), cons(String_var(_125), NULL))), start, cons(_121, cons(String_var(name), _128)));
