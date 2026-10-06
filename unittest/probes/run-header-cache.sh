@@ -616,7 +616,9 @@ done
 # so an unchanged artifact replays and a changed payload forces collection.
 mkdir -p "$BUILD/embed/out"
 (cd "$ROOT" && "$X2C" translate --out-dir \
-  "$BUILD/embed/out" unittest/compiler-fixtures/macro-embed-text.x)
+  "$BUILD/embed/out" \
+  @unittest/compiler-fixtures/macro-embed-text.flags \
+  unittest/compiler-fixtures/macro-embed-text.x)
 embed_dep="$BUILD/embed/out/macro-embed-text.d"
 grep -Fq "macro-embed-text-definition/embed.x" "$embed_dep" ||
   fail "outer macro import is missing from the embed depfile"
