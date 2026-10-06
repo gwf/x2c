@@ -1,4 +1,5 @@
-unittest/compiler-fixtures/string-typedef-bracket-assignment.x:13:11: parse: type ( Text ) does not support getindex
+unittest/compiler-fixtures/string-typedef-bracket-assignment.x:9:3: xform: String does not support bracket assignment
     text[0] = 'j';
-            ^
+    ^^^^
+  note: String is immutable: use the copy-producing String.withindex, or bind a char * to write a transient String.malloc buffer
 

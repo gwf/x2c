@@ -259,7 +259,7 @@ meta static List _tag_validated_ids(void) => %(
   "_u8_" "_i8_" "_u16_" "_i16_" "_nan_" "_neginf_" "_posinf_");
 
 meta static int _tag_constant_row(List row) {
-  if (_tag_validated_ids().contains(_tag_id(row))) return 0;
+  if (_tag_id(row) in _tag_validated_ids()) return 0;
   return _tag_top(row) != 0x8002 && _tag_top(row) != 0x8003;
 }
 

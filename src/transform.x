@@ -614,21 +614,6 @@ static List Compiler._cast(Compiler c, List ast) {
   return ast;
 }
 
-// Lower bracket reads into helper calls with method-call conversions.
-static List Compiler._nominal_getindex(Compiler c, Type type) {
-  if (!type.is_typedef_name()) return NULL;
-  if (c.sym.is_array_type(type) || c.sym.is_map_type(type)) return NULL;
-  match (type)
-    case %(?(String nominal)): {
-      String source = %"${nominal}_getindex";
-      Type signature = c.sym.get(%($source));
-      match (signature)
-        case %((func ($type ?)) ?):
-          return %(${c.sym.reference(%($source), NULL)} $signature);
-    }
-  return NULL;
-}
-
 // A `Var` subscript of a native pointer or array reads as an integer.
 static List Compiler._index(Compiler c, List ast) {
   Macro indexed = $indexed;
@@ -1667,14 +1652,6 @@ static void Compiler._convert_indexed_parts(
     base = c.convert_expression(base, %("Map"));
     selector = c.convert_expression(selector, %("Var"));
   }
-}
-
-// Identify only the built-in helper family. Protocol resolution still
-// handles every bracket form.
-static Symbol Compiler._indexed_builtin_helper(Compiler c, Type type) {
-  if (c.sym.is_array_type(type)) return <array>;
-  if (c.sym.is_map_type(type)) return <map>;
-  return 0;
 }
 
 static List Compiler._indexed_call_expr(
