@@ -884,7 +884,7 @@ static Bytes _Layout.emit(_Layout &l) {
     out = _layout_insert(out, edit.before, tok, 0);
     struct Token copy = *tok;
     if (edit.type && edit.type != <space> && edit.type != <comment>)
-      copy.text = Symbol.str(edit.type);
+      copy.text = edit.type;
     if (edit.type) copy.type = edit.type;
     out = out.append(&copy, 1);
     out = _layout_insert(out, edit.after, tok, 1);

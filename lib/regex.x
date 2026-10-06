@@ -806,7 +806,7 @@ int RegexCapture.index(RegexCapture capture) => capture.getindex(0).int();
 String RegexCapture.name(RegexCapture capture) => capture.getindex(1);
 
 /** Reports whether the capture took part in the match. */
-int RegexCapture.matched(RegexCapture capture) => capture.getindex(2).truth();
+int RegexCapture.matched(RegexCapture capture) => !!capture.getindex(2);
 
 /** Returns the matched text, or NULL for a capture that did not take part. */
 String RegexCapture.text(RegexCapture capture) => capture.getindex(3);

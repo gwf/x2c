@@ -608,7 +608,7 @@ static char **_environment(Map env) {
   for (char **entry = environ; *entry; entry++) {
     String text = String.new(*entry);
     int equals = text.find("=");
-    if (!names.contains(equals < 0 ? text : text[:equals])) entries.push(text);
+    if (!((equals < 0 ? text : text[:equals]) in names)) entries.push(text);
   }
   foreach (Var (name, value), env) entries.push(%"$name=$value");
   char **out = Scope.calloc(entries.len() + 1, sizeof(char *));

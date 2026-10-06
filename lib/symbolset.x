@@ -129,7 +129,7 @@ Symbol SymbolSet.getindex(SymbolSet x, int index) {
 static int _next(Iter iter, Var *out) {
   SymbolSet x = (SymbolSet) iter.obj.pointer(), int index = iter.state;
   if (index < 0 || (size_t) index >= x.len()) return 0;
-  *out = x.getindex(index);
+  *out = x[index];
   iter.state = index + 1;
   return 1;
 }

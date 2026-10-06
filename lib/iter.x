@@ -597,7 +597,7 @@ static int _unique_next(Iter iter, Var *out) {
   loop {
     Var value;
     if (!source.try_next(value)) return 0;
-    if (!seen.contains(value)) {
+    if (!(value in seen)) {
       seen[value] = value;
       *out = value;
       return 1;
