@@ -66,6 +66,7 @@
 
 .landing-tagline {
   display: inline-block;
+  flex: none;
   margin-left: 1px;
   padding: 0;
   border: 0;
