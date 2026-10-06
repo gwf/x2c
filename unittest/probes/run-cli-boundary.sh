@@ -1718,8 +1718,10 @@ source_dir = root / 'source "quote\\ and space'
 source_dir.mkdir(parents=True)
 source = source_dir / 'mapped.x'
 helper = source_dir / 'included.x'
-(source_dir / 'where.x').write_text(
-    'macro Expression $imported_where() => __LINE__;\n')
+provider = source_dir / 'where.x'
+provider.write_text(
+    'int imported_where(int line) => line;\n'
+    'macro Expression $imported_where() => imported_where(__LINE__);\n')
 source.write_text(r'''#include "x2c.x"
 #include "included.x"
 #include "where.x"
@@ -1751,7 +1753,7 @@ def run(arguments):
 
 command = [compiler, 'build', '--quiet', '-g', '-O0', '--build-dir',
            str(root / 'build'), '--output', str(root / 'app'),
-           str(source), str(helper)]
+           str(source), str(helper), str(provider)]
 run(command)
 generated = list((root / 'build').rglob('*.c'))
 assert generated and all('#line ' not in p.read_text() for p in generated)
