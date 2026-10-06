@@ -18,8 +18,8 @@
 #include <string.h>
 
 
-#include "../../lib/error-macros.x"
-#include "../../src/grammar.x"
+#include "error-macros.x"
+#include "grammar.x"
 
 static Ast _raise_terminal(Ast statement):
   for (;;):

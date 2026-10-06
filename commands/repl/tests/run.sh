@@ -12,6 +12,7 @@ builds/0/x2c build --plain ${BUILD_JOBS:+-j "$BUILD_JOBS"} \
   --c-include-dir builds/0/src \
   commands/repl/tests/api-check.x commands/repl/repl-session.x \
   commands/repl/repl-lower.x commands/repl/repl-runtime.x \
+  commands/repl/decline-errors.x commands/repl/refusal-errors.x \
   builds/0/libx2c-dev.a
 "$tmp/api-check"
 

@@ -721,8 +721,10 @@ void Compiler.record_declaration_visibility(Compiler c, List declaration) {
       int mark = private || type.type().is_static();
       if (mark) {
         Type base = type.type().base_type();
-        match (base) case %((!set ?tag (!or struct union enum)) ?name *):
-          if (name) c.sym.mark_static(%($tag $name));
+        match (base)
+          case %((!set ?tag (!or struct union enum)) ?name *body):
+            if (name && (body || !rows || rows === %((bind () ()))))
+              c.sym.mark_static(%($tag $name));
       }
       c._record_rows_visibility(declaration, kind, private, mark, rows);
       if (kind == <declare> && !mark)

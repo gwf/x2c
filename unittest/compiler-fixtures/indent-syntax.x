@@ -10,6 +10,20 @@ Color
 struct Point:
   int x, y
 
+static typedef struct Prose:
+  String text
+Prose
+
+static typedef union Choice:
+  int number
+  double fraction
+Choice
+
+static typedef enum Shade:
+  DARK,
+  LIGHT
+Shade
+
 /* Sums the positive entries. */
 int sum_positive(int *xs, int n):
   int total = 0
@@ -49,6 +63,11 @@ int count_positive(int *xs, int n, int strict):
   return total
 
 int main(void):
+  Prose prose[] = {{"one two"}}
+  Choice choice = {.number = 3}
+  Shade shade = LIGHT
+  if prose[0].text.split(" ").len() != 2 || choice.number != 3 || shade != 1:
+    return 1
   int xs[] = {3, -1, 4,
               -1, 5}
   struct Point p = {.x = 2, .y = square(3)}

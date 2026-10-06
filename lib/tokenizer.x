@@ -764,7 +764,10 @@ static void _Layout.open_block(
     l.edit(line.first).type = <space>;
   l.indents[++l.top] = next;
   l.enums[l.top] = header.enumeration;
-  l.closers[l.top] = header.aggregate && first.text != "typedef" ? "};" : "}";
+  int alias = first.type == <typedef> ||
+              (first.type == <static> &&
+               l.sig[line.first + 1].type == <typedef>);
+  l.closers[l.top] = header.aggregate && !alias ? "};" : "}";
 }
 
 static _LayoutHeader _Layout.header(_Layout &l, _LayoutLine line) {
