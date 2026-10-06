@@ -17,7 +17,8 @@ import { wordmark } from "./wordmark.mjs";
 const hiddenLines = {
   name: "x2c-hidden-lines",
   preprocess(code) {
-    if (this.options.lang !== "x2c") return code;
+    if (this.options.lang !== "x2c" &&
+        this.options.lang !== "x2c,ignore") return code;
     return code
       .split("\n")
       .filter((line) => !line.trimStart().startsWith("~"))

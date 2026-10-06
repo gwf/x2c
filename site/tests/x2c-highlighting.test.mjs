@@ -3,10 +3,31 @@ import { readdirSync, readFileSync } from "node:fs";
 import test from "node:test";
 
 import { createHighlighter } from "shiki";
+import { createSatteriMarkdownProcessor } from "@astrojs/markdown-satteri";
 
+import config from "../astro.config.mjs";
 import { x2cDarkTheme, x2cLang } from "../shiki-x2c.mjs";
 
 const slides = new URL("../src/content/slides/", import.meta.url);
+
+test("hides marked setup lines in both site x2c fence spellings", async () => {
+  const processor = await createSatteriMarkdownProcessor({
+    shikiConfig: config.markdown.shikiConfig
+  });
+  for (const lang of ["x2c", "x2c,ignore"]) {
+    const { code } = await processor.render([
+      `\`\`\`${lang}`,
+      "~#include <math.h>",
+      "  ~int hidden = 1;",
+      "int flipped = ~bits;",
+      "\`\`\`"
+    ].join("\n"));
+    assert.doesNotMatch(code, /#include|hidden/);
+    assert.match(code, /flipped = ~bits;/);
+  }
+  const { code } = await processor.render("```text\n~literal\n```");
+  assert.match(code, /~literal/);
+});
 
 test("recognizes quotation sigils and kinds in the shared grammar", async () => {
   const highlighter = await createHighlighter({
