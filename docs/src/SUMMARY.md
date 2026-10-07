@@ -27,6 +27,9 @@
 # Language reference
 
 - [Language Reference](reference/language.md)
+- [Syntax Specifications](reference/syntax/index.md)
+  - [Source Grammar](reference/syntax/grammar.md)
+  - [Lexical Specification](reference/syntax/lexical.md)
 - [Compiler Options](reference/cli.md)
 - [Install a Native Compiler](guide/installation.md)
 
