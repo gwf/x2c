@@ -37,13 +37,18 @@ typedef struct SymScope{
 }
 SymScope;
 
+enum{
+  PENDING_AREAS = 5
+}
+;
+
 typedef struct Pending{
-  Array areas[5];
+  Array areas[PENDING_AREAS];
 }
 Pending;
 
 typedef struct PendingMark{
-  int lengths[5];
+  int lengths[PENDING_AREAS];
 }
 PendingMark;
 
@@ -3208,7 +3213,7 @@ List Sym_visible_symbols(Sym);
 Symbol Compiler_peek(Compiler c, int steps){
   if(! _init_guard_) _file_init_();  Token token = c -> token;  if(! steps && Compiler_at_completion(c)){
     List rows = Sym_visible_symbols(c -> sym); {
-      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/compiler.x",.function = "Compiler_peek",.line = 1881};  x2c_error_raise_n(& _x2c_error_site_0, 1248787135328, 3, Symbol_var(740232), Symbol_var(29452646), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
+      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/compiler.x",.function = "Compiler_peek",.line = 1884};  x2c_error_raise_n(& _x2c_error_site_0, 1248787135328, 3, Symbol_var(740232), Symbol_var(29452646), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
     }
 
   }
@@ -3243,7 +3248,7 @@ static Token _skip_backward(Token token, Token origin){
 
 void Compiler_require_input(Compiler c){
   if(! _init_guard_) _file_init_();  if(c -> input_boundary && c -> token >= c -> input_boundary){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/compiler.x",.function = "Compiler_require_input",.line = 1922};  x2c_error_raise_n(& _x2c_error_site_1, 664344300629258, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/compiler.x",.function = "Compiler_require_input",.line = 1925};  x2c_error_raise_n(& _x2c_error_site_1, 664344300629258, 0);  __builtin_unreachable();
   }
 
 }
@@ -3310,7 +3315,7 @@ int Compiler_at_completion(Compiler c){
 
 void Compiler___complete_here(Compiler c, Symbol role, List keywords){
   if(! _init_guard_) _file_init_();  if(! Compiler_at_completion(c)) return;  List rows = Sym_visible_symbols(c -> sym); {
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../src/compiler.x",.function = "Compiler___complete_here",.line = 2045};  x2c_error_raise_n(& _x2c_error_site_2, 1248787135328, 3, Symbol_var(740232), Symbol_var(role), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(keywords));
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../src/compiler.x",.function = "Compiler___complete_here",.line = 2048};  x2c_error_raise_n(& _x2c_error_site_2, 1248787135328, 3, Symbol_var(740232), Symbol_var(role), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(keywords));
   }
 
 }
@@ -3479,7 +3484,7 @@ void Compiler_add_init(Compiler c, Symbol phase, List stmt){
 }
 
 void Pending_reset(Pending * p){
-  if(! _init_guard_) _file_init_();  for(int i = 0;  i < 5;  i ++)(* p).areas[i] = Array_new();
+  if(! _init_guard_) _file_init_();  for(int i = 0;  i < PENDING_AREAS;  i ++)(* p).areas[i] = Array_new();
 }
 
 int SymbolSet_index(SymbolSet, Symbol);
@@ -3488,15 +3493,15 @@ Array Pending_area(Pending * p, Symbol area){
 }
 
 int Pending_initializes(Pending * p){
-  if(! _init_guard_) _file_init_();  for(int i = 1;  i < 5;  i ++) if(Array_truth((* p).areas[i])) return 1;  return 0;
+  if(! _init_guard_) _file_init_();  for(int i = 1;  i < PENDING_AREAS;  i ++) if(Array_truth((* p).areas[i])) return 1;  return 0;
 }
 
 PendingMark Pending_checkpoint(Pending * p){
-  if(! _init_guard_) _file_init_();  PendingMark mark;  for(int i = 0;  i < 5;  i ++) mark.lengths[i] = Array_len((* p).areas[i]);  return mark;
+  if(! _init_guard_) _file_init_();  PendingMark mark;  for(int i = 0;  i < PENDING_AREAS;  i ++) mark.lengths[i] = Array_len((* p).areas[i]);  return mark;
 }
 
 void Pending_restore(Pending * p, PendingMark mark){
-  if(! _init_guard_) _file_init_();  for(int i = 0;  i < 5;  i ++) Array_resize((* p).areas[i], mark.lengths[i]);
+  if(! _init_guard_) _file_init_();  for(int i = 0;  i < PENDING_AREAS;  i ++) Array_resize((* p).areas[i], mark.lengths[i]);
 }
 
 Var Map_setdefault(Map, Var, Var);

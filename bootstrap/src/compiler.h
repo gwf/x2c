@@ -32,13 +32,18 @@ typedef struct SymScope{
 }
 SymScope;
 
+enum{
+  PENDING_AREAS = 5
+}
+;
+
 typedef struct Pending{
-  Array areas[5];
+  Array areas[PENDING_AREAS];
 }
 Pending;
 
 typedef struct PendingMark{
-  int lengths[5];
+  int lengths[PENDING_AREAS];
 }
 PendingMark;
 
