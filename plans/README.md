@@ -44,11 +44,6 @@ execution.
 
 ### Current work
 
-- [Unit initialization, entry setup, and assembly](unit-initialization-and-assembly.md):
-  delivered 2026-10-07: one pending owner with named destinations, one
-  run-once initializer builder and entry decision, single-scan source
-  assembly, and shared function-entry setup, with byte-identical generated
-  C. Only the deferred memoization section remains.
 - [Harness simplification and messaging](harness-simplification-and-messaging.md):
   authorized corrections to existing tools and guidance, a small
   cross-platform integrator messaging pilot, and separate external runtime
@@ -93,6 +88,7 @@ execution.
 | [Explicit meta campaign](archive/explicit-meta-and-lifetime-campaign.md#backlog) | Parked compound-selector owner, direct function-handle assignment in meta bodies, a REPL test for wide scalar globals, destructuring beside a cleanup, and three small heap limits. |
 | [Lifetime proof follow-up](lifetime-proof-followup.md) | Results from the shipped selected-root audit and an optional path to model indexed borrows, container values, native handles, and iterator callbacks. |
 | [Source organization follow-ups](archive/x2c-source-organization.md#outside-this-plan) | Defects and costs found during the campaign, all fixed: the lambda cell cost, file-init inlining, private-include header types, the region cast false positive, the `try return` warning, the unused open-template paths, nested macro expansion cost, struct-tag method lookup, flaky libuv watch tests, and nondeterministic certify paths. |
+| [Scoped memoization](archive/unit-initialization-and-assembly.md#scoped-memoization-deferred) | Start only after an inventory names a repeated substantial computation, its complete inputs, and the owner that bounds its lifetime. |
 | [Consolidation catalog C13](archive/consolidation-catalog-f28fc36.md#c13-larger-lifetime-sharing-locate-overlap-without-pretending-equivalence) | Shared lifetime summary and flow production; design and measurement before any rewrite. |
 
 An entry here preserves remaining work; it does not dispatch it or add a gate.
@@ -100,6 +96,10 @@ Production promotion remains separately authorized under the release workflow.
 
 ### Decisions and completed records
 
+- [Unit initialization, entry setup, and assembly](archive/unit-initialization-and-assembly.md):
+  done 2026-10-07 at `0916ff92`. One pending owner with named destinations,
+  one run-once initializer builder and entry decision, single-scan source
+  assembly, and shared function-entry setup; generated C is byte-identical.
 - [Ordinary source modules and automatic interfaces](archive/automatic-interfaces.md):
   done 2026-10-06 at 6938c195. Ordinary includes, static storage, and public
   type dependency selection replace visibility pragmas and macro packs.
