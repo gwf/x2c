@@ -1152,19 +1152,29 @@ static void Compiler.publish_inline_dependencies(
   } while (changed);
   Map published = {};
   foreach (Var part, entry.car())
-    if (part is <map>) published.merge(part);
+    if (part is <map>)
+      foreach (Var key, part.map().keys()) published[key] = part;
   Array dropped = $auto([]);
   foreach (Var key, additions.keys()) {
-    Var prior;
-    if (published.try_get(key, prior) && prior == additions[key])
-      dropped.push(key);
+    Var owner;
+    if (published.try_get(key, owner) &&
+        owner.map()[key] == additions[key]) dropped.push(key);
   }
   foreach (Var key, dropped) additions.del(key);
   _cache_dependencies(entry[3], c.deps);
   if (!additions.len()) return;
   Map retained = _cache_copy(additions);
-  List parts = entry.car().list().append(%($retained));
   _retain_rows(%($retained));
+  Array replaced = $auto([]);
+  foreach (Var (key, value), retained) {
+    Var owner;
+    if (!published.try_get(key, owner)) continue;
+    owner.map()[key] = value;
+    replaced.push(key);
+  }
+  foreach (Var key, replaced) retained.del(key);
+  if (!retained.len()) return;
+  List parts = entry.car().list().append(%($retained));
   List updated = %($parts @{entry.cdr()});
   _require_retained(updated.try_own());
   _process_cache()[path] = updated;
