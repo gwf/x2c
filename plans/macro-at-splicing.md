@@ -6,9 +6,9 @@
 > Baseline: `origin/dev` at `ae34288c8a4de03168e4055d885b796cbc35da27`.
 > The branch fast-forwarded to this snapshot. The October 4 plan was
 > recovered from local snapshot `332d0bc3` and revised against current code.
-> Delivery: individual/private. Gary requires approval before any merge or
-> PR to dev. Keep this branch local; do not push, submit, merge, or publish
-> while this hold applies.
+> Delivery: individual/direct for this plan. Gary authorized publishing the
+> plan to dev on 2026-10-07. Implementation has not been authorized; the
+> approval hold on publishing an implementation remains in effect.
 
 ## Result
 
