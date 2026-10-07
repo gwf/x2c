@@ -178,7 +178,8 @@ static int _start(
   try {
     if (!filename) _tokenize_session(frontend, c, source);
     else {
-      _configure_package(c, frontend.request, filename);
+      c.package_dirs = frontend.request.package_roots();
+      c.configure_package(frontend.request.package_dirs, filename);
       _tokenize_input(frontend, unit, filename);
       c.inherited_lisp = Compiler.inherits_import(Path.absolute(filename));
       Compiler.begin_meta_unit(c.filename);
@@ -223,23 +224,6 @@ static void _tokenize_session(Frontend frontend, Compiler c, String source) {
   c.prelude = c.runtime_inc = 1;
   c.include_dirs = frontend.include_dirs;
   c.tokenize(source ? source : "$(begin)");
-}
-
-/* A unit compiles in package mode only when it is one of that package's own
-   files below `<root>/<name>/src/` or the single-file `<root>/<name>/<name>.x`
-   under an explicit --package-dir root. The comparison uses the canonical
-   path, so symlinked or relative spellings of one file agree; a test or
-   example elsewhere in the package directory is a consumer and reaches the
-   package through `import`. */
-static void _configure_package(
-  Compiler c, CliRequest request, String filename) {
-  c.package_dirs = request.package_roots();
-  String source = Path.absolute(filename);
-  String package = package_directory(request.package_dirs, source);
-  if (!package || !package_source(package, source)) return;
-  String name = Path.basename(package);
-  c.package = name;
-  c.package_roots[name] = package;
 }
 
 static void _tokenize_input(

@@ -474,20 +474,23 @@ static int Compiler._bind_project_meta(
   if (c.meta_build) return 0;
   Var bound;
   if (!install && c.macro_lisp.try_get(name, bound)) return 1;
-  Var (signature, provider, _) = target;
-  if (c.project_meta_uses_linked(name, provider) &&
+  Var (signature, provider, hashes) = target;
+  if (c.project_meta_uses_linked(name, provider, hashes) &&
       c._bind_linked_target(name, signature)) return 1;
   c._install_stub(name, signature, provider, NULL);
   return 1;
 }
 
 /** Answers whether a provider's function can use its linked body.
-    Its source dependencies include private helpers and native inputs. */
+    Copied definitions retain precise callees; runtime bodies retain their
+    provider's source dependencies, including private helpers. */
 int Compiler.project_meta_uses_linked(
-  Compiler c, String name, String provider) {
+  Compiler c, String name, String provider, Map hashes) {
   Map linked = _linked_module();
   if (!(name in linked)) return 0;
-  return c.linked_meta_provider_current(home_absolute_path(provider));
+  $let(c.filename, home_absolute_path(provider))
+  $let(c.meta_hashes, hashes) $let(c.meta_calls, {})
+    return c._linked_copy(name, linked);
 }
 
 /* Shipped meta definitions already have Func adapters in their linked
@@ -952,15 +955,21 @@ static int Compiler._linked_copy(Compiler c, String name, Map linked) {
 static int Compiler._linked_texts_match(
   Compiler c, String name, Map linked, Map reached) {
   Var hash, own, names = void;
+  String key = %"${home_portable_path(c.canonical_path(c.filename))}:$name";
   if (!c.meta_hashes.try_get(name, own)) {
     Var advertisement;
-    if (c.project_meta.try_get(name, advertisement))
-      match (advertisement) case %(? ?(String provider) ?):
-        return c.project_meta_uses_linked(name, provider);
+    if (c.project_meta.try_get(name, advertisement)) {
+      Var (_, provider, hashes) = advertisement;
+      Map dependency = hashes;
+      if (!(name in dependency)) return 0;
+      $let(c.filename, home_absolute_path(provider))
+      $let(c.meta_hashes, hashes) $let(c.meta_calls, {})
+        return c._linked_texts_match(name, linked, reached);
+    }
     return !(name in linked_hashes);
   }
-  if (name in reached) return 1;
-  reached[name] = 1;
+  if (key in reached) return 1;
+  reached[key] = 1;
   if (linked_hashes.try_get(name, hash)) {
     List row = hash;
     hash = row.car();
