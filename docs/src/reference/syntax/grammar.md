@@ -1,6 +1,6 @@
 # Source grammar
 
-The [EBNF file](x2c.ebnf) below describes x2c's source forms at the
+The [EBNF file](x2c.ebnf), generated from [ordinary List data](data.md), describes x2c's source forms at the
 [extraction revision](index.md). It consumes tokens after the
 [lexical transformations](lexical.md). It is a descriptive grammar with
 explicit contextual recognizers, not a ready-to-run parser-generator input.
@@ -10,7 +10,8 @@ The [language reference](../language.md) owns semantics and restrictions.
 
 `A = B ;` defines a production. `,` concatenates, `|` selects alternatives,
 `[ ... ]` is optional, `{ ... }` repeats zero or more times, and parentheses
-group. Single- or double-quoted strings denote terminal token spellings.
+group. Double-quoted strings denote terminal token spellings. Backslash
+escapes a quotation mark, apostrophe, or backslash inside a terminal string.
 `(* ... *)` is a comment. `? description ?` is an external recognizer,
 whose contract is stated below or in the lexical specification.
 

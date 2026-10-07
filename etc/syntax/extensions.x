@@ -4,6 +4,8 @@
     Notes select the added alternatives within those productions.
 */
 
+#pragma once
+
 #include "x2c.x"
 
 List syntax_extensions(void) => %(
@@ -13,9 +15,9 @@ List syntax_extensions(void) => %(
     (feature source-organization
       (title "Source organization")
       (summary "Import packages and run statements in script units.")
-      (grammar import-declaration import-member script-unit)
+      (grammar import-declaration import-member script-unit type-reference identifier)
       (lexical c-tokens)
-      (grammar-note "import with aliases/member selection; script statements outside an explicit main.")
+      (grammar-note "import with aliases/member selection, package-qualified alias.Type/alias.member names, and script statements outside an explicit main.")
       (lexical-note "import is a keyword; a leading shebang is handled before lexing.")
       (spellings "import" "as" "with" "#!")
       (reference "../reference/language.md#source-files-and-visibility"))
@@ -64,7 +66,7 @@ List syntax_extensions(void) => %(
       (summary "Build Arrays and Maps from expressions.")
       (grammar primary array map map-entry initializer atomic arguments)
       (lexical c-tokens)
-      (grammar-note "Bare Array/Map literals, destination-typed brace expressions, void as a value, and trailing call-argument commas.")
+      (grammar-note "Bare Array/Map literals, destination-typed brace expressions, void as a value, and trailing ordinary call-argument commas.")
       (lexical-note "No new delimiter tokens: [], {}, commas, colons, and void acquire expression roles.")
       (spellings "[a, b]" "{key: value}" "return {a, b};" "void"
                  "f(a,)")
@@ -79,7 +81,7 @@ List syntax_extensions(void) => %(
                x2c-escape byte-escape list-atom collection-atom set-atom signed-number
                octal-integer)
       (grammar-note "List/data readers, interpolation, splicing, reader prefixes, typed pattern captures, Symbols, and SymbolSets.")
-      (lexical-note "Percent openers select reader modes; dollar/at escapes re-enter code; angle Symbols, atom boundaries, byte escapes, signed data numbers, and explicit 0o octal extend scanning.")
+      (lexical-note "Percent openers select reader modes; braced interpolation/splicing re-enters code; angle Symbols, atom boundaries, byte escapes, signed data numbers, and explicit 0o octal extend scanning.")
       (spellings "%(...)" "%[...]" "%{...}" "%\"...\"" "%<<...>>"
                  "<name>" "\$name" "\${expr}" "@items" "@{expr}"
                  "?(Type name)" "'" "`" ",@" "0o17")

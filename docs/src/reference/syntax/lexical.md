@@ -4,6 +4,8 @@ This is an operational specification of `lib/scan.x`, `lib/tokenizer.x`,
 and the token reclassification in `src/compiler.x` at the
 [extraction revision](index.md). Rules are ordered where order affects
 recognition. The [source grammar](grammar.md) consumes their output.
+The same rules are available as [structured List data](data.md), with a
+[generated inventory](lexical-data.md).
 
 ## Input and output
 

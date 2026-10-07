@@ -5,6 +5,7 @@
 # Language guide
 
 - [From C to x2c](guide/from-c.md)
+- [x2c Syntax Map](guide/x2c-syntax-map.md)
 - [Values and Var](guide/values.md)
 - [Symbols and Atoms](guide/symbols.md)
 - [Strings, Lists, Arrays, and Maps](guide/collections.md)
@@ -30,6 +31,8 @@
 - [Syntax Specifications](reference/syntax/index.md)
   - [Source Grammar](reference/syntax/grammar.md)
   - [Lexical Specification](reference/syntax/lexical.md)
+  - [Syntax as Data](reference/syntax/data.md)
+  - [Lexical Data Inventory](reference/syntax/lexical-data.md)
 - [Compiler Options](reference/cli.md)
 - [Install a Native Compiler](guide/installation.md)
 

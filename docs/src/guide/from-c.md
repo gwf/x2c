@@ -26,6 +26,9 @@ whole program to a new object model.
 | methods forwarded to a contained value | a `delegate` field |
 | repeated declarations or expressions | a compile-time `macro` or `Decorator` |
 
+The [x2c syntax map](x2c-syntax-map.md) separates the grammar and lexical
+additions from familiar C syntax.
+
 ## What x2c adds
 
 Native C types, layout, preprocessing, calls, and libraries keep their

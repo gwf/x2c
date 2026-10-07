@@ -8,10 +8,14 @@ constraints of the forms.
 
 - [Source grammar](grammar.md): EBNF, precedence, contextual decisions, and
   macro extension contracts. The [EBNF file](x2c.ebnf) is the same grammar
-  included in that chapter, available separately for tools.
+  included in that chapter, generated from `etc/syntax/grammar.x`.
 - [Lexical specification](lexical.md): byte classes, ordered recognition,
   numeric and escape rules, nested modes, token reclassification, layout,
   and failure behavior.
+- [Syntax as data](data.md): ordinary x2c Lists, their algebra, and a tool for
+  generation, reference checks, dependency graphs, and lexical mode graphs.
+- [x2c syntax map](../../guide/x2c-syntax-map.md): the additions beyond C11,
+  grouped for onboarding and linked to the specification data.
 
 The grammar describes source after tokenization and indentation rewriting.
 It is not a claim that a context-free recognizer can decide whether an x2c
@@ -61,7 +65,8 @@ principal prose specification.
 The extraction has three layers:
 
 1. Byte recognition and token transitions in the lexical specification.
-2. Token productions in `x2c.ebnf` with explicit external recognizers.
+2. Token productions in `etc/syntax/grammar.x`, rendered as `x2c.ebnf`,
+   with explicit external recognizers.
 3. Context and semantic constraints in the grammar chapter and language
    reference.
 

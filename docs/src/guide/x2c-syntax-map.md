@@ -12,7 +12,21 @@ reference](../reference/language.md) owns each construct's meaning.
 ## The short list
 
 <!-- syntax-extensions:start -->
-<!-- Generated from etc/syntax/extensions.x by the syntax data tool. -->
+
+| Extension family | Grammar additions | Lexical changes |
+| --- | --- | --- |
+| [Source organization](../reference/language.md#source-files-and-visibility) | import with aliases/member selection, package-qualified alias.Type/alias.member names, and script statements outside an explicit main. | import is a keyword; a leading shebang is handled before lexing. |
+| [Optional indentation](../reference/language.md#indentation-syntax) | The parser receives ordinary braces, parentheses, and semicolons. | In .xp or after #pragma indent, a token pass rewrites layout and colons. |
+| [Declarations and references](../reference/language.md#c-foundation) | Mixed-type rows, T.method names, & and &? parameters, delegate fields, destructuring, class/NamedType forms, and static type visibility. | delegate and threaded are keywords; Self is contextual. Existing punctuation gains declaration roles. |
+| [Protocols](../reference/language.md#protocols) | Protocol definitions/adoptions, associated types, member aliases, and as/tag adoption modifiers. | protocol and associated are keywords; as and tag are contextual words. |
+| [Short functions and lambdas](../reference/language.md#lambdas) | Expression bodies use =>; lambdas permit typed or bare parameters and using captures. | %! is a lambda opener; => remains two tokens; using is contextual. |
+| [Evaluated collections](../reference/language.md#array-and-map-literals) | Bare Array/Map literals, destination-typed brace expressions, void as a value, and trailing ordinary call-argument commas. | No new delimiter tokens: [], {}, commas, colons, and void acquire expression roles. |
+| [Quoted data and text](../reference/language.md#percent-literals-quote-and-unquote) | List/data readers, interpolation, splicing, reader prefixes, typed pattern captures, Symbols, and SymbolSets. | Percent openers select reader modes; braced interpolation/splicing re-enters code; angle Symbols, atom boundaries, byte escapes, signed data numbers, and explicit 0o octal extend scanning. |
+| [Operators and slices](../reference/language.md#membership-with-in) | === and !==, in, is/is not, @ and @=, and [start:stop:step] extend the C expression ladder. | ===, !==, @, and @= are operator tokens; in is contextually retagged; is and not remain contextual words. |
+| [Iteration and matching](../reference/language.md#statements) | foreach binders and match cases with patterns and optional guards; case/default otherwise remain C forms. | match is contextually retagged; foreach is a shipped keyword alias; pattern sigils are data-mode atom spellings. |
+| [Cleanup and errors](../reference/language.md#errors-and-cleanup) | with/as blocks, defer statements, try/catch/finally, and raise with structured details. | defer, try, catch, finally, and raise are keywords; with/as are contextual; error patterns reuse List mode. |
+| [Syntax-producing code](../reference/language.md#compile-time-macros) | Typed macro holes/results, sequence holes, aliases, decorators, source quotations, Lisp escapes, and meta/native functions. | $ references and $( switch into compile-time forms; $! uses ordinary ! after $; macro/keyword/meta/native are contextual. |
+
 <!-- syntax-extensions:end -->
 
 The grammar column identifies added alternatives or contexts. It does not
