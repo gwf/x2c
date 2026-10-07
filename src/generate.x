@@ -983,9 +983,10 @@ static List Init.synthesize(Init &i, List arms) {
    setup keeps its pre-body order. */
 static List Init.statements(Init &i, List entry, List body) {
   Compiler c = i.c;
-  return _run_once(c, entry, i.guard, List.concat_n(
+  List queued = List.concat_n(
     5, c.init_statements(<prepare>), c.init_statements(<statics>), body,
-    c.init_statements(<finish>), i.shutdown));
+    c.init_statements(<finish>), i.shutdown);
+  return _run_once(c, entry, i.guard, queued);
 }
 
 /* `function` calls the region's initializer unless its guard is set. */
@@ -1008,8 +1009,9 @@ static List Compiler._protocol_initializer(
   Compiler c, List function, List body) {
   List guard = c.sym.introduce("_x2c_protocol_guard_");
   List declaration = c.initialization_guard(guard);
-  return c._replace_body(function, _run_once(
-    c, %($declaration), guard, c.init_statements(<protocol>).append(body)));
+  List queued = c.init_statements(<protocol>).append(body);
+  return c._replace_body(
+    function, _run_once(c, %($declaration), guard, queued));
 }
 
 /* The registration of the unit's shutdown function, under the arms that
