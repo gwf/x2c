@@ -1,11 +1,10 @@
 # Unit initialization, entry setup, and assembly
 
 > Status: active
-> Planning only. Revised 2026-10-07 against `origin/dev` `e18ce3de` after a
-> review of the plan, the current source, and the planning conversation that
-> produced it. No compiler implementation, probe, test run, or measurement
-> has been done for this plan. Obtain Gary's execution instruction before
-> changing production code. Formerly `deferred-code-and-memoization.md`.
+> The implementation in steps 3 to 6 was delivered to `dev` on 2026-10-07
+> from base `48715bde`; see the delivery record at the end. Only the
+> deferred memoization section remains, and it waits for named evidence.
+> Formerly `deferred-code-and-memoization.md`.
 
 ## Goal
 
@@ -440,3 +439,51 @@ conversions. Each new field or operation must replace one of those.
 No new validator, diagnostic, negative fixture, recurring gate, generic
 event bus, scheduler, or universal cache is proposed. Memoization waits for
 named evidence.
+
+## Delivery record
+
+Delivered 2026-10-07 by one orchestrated batch from base `48715bde`. Four
+workers changed disjoint regions; the orchestrator integrated them and
+renamed across files.
+
+- **Pending owner.** `Compiler.pending` (`Pending`, compiler.x) replaces
+  `early_decls` and `inits`. It holds one array per destination: `<support>`
+  and the file-initialization areas `<protocol>`, `<prepare>`, `<statics>`,
+  and `<finish>` (formerly `<early>`, `<mid>`, `<late>`). `add_early` is now
+  `add_support`. `SymTxn` and `_speculate` share `Pending.checkpoint` and
+  `Pending.restore`; a failed speculation now also drops initialization
+  statements it queued. The code-value effect keeps its macro-visible
+  spelling `early`.
+- **Static initializers.** `StaticQueue.record` creates each record as
+  `(binding assignment helper arms)`, and one `state` map replaces `state`
+  and `phases`.
+- **Initializers and entries.** `_run_once` builds the body of all three
+  run-once initializers. `Init._enter` is the one entry decision for source
+  functions and header cache readers. `_header_initializer`, `Init.patch`,
+  `_patch_initialized_entry`, and the `initblock`/`initstmt` match are
+  deleted.
+- **Assembly.** `_anchors` finds both boundaries in one scan, and
+  `_source_text` replaces `_primary_include`, source spacing, and
+  `_patch_main`. `Partition.source` is replaced by `source_started` and
+  `source_groups`.
+- **Function entry.** `Compiler.prepend_setup` serves parameter cells,
+  parameter escapes, and callable adapters.
+
+Narrower than designed:
+
+- The `main` prefix is applied in `_source_text`, not in `Init._enter`.
+  Applied earlier, `_forward_declarations` emits an extra `x2c_initialize`
+  prototype into `main.c`.
+- The source region still finds its prelude boundary twice: once in
+  `_source_cache` for cache storage and once in `_file_init` on the expanded
+  source. Sharing it needs a channel between the two stages.
+- No initialization effect was added to the code-value carrier, because no
+  producer needs one yet.
+
+Evidence: the compiler built before the change and the compiler built after
+it translate the changed `src/*.x` and `lib/*.x` to byte-identical `.c` and
+`.h` files. Authored source, probe, and command changes total 394 insertions
+and 439 deletions. Workers ran the focused fixtures named above; a fixture's
+`.ast` or `.transform` origin numbers shift whenever `src/` differs from
+`bootstrap/`, and the publication gate's bootstrap refresh removes that
+effect.

@@ -45,10 +45,10 @@ execution.
 ### Current work
 
 - [Unit initialization, entry setup, and assembly](unit-initialization-and-assembly.md):
-  planning only against dev e18ce3de. Semantic destinations for generated
-  code, one pending owner, one initializer builder and entry patch, and
-  assembly simplification; memoization waits for named evidence. No compiler
-  implementation or measured savings yet.
+  delivered 2026-10-07: one pending owner with named destinations, one
+  run-once initializer builder and entry decision, single-scan source
+  assembly, and shared function-entry setup, with byte-identical generated
+  C. Only the deferred memoization section remains.
 - [Harness simplification and messaging](harness-simplification-and-messaging.md):
   authorized corrections to existing tools and guidance, a small
   cross-platform integrator messaging pilot, and separate external runtime

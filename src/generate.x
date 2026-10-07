@@ -1068,8 +1068,8 @@ List Compiler.init_statements(Compiler c, Symbol phase) =>
    pool setup. */
 
 static int Compiler._cache_only(Compiler c) =>
-  !c.init_fn && c.init_statements(<prepare>) &&
-  !c.init_statements(<statics>) && !c.init_statements(<finish>);
+  !c.init_fn && c.pending.area(<prepare>) &&
+  !c.pending.area(<statics>) && !c.pending.area(<finish>);
 
 /* Every function that directly or transitively reaches a source cache. */
 static Map _cache_reachable(List source) {
