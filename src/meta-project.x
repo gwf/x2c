@@ -126,7 +126,7 @@ static void Helper.use(Helper &h, List manifest) {
 
 // reaching meta code
 
-/* The scan of one input. `units` collects included meta providers;
+/* The scan of all inputs. `units` collects included meta providers;
    `seen` holds each file's result bits, and
    `packages` the root of each package imported. */
 static typedef struct Scan {
@@ -141,15 +141,14 @@ static void Helper.scan(Helper &h, List inputs) {
   Compiler c = Compiler.new();
   c.sources = h.frontend.request.sources;
   c.include_dirs = h.frontend.include_dirs;
+  Scan s = {
+    .request = h.frontend.request, .c = c, .units = [], .seen = {},
+    .packages = h.packages};
+  int units = 0;
   foreach (String input, inputs) {
     String path = Path.absolute(input);
-    Scan s = {
-      .request = h.frontend.request, .c = c, .units = [], .seen = {},
-      .packages = h.packages};
-    int meta = s.file(path);
-    if (!meta) continue;
-    if (meta & 1) h.own(path, owned);
-    foreach (String unit, s.units) h.own(unit, owned);
+    if (s.file(path) & 1) h.own(path, owned);
+    while (units < s.units.len()) h.own(s.units[units++], owned);
   }
   collect_forget_provisional_entries();
 }
@@ -167,6 +166,8 @@ static int Scan.file(Scan &s, String path) {
   Var found;
   if (s.seen.try_get(path, found)) return found;
   s.seen[path] = 0;
+  if (_compiler_owns(path) && s.c.linked_meta_provider_current(path))
+    return 0;
   String text = NULL;
   try text = Path.read_text(path);
   catch %((!or not-found io-fail) *): return 0;
@@ -231,7 +232,6 @@ static int Scan.include(Scan &s, String directive, String directory) {
   if (!file) return 0;
   String path = Path.absolute(file);
   int rooted = _compiler_owns(path);
-  if (rooted && s.c.linked_meta_provider_current(path)) return 0;
   int meta = s.file(path);
   if (!rooted || (meta & 1)) s.units.push(absolute_path(path));
   return !!meta;

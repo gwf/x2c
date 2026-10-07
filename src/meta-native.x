@@ -474,38 +474,20 @@ static int Compiler._bind_project_meta(
   if (c.meta_build) return 0;
   Var bound;
   if (!install && c.macro_lisp.try_get(name, bound)) return 1;
-  Var (signature, provider, hashes) = target;
-  if (c.project_meta_uses_linked(name, provider, hashes) &&
+  Var (signature, provider, _) = target;
+  if (c.project_meta_uses_linked(name, provider) &&
       c._bind_linked_target(name, signature)) return 1;
   c._install_stub(name, signature, provider, NULL);
   return 1;
 }
 
 /** Answers whether a provider's function can use its linked body.
-    Provider hashes include private callees, so edited bodies stage instead. */
+    Its source dependencies include private helpers and native inputs. */
 int Compiler.project_meta_uses_linked(
-  Compiler c, String name, String provider, Map hashes) {
+  Compiler c, String name, String provider) {
   Map linked = _linked_module();
   if (!(name in linked)) return 0;
-  $let(c.filename, home_absolute_path(provider))
-  $let(c.meta_hashes, hashes) $let(c.meta_calls, {})
-    return c._linked_copy(name, linked);
-}
-
-/** Answers whether the provider's own meta definitions match linked code.
-    Native advertisements keep their declared supplier semantics. */
-int Compiler.meta_provider_hashes_current(
-  Compiler c, Map hashes, Map native) {
-  Map linked = _linked_module();
-  Map reached = {};
-  $let(c.meta_hashes, hashes) $let(c.meta_calls, {})
-    foreach (String name, hashes.keys()) {
-      if (name in native) continue;
-      String key = %"${home_portable_path(c.canonical_path(c.filename))}:$name";
-      if (!(key in linked_hashes) && !(name in linked_hashes)) return 0;
-      if (!c._linked_texts_match(name, linked, reached)) return 0;
-    }
-  return 1;
+  return c.linked_meta_provider_current(home_absolute_path(provider));
 }
 
 /* Shipped meta definitions already have Func adapters in their linked
@@ -948,6 +930,12 @@ static Map _linked_module(void) {
   return native_modules[linked_supplier];
 }
 
+/** Returns the source and dependency hashes compiled into a linked provider. */
+List linked_meta_provider_source(String provider) {
+  _linked_module();
+  return linked_hashes[provider];
+}
+
 /* A row without a hash is the runtime library's own compiled definition
    of a `lib/meta.x` builder, which has no copy to compare; only
    `lib/meta.x` itself binds it. */
@@ -964,23 +952,16 @@ static int Compiler._linked_copy(Compiler c, String name, Map linked) {
 static int Compiler._linked_texts_match(
   Compiler c, String name, Map linked, Map reached) {
   Var hash, own, names = void;
-  String key = %"${home_portable_path(c.canonical_path(c.filename))}:$name";
   if (!c.meta_hashes.try_get(name, own)) {
     Var advertisement;
-    if (c.project_meta.try_get(name, advertisement)) {
-      Var (_, provider, hashes) = advertisement;
-      Map dependency = hashes;
-      if (!(name in dependency)) return 0;
-      $let(c.filename, home_absolute_path(provider))
-      $let(c.meta_hashes, hashes) $let(c.meta_calls, {})
-        return c._linked_texts_match(name, linked, reached);
-    }
-    return !(key in linked_hashes) && !(name in linked_hashes);
+    if (c.project_meta.try_get(name, advertisement))
+      match (advertisement) case %(? ?(String provider) ?):
+        return c.project_meta_uses_linked(name, provider);
+    return !(name in linked_hashes);
   }
-  if (key in reached) return 1;
-  reached[key] = 1;
-  if (linked_hashes.try_get(key, hash) ||
-      linked_hashes.try_get(name, hash)) {
+  if (name in reached) return 1;
+  reached[name] = 1;
+  if (linked_hashes.try_get(name, hash)) {
     List row = hash;
     hash = row.car();
     names = row.cadr();
@@ -988,6 +969,8 @@ static int Compiler._linked_texts_match(
   }
   else if (!(name in linked) && !(name in c.native_meta)) return 0;
   c.meta_calls.try_get(name, names);
+  if (names is <string>)
+    return c.linked_meta_provider_current(home_absolute_path(names));
   if (names is <list>)
     foreach (String callee, names.list())
       if (!c._linked_texts_match(callee, linked, reached)) return 0;

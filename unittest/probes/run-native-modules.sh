@@ -192,7 +192,7 @@ grep -Fq "return 53;" out/abi-main.c || fail "module native ABI"
 cat >private.x <<'EOF'
 meta native static int hidden(int n) => n + 1;
 EOF
-expect_error "is a static function private to its unit" \
+expect_error "native module sources declare no meta function" \
   "$X2C" build -q --kind meta-module private.x --output private.so
 
 printf 'int unrelated;\n' >empty.x

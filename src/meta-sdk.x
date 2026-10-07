@@ -428,18 +428,16 @@ Map x2c_meta_definition_hashes(void) {
   return hashes;
 }
 
-/* Linked runtime functions keep their provider's whole definition set.
+/* Imported functions refer to their provider's shared source proof.
    Fully parsed copies retain their own hashes and precise references. */
 static Map _sdk_linked_hashes(void) {
   _sdk_guard("_x2c.meta.linked.hashes");
   Compiler c = active.expander;
   Map rows = {};
   c.add_linked_meta_provider_hashes(rows);
-  foreach (Var (_, source), c.project_meta)
-    match (source) case %(? ? ?(Map hashes)): {
-      List names = hashes.keys().list().sort();
-      foreach (Var (name, hash), hashes) rows[name] = %($hash $names);
-    }
+  foreach (Var (name, source), c.project_meta)
+    match (source) case %(? ?provider ?(Map hashes)):
+      rows[name] = %(${hashes[name]} $provider);
   foreach (String name, c.meta_calls.keys())
     rows[name] = %(${c.meta_hashes[name]} ${c.meta_calls[name]});
   return rows;
