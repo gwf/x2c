@@ -458,7 +458,7 @@ renamed across files.
   `(binding assignment helper arms)`, and one `state` map replaces `state`
   and `phases`.
 - **Initializers and entries.** `_run_once` builds the body of all three
-  run-once initializers. `Init._enter` is the one entry decision for source
+  run-once initializers. `Init.enter` is the one entry decision for source
   functions and header cache readers. `_header_initializer`, `Init.patch`,
   `_patch_initialized_entry`, and the `initblock`/`initstmt` match are
   deleted.
@@ -471,7 +471,7 @@ renamed across files.
 
 Narrower than designed:
 
-- The `main` prefix is applied in `_source_text`, not in `Init._enter`.
+- The `main` prefix is applied in `_source_text`, not in `Init.enter`.
   Applied earlier, `_forward_declarations` emits an extra `x2c_initialize`
   prototype into `main.c`.
 - The source region still finds its prelude boundary twice: once in

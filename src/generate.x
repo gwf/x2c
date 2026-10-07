@@ -804,12 +804,12 @@ static void _add_names(Map available, List node) {
    receives its entry setup from one decision, which the header's cache
    initialization also uses. */
 
-/* One region's initialization. `guard` is set once the region has
-   initialized, and `entry` is the function a guarded entry calls. In the
-   source, `initializer` names the type initializer, `shutdown` registers
-   the unit's shutdown function, `synthetic` is the synthetic initializer or
-   NULL, and `reachable` holds the entries a cache-only file guards, or is
-   NULL when every public entry is guarded. */
+/** Holds one region's initialization. `guard` is set once the region has
+    initialized, and `entry` is the function a guarded entry calls. In the
+    source, `initializer` names the type initializer, `shutdown` registers
+    the unit's shutdown function, `synthetic` is the synthetic initializer or
+    NULL, and `reachable` holds the entries a cache-only file guards, or is
+    NULL when every public entry is guarded. */
 typedef struct Init {
   Compiler c, String initializer, List guard, entry, shutdown, synthetic;
   Map reachable;
@@ -825,7 +825,7 @@ static List Compiler._file_init(Compiler c, List source) {
   init.prepare(source);
   Array entries = [];
   foreach (List item, source)
-    entries.push(init._enter(item, init.patches(item)));
+    entries.push(init.enter(item, init.patches(item)));
   List guard = c.initialization_guard(init.guard);
   List prelude = init.synthetic ? %($guard ${init.synthetic}) : %($guard);
   return c.place_source_prelude(entries.list_free(), prelude);
@@ -843,10 +843,10 @@ static void Init.prepare(Init &i, List source) {
   if (c._cache_only()) i.reachable = _cache_reachable(source);
 }
 
-/* `function` with its entry setup: the protocol initializer and the type
-   initializer run once, and a `guarded` entry calls the region's
-   initializer unless its guard is set. */
-List Init._enter(Init &i, List function, int guarded) {
+/** Returns `function` with its entry setup: the protocol initializer and
+    the type initializer run once, and a `guarded` entry calls the region's
+    initializer unless its guard is set. */
+List Init.enter(Init &i, List function, int guarded) {
   match (function)
     case %(function ? (bind (binding ? ?(String name)) ?) (block *body)): {
       if (name == "x2c_initialize_protocols")

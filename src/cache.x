@@ -502,7 +502,7 @@ static List HeaderCache.entries(HeaderCache &h, List header, List prelude) {
       if (replaced) {
         foreach (Var item, prelude) output.push(item);
         prelude = NULL;
-        function = entry._enter(function, 1);
+        function = entry.enter(function, 1);
         node = captured ? %(sourceinit $function) : function;
       }
     output.push(node);
