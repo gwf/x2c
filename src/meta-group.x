@@ -870,6 +870,7 @@ void Compiler.use_meta_build_directory(String directory, Array owners) {
 void Compiler.write_meta_build(Compiler c) {
   int index = c.meta_build - 1;
   if (!meta_build_directory) return;
+  c.ensure_macro_lisp();
   String base = %"$meta_build_directory/group-$index";
   String failure = c._unbound();
   List code = failure ? NULL : c._emit(

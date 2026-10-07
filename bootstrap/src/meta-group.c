@@ -2079,11 +2079,12 @@ void Compiler_use_meta_build_directory(String directory, Array owners){
 
 }
 
+void Compiler_ensure_macro_lisp(Compiler);
 String build_module_stamp(void);
 void Path_write_text(Path, String);
 String String_join(String, List);
 void Compiler_write_meta_build(Compiler c){
-  if(! _init_guard_) _file_init_();  int index = c -> meta_build - 1;  if(! String_truth(meta_build_directory)) return;  String base = String_join(NULL, cons(String_var(meta_build_directory), cons(String_var(_665), cons(String_var(int_str(index)), NULL))));  String failure = Compiler__unbound(c);  List code = String_truth(failure) ? NULL : Compiler__emit(c, build_module_stamp(), String_join(NULL, cons(String_var(_261), cons(String_var(int_str(index)), NULL))), String_join(NULL, cons(String_var(_93), cons(String_var(int_str(index)), NULL))), &(failure));  Array sources = Array_new(); {
+  if(! _init_guard_) _file_init_();  int index = c -> meta_build - 1;  if(! String_truth(meta_build_directory)) return;  Compiler_ensure_macro_lisp(c);  String base = String_join(NULL, cons(String_var(meta_build_directory), cons(String_var(_665), cons(String_var(int_str(index)), NULL))));  String failure = Compiler__unbound(c);  List code = String_truth(failure) ? NULL : Compiler__emit(c, build_module_stamp(), String_join(NULL, cons(String_var(_261), cons(String_var(int_str(index)), NULL))), String_join(NULL, cons(String_var(_93), cons(String_var(int_str(index)), NULL))), &(failure));  Array sources = Array_new(); {
     Var path, _;  Map _x2c_macro_object_32 = c -> deps;  unsigned _x2c_macro_cursor_35 = 0;  Var _x2c_macro_cursor_output_34;  Var _x2c_macro_cursor_output_35;  while(Map_try_next(_x2c_macro_object_32, &(_x2c_macro_cursor_35), &(_x2c_macro_cursor_output_34), &(_x2c_macro_cursor_output_35))){
       path = _x2c_macro_cursor_output_34;  _ = _x2c_macro_cursor_output_35;  Array_push(sources, path);
     }

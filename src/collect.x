@@ -254,6 +254,15 @@ static void Compiler._walk_file(
       .dependencies = _cache_map(), .statics = {}, .hashes = _cache_map(),
       .unit = is_source_file(path), .line = 1};
     if (path == _canonical_path(c.filename)) c.meta_hashes = w.hashes;
+    if (w.unit) {
+      String provider = home_portable_path(path);
+      Map metadata = _cache_map();
+      // Advertisements share this table while later segments fill it.
+      metadata[%("source-node" (meta-hashes $provider 0))] =
+        %(meta-hashes $provider ${w.hashes});
+      w.parts.push(metadata);
+      globs.merge(metadata);
+    }
     // A cycle sees only the exports collected before its include.
     visited[path] = w.parts;
     w.split(tokenizer.tokens);
@@ -786,6 +795,10 @@ void Compiler.complete_meta_hashes(Compiler c) {
   collect_forget_provisional_entries();
 }
 
+/** Returns the shared function hashes of an advertised meta provider. */
+Map Compiler.meta_provider_hashes(Compiler c, String provider) =>
+  c.sym.get_exact(%("source-node" (meta-hashes $provider 0))).caddr();
+
 /** Retains each linked provider's existing source and dependency hashes.
     Definition rows reference this shared proof instead of every sibling. */
 void Compiler.add_linked_meta_provider_hashes(Compiler c, Map rows) {
@@ -996,9 +1009,6 @@ static void FileWalk.publish(FileWalk &w) {
     // Keep the walk's proof before inline typing enriches entry dependencies.
     metadata[%("source-node" (provider-source $provider 0))] =
       %(source $hash ${_stored_dependencies(w.dependencies)});
-    if (w.hashes.len())
-      metadata[%("source-node" (meta-hashes $provider 0))] =
-        %(meta-hashes $provider ${w.hashes});
     w.parts.push(metadata);
   }
   List parts = w.parts.list_free();
@@ -1576,13 +1586,12 @@ static List _interface_candidates(String canonical) {
 /* Materialize one interface file only after its compiler identity, source
    path and hash, and the content hashes of the includes, macros, Lisp, and
    embedded text it depends on, validate. The entry uses process_cache_scope
-   ownership and the same ordered parts representation as a cold walk. The
-   interface's selected definition rows are not read back. */
+   ownership and the same ordered parts representation as a cold walk. */
 static List Compiler._interface_load(
   Compiler c, String canonical, String path) {
   match (_interface_record(path))
-    case %(interface 5 ?(String compiler) ?(String owner) ?(String hash)
-           ?(List parts) ?(List definitions) ? ?(List dependencies)
+    case %(interface 6 ?(String compiler) ?(String owner) ?(String hash)
+           ?(List parts) ?(List definitions) ?(List dependencies)
            ?(List include_dirs)):
       if (c._interface_current(canonical, compiler, owner, hash) &&
           c._interface_include_dirs(canonical) == include_dirs)
@@ -1599,7 +1608,7 @@ static List _interface_record(String path) {
   try source = input.string_close();
   catch %(io-fail *): return NULL;
   String identity = compiler_identity();
-  if (!identity || !source.startswith(%"(interface 5 \"$identity\" "))
+  if (!identity || !source.startswith(%"(interface 6 \"$identity\" "))
     return NULL;
   unsigned cursor = 0;
   Var record = void;
@@ -1704,33 +1713,16 @@ static Map _read_rows(List stored) {
     List pair = row;
     _require_retained(pair.try_own());
     Var (key, value) = pair;
-    if (value is <list>) {
-      int valid = 1;
-      value = _restore_meta_hashes(value, valid);
-      if (!valid) return NULL;
-      _retain(value);
-    }
+    if (value is <list>) match (value)
+      case %(meta-hashes ?provider ?(List stored)): {
+        Map hashes = _read_rows(stored);
+        if (hashes == NULL) return NULL;
+        value = %(meta-hashes $provider $hashes);
+        _retain(value);
+      }
     rows[key] = value;
   }
   return rows;
-}
-
-/* A combined source effect can hold several provider advertisements. */
-static List _restore_meta_hashes(List node, int &valid) {
-  match (node) {
-    case %(meta-hashes ?provider ?(List stored)): {
-      Map hashes = _read_rows(stored);
-      if (hashes == NULL) { valid = 0; return NULL; }
-      return %(meta-hashes $provider $hashes);
-    }
-    case %(project-meta ?name ?signature ?provider ?(List stored)): {
-      Map hashes = _read_rows(stored);
-      if (hashes == NULL) { valid = 0; return NULL; }
-      return %(project-meta $name $signature $provider $hashes);
-    }
-  }
-  Var child;
-  $ast.rewrite_children(node, child, _restore_meta_hashes(child, valid));
 }
 
 /* Each dependency still hashes as it did when the interface was written; a
@@ -1762,7 +1754,7 @@ String interface_prelude(void) {
   String identity = compiler_identity();
   if (!identity) return NULL;
   String runtime = _canonical_path(%"${x2c_get_root()}/lib/x2c.x");
-  String header = %"(interface 5 \"$identity\" ";
+  String header = %"(interface 6 \"$identity\" ";
   foreach (String path, _interface_candidates(runtime)) {
     String text = NULL;
     try text = Path.read_text(path);
@@ -1780,26 +1772,25 @@ String interface_prelude(void) {
     contribution that the interface grammar cannot spell is reported as an
     `emit` diagnostic.
 */
-String interface_text(Compiler c, List selected) {
+String interface_text(Compiler c) {
   if (!compiler_identity()) return NULL;
   String canonical = _canonical_path(c.filename);
   Var cached = _process_cache()[canonical];
   if (cached is void) return NULL;
   Buffer out = $auto(Buffer.new(0));
-  if (_write_interface_entry(out, canonical, cached, selected)) return out;
+  if (_write_interface_entry(out, canonical, cached)) return out;
   $report.emit.interface_write(c);
 }
 
 static int _write_interface_entry(
-  Buffer out, String canonical, List entry, List selected) {
+  Buffer out, String canonical, List entry) {
   (List cached_parts, Var hash, List definitions, Map dependencies,
    List include_dirs) = entry;
   Map identities = {}, Array parts = [];
   foreach (Var part, cached_parts) parts.push(_stored_part(part, identities));
   List record = %(
-    interface 5 ${compiler_identity()} ${home_portable_path(canonical)}
+    interface 6 ${compiler_identity()} ${home_portable_path(canonical)}
     $hash ${parts.list_free()} $definitions
-    ${_renumber_bindings(selected, identities)}
     ${_stored_dependencies(dependencies)} $include_dirs
   );
   /* An interface is plain data, which a loader never evaluates. */
@@ -1857,9 +1848,6 @@ static List _renumber_bindings(List node, Map identities) {
   match (node) {
     case %(meta-hashes ?provider ?(Map hashes)):
       return %(meta-hashes $provider ${_stored_meta_hashes(hashes)});
-    case %(project-meta ?name ?signature ?provider ?(Map hashes)):
-      return %(project-meta $name $signature $provider
-               ${_stored_meta_hashes(hashes)});
   }
   String spelling = NULL;
   if (binding_identity_try_parts(node, NULL, spelling)) {

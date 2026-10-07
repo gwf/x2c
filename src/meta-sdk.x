@@ -436,8 +436,10 @@ static Map _sdk_linked_hashes(void) {
   Map rows = {};
   c.add_linked_meta_provider_hashes(rows);
   foreach (Var (name, source), c.project_meta)
-    match (source) case %(? ?provider ?(Map hashes)):
+    match (source) case %(? ?provider): {
+      Map hashes = c.meta_provider_hashes(provider);
       rows[name] = %(${hashes[name]} $provider);
+    }
   foreach (String name, c.meta_calls.keys())
     rows[name] = %(${c.meta_hashes[name]} ${c.meta_calls[name]});
   return rows;

@@ -92,7 +92,7 @@ typedef struct Compiler{
   int import_protocols;
   int in_pattern, match_is, runtime_literals, inline_header;
   int builtin_defs, in_proto, macro_count, recovery_depth;
-  int declaration_projection, declaration_produced;
+  int declaration_produced;
   int needs_exception;
   int local_macro_capture_scopes;
   int open_linkage;
@@ -2127,7 +2127,7 @@ Map Compiler_select_declaration_defaults(Compiler c, String path, Map symbols, A
 
 void Compiler_share_meta_group(Compiler c, Compiler owner);
 static void Compiler__prepare_shadow(Compiler c, Compiler owner, String path, Map symbols){
-  c -> filename = path;  c -> macro_lisp = owner -> macro_lisp;  c -> borrowed_lisp = c -> macro_lisp != NULL;  Compiler_share_meta_group(c, owner);  Sym_reset_overlay(c -> sym, symbols, Map_new());  Compiler_rebuild_protocols(c, symbols);  c -> conforms = Map_new();  c -> shallow = 1;  c -> declaration_projection = 1;
+  c -> filename = path;  c -> macro_lisp = owner -> macro_lisp;  c -> borrowed_lisp = c -> macro_lisp != NULL;  Compiler_share_meta_group(c, owner);  Sym_reset_overlay(c -> sym, symbols, Map_new());  Compiler_rebuild_protocols(c, symbols);  c -> conforms = Map_new();  c -> shallow = 1;
 }
 
 int Map_try_next(Map, unsigned *, Var *, Var *);
@@ -3199,7 +3199,7 @@ List Sym_visible_symbols(Sym);
 Symbol Compiler_peek(Compiler c, int steps){
   if(! _init_guard_) _file_init_();  Token token = c -> token;  if(! steps && Compiler_at_completion(c)){
     List rows = Sym_visible_symbols(c -> sym); {
-      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/compiler.x",.function = "Compiler_peek",.line = 1873};  x2c_error_raise_n(& _x2c_error_site_0, 1248787135328, 3, Symbol_var(740232), Symbol_var(29452646), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
+      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/compiler.x",.function = "Compiler_peek",.line = 1872};  x2c_error_raise_n(& _x2c_error_site_0, 1248787135328, 3, Symbol_var(740232), Symbol_var(29452646), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
     }
 
   }
@@ -3234,7 +3234,7 @@ static Token _skip_backward(Token token, Token origin){
 
 void Compiler_require_input(Compiler c){
   if(! _init_guard_) _file_init_();  if(c -> input_boundary && c -> token >= c -> input_boundary){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/compiler.x",.function = "Compiler_require_input",.line = 1914};  x2c_error_raise_n(& _x2c_error_site_1, 664344300629258, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/compiler.x",.function = "Compiler_require_input",.line = 1913};  x2c_error_raise_n(& _x2c_error_site_1, 664344300629258, 0);  __builtin_unreachable();
   }
 
 }
@@ -3301,7 +3301,7 @@ int Compiler_at_completion(Compiler c){
 
 void Compiler___complete_here(Compiler c, Symbol role, List keywords){
   if(! _init_guard_) _file_init_();  if(! Compiler_at_completion(c)) return;  List rows = Sym_visible_symbols(c -> sym); {
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../src/compiler.x",.function = "Compiler___complete_here",.line = 2037};  x2c_error_raise_n(& _x2c_error_site_2, 1248787135328, 3, Symbol_var(740232), Symbol_var(role), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(keywords));
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../src/compiler.x",.function = "Compiler___complete_here",.line = 2036};  x2c_error_raise_n(& _x2c_error_site_2, 1248787135328, 3, Symbol_var(740232), Symbol_var(role), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(keywords));
   }
 
 }

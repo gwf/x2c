@@ -441,13 +441,13 @@ void Compiler.record_project_meta_effect(
   if (%(function $name) in c.sym.file_statics()) return;
   c.sym.set(
     %("source-node" (declaration $path ${marker.pos})),
-    %(project-meta $name ${c.func_signature(type)} $path ${c.meta_hashes}));
+    %(project-meta $name ${c.func_signature(type)} $path));
 }
 
 /** Installs an included meta function's evaluator advertisement. */
 void Compiler.install_project_meta_effect(Compiler c, List row) {
-  match (row) case %(project-meta ?name ?signature ?provider ?hashes): {
-    c.project_meta[name] = %($signature $provider $hashes);
+  match (row) case %(project-meta ?name ?signature ?provider): {
+    c.project_meta[name] = %($signature $provider);
     c.native_meta.del(name);
     c.meta_group_bound.del(%"<unbound $name>");
     if (!c.meta_build) {
@@ -474,8 +474,8 @@ static int Compiler._bind_project_meta(
   if (c.meta_build) return 0;
   Var bound;
   if (!install && c.macro_lisp.try_get(name, bound)) return 1;
-  Var (signature, provider, hashes) = target;
-  if (c.project_meta_uses_linked(name, provider, hashes) &&
+  Var (signature, provider) = target;
+  if (c.project_meta_uses_linked(name, provider) &&
       c._bind_linked_target(name, signature)) return 1;
   c._install_stub(name, signature, provider, NULL);
   return 1;
@@ -485,9 +485,10 @@ static int Compiler._bind_project_meta(
     Copied definitions retain precise callees; runtime bodies retain their
     provider's source dependencies, including private helpers. */
 int Compiler.project_meta_uses_linked(
-  Compiler c, String name, String provider, Map hashes) {
+  Compiler c, String name, String provider) {
   Map linked = _linked_module();
   if (!(name in linked)) return 0;
+  Map hashes = c.meta_provider_hashes(provider);
   $let(c.filename, home_absolute_path(provider))
   $let(c.meta_hashes, hashes) $let(c.meta_calls, {})
     return c._linked_copy(name, linked);
@@ -959,9 +960,9 @@ static int Compiler._linked_texts_match(
   if (!c.meta_hashes.try_get(name, own)) {
     Var advertisement;
     if (c.project_meta.try_get(name, advertisement)) {
-      Var (_, provider, hashes) = advertisement;
-      Map dependency = hashes;
-      if (!(name in dependency)) return 0;
+      Var (_, provider) = advertisement;
+      Map hashes = c.meta_provider_hashes(provider);
+      if (!(name in hashes)) return 0;
       $let(c.filename, home_absolute_path(provider))
       $let(c.meta_hashes, hashes) $let(c.meta_calls, {})
         return c._linked_texts_match(name, linked, reached);

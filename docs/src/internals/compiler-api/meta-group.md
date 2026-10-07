@@ -38,7 +38,7 @@ A unit's meta group, emitted as C.
 Binds the session's group function `name` when it is not bound yet, by
 staging the group, and reports at `site` a function that cannot run.
 
-Source: `src/meta-group.x:896`
+Source: `src/meta-group.x:897`
 
 <a id="Compiler.finish_meta_functions"></a>
 #### Compiler.finish_meta_functions

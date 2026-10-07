@@ -37,7 +37,7 @@ String written = interface.exists() ? interface.read_text() : NULL;
 if (!written) _fail("unit interface was not written");
 if (written != build.join("second/probe.xi").read_text())
   _fail("repeated translations wrote different interfaces");
-if (!Regex.compile("(?m)^\\(interface 5 ").match(written))
+if (!Regex.compile("(?m)^\\(interface 6 ").match(written))
   _fail("interface lacks its version header");
 if (!written.contains("\"ProbeRow\""))
   _fail("interface omits the unit's declarations");

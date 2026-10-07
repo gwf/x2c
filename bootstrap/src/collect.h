@@ -31,6 +31,8 @@ int Compiler_linked_meta_provider_current(Compiler c, String path);
 
 void Compiler_complete_meta_hashes(Compiler c);
 
+Map Compiler_meta_provider_hashes(Compiler c, String provider);
+
 void Compiler_add_linked_meta_provider_hashes(Compiler c, Map rows);
 
 void Compiler_name_meta_provider_bindings(Compiler c, String path, int index);
@@ -57,7 +59,7 @@ void interface_configure(String out_dir, int cold);
 
 String interface_prelude(void);
 
-String interface_text(Compiler c, List selected);
+String interface_text(Compiler c);
 
 void collect_forget_provisional_entries(void);
 

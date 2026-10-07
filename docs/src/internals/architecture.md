@@ -234,17 +234,15 @@ write log restores that decode if its expansion rolls back.
 Local declaration productions stay in their owning unit's
 Context until full parsing consumes them. Their syntax, macro frames, and
 binding facts are not exported. Static helpers remain in their provider.
+Each provider has one function-hash table. Its meta advertisements identify
+the provider; collection and replay install the table before advertisements.
 The file holds one
-`(interface 5 "compiler" "path" "hash" (PARTS...) (DEFINITIONS...)
-(SELECTED-DEFINITIONS...) (DEPENDENCIES...) (INCLUDE-DIRS...))` form in
+`(interface 6 "compiler" "path" "hash" (PARTS...) (DEFINITIONS...)
+(DEPENDENCIES...) (INCLUDE-DIRS...))` form in
 `%()` List syntax, with bare Atoms for its structural words and Strings for
-identifiers; the reader reads that one form without evaluating it. Selected
-definitions carry
-the local function's native and source names, canonical type, parameter
-spellings, source line, and documentation. They include macro output and
-compiler-only `meta` definitions, while prototypes and imported functions
-do not become local definitions. The API reference enumerates these rows and
-joins authored prose to them. Before walking a file's source, collection looks
+identifiers; the reader reads that one form without evaluating it.
+The API reference reads `--dump-definitions` output and joins authored prose
+to those definitions. Before walking a file's source, collection looks
 for its interface in the output directory, then in the directory that mirrors
 the file's home-relative path under the compiler's stage directory (or under
 an installed home), then in a package's `builds/`. An interface is used only

@@ -50,8 +50,7 @@ void generate_code(Compiler c, List ast, String dir) {
   ast = _without_trivia(ast);
   String basename = %"${dir.rstrip("/")}/${Path.stem(c.filename)}";
   List outputs = c._generated_code(ast, basename);
-  String interface = c.source_facts ? NULL : interface_text(
-    c, _public_rows(c.definition_rows(ast)));
+  String interface = c.source_facts ? NULL : interface_text(c);
   if (interface) outputs = outputs.append(%("$basename.xi" $interface));
   c._publish(outputs);
 }
@@ -1615,16 +1614,6 @@ static String Compiler._parameter_name(Compiler c, List binding) {
   Map facts = c.semantic_binding_facts();
   if (facts.try_get(%(source-spelling $binding), spelling)) name = spelling;
   return name ? name : "";
-}
-
-/* A unit interface lists the public functions only. */
-static List _public_rows(List definitions) {
-  Array rows = [];
-  foreach (List row, definitions) match (row)
-    case %(function ?name ?display ?type ?names ?line ?doc
-           ?(int is_static) *):
-      if (!is_static) rows.push(%($name $display $type $names $line $doc));
-  return rows.list_free();
 }
 
 // definition dump

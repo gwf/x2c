@@ -38,7 +38,7 @@ void Compiler_install_project_meta_effect(Compiler c, List row);
 
 int Compiler_bind_project_meta(Compiler c, String name);
 
-int Compiler_project_meta_uses_linked(Compiler c, String name, String provider, Map hashes);
+int Compiler_project_meta_uses_linked(Compiler c, String name, String provider);
 
 void Compiler_record_native_meta_effect(Compiler c, List declaration, Token marker);
 

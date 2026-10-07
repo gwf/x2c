@@ -183,7 +183,7 @@ typedef struct Compiler {
   int import_protocols;
   int in_pattern, match_is, runtime_literals, inline_header;
   int builtin_defs, in_proto, macro_count, recovery_depth;
-  int declaration_projection, declaration_produced;
+  int declaration_produced;
   // Set when a cleanup region needs the exception runtime declarations.
   int needs_exception;
   int local_macro_capture_scopes;
@@ -916,7 +916,6 @@ static void Compiler._prepare_shadow(
   c.rebuild_protocols(symbols);
   c.conforms = {};
   c.shallow = 1;
-  c.declaration_projection = 1;
 }
 
 // A part's productions run in source order.

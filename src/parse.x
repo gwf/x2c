@@ -3092,15 +3092,13 @@ static List Compiler._bind_bundle(Compiler c, List rows) {
     c.declaration_produced = 1;
     c.run_declaration_effects();
   }
-  $let(c.declaration_projection, c.declaration_projection + 1) {
-    Array projected = [];
-    foreach (List row, rows) {
-      List bound = c.bind_syntax(row, AST_UNIT, c.return_type);
-      _append_rows(projected, bound);
-    }
-    List items = projected.list_free();
-    return c.shallow ? %(declaration-bundle (rows @items)) : %(seq @items);
+  Array projected = [];
+  foreach (List row, rows) {
+    List bound = c.bind_syntax(row, AST_UNIT, c.return_type);
+    _append_rows(projected, bound);
   }
+  List items = projected.list_free();
+  return c.shallow ? %(declaration-bundle (rows @items)) : %(seq @items);
 }
 
 static void _append_rows(Array output, List syntax) {
