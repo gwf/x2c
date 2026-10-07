@@ -58,6 +58,12 @@ without instrumenting every operation or adding another cleanup walker.
 - Fetching `origin/dev` for this document found it at `3f2ad976`. The
   automatic-interface architecture has therefore landed. This plan is based
   on that architecture, not the older visibility-pragma design.
+- Follow-up review fetched and fast-forwarded to
+  `00389e131bf1b5c5a33afa59f299746fc3fc5bbb` (`fix retained macro bindings and
+  package builds`). The changes below refine the compatibility and reuse
+  contracts; they do not implement the pending-code consolidation. The
+  generation, cache, cleanup, transform, transaction, generic memo, Scope, and
+  Match-cache owners were unchanged by that commit.
 - Source and checked-in fixtures were inspected. No behavior probe, compiler
   test run, LOC prototype, allocation measurement, or timing result establishes
   the proposed changes' benefit yet. No defect is claimed merely from finding
@@ -67,8 +73,48 @@ Read current [repository instructions](../AGENTS.md),
 [planning guidance](../agents/skills/plan-x2c-change/SKILL.md),
 [simplification guidance](../agents/skills/simplify-x2c-source/SKILL.md), and
 [plan conventions](README.md) when resuming. Reconcile this plan with the actual
-current `origin/dev`; source symbols below are the primary locators and line
-numbers are evidence at `3f2ad976`.
+current `origin/dev`; source symbols below are the primary locators. Original
+line numbers are evidence at `3f2ad976`; the follow-up below describes `00389e13`.
+
+### Reconciliation with retained-macro and package repairs
+
+Four landed changes matter to this design:
+
+1. **Linked meta reuse distinguishes provider freshness from definition
+   freshness.** `Compiler.linked_meta_definitions_current` in
+   [collect.x](../src/collect.x) first uses existing provider/source proofs,
+   then can compare a retained digest of the sorted definition-hash rows.
+   `add_linked_meta_provider_hashes` appends that digest to the existing source
+   proof for relevant providers. `Scan.file` in
+   [meta-project.x](../src/meta-project.x) uses it to avoid a project helper
+   for compiler-owned definitions that still match; `_linked_texts_match` in
+   [meta-native.x](../src/meta-native.x) uses it for provider references.
+   This is existing reuse at a meaningful boundary. Preserve both validity
+   questions and their callers: definition freshness is not a universal
+   replacement for source/dependency freshness or interface invalidation.
+2. **Retained native stubs transfer their storage to the Lisp session.**
+   `_install_stub` now calls `Lisp.bind` instead of `Lisp.set_global`.
+   [Lisp.bind](../lib/lisp.x) moves the `Func` into the session's Scope;
+   `set_global` alone borrows value referents. A shared pending or memo owner
+   must preserve that established ownership transfer. The move does not
+   automatically transfer the owners of every value referenced by the Func,
+   including its signature graph.
+3. **Retained catch syntax still needs occurrence-specific resolution.**
+   `_bind_catchcases` in [parse.x](../src/parse.x) now resolves the pattern
+   before introducing catch-arm bindings. Keep this resolution when reusing a
+   prepared macro or recipe. Syntax immutability alone does not establish that
+   the fully bound catch is reusable in a different expansion environment.
+4. **Implementation keyword aliases are file-local.**
+   [private-keywords.x](../lib/private-keywords.x) exports the loop decorator,
+   while files that use its shorthand declare `static keyword loop` locally.
+   Do not reconstruct or memoize the includer's syntax environment by exporting
+   the implementation alias together with the reusable decorator.
+
+`keyword-identifier` now exercises an ordinary `loop` identifier after an
+include, and `macro-catch-binders` includes a catch inside a generated Unit
+function. Include these cases in the relevant future focused validation. This
+review inspected source and fixture changes; it did not rerun compiler tests,
+package builds, or benchmarks or infer that other benchmark work had finished.
 
 ## Existing cooperation to preserve
 
@@ -197,6 +243,13 @@ can use operation-tagged keys in a shared memo when their ownership matches.
 Known compiler contracts establish stability; do not recursively rediscover
 purity or deep immutability at every lookup.
 
+The landed linked-meta definition digest is a concrete example of such a
+boundary. Count it as existing cooperation, and reuse its established evidence
+when evaluating meta-generation candidates. A new memo around filesystem or
+provider checks still needs the current validity contract; a path alone is not
+an immutable input. Do not merge source-freshness and definition-freshness
+answers under the same operation identity.
+
 Inventory actual computations using: result, complete inputs, point of input
 stability, lifetime, existing preparation/cache, repeated callers, and effects.
 Investigate prepared decorator/template analysis, structural projections,
@@ -292,6 +345,13 @@ effect activation. Header cache storage remains private to each native unit.
   name alone, determines reusable preparation across redefinitions.
 - Binding, hygiene, diagnostics, transaction rollback, and per-invocation
   origins remain correct on both memo hits and misses.
+- Retained host function storage follows `Lisp.bind` session ownership;
+  catch patterns retain their resolution before catch binding; implementation
+  keyword aliases remain file-local even when their decorator is public.
+- Linked meta definition reuse retains the current distinction between
+  unchanged definitions and unchanged provider sources/dependencies. Preserve
+  avoidance of unnecessary helper generation without weakening other consumers'
+  freshness requirements.
 - Native directives retain their effects. Public inline bodies preserve their
   source macro state; ordinary bodies obey `#undef` boundaries and conditional
   arms. Captured initializer helpers stay at their source positions.
@@ -344,8 +404,8 @@ Use existing compiler fixtures and probes first:
 | Concern | Existing starting points |
 | --- | --- |
 | Cold/warm interfaces and ordering | `ordinary-interface-cold`, `ordinary-interface-warm`, `ordinary-interface-unit-order`, `ordinary-interface-unit-order-warm`, `ordinary-interface-meta-order` |
-| Private compile-time definitions and context | `ordinary-interface-static-macro`, `ordinary-interface-static-keyword`, `ordinary-interface-meta-static-lisp`, `keyword-alias-included`, `meta-included-file-constants-shadowed` |
-| Recovery and identity | `macro-enumerator-rollback`, `macro-type-fields-rollback`, local macro and hygiene fixtures |
+| Private compile-time definitions and context | `ordinary-interface-static-macro`, `ordinary-interface-static-keyword`, `ordinary-interface-meta-static-lisp`, `keyword-alias-included`, `keyword-identifier`, `meta-included-file-constants-shadowed` |
+| Recovery and identity | `macro-enumerator-rollback`, `macro-type-fields-rollback`, `macro-catch-binders`, local macro and hygiene fixtures |
 | Native ordering and captured initialization | `header-promoted-include-macros`, `static-native-source`, `c-macro-redefinition`, `initializer-native-identity` |
 | Initialization and dependencies | `conditional-file-init`, `conditional-type-initializer`, `conditional-type-initializer-compiled`, `cache-reachability`, `literal-cache-init`, `private-typedef-order` |
 | Lifecycle | Existing defer, try/finally, scoped allocation, return/break/continue/goto fixtures; select by changed consumers |
@@ -356,6 +416,15 @@ generated C/header output, diagnostics/status, and runtime expectations. Check
 coverage of large-cache batching and units without functions. Add a focused
 fixture only for a public invariant not already covered, not to mirror the new
 containers. No new negative fixture is prescribed by this plan.
+
+If the implementation changes linked-meta reuse, provider proofs, or retained
+native stubs, also select relevant existing coverage from
+[run-meta-helper.sh](../unittest/probes/run-meta-helper.sh),
+[run-meta-cache-key.sh](../unittest/probes/run-meta-cache-key.sh), and
+[run-package-install.sh](../unittest/probes/run-package-install.sh). Inspect
+their actual cases before choosing focused commands; their existence is not a
+claim that every new digest/ownership boundary has dedicated coverage. These
+are conditional implementation checks, not additions to recurring gates.
 
 Follow [performance guidance](../agents/performance-checkpoints.md) when the
 machine is available. Compare converged toolchains with valid, nonempty
