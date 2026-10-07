@@ -824,6 +824,7 @@ void Compiler.name_meta_provider_bindings(
 static void Compiler._name_meta_provider(
   Compiler c, String name, int index) {
   if (%($name) in c.sym.file_statics()) return;
+  if (name in c.native_meta && c.bind_native_meta(name)) return;
   List binding = c.sym.lookup(%($name), NULL);
   if (binding)
     c.set_fact(%(emitted $binding), %"_x2c_meta_group_${index}_$name");

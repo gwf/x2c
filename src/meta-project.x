@@ -193,7 +193,7 @@ static int Scan.file_scope(Scan &s, Tokenizer tokens, String directory) {
       case <"}">: depth--; continue;
     }
     if (depth) continue;
-    if (word == "meta") meta |= _marker(tokens);
+    if (word == "meta") meta |= _marker(token);
     else if (word == "import") meta |= s.package(tokens) ? 2 : 0;
     else if (token.type == <preproc>)
       meta |= s.include(word, directory) ? 2 : 0;
@@ -201,13 +201,27 @@ static int Scan.file_scope(Scan &s, Tokenizer tokens, String directory) {
   return meta;
 }
 
-/* Whether the words after `meta` mark project meta code: `meta native T
-   name(` binds a native function, while in `meta native name(`, `native`
-   is a type. */
-static int _marker(Tokenizer tokens) {
-  if (tokens.next().text != "native") return 1;
-  tokens.next();
-  return tokens.next().text == "(";
+/* Only a body or initializer needs a helper. Prototypes and protocol
+   adoptions use their native supplier. In `meta native name(`, `native`
+   is a type rather than the explicit native marker. */
+static int _marker(Token token) {
+  token = Token.skip_trivia(token + 1);
+  if (token.text == "native") {
+    Token name = Token.skip_trivia(token + 1);
+    if (name.type == <eof> ||
+        Token.skip_trivia(name + 1).type != <(>) return 0;
+  }
+  int depth = 0;
+  for (; token.type != <eof>; token++) {
+    Symbol kind = token.type;
+    if (!depth) {
+      if (kind == <;>) return 0;
+      if (kind == <"{"> || kind == <"=>"> || kind == <"=">) return 1;
+    }
+    if (kind == <(> || kind == <[>) depth++;
+    else if (kind == <)> || kind == <]>) depth--;
+  }
+  return 0;
 }
 
 /* A package entry is read as an ordinary source provider. */

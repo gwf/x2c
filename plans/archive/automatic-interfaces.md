@@ -126,10 +126,9 @@ The new interface rules preserve opaque pointers. Public inline bodies that
 access an opaque handle's fields require its layout, so their typed syntax
 must participate in the same type selection as public signatures.
 
-Cold included providers bind public inline bodies before collection continues.
-An active include cycle can inspect later plain source signatures without
-executing future Lisp or declaration producers. A cycle that requires a future
-producer-created signature must supply that signature before the include.
+Cold included providers bind public inline bodies after the include graph is
+collected. They use the completed signatures without parsing active ancestors
+again. Compile-time effects retain their original source positions.
 
 A native enum cycle that depends on a later object-like #define was already
 unsupported at the pinned baseline. The baseline generated an included
