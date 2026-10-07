@@ -2149,7 +2149,7 @@ static List Compiler._bound_call(
 
 /** Returns a generated helper for a direct protocol-backed update.
     The resolved member must have exactly `(Participant, RHS) -> Participant`.
-    A matching helper is emitted once into the compiler's early declarations;
+    A matching helper is emitted once into the unit's pending support;
     `postfix` selects whether it returns the old or stored value. Returns null
     when the member cannot implement this update shape.
 */
@@ -2310,7 +2310,7 @@ static List DiscardCall.emit(DiscardCall &d) {
 /** Generates adapters and descriptor registration for resolved conformances.
     Native aliases are inserted at the participant's inferred public or
     private boundary. Ordinary adapters and descriptor thunks are added to the
-    compiler's early output. Returns `ast` with native insertions applied.
+    unit's pending support. Returns `ast` with native insertions applied.
 */
 List Compiler.generate_protocol_adapters(Compiler c, List ast) {
   /* Emit adapters only for finalized, declared conformances. */
@@ -2639,7 +2639,7 @@ static void Compiler._register_descriptor(
   List registration = c._fallback_registration(methods, name, early_call);
   List explicit_call = explicit_tag
     ? c._tagged_registration(methods, name, explicit_tag) : NULL;
-  Symbol queue = central_initializer ? <protocol> : <early>;
+  Symbol queue = central_initializer ? <protocol> : <prepare>;
   c.add_early(
     c.bind_syntax($!Unit{ static VarMethods $methods; }, AST_UNIT, NULL));
   if (thunks) {

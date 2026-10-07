@@ -57,7 +57,7 @@ static typedef struct StaticQueue {
     `guard_name`, and `initializer_name` name the header's private slots,
     guard, and initializer. Returns `(header source bindings)`; `bindings`
     maps source cache ids to emitted slots. Appends initialization work
-    to the compiler's early, middle, and late initialization phases; the
+    to the `<prepare>`, `<statics>`, and `<finish>` initialization areas; the
     operation is not idempotent. Header cache storage remains private to each
     C translation unit that includes it.
 */
@@ -72,7 +72,7 @@ List Compiler.setup_cache_init(
   Array scan = [];
   scan.push(source);
   foreach (Var initializer, statics.initializers) scan.push(initializer);
-  foreach (Symbol area, %<<protocol early mid late>>)
+  foreach (Symbol area, %<<protocol prepare statics finish>>)
     scan.push(c.init_statements(area));
   Array source_ids = c._cache_ids(scan.list_free());
   if (header_ids)
@@ -531,12 +531,12 @@ List Compiler.initialization_guard(Compiler c, List guard) =>
 /* source caches
 
    Source cache slots and the deferred file-static initializers run in the
-   unit's early, middle, or late initialization phase. */
+   unit's `<prepare>`, `<statics>`, or `<finish>` initialization area. */
 
 /* Materialize source cache slots before ordinary file-static assignments.
    While generating String.initialize or List.initialize, a cache graph that
-   requires that same canonicalizer runs late, after the initializer body;
-   dependent file-static assignments move late with it. */
+   requires that same canonicalizer runs in `<finish>`, after the
+   initializer body; dependent file-static assignments move with it. */
 static List Compiler._source_cache(
   Compiler c, List source, Array ids, Map bindings, StaticQueue &statics) {
   source = c._rewrite_statics(source, statics);
@@ -557,9 +557,9 @@ static List Compiler._source_cache(
     (deferred ? late : early).push(stmt);
   }
   foreach (List stmt, c._cache_batches(early, declarations, NULL))
-    c.add_init(<early>, stmt);
+    c.add_init(<prepare>, stmt);
   foreach (List stmt, c._cache_batches(late, declarations, NULL))
-    c.add_init(<late>, stmt);
+    c.add_init(<finish>, stmt);
   statics.queue(deferred_kind);
   ids.free();
   return c.place_source_prelude(source, declarations.list_free());
@@ -600,8 +600,8 @@ static int Compiler._reaches_kind(Compiler c, List code, Symbol kind) {
 }
 
 /* Queue a stable dependency walk. Dependencies precede their consumers, and
-   independent roots retain source order. A dependency queued late moves every
-   consuming initializer late as well. */
+   independent roots retain source order. A dependency queued in `<finish>`
+   moves every consuming initializer there as well. */
 static void StaticQueue.queue(StaticQueue &q, Symbol deferred_kind) {
   q.deferred_kind = deferred_kind;
   foreach (List initializer, q.initializers) q.visit(initializer.car());
@@ -614,11 +614,11 @@ static Symbol StaticQueue.visit(StaticQueue &q, List binding) {
   if (status is not void) return status;
   q.state[binding] = <visiting>;
   Array definitions = q.pending[binding];
-  Symbol area = q.deferred(definitions) ? <late> : <mid>;
+  Symbol area = q.deferred(definitions) ? <finish> : <statics>;
   List dependencies = q.c.static_init_deps.getdefault(binding, %());
   foreach (List dependency, dependencies)
-    if (dependency in q.pending && q.visit(dependency) == <late>)
-      area = <late>;
+    if (dependency in q.pending && q.visit(dependency) == <finish>)
+      area = <finish>;
   q.add_calls(definitions, area);
   q.state[binding] = area;
   return area;

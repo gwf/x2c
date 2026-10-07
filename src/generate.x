@@ -976,16 +976,16 @@ static List Init.synthesize(Init &i, List arms) {
   return _initializer_function(i.c, type, binding, statements);
 }
 
-/* An initializer runs `entry` and its run-once test, then the early and
-   middle queues, its own `body`, the late queue, and the shutdown
-   registration. Cache graphs that require the initializer's own
-   String/List canonicalizer are queued late; all other cache and static
+/* An initializer runs `entry` and its run-once test, then the `<prepare>`
+   and `<statics>` areas, its own `body`, the `<finish>` area, and the
+   shutdown registration. Cache graphs that require the initializer's own
+   String/List canonicalizer go in `<finish>`; all other cache and static
    setup keeps its pre-body order. */
 static List Init.statements(Init &i, List entry, List body) {
   Compiler c = i.c;
   return _run_once(c, entry, i.guard, List.concat_n(
-    5, c.init_statements(<early>), c.init_statements(<mid>), body,
-    c.init_statements(<late>), i.shutdown));
+    5, c.init_statements(<prepare>), c.init_statements(<statics>), body,
+    c.init_statements(<finish>), i.shutdown));
 }
 
 /* `function` calls the region's initializer unless its guard is set. */
@@ -1061,14 +1061,15 @@ List Compiler.init_statements(Compiler c, Symbol phase) =>
 
 /* cache-only files
 
-   A file without a type initializer whose only queued work is early cache
-   setup patches only the entries that reach a cache. Its eager constructor
-   already runs the initializers, and unrelated foundational calls then
-   cannot recursively materialize literals during String/List pool setup. */
+   A file without a type initializer whose only queued work is `<prepare>`
+   cache setup patches only the entries that reach a cache. Its eager
+   constructor already runs the initializers, and unrelated foundational
+   calls then cannot recursively materialize literals during String/List
+   pool setup. */
 
 static int Compiler._cache_only(Compiler c) =>
-  !c.init_fn && c.init_statements(<early>) &&
-  !c.init_statements(<mid>) && !c.init_statements(<late>);
+  !c.init_fn && c.init_statements(<prepare>) &&
+  !c.init_statements(<statics>) && !c.init_statements(<finish>);
 
 /* Every function that directly or transitively reaches a source cache. */
 static Map _cache_reachable(List source) {
