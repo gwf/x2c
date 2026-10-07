@@ -67,7 +67,7 @@ static void check(Compiler c, Lisp reader, Macro plain, Macro captured,
   int scopes = Sym_scope_count(c->sym), count = c->macro_count;
   List lambda_scopes = c->lambda_scopes;
   Map retained_holes = c->macro_holes;
-  size_t early = Array_len(c->early_decls);
+  size_t early = Array_len(c->pending.areas[0]);
   List rebuilt = Compiler_rebuild_expression(c, type, application);
   require(Var_list(List_cadr(rebuilt)) == type, "root type changed");
   require(List_equal(Var_list(List_caddr(rebuilt)), content),
@@ -80,7 +80,7 @@ static void check(Compiler c, Lisp reader, Macro plain, Macro captured,
   require(c->lambda_scopes == lambda_scopes, "changed capture scopes");
   require(c->macro_holes == retained_holes, "changed template hole context");
   require(c->macro_count == count, "performed normal macro expansion");
-  require(Array_len(c->early_decls) == early, "added early declarations");
+  require(Array_len(c->pending.areas[0]) == early, "added early declarations");
   require(Compiler_error_count(c) == 0, "reported a compiler error");
   require(List_match(rebuilt, List_var(Macro_pattern(shape, names))) != NULL,
     "rebuilt lambda stopped matching its source template");

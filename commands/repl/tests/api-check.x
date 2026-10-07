@@ -113,7 +113,7 @@ static void _carrier_rollback(Compiler c) {
     ((new-name $token "rollback")
      (early $key $token (declare (int) (bindings (bind $token ()))))
      (cleanup $placed (seq))));
-  int early = c.early_decls.len(), exception = c.needs_exception;
+  int early = c.pending.area(<support>).len(), exception = c.needs_exception;
   String counters = c.names.counters.repr();
   int failed = 0;
   DiagnosticsHold hold = c.diagnostics.hold();
@@ -131,7 +131,7 @@ static void _carrier_rollback(Compiler c) {
     catch %(malformed *): failed = 1;
   }
   c.diagnostics.release(hold, 0);
-  if (!failed || c.early_decls.len() != early ||
+  if (!failed || c.pending.area(<support>).len() != early ||
       c.names.adapters.contains(key) || c.needs_exception != exception ||
       c.names.counters.repr() != counters) {
     fputs("carrier effects leaked past a failed application\n", stderr);
