@@ -41,10 +41,8 @@ typedef struct ScriptUnit {
     the last binding identity issued in the translation unit: collection,
     shadow, package, and full-parse compilers all draw from it, so a binding
     number names one live declaration across every symbol table in the unit.
-    Rows replayed from an interface keep that interface's own numbering,
-    which starts at 1. A file walked cold restores the counter afterwards,
-    so the unit reuses the numbers its rows took. Either way a replayed row's
-    number identifies a declaration only within that file's rows.
+    Exported rows use their interface's own numbering, which starts at 1;
+    imported templates rebind those references in the consuming unit.
 */
 typedef struct GenNames {
   Map counters, adapters, file_scope_owners;
@@ -92,14 +90,6 @@ typedef struct Compiler {
   Map deps;
   List aggregate_type, macro_stack, declaration_effects, Sym sym;
   Map evaluated_effects;
-  /* The last frozen `macro_stack`, reused while that List and every pool
-     level live; one expansion's declarations share one stack. */
-  List frozen_stack_key;
-  Var frozen_stack;
-  unsigned long frozen_stack_epoch;
-  /* Each macro definition frozen in this pool epoch, by its identity. */
-  Map frozen_macros;
-  unsigned long frozen_macros_epoch;
   /* The last binding identity issued before the outermost active expansion
      began; a later identity was introduced by that expansion. */
   int expansion_floor;
@@ -122,7 +112,6 @@ typedef struct Compiler {
   /* The cursor after a governed statement took the directives before it,
      which the following item must not read again. */
   Token directives_taken;
-  // Import paths already applied to this .x file's alias map.
   Map protocols, conforms, protocol_helpers;
   // Answers derived from the occurrence and adoption tables. Publishing a
   // protocol or an adoption changes what these would say, so the whole map
@@ -585,7 +574,8 @@ void Compiler.run_declaration_effects(Compiler c) {
       Token token = c.thaw_declaration_syntax(site);
       c.evaluate_declaration_effect(form, token);
       if (c.collect_protocols && end >= 0)
-        c.sym.set(key, %(declaration-source $end (declaration-bundle (rows))));
+        c.sym.set(key, %(declaration-source $end (declaration-bundle (rows))
+          ${c.semantic_binding_facts()}));
     }
   }
 }
@@ -643,18 +633,18 @@ static void Compiler._expand_unit_macro(Compiler c) {
   if (!retained) c.names.counters = counters;
 }
 
-/* The owning source records one declaration production, including its exact
-   token span. Full parsing consumes that production instead of invoking its
-   compile-time producer again. */
+/* The owning source records one declaration production and its token span.
+   Both parses share its Context, bindings, origins, and macro frames.
+   Full parsing consumes the result without invoking its producer again. */
 static int Compiler._retain_bundle(
   Compiler c, List syntax, Token first, Token after) {
   match (syntax) {
     case %(seq ?only): return c._retain_bundle(only, first, after);
     case %(declaration-bundle (rows *)): {
-      List frozen = c.freeze_declaration_syntax(syntax);
       c.sym.set(
         c._declaration_source_key(first),
-        %(declaration-source ${after.pos} $frozen));
+        %(declaration-source ${after.pos} $syntax
+          ${c.semantic_binding_facts()}));
       return 1;
     }
   }
@@ -666,23 +656,40 @@ static int Compiler._retain_bundle(
 List Compiler.replay_declaration_source(Compiler c) {
   List source = c.sym.get(c._declaration_source_key(c.token));
   match (source)
-    case %(declaration-source ?(int end) ?syntax): {
-      List thawed = c.land_retained_bindings(
-        c.thaw_declaration_syntax(syntax));
-      List bound = c.bind_syntax(thawed, AST_UNIT, NULL);
+    case %(declaration-source ?(int end) ?syntax ?facts): {
+      c._restore_declaration_bindings(syntax, facts, {});
+      List bound = c.bind_syntax(syntax, AST_UNIT, NULL);
       while (c.peek(0) != <eof> && c.token.pos < end) c.next();
       return bound;
     }
   return NULL;
 }
 
-/* retained declaration syntax
+/* Register only this production's identities. Shared macro frames are
+   visited once, and later source declarations keep their ordinary order. */
+static void Compiler._restore_declaration_bindings(
+  Compiler c, Var syntax, Map facts, Map seen) {
+  if (syntax is not <list> || syntax in seen) return;
+  seen[syntax] = 1;
+  int identity = 0;
+  String spelling = NULL;
+  if (binding_identity_try_parts(syntax, identity, spelling)) {
+    c.set_fact(%(known $identity), spelling);
+    c.set_fact(%(source-spelling $syntax),
+      facts.getdefault(%(source-spelling $syntax), spelling));
+    return;
+  }
+  foreach (Var child, syntax.list())
+    c._restore_declaration_bindings(child, facts, seen);
+}
 
-   Declaration syntax outlives the segment that parsed it, in the process
-   cache and in `.xi` interfaces. Freezing turns tokens and origin indices
-   into portable rows, and thawing rebuilds them in the current parse. */
+/* portable compile-time syntax
 
-/** Retains declaration syntax across source segments and cached interfaces.
+   Public macro definitions and effects cross Context and interface
+   boundaries. Freezing turns tokens and origin indices into portable rows;
+   thawing rebuilds them in the importing unit. Local recipes stay live. */
+
+/** Retains exported syntax across translation units and cached interfaces.
     Tokens and origin indices become portable source data; marker-shaped user
     Lists are escaped so thawing preserves their values.
 */
@@ -697,7 +704,7 @@ Var Compiler.freeze_declaration_syntax(Compiler c, Var syntax) {
   match (syntax) {
     case %(cache ?(int id)):
       return %(declaration-cache ${c._freeze_cache_key(c.id_keys[id])});
-    case %(macrodef *rows): return c._frozen_macro(syntax, rows);
+    case %(macrodef *rows): return c._declaration_macro(rows, 0);
     case %(src (source ?path ?begin ?end) ?node):
       return %(src (source ${_declaration_path(path, 0)} $begin $end)
         ${c.freeze_declaration_syntax(node)});
@@ -740,19 +747,7 @@ static List Compiler._freeze_rows(Compiler c, List syntax) {
   return rows.list_free();
 }
 
-/** Returns `freeze_declaration_syntax` of the active macro stack. */
-Var Compiler.freeze_macro_stack(Compiler c) {
-  unsigned long epoch = Pool.epoch();
-  if (c.macro_stack != c.frozen_stack_key || epoch != c.frozen_stack_epoch ||
-      c.frozen_stack is void) {
-    c.frozen_stack = c.freeze_declaration_syntax(c.macro_stack);
-    c.frozen_stack_key = c.macro_stack;
-    c.frozen_stack_epoch = epoch;
-  }
-  return c.frozen_stack;
-}
-
-/** Restores a retained declaration recipe in the current parsing lifetime. */
+/** Restores exported syntax in the importing unit's parsing lifetime. */
 Var Compiler.thaw_declaration_syntax(Compiler c, Var syntax) {
   if (syntax is not <list> || syntax.is_nil()) return syntax;
   match (syntax) {
@@ -828,24 +823,6 @@ static List Compiler._thaw_origin(Compiler c, List location, Var node) {
       c.origins.push(%(source $file $line $column $length $position));
   int occurrence = c.origins.len();
   return %(at $occurrence ${c.thaw_declaration_syntax(node)});
-}
-
-/* A definition is immutable, so it freezes once per pool epoch. A template
-   that invokes others carries their definitions, which would otherwise be
-   frozen again for every retained declaration it produces. */
-static List Compiler._frozen_macro(Compiler c, List definition, List rows) {
-  unsigned long epoch = Pool.epoch();
-  if (!c.frozen_macros || epoch != c.frozen_macros_epoch) {
-    c.frozen_macros = {};
-    c.frozen_macros_epoch = epoch;
-  }
-  uintptr_t key = (uintptr_t) definition;
-  Var frozen = void;
-  if (!c.frozen_macros.try_get(key, frozen)) {
-    frozen = c._declaration_macro(rows, 0);
-    c.frozen_macros[key] = frozen;
-  }
-  return frozen;
 }
 
 static List Compiler._declaration_macro(Compiler c, List rows, int thaw) {
@@ -953,8 +930,9 @@ static void Defaults.produce(Defaults &d, Map declarations) {
     (Var position, Var key, Var value) = entry;
     (void) position;
     match (value)
-      case %(declaration-source ?end (declaration-bundle (rows *rows))): {
-        rows = d.c.thaw_declaration_syntax(rows);
+      case %(declaration-source ?end (declaration-bundle (rows *rows))
+               ?facts): {
+        d.c._restore_declaration_bindings(rows, facts, {});
         Array produced = [];
         d.c._produce(rows, produced);
         d.sources.push(%($declarations $key $end ${produced.list_free()}));
@@ -969,7 +947,7 @@ static void Compiler._produce(Compiler c, List rows, Array selected) {
     match (row)
       case %(declaration-pending ?callback ?arguments
                ?construction ?privacy): {
-        $let(c.macro_stack, c.thaw_declaration_syntax(construction))
+        $let(c.macro_stack, construction)
         $let(c.source_private, privacy)
           c._produce(c._generated_rows(callback, arguments), selected);
         continue;
@@ -1009,7 +987,7 @@ static List Defaults._select_rows(Defaults &d, List rows) {
   foreach (List row, rows) {
     match (row)
       case %(declaration-default ?function ?construction ?privacy): {
-        $let(c.macro_stack, c.thaw_declaration_syntax(construction))
+        $let(c.macro_stack, construction)
         $let(c.source_private, privacy) {
           Var syntax = d._unless_taken(function);
           if (syntax is not void) selected.push(c._bind_default(syntax));
@@ -1154,8 +1132,9 @@ static List Compiler._forwarder(
 static void Defaults.store(Defaults &d, Map symbols) {
   foreach (List source, d.sources) {
     (Map declarations, Var key, Var end, List rows) = source;
-    declarations[key] = d.c.freeze_declaration_syntax(
-      %(declaration-source $end (declaration-bundle (rows @rows))));
+    declarations[key] =
+      %(declaration-source $end (declaration-bundle (rows @rows))
+        ${d.c.semantic_binding_facts()});
     symbols[key] = declarations[key];
   }
 }
@@ -1177,8 +1156,8 @@ static typedef struct FullParse {
 
 /** Parses and types the positioned source against `globs`.
 
-    The result is a source-ordered top-level AST. This resets per-parse
-    origins, macro state, and protocol resolution.
+    The result is a source-ordered top-level AST. This resets macro state
+    and protocol resolution; origins live for the whole unit.
     `generated_symbols` publishes external adapter signatures before parsing.
 */
 List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) {
@@ -1202,7 +1181,6 @@ List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) {
 static void Compiler._reset_parse(Compiler c, Map globs, int generated) {
   c.meta_group.clear();
   c.meta_group_bound = {};
-  c.origins.clear();
   c.meta_comptime = {};
   c.meta_regions = {};
   c.native_meta = {};
@@ -2762,7 +2740,7 @@ static Compiler _new(Compiler owner) {
   c.braces = [];
   c.line_starts = [];
   c.import_stack = [];
-  c.origins = [];
+  c.origins = owner ? owner.origins : [];
   c.root_dir = x2c_get_root();
   return c;
 }

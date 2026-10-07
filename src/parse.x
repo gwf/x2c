@@ -3125,13 +3125,13 @@ static List Compiler._bind_decl_recipe(
   Compiler c, Var callback, Var arguments) {
   if (c.shallow)
     return %(declaration-pending $callback $arguments
-              ${c.freeze_macro_stack()} ${c.source_private});
+              ${c.macro_stack} ${c.source_private});
   return c._bind_recipe(callback, arguments, AST_UNIT);
 }
 
 static List Compiler._bind_default(Compiler c, Var function) {
   if (c.shallow)
-    return %(declaration-default $function ${c.freeze_macro_stack()}
+    return %(declaration-default $function ${c.macro_stack}
               ${c.source_private});
   return c.bind_syntax(function, AST_UNIT, c.return_type);
 }
@@ -3173,9 +3173,7 @@ static List Compiler._bind_collected_function(
   Type type = %(declare $return_type (bindings $declarator)).type_from_ast();
   if (c.public_bodies &&
       (!type.is_inline() || type.is_static() || c.source_private)) return NULL;
-  List landed = c.land_retained_bindings(%($declarator $body $construction));
-  (declarator, body, construction) = landed;
-  $let(c.macro_stack, c.thaw_declaration_syntax(construction)) {
+  $let(c.macro_stack, construction) {
     Token invocation = c.macro_stack ? c.macro_stack.last().list()[3] : NULL;
     $let(c.origin, invocation ? c.record_origin(invocation) : c.origin)
     return c.bind_syntax(
@@ -3189,46 +3187,9 @@ static List Compiler._bind_collected_function(
 static List Compiler._bind_collected_initializers(
   Compiler c, List input, Var declaration, Var construction) {
   if (c.shallow) return input;
-  List landed = c.land_retained_bindings(%($declaration $construction));
-  (declaration, construction) = landed;
-  $let(c.macro_stack, c.thaw_declaration_syntax(construction)) {
+  $let(c.macro_stack, construction) {
     return c.bind_syntax(declaration, AST_UNIT, c.return_type);
   }
-}
-
-/** Lands retained bindings without changing a live identity's spelling.
-    Collection-local numbers can collide with bindings full parsing issued.
-    One relocation map keeps declarations, bodies, and captures consistent. */
-Var Compiler.land_retained_bindings(Compiler c, Var syntax) =>
-  c._land_retained_bindings(syntax, {});
-
-static Var Compiler._land_retained_bindings(
-  Compiler c, Var syntax, Map identities) {
-  if (syntax is not <list>) return syntax;
-  int identity = 0;
-  String spelling = NULL;
-  if (!binding_identity_try_parts(syntax, identity, spelling)) {
-    List node = syntax, Var child;
-    $ast.rewrite_children(
-      node, child, c._land_retained_bindings(child, identities));
-  }
-  Var landed;
-  if (identities.try_get(syntax, landed)) return landed;
-  if (c.names.next_binding < identity) c.names.next_binding = identity;
-  Var issued;
-  if (c.semantic_binding_facts().try_get(%(known $identity), issued) &&
-      issued != spelling)
-    landed = c.sym.introduce(spelling);
-  else {
-    landed = syntax;
-    c.set_fact(%(known $identity), spelling);
-  }
-  identities[syntax] = landed;
-  Var source;
-  if (!c.semantic_binding_facts().try_get(%(source-spelling $syntax), source))
-    source = spelling;
-  c.set_fact(%(source-spelling $landed), source);
-  return landed;
 }
 
 /* Binds a constructed function's parameters in a fresh prototype scope,
@@ -3292,7 +3253,7 @@ static List Compiler._collected_function(
           declaration = %(declare $type (bindings (bind $name $modifiers)));
       }
     }
-  return %(declaration-function $declaration $body ${c.freeze_macro_stack()});
+  return %(declaration-function $declaration $body ${c.macro_stack});
 }
 
 // constructed declarations and expressions
@@ -3347,7 +3308,7 @@ static List Compiler._bind_declaration(
     tag, base, output.list_free(), preserved_self);
   if (context == AST_UNIT) c.record_declaration_visibility(decl);
   if (c.shallow && context == AST_UNIT && _initializes(declarators))
-    return %(declaration-initialized $decl ${c.freeze_macro_stack()});
+    return %(declaration-initialized $decl ${c.macro_stack});
   if (context == AST_BLOCK && tag == <declare>)
     return c.finish_managed_declaration(decl, c.token);
   return decl;

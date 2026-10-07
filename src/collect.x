@@ -167,15 +167,16 @@ Map Compiler.collect_symbols(Compiler c, Map globs) {
   c.deps = {};
   c.add_translation_dependency(canonical);
   if (c.prelude) c._add_prelude(globs, visited);
-  int covered = canonical in visited;
+  /* The prelude needs this file's signatures to close include cycles.
+     Its own walk must select defaults against its current declarations. */
+  if (canonical in visited) {
+    List own = c._entry(canonical);
+    foreach (Var part, own.car()) if (part is <map>)
+      foreach (Var key, part.map().keys()) globs.del(key);
+    foreach (Var name, own.caddr()) c.fn_defs.del(name);
+  }
   visited[canonical] = 1;
   c._walk_file(canonical, c.text, Path.dirname(c.filename), globs, visited);
-  /* The prelude's replay already declared this unit's defaults, so its own
-     walk selects none of them. The first walk's declarations stay in force,
-     as they are for every other unit that reaches this file. */
-  if (covered)
-    foreach (Var part, c._entry(canonical).car())
-      if (part is <map>) c._merge_rows(globs, part);
   c.bind_pending_inline_bodies(globs, canonical, NULL, NULL);
   return globs;
 }
@@ -456,6 +457,8 @@ static void FileWalk.select_public(FileWalk &w) {
   Map rows = {}, needed = {}, selected = {};
   foreach (Var part, w.parts) if (part is <map>) rows.merge(part);
   foreach (Var (key, value), rows) {
+    // The owning unit replays its recipes before its Context closes.
+    match (value) case %(declaration-source *): continue;
     List family = _row_type_family(rows, w.statics, key, value);
     if (_private_row(w.statics, key, family)) continue;
     selected[key] = 1;
@@ -596,12 +599,10 @@ static List Compiler._walk_cold(
   return _process_cache()[canonical];
 }
 
-/* A cold included file has its own generated names. Restore the unit's
-   counters afterwards, so cold walks and cached interfaces give the unit
-   the same binding numbers and private spellings. */
+/* A cold included file has its own generated spellings. Binding identities
+   remain unique across the unit and its pending inline-body parses. */
 static void Compiler._walk_apart(
   Compiler c, String path, String text, Map globs, Map visited) {
-  $let(c.names.next_binding, c.names.next_binding)
   $let(c.names.counters, {})
     c._walk_file(path, text, Path.dirname(path), globs, visited);
 }
