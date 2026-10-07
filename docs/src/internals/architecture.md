@@ -193,11 +193,12 @@ includes. `src/collect.x` shallow-parses source text directly, splicing
 quote-includes inline at their include points in the same order the
 preprocessor would have produced them, resolving each through the same search
 order (the including file's directory, `.`, `src/`, `lib/`, then the `-I`
-chain), and overlays what it finds on the prelude. Includes that land under
-`lib/` or `include/` are already covered by the prelude and are skipped;
-unresolved angle includes are system headers the generated C re-includes
-anyway; unresolved quote includes are driver errors. Each file is spliced once
-by real path, so include cycles terminate.
+chain), and overlays what it finds on the prelude. Source includes install
+their public declarations and compile-time definitions. Native runtime headers
+already covered by the prelude add no declarations. Unresolved angle includes
+are system headers the generated C re-includes; unresolved quote includes are
+driver errors. Each file is spliced once by real path, so include cycles
+terminate.
 
 Collection also hashes this unit's function bodies and initialized
 file-static values while it skips them. Full parsing records each
@@ -206,6 +207,11 @@ generation pairs those names with the hashes. An unchanged forward
 definition can therefore use its shipped reference list to check later
 dependencies before their bodies are parsed. Included source bodies belong
 to their own units and do not enter this unit's hash map.
+
+Linked providers retain one source hash and their direct dependency hashes.
+Imported functions refer to that provider record. The collector checks the
+dependency graph once per translation process, using its existing source
+hashes. A changed provider or dependency requires rebuilding its meta code.
 
 The public `x2c_meta_definition_hashes()` query still returns String hashes
 for definitions parsed so far. The private Lisp query
@@ -222,7 +228,10 @@ type families needed by public declarations. Source-position rows also retain
 public macro and keyword definitions, Lisp effects, and provider meta-function
 identities. Cold collection and interface replay use the same ordered parts,
 while the full parser installs included compile-time definitions at their
-include positions. Static helpers remain in their provider. The file holds one
+include positions. Local declaration productions stay in their owning unit's
+Context until full parsing consumes them. Their syntax, macro frames, and
+binding facts are not exported. Static helpers remain in their provider.
+The file holds one
 `(interface 5 "compiler" "path" "hash" (PARTS...) (DEFINITIONS...)
 (SELECTED-DEFINITIONS...) (DEPENDENCIES...) (INCLUDE-DIRS...))` form in
 `%()` List syntax, with bare Atoms for its structural words and Strings for
