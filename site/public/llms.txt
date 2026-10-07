@@ -33,6 +33,9 @@
 ## Language reference
 
 - [Language Reference](https://x2c-lang.dev/docs/reference/language.html)
+- [Syntax Specifications](https://x2c-lang.dev/docs/reference/syntax/index.html)
+- [Source Grammar](https://x2c-lang.dev/docs/reference/syntax/grammar.html)
+- [Lexical Specification](https://x2c-lang.dev/docs/reference/syntax/lexical.html)
 - [Compiler Options](https://x2c-lang.dev/docs/reference/cli.html)
 - [Install a Native Compiler](https://x2c-lang.dev/docs/guide/installation.html)
 

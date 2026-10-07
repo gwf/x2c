@@ -9,6 +9,9 @@ phase are in [compiler options](cli.md). If you have not built the compiler
 yet, the website's install page is the quickest route, and [building the
 compiler](../internals/building.md) covers the self-host stages behind it.
 
+The [syntax specifications](syntax/index.md) catalog the source rules and
+provide an extracted EBNF grammar and lexical transition specification.
+
 ## Source files and visibility
 
 An `.x` file combines declarations and definitions. Translation produces a
