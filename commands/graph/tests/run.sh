@@ -8,10 +8,14 @@ tmp=${TMPDIR:-/tmp}/x2c-graph-tests.$$
 mkdir -p "$tmp"
 trap 'rm -rf "$tmp"' EXIT HUP INT TERM
 
-# Binding numbers count the declarations each frontend loaded first, and
-# their widths move line breaks, so compare renumbered, unwrapped dumps.
+# Binding, origin, and literal-cache numbers belong to one compiler instance.
+# Compare their identity relationships in renumbered, unwrapped dumps.
 ast_shape() {
-  perl -pe 's/\(binding (-?\d+)/"(binding " . ($id{$1} \/\/= ++$n)/ge' |
+  perl -pe 's{\((binding|at|tadapt|cache)\s+(-?\d+)}{
+    my ($tag, $old) = ($1, $2);
+    my $kind = $tag eq "tadapt" ? "at" : $tag;
+    "($tag " . ($ids{$kind}{$old} //= ++$next{$kind})
+  }gex' |
     tr '\n' ' ' | sed 's/  */ /g'
 }
 
