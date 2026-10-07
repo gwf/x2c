@@ -127,9 +127,9 @@ static void * _input(Thread thread){
   return(unsigned char *) thread + _input_offset();
 }
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
-Var String_var(String);
+static Var String_var(String);
 
 void Error_policy_release(void *);
 
@@ -143,7 +143,7 @@ void Pool_thread_start(void);
 Thread Thread_start(ThreadFn function, const void * input, size_t input_size){
   if(! _init_guard_) _file_init_();
   if(! function ||(input_size && ! input)){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/thread.x",.function = "Thread_start",.line = 100};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/thread.x",.function = "Thread_start",.line = 98};
     x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Thread.start")), NULL))));
     __builtin_unreachable();
   }
@@ -171,7 +171,7 @@ void * Error_policy_capture(void);
 static Thread _new_handle(ThreadFn function, const void * input, size_t input_size){
   size_t input_offset = _input_offset();
   if(input_size > SIZE_MAX - input_offset){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/thread.x",.function = "_new_handle",.line = 126};
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/thread.x",.function = "_new_handle",.line = 124};
     x2c_error_raise_n(& _x2c_error_site_1, 1358596898646632, 0);
     __builtin_unreachable();
   }
@@ -180,7 +180,7 @@ static Thread _new_handle(ThreadFn function, const void * input, size_t input_si
   if(! thread){
     Error_policy_release(policy);
     {
-      static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/thread.x",.function = "_new_handle",.line = 131};
+      static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/thread.x",.function = "_new_handle",.line = 129};
       x2c_error_raise_n(& _x2c_error_site_2, 97614135954008, 0);
       __builtin_unreachable();
     }
@@ -239,12 +239,12 @@ static void _stack_attributes(pthread_attr_t * attributes){
 
 }
 
-Var int_var(int);
+static Var int_var(int);
 
 _Noreturn static void _error(const char * operation, int error){
   String name = String_new(operation);
   {
-    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/thread.x",.function = "_error",.line = 189};
+    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/thread.x",.function = "_error",.line = 187};
     x2c_error_raise_n(& _x2c_error_site_3, 20399393368, 2, Symbol_var(34096809266140), String_var(name), Symbol_var(11703198), int_var(error));
     __builtin_unreachable();
   }
@@ -297,7 +297,7 @@ int Error_mark(void);
 
 int x2c_error_catch_site_pending(ErrorCatchSite *);
 
-Var List_var(List);
+static Var List_var(List);
 
 ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
 
@@ -415,13 +415,13 @@ static void _call(Thread thread, Context work){
 
 }
 
-int List_truth(List);
+static int List_truth(List);
 
 Var List_last(List);
 
-int Var_is_row(Var, unsigned, unsigned long, unsigned long);
+static int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 
-List Var_list(Var);
+static List Var_list(Var);
 
 Var List_assoc(List, Var);
 
@@ -442,7 +442,7 @@ static Symbol _capture_errors(List errors, Var data){
   if(Error_policy_get(Var_symbol(code)) != 2260136) return 285842436424;
   thread -> errors = Error_snapshot_in(List_var(errors), & thread -> result_scope, thread -> result_pool);
   {
-    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/thread.x",.function = "_capture_errors",.line = 267};
+    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/thread.x",.function = "_capture_errors",.line = 265};
     x2c_error_raise_n(& _x2c_error_site_4, 23041356991064, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Thread callback")), NULL))));
     __builtin_unreachable();
   }
@@ -463,14 +463,14 @@ Var Context_export_scope(Scope, Pool, Var);
 Var Thread_join(Thread t){
   if(! _init_guard_) _file_init_();
   if(! t){
-    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/thread.x",.function = "Thread_join",.line = 295};
+    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/thread.x",.function = "Thread_join",.line = 293};
     x2c_error_raise_n(& _x2c_error_site_5, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Thread.join")), NULL))));
     __builtin_unreachable();
   }
   int expected = THREAD_RUNNING;
   if(! __atomic_compare_exchange_n(& t -> state, & expected, THREAD_JOINING, 0, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST)){
     {
-      static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/thread.x",.function = "Thread_join",.line = 300};
+      static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/thread.x",.function = "Thread_join",.line = 298};
       x2c_error_raise_n(& _x2c_error_site_6, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Thread.join")), NULL))));
       __builtin_unreachable();
     }
@@ -498,7 +498,7 @@ Var Thread_join(Thread t){
       if(! Var_is_void(t -> errors)) errors = Context_export_scope(t -> result_scope, t -> result_pool, t -> errors);
       else result = Context_export_scope(t -> result_scope, t -> result_pool, t -> result);
       if(! Var_is_void(errors)){
-        static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/thread.x",.function = "Thread_join",.line = 315};
+        static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/thread.x",.function = "Thread_join",.line = 313};
         x2c_error_raise_n(& _x2c_error_site_7, 23041356991064, 1, Symbol_var(374504614), errors);
         __builtin_unreachable();
       }
@@ -532,7 +532,7 @@ static void _finish_join(Thread thread){
 void Thread_free(Thread t){
   if(! _init_guard_) _file_init_();
   if(! t || __atomic_load_n(& t -> state, __ATOMIC_SEQ_CST) != THREAD_JOINED){
-    static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/thread.x",.function = "Thread_free",.line = 335};
+    static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/thread.x",.function = "Thread_free",.line = 333};
     x2c_error_raise_n(& _x2c_error_site_8, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Thread.free")), NULL))));
     __builtin_unreachable();
   }

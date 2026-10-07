@@ -6,8 +6,18 @@
 #define __GUARD_0x46021D32__
 
 #include "x2c.h"
+#include "../lib/private-keywords.h"
 #include "compiler.h"
 #include "type.h"
+#include "parse-report-macros.h"
+#include "grammar.h"
+#include "statements.h"
+#include "expressions.h"
+#include "literals.h"
+#include "collect.h"
+#include "macros.h"
+#include "protocol.h"
+#include "utils.h"
 List Compiler_parse_top_level_mode(Compiler c, int skip_body);
 
 int Compiler_skip_linkage_brace(Compiler c);
@@ -85,6 +95,8 @@ List Compiler_parse_function_target(Compiler c);
 List Compiler_finish_managed_declaration(Compiler c, List declaration, Token origin);
 
 List Compiler_bind_syntax(Compiler c, Var syntax, AstPos context, Type return_type);
+
+Var Compiler_land_retained_bindings(Compiler c, Var syntax);
 
 List Compiler_bind_callable_body(Compiler c, List syntax, Type return_type);
 

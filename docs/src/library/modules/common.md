@@ -103,7 +103,7 @@ The `Var` encoding every runtime module shares.
 
 Initializes the x2c runtime once for the current process.
 
-Source: `lib/common.x:843`
+Source: `lib/common.x:841`
 
 #### x2c_initialize_protocols
 
@@ -111,7 +111,7 @@ Source: `lib/common.x:843`
 
 Runs compiler-generated runtime protocol registration.
 
-Source: `lib/common.x:839`
+Source: `lib/common.x:837`
 
 #### x2c_normalize_index
 
@@ -119,7 +119,7 @@ Source: `lib/common.x:839`
 
 Normalizes one element index against `length`.
 
-Source: `lib/common.x:869`
+Source: `lib/common.x:867`
 
 #### x2c_normalize_slice
 
@@ -127,7 +127,7 @@ Source: `lib/common.x:869`
 
 Normalizes slice bounds and returns the resulting element count.
 
-Source: `lib/common.x:889`
+Source: `lib/common.x:887`
 
 ### `Array`
 
@@ -272,29 +272,29 @@ Source: `lib/common.x:565`
 <a id="Var.array"></a>
 #### Var.array
 
-`Array Var.array(Var _x2c_macro_value_0)`
+`Array Var.array(Var value)`
 
 Extracts the `Array` payload of `value`, or NULL for another tag.
 
-Source: `lib/common.x:662`
+Source: `lib/common.x:660`
 
 <a id="Var.as_iter"></a>
 #### Var.as_iter
 
-`Iter Var.as_iter(Var _x2c_macro_value_5)`
+`Iter Var.as_iter(Var value)`
 
 Extracts the `Iter` payload of `value`, or NULL for another tag.
 
-Source: `lib/common.x:667`
+Source: `lib/common.x:665`
 
 <a id="Var.block"></a>
 #### Var.block
 
-`Block Var.block(Var _x2c_macro_value_1)`
+`Block Var.block(Var value)`
 
 Extracts the `Block` payload of `value`, or NULL for another tag.
 
-Source: `lib/common.x:663`
+Source: `lib/common.x:661`
 
 <a id="Var.box_f32"></a>
 #### Var.box_f32
@@ -371,20 +371,20 @@ Source: `lib/common.x:518`
 <a id="Var.buffer"></a>
 #### Var.buffer
 
-`Buffer Var.buffer(Var _x2c_macro_value_2)`
+`Buffer Var.buffer(Var value)`
 
 Extracts the `Buffer` payload of `value`, or NULL for another tag.
 
-Source: `lib/common.x:664`
+Source: `lib/common.x:662`
 
 <a id="Var.bytes"></a>
 #### Var.bytes
 
-`Bytes Var.bytes(Var _x2c_macro_value_3)`
+`Bytes Var.bytes(Var value)`
 
 Extracts the `Bytes` payload of `value`, or NULL for another tag.
 
-Source: `lib/common.x:665`
+Source: `lib/common.x:663`
 
 <a id="Var.char"></a>
 #### Var.char
@@ -396,7 +396,7 @@ Returns `x` as a native `char` under the `Var.convert` rules.
 **Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
 of floating range, or invalidly encoded.
 
-Source: `lib/common.x:693`
+Source: `lib/common.x:691`
 
 <a id="Var.decode_f32"></a>
 #### Var.decode_f32
@@ -426,16 +426,16 @@ Returns `x` as a native `double` under the `Var.convert` rules.
 **Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, or
 invalidly encoded.
 
-Source: `lib/common.x:822`
+Source: `lib/common.x:820`
 
 <a id="Var.file"></a>
 #### Var.file
 
-`File Var.file(Var _x2c_macro_value_4)`
+`File Var.file(Var value)`
 
 Extracts the `File` payload of `value`, or NULL for another tag.
 
-Source: `lib/common.x:666`
+Source: `lib/common.x:664`
 
 <a id="Var.float"></a>
 #### Var.float
@@ -447,7 +447,7 @@ Returns `x` as a native `float` under the `Var.convert` rules.
 **Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, or
 invalidly encoded.
 
-Source: `lib/common.x:813`
+Source: `lib/common.x:811`
 
 <a id="Var.int"></a>
 #### Var.int
@@ -459,7 +459,7 @@ Returns `x` as a native `int` under the `Var.convert` rules.
 **Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
 of floating range, or invalidly encoded.
 
-Source: `lib/common.x:729`
+Source: `lib/common.x:727`
 
 <a id="Var.is_row"></a>
 #### Var.is_row
@@ -487,11 +487,11 @@ Source: `lib/common.x:479`
 <a id="Var.list"></a>
 #### Var.list
 
-`List Var.list(Var _x2c_macro_value_6)`
+`List Var.list(Var value)`
 
 Extracts the `List` payload of `value`, or NULL for another tag.
 
-Source: `lib/common.x:668`
+Source: `lib/common.x:666`
 
 <a id="Var.long"></a>
 #### Var.long
@@ -503,7 +503,7 @@ Returns `x` as a native `long` under the `Var.convert` rules.
 **Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
 of floating range, or invalidly encoded.
 
-Source: `lib/common.x:756`
+Source: `lib/common.x:754`
 
 <a id="Var.long_double"></a>
 #### Var.long_double
@@ -515,7 +515,7 @@ Returns `x` as a native `long double` under the `Var.convert` rules.
 **Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, or
 invalidly encoded.
 
-Source: `lib/common.x:803`
+Source: `lib/common.x:801`
 
 <a id="Var.long_long"></a>
 #### Var.long_long
@@ -527,16 +527,16 @@ Returns `x` as a native `long long` under the `Var.convert` rules.
 **Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
 of floating range, or invalidly encoded.
 
-Source: `lib/common.x:779`
+Source: `lib/common.x:777`
 
 <a id="Var.map"></a>
 #### Var.map
 
-`Map Var.map(Var _x2c_macro_value_7)`
+`Map Var.map(Var value)`
 
 Extracts the `Map` payload of `value`, or NULL for another tag.
 
-Source: `lib/common.x:669`
+Source: `lib/common.x:667`
 
 <a id="Var.payload32"></a>
 #### Var.payload32
@@ -557,16 +557,16 @@ Returns `x` as a native `short` under the `Var.convert` rules.
 **Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
 of floating range, or invalidly encoded.
 
-Source: `lib/common.x:711`
+Source: `lib/common.x:709`
 
 <a id="Var.string"></a>
 #### Var.string
 
-`String Var.string(Var _x2c_macro_value_8)`
+`String Var.string(Var value)`
 
 Extracts the `String` payload of `value`, or NULL for another tag.
 
-Source: `lib/common.x:670`
+Source: `lib/common.x:668`
 
 <a id="Var.symbol"></a>
 #### Var.symbol
@@ -576,7 +576,7 @@ Source: `lib/common.x:670`
 Extracts the `symbol` payload after the caller establishes the matching
 `Var` kind.
 
-Source: `lib/common.x:679`
+Source: `lib/common.x:677`
 
 <a id="Var.uchar"></a>
 #### Var.uchar
@@ -588,7 +588,7 @@ Returns `x` as a native `uchar` under the `Var.convert` rules.
 **Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
 of floating range, or invalidly encoded.
 
-Source: `lib/common.x:702`
+Source: `lib/common.x:700`
 
 <a id="Var.uint"></a>
 #### Var.uint
@@ -600,7 +600,7 @@ Returns `x` as a native `uint` under the `Var.convert` rules.
 **Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
 of floating range, or invalidly encoded.
 
-Source: `lib/common.x:738`
+Source: `lib/common.x:736`
 
 <a id="Var.ulong"></a>
 #### Var.ulong
@@ -612,7 +612,7 @@ Returns `x` as a native `ulong` under the `Var.convert` rules.
 **Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
 of floating range, or invalidly encoded.
 
-Source: `lib/common.x:768`
+Source: `lib/common.x:766`
 
 <a id="Var.ulong_long"></a>
 #### Var.ulong_long
@@ -625,7 +625,7 @@ rules.
 **Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
 of floating range, or invalidly encoded.
 
-Source: `lib/common.x:791`
+Source: `lib/common.x:789`
 
 <a id="Var.unsigned"></a>
 #### Var.unsigned
@@ -637,7 +637,7 @@ Returns `x` as a native `unsigned` under the `Var.convert` rules.
 **Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
 of floating range, or invalidly encoded.
 
-Source: `lib/common.x:747`
+Source: `lib/common.x:745`
 
 <a id="Var.ushort"></a>
 #### Var.ushort
@@ -649,7 +649,7 @@ Returns `x` as a native `ushort` under the `Var.convert` rules.
 **Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
 of floating range, or invalidly encoded.
 
-Source: `lib/common.x:720`
+Source: `lib/common.x:718`
 
 ### `char`
 

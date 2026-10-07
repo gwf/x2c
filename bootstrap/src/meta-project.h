@@ -7,6 +7,14 @@
 
 #include "x2c.h"
 #include "frontend.h"
+#include "datum.h"
+#include "digest.h"
+#include "deps.h"
+#include "meta-helper-client.h"
+#include "script.h"
+#include "toolchain.h"
+#include "utils.h"
+#include <unistd.h>
 void Frontend_prepare_meta(Frontend f, List inputs);
 
 

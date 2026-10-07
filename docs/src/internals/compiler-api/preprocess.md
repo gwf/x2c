@@ -22,8 +22,8 @@ C preprocessor directives in x2c source.
 | [`preproc_within_arms`](#preproc_within_arms) | Returns `items` inside the conditional arms `arms` tracked by `preproc_track_arms`: the directives that reopen each group, outermost first, then `items`, then one `#endif` per group. |
 | [`Compiler.leading_preproc`](#Compiler.leading_preproc) | Returns source-ordered preprocessor nodes in the preceding trivia. |
 | [`Compiler.note_object_macro`](#Compiler.note_object_macro) | Records the name of the `#define` line `content` so a bare atom spelled the same way inside a literal can be flagged and a declaration prefix can be read. |
+| [`Compiler.note_preprocessor_macros`](#Compiler.note_preprocessor_macros) | Records object-like `#define` names and removes names after `#undef`. |
 | [`Compiler.scan_conditionals`](#Compiler.scan_conditionals) | Records the open groups after each conditional directive of the tokenized unit, and marks layout attributes where written or where a macro expands to one. |
-| [`Compiler.update_source_visibility`](#Compiler.update_source_visibility) | Records object-like `#define` names and removes names after `#undef`. |
 
 ### Functions
 
@@ -133,6 +133,16 @@ identifier.
 
 Source: `src/preprocess.x:310`
 
+<a id="Compiler.note_preprocessor_macros"></a>
+#### Compiler.note_preprocessor_macros
+
+`void Compiler.note_preprocessor_macros(Compiler c, List directives)`
+
+Records object-like `#define` names and removes names after `#undef`.
+Source storage determines visibility independently of directives.
+
+Source: `src/preprocess.x:300`
+
 <a id="Compiler.scan_conditionals"></a>
 #### Compiler.scan_conditionals
 
@@ -143,16 +153,6 @@ tokenized unit, and marks layout attributes where written or where a
 macro expands to one.
 
 Source: `src/preprocess.x:146`
-
-<a id="Compiler.update_source_visibility"></a>
-#### Compiler.update_source_visibility
-
-`void Compiler.update_source_visibility(Compiler c, List directives)`
-
-Records object-like `#define` names and removes names after `#undef`.
-Source storage determines visibility independently of directives.
-
-Source: `src/preprocess.x:300`
 
 ## Design notes
 

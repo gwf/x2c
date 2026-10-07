@@ -96,6 +96,7 @@ typedef struct LogMemorySink{
 }
 * LogMemorySink;
 
+#include "var-adapters.h"
 static String _3, _2, _1, _0;
 
 static int _init_guard_ = 0;
@@ -790,13 +791,13 @@ static LogSink _new_sink(Logger logger, LogEmitter emit, LogFlusher flush, Var d
 
 }
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
-Var String_var(String);
+static Var String_var(String);
 
 static void _require_quiescent(Logger logger, String owner){
   if(logger && logger -> emission_depth != 0){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/logger.x",.function = "_require_quiescent",.line = 333};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/logger.x",.function = "_require_quiescent",.line = 332};
     x2c_error_raise_n(& _x2c_error_site_0, 4477477457162, 1, Symbol_var(34096809266140), String_var(owner));
     __builtin_unreachable();
   }
@@ -943,7 +944,7 @@ static LogSink _add_text_sink(Logger logger, File file, int color, int flush_eac
 
 Buffer Buffer_clear(Buffer);
 
-size_t File_write(File, const void *, size_t, size_t);
+static size_t File_write(File, const void *, size_t, size_t);
 
 static void _emit_text(Logger logger, const LogEvent * event, Var data){
   LogTextSink context = Var_logtextsink(data);
@@ -1056,9 +1057,9 @@ static void _destroy_text(Var data){
 
 int List_try_next(List, List *, Var *);
 
-List Var_list(Var);
+static List Var_list(Var);
 
-int List_truth(List);
+static int List_truth(List);
 
 Buffer Buffer_write(Buffer, const char *);
 
@@ -1144,7 +1145,7 @@ static void _write_field(Buffer out, List field, int color){
 
 int Var_is(Var, Symbol);
 
-int Var_is_row(Var, unsigned, unsigned long, unsigned long);
+static int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 
 Buffer Var_write_str(Var, Buffer);
 
@@ -1262,7 +1263,7 @@ LogSink Logger_add_memory_sink(Logger logger, List * destination){
 
 }
 
-Var List_var(List);
+static Var List_var(List);
 
 List List_cons_in(Pool, Var, List);
 
@@ -1303,7 +1304,7 @@ int Var_is_null(Var);
 
 int Var_is_nil(Var);
 
-int Var_is_wide(Var);
+static int Var_is_wide(Var);
 
 int Var_is_integer(Var);
 
@@ -1321,7 +1322,7 @@ static Var LogMemorySink__retain(LogMemorySink l, Var value){
 
 Var Var_clone_wide(Var);
 
-void Block_push(Block, const void *);
+static void Block_push(Block, const void *);
 
 static Var LogMemorySink__retain_wide(LogMemorySink l, Var value){
   Var copy;
@@ -1350,7 +1351,7 @@ static Var LogMemorySink__retain_wide(LogMemorySink l, Var value){
   return copy;
 }
 
-String Var_string(Var);
+static String Var_string(Var);
 
 String String_new_in(Pool, const char *, int);
 

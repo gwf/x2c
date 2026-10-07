@@ -5,7 +5,11 @@
 #ifndef __GUARD_0xD7C30390__
 #define __GUARD_0xD7C30390__
 
+#include "error-macros.h"
+#include "private-keywords.h"
 #include <stddef.h>
+typedef struct Pool * Pool;
+
 #include "common.h"
 #include "scope.h"
 #include "var.h"
@@ -35,6 +39,15 @@ typedef struct PoolStats{
 }
 PoolStats;
 
+#include <stdint.h>
+#include <pthread.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "block.h"
+#include "exception.h"
+#include "mutex.h"
+#include "map-generics.h"
 Var Pool_lookup(Pool inner, Var key);
 
 Var Pool_intern(Pool inner, Var object, void * alloc);

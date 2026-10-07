@@ -142,9 +142,9 @@ Symbol SymbolSet_getindex(SymbolSet x, int index){
 
 void * Var_pointer(Var);
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
-Var int_var(int);
+static Var int_var(int);
 
 static int _next(Iter iter, Var * out){
   SymbolSet x =(SymbolSet) Var_pointer(iter -> obj);
@@ -155,7 +155,7 @@ static int _next(Iter iter, Var * out){
   return 1;
 }
 
-int Iter_truth(Iter);
+static int Iter_truth(Iter);
 
 Iter Iter_init(Iter, Var, IterNextFn, Var);
 
@@ -166,7 +166,7 @@ Iter SymbolSet_iter(SymbolSet x, Iter dest){
 
 Block Block_new(size_t);
 
-Symbol Var_symbol(Var);
+static Symbol Var_symbol(Var);
 
 Var Array_getindex(Array, int);
 
@@ -188,7 +188,7 @@ Block SymbolSet_encode(Array symbols){
   return bytes;
 }
 
-void Block_push(Block, const void *);
+static void Block_push(Block, const void *);
 
 static void _put(Block bytes, uint64_t value, int size){
   for(int byte = 0;  byte < size;  byte ++){

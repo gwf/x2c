@@ -6,8 +6,14 @@
 #define __GUARD_0x63A6D8C6__
 
 #include "x2c.h"
+#include "../lib/private-keywords.h"
 #include "compiler.h"
 #include "type.h"
+#include "grammar.h"
+#include "adapter-memo.h"
+#include "ast.h"
+#include "expressions.h"
+#include "macros.h"
 List Compiler_convert_initializer(Compiler c, List value, Type type, List target);
 
 List Compiler_initializer_rows(Compiler c, Type root, List items, List target);

@@ -5,9 +5,24 @@
 #ifndef __GUARD_0x0C64D6F9__
 #define __GUARD_0x0C64D6F9__
 
+#include "error-macros.h"
+#include "array-generics.h"
+#include "private-keywords.h"
 #include "common.h"
 typedef Block Array;
 
+#include <string.h>
+#include <stdarg.h>
+#include <stdlib.h>
+#include <limits.h>
+#include <stdio.h>
+#include "buffer.h"
+#include "exception.h"
+#include "func.h"
+#include "iter.h"
+#include "block.h"
+#include "var.h"
+#include "varconvert.h"
 Array Array_new(void);
 
 int Array_try_next(Array _x2c_macro_array_15, int * _x2c_macro_cursor_1, Var * _x2c_macro_out_4);
@@ -61,6 +76,8 @@ static inline Block Array_block(Array x){
 static inline Array Block_array(Block x){
   return(Array) x;
 }
+
+void Array_free(Array array);
 
 void Array_resize(Array arr, size_t size);
 

@@ -33,7 +33,7 @@ Macros as values that build and recognize code.
 Applies a macro value to code values. The result is a pending
 invocation; inserting it into a program expands and binds it there.
 
-Source: `lib/macro-value.x:71`
+Source: `lib/macro-value.x:70`
 
 <a id="Macro_case_capture_at"></a>
 #### Macro_case_capture_at
@@ -45,7 +45,7 @@ may be NULL, and publishes the captures under `names`. A pattern that
 does not depend on the current call's subject is prepared once and kept
 in the site; generated `match` code calls this for a macro-valued case.
 
-Source: `lib/macro-value.x:483`
+Source: `lib/macro-value.x:482`
 
 <a id="Macro_case_pattern"></a>
 #### Macro_case_pattern
@@ -55,7 +55,7 @@ Source: `lib/macro-value.x:483`
 The pattern a macro-valued `case` compiles to; the compiler lowers a
 call of this to `Macro_case_capture_at` over the match subject.
 
-Source: `lib/macro-value.x:476`
+Source: `lib/macro-value.x:475`
 
 <a id="Macro_close"></a>
 #### Macro_close
@@ -65,7 +65,7 @@ Source: `lib/macro-value.x:476`
 Records the Macro values an anonymous macro captured where it was
 created, so applying it later applies the same children.
 
-Source: `lib/macro-value.x:66`
+Source: `lib/macro-value.x:65`
 
 <a id="Macro_pattern"></a>
 #### Macro_pattern
@@ -75,7 +75,7 @@ Source: `lib/macro-value.x:66`
 Derives the Match pattern that recognizes code this macro builds,
 capturing each parameter under the given binder.
 
-Source: `lib/macro-value.x:186`
+Source: `lib/macro-value.x:185`
 
 ### `Macro`
 
@@ -88,7 +88,7 @@ Returns the name a typed quotation declares with a Name hole whose local
 holds `value`: the name form of an `x2c_ident` spelling or a String,
 or a binding as it is.
 
-Source: `lib/macro-value.x:125`
+Source: `lib/macro-value.x:124`
 
 <a id="Macro.inserted"></a>
 #### Macro.inserted
@@ -103,7 +103,7 @@ spelling, or a Name hole's String becomes an identifier expression;
 in a Name hole's member position, an `x2c_ident` spelling is its
 String.
 
-Source: `lib/macro-value.x:112`
+Source: `lib/macro-value.x:111`
 
 <a id="Macro.inserted_items"></a>
 #### Macro.inserted_items
@@ -114,7 +114,7 @@ Returns the items a typed quotation splices for an expression sequence
 hole whose local holds `values`: each number, String, or Symbol becomes
 its literal, as a spliced data List's items do.
 
-Source: `lib/macro-value.x:133`
+Source: `lib/macro-value.x:132`
 
 <a id="Macro.number_literal"></a>
 #### Macro.number_literal
@@ -125,7 +125,7 @@ Returns the literal expression of type `result` that holds `value`, a
 number of the scalar type `type`. An `int` value is its decimal
 literal; another number is its exact bits cast to `type`.
 
-Source: `lib/macro-value.x:353`
+Source: `lib/macro-value.x:352`
 
 <a id="Macro.number_type"></a>
 #### Macro.number_type
@@ -135,7 +135,7 @@ Source: `lib/macro-value.x:353`
 Returns the C type of a number's Var family, or NULL when `value` is not
 a number. An untyped integer is an `int` when it fits one.
 
-Source: `lib/macro-value.x:327`
+Source: `lib/macro-value.x:326`
 
 <a id="Macro.subject"></a>
 #### Macro.subject
@@ -144,7 +144,7 @@ Source: `lib/macro-value.x:327`
 
 Returns the table `Macro.use_subject` last set, or void.
 
-Source: `lib/macro-value.x:156`
+Source: `lib/macro-value.x:155`
 
 <a id="Macro.typed"></a>
 #### Macro.typed
@@ -155,7 +155,7 @@ Returns what a typed quotation builds when its code is one hole whose
 local holds `value`: the inserted expression with the type `type`. A
 String typed `String` is a String literal.
 
-Source: `lib/macro-value.x:138`
+Source: `lib/macro-value.x:137`
 
 <a id="Macro.use_subject"></a>
 #### Macro.use_subject
@@ -169,7 +169,7 @@ recognizes only the recorded global binding; with void it recognizes
 any binding of its spelling. The compiler sets these rows for each
 `meta` call and carries them through the helper.
 
-Source: `lib/macro-value.x:164`
+Source: `lib/macro-value.x:163`
 
 ## Runtime-internal callables
 
@@ -192,7 +192,7 @@ whose binder is `binder`. Splice and construction projections are
 always sequences; return, declarator, and member projections never
 are; source, value, and expression follow the hole's `sequence`.
 
-Source: `lib/macro-value.x:232`
+Source: `lib/macro-value.x:231`
 
 ## Public types
 

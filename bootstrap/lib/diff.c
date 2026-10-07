@@ -103,7 +103,7 @@ _x2c_defer_env_4;
 
 static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4);
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
 #include "exception.h"
 
@@ -126,7 +126,7 @@ List String_split_lines(String, int);
 
 void x2c_cleanup_push(X2CCleanup *);
 
-String Var_string(Var);
+static String Var_string(Var);
 
 Var Array_getindex(Array, int);
 
@@ -203,9 +203,9 @@ static void Script_replace(Script * s){
 
 List cons(Var, List);
 
-Var List_var(List);
+static Var List_var(List);
 
-Var String_var(String);
+static Var String_var(String);
 
 static void Script_emit(Script * s, Symbol kind, String line){
   (* s).edits = cons(List_var(cons(Symbol_var(kind), cons(String_var(line), NULL))), (* s).edits);
@@ -221,7 +221,7 @@ void * Scope_calloc(size_t, size_t);
 
 int List_try_next(List, List *, Var *);
 
-List Var_list(Var);
+static List Var_list(Var);
 
 Var List_getindex(List, int);
 
@@ -311,7 +311,7 @@ static int _inserted(int step, int k, int left, int right){
   return k == - step ||(k != step && left < right);
 }
 
-Var int_var(int);
+static Var int_var(int);
 
 static List Trace_path(Trace trace, int found, int n, int m){
   List path = NULL;
@@ -408,13 +408,13 @@ String Diff_unified(String old, String new, String old_name, String new_name){
 
 }
 
-Var List_car(List);
+static Var List_car(List);
 
 static Symbol _kind(Array edits, int at){
   return Var_symbol(List_car(Var_list(Array_getindex(edits, at))));
 }
 
-String char_str(char);
+static String char_str(char);
 
 static Hunk _hunk(Array edits, int at, int old_line, int new_line){
   int start = at > _CONTEXT ? at - _CONTEXT : 0, lead = at - start;

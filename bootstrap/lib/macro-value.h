@@ -31,6 +31,14 @@ typedef struct MacroCaseSite{
 }
 MacroCaseSite;
 
+#include "array.h"
+#include "atom.h"
+#include "list.h"
+#include "match-machine.h"
+#include "meta.h"
+#include "string.h"
+#include "varconvert.h"
+#include <math.h>
 Macro Macro_close(Macro value, List captures);
 
 List Macro_apply(Macro t, List values);

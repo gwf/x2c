@@ -3,7 +3,7 @@
 #define __GUARD_0x246C5420__
 #include "string.h"
 #include <ctype.h>
-int String_truth(String);
+static int String_truth(String);
 
 int String_contains_digit(String str){
   if(! String_truth(str) || ! * str) return 0;

@@ -135,6 +135,7 @@ typedef struct TargetKind{
 }
 TargetKind;
 
+#include "../lib/system-macros.h"
 #include <ctype.h>
 #include <errno.h>
 #include <limits.h>
@@ -1142,11 +1143,11 @@ Array Array_new(void);
 
 void x2c_cleanup_push(X2CCleanup *);
 
-String Var_string(Var);
+static String Var_string(Var);
 
 Var Array_getindex(Array, int);
 
-int String_truth(String);
+static int String_truth(String);
 
 void driver_error(const char *);
 
@@ -1156,7 +1157,7 @@ int String_equal(String, String);
 
 String cli_version(void);
 
-Var String_var(String);
+static Var String_var(String);
 
 int String_getindex(String, int);
 
@@ -1278,9 +1279,9 @@ static void Parse_finish(Parse * p){
   r -> extensions = List_reverse(r -> extensions);
 }
 
-int List_truth(List);
+static int List_truth(List);
 
-List List_cdr(List);
+static List List_cdr(List);
 
 static void CliRequest__check(CliRequest r, int mask){
   Symbol name = r -> command;

@@ -15,6 +15,7 @@
 #define __GUARD_0x05ED52D8__
 #include "x2c.h"
 
+#include "../lib/private-keywords.h"
 #include "build.h"
 typedef struct ProjectBuild{
   CliRequest request;
@@ -281,13 +282,13 @@ _x2c_lambda_context_2;
 
 static Var _x2c_lambda_4(Func _x2c_lambda_closure_1, const FuncArg * _x2c_lambda_argv_1);
 
-Var String_var(String);
+static Var String_var(String);
 
 List cons(Var, List);
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
-Var List_var(List);
+static Var List_var(List);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -450,7 +451,7 @@ Map Map_new(void);
 
 String project_manifest(CliRequest c);
 
-int String_truth(String);
+static int String_truth(String);
 
 Path Path_absolute(Path);
 
@@ -512,7 +513,7 @@ List String_split_lines(String, int);
 
 int List_try_next(List, List *, Var *);
 
-String Var_string(Var);
+static String Var_string(Var);
 
 static void _parse_manifest(Project p){
   Manifest m ={
@@ -666,7 +667,7 @@ int Map_contains(Map, Var);
 
 Var Map_setindex(Map, Var, Var);
 
-Var int_var(int);
+static Var int_var(int);
 
 static void Manifest_claim(Manifest * m, String key){
   Map keys = Manifest_keys(&((* m)));
@@ -1068,7 +1069,7 @@ static List _read_lock(String path){
   return install_rows(text);
 }
 
-int List_truth(List);
+static int List_truth(List);
 
 String install_version(String);
 
@@ -1081,11 +1082,11 @@ static int _lock_satisfies(Project p, List rows){
   return 1;
 }
 
-List Var_list(Var);
+static List Var_list(Var);
 
-Var List_car(List);
+static Var List_car(List);
 
-Var List_cadr(List);
+static Var List_cadr(List);
 
 static List _locked_row(List rows, ProjectDependency entry){
   List found = NULL;

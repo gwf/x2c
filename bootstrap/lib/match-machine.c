@@ -138,7 +138,7 @@ int MatchMachine_step(MatchMachine * m){
   return(* m).running;
 }
 
-int List_truth(List);
+static int List_truth(List);
 
 static void MatchMachine__execute(MatchMachine * m, const MachineWord * w){
   switch((* w).op){
@@ -244,9 +244,9 @@ static int _is_kind(Var value, int kind){
   return 0;
 }
 
-int Var_is_row(Var, unsigned, unsigned long, unsigned long);
+static int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 
-List Var_list(Var);
+static List Var_list(Var);
 
 static int MatchMachine__enter(MatchMachine * m, int reg, Var input){
   Var seen =(* m).view ?(* m).view(input) : input;
@@ -272,14 +272,14 @@ static void MatchMachine__offset(MatchMachine * m, const MachineWord * w){
   for(int n = 0;  n <(* w).b;  n ++) if(! MatchMachine__advance(&((* m)), (* w).a)) return;
 }
 
-Var List_car(List);
+static Var List_car(List);
 
 static void MatchMachine__descend(MatchMachine * m, const MachineWord * w){
   List at = * MatchMachine__cursor(&((* m)), (* w).b);
   if(! List_truth(at) || ! MatchMachine__enter(&((* m)), (* w).c, List_car(at)))(* m).pc =(* w).target;
 }
 
-List List_cdr(List);
+static List List_cdr(List);
 
 static void MatchMachine__scan(MatchMachine * m, const MachineWord * w){
   List split = * MatchMachine__cursor(&((* m)), (* w).a), probe = * MatchMachine__cursor(&((* m)), (* w).b);
@@ -300,7 +300,7 @@ static void MatchMachine__scan(MatchMachine * m, const MachineWord * w){
   if(! List_truth(probe))(* m).pc =(* w).target;
 }
 
-Var List_var(List);
+static Var List_var(List);
 
 static void MatchMachine__cursor_value(MatchMachine * m, const MachineWord * w){
   (* m).value = List_var(* MatchMachine__cursor(&((* m)), (* w).a));
@@ -419,9 +419,9 @@ static void MatchMachine__eq_prefix(MatchMachine * m, const MachineWord * w){
   if(! MatchMachine__sequence_equal(&((* m)), (* w).a, * MatchMachine__cursor(&((* m)), (* w).b), length, 0))(* m).pc =(* w).target;
 }
 
-int MachineSlot_final_equal(MachineSlot *, List, MachineStats *);
+static int MachineSlot_final_equal(MachineSlot *, List, MachineStats *);
 
-int MachineSlot_prefix_equal(MachineSlot *, List, int, MachineStats *);
+static int MachineSlot_prefix_equal(MachineSlot *, List, int, MachineStats *);
 
 List MatchMachine_materialize_span(MatchMachine * m, MachineSpan span);
 
@@ -514,7 +514,7 @@ static List MatchMachine__cons_scratch(MatchMachine * m, int length){
   return out;
 }
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
 static void MatchMachine__error(MatchMachine * m, Symbol code){
   MatchMachine__rollback(&((* m)), 0);
@@ -574,7 +574,7 @@ void MatchMachine_begin(MatchMachine * m, MachineView program, Var input){
   MatchMachine__count_call(&((* m)));
 }
 
-Var String_var(String);
+static Var String_var(String);
 
 #include "error.h"
 
@@ -583,7 +583,7 @@ Var String_var(String);
 
 void MatchMachine_finish(MatchMachine * m){
   if((* m).running){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/match-machine.x",.function = "MatchMachine_finish",.line = 516};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/match-machine.x",.function = "MatchMachine_finish",.line = 514};
     x2c_error_raise_n(& _x2c_error_site_0, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("MatchMachine.finish")), NULL))));
     __builtin_unreachable();
   }
@@ -618,7 +618,7 @@ void MatchMachine_dispose(MatchMachine * m){
 MatchMachine * MatchMachine_acquire(MachineStats * stats){
   MatchMachine * m = machine_thread.count ? machine_thread.spares[-- machine_thread.count] : calloc(1, sizeof(MatchMachine));
   if(! m){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/match-machine.x",.function = "MatchMachine_acquire",.line = 569};
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/match-machine.x",.function = "MatchMachine_acquire",.line = 567};
     x2c_error_raise_n(& _x2c_error_site_1, 97614135954008, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("MatchMachine.acquire")), NULL))));
     __builtin_unreachable();
   }

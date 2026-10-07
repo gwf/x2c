@@ -5,11 +5,14 @@
 #ifndef __GUARD_0x8C6C249F__
 #define __GUARD_0x8C6C249F__
 
+#include "error-macros.h"
+#include "cleanup.h"
 #include "common.h"
 typedef struct Mutex * Mutex;
 
 void Mutex_cleanup(Mutex _x2c_macro_value_0);
 
+#include "scope.h"
 void Mutex_recursive_initialize(pthread_mutex_t * mutex, const char * failure);
 
 void Mutex_recursive_lock(pthread_mutex_t * mutex, pthread_once_t * once, void(* initialize)(void), const char * failure);

@@ -7,13 +7,39 @@
 
 #include "x2c.h"
 #include "compiler.h"
+#include "ast-rewrite.h"
+#include "buffer.h"
+#include "datum.h"
+#include "utils.h"
+#include <errno.h>
+#include <limits.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 Map Compiler_collect_symbols(Compiler c, Map globs);
-
-void Sym_withhold_import_rows(Sym s, Map published);
 
 String collect_resolve_include(SourceView sources, List dirs, String includer_dir, String target, int angle);
 
 List Compiler_include_typedef_names(Compiler c, String target, int angle, Map seen);
+
+List Compiler_include_type_dependencies(Compiler c, String target, int angle, Map seen);
+
+int Compiler_linked_meta_provider_current(Compiler c, String path);
+
+void Compiler_complete_meta_hashes(Compiler c);
+
+void Compiler_add_linked_meta_provider_hashes(Compiler c, Map rows);
+
+void Compiler_name_meta_provider_bindings(Compiler c, String path, int index);
+
+int Compiler_publishes_typedef(Compiler c, String name);
+
+int Compiler_publishes_type_family(Compiler c, List family);
+
+Map Compiler_inline_type_dependencies(Compiler c, List ast);
+
+void Compiler_publish_inline_types(Compiler c, List ast);
 
 void Compiler_record_generated_symbol(Compiler c, String name, Type signature);
 
@@ -21,9 +47,9 @@ void Compiler_collect_package(Compiler c, String name, Token token);
 
 void Compiler_replay_package_imports(Compiler c, Map globs, Map rows, Array exports);
 
-Map Compiler_replay_included_package_imports(Compiler c, Map globs);
+Map Compiler_included_compile_time_effects(Compiler c, Map globs, Map active);
 
-void Compiler_import_included_exports(Compiler c);
+void Compiler_install_included_effects(Compiler c);
 
 void interface_configure(String out_dir, int cold);
 

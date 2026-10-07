@@ -6,6 +6,7 @@
 #define __GUARD_0xAA205D9A__
 
 #include "x2c.h"
+#include "../lib/private-keywords.h"
 #include "compiler.h"
 #include "type.h"
 typedef struct PrintfFn{
@@ -14,6 +15,16 @@ typedef struct PrintfFn{
 }
 PrintfFn;
 
+#include "ast-rewrite.h"
+#include "grammar.h"
+#include "parse.h"
+#include "literals.h"
+#include "protocol.h"
+#include "transform.h"
+#include "stage.h"
+#include "initializers.h"
+#include "macros.h"
+#include "expressions-reports.h"
 List Compiler_parse_expression(Compiler c);
 
 List Compiler_parse_assignment(Compiler c);

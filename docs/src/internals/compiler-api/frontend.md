@@ -34,7 +34,7 @@ Loads process-owned collection support and the native modules `request`
 names before units, and selects those modules, in order, for its
 compile-time calls.
 
-Source: `src/frontend.x:537`
+Source: `src/frontend.x:541`
 
 <a id="Frontend.new"></a>
 #### Frontend.new
@@ -45,7 +45,7 @@ Borrows a configured request for sequential units. The request and this
 session must outlive its units. Initialize process support above any
 temporary command Context before creating a session inside that Context.
 
-Source: `src/frontend.x:548`
+Source: `src/frontend.x:552`
 
 <a id="Frontend.open"></a>
 #### Frontend.open
@@ -90,7 +90,7 @@ own definitions, once for the active build or translation target. Returns
 zero after reporting a failed preload, without publishing a partial
 session.
 
-Source: `src/frontend.x:472`
+Source: `src/frontend.x:476`
 
 <a id="Frontend.start"></a>
 #### Frontend.start

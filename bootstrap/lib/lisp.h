@@ -5,6 +5,8 @@
 #ifndef __GUARD_0xD09CF48E__
 #define __GUARD_0xD09CF48E__
 
+#include "private-keywords.h"
+#include "cleanup.h"
 #include "x2c.h"
 #include "macro-value.h"
 typedef Var(* NativeScalarLoad)(const void * bytes, Scope * owner);
@@ -19,16 +21,27 @@ typedef struct NativeScalarAccess{
 }
 * NativeScalarAccess;
 
+#include "native-scalar-types.h"
 NativeScalarAccess native_scalar_access(List exact_type);
 
 typedef struct Lisp * Lisp;
 
 void Lisp_cleanup(Lisp _x2c_macro_value_28);
 
+#include "meta.h"
+#include "var-adapters.h"
+#define LISP_NATIVE_ARG_MAX  8
+#define LISP_STACK_BYTES_MAX (6L << 20)
+#if defined(__GLIBC__)
+extern int pthread_getattr_np(pthread_t thread, pthread_attr_t * attributes);
+
+#endif
+#define LISP_CALL_STEP_MAX 40000000
 void Lisp_call_budget(Lisp lisp, long budget);
 
 void Lisp_set_interrupted(Lisp lisp, int interrupted);
 
+#define LISP_READ_DEPTH_MAX 1024
 Var lisp_truth(Var value);
 
 Var lisp_atom(Var value);
@@ -96,6 +109,8 @@ Var lisp_match_replace(List input, Var pat, Var template);
 Var lisp_read_file(String path);
 
 Var lisp_write_file(String path, String text);
+
+extern Map lisp_native_targets(void);
 
 Lisp Lisp_kernel(void);
 

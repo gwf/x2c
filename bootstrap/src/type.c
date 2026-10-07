@@ -15,20 +15,23 @@
 #include "meta.h"
 typedef List Type;
 
+#include "grammar.h"
+#include "ast-rewrite.h"
+#include "../lib/native-scalar-types.h"
 #include <limits.h>
 #include <stdarg.h>
 #include <stdio.h>
-static List _295, _294, _293, _287, _286, _285, _279, _278, _277, _271, _270, _269, _263, _262, _261, _255, _254, _253, _247, _246, _245, _240, _239, _238, _232, _231, _230, _224, _223, _222, _216, _215, _214, _208, _207, _206, _200, _199, _198, _195, _194, _193, _187, _186, _185, _184, _183, _182, _181, _179, _177, _175, _174, _171, _169, _168, _166, _165, _162, _161, _160, _158, _156, _155, _153, _152, _150, _149, _147, _146, _144, _142, _140, _139, _138, _137, _132, _131, _130, _126, _125, _123, _121, _119, _118, _117, _116, _115, _110, _108, _107, _106, _105, _103, _102, _101, _100, _98, _97, _96, _95, _94, _92, _91, _90, _89, _87, _85, _84, _81, _79, _77, _76, _75, _73, _71, _69, _68, _67, _66, _64, _63, _62, _58, _55, _54, _53, _50, _49, _45, _44, _41, _40, _37, _35, _34, _31, _30, _29, _27, _25, _24, _23, _19, _18, _17, _16, _13, _12, _11, _9, _3, _1;
+static List _295, _294, _293, _287, _286, _285, _279, _278, _277, _271, _270, _269, _263, _262, _261, _256, _255, _254, _248, _247, _246, _240, _239, _238, _235, _234, _233, _227, _226, _225, _219, _218, _217, _211, _210, _209, _203, _202, _201, _195, _194, _193, _187, _186, _185, _184, _183, _182, _181, _179, _177, _175, _174, _171, _169, _168, _166, _165, _162, _161, _160, _158, _156, _155, _153, _152, _150, _149, _147, _146, _144, _142, _140, _139, _138, _137, _132, _131, _130, _126, _125, _123, _121, _119, _118, _117, _116, _115, _110, _108, _107, _106, _105, _103, _102, _101, _100, _98, _97, _96, _95, _94, _92, _91, _90, _89, _87, _85, _84, _81, _79, _77, _76, _75, _73, _71, _69, _68, _67, _66, _64, _63, _62, _58, _55, _54, _53, _50, _49, _45, _44, _41, _40, _37, _35, _34, _31, _30, _29, _27, _25, _24, _23, _19, _18, _17, _16, _13, _12, _11, _9, _3, _1;
 
-static String _296, _291, _289, _283, _281, _275, _273, _267, _265, _259, _257, _251, _249, _243, _241, _236, _234, _228, _226, _220, _218, _212, _210, _204, _202, _196, _191, _189;
+static String _296, _291, _289, _283, _281, _275, _273, _267, _265, _259, _257, _252, _250, _244, _242, _236, _231, _229, _223, _221, _215, _213, _207, _205, _199, _197, _191, _189;
 
-static Var _292, _290, _288, _284, _282, _280, _276, _274, _272, _268, _266, _264, _260, _258, _256, _252, _250, _248, _244, _242, _237, _235, _233, _229, _227, _225, _221, _219, _217, _213, _211, _209, _205, _203, _201, _197, _192, _190, _188, _180, _178, _176, _173, _172, _170, _167, _164, _163, _159, _157, _154, _151, _148, _145, _143, _141, _136, _135, _134, _133, _129, _128, _127, _124, _122, _120, _114, _113, _112, _111, _109, _104, _99, _93, _88, _86, _83, _82, _80, _78, _74, _72, _70, _65, _61, _60, _59, _57, _56, _52, _51, _48, _47, _46, _43, _42, _39, _38, _36, _33, _32, _28, _26, _22, _21, _20, _15, _14, _10, _8, _7, _6, _5, _4, _2, _0;
+static Var _292, _290, _288, _284, _282, _280, _276, _274, _272, _268, _266, _264, _260, _258, _253, _251, _249, _245, _243, _241, _237, _232, _230, _228, _224, _222, _220, _216, _214, _212, _208, _206, _204, _200, _198, _196, _192, _190, _188, _180, _178, _176, _173, _172, _170, _167, _164, _163, _159, _157, _154, _151, _148, _145, _143, _141, _136, _135, _134, _133, _129, _128, _127, _124, _122, _120, _114, _113, _112, _111, _109, _104, _99, _93, _88, _86, _83, _82, _80, _78, _74, _72, _70, _65, _61, _60, _59, _57, _56, _52, _51, _48, _47, _46, _43, _42, _39, _38, _36, _33, _32, _28, _26, _22, _21, _20, _15, _14, _10, _8, _7, _6, _5, _4, _2, _0;
 
 static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
-int Var_is_row(Var, unsigned, unsigned long, unsigned long);
+static int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 
 void * Var_pointer(Var);
 
@@ -113,9 +116,9 @@ Map Map_update_n(Map, unsigned, ...);
 
 Map Map_new(void);
 
-Var List_var(List);
+static Var List_var(List);
 
-_x2c_initializer_choice_2B6ED6EF_0((scalartypes = Map_update_n(Map_new(), 14, List_var(_165), List_var(_195), List_var(_179), List_var(_200), List_var(_177), List_var(_208), List_var(_181), List_var(_216), List_var(_182), List_var(_224), List_var(_58), List_var(_232), List_var(_187), List_var(_240), List_var(_183), List_var(_247), List_var(_184), List_var(_255), List_var(_185), List_var(_263), List_var(_186), List_var(_271), List_var(_171), List_var(_279), List_var(_174), List_var(_287), List_var(_175), List_var(_295))))
+_x2c_initializer_choice_2B6ED6EF_0((scalartypes = Map_update_n(Map_new(), 14, List_var(_58), List_var(_195), List_var(_165), List_var(_203), List_var(_171), List_var(_211), List_var(_174), List_var(_219), List_var(_175), List_var(_227), List_var(_177), List_var(_235), List_var(_179), List_var(_240), List_var(_181), List_var(_248), List_var(_182), List_var(_256), List_var(_183), List_var(_263), List_var(_184), List_var(_271), List_var(_185), List_var(_279), List_var(_186), List_var(_287), List_var(_187), List_var(_295))))
 static List _scalar_row(Type type);
 
 static int _scalar_numeric_info(Type type, X2CVarNumericInfo * info);
@@ -137,11 +140,11 @@ Map Type_var_tag_rows(void);
 static Map declared_typetags;
 
 _x2c_initializer_choice_2B6ED6EF_1((declared_typetags = NULL))
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
 List cons(Var, List);
 
-Var String_var(String);
+static Var String_var(String);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -335,110 +338,110 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _185 = cons(_172, _183);
   _186 = cons(_176, _185);
   _187 = cons(_176, NULL);
-  _188 = Symbol_var(26993);
-  _189 = String_new("Var_char");
+  _188 = Symbol_var(3453797);
+  _189 = String_new("Var_int");
   _190 = String_var(_189);
-  _191 = String_new("x2c_var_update_i8");
+  _191 = String_new("x2c_var_update_i32");
   _192 = String_var(_191);
   _193 = cons(_192, NULL);
   _194 = cons(_190, _193);
   _195 = cons(_188, _194);
-  _196 = String_new("x2c_var_update_schar");
-  _197 = String_var(_196);
-  _198 = cons(_197, NULL);
-  _199 = cons(_190, _198);
-  _200 = cons(_188, _199);
-  _201 = Symbol_var(30065);
-  _202 = String_new("Var_uchar");
-  _203 = String_var(_202);
-  _204 = String_new("x2c_var_update_u8");
-  _205 = String_var(_204);
-  _206 = cons(_205, NULL);
-  _207 = cons(_203, _206);
-  _208 = cons(_201, _207);
-  _209 = Symbol_var(3453293);
-  _210 = String_new("Var_short");
-  _211 = String_var(_210);
-  _212 = String_new("x2c_var_update_i16");
-  _213 = String_var(_212);
-  _214 = cons(_213, NULL);
-  _215 = cons(_211, _214);
-  _216 = cons(_209, _215);
-  _217 = Symbol_var(3846509);
-  _218 = String_new("Var_ushort");
-  _219 = String_var(_218);
-  _220 = String_new("x2c_var_update_u16");
-  _221 = String_var(_220);
-  _222 = cons(_221, NULL);
-  _223 = cons(_219, _222);
-  _224 = cons(_217, _223);
-  _225 = Symbol_var(3453797);
-  _226 = String_new("Var_int");
-  _227 = String_var(_226);
-  _228 = String_new("x2c_var_update_i32");
-  _229 = String_var(_228);
-  _230 = cons(_229, NULL);
-  _231 = cons(_227, _230);
-  _232 = cons(_225, _231);
-  _233 = Symbol_var(3847013);
-  _234 = String_new("Var_uint");
-  _235 = String_var(_234);
-  _236 = String_new("x2c_var_update_u32");
+  _196 = Symbol_var(26993);
+  _197 = String_new("Var_char");
+  _198 = String_var(_197);
+  _199 = String_new("x2c_var_update_i8");
+  _200 = String_var(_199);
+  _201 = cons(_200, NULL);
+  _202 = cons(_198, _201);
+  _203 = cons(_196, _202);
+  _204 = Symbol_var(3355493);
+  _205 = String_new("Var_float");
+  _206 = String_var(_205);
+  _207 = String_new("x2c_var_update_f32");
+  _208 = String_var(_207);
+  _209 = cons(_208, NULL);
+  _210 = cons(_206, _209);
+  _211 = cons(_204, _210);
+  _212 = Symbol_var(3356265);
+  _213 = String_new("Var_floating");
+  _214 = String_var(_213);
+  _215 = String_new("x2c_var_update_f64");
+  _216 = String_var(_215);
+  _217 = cons(_216, NULL);
+  _218 = cons(_214, _217);
+  _219 = cons(_212, _218);
+  _220 = Symbol_var(26071077642);
+  _221 = String_new("Var_long_double");
+  _222 = String_var(_221);
+  _223 = String_new("x2c_var_update_long_double");
+  _224 = String_var(_223);
+  _225 = cons(_224, NULL);
+  _226 = cons(_222, _225);
+  _227 = cons(_220, _226);
+  _228 = Symbol_var(30065);
+  _229 = String_new("Var_uchar");
+  _230 = String_var(_229);
+  _231 = String_new("x2c_var_update_u8");
+  _232 = String_var(_231);
+  _233 = cons(_232, NULL);
+  _234 = cons(_230, _233);
+  _235 = cons(_228, _234);
+  _236 = String_new("x2c_var_update_schar");
   _237 = String_var(_236);
   _238 = cons(_237, NULL);
-  _239 = cons(_235, _238);
-  _240 = cons(_233, _239);
-  _241 = String_new("Var_long");
-  _242 = String_var(_241);
-  _243 = String_new("x2c_var_update_long");
-  _244 = String_var(_243);
-  _245 = cons(_244, NULL);
-  _246 = cons(_242, _245);
-  _247 = cons(_172, _246);
-  _248 = Symbol_var(44858254);
-  _249 = String_new("Var_ulong");
-  _250 = String_var(_249);
-  _251 = String_new("x2c_var_update_ulong");
-  _252 = String_var(_251);
-  _253 = cons(_252, NULL);
-  _254 = cons(_250, _253);
-  _255 = cons(_248, _254);
-  _256 = Symbol_var(25983886);
-  _257 = String_new("Var_long_long");
+  _239 = cons(_198, _238);
+  _240 = cons(_196, _239);
+  _241 = Symbol_var(3453293);
+  _242 = String_new("Var_short");
+  _243 = String_var(_242);
+  _244 = String_new("x2c_var_update_i16");
+  _245 = String_var(_244);
+  _246 = cons(_245, NULL);
+  _247 = cons(_243, _246);
+  _248 = cons(_241, _247);
+  _249 = Symbol_var(3846509);
+  _250 = String_new("Var_ushort");
+  _251 = String_var(_250);
+  _252 = String_new("x2c_var_update_u16");
+  _253 = String_var(_252);
+  _254 = cons(_253, NULL);
+  _255 = cons(_251, _254);
+  _256 = cons(_249, _255);
+  _257 = String_new("Var_long");
   _258 = String_var(_257);
-  _259 = String_new("x2c_var_update_long_long");
+  _259 = String_new("x2c_var_update_long");
   _260 = String_var(_259);
   _261 = cons(_260, NULL);
   _262 = cons(_258, _261);
-  _263 = cons(_256, _262);
-  _264 = Symbol_var(1435270030);
-  _265 = String_new("Var_ulong_long");
+  _263 = cons(_172, _262);
+  _264 = Symbol_var(44858254);
+  _265 = String_new("Var_ulong");
   _266 = String_var(_265);
-  _267 = String_new("x2c_var_update_ulong_long");
+  _267 = String_new("x2c_var_update_ulong");
   _268 = String_var(_267);
   _269 = cons(_268, NULL);
   _270 = cons(_266, _269);
   _271 = cons(_264, _270);
-  _272 = Symbol_var(3355493);
-  _273 = String_new("Var_float");
+  _272 = Symbol_var(25983886);
+  _273 = String_new("Var_long_long");
   _274 = String_var(_273);
-  _275 = String_new("x2c_var_update_f32");
+  _275 = String_new("x2c_var_update_long_long");
   _276 = String_var(_275);
   _277 = cons(_276, NULL);
   _278 = cons(_274, _277);
   _279 = cons(_272, _278);
-  _280 = Symbol_var(3356265);
-  _281 = String_new("Var_floating");
+  _280 = Symbol_var(1435270030);
+  _281 = String_new("Var_ulong_long");
   _282 = String_var(_281);
-  _283 = String_new("x2c_var_update_f64");
+  _283 = String_new("x2c_var_update_ulong_long");
   _284 = String_var(_283);
   _285 = cons(_284, NULL);
   _286 = cons(_282, _285);
   _287 = cons(_280, _286);
-  _288 = Symbol_var(26071077642);
-  _289 = String_new("Var_long_double");
+  _288 = Symbol_var(3847013);
+  _289 = String_new("Var_uint");
   _290 = String_var(_289);
-  _291 = String_new("x2c_var_update_long_double");
+  _291 = String_new("x2c_var_update_u32");
   _292 = String_var(_291);
   _293 = cons(_292, NULL);
   _294 = cons(_290, _293);
@@ -448,7 +451,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _x2c_static_initialize_1();
 }
 
-Var List_car(List);
+static Var List_car(List);
 
 Type List_type_from_ast(List ast){
   if(! _init_guard_) _file_init_();
@@ -467,8 +470,8 @@ Type List_type_from_ast(List ast){
 return List_type(type);
 }
 
-int List_truth(List);
-List Var_list(Var);
+static int List_truth(List);
+static List Var_list(Var);
 static List _from_ast(List node, List context){
   if(! List_truth(node)) return node;
   {
@@ -506,7 +509,7 @@ return _from_modifiers(node, context);
 int Var_is(Var, Symbol);
 Array Array_new(void);
 Var Array_push(Array, Var);
-List List_cdr(List);
+static List List_cdr(List);
 List List_append(List, List);
 List Array_list_free(Array);
 static List _from_modifiers(List node, List context){
@@ -583,7 +586,7 @@ static List _from_fields(List fields, List context){
 
 int Type_is_aggregate_tag(Type t);
 List List_flatten(List);
-Var List_cadr(List);
+static Var List_cadr(List);
 static List _from_aggregate(List node, Var head){
   if(Type_is_aggregate_tag(List_type(node))) return node;  if(Type__is_aggregate_body(List_type(node))){
     List fields = List_flatten(_from_ast(Var_list(List_cadr(node)), NULL));  return cons(head, cons(List_var(fields), NULL));
@@ -605,7 +608,7 @@ static List _without_leading_text(List items){
   return Array_list_free(typed);
 }
 
-Var car(List);
+static Var car(List);
 static int _is_source_text(Var item){
   return Var_is_row(item, 9, 7, 4) && Var_is_row(car(Var_list(item)), 11, 7, 1);
 }
@@ -703,8 +706,8 @@ List Type_tag(Type type){
   if(! _init_guard_) _file_init_();  if(Type_is_enum_tag(type) || Type_is_enum_tag_body(type) || Type_is_aggregate_tag(type) || Type_is_aggregate_tag_body(type)) return cons(List_cadr(Type_list(type)), NULL);  return NULL;
 }
 
-List cdr(List);
-List List_cddr(List);
+static List cdr(List);
+static List List_cddr(List);
 List Type_body(Type t){
   if(! _init_guard_) _file_init_();  if(Type__is_enum_body(t) || Type__is_aggregate_body(t)) return cdr(Type_list(t));  if(Type_is_enum_tag_body(t) || Type_is_aggregate_tag_body(t)) return Type_list(List_cddr(t));  return NULL;
 }
@@ -729,7 +732,7 @@ int Type_is_bitfield(Type type){
   if(! _init_guard_) _file_init_();  return _declarator_kind(type) == 158121667336;
 }
 
-Var int_var(int);
+static Var int_var(int);
 static Symbol _declarator_kind(Type type){
   while(List_truth(Type_list(type)) && Var_is_row(List_car(Type_list(type)), 9, 7, 4)) type = Var_type(List_car(Type_list(type)));  return Var_symbol(List_truth(Type_list(type)) && Var_is(List_car(Type_list(type)), 1328354264) ? List_car(Type_list(type)) : int_var(0));
 }
@@ -739,7 +742,7 @@ Type Type_dereference(Type type){
   if(! _init_guard_) _file_init_();  Type declared = type;  _qualifiers(&(type));  if(Type_is_array(type)) return Type_qualify(List_type(cdr(Type_list(type))), declared);  if(Type_is_pointer(type)) return List_type(cdr(Type_list(type)));  return NULL;
 }
 
-Symbol Var_symbol(Var);
+static Symbol Var_symbol(Var);
 Iter List_iter(List, Iter);
 int Iter_try_next(Iter, Var *);
 Type Type_qualify(Type type, Type source){
@@ -960,12 +963,12 @@ Symbol Type_scalar_tag(Type type){
   if(! _init_guard_) _file_init_();  List row = _scalar_row(type);  return Var_symbol(List_truth(row) ? List_car(row) : Symbol_var((Symbol) 0));
 }
 
-String Var_string(Var);
+static String Var_string(Var);
 String Type_var_numeric_extractor(Type type){
   if(! _init_guard_) _file_init_();  if(Type_is_enum(type)) return _296;  List row = _scalar_row(type);  return List_truth(row) ? Var_string(List_cadr(row)) : NULL;
 }
 
-Var List_caddr(List);
+static Var List_caddr(List);
 String Type_var_numeric_update_helper(Type type){
   if(! _init_guard_) _file_init_();  List row = _scalar_row(type);  return List_truth(row) ? Var_string(List_caddr(row)) : NULL;
 }
@@ -1003,8 +1006,8 @@ Type Type_numeric_literal(String text, int floating){
   unsigned long long magnitude;  int decimal;  if(! _literal_magnitude(text, suffix, &(magnitude), &(decimal))) return NULL;  return _integer_literal_type(magnitude, decimal, is_unsigned, longs);
 }
 
-Var float_var(float);
-Var double_var(double);
+static Var float_var(float);
+static Var double_var(double);
 Var Var_convert(Var, Symbol);
 Var Type_numeric_literal_value(Type type, String text){
   if(! _init_guard_) _file_init_();  Symbol tag = Type_scalar_tag(type);  if(tag == 3355493){
@@ -1019,7 +1022,7 @@ Var Type_numeric_literal_value(Type type, String text){
   int negative = String_getindex(text, 0) == '-';  if(negative || String_getindex(text, 0) == '+') text = String_getslice(text, 1, -2147483648, 1);  int end = _integer_literal_end(text);  unsigned long long magnitude;  int decimal;  if(! _literal_magnitude(text, end, &(magnitude), &(decimal))) return((void) 0, Void);  Var value = Var_box_ulong_long(negative ? 0ULL - magnitude : magnitude);  return Var_convert(value, tag);
 }
 
-int String_truth(String);
+static int String_truth(String);
 int Type_integer_literal_magnitude(Type type, String text, unsigned long long * value){
   if(! _init_guard_) _file_init_();  if(! Type_is_integral(type) || ! String_truth(text) || String_getindex(text, 0) < '0' || String_getindex(text, 0) > '9') return 0;  int decimal;  return _literal_magnitude(text, _integer_literal_end(text), &((* value)), &(decimal));
 }
@@ -1031,7 +1034,7 @@ static int _integer_literal_end(String text){
   return end;
 }
 
-int scan_ascii_hex_value(int);
+static int scan_ascii_hex_value(int);
 static int _literal_magnitude(String text, int end, unsigned long long * magnitude, int * decimal){
   int pos = 0, base = _radix(text, end, &(pos)); (* decimal) = base == 10;  unsigned long long sum = 0;  for(;  pos < end;  pos ++){
     unsigned digit = scan_ascii_hex_value((unsigned char) String_getindex(text, pos));  if(sum >(ULLONG_MAX - digit) /(unsigned) base) return 0;  sum = sum *(unsigned) base + digit;

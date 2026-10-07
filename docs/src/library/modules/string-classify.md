@@ -32,7 +32,7 @@ Byte classification for canonical strings.
 Reports whether `str` contains a decimal digit.
 A null or empty `String` returns false.
 
-Source: `lib/string-classify.x:18`
+Source: `lib/string-classify.x:17`
 
 <a id="String.is_alnum"></a>
 #### String.is_alnum
@@ -41,7 +41,7 @@ Source: `lib/string-classify.x:18`
 
 Reports whether every byte of nonempty `s` is alphanumeric.
 
-Source: `lib/string-classify.x:52`
+Source: `lib/string-classify.x:51`
 
 <a id="String.is_alnum_under"></a>
 #### String.is_alnum_under
@@ -50,7 +50,7 @@ Source: `lib/string-classify.x:52`
 
 Reports whether nonempty `s` is alphanumeric or underscore.
 
-Source: `lib/string-classify.x:57`
+Source: `lib/string-classify.x:56`
 
 <a id="String.is_alpha"></a>
 #### String.is_alpha
@@ -59,7 +59,7 @@ Source: `lib/string-classify.x:57`
 
 Reports whether every byte of nonempty `s` is alphabetic.
 
-Source: `lib/string-classify.x:37`
+Source: `lib/string-classify.x:36`
 
 <a id="String.is_alpha_under"></a>
 #### String.is_alpha_under
@@ -68,7 +68,7 @@ Source: `lib/string-classify.x:37`
 
 Reports whether every byte of nonempty `s` is alphabetic or underscore.
 
-Source: `lib/string-classify.x:42`
+Source: `lib/string-classify.x:41`
 
 <a id="String.is_digit"></a>
 #### String.is_digit
@@ -77,7 +77,7 @@ Source: `lib/string-classify.x:42`
 
 Reports whether every byte of nonempty `s` is a decimal digit.
 
-Source: `lib/string-classify.x:47`
+Source: `lib/string-classify.x:46`
 
 <a id="String.is_identifier"></a>
 #### String.is_identifier
@@ -88,7 +88,7 @@ Reports whether `s` is a C identifier under C character classes.
 The first byte must be alphabetic or underscore; later bytes may also be
 decimal digits. A null or empty `String` returns false.
 
-Source: `lib/string-classify.x:65`
+Source: `lib/string-classify.x:64`
 
 <a id="String.is_lower"></a>
 #### String.is_lower
@@ -97,7 +97,7 @@ Source: `lib/string-classify.x:65`
 
 Reports whether every byte of nonempty `s` is lower-case.
 
-Source: `lib/string-classify.x:80`
+Source: `lib/string-classify.x:79`
 
 <a id="String.is_lower_under"></a>
 #### String.is_lower_under
@@ -106,7 +106,7 @@ Source: `lib/string-classify.x:80`
 
 Reports whether every byte of nonempty `s` is lower-case or underscore.
 
-Source: `lib/string-classify.x:85`
+Source: `lib/string-classify.x:84`
 
 <a id="String.is_space"></a>
 #### String.is_space
@@ -115,7 +115,7 @@ Source: `lib/string-classify.x:85`
 
 Reports whether every byte of nonempty `s` is whitespace.
 
-Source: `lib/string-classify.x:75`
+Source: `lib/string-classify.x:74`
 
 <a id="String.is_upper"></a>
 #### String.is_upper
@@ -124,7 +124,7 @@ Source: `lib/string-classify.x:75`
 
 Reports whether every byte of nonempty `s` is upper-case.
 
-Source: `lib/string-classify.x:90`
+Source: `lib/string-classify.x:89`
 
 <a id="String.is_upper_under"></a>
 #### String.is_upper_under
@@ -133,7 +133,7 @@ Source: `lib/string-classify.x:90`
 
 Reports whether every byte of nonempty `s` is upper-case or underscore.
 
-Source: `lib/string-classify.x:95`
+Source: `lib/string-classify.x:94`
 
 ## Design notes
 

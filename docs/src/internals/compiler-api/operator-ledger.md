@@ -6,7 +6,7 @@
 
 # `src/operator-ledger.x`
 
-Compiler lookups from one binary operator ledger.
+Binary operator facts and case projections.
 
 ## Functions
 
@@ -29,7 +29,7 @@ Returns the protocol member that derives a comparison operator.
 Inequality derives from `equal`, ordered comparisons derive from `compare`,
 and unsupported operators return zero.
 
-Source: `src/operator-ledger.x:94`
+Source: `src/operator-ledger.x:91`
 
 <a id="Compiler.operator_member"></a>
 #### Compiler.operator_member
@@ -39,7 +39,7 @@ Source: `src/operator-ledger.x:94`
 Returns the protocol member corresponding to a direct binary operator.
 Returns zero when the operator has no direct protocol mapping.
 
-Source: `src/operator-ledger.x:84`
+Source: `src/operator-ledger.x:81`
 
 ### `Symbol`
 
@@ -54,7 +54,7 @@ operators, so a larger level binds more tightly. `===` and `!==` share
 the equality level, `in` the relational level, and `@` the
 multiplicative level.
 
-Source: `src/operator-ledger.x:64`
+Source: `src/operator-ledger.x:61`
 
 <a id="Symbol.compound_assignment"></a>
 #### Symbol.compound_assignment
@@ -63,7 +63,7 @@ Source: `src/operator-ledger.x:64`
 
 Returns the compound assignment for a binary operator, or zero.
 
-Source: `src/operator-ledger.x:76`
+Source: `src/operator-ledger.x:73`
 
 <a id="Symbol.compound_operator"></a>
 #### Symbol.compound_operator
@@ -72,4 +72,11 @@ Source: `src/operator-ledger.x:76`
 
 Returns the binary operator computed by a compound assignment, or zero.
 
-Source: `src/operator-ledger.x:70`
+Source: `src/operator-ledger.x:67`
+
+## Design notes
+
+Each row gives the operator, precedence, compound assignment, protocol
+member, and whether that member derives a comparison. Zero denotes an
+absent compound assignment or member. Private case projections generate
+the public operator lookups below.

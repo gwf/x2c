@@ -7,6 +7,17 @@
 
 #include "x2c.h"
 #include "compiler.h"
+#include "adapter-memo.h"
+#include "ast-rewrite.h"
+#include "meta.h"
+#include "grammar.h"
+#include "ast.h"
+#include "type.h"
+#include "parse.h"
+#include "expressions.h"
+#include "protocol.h"
+#include "transform.h"
+#include "lambdas.h"
 List Compiler_lower_lambda_expr(Compiler c, List expression);
 
 List Compiler_capture_environment(Compiler c, List name, List fields);

@@ -6,6 +6,10 @@
 #define __GUARD_0x22AD6B5D__
 
 #include "string.h"
+#include <limits.h>
+#include "buffer.h"
+#include "exception.h"
+#include "scan.h"
 String String_escape(String str);
 
 String String_repr(String str);

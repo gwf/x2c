@@ -5,6 +5,8 @@
 #ifndef __GUARD_0xCC13178C__
 #define __GUARD_0xCC13178C__
 
+#include "error-macros.h"
+#include "private-keywords.h"
 #include "common.h"
 typedef struct Iter * Iter;
 
@@ -35,6 +37,17 @@ struct UnzipShared{
 }
 ;
 
+#include "list.h"
+#include "var.h"
+#include "symbol.h"
+#include "scope.h"
+#include "array.h"
+#include "block.h"
+#include "func.h"
+#include <limits.h>
+#include <stdlib.h>
+#define UNZIP_COMPACT_THRESHOLD 256
+#include "var-adapters.h"
 Iter Iter_init(Iter iter, Var obj, IterNextFn next, Var state);
 
 Iter Iter_new(void);

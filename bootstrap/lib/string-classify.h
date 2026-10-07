@@ -6,6 +6,7 @@
 #define __GUARD_0x246C5420__
 
 #include "string.h"
+#include <ctype.h>
 int String_contains_digit(String str);
 
 int String_is_alpha(String s);

@@ -6,7 +6,16 @@
 #define __GUARD_0x5DA47678__
 
 #include "x2c.h"
+#include "common.h"
+#include "list-selectors.h"
 #include "meta.h"
+#include "native-scalar-types.h"
+#include "system-macros.h"
+#include "var-tags.h"
+#include "varops.h"
+#include "fields.h"
+#include "grammar.h"
+#include "operator-ledger.h"
 List x2c_expr_field(List receiver, String name);
 
 List x2c_expr_cast(List type, List expression);
@@ -16,6 +25,16 @@ List x2c_decl_make(List type, Var name, List initializer);
 List x2c_param_make(List type, Var name);
 
 List x2c_type_members(List type);
+
+List _dedent_expand(List node);
+
+List _macros_location(void);
+
+List _tag_decode_group(List rows, Map counts, int top);
+
+List _tag_decode_groups(void);
+
+List _tag_id_checks(void);
 
 Map linked_meta_targets(void);
 

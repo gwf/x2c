@@ -47,9 +47,14 @@ Buffer Tokenizer_write_repr(Tokenizer value, Buffer out);
 
 String Tokenizer_repr(Tokenizer value);
 
+#include "exception.h"
+void * Var_pointer(Var);
+
 static inline Token Var_token(Var x){
   return Var_pointer(x);
 }
+
+Var Var_new(Symbol, ...);
 
 static inline Var Token_var(Token x){
   return Var_new(42948956, x);

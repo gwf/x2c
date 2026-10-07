@@ -12,6 +12,8 @@
 #include "x2c.h"
 
 #include "common.h"
+typedef struct Diagnostics * Diagnostics;
+
 #include "compiler.h"
 typedef struct Diagnostics{
   Array entries;
@@ -106,15 +108,15 @@ _x2c_defer_env_0;
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
 List cons(Var, List);
 
-Var List_var(List);
+static Var List_var(List);
 
-Var int_var(int);
+static Var int_var(int);
 
-Var String_var(String);
+static Var String_var(String);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -289,7 +291,7 @@ DiagnosticsHold Diagnostics_hold(Diagnostics diag){
   return hold;
 }
 
-List Var_list(Var);
+static List Var_list(Var);
 
 Var Array_getindex(Array, int);
 
@@ -395,7 +397,7 @@ static void Diagnostics__warn(Diagnostics diag, Symbol code, String message, Lis
 
 List List_filter(List, Func);
 
-int List_truth(List);
+static int List_truth(List);
 
 String String_join(String, List);
 
@@ -410,7 +412,7 @@ int diagnostics_write_json(String path){
   return diagnostics_json >= 0;
 }
 
-int String_truth(String);
+static int String_truth(String);
 
 int String_startswith(String, String);
 
@@ -438,7 +440,7 @@ Buffer Buffer_write(Buffer, const char *);
 
 String Var_json(Var);
 
-Var Array_var(Array);
+static Var Array_var(Array);
 
 Array Array_update_n(Array, unsigned, ...);
 
@@ -473,7 +475,7 @@ static void Compiler__write_json(Compiler c, Symbol code, Symbol severity, Strin
 
 }
 
-String Var_string(Var);
+static String Var_string(Var);
 
 static void Compiler__write_json_location(Compiler c, Buffer out, List location){
 
@@ -626,7 +628,7 @@ int List_try_next(List, List *, Var *);
 
 _Noreturn void Compiler_report_error(Compiler compiler, Symbol code, String message, Token token, List notes){
   if(! _init_guard_) _file_init_();  report_suspend();  Diagnostics diag = compiler -> diagnostics;  message = String_truth(message) ? message : _112;  List loc = _compiler_location(compiler, token);  Diagnostics_report(diag, code, message, loc, notes);  if(compiler -> recovery_depth > 0){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/diagnostics.x",.function = "Compiler_report_error",.line = 427};  x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(209659067570), Symbol_var(code));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/diagnostics.x",.function = "Compiler_report_error",.line = 426};  x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(209659067570), Symbol_var(code));  __builtin_unreachable();
   }
   if(! diag -> printer){
     Var held;  List _x2c_macro_object_2 = Diagnostics_entries(diag);  List _x2c_macro_cursor_2 = _x2c_macro_object_2;  Var _x2c_macro_cursor_output_2;  while(List_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
@@ -725,7 +727,7 @@ void Compiler_dump_cache(Compiler compiler){
 
 }
 
-int Var_is_row(Var, unsigned, unsigned long, unsigned long);
+static int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 static Var _x2c_lambda_0(Var entry){
   return int_var(Var_is_row(entry, 11, 7, 1)); ;
 }

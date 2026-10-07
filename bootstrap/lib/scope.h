@@ -5,8 +5,11 @@
 #ifndef __GUARD_0xAAD89034__
 #define __GUARD_0xAAD89034__
 
+#include "error-macros.h"
 #include <stddef.h>
 #include <stdatomic.h>
+typedef struct Scope * Scope;
+
 #include "common.h"
 typedef struct ScopeAlloc{
   struct ScopeAlloc * prev, * next;
@@ -27,6 +30,10 @@ typedef struct ScopeStats{
 ScopeStats;
 
 #include <stdlib.h>
+#include <limits.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
 void * Scope_malloc(size_t size);
 
 void * Scope_malloc_finalized(size_t size, void(* drop)(void *));

@@ -5,6 +5,10 @@
 #ifndef __GUARD_0x728E1434__
 #define __GUARD_0x728E1434__
 
+#include "error-macros.h"
+#include "cleanup.h"
+typedef struct Buffer * Buffer;
+
 #include "common.h"
 #include "block.h"
 #include <stddef.h>
@@ -16,6 +20,9 @@ typedef struct Buffer{
 
 void Buffer_cleanup(Buffer _x2c_macro_value_0);
 
+#include "exception.h"
+#include "scope.h"
+#include "string.h"
 Buffer Buffer_write_len(Buffer buf, const char * text, size_t length);
 
 Buffer Buffer_write(Buffer buf, const char * text);

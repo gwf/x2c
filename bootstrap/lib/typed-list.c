@@ -27,7 +27,7 @@ _Noreturn static void _no_convert(String owner, int index, Symbol tag);
 
 static int _typed_list_holds(Var value, Symbol tag);
 
-Var Var_box_i8(char);
+static Var Var_box_i8(char);
 
 static inline Var _typed_list_encode_i8(char value){
   return Var_box_i8(value);
@@ -37,7 +37,7 @@ static inline char _typed_list_decode_i8(Var value){
   return(char)(value.u64 & 0xFFul);
 }
 
-Var Var_box_i16(short);
+static Var Var_box_i16(short);
 
 static inline Var _typed_list_encode_i16(short value){
   return Var_box_i16(value);
@@ -47,7 +47,7 @@ static inline short _typed_list_decode_i16(Var value){
   return(short)(value.u64 & 0xFFFFul);
 }
 
-Var Var_box_i32_bits(unsigned);
+static Var Var_box_i32_bits(unsigned);
 
 static inline Var _typed_list_encode_i32(int value){
   return Var_box_i32_bits((unsigned) value);
@@ -57,7 +57,7 @@ static inline int _typed_list_decode_i32(Var value){
   return(int)(value.u64 & 0xFFFFFFFFul);
 }
 
-Var Var_box_f32(float);
+static Var Var_box_f32(float);
 
 static inline Var _typed_list_encode_f32(float value){
   return Var_box_f32(value);
@@ -70,13 +70,13 @@ static inline float _typed_list_decode_f32(Var value){
   return result;
 }
 
-Var Var_box_f64(double);
+static Var Var_box_f64(double);
 
 static inline Var _typed_list_encode_f64(double value){
   return Var_box_f64(value);
 }
 
-double Var_decode_f64(Var);
+static double Var_decode_f64(Var);
 
 static inline double _typed_list_decode_f64(Var value){
   return Var_decode_f64(value);
@@ -90,7 +90,7 @@ static inline Var _typed_list_encode_string(String value){
   ;
 }
 
-String Var_string(Var);
+static String Var_string(Var);
 
 static inline String _typed_list_decode_string(Var value){
   return Var_string(value);
@@ -107,7 +107,7 @@ static inline Symbol _typed_list_decode_symbol(Var value){
   return(Symbol)(value.u64 - VAR_SYMBOL_OFFSET);
 }
 
-int List_truth(List);
+static int List_truth(List);
 
 static inline char ListChar_car(ListChar _x2c_macro_xs_0){
   return List_truth(_x2c_macro_xs_0) ? _typed_list_decode_i8(((List) _x2c_macro_xs_0) -> car) : 0;
@@ -180,11 +180,11 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _6 = String_new("ListSymbol");
 }
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
-Var String_var(String);
+static Var String_var(String);
 
-Var int_var(int);
+static Var int_var(int);
 
 #include "error.h"
 
@@ -193,7 +193,7 @@ Var int_var(int);
 
 _Noreturn static void _no_convert(String owner, int index, Symbol tag){
   {
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/typed-list.x",.function = "_no_convert",.line = 48};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/typed-list.x",.function = "_no_convert",.line = 150};
     x2c_error_raise_n(& _x2c_error_site_0, 1020285550996648, 3, Symbol_var(34096809266140), String_var(owner), Symbol_var(19800432), int_var(index), Symbol_var(41038), Symbol_var(tag));
     __builtin_unreachable();
   }
@@ -220,7 +220,7 @@ int ListChar_index(ListChar _x2c_macro_xs_2, char _x2c_macro_value_1){
   return List_index((List) _x2c_macro_xs_2, _typed_list_encode_i8(_x2c_macro_value_1));
 }
 
-List List_cdr(List);
+static List List_cdr(List);
 
 ListChar List_listchar(List _x2c_macro_xs_3){
   if(! _init_guard_) _file_init_();
@@ -232,7 +232,7 @@ ListChar List_listchar(List _x2c_macro_xs_3){
   return(ListChar) _x2c_macro_xs_3;
 }
 
-List Var_list(Var);
+static List Var_list(Var);
 
 ListChar Var_listchar(Var _x2c_macro_value_2){
   if(! _init_guard_) _file_init_();

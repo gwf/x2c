@@ -32,7 +32,7 @@ X2c command-line parsing and presentation.
 
 Reports whether a raw command name belongs to the built-in parser.
 
-Source: `src/cli.x:1267`
+Source: `src/cli.x:1264`
 
 #### cli_dependency_pass_through
 
@@ -42,7 +42,7 @@ Returns whether `s` contains a driver-owned dependency option.
 Recognizes `-MMD`, `-MP`, `-MF`, and `-MT` as leading spellings or in a
 comma-delimited pass-through argument; `NULL` returns zero.
 
-Source: `src/cli.x:723`
+Source: `src/cli.x:720`
 
 #### cli_package_options
 
@@ -55,7 +55,7 @@ and the `-Wl,` and `-Xlinker` linker pass-throughs are admitted.
 `cc_args` and `ld_args` serve native actions; no source-preprocessing
 options are returned.
 
-Source: `src/cli.x:751`
+Source: `src/cli.x:748`
 
 #### cli_parse
 
@@ -70,7 +70,7 @@ canonical-pool lifetimes described by `CliRequest`.
 **Raises:** `<alloc-fail>` or `<size-limit>` while expanding response files or
 constructing request values.
 
-Source: `src/cli.x:402`
+Source: `src/cli.x:399`
 
 #### cli_request
 
@@ -78,7 +78,7 @@ Source: `src/cli.x:402`
 
 Constructs a request with the command's ordinary CLI defaults.
 
-Source: `src/cli.x:1249`
+Source: `src/cli.x:1246`
 
 #### cli_response_arguments
 
@@ -88,7 +88,7 @@ Reads response-file tokens with ordinary quoting and UTF-8 checks.
 Returns canonical Strings without expanding `@` references. Paths and
 arguments retain the producing pool lifetime.
 
-Source: `src/cli.x:810`
+Source: `src/cli.x:807`
 
 #### cli_version
 
@@ -96,7 +96,7 @@ Source: `src/cli.x:810`
 
 Returns the version line `--version` prints, without a newline.
 
-Source: `src/cli.x:1271`
+Source: `src/cli.x:1268`
 
 ### `CliRequest`
 
@@ -107,7 +107,7 @@ Source: `src/cli.x:1271`
 
 Returns whether `request` selects a terminating inspection or dump mode.
 
-Source: `src/cli.x:1274`
+Source: `src/cli.x:1271`
 
 <a id="CliRequest.package_roots"></a>
 #### CliRequest.package_roots
@@ -120,7 +120,7 @@ when it exists. A root named twice is searched twice and resolves the
 same entries. Explicit directories are borrowed; the result is a fresh
 `List` only when the home directory is appended.
 
-Source: `src/cli.x:1282`
+Source: `src/cli.x:1279`
 
 ### `TargetKind`
 
@@ -133,7 +133,7 @@ Returns the target kind spelled `spelling`, or 0 when no kind has that
 spelling. `refusal` says why this compiler refuses a known spelling, and
 is NULL otherwise.
 
-Source: `src/cli.x:669`
+Source: `src/cli.x:666`
 
 <a id="TargetKind.of"></a>
 #### TargetKind.of
@@ -143,7 +143,7 @@ Source: `src/cli.x:669`
 Returns the row of target kind `kind`; any other kind reads as an
 executable.
 
-Source: `src/cli.x:679`
+Source: `src/cli.x:676`
 
 ## Public types
 

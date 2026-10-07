@@ -7,6 +7,13 @@
 
 #include "x2c.h"
 #include "compiler.h"
+#include "grammar.h"
+#include "adapter-memo.h"
+#include <string.h>
+#include "collect.h"
+#include "expressions.h"
+#include "parse.h"
+#include "meta.h"
 String Compiler_reverse_converter_spelling(Compiler c, String base_name, String infix, String participant);
 
 List Compiler_parse_protocol_declaration(Compiler c);
@@ -15,6 +22,8 @@ List Compiler_publish_protocol_node(Compiler c, List node, Token participant_tok
 
 void Compiler_resolve_protocols(Compiler c);
 
+#define PROTOCOL_VARIABLE 1
+#define PROTOCOL_VARIADIC 2
 List Compiler_protocol_members_for(Compiler c, Type participant, Type base);
 
 List Compiler_protocol_member_names(Compiler c, Type participant);
@@ -22,6 +31,10 @@ List Compiler_protocol_member_names(Compiler c, Type participant);
 int Compiler_protocol_rejects_direct_member(Compiler c, Type participant, String member);
 
 void Compiler_dump_conformance(Compiler c, Map globs);
+
+Symbol Compiler_operator_member(Compiler c, Symbol op);
+
+Symbol Compiler_derived_member(Compiler c, Symbol op);
 
 List Compiler_resolve_protocol_member(Compiler c, Type participant, String member_name);
 
@@ -38,6 +51,8 @@ List Compiler_protocol_discard_helper(Compiler c, Type participant, String membe
 List Compiler_generate_protocol_adapters(Compiler c, List ast);
 
 void Compiler_install_generated_protocol_symbols(Compiler c);
+
+int Compiler_native_protocol_alias(Compiler c, String name);
 
 void Compiler_record_source_typedef(Compiler c, String name, List declaration, int private);
 

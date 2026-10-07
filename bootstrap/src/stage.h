@@ -7,6 +7,16 @@
 
 #include "x2c.h"
 #include "compiler.h"
+#include "grammar.h"
+#include "type.h"
+#include "var.h"
+#include "string.h"
+#include "varconvert.h"
+#include "datum.h"
+#include <limits.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 typedef Var(* MetaCall)(Compiler c, List expression, Token site);
 
 Var Compiler_meta_argument(Compiler c, List node, Type want, Token site, MetaCall call);

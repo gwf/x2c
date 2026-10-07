@@ -9,6 +9,10 @@
 #include "cli.h"
 #include "compiler.h"
 #include "utils.h"
+#include "collect.h"
+#include <stdio.h>
+#include <string.h>
+#include "buffer.h"
 int translation_depfile_write(CliRequest request, Compiler compiler, String input, String output_dir);
 
 List translation_depfile_parse(String text);

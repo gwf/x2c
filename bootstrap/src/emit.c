@@ -272,13 +272,13 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _x2c_cache_initialize_1();
 }
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
 List cons(Var, List);
 
-Var String_var(String);
+static Var String_var(String);
 
-Var List_var(List);
+static Var List_var(List);
 
 String String_add(String, String);
 
@@ -1102,9 +1102,9 @@ List Array_list_free(Array);
 
 int List_try_next(List, List *, Var *);
 
-List Var_list(Var);
+static List Var_list(Var);
 
-String Var_string(Var);
+static String Var_string(Var);
 
 Var List_getindex(List, int);
 
@@ -1140,25 +1140,25 @@ List Compiler_emit(Compiler c, List ast, Map cache_bindings){
   return List_append(List_append(Array_list_free(before), code), Array_list_free(after));
 }
 
-int List_truth(List);
+static int List_truth(List);
 
-Var List_car(List);
+static Var List_car(List);
 
-int Var_is_row(Var, unsigned, unsigned long, unsigned long);
+static int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 
 int Var_is(Var, Symbol);
 
-List List_cdr(List);
+static List List_cdr(List);
 
 int Symbol_is_storage_class(Symbol);
 
-Symbol Var_symbol(Var);
+static Symbol Var_symbol(Var);
 
 int Symbol_is_type_qualifier(Symbol);
 
 int Symbol_is_inline(Symbol);
 
-Type Var_type(Var);
+static Type Var_type(Var);
 
 int Map_truth(Map);
 
@@ -1398,7 +1398,7 @@ static List Emitter__emit_leaf(Emitter * e, List ast){
   );
 }
 
-Var int_var(int);
+static Var int_var(int);
 static List Emitter__emit_at(Emitter * e, int origin, List inner){
   int old_origin =(* e).origin; (* e).origin = origin;  List result = Emitter__emit(&((* e)), inner); (* e).origin = old_origin;  if((* e).c -> source_map) return cons(_264, cons(int_var(origin), List_append(result, cons(_264, cons(int_var(old_origin), NULL)))));  return result;
 }
@@ -1414,7 +1414,7 @@ String Compiler_fresh_name(Compiler, String);
 char * Compiler_code_pretty_string(Compiler, List, String);
 String String_replace(String, String, String);
 String String_rstrip(String, char *);
-Var List_cadr(List);
+static Var List_cadr(List);
 static List Emitter__initializer_macro(Emitter * e, List input, List body){
   Buffer parameters = Buffer_new(0); {
     List argument;  List _x2c_macro_object_1 = List_cdr(input);  List _x2c_macro_cursor_1 = _x2c_macro_object_1;  Var _x2c_macro_cursor_output_1;  while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
@@ -1477,7 +1477,7 @@ List List_reverse(List);
 
 List List_match(List, Var);
 
-List Type_list(Type);
+static List Type_list(Type);
 
 static List Emitter__initializer_value(Emitter * e, List ast){
   List source = NULL;
@@ -1538,11 +1538,11 @@ static List Emitter__emit_dot_init(Emitter * e, Var field, List value){
   );
 }
 
-Var List_caddr(List);
+static Var List_caddr(List);
 
 void Compiler_report_error(Compiler, Symbol, String, Token, List);
 
-Type List_type(List);
+static Type List_type(List);
 
 Type Type_declared(Type);
 
@@ -2023,7 +2023,7 @@ static List Emitter__emit_call(Emitter * e, Var function, Var arguments){
 }
 
 String binding_identity_spelling(List);
-int String_truth(String);
+static int String_truth(String);
 List Sym_resolve_global(Sym, List, Type *);
 int List_equal(List, List);
 int Type_is_function(Type);
@@ -2077,7 +2077,7 @@ static List Emitter__emit_label(Emitter * e, Var name){
 List Compiler_origin_location(Compiler, int);
 Var List_assoc(List, Var);
 int Ast_never_returns(Ast);
-String int_str(int);
+static String int_str(int);
 int List_len(List);
 static List Emitter__raise(Emitter * e, Ast ast, Var cause, List arguments){
   List code = Emitter__emit(&((* e)), Var_list(cause));  List arg_tokens = _commas(Emitter__emit(&((* e)), arguments));  String site_name = Compiler_fresh_name((* e).c, _630);  List location = Compiler_origin_location((* e).c, (* e).origin);  String file = Var_string(List_truth(location) ? List_assoc(location, Symbol_var(412426)) : String_var((* e).c -> filename));  int line = Var_int(Var_convert(List_truth(location) ? List_assoc(location, Symbol_var(805770)) : int_var(0), 3453797));  String function = String_truth((* e).fn_name) ?(* e).fn_name : _631;  String file_literal = _c_string_literal(file);  String function_literal = _c_string_literal(function);  List tail = List_truth(arguments) ? cons(_36, List_append(arg_tokens, NULL)) : NULL;  List terminal = Ast_never_returns(ast) ? _634 : NULL;  return({
@@ -2092,7 +2092,7 @@ static String _c_string_literal(String value){
 }
 
 int String_equal(String, String);
-String long_str(long);
+static String long_str(long);
 int String_getindex(String, int);
 String String_new(const char *);
 static List Emitter__literal(Emitter * e, List ast){
@@ -2187,7 +2187,7 @@ static List Emitter__function(Emitter * e, List ast){
   (* e).fn_name = old_fn;  return List_append(type, List_append(decl, List_append(body_code, NULL)));
 }
 
-Var Var_cadr(Var);
+static Var Var_cadr(Var);
 Type List_type_from_ast(List);
 static List Emitter__foreign_alias(Emitter * e, List ast){
   List declaration, native_binding;  List _x2c_destructure_11 = List_cdr(ast);  declaration = Var_list(List_getindex(_x2c_destructure_11, 0));  native_binding = Var_list(List_getindex(_x2c_destructure_11, 1));  List bindings = Var_list(List_caddr(declaration)), target = Var_list(Var_cadr(List_cadr(bindings)));  Type function_type = Type_declared(List_type_from_ast(declaration));  Type pointer_type = Type_reference(function_type);  List pointer = Emitter__semantic_type(&((* e)), pointer_type);  List native = Emitter__emit(&((* e)), native_binding);  String target_name = Compiler_emitted_binding_name((* e).c, target);  String native_name = Compiler_emitted_binding_name((* e).c, native_binding);  String message = String_join(NULL, cons(String_var(_685), cons(String_var(target_name), cons(String_var(_686), cons(String_var(native_name), NULL)))));  String define = String_join(NULL, cons(String_var(_269), cons(String_var(target_name), cons(String_var(_687), cons(String_var(native_name), NULL)))));  return({

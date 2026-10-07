@@ -5,11 +5,11 @@
 
 #include "compiler.h"
 #include <ctype.h>
-static List _45, _44, _41, _40, _39;
+static List _42, _41, _38, _37, _36;
 
-static String _42, _36, _34, _33, _32, _31, _30, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _39, _33, _31, _30, _29, _28, _27, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
-static Var _43, _38, _37, _35, _29;
+static Var _40, _35, _34, _32, _26;
 
 static int _init_guard_ = 0;
 
@@ -71,13 +71,13 @@ _x2c_defer_env_1;
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
 
-Var int_var(int);
+static Var int_var(int);
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
 List cons(Var, List);
 
-Var String_var(String);
+static Var String_var(String);
 
 #include "exception.h"
 
@@ -109,31 +109,28 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _18 = String_new("_WIN32");
   _19 = String_new("_WIN64");
   _20 = String_new("__CYGWIN__");
-  _21 = String_new("pragma");
-  _22 = String_new("pragma private");
-  _23 = String_new("pragma public");
-  _24 = String_new("include");
-  _25 = String_new(">");
-  _26 = String_new("\"");
-  _27 = String_new("undef");
-  _28 = String_new("define");
-  _29 = int_var(0);
-  _30 = String_new("__attribute__");
-  _31 = String_new("packed");
-  _32 = String_new("aligned");
-  _33 = String_new("mode");
-  _34 = String_new("vector_size");
-  _35 = Symbol_var(35579270086);
-  _36 = String_new("__declspec");
-  _37 = Symbol_var(54);
-  _38 = Symbol_var(1317118534);
-  _39 = cons(_37, NULL);
-  _40 = cons(_38, _39);
-  _41 = cons(_37, _40);
-  _42 = String_new("#endif");
-  _43 = String_var(_42);
-  _44 = cons(_43, NULL);
-  _45 = cons(_35, _44);
+  _21 = String_new("include");
+  _22 = String_new(">");
+  _23 = String_new("\"");
+  _24 = String_new("undef");
+  _25 = String_new("define");
+  _26 = int_var(0);
+  _27 = String_new("__attribute__");
+  _28 = String_new("packed");
+  _29 = String_new("aligned");
+  _30 = String_new("mode");
+  _31 = String_new("vector_size");
+  _32 = Symbol_var(35579270086);
+  _33 = String_new("__declspec");
+  _34 = Symbol_var(54);
+  _35 = Symbol_var(1317118534);
+  _36 = cons(_34, NULL);
+  _37 = cons(_35, _36);
+  _38 = cons(_34, _37);
+  _39 = String_new("#endif");
+  _40 = String_var(_39);
+  _41 = cons(_40, NULL);
+  _42 = cons(_32, _41);
 }
 
 String String_strip(String, char *);
@@ -205,15 +202,6 @@ int preproc_branch_state(int state){
   return state == 1 ? 2 : 0;
 }
 
-int preproc_visibility(String text){
-  if(! _init_guard_) _file_init_();
-  String directive = preproc_directive(text);
-  if(! String_startswith(directive, _21)) return - 1;
-  String line = _directive_line(directive);
-  if(String_equal(line, _22)) return 1;
-  return String_equal(line, _23) ? 0 : - 1;
-}
-
 String String_lstrip(String, char *);
 
 int String_len(String);
@@ -226,12 +214,12 @@ String preproc_include_target(String text, int * angle){
   if(! _init_guard_) _file_init_();
   (* angle) = 0;
   String body = preproc_directive(text);
-  if(! String_startswith(body, _24)) return NULL;
-  body = String_lstrip(String_remove_prefix(body, _24), " \t");
+  if(! String_startswith(body, _21)) return NULL;
+  body = String_lstrip(String_remove_prefix(body, _21), " \t");
   if(! String_len(body) ||(String_getindex(body, 0) != '"' && String_getindex(body, 0) != '<')) return NULL;
   (* angle) = String_getindex(body, 0) == '<';
   String rest = String_getslice(body, 1, -2147483648, 1);
-  int close = String_find(rest, (* angle) ? _25 : _26);
+  int close = String_find(rest, (* angle) ? _22 : _23);
   return close > 0 ? String_getslice(rest, -2147483648, close, 1) : NULL;
 }
 
@@ -245,8 +233,8 @@ String preproc_marker_file(String text, int * line){
   size_t digits = 0;
   while(digits < String_len(body) && isdigit(String_getindex(body, digits))) digits ++;
   String rest = String_lstrip(String_getslice(body, digits, -2147483648, 1), " \t");
-  if(! digits || ! String_startswith(rest, _26)) return NULL;
-  int close = String_find(String_getslice(rest, 1, -2147483648, 1), _26);
+  if(! digits || ! String_startswith(rest, _23)) return NULL;
+  int close = String_find(String_getslice(rest, 1, -2147483648, 1), _23);
   if(close < 0) return NULL;
   (* line) = atoi(body);
   return String_unescape(String_getslice(rest, 1, close + 1, 1));
@@ -254,9 +242,9 @@ String preproc_marker_file(String text, int * line){
 
 static Token _macro_directive(String content, int * undefined){
   String directive = preproc_directive(content);
-  (* undefined) = String_startswith(directive, _27);
-  if(!(* undefined) && ! String_startswith(directive, _28)) return NULL;
-  Tokenizer scanned = Tokenizer_new(String_remove_prefix(directive, (* undefined) ? _27 : _28), 3945159);
+  (* undefined) = String_startswith(directive, _24);
+  if(!(* undefined) && ! String_startswith(directive, _25)) return NULL;
+  Tokenizer scanned = Tokenizer_new(String_remove_prefix(directive, (* undefined) ? _24 : _25), 3945159);
   Tokenizer_scan(scanned);
   Token token = Token_skip_trivia(scanned -> tokens);
   return token -> type == 19147688 ? token : NULL;
@@ -320,9 +308,9 @@ void Compiler_scan_conditionals(Compiler c){
 
 }
 
-Var List_var(List);
+static Var List_var(List);
 
-List Var_list(Var);
+static List Var_list(Var);
 
 Var Array_getindex(Array, int);
 
@@ -330,7 +318,7 @@ Var List_getindex(List, int);
 
 Var Array_setindex(Array, int, Var);
 
-Var long_var(long);
+static Var long_var(long);
 
 long Var_integer(Var);
 
@@ -344,7 +332,7 @@ static void ArmScan_directive(ArmScan * s, Token token, size_t i){
   Symbol kind = preproc_conditional_kind(token -> text);
   int conditional = kind == 1016156 ||(kind && Array_len((* s).stack));
   if(kind == 1016156) Array_push((* s).stack, List_var(({
-    Var _x2c_literal_part_0 = int_var(++(* s).serial);  Var _x2c_literal_part_1 = int_var(preproc_open_state(token -> text));  cons(_x2c_literal_part_0, cons(_29, cons(_x2c_literal_part_1, NULL)));
+    Var _x2c_literal_part_0 = int_var(++(* s).serial);  Var _x2c_literal_part_1 = int_var(preproc_open_state(token -> text));  cons(_x2c_literal_part_0, cons(_26, cons(_x2c_literal_part_1, NULL)));
   }
   )));
   else if(kind == 172060880 && Array_len((* s).stack)){
@@ -367,7 +355,7 @@ static void ArmScan_directive(ArmScan * s, Token token, size_t i){
 
 int Array_try_next(Array, int *, Var *);
 
-Var List_caddr(List);
+static Var List_caddr(List);
 
 static int _hidden_group(Array stack){
   {
@@ -390,7 +378,7 @@ Var Map_getindex(Map, Var);
 
 static size_t ArmScan_code(ArmScan * s, Token token, size_t i){
   if((* s).hidden && token -> type != 40896714 && token -> type != 11703268) token -> type = 7477210024;
-  else if(token -> type == 19147688 && String_equal(token -> text, _30)) return ArmScan__note_attribute(&((* s)), i);
+  else if(token -> type == 19147688 && String_equal(token -> text, _27)) return ArmScan__note_attribute(&((* s)), i);
   else if(token -> type == 19147688 && Map_contains((* s).layout, String_var(token -> text))) ArmScan__mark_layout(&((* s)), i, Var_equal(Map_getindex((* s).layout, String_var(token -> text)), int_var(2)));
   return i;
 }
@@ -426,11 +414,11 @@ static int _layout_attribute(Token open, int * packed){
     depth += Symbol_group_step(t -> type);
     if(depth != 1 || t -> type != 19147688) continue;
     String word = String_strip(t -> text, "_");
-    if(String_equal(word, _31)){
+    if(String_equal(word, _28)){
       layout = 1;
       (* packed) = 1;
     }
-    else if(String_equal(word, _32) || String_equal(word, _33) || String_equal(word, _34)) layout = 1;
+    else if(String_equal(word, _29) || String_equal(word, _30) || String_equal(word, _31)) layout = 1;
   }
   return layout;
 }
@@ -451,7 +439,7 @@ static void ArmScan__note_layout_macro(ArmScan * s, String content){
   int value = 0;
   for(;  token -> type != 11212;  token = Token_skip_trivia(token + 1)){
     if(token -> type != 19147688) continue;
-    int level = Var_int(Var_convert(String_equal(token -> text, _30) ? int_var(_attribute_layout(token)) : Map_contains(layout, String_var(token -> text)) ? Map_getindex(layout, String_var(token -> text)) : int_var(0), 3453797));
+    int level = Var_int(Var_convert(String_equal(token -> text, _27) ? int_var(_attribute_layout(token)) : Map_contains(layout, String_var(token -> text)) ? Map_getindex(layout, String_var(token -> text)) : int_var(0), 3453797));
     if(level > value) value = level;
   }
   if(value &&(!(Map_contains(layout, String_var(name -> text))) || Var_compare(Map_getindex(layout, String_var(name -> text)), int_var(value)) < 0)) Map_setindex(layout, String_var(name -> text), int_var(value));
@@ -470,7 +458,7 @@ List Compiler_leading_preproc(Compiler c){
   List noncode = NULL;
   Token base = c -> tokenizer -> tokens, token = c -> token;
   while(-- token >= base){
-    if(token -> type == 35579270086) noncode = cons(List_var(cons(_35, cons(String_var(token -> text), NULL))), noncode);
+    if(token -> type == 35579270086) noncode = cons(List_var(cons(_32, cons(String_var(token -> text), NULL))), noncode);
     else if(token -> type != 40896714 && token -> type != 7477210024) break;
   }
   return noncode;
@@ -480,11 +468,11 @@ int List_try_next(List, List *, Var *);
 
 void Compiler_note_object_macro(Compiler c, String content);
 
-String Var_string(Var);
+static String Var_string(Var);
 
-Var List_cadr(List);
+static Var List_cadr(List);
 
-void Compiler_update_source_visibility(Compiler c, List directives){
+void Compiler_note_preprocessor_macros(Compiler c, List directives){
   if(! _init_guard_) _file_init_();
   {
     List directive;
@@ -493,12 +481,7 @@ void Compiler_update_source_visibility(Compiler c, List directives){
     Var _x2c_macro_cursor_output_1;
     while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
       directive = Var_list(_x2c_macro_cursor_output_1);
-      {
-        Compiler_note_object_macro(c, Var_string(List_cadr(directive)));
-        int visibility = c -> source_private < 0 ? - 1 : preproc_visibility(Var_string(List_cadr(directive)));
-        if(visibility >= 0) c -> source_private = visibility;
-      }
-
+      Compiler_note_object_macro(c, Var_string(List_cadr(directive)));
     }
 
   }
@@ -534,9 +517,9 @@ static void Compiler__note_prefix_macro(Compiler c, String name, Token body){
   if(! Map_try_get(c -> object_macros, String_var(name), &(existing)) || _prefix_rank(definition) > _prefix_rank(existing) ||(Var_equal(existing, Symbol_var(1318210446)) && ! Var_equal(definition, Symbol_var(1318210446)))) Map_setindex(c -> object_macros, String_var(name), definition);
 }
 
-int String_truth(String);
+static int String_truth(String);
 
-int Var_is_row(Var, unsigned, unsigned long, unsigned long);
+static int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 
 Iter Var_iter(Var, Iter);
 
@@ -592,16 +575,16 @@ static int _is_specifier(Symbol type){
 
 static int Compiler__is_annotation(Compiler c, String word){
   Var definition;
-  return String_equal(word, _30) || String_equal(word, _36) ||(Map_try_get(c -> object_macros, String_var(word), &(definition)) && Var_equal(definition, Symbol_var(102150700288988)));
+  return String_equal(word, _27) || String_equal(word, _33) ||(Map_try_get(c -> object_macros, String_var(word), &(definition)) && Var_equal(definition, Symbol_var(102150700288988)));
 }
 
-int List_truth(List);
+static int List_truth(List);
 
 List List_match(List, Var);
 
 static int _prefix_rank(Var v){
   if(! Var_is_row(v, 9, 7, 4)) return 0;
-  if(List_truth(({ static MatchCaptureSite _x2c_match_site_0;  x2c_match_site_match(& _x2c_match_site_0, Var_list(v), List_var(_41)); }))) return 4;
+  if(List_truth(({ static MatchCaptureSite _x2c_match_site_0;  x2c_match_site_match(& _x2c_match_site_0, Var_list(v), List_var(_38)); }))) return 4;
   {
     Symbol word;
     Iter _x2c_macro_iterator_3 = Var_iter(v, &(struct Iter){
@@ -618,17 +601,17 @@ static int _prefix_rank(Var v){
   return List_truth(Var_list(v)) ? 3 : 2;
 }
 
-Var List_car(List);
+static Var List_car(List);
 
-List List_cdr(List);
+static List List_cdr(List);
 
 List preproc_track_arms(List arms, String text){
   if(! _init_guard_) _file_init_();
   Symbol kind = preproc_conditional_kind(text);
-  if(kind == 1016156) return cons(List_var(cons(List_var(cons(_35, cons(String_var(text), NULL))), NULL)), arms);
+  if(kind == 1016156) return cons(List_var(cons(List_var(cons(_32, cons(String_var(text), NULL))), NULL)), arms);
   if(! List_truth(arms)) return arms;
   if(kind == 172060880) return cons(List_var(({
-    List _x2c_literal_part_5 = Var_list(List_car(arms));  Var _x2c_literal_part_6 = List_var(cons(_35, cons(String_var(text), NULL)));  List_append(_x2c_literal_part_5, cons(_x2c_literal_part_6, NULL));
+    List _x2c_literal_part_5 = Var_list(List_car(arms));  Var _x2c_literal_part_6 = List_var(cons(_32, cons(String_var(text), NULL)));  List_append(_x2c_literal_part_5, cons(_x2c_literal_part_6, NULL));
   }
   )), List_cdr(arms));
   return kind == 7109834 ? List_cdr(arms) : arms;
@@ -674,7 +657,7 @@ List preproc_within_arms(List arms, List items){
     }
 
   }
-  for(unsigned i = List_len(arms);  i;  i --) Array_push(out, List_var(_45));
+  for(unsigned i = List_len(arms);  i;  i --) Array_push(out, List_var(_42));
   return Array_list_free(out);
 }
 

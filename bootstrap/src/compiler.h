@@ -6,6 +6,7 @@
 #define __GUARD_0x08246194__
 
 #include "x2c.h"
+#include "../lib/private-keywords.h"
 #include "tokenizer.h"
 #include "ast.h"
 #include "type.h"
@@ -37,7 +38,7 @@ typedef struct Compiler{
   String filename, text, root_dir;
   String package;
   List package_dirs;
-  Map package_roots, package_aliases, package_members, package_exports;
+  Map package_roots, package_aliases, package_members, package_effects;
   Token token;
   Token input_boundary;
   Tokenizer tokenizer;
@@ -46,6 +47,7 @@ typedef struct Compiler{
   Map deps;
   List aggregate_type, macro_stack, declaration_effects;
   Sym sym;
+  Map evaluated_effects;
   List frozen_stack_key;
   Var frozen_stack;
   unsigned long frozen_stack_epoch;
@@ -59,7 +61,6 @@ typedef struct Compiler{
   Map arm_stacks;
   Array layout_marks, packed_marks;
   Token directives_taken;
-  Map kw_seen;
   Map protocols, conforms, protocol_helpers;
   Map proto_cache;
   Map adoptions;
@@ -69,19 +70,23 @@ typedef struct Compiler{
   List lambda_scopes;
   Array match_types;
   Map imports;
-  Map included_exports;
+  Map included_effects;
   Map init_tokens, static_init_deps, fn_defs;
   Array id_keys, inits;
   String init_fn, fini_fn;
   Array early_decls;
   int prelude;
-  Array meta_defs;
   Map meta_comptime, meta_regions, meta_hashes, meta_calls;
   Map native_meta;
+  Map project_meta;
   Array unit_nodes, meta_group;
   Map meta_group_bound;
   int meta_build;
   int runtime_inc, runtime_hdrs, collect_protocols, shallow, source_private;
+  int public_bodies;
+  int interface_provider, signature_only;
+  Map interface_active;
+  Array pending_inline_bodies;
   int layout;
   int meta_body;
   Token meta_statement;
@@ -99,7 +104,6 @@ typedef struct Compiler{
   Array line_starts;
   ScriptUnit unit_script, script;
   Lisp macro_lisp;
-  String import_src;
   int borrowed_lisp;
   int inherited_lisp;
   GenNames names;
@@ -136,15 +140,26 @@ Var Compiler_var(Compiler c);
 
 Compiler Var_compiler(Var value);
 
+#include "grammar.h"
+#include "utils.h"
+#include "parse.h"
+#include "protocol.h"
+#include "macros.h"
+#include "stage.h"
+#include "meta-group.h"
+#include "meta-helper-client.h"
+#include "fields.h"
 void Compiler_shallow_parse(Compiler c, Map globals);
 
 void Compiler_shallow_parse_overlay(Compiler c, Map base, Map overlay);
 
 void Compiler_start_collection(Compiler c);
 
-int Compiler_collect_compile_time_definition(Compiler c, int keyword);
+void Compiler_collect_compile_time_definition(Compiler c, int keyword);
 
 void Compiler_finish_collected_declaration(Compiler c, List declaration, Token meta, int native);
+
+void Compiler_record_inline_function(Compiler c, List declaration);
 
 int Compiler__at_function_arrow(Compiler c);
 
@@ -156,13 +171,15 @@ void Compiler_run_declaration_effects(Compiler c);
 
 int Compiler_collect_unit_macro(Compiler c);
 
+List Compiler_replay_declaration_source(Compiler c);
+
 Var Compiler_freeze_declaration_syntax(Compiler c, Var syntax);
 
 Var Compiler_freeze_macro_stack(Compiler c);
 
 Var Compiler_thaw_declaration_syntax(Compiler c, Var syntax);
 
-Map Compiler_select_declaration_defaults(Compiler c, String path, Map symbols, Array parts, Map definitions);
+Map Compiler_select_declaration_defaults(Compiler c, String path, Map symbols, Array parts, Map definitions, Map statics);
 
 List Compiler_full_parse(Compiler c, Map globs, int generated_symbols);
 
@@ -269,8 +286,6 @@ void Compiler_own_diagnostics(Compiler c);
 void Compiler_borrow_diagnostics(Compiler c, Compiler owner);
 
 void Compiler_close_child(Compiler c, Compiler child);
-
-void Compiler_borrow_unit_semantics(Compiler c, Compiler owner);
 
 void Compiler_share_meta_group(Compiler c, Compiler owner);
 

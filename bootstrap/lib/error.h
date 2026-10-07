@@ -24,6 +24,27 @@ ErrorCatchSite;
 #define ERROR_CATCH_PENDING 0
 #define ERROR_CATCH_STATIC 1
 #define ERROR_CATCH_TRANSIENT 2
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include "array.h"
+#include "block.h"
+#include "exception.h"
+#include "list.h"
+#include "map.h"
+#include "pool.h"
+#include "scope.h"
+#include "string.h"
+#include "symbol.h"
+#include "symbolset.h"
+#include "var.h"
+#include "error-macros.h"
+#include "error-private.h"
+Atom Atom_intern(String spelling);
+
+String Atom_str(Atom atom);
+
+#define ERROR_MAX_DEPTH 4
 Symbol Error_raise(Symbol code, List detail);
 
 void x2c_error_raise(Symbol code, List detail);

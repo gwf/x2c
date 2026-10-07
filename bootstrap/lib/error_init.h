@@ -8,6 +8,7 @@
 #include "common.h"
 typedef struct Error * Error;
 
+#include "error.h"
 void Error_initialize(void);
 
 void Error_shutdown(void);

@@ -60,9 +60,9 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
 
 String Env_get(String);
 
-int String_truth(String);
+static int String_truth(String);
 
-Var String_var(String);
+static Var String_var(String);
 
 String script_cache_root(void){
   if(! _init_guard_) _file_init_();
@@ -75,9 +75,9 @@ void driver_error(const char *);
 
 Path Path_absolute(Path);
 
-String Var_string(Var);
+static String Var_string(Var);
 
-Var List_car(List);
+static Var List_car(List);
 
 int Path_is_file(Path);
 
@@ -88,9 +88,9 @@ int Path_is_file(Path);
 
 int x2c_error_catch_site_pending(ErrorCatchSite *);
 
-Var List_var(List);
+static Var List_var(List);
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
 ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
 

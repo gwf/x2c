@@ -5,6 +5,21 @@
 #ifndef __GUARD_0x857C07E7__
 #define __GUARD_0x857C07E7__
 
+typedef enum MachinePrepare{
+  MACHINE_PREPARED, MACHINE_INELIGIBLE, MACHINE_MALFORMED
+}
+MachinePrepare;
+
+typedef struct MachineView MachineView;
+
+typedef struct MachineProgram * MachineProgram;
+
+typedef struct MachineSpan MachineSpan;
+
+typedef struct MachineStats MachineStats;
+
+typedef struct MatchMachine MatchMachine;
+
 #include "common.h"
 #include "var.h"
 #include "list.h"
@@ -18,11 +33,6 @@
 #define MACHINE_UNDO_MAX      256
 #define MACHINE_CURSOR_REGS     3
 #define MACHINE_INT_REGS        2
-typedef enum MachinePrepare{
-  MACHINE_PREPARED, MACHINE_INELIGIBLE, MACHINE_MALFORMED
-}
-MachinePrepare;
-
 enum MachineOp{
   MW_EQ_VALUE_CONST, MW_EQ_VALUE_BITS, MW_INPUT_LIST, MW_NONNIL, MW_NIL, MW_CALL, MW_BR_FAIL, MW_JUMP, MW_ADVANCE, MW_ADVANCE_OPTIONAL, MW_MOVE, MW_OFFSET, MW_DESCEND, MW_SCAN, MW_SET_ACTIVE, MW_REQUIRE_ACTIVE, MW_MARK, MW_ROLLBACK, MW_SLOT_VALID, MW_SLOT_IS_SPAN, MW_SLOT_SET_VALUE, MW_SLOT_SET_SPAN, MW_SLOT_EQ_VALUE, MW_SLOT_EQ_PREFIX, MW_SLOT_EQ_FINAL_IDENTITY, MW_CURSOR_VALUE, MW_EQ_HEAD_CONST, MW_BIND_HEAD, MW_SKIP_HEAD, MW_RET_SUCCESS, MW_RET_FAILURE, MW_TAG, MW_MATCH_KIND
 }
@@ -173,6 +183,18 @@ typedef struct MatchMachine{
 }
 MatchMachine;
 
+static List Var_list(Var);
+
+static int List_truth(List);
+
+int Var_equal(Var, Var);
+
+static Var List_car(List);
+
+static List List_cdr(List);
+
+int List_equal(List, List);
+
 static inline int MachineSlot_prefix_equal(MachineSlot * slot, List input, int length, MachineStats * stats){
   if(stats) stats -> range_comparisons ++;
   List expected, end = NULL;
@@ -216,6 +238,7 @@ static inline int MachineSlot_final_equal(MachineSlot * slot, List input, Machin
   return length == slot -> span.length && List_equal(expected, slot -> span.end) && ! List_truth(candidate);
 }
 
+#include "exception.h"
 int MachineBuilder_emit(MachineBuilder * b, int op, int a, int operand_b, int c, int d, int target);
 
 int MachineBuilder_constant(MachineBuilder * b, Var value);

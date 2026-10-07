@@ -58,7 +58,7 @@ Symbol Symbol_new(const char * str){
   return Symbol_new_len(str, strlen(str));
 }
 
-int String_truth(String);
+static int String_truth(String);
 
 int String_equal(String, String);
 

@@ -5,6 +5,7 @@
 #ifndef __GUARD_0x41126DC7__
 #define __GUARD_0x41126DC7__
 
+#include "error-macros.h"
 #include "common.h"
 #include "dispatch.h"
 #include <stdint.h>
@@ -32,10 +33,30 @@ VarDecodeGroup;
 
 int Var_known_tag(Symbol tag);
 
+#include "symbol.h"
+#include "map.h"
+#include "scope.h"
+#include "exception.h"
+#include "string-number.h"
+#include "symbolset.h"
+extern const VarTagInfo x2c_var_taginfo[];
+
+extern const SymbolSet x2c_var_tags;
+
+extern const VarDecodeGroup x2c_var_decode_groups[];
+
 unsigned long Var_tag_top(Symbol tag);
 
 unsigned long Var_tag_bottom(Symbol tag);
 
+#define VAR_CUSTOM_TAG_TOP     0x800C
+#define VAR_CUSTOM_TAG_COUNT   32
+#define VAR_DIRECT_ROWS        30
+#define VAR_CELL_ROW           30
+#define VAR_RECORD_ROW         31
+#define VAR_CELL_MASK          0xFFFF000000000007ul
+#define VAR_CELL_BITS          0x800F000000000006ul
+#define RECORD_PREFIX sizeof(max_align_t)
 Symbol Var_tag(Var v);
 
 int Var_is(Var var, Symbol tag);

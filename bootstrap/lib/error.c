@@ -38,6 +38,8 @@ ErrorCatchSite;
 #include "symbol.h"
 #include "symbolset.h"
 #include "var.h"
+#include "error-macros.h"
+#include "error-private.h"
 Atom Atom_intern(String spelling);
 
 String Atom_str(Atom atom);
@@ -338,11 +340,11 @@ int Error_depth(void){
 
 int Error_bound(void);
 
-List Var_list(Var);
+static List Var_list(Var);
 
-Var List_var(List);
+static Var List_var(List);
 
-void Block_push(Block, const void *);
+static void Block_push(Block, const void *);
 
 static void _record(const X2CErrorSite * site, Symbol code, List detail){
   if(Error_count() >= Error_bound()) _floor(code, "error stack exceeded its bound");
@@ -397,7 +399,7 @@ static List ErrorRegion__counted_detail(ErrorRegion * region, Symbol code, unsig
   return detail;
 }
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
 static List ErrorRegion__entry(ErrorRegion * region, const X2CErrorSite * site, Symbol code, List detail){
   List location = ErrorRegion__location(region, site), entry = NULL;
@@ -407,9 +409,9 @@ static List ErrorRegion__entry(ErrorRegion * region, const X2CErrorSite * site, 
   return entry;
 }
 
-Var String_var(String);
+static Var String_var(String);
 
-Var int_var(int);
+static Var int_var(int);
 
 static List ErrorRegion__location(ErrorRegion * e, const X2CErrorSite * site){
   if(! site) return NULL;
@@ -446,7 +448,7 @@ static ErrorRecord * _record_at(int index){
   return & records[index];
 }
 
-void Block_pop(Block);
+static void Block_pop(Block);
 
 static void _truncate(int mark){
   if(! Error_ready() || mark < 0) return;
@@ -466,13 +468,13 @@ int Var_is_nil(Var);
 
 int Var_is(Var, Symbol);
 
-int Var_is_wide(Var);
+static int Var_is_wide(Var);
 
 int Var_is_integer(Var);
 
 int Var_is_floating(Var);
 
-int Var_is_row(Var, unsigned, unsigned long, unsigned long);
+static int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 
 static Var ErrorRegion__copy_value(ErrorRegion * region, Var value){
   if(Var_is_void(value)) _floor(4477479911782, region ? "void is not an admissible error detail" : "void is not an admissible error snapshot");
@@ -510,7 +512,7 @@ static Var _clone_in(Scope * owner, Var v){
 
 String Var_str(Var);
 
-String Var_string(Var);
+static String Var_string(Var);
 
 int String_len(String);
 
@@ -538,9 +540,9 @@ static Var _snapshot_text(Var value, String source){
   return atom;
 }
 
-Var List_car(List);
+static Var List_car(List);
 
-List List_cdr(List);
+static List List_cdr(List);
 
 List cons(Var, List);
 
@@ -691,7 +693,7 @@ void Error_note_rendered(void){
   if(state -> depth > 0 && state -> depth <= ERROR_MAX_DEPTH) state -> rendered[state -> depth] = 1;
 }
 
-Var List_cadr(List);
+static Var List_cadr(List);
 
 Pool Pool_open_named(const char *);
 

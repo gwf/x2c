@@ -130,13 +130,13 @@ static String _trimmed(String path){
   return String_getslice(path, -2147483648, length, 1);
 }
 
-int String_truth(String);
+static int String_truth(String);
 
 int String_startswith(String, String);
 
 int String_endswith(String, String);
 
-Var String_var(String);
+static Var String_var(String);
 
 Path Path_join(Path base, Path name){
   if(! _init_guard_) _file_init_();
@@ -193,7 +193,7 @@ List String_split(String, String);
 
 int List_try_next(List, List *, Var *);
 
-String Var_string(Var);
+static String Var_string(Var);
 
 Path Path_absolute(Path path){
   if(! _init_guard_) _file_init_();
@@ -254,7 +254,7 @@ static struct stat _stat(String operation, String path){
   return info;
 }
 
-int File_stat(File, struct stat *);
+static int File_stat(File, struct stat *);
 
 static File _open(String operation, Path path, const char * mode){
   File file = fopen(path, mode);
@@ -327,7 +327,7 @@ static void _push_children(Array pending, Path directory){
 
 }
 
-Array Var_array(Var);
+static Array Var_array(Var);
 
 Var Array_take_last(Array);
 
@@ -342,7 +342,7 @@ static int _walk_next(Iter iter, Var * out){
 
 Iter Iter_init(Iter, Var, IterNextFn, Var);
 
-Var Array_var(Array);
+static Var Array_var(Array);
 
 Iter Path_walk(Path root, Iter dest){
   if(! _init_guard_) _file_init_();
@@ -593,9 +593,9 @@ static void _remove_tree(Path path, String * failed, int * failure){
   else if(unlink(path) && ! String_truth((* failed)))(* failed) = path, (* failure) = errno;
 }
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
-Var int_var(int);
+static Var int_var(int);
 
 #include "error.h"
 
@@ -610,7 +610,7 @@ void Path_remove_tree(Path path){
   if(String_truth(failed)){
     Var _x2c_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("Path.remove_tree")), NULL)));
     {
-      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/path.x",.function = "Path_remove_tree",.line = 467};
+      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/path.x",.function = "Path_remove_tree",.line = 465};
       x2c_error_raise_n(& _x2c_error_site_0, 20399393368, 3, Symbol_var(34096809266140), _x2c_literal_part_0, Symbol_var(1051920), String_var(failed), Symbol_var(11703198), int_var(failure));
       __builtin_unreachable();
     }

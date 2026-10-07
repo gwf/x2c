@@ -2,6 +2,7 @@
 
 #define __GUARD_0x229C9016__
 #include "x2c.h"
+#include "array-generics.h"
 #include <limits.h>
 #include <string.h>
 typedef Block ArrayChar;
@@ -97,9 +98,9 @@ static int ArrayChar__core_compare(ArrayChar _x2c_macro_a_5, ArrayChar _x2c_macr
 
 static Buffer ArrayChar__core_write(ArrayChar _x2c_macro_array_40, Buffer _x2c_macro_out_11, Symbol _x2c_macro_mode_0);
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
-Var int_var(int);
+static Var int_var(int);
 
 #include "error.h"
 
@@ -181,6 +182,8 @@ static inline char ArrayChar_postfixindex(ArrayChar _x2c_macro_array_43, int _x2
   return _x2c_macro_old_0;
 }
 
+Iter ArrayChar_iter(ArrayChar, Iter);
+
 Var Var_new(Symbol, ...);
 
 static inline Var ArrayChar_var(ArrayChar _x2c_macro_array_44){
@@ -198,6 +201,8 @@ static inline ArrayChar Var_arraychar(Var _x2c_macro_value_14){
 }
 
 static ArrayChar ArrayChar_export_context(ArrayChar _x2c_macro_array_46, Context _x2c_macro_source_1);
+
+Iter ArrayChar_iter(ArrayChar, Iter);
 
 static int _x2c_macro_next_0(Iter _x2c_macro_iter_0, Var * _x2c_macro_out_12);
 
@@ -318,6 +323,8 @@ static inline short ArrayShort_postfixindex(ArrayShort _x2c_macro_array_92, int 
   return _x2c_macro_old_1;
 }
 
+Iter ArrayShort_iter(ArrayShort, Iter);
+
 static inline Var ArrayShort_var(ArrayShort _x2c_macro_array_93){
   return Var_new(111191978966184, _x2c_macro_array_93);
 }
@@ -331,6 +338,8 @@ static inline ArrayShort Var_arrayshort(Var _x2c_macro_value_29){
 }
 
 static ArrayShort ArrayShort_export_context(ArrayShort _x2c_macro_array_95, Context _x2c_macro_source_3);
+
+Iter ArrayShort_iter(ArrayShort, Iter);
 
 static int _x2c_macro_next_1(Iter _x2c_macro_iter_1, Var * _x2c_macro_out_25);
 
@@ -451,6 +460,8 @@ static inline int ArrayInt_postfixindex(ArrayInt _x2c_macro_array_141, int _x2c_
   return _x2c_macro_old_2;
 }
 
+Iter ArrayInt_iter(ArrayInt, Iter);
+
 static inline Var ArrayInt_var(ArrayInt _x2c_macro_array_142){
   return Var_new(108585896872, _x2c_macro_array_142);
 }
@@ -464,6 +475,8 @@ static inline ArrayInt Var_arrayint(Var _x2c_macro_value_44){
 }
 
 static ArrayInt ArrayInt_export_context(ArrayInt _x2c_macro_array_144, Context _x2c_macro_source_5);
+
+Iter ArrayInt_iter(ArrayInt, Iter);
 
 static int _x2c_macro_next_2(Iter _x2c_macro_iter_2, Var * _x2c_macro_out_38);
 
@@ -584,6 +597,8 @@ static inline long ArrayLong_postfixindex(ArrayLong _x2c_macro_array_190, int _x
   return _x2c_macro_old_3;
 }
 
+Iter ArrayLong_iter(ArrayLong, Iter);
+
 static inline Var ArrayLong_var(ArrayLong _x2c_macro_array_191){
   return Var_new(3474748898190, _x2c_macro_array_191);
 }
@@ -597,6 +612,8 @@ static inline ArrayLong Var_arraylong(Var _x2c_macro_value_59){
 }
 
 static ArrayLong ArrayLong_export_context(ArrayLong _x2c_macro_array_193, Context _x2c_macro_source_7);
+
+Iter ArrayLong_iter(ArrayLong, Iter);
 
 static int _x2c_macro_next_3(Iter _x2c_macro_iter_3, Var * _x2c_macro_out_51);
 
@@ -676,6 +693,8 @@ static inline float ArrayFloat_postfixindex(ArrayFloat _x2c_macro_array_239, int
   return _x2c_macro_old_4;
 }
 
+Iter ArrayFloat_iter(ArrayFloat, Iter);
+
 static inline Var ArrayFloat_var(ArrayFloat _x2c_macro_array_240){
   return Var_new(111191951964264, _x2c_macro_array_240);
 }
@@ -689,6 +708,8 @@ static inline ArrayFloat Var_arrayfloat(Var _x2c_macro_value_74){
 }
 
 static ArrayFloat ArrayFloat_export_context(ArrayFloat _x2c_macro_array_242, Context _x2c_macro_source_9);
+
+Iter ArrayFloat_iter(ArrayFloat, Iter);
 
 static int _x2c_macro_next_4(Iter _x2c_macro_iter_4, Var * _x2c_macro_out_64);
 
@@ -768,6 +789,8 @@ static inline double ArrayDbl_postfixindex(ArrayDbl _x2c_macro_array_288, int _x
   return _x2c_macro_old_5;
 }
 
+Iter ArrayDbl_iter(ArrayDbl, Iter);
+
 static inline Var ArrayDbl_var(ArrayDbl _x2c_macro_array_289){
   return Var_new(108585885848, _x2c_macro_array_289);
 }
@@ -781,6 +804,8 @@ static inline ArrayDbl Var_arraydbl(Var _x2c_macro_value_89){
 }
 
 static ArrayDbl ArrayDbl_export_context(ArrayDbl _x2c_macro_array_291, Context _x2c_macro_source_11);
+
+Iter ArrayDbl_iter(ArrayDbl, Iter);
 
 static int _x2c_macro_next_5(Iter _x2c_macro_iter_5, Var * _x2c_macro_out_77);
 
@@ -850,6 +875,8 @@ static _Noreturn inline String ArrayString_postfixindex(ArrayString _x2c_macro_a
 
 }
 
+Iter ArrayString_iter(ArrayString, Iter);
+
 static inline Var ArrayString_var(ArrayString _x2c_macro_array_338){
   return Var_new(108585917732, _x2c_macro_array_338);
 }
@@ -863,6 +890,8 @@ static inline ArrayString Var_arraystring(Var _x2c_macro_value_104){
 }
 
 static ArrayString ArrayString_export_context(ArrayString _x2c_macro_array_340, Context _x2c_macro_source_13);
+
+Iter ArrayString_iter(ArrayString, Iter);
 
 static int _x2c_macro_next_6(Iter _x2c_macro_iter_6, Var * _x2c_macro_out_90);
 
@@ -1419,7 +1448,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _6 = String_new("ArrayString");
 }
 
-Var String_var(String);
+static Var String_var(String);
 
 _Noreturn static void _bad_index(String owner, int index, size_t size){
   {
@@ -1486,13 +1515,13 @@ static int _array_compare_long(long a, long b){
 
 int Var_compare(Var, Var);
 
-Var float_var(float);
+static Var float_var(float);
 
 static int _array_compare_float(float a, float b){
   return Var_compare(float_var(a), float_var(b));
 }
 
-Var double_var(double);
+static Var double_var(double);
 
 static int _array_compare_double(double a, double b){
   return Var_compare(double_var(a), double_var(b));
@@ -1516,7 +1545,7 @@ void x2c_cleanup_push(X2CCleanup *);
 
 void Block_reserve(Block, size_t);
 
-String Var_string(Var);
+static String Var_string(Var);
 
 Var Context_export_nested(Context, Var);
 
@@ -1774,7 +1803,7 @@ int ArrayChar_try_next(ArrayChar _x2c_macro_array_15, int * _x2c_macro_cursor_1,
 
 int Var_is_void(Var);
 
-Var char_var(char);
+static Var char_var(char);
 
 char ArrayChar_push(ArrayChar _x2c_macro_array_16, char _x2c_macro_value_3){
   if(! _init_guard_) _file_init_();
@@ -1789,7 +1818,7 @@ char ArrayChar_push(ArrayChar _x2c_macro_array_16, char _x2c_macro_value_3){
   return _x2c_macro_value_3;
 }
 
-int Block_try_pop(Block, void *);
+static int Block_try_pop(Block, void *);
 
 int ArrayChar_try_take_last(ArrayChar _x2c_macro_array_17, char * _x2c_macro_out_5){
   return _x2c_macro_array_17 != NULL && _x2c_macro_out_5 ? Block_try_pop((Block) _x2c_macro_array_17, _x2c_macro_out_5) : 0;
@@ -2409,7 +2438,7 @@ int ArrayShort_try_next(ArrayShort _x2c_macro_array_64, int * _x2c_macro_cursor_
   return 1;
 }
 
-Var short_var(short);
+static Var short_var(short);
 
 short ArrayShort_push(ArrayShort _x2c_macro_array_65, short _x2c_macro_value_18){
   if(! _init_guard_) _file_init_();
@@ -3613,7 +3642,7 @@ int ArrayLong_try_next(ArrayLong _x2c_macro_array_162, int * _x2c_macro_cursor_7
   return 1;
 }
 
-Var long_var(long);
+static Var long_var(long);
 
 long ArrayLong_push(ArrayLong _x2c_macro_array_163, long _x2c_macro_value_48){
   if(! _init_guard_) _file_init_();
@@ -5815,19 +5844,19 @@ Iter ArrayString_iter(ArrayString _x2c_macro_array_342, Iter _x2c_macro_dest_6){
   return Iter_init(_x2c_macro_dest_6, ArrayString_var(_x2c_macro_array_342), _x2c_macro_next_6, int_var(0));
 }
 
-void Block_clear(Block);
+static void Block_clear(Block);
 
 void ArrayChar_clear(ArrayChar a0){
   return Block_clear(ArrayChar_block(a0));
 }
 
-size_t Block_len(Block);
+static size_t Block_len(Block);
 
 size_t ArrayChar_len(ArrayChar a0){
   return Block_len(ArrayChar_block(a0));
 }
 
-size_t Block_capacity(Block);
+static size_t Block_capacity(Block);
 
 size_t ArrayChar_capacity(ArrayChar a0){
   return Block_capacity(ArrayChar_block(a0));
@@ -5839,7 +5868,7 @@ int ArrayChar_truth(ArrayChar a0){
   return Block_truth(ArrayChar_block(a0));
 }
 
-void Block_pop(Block);
+static void Block_pop(Block);
 
 void ArrayChar_pop(ArrayChar a0){
   return Block_pop(ArrayChar_block(a0));
@@ -5851,7 +5880,7 @@ void ArrayChar_free(ArrayChar a0){
   return Block_free(ArrayChar_block(a0));
 }
 
-void Block_truncate(Block, size_t);
+static void Block_truncate(Block, size_t);
 
 void ArrayChar_truncate(ArrayChar a0, size_t a1){
   return Block_truncate(ArrayChar_block(a0), a1);

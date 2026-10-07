@@ -3,7 +3,9 @@
 #define __GUARD_0x670D7DD9__
 #include "x2c.h"
 
+#include "../lib/private-keywords.h"
 #include "compiler.h"
+#include "parse-report-macros.h"
 #include "parse.h"
 #include "expressions.h"
 #include "literals.h"
@@ -215,13 +217,13 @@ _x2c_defer_env_10;
 
 static void _x2c_defer_cleanup_10(void * _x2c_defer_opaque_10);
 
-Var String_var(String);
+static Var String_var(String);
 
 List cons(Var, List);
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
-Var List_var(List);
+static Var List_var(List);
 
 #include "exception.h"
 
@@ -447,7 +449,7 @@ void Compiler___complete_here(Compiler, Symbol, List);
 
 List Compiler_try_parse_macro_slot(Compiler, Symbol);
 
-int List_truth(List);
+static int List_truth(List);
 
 int Compiler_at_word(Compiler, String);
 
@@ -577,7 +579,7 @@ return cons(_49, cons(List_var(expr), NULL));
 
 Token Compiler_after_hole(Compiler);
 List Compiler_parse_optional_identifier(Compiler);
-int Compiler_test(Compiler, Symbol);
+static int Compiler_test(Compiler, Symbol);
 static List Compiler__label_statement(Compiler c){
   Token head = c -> token;  if(Compiler_peek(c, 0) == 19147688 ||(Map_truth(c -> macro_holes) && List_truth(Compiler_peek_macro_hole(c)) && Compiler_after_hole(c) -> type == 117)){
     List label = Compiler_try_parse_macro_slot(c, 920394);  if(! List_truth(label)) label = Compiler_parse_optional_identifier(c);  if(Compiler_test(c, 117)) return cons(_60, cons(List_var(label), NULL));  c -> token = head;
@@ -595,7 +597,7 @@ static String Compiler__with_alias(Compiler c){
   if(! Compiler_take_word(c, _63)) return _64;  if(Compiler_peek(c, 0) != 19147688) Compiler_report_error(c, 33658058, _65, c -> token, NULL);  String alias = c -> token -> text;  Compiler_next(c);  return alias;
 }
 
-List Var_list(Var);
+static List Var_list(Var);
 void Sym_push_new_scope(Sym);
 List Sym_define(Sym, List, List);
 void Compiler_set_fact(Compiler, Var, Var);
@@ -705,7 +707,7 @@ static List Compiler__return_statement(Compiler c){
 
 List Compiler_resolve_expression(Compiler, List, Token);
 void Compiler_check_explicit_converter(Compiler, List, Type, int);
-Type List_type(List);
+static Type List_type(List);
 List Compiler_finish_return_statement(Compiler c, List expr){
   if(! _init_guard_) _file_init_();  if(! List_truth(expr)) return _80;  List resolved = Compiler_resolve_expression(c, expr, c -> token);  Compiler_check_explicit_converter(c, resolved, List_type(c -> return_type), 0);  return cons(_79, cons(List_var(c -> return_type), cons(List_var(resolved), NULL)));
 }
@@ -804,9 +806,9 @@ static int Compiler__arm_directives(Compiler c, Array cases, Array groups, int s
 }
 
 Symbol preproc_conditional_kind(String);
-String Var_string(Var);
-Var List_cadr(List);
-Var int_var(int);
+static String Var_string(Var);
+static Var List_cadr(List);
+static Var int_var(int);
 Var Array_take_last(Array);
 Var List_getindex(List, int);
 static int _default_after_directive(Array groups, int saw_default, List d){
@@ -977,7 +979,7 @@ return Array_list_free(declarations);
 
 List Compiler_macro_introduced_name(Compiler, String);
 void Compiler_bind_template_local(Compiler, List, List, List);
-List Type_list(Type);
+static List Type_list(Type);
 List Sym_introduce(Sym, String);
 List Compiler_bind_syntax(Compiler, Var, AstPos, Type);
 static List Compiler__capture_declaration(Compiler c, Type type, String name, List initializer, int temporary){
@@ -994,7 +996,7 @@ static List Compiler__capture_declaration(Compiler c, Type type, String name, Li
 }
 
 int Array_try_next(Array, int *, Var *);
-Type Var_type(Var);
+static Type Var_type(Var);
 static List Compiler__capture_locals(Compiler c, Array locals){
   Array declarations = Array_new(); {
     List row;  Array _x2c_macro_object_4 = locals;  int _x2c_macro_cursor_4 = 0;  Var _x2c_macro_cursor_output_4;  while(Array_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_4))){
@@ -1221,9 +1223,9 @@ static List Compiler__block_items(Compiler c, int anchor_items){
 
 }
 
-Var List_car(List);
+static Var List_car(List);
 List Compiler_anchor_origin(Compiler, List, Token);
-List List_cdr(List);
+static List List_cdr(List);
 static void Compiler__push_item(Compiler c, Array block, int anchor_items){
   Token origin = c -> token;  int expansion = Compiler__expands(c);  List stmt = Compiler_parse_block_item(c);  if(Map_truth(c -> macro_holes) &&(Var_equal(List_car(stmt), Symbol_var(917238582496136)) || Var_equal(List_car(stmt), Symbol_var(917238583616488)))){
     Array_push(block, List_var(stmt));  return;

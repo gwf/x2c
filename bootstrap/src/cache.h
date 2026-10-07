@@ -7,6 +7,18 @@
 
 #include "x2c.h"
 #include "compiler.h"
+#include "ast-rewrite.h"
+#include "type.h"
+#include "var.h"
+#include "string.h"
+#include "transform.h"
+#include "cleanup.h"
+#include "expressions.h"
+#include "generate.h"
+#include "logger.h"
+#include <stdio.h>
+#include <stdint.h>
+#include <assert.h>
 List Compiler_setup_cache_init(Compiler c, List header, List source, String prefix, String guard_name, String initializer_name);
 
 List _initializer_function(Compiler c, Type type, List name, List body);

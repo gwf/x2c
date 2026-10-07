@@ -30,7 +30,7 @@ Emitted `src-at` markers carry existing compiler origin IDs; zero restores
 
 **Raises:** `<size-limit>` or `<alloc-fail>` while materializing the result.
 
-Source: `src/format.x:35`
+Source: `src/format.x:34`
 
 ## Design notes
 

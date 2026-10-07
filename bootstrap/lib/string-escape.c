@@ -35,7 +35,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _2 = String_new("\\");
 }
 
-int String_truth(String);
+static int String_truth(String);
 
 String String_malloc(int);
 
@@ -121,9 +121,9 @@ int String_contains(String, String);
 
 void String_free(String);
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
-Var String_var(String);
+static Var String_var(String);
 
 #include "error.h"
 
@@ -139,7 +139,7 @@ String String_unescape(String str){
   if(_unescape_into(string, str) < 0){
     String_free(string);
     {
-      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/string-escape.x",.function = "String_unescape",.line = 131};
+      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/string-escape.x",.function = "String_unescape",.line = 129};
       x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.unescape")), NULL))));
       __builtin_unreachable();
     }
@@ -175,7 +175,7 @@ static inline int _decode_escape(const char * * at){
   return _named_escape(esc);
 }
 
-int scan_ascii_hex_value(int);
+static int scan_ascii_hex_value(int);
 
 static inline int _hex_escape(const char * * at, int esc){
   int byte = 0, digits = 0;

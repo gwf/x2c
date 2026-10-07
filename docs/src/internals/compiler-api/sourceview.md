@@ -27,7 +27,7 @@ Request-owned source overlays.
 
 Returns readable-file presence, including unsaved new files.
 
-Source: `src/sourceview.x:47`
+Source: `src/sourceview.x:46`
 
 <a id="SourceView.init"></a>
 #### SourceView.init
@@ -36,7 +36,7 @@ Source: `src/sourceview.x:47`
 
 Initializes empty overlays in the current request lifetime.
 
-Source: `src/sourceview.x:29`
+Source: `src/sourceview.x:28`
 
 <a id="SourceView.is_changed"></a>
 #### SourceView.is_changed
@@ -45,7 +45,7 @@ Source: `src/sourceview.x:29`
 
 Returns whether this logical file has an unsaved overlay.
 
-Source: `src/sourceview.x:43`
+Source: `src/sourceview.x:42`
 
 <a id="SourceView.read"></a>
 #### SourceView.read
@@ -56,7 +56,7 @@ Reads through the request overlay, falling back to a regular disk file.
 The return value distinguishes an empty file from a failed read. Disk
 text belongs to the calling unit; configured snapshots remain borrowed.
 
-Source: `src/sourceview.x:57`
+Source: `src/sourceview.x:56`
 
 <a id="SourceView.set"></a>
 #### SourceView.set
@@ -66,7 +66,7 @@ Source: `src/sourceview.x:57`
 Stores an immutable snapshot under its logical source path. Empty text
 is a present snapshot, not a request to fall back to the disk file.
 
-Source: `src/sourceview.x:37`
+Source: `src/sourceview.x:36`
 
 ## Public types
 

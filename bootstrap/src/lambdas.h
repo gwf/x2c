@@ -6,7 +6,13 @@
 #define __GUARD_0x57655C8B__
 
 #include "x2c.h"
+#include "../lib/private-keywords.h"
 #include "compiler.h"
+#include "ast-rewrite.h"
+#include "grammar.h"
+#include "parse.h"
+#include "type.h"
+#include "expressions.h"
 List Compiler_parse_lambda_literal(Compiler c);
 
 List Compiler_lambda_param_types(Compiler c, List entries);

@@ -108,7 +108,7 @@ int DisjointSet_equal(DisjointSet left, DisjointSet right){
   return(void *) left ==(void *) right;
 }
 
-unsigned x2c_hash_word(unsigned long);
+static unsigned x2c_hash_word(unsigned long);
 
 unsigned DisjointSet_hash(DisjointSet value){
   return x2c_hash_word((unsigned long) value);
@@ -164,7 +164,7 @@ Buffer Buffer_write(Buffer, const char *);
 
 Buffer Var_write_repr(Var, Buffer);
 
-Var int_var(int);
+static Var int_var(int);
 
 Buffer DisjointSet_write_repr(DisjointSet value, Buffer out){
   if((void *) value ==(void *) 0) return Buffer_printf(out, "<DisjointSet: 0x%012lX>", (long) value);
@@ -286,7 +286,7 @@ Array Array_new(void);
 
 Var Array_push(Array, Var);
 
-Var List_var(List);
+static Var List_var(List);
 
 List Array_list_free(Array);
 

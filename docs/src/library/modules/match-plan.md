@@ -26,7 +26,7 @@ Releases resources owned by `plan`.
 A null plan is ignored; the plan, layout, program, and all aliases to them
 are invalid afterward. Borrowed pattern constants are not released.
 
-Source: `lib/match-plan.x:80`
+Source: `lib/match-plan.x:79`
 
 <a id="MatchPlan.prepare"></a>
 #### MatchPlan.prepare
@@ -42,7 +42,7 @@ pattern constants, which must outlive it.
 
 **Raises:** `<alloc-fail>` while analyzing, lowering, or freezing.
 
-Source: `lib/match-plan.x:47`
+Source: `lib/match-plan.x:46`
 
 ## Design notes
 

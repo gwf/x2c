@@ -5,7 +5,23 @@
 #ifndef __GUARD_0xC34B3F4F__
 #define __GUARD_0xC34B3F4F__
 
+#include "error-macros.h"
 #include "common.h"
+#include "array.h"
+#include "atom.h"
+#include "block.h"
+#include "buffer.h"
+#include "dispatch.h"
+#include "error.h"
+#include "exception.h"
+#include "list.h"
+#include "map.h"
+#include "match-cache.h"
+#include "pool.h"
+#include "scope.h"
+#include "string.h"
+#include "var.h"
+#include <stdlib.h>
 Var Context_export(Context context, Var value);
 
 Var Context_export_scope(Scope source_scope, Pool pool, Var value);

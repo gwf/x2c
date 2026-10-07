@@ -6,6 +6,11 @@
 #define __GUARD_0xA509A3AF__
 
 #include "common.h"
+#include "exception.h"
+#include <pthread.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
 int x2c_static_acquire(X2CStatic * guard, size_t size, size_t alignment, int per_thread);
 
 void x2c_static_commit(X2CStatic * guard);

@@ -163,17 +163,17 @@ Map Map_new(void);
 
 Var Map_setindex(Map, Var, Var);
 
-Var String_var(String);
+static Var String_var(String);
 
 Array Array_new(void);
 
-int List_truth(List);
+static int List_truth(List);
 
-List List_cdr(List);
+static List List_cdr(List);
 
 String Var_str(Var);
 
-Var List_car(List);
+static Var List_car(List);
 
 int String_len(String);
 
@@ -185,7 +185,7 @@ int String_equal(String, String);
 
 List Array_list(Array);
 
-Var List_var(List);
+static Var List_var(List);
 
 void x2c_cleanup_leave(X2CCleanup *);
 
@@ -284,13 +284,13 @@ void * Scope_calloc(size_t, size_t);
 
 int List_try_next(List, List *, Var *);
 
-List Var_list(Var);
+static List Var_list(Var);
 
 int Map_try_get(Map, Var, Var *);
 
 long Var_integer(Var);
 
-Var int_var(int);
+static Var int_var(int);
 
 static Spec _read_spec(List spec){
   Spec result ={
@@ -350,9 +350,9 @@ static Spec _read_spec(List spec){
 
 int String_startswith(String, String);
 
-int Var_is_row(Var, unsigned, unsigned long, unsigned long);
+static int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 
-int String_truth(String);
+static int String_truth(String);
 
 static void Option__read_row(Option * o, List row, Map index, int position){
   String first = Var_str(List_car(row));
@@ -399,7 +399,7 @@ static void Option__read_row(Option * o, List row, Map index, int position){
 
 int Var_is(Var, Symbol);
 
-Var List_cadr(List);
+static Var List_cadr(List);
 
 static void Option__read_property(Option * o, List property){
   Symbol key = 0;
@@ -497,7 +497,7 @@ static void Spec__assign_operands(Spec * s, Map result, List operands){
   if(List_truth(operands)) _bad_operand(_14, Var_str(List_car(operands)));
 }
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
 #include "error.h"
 
@@ -508,7 +508,7 @@ _Noreturn static void _bad_option(String why, String option){
   {
     Var _x2c_literal_part_1 = String_var(String_join(NULL, cons(String_var(String_new("Args.parse")), NULL)));
     {
-      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/args.x",.function = "_bad_option",.line = 279};
+      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/args.x",.function = "_bad_option",.line = 277};
       x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 3, Symbol_var(34096809266140), _x2c_literal_part_1, Symbol_var(1218550748), String_var(why), Symbol_var(1041517532), String_var(option));
       __builtin_unreachable();
     }
@@ -521,7 +521,7 @@ _Noreturn static void _bad_operand(String why, String operand){
   {
     Var _x2c_literal_part_2 = String_var(String_join(NULL, cons(String_var(String_new("Args.parse")), NULL)));
     {
-      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/args.x",.function = "_bad_operand",.line = 283};
+      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/args.x",.function = "_bad_operand",.line = 281};
       x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 3, Symbol_var(34096809266140), _x2c_literal_part_2, Symbol_var(1218550748), String_var(why), Symbol_var(33297664904), String_var(operand));
       __builtin_unreachable();
     }
@@ -534,7 +534,7 @@ _Noreturn static void _bad_spec(String why, Var entry){
   {
     Var _x2c_literal_part_3 = String_var(String_join(NULL, cons(String_var(String_new("Args.parse")), NULL)));
     {
-      static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/args.x",.function = "_bad_spec",.line = 288};
+      static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/args.x",.function = "_bad_spec",.line = 286};
       x2c_error_raise_n(& _x2c_error_site_2, 4372499598, 3, Symbol_var(34096809266140), _x2c_literal_part_3, Symbol_var(1218550748), String_var(why), Symbol_var(1278278), entry);
       __builtin_unreachable();
     }

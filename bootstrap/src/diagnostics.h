@@ -7,6 +7,8 @@
 
 #include "x2c.h"
 #include "common.h"
+typedef struct Diagnostics * Diagnostics;
+
 #include "compiler.h"
 typedef struct Diagnostics{
   Array entries;
@@ -24,6 +26,11 @@ typedef struct DiagnosticsHold{
 DiagnosticsHold;
 
 #include "type.h"
+#include "json.h"
+#include "report.h"
+#include <errno.h>
+#include <fcntl.h>
+#include <unistd.h>
 Diagnostics Diagnostics_new(Compiler printer, int limit);
 
 void Diagnostics_reset(Diagnostics diag);

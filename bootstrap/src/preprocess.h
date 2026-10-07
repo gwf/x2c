@@ -7,6 +7,7 @@
 
 #include "x2c.h"
 #include "compiler.h"
+#include <ctype.h>
 String preproc_directive(String text);
 
 Symbol preproc_conditional_kind(String text);
@@ -14,8 +15,6 @@ Symbol preproc_conditional_kind(String text);
 int preproc_open_state(String text);
 
 int preproc_branch_state(int state);
-
-int preproc_visibility(String text);
 
 String preproc_include_target(String text, int * angle);
 
@@ -25,7 +24,7 @@ void Compiler_scan_conditionals(Compiler c);
 
 List Compiler_leading_preproc(Compiler c);
 
-void Compiler_update_source_visibility(Compiler c, List directives);
+void Compiler_note_preprocessor_macros(Compiler c, List directives);
 
 void Compiler_note_object_macro(Compiler c, String content);
 

@@ -4,6 +4,7 @@
 #include "var.h"
 #include "varconvert.h"
 #include "meta.h"
+#include "var-tags.h"
 _Static_assert(_u8_ == 0, "TagId matches the var tag ledger");
 _Static_assert(_i8_ == 1, "TagId matches the var tag ledger");
 _Static_assert(_u16_ == 2, "TagId matches the var tag ledger");

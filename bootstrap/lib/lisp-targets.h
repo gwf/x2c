@@ -5,7 +5,18 @@
 #ifndef __GUARD_0x47649B83__
 #define __GUARD_0x47649B83__
 
+#include "private-keywords.h"
 #include "x2c.h"
+#include "diff.h"
+#include "digest.h"
+#include "json.h"
+#include "lisp-init.h"
+#include "list-selectors.h"
+#include "process.h"
+#include "regex.h"
+#include "typed-array.h"
+#include "typed-list.h"
+#include "typed-map.h"
 Map lisp_native_targets(void);
 
 

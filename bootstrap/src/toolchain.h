@@ -30,6 +30,14 @@ typedef struct ToolRun{
 }
 * ToolRun;
 
+#include <ctype.h>
+#include <errno.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include "report.h"
+#include "utils.h"
 Toolchain toolchain_new(CliRequest request);
 
 Toolchain toolchain_meta(String cc);

@@ -19,6 +19,7 @@
 #define __GUARD_0x3CFE94DA__
 #include "x2c.h"
 
+#include "../lib/private-keywords.h"
 #include "build.h"
 #include <stdio.h>
 #include <string.h>
@@ -154,13 +155,13 @@ static Func _x2c_func_handle_1;
 _x2c_initializer_choice_3CFE94DA_3((_x2c_func_handle_1 = x2c_func_shared(_x2c_func_adapt_1, _81)))
 static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3);
 
-Var String_var(String);
+static Var String_var(String);
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
 List cons(Var, List);
 
-Var List_var(List);
+static Var List_var(List);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -381,7 +382,7 @@ List Path_list_dir(Path);
 
 int List_try_next(List, List *, Var *);
 
-String Var_string(Var);
+static String Var_string(Var);
 
 int String_startswith(String, String);
 
@@ -407,7 +408,7 @@ static String _work_directory(String packages){
   return work;
 }
 
-int String_truth(String);
+static int String_truth(String);
 
 static void _release_packages(void){
   String work = _staging;
@@ -473,7 +474,7 @@ static void _host_error(List detail){
   host_error(detail);
 }
 
-Var List_car(List);
+static Var List_car(List);
 
 void x2c_cleanup_push(X2CCleanup *);
 
@@ -507,7 +508,7 @@ int install_command(CliRequest request){
 
 }
 
-int List_truth(List);
+static int List_truth(List);
 
 Var List_getindex(List, int);
 
@@ -659,7 +660,7 @@ void Path_write_text(Path, String);
 
 String Var_pretty_json(Var);
 
-Var Map_var(Map);
+static Var Map_var(Map);
 
 static void Install_mark_source(Install * i, String staged, String name){
   String version =(* i).version;
@@ -890,7 +891,7 @@ int Var_is(Var, Symbol);
 
 Var Var_getindex(Var, Var);
 
-int Var_is_row(Var, unsigned, unsigned long, unsigned long);
+static int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 
 static String _marker_string(String path, String field){
   Var volatile marker = Var_null();
@@ -983,7 +984,7 @@ List install_rows(String text){
 
 String Path_read_text(Path);
 
-List Var_list(Var);
+static List Var_list(Var);
 
 static List _index_row(CliRequest request, String name, String work){
   String location = String_truth(request -> index) ? request -> index : _87;
@@ -1176,7 +1177,7 @@ static void _verify(Path p, String expected){
 
 }
 
-List List_cdr(List);
+static List List_cdr(List);
 
 static String _unpack(String tarball, String work){
   Path extracted = String_join(NULL, cons(String_var(work), cons(String_var(_111), NULL)));
@@ -1326,7 +1327,7 @@ Var x2c_func_value_argument(Func, const FuncArg *, unsigned, Symbol);
 
 const void * Func_context(Func);
 
-Var int_var(int);
+static Var int_var(int);
 
 int String_contains(String, String);
 

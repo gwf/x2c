@@ -6,6 +6,12 @@
 #define __GUARD_0x491AB95F__
 
 #include "machine.h"
+#include <assert.h>
+#include <string.h>
+#include "scope.h"
+#include "array.h"
+#include "exception.h"
+#include "match.h"
 void MatchMachine_run(MatchMachine * m);
 
 int MatchMachine_step(MatchMachine * m);

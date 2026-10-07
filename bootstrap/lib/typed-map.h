@@ -6,8 +6,11 @@
 #define __GUARD_0xE8B0EF19__
 
 #include "x2c.h"
+#include "error-macros.h"
 #include <stdlib.h>
 #include <string.h>
+#include "map-generics.h"
+#include "integer-ops.h"
 typedef struct MapIntInt{
   Scope scope;
   Bytes hashes, entries;
@@ -298,7 +301,7 @@ MapStringInt MapStringInt_copy(MapStringInt _x2c_macro_map_191);
 
 MapStringInt MapStringInt_merge(MapStringInt _x2c_macro_map_192, MapStringInt _x2c_macro_other_11);
 
-int MapStringInt_try_next(MapStringInt _x2c_macro_map_193, unsigned * _x2c_macro_cursor_35, String * _x2c_macro_key_123, int * _x2c_macro_val_46);
+int MapStringInt_try_next(MapStringInt _x2c_macro_map_193, unsigned * _x2c_macro_cursor_34, String * _x2c_macro_key_123, int * _x2c_macro_val_46);
 
 int MapStringInt_truth(MapStringInt _x2c_macro_map_194);
 

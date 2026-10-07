@@ -7,6 +7,16 @@
 
 #include "x2c.h"
 #include "compiler.h"
+#include "grammar.h"
+#include "ast-rewrite.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "cache.h"
+#include "collect.h"
+#include "format.h"
+#include "emit.h"
+#include "utils.h"
 void generate_code(Compiler c, List ast, String dir);
 
 List generate_code_text(Compiler c, List ast, String basename);

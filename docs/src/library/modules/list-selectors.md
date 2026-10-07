@@ -63,436 +63,436 @@ Optional compound `List` selectors.
 <a id="List.caaaar"></a>
 #### List.caaaar
 
-`Var List.caaaar(List _x2c_macro_value_16)`
+`Var List.caaaar(List value)`
 
 Returns the element that `caaaar` selects from `value`.
 
-Source: `lib/list-selectors.x:84`
+Source: `lib/list-selectors.x:81`
 
 <a id="List.caaadr"></a>
 #### List.caaadr
 
-`Var List.caaadr(List _x2c_macro_value_32)`
+`Var List.caaadr(List value)`
 
 Returns the element that `caaadr` selects from `value`.
 
-Source: `lib/list-selectors.x:84`
+Source: `lib/list-selectors.x:81`
 
 <a id="List.caaar"></a>
 #### List.caaar
 
-`Var List.caaar(List _x2c_macro_value_2)`
+`Var List.caaar(List value)`
 
 Returns the element that `caaar` selects from `value`.
 
-Source: `lib/list-selectors.x:84`
+Source: `lib/list-selectors.x:81`
 
 <a id="List.caadar"></a>
 #### List.caadar
 
-`Var List.caadar(List _x2c_macro_value_24)`
+`Var List.caadar(List value)`
 
 Returns the element that `caadar` selects from `value`.
 
-Source: `lib/list-selectors.x:84`
+Source: `lib/list-selectors.x:81`
 
 <a id="List.caaddr"></a>
 #### List.caaddr
 
-`Var List.caaddr(List _x2c_macro_value_40)`
+`Var List.caaddr(List value)`
 
 Returns the element that `caaddr` selects from `value`.
 
-Source: `lib/list-selectors.x:84`
+Source: `lib/list-selectors.x:81`
 
 <a id="List.caadr"></a>
 #### List.caadr
 
-`Var List.caadr(List _x2c_macro_value_10)`
+`Var List.caadr(List value)`
 
 Returns the element that `caadr` selects from `value`.
 
-Source: `lib/list-selectors.x:84`
+Source: `lib/list-selectors.x:81`
 
 <a id="List.cadaar"></a>
 #### List.cadaar
 
-`Var List.cadaar(List _x2c_macro_value_20)`
+`Var List.cadaar(List value)`
 
 Returns the element that `cadaar` selects from `value`.
 
-Source: `lib/list-selectors.x:84`
+Source: `lib/list-selectors.x:81`
 
 <a id="List.cadadr"></a>
 #### List.cadadr
 
-`Var List.cadadr(List _x2c_macro_value_36)`
+`Var List.cadadr(List value)`
 
 Returns the element that `cadadr` selects from `value`.
 
-Source: `lib/list-selectors.x:84`
+Source: `lib/list-selectors.x:81`
 
 <a id="List.cadar"></a>
 #### List.cadar
 
-`Var List.cadar(List _x2c_macro_value_6)`
+`Var List.cadar(List value)`
 
 Returns the element that `cadar` selects from `value`.
 
-Source: `lib/list-selectors.x:84`
+Source: `lib/list-selectors.x:81`
 
 <a id="List.caddar"></a>
 #### List.caddar
 
-`Var List.caddar(List _x2c_macro_value_28)`
+`Var List.caddar(List value)`
 
 Returns the element that `caddar` selects from `value`.
 
-Source: `lib/list-selectors.x:84`
+Source: `lib/list-selectors.x:81`
 
 <a id="List.cadddr"></a>
 #### List.cadddr
 
-`Var List.cadddr(List _x2c_macro_value_44)`
+`Var List.cadddr(List value)`
 
 Returns the element that `cadddr` selects from `value`.
 
-Source: `lib/list-selectors.x:84`
+Source: `lib/list-selectors.x:81`
 
 <a id="List.cdaaar"></a>
 #### List.cdaaar
 
-`List List.cdaaar(List _x2c_macro_value_18)`
+`List List.cdaaar(List value)`
 
 Returns the tail that `cdaaar` selects from `value`.
 
-Source: `lib/list-selectors.x:84`
+Source: `lib/list-selectors.x:81`
 
 <a id="List.cdaadr"></a>
 #### List.cdaadr
 
-`List List.cdaadr(List _x2c_macro_value_34)`
+`List List.cdaadr(List value)`
 
 Returns the tail that `cdaadr` selects from `value`.
 
-Source: `lib/list-selectors.x:84`
+Source: `lib/list-selectors.x:81`
 
 <a id="List.cdaar"></a>
 #### List.cdaar
 
-`List List.cdaar(List _x2c_macro_value_4)`
+`List List.cdaar(List value)`
 
 Returns the tail that `cdaar` selects from `value`.
 
-Source: `lib/list-selectors.x:84`
+Source: `lib/list-selectors.x:81`
 
 <a id="List.cdadar"></a>
 #### List.cdadar
 
-`List List.cdadar(List _x2c_macro_value_26)`
+`List List.cdadar(List value)`
 
 Returns the tail that `cdadar` selects from `value`.
 
-Source: `lib/list-selectors.x:84`
+Source: `lib/list-selectors.x:81`
 
 <a id="List.cdaddr"></a>
 #### List.cdaddr
 
-`List List.cdaddr(List _x2c_macro_value_42)`
+`List List.cdaddr(List value)`
 
 Returns the tail that `cdaddr` selects from `value`.
 
-Source: `lib/list-selectors.x:84`
+Source: `lib/list-selectors.x:81`
 
 <a id="List.cdadr"></a>
 #### List.cdadr
 
-`List List.cdadr(List _x2c_macro_value_12)`
+`List List.cdadr(List value)`
 
 Returns the tail that `cdadr` selects from `value`.
 
-Source: `lib/list-selectors.x:84`
+Source: `lib/list-selectors.x:81`
 
 <a id="List.cdar"></a>
 #### List.cdar
 
-`List List.cdar(List _x2c_macro_value_0)`
+`List List.cdar(List value)`
 
 Returns the tail that `cdar` selects from `value`.
 
-Source: `lib/list-selectors.x:84`
+Source: `lib/list-selectors.x:81`
 
 <a id="List.cddaar"></a>
 #### List.cddaar
 
-`List List.cddaar(List _x2c_macro_value_22)`
+`List List.cddaar(List value)`
 
 Returns the tail that `cddaar` selects from `value`.
 
-Source: `lib/list-selectors.x:84`
+Source: `lib/list-selectors.x:81`
 
 <a id="List.cddadr"></a>
 #### List.cddadr
 
-`List List.cddadr(List _x2c_macro_value_38)`
+`List List.cddadr(List value)`
 
 Returns the tail that `cddadr` selects from `value`.
 
-Source: `lib/list-selectors.x:84`
+Source: `lib/list-selectors.x:81`
 
 <a id="List.cddar"></a>
 #### List.cddar
 
-`List List.cddar(List _x2c_macro_value_8)`
+`List List.cddar(List value)`
 
 Returns the tail that `cddar` selects from `value`.
 
-Source: `lib/list-selectors.x:84`
+Source: `lib/list-selectors.x:81`
 
 <a id="List.cdddar"></a>
 #### List.cdddar
 
-`List List.cdddar(List _x2c_macro_value_30)`
+`List List.cdddar(List value)`
 
 Returns the tail that `cdddar` selects from `value`.
 
-Source: `lib/list-selectors.x:84`
+Source: `lib/list-selectors.x:81`
 
 <a id="List.cddddr"></a>
 #### List.cddddr
 
-`List List.cddddr(List _x2c_macro_value_46)`
+`List List.cddddr(List value)`
 
 Returns the tail that `cddddr` selects from `value`.
 
-Source: `lib/list-selectors.x:84`
+Source: `lib/list-selectors.x:81`
 
 <a id="List.cdddr"></a>
 #### List.cdddr
 
-`List List.cdddr(List _x2c_macro_value_14)`
+`List List.cdddr(List value)`
 
 Returns the tail that `cdddr` selects from `value`.
 
-Source: `lib/list-selectors.x:84`
+Source: `lib/list-selectors.x:81`
 
 ### `Var`
 
 <a id="Var.caaaar"></a>
 #### Var.caaaar
 
-`Var Var.caaaar(Var _x2c_macro_value_17)`
+`Var Var.caaaar(Var value)`
 
 Returns the element that `caaaar` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:84`
+Source: `lib/list-selectors.x:81`
 
 <a id="Var.caaadr"></a>
 #### Var.caaadr
 
-`Var Var.caaadr(Var _x2c_macro_value_33)`
+`Var Var.caaadr(Var value)`
 
 Returns the element that `caaadr` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:84`
+Source: `lib/list-selectors.x:81`
 
 <a id="Var.caaar"></a>
 #### Var.caaar
 
-`Var Var.caaar(Var _x2c_macro_value_3)`
+`Var Var.caaar(Var value)`
 
 Returns the element that `caaar` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:84`
+Source: `lib/list-selectors.x:81`
 
 <a id="Var.caadar"></a>
 #### Var.caadar
 
-`Var Var.caadar(Var _x2c_macro_value_25)`
+`Var Var.caadar(Var value)`
 
 Returns the element that `caadar` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:84`
+Source: `lib/list-selectors.x:81`
 
 <a id="Var.caaddr"></a>
 #### Var.caaddr
 
-`Var Var.caaddr(Var _x2c_macro_value_41)`
+`Var Var.caaddr(Var value)`
 
 Returns the element that `caaddr` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:84`
+Source: `lib/list-selectors.x:81`
 
 <a id="Var.caadr"></a>
 #### Var.caadr
 
-`Var Var.caadr(Var _x2c_macro_value_11)`
+`Var Var.caadr(Var value)`
 
 Returns the element that `caadr` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:84`
+Source: `lib/list-selectors.x:81`
 
 <a id="Var.cadaar"></a>
 #### Var.cadaar
 
-`Var Var.cadaar(Var _x2c_macro_value_21)`
+`Var Var.cadaar(Var value)`
 
 Returns the element that `cadaar` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:84`
+Source: `lib/list-selectors.x:81`
 
 <a id="Var.cadadr"></a>
 #### Var.cadadr
 
-`Var Var.cadadr(Var _x2c_macro_value_37)`
+`Var Var.cadadr(Var value)`
 
 Returns the element that `cadadr` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:84`
+Source: `lib/list-selectors.x:81`
 
 <a id="Var.cadar"></a>
 #### Var.cadar
 
-`Var Var.cadar(Var _x2c_macro_value_7)`
+`Var Var.cadar(Var value)`
 
 Returns the element that `cadar` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:84`
+Source: `lib/list-selectors.x:81`
 
 <a id="Var.caddar"></a>
 #### Var.caddar
 
-`Var Var.caddar(Var _x2c_macro_value_29)`
+`Var Var.caddar(Var value)`
 
 Returns the element that `caddar` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:84`
+Source: `lib/list-selectors.x:81`
 
 <a id="Var.cadddr"></a>
 #### Var.cadddr
 
-`Var Var.cadddr(Var _x2c_macro_value_45)`
+`Var Var.cadddr(Var value)`
 
 Returns the element that `cadddr` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:84`
+Source: `lib/list-selectors.x:81`
 
 <a id="Var.cdaaar"></a>
 #### Var.cdaaar
 
-`List Var.cdaaar(Var _x2c_macro_value_19)`
+`List Var.cdaaar(Var value)`
 
 Returns the tail that `cdaaar` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:84`
+Source: `lib/list-selectors.x:81`
 
 <a id="Var.cdaadr"></a>
 #### Var.cdaadr
 
-`List Var.cdaadr(Var _x2c_macro_value_35)`
+`List Var.cdaadr(Var value)`
 
 Returns the tail that `cdaadr` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:84`
+Source: `lib/list-selectors.x:81`
 
 <a id="Var.cdaar"></a>
 #### Var.cdaar
 
-`List Var.cdaar(Var _x2c_macro_value_5)`
+`List Var.cdaar(Var value)`
 
 Returns the tail that `cdaar` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:84`
+Source: `lib/list-selectors.x:81`
 
 <a id="Var.cdadar"></a>
 #### Var.cdadar
 
-`List Var.cdadar(Var _x2c_macro_value_27)`
+`List Var.cdadar(Var value)`
 
 Returns the tail that `cdadar` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:84`
+Source: `lib/list-selectors.x:81`
 
 <a id="Var.cdaddr"></a>
 #### Var.cdaddr
 
-`List Var.cdaddr(Var _x2c_macro_value_43)`
+`List Var.cdaddr(Var value)`
 
 Returns the tail that `cdaddr` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:84`
+Source: `lib/list-selectors.x:81`
 
 <a id="Var.cdadr"></a>
 #### Var.cdadr
 
-`List Var.cdadr(Var _x2c_macro_value_13)`
+`List Var.cdadr(Var value)`
 
 Returns the tail that `cdadr` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:84`
+Source: `lib/list-selectors.x:81`
 
 <a id="Var.cdar"></a>
 #### Var.cdar
 
-`List Var.cdar(Var _x2c_macro_value_1)`
+`List Var.cdar(Var value)`
 
 Returns the tail that `cdar` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:84`
+Source: `lib/list-selectors.x:81`
 
 <a id="Var.cddaar"></a>
 #### Var.cddaar
 
-`List Var.cddaar(Var _x2c_macro_value_23)`
+`List Var.cddaar(Var value)`
 
 Returns the tail that `cddaar` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:84`
+Source: `lib/list-selectors.x:81`
 
 <a id="Var.cddadr"></a>
 #### Var.cddadr
 
-`List Var.cddadr(Var _x2c_macro_value_39)`
+`List Var.cddadr(Var value)`
 
 Returns the tail that `cddadr` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:84`
+Source: `lib/list-selectors.x:81`
 
 <a id="Var.cddar"></a>
 #### Var.cddar
 
-`List Var.cddar(Var _x2c_macro_value_9)`
+`List Var.cddar(Var value)`
 
 Returns the tail that `cddar` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:84`
+Source: `lib/list-selectors.x:81`
 
 <a id="Var.cdddar"></a>
 #### Var.cdddar
 
-`List Var.cdddar(Var _x2c_macro_value_31)`
+`List Var.cdddar(Var value)`
 
 Returns the tail that `cdddar` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:84`
+Source: `lib/list-selectors.x:81`
 
 <a id="Var.cddddr"></a>
 #### Var.cddddr
 
-`List Var.cddddr(Var _x2c_macro_value_47)`
+`List Var.cddddr(Var value)`
 
 Returns the tail that `cddddr` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:84`
+Source: `lib/list-selectors.x:81`
 
 <a id="Var.cdddr"></a>
 #### Var.cdddr
 
-`List Var.cdddr(Var _x2c_macro_value_15)`
+`List Var.cdddr(Var value)`
 
 Returns the tail that `cdddr` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:84`
+Source: `lib/list-selectors.x:81`
 
 ## Design notes
 

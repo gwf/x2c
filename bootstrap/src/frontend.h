@@ -29,6 +29,14 @@ typedef struct ParsedUnit{
 }
 ParsedUnit;
 
+#include <limits.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "build.h"
+#include "collect.h"
+#include "deps.h"
+#include "utils.h"
 int Frontend_open(Frontend f, String filename, ParsedUnit * unit);
 
 int Frontend_open_reporting(Frontend f, String filename, ParsedUnit * unit);

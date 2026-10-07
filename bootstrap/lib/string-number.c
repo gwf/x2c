@@ -13,7 +13,7 @@ static int _only_space(const char * rest){
   return ! * rest;
 }
 
-int String_truth(String);
+static int String_truth(String);
 
 int String_try_long(String str, long * out){
   if(! String_truth(str) || ! out) return 0;

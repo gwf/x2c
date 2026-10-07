@@ -89,13 +89,13 @@ static const SymbolSet _type_qualifiers =(SymbolSet) "\001\000\000\000\003\000\0
 
 static Var _modifier_syntax(Var modifier);
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
-Var String_var(String);
+static Var String_var(String);
 
 List cons(Var, List);
 
-Var List_var(List);
+static Var List_var(List);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -194,7 +194,7 @@ List x2c_literal_string(String value){
   return cons(_0, cons(_4, cons(List_var(cons(_5, cons(List_var(cons(_6, cons(List_var(cons(_0, cons(_4, cons(List_var(cons(_7, cons(_4, cons(String_var(value), NULL)))), NULL)))), NULL))), NULL))), NULL)));
 }
 
-String int_str(int);
+static String int_str(int);
 
 List x2c_literal_int(int value){
   if(! _init_guard_) _file_init_();
@@ -269,7 +269,7 @@ return NULL;
 }
 
 int List_try_next(List, List *, Var *);
-List Var_list(Var);
+static List Var_list(Var);
 List List_reverse(List);
 List x2c_parameters_arguments(List value){
   if(! _init_guard_) _file_init_();
@@ -325,10 +325,10 @@ default: ;  static MatchCaptureSite _x2c_match_site_5;  if (x2c_match_site_try_c
 return List_var(node);
 }
 
-int List_truth(List);
-List List_cdr(List);
-Var List_car(List);
-int Var_is_row(Var, unsigned, unsigned long, unsigned long);
+static int List_truth(List);
+static List List_cdr(List);
+static Var List_car(List);
+static int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 int Var_is(Var, Symbol);
 int SymbolSet_contains(SymbolSet, Symbol);
 List type_base_suffix(List type){

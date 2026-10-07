@@ -4,6 +4,267 @@
 #include "x2c.h"
 
 #include "compiler.h"
+static List _182, _181, _180, _178, _177, _173, _172, _162, _161, _160, _159, _158, _157, _156, _155, _154, _153, _152, _151, _150, _149, _148, _147, _146, _145, _144, _143, _142, _141, _139, _138, _137, _136, _131, _130, _129, _128, _123, _122, _121, _120, _115, _114, _113, _112, _106, _105, _104, _103, _98, _97, _96, _95, _89, _88, _87, _83, _82, _81, _76, _75, _72, _69, _66, _63, _62, _61, _60, _55, _52, _51, _48, _47, _46, _45, _44, _41, _40, _39, _38, _33, _32, _31, _26, _25, _24, _19, _18, _17, _12, _11, _7, _6, _5, _4, _3;
+
+static String _167, _163;
+
+static Var _186, _185, _184, _183, _179, _176, _175, _174, _171, _170, _169, _168, _166, _165, _164, _140, _135, _134, _133, _132, _127, _126, _125, _124, _119, _118, _117, _116, _111, _110, _109, _108, _107, _102, _101, _100, _99, _94, _93, _92, _91, _90, _86, _85, _84, _80, _79, _78, _77, _74, _73, _71, _70, _68, _67, _65, _64, _59, _58, _57, _56, _54, _53, _50, _49, _43, _42, _37, _36, _35, _34, _30, _29, _28, _27, _23, _22, _21, _20, _16, _15, _14, _13, _10, _9, _8, _2, _1, _0;
+
+static int _init_guard_ = 0;
+
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
+
+static List _operator_rows(void);
+
+static List _operator_cases(int key, int value, int derived);
+
+static Var Symbol_var(Symbol);
+
+static Var int_var(int);
+
+List cons(Var, List);
+
+static Var List_var(List);
+
+static Var String_var(String);
+
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
+  x2c_initialize_protocols();
+  if(_init_guard_) return;
+  _init_guard_ = 1;
+  _0 = Symbol_var(31993);
+  _1 = int_var(1);
+  _2 = int_var(0);
+  _3 = cons(_2, NULL);
+  _4 = cons(_2, _3);
+  _5 = cons(_2, _4);
+  _6 = cons(_1, _5);
+  _7 = cons(_0, _6);
+  _8 = List_var(_7);
+  _9 = Symbol_var(9805);
+  _10 = int_var(2);
+  _11 = cons(_10, _5);
+  _12 = cons(_9, _11);
+  _13 = List_var(_12);
+  _14 = Symbol_var(249);
+  _15 = int_var(3);
+  _16 = Symbol_var(31867);
+  _17 = cons(_16, _4);
+  _18 = cons(_15, _17);
+  _19 = cons(_14, _18);
+  _20 = List_var(_19);
+  _21 = Symbol_var(189);
+  _22 = int_var(4);
+  _23 = Symbol_var(24187);
+  _24 = cons(_23, _4);
+  _25 = cons(_22, _24);
+  _26 = cons(_21, _25);
+  _27 = List_var(_26);
+  _28 = Symbol_var(77);
+  _29 = int_var(5);
+  _30 = Symbol_var(9851);
+  _31 = cons(_30, _4);
+  _32 = cons(_29, _31);
+  _33 = cons(_28, _32);
+  _34 = List_var(_33);
+  _35 = Symbol_var(15739);
+  _36 = int_var(6);
+  _37 = Symbol_var(11642968);
+  _38 = cons(_37, _3);
+  _39 = cons(_2, _38);
+  _40 = cons(_36, _39);
+  _41 = cons(_35, _40);
+  _42 = List_var(_41);
+  _43 = Symbol_var(8571);
+  _44 = cons(_1, NULL);
+  _45 = cons(_37, _44);
+  _46 = cons(_2, _45);
+  _47 = cons(_36, _46);
+  _48 = cons(_43, _47);
+  _49 = List_var(_48);
+  _50 = Symbol_var(2014587);
+  _51 = cons(_36, _5);
+  _52 = cons(_50, _51);
+  _53 = List_var(_52);
+  _54 = Symbol_var(1097083);
+  _55 = cons(_54, _51);
+  _56 = List_var(_55);
+  _57 = Symbol_var(121);
+  _58 = int_var(7);
+  _59 = Symbol_var(7477398666);
+  _60 = cons(_59, _44);
+  _61 = cons(_2, _60);
+  _62 = cons(_58, _61);
+  _63 = cons(_57, _62);
+  _64 = List_var(_63);
+  _65 = Symbol_var(15483);
+  _66 = cons(_65, _62);
+  _67 = List_var(_66);
+  _68 = Symbol_var(125);
+  _69 = cons(_68, _62);
+  _70 = List_var(_69);
+  _71 = Symbol_var(15995);
+  _72 = cons(_71, _62);
+  _73 = List_var(_72);
+  _74 = Symbol_var(604);
+  _75 = cons(_58, _5);
+  _76 = cons(_74, _75);
+  _77 = List_var(_76);
+  _78 = Symbol_var(15481);
+  _79 = int_var(8);
+  _80 = Symbol_var(1981563);
+  _81 = cons(_80, _4);
+  _82 = cons(_79, _81);
+  _83 = cons(_78, _82);
+  _84 = List_var(_83);
+  _85 = Symbol_var(15997);
+  _86 = Symbol_var(2047611);
+  _87 = cons(_86, _4);
+  _88 = cons(_79, _87);
+  _89 = cons(_85, _88);
+  _90 = List_var(_89);
+  _91 = Symbol_var(56);
+  _92 = int_var(9);
+  _93 = Symbol_var(11131);
+  _94 = Symbol_var(2312);
+  _95 = cons(_94, _3);
+  _96 = cons(_93, _95);
+  _97 = cons(_92, _96);
+  _98 = cons(_91, _97);
+  _99 = List_var(_98);
+  _100 = Symbol_var(62);
+  _101 = Symbol_var(11643);
+  _102 = Symbol_var(40260);
+  _103 = cons(_102, _3);
+  _104 = cons(_101, _103);
+  _105 = cons(_92, _104);
+  _106 = cons(_100, _105);
+  _107 = List_var(_106);
+  _108 = Symbol_var(54);
+  _109 = int_var(10);
+  _110 = Symbol_var(10875);
+  _111 = Symbol_var(27992);
+  _112 = cons(_111, _3);
+  _113 = cons(_110, _112);
+  _114 = cons(_109, _113);
+  _115 = cons(_108, _114);
+  _116 = List_var(_115);
+  _117 = Symbol_var(95);
+  _118 = Symbol_var(12155);
+  _119 = Symbol_var(8812);
+  _120 = cons(_119, _3);
+  _121 = cons(_118, _120);
+  _122 = cons(_109, _121);
+  _123 = cons(_117, _122);
+  _124 = List_var(_123);
+  _125 = Symbol_var(75);
+  _126 = Symbol_var(9595);
+  _127 = Symbol_var(27592);
+  _128 = cons(_127, _3);
+  _129 = cons(_126, _128);
+  _130 = cons(_109, _129);
+  _131 = cons(_125, _130);
+  _132 = List_var(_131);
+  _133 = Symbol_var(129);
+  _134 = Symbol_var(16507);
+  _135 = Symbol_var(875851096);
+  _136 = cons(_135, _3);
+  _137 = cons(_134, _136);
+  _138 = cons(_109, _137);
+  _139 = cons(_133, _138);
+  _140 = List_var(_139);
+  _141 = cons(_140, NULL);
+  _142 = cons(_132, _141);
+  _143 = cons(_124, _142);
+  _144 = cons(_116, _143);
+  _145 = cons(_107, _144);
+  _146 = cons(_99, _145);
+  _147 = cons(_90, _146);
+  _148 = cons(_84, _147);
+  _149 = cons(_77, _148);
+  _150 = cons(_73, _149);
+  _151 = cons(_70, _150);
+  _152 = cons(_67, _151);
+  _153 = cons(_64, _152);
+  _154 = cons(_56, _153);
+  _155 = cons(_53, _154);
+  _156 = cons(_49, _155);
+  _157 = cons(_42, _156);
+  _158 = cons(_34, _157);
+  _159 = cons(_27, _158);
+  _160 = cons(_20, _159);
+  _161 = cons(_13, _160);
+  _162 = cons(_8, _161);
+  _163 = String_new("x2c.quoted");
+  _164 = String_var(_163);
+  _165 = List_var(NULL);
+  _166 = Symbol_var(199882);
+  _167 = String_new("x2c.hole");
+  _168 = String_var(_167);
+  _169 = Atom_intern(String_new("macro-param"));
+  _170 = Symbol_var(740232);
+  _171 = Symbol_var(377892);
+  _172 = cons(_171, NULL);
+  _173 = cons(_170, _172);
+  _174 = List_var(_173);
+  _175 = Symbol_var(1317592723658);
+  _176 = int_var(0);
+  _177 = cons(_176, NULL);
+  _178 = cons(_175, _177);
+  _179 = List_var(_178);
+  _180 = cons(_179, NULL);
+  _181 = cons(_174, _180);
+  _182 = cons(_169, _181);
+  _183 = List_var(_182);
+  _184 = Symbol_var(40381208);
+  _185 = Symbol_var(1219800220);
+  _186 = Symbol_var(39266);
+}
+
+static List _operator_rows(void){
+  return _162;
+}
+
+Array Array_new(void);
+
+int List_try_next(List, List *, Var *);
+
+static List Var_list(Var);
+
+int Var_truth(Var);
+
+Var List_getindex(List, int);
+
+Var Array_push(Array, Var);
+
+List Array_list_free(Array);
+
+static List _operator_cases(int key, int value, int derived){
+  Array cases = Array_new();
+  {
+    List row;
+    List _x2c_macro_object_0 = _operator_rows();
+    List _x2c_macro_cursor_0 = _x2c_macro_object_0;
+    Var _x2c_macro_cursor_output_0;
+    while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
+      row = Var_list(_x2c_macro_cursor_output_0);
+      {
+        if(! Var_truth(List_getindex(row, key)) || ! Var_truth(List_getindex(row, value))) continue;
+        if(derived >= 0 && ! Var_equal(List_getindex(row, 4), int_var(derived))) continue;
+        Symbol label = Var_symbol(List_getindex(row, key));
+        Var result = List_getindex(row, value);
+        Array_push(cases, List_var(cons(_164, cons(_165, cons(List_var(({
+          Var _x2c_literal_part_0 = List_var(cons(_166, cons(List_var(cons(_168, cons(_183, cons(_184, cons(Symbol_var(label), NULL))))), NULL)));  Var _x2c_literal_part_1 = List_var(cons(_185, cons(_165, cons(List_var(cons(_168, cons(_183, cons(_184, cons(result, NULL))))), NULL))));  cons(_186, cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, NULL)));
+        }
+        )), NULL)))));
+      }
+
+    }
+
+  }
+  return Array_list_free(cases);
+}
+
 int Symbol_binary_precedence(Symbol op){
   switch(op){
     case 31993 : return 1;

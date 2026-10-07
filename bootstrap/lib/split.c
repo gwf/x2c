@@ -67,7 +67,7 @@ Split Var_split(Var value){
 
 int String_len(String);
 
-int String_truth(String);
+static int String_truth(String);
 
 static inline int _end(String str, String sep, int start, int * next){
   int length = String_len(str);
@@ -104,7 +104,7 @@ String String_new_len(const char *, int);
 
 Var Array_push(Array, Var);
 
-Var String_var(String);
+static Var String_var(String);
 
 List Array_list_free(Array);
 
@@ -203,7 +203,7 @@ int Split_try_next(Split split, int * cursor, String * out){
   return split -> next(split, cursor, out);
 }
 
-Var int_var(int);
+static Var int_var(int);
 
 static int _iter_next(Iter iter, Var * out){
   Split split = Var_split(iter -> obj);
@@ -215,7 +215,7 @@ static int _iter_next(Iter iter, Var * out){
   return 1;
 }
 
-int Iter_truth(Iter);
+static int Iter_truth(Iter);
 
 Iter Iter_init(Iter, Var, IterNextFn, Var);
 

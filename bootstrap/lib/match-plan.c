@@ -188,7 +188,7 @@ _x2c_defer_env_0;
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
 List cons(Var, List);
 
@@ -286,17 +286,17 @@ void MatchPlan_free(MatchPlan plan){
 
 int Var_is_atom_binder(Var);
 
-int Var_is_row(Var, unsigned, unsigned long, unsigned long);
+static int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 
-List Var_list(Var);
+static List Var_list(Var);
 
-int List_truth(List);
+static int List_truth(List);
 
 int Var_is_match_op(Var);
 
-Var List_car(List);
+static Var List_car(List);
 
-List List_cdr(List);
+static List List_cdr(List);
 
 static int MatchLower__compile_value(MatchLower * l, Var pattern){
   if(Var_is_atom_binder(pattern)) return MatchLower__compile_binder(&((* l)), pattern);
@@ -406,7 +406,7 @@ static int _is_list_literal(List pat){
   return 1;
 }
 
-Var List_var(List);
+static Var List_var(List);
 
 static int MatchLower__compile_literal_list(MatchLower * l, List pattern){
   int constant = MachineBuilder_constant(&((* l).b), List_var(pattern));
@@ -572,7 +572,7 @@ static int MatchLower__compile_set(MatchLower * l, List args){
   return MatchLower__emit_binder(&((* l)), binder) && MatchLower__emit_test(&((* l)), test, child) ? MatchLower__finish(&((* l)), entry, base) : - 1;
 }
 
-List List_cddr(List);
+static List List_cddr(List);
 
 static int _set_binds(List args){
   return List_truth(args) && List_truth(List_cdr(args)) && ! List_truth(List_cddr(args)) && Var_is_atom_binder(List_car(args));
@@ -593,7 +593,7 @@ static int MatchLower__compile_quote(MatchLower * l, List args){
 
 int List_equal(List, List);
 
-Var List_cadr(List);
+static Var List_cadr(List);
 
 static int MatchLower__compile_is(MatchLower * l, List args){
   int kind = _match_kind(args);
@@ -633,7 +633,7 @@ static int MatchLower__is_atom(MatchLower * l){
 
 int Var_is(Var, Symbol);
 
-Symbol Var_symbol(Var);
+static Symbol Var_symbol(Var);
 
 static int MatchLower__is_type(MatchLower * l, Var type){
   Symbol tag = _canonical_type_tag(Var_is(type, 1328354264) ? Var_symbol(type) : 0);

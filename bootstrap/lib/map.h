@@ -5,6 +5,10 @@
 #ifndef __GUARD_0x409392BC__
 #define __GUARD_0x409392BC__
 
+#include "error-macros.h"
+#include "private-keywords.h"
+typedef struct Map * Map;
+
 #include "common.h"
 #include "iter.h"
 typedef struct Map{
@@ -16,6 +20,16 @@ typedef struct Map{
 }
 * Map;
 
+#include <stdlib.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include "var.h"
+#include "exception.h"
+#include "scope.h"
+#include "block.h"
+#include "buffer.h"
+#include "varconvert.h"
+#include "map-generics.h"
 Map Map_new_capacity(unsigned _x2c_macro_capacity_4);
 
 Map Map_new(void);

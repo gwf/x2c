@@ -7,6 +7,7 @@
 
 #include "x2c.h"
 #include "type.h"
+#include "../lib/var-tags.h"
 Map Type_builtin_var_tags(void);
 
 Map Type_var_tag_rows(void);

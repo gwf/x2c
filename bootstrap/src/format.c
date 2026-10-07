@@ -64,17 +64,17 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
 
 Buffer Buffer_new(size_t);
 
-int List_truth(List);
+static int List_truth(List);
 
-List List_cdr(List);
+static List List_cdr(List);
 
-Var List_car(List);
+static Var List_car(List);
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
 String Var_str(Var);
 
-int String_truth(String);
+static int String_truth(String);
 
 int String_getindex(String, int);
 
@@ -119,13 +119,13 @@ int Buffer_getindex(Buffer, int);
 
 Buffer Buffer_unwrite(Buffer, size_t);
 
-String Var_string(Var);
+static String Var_string(Var);
 
 Var List_assoc(List, Var);
 
-Var String_var(String);
+static Var String_var(String);
 
-Var int_var(int);
+static Var int_var(int);
 
 String String_replace(String, String, String);
 
@@ -133,7 +133,7 @@ String String_escape(String);
 
 Buffer Buffer_write(Buffer, const char *);
 
-String int_str(int);
+static String int_str(int);
 
 static void Pretty_source_marker(Pretty * p, Var value){
   List location = Compiler_origin_location((* p).c, Var_int(Var_convert(value, 3453797)));

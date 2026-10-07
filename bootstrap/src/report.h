@@ -6,6 +6,18 @@
 #define __GUARD_0x1A01A7A9__
 
 #include "x2c.h"
+#include <errno.h>
+#include <fcntl.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/file.h>
+#include <sys/ioctl.h>
+#include <sys/stat.h>
+#include <sys/uio.h>
+#include <time.h>
+#include <unistd.h>
+#include "process.h"
 void report_configure(int quiet, int plain, Symbol color_mode, int verbose, int dry_run, int inspecting);
 
 int report_receipts(void);

@@ -228,13 +228,13 @@ _x2c_lambda_context_0;
 
 static Var _x2c_lambda_1(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0);
 
-Var String_var(String);
+static Var String_var(String);
 
 List cons(Var, List);
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
-Var List_var(List);
+static Var List_var(List);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -504,7 +504,7 @@ static String _process_suffix(void){
   return String_printf(_3, (long) getpid());
 }
 
-int List_truth(List);
+static int List_truth(List);
 
 void driver_error(const char *);
 
@@ -512,7 +512,7 @@ void * Scope_calloc(size_t, size_t);
 
 Array Array_new(void);
 
-int String_truth(String);
+static int String_truth(String);
 
 unsigned long report_now_us(void);
 
@@ -540,7 +540,7 @@ Build CliRequest_prepare(CliRequest request){
 
 int List_try_next(List, List *, Var *);
 
-String Var_string(Var);
+static String Var_string(Var);
 
 Path Path_absolute(Path);
 
@@ -623,7 +623,7 @@ void build_check_input(String input){
   exit(2);
 }
 
-List List_cdr(List);
+static List List_cdr(List);
 
 static void Build__check_compile_only(Build b){
   List inputs = b -> request -> inputs;
@@ -642,7 +642,7 @@ static void Build__select_tools(Build b){
   if(request -> kind == 904178442) b -> toolchain -> cc_args = cons(_14, List_append(b -> toolchain -> cc_args, NULL));
 }
 
-Var List_car(List);
+static Var List_car(List);
 
 static String CliRequest__default_output(CliRequest request){
   if(String_truth(request -> output)) return request -> output;
@@ -1314,7 +1314,7 @@ Map Map_update_n(Map, unsigned, ...);
 
 String Var_json(Var);
 
-Var Map_var(Map);
+static Var Map_var(Map);
 
 static String Build__compile_command(Build b, CcJob job){
   Map entry = Map_update_n(Map_new(), 4, Symbol_var(9453566196914), String_var(b -> compile_directory), Symbol_var(412426), String_var(job.source), Symbol_var(1052018024), String_var(job.object), Symbol_var(3452443129126), List_var(job.action -> arguments));
@@ -1733,7 +1733,7 @@ static int Build__archive_extensions(Build b){
   return ToolAction_run(Toolchain_archive_action(b -> toolchain, String_join(NULL, cons(String_var(directory), cons(String_var(_2), cons(String_var(identity), cons(String_var(_17), NULL))))), Array_list_free(objects)));
 }
 
-Var int_var(int);
+static Var int_var(int);
 
 static void Build__extension_sources(Build b, String package, String include, Map sources){
   String root = String_join(NULL, cons(String_var(Path_absolute(package)), cons(String_var(_140), NULL)));
@@ -1765,7 +1765,7 @@ int report_receipts(void);
 
 void report_generated(int, unsigned long long);
 
-String int_str(int);
+static String int_str(int);
 
 String report_size(unsigned long long);
 
@@ -2036,7 +2036,7 @@ static List Build__script_directories(Build b, List prerequisites){
   return Build__search_entries(b, directories);
 }
 
-Var List_cadr(List);
+static Var List_cadr(List);
 
 static void _add_option_dirs(Array directories, List args){
   for(List p = args;  List_truth(p);  p = List_cdr(p)){

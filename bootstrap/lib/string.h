@@ -8,10 +8,27 @@
 #include "common.h"
 typedef char * String;
 
+#include <stdlib.h>
+#include <ctype.h>
+#include <assert.h>
+#include <limits.h>
+#include <stdarg.h>
+#include <stdint.h>
+#include <string.h>
+#include "var.h"
+#include "list.h"
+#include "array.h"
+#include "buffer.h"
+#include "exception.h"
+#include "func.h"
+#include "symbol.h"
+#include "pool.h"
+#define STRING_STACK_BYTES 256
 #ifndef X2CCPP
 _Static_assert(_Generic(& strlen, size_t(*)(const char *) : 1, default: 0), "native alias String_c_len does not match strlen");
 #endif
 #define String_c_len strlen
+int strcmp(const char *, const char *);
 #ifndef X2CCPP
 _Static_assert(_Generic(& strcmp, int(*)(const char *, const char *) : 1, default: 0), "native alias String_c_compare does not match strcmp");
 #endif

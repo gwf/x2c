@@ -6,13 +6,45 @@
 #define __GUARD_0x28FCBFDC__
 
 #include "x2c.h"
+#include "../lib/private-keywords.h"
+#include "grammar.h"
+#include "ast-rewrite.h"
 #include "compiler.h"
+#include "adapter-memo.h"
+#include "fields.h"
+#include "expressions.h"
+#include "builtins.h"
+#include "linked-meta.h"
+#include "literals.h"
+#include "stage.h"
+#include "meta-group.h"
+#include "meta-helper-client.h"
+#include "meta-native.h"
+#include "meta-sdk.h"
+#include "meta.h"
+#include "parse.h"
+#include "regions.h"
+#include "statements.h"
+#include "digest.h"
+#include "script.h"
+#include "toolchain.h"
+#include "utils.h"
+#include <dlfcn.h>
+#include <unistd.h>
+#include <errno.h>
+#include <limits.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/stat.h>
+#include "expressions-reports.h"
 List Compiler_expand_macro_invocation_node(Compiler c, Var stored, List arguments, Token invocation, AstPos position);
 
 Token Compiler_macro_invocation_site(Compiler c, Var site);
 
 List Compiler_parse_macro_definition(Compiler c);
 
+#define MACRO_CATEGORY_COUNT \
+  (int) (sizeof(macro_categories) / sizeof(macro_categories[0]))
 List Compiler_try_parse_macro_slot(Compiler c, Symbol role);
 
 List Compiler_peek_macro_hole(Compiler c);
@@ -30,6 +62,10 @@ List Compiler_macro_introduced_name(Compiler c, String spelling);
 List Compiler_macro_tag_name(Compiler c, Symbol kind, String name, int definition);
 
 List Compiler_publish_macro_definition_node(Compiler c, List node);
+
+void Compiler_record_compile_time_effect(Compiler c, List row, Token start);
+
+void Compiler_install_compile_time_effects(Compiler c, List rows);
 
 int Compiler_macro_form_is_definition(Compiler c);
 
@@ -91,14 +127,6 @@ List Compiler_parse_macro_lisp_top_level(Compiler c);
 
 void Compiler_parse_macro_lisp_shallow(Compiler c);
 
-void Compiler_keep_imported_meta(Compiler c, List imported);
-
-int Compiler_at_import(Compiler c);
-
-void Compiler_record_macro_export(Compiler c);
-
-void Compiler_import_exported(Compiler c, String path, Token invocation);
-
 void Compiler_evaluate_declaration_effect(Compiler c, String form, Token invocation);
 
 List Compiler_parse_macro_lisp_expression(Compiler c);
@@ -106,8 +134,6 @@ List Compiler_parse_macro_lisp_expression(Compiler c);
 List Compiler_lift_macro_lisp_expression(Compiler c, Var value, Token invocation);
 
 List Compiler_bind_macro_lisp_statement(Compiler c, List value, AstPos context);
-
-void Compiler_import_package_macros(Compiler c, String name, Token invocation);
 
 String Compiler_source_path(Compiler c, String file);
 

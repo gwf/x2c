@@ -6,10 +6,20 @@
 #define __GUARD_0x6E6B8BB0__
 
 #include "x2c.h"
+#include "../lib/private-keywords.h"
 #include "path.h"
 #include "process.h"
 #include "sourceview.h"
 #define FNV_OFFSET_BASIS 0xcbf29ce484222325ULL
+#include <errno.h>
+#include <fcntl.h>
+#include <limits.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/file.h>
+#include <sys/wait.h>
+#include <unistd.h>
 void x2c_initialize_environment(const char * argv0);
 
 void x2c_initialize_command_environment(const char * argv0, String embedded_identity);

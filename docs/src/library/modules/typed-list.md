@@ -57,7 +57,7 @@ Typed cons chains generated from typed methods.
 <a id="List.listchar"></a>
 #### List.listchar
 
-`ListChar List.listchar(List _x2c_macro_xs_3)`
+`ListChar List.listchar(List xs)`
 
 Validates `xs` as `ListChar` and returns the identical canonical chain.
 Nil is valid. Every nonempty cell must hold a `<i8>` element; a foreign
@@ -67,12 +67,12 @@ lifetime.
 
 **Raises:** `<no-convert>` for the first foreign element.
 
-Source: `lib/typed-list.x:200`
+Source: `lib/typed-list.x:199`
 
 <a id="List.listdbl"></a>
 #### List.listdbl
 
-`ListDbl List.listdbl(List _x2c_macro_xs_23)`
+`ListDbl List.listdbl(List xs)`
 
 Validates `xs` as `ListDbl` and returns the identical canonical chain.
 Nil is valid. Every nonempty cell must hold a `<f64>` element; a foreign
@@ -82,12 +82,12 @@ lifetime.
 
 **Raises:** `<no-convert>` for the first foreign element.
 
-Source: `lib/typed-list.x:216`
+Source: `lib/typed-list.x:215`
 
 <a id="List.listfloat"></a>
 #### List.listfloat
 
-`ListFloat List.listfloat(List _x2c_macro_xs_18)`
+`ListFloat List.listfloat(List xs)`
 
 Validates `xs` as `ListFloat` and returns the identical canonical chain.
 Nil is valid. Every nonempty cell must hold a `<f32>` element; a foreign
@@ -97,12 +97,12 @@ lifetime.
 
 **Raises:** `<no-convert>` for the first foreign element.
 
-Source: `lib/typed-list.x:212`
+Source: `lib/typed-list.x:211`
 
 <a id="List.listint"></a>
 #### List.listint
 
-`ListInt List.listint(List _x2c_macro_xs_13)`
+`ListInt List.listint(List xs)`
 
 Validates `xs` as `ListInt` and returns the identical canonical chain.
 Nil is valid. Every nonempty cell must hold a `<i32>` element; a foreign
@@ -112,12 +112,12 @@ lifetime.
 
 **Raises:** `<no-convert>` for the first foreign element.
 
-Source: `lib/typed-list.x:208`
+Source: `lib/typed-list.x:207`
 
 <a id="List.listshort"></a>
 #### List.listshort
 
-`ListShort List.listshort(List _x2c_macro_xs_8)`
+`ListShort List.listshort(List xs)`
 
 Validates `xs` as `ListShort` and returns the identical canonical chain.
 Nil is valid. Every nonempty cell must hold a `<i16>` element; a foreign
@@ -127,12 +127,12 @@ lifetime.
 
 **Raises:** `<no-convert>` for the first foreign element.
 
-Source: `lib/typed-list.x:204`
+Source: `lib/typed-list.x:203`
 
 <a id="List.liststring"></a>
 #### List.liststring
 
-`ListString List.liststring(List _x2c_macro_xs_28)`
+`ListString List.liststring(List xs)`
 
 Validates `xs` as `ListString` and returns the identical canonical chain.
 Nil is valid. Every nonempty cell must hold a `<string>` element; a foreign
@@ -142,12 +142,12 @@ lifetime.
 
 **Raises:** `<no-convert>` for the first foreign element.
 
-Source: `lib/typed-list.x:220`
+Source: `lib/typed-list.x:219`
 
 <a id="List.listsymbol"></a>
 #### List.listsymbol
 
-`ListSymbol List.listsymbol(List _x2c_macro_xs_33)`
+`ListSymbol List.listsymbol(List xs)`
 
 Validates `xs` as `ListSymbol` and returns the identical canonical chain.
 Nil is valid. Every nonempty cell must hold a `<symbol>` element; a foreign
@@ -157,24 +157,24 @@ lifetime.
 
 **Raises:** `<no-convert>` for the first foreign element.
 
-Source: `lib/typed-list.x:224`
+Source: `lib/typed-list.x:223`
 
 ### `ListChar`
 
 <a id="ListChar.car"></a>
 #### ListChar.car
 
-`char ListChar.car(ListChar _x2c_macro_xs_0)`
+`char ListChar.car(ListChar xs)`
 
 Returns the first `char` in `xs`, or `0` when `xs` is `nil`.
 A nonempty `xs` must retain the `ListChar` element-tag invariant.
 
-Source: `lib/typed-list.x:200`
+Source: `lib/typed-list.x:199`
 
 <a id="ListChar.cons"></a>
 #### ListChar.cons
 
-`ListChar ListChar.cons(char _x2c_macro_value_0, ListChar _x2c_macro_tail_0)`
+`ListChar ListChar.cons(char value, ListChar tail)`
 
 Returns the canonical `ListChar` formed by prepending `value` to `tail`.
 The immutable tail is shared. The result follows the lifetime of its
@@ -184,44 +184,44 @@ pool when an existing cell is reused.
 **Raises:** `<alloc-fail>` or `<size-limit>` while installing a new
 canonical cell.
 
-Source: `lib/typed-list.x:200`
+Source: `lib/typed-list.x:199`
 
 <a id="ListChar.index"></a>
 #### ListChar.index
 
-`int ListChar.index(ListChar _x2c_macro_xs_2, char _x2c_macro_value_1)`
+`int ListChar.index(ListChar xs, char value)`
 
 Returns the first zero-based index of `value`, or -1 when absent.
 
-Source: `lib/typed-list.x:200`
+Source: `lib/typed-list.x:199`
 
 <a id="ListChar.last"></a>
 #### ListChar.last
 
-`char ListChar.last(ListChar _x2c_macro_xs_1)`
+`char ListChar.last(ListChar xs)`
 
 Returns the final `char` in `xs`, or `0` when `xs` is `nil`,
 after an O(n) walk.
 A nonempty `xs` must retain the `ListChar` element-tag invariant.
 
-Source: `lib/typed-list.x:200`
+Source: `lib/typed-list.x:199`
 
 ### `ListDbl`
 
 <a id="ListDbl.car"></a>
 #### ListDbl.car
 
-`double ListDbl.car(ListDbl _x2c_macro_xs_20)`
+`double ListDbl.car(ListDbl xs)`
 
 Returns the first `double` in `xs`, or `0.0` when `xs` is `nil`.
 A nonempty `xs` must retain the `ListDbl` element-tag invariant.
 
-Source: `lib/typed-list.x:216`
+Source: `lib/typed-list.x:215`
 
 <a id="ListDbl.cons"></a>
 #### ListDbl.cons
 
-`ListDbl ListDbl.cons(double _x2c_macro_value_12, ListDbl _x2c_macro_tail_4)`
+`ListDbl ListDbl.cons(double value, ListDbl tail)`
 
 Returns the canonical `ListDbl` formed by prepending `value` to `tail`.
 The immutable tail is shared. The result follows the lifetime of its
@@ -231,44 +231,44 @@ pool when an existing cell is reused.
 **Raises:** `<alloc-fail>` or `<size-limit>` while installing a new
 canonical cell.
 
-Source: `lib/typed-list.x:216`
+Source: `lib/typed-list.x:215`
 
 <a id="ListDbl.index"></a>
 #### ListDbl.index
 
-`int ListDbl.index(ListDbl _x2c_macro_xs_22, double _x2c_macro_value_13)`
+`int ListDbl.index(ListDbl xs, double value)`
 
 Returns the first zero-based index of `value`, or -1 when absent.
 
-Source: `lib/typed-list.x:216`
+Source: `lib/typed-list.x:215`
 
 <a id="ListDbl.last"></a>
 #### ListDbl.last
 
-`double ListDbl.last(ListDbl _x2c_macro_xs_21)`
+`double ListDbl.last(ListDbl xs)`
 
 Returns the final `double` in `xs`, or `0.0` when `xs` is `nil`,
 after an O(n) walk.
 A nonempty `xs` must retain the `ListDbl` element-tag invariant.
 
-Source: `lib/typed-list.x:216`
+Source: `lib/typed-list.x:215`
 
 ### `ListFloat`
 
 <a id="ListFloat.car"></a>
 #### ListFloat.car
 
-`float ListFloat.car(ListFloat _x2c_macro_xs_15)`
+`float ListFloat.car(ListFloat xs)`
 
 Returns the first `float` in `xs`, or `0.0f` when `xs` is `nil`.
 A nonempty `xs` must retain the `ListFloat` element-tag invariant.
 
-Source: `lib/typed-list.x:212`
+Source: `lib/typed-list.x:211`
 
 <a id="ListFloat.cons"></a>
 #### ListFloat.cons
 
-`ListFloat ListFloat.cons(float _x2c_macro_value_9, ListFloat _x2c_macro_tail_3)`
+`ListFloat ListFloat.cons(float value, ListFloat tail)`
 
 Returns the canonical `ListFloat` formed by prepending `value` to `tail`.
 The immutable tail is shared. The result follows the lifetime of its
@@ -278,44 +278,44 @@ pool when an existing cell is reused.
 **Raises:** `<alloc-fail>` or `<size-limit>` while installing a new
 canonical cell.
 
-Source: `lib/typed-list.x:212`
+Source: `lib/typed-list.x:211`
 
 <a id="ListFloat.index"></a>
 #### ListFloat.index
 
-`int ListFloat.index(ListFloat _x2c_macro_xs_17, float _x2c_macro_value_10)`
+`int ListFloat.index(ListFloat xs, float value)`
 
 Returns the first zero-based index of `value`, or -1 when absent.
 
-Source: `lib/typed-list.x:212`
+Source: `lib/typed-list.x:211`
 
 <a id="ListFloat.last"></a>
 #### ListFloat.last
 
-`float ListFloat.last(ListFloat _x2c_macro_xs_16)`
+`float ListFloat.last(ListFloat xs)`
 
 Returns the final `float` in `xs`, or `0.0f` when `xs` is `nil`,
 after an O(n) walk.
 A nonempty `xs` must retain the `ListFloat` element-tag invariant.
 
-Source: `lib/typed-list.x:212`
+Source: `lib/typed-list.x:211`
 
 ### `ListInt`
 
 <a id="ListInt.car"></a>
 #### ListInt.car
 
-`int ListInt.car(ListInt _x2c_macro_xs_10)`
+`int ListInt.car(ListInt xs)`
 
 Returns the first `int` in `xs`, or `0` when `xs` is `nil`.
 A nonempty `xs` must retain the `ListInt` element-tag invariant.
 
-Source: `lib/typed-list.x:208`
+Source: `lib/typed-list.x:207`
 
 <a id="ListInt.cons"></a>
 #### ListInt.cons
 
-`ListInt ListInt.cons(int _x2c_macro_value_6, ListInt _x2c_macro_tail_2)`
+`ListInt ListInt.cons(int value, ListInt tail)`
 
 Returns the canonical `ListInt` formed by prepending `value` to `tail`.
 The immutable tail is shared. The result follows the lifetime of its
@@ -325,44 +325,44 @@ pool when an existing cell is reused.
 **Raises:** `<alloc-fail>` or `<size-limit>` while installing a new
 canonical cell.
 
-Source: `lib/typed-list.x:208`
+Source: `lib/typed-list.x:207`
 
 <a id="ListInt.index"></a>
 #### ListInt.index
 
-`int ListInt.index(ListInt _x2c_macro_xs_12, int _x2c_macro_value_7)`
+`int ListInt.index(ListInt xs, int value)`
 
 Returns the first zero-based index of `value`, or -1 when absent.
 
-Source: `lib/typed-list.x:208`
+Source: `lib/typed-list.x:207`
 
 <a id="ListInt.last"></a>
 #### ListInt.last
 
-`int ListInt.last(ListInt _x2c_macro_xs_11)`
+`int ListInt.last(ListInt xs)`
 
 Returns the final `int` in `xs`, or `0` when `xs` is `nil`,
 after an O(n) walk.
 A nonempty `xs` must retain the `ListInt` element-tag invariant.
 
-Source: `lib/typed-list.x:208`
+Source: `lib/typed-list.x:207`
 
 ### `ListShort`
 
 <a id="ListShort.car"></a>
 #### ListShort.car
 
-`short ListShort.car(ListShort _x2c_macro_xs_5)`
+`short ListShort.car(ListShort xs)`
 
 Returns the first `short` in `xs`, or `0` when `xs` is `nil`.
 A nonempty `xs` must retain the `ListShort` element-tag invariant.
 
-Source: `lib/typed-list.x:204`
+Source: `lib/typed-list.x:203`
 
 <a id="ListShort.cons"></a>
 #### ListShort.cons
 
-`ListShort ListShort.cons(short _x2c_macro_value_3, ListShort _x2c_macro_tail_1)`
+`ListShort ListShort.cons(short value, ListShort tail)`
 
 Returns the canonical `ListShort` formed by prepending `value` to `tail`.
 The immutable tail is shared. The result follows the lifetime of its
@@ -372,44 +372,44 @@ pool when an existing cell is reused.
 **Raises:** `<alloc-fail>` or `<size-limit>` while installing a new
 canonical cell.
 
-Source: `lib/typed-list.x:204`
+Source: `lib/typed-list.x:203`
 
 <a id="ListShort.index"></a>
 #### ListShort.index
 
-`int ListShort.index(ListShort _x2c_macro_xs_7, short _x2c_macro_value_4)`
+`int ListShort.index(ListShort xs, short value)`
 
 Returns the first zero-based index of `value`, or -1 when absent.
 
-Source: `lib/typed-list.x:204`
+Source: `lib/typed-list.x:203`
 
 <a id="ListShort.last"></a>
 #### ListShort.last
 
-`short ListShort.last(ListShort _x2c_macro_xs_6)`
+`short ListShort.last(ListShort xs)`
 
 Returns the final `short` in `xs`, or `0` when `xs` is `nil`,
 after an O(n) walk.
 A nonempty `xs` must retain the `ListShort` element-tag invariant.
 
-Source: `lib/typed-list.x:204`
+Source: `lib/typed-list.x:203`
 
 ### `ListString`
 
 <a id="ListString.car"></a>
 #### ListString.car
 
-`String ListString.car(ListString _x2c_macro_xs_25)`
+`String ListString.car(ListString xs)`
 
 Returns the first `String` in `xs`, or `NULL` when `xs` is `nil`.
 A nonempty `xs` must retain the `ListString` element-tag invariant.
 
-Source: `lib/typed-list.x:220`
+Source: `lib/typed-list.x:219`
 
 <a id="ListString.cons"></a>
 #### ListString.cons
 
-`ListString ListString.cons(String _x2c_macro_value_15, ListString _x2c_macro_tail_5)`
+`ListString ListString.cons(String value, ListString tail)`
 
 Returns the canonical `ListString` formed by prepending `value` to `tail`.
 The immutable tail is shared. The result follows the lifetime of its
@@ -419,44 +419,44 @@ pool when an existing cell is reused.
 **Raises:** `<alloc-fail>` or `<size-limit>` while installing a new
 canonical cell.
 
-Source: `lib/typed-list.x:220`
+Source: `lib/typed-list.x:219`
 
 <a id="ListString.index"></a>
 #### ListString.index
 
-`int ListString.index(ListString _x2c_macro_xs_27, String _x2c_macro_value_16)`
+`int ListString.index(ListString xs, String value)`
 
 Returns the first zero-based index of `value`, or -1 when absent.
 
-Source: `lib/typed-list.x:220`
+Source: `lib/typed-list.x:219`
 
 <a id="ListString.last"></a>
 #### ListString.last
 
-`String ListString.last(ListString _x2c_macro_xs_26)`
+`String ListString.last(ListString xs)`
 
 Returns the final `String` in `xs`, or `NULL` when `xs` is `nil`,
 after an O(n) walk.
 A nonempty `xs` must retain the `ListString` element-tag invariant.
 
-Source: `lib/typed-list.x:220`
+Source: `lib/typed-list.x:219`
 
 ### `ListSymbol`
 
 <a id="ListSymbol.car"></a>
 #### ListSymbol.car
 
-`Symbol ListSymbol.car(ListSymbol _x2c_macro_xs_30)`
+`Symbol ListSymbol.car(ListSymbol xs)`
 
 Returns the first `Symbol` in `xs`, or `0` when `xs` is `nil`.
 A nonempty `xs` must retain the `ListSymbol` element-tag invariant.
 
-Source: `lib/typed-list.x:224`
+Source: `lib/typed-list.x:223`
 
 <a id="ListSymbol.cons"></a>
 #### ListSymbol.cons
 
-`ListSymbol ListSymbol.cons(Symbol _x2c_macro_value_18, ListSymbol _x2c_macro_tail_6)`
+`ListSymbol ListSymbol.cons(Symbol value, ListSymbol tail)`
 
 Returns the canonical `ListSymbol` formed by prepending `value` to `tail`.
 The immutable tail is shared. The result follows the lifetime of its
@@ -466,34 +466,34 @@ pool when an existing cell is reused.
 **Raises:** `<alloc-fail>` or `<size-limit>` while installing a new
 canonical cell.
 
-Source: `lib/typed-list.x:224`
+Source: `lib/typed-list.x:223`
 
 <a id="ListSymbol.index"></a>
 #### ListSymbol.index
 
-`int ListSymbol.index(ListSymbol _x2c_macro_xs_32, Symbol _x2c_macro_value_19)`
+`int ListSymbol.index(ListSymbol xs, Symbol value)`
 
 Returns the first zero-based index of `value`, or -1 when absent.
 
-Source: `lib/typed-list.x:224`
+Source: `lib/typed-list.x:223`
 
 <a id="ListSymbol.last"></a>
 #### ListSymbol.last
 
-`Symbol ListSymbol.last(ListSymbol _x2c_macro_xs_31)`
+`Symbol ListSymbol.last(ListSymbol xs)`
 
 Returns the final `Symbol` in `xs`, or `0` when `xs` is `nil`,
 after an O(n) walk.
 A nonempty `xs` must retain the `ListSymbol` element-tag invariant.
 
-Source: `lib/typed-list.x:224`
+Source: `lib/typed-list.x:223`
 
 ### `Var`
 
 <a id="Var.listchar"></a>
 #### Var.listchar
 
-`ListChar Var.listchar(Var _x2c_macro_value_2)`
+`ListChar Var.listchar(Var value)`
 
 Extracts and validates `value` as `ListChar` without copying its cells.
 A `Var` without the `<list>` tag becomes `nil`. A `List`
@@ -502,12 +502,12 @@ same element validation, identity, and lifetime rules as `List.listchar`.
 
 **Raises:** `<no-convert>` for the first foreign element.
 
-Source: `lib/typed-list.x:200`
+Source: `lib/typed-list.x:199`
 
 <a id="Var.listdbl"></a>
 #### Var.listdbl
 
-`ListDbl Var.listdbl(Var _x2c_macro_value_14)`
+`ListDbl Var.listdbl(Var value)`
 
 Extracts and validates `value` as `ListDbl` without copying its cells.
 A `Var` without the `<list>` tag becomes `nil`. A `List`
@@ -516,12 +516,12 @@ same element validation, identity, and lifetime rules as `List.listdbl`.
 
 **Raises:** `<no-convert>` for the first foreign element.
 
-Source: `lib/typed-list.x:216`
+Source: `lib/typed-list.x:215`
 
 <a id="Var.listfloat"></a>
 #### Var.listfloat
 
-`ListFloat Var.listfloat(Var _x2c_macro_value_11)`
+`ListFloat Var.listfloat(Var value)`
 
 Extracts and validates `value` as `ListFloat` without copying its cells.
 A `Var` without the `<list>` tag becomes `nil`. A `List`
@@ -530,12 +530,12 @@ same element validation, identity, and lifetime rules as `List.listfloat`.
 
 **Raises:** `<no-convert>` for the first foreign element.
 
-Source: `lib/typed-list.x:212`
+Source: `lib/typed-list.x:211`
 
 <a id="Var.listint"></a>
 #### Var.listint
 
-`ListInt Var.listint(Var _x2c_macro_value_8)`
+`ListInt Var.listint(Var value)`
 
 Extracts and validates `value` as `ListInt` without copying its cells.
 A `Var` without the `<list>` tag becomes `nil`. A `List`
@@ -544,12 +544,12 @@ same element validation, identity, and lifetime rules as `List.listint`.
 
 **Raises:** `<no-convert>` for the first foreign element.
 
-Source: `lib/typed-list.x:208`
+Source: `lib/typed-list.x:207`
 
 <a id="Var.listshort"></a>
 #### Var.listshort
 
-`ListShort Var.listshort(Var _x2c_macro_value_5)`
+`ListShort Var.listshort(Var value)`
 
 Extracts and validates `value` as `ListShort` without copying its cells.
 A `Var` without the `<list>` tag becomes `nil`. A `List`
@@ -558,12 +558,12 @@ same element validation, identity, and lifetime rules as `List.listshort`.
 
 **Raises:** `<no-convert>` for the first foreign element.
 
-Source: `lib/typed-list.x:204`
+Source: `lib/typed-list.x:203`
 
 <a id="Var.liststring"></a>
 #### Var.liststring
 
-`ListString Var.liststring(Var _x2c_macro_value_17)`
+`ListString Var.liststring(Var value)`
 
 Extracts and validates `value` as `ListString` without copying its cells.
 A `Var` without the `<list>` tag becomes `nil`. A `List`
@@ -572,12 +572,12 @@ same element validation, identity, and lifetime rules as `List.liststring`.
 
 **Raises:** `<no-convert>` for the first foreign element.
 
-Source: `lib/typed-list.x:220`
+Source: `lib/typed-list.x:219`
 
 <a id="Var.listsymbol"></a>
 #### Var.listsymbol
 
-`ListSymbol Var.listsymbol(Var _x2c_macro_value_20)`
+`ListSymbol Var.listsymbol(Var value)`
 
 Extracts and validates `value` as `ListSymbol` without copying its cells.
 A `Var` without the `<list>` tag becomes `nil`. A `List`
@@ -586,7 +586,7 @@ same element validation, identity, and lifetime rules as `List.listsymbol`.
 
 **Raises:** `<no-convert>` for the first foreign element.
 
-Source: `lib/typed-list.x:224`
+Source: `lib/typed-list.x:223`
 
 ## Public types
 
@@ -607,7 +607,7 @@ Source: `lib/typed-list.x:224`
 
 Typed view of canonical `List` cells whose cars are `<i8>` char values.
 
-Source: `lib/typed-list.x:131`
+Source: `lib/typed-list.x:130`
 
 <a id="ListDbl"></a>
 ### ListDbl
@@ -616,7 +616,7 @@ Source: `lib/typed-list.x:131`
 
 Typed view of canonical `List` cells whose cars are `<f64>` double values.
 
-Source: `lib/typed-list.x:142`
+Source: `lib/typed-list.x:141`
 
 <a id="ListFloat"></a>
 ### ListFloat
@@ -625,7 +625,7 @@ Source: `lib/typed-list.x:142`
 
 Typed view of canonical `List` cells whose cars are `<f32>` float values.
 
-Source: `lib/typed-list.x:139`
+Source: `lib/typed-list.x:138`
 
 <a id="ListInt"></a>
 ### ListInt
@@ -634,7 +634,7 @@ Source: `lib/typed-list.x:139`
 
 Typed view of canonical `List` cells whose cars are `<i32>` int values.
 
-Source: `lib/typed-list.x:136`
+Source: `lib/typed-list.x:135`
 
 <a id="ListShort"></a>
 ### ListShort
@@ -643,7 +643,7 @@ Source: `lib/typed-list.x:136`
 
 Typed view of canonical `List` cells whose cars are `<i16>` short values.
 
-Source: `lib/typed-list.x:134`
+Source: `lib/typed-list.x:133`
 
 <a id="ListString"></a>
 ### ListString
@@ -652,7 +652,7 @@ Source: `lib/typed-list.x:134`
 
 Typed view of canonical `List` cells whose cars are `<string>` `String`s.
 
-Source: `lib/typed-list.x:145`
+Source: `lib/typed-list.x:144`
 
 <a id="ListSymbol"></a>
 ### ListSymbol
@@ -661,7 +661,7 @@ Source: `lib/typed-list.x:145`
 
 Typed view of canonical `List` cells whose cars are `<symbol>` `Symbol`s.
 
-Source: `lib/typed-list.x:148`
+Source: `lib/typed-list.x:147`
 
 ## Design notes
 

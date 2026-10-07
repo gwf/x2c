@@ -5,6 +5,7 @@
 #ifndef __GUARD_0xDC321DB1__
 #define __GUARD_0xDC321DB1__
 
+#include "error-macros.h"
 #include "symbol.h"
 static inline int scan_ascii_alpha(int c){
   return(unsigned)((c | 32) - 'a') < 26;
@@ -20,6 +21,7 @@ static inline int scan_ascii_hex_value(int c){
   return(unsigned)(c - 'a') < 6 ? c - 'a' + 10 : - 1;
 }
 
+#include <string.h>
 int scan_white_space(char * s);
 
 int scan_line_comment(char * s);

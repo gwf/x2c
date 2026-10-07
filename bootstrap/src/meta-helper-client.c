@@ -164,13 +164,13 @@ static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
 List cons(Var, List);
 
-Var List_var(List);
+static Var List_var(List);
 
-Var String_var(String);
+static Var String_var(String);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -260,13 +260,17 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _x2c_static_initialize_11();
 }
 
+static int String_truth(String);
+
 String real_path(String);
+
+String home_absolute_path(String);
 
 String Compiler_token_source(Compiler, Token, int *);
 
-List Var_list(Var);
+static List Var_list(Var);
 
-String Var_string(Var);
+static String Var_string(Var);
 
 void Compiler_report_warning(Compiler, Symbol, String, Token, List);
 
@@ -278,9 +282,9 @@ String Compiler_meta_call_missing(Compiler, String);
 
 Symbol Error_raise(Symbol, List);
 
-Var Compiler_meta_helper_call(Compiler c, String name, Token site, List arguments){
+Var Compiler_meta_helper_call(Compiler c, String name, Token site, List arguments, String provider){
   if(! _init_guard_) _file_init_();
-  String file = real_path(Compiler_token_source(c, site, NULL));
+  String file = String_truth(provider) ? real_path(home_absolute_path(provider)) : real_path(Compiler_token_source(c, site, NULL));
   Call call ={
     .compiler = c, .name = name, .site = site, .table = _table_of(file, helper_table)
   }
@@ -360,10 +364,9 @@ Var Compiler_meta_helper_call(Compiler c, String name, Token site, List argument
 }
 }
 
-int String_truth(String);
 int Map_truth(Map);
 int Map_try_get(Map, Var, Var *);
-Var int_var(int);
+static Var int_var(int);
 void Compiler_refuse_record_meta_call(Compiler, String, Token);
 static void Call_check(Call * call){
   Var failure;  if(! String_truth(helper_path) && Map_truth(helper_failures) && Map_try_get(helper_failures, int_var(- 1), &(failure))) Call_refuse(&((* call)), Var_string(failure));  if(! String_truth(helper_path)) Call_refuse(&((* call)), _52);  if(Map_truth(helper_failures) && Map_try_get(helper_failures, int_var((* call).table), &(failure))) Call_refuse(&((* call)), Var_string(failure));  Compiler_refuse_record_meta_call((* call).compiler, (* call).name, (* call).site);
@@ -436,7 +439,7 @@ static int _helper_stop(int signal){
 }
 
 int shell_status(int, int *);
-String int_str(int);
+static String int_str(int);
 String String_new(const char *);
 static String _helper_ending(void){
   int signal, code = shell_status(_helper_stop(0), &(signal));  if(! signal) return String_join(NULL, cons(String_var(_59), cons(String_var(int_str(code)), NULL)));  String name = String_new(strsignal(signal));  return String_join(NULL, cons(String_var(_60), cons(String_var(int_str(signal)), cons(String_var(_61), cons(String_var(name), cons(String_var(_62), NULL))))));

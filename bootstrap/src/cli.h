@@ -35,6 +35,24 @@ typedef struct TargetKind{
 }
 TargetKind;
 
+#include "../lib/system-macros.h"
+#include <ctype.h>
+#include <errno.h>
+#include <limits.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include "buffer.h"
+#include "report.h"
+#include "utils.h"
+#define CLI_FIELD_FLAG(field) .apply = FIELD_FLAG, \
+  .offset = offsetof(struct CliRequest, field)
+#define CLI_FIELD_TEXT(field) .apply = FIELD_TEXT, \
+  .offset = offsetof(struct CliRequest, field)
+#define CLI_FIELD_LIST(field) .apply = FIELD_LIST, \
+  .offset = offsetof(struct CliRequest, field)
 CliRequest cli_parse(int argc, char * * argv);
 
 Symbol TargetKind_named(String spelling, String * refusal);

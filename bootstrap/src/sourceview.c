@@ -112,7 +112,7 @@ int SourceView_equal(SourceView left, SourceView right){
   return(void *) left ==(void *) right;
 }
 
-unsigned x2c_hash_word(unsigned long);
+static unsigned x2c_hash_word(unsigned long);
 
 unsigned SourceView_hash(SourceView value){
   return x2c_hash_word((unsigned long) value);
@@ -244,11 +244,11 @@ void SourceView_init(SourceView sources){
 
 Var Map_setindex(Map, Var, Var);
 
-Var String_var(String);
+static Var String_var(String);
 
 Path Path_absolute(Path);
 
-Var int_var(int);
+static Var int_var(int);
 
 void SourceView_set(SourceView s, String path, String text, int changed){
   Map_setindex(s -> overlays, String_var(Path_absolute(path)), String_var(text));
@@ -269,9 +269,9 @@ int SourceView_exists(SourceView sources, String path){
 
 int Map_try_get(Map, Var, Var *);
 
-String Var_string(Var);
+static String Var_string(Var);
 
-int File_stat(File, struct stat *);
+static int File_stat(File, struct stat *);
 
 #include "error.h"
 
@@ -280,9 +280,9 @@ int File_stat(File, struct stat *);
 
 int x2c_error_catch_site_pending(ErrorCatchSite *);
 
-Var List_var(List);
+static Var List_var(List);
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
 ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
 

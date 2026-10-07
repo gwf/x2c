@@ -5,6 +5,10 @@
 #ifndef __GUARD_0x36E46C2D__
 #define __GUARD_0x36E46C2D__
 
+#include "error-macros.h"
+#include "cleanup.h"
+typedef struct Block * Block;
+
 #include "common.h"
 #include <stdint.h>
 #include <string.h>
@@ -18,6 +22,8 @@ void Block_cleanup(Block _x2c_macro_value_0);
 
 void Bytes_cleanup(Bytes _x2c_macro_value_1);
 
+#include "exception.h"
+#include "scope.h"
 static inline Block Bytes_block(Bytes bytes){
   if(bytes == NULL) return NULL;
   unsigned char * data = bytes;

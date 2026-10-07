@@ -5,8 +5,15 @@
 #ifndef __GUARD_0xD09D0392__
 #define __GUARD_0xD09D0392__
 
+#include "error-macros.h"
+typedef struct List * List;
+
 #include "common.h"
 #include "var.h"
+static inline Var car(List x);
+
+static inline List cdr(List x);
+
 typedef struct List{
   Var car;
   struct List * cdr;
@@ -15,6 +22,18 @@ typedef struct List{
 
 List List_cons_in(Pool pool, Var head, List tail);
 
+#include "symbol.h"
+#include "atom.h"
+#include "block.h"
+#include "buffer.h"
+#include "exception.h"
+#include "func.h"
+#include "map.h"
+#include "scope.h"
+#include "pool.h"
+#include "string.h"
+#include "iter.h"
+#include "array.h"
 List cons(Var head, List tail);
 
 List List_cons(Var head, List tail);
@@ -31,6 +50,8 @@ List List_promote(List lst);
 
 int List_try_own(List lst);
 
+static int List_truth(List);
+
 static inline Var car(List x){
   return List_truth(x) ? x -> car :((void) 0, Void);
 }
@@ -46,6 +67,8 @@ static inline Var List_car(List lst){
 static inline List List_cdr(List lst){
   return cdr(lst);
 }
+
+static List Var_list(Var);
 
 static inline Var List_caar(List lst){
   return car(Var_list(car(lst)));

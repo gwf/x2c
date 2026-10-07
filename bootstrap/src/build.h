@@ -25,6 +25,15 @@ typedef struct Build{
 }
 * Build;
 
+#include <errno.h>
+#include <stdio.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <unistd.h>
+#include "json.h"
+#include "report.h"
 Build CliRequest_prepare(CliRequest request);
 
 void build_check_input(String input);

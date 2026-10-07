@@ -6,6 +6,33 @@
 #define __GUARD_0x1E27A9AE__
 
 #include "x2c.h"
+#include "build.h"
+#include "project.h"
+#include "frontend.h"
+#include "meta-project.h"
+#include "editor.h"
+#include "install.h"
+#include "script.h"
+#include "toolchain.h"
+#include <ctype.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
+#include <limits.h>
+#include <signal.h>
+#include <unistd.h>
+#include "report.h"
+#include "collect.h"
+#include "cli.h"
+#include "compiler.h"
+#include "deps.h"
+#include "logger.h"
+#include "utils.h"
+#include "emit.h"
+#include "generate.h"
+#include "format.h"
+#include "protocol.h"
 int main(int argc, char * * argv);
 
 

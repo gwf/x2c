@@ -186,10 +186,12 @@ List _tag_id_checks(void) {
   Array checks = [];
   int index = 0;
   foreach (List row, _tag_rows()) {
-    checks.push($!Unit{
-      _Static_assert(${x2c_ident(_tag_id(row))} == $index,
-                     "TagId matches the var tag ledger");
-    });
+    checks.push(
+      $!Unit{
+        _Static_assert(
+          ${x2c_ident(_tag_id(row))} == $index,
+          "TagId matches the var tag ledger");
+      });
     index++;
   }
   return checks;

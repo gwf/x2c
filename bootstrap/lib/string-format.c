@@ -159,7 +159,7 @@ void x2c_cleanup_push(X2CCleanup *);
 
 int String_len(String);
 
-int List_truth(List);
+static int List_truth(List);
 
 String Buffer_str(Buffer);
 
@@ -288,7 +288,7 @@ static void Format_precision(Format * f, Spec * spec){
   else(* spec).precision = Format_decimal(&((* f)), _6);
 }
 
-Var String_var(String);
+static Var String_var(String);
 
 static int Format_decimal(Format * f, String label){
   int number = 0, start =(* f).cursor;
@@ -340,9 +340,9 @@ static void Format_check(Format * f, Spec spec){
   if(ch == 'c' && spec.precision >= 0) Format_fail(&((* f)), _15);
 }
 
-Var List_car(List);
+static Var List_car(List);
 
-List List_cdr(List);
+static List List_cdr(List);
 
 static Var Format_take(Format * f, String reason){
   if(! List_truth((* f).args)) Format_fail(&((* f)), reason);
@@ -409,9 +409,9 @@ static Buffer Format_character(Format * f, const char * text, Var arg){
 
 int x2c_error_catch_site_pending(ErrorCatchSite *);
 
-Var List_var(List);
+static Var List_var(List);
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
 ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
 
@@ -433,7 +433,7 @@ void x2c_error_catch_close(ErrorHandler);
 
 void x2c_exception_leave(ExceptionFrame *);
 
-int String_truth(String);
+static int String_truth(String);
 
 static Buffer Format_string(Format * f, const char * text, Var arg){
   String volatile string = NULL;
@@ -529,11 +529,11 @@ static Var Format_number(Format * f, Var arg, Symbol target){
   return converted;
 }
 
-Var int_var(int);
+static Var int_var(int);
 
 _Noreturn static void _format_error(int offset, String reason){
   {
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/string-format.x",.function = "_format_error",.line = 312};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/string-format.x",.function = "_format_error",.line = 331};
     x2c_error_raise_n(& _x2c_error_site_0, 435316840, 2, Symbol_var(1019648360), int_var(offset), Symbol_var(1218550748), String_var(reason));
     __builtin_unreachable();
   }
@@ -551,7 +551,7 @@ _Noreturn static void Format_nested(Format * f, String reason, Var code, List de
   {
     Var _x2c_literal_part_0 = int_var((* f).offset);
     {
-      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/string-format.x",.function = "Format_nested",.line = 323};
+      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/string-format.x",.function = "Format_nested",.line = 342};
       x2c_error_raise_n(& _x2c_error_site_1, 435316840, 3, Symbol_var(1019648360), _x2c_literal_part_0, Symbol_var(1218550748), String_var(reason), Symbol_var(6401226), List_var(cause));
       __builtin_unreachable();
     }

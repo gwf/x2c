@@ -114,13 +114,13 @@ static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func
 static Func _x2c_func_handle_1;
 
 _x2c_initializer_choice_242786A8_1((_x2c_func_handle_1 = x2c_func_shared(_x2c_func_adapt_1, _132)))
-Var String_var(String);
+static Var String_var(String);
 
 List cons(Var, List);
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
-Var List_var(List);
+static Var List_var(List);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -289,7 +289,7 @@ static Toolchain _toolchain(String cc, String ar){
   return t;
 }
 
-int String_truth(String);
+static int String_truth(String);
 
 String Env_get(String);
 
@@ -334,7 +334,7 @@ List String_split_lines(String, int);
 
 int List_try_next(List, List *, Var *);
 
-String Var_string(Var);
+static String Var_string(Var);
 
 int String_startswith(String, String);
 
@@ -510,7 +510,7 @@ Job Job_live(Job);
 
 Job List_job(List);
 
-Var List_car(List);
+static Var List_car(List);
 
 ToolRun ToolAction_start(ToolAction action){
   if(! _init_guard_) _file_init_();

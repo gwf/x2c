@@ -8,6 +8,10 @@
 #include "common.h"
 #define SYMBOL_MAX_5BIT 10
 #define SYMBOL_MAX_7BIT 7
+#include <stdint.h>
+#include <string.h>
+#include "buffer.h"
+#include "string.h"
 Symbol Symbol_new_len(const char * str, int len);
 
 Symbol Symbol_new(const char * str);

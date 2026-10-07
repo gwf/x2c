@@ -7,6 +7,9 @@
 
 #include "x2c.h"
 #include "build.h"
+#include <errno.h>
+#include <string.h>
+#include <unistd.h>
 String script_cache_root(void);
 
 int script_prepare(CliRequest c);

@@ -5,8 +5,34 @@
 #ifndef __GUARD_0x4D85CB6E__
 #define __GUARD_0x4D85CB6E__
 
+#include "error-macros.h"
 #include "common.h"
 #include "map.h"
+#include "var.h"
+#include "varconvert.h"
+#include "symbol.h"
+#include "string.h"
+#include "array.h"
+#include "buffer.h"
+#include "list.h"
+#include "file.h"
+#include "iter.h"
+#include "exception.h"
+#include "mutex.h"
+#include <float.h>
+#include <stdint.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+int x2c_var_descriptor_index(Var value);
+
+VarDescriptor * x2c_var_custom_descriptor(Var value);
+
+VarDescriptor * x2c_var_declare(Symbol tag);
+
+int x2c_var_tag_descriptor_index(Symbol tag);
+
 String Var_str(Var v);
 
 String Var_fallback_str(Var v);

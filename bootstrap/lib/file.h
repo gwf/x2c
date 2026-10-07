@@ -8,6 +8,8 @@
 #include <sys/stat.h>
 #include <stdio.h>
 #include "common.h"
+#include "error-macros.h"
+#include "cleanup.h"
 typedef FILE * File;
 
 extern File Stdin, Stdout, Stderr;
@@ -98,6 +100,12 @@ _Static_assert(_Generic(& setbuf, void(*)(File, char *) : 1, default: 0), "nativ
 #endif
 #define File_setbuf setbuf
 void File_cleanup(File _x2c_macro_value_0);
+#include "string.h"
+#include "block.h"
+#include "buffer.h"
+#include "exception.h"
+#include "var.h"
+#include "iter.h"
 String File_string(File file);
 String File_readline(File file);
 String File_readblock(File file, long size);

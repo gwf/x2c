@@ -7,6 +7,11 @@
 
 #include "x2c.h"
 #include "compiler.h"
+#include "meta.h"
+#include "grammar.h"
+#include "ast.h"
+#include "stage.h"
+#include "type.h"
 Symbol Compiler_region_result(String name);
 
 int Compiler_region_wrapper(String name);

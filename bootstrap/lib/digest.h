@@ -6,6 +6,10 @@
 #define __GUARD_0xC932CCB8__
 
 #include "x2c.h"
+#include <errno.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
 String String_sha256(String text);
 
 String File_sha256(File file);

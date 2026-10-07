@@ -6,6 +6,8 @@
 #define __GUARD_0x860E2402__
 
 #include "common.h"
+extern _Thread_local int x2c_error_runtime_ready;
+
 void x2c_thread_state_release(void);
 
 

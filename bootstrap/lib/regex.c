@@ -240,9 +240,9 @@ _x2c_defer_env_7;
 
 static void _x2c_defer_cleanup_7(void * _x2c_defer_opaque_7);
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
-Var String_var(String);
+static Var String_var(String);
 
 List cons(Var, List);
 
@@ -314,7 +314,7 @@ int Regex_equal(Regex left, Regex right){
   return(void *) left ==(void *) right;
 }
 
-unsigned x2c_hash_word(unsigned long);
+static unsigned x2c_hash_word(unsigned long);
 
 unsigned Regex_hash(Regex value){
   return x2c_hash_word((unsigned long) value);
@@ -372,7 +372,7 @@ Buffer String_write_repr(String, Buffer);
 
 Buffer Var_write_repr(Var, Buffer);
 
-Var int_var(int);
+static Var int_var(int);
 
 Buffer List_write_repr(List, Buffer);
 
@@ -483,9 +483,9 @@ static void _RegexNode__add_range(_RegexNode node, int low, int high){
   for(int byte = low;  byte <= high;  byte ++) _RegexNode__add(node, byte);
 }
 
-int scan_ascii_alpha(int);
+static int scan_ascii_alpha(int);
 
-int scan_ascii_digit(int);
+static int scan_ascii_digit(int);
 
 static int _is_word(int byte){
   return byte == '_' || scan_ascii_alpha(byte) || scan_ascii_digit(byte);
@@ -668,7 +668,7 @@ _Noreturn static void Parser_fail(Parser * p, String why){
     Var _x2c_literal_part_2 = String_var((* p).regex -> pattern);
     Var _x2c_literal_part_3 = int_var((* p).pos);
     {
-      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/regex.x",.function = "Parser_fail",.line = 276};
+      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/regex.x",.function = "Parser_fail",.line = 298};
       x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 4, Symbol_var(34096809266140), _x2c_literal_part_0, Symbol_var(1218550748), _x2c_literal_part_1, Symbol_var(34470112412), _x2c_literal_part_2, Symbol_var(1019648360), _x2c_literal_part_3);
       __builtin_unreachable();
     }
@@ -854,7 +854,7 @@ static RegexMatch _search(Regex regex, String subject, int offset){
 
 }
 
-Var List_var(List);
+static Var List_var(List);
 
 static RegexMatch Matcher_found(Matcher * m, String subject, int at){
   (* m).starts[0] = at;
@@ -864,7 +864,7 @@ static RegexMatch Matcher_found(Matcher * m, String subject, int at){
   return(RegexMatch) captures;
 }
 
-String Var_string(Var);
+static String Var_string(Var);
 
 Var List_getindex(List, int);
 
@@ -877,7 +877,7 @@ static RegexCapture Matcher_capture(Matcher * m, String subject, int i){
 
 RegexCapture Var_regexcapture(Var v);
 
-Var List_car(List);
+static Var List_car(List);
 
 static RegexCapture _whole(RegexMatch found){
   return Var_regexcapture(List_car(found));
@@ -1008,7 +1008,7 @@ _Noreturn static void Matcher_too_deep(Matcher * m){
     Var _x2c_literal_part_5 = String_var((* m).regex -> pattern);
     Var _x2c_literal_part_6 = String_var(String_join(NULL, cons(String_var(String_new("a group repeated more times than one match allows")), NULL)));
     {
-      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/regex.x",.function = "Matcher_too_deep",.line = 617};
+      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/regex.x",.function = "Matcher_too_deep",.line = 639};
       x2c_error_raise_n(& _x2c_error_site_1, 1358596898646632, 4, Symbol_var(34096809266140), _x2c_literal_part_4, Symbol_var(34470112412), _x2c_literal_part_5, Symbol_var(1218550748), _x2c_literal_part_6, Symbol_var(25782888), int_var(_DEPTH_LIMIT));
       __builtin_unreachable();
     }
@@ -1033,7 +1033,7 @@ static int Matcher_iteration(Matcher * m, _RegexNode rep, int count, int pos, in
   return more && Matcher_run(&((* m)), rep -> child, pos, & again);
 }
 
-int List_truth(List);
+static int List_truth(List);
 
 Buffer String_write_str(String, Buffer);
 
@@ -1041,9 +1041,9 @@ String Var_str(Var);
 
 List x2c_func_reference_type(Func, unsigned, unsigned);
 
-FuncArg FuncArg_reference(const void *, List);
+static FuncArg FuncArg_reference(const void *, List);
 
-FuncArg FuncArg_value(Var);
+static FuncArg FuncArg_value(Var);
 
 Var Func_apply(Func, unsigned, const FuncArg *);
 
@@ -1342,7 +1342,7 @@ int RegexCapture_end(RegexCapture capture){
   return Var_int(List_getindex(capture, 5));
 }
 
-List Var_list(Var);
+static List Var_list(Var);
 
 RegexCapture Var_regexcapture(Var v){
   return(RegexCapture) Var_list(v);

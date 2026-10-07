@@ -6,6 +6,7 @@
 #define __GUARD_0x200088A7__
 
 #include "x2c.h"
+#include "../lib/private-keywords.h"
 #include "compiler.h"
 typedef struct MetaContext{
   Compiler expander, evaluator;
@@ -16,6 +17,12 @@ typedef struct MetaContext{
 }
 MetaContext;
 
+#include "grammar.h"
+#include "macros.h"
+#include "meta.h"
+#include <limits.h>
+#include <stdint.h>
+#include <sys/stat.h>
 MetaContext * MetaContext_current(void);
 
 Compiler Compiler_expanding(void);

@@ -47,7 +47,7 @@ Returns the error handler the parser introduced for the catch arms of
 the parsed try `node`, or NULL for a try without catches. The arms read
 their captures through it, and no source form writes it.
 
-Source: `src/grammar.x:215`
+Source: `src/grammar.x:217`
 
 #### retain_catch_handle
 
@@ -56,7 +56,7 @@ Source: `src/grammar.x:215`
 Restores the binder's handler after a caught template rebuild.
 The source form has no hole for this derived identity.
 
-Source: `src/grammar.x:222`
+Source: `src/grammar.x:224`
 
 #### source_any_lambda
 
@@ -72,15 +72,16 @@ Source: `src/grammar.x:89`
 
 Builds block content with its complete source-ordered statements.
 
-Source: `src/grammar.x:184`
+Source: `src/grammar.x:185`
 
 #### source_call_content
 
 `meta List source_call_content( Macro call, List callee, List arguments)`
 
-Returns bare call content with the supplied callee and argument patterns.
+Returns bare call content with the supplied callee and argument
+patterns.
 
-Source: `src/grammar.x:172`
+Source: `src/grammar.x:173`
 
 #### source_cast_content
 
@@ -133,15 +134,16 @@ Source: `src/grammar.x:168`
 
 Returns a pattern for a declarator row, with or without its initializer.
 
-Source: `src/grammar.x:196`
+Source: `src/grammar.x:197`
 
 #### source_expression
 
 `meta Var source_expression(Var value)`
 
-Returns the source expression beneath casts and parentheses with its type.
+Returns the source expression beneath casts and parentheses with
+its type.
 
-Source: `src/grammar.x:200`
+Source: `src/grammar.x:202`
 
 #### source_generic_content
 
@@ -157,7 +159,7 @@ Source: `src/grammar.x:134`
 
 Builds identifier content with its bound child records.
 
-Source: `src/grammar.x:188`
+Source: `src/grammar.x:189`
 
 #### source_literal_content
 
@@ -165,7 +167,7 @@ Source: `src/grammar.x:188`
 
 Builds literal content with its typed child records.
 
-Source: `src/grammar.x:192`
+Source: `src/grammar.x:193`
 
 #### source_operator_content
 
@@ -206,7 +208,7 @@ Source: `src/grammar.x:162`
 
 Builds return content with all bound and normalized fields.
 
-Source: `src/grammar.x:180`
+Source: `src/grammar.x:181`
 
 #### source_return_type
 

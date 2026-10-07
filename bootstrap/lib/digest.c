@@ -98,9 +98,9 @@ String String_sha256(String text){
   return _finish(&(sha));
 }
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
-Var int_var(int);
+static Var int_var(int);
 
 #include "error.h"
 
@@ -115,7 +115,7 @@ String File_sha256(File file){
   if(ferror(file)){
     int error = errno;
     {
-      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/digest.x",.function = "File_sha256",.line = 127};
+      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/digest.x",.function = "File_sha256",.line = 125};
       x2c_error_raise_n(& _x2c_error_site_0, 20399393368, 2, Symbol_var(34096809266140), Symbol_var(1189960), Symbol_var(11703198), int_var(error));
       __builtin_unreachable();
     }

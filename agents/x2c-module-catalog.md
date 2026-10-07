@@ -117,8 +117,11 @@ Public functions:
 
 `Compiler.collect_symbols`, `collect_resolve_include`,
 `Compiler.include_typedef_names`, `Compiler.include_type_dependencies`,
+`Compiler.linked_meta_provider_current`, `Compiler.complete_meta_hashes`,
+`Compiler.add_linked_meta_provider_hashes`,
 `Compiler.name_meta_provider_bindings`, `Compiler.publishes_typedef`,
-`Compiler.publishes_type_family`, `Compiler.record_generated_symbol`,
+`Compiler.publishes_type_family`, `Compiler.inline_type_dependencies`,
+`Compiler.publish_inline_types`, `Compiler.record_generated_symbol`,
 `Compiler.collect_package`, `Compiler.replay_package_imports`,
 `Compiler.included_compile_time_effects`, `Compiler.install_included_effects`,
 `interface_configure`, `interface_prelude`, `interface_text`,
@@ -399,10 +402,10 @@ Public functions:
 `Compiler.use_meta_toolchain`, `Compiler.meta_cc`, `Compiler.meta_cc_identity`,
 `Compiler.meta_cc_run`, `Compiler.stage_meta_in_process`,
 `Compiler.groups_meta`, `Compiler.group_meta_function`,
-`Compiler.meta_reaches_compile_time`, `Compiler.meta_call_missing`,
-`Compiler.refuse_meta_call`, `Compiler.refuse_record_meta_call`,
-`Compiler.use_meta_build_directory`, `Compiler.write_meta_build`,
-`Compiler.bind_meta_group`
+`Compiler.meta_reaches_compile_time`, `Compiler.finish_meta_functions`,
+`Compiler.meta_call_missing`, `Compiler.refuse_meta_call`,
+`Compiler.refuse_record_meta_call`, `Compiler.use_meta_build_directory`,
+`Compiler.write_meta_build`, `Compiler.bind_meta_group`
 
 ### [src/meta-helper-client.x](../src/meta-helper-client.x)
 
@@ -423,7 +426,8 @@ Public functions:
 `Compiler.install_meta_declaration`, `Compiler.evaluate_meta_expression`,
 `Compiler.evaluate_meta_statement`, `Compiler.run_meta_call`,
 `Compiler.record_project_meta_effect`, `Compiler.install_project_meta_effect`,
-`Compiler.bind_project_meta`, `Compiler.record_native_meta_effect`,
+`Compiler.bind_project_meta`, `Compiler.project_meta_uses_linked`,
+`Compiler.meta_provider_hashes_current`, `Compiler.record_native_meta_effect`,
 `Compiler.install_native_meta_effects`, `Compiler.bind_native_meta`,
 `Compiler.install_native_meta_function`, `Compiler.native_meta_accepts`,
 `Compiler.native_meta_module`, `Compiler.native_meta_targets`,
@@ -467,7 +471,7 @@ Public functions:
 
 ### [src/operator-ledger.x](../src/operator-ledger.x)
 
-compiler lookups from one binary operator ledger.
+binary operator facts and case projections.
 
 Public functions:
 
@@ -499,17 +503,17 @@ Public functions:
 `Compiler.parse_type_operand`, `Compiler.parse_declaration_argument`,
 `Compiler.test_static_assert`, `Compiler.parse_static_assert`,
 `Compiler.test_declaration`, `Compiler.check_reference_placement`,
-`Compiler.collect_inline_type_dependencies`, `Compiler.parse_type_name`,
-`Compiler.parse_fields`, `Compiler.parse_field`, `Compiler.parse_named_type`,
-`Compiler.parse_enumerators`, `Compiler.parse_enumerator`,
-`Compiler.parse_declarator_argument`, `Compiler.bind_template_local`,
-`Compiler.parse_parameter_list`, `Compiler.parse_parameter`,
-`Compiler.bind_parameter`, `Compiler.parse_complex_identifier`,
-`Compiler.package_alias_spelling`, `Compiler.parse_basic_identifier`,
-`Compiler.parse_optional_identifier`, `Compiler.parse_function_definition`,
-`Compiler.parse_function_target`, `Compiler.finish_managed_declaration`,
-`Compiler.bind_syntax`, `Compiler.land_retained_bindings`,
-`Compiler.bind_callable_body`, `Compiler.finish_foreign_alias`
+`Compiler.parse_type_name`, `Compiler.parse_fields`, `Compiler.parse_field`,
+`Compiler.parse_named_type`, `Compiler.parse_enumerators`,
+`Compiler.parse_enumerator`, `Compiler.parse_declarator_argument`,
+`Compiler.bind_template_local`, `Compiler.parse_parameter_list`,
+`Compiler.parse_parameter`, `Compiler.bind_parameter`,
+`Compiler.parse_complex_identifier`, `Compiler.package_alias_spelling`,
+`Compiler.parse_basic_identifier`, `Compiler.parse_optional_identifier`,
+`Compiler.parse_function_definition`, `Compiler.parse_function_target`,
+`Compiler.finish_managed_declaration`, `Compiler.bind_syntax`,
+`Compiler.land_retained_bindings`, `Compiler.bind_callable_body`,
+`Compiler.finish_foreign_alias`
 
 ### [src/preprocess.x](../src/preprocess.x)
 
@@ -520,7 +524,7 @@ Public functions:
 `preproc_directive`, `preproc_conditional_kind`, `preproc_open_state`,
 `preproc_branch_state`, `preproc_include_target`, `preproc_marker_file`,
 `Compiler.scan_conditionals`, `Compiler.leading_preproc`,
-`Compiler.update_source_visibility`, `Compiler.note_object_macro`,
+`Compiler.note_preprocessor_macros`, `Compiler.note_object_macro`,
 `preproc_track_arms`, `preproc_within_arms`
 
 ### [src/project.x](../src/project.x)
@@ -546,7 +550,8 @@ Public functions:
 `Compiler.discard_helper`, `Compiler.protocol_discard_helper`,
 `Compiler.generate_protocol_adapters`,
 `Compiler.install_generated_protocol_symbols`,
-`Compiler.record_source_typedef`, `Compiler.rebuild_protocols`
+`Compiler.native_protocol_alias`, `Compiler.record_source_typedef`,
+`Compiler.rebuild_protocols`
 
 ### [src/regions.x](../src/regions.x)
 

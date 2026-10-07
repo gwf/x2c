@@ -84,11 +84,11 @@ _x2c_defer_env_1;
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
 List cons(Var, List);
 
-Var List_var(List);
+static Var List_var(List);
 
 #include "exception.h"
 
@@ -194,7 +194,7 @@ static SourceView _snapshots(char * * argv, int count){
 
 CliRequest cli_parse(int, char * *);
 
-int List_truth(List);
+static int List_truth(List);
 
 int SourceView_is_changed(SourceView, String);
 
@@ -215,13 +215,13 @@ static CliRequest Query_configure(Query * q, int argc, char * * argv){
 
 String project_manifest(CliRequest);
 
-int String_truth(String);
+static int String_truth(String);
 
 ProjectBuild project_plan(CliRequest);
 
 int List_try_next(List, List *, Var *);
 
-String Var_string(Var);
+static String Var_string(Var);
 
 int String_equal(String, String);
 
@@ -265,7 +265,7 @@ int Frontend_preload_macro_libraries(Frontend);
 
 void Frontend_prepare_meta(Frontend, List);
 
-Var String_var(String);
+static Var String_var(String);
 
 Context Context_open_isolated_named(const char *);
 
@@ -342,7 +342,7 @@ static int Query_serve(Query * q, CliRequest request){
 
 Iter Map_keys(Map, Iter);
 
-Var int_var(int);
+static Var int_var(int);
 
 int Iter_try_next(Iter, Var *);
 
@@ -378,7 +378,7 @@ static int _changed_dependency(Compiler c, SourceView sources){
 
 Map Map_new(void);
 
-Var Array_var(Array);
+static Var Array_var(Array);
 
 Map Map_update_n(Map, unsigned, ...);
 
@@ -386,7 +386,7 @@ Var Map_setindex(Map, Var, Var);
 
 String Var_json(Var);
 
-Var Map_var(Map);
+static Var Map_var(Map);
 
 static int Query_write(Query * q, int parsed){
   File out = fopen((* q).response, "w");
@@ -406,7 +406,7 @@ Array Array_new(void);
 
 List Compiler_diagnostics(Compiler);
 
-List Var_list(Var);
+static List Var_list(Var);
 
 Var Array_push(Array, Var);
 
@@ -487,13 +487,13 @@ static List _occurrence(Compiler c, String path, int offset){
 }
 
 Var Map_getindex(Map, Var);
-int Var_is_row(Var, unsigned, unsigned long, unsigned long);
+static int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 static void Query_definition(Query * q, List row){
   List binding = Var_list(List_getindex(row, 3));  Var value = Map_getindex((* q).compiler -> source_definitions, List_var(binding));  if(! Var_is_row(value, 9, 7, 4)) return;  List target = Var_list(value);  Map_setindex((* q).reply, Symbol_var(292902696930268), Map_var(Query_location(&((* q)), Var_string(List_getindex(target, 0)), Var_int(Var_convert(List_getindex(target, 1), 3453797)), Var_int(Var_convert(List_getindex(target, 2), 3453797)))));
 }
 
-Type Var_type(Var);
-List Type_list(Type);
+static Type Var_type(Var);
+static List Type_list(Type);
 List Type_declaration_ast(Type, List);
 char * Compiler_code_pretty_string(Compiler, List, String);
 List Compiler_emit(Compiler, List, Map);

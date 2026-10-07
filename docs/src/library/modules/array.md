@@ -51,7 +51,7 @@ Dynamic contiguous arrays of `Var` elements.
 <a id="Array.concat"></a>
 #### Array.concat
 
-`Array Array.concat(Array _x2c_macro_a_12, Array _x2c_macro_b_12)`
+`Array Array.concat(Array a, Array b)`
 
 Returns a fresh array holding `a` followed by `b`.
 Neither input is modified. A null `a` returns NULL, while a null `b`
@@ -65,7 +65,7 @@ Source: `lib/array.x:71`
 <a id="Array.contains"></a>
 #### Array.contains
 
-`int Array.contains(Array _x2c_macro_array_29, Var _x2c_macro_value_32)`
+`int Array.contains(Array array, Var value)`
 
 Reports whether a native element equals `value`.
 The scan is linear. Raises: `<size-limit>` when the length exceeds the
@@ -76,7 +76,7 @@ Source: `lib/array.x:71`
 <a id="Array.copy"></a>
 #### Array.copy
 
-`Array Array.copy(Array _x2c_macro_array_23)`
+`Array Array.copy(Array array)`
 
 Returns a fresh packed copy, or NULL for a null array.
 The result has independent mutable storage containing the same stored
@@ -90,7 +90,7 @@ Source: `lib/array.x:71`
 <a id="Array.count"></a>
 #### Array.count
 
-`int Array.count(Array _x2c_macro_array_30, Var _x2c_macro_value_33)`
+`int Array.count(Array array, Var value)`
 
 Returns how many native elements equal `value`.
 A null array returns zero; the scan is linear.
@@ -102,7 +102,7 @@ Source: `lib/array.x:71`
 <a id="Array.find"></a>
 #### Array.find
 
-`int Array.find(Array _x2c_macro_array_28, Var _x2c_macro_value_31)`
+`int Array.find(Array array, Var value)`
 
 Returns the first index whose native element equals `value`, or -1.
 A null array returns -1; the scan is linear and preserves source order.
@@ -140,7 +140,7 @@ Source: `lib/array.x:93`
 <a id="Array.getindex"></a>
 #### Array.getindex
 
-`Var Array.getindex(Array _x2c_macro_array_33, int _x2c_macro_index_26)`
+`Var Array.getindex(Array array, int index)`
 
 Reads `index` from a non-null array, counting negatives from the end.
 Returns `void` when the normalized index is outside the array.
@@ -152,7 +152,7 @@ Source: `lib/array.x:72`
 <a id="Array.getslice"></a>
 #### Array.getslice
 
-`Array Array.getslice(Array _x2c_macro_array_24, int _x2c_macro_start_5, int _x2c_macro_end_4, int _x2c_macro_step_2)`
+`Array Array.getslice(Array array, int start, int end, int step)`
 
 Returns a fresh packed array for normalized `[start:end:step]`.
 Negative bounds count from the end and a negative step walks backward.
@@ -165,7 +165,7 @@ Source: `lib/array.x:71`
 <a id="Array.indexof"></a>
 #### Array.indexof
 
-`int Array.indexof(Array _x2c_macro_array_31, Var _x2c_macro_value_34)`
+`int Array.indexof(Array array, Var value)`
 
 Returns the same first-match index as `Array.find`.
 
@@ -174,7 +174,7 @@ Source: `lib/array.x:71`
 <a id="Array.insert"></a>
 #### Array.insert
 
-`Var Array.insert(Array _x2c_macro_array_21, int _x2c_macro_index_23, Var _x2c_macro_value_29)`
+`Var Array.insert(Array array, int index, Var value)`
 
 Inserts `value` at normalized `index` and returns it.
 The accepted range includes the position after the last element;
@@ -189,7 +189,7 @@ Source: `lib/array.x:71`
 <a id="Array.iter"></a>
 #### Array.iter
 
-`Iter Array.iter(Array _x2c_macro_array_41, Iter _x2c_macro_dest_3)`
+`Iter Array.iter(Array array, Iter dest)`
 
 Initializes `dest` to lazily yield boxed elements in index order.
 Returns `dest`, whose storage is caller-owned. The iterator borrows
@@ -284,7 +284,7 @@ Source: `lib/array.x:151`
 <a id="Array.push"></a>
 #### Array.push
 
-`Var Array.push(Array _x2c_macro_array_16, Var _x2c_macro_value_25)`
+`Var Array.push(Array array, Var value)`
 
 Appends `value` and returns it.
 
@@ -296,7 +296,7 @@ Source: `lib/array.x:71`
 <a id="Array.remove"></a>
 #### Array.remove
 
-`Var Array.remove(Array _x2c_macro_array_22, int _x2c_macro_index_24)`
+`Var Array.remove(Array array, int index)`
 
 Removes and returns the element at normalized `index`.
 Negative indices count from the end; following elements shift left.
@@ -322,7 +322,7 @@ Source: `lib/array.x:100`
 <a id="Array.reverse"></a>
 #### Array.reverse
 
-`Array Array.reverse(Array _x2c_macro_array_32)`
+`Array Array.reverse(Array array)`
 
 Reverses `array` in place and returns that same array.
 A null or one-element array is returned unchanged.
@@ -332,7 +332,7 @@ Source: `lib/array.x:71`
 <a id="Array.setindex"></a>
 #### Array.setindex
 
-`Var Array.setindex(Array _x2c_macro_array_34, int _x2c_macro_index_27, Var _x2c_macro_value_35)`
+`Var Array.setindex(Array array, int index, Var value)`
 
 Stores and returns `value`, counting negatives from the end.
 Requires a non-null array. Returns `void` for an out-of-range index.
@@ -345,7 +345,7 @@ Source: `lib/array.x:72`
 <a id="Array.setslice"></a>
 #### Array.setslice
 
-`Array Array.setslice(Array _x2c_macro_array_25, int _x2c_macro_start_6, int _x2c_macro_end_5, Array _x2c_macro_values_2)`
+`Array Array.setslice(Array array, int start, int end, Array values)`
 
 Replaces the region `array[start:end]` and returns `array`.
 Bounds normalize as slice bounds, so a negative `end` is a stop.
@@ -362,7 +362,7 @@ Source: `lib/array.x:71`
 <a id="Array.shift"></a>
 #### Array.shift
 
-`Var Array.shift(Array _x2c_macro_array_19)`
+`Var Array.shift(Array array)`
 
 Removes and returns the first element, shifting the remainder left.
 This operation is O(n).
@@ -431,7 +431,7 @@ Source: `lib/array.x:254`
 <a id="Array.splice"></a>
 #### Array.splice
 
-`Array Array.splice(Array _x2c_macro_array_27, int _x2c_macro_index_25, int _x2c_macro_remove_count_1, Array _x2c_macro_values_3)`
+`Array Array.splice(Array array, int index, int remove_count, Array values)`
 
 Replaces `remove_count` values at normalized `index` and returns them.
 The result is a fresh packed array. A nonpositive count removes nothing;
@@ -445,7 +445,7 @@ Source: `lib/array.x:71`
 <a id="Array.take_last"></a>
 #### Array.take_last
 
-`Var Array.take_last(Array _x2c_macro_array_18)`
+`Var Array.take_last(Array array)`
 
 Removes and returns the last element.
 
@@ -456,7 +456,7 @@ Source: `lib/array.x:71`
 <a id="Array.try_next"></a>
 #### Array.try_next
 
-`int Array.try_next(Array _x2c_macro_array_15, int &?_x2c_macro_cursor_12, Var &?_x2c_macro_out_23)`
+`int Array.try_next(Array array, int &?cursor, Var &?out)`
 
 Writes the next native element, advances `cursor`, and returns one.
 Initialize the caller-owned cursor to zero. A null argument, negative
@@ -469,7 +469,7 @@ Source: `lib/array.x:71`
 <a id="Array.try_take_last"></a>
 #### Array.try_take_last
 
-`int Array.try_take_last(Array _x2c_macro_array_17, Var &?_x2c_macro_out_24)`
+`int Array.try_take_last(Array array, Var &?out)`
 
 Removes the last element into `out` and returns one when present.
 A null or empty array, or null `out`, returns zero without writing or
@@ -480,7 +480,7 @@ Source: `lib/array.x:71`
 <a id="Array.unshift"></a>
 #### Array.unshift
 
-`Var Array.unshift(Array _x2c_macro_array_20, Var _x2c_macro_value_28)`
+`Var Array.unshift(Array array, Var value)`
 
 Inserts `value` at the front and returns it, shifting elements right.
 This operation is O(n).
@@ -502,7 +502,7 @@ Source: `lib/array.x:131`
 <a id="Array.write_str"></a>
 #### Array.write_str
 
-`Buffer Array.write_str(Array _x2c_macro_array_36, Buffer _x2c_macro_out_26)`
+`Buffer Array.write_str(Array array, Buffer out)`
 
 Appends the packed-Array display text to `out`.
 
@@ -560,7 +560,7 @@ Source: `lib/array.x:434`
 <a id="Array.compare"></a>
 #### Array.compare
 
-`int Array.compare(Array _x2c_macro_a_14, Array _x2c_macro_b_14)`
+`int Array.compare(Array a, Array b)`
 
 Compares packed Arrays lexicographically with the element family's
 ordering. Identical handles compare equal and NULL sorts first.
@@ -570,7 +570,7 @@ Source: `lib/array.x:213`
 <a id="Array.equal"></a>
 #### Array.equal
 
-`int Array.equal(Array _x2c_macro_a_13, Array _x2c_macro_b_13)`
+`int Array.equal(Array a, Array b)`
 
 Reports elementwise native equality.
 Two null arrays compare equal; one null array or different lengths
@@ -647,7 +647,7 @@ Source: `lib/array.x:398`
 <a id="Array.remslice"></a>
 #### Array.remslice
 
-`Array Array.remslice(Array _x2c_macro_array_26, int _x2c_macro_start_7, int _x2c_macro_end_6)`
+`Array Array.remslice(Array array, int start, int end)`
 
 Removes the region `array[start:end]` and returns a fresh packed array.
 Bounds normalize as slice bounds, so a negative `end` is a stop.
@@ -661,7 +661,7 @@ Source: `lib/array.x:71`
 <a id="Array.repr"></a>
 #### Array.repr
 
-`String Array.repr(Array _x2c_macro_array_38)`
+`String Array.repr(Array array)`
 
 Returns the readable packed-Array representation.
 
@@ -670,7 +670,7 @@ Source: `lib/array.x:213`
 <a id="Array.str"></a>
 #### Array.str
 
-`String Array.str(Array _x2c_macro_array_37)`
+`String Array.str(Array array)`
 
 Returns the packed-Array display String.
 
@@ -691,7 +691,7 @@ Source: `lib/array.x:119`
 <a id="Array.write_repr"></a>
 #### Array.write_repr
 
-`Buffer Array.write_repr(Array _x2c_macro_array_35, Buffer _x2c_macro_out_25)`
+`Buffer Array.write_repr(Array array, Buffer out)`
 
 Appends the readable packed-Array representation to `out`.
 

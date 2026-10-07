@@ -66,9 +66,9 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
 
 int CliRequest_inspects(CliRequest);
 
-int String_truth(String);
+static int String_truth(String);
 
-Var String_var(String);
+static Var String_var(String);
 
 String String_rstrip(String, char *);
 
@@ -81,9 +81,9 @@ String Path_stem(Path);
 
 int x2c_error_catch_site_pending(ErrorCatchSite *);
 
-Var List_var(List);
+static Var List_var(List);
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
 ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
 
@@ -180,11 +180,11 @@ void x2c_cleanup_push(X2CCleanup *);
 
 int Map_try_next(Map, unsigned *, Var *, Var *);
 
-int Var_is_row(Var, unsigned, unsigned long, unsigned long);
+static int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 
 int String_startswith(String, String);
 
-String Var_string(Var);
+static String Var_string(Var);
 
 Var Array_push(Array, Var);
 

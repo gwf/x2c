@@ -44,7 +44,7 @@ Atom Atom_promote(Atom atom){
   return atom;
 }
 
-int String_truth(String);
+static int String_truth(String);
 
 int String_getindex(String, int);
 
@@ -105,7 +105,7 @@ int Var_is_atom(Var value){
 
 String Symbol_str(Symbol);
 
-Symbol Var_symbol(Var);
+static Symbol Var_symbol(Var);
 
 String Atom_str(Atom atom){
   if(! _init_guard_) Atom_initialize();
@@ -176,9 +176,9 @@ static int _truth(Var value){
 
 int x2c_try_register_descriptor(String, VarMethods);
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
-Var String_var(String);
+static Var String_var(String);
 
 #include "error.h"
 
@@ -196,7 +196,7 @@ void Atom_initialize(void){
   }
   ;
   if(! x2c_try_register_descriptor(_0, methods)){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/atom.x",.function = "Atom_initialize",.line = 179};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/atom.x",.function = "Atom_initialize",.line = 177};
     x2c_error_raise_n(& _x2c_error_site_0, 20774016911960, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Atom")), NULL))));
     __builtin_unreachable();
   }
@@ -246,7 +246,7 @@ Var Var_new(Symbol, ...);
 Atom Atom_intern(String spelling){
   if(! _init_guard_) Atom_initialize();
   if(! String_truth(spelling) || ! * spelling){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/atom.x",.function = "Atom_intern",.line = 220};
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/atom.x",.function = "Atom_intern",.line = 218};
     x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Atom.intern")), NULL))));
     __builtin_unreachable();
   }

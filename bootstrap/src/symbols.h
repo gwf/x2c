@@ -7,15 +7,9 @@
 
 #include "x2c.h"
 #include "compiler.h"
-typedef struct Sym{
-  Block scopes;
-  Map globals, statics, binding_facts;
-  int base_scopes, local_macro_names;
-  Block undo;
-  int transactions, import_depth;
-  Compiler c;
-}
-* Sym;
+#include "parse-report-macros.h"
+#include "grammar.h"
+typedef struct Sym * Sym;
 
 Sym Sym_new(Compiler c);
 
@@ -119,6 +113,8 @@ Map Compiler_macro_definition_locals(Compiler c);
 
 int Compiler_macro_template_local(Compiler c, List binding);
 
+#define RESOLVE_KEY_MAX_TYPEDEFS 64
+#define RESOLVE_KEY_MAX_HOPS (2 * RESOLVE_KEY_MAX_TYPEDEFS)
 Type Sym_resolve_key(Sym s, Type key);
 
 Type Sym_next_typedef(Sym s, Type type, int * hops);
@@ -158,12 +154,6 @@ Type Sym_delegate_aggregate(Sym s, Type type);
 SymTxn Compiler_begin_semantic_transaction(Compiler c);
 
 int SymTxn_local_macros_changed(SymTxn * s);
-
-int Sym_begin_import(Sym s);
-
-void Sym_end_import(Sym s);
-
-Map Sym_added_globals(Sym s, int mark);
 
 void Sym_end_log(Sym s);
 

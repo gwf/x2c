@@ -43,11 +43,11 @@ _x2c_defer_env_0;
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
-Var String_var(String);
+static Var String_var(String);
 
 List cons(Var, List);
 
-Var List_var(List);
+static Var List_var(List);
 
 #include "exception.h"
 
@@ -120,9 +120,9 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _59 = cons(_58, NULL);
 }
 
-int List_truth(List);
+static int List_truth(List);
 
-Var List_car(List);
+static Var List_car(List);
 
 int Var_is_atom(Var);
 
@@ -132,7 +132,7 @@ int String_startswith(String, String);
 
 int List_try_next(List, List *, Var *);
 
-String Var_string(Var);
+static String Var_string(Var);
 
 int String_equal(String, String);
 
@@ -156,9 +156,9 @@ static int _tag_headed(List list){
   return 0;
 }
 
-int Var_is_row(Var, unsigned, unsigned long, unsigned long);
+static int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 
-List Var_list(Var);
+static List Var_list(Var);
 
 int Var_is_null(Var);
 
@@ -168,7 +168,7 @@ int Var_is_void(Var);
 
 int Var_is(Var, Symbol);
 
-Symbol Var_symbol(Var);
+static Symbol Var_symbol(Var);
 
 String Var_repr(Var);
 
@@ -182,9 +182,9 @@ long Var_integer(Var);
 
 double Var_floating(Var);
 
-Array Var_array(Var);
+static Array Var_array(Var);
 
-Map Var_map(Var);
+static Map Var_map(Var);
 
 int datum_write(Buffer out, Var value, int tagged){
   if(! _init_guard_) _file_init_();
@@ -204,7 +204,7 @@ int datum_write(Buffer out, Var value, int tagged){
   return 1;
 }
 
-List List_cdr(List);
+static List List_cdr(List);
 
 Buffer Buffer_write_char(Buffer, char);
 
@@ -311,23 +311,23 @@ int Var_is_nil(Var);
 
 Var Var_null(void);
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
 Atom Atom_intern(String);
 
-Var List_cadr(List);
+static Var List_cadr(List);
 
 Symbol Symbol_new(const char *);
 
-Var List_caddr(List);
+static Var List_caddr(List);
 
 Var Var_new(Symbol, ...);
 
-Var Array_var(Array);
+static Var Array_var(Array);
 
 Array List_array(List);
 
-Var Map_var(Map);
+static Var Map_var(Map);
 
 static Var _decode(Var value){
   if(! Var_is_row(value, 9, 7, 4) || Var_is_nil(value)) return value;
@@ -477,7 +477,7 @@ int datum_unframe(String input, size_t * used, Var * value){
   unsigned cursor = 0;
   (* value) =((void) 0, Void);
   if(! datum_read(frame, &(cursor), &((* value)))){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/datum.x",.function = "datum_unframe",.line = 220};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/datum.x",.function = "datum_unframe",.line = 218};
     x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(13765450), String_var(frame));
     __builtin_unreachable();
   }
@@ -489,11 +489,11 @@ int Var_is_pointer(Var);
 
 int Map_contains(Map, Var);
 
-Var ulong_var(ulong);
+static Var ulong_var(ulong);
 
 Var Map_getindex(Map, Var);
 
-Var int_var(int);
+static Var int_var(int);
 
 List datum_result_problem(Var value, Map marks){
   if(! _init_guard_) _file_init_();

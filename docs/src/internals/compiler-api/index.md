@@ -44,7 +44,7 @@ Functions and types exposed by each compiler module.
 | [`src/meta-native.x`](meta-native.md) | meta functions and the native code they call. |
 | [`src/meta-project.x`](meta-project.md) | the project meta build. |
 | [`src/meta-sdk.x`](meta-sdk.md) | the compiler's answers to `lib/meta.x` operations. |
-| [`src/operator-ledger.x`](operator-ledger.md) | compiler lookups from one binary operator ledger. |
+| [`src/operator-ledger.x`](operator-ledger.md) | binary operator facts and case projections. |
 | [`src/parse-report-macros.x`](parse-report-macros.md) | package, binding, and alias diagnostics. |
 | [`src/parse.x`](parse.md) | x2c declarations, parsed from source or constructed. |
 | [`src/preprocess.x`](preprocess.md) | C preprocessor directives in x2c source. |

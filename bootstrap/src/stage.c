@@ -4,6 +4,7 @@
 #include "x2c.h"
 
 #include "compiler.h"
+#include "grammar.h"
 #include "type.h"
 #include "var.h"
 #include "string.h"
@@ -89,13 +90,13 @@ _x2c_defer_env_3;
 
 static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3);
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
 List cons(Var, List);
 
-Var List_var(List);
+static Var List_var(List);
 
-Var String_var(String);
+static Var String_var(String);
 
 #include "exception.h"
 
@@ -426,9 +427,9 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _317 = cons(_301, _316);
 }
 
-int List_truth(List);
+static int List_truth(List);
 
-List Type_list(Type);
+static List Type_list(Type);
 
 int Sym_is_named_value_type(Sym, Type, String);
 
@@ -436,21 +437,21 @@ List meta_type_description(Var);
 
 List meta_source_description(Var);
 
-List Var_list(Var);
+static List Var_list(Var);
 
 List Compiler_capture_macro_value(Compiler, List);
 
 Var Var_binary(Var, Symbol, Var);
 
-Type Var_type(Var);
+static Type Var_type(Var);
 
-Var int_var(int);
+static Var int_var(int);
 
 int SymbolSet_contains(SymbolSet, Symbol);
 
 Type Sym_resolve_numeric_type(Sym, Type);
 
-Var List_cadr(List);
+static Var List_cadr(List);
 
 Type Type_widest(Type, Type);
 
@@ -508,7 +509,7 @@ if(Var_is_void(value)) value = _name_syntax(c, node, site);  return _scalar_valu
 }
 
 int Sym_is_var_type(Sym, Type);
-int Var_is_row(Var, unsigned, unsigned long, unsigned long);
+static int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 static Var _captured_value(Compiler c, Var captured, Type want){
   if(! List_truth(Type_list(want)) || Sym_is_var_type(c -> sym, want) || Sym_is_named_value_type(c -> sym, want, _66)) return captured;  Var literal = Var_is_row(captured, 9, 7, 4) ? _constant_leaf(c, Var_list(captured)) :((void) 0, Void);  if(Var_is_void(literal) || Var_is_row(literal, 9, 7, 4)) return captured;  return literal;
 }
@@ -568,9 +569,9 @@ return List_var(key);
 }
 
 Var literal_text_value(String spelling);
-String Var_string(Var);
+static String Var_string(Var);
 Var Type_numeric_literal_value(Type, String);
-Var List_car(List);
+static Var List_car(List);
 static Var _constant_leaf(Compiler c, List expr){
 
   {
@@ -628,7 +629,7 @@ int String_len(String);
 int String_getindex(String, int);
 String String_unescape(String);
 String String_new_len(const char *, int);
-Var char_var(char);
+static Var char_var(char);
 Var literal_text_value(String spelling){
   if(! _init_guard_) _file_init_();  int len = String_len(spelling);  if(len >= 2 && String_getindex(spelling, 0) == '"'){
     String text = _243;  for(int i = 0;  i < len;  i ++){
@@ -642,14 +643,14 @@ Var literal_text_value(String spelling){
   return String_var(spelling);
 }
 
-Type List_type(List);
+static Type List_type(List);
 List Macro_number_type(Var);
 List Compiler_macro_value_literal(Compiler, List);
-Var List_caddr(List);
+static Var List_caddr(List);
 Symbol Sym_var_tag_for_type(Sym, Type, Type *);
 int Var_is(Var, Symbol);
 String Symbol_str(Symbol);
-Symbol Var_symbol(Var);
+static Symbol Var_symbol(Var);
 List Compiler_meta_value_expression(Compiler c, Type declared, Var value, Token site){
   if(! _init_guard_) _file_init_();  if(! Var_is_row(value, 9, 7, 4)) _refuse(c, value, site);  Type type = List_truth(Type_list(declared)) ? declared : List_type(Macro_number_type(value));  if(Var_is_row(value, 9, 7, 4) && Sym_is_named_value_type(c -> sym, declared, _244)){
     List expression = Compiler_macro_value_literal(c, Var_list(value));  return cons(_0, cons(_248, cons(List_caddr(expression), NULL)));
@@ -739,7 +740,7 @@ static List _list_form(Compiler c, Var value){
 }
 
 Array Array_new(void);
-Array Var_array(Var);
+static Array Var_array(Var);
 int Array_try_next(Array, int *, Var *);
 Var Array_push(Array, Var);
 List Array_list(Array);
@@ -780,7 +781,7 @@ static List _array_form(Compiler c, Var value){
 
 }
 
-Map Var_map(Var);
+static Map Var_map(Var);
 int Map_try_next(Map, unsigned *, Var *, Var *);
 Array Array_sort(Array);
 Var Map_getindex(Map, Var);

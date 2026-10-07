@@ -152,13 +152,13 @@ _x2c_defer_env_0;
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
-Var String_var(String);
+static Var String_var(String);
 
 List cons(Var, List);
 
-Var List_var(List);
+static Var List_var(List);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -390,19 +390,19 @@ List Macro_apply(Macro t, List values){
 
 Array Array_new(void);
 
-List Var_list(Var);
+static List Var_list(Var);
 
 Var List_assoc(List, Var);
 
 int List_try_next(List, List *, Var *);
 
-int List_truth(List);
+static int List_truth(List);
 
-List List_cdr(List);
+static List List_cdr(List);
 
-int Var_is_row(Var, unsigned, unsigned long, unsigned long);
+static int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 
-Var List_car(List);
+static Var List_car(List);
 
 Var Array_push(Array, Var);
 
@@ -450,7 +450,7 @@ static int _macro_items(List items){
 Var first = List_car(items);  return Var_is_row(first, 9, 7, 4) || Var_is_row(first, 11, 7, 1) || Var_is_integer(first) || Var_is_floating(first);
 }
 
-String Var_string(Var);
+static String Var_string(Var);
 Var Macro_inserted(Var value, int lifts, int expression){
   if(! _init_guard_) _file_init_();  if(lifts) value = _macro_expr_value(value);  Var spelling = value;
   {
@@ -491,7 +491,7 @@ List Macro_inserted_items(List values){
 
 int List_compare(List, List);
 List x2c_literal_string(String);
-List List_cddr(List);
+static List List_cddr(List);
 List Macro_typed(List type, Var value){
   if(! _init_guard_) _file_init_();  if(Var_is_row(value, 11, 7, 1) && List_compare(type, _37) == 0) value = List_var(x2c_literal_string(Var_string(value)));  List expression = Var_list(Macro_inserted(value, 1, 1));  return({
     Var _x2c_literal_part_2 = List_var(type);  List _x2c_literal_part_3 = List_cddr(expression);  cons(_27, cons(_x2c_literal_part_2, List_append(_x2c_literal_part_3, NULL)));
@@ -508,7 +508,7 @@ void Macro_use_subject(Var rows){
 }
 
 int Var_is_void(Var);
-Var List_cadr(List);
+static Var List_cadr(List);
 static Var _macro_free_reference(String spelling){
   if(Var_is_void(macro_subject)) return List_var(cons(_30, cons(_31, cons(String_var(spelling), NULL))));  macro_subject_used = 1; {
     List row;  List _x2c_macro_object_1 = Var_list(macro_subject);  List _x2c_macro_cursor_1 = _x2c_macro_object_1;  Var _x2c_macro_cursor_output_1;  while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
@@ -950,7 +950,7 @@ default: break;
 return Var_list(_macro_view(List_var(pattern)));
 }
 
-String int_str(int);
+static String int_str(int);
 static Atom _macro_fixed(int index){
   return Atom_intern(String_join(NULL, cons(String_var(_180), cons(String_var(int_str(index)), NULL))));
 }
@@ -1023,7 +1023,7 @@ static int _macro_take_slots(MatchMachine * machine, MatchCaptureBuffer * captur
   return(* machine).status == 982;
 }
 
-int String_truth(String);
+static int String_truth(String);
 int Var_equal(Var, Var);
 static int _macro_identity_equal(void * raw_machine, int slot, Var left, Var right, void * raw_policy){
   MatchMachine * machine = raw_machine;  MacroFixedSlots * policy = raw_policy;  left = _macro_unwrap(left);  right = _macro_unwrap(right);  if(_macro_has_slot(policy -> name_slots, policy -> names, slot)){

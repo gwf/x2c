@@ -23,6 +23,17 @@ FuncArg;
 
 typedef Var(* FuncAdapter)(Func fn, const FuncArg * argv);
 
+#include "varconvert.h"
+#include "error.h"
+#include "exception.h"
+#include "match.h"
+#include "symbol.h"
+#include "scope.h"
+#include "meta.h"
+#include "func-errors.h"
+#include <stddef.h>
+#include <stdint.h>
+#include <string.h>
 Var Func_apply(Func f, unsigned argc, const FuncArg * argv);
 
 static inline FuncArg FuncArg_value(Var value){

@@ -7,9 +7,18 @@
 
 #include "x2c.h"
 #include "compiler.h"
+#include "ast-rewrite.h"
+#include "meta.h"
+#include "grammar.h"
+#include "ast.h"
+#include "type.h"
+#include "parse.h"
+#include "callables.h"
 List Compiler_lower_cleanup(Compiler c, List node);
 
 int Compiler_static_value_is_runtime(Compiler c, List value, Map runtime);
+
+List builtin_try_cleanup_placement(Var cleanup);
 
 List builtin_try_catch_site(List frame, List clause);
 

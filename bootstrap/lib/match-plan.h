@@ -6,6 +6,11 @@
 #define __GUARD_0x4FF5E8E5__
 
 #include "match.h"
+#include <assert.h>
+#include "scope.h"
+#include "list.h"
+#define MATCH_SEGMENT_MAX 128
+#define MATCH_INLINE_MAX   64
 MatchPlan MatchPlan_prepare(Var pattern);
 
 void MatchPlan_free(MatchPlan plan);

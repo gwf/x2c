@@ -5,6 +5,7 @@
 #ifndef __GUARD_0xCDBE555C__
 #define __GUARD_0xCDBE555C__
 
+#include "private-keywords.h"
 #include "x2c.h"
 #include "path.h"
 typedef enum Json{
@@ -14,6 +15,14 @@ Json;
 
 typedef struct JsonBool * JsonBool;
 
+#include "meta.h"
+#include <errno.h>
+#include <limits.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#define JSON_MAX_DEPTH 512
 Var JsonBool_var(JsonBool value);
 
 JsonBool Var_jsonbool(Var value);

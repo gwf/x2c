@@ -12,6 +12,16 @@
 #else
 #define X2C_NATIVE_MODULES 1
 #endif
+#include "grammar.h"
+#include "ast-rewrite.h"
+#include "type.h"
+#include "generate.h"
+#include "macros.h"
+#include "script.h"
+#include "toolchain.h"
+#include "transform.h"
+#include "utils.h"
+#include <unistd.h>
 void Compiler_use_meta_toolchain(String cc, String include_dir);
 
 String Compiler_meta_cc(String * include_dir);
@@ -26,9 +36,9 @@ int Compiler_groups_meta(Compiler c);
 
 void Compiler_group_meta_function(Compiler c, List fn);
 
-void Compiler_record_meta_import(Compiler c);
-
 int Compiler_meta_reaches_compile_time(Compiler c, Var node);
+
+void Compiler_finish_meta_functions(Compiler c, Array nodes);
 
 String Compiler_meta_call_missing(Compiler c, String name);
 
@@ -36,7 +46,7 @@ void Compiler_refuse_meta_call(Compiler c, String name, Token site, String why);
 
 void Compiler_refuse_record_meta_call(Compiler c, String name, Token site);
 
-void Compiler_use_meta_build_directory(String directory);
+void Compiler_use_meta_build_directory(String directory, Array owners);
 
 void Compiler_write_meta_build(Compiler c);
 

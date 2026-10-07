@@ -21,6 +21,8 @@ typedef List ListString;
 
 typedef List ListSymbol;
 
+static Var Var_box_i8(char);
+
 static inline Var _typed_list_encode_i8(char value){
   return Var_box_i8(value);
 }
@@ -28,6 +30,8 @@ static inline Var _typed_list_encode_i8(char value){
 static inline char _typed_list_decode_i8(Var value){
   return(char)(value.u64 & 0xFFul);
 }
+
+static Var Var_box_i16(short);
 
 static inline Var _typed_list_encode_i16(short value){
   return Var_box_i16(value);
@@ -37,6 +41,8 @@ static inline short _typed_list_decode_i16(Var value){
   return(short)(value.u64 & 0xFFFFul);
 }
 
+static Var Var_box_i32_bits(unsigned);
+
 static inline Var _typed_list_encode_i32(int value){
   return Var_box_i32_bits((unsigned) value);
 }
@@ -44,6 +50,8 @@ static inline Var _typed_list_encode_i32(int value){
 static inline int _typed_list_decode_i32(Var value){
   return(int)(value.u64 & 0xFFFFFFFFul);
 }
+
+static Var Var_box_f32(float);
 
 static inline Var _typed_list_encode_f32(float value){
   return Var_box_f32(value);
@@ -56,9 +64,13 @@ static inline float _typed_list_decode_f32(Var value){
   return result;
 }
 
+static Var Var_box_f64(double);
+
 static inline Var _typed_list_encode_f64(double value){
   return Var_box_f64(value);
 }
+
+static double Var_decode_f64(Var);
 
 static inline double _typed_list_decode_f64(Var value){
   return Var_decode_f64(value);
@@ -71,6 +83,8 @@ static inline Var _typed_list_encode_string(String value){
   }
   ;
 }
+
+static String Var_string(Var);
 
 static inline String _typed_list_decode_string(Var value){
   return Var_string(value);
@@ -87,9 +101,13 @@ static inline Symbol _typed_list_decode_symbol(Var value){
   return(Symbol)(value.u64 - VAR_SYMBOL_OFFSET);
 }
 
+static int List_truth(List);
+
 static inline char ListChar_car(ListChar _x2c_macro_xs_0){
   return List_truth(_x2c_macro_xs_0) ? _typed_list_decode_i8(((List) _x2c_macro_xs_0) -> car) : 0;
 }
+
+List cons(Var, List);
 
 static inline ListChar ListChar_cons(char _x2c_macro_value_0, ListChar _x2c_macro_tail_0){
   return(ListChar) cons(_typed_list_encode_i8(_x2c_macro_value_0), (List) _x2c_macro_tail_0);

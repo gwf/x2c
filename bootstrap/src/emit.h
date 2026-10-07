@@ -7,6 +7,13 @@
 
 #include "x2c.h"
 #include "compiler.h"
+#include <stdlib.h>
+#include <stdio.h>
+#include "string.h"
+#include "var.h"
+#include "ast.h"
+#include "format.h"
+#include "cleanup.h"
 List Compiler_emit(Compiler c, List ast, Map cache_bindings);
 
 

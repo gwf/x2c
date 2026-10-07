@@ -25,6 +25,7 @@
 
 #include "x2c.h"
 #include "meta.h"
+#include "grammar.h"
 #include "lisp.h"
 #include "macros.h"
 #include "transform.h"
@@ -294,15 +295,15 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _x2c_static_initialize_4();
 }
 
-Var String_var(String);
+static Var String_var(String);
 
-Var List_var(List);
+static Var List_var(List);
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
 List cons(Var, List);
 
-Var int_var(int);
+static Var int_var(int);
 
 __attribute__((noinline, cold)) static void _x2c_cache_initialize_0(void){
   _0 = String_new("$scope accepts zero or one destination");
@@ -1619,7 +1620,7 @@ int List_len(List);
 
 void x2c_diagnostic_fail(String, List);
 
-int List_truth(List);
+static int List_truth(List);
 
 static List _scope_expand(List body, List destinations){
   if(List_len(destinations) > 1) x2c_diagnostic_fail(_0, NULL);
@@ -1646,7 +1647,7 @@ String String_add(String, String);
 
 String Var_repr(Var);
 
-List Var_list(Var);
+static List Var_list(Var);
 
 Var List_getindex(List, int);
 
@@ -1680,11 +1681,11 @@ static List _converter(List type){
 
 String Var_str(Var);
 
-Var List_car(List);
+static Var List_car(List);
 
 List x2c_type_parameters(List);
 
-List List_cdr(List);
+static List List_cdr(List);
 
 List x2c_type_return(List);
 
@@ -1716,7 +1717,7 @@ static List _cursor_spec(List collection_type){
   return cons(List_var(function), cons(List_var(cursor_type), cons(List_var(output_types), _158)));
 }
 
-int Var_is_row(Var, unsigned, unsigned long, unsigned long);
+static int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 
 Symbol Var_kind(Var);
 
@@ -1745,7 +1746,7 @@ static int _valid_outputs(List outputs){
   return 1;
 }
 
-Type List_type(List);
+static Type List_type(List);
 
 static List Foreach_with_cursor(Foreach * f, List spec){
   List function = Var_list(List_getindex(spec, 0)), cursor_type = Var_list(List_getindex(spec, 1)), types = Var_list(List_getindex(spec, 2));
@@ -1902,7 +1903,7 @@ static List _assign(List target, List value){
   )), NULL)))), NULL))), NULL))), NULL)));
 }
 
-String Var_string(Var);
+static String Var_string(Var);
 
 List builtin_class_location(void);
 
@@ -2029,7 +2030,7 @@ static List Shape_release(Shape * s){
   return cons(List_var(release), NULL);
 }
 
-List Type_list(Type);
+static List Type_list(Type);
 
 static List Shape_alloc(Shape * s){
   Type type = List_type(cons(String_var((* s).owner), NULL));
@@ -2776,7 +2777,7 @@ static Var _x2c_func_adapt_3(Func _x2c_func_binding_3, const FuncArg * _x2c_func
   List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_3, _x2c_func_argv_3, 0, 806120));  return _x2c_lambda_3(a0); ;
 }
 
-Type Var_type(Var);
+static Type Var_type(Var);
 static Var _x2c_lambda_4(List record){
   return List_var(_declare(Var_type(List_getindex(record, 0)), List_getindex(record, 1), NULL)); ;
 }

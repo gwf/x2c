@@ -13,6 +13,10 @@ typedef enum AstPos{
 }
 AstPos;
 
+#include "../lib/error-macros.h"
+#include "ast-rewrite.h"
+#include "grammar.h"
+#include "symbolset.h"
 List binding_identity_new(int identity, String spelling);
 
 int binding_identity_try_parts(List binding, int * identity, String * spelling);
@@ -44,6 +48,12 @@ Ast Ast_without_origin(Ast ast);
 Ast Ast_rewrap_origin(Ast original, Ast replacement);
 
 int Ast_never_returns(Ast ast);
+
+Symbol Symbol_compound_operator(Symbol op);
+
+Symbol Symbol_compound_assignment(Symbol op);
+
+int Symbol_binary_precedence(Symbol op);
 
 int Symbol_is_assignment_op(Symbol op);
 

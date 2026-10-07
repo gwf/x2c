@@ -10,6 +10,16 @@
 #include "meta.h"
 typedef List Type;
 
+#include "grammar.h"
+#include "ast-rewrite.h"
+#include "../lib/native-scalar-types.h"
+#include <limits.h>
+#include <stdarg.h>
+#include <stdio.h>
+static int Var_is_row(Var, unsigned, unsigned long, unsigned long);
+
+void * Var_pointer(Var);
+
 static inline Type Var_type(Var x){
   return Var_is_row(x, 9, 7, 4) ?(Type) Var_pointer(x) :(Type) NULL;
 }
@@ -123,6 +133,10 @@ Type Type_numeric_literal(String text, int floating);
 Var Type_numeric_literal_value(Type type, String text);
 
 int Type_integer_literal_magnitude(Type type, String text, unsigned long long * value);
+
+Map Type_builtin_var_tags(void);
+
+Map Type_var_tag_rows(void);
 
 Symbol Type_var_tag(Type type);
 

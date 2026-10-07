@@ -6,6 +6,12 @@
 #define __GUARD_0x43B606B9__
 
 #include "x2c.h"
+static List cdr(List);
+
+static List Var_list(Var);
+
+static Var car(List);
+
 static inline List List_cdar(List _x2c_macro_value_0){
   return cdr(Var_list(car(_x2c_macro_value_0)));
 }

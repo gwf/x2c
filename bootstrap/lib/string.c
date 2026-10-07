@@ -4,19 +4,6 @@
 #include "common.h"
 typedef char * String;
 
-#ifndef X2CCPP
-_Static_assert(_Generic(& strlen, size_t(*)(const char *) : 1, default: 0), "native alias String_c_len does not match strlen");
-#endif
-#define String_c_len strlen
-int strcmp(const char *, const char *);
-#ifndef X2CCPP
-_Static_assert(_Generic(& strcmp, int(*)(const char *, const char *) : 1, default: 0), "native alias String_c_compare does not match strcmp");
-#endif
-#define String_c_compare strcmp
-#ifndef X2CCPP
-_Static_assert(_Generic(& strchr, char *(*)(const char *, int) : 1, default: 0), "native alias String_c_find does not match strchr");
-#endif
-#define String_c_find strchr
 #include <stdlib.h>
 #include <ctype.h>
 #include <assert.h>
@@ -33,15 +20,30 @@ _Static_assert(_Generic(& strchr, char *(*)(const char *, int) : 1, default: 0),
 #include "symbol.h"
 #include "pool.h"
 typedef struct StringHeader{
-  int length;  unsigned hash;
+  int length;
+  unsigned hash;
 }
 * StringHeader;
+
 _Static_assert(sizeof(struct StringHeader) == 8, "the String header is 8 bytes, so payloads stay aligned");
 #define STRING_STACK_BYTES 256
 typedef union StringQuery{
   unsigned long align;  char bytes[sizeof(struct StringHeader) + STRING_STACK_BYTES + 1];
 }
 StringQuery;
+#ifndef X2CCPP
+_Static_assert(_Generic(& strlen, size_t(*)(const char *) : 1, default: 0), "native alias String_c_len does not match strlen");
+#endif
+#define String_c_len strlen
+int strcmp(const char *, const char *);
+#ifndef X2CCPP
+_Static_assert(_Generic(& strcmp, int(*)(const char *, const char *) : 1, default: 0), "native alias String_c_compare does not match strcmp");
+#endif
+#define String_c_compare strcmp
+#ifndef X2CCPP
+_Static_assert(_Generic(& strchr, char *(*)(const char *, int) : 1, default: 0), "native alias String_c_find does not match strchr");
+#endif
+#define String_c_find strchr
 static String _2, _1, _0;
 static int _init_guard_ = 0;
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
@@ -103,7 +105,7 @@ static inline StringHeader _header(String str){
   return(StringHeader)((char *) str - sizeof(struct StringHeader));
 }
 
-unsigned x2c_hash_bytes(unsigned long, const void *, size_t);
+static unsigned x2c_hash_bytes(unsigned long, const void *, size_t);
 static unsigned _hash_n(const char * str, int length){
   return x2c_hash_bytes(0, str, (size_t) length);
 }
@@ -112,7 +114,7 @@ int String_len(String str){
   if(str == NULL) return 0;  return _header(str) -> length - 1;
 }
 
-int String_truth(String);
+static int String_truth(String);
 unsigned String_hash(String str){
   if(! String_truth(str) || ! * str) return 0;  StringHeader header = _header(str);  return header -> hash ? header -> hash : _hash_n(str, strlen(str));
 }
@@ -147,10 +149,10 @@ static String _from_bytes(const char * bytes, int length){
 }
 
 int Var_is_void(Var);
-String Var_string(Var);
+static String Var_string(Var);
 void * Pool_malloc(Pool, size_t);
 Var Pool_intern(Pool, Var, void *);
-Var String_var(String);
+static Var String_var(String);
 void Pool_insert(Pool, Var);
 static String _from_bytes_in(Pool pool, const char * bytes, int length){
   if(! pool || ! bytes || length <= 0) return NULL;  unsigned hash = _hash_n(bytes, length);  if(length <= STRING_STACK_BYTES){
@@ -250,7 +252,7 @@ int String_rfind(String str, String sub){
 
 Array Array_new(void);
 Var Array_push(Array, Var);
-Var int_var(int);
+static Var int_var(int);
 List Array_list_free(Array);
 List String_find_all(String str, String sub, int start, int end){
   if(! String_truth(str) || ! String_truth(sub)) return NULL;  Array results = Array_new();  int n = String_len(sub), pos = start;  for(; ; ){
@@ -315,7 +317,7 @@ String String_getslice(String s, int start, int stop, int step){
   if(! String_truth(s) || step == 0) return NULL;  int n = String_len(s), len = x2c_normalize_slice(& start, & stop, step, n);  if(len <= 0) return NULL;  if(step == 1 && start == 0 && len == n && _is_active_canonical(s)) return s;  if(step == 1) return _from_bytes(s + start, len);  String string = String_malloc(len + 1);  char * out = string;  const char * src = s;  for(int i = 0, idx = start;  i < len;  i ++, idx += step) out[i] = src[idx];  return _finish(string, len);
 }
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 #include "error.h"
 
 
@@ -324,7 +326,7 @@ Var Symbol_var(Symbol);
 String String_withindex(String str, int index, char value){
   if(! String_truth(str) || ! * str) return str;  if(value == '\0'){
     Var _x2c_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("String.withindex")), NULL))); {
-      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/string.x",.function = "String_withindex",.line = 687};  x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 2, Symbol_var(34096809266140), _x2c_literal_part_0, Symbol_var(19800432), int_var(index));  __builtin_unreachable();
+      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/string.x",.function = "String_withindex",.line = 685};  x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 2, Symbol_var(34096809266140), _x2c_literal_part_0, Symbol_var(19800432), int_var(index));  __builtin_unreachable();
     }
 
   }
@@ -333,7 +335,7 @@ String String_withindex(String str, int index, char value){
 
 String String_add(String str, String other){
   if(! String_truth(other)) return str;  if(! String_truth(str)) return other;  int left_len = String_len(str), right_len = String_len(other);  size_t length =(size_t) left_len +(size_t) right_len;  if(length > INT_MAX - 1){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/string.x",.function = "String_add",.line = 720};  x2c_error_raise_n(& _x2c_error_site_1, 1358596898646632, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.add")), NULL))));
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/string.x",.function = "String_add",.line = 718};  x2c_error_raise_n(& _x2c_error_site_1, 1358596898646632, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.add")), NULL))));
     __builtin_unreachable();
   }
   if(length <= STRING_STACK_BYTES){
@@ -366,14 +368,14 @@ String String_repeat(String str, int count){
 String String_new_fill(char fill, int count){
   if(count <= 0) return NULL;
   if(fill == '\0'){
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/string.x",.function = "String_new_fill",.line = 761};
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/string.x",.function = "String_new_fill",.line = 759};
     x2c_error_raise_n(& _x2c_error_site_2, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.new_fill")), NULL))));
     __builtin_unreachable();
   }
   if(count == INT_MAX){
     Var _x2c_literal_part_1 = String_var(String_join(NULL, cons(String_var(String_new("String.new_fill")), NULL)));
     {
-      static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/string.x",.function = "String_new_fill",.line = 762};
+      static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/string.x",.function = "String_new_fill",.line = 760};
       x2c_error_raise_n(& _x2c_error_site_3, 1358596898646632, 2, Symbol_var(34096809266140), _x2c_literal_part_1, Symbol_var(7318440), int_var(count));
       __builtin_unreachable();
     }
@@ -384,7 +386,7 @@ String String_new_fill(char fill, int count){
   return _finish(string, count);
 }
 
-int List_truth(List);
+static int List_truth(List);
 
 int List_len(List);
 
@@ -429,9 +431,9 @@ static int _join_length(List strings, int n, int sep_len){
   return(int) total;
 }
 
-List List_cdr(List);
+static List List_cdr(List);
 
-Var List_car(List);
+static Var List_car(List);
 
 static void _join_into(char * out, List strings, String sep, int sep_len){
   for(List p = strings;  List_truth(p);  p = List_cdr(p)){
@@ -464,7 +466,7 @@ String String_pad_center(String str, int width, char fill){
 
 static String _pad(String str, int width, char fill, int side){
   if(fill == '\0'){
-    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/string.x",.function = "_pad",.line = 849};
+    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/string.x",.function = "_pad",.line = 847};
     x2c_error_raise_n(& _x2c_error_site_4, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.pad")), NULL))));
     __builtin_unreachable();
   }
@@ -473,7 +475,7 @@ static String _pad(String str, int width, char fill, int side){
   if(width == INT_MAX){
     Var _x2c_literal_part_2 = String_var(String_join(NULL, cons(String_var(String_new("String.pad")), NULL)));
     {
-      static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/string.x",.function = "_pad",.line = 852};
+      static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/string.x",.function = "_pad",.line = 850};
       x2c_error_raise_n(& _x2c_error_site_5, 1358596898646632, 2, Symbol_var(34096809266140), _x2c_literal_part_2, Symbol_var(48833808), int_var(width));
       __builtin_unreachable();
     }
@@ -649,9 +651,9 @@ void x2c_cleanup_push(X2CCleanup *);
 
 int Var_truth(Var);
 
-Var Func_apply_value(Func, Var);
+static Var Func_apply_value(Func, Var);
 
-Var char_var(char);
+static Var char_var(char);
 
 void x2c_cleanup_leave(X2CCleanup *);
 
@@ -716,7 +718,7 @@ String String_map(String str, Func fn){
         if(! ch){
           Var _x2c_literal_part_3 = String_var(String_join(NULL, cons(String_var(String_new("String.map")), NULL)));
           {
-            static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/string.x",.function = "String_map",.line = 1149};
+            static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/string.x",.function = "String_map",.line = 1147};
             x2c_error_raise_n(& _x2c_error_site_6, 143279181245224, 2, Symbol_var(34096809266140), _x2c_literal_part_3, Symbol_var(19800432), int_var(i));
             __builtin_unreachable();
           }
@@ -871,7 +873,7 @@ Symbol String_symbol(String str){
   return Symbol_new(str);
 }
 
-int Iter_truth(Iter);
+static int Iter_truth(Iter);
 
 Iter Iter_init(Iter, Var, IterNextFn, Var);
 

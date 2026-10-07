@@ -6,7 +6,14 @@
 #define __GUARD_0x3CFE94DA__
 
 #include "x2c.h"
+#include "../lib/private-keywords.h"
 #include "build.h"
+#include <stdio.h>
+#include <string.h>
+#include <sys/utsname.h>
+#include <unistd.h>
+#include "digest.h"
+#include "json.h"
 int install_command(CliRequest request);
 
 List install_require(CliRequest request, String name, String version, List locked);

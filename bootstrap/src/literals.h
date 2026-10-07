@@ -6,7 +6,16 @@
 #define __GUARD_0xC5263D59__
 
 #include "x2c.h"
+#include "../lib/private-keywords.h"
 #include "compiler.h"
+#include "grammar.h"
+#include "parse.h"
+#include "type.h"
+#include "expressions.h"
+#include "transform.h"
+#include "lambdas.h"
+#include <stdint.h>
+#include <string.h>
 List Compiler_parse_list_literal(Compiler c);
 
 List Compiler_parse_macro_pattern_arguments(Compiler c);

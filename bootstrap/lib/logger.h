@@ -23,6 +23,29 @@ typedef void(* LogEmitter)(Logger logger, const LogEvent * event, Var data);
 
 typedef void(* LogFlusher)(Logger logger, Var data);
 
+#include <assert.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <sys/time.h>
+#include <unistd.h>
+#include "array.h"
+#include "block.h"
+#include "buffer.h"
+#include "exception.h"
+#include "mutex.h"
+#include "error.h"
+#include "error_init.h"
+#include "file.h"
+#include "list.h"
+#include "pool.h"
+#include "scope.h"
+#include "string.h"
+#include "symbol.h"
+#include "var.h"
+#include "var-adapters.h"
 void Logger_log(Logger logger, Symbol level, Symbol category, List fields);
 
 int Logger_should_log(Logger logger, Symbol level, Symbol category);

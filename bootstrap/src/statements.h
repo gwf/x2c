@@ -6,7 +6,13 @@
 #define __GUARD_0x670D7DD9__
 
 #include "x2c.h"
+#include "../lib/private-keywords.h"
 #include "compiler.h"
+#include "parse-report-macros.h"
+#include "parse.h"
+#include "expressions.h"
+#include "literals.h"
+#include "macros.h"
 List Compiler_parse_statement(Compiler c);
 
 List Compiler_with_binding(Compiler c);

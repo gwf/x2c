@@ -14,6 +14,9 @@ typedef enum AstPos{
 }
 AstPos;
 
+#include "../lib/error-macros.h"
+#include "ast-rewrite.h"
+#include "grammar.h"
 #include "symbolset.h"
 static List _261, _260, _259, _257, _256, _254, _253, _252, _250, _249, _248, _246, _245, _242, _241, _240, _238, _237, _234, _233, _232, _229, _228, _227, _225, _221, _220, _219, _218, _217, _206, _205, _202, _201, _199, _198, _197, _195, _194, _192, _191, _190, _188, _187, _186, _184, _181, _180, _179, _174, _173, _171, _170, _169, _167, _166, _165, _164, _160, _156, _155, _153, _151, _150, _148, _147, _145, _144, _143, _141, _140, _139, _136, _135, _133, _132, _131, _129, _128, _126, _125, _124, _122, _121, _120, _119, _117, _116, _115, _113, _112, _111, _109, _108, _107, _105, _104, _102, _101, _99, _98, _97, _95, _94, _92, _91, _88, _87, _84, _83, _82, _79, _78, _76, _75, _74, _72, _71, _69, _68, _67, _65, _64, _63, _61, _59, _58, _52, _51, _49, _48, _47, _45, _42, _41, _40, _36, _35, _34, _32, _31, _30, _28, _27, _21, _20, _18, _17, _13, _12, _11, _9, _8, _7, _6;
 
@@ -68,13 +71,13 @@ _x2c_defer_env_2;
 
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
 List cons(Var, List);
 
-Var List_var(List);
+static Var List_var(List);
 
-Var String_var(String);
+static Var String_var(String);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -345,14 +348,14 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _x2c_static_initialize_0();
 }
 
-Var int_var(int);
+static Var int_var(int);
 
 List binding_identity_new(int identity, String spelling){
   if(! _init_guard_) _file_init_();
   return cons(_0, cons(int_var(identity), cons(String_var(spelling), NULL)));
 }
 
-String Var_string(Var);
+static String Var_string(Var);
 
 int Var_is_integer(Var);
 
@@ -402,15 +405,15 @@ Array Array_new(void);
 
 Iter Var_iter(Var, Iter);
 
-Var List_caddr(List);
+static Var List_caddr(List);
 
 int Iter_try_next(Iter, Var *);
 
-List Var_list(Var);
+static List Var_list(Var);
 
 Var Array_push(Array, Var);
 
-Var List_cadr(List);
+static Var List_cadr(List);
 
 List Array_list_free(Array);
 
@@ -490,7 +493,7 @@ Array_push(rebuilt, List_var(parameter));
 return cons(_14, cons(List_var(cons(_15, List_append(Array_list_free(rebuilt), NULL))), NULL));
 }
 
-int Var_is_row(Var, unsigned, unsigned long, unsigned long);
+static int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 List Ast_designated(Var value){
   if(! _init_guard_) _file_init_();  while(Var_is_row(value, 9, 7, 4)){
     List node = Var_list(value);
@@ -596,12 +599,12 @@ default: break;
 return NULL;
 }
 
-int List_truth(List);
-List List_cdr(List);
-Var List_car(List);
+static int List_truth(List);
+static List List_cdr(List);
+static Var List_car(List);
 List x2c_func_reference_type(Func, unsigned, unsigned);
-FuncArg FuncArg_reference(const void *, List);
-FuncArg FuncArg_value(Var);
+static FuncArg FuncArg_reference(const void *, List);
+static FuncArg FuncArg_value(Var);
 Var Func_apply(Func, unsigned, const FuncArg *);
 int Var_equal(Var, Var);
 int List_equal(List, List);

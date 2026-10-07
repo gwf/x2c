@@ -5,6 +5,9 @@
 #ifndef __GUARD_0x6A4A1365__
 #define __GUARD_0x6A4A1365__
 
+#include "error-macros.h"
+typedef struct MatchCaptureSite MatchCaptureSite;
+
 #include "common.h"
 #include "machine.h"
 typedef struct MatchCaptureLayout{
@@ -51,6 +54,21 @@ typedef struct MatchCaptureSite{
 }
 MatchCaptureSite;
 
+#include <pthread.h>
+#include <stdlib.h>
+#include <stddef.h>
+#include <assert.h>
+#include "var.h"
+#include "list.h"
+#include "atom.h"
+#include "exception.h"
+#include "symbol.h"
+#include "scope.h"
+#include "block.h"
+#include "match-machine.h"
+#include "match-plan.h"
+#include "match-cache.h"
+#include "scan.h"
 int Var_is_atom_binder(Var atom);
 
 int Var_is_list_binder(Var atom);

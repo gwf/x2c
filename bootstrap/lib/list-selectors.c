@@ -2,11 +2,31 @@
 
 #define __GUARD_0x43B606B9__
 #include "x2c.h"
-List cdr(List);
+static List _67, _66, _65, _64, _55, _50, _49, _48, _46, _45, _43, _42, _37, _36, _35, _33, _32, _28, _27, _20, _19, _18, _16, _15, _13, _12, _5;
 
-List Var_list(Var);
+static String _70, _69, _68, _62, _60, _58, _56, _53, _52, _40, _23, _10, _0;
 
-Var car(List);
+static Var _63, _61, _59, _57, _54, _51, _47, _44, _41, _39, _38, _34, _31, _30, _29, _26, _25, _24, _22, _21, _17, _14, _11, _9, _8, _7, _6, _4, _3, _2, _1;
+
+static int _init_guard_ = 0;
+
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
+
+static List _selector_chain(String spelling, List value);
+
+static List _selector_double(List steps);
+
+static List _selector_middles(void);
+
+static List _selector_units(List middles, Macro car, Macro cdr);
+
+static List _selector_definitions(Macro car, Macro cdr);
+
+static List cdr(List);
+
+static List Var_list(Var);
+
+static Var car(List);
 
 static inline List List_cdar(List _x2c_macro_value_0){
   return cdr(Var_list(car(_x2c_macro_value_0)));
@@ -198,5 +218,151 @@ static inline List List_cddddr(List _x2c_macro_value_46){
 
 static inline List Var_cddddr(Var _x2c_macro_value_47){
   return cdr(cdr(cdr(cdr(Var_list(_x2c_macro_value_47)))));
+}
+
+static Var String_var(String);
+
+static Var List_var(List);
+
+static Var Symbol_var(Symbol);
+
+List cons(Var, List);
+
+static Var int_var(int);
+
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
+  x2c_initialize_protocols();
+  if(_init_guard_) return;
+  _init_guard_ = 1;
+  _0 = String_new("x2c.quoted");
+  _1 = String_var(_0);
+  _2 = List_var(NULL);
+  _3 = Symbol_var(377892);
+  _4 = Symbol_var(917238582723620);
+  _5 = cons(_4, NULL);
+  _6 = List_var(_5);
+  _7 = Symbol_var(199448);
+  _8 = Symbol_var(19147688);
+  _9 = Atom_intern(String_new("binding-name"));
+  _10 = String_new("car");
+  _11 = String_var(_10);
+  _12 = cons(_11, NULL);
+  _13 = cons(_9, _12);
+  _14 = List_var(_13);
+  _15 = cons(_14, NULL);
+  _16 = cons(_8, _15);
+  _17 = List_var(_16);
+  _18 = cons(_17, NULL);
+  _19 = cons(_6, _18);
+  _20 = cons(_3, _19);
+  _21 = List_var(_20);
+  _22 = Symbol_var(102886);
+  _23 = String_new("x2c.hole");
+  _24 = String_var(_23);
+  _25 = Atom_intern(String_new("macro-param"));
+  _26 = Symbol_var(740232);
+  _27 = cons(_3, NULL);
+  _28 = cons(_26, _27);
+  _29 = List_var(_28);
+  _30 = Symbol_var(1317592723658);
+  _31 = int_var(0);
+  _32 = cons(_31, NULL);
+  _33 = cons(_30, _32);
+  _34 = List_var(_33);
+  _35 = cons(_34, NULL);
+  _36 = cons(_29, _35);
+  _37 = cons(_25, _36);
+  _38 = List_var(_37);
+  _39 = Symbol_var(40381208);
+  _40 = String_new("cdr");
+  _41 = String_var(_40);
+  _42 = cons(_41, NULL);
+  _43 = cons(_9, _42);
+  _44 = List_var(_43);
+  _45 = cons(_44, NULL);
+  _46 = cons(_8, _45);
+  _47 = List_var(_46);
+  _48 = cons(_47, NULL);
+  _49 = cons(_6, _48);
+  _50 = cons(_3, _49);
+  _51 = List_var(_50);
+  _52 = String_new("a");
+  _53 = String_new("d");
+  _54 = String_var(0);
+  _55 = cons(_54, NULL);
+  _56 = String_new("aa");
+  _57 = String_var(_56);
+  _58 = String_new("ad");
+  _59 = String_var(_58);
+  _60 = String_new("dd");
+  _61 = String_var(_60);
+  _62 = String_new("add");
+  _63 = String_var(_62);
+  _64 = cons(_63, NULL);
+  _65 = cons(_61, _64);
+  _66 = cons(_59, _65);
+  _67 = cons(_57, _66);
+  _68 = String_new("c");
+  _69 = String_new("r");
+  _70 = String_new("a");
+}
+
+int String_len(String);
+
+int String_getindex(String, int);
+
+static List _selector_chain(String spelling, List value){
+  for(int i = String_len(spelling) - 2;  i >= 1;  i --) value = String_getindex(spelling, i) == 'a' ? cons(_1, cons(_2, cons(List_var(cons(_3, cons(_6, cons(List_var(cons(_7, cons(_21, cons(List_var(cons(_22, cons(List_var(cons(_24, cons(_38, cons(_39, cons(List_var(value), NULL))))), NULL))), NULL)))), NULL)))), NULL))) : cons(_1, cons(_2, cons(List_var(cons(_3, cons(_6, cons(List_var(cons(_7, cons(_51, cons(List_var(cons(_22, cons(List_var(cons(_24, cons(_38, cons(_39, cons(List_var(value), NULL))))), NULL))), NULL)))), NULL)))), NULL)));
+  return value;
+}
+
+static int List_truth(List);
+
+static String Var_string(Var);
+
+static Var List_car(List);
+
+static List List_cdr(List);
+
+static List _selector_double(List steps){
+  if(! List_truth(steps)) return NULL;
+  String rest = Var_string(List_car(steps)), a = String_join(NULL, cons(String_var(_52), cons(String_var(rest), NULL))), d = String_join(NULL, cons(String_var(_53), cons(String_var(rest), NULL)));
+  return({
+    Var _x2c_literal_part_0 = String_var(a);  Var _x2c_literal_part_1 = String_var(d);  List _x2c_literal_part_2 = _selector_double(List_cdr(steps));  cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, List_append(_x2c_literal_part_2, NULL)));
+  }
+  );
+}
+
+List List_append(List, List);
+
+static List _selector_middles(void){
+  List level = _55, middles = NULL;
+  for(int length = 1;  length <= 4;  length ++){
+    level = _selector_double(level);
+    if(length > 1) middles = List_append(middles, level);
+  }
+  return middles;
+}
+
+int List_contains(List, Var);
+
+int String_startswith(String, String);
+
+List Macro_apply(Macro, List);
+
+static List _selector_units(List middles, Macro car, Macro cdr){
+  if(! List_truth(middles)) return NULL;
+  String middle = Var_string(List_car(middles));
+  List rest = _selector_units(List_cdr(middles), car, cdr);
+  if(List_contains(_67, String_var(middle))) return rest;
+  String name = String_join(NULL, cons(String_var(_68), cons(String_var(middle), cons(String_var(_69), NULL))));
+  return({
+    Var _x2c_literal_part_3 = List_var(String_startswith(middle, _70) ? Macro_apply(car, cons(String_var(name), NULL)) : Macro_apply(cdr, cons(String_var(name), NULL)));  cons(_x2c_literal_part_3, List_append(rest, NULL));
+  }
+  );
+}
+
+static List _selector_definitions(Macro car, Macro cdr){
+  return _selector_units(_selector_middles(), car, cdr);
 }
 

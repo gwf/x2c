@@ -274,7 +274,7 @@ Packed typed `Array`s generated from shared methods.
 <a id="Array.arraychar"></a>
 #### Array.arraychar
 
-`ArrayChar Array.arraychar(Array _x2c_macro_values_4)`
+`ArrayChar Array.arraychar(Array values)`
 
 Packs `values` into a fresh array in source order.
 A null input returns NULL. Each element goes through its `Var`
@@ -286,7 +286,7 @@ Source: `lib/typed-array.x:108`
 <a id="Array.arraydbl"></a>
 #### Array.arraydbl
 
-`ArrayDbl Array.arraydbl(Array _x2c_macro_values_29)`
+`ArrayDbl Array.arraydbl(Array values)`
 
 Packs `values` into a fresh array in source order.
 A null input returns NULL. Each element goes through its `Var`
@@ -298,7 +298,7 @@ Source: `lib/typed-array.x:153`
 <a id="Array.arrayfloat"></a>
 #### Array.arrayfloat
 
-`ArrayFloat Array.arrayfloat(Array _x2c_macro_values_24)`
+`ArrayFloat Array.arrayfloat(Array values)`
 
 Packs `values` into a fresh array in source order.
 A null input returns NULL. Each element goes through its `Var`
@@ -310,7 +310,7 @@ Source: `lib/typed-array.x:144`
 <a id="Array.arrayint"></a>
 #### Array.arrayint
 
-`ArrayInt Array.arrayint(Array _x2c_macro_values_14)`
+`ArrayInt Array.arrayint(Array values)`
 
 Packs `values` into a fresh array in source order.
 A null input returns NULL. Each element goes through its `Var`
@@ -322,7 +322,7 @@ Source: `lib/typed-array.x:126`
 <a id="Array.arraylong"></a>
 #### Array.arraylong
 
-`ArrayLong Array.arraylong(Array _x2c_macro_values_19)`
+`ArrayLong Array.arraylong(Array values)`
 
 Packs `values` into a fresh array in source order.
 A null input returns NULL. Each element goes through its `Var`
@@ -334,7 +334,7 @@ Source: `lib/typed-array.x:135`
 <a id="Array.arrayshort"></a>
 #### Array.arrayshort
 
-`ArrayShort Array.arrayshort(Array _x2c_macro_values_9)`
+`ArrayShort Array.arrayshort(Array values)`
 
 Packs `values` into a fresh array in source order.
 A null input returns NULL. Each element goes through its `Var`
@@ -346,7 +346,7 @@ Source: `lib/typed-array.x:117`
 <a id="Array.arraystring"></a>
 #### Array.arraystring
 
-`ArrayString Array.arraystring(Array _x2c_macro_values_34)`
+`ArrayString Array.arraystring(Array values)`
 
 Packs `values` into a fresh array in source order.
 A null input returns NULL. Each element goes through its `Var`
@@ -360,7 +360,7 @@ Source: `lib/typed-array.x:162`
 <a id="ArrayChar.array"></a>
 #### ArrayChar.array
 
-`Array ArrayChar.array(ArrayChar _x2c_macro_array_41)`
+`Array ArrayChar.array(ArrayChar array)`
 
 Returns a fresh ordinary Array containing boxed elements in source order.
 A null input returns NULL. The typed Array and its storage are unchanged.
@@ -372,7 +372,7 @@ Source: `lib/typed-array.x:106`
 <a id="ArrayChar.block"></a>
 #### ArrayChar.block
 
-`Block ArrayChar.block(ArrayChar _x2c_macro_array_45)`
+`Block ArrayChar.block(ArrayChar array)`
 
 Views `array` as the same underlying `Block` storage.
 
@@ -381,7 +381,7 @@ Source: `lib/typed-array.x:108`
 <a id="ArrayChar.compare"></a>
 #### ArrayChar.compare
 
-`int ArrayChar.compare(ArrayChar _x2c_macro_a_4, ArrayChar _x2c_macro_b_4)`
+`int ArrayChar.compare(ArrayChar a, ArrayChar b)`
 
 Compares packed Arrays lexicographically with the element family's
 ordering. Identical handles compare equal and NULL sorts first.
@@ -391,7 +391,7 @@ Source: `lib/typed-array.x:105`
 <a id="ArrayChar.concat"></a>
 #### ArrayChar.concat
 
-`ArrayChar ArrayChar.concat(ArrayChar _x2c_macro_a_2, ArrayChar _x2c_macro_b_2)`
+`ArrayChar ArrayChar.concat(ArrayChar a, ArrayChar b)`
 
 Returns a fresh array holding `a` followed by `b`.
 Neither input is modified. A null `a` returns NULL, while a null `b`
@@ -405,7 +405,7 @@ Source: `lib/typed-array.x:104`
 <a id="ArrayChar.contains"></a>
 #### ArrayChar.contains
 
-`int ArrayChar.contains(ArrayChar _x2c_macro_array_29, char _x2c_macro_value_10)`
+`int ArrayChar.contains(ArrayChar array, char value)`
 
 Reports whether a native element equals `value`.
 The scan is linear. Raises: `<size-limit>` when the length exceeds the
@@ -416,7 +416,7 @@ Source: `lib/typed-array.x:104`
 <a id="ArrayChar.copy"></a>
 #### ArrayChar.copy
 
-`ArrayChar ArrayChar.copy(ArrayChar _x2c_macro_array_23)`
+`ArrayChar ArrayChar.copy(ArrayChar array)`
 
 Returns a fresh packed copy, or NULL for a null array.
 The result has independent mutable storage containing the same stored
@@ -430,7 +430,7 @@ Source: `lib/typed-array.x:104`
 <a id="ArrayChar.count"></a>
 #### ArrayChar.count
 
-`int ArrayChar.count(ArrayChar _x2c_macro_array_30, char _x2c_macro_value_11)`
+`int ArrayChar.count(ArrayChar array, char value)`
 
 Returns how many native elements equal `value`.
 A null array returns zero; the scan is linear.
@@ -442,7 +442,7 @@ Source: `lib/typed-array.x:104`
 <a id="ArrayChar.equal"></a>
 #### ArrayChar.equal
 
-`int ArrayChar.equal(ArrayChar _x2c_macro_a_3, ArrayChar _x2c_macro_b_3)`
+`int ArrayChar.equal(ArrayChar a, ArrayChar b)`
 
 Reports elementwise native equality.
 Two null arrays compare equal; one null array or different lengths
@@ -453,7 +453,7 @@ Source: `lib/typed-array.x:104`
 <a id="ArrayChar.find"></a>
 #### ArrayChar.find
 
-`int ArrayChar.find(ArrayChar _x2c_macro_array_28, char _x2c_macro_value_9)`
+`int ArrayChar.find(ArrayChar array, char value)`
 
 Returns the first index whose native element equals `value`, or -1.
 A null array returns -1; the scan is linear and preserves source order.
@@ -465,7 +465,7 @@ Source: `lib/typed-array.x:104`
 <a id="ArrayChar.getindex"></a>
 #### ArrayChar.getindex
 
-`char ArrayChar.getindex(ArrayChar _x2c_macro_array_34, int _x2c_macro_index_8)`
+`char ArrayChar.getindex(ArrayChar array, int index)`
 
 Reads raw `index` with the bounds and null preconditions of a C pointer.
 Negative indices are not normalized. Use `try_get` for a checked read.
@@ -475,7 +475,7 @@ Source: `lib/typed-array.x:104`
 <a id="ArrayChar.getslice"></a>
 #### ArrayChar.getslice
 
-`ArrayChar ArrayChar.getslice(ArrayChar _x2c_macro_array_24, int _x2c_macro_start_5, int _x2c_macro_end_4, int _x2c_macro_step_1)`
+`ArrayChar ArrayChar.getslice(ArrayChar array, int start, int end, int step)`
 
 Returns a fresh packed array for normalized `[start:end:step]`.
 Negative bounds count from the end and a negative step walks backward.
@@ -488,7 +488,7 @@ Source: `lib/typed-array.x:104`
 <a id="ArrayChar.indexof"></a>
 #### ArrayChar.indexof
 
-`int ArrayChar.indexof(ArrayChar _x2c_macro_array_31, char _x2c_macro_value_12)`
+`int ArrayChar.indexof(ArrayChar array, char value)`
 
 Returns the same first-match index as `ArrayChar.find`.
 
@@ -497,7 +497,7 @@ Source: `lib/typed-array.x:104`
 <a id="ArrayChar.insert"></a>
 #### ArrayChar.insert
 
-`char ArrayChar.insert(ArrayChar _x2c_macro_array_21, int _x2c_macro_index_4, char _x2c_macro_value_7)`
+`char ArrayChar.insert(ArrayChar array, int index, char value)`
 
 Inserts `value` at normalized `index` and returns it.
 The accepted range includes the position after the last element;
@@ -512,7 +512,7 @@ Source: `lib/typed-array.x:104`
 <a id="ArrayChar.iter"></a>
 #### ArrayChar.iter
 
-`Iter ArrayChar.iter(ArrayChar _x2c_macro_array_48, Iter _x2c_macro_dest_0)`
+`Iter ArrayChar.iter(ArrayChar array, Iter dest)`
 
 Initializes `dest` to lazily yield boxed elements in index order.
 Returns `dest`, whose storage is caller-owned. The iterator borrows
@@ -541,7 +541,7 @@ Source: `lib/typed-array.x:104`
 <a id="ArrayChar.postfixindex"></a>
 #### ArrayChar.postfixindex
 
-`char ArrayChar.postfixindex(ArrayChar _x2c_macro_array_43, int _x2c_macro_index_11, Symbol _x2c_macro_op_1)`
+`char ArrayChar.postfixindex(ArrayChar array, int index, Symbol op)`
 
 Applies `++` or `--` at raw `index` and returns the previous value.
 The index has the unchecked C-pointer preconditions of bracket access.
@@ -553,7 +553,7 @@ Source: `lib/typed-array.x:107`
 <a id="ArrayChar.push"></a>
 #### ArrayChar.push
 
-`char ArrayChar.push(ArrayChar _x2c_macro_array_16, char _x2c_macro_value_3)`
+`char ArrayChar.push(ArrayChar array, char value)`
 
 Appends `value` and returns it.
 
@@ -565,7 +565,7 @@ Source: `lib/typed-array.x:104`
 <a id="ArrayChar.remove"></a>
 #### ArrayChar.remove
 
-`char ArrayChar.remove(ArrayChar _x2c_macro_array_22, int _x2c_macro_index_5)`
+`char ArrayChar.remove(ArrayChar array, int index)`
 
 Removes and returns the element at normalized `index`.
 Negative indices count from the end; following elements shift left.
@@ -578,7 +578,7 @@ Source: `lib/typed-array.x:104`
 <a id="ArrayChar.remslice"></a>
 #### ArrayChar.remslice
 
-`ArrayChar ArrayChar.remslice(ArrayChar _x2c_macro_array_26, int _x2c_macro_start_7, int _x2c_macro_end_6)`
+`ArrayChar ArrayChar.remslice(ArrayChar array, int start, int end)`
 
 Removes the region `array[start:end]` and returns a fresh packed array.
 Bounds normalize as slice bounds, so a negative `end` is a stop.
@@ -592,7 +592,7 @@ Source: `lib/typed-array.x:104`
 <a id="ArrayChar.repr"></a>
 #### ArrayChar.repr
 
-`String ArrayChar.repr(ArrayChar _x2c_macro_array_39)`
+`String ArrayChar.repr(ArrayChar array)`
 
 Returns the readable packed-Array representation.
 
@@ -601,7 +601,7 @@ Source: `lib/typed-array.x:105`
 <a id="ArrayChar.reverse"></a>
 #### ArrayChar.reverse
 
-`ArrayChar ArrayChar.reverse(ArrayChar _x2c_macro_array_32)`
+`ArrayChar ArrayChar.reverse(ArrayChar array)`
 
 Reverses `array` in place and returns that same array.
 A null or one-element array is returned unchanged.
@@ -611,7 +611,7 @@ Source: `lib/typed-array.x:104`
 <a id="ArrayChar.setindex"></a>
 #### ArrayChar.setindex
 
-`char ArrayChar.setindex(ArrayChar _x2c_macro_array_35, int _x2c_macro_index_9, char _x2c_macro_value_13)`
+`char ArrayChar.setindex(ArrayChar array, int index, char value)`
 
 Stores and returns `value` at raw `index`, with C-pointer preconditions.
 Negative indices are not normalized; the caller supplies a valid index.
@@ -621,7 +621,7 @@ Source: `lib/typed-array.x:104`
 <a id="ArrayChar.setslice"></a>
 #### ArrayChar.setslice
 
-`ArrayChar ArrayChar.setslice(ArrayChar _x2c_macro_array_25, int _x2c_macro_start_6, int _x2c_macro_end_5, ArrayChar _x2c_macro_values_2)`
+`ArrayChar ArrayChar.setslice(ArrayChar array, int start, int end, ArrayChar values)`
 
 Replaces the region `array[start:end]` and returns `array`.
 Bounds normalize as slice bounds, so a negative `end` is a stop.
@@ -638,7 +638,7 @@ Source: `lib/typed-array.x:104`
 <a id="ArrayChar.shift"></a>
 #### ArrayChar.shift
 
-`char ArrayChar.shift(ArrayChar _x2c_macro_array_19)`
+`char ArrayChar.shift(ArrayChar array)`
 
 Removes and returns the first element, shifting the remainder left.
 This operation is O(n).
@@ -651,7 +651,7 @@ Source: `lib/typed-array.x:104`
 <a id="ArrayChar.splice"></a>
 #### ArrayChar.splice
 
-`ArrayChar ArrayChar.splice(ArrayChar _x2c_macro_array_27, int _x2c_macro_index_6, int _x2c_macro_remove_count_1, ArrayChar _x2c_macro_values_3)`
+`ArrayChar ArrayChar.splice(ArrayChar array, int index, int remove_count, ArrayChar values)`
 
 Replaces `remove_count` values at normalized `index` and returns them.
 The result is a fresh packed array. A nonpositive count removes nothing;
@@ -665,7 +665,7 @@ Source: `lib/typed-array.x:104`
 <a id="ArrayChar.str"></a>
 #### ArrayChar.str
 
-`String ArrayChar.str(ArrayChar _x2c_macro_array_38)`
+`String ArrayChar.str(ArrayChar array)`
 
 Returns the packed-Array display String.
 
@@ -674,7 +674,7 @@ Source: `lib/typed-array.x:105`
 <a id="ArrayChar.take_last"></a>
 #### ArrayChar.take_last
 
-`char ArrayChar.take_last(ArrayChar _x2c_macro_array_18)`
+`char ArrayChar.take_last(ArrayChar array)`
 
 Removes and returns the last element.
 
@@ -685,7 +685,7 @@ Source: `lib/typed-array.x:104`
 <a id="ArrayChar.try_get"></a>
 #### ArrayChar.try_get
 
-`int ArrayChar.try_get(ArrayChar _x2c_macro_array_33, int _x2c_macro_index_7, char &?_x2c_macro_out_6)`
+`int ArrayChar.try_get(ArrayChar array, int index, char &?out)`
 
 Reads normalized `index` into `out` and reports whether it exists.
 Negative indices count from the end. A null array, null `out`, or
@@ -698,7 +698,7 @@ Source: `lib/typed-array.x:104`
 <a id="ArrayChar.try_next"></a>
 #### ArrayChar.try_next
 
-`int ArrayChar.try_next(ArrayChar _x2c_macro_array_15, int &?_x2c_macro_cursor_1, char &?_x2c_macro_out_4)`
+`int ArrayChar.try_next(ArrayChar array, int &?cursor, char &?out)`
 
 Writes the next native element, advances `cursor`, and returns one.
 Initialize the caller-owned cursor to zero. A null argument, negative
@@ -711,7 +711,7 @@ Source: `lib/typed-array.x:104`
 <a id="ArrayChar.try_take_last"></a>
 #### ArrayChar.try_take_last
 
-`int ArrayChar.try_take_last(ArrayChar _x2c_macro_array_17, char &?_x2c_macro_out_5)`
+`int ArrayChar.try_take_last(ArrayChar array, char &?out)`
 
 Removes the last element into `out` and returns one when present.
 A null or empty array, or null `out`, returns zero without writing or
@@ -722,7 +722,7 @@ Source: `lib/typed-array.x:104`
 <a id="ArrayChar.unshift"></a>
 #### ArrayChar.unshift
 
-`char ArrayChar.unshift(ArrayChar _x2c_macro_array_20, char _x2c_macro_value_6)`
+`char ArrayChar.unshift(ArrayChar array, char value)`
 
 Inserts `value` at the front and returns it, shifting elements right.
 This operation is O(n).
@@ -735,7 +735,7 @@ Source: `lib/typed-array.x:104`
 <a id="ArrayChar.updateindex"></a>
 #### ArrayChar.updateindex
 
-`char ArrayChar.updateindex(ArrayChar _x2c_macro_array_42, int _x2c_macro_index_10, Symbol _x2c_macro_op_0, char _x2c_macro_rhs_0)`
+`char ArrayChar.updateindex(ArrayChar array, int index, Symbol op, char rhs)`
 
 Applies integer `op` to raw element `index` and returns the stored value.
 The index has the unchecked C-pointer preconditions of bracket access.
@@ -750,7 +750,7 @@ Source: `lib/typed-array.x:107`
 <a id="ArrayChar.var"></a>
 #### ArrayChar.var
 
-`Var ArrayChar.var(ArrayChar _x2c_macro_array_44)`
+`Var ArrayChar.var(ArrayChar array)`
 
 Boxes `array` with its registered packed-array tag without copying.
 The boxed and typed values share the same mutable object identity.
@@ -760,7 +760,7 @@ Source: `lib/typed-array.x:108`
 <a id="ArrayChar.write_repr"></a>
 #### ArrayChar.write_repr
 
-`Buffer ArrayChar.write_repr(ArrayChar _x2c_macro_array_36, Buffer _x2c_macro_out_7)`
+`Buffer ArrayChar.write_repr(ArrayChar array, Buffer out)`
 
 Appends the readable packed-Array representation to `out`.
 
@@ -769,7 +769,7 @@ Source: `lib/typed-array.x:105`
 <a id="ArrayChar.write_str"></a>
 #### ArrayChar.write_str
 
-`Buffer ArrayChar.write_str(ArrayChar _x2c_macro_array_37, Buffer _x2c_macro_out_8)`
+`Buffer ArrayChar.write_str(ArrayChar array, Buffer out)`
 
 Appends the packed-Array display text to `out`.
 
@@ -780,7 +780,7 @@ Source: `lib/typed-array.x:105`
 <a id="ArrayDbl.array"></a>
 #### ArrayDbl.array
 
-`Array ArrayDbl.array(ArrayDbl _x2c_macro_array_286)`
+`Array ArrayDbl.array(ArrayDbl array)`
 
 Returns a fresh ordinary Array containing boxed elements in source order.
 A null input returns NULL. The typed Array and its storage are unchanged.
@@ -792,7 +792,7 @@ Source: `lib/typed-array.x:151`
 <a id="ArrayDbl.block"></a>
 #### ArrayDbl.block
 
-`Block ArrayDbl.block(ArrayDbl _x2c_macro_array_290)`
+`Block ArrayDbl.block(ArrayDbl array)`
 
 Views `array` as the same underlying `Block` storage.
 
@@ -801,7 +801,7 @@ Source: `lib/typed-array.x:153`
 <a id="ArrayDbl.compare"></a>
 #### ArrayDbl.compare
 
-`int ArrayDbl.compare(ArrayDbl _x2c_macro_a_38, ArrayDbl _x2c_macro_b_38)`
+`int ArrayDbl.compare(ArrayDbl a, ArrayDbl b)`
 
 Compares packed Arrays lexicographically with the element family's
 ordering. Identical handles compare equal and NULL sorts first.
@@ -811,7 +811,7 @@ Source: `lib/typed-array.x:150`
 <a id="ArrayDbl.concat"></a>
 #### ArrayDbl.concat
 
-`ArrayDbl ArrayDbl.concat(ArrayDbl _x2c_macro_a_36, ArrayDbl _x2c_macro_b_36)`
+`ArrayDbl ArrayDbl.concat(ArrayDbl a, ArrayDbl b)`
 
 Returns a fresh array holding `a` followed by `b`.
 Neither input is modified. A null `a` returns NULL, while a null `b`
@@ -825,7 +825,7 @@ Source: `lib/typed-array.x:149`
 <a id="ArrayDbl.contains"></a>
 #### ArrayDbl.contains
 
-`int ArrayDbl.contains(ArrayDbl _x2c_macro_array_274, double _x2c_macro_value_85)`
+`int ArrayDbl.contains(ArrayDbl array, double value)`
 
 Reports whether a native element equals `value`.
 The scan is linear. Raises: `<size-limit>` when the length exceeds the
@@ -836,7 +836,7 @@ Source: `lib/typed-array.x:149`
 <a id="ArrayDbl.copy"></a>
 #### ArrayDbl.copy
 
-`ArrayDbl ArrayDbl.copy(ArrayDbl _x2c_macro_array_268)`
+`ArrayDbl ArrayDbl.copy(ArrayDbl array)`
 
 Returns a fresh packed copy, or NULL for a null array.
 The result has independent mutable storage containing the same stored
@@ -850,7 +850,7 @@ Source: `lib/typed-array.x:149`
 <a id="ArrayDbl.count"></a>
 #### ArrayDbl.count
 
-`int ArrayDbl.count(ArrayDbl _x2c_macro_array_275, double _x2c_macro_value_86)`
+`int ArrayDbl.count(ArrayDbl array, double value)`
 
 Returns how many native elements equal `value`.
 A null array returns zero; the scan is linear.
@@ -862,7 +862,7 @@ Source: `lib/typed-array.x:149`
 <a id="ArrayDbl.equal"></a>
 #### ArrayDbl.equal
 
-`int ArrayDbl.equal(ArrayDbl _x2c_macro_a_37, ArrayDbl _x2c_macro_b_37)`
+`int ArrayDbl.equal(ArrayDbl a, ArrayDbl b)`
 
 Reports elementwise native equality.
 Two null arrays compare equal; one null array or different lengths
@@ -873,7 +873,7 @@ Source: `lib/typed-array.x:149`
 <a id="ArrayDbl.find"></a>
 #### ArrayDbl.find
 
-`int ArrayDbl.find(ArrayDbl _x2c_macro_array_273, double _x2c_macro_value_84)`
+`int ArrayDbl.find(ArrayDbl array, double value)`
 
 Returns the first index whose native element equals `value`, or -1.
 A null array returns -1; the scan is linear and preserves source order.
@@ -885,7 +885,7 @@ Source: `lib/typed-array.x:149`
 <a id="ArrayDbl.getindex"></a>
 #### ArrayDbl.getindex
 
-`double ArrayDbl.getindex(ArrayDbl _x2c_macro_array_279, int _x2c_macro_index_73)`
+`double ArrayDbl.getindex(ArrayDbl array, int index)`
 
 Reads raw `index` with the bounds and null preconditions of a C pointer.
 Negative indices are not normalized. Use `try_get` for a checked read.
@@ -895,7 +895,7 @@ Source: `lib/typed-array.x:149`
 <a id="ArrayDbl.getslice"></a>
 #### ArrayDbl.getslice
 
-`ArrayDbl ArrayDbl.getslice(ArrayDbl _x2c_macro_array_269, int _x2c_macro_start_45, int _x2c_macro_end_39, int _x2c_macro_step_11)`
+`ArrayDbl ArrayDbl.getslice(ArrayDbl array, int start, int end, int step)`
 
 Returns a fresh packed array for normalized `[start:end:step]`.
 Negative bounds count from the end and a negative step walks backward.
@@ -908,7 +908,7 @@ Source: `lib/typed-array.x:149`
 <a id="ArrayDbl.indexof"></a>
 #### ArrayDbl.indexof
 
-`int ArrayDbl.indexof(ArrayDbl _x2c_macro_array_276, double _x2c_macro_value_87)`
+`int ArrayDbl.indexof(ArrayDbl array, double value)`
 
 Returns the same first-match index as `ArrayDbl.find`.
 
@@ -917,7 +917,7 @@ Source: `lib/typed-array.x:149`
 <a id="ArrayDbl.insert"></a>
 #### ArrayDbl.insert
 
-`double ArrayDbl.insert(ArrayDbl _x2c_macro_array_266, int _x2c_macro_index_69, double _x2c_macro_value_82)`
+`double ArrayDbl.insert(ArrayDbl array, int index, double value)`
 
 Inserts `value` at normalized `index` and returns it.
 The accepted range includes the position after the last element;
@@ -932,7 +932,7 @@ Source: `lib/typed-array.x:149`
 <a id="ArrayDbl.iter"></a>
 #### ArrayDbl.iter
 
-`Iter ArrayDbl.iter(ArrayDbl _x2c_macro_array_293, Iter _x2c_macro_dest_5)`
+`Iter ArrayDbl.iter(ArrayDbl array, Iter dest)`
 
 Initializes `dest` to lazily yield boxed elements in index order.
 Returns `dest`, whose storage is caller-owned. The iterator borrows
@@ -961,7 +961,7 @@ Source: `lib/typed-array.x:149`
 <a id="ArrayDbl.postfixindex"></a>
 #### ArrayDbl.postfixindex
 
-`double ArrayDbl.postfixindex(ArrayDbl _x2c_macro_array_288, int _x2c_macro_index_76, Symbol _x2c_macro_op_11)`
+`double ArrayDbl.postfixindex(ArrayDbl array, int index, Symbol op)`
 
 Applies `++` or `--` at raw `index` and returns the previous value.
 The index has the unchecked C-pointer preconditions of bracket access.
@@ -973,7 +973,7 @@ Source: `lib/typed-array.x:152`
 <a id="ArrayDbl.push"></a>
 #### ArrayDbl.push
 
-`double ArrayDbl.push(ArrayDbl _x2c_macro_array_261, double _x2c_macro_value_78)`
+`double ArrayDbl.push(ArrayDbl array, double value)`
 
 Appends `value` and returns it.
 
@@ -985,7 +985,7 @@ Source: `lib/typed-array.x:149`
 <a id="ArrayDbl.remove"></a>
 #### ArrayDbl.remove
 
-`double ArrayDbl.remove(ArrayDbl _x2c_macro_array_267, int _x2c_macro_index_70)`
+`double ArrayDbl.remove(ArrayDbl array, int index)`
 
 Removes and returns the element at normalized `index`.
 Negative indices count from the end; following elements shift left.
@@ -998,7 +998,7 @@ Source: `lib/typed-array.x:149`
 <a id="ArrayDbl.remslice"></a>
 #### ArrayDbl.remslice
 
-`ArrayDbl ArrayDbl.remslice(ArrayDbl _x2c_macro_array_271, int _x2c_macro_start_47, int _x2c_macro_end_41)`
+`ArrayDbl ArrayDbl.remslice(ArrayDbl array, int start, int end)`
 
 Removes the region `array[start:end]` and returns a fresh packed array.
 Bounds normalize as slice bounds, so a negative `end` is a stop.
@@ -1012,7 +1012,7 @@ Source: `lib/typed-array.x:149`
 <a id="ArrayDbl.repr"></a>
 #### ArrayDbl.repr
 
-`String ArrayDbl.repr(ArrayDbl _x2c_macro_array_284)`
+`String ArrayDbl.repr(ArrayDbl array)`
 
 Returns the readable packed-Array representation.
 
@@ -1021,7 +1021,7 @@ Source: `lib/typed-array.x:150`
 <a id="ArrayDbl.reverse"></a>
 #### ArrayDbl.reverse
 
-`ArrayDbl ArrayDbl.reverse(ArrayDbl _x2c_macro_array_277)`
+`ArrayDbl ArrayDbl.reverse(ArrayDbl array)`
 
 Reverses `array` in place and returns that same array.
 A null or one-element array is returned unchanged.
@@ -1031,7 +1031,7 @@ Source: `lib/typed-array.x:149`
 <a id="ArrayDbl.setindex"></a>
 #### ArrayDbl.setindex
 
-`double ArrayDbl.setindex(ArrayDbl _x2c_macro_array_280, int _x2c_macro_index_74, double _x2c_macro_value_88)`
+`double ArrayDbl.setindex(ArrayDbl array, int index, double value)`
 
 Stores and returns `value` at raw `index`, with C-pointer preconditions.
 Negative indices are not normalized; the caller supplies a valid index.
@@ -1041,7 +1041,7 @@ Source: `lib/typed-array.x:149`
 <a id="ArrayDbl.setslice"></a>
 #### ArrayDbl.setslice
 
-`ArrayDbl ArrayDbl.setslice(ArrayDbl _x2c_macro_array_270, int _x2c_macro_start_46, int _x2c_macro_end_40, ArrayDbl _x2c_macro_values_27)`
+`ArrayDbl ArrayDbl.setslice(ArrayDbl array, int start, int end, ArrayDbl values)`
 
 Replaces the region `array[start:end]` and returns `array`.
 Bounds normalize as slice bounds, so a negative `end` is a stop.
@@ -1058,7 +1058,7 @@ Source: `lib/typed-array.x:149`
 <a id="ArrayDbl.shift"></a>
 #### ArrayDbl.shift
 
-`double ArrayDbl.shift(ArrayDbl _x2c_macro_array_264)`
+`double ArrayDbl.shift(ArrayDbl array)`
 
 Removes and returns the first element, shifting the remainder left.
 This operation is O(n).
@@ -1071,7 +1071,7 @@ Source: `lib/typed-array.x:149`
 <a id="ArrayDbl.splice"></a>
 #### ArrayDbl.splice
 
-`ArrayDbl ArrayDbl.splice(ArrayDbl _x2c_macro_array_272, int _x2c_macro_index_71, int _x2c_macro_remove_count_11, ArrayDbl _x2c_macro_values_28)`
+`ArrayDbl ArrayDbl.splice(ArrayDbl array, int index, int remove_count, ArrayDbl values)`
 
 Replaces `remove_count` values at normalized `index` and returns them.
 The result is a fresh packed array. A nonpositive count removes nothing;
@@ -1085,7 +1085,7 @@ Source: `lib/typed-array.x:149`
 <a id="ArrayDbl.str"></a>
 #### ArrayDbl.str
 
-`String ArrayDbl.str(ArrayDbl _x2c_macro_array_283)`
+`String ArrayDbl.str(ArrayDbl array)`
 
 Returns the packed-Array display String.
 
@@ -1094,7 +1094,7 @@ Source: `lib/typed-array.x:150`
 <a id="ArrayDbl.take_last"></a>
 #### ArrayDbl.take_last
 
-`double ArrayDbl.take_last(ArrayDbl _x2c_macro_array_263)`
+`double ArrayDbl.take_last(ArrayDbl array)`
 
 Removes and returns the last element.
 
@@ -1105,7 +1105,7 @@ Source: `lib/typed-array.x:149`
 <a id="ArrayDbl.try_get"></a>
 #### ArrayDbl.try_get
 
-`int ArrayDbl.try_get(ArrayDbl _x2c_macro_array_278, int _x2c_macro_index_72, double &?_x2c_macro_out_71)`
+`int ArrayDbl.try_get(ArrayDbl array, int index, double &?out)`
 
 Reads normalized `index` into `out` and reports whether it exists.
 Negative indices count from the end. A null array, null `out`, or
@@ -1118,7 +1118,7 @@ Source: `lib/typed-array.x:149`
 <a id="ArrayDbl.try_next"></a>
 #### ArrayDbl.try_next
 
-`int ArrayDbl.try_next(ArrayDbl _x2c_macro_array_260, int &?_x2c_macro_cursor_11, double &?_x2c_macro_out_69)`
+`int ArrayDbl.try_next(ArrayDbl array, int &?cursor, double &?out)`
 
 Writes the next native element, advances `cursor`, and returns one.
 Initialize the caller-owned cursor to zero. A null argument, negative
@@ -1131,7 +1131,7 @@ Source: `lib/typed-array.x:149`
 <a id="ArrayDbl.try_take_last"></a>
 #### ArrayDbl.try_take_last
 
-`int ArrayDbl.try_take_last(ArrayDbl _x2c_macro_array_262, double &?_x2c_macro_out_70)`
+`int ArrayDbl.try_take_last(ArrayDbl array, double &?out)`
 
 Removes the last element into `out` and returns one when present.
 A null or empty array, or null `out`, returns zero without writing or
@@ -1142,7 +1142,7 @@ Source: `lib/typed-array.x:149`
 <a id="ArrayDbl.unshift"></a>
 #### ArrayDbl.unshift
 
-`double ArrayDbl.unshift(ArrayDbl _x2c_macro_array_265, double _x2c_macro_value_81)`
+`double ArrayDbl.unshift(ArrayDbl array, double value)`
 
 Inserts `value` at the front and returns it, shifting elements right.
 This operation is O(n).
@@ -1155,7 +1155,7 @@ Source: `lib/typed-array.x:149`
 <a id="ArrayDbl.updateindex"></a>
 #### ArrayDbl.updateindex
 
-`double ArrayDbl.updateindex(ArrayDbl _x2c_macro_array_287, int _x2c_macro_index_75, Symbol _x2c_macro_op_10, double _x2c_macro_rhs_5)`
+`double ArrayDbl.updateindex(ArrayDbl array, int index, Symbol op, double rhs)`
 
 Applies a floating arithmetic `op` and returns the stored value.
 The supported operators are `+`, `-`, `*`, and `/`; the raw index has
@@ -1168,7 +1168,7 @@ Source: `lib/typed-array.x:152`
 <a id="ArrayDbl.var"></a>
 #### ArrayDbl.var
 
-`Var ArrayDbl.var(ArrayDbl _x2c_macro_array_289)`
+`Var ArrayDbl.var(ArrayDbl array)`
 
 Boxes `array` with its registered packed-array tag without copying.
 The boxed and typed values share the same mutable object identity.
@@ -1178,7 +1178,7 @@ Source: `lib/typed-array.x:153`
 <a id="ArrayDbl.write_repr"></a>
 #### ArrayDbl.write_repr
 
-`Buffer ArrayDbl.write_repr(ArrayDbl _x2c_macro_array_281, Buffer _x2c_macro_out_72)`
+`Buffer ArrayDbl.write_repr(ArrayDbl array, Buffer out)`
 
 Appends the readable packed-Array representation to `out`.
 
@@ -1187,7 +1187,7 @@ Source: `lib/typed-array.x:150`
 <a id="ArrayDbl.write_str"></a>
 #### ArrayDbl.write_str
 
-`Buffer ArrayDbl.write_str(ArrayDbl _x2c_macro_array_282, Buffer _x2c_macro_out_73)`
+`Buffer ArrayDbl.write_str(ArrayDbl array, Buffer out)`
 
 Appends the packed-Array display text to `out`.
 
@@ -1198,7 +1198,7 @@ Source: `lib/typed-array.x:150`
 <a id="ArrayFloat.array"></a>
 #### ArrayFloat.array
 
-`Array ArrayFloat.array(ArrayFloat _x2c_macro_array_237)`
+`Array ArrayFloat.array(ArrayFloat array)`
 
 Returns a fresh ordinary Array containing boxed elements in source order.
 A null input returns NULL. The typed Array and its storage are unchanged.
@@ -1210,7 +1210,7 @@ Source: `lib/typed-array.x:142`
 <a id="ArrayFloat.block"></a>
 #### ArrayFloat.block
 
-`Block ArrayFloat.block(ArrayFloat _x2c_macro_array_241)`
+`Block ArrayFloat.block(ArrayFloat array)`
 
 Views `array` as the same underlying `Block` storage.
 
@@ -1219,7 +1219,7 @@ Source: `lib/typed-array.x:144`
 <a id="ArrayFloat.compare"></a>
 #### ArrayFloat.compare
 
-`int ArrayFloat.compare(ArrayFloat _x2c_macro_a_32, ArrayFloat _x2c_macro_b_32)`
+`int ArrayFloat.compare(ArrayFloat a, ArrayFloat b)`
 
 Compares packed Arrays lexicographically with the element family's
 ordering. Identical handles compare equal and NULL sorts first.
@@ -1229,7 +1229,7 @@ Source: `lib/typed-array.x:141`
 <a id="ArrayFloat.concat"></a>
 #### ArrayFloat.concat
 
-`ArrayFloat ArrayFloat.concat(ArrayFloat _x2c_macro_a_30, ArrayFloat _x2c_macro_b_30)`
+`ArrayFloat ArrayFloat.concat(ArrayFloat a, ArrayFloat b)`
 
 Returns a fresh array holding `a` followed by `b`.
 Neither input is modified. A null `a` returns NULL, while a null `b`
@@ -1243,7 +1243,7 @@ Source: `lib/typed-array.x:140`
 <a id="ArrayFloat.contains"></a>
 #### ArrayFloat.contains
 
-`int ArrayFloat.contains(ArrayFloat _x2c_macro_array_225, float _x2c_macro_value_70)`
+`int ArrayFloat.contains(ArrayFloat array, float value)`
 
 Reports whether a native element equals `value`.
 The scan is linear. Raises: `<size-limit>` when the length exceeds the
@@ -1254,7 +1254,7 @@ Source: `lib/typed-array.x:140`
 <a id="ArrayFloat.copy"></a>
 #### ArrayFloat.copy
 
-`ArrayFloat ArrayFloat.copy(ArrayFloat _x2c_macro_array_219)`
+`ArrayFloat ArrayFloat.copy(ArrayFloat array)`
 
 Returns a fresh packed copy, or NULL for a null array.
 The result has independent mutable storage containing the same stored
@@ -1268,7 +1268,7 @@ Source: `lib/typed-array.x:140`
 <a id="ArrayFloat.count"></a>
 #### ArrayFloat.count
 
-`int ArrayFloat.count(ArrayFloat _x2c_macro_array_226, float _x2c_macro_value_71)`
+`int ArrayFloat.count(ArrayFloat array, float value)`
 
 Returns how many native elements equal `value`.
 A null array returns zero; the scan is linear.
@@ -1280,7 +1280,7 @@ Source: `lib/typed-array.x:140`
 <a id="ArrayFloat.equal"></a>
 #### ArrayFloat.equal
 
-`int ArrayFloat.equal(ArrayFloat _x2c_macro_a_31, ArrayFloat _x2c_macro_b_31)`
+`int ArrayFloat.equal(ArrayFloat a, ArrayFloat b)`
 
 Reports elementwise native equality.
 Two null arrays compare equal; one null array or different lengths
@@ -1291,7 +1291,7 @@ Source: `lib/typed-array.x:140`
 <a id="ArrayFloat.find"></a>
 #### ArrayFloat.find
 
-`int ArrayFloat.find(ArrayFloat _x2c_macro_array_224, float _x2c_macro_value_69)`
+`int ArrayFloat.find(ArrayFloat array, float value)`
 
 Returns the first index whose native element equals `value`, or -1.
 A null array returns -1; the scan is linear and preserves source order.
@@ -1303,7 +1303,7 @@ Source: `lib/typed-array.x:140`
 <a id="ArrayFloat.getindex"></a>
 #### ArrayFloat.getindex
 
-`float ArrayFloat.getindex(ArrayFloat _x2c_macro_array_230, int _x2c_macro_index_60)`
+`float ArrayFloat.getindex(ArrayFloat array, int index)`
 
 Reads raw `index` with the bounds and null preconditions of a C pointer.
 Negative indices are not normalized. Use `try_get` for a checked read.
@@ -1313,7 +1313,7 @@ Source: `lib/typed-array.x:140`
 <a id="ArrayFloat.getslice"></a>
 #### ArrayFloat.getslice
 
-`ArrayFloat ArrayFloat.getslice(ArrayFloat _x2c_macro_array_220, int _x2c_macro_start_37, int _x2c_macro_end_32, int _x2c_macro_step_9)`
+`ArrayFloat ArrayFloat.getslice(ArrayFloat array, int start, int end, int step)`
 
 Returns a fresh packed array for normalized `[start:end:step]`.
 Negative bounds count from the end and a negative step walks backward.
@@ -1326,7 +1326,7 @@ Source: `lib/typed-array.x:140`
 <a id="ArrayFloat.indexof"></a>
 #### ArrayFloat.indexof
 
-`int ArrayFloat.indexof(ArrayFloat _x2c_macro_array_227, float _x2c_macro_value_72)`
+`int ArrayFloat.indexof(ArrayFloat array, float value)`
 
 Returns the same first-match index as `ArrayFloat.find`.
 
@@ -1335,7 +1335,7 @@ Source: `lib/typed-array.x:140`
 <a id="ArrayFloat.insert"></a>
 #### ArrayFloat.insert
 
-`float ArrayFloat.insert(ArrayFloat _x2c_macro_array_217, int _x2c_macro_index_56, float _x2c_macro_value_67)`
+`float ArrayFloat.insert(ArrayFloat array, int index, float value)`
 
 Inserts `value` at normalized `index` and returns it.
 The accepted range includes the position after the last element;
@@ -1350,7 +1350,7 @@ Source: `lib/typed-array.x:140`
 <a id="ArrayFloat.iter"></a>
 #### ArrayFloat.iter
 
-`Iter ArrayFloat.iter(ArrayFloat _x2c_macro_array_244, Iter _x2c_macro_dest_4)`
+`Iter ArrayFloat.iter(ArrayFloat array, Iter dest)`
 
 Initializes `dest` to lazily yield boxed elements in index order.
 Returns `dest`, whose storage is caller-owned. The iterator borrows
@@ -1379,7 +1379,7 @@ Source: `lib/typed-array.x:140`
 <a id="ArrayFloat.postfixindex"></a>
 #### ArrayFloat.postfixindex
 
-`float ArrayFloat.postfixindex(ArrayFloat _x2c_macro_array_239, int _x2c_macro_index_63, Symbol _x2c_macro_op_9)`
+`float ArrayFloat.postfixindex(ArrayFloat array, int index, Symbol op)`
 
 Applies `++` or `--` at raw `index` and returns the previous value.
 The index has the unchecked C-pointer preconditions of bracket access.
@@ -1391,7 +1391,7 @@ Source: `lib/typed-array.x:143`
 <a id="ArrayFloat.push"></a>
 #### ArrayFloat.push
 
-`float ArrayFloat.push(ArrayFloat _x2c_macro_array_212, float _x2c_macro_value_63)`
+`float ArrayFloat.push(ArrayFloat array, float value)`
 
 Appends `value` and returns it.
 
@@ -1403,7 +1403,7 @@ Source: `lib/typed-array.x:140`
 <a id="ArrayFloat.remove"></a>
 #### ArrayFloat.remove
 
-`float ArrayFloat.remove(ArrayFloat _x2c_macro_array_218, int _x2c_macro_index_57)`
+`float ArrayFloat.remove(ArrayFloat array, int index)`
 
 Removes and returns the element at normalized `index`.
 Negative indices count from the end; following elements shift left.
@@ -1416,7 +1416,7 @@ Source: `lib/typed-array.x:140`
 <a id="ArrayFloat.remslice"></a>
 #### ArrayFloat.remslice
 
-`ArrayFloat ArrayFloat.remslice(ArrayFloat _x2c_macro_array_222, int _x2c_macro_start_39, int _x2c_macro_end_34)`
+`ArrayFloat ArrayFloat.remslice(ArrayFloat array, int start, int end)`
 
 Removes the region `array[start:end]` and returns a fresh packed array.
 Bounds normalize as slice bounds, so a negative `end` is a stop.
@@ -1430,7 +1430,7 @@ Source: `lib/typed-array.x:140`
 <a id="ArrayFloat.repr"></a>
 #### ArrayFloat.repr
 
-`String ArrayFloat.repr(ArrayFloat _x2c_macro_array_235)`
+`String ArrayFloat.repr(ArrayFloat array)`
 
 Returns the readable packed-Array representation.
 
@@ -1439,7 +1439,7 @@ Source: `lib/typed-array.x:141`
 <a id="ArrayFloat.reverse"></a>
 #### ArrayFloat.reverse
 
-`ArrayFloat ArrayFloat.reverse(ArrayFloat _x2c_macro_array_228)`
+`ArrayFloat ArrayFloat.reverse(ArrayFloat array)`
 
 Reverses `array` in place and returns that same array.
 A null or one-element array is returned unchanged.
@@ -1449,7 +1449,7 @@ Source: `lib/typed-array.x:140`
 <a id="ArrayFloat.setindex"></a>
 #### ArrayFloat.setindex
 
-`float ArrayFloat.setindex(ArrayFloat _x2c_macro_array_231, int _x2c_macro_index_61, float _x2c_macro_value_73)`
+`float ArrayFloat.setindex(ArrayFloat array, int index, float value)`
 
 Stores and returns `value` at raw `index`, with C-pointer preconditions.
 Negative indices are not normalized; the caller supplies a valid index.
@@ -1459,7 +1459,7 @@ Source: `lib/typed-array.x:140`
 <a id="ArrayFloat.setslice"></a>
 #### ArrayFloat.setslice
 
-`ArrayFloat ArrayFloat.setslice(ArrayFloat _x2c_macro_array_221, int _x2c_macro_start_38, int _x2c_macro_end_33, ArrayFloat _x2c_macro_values_22)`
+`ArrayFloat ArrayFloat.setslice(ArrayFloat array, int start, int end, ArrayFloat values)`
 
 Replaces the region `array[start:end]` and returns `array`.
 Bounds normalize as slice bounds, so a negative `end` is a stop.
@@ -1476,7 +1476,7 @@ Source: `lib/typed-array.x:140`
 <a id="ArrayFloat.shift"></a>
 #### ArrayFloat.shift
 
-`float ArrayFloat.shift(ArrayFloat _x2c_macro_array_215)`
+`float ArrayFloat.shift(ArrayFloat array)`
 
 Removes and returns the first element, shifting the remainder left.
 This operation is O(n).
@@ -1489,7 +1489,7 @@ Source: `lib/typed-array.x:140`
 <a id="ArrayFloat.splice"></a>
 #### ArrayFloat.splice
 
-`ArrayFloat ArrayFloat.splice(ArrayFloat _x2c_macro_array_223, int _x2c_macro_index_58, int _x2c_macro_remove_count_9, ArrayFloat _x2c_macro_values_23)`
+`ArrayFloat ArrayFloat.splice(ArrayFloat array, int index, int remove_count, ArrayFloat values)`
 
 Replaces `remove_count` values at normalized `index` and returns them.
 The result is a fresh packed array. A nonpositive count removes nothing;
@@ -1503,7 +1503,7 @@ Source: `lib/typed-array.x:140`
 <a id="ArrayFloat.str"></a>
 #### ArrayFloat.str
 
-`String ArrayFloat.str(ArrayFloat _x2c_macro_array_234)`
+`String ArrayFloat.str(ArrayFloat array)`
 
 Returns the packed-Array display String.
 
@@ -1512,7 +1512,7 @@ Source: `lib/typed-array.x:141`
 <a id="ArrayFloat.take_last"></a>
 #### ArrayFloat.take_last
 
-`float ArrayFloat.take_last(ArrayFloat _x2c_macro_array_214)`
+`float ArrayFloat.take_last(ArrayFloat array)`
 
 Removes and returns the last element.
 
@@ -1523,7 +1523,7 @@ Source: `lib/typed-array.x:140`
 <a id="ArrayFloat.try_get"></a>
 #### ArrayFloat.try_get
 
-`int ArrayFloat.try_get(ArrayFloat _x2c_macro_array_229, int _x2c_macro_index_59, float &?_x2c_macro_out_58)`
+`int ArrayFloat.try_get(ArrayFloat array, int index, float &?out)`
 
 Reads normalized `index` into `out` and reports whether it exists.
 Negative indices count from the end. A null array, null `out`, or
@@ -1536,7 +1536,7 @@ Source: `lib/typed-array.x:140`
 <a id="ArrayFloat.try_next"></a>
 #### ArrayFloat.try_next
 
-`int ArrayFloat.try_next(ArrayFloat _x2c_macro_array_211, int &?_x2c_macro_cursor_9, float &?_x2c_macro_out_56)`
+`int ArrayFloat.try_next(ArrayFloat array, int &?cursor, float &?out)`
 
 Writes the next native element, advances `cursor`, and returns one.
 Initialize the caller-owned cursor to zero. A null argument, negative
@@ -1549,7 +1549,7 @@ Source: `lib/typed-array.x:140`
 <a id="ArrayFloat.try_take_last"></a>
 #### ArrayFloat.try_take_last
 
-`int ArrayFloat.try_take_last(ArrayFloat _x2c_macro_array_213, float &?_x2c_macro_out_57)`
+`int ArrayFloat.try_take_last(ArrayFloat array, float &?out)`
 
 Removes the last element into `out` and returns one when present.
 A null or empty array, or null `out`, returns zero without writing or
@@ -1560,7 +1560,7 @@ Source: `lib/typed-array.x:140`
 <a id="ArrayFloat.unshift"></a>
 #### ArrayFloat.unshift
 
-`float ArrayFloat.unshift(ArrayFloat _x2c_macro_array_216, float _x2c_macro_value_66)`
+`float ArrayFloat.unshift(ArrayFloat array, float value)`
 
 Inserts `value` at the front and returns it, shifting elements right.
 This operation is O(n).
@@ -1573,7 +1573,7 @@ Source: `lib/typed-array.x:140`
 <a id="ArrayFloat.updateindex"></a>
 #### ArrayFloat.updateindex
 
-`float ArrayFloat.updateindex(ArrayFloat _x2c_macro_array_238, int _x2c_macro_index_62, Symbol _x2c_macro_op_8, float _x2c_macro_rhs_4)`
+`float ArrayFloat.updateindex(ArrayFloat array, int index, Symbol op, float rhs)`
 
 Applies a floating arithmetic `op` and returns the stored value.
 The supported operators are `+`, `-`, `*`, and `/`; the raw index has
@@ -1586,7 +1586,7 @@ Source: `lib/typed-array.x:143`
 <a id="ArrayFloat.var"></a>
 #### ArrayFloat.var
 
-`Var ArrayFloat.var(ArrayFloat _x2c_macro_array_240)`
+`Var ArrayFloat.var(ArrayFloat array)`
 
 Boxes `array` with its registered packed-array tag without copying.
 The boxed and typed values share the same mutable object identity.
@@ -1596,7 +1596,7 @@ Source: `lib/typed-array.x:144`
 <a id="ArrayFloat.write_repr"></a>
 #### ArrayFloat.write_repr
 
-`Buffer ArrayFloat.write_repr(ArrayFloat _x2c_macro_array_232, Buffer _x2c_macro_out_59)`
+`Buffer ArrayFloat.write_repr(ArrayFloat array, Buffer out)`
 
 Appends the readable packed-Array representation to `out`.
 
@@ -1605,7 +1605,7 @@ Source: `lib/typed-array.x:141`
 <a id="ArrayFloat.write_str"></a>
 #### ArrayFloat.write_str
 
-`Buffer ArrayFloat.write_str(ArrayFloat _x2c_macro_array_233, Buffer _x2c_macro_out_60)`
+`Buffer ArrayFloat.write_str(ArrayFloat array, Buffer out)`
 
 Appends the packed-Array display text to `out`.
 
@@ -1616,7 +1616,7 @@ Source: `lib/typed-array.x:141`
 <a id="ArrayInt.array"></a>
 #### ArrayInt.array
 
-`Array ArrayInt.array(ArrayInt _x2c_macro_array_139)`
+`Array ArrayInt.array(ArrayInt array)`
 
 Returns a fresh ordinary Array containing boxed elements in source order.
 A null input returns NULL. The typed Array and its storage are unchanged.
@@ -1628,7 +1628,7 @@ Source: `lib/typed-array.x:124`
 <a id="ArrayInt.block"></a>
 #### ArrayInt.block
 
-`Block ArrayInt.block(ArrayInt _x2c_macro_array_143)`
+`Block ArrayInt.block(ArrayInt array)`
 
 Views `array` as the same underlying `Block` storage.
 
@@ -1637,7 +1637,7 @@ Source: `lib/typed-array.x:126`
 <a id="ArrayInt.compare"></a>
 #### ArrayInt.compare
 
-`int ArrayInt.compare(ArrayInt _x2c_macro_a_18, ArrayInt _x2c_macro_b_18)`
+`int ArrayInt.compare(ArrayInt a, ArrayInt b)`
 
 Compares packed Arrays lexicographically with the element family's
 ordering. Identical handles compare equal and NULL sorts first.
@@ -1647,7 +1647,7 @@ Source: `lib/typed-array.x:123`
 <a id="ArrayInt.concat"></a>
 #### ArrayInt.concat
 
-`ArrayInt ArrayInt.concat(ArrayInt _x2c_macro_a_16, ArrayInt _x2c_macro_b_16)`
+`ArrayInt ArrayInt.concat(ArrayInt a, ArrayInt b)`
 
 Returns a fresh array holding `a` followed by `b`.
 Neither input is modified. A null `a` returns NULL, while a null `b`
@@ -1661,7 +1661,7 @@ Source: `lib/typed-array.x:122`
 <a id="ArrayInt.contains"></a>
 #### ArrayInt.contains
 
-`int ArrayInt.contains(ArrayInt _x2c_macro_array_127, int _x2c_macro_value_40)`
+`int ArrayInt.contains(ArrayInt array, int value)`
 
 Reports whether a native element equals `value`.
 The scan is linear. Raises: `<size-limit>` when the length exceeds the
@@ -1672,7 +1672,7 @@ Source: `lib/typed-array.x:122`
 <a id="ArrayInt.copy"></a>
 #### ArrayInt.copy
 
-`ArrayInt ArrayInt.copy(ArrayInt _x2c_macro_array_121)`
+`ArrayInt ArrayInt.copy(ArrayInt array)`
 
 Returns a fresh packed copy, or NULL for a null array.
 The result has independent mutable storage containing the same stored
@@ -1686,7 +1686,7 @@ Source: `lib/typed-array.x:122`
 <a id="ArrayInt.count"></a>
 #### ArrayInt.count
 
-`int ArrayInt.count(ArrayInt _x2c_macro_array_128, int _x2c_macro_value_41)`
+`int ArrayInt.count(ArrayInt array, int value)`
 
 Returns how many native elements equal `value`.
 A null array returns zero; the scan is linear.
@@ -1698,7 +1698,7 @@ Source: `lib/typed-array.x:122`
 <a id="ArrayInt.equal"></a>
 #### ArrayInt.equal
 
-`int ArrayInt.equal(ArrayInt _x2c_macro_a_17, ArrayInt _x2c_macro_b_17)`
+`int ArrayInt.equal(ArrayInt a, ArrayInt b)`
 
 Reports elementwise native equality.
 Two null arrays compare equal; one null array or different lengths
@@ -1709,7 +1709,7 @@ Source: `lib/typed-array.x:122`
 <a id="ArrayInt.find"></a>
 #### ArrayInt.find
 
-`int ArrayInt.find(ArrayInt _x2c_macro_array_126, int _x2c_macro_value_39)`
+`int ArrayInt.find(ArrayInt array, int value)`
 
 Returns the first index whose native element equals `value`, or -1.
 A null array returns -1; the scan is linear and preserves source order.
@@ -1721,7 +1721,7 @@ Source: `lib/typed-array.x:122`
 <a id="ArrayInt.getindex"></a>
 #### ArrayInt.getindex
 
-`int ArrayInt.getindex(ArrayInt _x2c_macro_array_132, int _x2c_macro_index_34)`
+`int ArrayInt.getindex(ArrayInt array, int index)`
 
 Reads raw `index` with the bounds and null preconditions of a C pointer.
 Negative indices are not normalized. Use `try_get` for a checked read.
@@ -1731,7 +1731,7 @@ Source: `lib/typed-array.x:122`
 <a id="ArrayInt.getslice"></a>
 #### ArrayInt.getslice
 
-`ArrayInt ArrayInt.getslice(ArrayInt _x2c_macro_array_122, int _x2c_macro_start_21, int _x2c_macro_end_18, int _x2c_macro_step_5)`
+`ArrayInt ArrayInt.getslice(ArrayInt array, int start, int end, int step)`
 
 Returns a fresh packed array for normalized `[start:end:step]`.
 Negative bounds count from the end and a negative step walks backward.
@@ -1744,7 +1744,7 @@ Source: `lib/typed-array.x:122`
 <a id="ArrayInt.indexof"></a>
 #### ArrayInt.indexof
 
-`int ArrayInt.indexof(ArrayInt _x2c_macro_array_129, int _x2c_macro_value_42)`
+`int ArrayInt.indexof(ArrayInt array, int value)`
 
 Returns the same first-match index as `ArrayInt.find`.
 
@@ -1753,7 +1753,7 @@ Source: `lib/typed-array.x:122`
 <a id="ArrayInt.insert"></a>
 #### ArrayInt.insert
 
-`int ArrayInt.insert(ArrayInt _x2c_macro_array_119, int _x2c_macro_index_30, int _x2c_macro_value_37)`
+`int ArrayInt.insert(ArrayInt array, int index, int value)`
 
 Inserts `value` at normalized `index` and returns it.
 The accepted range includes the position after the last element;
@@ -1768,7 +1768,7 @@ Source: `lib/typed-array.x:122`
 <a id="ArrayInt.iter"></a>
 #### ArrayInt.iter
 
-`Iter ArrayInt.iter(ArrayInt _x2c_macro_array_146, Iter _x2c_macro_dest_2)`
+`Iter ArrayInt.iter(ArrayInt array, Iter dest)`
 
 Initializes `dest` to lazily yield boxed elements in index order.
 Returns `dest`, whose storage is caller-owned. The iterator borrows
@@ -1797,7 +1797,7 @@ Source: `lib/typed-array.x:122`
 <a id="ArrayInt.postfixindex"></a>
 #### ArrayInt.postfixindex
 
-`int ArrayInt.postfixindex(ArrayInt _x2c_macro_array_141, int _x2c_macro_index_37, Symbol _x2c_macro_op_5)`
+`int ArrayInt.postfixindex(ArrayInt array, int index, Symbol op)`
 
 Applies `++` or `--` at raw `index` and returns the previous value.
 The index has the unchecked C-pointer preconditions of bracket access.
@@ -1809,7 +1809,7 @@ Source: `lib/typed-array.x:125`
 <a id="ArrayInt.push"></a>
 #### ArrayInt.push
 
-`int ArrayInt.push(ArrayInt _x2c_macro_array_114, int _x2c_macro_value_33)`
+`int ArrayInt.push(ArrayInt array, int value)`
 
 Appends `value` and returns it.
 
@@ -1821,7 +1821,7 @@ Source: `lib/typed-array.x:122`
 <a id="ArrayInt.remove"></a>
 #### ArrayInt.remove
 
-`int ArrayInt.remove(ArrayInt _x2c_macro_array_120, int _x2c_macro_index_31)`
+`int ArrayInt.remove(ArrayInt array, int index)`
 
 Removes and returns the element at normalized `index`.
 Negative indices count from the end; following elements shift left.
@@ -1834,7 +1834,7 @@ Source: `lib/typed-array.x:122`
 <a id="ArrayInt.remslice"></a>
 #### ArrayInt.remslice
 
-`ArrayInt ArrayInt.remslice(ArrayInt _x2c_macro_array_124, int _x2c_macro_start_23, int _x2c_macro_end_20)`
+`ArrayInt ArrayInt.remslice(ArrayInt array, int start, int end)`
 
 Removes the region `array[start:end]` and returns a fresh packed array.
 Bounds normalize as slice bounds, so a negative `end` is a stop.
@@ -1848,7 +1848,7 @@ Source: `lib/typed-array.x:122`
 <a id="ArrayInt.repr"></a>
 #### ArrayInt.repr
 
-`String ArrayInt.repr(ArrayInt _x2c_macro_array_137)`
+`String ArrayInt.repr(ArrayInt array)`
 
 Returns the readable packed-Array representation.
 
@@ -1857,7 +1857,7 @@ Source: `lib/typed-array.x:123`
 <a id="ArrayInt.reverse"></a>
 #### ArrayInt.reverse
 
-`ArrayInt ArrayInt.reverse(ArrayInt _x2c_macro_array_130)`
+`ArrayInt ArrayInt.reverse(ArrayInt array)`
 
 Reverses `array` in place and returns that same array.
 A null or one-element array is returned unchanged.
@@ -1867,7 +1867,7 @@ Source: `lib/typed-array.x:122`
 <a id="ArrayInt.setindex"></a>
 #### ArrayInt.setindex
 
-`int ArrayInt.setindex(ArrayInt _x2c_macro_array_133, int _x2c_macro_index_35, int _x2c_macro_value_43)`
+`int ArrayInt.setindex(ArrayInt array, int index, int value)`
 
 Stores and returns `value` at raw `index`, with C-pointer preconditions.
 Negative indices are not normalized; the caller supplies a valid index.
@@ -1877,7 +1877,7 @@ Source: `lib/typed-array.x:122`
 <a id="ArrayInt.setslice"></a>
 #### ArrayInt.setslice
 
-`ArrayInt ArrayInt.setslice(ArrayInt _x2c_macro_array_123, int _x2c_macro_start_22, int _x2c_macro_end_19, ArrayInt _x2c_macro_values_12)`
+`ArrayInt ArrayInt.setslice(ArrayInt array, int start, int end, ArrayInt values)`
 
 Replaces the region `array[start:end]` and returns `array`.
 Bounds normalize as slice bounds, so a negative `end` is a stop.
@@ -1894,7 +1894,7 @@ Source: `lib/typed-array.x:122`
 <a id="ArrayInt.shift"></a>
 #### ArrayInt.shift
 
-`int ArrayInt.shift(ArrayInt _x2c_macro_array_117)`
+`int ArrayInt.shift(ArrayInt array)`
 
 Removes and returns the first element, shifting the remainder left.
 This operation is O(n).
@@ -1907,7 +1907,7 @@ Source: `lib/typed-array.x:122`
 <a id="ArrayInt.splice"></a>
 #### ArrayInt.splice
 
-`ArrayInt ArrayInt.splice(ArrayInt _x2c_macro_array_125, int _x2c_macro_index_32, int _x2c_macro_remove_count_5, ArrayInt _x2c_macro_values_13)`
+`ArrayInt ArrayInt.splice(ArrayInt array, int index, int remove_count, ArrayInt values)`
 
 Replaces `remove_count` values at normalized `index` and returns them.
 The result is a fresh packed array. A nonpositive count removes nothing;
@@ -1921,7 +1921,7 @@ Source: `lib/typed-array.x:122`
 <a id="ArrayInt.str"></a>
 #### ArrayInt.str
 
-`String ArrayInt.str(ArrayInt _x2c_macro_array_136)`
+`String ArrayInt.str(ArrayInt array)`
 
 Returns the packed-Array display String.
 
@@ -1930,7 +1930,7 @@ Source: `lib/typed-array.x:123`
 <a id="ArrayInt.take_last"></a>
 #### ArrayInt.take_last
 
-`int ArrayInt.take_last(ArrayInt _x2c_macro_array_116)`
+`int ArrayInt.take_last(ArrayInt array)`
 
 Removes and returns the last element.
 
@@ -1941,7 +1941,7 @@ Source: `lib/typed-array.x:122`
 <a id="ArrayInt.try_get"></a>
 #### ArrayInt.try_get
 
-`int ArrayInt.try_get(ArrayInt _x2c_macro_array_131, int _x2c_macro_index_33, int &?_x2c_macro_out_32)`
+`int ArrayInt.try_get(ArrayInt array, int index, int &?out)`
 
 Reads normalized `index` into `out` and reports whether it exists.
 Negative indices count from the end. A null array, null `out`, or
@@ -1954,7 +1954,7 @@ Source: `lib/typed-array.x:122`
 <a id="ArrayInt.try_next"></a>
 #### ArrayInt.try_next
 
-`int ArrayInt.try_next(ArrayInt _x2c_macro_array_113, int &?_x2c_macro_cursor_5, int &?_x2c_macro_out_30)`
+`int ArrayInt.try_next(ArrayInt array, int &?cursor, int &?out)`
 
 Writes the next native element, advances `cursor`, and returns one.
 Initialize the caller-owned cursor to zero. A null argument, negative
@@ -1967,7 +1967,7 @@ Source: `lib/typed-array.x:122`
 <a id="ArrayInt.try_take_last"></a>
 #### ArrayInt.try_take_last
 
-`int ArrayInt.try_take_last(ArrayInt _x2c_macro_array_115, int &?_x2c_macro_out_31)`
+`int ArrayInt.try_take_last(ArrayInt array, int &?out)`
 
 Removes the last element into `out` and returns one when present.
 A null or empty array, or null `out`, returns zero without writing or
@@ -1978,7 +1978,7 @@ Source: `lib/typed-array.x:122`
 <a id="ArrayInt.unshift"></a>
 #### ArrayInt.unshift
 
-`int ArrayInt.unshift(ArrayInt _x2c_macro_array_118, int _x2c_macro_value_36)`
+`int ArrayInt.unshift(ArrayInt array, int value)`
 
 Inserts `value` at the front and returns it, shifting elements right.
 This operation is O(n).
@@ -1991,7 +1991,7 @@ Source: `lib/typed-array.x:122`
 <a id="ArrayInt.updateindex"></a>
 #### ArrayInt.updateindex
 
-`int ArrayInt.updateindex(ArrayInt _x2c_macro_array_140, int _x2c_macro_index_36, Symbol _x2c_macro_op_4, int _x2c_macro_rhs_2)`
+`int ArrayInt.updateindex(ArrayInt array, int index, Symbol op, int rhs)`
 
 Applies integer `op` to raw element `index` and returns the stored value.
 The index has the unchecked C-pointer preconditions of bracket access.
@@ -2006,7 +2006,7 @@ Source: `lib/typed-array.x:125`
 <a id="ArrayInt.var"></a>
 #### ArrayInt.var
 
-`Var ArrayInt.var(ArrayInt _x2c_macro_array_142)`
+`Var ArrayInt.var(ArrayInt array)`
 
 Boxes `array` with its registered packed-array tag without copying.
 The boxed and typed values share the same mutable object identity.
@@ -2016,7 +2016,7 @@ Source: `lib/typed-array.x:126`
 <a id="ArrayInt.write_repr"></a>
 #### ArrayInt.write_repr
 
-`Buffer ArrayInt.write_repr(ArrayInt _x2c_macro_array_134, Buffer _x2c_macro_out_33)`
+`Buffer ArrayInt.write_repr(ArrayInt array, Buffer out)`
 
 Appends the readable packed-Array representation to `out`.
 
@@ -2025,7 +2025,7 @@ Source: `lib/typed-array.x:123`
 <a id="ArrayInt.write_str"></a>
 #### ArrayInt.write_str
 
-`Buffer ArrayInt.write_str(ArrayInt _x2c_macro_array_135, Buffer _x2c_macro_out_34)`
+`Buffer ArrayInt.write_str(ArrayInt array, Buffer out)`
 
 Appends the packed-Array display text to `out`.
 
@@ -2036,7 +2036,7 @@ Source: `lib/typed-array.x:123`
 <a id="ArrayLong.array"></a>
 #### ArrayLong.array
 
-`Array ArrayLong.array(ArrayLong _x2c_macro_array_188)`
+`Array ArrayLong.array(ArrayLong array)`
 
 Returns a fresh ordinary Array containing boxed elements in source order.
 A null input returns NULL. The typed Array and its storage are unchanged.
@@ -2048,7 +2048,7 @@ Source: `lib/typed-array.x:133`
 <a id="ArrayLong.block"></a>
 #### ArrayLong.block
 
-`Block ArrayLong.block(ArrayLong _x2c_macro_array_192)`
+`Block ArrayLong.block(ArrayLong array)`
 
 Views `array` as the same underlying `Block` storage.
 
@@ -2057,7 +2057,7 @@ Source: `lib/typed-array.x:135`
 <a id="ArrayLong.compare"></a>
 #### ArrayLong.compare
 
-`int ArrayLong.compare(ArrayLong _x2c_macro_a_25, ArrayLong _x2c_macro_b_25)`
+`int ArrayLong.compare(ArrayLong a, ArrayLong b)`
 
 Compares packed Arrays lexicographically with the element family's
 ordering. Identical handles compare equal and NULL sorts first.
@@ -2067,7 +2067,7 @@ Source: `lib/typed-array.x:132`
 <a id="ArrayLong.concat"></a>
 #### ArrayLong.concat
 
-`ArrayLong ArrayLong.concat(ArrayLong _x2c_macro_a_23, ArrayLong _x2c_macro_b_23)`
+`ArrayLong ArrayLong.concat(ArrayLong a, ArrayLong b)`
 
 Returns a fresh array holding `a` followed by `b`.
 Neither input is modified. A null `a` returns NULL, while a null `b`
@@ -2081,7 +2081,7 @@ Source: `lib/typed-array.x:131`
 <a id="ArrayLong.contains"></a>
 #### ArrayLong.contains
 
-`int ArrayLong.contains(ArrayLong _x2c_macro_array_176, long _x2c_macro_value_55)`
+`int ArrayLong.contains(ArrayLong array, long value)`
 
 Reports whether a native element equals `value`.
 The scan is linear. Raises: `<size-limit>` when the length exceeds the
@@ -2092,7 +2092,7 @@ Source: `lib/typed-array.x:131`
 <a id="ArrayLong.copy"></a>
 #### ArrayLong.copy
 
-`ArrayLong ArrayLong.copy(ArrayLong _x2c_macro_array_170)`
+`ArrayLong ArrayLong.copy(ArrayLong array)`
 
 Returns a fresh packed copy, or NULL for a null array.
 The result has independent mutable storage containing the same stored
@@ -2106,7 +2106,7 @@ Source: `lib/typed-array.x:131`
 <a id="ArrayLong.count"></a>
 #### ArrayLong.count
 
-`int ArrayLong.count(ArrayLong _x2c_macro_array_177, long _x2c_macro_value_56)`
+`int ArrayLong.count(ArrayLong array, long value)`
 
 Returns how many native elements equal `value`.
 A null array returns zero; the scan is linear.
@@ -2118,7 +2118,7 @@ Source: `lib/typed-array.x:131`
 <a id="ArrayLong.equal"></a>
 #### ArrayLong.equal
 
-`int ArrayLong.equal(ArrayLong _x2c_macro_a_24, ArrayLong _x2c_macro_b_24)`
+`int ArrayLong.equal(ArrayLong a, ArrayLong b)`
 
 Reports elementwise native equality.
 Two null arrays compare equal; one null array or different lengths
@@ -2129,7 +2129,7 @@ Source: `lib/typed-array.x:131`
 <a id="ArrayLong.find"></a>
 #### ArrayLong.find
 
-`int ArrayLong.find(ArrayLong _x2c_macro_array_175, long _x2c_macro_value_54)`
+`int ArrayLong.find(ArrayLong array, long value)`
 
 Returns the first index whose native element equals `value`, or -1.
 A null array returns -1; the scan is linear and preserves source order.
@@ -2141,7 +2141,7 @@ Source: `lib/typed-array.x:131`
 <a id="ArrayLong.getindex"></a>
 #### ArrayLong.getindex
 
-`long ArrayLong.getindex(ArrayLong _x2c_macro_array_181, int _x2c_macro_index_47)`
+`long ArrayLong.getindex(ArrayLong array, int index)`
 
 Reads raw `index` with the bounds and null preconditions of a C pointer.
 Negative indices are not normalized. Use `try_get` for a checked read.
@@ -2151,7 +2151,7 @@ Source: `lib/typed-array.x:131`
 <a id="ArrayLong.getslice"></a>
 #### ArrayLong.getslice
 
-`ArrayLong ArrayLong.getslice(ArrayLong _x2c_macro_array_171, int _x2c_macro_start_29, int _x2c_macro_end_25, int _x2c_macro_step_7)`
+`ArrayLong ArrayLong.getslice(ArrayLong array, int start, int end, int step)`
 
 Returns a fresh packed array for normalized `[start:end:step]`.
 Negative bounds count from the end and a negative step walks backward.
@@ -2164,7 +2164,7 @@ Source: `lib/typed-array.x:131`
 <a id="ArrayLong.indexof"></a>
 #### ArrayLong.indexof
 
-`int ArrayLong.indexof(ArrayLong _x2c_macro_array_178, long _x2c_macro_value_57)`
+`int ArrayLong.indexof(ArrayLong array, long value)`
 
 Returns the same first-match index as `ArrayLong.find`.
 
@@ -2173,7 +2173,7 @@ Source: `lib/typed-array.x:131`
 <a id="ArrayLong.insert"></a>
 #### ArrayLong.insert
 
-`long ArrayLong.insert(ArrayLong _x2c_macro_array_168, int _x2c_macro_index_43, long _x2c_macro_value_52)`
+`long ArrayLong.insert(ArrayLong array, int index, long value)`
 
 Inserts `value` at normalized `index` and returns it.
 The accepted range includes the position after the last element;
@@ -2188,7 +2188,7 @@ Source: `lib/typed-array.x:131`
 <a id="ArrayLong.iter"></a>
 #### ArrayLong.iter
 
-`Iter ArrayLong.iter(ArrayLong _x2c_macro_array_195, Iter _x2c_macro_dest_3)`
+`Iter ArrayLong.iter(ArrayLong array, Iter dest)`
 
 Initializes `dest` to lazily yield boxed elements in index order.
 Returns `dest`, whose storage is caller-owned. The iterator borrows
@@ -2217,7 +2217,7 @@ Source: `lib/typed-array.x:131`
 <a id="ArrayLong.postfixindex"></a>
 #### ArrayLong.postfixindex
 
-`long ArrayLong.postfixindex(ArrayLong _x2c_macro_array_190, int _x2c_macro_index_50, Symbol _x2c_macro_op_7)`
+`long ArrayLong.postfixindex(ArrayLong array, int index, Symbol op)`
 
 Applies `++` or `--` at raw `index` and returns the previous value.
 The index has the unchecked C-pointer preconditions of bracket access.
@@ -2229,7 +2229,7 @@ Source: `lib/typed-array.x:134`
 <a id="ArrayLong.push"></a>
 #### ArrayLong.push
 
-`long ArrayLong.push(ArrayLong _x2c_macro_array_163, long _x2c_macro_value_48)`
+`long ArrayLong.push(ArrayLong array, long value)`
 
 Appends `value` and returns it.
 
@@ -2241,7 +2241,7 @@ Source: `lib/typed-array.x:131`
 <a id="ArrayLong.remove"></a>
 #### ArrayLong.remove
 
-`long ArrayLong.remove(ArrayLong _x2c_macro_array_169, int _x2c_macro_index_44)`
+`long ArrayLong.remove(ArrayLong array, int index)`
 
 Removes and returns the element at normalized `index`.
 Negative indices count from the end; following elements shift left.
@@ -2254,7 +2254,7 @@ Source: `lib/typed-array.x:131`
 <a id="ArrayLong.remslice"></a>
 #### ArrayLong.remslice
 
-`ArrayLong ArrayLong.remslice(ArrayLong _x2c_macro_array_173, int _x2c_macro_start_31, int _x2c_macro_end_27)`
+`ArrayLong ArrayLong.remslice(ArrayLong array, int start, int end)`
 
 Removes the region `array[start:end]` and returns a fresh packed array.
 Bounds normalize as slice bounds, so a negative `end` is a stop.
@@ -2268,7 +2268,7 @@ Source: `lib/typed-array.x:131`
 <a id="ArrayLong.repr"></a>
 #### ArrayLong.repr
 
-`String ArrayLong.repr(ArrayLong _x2c_macro_array_186)`
+`String ArrayLong.repr(ArrayLong array)`
 
 Returns the readable packed-Array representation.
 
@@ -2277,7 +2277,7 @@ Source: `lib/typed-array.x:132`
 <a id="ArrayLong.reverse"></a>
 #### ArrayLong.reverse
 
-`ArrayLong ArrayLong.reverse(ArrayLong _x2c_macro_array_179)`
+`ArrayLong ArrayLong.reverse(ArrayLong array)`
 
 Reverses `array` in place and returns that same array.
 A null or one-element array is returned unchanged.
@@ -2287,7 +2287,7 @@ Source: `lib/typed-array.x:131`
 <a id="ArrayLong.setindex"></a>
 #### ArrayLong.setindex
 
-`long ArrayLong.setindex(ArrayLong _x2c_macro_array_182, int _x2c_macro_index_48, long _x2c_macro_value_58)`
+`long ArrayLong.setindex(ArrayLong array, int index, long value)`
 
 Stores and returns `value` at raw `index`, with C-pointer preconditions.
 Negative indices are not normalized; the caller supplies a valid index.
@@ -2297,7 +2297,7 @@ Source: `lib/typed-array.x:131`
 <a id="ArrayLong.setslice"></a>
 #### ArrayLong.setslice
 
-`ArrayLong ArrayLong.setslice(ArrayLong _x2c_macro_array_172, int _x2c_macro_start_30, int _x2c_macro_end_26, ArrayLong _x2c_macro_values_17)`
+`ArrayLong ArrayLong.setslice(ArrayLong array, int start, int end, ArrayLong values)`
 
 Replaces the region `array[start:end]` and returns `array`.
 Bounds normalize as slice bounds, so a negative `end` is a stop.
@@ -2314,7 +2314,7 @@ Source: `lib/typed-array.x:131`
 <a id="ArrayLong.shift"></a>
 #### ArrayLong.shift
 
-`long ArrayLong.shift(ArrayLong _x2c_macro_array_166)`
+`long ArrayLong.shift(ArrayLong array)`
 
 Removes and returns the first element, shifting the remainder left.
 This operation is O(n).
@@ -2327,7 +2327,7 @@ Source: `lib/typed-array.x:131`
 <a id="ArrayLong.splice"></a>
 #### ArrayLong.splice
 
-`ArrayLong ArrayLong.splice(ArrayLong _x2c_macro_array_174, int _x2c_macro_index_45, int _x2c_macro_remove_count_7, ArrayLong _x2c_macro_values_18)`
+`ArrayLong ArrayLong.splice(ArrayLong array, int index, int remove_count, ArrayLong values)`
 
 Replaces `remove_count` values at normalized `index` and returns them.
 The result is a fresh packed array. A nonpositive count removes nothing;
@@ -2341,7 +2341,7 @@ Source: `lib/typed-array.x:131`
 <a id="ArrayLong.str"></a>
 #### ArrayLong.str
 
-`String ArrayLong.str(ArrayLong _x2c_macro_array_185)`
+`String ArrayLong.str(ArrayLong array)`
 
 Returns the packed-Array display String.
 
@@ -2350,7 +2350,7 @@ Source: `lib/typed-array.x:132`
 <a id="ArrayLong.take_last"></a>
 #### ArrayLong.take_last
 
-`long ArrayLong.take_last(ArrayLong _x2c_macro_array_165)`
+`long ArrayLong.take_last(ArrayLong array)`
 
 Removes and returns the last element.
 
@@ -2361,7 +2361,7 @@ Source: `lib/typed-array.x:131`
 <a id="ArrayLong.try_get"></a>
 #### ArrayLong.try_get
 
-`int ArrayLong.try_get(ArrayLong _x2c_macro_array_180, int _x2c_macro_index_46, long &?_x2c_macro_out_45)`
+`int ArrayLong.try_get(ArrayLong array, int index, long &?out)`
 
 Reads normalized `index` into `out` and reports whether it exists.
 Negative indices count from the end. A null array, null `out`, or
@@ -2374,7 +2374,7 @@ Source: `lib/typed-array.x:131`
 <a id="ArrayLong.try_next"></a>
 #### ArrayLong.try_next
 
-`int ArrayLong.try_next(ArrayLong _x2c_macro_array_162, int &?_x2c_macro_cursor_7, long &?_x2c_macro_out_43)`
+`int ArrayLong.try_next(ArrayLong array, int &?cursor, long &?out)`
 
 Writes the next native element, advances `cursor`, and returns one.
 Initialize the caller-owned cursor to zero. A null argument, negative
@@ -2387,7 +2387,7 @@ Source: `lib/typed-array.x:131`
 <a id="ArrayLong.try_take_last"></a>
 #### ArrayLong.try_take_last
 
-`int ArrayLong.try_take_last(ArrayLong _x2c_macro_array_164, long &?_x2c_macro_out_44)`
+`int ArrayLong.try_take_last(ArrayLong array, long &?out)`
 
 Removes the last element into `out` and returns one when present.
 A null or empty array, or null `out`, returns zero without writing or
@@ -2398,7 +2398,7 @@ Source: `lib/typed-array.x:131`
 <a id="ArrayLong.unshift"></a>
 #### ArrayLong.unshift
 
-`long ArrayLong.unshift(ArrayLong _x2c_macro_array_167, long _x2c_macro_value_51)`
+`long ArrayLong.unshift(ArrayLong array, long value)`
 
 Inserts `value` at the front and returns it, shifting elements right.
 This operation is O(n).
@@ -2411,7 +2411,7 @@ Source: `lib/typed-array.x:131`
 <a id="ArrayLong.updateindex"></a>
 #### ArrayLong.updateindex
 
-`long ArrayLong.updateindex(ArrayLong _x2c_macro_array_189, int _x2c_macro_index_49, Symbol _x2c_macro_op_6, long _x2c_macro_rhs_3)`
+`long ArrayLong.updateindex(ArrayLong array, int index, Symbol op, long rhs)`
 
 Applies integer `op` to raw element `index` and returns the stored value.
 The index has the unchecked C-pointer preconditions of bracket access.
@@ -2426,7 +2426,7 @@ Source: `lib/typed-array.x:134`
 <a id="ArrayLong.var"></a>
 #### ArrayLong.var
 
-`Var ArrayLong.var(ArrayLong _x2c_macro_array_191)`
+`Var ArrayLong.var(ArrayLong array)`
 
 Boxes `array` with its registered packed-array tag without copying.
 The boxed and typed values share the same mutable object identity.
@@ -2436,7 +2436,7 @@ Source: `lib/typed-array.x:135`
 <a id="ArrayLong.write_repr"></a>
 #### ArrayLong.write_repr
 
-`Buffer ArrayLong.write_repr(ArrayLong _x2c_macro_array_183, Buffer _x2c_macro_out_46)`
+`Buffer ArrayLong.write_repr(ArrayLong array, Buffer out)`
 
 Appends the readable packed-Array representation to `out`.
 
@@ -2445,7 +2445,7 @@ Source: `lib/typed-array.x:132`
 <a id="ArrayLong.write_str"></a>
 #### ArrayLong.write_str
 
-`Buffer ArrayLong.write_str(ArrayLong _x2c_macro_array_184, Buffer _x2c_macro_out_47)`
+`Buffer ArrayLong.write_str(ArrayLong array, Buffer out)`
 
 Appends the packed-Array display text to `out`.
 
@@ -2456,7 +2456,7 @@ Source: `lib/typed-array.x:132`
 <a id="ArrayShort.array"></a>
 #### ArrayShort.array
 
-`Array ArrayShort.array(ArrayShort _x2c_macro_array_90)`
+`Array ArrayShort.array(ArrayShort array)`
 
 Returns a fresh ordinary Array containing boxed elements in source order.
 A null input returns NULL. The typed Array and its storage are unchanged.
@@ -2468,7 +2468,7 @@ Source: `lib/typed-array.x:115`
 <a id="ArrayShort.block"></a>
 #### ArrayShort.block
 
-`Block ArrayShort.block(ArrayShort _x2c_macro_array_94)`
+`Block ArrayShort.block(ArrayShort array)`
 
 Views `array` as the same underlying `Block` storage.
 
@@ -2477,7 +2477,7 @@ Source: `lib/typed-array.x:117`
 <a id="ArrayShort.compare"></a>
 #### ArrayShort.compare
 
-`int ArrayShort.compare(ArrayShort _x2c_macro_a_11, ArrayShort _x2c_macro_b_11)`
+`int ArrayShort.compare(ArrayShort a, ArrayShort b)`
 
 Compares packed Arrays lexicographically with the element family's
 ordering. Identical handles compare equal and NULL sorts first.
@@ -2487,7 +2487,7 @@ Source: `lib/typed-array.x:114`
 <a id="ArrayShort.concat"></a>
 #### ArrayShort.concat
 
-`ArrayShort ArrayShort.concat(ArrayShort _x2c_macro_a_9, ArrayShort _x2c_macro_b_9)`
+`ArrayShort ArrayShort.concat(ArrayShort a, ArrayShort b)`
 
 Returns a fresh array holding `a` followed by `b`.
 Neither input is modified. A null `a` returns NULL, while a null `b`
@@ -2501,7 +2501,7 @@ Source: `lib/typed-array.x:113`
 <a id="ArrayShort.contains"></a>
 #### ArrayShort.contains
 
-`int ArrayShort.contains(ArrayShort _x2c_macro_array_78, short _x2c_macro_value_25)`
+`int ArrayShort.contains(ArrayShort array, short value)`
 
 Reports whether a native element equals `value`.
 The scan is linear. Raises: `<size-limit>` when the length exceeds the
@@ -2512,7 +2512,7 @@ Source: `lib/typed-array.x:113`
 <a id="ArrayShort.copy"></a>
 #### ArrayShort.copy
 
-`ArrayShort ArrayShort.copy(ArrayShort _x2c_macro_array_72)`
+`ArrayShort ArrayShort.copy(ArrayShort array)`
 
 Returns a fresh packed copy, or NULL for a null array.
 The result has independent mutable storage containing the same stored
@@ -2526,7 +2526,7 @@ Source: `lib/typed-array.x:113`
 <a id="ArrayShort.count"></a>
 #### ArrayShort.count
 
-`int ArrayShort.count(ArrayShort _x2c_macro_array_79, short _x2c_macro_value_26)`
+`int ArrayShort.count(ArrayShort array, short value)`
 
 Returns how many native elements equal `value`.
 A null array returns zero; the scan is linear.
@@ -2538,7 +2538,7 @@ Source: `lib/typed-array.x:113`
 <a id="ArrayShort.equal"></a>
 #### ArrayShort.equal
 
-`int ArrayShort.equal(ArrayShort _x2c_macro_a_10, ArrayShort _x2c_macro_b_10)`
+`int ArrayShort.equal(ArrayShort a, ArrayShort b)`
 
 Reports elementwise native equality.
 Two null arrays compare equal; one null array or different lengths
@@ -2549,7 +2549,7 @@ Source: `lib/typed-array.x:113`
 <a id="ArrayShort.find"></a>
 #### ArrayShort.find
 
-`int ArrayShort.find(ArrayShort _x2c_macro_array_77, short _x2c_macro_value_24)`
+`int ArrayShort.find(ArrayShort array, short value)`
 
 Returns the first index whose native element equals `value`, or -1.
 A null array returns -1; the scan is linear and preserves source order.
@@ -2561,7 +2561,7 @@ Source: `lib/typed-array.x:113`
 <a id="ArrayShort.getindex"></a>
 #### ArrayShort.getindex
 
-`short ArrayShort.getindex(ArrayShort _x2c_macro_array_83, int _x2c_macro_index_21)`
+`short ArrayShort.getindex(ArrayShort array, int index)`
 
 Reads raw `index` with the bounds and null preconditions of a C pointer.
 Negative indices are not normalized. Use `try_get` for a checked read.
@@ -2571,7 +2571,7 @@ Source: `lib/typed-array.x:113`
 <a id="ArrayShort.getslice"></a>
 #### ArrayShort.getslice
 
-`ArrayShort ArrayShort.getslice(ArrayShort _x2c_macro_array_73, int _x2c_macro_start_13, int _x2c_macro_end_11, int _x2c_macro_step_3)`
+`ArrayShort ArrayShort.getslice(ArrayShort array, int start, int end, int step)`
 
 Returns a fresh packed array for normalized `[start:end:step]`.
 Negative bounds count from the end and a negative step walks backward.
@@ -2584,7 +2584,7 @@ Source: `lib/typed-array.x:113`
 <a id="ArrayShort.indexof"></a>
 #### ArrayShort.indexof
 
-`int ArrayShort.indexof(ArrayShort _x2c_macro_array_80, short _x2c_macro_value_27)`
+`int ArrayShort.indexof(ArrayShort array, short value)`
 
 Returns the same first-match index as `ArrayShort.find`.
 
@@ -2593,7 +2593,7 @@ Source: `lib/typed-array.x:113`
 <a id="ArrayShort.insert"></a>
 #### ArrayShort.insert
 
-`short ArrayShort.insert(ArrayShort _x2c_macro_array_70, int _x2c_macro_index_17, short _x2c_macro_value_22)`
+`short ArrayShort.insert(ArrayShort array, int index, short value)`
 
 Inserts `value` at normalized `index` and returns it.
 The accepted range includes the position after the last element;
@@ -2608,7 +2608,7 @@ Source: `lib/typed-array.x:113`
 <a id="ArrayShort.iter"></a>
 #### ArrayShort.iter
 
-`Iter ArrayShort.iter(ArrayShort _x2c_macro_array_97, Iter _x2c_macro_dest_1)`
+`Iter ArrayShort.iter(ArrayShort array, Iter dest)`
 
 Initializes `dest` to lazily yield boxed elements in index order.
 Returns `dest`, whose storage is caller-owned. The iterator borrows
@@ -2637,7 +2637,7 @@ Source: `lib/typed-array.x:113`
 <a id="ArrayShort.postfixindex"></a>
 #### ArrayShort.postfixindex
 
-`short ArrayShort.postfixindex(ArrayShort _x2c_macro_array_92, int _x2c_macro_index_24, Symbol _x2c_macro_op_3)`
+`short ArrayShort.postfixindex(ArrayShort array, int index, Symbol op)`
 
 Applies `++` or `--` at raw `index` and returns the previous value.
 The index has the unchecked C-pointer preconditions of bracket access.
@@ -2649,7 +2649,7 @@ Source: `lib/typed-array.x:116`
 <a id="ArrayShort.push"></a>
 #### ArrayShort.push
 
-`short ArrayShort.push(ArrayShort _x2c_macro_array_65, short _x2c_macro_value_18)`
+`short ArrayShort.push(ArrayShort array, short value)`
 
 Appends `value` and returns it.
 
@@ -2661,7 +2661,7 @@ Source: `lib/typed-array.x:113`
 <a id="ArrayShort.remove"></a>
 #### ArrayShort.remove
 
-`short ArrayShort.remove(ArrayShort _x2c_macro_array_71, int _x2c_macro_index_18)`
+`short ArrayShort.remove(ArrayShort array, int index)`
 
 Removes and returns the element at normalized `index`.
 Negative indices count from the end; following elements shift left.
@@ -2674,7 +2674,7 @@ Source: `lib/typed-array.x:113`
 <a id="ArrayShort.remslice"></a>
 #### ArrayShort.remslice
 
-`ArrayShort ArrayShort.remslice(ArrayShort _x2c_macro_array_75, int _x2c_macro_start_15, int _x2c_macro_end_13)`
+`ArrayShort ArrayShort.remslice(ArrayShort array, int start, int end)`
 
 Removes the region `array[start:end]` and returns a fresh packed array.
 Bounds normalize as slice bounds, so a negative `end` is a stop.
@@ -2688,7 +2688,7 @@ Source: `lib/typed-array.x:113`
 <a id="ArrayShort.repr"></a>
 #### ArrayShort.repr
 
-`String ArrayShort.repr(ArrayShort _x2c_macro_array_88)`
+`String ArrayShort.repr(ArrayShort array)`
 
 Returns the readable packed-Array representation.
 
@@ -2697,7 +2697,7 @@ Source: `lib/typed-array.x:114`
 <a id="ArrayShort.reverse"></a>
 #### ArrayShort.reverse
 
-`ArrayShort ArrayShort.reverse(ArrayShort _x2c_macro_array_81)`
+`ArrayShort ArrayShort.reverse(ArrayShort array)`
 
 Reverses `array` in place and returns that same array.
 A null or one-element array is returned unchanged.
@@ -2707,7 +2707,7 @@ Source: `lib/typed-array.x:113`
 <a id="ArrayShort.setindex"></a>
 #### ArrayShort.setindex
 
-`short ArrayShort.setindex(ArrayShort _x2c_macro_array_84, int _x2c_macro_index_22, short _x2c_macro_value_28)`
+`short ArrayShort.setindex(ArrayShort array, int index, short value)`
 
 Stores and returns `value` at raw `index`, with C-pointer preconditions.
 Negative indices are not normalized; the caller supplies a valid index.
@@ -2717,7 +2717,7 @@ Source: `lib/typed-array.x:113`
 <a id="ArrayShort.setslice"></a>
 #### ArrayShort.setslice
 
-`ArrayShort ArrayShort.setslice(ArrayShort _x2c_macro_array_74, int _x2c_macro_start_14, int _x2c_macro_end_12, ArrayShort _x2c_macro_values_7)`
+`ArrayShort ArrayShort.setslice(ArrayShort array, int start, int end, ArrayShort values)`
 
 Replaces the region `array[start:end]` and returns `array`.
 Bounds normalize as slice bounds, so a negative `end` is a stop.
@@ -2734,7 +2734,7 @@ Source: `lib/typed-array.x:113`
 <a id="ArrayShort.shift"></a>
 #### ArrayShort.shift
 
-`short ArrayShort.shift(ArrayShort _x2c_macro_array_68)`
+`short ArrayShort.shift(ArrayShort array)`
 
 Removes and returns the first element, shifting the remainder left.
 This operation is O(n).
@@ -2747,7 +2747,7 @@ Source: `lib/typed-array.x:113`
 <a id="ArrayShort.splice"></a>
 #### ArrayShort.splice
 
-`ArrayShort ArrayShort.splice(ArrayShort _x2c_macro_array_76, int _x2c_macro_index_19, int _x2c_macro_remove_count_3, ArrayShort _x2c_macro_values_8)`
+`ArrayShort ArrayShort.splice(ArrayShort array, int index, int remove_count, ArrayShort values)`
 
 Replaces `remove_count` values at normalized `index` and returns them.
 The result is a fresh packed array. A nonpositive count removes nothing;
@@ -2761,7 +2761,7 @@ Source: `lib/typed-array.x:113`
 <a id="ArrayShort.str"></a>
 #### ArrayShort.str
 
-`String ArrayShort.str(ArrayShort _x2c_macro_array_87)`
+`String ArrayShort.str(ArrayShort array)`
 
 Returns the packed-Array display String.
 
@@ -2770,7 +2770,7 @@ Source: `lib/typed-array.x:114`
 <a id="ArrayShort.take_last"></a>
 #### ArrayShort.take_last
 
-`short ArrayShort.take_last(ArrayShort _x2c_macro_array_67)`
+`short ArrayShort.take_last(ArrayShort array)`
 
 Removes and returns the last element.
 
@@ -2781,7 +2781,7 @@ Source: `lib/typed-array.x:113`
 <a id="ArrayShort.try_get"></a>
 #### ArrayShort.try_get
 
-`int ArrayShort.try_get(ArrayShort _x2c_macro_array_82, int _x2c_macro_index_20, short &?_x2c_macro_out_19)`
+`int ArrayShort.try_get(ArrayShort array, int index, short &?out)`
 
 Reads normalized `index` into `out` and reports whether it exists.
 Negative indices count from the end. A null array, null `out`, or
@@ -2794,7 +2794,7 @@ Source: `lib/typed-array.x:113`
 <a id="ArrayShort.try_next"></a>
 #### ArrayShort.try_next
 
-`int ArrayShort.try_next(ArrayShort _x2c_macro_array_64, int &?_x2c_macro_cursor_3, short &?_x2c_macro_out_17)`
+`int ArrayShort.try_next(ArrayShort array, int &?cursor, short &?out)`
 
 Writes the next native element, advances `cursor`, and returns one.
 Initialize the caller-owned cursor to zero. A null argument, negative
@@ -2807,7 +2807,7 @@ Source: `lib/typed-array.x:113`
 <a id="ArrayShort.try_take_last"></a>
 #### ArrayShort.try_take_last
 
-`int ArrayShort.try_take_last(ArrayShort _x2c_macro_array_66, short &?_x2c_macro_out_18)`
+`int ArrayShort.try_take_last(ArrayShort array, short &?out)`
 
 Removes the last element into `out` and returns one when present.
 A null or empty array, or null `out`, returns zero without writing or
@@ -2818,7 +2818,7 @@ Source: `lib/typed-array.x:113`
 <a id="ArrayShort.unshift"></a>
 #### ArrayShort.unshift
 
-`short ArrayShort.unshift(ArrayShort _x2c_macro_array_69, short _x2c_macro_value_21)`
+`short ArrayShort.unshift(ArrayShort array, short value)`
 
 Inserts `value` at the front and returns it, shifting elements right.
 This operation is O(n).
@@ -2831,7 +2831,7 @@ Source: `lib/typed-array.x:113`
 <a id="ArrayShort.updateindex"></a>
 #### ArrayShort.updateindex
 
-`short ArrayShort.updateindex(ArrayShort _x2c_macro_array_91, int _x2c_macro_index_23, Symbol _x2c_macro_op_2, short _x2c_macro_rhs_1)`
+`short ArrayShort.updateindex(ArrayShort array, int index, Symbol op, short rhs)`
 
 Applies integer `op` to raw element `index` and returns the stored value.
 The index has the unchecked C-pointer preconditions of bracket access.
@@ -2846,7 +2846,7 @@ Source: `lib/typed-array.x:116`
 <a id="ArrayShort.var"></a>
 #### ArrayShort.var
 
-`Var ArrayShort.var(ArrayShort _x2c_macro_array_93)`
+`Var ArrayShort.var(ArrayShort array)`
 
 Boxes `array` with its registered packed-array tag without copying.
 The boxed and typed values share the same mutable object identity.
@@ -2856,7 +2856,7 @@ Source: `lib/typed-array.x:117`
 <a id="ArrayShort.write_repr"></a>
 #### ArrayShort.write_repr
 
-`Buffer ArrayShort.write_repr(ArrayShort _x2c_macro_array_85, Buffer _x2c_macro_out_20)`
+`Buffer ArrayShort.write_repr(ArrayShort array, Buffer out)`
 
 Appends the readable packed-Array representation to `out`.
 
@@ -2865,7 +2865,7 @@ Source: `lib/typed-array.x:114`
 <a id="ArrayShort.write_str"></a>
 #### ArrayShort.write_str
 
-`Buffer ArrayShort.write_str(ArrayShort _x2c_macro_array_86, Buffer _x2c_macro_out_21)`
+`Buffer ArrayShort.write_str(ArrayShort array, Buffer out)`
 
 Appends the packed-Array display text to `out`.
 
@@ -2876,7 +2876,7 @@ Source: `lib/typed-array.x:114`
 <a id="ArrayString.array"></a>
 #### ArrayString.array
 
-`Array ArrayString.array(ArrayString _x2c_macro_array_335)`
+`Array ArrayString.array(ArrayString array)`
 
 Returns a fresh ordinary Array containing boxed elements in source order.
 A null input returns NULL. The typed Array and its storage are unchanged.
@@ -2888,7 +2888,7 @@ Source: `lib/typed-array.x:160`
 <a id="ArrayString.block"></a>
 #### ArrayString.block
 
-`Block ArrayString.block(ArrayString _x2c_macro_array_339)`
+`Block ArrayString.block(ArrayString array)`
 
 Views `array` as the same underlying `Block` storage.
 
@@ -2897,7 +2897,7 @@ Source: `lib/typed-array.x:162`
 <a id="ArrayString.compare"></a>
 #### ArrayString.compare
 
-`int ArrayString.compare(ArrayString _x2c_macro_a_44, ArrayString _x2c_macro_b_44)`
+`int ArrayString.compare(ArrayString a, ArrayString b)`
 
 Compares packed Arrays lexicographically with the element family's
 ordering. Identical handles compare equal and NULL sorts first.
@@ -2907,7 +2907,7 @@ Source: `lib/typed-array.x:159`
 <a id="ArrayString.concat"></a>
 #### ArrayString.concat
 
-`ArrayString ArrayString.concat(ArrayString _x2c_macro_a_42, ArrayString _x2c_macro_b_42)`
+`ArrayString ArrayString.concat(ArrayString a, ArrayString b)`
 
 Returns a fresh array holding `a` followed by `b`.
 Neither input is modified. A null `a` returns NULL, while a null `b`
@@ -2921,7 +2921,7 @@ Source: `lib/typed-array.x:158`
 <a id="ArrayString.contains"></a>
 #### ArrayString.contains
 
-`int ArrayString.contains(ArrayString _x2c_macro_array_323, String _x2c_macro_value_100)`
+`int ArrayString.contains(ArrayString array, String value)`
 
 Reports whether a native element equals `value`.
 The scan is linear. Raises: `<size-limit>` when the length exceeds the
@@ -2932,7 +2932,7 @@ Source: `lib/typed-array.x:158`
 <a id="ArrayString.copy"></a>
 #### ArrayString.copy
 
-`ArrayString ArrayString.copy(ArrayString _x2c_macro_array_317)`
+`ArrayString ArrayString.copy(ArrayString array)`
 
 Returns a fresh packed copy, or NULL for a null array.
 The result has independent mutable storage containing the same stored
@@ -2946,7 +2946,7 @@ Source: `lib/typed-array.x:158`
 <a id="ArrayString.count"></a>
 #### ArrayString.count
 
-`int ArrayString.count(ArrayString _x2c_macro_array_324, String _x2c_macro_value_101)`
+`int ArrayString.count(ArrayString array, String value)`
 
 Returns how many native elements equal `value`.
 A null array returns zero; the scan is linear.
@@ -2958,7 +2958,7 @@ Source: `lib/typed-array.x:158`
 <a id="ArrayString.equal"></a>
 #### ArrayString.equal
 
-`int ArrayString.equal(ArrayString _x2c_macro_a_43, ArrayString _x2c_macro_b_43)`
+`int ArrayString.equal(ArrayString a, ArrayString b)`
 
 Reports elementwise native equality.
 Two null arrays compare equal; one null array or different lengths
@@ -2969,7 +2969,7 @@ Source: `lib/typed-array.x:158`
 <a id="ArrayString.find"></a>
 #### ArrayString.find
 
-`int ArrayString.find(ArrayString _x2c_macro_array_322, String _x2c_macro_value_99)`
+`int ArrayString.find(ArrayString array, String value)`
 
 Returns the first index whose native element equals `value`, or -1.
 A null array returns -1; the scan is linear and preserves source order.
@@ -2981,7 +2981,7 @@ Source: `lib/typed-array.x:158`
 <a id="ArrayString.getindex"></a>
 #### ArrayString.getindex
 
-`String ArrayString.getindex(ArrayString _x2c_macro_array_328, int _x2c_macro_index_86)`
+`String ArrayString.getindex(ArrayString array, int index)`
 
 Reads raw `index` with the bounds and null preconditions of a C pointer.
 Negative indices are not normalized. Use `try_get` for a checked read.
@@ -2991,7 +2991,7 @@ Source: `lib/typed-array.x:158`
 <a id="ArrayString.getslice"></a>
 #### ArrayString.getslice
 
-`ArrayString ArrayString.getslice(ArrayString _x2c_macro_array_318, int _x2c_macro_start_53, int _x2c_macro_end_46, int _x2c_macro_step_13)`
+`ArrayString ArrayString.getslice(ArrayString array, int start, int end, int step)`
 
 Returns a fresh packed array for normalized `[start:end:step]`.
 Negative bounds count from the end and a negative step walks backward.
@@ -3004,7 +3004,7 @@ Source: `lib/typed-array.x:158`
 <a id="ArrayString.indexof"></a>
 #### ArrayString.indexof
 
-`int ArrayString.indexof(ArrayString _x2c_macro_array_325, String _x2c_macro_value_102)`
+`int ArrayString.indexof(ArrayString array, String value)`
 
 Returns the same first-match index as `ArrayString.find`.
 
@@ -3013,7 +3013,7 @@ Source: `lib/typed-array.x:158`
 <a id="ArrayString.insert"></a>
 #### ArrayString.insert
 
-`String ArrayString.insert(ArrayString _x2c_macro_array_315, int _x2c_macro_index_82, String _x2c_macro_value_97)`
+`String ArrayString.insert(ArrayString array, int index, String value)`
 
 Inserts `value` at normalized `index` and returns it.
 The accepted range includes the position after the last element;
@@ -3028,7 +3028,7 @@ Source: `lib/typed-array.x:158`
 <a id="ArrayString.iter"></a>
 #### ArrayString.iter
 
-`Iter ArrayString.iter(ArrayString _x2c_macro_array_342, Iter _x2c_macro_dest_6)`
+`Iter ArrayString.iter(ArrayString array, Iter dest)`
 
 Initializes `dest` to lazily yield boxed elements in index order.
 Returns `dest`, whose storage is caller-owned. The iterator borrows
@@ -3057,7 +3057,7 @@ Source: `lib/typed-array.x:158`
 <a id="ArrayString.postfixindex"></a>
 #### ArrayString.postfixindex
 
-`String ArrayString.postfixindex(ArrayString _x2c_macro_array_337, int _x2c_macro_index_89, Symbol _x2c_macro_op_13)`
+`String ArrayString.postfixindex(ArrayString array, int index, Symbol op)`
 
 Raises `<bad-op>` because String elements have no postfix operation.
 
@@ -3066,7 +3066,7 @@ Source: `lib/typed-array.x:161`
 <a id="ArrayString.push"></a>
 #### ArrayString.push
 
-`String ArrayString.push(ArrayString _x2c_macro_array_310, String _x2c_macro_value_93)`
+`String ArrayString.push(ArrayString array, String value)`
 
 Appends `value` and returns it.
 
@@ -3078,7 +3078,7 @@ Source: `lib/typed-array.x:158`
 <a id="ArrayString.remove"></a>
 #### ArrayString.remove
 
-`String ArrayString.remove(ArrayString _x2c_macro_array_316, int _x2c_macro_index_83)`
+`String ArrayString.remove(ArrayString array, int index)`
 
 Removes and returns the element at normalized `index`.
 Negative indices count from the end; following elements shift left.
@@ -3091,7 +3091,7 @@ Source: `lib/typed-array.x:158`
 <a id="ArrayString.remslice"></a>
 #### ArrayString.remslice
 
-`ArrayString ArrayString.remslice(ArrayString _x2c_macro_array_320, int _x2c_macro_start_55, int _x2c_macro_end_48)`
+`ArrayString ArrayString.remslice(ArrayString array, int start, int end)`
 
 Removes the region `array[start:end]` and returns a fresh packed array.
 Bounds normalize as slice bounds, so a negative `end` is a stop.
@@ -3105,7 +3105,7 @@ Source: `lib/typed-array.x:158`
 <a id="ArrayString.repr"></a>
 #### ArrayString.repr
 
-`String ArrayString.repr(ArrayString _x2c_macro_array_333)`
+`String ArrayString.repr(ArrayString array)`
 
 Returns the readable packed-Array representation.
 
@@ -3114,7 +3114,7 @@ Source: `lib/typed-array.x:159`
 <a id="ArrayString.reverse"></a>
 #### ArrayString.reverse
 
-`ArrayString ArrayString.reverse(ArrayString _x2c_macro_array_326)`
+`ArrayString ArrayString.reverse(ArrayString array)`
 
 Reverses `array` in place and returns that same array.
 A null or one-element array is returned unchanged.
@@ -3124,7 +3124,7 @@ Source: `lib/typed-array.x:158`
 <a id="ArrayString.setindex"></a>
 #### ArrayString.setindex
 
-`String ArrayString.setindex(ArrayString _x2c_macro_array_329, int _x2c_macro_index_87, String _x2c_macro_value_103)`
+`String ArrayString.setindex(ArrayString array, int index, String value)`
 
 Stores and returns `value` at raw `index`, with C-pointer preconditions.
 Negative indices are not normalized; the caller supplies a valid index.
@@ -3134,7 +3134,7 @@ Source: `lib/typed-array.x:158`
 <a id="ArrayString.setslice"></a>
 #### ArrayString.setslice
 
-`ArrayString ArrayString.setslice(ArrayString _x2c_macro_array_319, int _x2c_macro_start_54, int _x2c_macro_end_47, ArrayString _x2c_macro_values_32)`
+`ArrayString ArrayString.setslice(ArrayString array, int start, int end, ArrayString values)`
 
 Replaces the region `array[start:end]` and returns `array`.
 Bounds normalize as slice bounds, so a negative `end` is a stop.
@@ -3151,7 +3151,7 @@ Source: `lib/typed-array.x:158`
 <a id="ArrayString.shift"></a>
 #### ArrayString.shift
 
-`String ArrayString.shift(ArrayString _x2c_macro_array_313)`
+`String ArrayString.shift(ArrayString array)`
 
 Removes and returns the first element, shifting the remainder left.
 This operation is O(n).
@@ -3164,7 +3164,7 @@ Source: `lib/typed-array.x:158`
 <a id="ArrayString.splice"></a>
 #### ArrayString.splice
 
-`ArrayString ArrayString.splice(ArrayString _x2c_macro_array_321, int _x2c_macro_index_84, int _x2c_macro_remove_count_13, ArrayString _x2c_macro_values_33)`
+`ArrayString ArrayString.splice(ArrayString array, int index, int remove_count, ArrayString values)`
 
 Replaces `remove_count` values at normalized `index` and returns them.
 The result is a fresh packed array. A nonpositive count removes nothing;
@@ -3178,7 +3178,7 @@ Source: `lib/typed-array.x:158`
 <a id="ArrayString.str"></a>
 #### ArrayString.str
 
-`String ArrayString.str(ArrayString _x2c_macro_array_332)`
+`String ArrayString.str(ArrayString array)`
 
 Returns the packed-Array display String.
 
@@ -3187,7 +3187,7 @@ Source: `lib/typed-array.x:159`
 <a id="ArrayString.take_last"></a>
 #### ArrayString.take_last
 
-`String ArrayString.take_last(ArrayString _x2c_macro_array_312)`
+`String ArrayString.take_last(ArrayString array)`
 
 Removes and returns the last element.
 
@@ -3198,7 +3198,7 @@ Source: `lib/typed-array.x:158`
 <a id="ArrayString.try_get"></a>
 #### ArrayString.try_get
 
-`int ArrayString.try_get(ArrayString _x2c_macro_array_327, int _x2c_macro_index_85, String &?_x2c_macro_out_84)`
+`int ArrayString.try_get(ArrayString array, int index, String &?out)`
 
 Reads normalized `index` into `out` and reports whether it exists.
 Negative indices count from the end. A null array, null `out`, or
@@ -3211,7 +3211,7 @@ Source: `lib/typed-array.x:158`
 <a id="ArrayString.try_next"></a>
 #### ArrayString.try_next
 
-`int ArrayString.try_next(ArrayString _x2c_macro_array_309, int &?_x2c_macro_cursor_13, String &?_x2c_macro_out_82)`
+`int ArrayString.try_next(ArrayString array, int &?cursor, String &?out)`
 
 Writes the next native element, advances `cursor`, and returns one.
 Initialize the caller-owned cursor to zero. A null argument, negative
@@ -3224,7 +3224,7 @@ Source: `lib/typed-array.x:158`
 <a id="ArrayString.try_take_last"></a>
 #### ArrayString.try_take_last
 
-`int ArrayString.try_take_last(ArrayString _x2c_macro_array_311, String &?_x2c_macro_out_83)`
+`int ArrayString.try_take_last(ArrayString array, String &?out)`
 
 Removes the last element into `out` and returns one when present.
 A null or empty array, or null `out`, returns zero without writing or
@@ -3235,7 +3235,7 @@ Source: `lib/typed-array.x:158`
 <a id="ArrayString.unshift"></a>
 #### ArrayString.unshift
 
-`String ArrayString.unshift(ArrayString _x2c_macro_array_314, String _x2c_macro_value_96)`
+`String ArrayString.unshift(ArrayString array, String value)`
 
 Inserts `value` at the front and returns it, shifting elements right.
 This operation is O(n).
@@ -3248,7 +3248,7 @@ Source: `lib/typed-array.x:158`
 <a id="ArrayString.updateindex"></a>
 #### ArrayString.updateindex
 
-`String ArrayString.updateindex(ArrayString _x2c_macro_array_336, int _x2c_macro_index_88, Symbol _x2c_macro_op_12, String _x2c_macro_rhs_6)`
+`String ArrayString.updateindex(ArrayString array, int index, Symbol op, String rhs)`
 
 Concatenates `rhs` onto the String at raw `index` and returns the stored
 canonical String. The index has the unchecked C-pointer preconditions of
@@ -3260,7 +3260,7 @@ Source: `lib/typed-array.x:161`
 <a id="ArrayString.var"></a>
 #### ArrayString.var
 
-`Var ArrayString.var(ArrayString _x2c_macro_array_338)`
+`Var ArrayString.var(ArrayString array)`
 
 Boxes `array` with its registered packed-array tag without copying.
 The boxed and typed values share the same mutable object identity.
@@ -3270,7 +3270,7 @@ Source: `lib/typed-array.x:162`
 <a id="ArrayString.write_repr"></a>
 #### ArrayString.write_repr
 
-`Buffer ArrayString.write_repr(ArrayString _x2c_macro_array_330, Buffer _x2c_macro_out_85)`
+`Buffer ArrayString.write_repr(ArrayString array, Buffer out)`
 
 Appends the readable packed-Array representation to `out`.
 
@@ -3279,7 +3279,7 @@ Source: `lib/typed-array.x:159`
 <a id="ArrayString.write_str"></a>
 #### ArrayString.write_str
 
-`Buffer ArrayString.write_str(ArrayString _x2c_macro_array_331, Buffer _x2c_macro_out_86)`
+`Buffer ArrayString.write_str(ArrayString array, Buffer out)`
 
 Appends the packed-Array display text to `out`.
 
@@ -3290,7 +3290,7 @@ Source: `lib/typed-array.x:159`
 <a id="Var.arraychar"></a>
 #### Var.arraychar
 
-`ArrayChar Var.arraychar(Var _x2c_macro_value_14)`
+`ArrayChar Var.arraychar(Var value)`
 
 Returns the packed-array pointer carried by `value`.
 `value` must carry this array family's registered tag; the converter
@@ -3301,7 +3301,7 @@ Source: `lib/typed-array.x:108`
 <a id="Var.arraydbl"></a>
 #### Var.arraydbl
 
-`ArrayDbl Var.arraydbl(Var _x2c_macro_value_89)`
+`ArrayDbl Var.arraydbl(Var value)`
 
 Returns the packed-array pointer carried by `value`.
 `value` must carry this array family's registered tag; the converter
@@ -3312,7 +3312,7 @@ Source: `lib/typed-array.x:153`
 <a id="Var.arrayfloat"></a>
 #### Var.arrayfloat
 
-`ArrayFloat Var.arrayfloat(Var _x2c_macro_value_74)`
+`ArrayFloat Var.arrayfloat(Var value)`
 
 Returns the packed-array pointer carried by `value`.
 `value` must carry this array family's registered tag; the converter
@@ -3323,7 +3323,7 @@ Source: `lib/typed-array.x:144`
 <a id="Var.arrayint"></a>
 #### Var.arrayint
 
-`ArrayInt Var.arrayint(Var _x2c_macro_value_44)`
+`ArrayInt Var.arrayint(Var value)`
 
 Returns the packed-array pointer carried by `value`.
 `value` must carry this array family's registered tag; the converter
@@ -3334,7 +3334,7 @@ Source: `lib/typed-array.x:126`
 <a id="Var.arraylong"></a>
 #### Var.arraylong
 
-`ArrayLong Var.arraylong(Var _x2c_macro_value_59)`
+`ArrayLong Var.arraylong(Var value)`
 
 Returns the packed-array pointer carried by `value`.
 `value` must carry this array family's registered tag; the converter
@@ -3345,7 +3345,7 @@ Source: `lib/typed-array.x:135`
 <a id="Var.arrayshort"></a>
 #### Var.arrayshort
 
-`ArrayShort Var.arrayshort(Var _x2c_macro_value_29)`
+`ArrayShort Var.arrayshort(Var value)`
 
 Returns the packed-array pointer carried by `value`.
 `value` must carry this array family's registered tag; the converter
@@ -3356,7 +3356,7 @@ Source: `lib/typed-array.x:117`
 <a id="Var.arraystring"></a>
 #### Var.arraystring
 
-`ArrayString Var.arraystring(Var _x2c_macro_value_104)`
+`ArrayString Var.arraystring(Var value)`
 
 Returns the packed-array pointer carried by `value`.
 `value` must carry this array family's registered tag; the converter

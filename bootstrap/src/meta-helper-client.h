@@ -7,7 +7,18 @@
 
 #include "x2c.h"
 #include "compiler.h"
-Var Compiler_meta_helper_call(Compiler c, String name, Token site, List arguments);
+#include "meta-group.h"
+#include "datum.h"
+#include <errno.h>
+#include <fcntl.h>
+#include <poll.h>
+#include <signal.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/wait.h>
+#include <time.h>
+#include <unistd.h>
+Var Compiler_meta_helper_call(Compiler c, String name, Token site, List arguments, String provider);
 
 void Compiler_use_meta_helper(String path, Map failures, Map units);
 

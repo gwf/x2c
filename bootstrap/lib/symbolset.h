@@ -7,6 +7,14 @@
 
 #include "common.h"
 #include "protocols.h"
+#include <limits.h>
+#include <stdint.h>
+#include "array.h"
+#include "block.h"
+#include "iter.h"
+#include "scope.h"
+#include "var.h"
+#define SYMBOL_SET_HEADER_SIZE 20
 size_t SymbolSet_len(SymbolSet x);
 
 int SymbolSet_index(SymbolSet x, Symbol symbol);

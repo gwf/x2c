@@ -11,6 +11,21 @@
 #define X2C_TRANSFORM_SOURCE
 #endif
 #include "compiler.h"
+#include "ast-rewrite.h"
+#include "meta.h"
+#include "grammar.h"
+#include "ast.h"
+#include "type.h"
+#include "parse.h"
+#include "expressions.h"
+#include "string.h"
+#include "symbol.h"
+#include "var.h"
+#include "list.h"
+#include "protocol.h"
+#include "regions.h"
+#include "callables.h"
+#include "cleanup.h"
 List Compiler_transform(Compiler c, List ast);
 
 Ast Compiler_normalize(Compiler c, Ast ast);

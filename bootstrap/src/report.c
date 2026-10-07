@@ -128,7 +128,7 @@ static int _columns(void){
   return parsed >= 20 && parsed <= 1000 ? parsed : 80;
 }
 
-int String_truth(String);
+static int String_truth(String);
 
 static int _use_color(int plain, Symbol mode, int terminal){
   if(plain || mode == 29733220) return 0;
@@ -219,9 +219,9 @@ void report_line(Symbol tone, String line){
 
 String report_duration(unsigned long microseconds);
 
-Var String_var(String);
+static Var String_var(String);
 
-String int_str(int);
+static String int_str(int);
 
 void report_phase(Symbol phase, int count, String noun, int cached, unsigned long microseconds){
   if(! _init_guard_) _file_init_();

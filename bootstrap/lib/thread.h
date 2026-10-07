@@ -10,6 +10,23 @@ typedef Var(* ThreadFn)(const void * input, size_t input_size);
 
 typedef struct Thread * Thread;
 
+#include "context.h"
+#include "dispatch.h"
+#include "error.h"
+#include "error_init.h"
+#include "exception.h"
+#include "list.h"
+#include "logger.h"
+#include "match.h"
+#include "pool.h"
+#include "scope.h"
+#include "string.h"
+#include <errno.h>
+#include <stddef.h>
+#include <pthread.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
 Thread Thread_start(ThreadFn function, const void * input, size_t input_size);
 
 Var Thread_join(Thread t);

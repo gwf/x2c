@@ -194,13 +194,13 @@ _x2c_defer_env_3;
 
 static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4);
 
-Var Symbol_var(Symbol);
+static Var Symbol_var(Symbol);
 
 List cons(Var, List);
 
-Var List_var(List);
+static Var List_var(List);
 
-Var String_var(String);
+static Var String_var(String);
 
 #include "exception.h"
 
@@ -296,7 +296,7 @@ void generate_code(Compiler, List, String);
 
 int translation_depfile_write(CliRequest, Compiler, String, String);
 
-int List_truth(List);
+static int List_truth(List);
 
 List Compiler_diagnostics(Compiler);
 
@@ -366,7 +366,7 @@ int List_try_next(List, List *, Var *);
 
 void Compiler_print_diagnostic(Compiler, List);
 
-List Var_list(Var);
+static List Var_list(Var);
 
 static void _report_diagnostics(Compiler c){
   if(c -> diagnostics -> printer) return;
@@ -396,7 +396,7 @@ static List _transform_ast(Compiler c, List ast){
   return ast;
 }
 
-int String_truth(String);
+static int String_truth(String);
 
 void Compiler_dump_symbol_table(Compiler, Map);
 
@@ -514,7 +514,7 @@ static int _run_translation(CliRequest request, Map unit_dirs, Build build){
 
 int Map_truth(Map);
 Map Map_new(void);
-String Var_string(Var);
+static String Var_string(Var);
 void build_check_input(String);
 int is_source_file(String);
 void driver_error(const char *);
@@ -621,7 +621,7 @@ String report_duration(unsigned long);
 
 void report_line(Symbol, String);
 
-String int_str(int);
+static String int_str(int);
 
 void report_generated(int, unsigned long long);
 
@@ -664,7 +664,7 @@ List CliRequest_package_roots(CliRequest);
 
 Iter Map_keys(Map, Iter);
 
-Var int_var(int);
+static Var int_var(int);
 
 int Iter_try_next(Iter, Var *);
 
@@ -909,9 +909,9 @@ static List _imported_packages(String path){
   return Array_list_free(names);
 }
 
-List List_cdr(List);
+static List List_cdr(List);
 
-Var List_car(List);
+static Var List_car(List);
 
 static Array _slices(List inputs, int total, int count){
   if(count > total) count = total;

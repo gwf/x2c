@@ -71,7 +71,7 @@ concatenation in a loop allocates and hashes at every step. Use
 **Raises:** `<size-limit>` when the result cannot fit the `String`
 representation. Allocation failures propagate from the owning allocator.
 
-Source: `lib/string.x:714`
+Source: `lib/string.x:713`
 
 <a id="String.capitalize"></a>
 #### String.capitalize
@@ -84,7 +84,7 @@ unchanged inputs are returned as-is.
 
 **Raises:** `<alloc-fail>` while constructing the result.
 
-Source: `lib/string.x:1097`
+Source: `lib/string.x:1096`
 
 <a id="String.contains"></a>
 #### String.contains
@@ -96,7 +96,7 @@ An empty `sub` is contained in every `String`, including the empty one,
 so a truth test on user-supplied text should check for emptiness
 separately if that matters.
 
-Source: `lib/string.x:530`
+Source: `lib/string.x:529`
 
 <a id="String.count"></a>
 #### String.count
@@ -106,7 +106,7 @@ Source: `lib/string.x:530`
 Returns the non-overlapping count of `sub` in `str`.
 A null or empty `str` or `sub` returns zero.
 
-Source: `lib/string.x:507`
+Source: `lib/string.x:506`
 
 <a id="String.dedent"></a>
 #### String.dedent
@@ -126,7 +126,7 @@ the prefix after a newline is removed.
 **Raises:** `<alloc-fail>` while constructing a changed result. Null input
 returns NULL and text with no prefix is returned as-is.
 
-Source: `lib/string.x:960`
+Source: `lib/string.x:959`
 
 <a id="String.endswith"></a>
 #### String.endswith
@@ -138,7 +138,7 @@ An empty `suffix` is a suffix of every `String`. The comparison is
 bytewise, so this is a safe test for a file extension but not for a
 case-insensitive one; lower both sides first.
 
-Source: `lib/string.x:553`
+Source: `lib/string.x:552`
 
 <a id="String.filter"></a>
 #### String.filter
@@ -153,7 +153,7 @@ is called once per byte from left to right and is not retained.
 **Raises:** whatever `Func.apply`, `fn`, or the returned `Var`'s truth
 operation raises, or `<alloc-fail>` when the result cannot be allocated.
 
-Source: `lib/string.x:1123`
+Source: `lib/string.x:1122`
 
 <a id="String.find"></a>
 #### String.find
@@ -165,7 +165,7 @@ The search compares bytes, so an index may land inside a multibyte
 sequence. An empty `sub` matches at index 0. Use `String.find_within` to
 bound the search to a range, or `String.rfind` to scan from the end.
 
-Source: `lib/string.x:421`
+Source: `lib/string.x:420`
 
 <a id="String.find_all"></a>
 #### String.find_all
@@ -179,7 +179,7 @@ result is a canonical `List` whose cells follow their owning pools.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the result.
 
-Source: `lib/string.x:492`
+Source: `lib/string.x:491`
 
 <a id="String.find_within"></a>
 #### String.find_within
@@ -202,7 +202,7 @@ printf("%d %d %d\n", text.find_within("c", 0, -1),
        text.find_within("c", 0, 2), text.find_within("a", -3, -1));
 ```
 
-Source: `lib/string.x:440`
+Source: `lib/string.x:439`
 
 <a id="String.getindex"></a>
 #### String.getindex
@@ -218,7 +218,7 @@ The byte is unsigned, so the result is 0 through 255 on every platform and
 -1 means out of range and nothing else. An `index` at or beyond the length
 is out of range.
 
-Source: `lib/string.x:640`
+Source: `lib/string.x:639`
 
 <a id="String.getslice"></a>
 #### String.getslice
@@ -236,7 +236,7 @@ slice can split a multibyte sequence. A full unit-step slice may return
 range, a range that runs the wrong way for its `step`, or a `step` of zero
 also returns NULL, the empty `String`, without raising.
 
-Source: `lib/string.x:656`
+Source: `lib/string.x:655`
 
 <a id="String.iter"></a>
 #### String.iter
@@ -257,7 +257,7 @@ foreach (char ch, "abc") printf("%c\n", ch);
 
 This is byte traversal, not Unicode character iteration.
 
-Source: `lib/string.x:1228`
+Source: `lib/string.x:1227`
 
 <a id="String.join"></a>
 #### String.join
@@ -276,7 +276,7 @@ convert to the empty `String`.
 empty `List`, or an oversized result, also returns NULL, the empty
 `String`, without raising.
 
-Source: `lib/string.x:779`
+Source: `lib/string.x:778`
 
 <a id="String.keep"></a>
 #### String.keep
@@ -288,7 +288,7 @@ Returns a canonical `String` containing only bytes found in `chars`.
 
 **Raises:** `<alloc-fail>` while constructing the result.
 
-Source: `lib/string.x:1160`
+Source: `lib/string.x:1159`
 
 <a id="String.len"></a>
 #### String.len
@@ -303,7 +303,7 @@ count.
 
 The empty `String` is the null pointer, whose length is 0.
 
-Source: `lib/string.x:97`
+Source: `lib/string.x:96`
 
 <a id="String.lower"></a>
 #### String.lower
@@ -318,7 +318,7 @@ temporary buffer is released.
 
 **Raises:** `<alloc-fail>` while constructing the result.
 
-Source: `lib/string.x:1078`
+Source: `lib/string.x:1077`
 
 <a id="String.lstrip"></a>
 #### String.lstrip
@@ -331,7 +331,7 @@ returns NULL and an unchanged input is returned as-is.
 
 **Raises:** `<alloc-fail>` while constructing a changed result.
 
-Source: `lib/string.x:927`
+Source: `lib/string.x:926`
 
 <a id="String.map"></a>
 #### String.map
@@ -351,7 +351,7 @@ not retained. Each result must convert to a non-NUL byte.
 `<bad-result>` when the converted result is zero, or `<alloc-fail>` when
 the result cannot be allocated.
 
-Source: `lib/string.x:1140`
+Source: `lib/string.x:1139`
 
 <a id="String.new"></a>
 #### String.new
@@ -371,7 +371,7 @@ representation.
 empty, or oversized input returns NULL, which is indistinguishable from the
 empty `String`, without raising.
 
-Source: `lib/string.x:154`
+Source: `lib/string.x:153`
 
 <a id="String.pad_center"></a>
 #### String.pad_center
@@ -382,7 +382,7 @@ Pads both sides of `str` to the requested width.
 
 **Raises:** the same causes as `String.pad_left`.
 
-Source: `lib/string.x:842`
+Source: `lib/string.x:841`
 
 <a id="String.pad_left"></a>
 #### String.pad_left
@@ -395,7 +395,7 @@ Pads the left side of `str` to the requested width.
 cannot be represented, or `<alloc-fail>` when result storage cannot be
 allocated.
 
-Source: `lib/string.x:830`
+Source: `lib/string.x:829`
 
 <a id="String.pad_right"></a>
 #### String.pad_right
@@ -406,7 +406,7 @@ Pads the right side of `str` to the requested width.
 
 **Raises:** the same causes as `String.pad_left`.
 
-Source: `lib/string.x:836`
+Source: `lib/string.x:835`
 
 <a id="String.partition"></a>
 #### String.partition
@@ -427,7 +427,7 @@ transient input must outlive the returned `List`.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the result.
 
-Source: `lib/string.x:1015`
+Source: `lib/string.x:1014`
 
 <a id="String.reject"></a>
 #### String.reject
@@ -439,7 +439,7 @@ Returns a canonical `String` after removing bytes found in `chars`.
 
 **Raises:** `<alloc-fail>` while constructing a changed result.
 
-Source: `lib/string.x:1171`
+Source: `lib/string.x:1170`
 
 <a id="String.remove_prefix"></a>
 #### String.remove_prefix
@@ -453,7 +453,7 @@ A null or absent prefix returns `str` unchanged; removing the complete
 
 **Raises:** `<alloc-fail>` while constructing a changed result.
 
-Source: `lib/string.x:987`
+Source: `lib/string.x:986`
 
 <a id="String.remove_suffix"></a>
 #### String.remove_suffix
@@ -466,7 +466,7 @@ A null or absent suffix returns `str` unchanged; removing the complete
 
 **Raises:** `<alloc-fail>` while constructing a changed result.
 
-Source: `lib/string.x:997`
+Source: `lib/string.x:996`
 
 <a id="String.repeat"></a>
 #### String.repeat
@@ -480,7 +480,7 @@ pool; a transient buffer is copied and interned instead.
 
 **Raises:** `<alloc-fail>` while constructing a nonempty result.
 
-Source: `lib/string.x:738`
+Source: `lib/string.x:737`
 
 <a id="String.replace"></a>
 #### String.replace
@@ -501,7 +501,7 @@ result may be the same pointer as the input.
 or null `old` returns `str`, and an oversized result returns NULL, without
 raising.
 
-Source: `lib/string.x:575`
+Source: `lib/string.x:574`
 
 <a id="String.replace_n"></a>
 #### String.replace_n
@@ -516,7 +516,7 @@ An oversized result returns NULL.
 
 **Raises:** `<alloc-fail>` while constructing a changed result.
 
-Source: `lib/string.x:586`
+Source: `lib/string.x:585`
 
 <a id="String.rfind"></a>
 #### String.rfind
@@ -529,7 +529,7 @@ measures from the start of `str`. An empty `sub` reports the length of
 `str`, matching after the last byte and mirroring the forward search
 reporting 0.
 
-Source: `lib/string.x:478`
+Source: `lib/string.x:477`
 
 <a id="String.rpartition"></a>
 #### String.rpartition
@@ -546,7 +546,7 @@ borrowed into the result, so a transient input must outlive the returned
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the result.
 
-Source: `lib/string.x:1035`
+Source: `lib/string.x:1034`
 
 <a id="String.rstrip"></a>
 #### String.rstrip
@@ -559,7 +559,7 @@ returns NULL and an unchanged input is returned as-is.
 
 **Raises:** `<alloc-fail>` while constructing a changed result.
 
-Source: `lib/string.x:940`
+Source: `lib/string.x:939`
 
 <a id="String.squeeze"></a>
 #### String.squeeze
@@ -572,7 +572,7 @@ Bytes outside `chars` are preserved even when repeated. `Null` or empty
 
 **Raises:** `<alloc-fail>` while constructing a changed result.
 
-Source: `lib/string.x:1181`
+Source: `lib/string.x:1180`
 
 <a id="String.startswith"></a>
 #### String.startswith
@@ -584,7 +584,7 @@ An empty `prefix` is a prefix of every `String`. `String.remove_prefix`
 performs the same test and returns the remainder, so there is rarely a
 reason to run both.
 
-Source: `lib/string.x:542`
+Source: `lib/string.x:541`
 
 <a id="String.strip"></a>
 #### String.strip
@@ -602,7 +602,7 @@ returned when nothing is trimmed.
 entirely of removable bytes trims to NULL, the empty `String`, without
 raising.
 
-Source: `lib/string.x:913`
+Source: `lib/string.x:912`
 
 <a id="String.try_next"></a>
 #### String.try_next
@@ -617,7 +617,7 @@ pointer, a negative cursor, or exhaustion returns zero without changing
 `foreach (int byte, str)` and `foreach (char ch, str)` compile to this
 loop.
 
-Source: `lib/string.x:1249`
+Source: `lib/string.x:1248`
 
 <a id="String.upper"></a>
 #### String.upper
@@ -631,7 +631,7 @@ would change.
 
 **Raises:** `<alloc-fail>` while constructing the result.
 
-Source: `lib/string.x:1088`
+Source: `lib/string.x:1087`
 
 <a id="String.withindex"></a>
 #### String.withindex
@@ -655,7 +655,7 @@ printf("%s %s\n", word, capital);
 or `<alloc-fail>` while constructing the result. An out-of-range `index`
 returns `str` unchanged.
 
-Source: `lib/string.x:684`
+Source: `lib/string.x:683`
 
 <a id="String.write_str"></a>
 #### String.write_str
@@ -669,7 +669,7 @@ borrowed `out` is returned and not retained.
 
 **Raises:** any cause from `Buffer.write`.
 
-Source: `lib/string.x:1200`
+Source: `lib/string.x:1199`
 
 ## Advanced and interop API
 
@@ -703,7 +703,7 @@ locale-aware nor Unicode collation, and only the sign of the result is
 meaningful. The empty `String`, being the null pointer, sorts before
 every non-empty `String`, and two empty `String`s compare equal.
 
-Source: `lib/string.x:132`
+Source: `lib/string.x:131`
 
 <a id="String.equal"></a>
 #### String.equal
@@ -717,7 +717,7 @@ Interning already makes `x == y` a content test for two canonical
 are equal, since the null pointer is the empty `String`, and a null
 equals no non-empty `String`.
 
-Source: `lib/string.x:120`
+Source: `lib/string.x:119`
 
 <a id="String.free"></a>
 #### String.free
@@ -733,7 +733,7 @@ unrelated pool is not a valid argument.
 
 A null argument is ignored.
 
-Source: `lib/string.x:356`
+Source: `lib/string.x:355`
 
 <a id="String.hash"></a>
 #### String.hash
@@ -744,7 +744,7 @@ Returns the content hash of `str`, or zero for the empty `String`.
 Canonical `String`s use the cached hash; transient buffers are hashed from
 their current NUL-terminated contents.
 
-Source: `lib/string.x:107`
+Source: `lib/string.x:106`
 
 <a id="String.intern"></a>
 #### String.intern
@@ -762,7 +762,7 @@ caller to free. Use `String.intern_free` for an owned buffer.
 **Raises:** `<alloc-fail>` when canonical storage cannot be allocated. `Null`
 or empty input returns NULL, the empty `String`, without raising.
 
-Source: `lib/string.x:203`
+Source: `lib/string.x:202`
 
 <a id="String.intern_free"></a>
 #### String.intern_free
@@ -792,7 +792,7 @@ printf("%s %d\n", canonical, canonical == "abcde");
 null argument returns NULL, and a buffer empty at its first byte is
 released and reported as NULL, the empty `String`, without raising.
 
-Source: `lib/string.x:300`
+Source: `lib/string.x:299`
 
 <a id="String.malloc"></a>
 #### String.malloc
@@ -818,7 +818,7 @@ printf("%d writable bytes\n", buf.len());
 **Raises:** `<alloc-fail>` when storage cannot be allocated. A nonpositive or
 oversized `len` returns NULL without raising.
 
-Source: `lib/string.x:267`
+Source: `lib/string.x:266`
 
 <a id="String.new_fill"></a>
 #### String.new_fill
@@ -832,7 +832,7 @@ Returns the canonical `String` containing `count` copies of `fill`.
 `<alloc-fail>` when canonical storage cannot be allocated. A nonpositive
 `count` returns NULL without raising.
 
-Source: `lib/string.x:758`
+Source: `lib/string.x:757`
 
 <a id="String.new_in"></a>
 #### String.new_in
@@ -848,7 +848,7 @@ argument, nonpositive length, or empty input returns NULL.
 
 **Raises:** `<alloc-fail>`, `<size-limit>`, or `<invariant>` while interning.
 
-Source: `lib/string.x:186`
+Source: `lib/string.x:185`
 
 <a id="String.new_len"></a>
 #### String.new_len
@@ -866,7 +866,7 @@ larger buffer.
 `str`, nonpositive `len`, or leading NUL returns NULL, the empty `String`,
 without raising.
 
-Source: `lib/string.x:171`
+Source: `lib/string.x:170`
 
 <a id="String.printf"></a>
 #### String.printf
@@ -885,7 +885,7 @@ you want, and `String.format` when the arguments must be checked.
 `fmt` or formatting error also returns NULL without raising. Arguments
 that do not match the conversions are undefined behavior as in C.
 
-Source: `lib/string.x:873`
+Source: `lib/string.x:872`
 
 <a id="String.promote"></a>
 #### String.promote
@@ -899,7 +899,7 @@ unchanged.
 **Raises:** `<alloc-fail>`, `<size-limit>`, or `<invariant>` while recording
 the promotion.
 
-Source: `lib/string.x:379`
+Source: `lib/string.x:378`
 
 <a id="String.str"></a>
 #### String.str
@@ -909,7 +909,7 @@ Source: `lib/string.x:379`
 Returns `str` itself as its display `String` without copying or retaining
 it.
 
-Source: `lib/string.x:1192`
+Source: `lib/string.x:1191`
 
 <a id="String.symbol"></a>
 #### String.symbol
@@ -921,7 +921,7 @@ Returns the compact `Symbol` encoded from `str`, or zero for empty input.
 use seven-bit bytes, and input beyond the selected encoding's capacity is
 truncated. Use `Symbol.try_new` when every byte must be preserved.
 
-Source: `lib/string.x:1207`
+Source: `lib/string.x:1206`
 
 ## Runtime-internal callables
 
@@ -946,7 +946,7 @@ transient buffer or a `String` a nested pool can still reclaim. Unlike
 `String.try_own` it neither promotes nor allocates, so a caller may ask
 about a `String` it does not own.
 
-Source: `lib/string.x:404`
+Source: `lib/string.x:403`
 
 <a id="String.try_own"></a>
 #### String.try_own
@@ -962,7 +962,7 @@ remain.
 **Raises:** `<alloc-fail>`, `<size-limit>`, or `<invariant>` while recording a
 promotion.
 
-Source: `lib/string.x:393`
+Source: `lib/string.x:392`
 
 ## Public types
 

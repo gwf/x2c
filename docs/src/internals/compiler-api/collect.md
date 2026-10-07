@@ -17,13 +17,18 @@ Source-ordered shallow symbol collection and replay.
 | [`interface_configure`](#interface_configure) | Creates the process cache and names the directories searched for `.xi` interfaces. |
 | [`interface_prelude`](#interface_prelude) | Returns the path of the first prelude interface this compiler wrote, or NULL when there is none or the compiler's identity is unknown. |
 | [`interface_text`](#interface_text) | Returns the compiler's own collected contribution as interface text, or NULL when the unit has not collected its symbols or the compiler's identity is unknown, since no compiler could replay that interface. |
+| [`Compiler.add_linked_meta_provider_hashes`](#Compiler.add_linked_meta_provider_hashes) | Adds retained hashes of ordinary private callees and native-only providers. |
 | [`Compiler.collect_package`](#Compiler.collect_package) | Collects a package once and installs its public surface in the current unit. |
 | [`Compiler.collect_symbols`](#Compiler.collect_symbols) | Collects the current translation unit's declarations into `globs`. |
+| [`Compiler.complete_meta_hashes`](#Compiler.complete_meta_hashes) | Completes a linked function's own source hashes before a shallow call. |
 | [`Compiler.include_type_dependencies`](#Compiler.include_type_dependencies) | The semantic type rows reached by an ordinary source include. |
 | [`Compiler.include_typedef_names`](#Compiler.include_typedef_names) | The typedef names published by the files that the current unit's include of `target` reaches, including its transitive includes. |
 | [`Compiler.included_compile_time_effects`](#Compiler.included_compile_time_effects) | Prepares included compile-time effects after full parsing resets macros. |
+| [`Compiler.inline_type_dependencies`](#Compiler.inline_type_dependencies) | Records the actual type dependencies of typed public inline bodies. |
 | [`Compiler.install_included_effects`](#Compiler.install_included_effects) | Installs the definitions of each include among the directives before the cursor. |
+| [`Compiler.linked_meta_provider_current`](#Compiler.linked_meta_provider_current) | Reports whether the cached meta provider matches linked code. |
 | [`Compiler.name_meta_provider_bindings`](#Compiler.name_meta_provider_bindings) | Selects helper C spellings for public definitions owned by `path`. |
+| [`Compiler.publish_inline_types`](#Compiler.publish_inline_types) | Promotes the selected type families after the owning ordinary full parse. |
 | [`Compiler.publishes_type_family`](#Compiler.publishes_type_family) | Reports whether this unit's interface publishes the type `family`. |
 | [`Compiler.publishes_typedef`](#Compiler.publishes_typedef) | Reports whether this unit's selected interface publishes `name`. |
 | [`Compiler.record_generated_symbol`](#Compiler.record_generated_symbol) | Records one generated public callable in the declaration map that the current file's collected entry contributes, which is the map its interface publishes. |
@@ -39,7 +44,7 @@ Drops the entries collected without declaration defaults while the shared
 compile-time session was filled, or by a project meta build. Call once
 that session is published, and after the meta build's parses.
 
-Source: `src/collect.x:1555`
+Source: `src/collect.x:1918`
 
 #### collect_resolve_include
 
@@ -48,7 +53,7 @@ Source: `src/collect.x:1555`
 The file the include of `target` from `includer_dir` names, searched as
 collection searches `dirs`, or NULL.
 
-Source: `src/collect.x:628`
+Source: `src/collect.x:650`
 
 #### interface_configure
 
@@ -61,7 +66,7 @@ stage directory when it runs from `<home>/builds/`, otherwise under the
 home. A `cold` process reads no interface and still writes its own. Call
 it before opening any translation unit's Context.
 
-Source: `src/collect.x:1239`
+Source: `src/collect.x:1582`
 
 #### interface_prelude
 
@@ -71,7 +76,7 @@ Returns the path of the first prelude interface this compiler wrote, or
 NULL when there is none or the compiler's identity is unknown. Its
 source hashes are not checked.
 
-Source: `src/collect.x:1448`
+Source: `src/collect.x:1800`
 
 #### interface_text
 
@@ -83,9 +88,20 @@ identity is unknown, since no compiler could replay that interface. A
 contribution that the interface grammar cannot spell is reported as an
 `emit` diagnostic.
 
-Source: `src/collect.x:1470`
+Source: `src/collect.x:1822`
 
 ### `Compiler`
+
+<a id="Compiler.add_linked_meta_provider_hashes"></a>
+#### Compiler.add_linked_meta_provider_hashes
+
+`void Compiler.add_linked_meta_provider_hashes(Compiler c, Map rows)`
+
+Adds retained hashes of ordinary private callees and native-only providers.
+Provider-qualified keys keep file-private names distinct without
+advertising more callable targets.
+
+Source: `src/collect.x:763`
 
 <a id="Compiler.collect_package"></a>
 #### Compiler.collect_package
@@ -101,7 +117,7 @@ protocol rows enter the current symbol state, and dependencies enter the
 importing compiler. Replay also merges recorded function definitions.
 `token` locates lookup and public-surface errors.
 
-Source: `src/collect.x:927`
+Source: `src/collect.x:1268`
 
 <a id="Compiler.collect_symbols"></a>
 #### Compiler.collect_symbols
@@ -118,7 +134,17 @@ is `globs`. Collection also updates dependencies, function definitions,
 and macro state. Keyword alias maps and seen-name state are file-local
 and restored when each file walk ends.
 
-Source: `src/collect.x:161`
+Source: `src/collect.x:163`
+
+<a id="Compiler.complete_meta_hashes"></a>
+#### Compiler.complete_meta_hashes
+
+`void Compiler.complete_meta_hashes(Compiler c)`
+
+Completes a linked function's own source hashes before a shallow call.
+A lookahead entry never replaces the file's ordinary contribution.
+
+Source: `src/collect.x:748`
 
 <a id="Compiler.include_type_dependencies"></a>
 #### Compiler.include_type_dependencies
@@ -129,7 +155,7 @@ The semantic type rows reached by an ordinary source include. Each
 file contributes once to `seen`; the current unit does not contribute
 through a cycle back to its own still-open header.
 
-Source: `src/collect.x:655`
+Source: `src/collect.x:677`
 
 <a id="Compiler.include_typedef_names"></a>
 #### Compiler.include_typedef_names
@@ -143,19 +169,28 @@ is skipped with the files it reaches, and each file reached is added to
 `seen`. NULL when the include does not resolve to x2c source; a runtime
 module adds nothing the prelude has not declared.
 
-Source: `src/collect.x:642`
+Source: `src/collect.x:664`
 
 <a id="Compiler.included_compile_time_effects"></a>
 #### Compiler.included_compile_time_effects
 
-`Map Compiler.included_compile_time_effects(Compiler c, Map globs)`
+`Map Compiler.included_compile_time_effects( Compiler c, Map globs, Map active)`
 
 Prepares included compile-time effects after full parsing resets macros.
 The ordered cache walk counts each file once and groups effects by the
 canonical path of the unit's direct include. The parser installs those
 effects when it reaches that include.
 
-Source: `src/collect.x:1157`
+Source: `src/collect.x:1499`
+
+<a id="Compiler.inline_type_dependencies"></a>
+#### Compiler.inline_type_dependencies
+
+`Map Compiler.inline_type_dependencies(Compiler c, List ast)`
+
+Records the actual type dependencies of typed public inline bodies.
+
+Source: `src/collect.x:1082`
 
 <a id="Compiler.install_included_effects"></a>
 #### Compiler.install_included_effects
@@ -165,7 +200,17 @@ Source: `src/collect.x:1157`
 Installs the definitions of each include among the directives before
 the cursor.
 
-Source: `src/collect.x:1193`
+Source: `src/collect.x:1536`
+
+<a id="Compiler.linked_meta_provider_current"></a>
+#### Compiler.linked_meta_provider_current
+
+`int Compiler.linked_meta_provider_current(Compiler c, String path)`
+
+Reports whether the cached meta provider matches linked code.
+The scanner uses the same retained hashes as evaluator installation.
+
+Source: `src/collect.x:713`
 
 <a id="Compiler.name_meta_provider_bindings"></a>
 #### Compiler.name_meta_provider_bindings
@@ -176,7 +221,17 @@ Selects helper C spellings for public definitions owned by `path`.
 Bindings, rather than source tokens, keep unrelated private names and
 fields unchanged. Native supplier declarations retain their C names.
 
-Source: `src/collect.x:692`
+Source: `src/collect.x:784`
+
+<a id="Compiler.publish_inline_types"></a>
+#### Compiler.publish_inline_types
+
+`void Compiler.publish_inline_types(Compiler c, List ast)`
+
+Promotes the selected type families after the owning ordinary full
+parse. The header and Xi then use the same complete family selection.
+
+Source: `src/collect.x:1126`
 
 <a id="Compiler.publishes_type_family"></a>
 #### Compiler.publishes_type_family
@@ -185,7 +240,7 @@ Source: `src/collect.x:692`
 
 Reports whether this unit's interface publishes the type `family`.
 
-Source: `src/collect.x:719`
+Source: `src/collect.x:811`
 
 <a id="Compiler.publishes_typedef"></a>
 #### Compiler.publishes_typedef
@@ -194,7 +249,7 @@ Source: `src/collect.x:719`
 
 Reports whether this unit's selected interface publishes `name`.
 
-Source: `src/collect.x:714`
+Source: `src/collect.x:806`
 
 <a id="Compiler.record_generated_symbol"></a>
 #### Compiler.record_generated_symbol
@@ -206,7 +261,7 @@ current file's collected entry contributes, which is the map its
 interface publishes. A file without a collected declaration map records
 nothing. The cache retains `signature`.
 
-Source: `src/collect.x:857`
+Source: `src/collect.x:1188`
 
 <a id="Compiler.replay_package_imports"></a>
 #### Compiler.replay_package_imports
@@ -218,7 +273,7 @@ order. The shadow borrows the unit's macro state and package registries.
 The full parse collects effects for the include line and leaves the
 unit's own definitions at their source sites.
 
-Source: `src/collect.x:1093`
+Source: `src/collect.x:1436`
 
 ## Design notes
 
