@@ -12,7 +12,7 @@ Meta functions and the native code they call.
 
 | Function | Summary |
 | --- | --- |
-| [`linked_meta_provider_source`](#linked_meta_provider_source) | Returns the source and dependency hashes compiled into a linked provider. |
+| [`linked_meta_provider_source`](#linked_meta_provider_source) | Returns a linked provider's source and dependency hashes. |
 | [`x2c_register_extension`](#x2c_register_extension) | Registers package `name`'s compile-time part, linked into the compiler, whose `targets` returns its name-to-`Func` Map. |
 | [`Compiler.add_native_module`](#Compiler.add_native_module) | Records the name-to-`Func` Map that the entry of the native module loaded from absolute `path` returns. |
 | [`Compiler.bind_linked_meta`](#Compiler.bind_linked_meta) | Binds the bodied `meta` definition `fn`, of function type `type`, to the compiler's linked copy of it when the two definition texts hash the same, instead of staging it. |
@@ -50,7 +50,7 @@ Meta functions and the native code they call.
 
 `List linked_meta_provider_source(String provider)`
 
-Returns the source and dependency hashes compiled into a linked provider.
+Returns a linked provider's source and dependency hashes.
 
 Source: `src/meta-native.x:937`
 

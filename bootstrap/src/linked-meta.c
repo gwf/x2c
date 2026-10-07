@@ -4495,14 +4495,14 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_8(void){
   _4128 = cons(_927, _4127);
   _4129 = String_new("src/collect.x");
   _4130 = String_var(_4129);
-  _4131 = String_new("3d196420");
+  _4131 = String_new("4c762c26");
   _4132 = String_var(_4131);
   _4133 = cons(_4132, NULL);
   _4134 = cons(_4130, _4133);
   _4135 = List_var(_4134);
   _4136 = String_new("src/compiler.x");
   _4137 = String_var(_4136);
-  _4138 = String_new("8a2bb4dc");
+  _4138 = String_new("4425e149");
   _4139 = String_var(_4138);
   _4140 = cons(_4139, NULL);
   _4141 = cons(_4137, _4140);
@@ -4783,7 +4783,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_8(void){
   _4416 = List_var(_4415);
   _4417 = String_new("src/meta-native.x");
   _4418 = String_var(_4417);
-  _4419 = String_new("4240b1a4");
+  _4419 = String_new("7595cb99");
   _4420 = String_var(_4419);
   _4421 = cons(_4420, NULL);
   _4422 = cons(_4418, _4421);
