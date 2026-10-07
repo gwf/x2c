@@ -2403,7 +2403,8 @@ int Compiler.keyword_form_is_definition(Compiler c) {
   Token token = c.token;
   int offset = c.peek(0) == <static>;
   if (offset) token = Token.skip_trivia(token + 1);
-  return c.peek(offset) == <ident> && token.text == "keyword" &&
+  return c.peek(offset) == <ident> &&
+         (token.text == "keyword" || token.text == "hook") &&
          c.peek(offset + 2) == <$>;
 }
 
@@ -2414,17 +2415,19 @@ int Compiler.keyword_form_is_definition(Compiler c) {
 void Compiler.parse_keyword_definition(Compiler c) {
   Token declaration = c.token;
   int storage = c.test(<static>) || c.source_private;
+  int hook = c.token.text == "hook";
   c.expect(<ident>);
-  if (c.peek(0) != <ident>)
+  if (hook ? c.peek(0) != <switch> && !c.at_word("function")
+           : c.peek(0) != <ident>)
     $report.parse.keyword_name(c);
-  Atom alias = Atom.intern(c.token.text);
+  Atom alias = Atom.intern(hook ? %"hook:${c.token.text}" : c.token.text);
   c.next();
   if (c._fixed_alias(alias))
     $report.macro.keyword_builtin(c, declaration);
   Token reference = c.token;
   List definition = c._lookup(c._name(), reference);
   Symbol kind = definition.assoc(<kind>);
-  if (!(kind in alias_kinds)) {
+  if (!(kind in alias_kinds) || (hook && kind != <decorator>)) {
     String spelling = _kind_spelling(kind);
     $report.macro.keyword_internal(
       c,
@@ -2437,6 +2440,25 @@ void Compiler.parse_keyword_definition(Compiler c) {
       %(compile-time keyword $alias
         ${c.freeze_declaration_syntax(definition)}), declaration);
 }
+
+/** Returns the decorator a `hook` declaration registered for `syntax`
+    (`switch` or `function`), or NULL. Template source is never hooked, so
+    syntax a hook's own expansion constructs is never hooked again.
+*/
+List Compiler.hook_for(Compiler c, String syntax) {
+  Var stored;
+  if (c.macro_holes ||
+      !c._try_macro(c.kw_aliases, Atom.intern(%"hook:$syntax"), stored))
+    return NULL;
+  return stored;
+}
+
+/** Applies hook `definition` to the source at the cursor as a decorator
+    invoked at `invocation`.
+*/
+List Compiler.apply_hook(
+  Compiler c, List definition, Token invocation, AstPos position) =>
+  c._decorate(definition, invocation, position, 0);
 
 /* Only the built-in sources define `with` or replace a built-in alias. */
 static int Compiler._fixed_alias(Compiler c, Atom alias) {

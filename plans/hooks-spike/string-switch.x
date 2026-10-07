@@ -2,7 +2,12 @@
 
     `$strings.switch(subject) { case "red": ... }` keeps C switch control
     flow. Each owned label becomes its index, and the subject, evaluated
-    once, selects the index whose label it equals. */
+    once, selects the index whose label it equals. A switch without
+    string-literal labels stays an ordinary switch.
+
+    Including this file hooks every following source `switch` statement,
+    so `switch (s) { case "red": ... }` works without the `$strings.`
+    spelling. */
 
 #pragma once
 #include "meta.x"
@@ -47,9 +52,26 @@ meta List _sswitch(List selected, List body) {
 }
 
 /* A switch over a String subject with string-literal labels. */
-macro Decorator $strings.switch(Stmt $body, Expr $subject) {
+macro Decorator $strings.string_switch(Stmt $body, Expr $subject) {
   {
     String selected = $subject;
     $_sswitch(selected, $body)...
   }
 }
+
+/* The string switch, or the unchanged switch when no label is a string
+   literal. */
+meta List _sswitch_or_plain(List subject, List body) {
+  Array labels = [];
+  (void) _sswitch_rewrite(body, labels);
+  if (!labels.len()) return %(${$!{ switch ($subject) $body }});
+  return %(${$!{ $strings.string_switch($subject) $body }});
+}
+
+/* A switch whose string-literal labels, if any, select by String
+   equality. */
+macro Decorator $strings.switch(Stmt $body, Expr $subject) {
+  $_sswitch_or_plain($subject, $body)...
+}
+
+hook switch $strings.switch;

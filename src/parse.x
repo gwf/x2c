@@ -444,8 +444,14 @@ static List Compiler._declaration_form(Compiler c, int skip_body) {
   if (native && !decl.type_from_ast().is_function())
     $report.parse.meta_function(c, meta);
   if (c.test(<;>)) return c._declared(decl, meta, first);
-  if (c.peek(0) == <"{"> || c._at_function_arrow())
+  if (c.peek(0) == <"{"> || c._at_function_arrow()) {
+    List hook = meta ? NULL : c.hook_for("function");
+    if (hook) {
+      c.token = first;
+      return c.apply_hook(hook, first, AST_UNIT);
+    }
     return c._defined(decl, meta, native, first);
+  }
   c.require_input();
   Symbol unexpected = c.peek(0);
   $report.parse.body_expected(c, unexpected);

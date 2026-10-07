@@ -109,7 +109,7 @@ static List Compiler._statement(Compiler c, AstPos position) {
     case <raise>:       return c._raise_statement();
     case <defer>:       return c._defer_statement();
     case <match>:       return c._match_statement();
-    case <switch>:      return c._switch_statement();
+    case <switch>:      return c._switch_statement(position);
     case <default>:     return c._default_statement();
     case <;>:           return c._empty_statement();
     case <(>:           return c.parse_parenthesized_statement();
@@ -372,7 +372,13 @@ static List Compiler._defer_statement(Compiler c) {
   return %(defer ${c.parse_governed(AST_STATEMENT)});
 }
 
-static List Compiler._switch_statement(Compiler c) {
+static List Compiler._switch_statement(Compiler c, AstPos position) {
+  List hook = c.hook_for("switch");
+  if (hook) {
+    Token invocation = c.token;
+    c.next();
+    return c.apply_hook(hook, invocation, position);
+  }
   List expr = c._keyword_paren_expr(<switch>);
   List body = c.parse_governed(AST_STATEMENT);
   return %(switch $expr $body);
