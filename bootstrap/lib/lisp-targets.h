@@ -5,7 +5,6 @@
 #ifndef __GUARD_0x47649B83__
 #define __GUARD_0x47649B83__
 
-#include "private-keywords.h"
 #include "x2c.h"
 #include "diff.h"
 #include "digest.h"

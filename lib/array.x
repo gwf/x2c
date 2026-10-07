@@ -23,6 +23,7 @@
 #include "error-macros.x"
 #include "array-generics.x"
 #include "private-keywords.x"
+static keyword loop $private.loop;
 #include "common.x"
 
 /** Holds a mutable identity-bearing sequence of non-`void` `Var` elements.

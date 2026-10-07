@@ -176,6 +176,8 @@ static int Scan.file(Scan &s, String path) {
   tokens.layout = is_layout_file(path);
   tokens.scan();
   int meta = s.file_scope(tokens, Path.dirname(path));
+  if ((meta & 1) && _compiler_owns(path) &&
+      s.c.linked_meta_definitions_current(path)) meta &= ~1;
   s.seen[path] = meta;
   return meta;
 }

@@ -12,7 +12,6 @@
 */
 
 #pragma once
-#include "private-keywords.x"
 #include "compiler.x"
 
 /** What the running compile-time call answers from. `expander` is the
@@ -428,7 +427,7 @@ Map x2c_meta_definition_hashes(void) {
   return hashes;
 }
 
-/* Imported functions refer to their provider's shared source proof.
+/* Imported functions refer to their provider's shared definition hash.
    Fully parsed copies retain their own hashes and precise references. */
 static Map _sdk_linked_hashes(void) {
   _sdk_guard("_x2c.meta.linked.hashes");

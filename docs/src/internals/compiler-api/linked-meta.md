@@ -12,7 +12,7 @@ Shipped `meta` code compiled into the compiler.
 
 | Function | Summary |
 | --- | --- |
-| [`linked_meta_hashes`](#linked_meta_hashes) | Returns linked definitions and their provider source dependencies. |
+| [`linked_meta_hashes`](#linked_meta_hashes) | Returns linked definition hashes and provider source dependencies. |
 | [`linked_meta_targets`](#linked_meta_targets) | Returns the linked copies, and the runtime builders, by name. |
 | [`x2c_decl_make`](#x2c_decl_make) | Declares `name` with `type` and an optional initializer. |
 | [`x2c_expr_cast`](#x2c_expr_cast) | Returns `expression` cast to `type`, which is a declared type rather than syntax. |
@@ -26,7 +26,7 @@ Shipped `meta` code compiled into the compiler.
 
 `Map linked_meta_hashes(void)`
 
-Returns linked definitions and their provider source dependencies.
+Returns linked definition hashes and provider source dependencies.
 
 Source: `src/linked-meta.x:430`
 
@@ -88,6 +88,6 @@ functions and initialized static values from shipped source
 modules appear without their `meta` markers,
 so their functions and initializers execute as native code.
 `Compiler.bind_linked_meta` binds an included definition to its
-copy only when its definition or provider sources agree. Public
+copy only when its definition hashes agree. Public
 functions with a run-time form bind to their ordinary provider's
 definitions and have no copy here.

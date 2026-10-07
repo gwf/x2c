@@ -29,6 +29,8 @@ List Compiler_include_type_dependencies(Compiler c, String target, int angle, Ma
 
 int Compiler_linked_meta_provider_current(Compiler c, String path);
 
+int Compiler_linked_meta_definitions_current(Compiler c, String path);
+
 void Compiler_complete_meta_hashes(Compiler c);
 
 Map Compiler_meta_provider_hashes(Compiler c, String provider);

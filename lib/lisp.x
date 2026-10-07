@@ -20,6 +20,7 @@
 #pragma once
 
 #include "private-keywords.x"
+static keyword loop $private.loop;
 #include "cleanup.x"
 #include "x2c.x"
 #include "macro-value.x"

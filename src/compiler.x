@@ -14,6 +14,7 @@
 */
 #pragma once
 #include "private-keywords.x"
+static keyword loop $private.loop;
 #include "tokenizer.x"
 #include "ast.x"
 #include "type.x"

@@ -2,7 +2,6 @@
 
 #define __GUARD_0x409392BC__
 #include "error-macros.h"
-#include "private-keywords.h"
 typedef struct Map * Map;
 
 #include "common.h"
@@ -188,7 +187,7 @@ _Noreturn static void _reinsert_error(unsigned _x2c_macro_capacity_0, int _x2c_m
   {
     Var _x2c_literal_part_0 = String_var(String_new("Map.reinsert"));
     {
-      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/map.x",.function = "_reinsert_error",.line = 58};
+      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/map.x",.function = "_reinsert_error",.line = 57};
       x2c_error_raise_n(& _x2c_error_site_0, 20800632064936, 3, Symbol_var(34096809266140), _x2c_literal_part_0, Symbol_var(209381969202), unsigned_var(_x2c_macro_capacity_0), Symbol_var(34764938), int_var(_x2c_macro_probe_0));
       __builtin_unreachable();
     }
@@ -201,7 +200,7 @@ _Noreturn static void _insert_error(unsigned _x2c_macro_capacity_1){
   {
     Var _x2c_literal_part_1 = String_var(String_new("Map.insert"));
     {
-      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/map.x",.function = "_insert_error",.line = 58};
+      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/map.x",.function = "_insert_error",.line = 57};
       x2c_error_raise_n(& _x2c_error_site_1, 20800632064936, 2, Symbol_var(34096809266140), _x2c_literal_part_1, Symbol_var(209381969202), unsigned_var(_x2c_macro_capacity_1));
       __builtin_unreachable();
     }
@@ -259,7 +258,7 @@ int Var_is_void(Var);
 
 static void _map_value_valid(Var * _x2c_macro_value_0){
   if(Var_is_void(_x2c_macro_value_0[0])){
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/map.x",.function = "_map_value_valid",.line = 63};
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/map.x",.function = "_map_value_valid",.line = 62};
     x2c_error_raise_n(& _x2c_error_site_2, 48270474208, 0);
     __builtin_unreachable();
   }
@@ -367,7 +366,7 @@ static void Map__core_expand(Map _x2c_macro_map_8){
   struct MapRecord * _x2c_macro_entries_1 = _x2c_macro_map_8 -> entries;
   unsigned _x2c_macro_cap_2 = _x2c_macro_map_8 -> capacity;
   if(_x2c_macro_cap_2 > ~ 0u / 2){
-    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/map.x",.function = "Map__core_expand",.line = 77};
+    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/map.x",.function = "Map__core_expand",.line = 76};
     x2c_error_raise_n(& _x2c_error_site_3, 1358596898646632, 1, Symbol_var(1265290), unsigned_var(_x2c_macro_cap_2));
     __builtin_unreachable();
   }
@@ -626,7 +625,7 @@ static int _capacity_valid(unsigned n){
 _Noreturn static void _bad_arg(String owner){
   (void) owner;
   {
-    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/map.x",.function = "_bad_arg",.line = 86};
+    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/map.x",.function = "_bad_arg",.line = 85};
     x2c_error_raise_n(& _x2c_error_site_4, 4372499598, 0);
     __builtin_unreachable();
   }
@@ -635,7 +634,7 @@ _Noreturn static void _bad_arg(String owner){
 
 _Noreturn static void _bad_op(Symbol op){
   {
-    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/map.x",.function = "_bad_op",.line = 88};
+    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/map.x",.function = "_bad_op",.line = 87};
     x2c_error_raise_n(& _x2c_error_site_5, 136641504, 1, Symbol_var(992), Symbol_var(op));
     __builtin_unreachable();
   }
@@ -653,7 +652,7 @@ Map Map_new_capacity(unsigned _x2c_macro_capacity_4){
     if(1){
       Var _x2c_literal_part_2 = String_var(String_join(NULL, cons(String_var(String_new("Map.new_capacity")), NULL)));
       {
-        static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/map.x",.function = "Map_new_capacity",.line = 91};
+        static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/map.x",.function = "Map_new_capacity",.line = 90};
         x2c_error_raise_n(& _x2c_error_site_6, 4372499598, 2, Symbol_var(34096809266140), _x2c_literal_part_2, Symbol_var(209381969202), unsigned_var(_x2c_macro_capacity_4));
         __builtin_unreachable();
       }
@@ -698,7 +697,7 @@ Var Map_getdefault(Map _x2c_macro_map_26, Var _x2c_macro_key_16, Var _x2c_macro_
 Var Map_setdefault(Map _x2c_macro_map_27, Var _x2c_macro_key_17, Var _x2c_macro_defval_1){
   if((void *) _x2c_macro_map_27 == 0)(void) _bad_arg(0);
   if(1 && Var_is_void(_x2c_macro_key_17)){
-    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/map.x",.function = "Map_setdefault",.line = 91};
+    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/map.x",.function = "Map_setdefault",.line = 90};
     x2c_error_raise_n(& _x2c_error_site_7, 48270474208, 0);
     __builtin_unreachable();
   }
@@ -714,7 +713,7 @@ int Map_contains(Map _x2c_macro_map_28, Var _x2c_macro_key_18){
 void Map_set(Map _x2c_macro_map_29, Var _x2c_macro_key_19, Var _x2c_macro_val_5){
   if((void *) _x2c_macro_map_29 == 0)(void) _bad_arg(0);
   if(1 &&(Var_is_void(_x2c_macro_key_19) || Var_is_void(_x2c_macro_val_5))){
-    static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/map.x",.function = "Map_set",.line = 91};
+    static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/map.x",.function = "Map_set",.line = 90};
     x2c_error_raise_n(& _x2c_error_site_8, 48270474208, 0);
     __builtin_unreachable();
   }
@@ -740,7 +739,7 @@ Var Map_updateindex(Map _x2c_macro_map_31, Var _x2c_macro_key_21, Symbol _x2c_ma
     X2CVarNumericInfo _x2c_macro_info_0;
     _x2c_macro_insert_0 = Var_encoding_valid(_x2c_macro_boxed_rhs_0) && Var_numeric_info(Var_tag(_x2c_macro_boxed_rhs_0), &(_x2c_macro_info_0));
     if(Var_is_void(_x2c_macro_key_21) || Var_is_void(_x2c_macro_boxed_rhs_0)){
-      static const X2CErrorSite _x2c_error_site_9 = {.file = "../../lib/map.x",.function = "Map_updateindex",.line = 91};
+      static const X2CErrorSite _x2c_error_site_9 = {.file = "../../lib/map.x",.function = "Map_updateindex",.line = 90};
       x2c_error_raise_n(& _x2c_error_site_9, 48270474208, 0);
       __builtin_unreachable();
     }
@@ -753,14 +752,14 @@ Var Map_updateindex(Map _x2c_macro_map_31, Var _x2c_macro_key_21, Symbol _x2c_ma
     return _update_var(_x2c_macro_stored_5, _x2c_macro_op_0, _x2c_macro_rhs_0);
   }
   if(1 && Var_is_void(_x2c_macro_key_21)){
-    static const X2CErrorSite _x2c_error_site_10 = {.file = "../../lib/map.x",.function = "Map_updateindex",.line = 91};
+    static const X2CErrorSite _x2c_error_site_10 = {.file = "../../lib/map.x",.function = "Map_updateindex",.line = 90};
     x2c_error_raise_n(& _x2c_error_site_10, 48270474208, 0);
     __builtin_unreachable();
   }
   long _x2c_macro_index_8 = Map__core_find_index(_x2c_macro_map_31, & _x2c_macro_key_21);
   if(_x2c_macro_index_8 < 0){
     if(1){
-      static const X2CErrorSite _x2c_error_site_11 = {.file = "../../lib/map.x",.function = "Map_updateindex",.line = 91};
+      static const X2CErrorSite _x2c_error_site_11 = {.file = "../../lib/map.x",.function = "Map_updateindex",.line = 90};
       x2c_error_raise_n(& _x2c_error_site_11, 4372499598, 1, Symbol_var(22898), _x2c_macro_key_21);
       __builtin_unreachable();
     }
@@ -775,14 +774,14 @@ Var Var_postfix(Var *, Symbol);
 Var Map_postfixindex(Map _x2c_macro_map_32, Var _x2c_macro_key_22, Symbol _x2c_macro_op_1){
   if((void *) _x2c_macro_map_32 == 0)(void) _bad_arg(0);
   if(1 && Var_is_void(_x2c_macro_key_22)){
-    static const X2CErrorSite _x2c_error_site_12 = {.file = "../../lib/map.x",.function = "Map_postfixindex",.line = 91};
+    static const X2CErrorSite _x2c_error_site_12 = {.file = "../../lib/map.x",.function = "Map_postfixindex",.line = 90};
     x2c_error_raise_n(& _x2c_error_site_12, 48270474208, 0);
     __builtin_unreachable();
   }
   long _x2c_macro_index_9 = Map__core_find_index(_x2c_macro_map_32, & _x2c_macro_key_22);
   if(_x2c_macro_index_9 < 0){
     if(1){
-      static const X2CErrorSite _x2c_error_site_13 = {.file = "../../lib/map.x",.function = "Map_postfixindex",.line = 91};
+      static const X2CErrorSite _x2c_error_site_13 = {.file = "../../lib/map.x",.function = "Map_postfixindex",.line = 90};
       x2c_error_raise_n(& _x2c_error_site_13, 4372499598, 1, Symbol_var(22898), _x2c_macro_key_22);
       __builtin_unreachable();
     }

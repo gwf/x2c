@@ -6,7 +6,6 @@
 #define __GUARD_0x8AA1709E__
 
 #include "x2c.h"
-#include "private-keywords.h"
 #include "compiler.h"
 #include "grammar.h"
 #include "macros.h"

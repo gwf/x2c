@@ -753,7 +753,7 @@ static int Compiler._linked_provider_current(
   seen[path] = 1;
   List source = linked_meta_provider_source(home_portable_path(path));
   match (source)
-    case %(source ?hash ?(List dependencies)): {
+    case %(source ?hash ?(List dependencies) *): {
       if (!c._hash_matches(path, hash)) return 0;
       Map found = c._read_dependencies(dependencies);
       if (found == NULL) return 0;
@@ -763,6 +763,30 @@ static int Compiler._linked_provider_current(
             !c._linked_provider_current(dependency, seen)) return 0;
       return 1;
     }
+  return 0;
+}
+
+/** Reports whether a provider's linked definition hashes still match.
+    Changes outside definitions do not require a project helper. */
+int Compiler.linked_meta_definitions_current(Compiler c, String path) {
+  if (c.linked_meta_provider_current(path)) return 1;
+  String canonical = _canonical_path(path);
+  String provider = home_portable_path(canonical);
+  List source = linked_meta_provider_source(provider);
+  match (source) case %(source ?hash *):
+    if (c._hash_matches(canonical, hash)) return 1;
+  match (source) case %(source ? ? ?(String definitions)): {
+    List entry = c._meta_provider_entry(canonical);
+    if (!entry) return 0;
+    foreach (Var part, entry.car()) {
+      if (part is not <map>) continue;
+      Var value;
+      if (!part.map().try_get(
+        %("source-node" (meta-hashes $provider 0)), value)) continue;
+      Map hashes = value.list().caddr();
+      return _content_hash(_stored_meta_hashes(hashes)) == definitions;
+    }
+  }
   return 0;
 }
 
@@ -799,21 +823,32 @@ void Compiler.complete_meta_hashes(Compiler c) {
 Map Compiler.meta_provider_hashes(Compiler c, String provider) =>
   c.sym.get_exact(%("source-node" (meta-hashes $provider 0))).caddr();
 
-/** Retains each linked provider's existing source and dependency hashes.
-    Definition rows reference this shared proof instead of every sibling. */
+/** Retains source proofs and one definition hash per linked provider. */
 void Compiler.add_linked_meta_provider_hashes(Compiler c, Map rows) {
   foreach (String path, c.deps.keys()) {
     if (!is_source_file(path)) continue;
     List entry = c._entry(_canonical_path(path));
     if (!entry) continue;
     String provider = home_portable_path(_canonical_path(path));
+    List proof = NULL;
+    Map hashes = NULL;
     foreach (Var part, entry.car()) {
       if (part is not <map>) continue;
-      Var proof;
+      Var value;
       if (part.map().try_get(
-        %("source-node" (provider-source $provider 0)), proof))
-        rows[provider] = proof;
+        %("source-node" (provider-source $provider 0)), value))
+        proof = value;
+      if (part.map().try_get(
+        %("source-node" (meta-hashes $provider 0)), value))
+        hashes = value.list().caddr();
     }
+    foreach (String name, hashes.keys()) {
+      if (!(name in c.project_meta) && !(name in c.meta_calls)) continue;
+      proof = proof.append(
+        %(${_content_hash(_stored_meta_hashes(hashes))}));
+      break;
+    }
+    rows[provider] = proof;
   }
 }
 

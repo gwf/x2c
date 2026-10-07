@@ -2792,7 +2792,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2189 = cons(_2188, NULL);
   _2190 = cons(_252, _2189);
   _2191 = List_var(_2190);
-  _2192 = int_var(2086);
+  _2192 = int_var(2087);
   _2193 = cons(_2192, NULL);
   _2194 = cons(_258, _2193);
   _2195 = List_var(_2194);
@@ -2800,7 +2800,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2197 = cons(_2196, NULL);
   _2198 = cons(_266, _2197);
   _2199 = List_var(_2198);
-  _2200 = int_var(78791);
+  _2200 = int_var(78826);
   _2201 = cons(_2200, NULL);
   _2202 = cons(_271, _2201);
   _2203 = List_var(_2202);
@@ -2993,11 +2993,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2390 = cons(_2389, NULL);
   _2391 = cons(_218, _2390);
   _2392 = List_var(_2391);
-  _2393 = int_var(2094);
+  _2393 = int_var(2095);
   _2394 = cons(_2393, NULL);
   _2395 = cons(_258, _2394);
   _2396 = List_var(_2395);
-  _2397 = int_var(79153);
+  _2397 = int_var(79188);
   _2398 = cons(_2397, NULL);
   _2399 = cons(_271, _2398);
   _2400 = List_var(_2399);
@@ -3110,11 +3110,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2507 = cons(_2506, NULL);
   _2508 = cons(_218, _2507);
   _2509 = List_var(_2508);
-  _2510 = int_var(2105);
+  _2510 = int_var(2106);
   _2511 = cons(_2510, NULL);
   _2512 = cons(_258, _2511);
   _2513 = List_var(_2512);
-  _2514 = int_var(79565);
+  _2514 = int_var(79600);
   _2515 = cons(_2514, NULL);
   _2516 = cons(_271, _2515);
   _2517 = List_var(_2516);
@@ -3211,11 +3211,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_5(void){
   _2605 = cons(_2604, NULL);
   _2606 = cons(_218, _2605);
   _2607 = List_var(_2606);
-  _2608 = int_var(2108);
+  _2608 = int_var(2109);
   _2609 = cons(_2608, NULL);
   _2610 = cons(_258, _2609);
   _2611 = List_var(_2610);
-  _2612 = int_var(79649);
+  _2612 = int_var(79684);
   _2613 = cons(_2612, NULL);
   _2614 = cons(_271, _2613);
   _2615 = List_var(_2614);
@@ -3303,11 +3303,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_5(void){
   _2697 = cons(_2696, NULL);
   _2698 = cons(_218, _2697);
   _2699 = List_var(_2698);
-  _2700 = int_var(2112);
+  _2700 = int_var(2113);
   _2701 = cons(_2700, NULL);
   _2702 = cons(_258, _2701);
   _2703 = List_var(_2702);
-  _2704 = int_var(79856);
+  _2704 = int_var(79891);
   _2705 = cons(_2704, NULL);
   _2706 = cons(_271, _2705);
   _2707 = List_var(_2706);
@@ -3514,11 +3514,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_5(void){
   _2908 = List_var(_2907);
   _2909 = cons(_218, _100);
   _2910 = List_var(_2909);
-  _2911 = int_var(2161);
+  _2911 = int_var(2162);
   _2912 = cons(_2911, NULL);
   _2913 = cons(_258, _2912);
   _2914 = List_var(_2913);
-  _2915 = int_var(81985);
+  _2915 = int_var(82020);
   _2916 = cons(_2915, NULL);
   _2917 = cons(_271, _2916);
   _2918 = List_var(_2917);
@@ -4686,7 +4686,7 @@ List Compiler_postfix_completions(Compiler c, Type receiver, Symbol access);
 static List Compiler__parse_postfix_arrow(Compiler c, List expr){
   Token origin = c -> token;  Compiler_expect(c, 11645);  if(Compiler_at_completion(c)){
     List rows = Compiler_postfix_completions(c, Var_type(List_cadr(expr)), 11645); {
-      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/expressions.x",.function = "Compiler__parse_postfix_arrow",.line = 564};  x2c_error_raise_n(& _x2c_error_site_0, 1248787135328, 3, Symbol_var(740232), Symbol_var(28280237222), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
+      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/expressions.x",.function = "Compiler__parse_postfix_arrow",.line = 565};  x2c_error_raise_n(& _x2c_error_site_0, 1248787135328, 3, Symbol_var(740232), Symbol_var(28280237222), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
     }
 
   }
@@ -4697,7 +4697,7 @@ List Compiler_resolve_postfix_member(Compiler c, Type receiver_type, List field,
 static List Compiler__parse_postfix_dot(Compiler c, List expr){
   Token origin = c -> token;  Compiler_expect(c, 93);  if(Compiler_at_completion(c)){
     Type receiver = Var_type(_expr_is_raw_string_literal(expr) ? List_var(_779) : List_cadr(expr));  List rows = Compiler_postfix_completions(c, receiver, 93); {
-      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/expressions.x",.function = "Compiler__parse_postfix_dot",.line = 578};  x2c_error_raise_n(& _x2c_error_site_1, 1248787135328, 3, Symbol_var(740232), Symbol_var(28280237222), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
+      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/expressions.x",.function = "Compiler__parse_postfix_dot",.line = 579};  x2c_error_raise_n(& _x2c_error_site_1, 1248787135328, 3, Symbol_var(740232), Symbol_var(28280237222), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
     }
 
   }

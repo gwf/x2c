@@ -51,7 +51,7 @@ cleanup.
 **Raises:** `<bad-arg>` when `step` is zero. A null `iter` returns NULL
 without raising.
 
-Source: `lib/iter.x:226`
+Source: `lib/iter.x:227`
 
 ### `Iter`
 
@@ -69,7 +69,7 @@ result uses ordinary `Var` truthiness.
 **Raises:** whatever the source, `Func.apply`, or `pred` raises. A null `pred`
 answers 1 for an empty iterator and 0 for any other.
 
-Source: `lib/iter.x:773`
+Source: `lib/iter.x:774`
 
 <a id="Iter.any"></a>
 #### Iter.any
@@ -85,7 +85,7 @@ truthiness.
 **Raises:** whatever the source, `Func.apply`, or `pred` raises. A null
 `pred` answers 0.
 
-Source: `lib/iter.x:759`
+Source: `lib/iter.x:760`
 
 <a id="Iter.chain"></a>
 #### Iter.chain
@@ -98,7 +98,7 @@ Pulls do not reach `second` until `first` is exhausted. Both sources and
 no elements, and a null `dest` returns NULL. Pulling may raise any cause
 raised by either source.
 
-Source: `lib/iter.x:525`
+Source: `lib/iter.x:526`
 
 <a id="Iter.count"></a>
 #### Iter.count
@@ -114,7 +114,7 @@ fit in `int`.
 **Raises:** `<void-op>` for a source callback that yields `void`, plus any
 cause raised by that callback.
 
-Source: `lib/iter.x:804`
+Source: `lib/iter.x:805`
 
 <a id="Iter.enumerate"></a>
 #### Iter.enumerate
@@ -130,7 +130,7 @@ successfully pulled values must remain within the `int` range.
 **Raises:** `<alloc-fail>` or `<size-limit>` while interning a pair, plus any
 cause raised by the source. A null `dest` returns NULL.
 
-Source: `lib/iter.x:502`
+Source: `lib/iter.x:503`
 
 <a id="Iter.filter"></a>
 #### Iter.filter
@@ -150,7 +150,7 @@ iterator. An empty source does not invoke or check `func`.
 
 **Raises:** whatever the source, `Func.apply`, or `func` raises while pulling.
 
-Source: `lib/iter.x:344`
+Source: `lib/iter.x:345`
 
 <a id="Iter.find"></a>
 #### Iter.find
@@ -164,7 +164,7 @@ matched", which is unambiguous because no iterator may yield `void`.
 Elements are passed as values. Raises: whatever the source, `Func.apply`,
 or `pred` raises. A null `pred` returns `void`.
 
-Source: `lib/iter.x:790`
+Source: `lib/iter.x:791`
 
 <a id="Iter.foldl"></a>
 #### Iter.foldl
@@ -181,7 +181,7 @@ element with a `void` seed, does not invoke or check `fn`.
 
 **Raises:** whatever the source, `Func.apply`, or `fn` raises.
 
-Source: `lib/iter.x:732`
+Source: `lib/iter.x:733`
 
 <a id="Iter.head"></a>
 #### Iter.head
@@ -195,7 +195,7 @@ values unconsumed. A nonpositive count yields nothing. The source and
 caller-owned `dest` must outlive traversal; a null `dest` returns NULL.
 Pulling may raise any cause raised by the source.
 
-Source: `lib/iter.x:546`
+Source: `lib/iter.x:547`
 
 <a id="Iter.iter"></a>
 #### Iter.iter
@@ -205,7 +205,7 @@ Source: `lib/iter.x:546`
 Returns `iter` unchanged as its own iterator.
 `dest` is ignored; ownership and remaining traversal state are unchanged.
 
-Source: `lib/iter.x:203`
+Source: `lib/iter.x:204`
 
 <a id="Iter.map"></a>
 #### Iter.map
@@ -239,7 +239,7 @@ A null `dest` returns NULL. An empty source does not invoke or check
 pulling, including `<void-op>` when `func` returns `void` and the iterator
 rejects it as an element.
 
-Source: `lib/iter.x:318`
+Source: `lib/iter.x:319`
 
 <a id="Iter.map2"></a>
 #### Iter.map2
@@ -255,7 +255,7 @@ type.
 The sources, destination, callback lifetime, value passing, and pull-time
 failures are those of `Iter.zip_with`. A null `fn` or `dest` returns NULL.
 
-Source: `lib/iter.x:488`
+Source: `lib/iter.x:489`
 
 <a id="Iter.max"></a>
 #### Iter.max
@@ -270,7 +270,7 @@ of any tie.
 **Raises:** `<void-op>` for a source callback that yields `void`, plus any
 cause from the source or `Var.compare`.
 
-Source: `lib/iter.x:844`
+Source: `lib/iter.x:845`
 
 <a id="Iter.min"></a>
 #### Iter.min
@@ -285,7 +285,7 @@ of any tie.
 **Raises:** `<void-op>` for a source callback that yields `void`, plus any
 cause from the source or `Var.compare`.
 
-Source: `lib/iter.x:858`
+Source: `lib/iter.x:859`
 
 <a id="Iter.new"></a>
 #### Iter.new
@@ -304,7 +304,7 @@ traversal because it allocates nothing.
 
 **Raises:** `<alloc-fail>` when storage cannot be allocated.
 
-Source: `lib/iter.x:151`
+Source: `lib/iter.x:152`
 
 <a id="Iter.product"></a>
 #### Iter.product
@@ -319,7 +319,7 @@ an expression. Integer results wrap to `Var.binary`'s promoted type width.
 **Raises:** any cause from the source or `Var.binary` while multiplying an
 element into the running product.
 
-Source: `lib/iter.x:831`
+Source: `lib/iter.x:832`
 
 <a id="Iter.repeat"></a>
 #### Iter.repeat
@@ -331,7 +331,7 @@ A nonpositive count yields nothing. `dest` is caller-owned, and any
 storage referenced by `value` must outlive traversal. A null `dest`
 returns NULL. Pulling a repeated `void` raises `<void-op>`.
 
-Source: `lib/iter.x:565`
+Source: `lib/iter.x:566`
 
 <a id="Iter.scan"></a>
 #### Iter.scan
@@ -366,7 +366,7 @@ invoke `fn`. Pulling may raise whatever `Func.apply`, the source, or `fn`
 raises, including `<void-op>` when `fn` returns `void` and the iterator
 rejects it as an element. A null `fn` or `dest` returns NULL.
 
-Source: `lib/iter.x:392`
+Source: `lib/iter.x:393`
 
 <a id="Iter.sum"></a>
 #### Iter.sum
@@ -381,7 +381,7 @@ iterator sums to 0. Use `Iter.accumulate` for the running totals.
 **Raises:** any cause from the source or `Var.binary` while adding an element
 to the running total.
 
-Source: `lib/iter.x:818`
+Source: `lib/iter.x:819`
 
 <a id="Iter.try_next"></a>
 #### Iter.try_next
@@ -411,7 +411,7 @@ while (counts.try_next(value)) printf("%d\n", value);
 element, plus any cause raised by that callback. A null `iter` or `out`
 reads as exhausted without raising.
 
-Source: `lib/iter.x:175`
+Source: `lib/iter.x:176`
 
 <a id="Iter.unique"></a>
 #### Iter.unique
@@ -428,7 +428,7 @@ traversal.
 source, hashing, or equality while constructing or pulling. A null `dest`
 returns NULL without allocating.
 
-Source: `lib/iter.x:588`
+Source: `lib/iter.x:589`
 
 <a id="Iter.zip"></a>
 #### Iter.zip
@@ -446,7 +446,7 @@ pool owning its canonical match.
 **Raises:** `<alloc-fail>` or `<size-limit>` while interning a pair, plus any
 cause raised by either source. A null `dest` returns NULL.
 
-Source: `lib/iter.x:445`
+Source: `lib/iter.x:446`
 
 <a id="Iter.zip_with"></a>
 #### Iter.zip_with
@@ -468,7 +468,7 @@ pulling does not invoke or check `fn`.
 pulling. With a null `fn`, pair interning may raise `<alloc-fail>` or
 `<size-limit>`.
 
-Source: `lib/iter.x:462`
+Source: `lib/iter.x:463`
 
 ## Advanced and interop API
 
@@ -524,7 +524,7 @@ for two stages of a pipeline silently overwrites the first.
 
 A null `iter` returns NULL.
 
-Source: `lib/iter.x:131`
+Source: `lib/iter.x:132`
 
 <a id="Iter.unzip"></a>
 #### Iter.unzip
@@ -566,7 +566,7 @@ creating or growing the column buffers. A source may also raise while a
 column pulls. A null `shared` or `dest` returns NULL without raising or
 allocating.
 
-Source: `lib/iter.x:644`
+Source: `lib/iter.x:645`
 
 ## Convenience API
 
@@ -593,7 +593,7 @@ operation and `Iter.sum` when only the final total matters.
 **Raises:** any cause from the source or `Var.binary` while adding an element
 to the running total. A null `dest` returns NULL without raising.
 
-Source: `lib/iter.x:420`
+Source: `lib/iter.x:421`
 
 <a id="Iter.next"></a>
 #### Iter.next
@@ -608,7 +608,7 @@ exhaustion separately from the element.
 **Raises:** `<void-op>` when the source callback claims success with `void`,
 plus any cause raised by that callback.
 
-Source: `lib/iter.x:195`
+Source: `lib/iter.x:196`
 
 ## Public types
 
@@ -630,7 +630,7 @@ adapter. Its storage, borrowed sources, and stored callbacks must outlive
 traversal. The handle has no destructor; auxiliary `Map` or `Array` storage
 follows the lifetime of its owning `Scope`.
 
-Source: `lib/iter.x:22`
+Source: `lib/iter.x:23`
 
 <a id="IterNextFn"></a>
 ### IterNextFn
@@ -642,7 +642,7 @@ The iterator borrows the callback and invokes it synchronously. A nonzero
 result must write one non-`void` value through `out`; zero reports
 exhaustion and must leave `out` unchanged.
 
-Source: `lib/iter.x:29`
+Source: `lib/iter.x:30`
 
 <a id="UnzipColumn"></a>
 ### UnzipColumn
@@ -653,7 +653,7 @@ Internal column selector embedded in `UnzipShared`.
 Callers reserve it as part of that shared record and do not initialize or
 use it independently.
 
-Source: `lib/iter.x:53`
+Source: `lib/iter.x:54`
 
 <a id="UnzipShared"></a>
 ### UnzipShared
@@ -666,7 +666,7 @@ belong to the `Scope` that owns the `Array`s created at initialization;
 that `Scope` must remain live through all column pulls and provides
 cleanup.
 
-Source: `lib/iter.x:47`
+Source: `lib/iter.x:48`
 
 ## Design notes
 

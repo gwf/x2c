@@ -11,6 +11,7 @@
 #pragma once
 #include "error-macros.x"
 #include "private-keywords.x"
+static keyword loop $private.loop;
 #include "common.x"
 
 /** Caller-owned handle to single-pass iterator state.

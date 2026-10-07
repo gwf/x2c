@@ -6,7 +6,6 @@
 #define __GUARD_0x05ED52D8__
 
 #include "x2c.h"
-#include "private-keywords.h"
 #include "build.h"
 typedef struct ProjectBuild{
   CliRequest request;

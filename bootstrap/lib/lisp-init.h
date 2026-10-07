@@ -5,7 +5,6 @@
 #ifndef __GUARD_0x396C5583__
 #define __GUARD_0x396C5583__
 
-#include "private-keywords.h"
 #include "x2c.h"
 #include "lisp.h"
 Var lisp_last(Var values);

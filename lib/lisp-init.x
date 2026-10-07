@@ -12,7 +12,6 @@
 */
 
 #pragma once
-#include "private-keywords.x"
 #include "x2c.x"
 #include "lisp.x"
 

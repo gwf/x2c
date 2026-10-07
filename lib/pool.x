@@ -14,6 +14,7 @@
 
 #include "error-macros.x"
 #include "private-keywords.x"
+static keyword loop $private.loop;
 
 #include <stddef.h>
 #include "common.x"

@@ -11,7 +11,6 @@
 */
 
 #pragma once
-#include "private-keywords.x"
 #include "compiler.x"
 
 #include "grammar.x"
@@ -187,7 +186,7 @@ void Compiler.install_collected_meta_function(
 static void Compiler._install_stub(
   Compiler c, String name, Type type, String provider, Token marker) {
   String context = %"$name\n${provider ? provider : ""}";
-  try c.macro_lisp.set_global(
+  try c.macro_lisp.bind(
     name,
     Func.new_context(
       _meta_stub, c.func_signature(type),
@@ -980,7 +979,7 @@ static int Compiler._linked_texts_match(
   else if (!(name in linked) && !(name in c.native_meta)) return 0;
   c.meta_calls.try_get(name, names);
   if (names is <string>)
-    return c.linked_meta_provider_current(home_absolute_path(names));
+    return c.linked_meta_definitions_current(home_absolute_path(names));
   if (names is <list>)
     foreach (String callee, names.list())
       if (!c._linked_texts_match(callee, linked, reached)) return 0;

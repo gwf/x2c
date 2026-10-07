@@ -6,7 +6,7 @@ import "libuv" with UvTcp;
 #include "test-support.x"
 
 
-#include "../src/libuv-errors.x"
+#include "libuv-errors.x"
 #include "../../../unittest/test-macros.x"
 
 static List seen_detail, seen_location;

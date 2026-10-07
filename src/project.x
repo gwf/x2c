@@ -8,7 +8,6 @@
 */
 
 #pragma once
-#include "private-keywords.x"
 #include "build.x"
 
 /** Links native build requests in dependency-first order.

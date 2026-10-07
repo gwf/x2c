@@ -11,6 +11,7 @@
 
 #pragma once
 #include "private-keywords.x"
+static keyword loop $private.loop;
 #include "grammar.x"
 #include "ast-rewrite.x"
 #include "compiler.x"

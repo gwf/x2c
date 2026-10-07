@@ -12,6 +12,7 @@
 
 #pragma once
 #include "private-keywords.x"
+static keyword loop $private.loop;
 #include "compiler.x"
 #include "type.x"
 #include "parse-report-macros.x"
@@ -3455,6 +3456,7 @@ static List Compiler._bind_catchcases(Compiler c, Var arms, List handler) {
   Array bound = [];
   foreach (List arm, arms.list()) {
     List pattern = arm.car(), body = arm.cadr();
+    if (pattern) pattern = c._resolve(pattern);
     List bindings = c.begin_catch_arm(pattern, c.token);
     {
       defer c.sym.pop_scope();

@@ -6,7 +6,6 @@
 #define __GUARD_0x3CFE94DA__
 
 #include "x2c.h"
-#include "private-keywords.h"
 #include "build.h"
 #include <stdio.h>
 #include <string.h>

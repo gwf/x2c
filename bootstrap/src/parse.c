@@ -6458,7 +6458,7 @@ static List Compiler__bind_catchcases(Compiler c, Var arms, List handler){
   List handle = List_truth(handler) ? Var_list(List_car(handler)) : Sym_introduce(c -> sym, Compiler_fresh_name(c, _2206));  Compiler_set_fact(c, List_var(cons(_33, cons(List_var(handle), NULL))), List_var(_2209));  Array bound = Array_new(); {
     List arm;  List _x2c_macro_object_38 = Var_list(arms);  List _x2c_macro_cursor_38 = _x2c_macro_object_38;  Var _x2c_macro_cursor_output_33;  while(List_try_next(_x2c_macro_object_38, &(_x2c_macro_cursor_38), &(_x2c_macro_cursor_output_33))){
       arm = Var_list(_x2c_macro_cursor_output_33); {
-        List pattern = Var_list(List_car(arm)), body = Var_list(List_cadr(arm));  List bindings = Compiler_begin_catch_arm(c, pattern, c -> token); {
+        List pattern = Var_list(List_car(arm)), body = Var_list(List_cadr(arm));  if(List_truth(pattern)) pattern = Compiler__resolve(c, pattern);  List bindings = Compiler_begin_catch_arm(c, pattern, c -> token); {
           {
             _x2c_defer_env_27 _x2c_macro_environment_27 ={
               0

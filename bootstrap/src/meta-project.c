@@ -577,6 +577,8 @@ void Tokenizer_scan(Tokenizer);
 
 Path Path_dirname(Path);
 
+int Compiler_linked_meta_definitions_current(Compiler, String);
+
 static int Scan_file(Scan * s, String path){
   Var found;
   if(Map_try_get((* s).seen, String_var(path), &(found))) return Var_int(Var_convert(found, 3453797));
@@ -634,6 +636,7 @@ static int Scan_file(Scan * s, String path){
   tokens -> layout = is_layout_file(path);
   Tokenizer_scan(tokens);
   int meta = Scan_file_scope(&((* s)), tokens, Path_dirname(path));
+  if((meta & 1) && _compiler_owns(path) && Compiler_linked_meta_definitions_current((* s).c, path)) meta &= ~ 1;
   Map_setindex((* s).seen, String_var(path), int_var(meta));
   return meta;
 }

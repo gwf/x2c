@@ -28,7 +28,7 @@ empty, and its last component names the target. Any other directory, an
 unusable name, or a failed write prints a diagnostic and exits with
 status 2.
 
-Source: `src/project.x:895`
+Source: `src/project.x:894`
 
 #### project_manifest
 
@@ -37,7 +37,7 @@ Source: `src/project.x:895`
 Returns the explicit or nearest readable project manifest, or NULL.
 Discovery uses the same request view as project parsing.
 
-Source: `src/project.x:152`
+Source: `src/project.x:151`
 
 #### project_plan
 
@@ -50,7 +50,7 @@ manifest fields and command-line overrides to ordinary `CliRequest` values
 without executing build actions. Manifest discovery, parsing, validation,
 or target-selection failures print a diagnostic and exit with status 2.
 
-Source: `src/project.x:123`
+Source: `src/project.x:122`
 
 ## Public types
 
@@ -69,7 +69,7 @@ is owned by the current `Scope` and needs no individual cleanup; its
 `String` and `List` fields retain their canonical pool lifetimes and may
 share values with the command request.
 
-Source: `src/project.x:20`
+Source: `src/project.x:19`
 
 ## Design notes
 

@@ -118,8 +118,8 @@ Public functions:
 `Compiler.collect_symbols`, `Compiler.configure_package`,
 `collect_resolve_include`, `Compiler.include_typedef_names`,
 `Compiler.include_type_dependencies`, `Compiler.linked_meta_provider_current`,
-`Compiler.complete_meta_hashes`, `Compiler.meta_provider_hashes`,
-`Compiler.add_linked_meta_provider_hashes`,
+`Compiler.linked_meta_definitions_current`, `Compiler.complete_meta_hashes`,
+`Compiler.meta_provider_hashes`, `Compiler.add_linked_meta_provider_hashes`,
 `Compiler.name_meta_provider_bindings`, `Compiler.publishes_typedef`,
 `Compiler.publishes_type_family`, `Compiler.inline_type_dependencies`,
 `Compiler.publish_inline_types`, `Compiler.record_generated_symbol`,
@@ -1278,7 +1278,7 @@ Public functions:
 
 ### [lib/private-keywords.x](../lib/private-keywords.x)
 
-implementation loop keyword aliases.
+implementation loop decorator.
 
 Public functions:
 

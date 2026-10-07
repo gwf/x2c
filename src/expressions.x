@@ -9,6 +9,7 @@
 */
 #pragma once
 #include "private-keywords.x"
+static keyword loop $private.loop;
 #include "compiler.x"
 #include "type.x"
 
