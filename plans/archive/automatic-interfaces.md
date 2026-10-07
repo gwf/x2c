@@ -1,9 +1,9 @@
 # Ordinary source modules and automatic interfaces
 
-> Status: active
-> Implementation authorized on 2026-10-06. The source starts at origin/dev
-> cb67de5ec658af4f9108433f24f062543c6087d4. Delivery destination is pending
-> because the supplied and current repository instructions disagree.
+> Status: done
+> Implemented and validated on 2026-10-06 at 6938c195. Gary requested local
+> retention after validation; no remote branch was changed. The source started
+> at origin/dev cb67de5ec658af4f9108433f24f062543c6087d4.
 
 ## Result
 
@@ -103,6 +103,19 @@ publication, binding, cache relocation, native linkage, and effect behavior.
 No additional defensive validator or diagnostic-only fixture is planned.
 
 ## Evidence and boundaries
+
+The full existing publication gate passed at the validated implementation:
+256 bootstrap/stage C/H files converge, and 384 cold C/H/interface files
+match stage 1. All 1,094 compiler fixtures and 2,450 artifacts pass. All
+941 native tests pass with 24,994 assertions. Documentation, 101 executable
+book samples, commands, and all CLI, protocol, header, and meta probes pass.
+The reviewed generated artifacts are committed; the local branch is
+codex/automatic-interfaces.
+
+The advisory performance snapshot was not run because the host had sustained
+unrelated CPU load from VS Code's C++ service. Optional full Cstar verification
+was unavailable without its prepared libcstar.a; its reduced native control
+passed. These limitations do not weaken the required correctness evidence.
 
 Ordinary includes retain declaration maps, macro snapshots, public Lisp
 forms, provider meta advertisements, and source positions. Runtime bodies

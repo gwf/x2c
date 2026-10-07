@@ -44,10 +44,6 @@ execution.
 
 ### Current work
 
-- [Ordinary source modules and automatic interfaces](automatic-interfaces.md):
-  authorized replacement of visibility pragmas and macro packs with ordinary
-  includes, static storage, and public type dependency selection. Migration
-  and compiler validation are in progress.
 - [Harness simplification and messaging](harness-simplification-and-messaging.md):
   authorized corrections to existing tools and guidance, a small
   cross-platform integrator messaging pilot, and separate external runtime
@@ -99,6 +95,10 @@ Production promotion remains separately authorized under the release workflow.
 
 ### Decisions and completed records
 
+- [Ordinary source modules and automatic interfaces](archive/automatic-interfaces.md):
+  done 2026-10-06 at 6938c195. Ordinary includes, static storage, and public
+  type dependency selection replace visibility pragmas and macro packs.
+  The full required gate passed; Gary requested local retention.
 - [Macro application cost](archive/macro-application-cost.md): done
   2026-10-04; phases 1 and 2 and the undo log in PR #129, phase 3 in
   PR #130, then PRs #132 and #135. Its open defer options stay under
