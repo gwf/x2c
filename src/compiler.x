@@ -59,13 +59,16 @@ typedef struct SymScope {
   Map symbols, bindings, enumerators, macros;
 } SymScope;
 
+/** Counts the destinations `Pending.area` names; area 0 is unit support. */
+enum { PENDING_AREAS = 5 };
+
 /** Holds generated code awaiting insertion, by `Pending.area` destination:
     unit support declarations, which `Compiler.transform` lowers after the
     unit, then the lowered statements of each file initialization area. */
-typedef struct Pending { Array areas[5]; } Pending;
+typedef struct Pending { Array areas[PENDING_AREAS]; } Pending;
 
 /** Holds each destination's length for `Pending.restore`. */
-typedef struct PendingMark { int lengths[5]; } PendingMark;
+typedef struct PendingMark { int lengths[PENDING_AREAS]; } PendingMark;
 
 /** Names the scope-owned semantic table belonging to one compiler. */
 typedef struct Sym *Sym;
@@ -2289,7 +2292,7 @@ void Compiler.add_init(Compiler c, Symbol phase, List stmt) {
 
 /** Gives every destination fresh, empty storage. */
 void Pending.reset(Pending &p) {
-  for (int i = 0; i < 5; i++) p.areas[i] = [];
+  for (int i = 0; i < PENDING_AREAS; i++) p.areas[i] = [];
 }
 
 /** Returns the storage of the destination `area`. */
@@ -2298,20 +2301,22 @@ Array Pending.area(Pending &p, Symbol area) =>
 
 /** Whether any file initialization area holds a statement. */
 int Pending.initializes(Pending &p) {
-  for (int i = 1; i < 5; i++) if (p.areas[i]) return 1;
+  for (int i = 1; i < PENDING_AREAS; i++) if (p.areas[i]) return 1;
   return 0;
 }
 
 /** Returns the mark that `restore` returns every destination to. */
 PendingMark Pending.checkpoint(Pending &p) {
   PendingMark mark;
-  for (int i = 0; i < 5; i++) mark.lengths[i] = p.areas[i].len();
+  for (int i = 0; i < PENDING_AREAS; i++)
+    mark.lengths[i] = p.areas[i].len();
   return mark;
 }
 
 /** Drops the code queued since `mark`. */
 void Pending.restore(Pending &p, PendingMark mark) {
-  for (int i = 0; i < 5; i++) p.areas[i].resize(mark.lengths[i]);
+  for (int i = 0; i < PENDING_AREAS; i++)
+    p.areas[i].resize(mark.lengths[i]);
 }
 
 // the literal cache

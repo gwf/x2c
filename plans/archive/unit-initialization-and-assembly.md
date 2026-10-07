@@ -1,9 +1,9 @@
 # Unit initialization, entry setup, and assembly
 
-> Status: active
-> The implementation in steps 3 to 6 was delivered to `dev` on 2026-10-07
-> from base `48715bde`; see the delivery record at the end. Only the
-> deferred memoization section remains, and it waits for named evidence.
+> Status: done 2026-10-07 at `0916ff92`.
+> Steps 3 to 6 were delivered; see the delivery record at the end. The
+> deferred memoization section moved to the backlog in
+> [plans/README.md](../README.md) and waits for named evidence.
 > Formerly `deferred-code-and-memoization.md`.
 
 ## Goal
@@ -46,7 +46,7 @@ Two features serve as design checks. Neither is part of this work.
   temporary valid for every case. It must preserve adjacent labels, default
   placement, fallthrough, user labels, and nested switches, and rewrite only
   cases owned by its switch. `break` and an enclosing loop's `continue` keep
-  their meaning; `Walk._rewrite_switch` in [cleanup.x](../src/cleanup.x)
+  their meaning; `Walk._rewrite_switch` in [cleanup.x](../../src/cleanup.x)
   already bounds `break` at the switch. Added cleanup
   regions can change which inward jumps are legal, so temporary placement is
   a semantic choice. String equality is a separate decision: pointer
@@ -60,10 +60,10 @@ Line numbers are locators at `e18ce3de`; function names are primary.
 
 | Generated code | Builder | Guard | Behavior |
 | --- | --- | --- | --- |
-| Protocol initializer | `_protocol_initializer`, [generate.x:1024](../src/generate.x) | `_x2c_protocol_guard_` | Wraps the authored `x2c_initialize_protocols` ([common.x:837](../lib/common.x)) with the `<protocol>` statements. The header cache initializer and the synthetic constructor call it first. |
-| Header cache initializer | `HeaderCache`, `_header_initializer`, [cache.x:447](../src/cache.x) | `_x2c_hcache_guard_<hash>` | Constructor. Header slots, guard, and batch helpers form a header prelude. `HeaderCache.entries` patches each header function that reads a header cache. |
-| File initializer | `_file_init`, `Init`, [generate.x:851](../src/generate.x) | `_init_guard_` | The synthetic constructor `_file_init_`, or the authored type initializer `init_fn`. Runs entry, run-once guard, `<early>`, `<mid>`, authored body, `<late>`, then the `fini_fn` shutdown registration. `Init.patch` patches public entries; a cache-only file patches only entries that reach a cache (`_cache_reachable`). |
-| Program entry | `_patch_main`, [generate.x:1506](../src/generate.x) | none | Prefixes `main` with `x2c_initialize()`. |
+| Protocol initializer | `_protocol_initializer`, [generate.x:1024](../../src/generate.x) | `_x2c_protocol_guard_` | Wraps the authored `x2c_initialize_protocols` ([common.x:837](../../lib/common.x)) with the `<protocol>` statements. The header cache initializer and the synthetic constructor call it first. |
+| Header cache initializer | `HeaderCache`, `_header_initializer`, [cache.x:447](../../src/cache.x) | `_x2c_hcache_guard_<hash>` | Constructor. Header slots, guard, and batch helpers form a header prelude. `HeaderCache.entries` patches each header function that reads a header cache. |
+| File initializer | `_file_init`, `Init`, [generate.x:851](../../src/generate.x) | `_init_guard_` | The synthetic constructor `_file_init_`, or the authored type initializer `init_fn`. Runs entry, run-once guard, `<early>`, `<mid>`, authored body, `<late>`, then the `fini_fn` shutdown registration. `Init.patch` patches public entries; a cache-only file patches only entries that reach a cache (`_cache_reachable`). |
+| Program entry | `_patch_main`, [generate.x:1506](../../src/generate.x) | none | Prefixes `main` with `x2c_initialize()`. |
 
 The three initializers each build a guard declaration
 (`initialization_guard`), a run-once test (`_run_once`), and a statement
@@ -75,13 +75,13 @@ different paths:
 
 | Producer | Storage | Initialization |
 | --- | --- | --- |
-| Protocol method tables, [protocol.x:2643](../src/protocol.x) | `add_early` | `add_init(<protocol>)` or `add_init(<early>)` |
-| Source cache slots, `_source_cache`, [cache.x:552](../src/cache.x) | `_slot_declarations`, `_cache_batches` helpers, `place_source_prelude` | `add_init(<early>)` or `add_init(<late>)` |
-| Deferred file statics, `_rewrite_statics`, [cache.x:161](../src/cache.x) | Declaration rewritten in place, then a `sourceinit` helper after it | `StaticQueue` orders them, then `add_init(<mid>)` or `add_init(<late>)` |
-| Header cache slots, `HeaderCache.prelude`, [cache.x:458](../src/cache.x) | Header prelude | Its own constructor; never `inits` |
+| Protocol method tables, [protocol.x:2643](../../src/protocol.x) | `add_early` | `add_init(<protocol>)` or `add_init(<early>)` |
+| Source cache slots, `_source_cache`, [cache.x:552](../../src/cache.x) | `_slot_declarations`, `_cache_batches` helpers, `place_source_prelude` | `add_init(<early>)` or `add_init(<late>)` |
+| Deferred file statics, `_rewrite_statics`, [cache.x:161](../../src/cache.x) | Declaration rewritten in place, then a `sourceinit` helper after it | `StaticQueue` orders them, then `add_init(<mid>)` or `add_init(<late>)` |
+| Header cache slots, `HeaderCache.prelude`, [cache.x:458](../../src/cache.x) | Header prelude | Its own constructor; never `inits` |
 
 **Placement and execution order are separate axes.** `early_decls` is not
-early. `Compiler.transform` ([transform.x:190](../src/transform.x)) drains
+early. `Compiler.transform` ([transform.x:190](../../src/transform.x)) drains
 it to a fixed point and appends the declarations after the authored unit;
 `_forward_declarations` later supplies the prototypes that make them usable.
 `<early>`, `<mid>`, and `<late>` order execution inside the file
@@ -92,7 +92,7 @@ reason, and the design replaces them.
 
 ## Entry-setup inventory
 
-Exit cleanup has one walker (`Walk` in [cleanup.x](../src/cleanup.x)) and one
+Exit cleanup has one walker (`Walk` in [cleanup.x](../../src/cleanup.x)) and one
 usual interface (`defer`). `$auto`, `$scope`, `$let`, `$lock`, timing, and
 tracing all generate `defer`. Try/finally and static-initialization regions
 cooperate with the same walker. Allocator finalizers and shutdown hooks are
@@ -103,14 +103,14 @@ existing code:
 
 | Scope | Path | Locator |
 | --- | --- | --- |
-| Block | Decorators prefix statements, paired with `defer` | `_scope_expand`, [builtins.x:31](../src/builtins.x) |
-| Function | Mutable-capture parameter cells | `_prepend_setup`, [callables.x:692](../src/callables.x) |
-| Function | Exception-preserved parameter escapes | `Preserve.escape_parameters`, [cleanup.x:1215](../src/cleanup.x) |
-| Generated function | Callable adapter argument and context setup | [callables.x:192](../src/callables.x) |
-| Expression | Ordered-evaluation temporaries | `_ordered_parts`, [transform.x:659](../src/transform.x) |
-| Protected block | Exception frames and defer records | `Walk._lower_try`, `Walk._lower_defer`, [cleanup.x:695](../src/cleanup.x) |
-| Unit | Generated declarations | `Compiler.add_early`, [compiler.x:2271](../src/compiler.x) |
-| File | Generated storage at the prelude boundary | `place_source_prelude`, [generate.x:887](../src/generate.x) |
+| Block | Decorators prefix statements, paired with `defer` | `_scope_expand`, [builtins.x:31](../../src/builtins.x) |
+| Function | Mutable-capture parameter cells | `_prepend_setup`, [callables.x:692](../../src/callables.x) |
+| Function | Exception-preserved parameter escapes | `Preserve.escape_parameters`, [cleanup.x:1215](../../src/cleanup.x) |
+| Generated function | Callable adapter argument and context setup | [callables.x:192](../../src/callables.x) |
+| Expression | Ordered-evaluation temporaries | `_ordered_parts`, [transform.x:659](../../src/transform.x) |
+| Protected block | Exception frames and defer records | `Walk._lower_try`, `Walk._lower_defer`, [cleanup.x:695](../../src/cleanup.x) |
+| Unit | Generated declarations | `Compiler.add_early`, [compiler.x:2271](../../src/compiler.x) |
+| File | Generated storage at the prelude boundary | `place_source_prelude`, [generate.x:887](../../src/generate.x) |
 | File and header | Initializers, constructors, guarded entries | `_file_init`, `HeaderCache` |
 | Program | Runtime initialization prefix on `main` | `_patch_main` |
 
@@ -131,11 +131,11 @@ transformation stage. Insertion order alone does not define execution order.
 | `Compiler.inits` | Each entry carries its phase tag. `init_statements` rescans the whole array for each phase: three times in `Init.statements`, once in `_protocol_initializer`, and three times in `_cache_only`, which discards its lists. | Store by destination |
 | Cache `initializers` | `(binding assignment)`, enriched in place to `(binding assignment helper arms)` | One record shape from creation |
 | `StaticQueue.pending/state/phases` | Three maps keyed by the same binding; `state` and `phases` can become visiting, finished-ordinary, and finished-late | One scheduling record per binding; account for its allocation |
-| `static_init_deps` | Two producers: `_record_static_object` ([compiler.x:1721](../src/compiler.x)) and Func conversion ([transform.x:861](../src/transform.x)) | Keep; it is a dependency fact, not pending code |
+| `static_init_deps` | Two producers: `_record_static_object` ([compiler.x:1721](../../src/compiler.x)) and Func conversion ([transform.x:861](../../src/transform.x)) | Keep; it is a dependency fact, not pending code |
 | `init_tokens` | Serves the cycle diagnostic and collection | Keep |
 | `init_fn`, `fini_fn` | Authored initializer and shutdown names; saved by `SymTxn` | Keep as file-initialization inputs |
 | `sourceinit` wrapper | Marks a captured static helper at its source position; read by `_prelude_position`, `HeaderCache.entries`, and `emit.x:331` | Keep the position; decide whether the record replaces the marker |
-| `initblock`/`initstmt` | `_file_init` skips them ([generate.x:859](../src/generate.x)); nothing in `src/`, `lib/`, `etc/`, or `unittest/` produces them | Delete the match and its comment |
+| `initblock`/`initstmt` | `_file_init` skips them ([generate.x:859](../../src/generate.x)); nothing in `src/`, `lib/`, `etc/`, or `unittest/` produces them | Delete the match and its comment |
 | `_prelude_position` | Four scans per unit: `_file_init`, `place_source_prelude`, and twice in `_primary_include`. File initialization and the source prelude insert at the same boundary in separate walks. | One boundary per region where ordering permits |
 | `declaration_effects` | Deferred Lisp forms with source key, span, syntax, and defining context | Out of scope; compile-time availability is not runtime initialization |
 | `pending_inline_bodies` | Shared among related compilers with their provider session | Keep its owner |
@@ -145,9 +145,9 @@ transformation stage. Insertion order alone does not define execution order.
 
 **Two rollback paths restore pending code.** `SymTxn` checkpoints
 `early_decls` and `inits` only for macro applications
-(`transaction.extended`, [symbols.x:1271](../src/symbols.x) and
-[1292](../src/symbols.x)). `_speculate`
-([initializers.x:734](../src/initializers.x)) separately snapshots and
+(`transaction.extended`, [symbols.x:1271](../../src/symbols.x) and
+[1292](../../src/symbols.x)). `_speculate`
+([initializers.x:734](../../src/initializers.x)) separately snapshots and
 restores `early_decls`, `id_keys`, `key_ids`, and the adapter map by hand.
 The pending owner provides one checkpoint and restore that both use.
 
@@ -198,7 +198,7 @@ Keep current fixed-point generation.
 ### Contribution protocol
 
 The macro code-value carrier is the existing contribution protocol.
-`_code_effects` ([macros.x:4197](../src/macros.x)) applies ordered effects
+`_code_effects` ([macros.x:4197](../../src/macros.x)) applies ordered effects
 under the application's transaction: `new-name`, `cleanup`, and `early`.
 The `early` effect already combines a pending declaration with a
 once-per-owner memo (`$adapter.memo`). Extend this vocabulary with an
@@ -282,7 +282,7 @@ complete inputs, the point where those inputs become stable, the owner whose
 lifetime bounds the result, and its repeated callers.
 
 The contract starts from the existing `$memo` in
-[adapter-memo.x](../src/adapter-memo.x):
+[adapter-memo.x](../../src/adapter-memo.x):
 
 ```text
 memo owner + operation identity + complete stable inputs -> reusable result
@@ -299,7 +299,7 @@ memo owner + operation identity + complete stable inputs -> reusable result
   per-occurrence. `freeze_declaration_syntax` and thawing read and install
   semantic facts, so do not memoize them by syntax identity.
 - The linked-meta definition digest (`linked_meta_definitions_current`,
-  [collect.x](../src/collect.x)) is existing reuse. Definition freshness and
+  [collect.x](../../src/collect.x)) is existing reuse. Definition freshness and
   source freshness stay separate questions.
 - Candidate families are prepared decorator and template analysis,
   structural projections, adapter recipes, and analysis against completed
@@ -384,8 +384,8 @@ These are checkpoints in one connected change.
 ## Validation
 
 Use existing fixtures under
-[unittest/compiler-fixtures](../unittest/compiler-fixtures) first; read
-[unittest/AGENTS.md](../unittest/AGENTS.md) before running them. Compare
+[unittest/compiler-fixtures](../../unittest/compiler-fixtures) first; read
+[unittest/AGENTS.md](../../unittest/AGENTS.md) before running them. Compare
 generated C and header output, diagnostics, and runtime results.
 
 | Concern | Starting points |
@@ -404,7 +404,7 @@ coverage. If the change touches linked-meta reuse or retained stubs, select
 cases from `run-meta-helper.sh`, `run-meta-cache-key.sh`, and
 `run-package-install.sh`.
 
-Follow [performance guidance](../agents/performance-checkpoints.md). Compare
+Follow [performance guidance](../../agents/performance-checkpoints.md). Compare
 converged toolchains with identical inputs, and report elapsed time,
 instruction counts, and allocations separately.
 
@@ -487,3 +487,9 @@ and 439 deletions. Workers ran the focused fixtures named above; a fixture's
 `.ast` or `.transform` origin numbers shift whenever `src/` differs from
 `bootstrap/`, and the publication gate's bootstrap refresh removes that
 effect.
+
+Follow-up after delivery: `PENDING_AREAS` names the destination count. I
+evaluated moving `_speculate`'s adapter and pending restore into `SymTxn`
+through a `stage_effects` method and did not do it. It adds about four lines
+net, also restores origins and `needs_exception` on a failed speculation,
+and still leaves the literal-cache restore (`key_ids`, `id_keys`) manual.
