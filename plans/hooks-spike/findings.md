@@ -39,6 +39,7 @@ string-literal labels only.
 | --- | --- | --- |
 | `String` and aliases | yes | yes |
 | C strings | yes, cast without allocation | converted to `String` |
+| Null C string | `default` in the prototype; Gary decided it matches `case ""` | matches `case ""` |
 | Non-literal label | diagnostic | left as an integer label: wrong dispatch |
 | Duplicate labels | diagnostic | C compiler error |
 | Plain `switch` syntax | yes | with `hook switch` |

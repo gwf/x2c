@@ -1,0 +1,148 @@
+diff --git a/src/transform.x b/src/transform.x
+index 463db0ea..9a437086 100644
+--- a/src/transform.x
++++ b/src/transform.x
+@@ -170,6 +170,19 @@ static macro Stmt $report.xform.index_update(
+   }
+ }
+ 
++static macro Stmt $report.xform.string_case_label(Expr $c) =>
++  $c.report_error(
++    <xform>, "a case label in a string switch must be a string literal",
++    NULL, %("compare computed values with an if chain or match"));
++
++static macro Stmt $report.xform.string_case_duplicate(Expr $c, Expr $key) {
++  {
++    String details = %"label: ${$key}";
++    $c.report_error(
++      <xform>, "duplicate case label in a string switch", NULL, %($details));
++  }
++}
++
+ // normalization
+ 
+ /** Lowers a bound and typed top-level AST to the normalized form consumed by
+@@ -248,6 +261,7 @@ static Ast Compiler._step_tag(Compiler c, Ast ast, Symbol tag) {
+     case <stmnt>: next = c._destructure_statement(ast); break;
+     case <dstrasgn>: next = c._destructure_value(ast); break;
+     case <match>: next = c._match_cases(ast); break;
++    case <switch>: next = c._string_switch(ast); break;
+     case <defer>: next = c._defer_node(ast); break;
+     case <return>: next = c._return(ast); break;
+     case <raise>: return c._raise_node(ast);
+@@ -1053,6 +1067,115 @@ static List Compiler._match_cases(Compiler c, List ast) {
+   return %(matchcases $expr $result);
+ }
+ 
++/* string switches
++
++   A switch on a String or a C string selects its arm by content. Each case
++   label becomes its arm's number, and the body stays an ordinary C switch,
++   so fallthrough, `break`, `continue`, and `default` keep their meaning.
++   The subject is evaluated once and compared with the labels in source
++   order through the ordinary `==`; no match selects `default`. A null C
++   string matches no label. */
++
++static typedef struct StringCases {
++  Compiler c;
++  Map keys;
++  Array labels;
++  int origin;
++} StringCases;
++
++static List Compiler._string_switch(Compiler c, List ast) {
++  List (subject, body) = ast.cdr();
++  Type type = subject.cadr();
++  int string = c.sym.is_string_type(type);
++  if (!string && !type.is_char_pointer_like()) return ast;
++  StringCases cases = { .c = c, .keys = {}, .labels = [], .origin = c.origin };
++  body = cases.number(body);
++  if (!string) type = %(* const char);
++  List binding = c.sym.introduce(c.fresh_name("switch_subject"));
++  List value = %(expr $type (ident $binding));
++  List view = string ? value : %(expr ("String") (cast ("String") $value));
++  List selector = cases.selector(view);
++  if (!string) selector = _conditional(value, selector, _arm_number(0));
++  List (base, mods) = type.declaration_parts();
++  return source_block_content(%(
++    (declare $base (bindings (op = (bind $binding $mods) $subject)))
++    (switch $selector $body)));
++}
++
++/* Numbers the labels this switch owns. A nested switch owns its labels,
++   and an expression holds none. */
++static Var StringCases.number(StringCases &s, Var node) {
++  if (node is not <list> || node.is_nil()) return node;
++  match (node) {
++    case %((!or expr switch match matchcases function) *): return node;
++    case %(at ?(int origin) ?inner): {
++      int outer = s.origin;
++      s.origin = origin;
++      List numbered = %(at $origin ${s.number(inner)});
++      s.origin = outer;
++      return numbered;
++    }
++    case %(case ?label): return %(case ${s.arm(label)});
++  }
++  Var child;
++  $ast.rewrite_children(node, child, s.number(child));
++}
++
++static List StringCases.arm(StringCases &s, List label) {
++  String key = _case_key(label);
++  $let(s.c.origin, s.origin) {
++    if (!key) $report.xform.string_case_label(s.c);
++    if (key in s.keys) $report.xform.string_case_duplicate(s.c, key);
++  }
++  s.keys[key] = 1;
++  s.labels.push(label);
++  return _arm_number(s.labels.len());
++}
++
++/* Tests the labels in source order: the first equal label's arm, else 0. */
++static List StringCases.selector(StringCases &s, List view) {
++  List selector = _arm_number(0);
++  for (int arm = s.labels.len(); arm > 0; arm--) {
++    List test = s.c.resolve_expression(
++      source_operator_expression(NULL, %(== $view ${s.labels[arm - 1]})),
++      s.c.token);
++    selector = _conditional(test, _arm_number(arm), selector);
++  }
++  return selector;
++}
++
++/* A label's identity for duplicate detection: the bytes its literals spell,
++   in quotes, or the name of a native macro x2c types as a string literal.
++   NULL for any other label. */
++static String _case_key(List label) {
++  match (label) {
++    case %(expr ? ${$grouped(?inner)}): return _case_key(inner);
++    case %(expr ? ${$source_literal_content(%(?type ?text))}): {
++      String spelling = text;
++      if (Type.is_char_pointer_like(type))
++        return "\"" in spelling ? _literal_bytes(spelling) : spelling;
++    }
++  }
++  return NULL;
++}
++
++/* Adjacent literals join after each decodes its own escapes, as in C. */
++static String _literal_bytes(const char *p) {
++  String bytes = "\"";
++  while ((p = strchr(p, '"'))) {
++    const char *start = ++p;
++    while (*p != '"') p += *p == '\\' ? 2 : 1;
++    bytes += String.new_len(start, p - start).unescape();
++    p++;
++  }
++  return bytes + "\"";
++}
++
++static List _arm_number(int arm) => %(expr (int) (literal (int) "$arm"));
++
++static List _conditional(List test, List yes, List no) =>
++  source_operator_expression(%(int), %(? $test $yes $no));
++
+ static List Compiler._return(Compiler c, List ast) {
+   Macro returned = $return_value;
+   match (ast)
