@@ -290,8 +290,7 @@ static void Compiler._isolate(
     _.names.file_scope_owners = names.file_scope_owners.copy();
     _.id_keys = saved.id_keys.copy();
     _.key_ids = saved.key_ids.copy();
-    _.inits = [];
-    _.early_decls = [];
+    _.pending.reset();
     _.origins = saved.origins.copy();
     _.init_tokens = {};
     _.static_init_deps = {};

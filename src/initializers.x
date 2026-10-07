@@ -737,7 +737,7 @@ static List Compiler._speculate(
   int &?native_used) {
   SymTxn transaction = c.begin_semantic_transaction();
   Map keys = c.key_ids, adapters = c.names.adapters;
-  int key_count = c.id_keys.len(), declarations = c.early_decls.len();
+  int key_count = c.id_keys.len(), PendingMark mark = c.pending.checkpoint();
   c.key_ids = keys.copy();
   c.names.adapters = adapters.copy();
   DiagnosticsHold hold = c.diagnostics.hold();
@@ -751,7 +751,7 @@ static List Compiler._speculate(
         c.key_ids = keys;
         c.names.adapters = adapters;
         c.id_keys.resize(key_count);
-        c.early_decls.resize(declarations);
+        c.pending.restore(mark);
       }
       transaction.rollback();
     }

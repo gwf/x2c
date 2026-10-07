@@ -59,6 +59,14 @@ typedef struct SymScope {
   Map symbols, bindings, enumerators, macros;
 } SymScope;
 
+/** Holds generated code awaiting insertion, by `Pending.area` destination:
+    unit support declarations, which `Compiler.transform` lowers after the
+    unit, then the lowered statements of each file initialization area. */
+typedef struct Pending { Array areas[5]; } Pending;
+
+/** Holds each destination's length for `Pending.restore`. */
+typedef struct PendingMark { int lengths[5]; } PendingMark;
+
 /** Names the scope-owned semantic table belonging to one compiler. */
 typedef struct Sym *Sym;
 
@@ -133,9 +141,9 @@ typedef struct Compiler {
      delivers at its include line, by the file's canonical path. */
   Map included_effects;
   Map init_tokens, static_init_deps, fn_defs;
-  Array id_keys, inits;
+  Array id_keys;
   String init_fn, fini_fn;
-  Array early_decls, int prelude;
+  Pending pending, int prelude;
   /* `meta_comptime` names the `meta` functions that reach a `Meta`
      operation and so have no runtime form at all: no unit emits one.
      `meta_regions` maps each installed one to its region summary, which
@@ -223,9 +231,9 @@ typedef struct SymTxn {
   Map source_definitions;
   int source_occurrences;
   /* A macro value application also stages producer effects: adapters,
-     base bindings, early declarations, initializers, origins and errors. */
+     base bindings, pending code, origins and errors. */
   int extended, Map adapters;
-  int early_count, init_count, origin_count, origin, needs_exception;
+  PendingMark pending, int origin_count, origin, needs_exception;
 } SymTxn;
 
 #include "diagnostics.x"
@@ -2267,19 +2275,43 @@ List Compiler.gensym(Compiler c) {
   return %((gensym $owner $count));
 }
 
-/** Appends a generated declaration to the early-declaration queue. */
+/** Appends a generated declaration to the unit's pending support. */
 void Compiler.add_early(Compiler c, List decl) {
-  c.early_decls.push(decl);
+  c.pending.area(<support>).push(decl);
 }
 
-/** Appends a statement to file initialization order under `phase`, which is
-    `<protocol>` for protocol setup, or `<early>`, `<mid>`, or `<late>` for
-    the file initializer's three stages. Generation splices the statement
-    after the transform has run, so it must already be lowered: bound code
-    that still needs lowering, such as a `String` literal, reaches C as is.
-*/
+/** Appends the lowered statement `stmt` to the file initialization area
+    `phase`. Bound code that still needs lowering, such as a `String`
+    literal, would reach C as is. */
 void Compiler.add_init(Compiler c, Symbol phase, List stmt) {
-  c.inits.push(%($phase $stmt));
+  c.pending.area(phase).push(stmt);
+}
+
+/** Gives every destination fresh, empty storage. */
+void Pending.reset(Pending &p) {
+  for (int i = 0; i < 5; i++) p.areas[i] = [];
+}
+
+/** Returns the storage of the destination `area`. */
+Array Pending.area(Pending &p, Symbol area) =>
+  p.areas[%<<support protocol early mid late>>.index(area)];
+
+/** Whether any file initialization area holds a statement. */
+int Pending.initializes(Pending &p) {
+  for (int i = 1; i < 5; i++) if (p.areas[i]) return 1;
+  return 0;
+}
+
+/** Returns the mark that `restore` returns every destination to. */
+PendingMark Pending.checkpoint(Pending &p) {
+  PendingMark mark;
+  for (int i = 0; i < 5; i++) mark.lengths[i] = p.areas[i].len();
+  return mark;
+}
+
+/** Drops the code queued since `mark`. */
+void Pending.restore(Pending &p, PendingMark mark) {
+  for (int i = 0; i < 5; i++) p.areas[i].resize(mark.lengths[i]);
 }
 
 // the literal cache
@@ -2732,14 +2764,12 @@ static Compiler _new(Compiler owner) {
   if (owner) c._share_unit(owner);
   else c._own_unit();
   c.sym = Sym.new(c);
-  c._init_queues();
+  c.pending.reset();
   c.collect_protocols = 1;
   c.diagnostics = Diagnostics.new(
     owner && owner.diagnostics.printer ? c : NULL,
     owner ? owner.diagnostics.limit : 1);
-  c.braces = [];
-  c.line_starts = [];
-  c.import_stack = [];
+  $set_fields(c, [], braces, line_starts, import_stack, meta_group);
   c.origins = owner ? owner.origins : [];
   c.root_dir = x2c_get_root();
   return c;
@@ -2751,7 +2781,7 @@ static void Compiler._init_tables(Compiler c) {
               object_macros, proto_cache, imports, init_tokens,
               static_init_deps, fn_defs, meta_comptime, meta_regions,
               meta_hashes, meta_calls, native_meta, project_meta,
-              evaluated_effects);
+              evaluated_effects, meta_group_bound);
 }
 
 /* A child compiler owns its tokens, symbols, and diagnostics. Package
@@ -2775,11 +2805,6 @@ static void Compiler._own_unit(Compiler c) {
               package_effects);
   c.names = Scope.calloc(1, sizeof(struct GenNames));
   $set_fields(c.names, {}, counters, adapters, file_scope_owners);
-}
-
-static void Compiler._init_queues(Compiler c) {
-  $set_fields(c, [], inits, early_decls, meta_group);
-  c.meta_group_bound = {};
 }
 
 /** Destroys a compiler's owned `Lisp` session, if any.

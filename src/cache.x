@@ -41,6 +41,15 @@ static macro Stmt $report.cache.init_cycle(
 
 // cache materialization
 
+/* The deferred file-static initializers of both regions, recorded as
+   `(binding assignment helper arms)` and grouped by binding in `pending`.
+   `arms` holds the conditional arms around the declaration being rewritten;
+   `state` maps a visiting binding to `<visiting>`, then to its area. */
+static typedef struct StaticQueue {
+  Compiler c, Array initializers, Map pending, state;
+  List arms, Symbol deferred_kind;
+} StaticQueue;
+
 /** Materializes cached literals and deferred file-static initialization.
     `header` and `source` must be partitioned lowered AST regions from this
     compiler. Every `(cache id)` must index `c.id_keys`, and file-static
@@ -55,22 +64,23 @@ static macro Stmt $report.cache.init_cycle(
 List Compiler.setup_cache_init(
   Compiler c, List header, List source, String prefix,
   String guard_name, String initializer_name) {
-  Array initializers = [];
-  header = c._rewrite_statics(header, initializers);
+  StaticQueue statics = {c, [], {}, {}};
+  header = c._rewrite_statics(header, statics);
   Array header_ids = c._cache_ids(header);
   /* A deferred header initializer is now in the source's initializer,
      so its slots belong to the source region. */
   Array scan = [];
   scan.push(source);
-  foreach (Var initializer, initializers) scan.push(initializer);
-  foreach (Var initializer, c.inits) scan.push(initializer);
+  foreach (Var initializer, statics.initializers) scan.push(initializer);
+  foreach (Symbol area, %<<protocol early mid late>>)
+    scan.push(c.init_statements(area));
   Array source_ids = c._cache_ids(scan.list_free());
   if (header_ids)
     header = c._header_cache(
       header, header_ids, prefix, guard_name, initializer_name);
   Map bindings = c._cache_bindings(source_ids, NULL);
-  source = c._source_cache(source, source_ids, bindings, initializers);
-  initializers.free();
+  source = c._source_cache(source, source_ids, bindings, statics);
+  statics.initializers.free();
   return %($header $source $bindings);
 }
 
@@ -153,25 +163,23 @@ static List Compiler._helper_call(Compiler c, List helper) {
 }
 
 /* Apply file-scope initializer rewrites across one generated region. Both
-   regions share one initializer list, so a header definition deferred into
-   the source's initializer is ordered against the file statics it reads. */
-static List Compiler._rewrite_statics(
-  Compiler c, List code, Array initializers) {
-  Array output = [], List arms = NULL;
+   regions share one queue, so a header definition deferred into the
+   source's initializer is ordered against the file statics it reads. */
+static List Compiler._rewrite_statics(Compiler c, List code, StaticQueue &q) {
+  Array output = [];
+  q.arms = NULL;
   foreach (List item, code) {
-    int first = initializers.len();
+    int first = q.initializers.len();
     match (item) {
       case %(!set ?declaration (declare *)):
-        item = c._rewrite_static(declaration, initializers);
-      case %(preproc ?content): arms = preproc_track_arms(arms, content);
+        item = c._rewrite_static(declaration, q);
+      case %(preproc ?content): q.arms = preproc_track_arms(q.arms, content);
     }
     output.push(item);
-    for (int i = first; i < initializers.len(); i++) {
-      (List binding, List assignment) = initializers[i];
-      List helper = c.sym.introduce(c.fresh_name("static_initialize"));
-      initializers[i] = %($binding $assignment $helper $arms);
-      List function =
-        _initializer_function(c, %(static void), helper, %($assignment));
+    for (int i = first; i < q.initializers.len(); i++) {
+      List initializer = q.initializers[i];
+      List function = _initializer_function(
+        c, %(static void), initializer.caddr(), %(${initializer.cadr()}));
       output.push(%(sourceinit $function));
     }
   }
@@ -182,34 +190,32 @@ static List Compiler._rewrite_statics(
    run in the initializer phase. A public object or a const object defers only
    where its initializer is not a C constant expression; otherwise nothing
    assigns its slot. */
-static List Compiler._rewrite_static(
-  Compiler c, List decl, Array initializers) {
+static List Compiler._rewrite_static(Compiler c, List decl, StaticQueue &q) {
   match (decl)
     case %(declare (!set ?decltype (!and (static *) (!not (* const *))))
                    (bindings *bound_list)):
-      return c._defer_bindings(decltype, bound_list, initializers);
+      return c._defer_bindings(decltype, bound_list, q);
   if (!c.static_value_is_runtime(decl, NULL)) return decl;
   match (decl)
     case %(declare (!set ?decltype (!not (* const *)))
                    (bindings *bound_list)):
-      return c._defer_bindings(decltype, bound_list, initializers);
+      return c._defer_bindings(decltype, bound_list, q);
   match (decl)
     case %(declare ?decltype (bindings *bound_list)):
-      return c._defer_bindings(
-        _unqualify_const(decltype), bound_list, initializers);
+      return c._defer_bindings(_unqualify_const(decltype), bound_list, q);
   return decl;
 }
 
 static List Compiler._defer_bindings(
-  Compiler c, List decltype, List bound_list, Array initializers) {
+  Compiler c, List decltype, List bound_list, StaticQueue &q) {
   Array values = [];
   foreach (Ast bound, bound_list)
-    values.push(c._defer_binding(decltype, bound, initializers));
+    values.push(c._defer_binding(decltype, bound, q));
   return %(declare $decltype (bindings @{values.list_free()}));
 }
 
 static List Compiler._defer_binding(
-  Compiler c, List decltype, Ast bound, Array initializers) {
+  Compiler c, List decltype, Ast bound, StaticQueue &q) {
   match (bound) {
     case %(bind *): return bound;
     case %(op = (bind ?name ?mods) (expr ?type ?value)): {
@@ -227,7 +233,7 @@ static List Compiler._defer_binding(
           case %(composite (commas *items)): {
             List target = $!($declared){ $name };
             List assign = c._array_block(target, resolved, items);
-            List binding = _record_deferred(name, mods, assign, initializers);
+            List binding = q.record(name, mods, assign);
             List zero = c._zero_initializer(value);
             return %(op = $binding (expr $type $zero));
           }
@@ -235,16 +241,20 @@ static List Compiler._defer_binding(
       }
       List stored = _initializer_rhs(decltype, name, mods, type, value);
       List assign = _assignment(name, type, stored);
-      return _record_deferred(name, mods, assign, initializers);
+      return q.record(name, mods, assign);
     }
   }
   return bound;
 }
 
-/* Strip one initialized binding and record the assignment that replaces it. */
-static List _record_deferred(
-  List name, List mods, List assign, Array initializers) {
-  initializers.push(%($name $assign));
+/* Strip one initialized binding and record the assignment that replaces it
+   with the helper that runs it. */
+static List StaticQueue.record(
+  StaticQueue &q, List name, List mods, List assign) {
+  List helper = q.c.sym.introduce(q.c.fresh_name("static_initialize"));
+  List initializer = %($name $assign $helper ${q.arms});
+  q.initializers.push(initializer);
+  q.pending.setdefault(name, []).array().push(initializer);
   return %(bind $name $mods);
 }
 
@@ -550,13 +560,13 @@ List _patch_initialized_entry(
    requires that same canonicalizer runs late, after the initializer body;
    dependent file-static assignments move late with it. */
 static List Compiler._source_cache(
-  Compiler c, List source, Array ids, Map bindings, Array initializers) {
-  source = c._rewrite_statics(source, initializers);
+  Compiler c, List source, Array ids, Map bindings, StaticQueue &statics) {
+  source = c._rewrite_statics(source, statics);
   Symbol deferred_kind = 0;
   if (c.init_fn == "String_initialize") deferred_kind = <string>;
   else if (c.init_fn == "List_initialize") deferred_kind = <cons>;
   if (!ids) {
-    c._queue_statics(initializers, deferred_kind);
+    statics.queue(deferred_kind);
     return source;
   }
   Array early = [], late = [], declarations = [];
@@ -572,7 +582,7 @@ static List Compiler._source_cache(
     c.add_init(<early>, stmt);
   foreach (List stmt, c._cache_batches(late, declarations, NULL))
     c.add_init(<late>, stmt);
-  c._queue_statics(initializers, deferred_kind);
+  statics.queue(deferred_kind);
   ids.free();
   return c.place_source_prelude(source, declarations.list_free());
 }
@@ -611,56 +621,29 @@ static int Compiler._reaches_kind(Compiler c, List code, Symbol kind) {
   return found;
 }
 
-/* The file-static initializers of one region queue, by binding. `state` is
-   1 while a binding's dependencies are visited and 2 once it is queued, and
-   `phases` records the bindings queued late. */
-static typedef struct StaticQueue {
-  Compiler c;
-  Map pending, state, phases;
-  Array initializers;
-  Symbol deferred_kind;
-} StaticQueue;
-
 /* Queue a stable dependency walk. Dependencies precede their consumers, and
    independent roots retain source order. A dependency queued late moves every
    consuming initializer late as well. */
-static void Compiler._queue_statics(
-  Compiler c, Array initializers, Symbol deferred_kind) {
-  Map pending = {}, state = {}, phases = {};
-  foreach (List initializer, initializers) {
-    Var definitions;
-    if (!pending.try_get(initializer.car(), definitions))
-      pending[initializer.car()] = definitions = [];
-    definitions.array().push(initializer);
-  }
-  StaticQueue queue = {c, pending, state, phases, initializers, deferred_kind};
-  foreach (List initializer, initializers) queue.visit(initializer.car());
+static void StaticQueue.queue(StaticQueue &q, Symbol deferred_kind) {
+  q.deferred_kind = deferred_kind;
+  foreach (List initializer, q.initializers) q.visit(initializer.car());
 }
 
-static void StaticQueue.visit(StaticQueue &q, List binding) {
-  Var status;
-  if (q.state.try_get(binding, status)) {
-    if (status == 2) return;
-    q.report_cycle();
-  }
-  q.state[binding] = 1;
+/* Queues `binding` after its dependencies and returns its area. */
+static Symbol StaticQueue.visit(StaticQueue &q, List binding) {
+  Var status = q.state[binding];
+  if (status == <visiting>) q.report_cycle();
+  if (status is not void) return status;
+  q.state[binding] = <visiting>;
   Array definitions = q.pending[binding];
-  int late = 0;
-  Var stored;
-  if (q.c.static_init_deps.try_get(binding, stored)) {
-    List dependencies = stored;
-    foreach (List dependency, dependencies) {
-      if (dependency in q.pending) {
-        q.visit(dependency);
-        Var phase = q.phases[dependency];
-        if (phase is not void && phase) late = 1;
-      }
-    }
-  }
-  if (q.deferred(definitions)) late = 1;
-  q.add_calls(definitions, late);
-  q.phases[binding] = late;
-  q.state[binding] = 2;
+  Symbol area = q.deferred(definitions) ? <late> : <mid>;
+  List dependencies = q.c.static_init_deps.getdefault(binding, %());
+  foreach (List dependency, dependencies)
+    if (dependency in q.pending && q.visit(dependency) == <late>)
+      area = <late>;
+  q.add_calls(definitions, area);
+  q.state[binding] = area;
+  return area;
 }
 
 static int StaticQueue.deferred(StaticQueue &q, Array definitions) {
@@ -671,7 +654,7 @@ static int StaticQueue.deferred(StaticQueue &q, Array definitions) {
 }
 
 static void StaticQueue.add_calls(
-  StaticQueue &q, Array definitions, int late) {
+  StaticQueue &q, Array definitions, Symbol area) {
   /* Each branch of a conditional group may define the binding. A definition
      runs under the directives that enclose it, since a disabled branch
      defines no helper. */
@@ -679,22 +662,20 @@ static void StaticQueue.add_calls(
     List helper = initializer.caddr(), arms = initializer[3];
     List call = q.c._helper_call(helper);
     foreach (List statement, preproc_within_arms(arms, %($call)))
-      q.c.add_init(late ? <late> : <mid>, statement);
+      q.c.add_init(area, statement);
   }
 }
 
 static void StaticQueue.report_cycle(StaticQueue &q) {
   Compiler c = q.c;
   Array notes = [], List first = NULL;
-  foreach (List initializer, q.initializers)
-    match (initializer)
-      case %(?binding *): {
-        Var status;
-        if (!q.state.try_get(binding, status) || status != 1) continue;
-        if (!first) first = binding;
-        String name = binding_identity_spelling(binding);
-        if (name) notes.push(%"initializer: $name");
-      }
+  foreach (List initializer, q.initializers) {
+    List binding = initializer.car();
+    if (q.state[binding] != <visiting>) continue;
+    if (!first) first = binding;
+    String name = binding_identity_spelling(binding);
+    if (name) notes.push(%"initializer: $name");
+  }
   Token token = NULL;
   Var token_index;
   if (first && c.init_tokens.try_get(first, token_index)) {

@@ -817,7 +817,7 @@ static typedef struct Init {
 
 /* Consume the initialization state completed by cache setup. */
 static List Compiler._file_init(Compiler c, List source) {
-  if (!c.inits.len() && !c.fini_fn && !c.init_fn) return source;
+  if (!c.pending.initializes() && !c.fini_fn && !c.init_fn) return source;
   Init init = {.c = c, .initializer = c.init_fn};
   init.prepare(source);
   int prelude = _prelude_position(source, 0), position = 0;
@@ -1041,12 +1041,8 @@ static List _within_definitions(List found, List statements) {
 }
 
 /** Returns the statements queued for `phase`, in the order they were added. */
-List Compiler.init_statements(Compiler c, Symbol phase) {
-  Array selected = [];
-  foreach (List entry, c.inits)
-    if (entry.car() == phase) selected.push(entry.cadr());
-  return selected.list_free();
-}
+List Compiler.init_statements(Compiler c, Symbol phase) =>
+  c.pending.area(phase);
 
 /* cache-only files
 

@@ -175,8 +175,8 @@ static macro Stmt $report.xform.index_update(
 /** Lowers a bound and typed top-level AST to the normalized form consumed by
     emission. `c` must own the AST's bindings, origins, and conversion
     state. Current-node rewrites finish before child traversal; containing
-    blocks absorb cleanup markers produced by declaration rewrites. Early
-    declarations are lowered and appended after the input units. Their
+    blocks absorb cleanup markers produced by declaration rewrites. Pending
+    support declarations are lowered and appended after the input units. Their
     storage determines their interface visibility. The call may add
     generated origins or diagnostics to `c`.
 */
@@ -186,14 +186,13 @@ List Compiler.transform(Compiler c, List ast) {
   c.check_regions(ast);
   List newast = c._sequence(ast, 0);
   // Merge and lower synthesized lambda siblings.
-  Array generated = [];
-  while (c.early_decls.len()) {
-    List items = c.early_decls;
-    c.early_decls.clear();
-    List lowered = c._sequence(items, 0);
-    foreach (Var sibling, lowered) generated.push(sibling);
+  Array generated = [], support = c.pending.area(<support>);
+  while (support) {
+    List items = support;
+    support.clear();
+    foreach (Var sibling, c._sequence(items, 0)) generated.push(sibling);
   }
-  if (generated.len()) newast = newast.append(generated.list_free());
+  if (generated) newast = newast.append(generated.list_free());
   return newast;
 }
 

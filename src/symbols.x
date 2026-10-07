@@ -1295,8 +1295,7 @@ static void SymTxn._save(SymTxn &s, SymScope scope) {
 static void SymTxn._save_effects(SymTxn &s) {
   Compiler c = s.c;
   s.adapters = c.names.adapters;
-  s.early_count = c.early_decls.len();
-  s.init_count = c.inits.len();
+  s.pending = c.pending.checkpoint();
   s.origin_count = c.origins.len();
   s.origin = c.origin;
   s.needs_exception = c.needs_exception;
@@ -1442,8 +1441,7 @@ static void SymTxn._restore(SymTxn &s) {
 static void SymTxn._restore_effects(SymTxn &s) {
   Compiler c = s.c;
   c.names.adapters = s.adapters;
-  c.early_decls.resize(s.early_count);
-  c.inits.resize(s.init_count);
+  c.pending.restore(s.pending);
   c.origins.resize(s.origin_count);
   c.origin = s.origin;
   c.needs_exception = s.needs_exception;
