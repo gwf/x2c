@@ -1,4 +1,4 @@
 macro Expression $twice($value) => $value + $value;
 $project.logging.trace(item)
-$items...
+@items
 $(import "helpers.xlisp")

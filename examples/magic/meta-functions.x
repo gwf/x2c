@@ -30,7 +30,7 @@ meta static List field_reads(List receiver, TypeInfo type) {
     reads.push($!( $receiver.$member ));
   }
   List items = reads.list_free();
-  return $!( { $items... } );
+  return $!( { @items } );
 }
 
 macro Expression $shape.names(Expr $value) => $field_names($value);

@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-macro Expression $made(Param $params...) => %!($params...) => 41;
+macro Expression $made(Param @params) => %!(@params) => 41;
 
 macro Expression $nested() =>
   $(quote

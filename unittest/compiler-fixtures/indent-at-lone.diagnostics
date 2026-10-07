@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/indent-at-lone.x:2:1: parse: top-level decorators are not supported
+  @
+  ^
+  note: module initialization: void TYPE.initialize(void)
+

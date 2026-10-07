@@ -7,8 +7,8 @@ macro Unit $check_width(Expr $condition) {
 }
 
 macro Unit $constructed_check(Expr $condition) {
-  $(list (list 'c-assert $condition
-     '(expr (* char) (literal (* char) "\"constructed width\""))))...
+  @(list (list 'c-assert $condition
+     '(expr (* char) (literal (* char) "\"constructed width\""))))
 }
 
 $check_width(sizeof(long) >= sizeof(int));

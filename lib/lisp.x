@@ -1685,7 +1685,7 @@ static Var _lisp_Lisp_Iter_find(Iter iter, Var callable) =>
    C-only declaration reaches its table without entering the x2c interface. */
 
 static macro Unit $lisp.native.declarations() {
-  $(quote ((preproc "extern Map lisp_native_targets(void);")))...
+  @(quote ((preproc "extern Map lisp_native_targets(void);")))
 }
 
 $lisp.native.declarations();
@@ -1862,7 +1862,7 @@ static macro Decorator $lisp.entry(Function $function, Expr $operation) {
   Lisp prior_lisp = lisp_active;
   lisp_active = $(x2c.function.parameter $function "lisp");
   defer lisp_active = prior_lisp;
-  $(x2c.function.body $function)...
+  @(x2c.function.body $function)
 }
 
 /** Reads one Lisp form and returns `<value>` or `<eof>`.

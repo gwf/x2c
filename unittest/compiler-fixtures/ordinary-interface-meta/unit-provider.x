@@ -5,7 +5,7 @@ macro Unit $ordinary.unit.declare(Type $type) {
 }
 macro Unit $ordinary.unit.identity(Name $name, Param $parameter) {
   int $name($parameter) {
-    return abs($(x2c.parameters.arguments (list $parameter))...);
+    return abs(@(x2c.parameters.arguments (list $parameter)));
   }
 }
 macro Unit $ordinary.unit.check(Expr $value) {

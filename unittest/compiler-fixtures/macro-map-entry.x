@@ -14,8 +14,8 @@ macro Entry $two() {
 macro Entry $none() {
 }
 
-macro Entry $forward(Entry $rows...) {
-  $rows...
+macro Entry $forward(Entry @rows) {
+  @rows
 }
 
 macro Entry $forward_one(Entry $row) {
@@ -27,11 +27,11 @@ macro Entry $nested_rows() {
 }
 
 macro Entry $lisp_rows() {
-  $(list
+  @(list
     (list 'map-entry (x2c.literal.string "lisp-a")
                      (x2c.literal.int 7))
     (list 'map-entry (x2c.literal.string "lisp-b")
-                     (x2c.literal.int 8)))...
+                     (x2c.literal.int 8)))
 }
 
 macro Expression $expression_key() => "expression";

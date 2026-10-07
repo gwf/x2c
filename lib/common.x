@@ -569,19 +569,19 @@ inline Var    Iter.var(Iter x)           => Var.new(<iter>, x);
 
 // primitive conversions
 
-macro Unit $scalar(Type $type, Expr $box, Param $parameter, Expr $prefix...) {
+macro Unit $scalar(Type $type, Expr $box, Param $parameter, Expr @prefix) {
   /** Boxes a native `$type` value as `Var`. */
   inline Var $type.var($parameter) {
-    return $box($prefix..., $(x2c.parameters.arguments (list $parameter))...);
+    return $box(@prefix, @(x2c.parameters.arguments (list $parameter)));
   }
   /** Returns the display `String` of `$type`. */
   inline String $type.str($parameter) {
-    return $box($prefix..., $(x2c.parameters.arguments (list $parameter))...)
+    return $box(@prefix, @(x2c.parameters.arguments (list $parameter)))
       .str();
   }
   /** Returns the readable representation of `$type`. */
   inline String $type.repr($parameter) {
-    return $box($prefix..., $(x2c.parameters.arguments (list $parameter))...)
+    return $box(@prefix, @(x2c.parameters.arguments (list $parameter)))
       .repr();
   }
 }

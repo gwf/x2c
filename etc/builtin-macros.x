@@ -4,7 +4,7 @@ macro Decorator $x2c.foreign.alias(
   Unit $declaration,
   Expr $native
 ) {
-  $(list (list 'falias $declaration $native))...
+  @(list (list 'falias $declaration $native))
 }
 
 macro Expression $x2c.callback.adapt(
@@ -19,15 +19,15 @@ macro Decorator $x2c.foreach(
   Expr $collection
 ) {
   using $iterator, $item, $pair, $object, $cursor;
-  $(foreach.expand
+  @(foreach.expand
     $declaration $collection $body
-    $iterator $item $pair $object $cursor)...
+    $iterator $item $pair $object $cursor)
 }
 
 keyword foreach $x2c.foreach;
 
-macro Decorator $scope(Stmt $body, Expr $destination...) {
-  $(scope.expand $body $destination)...
+macro Decorator $scope(Stmt $body, Expr @destination) {
+  @(scope.expand $body $destination)
 }
 
 macro Decorator $let(Stmt $body, Expr $place, Expr $value) {
@@ -53,7 +53,7 @@ macro Expression $auto(Expr $value) =>
   $(list 'managed-init $value);
 
 macro Decorator $class(NamedType $definition) {
-  $(class.expand $definition)...
+  @(class.expand $definition)
 }
 
 keyword class $class;

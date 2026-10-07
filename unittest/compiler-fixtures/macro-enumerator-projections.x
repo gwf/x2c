@@ -29,7 +29,7 @@ $(defun fixture.case-row (row)
     `(return (int) ,(fixture.int-expr (fixture.row.value row)))))
 
 macro Enumerator $fixture.empty() {
-  $(list)...
+  @(list)
 }
 
 macro Enumerator $fixture.one() {
@@ -38,7 +38,7 @@ macro Enumerator $fixture.one() {
 
 macro Enumerator $fixture.enumerators() {
   private_row = 3,
-  $(list (fixture.enum-row fixture.row))...,
+  @(list (fixture.enum-row fixture.row)),
   $(x2c.ident "ROW_AUTO") = private_row + 5
 }
 
@@ -50,7 +50,7 @@ macro Expression $fixture.initializer() =>
   $(fixture.initializer fixture.row);
 
 macro Stmt $fixture.cases() {
-  $(fixture.case-row fixture.row)...
+  @(fixture.case-row fixture.row)
 }
 
 typedef enum GeneratedRows {

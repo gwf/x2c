@@ -53,8 +53,8 @@ than reading the Symbol's payload.
 ## Operators
 
 `Tensor` adopts a protocol carrying `add`, `sub`, `mul`, `div`, `neg`,
-and `matmul`, so `+ - * /` are elementwise, unary `-` negates, and `@` is
-matrix multiplication, as in PyTorch. A `double` beside a `Tensor`
+and `matmul`, so `+ - * /` are elementwise, unary `-` negates, and
+`left.matmul(right)` multiplies matrices. A `double` beside a `Tensor`
 converts to a float64 scalar tensor and an `int` or `long` to an int64
 one, which is why `2 * t` stays exact on an integer tensor. A `Tensor`
 also boxes into a `Var`, and the operators work on the boxed form.
@@ -64,7 +64,7 @@ also boxes into a `Var`, and the operators work on the boxed form.
 Tensor a = Tensor.of(%(1 2 3 4), %(2 2), XT_FLOAT64);
 Tensor b = Tensor.of(%(1 0 0 1), %(2 2), XT_FLOAT64);
 EXPECT_TRUE((a * b).equal(Tensor.of(%(1 0 0 4), %(2 2), XT_FLOAT64)));
-EXPECT_TRUE((a @ b).equal(a));
+EXPECT_TRUE((a.matmul(b)).equal(a));
 EXPECT_NEAR((2.0 * a).sum().item().double(), 20.0, 1e-12);
 ```
 
@@ -131,7 +131,7 @@ Tensor x = Tensor.arange(0.0, 8.0, 1.0, XT_FLOAT64).reshape(%(8 1));
 Tensor y = 3.0 * x - 1.0;
 Tensor w = Tensor.randn(%(1 1), XT_FLOAT64).requires_grad_(1);
 for (int step = 0; step < 200; step++) $scope() {
-  Tensor error = Tensor.mse_loss(x @ w, y);
+  Tensor error = Tensor.mse_loss(x.matmul(w), y);
   error.backward();
   Torch.no_grad();
   w.add_(w.grad(), -0.02);
@@ -163,7 +163,7 @@ static Tensor _forward(Module model, Tensor x) {
 ```
 
 A child's parameters are tensors, so
-`x @ layer.parameters()[0].tensor().t() + layer.parameters()[1].tensor()`
+`x.matmul(layer.parameters()[0].tensor().t()) + layer.parameters()[1].tensor()`
 is that affine step written out, as `examples/mlp.x` writes it.
 `Module.forward` runs a native forward where libtorch has one; a composed
 root has none and raises. `parameters`, `buffers`, `named_parameters`,

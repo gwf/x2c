@@ -1,7 +1,7 @@
 /*  mlp.x -- Train a 4-8-1 network on synthetic data, then reload it.
 
     The model is a composed Module holding two Linear children. Its
-    forward is ordinary x2c: `@` for the matrix product and `+` for the
+    forward is ordinary x2c: `matmul` for the matrix product and `+` for the
     bias, over the parameters libtorch owns.
 */
 
@@ -17,7 +17,7 @@ static Module _mlp(void) {
 static Tensor _affine(Module layer, Tensor x) {
   List parameters = layer.parameters();
   Tensor weight = parameters[0].tensor(), bias = parameters[1].tensor();
-  return x @ weight.t() + bias;
+  return x.matmul(weight.t()) + bias;
 }
 
 static Tensor _forward(Module model, Tensor x) =>
@@ -39,7 +39,7 @@ int main(void) {
     Tensor x = Tensor.randn(%(64 4), XT_FLOAT32);
     Tensor weights = Tensor.of(%(0.5 -1.25 2.0 0.75), %(1 4), XT_FLOAT32);
     Tensor noise = Tensor.randn(%(64 1), XT_FLOAT32) * 0.05;
-    Tensor y = x @ weights.t() + 0.5 + noise;
+    Tensor y = x.matmul(weights.t()) + 0.5 + noise;
 
     Module model = _mlp();
     Optimizer adam = Optimizer.adam(model, 0.05);

@@ -113,6 +113,7 @@ static void scan_operators(void) {
   EXPECT_INT_EQ(scan_c_operator("++"), 2);
   EXPECT_INT_EQ(scan_c_operator("->"), 2);
   EXPECT_INT_EQ(scan_c_operator("@"), 1);
+  EXPECT_INT_EQ(scan_c_operator("@="), 1);
   EXPECT_INT_EQ(scan_c_operator("#"), -1);
 }
 

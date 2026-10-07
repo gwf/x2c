@@ -183,7 +183,7 @@ macro Stmt $sample.trace(Stmt $body) => $traced($body);
 ~}
 ```
 
-Keep the braced `{ $helper(...)... }` form for a function that returns
+Keep the braced `{ @helper(...) }` form for a function that returns
 several block items as a `List`.
 
 ## Choose collections by mutation and identity

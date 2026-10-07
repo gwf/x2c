@@ -173,7 +173,7 @@ int main(void):
 - **One-line bodies.** `if cond: statement` puts the body after the first
   colon outside brackets that does not belong to a `?:`.
 - **Statements.** Every other line ends with an implied `;`. Directives,
-  enum bodies, a line that is one whole `$(...)` form, and a statement
+  enum bodies, a line that is one whole `$(...)` or `@(...)` form, and a statement
   that is only a macro hole, alone or after a control header, take none.
 - **Bare blocks.** `do:` whose block is not followed by a `while` line at
   the same indentation is a bare `{ ... }` scope. With that trailer it is a
@@ -1011,8 +1011,8 @@ hole-kind annotations:
 | `Captures` | a lambda's complete capture clause | supplied by compile-time code |
 | `MatchRow` | one `match` arm or `default` | `case 1: return one;` |
 
-A `Catch $arms...` hole fills the catch arms of a `try` template, as in
-`try $body catch $arms... finally $cleanup`. `Captures` and `MatchRow` are
+A `Catch @arms` hole fills the catch arms of a `try` template, as in
+`try $body catch @arms finally $cleanup`. `Captures` and `MatchRow` are
 described below with the templates that use them. Compile-time code supplies
 `Catch` and `Captures` rows by applying the macro as a value; a source
 invocation has no argument syntax for them.
@@ -1035,11 +1035,11 @@ declarators.
 
 A `DeclaratorRow` argument has no leading type or trailing semicolon. A
 declaration template supplies the shared type, and a trailing
-`DeclaratorRow $rows...` hole forwards comma-separated declarators in order:
+`DeclaratorRow @rows` hole forwards comma-separated declarators in order:
 
 ```x2c
-macro Stmt $group(Type $type, DeclaratorRow $rows...) {
-  $type $rows...;
+macro Stmt $group(Type $type, DeclaratorRow @rows) {
+  $type @rows;
 }
 
 int main(void) {
@@ -1090,8 +1090,8 @@ with generated bodies,
 so a private converter needed only within the defining unit can be generated
 before the adoption.
 
-`$name...` is a sequence hole. It captures zero or more arguments of one
-element kind, must be the final argument, and `$name...` in the body is the
+`@name` is a sequence hole. It captures zero or more arguments of one
+element kind, must be the final argument, and `@name` in the body is the
 splice point:
 
 ```x2c
@@ -1099,8 +1099,8 @@ static int sum(int a, int b) {
   return a + b;
 }
 
-macro Expression $call(Expr $callee, Expr $arguments...) =>
-  $callee($arguments...);
+macro Expression $call(Expr $callee, Expr @arguments) =>
+  $callee(@arguments);
 
 static int answer(void) {
   return $call(sum, 19, 23);
@@ -1108,15 +1108,15 @@ static int answer(void) {
 ```
 
 The element kind is inferred in the same way as a singular hole and may be
-overridden, for example `Field $members...`. Argument-hole names must be
+overridden, for example `Field @members`. Argument-hole names must be
 unique, and a name cannot be both singular and sequence-valued.
 In a quoted `Array` template, an `Expr` sequence hole occupies an element
 position and inserts its captured expressions in order. It may be empty:
 
 ```x2c
 ~#include "x2c.x"
-macro Expression $values(Expr $items...) =>
-  %[${10}, $items..., ${40}];
+macro Expression $values(Expr @items) =>
+  %[${10}, @items, ${40}];
 
 int main(void) {
   Array values = $values(20, 30);
@@ -1125,21 +1125,21 @@ int main(void) {
 }
 ```
 
-The `$items...` position is part of the macro template; `${expression}`
+The `@items` position is part of the macro template; `${expression}`
 inside an ordinary quoted `Array` still inserts one value.
 
-`Entry` holes capture one `key: value` row; `Entry $rows...` captures and
+`Entry` holes capture one `key: value` row; `Entry @rows` captures and
 forwards zero or more complete rows.
 
 A `Captures` hole carries a complete lambda capture clause as one value.
-In a template, `%!($params...) using $captures => $body` preserves its
-value and reference capture rows, with `Param $params...` as the trailing
+In a template, `%!(@params) using $captures => $body` preserves its
+value and reference capture rows, with `Param @params` as the trailing
 sequence. Apply this template as a macro value with the captured rows;
 recognition binds those rows with `*captures`. Like `Catch` rows, capture
 rows retain their canonical structure when supplied by compile-time code.
 
-`MatchRow $rows...` carries complete `match` arms in a `Stmt` template:
-`match ($subject) { $rows... }`. Each captured row retains its pattern,
+`MatchRow @rows` carries complete `match` arms in a `Stmt` template:
+`match ($subject) { @rows }`. Each captured row retains its pattern,
 guarded body, typed captures, and position; preprocessor directive rows stay
 interleaved with the arms. A `default` arm is one row. Source macro calls may
 pass comma-separated `case` and `default` arms; compile-time code may pass a
@@ -1249,8 +1249,8 @@ any number of rows. In a bare `{...}` literal a direct or keyword-alias
 invocation is written as a row. In the quoted `%{...}` literal it must sit
 inside `${...}`, which leaves the quoted Map syntax to parse x2c. Elsewhere in
 an entry macro body, ordinary expression grammar applies, so an expression
-macro may generate a key. `$(form)...` inserts a `List` of explicit `(map-entry
-KEY VALUE)` nodes; without `...`, `$(form): value` constructs a generated key.
+macro may generate a key. `@(form)` inserts a `List` of explicit `(map-entry
+KEY VALUE)` nodes; singular `$(form): value` constructs a generated key.
 
 The semicolon belongs to the invocation context, not the definition.
 `Enumerator` and entry invocations occupy comma-delimited positions and have no
@@ -1275,7 +1275,7 @@ macro Decorator $trace(
     $channel,
     $trace_name($function)
   );
-  $trace_body($function)...
+  @trace_body($function)
 }
 
 $trace("request")
@@ -1443,10 +1443,10 @@ target of the required kind for the outer decorator:
 ~#include "meta.x"
 ~meta static List old_body(List fn) => x2c_function_body(fn);
 ~macro Decorator $logged(Function $function) {
-~  $old_body($function)...
+~  @old_body($function)
 ~}
 ~macro Decorator $validated(Function $function) {
-~  $old_body($function)...
+~  @old_body($function)
 ~}
 $logged()
 $validated()
@@ -1516,7 +1516,7 @@ A quotation is an anonymous macro applied where it is written:
 `$!Kind{ ... }` for another category, such as `$!Unit{ ... }`. Each `$name`
 in its body names the visible local `name`; its first use declares a hole
 whose kind its position gives, and the quotation applies to the locals'
-values in that order. `$name...` is a sequence. A local declared `Type`,
+values in that order. `@name` is a sequence. A local declared `Type`,
 which `lib/meta.x` declares as a `List` of type syntax such as
 `%(double)`, fills a type hole, so `$!{ $type value = $initial; }`
 declares `value` with the type the local holds. Type syntax spells C type
@@ -1526,7 +1526,7 @@ is a Symbol, such as `%(String)`, is an error where it fills a type.
 A `String` local fills an
 expression hole as a string literal and an `int` local as an integer
 literal. A `$name` that names no local is a macro invocation or a `meta`
-call, as in a template, so `$rows($items)...` splices a `meta` function's
+call, as in a template, so `@rows($items)` splices a `meta` function's
 result where the quotation expands. A `${expression}`, with `{` directly
 after `$`, is a hole whose value is an expression of the function that
 contains the quotation. It means the same as a local declared just before
@@ -1536,12 +1536,18 @@ written, before the quotation builds its code. Names in the braces resolve
 at the quotation; names the body declares are not visible there. The
 expression's declared type gives the hole its kind, as a local's type does:
 a `Type` fills a type, a `String`, `int`, or `Symbol` inserts a literal, and
-a `List` inserts its syntax. `${expression}...` splices a `List`. Each
-`${...}` is a separate hole and belongs to the innermost quotation, so
+a `List` inserts its syntax. `@{expression}` splices a `List`. Each
+`${...}` or `@{...}` is a separate hole and belongs to the innermost quotation, so
 `${$!( ... )}` inserts a quotation built first. Inside a `%(...)`,
 `%[...]`, `%{...}`, or `%"..."` literal in the body, `${...}` keeps its
 literal meaning and inserts when the built code runs; `${${expression}}`
-there inserts a value computed at the quotation. After `case`,
+there inserts a value computed at the quotation. For a template Array,
+`%[${@{items}}]` splices a sequence computed while the quotation is built.
+It does not add runtime Array splicing. In a List, `@{expression}` retains
+runtime splicing and does not evaluate during template construction.
+Literal strings such as `"$ @"`, percent strings such as `%"\$ @"`, and
+quoted atom escapes such as `%(\$ \@)` preserve sigils as data.
+After `case`,
 `${$name(...)}` is still a macro pattern. These holes exist only in
 quotations; in a named template's code, `${` still reports a missing macro
 name. See
@@ -1590,7 +1596,7 @@ same-spelled binding or a different member does not match. The case captures
 the original binding syntax.
 
 A template can call a `meta` function in a slot and pass it a sequence
-hole written without `...`; the function receives the captured items as
+hole written with `$name`; the function receives the captured items as
 one `List`. Applying a macro value with one `List` of syntax as the last
 argument passes that List as the whole trailing sequence, so
 `outer(head, items)` and `outer(head, a, b)` build the same code. A `List`
@@ -1777,7 +1783,7 @@ introduce it, place `using $name, $other;` at the start of the braced body.
 Each name is a compiler-allocated singular `Name` hole. Every occurrence
 within one expansion receives the same binding, while different expansions
 receive different bindings. A generated name may not duplicate an argument
-hole or another generated name and takes no kind annotation or `...`. The
+hole or another generated name and takes no kind annotation or `@` prefix. The
 directives must precede all other body items.
 
 Compile-time Lisp uses `x2c.ident` to mark an exact public spelling. In a
@@ -1962,7 +1968,7 @@ invocation line.
 The `x2c.function.*` operations inspect a decorator's captured function. `name`
 returns its free-function or dotted method name as written in source,
 `parameter` resolves a named parameter to bound identifier syntax, and `body`
-returns the block-item sequence for an explicit `...` splice. Use
+returns the block-item sequence for an explicit `@` splice. Use
 `x2c.syntax.type` on a resolved parameter when its canonical `Type` is needed.
 These operations do not construct or mutate functions.
 
@@ -2682,8 +2688,9 @@ the Lisp reader construct the same `List` data from the same text. Reader
 punctuation also ends a bare `Atom`: `%(a,b)` is `a` followed by
 `(unquote b)`. These spellings do not replace x2c's `$` and `@`: those still
 insert or splice x2c values while the `List` itself is being constructed.
-A `@` followed by whitespace, `)`, or `=` is the ordinary `@` or `@=`
-operator atom, so `%(op @ a b)` spells the same `List` the parser builds.
+A `@` followed by whitespace, `)`, or `=` is ordinary `@` or `@=`
+atom data. `%(op @ a b)` remains a List of atoms; it does not authorize
+matrix operator syntax.
 
 `%<<...>>` is an immutable ordered `SymbolSet`. Bare entries are compact
 `Symbol`s rather than `Atom`s, and their source positions are their numeric
@@ -3155,8 +3162,8 @@ Direct runtime calls to `Var.binary` additionally accept comparisons and eager
 
 ### Protocol-backed direct updates
 
-A direct participant lvalue supports `+=`, `-=`, `*=`, `/=`, `%=`, or `@=`
-when its protocol-resolved `add`, `sub`, `mul`, `div`, `mod`, or `matmul`
+A direct participant lvalue supports `+=`, `-=`, `*=`, `/=`, or `%=`
+when its protocol-resolved `add`, `sub`, `mul`, `div`, or `mod`
 member has signature
 `Participant member(Participant, RHS)`. The right operand is converted to
 `RHS`. Prefix and postfix `++`/`--` use `add` or `sub` with the integer `1`

@@ -18,13 +18,13 @@ macro Stmt $tried(Stmt $body, Stmt $finalizer) {
 
 /* A try with catch arms, each a pattern and a body, and a finalizer. */
 macro Stmt $caught(Stmt $body, Stmt $finalizer,
-    Catch $arms...) {
-  try $body catch $arms... finally $finalizer
+    Catch @arms) {
+  try $body catch @arms finally $finalizer
 }
 
 /* A match with its complete source-ordered arm and directive rows. */
-macro Stmt $matched(Expr $subject, MatchRow $rows...) {
-  match ($subject) { $rows... }
+macro Stmt $matched(Expr $subject, MatchRow @rows) {
+  match ($subject) { @rows }
 }
 
 /* A cleanup statement owned by the rest of its enclosing block. */
@@ -89,24 +89,24 @@ macro Stmt $expression_statement(Expr $value) { $value; }
 meta List source_any_lambda(void) => %(expr ? (lambda *));
 
 /* A noncapturing lambda expression: its parameters and body. */
-macro Expression $lambda_expression(Expr $body, Param $params...) =>
-  %!($params...) => $body;
+macro Expression $lambda_expression(Expr $body, Param @params) =>
+  %!(@params) => $body;
 
 /* A lambda with the value and reference rows its binder supplied. */
 macro Expression $lambda_captured(Expr $body, Captures $captures,
-    Param $params...) => %!($params...) using $captures => $body;
+    Param @params) => %!(@params) using $captures => $body;
 
 /* The parsed bracket index, before receiver-specific lowering. */
 macro Expression $indexed(Expr $receiver, Expr $selector) =>
   $receiver[$selector];
 
 /* A call with its typed callee and source-ordered arguments. */
-macro Expression $called(Expr $callee, Expr $arguments...) =>
-  $callee($arguments...);
+macro Expression $called(Expr $callee, Expr @arguments) =>
+  $callee(@arguments);
 
 /* Complete, source-ordered collection members before semantic resolution. */
-macro Expression $array_value(Expr $items...) => %[$items...];
-macro Expression $map_value(Entry $rows...) => %{${$rows...}};
+macro Expression $array_value(Expr @items) => %[@items];
+macro Expression $map_value(Entry @rows) => %{${@rows}};
 
 /* Assignment syntax, before receiver-specific lowering. */
 macro Expression $assigned(Expr $target, Expr $stored) => $target = $stored;

@@ -1179,7 +1179,7 @@ uv_getaddrinfo_t *UvLookup.native(UvLookup lookup) =>
 static macro Unit $uv.stream(
   Type $endpoint, Type $native, Name $method, Name $ready,
   Literal $operation, Literal $label, Literal $required,
-  Literal $init_operation, Expr $init, Expr $init_arguments...
+  Literal $init_operation, Expr $init, Expr @init_arguments
 ) {
   /* A Type hole cannot spell a struct tag, so the tag comes from its name. */
   struct $(x2c.ident (str (car $endpoint))) {
@@ -1195,7 +1195,7 @@ static macro Unit $uv.stream(
 
   static $endpoint _new(UvLoop loop) {
     $endpoint endpoint = Scope.calloc(1, sizeof(*endpoint));
-    int status = $init(&loop.loop, &endpoint.handle, $init_arguments...);
+    int status = $init(&loop.loop, &endpoint.handle, @init_arguments);
     if (status < 0) {
       Scope.free(endpoint);
       _uv_raise($init_operation, status);

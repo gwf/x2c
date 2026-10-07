@@ -4,9 +4,9 @@
 static int sum_many(int first, ...) { return first; }
 static int sum_two(int left, int right) { return left + right; }
 
-macro Expression $pack(Expr $items...) => sum_many(0, $items...);
-macro Expression $mixed(Expr $first, Expr $items...) =>
-  sum_many($first, $items...);
+macro Expression $pack(Expr @items) => sum_many(0, @items);
+macro Expression $mixed(Expr $first, Expr @items) =>
+  sum_many($first, @items);
 macro Expression $reverse(Expr $first, Expr $second) =>
   sum_two($second, $first);
 macro Expression $fixed() => sum_two(0, 0);

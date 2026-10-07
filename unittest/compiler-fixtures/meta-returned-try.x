@@ -4,7 +4,7 @@
 /* A meta function returns parsed try statements unchanged. A parsed catch
    arm already declares its binders, so binding it declares them once. */
 meta static List same_items(List code) => %($code);
-macro Stmt $same(Stmt $code) { $same_items($code)... }
+macro Stmt $same(Stmt $code) { @same_items($code) }
 
 /* A constructed arm may retain only part of its capture declarations. */
 meta static List omit_second_capture(List code) {
@@ -17,7 +17,7 @@ meta static List omit_second_capture(List code) {
         $finalizer));
   return %($code);
 }
-macro Stmt $partial(Stmt $code) { $omit_second_capture($code)... }
+macro Stmt $partial(Stmt $code) { @omit_second_capture($code) }
 
 int main(void) {
   int total = 0;

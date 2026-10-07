@@ -170,7 +170,7 @@ List _tag_decode_group(List rows, Map counts, int top) {
     int selector = immediate ? _tag_middle(row) : _tag_bottom(row) & mask;
     ids[selector] = x2c_expr_ident(x2c_ident(_tag_id(row)));
   }
-  return $!( { $mask, $immediate, { ${ids.list_free()}... } } );
+  return $!( { $mask, $immediate, { @{ids.list_free()} } } );
 }
 
 List _tag_decode_groups(void) {
@@ -179,7 +179,7 @@ List _tag_decode_groups(void) {
   Array groups = [];
   for (int group = 0; group < 32; group++)
     groups.push(_tag_decode_group(rows, counts, _tag_group_top(group)));
-  return $!( { ${groups.list_free()}... } );
+  return $!( { @{groups.list_free()} } );
 }
 
 List _tag_id_checks(void) {
@@ -286,7 +286,6 @@ static List _operator_rows(void) => %(
   (<*>       10 <*=>     <mul>     0)
   (</>       10 </=>     <div>     0)
   (<%>       10 <%=>     <mod>     0)
-  (<@>       10 <@=>     <matmul>  0)
 );
 
 static List _operator_cases(int key, int value, int derived) {

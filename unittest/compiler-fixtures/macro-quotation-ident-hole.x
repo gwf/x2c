@@ -15,7 +15,7 @@ meta static List shared(List value) {
   List use = $!{ printf("%d\n", $name * 2); };
   return %($declaration $use);
 }
-macro Stmt $show_doubled(Expr $value) { $shared($value)... }
+macro Stmt $show_doubled(Expr $value) { @shared($value) }
 
 int main(void) {
   printf("%d\n", $next(41));

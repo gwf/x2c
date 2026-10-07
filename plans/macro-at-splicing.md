@@ -1,14 +1,17 @@
 # Macro sequence splicing with @
 
 > Status: active
-> Planning only, revised 2026-10-07. No compiler implementation has started.
-> Branch: `codex/macro-at-splicing`.
+> Implemented locally; publication held. Gary authorized the complete
+> implementation on 2026-10-07, including `@{expression}` and operator removal.
+> Final validation and review evidence: [.context/macro-at-review.md](../.context/macro-at-review.md).
+> Implementation branch: `codex/macro-at-implementation`.
+> Historical plan branch: `codex/macro-at-splicing`.
 > Baseline: `origin/dev` at `ae34288c8a4de03168e4055d885b796cbc35da27`.
 > The branch fast-forwarded to this snapshot. The October 4 plan was
 > recovered from local snapshot `332d0bc3` and revised against current code.
-> Delivery: individual/direct for this plan. Gary authorized publishing the
-> plan to dev on 2026-10-07. Implementation has not been authorized; the
-> approval hold on publishing an implementation remains in effect.
+> Gary authorized publishing the plan to dev on 2026-10-07. The implementation
+> now uses isolated worker/private delivery to its local orchestrator.
+> The implementation review hold remains: no PR, push, merge, or publication.
 
 ## Result
 
@@ -35,7 +38,7 @@ tooling, and documentation. Native C ellipses are unaffected.
 | `left @= right` | explicit single-evaluation method update | Matrix multiplication and assignment |
 
 The first four mappings and operator removal follow the conversation.
-`@{expression}` is the plan's proposed completion for expression holes,
+`@{expression}` is the accepted completion for expression holes,
 which exist on current dev. It reuses the existing List-splice spelling
 and avoids leaving a suffix-based splice behind.
 
@@ -146,7 +149,7 @@ have changed. This revision is based on source inspection, not a new build.
 | `src/operator-ledger.x` generates operator facts from one table | Delete its matrix row once instead of rebuilding separate operator tables |
 | `src/linked-meta.x` is generated from shipped providers | Regenerate it; a migrated provider and its linked definition must agree |
 
-The current source still uses the old sequence suffix. For example,
+At the planning snapshot, source used the old sequence suffix. For example,
 `unittest/compiler-fixtures/macro-quotation-typed.x` constructs
 `$!(unsigned long){ f($lhs, $items...) }`. The intended form is
 `$!(unsigned long){ f($lhs, @items) }`; the type and construction path stay
@@ -360,14 +363,14 @@ unittest/compiler-fixtures/run.sh check --fixture macro-quotation-expression-hol
 
 For an intentional change to a named expectation, use that runner's `update`
 mode and review its owned sidecars. Do not bulk-update unrelated failures.
-These commands are implementation checks to run later; this plan refresh
-does not claim they passed on the new syntax.
+These commands were recorded as future implementation checks during planning.
+The local progress below records the focused checks performed afterward.
 
 - Named sequence declarations/use, empty/multiple elements, annotations and
   inferred kinds, all existing sequence roles, aliases, and local macros.
 - Computed @ calls and Lisp slots: expansion once, insertion order, qualified
   names, empty results, and the same canonical binding as prior forms.
-- Source quotations: `@name`, proposed `@{expression}`, multiple holes,
+- Source quotations: `@name`, `@{expression}`, multiple holes,
   nested quotes/definitions, literal sigils, and reverse macro recognition.
 - Include/replay: migrated nonstatic definitions cross ordinary/transitive
   includes while static definitions remain local. Compare cold and warm
@@ -403,10 +406,10 @@ matrix operator punctuation. Existing runtime data literals and singular
 forms retain their meanings. Temporary dual parsing exists only to cross the
 self-host bootstrap transition and is removed before final validation.
 
-This plan proposes `@{expression}` as the remaining expression-hole spelling.
-No additional escape syntax is selected. Implementation is not authorized by
-this planning-only turn. Approval of implementation does not lift the separate
-hold on a PR, merge, or publication to dev unless Gary says so.
+Gary authorized `@{expression}` as the remaining expression-hole spelling
+with the implementation on 2026-10-07. No additional escape syntax is selected.
+That authorization retains the separate hold on a PR, push, merge, or
+publication to dev.
 
 ## Plan review
 
@@ -425,3 +428,36 @@ hold on a PR, merge, or publication to dev unless Gary says so.
   cardinality, and placement contracts; nested/mode fixtures protect against
   wrong code or expansion at the wrong layer. Existing matching and binding
   continue to accept structurally valid constructed ASTs from any producer.
+
+## Local implementation progress (2026-10-07)
+
+- Parser checkpoint `0895fe07399e69feebb485f0e207532f3daa25c2` introduced
+  prefix syntax through the existing macro parameter and splice-slot forms.
+  A fresh safe build and new-form sequence, quotation, recognition, Array,
+  initializer, and operator-ledger producer probes passed before migration.
+- The authored corpus has migrated by token positions and parser context.
+  Singular sequence reads in Lisp, native varargs, runtime List splices,
+  and the saved starting inventory remain unchanged. Suffix consumers and
+  matrix punctuation have been removed from authoritative source.
+- Syntax tooling checkpoint `9fd19789` includes editor tests and packaged
+  VSIX, authoritative syntax data, and regenerated syntax reference outputs.
+  Editor tests/build and syntax-spec consistency passed in its isolated worker.
+- Focused runtime suites passed: scan, tokenizer, system macros, and Var
+  operations, 49 tests and 7,125 assertions. BLIS and Torch `test run`
+  passed using their pinned dependency caches. Torch Python agreement could
+  not run because no installed interpreter has the required torch module;
+  its checkpoint-roundtrip and module-names programs compiled.
+- Quotation order/data-mode, indentation, matrix method/update, old syntax
+  rejection, and category placement fixtures pass. Computed producers now
+  cover all ten sequence roles, including Catch, MatchRow, and DeclaratorRow
+  binders that previously omitted computed row evaluation. Intentional
+  diagnostic/token sidecars were reviewed individually. Unchanged fixture
+  IDs and offsets remain retained for the converged compiler checks.
+- Final bootstrap/doc regeneration, self-host verification, and the complete
+  validation result belong to the orchestrator's local review. See the linked
+  review report for those results. Performance evidence is required before
+  eventual publication; this local implementation makes no performance claim.
+
+The original baseline and planning evidence above are historical records.
+The saved `.context/x2c-c-differences-starting-inventory.md` remains the
+starting inventory; the final source contract is the syntax table in this plan.

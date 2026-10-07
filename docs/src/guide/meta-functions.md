@@ -1050,7 +1050,7 @@ meta static List build_function(String name, int n) {
   return %($node);
 }
 
-macro Unit $sample.make_answer() { $build_function("answer", 21)... }
+macro Unit $sample.make_answer() { @build_function("answer", 21) }
 
 $sample.make_answer();
 int main(void) {
@@ -1064,7 +1064,7 @@ int main(void) {
 ```
 
 The constructor returns one code node. The helper wraps it in a List because
-`...` inserts a sequence of nodes. It does not return an already expanded
+`@` inserts a sequence of nodes. It does not return an already expanded
 function declaration for the helper to inspect. Name, Type, parameter and
 statement captures still follow the source macro's declared hole kinds.
 
@@ -1078,13 +1078,13 @@ inserts the selected invocation into the function body:
 
 static int calls = 0;
 
-macro Stmt $sample.counted(Stmt $body...) {
+macro Stmt $sample.counted(Stmt @body) {
   calls++;
-  $body...
+  @body
 }
 
-macro Stmt $sample.plain(Stmt $body...) {
-  $body...
+macro Stmt $sample.plain(Stmt @body) {
+  @body
 }
 
 meta static List choose_body(List function) {
@@ -1095,7 +1095,7 @@ meta static List choose_body(List function) {
 }
 
 macro Decorator $sample.count_if_tracked(Function $function) {
-  $choose_body($function)...
+  @choose_body($function)
 }
 
 $sample.count_if_tracked()
@@ -1137,7 +1137,7 @@ A template that a `meta` function uses once can be written where it is used.
 `$!Unit{ ... }`, `$!Field{ ... }`, or another category name before the braces
 builds that kind of code. A `$name` inside names the function's local
 `name` and inserts its value: syntax where the position takes syntax, and a
-number, String, or Symbol as a literal. `$name...` splices a `List` local.
+number, String, or Symbol as a literal. `@name` splices a `List` local.
 `${expression}` inserts any value; see below. Each local's first position
 decides what it fills.
 
@@ -1155,8 +1155,8 @@ meta static List numbered(List subject, List arms) {
   return cases.list_free();
 }
 
-macro Stmt $sample.choose(Expr $subject, Stmt $arms...) {
-  $numbered($subject, $arms)...
+macro Stmt $sample.choose(Expr $subject, Stmt @arms) {
+  @numbered($subject, $arms)
 }
 
 int main(void) {
@@ -1176,11 +1176,11 @@ syntax or values the locals hold, names the body declares are private to the
 expansion, and other names resolve where the code lands. It keeps nothing
 from the function once it has been applied. Inside a `%(...)` List, `$`
 inserts a value, so bind a quotation to a local first and insert the local.
-`$` inserts everywhere; code, in templates and quotations, splices with a
-trailing `...`, as C varargs do, and Lisp-shaped List literals splice with
-`@`. A `$name...` sequence splices into call arguments, braced initializers such
-as `$!( { $items... } )` or `(T){ $first, $rest... }`, and `%[$items...]`
-Array literals; Map entries splice as `%{${$rows...}}`.
+`$` inserts one value and `@` splices a sequence in templates and
+quotations. Runtime List literals use the same prefixes. Native C varargs
+retain their `...` spelling. An `@name` sequence splices into call arguments
+and braced initializers such as `$!( { @items } )` or `(T){ $first, @rest }`,
+and `%[@items]` Array literals; Map entries splice as `%{${@rows}}`.
 A quotation expands where code is bound, spliced, or resolved: return it,
 pass it to a slot, or use it as another quotation's hole. A quotation inside
 hand-built expression syntax, such as a call's argument list or a declaration
@@ -1217,7 +1217,7 @@ typedef struct Call { List callee; List arguments; Type result; } Call;
 meta static List scaled_call(List callee, List a, List b) {
   Call d = {.callee = callee, .arguments = %($a $b), .result = %(int)};
   return $!( ({
-    ${d.result} value = ${d.callee}(${d.arguments}...);
+    ${d.result} value = ${d.callee}(@{d.arguments});
     value * ${d.arguments.len()};
   }) );
 }
@@ -1247,18 +1247,18 @@ the same as a local declared just before the quotation and named with `$`:
 
 <!-- ignore: a meta function fragment without its includes -->
 ```x2c,ignore
-return $!( ${d.callee}(${d.arguments}...) );
+return $!( ${d.callee}(@{d.arguments}) );
 // means
 List callee = d.callee;
 List arguments = d.arguments;
-return $!( $callee($arguments...) );
+return $!( $callee(@arguments) );
 ```
 
 The expression's declared type gives the hole its kind, as a local's type
 does. A `Type` expression fills a type position, as `${d.result}` does
 above. A `String`, `int`, or `Symbol` expression inserts a literal, so
 `${d.arguments.len()}` inserts `2`. A `List` expression inserts the syntax it
-holds. `${expression}...` splices a `List`, like `$name...`. Each `${...}` is
+holds. `@{expression}` splices a `List`, like `@name`. Each `${...}` or `@{...}` is
 a separate hole, even when two are spelled alike.
 
 A `${...}` belongs to the innermost quotation that contains it. To put one
@@ -1269,7 +1269,14 @@ it.
 Inside a `%(...)`, `%[...]`, `%{...}`, or `%"..."` literal in a quotation's
 body, `${...}` keeps its literal meaning: it inserts a value when the built
 code runs. Write `${${expression}}` there to insert a value that the function
-computes.
+computes. A template Array splices a computed sequence through the same
+code boundary: `%[${@{items}}]`. This constructs template slots; ordinary
+Arrays and Maps do not support runtime splicing. A List's `@{expression}`
+still runs when the generated program constructs that List.
+
+Literal characters need no new staging operator. Write an ordinary string
+such as `"$ @"`, or `%"\$ @"` for a percent string. Quoted atom escapes
+such as `%(\$ \@)` preserve sigils as data.
 
 `${...}` works only in quotations. A named template has no function to
 evaluate it in; it computes with a `$meta(...)` call or a `$(...)` slot,
@@ -1297,7 +1304,7 @@ the type `T`. `T` is one identifier that names a type, such as `int` or
 `String`. Put any other type in parentheses: a type of several words, as in
 `$!(unsigned long){ ... }` or `$!(char *){ ... }`, or a `Type` local or
 `${...}` hole whose value is the type, as in
-`$!($result){ $callee($arguments...) }`. A kind name such as `Unit` or
+`$!($result){ $callee(@arguments) }`. A kind name such as `Unit` or
 `Type` after `$!` always names a kind, so a type spelled like one also takes
 parentheses: `$!(Type){ ... }`.
 
@@ -1310,7 +1317,7 @@ differences:
 - Nothing is bound. Holes keep the syntax their locals hold, a binding
   becomes a reference to it, and a number, String, or Symbol becomes a
   literal. A number keeps its exact value and type, and a String is a
-  String literal when `T` is `String`. A `$items...` sequence makes each
+  String literal when `T` is `String`. A `@items` sequence makes each
   number, String, or Symbol it holds a literal in the same way. A name the
   expression reads without
   declaring stays a name and is bound wherever the code is bound, if it is
@@ -1378,11 +1385,11 @@ meta static List sum_function(String name, int count) {
     total = $!( $total + $x );
   }
   List declared = params.list_free();
-  List function = $!Unit{ double $name($declared...) { return $total; } };
+  List function = $!Unit{ double $name(@declared) { return $total; } };
   return %($function);
 }
 macro Unit $sample.define_sum(Literal $name, Literal $count) {
-  $sum_function($name, $count)...
+  @sum_function($name, $count)
 }
 $sample.define_sum("sum3", 3);   // sum3(1.0, 2.0, 3.5) is 6.5
 ~
@@ -1589,7 +1596,7 @@ meta List shape_reads(List receiver, TypeInfo type) {
     reads.push($!( $receiver.$member ));
   }
   List items = reads.list_free();
-  return $!( { $items... } );
+  return $!( { @items } );
 }
 
 macro Expression $shape.names(Expr $value) => $shape_names($value);

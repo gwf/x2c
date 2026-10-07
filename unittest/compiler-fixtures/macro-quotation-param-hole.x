@@ -15,7 +15,7 @@ meta static List single(String name) {
 meta static List sequence(String name) {
   List x = x2c_ident("x");
   List params = %((param (double) (bind ("x") ())));
-  return %(${$!Unit{ double $name($params...) { return $x * 3; } }});
+  return %(${$!Unit{ double $name(@params) { return $x * 3; } }});
 }
 
 meta static List pair(String name) {
@@ -27,9 +27,9 @@ meta static List pair(String name) {
   return %(${$!Unit{ double $name($forwarded, $second) { return $body; } }});
 }
 
-macro Unit $make_single(Literal $name) { $single($name)... }
-macro Unit $make_sequence(Literal $name) { $sequence($name)... }
-macro Unit $make_pair(Literal $name) { $pair($name)... }
+macro Unit $make_single(Literal $name) { @single($name) }
+macro Unit $make_sequence(Literal $name) { @sequence($name) }
+macro Unit $make_pair(Literal $name) { @pair($name) }
 $make_single("twice");
 $make_sequence("thrice");
 $make_pair("product");

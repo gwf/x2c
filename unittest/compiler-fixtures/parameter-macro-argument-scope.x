@@ -4,7 +4,7 @@ macro Unit $accessor(Name $name, Param $left, Param $right, Expr $body) {
   static int $name($left, $right) { return $body; }
 }
 
-macro Expression $made(Param $params...) => %!($params...) => 41;
+macro Expression $made(Param @params) => %!(@params) => 41;
 
 $accessor(sum, int x, int y, x + y);
 $accessor(difference, short x, short y, x - y);

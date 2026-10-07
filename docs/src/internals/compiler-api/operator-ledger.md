@@ -29,7 +29,7 @@ Returns the protocol member that derives a comparison operator.
 Inequality derives from `equal`, ordered comparisons derive from `compare`,
 and unsupported operators return zero.
 
-Source: `src/operator-ledger.x:91`
+Source: `src/operator-ledger.x:89`
 
 <a id="Compiler.operator_member"></a>
 #### Compiler.operator_member
@@ -39,7 +39,7 @@ Source: `src/operator-ledger.x:91`
 Returns the protocol member corresponding to a direct binary operator.
 Returns zero when the operator has no direct protocol mapping.
 
-Source: `src/operator-ledger.x:81`
+Source: `src/operator-ledger.x:79`
 
 ### `Symbol`
 
@@ -51,10 +51,9 @@ Source: `src/operator-ledger.x:81`
 Returns a binary operator's precedence level, or zero for any other
 `Symbol`. Levels run from 1 for `||` to 10 for the multiplicative
 operators, so a larger level binds more tightly. `===` and `!==` share
-the equality level, `in` the relational level, and `@` the
-multiplicative level.
+the equality level, and `in` the relational level.
 
-Source: `src/operator-ledger.x:61`
+Source: `src/operator-ledger.x:59`
 
 <a id="Symbol.compound_assignment"></a>
 #### Symbol.compound_assignment
@@ -63,7 +62,7 @@ Source: `src/operator-ledger.x:61`
 
 Returns the compound assignment for a binary operator, or zero.
 
-Source: `src/operator-ledger.x:73`
+Source: `src/operator-ledger.x:71`
 
 <a id="Symbol.compound_operator"></a>
 #### Symbol.compound_operator
@@ -72,7 +71,7 @@ Source: `src/operator-ledger.x:73`
 
 Returns the binary operator computed by a compound assignment, or zero.
 
-Source: `src/operator-ledger.x:67`
+Source: `src/operator-ledger.x:65`
 
 ## Design notes
 

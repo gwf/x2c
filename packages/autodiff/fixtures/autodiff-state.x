@@ -49,7 +49,7 @@ meta static List ad_both_ways(List fn) {
 
 macro Decorator $both_ways(Unit $fn) {
   $fn
-  $ad_both_ways($fn)...
+  @ad_both_ways($fn)
 }
 
 $both_ways()

@@ -75,7 +75,7 @@ meta static List _selector_definitions(Macro car, Macro cdr) =>
 
 /* Every selector two to four steps long that the prelude does not define. */
 static macro Unit $selectors() {
-  $_selector_definitions($selector.car, $selector.cdr)...
+  @_selector_definitions($selector.car, $selector.cdr)
 }
 
 $selectors();

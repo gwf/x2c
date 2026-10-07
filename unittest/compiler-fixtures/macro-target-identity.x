@@ -1,21 +1,21 @@
 #include "x2c.x"
 
-macro Stmt $keep_block(Stmt $items...) {
-  $items...
+macro Stmt $keep_block(Stmt @items) {
+  @items
 }
 
-macro Stmt $discard_block(Stmt $items...) {
+macro Stmt $discard_block(Stmt @items) {
 }
 
 macro Stmt $unless(Expr $condition, Stmt $body) {
   if (!($condition)) $body
 }
 
-macro Field $keep_field(Field $fields...) {
-  $fields...
+macro Field $keep_field(Field @fields) {
+  @fields
 }
 
-macro Field $discard_field(Field $fields...) {
+macro Field $discard_field(Field @fields) {
 }
 
 typedef struct MacroFields {

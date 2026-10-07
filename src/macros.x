@@ -155,7 +155,7 @@ static macro Stmt $report.parse.hole_unknown_kind(Expr $c, Expr $spelling) =>
 
 static macro Stmt $report.parse.hole_name(Expr $c) =>
   $c.report_error(
-    <parse>, "expected macro hole name after '$'",
+    <parse>, "expected macro hole name after '$' or '@'",
     $c.token, NULL);
 
 static macro Stmt $report.parse.hole_duplicate(
@@ -201,7 +201,7 @@ static macro Stmt $report.parse.hole_cardinality(
   {
     String message = $sequence
       ? %"singular macro hole '${$spelling}' cannot be spliced"
-      : %"sequence macro hole '${$spelling}' requires '...'";
+      : %"sequence macro hole '${$spelling}' requires '@'";
     $c.report_error(<parse>, message, $origin, NULL);
   }
 }
@@ -1208,14 +1208,14 @@ static List Definition.node(Definition &d) {
    it takes a sequence. A `using` hole is a Name that compile-time Lisp
    fills with a fresh identifier. */
 
-/* A parameter: an optional kind, `$NAME`, and `...` for a sequence. */
+/* A parameter: an optional kind, `$NAME` or sequence `@NAME`. */
 static List Compiler._signature_hole(Compiler c) {
   Symbol kind = 0;
   if (c.peek(0) == <ident> && (c.peek(1) == <$> || c.peek(1) == <@>))
     kind = c._hole_kind();
   int sequence = c.peek(0) == <@>;
   Token token = c._hole_name_token(sequence ? <@> : <$>);
-  return c._declare_hole(token, kind, c.test(<...>) || sequence);
+  return c._declare_hole(token, kind, sequence);
 }
 
 static Symbol Compiler._hole_kind(Compiler c) {
@@ -1440,9 +1440,9 @@ static const SymbolSet operand_continuations =
 
 /* template holes
 
-   In a template, a `$NAME` hole, a `$(...)` Lisp slot, or a `$name(...)`
-   meta call stands where the grammar expects syntax of some role. The
-   first role a hole of no kind fills gives it its kind. */
+   A named hole, Lisp slot, or computed call fills a syntax role. `$` inserts
+   one value and `@` splices a sequence. The first role an untyped hole fills
+   gives it its kind. */
 
 /** Parses a macro hole or Lisp slot for `role` while reading a template.
     Returns role-shaped syntax containing `(macro-bind ...)` or
@@ -1462,34 +1462,37 @@ List Compiler.try_parse_macro_slot(Compiler c, Symbol role) {
   return c._hole_slot(role);
 }
 
-/* A meta call fills a declaration or block slot only when `...` splices
-   its result there. */
+/* The callable supplies syntax in the requested insertion position. */
 static List Compiler._meta_call_slot(Compiler c, Symbol role) {
   int sequence = c.peek(0) == <@>;
   if (sequence && !(role in sequence_roles))
     $report.parse.splice_position(c);
-  String spelling;
-  Token arguments = c._scan_name(spelling);
-  int follows_splice = sequence || arguments.after_group().type == <...>;
-  if (!follows_splice && (role == <block> || role in declaration_roles))
+  if (!sequence && (role == <block> || role in declaration_roles))
     return NULL;
   List definition = c._peek_invocation();
-  if (sequence && definition && _result_kind(definition) != <expression>) {
-    Token invocation = c.token;
-    c._name();
-    List input = c._invocation_arguments(definition, invocation);
-    return %(seq ${c._invocation_node(definition, input, invocation)});
-  }
+  if (sequence && definition && _result_kind(definition) != <expression>)
+    return c._target_at(_slot_position(role), 1);
   List call = c.try_parse_macro_expression();
-  int splice = c._slot_splice(sequence, role in sequence_roles);
-  return %(macro-slot $splice $call);
+  return %(macro-slot $sequence $call);
 }
 
-/* A Lisp slot fills a declaration slot only when `...` splices it. A block
+/* A result macro keeps the ordinary position's kind and decorator rules. */
+static AstPos _slot_position(Symbol role) {
+  switch (role) {
+    case <unit>:       return AST_UNIT;
+    case <block>:      return AST_BLOCK;
+    case <field>:      return AST_FIELD;
+    case <enumerator>: return AST_ENUMERATOR;
+    case <map-entry>:  return AST_MAP_ENTRY;
+    default:           return AST_EXPRESSION;
+  }
+}
+
+/* A Lisp slot fills a declaration slot only when @ splices it. A block
    item that continues into a declaration, and a statement, keep the
    ordinary grammar. */
 static List Compiler._lisp_slot(Compiler c, Symbol role) {
-  int splice = c.peek(0) == <"@("> || c._lisp_splice_follows();
+  int splice = c.peek(0) == <"@(">;
   if (splice && !(role in sequence_roles))
     $report.parse.splice_position(c);
   if (role in declaration_roles && !splice) return NULL;
@@ -1497,11 +1500,11 @@ static List Compiler._lisp_slot(Compiler c, Symbol role) {
     return NULL;
   if (role == <statement>) return NULL;
   if (role == <expression>) return c.parse_macro_lisp_expression();
-  return c._parse_lisp_slot(role in sequence_roles, role);
+  return c._parse_lisp_slot(role);
 }
 
-/* A hole fills a slot whose role its kind accepts. A hole of no kind
-   fills a typed role only when `...` follows it. */
+/* A hole fills a slot whose role its kind accepts. A sequence hole of no
+   kind takes the slot's kind. */
 static List Compiler._hole_slot(Compiler c, Symbol role) {
   List hole = c.peek_macro_hole();
   if (!hole ||
@@ -1512,7 +1515,7 @@ static List Compiler._hole_slot(Compiler c, Symbol role) {
   if (!(role in untyped_roles)) {
     Symbol kind = hole.assoc(<kind>);
     if (!kind && c.peek(0) != <@> && c.peek(0) != <"@{"> &&
-        c.after_hole().type != <...> && !c._quoted_role(role))
+        !c._quoted_role(role))
       return NULL;
     if (kind && !_kind_accepts_role(kind, role)) return NULL;
   }
@@ -1529,18 +1532,9 @@ static const SymbolSet sequence_roles =
 static const SymbolSet untyped_roles = %<<expression argument type>>;
 static const SymbolSet quoted_roles = %<<statement block name param>>;
 
-/* Consumes a `...` after a slot. It is legal only where the role takes a
-   sequence. */
-static int Compiler._slot_splice(Compiler c, int sequence, int allowed) {
-  int splice = c.test(<...>) || sequence;
-  if (splice && !allowed)
-    $report.parse.splice_position(c);
-  return splice;
-}
-
-/** Returns the registered hole descriptor at the current `$NAME`, or at a
-    quotation's `${expression}`. Returns NULL without consuming tokens when
-    the spelling is not a hole.
+/** Returns the registered hole descriptor for a named or expression hole.
+    `$NAME` and `${expression}` insert one value; `@NAME` and `@{expression}`
+    splice a sequence. Returns NULL without consuming a non-hole spelling.
 */
 List Compiler.peek_macro_hole(Compiler c) {
   Symbol prefix = c.peek(0);
@@ -1550,11 +1544,11 @@ List Compiler.peek_macro_hole(Compiler c) {
   if (c.peek(1) != <ident>) return NULL;
   Token name = Token.skip_trivia(c.token + 1);
   List hole = c._hole_record(Atom.intern(name.text));
-  return hole ? hole : c._quoted_hole(name.text, c.token, name + 1);
+  return hole ? hole : c._quoted_hole(name.text, c.token);
 }
 
-/** Returns the token after the hole at the cursor: after `$NAME`, or after
-    the braces of `${expression}`.
+/** Returns the token after the named or expression hole at the cursor.
+    Consumes neither its `$` or `@` prefix nor its optional braces.
 */
 Token Compiler.after_hole(Compiler c) {
   if (c.peek(0) == <"@{">) return c.token.after_group();
@@ -1568,8 +1562,9 @@ Token Compiler.after_hole(Compiler c) {
    `$!( expression )`, `$!{ items }`, and `$!Kind{ ... }` are anonymous
    macros applied where they are written. A `$name` in the body names the
    visible local `name`: its first use declares a hole, and the quotation
-   applies to that local's value. A `${expression}` is a hole for a hidden
-   local that the quotation declares before it builds its code. A typed
+   applies to that local's value. An `@name` splices the local's sequence.
+   `${expression}` and `@{expression}` declare hidden locals before building
+   the code, for singular and sequence insertion. A typed
    quotation, `$!T{ expression }` or `$!(T){ expression }`, builds its code
    where it is written (see "typed quotations"), and so do
    `$!Type{ type-name }` and `$!Param{ parameter }`. */
@@ -1622,9 +1617,9 @@ static int Compiler._typed_quotation(Compiler c) {
   return c.peek(0) == <(> && c.token.after_group().type == <"{">;
 }
 
-/* Declares a hidden local for each `${expression}` in the body at the
-   cursor, in source order, and records its name under the position of its
-   `$`. A nested quotation's holes are its own, and `case ${$name(...)}` is
+/* Declares a hidden local for each `${expression}` or `@{expression}` in
+   the body, in source order, and records its name under the sigil's position.
+   A nested quotation's holes are its own, and `case ${$name(...)}` is
    a macro pattern. */
 static List Compiler._expression_holes(Compiler c, Map holes) {
   Token saved = c.token, close = c.token.group_close();
@@ -1677,9 +1672,7 @@ static List Compiler._expression_hole(Compiler c, Token prefix) {
       !c.macro_holes.try_get(%(expression ${prefix.pos}), name))
     return NULL;
   List hole = c._hole_record(Atom.intern(name));
-  return hole ? hole : c._quoted_hole(
-    name, prefix, prefix.type == <"@{"> ? prefix.after_group()
-                                        : Token.after_group(prefix + 1));
+  return hole ? hole : c._quoted_hole(name, prefix);
 }
 
 /* The expression that computes a typed quotation's type: the identifier at
@@ -1961,21 +1954,17 @@ static int Compiler._quoted_role(Compiler c, Symbol role) {
   return after.type != <;> && !_extends_expression(after);
 }
 
-/* A `$name` in a quotation's body that names a visible local declares its
-   hole, a sequence when `...` follows. A local declared `Type` fills a type
+/* A `$name` or `@name` in a quotation's body that names a visible local
+   declares a singular or sequence hole. A local declared `Type` fills a type
    hole, which no position can tell from a statement before a name. */
 static List Compiler._quoted_hole(
-  Compiler c, String spelling, Token prefix, Token after) {
+  Compiler c, String spelling, Token prefix) {
   if (!c.macro_holes || !(%(quotation) in c.macro_holes)) return NULL;
   Type type = NULL;
   List local = c.sym.lookup(%($spelling), type);
   if (!local || !c.sym.binding_is_local(local)) return NULL;
   Symbol kind = c.sym.is_named_value_type(type, "Type") ? <type> : 0;
-  /* Inside `%[...]`, the splice scans as the atom `...`. */
-  after = Token.skip_trivia(after);
-  int sequence = prefix.type == <@> || prefix.type == <"@{"> ||
-                 after.type == <...> ||
-                 (after.type == <lit-atom> && after.text == "...");
+  int sequence = prefix.type == <@> || prefix.type == <"@{">;
   List hole = c._record_hole(spelling, kind, sequence);
   Var quoted = c.macro_holes[%(quoted)];
   c.macro_holes[%(quoted)] =
@@ -1996,7 +1985,7 @@ static List Compiler._parse_hole(Compiler c, Symbol role) {
   if (!hole) c._unbound(c._hole_name_token(token.type).text, token);
   c.token = c.after_hole();
   Atom name = _hole_name(hole);
-  int sequence = c._hole_splice(role) || token.type == <@> ||
+  int sequence = token.type == <@> ||
                  token.type == <"@{">;
   if (sequence != hole.assoc(<sequence>).int())
     c._cardinality_error(name.str(), sequence, token);
@@ -2015,17 +2004,6 @@ static List Compiler._parse_hole(Compiler c, Symbol role) {
   }
   String projection = c._hole_projection(hole, role, sequence);
   return %(macro-bind ${_hole_key(hole, projection)});
-}
-
-/* A `...` after a hole splices it, and an argument may also spell the
-   splice as the atom `...`. */
-static int Compiler._hole_splice(Compiler c, Symbol role) {
-  if (c.test(<...>)) return 1;
-  if (role != <argument> || c.peek(0) != <lit-atom> ||
-      c.token.text != "...")
-    return 0;
-  c.next();
-  return 1;
 }
 
 static void Compiler._cardinality_error(
@@ -2062,10 +2040,6 @@ static int _kind_accepts_role(Symbol kind, Symbol role) {
      (kind == <decl> || kind == <function> || kind == <named-type>));
 }
 
-static int Compiler._lisp_splice_follows(Compiler c) =>
-  c.peek(0) == <"$("> &&
-         c.token.after_group().type == <...>;
-
 /** Returns whether tokens after a Lisp form or explicit meta call continue
     a declaration. The balanced argument group is inspected without moving
     the compiler cursor; a visible source macro retains its own grammar.
@@ -2098,11 +2072,9 @@ List Compiler.try_parse_macro_member(Compiler c) {
 
 /* A Lisp slot carries its form and the construction binders its Unit holes
    need. A slot inside a Unit decorator also carries the target's. */
-static List Compiler._parse_lisp_slot(
-  Compiler c, int allow_sequence, Symbol role) {
+static List Compiler._parse_lisp_slot(Compiler c, Symbol role) {
   int sequence = c.peek(0) == <"@(">;
   String form = c._lisp_form();
-  int splice = c._slot_splice(sequence, allow_sequence);
   Var target = c.macro_holes[%(target)];
   List construction = c._lisp_construction(form);
   if (target is <list>) {
@@ -2112,7 +2084,7 @@ static List Compiler._parse_lisp_slot(
     else if (role == <unit>) construction = construction.append(%($required));
   }
   return %(
-    macro-slot $splice $form
+    macro-slot $sequence $form
     @construction
   );
 }

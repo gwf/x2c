@@ -43,8 +43,8 @@ macro Stmt $tried(Stmt $body, Stmt $finalizer) {
 
 /* A try with catch arms, each a pattern and a body, and a finalizer. */
 macro Stmt $caught(Stmt $body, Stmt $finalizer,
-    Catch $arms...) {
-  try $body catch $arms... finally $finalizer
+    Catch @arms) {
+  try $body catch @arms finally $finalizer
 }
 ```
 
@@ -117,26 +117,26 @@ macro Stmt $compiler_try(Name $frame, Expr $clause,
     Stmt $body, Stmt $cleanup) {
   {
     ExceptionFrame $frame;
-    $builtin_try_catch_site($frame, $clause)...
+    @builtin_try_catch_site($frame, $clause)
     x2c_exception_push(&$frame);
     if (!sigsetjmp($frame.env, 0)) $body
     else {
       x2c_exception_landed(&$frame);
-      $builtin_try_landing($frame, $clause, $cleanup)...
+      @builtin_try_landing($frame, $clause, $cleanup)
     }
-    $builtin_try_cleanup_placement($cleanup)...
+    @builtin_try_cleanup_placement($cleanup)
   }
 }
 
 /* One catch site: its patterns prepared once, its handler pushed with
    them. */
 macro Stmt $catch_site(Name $frame, Name $handle, Expr $count,
-    Expr $fallback, Expr $state, Expr $patterns...) {
+    Expr $fallback, Expr $state, Expr @patterns) {
   static MatchCaptureSite arms[$count];
   Var patterns[$count];
   static ErrorCatchSite site = {arms, $fallback, $count, $state, -1};
   if (x2c_error_catch_site_pending(&site)) {
-    $builtin_catch_patterns(patterns, $patterns)...
+    @builtin_catch_patterns(patterns, $patterns)
   }
   volatile ErrorHandler $handle =
     x2c_error_catch_site_push(&$frame, &site, patterns);
@@ -150,12 +150,12 @@ macro Stmt $catch_pattern(Expr $patterns, Expr $index,
 
 /* A landing that hands a raised error to the arm its handler selected. */
 macro Stmt $catch_landing(Name $frame, Name $handle,
-    Stmt $unhandled, Stmt $arms...) {
+    Stmt $unhandled, Stmt @arms) {
   if (x2c_exception_is_error_target(&$frame)) {
     int selected = x2c_error_catch_selected($handle);
     x2c_error_catch_detach($handle);
     x2c_exception_mark_handled(&$frame);
-    $builtin_catch_cases(selected, $arms)...
+    @builtin_catch_cases(selected, $arms)
   }
   else $unhandled
 }
@@ -262,13 +262,13 @@ examples are excerpts from current source.
    equal List costs (PR #130). From `_scope_expand` in `src/builtins.x`:
 
    ```x2c
-   List enter = destinations ? $!( Scope_push($destinations...) )
+   List enter = destinations ? $!( Scope_push(@destinations) )
                              : $!( Scope_retain() );
    List leave = destinations ? $!( Scope_pop() ) : $!( Scope_release() );
    return $!{ { $enter; { defer $leave; $body } } };
    ```
 
-2. **Holes from locals.** `$name` inserts a local's value and `$name...`
+2. **Holes from locals.** `$name` inserts a local's value and `@name`
    splices a List local. A `Type` local fills a type position, a binding
    identity names that binding, and an `int`, String, or Symbol becomes a
    literal. `_declare` in `src/builtins.x`:
@@ -296,14 +296,14 @@ examples are excerpts from current source.
    `c.sym.introduce(c.fresh_name(...))`, used the same way.
 
 3. **Expression holes.** `${expr}` inserts a field, an element, or a call
-   result without a local, and `${expr}...` splices a List. The function
+   result without a local, and `@{expr}` splices a List. The function
    evaluates each hole once, where the quotation is written, in written
    order. Call helpers this way rather than as `$helper(...)` slots. A slot
    makes the quotation apply a template, so it is no longer built where it
    is written (PR #135). `Foreach.loop` in `src/builtins.x`:
 
    ```x2c
-   return $!{ { ${f.declaration} $setup... while ($condition) $body } };
+   return $!{ { ${f.declaration} @setup while ($condition) $body } };
    ```
 
 4. **A typed quotation.** `$!T{ expr }` builds `(expr T ...)` at once.

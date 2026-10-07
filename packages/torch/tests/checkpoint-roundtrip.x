@@ -24,7 +24,7 @@ static Module _mlp(void) {
 static Tensor _affine(Module layer, Tensor x) {
   List parameters = layer.parameters();
   Tensor weight = parameters[0].tensor(), bias = parameters[1].tensor();
-  return x @ weight.t() + bias;
+  return x.matmul(weight.t()) + bias;
 }
 
 static Tensor _forward(Module model, Tensor x) =>
@@ -41,7 +41,7 @@ static int _train(void) {
   Torch.manual_seed(0);
   Tensor x = Tensor.randn(%(64 4), XT_FLOAT32);
   Tensor weights = Tensor.of(%(0.5 -1.25 2.0 0.75), %(1 4), XT_FLOAT32);
-  Tensor y = x @ weights.t() + 0.5 + Tensor.randn(%(64 1), XT_FLOAT32) * 0.05;
+  Tensor y = x.matmul(weights.t()) + 0.5 + Tensor.randn(%(64 1), XT_FLOAT32) * 0.05;
 
   Module model = _mlp();
   Map start = {};

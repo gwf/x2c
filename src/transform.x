@@ -585,13 +585,13 @@ static List Compiler._var_literal_content(Compiler c, List application) {
 static List Compiler._var_array_literal(Compiler c, List values) {
   if (!values) return c._var_literal_content($!( Array.new() ));
   return c._var_literal_content(
-    $!( Array.update_n(Array.new(), ${values.len()}, $values...) ));
+    $!( Array.update_n(Array.new(), ${values.len()}, @values) ));
 }
 
 static List Compiler._var_map_literal(Compiler c, List entries) {
   if (!entries) return c._var_literal_content($!( Map.new() ));
   return c._var_literal_content(
-    $!( Map.update_n(Map.new(), ${entries.len() / 2}, $entries...) ));
+    $!( Map.update_n(Map.new(), ${entries.len() / 2}, @entries) ));
 }
 
 /* A literal element is a `Var`, and an empty brace there is an empty Map. */
@@ -828,14 +828,14 @@ static macro Stmt $destructure_typed_target(
   $type $row = $value;
 }
 
-static macro Stmt $destructure_sequence(Stmt $items...) {
-  $items...
+static macro Stmt $destructure_sequence(Stmt @items) {
+  @items
 }
 
 static macro Stmt $destructure_declarations(
-    Name $temporary, Expr $source, Stmt $assignments...) {
+    Name $temporary, Expr $source, Stmt @assignments) {
   List $temporary = $source;
-  $assignments...
+  @assignments
 }
 
 static List Compiler._declaration(Compiler c, List ast) {
@@ -905,7 +905,7 @@ static List Compiler._destructure_statement(Compiler c, List ast) {
         $!{
           {
             List $temporary = ${c._destructure_source(source, source_type)};
-            ${c._destructure_assignments(targets, temporary)}...
+            @{c._destructure_assignments(targets, temporary)}
           }
         }, AST_BLOCK, c.return_type);
     }
@@ -926,10 +926,10 @@ static List Compiler._destructure_value(Compiler c, List ast) {
       List assignments = c._destructure_assignments(targets, temporary);
       Macro shape = macro Expression(
         Type $type, Name $result, Expr $source, Name $temporary,
-        Expr $converted, Stmt $assignments...) => ({
+        Expr $converted, Stmt @assignments) => ({
         $type $result = $source;
         List $temporary = $converted;
-        $assignments...
+        @assignments
         $result;
       });
       List bound = c.bind_syntax(
@@ -961,7 +961,7 @@ static List Compiler._named_destructure(
     expressions.push($!($type){ $ident });
   }
   List target_decl =
-    c.rebuild_statement($!{ $type ${declarations.list_free()}...; }).cadr();
+    c.rebuild_statement($!{ $type @{declarations.list_free()}; }).cadr();
   List assignments = c._destructure_assignments(
     expressions.list_free(), temporary);
   Macro shape = $destructure_declarations;

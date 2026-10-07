@@ -129,7 +129,7 @@ static void _unlock(void) =>
 static macro Decorator $logger.synchronized(Function $function) {
   _lock();
   defer _unlock();
-  $(x2c.function.body $function)...
+  @(x2c.function.body $function)
 }
 
 static keyword synchronized $logger.synchronized;

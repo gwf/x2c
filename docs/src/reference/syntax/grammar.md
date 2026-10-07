@@ -129,7 +129,7 @@ parentheses without braces do not form a statement expression.
 | Level | Operators | Association |
 | --- | --- | --- |
 | Comma | `,` | Left |
-| Assignment | `= += -= *= /= %= @= <<= >>= &= ^= \|=` | Right |
+| Assignment | `= += -= *= /= %= <<= >>= &= ^= \|=` | Right |
 | Conditional | `? :` | Right |
 | Binary 1 | `\|\|` | Left |
 | Binary 2 | `&&` | Left |
@@ -211,6 +211,7 @@ supports macro sequence handling where the template parser permits it.
 
 `lisp-escape` records the contents inside `$(`, whose outer parentheses also
 form the compile-time Lisp call/list. It is not a sequence of C expressions.
+Templates use `@(form)` to splice a Lisp result at a sequence slot.
 The ordinary Lisp reader supports lists, four reader prefixes, and atomic
 values; it has no special dotted-pair production. Compiler templates add
 hole capture before evaluation. The EBNF covers reading; it does not specify
@@ -286,8 +287,9 @@ the target category. Targets can be Expr, Stmt, Field, Unit, Function, or
 NamedType. An identifier alias omits parentheses when there are no ordinary arguments;
 a `$` invocation still has its argument parentheses.
 Unit/Function/NamedType decorators therefore extend file scope as well as
-block/expression positions. In indentation syntax, leading `@` is a decorator line marker removed
-before parsing. Brace-source decorators compose directly before their target.
+block/expression positions. In indentation syntax, the leading `@` in
+`@$decorator(...)` is a layout marker removed before parsing. Sequence
+prefixes `@name`, `@producer(...)`, and `@(form)` remain. Brace-source decorators compose directly before their target.
 A naked file-scope `@` is rejected. Target placement and alias shadowing
 follow `try_parse_macro_target_at`, not arbitrary grammar substitution.
 
@@ -301,7 +303,7 @@ to `parse_macro_quotation`. Typed quotations have context and nesting
 restrictions described in the reference.
 
 **M5: slots and sequences.** Inside a template, `$name` inserts a declared
-hole in a category-compatible position, and `$name...` splices a sequence.
+hole in a category-compatible position, and `@name` splices a sequence.
 `${expression}` and `$(...)` supply computed syntax in the applicable slot;
 meta calls use the same binding operations. The parser selects the slot's
 role (expression, type, name, parameter, declarator row, field, entry,

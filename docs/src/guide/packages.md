@@ -344,7 +344,7 @@ without requiring public services:
 - raylib's standard examples render PNG files in memory. Use
   `run-interactive` for the windowed showcase; package checks do not run it.
 - `packages/torch/examples/fit-line.x` fits a line by gradient descent
-  through libtorch autograd: `x @ w + b`, `backward`, and an in-place update
+  through libtorch autograd: `x.matmul(w) + b`, `backward`, and an in-place update
   under `Torch.no_grad`, with every operator temporary reclaimed by the
   step's `Scope`. `mlp.x` trains a composed model with Adam and reloads it
   from a checkpoint; `mnist.x` trains a convolutional network for one epoch

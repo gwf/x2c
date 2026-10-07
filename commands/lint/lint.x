@@ -203,7 +203,8 @@ int lint_closes(Token t) =>
 static int _quoting(Lint l, int at, int outer):
   String text = l.tokens[at].text
   int after_at = at && l.tokens[at - 1].text == "@"
-  if text == "%(" || text == "$(" || text == "(" && after_at: return 1
+  if text == "%(" || text == "$(" || text == "@(" ||
+      text == "(" && after_at: return 1
   if text == "${" || text == "{" && after_at: return 0
   return outer
 

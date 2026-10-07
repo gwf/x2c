@@ -100,12 +100,11 @@ static int Tokenizer._end_of_file(Tokenizer t) {
   return 0;
 }
 
-/* x2c code tries C trivia and numbers, `$` forms, `%` and `<` literals, then
-   C strings, identifiers, and operators. */
+/* x2c code tries C trivia and numbers, `$`/`@` forms, and `%`/`<` literals
+   before C strings, identifiers, and operators. */
 static int Tokenizer._x2c_tokens(Tokenizer t) =>
   t._common_tokens() ||
-  ((t.text[t.pos] == '$' ||
-    (t.text[t.pos] == '@' && t.text[t.pos + 1] != '=')) &&
+  ((t.text[t.pos] == '$' || t.text[t.pos] == '@') &&
    (t._embedded_lisp() || t._named_reference())) ||
   t._percent_tokens() || t._angle_symbol_literal() || t._c_tokens();
 
@@ -230,17 +229,16 @@ static int Tokenizer._lisp_tokens(Tokenizer t) {
 }
 
 /* A token its first characters decide: `void` in a collection, a list's
-   `?(` capture and bare `@` operator atom, and the `$` and `@` escapes into
-   x2c. Lisp source escapes only `$name`, and a collection splices only
-   with `$`. */
+   `?(` capture and bare `@` atoms, and the `$` and `@` escapes into x2c.
+   Lisp source escapes only `$name`; Array/Map @ references reach template
+   slots, without adding runtime splicing. */
 static int Tokenizer._lisp_prefix(Tokenizer t, int list, int collection) {
   char *text = t.text + t.pos;
   if (collection && !strncmp(text, "void", 4) && scan_identifier(text) == 4)
     return t.tokenize(4, <void>);
   if (list && text[0] == '?' && text[1] == '(') return t._operator(2);
   if (text[0] == '$' && !list && !collection) return t._named_reference();
-  /* A bare `@` or `@=` in a list is the operator atom, so an AST literal
-     or match pattern can spell `%(op @ a b)`; `@name` and `@{` splice. */
+  /* Bare @ and @= are atom data; @name and @{ splice a runtime List. */
   if (list && text[0] == '@' &&
       (!text[1] || text[1] == '=' || strchr(" \t\n\v\f\r)", text[1])))
     return t.tokenize(text[1] == '=' ? 2 : 1, <lit-atom>);
@@ -555,7 +553,7 @@ static Token _before_group(Tokenizer tokenizer, Token close, Symbol opener) {
       case <")">: case <"}">:
         depth++;
         break;
-      case <"(">: case <"%(">: case <"$(">: case <"?(">:
+      case <"(">: case <"%(">: case <"$(">: case <"@(">: case <"?(">:
       case <"{">: case <"%{">: case <"${">: case <"@{">:
         if (--depth) break;
         return scan.type == opener ? _significant_before(tokenizer, scan)
@@ -801,11 +799,11 @@ static int _Layout.bare_do(_Layout &l, _LayoutLine line, int j) {
 }
 
 /* A statement line ends with `;` unless it already does or it is an enum
-   member, one whole `$(...)` form, or a bare macro hole. A leading `@` marks
+   member, one whole Lisp form, or a bare macro hole. The leading `@$` marks
    a decorator line, which takes none. */
 static String _Layout.end_statement(_Layout &l, _LayoutLine line) {
   l.one_line_body(line);
-  if (l.sig[line.first].type == <"@"> &&
+  if (line.first < line.last && l.sig[line.first].type == <"@"> &&
       l.sig[line.first + 1].type == <$>) {
     l.edit(line.first).type = <space>;
     return NULL;

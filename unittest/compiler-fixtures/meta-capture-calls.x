@@ -25,7 +25,7 @@ macro Enumerator $capture.values() {
 }
 macro Decorator $capture.trace(Function $function) {
   printf("%s\n", $capture_function_name($function));
-  $capture_function_body($function)...
+  @capture_function_body($function)
 }
 
 enum Status { $capture.values() };

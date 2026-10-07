@@ -1,6 +1,6 @@
 #include "x2c.x"
 macro Unit $install_declaration() {
-  $(list '(macrodef
+  @(list '(macrodef
       (name built_declare) (kind block-item)
       (target) (targetp ())
       (parameters
@@ -17,7 +17,7 @@ macro Unit $install_declaration() {
         (seq (declare (int)
           (bindings (op = (bind ?__macro_value_n ())
             (expr (macro-expr) ?__macro_expression_v))))))
-      (local 0)))...
+      (local 0)))
 }
 $install_declaration();
 macro Stmt $outer_built(Name $out) {

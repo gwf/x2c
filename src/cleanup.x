@@ -655,24 +655,24 @@ static macro Stmt $compiler_try(Name $frame, Expr $clause,
     Stmt $body, Stmt $cleanup) {
   {
     ExceptionFrame $frame;
-    $builtin_try_catch_site($frame, $clause)...
+    @builtin_try_catch_site($frame, $clause)
     x2c_exception_push(&$frame);
     if (!sigsetjmp($frame.env, 0)) $body
     else {
       x2c_exception_landed(&$frame);
-      $builtin_try_landing($frame, $clause, $cleanup)...
+      @builtin_try_landing($frame, $clause, $cleanup)
     }
-    $builtin_try_cleanup_placement($cleanup)...
+    @builtin_try_cleanup_placement($cleanup)
   }
 }
 
 static macro Stmt $catch_site(Name $frame, Name $handle, Expr $count,
-    Expr $fallback, Expr $state, Expr $patterns...) {
+    Expr $fallback, Expr $state, Expr @patterns) {
   static MatchCaptureSite arms[$count];
   Var patterns[$count];
   static ErrorCatchSite site = {arms, $fallback, $count, $state, -1};
   if (x2c_error_catch_site_pending(&site)) {
-    $builtin_catch_patterns(patterns, $patterns)...
+    @builtin_catch_patterns(patterns, $patterns)
   }
   volatile ErrorHandler $handle =
     x2c_error_catch_site_push(&$frame, &site, patterns);
@@ -680,12 +680,12 @@ static macro Stmt $catch_site(Name $frame, Name $handle, Expr $count,
 
 /* A landing that hands a raised error to the arm its handler selected. */
 static macro Stmt $catch_landing(Name $frame, Name $handle,
-    Stmt $unhandled, Stmt $arms...) {
+    Stmt $unhandled, Stmt @arms) {
   if (x2c_exception_is_error_target(&$frame)) {
     int selected = x2c_error_catch_selected($handle);
     x2c_error_catch_detach($handle);
     x2c_exception_mark_handled(&$frame);
-    $builtin_catch_cases(selected, $arms)...
+    @builtin_catch_cases(selected, $arms)
   }
   else $unhandled
 }
@@ -764,13 +764,13 @@ static List Compiler._try_cleanup(
     List lowered = %(code-value "lowered" (seq $finalizer) ());
     syntax = $!{
       if (x2c_exception_claim($address)) {
-        $before...
+        @before
         $lowered
       }
       x2c_exception_leave($address);
     };
   }
-  else syntax = $!{ $before... x2c_exception_leave($address); };
+  else syntax = $!{ @before x2c_exception_leave($address); };
   List result = c.bind_syntax(syntax, AST_BLOCK, c.return_type);
   return %(code-value "lowered" $result ());
 }
@@ -908,7 +908,7 @@ List builtin_defer_record(
   Type type = %(${binding_identity_spelling(environment)});
   return $!{
     $type environment = {0};
-    $builtin_defer_captures(environment, $records)...
+    @builtin_defer_captures(environment, $records)
     X2CCleanup $record = {.fn = $callback, .env = &environment};
   };
 }

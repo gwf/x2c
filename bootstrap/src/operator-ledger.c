@@ -4,11 +4,11 @@
 #include "x2c.h"
 
 #include "compiler.h"
-static List _182, _181, _180, _178, _177, _173, _172, _162, _161, _160, _159, _158, _157, _156, _155, _154, _153, _152, _151, _150, _149, _148, _147, _146, _145, _144, _143, _142, _141, _139, _138, _137, _136, _131, _130, _129, _128, _123, _122, _121, _120, _115, _114, _113, _112, _106, _105, _104, _103, _98, _97, _96, _95, _89, _88, _87, _83, _82, _81, _76, _75, _72, _69, _66, _63, _62, _61, _60, _55, _52, _51, _48, _47, _46, _45, _44, _41, _40, _39, _38, _33, _32, _31, _26, _25, _24, _19, _18, _17, _12, _11, _7, _6, _5, _4, _3;
+static List _173, _172, _171, _169, _168, _164, _163, _153, _152, _151, _150, _149, _148, _147, _146, _145, _144, _143, _142, _141, _140, _139, _138, _137, _136, _135, _134, _133, _131, _130, _129, _128, _123, _122, _121, _120, _115, _114, _113, _112, _106, _105, _104, _103, _98, _97, _96, _95, _89, _88, _87, _83, _82, _81, _76, _75, _72, _69, _66, _63, _62, _61, _60, _55, _52, _51, _48, _47, _46, _45, _44, _41, _40, _39, _38, _33, _32, _31, _26, _25, _24, _19, _18, _17, _12, _11, _7, _6, _5, _4, _3;
 
-static String _167, _163;
+static String _158, _154;
 
-static Var _186, _185, _184, _183, _179, _176, _175, _174, _171, _170, _169, _168, _166, _165, _164, _140, _135, _134, _133, _132, _127, _126, _125, _124, _119, _118, _117, _116, _111, _110, _109, _108, _107, _102, _101, _100, _99, _94, _93, _92, _91, _90, _86, _85, _84, _80, _79, _78, _77, _74, _73, _71, _70, _68, _67, _65, _64, _59, _58, _57, _56, _54, _53, _50, _49, _43, _42, _37, _36, _35, _34, _30, _29, _28, _27, _23, _22, _21, _20, _16, _15, _14, _13, _10, _9, _8, _2, _1, _0;
+static Var _177, _176, _175, _174, _170, _167, _166, _165, _162, _161, _160, _159, _157, _156, _155, _132, _127, _126, _125, _124, _119, _118, _117, _116, _111, _110, _109, _108, _107, _102, _101, _100, _99, _94, _93, _92, _91, _90, _86, _85, _84, _80, _79, _78, _77, _74, _73, _71, _70, _68, _67, _65, _64, _59, _58, _57, _56, _54, _53, _50, _49, _43, _42, _37, _36, _35, _34, _30, _29, _28, _27, _23, _22, _21, _20, _16, _15, _14, _13, _10, _9, _8, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
@@ -165,64 +165,55 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _130 = cons(_109, _129);
   _131 = cons(_125, _130);
   _132 = List_var(_131);
-  _133 = Symbol_var(129);
-  _134 = Symbol_var(16507);
-  _135 = Symbol_var(875851096);
-  _136 = cons(_135, _3);
-  _137 = cons(_134, _136);
-  _138 = cons(_109, _137);
-  _139 = cons(_133, _138);
-  _140 = List_var(_139);
-  _141 = cons(_140, NULL);
-  _142 = cons(_132, _141);
-  _143 = cons(_124, _142);
-  _144 = cons(_116, _143);
-  _145 = cons(_107, _144);
-  _146 = cons(_99, _145);
-  _147 = cons(_90, _146);
-  _148 = cons(_84, _147);
-  _149 = cons(_77, _148);
-  _150 = cons(_73, _149);
-  _151 = cons(_70, _150);
-  _152 = cons(_67, _151);
-  _153 = cons(_64, _152);
-  _154 = cons(_56, _153);
-  _155 = cons(_53, _154);
-  _156 = cons(_49, _155);
-  _157 = cons(_42, _156);
-  _158 = cons(_34, _157);
-  _159 = cons(_27, _158);
-  _160 = cons(_20, _159);
-  _161 = cons(_13, _160);
-  _162 = cons(_8, _161);
-  _163 = String_new("x2c.quoted");
-  _164 = String_var(_163);
-  _165 = List_var(NULL);
-  _166 = Symbol_var(199882);
-  _167 = String_new("x2c.hole");
-  _168 = String_var(_167);
-  _169 = Atom_intern(String_new("macro-param"));
-  _170 = Symbol_var(740232);
-  _171 = Symbol_var(377892);
-  _172 = cons(_171, NULL);
-  _173 = cons(_170, _172);
+  _133 = cons(_132, NULL);
+  _134 = cons(_124, _133);
+  _135 = cons(_116, _134);
+  _136 = cons(_107, _135);
+  _137 = cons(_99, _136);
+  _138 = cons(_90, _137);
+  _139 = cons(_84, _138);
+  _140 = cons(_77, _139);
+  _141 = cons(_73, _140);
+  _142 = cons(_70, _141);
+  _143 = cons(_67, _142);
+  _144 = cons(_64, _143);
+  _145 = cons(_56, _144);
+  _146 = cons(_53, _145);
+  _147 = cons(_49, _146);
+  _148 = cons(_42, _147);
+  _149 = cons(_34, _148);
+  _150 = cons(_27, _149);
+  _151 = cons(_20, _150);
+  _152 = cons(_13, _151);
+  _153 = cons(_8, _152);
+  _154 = String_new("x2c.quoted");
+  _155 = String_var(_154);
+  _156 = List_var(NULL);
+  _157 = Symbol_var(199882);
+  _158 = String_new("x2c.hole");
+  _159 = String_var(_158);
+  _160 = Atom_intern(String_new("macro-param"));
+  _161 = Symbol_var(740232);
+  _162 = Symbol_var(377892);
+  _163 = cons(_162, NULL);
+  _164 = cons(_161, _163);
+  _165 = List_var(_164);
+  _166 = Symbol_var(1317592723658);
+  _167 = int_var(0);
+  _168 = cons(_167, NULL);
+  _169 = cons(_166, _168);
+  _170 = List_var(_169);
+  _171 = cons(_170, NULL);
+  _172 = cons(_165, _171);
+  _173 = cons(_160, _172);
   _174 = List_var(_173);
-  _175 = Symbol_var(1317592723658);
-  _176 = int_var(0);
-  _177 = cons(_176, NULL);
-  _178 = cons(_175, _177);
-  _179 = List_var(_178);
-  _180 = cons(_179, NULL);
-  _181 = cons(_174, _180);
-  _182 = cons(_169, _181);
-  _183 = List_var(_182);
-  _184 = Symbol_var(40381208);
-  _185 = Symbol_var(1219800220);
-  _186 = Symbol_var(39266);
+  _175 = Symbol_var(40381208);
+  _176 = Symbol_var(1219800220);
+  _177 = Symbol_var(39266);
 }
 
 static List _operator_rows(void){
-  return _162;
+  return _153;
 }
 
 Array Array_new(void);
@@ -253,8 +244,8 @@ static List _operator_cases(int key, int value, int derived){
         if(derived >= 0 && ! Var_equal(List_getindex(row, 4), int_var(derived))) continue;
         Symbol label = Var_symbol(List_getindex(row, key));
         Var result = List_getindex(row, value);
-        Array_push(cases, List_var(cons(_164, cons(_165, cons(List_var(({
-          Var _x2c_literal_part_0 = List_var(cons(_166, cons(List_var(cons(_168, cons(_183, cons(_184, cons(Symbol_var(label), NULL))))), NULL)));  Var _x2c_literal_part_1 = List_var(cons(_185, cons(_165, cons(List_var(cons(_168, cons(_183, cons(_184, cons(result, NULL))))), NULL))));  cons(_186, cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, NULL)));
+        Array_push(cases, List_var(cons(_155, cons(_156, cons(List_var(({
+          Var _x2c_literal_part_0 = List_var(cons(_157, cons(List_var(cons(_159, cons(_174, cons(_175, cons(Symbol_var(label), NULL))))), NULL)));  Var _x2c_literal_part_1 = List_var(cons(_176, cons(_156, cons(List_var(cons(_159, cons(_174, cons(_175, cons(result, NULL))))), NULL))));  cons(_177, cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, NULL)));
         }
         )), NULL)))));
       }
@@ -288,7 +279,6 @@ int Symbol_binary_precedence(Symbol op){
     case 54 : return 10;
     case 95 : return 10;
     case 75 : return 10;
-    case 129 : return 10;
   }
   return 0;
 }
@@ -305,7 +295,6 @@ Symbol Symbol_compound_operator(Symbol op){
     case 10875 : return 54;
     case 12155 : return 95;
     case 9595 : return 75;
-    case 16507 : return 129;
   }
   return 0;
 }
@@ -322,7 +311,6 @@ Symbol Symbol_compound_assignment(Symbol op){
     case 54 : return 10875;
     case 95 : return 12155;
     case 75 : return 9595;
-    case 129 : return 16507;
   }
   return 0;
 }
@@ -336,7 +324,6 @@ Symbol Compiler_operator_member(Compiler c, Symbol op){
     case 54 : return 27992;
     case 95 : return 8812;
     case 75 : return 27592;
-    case 129 : return 875851096;
   }
   return 0;
 }

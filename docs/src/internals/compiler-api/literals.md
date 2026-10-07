@@ -60,7 +60,7 @@ Parses the current atomic token into a typed expression and advances once.
 Pattern and macro-hole state control binder validation and quoting, while
 shallow parsing permits provisional numeric types.
 
-Source: `src/literals.x:923`
+Source: `src/literals.x:933`
 
 <a id="Compiler.parse_catch_pattern_literal"></a>
 #### Compiler.parse_catch_pattern_literal
@@ -104,7 +104,7 @@ Source: `src/literals.x:215`
 Parses comma-separated `Map` entries up to but not including `}`.
 `Entry`-position macro sequences are flattened in source order.
 
-Source: `src/literals.x:781`
+Source: `src/literals.x:791`
 
 <a id="Compiler.parse_map_entry"></a>
 #### Compiler.parse_map_entry
@@ -116,7 +116,7 @@ A bare identifier key is an Atom; any other key is an expression.
 A direct row returns a resolved `(map-entry KEY VALUE)` node; an
 entry-position macro may return `(seq ...)` for its caller to splice.
 
-Source: `src/literals.x:796`
+Source: `src/literals.x:806`
 
 <a id="Compiler.parse_map_literal"></a>
 #### Compiler.parse_map_literal
@@ -126,7 +126,7 @@ Source: `src/literals.x:796`
 Parses a quoted Map literal into a typed, source-ordered `(map ...)` node
 and consumes its closing `}`.
 
-Source: `src/literals.x:732`
+Source: `src/literals.x:740`
 
 <a id="Compiler.parse_raise_literal"></a>
 #### Compiler.parse_raise_literal
@@ -149,7 +149,7 @@ Parses a percent `String` literal and returns its typed expression after
 the closing quote. Static segments enter the compiler cache unless
 `runtime_literals` is set; interpolated segments remain source ordered.
 
-Source: `src/literals.x:824`
+Source: `src/literals.x:834`
 
 <a id="Compiler.parse_symbol_set_literal"></a>
 #### Compiler.parse_symbol_set_literal

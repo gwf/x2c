@@ -5,7 +5,7 @@
 macro Expression $embed.empty_path() =>
   $(x2c.literal.string (x2c.embed.text ""));
 
-macro Expression $call(Expr $arguments..., Expr $final) => $final;
+macro Expression $call(Expr @arguments, Expr $final) => $final;
 
 int parse_error(void) {
   int sum = 42 +;

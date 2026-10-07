@@ -31,7 +31,7 @@ int main(void) {
   int round = 0;
   for (; shift > 1e-15 && round < 100; round++) {
     $scope() {
-      BlisObject next = links @ rank;
+      BlisObject next = links.matmul(rank);
       next = next.scale(1.0 / next.dotv(ones));
       shift = (next - rank).normfv();
       rank.copy_from(next);

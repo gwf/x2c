@@ -32,8 +32,8 @@ static int literal_sum(List e) {
 }
 
 /* A bare `*` in a sequence hole matches any number of arguments. */
-macro Expression $call(Expr $callee, Expr $arguments...) =>
-  $callee($arguments...);
+macro Expression $call(Expr $callee, Expr @arguments) =>
+  $callee(@arguments);
 static int any_call(List e) {
   match (e) case $call(%(expr ? (ident "f")), *): return 1;
   return 0;

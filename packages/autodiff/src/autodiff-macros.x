@@ -621,7 +621,7 @@ meta List ad_forward(List fn) {
       String dot = ad_dot(name);
       List tangents = ad_fwd_params(params);
       List items = ad_fwd_body(body, names).cdr();
-      List one = $!Unit{ $result $dot($tangents...) { $items... } };
+      List one = $!Unit{ $result $dot(@tangents) { @items } };
       return %($one);
     }
   }
@@ -1183,14 +1183,14 @@ macro Unit $ad.gradient(
   Expr $params, Expr $items, Expr $checkpoint, Name $function
 ) {
   using $tape, $result, $seed, $code, $reverse;
-  $spec $name($ad_grad_params($params)...) {
+  $spec $name(@ad_grad_params($params)) {
     $tape_type $tape = $tape_new();
     double $result = 0.0, $seed = 0.0, $code = 0.0;
-    $ad_reverse_prepare($params, $items, $checkpoint, $function,
-                        $tape, $result, $seed, $code, $reverse)...
+    @ad_reverse_prepare($params, $items, $checkpoint, $function,
+                        $tape, $result, $seed, $code, $reverse)
     $reverse:
     $code = $tape.take_last();
-    $ad_reverse_finish()...
+    @ad_reverse_finish()
     $tape.free();
     return $result;
   }
@@ -1369,7 +1369,7 @@ meta List ad_checkpoint(List fn, List block) =>
 */
 macro Decorator $ad.forward(Unit $fn) {
   $fn
-  $ad_forward($fn)...
+  @ad_forward($fn)
 }
 
 /** Emits `NAME_grad` beside a `double` function: the original parameters
@@ -1381,7 +1381,7 @@ macro Decorator $ad.forward(Unit $fn) {
 */
 macro Decorator $ad.reverse(Unit $fn) {
   $fn
-  $ad_reverse($fn)...
+  @ad_reverse($fn)
 }
 
 /** Like `$ad.reverse()`, but every loop runs without recording and pushes a
@@ -1393,7 +1393,7 @@ macro Decorator $ad.reverse(Unit $fn) {
 */
 macro Decorator $ad.checkpoint(Unit $fn, Literal $block) {
   $fn
-  $ad_checkpoint($fn, $block)...
+  @ad_checkpoint($fn, $block)
 }
 
 /** Emits both `NAME_dot` and `NAME_grad`. Decorators cannot stack when each
@@ -1402,6 +1402,6 @@ macro Decorator $ad.checkpoint(Unit $fn, Literal $block) {
 */
 macro Decorator $ad.both(Unit $fn) {
   $fn
-  $ad_forward($fn)...
-  $ad_reverse($fn)...
+  @ad_forward($fn)
+  @ad_reverse($fn)
 }

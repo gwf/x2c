@@ -19,12 +19,12 @@ meta List _field_sets(List to, List value, List fields) {
            @{_field_sets(to, value, fields.cdr())});
 }
 
-macro Stmt $copy_fields(Expr $to, Expr $from, Name $fields...) {
-  $_field_copies($to, $from, $fields)...
+macro Stmt $copy_fields(Expr $to, Expr $from, Name @fields) {
+  @_field_copies($to, $from, $fields)
 }
 
-macro Stmt $set_fields(Expr $to, Expr $value, Name $fields...) {
-  $_field_sets($to, $value, $fields)...
+macro Stmt $set_fields(Expr $to, Expr $value, Name @fields) {
+  @_field_sets($to, $value, $fields)
 }
 
 /* The macro, import, keyword, and Lisp state a segment takes from its

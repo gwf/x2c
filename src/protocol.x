@@ -2110,7 +2110,7 @@ List Compiler.wrapper_function(
   Compiler c, Type result, List binding, List params, List body) {
   List lowered = %(code-value "lowered" (seq @body) ());
   return c._generated_function(
-    binding, $!Unit{ $result $binding($params...) { $lowered } });
+    binding, $!Unit{ $result $binding(@params) { $lowered } });
 }
 
 /** Returns `(declarations arguments)` for a helper that forwards its
@@ -2282,11 +2282,11 @@ static List DiscardCall.emit(DiscardCall &d) {
   List helper_binding = d.c.sym.introduce(name);
   List value = d.c.sym.introduce("value");
   List call = d.c.bind_syntax(
-    $!( ${d.binding}(${d.arguments}...) ), AST_EXPRESSION, d.result);
+    $!( ${d.binding}(@{d.arguments}) ), AST_EXPRESSION, d.result);
   List drops = d.discards.list_free();
   List shape = d.result == %(void)
-    ? $!{ $call; $drops... return; }
-    : $!{ ${d.result} $value = $call; $drops... return $value; };
+    ? $!{ $call; @drops return; }
+    : $!{ ${d.result} $value = $call; @drops return $value; };
   List body = d.c.bind_syntax(shape, AST_BLOCK, d.result);
   List helper = d.c.wrapper_function(
     %(static @{d.result}), helper_binding, d.declarations, body.cdr());
@@ -2563,11 +2563,11 @@ static List AdapterFunction.generate(AdapterFunction &a) {
 
 static macro Decorator $guard_value_rendering(
   Function $function, Name $path, Expr $enter, Expr $fallback,
-  Expr $leave, Stmt $body...) {
+  Expr $leave, Stmt @body) {
   RenderPath $path;
   if (!$enter) return $fallback;
   defer $leave;
-  $body...
+  @body
 }
 
 /* Copied aggregate boxes have an identity only before unboxing. Their direct
@@ -2644,7 +2644,7 @@ static void Compiler._register_descriptor(
     c.bind_syntax($!Unit{ static VarMethods $methods; }, AST_UNIT, NULL));
   if (thunks) {
     List assignment = c.bind_syntax(
-      $!{ $methods = (VarMethods){ $fields... }; }, AST_BLOCK, NULL);
+      $!{ $methods = (VarMethods){ @fields }; }, AST_BLOCK, NULL);
     c.add_init(queue, assignment);
   }
   List call = explicit_tag ? explicit_call : early_call;
@@ -2689,7 +2689,7 @@ static List Compiler._fallback_registration(
 }
 
 static macro Expression $helper_call(
-    Name $callee, Expr $arguments...) => $callee($arguments...);
+    Name $callee, Expr @arguments) => $callee(@arguments);
 
 static List Compiler._helper_call(
   Compiler c, Type result, String callee, List arguments) {

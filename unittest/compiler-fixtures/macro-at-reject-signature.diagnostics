@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/macro-at-reject-signature.x:4:34: parse: expected ')'
+  macro Expression $old(Expr $items...) => 0;
+                                   ^^^
+

@@ -2271,12 +2271,9 @@ static Var _lower_update(
   return _lower_bind_value(l, id, combined, rest, k);
 }
 
-/* The operator a compound assignment applies, or the zero Symbol. `@=`
-   has no scalar evaluation, so it stays unlowered. */
-static Symbol _lower_compound(Var operator) {
-  Symbol applied = ((Symbol) operator).compound_operator();
-  return applied == <@> ? (Symbol) 0 : applied;
-}
+/* The operator a compound assignment applies, or the zero Symbol. */
+static Symbol _lower_compound(Var operator) =>
+  ((Symbol) operator).compound_operator();
 
 /* A step of one in the target's own type: an `int` counter must not become
    a `double`, or the next bitwise operation on it has no meaning. */

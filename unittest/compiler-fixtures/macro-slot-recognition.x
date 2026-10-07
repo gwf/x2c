@@ -12,10 +12,10 @@ meta static List parts(List xs) {
   foreach (List x, xs) rows.push(add(x));
   return rows.list_free();
 }
-macro Stmt $outer(Expr $head, Expr $xs...) {
+macro Stmt $outer(Expr $head, Expr @xs) {
   {
     total = $head;
-    $parts($xs)...
+    @parts($xs)
   }
 }
 meta static List build(List head, List a, List b) {
@@ -31,7 +31,7 @@ meta static List summary(List code) {
   }
   return x2c_literal_int(n);
 }
-macro Stmt $built(Expr $h, Expr $a, Expr $b) { $build($h, $a, $b)... }
+macro Stmt $built(Expr $h, Expr $a, Expr $b) { @build($h, $a, $b) }
 macro Expression $count_adds(Stmt $s) => $summary($s);
 int main(void) {
   $built(1, 2, 3);

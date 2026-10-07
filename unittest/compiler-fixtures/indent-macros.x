@@ -25,4 +25,6 @@ int main(void):
   List code = %(block (if (not ready) (call wait) (call start)))
   puts(simplify(code).str())
   %(if true (call save) (call discard)).len()
+  $indent.generated(total += 1;)
+  if total != 11: return 1
   return 0

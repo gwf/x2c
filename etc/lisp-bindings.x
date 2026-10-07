@@ -13,10 +13,10 @@ macro Stmt $lisp.bind(
 macro Decorator $lisp.binding(
   Function $function, Name $group, Literal $name
 ) {
-  $(lisp.binding.record $group $name $function)...
-  $(x2c.function.body $function)...
+  @(lisp.binding.record $group $name $function)
+  @(x2c.function.body $function)
 }
 
 macro Stmt $lisp.install(Expr $lisp, Name $group) {
-  $(lisp.binding.install $lisp $group)...
+  @(lisp.binding.install $lisp $group)
 }

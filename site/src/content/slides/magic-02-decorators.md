@@ -11,7 +11,7 @@ macro Decorator $trace(Function $function) {
     $(x2c.literal.string (x2c.function.name $function)));
   defer printf("leave %s\n",
     $(x2c.literal.string (x2c.function.name $function)));
-  $(x2c.function.body $function)...
+  @(x2c.function.body $function)
 }
 
 $trace()

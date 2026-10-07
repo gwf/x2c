@@ -713,7 +713,15 @@ List Compiler.parse_array_literal(Compiler c) {
 /* An Expr sequence hole fills one quoted Array argument position. */
 static List Compiler._parse_array_element(Compiler c) {
   List slot = c.try_parse_macro_slot(<argument>);
-  return slot ? slot : c._parse_element();
+  if (slot) return slot;
+  if (c.peek(0) == <"${"> && c.token.len == 2 &&
+      (c.peek(1) == <@> || c.peek(1) == <"@(">)) {
+    c.next();
+    slot = c.try_parse_macro_slot(<argument>);
+    c.expect(<"}">);
+    return slot;
+  }
+  return c._parse_element();
 }
 
 /* A comma may follow the last element. */
@@ -755,6 +763,8 @@ static void _push_entry(Array entries, Ast entry) {
 /* `${...}` holds a macro-produced entry or an expression key. */
 static List Compiler._parse_quoted_entry(Compiler c) {
   Token origin = c.token;
+  List slot = c.try_parse_macro_slot(<map-entry>);
+  if (slot) return slot;
   if (c.peek(0) != <"${"> || c.token.len != 2)
     return c._entry_value(c._parse_element(), origin);
   c.next();

@@ -11,7 +11,7 @@ meta static List counter_slot(void) {
     ((new-name $token "counter")));
 }
 macro Stmt $counted(Stmt $body) {
-  $counter_slot()...
+  @counter_slot()
   $body
 }
 
@@ -19,7 +19,7 @@ meta static List count_twice(List body) {
   Macro counted = $counted;
   return counted(body);
 }
-macro Stmt $twice_counted(Stmt $body) { $count_twice($body)... }
+macro Stmt $twice_counted(Stmt $body) { @count_twice($body) }
 
 int main(void) {
   int total = 0;

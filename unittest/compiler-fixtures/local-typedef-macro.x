@@ -10,7 +10,7 @@ macro Stmt $local_alias(Expr $result) {
 
 macro Unit $constructed_alias() {
   static int $(x2c.ident "constructed")(void) {
-    $(quote (
+    @(quote (
       (typedef ("Var") (bindings (bind ("Value") ())))
       (declare ("Value")
         (bindings (op = (bind ("value") ())
@@ -18,7 +18,7 @@ macro Unit $constructed_alias() {
       (return (int)
         (expr () (cast (decl ("Value") (bindings (bind () ())))
           (expr () (ident ("value"))))))
-    ))...
+    ))
   }
 }
 
