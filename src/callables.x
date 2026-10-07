@@ -165,7 +165,7 @@ List Compiler.lower_lambda_expr(Compiler c, List expression) {
       c.add_early(
         c.wrapper_function(
           %(static "Var"), lambda_binding, decl_params.cdr(),
-          c._helper_body(body, NULL).cdr()));
+          c._helper_body(body).cdr()));
       return _func_bound(type, lambda_binding);
     }
   }
@@ -185,18 +185,17 @@ static List _params_to_decl_params(List names) {
   return %(params @{out.list_free()});
 }
 
-static List Compiler._helper_body(Compiler c, List body, List setup) {
+static List Compiler._helper_body(Compiler c, List body) {
   match (body) {
     case $source_block_content(%(*items)): {
       List normalized = _block_returns(items);
-      return source_block_content(%(@setup @normalized ${_no_value_return()}));
+      return source_block_content(%(@normalized ${_no_value_return()}));
     }
     case %(expr (void) ?):
-      return source_block_content(
-        %(@setup (stmnt $body) ${_no_value_return()}));
+      return source_block_content(%((stmnt $body) ${_no_value_return()}));
   }
   List result = c.convert_expression(body, %("Var"));
-  return source_block_content(%(@setup (stmnt (return $result))));
+  return source_block_content(%((stmnt (return $result))));
 }
 
 /* A block lambda returns void for a bare return and for
@@ -484,7 +483,7 @@ static List Compiler._prepare_lambda_region(
   if (!candidates.len()) return body;
   r.allocate(candidates);
   List rewritten = r.rewrite(body);
-  return c._prepend_setup(rewritten, r.setup(entries));
+  return c.prepend_setup(rewritten, r.setup(entries));
 }
 
 /* Nested bodies own their local cells; their construction expressions still
@@ -689,7 +688,8 @@ static List CellRegion.setup(CellRegion &r, List entries) {
   return setup.list_free();
 }
 
-static List Compiler._prepend_setup(Compiler c, List body, List setup) {
+/** Puts `setup` at the entry of a block or typed expression `body`. */
+List Compiler.prepend_setup(Compiler c, List body, List setup) {
   if (!setup) return body;
   Macro shape = $statement_value;
   match (body) {
@@ -1270,7 +1270,7 @@ static void Compiler._publish_func_adapter(
   c.add_early(
     c.wrapper_function(
       %(static "Var"), binding, parameters.cdr(),
-      c._helper_body(body, setup).cdr()));
+      c.prepend_setup(c._helper_body(body), setup).cdr()));
 }
 
 static List Compiler._func_record_call(

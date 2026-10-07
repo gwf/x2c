@@ -1219,11 +1219,7 @@ static List Preserve.escape_parameters(Preserve &p, List body, List bindings) {
     foreach (List parameter, parameters)
       match (parameter) case %(param ? ?bind):
         p._escape_declared(output, %($bind));
-  List escapes = output.list_free();
-  if (escapes)
-    match (body) case $source_block_content(%(*statements)):
-      return source_block_content(%(@escapes @statements));
-  return body;
+  return p.c.prepend_setup(body, output.list_free());
 }
 
 // defer statements
