@@ -29,7 +29,7 @@ $(defun cstar._where ()
 
 // A captured string-literal argument arrives as typed syntax. Read the
 // literal spelling out of the AST and drop the surrounding quotes; the
-// elements of a `...` sequence hole are not accepted by x2c.source.text.
+// elements of an `@` sequence hole are not accepted by x2c.source.text.
 $(defun cstar._unquote (spelling)
    (if (and (> (string-length spelling) 1)
             (equal? (substring spelling 0 1) "\""))
