@@ -561,7 +561,7 @@ static int Tokenizer__end_of_file(Tokenizer t){
 }
 
 static int Tokenizer__x2c_tokens(Tokenizer t){
-  return Tokenizer__common_tokens(t) ||((t -> text[t -> pos] == '$' ||(t -> text[t -> pos] == '@' && t -> text[t -> pos + 1] != '=')) &&(Tokenizer__embedded_lisp(t) || Tokenizer__named_reference(t))) || Tokenizer__percent_tokens(t) || Tokenizer__angle_symbol_literal(t) || Tokenizer__c_tokens(t);
+  return Tokenizer__common_tokens(t) ||((t -> text[t -> pos] == '$' || t -> text[t -> pos] == '@') &&(Tokenizer__embedded_lisp(t) || Tokenizer__named_reference(t))) || Tokenizer__percent_tokens(t) || Tokenizer__angle_symbol_literal(t) || Tokenizer__c_tokens(t);
 }
 
 int Tokenizer_do_scanner(Tokenizer t, int(* scanner)(char *), Symbol type);
@@ -1026,7 +1026,7 @@ static Token _before_group(Tokenizer tokenizer, Token close, Symbol opener){
     switch((-- scan) -> type){
       case 83 : case 251 : depth ++;
       break;
-      case 81 : case 9553 : case 9297 : case 16209 : case 247 : case 9719 : case 9463 : case 16631 : if(-- depth) break;
+      case 81 : case 9553 : case 9297 : case 16465 : case 16209 : case 247 : case 9719 : case 9463 : case 16631 : if(-- depth) break;
       return scan -> type == opener ? _significant_before(tokenizer, scan) : NULL;
     }
 
@@ -1222,7 +1222,7 @@ static int _Layout_bare_do(_Layout * l, _LayoutLine line, int j){
 
 static String _Layout_end_statement(_Layout * l, _LayoutLine line){
   _Layout_one_line_body(&((* l)), line);
-  if((* l).sig[line.first] -> type == 129 &&(* l).sig[line.first + 1] -> type == 73){
+  if(line.first < line.last &&(* l).sig[line.first] -> type == 129 &&(* l).sig[line.first + 1] -> type == 73){
     _Layout_edit(&((* l)), line.first) -> type = 40896714;
     return NULL;
   }

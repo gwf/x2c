@@ -434,8 +434,8 @@ int scan_c_operator(char * s){
     case '|' : return s[1] == '=' || s[1] == '|' ? 2 : 1;
     case '=' : return s[1] == '=' ? 2 +(s[2] == '=') : 1;
     case '!' : return s[1] == '=' ? 2 +(s[2] == '=') : 1;
-    case '*' : case '/' : case '%' : case '^' : case '@' : return s[1] == '=' ? 2 : 1;
-    case '~' : case ';' : case ',' : case ':' : case '(' : case ')' : case '[' : case ']' : case '{' : case '}' : case '?' : return 1;
+    case '*' : case '/' : case '%' : case '^' : return s[1] == '=' ? 2 : 1;
+    case '@' : case '~' : case ';' : case ',' : case ':' : case '(' : case ')' : case '[' : case ']' : case '{' : case '}' : case '?' : return 1;
   }
   return - 1;
 }

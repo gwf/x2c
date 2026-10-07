@@ -462,7 +462,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _301 = cons(_298, _300);
   _302 = List_var(_301);
   _303 = Symbol_var(1133019155420);
-  _304 = int_var(3143);
+  _304 = int_var(3125);
   _305 = cons(_304, NULL);
   _306 = cons(_303, _305);
   _307 = List_var(_306);
@@ -538,7 +538,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _377 = cons(_376, NULL);
   _378 = cons(_290, _377);
   _379 = List_var(_378);
-  _380 = int_var(2976);
+  _380 = int_var(2964);
   _381 = cons(_380, NULL);
   _382 = cons(_303, _381);
   _383 = List_var(_382);
