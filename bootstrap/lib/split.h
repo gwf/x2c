@@ -12,11 +12,6 @@ Var Split_var(Split split);
 
 Split Var_split(Var value);
 
-#include "var.h"
-#include "list.h"
-#include "array.h"
-#include "iter.h"
-#include "scope.h"
 List String_split_n(String str, String sep, int max_splits);
 
 List String_split(String str, String sep);

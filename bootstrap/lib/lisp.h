@@ -28,8 +28,6 @@ typedef struct Lisp * Lisp;
 
 void Lisp_cleanup(Lisp _x2c_macro_value_28);
 
-#include "meta.h"
-#include "var-adapters.h"
 #define LISP_NATIVE_ARG_MAX  8
 #define LISP_STACK_BYTES_MAX (6L << 20)
 #if defined(__GLIBC__)

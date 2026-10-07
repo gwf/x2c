@@ -56,8 +56,6 @@ static Compiler _begin_unit(Frontend frontend, ParsedUnit * unit, Context contex
 
 static void _tokenize_session(Frontend frontend, Compiler c, String source);
 
-static void _configure_package(Compiler c, CliRequest request, String filename);
-
 static void _tokenize_input(Frontend frontend, ParsedUnit * unit, String filename);
 
 static String _input_name(Compiler c, String filename);
@@ -456,6 +454,10 @@ void ParsedUnit_close(ParsedUnit * unit){
 
 static int String_truth(String);
 
+List CliRequest_package_roots(CliRequest);
+
+void Compiler_configure_package(Compiler, List, String);
+
 int Compiler_inherits_import(String);
 
 Path Path_absolute(Path);
@@ -480,7 +482,8 @@ static int _start(Frontend frontend, String filename, ParsedUnit * unit, Context
     if(! sigsetjmp(_x2c_exception_frame_2.env, 0)){
       if(! String_truth(filename)) _tokenize_session(frontend, c, source);
       else{
-        _configure_package(c, frontend -> request, filename);
+        c -> package_dirs = CliRequest_package_roots(frontend -> request);
+        Compiler_configure_package(c, frontend -> request -> package_dirs, filename);
         _tokenize_input(frontend, &((* unit)), filename);
         c -> inherited_lisp = Compiler_inherits_import(Path_absolute(filename));
         Compiler_begin_meta_unit(c -> filename);
@@ -572,26 +575,6 @@ static void _tokenize_session(Frontend frontend, Compiler c, String source){
   Compiler_tokenize(c, String_truth(source) ? source : "$(begin)");
 }
 
-List CliRequest_package_roots(CliRequest);
-
-String package_directory(List, String);
-
-int package_source(String, String);
-
-Path Path_basename(Path);
-
-Var Map_setindex(Map, Var, Var);
-
-static void _configure_package(Compiler c, CliRequest request, String filename){
-  c -> package_dirs = CliRequest_package_roots(request);
-  String source = Path_absolute(filename);
-  String package = package_directory(request -> package_dirs, source);
-  if(! String_truth(package) || ! package_source(package, source)) return;
-  String name = Path_basename(package);
-  c -> package = name;
-  Map_setindex(c -> package_roots, String_var(name), String_var(package));
-}
-
 int String_startswith(String, String);
 
 String String_new(const char *);
@@ -615,6 +598,8 @@ static void _tokenize_input(Frontend frontend, ParsedUnit * unit, String filenam
 String Compiler_canonical_path(Compiler, String);
 
 Path Path_dirname(Path);
+
+Path Path_basename(Path);
 
 int String_equal(String, String);
 
@@ -698,6 +683,8 @@ int List_len(List);
 Var Map_del(Map, Var);
 
 static Var List_car(List);
+
+Var Map_setindex(Map, Var, Var);
 
 static Var List_cadr(List);
 

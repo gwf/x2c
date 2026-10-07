@@ -238,7 +238,6 @@ static inline int MachineSlot_final_equal(MachineSlot * slot, List input, Machin
   return length == slot -> span.length && List_equal(expected, slot -> span.end) && ! List_truth(candidate);
 }
 
-#include "exception.h"
 int MachineBuilder_emit(MachineBuilder * b, int op, int a, int operand_b, int c, int d, int target);
 
 int MachineBuilder_constant(MachineBuilder * b, Var value);

@@ -6,7 +6,7 @@
 #define __GUARD_0x28FCBFDC__
 
 #include "x2c.h"
-#include "../lib/private-keywords.h"
+#include "private-keywords.h"
 #include "grammar.h"
 #include "ast-rewrite.h"
 #include "compiler.h"

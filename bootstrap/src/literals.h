@@ -6,7 +6,7 @@
 #define __GUARD_0xC5263D59__
 
 #include "x2c.h"
-#include "../lib/private-keywords.h"
+#include "private-keywords.h"
 #include "compiler.h"
 #include "grammar.h"
 #include "parse.h"

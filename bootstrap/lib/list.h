@@ -22,18 +22,6 @@ typedef struct List{
 
 List List_cons_in(Pool pool, Var head, List tail);
 
-#include "symbol.h"
-#include "atom.h"
-#include "block.h"
-#include "buffer.h"
-#include "exception.h"
-#include "func.h"
-#include "map.h"
-#include "scope.h"
-#include "pool.h"
-#include "string.h"
-#include "iter.h"
-#include "array.h"
 List cons(Var head, List tail);
 
 List List_cons(Var head, List tail);

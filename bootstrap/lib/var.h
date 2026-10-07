@@ -33,12 +33,6 @@ VarDecodeGroup;
 
 int Var_known_tag(Symbol tag);
 
-#include "symbol.h"
-#include "map.h"
-#include "scope.h"
-#include "exception.h"
-#include "string-number.h"
-#include "symbolset.h"
 extern const VarTagInfo x2c_var_taginfo[];
 
 extern const SymbolSet x2c_var_tags;

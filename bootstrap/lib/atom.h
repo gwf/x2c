@@ -14,11 +14,6 @@ Buffer Atom_write_str(Atom atom, Buffer out);
 
 Buffer Atom_write_repr(Atom value, Buffer out);
 
-#include "buffer.h"
-#include "dispatch.h"
-#include "scan.h"
-#include "string.h"
-#include "symbol.h"
 int Var_is_atom(Var value);
 
 String Atom_str(Atom atom);

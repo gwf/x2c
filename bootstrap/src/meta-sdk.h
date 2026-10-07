@@ -6,7 +6,7 @@
 #define __GUARD_0x200088A7__
 
 #include "x2c.h"
-#include "../lib/private-keywords.h"
+#include "private-keywords.h"
 #include "compiler.h"
 typedef struct MetaContext{
   Compiler expander, evaluator;

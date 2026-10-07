@@ -6,7 +6,7 @@
 #define __GUARD_0x08246194__
 
 #include "x2c.h"
-#include "../lib/private-keywords.h"
+#include "private-keywords.h"
 #include "tokenizer.h"
 #include "ast.h"
 #include "type.h"
@@ -48,11 +48,6 @@ typedef struct Compiler{
   List aggregate_type, macro_stack, declaration_effects;
   Sym sym;
   Map evaluated_effects;
-  List frozen_stack_key;
-  Var frozen_stack;
-  unsigned long frozen_stack_epoch;
-  Map frozen_macros;
-  unsigned long frozen_macros_epoch;
   int expansion_floor;
   SymScope params;
   Map key_ids, macros, kw_aliases;
@@ -85,7 +80,6 @@ typedef struct Compiler{
   int runtime_inc, runtime_hdrs, collect_protocols, shallow, source_private;
   int public_bodies;
   int interface_provider, signature_only;
-  Map interface_active;
   Array pending_inline_bodies;
   int layout;
   int meta_body;
@@ -140,15 +134,6 @@ Var Compiler_var(Compiler c);
 
 Compiler Var_compiler(Var value);
 
-#include "grammar.h"
-#include "utils.h"
-#include "parse.h"
-#include "protocol.h"
-#include "macros.h"
-#include "stage.h"
-#include "meta-group.h"
-#include "meta-helper-client.h"
-#include "fields.h"
 void Compiler_shallow_parse(Compiler c, Map globals);
 
 void Compiler_shallow_parse_overlay(Compiler c, Map base, Map overlay);
@@ -174,8 +159,6 @@ int Compiler_collect_unit_macro(Compiler c);
 List Compiler_replay_declaration_source(Compiler c);
 
 Var Compiler_freeze_declaration_syntax(Compiler c, Var syntax);
-
-Var Compiler_freeze_macro_stack(Compiler c);
 
 Var Compiler_thaw_declaration_syntax(Compiler c, Var syntax);
 

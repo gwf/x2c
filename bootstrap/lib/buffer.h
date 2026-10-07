@@ -20,9 +20,6 @@ typedef struct Buffer{
 
 void Buffer_cleanup(Buffer _x2c_macro_value_0);
 
-#include "exception.h"
-#include "scope.h"
-#include "string.h"
 Buffer Buffer_write_len(Buffer buf, const char * text, size_t length);
 
 Buffer Buffer_write(Buffer buf, const char * text);

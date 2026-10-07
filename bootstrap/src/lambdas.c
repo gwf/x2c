@@ -3,7 +3,7 @@
 #define __GUARD_0x57655C8B__
 #include "x2c.h"
 
-#include "../lib/private-keywords.h"
+#include "private-keywords.h"
 #include "compiler.h"
 #include "ast-rewrite.h"
 #include "grammar.h"

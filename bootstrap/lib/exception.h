@@ -54,6 +54,5 @@ void x2c_exception_mark_handled(ExceptionFrame * frame);
 
 void x2c_exception_leave(ExceptionFrame * frame);
 
-#include "error.h"
 
 #endif /* __GUARD_0xA748346F__ */

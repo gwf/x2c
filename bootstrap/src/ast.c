@@ -14,7 +14,7 @@ typedef enum AstPos{
 }
 AstPos;
 
-#include "../lib/error-macros.h"
+#include "error-macros.h"
 #include "ast-rewrite.h"
 #include "grammar.h"
 #include "symbolset.h"

@@ -53,7 +53,6 @@ typedef enum Env{
 }
 Env;
 
-#include "meta.h"
 extern char * * environ;
 
 Job List_job(List command);

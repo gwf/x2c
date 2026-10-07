@@ -47,7 +47,6 @@ struct UnzipShared{
 #include <limits.h>
 #include <stdlib.h>
 #define UNZIP_COMPACT_THRESHOLD 256
-#include "var-adapters.h"
 Iter Iter_init(Iter iter, Var obj, IterNextFn next, Var state);
 
 Iter Iter_new(void);

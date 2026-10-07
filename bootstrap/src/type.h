@@ -12,7 +12,7 @@ typedef List Type;
 
 #include "grammar.h"
 #include "ast-rewrite.h"
-#include "../lib/native-scalar-types.h"
+#include "native-scalar-types.h"
 #include <limits.h>
 #include <stdarg.h>
 #include <stdio.h>

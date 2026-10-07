@@ -6,7 +6,7 @@
 #define __GUARD_0x8AA1709E__
 
 #include "x2c.h"
-#include "../lib/private-keywords.h"
+#include "private-keywords.h"
 #include "compiler.h"
 #include "grammar.h"
 #include "macros.h"
@@ -40,8 +40,6 @@ int Compiler_bind_project_meta(Compiler c, String name);
 
 int Compiler_project_meta_uses_linked(Compiler c, String name, String provider, Map hashes);
 
-int Compiler_meta_provider_hashes_current(Compiler c, Map hashes, Map native);
-
 void Compiler_record_native_meta_effect(Compiler c, List declaration, Token marker);
 
 void Compiler_install_native_meta_effects(Compiler c, Map globs);
@@ -57,6 +55,8 @@ String Compiler_native_meta_module(Compiler c, String name, Type * type);
 List Compiler_native_meta_targets(List paths);
 
 int Compiler_bind_linked_meta(Compiler c, List fn, Type type);
+
+List linked_meta_provider_source(String provider);
 
 Map Compiler_compiler_targets(void);
 

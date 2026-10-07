@@ -27,7 +27,7 @@
 #define __GUARD_0x6E6B8BB0__
 #include "x2c.h"
 
-#include "../lib/private-keywords.h"
+#include "private-keywords.h"
 #include "path.h"
 #include "process.h"
 #include "sourceview.h"

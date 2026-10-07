@@ -35,7 +35,7 @@ typedef struct TargetKind{
 }
 TargetKind;
 
-#include "../lib/system-macros.h"
+#include "system-macros.h"
 #include <ctype.h>
 #include <errno.h>
 #include <limits.h>

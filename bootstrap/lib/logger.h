@@ -45,7 +45,6 @@ typedef void(* LogFlusher)(Logger logger, Var data);
 #include "string.h"
 #include "symbol.h"
 #include "var.h"
-#include "var-adapters.h"
 void Logger_log(Logger logger, Symbol level, Symbol category, List fields);
 
 int Logger_should_log(Logger logger, Symbol level, Symbol category);

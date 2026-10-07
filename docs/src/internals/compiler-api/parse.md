@@ -21,7 +21,6 @@ X2c declarations, parsed from source or constructed.
 | [`Compiler.definition_doc`](#Compiler.definition_doc) | Returns the body of the doc comment that documents the definition starting at `start`, or NULL. |
 | [`Compiler.finish_foreign_alias`](#Compiler.finish_foreign_alias) | Constructs a foreign alias from one direct function declaration and target. |
 | [`Compiler.finish_managed_declaration`](#Compiler.finish_managed_declaration) | Lowers managed block declarations to declaration/defer pairs in source order, preserving their installed bindings and the enclosing lifetime. |
-| [`Compiler.land_retained_bindings`](#Compiler.land_retained_bindings) | Lands retained bindings without changing a live identity's spelling. |
 | [`Compiler.meta_form_is_declaration`](#Compiler.meta_form_is_declaration) | Reports whether the cursor begins a contextual top-level `meta` declaration: a function or an initialized file-static value. |
 | [`Compiler.package_alias_spelling`](#Compiler.package_alias_spelling) | Returns the folded package-member spelling at the current token, or NULL. |
 | [`Compiler.parse_basic_identifier`](#Compiler.parse_basic_identifier) | Consumes one `ident` token and returns its spelling as a one-item `List`. |
@@ -65,7 +64,7 @@ X2c declarations, parsed from source or constructed.
 Binds a callable's outer block in its active parameter scope. Ordinary
 constructed blocks open their own scope before using this operation.
 
-Source: `src/parse.x:3598`
+Source: `src/parse.x:3559`
 
 <a id="Compiler.bind_parameter"></a>
 #### Compiler.bind_parameter
@@ -145,7 +144,7 @@ Constructs a foreign alias from one direct function declaration and target.
 typed, a function. Storage is limited to `static` or `inline`, when
 present, and variadic parameters are rejected.
 
-Source: `src/parse.x:3742`
+Source: `src/parse.x:3703`
 
 <a id="Compiler.finish_managed_declaration"></a>
 #### Compiler.finish_managed_declaration
@@ -156,17 +155,6 @@ Lowers managed block declarations to declaration/defer pairs in source
 order, preserving their installed bindings and the enclosing lifetime.
 
 Source: `src/parse.x:2680`
-
-<a id="Compiler.land_retained_bindings"></a>
-#### Compiler.land_retained_bindings
-
-`Var Compiler.land_retained_bindings(Compiler c, Var syntax)`
-
-Lands retained bindings without changing a live identity's spelling.
-Collection-local numbers can collide with bindings full parsing issued.
-One relocation map keeps declarations, bodies, and captures consistent.
-
-Source: `src/parse.x:3202`
 
 <a id="Compiler.meta_form_is_declaration"></a>
 #### Compiler.meta_form_is_declaration

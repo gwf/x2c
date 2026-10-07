@@ -38,11 +38,6 @@ double x2c_var_update_f64(volatile double * lhs, Symbol op, Var rhs);
 
 long double x2c_var_update_long_double(volatile long double * lhs, Symbol op, Var rhs);
 
-#include "var.h"
-#include "dispatch.h"
-#include "string.h"
-#include "array.h"
-#include "map.h"
 Var Var_binary(Var lhs, Symbol op, Var rhs);
 
 Var Var_add(Var lhs, Var rhs);

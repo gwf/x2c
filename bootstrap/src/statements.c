@@ -3,7 +3,7 @@
 #define __GUARD_0x670D7DD9__
 #include "x2c.h"
 
-#include "../lib/private-keywords.h"
+#include "private-keywords.h"
 #include "compiler.h"
 #include "parse-report-macros.h"
 #include "parse.h"

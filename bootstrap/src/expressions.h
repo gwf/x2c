@@ -6,7 +6,7 @@
 #define __GUARD_0xAA205D9A__
 
 #include "x2c.h"
-#include "../lib/private-keywords.h"
+#include "private-keywords.h"
 #include "compiler.h"
 #include "type.h"
 typedef struct PrintfFn{
