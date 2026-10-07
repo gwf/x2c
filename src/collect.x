@@ -168,13 +168,14 @@ Map Compiler.collect_symbols(Compiler c, Map globs) {
   c.add_translation_dependency(canonical);
   if (c.prelude) c._add_prelude(globs, visited);
   /* The prelude needs this file's signatures to close include cycles.
-     Its own walk must select defaults against its current declarations. */
-  if (canonical in visited) {
-    List own = c._entry(canonical);
-    foreach (Var part, own.car()) if (part is <map>)
-      foreach (Var key, part.map().keys()) globs.del(key);
-    foreach (Var name, own.caddr()) c.fn_defs.del(name);
-  }
+     Its own definitions must not suppress fresh declaration defaults.
+     Keep type rows: public inline bodies can promote imported families. */
+  if (canonical in visited)
+    foreach (Var name, c._entry(canonical).caddr()) {
+      globs.del(%($name));
+      globs.del(%(self $name));
+      c.fn_defs.del(name);
+    }
   visited[canonical] = 1;
   c._walk_file(canonical, c.text, Path.dirname(c.filename), globs, visited);
   c.bind_pending_inline_bodies(globs, canonical);
