@@ -573,8 +573,9 @@ void Compiler.run_declaration_effects(Compiler c) {
       Token token = c.thaw_declaration_syntax(site);
       c.evaluate_declaration_effect(form, token);
       if (c.collect_protocols && end >= 0)
-        c.sym.set(key, %(declaration-source $end (declaration-bundle (rows))
-          ${c.semantic_binding_facts()}));
+        c.sym.set(
+          key, %(declaration-source $end (declaration-bundle (rows))
+            ${c.semantic_binding_facts()}));
     }
   }
 }
@@ -674,7 +675,8 @@ static void Compiler._restore_declaration_bindings(
   String spelling = NULL;
   if (binding_identity_try_parts(syntax, identity, spelling)) {
     c.set_fact(%(known $identity), spelling);
-    c.set_fact(%(source-spelling $syntax),
+    c.set_fact(
+      %(source-spelling $syntax),
       facts.getdefault(%(source-spelling $syntax), spelling));
     return;
   }

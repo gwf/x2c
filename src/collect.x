@@ -798,7 +798,7 @@ void Compiler.add_linked_meta_provider_hashes(Compiler c, Map rows) {
       if (part is not <map>) continue;
       Var proof;
       if (part.map().try_get(
-          %("source-node" (provider-source $provider 0)), proof))
+        %("source-node" (provider-source $provider 0)), proof))
         rows[provider] = proof;
     }
   }

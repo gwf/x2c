@@ -126,7 +126,7 @@ static void Helper.use(Helper &h, List manifest) {
 
 // reaching meta code
 
-/* The scan of all inputs. `units` collects included meta providers;
+/* The scan of one input. `units` collects included meta providers;
    `seen` holds each file's result bits, and
    `packages` the root of each package imported. */
 static typedef struct Scan {
@@ -141,14 +141,15 @@ static void Helper.scan(Helper &h, List inputs) {
   Compiler c = Compiler.new();
   c.sources = h.frontend.request.sources;
   c.include_dirs = h.frontend.include_dirs;
-  Scan s = {
-    .request = h.frontend.request, .c = c, .units = [], .seen = {},
-    .packages = h.packages};
-  int units = 0;
   foreach (String input, inputs) {
     String path = Path.absolute(input);
-    if (s.file(path) & 1) h.own(path, owned);
-    while (units < s.units.len()) h.own(s.units[units++], owned);
+    Scan s = {
+      .request = h.frontend.request, .c = c, .units = [], .seen = {},
+      .packages = h.packages};
+    int meta = s.file(path);
+    if (!meta) continue;
+    if (meta & 1) h.own(path, owned);
+    foreach (String unit, s.units) h.own(unit, owned);
   }
   collect_forget_provisional_entries();
 }

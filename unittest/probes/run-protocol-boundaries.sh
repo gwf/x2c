@@ -433,8 +433,18 @@ done
   >"$repeat_build/snapshot-first"
 "$X2C" translate --dump-symbols "$repeat" \
   >"$repeat_build/snapshot-second"
-cmp -s <(LC_ALL=C sort "$repeat_build/snapshot-first") \
-  <(LC_ALL=C sort "$repeat_build/snapshot-second") ||
+# Local replay recipes carry unordered binding-fact maps. Compare their
+# source keys and the semantic rows, including every protocol and adoption.
+for snapshot in first second; do
+  awk '
+    /^\( declaration-source / { skipping = 1; next }
+    /^\(/ { skipping = 0 }
+    !skipping
+  ' "$repeat_build/snapshot-$snapshot" | LC_ALL=C sort \
+    >"$repeat_build/snapshot-$snapshot-sorted"
+done
+cmp -s "$repeat_build/snapshot-first-sorted" \
+  "$repeat_build/snapshot-second-sorted" ||
   fail "repeated generated protocol symbol table is not deterministic"
 for participant in RepeatOne RepeatTwo; do
   grep -Fq "( adopt ( Var ) ( $participant )" \
