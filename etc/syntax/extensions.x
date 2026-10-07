@@ -89,12 +89,11 @@ List syntax_extensions(void) => %(
     (feature operators
       (title "Operators and slices")
       (summary "Test identity, membership, or type; slice a sequence.")
-      (grammar assignment-op equality relational type-selector
-               multiplicative postfix-part)
+      (grammar equality relational type-selector postfix-part)
       (lexical c-tokens keyword-retag)
-      (grammar-note "=== and !==, in, is/is not, @ and @=, and [start:stop:step] extend the C expression ladder.")
-      (lexical-note "===, !==, @, and @= are operator tokens; in is contextually retagged; is and not remain contextual words.")
-      (spellings "===" "!==" "in" "is" "is not" "@" "@="
+      (grammar-note "=== and !==, in, is/is not, and [start:stop:step] extend the C expression ladder.")
+      (lexical-note "=== and !== are operator tokens; in is contextually retagged; is and not remain contextual words.")
+      (spellings "===" "!==" "in" "is" "is not"
                  "[start:stop:step]")
       (reference "../reference/language.md#membership-with-in"))
     (feature iteration-matching
@@ -131,10 +130,11 @@ List syntax_extensions(void) => %(
                block-extension statement-macro field-extension
                enumerator-extension entry-extension)
       (lexical code-reference named-reference lisp-reference data-prefix)
-      (grammar-note "Typed macro holes/results, sequence holes, aliases, decorators, source quotations, Lisp escapes, and meta/native functions.")
-      (lexical-note "\$ references and \$( switch into compile-time forms; \$! uses ordinary ! after \$; macro/keyword/meta/native are contextual.")
+      (grammar-note "Typed macro holes/results, @ sequence parameters and splices, aliases, decorators, source quotations, Lisp escapes, and meta/native functions.")
+      (lexical-note "\$ inserts one result; @ splices a sequence. \$( and @( enter compile-time Lisp in code; \$! uses ordinary ! after \$; macro/keyword/meta/native are contextual.")
       (spellings "macro" "keyword" "\$name(...)" "\$!{...}" "\$(...)"
-                 "\$hole..." "meta" "native")
+                 "@items" "@name(...)" "@(...)" "@{expression}"
+                 "meta" "native")
       (reference "../reference/language.md#compile-time-macros")))
   (inherited
     (item c11

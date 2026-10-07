@@ -521,7 +521,6 @@ List syntax_grammar(void) => %(grammar
         (token "*=")
         (token "/=")
         (token "%=")
-        (token "@=")
         (token "<<=")
         (token ">>=")
         (token "&=")
@@ -600,7 +599,7 @@ List syntax_grammar(void) => %(grammar
         (ref cast)
         (repeat 0
           (seq
-            (choice (token "*") (token "/") (token "%") (token "@"))
+            (choice (token "*") (token "/") (token "%"))
             (ref cast)))))
 
     (rule cast
@@ -981,9 +980,8 @@ List syntax_grammar(void) => %(grammar
     (rule hole-parameter
       (seq
         (optional (ref hole-kind))
-        (token "\$")
-        (ref identifier)
-        (optional (token "..."))))
+        (choice (token "\$") (token "@"))
+        (ref identifier)))
 
     (rule using-list
       (choice
@@ -1049,7 +1047,7 @@ List syntax_grammar(void) => %(grammar
       (external "type operand or computed type under M4"))
 
     (rule quotation-items
-      (external "contents selected by quotation kind; M4"))
+      (external "contents selected by quotation kind, with \${expr} and @{expr} holes; M4"))
 
     (rule result-kind
       (choice
@@ -1086,7 +1084,8 @@ List syntax_grammar(void) => %(grammar
 
     (rule expression-slot (external "expression slot under M5"))
 
-    (rule argument-slot (external "argument sequence slot under M5"))
+    (rule argument-slot
+      (external "argument sequence slot: @name, @call(...), or @(form); M5"))
 
     (rule declarator-row-slot (external "declarator row slot under M5"))
 

@@ -169,7 +169,8 @@ See [the lexical specification](lexical.md) for explanations and
   (emit-sigil) (emit-identifier ident) (keyword-lookup false))
  (rule code-reference
   (ordered (seq (bytes "$(") (transition embedded-lisp))
-   (when-prefix (byte 36) (ref named-reference))))
+   (seq (bytes "@(") (transition embedded-lisp-splice))
+   (when-prefix (one-of-bytes "$@") (ref named-reference))))
  (rule percent-forms
   (ordered (seq (bytes "%\"") (transition percent-string))
    (seq (bytes "%[") (transition percent-array))
@@ -197,7 +198,7 @@ See [the lexical specification](lexical.md) for explanations and
     (when-prefix (byte 36)
      (ordered (seq (bytes "${") (transition data-code))
       (ref named-reference))))
-   (when-mode list
+   (when-mode list array map
     (when-prefix (byte 64)
      (ordered (seq (bytes "@{") (transition list-splice))
       (ref named-reference))))))
@@ -266,6 +267,8 @@ See [the lexical specification](lexical.md) for explanations and
   (on "%\"") (push string))
  (transition embedded-lisp (from x2c x2c-par)
   (on "$(") (push macro-lisp))
+ (transition embedded-lisp-splice (from x2c x2c-par)
+  (on "@(") (push macro-lisp))
  (transition code-parenthesis (from x2c-par)
   (on "(") (push x2c-par))
  (transition close-code-parenthesis (from x2c-par)
@@ -280,9 +283,10 @@ See [the lexical specification](lexical.md) for explanations and
   (on "\"") (emit "%\"") (push string))
  (transition data-code (from list array map)
   (on "${") (push x2c))
- (transition list-splice (from list) (on "@{")
-  (push x2c)) (transition capture (from list) (on "?(") (push x2c-par))
- (transition close-list (from list) (on ")") (pop))
+ (transition list-splice (from list array map)
+  (on "@{") (push x2c))
+ (transition capture (from list) (on "?(")
+  (push x2c-par)) (transition close-list (from list) (on ")") (pop))
  (transition close-array (from array) (on "]") (pop))
  (transition close-map (from map) (on "}") (pop))
  (transition close-set (from symbol-set) (on ">>") (pop))
@@ -378,8 +382,8 @@ See [the lexical specification](lexical.md) for explanations and
     (remove "do"))
    (append-semicolon
     (unless directive final-semicolon enum-body
-     whole-embedded-lisp whole-bare-macro bare-macro-after-close-paren
-     decorator)) (decorator (leading "@") (retag space))
+     whole-embedded-lisp whole-syntax-hole syntax-hole-after-close-paren
+     decorator)) (decorator (leading "@" "$") (retag-first space))
    (indent-directive (retag comment))
    (dedent (append-stored-closers) (require remaining-level)
     (fail indent)) (eof close-all)) (external-details "lib/tokenizer.x:_Layout")
@@ -439,16 +443,15 @@ See [the lexical specification](lexical.md) for explanations and
  (operator "!=") (operator "&&") (operator "||")
  (operator "+=") (operator "-=") (operator "*=")
  (operator "/=") (operator "%=") (operator "&=")
- (operator "^=") (operator "|=") (operator "@=")
- (operator "-") (operator ",") (operator ";")
- (operator ":") (operator "!") (operator "?")
- (operator ".") (operator "(") (operator ")")
- (operator "[") (operator "]") (operator "{")
- (operator "}") (operator "*") (operator "/")
- (operator "&") (operator "%") (operator "^")
- (operator "+") (operator "<") (operator "=")
- (operator ">") (operator "|") (operator "~")
- (operator "@"))
+ (operator "^=") (operator "|=") (operator "-")
+ (operator ",") (operator ";") (operator ":")
+ (operator "!") (operator "?") (operator ".")
+ (operator "(") (operator ")") (operator "[")
+ (operator "]") (operator "{") (operator "}")
+ (operator "*") (operator "/") (operator "&")
+ (operator "%") (operator "^") (operator "+")
+ (operator "<") (operator "=") (operator ">")
+ (operator "|") (operator "~") (operator "@"))
 ```
 
 ## failures

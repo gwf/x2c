@@ -315,7 +315,9 @@ macro Stmt $holes(
 //                   ^^^^^ storage.type.macro.hole.x2c
 //                             ^^^^^ storage.type.macro.hole.x2c
 //                                       ^^^^^ storage.type.macro.hole.x2c
-  Enumerator $enum, Unit $k...
+  Enumerator $enum, Unit @k
+//                       ^ punctuation.definition.macro.splice.x2c
+//                        ^ variable.parameter.macro.x2c
 //^^^^^^^^^^ storage.type.macro.hole.x2c
 //                  ^^^^ storage.type.macro.hole.x2c
 ) {
@@ -325,8 +327,9 @@ macro Stmt $holes(
 //       ^^^^^^^^^ variable.parameter.macro.x2c
 //                  ^ punctuation.definition.macro.sigil.x2c
 //                   ^^^^^^ variable.parameter.macro.x2c
-  $k...
-//  ^^^ punctuation.definition.macro.splice.x2c
+  @k
+//^ punctuation.definition.macro.splice.x2c
+// ^ variable.other.macro.hole.x2c
 }
 
 macro Stmt $stmt() {}
@@ -459,8 +462,10 @@ $(def lisp.native.target.rows '(
 macro Expression $after.embedded.lisp() => 0;
 // <---- keyword.declaration.macro.x2c
 //               ^ punctuation.definition.macro.sigil.x2c
-Var sequence = $(list $items...);
-//                          ^^^ punctuation.definition.macro.splice.x2c
+macro Stmt $sequence(Stmt $target) { @(list $target) }
+//                                   ^^ punctuation.definition.embedded.lisp.begin.x2c
+//                                          ^ punctuation.definition.macro.sigil.x2c
+//                                           ^^^^^^ variable.other.macro.hole.x2c
 
 int modulo = left % right;
 //                  ^ - punctuation.definition.literal.list.begin.x2c
@@ -509,3 +514,35 @@ List typed = %(?(String text) ? (String text));
 //                            ^ constant.other.atom.x2c
 //                              ^ meta.literal.list.nested.x2c
 //                               ^^^^^^ constant.other.atom.x2c
+
+macro Expression $call(Expr $callee, Expr @items) => $callee(@items);
+//                                        ^ punctuation.definition.macro.splice.x2c
+//                                         ^^^^^ variable.parameter.macro.x2c
+call(@fixture.row.values($value));
+//   ^ punctuation.definition.macro.splice.x2c
+//    ^^^^^^^^^^^^^^^^^^ entity.name.function.macro.x2c
+//                       ^ punctuation.definition.macro.sigil.x2c
+List quotation = $!{ call(@items, @{parts}); };
+//               ^^ punctuation.definition.macro.sigil.x2c
+//                        ^ punctuation.definition.macro.splice.x2c
+//                         ^^^^^ variable.other.macro.hole.x2c
+//                                ^^ meta.macro.hole.expression.x2c
+List array_quotation = $!{ return %[${10}, @items, ${40}]; };
+//                                         ^ punctuation.definition.macro.splice.x2c
+//                                          ^^^^^ variable.other.macro.hole.x2c
+List list_data = %(head @items @{values} @(values));
+//                      ^^^^^^ meta.interpolation.list.x2c
+//                             ^^ meta.interpolation.list.expression.x2c
+//                                       ^^ - punctuation.definition.embedded.lisp.begin.x2c
+void native_variadic(const char *format, ...);
+//                                       ^^^ - punctuation.definition.macro.splice.x2c
+macro Expression $removed_suffix(Expr $items...) => 0;
+//                                          ^^^ - punctuation.definition.macro.splice.x2c
+int removed_matrix = left @ right;
+//                        ^ - keyword.operator.x2c
+int removed_matrix_update = left @= right;
+//                               ^ - keyword.operator.assignment.compound.x2c
+
+List operator_data = %(@ @=);
+//                     ^ constant.other.atom.x2c
+//                       ^^ constant.other.atom.x2c
