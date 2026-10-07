@@ -94,8 +94,7 @@ static List Compiler._emit_source(
   Compiler c, List source, Map bindings, Map inline_bodies) {
   source = c._forward_declarations(
     _move_bodies(c._file_init(source), inline_bodies));
-  source = c._primary_include(source);
-  return c.emit(c._patch_main(source), bindings);
+  return c.emit(c._source_text(source), bindings);
 }
 
 /* A failed write reports its file and the host error. */
@@ -801,39 +800,35 @@ static void _add_names(Map available, List node) {
 
 /* file initialization
 
-   Queued initialization runs once per file, behind a guard. initblock and
-   initstmt markers do not reach generated output; the compiler's
-   initialization queues hold those statements. */
+   Queued initialization runs once per file, behind a guard. Each function
+   receives its entry setup from one decision, which the header's cache
+   initialization also uses. */
 
-/* One unit's file initialization. `guard` is set once the file has
-   initialized, `shutdown` registers the unit's shutdown function,
-   `synthetic` is the synthetic initializer or NULL, and `entry` names the
-   function a patched entry calls. `reachable` holds the entries a
-   cache-only file patches, or is NULL when every public entry is patched. */
-static typedef struct Init {
-  Compiler c, String initializer, entry, List guard, shutdown;
-  List synthetic, Map reachable;
+/* One region's initialization. `guard` is set once the region has
+   initialized, and `entry` is the function a guarded entry calls. In the
+   source, `initializer` names the type initializer, `shutdown` registers
+   the unit's shutdown function, `synthetic` is the synthetic initializer or
+   NULL, and `reachable` holds the entries a cache-only file guards, or is
+   NULL when every public entry is guarded. */
+typedef struct Init {
+  Compiler c, String initializer, List guard, entry, shutdown, synthetic;
+  Map reachable;
 } Init;
 
-/* Consume the initialization state completed by cache setup. */
+/* Consume the initialization state completed by cache setup. `source`
+   already holds the cache slots and batch helpers at the prelude boundary.
+   The helpers are functions, so the guard and synthetic initializer follow
+   the slots and precede the helpers, and cache reachability sees them. */
 static List Compiler._file_init(Compiler c, List source) {
   if (!c.pending.initializes() && !c.fini_fn && !c.init_fn) return source;
   Init init = {.c = c, .initializer = c.init_fn};
   init.prepare(source);
-  int prelude = _prelude_position(source, 0), position = 0;
-  List out = NULL;
-  foreach (List item, source) {
-    if (position++ == prelude) out = init.prelude(out);
-    match (item) case %((!or initblock initstmt) *): continue;
-    out = cons(init.patch(item), out);
-  }
-  /* The prelude normally goes before the first function, or before the
-     outermost conditional group containing it. A unit of only declarations
-     has no such function. The constructor is then the only thing that runs
-     the initializers the loop above dropped, so it goes after the
-     declarations it assigns. */
-  if (prelude < 0) out = init.prelude(out);
-  return out.reverse();
+  Array entries = [];
+  foreach (List item, source)
+    entries.push(init._enter(item, init.patches(item)));
+  List guard = c.initialization_guard(init.guard);
+  List prelude = init.synthetic ? %($guard ${init.synthetic}) : %($guard);
+  return c.place_source_prelude(entries.list_free(), prelude);
 }
 
 /* A file without a type initializer, or with one that conditional groups
@@ -844,19 +839,53 @@ static void Init.prepare(Init &i, List source) {
   i.shutdown = c._shutdown_registration(source);
   List arms = i.initializer ? _definition_arms(source, i.initializer) : NULL;
   if (!i.initializer || arms) i.synthetic = i.synthesize(arms);
-  i.entry = i.synthetic ? "_file_init_" : i.initializer;
+  else i.entry = c.sym.reference(%(${i.initializer}), NULL);
   if (c._cache_only()) i.reachable = _cache_reachable(source);
 }
 
+/* `function` with its entry setup: the protocol initializer and the type
+   initializer run once, and a `guarded` entry calls the region's
+   initializer unless its guard is set. */
+List Init._enter(Init &i, List function, int guarded) {
+  match (function)
+    case %(function ? (bind (binding ? ?(String name)) ?) (block *body)): {
+      if (name == "x2c_initialize_protocols")
+        return i.c._protocol_initializer(function, body);
+      if (i.initializer && name == i.initializer)
+        return i.c._replace_body(function, i.statements(NULL, body));
+      if (guarded) return i._guarded(function, body);
+    }
+  return function;
+}
+
+/* A source file guards its public entries. The protocol bootstrap
+   functions are never guarded, and a cache-only file guards only the
+   entries that reach a cache. */
+static int Init.patches(Init &i, List item) {
+  match (item)
+    case %(function (!set ?type (*)) (bind (binding ? ?(String name)) ?)
+           (block *)):
+      return !type.type().is_static() && !_protocol_bootstrap(name) &&
+        (i.reachable == NULL || name in i.reachable);
+  return 0;
+}
+
+static int _protocol_bootstrap(String name) =>
+  name == "x2c_initialize_protocols" ||
+  name == "x2c_register_builtin_descriptor" ||
+  name == "x2c_try_register_tagged_descriptor";
+
 /** Places generated `declarations` after source types and includes, before
     the first function or captured initializer that can use them. An outer
-    conditional containing that first use follows the declarations.
+    conditional containing that first use follows the declarations. A unit
+    without such a use gets them at its end, after the declarations they
+    may assign.
 */
 List Compiler.place_source_prelude(
   Compiler c, List source, List declarations) {
   (void) c;
   Array out = [];
-  int prelude = _prelude_position(source, 0), position = 0;
+  int prelude = _anchors(source, 0).function, position = 0;
   foreach (List node, source) {
     if (position++ == prelude)
       foreach (List declaration, declarations) out.push(declaration);
@@ -867,25 +896,23 @@ List Compiler.place_source_prelude(
   return out.list_free();
 }
 
-/* The position of the first function or captured initializer, or of the
-   directive opening the outermost conditional group around it, so the
-   prelude is declared whichever arms the C compiler selects. A unit without
-   a matching use gives -1. With `errors`, find the first raise or
-   declaration that needs the lowered catch ABI instead. */
-static int _prelude_position(List source, int errors) {
+/* Where generated code must precede its first use in a unit's source:
+   `function` before the first function or captured initializer, and
+   `error` before the first raise or declaration that needs the lowered
+   catch ABI. Each position moves out to the directive opening the outermost
+   conditional group around its item, so the code is declared whichever
+   arms the C compiler selects. A missing use gives -1. */
+static typedef struct Anchors { int function, error; } Anchors;
+
+/* The anchors of `source`; `error` is sought only with `errors`. */
+static Anchors _anchors(List source, int errors) {
+  Anchors at = {-1, -1};
   int position = 0, depth = 0, opening = 0;
   foreach (List item, source) {
-    List function = item.car() == <sourceinit> ? item.cadr() : item;
-    if (errors) {
-      Map types = $auto({});
-      _spelled_types(item, types);
-      if (ast_contains_head(item, <raise>) ||
-          "ErrorCatchSite" in types || "ErrorHandler" in types)
-        return depth ? opening : position;
-    }
-    else match (function)
-      case %(function (*) (bind (binding ? ?) ?) (block *)):
-        return depth ? opening : position;
+    int here = depth ? opening : position;
+    if (at.function < 0 && _is_function(item)) at.function = here;
+    if (errors && at.error < 0 && _needs_errors(item)) at.error = here;
+    if (at.function >= 0 && (!errors || at.error >= 0)) break;
     match (item) case %(preproc ?(String content)): {
       Symbol kind = preproc_conditional_kind(content);
       if (kind == <open> && !depth) opening = position;
@@ -894,52 +921,33 @@ static int _prelude_position(List source, int errors) {
     }
     position++;
   }
-  return -1;
+  return at;
 }
 
-/* The guard's declaration, then the synthetic initializer.
-   `Compiler.transform` owns the early-declaration queue and appends its
-   drained declarations after the unit, so the queue is empty here. */
-static List Init.prelude(Init &i, List out) {
-  out = cons(i.c.initialization_guard(i.guard), out);
-  return i.synthetic ? cons(i.synthetic, out) : out;
+static int _is_function(List item) {
+  List function = item.car() == <sourceinit> ? item.cadr() : item;
+  match (function)
+    case %(function (*) (bind (binding ? ?) ?) (block *)): return 1;
+  return 0;
 }
 
-/* The protocol initializer and the type initializer wrap their own bodies.
-   Other non-static entries initialize their static helpers first. */
-static List Init.patch(Init &i, List item) {
-  match (item)
-    case %(function (!set ?type (*))
-           (!set ?declarator (bind (binding ? ?spelling) ?))
-           (block *body)): {
-      String name = spelling;
-      if (name == "x2c_initialize_protocols")
-        return i.c._protocol_initializer(item, body);
-      if (i.initializer && name == i.initializer)
-        return i.c._replace_body(item, i.statements(NULL, body));
-      if (i.patches(type, spelling)) {
-        List entry = i.c.sym.reference(%(${i.entry}), NULL);
-        return _patch_initialized_entry(i.c, item, body, i.guard, entry);
-      }
-    }
-  return item;
+static int _needs_errors(List item) {
+  Map types = $auto({});
+  _spelled_types(item, types);
+  return ast_contains_head(item, <raise>) ||
+    "ErrorCatchSite" in types || "ErrorHandler" in types;
 }
-
-/* The protocol bootstrap functions are never patched, and a cache-only
-   file patches only the entries that reach a cache. */
-static int Init.patches(Init &i, Var type, Var spelling) =>
-  !type.type().is_static() && !_protocol_bootstrap(spelling) &&
-  (i.reachable == NULL || spelling in i.reachable);
-
-static int _protocol_bootstrap(String name) =>
-  name == "x2c_initialize_protocols" ||
-  name == "x2c_register_builtin_descriptor" ||
-  name == "x2c_try_register_tagged_descriptor";
 
 // initializers
 
 static macro Decorator $initializer_body(Function $function,
     Stmt $body...) {
+  $body...
+}
+
+static macro Decorator $initialized_entry(
+  Function $function, Expr $guard, Expr $entry, Stmt $body...) {
+  if (!$guard) $entry();
   $body...
 }
 
@@ -955,7 +963,7 @@ static macro Decorator $initializer_body(Function $function,
    of line and cold: a small initializer inlined into each entry costs
    every call its frame setup. */
 static List Init.synthesize(Init &i, List arms) {
-  List binding = i.c.sym.introduce("_file_init_");
+  List binding = i.entry = i.c.sym.introduce("_file_init_");
   List type =
     %(("__attribute__((constructor, noinline, cold))") static void);
   String entry = "x2c_initialize_protocols";
@@ -968,16 +976,24 @@ static List Init.synthesize(Init &i, List arms) {
   return _initializer_function(i.c, type, binding, statements);
 }
 
-/* An initializer runs `entry`, returns when its guard is set and sets it
-   otherwise, then runs the early and middle queues, its own `body`, the
-   late queue, and the shutdown registration. Cache graphs that require the
-   initializer's own String/List canonicalizer are queued late; all other
-   cache and static setup keeps its pre-body order. */
+/* An initializer runs `entry` and its run-once test, then the early and
+   middle queues, its own `body`, the late queue, and the shutdown
+   registration. Cache graphs that require the initializer's own
+   String/List canonicalizer are queued late; all other cache and static
+   setup keeps its pre-body order. */
 static List Init.statements(Init &i, List entry, List body) {
   Compiler c = i.c;
-  return List.concat_n(
-    7, entry, _run_once(c, i.guard), c.init_statements(<early>),
-    c.init_statements(<mid>), body, c.init_statements(<late>), i.shutdown);
+  return _run_once(c, entry, i.guard, List.concat_n(
+    5, c.init_statements(<early>), c.init_statements(<mid>), body,
+    c.init_statements(<late>), i.shutdown));
+}
+
+/* `function` calls the region's initializer unless its guard is set. */
+static List Init._guarded(Init &i, List function, List body) {
+  Macro shape = $initialized_entry;
+  List guard = i.guard, condition = $!int{ $guard };
+  List callee = %(expr ((func ((void))) void) (ident ${i.entry}));
+  return i.c.rebuild_function(function, shape(condition, callee, body));
 }
 
 static List Compiler._replace_body(
@@ -991,10 +1007,9 @@ static List Compiler._replace_body(
 static List Compiler._protocol_initializer(
   Compiler c, List function, List body) {
   List guard = c.sym.introduce("_x2c_protocol_guard_");
-  List statements = List.concat_n(
-    4, %(${c.initialization_guard(guard)}), _run_once(c, guard),
-    c.init_statements(<protocol>), body);
-  return c._replace_body(function, statements);
+  List declaration = c.initialization_guard(guard);
+  return c._replace_body(function, _run_once(
+    c, %($declaration), guard, c.init_statements(<protocol>).append(body)));
 }
 
 /* The registration of the unit's shutdown function, under the arms that
@@ -1393,11 +1408,13 @@ static void Forward.types(Forward &f, Type type) {
 
 static List _vertical_spacing(List code) {
   Array out = [];
-  foreach (Var node, code) {
-    out.push(node);
-    out.push(%(space "\n"));
-  }
+  foreach (Var node, code) _push_line(out, node);
   return out.list_free();
+}
+
+static void _push_line(Array out, Var node) {
+  out.push(node);
+  out.push(%(space "\n"));
 }
 
 /* A unit that uses the runtime includes it inside the header's guard. */
@@ -1438,49 +1455,46 @@ static List _header_guard(List content, String guard) => %(
     (space "\n")
   );
 
-/* Suppress a cyclic include of this unit's completed header. Its own
-   declarations occur in order below. Add the runtime headers that lowering
-   needs. */
-static List Compiler._primary_include(
-  Compiler c, List content) {
+/* The source defines its own header's guard, so a cyclic include of that
+   header adds nothing; its own declarations follow in order. The runtime
+   headers that lowering needs precede their first uses. */
+static List Compiler._source_text(Compiler c, List content) {
   String guard = filename_hash(c.filename);
-  List own = %((preproc "#define __GUARD_0x${guard}__"));
   List runtime = c.runtime_inc ? _include_directive("x2c.x") : NULL;
-  int error_at = _prelude_position(content, 1);
-  List error = error_at >= 0 ? _include_directive("error.h") : NULL;
+  Anchors at = _anchors(content, 1);
+  List error = at.error >= 0 ? _include_directive("error.h") : NULL;
   List exception =
     c.needs_exception ? _include_directive("exception.h") : NULL;
-  Array ordered = [];
-  int exception_at = _prelude_position(content, 0), position = 0;
+  Array lines = [];
+  int position = 0;
   foreach (List node, content) {
-    if (position == error_at)
-      foreach (List include, error) ordered.push(include);
-    if (position++ == exception_at)
-      foreach (List include, exception) ordered.push(include);
-    ordered.push(node);
+    if (position == at.error)
+      foreach (List include, error) _push_line(lines, include);
+    if (position++ == at.function)
+      foreach (List include, exception) _push_line(lines, include);
+    _push_line(lines, c._runtime_entry(node));
   }
-  return %(@{_banner()} @own @runtime
-           @{_vertical_spacing(ordered.list_free())});
+  return %(@{_banner()} (preproc "#define __GUARD_0x${guard}__") @runtime
+           @{lines.list_free()});
+}
+
+/* `main` initializes the runtime before anything else, including its file
+   initialization guard. Its prototype comes from the runtime header, so
+   the call is added after forward declarations. */
+static List Compiler._runtime_entry(Compiler c, List node) {
+  match (node)
+    case %(function ? (bind (binding ? "main") ?) (block *body)): {
+      List initializer = c.sym.reference(%("x2c_initialize"), NULL);
+      List setup = %((stmnt (expr (void) (call
+        (expr ((func ((void))) void) (ident $initializer))
+        (args (expr (void) ()))))));
+      return c._replace_body(node, setup.append(body));
+    }
+  return node;
 }
 
 static List _include_directive(String fname) =>
   %((preproc "#include \"$fname\"") (space "\n") (space "\n"));
-
-/* `main` calls the runtime initializer before anything else. */
-static List Compiler._patch_main(Compiler c, List source) {
-  List initializer = c.sym.reference(%("x2c_initialize"), NULL);
-  List setup = %((stmnt (expr (void) (call
-    (expr ((func ((void))) void) (ident $initializer))
-    (args (expr (void) ()))))));
-  return source.map(
-    %!(List node) => {
-      match (node)
-        case %(function ? (bind (!set ?binding (*)) ?) (block *body)):
-          if (binding_identity_spelling(binding) == "main")
-            return c._replace_body(node, setup.append(body));
-      return node;
-    });
-}
 
 // definition rows
 

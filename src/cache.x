@@ -146,10 +146,12 @@ static void Compiler._collect_ids(
 List _initializer_function(Compiler c, Type type, List name, List body) =>
   c.rebuild_unit_function($!Unit{ $type $name(void) { $body... } });
 
-/* Returns when `guard` is set and sets it otherwise. */
-List _run_once(Compiler c, List guard) {
+/* The body of every run-once initializer: `before`, then a return when
+   `guard` is set that sets it otherwise, then `after`. */
+List _run_once(Compiler c, List before, List guard, List after) {
   List flag = $!int{ $guard };
-  return c.rebuild_statement($!{ if ($flag) return; $flag = 1; }).cdr();
+  List test = c.rebuild_statement($!{ if ($flag) return; $flag = 1; }).cdr();
+  return List.concat_n(3, before, test, after);
 }
 
 /* The statement calling the `void (void)` function `entry`. */
@@ -477,33 +479,32 @@ static List HeaderCache.prelude(HeaderCache &h, Array ids) {
     statements.push(_cache_refs(statement, h.bindings, NULL));
   }
   List body = c._cache_batches(statements, declarations, h.prefix);
-  declarations.push(
-    c._header_initializer(h.guard, h.initializer, body));
+  List type = %(("__attribute__((constructor))") static void);
+  body = _run_once(
+    c, _entry_call("x2c_initialize_protocols"), h.guard, body);
+  declarations.push(_initializer_function(c, type, h.initializer, body));
   ids.free();
   return declarations.list_free();
 }
 
+/* The prelude precedes the first function that reads a cache, and each
+   such function calls the header's initializer through the same entry
+   decision as source functions. */
 static List HeaderCache.entries(HeaderCache &h, List header, List prelude) {
-  Compiler c = h.c;
+  Init entry = {.c = h.c, .guard = h.guard, .entry = h.initializer};
   Array output = [];
-  int inserted = 0;
   foreach (List node, header) {
     int replaced = 0;
     node = _cache_refs(node, h.bindings, replaced);
     int captured = node.car() == <sourceinit>;
-    List function = node;
-    if (captured) function = node.cadr();
-    match (function)
-      case %(function ?type ?bind (block *statements)):
-        if (replaced) {
-          if (!inserted) {
-            foreach (Var item, prelude) output.push(item);
-            inserted = 1;
-          }
-          function = _patch_initialized_entry(
-            c, function, statements, h.guard, h.initializer);
-          node = captured ? %(sourceinit $function) : function;
-        }
+    List function = captured ? node.cadr() : node;
+    match (function) case %(function ? ? (block *)):
+      if (replaced) {
+        foreach (Var item, prelude) output.push(item);
+        prelude = NULL;
+        function = entry._enter(function, 1);
+        node = captured ? %(sourceinit $function) : function;
+      }
     output.push(node);
   }
   return output.list_free();
@@ -522,33 +523,10 @@ static List _cache_refs(List node, Map bindings, int &?replaced) {
   $ast.rewrite_children(node, child, _cache_refs(child, bindings, replaced));
 }
 
-static List Compiler._header_initializer(
-  Compiler c, List guard, List initializer, List statements) {
-  List type = %(("__attribute__((constructor))") static void);
-  List body = List.concat_n(
-    3, _entry_call("x2c_initialize_protocols"), _run_once(c, guard),
-    statements);
-  return _initializer_function(c, type, initializer, body);
-}
-
 /** Returns the declaration of the file's initialization `guard`, which
     starts at zero. */
 List Compiler.initialization_guard(Compiler c, List guard) =>
   c.rebuild_statement($!{ static int $guard = 0; }).cadr();
-
-static macro Decorator $initialized_entry(
-  Function $function, Expr $guard, Expr $entry, Stmt $body...) {
-  if (!$guard) $entry();
-  $body...
-}
-
-List _patch_initialized_entry(
-  Compiler c, List function, List body, List guard, List entry) {
-  Macro shape = $initialized_entry;
-  List condition = $!int{ $guard };
-  List callee = %(expr ((func ((void))) void) (ident $entry));
-  return c.rebuild_function(function, shape(condition, callee, body));
-}
 
 /* source caches
 
