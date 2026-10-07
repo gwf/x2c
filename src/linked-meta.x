@@ -5,7 +5,7 @@
     modules appear without their `meta` markers,
     so their functions and initializers execute as native code.
     `Compiler.bind_linked_meta` binds an included definition to its
-    copy only when its source and provider hashes agree. Public
+    copy only when its definition or provider sources agree. Public
     functions with a run-time form bind to their ordinary provider's
     definitions and have no copy here.
 */
@@ -426,7 +426,7 @@ Map linked_meta_targets(void) {
 
 macro Expression $linked.hashes() => $(_x2c.meta.linked.hashes);
 
-/** Returns each linked definition's hash and referenced names. */
+/** Returns linked definitions and their provider source dependencies. */
 Map linked_meta_hashes(void) {
   return $linked.hashes();
 }
