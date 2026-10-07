@@ -709,24 +709,46 @@ static void Compiler._add_type_dependencies(
     }
 }
 
-/** Reports whether the cached meta provider matches linked code.
-    The scanner uses the same retained hashes as evaluator installation. */
+/** Reports whether a linked provider and the files it read are unchanged.
+    The linked inventory retains the ordinary collector's dependency proof. */
 int Compiler.linked_meta_provider_current(Compiler c, String path) {
   String canonical = _canonical_path(path);
-  List entry = c._meta_provider_entry(canonical);
-  if (!entry) return 0;
-  Map hashes = {}, native = {};
-  foreach (Var part, entry.car()) {
-    if (part is not <map>) continue;
-    foreach (Var value, part.map()) match (value) {
-      case %(meta-hashes ? ?(Map own)): hashes = own;
-      case %(native-meta ?(String name) ?): native[name] = 1;
-      case %(project-meta ?name ? ?provider ?(Map own)):
-        if (!c.project_meta_uses_linked(name, provider, own)) return 0;
+  _interface_lisp();
+  Var current;
+  if (linked_providers.try_get(canonical, current)) return current;
+  Map seen = {};
+  int valid = c._linked_provider_current(canonical, seen);
+  if (valid)
+    foreach (String dependency, seen.keys()) {
+      _retain(dependency);
+      linked_providers[dependency] = 1;
     }
+  else {
+    _retain(canonical);
+    linked_providers[canonical] = 0;
   }
-  $let(c.filename, canonical)
-    return c.meta_provider_hashes_current(hashes, native);
+  return valid;
+}
+
+static int Compiler._linked_provider_current(
+  Compiler c, String path, Map seen) {
+  Var current;
+  if (linked_providers.try_get(path, current)) return current;
+  if (path in seen) return 1;
+  seen[path] = 1;
+  List source = linked_meta_provider_source(home_portable_path(path));
+  match (source)
+    case %(source ?hash ?(List dependencies)): {
+      if (!c._hash_matches(path, hash)) return 0;
+      Map found = c._read_dependencies(dependencies);
+      if (found == NULL) return 0;
+      foreach (Var (dependency, expected), found)
+        if (is_source_file(dependency) && expected is <string> &&
+            !String.startswith(expected, "search:") &&
+            !c._linked_provider_current(dependency, seen)) return 0;
+      return 1;
+    }
+  return 0;
 }
 
 /* Metadata lookahead reads declarations and hashes without source effects. */
@@ -758,24 +780,23 @@ void Compiler.complete_meta_hashes(Compiler c) {
   collect_forget_provisional_entries();
 }
 
-/** Adds retained hashes of ordinary private callees and native-only providers.
-    Provider-qualified keys keep file-private names distinct without
-    advertising more callable targets. */
+/** Retains each linked provider's existing source and dependency hashes.
+    Definition rows reference this shared proof instead of every sibling. */
 void Compiler.add_linked_meta_provider_hashes(Compiler c, Map rows) {
   foreach (String path, c.deps.keys()) {
     if (!is_source_file(path)) continue;
     List entry = c._entry(_canonical_path(path));
     if (!entry) continue;
-    foreach (Var part, entry.car()) {
-      if (part is not <map>) continue;
-      foreach (Var value, part.map()) match (value) {
-        case %(meta-hashes ?(String provider) ?(Map hashes)): {
-          List names = hashes.keys().list().sort();
-          foreach (Var (name, hash), hashes)
-            rows[%"$provider:$name"] = %($hash $names);
-        }
-      }
-    }
+    String provider = home_portable_path(_canonical_path(path));
+    Map dependencies = entry[3], direct = {};
+    foreach (Var part, entry.car())
+      if (part is <string>) direct[part] = dependencies[part];
+    foreach (Var (file, hash), dependencies)
+      if (!is_source_file(file) ||
+          (hash is <string> && String.startswith(hash, "search:")))
+        direct[file] = hash;
+    rows[provider] =
+      %(source ${entry.cadr()} ${_stored_dependencies(direct)});
   }
 }
 
@@ -1571,7 +1592,8 @@ static String interface_out_dir = NULL, interface_mirror = NULL;
 
 /* Interfaces name the same sources many times, so a process hashes each
    source once. */
-static Map source_hashes = NULL, static Lisp interface_reader = NULL;
+static Map source_hashes = NULL, linked_providers = NULL;
+static Lisp interface_reader = NULL;
 
 /** Creates the process cache and names the directories searched for `.xi`
     interfaces. `out_dir` is the current translation output directory, or
@@ -1658,6 +1680,7 @@ static Lisp _interface_lisp(void) {
   $scope(&process_cache_scope) {
     interface_reader = Lisp.kernel();
     source_hashes = {};
+    linked_providers = {};
     Scope.shutdown_hook(_interface_shutdown);
   }
   return interface_reader;
@@ -1667,6 +1690,7 @@ static void _interface_shutdown(void) {
   Lisp.destroy(interface_reader);
   interface_reader = NULL;
   source_hashes = NULL;
+  linked_providers = NULL;
 }
 
 /* The interface belongs to this compiler and this source, and the source
