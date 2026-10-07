@@ -3,7 +3,7 @@
 > Status: active
 > Implemented locally; publication held. Gary authorized the complete
 > implementation on 2026-10-07, including `@{expression}` and operator removal.
-> Final validation and review evidence: [.context/macro-at-review.md](../.context/macro-at-review.md).
+> Final validation and review evidence: `.context/macro-at-review.md` (local report).
 > Implementation branch: `codex/macro-at-implementation`.
 > Historical plan branch: `codex/macro-at-splicing`.
 > Baseline: `origin/dev` at `ae34288c8a4de03168e4055d885b796cbc35da27`.
