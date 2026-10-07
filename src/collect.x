@@ -794,15 +794,13 @@ void Compiler.add_linked_meta_provider_hashes(Compiler c, Map rows) {
     List entry = c._entry(_canonical_path(path));
     if (!entry) continue;
     String provider = home_portable_path(_canonical_path(path));
-    Map dependencies = entry[3], direct = {};
-    foreach (Var part, entry.car())
-      if (part is <string>) direct[part] = dependencies[part];
-    foreach (Var (file, hash), dependencies)
-      if (!is_source_file(file) ||
-          (hash is <string> && String.startswith(hash, "search:")))
-        direct[file] = hash;
-    rows[provider] =
-      %(source ${entry.cadr()} ${_stored_dependencies(direct)});
+    foreach (Var part, entry.car()) {
+      if (part is not <map>) continue;
+      Var proof;
+      if (part.map().try_get(
+          %("source-node" (provider-source $provider 0)), proof))
+        rows[provider] = proof;
+    }
   }
 }
 
@@ -991,11 +989,16 @@ static int FileWalk.produces(FileWalk &w) {
    as a unit whose text the prelude already covered, does not replace an
    entry that other units may already have replayed. */
 static void FileWalk.publish(FileWalk &w) {
-  if (w.unit && w.hashes.len()) {
+  String hash = _content_hash(w.text);
+  if (w.unit) {
     Map metadata = _cache_map();
     String provider = home_portable_path(w.path);
-    metadata[%("source-node" (meta-hashes $provider 0))] =
-      %(meta-hashes $provider ${w.hashes});
+    // Keep the walk's proof before inline typing enriches entry dependencies.
+    metadata[%("source-node" (provider-source $provider 0))] =
+      %(source $hash ${_stored_dependencies(w.dependencies)});
+    if (w.hashes.len())
+      metadata[%("source-node" (meta-hashes $provider 0))] =
+        %(meta-hashes $provider ${w.hashes});
     w.parts.push(metadata);
   }
   List parts = w.parts.list_free();
@@ -1005,7 +1008,6 @@ static void FileWalk.publish(FileWalk &w) {
     _retain(name);
     _retain(hash);
   }
-  String hash = _content_hash(w.text);
   List definitions = _sorted_names(w.definitions);
   List roots = w.c._interface_include_dirs(w.path);
   List entry = %($parts $hash $definitions ${w.dependencies} $roots);
