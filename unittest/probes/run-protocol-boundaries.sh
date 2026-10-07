@@ -355,15 +355,22 @@ grep -Fq '(getindex implemented MacroArrayInt_getindex dot+punctuation)' \
   >"$BUILD/generated-tag-snapshot"
 "$X2C" translate --live-symbols --dump-symbols "$generated" \
   >"$BUILD/generated-tag-live"
-grep -F '( adopt ( Var ) ( MacroArrayInt )' \
-  "$BUILD/generated-tag-snapshot" >"$BUILD/generated-tag-row-snapshot"
-grep -F '( adopt ( Var ) ( MacroArrayInt )' \
-  "$BUILD/generated-tag-live" >"$BUILD/generated-tag-row-live"
+for transport in snapshot live; do
+  awk '
+    /^\( adopt \( Var \) \( MacroArrayInt \) / { copying = 1 }
+    copying && /^\(/ &&
+      $0 !~ /^\( adopt \( Var \) \( MacroArrayInt \) / { exit }
+    copying { print }
+    END { exit !copying }
+  ' "$BUILD/generated-tag-$transport" \
+    >"$BUILD/generated-tag-row-$transport" ||
+    fail "generated adoption was absent from the symbol table"
+done
 cmp -s "$BUILD/generated-tag-row-snapshot" \
   "$BUILD/generated-tag-row-live" ||
   fail "generated explicit tag depends on the symbol transport"
 grep -Fq '( tag ( expr ( Symbol ) ( literal ( Symbol ) <macarray> macarray )))' \
-  "$BUILD/generated-tag-snapshot" ||
+  "$BUILD/generated-tag-row-snapshot" ||
   fail "generated adoption omitted its explicit tag"
 
 # A Var participant inherits methods only from the representation named by an
