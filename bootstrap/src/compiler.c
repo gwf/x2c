@@ -3286,7 +3286,7 @@ static void Compiler__check_unmatched_braces(Compiler c){
 
 int Symbol_group_step(Symbol s){
   if(! _init_guard_) _file_init_();  switch(s){
-    case 81 : case 183 : case 247 : case 16209 : case 9297 : case 9463 : case 9553 : case 9655 : case 9719 : case 16631 : return 1;  case 83 : case 187 : case 251 : return - 1;
+    case 81 : case 183 : case 247 : case 16209 : case 9297 : case 16465 : case 9463 : case 9553 : case 9655 : case 9719 : case 16631 : return 1;  case 83 : case 187 : case 251 : return - 1;
   }
   return 0;
 }
@@ -3315,7 +3315,7 @@ int Compiler_at_completion(Compiler c){
 
 void Compiler___complete_here(Compiler c, Symbol role, List keywords){
   if(! _init_guard_) _file_init_();  if(! Compiler_at_completion(c)) return;  List rows = Sym_visible_symbols(c -> sym); {
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../src/compiler.x",.function = "Compiler___complete_here",.line = 2048};  x2c_error_raise_n(& _x2c_error_site_2, 1248787135328, 3, Symbol_var(740232), Symbol_var(role), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(keywords));
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../src/compiler.x",.function = "Compiler___complete_here",.line = 2049};  x2c_error_raise_n(& _x2c_error_site_2, 1248787135328, 3, Symbol_var(740232), Symbol_var(role), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(keywords));
   }
 
 }

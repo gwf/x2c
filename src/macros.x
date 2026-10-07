@@ -1211,9 +1211,11 @@ static List Definition.node(Definition &d) {
 /* A parameter: an optional kind, `$NAME`, and `...` for a sequence. */
 static List Compiler._signature_hole(Compiler c) {
   Symbol kind = 0;
-  if (c.peek(0) == <ident> && c.peek(1) == <$>) kind = c._hole_kind();
-  Token token = c._hole_name_token();
-  return c._declare_hole(token, kind, c.test(<...>));
+  if (c.peek(0) == <ident> && (c.peek(1) == <$> || c.peek(1) == <@>))
+    kind = c._hole_kind();
+  int sequence = c.peek(0) == <@>;
+  Token token = c._hole_name_token(sequence ? <@> : <$>);
+  return c._declare_hole(token, kind, c.test(<...>) || sequence);
 }
 
 static Symbol Compiler._hole_kind(Compiler c) {
@@ -1227,8 +1229,8 @@ static Symbol Compiler._hole_kind(Compiler c) {
   return kind;
 }
 
-static Token Compiler._hole_name_token(Compiler c) {
-  c.expect(<$>);
+static Token Compiler._hole_name_token(Compiler c, Symbol prefix) {
+  c.expect(prefix);
   if (c.peek(0) != <ident>)
     $report.parse.hole_name(c);
   Token name = c.token;
@@ -1258,7 +1260,7 @@ static void Compiler._using_holes(Compiler c, Array binders) {
 }
 
 static List Compiler._using_hole(Compiler c) =>
-  c._declare_hole(c._hole_name_token(), <name>, 0);
+  c._declare_hole(c._hole_name_token(<$>), <name>, 0);
 
 static List _hole(Atom binder, Symbol kind, int sequence) => %(
     macro-param
@@ -1449,23 +1451,37 @@ static const SymbolSet operand_continuations =
 */
 List Compiler.try_parse_macro_slot(Compiler c, Symbol role) {
   if (!c.macro_holes) return NULL;
+  if (c.peek(0) == <@> && !c.peek_macro_hole())
+    return c._meta_call_slot(role);
   if (role != <expression> && role != <statement> &&
       c.peek(0) == <$> && c.peek(2) == <(> &&
       !c.peek_macro_hole() && !c._peek_invocation())
     return c._meta_call_slot(role);
-  if (c.peek(0) == <"$(">) return c._lisp_slot(role);
+  if (c.peek(0) == <"$("> || c.peek(0) == <"@(">)
+    return c._lisp_slot(role);
   return c._hole_slot(role);
 }
 
 /* A meta call fills a declaration or block slot only when `...` splices
    its result there. */
 static List Compiler._meta_call_slot(Compiler c, Symbol role) {
-  Token arguments = Token.skip_trivia(Token.skip_trivia(c.token + 1) + 1);
-  int follows_splice = arguments.after_group().type == <...>;
+  int sequence = c.peek(0) == <@>;
+  if (sequence && !(role in sequence_roles))
+    $report.parse.splice_position(c);
+  String spelling;
+  Token arguments = c._scan_name(spelling);
+  int follows_splice = sequence || arguments.after_group().type == <...>;
   if (!follows_splice && (role == <block> || role in declaration_roles))
     return NULL;
+  List definition = c._peek_invocation();
+  if (sequence && definition && _result_kind(definition) != <expression>) {
+    Token invocation = c.token;
+    c._name();
+    List input = c._invocation_arguments(definition, invocation);
+    return %(seq ${c._invocation_node(definition, input, invocation)});
+  }
   List call = c.try_parse_macro_expression();
-  int splice = c._slot_splice(role in sequence_roles);
+  int splice = c._slot_splice(sequence, role in sequence_roles);
   return %(macro-slot $splice $call);
 }
 
@@ -1473,9 +1489,12 @@ static List Compiler._meta_call_slot(Compiler c, Symbol role) {
    item that continues into a declaration, and a statement, keep the
    ordinary grammar. */
 static List Compiler._lisp_slot(Compiler c, Symbol role) {
-  int splice = c._lisp_splice_follows();
+  int splice = c.peek(0) == <"@("> || c._lisp_splice_follows();
+  if (splice && !(role in sequence_roles))
+    $report.parse.splice_position(c);
   if (role in declaration_roles && !splice) return NULL;
-  if (role == <block> && c.macro_lisp_starts_declaration()) return NULL;
+  if (!splice && role == <block> && c.macro_lisp_starts_declaration())
+    return NULL;
   if (role == <statement>) return NULL;
   if (role == <expression>) return c.parse_macro_lisp_expression();
   return c._parse_lisp_slot(role in sequence_roles, role);
@@ -1492,7 +1511,8 @@ static List Compiler._hole_slot(Compiler c, Symbol role) {
     $report.parse.splice_expr(c);
   if (!(role in untyped_roles)) {
     Symbol kind = hole.assoc(<kind>);
-    if (!kind && c.after_hole().type != <...> && !c._quoted_role(role))
+    if (!kind && c.peek(0) != <@> && c.peek(0) != <"@{"> &&
+        c.after_hole().type != <...> && !c._quoted_role(role))
       return NULL;
     if (kind && !_kind_accepts_role(kind, role)) return NULL;
   }
@@ -1511,8 +1531,8 @@ static const SymbolSet quoted_roles = %<<statement block name param>>;
 
 /* Consumes a `...` after a slot. It is legal only where the role takes a
    sequence. */
-static int Compiler._slot_splice(Compiler c, int allowed) {
-  int splice = c.test(<...>);
+static int Compiler._slot_splice(Compiler c, int sequence, int allowed) {
+  int splice = c.test(<...>) || sequence;
   if (splice && !allowed)
     $report.parse.splice_position(c);
   return splice;
@@ -1523,18 +1543,21 @@ static int Compiler._slot_splice(Compiler c, int allowed) {
     the spelling is not a hole.
 */
 List Compiler.peek_macro_hole(Compiler c) {
-  if (c.peek(0) != <$>) return NULL;
+  Symbol prefix = c.peek(0);
+  if (prefix == <"@{">) return c._expression_hole(c.token);
+  if (prefix != <$> && prefix != <@>) return NULL;
   if (c.peek(1) == <"{">) return c._expression_hole(c.token);
   if (c.peek(1) != <ident>) return NULL;
   Token name = Token.skip_trivia(c.token + 1);
   List hole = c._hole_record(Atom.intern(name.text));
-  return hole ? hole : c._quoted_hole(name.text, name + 1);
+  return hole ? hole : c._quoted_hole(name.text, c.token, name + 1);
 }
 
 /** Returns the token after the hole at the cursor: after `$NAME`, or after
     the braces of `${expression}`.
 */
 Token Compiler.after_hole(Compiler c) {
+  if (c.peek(0) == <"@{">) return c.token.after_group();
   Token next = Token.skip_trivia(c.token + 1);
   return next.type == <"{"> ? next.after_group()
                            : Token.skip_trivia(next + 1);
@@ -1617,7 +1640,7 @@ static List Compiler._expression_holes(Compiler c, Map holes) {
       Token typed = next.after_group();
       if (next.type == <(> && typed.type == <"{">) t = typed.group_close();
     }
-    else if (t.type == <$> && brace.type == <"{"> &&
+    else if ((t.type == <@> || t.type == <$>) && brace.type == <"{"> &&
              (last != <case> || Token.skip_trivia(brace + 1).type != <$>)) {
       c.token = brace;
       locals.push(c._hole_local(holes, t.pos));
@@ -1648,13 +1671,15 @@ static List Compiler._hole_local(Compiler c, Map holes, int position) {
 }
 
 /* Returns NULL if the quotation registered no expression at this offset. */
-static List Compiler._expression_hole(Compiler c, Token dollar) {
+static List Compiler._expression_hole(Compiler c, Token prefix) {
   Var name;
   if (!c.macro_holes ||
-      !c.macro_holes.try_get(%(expression ${dollar.pos}), name))
+      !c.macro_holes.try_get(%(expression ${prefix.pos}), name))
     return NULL;
   List hole = c._hole_record(Atom.intern(name));
-  return hole ? hole : c._quoted_hole(name, Token.after_group(dollar + 1));
+  return hole ? hole : c._quoted_hole(
+    name, prefix, prefix.type == <"@{"> ? prefix.after_group()
+                                        : Token.after_group(prefix + 1));
 }
 
 /* The expression that computes a typed quotation's type: the identifier at
@@ -1940,7 +1965,7 @@ static int Compiler._quoted_role(Compiler c, Symbol role) {
    hole, a sequence when `...` follows. A local declared `Type` fills a type
    hole, which no position can tell from a statement before a name. */
 static List Compiler._quoted_hole(
-  Compiler c, String spelling, Token after) {
+  Compiler c, String spelling, Token prefix, Token after) {
   if (!c.macro_holes || !(%(quotation) in c.macro_holes)) return NULL;
   Type type = NULL;
   List local = c.sym.lookup(%($spelling), type);
@@ -1948,7 +1973,8 @@ static List Compiler._quoted_hole(
   Symbol kind = c.sym.is_named_value_type(type, "Type") ? <type> : 0;
   /* Inside `%[...]`, the splice scans as the atom `...`. */
   after = Token.skip_trivia(after);
-  int sequence = after.type == <...> ||
+  int sequence = prefix.type == <@> || prefix.type == <"@{"> ||
+                 after.type == <...> ||
                  (after.type == <lit-atom> && after.text == "...");
   List hole = c._record_hole(spelling, kind, sequence);
   Var quoted = c.macro_holes[%(quoted)];
@@ -1967,12 +1993,15 @@ static List _quoted_holes(Compiler c) {
 static List Compiler._parse_hole(Compiler c, Symbol role) {
   Token token = c.token;
   List hole = c.peek_macro_hole();
-  if (!hole) c._unbound(c._hole_name_token().text, token);
+  if (!hole) c._unbound(c._hole_name_token(token.type).text, token);
   c.token = c.after_hole();
   Atom name = _hole_name(hole);
-  int sequence = c._hole_splice(role);
+  int sequence = c._hole_splice(role) || token.type == <@> ||
+                 token.type == <"@{">;
   if (sequence != hole.assoc(<sequence>).int())
     c._cardinality_error(name.str(), sequence, token);
+  if (sequence && !(role in sequence_roles))
+    $report.parse.splice_position(c);
   Symbol inferred = _role_kind(role), kind = hole.assoc(<kind>);
   if (!kind) {
     hole = hole.search_replace(%(kind ?prior), %(kind $inferred));
@@ -2071,8 +2100,9 @@ List Compiler.try_parse_macro_member(Compiler c) {
    need. A slot inside a Unit decorator also carries the target's. */
 static List Compiler._parse_lisp_slot(
   Compiler c, int allow_sequence, Symbol role) {
+  int sequence = c.peek(0) == <"@(">;
   String form = c._lisp_form();
-  int splice = c._slot_splice(allow_sequence);
+  int splice = c._slot_splice(sequence, allow_sequence);
   Var target = c.macro_holes[%(target)];
   List construction = c._lisp_construction(form);
   if (target is <list>) {
@@ -2530,7 +2560,7 @@ static Symbol _result_kind(List definition) {
    argument list follows or the invocation is bare. */
 static List Compiler._peek_invocation(Compiler c) {
   Var stored;
-  if (c.peek(0) == <$>) {
+  if (c.peek(0) == <$> || c.peek(0) == <@>) {
     String spelling;
     c._scan_name(spelling);
     if (!spelling ||
@@ -2571,7 +2601,8 @@ static Token Compiler._scan_name(Compiler c, String &spelling) {
 /* An identifier invoking a decorator without explicit parameters has no
    argument list. */
 static int _bare(Token invocation, List definition) =>
-  invocation.type != <$> && definition.assoc(<kind>) == <decorator> &&
+  invocation.type != <$> && invocation.type != <@> &&
+  definition.assoc(<kind>) == <decorator> &&
   !definition.assoc(<parameters>).list();
 
 /* Consumes the name of an invocation claimed at `position` and returns its
@@ -2581,7 +2612,7 @@ static int _bare(Token invocation, List definition) =>
 static List Compiler._take_invocation(Compiler c, AstPos position) {
   List definition = c._peek_invocation();
   if (!c._claims(definition, position)) return NULL;
-  if (c.peek(0) != <$>) {
+  if (c.peek(0) != <$> && c.peek(0) != <@>) {
     c.next();
     return definition;
   }
@@ -3274,7 +3305,7 @@ List Compiler.try_parse_macro_expression(Compiler c) {
     List value = c._named_macro_value(invocation);
     if (value) return value;
   }
-  if (c.peek(0) == <$> && !c._peek_invocation())
+  if ((c.peek(0) == <$> || c.peek(0) == <@>) && !c._peek_invocation())
     return c._parse_meta_call(invocation);
   List definition = c._take_invocation(AST_EXPRESSION);
   if (!definition) return NULL;

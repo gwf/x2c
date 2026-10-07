@@ -3171,7 +3171,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_5(void){
   _2813 = List_var(_2812);
   _2814 = String_new("lib/tokenizer.x");
   _2815 = String_var(_2814);
-  _2816 = String_new("23bf1dd0");
+  _2816 = String_new("d8fb9579");
   _2817 = String_var(_2816);
   _2818 = cons(_2817, NULL);
   _2819 = cons(_2815, _2818);
@@ -4530,7 +4530,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_8(void){
   _4163 = List_var(_4162);
   _4164 = String_new("src/compiler.x");
   _4165 = String_var(_4164);
-  _4166 = String_new("a40aa0c6");
+  _4166 = String_new("ad435c8c");
   _4167 = String_var(_4166);
   _4168 = cons(_4167, NULL);
   _4169 = cons(_4165, _4168);
@@ -4695,7 +4695,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_8(void){
   _4328 = List_var(_4327);
   _4329 = String_new("src/macros.x");
   _4330 = String_var(_4329);
-  _4331 = String_new("4ea81bc3");
+  _4331 = String_new("1b9c4e59");
   _4332 = String_var(_4331);
   _4333 = cons(_4332, NULL);
   _4334 = cons(_4330, _4333);
@@ -4773,7 +4773,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_8(void){
   _4406 = List_var(_4405);
   _4407 = String_new("src/expressions.x");
   _4408 = String_var(_4407);
-  _4409 = String_new("ebe2bd66");
+  _4409 = String_new("c00324c7");
   _4410 = String_var(_4409);
   _4411 = cons(_4410, NULL);
   _4412 = cons(_4408, _4411);
@@ -4825,7 +4825,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_8(void){
   _4458 = List_var(_4457);
   _4459 = String_new("src/parse.x");
   _4460 = String_var(_4459);
-  _4461 = String_new("bfa4553a");
+  _4461 = String_new("50269d47");
   _4462 = String_var(_4461);
   _4463 = cons(_4462, NULL);
   _4464 = cons(_4460, _4463);
@@ -5235,7 +5235,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_9(void){
   _4865 = cons(_927, _4864);
   _4866 = String_new("src/lambdas.x");
   _4867 = String_var(_4866);
-  _4868 = String_new("9d17121a");
+  _4868 = String_new("83a48663");
   _4869 = String_var(_4868);
   _4870 = cons(_4869, NULL);
   _4871 = cons(_4867, _4870);

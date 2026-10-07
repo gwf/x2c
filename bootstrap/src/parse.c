@@ -4709,7 +4709,7 @@ static List Compiler__declarator_list(Compiler c, List type, List context, int r
 
 void Compiler_record_source_declaration(Compiler, List, Token, Token);
 static List Compiler__declarator_init(Compiler c, List type, List context){
-  List slot = List_truth(Compiler_peek_macro_hole(c)) ? Compiler_try_parse_macro_slot(c, 285843887086) : NULL;  if(List_truth(slot)){
+  List slot = List_truth(Compiler_peek_macro_hole(c)) || Compiler_peek(c, 0) == 129 || Compiler_peek(c, 0) == 16465 ? Compiler_try_parse_macro_slot(c, 285843887086) : NULL;  if(List_truth(slot)){
     if(Compiler_test(c, 123)) return({
       Var _x2c_literal_part_39 = List_var(slot);  Var _x2c_literal_part_40 = List_var(Compiler_parse_assignment(c));  cons(_101, cons(_102, cons(_x2c_literal_part_39, cons(_x2c_literal_part_40, NULL))));
     }

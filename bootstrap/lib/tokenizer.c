@@ -561,7 +561,7 @@ static int Tokenizer__end_of_file(Tokenizer t){
 }
 
 static int Tokenizer__x2c_tokens(Tokenizer t){
-  return Tokenizer__common_tokens(t) ||(t -> text[t -> pos] == '$' &&(Tokenizer__embedded_lisp(t) || Tokenizer__named_reference(t))) || Tokenizer__percent_tokens(t) || Tokenizer__angle_symbol_literal(t) || Tokenizer__c_tokens(t);
+  return Tokenizer__common_tokens(t) ||((t -> text[t -> pos] == '$' ||(t -> text[t -> pos] == '@' && t -> text[t -> pos + 1] != '=')) &&(Tokenizer__embedded_lisp(t) || Tokenizer__named_reference(t))) || Tokenizer__percent_tokens(t) || Tokenizer__angle_symbol_literal(t) || Tokenizer__c_tokens(t);
 }
 
 int Tokenizer_do_scanner(Tokenizer t, int(* scanner)(char *), Symbol type);
@@ -624,7 +624,7 @@ static int Tokenizer__number(Tokenizer tokenizer){
 
 static int Tokenizer__embedded_lisp(Tokenizer tokenizer){
   char * text = tokenizer -> text + tokenizer -> pos;
-  if(text[0] != '$' || text[1] != '(') return 0;
+  if((text[0] != '$' && text[0] != '@') || text[1] != '(') return 0;
   return Tokenizer__operator(tokenizer, 2);
 }
 
@@ -709,7 +709,7 @@ static int Tokenizer__lisp_prefix(Tokenizer t, int list, int collection){
   if(list && text[0] == '?' && text[1] == '(') return Tokenizer__operator(t, 2);
   if(text[0] == '$' && ! list && ! collection) return Tokenizer__named_reference(t);
   if(list && text[0] == '@' &&(! text[1] || text[1] == '=' || strchr(" \t\n\v\f\r)", text[1]))) return Tokenizer_tokenize(t, text[1] == '=' ? 2 : 1, 845368370138);
-  if((list &&(text[0] == '$' || text[0] == '@')) ||(collection && text[0] == '$')) return text[1] == '{' ? Tokenizer__operator(t, 2) : Tokenizer__named_reference(t);
+  if((list &&(text[0] == '$' || text[0] == '@')) ||(collection &&(text[0] == '$' || text[0] == '@'))) return text[1] == '{' ? Tokenizer__operator(t, 2) : Tokenizer__named_reference(t);
   return 0;
 }
 
@@ -851,7 +851,7 @@ static int Tokenizer__operator(Tokenizer t, int len){
       break;
       case 9655 : push = 3313778;
       break;
-      case 9297 : push = 917238583151840;
+      case 9297 : case 16465 : push = 917238583151840;
       break;
       case 251 : pop = Array_len(t -> modes) > 1;
       break;
@@ -870,7 +870,7 @@ static int Tokenizer__operator(Tokenizer t, int len){
       break;
       case 16209 : if(mode == 806120) push = 1059020479160805;
       break;
-      case 16631 : if(mode == 806120) push = 3945159;
+      case 16631 : push = 3945159;
       break;
       case 247 : push = 26720;
       token_type = 9719;
@@ -1222,7 +1222,7 @@ static int _Layout_bare_do(_Layout * l, _LayoutLine line, int j){
 
 static String _Layout_end_statement(_Layout * l, _LayoutLine line){
   _Layout_one_line_body(&((* l)), line);
-  if((* l).sig[line.first] -> type == 129){
+  if((* l).sig[line.first] -> type == 129 &&(* l).sig[line.first + 1] -> type == 73){
     _Layout_edit(&((* l)), line.first) -> type = 40896714;
     return NULL;
   }
@@ -1243,14 +1243,19 @@ static void _Layout_one_line_body(_Layout * l, _LayoutLine line){
 }
 
 static int _Layout_lisp_form(_Layout * l, _LayoutLine line){
-  if((* l).sig[line.first] -> type != 9297) return 0;
+  if((* l).sig[line.first] -> type != 9297 &&(* l).sig[line.first] -> type != 16465) return 0;
   for(int m = line.first + 1;  m < line.last;  m ++) if((* l).depths[m] <= 0) return 0;
   return 1;
 }
 
 static int _Layout_hole(_Layout * l, _LayoutLine line){
   int last = line.last;
-  return(* l).sig[last] -> type == 19147688 && last > line.first &&(* l).sig[last - 1] -> type == 73 &&(last - 1 == line.first ||(* l).sig[last - 2] -> type == 83);
+  for(int first = line.first;  first < last;  first ++){
+    if(first != line.first &&(* l).sig[first - 1] -> type != 83) continue;
+    if((* l).sig[first] -> type != 129 &&(* l).sig[first] -> type != 16465) continue;
+    if((* l).sig[last] -> type == 83 ||(* l).sig[last] -> type == 251) return 1;
+  }
+  return(* l).sig[last] -> type == 19147688 && last > line.first &&((* l).sig[last - 1] -> type == 73 ||(* l).sig[last - 1] -> type == 129) &&(last - 1 == line.first ||(* l).sig[last - 2] -> type == 83);
 }
 
 static int _Layout_condition(_Layout * l, int first, int colon, String body){

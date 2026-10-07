@@ -88,7 +88,8 @@ static List Compiler._parse_params(Compiler c) =>
    a template's `$` hole. */
 static int Compiler._params_look_typed(Compiler c) {
   Symbol head = c.peek(0);
-  if (head == <$> && c.macro_holes) return 1;
+  if (c.macro_holes && (head == <$> || head == <@> || head == <"@(">))
+    return 1;
   if (head.is_builtin_type() || head.is_type_qualifier() ||
       head == <struct> || head == <union> || head == <enum> || head == <void>)
     return 1;

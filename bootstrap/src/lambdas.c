@@ -773,7 +773,7 @@ List Sym_get(Sym, List);
 
 static int Compiler__params_look_typed(Compiler c){
   Symbol head = Compiler_peek(c, 0);
-  if(head == 73 && Map_truth(c -> macro_holes)) return 1;
+  if(Map_truth(c -> macro_holes) &&(head == 73 || head == 129 || head == 16465)) return 1;
   if(Symbol_is_builtin_type(head) || Symbol_is_type_qualifier(head) || head == 1318234344 || head == 44977116 || head == 357722 || head == 1473096) return 1;
   if(head != 19147688) return 0;
   String folded = Compiler_package_alias_spelling(c);

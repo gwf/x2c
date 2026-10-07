@@ -104,7 +104,9 @@ static int Tokenizer._end_of_file(Tokenizer t) {
    C strings, identifiers, and operators. */
 static int Tokenizer._x2c_tokens(Tokenizer t) =>
   t._common_tokens() ||
-  (t.text[t.pos] == '$' && (t._embedded_lisp() || t._named_reference())) ||
+  ((t.text[t.pos] == '$' ||
+    (t.text[t.pos] == '@' && t.text[t.pos + 1] != '=')) &&
+   (t._embedded_lisp() || t._named_reference())) ||
   t._percent_tokens() || t._angle_symbol_literal() || t._c_tokens();
 
 static int Tokenizer._common_tokens(Tokenizer t) {
@@ -154,7 +156,7 @@ static int Tokenizer._number(Tokenizer tokenizer) {
 /* Enter file-scoped compile-time Lisp until its closing parenthesis. */
 static int Tokenizer._embedded_lisp(Tokenizer tokenizer) {
   char *text = tokenizer.text + tokenizer.pos;
-  if (text[0] != '$' || text[1] != '(') return 0;
+  if ((text[0] != '$' && text[0] != '@') || text[1] != '(') return 0;
   return tokenizer._operator(2);
 }
 
@@ -243,7 +245,7 @@ static int Tokenizer._lisp_prefix(Tokenizer t, int list, int collection) {
       (!text[1] || text[1] == '=' || strchr(" \t\n\v\f\r)", text[1])))
     return t.tokenize(text[1] == '=' ? 2 : 1, <lit-atom>);
   if ((list && (text[0] == '$' || text[0] == '@')) ||
-      (collection && text[0] == '$'))
+      (collection && (text[0] == '$' || text[0] == '@')))
     return text[1] == '{' ? t._operator(2) : t._named_reference();
   return 0;
 }
@@ -400,7 +402,7 @@ static int Tokenizer._operator(Tokenizer t, int len) {
         case <"{">:     push = <x2c>; break;
         case <"%{">:    push = <map>; break;
         case <"%[">:    push = <array>; break;
-        case <"$(">:    push = <macro-lisp>; break;
+        case <"$(">: case <"@(">: push = <macro-lisp>; break;
         // A stray `}` at file scope is the parser's to diagnose or skip.
         case <"}">:      pop = t.modes.len() > 1; break;
         case <"%(">:    push = <list>; break;
@@ -413,7 +415,7 @@ static int Tokenizer._operator(Tokenizer t, int len) {
         case <"(">: push = <list>; break;
         case <"${">: push = <x2c>; break;
         case <"?(">: if (mode == <list>) push = <x2c-par>; break;
-        case <"@{">: if (mode == <list>) push = <x2c>; break;
+        case <"@{">: push = <x2c>; break;
         case <"{">: push = <map>; token_type = <"%{">; break;
         case <"[">: push = <array>; token_type = <"%[">; break;
         case <"\"">: push = <string>; token_type = <"%\"">; break;
@@ -803,7 +805,8 @@ static int _Layout.bare_do(_Layout &l, _LayoutLine line, int j) {
    a decorator line, which takes none. */
 static String _Layout.end_statement(_Layout &l, _LayoutLine line) {
   l.one_line_body(line);
-  if (l.sig[line.first].type == <"@">) {
+  if (l.sig[line.first].type == <"@"> &&
+      l.sig[line.first + 1].type == <$>) {
     l.edit(line.first).type = <space>;
     return NULL;
   }
@@ -828,7 +831,8 @@ static void _Layout.one_line_body(_Layout &l, _LayoutLine line) {
 }
 
 static int _Layout.lisp_form(_Layout &l, _LayoutLine line) {
-  if (l.sig[line.first].type != <"$(">) return 0;
+  if (l.sig[line.first].type != <"$("> &&
+      l.sig[line.first].type != <"@(">) return 0;
   for (int m = line.first + 1; m < line.last; m++)
     if (l.depths[m] <= 0) return 0;
   return 1;
@@ -836,8 +840,13 @@ static int _Layout.lisp_form(_Layout &l, _LayoutLine line) {
 
 static int _Layout.hole(_Layout &l, _LayoutLine line) {
   int last = line.last;
+  for (int first = line.first; first < last; first++) {
+    if (first != line.first && l.sig[first - 1].type != <")">) continue;
+    if (l.sig[first].type != <@> && l.sig[first].type != <"@(">) continue;
+    if (l.sig[last].type == <")"> || l.sig[last].type == <"}">) return 1;
+  }
   return l.sig[last].type == <ident> && last > line.first &&
-    l.sig[last - 1].type == <"$"> &&
+    (l.sig[last - 1].type == <$> || l.sig[last - 1].type == <@>) &&
     (last - 1 == line.first || l.sig[last - 2].type == <")">);
 }
 

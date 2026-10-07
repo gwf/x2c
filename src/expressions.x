@@ -830,8 +830,9 @@ static List Compiler._parse_composite_elements(Compiler c) {
   Array elements = [];
   while (c.peek(0) != <"}">) {
     List hole = c.peek_macro_hole();
-    List element = hole && hole.assoc(<sequence>).int()
-                 ? c.try_parse_macro_slot(<argument>) : NULL;
+    int sequence = c.peek(0) == <@> || c.peek(0) == <"@("> ||
+                   (hole && hole.assoc(<sequence>).int());
+    List element = sequence ? c.try_parse_macro_slot(<argument>) : NULL;
     if (!element)
       element =
         c._test_dot_init() ||
@@ -2941,8 +2942,9 @@ static List Resolve._array_value(Resolve &r) {
   Macro array_value = $array_value;
   match (r.input) case array_value(*elements): {
     Array resolved = [];
-    foreach (List element, elements)
-      resolved.push(r.c.resolve_expression(element, r.origin));
+    foreach (Var element, elements)
+      foreach (List row, r.c.evaluate_macro_rows(element))
+        resolved.push(r.c.resolve_expression(row, r.origin));
     return r.c.rebuild_expression(
       r.type, array_value(resolved.list_free()));
   }
@@ -2997,8 +2999,9 @@ static List Resolve._initval(Resolve &r, List content) {
 
 static List Resolve._composite(Resolve &r, List elements) {
   Array values = [];
-  foreach (List element, elements)
-    values.push(r.c._resolve_initializer(element, r.origin));
+  foreach (Var element, elements)
+    foreach (List row, r.c.evaluate_macro_rows(element))
+      values.push(r.c._resolve_initializer(row, r.origin));
   return %(expr ${r.type} ${source_composite_content(
     values.list_free())});
 }

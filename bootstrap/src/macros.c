@@ -227,7 +227,7 @@ static List Compiler__signature_hole(Compiler c);
 
 static Symbol Compiler__hole_kind(Compiler c);
 
-static Token Compiler__hole_name_token(Compiler c);
+static Token Compiler__hole_name_token(Compiler c, Symbol prefix);
 
 static List Compiler__declare_hole(Compiler c, Token token, Symbol kind, int sequence);
 
@@ -362,7 +362,7 @@ static const SymbolSet untyped_roles =(SymbolSet) "\001\000\000\000\003\000\000\
 
 static const SymbolSet quoted_roles =(SymbolSet) "\001\000\000\000\004\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\001\003\003\000\003\000\250\053\255\320\100\047\000\000\326\170\114\000\000\000\000\000\112\013\016\000\000\000\000\000\132\220\001\002\000\000\000\000";
 
-static int Compiler__slot_splice(Compiler c, int allowed);
+static int Compiler__slot_splice(Compiler c, int sequence, int allowed);
 
 static Symbol Compiler__quotation_kind(Compiler c, Token token);
 
@@ -372,7 +372,7 @@ static List Compiler__expression_holes(Compiler c, Map holes);
 
 static List Compiler__hole_local(Compiler c, Map holes, int position);
 
-static List Compiler__expression_hole(Compiler c, Token dollar);
+static List Compiler__expression_hole(Compiler c, Token prefix);
 
 static List Compiler__quoted_type(Compiler c, Map holes);
 
@@ -408,7 +408,7 @@ static List Compiler__hole_value(Compiler c, List hole, Token start);
 
 static int Compiler__quoted_role(Compiler c, Symbol role);
 
-static List Compiler__quoted_hole(Compiler c, String spelling, Token after);
+static List Compiler__quoted_hole(Compiler c, String spelling, Token prefix, Token after);
 
 static List _quoted_holes(Compiler c);
 
@@ -1584,8 +1584,8 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_0(void){
   _314 = Symbol_var(45304718);
   _315 = String_new("is");
   _316 = String_new("in");
-  _317 = String_new("sequence insertion is not legal in an expression slot");
-  _318 = String_new("sequence insertion is not legal in this syntax slot");
+  _317 = String_new("sequence insertion is not legal in this syntax slot");
+  _318 = String_new("sequence insertion is not legal in an expression slot");
   _319 = Symbol_var(38860062215132);
   _320 = cons(_319, NULL);
   _321 = String_new("write ${$!T{ ... }} to insert the code it builds");
@@ -3240,7 +3240,7 @@ static List Definition_node(Definition * d){
 }
 
 static List Compiler__signature_hole(Compiler c){
-  Symbol kind = 0;  if(Compiler_peek(c, 0) == 19147688 && Compiler_peek(c, 1) == 73) kind = Compiler__hole_kind(c);  Token token = Compiler__hole_name_token(c);  return Compiler__declare_hole(c, token, kind, Compiler_test(c, 1519197));
+  Symbol kind = 0;  if(Compiler_peek(c, 0) == 19147688 &&(Compiler_peek(c, 1) == 73 || Compiler_peek(c, 1) == 129)) kind = Compiler__hole_kind(c);  int sequence = Compiler_peek(c, 0) == 129;  Token token = Compiler__hole_name_token(c, sequence ? 129 : 73);  return Compiler__declare_hole(c, token, kind, Compiler_test(c, 1519197) || sequence);
 }
 
 static Symbol Compiler__hole_kind(Compiler c){
@@ -3250,8 +3250,8 @@ static Symbol Compiler__hole_kind(Compiler c){
   Compiler_next(c);  return kind;
 }
 
-static Token Compiler__hole_name_token(Compiler c){
-  Compiler_expect(c, 73);  if(Compiler_peek(c, 0) != 19147688) Compiler_report_error(c, 33658058, _303, c -> token, NULL);  Token name = c -> token;  Compiler_next(c);  return name;
+static Token Compiler__hole_name_token(Compiler c, Symbol prefix){
+  Compiler_expect(c, prefix);  if(Compiler_peek(c, 0) != 19147688) Compiler_report_error(c, 33658058, _303, c -> token, NULL);  Token name = c -> token;  Compiler_next(c);  return name;
 }
 
 static List Compiler__declare_hole(Compiler c, Token token, Symbol kind, int sequence){
@@ -3267,7 +3267,7 @@ static void Compiler__using_holes(Compiler c, Array binders){
 }
 
 static List Compiler__using_hole(Compiler c){
-  return Compiler__declare_hole(c, Compiler__hole_name_token(c), 920394, 0);
+  return Compiler__declare_hole(c, Compiler__hole_name_token(c, 73), 920394, 0);
 }
 
 static List _hole(Atom binder, Symbol kind, int sequence){
@@ -3376,39 +3376,42 @@ static int _extends_expression(Token token){
 
 List Compiler_peek_macro_hole(Compiler c);
 List Compiler_try_parse_macro_slot(Compiler c, Symbol role){
-  if(! _init_guard_) _file_init_();  if(! Map_truth(c -> macro_holes)) return NULL;  if(role != 405758822009820 && role != 43159332400040 && Compiler_peek(c, 0) == 73 && Compiler_peek(c, 2) == 81 && ! List_truth(Compiler_peek_macro_hole(c)) && ! List_truth(Compiler__peek_invocation(c))) return Compiler__meta_call_slot(c, role);  if(Compiler_peek(c, 0) == 9297) return Compiler__lisp_slot(c, role);  return Compiler__hole_slot(c, role);
+  if(! _init_guard_) _file_init_();  if(! Map_truth(c -> macro_holes)) return NULL;  if(Compiler_peek(c, 0) == 129 && ! List_truth(Compiler_peek_macro_hole(c))) return Compiler__meta_call_slot(c, role);  if(role != 405758822009820 && role != 43159332400040 && Compiler_peek(c, 0) == 73 && Compiler_peek(c, 2) == 81 && ! List_truth(Compiler_peek_macro_hole(c)) && ! List_truth(Compiler__peek_invocation(c))) return Compiler__meta_call_slot(c, role);  if(Compiler_peek(c, 0) == 9297 || Compiler_peek(c, 0) == 16465) return Compiler__lisp_slot(c, role);  return Compiler__hole_slot(c, role);
 }
 
-Token Token_skip_trivia(Token);
 List Compiler_try_parse_macro_expression(Compiler c);
 static List Compiler__meta_call_slot(Compiler c, Symbol role){
-  Token arguments = Token_skip_trivia(Token_skip_trivia(c -> token + 1) + 1);  int follows_splice = Token_after_group(arguments) -> type == 1519197;  if(! follows_splice &&(role == 5011670 || SymbolSet_contains(declaration_roles, role))) return NULL;  List call = Compiler_try_parse_macro_expression(c);  int splice = Compiler__slot_splice(c, SymbolSet_contains(sequence_roles, role));  return cons(_234, cons(int_var(splice), cons(List_var(call), NULL)));
+  int sequence = Compiler_peek(c, 0) == 129;  if(sequence && !(SymbolSet_contains(sequence_roles, role))) Compiler_report_error(c, 33658058, _317, c -> token, NULL);  String spelling;  Token arguments = Compiler__scan_name(c, &(spelling));  int follows_splice = sequence || Token_after_group(arguments) -> type == 1519197;  if(! follows_splice &&(role == 5011670 || SymbolSet_contains(declaration_roles, role))) return NULL;  List definition = Compiler__peek_invocation(c);  if(sequence && List_truth(definition) && _result_kind(definition) != 405758822009820){
+    Token invocation = c -> token;  Compiler__name(c);  List input = Compiler__invocation_arguments(c, definition, invocation);  return cons(_77, cons(List_var(Compiler__invocation_node(c, definition, input, invocation)), NULL));
+  }
+  List call = Compiler_try_parse_macro_expression(c);  int splice = Compiler__slot_splice(c, sequence, SymbolSet_contains(sequence_roles, role));  return cons(_234, cons(int_var(splice), cons(List_var(call), NULL)));
 }
 
 int Compiler_macro_lisp_starts_declaration(Compiler c);
 List Compiler_parse_macro_lisp_expression(Compiler c);
 static List Compiler__lisp_slot(Compiler c, Symbol role){
-  int splice = Compiler__lisp_splice_follows(c);  if(SymbolSet_contains(declaration_roles, role) && ! splice) return NULL;  if(role == 5011670 && Compiler_macro_lisp_starts_declaration(c)) return NULL;  if(role == 43159332400040) return NULL;  if(role == 405758822009820) return Compiler_parse_macro_lisp_expression(c);  return Compiler__parse_lisp_slot(c, SymbolSet_contains(sequence_roles, role), role);
+  int splice = Compiler_peek(c, 0) == 16465 || Compiler__lisp_splice_follows(c);  if(splice && !(SymbolSet_contains(sequence_roles, role))) Compiler_report_error(c, 33658058, _317, c -> token, NULL);  if(SymbolSet_contains(declaration_roles, role) && ! splice) return NULL;  if(! splice && role == 5011670 && Compiler_macro_lisp_starts_declaration(c)) return NULL;  if(role == 43159332400040) return NULL;  if(role == 405758822009820) return Compiler_parse_macro_lisp_expression(c);  return Compiler__parse_lisp_slot(c, SymbolSet_contains(sequence_roles, role), role);
 }
 
 Token Compiler_after_hole(Compiler c);
 static List Compiler__hole_slot(Compiler c, Symbol role){
-  List hole = Compiler_peek_macro_hole(c);  if(! List_truth(hole) ||(role == 107888847784 && ! Var_int(List_assoc(hole, Symbol_var(1317592723658)))) ||(role == 43159332400040 && Compiler_after_hole(c) -> type == 81)) return NULL;  if(role == 405758822009820 && Var_int(List_assoc(hole, Symbol_var(1317592723658)))) Compiler_report_error(c, 33658058, _317, c -> token, NULL);  if(!(SymbolSet_contains(untyped_roles, role))){
-    Symbol kind = Var_symbol(List_assoc(hole, Symbol_var(740232)));  if(! kind && Compiler_after_hole(c) -> type != 1519197 && ! Compiler__quoted_role(c, role)) return NULL;  if(kind && ! _kind_accepts_role(kind, role)) return NULL;
+  List hole = Compiler_peek_macro_hole(c);  if(! List_truth(hole) ||(role == 107888847784 && ! Var_int(List_assoc(hole, Symbol_var(1317592723658)))) ||(role == 43159332400040 && Compiler_after_hole(c) -> type == 81)) return NULL;  if(role == 405758822009820 && Var_int(List_assoc(hole, Symbol_var(1317592723658)))) Compiler_report_error(c, 33658058, _318, c -> token, NULL);  if(!(SymbolSet_contains(untyped_roles, role))){
+    Symbol kind = Var_symbol(List_assoc(hole, Symbol_var(740232)));  if(! kind && Compiler_peek(c, 0) != 129 && Compiler_peek(c, 0) != 16631 && Compiler_after_hole(c) -> type != 1519197 && ! Compiler__quoted_role(c, role)) return NULL;  if(kind && ! _kind_accepts_role(kind, role)) return NULL;
   }
   List syntax = Compiler__parse_hole(c, role);  return List_truth(syntax) && role == 405758822009820 ? cons(_199, cons(_202, cons(List_var(syntax), NULL))) : syntax;
 }
 
-static int Compiler__slot_splice(Compiler c, int allowed){
-  int splice = Compiler_test(c, 1519197);  if(splice && ! allowed) Compiler_report_error(c, 33658058, _318, c -> token, NULL);  return splice;
+static int Compiler__slot_splice(Compiler c, int sequence, int allowed){
+  int splice = Compiler_test(c, 1519197) || sequence;  if(splice && ! allowed) Compiler_report_error(c, 33658058, _317, c -> token, NULL);  return splice;
 }
 
+Token Token_skip_trivia(Token);
 List Compiler_peek_macro_hole(Compiler c){
-  if(! _init_guard_) _file_init_();  if(Compiler_peek(c, 0) != 73) return NULL;  if(Compiler_peek(c, 1) == 247) return Compiler__expression_hole(c, c -> token);  if(Compiler_peek(c, 1) != 19147688) return NULL;  Token name = Token_skip_trivia(c -> token + 1);  List hole = Compiler__hole_record(c, Atom_intern(name -> text));  return List_truth(hole) ? hole : Compiler__quoted_hole(c, name -> text, name + 1);
+  if(! _init_guard_) _file_init_();  Symbol prefix = Compiler_peek(c, 0);  if(prefix == 16631) return Compiler__expression_hole(c, c -> token);  if(prefix != 73 && prefix != 129) return NULL;  if(Compiler_peek(c, 1) == 247) return Compiler__expression_hole(c, c -> token);  if(Compiler_peek(c, 1) != 19147688) return NULL;  Token name = Token_skip_trivia(c -> token + 1);  List hole = Compiler__hole_record(c, Atom_intern(name -> text));  return List_truth(hole) ? hole : Compiler__quoted_hole(c, name -> text, c -> token, name + 1);
 }
 
 Token Compiler_after_hole(Compiler c){
-  if(! _init_guard_) _file_init_();  Token next = Token_skip_trivia(c -> token + 1);  return next -> type == 247 ? Token_after_group(next) : Token_skip_trivia(next + 1);
+  if(! _init_guard_) _file_init_();  if(Compiler_peek(c, 0) == 16631) return Token_after_group(c -> token);  Token next = Token_skip_trivia(c -> token + 1);  return next -> type == 247 ? Token_after_group(next) : Token_skip_trivia(next + 1);
 }
 
 List Compiler_parse_macro_quotation(Compiler c){
@@ -3460,7 +3463,7 @@ static List Compiler__expression_holes(Compiler c, Map holes){
     Token brace = t + 1, next = Token_skip_trivia(brace);  if(t -> type == 73 && next -> type == 60){
       next = Token_skip_trivia(next + 1);  if(String_is_identifier(next -> text)) next = Token_skip_trivia(next + 1);  t = Token_group_close(next);  Token typed = Token_after_group(next);  if(next -> type == 81 && typed -> type == 247) t = Token_group_close(typed);
     }
-    else if(t -> type == 73 && brace -> type == 247 &&(last != 199882 || Token_skip_trivia(brace + 1) -> type != 73)){
+    else if((t -> type == 129 || t -> type == 73) && brace -> type == 247 &&(last != 199882 || Token_skip_trivia(brace + 1) -> type != 73)){
       c -> token = brace;  Array_push(locals, List_var(Compiler__hole_local(c, holes, t -> pos)));  t = Token_group_close(brace);
     }
     last = t -> type;
@@ -3481,8 +3484,8 @@ static List Compiler__hole_local(Compiler c, Map holes, int position){
   )), AST_BLOCK, List_type(c -> return_type));
 }
 
-static List Compiler__expression_hole(Compiler c, Token dollar){
-  Var name;  if(! Map_truth(c -> macro_holes) || ! Map_try_get(c -> macro_holes, List_var(cons(_336, cons(int_var(dollar -> pos), NULL))), &(name))) return NULL;  List hole = Compiler__hole_record(c, Atom_intern(Var_string(name)));  return List_truth(hole) ? hole : Compiler__quoted_hole(c, Var_string(name), Token_after_group(dollar + 1));
+static List Compiler__expression_hole(Compiler c, Token prefix){
+  Var name;  if(! Map_truth(c -> macro_holes) || ! Map_try_get(c -> macro_holes, List_var(cons(_336, cons(int_var(prefix -> pos), NULL))), &(name))) return NULL;  List hole = Compiler__hole_record(c, Atom_intern(Var_string(name)));  return List_truth(hole) ? hole : Compiler__quoted_hole(c, Var_string(name), prefix, prefix -> type == 16631 ? Token_after_group(prefix) : Token_after_group(prefix + 1));
 }
 
 List Compiler_resolve_expression(Compiler, List, Token);
@@ -3700,8 +3703,8 @@ static int Compiler__quoted_role(Compiler c, Symbol role){
 List Sym_lookup(Sym, List, Type *);
 int Sym_binding_is_local(Sym, List);
 int Sym_is_named_value_type(Sym, Type, String);
-static List Compiler__quoted_hole(Compiler c, String spelling, Token after){
-  if(! Map_truth(c -> macro_holes) || !(Map_contains(c -> macro_holes, List_var(_320)))) return NULL;  Type type = NULL;  List local = Sym_lookup(c -> sym, cons(String_var(spelling), NULL), &(type));  if(! List_truth(local) || ! Sym_binding_is_local(c -> sym, local)) return NULL;  Symbol kind = Sym_is_named_value_type(c -> sym, type, _398) ? 1362954 : 0;  after = Token_skip_trivia(after);  int sequence = after -> type == 1519197 ||(after -> type == 845368370138 && String_equal(after -> text, _399));  List hole = Compiler__record_hole(c, spelling, kind, sequence);  Var quoted = Map_getindex(c -> macro_holes, List_var(_401));  Map_setindex(c -> macro_holes, List_var(_401), List_var(cons(List_var(hole), Var_is_row(quoted, 9, 7, 4) ? Var_list(quoted) : NULL)));  return hole;
+static List Compiler__quoted_hole(Compiler c, String spelling, Token prefix, Token after){
+  if(! Map_truth(c -> macro_holes) || !(Map_contains(c -> macro_holes, List_var(_320)))) return NULL;  Type type = NULL;  List local = Sym_lookup(c -> sym, cons(String_var(spelling), NULL), &(type));  if(! List_truth(local) || ! Sym_binding_is_local(c -> sym, local)) return NULL;  Symbol kind = Sym_is_named_value_type(c -> sym, type, _398) ? 1362954 : 0;  after = Token_skip_trivia(after);  int sequence = prefix -> type == 129 || prefix -> type == 16631 || after -> type == 1519197 ||(after -> type == 845368370138 && String_equal(after -> text, _399));  List hole = Compiler__record_hole(c, spelling, kind, sequence);  Var quoted = Map_getindex(c -> macro_holes, List_var(_401));  Map_setindex(c -> macro_holes, List_var(_401), List_var(cons(List_var(hole), Var_is_row(quoted, 9, 7, 4) ? Var_list(quoted) : NULL)));  return hole;
 }
 
 static List _quoted_holes(Compiler c){
@@ -3709,7 +3712,7 @@ static List _quoted_holes(Compiler c){
 }
 
 static List Compiler__parse_hole(Compiler c, Symbol role){
-  Token token = c -> token;  List hole = Compiler_peek_macro_hole(c);  if(! List_truth(hole)) Compiler__unbound(c, Compiler__hole_name_token(c) -> text, token);  c -> token = Compiler_after_hole(c);  Atom name = _hole_name(hole);  int sequence = Compiler__hole_splice(c, role);  if(sequence != Var_int(List_assoc(hole, Symbol_var(1317592723658)))) Compiler__cardinality_error(c, Atom_str(name), sequence, token);  Symbol inferred = _role_kind(role), kind = Var_symbol(List_assoc(hole, Symbol_var(740232)));  if(! kind){
+  Token token = c -> token;  List hole = Compiler_peek_macro_hole(c);  if(! List_truth(hole)) Compiler__unbound(c, Compiler__hole_name_token(c, token -> type) -> text, token);  c -> token = Compiler_after_hole(c);  Atom name = _hole_name(hole);  int sequence = Compiler__hole_splice(c, role) || token -> type == 129 || token -> type == 16631;  if(sequence != Var_int(List_assoc(hole, Symbol_var(1317592723658)))) Compiler__cardinality_error(c, Atom_str(name), sequence, token);  if(sequence && !(SymbolSet_contains(sequence_roles, role))) Compiler_report_error(c, 33658058, _317, c -> token, NULL);  Symbol inferred = _role_kind(role), kind = Var_symbol(List_assoc(hole, Symbol_var(740232)));  if(! kind){
     hole =({ static MatchCaptureSite _x2c_match_site_26;  x2c_match_site_search_replace(& _x2c_match_site_26, hole, List_var(_404), List_var(cons(_289, cons(Symbol_var(inferred), NULL)))); });  Map_setindex(c -> macro_holes, name, List_var(hole));
   }
   else if(! _kind_accepts_role(kind, role)){
@@ -3761,7 +3764,7 @@ List Compiler_try_parse_macro_member(Compiler c){
 }
 
 static List Compiler__parse_lisp_slot(Compiler c, int allow_sequence, Symbol role){
-  String form = Compiler__lisp_form(c);  int splice = Compiler__slot_splice(c, allow_sequence);  Var target = Map_getindex(c -> macro_holes, List_var(_187));  List construction = Compiler__lisp_construction(c, form);  if(Var_is_row(target, 9, 7, 4)){
+  int sequence = Compiler_peek(c, 0) == 16465;  String form = Compiler__lisp_form(c);  int splice = Compiler__slot_splice(c, sequence, allow_sequence);  Var target = Map_getindex(c -> macro_holes, List_var(_187));  List construction = Compiler__lisp_construction(c, form);  if(Var_is_row(target, 9, 7, 4)){
     Var required = _hole_key(Var_list(target), _221);  if(role == 920394) construction = List_append(construction, cons(List_var(cons(_31, cons(required, NULL))), NULL));  else if(role == 1405544) construction = List_append(construction, cons(required, NULL));
   }
   return cons(_234, cons(int_var(splice), cons(String_var(form), List_append(construction, NULL))));
@@ -4129,7 +4132,7 @@ static Symbol _result_kind(List definition){
 
 int Sym_has_local_macros(Sym);
 static List Compiler__peek_invocation(Compiler c){
-  Var stored;  if(Compiler_peek(c, 0) == 73){
+  Var stored;  if(Compiler_peek(c, 0) == 73 || Compiler_peek(c, 0) == 129){
     String spelling;  Compiler__scan_name(c, &(spelling));  if(! String_truth(spelling) || ! Compiler__try_definition(c, Atom_intern(spelling), ! c -> shallow, &(stored))) return NULL;  return Var_list(stored);
   }
   if(Compiler_peek(c, 0) != 19147688) return NULL;  Atom name = Atom_intern(c -> token -> text);  List definition = Sym_has_local_macros(c -> sym) ? Sym_lookup_macro(c -> sym, name) : NULL;  if(! List_truth(definition) && Compiler__try_macro(c, c -> kw_aliases, name, &(stored))) definition = Var_list(stored);  return List_truth(definition) &&(Compiler_peek(c, 1) == 81 || _bare(c -> token, definition)) ? definition : NULL;
@@ -4147,11 +4150,11 @@ static Token Compiler__scan_name(Compiler c, String * spelling){
 }
 
 static int _bare(Token invocation, List definition){
-  return invocation -> type != 73 && Var_equal(List_assoc(definition, Symbol_var(740232)), Symbol_var(9147177346020)) && ! List_truth(Var_list(List_assoc(definition, Symbol_var(1129338912386214))));
+  return invocation -> type != 73 && invocation -> type != 129 && Var_equal(List_assoc(definition, Symbol_var(740232)), Symbol_var(9147177346020)) && ! List_truth(Var_list(List_assoc(definition, Symbol_var(1129338912386214))));
 }
 
 static List Compiler__take_invocation(Compiler c, AstPos position){
-  List definition = Compiler__peek_invocation(c);  if(! Compiler__claims(c, definition, position)) return NULL;  if(Compiler_peek(c, 0) != 73){
+  List definition = Compiler__peek_invocation(c);  if(! Compiler__claims(c, definition, position)) return NULL;  if(Compiler_peek(c, 0) != 73 && Compiler_peek(c, 0) != 129){
     Compiler_next(c);  return definition;
   }
   Token invocation = c -> token;  Atom name = Compiler__name(c);  Var existing;  if(Map_truth(c -> macro_holes) && Compiler_peek(c, 0) != 81 && ! Compiler__try_definition(c, name, 1, &(existing))) Compiler__unbound(c, Atom_str(name), invocation);  return Compiler__lookup(c, name, invocation);
@@ -4862,7 +4865,7 @@ List Compiler_try_parse_macro_expression(Compiler c){
   if(! _init_guard_) _file_init_();  Token invocation = c -> token;  if(Compiler_peek(c, 0) == 73){
     List value = Compiler__named_macro_value(c, invocation);  if(List_truth(value)) return value;
   }
-  if(Compiler_peek(c, 0) == 73 && ! List_truth(Compiler__peek_invocation(c))) return Compiler__parse_meta_call(c, invocation);  List definition = Compiler__take_invocation(c, AST_EXPRESSION);  if(! List_truth(definition)) return NULL;  return Compiler_resolve_expression(c, Compiler__expression_invocation(c, definition, invocation), invocation);
+  if((Compiler_peek(c, 0) == 73 || Compiler_peek(c, 0) == 129) && ! List_truth(Compiler__peek_invocation(c))) return Compiler__parse_meta_call(c, invocation);  List definition = Compiler__take_invocation(c, AST_EXPRESSION);  if(! List_truth(definition)) return NULL;  return Compiler_resolve_expression(c, Compiler__expression_invocation(c, definition, invocation), invocation);
 }
 
 static List Compiler__named_macro_value(Compiler c, Token invocation){
@@ -6031,7 +6034,7 @@ static Var Compiler__eval_string(Compiler c, String source, Token invocation){
                     x2c_exception_landed(& _x2c_exception_frame_0);  if(x2c_exception_is_error_target(& _x2c_exception_frame_0)){
                       int _x2c_macro_selected_0 = x2c_error_catch_selected(_x2c_error_handler_0);  x2c_error_catch_detach(_x2c_error_handler_0);  x2c_exception_mark_handled(& _x2c_exception_frame_0);  if(_x2c_macro_selected_0 == 0){
                         Var volatile category;  category = x2c_error_catch_capture(_x2c_error_handler_0, 0); {
-                          static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/macros.x",.function = "Compiler__eval_string",.line = 4269};  x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(209659067570), category);  __builtin_unreachable();
+                          static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/macros.x",.function = "Compiler__eval_string",.line = 4300};  x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(209659067570), category);  __builtin_unreachable();
                         }
 
                       }
@@ -6193,7 +6196,7 @@ return Var_is_row(value, 9, 7, 4) && binding_identity_try_parts(Var_list(value),
 
 static Var _lisp_import_hook(String path){
   MetaContext * context = MetaContext_current();  Compiler c = context -> evaluator;  if(! c){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/macros.x",.function = "_lisp_import_hook",.line = 4417};  x2c_error_raise_n(& _x2c_error_site_1, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("compile-time import")), NULL))));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/macros.x",.function = "_lisp_import_hook",.line = 4448};  x2c_error_raise_n(& _x2c_error_site_1, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("compile-time import")), NULL))));  __builtin_unreachable();
   }
   Compiler__import(c, path, context -> site);  return List_var(NULL);
 }
