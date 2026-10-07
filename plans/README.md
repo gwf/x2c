@@ -44,6 +44,10 @@ execution.
 
 ### Current work
 
+- [Ordinary switch over String](string-switch.md): planned against dev
+  0916ff92. String and String-alias selectors with string-literal labels,
+  dispatched through one memoized helper in unit support; awaiting
+  execution.
 - [Harness simplification and messaging](harness-simplification-and-messaging.md):
   authorized corrections to existing tools and guidance, a small
   cross-platform integrator messaging pilot, and separate external runtime
