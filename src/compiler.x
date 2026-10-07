@@ -166,7 +166,6 @@ typedef struct Compiler {
   int runtime_inc, runtime_hdrs, collect_protocols, shallow, source_private;
   int public_bodies;  // Cold interfaces bind only exposed inline bodies.
   int interface_provider, signature_only;
-  Map interface_active;
   Array pending_inline_bodies;
   /* Whether the source is in the indentation syntax whatever its name, as
      when collection parses a segment of a file whose pragma it saw. */
@@ -1197,8 +1196,7 @@ static void Compiler._reset_parse(Compiler c, Map globs, int generated) {
   c.resolve_protocols();
   if (generated) c.install_generated_protocol_symbols();
   c.install_native_meta_effects(globs);
-  c.included_effects = c.included_compile_time_effects(
-    globs, c.interface_active);
+  c.included_effects = c.included_compile_time_effects(globs);
 }
 
 static void Compiler._reset_macros(Compiler c) {

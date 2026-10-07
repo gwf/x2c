@@ -177,7 +177,7 @@ Map Compiler.collect_symbols(Compiler c, Map globs) {
   }
   visited[canonical] = 1;
   c._walk_file(canonical, c.text, Path.dirname(c.filename), globs, visited);
-  c.bind_pending_inline_bodies(globs, canonical, NULL, NULL);
+  c.bind_pending_inline_bodies(globs, canonical);
   return globs;
 }
 
@@ -193,7 +193,7 @@ static void Compiler._add_prelude(Compiler c, Map globs, Map visited) {
   else
     c._replay_cached(
       c._prelude_entry(runtime, canonical), canonical, globs, visited,
-      NULL, NULL);
+      NULL);
 }
 
 /* The prelude contribution is `lib/x2c.x`'s entry: cached in this process,
@@ -519,21 +519,13 @@ static void FileWalk.include(FileWalk &w, String target, int angle) {
     w.visited[canonical] = 1;
     if (!entry) entry = w.c._walk_cold(target, canonical, w.globs, w.visited);
     w.c._replay_cached(
-      entry, canonical, w.globs, w.visited, NULL, NULL);
+      entry, canonical, w.globs, w.visited, NULL);
   }
   else if (w.visited[canonical] is <array>)
     w.c._replay_included(w.globs, canonical, {}, NULL, w.visited);
   _cache_dependency(
     w.dependencies, canonical, w.c._walked_hash(target, canonical));
   w.parts.push(canonical);
-  if (w.c.pending_inline_bodies.len()) {
-    int needs = w.c.pending_inline_needs_signatures(w.visited);
-    Map signatures = needs
-                   ? w.c.signature_lookahead(w.globs, w.visited) : NULL;
-    if (!needs || signatures != NULL)
-      w.c.bind_pending_inline_bodies(
-        w.globs, w.path, signatures, w.visited);
-  }
 }
 
 /* Preserve absent candidates and alias identity, not directory timestamps.
@@ -948,80 +940,12 @@ static void FileWalk.queue_public_bodies(FileWalk &w) {
       ${w.statics} ${w.hashes}));
 }
 
-/* A completed provider binds immediately. Only a dependency on an active,
-   unpublished ancestor needs future ordinary signatures. */
-static int Compiler.pending_inline_needs_signatures(
-  Compiler c, Map active) {
-  foreach (List work, c.pending_inline_bodies) {
-    List entry = c._entry(work[1]);
-    Map dependencies = entry[3];
-    foreach (Var (path, state), active)
-      if (state is <array> && path in dependencies && !c._entry(path))
-        return 1;
-  }
-  return 0;
-}
-
-/* Read ordinary declarations of active ancestors without evaluating their
-   future Lisp, imports, or Unit producers. Macro maps remain local to this
-   lookahead; the real walk still applies effects at their source positions. */
-static Map Compiler.signature_lookahead(
-  Compiler c, Map globs, Map active) {
-  Map signatures = {};
-  Array paths = [];
-  foreach (Var (path, state), active)
-    if (state is <array>) paths.push(path);
-  paths.sort();
-  foreach (String path, paths) {
-    String text = c._include_text(path, path);
-    Compiler shadow = Compiler.new_shared(c);
-    defer c.close_child(shadow);
-    shadow.filename = path;
-    if (!shadow._package_owns(path)) shadow.package = NULL;
-    shadow.layout = is_layout_file(path);
-    shadow.take_unit_state(c);
-    shadow.signature_only = 1;
-    shadow.macros = shadow.macros.copy();
-    shadow.kw_aliases = shadow.kw_aliases.copy();
-    shadow.object_macros = shadow.object_macros.copy();
-    shadow.imports = shadow.imports.copy();
-    shadow.declaration_effects = NULL;
-    shadow.collect_protocols = 0;
-    shadow.tokenize(text);
-    Map overlay = {};
-    DiagnosticsHold hold = shadow.diagnostics.hold();
-    int failed = 0;
-    $let(c.names.next_binding, c.names.next_binding)
-    $let(c.names.counters, c.names.counters.copy())
-    $let(c.names.file_scope_owners, c.names.file_scope_owners.copy()) {
-      try shadow.shallow_parse_overlay(globs, overlay);
-      catch %(malformed *): failed = 1;
-    }
-    shadow.diagnostics.release(hold, 0);
-    if (failed) return NULL;
-    FileWalk lookahead = {
-      .c = shadow, .unit = 1, .path = path, .globs = globs,
-      .parts = [overlay], .statics = shadow.sym.file_statics()};
-    _publish_unit_statics(lookahead.statics, overlay, path);
-    lookahead.select_public();
-    foreach (Var (key, value), overlay) {
-      if (_type_family(key)) signatures[key] = value;
-      else match (key) {
-        case %(?(String name)): signatures[key] = value;
-        case %(self ?): signatures[key] = value;
-        case %("unit-static" ?): signatures[key] = value;
-      }
-    }
-  }
-  return signatures;
-}
-
 /* Each provider binds its header bodies in its own original session.
    Included signatures come from the completed graph; effects still install
    at the provider's ordinary include positions. Remove the work before
    replay, because a cold dependency can complete more pending providers. */
 static void Compiler.bind_pending_inline_bodies(
-  Compiler c, Map globs, String unit, Map signatures, Map active) {
+  Compiler c, Map globs, String unit) {
   Array pending = c.pending_inline_bodies;
   if (!pending.len()) return;
   while (pending.len()) {
@@ -1030,12 +954,10 @@ static void Compiler.bind_pending_inline_bodies(
     Map visited = {};
     visited[path] = 1;
     Array effects = [];
-    if (signatures) symbols.merge(signatures);
     body._replay_cached(
-      body._entry(path), path, symbols, visited, effects, active);
+      body._entry(path), path, symbols, visited, effects);
     body.filename = path;
     body.meta_hashes = hashes;
-    body.interface_active = active;
     body.tokenize(text);
     List ast = body.full_parse(symbols, 0);
     Map additions = body.inline_type_dependencies(ast);
@@ -1050,7 +972,7 @@ static void Compiler.bind_pending_inline_bodies(
   visited[unit] = 1;
   Array effects = [];
   List entry = c._entry(unit);
-  if (entry) c._replay_cached(entry, unit, globs, visited, effects, active);
+  if (entry) c._replay_cached(entry, unit, globs, visited, effects);
 }
 
 static int FileWalk.produces(FileWalk &w) {
@@ -1248,7 +1170,7 @@ void Compiler.record_generated_symbol(
    completed-provider replay for full parsing. */
 static void Compiler._replay_cached(
   Compiler c, List entry, String path, Map globs, Map visited,
-  Array effects, Map active) {
+  Array effects) {
   Array prefix = effects != NULL ? NULL : [];
   if (prefix != NULL) visited[path] = prefix;
   foreach (Var name, entry.caddr()) c.fn_defs[name] = 1;
@@ -1262,7 +1184,7 @@ static void Compiler._replay_cached(
       c.replay_package_imports(globs, part, effects);
     }
     else if (part is <string>)
-      c._replay_include(part, globs, visited, effects, active);
+      c._replay_include(part, globs, visited, effects);
     if (prefix != NULL) prefix.push(part);
   }
   if (prefix != NULL) visited[path] = 1;
@@ -1270,15 +1192,13 @@ static void Compiler._replay_cached(
 
 /* An included file replays once per unit, from its entry or a cold walk. */
 static void Compiler._replay_include(
-  Compiler c, String path, Map globs, Map visited, Array effects,
-  Map active) {
+  Compiler c, String path, Map globs, Map visited, Array effects) {
   c.add_translation_dependency(path);
   if (path in visited) return;
   visited[path] = 1;
   List entry = c._entry(path);
-  if (!entry && active && active[path] is <array>) return;
   if (!entry) entry = c._walk_cold(path, path, globs, visited);
-  c._replay_cached(entry, path, globs, visited, effects, active);
+  c._replay_cached(entry, path, globs, visited, effects);
 }
 
 // package imports
@@ -1340,7 +1260,7 @@ static void Compiler._walk_package(
   visited[entry] = 1;
   List cached = package._entry(entry);
   if (cached) {
-    package._replay_cached(cached, entry, globs, visited, NULL, NULL);
+    package._replay_cached(cached, entry, globs, visited, NULL);
     return;
   }
   String text = NULL;
@@ -1531,8 +1451,7 @@ static void Compiler._import_package(
     canonical path of the unit's direct include. The parser installs those
     effects when it reaches that include.
 */
-Map Compiler.included_compile_time_effects(
-  Compiler c, Map globs, Map active) {
+Map Compiler.included_compile_time_effects(Compiler c, Map globs) {
   Map visited = {}, delivered = {};
   String unit = _canonical_path(c.filename);
   visited[unit] = 1;
@@ -1542,7 +1461,7 @@ Map Compiler.included_compile_time_effects(
     Array exports = [];
     if (part is <map>) c.replay_package_imports(globs, part, exports);
     else if (part is <string>) {
-      c._replay_included(globs, part, visited, exports, active);
+      c._replay_included(globs, part, visited, exports, NULL);
       if (exports.len()) delivered[part] = exports.list_free();
     }
   }
