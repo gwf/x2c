@@ -18,6 +18,7 @@ The generated header and source of one unit.
 | [`Compiler.dump_definitions`](#Compiler.dump_definitions) | Prints the `--dump-definitions` projection of the lowered unit `ast`: `(unit PATH)`, the module comment as `(module TEXT)` when the file opens with one, then one row per `Compiler.definition_rows` entry. |
 | [`Compiler.init_statements`](#Compiler.init_statements) | Returns the statements queued for `phase`, in the order they were added. |
 | [`Compiler.place_source_prelude`](#Compiler.place_source_prelude) | Places generated `declarations` after source types and includes, before the first function or captured initializer that can use them. |
+| [`Init.enter`](#Init.enter) | Returns `function` with its entry setup: the protocol initializer and the type initializer run once, and a `guarded` entry calls the region's initializer unless its guard is set. |
 
 ### Functions
 
@@ -65,7 +66,7 @@ token range and privacy of the top-level form that produced the
 definition; either is empty when the compiler made the definition.
 `LINE` is 1 and `DOC` empty for a definition without authored source.
 
-Source: `src/generate.x:1533`
+Source: `src/generate.x:1512`
 
 <a id="Compiler.dump_definitions"></a>
 #### Compiler.dump_definitions
@@ -77,7 +78,7 @@ Prints the `--dump-definitions` projection of the lowered unit `ast`:
 with one, then one row per `Compiler.definition_rows` entry. The
 command-line reference in the book describes the fields.
 
-Source: `src/generate.x:1626`
+Source: `src/generate.x:1605`
 
 <a id="Compiler.init_statements"></a>
 #### Compiler.init_statements
@@ -86,7 +87,7 @@ Source: `src/generate.x:1626`
 
 Returns the statements queued for `phase`, in the order they were added.
 
-Source: `src/generate.x:1076`
+Source: `src/generate.x:1059`
 
 <a id="Compiler.place_source_prelude"></a>
 #### Compiler.place_source_prelude
@@ -95,9 +96,44 @@ Source: `src/generate.x:1076`
 
 Places generated `declarations` after source types and includes, before
 the first function or captured initializer that can use them. An outer
-conditional containing that first use follows the declarations.
+conditional containing that first use follows the declarations. A unit
+without such a use gets them at its end, after the declarations they
+may assign.
 
-Source: `src/generate.x:887`
+Source: `src/generate.x:884`
+
+### `Init`
+
+<a id="Init.enter"></a>
+#### Init.enter
+
+`List Init.enter(Init &i, List function, int guarded)`
+
+Returns `function` with its entry setup: the protocol initializer and
+the type initializer run once, and a `guarded` entry calls the region's
+initializer unless its guard is set.
+
+Source: `src/generate.x:849`
+
+## Public types
+
+| Type | Kind | Summary |
+| --- | --- | --- |
+| [`Init`](#Init) | struct | Holds one region's initialization. |
+
+<a id="Init"></a>
+### Init
+
+`typedef struct Init { Compiler c, String initializer, List guard, entry, shutdown, synthetic; Map reachable; } Init`
+
+Holds one region's initialization. `guard` is set once the region has
+initialized, and `entry` is the function a guarded entry calls. In the
+source, `initializer` names the type initializer, `shutdown` registers
+the unit's shutdown function, `synthetic` is the synthetic initializer or
+NULL, and `reachable` holds the entries a cache-only file guards, or is
+NULL when every public entry is guarded.
+
+Source: `src/generate.x:813`
 
 ## Design notes
 

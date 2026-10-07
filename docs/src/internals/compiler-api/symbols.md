@@ -419,7 +419,7 @@ Source: `src/symbols.x:134`
 
 Stops one transaction's semantic write log.
 
-Source: `src/symbols.x:1348`
+Source: `src/symbols.x:1347`
 
 <a id="Sym.enumerator_owner"></a>
 #### Sym.enumerator_owner
@@ -826,7 +826,7 @@ Its writes are already in the scope maps, so code holding a borrowed
 map observes a committed expansion. An absent or inactive transaction
 has no effect.
 
-Source: `src/symbols.x:1359`
+Source: `src/symbols.x:1358`
 
 <a id="SymTxn.commit_transient"></a>
 #### SymTxn.commit_transient
@@ -837,7 +837,7 @@ Commits an active transaction, retaining the original counters map.
 The caller may then release the transaction's construction scope.
 Parsing and evaluation must allocate outside that temporary scope.
 
-Source: `src/symbols.x:1381`
+Source: `src/symbols.x:1380`
 
 <a id="SymTxn.local_macros_changed"></a>
 #### SymTxn.local_macros_changed
@@ -846,7 +846,7 @@ Source: `src/symbols.x:1381`
 
 Returns whether the transaction's active scope changed its macro map.
 
-Source: `src/symbols.x:1331`
+Source: `src/symbols.x:1330`
 
 <a id="SymTxn.rollback"></a>
 #### SymTxn.rollback
@@ -856,7 +856,7 @@ Source: `src/symbols.x:1331`
 Restores every semantic value captured by an active transaction.
 An absent or inactive transaction has no effect.
 
-Source: `src/symbols.x:1401`
+Source: `src/symbols.x:1400`
 
 ## Public types
 

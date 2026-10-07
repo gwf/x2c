@@ -80,7 +80,7 @@ Source: `src/protocol.x:2119`
 Generates adapters and descriptor registration for resolved conformances.
 Native aliases are inserted at the participant's inferred public or
 private boundary. Ordinary adapters and descriptor thunks are added to the
-compiler's early output. Returns `ast` with native insertions applied.
+unit's pending support. Returns `ast` with native insertions applied.
 
 Source: `src/protocol.x:2315`
 
@@ -167,7 +167,7 @@ Source: `src/protocol.x:1789`
 
 Returns a generated helper for a direct protocol-backed update.
 The resolved member must have exactly `(Participant, RHS) -> Participant`.
-A matching helper is emitted once into the compiler's early declarations;
+A matching helper is emitted once into the unit's pending support;
 `postfix` selects whether it returns the old or stored value. Returns null
 when the member cannot implement this update shape.
 

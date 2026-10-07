@@ -20,6 +20,7 @@ Callable values lowered to C helpers.
 | [`Compiler.lower_typed_adapter_expr`](#Compiler.lower_typed_adapter_expr) | Lowers a resolved `tadapt` expression to a typed callback helper. |
 | [`Compiler.maybe_adapt_func_arg`](#Compiler.maybe_adapt_func_arg) | Adapts a direct native function argument when `FuncAdapter` is expected. |
 | [`Compiler.prepare_lambda_cells`](#Compiler.prepare_lambda_cells) | Prepares one resolved function body for shared mutable lambda captures. |
+| [`Compiler.prepend_setup`](#Compiler.prepend_setup) | Puts `setup` at the entry of a block or typed expression `body`. |
 
 ### `Compiler`
 
@@ -49,7 +50,7 @@ Binds the file-static context type `name` with the field rows `fields`,
 for captured lambdas and callable defers. The complete typedef is bound
 at once, so each field keeps its member type.
 
-Source: `src/callables.x:263`
+Source: `src/callables.x:262`
 
 <a id="Compiler.func_signature"></a>
 #### Compiler.func_signature
@@ -133,7 +134,16 @@ parameters and locals to `Scope`-owned cells, prepares nested bodies,
 and returns the rewritten body with declaration and initializer order
 preserved.
 
-Source: `src/callables.x:462`
+Source: `src/callables.x:461`
+
+<a id="Compiler.prepend_setup"></a>
+#### Compiler.prepend_setup
+
+`List Compiler.prepend_setup(Compiler c, List body, List setup)`
+
+Puts `setup` at the entry of a block or typed expression `body`.
+
+Source: `src/callables.x:692`
 
 ## Design notes
 

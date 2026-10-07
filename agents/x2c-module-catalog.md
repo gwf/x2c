@@ -74,7 +74,7 @@ cached literal slots and deferred file-static initializers.
 Public functions:
 
 `Compiler.setup_cache_init`, `_initializer_function`, `_run_once`,
-`_entry_call`, `Compiler.initialization_guard`, `_patch_initialized_entry`
+`_entry_call`, `Compiler.initialization_guard`
 
 ### [src/callables.x](../src/callables.x)
 
@@ -83,9 +83,10 @@ callable values lowered to C helpers.
 Public functions:
 
 `Compiler.lower_lambda_expr`, `Compiler.capture_environment`,
-`Compiler.prepare_lambda_cells`, `Compiler.lift_func_expression`,
-`Compiler.maybe_adapt_func_arg`, `Compiler.func_signature`,
-`Compiler.lower_typed_adapter_expr`, `Compiler.adapt_lambda_arg`
+`Compiler.prepare_lambda_cells`, `Compiler.prepend_setup`,
+`Compiler.lift_func_expression`, `Compiler.maybe_adapt_func_arg`,
+`Compiler.func_signature`, `Compiler.lower_typed_adapter_expr`,
+`Compiler.adapt_lambda_arg`
 
 ### [src/cleanup.x](../src/cleanup.x)
 
@@ -156,11 +157,12 @@ Public functions:
 `Compiler.settle_reference`, `Compiler.restore_reference_presence`,
 `Compiler.optional_reference_test`, `reference_guard_exits`,
 `Compiler.fresh_name`, `Compiler.gensym`, `Compiler.add_early`,
-`Compiler.add_init`, `Compiler.cache`, `Compiler.cache_cons_cell`,
-`Compiler.cache_literal_var`, `Compiler.cache_literal_list`,
-`Compiler.match_pattern_value`, `match_value_is_static`,
-`Compiler.match_pattern_is_static`, `match_value_head`,
-`match_value_flat_head`, `Compiler.match_pattern_binders`,
+`Compiler.add_init`, `Pending.reset`, `Pending.area`, `Pending.initializes`,
+`Pending.checkpoint`, `Pending.restore`, `Compiler.cache`,
+`Compiler.cache_cons_cell`, `Compiler.cache_literal_var`,
+`Compiler.cache_literal_list`, `Compiler.match_pattern_value`,
+`match_value_is_static`, `Compiler.match_pattern_is_static`,
+`match_value_head`, `match_value_flat_head`, `Compiler.match_pattern_binders`,
 `Compiler.define_match_binders`, `Compiler.define_catch_binders`,
 `Compiler.catch_binder_declarations`, `Compiler.own_diagnostics`,
 `Compiler.borrow_diagnostics`, `Compiler.close_child`,
@@ -272,9 +274,9 @@ the generated header and source of one unit.
 
 Public functions:
 
-`generate_code`, `generate_code_text`, `Compiler.place_source_prelude`,
-`Compiler.init_statements`, `Compiler.definition_rows`,
-`Compiler.dump_definitions`
+`generate_code`, `generate_code_text`, `Init.enter`,
+`Compiler.place_source_prelude`, `Compiler.init_statements`,
+`Compiler.definition_rows`, `Compiler.dump_definitions`
 
 ### [src/grammar.x](../src/grammar.x)
 
