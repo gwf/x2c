@@ -835,7 +835,7 @@ static List Compiler._declaration_macro(Compiler c, List rows, int thaw) {
 static List Compiler._macro_row(Compiler c, List row, int thaw) {
   match (row) {
     case %(origin ?location):
-      return %(origin ${_declaration_location(location, thaw)});
+      return %(origin ${_declaration_location(location, 0)});
     case %(file ?path): return %(file ${home_portable_path(path)});
   }
   return thaw ? c.thaw_declaration_syntax(row)

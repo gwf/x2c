@@ -4502,7 +4502,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_8(void){
   _4135 = List_var(_4134);
   _4136 = String_new("src/compiler.x");
   _4137 = String_var(_4136);
-  _4138 = String_new("594dfe36");
+  _4138 = String_new("f9400709");
   _4139 = String_var(_4138);
   _4140 = cons(_4139, NULL);
   _4141 = cons(_4137, _4140);
