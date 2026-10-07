@@ -10,7 +10,7 @@
 */
 
 #pragma once
-#include "../lib/private-keywords.x"
+#include "private-keywords.x"
 #include "grammar.x"
 #include "ast-rewrite.x"
 #include "compiler.x"
@@ -2340,13 +2340,12 @@ void Compiler.install_compile_time_effects(Compiler c, List rows) {
     case %(compile-time effects *effects):
       c.install_compile_time_effects(effects);
     case %(compile-time macrodef ?definition): {
-      List node = c._rebind_imported(c.thaw_declaration_syntax(definition));
-      c.macros[node.assoc(<name>)] = node;
+      Var name = c.thaw_declaration_syntax(definition.list().assoc(<name>));
+      c.macros[name] = %(imported-macro $definition);
     }
     case %(compile-time keyword ?alias ?definition): {
       if (!c.kw_aliases) c.kw_aliases = {};
-      c.kw_aliases[alias] =
-        c._rebind_imported(c.thaw_declaration_syntax(definition));
+      c.kw_aliases[alias] = %(imported-macro $definition);
     }
     case %(compile-time lisp ?form (source ?path ?site)): {
       Token token = c.thaw_declaration_syntax(site);
@@ -2443,7 +2442,7 @@ static int Compiler._fixed_alias(Compiler c, Atom alias) {
   Var existing;
   return !c.builtin_defs &&
     (alias == <with> ||
-     (c.kw_aliases.try_get(alias, existing) &&
+     (c._try_macro(c.kw_aliases, alias, existing) &&
       existing.list().assoc(<builtin>).int()));
 }
 
@@ -2542,7 +2541,8 @@ static List Compiler._peek_invocation(Compiler c) {
   Atom name = Atom.intern(c.token.text);
   List definition = c.sym.has_local_macros()
                   ? c.sym.lookup_macro(name) : NULL;
-  if (!definition && c.kw_aliases.try_get(name, stored)) definition = stored;
+  if (!definition && c._try_macro(c.kw_aliases, name, stored))
+    definition = stored;
   return definition && (c.peek(1) == <(> || _bare(c.token, definition))
        ? definition : NULL;
 }
@@ -2614,11 +2614,23 @@ static List Compiler._lookup(Compiler c, Atom name, Token invocation) {
    dependency and installs them when the name is not yet defined. */
 static int Compiler._try_definition(
   Compiler c, Atom name, int install_lisp, Var &stored) {
-  int found = c.macros.try_get(name, stored);
+  int found = c._try_macro(c.macros, name, stored);
   String spelling = name.str();
   if (!install_lisp || !spelling.startswith("lisp.")) return found;
   c._use_lisp_bindings(!found);
-  return found || c.macros.try_get(name, stored);
+  return found || c._try_macro(c.macros, name, stored);
+}
+
+/* Includes publish names immediately. Decode a template into this unit's
+   bindings only when it is used, keeping the result in the same name map. */
+static int Compiler._try_macro(
+  Compiler c, Map definitions, Atom name, Var &stored) {
+  if (!definitions.try_get(name, stored)) return 0;
+  match (stored) case %(imported-macro ?definition): {
+    stored = c._rebind_imported(c.thaw_declaration_syntax(definition));
+    c.sym.put(definitions, name, stored);
+  }
+  return 1;
 }
 
 // shallow collection

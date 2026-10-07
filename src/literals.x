@@ -6,7 +6,7 @@
     literals parse in `lambdas.x`.
 */
 #pragma once
-#include "../lib/private-keywords.x"
+#include "private-keywords.x"
 #include "compiler.x"
 #include "grammar.x"
 #include "parse.x"

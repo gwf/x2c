@@ -20,7 +20,7 @@ typedef List Type;
 
 #include "grammar.x"
 #include "ast-rewrite.x"
-#include "../lib/native-scalar-types.x"
+#include "native-scalar-types.x"
 #include <limits.h>
 #include <stdarg.h>
 #include <stdio.h>

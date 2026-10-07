@@ -10,7 +10,7 @@
 */
 
 #pragma once
-#include "../lib/private-keywords.x"
+#include "private-keywords.x"
 #include "path.x"
 #include "process.x"
 #include "sourceview.x"

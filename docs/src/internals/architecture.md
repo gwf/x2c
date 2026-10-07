@@ -228,7 +228,10 @@ type families needed by public declarations. Source-position rows also retain
 public macro and keyword definitions, Lisp effects, and provider meta-function
 identities. Cold collection and interface replay use the same ordered parts,
 while the full parser installs included compile-time definitions at their
-include positions. Local declaration productions stay in their owning unit's
+include positions. Macro names become visible immediately; their templates
+are decoded into the current unit only on first use. The existing semantic
+write log restores that decode if its expansion rolls back.
+Local declaration productions stay in their owning unit's
 Context until full parsing consumes them. Their syntax, macro frames, and
 binding facts are not exported. Static helpers remain in their provider.
 The file holds one

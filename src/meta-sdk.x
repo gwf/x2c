@@ -12,7 +12,7 @@
 */
 
 #pragma once
-#include "../lib/private-keywords.x"
+#include "private-keywords.x"
 #include "compiler.x"
 
 /** What the running compile-time call answers from. `expander` is the

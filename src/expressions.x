@@ -8,7 +8,7 @@
     `initializers.x`.
 */
 #pragma once
-#include "../lib/private-keywords.x"
+#include "private-keywords.x"
 #include "compiler.x"
 #include "type.x"
 

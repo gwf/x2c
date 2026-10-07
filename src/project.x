@@ -8,7 +8,7 @@
 */
 
 #pragma once
-#include "../lib/private-keywords.x"
+#include "private-keywords.x"
 #include "build.x"
 
 /** Links native build requests in dependency-first order.

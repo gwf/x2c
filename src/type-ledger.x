@@ -9,7 +9,7 @@
 
 #include "type.x"
 
-#include "../lib/var-tags.x"
+#include "var-tags.x"
 
 /* Each native pointer type's tag; the ledger adds every boxed class and a
    pointer to it. */

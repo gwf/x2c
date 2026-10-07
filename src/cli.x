@@ -45,7 +45,7 @@ typedef struct TargetKind {
   Symbol kind, String spelling, noun, prefix, suffix;
 } TargetKind;
 
-#include "../lib/system-macros.x"
+#include "system-macros.x"
 
 #include <ctype.h>
 #include <errno.h>

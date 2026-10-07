@@ -9,7 +9,7 @@
 */
 
 #pragma once
-#include "../lib/private-keywords.x"
+#include "private-keywords.x"
 #include "build.x"
 
 #include <stdio.h>

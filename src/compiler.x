@@ -13,7 +13,7 @@
     boundary is active.
 */
 #pragma once
-#include "../lib/private-keywords.x"
+#include "private-keywords.x"
 #include "tokenizer.x"
 #include "ast.x"
 #include "type.x"

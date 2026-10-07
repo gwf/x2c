@@ -8,7 +8,7 @@
     leave here resolved and in first-use order; `callables.x` lowers them.
 */
 #pragma once
-#include "../lib/private-keywords.x"
+#include "private-keywords.x"
 #include "compiler.x"
 #include "ast-rewrite.x"
 #include "grammar.x"
