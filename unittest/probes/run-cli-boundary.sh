@@ -561,10 +561,11 @@ if ! ended $sleeper; then
 fi
 
 # GNU Make 4 remakes a deleted included file, and the unit that included it
-# then translates again.
+# then translates again. Keep its jobserver separate from the parent Make.
 gnu_make=$(command -v gmake || command -v make)
 if [[ $("$gnu_make" --version 2>/dev/null) == "GNU Make "[4-9]* ]]; then
   mv "$BUILD/deps/src/leaf.x" "$BUILD/deps/leaf.gone"
+  MAKEFLAGS= MFLAGS= MAKELEVEL= \
   "$gnu_make" -C "$ROOT/unittest" -f build/cli-boundary/deps/Makefile \
     default >"$BUILD/deps/gone.out" 2>&1 || true
   grep -q 'translate .*root\.x' "$BUILD/deps/gone.out"
