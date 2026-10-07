@@ -12,8 +12,7 @@
     The ledger and its projections are `meta` functions. lib/var-ledger.x
     projects the tag table, the tag sets, the numeric table, the decoder
     table, and the `TagId` check; src/type-ledger.x projects the type lookup
-    and the constant rows. Only those two units import this file, because
-    an import in an included file runs in every unit that includes it.
+    and the constant rows.
 */
 
 meta List _tag_groups(void) => %(
