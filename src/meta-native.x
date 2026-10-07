@@ -933,7 +933,7 @@ static Map _linked_module(void) {
   return native_modules[linked_supplier];
 }
 
-/** Returns the source and dependency hashes compiled into a linked provider. */
+/** Returns a linked provider's source and dependency hashes. */
 List linked_meta_provider_source(String provider) {
   _linked_module();
   return linked_hashes[provider];
