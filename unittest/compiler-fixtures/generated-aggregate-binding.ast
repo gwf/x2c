@@ -11,17 +11,18 @@
 (function (int) 
  (bind (binding 3 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 2 (declare ("GeneratedRecord") 
-         (bindings 
-          (op = (bind (binding 4 "record") ()) 
-           (expr () 
-            (composite 
-             (commas (dotinit ("value") (expr (int) (literal (int) "17")))))))))) 
-  (at 3 (stmnt 
-         (expr () 
-          (call (expr () (ident (binding 5 "printf"))) 
-           (args (expr (* char) (literal (* char) "\"%d\\n\"")) 
-            (expr (int) 
-             (op . (expr ("GeneratedRecord") (ident (binding 4 "record"))) 
-              ("value")))))))) 
-  (at 4 (return (int) (expr (int) (literal (int) "0"))))))
+  (at 20 
+   (declare ("GeneratedRecord") 
+    (bindings 
+     (op = (bind (binding 4 "record") ()) 
+      (expr () 
+       (composite (commas (dotinit ("value") (expr (int) (literal (int) "17")))))))))) 
+  (at 21 
+   (stmnt 
+    (expr () 
+     (call (expr () (ident (binding 5 "printf"))) 
+      (args (expr (* char) (literal (* char) "\"%d\\n\"")) 
+       (expr (int) 
+        (op . (expr ("GeneratedRecord") (ident (binding 4 "record"))) 
+         ("value")))))))) 
+  (at 22 (return (int) (expr (int) (literal (int) "0"))))))

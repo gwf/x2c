@@ -11,75 +11,78 @@
   ((fnmod (params (param (void) (bind () ())))) 
    *)) 
  (block 
-  (at 1 (stmnt 
-         (expr (int) 
-          (postfix ++ (expr (int) (ident (binding 1 "dynamic_calls"))))))) 
-  (at 2 (return (* char) (expr (* char) (literal (* char) "\"dynamic\""))))))
+  (at 17 
+   (stmnt 
+    (expr (int) (postfix ++ (expr (int) (ident (binding 1 "dynamic_calls"))))))) 
+  (at 18 (return (* char) (expr (* char) (literal (* char) "\"dynamic\""))))))
 
 (function (inline "String") 
  (bind (binding 3 "header_direct") 
   ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 3 (return ("String") (expr (* char) (literal (* char) "\"shared\""))))))
+  (at 19 (return ("String") (expr (* char) (literal (* char) "\"shared\""))))))
 
 (function (inline "String") 
  (bind (binding 4 "header_same") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 4 (return ("String") (expr (* char) (literal (* char) "\"shared\""))))))
+  (at 20 (return ("String") (expr (* char) (literal (* char) "\"shared\""))))))
 
 (function (inline "String") 
  (bind (binding 5 "header_dual") ((fnmod (params (param (void) (bind () ())))))) 
- (block (at 5 (return ("String") (expr (* char) (literal (* char) "\"dual\""))))))
+ (block 
+  (at 21 (return ("String") (expr (* char) (literal (* char) "\"dual\""))))))
 
 (function (inline "String") 
  (bind (binding 6 "header_parens") 
   ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 6 (return ("String") 
-         (expr (* char) (parens (expr (* char) (literal (* char) "\"paren\""))))))))
+  (at 22 
+   (return ("String") 
+    (expr (* char) (parens (expr (* char) (literal (* char) "\"paren\""))))))))
 
 (function (inline "String") 
  (bind (binding 7 "header_conditional") 
   ((fnmod (params (param (int) (bind (binding 8 "literal") ())))))) 
  (block 
-  (at 7 (return ("String") 
-         (expr (* char) 
-          (op ? (expr (int) (ident (binding 8 "literal"))) 
-           (expr (* char) (literal (* char) "\"\\x41\\u00A9\\\"C\\0tail\"")) 
-           (expr (* char) 
-            (call (expr ((func ((void))) * char) 
-                   (ident (binding 2 "dynamic_raw"))) (args (expr (void) ()))))))))))
+  (at 23 
+   (return ("String") 
+    (expr (* char) 
+     (op ? (expr (int) (ident (binding 8 "literal"))) 
+      (expr (* char) (literal (* char) "\"\\x41\\u00A9\\\"C\\0tail\"")) 
+      (expr (* char) 
+       (call (expr ((func ((void))) * char) (ident (binding 2 "dynamic_raw"))) 
+        (args (expr (void) ()))))))))))
 
 (function (inline "Var") 
  (bind (binding 9 "header_boxed") 
   ((fnmod (params (param (void) (bind () ())))))) 
- (block (at 8 (return ("Var") (expr (* char) (literal (* char) "\"boxed\""))))))
+ (block (at 24 (return ("Var") (expr (* char) (literal (* char) "\"boxed\""))))))
 
 (function (inline "List") 
  (bind (binding 10 "header_list") ((fnmod (params (param (void) (bind () ())))))) 
- (block (at 9 (return ("List") (expr ("List") (expr ("List") (cache 843)))))))
+ (block (at 25 (return ("List") (expr ("List") (expr ("List") (cache 4)))))))
 
 (function (static "String") 
  (bind (binding 11 "source_dual") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 10 (return ("String") (expr (* char) (literal (* char) "\"dual\""))))))
+  (at 26 (return ("String") (expr (* char) (literal (* char) "\"dual\""))))))
 
 (function (static "String") 
  (bind (binding 12 "take_string") 
   ((fnmod (params (param ("String") (bind (binding 13 "value") ())))))) 
  (block 
-  (at 11 (return ("String") (expr ("String") (ident (binding 13 "value")))))))
+  (at 27 (return ("String") (expr ("String") (ident (binding 13 "value")))))))
 
 (function (int) 
  (bind (binding 14 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 12 (declare ("String") (bindings (bind (binding 15 "assigned") ())))) 
-  (at 13 
+  (at 28 (declare ("String") (bindings (bind (binding 15 "assigned") ())))) 
+  (at 29 
    (stmnt 
     (expr ("String") 
      (op = (expr ("String") (ident (binding 15 "assigned"))) 
-      (expr ("String") (cache 844)))))) 
-  (at 14 
+      (expr ("String") (cache 5)))))) 
+  (at 30 
    (declare ("String") 
     (bindings 
      (op = (bind (binding 16 "direct") ()) 
@@ -87,7 +90,7 @@
        (call (expr ((func (("String"))) "String") 
               (ident (binding 12 "take_string"))) 
         (args (expr (* char) (literal (* char) "\"argument\""))))))))) 
-  (at 15 
+  (at 31 
    (declare ("String") 
     (bindings 
      (op = (bind (binding 17 "escaped") ()) 
@@ -95,7 +98,7 @@
        (call (expr ((func ((int))) "String") 
               (ident (binding 7 "header_conditional"))) 
         (args (expr (int) (literal (int) "1"))))))))) 
-  (at 16 
+  (at 32 
    (declare ("String") 
     (bindings 
      (op = (bind (binding 18 "dynamic") ()) 
@@ -103,38 +106,38 @@
        (call (expr ((func ((int))) "String") 
               (ident (binding 7 "header_conditional"))) 
         (args (expr (int) (literal (int) "0"))))))))) 
-  (at 17 
+  (at 33 
    (declare ("String") 
     (bindings 
      (op = (bind (binding 19 "before_string") ()) 
       (expr ("String") 
        (call (expr ((func ((void))) "String") 
               (ident (binding 3 "header_direct"))) (args (expr (void) ())))))))) 
-  (at 18 
+  (at 34 
    (declare ("List") 
     (bindings 
      (op = (bind (binding 20 "before_list") ()) 
       (expr ("List") 
        (call (expr ((func ((void))) "List") (ident (binding 10 "header_list"))) 
         (args (expr (void) ())))))))) 
-  (at 19 
+  (at 35 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 21 "boxed") ()) 
       (expr ("Var") 
        (call (expr ((func ((void))) "Var") (ident (binding 9 "header_boxed"))) 
         (args (expr (void) ())))))))) 
-  (at 20 
+  (at 36 
    (declare ("String") 
     (bindings 
      (op = (bind (binding 22 "child_string") ()) 
       (expr () (ident (binding 23 "NULL"))))))) 
-  (at 21 
+  (at 37 
    (declare ("List") 
     (bindings 
      (op = (bind (binding 24 "child_list") ()) 
       (expr () (ident (binding 23 "NULL"))))))) 
-  (at 22 
+  (at 38 
    (declare ("Pool") 
     (bindings 
      (op = (bind (binding 25 "string_pool") ()) 
@@ -142,12 +145,12 @@
        (call (expr ((func ((* const char))) "Pool") 
               (ident (binding 26 "Pool_open_named"))) 
         (args (expr (* char) (literal (* char) "\"promoted-value-cache\""))))))))) 
-  (at 23 
+  (at 39 
    (declare ("Pool") 
     (bindings 
      (op = (bind (binding 27 "list_pool") ()) 
       (expr ("Pool") (ident (binding 25 "string_pool"))))))) 
-  (at 24 
+  (at 40 
    (declare ("PoolStats") 
     (bindings 
      (op = (bind (binding 28 "string_before") ()) 
@@ -155,7 +158,7 @@
        (call (expr ((func (("Pool"))) ("PoolStats")) 
               (ident (binding 29 "Pool_stats"))) 
         (args (expr ("Pool") (ident (binding 25 "string_pool")))))))))) 
-  (at 25 
+  (at 41 
    (declare ("PoolStats") 
     (bindings 
      (op = (bind (binding 30 "list_before") ()) 
@@ -163,21 +166,21 @@
        (call (expr ((func (("Pool"))) ("PoolStats")) 
               (ident (binding 29 "Pool_stats"))) 
         (args (expr ("Pool") (ident (binding 27 "list_pool")))))))))) 
-  (at 26 
+  (at 42 
    (stmnt 
     (expr ("String") 
      (op = (expr ("String") (ident (binding 22 "child_string"))) 
       (expr ("String") 
        (call (expr ((func ((void))) "String") (ident (binding 4 "header_same"))) 
         (args (expr (void) ())))))))) 
-  (at 27 
+  (at 43 
    (stmnt 
     (expr ("List") 
      (op = (expr ("List") (ident (binding 24 "child_list"))) 
       (expr ("List") 
        (call (expr ((func ((void))) "List") (ident (binding 10 "header_list"))) 
         (args (expr (void) ())))))))) 
-  (at 28 
+  (at 44 
    (declare ("PoolStats") 
     (bindings 
      (op = (bind (binding 31 "string_after") ()) 
@@ -190,12 +193,12 @@
        (call (expr ((func (("Pool"))) ("PoolStats")) 
               (ident (binding 29 "Pool_stats"))) 
         (args (expr ("Pool") (ident (binding 27 "list_pool")))))))))) 
-  (at 29 
+  (at 45 
    (stmnt 
     (expr (void) 
      (call (expr ((func ((void))) void) (ident (binding 33 "Pool_close"))) 
       (args (expr (void) ())))))) 
-  (at 30 
+  (at 46 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 34 "printf"))) 
@@ -260,7 +263,7 @@
         (call (expr ((func (("Var"))) ("String")) 
                (ident (binding 39 "Var_string"))) 
          (args (expr ("Var") (ident (binding 21 "boxed"))))))))))) 
-  (at 31 
+  (at 47 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 34 "printf"))) 
@@ -287,7 +290,7 @@
              (expr ("size_t") 
               (op . (expr ("PoolStats") (ident (binding 30 "list_before"))) 
                ("interned")))))))))))))) 
-  (at 32 
+  (at 48 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 34 "printf"))) 
@@ -304,4 +307,4 @@
                 (call (expr ((func (("List"))) ("Var")) 
                        (ident (binding 40 "List_cadr"))) 
                  (args (expr ("List") (ident (binding 24 "child_list")))))))))))))) 
-  (at 33 (return (int) (expr (int) (literal (int) "0"))))))
+  (at 49 (return (int) (expr (int) (literal (int) "0"))))))

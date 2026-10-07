@@ -3,10 +3,10 @@
  (bind (binding 1 "double_value") 
   ((fnmod (params (param ("Var") (bind (binding 2 "value") ())))))) 
  (block 
-  (at 37 
+  (at 53 
    (return 
     (expr ("Var") 
-     (at 36 
+     (at 52 
       (call (expr (macro-expr) (ident (binding-name "Var_binary"))) 
        (args (expr ("Var") (ident (binding 2 "value"))) 
         (expr ("Symbol") (literal ("Symbol") "*" *)) 
@@ -18,13 +18,13 @@
  (bind (binding 4 "is_even") 
   ((fnmod (params (param ("Var") (bind (binding 5 "value") ())))))) 
  (block 
-  (at 40 
+  (at 56 
    (return 
     (expr (int) 
-     (at 39 
+     (at 55 
       (call (expr (macro-expr) (ident (binding-name "Var_equal"))) 
        (args (expr ("Var") 
-              (at 38 
+              (at 54 
                (call (expr (macro-expr) (ident (binding-name "Var_binary"))) 
                 (args (expr ("Var") (ident (binding 5 "value"))) 
                  (expr ("Symbol") (literal ("Symbol") "%" %)) 
@@ -42,7 +42,7 @@
     (params (param ("Var") (bind (binding 7 "left") ())) 
      (param ("Var") (bind (binding 8 "right") ())))))) 
  (block 
-  (at 41 
+  (at 57 
    (return 
     (expr ("Var") 
      (call (expr ((func (("Var") ("Var"))) "Var") 
@@ -53,11 +53,12 @@
 (function (int) 
  (bind (binding 10 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 7 (stmnt 
-         (expr (void) 
-          (call (expr ((func ((void))) void) (ident (binding 11 "Scope_retain"))) 
-           (args (expr (void) ())))))) 
-  (at 42 
+  (at 23 
+   (stmnt 
+    (expr (void) 
+     (call (expr ((func ((void))) void) (ident (binding 11 "Scope_retain"))) 
+      (args (expr (void) ())))))) 
+  (at 58 
    (declare ("List") 
     (bindings 
      (op = (bind (binding 12 "fluent") ()) 
@@ -111,7 +112,7 @@
                               (call (expr ((func ((int))) "Var") 
                                      (ident (binding 3 "int_var"))) 
                                (args (expr (int) (literal (int) "0")))))))))))))))))))))) 
-  (at 43 
+  (at 59 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 19 "paired") ()) 
@@ -163,11 +164,11 @@
                               (call (expr ((func ((int))) "Var") 
                                      (ident (binding 3 "int_var"))) 
                                (args (expr (int) (literal (int) "0")))))))))))))))))))))) 
-  (at 10 
+  (at 26 
    (declare (int) 
     (bindings 
      (op = (bind (binding 23 "nested") ()) (expr (int) (literal (int) "0")))))) 
-  (at 46 
+  (at 62 
    (block (declare (int) (bindings (bind (binding 24 "left") ()))) 
     (declare ("Iter") 
      (bindings 
@@ -203,7 +204,7 @@
                               (ident (binding 3 "int_var"))) 
                         (args (expr (int) (literal (int) "0")))))))))))))))))) 
     (declare ("Var") (bindings (bind (binding 26 "_x2c_macro_item_1") ()))) 
-    (at 45 
+    (at 61 
      (while 
       (expr (int) 
        (call (expr ((func (("Iter") (opt-ref "Var"))) int) 
@@ -256,7 +257,7 @@
                                   (ident (binding 3 "int_var"))) 
                             (args (expr (int) (literal (int) "0")))))))))))))))))) 
         (declare ("Var") (bindings (bind (binding 31 "_x2c_macro_item_0") ()))) 
-        (at 44 
+        (at 60 
          (while 
           (expr (int) 
            (call (expr ((func (("Iter") (opt-ref "Var"))) int) 
@@ -282,10 +283,10 @@
               (expr (int) 
                (op + (expr (int) (ident (binding 24 "left"))) 
                 (expr (int) (ident (binding 28 "right"))))))))))))))))) 
-  (at 26 
+  (at 42 
    (declare (struct "Iter") 
     (bindings (bind (binding 32 "mixed_source_storage") ())))) 
-  (at 47 
+  (at 63 
    (declare ("List") 
     (bindings 
      (op = (bind (binding 33 "mixed") ()) 
@@ -315,12 +316,12 @@
                               (call (expr ((func ((int))) "Var") 
                                      (ident (binding 3 "int_var"))) 
                                (args (expr (int) (literal (int) "0")))))))))))))))))))))) 
-  (at 28 
+  (at 44 
    (declare (struct "Iter") 
     (bindings (bind (binding 34 "source_storage") ()) 
      (bind (binding 35 "map_storage") ()) 
      (bind (binding 36 "filter_storage") ())))) 
-  (at 29 
+  (at 45 
    (declare ("Iter") 
     (bindings 
      (op = (bind (binding 37 "source") ()) 
@@ -331,7 +332,7 @@
          (expr (int) (literal (int) "1")) 
          (expr (* struct "Iter") 
           (op & (expr (struct "Iter") (ident (binding 34 "source_storage")))))))))))) 
-  (at 48 
+  (at 64 
    (declare ("Iter") 
     (bindings 
      (op = (bind (binding 38 "mapped") ()) 
@@ -342,7 +343,7 @@
          (expr ("Func") (ident (binding 17 "_x2c_func_handle_1"))) 
          (expr (* struct "Iter") 
           (op & (expr (struct "Iter") (ident (binding 35 "map_storage")))))))))))) 
-  (at 49 
+  (at 65 
    (declare ("Iter") 
     (bindings 
      (op = (bind (binding 39 "filtered") ()) 
@@ -353,7 +354,7 @@
          (expr ("Func") (ident (binding 18 "_x2c_func_handle_0"))) 
          (expr (* struct "Iter") 
           (op & (expr (struct "Iter") (ident (binding 36 "filter_storage")))))))))))) 
-  (at 32 
+  (at 48 
    (declare ("List") 
     (bindings 
      (op = (bind (binding 40 "explicit") ()) 
@@ -361,7 +362,7 @@
        (call (expr ((func (("Iter"))) ("List")) 
               (ident (binding 13 "Iter_list"))) 
         (args (expr ("Iter") (ident (binding 39 "filtered")))))))))) 
-  (at 33 
+  (at 49 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 41 "printf"))) 
@@ -379,12 +380,12 @@
        (expr (int) 
         (call (expr ((func (("List"))) (int)) (ident (binding 42 "List_len"))) 
          (args (expr ("List") (ident (binding 40 "explicit"))))))))))) 
-  (at 34 
+  (at 50 
    (stmnt 
     (expr (void) 
      (call (expr ((func ((void))) void) (ident (binding 44 "Scope_release"))) 
       (args (expr (void) ())))))) 
-  (at 50 (return (expr (int) (literal (int) "0"))))))
+  (at 66 (return (expr (int) (literal (int) "0"))))))
 
 (function (static "Var") 
  (bind (binding 45 "_x2c_func_adapt_0") 
@@ -416,7 +417,7 @@
     (call (expr ((func (("FuncAdapter") ("List"))) "Func") 
            (ident (binding 50 "x2c_func_shared"))) 
      (args (expr ("FuncAdapter") (ident (binding 45 "_x2c_func_adapt_0"))) 
-      (expr ("List") (expr ("List") (cache 686)))))))))
+      (expr ("List") (expr ("List") (cache 12)))))))))
 
 (function (static "Var") 
  (bind (binding 51 "_x2c_func_adapt_1") 
@@ -446,7 +447,7 @@
     (call (expr ((func (("FuncAdapter") ("List"))) "Func") 
            (ident (binding 50 "x2c_func_shared"))) 
      (args (expr ("FuncAdapter") (ident (binding 51 "_x2c_func_adapt_1"))) 
-      (expr ("List") (expr ("List") (cache 687)))))))))
+      (expr ("List") (expr ("List") (cache 13)))))))))
 
 (function (static "Var") 
  (bind (binding 55 "_x2c_func_adapt_2") 
@@ -487,4 +488,4 @@
     (call (expr ((func (("FuncAdapter") ("List"))) "Func") 
            (ident (binding 50 "x2c_func_shared"))) 
      (args (expr ("FuncAdapter") (ident (binding 55 "_x2c_func_adapt_2"))) 
-      (expr ("List") (expr ("List") (cache 693)))))))))
+      (expr ("List") (expr ("List") (cache 19)))))))))

@@ -10,43 +10,45 @@
 (function (static void) 
  (bind (binding 2 "touch") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 1 (stmnt 
-         (expr (int) (postfix ++ (expr (int) (ident (binding 1 "calls")))))))))
+  (at 17 
+   (stmnt (expr (int) (postfix ++ (expr (int) (ident (binding 1 "calls")))))))))
 
 (function (int) 
  (bind (binding 3 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 2 (declare ("Var") 
-         (bindings 
-          (op = (bind (binding 4 "bare") ()) 
-           (expr ("Var") (literal ("Var") "void")))))) 
-  (at 3 (declare ("Var") 
-         (bindings 
-          (op = (bind (binding 5 "parenthesized") ()) 
-           (expr ("Var") (parens (expr ("Var") (literal ("Var") "void")))))))) 
-  (at 4 (declare (void) 
-         (bindings 
-          (op = (bind (binding 6 "pointer") (*)) 
-           (expr () (ident (binding 7 "NULL"))))))) 
-  (at 21 
+  (at 18 
+   (declare ("Var") 
+    (bindings 
+     (op = (bind (binding 4 "bare") ()) (expr ("Var") (literal ("Var") "void")))))) 
+  (at 19 
+   (declare ("Var") 
+    (bindings 
+     (op = (bind (binding 5 "parenthesized") ()) 
+      (expr ("Var") (parens (expr ("Var") (literal ("Var") "void")))))))) 
+  (at 20 
+   (declare (void) 
+    (bindings 
+     (op = (bind (binding 6 "pointer") (*)) 
+      (expr () (ident (binding 7 "NULL"))))))) 
+  (at 37 
    (declare (void) 
     (bindings 
      (op = (bind (binding 8 "cast_pointer") (*)) 
       (expr (* void) 
        (cast (* void) (expr (* void) (ident (binding 6 "pointer"))))))))) 
-  (at 22 
+  (at 38 
    (stmnt 
     (expr (void) 
      (cast (void) 
       (expr (void) 
        (call (expr ((func ((void))) void) (ident (binding 2 "touch"))) 
         (args (expr (void) ())))))))) 
-  (at 23 
+  (at 39 
    (stmnt 
     (expr (void) 
      (cast (void) 
       (expr ("size_t") (sizeof (parens (decl (void) (bindings (bind () ())))))))))) 
-  (at 34 
+  (at 50 
    (declare (int) 
     (bindings 
      (op = (bind (binding 9 "ok") ()) 
@@ -95,8 +97,7 @@
                                                       (ident 
                                                        (binding 10 "Var_is_void"))) 
                                                 (args (expr ("Var") 
-                                                       (ident 
-                                                        (binding 4 "bare")))))) 
+                                                       (ident (binding 4 "bare")))))) 
                                               (expr (int) 
                                                (call (expr ((func (("Var"))) int) 
                                                       (ident 
@@ -161,7 +162,7 @@
                                              (literal ("Var") "void")) 
                                        (expr ("Var") (literal ("Var") "void"))))))) 
                                   (expr (int) 
-                                   (at 24 
+                                   (at 40 
                                     (call (expr (macro-expr) 
                                            (ident (binding-name "Var_same"))) 
                                      (args (expr ("Var") 
@@ -185,7 +186,7 @@
                                (op ! (expr (int) 
                                       (parens 
                                        (expr (int) 
-                                        (at 25 
+                                        (at 41 
                                          (expr (int) 
                                           (op ! (expr (macro-expr) 
                                                  (call (expr (macro-expr) 
@@ -197,7 +198,7 @@
                                                    (expr ("Var") 
                                                     (literal ("Var") "void"))))))))))))))) 
                             (expr (int) 
-                             (at 26 
+                             (at 42 
                               (expr (int) 
                                (op ! (expr (macro-expr) 
                                       (call (expr (macro-expr) 
@@ -209,7 +210,7 @@
                                                 (ident (binding 13 "int_var"))) 
                                           (args (expr (int) (literal (int) "1")))))))))))))) 
                           (expr (int) 
-                           (at 27 
+                           (at 43 
                             (expr (int) 
                              (op ! (expr (macro-expr) 
                                     (call (expr (macro-expr) 
@@ -221,7 +222,7 @@
                                                     (literal (int) "1"))))) 
                                       (expr ("Var") (literal ("Var") "void"))))))))))) 
                         (expr (int) 
-                         (at 28 
+                         (at 44 
                           (expr (int) 
                            (op ! (expr (macro-expr) 
                                   (call (expr (macro-expr) 
@@ -232,7 +233,7 @@
                                             (ident (binding 13 "int_var"))) 
                                       (args (expr (int) (literal (int) "1")))))))))))))) 
                       (expr (int) 
-                       (at 29 
+                       (at 45 
                         (expr (int) 
                          (op ! (expr (macro-expr) 
                                 (call (expr (macro-expr) 
@@ -246,7 +247,7 @@
                      (op ! (expr (int) 
                             (parens 
                              (expr (int) 
-                              (at 30 
+                              (at 46 
                                (call (expr (macro-expr) 
                                       (ident (binding-name "Var_equal"))) 
                                 (args (expr ("Var") (literal ("Var") "void")) 
@@ -258,7 +259,7 @@
                    (op ! (expr (int) 
                           (parens 
                            (expr (int) 
-                            (at 31 
+                            (at 47 
                              (call (expr (macro-expr) 
                                     (ident (binding-name "Var_equal"))) 
                               (args (expr ("Var") 
@@ -270,7 +271,7 @@
                  (op ! (expr (int) 
                         (parens 
                          (expr (int) 
-                          (at 32 
+                          (at 48 
                            (call (expr (macro-expr) 
                                   (ident (binding-name "Var_same"))) 
                             (args (expr ("Var") (literal ("Var") "void")) 
@@ -282,7 +283,7 @@
                (op ! (expr (int) 
                       (parens 
                        (expr (int) 
-                        (at 33 
+                        (at 49 
                          (call (expr (macro-expr) 
                                 (ident (binding-name "Var_same"))) 
                           (args (expr ("Var") 
@@ -302,14 +303,14 @@
         (expr (int) 
          (op == (expr (int) (ident (binding 1 "calls"))) 
           (expr (int) (literal (int) "1")))))))))) 
-  (at 19 
+  (at 35 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 14 "printf"))) 
       (args (expr (* char) (literal (* char) "\"%d %d\\n\"")) 
        (expr (int) (ident (binding 9 "ok"))) 
        (expr (int) (ident (binding 1 "calls")))))))) 
-  (at 35 
+  (at 51 
    (return 
     (expr (int) 
      (op ? (expr (int) (ident (binding 9 "ok"))) 

@@ -15,12 +15,13 @@
     (params 
      (param ("MacroDynamicOwner") (bind (binding 3 "_x2c_macro_value_0") ())))))) 
  (block 
-  (at 3 (return ("Var") 
-         (expr ("Var") 
-          (call (expr ((func (("Symbol") (...))) "Var") 
-                 (ident (binding 4 "Var_new"))) 
-           (args (expr ("Symbol") (literal ("Symbol") "<i32>" i32)) 
-            (expr ("MacroDynamicOwner") (ident (binding 3 "_x2c_macro_value_0"))))))))))
+  (at 23 
+   (return ("Var") 
+    (expr ("Var") 
+     (call (expr ((func (("Symbol") (...))) "Var") 
+            (ident (binding 4 "Var_new"))) 
+      (args (expr ("Symbol") (literal ("Symbol") "<i32>" i32)) 
+       (expr ("MacroDynamicOwner") (ident (binding 3 "_x2c_macro_value_0"))))))))))
 
 (function (inline "Var") 
  (bind (binding 5 "MacroDynamicOwner_box") 
@@ -28,64 +29,69 @@
     (params 
      (param ("MacroDynamicOwner") (bind (binding 6 "_x2c_macro_value_1") ())))))) 
  (block 
-  (at 4 (return ("Var") 
-         (expr ("Var") 
-          (call (expr ((func (("Symbol") (...))) "Var") 
-                 (ident (binding 4 "Var_new"))) 
-           (args (expr ("Symbol") (literal ("Symbol") "<i32>" i32)) 
-            (expr ("MacroDynamicOwner") (ident (binding 6 "_x2c_macro_value_1"))))))))))
+  (at 24 
+   (return ("Var") 
+    (expr ("Var") 
+     (call (expr ((func (("Symbol") (...))) "Var") 
+            (ident (binding 4 "Var_new"))) 
+      (args (expr ("Symbol") (literal ("Symbol") "<i32>" i32)) 
+       (expr ("MacroDynamicOwner") (ident (binding 6 "_x2c_macro_value_1"))))))))))
 
 (function (int) 
  (bind (binding 7 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 5 (declare ("Var") 
-         (bindings 
-          (op = (bind (binding 8 "value") ()) 
-           (expr ("Var") 
-            (call (expr ((func (("MacroDynamicOwner"))) ("Var")) 
-                   (ident (binding 2 "MacroDynamicOwner_var"))) 
-             (args (expr ("MacroDynamicOwner") 
-                    (parens 
-                     (expr ("MacroDynamicOwner") 
-                      (cast (decl ("MacroDynamicOwner") (bindings (bind () ()))) 
-                       (expr (int) (literal (int) "42"))))))))))))) 
-  (at 6 (declare ("Var") 
-         (bindings 
-          (op = (bind (binding 9 "boxed") ()) 
-           (expr ("Var") 
-            (call (expr ((func (("MacroDynamicOwner"))) ("Var")) 
-                   (ident (binding 5 "MacroDynamicOwner_box"))) 
-             (args (expr ("MacroDynamicOwner") 
-                    (parens 
-                     (expr ("MacroDynamicOwner") 
-                      (cast (decl ("MacroDynamicOwner") (bindings (bind () ()))) 
-                       (expr (int) (literal (int) "43"))))))))))))) 
-  (at 7 (stmnt 
-         (expr () 
-          (call (expr () (ident (binding 10 "printf"))) 
-           (args (expr (* char) (literal (* char) "\"%d %d\\n\"")) 
-            (expr (int) 
-             (call (expr ((func (("Var"))) (int)) (ident (binding 11 "Var_int"))) 
-              (args (expr ("Var") (ident (binding 8 "value")))))) 
-            (expr (int) 
-             (call (expr ((func (("Var"))) (int)) (ident (binding 11 "Var_int"))) 
-              (args (expr ("Var") (ident (binding 9 "boxed"))))))))))) 
-  (at 8 (return (int) 
-         (expr (int) 
-          (op ? (expr (int) 
-                 (op && 
-                  (expr (int) 
-                   (op == 
-                    (expr (int) 
-                     (call (expr ((func (("Var"))) (int)) 
-                            (ident (binding 11 "Var_int"))) 
-                      (args (expr ("Var") (ident (binding 8 "value")))))) 
-                    (expr (int) (literal (int) "42")))) 
-                  (expr (int) 
-                   (op == 
-                    (expr (int) 
-                     (call (expr ((func (("Var"))) (int)) 
-                            (ident (binding 11 "Var_int"))) 
-                      (args (expr ("Var") (ident (binding 9 "boxed")))))) 
-                    (expr (int) (literal (int) "43")))))) 
-           (expr (int) (literal (int) "0")) (expr (int) (literal (int) "1"))))))))
+  (at 25 
+   (declare ("Var") 
+    (bindings 
+     (op = (bind (binding 8 "value") ()) 
+      (expr ("Var") 
+       (call (expr ((func (("MacroDynamicOwner"))) ("Var")) 
+              (ident (binding 2 "MacroDynamicOwner_var"))) 
+        (args (expr ("MacroDynamicOwner") 
+               (parens 
+                (expr ("MacroDynamicOwner") 
+                 (cast (decl ("MacroDynamicOwner") (bindings (bind () ()))) 
+                  (expr (int) (literal (int) "42"))))))))))))) 
+  (at 26 
+   (declare ("Var") 
+    (bindings 
+     (op = (bind (binding 9 "boxed") ()) 
+      (expr ("Var") 
+       (call (expr ((func (("MacroDynamicOwner"))) ("Var")) 
+              (ident (binding 5 "MacroDynamicOwner_box"))) 
+        (args (expr ("MacroDynamicOwner") 
+               (parens 
+                (expr ("MacroDynamicOwner") 
+                 (cast (decl ("MacroDynamicOwner") (bindings (bind () ()))) 
+                  (expr (int) (literal (int) "43"))))))))))))) 
+  (at 27 
+   (stmnt 
+    (expr () 
+     (call (expr () (ident (binding 10 "printf"))) 
+      (args (expr (* char) (literal (* char) "\"%d %d\\n\"")) 
+       (expr (int) 
+        (call (expr ((func (("Var"))) (int)) (ident (binding 11 "Var_int"))) 
+         (args (expr ("Var") (ident (binding 8 "value")))))) 
+       (expr (int) 
+        (call (expr ((func (("Var"))) (int)) (ident (binding 11 "Var_int"))) 
+         (args (expr ("Var") (ident (binding 9 "boxed"))))))))))) 
+  (at 28 
+   (return (int) 
+    (expr (int) 
+     (op ? (expr (int) 
+            (op && 
+             (expr (int) 
+              (op == 
+               (expr (int) 
+                (call (expr ((func (("Var"))) (int)) 
+                       (ident (binding 11 "Var_int"))) 
+                 (args (expr ("Var") (ident (binding 8 "value")))))) 
+               (expr (int) (literal (int) "42")))) 
+             (expr (int) 
+              (op == 
+               (expr (int) 
+                (call (expr ((func (("Var"))) (int)) 
+                       (ident (binding 11 "Var_int"))) 
+                 (args (expr ("Var") (ident (binding 9 "boxed")))))) 
+               (expr (int) (literal (int) "43")))))) 
+      (expr (int) (literal (int) "0")) (expr (int) (literal (int) "1"))))))))

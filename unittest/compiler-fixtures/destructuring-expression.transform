@@ -6,106 +6,104 @@
 (function (int) 
  (bind (binding 2 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 1 (declare ("Values") 
-         (bindings 
-          (op = (bind (binding 3 "values") ()) 
-           (expr ("List") (expr ("List") (cache 842))))))) 
-  (at 2 (declare ("Var") 
-         (bindings (bind (binding 4 "a") ()) (bind (binding 5 "b") ()) 
-          (bind (binding 6 "c") ()) (bind (binding 7 "d") ())))) 
-  (at 6 (declare ("Values") 
-         (bindings 
-          (op = (bind (binding 8 "result") ()) 
-           (expr ("Values") 
-            (parens 
-             (block 
-              (declare ("Values") 
-               (bindings 
-                (op = (bind (binding 9 "_x2c_destructure_result_0") ()) 
-                 (expr ("Values") 
-                  (parens 
-                   (block 
-                    (declare ("Values") 
-                     (bindings 
-                      (op = (bind (binding 10 "_x2c_destructure_result_1") ()) 
-                       (expr ("Values") (ident (binding 3 "values")))))) 
-                    (declare ("List") 
-                     (bindings 
-                      (op = (bind (binding 11 "_x2c_destructure_1") ()) 
-                       (expr ("Values") 
-                        (ident (binding 10 "_x2c_destructure_result_1")))))) 
-                    (stmnt 
-                     (expr ("Var") 
-                      (op = (expr ("Var") (ident (binding 4 "a"))) 
-                       (expr ("Var") 
-                        (call (expr ((func (("List") (int))) "Var") 
-                               (ident (binding 12 "List_getindex"))) 
-                         (args (expr ("List") 
-                                (ident (binding 11 "_x2c_destructure_1"))) 
-                          (literal (int) "0"))))))) 
-                    (stmnt 
-                     (expr ("Var") 
-                      (op = (expr ("Var") (ident (binding 5 "b"))) 
-                       (expr ("Var") 
-                        (call (expr ((func (("List") (int))) "Var") 
-                               (ident (binding 12 "List_getindex"))) 
-                         (args (expr ("List") 
-                                (ident (binding 11 "_x2c_destructure_1"))) 
-                          (literal (int) "1"))))))) 
-                    (stmnt 
-                     (expr ("Values") 
-                      (ident (binding 10 "_x2c_destructure_result_1")))))))))) 
-              (declare ("List") 
-               (bindings 
-                (op = (bind (binding 13 "_x2c_destructure_0") ()) 
-                 (expr ("Values") 
-                  (ident (binding 9 "_x2c_destructure_result_0")))))) 
-              (stmnt 
-               (expr ("Var") 
-                (op = (expr ("Var") (ident (binding 6 "c"))) 
-                 (expr ("Var") 
-                  (call (expr ((func (("List") (int))) "Var") 
-                         (ident (binding 12 "List_getindex"))) 
-                   (args (expr ("List") 
-                          (ident (binding 13 "_x2c_destructure_0"))) 
-                    (literal (int) "0"))))))) 
-              (stmnt 
-               (expr ("Var") 
-                (op = (expr ("Var") (ident (binding 7 "d"))) 
-                 (expr ("Var") 
-                  (call (expr ((func (("List") (int))) "Var") 
-                         (ident (binding 12 "List_getindex"))) 
-                   (args (expr ("List") 
-                          (ident (binding 13 "_x2c_destructure_0"))) 
-                    (literal (int) "1"))))))) 
-              (stmnt 
-               (expr ("Values") (ident (binding 9 "_x2c_destructure_result_0"))))))))))) 
-  (at 7 (stmnt 
-         (expr () 
-          (call (expr () (ident (binding 14 "printf"))) 
-           (args (expr (* char) (literal (* char) "\"%ld %ld %ld %ld %d\\n\"")) 
-            (expr (long) 
-             (call (expr ((func (("Var"))) (long)) 
-                    (ident (binding 15 "Var_integer"))) 
-              (args (expr ("Var") (ident (binding 4 "a")))))) 
-            (expr (long) 
-             (call (expr ((func (("Var"))) (long)) 
-                    (ident (binding 15 "Var_integer"))) 
-              (args (expr ("Var") (ident (binding 5 "b")))))) 
-            (expr (long) 
-             (call (expr ((func (("Var"))) (long)) 
-                    (ident (binding 15 "Var_integer"))) 
-              (args (expr ("Var") (ident (binding 6 "c")))))) 
-            (expr (long) 
-             (call (expr ((func (("Var"))) (long)) 
-                    (ident (binding 15 "Var_integer"))) 
-              (args (expr ("Var") (ident (binding 7 "d")))))) 
-            (expr (int) 
-             (op == (expr ("Values") (ident (binding 8 "result"))) 
-              (expr ("Values") (ident (binding 3 "values")))))))))) 
-  (at 8 (return 
-         (expr (int) 
-          (op ? (expr (int) 
-                 (op == (expr ("Values") (ident (binding 8 "result"))) 
-                  (expr ("Values") (ident (binding 3 "values"))))) 
-           (expr (int) (literal (int) "0")) (expr (int) (literal (int) "1"))))))))
+  (at 17 
+   (declare ("Values") 
+    (bindings 
+     (op = (bind (binding 3 "values") ()) 
+      (expr ("List") (expr ("List") (cache 3))))))) 
+  (at 18 
+   (declare ("Var") 
+    (bindings (bind (binding 4 "a") ()) (bind (binding 5 "b") ()) 
+     (bind (binding 6 "c") ()) (bind (binding 7 "d") ())))) 
+  (at 22 
+   (declare ("Values") 
+    (bindings 
+     (op = (bind (binding 8 "result") ()) 
+      (expr ("Values") 
+       (parens 
+        (block 
+         (declare ("Values") 
+          (bindings 
+           (op = (bind (binding 9 "_x2c_destructure_result_0") ()) 
+            (expr ("Values") 
+             (parens 
+              (block 
+               (declare ("Values") 
+                (bindings 
+                 (op = (bind (binding 10 "_x2c_destructure_result_1") ()) 
+                  (expr ("Values") (ident (binding 3 "values")))))) 
+               (declare ("List") 
+                (bindings 
+                 (op = (bind (binding 11 "_x2c_destructure_1") ()) 
+                  (expr ("Values") 
+                   (ident (binding 10 "_x2c_destructure_result_1")))))) 
+               (stmnt 
+                (expr ("Var") 
+                 (op = (expr ("Var") (ident (binding 4 "a"))) 
+                  (expr ("Var") 
+                   (call (expr ((func (("List") (int))) "Var") 
+                          (ident (binding 12 "List_getindex"))) 
+                    (args (expr ("List") 
+                           (ident (binding 11 "_x2c_destructure_1"))) 
+                     (literal (int) "0"))))))) 
+               (stmnt 
+                (expr ("Var") 
+                 (op = (expr ("Var") (ident (binding 5 "b"))) 
+                  (expr ("Var") 
+                   (call (expr ((func (("List") (int))) "Var") 
+                          (ident (binding 12 "List_getindex"))) 
+                    (args (expr ("List") 
+                           (ident (binding 11 "_x2c_destructure_1"))) 
+                     (literal (int) "1"))))))) 
+               (stmnt 
+                (expr ("Values") 
+                 (ident (binding 10 "_x2c_destructure_result_1")))))))))) 
+         (declare ("List") 
+          (bindings 
+           (op = (bind (binding 13 "_x2c_destructure_0") ()) 
+            (expr ("Values") (ident (binding 9 "_x2c_destructure_result_0")))))) 
+         (stmnt 
+          (expr ("Var") 
+           (op = (expr ("Var") (ident (binding 6 "c"))) 
+            (expr ("Var") 
+             (call (expr ((func (("List") (int))) "Var") 
+                    (ident (binding 12 "List_getindex"))) 
+              (args (expr ("List") (ident (binding 13 "_x2c_destructure_0"))) 
+               (literal (int) "0"))))))) 
+         (stmnt 
+          (expr ("Var") 
+           (op = (expr ("Var") (ident (binding 7 "d"))) 
+            (expr ("Var") 
+             (call (expr ((func (("List") (int))) "Var") 
+                    (ident (binding 12 "List_getindex"))) 
+              (args (expr ("List") (ident (binding 13 "_x2c_destructure_0"))) 
+               (literal (int) "1"))))))) 
+         (stmnt 
+          (expr ("Values") (ident (binding 9 "_x2c_destructure_result_0"))))))))))) 
+  (at 23 
+   (stmnt 
+    (expr () 
+     (call (expr () (ident (binding 14 "printf"))) 
+      (args (expr (* char) (literal (* char) "\"%ld %ld %ld %ld %d\\n\"")) 
+       (expr (long) 
+        (call (expr ((func (("Var"))) (long)) (ident (binding 15 "Var_integer"))) 
+         (args (expr ("Var") (ident (binding 4 "a")))))) 
+       (expr (long) 
+        (call (expr ((func (("Var"))) (long)) (ident (binding 15 "Var_integer"))) 
+         (args (expr ("Var") (ident (binding 5 "b")))))) 
+       (expr (long) 
+        (call (expr ((func (("Var"))) (long)) (ident (binding 15 "Var_integer"))) 
+         (args (expr ("Var") (ident (binding 6 "c")))))) 
+       (expr (long) 
+        (call (expr ((func (("Var"))) (long)) (ident (binding 15 "Var_integer"))) 
+         (args (expr ("Var") (ident (binding 7 "d")))))) 
+       (expr (int) 
+        (op == (expr ("Values") (ident (binding 8 "result"))) 
+         (expr ("Values") (ident (binding 3 "values")))))))))) 
+  (at 24 
+   (return 
+    (expr (int) 
+     (op ? (expr (int) 
+            (op == (expr ("Values") (ident (binding 8 "result"))) 
+             (expr ("Values") (ident (binding 3 "values"))))) 
+      (expr (int) (literal (int) "0")) (expr (int) (literal (int) "1"))))))))

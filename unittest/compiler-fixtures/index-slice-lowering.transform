@@ -24,52 +24,55 @@
 (function (static "Array") 
  (bind (binding 11 "array_base") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 1 (stmnt 
-         (expr (int) 
-          (postfix ++ (expr (int) (ident (binding 4 "array_base_calls"))))))) 
-  (at 37 (return (expr ("Array") (ident (binding 1 "saved_array")))))))
+  (at 17 
+   (stmnt 
+    (expr (int) 
+     (postfix ++ (expr (int) (ident (binding 4 "array_base_calls"))))))) 
+  (at 53 (return (expr ("Array") (ident (binding 1 "saved_array")))))))
 
 (function (static "Map") 
  (bind (binding 12 "map_base") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 3 (stmnt 
-         (expr (int) 
-          (postfix ++ (expr (int) (ident (binding 5 "map_base_calls"))))))) 
-  (at 38 (return (expr ("Map") (ident (binding 2 "saved_map")))))))
+  (at 19 
+   (stmnt 
+    (expr (int) (postfix ++ (expr (int) (ident (binding 5 "map_base_calls"))))))) 
+  (at 54 (return (expr ("Map") (ident (binding 2 "saved_map")))))))
 
 (function (static "String") 
  (bind (binding 13 "buffer_base") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 5 (stmnt 
-         (expr (int) 
-          (postfix ++ (expr (int) (ident (binding 6 "buffer_base_calls"))))))) 
-  (at 39 (return (expr ("String") (ident (binding 3 "saved_buffer")))))))
+  (at 21 
+   (stmnt 
+    (expr (int) 
+     (postfix ++ (expr (int) (ident (binding 6 "buffer_base_calls"))))))) 
+  (at 55 (return (expr ("String") (ident (binding 3 "saved_buffer")))))))
 
 (function (static int) 
  (bind (binding 14 "next_index") 
   ((fnmod (params (param (int) (bind (binding 15 "index") ())))))) 
  (block 
-  (at 7 (stmnt 
-         (expr (int) 
-          (postfix ++ (expr (int) (ident (binding 7 "index_calls"))))))) 
-  (at 40 (return (expr (int) (ident (binding 15 "index")))))))
+  (at 23 
+   (stmnt 
+    (expr (int) (postfix ++ (expr (int) (ident (binding 7 "index_calls"))))))) 
+  (at 56 (return (expr (int) (ident (binding 15 "index")))))))
 
 (function (static "Symbol") 
  (bind (binding 16 "next_key") 
   ((fnmod (params (param ("Symbol") (bind (binding 17 "key") ())))))) 
  (block 
-  (at 9 (stmnt 
-         (expr (int) (postfix ++ (expr (int) (ident (binding 8 "key_calls"))))))) 
-  (at 41 (return (expr ("Symbol") (ident (binding 17 "key")))))))
+  (at 25 
+   (stmnt 
+    (expr (int) (postfix ++ (expr (int) (ident (binding 8 "key_calls"))))))) 
+  (at 57 (return (expr ("Symbol") (ident (binding 17 "key")))))))
 
 (function (static "Var") 
  (bind (binding 18 "next_value") 
   ((fnmod (params (param (int) (bind (binding 19 "value") ())))))) 
  (block 
-  (at 11 
+  (at 27 
    (stmnt 
     (expr (int) (postfix ++ (expr (int) (ident (binding 9 "value_calls"))))))) 
-  (at 42 
+  (at 58 
    (return 
     (expr ("Var") 
      (call (expr ((func ((int))) "Var") (ident (binding 20 "int_var"))) 
@@ -79,15 +82,15 @@
  (bind (binding 21 "next_bound") 
   ((fnmod (params (param (int) (bind (binding 22 "bound") ())))))) 
  (block 
-  (at 13 
+  (at 29 
    (stmnt 
     (expr (int) (postfix ++ (expr (int) (ident (binding 10 "bound_calls"))))))) 
-  (at 43 (return (expr (int) (ident (binding 22 "bound")))))))
+  (at 59 (return (expr (int) (ident (binding 22 "bound")))))))
 
 (function (int) 
  (bind (binding 23 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 44 
+  (at 60 
    (declare (int) 
     (bindings 
      (op = (bind (binding 24 "raw") ((dim (expr (int) (literal (int) "3"))))) 
@@ -101,13 +104,13 @@
       (expr (int) 
        (index (expr (* int) (ident (binding 25 "ptr"))) 
         (expr (int) (literal (int) "1")))))))) 
-  (at 16 
+  (at 32 
    (stmnt 
     (expr (int) 
      (op = (expr (int) 
             (index (expr ((dim ("3")) int) (ident (binding 24 "raw"))) 
              (expr (int) (literal (int) "2")))) (expr (int) (literal (int) "9")))))) 
-  (at 45 
+  (at 61 
    (stmnt 
     (expr ("Array") 
      (op = (expr ("Array") (ident (binding 1 "saved_array"))) 
@@ -130,15 +133,15 @@
          (expr ("Var") 
           (call (expr ((func ((int))) "Var") (ident (binding 20 "int_var"))) 
            (args (expr (int) (literal (int) "40")))))))))))) 
-  (at 18 
+  (at 34 
    (declare ("List") 
     (bindings 
      (op = (bind (binding 29 "list") ()) 
-      (expr ("List") (expr ("List") (cache 846))))))) 
-  (at 19 
+      (expr ("List") (expr ("List") (cache 7))))))) 
+  (at 35 
    (declare ("String") 
-    (bindings (op = (bind (binding 30 "text") ()) (expr ("String") (cache 847)))))) 
-  (at 46 
+    (bindings (op = (bind (binding 30 "text") ()) (expr ("String") (cache 8)))))) 
+  (at 62 
    (stmnt 
     (expr ("Map") 
      (op = (expr ("Map") (ident (binding 2 "saved_map"))) 
@@ -156,7 +159,7 @@
          (expr ("Var") 
           (call (expr ((func ((int))) "Var") (ident (binding 20 "int_var"))) 
            (args (expr (int) (literal (int) "7")))))))))))) 
-  (at 21 
+  (at 37 
    (stmnt 
     (expr ("String") 
      (op = (expr ("String") (ident (binding 3 "saved_buffer"))) 
@@ -164,13 +167,13 @@
        (call (expr ((func ((int))) "String") 
               (ident (binding 34 "String_malloc"))) 
         (args (expr (int) (literal (int) "4"))))))))) 
-  (at 22 
+  (at 38 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 35 "strcpy"))) 
       (args (expr ("String") (ident (binding 3 "saved_buffer"))) 
        (expr (* char) (literal (* char) "\"abc\""))))))) 
-  (at 47 
+  (at 63 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 36 "array_read") ()) 
@@ -183,7 +186,7 @@
          (expr (int) 
           (call (expr ((func ((int))) int) (ident (binding 14 "next_index"))) 
            (args (expr (int) (literal (int) "1")))))))))))) 
-  (at 48 
+  (at 64 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 38 "list_read") ()) 
@@ -194,7 +197,7 @@
          (expr (int) 
           (call (expr ((func ((int))) int) (ident (binding 14 "next_index"))) 
            (args (expr (int) (literal (int) "2")))))))))))) 
-  (at 49 
+  (at 65 
    (declare (int) 
     (bindings 
      (op = (bind (binding 40 "string_read") ()) 
@@ -205,7 +208,7 @@
          (expr (int) 
           (call (expr ((func ((int))) int) (ident (binding 14 "next_index"))) 
            (args (expr (int) (literal (int) "3")))))))))))) 
-  (at 50 
+  (at 66 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 42 "map_read") ()) 
@@ -222,7 +225,7 @@
                   (call (expr ((func (("Symbol"))) "Symbol") 
                          (ident (binding 16 "next_key"))) 
                    (args (expr ("Symbol") (literal ("Symbol") "<seed>" seed))))))))))))))) 
-  (at 51 
+  (at 67 
    (stmnt 
     (expr ("Var") 
      (call (expr ((func (("Array") (int) ("Var"))) "Var") 
@@ -236,7 +239,7 @@
        (expr ("Var") 
         (call (expr ((func ((int))) "Var") (ident (binding 18 "next_value"))) 
          (args (expr (int) (literal (int) "90")))))))))) 
-  (at 52 
+  (at 68 
    (stmnt 
     (expr ("Var") 
      (call (expr ((func (("Map") ("Var") ("Var"))) "Var") 
@@ -254,7 +257,7 @@
        (expr ("Var") 
         (call (expr ((func ((int))) "Var") (ident (binding 18 "next_value"))) 
          (args (expr (int) (literal (int) "42")))))))))) 
-  (at 53 
+  (at 69 
    (stmnt 
     (expr (char) 
      (op = (expr (char) 
@@ -271,7 +274,7 @@
               (call (expr ((func ((int))) int) (ident (binding 14 "next_index"))) 
                (args (expr (int) (literal (int) "0"))))))) 
       (expr (char) (literal (char) "\'z\'")))))) 
-  (at 54 
+  (at 70 
    (declare ("Array") 
     (bindings 
      (op = (bind (binding 46 "slice") ()) 
@@ -289,7 +292,7 @@
          (expr (int) 
           (call (expr ((func ((int))) int) (ident (binding 21 "next_bound"))) 
            (args (expr (int) (literal (int) "2")))))))))))) 
-  (at 55 
+  (at 71 
    (declare ("List") 
     (bindings 
      (op = (bind (binding 47 "reverse") ()) 
@@ -298,7 +301,7 @@
         (args (expr ("List") (ident (binding 29 "list"))) 
          (literal (int) "-2147483648") (literal (int) "-2147483648") 
          (expr (int) (op - (expr (int) (literal (int) "1"))))))))))) 
-  (at 56 
+  (at 72 
    (declare ("String") 
     (bindings 
      (op = (bind (binding 48 "suffix") ()) 
@@ -307,7 +310,7 @@
         (args (expr ("String") (ident (binding 30 "text"))) 
          (expr (int) (literal (int) "1")) (literal (int) "-2147483648") 
          (literal (int) "1")))))))) 
-  (at 57 
+  (at 73 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 49 "printf"))) 
@@ -351,7 +354,7 @@
                (ident (binding 41 "String_getindex"))) 
          (args (expr ("String") (ident (binding 3 "saved_buffer"))) 
           (expr (int) (literal (int) "0")))))))))) 
-  (at 34 
+  (at 50 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 49 "printf"))) 
@@ -377,9 +380,9 @@
        (expr (int) (ident (binding 8 "key_calls"))) 
        (expr (int) (ident (binding 9 "value_calls"))) 
        (expr (int) (ident (binding 10 "bound_calls")))))))) 
-  (at 35 
+  (at 51 
    (stmnt 
     (expr (void) 
      (call (expr ((func (("String"))) void) (ident (binding 54 "String_free"))) 
       (args (expr ("String") (ident (binding 3 "saved_buffer")))))))) 
-  (at 58 (return (expr (int) (literal (int) "0"))))))
+  (at 74 (return (expr (int) (literal (int) "0"))))))

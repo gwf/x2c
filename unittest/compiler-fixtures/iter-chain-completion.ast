@@ -3,22 +3,26 @@
  (bind (binding 1 "double_value") 
   ((fnmod (params (param ("Var") (bind (binding 2 "value") ())))))) 
  (block 
-  (at 2 (return ("Var") 
-         (expr ("Var") 
-          (at 1 (op * (expr ("Var") (ident (binding 2 "value"))) 
-                 (expr (int) (literal (int) "2")))))))))
+  (at 18 
+   (return ("Var") 
+    (expr ("Var") 
+     (at 17 
+      (op * (expr ("Var") (ident (binding 2 "value"))) 
+       (expr (int) (literal (int) "2")))))))))
 
 (function (static int) 
  (bind (binding 3 "is_even") 
   ((fnmod (params (param ("Var") (bind (binding 4 "value") ())))))) 
  (block 
-  (at 5 (return (int) 
-         (expr (int) 
-          (at 4 (op == 
-                 (expr ("Var") 
-                  (at 3 (op % (expr ("Var") (ident (binding 4 "value"))) 
-                         (expr (int) (literal (int) "2"))))) 
-                 (expr (int) (literal (int) "0")))))))))
+  (at 21 
+   (return (int) 
+    (expr (int) 
+     (at 20 
+      (op == 
+       (expr ("Var") 
+        (at 19 
+         (op % (expr ("Var") (ident (binding 4 "value"))) 
+          (expr (int) (literal (int) "2"))))) (expr (int) (literal (int) "0")))))))))
 
 (function (static "Var") 
  (bind (binding 5 "add_pair") 
@@ -26,72 +30,72 @@
     (params (param ("Var") (bind (binding 6 "left") ())) 
      (param ("Var") (bind (binding 7 "right") ())))))) 
  (block 
-  (at 6 (return ("Var") 
-         (expr ("Var") 
-          (call (expr ((func (("Var") ("Var"))) "Var") 
-                 (ident (binding 8 "Var_add"))) 
-           (args (expr ("Var") (ident (binding 6 "left"))) 
-            (expr ("Var") (ident (binding 7 "right"))))))))))
+  (at 22 
+   (return ("Var") 
+    (expr ("Var") 
+     (call (expr ((func (("Var") ("Var"))) "Var") 
+            (ident (binding 8 "Var_add"))) 
+      (args (expr ("Var") (ident (binding 6 "left"))) 
+       (expr ("Var") (ident (binding 7 "right"))))))))))
 
 (function (int) 
  (bind (binding 9 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 7 (stmnt 
-         (expr (void) 
-          (call (expr ((func ((void))) void) (ident (binding 10 "Scope_retain"))) 
-           (args (expr (void) ())))))) 
-  (at 8 (declare ("List") 
-         (bindings 
-          (op = (bind (binding 11 "fluent") ()) 
-           (expr ("List") 
-            (call (expr ((func (("Iter"))) ("List")) 
-                   (ident (binding 12 "Iter_list"))) 
-             (args (expr ("Iter") 
-                    (call (expr ((func (("Iter") ("Func") ("Iter"))) ("Iter")) 
-                           (ident (binding 13 "Iter_filter"))) 
-                     (args (expr ("Iter") 
-                            (call (expr ((func (("Iter") ("Func") ("Iter"))) 
-                                         ("Iter")) 
-                                   (ident (binding 14 "Iter_map"))) 
-                             (args (expr ("Iter") 
-                                    (call (expr ((func ((int) (int) (int) 
-                                                        ("Iter"))) "Iter") 
-                                           (ident (binding 15 "range"))) 
-                                     (args (expr (int) (literal (int) "1")) 
-                                      (expr (int) (literal (int) "4")) 
-                                      (expr (int) (literal (int) "1"))))) 
-                              (expr ((func (("Var"))) "Var") 
-                               (ident (binding 1 "double_value")))))) 
-                      (expr ((func (("Var"))) int) 
-                       (ident (binding 3 "is_even"))))))))))))) 
-  (at 9 (declare ("Var") 
-         (bindings 
-          (op = (bind (binding 16 "paired") ()) 
-           (expr ("Var") 
-            (call (expr ((func (("Iter"))) ("Var")) 
-                   (ident (binding 17 "Iter_sum"))) 
-             (args (expr ("Iter") 
-                    (call (expr ((func (("Iter") ("Iter") ("Func") ("Iter"))) 
-                                 ("Iter")) (ident (binding 18 "Iter_map2"))) 
-                     (args (expr ("Iter") 
-                            (call (expr ((func ((int) (int) (int) ("Iter"))) 
-                                         "Iter") (ident (binding 15 "range"))) 
-                             (args (expr (int) (literal (int) "1")) 
-                              (expr (int) (literal (int) "3")) 
-                              (expr (int) (literal (int) "1"))))) 
-                      (expr ("Iter") 
+  (at 23 
+   (stmnt 
+    (expr (void) 
+     (call (expr ((func ((void))) void) (ident (binding 10 "Scope_retain"))) 
+      (args (expr (void) ())))))) 
+  (at 24 
+   (declare ("List") 
+    (bindings 
+     (op = (bind (binding 11 "fluent") ()) 
+      (expr ("List") 
+       (call (expr ((func (("Iter"))) ("List")) 
+              (ident (binding 12 "Iter_list"))) 
+        (args (expr ("Iter") 
+               (call (expr ((func (("Iter") ("Func") ("Iter"))) ("Iter")) 
+                      (ident (binding 13 "Iter_filter"))) 
+                (args (expr ("Iter") 
+                       (call (expr ((func (("Iter") ("Func") ("Iter"))) 
+                                    ("Iter")) (ident (binding 14 "Iter_map"))) 
+                        (args (expr ("Iter") 
+                               (call (expr ((func ((int) (int) (int) ("Iter"))) 
+                                            "Iter") (ident (binding 15 "range"))) 
+                                (args (expr (int) (literal (int) "1")) 
+                                 (expr (int) (literal (int) "4")) 
+                                 (expr (int) (literal (int) "1"))))) 
+                         (expr ((func (("Var"))) "Var") 
+                          (ident (binding 1 "double_value")))))) 
+                 (expr ((func (("Var"))) int) (ident (binding 3 "is_even"))))))))))))) 
+  (at 25 
+   (declare ("Var") 
+    (bindings 
+     (op = (bind (binding 16 "paired") ()) 
+      (expr ("Var") 
+       (call (expr ((func (("Iter"))) ("Var")) (ident (binding 17 "Iter_sum"))) 
+        (args (expr ("Iter") 
+               (call (expr ((func (("Iter") ("Iter") ("Func") ("Iter"))) 
+                            ("Iter")) (ident (binding 18 "Iter_map2"))) 
+                (args (expr ("Iter") 
                        (call (expr ((func ((int) (int) (int) ("Iter"))) "Iter") 
                               (ident (binding 15 "range"))) 
-                        (args (expr (int) (literal (int) "10")) 
-                         (expr (int) (literal (int) "12")) 
+                        (args (expr (int) (literal (int) "1")) 
+                         (expr (int) (literal (int) "3")) 
                          (expr (int) (literal (int) "1"))))) 
-                      (expr ((func (("Var") ("Var"))) "Var") 
-                       (ident (binding 5 "add_pair"))))))))))))) 
-  (at 10 
+                 (expr ("Iter") 
+                  (call (expr ((func ((int) (int) (int) ("Iter"))) "Iter") 
+                         (ident (binding 15 "range"))) 
+                   (args (expr (int) (literal (int) "10")) 
+                    (expr (int) (literal (int) "12")) 
+                    (expr (int) (literal (int) "1"))))) 
+                 (expr ((func (("Var") ("Var"))) "Var") 
+                  (ident (binding 5 "add_pair"))))))))))))) 
+  (at 26 
    (declare (int) 
     (bindings 
      (op = (bind (binding 19 "nested") ()) (expr (int) (literal (int) "0")))))) 
-  (at 25 
+  (at 41 
    (block (declare (int) (bindings (bind (binding 20 "left") ()))) 
     (declare ("Iter") 
      (bindings 
@@ -117,7 +121,7 @@
                    (expr () 
                     (composite (commas (expr (int) (literal (int) "0"))))))))))))))) 
     (declare ("Var") (bindings (bind (binding 22 "_x2c_macro_item_1") ()))) 
-    (at 19 
+    (at 35 
      (while 
       (expr (int) 
        (call (expr ((func (("Iter") (opt-ref "Var"))) int) 
@@ -161,7 +165,7 @@
                        (expr () 
                         (composite (commas (expr (int) (literal (int) "0"))))))))))))))) 
         (declare ("Var") (bindings (bind (binding 27 "_x2c_macro_item_0") ()))) 
-        (at 12 
+        (at 28 
          (while 
           (expr (int) 
            (call (expr ((func (("Iter") (opt-ref "Var"))) int) 
@@ -185,10 +189,10 @@
               (expr (int) 
                (op + (expr (int) (ident (binding 20 "left"))) 
                 (expr (int) (ident (binding 24 "right"))))))))))))))))) 
-  (at 26 
+  (at 42 
    (declare (struct "Iter") 
     (bindings (bind (binding 28 "mixed_source_storage") ())))) 
-  (at 27 
+  (at 43 
    (declare ("List") 
     (bindings 
      (op = (bind (binding 29 "mixed") ()) 
@@ -209,12 +213,12 @@
                                  (ident (binding 28 "mixed_source_storage")))))))) 
                  (expr ((func (("Var"))) "Var") 
                   (ident (binding 1 "double_value"))))))))))))) 
-  (at 28 
+  (at 44 
    (declare (struct "Iter") 
     (bindings (bind (binding 30 "source_storage") ()) 
      (bind (binding 31 "map_storage") ()) 
      (bind (binding 32 "filter_storage") ())))) 
-  (at 29 
+  (at 45 
    (declare ("Iter") 
     (bindings 
      (op = (bind (binding 33 "source") ()) 
@@ -225,7 +229,7 @@
          (expr (int) (literal (int) "1")) 
          (expr (* struct "Iter") 
           (op & (expr (struct "Iter") (ident (binding 30 "source_storage")))))))))))) 
-  (at 30 
+  (at 46 
    (declare ("Iter") 
     (bindings 
      (op = (bind (binding 34 "mapped") ()) 
@@ -236,7 +240,7 @@
          (expr ((func (("Var"))) "Var") (ident (binding 1 "double_value"))) 
          (expr (* struct "Iter") 
           (op & (expr (struct "Iter") (ident (binding 31 "map_storage")))))))))))) 
-  (at 31 
+  (at 47 
    (declare ("Iter") 
     (bindings 
      (op = (bind (binding 35 "filtered") ()) 
@@ -247,7 +251,7 @@
          (expr ((func (("Var"))) int) (ident (binding 3 "is_even"))) 
          (expr (* struct "Iter") 
           (op & (expr (struct "Iter") (ident (binding 32 "filter_storage")))))))))))) 
-  (at 32 
+  (at 48 
    (declare ("List") 
     (bindings 
      (op = (bind (binding 36 "explicit") ()) 
@@ -255,7 +259,7 @@
        (call (expr ((func (("Iter"))) ("List")) 
               (ident (binding 12 "Iter_list"))) 
         (args (expr ("Iter") (ident (binding 35 "filtered")))))))))) 
-  (at 33 
+  (at 49 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 37 "printf"))) 
@@ -273,9 +277,9 @@
        (expr (int) 
         (call (expr ((func (("List"))) (int)) (ident (binding 38 "List_len"))) 
          (args (expr ("List") (ident (binding 36 "explicit"))))))))))) 
-  (at 34 
+  (at 50 
    (stmnt 
     (expr (void) 
      (call (expr ((func ((void))) void) (ident (binding 40 "Scope_release"))) 
       (args (expr (void) ())))))) 
-  (at 35 (return (int) (expr (int) (literal (int) "0"))))))
+  (at 51 (return (int) (expr (int) (literal (int) "0"))))))

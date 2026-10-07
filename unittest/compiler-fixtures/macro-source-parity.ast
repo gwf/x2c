@@ -17,10 +17,11 @@
  (bind (binding 3 "DirectValue_read") 
   ((fnmod (params (param ("DirectValue") (bind (binding 4 "value") ())))))) 
  (block 
-  (at 1 (return (int) 
-         (expr (int) 
-          (op . (expr ("DirectValue") (ident (binding 4 "value"))) 
-           ("value")))))))
+  (at 24 
+   (return (int) 
+    (expr (int) 
+     (op . (expr ("DirectValue") (ident (binding 4 "value"))) 
+      ("value")))))))
 
 (adopt ("DirectProtocol") ("DirectValue") 
  external 
@@ -52,19 +53,21 @@
  (bind (binding 14 "direct_inline") 
   ((fnmod (params (param (int) (bind (binding 15 "value") ())))))) 
  (block 
-  (at 2 (return (int) 
-         (expr (int) 
-          (op + (expr (int) (ident (binding 15 "value"))) 
-           (expr (int) (literal (int) "1"))))))))
+  (at 25 
+   (return (int) 
+    (expr (int) 
+     (op + (expr (int) (ident (binding 15 "value"))) 
+      (expr (int) (literal (int) "1"))))))))
 
 (function (int) 
  (bind (binding 12 "direct_function") 
   ((fnmod (params (param (int) (bind (binding 16 "value") ())))))) 
  (block 
-  (at 3 (return (int) 
-         (expr (int) 
-          (op + (expr (int) (ident (binding 16 "value"))) 
-           (expr (enum "DirectKind") (ident (binding 5 "DIRECT_KIND")))))))))
+  (at 26 
+   (return (int) 
+    (expr (int) 
+     (op + (expr (int) (ident (binding 16 "value"))) 
+      (expr (enum "DirectKind") (ident (binding 5 "DIRECT_KIND")))))))))
 
 (macrodef <macro generated_protocol>)
 
@@ -116,38 +119,40 @@
  (bind (binding 27 "generated_inline") 
   ((fnmod (params (param (int) (bind (binding 28 "_x2c_macro_value_1") ())))))) 
  (block 
-  (at 8 (return (int) 
-         (expr (int) 
-          (op + (expr (int) (ident (binding 28 "_x2c_macro_value_1"))) 
-           (expr (int) (literal (int) "1"))))))))
+  (at 31 
+   (return (int) 
+    (expr (int) 
+     (op + (expr (int) (ident (binding 28 "_x2c_macro_value_1"))) 
+      (expr (int) (literal (int) "1"))))))))
 
 (function (int) 
  (bind (binding 25 "generated_function") 
   ((fnmod (params (param (int) (bind (binding 29 "_x2c_macro_value_2") ())))))) 
  (block 
-  (at 9 (return (int) 
-         (expr (int) 
-          (op + (expr (int) (ident (binding 29 "_x2c_macro_value_2"))) 
-           (expr (int) (literal (int) "3"))))))))
+  (at 32 
+   (return (int) 
+    (expr (int) 
+     (op + (expr (int) (ident (binding 29 "_x2c_macro_value_2"))) 
+      (expr (int) (literal (int) "3"))))))))
 
 (macrodef <macro generated_read>)
 
 (function (int) 
  (bind (binding 30 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 10 
+  (at 33 
    (declare ("DirectValue") 
     (bindings 
      (op = (bind (binding 31 "direct") ()) 
       (expr () 
        (composite (commas (dotinit ("value") (expr (int) (literal (int) "37")))))))))) 
-  (at 11 
+  (at 34 
    (declare ("DirectRecord") 
     (bindings 
      (op = (bind (binding 32 "direct_record") ()) 
       (expr () 
        (composite (commas (dotinit ("value") (expr (int) (literal (int) "1")))))))))) 
-  (at 12 
+  (at 35 
    (declare ("DirectUnion") 
     (bindings 
      (op = (bind (binding 33 "direct_union") ()) 
@@ -158,13 +163,13 @@
           (expr (int) 
            (op . (expr ("DirectRecord") (ident (binding 32 "direct_record"))) 
             ("value"))))))))))) 
-  (at 13 
+  (at 36 
    (declare ("GeneratedRecord") 
     (bindings 
      (op = (bind (binding 34 "generated_record") ()) 
       (expr () 
        (composite (commas (dotinit ("value") (expr (int) (literal (int) "1")))))))))) 
-  (at 14 
+  (at 37 
    (declare ("GeneratedUnion") 
     (bindings 
      (op = (bind (binding 35 "generated_union") ()) 
@@ -176,7 +181,7 @@
            (op . (expr ("GeneratedRecord") 
                   (ident (binding 34 "generated_record"))) 
             ("value"))))))))))) 
-  (at 15 
+  (at 38 
    (declare (int) 
     (bindings 
      (op = (bind (binding 36 "parity") ()) 
@@ -215,7 +220,7 @@
                         (args (expr (int) (literal (int) "0"))))))) 
                (expr (int) (ident (binding 24 "generated_global"))))) 
         (expr () (ident (binding 37 "GENERATED_SOURCE_FLAG"))))))))) 
-  (at 17 
+  (at 40 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 38 "printf"))) 
@@ -225,4 +230,4 @@
                (ident (binding 3 "DirectValue_read"))) 
          (args (expr ("DirectValue") (ident (binding 31 "direct")))))) 
        (expr (int) (ident (binding 36 "parity")))))))) 
-  (at 18 (return (int) (expr (int) (literal (int) "0"))))))
+  (at 41 (return (int) (expr (int) (literal (int) "0"))))))

@@ -25,34 +25,37 @@
   ((fnmod (params (param (int) (bind (binding 10 "values") (*))))) 
    *)) 
  (block 
-  (at 1 (stmnt 
-         (expr (int) (postfix ++ (expr (int) (ident (binding 5 "base_calls"))))))) 
-  (at 79 (return (expr (* int) (ident (binding 10 "values")))))))
+  (at 17 
+   (stmnt 
+    (expr (int) (postfix ++ (expr (int) (ident (binding 5 "base_calls"))))))) 
+  (at 95 (return (expr (* int) (ident (binding 10 "values")))))))
 
 (function (static "NumericBox") 
  (bind (binding 11 "pick_box") 
   ((fnmod (params (param ("NumericBox") (bind (binding 12 "box") (*))))) 
    *)) 
  (block 
-  (at 3 (stmnt 
-         (expr (int) (postfix ++ (expr (int) (ident (binding 5 "base_calls"))))))) 
-  (at 80 (return (expr (* "NumericBox") (ident (binding 12 "box")))))))
+  (at 19 
+   (stmnt 
+    (expr (int) (postfix ++ (expr (int) (ident (binding 5 "base_calls"))))))) 
+  (at 96 (return (expr (* "NumericBox") (ident (binding 12 "box")))))))
 
 (function (static int) 
  (bind (binding 13 "pick_index") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 5 (stmnt 
-         (expr (int) 
-          (postfix ++ (expr (int) (ident (binding 6 "index_calls"))))))) 
-  (at 81 (return (expr (int) (literal (int) "1"))))))
+  (at 21 
+   (stmnt 
+    (expr (int) (postfix ++ (expr (int) (ident (binding 6 "index_calls"))))))) 
+  (at 97 (return (expr (int) (literal (int) "1"))))))
 
 (function (static "Var") 
  (bind (binding 14 "counted_rhs") 
   ((fnmod (params (param (int) (bind (binding 15 "value") ())))))) 
  (block 
-  (at 7 (stmnt 
-         (expr (int) (postfix ++ (expr (int) (ident (binding 7 "rhs_calls"))))))) 
-  (at 82 
+  (at 23 
+   (stmnt 
+    (expr (int) (postfix ++ (expr (int) (ident (binding 7 "rhs_calls"))))))) 
+  (at 98 
    (return 
     (expr ("Var") 
      (call (expr ((func ((int))) "Var") (ident (binding 16 "int_var"))) 
@@ -61,10 +64,10 @@
 (function (static "Var") 
  (bind (binding 17 "skipped_rhs") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 9 (stmnt 
-         (expr (int) 
-          (postfix ++ (expr (int) (ident (binding 8 "skipped_calls"))))))) 
-  (at 83 
+  (at 25 
+   (stmnt 
+    (expr (int) (postfix ++ (expr (int) (ident (binding 8 "skipped_calls"))))))) 
+  (at 99 
    (return 
     (expr ("Var") 
      (call (expr ((func ((int))) "Var") (ident (binding 16 "int_var"))) 
@@ -73,66 +76,66 @@
 (function (int) 
  (bind (binding 18 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 84 
+  (at 100 
    (declare ("Dynamic") 
     (bindings 
      (op = (bind (binding 19 "a") ()) 
       (expr ("Var") 
        (call "Var_new" 
         (args (expr ("Symbol") "3453797") (expr (int) (literal (int) "40"))))))))) 
-  (at 85 
+  (at 101 
    (declare ("DynamicAlias") 
     (bindings 
      (op = (bind (binding 20 "b") ()) 
       (expr ("Var") 
        (call "Var_new" 
         (args (expr ("Symbol") "3453797") (expr (int) (literal (int) "2"))))))))) 
-  (at 87 
+  (at 103 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 21 "sum") ()) 
       (expr ("Var") 
-       (at 86 
+       (at 102 
         (call (expr (macro-expr) (ident (binding-name "Var_binary"))) 
          (args (expr ("Dynamic") (ident (binding 19 "a"))) 
           (expr ("Symbol") (literal ("Symbol") "+" +)) 
           (expr ("DynamicAlias") (ident (binding 20 "b"))))))))))) 
-  (at 89 
+  (at 105 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 22 "product") ()) 
       (expr ("Var") 
-       (at 88 
+       (at 104 
         (call (expr (macro-expr) (ident (binding-name "Var_binary"))) 
          (args (expr ("Dynamic") (ident (binding 19 "a"))) 
           (expr ("Symbol") (literal ("Symbol") "*" *)) 
           (expr ("DynamicAlias") (ident (binding 20 "b"))))))))))) 
-  (at 91 
+  (at 107 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 23 "shifted") ()) 
       (expr ("Var") 
-       (at 90 
+       (at 106 
         (call (expr (macro-expr) (ident (binding-name "Var_binary"))) 
          (args (expr ("Dynamic") (ident (binding 19 "a"))) 
           (expr ("Symbol") (literal ("Symbol") "<<" \x3C<)) 
           (expr ("DynamicAlias") (ident (binding 20 "b"))))))))))) 
-  (at 93 
+  (at 109 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 24 "bits") ()) 
       (expr ("Var") 
-       (at 92 
+       (at 108 
         (call (expr (macro-expr) (ident (binding-name "Var_binary"))) 
          (args (expr ("Dynamic") (ident (binding 19 "a"))) 
           (expr ("Symbol") (literal ("Symbol") "|" |)) 
           (expr ("DynamicAlias") (ident (binding 20 "b"))))))))))) 
-  (at 95 
+  (at 111 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 25 "quotient") ()) 
       (expr ("Var") 
-       (at 94 
+       (at 110 
         (call (expr (macro-expr) (ident (binding-name "Var_binary"))) 
          (args (expr ("Dynamic") (ident (binding 19 "a"))) 
           (expr ("Symbol") (literal ("Symbol") "/" /)) 
@@ -140,7 +143,7 @@
            (call (expr ((func ((double))) "Var") 
                   (ident (binding 26 "double_var"))) 
             (args (expr (double) (literal (double) "4.0"))))))))))))) 
-  (at 96 
+  (at 112 
    (declare (double) 
     (bindings 
      (op = (bind (binding 27 "converted") ()) 
@@ -150,7 +153,7 @@
                (call "Var_convert" 
                 (args (expr ("Var") (ident (binding 21 "sum"))) 
                  (expr ("Symbol") "3356265"))))))))))) 
-  (at 97 
+  (at 113 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 28 "infinity") ()) 
@@ -165,7 +168,7 @@
         (args (expr (double) 
                (op / (expr (double) (literal (double) "0.0")) 
                 (expr (double) (literal (double) "0.0"))))))))))) 
-  (at 98 
+  (at 114 
    (declare (double) 
     (bindings 
      (op = (bind (binding 30 "converted_infinity") ()) 
@@ -175,7 +178,7 @@
                (call "Var_convert" 
                 (args (expr ("Var") (ident (binding 28 "infinity"))) 
                  (expr ("Symbol") "3356265"))))))))))) 
-  (at 99 
+  (at 115 
    (declare (double) 
     (bindings 
      (op = (bind (binding 31 "converted_nan") ()) 
@@ -185,12 +188,12 @@
                (call "Var_convert" 
                 (args (expr ("Var") (ident (binding 29 "not_number"))) 
                  (expr ("Symbol") "3356265"))))))))))) 
-  (at 27 
+  (at 43 
    (declare (double) 
     (bindings 
      (op = (bind (binding 32 "compound_infinity") ()) 
       (expr (double) (literal (double) "2.0")))))) 
-  (at 100 
+  (at 116 
    (stmnt 
     (expr (double) 
      (call "x2c_var_update_f64" 
@@ -198,16 +201,16 @@
              (op & (parens 
                     (expr (double) (ident (binding 32 "compound_infinity")))))) 
        (expr ("Symbol") "54") (expr ("Var") (ident (binding 28 "infinity")))))))) 
-  (at 29 
+  (at 45 
    (declare (int) 
     (bindings 
      (op = (bind (binding 33 "native") ()) (expr (int) (literal (int) "3")))))) 
-  (at 30 
+  (at 46 
    (stmnt 
     (expr (int) 
      (op += (expr (int) (ident (binding 33 "native"))) 
       (expr (int) (literal (int) "4")))))) 
-  (at 101 
+  (at 117 
    (declare (int) 
     (bindings 
      (op = (bind (binding 34 "compound_result") ()) 
@@ -219,12 +222,12 @@
                  (op & (parens (expr (int) (ident (binding 33 "native")))))) 
            (expr ("Symbol") "56") 
            (expr ("DynamicAlias") (ident (binding 20 "b")))))))))))) 
-  (at 32 
+  (at 48 
    (declare (signed char) 
     (bindings 
      (op = (bind (binding 35 "signed_byte") ()) 
       (expr (int) (literal (int) "3")))))) 
-  (at 102 
+  (at 118 
    (stmnt 
     (expr (signed char) 
      (call "x2c_var_update_schar" 
@@ -232,21 +235,21 @@
              (op & (parens 
                     (expr (signed char) (ident (binding 35 "signed_byte")))))) 
        (expr ("Symbol") "56") (expr ("DynamicAlias") (ident (binding 20 "b")))))))) 
-  (at 103 
+  (at 119 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 36 "dynamic") ()) 
       (expr ("Var") 
        (call (expr ((func ((int))) "Var") (ident (binding 16 "int_var"))) 
         (args (expr (int) (literal (int) "5"))))))))) 
-  (at 104 
+  (at 120 
    (stmnt 
     (expr ("Var") 
      (call "x2c_var_update_volatile" 
       (args (expr (* "Var") 
              (op & (parens (expr ("Var") (ident (binding 36 "dynamic")))))) 
        (expr ("Symbol") "54") (expr ("DynamicAlias") (ident (binding 20 "b")))))))) 
-  (at 105 
+  (at 121 
    (declare (int) 
     (bindings 
      (op = (bind (binding 37 "values") ((dim))) 
@@ -254,7 +257,7 @@
        (composite 
         (commas (expr (int) (literal (int) "10")) 
          (expr (int) (literal (int) "20"))))))))) 
-  (at 106 
+  (at 122 
    (stmnt 
     (expr (int) 
      (call "x2c_var_update_i32" 
@@ -273,12 +276,12 @@
        (expr ("Var") 
         (call (expr ((func ((int))) "Var") (ident (binding 14 "counted_rhs"))) 
          (args (expr (int) (literal (int) "3")))))))))) 
-  (at 107 
+  (at 123 
    (declare ("NumericBox") 
     (bindings 
      (op = (bind (binding 38 "box") ()) 
       (expr ("NumericBox") (composite (commas (expr (int) (literal (int) "7"))))))))) 
-  (at 108 
+  (at 124 
    (stmnt 
     (expr (int) 
      (call "x2c_var_update_i32" 
@@ -296,7 +299,7 @@
        (expr ("Var") 
         (call (expr ((func ((int))) "Var") (ident (binding 14 "counted_rhs"))) 
          (args (expr (int) (literal (int) "2")))))))))) 
-  (at 109 
+  (at 125 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 39 "empty") ()) 
@@ -304,12 +307,12 @@
        (call (expr ((func (("String"))) "Var") (ident (binding 40 "String_var"))) 
         (args (expr ("String") 
                (cast ("String") (expr () (ident (binding 41 "NULL")))))))))))) 
-  (at 111 
+  (at 127 
    (declare (int) 
     (bindings 
      (op = (bind (binding 42 "logical") ()) 
       (expr (int) 
-       (at 110 
+       (at 126 
         (op && 
          (expr (int) 
           (call (expr ((func (("Var"))) int) (ident (binding 43 "Var_truth"))) 
@@ -317,12 +320,12 @@
          (expr (int) 
           (call (expr ((func (("Var"))) int) (ident (binding 43 "Var_truth"))) 
            (args (expr ("DynamicAlias") (ident (binding 20 "b"))))))))))))) 
-  (at 113 
+  (at 129 
    (declare (int) 
     (bindings 
      (op = (bind (binding 44 "short_and") ()) 
       (expr (int) 
-       (at 112 
+       (at 128 
         (op && 
          (expr (int) 
           (call (expr ((func (("Var"))) int) (ident (binding 43 "Var_truth"))) 
@@ -333,12 +336,12 @@
                   (call (expr ((func ((void))) "Var") 
                          (ident (binding 17 "skipped_rhs"))) 
                    (args (expr (void) ())))))))))))))) 
-  (at 115 
+  (at 131 
    (declare (int) 
     (bindings 
      (op = (bind (binding 45 "short_or") ()) 
       (expr (int) 
-       (at 114 
+       (at 130 
         (op || 
          (expr (int) 
           (call (expr ((func (("Var"))) int) (ident (binding 43 "Var_truth"))) 
@@ -349,7 +352,7 @@
                   (call (expr ((func ((void))) "Var") 
                          (ident (binding 17 "skipped_rhs"))) 
                    (args (expr (void) ())))))))))))))) 
-  (at 116 
+  (at 132 
    (declare (int) 
     (bindings 
      (op = (bind (binding 46 "negated") ()) 
@@ -358,7 +361,7 @@
               (call (expr ((func (("Var"))) int) 
                      (ident (binding 43 "Var_truth"))) 
                (args (expr ("Var") (ident (binding 39 "empty")))))))))))) 
-  (at 117 
+  (at 133 
    (declare (int) 
     (bindings 
      (op = (bind (binding 47 "choice") ()) 
@@ -368,33 +371,33 @@
                      (ident (binding 43 "Var_truth"))) 
                (args (expr ("Var") (ident (binding 39 "empty")))))) 
         (expr (int) (literal (int) "1")) (expr (int) (literal (int) "2")))))))) 
-  (at 49 
+  (at 65 
    (declare (int) 
     (bindings 
      (op = (bind (binding 48 "branch") (volatile)) 
       (expr (int) (literal (int) "0")))))) 
-  (at 118 
+  (at 134 
    (if (expr (int) 
         (call (expr ((func (("Var"))) int) (ident (binding 43 "Var_truth"))) 
          (args (expr ("Dynamic") (ident (binding 19 "a")))))) 
     (stmnt (expr (int) (postfix ++ (expr (int) (ident (binding 48 "branch")))))))) 
-  (at 119 
+  (at 135 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 49 "remaining") ()) 
       (expr ("Var") 
        (call (expr ((func ((int))) "Var") (ident (binding 16 "int_var"))) 
         (args (expr (int) (literal (int) "2"))))))))) 
-  (at 121 
+  (at 137 
    (while 
     (expr (int) 
      (call (expr ((func (("Var"))) int) (ident (binding 43 "Var_truth"))) 
       (args (expr ("Var") (ident (binding 49 "remaining")))))) 
     (block 
-     (at 52 
+     (at 68 
       (stmnt 
        (expr (int) (postfix ++ (expr (int) (ident (binding 48 "branch"))))))) 
-     (at 120 
+     (at 136 
       (stmnt 
        (expr ("Var") 
         (call "x2c_var_update_volatile" 
@@ -404,14 +407,14 @@
           (expr ("Var") 
            (call (expr ((func ((int))) "Var") (ident (binding 16 "int_var"))) 
             (args (expr (int) (literal (int) "1"))))))))))))) 
-  (at 122 
+  (at 138 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 50 "for_cond") ()) 
       (expr ("Var") 
        (call (expr ((func ((int))) "Var") (ident (binding 16 "int_var"))) 
         (args (expr (int) (literal (int) "0"))))))))) 
-  (at 123 
+  (at 139 
    (for (expr ("Var") 
          (op = (expr ("Var") (ident (binding 50 "for_cond"))) 
           (expr ("Var") 
@@ -429,48 +432,48 @@
         (call (expr ((func ((int))) "Var") (ident (binding 16 "int_var"))) 
          (args (expr (int) (literal (int) "1")))))))) 
     (stmnt (expr (int) (postfix ++ (expr (int) (ident (binding 48 "branch")))))))) 
-  (at 124 
+  (at 140 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 51 "do_cond") ()) 
       (expr ("Var") 
        (call (expr ((func ((int))) "Var") (ident (binding 16 "int_var"))) 
         (args (expr (int) (literal (int) "0"))))))))) 
-  (at 125 
+  (at 141 
    (do (block 
-        (at 58 
+        (at 74 
          (stmnt 
           (expr (int) (postfix ++ (expr (int) (ident (binding 48 "branch")))))))) 
     (expr (int) 
      (call (expr ((func (("Var"))) int) (ident (binding 43 "Var_truth"))) 
       (args (expr ("Var") (ident (binding 51 "do_cond")))))))) 
-  (at 60 (empty)) 
-  (at 61 
+  (at 76 (empty)) 
+  (at 77 
    (declare (int) 
     (bindings 
      (op = (bind (binding 52 "preserved") (volatile)) 
       (expr (int) (literal (int) "1")))))) 
-  (at 126 
+  (at 142 
    (declare ("NumericBox") 
     (bindings 
      (op = (bind (binding 53 "preserved_box") (volatile)) 
       (expr ("NumericBox") (composite (commas (expr (int) (literal (int) "2"))))))))) 
-  (at 127 
+  (at 143 
    (declare (int) 
     (bindings 
      (op = (bind (binding 54 "preserved_values") (volatile (dim))) 
       (expr ((dim) int) (composite (commas (expr (int) (literal (int) "3"))))))))) 
-  (at 127 
+  (at 143 
    (declare (int) 
     (bindings 
      (op = (bind (binding 55 "addressed") (volatile)) 
       (expr (int) (literal (int) "4")))))) 
-  (at 128 
+  (at 144 
    (declare ("NumericBox") 
     (bindings 
      (op = (bind (binding 56 "addressed_box") (volatile)) 
       (expr ("NumericBox") (composite (commas (expr (int) (literal (int) "5"))))))))) 
-  (at 134 
+  (at 150 
    (block 
     (declare ("ExceptionFrame") 
      (bindings (bind (binding 57 "_x2c_exception_frame_0") ()))) 
@@ -547,7 +550,7 @@
                                (ident (binding 57 "_x2c_exception_frame_0"))) 
                          ("env"))) (expr (int) (literal (int) "0"))))))) 
      (block 
-      (at 129 
+      (at 145 
        (stmnt 
         (expr (int) 
          (call "x2c_var_update_i32" 
@@ -555,7 +558,7 @@
                  (op & (parens (expr (int) (ident (binding 52 "preserved")))))) 
            (expr ("Symbol") "56") 
            (expr ("DynamicAlias") (ident (binding 20 "b")))))))) 
-      (at 130 
+      (at 146 
        (stmnt 
         (expr (int) 
          (call "x2c_var_update_i32" 
@@ -566,7 +569,7 @@
                                 (ident (binding 53 "preserved_box"))) ("value")))))) 
            (expr ("Symbol") "56") 
            (expr ("DynamicAlias") (ident (binding 20 "b")))))))) 
-      (at 131 
+      (at 147 
        (stmnt 
         (expr (int) 
          (call "x2c_var_update_i32" 
@@ -579,7 +582,7 @@
                           (expr (int) (literal (int) "0"))))))) 
            (expr ("Symbol") "56") 
            (expr ("DynamicAlias") (ident (binding 20 "b")))))))) 
-      (at 132 
+      (at 148 
        (stmnt 
         (expr (int) 
          (call "x2c_var_update_i32" 
@@ -593,7 +596,7 @@
                                          (ident (binding 55 "addressed")))))))))))) 
            (expr ("Symbol") "56") 
            (expr ("DynamicAlias") (ident (binding 20 "b")))))))) 
-      (at 133 
+      (at 149 
        (stmnt 
         (expr (int) 
          (call "x2c_var_update_i32" 
@@ -608,7 +611,7 @@
                                     (ident (binding 56 "addressed_box"))))))) 
                           ("value")))))) (expr ("Symbol") "56") 
            (expr ("DynamicAlias") (ident (binding 20 "b")))))))) 
-      (at 70 
+      (at 86 
        (raise (expr ("Symbol") (literal ("Symbol") "invariant" invariant)) 
         (args)))) 
      (block 
@@ -652,7 +655,7 @@
               (expr (int) (literal (int) "0")))) 
          (block 
           (block 
-           (at 71 
+           (at 87 
             (stmnt 
              (expr (int) (postfix ++ (expr (int) (ident (binding 48 "branch"))))))))))) 
        (block 
@@ -675,7 +678,7 @@
                    (ident (binding 64 "_x2c_error_handler_0"))) 
              (expr () (ident (binding 76 "NULL")))))) 
           (block 
-           (at 72 
+           (at 88 
             (stmnt 
              (expr (int) (postfix ++ (expr (int) (ident (binding 48 "branch")))))))))) 
         (stmnt 
@@ -708,7 +711,7 @@
                (ident (binding 64 "_x2c_error_handler_0"))) 
          (expr () (ident (binding 76 "NULL")))))) 
       (block 
-       (at 72 
+       (at 88 
         (stmnt 
          (expr (int) (postfix ++ (expr (int) (ident (binding 48 "branch")))))))))) 
     (stmnt 
@@ -718,7 +721,7 @@
        (args (expr (* ("ExceptionFrame")) 
               (op & (expr (("ExceptionFrame")) 
                      (ident (binding 57 "_x2c_exception_frame_0"))))))))))) 
-  (at 74 
+  (at 90 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 79 "printf"))) 
@@ -741,7 +744,7 @@
                (ident (binding 81 "Var_double"))) 
          (args (expr ("Var") (ident (binding 25 "quotient")))))) 
        (expr (double) (ident (binding 27 "converted")))))))) 
-  (at 75 
+  (at 91 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 79 "printf"))) 
@@ -762,7 +765,7 @@
          ("value"))) (expr (int) (ident (binding 5 "base_calls"))) 
        (expr (int) (ident (binding 6 "index_calls"))) 
        (expr (int) (ident (binding 7 "rhs_calls")))))))) 
-  (at 76 
+  (at 92 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 79 "printf"))) 
@@ -777,7 +780,7 @@
        (expr (int) (ident (binding 48 "branch"))) 
        (expr (int) (ident (binding 52 "preserved"))) 
        (expr (int) (ident (binding 8 "skipped_calls")))))))) 
-  (at 77 
+  (at 93 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 79 "printf"))) 
@@ -802,4 +805,4 @@
        (expr (int) (ident (binding 55 "addressed"))) 
        (expr (int) 
         (op . (expr ("NumericBox") (ident (binding 56 "addressed_box"))) 
-         ("value")))))))) (at 135 (return (expr (int) (literal (int) "0"))))))
+         ("value")))))))) (at 151 (return (expr (int) (literal (int) "0"))))))

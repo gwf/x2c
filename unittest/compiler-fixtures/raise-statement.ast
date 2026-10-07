@@ -4,82 +4,88 @@
 (function (static void) 
  (bind (binding 1 "raise_empty") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 1 (raise (expr ("Symbol") (literal ("Symbol") "raise-prob" raise-prob)) 
-         (args)))))
+  (at 17 
+   (raise (expr ("Symbol") (literal ("Symbol") "raise-prob" raise-prob)) 
+    (args)))))
 
 (function (int) 
  (bind (binding 2 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 2 (stmnt 
-         (expr (void) 
-          (call (expr ((func ((void))) void) 
-                 (ident (binding 3 "Error_initialize"))) 
-           (args (expr (void) ())))))) 
-  (at 3 (stmnt 
-         (expr (void) 
-          (call (expr ((func (("Symbol") ("Symbol"))) void) 
-                 (ident (binding 4 "Error_policy_set"))) 
-           (args (expr ("Symbol") (literal ("Symbol") "<collected>" collected)) 
-            (expr ("Symbol") (literal ("Symbol") "<collect>" collect))))))) 
-  (at 4 (stmnt 
-         (expr (void) 
-          (call (expr ((func (("Symbol") ("Symbol"))) void) 
-                 (ident (binding 4 "Error_policy_set"))) 
-           (args (expr ("Symbol") (literal ("Symbol") "<raise-prob>" raise-prob)) 
-            (expr ("Symbol") (literal ("Symbol") "<collect>" collect))))))) 
-  (at 5 (declare (int) 
-         (bindings 
-          (op = (bind (binding 5 "bytes") ()) (expr (int) (literal (int) "64"))) 
-          (op = (bind (binding 6 "mark") ()) 
-           (expr (int) 
-            (call (expr ((func ((void))) int) (ident (binding 7 "Error_mark"))) 
-             (args (expr (void) ())))))))) 
-  (at 6 (raise (expr ("Symbol") (literal ("Symbol") "collected" collected)) 
-         (args (expr ("Symbol") (literal ("Symbol") "bytes" bytes)) 
-          (expr (int) (ident (binding 5 "bytes"))) 
-          (expr ("Symbol") (literal ("Symbol") "operation" operation)) 
-          (expr ("String") 
-           (segments 
-            (segexp (expr ("String") (literal ("String") "raise-probe")))))))) 
-  (at 7 (declare ("List") 
-         (bindings 
-          (op = (bind (binding 8 "entry") ()) 
-           (expr ("Var") 
-            (call (expr ((func (("List"))) ("Var")) 
-                   (ident (binding 9 "List_car"))) 
-             (args (expr ("List") 
-                    (call (expr ((func ((int))) "List") 
-                           (ident (binding 10 "Error_since"))) 
-                     (args (expr (int) (ident (binding 6 "mark"))))))))))))) 
-  (at 8 (declare ("List") 
-         (bindings 
-          (op = (bind (binding 11 "detail") ()) 
-           (expr ("Var") 
-            (call (expr ((func (("List") ("Var"))) ("Var")) 
-                   (ident (binding 12 "List_assoc"))) 
-             (args (expr ("List") (ident (binding 8 "entry"))) 
-              (expr ("Symbol") (literal ("Symbol") "<detail>" detail))))))))) 
-  (at 9 (declare ("List") 
-         (bindings 
-          (op = (bind (binding 13 "location") ()) 
-           (expr ("Var") 
-            (call (expr ((func (("List") ("Var"))) ("Var")) 
-                   (ident (binding 12 "List_assoc"))) 
-             (args (expr ("List") (ident (binding 8 "entry"))) 
-              (expr ("Symbol") (literal ("Symbol") "<location>" location))))))))) 
-  (at 10 
+  (at 18 
+   (stmnt 
+    (expr (void) 
+     (call (expr ((func ((void))) void) (ident (binding 3 "Error_initialize"))) 
+      (args (expr (void) ())))))) 
+  (at 19 
+   (stmnt 
+    (expr (void) 
+     (call (expr ((func (("Symbol") ("Symbol"))) void) 
+            (ident (binding 4 "Error_policy_set"))) 
+      (args (expr ("Symbol") (literal ("Symbol") "<collected>" collected)) 
+       (expr ("Symbol") (literal ("Symbol") "<collect>" collect))))))) 
+  (at 20 
+   (stmnt 
+    (expr (void) 
+     (call (expr ((func (("Symbol") ("Symbol"))) void) 
+            (ident (binding 4 "Error_policy_set"))) 
+      (args (expr ("Symbol") (literal ("Symbol") "<raise-prob>" raise-prob)) 
+       (expr ("Symbol") (literal ("Symbol") "<collect>" collect))))))) 
+  (at 21 
+   (declare (int) 
+    (bindings 
+     (op = (bind (binding 5 "bytes") ()) (expr (int) (literal (int) "64"))) 
+     (op = (bind (binding 6 "mark") ()) 
+      (expr (int) 
+       (call (expr ((func ((void))) int) (ident (binding 7 "Error_mark"))) 
+        (args (expr (void) ())))))))) 
+  (at 22 
+   (raise (expr ("Symbol") (literal ("Symbol") "collected" collected)) 
+    (args (expr ("Symbol") (literal ("Symbol") "bytes" bytes)) 
+     (expr (int) (ident (binding 5 "bytes"))) 
+     (expr ("Symbol") (literal ("Symbol") "operation" operation)) 
+     (expr ("String") 
+      (segments (segexp (expr ("String") (literal ("String") "raise-probe")))))))) 
+  (at 23 
+   (declare ("List") 
+    (bindings 
+     (op = (bind (binding 8 "entry") ()) 
+      (expr ("Var") 
+       (call (expr ((func (("List"))) ("Var")) (ident (binding 9 "List_car"))) 
+        (args (expr ("List") 
+               (call (expr ((func ((int))) "List") 
+                      (ident (binding 10 "Error_since"))) 
+                (args (expr (int) (ident (binding 6 "mark"))))))))))))) 
+  (at 24 
+   (declare ("List") 
+    (bindings 
+     (op = (bind (binding 11 "detail") ()) 
+      (expr ("Var") 
+       (call (expr ((func (("List") ("Var"))) ("Var")) 
+              (ident (binding 12 "List_assoc"))) 
+        (args (expr ("List") (ident (binding 8 "entry"))) 
+         (expr ("Symbol") (literal ("Symbol") "<detail>" detail))))))))) 
+  (at 25 
+   (declare ("List") 
+    (bindings 
+     (op = (bind (binding 13 "location") ()) 
+      (expr ("Var") 
+       (call (expr ((func (("List") ("Var"))) ("Var")) 
+              (ident (binding 12 "List_assoc"))) 
+        (args (expr ("List") (ident (binding 8 "entry"))) 
+         (expr ("Symbol") (literal ("Symbol") "<location>" location))))))))) 
+  (at 26 
    (declare (int) 
     (bindings 
      (op = (bind (binding 14 "empty_mark") ()) 
       (expr (int) 
        (call (expr ((func ((void))) int) (ident (binding 7 "Error_mark"))) 
         (args (expr (void) ())))))))) 
-  (at 11 
+  (at 27 
    (stmnt 
     (expr (void) 
      (call (expr ((func ((void))) void) (ident (binding 1 "raise_empty"))) 
       (args (expr (void) ())))))) 
-  (at 12 
+  (at 28 
    (declare ("List") 
     (bindings 
      (op = (bind (binding 15 "empty_entry") ()) 
@@ -89,7 +95,7 @@
                (call (expr ((func ((int))) "List") 
                       (ident (binding 10 "Error_since"))) 
                 (args (expr (int) (ident (binding 14 "empty_mark"))))))))))))) 
-  (at 13 
+  (at 29 
    (declare ("List") 
     (bindings 
      (op = (bind (binding 16 "empty_detail") ()) 
@@ -98,7 +104,7 @@
               (ident (binding 12 "List_assoc"))) 
         (args (expr ("List") (ident (binding 15 "empty_entry"))) 
          (expr ("Symbol") (literal ("Symbol") "<detail>" detail))))))))) 
-  (at 14 
+  (at 30 
    (declare ("List") 
     (bindings 
      (op = (bind (binding 17 "empty_location") ()) 
@@ -107,7 +113,7 @@
               (ident (binding 12 "List_assoc"))) 
         (args (expr ("List") (ident (binding 15 "empty_entry"))) 
          (expr ("Symbol") (literal ("Symbol") "<location>" location))))))))) 
-  (at 15 
+  (at 31 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 18 "printf"))) 
@@ -183,30 +189,30 @@
                        (ident (binding 12 "List_assoc"))) 
                  (args (expr ("List") (ident (binding 17 "empty_location"))) 
                   (expr ("Symbol") (literal ("Symbol") "<function>" function))))))))))))) 
-  (at 16 (return (int) (expr (int) (literal (int) "0"))))))
+  (at 32 (return (int) (expr (int) (literal (int) "0"))))))
 
 (function (static void) 
  (bind (binding 26 "raise_terminal") 
   ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 17 (raise (expr ("Symbol") (literal ("Symbol") "bad-arg" bad-arg)) (args)))))
+  (at 33 (raise (expr ("Symbol") (literal ("Symbol") "bad-arg" bad-arg)) (args)))))
 
 (function (static void) 
  (bind (binding 27 "raise_after_return") 
   ((fnmod (params (param (int) (bind (binding 28 "code") ())))))) 
  (block 
-  (at 18 
+  (at 34 
    (if (expr (int) (op ! (expr (int) (ident (binding 28 "code"))))) 
     (return))) 
-  (at 19 (raise (expr ("Symbol") (literal ("Symbol") "bad-arg" bad-arg)) (args)))))
+  (at 35 (raise (expr ("Symbol") (literal ("Symbol") "bad-arg" bad-arg)) (args)))))
 
 (function (static void) 
  (bind (binding 29 "raise_caught") 
   ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 21 
+  (at 37 
    (try (block 
-         (at 20 
+         (at 36 
           (raise (expr ("Symbol") (literal ("Symbol") "bad-arg" bad-arg)) 
            (args)))) 
     (catchcases 

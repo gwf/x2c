@@ -4,15 +4,17 @@
 (function (int) 
  (bind (binding 1 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 1 (declare ("List") 
-         (bindings 
-          (op = (bind (binding 2 "break_inputs") ()) 
-           (expr ("List") (expr ("List") (cache 845))))))) 
-  (at 2 (declare (int) 
-         (bindings 
-          (op = (bind (binding 3 "matched") ()) (expr (int) (literal (int) "0"))) 
-          (op = (bind (binding 4 "after") ()) (expr (int) (literal (int) "0")))))) 
-  (at 37 
+  (at 17 
+   (declare ("List") 
+    (bindings 
+     (op = (bind (binding 2 "break_inputs") ()) 
+      (expr ("List") (expr ("List") (cache 6))))))) 
+  (at 18 
+   (declare (int) 
+    (bindings 
+     (op = (bind (binding 3 "matched") ()) (expr (int) (literal (int) "0"))) 
+     (op = (bind (binding 4 "after") ()) (expr (int) (literal (int) "0")))))) 
+  (at 53 
    (block (declare ("Var") (bindings (bind (binding 5 "item") ()))) 
     (declare ("List") 
      (bindings 
@@ -24,7 +26,7 @@
        (expr ("List") (ident (binding 6 "_x2c_macro_object_0")))))) 
     (declare ("Var") 
      (bindings (bind (binding 8 "_x2c_macro_cursor_output_0") ()))) 
-    (at 36 
+    (at 52 
      (while 
       (expr (int) 
        (call (expr ((func (("List") (opt-ref "List") (opt-ref "Var"))) int) 
@@ -42,7 +44,7 @@
          (op = (expr ("Var") (ident (binding 5 "item"))) 
           (expr ("Var") (ident (binding 8 "_x2c_macro_cursor_output_0")))))) 
        (block 
-        (at 34 
+        (at 50 
          (declare ("List") 
           (bindings 
            (op = (bind (binding 10 "value") ()) 
@@ -50,27 +52,29 @@
              (call (expr ((func (("Var"))) "List") 
                     (ident (binding 11 "Var_list"))) 
               (args (expr ("Var") (ident (binding 5 "item")))))))))) 
-        (at 35 
+        (at 51 
          (matchcases (expr ("List") (ident (binding 10 "value"))) 
-          ((() (expr ("List") (expr ("List") (cache 842))) 
+          ((() (expr ("List") (expr ("List") (cache 3))) 
             (block 
-             (at 4 (stmnt 
-                    (expr (int) 
-                     (postfix ++ (expr (int) (ident (binding 3 "matched"))))))) 
-             (at 5 (break))))))) 
-        (at 7 (stmnt 
-               (expr (int) (postfix ++ (expr (int) (ident (binding 4 "after"))))))))))))) 
-  (at 17 
+             (at 20 
+              (stmnt 
+               (expr (int) 
+                (postfix ++ (expr (int) (ident (binding 3 "matched"))))))) 
+             (at 21 (break))))))) 
+        (at 23 
+         (stmnt 
+          (expr (int) (postfix ++ (expr (int) (ident (binding 4 "after"))))))))))))) 
+  (at 33 
    (declare ("List") 
     (bindings 
      (op = (bind (binding 12 "continue_inputs") ()) 
-      (expr ("List") (expr ("List") (cache 858))))))) 
-  (at 18 
+      (expr ("List") (expr ("List") (cache 19))))))) 
+  (at 34 
    (declare (int) 
     (bindings 
      (op = (bind (binding 13 "visited") ()) (expr (int) (literal (int) "0"))) 
      (op = (bind (binding 14 "accepted") ()) (expr (int) (literal (int) "0")))))) 
-  (at 41 
+  (at 57 
    (block (declare ("Var") (bindings (bind (binding 15 "item") ()))) 
     (declare ("List") 
      (bindings 
@@ -82,7 +86,7 @@
        (expr ("List") (ident (binding 16 "_x2c_macro_object_1")))))) 
     (declare ("Var") 
      (bindings (bind (binding 18 "_x2c_macro_cursor_output_1") ()))) 
-    (at 40 
+    (at 56 
      (while 
       (expr (int) 
        (call (expr ((func (("List") (opt-ref "List") (opt-ref "Var"))) int) 
@@ -100,7 +104,7 @@
          (op = (expr ("Var") (ident (binding 15 "item"))) 
           (expr ("Var") (ident (binding 18 "_x2c_macro_cursor_output_1")))))) 
        (block 
-        (at 38 
+        (at 54 
          (declare ("List") 
           (bindings 
            (op = (bind (binding 19 "value") ()) 
@@ -108,16 +112,16 @@
              (call (expr ((func (("Var"))) "List") 
                     (ident (binding 11 "Var_list"))) 
               (args (expr ("Var") (ident (binding 15 "item")))))))))) 
-        (at 20 
+        (at 36 
          (stmnt 
           (expr (int) (postfix ++ (expr (int) (ident (binding 13 "visited"))))))) 
-        (at 39 
+        (at 55 
          (matchcases (expr ("List") (ident (binding 19 "value"))) 
-          ((() (expr ("List") (expr ("List") (cache 849))) (continue))))) 
-        (at 22 
+          ((() (expr ("List") (expr ("List") (cache 10))) (continue))))) 
+        (at 38 
          (stmnt 
           (expr (int) (postfix ++ (expr (int) (ident (binding 14 "accepted"))))))))))))) 
-  (at 32 
+  (at 48 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 20 "printf"))) 
@@ -126,7 +130,7 @@
        (expr (int) (ident (binding 4 "after"))) 
        (expr (int) (ident (binding 13 "visited"))) 
        (expr (int) (ident (binding 14 "accepted")))))))) 
-  (at 42 
+  (at 58 
    (return 
     (expr (int) 
      (op ? (expr (int) 

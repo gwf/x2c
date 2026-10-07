@@ -15,41 +15,45 @@
 (function (int) 
  (bind (binding 3 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 3 (declare ("MacroMemberName") 
-         (bindings 
-          (op = (bind (binding 4 "record") ()) 
-           (expr () 
-            (composite 
-             (commas (dotinit ("value") (expr (int) (literal (int) "42"))))))) 
-          (op = (bind (binding 5 "pointer") (*)) 
-           (expr (* "MacroMemberName") 
-            (op & (expr ("MacroMemberName") (ident (binding 4 "record"))))))))) 
-  (at 5 (declare (int) 
-         (bindings 
-          (op = (bind (binding 6 "direct") ()) 
-           (expr (int) 
-            (op . (expr ("MacroMemberName") (ident (binding 4 "record"))) 
-             ("value"))))))) 
-  (at 7 (declare (int) 
-         (bindings 
-          (op = (bind (binding 7 "indirect") ()) 
-           (expr (int) 
-            (op -> (expr (* "MacroMemberName") (ident (binding 5 "pointer"))) 
-             ("value"))))))) 
-  (at 8 (stmnt 
-         (expr () 
-          (call (expr () (ident (binding 8 "printf"))) 
-           (args (expr (* char) (literal (* char) "\"%d %d\\n\"")) 
-            (expr (int) (ident (binding 6 "direct"))) 
-            (expr (int) (ident (binding 7 "indirect")))))))) 
-  (at 9 (return (int) 
-         (expr (int) 
-          (op ? (expr (int) 
-                 (op && 
-                  (expr (int) 
-                   (op == (expr (int) (ident (binding 6 "direct"))) 
-                    (expr (int) (literal (int) "42")))) 
-                  (expr (int) 
-                   (op == (expr (int) (ident (binding 7 "indirect"))) 
-                    (expr (int) (literal (int) "42")))))) 
-           (expr (int) (literal (int) "0")) (expr (int) (literal (int) "1"))))))))
+  (at 21 
+   (declare ("MacroMemberName") 
+    (bindings 
+     (op = (bind (binding 4 "record") ()) 
+      (expr () 
+       (composite (commas (dotinit ("value") (expr (int) (literal (int) "42"))))))) 
+     (op = (bind (binding 5 "pointer") (*)) 
+      (expr (* "MacroMemberName") 
+       (op & (expr ("MacroMemberName") (ident (binding 4 "record"))))))))) 
+  (at 23 
+   (declare (int) 
+    (bindings 
+     (op = (bind (binding 6 "direct") ()) 
+      (expr (int) 
+       (op . (expr ("MacroMemberName") (ident (binding 4 "record"))) 
+        ("value"))))))) 
+  (at 25 
+   (declare (int) 
+    (bindings 
+     (op = (bind (binding 7 "indirect") ()) 
+      (expr (int) 
+       (op -> (expr (* "MacroMemberName") (ident (binding 5 "pointer"))) 
+        ("value"))))))) 
+  (at 26 
+   (stmnt 
+    (expr () 
+     (call (expr () (ident (binding 8 "printf"))) 
+      (args (expr (* char) (literal (* char) "\"%d %d\\n\"")) 
+       (expr (int) (ident (binding 6 "direct"))) 
+       (expr (int) (ident (binding 7 "indirect")))))))) 
+  (at 27 
+   (return (int) 
+    (expr (int) 
+     (op ? (expr (int) 
+            (op && 
+             (expr (int) 
+              (op == (expr (int) (ident (binding 6 "direct"))) 
+               (expr (int) (literal (int) "42")))) 
+             (expr (int) 
+              (op == (expr (int) (ident (binding 7 "indirect"))) 
+               (expr (int) (literal (int) "42")))))) 
+      (expr (int) (literal (int) "0")) (expr (int) (literal (int) "1"))))))))

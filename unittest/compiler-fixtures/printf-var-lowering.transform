@@ -8,14 +8,14 @@
 (function (int) 
  (bind (binding 3 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 18 
+  (at 34 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 4 "key") ()) 
       (expr ("Var") 
        (call (expr ((func ((int))) "Var") (ident (binding 5 "int_var"))) 
         (args (expr (int) (literal (int) "23"))))))))) 
-  (at 19 
+  (at 35 
    (declare ("Dynamic") 
     (bindings 
      (op = (bind (binding 6 "val") ()) 
@@ -23,14 +23,14 @@
        (call "Var_new" 
         (args (expr ("Symbol") "3356265") 
          (expr (double) (literal (double) "3.14"))))))))) 
-  (at 20 
+  (at 36 
    (declare ("DynamicAlias") 
     (bindings 
      (op = (bind (binding 7 "answer") ()) 
       (expr ("Var") 
        (call (expr ((func (("String"))) "Var") (ident (binding 8 "String_var"))) 
-        (args (expr ("String") (cache 839))))))))) 
-  (at 21 
+        (args (expr ("String") (cache 0))))))))) 
+  (at 37 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 9 "width") ()) 
@@ -49,12 +49,13 @@
       (expr ("Var") 
        (call (expr ((func ((int))) "Var") (ident (binding 5 "int_var"))) 
         (args (expr (int) (literal (int) "7"))))))))) 
-  (at 5 (declare (char) 
-         (bindings 
-          (bind (binding 14 "first") ((dim (expr (int) (literal (int) "80"))))) 
-          (bind (binding 15 "second") ((dim (expr (int) (literal (int) "80"))))) 
-          (bind (binding 16 "third") ((dim (expr (int) (literal (int) "80")))))))) 
-  (at 22 
+  (at 21 
+   (declare (char) 
+    (bindings 
+     (bind (binding 14 "first") ((dim (expr (int) (literal (int) "80"))))) 
+     (bind (binding 15 "second") ((dim (expr (int) (literal (int) "80"))))) 
+     (bind (binding 16 "third") ((dim (expr (int) (literal (int) "80")))))))) 
+  (at 38 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 17 "printf"))) 
@@ -76,7 +77,7 @@
         (call "Var_str" 
          (args (expr ("DynamicAlias") (ident (binding 7 "answer")))))) 
        (expr (int) (literal (int) "9"))))))) 
-  (at 23 
+  (at 39 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 18 "fprintf"))) 
@@ -94,7 +95,7 @@
                 (call "Var_convert" 
                  (args (expr ("Var") (ident (binding 4 "key"))) 
                   (expr ("Symbol") "3453797")))))))))))) 
-  (at 24 
+  (at 40 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 20 "sprintf"))) 
@@ -109,7 +110,7 @@
        (expr ("String") 
         (call "Var_str" 
          (args (expr ("DynamicAlias") (ident (binding 7 "answer"))))))))))) 
-  (at 25 
+  (at 41 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 21 "snprintf"))) 
@@ -141,7 +142,7 @@
                 (call "Var_convert" 
                  (args (expr ("Var") (ident (binding 13 "whole"))) 
                   (expr ("Symbol") "3356265")))))))))))) 
-  (at 26 
+  (at 42 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 21 "snprintf"))) 
@@ -158,14 +159,14 @@
                 (call "Var_convert" 
                  (args (expr ("Var") (ident (binding 4 "key"))) 
                   (expr ("Symbol") "3453797")))))))))))) 
-  (at 27 
+  (at 43 
    (declare ("String") 
     (bindings 
      (op = (bind (binding 23 "string") ()) 
       (expr ("String") 
        (call (expr ((func (("String") (...))) ("String")) 
               (ident (binding 24 "String_printf"))) 
-        (args (expr ("String") (cache 840)) 
+        (args (expr ("String") (cache 1)) 
          (expr (int) 
           (call "Var_int" 
            (args (expr ("Var") 
@@ -187,7 +188,7 @@
          (expr ("String") 
           (call "Var_str" 
            (args (expr ("DynamicAlias") (ident (binding 7 "answer"))))))))))))) 
-  (at 28 
+  (at 44 
    (stmnt 
     (expr (int) 
      (call (expr ((func (("File") (* const char) (...))) (int)) 
@@ -206,7 +207,7 @@
                 (call "Var_convert" 
                  (args (expr ("Var") (ident (binding 4 "key"))) 
                   (expr ("Symbol") "3847013")))))))))))) 
-  (at 13 
+  (at 29 
    (declare ("Buffer") 
     (bindings 
      (op = (bind (binding 27 "buffer") ()) 
@@ -214,7 +215,7 @@
        (call (expr ((func (("size_t"))) "Buffer") 
               (ident (binding 28 "Buffer_new"))) 
         (args (expr (int) (literal (int) "0"))))))))) 
-  (at 29 
+  (at 45 
    (stmnt 
     (expr ("Buffer") 
      (call (expr ((func (("Buffer") (* const char) (...))) ("Buffer")) 
@@ -233,7 +234,7 @@
                 (call "Var_convert" 
                  (args (expr ("Dynamic") (ident (binding 6 "val"))) 
                   (expr ("Symbol") "3356265")))))))))))) 
-  (at 15 
+  (at 31 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 17 "printf"))) 
@@ -245,10 +246,10 @@
         (call (expr ((func (("Buffer"))) ("String")) 
                (ident (binding 30 "Buffer_str"))) 
          (args (expr ("Buffer") (ident (binding 27 "buffer"))))))))))) 
-  (at 16 
+  (at 32 
    (stmnt 
     (expr (void) 
      (call (expr ((func (("Buffer"))) (void)) 
             (ident (binding 31 "Buffer_free"))) 
       (args (expr ("Buffer") (ident (binding 27 "buffer")))))))) 
-  (at 30 (return (expr (int) (literal (int) "0"))))))
+  (at 46 (return (expr (int) (literal (int) "0"))))))

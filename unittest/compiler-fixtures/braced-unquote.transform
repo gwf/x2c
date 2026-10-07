@@ -7,81 +7,85 @@
  (bind (binding 2 "answer") 
   ((fnmod (params (param (int) (bind (binding 3 "value") ())))))) 
  (block 
-  (at 1 (stmnt 
-         (expr (int) (postfix ++ (expr (int) (ident (binding 1 "calls"))))))) 
-  (at 38 (return (expr (int) (ident (binding 3 "value")))))))
+  (at 18 
+   (stmnt (expr (int) (postfix ++ (expr (int) (ident (binding 1 "calls"))))))) 
+  (at 55 (return (expr (int) (ident (binding 3 "value")))))))
 
 (macrodef <macro fixture.identity>)
 
 (function (int) 
  (bind (binding 4 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 4 (declare (int) 
-         (bindings 
-          (op = (bind (binding 5 "base") ()) (expr (int) (literal (int) "40")))))) 
-  (at 5 (declare ("List") 
-         (bindings 
-          (op = (bind (binding 6 "tail") ()) 
-           (expr ("List") (expr ("List") (cache 842))))))) 
-  (at 6 (declare ("List") 
-         (bindings 
-          (op = (bind (binding 7 "insert") ()) 
-           (expr ("List") 
-            (expr ("List") 
-             (cons (cache 843) 
-              (expr ("List") 
-               (cons (expr ("Var") 
-                      (call (expr ((func ((int))) "Var") 
-                             (ident (binding 8 "int_var"))) 
-                       (args (expr (int) 
-                              (op + (expr (int) 
-                                     (call (expr ((func ((int))) int) 
-                                            (ident (binding 2 "answer"))) 
-                                      (args (expr (int) 
-                                             (ident (binding 5 "base")))))) 
-                               (expr (int) (literal (int) "2"))))))) (nil)))))))))) 
-  (at 7 (declare ("List") 
-         (bindings 
-          (op = (bind (binding 9 "splice") ()) 
-           (expr ("List") 
-            (expr ("List") 
-             (cons (cache 844) 
-              (expr ("List") 
-               (append (expr ("List") (ident (binding 6 "tail"))) 
-                (expr ("List") (cache 846))))))))))) 
-  (at 8 (declare ("List") 
-         (bindings 
-          (op = (bind (binding 10 "short_splice") ()) 
-           (expr ("List") 
-            (expr ("List") 
-             (cons (cache 844) 
-              (expr ("List") 
-               (append (expr ("List") (ident (binding 6 "tail"))) 
-                (expr ("List") (cache 846))))))))))) 
-  (at 9 (declare ("List") 
-         (bindings 
-          (op = (bind (binding 11 "nested") ()) 
-           (expr ("List") 
-            (expr ("List") 
-             (cons (cache 847) 
-              (expr ("List") 
-               (cons (expr ("Var") 
-                      (call (expr ((func (("List"))) "Var") 
-                             (ident (binding 12 "List_var"))) 
-                       (args (expr ("List") 
-                              (expr ("List") 
-                               (cons (cache 848) 
-                                (expr ("List") 
-                                 (cons (expr ("Var") 
-                                        (call (expr ((func ((int))) "Var") 
-                                               (ident (binding 8 "int_var"))) 
-                                         (args (expr (int) 
-                                                (op + (expr (int) 
-                                                       (ident 
-                                                        (binding 5 "base"))) 
-                                                 (expr (int) (literal (int) "2"))))))) 
-                                  (nil))))))))) (nil)))))))))) 
-  (at 39 
+  (at 21 
+   (declare (int) 
+    (bindings 
+     (op = (bind (binding 5 "base") ()) (expr (int) (literal (int) "40")))))) 
+  (at 22 
+   (declare ("List") 
+    (bindings 
+     (op = (bind (binding 6 "tail") ()) 
+      (expr ("List") (expr ("List") (cache 3))))))) 
+  (at 23 
+   (declare ("List") 
+    (bindings 
+     (op = (bind (binding 7 "insert") ()) 
+      (expr ("List") 
+       (expr ("List") 
+        (cons (cache 4) 
+         (expr ("List") 
+          (cons (expr ("Var") 
+                 (call (expr ((func ((int))) "Var") 
+                        (ident (binding 8 "int_var"))) 
+                  (args (expr (int) 
+                         (op + (expr (int) 
+                                (call (expr ((func ((int))) int) 
+                                       (ident (binding 2 "answer"))) 
+                                 (args (expr (int) (ident (binding 5 "base")))))) 
+                          (expr (int) (literal (int) "2"))))))) (nil)))))))))) 
+  (at 24 
+   (declare ("List") 
+    (bindings 
+     (op = (bind (binding 9 "splice") ()) 
+      (expr ("List") 
+       (expr ("List") 
+        (cons (cache 5) 
+         (expr ("List") 
+          (append (expr ("List") (ident (binding 6 "tail"))) 
+           (expr ("List") (cache 7))))))))))) 
+  (at 25 
+   (declare ("List") 
+    (bindings 
+     (op = (bind (binding 10 "short_splice") ()) 
+      (expr ("List") 
+       (expr ("List") 
+        (cons (cache 5) 
+         (expr ("List") 
+          (append (expr ("List") (ident (binding 6 "tail"))) 
+           (expr ("List") (cache 7))))))))))) 
+  (at 26 
+   (declare ("List") 
+    (bindings 
+     (op = (bind (binding 11 "nested") ()) 
+      (expr ("List") 
+       (expr ("List") 
+        (cons (cache 8) 
+         (expr ("List") 
+          (cons (expr ("Var") 
+                 (call (expr ((func (("List"))) "Var") 
+                        (ident (binding 12 "List_var"))) 
+                  (args (expr ("List") 
+                         (expr ("List") 
+                          (cons (cache 9) 
+                           (expr ("List") 
+                            (cons (expr ("Var") 
+                                   (call (expr ((func ((int))) "Var") 
+                                          (ident (binding 8 "int_var"))) 
+                                    (args (expr (int) 
+                                           (op + (expr (int) 
+                                                  (ident (binding 5 "base"))) 
+                                            (expr (int) (literal (int) "2"))))))) 
+                             (nil))))))))) (nil)))))))))) 
+  (at 56 
    (declare ("List") 
     (bindings 
      (op = (bind (binding 13 "nested_string") ()) 
@@ -96,7 +100,7 @@
                          (cons (expr ("Var") 
                                 (call (expr ((func (("String"))) "Var") 
                                        (ident (binding 14 "String_var"))) 
-                                 (args (expr ("String") (cache 849))))) 
+                                 (args (expr ("String") (cache 10))))) 
                           (expr ("List") 
                            (cons (expr ("Var") 
                                   (call (expr ((func (("String"))) "Var") 
@@ -111,7 +115,7 @@
                                                    (expr (int) 
                                                     (literal (int) "2")))))))))) 
                             (nil))))) ")"))))) (nil)))))))) 
-  (at 11 
+  (at 28 
    (declare ("List") 
     (bindings 
      (op = (bind (binding 16 "short_then_list") ()) 
@@ -120,13 +124,13 @@
         (cons (expr ("Var") 
                (call (expr ((func ((int))) "Var") (ident (binding 8 "int_var"))) 
                 (args (expr (int) (ident (binding 5 "base")))))) 
-         (expr ("List") (cache 853))))))))) 
-  (at 12 
+         (expr ("List") (cache 14))))))))) 
+  (at 29 
    (declare (int) 
     (bindings 
      (op = (bind (binding 17 "compile_time") ()) 
       (expr (int) (literal (int) "42")))))) 
-  (at 13 
+  (at 30 
    (declare ("List") 
     (bindings 
      (op = (bind (binding 18 "nested_compile_time") ()) 
@@ -136,7 +140,7 @@
                (call (expr ((func ((int))) "Var") (ident (binding 8 "int_var"))) 
                 (args (expr (int) (literal (int) "42"))))) 
          (nil)))))))) 
-  (at 40 
+  (at 57 
    (declare ("String") 
     (bindings 
      (op = (bind (binding 19 "text") ()) 
@@ -146,7 +150,7 @@
          (cons (expr ("Var") 
                 (call (expr ((func (("String"))) "Var") 
                        (ident (binding 14 "String_var"))) 
-                 (args (expr ("String") (cache 849))))) 
+                 (args (expr ("String") (cache 10))))) 
           (expr ("List") 
            (cons (expr ("Var") 
                   (call (expr ((func (("String"))) "Var") 
@@ -173,9 +177,9 @@
            (cons (expr ("Var") 
                   (call (expr ((func (("String"))) "Var") 
                          (ident (binding 14 "String_var"))) 
-                   (args (expr ("String") (cache 854))))) (nil))))) 
+                   (args (expr ("String") (cache 15))))) (nil))))) 
         ")")))))) 
-  (at 41 
+  (at 58 
    (declare ("Array") 
     (bindings 
      (op = (bind (binding 21 "array") ()) 
@@ -189,7 +193,7 @@
          (expr ("Var") 
           (call (expr ((func ((int))) "Var") (ident (binding 8 "int_var"))) 
            (args (expr (int) (literal (int) "42")))))))))))) 
-  (at 42 
+  (at 59 
    (declare ("Map") 
     (bindings 
      (op = (bind (binding 24 "map") ()) 
@@ -207,7 +211,7 @@
          (expr ("Var") 
           (call (expr ((func ((int))) "Var") (ident (binding 8 "int_var"))) 
            (args (expr (int) (literal (int) "42")))))))))))) 
-  (at 18 
+  (at 35 
    (declare (int) 
     (bindings 
      (op = (bind (binding 28 "macro_value") ()) 
@@ -215,7 +219,7 @@
        (op + (expr (int) (ident (binding 5 "base"))) 
         (expr (int) (literal (int) "2"))))) 
      (op = (bind (binding 29 "comma") ()) (expr (int) (literal (int) "0")))))) 
-  (at 43 
+  (at 60 
    (declare ("List") 
     (bindings 
      (op = (bind (binding 30 "comma_value") ()) 
@@ -236,7 +240,7 @@
                              (op + (expr (int) (ident (binding 29 "comma"))) 
                               (expr (int) (literal (int) "1"))))))))))))) 
          (nil)))))))) 
-  (at 44 
+  (at 61 
    (declare ("List") 
     (bindings 
      (op = (bind (binding 31 "index") ()) 
@@ -254,7 +258,7 @@
                                        (ident (binding 21 "array"))) 
                                  (expr (int) (literal (int) "0"))))))))))) 
          (nil)))))))) 
-  (at 21 
+  (at 38 
    (declare ("List") 
     (bindings 
      (op = (bind (binding 34 "ternary") ()) 
@@ -268,7 +272,7 @@
                                (expr (int) (literal (int) "40")))) 
                         (expr (int) (literal (int) "42")) 
                         (expr (int) (literal (int) "0"))))))) (nil)))))))) 
-  (at 45 
+  (at 62 
    (declare ("List") 
     (bindings 
      (op = (bind (binding 35 "literals") ()) 
@@ -319,18 +323,18 @@
                           (args (expr (int) (literal (int) "42")))))))))))))) 
           (stmnt 
            (expr ("List") 
-            (cons (cache 859) 
+            (cons (cache 20) 
              (expr ("List") 
               (cons (expr ("Var") 
                      (call (expr ((func (("String"))) "Var") 
                             (ident (binding 14 "String_var"))) 
-                      (args (expr ("String") (cache 858))))) 
+                      (args (expr ("String") (cache 19))))) 
                (expr ("List") 
                 (cons (expr ("Var") (ident (binding 36 "_x2c_literal_part_0"))) 
                  (expr ("List") 
                   (cons (expr ("Var") (ident (binding 38 "_x2c_literal_part_1"))) 
                    (nil)))))))))))))))))) 
-  (at 46 
+  (at 63 
    (if (expr (int) 
         (op || 
          (expr (int) 
@@ -338,15 +342,15 @@
                  (call (expr ((func (("List") ("List"))) int) 
                         (ident (binding 40 "List_equal"))) 
                   (args (expr ("List") (ident (binding 7 "insert"))) 
-                   (expr ("List") (expr ("List") (cache 860)))))))) 
+                   (expr ("List") (expr ("List") (cache 21)))))))) 
          (expr (int) 
           (op ! (expr (int) 
                  (call (expr ((func (("List") ("List"))) int) 
                         (ident (binding 40 "List_equal"))) 
                   (args (expr ("List") (ident (binding 9 "splice"))) 
-                   (expr ("List") (expr ("List") (cache 863)))))))))) 
+                   (expr ("List") (expr ("List") (cache 24)))))))))) 
     (return (expr (int) (literal (int) "1"))))) 
-  (at 47 
+  (at 64 
    (if (expr (int) 
         (op ! (expr (int) 
                (call (expr ((func (("List") ("List"))) int) 
@@ -354,15 +358,15 @@
                 (args (expr ("List") (ident (binding 10 "short_splice"))) 
                  (expr ("List") (ident (binding 9 "splice")))))))) 
     (return (expr (int) (literal (int) "2"))))) 
-  (at 48 
+  (at 65 
    (if (expr (int) 
         (op ! (expr (int) 
                (call (expr ((func (("List") ("List"))) int) 
                       (ident (binding 40 "List_equal"))) 
                 (args (expr ("List") (ident (binding 11 "nested"))) 
-                 (expr ("List") (expr ("List") (cache 865)))))))) 
+                 (expr ("List") (expr ("List") (cache 26)))))))) 
     (return (expr (int) (literal (int) "3"))))) 
-  (at 49 
+  (at 66 
    (if (expr (int) 
         (op ! (expr (int) 
                (call (expr ((func (("String") ("String"))) int) 
@@ -376,17 +380,17 @@
                                 (args (expr ("List") 
                                        (ident (binding 13 "nested_string"))) 
                                  (expr (int) (literal (int) "0")))))))) 
-                 (expr ("String") (cache 858))))))) 
+                 (expr ("String") (cache 19))))))) 
     (return (expr (int) (literal (int) "4"))))) 
-  (at 50 
+  (at 67 
    (if (expr (int) 
         (op ! (expr (int) 
                (call (expr ((func (("List") ("List"))) int) 
                       (ident (binding 40 "List_equal"))) 
                 (args (expr ("List") (ident (binding 16 "short_then_list"))) 
-                 (expr ("List") (expr ("List") (cache 867)))))))) 
+                 (expr ("List") (expr ("List") (cache 28)))))))) 
     (return (expr (int) (literal (int) "5"))))) 
-  (at 51 
+  (at 68 
    (if (expr (int) 
         (op || 
          (expr (int) 
@@ -398,25 +402,25 @@
                         (ident (binding 40 "List_equal"))) 
                   (args (expr ("List") 
                          (ident (binding 18 "nested_compile_time"))) 
-                   (expr ("List") (expr ("List") (cache 856)))))))))) 
+                   (expr ("List") (expr ("List") (cache 17)))))))))) 
     (return (expr (int) (literal (int) "6"))))) 
-  (at 52 
+  (at 69 
    (if (expr (int) 
         (op ! (expr (int) 
                (call (expr ((func (("String") ("String"))) int) 
                       (ident (binding 41 "String_equal"))) 
                 (args (expr ("String") (ident (binding 19 "text"))) 
-                 (expr ("String") (cache 858))))))) 
+                 (expr ("String") (cache 19))))))) 
     (return (expr (int) (literal (int) "7"))))) 
-  (at 53 
+  (at 70 
    (if (expr (int) 
         (op ! (expr (int) 
                (call (expr ((func (("String") ("String"))) int) 
                       (ident (binding 41 "String_equal"))) 
                 (args (expr ("String") (ident (binding 20 "short_then_text"))) 
-                 (expr ("String") (cache 868))))))) 
+                 (expr ("String") (cache 29))))))) 
     (return (expr (int) (literal (int) "8"))))) 
-  (at 54 
+  (at 71 
    (if (expr (int) 
         (op || 
          (expr (int) 
@@ -444,7 +448,7 @@
                                (literal ("Symbol") "<answer>" answer))))))))))) 
            (expr (int) (literal (int) "42")))))) 
     (return (expr (int) (literal (int) "9"))))) 
-  (at 55 
+  (at 72 
    (if (expr (int) 
         (op || 
          (expr (int) 
@@ -454,7 +458,7 @@
           (op != (expr (int) (ident (binding 1 "calls"))) 
            (expr (int) (literal (int) "1")))))) 
     (return (expr (int) (literal (int) "10"))))) 
-  (at 56 
+  (at 73 
    (if (expr (int) 
         (op || 
          (expr (int) 
@@ -462,12 +466,12 @@
                  (call (expr ((func (("List") ("List"))) int) 
                         (ident (binding 40 "List_equal"))) 
                   (args (expr ("List") (ident (binding 30 "comma_value"))) 
-                   (expr ("List") (expr ("List") (cache 870)))))))) 
+                   (expr ("List") (expr ("List") (cache 31)))))))) 
          (expr (int) 
           (op != (expr (int) (ident (binding 29 "comma"))) 
            (expr (int) (literal (int) "1")))))) 
     (return (expr (int) (literal (int) "11"))))) 
-  (at 57 
+  (at 74 
    (if (expr (int) 
         (op || 
          (expr (int) 
@@ -475,15 +479,15 @@
                  (call (expr ((func (("List") ("List"))) int) 
                         (ident (binding 40 "List_equal"))) 
                   (args (expr ("List") (ident (binding 31 "index"))) 
-                   (expr ("List") (expr ("List") (cache 856)))))))) 
+                   (expr ("List") (expr ("List") (cache 17)))))))) 
          (expr (int) 
           (op ! (expr (int) 
                  (call (expr ((func (("List") ("List"))) int) 
                         (ident (binding 40 "List_equal"))) 
                   (args (expr ("List") (ident (binding 34 "ternary"))) 
-                   (expr ("List") (expr ("List") (cache 856)))))))))) 
+                   (expr ("List") (expr ("List") (cache 17)))))))))) 
     (return (expr (int) (literal (int) "12"))))) 
-  (at 58 
+  (at 75 
    (if (expr (int) 
         (op || 
          (expr (int) 
@@ -503,7 +507,7 @@
                                       (args (expr ("List") 
                                              (ident (binding 35 "literals"))) 
                                        (expr (int) (literal (int) "0")))))))) 
-                       (expr ("List") (expr ("List") (cache 857)))))))) 
+                       (expr ("List") (expr ("List") (cache 18)))))))) 
              (expr (int) 
               (op ! (expr (int) 
                      (call (expr ((func (("String") ("String"))) int) 
@@ -517,7 +521,7 @@
                                       (args (expr ("List") 
                                              (ident (binding 35 "literals"))) 
                                        (expr (int) (literal (int) "1")))))))) 
-                       (expr ("String") (cache 858))))))))) 
+                       (expr ("String") (cache 19))))))))) 
            (expr (int) 
             (op != 
              (expr (int) 
@@ -560,9 +564,9 @@
                                (literal ("Symbol") "<answer>" answer))))))))))) 
            (expr (int) (literal (int) "42")))))) 
     (return (expr (int) (literal (int) "13"))))) 
-  (at 36 
+  (at 53 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 48 "printf"))) 
       (args (expr (* char) (literal (* char) "\"braced unquote ok\\n\""))))))) 
-  (at 59 (return (expr (int) (literal (int) "0"))))))
+  (at 76 (return (expr (int) (literal (int) "0"))))))
