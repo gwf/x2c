@@ -569,6 +569,18 @@ static String Compiler._include_text(Compiler c, String target, String path) {
   $report.driver.include_read(c, target, path);
 }
 
+/** Selects a source file's own package, as its standalone translation does.
+    A cold provider does not register an import in its including unit. */
+void Compiler.configure_package(Compiler c, List roots, String filename) {
+  String source = Path.absolute(filename);
+  String package = package_directory(roots, source);
+  if (!package || !package_source(package, source)) return;
+  String name = Path.basename(package);
+  c.package = name;
+  if (!(name in c.package_roots)) c.package_roots = c.package_roots.copy();
+  c.package_roots[name] = package;
+}
+
 /* Walk one included file cold and return its entry. The walk reads the
    includer's names through copies, so its private rows and includes stay
    there. It runs in a compiler of its own, with the macro, import, keyword,
@@ -580,6 +592,7 @@ static List Compiler._walk_cold(
   Compiler file = Compiler.new_shared(c);
   defer c.close_child(file);
   file.interface_provider = 1;
+  file.configure_package(c.package_dirs, canonical);
   file.signature_only = c.signature_only;
   file.filename = c.filename;
   // Every file the shared session preloads defines its Lisp there.
