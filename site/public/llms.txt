@@ -11,6 +11,7 @@
 ## Language guide
 
 - [From C to x2c](https://x2c-lang.dev/docs/guide/from-c.html)
+- [x2c Syntax Map](https://x2c-lang.dev/docs/guide/x2c-syntax-map.html)
 - [Values and Var](https://x2c-lang.dev/docs/guide/values.html)
 - [Symbols and Atoms](https://x2c-lang.dev/docs/guide/symbols.html)
 - [Strings, Lists, Arrays, and Maps](https://x2c-lang.dev/docs/guide/collections.html)
@@ -36,6 +37,8 @@
 - [Syntax Specifications](https://x2c-lang.dev/docs/reference/syntax/index.html)
 - [Source Grammar](https://x2c-lang.dev/docs/reference/syntax/grammar.html)
 - [Lexical Specification](https://x2c-lang.dev/docs/reference/syntax/lexical.html)
+- [Syntax as Data](https://x2c-lang.dev/docs/reference/syntax/data.html)
+- [Lexical Data Inventory](https://x2c-lang.dev/docs/reference/syntax/lexical-data.html)
 - [Compiler Options](https://x2c-lang.dev/docs/reference/cli.html)
 - [Install a Native Compiler](https://x2c-lang.dev/docs/guide/installation.html)
 
