@@ -128,7 +128,6 @@ Sym Sym.new(Compiler c) {
 void Sym.put(Sym s, Map map, Var key, Var value) {
   s._remember(map, key);
   map[key] = value;
-
 }
 
 /** Deletes `key` from `map` so that an active transaction can restore it. */
@@ -1344,7 +1343,7 @@ int SymTxn.local_macros_changed(SymTxn &s) {
   return 0;
 }
 
-/** Stops one import or transaction's semantic write log. */
+/** Stops one transaction's semantic write log. */
 void Sym.end_log(Sym s) {
   if (!--s.transactions) s.undo.clear();
 }

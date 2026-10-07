@@ -87,12 +87,14 @@ static List Compiler._generated_code(Compiler c, List ast, String basename) {
 
 static List Compiler._emit_header(Compiler c, List header) =>
   c.emit(
-    c._include_guard(_vertical_spacing(c._header_prototypes(header))), NULL);
+    c._include_guard(_vertical_spacing(c._forward_declarations(header))),
+    NULL);
 
 /* Each source use follows the declarations it needs. */
 static List Compiler._emit_source(
   Compiler c, List source, Map bindings, Map inline_bodies) {
-  source = c._static_prototypes(c._file_init(source), inline_bodies);
+  source = c._forward_declarations(
+    _move_bodies(c._file_init(source), inline_bodies));
   source = c._primary_include(source);
   return c.emit(c._patch_main(source), bindings);
 }
@@ -1133,32 +1135,15 @@ static int _record_calls(Var value, Var caller, Map callers) {
 
 // prototypes and bodies
 
-/* Each static function's prototype takes its definition's place, and each
-   node follows the forward declarations it needs. */
-static List Compiler._static_prototypes(
-  Compiler c, List source, Map inline_bodies) {
-  source = _move_bodies(source, inline_bodies);
+/* Header and source nodes follow the declarations they need. This also
+   supplies prototypes when a cyclic include reaches an inline body first. */
+static List Compiler._forward_declarations(Compiler c, List source) {
   Forward f = {
     .c = c, .available = {}, .statics = {}, .seen = {}, .out = []};
   _source_declarations(source, f.statics);
   foreach (List node, source) {
     node = c._inline_prototype(node);
     if (node.car() == <typedef> && node in f.seen) continue;
-    _collect_declared(node, f.available);
-    f.dependencies(node);
-    f.out.push(node);
-  }
-  return f.out.list_free();
-}
-
-/* A cyclic include can reach an inline body before the called function's
-   header resumes. Forward its actual typed dependencies at the body. */
-static List Compiler._header_prototypes(Compiler c, List header) {
-  Forward f = {
-    .c = c, .available = {}, .statics = {}, .seen = {}, .out = []};
-  _source_declarations(header, f.statics);
-  foreach (List node, header) {
-    node = c._inline_prototype(node);
     _collect_declared(node, f.available);
     f.dependencies(node);
     f.out.push(node);
