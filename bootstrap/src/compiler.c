@@ -37,6 +37,16 @@ typedef struct SymScope{
 }
 SymScope;
 
+typedef struct Pending{
+  Array areas[5];
+}
+Pending;
+
+typedef struct PendingMark{
+  int lengths[5];
+}
+PendingMark;
+
 typedef struct Sym * Sym;
 
 typedef struct Compiler{
@@ -72,9 +82,9 @@ typedef struct Compiler{
   Map imports;
   Map included_effects;
   Map init_tokens, static_init_deps, fn_defs;
-  Array id_keys, inits;
+  Array id_keys;
   String init_fn, fini_fn;
-  Array early_decls;
+  Pending pending;
   int prelude;
   Map meta_comptime, meta_regions, meta_hashes, meta_calls;
   Map native_meta;
@@ -128,7 +138,8 @@ typedef struct SymTxn{
   int source_occurrences;
   int extended;
   Map adapters;
-  int early_count, init_count, origin_count, origin, needs_exception;
+  PendingMark pending;
+  int origin_count, origin, needs_exception;
 }
 SymTxn;
 
@@ -402,8 +413,6 @@ static void Compiler__init_tables(Compiler c);
 static void Compiler__share_unit(Compiler c, Compiler owner);
 
 static void Compiler__own_unit(Compiler c);
-
-static void Compiler__init_queues(Compiler c);
 
 static void _drop_compiler(void * ptr);
 
@@ -3199,7 +3208,7 @@ List Sym_visible_symbols(Sym);
 Symbol Compiler_peek(Compiler c, int steps){
   if(! _init_guard_) _file_init_();  Token token = c -> token;  if(! steps && Compiler_at_completion(c)){
     List rows = Sym_visible_symbols(c -> sym); {
-      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/compiler.x",.function = "Compiler_peek",.line = 1873};  x2c_error_raise_n(& _x2c_error_site_0, 1248787135328, 3, Symbol_var(740232), Symbol_var(29452646), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
+      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/compiler.x",.function = "Compiler_peek",.line = 1881};  x2c_error_raise_n(& _x2c_error_site_0, 1248787135328, 3, Symbol_var(740232), Symbol_var(29452646), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
     }
 
   }
@@ -3234,7 +3243,7 @@ static Token _skip_backward(Token token, Token origin){
 
 void Compiler_require_input(Compiler c){
   if(! _init_guard_) _file_init_();  if(c -> input_boundary && c -> token >= c -> input_boundary){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/compiler.x",.function = "Compiler_require_input",.line = 1914};  x2c_error_raise_n(& _x2c_error_site_1, 664344300629258, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/compiler.x",.function = "Compiler_require_input",.line = 1922};  x2c_error_raise_n(& _x2c_error_site_1, 664344300629258, 0);  __builtin_unreachable();
   }
 
 }
@@ -3301,7 +3310,7 @@ int Compiler_at_completion(Compiler c){
 
 void Compiler___complete_here(Compiler c, Symbol role, List keywords){
   if(! _init_guard_) _file_init_();  if(! Compiler_at_completion(c)) return;  List rows = Sym_visible_symbols(c -> sym); {
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../src/compiler.x",.function = "Compiler___complete_here",.line = 2037};  x2c_error_raise_n(& _x2c_error_site_2, 1248787135328, 3, Symbol_var(740232), Symbol_var(role), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(keywords));
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../src/compiler.x",.function = "Compiler___complete_here",.line = 2045};  x2c_error_raise_n(& _x2c_error_site_2, 1248787135328, 3, Symbol_var(740232), Symbol_var(role), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(keywords));
   }
 
 }
@@ -3460,12 +3469,34 @@ List Compiler_gensym(Compiler c){
   if(! _init_guard_) _file_init_();  String owner = String_truth(c -> filename) ? home_portable_path(Compiler_canonical_path(c, c -> filename)) : _605;  String key = String_join(NULL, cons(String_var(_606), cons(String_var(owner), NULL)));  Var stored;  int count = Map_try_get(c -> names -> counters, String_var(key), &(stored)) ? Var_int(stored) + 1 : 1;  Map_setindex(c -> names -> counters, String_var(key), int_var(count));  return cons(List_var(cons(_607, cons(String_var(owner), cons(int_var(count), NULL)))), NULL);
 }
 
+Array Pending_area(Pending * p, Symbol area);
 void Compiler_add_early(Compiler c, List decl){
-  if(! _init_guard_) _file_init_();  Array_push(c -> early_decls, List_var(decl));
+  if(! _init_guard_) _file_init_();  Array_push(Pending_area(&(c -> pending), 42246110376), List_var(decl));
 }
 
 void Compiler_add_init(Compiler c, Symbol phase, List stmt){
-  if(! _init_guard_) _file_init_();  Array_push(c -> inits, List_var(cons(Symbol_var(phase), cons(List_var(stmt), NULL))));
+  if(! _init_guard_) _file_init_();  Array_push(Pending_area(&(c -> pending), phase), List_var(stmt));
+}
+
+void Pending_reset(Pending * p){
+  if(! _init_guard_) _file_init_();  for(int i = 0;  i < 5;  i ++)(* p).areas[i] = Array_new();
+}
+
+int SymbolSet_index(SymbolSet, Symbol);
+Array Pending_area(Pending * p, Symbol area){
+  if(! _init_guard_) _file_init_();  return(* p).areas[SymbolSet_index((SymbolSet) "\001\000\000\000\005\000\000\000\003\000\000\000\025\174\112\177\271\171\067\236\004\002\000\003\000\000\000\000\000\001\000\000\250\174\020\326\011\000\000\000\330\033\217\076\011\001\000\000\212\014\260\110\010\000\000\000\346\110\064\320\011\000\000\000\320\114\056\031\000\000\000\000", area)];
+}
+
+int Pending_initializes(Pending * p){
+  if(! _init_guard_) _file_init_();  for(int i = 1;  i < 5;  i ++) if(Array_truth((* p).areas[i])) return 1;  return 0;
+}
+
+PendingMark Pending_checkpoint(Pending * p){
+  if(! _init_guard_) _file_init_();  PendingMark mark;  for(int i = 0;  i < 5;  i ++) mark.lengths[i] = Array_len((* p).areas[i]);  return mark;
+}
+
+void Pending_restore(Pending * p, PendingMark mark){
+  if(! _init_guard_) _file_init_();  for(int i = 0;  i < 5;  i ++) Array_resize((* p).areas[i], mark.lengths[i]);
 }
 
 Var Map_setdefault(Map, Var, Var);
@@ -3888,11 +3919,11 @@ void * Scope_malloc_finalized(size_t, void(*)(void *));
 Sym Sym_new(Compiler);
 Diagnostics Diagnostics_new(Compiler, int);
 static Compiler _new(Compiler owner){
-  Compiler c = Scope_malloc_finalized(sizeof(struct Compiler), _drop_compiler);  memset(c, 0, sizeof(struct Compiler));  Compiler__init_tables(c);  if(owner) Compiler__share_unit(c, owner);  else Compiler__own_unit(c);  c -> sym = Sym_new(c);  Compiler__init_queues(c);  c -> collect_protocols = 1;  c -> diagnostics = Diagnostics_new(owner && owner -> diagnostics -> printer ? c : NULL, owner ? owner -> diagnostics -> limit : 1);  c -> braces = Array_new();  c -> line_starts = Array_new();  c -> import_stack = Array_new();  c -> origins = owner ? owner -> origins : Array_new();  c -> root_dir = x2c_get_root();  return c;
+  Compiler c = Scope_malloc_finalized(sizeof(struct Compiler), _drop_compiler);  memset(c, 0, sizeof(struct Compiler));  Compiler__init_tables(c);  if(owner) Compiler__share_unit(c, owner);  else Compiler__own_unit(c);  c -> sym = Sym_new(c);  Pending_reset(&(c -> pending));  c -> collect_protocols = 1;  c -> diagnostics = Diagnostics_new(owner && owner -> diagnostics -> printer ? c : NULL, owner ? owner -> diagnostics -> limit : 1);  c -> braces = Array_new();  c -> line_starts = Array_new();  c -> import_stack = Array_new();  c -> meta_group = Array_new();  c -> origins = owner ? owner -> origins : Array_new();  c -> root_dir = x2c_get_root();  return c;
 }
 
 static void Compiler__init_tables(Compiler c){
-  c -> id_keys = Array_new();  c -> key_ids = Map_new();  c -> deps = Map_new();  c -> macros = Map_new();  c -> kw_aliases = Map_new();  c -> object_macros = Map_new();  c -> proto_cache = Map_new();  c -> imports = Map_new();  c -> init_tokens = Map_new();  c -> static_init_deps = Map_new();  c -> fn_defs = Map_new();  c -> meta_comptime = Map_new();  c -> meta_regions = Map_new();  c -> meta_hashes = Map_new();  c -> meta_calls = Map_new();  c -> native_meta = Map_new();  c -> project_meta = Map_new();  c -> evaluated_effects = Map_new();
+  c -> id_keys = Array_new();  c -> key_ids = Map_new();  c -> deps = Map_new();  c -> macros = Map_new();  c -> kw_aliases = Map_new();  c -> object_macros = Map_new();  c -> proto_cache = Map_new();  c -> imports = Map_new();  c -> init_tokens = Map_new();  c -> static_init_deps = Map_new();  c -> fn_defs = Map_new();  c -> meta_comptime = Map_new();  c -> meta_regions = Map_new();  c -> meta_hashes = Map_new();  c -> meta_calls = Map_new();  c -> native_meta = Map_new();  c -> project_meta = Map_new();  c -> evaluated_effects = Map_new();  c -> meta_group_bound = Map_new();
 }
 
 static void Compiler__share_unit(Compiler c, Compiler owner){
@@ -3901,10 +3932,6 @@ static void Compiler__share_unit(Compiler c, Compiler owner){
 
 static void Compiler__own_unit(Compiler c){
   c -> pending_inline_bodies = Array_new();  Compiler_inherit_library_comptime(c);  c -> package_roots = Map_new();  c -> package_aliases = Map_new();  c -> package_members = Map_new();  c -> package_effects = Map_new();  c -> names = Scope_calloc(1, sizeof(struct GenNames));  c -> names -> counters = Map_new();  c -> names -> adapters = Map_new();  c -> names -> file_scope_owners = Map_new();
-}
-
-static void Compiler__init_queues(Compiler c){
-  c -> inits = Array_new();  c -> early_decls = Array_new();  c -> meta_group = Array_new();  c -> meta_group_bound = Map_new();
 }
 
 void Lisp_destroy(Lisp);

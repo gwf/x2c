@@ -1945,6 +1945,7 @@ List result = Compiler__speculate(c, value, type, condition, target, native_used
 }
 
 SymTxn Compiler_begin_semantic_transaction(Compiler);
+PendingMark Pending_checkpoint(Pending *);
 Map Map_copy(Map);
 DiagnosticsHold Diagnostics_hold(Diagnostics);
 #include "error.h"
@@ -1964,12 +1965,12 @@ void x2c_exception_mark_handled(ExceptionFrame *);
 void x2c_error_catch_close(ErrorHandler);
 void x2c_exception_leave(ExceptionFrame *);
 static List Compiler__speculate(Compiler c, List value, Type type, List condition, List target, int * native_used){
-  SymTxn transaction = Compiler_begin_semantic_transaction(c);  x2c_exception_escaped = & transaction;  Map keys = c -> key_ids, adapters = c -> names -> adapters;  int key_count = Array_len(c -> id_keys), declarations = Array_len(c -> early_decls);  c -> key_ids = Map_copy(keys);  c -> names -> adapters = Map_copy(adapters);  DiagnosticsHold hold = Diagnostics_hold(c -> diagnostics);  int depth = c -> recovery_depth;  int volatile completed = 0;  int volatile rejected = 0;  List volatile result = NULL; {
+  SymTxn transaction = Compiler_begin_semantic_transaction(c);  x2c_exception_escaped = & transaction;  Map keys = c -> key_ids, adapters = c -> names -> adapters;  int key_count = Array_len(c -> id_keys);  PendingMark mark = Pending_checkpoint(&(c -> pending));  c -> key_ids = Map_copy(keys);  c -> names -> adapters = Map_copy(adapters);  DiagnosticsHold hold = Diagnostics_hold(c -> diagnostics);  int depth = c -> recovery_depth;  int volatile completed = 0;  int volatile rejected = 0;  List volatile result = NULL; {
     {
       _x2c_defer_env_1 _x2c_macro_environment_1 ={
         0
       }
-      ;  _x2c_macro_environment_1._x2c_defer_capture_1 =(const void *) & c;  _x2c_macro_environment_1._x2c_defer_capture_2 =(const void *) & depth;  _x2c_macro_environment_1._x2c_defer_capture_3 =(const void *) & hold;  _x2c_macro_environment_1._x2c_defer_capture_4 =(const void *) & rejected;  _x2c_macro_environment_1._x2c_defer_capture_5 =(const void *) & completed;  _x2c_macro_environment_1._x2c_defer_capture_6 =(const void *) & keys;  _x2c_macro_environment_1._x2c_defer_capture_7 =(const void *) & adapters;  _x2c_macro_environment_1._x2c_defer_capture_8 =(const void *) & key_count;  _x2c_macro_environment_1._x2c_defer_capture_9 =(const void *) & declarations;  _x2c_macro_environment_1._x2c_defer_capture_10 =(const void *) & transaction;  X2CCleanup _x2c_defer_record_1 ={
+      ;  _x2c_macro_environment_1._x2c_defer_capture_1 =(const void *) & c;  _x2c_macro_environment_1._x2c_defer_capture_2 =(const void *) & depth;  _x2c_macro_environment_1._x2c_defer_capture_3 =(const void *) & hold;  _x2c_macro_environment_1._x2c_defer_capture_4 =(const void *) & rejected;  _x2c_macro_environment_1._x2c_defer_capture_5 =(const void *) & completed;  _x2c_macro_environment_1._x2c_defer_capture_6 =(const void *) & keys;  _x2c_macro_environment_1._x2c_defer_capture_7 =(const void *) & adapters;  _x2c_macro_environment_1._x2c_defer_capture_8 =(const void *) & key_count;  _x2c_macro_environment_1._x2c_defer_capture_9 =(const void *) & mark;  _x2c_macro_environment_1._x2c_defer_capture_10 =(const void *) & transaction;  X2CCleanup _x2c_defer_record_1 ={
         .fn = _x2c_defer_cleanup_1, .env = & _x2c_macro_environment_1
       }
       ;  x2c_cleanup_push(& _x2c_defer_record_1); {
@@ -2415,11 +2416,12 @@ static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
 
 void Diagnostics_release(Diagnostics, DiagnosticsHold, int);
 void Array_resize(Array, size_t);
+void Pending_restore(Pending *, PendingMark);
 void SymTxn_rollback(SymTxn *);
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
   _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1; {
     (*(Compiler *) _x2c_defer_data_1->_x2c_defer_capture_1) -> recovery_depth =(*(int *) _x2c_defer_data_1->_x2c_defer_capture_2);  Diagnostics_release((*(Compiler *) _x2c_defer_data_1->_x2c_defer_capture_1) -> diagnostics, (*(DiagnosticsHold *) _x2c_defer_data_1->_x2c_defer_capture_3), !(*(int *) _x2c_defer_data_1->_x2c_defer_capture_4));  if(!(*(int *) _x2c_defer_data_1->_x2c_defer_capture_5)){
-      (*(Compiler *) _x2c_defer_data_1->_x2c_defer_capture_1) -> key_ids =(*(Map *) _x2c_defer_data_1->_x2c_defer_capture_6); (*(Compiler *) _x2c_defer_data_1->_x2c_defer_capture_1) -> names -> adapters =(*(Map *) _x2c_defer_data_1->_x2c_defer_capture_7);  Array_resize((*(Compiler *) _x2c_defer_data_1->_x2c_defer_capture_1) -> id_keys, (*(int *) _x2c_defer_data_1->_x2c_defer_capture_8));  Array_resize((*(Compiler *) _x2c_defer_data_1->_x2c_defer_capture_1) -> early_decls, (*(int *) _x2c_defer_data_1->_x2c_defer_capture_9));
+      (*(Compiler *) _x2c_defer_data_1->_x2c_defer_capture_1) -> key_ids =(*(Map *) _x2c_defer_data_1->_x2c_defer_capture_6); (*(Compiler *) _x2c_defer_data_1->_x2c_defer_capture_1) -> names -> adapters =(*(Map *) _x2c_defer_data_1->_x2c_defer_capture_7);  Array_resize((*(Compiler *) _x2c_defer_data_1->_x2c_defer_capture_1) -> id_keys, (*(int *) _x2c_defer_data_1->_x2c_defer_capture_8));  Pending_restore(&((*(Compiler *) _x2c_defer_data_1->_x2c_defer_capture_1) -> pending), (*(PendingMark *) _x2c_defer_data_1->_x2c_defer_capture_9));
     }
     SymTxn_rollback(&((*(SymTxn *) _x2c_defer_data_1->_x2c_defer_capture_10)));
   }

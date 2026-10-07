@@ -32,6 +32,16 @@ typedef struct SymScope{
 }
 SymScope;
 
+typedef struct Pending{
+  Array areas[5];
+}
+Pending;
+
+typedef struct PendingMark{
+  int lengths[5];
+}
+PendingMark;
+
 typedef struct Sym * Sym;
 
 typedef struct Compiler{
@@ -67,9 +77,9 @@ typedef struct Compiler{
   Map imports;
   Map included_effects;
   Map init_tokens, static_init_deps, fn_defs;
-  Array id_keys, inits;
+  Array id_keys;
   String init_fn, fini_fn;
-  Array early_decls;
+  Pending pending;
   int prelude;
   Map meta_comptime, meta_regions, meta_hashes, meta_calls;
   Map native_meta;
@@ -123,7 +133,8 @@ typedef struct SymTxn{
   int source_occurrences;
   int extended;
   Map adapters;
-  int early_count, init_count, origin_count, origin, needs_exception;
+  PendingMark pending;
+  int origin_count, origin, needs_exception;
 }
 SymTxn;
 
@@ -237,6 +248,16 @@ List Compiler_gensym(Compiler c);
 void Compiler_add_early(Compiler c, List decl);
 
 void Compiler_add_init(Compiler c, Symbol phase, List stmt);
+
+void Pending_reset(Pending * p);
+
+Array Pending_area(Pending * p, Symbol area);
+
+int Pending_initializes(Pending * p);
+
+PendingMark Pending_checkpoint(Pending * p);
+
+void Pending_restore(Pending * p, PendingMark mark);
 
 List Compiler_cache(Compiler c, List key);
 

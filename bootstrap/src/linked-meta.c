@@ -4530,7 +4530,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_8(void){
   _4163 = List_var(_4162);
   _4164 = String_new("src/compiler.x");
   _4165 = String_var(_4164);
-  _4166 = String_new("1e56c575");
+  _4166 = String_new("41c3d9b4");
   _4167 = String_var(_4166);
   _4168 = cons(_4167, NULL);
   _4169 = cons(_4165, _4168);
@@ -4706,7 +4706,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_8(void){
   _4339 = List_var(_4338);
   _4340 = String_new("src/transform.x");
   _4341 = String_var(_4340);
-  _4342 = String_new("7e9f61e1");
+  _4342 = String_new("adeaa34b");
   _4343 = String_var(_4342);
   _4344 = cons(_4343, NULL);
   _4345 = cons(_4341, _4344);
@@ -4797,7 +4797,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_8(void){
   _4430 = List_var(_4429);
   _4431 = String_new("src/meta-group.x");
   _4432 = String_var(_4431);
-  _4433 = String_new("b66cf3ed");
+  _4433 = String_new("93f342a9");
   _4434 = String_var(_4433);
   _4435 = cons(_4434, NULL);
   _4436 = cons(_4432, _4435);
@@ -4936,14 +4936,14 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_8(void){
   _4569 = List_var(_4568);
   _4570 = String_new("src/callables.x");
   _4571 = String_var(_4570);
-  _4572 = String_new("982686b8");
+  _4572 = String_new("03facb80");
   _4573 = String_var(_4572);
   _4574 = cons(_4573, NULL);
   _4575 = cons(_4571, _4574);
   _4576 = List_var(_4575);
   _4577 = String_new("src/cleanup.x");
   _4578 = String_var(_4577);
-  _4579 = String_new("db18cec1");
+  _4579 = String_new("53f838ac");
   _4580 = String_var(_4579);
   _4581 = cons(_4580, NULL);
   _4582 = cons(_4578, _4581);
@@ -4954,7 +4954,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_8(void){
   _4587 = List_var(_4586);
   _4588 = String_new("src/protocol.x");
   _4589 = String_var(_4588);
-  _4590 = String_new("43b0f5f5");
+  _4590 = String_new("cdaae00e");
   _4591 = String_var(_4590);
   _4592 = cons(_4591, NULL);
   _4593 = cons(_4589, _4592);
@@ -5013,7 +5013,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_9(void){
   _4643 = cons(_927, _4642);
   _4644 = String_new("src/cache.x");
   _4645 = String_var(_4644);
-  _4646 = String_new("227c7005");
+  _4646 = String_new("dafddace");
   _4647 = String_var(_4646);
   _4648 = String_new("cwd:./logger.x");
   _4649 = String_var(_4648);
@@ -5021,7 +5021,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_9(void){
   _4651 = List_var(_4650);
   _4652 = String_new("src/generate.x");
   _4653 = String_var(_4652);
-  _4654 = String_new("7df91c15");
+  _4654 = String_new("e67f8ea6");
   _4655 = String_var(_4654);
   _4656 = cons(_4655, NULL);
   _4657 = cons(_4653, _4656);
@@ -5091,7 +5091,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_9(void){
   _4721 = List_var(_4720);
   _4722 = String_new("src/symbols.x");
   _4723 = String_var(_4722);
-  _4724 = String_new("d02b3c4c");
+  _4724 = String_new("82ffc6b1");
   _4725 = String_var(_4724);
   _4726 = cons(_4725, NULL);
   _4727 = cons(_4723, _4726);
@@ -5144,7 +5144,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_9(void){
   _4774 = cons(_927, _4773);
   _4775 = String_new("src/initializers.x");
   _4776 = String_var(_4775);
-  _4777 = String_new("1a435bc7");
+  _4777 = String_new("f3a147e0");
   _4778 = String_var(_4777);
   _4779 = cons(_4778, NULL);
   _4780 = cons(_4776, _4779);

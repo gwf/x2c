@@ -1368,8 +1368,9 @@ static void SymTxn__save(SymTxn * s, SymScope scope){
   Compiler c =(* s).c; (* s).scope = scope; (* s).mark = Block_len(c -> sym -> undo); (* s).counters = c -> names -> counters; (* s).statics = c -> sym -> statics; (* s).binding_facts = Compiler_semantic_binding_facts(c); (* s).next_binding = c -> names -> next_binding; (* s).local_macro_names = c -> sym -> local_macro_names; (* s).initializer_name = c -> init_fn; (* s).shutdown_name = c -> fini_fn; (* s).extended = c -> macro_application > 0;
 }
 
+PendingMark Pending_checkpoint(Pending *);
 static void SymTxn__save_effects(SymTxn * s){
-  Compiler c =(* s).c; (* s).adapters = c -> names -> adapters; (* s).early_count = Array_len(c -> early_decls); (* s).init_count = Array_len(c -> inits); (* s).origin_count = Array_len(c -> origins); (* s).origin = c -> origin; (* s).needs_exception = c -> needs_exception;  c -> names -> adapters = Map_copy(c -> names -> adapters);
+  Compiler c =(* s).c; (* s).adapters = c -> names -> adapters; (* s).pending = Pending_checkpoint(&(c -> pending)); (* s).origin_count = Array_len(c -> origins); (* s).origin = c -> origin; (* s).needs_exception = c -> needs_exception;  c -> names -> adapters = Map_copy(c -> names -> adapters);
 }
 
 static void SymTxn__save_sources(SymTxn * s){
@@ -1457,9 +1458,10 @@ static void SymTxn__restore(SymTxn * s){
   Compiler c =(* s).c;  SymScope * scope = Sym__scope_at(c -> sym, (* s).scope_index);  * scope =(* s).scope;  c -> sym -> statics =(* s).statics;  c -> sym -> binding_facts =(* s).binding_facts;  c -> names -> next_binding =(* s).next_binding;  c -> sym -> local_macro_names =(* s).local_macro_names;  c -> names -> counters =(* s).counters;  c -> init_fn =(* s).initializer_name;  c -> fini_fn =(* s).shutdown_name;
 }
 
+void Pending_restore(Pending *, PendingMark);
 void Array_resize(Array, size_t);
 static void SymTxn__restore_effects(SymTxn * s){
-  Compiler c =(* s).c;  c -> names -> adapters =(* s).adapters;  Array_resize(c -> early_decls, (* s).early_count);  Array_resize(c -> inits, (* s).init_count);  Array_resize(c -> origins, (* s).origin_count);  c -> origin =(* s).origin;  c -> needs_exception =(* s).needs_exception;
+  Compiler c =(* s).c;  c -> names -> adapters =(* s).adapters;  Pending_restore(&(c -> pending), (* s).pending);  Array_resize(c -> origins, (* s).origin_count);  c -> origin =(* s).origin;  c -> needs_exception =(* s).needs_exception;
 }
 
 static void SymTxn__restore_sources(SymTxn * s){

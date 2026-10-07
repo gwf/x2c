@@ -1327,10 +1327,11 @@ return line;
 
 Map Map_copy(Map);
 Array Array_copy(Array);
+void Pending_reset(Pending *);
 Diagnostics Diagnostics_new(Compiler, int);
 static void Compiler__isolate(Compiler c, struct Compiler * saved, struct GenNames * names, String stem){
   {
-    (c) -> names -> adapters = Map_copy((* names).adapters); (c) -> names -> file_scope_owners = Map_copy((* names).file_scope_owners); (c) -> id_keys = Array_copy((* saved).id_keys); (c) -> key_ids = Map_copy((* saved).key_ids); (c) -> inits = Array_new(); (c) -> early_decls = Array_new(); (c) -> origins = Array_copy((* saved).origins); (c) -> init_tokens = Map_new(); (c) -> static_init_deps = Map_new(); (c) -> fn_defs = Map_copy((* saved).fn_defs); (c) -> protocol_helpers = Map_copy((* saved).protocol_helpers); (c) -> meta_regions = Map_copy((* saved).meta_regions); (c) -> deps = Map_new(); (c) -> needs_exception = 0; (c) -> macro_stack = NULL; (c) -> macro_holes = NULL; (c) -> meta_body = 0; (c) -> return_type = NULL; (c) -> lambda_scopes = NULL; (c) -> source_facts = 0; (c) -> recovery_depth =(* saved).recovery_depth + 1; (c) -> filename = String_join(NULL, cons(String_var(stem), cons(String_var(_146), NULL))); (c) -> diagnostics = Diagnostics_new(NULL, 1);
+    (c) -> names -> adapters = Map_copy((* names).adapters); (c) -> names -> file_scope_owners = Map_copy((* names).file_scope_owners); (c) -> id_keys = Array_copy((* saved).id_keys); (c) -> key_ids = Map_copy((* saved).key_ids);  Pending_reset(&((c) -> pending)); (c) -> origins = Array_copy((* saved).origins); (c) -> init_tokens = Map_new(); (c) -> static_init_deps = Map_new(); (c) -> fn_defs = Map_copy((* saved).fn_defs); (c) -> protocol_helpers = Map_copy((* saved).protocol_helpers); (c) -> meta_regions = Map_copy((* saved).meta_regions); (c) -> deps = Map_new(); (c) -> needs_exception = 0; (c) -> macro_stack = NULL; (c) -> macro_holes = NULL; (c) -> meta_body = 0; (c) -> return_type = NULL; (c) -> lambda_scopes = NULL; (c) -> source_facts = 0; (c) -> recovery_depth =(* saved).recovery_depth + 1; (c) -> filename = String_join(NULL, cons(String_var(stem), cons(String_var(_146), NULL))); (c) -> diagnostics = Diagnostics_new(NULL, 1);
   }
 
 }

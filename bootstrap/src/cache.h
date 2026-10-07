@@ -23,13 +23,11 @@ List Compiler_setup_cache_init(Compiler c, List header, List source, String pref
 
 List _initializer_function(Compiler c, Type type, List name, List body);
 
-List _run_once(Compiler c, List guard);
+List _run_once(Compiler c, List before, List guard, List after);
 
 List _entry_call(String entry);
 
 List Compiler_initialization_guard(Compiler c, List guard);
-
-List _patch_initialized_entry(Compiler c, List function, List body, List guard, List entry);
 
 
 #endif /* __GUARD_0x9578BA41__ */

@@ -1950,7 +1950,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void){
   _1496 = cons(_1495, NULL);
   _1497 = cons(_715, _1496);
   _1498 = List_var(_1497);
-  _1499 = int_var(94308);
+  _1499 = int_var(94300);
   _1500 = cons(_1499, NULL);
   _1501 = cons(_720, _1500);
   _1502 = List_var(_1501);
@@ -2033,7 +2033,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_3(void){
   _1576 = cons(_1575, NULL);
   _1577 = cons(_707, _1576);
   _1578 = List_var(_1577);
-  _1579 = int_var(99295);
+  _1579 = int_var(99289);
   _1580 = cons(_1579, NULL);
   _1581 = cons(_720, _1580);
   _1582 = List_var(_1581);
@@ -4509,7 +4509,7 @@ Symbol Type_var_tag(Type);
 void Compiler_add_init(Compiler, Symbol, List);
 List Compiler_rebuild_statement(Compiler, List);
 static void Compiler__register_descriptor(Compiler c, Type participant, String name, Symbol explicit_tag, List thunks, int central_initializer){
-  List methods = Sym_introduce(c -> sym, Compiler_fresh_name(c, _1536));  List fields = _descriptor_fields(thunks);  Symbol tag_symbol = Type_var_tag(participant);  List early_call = Compiler__builtin_registration(c, methods, name, tag_symbol);  List registration = Compiler__fallback_registration(c, methods, name, early_call);  List explicit_call = explicit_tag ? Compiler__tagged_registration(c, methods, name, explicit_tag) : NULL;  Symbol queue = central_initializer ? 1139215899608 : 10588978;  Compiler_add_early(c, Compiler_bind_syntax(c, List_var(cons(_488, cons(_489, cons(List_var(cons(_484, cons(List_var(cons(_74, cons(_1538, cons(List_var(cons(_75, cons(List_var(cons(_78, cons(List_var(cons(_495, cons(_517, cons(_518, cons(List_var(methods), NULL))))), _557))), NULL))), NULL)))), NULL))), NULL)))), AST_UNIT, NULL));  if(List_truth(thunks)){
+  List methods = Sym_introduce(c -> sym, Compiler_fresh_name(c, _1536));  List fields = _descriptor_fields(thunks);  Symbol tag_symbol = Type_var_tag(participant);  List early_call = Compiler__builtin_registration(c, methods, name, tag_symbol);  List registration = Compiler__fallback_registration(c, methods, name, early_call);  List explicit_call = explicit_tag ? Compiler__tagged_registration(c, methods, name, explicit_tag) : NULL;  Symbol queue = central_initializer ? 1139215899608 : 35579235466;  Compiler_add_early(c, Compiler_bind_syntax(c, List_var(cons(_488, cons(_489, cons(List_var(cons(_484, cons(List_var(cons(_74, cons(_1538, cons(List_var(cons(_75, cons(List_var(cons(_78, cons(List_var(cons(_495, cons(_517, cons(_518, cons(List_var(methods), NULL))))), _557))), NULL))), NULL)))), NULL))), NULL)))), AST_UNIT, NULL));  if(List_truth(thunks)){
     List assignment = Compiler_bind_syntax(c, List_var(cons(_488, cons(_489, cons(List_var(cons(_484, cons(List_var(cons(_848, cons(List_var(cons(_225, cons(_653, cons(List_var(({
       Var _x2c_literal_part_133 = List_var(cons(_495, cons(_850, cons(_851, cons(List_var(methods), NULL)))));  Var _x2c_literal_part_134 = List_var(cons(_225, cons(_1539, cons(List_var(cons(_1540, cons(_1551, cons(List_var(cons(_225, cons(_489, cons(List_var(cons(_1552, cons(List_var(cons(_1553, cons(List_var(cons(_495, cons(_913, cons(_510, cons(List_var(fields), NULL))))), NULL))), NULL))), NULL)))), NULL)))), NULL))));  cons(_804, cons(_805, cons(_x2c_literal_part_133, cons(_x2c_literal_part_134, NULL))));
     }

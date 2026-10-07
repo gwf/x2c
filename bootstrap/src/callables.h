@@ -24,6 +24,8 @@ List Compiler_capture_environment(Compiler c, List name, List fields);
 
 List Compiler_prepare_lambda_cells(Compiler c, List declarator, List body);
 
+List Compiler_prepend_setup(Compiler c, List body, List setup);
+
 List Compiler_lift_func_expression(Compiler c, List expression);
 
 List Compiler_maybe_adapt_func_arg(Compiler c, List argument, List expected_type);
