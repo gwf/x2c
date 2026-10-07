@@ -4,7 +4,7 @@
 */
 
 #pragma once
-#include "common.x"
+#include "meta.x"
 
 /* Dedents the literal `node` was written as when its spelling is exact.
    Escaped, interpolated and computed values keep their meaning by calling

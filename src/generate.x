@@ -682,14 +682,11 @@ static void Partition.publish_directive(Partition &p, List node) {
   p.header.push(node);
 }
 
-/* x2c includes publish their whole selected interface. A late native
-   include waits under its typedef names and is promoted when a later
-   public declaration needs one. The source keeps either at its position. */
+/* A late include waits under its typedef names and is promoted when a
+   public declaration needs one. The source keeps it at its position. */
 static void Partition.add_include(
   Partition &p, List node, String target, int angle) {
-  String path = collect_resolve_include(
-    p.c.sources, p.c.include_dirs, Path.dirname(p.c.filename), target, angle);
-  if ((path && is_source_file(path)) || !_holds_item(p.source)) {
+  if (!_holds_item(p.source)) {
     p.c.include_typedef_names(target, angle, p.included);
     p.header.push(node);
     return;
