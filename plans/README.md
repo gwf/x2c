@@ -44,10 +44,11 @@ execution.
 
 ### Current work
 
-- [Deferred code, scoped memoization, and unit assembly](deferred-code-and-memoization.md):
-  planning only against the landed automatic-interface architecture. Shared
-  pending-code representation, reuse of substantial stable computations, and
-  assembly simplification; no compiler implementation or measured savings yet.
+- [Unit initialization, entry setup, and assembly](unit-initialization-and-assembly.md):
+  planning only against dev e18ce3de. Semantic destinations for generated
+  code, one pending owner, one initializer builder and entry patch, and
+  assembly simplification; memoization waits for named evidence. No compiler
+  implementation or measured savings yet.
 - [Harness simplification and messaging](harness-simplification-and-messaging.md):
   authorized corrections to existing tools and guidance, a small
   cross-platform integrator messaging pilot, and separate external runtime
