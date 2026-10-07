@@ -109,14 +109,17 @@ static void Compiler._publish(Compiler c, List outputs) {
 
 // header and source
 
-/* One unit's split into header and source. `pending` holds each static
-   type or late native include as `(names node promoted)`, `open` the
-   conditional groups still open, `forwarded`
-   the struct and union tags the header declares, `included` the files its
-   includes reach, and `statics` the bindings static declarations declare. */
+/* One unit's split into header and source. `pending` holds each late
+   native include as `(names node)`, `open` the conditional groups still
+   open, `forwarded` the struct and union tags the header declares,
+   `included` the files its includes reach, and `statics` the bindings
+   static declarations declare. The source projection writes the source;
+   `source_started` records that it holds an item, and `source_groups` the
+   conditional groups that hold one. */
 static typedef struct Partition {
-  Compiler c, Array header, source, pending, open;
-  Map forwarded, included, statics;
+  Compiler c, Array header, pending, open;
+  Map forwarded, included, statics, source_groups;
+  int source_started;
 } Partition;
 
 /* Partition a normalized unit without changing source order. Non-inline
@@ -127,8 +130,8 @@ static typedef struct Partition {
 static List Compiler._header_and_source(
   Compiler c, List ast, Map inline_bodies) {
   Partition p = {
-    .c = c, .header = [], .source = [], .pending = [],
-    .open = [], .forwarded = {}, .included = {}, .statics = {}};
+    .c = c, .header = [], .pending = [], .open = [], .forwarded = {},
+    .included = {}, .statics = {}, .source_groups = {}};
   foreach (Ast node, ast) p.add(node);
   return %(${p.finish()} ${c._source_projection(ast, inline_bodies)});
 }
@@ -193,7 +196,7 @@ static void Partition.publish(Partition &p, List node) {
     return;
   }
   _add_declared(node, p.statics);
-  p.source.push(node);
+  p.keep();
 }
 
 /* Both walks keep pending parts off the C stack, since an expression can
@@ -235,21 +238,19 @@ static void Partition.add_statics(Partition &p, List declarators) {
   }
 }
 
-/* A marker holds a node's place in both files until the partition ends. */
-static void Partition.mark(Partition &p, List marker) {
-  p.header.push(marker);
-  p.source.push(marker);
+/* An item the source keeps fills each group open around it. */
+static void Partition.keep(Partition &p) {
+  p.source_started = 1;
+  foreach (Var group, p.open) p.source_groups[group] = 1;
 }
 
-/* Settle pending typedefs and conditional groups in the public projection.
-   The source partition records which groups contain private items. */
+/* Settle pending includes and conditional groups in the public projection.
+   A marker left after promotion leaves its include to the source. */
 static List Partition.finish(Partition &p) {
   _promote_typedefs(p.header, p.pending);
-  List header = _place_typedefs(p.header, p.pending, 1);
-  List source = _place_typedefs(p.source, p.pending, 0);
-  Map header_filled = _filled_groups(header);
-  Map source_filled = _filled_groups(source);
-  header = _place_groups(header, header_filled, source_filled);
+  List header = p.header.list().filter(
+    %!(item) => !item.list().match(%(pending ?)));
+  header = _place_groups(header, _filled_groups(header), p.source_groups);
   return _typedef_forwards(header, NULL, p.c);
 }
 
@@ -266,12 +267,12 @@ static void Partition.add_typedef(Partition &p, List node) {
   match (core) case %((!or struct union enum) ?name (*)):
     body = p.c.publishes_type_family(%(${core.car()} $name));
   if (type.is_static() && !p.publishes_typedefs(_typedef_names(node))) {
-    p.source.push(node);
+    p.keep();
     if (body) p.publish(%(declare $core (bindings (bind () ()))));
     return;
   }
   if (forward && !body) {
-    p.source.push(node);
+    p.keep();
     p.publish(forward);
     return;
   }
@@ -300,16 +301,14 @@ static List _without_static_type(List node) {
 static List _without_static(List type) =>
   type.filter(%!(specifier) => specifier != <static>);
 
-/* A private node declaring `names` waits as a `pending` marker in both
-   files until the whole unit has been partitioned. A node without names
-   takes the current side. */
+/* A late include declaring `names` waits as a `pending` marker in the
+   header until the whole unit has been partitioned. It fills the source
+   groups open around it. A promoted include fills the same groups in the
+   header, which then keeps them, so this changes no header placement. */
 static void Partition.hold(Partition &p, List names, List node) {
-  if (!names) {
-    p.publish(node);
-    return;
-  }
-  p.mark(%(pending ${p.pending.len()}));
-  p.pending.push(%($names $node 0));
+  p.header.push(%(pending ${p.pending.len()}));
+  p.pending.push(%($names $node));
+  foreach (Var group, p.open) p.source_groups[group] = 1;
 }
 
 static List _typedef_names(List node) {
@@ -352,11 +351,8 @@ static void _promote_typedefs(Array header, Array pending) {
   HeaderNeeds needs = {.header = header, .walked = header.len()};
   for (int i = header.len() - 1; i >= 0; i--)
     match (header[i]) case %(pending ?index): {
-      int at = index;
-      (List names, List node, int promoted) = pending[at];
-      if (!promoted) promoted = needs.at(i, names);
-      pending[at] = %($names $node $promoted);
-      if (promoted) header[i] = node;
+      (List names, List node) = pending[index];
+      if (needs.at(i, names)) header[i] = node;
     }
 }
 
@@ -411,22 +407,6 @@ static void _spelled_types(List node, Map names) {
   }
 }
 
-/* Each remaining marker becomes its typedef in the file the typedef settled
-   in, and disappears from the other. */
-static List _place_typedefs(Array items, Array pending, int header) {
-  Array out = [];
-  foreach (Var item, items) {
-    match (item) case %(pending ?index): {
-      (List names, List node, int promoted) = pending[index];
-      (void) names;
-      if (promoted == header) out.push(node);
-      continue;
-    }
-    out.push(item);
-  }
-  return out.list_free();
-}
-
 // functions
 
 static void Partition.add_function(
@@ -448,15 +428,14 @@ static List _with_attributes(Map facts, List type, Var binding) {
 static void Partition.place_function(
   Partition &p, Type type, List declarator, Ast body) {
   type = _noreturn(type, declarator, body);
-  List function = %(function $type $declarator $body);
   if (type.is_static()) {
     p.add_statics(%($declarator));
-    p.source.push(function);
+    p.keep();
     return;
   }
   p.forward_tags(%($type $declarator));
   p.header.push(_header_function(type, declarator, body));
-  if (!type.is_inline()) p.source.push(function);
+  if (!type.is_inline()) p.keep();
 }
 
 /* C sees only the prototype of a helper that always raises, so a caller
@@ -509,18 +488,16 @@ static void Partition.add_declaration(
       if (p.c._completed_prototype(binding)): return;
   if ((type.is_static() && !_body_tag(type)) ||
       (_anonymous_body(type) && _declares_object(bindings))) {
-    p.source.push(decl);
+    p.keep();
     return;
   }
   if (type.is_static() && _body_tag(type)) {
     List core = type.base_type();
-    List body = %(declare $core (bindings (bind () ())));
     List family = %(${core.car()} ${core.cadr()});
-    if (p.c.publishes_type_family(family)) p.publish(body);
-    else p.source.push(body);
-    if (_declares_object(bindings))
-      p.source.push(
-        %(declare ${_tag_only(type, core, _body_tag(type))} $bindings));
+    if (p.c.publishes_type_family(family))
+      p.publish(%(declare $core (bindings (bind () ()))));
+    else p.keep();
+    if (_declares_object(bindings)) p.keep();
     return;
   }
   match (type.base_type())
@@ -552,7 +529,7 @@ static int Partition.place_tagged_object(
   p.publish(%(declare $core (bindings (bind () ()))));
   if (!type.is_static())
     p.publish(p.object_header(decl, tagged, bindings));
-  p.source.push(%(declare $tagged $bindings));
+  p.keep();
   return 1;
 }
 
@@ -576,7 +553,7 @@ static int Partition.place_object(
   Partition &p, List decl, Type type, List bindings) {
   if (type.is_extern() || !_declares_object(bindings)) return 0;
   p.publish(p.object_header(decl, type, bindings));
-  p.source.push(decl);
+  p.keep();
   return 1;
 }
 
@@ -645,14 +622,15 @@ static List _header_declaration(List node, Type type, List bindings) {
   return node;
 }
 
-static void Partition.add_alias(Partition &p, List alias, Type type) =>
-  (type.is_static() ? p.source : p.header).push(alias);
+static void Partition.add_alias(Partition &p, List alias, Type type) {
+  if (type.is_static()) p.keep();
+  else p.header.push(alias);
+}
 
 /* directives
 
    A conditional directive inside an open group becomes a `conditional`
-   marker in both files. Once the unit is partitioned, the group's
-   directives go to each file that holds one of its items. */
+   marker in the header until the unit is partitioned. */
 
 /* Each conditional group takes the position where its first marker opens. */
 static void Partition.add_preproc(Partition &p, List node, String content) {
@@ -663,7 +641,7 @@ static void Partition.add_preproc(Partition &p, List node, String content) {
 }
 
 static void Partition.mark_conditional(Partition &p, List node, Symbol kind) {
-  p.mark(%(conditional ${p.open[-1]} $kind $node));
+  p.header.push(%(conditional ${p.open[-1]} $kind $node));
   if (kind == <close>) p.open.take_last();
 }
 
@@ -687,24 +665,14 @@ static void Partition.publish_directive(Partition &p, List node) {
    public declaration needs one. The source keeps it at its position. */
 static void Partition.add_include(
   Partition &p, List node, String target, int angle) {
-  if (!_holds_item(p.source)) {
+  if (!p.source_started) {
     p.c.include_typedef_names(target, angle, p.included);
     p.header.push(node);
     return;
   }
   List names = p.c.include_typedef_names(target, angle, p.included.copy());
   if (names) p.hold(names, node);
-  else p.source.push(node);
-}
-
-/* Pending and conditional nodes are skipped as items. */
-static int _holds_item(Array source) {
-  foreach (List item, source)
-    match (item) {
-      case %((!or pending conditional) *): continue;
-      default: return 1;
-    }
-  return 0;
+  else p.keep();
 }
 
 static int _is_pragma_once(String content) =>
