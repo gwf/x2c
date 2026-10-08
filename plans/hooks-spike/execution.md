@@ -29,7 +29,6 @@
 ## Later waves (ranked by `thin-api.md`)
 
 - Typing queries from project meta code (gap found in wave 1).
-
 - Patterns to `if` tests, with `catch` selection and `match` arms as clients.
 - Fact registration at collection, with `delegate` as the first client.
 - Declaration-position hook, with `$auto` as the client (deletes
