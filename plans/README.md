@@ -44,6 +44,10 @@ execution.
 
 ### Current work
 
+- [Language features as components](language-components.md): branch
+  `gwf/language-components`. Kernel list, one-file component contract with
+  a single hook mechanism, salvage from `gwf/hooks-spike`, and the feature
+  extraction order for the next agent.
 - [Ordinary switch over String](string-switch.md): planned against dev
   0916ff92. String and String-alias selectors with string-literal labels,
   dispatched through one memoized helper in unit support; awaiting
