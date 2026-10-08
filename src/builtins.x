@@ -1200,9 +1200,10 @@ static List _catch_clause(List handle, List records, Array rows) {
     rows.push(%(region $arm ${record.cadr()}));
     arms.push(arm);
   }
-  List select = _catch_selector(handle, patterns, arms.len(), rows);
-  if (select) return %($handle $select ${arms.list_free()});
-  return %($handle $state ${arms.list_free()} @{patterns.list_free()});
+  List filters = patterns.list_free(), lowered = arms.list_free();
+  List select = _catch_selector(filters, lowered.len(), rows);
+  if (select) return %($handle $select $lowered);
+  return %($handle $state $lowered @filters);
 }
 
 /* Well inside the Match machine's constant, binder, and code limits. */
@@ -1212,10 +1213,10 @@ static const int _catch_step_limit = 128;
    `count` arms, adding to `rows` the effects that declare SELECTOR, a
    function of the unit that tests the newest Error against each pattern in
    order when it is raised; or NULL when a pattern is outside the static
-   subset. A pattern with more steps than `_catch_step_limit` keeps the
-   Match path, whose plan reports a pattern too large to prepare. */
-static List _catch_selector(
-  List handle, Array patterns, int count, Array rows) {
+   subset. Catches with the same patterns and default share one function.
+   A pattern with more steps than `_catch_step_limit` keeps the Match path,
+   whose plan reports a pattern too large to prepare. */
+static List _catch_selector(List patterns, int count, Array rows) {
   Atom error = x2c_fresh_name("catch_error");
   Atom captures = x2c_fresh_name("catch_captures");
   Atom found = x2c_fresh_name("catch_count");
@@ -1234,7 +1235,8 @@ static List _catch_selector(
   Array names = [select, error, captures, found], declarations = [];
   List subject = %(expr () (ident $error));
   foreach (Atom cursor, cursors) {
-    declarations.push($!{ List $cursor = $subject; });
+    declarations.push(
+      %(declare ("List") (bindings (op = (bind $cursor ()) $subject))));
     names.push(cursor);
   }
   int filtered = patterns.len();
@@ -1247,24 +1249,30 @@ static List _catch_selector(
     }
   };
   foreach (Atom name, names) rows.push(x2c_effect_name(name));
-  rows.push(x2c_effect_support(%(catch-select $handle), select, function));
+  List key = %(catch-select $fallback @patterns);
+  rows.push(x2c_effect_support(key, select, function));
   return %(select $select $fallback);
 }
 
 /* Stores the binders of arm `arm` in `captures`, their number in `found`,
-   and returns the arm. */
+   and returns the arm. Like the steps, these statements are canonical
+   syntax, which binds faster than quotations. */
 static List _catch_selected(
   int arm, List binders, Atom captures, Atom found) {
   Array statements = [];
   int index = 0;
   foreach (Var binder, binders) {
     List value = x2c_expr_ident(x2c_ident(binder.str()[1:]));
-    List slot = x2c_literal_int(index++);
-    statements.push($!{ $captures[$slot] = $value; });
+    List slot = %(expr () (index (expr () (ident $captures))
+                                 ${x2c_literal_int(index++)}));
+    statements.push(%(stmnt (expr () (op = $slot $value))));
   }
-  List number = x2c_literal_int(index), selected = x2c_literal_int(arm);
-  if (index) statements.push($!{ *$found = $number; });
-  statements.push($!{ return $selected; });
+  if (index) {
+    List count = %(expr () (op * (expr () (ident $found))));
+    statements.push(
+      %(stmnt (expr () (op = $count ${x2c_literal_int(index)}))));
+  }
+  statements.push(x2c_stmnt_return(x2c_literal_int(arm)));
   return statements.list_free();
 }
 
