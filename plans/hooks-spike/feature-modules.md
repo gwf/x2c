@@ -49,6 +49,8 @@ it would be a pure library file.
 | Runtime static locals | 320 | B | cleanup region participation |
 | class defaults | 780 | B | collection-time declaration defaults service |
 | Truthiness, getindex/setindex, dynamic operators | 470 | B | several handlers share the `op` arm; parent-before-child order |
+| match | 650 | B | see "Revised after review" below |
+| Lambda lowering | 550 plus callables.x | B | see "Revised after review" below |
 
 ### Core
 
@@ -57,12 +59,40 @@ it would be a pure library file.
 | Declarations, call arguments, assignment, comparison | 165 in transform plus initializers.x | implicit conversion rules of the language |
 | defer | 320 | control-flow analysis over every transfer; the primitive other features reuse |
 | try/catch/finally | 700 | regions, label ancestry, volatile preservation |
-| match | 650 | binder scopes, cleanup barrier, its own emission |
-| Lambdas | 550 plus callables.x | capture analysis inside identifier resolution |
 | Protocols | 2,832 | operator typing depends on it |
 
 Roughly: transform-phase feature code is 30% A, 59% B, 12% C; parse, bind,
 and later phases hold about 480 lines A, 2,000 B, and more than 5,000 C.
+
+## Revised after review
+
+Gary's correction: the surveys classified the current implementation, not
+the necessary one. Rechecked against source:
+
+- **match.** Its cleanup barrier is the switch barrier:
+  `Walk._rewrite_matchcases` and `Walk._rewrite_switch` both call
+  `_bounded(body, 0)` (cleanup.x:531-536). Binders are ordinary declarations
+  once typed. The C text built in emit.x (`_match_cases`, `_match_if`) is a
+  choice; a typed-phase module can produce an ordinary `switch` on the head
+  symbol plus `if` arms with Match runtime calls. The Match engine was once
+  isolated behind a thin API and can be again.
+- **catch patterns.** Selection happens at raise time, before unwinding: the
+  catch site prepares a `MatchPlan` per arm (lib/error.x:950-1000). Patterns
+  restricted to a simpler form can lower to nested `if` tests, emitted as a
+  predicate helper the catch site calls during selection, not as tests in
+  the catcher after landing.
+- **Lambda lowering.** Capture analysis now runs inside identifier
+  resolution, but a typed function-level hook sees binding identities, so
+  free variables, mutated captures, cell rewriting, and helper lifting
+  through unit support are structural. Func typing and call conversion stay
+  core.
+
+## Principle
+
+Everyone uses the same thin API: compiler modules, library extensions, and
+user includes. A feature that needs something outside that API either
+justifies a new API entry or stays core. This keeps the compiler from
+becoming monolithic again.
 
 ## Seams a module system needs
 
