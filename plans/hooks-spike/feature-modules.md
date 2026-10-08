@@ -194,3 +194,50 @@ lowering. File-initialization statements are spliced in after the transform
 and must arrive lowered (`Compiler.add_init`), so strings or pre-lowered
 forms fit there. Contribute code literals before lowering and lowered forms
 after it; a module that follows this never re-runs transformations.
+
+## Kernel or component, by keyword
+
+Operators (`in`, `is`, `is not`, `===`, `@`) are left as they are for now.
+
+| Keyword or word | Verdict | What the component needs from the kernel |
+| --- | --- | --- |
+| `macro`, `keyword`, `meta`, `native`, `using`, `$`, `$!`, `$(` | Kernel: the extension substrate | (it is the API) |
+| `import`, `as` in import, `with` in import | Kernel: unit assembly and interfaces | (it is the API) |
+| `defer` | Kernel: cleanup regions | (it is the cleanup service) |
+| `protocol`, `associated`, `Self`, `as`/`tag` in adoption | Component | fact registration at collection; member-resolution and conversion rule tables; unit support and initialization for adapters and descriptor tables |
+| `delegate` | Component (with protocols) | a member-resolution fallback rule |
+| `match` | Component | the pattern API; typed node lowering to `switch` plus `if` arms |
+| `catch` | Component (pattern part) | the pattern API, emitted as a selection predicate |
+| `try`, `finally` | Component | cleanup participation (regions, transfers); include anchor |
+| `raise` | Component | "never returns" fact; include anchor |
+| `with` | Component | a local expression macro invoked by bare name |
+| `threaded` | Lexical data | a spelling alias for `_Thread_local` |
+| `foreach`, `class`, `loop`, `synchronized` | Already components | `class` needs the declaration-defaults service |
+
+### Patterns as one component
+
+`match`, `catch`, macro recognition, and typed captures (`?(T x)`) share one
+pattern language. One pattern component compiles a pattern into a test and
+its binders: static patterns into nested `if` tests over List structure,
+dynamic ones into a runtime `MatchPlan`. Its clients choose where the test
+runs: a `match` arm in place, a catch site's selection predicate, a macro's
+recognition.
+
+### Protocols and adapters as shims
+
+An adapter sits between two API endpoints: a caller's expected signature
+and a participant's member. It is a small template instantiated per pair
+and memoized per unit. Protocol conformance supplies the pairs as facts;
+the kernel's resolution engine reads the facts; the adapter template emits
+through unit support. None of the three needs private compiler state.
+
+### The kernel that remains
+
+1. Lexer and C parser.
+2. Binder: scopes, names, identifier resolution.
+3. Typing: the conversion engine (positions by rule table) and member
+   resolution, both reading registered facts.
+4. Cleanup and region service (`defer`).
+5. Macro and meta substrate: expansion, hygiene, quotation, meta execution.
+6. Hook dispatch and module registration.
+7. Unit assembly: imports, interfaces, pending destinations, emission.
