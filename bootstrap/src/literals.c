@@ -727,7 +727,7 @@ static List Compiler__parse_splice(Compiler c){
   return cons(_58, cons(List_var(expr), NULL));
 }
 
-void Compiler_check_explicit_converter(Compiler, List, Type, int);
+void Compiler_check_explicit_converter(Compiler, Symbol, List, Type);
 
 static Type List_type(List);
 
@@ -738,7 +738,7 @@ static List Compiler__parse_insertion(Compiler c){
   if(Compiler_peek(c, 0) != 9463 || c -> token -> len != 2) return NULL;
   Compiler_next(c);
   List expr = Compiler_parse_expression(c);
-  Compiler_check_explicit_converter(c, expr, List_type(_61), 0);
+  Compiler_check_explicit_converter(c, 11554073512, expr, List_type(_61));
   Compiler_expect(c, 251);
   return expr;
 }
@@ -1292,13 +1292,13 @@ static List Compiler__parse_text_segment(Compiler c){
   List cached = Compiler_cache(c, cons(_213, cons(List_var(cons(_0, cons(_204, cons(List_var(cons(_16, cons(_204, cons(String_var(text), NULL)))), NULL)))), NULL)));  Compiler_next(c);  return cached;
 }
 
-List Compiler_convert_segment_to_string(Compiler, List);
+List Compiler_convert_at(Compiler, Symbol, List, Type);
 static List Compiler__parse_named_segment(Compiler c){
-  List expr = Compiler__parse_named_reference(c, 73);  expr = Compiler_convert_segment_to_string(c, expr);  return cons(_214, cons(List_var(expr), NULL));
+  List expr = Compiler__parse_named_reference(c, 73);  expr = Compiler_convert_at(c, 555786, expr, List_type(_203));  return cons(_214, cons(List_var(expr), NULL));
 }
 
 static List Compiler__parse_braced_segment(Compiler c){
-  Compiler_next(c);  List expr = Compiler_parse_expression(c);  Compiler_check_explicit_converter(c, expr, List_type(_203), 1);  expr = Compiler_convert_segment_to_string(c, expr);  Compiler_expect(c, 251);  return cons(_212, cons(List_var(expr), NULL));
+  Compiler_next(c);  List expr = Compiler_parse_expression(c);  Compiler_check_explicit_converter(c, 555786, expr, List_type(_203));  expr = Compiler_convert_at(c, 555786, expr, List_type(_203));  Compiler_expect(c, 251);  return cons(_212, cons(List_var(expr), NULL));
 }
 
 String String_replace(String, String, String);

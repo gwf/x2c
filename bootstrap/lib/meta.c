@@ -71,6 +71,8 @@ List x2c_protocol_member(List participant, List base, String member);
 
 List x2c_member_resolve(List type, String name, int call);
 
+List x2c_convert(Symbol position, List value, List type);
+
 List x2c_fact_record(List subject, Symbol relation, String name, List value);
 
 List x2c_fact_lookup(List subject, Symbol relation, String name);

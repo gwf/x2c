@@ -82,7 +82,7 @@ static List Compiler._parse_assignment_tail(Compiler c, List lhs) {
   List rhs = c.parse_assignment();
   if (targets) match (rhs)
     case %(expr ?type ?): return %(expr $type (dstrasgn $targets $rhs));
-  if (op == <=>) c.check_explicit_converter(rhs, lhs.cadr(), 0);
+  if (op == <=>) c.check_explicit_converter(<assignment>, rhs, lhs.cadr());
   return c.resolve_expression(
     source_operator_expression(NULL, %($op $lhs $rhs)), origin);
 }
@@ -2301,7 +2301,7 @@ static List Compiler._binary_expression(
        here would lift a function name to a hidden global first. */
     if (operator == <=> &&
         !(c.meta_body && c.sym.is_named_value_type(type, "Func")))
-      rhs = c.convert_expression(rhs, type);
+      rhs = c.convert_at(<assignment>, rhs, type);
     return source_operator_expression(type, %($operator $lhs $rhs));
   }
   c._convert_string_comparison(operator, lhs, rhs);
@@ -2780,7 +2780,8 @@ static List Resolve._segments(Resolve &r, List items) {
         resolved.push(%($tag $expression));
         continue;
       }
-      resolved.push(%($tag ${r.c.convert_segment_to_string(expression)}));
+      List hole = r.c.convert_at(<hole>, expression, %("String"));
+      resolved.push(%($tag $hole));
       continue;
     }
     default: resolved.push(item);
@@ -2986,16 +2987,15 @@ static void Compiler._note_explicit_converter(
 /** Reports `parsed` when it is the explicit converter call resolved last
     and `target` converts its receiver on its own: either side is Var, the
     types share one C type, or the receiver declares a converter to the
-    target. The call then changes nothing but the spelling. `context` is 0
-    for a typed destination, 1 for an interpolation hole, which displays
-    every value through `Var.str`, and 2 for a printf-family value, which
-    the format converts when it is a Var.
+    target at the destination `position`, as `convert_at` names it. The
+    call then changes nothing but the spelling. A list literal's inserted
+    value is checked at the typed position <element>.
 */
 void Compiler.check_explicit_converter(
-  Compiler c, List parsed, Type target, int context) {
+  Compiler c, Symbol position, List parsed, Type target) {
   c._check_noted_converter(
-    c.protocol_helpers.getdefault("explicit-converter", %()), parsed,
-    target, context);
+    c.protocol_helpers.getdefault("explicit-converter", %()), position,
+    parsed, target);
 }
 
 /* Each argument of a call spelled in source is checked against its declared
@@ -3018,7 +3018,7 @@ static void Compiler._check_converter_args(
     if (car(p) is not <list> || car(a) is not <list>) continue;
     List param = car(p), argument = car(a);
     Type expected = param.car() == <param> ? param.type_from_ast() : param;
-    c._check_noted_converter(car(n), argument, expected, 0);
+    c._check_noted_converter(car(n), <argument>, argument, expected);
   }
   /* A static printf-family format converts each Var value it consumes. The
      family's positions count the receiver a method call spells before the
@@ -3031,11 +3031,12 @@ static void Compiler._check_converter_args(
   int first = info.first_arg - method, index = 0;
   for (List a = arguments, n = notes; a; a = cdr(a), n = cdr(n))
     if (index++ >= first && car(a) is <list>)
-      c._check_noted_converter(car(n), car(a), car(a).list().cadr(), 2);
+      c._check_noted_converter(
+        car(n), <printf>, car(a), car(a).list().cadr());
 }
 
 static void Compiler._check_noted_converter(
-  Compiler c, List noted, List parsed, Type target, int context) {
+  Compiler c, List noted, Symbol position, List parsed, Type target) {
   if (!noted || !parsed || !target) return;
   (List call, String method, List location) = noted;
   if (call != parsed) return;
@@ -3051,14 +3052,15 @@ static void Compiler._check_noted_converter(
      reads the String payload: a different operation for a Symbol or a
      number. A hole and a format render a Var through `Var.str`, so there
      only `.str()` repeats the crossing. */
-  if (source_is_var && (method == "str") != (context != 0)) return;
+  int rendered = position == <hole> || position == <printf>;
+  if (source_is_var && (method == "str") != rendered) return;
   /* A Var reaches a numeric scalar other than Symbol through `Var.convert`
      and then a read. `Var.int` already converts, and a raw reader such as
      `Var.integer` skips the conversion, so either call differs. */
   if (source_is_var && target !== %("Symbol") &&
       c.sym.resolve_numeric_type(target))
     return;
-  if (context == 2 && !source_is_var) return;
+  if (position == <printf> && !source_is_var) return;
   // A declared crossing to String calls `str`, not a reader like `string`.
   if (!source_is_var && method != "str" && c.sym.is_string_type(target))
     return;
@@ -3066,7 +3068,7 @@ static void Compiler._check_noted_converter(
     receiver, source, target, source_is_var);
   if (!implicit || c._defines_crossing(source, target)) return;
   c.protocol_helpers.del("explicit-converter");
-  $report.conversion.call_redundant(c, method, target, location, context);
+  $report.conversion.call_redundant(c, method, target, location, position);
 }
 
 static int Compiler._implicit_converter(
@@ -3219,6 +3221,45 @@ static List Compiler._raw_string_to_string(Compiler c, List expr) {
 
    A resolved value converts to the type its destination declares. C
    performs every conversion this section returns unchanged. */
+
+/** Converts the resolved `expr` at the destination `position`, which
+    declares `target`. The positions are where source gives a value a
+    destination: an initializer (<init>), an <assignment>, a <return>, a
+    declared call <argument>, an interpolation <hole>, and a <printf>
+    value, a `Var` that a printf-family format reads as `target`. A brace
+    converts by an initializer's rows, and a hole or a format renders a
+    `Var` through `Var.str`; every other conversion is
+    `convert_expression`. `check_explicit_converter` warns at the same
+    positions when source spells the conversion.
+*/
+List Compiler.convert_at(
+  Compiler c, Symbol position, List expr, Type target) {
+  switch (position) {
+    case <init>: return c.convert_initializer(expr, target, NULL);
+    case <hole>: return c._convert_hole(expr);
+    case <printf>:
+      if (target === %("String")) return _rendered(expr);
+  }
+  return c.convert_expression(expr, target);
+}
+
+/* A hole renders its value as a `String`. A declared numeric converter
+   keeps its formatting; another number, and a `Var` of any tag, renders
+   through `Var.str`, where the `Var`-to-`String` crossing would read only
+   a `String` payload. A value with no `String` conversion stays as it is,
+   and the transform renders it through a `Var`. */
+static List Compiler._convert_hole(Compiler c, List expr) {
+  Type type = expr.cadr().type().canonicalize();
+  if (c.sym.is_var_type(type)) return _rendered(expr);
+  if (!c.sym.resolve_numeric_type(type))
+    return c.convert_expression(expr, %("String"));
+  List converted = c.converter_call(expr, type, %("String"));
+  if (converted) return converted;
+  return _rendered(c.convert_expression(expr, %("Var")));
+}
+
+static List _rendered(List value) =>
+  %(expr ("String") (call "Var_str" (args $value)));
 
 /** Adds operations to convert a resolved expression AST to `target`.
     The result may contain converter, boxing, unboxing, `Func`, reference, or
@@ -3406,30 +3447,6 @@ static List Compiler._convert_reference(
   if (type.car() == <&> && cdr(type) === target)
     return %(expr $target (op * (parens $expr)));
   return NULL;
-}
-
-/** Converts a resolved interpolation segment to `String` when available.
-    A missing `String` conversion is expected: the transform boxes that segment
-    to `Var` and renders it at runtime.
-
-    A declared numeric converter keeps its formatting; other numeric segments
-    use `Var.str`. A segment statically spelled `Var` also uses `Var.str` for
-    every
-    runtime tag. The ordinary `Var`-to-`String` conversion is
-    not equivalent: it
-    extracts only a `String` payload and yields empty `String` for every other
-    tag.
-*/
-List Compiler.convert_segment_to_string(Compiler c, List expr) {
-  Type type = expr.cadr().type().canonicalize();
-  if (c.sym.is_var_type(type))
-    return %(expr ("String") (call "Var_str" (args $expr)));
-  if (!c.sym.resolve_numeric_type(type))
-    return c.convert_expression(expr, %("String"));
-  List converted = c.converter_call(expr, type, %("String"));
-  if (converted) return converted;
-  List boxed = c.convert_expression(expr, %("Var"));
-  return %(expr ("String") (call "Var_str" (args $boxed)));
 }
 
 // Var crossings

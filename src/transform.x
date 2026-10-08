@@ -798,7 +798,7 @@ static List Compiler._segment_value(Compiler c, List seg) {
   switch (kind) {
     case <segraw>: seg = c._process_raw_segment(seg); break;
     case <segvar>:
-    case <segexp>: seg = c.convert_segment_to_string(seg.cadr()); break;
+    case <segexp>: seg = c.convert_at(<hole>, seg.cadr(), %("String")); break;
     case <cache>: seg = %(expr ("String") $seg); break;
   }
   return c.convert_expression(seg, %("Var"));
@@ -1054,7 +1054,8 @@ static List Compiler._return(Compiler c, List ast) {
   Macro returned = $return_value;
   match (ast)
     case returned(?expression): {
-      List value = c.convert_expression(expression, source_return_type(ast));
+      List value =
+        c.convert_at(<return>, expression, source_return_type(ast));
       return source_return_content(%($value));
     }
   return ast;
@@ -1184,7 +1185,7 @@ static List Compiler._typed_call(
     if (param && param.car() == <param>) expected = param.type_from_ast();
     arg = c.maybe_adapt_func_arg(arg, expected);
     List converted = expected
-      ? c.convert_expression(arg, expected)
+      ? c.convert_at(<argument>, arg, expected)
       : c.lower_lambda_expr(arg);
     values.push(converted);
   }
@@ -1414,12 +1415,10 @@ static void PrintfWalk._value(
            conversion == 'a' || conversion == 'A')
     target = length == _printf_L ? %(long double) : %(double);
   else if (conversion == 'c' && length == _printf_default) target = %(int);
-  else if (conversion == 's' && length == _printf_default) {
-    w.values[index] = %(expr ("String") (call "Var_str" (args $arg)));
-    return;
-  }
+  else if (conversion == 's' && length == _printf_default)
+    target = %("String");
   if (target) {
-    w.values[index] = w.c.convert_expression(arg, target);
+    w.values[index] = w.c.convert_at(<printf>, arg, target);
     return;
   }
 
@@ -1435,7 +1434,7 @@ static void PrintfWalk._star(PrintfWalk &w) {
     w._error("format consumes a missing '*' argument");
   List arg = w.values[index];
   if (w.c.sym.is_var_type(arg.cadr()))
-    w.values[index] = w.c.convert_expression(arg, %(int));
+    w.values[index] = w.c.convert_at(<printf>, arg, %(int));
 }
 
 static Type _printf_integer_type(PrintfLength length, int is_unsigned) {
@@ -1571,7 +1570,7 @@ static List Compiler._assignment(Compiler c, Symbol op, List lhs, List rhs) {
       $report.xform.index_copy(c, base_type);
     return %(setindex $base $index $rhs);
   }
-  rhs = c.convert_expression(rhs, lhs.cadr());
+  rhs = c.convert_at(<assignment>, rhs, lhs.cadr());
   return %(op $op $lhs $rhs);
 }
 

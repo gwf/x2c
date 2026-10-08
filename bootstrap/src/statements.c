@@ -707,10 +707,10 @@ static List Compiler__return_statement(Compiler c){
 }
 
 List Compiler_resolve_expression(Compiler, List, Token);
-void Compiler_check_explicit_converter(Compiler, List, Type, int);
+void Compiler_check_explicit_converter(Compiler, Symbol, List, Type);
 static Type List_type(List);
 List Compiler_finish_return_statement(Compiler c, List expr){
-  if(! _init_guard_) _file_init_();  if(! List_truth(expr)) return _80;  List resolved = Compiler_resolve_expression(c, expr, c -> token);  Compiler_check_explicit_converter(c, resolved, List_type(c -> return_type), 0);  return cons(_79, cons(List_var(c -> return_type), cons(List_var(resolved), NULL)));
+  if(! _init_guard_) _file_init_();  if(! List_truth(expr)) return _80;  List resolved = Compiler_resolve_expression(c, expr, c -> token);  Compiler_check_explicit_converter(c, 1219800220, resolved, List_type(c -> return_type));  return cons(_79, cons(List_var(c -> return_type), cons(List_var(resolved), NULL)));
 }
 
 static List Compiler__case_statement(Compiler c){

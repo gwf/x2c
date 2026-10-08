@@ -3485,7 +3485,7 @@ static Array Compiler._meta_arguments(Compiler c, List parameters) {
   if (c.peek(0) != <)>) loop {
     List argument = c._meta_argument();
     if (parameters && !c.macro_holes)
-      argument = c.convert_expression(argument, parameters.car());
+      argument = c.convert_at(<argument>, argument, parameters.car());
     parameters = parameters.cdr();
     arguments.push(argument);
     if (!c.test(<,>)) break;

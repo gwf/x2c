@@ -5043,9 +5043,10 @@ static List Compiler__parse_meta_call(Compiler c, Token invocation){
   );  return Compiler_resolve_expression(c, call, invocation);
 }
 
+List Compiler_convert_at(Compiler, Symbol, List, Type);
 static Array Compiler__meta_arguments(Compiler c, List parameters){
   Array arguments = Array_new();  Compiler_expect(c, 81);  if(Compiler_peek(c, 0) != 83) while(1){
-    List argument = Compiler__meta_argument(c);  if(List_truth(parameters) && ! Map_truth(c -> macro_holes)) argument = Compiler_convert_expression(c, argument, Var_type(List_car(parameters)));  parameters = List_cdr(parameters);  Array_push(arguments, List_var(argument));  if(! Compiler_test(c, 89)) break;
+    List argument = Compiler__meta_argument(c);  if(List_truth(parameters) && ! Map_truth(c -> macro_holes)) argument = Compiler_convert_at(c, 107888847784, argument, Var_type(List_car(parameters)));  parameters = List_cdr(parameters);  Array_push(arguments, List_var(argument));  if(! Compiler_test(c, 89)) break;
   }
   Compiler_expect(c, 83);  return arguments;
 }

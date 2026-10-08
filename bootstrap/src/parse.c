@@ -4707,7 +4707,7 @@ static List Compiler__declarator_init(Compiler c, List type, List context){
 }
 
 int binding_identity_try_parts(List, int *, String *);
-void Compiler_check_explicit_converter(Compiler, List, Type, int);
+void Compiler_check_explicit_converter(Compiler, Symbol, List, Type);
 static List Compiler__initialized(Compiler c, List type, List bind, Token origin){
   List binding = Var_list(List_cadr(bind));  if(binding_identity_try_parts(binding, NULL, NULL)){
     Token tokens = c -> tokenizer -> tokens;  Map_setindex(c -> init_tokens, List_var(binding), Var_box_long(origin - tokens));
@@ -4715,10 +4715,10 @@ static List Compiler__initialized(Compiler c, List type, List bind, Token origin
   if(c -> shallow){
     Compiler__skip_shallow_expression(c, 1);  return bind;
   }
-  List init = Compiler_parse_assignment(c);  Compiler_check_explicit_converter(c, init, List_type_from_ast(({
+  List init = Compiler_parse_assignment(c);  Compiler_check_explicit_converter(c, 619112, init, List_type_from_ast(({
     Var _x2c_literal_part_43 = List_var(type);  Var _x2c_literal_part_44 = List_var(cons(_29, cons(List_var(bind), NULL)));  cons(_27, cons(_x2c_literal_part_43, cons(_x2c_literal_part_44, NULL)));
   }
-  )), 0);  return cons(_102, cons(_103, cons(List_var(bind), cons(List_var(init), NULL))));
+  )));  return cons(_102, cons(_103, cons(List_var(bind), cons(List_var(init), NULL))));
 }
 
 static List Compiler__declarator(Compiler c, List type, List context, List * method_identity_out, Token * source_first, Token * source_after){

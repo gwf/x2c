@@ -65,7 +65,7 @@ List Compiler_var_tag_expression(Compiler c, Type target, Token origin);
 
 List Compiler_resolve_map_entry(Compiler c, List input, Token origin);
 
-void Compiler_check_explicit_converter(Compiler c, List parsed, Type target, int context);
+void Compiler_check_explicit_converter(Compiler c, Symbol position, List parsed, Type target);
 
 const PrintfFn * List_printf_family(List l);
 
@@ -73,9 +73,9 @@ String Compiler_printf_static_format(Compiler c, Var format, int * raw);
 
 List Compiler_promote_string_literal(Compiler c, List expr);
 
-List Compiler_convert_expression(Compiler c, List expr, Type target);
+List Compiler_convert_at(Compiler c, Symbol position, List expr, Type target);
 
-List Compiler_convert_segment_to_string(Compiler c, List expr);
+List Compiler_convert_expression(Compiler c, List expr, Type target);
 
 List Compiler_converter_call(Compiler c, List expr, Type type, Type target);
 

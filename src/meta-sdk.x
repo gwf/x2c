@@ -242,6 +242,12 @@ List x2c_member_resolve(List type, String name, int call) {
   return active.expander.resolve_postfix_member(type, %($name), <.>, call);
 }
 
+/** Answers `x2c.convert`, declared in `lib/meta.x`. */
+List x2c_convert(Symbol position, List value, List type) {
+  _sdk_guard("x2c.convert");
+  return active.expander.convert_at(position, value, type);
+}
+
 // facts
 
 /** Answers `x2c.fact.record`, declared in `lib/meta.x`. */

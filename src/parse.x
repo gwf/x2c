@@ -1928,7 +1928,7 @@ static List Compiler._initialized(
   }
   List init = c.parse_assignment();
   c.check_explicit_converter(
-    init, %(declare $type (bindings $bind)).type_from_ast(), 0);
+    <init>, init, %(declare $type (bindings $bind)).type_from_ast());
   return %( op = $bind $init );
 }
 

@@ -307,10 +307,10 @@ macro Stmt $report.parse.statement_defer(Expr $c, Expr $origin) =>
     "declaration", $origin, %("move it into a nested block"));
 
 macro Stmt $report.conversion.call_redundant(
-  Expr $c, Expr $method, Expr $target, Expr $location, Expr $context) {
+  Expr $c, Expr $method, Expr $target, Expr $location, Expr $position) {
   {
-    String hint = $context == 1 ?
-      "remove the call; the hole renders the value" : $context == 2 ?
+    String hint = $position == <hole> ?
+      "remove the call; the hole renders the value" : $position == <printf> ?
       "remove the call; the format converts the value" :
       "remove the call; the destination converts the value";
     $c.report_warning_at(

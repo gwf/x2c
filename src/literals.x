@@ -291,7 +291,7 @@ static List Compiler._parse_insertion(Compiler c) {
   if (c.peek(0) != <"${"> || c.token.len != 2) return NULL;
   c.next();
   List expr = c.parse_expression();
-  c.check_explicit_converter(expr, %("Var"), 0);
+  c.check_explicit_converter(<element>, expr, %("Var"));
   c.expect(<"}">);
   return expr;
 }
@@ -871,15 +871,15 @@ static List Compiler._parse_text_segment(Compiler c) {
 
 static List Compiler._parse_named_segment(Compiler c) {
   List expr = c._parse_named_reference(<$>);
-  expr = c.convert_segment_to_string(expr);
+  expr = c.convert_at(<hole>, expr, %("String"));
   return %(segvar $expr);
 }
 
 static List Compiler._parse_braced_segment(Compiler c) {
   c.next();
   List expr = c.parse_expression();
-  c.check_explicit_converter(expr, %("String"), 1);
-  expr = c.convert_segment_to_string(expr);
+  c.check_explicit_converter(<hole>, expr, %("String"));
+  expr = c.convert_at(<hole>, expr, %("String"));
   c.expect(<"}">);
   return %(segexp $expr);
 }

@@ -328,7 +328,7 @@ static List Compiler._return_statement(Compiler c) {
 List Compiler.finish_return_statement(Compiler c, List expr) {
   if (!expr) return %(return);
   List resolved = c.resolve_expression(expr, c.token);
-  c.check_explicit_converter(resolved, c.return_type, 0);
+  c.check_explicit_converter(<return>, resolved, c.return_type);
   return %(return ${c.return_type} $resolved);
 }
 

@@ -299,6 +299,15 @@ meta List x2c_protocol_member(List participant, List base, String member);
     consulted. */
 meta List x2c_member_resolve(List type, String name, int call);
 
+/** Returns the bound expression `value` converted to `type` as the
+    destination `position` converts it: an initializer (<init>),
+    <assignment>, <return>, <argument>, <hole>, or <printf>. A brace
+    converts by an initializer's rows; a <hole> renders the value as a
+    `String`, and a <printf> value is a `Var` that a format reads as
+    `type`. Fails the expansion when the value has no conversion to
+    `type`. */
+meta List x2c_convert(Symbol position, List value, List type);
+
 /* facts
 
    A fact describes the member `name` of `subject`, a type key such as
