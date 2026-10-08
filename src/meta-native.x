@@ -370,6 +370,7 @@ Var Compiler.apply_meta_function(
   $let(context.expander, c)
   $let(context.evaluator, c)
   $let(context.site, site)
+  $let(meta_call_form, meta_call_form)
     return c._run_meta(NULL, name, arguments, site, 0);
 }
 

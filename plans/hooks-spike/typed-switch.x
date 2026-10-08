@@ -1,13 +1,15 @@
 /*  typed-switch.x -- a typed-phase switch over strings
 
     Including this file registers `string_switch` for every bound and typed
-    `switch` statement that follows. A switch whose subject is a named type
-    or a C string, and whose owned labels are string literals, becomes a
-    switch over label indices: each label becomes its index, the subject is
-    evaluated once into a fresh String, and the first label it equals by
-    String `==` selects the index. A null C string becomes a null String, which
-    equals `""`. Every other switch is declined and emits as before. A
-    non-literal label in a string switch is an error at that label. */
+    `switch` statement that follows. A switch whose subject's type resolves
+    to a C string, as String, its typedefs, and `char *` do, and whose owned
+    labels are string literals, becomes a switch over label indices: each
+    label becomes its index, the subject is evaluated once into a fresh
+    String, and the first label it equals by String `==` selects the index.
+    A null C string becomes a null String, which equals `""`. Every other
+    switch is declined and emits as before, so a named subject of another
+    type keeps C's own switch rules. A non-literal label in a string switch
+    is an error at that label. */
 
 #pragma once
 #include "meta.x"
@@ -63,28 +65,31 @@ meta static int _tswitch_c_string(List type) {
   return 0;
 }
 
-/* Whether `type` is named, such as `String` or a typedef of it. */
+/* Whether `type` is named, such as `String`, `Symbol`, or a typedef. */
 meta static int _tswitch_named(List type) {
   match (type) case %((!is ? type string)): return 1;
   return 0;
 }
 
-/* The string switch `node` becomes, or `node` itself. Project meta code
-   cannot resolve a typedef, so a named subject converts to String where
-   the result binds; only a string subject has string-literal labels. In a
-   string switch every other label is an error at that label. */
+/* The string switch `node` becomes, or `node` itself. The subject's type
+   must resolve to a C string, which String and its typedefs do; a named
+   subject is resolved only once its labels are strings, so other switches
+   ask nothing. In a string switch every other label is an error at that
+   label. */
 meta List string_switch(List node) {
   match (node) case %(switch (!set ?subject (expr ?type ?)) ?body): {
-    int c_string = _tswitch_c_string(type);
-    if (!c_string && !_tswitch_named(type)) return node;
+    if (!_tswitch_c_string(type) && !_tswitch_named(type)) return node;
     Array labels = [], others = [];
     List rewritten = _tswitch_rewrite(body, labels, others);
     if (!labels.len()) return node;
+    if (!_tswitch_c_string(type) &&
+        !_tswitch_c_string(x2c_type_resolve(type)))
+      return node;
     if (others.len())
       x2c_diagnostic_fail_at(
         others[0], "a string switch label must be a string literal", %());
     Atom selected = x2c_fresh_name("selected");
-    List value = c_string ? x2c_expr_cast(%("String"), subject) : subject;
+    List value = x2c_expr_cast(%("String"), subject);
     List dispatch = _tswitch_dispatch(selected, labels, 0);
     return x2c_code(
       $!{ { String $selected = $value; switch ($dispatch) $rewritten } },

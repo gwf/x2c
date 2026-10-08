@@ -120,11 +120,26 @@ Var Compiler.meta_helper_call(
         c.report_meta_error(node, message, site, notes);
       case %(dependency ?(String path) ?(String hash)):
         c.deps.merge_translation_dependency(path, hash);
+      case %(query ?(String operation) ?(List operands)):
+        call.answer(operation, operands);
       case %(missing): call.refuse(c.meta_call_missing(name));
       case %(failure (?code *detail)): Error.raise(code, detail);
       default: call.stopped("the helper sent an unknown reply");
     }
   }
+}
+
+/* Answers the body's query with the compiler's own `operation` applied to
+   `operands` at the call's site, in the state the call sees. A failed
+   answer ends the helper, which waits for it, before the failure leaves. */
+static void Call.answer(Call &call, String operation, List operands) {
+  Var value = void;
+  try value = call.compiler.apply_meta_function(operation, operands, call.site);
+  catch %(?code *detail): {
+    _helper_stop(SIGKILL);
+    Error.raise(code, detail);
+  }
+  call.send_frame(%(answer $value));
 }
 
 /* Refuses the call when the project's helper or the call's table did not

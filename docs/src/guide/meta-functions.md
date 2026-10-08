@@ -731,14 +731,15 @@ initializers again before the first call a unit makes. What those
 initializers allocate, a Job one starts included, lasts until the next
 unit's reset or the end of the helper.
 
-A project `meta` function receives what it needs as arguments and returns
-a value; it does not query the compiler. The syntax builders of
-`lib/meta.x`, `x2c_ident`, `x2c_function_name`, `x2c_diagnostic_fail`,
-and `x2c_diagnostic_warn` work in the helper, and a builder that needs a
-type's parts is finished by the compiler when the call returns. The
-operations that read other compiler state, such as `x2c_source_text` and
-`x2c_type_fields`, report that they are not available to project meta
-code.
+A project `meta` function receives arguments and returns a value. The
+syntax builders of `lib/meta.x`, `x2c_ident`, `x2c_function_name`,
+`x2c_diagnostic_fail`, and `x2c_diagnostic_warn` work in the helper. The
+typing and invocation queries, such as `x2c_type_resolve`,
+`x2c_type_fields`, `x2c_syntax_type`, and `x2c_method_resolve`, ask the
+compiler while the call waits. The compiler answers in the state of the `$`
+call's site, so a project function gets the answer that compiler-linked
+meta code gets at the same place. `x2c_source_text` reads only the text a
+`Source` parameter carries.
 
 Running compile-time code needs what building the program needs: the C
 compiler and the runtime headers. A project meta module that does not
@@ -1416,11 +1417,10 @@ declarations.
 `x2c_ident`, `x2c_function_name`, `x2c_diagnostic_fail` and
 `x2c_diagnostic_warn` work in every `meta` function. The queries that read
 the compiler's symbol table, such as `x2c_syntax_type`,
-`x2c_type_fields` and `x2c_type_resolve`, run only in the compiler's own
-`meta` code: the source modules and `lib/meta.x` that are linked into
-the compiler. A project `meta` function receives those answers as `TypeInfo`
-and `Source` parameters instead; calling such a query from the project
-meta module reports that it is not available to project meta code. Each
+`x2c_type_fields` and `x2c_type_resolve`, also work in every `meta`
+function: the compiler answers a project function's query while the call
+waits, in the state of the call's site. `TypeInfo` and `Source`
+parameters still deliver a description in one argument. Each
 operation is a plain function whose name is the compile-time Lisp name with `_`
 for `.`, so `x2c.type.fields` is `x2c_type_fields` from x2c. They are grouped
 here by the task, not by signature; the
