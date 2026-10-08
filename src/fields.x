@@ -31,5 +31,6 @@ macro Stmt $set_fields(Expr $to, Expr $value, Name @fields) {
    owner and returns to it. */
 macro Stmt $segment_state(Expr $to, Expr $from) {
   $copy_fields($to, $from, macros, object_macros, imports, kw_aliases,
-               macro_lisp, declaration_effects, evaluated_effects);
+               typed_hooks, macro_lisp, declaration_effects,
+               evaluated_effects);
 }

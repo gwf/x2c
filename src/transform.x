@@ -231,7 +231,8 @@ static Ast Compiler._step(Compiler c, Ast ast) {
 
 // Tag-only lowering does not retain the typed-pattern capture buffer.
 static Ast Compiler._step_tag(Compiler c, Ast ast, Symbol tag) {
-  Ast next = ast;
+  Ast next = c.typed_hooks ? c.apply_typed_hook(ast, tag) : ast;
+  if (next != ast) return c._step(next);
   switch (tag) {
     case <protocol>: case <adopt>: case <macrodef>: case <literal>:
       return ast;

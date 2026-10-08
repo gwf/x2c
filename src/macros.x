@@ -222,6 +222,15 @@ static macro Stmt $report.parse.keyword_name(Expr $c) =>
     <parse>, "keyword alias requires an identifier",
     $c.token, NULL);
 
+static macro Stmt $report.parse.typed_hook_kind(Expr $c) =>
+  $c.report_error(
+    <parse>, %"typed hook cannot name node kind '${$c.token.text}'",
+    $c.token, %("typed hooks support <switch>"));
+
+static macro Stmt $report.parse.typed_hook_target(Expr $c, Expr $origin) =>
+  $c.report_error(
+    <parse>, "typed hook requires a meta function name", $origin, NULL);
+
 static macro Stmt $report.parse.macro_name(Expr $c, Expr $origin) =>
   $c.report_error(
     <parse>, $c.peek(1) == <ident>
@@ -2349,6 +2358,7 @@ void Compiler.install_compile_time_effects(Compiler c, List rows) {
     case %(compile-time keyword ?alias ?definition): {
       if (!c.kw_aliases) c.kw_aliases = {};
       c.kw_aliases[alias] = %(imported-macro $definition);
+      if (definition is <string>) c.typed_hooks = 1;
     }
     case %(compile-time lisp ?form (source ?path ?site)): {
       Token token = c.thaw_declaration_syntax(site);
@@ -2398,15 +2408,17 @@ int Compiler.local_macro_form_is_definition(Compiler c) {
          c.peek(2) == <ident> && c.peek(3) == <(>;
 }
 
-/** Returns whether the current tokens begin a `keyword NAME $macro` alias.
+/** Returns whether the current tokens begin a `keyword NAME $macro` alias,
+    a `hook NAME $macro` parse hook, or a `hook <KIND> f` typed node hook.
     This query does not consume tokens.
 */
 int Compiler.keyword_form_is_definition(Compiler c) {
   Token token = c.token;
   int offset = c.peek(0) == <static>;
   if (offset) token = Token.skip_trivia(token + 1);
-  return c.peek(offset) == <ident> &&
-         (token.text == "keyword" || token.text == "hook") &&
+  if (c.peek(offset) != <ident>) return 0;
+  if (token.text == "hook" && c.peek(offset + 1) == <lit-symbol>) return 1;
+  return (token.text == "keyword" || token.text == "hook") &&
          c.peek(offset + 2) == <$>;
 }
 
@@ -2419,6 +2431,8 @@ void Compiler.parse_keyword_definition(Compiler c) {
   int storage = c.test(<static>) || c.source_private;
   int hook = c.token.text == "hook";
   c.expect(<ident>);
+  if (hook && c.peek(0) == <lit-symbol>)
+    return c._typed_hook_definition(declaration, storage);
   if (hook ? c.peek(0) != <switch> && !c.at_word("function")
            : c.peek(0) != <ident>)
     $report.parse.keyword_name(c);
@@ -2461,6 +2475,58 @@ List Compiler.hook_for(Compiler c, String syntax) {
 List Compiler.apply_hook(
   Compiler c, List definition, Token invocation, AstPos position) =>
   c._decorate(definition, invocation, position, 0);
+
+/* typed node hooks
+
+   `hook <switch> f;` registers the meta function `List f(List node)` for
+   each bound and typed `switch` statement. Transformation passes the node
+   to `f` before its built-in lowering. Returning the node declines; any
+   other result binds as a statement in its place and is transformed
+   again, so a hook declines on what it produced. Storage and include
+   export are those of a keyword alias. */
+
+static const SymbolSet typed_hook_kinds = %<<switch>>;
+
+/* Parses the rest of a `hook <KIND> f;` declaration begun at
+   `declaration`. */
+static void Compiler._typed_hook_definition(
+  Compiler c, Token declaration, int storage) {
+  Symbol kind = Symbol.parse(c.token.text);
+  if (!(kind in typed_hook_kinds)) $report.parse.typed_hook_kind(c);
+  Atom alias = _typed_hook_alias(kind);
+  c.next();
+  Token reference = c.token;
+  List callee = c.parse_variable();
+  String name = NULL;
+  match (callee)
+    case %(expr ((func *) *)
+           ${$source_identifier_content(%((binding ? ?spelling)))}):
+      name = spelling;
+  if (!name) $report.parse.typed_hook_target(c, reference);
+  c.expect(<;>);
+  c.kw_aliases[alias] = name;
+  c.typed_hooks = 1;
+  if (!storage)
+    c.record_compile_time_effect(
+      %(compile-time keyword $alias $name), declaration);
+}
+
+static Atom _typed_hook_alias(Symbol kind) =>
+  Atom.intern(%"hook:<$kind>");
+
+/** Returns what the typed hook registered for `tag` makes of the bound node
+    `ast`: `ast` itself when no hook is visible or the hook declines, else
+    the hook's result bound as a statement.
+*/
+List Compiler.apply_typed_hook(Compiler c, List ast, Symbol tag) {
+  Var name;
+  if (!(tag in typed_hook_kinds) ||
+      !c._try_macro(c.kw_aliases, _typed_hook_alias(tag), name))
+    return ast;
+  Var result = c.apply_meta_function(name.str(), %($ast), c.token);
+  if (result is void || result.equal(ast)) return ast;
+  return c.bind_syntax(result, AST_STATEMENT, c.return_type);
+}
 
 /* Only the built-in sources define `with` or replace a built-in alias. */
 static int Compiler._fixed_alias(Compiler c, Atom alias) {

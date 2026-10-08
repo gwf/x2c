@@ -469,13 +469,14 @@ static inline int _percent_is_operator(Tokenizer tokenizer) {
 }
 
 /* After an operand, `<` opens a Symbol literal only in the comparison forms
-   `OPERAND is <sym>` and `OPERAND is not <sym>`. */
+   `OPERAND is <sym>` and `OPERAND is not <sym>`, and after `tag` or the
+   `hook` of a typed node hook. */
 static inline int _can_start_symbol_literal(Tokenizer tokenizer) {
   if (!_prev_token_ends_operand(tokenizer)) return 1;
   Token keyword = _significant_back(tokenizer, 0);
   int back = 1;
   if (keyword.type != <ident>) return 0;
-  if (keyword.text == "tag") return 1;
+  if (keyword.text == "tag" || keyword.text == "hook") return 1;
   if (keyword.text == "not") {
     keyword = _significant_back(tokenizer, back++);
     if (!keyword || keyword.type != <ident>) return 0;

@@ -107,6 +107,9 @@ typedef struct Compiler {
   int expansion_floor;
   SymScope params;
   Map key_ids, macros, kw_aliases;
+  /* Nonzero once a typed node hook is visible, so transformation looks
+     for one only in units that register them. */
+  int typed_hooks;
   /* `#define` names this unit has passed, for the literal warning and for
      declaration prefixes: the `List` of specifier words of a body made of
      specifiers and attributes, `<string>` for a string literal,
