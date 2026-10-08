@@ -13,38 +13,38 @@ meta static List call(List unused) {
   unsigned u = 4000000000u;
   long b = -5000000000;
   List xs = %($u $b 1e-9);
-  return $!( show($xs...) );
+  return $!( show(@xs) );
 }
 
 meta static List numbers(List unused) {
   List xs = %(1 2 3);
-  return $!( %[$xs...] );
+  return $!( %[@xs] );
 }
 
 meta static List words(List unused) {
   List xs = %("a" "b");
-  return $!( %[$xs...] );
+  return $!( %[@xs] );
 }
 
 static long sum3(long a, long b, long c) => a + b + c;
 
 meta static List typed_sum(List unused) {
   List xs = %(1 2 3);
-  return $!long{ sum3($xs...) };
+  return $!long{ sum3(@xs) };
 }
 
 meta static List typed_sizes(List unused) {
   List xs = %(4 5);
-  return $!(int *){ (int[]){ $xs... } };
+  return $!(int *){ (int[]){ @xs } };
 }
 
 meta static List typed_symbol(List unused) {
   List xs = %(<wanted>);
-  return $!String{ Symbol_str($xs...) };
+  return $!String{ Symbol_str(@xs) };
 }
 
-macro Expression $add(Expr $xs...) => sum3($xs...);
-macro Stmt $show(Expr $xs...) { printf("[%s]\n", $xs...); }
+macro Expression $add(Expr @xs) => sum3(@xs);
+macro Stmt $show(Expr @xs) { printf("[%s]\n", @xs); }
 
 meta static List applied_sum(List unused) {
   Macro add = $add;
@@ -61,7 +61,7 @@ macro Expression $typed_sum_of(Expr $v) => $typed_sum($v);
 macro Expression $typed_sizes_of(Expr $v) => $typed_sizes($v);
 macro Expression $typed_symbol_of(Expr $v) => $typed_symbol($v);
 macro Expression $applied_sum_of(Expr $v) => $applied_sum($v);
-macro Stmt $applied_show_of() { $applied_show()... }
+macro Stmt $applied_show_of() { @applied_show() }
 macro Expression $numbers_of(Expr $v) => $numbers($v);
 macro Expression $words_of(Expr $v) => $words($v);
 

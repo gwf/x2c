@@ -6,7 +6,7 @@ static int increment(int value) => value + 1;
 
 macro Unit $constructed_types() {
   static int $(x2c.ident "constructed_types")(void) {
-    $(quote (
+    @(quote (
       (typedef (int) (bindings (bind ("Count") ())))
       (typedef (int)
         (bindings (bind ("Callback")
@@ -17,7 +17,7 @@ macro Unit $constructed_types() {
       (return (int) (expr ()
         (call (expr () (ident ("callback")))
           (args (expr (int) (literal (int) "7"))))))
-    ))...
+    ))
   }
 }
 

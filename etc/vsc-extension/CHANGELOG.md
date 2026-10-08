@@ -5,6 +5,10 @@ first.
 
 ## Unreleased
 
+- Highlight `@` sequence parameters, named and computed syntax splices,
+  compile-time Lisp splices, and expression-valued quotation holes.
+  Remove macro suffix-splice highlighting while preserving native variadics,
+  runtime List splices, and Lisp `,@`.
 - Highlight the current macro categories: `Stmt` replaces `Statement`,
   `Block` is gone, and `Expr`, `Declaration`, `DeclaratorRow`,
   `NamedType`, `Catch`, `Captures`, and `MatchRow` are recognized.

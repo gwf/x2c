@@ -166,6 +166,33 @@ static void tokenizer_parenthesized_forms_stay_in_literal_modes(void) {
 }
 
 
+static void tokenizer_prefix_splices_keep_mode_and_positions(void) {
+  Tokenizer tokenizer = Tokenizer.new(
+    "@rows; @(list $rows); %[@rows]; %{@rows}; @=", <x2c>);
+  tokenizer.scan();
+  Symbol expected[] = {
+    <@>, <ident>, <;>, <"@(">, <ident>, <$>, <ident>, <)>, <;>,
+    <"%[">, <@>, <ident>, <]>, <;>,
+    <"%{">, <@>, <ident>, <}>, <;>, <@>, <=>, <eof>
+  };
+  for (int i = 0; i < sizeof(expected) / sizeof(*expected); i++) {
+    Token token = tokenizer.next();
+    EXPECT_INT_EQ(token.type, expected[i]);
+    if (i == 0) {
+      EXPECT_INT_EQ(token.pos, 0);
+      EXPECT_INT_EQ(token.len, 1);
+      EXPECT_STR_EQ(token.text, "@");
+    }
+    if (i == 3) {
+      EXPECT_INT_EQ(token.pos, 7);
+      EXPECT_INT_EQ(token.len, 2);
+      EXPECT_STR_EQ(token.text, "@(");
+    }
+  }
+  EXPECT_INT_EQ(tokenizer.status(), <ok>);
+}
+
+
 static void tokenizer_braced_literal_unquote_modes(void) {
   Tokenizer tokenizer = Tokenizer.new(
     "%(a ${call(1, %(b))} @{t()} \"x${call()}y\" c); %\"x${call()}y @{t}\"",
@@ -300,6 +327,7 @@ void tokenizer_suite(void) {
   $test.run(tokenizer_percent_after_closing_delimiter);
   $test.run(tokenizer_list_mode_bare_at_is_an_atom);
   $test.run(tokenizer_parenthesized_forms_stay_in_literal_modes);
+  $test.run(tokenizer_prefix_splices_keep_mode_and_positions);
   $test.run(tokenizer_braced_literal_unquote_modes);
   $test.run(tokenizer_typed_capture_parentheses);
   $test.run(tokenizer_list_reader_prefixes);

@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/macro-at-reject-meta.x:5:28: parse: expected ';'
+  macro Stmt $old() { $rows()... }
+                             ^^^
+

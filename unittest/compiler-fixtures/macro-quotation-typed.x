@@ -27,7 +27,7 @@ static void built(void) {
   show($!int{ !equal($lhs, other) });
   /* A type of several words takes parentheses; a sequence hole splices
      its items. */
-  show($!(unsigned long){ f($lhs, $items...) });
+  show($!(unsigned long){ f($lhs, @items) });
   /* So does a type spelled like a kind name. */
   show($!(Type){ $lhs });
   /* A Type local names the type and fills a type position; an int is a
@@ -38,7 +38,7 @@ static void built(void) {
   /* A binding is a reference to it. */
   show($!($type){ $binding });
   /* `${...}` holes compute the type and the code. */
-  show($!(${d.result}){ ${d.callee}($items...) });
+  show($!(${d.result}){ ${d.callee}(@items) });
 }
 
 /* In a `meta` function the typed code returns to the compiler, which

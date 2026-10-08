@@ -25,7 +25,7 @@ List x2c_param_make(List type, Var name);
 static List _scope_expand(List body, List destinations) {
   if (destinations.len() > 1)
     x2c_diagnostic_fail("$scope accepts zero or one destination", %());
-  List enter = destinations ? $!( Scope_push($destinations...) )
+  List enter = destinations ? $!( Scope_push(@destinations) )
                             : $!( Scope_retain() );
   List leave = destinations ? $!( Scope_pop() ) : $!( Scope_release() );
   return $!{ { $enter; { defer $leave; $body } } };
@@ -141,9 +141,9 @@ static List Foreach.with_cursor(Foreach &f, List spec) {
   List cursor_argument = by_reference ? cursor_expression
     : _address(cursor_expression);
   List condition =
-    $!( $function($object_expression, $cursor_argument, $addresses...) );
+    $!( $function($object_expression, $cursor_argument, @addresses) );
   List loop_body =
-    $!{ { ${_cursor_assignments(f.targets, values)}... ${f.body} } };
+    $!{ { @{_cursor_assignments(f.targets, values)} ${f.body} } };
   List initial = cursor_type == f.type ? object_expression : $!( 0 );
   List setup = %(
     ${_declare(f.type, f.object, f.collection)}
@@ -174,7 +174,7 @@ static List Foreach.with_iter(Foreach &f, List converter) {
   List assignments = f.targets.len() == 1
     ? %(${_assign(f.targets[0], item_expression)})
     : _pair_assignments(f.targets, item_expression, f.pair);
-  List loop_body = $!{ { $assignments... ${f.body} } };
+  List loop_body = $!{ { @assignments ${f.body} } };
   List setup = %(
     ${_declare(%("Iter"), f.iterator, initializer)}
     ${_declare(%("Var"), f.item, %())});
@@ -183,7 +183,7 @@ static List Foreach.with_iter(Foreach &f, List converter) {
 
 static List Foreach.loop(
   Foreach &f, List condition, List body, List setup) {
-  return $!{ { ${f.declaration} $setup... while ($condition) $body } };
+  return $!{ { ${f.declaration} @setup while ($condition) $body } };
 }
 
 /* The function that makes the loop's Iter: the owner's `enumerate` for a
@@ -456,7 +456,7 @@ static List _positional_new(
   }
   List value = x2c_ident("value");
   List declaration =
-    $!{ $representation $value = { ${arguments.list_free()}... }; };
+    $!{ $representation $value = { @{arguments.list_free()} }; };
   return _finish_new(
     owner, %($owner), parameters.list_free(), %($declaration), heap);
 }
@@ -508,8 +508,8 @@ static List _class_initializer(String owner, Var heap_value) {
     if (refusable || signature == %((func $parameters) void)) {
       List init = _ref(x2c_binding_spelling(method));
       List arguments = _init_arguments(parameters);
-      List call = heap || reference ? $!( $init(value, $arguments...) )
-                                    : $!( $init(&value, $arguments...) );
+      List call = heap || reference ? $!( $init(value, @arguments) )
+                                    : $!( $init(&value, @arguments) );
       return refusable ? $!{ if (!$call) { Scope_free(value); return 0; } }
                        : $!{ $call; };
     }
@@ -797,7 +797,7 @@ static List _binding_targets(List rows) {
   foreach (List row, rows)
     foreach (Var item, _binding_target_row(row)) arguments.push(item);
   return $!(
-    Map_update_n(Map_new(), ${rows.len()}, ${arguments.list_free()}...) );
+    Map_update_n(Map_new(), ${rows.len()}, @{arguments.list_free()}) );
 }
 
 static List _binding_target_row(List row) {

@@ -34,7 +34,7 @@ Applies `Var.postfix` semantics to a volatile destination in generated
 code. Volatile preserves accesses across exception transfer, without
 providing thread synchronization.
 
-Source: `lib/varops.x:585`
+Source: `lib/varops.x:582`
 
 #### x2c_var_update_volatile
 
@@ -44,7 +44,7 @@ Applies `Var.update` semantics to a volatile destination in generated code.
 Volatile preserves accesses across exception transfer, without providing
 thread synchronization.
 
-Source: `lib/varops.x:539`
+Source: `lib/varops.x:538`
 
 ### `Var`
 
@@ -59,7 +59,7 @@ Numeric promotion, failure, and result ownership follow `Var.binary`;
 `String` addition returns a canonical concatenation, and a protocol result
 keeps the ownership chosen by its callback.
 
-Source: `lib/varops.x:226`
+Source: `lib/varops.x:225`
 
 <a id="Var.binary"></a>
 #### Var.binary
@@ -93,7 +93,7 @@ Numeric integer zero divisors raise; floating division uses host infinity
 and NaN behavior. Other promotion, failure, and ownership follow
 `Var.binary`.
 
-Source: `lib/varops.x:255`
+Source: `lib/varops.x:254`
 
 <a id="Var.fallback_truth"></a>
 #### Var.fallback_truth
@@ -107,7 +107,7 @@ supported built-ins are true. Container-specific truth comes from dispatch.
 **Raises:** `<bad-enc>` for invalid `Var` bits, `<void-op>` for `void`, or
 `<bad-types>` when no truthiness rule exists.
 
-Source: `lib/varops.x:501`
+Source: `lib/varops.x:500`
 
 <a id="Var.matmul"></a>
 #### Var.matmul
@@ -118,7 +118,7 @@ Multiplies matrices through a registered `matmul` behavior.
 `@` has no numeric meaning, so numeric operands raise `<bad-op>`; a
 protocol result keeps the ownership chosen by its callback.
 
-Source: `lib/varops.x:247`
+Source: `lib/varops.x:246`
 
 <a id="Var.mod"></a>
 #### Var.mod
@@ -130,7 +130,7 @@ Numeric operands use the common promoted integer type and reject a zero
 divisor; floating operands are not accepted. Other failure and ownership
 follow `Var.binary`.
 
-Source: `lib/varops.x:263`
+Source: `lib/varops.x:262`
 
 <a id="Var.mul"></a>
 #### Var.mul
@@ -141,7 +141,7 @@ Multiplies dynamic values through numeric or registered `mul` behavior.
 Numeric promotion, failure, and result ownership follow `Var.binary`; a
 protocol result keeps the ownership chosen by its callback.
 
-Source: `lib/varops.x:240`
+Source: `lib/varops.x:239`
 
 <a id="Var.neg"></a>
 #### Var.neg
@@ -156,7 +156,7 @@ promotion and wrapping, so a narrow integer promotes before negation.
 for an object without `neg`, or any cause from protocol or numeric
 subtraction.
 
-Source: `lib/varops.x:292`
+Source: `lib/varops.x:291`
 
 <a id="Var.postfix"></a>
 #### Var.postfix
@@ -173,7 +173,7 @@ bits, `<void-op>` for `void`, `<bad-op>` for an operator other than
 `++` or `--`, or any cause from `Var.update`. These failures leave the
 stored value unchanged.
 
-Source: `lib/varops.x:579`
+Source: `lib/varops.x:576`
 
 <a id="Var.sub"></a>
 #### Var.sub
@@ -184,7 +184,7 @@ Subtracts dynamic values through numeric or registered `sub` behavior.
 Numeric promotion, failure, and result ownership follow `Var.binary`; a
 protocol result keeps the ownership chosen by its callback.
 
-Source: `lib/varops.x:233`
+Source: `lib/varops.x:232`
 
 <a id="Var.truth"></a>
 #### Var.truth
@@ -202,7 +202,7 @@ return false independently of object state. The call does not retain
 `<bad-types>` when no truthiness rule exists, plus any cause raised by a
 selected descriptor callback.
 
-Source: `lib/varops.x:489`
+Source: `lib/varops.x:488`
 
 <a id="Var.update"></a>
 #### Var.update
@@ -220,7 +220,7 @@ returns `void`, the function leaves the destination unchanged.
 `Var.binary` and `Var.convert`. These failures leave the stored value
 unchanged.
 
-Source: `lib/varops.x:532`
+Source: `lib/varops.x:531`
 
 ## Advanced and interop API
 

@@ -185,7 +185,6 @@ Var Var.binary(Var lhs, Symbol op, Var rhs) {
     case <*>: return lhs.mul(rhs);
     case </>: return lhs.div(rhs);
     case <%>: return lhs.mod(rhs);
-    case <@>: return lhs.matmul(rhs);
   }
   Var result = _fast_numeric(op, lhs, rhs);
   if (result.u64 != VAR_VOID_BITS) return result;
@@ -540,15 +539,13 @@ Var x2c_var_update_volatile(volatile Var &?lhs, Symbol op, Var rhs) {
   if (!lhs) raise %(bad-arg (operation "Var.update"));
   _valid_operands(lhs, rhs);
   if (lhs is void || rhs is void) raise %(void-op (op $op));
-  if (!_update_operator(op)) raise %(bad-op (op $op));
+  if (!_numeric_operator(op)) raise %(bad-op (op $op));
   Var result = lhs.binary(op, rhs);
   if (result is void) return void;
   Var stored = _same_tag_update(lhs, rhs) ? result : result.convert(lhs.tag());
   lhs = stored;
   return stored;
 }
-
-static int _update_operator(Symbol op) => op == <@> || _numeric_operator(op);
 
 /* Var.update skips conversion only when the fast binary path returns the
    operands' shared tag. Every other pair goes through Var.convert, which

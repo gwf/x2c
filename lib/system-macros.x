@@ -85,14 +85,14 @@ meta List _cases_split(List items, int labelled) {
 
 meta List _cases_switch(List condition, List body) {
   List selected =
-    $!{ switch ($condition) { ${_cases_split(body.cdr(), 0)}... } };
+    $!{ switch ($condition) { @{_cases_split(body.cdr(), 0)} } };
   return %($selected);
 }
 
 /* Gives every case run its own block and its own break. Deliberate
    fallthrough is written by nesting an ordinary switch. */
 macro Decorator $switch(Stmt $body, Expr $condition) {
-  $(_cases_switch $condition $body)...
+  @(_cases_switch $condition $body)
 }
 
 meta List _macros_location(void) =>

@@ -19,7 +19,7 @@ macro Decorator $named(Function $function) {
     "%s\n",
     $(x2c.literal.string (x2c.function.name $function))
   );
-  $(x2c.function.body $function)...
+  @(x2c.function.body $function)
 }
 
 macro Decorator $return_parameter(

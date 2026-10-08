@@ -1,5 +1,5 @@
-macro Stmt $fail(Expr $cause, Expr $op, Expr $fields...) {
-  raise %($cause (operation ${$op}) $fields...);
+macro Stmt $fail(Expr $cause, Expr $op, Expr @fields) {
+  raise %($cause (operation ${$op}) @fields);
 }
 macro Stmt $keyed(Expr $cause, Expr $key, Expr $value) {
   raise %($cause ($key ${$value}));

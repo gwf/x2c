@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/macro-at-reject-runtime-array.x:2:53: parse: expected atomic expression
+  int main(void) { List xs = %(1 2); Array result = %[@xs]; return 0; }
+                                                      ^
+  note: token: @ kind: @
+

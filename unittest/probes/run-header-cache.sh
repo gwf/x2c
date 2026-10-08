@@ -548,10 +548,10 @@ mkdir -p "$BUILD/keyword/src" "$BUILD/keyword/alias-first" \
   "$BUILD/keyword/main-first"
 cat >"$BUILD/keyword/src/private-keywords.x" <<'EOF'
 macro Decorator $cache.identity(Function $target) {
-  $(x2c.function.body $target)...
+  @(x2c.function.body $target)
 }
 macro Decorator $cache.outer(Function $target) {
-  $(x2c.function.body $target)...
+  @(x2c.function.body $target)
 }
 keyword identity $cache.identity;
 keyword outer $cache.outer;
@@ -746,12 +746,12 @@ $(write-file projection-effect-path
 macro Field $projection.field() { int $(projection-field); }
 macro Declaration $projection.inner(Expr $value) {
   int $(projection-name)(void) { return $(car (list $value)); }
-  $(quote (
+  @(quote (
     (default (function (int) (bind ("selected_answer") ((fnmod (params))))
       (block (return () (expr (int) (literal (int) "7"))))))
     (default (function (int) (bind ("default_answer") ((fnmod (params))))
       (block (return () (expr (int) (literal (int) "9"))))))
-  ))...
+  ))
 }
 macro Declaration $projection.outer(Expr $value) {
   $projection.inner($value);
@@ -776,7 +776,7 @@ macro Declaration $projection.local() {
 }
 $projection.local();
 macro Declaration $projection.late() {
-  $(quote ((declaration-recipe projection-late ())))...
+  @(quote ((declaration-recipe projection-late ())))
 }
 $projection.late();
 int selected_answer(void) { return 11; }
@@ -832,8 +832,8 @@ $(defun projection-data (data)
   `(return () ,(x2c.literal.int
     (if (equal? data '(declaration-void)) 17 19))))
 macro Declaration $projection.data() {
-  $(quote ((function (int) (bind ("data_answer") ((fnmod (params))))
-    (block (syntax-recipe projection-data ((declaration-void)))))))...
+  @(quote ((function (int) (bind ("data_answer") ((fnmod (params))))
+    (block (syntax-recipe projection-data ((declaration-void)))))))
 }
 $projection.data();
 static class Hidden { int value; };
@@ -868,12 +868,12 @@ $(def write-file
   (bind "lisp_write_file" '((func (("String") ("String"))) "Var")))
 $(write-file "effects" (string-append (read-file "effects") "x"))
 macro Declaration $projection.persist() {
-  $(begin
+  @(begin
     (write-file "effects" (string-append (read-file "effects") "p"))
     (quote (
       (default (function (int) (bind ("persisted_answer") ((fnmod (params))))
         (block (return () (expr (int) (literal (int) "13"))))))
-    )))...
+    )))
 }
 EOF2
 cat >"$declaration_root/src/provider.x" <<'EOF2'

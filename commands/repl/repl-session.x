@@ -418,7 +418,8 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
       return result;
     }
     for (Token token = c.tokenizer.tokens; token.type != <eof>; token++) {
-      if (token.type == <preproc> || token.type == <"$(">)
+      if (token.type == <preproc> || token.type == <"$("> ||
+          token.type == <"@(">)
         $refusal.input.unsupported();
       if (token.type == <const> || token.type == <volatile>)
         $refusal.qualifier.native();
@@ -429,7 +430,8 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
     }
     int native = _native_prototype(c);
     if (c.peek(0) == <import> || c.protocol_form_starts() ||
-        c.peek(0) == <"$("> || (c.meta_form_is_declaration() && !native) ||
+        c.peek(0) == <"$("> || c.peek(0) == <"@("> ||
+        (c.meta_form_is_declaration() && !native) ||
         c.macro_form_is_definition() || c.keyword_form_is_definition())
       $refusal.definition.unsupported();
     if (c.peek(0) == <union> || c.peek(0) == <enum> ||

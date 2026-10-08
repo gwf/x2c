@@ -941,14 +941,14 @@ static int _needs_errors(List item) {
 // initializers
 
 static macro Decorator $initializer_body(Function $function,
-    Stmt $body...) {
-  $body...
+    Stmt @body) {
+  @body
 }
 
 static macro Decorator $initialized_entry(
-  Function $function, Expr $guard, Expr $entry, Stmt $body...) {
+  Function $function, Expr $guard, Expr $entry, Stmt @body) {
   if (!$guard) $entry();
-  $body...
+  @body
 }
 
 /* The synthetic initializer runs `entry` before its guard. Without a type

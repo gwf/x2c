@@ -19,14 +19,14 @@ meta static List build_function(String name, int n) {
   List node = $make_function(name, n * 2);
   return %($node);
 }
-macro Unit $make_answer() { $build_function("answer", 21)... }
+macro Unit $make_answer() { @build_function("answer", 21) }
 $make_answer();
 
 meta static List template_parts(List value) { return value; }
 macro Unit $function_template(
   Type $spec, Name $name, Expr $params, Expr $items) {
-  $spec $name($template_parts($params)...) {
-    $template_parts($items)...
+  $spec $name(@template_parts($params)) {
+    @template_parts($items)
   }
 }
 meta static List template_build(void) {
@@ -36,7 +36,7 @@ meta static List template_build(void) {
   List node = $function_template(spec, "echo", params, items);
   return %($node);
 }
-macro Unit $build_echo() { $template_build()... }
+macro Unit $build_echo() { @template_build() }
 $build_echo();
 
 int main(int argc, char **argv) {

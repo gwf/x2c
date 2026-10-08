@@ -92,7 +92,7 @@ meta List _scalar_access_units(Macro access) {
 }
 
 macro Unit $native.scalar.access.all() {
-  $_scalar_access_units($native.scalar.access)...
+  @_scalar_access_units($native.scalar.access)
 }
 
 $(defun native.scalar.access-entry (entry)
@@ -105,6 +105,6 @@ $(defun native.scalar.access-entry (entry)
    depend on hash layout: each row's type to its access record,
    which `$native.scalar.access.all` defines first. */
 macro Entry $native.scalar.access.entries() {
-  $(map native.scalar.access-entry
-        (List.sort (Map.list (native_scalar_types))))...
+  @(map native.scalar.access-entry
+        (List.sort (Map.list (native_scalar_types))))
 }

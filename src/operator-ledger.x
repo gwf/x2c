@@ -30,7 +30,6 @@ meta static List _operator_rows(void) => %(
   (<*>       10 <*=>     <mul>     0)
   (</>       10 </=>     <div>     0)
   (<%>       10 <%=>     <mod>     0)
-  (<@>       10 <@=>     <matmul>  0)
 );
 
 /* Select key and value columns; -1 includes both direct and derived rows. */
@@ -46,17 +45,16 @@ meta static List _operator_cases(int key, int value, int derived) {
   return cases.list_free();
 }
 
-static macro Stmt $operator.precedence() { $_operator_cases(0, 1, -1)... }
-static macro Stmt $operator.binary() { $_operator_cases(2, 0, -1)... }
-static macro Stmt $operator.compound() { $_operator_cases(0, 2, -1)... }
-static macro Stmt $operator.direct() { $_operator_cases(0, 3, 0)... }
-static macro Stmt $operator.derived() { $_operator_cases(0, 3, 1)... }
+static macro Stmt $operator.precedence() { @_operator_cases(0, 1, -1) }
+static macro Stmt $operator.binary() { @_operator_cases(2, 0, -1) }
+static macro Stmt $operator.compound() { @_operator_cases(0, 2, -1) }
+static macro Stmt $operator.direct() { @_operator_cases(0, 3, 0) }
+static macro Stmt $operator.derived() { @_operator_cases(0, 3, 1) }
 
 /** Returns a binary operator's precedence level, or zero for any other
     `Symbol`. Levels run from 1 for `||` to 10 for the multiplicative
     operators, so a larger level binds more tightly. `===` and `!==` share
-    the equality level, `in` the relational level, and `@` the
-    multiplicative level.
+    the equality level, and `in` the relational level.
 */
 int Symbol.binary_precedence(Symbol op) {
   switch (op) { $operator.precedence(); }

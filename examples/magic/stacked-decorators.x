@@ -6,12 +6,12 @@ macro Decorator $trace(Function $function, Expr $label) {
     $(x2c.literal.string (x2c.function.name $function))
   );
   defer printf("[%s] leave\n", $label);
-  $(x2c.function.body $function)...
+  @(x2c.function.body $function)
 }
 
 macro Decorator $require_parameter(Function $function, Name $parameter) {
   if (!$(x2c.function.parameter $function $parameter)) return -1;
-  $(x2c.function.body $function)...
+  @(x2c.function.body $function)
 }
 
 macro Decorator $increment(Expr $target) => $target + 1;

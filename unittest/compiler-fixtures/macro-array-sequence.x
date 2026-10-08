@@ -1,7 +1,7 @@
 #include "x2c.x"
 
-macro Expression $values(Expr $items...) =>
-  %[${10}, $items..., ${40}];
+macro Expression $values(Expr @items) =>
+  %[${10}, @items, ${40}];
 
 macro Entry $named_value(Expr $value) {
   result: $value

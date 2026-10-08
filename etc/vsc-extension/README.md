@@ -11,6 +11,13 @@ decorators; `with` blocks; List destructuring; imports; delegate fields;
 `Self` method types; embedded and standalone compile-time Lisp; and the
 C-compatible syntax used by the language.
 
+Macro signatures use `$value` for one syntax value and `@items` for a
+sequence. Code templates highlight `@items`, `@producer(args)`, `@(form)`,
+and quotation holes such as `@{expression}`. Singular `$` forms and `$!`
+source quotations keep their existing scopes. Quoted Lists retain runtime
+`@items` and `@{expression}` splices; Lisp retains `,@` unquote-splicing.
+Native C variadic `...` remains distinct from macro syntax.
+
 With a current x2c compiler available, the extension also provides compiler
 diagnostics, definition navigation, and type hover. Syntax highlighting works
 without the compiler. The extension does not install tools or collect
@@ -168,7 +175,8 @@ The most useful scopes are:
 - `meta.destructuring.*.x2c` and
   `variable.other.readwrite.destructuring.x2c` for List destructuring;
 - `keyword.declaration.macro.x2c` and `entity.name.function.macro.x2c` for
-  macro definitions and applications; and
+  macro definitions and applications;
+- `punctuation.definition.macro.splice.x2c` for sequence prefixes in code; and
 - `meta.embedded.lisp.x2c` and `*.lisp.x2c` for compile-time Lisp.
 
 Standard C strings retain the standard `string.quoted.double` and

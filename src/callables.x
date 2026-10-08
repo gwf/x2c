@@ -261,7 +261,7 @@ static void CaptureBuild.declare(
 */
 List Compiler.capture_environment(Compiler c, List name, List fields) {
   return c.bind_syntax(
-    $!Unit{ static typedef struct $name { $fields... } $name; },
+    $!Unit{ static typedef struct $name { @fields } $name; },
     AST_UNIT, NULL);
 }
 
@@ -404,7 +404,7 @@ static List CaptureBuild.direct(CaptureBuild &b) {
 
 static List CaptureBuild._storage(CaptureBuild &b, List context, List values) {
   return b.c.rebuild_statement(
-    $!{ ${b.value_type} $context = { $values... }; }).cadr();
+    $!{ ${b.value_type} $context = { @values }; }).cadr();
 }
 
 static List CaptureBuild._construct(CaptureBuild &b, List context) {
@@ -418,8 +418,8 @@ static List CaptureBuild._construct(CaptureBuild &b, List context) {
 }
 
 /* A value computed after its setup statements. */
-static macro Expression $statement_value(Expr $value, Stmt $setup...) =>
-  ({ $setup... $value; });
+static macro Expression $statement_value(Expr $value, Stmt @setup) =>
+  ({ @setup $value; });
 
 static List CaptureBuild._result(CaptureBuild &b, List storage, List value) {
   List setup = b.locals.list_free();
@@ -835,7 +835,7 @@ static List Compiler._func_bridge_call(
     %("Func"), _func_bound(function_type, bridge), arguments);
   /* A call through a bridge function the unit declares where it calls. */
   return $!Func{ ({
-    extern Func $bridge(${parameters.cdr()}...);
+    extern Func $bridge(@{parameters.cdr()});
     $call;
   }) };
 }

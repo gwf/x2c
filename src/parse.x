@@ -1038,7 +1038,8 @@ static int Compiler._hole_starts(Compiler c) {
   Symbol kind = hole.assoc(<kind>);
   if (kind) return kind == <type>;
   Symbol next = c.after_hole().type;
-  return next == <ident> || next == <$> || next == <"$(">;
+  return next == <ident> || next == <$> || next == <@> ||
+         next == <"$("> || next == <"@(">;
 }
 
 /* An identifier that names no object starts a declaration when the token
@@ -1903,7 +1904,7 @@ static List Compiler._declarator_list(
 static List Compiler._declarator_init(
   Compiler c, List type, List context) {
   // A Lisp-produced declarator name still needs ordinary binding.
-  List slot = c.peek_macro_hole()
+  List slot = c.peek_macro_hole() || c.peek(0) == <@> || c.peek(0) == <"@(">
     ? c.try_parse_macro_slot(<decl-row>) : NULL;
   if (slot) {
     if (c.test(<=>)) return %(op = $slot ${c.parse_assignment()});
@@ -3300,19 +3301,21 @@ static List Compiler._bind_declaration(
   List field_context = context == AST_FIELD ? c.aggregate_type : NULL;
   List declaration_context = tag == <typedef> ? %(typedef) : field_context;
   Array output = [];
-  int preserved_self = 0;
-  foreach (List declarator, declarators) {
-    declarator = c._finish_fnmods(declarator);
-    if (context != AST_FIELD && _has_bitfield(declarator))
-      return c._construction_error();
-    List installed = c._install_declarator(
-      base, declaration_context, declarator, NULL, preserved_self);
-    output.push(installed);
-  }
+  int preserved_self = 0, initializes = 0;
+  foreach (Var value, declarators)
+    foreach (List declarator, c.evaluate_macro_rows(value)) {
+      declarator = c._finish_fnmods(declarator);
+      if (context != AST_FIELD && _has_bitfield(declarator))
+        return c._construction_error();
+      match (declarator) case %(op = * *): initializes = 1;
+      List installed = c._install_declarator(
+        base, declaration_context, declarator, NULL, preserved_self);
+      output.push(installed);
+    }
   List decl = c._finish_declaration(
     tag, base, output.list_free(), preserved_self);
   if (context == AST_UNIT) c.record_declaration_visibility(decl);
-  if (c.shallow && context == AST_UNIT && _initializes(declarators))
+  if (c.shallow && context == AST_UNIT && initializes)
     return %(declaration-initialized $decl ${c.macro_stack});
   if (context == AST_BLOCK && tag == <declare>)
     return c.finish_managed_declaration(decl, c.token);
@@ -3325,12 +3328,6 @@ static int _declaration_legal(Var tag, AstPos context) {
   if (tag == <typedef>) return context == AST_UNIT || context == AST_BLOCK;
   if (tag == <decl>) return context == AST_BLOCK;
   return context == AST_UNIT || context == AST_BLOCK || context == AST_FIELD;
-}
-
-static int _initializes(List declarators) {
-  foreach (List declarator, declarators)
-    match (declarator) case %(op = * *): return 1;
-  return 0;
 }
 
 static int _has_bitfield(List declarator) {
@@ -3460,19 +3457,20 @@ static List Compiler._bind_catchcases(Compiler c, Var arms, List handler) {
      its identity rather than reading a template local's source spelling. */
   c.set_fact(%(type $handle), %("ErrorHandler"));
   Array bound = [];
-  foreach (List arm, arms.list()) {
-    List pattern = arm.car(), body = arm.cadr();
-    if (pattern) pattern = c._resolve(pattern);
-    List bindings = c.begin_catch_arm(pattern, c.token);
-    {
-      defer c.sym.pop_scope();
-      List statement = c._bind_statement(body);
-      if (!_declares_binders(body, bindings))
-        statement = %(block
-          @{c.catch_binder_declarations(bindings, handle)} $statement);
-      bound.push(%($pattern $statement));
+  foreach (Var value, arms.list())
+    foreach (List arm, c.evaluate_macro_rows(value)) {
+      List pattern = arm.car(), body = arm.cadr();
+      if (pattern) pattern = c._resolve(pattern);
+      List bindings = c.begin_catch_arm(pattern, c.token);
+      {
+        defer c.sym.pop_scope();
+        List statement = c._bind_statement(body);
+        if (!_declares_binders(body, bindings))
+          statement = %(block
+            @{c.catch_binder_declarations(bindings, handle)} $statement);
+        bound.push(%($pattern $statement));
+      }
     }
-  }
   return %(catchcases ${bound.list_free()} $handle);
 }
 
@@ -3517,21 +3515,22 @@ static List Compiler._bind_try(
 /* Binds each `match` arm's captures in a scope of its own. */
 static List Compiler._bind_match(Compiler c, Var subject, List cases) {
   Array bound = [];
-  foreach (List row, cases) {
-    if (row.car() == <preproc>) {
-      bound.push(row);
-      continue;
+  foreach (Var value, cases)
+    foreach (List row, c.evaluate_macro_rows(value)) {
+      if (row.car() == <preproc>) {
+        bound.push(row);
+        continue;
+      }
+      List pattern = row.car();
+      int binds = pattern !== %(*);
+      if (binds) pattern = c._resolve(pattern);
+      c.begin_match_arm(pattern, c.token, binds);
+      {
+        defer c.sym.pop_scope();
+        List body = c._bind_arm_body(row.cadr());
+        bound.push(%($pattern $body));
+      }
     }
-    List pattern = row.car();
-    int binds = pattern !== %(*);
-    if (binds) pattern = c._resolve(pattern);
-    c.begin_match_arm(pattern, c.token, binds);
-    {
-      defer c.sym.pop_scope();
-      List body = c._bind_arm_body(row.cadr());
-      bound.push(%($pattern $body));
-    }
-  }
   return %(match ${c._resolve(subject)} ${bound.list_free()});
 }
 

@@ -150,13 +150,6 @@ macro Stmt $report.type.operand_untyped(Expr $c, Expr $origin) =>
     $origin,
     %("a preprocessor macro has no type here: cast it, or bind its value to a local"));
 
-macro Stmt $report.type.matmul_missing(
-  Expr $c, Expr $lhs_type, Expr $rhs_type, Expr $origin) =>
-  $c.report_error(
-    <type>, "operator '@' requires an implemented matmul member",
-    $origin,
-    %("left type: ${$lhs_type.repr()} right type: ${$rhs_type.repr()}"));
-
 macro Stmt $report.type.is_var(Expr $c, Expr $type, Expr $origin) =>
   $c.report_error(
     <type>, "operator 'is' requires Var on the left",

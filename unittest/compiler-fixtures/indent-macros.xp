@@ -23,3 +23,10 @@ macro Decorator $indent.fallback(Stmt $target, Expr $fallback):
   do:
     $target
     return $fallback
+
+macro Stmt $indent.sequence(Stmt @rows):
+  @rows
+
+macro Stmt $indent.generated(Stmt $row):
+  @indent.sequence($row)
+  @(list $row)

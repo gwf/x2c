@@ -26,7 +26,7 @@ for (; shift > 1e-15 && round < 100; round++) {
   Scope.retain();
   {
     defer Scope.release();
-    BlisObject next = links @ rank;
+    BlisObject next = links.matmul(rank);
     next = next.scale(1.0 / next.dotv(ones));
     shift = (next - rank).normfv();
     rank.copy_from(next);
@@ -37,7 +37,7 @@ printf("converged after %d rounds, shift %.1e\n",
 ```
 
 Multiply a link matrix by a rank vector, normalize the scores, and
-repeat until they converge. `@` multiplies the matrix and vector;
+repeat until they converge. `matmul` multiplies the matrix and vector;
 ordinary operators handle the remaining arithmetic. Each round copies
 the new scores into the retained rank vector and releases its temporary
 values.

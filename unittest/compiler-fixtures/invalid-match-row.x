@@ -1,7 +1,7 @@
 #include "x2c.x"
 
-macro Stmt $pick(Expr $subject, MatchRow $rows...) {
-  match ($subject) { $rows... }
+macro Stmt $pick(Expr $subject, MatchRow @rows) {
+  match ($subject) { @rows }
 }
 
 int main(void) {

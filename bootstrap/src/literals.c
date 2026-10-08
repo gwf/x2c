@@ -1199,7 +1199,10 @@ List Compiler_parse_array_literal(Compiler c){
 }
 
 static List Compiler__parse_array_element(Compiler c){
-  List slot = Compiler_try_parse_macro_slot(c, 107888847784);  return List_truth(slot) ? slot : Compiler__parse_element(c);
+  List slot = Compiler_try_parse_macro_slot(c, 107888847784);  if(List_truth(slot)) return slot;  if(Compiler_peek(c, 0) == 9463 && c -> token -> len == 2 &&(Compiler_peek(c, 1) == 129 || Compiler_peek(c, 1) == 16465)){
+    Compiler_next(c);  slot = Compiler_try_parse_macro_slot(c, 107888847784);  Compiler_expect(c, 251);  return slot;
+  }
+  return Compiler__parse_element(c);
 }
 
 static List Compiler__parse_array_elements(Compiler c){
@@ -1236,7 +1239,7 @@ static void _push_entry(Array entries, Ast entry){
 
 List Compiler_try_parse_macro_target_at(Compiler, AstPos);
 static List Compiler__parse_quoted_entry(Compiler c){
-  Token origin = c -> token;  if(Compiler_peek(c, 0) != 9463 || c -> token -> len != 2) return Compiler__entry_value(c, Compiler__parse_element(c), origin);  Compiler_next(c);  List entry = Compiler_try_parse_macro_slot(c, 28692473357490);  if(! List_truth(entry)) entry = Compiler_try_parse_macro_target_at(c, AST_MAP_ENTRY);  if(List_truth(entry)){
+  Token origin = c -> token;  List slot = Compiler_try_parse_macro_slot(c, 28692473357490);  if(List_truth(slot)) return slot;  if(Compiler_peek(c, 0) != 9463 || c -> token -> len != 2) return Compiler__entry_value(c, Compiler__parse_element(c), origin);  Compiler_next(c);  List entry = Compiler_try_parse_macro_slot(c, 28692473357490);  if(! List_truth(entry)) entry = Compiler_try_parse_macro_target_at(c, AST_MAP_ENTRY);  if(List_truth(entry)){
     Compiler_expect(c, 251);  return entry;
   }
   List key = Compiler_parse_expression(c);  Compiler_expect(c, 251);  return Compiler__entry_value(c, key, origin);

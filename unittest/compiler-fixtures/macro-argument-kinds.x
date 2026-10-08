@@ -45,8 +45,8 @@ macro Unit $unit_arg(Unit $item) {
   $item
 }
 
-macro Unit $unit_sequence(Unit $items...) {
-  $items...
+macro Unit $unit_sequence(Unit @items) {
+  @items
 }
 
 $type_arg(unsigned long);

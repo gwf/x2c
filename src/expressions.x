@@ -760,7 +760,8 @@ static int Compiler._statement_expression_follows(Compiler c) {
     if (type == <;>) return 1;
     if (type == <eof> || type == <"}">) return hole && !comma;
     if (type == <,>) comma = 1;
-    if (type == <$> && c.macro_holes) hole = 1;
+    if (c.macro_holes && (type == <$> || type == <@> || type == <"@(">))
+      hole = 1;
   }
 }
 
@@ -830,8 +831,9 @@ static List Compiler._parse_composite_elements(Compiler c) {
   Array elements = [];
   while (c.peek(0) != <"}">) {
     List hole = c.peek_macro_hole();
-    List element = hole && hole.assoc(<sequence>).int()
-                 ? c.try_parse_macro_slot(<argument>) : NULL;
+    int sequence = c.peek(0) == <@> || c.peek(0) == <"@("> ||
+                   (hole && hole.assoc(<sequence>).int());
+    List element = sequence ? c.try_parse_macro_slot(<argument>) : NULL;
     if (!element)
       element =
         c._test_dot_init() ||
@@ -2160,10 +2162,10 @@ List x2c_func_call_arguments(List function, List storage, List arguments) {
    arity and dispatches; the selected adapter checks carrier, type and
    conversion. */
 static macro Expression $func_call(Expr $callee, Expr $count,
-    Expr $arguments...) => ({
+    Expr @arguments) => ({
   Func function = $callee;
   FuncArg storage[$count];
-  $x2c_func_call_arguments(function, storage, $arguments)...
+  @x2c_func_call_arguments(function, storage, $arguments)
   Func_apply(function, $count, storage);
 });
 
@@ -2435,7 +2437,6 @@ static List Compiler._binary_expression(
     c._check_untyped_operand(
       operator, lhs_type ? lhs_type : rhs_type,
       lhs_type ? rhs : lhs, origin);
-  c._check_matmul(operator, lhs_type, rhs_type, origin);
   return c._native_binary_expression(operator, lhs, rhs, origin);
 }
 
@@ -2494,14 +2495,6 @@ static void Compiler._check_untyped_operand(
       c.resolve_protocol_member(participant, member) &&
       other.match(%(expr ? ${$source_identifier_content(%(?))})))
     $report.type.operand_untyped(c, origin);
-}
-
-static void Compiler._check_matmul(
-  Compiler c, Symbol operator, Type lhs_type, Type rhs_type,
-  Token origin) {
-  if (operator == <@> && !c.sym.is_var_type(lhs_type) &&
-      !c.sym.is_var_type(rhs_type))
-    $report.type.matmul_missing(c, lhs_type, rhs_type, origin);
 }
 
 /* Operands have been resolved in the caller's current semantic scope. */
@@ -2941,8 +2934,9 @@ static List Resolve._array_value(Resolve &r) {
   Macro array_value = $array_value;
   match (r.input) case array_value(*elements): {
     Array resolved = [];
-    foreach (List element, elements)
-      resolved.push(r.c.resolve_expression(element, r.origin));
+    foreach (Var element, elements)
+      foreach (List row, r.c.evaluate_macro_rows(element))
+        resolved.push(r.c.resolve_expression(row, r.origin));
     return r.c.rebuild_expression(
       r.type, array_value(resolved.list_free()));
   }
@@ -2997,8 +2991,9 @@ static List Resolve._initval(Resolve &r, List content) {
 
 static List Resolve._composite(Resolve &r, List elements) {
   Array values = [];
-  foreach (List element, elements)
-    values.push(r.c._resolve_initializer(element, r.origin));
+  foreach (Var element, elements)
+    foreach (List row, r.c.evaluate_macro_rows(element))
+      values.push(r.c._resolve_initializer(row, r.origin));
   return %(expr ${r.type} ${source_composite_content(
     values.list_free())});
 }

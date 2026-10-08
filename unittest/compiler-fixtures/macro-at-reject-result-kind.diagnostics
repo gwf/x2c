@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/macro-at-reject-result-kind.x:5:21: macro: macro 'fields' has result kind Field and cannot be invoked at block scope
+  macro Stmt $old() { @fields() }
+                      ^
+

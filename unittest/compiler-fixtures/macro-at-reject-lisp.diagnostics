@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/macro-at-reject-lisp.x:4:28: parse: expected atomic expression
+  macro Stmt $old() { $(list)... }
+                             ^^^
+  note: token: ... kind: ...
+

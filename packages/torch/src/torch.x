@@ -655,7 +655,7 @@ void Tensor.discard(Tensor a) { _tensor_drop(a); }
    names Python's state_dict() uses.
 */
 
-/** A fully connected layer with a bias, `y = x @ w.t() + b`. */
+/** A fully connected layer with a bias, `y = x.matmul(w.t()) + b`. */
 Module Module.linear(long in_features, long out_features) =>
   _wrap_module(xt_linear_new(in_features, out_features, 1), "linear");
 
@@ -1446,7 +1446,7 @@ static Var _lisp_mul(Var a, Var b) {
 $lisp.binding(torch_lisp, "torch-matmul")
 static Var _lisp_matmul(Var a, Var b) {
   Tensor left = _lisp_tensor_arg(a), right = _lisp_tensor_arg(b);
-  return left @ right;
+  return left.matmul(right);
 }
 
 $lisp.binding(torch_lisp, "torch-relu")

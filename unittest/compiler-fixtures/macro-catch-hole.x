@@ -4,8 +4,8 @@
 /* A Catch sequence hole writes a try's catch arms, so one macro recognizes
    a try with catches: its body, its arms and its finalizer. */
 macro Stmt $caught(Stmt $body, Stmt $finalizer,
-    Catch $arms...) {
-  try $body catch $arms... finally $finalizer
+    Catch @arms) {
+  try $body catch @arms finally $finalizer
 }
 macro Stmt $tried(Stmt $body, Stmt $finalizer) {
   try $body finally $finalizer

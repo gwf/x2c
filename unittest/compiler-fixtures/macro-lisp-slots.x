@@ -11,7 +11,7 @@ macro Unit $computed(Expr $value, Name $public) {
 }
 
 macro Unit $through_sequence(Unit $target) {
-  $(list $target)...
+  @(list $target)
 }
 
 $through_sequence(int retained = 42;);

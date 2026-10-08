@@ -85,10 +85,11 @@ static List Compiler._parse_params(Compiler c) =>
   c._params_look_typed() ? c._parse_typed_params() : c._parse_bare_params();
 
 /* Typed parameters begin with a type: a type keyword, a typedef name, or
-   a template's `$` hole. */
+   a template's `$` type hole or `@` parameter sequence. */
 static int Compiler._params_look_typed(Compiler c) {
   Symbol head = c.peek(0);
-  if (head == <$> && c.macro_holes) return 1;
+  if (c.macro_holes && (head == <$> || head == <@> || head == <"@(">))
+    return 1;
   if (head.is_builtin_type() || head.is_type_qualifier() ||
       head == <struct> || head == <union> || head == <enum> || head == <void>)
     return 1;

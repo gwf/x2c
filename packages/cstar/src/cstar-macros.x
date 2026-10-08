@@ -29,7 +29,7 @@ $(defun cstar._where ()
 
 // A captured string-literal argument arrives as typed syntax. Read the
 // literal spelling out of the AST and drop the surrounding quotes; the
-// elements of a `...` sequence hole are not accepted by x2c.source.text.
+// elements of an `@` sequence hole are not accepted by x2c.source.text.
 $(defun cstar._unquote (spelling)
    (if (and (> (string-length spelling) 1)
             (equal? (substring spelling 0 1) "\""))
@@ -90,7 +90,7 @@ macro Decorator $cstar.verify(
   Expr $pre,
   Expr $post
 ) {
-  $(cstar._record-function $function "" $pre $post)...
+  @(cstar._record-function $function "" $pre $post)
 }
 
 /** Verifies the decorated function with logical ghost parameters, written as
@@ -101,7 +101,7 @@ macro Decorator $cstar.verify_with(
   Expr $pre,
   Expr $post
 ) {
-  $(cstar._record-function $function (cstar._text $ghosts) $pre $post)...
+  @(cstar._record-function $function (cstar._text $ghosts) $pre $post)
 }
 
 /** Records an intermediate assertion at this program point. */
@@ -111,7 +111,7 @@ macro Stmt $cstar.assert(Expr $text) {
 
 /** Runs one of the session's own proof steps, such as the array-fill steps
     the package ships, with logical term arguments. */
-macro Stmt $cstar.proof(Name $step, Expr $arguments...) {
+macro Stmt $cstar.proof(Name $step, Expr @arguments) {
   cstar_marker($(cstar._record-proof 'proof $step $arguments));
 }
 
@@ -119,7 +119,7 @@ macro Stmt $cstar.proof(Name $step, Expr $arguments...) {
     receives the session and then the logical term arguments. The helper is
     resolved when the generated proof program is compiled; the verified unit
     needs no declaration of it. */
-macro Stmt $cstar.helper(Name $helper, Expr $arguments...) {
+macro Stmt $cstar.helper(Name $helper, Expr @arguments) {
   cstar_marker($(cstar._record-proof 'helper $helper $arguments));
 }
 

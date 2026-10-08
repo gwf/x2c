@@ -2,9 +2,9 @@
 #include "meta.x"
 
 macro Expression $captured(Expr $body, Captures $captures,
-    Param $params...) => %!($params...) using $captures => $body;
-macro Expression $plain(Expr $body, Param $params...) =>
-  %!($params...) => $body;
+    Param @params) => %!(@params) using $captures => $body;
+macro Expression $plain(Expr $body, Param @params) =>
+  %!(@params) => $body;
 
 meta static List rebuild(List code) {
   Macro captured = $captured, plain = $plain;

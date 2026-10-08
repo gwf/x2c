@@ -135,16 +135,16 @@ Every hole has a syntax kind:
 | `Enumerator` | one enum member |
 | `Unit` | one translation-unit item |
 
-A trailing `...` makes the final hole a sequence. The replacement uses the
-same ellipsis to splice the captured sequence:
+An `@` prefix makes the final hole a sequence. The replacement uses the
+same prefix to splice the captured sequence:
 
 ```x2c
 ~
 macro Expression $project.call(
   Expr $callee,
-  Expr $arguments...
+  Expr @arguments
 ) =>
-  $callee($arguments...);
+  $callee(@arguments);
 ~
 ~static int add(int left, int right) {
 ~  return left + right;
@@ -160,8 +160,8 @@ field keys. A sequence hole between field pairs supplies alternating key and
 value expressions, in source order:
 
 ```x2c
-macro Stmt $fail(Expr $cause, Expr $op, Expr $fields...) {
-  raise %($cause (operation ${$op}) $fields...);
+macro Stmt $fail(Expr $cause, Expr $op, Expr @fields) {
+  raise %($cause (operation ${$op}) @fields);
 }
 ```
 
@@ -223,7 +223,7 @@ The declared result kind determines where an invocation may appear:
 | `Decorator` | as a prefix immediately before its target |
 
 An `Entry` macro can produce zero, one, or several comma-separated `Map` rows.
-`Entry` holes capture complete rows, and a trailing `...` captures or inserts
+`Entry` holes capture complete rows, and `@rows` captures or inserts
 a row sequence. A `Map` literal reads quoted data, so `${...}` crosses into
 x2c before invoking either a `$handler(...)` or a keyword alias:
 
@@ -323,7 +323,7 @@ needs a private `Name` hole before an ordinary declaration can introduce it:
 ```x2c,ignore
 macro Unit $project.generated() {
   using $private;
-  $project_generate($private)...
+  @project_generate($private)
 }
 ```
 
@@ -383,7 +383,7 @@ macro Decorator $project.trace(
     $project_name($function)
   );
   defer printf("[%s] leave\n", $label);
-  $project_body($function)...
+  @project_body($function)
 }
 
 $project.trace("request")
@@ -397,7 +397,7 @@ int answer(int value) {
 ```
 
 The helpers receive the complete captured function. One returns its name;
-the other returns its body as the sequence inserted by `...`.
+the other returns its body as the sequence inserted by `@`.
 
 There is no semicolon after the decorator invocation. Decorators stack
 closest-first, and each expansion must leave exactly one target for the next.
@@ -585,7 +585,7 @@ meta static List project_fields(List receiver, TypeInfo type) {
     reads.push($!( $receiver.$member ));
   }
   List items = reads.list_free();
-  return $!( { $items... } );
+  return $!( { @items } );
 }
 macro Expression $project.fields(Expr $value) =>
   $project_fields($value, $value);

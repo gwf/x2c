@@ -42,12 +42,12 @@ meta static List sum_function(String name, int count) {
     total = $!( $total + $x );
   }
   List declared = params.list_free();
-  List function = $!Unit{ double $name($declared...) { return $total; } };
+  List function = $!Unit{ double $name(@declared) { return $total; } };
   return %($function);
 }
 
 macro Unit $define_sum(Literal $name, Literal $count) {
-  $sum_function($name, $count)...
+  @sum_function($name, $count)
 }
 
 $define_sum("sum3", 3);

@@ -8,7 +8,7 @@ macro Field $generated_field() {
 }
 
 macro Unit $check_record(Type $type) {
-  $(let ((actual (x2c.type.fields $type)))
+  @(let ((actual (x2c.type.fields $type)))
      (if (equal? actual
            '(("first" (int))
              ("second" (int))
@@ -17,23 +17,23 @@ macro Unit $check_record(Type $type) {
              ("flags" ((bitfield ("3")) unsigned))
              ("generated" (long))))
          nil
-         (x2c.diagnostic.fail "record fields differ" (list (repr actual)))))...
+         (x2c.diagnostic.fail "record fields differ" (list (repr actual)))))
 }
 
 macro Unit $check_union(Type $type) {
-  $(let ((actual (x2c.type.fields $type)))
+  @(let ((actual (x2c.type.fields $type)))
      (if (equal? actual
            '(("integer" (int)) ("floating" (float))))
          nil
-         (x2c.diagnostic.fail "union fields differ" (list (repr actual)))))...
+         (x2c.diagnostic.fail "union fields differ" (list (repr actual)))))
 }
 
 macro Unit $check_included(Type $type) {
-  $(let ((actual (x2c.type.fields $type)))
+  @(let ((actual (x2c.type.fields $type)))
      (if (equal? actual '(("included" (short))))
          nil
          (x2c.diagnostic.fail "included fields differ"
-                              (list (repr actual)))))...
+                              (list (repr actual)))))
 }
 
 macro Expression $first(Expr $receiver) =>

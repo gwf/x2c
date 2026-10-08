@@ -17,7 +17,7 @@ int main(void) {
          mode that Torch.no_grad turned off, even if a raise crosses the
          release. */
       $scope() {
-        Tensor error = Tensor.mse_loss(x @ w + b, y);
+        Tensor error = Tensor.mse_loss(x.matmul(w) + b, y);
         error.backward();
         loss = error.item().double();
         Torch.no_grad();

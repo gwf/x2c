@@ -21,8 +21,8 @@ $(defun fixture.private-before-sibling ()
       (op = (bind ,(x2c.ident "private_before_lisp_sibling") ())
             (expr (int) (literal (int) "13"))))))
 
-macro Expression $call(Expr $callee, Expr $arguments...) =>
-  $callee($arguments...);
+macro Expression $call(Expr $callee, Expr @arguments) =>
+  $callee(@arguments);
 
 macro Expression $type_size(Type $value) => sizeof($value);
 macro Expression $outer(Expr $value) => $type_size(int) + $value;
@@ -58,15 +58,15 @@ macro Unit $nested_decorator_declarations() {
 }
 
 macro Decorator $preserve_lisp(Unit $target) {
-  $(list $target)...
+  @(list $target)
 }
 
 macro Unit $preserve_nested_lisp_target(Unit $target) {
-  $(list $target)...
+  @(list $target)
 }
 
-macro Unit $preserve_nested_lisp_targets(Unit $targets...) {
-  $(append $targets (list))...
+macro Unit $preserve_nested_lisp_targets(Unit @targets) {
+  @(append $targets (list))
 }
 
 macro Decorator $preserve_nested_lisp(Unit $target) {
@@ -83,19 +83,19 @@ macro Decorator $private_name_sibling(Unit $target) {
 }
 
 macro Decorator $private_lisp_sibling(Unit $target) {
-  $(list $target
+  @(list $target
     `(declare (static int)
       (bindings
         (op = (bind ,(x2c.ident "private_lisp_sibling") ())
-              (expr (int) (literal (int) "11"))))))...
+              (expr (int) (literal (int) "11"))))))
 }
 
 macro Decorator $private_generated_lisp_sibling(Unit $target) {
-  $(list $target (fixture.private-sibling))...
+  @(list $target (fixture.private-sibling))
 }
 
 macro Decorator $private_before_lisp_sibling(Unit $target) {
-  $(list (fixture.private-before-sibling) $target)...
+  @(list (fixture.private-before-sibling) $target)
 }
 
 macro Unit $preserve_target(Unit $target) {
@@ -113,12 +113,12 @@ macro Decorator $discard_nested(Unit $target) {
   $discard_target($target);
 }
 
-macro Unit $preserve_targets(Unit $targets...) {
-  $targets...
+macro Unit $preserve_targets(Unit @targets) {
+  @targets
 }
 
-macro Unit $relay_targets(Unit $targets...) {
-  $preserve_targets($targets...);
+macro Unit $relay_targets(Unit @targets) {
+  $preserve_targets(@targets);
 }
 
 macro Decorator $preserve_variadic(Unit $target) {
@@ -177,7 +177,7 @@ $drop()
 static int discarded_private = 2;
 
 macro Stmt $bare_return() {
-  $(quote ((return)))...
+  @(quote ((return)))
 }
 
 macro Stmt $statement_item(Expr $value) {

@@ -19,7 +19,7 @@ macro Stmt $typed_size(Type $T, Expr $subject, Name $result) {
 }
 
 macro Stmt $constructed_guard(Expr $subject, Name $result) {
-  $(list
+  @(list
     `(match ,$subject
       (((*)
         (guarded
@@ -27,7 +27,7 @@ macro Stmt $constructed_guard(Expr $subject, Name $result) {
             (block
               (stmnt (expr () (op = (expr () (ident ,$result))
                 (expr (int) (literal (int) "7")))))
-              (break))))))))...
+              (break))))))))
 }
 
 int main(void) {

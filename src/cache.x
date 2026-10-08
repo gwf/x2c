@@ -144,7 +144,7 @@ static void Compiler._collect_ids(
 
 /* The function `type name(void)` running `body`. */
 List _initializer_function(Compiler c, Type type, List name, List body) =>
-  c.rebuild_unit_function($!Unit{ $type $name(void) { $body... } });
+  c.rebuild_unit_function($!Unit{ $type $name(void) { @body } });
 
 /* The body of every run-once initializer: `before`, then a return when
    `guard` is set that sets it otherwise, then `after`. */

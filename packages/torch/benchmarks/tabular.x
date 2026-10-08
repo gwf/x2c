@@ -7,7 +7,7 @@
     the same numbers rather than from the same seed.
 
     The forward runs twice over: `native` calls each Linear's own forward,
-    and `explicit` writes `x @ weight.t() + bias` over the enumerated
+    and `explicit` writes `x.matmul(weight.t()) + bias` over the enumerated
     parameters, as packages/torch/README.md documents. They are the same
     model and different call and lifetime pressure, so they are reported
     apart.
@@ -79,7 +79,7 @@ static Tensor _forward(List layers, Tensor x) =>
 
 static Tensor _affine(Module layer, Tensor x) {
   List parameters = layer.parameters();
-  return x @ parameters[0].tensor().t() + parameters[1].tensor();
+  return x.matmul(parameters[0].tensor().t()) + parameters[1].tensor();
 }
 
 static Tensor _forward_explicit(List layers, Tensor x) =>
@@ -146,7 +146,7 @@ static double _mean_baseline(Tensor y_train, Tensor y_val) {
     Tensor mean = y_train.mean_dim(0, 1);
     long rows = y_val.size(0);
     Tensor column = Tensor.ones(%($rows 1), XT_FLOAT32);
-    return Tensor.mse_loss(column @ mean, y_val).item().double();
+    return Tensor.mse_loss(column.matmul(mean), y_val).item().double();
   }
 }
 
@@ -383,7 +383,7 @@ static int _trace(String artifacts, String out, String variant, int n) {
   for (int i = 0; i < 3; i++) {
     List parameters = layers[i].module().parameters();
     Tensor weight = parameters[0].tensor(), bias = parameters[1].tensor();
-    Tensor product = h @ weight.t();
+    Tensor product = h.matmul(weight.t());
     Tensor affine = product + bias;
     char name[32];
     snprintf(name, sizeof(name), "fwd.m%d", i + 1);
@@ -495,7 +495,7 @@ static void _memory_churn(String artifacts, Map data, int steps,
       Tensor output = input.narrow(0, 0, count);
       if (hoisted) {
         for (int i = 0; i < 3; i++) {
-          output = output @ weights[i].t() + biases[i];
+          output = output.matmul(weights[i].t()) + biases[i];
           if (i < 2) output = output.relu();
         }
       }

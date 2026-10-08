@@ -163,7 +163,7 @@ raise-detail = ( "(" , ( bare-symbol | expression-slot ) , list-element , ")" ) 
 bare-symbol = ? bare lit-atom whose decoded spelling is an exact Symbol ? ;
 expression = ( assignment , { ( "," , assignment ) } ) ;
 assignment = ( conditional , [ ( assignment-op , assignment ) ] ) ;
-assignment-op = ( "=" | "+=" | "-=" | "*=" | "/=" | "%=" | "@=" | "<<=" | ">>=" | "&=" | "^=" | "|=" ) ;
+assignment-op = ( "=" | "+=" | "-=" | "*=" | "/=" | "%=" | "<<=" | ">>=" | "&=" | "^=" | "|=" ) ;
 conditional = ( logical-or , [ ( "?" , expression , ":" , conditional ) ] ) ;
 logical-or = ( logical-and , { ( "||" , logical-and ) } ) ;
 logical-and = ( bitwise-or , { ( "&&" , bitwise-or ) } ) ;
@@ -176,7 +176,7 @@ relational = ( shift ,
 type-selector = ( type-name | ( "(" , type-name , ")" ) | cast ) ;
 shift = ( additive , { ( ( "<<" | ">>" ) , additive ) } ) ;
 additive = ( multiplicative , { ( ( "+" | "-" ) , multiplicative ) } ) ;
-multiplicative = ( cast , { ( ( "*" | "/" | "%" | "@" ) , cast ) } ) ;
+multiplicative = ( cast , { ( ( "*" | "/" | "%" ) , cast ) } ) ;
 cast = ( ( "(" , type-operand , ")" , cast ) | unary ) ;
 unary = ( ( ( "++" | "--" ) , unary ) |
     ( ( "&" | "*" | "+" | "-" | "~" | "!" ) , cast ) |
@@ -278,7 +278,7 @@ macro-signature = ( "(" ,
     [ ( hole-parameter , { ( "," , hole-parameter ) } ) ] ,
     ")" ,
     [ ( "using" , using-list ) ] ) ;
-hole-parameter = ( [ hole-kind ] , "$" , identifier , [ "..." ] ) ;
+hole-parameter = ( [ hole-kind ] , ( "$" | "@" ) , identifier ) ;
 using-list = ( ( "$" , identifier , { ( "," , "$" , identifier ) } ) |
     ( identifier , { ( "," , identifier ) } ) ) ;
 macro-body = ? body selected by result/target kind; contract M2 ? ;
@@ -296,7 +296,7 @@ quotation = ( "$" ,
     ( quotation-type , "{" , expression , "}" ) ) ) ;
 quotation-kind = ( result-kind | "Type" | "Param" ) ;
 quotation-type = ? type operand or computed type under M4 ? ;
-quotation-items = ? contents selected by quotation kind; M4 ? ;
+quotation-items = ? contents selected by quotation kind, with ${expr} and @{expr} holes; M4 ? ;
 result-kind = ( "Expr" |
     "Expression" |
     "Stmt" |
@@ -325,7 +325,7 @@ hole-kind = ( "Expr" |
     "Captures" |
     "MatchRow" ) ;
 expression-slot = ? expression slot under M5 ? ;
-argument-slot = ? argument sequence slot under M5 ? ;
+argument-slot = ? argument sequence slot: @name, @call(...), or @(form); M5 ? ;
 declarator-row-slot = ? declarator row slot under M5 ? ;
 named-type-slot = ? named type slot under M5 ? ;
 type-slot = ? type slot under M5 ? ;

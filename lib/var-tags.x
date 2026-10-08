@@ -177,7 +177,7 @@ meta List _tag_info_sentinel(void) =>
 meta List _tag_info(void) {
   Array cells = [];
   foreach (List row, _tag_rows()) cells.push(_tag_info_row(row));
-  return $!( { ${cells.list_free()}..., ${_tag_info_sentinel()} } );
+  return $!( { @{cells.list_free()}, ${_tag_info_sentinel()} } );
 }
 
 meta int _tag_descriptor(List row) =>
@@ -225,7 +225,7 @@ meta List _tag_numeric_row(List row) => $!( {
 meta List _tag_numeric_table(void) {
   Array cells = [];
   foreach (List row, _tag_numeric_rows()) cells.push(_tag_numeric_row(row));
-  return $!( { ${cells.list_free()}... } );
+  return $!( { @{cells.list_free()} } );
 }
 
 /* --- the built-in decoder ------------------------------------------------ */
@@ -323,7 +323,7 @@ meta List _tag_decode_group(List rows, Map counts, int top) {
     int selector = immediate ? _tag_middle(row) : _tag_bottom(row) & mask;
     ids[selector] = x2c_expr_ident(x2c_ident(_tag_id(row)));
   }
-  return $!( { $mask, $immediate, { ${ids.list_free()}... } } );
+  return $!( { $mask, $immediate, { @{ids.list_free()} } } );
 }
 
 meta List _tag_decode_groups(void) {
@@ -332,7 +332,7 @@ meta List _tag_decode_groups(void) {
   Array groups = [];
   for (int group = 0; group < 32; group++)
     groups.push(_tag_decode_group(rows, counts, _tag_group_top(group)));
-  return $!( { ${groups.list_free()}... } );
+  return $!( { @{groups.list_free()} } );
 }
 
 /* --- the enum check ----------------------------------------------------- */
@@ -392,9 +392,9 @@ macro Expression $var.tag.decode.groups() => $_tag_decode_groups();
 /* The rows a caller holding a statically known tag can test without
    decoding, as `tag : (top, mask, bottom)`. */
 macro Entry $var.tag.constant.rows() {
-  $_tag_constant_rows()...
+  @_tag_constant_rows()
 }
 
 macro Unit $var.tag.id.checks() {
-  $_tag_id_checks()...
+  @_tag_id_checks()
 }

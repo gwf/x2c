@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/macro-at-reject-named.x:4:41: parse: sequence macro hole 'items' requires '@'
+  macro Expression $old(Expr @items) => f($items...);
+                                          ^
+

@@ -39,10 +39,10 @@ macro Stmt $print_value(Expr $value) {
   printf("%d\n", $value);
 }
 
-macro Unit $project_parameters(Name $name, Param $parameters...) {
-  static int $name($parameters...) {
+macro Unit $project_parameters(Name $name, Param @parameters) {
+  static int $name(@parameters) {
     return sdk_sum(
-      $(x2c.parameters.arguments $parameters)...
+      @(x2c.parameters.arguments $parameters)
     );
   }
 }

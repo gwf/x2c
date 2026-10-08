@@ -33,6 +33,9 @@
 			"include": "#x2c_macro_hole"
 		},
 		{
+			"include": "#x2c_macro_expression_hole"
+		},
+		{
 			"include": "#x2c_keyword_alias"
 		},
 		{
@@ -3909,12 +3912,12 @@
 		"x2c_macro_context": {
 			"patterns": [
 				{
-					"match": "\\b((?i:expression|expr|stmt|type|declaratorrow|decl|function|namedtype|name|literal|param|field|entry|enumerator|unit|catch|captures|matchrow))(\\s+)(\\$)([A-Za-z_][A-Za-z0-9_]*)(\\.\\.\\.)?",
+					"match": "\\b((?i:expression|expr|stmt|type|declaratorrow|decl|function|namedtype|name|literal|param|field|entry|enumerator|unit|catch|captures|matchrow))(\\s+)(?:(\\$)|(@))([A-Za-z_][A-Za-z0-9_]*)",
 					"captures": {
 						"1": { "name": "storage.type.macro.hole.x2c" },
 						"3": { "name": "punctuation.definition.macro.sigil.x2c" },
-						"4": { "name": "variable.parameter.macro.x2c" },
-						"5": { "name": "punctuation.definition.macro.splice.x2c" }
+						"4": { "name": "punctuation.definition.macro.splice.x2c" },
+						"5": { "name": "variable.parameter.macro.x2c" }
 					}
 				},
 				{
@@ -3924,26 +3927,44 @@
 			]
 		},
 		"x2c_builtin_macro_reference": {
-			"match": "(\\$)(auto|scope|let|lock)(?=[ \\t]*\\()",
+			"match": "(?:(\\$)|(@))(auto|scope|let|lock)(?=[ \\t]*\\()",
 			"captures": {
 				"1": { "name": "punctuation.definition.macro.sigil.x2c" },
-				"2": { "name": "support.function.macro.builtin.x2c" }
+				"2": { "name": "punctuation.definition.macro.splice.x2c" },
+				"3": { "name": "support.function.macro.builtin.x2c" }
 			}
 		},
 		"x2c_macro_reference": {
-			"match": "(\\$)([A-Za-z_][A-Za-z0-9_]*(?:\\.[A-Za-z_][A-Za-z0-9_]*)*)(?=\\s*\\()",
+			"match": "(?:(\\$)|(@))([A-Za-z_][A-Za-z0-9_]*(?:\\.[A-Za-z_][A-Za-z0-9_]*)*)(?=\\s*\\()",
 			"captures": {
 				"1": { "name": "punctuation.definition.macro.sigil.x2c" },
-				"2": { "name": "entity.name.function.macro.x2c" }
+				"2": { "name": "punctuation.definition.macro.splice.x2c" },
+				"3": { "name": "entity.name.function.macro.x2c" }
 			}
 		},
 		"x2c_macro_hole": {
-			"match": "(\\$)([A-Za-z_][A-Za-z0-9_]*)(\\.\\.\\.)?",
+			"match": "(?:(\\$)|(@))([A-Za-z_][A-Za-z0-9_]*)",
 			"captures": {
 				"1": { "name": "punctuation.definition.macro.sigil.x2c" },
-				"2": { "name": "variable.other.macro.hole.x2c" },
-				"3": { "name": "punctuation.definition.macro.splice.x2c" }
+				"2": { "name": "punctuation.definition.macro.splice.x2c" },
+				"3": { "name": "variable.other.macro.hole.x2c" }
 			}
+		},
+		"x2c_macro_expression_hole": {
+			"name": "meta.macro.hole.expression.x2c",
+			"begin": "(?:(\\$)|(@))(\\{)",
+			"beginCaptures": {
+				"1": { "name": "punctuation.definition.macro.sigil.x2c" },
+				"2": { "name": "punctuation.definition.macro.splice.x2c" },
+				"3": { "name": "punctuation.section.macro.hole.begin.x2c" }
+			},
+			"end": "\\}",
+			"endCaptures": {
+				"0": { "name": "punctuation.section.macro.hole.end.x2c" }
+			},
+			"patterns": [
+				{ "include": "$self" }
+			]
 		},
 		"x2c_literals": {
 			"patterns": [
@@ -4000,6 +4021,7 @@
 				{ "include": "#comments" },
 				{ "include": "#x2c_current_braced_unquote" },
 				{ "include": "#x2c_current_braced_splice" },
+				{ "match": "(?<!\\\\)(?:@=|@(?=[\\s)]|$))", "name": "constant.other.atom.x2c" },
 				{ "include": "#x2c_current_list_interpolation" },
 				{ "include": "#x2c_current_list_nested" },
 				{ "include": "#x2c_current_array_nested" },
@@ -4130,6 +4152,7 @@
 				{ "include": "#comments" },
 				{ "include": "#x2c_current_braced_unquote" },
 				{ "include": "#x2c_current_collection_interpolation" },
+				{ "include": "#x2c_macro_splice_hole" },
 				{ "include": "#x2c_current_list_nested" },
 				{ "include": "#x2c_current_array_nested" },
 				{ "include": "#x2c_current_map_nested" },
@@ -4150,8 +4173,15 @@
 			}
 		},
 		"x2c_current_collection_atom": {
-			"match": "(?:\\\\.|[^()\\[\\]{},:\\s$])+",
+			"match": "(?:\\\\.|[^()\\[\\]{},:\\s$@])+",
 			"name": "constant.other.atom.x2c"
+		},
+		"x2c_macro_splice_hole": {
+			"match": "(?<!\\\\)(@)([A-Za-z_][A-Za-z0-9_]*)",
+			"captures": {
+				"1": { "name": "punctuation.definition.macro.splice.x2c" },
+				"2": { "name": "variable.other.macro.hole.x2c" }
+			}
 		},
 		"x2c_current_collection_separator": {
 			"match": "[:,]",
@@ -4306,7 +4336,7 @@
 		},
 		"x2c_embedded_lisp": {
 			"name": "meta.embedded.lisp.x2c",
-			"begin": "\\$\\(",
+			"begin": "(?:\\$|@)\\(",
 			"beginCaptures": {
 				"0": { "name": "punctuation.definition.embedded.lisp.begin.x2c" }
 			},
@@ -4325,11 +4355,10 @@
 				{ "include": "#x2c_lisp_list" },
 				{ "include": "#x2c_lisp_symbol" },
 				{
-					"match": "(\\$)([A-Za-z_][A-Za-z0-9_]*)(\\.\\.\\.)?",
+					"match": "(\\$)([A-Za-z_][A-Za-z0-9_]*)",
 					"captures": {
 						"1": { "name": "punctuation.definition.macro.sigil.x2c" },
-						"2": { "name": "variable.other.macro.hole.x2c" },
-						"3": { "name": "punctuation.definition.macro.splice.x2c" }
+						"2": { "name": "variable.other.macro.hole.x2c" }
 					}
 				},
 				{ "match": ",@", "name": "punctuation.definition.unquote-splicing.lisp.x2c" },

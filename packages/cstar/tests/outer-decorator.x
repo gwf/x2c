@@ -6,7 +6,7 @@
 #include "../src/cstar-macros.x"
 
 macro Decorator $demo.append(Function $function) {
-  $(x2c.function.body $function)...
+  @(x2c.function.body $function)
   int unused = 0;
   (void) unused;
 }

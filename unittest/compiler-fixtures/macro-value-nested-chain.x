@@ -22,7 +22,7 @@ meta static List chain(List x, List r, int n) {
   }
   return out;
 }
-macro Stmt $chained(Expr $x, Expr $r) { $chain($x, $r, 12)... }
+macro Stmt $chained(Expr $x, Expr $r) { @chain($x, $r, 12) }
 
 static int choose(int x) {
   int r = -1;

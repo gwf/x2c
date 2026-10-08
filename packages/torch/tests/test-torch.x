@@ -78,14 +78,14 @@ static void torch_operators(void) {
   Tensor a = Tensor.of(%(1 2 3 4), %(2 2), XT_FLOAT64);
   Tensor b = Tensor.of(%(1 0 0 1), %(2 2), XT_FLOAT64);
   EXPECT_TRUE((a * b).equal(Tensor.of(%(1 0 0 4), %(2 2), XT_FLOAT64)));
-  EXPECT_TRUE((a @ b).equal(a));
+  EXPECT_TRUE((a.matmul(b)).equal(a));
   EXPECT_NEAR((a + b - b / 2.0).sum().item().double(), 10.0 + 2.0 - 1.0,
               1e-12);
   EXPECT_NEAR((2.0 * a).sum().item().double(), 20.0, 1e-12);
   EXPECT_NEAR((-a).sum().item().double(), -10.0, 1e-12);
   Var boxed = a;
   EXPECT_TRUE(boxed is Tensor);
-  EXPECT_NEAR((boxed @ boxed).tensor().to_values()[0].double(), 7.0, 1e-12);
+  EXPECT_NEAR((boxed.matmul(boxed)).tensor().to_values()[0].double(), 7.0, 1e-12);
   EXPECT_NEAR(a.t()[0].to_values()[1].double(), 3.0, 1e-12);
   EXPECT_NEAR(a.reshape(%(4)).slice(0, 1, 3, 1).sum().item().double(), 5.0,
               1e-12);
@@ -164,7 +164,7 @@ static void torch_no_grad_is_scoped(void) {
       EXPECT_FALSE(Torch.grad_enabled());
       Tensor a = Tensor.ones(%(2 3), XT_FLOAT64);
       Tensor b = Tensor.ones(%(2 2), XT_FLOAT64);
-      (void) (a @ b);
+      (void) (a.matmul(b));
     }
   }
   catch %(bad-state (library "torch") *): caught++;
@@ -186,7 +186,7 @@ static void torch_modules(void) {
   Tensor weight = layer.named_parameters()[0].list()[1].tensor();
   Tensor bias = layer.named_parameters()[1].list()[1].tensor();
   EXPECT_STR_EQ(layer.named_parameters()[0].list()[0].str(), "weight");
-  EXPECT_TRUE(layer.forward(x).allclose(x @ weight.t() + bias, 1e-5, 1e-6));
+  EXPECT_TRUE(layer.forward(x).allclose(x.matmul(weight.t()) + bias, 1e-5, 1e-6));
 
   Module model = _mlp();
   List names = %();
@@ -343,7 +343,7 @@ static void _errors_and_lifetimes_once(void) {
     Tensor b = Tensor.ones(%(2 2), XT_FLOAT64);
     int caught = 0;
     try {
-      Tensor bad = a @ b;
+      Tensor bad = a.matmul(b);
       EXPECT_NULL(bad);
     }
     catch %(bad-state (library "torch") *): caught++;

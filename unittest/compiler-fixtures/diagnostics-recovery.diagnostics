@@ -1,6 +1,6 @@
-unittest/compiler-fixtures/diagnostics-recovery.x:8:42: parse: sequence macro hole must be the final argument
-  macro Expression $call(Expr $arguments..., Expr $final) => $final;
-                                           ^
+unittest/compiler-fixtures/diagnostics-recovery.x:8:39: parse: sequence macro hole must be the final argument
+  macro Expression $call(Expr @arguments, Expr $final) => $final;
+                                        ^
 
 unittest/compiler-fixtures/diagnostics-recovery.x:11:17: parse: expected atomic expression
     int sum = 42 +;

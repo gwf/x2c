@@ -3,13 +3,13 @@
 
 /* A `${expression}` hole in a quotation inserts a value of the function
    that writes the quotation: a field, an element, or a call's result. A
-   `Type` value fills a type, and `...` splices a List. */
+   `Type` value fills a type, and `@{expression}` splices a List. */
 typedef struct Call { List callee; List arguments; Type result; } Call;
 
 meta static List scaled_call(List callee, List a, List b) {
   Call d = {.callee = callee, .arguments = %($a $b), .result = %(int)};
   return $!( ({
-    ${d.result} value = ${d.callee}(${d.arguments}...);
+    ${d.result} value = ${d.callee}(@{d.arguments});
     value * ${d.arguments.len()};
   }) );
 }
@@ -32,7 +32,7 @@ meta static List getter(String name, int value) {
   return %($unit);
 }
 macro Unit $define_getter(Name $name, Literal $value) {
-  $getter($name, $value)...
+  @getter($name, $value)
 }
 $define_getter(answer, 21);
 

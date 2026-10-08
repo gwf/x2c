@@ -11,7 +11,7 @@ typedef struct method_self_Record {
 typedef method_self_Record method_self_RecordLeaf;
 
 macro Decorator $self_identity(Function $function) {
-  $(x2c.function.body $function)...
+  @(x2c.function.body $function)
 }
 
 Self method_inherit_Base.rest(Self value) {

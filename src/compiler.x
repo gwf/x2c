@@ -1998,6 +1998,7 @@ static void Compiler._check_unmatched_braces(Compiler c) {
 int Symbol.group_step(Symbol s) {
   switch (s) {
     case <"(">: case <"[">: case <"{">: case <"?(">: case <"$(">:
+    case <"@(">:
     case <"${">: case <"%(">: case <"%[">: case <"%{">: case <"@{">:
       return 1;
     case <")">: case <"]">: case <"}">:

@@ -4,7 +4,7 @@ macro Unit $broken_fields() {
   typedef struct RollbackRecord {
     int stale;
   } RollbackRecord;
-  $(list 42)...
+  @(list 42)
 }
 
 $broken_fields();

@@ -3,7 +3,7 @@
 
 /* A template writes a lambda whose parameters are a Param sequence, and
    a case on it recognizes a lambda and captures its body. */
-macro Expression $lam(Expr $body, Param $params...) => %!($params...) => $body;
+macro Expression $lam(Expr $body, Param @params) => %!(@params) => $body;
 meta static List lambda_body(List code) {
   Macro lam = $lam;
   match (code) { case lam(?body, *params): return body; }

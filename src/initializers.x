@@ -78,7 +78,7 @@ static List Compiler._convert_composite(
         row, native_target, row_condition, parent_condition, native_used));
   }
   List converted = elements.list_free();
-  return $!($target){ { $converted... } };
+  return $!($target){ { @converted } };
 }
 
 /* An empty initializer for a Map or Array, or for a type that converts from

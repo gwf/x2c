@@ -17,11 +17,11 @@ import "torch" with Torch, Tensor;
 Tensor x = Tensor.arange(0.0, 8.0, 1.0, XT_FLOAT64).reshape(%(8 1));
 Tensor y = 3.0 * x - 1.0;
 Tensor w = Tensor.randn(%(1 1), XT_FLOAT64).requires_grad_(1);
-Tensor error = Tensor.mse_loss(x @ w, y);
+Tensor error = Tensor.mse_loss(x.matmul(w), y);
 error.backward();
 ```
 
-`*` is elementwise and `@` is matrix multiplication, as in PyTorch. A
+`*` is elementwise and `matmul` performs matrix multiplication. A
 `double` beside a `Tensor` converts to a float64 scalar tensor and an `int`
 or `long` to an int64 one, so `2 * t` stays exact on an integer tensor.
 
@@ -61,7 +61,7 @@ model.register("l2", Module.linear(8, 1));
 
 static Tensor _affine(Module layer, Tensor x) {
   List parameters = layer.parameters();
-  return x @ parameters[0].tensor().t() + parameters[1].tensor();
+  return x.matmul(parameters[0].tensor().t()) + parameters[1].tensor();
 }
 
 static Tensor _forward(Module model, Tensor x) =>

@@ -174,8 +174,10 @@ List syntax_lexical(void) => %(lexical
       (seq (one-of-bytes "\$@") (optional (ref identifier)))
       (emit-sigil) (emit-identifier ident) (keyword-lookup false))
     (rule code-reference
-      (ordered (seq (bytes "\$(") (transition embedded-lisp))
-        (when-prefix (byte 36) (ref named-reference))))
+      (ordered
+        (seq (bytes "\$(") (transition embedded-lisp))
+        (seq (bytes "@(") (transition embedded-lisp-splice))
+        (when-prefix (one-of-bytes "\$@") (ref named-reference))))
     (rule percent-forms
       (ordered
         (seq (bytes "%\"") (transition percent-string))
@@ -210,7 +212,7 @@ List syntax_lexical(void) => %(lexical
           (when-prefix (byte 36)
             (ordered (seq (bytes "\${") (transition data-code))
               (ref named-reference))))
-        (when-mode list
+        (when-mode list array map
           (when-prefix (byte 64)
             (ordered (seq (bytes "@{") (transition list-splice))
               (ref named-reference))))))
@@ -271,6 +273,8 @@ List syntax_lexical(void) => %(lexical
     (transition percent-string (from x2c x2c-par) (on "%\"") (push string))
     (transition embedded-lisp (from x2c x2c-par) (on "\$(")
       (push macro-lisp))
+    (transition embedded-lisp-splice (from x2c x2c-par) (on "@(")
+      (push macro-lisp))
     (transition code-parenthesis (from x2c-par) (on "(") (push x2c-par))
     (transition close-code-parenthesis (from x2c-par) (on ")") (pop))
     (transition nested-list (from list array map) (on "(") (push list))
@@ -281,7 +285,7 @@ List syntax_lexical(void) => %(lexical
     (transition nested-string (from list array map) (on "\"")
       (emit "%\"") (push string))
     (transition data-code (from list array map) (on "\${") (push x2c))
-    (transition list-splice (from list) (on "@{") (push x2c))
+    (transition list-splice (from list array map) (on "@{") (push x2c))
     (transition capture (from list) (on "?(") (push x2c-par))
     (transition close-list (from list) (on ")") (pop))
     (transition close-array (from array) (on "]") (pop))
@@ -374,8 +378,8 @@ List syntax_lexical(void) => %(lexical
           (remove "do"))
         (append-semicolon
           (unless directive final-semicolon enum-body whole-embedded-lisp
-            whole-bare-macro bare-macro-after-close-paren decorator))
-        (decorator (leading "@") (retag space))
+            whole-syntax-hole syntax-hole-after-close-paren decorator))
+        (decorator (leading "@" "\$") (retag-first space))
         (indent-directive (retag comment))
         (dedent (append-stored-closers)
           (require remaining-level) (fail indent))
@@ -474,7 +478,6 @@ List syntax_lexical(void) => %(lexical
     (operator "&=")
     (operator "^=")
     (operator "|=")
-    (operator "@=")
     (operator "-")
     (operator ",")
     (operator ";")
