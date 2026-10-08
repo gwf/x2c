@@ -102,6 +102,13 @@
   in an arm that reads an arm binder fails in C with an undeclared
   identifier.
 
+## Wave 4
+
+- W4-B (reader prefix, quotations): negative. Reading the body is the whole
+  of a quotation's work, and it needs parser and binder state that no hook
+  target can reach; the narrowest hook adds about 20 kernel lines and
+  removes none. Quotations stay in the kernel's macro substrate.
+
 ## Log
 
 - 2026-10-07: merged `origin/dev` `7e946b86`; migrated spike files to

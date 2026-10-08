@@ -91,8 +91,11 @@ the necessary one. Rechecked against source:
   `parse_macro_quotation` (macros.x:1556) reads the body through the macro
   definition reader with `d.quotation` set, whose parameters are the holes the
   body names (macros.x:904). What is special is only the `$!` prefix and the
-  kind selection (expressions.x:626). A reader-prefix hook would make them a
-  module.
+  kind selection (expressions.x:626). Wave 4 tested a reader-prefix hook
+  and rejected it: every quotation-specific step needs parser and binder
+  state (token cursor, holes, symbol lookup, literal cache), so the hook
+  adds about 20 kernel lines and removes none (reader-prefix.md).
+  Quotations stay in the kernel's macro substrate.
 - **Protocols.** protocol.x (2,832 lines) already falls into four parts:
   declaration parsing, publication, adoption, and conformance checking
   (449-1490); typing queries such as conversion, member resolution with the
@@ -144,7 +147,7 @@ Ranked by how many features need them:
    defer, match, switch, static locals. Hardest; `defer` is the published
    primitive features compose with instead.
 6. **Identifier resolution.** `with` and lambda captures. Hardest; stays core.
-7. **Reader prefix.** `$!` quotations.
+7. **Reader prefix.** Rejected in wave 4; quotations stay in the kernel.
 8. **Fact registration at collection.** Protocol conformance, conversions,
    operator members, and class defaults, replayed through interfaces.
 

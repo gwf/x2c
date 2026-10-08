@@ -27,7 +27,7 @@ component's file is included and replay through interfaces.
 | `hook function $m;` | parse: function definition body | prototype (parse.x) | tracing, entry guards, lambda lowering |
 | typed node hook, by node kind, may decline: `hook <switch> f;`, `hook <match> f;` | transform: after binding and typing | prototype (waves 1, 3) | string switch, collection literals, printf formats, `match`, destructuring |
 | declaration-position hook through claims: `hook <TAG> f;` for `(claim TAG MESSAGE VALUE)` | bind: block declaration | prototype (wave 2) | `$auto`; later destructuring, `class` |
-| reader-prefix hook | lex and parse: `$!`-style prefixes | missing | quotations |
+| reader-prefix hook | lex and parse: `$!`-style prefixes | rejected (wave 4): adds about 20 kernel lines and removes none; see reader-prefix.md | quotations stay in the kernel's macro substrate |
 | fact registration: `x2c_fact_record`, `x2c_fact_lookup` | parse and collect, replayed by interfaces | prototype (wave 3) | `delegate`; later `protocol`, `class` defaults |
 | member-resolution fallback: `hook <member> f;` | bind: on a resolution miss only | prototype (wave 3) | `delegate` |
 
