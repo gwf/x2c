@@ -32,6 +32,12 @@ List x2c_protocol_member(List participant, List base, String member);
 
 List x2c_method_resolve(List type_value, String name);
 
+List x2c_member_resolve(List type, String name, int call);
+
+List x2c_fact_record(List subject, Symbol relation, String name, List value);
+
+List x2c_fact_lookup(List subject, Symbol relation, String name);
+
 List builtin_foreach_bindings(List declaration);
 
 List builtin_foreach_reference(String name);
@@ -79,6 +85,8 @@ List binding_literal_list(List values);
 String x2c_source_text(Var value);
 
 String x2c_embed_text(Var requested);
+
+Var x2c_pattern_value(List pattern);
 
 Var x2c_literal_value(Var syntax);
 

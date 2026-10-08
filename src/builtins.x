@@ -54,6 +54,139 @@ static List _auto_declaration(List declaration) {
   return declaration;
 }
 
+/* delegate
+
+   The member-resolution fallback of `delegate` fields. A method missing
+   from a receiver is searched through its delegate fields, depth first in
+   field order, and the call goes through the one path that finds it. More
+   than one path, or a cycle with no path, is an error. Called without a
+   member, it returns the delegate field types, whose members complete. */
+
+/* One search: the receiver type, the member, each path that finds the
+   method as `((FIELD ...) BINDING)`, and the first cycle's fields. */
+static typedef struct Delegation {
+  List outer;
+  String member;
+  Array found;
+  List cycle;
+} Delegation;
+
+static List _delegate_member(List type, String member) {
+  if (!member) {
+    Array types = [];
+    _delegate_types(type, {}, types);
+    return types.list_free();
+  }
+  Delegation d = {.outer = type, .member = member, .found = []};
+  d.search(type, NULL, NULL);
+  List found = d.found.list_free();
+  if (found && found.cdr()) d.report_paths(found);
+  if (found) return %(${found.car().car()} $member);
+  if (d.cycle) d.report_cycle();
+  return %();
+}
+
+static void Delegation.search(
+  Delegation &d, List receiver, List reverse_path, List seen) {
+  List aggregate = _delegate_aggregate(receiver);
+  if (!aggregate) return;
+  if (aggregate in seen) {
+    if (!d.cycle) d.cycle = reverse_path.reverse();
+    return;
+  }
+  seen = cons(aggregate, seen);
+  foreach (List row, _delegate_fields(aggregate)) {
+    String name = row.car();
+    List type = x2c_member_resolve(receiver, name, 0).caddr();
+    List path = cons(name, reverse_path);
+    List resolution = x2c_member_resolve(type, d.member, 1);
+    match (resolution) {
+      case %(method ?binding ?):
+        d.found.push(%(${path.reverse()} $binding));
+      case %(ambiguous *packages):
+        d.report_packages(type, path.reverse(), packages);
+    }
+    if (!resolution) d.search(type, path, seen);
+  }
+}
+
+/* The `(NAME TYPE)` layout rows of the delegate fields of `aggregate`. */
+static List _delegate_fields(List aggregate) {
+  Array rows = [];
+  foreach (List row, x2c_type_layout(aggregate)) {
+    String name = row.car();
+    if (name && x2c_fact_lookup(aggregate, <delegate>, name)) rows.push(row);
+  }
+  return rows.list_free();
+}
+
+/* The aggregate tag a typedef chain, or one pointer layer, reaches. */
+static List _delegate_aggregate(List type) {
+  List resolved = x2c_type_resolve(type);
+  if (x2c_type_is_pointer(resolved))
+    resolved = x2c_type_resolve(x2c_type_element(resolved));
+  return _aggregate_tag(resolved) ? resolved : NULL;
+}
+
+static int _aggregate_tag(List type) =>
+  !!type.match(
+    %((!or struct union) (!or (!not (*)) (gensym ? ?) (binding ? ?))));
+
+/* Every delegate field type reachable from `type`, each aggregate once. */
+static void _delegate_types(List type, Map visited, Array types) {
+  List aggregate = _delegate_aggregate(type);
+  if (!aggregate || aggregate in visited) return;
+  visited[aggregate] = 1;
+  foreach (List row, _delegate_fields(aggregate)) {
+    types.push(row.cadr());
+    _delegate_types(row.cadr(), visited, types);
+  }
+}
+
+static void Delegation.report_paths(Delegation &d, List found) {
+  Array notes = [];
+  foreach (List candidate, found) {
+    String path = _delegate_path(d.outer, candidate.car(), d.member);
+    String spelling = x2c_binding_spelling(candidate.cadr());
+    notes.push(%"delegate path: $path -> $spelling");
+  }
+  String method = %"${_delegate_type_name(d.outer)}.${d.member}";
+  x2c_diagnostic_fail_at(
+    NULL, <type>, %"method '$method' has multiple delegate paths",
+    notes.list_free());
+}
+
+static void Delegation.report_cycle(Delegation &d) {
+  String path = _delegate_path(d.outer, d.cycle, NULL);
+  x2c_diagnostic_fail_at(
+    NULL, <type>,
+    %"delegation cycle resolving ${_delegate_type_name(d.outer)}.${d.member}",
+    %("delegate path: $path"));
+}
+
+static void Delegation.report_packages(
+  Delegation &d, List type, List fields, List packages) {
+  Array notes = [%"delegate path: ${_delegate_path(d.outer, fields, NULL)}"];
+  foreach (String package, packages) notes.push(%"package: '$package'");
+  String method = %"${_delegate_type_name(type)}.${d.member}";
+  x2c_diagnostic_fail_at(
+    NULL, <type>,
+    %"method '$method' is provided by multiple imported packages",
+    notes.list_free());
+}
+
+static String _delegate_path(List type, List fields, String member) {
+  Array parts = [_delegate_type_name(type)];
+  foreach (String name, fields) parts.push(name);
+  if (member) parts.push(member);
+  return ".".join(parts.list_free());
+}
+
+static String _delegate_type_name(List type) {
+  List base = type_base_suffix(type);
+  return (_aggregate_tag(base) ? base.cadr() : base.car()).str();
+}
+
 /* foreach
 
    A collection whose owner declares a matching `try_next` runs a cursor
@@ -874,6 +1007,7 @@ Map builtin_targets(void) {
   Map rows = {};
   $builtin.row(rows, "builtin_scope_expand", _scope_expand);
   $builtin.row(rows, "builtin_auto_declaration", _auto_declaration);
+  $builtin.row(rows, "builtin_delegate_member", _delegate_member);
   $builtin.row(rows, "x2c_func_call_arguments", x2c_func_call_arguments);
   $builtin.row(rows, "builtin_defer_captures", builtin_defer_captures);
   $builtin.row(rows, "builtin_try_catch_site", builtin_try_catch_site);

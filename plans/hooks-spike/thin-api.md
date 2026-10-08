@@ -28,7 +28,8 @@ component's file is included and replay through interfaces.
 | typed node hook, by node kind, may decline: `hook <switch> f;`, `hook <match> f;` | transform: after binding and typing | prototype (waves 1, 3) | string switch, collection literals, printf formats, `match`, destructuring |
 | declaration-position hook through claims: `hook <TAG> f;` for `(claim TAG MESSAGE VALUE)` | bind: block declaration | prototype (wave 2) | `$auto`; later destructuring, `class` |
 | reader-prefix hook | lex and parse: `$!`-style prefixes | missing | quotations |
-| fact registration at collection | collect: declaration time, replayed by interfaces | missing (protocol.x and `Defaults` internal) | `protocol`, `delegate`, `class` defaults |
+| fact registration: `x2c_fact_record`, `x2c_fact_lookup` | parse and collect, replayed by interfaces | prototype (wave 3) | `delegate`; later `protocol`, `class` defaults |
+| member-resolution fallback: `hook <member> f;` | bind: on a resolution miss only | prototype (wave 3) | `delegate` |
 
 ## 2. Building and reading syntax
 
@@ -50,6 +51,7 @@ component's file is included and replay through interfaces.
 | Typing queries from project meta code | prototype (wave 2) | nested query request answered at the call site; about 0.17 M instructions per query |
 | `x2c_type_resolve`, `x2c_type_fields`, `x2c_type_members`, `x2c_type_is_*`, `x2c_type_element` | public (lib/meta.x) | |
 | `x2c_method_resolve(type, name)` | public | member resolution, including the self type |
+| `x2c_member_resolve(type, name, call)` | prototype (wave 3) | the kernel's own row: method, field, or ambiguity; no fallbacks |
 | `x2c_protocol_member(participant, base, member)` | public | |
 | conversion at a position: `x2c_convert(position, expr, type)` | missing (`convert_expression` internal) | positions: initializer, assignment, return, argument, interpolation hole, printf value |
 
@@ -73,7 +75,7 @@ forms after it.
 
 | Entry | Status | Used by |
 | --- | --- | --- |
-| Member-resolution rule (alias, fallback field) | internal (protocol.x, expressions.x) | `protocol` member aliases, `delegate` |
+| Member-resolution rule (alias, fallback field) | prototype for fallbacks (wave 3); protocol aliases internal | `delegate` (done), `protocol` member aliases |
 | Conversion rule (source, destination, converter) | internal (converters, `Func` conversion) | protocols, typed arrays |
 | Operator member | internal (operator-ledger.x) | protocol operators (deferred) |
 | Declaration defaults | internal (`Defaults`, compiler.x:885) | `class` |

@@ -269,8 +269,8 @@ Source: `src/parse.x:1591`
 `List Compiler.parse_fields(Compiler c, List context)`
 
 Parses aggregate fields in source order up to the current closing brace.
-Returns a flat field `List`, publishes delegate-field metadata, and leaves
-the closing brace unconsumed.
+Returns a flat field `List`, records a `delegate` fact for each delegate
+field, and leaves the closing brace unconsumed.
 
 Source: `src/parse.x:1572`
 

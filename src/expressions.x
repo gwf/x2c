@@ -1651,17 +1651,10 @@ static List CallSite._method(CallSite &k, List receiver, List field) {
   }
   match (resolution) {
     case %(ambiguous *packages):
-      k.c._report_method_ambiguity(k.type, k.method, packages, NULL, k.origin);
+      k.c._report_method_ambiguity(k.type, k.method, packages, k.origin);
     case %(method ?binding (!set ?signature
       ((func (!set ?parameters (?declared *))) *returns))):
       return k._bound(binding, signature, declared, parameters, returns);
-    case %(delegate ?binding (!set ?signature
-           ((func (!set ?parameters (?declared *))) *returns))
-           ?path): {
-      k.receiver = _delegate_receiver(k.receiver, path);
-      k.type = k.receiver.cadr();
-      return k._bound(binding, signature, declared, parameters, returns);
-    }
     case %(field ?access ?field_type): {
       List callee = %(expr $field_type
         (op $access ${k.receiver} ${k.field}));
@@ -1681,8 +1674,26 @@ static List CallSite._lookup(CallSite &k) {
     k.type = k.receiver.cadr();
     resolution = k.c.resolve_postfix_member(k.type, k.field, <.>, 1);
   }
-  return resolution ? resolution
-    : k.c._resolve_delegate_method(k.type, k.method, k.origin);
+  if (resolution || _deferred_receiver(k.receiver)) return resolution;
+  return k._fallback();
+}
+
+/* A member the receiver lacks goes to the member-resolution fallbacks.
+   One may redirect the call through fields of the receiver to a member of
+   the field it reaches. */
+static List CallSite._fallback(CallSite &k) {
+  match (k.c.member_fallback(k.type, k.method, k.origin))
+    case %(?(List fields) ?(String member)): {
+      foreach (String name, fields)
+        k.receiver = k.c.resolve_expression(
+          source_operator_expression(NULL, %(. ${k.receiver} ($name))),
+          k.origin);
+      k.type = k.receiver.cadr();
+      k.method = member;
+      k.field = %($member);
+      return k.c.resolve_postfix_member(k.type, k.field, <.>, 1);
+    }
+  return NULL;
 }
 
 static List CallSite._bound(
@@ -1856,152 +1867,41 @@ static List Resolve._member(
   return source_operator_expression(type, %($operator $receiver $field));
 }
 
-/* delegate methods
-
-   A method missing from a receiver may be found through its delegate
-   fields, searched depth first in field order. More than one path, or a
-   cycle with no path, is an error. */
-
-static typedef struct DelegateSearch {
-  Compiler c;
-  String member;
-  Type outer;
-  Token origin;
-  Array candidates;
-  List first_cycle;
-} DelegateSearch;
-
-static List Compiler._resolve_delegate_method(
-  Compiler c, Type receiver, String member, Token origin) {
-  DelegateSearch search = {
-    .c = c, .member = member, .outer = receiver,
-    .origin = origin, .candidates = []};
-  search._find(receiver, NULL, NULL);
-  List candidates = search.candidates.list_free();
-  if (candidates && candidates.cdr()) search._report_paths(candidates);
-  if (candidates) return candidates.car();
-  if (search.first_cycle) search._report_cycle();
-  return NULL;
-}
-
-static void DelegateSearch._find(
-  DelegateSearch &d, Type receiver, List reverse_path, List seen) {
-  Type aggregate = d.c.sym.delegate_aggregate(receiver);
-  if (!aggregate) return;
-  if (aggregate in seen) {
-    if (!d.first_cycle)
-      d.first_cycle = cons(<path>, reverse_path.reverse());
-    return;
-  }
-  seen = cons(aggregate, seen);
-  List order = d.c.sym.field_order(aggregate);
-  foreach (List row, order ? order.cdr() : NULL) {
-    String name = row.car();
-    if (!name) continue;
-    if (!d.c.sym.get(%(@aggregate delegate $name))) continue;
-    List step = d.c._delegate_step(receiver, name);
-    Type field_type = step.cddr().cadr();
-    List next_path = cons(step, reverse_path);
-    List resolution = d.c.resolve_postfix_member(
-      field_type, %(${d.member}), <.>, 1);
-    if (resolution && resolution.car() == <method>) {
-      List binding = resolution.cadr(), Type signature = resolution.caddr();
-      List path = cons(<path>, next_path.reverse());
-      d.candidates.push(%( delegate $binding $signature $path ));
-    }
-    else if (resolution && resolution.car() == <ambiguous>) {
-      String path = _delegate_path_string(
-        d.outer, cons(<path>, next_path.reverse()), NULL);
-      d.c._report_method_ambiguity(
-        field_type, d.member, resolution.cdr(), path, d.origin);
-    }
-    else if (!resolution)
-      d._find(field_type, next_path, seen);
-  }
-}
-
-static List Compiler._delegate_step(Compiler c, Type receiver, String name) {
-  List field = c.resolve_postfix_member(receiver, %($name), <.>, 0);
-  (Symbol access, Type field_type) = field.cdr();
-  return %(step $access $name $field_type);
-}
-
-static void DelegateSearch._report_paths(
-  DelegateSearch &d, List candidates) {
-  List notes = NULL;
-  foreach (List candidate, candidates) {
-    List path = candidate.cddr().cadr();
-    String spelling = binding_identity_spelling(candidate.cadr());
-    String description = _delegate_path_string(d.outer, path, d.member);
-    notes = cons(%"delegate path: $description -> $spelling", notes);
-  }
-  String type = _delegate_type_name(d.outer), member = d.member;
-  $report.type.delegate_ambiguous(d.c, type, member, d.origin,
-    notes.reverse());
-}
-
-static void DelegateSearch._report_cycle(DelegateSearch &d) {
-  String type = _delegate_type_name(d.outer), member = d.member;
-  String path = _delegate_path_string(d.outer, d.first_cycle, NULL);
-  $report.type.delegate_cycle(d.c, type, member, d.origin, path);
-}
-
 static void Compiler._report_method_ambiguity(
-  Compiler c, Type receiver, String member, List packages,
-  String delegate_path, Token origin) {
-  List notes = delegate_path
-             ? %("delegate path: $delegate_path") : NULL;
-  foreach (String package, packages)
-    notes = cons(%"package: '$package'", notes);
-  String type = _delegate_type_name(receiver);
-  $report.type.method_packages(c, type, member, origin, notes.reverse());
-}
-
-static String _delegate_path_string(Type receiver, List path, String member) {
-  Array parts = [];
-  parts.push(_delegate_type_name(receiver));
-  foreach (List step, path.cdr()) parts.push(step.caddr());
-  if (member) parts.push(member);
-  return ".".join(parts.list_free());
-}
-
-static String _delegate_type_name(Type type) {
-  Type base = type.base_type();
+  Compiler c, Type receiver, String member, List packages, Token origin) {
+  Array notes = [];
+  foreach (String package, packages) notes.push(%"package: '$package'");
+  Type base = receiver.base_type();
   Var (head, name) = base;
-  return base.is_aggregate_tag() ? name.str() : head.str();
-}
-
-static List _delegate_receiver(List receiver, List path) {
-  foreach (List step, path.cdr()) {
-    (Symbol access, String name, Type type) = step.cdr();
-    receiver = %(
-      expr $type
-        (op $access $receiver ($name))
-    );
-  }
-  return receiver;
+  String type = base.is_aggregate_tag() ? name.str() : head.str();
+  $report.type.method_packages(c, type, member, origin, notes.list_free());
 }
 
 // member completion
 
 /** Returns sorted visible field and method names that resolve on `receiver`
-    through `access`. */
+    through `access`. The member-resolution fallbacks name more candidate
+    types and are asked about each candidate the receiver lacks, which may
+    report as a call would; only a field or method row is listed. */
 List Compiler.postfix_completions(
   Compiler c, Type receiver, Symbol access) {
-  Map seen = {}, visited = {};
+  Map seen = {};
   Array names = $auto([]), accepted = [];
   Type fields = c.sym.resolve_key(receiver);
   if (fields.is_pointer()) fields = fields.dereference();
   c._completion_fields(fields, seen, names, {});
   if (access == <.>) {
     c._completion_methods(receiver, seen, names);
-    c._completion_delegates(receiver, seen, names, visited);
+    foreach (Type type, c.member_fallback(receiver, NULL, c.token)) {
+      c._completion_methods(type, seen, names);
+      c._completion_fields(type, seen, names, {});
+    }
   }
   names.sort();
   foreach (String name, names) {
     List resolution = c.resolve_postfix_member(receiver, %($name), access, 1);
     if (!resolution && access == <.>)
-      resolution = c._resolve_delegate_method(receiver, name, c.token);
+      resolution = c.member_fallback(receiver, name, c.token);
     match (resolution) {
       case %((!or field method) ? ?): accepted.push(name);
     }
@@ -2053,23 +1953,6 @@ static void Compiler._completion_owner_methods(
       if (signature.is_function() && spelling.startswith(imported))
         _completion_add(seen, names, spelling.remove_prefix(imported));
     }
-  }
-}
-
-static void Compiler._completion_delegates(
-  Compiler c, Type receiver, Map seen, Array names, Map visited) {
-  Type aggregate = c.sym.delegate_aggregate(receiver);
-  if (!aggregate || aggregate in visited) return;
-  visited[aggregate] = 1;
-  List order = c.sym.field_order(aggregate);
-  foreach (List row, order ? order.cdr() : NULL) {
-    String field = row.car();
-    if (!field ||
-        !c.sym.get(%(@aggregate delegate $field))) continue;
-    Type type = row.cadr();
-    c._completion_methods(type, seen, names);
-    c._completion_fields(type, seen, names, {});
-    c._completion_delegates(type, seen, names, visited);
   }
 }
 

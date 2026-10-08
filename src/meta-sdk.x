@@ -236,6 +236,27 @@ List x2c_method_resolve(List type_value, String name) {
   return %();
 }
 
+/** Answers `x2c.member.resolve`, declared in `lib/meta.x`. */
+List x2c_member_resolve(List type, String name, int call) {
+  _sdk_guard("x2c.member.resolve");
+  return active.expander.resolve_postfix_member(type, %($name), <.>, call);
+}
+
+// facts
+
+/** Answers `x2c.fact.record`, declared in `lib/meta.x`. */
+List x2c_fact_record(
+  List subject, Symbol relation, String name, List value) {
+  _sdk_guard("x2c.fact.record");
+  return active.expander.sym.record_fact(subject, relation, name, value);
+}
+
+/** Answers `x2c.fact.lookup`, declared in `lib/meta.x`. */
+List x2c_fact_lookup(List subject, Symbol relation, String name) {
+  _sdk_guard("x2c.fact.lookup");
+  return active.expander.sym.fact(subject, relation, name);
+}
+
 /** Returns an expression reading each binding `declaration` declares. */
 List builtin_foreach_bindings(List declaration) {
   Array result = [];
@@ -616,6 +637,12 @@ static int _literal_string(Var syntax, String &value) {
       }
     }
   return 0;
+}
+
+/** Answers `x2c.pattern.value`, declared in `lib/meta.x`. */
+Var x2c_pattern_value(List pattern) {
+  _sdk_guard("x2c.pattern.value");
+  return Compiler.expanding().match_pattern_value(pattern);
 }
 
 /** Answers `x2c.literal.value`, declared in `lib/meta.x`. */

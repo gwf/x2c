@@ -1106,7 +1106,7 @@ Map Compiler.inline_type_dependencies(Compiler c, List ast) {
               }
             case %(offsetof ?type ?): types[type] = 1;
             case %(op (!or . (!quote ->)) (expr ?receiver ?) ?): {
-              Type aggregate = c.sym.delegate_aggregate(receiver);
+              Type aggregate = c.sym.member_aggregate(receiver);
               if (aggregate) types[aggregate] = 1;
             }
           }

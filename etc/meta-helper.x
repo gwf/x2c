@@ -234,6 +234,12 @@ List x2c_method_resolve(List v, String w) =>
   _ask("x2c_method_resolve", %($v $w));
 List x2c_protocol_member(List v, List w, String x) =>
   _ask("x2c_protocol_member", %($v $w $x));
+List x2c_member_resolve(List v, String w, int x) =>
+  _ask("x2c_member_resolve", %($v $w $x));
+List x2c_fact_record(List v, Symbol w, String x, List y) =>
+  _ask("x2c_fact_record", %($v $w $x $y));
+List x2c_fact_lookup(List v, Symbol w, String x) =>
+  _ask("x2c_fact_lookup", %($v $w $x));
 List x2c_function_parameter(List v, String w) =>
   _ask("x2c_function_parameter", %($v $w));
 List x2c_syntax_type(List v) => _ask("x2c_syntax_type", %($v));

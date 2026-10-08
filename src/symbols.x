@@ -1232,13 +1232,23 @@ static List Sym._field_row(
 /** Returns recorded fields in source order, or `NULL`. */
 List Sym.field_order(Sym s, Type type) => s.get(%(@type "field-order"));
 
-/** Marks one named aggregate field as a delegate. */
-void Sym.declare_delegate_field(Sym s, Type aggregate, String name) {
-  s.set(%(@aggregate delegate $name), %(delegate));
+/** Records the fact `relation` about the member `name` of `subject`, a type
+    key, with `value`, and returns the stored `(RELATION @VALUE)`. A fact
+    lives in the current scope, so a file-scope fact reaches importers
+    through the unit's interface. */
+List Sym.record_fact(
+  Sym s, Type subject, Symbol relation, String name, List value) {
+  List fact = %($relation @value);
+  s.set(%(@subject $relation $name), fact);
+  return fact;
 }
 
+/** Returns the recorded `(RELATION @VALUE)`, or `NULL`. */
+List Sym.fact(Sym s, Type subject, Symbol relation, String name) =>
+  s.get(%(@subject $relation $name));
+
 /** Resolves typedefs or one pointer layer to an aggregate tag, or `NULL`. */
-Type Sym.delegate_aggregate(Sym s, Type type) {
+Type Sym.member_aggregate(Sym s, Type type) {
   type = type.canonicalize();
   int hops = 0;
   while (type && !type.is_aggregate_tag()) {

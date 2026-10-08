@@ -83,6 +83,8 @@ List Compiler_apply_typed_hook(Compiler c, List ast, Symbol tag);
 
 List Compiler_apply_claim_hook(Compiler c, Var tag, List declaration, Token site);
 
+List Compiler_member_fallback(Compiler c, Type type, String member, Token site);
+
 int Compiler_macro_starts_target_at(Compiler c, AstPos position);
 
 Symbol Compiler_macro_invocation_collection(Compiler c);

@@ -57,6 +57,8 @@ macro Expression $auto(Expr $value) =>
 
 hook <auto> builtin_auto_declaration;
 
+hook <member> builtin_delegate_member;
+
 macro Decorator $class(NamedType $definition) {
   @(class.expand $definition)
 }

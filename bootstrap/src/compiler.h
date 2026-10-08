@@ -279,8 +279,6 @@ int match_value_is_static(Var value);
 
 int Compiler_match_pattern_is_static(Compiler c, List pattern);
 
-Var x2c_pattern_value(List pattern);
-
 Symbol match_value_head(Var value);
 
 Symbol match_value_flat_head(Var value, List binders, List * tags);

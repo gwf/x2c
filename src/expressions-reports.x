@@ -109,18 +109,6 @@ macro Stmt $report.type.optional_ref_access(Expr $c) =>
     <type>, "check optional reference before accessing its value",
     $c.token, NULL);
 
-macro Stmt $report.type.delegate_ambiguous(
-  Expr $c, Expr $type, Expr $member, Expr $origin, Expr $notes) =>
-  $c.report_error(
-    <type>, %"method '${$type}.${$member}' has multiple delegate paths",
-    $origin, $notes);
-
-macro Stmt $report.type.delegate_cycle(
-  Expr $c, Expr $type, Expr $member, Expr $origin, Expr $path) =>
-  $c.report_error(
-    <type>, %"delegation cycle resolving ${$type}.${$member}",
-    $origin, %("delegate path: ${$path}"));
-
 macro Stmt $report.type.method_packages(
   Expr $c, Expr $type, Expr $member, Expr $origin, Expr $notes) =>
   $c.report_error(

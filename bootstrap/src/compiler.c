@@ -3659,11 +3659,6 @@ int Compiler_match_pattern_is_static(Compiler c, List pattern){
   if(! _init_guard_) _file_init_();  return match_value_is_static(Compiler_match_pattern_value(c, List_var(pattern)));
 }
 
-Compiler Compiler_expanding(void);
-Var x2c_pattern_value(List pattern){
-  if(! _init_guard_) _file_init_();  return Compiler_match_pattern_value(Compiler_expanding(), List_var(pattern));
-}
-
 int Var_is_binder(Var);
 int Var_is_match_op(Var);
 Symbol match_value_head(Var value){

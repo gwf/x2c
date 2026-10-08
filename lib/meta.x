@@ -291,6 +291,29 @@ meta List x2c_method_resolve(List type, String name);
     there is none. */
 meta List x2c_protocol_member(List participant, List base, String member);
 
+/** Returns how the compiler resolves the member `name` of a `type` value
+    with `.`: `(method BINDING SIGNATURE)`, `(field ACCESS TYPE)`,
+    `(ambiguous PACKAGE ...)` when imported packages provide the method, or
+    nothing. A nonzero `call` resolves it as a call does, which also finds
+    methods; zero finds only fields. Member-resolution fallbacks are not
+    consulted. */
+meta List x2c_member_resolve(List type, String name, int call);
+
+/* facts
+
+   A fact describes the member `name` of `subject`, a type key such as
+   `%((struct "Point"))`, under the Symbol `relation`. It lives in the scope
+   that records it, so a file-scope fact reaches every unit that includes
+   or imports the file. */
+
+/** Records the fact `relation` about `name` in `subject` with `value`, and
+    returns the stored `(RELATION @VALUE)`. */
+meta List x2c_fact_record(
+  List subject, Symbol relation, String name, List value);
+
+/** Returns the recorded `(RELATION @VALUE)`, or nothing. */
+meta List x2c_fact_lookup(List subject, Symbol relation, String name);
+
 /* the invocation site
 
    Where the macro was written and what is beside it. A macro that reports

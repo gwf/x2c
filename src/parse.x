@@ -1566,8 +1566,8 @@ static int Compiler._attribute_since(Compiler c, Token first, Array marks) {
 // fields
 
 /** Parses aggregate fields in source order up to the current closing brace.
-    Returns a flat field `List`, publishes delegate-field metadata, and leaves
-    the closing brace unconsumed.
+    Returns a flat field `List`, records a `delegate` fact for each delegate
+    field, and leaves the closing brace unconsumed.
 */
 List Compiler.parse_fields(Compiler c, List context) {
   Array fields = [];
@@ -1630,7 +1630,7 @@ static void Compiler._declare_delegate(Compiler c, List context, Var binding) {
   String name = binding_identity_spelling(binding);
   if (!name)
     $report.parse.delegate_name(c);
-  if (!c.macro_holes) c.sym.declare_delegate_field(context, name);
+  if (!c.macro_holes) c.sym.record_fact(context, <delegate>, name, NULL);
 }
 
 static List Compiler._field_row(Compiler c, List context) {

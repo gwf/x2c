@@ -2352,7 +2352,8 @@ void Compiler.install_compile_time_effects(Compiler c, List rows) {
     }
     case %(compile-time keyword ?alias ?definition): {
       if (!c.kw_aliases) c.kw_aliases = {};
-      c.kw_aliases[alias] = %(imported-macro $definition);
+      if (alias == _fallback_alias()) c._add_member_fallback(definition);
+      else c.kw_aliases[alias] = %(imported-macro $definition);
       if (definition is <string> && alias.str().startswith("hook:"))
         c.typed_hooks = 1;
     }
@@ -2482,12 +2483,12 @@ List Compiler.apply_hook(
    other result binds as a statement in its place and is transformed
    again, so a hook declines on what it produced.
 
-   `hook <TAG> f;` with any other TAG registers `f` as the declaration hook
-   of claim TAG. A claim, `(claim TAG MESSAGE VALUE)`, has the type of
-   VALUE. Binding passes each block declarator whose complete initializer
-   is a claim to `f`, alone and initialized with VALUE; returning it
-   declines, and any other result binds as block items in its place. A
-   claim no hook takes reports MESSAGE when it is transformed.
+   `hook <TAG> f;` with any other TAG but `member` registers `f` as the
+   declaration hook of claim TAG. A claim, `(claim TAG MESSAGE VALUE)`, has
+   the type of VALUE. Binding passes each block declarator whose complete
+   initializer is a claim to `f`, alone and initialized with VALUE;
+   returning it declines, and any other result binds as block items in its
+   place. A claim no hook takes reports MESSAGE when it is transformed.
 
    Storage and include export are those of a keyword alias. Built-in
    source names a meta function the compiler links. */
@@ -2500,11 +2501,13 @@ static Atom Compiler._typed_hook_definition(
   Compiler c, Token declaration, int storage) {
   Symbol kind = Symbol.parse(c.token.text);
   int typed = kind in typed_hook_kinds;
-  Atom alias = typed ? _typed_hook_alias(kind) : _claim_hook_alias(kind);
+  Atom alias = kind == <member> ? _fallback_alias()
+             : typed ? _typed_hook_alias(kind) : _claim_hook_alias(kind);
   c.next();
   String name = c._hook_target();
   c.expect(<;>);
-  c.kw_aliases[alias] = name;
+  if (kind == <member>) c._add_member_fallback(name);
+  else c.kw_aliases[alias] = name;
   if (typed) c.typed_hooks = 1;
   if (!storage)
     c.record_compile_time_effect(
@@ -2557,6 +2560,47 @@ List Compiler.apply_claim_hook(
   Var result = c.apply_meta_function(name.str(), %($declaration), site);
   if (result is void || result.equal(declaration)) return NULL;
   return c.bind_syntax(result, AST_BLOCK, c.return_type);
+}
+
+/* member-resolution fallbacks
+
+   `hook <member> f;` adds the meta function `List f(List type, String
+   member)` to the fallbacks, after those already visible. When a dotted
+   call finds no member `member` on a receiver of type `type`, each
+   fallback is called in order until one returns a redirect, `((FIELD ...)
+   MEMBER)`: the call then reads FIELD after FIELD from the receiver and
+   calls MEMBER on the result. Returning nothing declines. A fallback
+   called with a NULL member returns the types whose members complete on
+   `type`. Resolutions that find a member never call a fallback. */
+
+static Atom _fallback_alias(void) => Atom.intern("fallback:<member>");
+
+static List Compiler._member_fallbacks(Compiler c) {
+  Var names;
+  return c.kw_aliases.try_get(_fallback_alias(), names) ? names : NULL;
+}
+
+static void Compiler._add_member_fallback(Compiler c, String name) {
+  List names = c._member_fallbacks();
+  if (!names.contains(name))
+    c.kw_aliases[_fallback_alias()] = names.append(%($name));
+}
+
+/** Returns the first redirect a member-resolution fallback makes of
+    `member`, which `type` lacks, at `site`, or NULL when every fallback
+    declines. With a NULL `member`, returns every type the fallbacks add to
+    member completion of `type`.
+*/
+List Compiler.member_fallback(
+  Compiler c, Type type, String member, Token site) {
+  Array types = [];
+  foreach (String name, c._member_fallbacks()) {
+    Var result = c.apply_meta_function(name, %($type $member), site);
+    if (result is not <list> || !result) continue;
+    if (member) return result;
+    foreach (Var item, (List) result) types.push(item);
+  }
+  return types.list_free();
 }
 
 /* Only the built-in sources define `with` or replace a built-in alias. */

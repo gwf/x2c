@@ -91,6 +91,13 @@
   The carrier already has a `lowered` stage; an API entry that returns
   lowered code would remove the rebinding where a component can produce
   lowered forms.
+- W3-B: `delegate` is a component (134 lines in src/builtins.x) on fact
+  registration (`x2c_fact_record`, `x2c_fact_lookup`) and a
+  member-resolution fallback hook (`hook <member> f;`, called only on a
+  miss). The parser keeps the reserved keyword and records the fact.
+  Kernel: 107 added, 182 removed. Generated C, diagnostics, and completion
+  behavior are byte-identical. Delegated call per use: 2.815 M before,
+  2.947 M after; a resolution hit pays nothing.
 - Defect found in the built-in `match` (not caused by the spike): a `defer`
   in an arm that reads an arm binder fails in C with an undeclared
   identifier.
@@ -104,3 +111,4 @@
 - 2026-10-07: W2-A integrated; bootstrap and docs refreshed.
 - 2026-10-07: W2-B integrated (claims, declaration hook, category argument).
 - 2026-10-07: W3-A integrated (match component, pattern values); bootstrap refreshed.
+- 2026-10-07: W3-B integrated (facts, member fallback, delegate); bootstrap refreshed twice and converged; 235 fixtures and 3 probes pass.

@@ -2483,7 +2483,7 @@ static void _retain_rows(List parts){
 
 int Type_is_inline(Type);
 int Var_truth(Var);
-Type Sym_delegate_aggregate(Sym, Type);
+Type Sym_member_aggregate(Sym, Type);
 String binding_identity_spelling(List);
 Map Compiler_inline_type_dependencies(Compiler c, List ast){
   if(! _init_guard_) _file_init_();  Map rows = Map_new();  List function;  Array _x2c_macro_pending_2 = Array_update_n(Array_new(), 1, List_var(ast)); {
@@ -2536,7 +2536,7 @@ Map Compiler_inline_type_dependencies(Compiler c, List ast){
                 static MatchCaptureSite _x2c_match_site_22;  if (x2c_match_site_try_capture(& _x2c_match_site_22, _x2c_match_expr, List_var(_176), &_x2c_match_capture)) {Var type = _x2c_match_values[0];  Map_setindex(types, type, int_var(1));  break;
               }
               static MatchCaptureSite _x2c_match_site_23;  if (x2c_match_site_try_capture(& _x2c_match_site_23, _x2c_match_expr, List_var(_194), &_x2c_match_capture)) {Var receiver = _x2c_match_values[0]; {
-                Type aggregate = Sym_delegate_aggregate(c -> sym, Var_type(receiver));  if(List_truth(Type_list(aggregate))) Map_setindex(types, List_var(aggregate), int_var(1));
+                Type aggregate = Sym_member_aggregate(c -> sym, Var_type(receiver));  if(List_truth(Type_list(aggregate))) Map_setindex(types, List_var(aggregate), int_var(1));
               }
               break;
             }
