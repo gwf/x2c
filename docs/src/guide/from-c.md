@@ -221,7 +221,7 @@ but remain operators in code. See [literal rules](../reference/language.md#perce
 | `a === b`, `a !== b` | Identity tests; for `Var`, compare tagged representation |
 | `value is Type`, `value is not Type` | Require a Var left operand; test its exact tag, not ancestry or convertibility; a tag Symbol may replace `Type` |
 | `item in collection` | Membership; Maps test keys, Strings test substrings; negate with `!(item in collection)` |
-| `a @ b`, `a @= b` | Call the participating type's `matmul` operation; `@=` updates its left operand |
+| `a.matmul(b)` | Multiply matrices through an ordinary method supplied by the participating type |
 | `items[-1]`, `items[start:stop:step]` | Negative indexing and slicing on Array/List/String; omitted bounds are allowed, zero step is invalid |
 | `int i, float x;` | Restart declaration specifiers after a comma |
 | `Var (a, b) = values;` | Destructure a List into new bindings |
@@ -371,12 +371,14 @@ single evaluation matters.
 | `keyword` | Give a macro a source keyword alias; shipped `class` and `foreach` use this mechanism |
 | Decorator macro | Consume and transform the following statement, function, or named type |
 
-A sequence hole such as `Expr $args...` captures syntax for `$args...`
-expansion in supported positions. This differs from `@` splicing in quoted
-Lists. A `meta` function can also be called at runtime; `$f(...)` selects
-compile-time execution. Neither form implies purity. `$` means interpolation inside quoted data and
-macro/meta invocation in source code. Runtime Lisp evaluation is a separate
-explicit library operation. See [macros](macros.md) and [meta functions](meta-functions.md).
+A sequence hole such as `Expr @args` captures syntax for `@args` expansion
+in supported positions. `$` inserts one result; `@` splices a sequence.
+Quoted Lists use the same insertion and splicing prefixes for runtime values.
+
+A `meta` function can also be called at runtime; `$f(...)` selects
+compile-time execution. Neither form implies purity. Runtime Lisp evaluation
+is a separate explicit library operation. See [macros](macros.md) and
+[meta functions](meta-functions.md).
 
 `with expression as name { ... }` is lexical expression substitution; the
 name defaults to `_`. Each use evaluates the expression again. It creates
