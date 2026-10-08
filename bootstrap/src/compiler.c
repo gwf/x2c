@@ -71,6 +71,7 @@ typedef struct Compiler{
   int expansion_floor;
   SymScope params;
   Map key_ids, macros, kw_aliases;
+  int typed_hooks;
   Map object_macros;
   List arms;
   Map arm_stacks;
@@ -3213,7 +3214,7 @@ List Sym_visible_symbols(Sym);
 Symbol Compiler_peek(Compiler c, int steps){
   if(! _init_guard_) _file_init_();  Token token = c -> token;  if(! steps && Compiler_at_completion(c)){
     List rows = Sym_visible_symbols(c -> sym); {
-      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/compiler.x",.function = "Compiler_peek",.line = 1884};  x2c_error_raise_n(& _x2c_error_site_0, 1248787135328, 3, Symbol_var(740232), Symbol_var(29452646), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
+      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/compiler.x",.function = "Compiler_peek",.line = 1887};  x2c_error_raise_n(& _x2c_error_site_0, 1248787135328, 3, Symbol_var(740232), Symbol_var(29452646), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
     }
 
   }
@@ -3248,7 +3249,7 @@ static Token _skip_backward(Token token, Token origin){
 
 void Compiler_require_input(Compiler c){
   if(! _init_guard_) _file_init_();  if(c -> input_boundary && c -> token >= c -> input_boundary){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/compiler.x",.function = "Compiler_require_input",.line = 1925};  x2c_error_raise_n(& _x2c_error_site_1, 664344300629258, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/compiler.x",.function = "Compiler_require_input",.line = 1928};  x2c_error_raise_n(& _x2c_error_site_1, 664344300629258, 0);  __builtin_unreachable();
   }
 
 }
@@ -3315,7 +3316,7 @@ int Compiler_at_completion(Compiler c){
 
 void Compiler___complete_here(Compiler c, Symbol role, List keywords){
   if(! _init_guard_) _file_init_();  if(! Compiler_at_completion(c)) return;  List rows = Sym_visible_symbols(c -> sym); {
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../src/compiler.x",.function = "Compiler___complete_here",.line = 2049};  x2c_error_raise_n(& _x2c_error_site_2, 1248787135328, 3, Symbol_var(740232), Symbol_var(role), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(keywords));
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../src/compiler.x",.function = "Compiler___complete_here",.line = 2052};  x2c_error_raise_n(& _x2c_error_site_2, 1248787135328, 3, Symbol_var(740232), Symbol_var(role), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(keywords));
   }
 
 }
@@ -3822,11 +3823,11 @@ void Compiler_share_meta_group(Compiler c, Compiler owner){
 }
 
 void Compiler_take_unit_state(Compiler c, Compiler owner){
-  if(! _init_guard_) _file_init_();  c -> id_keys = owner -> id_keys;  c -> key_ids = owner -> key_ids;  c -> macros = owner -> macros;  c -> object_macros = owner -> object_macros;  c -> imports = owner -> imports;  c -> kw_aliases = owner -> kw_aliases;  c -> macro_lisp = owner -> macro_lisp;  c -> declaration_effects = owner -> declaration_effects;  c -> evaluated_effects = owner -> evaluated_effects;  c -> borrowed_lisp = c -> macro_lisp != NULL;  Compiler_share_meta_group(c, owner);
+  if(! _init_guard_) _file_init_();  c -> id_keys = owner -> id_keys;  c -> key_ids = owner -> key_ids;  c -> macros = owner -> macros;  c -> object_macros = owner -> object_macros;  c -> imports = owner -> imports;  c -> kw_aliases = owner -> kw_aliases;  c -> typed_hooks = owner -> typed_hooks;  c -> macro_lisp = owner -> macro_lisp;  c -> declaration_effects = owner -> declaration_effects;  c -> evaluated_effects = owner -> evaluated_effects;  c -> borrowed_lisp = c -> macro_lisp != NULL;  Compiler_share_meta_group(c, owner);
 }
 
 void Compiler_return_unit_state(Compiler c, Compiler owner){
-  if(! _init_guard_) _file_init_();  owner -> macros = c -> macros;  owner -> object_macros = c -> object_macros;  owner -> imports = c -> imports;  owner -> kw_aliases = c -> kw_aliases;  owner -> macro_lisp = c -> macro_lisp;  owner -> declaration_effects = c -> declaration_effects;  owner -> evaluated_effects = c -> evaluated_effects;  owner -> declaration_produced |= c -> declaration_produced;  c -> borrowed_lisp = c -> macro_lisp != NULL;
+  if(! _init_guard_) _file_init_();  owner -> macros = c -> macros;  owner -> object_macros = c -> object_macros;  owner -> imports = c -> imports;  owner -> kw_aliases = c -> kw_aliases;  owner -> typed_hooks = c -> typed_hooks;  owner -> macro_lisp = c -> macro_lisp;  owner -> declaration_effects = c -> declaration_effects;  owner -> evaluated_effects = c -> evaluated_effects;  owner -> declaration_produced |= c -> declaration_produced;  c -> borrowed_lisp = c -> macro_lisp != NULL;
 }
 
 int SourceView_read(SourceView, String, volatile String *);

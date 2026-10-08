@@ -36,7 +36,7 @@ definite pattern binders. Returns their capture-token/binding pairs.
 The caller must pop the scope after parsing or binding the arm body;
 binder diagnostics use `start`.
 
-Source: `src/statements.x:669`
+Source: `src/statements.x:675`
 
 <a id="Compiler.begin_match_arm"></a>
 #### Compiler.begin_match_arm
@@ -47,7 +47,7 @@ Opens a `Sym` scope for one match arm and optionally defines its definite
 pattern binders. The caller must pop the scope after parsing or binding the
 arm body; binder diagnostics use `start`.
 
-Source: `src/statements.x:505`
+Source: `src/statements.x:511`
 
 <a id="Compiler.finish_return_statement"></a>
 #### Compiler.finish_return_statement
@@ -69,7 +69,7 @@ Parses one block-position declaration, statement, or macro insertion.
 The caller owns the surrounding scope; a macro insertion may return a
 `(seq ...)` node containing several block items.
 
-Source: `src/statements.x:769`
+Source: `src/statements.x:775`
 
 <a id="Compiler.parse_block_items"></a>
 #### Compiler.parse_block_items
@@ -79,7 +79,7 @@ Source: `src/statements.x:769`
 Parses block items after an already-consumed opening brace through `}` in
 a new lexical scope. `anchor_items` records statement origins.
 
-Source: `src/statements.x:812`
+Source: `src/statements.x:818`
 
 <a id="Compiler.parse_callable_body"></a>
 #### Compiler.parse_callable_body
@@ -88,7 +88,7 @@ Source: `src/statements.x:812`
 
 Parses a callable's outer block in its active parameter scope.
 
-Source: `src/statements.x:819`
+Source: `src/statements.x:825`
 
 <a id="Compiler.parse_compound_statement"></a>
 #### Compiler.parse_compound_statement
@@ -98,7 +98,7 @@ Source: `src/statements.x:819`
 Parses a compound body after its opening brace and consumes the closing
 `}`, returning an origin-anchored `(block ...)` node.
 
-Source: `src/statements.x:807`
+Source: `src/statements.x:813`
 
 <a id="Compiler.parse_governed"></a>
 #### Compiler.parse_governed
@@ -114,7 +114,7 @@ statement macro that wraps its body in braces keeps the whole group
 inside them. A later statement in the same arm follows the governed one,
 as in C.
 
-Source: `src/statements.x:687`
+Source: `src/statements.x:693`
 
 <a id="Compiler.parse_match_row_argument"></a>
 #### Compiler.parse_match_row_argument
@@ -123,7 +123,7 @@ Source: `src/statements.x:687`
 
 Parses one MatchRow macro argument with the ordinary match-arm owner.
 
-Source: `src/statements.x:455`
+Source: `src/statements.x:461`
 
 <a id="Compiler.parse_statement"></a>
 #### Compiler.parse_statement

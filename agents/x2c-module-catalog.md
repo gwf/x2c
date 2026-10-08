@@ -365,6 +365,7 @@ Public functions:
 `Compiler.record_compile_time_effect`, `Compiler.install_compile_time_effects`,
 `Compiler.macro_form_is_definition`, `Compiler.local_macro_form_is_definition`,
 `Compiler.keyword_form_is_definition`, `Compiler.parse_keyword_definition`,
+`Compiler.hook_for`, `Compiler.apply_hook`, `Compiler.apply_typed_hook`,
 `Compiler.macro_starts_target_at`, `Compiler.macro_invocation_collection`,
 `Compiler.skip_macro_invocation`, `Compiler.skip_named_type_declaration`,
 `Compiler.macro_targets_unit`, `Compiler.try_parse_macro_target_at`,
@@ -376,17 +377,17 @@ Public functions:
 `Compiler.land_quotation`, `Compiler.macro_value_literal`,
 `Compiler.try_parse_macro_pattern`, `Compiler.macro_pattern_at`,
 `Compiler.try_parse_macro_subpattern`, `Compiler.capture_macro_value`,
-`Compiler.take_code_value`, `Compiler.ensure_macro_lisp`,
-`Compiler.parse_macro_lisp_top_level`, `Compiler.parse_macro_lisp_shallow`,
-`Compiler.evaluate_declaration_effect`, `Compiler.parse_macro_lisp_expression`,
-`Compiler.lift_macro_lisp_expression`, `Compiler.bind_macro_lisp_statement`,
-`Compiler.source_path`, `Compiler.open_macro_library`,
-`Compiler.publish_macro_library`, `Compiler.inherits_import`,
-`Compiler.record_comptime`, `Compiler.inherit_library_comptime`,
-`macro_library_filling`, `Compiler.shared_definitions`,
-`Compiler.shares_meta_definition`, `Compiler.install_builtin_macros`,
-`Compiler.bind_meta_operation`, `Compiler.report_lisp_failure`,
-`macro_library_reset`
+`Compiler.take_code_value`, `Compiler.bind_code_value`,
+`Compiler.ensure_macro_lisp`, `Compiler.parse_macro_lisp_top_level`,
+`Compiler.parse_macro_lisp_shallow`, `Compiler.evaluate_declaration_effect`,
+`Compiler.parse_macro_lisp_expression`, `Compiler.lift_macro_lisp_expression`,
+`Compiler.bind_macro_lisp_statement`, `Compiler.source_path`,
+`Compiler.open_macro_library`, `Compiler.publish_macro_library`,
+`Compiler.inherits_import`, `Compiler.record_comptime`,
+`Compiler.inherit_library_comptime`, `macro_library_filling`,
+`Compiler.shared_definitions`, `Compiler.shares_meta_definition`,
+`Compiler.install_builtin_macros`, `Compiler.bind_meta_operation`,
+`Compiler.report_lisp_failure`, `macro_library_reset`
 
 ### [src/main.x](../src/main.x)
 
@@ -416,8 +417,9 @@ the compiler's side of the project meta helper.
 
 Public functions:
 
-`Compiler.meta_helper_call`, `Compiler.use_meta_helper`,
-`Compiler.begin_meta_unit`, `Compiler.stop_meta_helper`
+`Compiler.report_meta_error`, `Compiler.meta_helper_call`,
+`Compiler.use_meta_helper`, `Compiler.begin_meta_unit`,
+`Compiler.stop_meta_helper`
 
 ### [src/meta-native.x](../src/meta-native.x)
 
@@ -428,19 +430,19 @@ Public functions:
 `Compiler.install_meta_function`, `Compiler.install_collected_meta_function`,
 `Compiler.install_meta_declaration`, `Compiler.evaluate_meta_expression`,
 `Compiler.evaluate_meta_statement`, `Compiler.run_meta_call`,
-`Compiler.record_project_meta_effect`, `Compiler.install_project_meta_effect`,
-`Compiler.bind_project_meta`, `Compiler.project_meta_uses_linked`,
-`Compiler.record_native_meta_effect`, `Compiler.install_native_meta_effects`,
-`Compiler.bind_native_meta`, `Compiler.install_native_meta_function`,
-`Compiler.native_meta_accepts`, `Compiler.native_meta_module`,
-`Compiler.native_meta_targets`, `Compiler.bind_linked_meta`,
-`linked_meta_provider_source`, `Compiler.compiler_targets`,
-`Compiler.select_native_modules`, `Compiler.select_package_module`,
-`Compiler.load_native_module`, `Compiler.preload_native_module`,
-`Compiler.add_native_module`, `Compiler.native_module_loaded`,
-`Compiler.native_module_targets`, `Compiler.supplies_native_meta`,
-`x2c_register_extension`, `Compiler.links_extension`,
-`Compiler.extension_archive`
+`Compiler.apply_meta_function`, `Compiler.record_project_meta_effect`,
+`Compiler.install_project_meta_effect`, `Compiler.bind_project_meta`,
+`Compiler.project_meta_uses_linked`, `Compiler.record_native_meta_effect`,
+`Compiler.install_native_meta_effects`, `Compiler.bind_native_meta`,
+`Compiler.install_native_meta_function`, `Compiler.native_meta_accepts`,
+`Compiler.native_meta_module`, `Compiler.native_meta_targets`,
+`Compiler.bind_linked_meta`, `linked_meta_provider_source`,
+`Compiler.compiler_targets`, `Compiler.select_native_modules`,
+`Compiler.select_package_module`, `Compiler.load_native_module`,
+`Compiler.preload_native_module`, `Compiler.add_native_module`,
+`Compiler.native_module_loaded`, `Compiler.native_module_targets`,
+`Compiler.supplies_native_meta`, `x2c_register_extension`,
+`Compiler.links_extension`, `Compiler.extension_archive`
 
 ### [src/meta-project.x](../src/meta-project.x)
 
@@ -467,9 +469,10 @@ Public functions:
 `binding_native_type`, `binding_literal_list`, `x2c_source_text`,
 `x2c_embed_text`, `x2c_literal_value`, `builtin_class_location`,
 `x2c_invocation_file`, `x2c_invocation_line`, `x2c_invocation_column`,
-`x2c_diagnostic_fail`, `x2c_diagnostic_warn`, `meta_type_description`,
-`meta_source_description`, `builtin_foreach_complete`,
-`builtin_foreach_collection`, `MetaContext.reject`,
+`x2c_diagnostic_fail`, `x2c_diagnostic_fail_at`, `x2c_diagnostic_warn`,
+`x2c_code`, `x2c_fresh_name`, `x2c_effect_name`, `x2c_effect_support`,
+`x2c_effect_initialize`, `meta_type_description`, `meta_source_description`,
+`builtin_foreach_complete`, `builtin_foreach_collection`, `MetaContext.reject`,
 `Compiler.bind_sdk_primitives`
 
 ### [src/operator-ledger.x](../src/operator-ledger.x)

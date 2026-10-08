@@ -79,7 +79,19 @@ String x2c_embed_text(Var path);
 
 void x2c_diagnostic_fail(String message, List notes);
 
+void x2c_diagnostic_fail_at(Var node, String message, List notes);
+
 void x2c_diagnostic_warn(String message, List notes);
+
+List x2c_code(List code, List effects);
+
+Atom x2c_fresh_name(String role);
+
+List x2c_effect_name(Atom name);
+
+List x2c_effect_support(Var key, Atom name, List declaration);
+
+List x2c_effect_initialize(Symbol area, List statement);
 
 Map x2c_meta_definition_hashes(void);
 

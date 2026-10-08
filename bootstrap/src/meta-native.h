@@ -31,6 +31,8 @@ List Compiler_evaluate_meta_statement(Compiler c, List expression, AstPos contex
 
 Var Compiler_run_meta_call(Compiler c, List expression, Token site, int slot);
 
+Var Compiler_apply_meta_function(Compiler c, String name, List arguments, Token site);
+
 void Compiler_record_project_meta_effect(Compiler c, List declaration, Token marker);
 
 void Compiler_install_project_meta_effect(Compiler c, List row);

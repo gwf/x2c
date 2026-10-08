@@ -1585,7 +1585,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void){
   _1157 = cons(_1156, NULL);
   _1158 = cons(_614, _1157);
   _1159 = List_var(_1158);
-  _1160 = int_var(927);
+  _1160 = int_var(928);
   _1161 = cons(_1160, NULL);
   _1162 = cons(_620, _1161);
   _1163 = List_var(_1162);
@@ -1593,7 +1593,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void){
   _1165 = cons(_1164, NULL);
   _1166 = cons(_625, _1165);
   _1167 = List_var(_1166);
-  _1168 = int_var(33807);
+  _1168 = int_var(33895);
   _1169 = cons(_1168, NULL);
   _1170 = cons(_633, _1169);
   _1171 = List_var(_1170);
@@ -1703,7 +1703,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void){
   _1275 = cons(_1274, NULL);
   _1276 = cons(_584, _1275);
   _1277 = List_var(_1276);
-  _1278 = int_var(835);
+  _1278 = int_var(836);
   _1279 = cons(_1278, NULL);
   _1280 = cons(_620, _1279);
   _1281 = List_var(_1280);
@@ -1711,7 +1711,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void){
   _1283 = cons(_1282, NULL);
   _1284 = cons(_628, _1283);
   _1285 = List_var(_1284);
-  _1286 = int_var(30264);
+  _1286 = int_var(30352);
   _1287 = cons(_1286, NULL);
   _1288 = cons(_633, _1287);
   _1289 = List_var(_1288);
@@ -1799,11 +1799,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void){
   _1371 = cons(_1370, NULL);
   _1372 = cons(_584, _1371);
   _1373 = List_var(_1372);
-  _1374 = int_var(831);
+  _1374 = int_var(832);
   _1375 = cons(_1374, NULL);
   _1376 = cons(_620, _1375);
   _1377 = List_var(_1376);
-  _1378 = int_var(30197);
+  _1378 = int_var(30285);
   _1379 = cons(_1378, NULL);
   _1380 = cons(_633, _1379);
   _1381 = List_var(_1380);
@@ -1940,11 +1940,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void){
   _1512 = cons(_1511, NULL);
   _1513 = cons(_584, _1512);
   _1514 = List_var(_1513);
-  _1515 = int_var(826);
+  _1515 = int_var(827);
   _1516 = cons(_1515, NULL);
   _1517 = cons(_620, _1516);
   _1518 = List_var(_1517);
-  _1519 = int_var(30075);
+  _1519 = int_var(30163);
   _1520 = cons(_1519, NULL);
   _1521 = cons(_633, _1520);
   _1522 = List_var(_1521);
@@ -3170,12 +3170,13 @@ return Compiler__step_tag(c, ast, Var_symbol(head));
 
 #endif
 #ifndef X2C_TRANSFORM_SOURCE
+List Compiler_apply_typed_hook(Compiler, List, Symbol);
+int List_equal(List, List);
 List transform_array_literal(Compiler c, List ast);
 List transform_map_literal(Compiler c, List ast);
 static Var List_cadr(List);
-int List_equal(List, List);
 static Ast Compiler__step_tag(Compiler c, Ast ast, Symbol tag){
-  Ast next = ast;  switch(tag){
+  Ast next = c -> typed_hooks ? Compiler_apply_typed_hook(c, ast, tag) : ast;  if(! List_equal(next, ast)) return Compiler__step(c, next);  switch(tag){
     case 1139215899608 : case 2391080 : case 895740748108 : case 26416091224 : return ast;  case 377892 : return Compiler__expression_node(c, ast);  case 3313778 : case 1479708786 : next = transform_array_literal(c, ast);  break;  case 26720 : case 1468512 : next = transform_map_literal(c, ast);  break;  case 199912 : next = Compiler__cast(c, ast);  break;  case 19800432 : next = Compiler__index(c, ast);  break;  case 228262 : case 101723016 : return Compiler__ordered_list(c, ast);  case 45156 : next = Compiler__to_var(c, Var_list(List_cadr(ast)));  break;  case 1316904858918 : next = Compiler__string_segments(c, ast);  break;  case 8932560010 : case 272600 : next = Compiler__declaration(c, ast);  break;  case 317060294872 : next = Compiler__destructure_declaration(c, ast);  break;  case 41184168 : next = Compiler__destructure_statement(c, ast);  break;  case 317060127196 : next = Compiler__destructure_value(c, ast);  break;  case 27369680 : next = Compiler__match_cases(c, ast);  break;  case 8728932 : next = Compiler__defer_node(c, ast);  break;  case 1219800220 : next = Compiler__return(c, ast);  break;  case 37833930 : return Compiler__raise_node(c, ast);  case 588 : case 48777994 : case 286 : case 13284 : next = Compiler__truthy(c, ast);  break;  case 199448 : next = Compiler__call(c, ast);  break;  case 992 : next = Compiler__operator(c, ast);  break;  case 35407540848 : next = Compiler__postfix(c, ast);  break;  default: return Compiler__default_node(c, ast);
   }
   if(! List_equal(next, ast)) return Compiler__step(c, next);  return Compiler__default_node(c, ast);
