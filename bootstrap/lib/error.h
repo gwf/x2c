@@ -15,9 +15,12 @@ typedef struct ErrorHandler * ErrorHandler;
 
 typedef Symbol(* ErrorHandlerFn)(List errors, Var data);
 
+typedef int(* ErrorCatchSelect)(List error, Var * captures, int * count);
+
 typedef struct ErrorCatchSite{
   MatchCaptureSite * arms;
   int default_arm, arm_count, state, fenced_arm;
+  ErrorCatchSelect select;
 }
 ErrorCatchSite;
 

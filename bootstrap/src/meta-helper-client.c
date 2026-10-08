@@ -167,6 +167,8 @@ _x2c_defer_env_0;
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
+static int _x2c_catch_select_0(List _x2c_catch_error_0, Var * _x2c_catch_captures_0, int * _x2c_catch_count_0);
+
 typedef struct _x2c_defer_env_1{
   const void * _x2c_defer_capture_2;
 }
@@ -487,7 +489,6 @@ default: ;  Call_stopped(&(call), _85);  break;
 
 
 
-int x2c_error_catch_site_pending(ErrorCatchSite *);
 ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
 void x2c_exception_push(ExceptionFrame *);
 Var Compiler_apply_meta_function(Compiler, String, List, Token);
@@ -500,13 +501,10 @@ void x2c_error_catch_close(ErrorHandler);
 void x2c_exception_leave(ExceptionFrame *);
 static void Call_answer(Call * call, String operation, List operands){
   Var volatile value =((void) 0, Void); {
-    ExceptionFrame _x2c_exception_frame_0;  static MatchCaptureSite _x2c_macro_arms_0[1];  Var _x2c_macro_patterns_0[1];  static ErrorCatchSite _x2c_macro_site_0 ={
-      _x2c_macro_arms_0, -1, 1, ERROR_CATCH_PENDING, - 1
+    ExceptionFrame _x2c_exception_frame_0;  static ErrorCatchSite _x2c_macro_site_0 ={
+      NULL, -1, 1, ERROR_CATCH_STATIC, - 1, _x2c_catch_select_0
     }
-    ;  if(x2c_error_catch_site_pending(& _x2c_macro_site_0)){
-      _x2c_macro_patterns_0[0] = List_var(cons(Symbol_var(61045002), cons(Symbol_var(58262293080), NULL)));
-    }
-    volatile ErrorHandler _x2c_error_handler_0 = x2c_error_catch_site_push(& _x2c_exception_frame_0, & _x2c_macro_site_0, _x2c_macro_patterns_0);  x2c_exception_push(& _x2c_exception_frame_0);  if(! sigsetjmp(_x2c_exception_frame_0.env, 0)) value = Compiler_apply_meta_function((* call).compiler, operation, operands, (* call).site);  else{
+    ;  volatile ErrorHandler _x2c_error_handler_0 = x2c_error_catch_site_push(& _x2c_exception_frame_0, & _x2c_macro_site_0, NULL);  x2c_exception_push(& _x2c_exception_frame_0);  if(! sigsetjmp(_x2c_exception_frame_0.env, 0)) value = Compiler_apply_meta_function((* call).compiler, operation, operands, (* call).site);  else{
       x2c_exception_landed(& _x2c_exception_frame_0);  if(x2c_exception_is_error_target(& _x2c_exception_frame_0)){
         int _x2c_macro_selected_0 = x2c_error_catch_selected(_x2c_error_handler_0);  x2c_error_catch_detach(_x2c_error_handler_0);  x2c_exception_mark_handled(& _x2c_exception_frame_0);  if(_x2c_macro_selected_0 == 0){
           Var volatile code;  code = x2c_error_catch_capture(_x2c_error_handler_0, 0);  List volatile detail;  detail = Var_list(x2c_error_catch_capture(_x2c_error_handler_0, 1)); {
@@ -690,21 +688,23 @@ static int _helper_send(List message, double deadline){
 
 }
 
+int x2c_error_catch_site_pending(ErrorCatchSite *);
+
 static int _helper_receive(double deadline, Var * reply){
   for(; ; ){
     int volatile framed = 0;
     {
       ExceptionFrame _x2c_exception_frame_1;
-      static MatchCaptureSite _x2c_macro_arms_1[1];
-      Var _x2c_macro_patterns_1[1];
+      static MatchCaptureSite _x2c_macro_arms_0[1];
+      Var _x2c_macro_patterns_0[1];
       static ErrorCatchSite _x2c_macro_site_1 ={
-        _x2c_macro_arms_1, -1, 1, ERROR_CATCH_PENDING, - 1
+        _x2c_macro_arms_0, -1, 1, ERROR_CATCH_PENDING, - 1
       }
       ;
       if(x2c_error_catch_site_pending(& _x2c_macro_site_1)){
-        _x2c_macro_patterns_1[0] = List_var(cons(List_var(cons(Symbol_var(62436), cons(Symbol_var(664344300629258), cons(Symbol_var(28682226919752), NULL)))), cons(Symbol_var(54), NULL)));
+        _x2c_macro_patterns_0[0] = List_var(cons(List_var(cons(Symbol_var(62436), cons(Symbol_var(664344300629258), cons(Symbol_var(28682226919752), NULL)))), cons(Symbol_var(54), NULL)));
       }
-      volatile ErrorHandler _x2c_error_handler_1 = x2c_error_catch_site_push(& _x2c_exception_frame_1, & _x2c_macro_site_1, _x2c_macro_patterns_1);
+      volatile ErrorHandler _x2c_error_handler_1 = x2c_error_catch_site_push(& _x2c_exception_frame_1, & _x2c_macro_site_1, _x2c_macro_patterns_0);
       x2c_exception_push(& _x2c_exception_frame_1);
       if(! sigsetjmp(_x2c_exception_frame_1.env, 0)) framed = _take_frame(&((* reply)));
       else{
@@ -877,6 +877,30 @@ static void _helper_shutdown(void){
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;
   *(*(int * *) _x2c_defer_data_0->_x2c_defer_capture_0) =(*(int *) _x2c_defer_data_0->_x2c_defer_capture_1);
+}
+
+static int List_truth(List);
+
+static Var List_car(List);
+
+static List List_cdr(List);
+
+static int _x2c_catch_select_0(List _x2c_catch_error_0, Var * _x2c_catch_captures_0, int * _x2c_catch_count_0){
+  List _x2c_cursor0_0 = _x2c_catch_error_0;
+  {
+    _x2c_cursor0_0 = _x2c_catch_error_0;
+    if(List_truth(_x2c_cursor0_0)){
+      Var code = List_car(_x2c_cursor0_0);
+      _x2c_cursor0_0 = List_cdr(_x2c_cursor0_0);
+      List detail = _x2c_cursor0_0;
+      _x2c_catch_captures_0[0] = code;
+      _x2c_catch_captures_0[1] = List_var(detail);
+      * _x2c_catch_count_0 = 2;
+      return 0;
+    }
+
+  }
+  return -1;
 }
 
 void Buffer_cleanup(Buffer);

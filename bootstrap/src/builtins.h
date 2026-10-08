@@ -13,6 +13,10 @@
 #include "transform.h"
 List x2c_param_make(List type, Var name);
 
+List x2c_pattern_steps(List pattern, Atom subject);
+
+List x2c_pattern_nest(List steps, List inner);
+
 List builtin_try_cleanup_placement(Var cleanup);
 
 List builtin_catch_patterns(List patterns, List items);

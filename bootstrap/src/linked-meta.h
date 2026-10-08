@@ -8,6 +8,7 @@
 #include "x2c.h"
 #include "common.h"
 #include "list-selectors.h"
+#include "meta-patterns.h"
 #include "meta.h"
 #include "native-scalar-types.h"
 #include "system-macros.h"
@@ -16,6 +17,8 @@
 #include "fields.h"
 #include "grammar.h"
 #include "operator-ledger.h"
+List x2c_pattern_steps(List pattern, Atom subject);
+
 List x2c_expr_field(List receiver, String name);
 
 List x2c_expr_cast(List type, List expression);

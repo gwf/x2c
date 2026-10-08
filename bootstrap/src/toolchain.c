@@ -93,6 +93,8 @@ static void _print_argument(String argument);
 
 static int _shell_safe(String argument);
 
+static int _x2c_catch_select_0(List _x2c_catch_error_0, Var * _x2c_catch_captures_0, int * _x2c_catch_count_0);
+
 static Var _x2c_lambda_0(Var directory);
 
 static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0);
@@ -107,6 +109,8 @@ Func x2c_func_shared(FuncAdapter, List);
 
 
 _x2c_initializer_choice_242786A8_0((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _132)))
+static int _x2c_catch_select_1(List _x2c_catch_error_1, Var * _x2c_catch_captures_1, int * _x2c_catch_count_1);
+
 static Var _x2c_lambda_1(Var directory);
 
 static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func_argv_1);
@@ -308,8 +312,6 @@ String home_dir(void);
 
 
 
-int x2c_error_catch_site_pending(ErrorCatchSite *);
-
 ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
 
 void x2c_exception_push(ExceptionFrame *);
@@ -346,16 +348,11 @@ static String _recorded_tool(String name){
   if(! String_truth(home)) return NULL;
   {
     ExceptionFrame _x2c_exception_frame_0;
-    static MatchCaptureSite _x2c_macro_arms_0[1];
-    Var _x2c_macro_patterns_0[1];
     static ErrorCatchSite _x2c_macro_site_0 ={
-      _x2c_macro_arms_0, -1, 1, ERROR_CATCH_PENDING, - 1
+      NULL, -1, 1, ERROR_CATCH_STATIC, - 1, _x2c_catch_select_0
     }
     ;
-    if(x2c_error_catch_site_pending(& _x2c_macro_site_0)){
-      _x2c_macro_patterns_0[0] = List_var(cons(Symbol_var(31862161386376), cons(Symbol_var(54), NULL)));
-    }
-    volatile ErrorHandler _x2c_error_handler_0 = x2c_error_catch_site_push(& _x2c_exception_frame_0, & _x2c_macro_site_0, _x2c_macro_patterns_0);
+    volatile ErrorHandler _x2c_error_handler_0 = x2c_error_catch_site_push(& _x2c_exception_frame_0, & _x2c_macro_site_0, NULL);
     x2c_exception_push(& _x2c_exception_frame_0);
     if(! sigsetjmp(_x2c_exception_frame_0.env, 0)) record = Path_read_text(String_join(NULL, cons(String_var(home), cons(String_var(_5), NULL))));
     else{
@@ -576,22 +573,24 @@ static Job _captured(List arguments){
   return Job_options(List_job(arguments), Map_update_n(Map_new(), 2, Symbol_var(1317305704), Symbol_var(6544469130), Symbol_var(1317285028), Symbol_var(6544469130)));
 }
 
+int x2c_error_catch_site_pending(ErrorCatchSite *);
+
 Job Job_start(Job);
 
 static Job _start_tool(Job command, String program, String * failure){
   Job volatile job = NULL;
   {
     ExceptionFrame _x2c_exception_frame_1;
-    static MatchCaptureSite _x2c_macro_arms_1[1];
-    Var _x2c_macro_patterns_1[1];
+    static MatchCaptureSite _x2c_macro_arms_0[1];
+    Var _x2c_macro_patterns_0[1];
     static ErrorCatchSite _x2c_macro_site_1 ={
-      _x2c_macro_arms_1, -1, 1, ERROR_CATCH_PENDING, - 1
+      _x2c_macro_arms_0, -1, 1, ERROR_CATCH_PENDING, - 1
     }
     ;
     if(x2c_error_catch_site_pending(& _x2c_macro_site_1)){
-      _x2c_macro_patterns_1[0] = List_var(cons(List_var(cons(Symbol_var(62436), cons(Symbol_var(31862161386376), cons(Symbol_var(20399393368), NULL)))), cons(Symbol_var(58262293080), NULL)));
+      _x2c_macro_patterns_0[0] = List_var(cons(List_var(cons(Symbol_var(62436), cons(Symbol_var(31862161386376), cons(Symbol_var(20399393368), NULL)))), cons(Symbol_var(58262293080), NULL)));
     }
-    volatile ErrorHandler _x2c_error_handler_1 = x2c_error_catch_site_push(& _x2c_exception_frame_1, & _x2c_macro_site_1, _x2c_macro_patterns_1);
+    volatile ErrorHandler _x2c_error_handler_1 = x2c_error_catch_site_push(& _x2c_exception_frame_1, & _x2c_macro_site_1, _x2c_macro_patterns_0);
     x2c_exception_push(& _x2c_exception_frame_1);
     if(! sigsetjmp(_x2c_exception_frame_1.env, 0)) job = Job_start(command);
     else{
@@ -651,16 +650,11 @@ int Toolchain_preprocess(Toolchain t, const char * fname, List include_dirs, con
   int status = _capture(command, Var_string(List_car(arguments)), &((* output)), &((* errors)));
   {
     ExceptionFrame _x2c_exception_frame_2;
-    static MatchCaptureSite _x2c_macro_arms_2[1];
-    Var _x2c_macro_patterns_2[1];
     static ErrorCatchSite _x2c_macro_site_2 ={
-      _x2c_macro_arms_2, -1, 1, ERROR_CATCH_PENDING, - 1
+      NULL, -1, 1, ERROR_CATCH_STATIC, - 1, _x2c_catch_select_1
     }
     ;
-    if(x2c_error_catch_site_pending(& _x2c_macro_site_2)){
-      _x2c_macro_patterns_2[0] = List_var(cons(Symbol_var(31862161386376), cons(Symbol_var(54), NULL)));
-    }
-    volatile ErrorHandler _x2c_error_handler_2 = x2c_error_catch_site_push(& _x2c_exception_frame_2, & _x2c_macro_site_2, _x2c_macro_patterns_2);
+    volatile ErrorHandler _x2c_error_handler_2 = x2c_error_catch_site_push(& _x2c_exception_frame_2, & _x2c_macro_site_2, NULL);
     x2c_exception_push(& _x2c_exception_frame_2);
     if(! sigsetjmp(_x2c_exception_frame_2.env, 0))(* dependencies) = Path_read_text(depfile);
     else{
@@ -869,6 +863,21 @@ static int _shell_safe(String argument){
   return 1;
 }
 
+static List List_cdr(List);
+
+static int _x2c_catch_select_0(List _x2c_catch_error_0, Var * _x2c_catch_captures_0, int * _x2c_catch_count_0){
+  List _x2c_cursor0_0 = _x2c_catch_error_0;
+  {
+    _x2c_cursor0_0 = _x2c_catch_error_0;
+    if(List_car(_x2c_cursor0_0).u64 ==(Symbol_var(31862161386376)).u64){
+      _x2c_cursor0_0 = List_cdr(_x2c_cursor0_0);
+      return 0;
+    }
+
+  }
+  return -1;
+}
+
 static Var _x2c_lambda_0(Var directory){
   return List_var(cons(_30, cons(directory, NULL)));
   ;
@@ -880,6 +889,19 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
   Var a0 = x2c_func_value_argument(_x2c_func_binding_0, _x2c_func_argv_0, 0, 45156);
   return _x2c_lambda_0(a0);
   ;
+}
+
+static int _x2c_catch_select_1(List _x2c_catch_error_1, Var * _x2c_catch_captures_1, int * _x2c_catch_count_1){
+  List _x2c_cursor0_1 = _x2c_catch_error_1;
+  {
+    _x2c_cursor0_1 = _x2c_catch_error_1;
+    if(List_car(_x2c_cursor0_1).u64 ==(Symbol_var(31862161386376)).u64){
+      _x2c_cursor0_1 = List_cdr(_x2c_cursor0_1);
+      return 0;
+    }
+
+  }
+  return -1;
 }
 
 static Var _x2c_lambda_1(Var directory){

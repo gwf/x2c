@@ -207,6 +207,12 @@ static int Build__files_unchanged(Build b, List files);
 
 static double _wall_seconds(void);
 
+static int _x2c_catch_select_0(List _x2c_catch_error_0, Var * _x2c_catch_captures_0, int * _x2c_catch_count_0);
+
+static int _x2c_catch_select_1(List _x2c_catch_error_1, Var * _x2c_catch_captures_1, int * _x2c_catch_count_1);
+
+static int _x2c_catch_select_2(List _x2c_catch_error_2, Var * _x2c_catch_captures_2, int * _x2c_catch_count_2);
+
 static Var _x2c_lambda_0(Var dir);
 
 static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0);
@@ -227,6 +233,10 @@ typedef struct _x2c_lambda_context_0{
 _x2c_lambda_context_0;
 
 static Var _x2c_lambda_1(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0);
+
+static int _x2c_catch_select_3(List _x2c_catch_error_3, Var * _x2c_catch_captures_3, int * _x2c_catch_count_3);
+
+static int _x2c_catch_select_4(List _x2c_catch_error_4, Var * _x2c_catch_captures_4, int * _x2c_catch_count_4);
 
 static Var String_var(String);
 
@@ -659,8 +669,6 @@ static String CliRequest__default_output(CliRequest request){
 
 
 
-int x2c_error_catch_site_pending(ErrorCatchSite *);
-
 ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
 
 void x2c_exception_push(ExceptionFrame *);
@@ -691,16 +699,11 @@ static void Build__make_work_dirs(Build b){
   b -> temporary = ! String_truth(b -> work_dir);
   {
     ExceptionFrame _x2c_exception_frame_0;
-    static MatchCaptureSite _x2c_macro_arms_0[1];
-    Var _x2c_macro_patterns_0[1];
     static ErrorCatchSite _x2c_macro_site_0 ={
-      _x2c_macro_arms_0, -1, 1, ERROR_CATCH_PENDING, - 1
+      NULL, -1, 1, ERROR_CATCH_STATIC, - 1, _x2c_catch_select_0
     }
     ;
-    if(x2c_error_catch_site_pending(& _x2c_macro_site_0)){
-      _x2c_macro_patterns_0[0] = List_var(cons(Symbol_var(20399393368), cons(Symbol_var(58262293080), NULL)));
-    }
-    volatile ErrorHandler _x2c_error_handler_0 = x2c_error_catch_site_push(& _x2c_exception_frame_0, & _x2c_macro_site_0, _x2c_macro_patterns_0);
+    volatile ErrorHandler _x2c_error_handler_0 = x2c_error_catch_site_push(& _x2c_exception_frame_0, & _x2c_macro_site_0, NULL);
     x2c_exception_push(& _x2c_exception_frame_0);
     if(! sigsetjmp(_x2c_exception_frame_0.env, 0)){
       if(! String_truth(b -> work_dir) && request -> dry_run) b -> work_dir = _20;
@@ -1038,16 +1041,11 @@ static void _write_entry(Path entry, List units, String exports){
   Path link = Path_join(Path_dirname(entry), _69);
   {
     ExceptionFrame _x2c_exception_frame_1;
-    static MatchCaptureSite _x2c_macro_arms_1[1];
-    Var _x2c_macro_patterns_1[1];
     static ErrorCatchSite _x2c_macro_site_1 ={
-      _x2c_macro_arms_1, -1, 1, ERROR_CATCH_PENDING, - 1
+      NULL, -1, 1, ERROR_CATCH_STATIC, - 1, _x2c_catch_select_1
     }
     ;
-    if(x2c_error_catch_site_pending(& _x2c_macro_site_1)){
-      _x2c_macro_patterns_1[0] = List_var(cons(Symbol_var(20399393368), cons(Symbol_var(58262293080), NULL)));
-    }
-    volatile ErrorHandler _x2c_error_handler_1 = x2c_error_catch_site_push(& _x2c_exception_frame_1, & _x2c_macro_site_1, _x2c_macro_patterns_1);
+    volatile ErrorHandler _x2c_error_handler_1 = x2c_error_catch_site_push(& _x2c_exception_frame_1, & _x2c_macro_site_1, NULL);
     x2c_exception_push(& _x2c_exception_frame_1);
     if(! sigsetjmp(_x2c_exception_frame_1.env, 0)){
       Path_make_dirs(Path_dirname(entry));
@@ -1323,6 +1321,8 @@ static String Build__compile_command(Build b, CcJob job){
 
 String String_join(String, List);
 
+int x2c_error_catch_site_pending(ErrorCatchSite *);
+
 void file_publish(List);
 
 void report_line(Symbol, String);
@@ -1332,16 +1332,16 @@ int compile_commands_write(String path, Array commands){
   String text = String_join(NULL, cons(String_var(_86), cons(String_var(String_join(_87, Array_list(commands))), cons(String_var(_88), NULL))));
   {
     ExceptionFrame _x2c_exception_frame_2;
-    static MatchCaptureSite _x2c_macro_arms_2[1];
-    Var _x2c_macro_patterns_2[1];
+    static MatchCaptureSite _x2c_macro_arms_0[1];
+    Var _x2c_macro_patterns_0[1];
     static ErrorCatchSite _x2c_macro_site_2 ={
-      _x2c_macro_arms_2, -1, 1, ERROR_CATCH_PENDING, - 1
+      _x2c_macro_arms_0, -1, 1, ERROR_CATCH_PENDING, - 1
     }
     ;
     if(x2c_error_catch_site_pending(& _x2c_macro_site_2)){
-      _x2c_macro_patterns_2[0] = List_var(cons(List_var(cons(Symbol_var(62436), cons(Symbol_var(31862161386376), cons(Symbol_var(20399393368), NULL)))), cons(Symbol_var(54), NULL)));
+      _x2c_macro_patterns_0[0] = List_var(cons(List_var(cons(Symbol_var(62436), cons(Symbol_var(31862161386376), cons(Symbol_var(20399393368), NULL)))), cons(Symbol_var(54), NULL)));
     }
-    volatile ErrorHandler _x2c_error_handler_2 = x2c_error_catch_site_push(& _x2c_exception_frame_2, & _x2c_macro_site_2, _x2c_macro_patterns_2);
+    volatile ErrorHandler _x2c_error_handler_2 = x2c_error_catch_site_push(& _x2c_exception_frame_2, & _x2c_macro_site_2, _x2c_macro_patterns_0);
     x2c_exception_push(& _x2c_exception_frame_2);
     if(! sigsetjmp(_x2c_exception_frame_2.env, 0)){
       file_publish(cons(String_var(path), cons(String_var(text), NULL)));
@@ -1840,16 +1840,11 @@ void Build_cleanup(Build b, int success){
   if(! success || ! b -> temporary || b -> request -> dry_run) return;
   {
     ExceptionFrame _x2c_exception_frame_5;
-    static MatchCaptureSite _x2c_macro_arms_3[1];
-    Var _x2c_macro_patterns_3[1];
     static ErrorCatchSite _x2c_macro_site_3 ={
-      _x2c_macro_arms_3, -1, 1, ERROR_CATCH_PENDING, - 1
+      NULL, -1, 1, ERROR_CATCH_STATIC, - 1, _x2c_catch_select_2
     }
     ;
-    if(x2c_error_catch_site_pending(& _x2c_macro_site_3)){
-      _x2c_macro_patterns_3[0] = List_var(cons(Symbol_var(20399393368), cons(Symbol_var(54), NULL)));
-    }
-    volatile ErrorHandler _x2c_error_handler_3 = x2c_error_catch_site_push(& _x2c_exception_frame_5, & _x2c_macro_site_3, _x2c_macro_patterns_3);
+    volatile ErrorHandler _x2c_error_handler_3 = x2c_error_catch_site_push(& _x2c_exception_frame_5, & _x2c_macro_site_3, NULL);
     x2c_exception_push(& _x2c_exception_frame_5);
     if(! sigsetjmp(_x2c_exception_frame_5.env, 0)) Path_remove_tree(b -> work_dir);
     else{
@@ -2093,16 +2088,11 @@ int CliRequest_script_current(CliRequest request, String directory){
   List volatile lines = NULL;
   {
     ExceptionFrame _x2c_exception_frame_6;
-    static MatchCaptureSite _x2c_macro_arms_4[1];
-    Var _x2c_macro_patterns_4[1];
     static ErrorCatchSite _x2c_macro_site_4 ={
-      _x2c_macro_arms_4, -1, 1, ERROR_CATCH_PENDING, - 1
+      NULL, -1, 1, ERROR_CATCH_STATIC, - 1, _x2c_catch_select_3
     }
     ;
-    if(x2c_error_catch_site_pending(& _x2c_macro_site_4)){
-      _x2c_macro_patterns_4[0] = List_var(cons(Symbol_var(20399393368), cons(Symbol_var(54), NULL)));
-    }
-    volatile ErrorHandler _x2c_error_handler_4 = x2c_error_catch_site_push(& _x2c_exception_frame_6, & _x2c_macro_site_4, _x2c_macro_patterns_4);
+    volatile ErrorHandler _x2c_error_handler_4 = x2c_error_catch_site_push(& _x2c_exception_frame_6, & _x2c_macro_site_4, NULL);
     x2c_exception_push(& _x2c_exception_frame_6);
     if(! sigsetjmp(_x2c_exception_frame_6.env, 0)) lines = String_split_lines(Path_read_text(record), 0);
     else{
@@ -2292,16 +2282,11 @@ static List _depfile_inputs(String depfile){
   String volatile text = NULL;
   {
     ExceptionFrame _x2c_exception_frame_7;
-    static MatchCaptureSite _x2c_macro_arms_5[1];
-    Var _x2c_macro_patterns_5[1];
     static ErrorCatchSite _x2c_macro_site_5 ={
-      _x2c_macro_arms_5, -1, 1, ERROR_CATCH_PENDING, - 1
+      NULL, -1, 1, ERROR_CATCH_STATIC, - 1, _x2c_catch_select_4
     }
     ;
-    if(x2c_error_catch_site_pending(& _x2c_macro_site_5)){
-      _x2c_macro_patterns_5[0] = List_var(cons(Symbol_var(20399393368), cons(Symbol_var(54), NULL)));
-    }
-    volatile ErrorHandler _x2c_error_handler_5 = x2c_error_catch_site_push(& _x2c_exception_frame_7, & _x2c_macro_site_5, _x2c_macro_patterns_5);
+    volatile ErrorHandler _x2c_error_handler_5 = x2c_error_catch_site_push(& _x2c_exception_frame_7, & _x2c_macro_site_5, NULL);
     x2c_exception_push(& _x2c_exception_frame_7);
     if(! sigsetjmp(_x2c_exception_frame_7.env, 0)) text = File_string_close(input);
     else{
@@ -2357,16 +2342,16 @@ static int _state_matches(String path, uint64_t hash){
   String volatile text = NULL;
   {
     ExceptionFrame _x2c_exception_frame_8;
-    static MatchCaptureSite _x2c_macro_arms_6[1];
-    Var _x2c_macro_patterns_6[1];
+    static MatchCaptureSite _x2c_macro_arms_1[1];
+    Var _x2c_macro_patterns_1[1];
     static ErrorCatchSite _x2c_macro_site_6 ={
-      _x2c_macro_arms_6, -1, 1, ERROR_CATCH_PENDING, - 1
+      _x2c_macro_arms_1, -1, 1, ERROR_CATCH_PENDING, - 1
     }
     ;
     if(x2c_error_catch_site_pending(& _x2c_macro_site_6)){
-      _x2c_macro_patterns_6[0] = List_var(cons(List_var(cons(Symbol_var(62436), cons(Symbol_var(31862161386376), cons(Symbol_var(20399393368), NULL)))), cons(Symbol_var(54), NULL)));
+      _x2c_macro_patterns_1[0] = List_var(cons(List_var(cons(Symbol_var(62436), cons(Symbol_var(31862161386376), cons(Symbol_var(20399393368), NULL)))), cons(Symbol_var(54), NULL)));
     }
-    volatile ErrorHandler _x2c_error_handler_6 = x2c_error_catch_site_push(& _x2c_exception_frame_8, & _x2c_macro_site_6, _x2c_macro_patterns_6);
+    volatile ErrorHandler _x2c_error_handler_6 = x2c_error_catch_site_push(& _x2c_exception_frame_8, & _x2c_macro_site_6, _x2c_macro_patterns_1);
     x2c_exception_push(& _x2c_exception_frame_8);
     if(! sigsetjmp(_x2c_exception_frame_8.env, 0)) text = Path_read_text(path);
     else{
@@ -2431,16 +2416,16 @@ static void _state_write_lines(String path, uint64_t hash, List lines){
   }
   {
     ExceptionFrame _x2c_exception_frame_9;
-    static MatchCaptureSite _x2c_macro_arms_7[1];
-    Var _x2c_macro_patterns_7[1];
+    static MatchCaptureSite _x2c_macro_arms_2[1];
+    Var _x2c_macro_patterns_2[1];
     static ErrorCatchSite _x2c_macro_site_7 ={
-      _x2c_macro_arms_7, -1, 1, ERROR_CATCH_PENDING, - 1
+      _x2c_macro_arms_2, -1, 1, ERROR_CATCH_PENDING, - 1
     }
     ;
     if(x2c_error_catch_site_pending(& _x2c_macro_site_7)){
-      _x2c_macro_patterns_7[0] = List_var(cons(List_var(cons(Symbol_var(62436), cons(Symbol_var(31862161386376), cons(Symbol_var(20399393368), NULL)))), cons(Symbol_var(54), NULL)));
+      _x2c_macro_patterns_2[0] = List_var(cons(List_var(cons(Symbol_var(62436), cons(Symbol_var(31862161386376), cons(Symbol_var(20399393368), NULL)))), cons(Symbol_var(54), NULL)));
     }
-    volatile ErrorHandler _x2c_error_handler_7 = x2c_error_catch_site_push(& _x2c_exception_frame_9, & _x2c_macro_site_7, _x2c_macro_patterns_7);
+    volatile ErrorHandler _x2c_error_handler_7 = x2c_error_catch_site_push(& _x2c_exception_frame_9, & _x2c_macro_site_7, _x2c_macro_patterns_2);
     x2c_exception_push(& _x2c_exception_frame_9);
     if(! sigsetjmp(_x2c_exception_frame_9.env, 0)) file_publish(cons(String_var(path), cons(String_var(text), NULL)));
     else{
@@ -2499,6 +2484,51 @@ static double _wall_seconds(void){
   return(double) now.tv_sec +(double) now.tv_nsec / 1e9;
 }
 
+static int _x2c_catch_select_0(List _x2c_catch_error_0, Var * _x2c_catch_captures_0, int * _x2c_catch_count_0){
+  List _x2c_cursor0_0 = _x2c_catch_error_0;
+  {
+    _x2c_cursor0_0 = _x2c_catch_error_0;
+    if(List_car(_x2c_cursor0_0).u64 ==(Symbol_var(20399393368)).u64){
+      _x2c_cursor0_0 = List_cdr(_x2c_cursor0_0);
+      List detail = _x2c_cursor0_0;
+      _x2c_catch_captures_0[0] = List_var(detail);
+      * _x2c_catch_count_0 = 1;
+      return 0;
+    }
+
+  }
+  return -1;
+}
+
+static int _x2c_catch_select_1(List _x2c_catch_error_1, Var * _x2c_catch_captures_1, int * _x2c_catch_count_1){
+  List _x2c_cursor0_1 = _x2c_catch_error_1;
+  {
+    _x2c_cursor0_1 = _x2c_catch_error_1;
+    if(List_car(_x2c_cursor0_1).u64 ==(Symbol_var(20399393368)).u64){
+      _x2c_cursor0_1 = List_cdr(_x2c_cursor0_1);
+      List detail = _x2c_cursor0_1;
+      _x2c_catch_captures_1[0] = List_var(detail);
+      * _x2c_catch_count_1 = 1;
+      return 0;
+    }
+
+  }
+  return -1;
+}
+
+static int _x2c_catch_select_2(List _x2c_catch_error_2, Var * _x2c_catch_captures_2, int * _x2c_catch_count_2){
+  List _x2c_cursor0_2 = _x2c_catch_error_2;
+  {
+    _x2c_cursor0_2 = _x2c_catch_error_2;
+    if(List_car(_x2c_cursor0_2).u64 ==(Symbol_var(20399393368)).u64){
+      _x2c_cursor0_2 = List_cdr(_x2c_cursor0_2);
+      return 0;
+    }
+
+  }
+  return -1;
+}
+
 static Var _x2c_lambda_0(Var dir){
   return String_var(String_join(NULL, cons(String_var(Var_str(dir)), cons(String_var(_2), NULL))));
   ;
@@ -2519,6 +2549,32 @@ static Var _x2c_lambda_1(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda
   const _x2c_lambda_context_0 * _x2c_lambda_context_value_0 =(const _x2c_lambda_context_0 *) Func_context(_x2c_lambda_closure_0);
   return int_var(String_startswith(Var_string(_x2c_lambda_context_value_0 -> _x2c_lambda_capture_0), prefix));
   ;
+}
+
+static int _x2c_catch_select_3(List _x2c_catch_error_3, Var * _x2c_catch_captures_3, int * _x2c_catch_count_3){
+  List _x2c_cursor0_3 = _x2c_catch_error_3;
+  {
+    _x2c_cursor0_3 = _x2c_catch_error_3;
+    if(List_car(_x2c_cursor0_3).u64 ==(Symbol_var(20399393368)).u64){
+      _x2c_cursor0_3 = List_cdr(_x2c_cursor0_3);
+      return 0;
+    }
+
+  }
+  return -1;
+}
+
+static int _x2c_catch_select_4(List _x2c_catch_error_4, Var * _x2c_catch_captures_4, int * _x2c_catch_count_4){
+  List _x2c_cursor0_4 = _x2c_catch_error_4;
+  {
+    _x2c_cursor0_4 = _x2c_catch_error_4;
+    if(List_car(_x2c_cursor0_4).u64 ==(Symbol_var(20399393368)).u64){
+      _x2c_cursor0_4 = List_cdr(_x2c_cursor0_4);
+      return 0;
+    }
+
+  }
+  return -1;
 }
 
 #undef _x2c_initializer_choice_8309C62D_0_expanded

@@ -15,9 +15,12 @@ typedef struct ErrorHandler * ErrorHandler;
 
 typedef Symbol(* ErrorHandlerFn)(List errors, Var data);
 
+typedef int(* ErrorCatchSelect)(List error, Var * captures, int * count);
+
 typedef struct ErrorCatchSite{
   MatchCaptureSite * arms;
   int default_arm, arm_count, state, fenced_arm;
+  ErrorCatchSelect select;
 }
 ErrorCatchSite;
 
@@ -182,11 +185,13 @@ static Symbol ErrorHandler__catch_match(ErrorHandler h);
 
 static int ErrorHandler__catch_select(ErrorHandler h, ErrorRecord * record, List projection);
 
+static int ErrorHandler__catch_selected(ErrorHandler h, ErrorRecord * record, List projection);
+
 static int ErrorHandler__catch_arm(ErrorHandler h, ErrorRecord * record, List projection, int i);
 
 static MatchPlan ErrorHandler__arm_plan(ErrorHandler h, int i);
 
-static void ErrorHandler__commit_captures(ErrorHandler handle, ErrorRecord * record, MatchCaptureLayout layout, MatchCaptureBuffer * captures);
+static void ErrorHandler__commit_captures(ErrorHandler handle, ErrorRecord * record, int count, MatchCaptureBuffer * captures);
 
 static void ErrorHandler__catch_retain(ErrorHandler handle);
 
@@ -716,11 +721,25 @@ static Symbol ErrorHandler__catch_match(ErrorHandler h){
 }
 
 static int ErrorHandler__catch_select(ErrorHandler h, ErrorRecord * record, List projection){
+  if(h -> site -> select) return ErrorHandler__catch_selected(h, record, projection);
   for(int i = 0;  i < h -> site -> arm_count;  i ++) if(ErrorHandler__catch_arm(h, record, projection, i)){
     h -> selected = i;
     return 1;
   }
   return 0;
+}
+
+static int ErrorHandler__catch_selected(ErrorHandler h, ErrorRecord * record, List projection){
+  Var values[MACHINE_BINDER_MAX];
+  int count = 0, arm = h -> site -> select(projection, values, & count);
+  if(arm < 0) return 0;
+  MatchCaptureBuffer captures ={
+    values, ~ 0UL, count
+  }
+  ;
+  ErrorHandler__commit_captures(h, record, count, & captures);
+  h -> selected = arm;
+  return 1;
 }
 
 void * Scope_malloc(size_t);
@@ -739,7 +758,7 @@ static int ErrorHandler__catch_arm(ErrorHandler h, ErrorRecord * record, List pr
   }
   ;
   int matched = i == h -> site -> default_arm ||(plan -> status == MACHINE_PREPARED && MatchPlan_execute_capture(plan, List_var(projection), &(captures), NULL) == 1);
-  if(matched) ErrorHandler__commit_captures(h, record, layout, & captures);
+  if(matched) ErrorHandler__commit_captures(h, record, binders, & captures);
   if(values) Scope_free(values);
   return matched;
 }
@@ -754,17 +773,17 @@ void Block_append(Block, const void *, size_t);
 
 int MatchCaptureBuffer_has(MatchCaptureBuffer *, int);
 
-static void ErrorHandler__commit_captures(ErrorHandler handle, ErrorRecord * record, MatchCaptureLayout layout, MatchCaptureBuffer * captures){
+static void ErrorHandler__commit_captures(ErrorHandler handle, ErrorRecord * record, int count, MatchCaptureBuffer * captures){
   if(handle -> capture_values != NULL){
     Block_free(handle -> capture_values);
     handle -> capture_values = NULL;
   }
-  if(! layout || ! layout -> binder_count) return;
+  if(! count) return;
   int pushed = _scope_push(97614135954008, "could not enter error scope for catch captures");
   handle -> capture_values = Block_new(sizeof(Var));
-  Block_append(handle -> capture_values, NULL, layout -> binder_count);
+  Block_append(handle -> capture_values, NULL, count);
   Var * values = handle -> capture_values -> bytes;
-  for(int i = 0;  i < layout -> binder_count;  i ++){
+  for(int i = 0;  i < count;  i ++){
     values[i] =((void) 0, Void);
     if(MatchCaptureBuffer_has(captures, i)) values[i] = ErrorRegion__copy_value(&(record -> region), captures -> values[i]);
   }
@@ -804,7 +823,7 @@ void Error_policy_set(Symbol code, Symbol disposition){
   if(disposition != 2260136 && disposition != 25550 && disposition != 7475046632 && disposition != 619609226){
     Var _x2c_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("Error.policy_set")), NULL)));
     {
-      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/error.x",.function = "Error_policy_set",.line = 646};
+      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/error.x",.function = "Error_policy_set",.line = 669};
       x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 2, Symbol_var(34096809266140), _x2c_literal_part_0, Symbol_var(302607262917214), Symbol_var(disposition));
       __builtin_unreachable();
     }
@@ -813,7 +832,7 @@ void Error_policy_set(Symbol code, Symbol disposition){
   if(_never_returns(code) && disposition != 2260136){
     Var _x2c_literal_part_1 = String_var(String_join(NULL, cons(String_var(String_new("Error.policy_set")), NULL)));
     {
-      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/error.x",.function = "Error_policy_set",.line = 649};
+      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/error.x",.function = "Error_policy_set",.line = 672};
       x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 3, Symbol_var(34096809266140), _x2c_literal_part_1, Symbol_var(227594), Symbol_var(code), Symbol_var(302607262917214), Symbol_var(disposition));
       __builtin_unreachable();
     }
@@ -868,7 +887,7 @@ void * Error_policy_capture(void){
   capacity *= 2;
   ErrorPolicyCapture capture = malloc(sizeof(struct ErrorPolicyCapture) +(size_t) capacity * sizeof(Symbol));
   if(! capture){
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/error.x",.function = "Error_policy_capture",.line = 717};
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/error.x",.function = "Error_policy_capture",.line = 740};
     x2c_error_raise_n(& _x2c_error_site_2, 97614135954008, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Error.policy_capture")), NULL))));
     __builtin_unreachable();
   }
@@ -950,7 +969,7 @@ void Error_pop(ErrorHandler handle){
 
 static void ErrorHandler__free(ErrorHandler handle){
   if(! handle) return;
-  if(handle -> site && ! handle -> site -> arms) Scope_free(handle -> site);
+  if(handle -> site && ! handle -> site -> arms && ! handle -> site -> select) Scope_free(handle -> site);
   _plans_free(handle -> plans);
   if(handle -> capture_values != NULL) Block_free(handle -> capture_values);
   _retained_destroy(handle -> retained);
@@ -1022,7 +1041,7 @@ ErrorHandler x2c_error_catch_site_push(void * target, ErrorCatchSite * site, Var
     {
       Var _x2c_literal_part_2 = String_var(String_join(NULL, cons(String_var(String_new("catch")), NULL)));
       {
-        static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/error.x",.function = "x2c_error_catch_site_push",.line = 926};
+        static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/error.x",.function = "x2c_error_catch_site_push",.line = 950};
         x2c_error_raise_n(& _x2c_error_site_3, 1358596898646632, 3, Symbol_var(34096809266140), _x2c_literal_part_2, Symbol_var(3226), int_var(arm), Symbol_var(12939466), String_var(fence));
         __builtin_unreachable();
       }
