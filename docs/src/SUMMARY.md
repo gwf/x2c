@@ -68,6 +68,7 @@
     - [lib/match-cache.x](library/modules/match-cache.md)
     - [lib/match-plan.x](library/modules/match-plan.md)
     - [lib/match.x](library/modules/match.md)
+    - [lib/meta-patterns.x](library/modules/meta-patterns.md)
     - [lib/meta.x](library/modules/meta.md)
     - [lib/mutex.x](library/modules/mutex.md)
     - [lib/path.x](library/modules/path.md)

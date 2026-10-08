@@ -33,7 +33,7 @@ returns or raises, control cannot leave them, and a final unreachable
 mark tells C so that a function ending in such a `try` needs no return
 after it.
 
-Source: `src/builtins.x:1022`
+Source: `src/builtins.x:1030`
 
 #### builtin_catch_patterns
 
@@ -42,7 +42,7 @@ Source: `src/builtins.x:1022`
 Returns the statement that prepares each of `items` into its slot of
 the catch site's `patterns`; `$catch_site` calls this in a slot.
 
-Source: `src/builtins.x:1005`
+Source: `src/builtins.x:1013`
 
 #### builtin_targets
 
@@ -51,7 +51,7 @@ Source: `src/builtins.x:1005`
 Returns each built-in algorithm by the name compile-time code calls it
 with.
 
-Source: `src/builtins.x:1240`
+Source: `src/builtins.x:1334`
 
 #### builtin_try_catch_site
 
@@ -61,7 +61,7 @@ Returns the catch site `frame` pushes for the clause `clause`
 describes, or nothing for a try without one; the `$compiler_try`
 template calls this in a slot.
 
-Source: `src/builtins.x:1069`
+Source: `src/builtins.x:1086`
 
 #### builtin_try_cleanup_placement
 
@@ -70,7 +70,7 @@ Source: `src/builtins.x:1069`
 Places the lowered statements that leave a try region after it, with
 the effect that marks the unit as needing exception support.
 
-Source: `src/builtins.x:994`
+Source: `src/builtins.x:1002`
 
 #### builtin_try_landing
 
@@ -81,7 +81,7 @@ handler selected, or `cleanup` and no return; the `$compiler_try`
 template calls this in a slot. A landing no catch arm handles runs the
 region's exits, and control does not come back.
 
-Source: `src/builtins.x:1086`
+Source: `src/builtins.x:1107`
 
 ## Design notes
 

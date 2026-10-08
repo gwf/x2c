@@ -757,6 +757,8 @@ static const char *evidence_rows[][2] = {
   {"meta", "`make verify` (`meta-comptime-only-call`, "
            "`meta-builder-compiler-only`, and `meta-literal-arguments` "
            "compiler fixtures)."},
+  {"meta-patterns", "`make verify` (`catch-constant-preparation`, "
+                    "`catch-filter-runtime-init`) through catch selectors."},
   {"match", "`make verify` (`unittest/test-match.x`) and `make examples` "
             "(`match-nested`)."},
   {"match-cache", "`make verify` (`unittest/test-match-cache.x`)."},

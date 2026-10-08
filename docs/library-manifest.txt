@@ -42,6 +42,7 @@ lib/match-machine.x|internal|Private `Match` wordcode decoder.
 lib/match-plan.x|api|
 lib/match.x|api|
 lib/meta.x|optional|Syntax builders and compiler operations for `meta` functions. Pure builders also run at runtime; operations that query the compiler remain compile-time only. Every unit reaches it through the prelude's `varops.x`; include `meta.x` explicitly where `meta` functions are written.
+lib/meta-patterns.x|optional|Static pattern lowering for `meta` components: a covered pattern becomes nested tests and binders, and other patterns are declined; include `meta-patterns.x` where a component lowers patterns.
 lib/mutex.x|api|
 lib/pool.x|api|
 lib/protocols.x|internal|The built-in `Cleanup`, `Block`, `Iter`, and `Var` protocol declarations used to generate runtime dispatch adapters.

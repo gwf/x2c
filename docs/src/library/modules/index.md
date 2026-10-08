@@ -40,6 +40,7 @@ points used by generated code, native callers, and compiler setup.
 | [`lib/match-cache.x`](match-cache.md) | caches of prepared Match plans. |
 | [`lib/match-plan.x`](match-plan.md) | lowering Match patterns to prepared plans. |
 | [`lib/match.x`](match.md) | pattern matching and transformation utilities for lists. |
+| [`lib/meta-patterns.x`](meta-patterns.md) | static patterns as tests a component writes. |
 | [`lib/meta.x`](meta.md) | the compiler surface a `meta` function calls. |
 | [`lib/mutex.x`](mutex.md) | shared mutable-state coordination. |
 | [`lib/path.x`](path.md) | filesystem locations and the operations on them. |
@@ -75,6 +76,7 @@ prelude. Include one explicitly to use its declarations.
 - [`lib/digest.x`](digest.md) - SHA-256 digests of `String`s and streams; explicitly include `digest.x` to use them.
 - [`lib/json.x`](json.md) - JSON text to and from ordinary `Map`, `Array`, `String`, and number values; explicitly include `json.x` to use it.
 - [`lib/list-selectors.x`](list-selectors.md) - Compound selectors beyond caar, cadr, cddr, and caddr; explicitly include `list-selectors.x` to use them.
+- [`lib/meta-patterns.x`](meta-patterns.md) - Static pattern lowering for `meta` components: a covered pattern becomes nested tests and binders, and other patterns are declined; include `meta-patterns.x` where a component lowers patterns.
 - [`lib/meta.x`](meta.md) - Syntax builders and compiler operations for `meta` functions. Pure builders also run at runtime; operations that query the compiler remain compile-time only. Every unit reaches it through the prelude's `varops.x`; include `meta.x` explicitly where `meta` functions are written.
 - [`lib/path.x`](path.md) - Filesystem operations on path `String`s; explicitly include `path.x` to use them.
 - [`lib/process.x`](process.md) - Commands, pipelines, and background jobs without a shell; explicitly include `process.x` to use them.

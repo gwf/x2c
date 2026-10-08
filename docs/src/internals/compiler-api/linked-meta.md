@@ -18,6 +18,7 @@ Shipped `meta` code compiled into the compiler.
 | [`x2c_expr_cast`](#x2c_expr_cast) | Returns `expression` cast to `type`, which is a declared type rather than syntax. |
 | [`x2c_expr_field`](#x2c_expr_field) | Returns the expression `receiver.name`. |
 | [`x2c_param_make`](#x2c_param_make) | Returns a parameter named `name` with `type`. |
+| [`x2c_pattern_steps`](#x2c_pattern_steps) | Returns `(STEPS BINDERS CURSORS)` that match the List the fresh name `subject` holds against the bound List pattern `pattern`, or NULL when the pattern is outside the static subset below. |
 | [`x2c_type_members`](#x2c_type_members) | Returns enum members as `(name value)` rows in declaration order. |
 
 ### Functions
@@ -28,7 +29,7 @@ Shipped `meta` code compiled into the compiler.
 
 Returns linked definition hashes and provider source dependencies.
 
-Source: `src/linked-meta.x:429`
+Source: `src/linked-meta.x:599`
 
 #### linked_meta_targets
 
@@ -36,7 +37,7 @@ Source: `src/linked-meta.x:429`
 
 Returns the linked copies, and the runtime builders, by name.
 
-Source: `src/linked-meta.x:311`
+Source: `src/linked-meta.x:468`
 
 #### x2c_decl_make
 
@@ -44,7 +45,7 @@ Source: `src/linked-meta.x:311`
 
 Declares `name` with `type` and an optional initializer.
 
-Source: `src/linked-meta.x:93`
+Source: `src/linked-meta.x:250`
 
 #### x2c_expr_cast
 
@@ -54,7 +55,7 @@ Returns `expression` cast to `type`, which is a declared type rather
 than syntax. A generator needs it where the value it holds and the
 parameter it reaches differ in width or sign.
 
-Source: `src/linked-meta.x:86`
+Source: `src/linked-meta.x:243`
 
 #### x2c_expr_field
 
@@ -62,13 +63,43 @@ Source: `src/linked-meta.x:86`
 
 Returns the expression `receiver.name`.
 
-Source: `src/linked-meta.x:78`
+Source: `src/linked-meta.x:235`
 
 #### x2c_param_make
 
 `List x2c_param_make(List type, Var name)`
 
 Returns a parameter named `name` with `type`.
+
+Source: `src/linked-meta.x:258`
+
+#### x2c_pattern_steps
+
+`List x2c_pattern_steps(List pattern, Atom subject)`
+
+Returns `(STEPS BINDERS CURSORS)` that match the List the fresh name
+`subject` holds against the bound List pattern `pattern`, or NULL when
+the pattern is outside the static subset below.
+
+A step is `(test EXPRESSION)`, which must hold, or a statement that
+moves a cursor or declares a binder; `x2c_pattern_nest` makes a block
+of them. BINDERS lists each named binder the steps declare, in order of
+first appearance, which is the order of `Match` captures; `?name` is
+declared by its spelling as a `Var`, `*name` as a `List`. CURSORS lists
+one fresh name per List depth the steps walk, which the caller declares
+as a `List` before they run. Every pattern names the same cursor at the
+same depth, so patterns tested in turn share the longest CURSORS.
+
+The static subset, by element of a List pattern:
+- a literal Symbol, compared by its bits;
+- any other literal, such as a number, String, or long Atom, compared
+  by `==` with the same element of the List `pattern` builds;
+- `?` and `?name`; a repeated `?name` compares by `==`;
+- a nested List pattern;
+- a typed capture `?(T name)`, and `(!is type T)`;
+- `*` or `*name` as the last element of its List, once per name.
+Interior stars, other guard operators, and computed parts are outside
+it.
 
 Source: `src/linked-meta.x:101`
 
@@ -79,7 +110,7 @@ Source: `src/linked-meta.x:101`
 Returns enum members as `(name value)` rows in declaration order.
 An implicit value is nil; a literal value retains its spelling.
 
-Source: `src/linked-meta.x:130`
+Source: `src/linked-meta.x:287`
 
 ## Design notes
 

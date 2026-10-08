@@ -82,6 +82,7 @@
 - [lib/match-cache.x](https://x2c-lang.dev/docs/library/modules/match-cache.html)
 - [lib/match-plan.x](https://x2c-lang.dev/docs/library/modules/match-plan.html)
 - [lib/match.x](https://x2c-lang.dev/docs/library/modules/match.html)
+- [lib/meta-patterns.x](https://x2c-lang.dev/docs/library/modules/meta-patterns.html)
 - [lib/meta.x](https://x2c-lang.dev/docs/library/modules/meta.html)
 - [lib/mutex.x](https://x2c-lang.dev/docs/library/modules/mutex.html)
 - [lib/path.x](https://x2c-lang.dev/docs/library/modules/path.html)
