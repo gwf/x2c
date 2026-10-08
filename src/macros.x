@@ -4174,8 +4174,9 @@ static List Compiler._captured_pair(Compiler c, List binding, Type type) {
 }
 
 /** Consumes a `(code-value STAGE CODE EFFECTS)` carrier a producer returned
-    into a macro value application. Effects are applied in order under the
-    application's transaction, and their tokens are replaced in the code.
+    into a macro value application, or that `Compiler.bind_code_value`
+    binds as one. Effects are applied in order under the application's
+    transaction, and their tokens are replaced in the code.
     `retained` reports a bound or lowered stage, which ordinary binding
     leaves untouched. Lowered code is not searched for a leftover binder.
     Returns 0 for any other value.
@@ -4209,11 +4210,37 @@ static Map Compiler._code_effects(Compiler c, Var effects) {
       }
       case %(early ?key ?binding ?declaration): {
         $adapter.memo(c, key, replacements[binding]) {
-          c.add_early(_replace_bindings(declaration, replacements));
+          c.add_early(c.bind_syntax(
+            _replace_bindings(declaration, replacements), AST_UNIT, NULL));
         }
       }
+      case %(initialize
+              (!set ?area (!or protocol prepare statics finish)) ?statement):
+        c.add_init(area, c.normalize(c.bind_syntax(
+          _replace_bindings(statement, replacements), AST_BLOCK, NULL)));
+      default:
+        c.report_error(
+          <macro>, "a meta call returned an unknown code effect", c.token,
+          %("effect: ${effect.repr()}"));
     }
   return replacements;
+}
+
+/** Binds a code-value carrier that a meta call returned outside a macro
+    value application as an application binds it, under a transaction that
+    also covers its effects. */
+List Compiler.bind_code_value(
+  Compiler c, List carrier, AstPos position, Type return_type) {
+  List bound = NULL;
+  $let(c.macro_application, c.macro_application + 1) {
+    SymTxn transaction = { 0 };
+    if (c.recovery_depth > 0)
+      transaction = c.begin_semantic_transaction();
+    defer transaction.rollback();
+    bound = c.bind_syntax(carrier, position, return_type);
+    transaction.commit();
+  }
+  return bound;
 }
 
 /* A named binder left as a carrier's code, identifier, or declarator

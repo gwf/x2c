@@ -3,11 +3,11 @@
     Copyright (c) 2026 Gary William Flake.
 
     The compiler builds a project's bodied `meta` functions into one helper
-    program with this unit and calls them through it, one request and one
-    reply at a time. Each message is a frame: its length in decimal and a
-    newline, then that many bytes of one datum (`lib/datum.x`). Requests
-    arrive on descriptor 3 and replies leave on descriptor 4, so a body
-    that prints still reaches the terminal.
+    program with this unit and calls them through it, one request at a
+    time. Each message is a frame: its length in decimal and a newline,
+    then that many bytes of one datum (`lib/datum.x`). Requests arrive on
+    descriptor 3 and replies leave on descriptor 4, so a body that prints
+    still reaches the terminal.
 
       (reset)               begin a unit, whose first call of each table
                             runs its `meta static` initializers; no reply
@@ -15,22 +15,26 @@
                             call NAME in table K; each GLOBAL is
                             `(SPELLING BINDING)`, the unit's binding that a
                             macro value's free reference recognizes
+      (answer V)            the compiler's answer to the call's last query
       (quit)
 
     A call replies with a `(warning MESSAGE (NOTE ...))` frame for each
     warning it made and a `(dependency PATH HASH)` frame for each file it
     embedded, then `(value V)`, `(void)` for no value, `(error
-    MESSAGE (NOTE ...))` for a
-    failure the body reported or the compiler would report, or `(failure
-    CAUSE)` for an Error the body raised, or `(missing)` when the table has
-    no such function. A body that crashes or exits ends the helper, which
-    the compiler reports at the call.
+    MESSAGE (NOTE ...))` for a failure the body reported or the compiler
+    would report, `(error MESSAGE (NOTE ...) (at NODE CATEGORY))` for one
+    the body reported at a node, or `(failure CAUSE)` for an Error the body
+    raised, or `(missing)` when the table has no such function. A body that
+    crashes or exits ends the helper, which the compiler reports at the
+    call.
 
-    A body receives what it needs as arguments. The operations that read
-    compiler state are compiler-owned and fail here. The builders compute
-    what the compiler would. A template call returns `("x2c.template"
-    STORED VALUES)`, which the compiler replaces by the invocation after
-    the call returns.
+    An operation that reads compiler state, such as `x2c_type_resolve`,
+    replies `(query OPERATION (ARG ...))` in the middle of its call and
+    waits for the `(answer V)` request. The compiler applies its own
+    OPERATION at the call's site, so the answer is the one the call site's
+    state gives. The builders compute what the compiler would. A template
+    call returns `("x2c.template" STORED VALUES)`, which the compiler
+    replaces by the invocation after the call returns.
 */
 
 #include "x2c.x"
@@ -50,7 +54,10 @@
 Map x2c_meta_helper_table(int index);
 int x2c_meta_helper_count(void);
 
+/* The replies' stream, the request bytes read so far, and the call's
+   notices, which its replies carry before its result. */
 static FILE *helper_out = NULL;
+static Buffer helper_input = NULL;
 static Array helper_notices = NULL;
 
 /* The handle of each native module loaded, by path, which `main` makes,
@@ -123,6 +130,14 @@ void x2c_diagnostic_fail(String message, List notes) {
   _fail(message, notes);
 }
 
+/* The failure carries the node, whose position the compiler reports. */
+void x2c_diagnostic_fail_at(
+  Var node, Symbol category, String message, List notes) {
+  _check_notes("x2c.diagnostic.fail.at", notes);
+  raise %(meta-fail
+    (message $message) (notes $notes) (at $node) (category $category));
+}
+
 void x2c_diagnostic_warn(String message, List notes) {
   _check_notes("x2c.diagnostic.warn", notes);
   helper_notices.push(%(warning $message $notes));
@@ -161,6 +176,20 @@ List x2c_expr_field(List receiver, String name) {
 
 List x2c_type_parts(List type) => type_declaration_parts(type);
 
+/* The code effect builders compute what the compiler's do. */
+List x2c_code(List code, List effects) =>
+  %(code-value "source" $code $effects);
+
+Atom x2c_fresh_name(String role) => Atom.intern("?__" + role);
+
+List x2c_effect_name(Atom name) => %(new-name $name ${name.str()[3:]});
+
+List x2c_effect_support(Var key, Atom name, List declaration) =>
+  %(early $key $name $declaration);
+
+List x2c_effect_initialize(Symbol area, List statement) =>
+  %(initialize $area $statement);
+
 /* The three builders below are the bodies in `lib/meta.x`. */
 List x2c_expr_cast(List type, List expression) {
   List (base, mods) = type_declaration_parts(type);
@@ -187,38 +216,33 @@ String x2c_source_text(Var syntax) {
   _unavailable("x2c.source.text");
 }
 
-/* The operations that read compiler state have no answer here. */
-List x2c_type_members(List v) { _unavailable("x2c.type.members"); }
-List x2c_type_resolve(List v) { _unavailable("x2c.type.resolve"); }
-List x2c_type_element(List v) { _unavailable("x2c.type.element"); }
-List x2c_type_parameters(List v) { _unavailable("x2c.type.parameters"); }
-List x2c_type_return(List v) { _unavailable("x2c.type.return"); }
-List x2c_type_layout(List v) { _unavailable("x2c.type.layout"); }
-List x2c_method_resolve(List v, String w) {
-  _unavailable("x2c.method.resolve");
-}
-List x2c_protocol_member(List v, List w, String x) {
-  _unavailable("x2c.protocol.member");
-}
-List x2c_function_parameter(List v, String w) {
-  _unavailable("x2c.function.parameter");
-}
-List x2c_syntax_type(List v) { _unavailable("x2c.syntax.type"); }
-List x2c_type_fields(List v) { _unavailable("x2c.type.fields"); }
-Var x2c_literal_value(Var v) { _unavailable("x2c.literal.value"); }
-int x2c_type_is_value(List v) { _unavailable("x2c.type.value?"); }
-int x2c_type_is_integral(List v) { _unavailable("x2c.type.integral?"); }
-int x2c_type_is_pointer(List v) { _unavailable("x2c.type.pointer?"); }
-Symbol x2c_type_tag_name(String v) { _unavailable("x2c.type.tag-name"); }
-String x2c_type_reverse_name(String v, String w) {
-  _unavailable("x2c.type.reverse-name");
-}
-String x2c_invocation_file(void) { _unavailable("x2c.invocation.file"); }
-int x2c_invocation_line(void) { _unavailable("x2c.invocation.line"); }
-int x2c_invocation_column(void) { _unavailable("x2c.invocation.column"); }
-Map x2c_meta_definition_hashes(void) {
-  _unavailable("x2c.meta.definition-hashes");
-}
+/* The operations that read compiler state ask the compiler. */
+List x2c_type_members(List v) => _ask("x2c_type_members", %($v));
+List x2c_type_resolve(List v) => _ask("x2c_type_resolve", %($v));
+List x2c_type_element(List v) => _ask("x2c_type_element", %($v));
+List x2c_type_parameters(List v) => _ask("x2c_type_parameters", %($v));
+List x2c_type_return(List v) => _ask("x2c_type_return", %($v));
+List x2c_type_layout(List v) => _ask("x2c_type_layout", %($v));
+List x2c_type_fields(List v) => _ask("x2c_type_fields", %($v));
+int x2c_type_is_value(List v) => _ask("x2c_type_is_value", %($v));
+int x2c_type_is_integral(List v) => _ask("x2c_type_is_integral", %($v));
+int x2c_type_is_pointer(List v) => _ask("x2c_type_is_pointer", %($v));
+Symbol x2c_type_tag_name(String v) => _ask("x2c_type_tag_name", %($v));
+String x2c_type_reverse_name(String v, String w) =>
+  _ask("x2c_type_reverse_name", %($v $w));
+List x2c_method_resolve(List v, String w) =>
+  _ask("x2c_method_resolve", %($v $w));
+List x2c_protocol_member(List v, List w, String x) =>
+  _ask("x2c_protocol_member", %($v $w $x));
+List x2c_function_parameter(List v, String w) =>
+  _ask("x2c_function_parameter", %($v $w));
+List x2c_syntax_type(List v) => _ask("x2c_syntax_type", %($v));
+Var x2c_literal_value(Var v) => _ask("x2c_literal_value", %($v));
+String x2c_invocation_file(void) => _ask("x2c_invocation_file", %());
+int x2c_invocation_line(void) => _ask("x2c_invocation_line", %());
+int x2c_invocation_column(void) => _ask("x2c_invocation_column", %());
+Map x2c_meta_definition_hashes(void) =>
+  _ask("x2c_meta_definition_hashes", %());
 
 /* A `Source` holding a String literal is read beside its file; a String
    must be absolute, since the helper does not know the definition's file.
@@ -285,11 +309,47 @@ static int _reply(List message) {
   return 1;
 }
 
+/* The compiler's answer to its own `operation` applied to `arguments`. A
+   call the compiler makes while it answers is served first. */
+static Var _ask(String operation, List arguments) {
+  if (!_reply(%(query $operation $arguments)))
+    _fail(
+      %"$operation requires arguments the compiler can read",
+      %("value: ${arguments.repr()}"));
+  for (;;) {
+    Var request = _request(3, helper_input);
+    match (request) case %(answer ?answer): return answer;
+    _serve(request);
+  }
+}
+
+/* Serves one request; the end of the requests, or `(quit)`, ends the
+   helper. */
+static void _serve(Var request) {
+  Var found;
+  match (request) {
+    case %(reset): _reset();
+    case %(call ?(int index) ?(String name) ?(List arguments)
+           ?(List globals)): {
+      Macro.use_subject(globals);
+      Map table = helper_tables.try_get(index, found) ? found : NULL;
+      List failure = _start(index, table);
+      if (failure) _reply(failure);
+      else _call(table, name, arguments);
+    }
+    default: {
+      helper_unit_scope.destroy();
+      _exit(0);
+    }
+  }
+}
+
 static void _call(Map table, String name, List arguments) {
-  helper_notices = [];
   Var target;
-  if (!table || !table.try_get(name, target)) _reply(%(missing));
-  else _apply(target, name, arguments);
+  $let(helper_notices, []) {
+    if (!table || !table.try_get(name, target)) _reply(%(missing));
+    else _apply(target, name, arguments);
+  }
 }
 
 /* Calls `target` and writes its replies. The call has a Scope of its own
@@ -304,6 +364,9 @@ $scope() static void _apply(Var target, String name, List arguments) {
   try result = ((Func) target.pointer()).apply(count, argv);
   catch %(meta-fail (message ?message) (notes ?notes)):
     failure = Error.snapshot(%(error $message $notes));
+  catch %(meta-fail
+           (message ?message) (notes ?notes) (at ?node) (category ?category)):
+    failure = Error.snapshot(%(error $message $notes (at $node $category)));
   /* A catch binding is borrowed by the arm; the reply is written after. */
   catch %(?code *detail):
     failure = %(failure ${Error.snapshot(cons(code, detail))});
@@ -395,29 +458,12 @@ int main(void) {
   pthread_t watcher;
   pthread_create(&watcher, NULL, _watch, (void *) (long) getppid());
   helper_modules = {};
-  Buffer input = Buffer.new(0);
+  helper_input = Buffer.new(0);
   helper_tables = {};
   for (int i = 0; i < x2c_meta_helper_count(); i++) {
     Map table = x2c_meta_helper_table(i);
     if (table) helper_tables[i] = table;
   }
   _reset();
-  for (;;) {
-    Var request = _request(3, input), found;
-    match (request) {
-      case %(reset): _reset();
-      case %(call ?(int index) ?(String name) ?(List arguments)
-             ?(List globals)): {
-        Macro.use_subject(globals);
-        Map table = helper_tables.try_get(index, found) ? found : NULL;
-        List failure = _start(index, table);
-        if (failure) _reply(failure);
-        else _call(table, name, arguments);
-      }
-      default: {
-        helper_unit_scope.destroy();
-        _exit(0);
-      }
-    }
-  }
+  for (;;) _serve(_request(3, helper_input));
 }

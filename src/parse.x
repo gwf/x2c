@@ -2869,6 +2869,8 @@ static List Compiler._bind_form(
     case %(macro-invoke ?def ?args ?site):
       return c._bind_invocation(def, args, site, context, pending);
     case %(macro-slot ? ? *) if (c.macro_holes): return input;
+    case %(code-value ? ? ?):
+      return c.bind_code_value(input, context, c.return_type);
     case %(src ? ?syntax):
       return c.bind_syntax(syntax, context, c.return_type);
     case %(api-source ?line ?doc ?syntax) if (unit):

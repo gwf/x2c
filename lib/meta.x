@@ -321,9 +321,53 @@ meta String x2c_embed_text(Var path);
     expansion. This does not return. */
 meta void x2c_diagnostic_fail(String message, List notes);
 
+/** Reports `message` with `notes` under `category`, such as `<parse>` or
+    `<type>`, at `node`, syntax the macro received, and fails the
+    expansion. The position is the first one recorded in or around `node`,
+    such as a captured statement's; a node without one reports at the macro
+    invocation. This does not return. */
+meta void x2c_diagnostic_fail_at(
+  Var node, Symbol category, String message, List notes);
+
 /** Reports `message` with `notes` as a warning where it is raised, and
     returns so the expansion continues. */
 meta void x2c_diagnostic_warn(String message, List notes);
+
+/* contributing effects
+
+   Code a meta function returns can ask for more than its own syntax: a
+   private name several quotations share, a declaration the unit holds
+   once, or a statement that runs when the file initializes. Each request
+   is one effect row, and `x2c_code` attaches the rows to the code. The
+   compiler applies them in order when it binds the code, under the
+   expansion's transaction, so a failed expansion leaves none behind. */
+
+/** Returns `code`, one node or a `(seq ...)` of nodes, with `effects`, a
+    `List` of the rows the builders below return. Return it from a meta
+    call a template slot makes. */
+meta List x2c_code(List code, List effects);
+
+/** Returns the binder that stands for one private name in code returned
+    through `x2c_code`. An `Atom` local holding it declares or reads the
+    name in as many quotations as the code holds, and every use names the
+    same binding. Give each name in one result its own `role`. */
+meta Atom x2c_fresh_name(String role);
+
+/** Returns the effect that gives the binder `name`, from
+    `x2c_fresh_name`, a fresh spelling private to the expansion. */
+meta List x2c_effect_name(Atom name);
+
+/** Returns the effect that adds `declaration` to the unit once under
+    `key`, ahead of the code. `declaration` declares the binder `name`,
+    which an earlier `x2c_effect_name` in the same effects names; a later
+    expansion under the same `key` names the first one's declaration. */
+meta List x2c_effect_support(Var key, Atom name, List declaration);
+
+/** Returns the effect that appends `statement` to the file initialization
+    area `area`: `<protocol>`, `<prepare>`, `<statics>`, or `<finish>`,
+    which run in that order when the file initializes. The statement binds
+    where the code lands, so it names only file-scope declarations. */
+meta List x2c_effect_initialize(Symbol area, List statement);
 
 // definition hashes
 
