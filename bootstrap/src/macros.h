@@ -121,6 +121,8 @@ List Compiler_capture_macro_value(Compiler c, List definition);
 
 int Compiler_take_code_value(Compiler c, Var input, Var * value, int * retained);
 
+List Compiler_bind_code_value(Compiler c, List carrier, AstPos position, Type return_type);
+
 void Compiler_ensure_macro_lisp(Compiler c);
 
 List Compiler_parse_macro_lisp_top_level(Compiler c);
