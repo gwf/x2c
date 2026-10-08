@@ -16,10 +16,10 @@ Expression syntax and its resolution.
 | [`Compiler._indexed_builtin_helper`](#Compiler._indexed_builtin_helper) | Identifies the Array or Map helper family for built-in indexed mutation. |
 | [`Compiler._nominal_getindex`](#Compiler._nominal_getindex) | Resolves the exact nominal getter shared by bracket admission and lowering. |
 | [`Compiler.apply_macro_value`](#Compiler.apply_macro_value) | Applies the Macro value `expr` to `supplied` argument expressions. |
-| [`Compiler.check_explicit_converter`](#Compiler.check_explicit_converter) | Reports `parsed` when it is the explicit converter call resolved last and `target` converts its receiver on its own: either side is Var, the types share one C type, or the receiver declares a converter to the target. |
+| [`Compiler.check_explicit_converter`](#Compiler.check_explicit_converter) | Reports `parsed` when it is the explicit converter call resolved last and `target` converts its receiver on its own: either side is Var, the types share one C type, or the receiver declares a converter to the target at the destination `position`, as `convert_at` names it. |
 | [`Compiler.complete_iter_chain`](#Compiler.complete_iter_chain) | Completes an eligible resolved `Iter` call chain for immediate consumption. |
+| [`Compiler.convert_at`](#Compiler.convert_at) | Converts the resolved `expr` at the destination `position`, which declares `target`. |
 | [`Compiler.convert_expression`](#Compiler.convert_expression) | Adds operations to convert a resolved expression AST to `target`. |
-| [`Compiler.convert_segment_to_string`](#Compiler.convert_segment_to_string) | Converts a resolved interpolation segment to `String` when available. |
 | [`Compiler.converter_call`](#Compiler.converter_call) | The call to the converter that `type`, or the first of its typedef names that declares one, provides for `target`, applied to `expr`, or NULL when none declares one. |
 | [`Compiler.func_call_parts`](#Compiler.func_call_parts) | Returns the callee and arguments of a typed `Func` call, or NULL for any other expression. |
 | [`Compiler.is_builtin_converter_call`](#Compiler.is_builtin_converter_call) | The global builtin boxers and scalar formatters only observe their arguments. |
@@ -90,15 +90,14 @@ Source: `src/expressions.x:543`
 <a id="Compiler.check_explicit_converter"></a>
 #### Compiler.check_explicit_converter
 
-`void Compiler.check_explicit_converter( Compiler c, List parsed, Type target, int context)`
+`void Compiler.check_explicit_converter( Compiler c, Symbol position, List parsed, Type target)`
 
 Reports `parsed` when it is the explicit converter call resolved last
 and `target` converts its receiver on its own: either side is Var, the
 types share one C type, or the receiver declares a converter to the
-target. The call then changes nothing but the spelling. `context` is 0
-for a typed destination, 1 for an interpolation hole, which displays
-every value through `Var.str`, and 2 for a printf-family value, which
-the format converts when it is a Var.
+target at the destination `position`, as `convert_at` names it. The
+call then changes nothing but the spelling. A list literal's inserted
+value is checked at the typed position <element>.
 
 Source: `src/expressions.x:2994`
 
@@ -116,6 +115,23 @@ hidden destination. Variadic calls and `Iter_unzip` are returned unchanged.
 
 Source: `src/expressions.x:2140`
 
+<a id="Compiler.convert_at"></a>
+#### Compiler.convert_at
+
+`List Compiler.convert_at( Compiler c, Symbol position, List expr, Type target)`
+
+Converts the resolved `expr` at the destination `position`, which
+declares `target`. The positions are where source gives a value a
+destination: an initializer (<init>), an <assignment>, a <return>, a
+declared call <argument>, an interpolation <hole>, and a <printf>
+value, a `Var` that a printf-family format reads as `target`. A brace
+converts by an initializer's rows, and a hole or a format renders a
+`Var` through `Var.str`; every other conversion is
+`convert_expression`. `check_explicit_converter` warns at the same
+positions when source spells the conversion.
+
+Source: `src/expressions.x:3235`
+
 <a id="Compiler.convert_expression"></a>
 #### Compiler.convert_expression
 
@@ -128,26 +144,7 @@ performs the conversion implicitly; an unsupported x2c conversion reports
 a type error through `c`. Synthesized operations may add generated
 bindings or immutable literal entries to compiler state.
 
-Source: `src/expressions.x:3230`
-
-<a id="Compiler.convert_segment_to_string"></a>
-#### Compiler.convert_segment_to_string
-
-`List Compiler.convert_segment_to_string(Compiler c, List expr)`
-
-Converts a resolved interpolation segment to `String` when available.
-A missing `String` conversion is expected: the transform boxes that segment
-to `Var` and renders it at runtime.
-
-A declared numeric converter keeps its formatting; other numeric segments
-use `Var.str`. A segment statically spelled `Var` also uses `Var.str` for
-every
-runtime tag. The ordinary `Var`-to-`String` conversion is
-not equivalent: it
-extracts only a `String` payload and yields empty `String` for every other
-tag.
-
-Source: `src/expressions.x:3423`
+Source: `src/expressions.x:3271`
 
 <a id="Compiler.converter_call"></a>
 #### Compiler.converter_call
@@ -158,7 +155,7 @@ The call to the converter that `type`, or the first of its typedef names
 that declares one, provides for `target`, applied to `expr`, or NULL
 when none declares one.
 
-Source: `src/expressions.x:3558`
+Source: `src/expressions.x:3575`
 
 <a id="Compiler.func_call_parts"></a>
 #### Compiler.func_call_parts
@@ -182,7 +179,7 @@ Source: `src/expressions.x:2079`
 The global builtin boxers and scalar formatters only observe their
 arguments. A custom converter or a shadowed callee may change state.
 
-Source: `src/expressions.x:3611`
+Source: `src/expressions.x:3628`
 
 <a id="Compiler.needs_resolution"></a>
 #### Compiler.needs_resolution
@@ -298,7 +295,7 @@ format, such as a variable or an object macro, is not readable here.
 `raw` reports C spelling, whose quotes and escape sequences the caller
 steps over.
 
-Source: `src/expressions.x:3125`
+Source: `src/expressions.x:3127`
 
 <a id="Compiler.promote_string_literal"></a>
 #### Compiler.promote_string_literal
@@ -310,7 +307,7 @@ method receiver, a `foreach` collection, or a raise detail. Parentheses
 and a conditional whose arms are both literals count as the literal; any
 other expression is returned unchanged.
 
-Source: `src/expressions.x:3182`
+Source: `src/expressions.x:3184`
 
 <a id="Compiler.require_var_tag"></a>
 #### Compiler.require_var_tag
@@ -344,7 +341,7 @@ Source: `src/expressions.x:941`
 Resolves the key and value of one `(map-entry key value)` AST row.
 Any other shape is reported at `origin` as a parse error.
 
-Source: `src/expressions.x:2845`
+Source: `src/expressions.x:2846`
 
 <a id="Compiler.resolve_postfix_member"></a>
 #### Compiler.resolve_postfix_member
@@ -380,7 +377,7 @@ Source: `src/expressions.x:2732`
 Returns the printf-family entry a callee names, or `NULL`. A resolved
 user function that happens to use a libc spelling is not one.
 
-Source: `src/expressions.x:3103`
+Source: `src/expressions.x:3105`
 
 ## Public types
 

@@ -53,7 +53,7 @@ component's file is included and replay through interfaces.
 | `x2c_method_resolve(type, name)` | public | member resolution, including the self type |
 | `x2c_member_resolve(type, name, call)` | prototype (wave 3) | the kernel's own row: method, field, or ambiguity; no fallbacks |
 | `x2c_protocol_member(participant, base, member)` | public | |
-| conversion at a position: `x2c_convert(position, expr, type)` | missing (`convert_expression` internal) | positions: initializer, assignment, return, argument, interpolation hole, printf value |
+| conversion at a position: `x2c_convert(position, expr, type)` | prototype (wave 4; kernel `Compiler.convert_at`) | positions `<init>`, `<assignment>`, `<return>`, `<argument>`, `<hole>`, `<printf>`; proof `var-switch.x` |
 
 ## 4. Contributions
 

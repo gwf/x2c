@@ -239,7 +239,7 @@ Public functions:
 `Compiler.var_tag_expression`, `Compiler.resolve_map_entry`,
 `Compiler.check_explicit_converter`, `List.printf_family`,
 `Compiler.printf_static_format`, `Compiler.promote_string_literal`,
-`Compiler.convert_expression`, `Compiler.convert_segment_to_string`,
+`Compiler.convert_at`, `Compiler.convert_expression`,
 `Compiler.converter_call`, `Compiler.is_builtin_converter_call`
 
 ### [src/fields.x](../src/fields.x)
@@ -461,9 +461,10 @@ Public functions:
 
 `MetaContext.current`, `Compiler.expanding`, `x2c_syntax_type`,
 `x2c_protocol_member`, `x2c_method_resolve`, `x2c_member_resolve`,
-`x2c_fact_record`, `x2c_fact_lookup`, `builtin_foreach_bindings`,
-`builtin_foreach_reference`, `x2c_type_is_integral`, `x2c_type_is_pointer`,
-`x2c_type_element`, `x2c_type_parameters`, `x2c_type_return`, `x2c_type_parts`,
+`x2c_convert`, `x2c_fact_record`, `x2c_fact_lookup`,
+`builtin_foreach_bindings`, `builtin_foreach_reference`,
+`x2c_type_is_integral`, `x2c_type_is_pointer`, `x2c_type_element`,
+`x2c_type_parameters`, `x2c_type_return`, `x2c_type_parts`,
 `x2c_type_reverse_name`, `x2c_type_resolve`, `x2c_type_layout`,
 `x2c_type_is_value`, `x2c_type_tag_name`, `x2c_type_fields`,
 `x2c_binding_spelling`, `x2c_ident`, `builtin_foreach_unique`,
