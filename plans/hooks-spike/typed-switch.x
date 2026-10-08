@@ -87,7 +87,8 @@ meta List string_switch(List node) {
       return node;
     if (others.len())
       x2c_diagnostic_fail_at(
-        others[0], "a string switch label must be a string literal", %());
+        others[0], <macro>,
+        "a string switch label must be a string literal", %());
     Atom selected = x2c_fresh_name("selected");
     List value = x2c_expr_cast(%("String"), subject);
     List dispatch = _tswitch_dispatch(selected, labels, 0);

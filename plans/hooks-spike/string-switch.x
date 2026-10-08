@@ -61,7 +61,8 @@ meta List _sswitch(List subject, List body) {
   if (!labels.len()) return %(${$!{ switch ($subject) $body }});
   if (others.len())
     x2c_diagnostic_fail_at(
-      others[0], "a string switch label must be a string literal", %());
+      others[0], <macro>,
+      "a string switch label must be a string literal", %());
   Atom selected = x2c_fresh_name("selected");
   List dispatch = _sswitch_dispatch(selected, labels, 0);
   return x2c_code(

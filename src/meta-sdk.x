@@ -667,9 +667,11 @@ void x2c_diagnostic_fail(String message, List notes) {
 }
 
 /** Answers `x2c.diagnostic.fail-at`, declared in `lib/meta.x`. */
-void x2c_diagnostic_fail_at(Var node, String message, List notes) {
+void x2c_diagnostic_fail_at(
+  Var node, Symbol category, String message, List notes) {
   _sdk_check_notes("x2c.diagnostic.fail-at", notes);
-  active.expander.report_meta_error(node, message, active.site, notes);
+  active.expander.report_meta_error(
+    node, category, message, active.site, notes);
 }
 
 /** A warning reports where it is raised and returns, so a macro can keep

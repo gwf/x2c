@@ -321,11 +321,13 @@ meta String x2c_embed_text(Var path);
     expansion. This does not return. */
 meta void x2c_diagnostic_fail(String message, List notes);
 
-/** Reports `message` with `notes` at `node`, syntax the macro received,
-    and fails the expansion. The position is the first one recorded in or
-    around `node`, such as a captured statement's; a node without one
-    reports at the macro invocation. This does not return. */
-meta void x2c_diagnostic_fail_at(Var node, String message, List notes);
+/** Reports `message` with `notes` under `category`, such as `<parse>` or
+    `<type>`, at `node`, syntax the macro received, and fails the
+    expansion. The position is the first one recorded in or around `node`,
+    such as a captured statement's; a node without one reports at the macro
+    invocation. This does not return. */
+meta void x2c_diagnostic_fail_at(
+  Var node, Symbol category, String message, List notes);
 
 /** Reports `message` with `notes` as a warning where it is raised, and
     returns so the expansion continues. */

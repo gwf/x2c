@@ -7,7 +7,7 @@
 meta static List single_statement(List body) {
   match (body) case %(block ? ?second):
     x2c_diagnostic_fail_at(
-      second, "only one statement is allowed", %("reason: example"));
+      second, <macro>, "only one statement is allowed", %("reason: example"));
   return %($body);
 }
 macro Decorator $single(Stmt $body) { @single_statement($body) }

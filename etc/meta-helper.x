@@ -131,9 +131,11 @@ void x2c_diagnostic_fail(String message, List notes) {
 }
 
 /* The failure carries the node, whose position the compiler reports. */
-void x2c_diagnostic_fail_at(Var node, String message, List notes) {
+void x2c_diagnostic_fail_at(
+  Var node, Symbol category, String message, List notes) {
   _check_notes("x2c.diagnostic.fail-at", notes);
-  raise %(meta-fail (message $message) (notes $notes) (at $node));
+  raise %(meta-fail
+    (message $message) (notes $notes) (at $node) (category $category));
 }
 
 void x2c_diagnostic_warn(String message, List notes) {
@@ -362,8 +364,9 @@ $scope() static void _apply(Var target, String name, List arguments) {
   try result = ((Func) target.pointer()).apply(count, argv);
   catch %(meta-fail (message ?message) (notes ?notes)):
     failure = Error.snapshot(%(error $message $notes));
-  catch %(meta-fail (message ?message) (notes ?notes) (at ?node)):
-    failure = Error.snapshot(%(error $message $notes (at $node)));
+  catch %(meta-fail
+           (message ?message) (notes ?notes) (at ?node) (category ?category)):
+    failure = Error.snapshot(%(error $message $notes (at $node $category)));
   /* A catch binding is borrowed by the arm; the reply is written after. */
   catch %(?code *detail):
     failure = %(failure ${Error.snapshot(cons(code, detail))});
