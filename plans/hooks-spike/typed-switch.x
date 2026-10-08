@@ -4,9 +4,10 @@
     `switch` statement that follows. A switch whose subject is a named type
     or a C string, and whose owned labels are string literals, becomes a
     switch over label indices: each label becomes its index, the subject is
-    evaluated once into a String, and the first label it equals by String
-    `==` selects the index. A null C string becomes a null String, which
-    equals `""`. Every other switch is declined and emits as before. */
+    evaluated once into a fresh String, and the first label it equals by
+    String `==` selects the index. A null C string becomes a null String, which
+    equals `""`. Every other switch is declined and emits as before. A
+    non-literal label in a string switch is an error at that label. */
 
 #pragma once
 #include "meta.x"
@@ -19,24 +20,32 @@ meta static int _tswitch_index(List label, Array labels) {
   return labels.len();
 }
 
+meta static int _tswitch_literal(List label) {
+  match (label) case %(expr (* char) (literal *)): return 1;
+  return 0;
+}
+
 /* `node` with each owned string label replaced by its index. A nested
-   switch owns its own labels. */
-meta static Var _tswitch_rewrite(Var node, Array labels) {
+   switch owns its own labels. Each other owned label's case is added to
+   `others`. */
+meta static Var _tswitch_rewrite(Var node, Array labels, Array others) {
   if (node is not <list>) return node;
   List list = node;
   if (!list) return node;
   match (list) {
     case %(switch *): return list;
-    case %(case (!set ?label (expr (* char) (literal *)))):
+    case %(case ?label) if (_tswitch_literal(label)):
       return %(case ${x2c_literal_int(_tswitch_index(label, labels))});
+    case %(at ? (case ?label)) if (!_tswitch_literal(label)):
+      others.push(list);
   }
   Array out = [];
-  foreach (Var child, list) out.push(_tswitch_rewrite(child, labels));
+  foreach (Var child, list) out.push(_tswitch_rewrite(child, labels, others));
   return out.list_free();
 }
 
 /* `selected == label1 ? 1 : selected == label2 ? 2 : ... : 0`. */
-meta static List _tswitch_dispatch(List selected, Array labels, int i) {
+meta static List _tswitch_dispatch(Atom selected, Array labels, int i) {
   if (i == labels.len()) return x2c_literal_int(0);
   List label = labels[i], index = x2c_literal_int(i + 1);
   List rest = _tswitch_dispatch(selected, labels, i + 1);
@@ -62,18 +71,24 @@ meta static int _tswitch_named(List type) {
 
 /* The string switch `node` becomes, or `node` itself. Project meta code
    cannot resolve a typedef, so a named subject converts to String where
-   the result binds; only a string subject has string-literal labels. */
+   the result binds; only a string subject has string-literal labels. In a
+   string switch every other label is an error at that label. */
 meta List string_switch(List node) {
   match (node) case %(switch (!set ?subject (expr ?type ?)) ?body): {
     int c_string = _tswitch_c_string(type);
     if (!c_string && !_tswitch_named(type)) return node;
-    Array labels = [];
-    List rewritten = _tswitch_rewrite(body, labels);
+    Array labels = [], others = [];
+    List rewritten = _tswitch_rewrite(body, labels, others);
     if (!labels.len()) return node;
-    List name = x2c_ident("_tswitch_subject");
+    if (others.len())
+      x2c_diagnostic_fail_at(
+        others[0], "a string switch label must be a string literal", %());
+    Atom selected = x2c_fresh_name("selected");
     List value = c_string ? x2c_expr_cast(%("String"), subject) : subject;
-    List dispatch = _tswitch_dispatch(x2c_expr_ident(name), labels, 0);
-    return $!{ { String $name = $value; switch ($dispatch) $rewritten } };
+    List dispatch = _tswitch_dispatch(selected, labels, 0);
+    return x2c_code(
+      $!{ { String $selected = $value; switch ($dispatch) $rewritten } },
+      %(${x2c_effect_name(selected)}));
   }
   return node;
 }

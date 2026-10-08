@@ -25,7 +25,7 @@ component's file is included and replay through interfaces.
 | `keyword ALIAS $macro;` | parse: identifier statement or expression | public (macros.x:2398) | `foreach`, `class`, `loop`, `synchronized` |
 | `hook switch $m;`, other C keywords | parse: C keyword statement | prototype (statements.x) | string switch; `match`, `try`, `raise`, `with` |
 | `hook function $m;` | parse: function definition body | prototype (parse.x) | tracing, entry guards, lambda lowering |
-| typed node hook, by node kind or pattern, may decline | transform: after binding and typing | missing (`_step_tag` is the internal form) | string switch, collection literals, printf formats, `match`, destructuring |
+| typed node hook, by node kind, may decline: `hook <switch> f;` | transform: after binding and typing | prototype (wave 1) | string switch, collection literals, printf formats, `match`, destructuring |
 | declaration-position hook | bind: block or file declaration | missing | `$auto`, destructuring, `class` |
 | reader-prefix hook | lex and parse: `$!`-style prefixes | missing | quotations |
 | fact registration at collection | collect: declaration time, replayed by interfaces | missing (protocol.x and `Defaults` internal) | `protocol`, `delegate`, `class` defaults |
@@ -39,7 +39,7 @@ component's file is included and replay through interfaces.
 | Builders `x2c_ident`, `x2c_literal_*`, `x2c_expr_*`, `x2c_stmnt_*`, `x2c_decl_make`, `x2c_param_make` | public (lib/meta.x) | |
 | Function parts `x2c_function_name`, `x2c_function_parameter`, `x2c_function_body` | public (lib/meta.x) | |
 | `match` over syntax in meta code | public | the pattern component's in-place client |
-| Hygienic names shared across quotations | missing | today a declaration in one quotation cannot be named in another, which forced string switch's second layer |
+| Hygienic names shared across quotations: `x2c_fresh_name`, `x2c_effect_name` | prototype (wave 1) | today a declaration in one quotation cannot be named in another, which forced string switch's second layer |
 | Child rewriting helper | internal (`$ast.rewrite_children`) | meta code recurses by hand |
 
 ## 3. Typing queries
@@ -47,6 +47,7 @@ component's file is included and replay through interfaces.
 | Entry | Status | Notes |
 | --- | --- | --- |
 | `x2c_syntax_type(expr)` | public | type of a bound expression |
+| Typing queries from project meta code | missing | they fail in the helper process; in-process meta code can call them |
 | `x2c_type_resolve`, `x2c_type_fields`, `x2c_type_members`, `x2c_type_is_*`, `x2c_type_element` | public (lib/meta.x) | |
 | `x2c_method_resolve(type, name)` | public | member resolution, including the self type |
 | `x2c_protocol_member(participant, base, member)` | public | |
@@ -56,8 +57,8 @@ component's file is included and replay through interfaces.
 
 | Entry | Status | Notes |
 | --- | --- | --- |
-| Unit support, once per key: `x2c_support(key, unit)` | internal (`add_support`, `$adapter.memo`; carrier `early` effect) | string switch helper, adapters, lambda helpers |
-| File initialization area: `x2c_initialize(area, stmt)` | internal (`add_init`) | areas `<protocol>`, `<prepare>`, `<statics>`, `<finish>`; statements arrive lowered |
+| Unit support, once per key: `x2c_effect_support(key, name, decl)` | prototype (wave 1); was internal (`add_support`, `$adapter.memo`; carrier `early` effect) | string switch helper, adapters, lambda helpers |
+| File initialization area: `x2c_effect_initialize(area, stmt)` | prototype (wave 1); was internal (`add_init`) | areas `<protocol>`, `<prepare>`, `<statics>`, `<finish>`; statements arrive lowered |
 | Include anchor: `x2c_requires(<errors>)` | internal (`needs_exception`, `_anchors`) | `try`, `raise` |
 | "Never returns" fact | internal (`Ast.never_returns`) | `raise` |
 | Cleanup participation: open a region, set break and continue barriers | internal (`Walk`) | `try`, `finally`, `match`, static locals; ordinary `defer` in generated code is already public |
@@ -89,7 +90,7 @@ forms after it.
 
 | Entry | Status | Notes |
 | --- | --- | --- |
-| `x2c_report(node, message, notes)` at a node | missing | string switch label check, every component's input checks |
+| `x2c_diagnostic_fail_at(node, message, notes)` | prototype (wave 1) | string switch label check, every component's input checks |
 | `x2c_invocation_file`, `x2c_invocation_line` | public | |
 
 ## 8. Execution
