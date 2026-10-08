@@ -15,6 +15,7 @@
 #include "x2c.x"
 #include "common.x"
 #include "list-selectors.x"
+#include "meta-patterns.x"
 #include "meta.x"
 #include "native-scalar-types.x"
 #include "system-macros.x"
@@ -71,6 +72,143 @@ static List _selector_units(List middles, Macro car, Macro cdr) {
 
 static List _selector_definitions(Macro car, Macro cdr) =>
   _selector_units(_selector_middles(), car, cdr);
+
+/* --- lib/meta-patterns.x ------------------------------------------------- */
+
+/** Returns the steps that match the List the fresh name `subject` holds
+    against the bound List pattern `pattern`, or NULL when the pattern is
+    outside the static subset below. A step is `(test EXPRESSION)`, which
+    must hold, or a statement that moves a cursor or declares a binder;
+    `x2c_pattern_nest` makes a block of them.
+
+    `cursors` holds one fresh name per List depth, which the caller
+    declares as a `List` before the steps run; the steps add the names a
+    deeper pattern needs, and several patterns' steps may share them.
+    `binders` gains each named binder the steps declare, in order of first
+    appearance, which is the order of `Match` captures. A binder is
+    declared by its spelling: `?name` as a `Var`, `*name` as a `List`.
+
+    The static subset, by element of a List pattern:
+    - a literal Symbol, compared by its bits;
+    - any other literal, such as a number, String, or long Atom, compared
+      by `==` with the same element of the List `pattern` builds;
+    - `?` and `?name`; a repeated `?name` compares by `==`;
+    - a nested List pattern;
+    - a typed capture `?(T name)`, and `(!is type T)`;
+    - `*` or `*name` as the last element of its List, once per name.
+    Interior stars, other guard operators, and computed parts are outside
+    it. */
+List x2c_pattern_steps(
+  List pattern, Atom subject, Array cursors, Array binders) {
+  Var value = x2c_pattern_value(pattern);
+  if (value is not <list> || value.list().car().is_match_op()) return NULL;
+  if (!cursors.len()) cursors.push(x2c_fresh_name("cursor0"));
+  Array steps = [_pattern_assign(cursors[0], _pattern_read(subject))];
+  if (!_pattern_segment(value, pattern, 0, cursors, steps, binders))
+    return NULL;
+  return steps.list_free();
+}
+
+static List _pattern_read(Var name) => %(expr () (ident $name));
+
+static List _pattern_call(List receiver, String method) =>
+  %(expr () (call (expr () (op . $receiver ($method)))
+                  (args (expr (void) ()))));
+
+static List _pattern_assign(Var name, List value) =>
+  %(stmnt (expr () (op = ${_pattern_read(name)} $value)));
+
+static List _pattern_same(List value, Symbol symbol) {
+  List boxed = %(expr () (parens (expr ()
+    (cast (decl ("Var") (bindings (bind () ())))
+          ${x2c_literal_symbol(symbol)}))));
+  return %(expr () (op == (expr () (op . $value ("u64")))
+                          (expr () (op . $boxed ("u64")))));
+}
+
+static int _pattern_segment(
+  List pattern, List constant, int depth, Array cursors, Array steps,
+  Array binders) {
+  List cursor = _pattern_read(cursors[depth]);
+  for (; pattern; pattern = pattern.cdr()) {
+    Var part = pattern.car();
+    if (part.is_list_binder()) {
+      if (pattern.cdr() || part in binders) return 0;
+      if (part != <*>) _pattern_declare(part, cursor, steps, binders);
+      return 1;
+    }
+    if (part.is_atom_binder()) steps.push(%(test $cursor));
+    List value = _pattern_call(cursor, "car");
+    List literal = _pattern_call(constant, "car");
+    if (!_pattern_element(
+          part, value, literal, depth, cursors, steps, binders))
+      return 0;
+    steps.push(_pattern_assign(cursors[depth], _pattern_call(cursor, "cdr")));
+    constant = _pattern_call(constant, "cdr");
+  }
+  steps.push(%(test (expr () (op ! $cursor))));
+  return 1;
+}
+
+static int _pattern_element(
+  Var part, List value, List literal, int depth, Array cursors,
+  Array steps, Array binders) {
+  if (part == <?>) return 1;
+  if (part.is_atom_binder()) {
+    if (part in binders) {
+      List bound = _pattern_read(x2c_ident(part.str()[1:]));
+      steps.push(%(test (expr () (op == $value $bound))));
+    }
+    else _pattern_declare(part, value, steps, binders);
+    return 1;
+  }
+  if (part is <list>)
+    return _pattern_list(
+      part, value, literal, depth, cursors, steps, binders);
+  if (part.is_match_op() || part == <x2c-dyn>) return 0;
+  if (part is <symbol>) steps.push(%(test ${_pattern_same(value, part)}));
+  else steps.push(%(test (expr () (op == $value $literal))));
+  return 1;
+}
+
+static int _pattern_list(
+  List part, List value, List literal, int depth, Array cursors,
+  Array steps, Array binders) {
+  Var binder = <?>, Symbol tag = 0;
+  match (part) {
+    case %((!quote !is) ?name type ?(Symbol named)): {
+      binder = name;
+      tag = named;
+    }
+    case %((!quote !is) type ?(Symbol named)): tag = named;
+  }
+  if (tag) {
+    if (tag == <varray>) tag = <array>;
+    if (tag == <vmap>) tag = <map>;
+    List symbol = x2c_literal_symbol(tag);
+    steps.push(%(test (expr () (is-symbol $value $symbol))));
+    return binder.is_atom_binder() && _pattern_element(
+      binder, value, literal, depth, cursors, steps, binders);
+  }
+  if (part && part.car().is_match_op()) return 0;
+  if (cursors.len() == depth + 1)
+    cursors.push(x2c_fresh_name(%"cursor${depth + 1}"));
+  List list = x2c_literal_symbol(<list>);
+  steps.push(%(test (expr () (is-symbol $value $list))));
+  steps.push(
+    _pattern_assign(cursors[depth + 1], _pattern_call(value, "list")));
+  return _pattern_segment(
+    part, _pattern_call(literal, "list"), depth + 1, cursors, steps,
+    binders);
+}
+
+static void _pattern_declare(
+  Var binder, List value, Array steps, Array binders) {
+  String type = binder.is_list_binder() ? "List" : "Var";
+  List name = x2c_ident(binder.str()[1:]);
+  steps.push(%(declare ($type) (bindings (op = (bind $name ()) $value))));
+  binders.push(binder);
+}
 
 /* --- lib/meta.x ---------------------------------------------------------- */
 
@@ -318,6 +456,15 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_selector_middles", _selector_middles);
   $linked.row(rows, "_selector_units", _selector_units);
   $linked.row(rows, "_selector_definitions", _selector_definitions);
+  $linked.row(rows, "x2c_pattern_steps", x2c_pattern_steps);
+  $linked.row(rows, "_pattern_read", _pattern_read);
+  $linked.row(rows, "_pattern_call", _pattern_call);
+  $linked.row(rows, "_pattern_assign", _pattern_assign);
+  $linked.row(rows, "_pattern_same", _pattern_same);
+  $linked.row(rows, "_pattern_segment", _pattern_segment);
+  $linked.row(rows, "_pattern_element", _pattern_element);
+  $linked.row(rows, "_pattern_list", _pattern_list);
+  $linked.row(rows, "_pattern_declare", _pattern_declare);
   $linked.row(rows, "x2c_expr_field", x2c_expr_field);
   $linked.row(rows, "x2c_expr_cast", x2c_expr_cast);
   $linked.row(rows, "x2c_decl_make", x2c_decl_make);
@@ -343,6 +490,7 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_update_decode", _update_decode);
   $linked.row(rows, "_operator_rows", _operator_rows);
   $linked.row(rows, "_operator_cases", _operator_cases);
+  $linked.row(rows, "x2c_pattern_nest", x2c_pattern_nest);
   $linked.row(rows, "x2c_literal_string", x2c_literal_string);
   $linked.row(rows, "x2c_literal_int", x2c_literal_int);
   $linked.row(rows, "x2c_literal_symbol", x2c_literal_symbol);

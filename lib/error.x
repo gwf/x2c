@@ -43,15 +43,25 @@ typedef struct ErrorHandler *ErrorHandler;
 */
 typedef Symbol (*ErrorHandlerFn)(List errors, Var data);
 
+/** Selects the arm of a compiler-generated catch for the newest `Error`,
+    `error` as `(CODE @DETAIL)`, at raise time. Returns the zero-based arm,
+    or -1 when no arm matches. A selected arm stores its captures, borrowed
+    from `error`, in `captures` in `Match` capture order and their number in
+    `count`.
+*/
+typedef int (*ErrorCatchSelect)(List error, Var *captures, int *count);
+
 /** Holds the process-lifetime plans of one compiler-generated filtered catch.
     `arms` is a zero-initialized static array of `arm_count` `Match` sites and
     `default_arm` is the first unpatterned arm, or -1. `state` and `fenced_arm`
     belong to `Error`; a site must be static storage that the first
-    registration binds to its patterns.
+    registration binds to its patterns. A site with `select` is static from
+    the start, has no `arms`, and selects through that function instead.
 */
 typedef struct ErrorCatchSite {
   MatchCaptureSite *arms;
   int default_arm, arm_count, state, fenced_arm;
+  ErrorCatchSelect select;
 } ErrorCatchSite;
 
 /* A site is bound on its first registration: `static` when `Match` retains a
@@ -536,12 +546,25 @@ static Symbol ErrorHandler._catch_match(ErrorHandler h) {
 
 static int ErrorHandler._catch_select(
   ErrorHandler h, ErrorRecord *record, List projection) {
+  if (h.site.select) return h._catch_selected(record, projection);
   for (int i = 0; i < h.site.arm_count; i++)
     if (h._catch_arm(record, projection, i)) {
       h.selected = i;
       return 1;
     }
   return 0;
+}
+
+/* A site's selector picks the arm and its captures in one call. */
+static int ErrorHandler._catch_selected(
+  ErrorHandler h, ErrorRecord *record, List projection) {
+  Var values[MACHINE_BINDER_MAX];
+  int count = 0, arm = h.site.select(projection, values, &count);
+  if (arm < 0) return 0;
+  MatchCaptureBuffer captures = {values, ~0UL, count};
+  h._commit_captures(record, count, &captures);
+  h.selected = arm;
+  return 1;
 }
 
 /* Tries arm `i` and, when it matches, copies its captures into the record's
@@ -556,7 +579,7 @@ static int ErrorHandler._catch_arm(
   int matched = i == h.site.default_arm ||
     (plan.status == MACHINE_PREPARED &&
      plan.execute_capture(projection, captures, NULL) == 1);
-  if (matched) h._commit_captures(record, layout, &captures);
+  if (matched) h._commit_captures(record, binders, &captures);
   if (values) Scope.free(values);
   return matched;
 }
@@ -570,19 +593,19 @@ static MatchPlan ErrorHandler._arm_plan(ErrorHandler h, int i) {
 }
 
 static void ErrorHandler._commit_captures(
-  ErrorHandler handle, ErrorRecord *record, MatchCaptureLayout layout,
+  ErrorHandler handle, ErrorRecord *record, int count,
   MatchCaptureBuffer *captures) {
   if (handle.capture_values != NULL) {
     handle.capture_values.free();
     handle.capture_values = NULL;
   }
-  if (!layout || !layout.binder_count) return;
+  if (!count) return;
   int pushed = _scope_push(
     <alloc-fail>, "could not enter error scope for catch captures");
   handle.capture_values = Block.new(sizeof(Var));
-  handle.capture_values.append(NULL, layout.binder_count);
+  handle.capture_values.append(NULL, count);
   Var *values = handle.capture_values.bytes;
-  for (int i = 0; i < layout.binder_count; i++) {
+  for (int i = 0; i < count; i++) {
     values[i] = void;
     if (captures.has(i))
       values[i] = record.region._copy_value(captures.values[i]);
@@ -822,8 +845,9 @@ void Error.pop(ErrorHandler handle) {
 
 static void ErrorHandler._free(ErrorHandler handle) {
   if (!handle) return;
-  // a per-call site has no static arm storage and belongs to this handler
-  if (handle.site && !handle.site.arms) Scope.free(handle.site);
+  // a per-call site has no static storage and belongs to this handler
+  if (handle.site && !handle.site.arms && !handle.site.select)
+    Scope.free(handle.site);
   _plans_free(handle.plans);
   if (handle.capture_values != NULL) handle.capture_values.free();
   _retained_destroy(handle.retained);

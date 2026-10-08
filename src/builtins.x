@@ -19,6 +19,11 @@
    `src/linked-meta.x` links. */
 // lint: allow src-forward-declaration FI-6: linked native copy
 List x2c_param_make(List type, Var name);
+// lint: allow src-forward-declaration FI-6: linked native copy
+List x2c_pattern_steps(
+  List pattern, Atom subject, Array cursors, Array binders);
+// lint: allow src-forward-declaration FI-6: linked native copy
+List x2c_pattern_nest(List steps, List inner);
 
 // $scope
 
@@ -987,7 +992,11 @@ static List _binding_name_signature(String name) =>
    when something raises, and the catch site selects the arm. A clause's
    facts are `(HANDLE STATE (ARM...) PATTERN...)`: the handler the parser
    introduced, the catch site's initial state, the lowered arms, and the
-   patterns of the filtered arms, which precede the default arm. */
+   patterns of the filtered arms, which precede the default arm. When
+   every filtered pattern is static and in the subset
+   `x2c_pattern_steps` covers, they are `(HANDLE (select SELECTOR
+   DEFAULT) (ARM...))` instead: the site selects through that function,
+   and DEFAULT is the default arm's index or -1. */
 
 /** Places the lowered statements that leave a try region after it, with
     the effect that marks the unit as needing exception support. */
@@ -1051,6 +1060,15 @@ static macro Stmt $catch_site(Name $frame, Name $handle, Expr $count,
     x2c_error_catch_site_push(&$frame, &site, patterns);
 }
 
+/* A site whose selector function chooses the arm when something raises. */
+static macro Stmt $catch_selector(Name $frame, Name $handle, Expr $count,
+    Expr $fallback, Name $select) {
+  static ErrorCatchSite site = {
+    NULL, $fallback, $count, ERROR_CATCH_STATIC, -1, $select};
+  volatile ErrorHandler $handle =
+    x2c_error_catch_site_push(&$frame, &site, NULL);
+}
+
 /* A landing that hands a raised error to the arm its handler selected. */
 static macro Stmt $catch_landing(Name $frame, Name $handle,
     Stmt $unhandled, Stmt @arms) {
@@ -1067,8 +1085,11 @@ static macro Stmt $catch_landing(Name $frame, Name $handle,
     describes, or nothing for a try without one; the `$compiler_try`
     template calls this in a slot. */
 List builtin_try_catch_site(List frame, List clause) {
-  Macro site = $catch_site;
-  match (clause)
+  Macro site = $catch_site, selector = $catch_selector;
+  match (clause) {
+    case %(?handle (select ?select ?fallback) ?(List arms)):
+      return selector(
+        frame, handle, x2c_literal_int(arms.len()), fallback, select);
     case %(?handle ?(String state) ?(List arms) *patterns): {
       int count = arms.len(), filtered = patterns.len();
       return site(
@@ -1076,6 +1097,7 @@ List builtin_try_catch_site(List frame, List clause) {
         x2c_literal_int(filtered < count ? filtered : -1),
         %(expr (int) $state), patterns);
     }
+  }
   return NULL;
 }
 
@@ -1179,7 +1201,69 @@ static List _catch_clause(List handle, List records, Array rows) {
     rows.push(%(region $arm ${record.cadr()}));
     arms.push(arm);
   }
+  List select = _catch_selector(handle, patterns, arms.len(), rows);
+  if (select) return %($handle $select ${arms.list_free()});
   return %($handle $state ${arms.list_free()} @{patterns.list_free()});
+}
+
+/* Well inside the Match machine's constant, binder, and code limits. */
+static const int _catch_step_limit = 128;
+
+/* `(select SELECTOR DEFAULT)` for the filtered `patterns` of a catch with
+   `count` arms, adding to `rows` the effects that declare SELECTOR, a
+   function of the unit that tests the newest Error against each pattern in
+   order when it is raised; or NULL when a pattern is outside the static
+   subset. A pattern with more steps than `_catch_step_limit` keeps the
+   Match path, whose plan reports a pattern too large to prepare. */
+static List _catch_selector(
+  List handle, Array patterns, int count, Array rows) {
+  Atom error = x2c_fresh_name("catch_error");
+  Atom captures = x2c_fresh_name("catch_captures");
+  Atom found = x2c_fresh_name("catch_count");
+  Array cursors = [], items = [];
+  foreach (List pattern, patterns) {
+    Array binders = [];
+    List steps = x2c_pattern_steps(pattern, error, cursors, binders);
+    if (!steps || steps.len() > _catch_step_limit) return NULL;
+    List selected = _catch_selected(items.len(), binders, captures, found);
+    items.push(x2c_pattern_nest(steps, selected));
+  }
+  Atom select = x2c_fresh_name("catch_select");
+  Array names = [select, error, captures, found], declarations = [];
+  List subject = %(expr () (ident $error));
+  foreach (Atom cursor, cursors) {
+    declarations.push($!{ List $cursor = $subject; });
+    names.push(cursor);
+  }
+  int filtered = patterns.len();
+  List fallback = x2c_literal_int(filtered < count ? filtered : -1);
+  List body = %(@{declarations.list_free()} @{items.list_free()});
+  List function = $!Unit{
+    static int $select(List $error, Var *$captures, int *$found) {
+      @body
+      return $fallback;
+    }
+  };
+  foreach (Atom name, names) rows.push(x2c_effect_name(name));
+  rows.push(x2c_effect_support(%(catch-select $handle), select, function));
+  return %(select $select $fallback);
+}
+
+/* Stores the binders of arm `arm` in `captures`, their number in `found`,
+   and returns the arm. */
+static List _catch_selected(
+  int arm, Array binders, Atom captures, Atom found) {
+  Array statements = [];
+  int index = 0;
+  foreach (Var binder, binders) {
+    List value = x2c_expr_ident(x2c_ident(binder.str()[1:]));
+    List slot = x2c_literal_int(index++);
+    statements.push($!{ $captures[$slot] = $value; });
+  }
+  List number = x2c_literal_int(index), selected = x2c_literal_int(arm);
+  if (index) statements.push($!{ *$found = $number; });
+  statements.push($!{ return $selected; });
+  return statements.list_free();
 }
 
 /* Reports a label the finalizer defines: it runs on every path that
