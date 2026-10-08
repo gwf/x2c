@@ -241,3 +241,19 @@ through unit support. None of the three needs private compiler state.
 5. Macro and meta substrate: expansion, hygiene, quotation, meta execution.
 6. Hook dispatch and module registration.
 7. Unit assembly: imports, interfaces, pending destinations, emission.
+
+## What remains open
+
+- **Operators** (`in`, `is`, `is not`, `===`, `@`, and protocol operator
+  dispatch) stay as they are until the conversion and resolution engines are
+  separated.
+- **Two statement entries.** Every core statement has a token production and
+  a constructed-form binder; unify them or register both.
+- **Conversion positions** are not yet the single entry to the conversion
+  engine (about 74 direct `convert_expression` calls).
+- **Meta cost** for user-space extensions: about 1.3 M instructions per
+  project meta call, and a second layer while quotations cannot share
+  hygienic names.
+- **Hook composition**: order when several hooks match one node, and replay
+  of hooks through interfaces beyond the keyword-alias rows.
+- The API the kernel exposes: see `thin-api.md`.
