@@ -452,7 +452,7 @@ static List _unit_trailing(List hole, Map binders);
 
 static List _capture_layout(int sequence, List source, List value, List expression, List splice, List trailing);
 
-static const SymbolSet typed_hook_kinds =(SymbolSet) "\001\000\000\000\001\000\000\000\000\000\000\000\025\174\112\177\271\171\067\236\000\000\000\320\240\351\116\000\000\000\000";
+static const SymbolSet typed_hook_kinds =(SymbolSet) "\001\000\000\000\002\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\001\000\000\000\000\000\320\240\351\116\000\000\000\000\320\240\241\001\000\000\000\000";
 
 static Atom Compiler__typed_hook_definition(Compiler c, Token declaration, int storage);
 

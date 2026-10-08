@@ -76,6 +76,25 @@
   removed. `$auto` per use: 17.13 M before, 17.32 M after; unused hooks cost
   nothing measurable.
 
+## Wave 3
+
+- W3-A: `match-component.x` lowers a `match` whose arms are all static
+  patterns to nested `if` tests inside `switch (0) { default: ... }`, with no
+  Match runtime call; every other `match` is declined with byte-identical C.
+  Semantics match the book on its test and on all 11 match fixture programs
+  with output. Translation per use: built-in 12.38 M, component 52.15 M,
+  the component's output written by hand 45.14 M. Runtime: 9 to 11 percent
+  faster than the built-in.
+- Cost floor found: a typed-phase component pays to bind and type the code
+  it returns, so it cannot translate cheaper than the same code written by
+  hand. The built-in emitter writes its tests as C text and avoids this.
+  The carrier already has a `lowered` stage; an API entry that returns
+  lowered code would remove the rebinding where a component can produce
+  lowered forms.
+- Defect found in the built-in `match` (not caused by the spike): a `defer`
+  in an arm that reads an arm binder fails in C with an undeclared
+  identifier.
+
 ## Log
 
 - 2026-10-07: merged `origin/dev` `7e946b86`; migrated spike files to
@@ -84,3 +103,4 @@
   bootstrap and docs refreshed; typed switch ported to the effects API.
 - 2026-10-07: W2-A integrated; bootstrap and docs refreshed.
 - 2026-10-07: W2-B integrated (claims, declaration hook, category argument).
+- 2026-10-07: W3-A integrated (match component, pattern values); bootstrap refreshed.

@@ -25,7 +25,7 @@ component's file is included and replay through interfaces.
 | `keyword ALIAS $macro;` | parse: identifier statement or expression | public (macros.x:2398) | `foreach`, `class`, `loop`, `synchronized` |
 | `hook switch $m;`, other C keywords | parse: C keyword statement | prototype (statements.x) | string switch; `match`, `try`, `raise`, `with` |
 | `hook function $m;` | parse: function definition body | prototype (parse.x) | tracing, entry guards, lambda lowering |
-| typed node hook, by node kind, may decline: `hook <switch> f;` | transform: after binding and typing | prototype (wave 1) | string switch, collection literals, printf formats, `match`, destructuring |
+| typed node hook, by node kind, may decline: `hook <switch> f;`, `hook <match> f;` | transform: after binding and typing | prototype (waves 1, 3) | string switch, collection literals, printf formats, `match`, destructuring |
 | declaration-position hook through claims: `hook <TAG> f;` for `(claim TAG MESSAGE VALUE)` | bind: block declaration | prototype (wave 2) | `$auto`; later destructuring, `class` |
 | reader-prefix hook | lex and parse: `$!`-style prefixes | missing | quotations |
 | fact registration at collection | collect: declaration time, replayed by interfaces | missing (protocol.x and `Defaults` internal) | `protocol`, `delegate`, `class` defaults |
@@ -82,8 +82,9 @@ forms after it.
 
 | Entry | Status | Notes |
 | --- | --- | --- |
+| Pattern value for meta code: `x2c_pattern_value(pattern)` | prototype (wave 3) | bound patterns hold literals as cache entries project meta code cannot read |
 | Pattern to test and binders | internal (Match runtime, `match_pattern_binders`) | one compiler for `match`, `catch`, macro recognition, typed captures |
-| Static pattern to nested `if` tests | missing | for `match` arms and catch predicates |
+| Static pattern to nested `if` tests | prototype in match-component.x (wave 3) | shared form waits for the catch predicate as a second client |
 | Dynamic pattern to `MatchPlan` | public runtime (lib/match.x) | |
 
 ## 7. Diagnostics

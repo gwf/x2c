@@ -20,6 +20,7 @@ One x2c unit's translation state and its two parses.
 | [`match_value_is_static`](#match_value_is_static) | Reports whether a recovered pattern value graph is fully static. |
 | [`real_path`](#real_path) | Returns the real path of the existing file at `path`, or NULL when `path` is NULL or does not resolve. |
 | [`reference_guard_exits`](#reference_guard_exits) | Returns whether `arm` ends with a return or non-returning raise. |
+| [`x2c_pattern_value`](#x2c_pattern_value) | Answers `x2c.pattern.value`, declared in `lib/meta.x`. |
 | [`Compiler._at_function_arrow`](#Compiler._at_function_arrow) | Reports whether the current two tokens are `=>`. |
 | [`Compiler._skip_shallow_expression`](#Compiler._skip_shallow_expression) | Skips a balanced shallow expression without consuming its terminator. |
 | [`Compiler.add_early`](#Compiler.add_early) | Appends a generated declaration to the unit's pending support. |
@@ -109,7 +110,7 @@ One x2c unit's translation state and its two parses.
 Returns `Path.absolute(path)`, resolving an existing file through
 `real_path`.
 
-Source: `src/compiler.x:2701`
+Source: `src/compiler.x:2705`
 
 #### home_absolute_path
 
@@ -117,7 +118,7 @@ Source: `src/compiler.x:2701`
 
 Returns the absolute path that a `home_portable_path` spelling names.
 
-Source: `src/compiler.x:2732`
+Source: `src/compiler.x:2736`
 
 #### home_portable_path
 
@@ -128,7 +129,7 @@ home, otherwise `path`. Interfaces, macro definitions, retained
 declarations, and generated identities spell paths this way, so they do
 not depend on where the home is installed.
 
-Source: `src/compiler.x:2726`
+Source: `src/compiler.x:2730`
 
 #### match_value_flat_head
 
@@ -140,7 +141,7 @@ Each element after the head is a unique named `?` binder or a typed
 capture of one. When `tags` is non-null, stores one entry per binder
 in order: the capture's tag Symbol, or integer zero when untyped.
 
-Source: `src/compiler.x:2507`
+Source: `src/compiler.x:2511`
 
 #### match_value_head
 
@@ -152,7 +153,7 @@ A binder, guard, non-list value, or computed head has no fixed symbol.
 Other pattern elements may remain dynamic because a literal head alone
 constrains the first input element.
 
-Source: `src/compiler.x:2492`
+Source: `src/compiler.x:2496`
 
 #### match_value_is_static
 
@@ -170,7 +171,7 @@ Returns the real path of the existing file at `path`, or NULL when
 `path` is NULL or does not resolve. Each spelling is resolved once per
 process.
 
-Source: `src/compiler.x:2688`
+Source: `src/compiler.x:2692`
 
 #### reference_guard_exits
 
@@ -179,6 +180,14 @@ Source: `src/compiler.x:2688`
 Returns whether `arm` ends with a return or non-returning raise.
 
 Source: `src/compiler.x:2245`
+
+#### x2c_pattern_value
+
+`Var x2c_pattern_value(List pattern)`
+
+Answers `x2c.pattern.value`, declared in `lib/meta.x`.
+
+Source: `src/compiler.x:2487`
 
 ### `Compiler`
 
@@ -229,7 +238,7 @@ Source: `src/compiler.x:2293`
 
 Records a path dependency not embedded in generated C.
 
-Source: `src/compiler.x:2744`
+Source: `src/compiler.x:2748`
 
 <a id="Compiler.anchor_origin"></a>
 #### Compiler.anchor_origin
@@ -271,7 +280,7 @@ Source: `src/compiler.x:1981`
 Shares a caller's diagnostic stream while preserving its emission policy.
 The caller restores the saved printer after this child finishes.
 
-Source: `src/compiler.x:2615`
+Source: `src/compiler.x:2619`
 
 <a id="Compiler.cache"></a>
 #### Compiler.cache
@@ -327,7 +336,7 @@ source view it is the absolute path, because an unsaved file need not
 exist on disk; otherwise it is the real path, or `path` itself when that
 does not resolve.
 
-Source: `src/compiler.x:2672`
+Source: `src/compiler.x:2676`
 
 <a id="Compiler.catch_binder_declarations"></a>
 #### Compiler.catch_binder_declarations
@@ -336,7 +345,7 @@ Source: `src/compiler.x:2672`
 
 Builds ordinary declarations from a catch scope's issued bindings.
 
-Source: `src/compiler.x:2579`
+Source: `src/compiler.x:2583`
 
 <a id="Compiler.close_child"></a>
 #### Compiler.close_child
@@ -345,7 +354,7 @@ Source: `src/compiler.x:2579`
 
 Retains a child's final diagnostics and closes its owned Lisp session.
 
-Source: `src/compiler.x:2621`
+Source: `src/compiler.x:2625`
 
 <a id="Compiler.collect_compile_time_definition"></a>
 #### Compiler.collect_compile_time_definition
@@ -386,7 +395,7 @@ Source: `src/compiler.x:2131`
 
 Defines catch binders and returns their capture-token/binding pairs.
 
-Source: `src/compiler.x:2565`
+Source: `src/compiler.x:2569`
 
 <a id="Compiler.define_match_binders"></a>
 #### Compiler.define_match_binders
@@ -395,7 +404,7 @@ Source: `src/compiler.x:2565`
 
 Defines a typed `Match` pattern's definite binders in the current scope.
 
-Source: `src/compiler.x:2557`
+Source: `src/compiler.x:2561`
 
 <a id="Compiler.emitted_binding_name"></a>
 #### Compiler.emitted_binding_name
@@ -443,7 +452,7 @@ it clears the diagnostic store and the compiler must not be reused.
 At process exit, root Scope cleanup follows shutdown hooks and canonical
 pool cleanup. Close explicitly while any native session dependencies live.
 
-Source: `src/compiler.x:2827`
+Source: `src/compiler.x:2831`
 
 <a id="Compiler.freeze_declaration_syntax"></a>
 #### Compiler.freeze_declaration_syntax
@@ -518,7 +527,7 @@ Returns definite binders from a typed `Match` pattern AST.
 
 When `possible` is non-null, stores every binder appearing on any path.
 
-Source: `src/compiler.x:2546`
+Source: `src/compiler.x:2550`
 
 <a id="Compiler.match_pattern_is_static"></a>
 #### Compiler.match_pattern_is_static
@@ -554,7 +563,7 @@ Source: `src/compiler.x:2142`
 
 Merges another translation's dependency rows into this compiler.
 
-Source: `src/compiler.x:2749`
+Source: `src/compiler.x:2753`
 
 <a id="Compiler.new"></a>
 #### Compiler.new
@@ -563,7 +572,7 @@ Source: `src/compiler.x:2749`
 
 Creates a compiler with independent package and generated-name state.
 
-Source: `src/compiler.x:2757`
+Source: `src/compiler.x:2761`
 
 <a id="Compiler.new_shared"></a>
 #### Compiler.new_shared
@@ -572,7 +581,7 @@ Source: `src/compiler.x:2757`
 
 Creates a compiler sharing its owner's package and generated-name state.
 
-Source: `src/compiler.x:2760`
+Source: `src/compiler.x:2764`
 
 <a id="Compiler.next"></a>
 #### Compiler.next
@@ -607,7 +616,7 @@ Routes this compiler's diagnostic store through its own printer.
 Compilers that share a store call this when taking the diagnostic stream
 back from another compiler.
 
-Source: `src/compiler.x:2608`
+Source: `src/compiler.x:2612`
 
 <a id="Compiler.peek"></a>
 #### Compiler.peek
@@ -649,7 +658,7 @@ Source: `src/compiler.x:555`
 Reads a source through the request view and retains exact response
 bytes.
 
-Source: `src/compiler.x:2661`
+Source: `src/compiler.x:2665`
 
 <a id="Compiler.record_inline_function"></a>
 #### Compiler.record_inline_function
@@ -732,7 +741,7 @@ Returns that state to `owner`, so the next segment starts where this one
 finished and any Lisp environment this segment created stays alive after
 the shadow is released.
 
-Source: `src/compiler.x:2650`
+Source: `src/compiler.x:2654`
 
 <a id="Compiler.run_declaration_effects"></a>
 #### Compiler.run_declaration_effects
@@ -795,7 +804,7 @@ Source: `src/compiler.x:384`
 Shares `owner`'s pending `meta` group and the definitions it reads, which
 belong with the Lisp session that holds the group's stubs.
 
-Source: `src/compiler.x:2630`
+Source: `src/compiler.x:2634`
 
 <a id="Compiler.skip_collected_script_statement"></a>
 #### Compiler.skip_collected_script_statement
@@ -839,7 +848,7 @@ literal cache, and Lisp state for one segment of a collected file.
 Segments are one translation unit, so retained macro bodies index the
 unit's literal cache and use its Lisp environment.
 
-Source: `src/compiler.x:2639`
+Source: `src/compiler.x:2643`
 
 <a id="Compiler.take_word"></a>
 #### Compiler.take_word
@@ -899,7 +908,7 @@ Source: `src/compiler.x:253`
 
 Merges one translation dependency, preserving an existing content hash.
 
-Source: `src/compiler.x:2736`
+Source: `src/compiler.x:2740`
 
 ### `Pending`
 

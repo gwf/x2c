@@ -99,6 +99,8 @@ void x2c_diagnostic_fail_at(Var node, Symbol category, String message, List note
 
 void x2c_diagnostic_warn(String message, List notes);
 
+Var x2c_pattern_value(List pattern);
+
 List x2c_code(List code, List effects);
 
 Atom x2c_fresh_name(String role);
