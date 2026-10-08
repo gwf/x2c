@@ -20,8 +20,9 @@
     A call replies with a `(warning MESSAGE (NOTE ...))` frame for each
     warning it made and a `(dependency PATH HASH)` frame for each file it
     embedded, then `(value V)`, `(void)` for no value, `(error
-    MESSAGE (NOTE ...))` for a
-    failure the body reported or the compiler would report, or `(failure
+    MESSAGE (NOTE ...))` for a failure the body reported or the compiler
+    would report, `(error MESSAGE (NOTE ...) (at NODE))` for one the body
+    reported at a node, or `(failure
     CAUSE)` for an Error the body raised, or `(missing)` when the table has
     no such function. A body that crashes or exits ends the helper, which
     the compiler reports at the call.
@@ -123,6 +124,12 @@ void x2c_diagnostic_fail(String message, List notes) {
   _fail(message, notes);
 }
 
+/* The failure carries the node, whose position the compiler reports. */
+void x2c_diagnostic_fail_at(Var node, String message, List notes) {
+  _check_notes("x2c.diagnostic.fail-at", notes);
+  raise %(meta-fail (message $message) (notes $notes) (at $node));
+}
+
 void x2c_diagnostic_warn(String message, List notes) {
   _check_notes("x2c.diagnostic.warn", notes);
   helper_notices.push(%(warning $message $notes));
@@ -160,6 +167,20 @@ List x2c_expr_field(List receiver, String name) {
 }
 
 List x2c_type_parts(List type) => type_declaration_parts(type);
+
+/* The code effect builders compute what the compiler's do. */
+List x2c_code(List code, List effects) =>
+  %(code-value "source" $code $effects);
+
+Atom x2c_fresh_name(String role) => Atom.intern("?__" + role);
+
+List x2c_effect_name(Atom name) => %(new-name $name ${name.str()[3:]});
+
+List x2c_effect_support(Var key, Atom name, List declaration) =>
+  %(early $key $name $declaration);
+
+List x2c_effect_initialize(Symbol area, List statement) =>
+  %(initialize $area $statement);
 
 /* The three builders below are the bodies in `lib/meta.x`. */
 List x2c_expr_cast(List type, List expression) {
@@ -304,6 +325,8 @@ $scope() static void _apply(Var target, String name, List arguments) {
   try result = ((Func) target.pointer()).apply(count, argv);
   catch %(meta-fail (message ?message) (notes ?notes)):
     failure = Error.snapshot(%(error $message $notes));
+  catch %(meta-fail (message ?message) (notes ?notes) (at ?node)):
+    failure = Error.snapshot(%(error $message $notes (at $node)));
   /* A catch binding is borrowed by the arm; the reply is written after. */
   catch %(?code *detail):
     failure = %(failure ${Error.snapshot(cons(code, detail))});

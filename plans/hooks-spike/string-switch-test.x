@@ -36,6 +36,14 @@ int fallthrough(String s) {
   return total;
 }
 
+/* The subject temporary's fresh name cannot capture the caller's. */
+int hygiene(String selected) {
+  switch (selected) {
+    case "x": return 1;
+  }
+  return 0;
+}
+
 /* Integer and Symbol switches in the same file stay ordinary switches. */
 int digits(int n) {
   int total = 0;
@@ -84,7 +92,7 @@ int main(void) {
     hooked("") == 3 && hooked(NULL) == 3 && hooked("purple") == 0 &&
     calls == 12 &&
     fallthrough("a") == 11 && fallthrough("b") == 10 &&
-    fallthrough("z") == 100 &&
+    fallthrough("z") == 100 && hygiene("x") == 1 && hygiene("y") == 0 &&
     digits(1) == 11 && digits(2) == 10 && digits(7) == 100 &&
     shade(<light>) == 1 && shade(<dark>) == 2 && shade(<none>) == 0 &&
     nested(1, "x") == 11 && nested(1, "q") == 10 && nested(2, "x") == 20 &&

@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/meta-fail-at.x:19:5: macro: only one statement is allowed
+      total += 2;
+      ^^^^^
+  note: reason: example
+

@@ -666,6 +666,12 @@ void x2c_diagnostic_fail(String message, List notes) {
   MetaContext.reject(message, notes);
 }
 
+/** Answers `x2c.diagnostic.fail-at`, declared in `lib/meta.x`. */
+void x2c_diagnostic_fail_at(Var node, String message, List notes) {
+  _sdk_check_notes("x2c.diagnostic.fail-at", notes);
+  active.expander.report_meta_error(node, message, active.site, notes);
+}
+
 /** A warning reports where it is raised and returns, so a macro can keep
    expanding. Failure stays separate because it never returns. */
 void x2c_diagnostic_warn(String message, List notes) {
@@ -673,6 +679,26 @@ void x2c_diagnostic_warn(String message, List notes) {
   active.expander.report_warning(
     <macro>, message, active.expander.token, notes);
 }
+
+// code effects, the rows `Compiler._code_effects` applies
+
+/** Answers `x2c.code`, declared in `lib/meta.x`. */
+List x2c_code(List code, List effects) =>
+  %(code-value "source" $code $effects);
+
+/** Answers `x2c.fresh-name`, declared in `lib/meta.x`. */
+Atom x2c_fresh_name(String role) => Atom.intern("?__" + role);
+
+/** Answers `x2c.effect.name`, declared in `lib/meta.x`. */
+List x2c_effect_name(Atom name) => %(new-name $name ${name.str()[3:]});
+
+/** Answers `x2c.effect.support`, declared in `lib/meta.x`. */
+List x2c_effect_support(Var key, Atom name, List declaration) =>
+  %(early $key $name $declaration);
+
+/** Answers `x2c.effect.initialize`, declared in `lib/meta.x`. */
+List x2c_effect_initialize(Symbol area, List statement) =>
+  %(initialize $area $statement);
 
 static void _sdk_check_notes(String operation, List notes) {
   _sdk_guard(operation);
