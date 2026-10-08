@@ -2354,8 +2354,7 @@ void Compiler.install_compile_time_effects(Compiler c, List rows) {
       if (!c.kw_aliases) c.kw_aliases = {};
       if (alias == _fallback_alias()) c._add_member_fallback(definition);
       else c.kw_aliases[alias] = %(imported-macro $definition);
-      if (definition is <string> && alias.str().startswith("hook:"))
-        c.typed_hooks = 1;
+      if (_typed_hook_row(alias, definition)) c.typed_hooks = 1;
     }
     case %(compile-time lisp ?form (source ?path ?site)): {
       Token token = c.thaw_declaration_syntax(site);
@@ -2531,6 +2530,11 @@ static String Compiler._hook_target(Compiler c) {
 
 static Atom _typed_hook_alias(Symbol kind) =>
   Atom.intern(%"hook:<$kind>");
+
+/* Whether an alias row registers a typed node hook, whose target is a
+   meta function's spelling. */
+static int _typed_hook_row(Var alias, Var definition) =>
+  definition is <string> && alias.str().startswith("hook:");
 
 static Atom _claim_hook_alias(Var tag) => Atom.intern(%"claim:<$tag>");
 
@@ -4917,10 +4921,17 @@ static void Compiler._install_source(
   int builtin) {
   (void) marker.try_own();
   Var installed;
-  if (c.macros.try_get(marker, installed)) {
-    c.kw_aliases.merge(installed);
-    return;
-  }
+  if (c.macros.try_get(marker, installed)) c.kw_aliases.merge(installed);
+  else
+    c.macros[marker] = installed = c._read_shipped(text, filename, builtin);
+  foreach (Var (alias, definition), installed.map())
+    if (_typed_hook_row(alias, definition)) c.typed_hooks = 1;
+}
+
+/* The aliases a shipped source declares, read by a child that shares the
+   unit's definitions. */
+static Map Compiler._read_shipped(
+  Compiler c, String text, String filename, int builtin) {
   Compiler child = Compiler.new_shared(c);
   defer c.close_child(child);
   child.filename = filename;
@@ -4930,8 +4941,7 @@ static void Compiler._install_source(
   child.kw_aliases = c.kw_aliases;
   child.builtin_defs = builtin;
   child.tokenize(text);
-  Map aliases = child._read_definitions();
-  c.macros[marker] = aliases;
+  return child._read_definitions();
 }
 
 /* A shipped source holds only definitions and keyword aliases. */
