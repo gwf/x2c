@@ -63,7 +63,7 @@ component's file is included and replay through interfaces.
 | File initialization area: `x2c_effect_initialize(area, stmt)` | prototype (wave 1); was internal (`add_init`) | areas `<protocol>`, `<prepare>`, `<statics>`, `<finish>`; statements arrive lowered |
 | Include anchor: `x2c_requires(<errors>)` | internal (`needs_exception`, `_anchors`) | `try`, `raise` |
 | "Never returns" fact | internal (`Ast.never_returns`) | `raise` |
-| Cleanup participation: open a region, set break and continue barriers | internal (`Walk`) | `try`, `finally`, `match`, static locals; ordinary `defer` in generated code is already public |
+| Cleanup participation: `hook <try> f;` returning `outer`, `exits`, `region`, `landing` rows | prototype (wave 4) | `try`, `finally`, `match`, static locals; ordinary `defer` in generated code is already public |
 | Region-analysis effect rows | internal (regions.x table) | `$scope`, `$let` |
 
 All contributions apply under the expansion's semantic transaction

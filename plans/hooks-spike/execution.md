@@ -119,3 +119,4 @@
 - 2026-10-07: W2-B integrated (claims, declaration hook, category argument).
 - 2026-10-07: W3-A integrated (match component, pattern values); bootstrap refreshed.
 - 2026-10-07: W3-B integrated (facts, member fallback, delegate); bootstrap refreshed twice and converged; 235 fixtures and 3 probes pass.
+- 2026-10-08: wave 4 integrated (W4-B negative, W4-C conversion, W4-A try component); make verify passes.
