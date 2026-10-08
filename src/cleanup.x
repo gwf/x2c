@@ -5,9 +5,10 @@
     A cleanup region is a `try` body or catch arm, a `defer` body, or the
     rest of a block after a static local whose initializer runs at runtime.
     Normalization turns each `defer` statement into a region. When a
-    function is complete, one walk places each region's exits on every
-    transfer that leaves it, rejects a jump into a region, and keeps the
-    locals a `sigsetjmp` landing reads either `volatile` or escaped.
+    function is complete, each `try` takes its region form, and one walk
+    places each region's exits on every transfer that leaves it, rejects a
+    jump into a region, and keeps the locals a `sigsetjmp` landing reads
+    either `volatile` or escaped.
 */
 
 #pragma once
@@ -43,7 +44,7 @@ static typedef struct Walk {
 static typedef struct Preserve {
   Compiler c;
   Map names, holders, pointers, escaped;
-  int expression_tries;
+  int expression_landings;
 } Preserve;
 
 /* Expressions may nest one level per operator. Visit blocks without
@@ -98,11 +99,12 @@ static List _expression_children(List node, Map changed) {
 }
 
 /* Whether a statement expression in `body`, before its regions lower,
-   holds a `try`. */
-static int _expression_holds_try(List body) {
+   holds a region form whose `(landing)` row says control comes back
+   through `siglongjmp`. */
+static int _expression_holds_landing(List body) {
   List node;
   $ast.walk(body, node) match (node) case %(expr *): {
-    if (ast_contains_head(node, <try>)) return 1;
+    if (ast_contains_head(node, <landing>)) return 1;
     continue;
   }
   return 0;
@@ -135,7 +137,7 @@ static List Compiler._lower_function(Compiler c, List node) {
         .return_type = cdr(declaration.type_from_ast()).type().declared()
       };
       Map runtime = {};
-      body = c._static_regions(body, runtime);
+      body = c._region_forms(body, runtime);
       w.collect_labels(body, NULL);
       Preserve p = {
         .c = c, .names = {}, .holders = {}, .pointers = {}, .escaped = {}
@@ -143,7 +145,7 @@ static List Compiler._lower_function(Compiler c, List node) {
       p.collect(body);
       List rewritten = w.rewrite(body);
       if (p.names.len() || p.escaped.len()) {
-        p.expression_tries = _expression_holds_try(body);
+        p.expression_landings = _expression_holds_landing(body);
         rewritten = p.rewrite(rewritten);
         bindings = p.rewrite(bindings);
         rewritten = p.escape_parameters(rewritten, bindings);
@@ -154,17 +156,19 @@ static List Compiler._lower_function(Compiler c, List node) {
   return node;
 }
 
-// static initializers
+// region forms
 
-/* A static local whose initializer runs at runtime protects the remainder
-   of its block just as a cleanup region does: a jump may not enter past the
-   initializer. Keeping the canonical binding makes shadowing and generated
-   syntax use the same object reference. */
-static List Compiler._static_regions(Compiler c, List ast, Map runtime) {
+/* Each construct that opens a region takes its form before labels are
+   collected. A static local whose initializer runs at runtime protects the
+   remainder of its block just as a cleanup region does: a jump may not
+   enter past the initializer. Keeping the canonical binding makes
+   shadowing and generated syntax use the same object reference. A `try`
+   takes its region form after its parts. */
+static List Compiler._region_forms(Compiler c, List ast, Map runtime) {
   match (ast) {
     case %(expr *):
       return _rewrite_expression(
-        ast, %!(List block) => c._static_regions(block, runtime));
+        ast, %!(List block) => c._region_forms(block, runtime));
     case %((!or function localinit typedef) *): return ast;
     case %(declare ?type ?bindings):
       return c._static_initializers(type, bindings, runtime);
@@ -173,19 +177,24 @@ static List Compiler._static_regions(Compiler c, List ast, Map runtime) {
       for (List rest = statements; rest; rest = rest.cdr()) {
         List statement = rest.car();
         if (c._runtime_static_declaration(statement, runtime)) {
-          List guard = c._static_regions(statement, runtime);
-          List body = c._static_regions(
+          List guard = c._region_forms(statement, runtime);
+          List body = c._region_forms(
             source_block_content(rest.cdr()), runtime);
           before.push(%(localinit $guard $body));
           break;
         }
-        before.push(c._static_regions(statement, runtime));
+        before.push(c._region_forms(statement, runtime));
       }
       return source_block_content(before.list_free());
     }
+    case %(try *): return c._try_form(c._region_children(ast, runtime));
   }
+  return c._region_children(ast, runtime);
+}
+
+static List Compiler._region_children(Compiler c, List ast, Map runtime) {
   Var child;
-  $ast.rewrite_children(ast, child, c._static_regions(child, runtime));
+  $ast.rewrite_children(ast, child, c._region_forms(child, runtime));
 }
 
 /* The pending initializer and the emitter share one cleanup record. Its
@@ -196,8 +205,8 @@ static List Compiler._static_initializers(
   foreach (List binding, bindings.cdr()) {
     match (binding)
       case %(op = ?declaration ?value): {
-        declaration = c._static_regions(declaration, runtime);
-        List initial = c._static_regions(value, runtime);
+        declaration = c._region_forms(declaration, runtime);
+        List initial = c._region_forms(value, runtime);
         if (type.is_static() && c.static_value_is_runtime(value, runtime)) {
           List record = c._region_binding("static_cleanup");
           initial = %(staticinit $record $initial);
@@ -205,7 +214,7 @@ static List Compiler._static_initializers(
         output.push(%(op = $declaration $initial));
         continue;
       }
-    output.push(c._static_regions(binding, runtime));
+    output.push(c._region_forms(binding, runtime));
   }
   return %(declare $type (bindings @{output.list_free()}));
 }
@@ -355,8 +364,7 @@ static void Walk.collect_labels(Walk &w, Var value, List path) {
   match (node) {
     case %(expr *): w._collect_blocks(node, path);
     case %(label ?name *rest): w._collect_label(name, rest, path);
-    case %(try ?body ?clause ?finalizer *):
-      w._collect_try(body, clause, finalizer, path);
+    case %(regions ? ?rows): w._collect_rows(rows, path);
     case %(defer ?body *): w.collect_labels(body, cons(body, path));
     case %(localinit ?guard ?body):
       w._collect_local(node, guard, body, path);
@@ -377,22 +385,13 @@ static void Walk._collect_label(Walk &w, Var name, List rest, List path) {
   w._collect_children(rest, path);
 }
 
-/* Each region a construct opens has its own identity: a `try` protects
-   its body and each catch arm separately, while its guards and its
-   finalizer run outside the region and keep the enclosing path. */
-static void Walk._collect_try(
-  Walk &w, Var body, Var clause, Var finalizer, List path) {
-  w.collect_labels(body, cons(body, path));
-  w._collect_catches(clause, path);
-  w.collect_labels(finalizer, path);
-}
-
-static void Walk._collect_catches(Walk &w, Var clause, List path) {
-  match (clause) case %(catchcases ?records ?handle):
-    foreach (List record, records) {
-      w.collect_labels(record.car(), path);
-      List arm = record.cadr();
-      w.collect_labels(arm, cons(arm, path));
+/* Each region a form opens has its own identity, such as a `try` body
+   and each catch arm, while its outer parts keep the enclosing path. */
+static void Walk._collect_rows(Walk &w, List rows, List path) {
+  foreach (List row, rows)
+    match (row) {
+      case %(outer ? ?node): w.collect_labels(node, path);
+      case %(region ? ?node): w.collect_labels(node, cons(node, path));
     }
 }
 
@@ -435,10 +434,7 @@ static Var Walk.rewrite(Walk &w, Var value) {
     case %(at ?(int origin) ?inner): return w._lower_at(origin, inner);
     case %(defer ?body ?env ?callback ?records ?):
       return w._lower_defer(body, env, callback, records);
-    case ${$caught(?body, ?finalizer, *arms)}:
-      return w._lower_try(node, body, arms, finalizer);
-    case ${$tried(?body, ?finalizer)}:
-      return w._lower_try(node, body, NULL, finalizer);
+    case %(regions ?code ?rows): return w._lower_regions(code, rows);
     case %(localinit ?guard ?body):
       return w._rewrite_localinit(node, guard, body);
     case %(staticinit ?record ?initial):
@@ -624,15 +620,84 @@ static void Walk._report_at(Walk &w, int origin, String message, List note) {
 static List Compiler._region_binding(Compiler c, String role) =>
   c.sym.introduce(c.fresh_name(role));
 
-static List _address_of(String spelling, List binding) {
+static List _address_of(String spelling, Var binding) {
   Type type = %(($spelling));
   return %(expr ${type.reference()} (op & (expr $type (ident $binding))));
 }
 
+/* region forms
+
+   A construct that opens regions takes the form `(regions CODE ROWS)`.
+   The walk applies its rows in order, and each row's TOKEN, a binder in
+   CODE and in the rows after it, is replaced by what the row lowered:
+
+   - `(new-name TOKEN ROLE)` introduces a fresh binding for ROLE.
+   - `(outer TOKEN NODE)` lowers NODE in the enclosing regions.
+   - `(exits TOKEN CODE)` binds CODE as the exits of the regions after
+     it. CODE holds lowered parts only, and binding lowers nothing more.
+   - `(region TOKEN NODE)` lowers NODE inside a region that runs those
+     exits on every transfer out of it, and that no `goto` may enter.
+   - `(landing)` says control comes back through `siglongjmp`, so the
+     locals the nodes of `outer` and `region` write stay valid.
+
+   CODE then binds in place of the construct. */
+
+static List Walk._lower_regions(Walk &w, Var code, List rows) {
+  Compiler c = w.c;
+  Map parts = {};
+  List exits = NULL;
+  foreach (List row, rows)
+    match (row) {
+      case %(new-name ?token ?(String role)):
+        parts[token] = c._region_binding(role);
+      case %(outer ?token ?node):
+        parts[token] = %(code-value "lowered" (seq ${w.rewrite(node)}) ());
+      case %(exits ?token ?statements): {
+        exits = %(code-value "lowered" ${c._bind_parts(statements, parts)} ());
+        parts[token] = exits;
+      }
+      case %(region ?token ?node): parts[token] = w._region(exits, node);
+    }
+  return c._bind_parts(code, parts);
+}
+
+/* A region's body, lowered inside the region `cleanup` leaves. */
+static List Walk._region(Walk &w, List cleanup, List body) =>
+  %(code-value "lowered" ${w._inside(cleanup, body, body)} ());
+
+static List Compiler._bind_parts(Compiler c, Var code, Map parts) =>
+  c.bind_syntax(_replace_tokens(code, parts), AST_BLOCK, c.return_type);
+
+/* Returns `code` with each token `parts` maps replaced. A template's
+   definition holds none, so only the values it applies are searched. */
+static Var _replace_tokens(Var code, Map parts) {
+  match (code) case %("x2c.template" ?definition ?values): {
+    Var replaced = _replaced(values, parts);
+    return replaced == values ? code
+                              : %("x2c.template" $definition $replaced);
+  }
+  return _replaced(code, parts);
+}
+
+static Var _replaced(Var value, Map parts) {
+  Var part;
+  if (value.is_binder() && parts.try_get(value, part)) return part;
+  if (value is not <list> || value.is_nil()) return value;
+  Array items = $auto([]);
+  int changed = 0;
+  foreach (Var child, value.list()) {
+    Var item = _replaced(child, parts);
+    changed |= item != child;
+    items.push(item);
+  }
+  return changed ? items.list().var() : value;
+}
+
 /* try
 
-   A try region: its frame, its catch site, its landing and its exits, each
-   written by a template below. A clause's facts are
+   A `try` lowers through its region form: its frame, its finalizer
+   outside its regions, its exits, then its body and each catch arm inside
+   them, written into the templates below. A clause's facts are
    `(HANDLE STATE (ARM...) PATTERN...)`: the handler the parser introduced,
    the catch site's initial state, the lowered arms, and the patterns of
    the filtered arms, which precede the default arm. */
@@ -690,33 +755,54 @@ static macro Stmt $catch_landing(Name $frame, Name $handle,
   else $unhandled
 }
 
-/* Lowers the parsed try `node`: its body, its catch arms, which may be
-   NULL, and its finalizer, which may be NULL. */
-static List Walk._lower_try(
-  Walk &w, List node, List body, List arms, List finalizer) {
-  Compiler c = w.c;
-  w._check_finalizer_label(finalizer);
-  List frame = c._region_binding("exception_frame");
-  List handle = arms ? catch_handle(node) : NULL;
-  List cleanup = c._try_cleanup(frame, handle, w.rewrite(finalizer), !!arms);
-  List lowered = w._try_region(cleanup, body);
-  Macro shape = $compiler_try;
-  return c.bind_syntax(
-    shape(frame, w._catch_clause(handle, cleanup, arms), lowered, cleanup),
-    AST_BLOCK, c.return_type);
+/* The region form of the parsed try `node`, whose parts have theirs. */
+static List Compiler._try_form(Compiler c, List node) {
+  match (node) {
+    case ${$caught(?body, ?finalizer, *arms)}:
+      return c._try_rows(node, body, arms, finalizer);
+    case ${$tried(?body, ?finalizer)}:
+      return c._try_rows(node, body, NULL, finalizer);
+  }
+  return node;
 }
+
+/* The template and rows of the try `node`: its body, its catch arms, which
+   may be NULL, and its finalizer, which may be NULL. */
+static List Compiler._try_rows(
+  Compiler c, List node, List body, List arms, List finalizer) {
+  c._check_finalizer_label(finalizer);
+  Atom frame = _token("exception_frame"), exits = _token("try_exits");
+  Atom lowered = _token("try_body"), finished = NULL;
+  List handle = arms ? catch_handle(node) : NULL;
+  Array rows = [%(new-name $frame "exception_frame")];
+  if (finalizer) {
+    finished = _token("try_finalizer");
+    rows.push(%(outer $finished $finalizer));
+  }
+  rows.push(%(exits $exits ${_try_exits(frame, handle, finished)}));
+  rows.push(%(region $lowered $body));
+  List clause = c._catch_clause(handle, arms, rows);
+  rows.push(%(landing));
+  Macro shape = $compiler_try;
+  return %(regions ${shape(frame, clause, lowered, exits)}
+           ${rows.list_free()});
+}
+
+/* A row token: a binder no source spells. */
+static Atom _token(String role) => Atom.intern(%"?__$role");
 
 /* Reports a label the finalizer defines: it runs on every path that
    leaves its region, so the label would be defined once for each. */
-static void Walk._check_finalizer_label(Walk &w, List finalizer) {
-  int labelled_at = w.origin;
-  Var labelled = _finalizer_label(finalizer, w.origin, labelled_at);
+static void Compiler._check_finalizer_label(Compiler c, List finalizer) {
+  int labelled_at = c.origin;
+  Var labelled = _finalizer_label(finalizer, c.origin, labelled_at);
   if (!labelled) return;
   String name = _label_spelling(labelled);
-  w._report_at(
-    labelled_at, "a finally body cannot define a label",
-    %("a finalizer runs on every path that leaves its region, so '${
-      name ? name : "this label"}' would be defined once for each"));
+  $let(c.origin, labelled_at)
+    c.report_error(
+      <emit>, "a finally body cannot define a label", NULL,
+      %("a finalizer runs on every path that leaves its region, so '${
+        name ? name : "this label"}' would be defined once for each"));
 }
 
 /* The first label a finalizer defines, or NULL. The statements that leave a
@@ -749,54 +835,45 @@ static Var _finalizer_label(Var value, int origin, int &at) {
   return NULL;
 }
 
-/* A catch closes before a claimed finalizer, then the frame leaves. The
-   finalizer is already lowered and retains its stage through the template. */
-static List Compiler._try_cleanup(
-  Compiler c, List frame, List handle, List finalizer, int has_clause) {
+/* A catch closes before a claimed finalizer, then the frame leaves. */
+static List _try_exits(Atom frame, List handle, Atom finalizer) {
   List before = NULL;
-  if (has_clause) {
+  if (handle) {
     List handler = %(expr (($_handler_type)) (ident $handle));
     List close = $!{ x2c_error_catch_close($handler); $handler = NULL; };
     before = %($close);
   }
-  List address = _address_of(_frame_type, frame), syntax = NULL;
-  if (finalizer) {
-    List lowered = %(code-value "lowered" (seq $finalizer) ());
-    syntax = $!{
+  List address = _address_of(_frame_type, frame);
+  if (finalizer)
+    return $!{
       if (x2c_exception_claim($address)) {
         @before
-        $lowered
+        $finalizer
       }
       x2c_exception_leave($address);
     };
-  }
-  else syntax = $!{ @before x2c_exception_leave($address); };
-  List result = c.bind_syntax(syntax, AST_BLOCK, c.return_type);
-  return %(code-value "lowered" $result ());
+  return $!{ @before x2c_exception_leave($address); };
 }
-
-/* A try region's body or catch arm, lowered inside the region `cleanup`
-   leaves. */
-static List Walk._try_region(Walk &w, List cleanup, List body) =>
-  %(code-value "lowered" ${w._inside(cleanup, body, body)} ());
 
 /* The facts `$compiler_try` writes a try's catch site and landing from,
    or NULL for a try without catches. Each arm is its own region, which a
-   jump from the body may not enter, and leaves `cleanup` on its exits. A
-   pattern with a dynamic part is prepared again on each entry. */
-static List Walk._catch_clause(
-  Walk &w, List handle, List cleanup, List records) {
+   jump from the body may not enter, and leaves the try's exits. A pattern
+   with a dynamic part is prepared again on each entry. */
+static List Compiler._catch_clause(
+  Compiler c, List handle, List records, Array rows) {
   if (!records) return NULL;
   String state = "ERROR_CATCH_PENDING";
   Array arms = [], patterns = [];
   foreach (List record, records) {
     List pattern = record.car();
     if (pattern) {
-      if (!w.c.match_pattern_is_static(pattern))
+      if (!c.match_pattern_is_static(pattern))
         state = "ERROR_CATCH_TRANSIENT";
       patterns.push(pattern);
     }
-    arms.push(w._try_region(cleanup, record.cadr()));
+    Atom arm = _token(%"try_arm_${arms.len()}");
+    rows.push(%(region $arm ${record.cadr()}));
+    arms.push(arm);
   }
   return %($handle $state ${arms.list_free()} @{patterns.list_free()});
 }
@@ -885,7 +962,7 @@ static List Walk._lower_defer(
     $!{ {
       ${builtin_defer_record(record, callback, env, records)}
       x2c_cleanup_push(&$record);
-      ${w._try_region(cleanup, body)}
+      ${w._region(cleanup, body)}
       ${builtin_try_cleanup_placement(cleanup)}
     }
   }, AST_BLOCK, c.return_type);
@@ -928,11 +1005,12 @@ List builtin_defer_captures(List environment, List records) {
 
 // volatile locals
 
-/* Names whose storage a transfer may leave stale: those a `try` body writes,
-   and those a `defer` inside one writes through its environment. The flag
-   covers a subtree, so a write outside every `try` preserves nothing. A
-   long expression chain nests as deeply as it is long, so the walk keeps
-   its pending work off the C stack. */
+/* Names whose storage a transfer may leave stale: those the parts of a
+   region form with a landing write, such as a `try` body, and those a
+   `defer` inside one writes through its environment. The flag covers a
+   subtree, so a write outside every landing preserves nothing. A long
+   expression chain nests as deeply as it is long, so the walk keeps its
+   pending work off the C stack. */
 static void Preserve.collect(Preserve &p, List body) {
   Array pending = $auto([body]), flags = $auto([0]);
   while (pending.len()) {
@@ -953,11 +1031,13 @@ static void Preserve.collect(Preserve &p, List body) {
         flags.push(inside);
         continue;
       }
-      case %(try ?body ?clause ?finalizer *): {
-        foreach (Var part, %($body $clause $finalizer)) {
-          pending.push(part);
-          flags.push(1);
-        }
+      case %(regions ? ?rows): {
+        int lands = inside || %(landing) in rows;
+        foreach (List row, rows)
+          match (row) case %((!or outer region) ? ?part): {
+            pending.push(part);
+            flags.push(lands);
+          }
         continue;
       }
     }
@@ -1038,10 +1118,10 @@ static Var Preserve.rewrite(Preserve &p, Var value) {
   if (value is not <list> || value.is_nil()) return value;
   List node = value;
   // Only declarations and parameters carry a qualifier. A statement
-  // expression's own locals follow any `try` around it, so they need one
-  // only when a statement expression in the function holds a `try`.
+  // expression's own locals follow any landing around it, so they need one
+  // only when a statement expression in the function holds a landing.
   match (node) case %(expr *):
-    return p.expression_tries
+    return p.expression_landings
       ? _rewrite_expression(node, %!(List block) using &p => p.rewrite(block))
       : node;
   match (node) {

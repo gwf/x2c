@@ -48,62 +48,73 @@ macro Stmt $caught(Stmt $body, Stmt $finalizer,
 }
 ```
 
-`Walk.rewrite` recognizes a try with them and makes one call. The `at` case
-comes first: recognition looks through a position wrapper, and that case
-records the position for reports.
+`Compiler._try_form` recognizes a try with them. It runs before the
+cleanup walk, after the try's parts have their own forms.
 
 ```x2c
-    case caught(?body, ?finalizer, *arms):
-      return w._lower_try(node, body, arms, finalizer);
-    case tried(?body, ?finalizer):
-      return w._lower_try(node, body, NULL, finalizer);
+    case ${$caught(?body, ?finalizer, *arms)}:
+      return c._try_rows(node, body, arms, finalizer);
+    case ${$tried(?body, ?finalizer)}:
+      return c._try_rows(node, body, NULL, finalizer);
 ```
 
 ## The lowering
 
-`Walk._lower_try` reports a finalizer label, allocates the frame, lowers the
-exits and the body, and applies one template. `catch_handle` reads the
-handler the parser introduced, which no source form writes.
+`Compiler._try_rows` reports a finalizer label and returns the try's region
+form: one template application and the rows the cleanup walk lowers. The
+template's frame, body, and exits are row tokens. The walk replaces each
+token with what its row lowered, in row order, and then binds the
+template. `catch_handle` reads the handler the parser introduced, which no
+source form writes. The region rows are described above
+`Walk._lower_regions` in `src/cleanup.x`.
 
 ```x2c
-/* Lowers the parsed try `node`: its body, its catch arms, which may be
-   NULL, and its finalizer, which may be NULL. */
-static List Walk._lower_try(
-  Walk &w, List node, List body, List arms, List finalizer) {
-  Compiler c = w.c;
-  w._check_finalizer_label(finalizer);
-  List frame = c._region_binding("exception_frame");
+/* The template and rows of the try `node`: its body, its catch arms, which
+   may be NULL, and its finalizer, which may be NULL. */
+static List Compiler._try_rows(
+  Compiler c, List node, List body, List arms, List finalizer) {
+  c._check_finalizer_label(finalizer);
+  Atom frame = _token("exception_frame"), exits = _token("try_exits");
+  Atom lowered = _token("try_body"), finished = NULL;
   List handle = arms ? catch_handle(node) : NULL;
-  List cleanup = c._try_cleanup(frame, handle, w.rewrite(finalizer), !!arms);
-  List lowered = w._try_region(cleanup, body);
+  Array rows = [%(new-name $frame "exception_frame")];
+  if (finalizer) {
+    finished = _token("try_finalizer");
+    rows.push(%(outer $finished $finalizer));
+  }
+  rows.push(%(exits $exits ${_try_exits(frame, handle, finished)}));
+  rows.push(%(region $lowered $body));
+  List clause = c._catch_clause(handle, arms, rows);
+  rows.push(%(landing));
   Macro shape = $compiler_try;
-  return c.bind_syntax(
-    shape(frame, w._catch_clause(handle, cleanup, arms), lowered, cleanup),
-    AST_BLOCK, c.return_type);
+  return %(regions ${shape(frame, clause, lowered, exits)}
+           ${rows.list_free()});
 }
 ```
 
-The region driver lowers each arm, and `Walk._catch_clause` gathers the facts
-the templates are written from.
+`Compiler._catch_clause` adds a region row for each arm and gathers the
+facts the templates are written from.
 
 ```x2c
 /* The facts `$compiler_try` writes a try's catch site and landing from,
    or NULL for a try without catches. Each arm is its own region, which a
-   jump from the body may not enter, and leaves `cleanup` on its exits. A
-   pattern with a dynamic part is prepared again on each entry. */
-static List Walk._catch_clause(
-  Walk &w, List handle, List cleanup, List records) {
+   jump from the body may not enter, and leaves the try's exits. A pattern
+   with a dynamic part is prepared again on each entry. */
+static List Compiler._catch_clause(
+  Compiler c, List handle, List records, Array rows) {
   if (!records) return NULL;
   String state = "ERROR_CATCH_PENDING";
   Array arms = [], patterns = [];
   foreach (List record, records) {
     List pattern = record.car();
     if (pattern) {
-      if (!w.c.match_pattern_is_static(pattern))
+      if (!c.match_pattern_is_static(pattern))
         state = "ERROR_CATCH_TRANSIENT";
       patterns.push(pattern);
     }
-    arms.push(w._try_region(cleanup, record.cadr()));
+    Atom arm = _token(%"try_arm_${arms.len()}");
+    rows.push(%(region $arm ${record.cadr()}));
+    arms.push(arm);
   }
   return %($handle $state ${arms.list_free()} @{patterns.list_free()});
 }
@@ -238,9 +249,9 @@ List builtin_catch_cases(List selected, List arms) {
   computed, and a bound `return` has no declared-type slot while a template
   writes one. No source-form macro matches either, so `Walk.rewrite` recognizes
   them with a `%()` pattern and says why beside it.
-- Lowering an arm needs the walk's region stack, so `Walk._catch_clause` lowers
-  the arms in a loop before the application; the slot functions number and
-  place them.
+- Lowering an arm needs the walk's region stack, so `Compiler._catch_clause`
+  gives each arm a region row, and the walk lowers it before binding the
+  application; the slot functions number and place the lowered arms.
 - A slot argument in an expression position inside a `meta` body is an
   ordinary call, so a count the C needs in both a declarator and a call is
   a hole, as in the Func call template.
@@ -345,7 +356,7 @@ examples are excerpts from current source.
 A hand-built `%(...)` List is still right in these cases:
 
 - **Patterns and data.** `case` patterns are not code. Neither are fact
-  rows, such as the one `Walk._catch_clause` returns above.
+  rows, such as the one `Compiler._catch_clause` returns above.
 - **Parser productions.** The parser assembles nodes from children it has
   already parsed and bound, as in `%(while $cond $body)` in
   `src/statements.x`. A quotation would bind them again.
