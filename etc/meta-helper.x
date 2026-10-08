@@ -238,6 +238,7 @@ List x2c_function_parameter(List v, String w) =>
   _ask("x2c_function_parameter", %($v $w));
 List x2c_syntax_type(List v) => _ask("x2c_syntax_type", %($v));
 Var x2c_literal_value(Var v) => _ask("x2c_literal_value", %($v));
+Var x2c_pattern_value(List v) => _ask("x2c_pattern_value", %($v));
 String x2c_invocation_file(void) => _ask("x2c_invocation_file", %());
 int x2c_invocation_line(void) => _ask("x2c_invocation_line", %());
 int x2c_invocation_column(void) => _ask("x2c_invocation_column", %());

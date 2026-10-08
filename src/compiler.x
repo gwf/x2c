@@ -2483,6 +2483,10 @@ int match_value_is_static(Var value) {
 int Compiler.match_pattern_is_static(Compiler c, List pattern) =>
   match_value_is_static(c.match_pattern_value(pattern));
 
+/** Answers `x2c.pattern.value`, declared in `lib/meta.x`. */
+Var x2c_pattern_value(List pattern) =>
+  Compiler.expanding().match_pattern_value(pattern);
+
 /** Returns a recovered pattern value's fixed literal head symbol, or zero.
 
     A binder, guard, non-list value, or computed head has no fixed symbol.

@@ -333,6 +333,16 @@ meta void x2c_diagnostic_fail_at(
     returns so the expansion continues. */
 meta void x2c_diagnostic_warn(String message, List notes);
 
+/* patterns
+
+   A `match` arm or `catch` filter holds its pattern as a bound expression
+   whose literal parts the compiler keeps. A component that compiles the
+   pattern itself reads the pattern as data. */
+
+/** Returns the value the bound pattern expression `pattern` builds, with
+    the Symbol `x2c-dyn` in place of each part computed at run time. */
+meta Var x2c_pattern_value(List pattern);
+
 /* contributing effects
 
    Code a meta function returns can ask for more than its own syntax: a

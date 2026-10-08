@@ -2492,7 +2492,7 @@ List Compiler.apply_hook(
    Storage and include export are those of a keyword alias. Built-in
    source names a meta function the compiler links. */
 
-static const SymbolSet typed_hook_kinds = %<<switch>>;
+static const SymbolSet typed_hook_kinds = %<<switch match>>;
 
 /* Parses the rest of a `hook <KIND> f;` declaration begun at
    `declaration` and returns its key. */
