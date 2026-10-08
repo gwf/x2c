@@ -75,18 +75,18 @@ static List _selector_definitions(Macro car, Macro cdr) =>
 
 /* --- lib/meta-patterns.x ------------------------------------------------- */
 
-/** Returns the steps that match the List the fresh name `subject` holds
-    against the bound List pattern `pattern`, or NULL when the pattern is
-    outside the static subset below. A step is `(test EXPRESSION)`, which
-    must hold, or a statement that moves a cursor or declares a binder;
-    `x2c_pattern_nest` makes a block of them.
+/** Returns `(STEPS BINDERS CURSORS)` that match the List the fresh name
+    `subject` holds against the bound List pattern `pattern`, or NULL when
+    the pattern is outside the static subset below.
 
-    `cursors` holds one fresh name per List depth, which the caller
-    declares as a `List` before the steps run; the steps add the names a
-    deeper pattern needs, and several patterns' steps may share them.
-    `binders` gains each named binder the steps declare, in order of first
-    appearance, which is the order of `Match` captures. A binder is
-    declared by its spelling: `?name` as a `Var`, `*name` as a `List`.
+    A step is `(test EXPRESSION)`, which must hold, or a statement that
+    moves a cursor or declares a binder; `x2c_pattern_nest` makes a block
+    of them. BINDERS lists each named binder the steps declare, in order of
+    first appearance, which is the order of `Match` captures; `?name` is
+    declared by its spelling as a `Var`, `*name` as a `List`. CURSORS lists
+    one fresh name per List depth the steps walk, which the caller declares
+    as a `List` before they run. Every pattern names the same cursor at the
+    same depth, so patterns tested in turn share the longest CURSORS.
 
     The static subset, by element of a List pattern:
     - a literal Symbol, compared by its bits;
@@ -98,15 +98,15 @@ static List _selector_definitions(Macro car, Macro cdr) =>
     - `*` or `*name` as the last element of its List, once per name.
     Interior stars, other guard operators, and computed parts are outside
     it. */
-List x2c_pattern_steps(
-  List pattern, Atom subject, Array cursors, Array binders) {
+List x2c_pattern_steps(List pattern, Atom subject) {
   Var value = x2c_pattern_value(pattern);
   if (value is not <list> || value.list().car().is_match_op()) return NULL;
-  if (!cursors.len()) cursors.push(x2c_fresh_name("cursor0"));
+  Array cursors = [x2c_fresh_name("cursor0")], binders = [];
   Array steps = [_pattern_assign(cursors[0], _pattern_read(subject))];
   if (!_pattern_segment(value, pattern, 0, cursors, steps, binders))
     return NULL;
-  return steps.list_free();
+  return %(${steps.list_free()} ${binders.list_free()}
+           ${cursors.list_free()});
 }
 
 static List _pattern_read(Var name) => %(expr () (ident $name));

@@ -20,8 +20,7 @@
 // lint: allow src-forward-declaration FI-6: linked native copy
 List x2c_param_make(List type, Var name);
 // lint: allow src-forward-declaration FI-6: linked native copy
-List x2c_pattern_steps(
-  List pattern, Atom subject, Array cursors, Array binders);
+List x2c_pattern_steps(List pattern, Atom subject);
 // lint: allow src-forward-declaration FI-6: linked native copy
 List x2c_pattern_nest(List steps, List inner);
 
@@ -1220,11 +1219,14 @@ static List _catch_selector(
   Atom error = x2c_fresh_name("catch_error");
   Atom captures = x2c_fresh_name("catch_captures");
   Atom found = x2c_fresh_name("catch_count");
-  Array cursors = [], items = [];
+  List cursors = NULL;
+  Array items = [];
   foreach (List pattern, patterns) {
-    Array binders = [];
-    List steps = x2c_pattern_steps(pattern, error, cursors, binders);
-    if (!steps || steps.len() > _catch_step_limit) return NULL;
+    List lowered = x2c_pattern_steps(pattern, error);
+    if (!lowered) return NULL;
+    List (steps, binders, walked) = lowered;
+    if (steps.len() > _catch_step_limit) return NULL;
+    if (walked.len() > cursors.len()) cursors = walked;
     List selected = _catch_selected(items.len(), binders, captures, found);
     items.push(x2c_pattern_nest(steps, selected));
   }
@@ -1252,7 +1254,7 @@ static List _catch_selector(
 /* Stores the binders of arm `arm` in `captures`, their number in `found`,
    and returns the arm. */
 static List _catch_selected(
-  int arm, Array binders, Atom captures, Atom found) {
+  int arm, List binders, Atom captures, Atom found) {
   Array statements = [];
   int index = 0;
   foreach (Var binder, binders) {

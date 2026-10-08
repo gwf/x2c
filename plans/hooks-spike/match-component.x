@@ -19,12 +19,15 @@
 /* The statement the arm `(pattern body)` lowers to, or NULL outside the
    static subset. The default arm's pattern is `(*)`; a guarded body ends
    with its own `break`. */
-meta static List _smatch_arm(List row, Atom selected, Array cursors) {
+meta static List _smatch_arm(List row, Atom selected, List &cursors) {
   List pattern = row.car(), body = row.cadr(), inner = %($body (break));
   match (body) case %(guarded ?statement): inner = %($statement);
   if (pattern.car() == <*>) return %(block @inner);
-  List steps = x2c_pattern_steps(pattern, selected, cursors, []);
-  return steps ? x2c_pattern_nest(steps, inner) : NULL;
+  List lowered = x2c_pattern_steps(pattern, selected);
+  if (!lowered) return NULL;
+  List (steps, binders, walked) = lowered;
+  if (walked.len() > cursors.len()) cursors = walked;
+  return x2c_pattern_nest(steps, inner);
 }
 
 meta static List _smatch_declare(Atom name, List value) =>
@@ -36,7 +39,8 @@ meta static List _smatch_declare(Atom name, List value) =>
 meta List static_match(List node) {
   match (node) case %(match ?subject ?cases): {
     Atom selected = x2c_fresh_name("subject");
-    Array cursors = [], arms = [];
+    List cursors = NULL;
+    Array arms = [];
     foreach (List row, cases) {
       if (row.car() == <preproc>) return node;
       List arm = _smatch_arm(row, selected, cursors);
