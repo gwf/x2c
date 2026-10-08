@@ -59,7 +59,6 @@ it would be a pure library file.
 | Declarations, call arguments, assignment, comparison | 165 in transform plus initializers.x | implicit conversion rules of the language |
 | defer | 320 | control-flow analysis over every transfer; the primitive other features reuse |
 | try/catch/finally | 700 | regions, label ancestry, volatile preservation |
-| Protocols | 2,832 | operator typing depends on it |
 
 Roughly: transform-phase feature code is 30% A, 59% B, 12% C; parse, bind,
 and later phases hold about 480 lines A, 2,000 B, and more than 5,000 C.
@@ -87,12 +86,42 @@ the necessary one. Rechecked against source:
   through unit support are structural. Func typing and call conversion stay
   core.
 
+- **Code quotations.** `$!{...}`, `$!(...)`, and `$!KIND{...}` are already
+  anonymous macro definitions applied to the locals they name:
+  `parse_macro_quotation` (macros.x:1556) reads the body through the macro
+  definition reader with `d.quotation` set, whose parameters are the holes the
+  body names (macros.x:904). What is special is only the `$!` prefix and the
+  kind selection (expressions.x:626). A reader-prefix hook would make them a
+  module.
+- **Protocols.** protocol.x (2,832 lines) already falls into four parts:
+  declaration parsing, publication, adoption, and conformance checking
+  (449-1490); typing queries such as conversion, member resolution with the
+  self type, and operator lookup (967-1980, with operator-ledger.x and
+  type-ledger.x); generated code such as owners, update helpers, adapters,
+  and descriptor tables registered through `add_support` and `add_init`
+  (1983-2706); and the runtime dispatcher in lib/. The split: declarations
+  and code generation become a module that runs when declarations are
+  collected and fills fact tables through the API; core typing keeps a small
+  compiled query engine over those tables; the dispatcher stays in the
+  runtime. Queries run on hot paths and stay compiled; declarations are rare
+  and tolerate meta cost.
+
 ## Principle
 
 Everyone uses the same thin API: compiler modules, library extensions, and
 user includes. A feature that needs something outside that API either
 justifies a new API entry or stays core. This keeps the compiler from
 becoming monolithic again.
+
+## Lift and shift already exists
+
+`foreach` shows the whole path today. Its surface is a decorator in
+etc/builtin-macros.x, its algorithm is meta code compiled into the compiler
+(`_foreach_expand`, builtins.x, through linked-meta), and one line wires it:
+`keyword foreach $x2c.foreach;`. A module written as macros and meta
+functions moves into the compiler unchanged, and its registration is the
+module's initializer. Generalizing needs more registration kinds, not a new
+architecture.
 
 ## Seams a module system needs
 
@@ -115,6 +144,9 @@ Ranked by how many features need them:
    defer, match, switch, static locals. Hardest; `defer` is the published
    primitive features compose with instead.
 6. **Identifier resolution.** `with` and lambda captures. Hardest; stays core.
+7. **Reader prefix.** `$!` quotations.
+8. **Fact registration at collection.** Protocol conformance, conversions,
+   operator members, and class defaults, replayed through interfaces.
 
 ## Roadmap shape
 
