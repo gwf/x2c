@@ -90,10 +90,10 @@ meta static List _pattern_same(List value, Symbol symbol) {
 }
 
 /* Appends the steps that match the List in cursor `depth` against the List
-   pattern `pattern`. `constant` reads the same List of the runtime pattern.
-   Only `?` and a binder test that an element is present: `car` of an
-   empty List is `void`, which no literal, tag, or List test accepts.
-   Returns 0 outside the static subset. */
+   pattern `pattern`. `constant` builds the same List of the runtime
+   pattern. Only `?` and a binder test that an element is present: `car`
+   of an empty List is `void`, which no literal, tag, or List test
+   accepts. Returns 0 outside the static subset. */
 meta static int _pattern_segment(
   List pattern, List constant, int depth, Array cursors, Array steps,
   Array binders) {
@@ -107,19 +107,19 @@ meta static int _pattern_segment(
     }
     if (part.is_atom_binder()) steps.push(%(test $cursor));
     List value = _pattern_call(cursor, "car");
-    List literal = _pattern_call(constant, "car");
+    List (literal, rest) = _pattern_parts(constant);
     if (!_pattern_element(
           part, value, literal, depth, cursors, steps, binders))
       return 0;
     steps.push(_pattern_assign(cursors[depth], _pattern_call(cursor, "cdr")));
-    constant = _pattern_call(constant, "cdr");
+    constant = rest;
   }
   steps.push(%(test (expr () (op ! $cursor))));
   return 1;
 }
 
 /* Appends the steps that match the Var `value` against the element `part`.
-   `literal` reads the same element of the runtime pattern. */
+   `literal` builds the same element of the runtime pattern. */
 meta static int _pattern_element(
   Var part, List value, List literal, int depth, Array cursors,
   Array steps, Array binders) {
@@ -171,8 +171,32 @@ meta static int _pattern_list(
   steps.push(
     _pattern_assign(cursors[depth + 1], _pattern_call(value, "list")));
   return _pattern_segment(
-    part, _pattern_call(literal, "list"), depth + 1, cursors, steps,
-    binders);
+    part, _pattern_sublist(literal), depth + 1, cursors, steps, binders);
+}
+
+/* The element and the rest of the List expression `constant`: the parts
+   of a `cons` it builds, or calls that read them from a List built once,
+   such as a cached literal. */
+meta static List _pattern_parts(List constant) {
+  match (_pattern_built(constant))
+    case %(cons ?element ?rest): return %($element $rest);
+  return %(${_pattern_call(constant, "car")}
+           ${_pattern_call(constant, "cdr")});
+}
+
+meta static List _pattern_built(List expression) {
+  match (expression)
+    case %(expr ? ?(List built)): return _pattern_built(built);
+  return expression;
+}
+
+/* The List expression a static pattern's element `literal` converts to a
+   Var, or a call that reads it. */
+meta static List _pattern_sublist(List literal) {
+  match (literal)
+    case %(expr ? (call ? (args (!set ?list (expr ("List") *))))):
+      return list;
+  return _pattern_call(literal, "list");
 }
 
 /* Appends the declaration of `binder` from `value`. */

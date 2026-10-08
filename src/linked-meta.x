@@ -139,12 +139,12 @@ static int _pattern_segment(
     }
     if (part.is_atom_binder()) steps.push(%(test $cursor));
     List value = _pattern_call(cursor, "car");
-    List literal = _pattern_call(constant, "car");
+    List (literal, rest) = _pattern_parts(constant);
     if (!_pattern_element(
           part, value, literal, depth, cursors, steps, binders))
       return 0;
     steps.push(_pattern_assign(cursors[depth], _pattern_call(cursor, "cdr")));
-    constant = _pattern_call(constant, "cdr");
+    constant = rest;
   }
   steps.push(%(test (expr () (op ! $cursor))));
   return 1;
@@ -198,8 +198,27 @@ static int _pattern_list(
   steps.push(
     _pattern_assign(cursors[depth + 1], _pattern_call(value, "list")));
   return _pattern_segment(
-    part, _pattern_call(literal, "list"), depth + 1, cursors, steps,
-    binders);
+    part, _pattern_sublist(literal), depth + 1, cursors, steps, binders);
+}
+
+static List _pattern_parts(List constant) {
+  match (_pattern_built(constant))
+    case %(cons ?element ?rest): return %($element $rest);
+  return %(${_pattern_call(constant, "car")}
+           ${_pattern_call(constant, "cdr")});
+}
+
+static List _pattern_built(List expression) {
+  match (expression)
+    case %(expr ? ?(List built)): return _pattern_built(built);
+  return expression;
+}
+
+static List _pattern_sublist(List literal) {
+  match (literal)
+    case %(expr ? (call ? (args (!set ?list (expr ("List") *))))):
+      return list;
+  return _pattern_call(literal, "list");
 }
 
 static void _pattern_declare(
@@ -464,6 +483,9 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_pattern_segment", _pattern_segment);
   $linked.row(rows, "_pattern_element", _pattern_element);
   $linked.row(rows, "_pattern_list", _pattern_list);
+  $linked.row(rows, "_pattern_parts", _pattern_parts);
+  $linked.row(rows, "_pattern_built", _pattern_built);
+  $linked.row(rows, "_pattern_sublist", _pattern_sublist);
   $linked.row(rows, "_pattern_declare", _pattern_declare);
   $linked.row(rows, "x2c_expr_field", x2c_expr_field);
   $linked.row(rows, "x2c_expr_cast", x2c_expr_cast);
