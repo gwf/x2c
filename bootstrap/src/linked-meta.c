@@ -4934,7 +4934,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_8(void){
   _4567 = List_var(_4566);
   _4568 = String_new("src/cleanup.x");
   _4569 = String_var(_4568);
-  _4570 = String_new("26583761");
+  _4570 = String_new("ac852a3c");
   _4571 = String_var(_4570);
   _4572 = cons(_4571, NULL);
   _4573 = cons(_4569, _4572);
