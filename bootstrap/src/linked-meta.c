@@ -5178,7 +5178,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_9(void){
   _4756 = cons(_1074, _4755);
   _4757 = String_new("src/builtins.x");
   _4758 = String_var(_4757);
-  _4759 = String_new("45bd4220");
+  _4759 = String_new("263ad51d");
   _4760 = String_var(_4759);
   _4761 = String_new("cwd:./lisp.x");
   _4762 = String_var(_4761);
