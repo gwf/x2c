@@ -26,7 +26,7 @@ component's file is included and replay through interfaces.
 | `hook switch $m;`, other C keywords | parse: C keyword statement | prototype (statements.x) | string switch; `match`, `try`, `raise`, `with` |
 | `hook function $m;` | parse: function definition body | prototype (parse.x) | tracing, entry guards, lambda lowering |
 | typed node hook, by node kind, may decline: `hook <switch> f;` | transform: after binding and typing | prototype (wave 1) | string switch, collection literals, printf formats, `match`, destructuring |
-| declaration-position hook | bind: block or file declaration | missing | `$auto`, destructuring, `class` |
+| declaration-position hook through claims: `hook <TAG> f;` for `(claim TAG MESSAGE VALUE)` | bind: block declaration | prototype (wave 2) | `$auto`; later destructuring, `class` |
 | reader-prefix hook | lex and parse: `$!`-style prefixes | missing | quotations |
 | fact registration at collection | collect: declaration time, replayed by interfaces | missing (protocol.x and `Defaults` internal) | `protocol`, `delegate`, `class` defaults |
 
@@ -90,7 +90,7 @@ forms after it.
 
 | Entry | Status | Notes |
 | --- | --- | --- |
-| `x2c_diagnostic_fail_at(node, message, notes)` | prototype (wave 1) | string switch label check, every component's input checks |
+| `x2c_diagnostic_fail_at(node, category, message, notes)` | prototype (waves 1-2) | string switch label check, every component's input checks |
 | `x2c_invocation_file`, `x2c_invocation_line` | public | |
 
 ## 8. Execution

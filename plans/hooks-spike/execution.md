@@ -68,6 +68,13 @@
   declaration hook, so only claiming declarations call it and unconsumed
   claims report at today's positions; let built-in components register
   hooks that survive reinstall and name compiled-in functions.
+- W2-B result: `managed-init` and its special cases are gone. `$auto`
+  produces `(claim auto MESSAGE VALUE)`; a 30-line component in
+  src/builtins.x, registered by `hook <auto> builtin_auto_declaration;` in
+  etc/builtin-macros.x, lowers it through the thin API. Generated C and all
+  `managed-init-*` diagnostics are byte-identical. Kernel: 104 added, 114
+  removed. `$auto` per use: 17.13 M before, 17.32 M after; unused hooks cost
+  nothing measurable.
 
 ## Log
 
@@ -76,3 +83,4 @@
 - 2026-10-07: wave 1 integrated (W1-A typed hook, W1-B effects API);
   bootstrap and docs refreshed; typed switch ported to the effects API.
 - 2026-10-07: W2-A integrated; bootstrap and docs refreshed.
+- 2026-10-07: W2-B integrated (claims, declaration hook, category argument).
