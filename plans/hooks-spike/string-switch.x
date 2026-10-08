@@ -55,7 +55,7 @@ meta List _sswitch(List selected, List body) {
 macro Decorator $strings.string_switch(Stmt $body, Expr $subject) {
   {
     String selected = $subject;
-    $_sswitch(selected, $body)...
+    @_sswitch(selected, $body)
   }
 }
 
@@ -71,7 +71,7 @@ meta List _sswitch_or_plain(List subject, List body) {
 /* A switch whose string-literal labels, if any, select by String
    equality. */
 macro Decorator $strings.switch(Stmt $body, Expr $subject) {
-  $_sswitch_or_plain($subject, $body)...
+  @_sswitch_or_plain($subject, $body)
 }
 
 hook switch $strings.switch;
