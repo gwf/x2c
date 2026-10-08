@@ -173,3 +173,24 @@ meta cost. Hot node kinds (operators, calls, declarations) stay compiled.
    kind and its five special cases.
 4. **printf formats as its own file.** A pure refactor that tests whether a
    built-in moves out cleanly with no hooks.
+
+## Conversions are one class of requirement
+
+The book lists the converting destinations (language.md, "Types and
+conversions"): an initializer's value, an assignment, a `return`, a declared
+call argument, an interpolation hole, and a `Var` value a printf-family
+format consumes. The rules are keyed on source and destination types: same C
+type or typedef substitution, `Var` crossing, a declared converter, `Func`
+conversion, and literal promotion. Conversion is therefore a small set of
+positions crossed with a rule table. It stays core, but as one separated
+concern. Today `convert_expression` has about 74 direct call sites in 8
+files (28 in transform.x); the positions are not yet the single entry.
+
+## Ordering rule for generated code
+
+Support declarations (`add_support`) are lowered once by the transform drain,
+so code literals contributed before or during the transform cost one ordinary
+lowering. File-initialization statements are spliced in after the transform
+and must arrive lowered (`Compiler.add_init`), so strings or pre-lowered
+forms fit there. Contribute code literals before lowering and lowered forms
+after it; a module that follows this never re-runs transformations.
