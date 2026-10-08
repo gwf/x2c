@@ -1,6 +1,9 @@
 # Thin API spike: execution
 
 > Status: active
+> Every ranked entry in thin-api.md is implemented or rejected with
+> evidence (2026-10-08). The branch awaits Gary's review; `dev` and
+> `main` are untouched.
 > Private branch `gwf/hooks-spike`, pushed to origin. Gary authorized
 > orchestrated implementation on this branch on 2026-10-07; `dev` and `main`
 > are untouched until he says otherwise. Scope is `thin-api.md`, in its
