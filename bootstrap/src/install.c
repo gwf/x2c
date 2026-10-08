@@ -126,11 +126,7 @@ static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
 
-static int _x2c_catch_select_2(List _x2c_catch_error_2, Var * _x2c_catch_captures_2, int * _x2c_catch_count_2);
-
 static int _x2c_catch_select_3(List _x2c_catch_error_3, Var * _x2c_catch_captures_3, int * _x2c_catch_count_3);
-
-static int _x2c_catch_select_4(List _x2c_catch_error_4, Var * _x2c_catch_captures_4, int * _x2c_catch_count_4);
 
 typedef struct _x2c_lambda_context_0{
   Var _x2c_lambda_capture_0;
@@ -138,8 +134,6 @@ typedef struct _x2c_lambda_context_0{
 _x2c_lambda_context_0;
 
 static Var _x2c_lambda_0(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0);
-
-static int _x2c_catch_select_5(List _x2c_catch_error_5, Var * _x2c_catch_captures_5, int * _x2c_catch_count_5);
 
 static Var _x2c_lambda_1(String field);
 
@@ -150,8 +144,6 @@ static Func _x2c_func_handle_0;
 Func x2c_func_shared(FuncAdapter, List);
 
 _x2c_initializer_choice_3CFE94DA_2((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _81)))
-static int _x2c_catch_select_6(List _x2c_catch_error_6, Var * _x2c_catch_captures_6, int * _x2c_catch_count_6);
-
 typedef struct _x2c_defer_env_0{
   const void * _x2c_defer_capture_0;
 }
@@ -167,8 +159,6 @@ static Func _x2c_func_handle_1;
 
 _x2c_initializer_choice_3CFE94DA_3((_x2c_func_handle_1 = x2c_func_shared(_x2c_func_adapt_1, _81)))
 static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3);
-
-static int _x2c_catch_select_7(List _x2c_catch_error_7, Var * _x2c_catch_captures_7, int * _x2c_catch_count_7);
 
 static Var String_var(String);
 
@@ -592,7 +582,7 @@ static void Install_run(Install * i){
   {
     ExceptionFrame _x2c_exception_frame_2;
     static ErrorCatchSite _x2c_macro_site_2 ={
-      NULL, -1, 1, ERROR_CATCH_STATIC, - 1, _x2c_catch_select_2
+      NULL, -1, 1, ERROR_CATCH_STATIC, - 1, _x2c_catch_select_0
     }
     ;
     volatile ErrorHandler _x2c_error_handler_2 = x2c_error_catch_site_push(& _x2c_exception_frame_2, & _x2c_macro_site_2, NULL);
@@ -799,7 +789,7 @@ static Path _empty_builds(String package){
   {
     ExceptionFrame _x2c_exception_frame_4;
     static ErrorCatchSite _x2c_macro_site_4 ={
-      NULL, -1, 1, ERROR_CATCH_STATIC, - 1, _x2c_catch_select_4
+      NULL, -1, 1, ERROR_CATCH_STATIC, - 1, _x2c_catch_select_0
     }
     ;
     volatile ErrorHandler _x2c_error_handler_4 = x2c_error_catch_site_push(& _x2c_exception_frame_4, & _x2c_macro_site_4, NULL);
@@ -886,7 +876,7 @@ static String _marker_string(String path, String field){
   {
     ExceptionFrame _x2c_exception_frame_5;
     static ErrorCatchSite _x2c_macro_site_5 ={
-      NULL, 0, 1, ERROR_CATCH_STATIC, - 1, _x2c_catch_select_5
+      NULL, 0, 1, ERROR_CATCH_STATIC, - 1, _x2c_catch_select_1
     }
     ;
     volatile ErrorHandler _x2c_error_handler_5 = x2c_error_catch_site_push(& _x2c_exception_frame_5, & _x2c_macro_site_5, NULL);
@@ -978,7 +968,7 @@ static List _index_row(CliRequest request, String name, String work){
   {
     ExceptionFrame _x2c_exception_frame_6;
     static ErrorCatchSite _x2c_macro_site_6 ={
-      NULL, -1, 1, ERROR_CATCH_STATIC, - 1, _x2c_catch_select_6
+      NULL, -1, 1, ERROR_CATCH_STATIC, - 1, _x2c_catch_select_3
     }
     ;
     volatile ErrorHandler _x2c_error_handler_6 = x2c_error_catch_site_push(& _x2c_exception_frame_6, & _x2c_macro_site_6, NULL);
@@ -1215,7 +1205,7 @@ int remove_command(CliRequest request){
       {
         ExceptionFrame _x2c_exception_frame_8;
         static ErrorCatchSite _x2c_macro_site_8 ={
-          NULL, -1, 1, ERROR_CATCH_STATIC, - 1, _x2c_catch_select_7
+          NULL, -1, 1, ERROR_CATCH_STATIC, - 1, _x2c_catch_select_0
         }
         ;
         volatile ErrorHandler _x2c_error_handler_8 = x2c_error_catch_site_push(& _x2c_exception_frame_8, & _x2c_macro_site_8, NULL);
@@ -1318,44 +1308,12 @@ static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
   _release_packages();
 }
 
-static int _x2c_catch_select_2(List _x2c_catch_error_2, Var * _x2c_catch_captures_2, int * _x2c_catch_count_2){
-  List _x2c_cursor0_1 = _x2c_catch_error_2;
-  {
-    _x2c_cursor0_1 = _x2c_catch_error_2;
-    if(List_car(_x2c_cursor0_1).u64 ==(Symbol_var(20399393368)).u64){
-      _x2c_cursor0_1 = List_cdr(_x2c_cursor0_1);
-      List detail = _x2c_cursor0_1;
-      _x2c_catch_captures_2[0] = List_var(detail);
-      * _x2c_catch_count_2 = 1;
-      return 0;
-    }
-
-  }
-  return -1;
-}
-
 static int _x2c_catch_select_3(List _x2c_catch_error_3, Var * _x2c_catch_captures_3, int * _x2c_catch_count_3){
   List _x2c_cursor0_2 = _x2c_catch_error_3;
   {
     _x2c_cursor0_2 = _x2c_catch_error_3;
     if(List_car(_x2c_cursor0_2).u64 ==(Symbol_var(31862161386376)).u64){
       _x2c_cursor0_2 = List_cdr(_x2c_cursor0_2);
-      return 0;
-    }
-
-  }
-  return -1;
-}
-
-static int _x2c_catch_select_4(List _x2c_catch_error_4, Var * _x2c_catch_captures_4, int * _x2c_catch_count_4){
-  List _x2c_cursor0_3 = _x2c_catch_error_4;
-  {
-    _x2c_cursor0_3 = _x2c_catch_error_4;
-    if(List_car(_x2c_cursor0_3).u64 ==(Symbol_var(20399393368)).u64){
-      _x2c_cursor0_3 = List_cdr(_x2c_cursor0_3);
-      List detail = _x2c_cursor0_3;
-      _x2c_catch_captures_4[0] = List_var(detail);
-      * _x2c_catch_count_4 = 1;
       return 0;
     }
 
@@ -1378,10 +1336,6 @@ static Var _x2c_lambda_0(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda
   ;
 }
 
-static int _x2c_catch_select_5(List _x2c_catch_error_5, Var * _x2c_catch_captures_5, int * _x2c_catch_count_5){
-  return 0;
-}
-
 static Var _x2c_lambda_1(String field){
   return int_var(field != NULL);
   ;
@@ -1391,19 +1345,6 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
   String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_0, _x2c_func_argv_0, 0, 1318210446));
   return _x2c_lambda_1(a0);
   ;
-}
-
-static int _x2c_catch_select_6(List _x2c_catch_error_6, Var * _x2c_catch_captures_6, int * _x2c_catch_count_6){
-  List _x2c_cursor0_4 = _x2c_catch_error_6;
-  {
-    _x2c_cursor0_4 = _x2c_catch_error_6;
-    if(List_car(_x2c_cursor0_4).u64 ==(Symbol_var(31862161386376)).u64){
-      _x2c_cursor0_4 = List_cdr(_x2c_cursor0_4);
-      return 0;
-    }
-
-  }
-  return -1;
 }
 
 void File_cleanup(File);
@@ -1426,22 +1367,6 @@ static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func
 
 static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3){
   _release_packages();
-}
-
-static int _x2c_catch_select_7(List _x2c_catch_error_7, Var * _x2c_catch_captures_7, int * _x2c_catch_count_7){
-  List _x2c_cursor0_5 = _x2c_catch_error_7;
-  {
-    _x2c_cursor0_5 = _x2c_catch_error_7;
-    if(List_car(_x2c_cursor0_5).u64 ==(Symbol_var(20399393368)).u64){
-      _x2c_cursor0_5 = List_cdr(_x2c_cursor0_5);
-      List detail = _x2c_cursor0_5;
-      _x2c_catch_captures_7[0] = List_var(detail);
-      * _x2c_catch_count_7 = 1;
-      return 0;
-    }
-
-  }
-  return -1;
 }
 
 #undef _x2c_initializer_choice_3CFE94DA_0_expanded

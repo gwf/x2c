@@ -100,10 +100,6 @@ static void _declare_builders(Compiler c, Lisp shared);
 
 static int _x2c_catch_select_0(List _x2c_catch_error_0, Var * _x2c_catch_captures_0, int * _x2c_catch_count_0);
 
-static int _x2c_catch_select_1(List _x2c_catch_error_1, Var * _x2c_catch_captures_1, int * _x2c_catch_count_1);
-
-static int _x2c_catch_select_2(List _x2c_catch_error_2, Var * _x2c_catch_captures_2, int * _x2c_catch_count_2);
-
 typedef struct _x2c_defer_env_0{
   const void * _x2c_defer_capture_0;
   const void * _x2c_defer_capture_1;
@@ -384,7 +380,7 @@ int ParsedUnit_parse(ParsedUnit * p){
   {
     ExceptionFrame _x2c_exception_frame_1;
     static ErrorCatchSite _x2c_macro_site_1 ={
-      NULL, -1, 1, ERROR_CATCH_STATIC, - 1, _x2c_catch_select_1
+      NULL, -1, 1, ERROR_CATCH_STATIC, - 1, _x2c_catch_select_0
     }
     ;
     volatile ErrorHandler _x2c_error_handler_1 = x2c_error_catch_site_push(& _x2c_exception_frame_1, & _x2c_macro_site_1, NULL);
@@ -463,7 +459,7 @@ static int _start(Frontend frontend, String filename, ParsedUnit * unit, Context
   {
     ExceptionFrame _x2c_exception_frame_2;
     static ErrorCatchSite _x2c_macro_site_2 ={
-      NULL, -1, 1, ERROR_CATCH_STATIC, - 1, _x2c_catch_select_2
+      NULL, -1, 1, ERROR_CATCH_STATIC, - 1, _x2c_catch_select_0
     }
     ;
     volatile ErrorHandler _x2c_error_handler_2 = x2c_error_catch_site_push(& _x2c_exception_frame_2, & _x2c_macro_site_2, NULL);
@@ -1021,32 +1017,6 @@ static int _x2c_catch_select_0(List _x2c_catch_error_0, Var * _x2c_catch_capture
     _x2c_cursor0_0 = _x2c_catch_error_0;
     if(List_car(_x2c_cursor0_0).u64 ==(Symbol_var(28682226919752)).u64){
       _x2c_cursor0_0 = List_cdr(_x2c_cursor0_0);
-      return 0;
-    }
-
-  }
-  return -1;
-}
-
-static int _x2c_catch_select_1(List _x2c_catch_error_1, Var * _x2c_catch_captures_1, int * _x2c_catch_count_1){
-  List _x2c_cursor0_1 = _x2c_catch_error_1;
-  {
-    _x2c_cursor0_1 = _x2c_catch_error_1;
-    if(List_car(_x2c_cursor0_1).u64 ==(Symbol_var(28682226919752)).u64){
-      _x2c_cursor0_1 = List_cdr(_x2c_cursor0_1);
-      return 0;
-    }
-
-  }
-  return -1;
-}
-
-static int _x2c_catch_select_2(List _x2c_catch_error_2, Var * _x2c_catch_captures_2, int * _x2c_catch_count_2){
-  List _x2c_cursor0_2 = _x2c_catch_error_2;
-  {
-    _x2c_cursor0_2 = _x2c_catch_error_2;
-    if(List_car(_x2c_cursor0_2).u64 ==(Symbol_var(28682226919752)).u64){
-      _x2c_cursor0_2 = List_cdr(_x2c_cursor0_2);
       return 0;
     }
 

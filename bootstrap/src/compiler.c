@@ -471,8 +471,6 @@ _x2c_defer_env_5;
 
 static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5);
 
-static int _x2c_catch_select_1(List _x2c_catch_error_1, Var * _x2c_catch_captures_1, int * _x2c_catch_count_1);
-
 typedef struct _x2c_defer_env_6{
   const void * _x2c_defer_capture_11;
   const void * _x2c_defer_capture_12;
@@ -1741,7 +1739,7 @@ static int Compiler__try_unit_macro(Compiler c){
         * _x2c_macro_address_4 = c -> recovery_depth + 1; {
           {
             ExceptionFrame _x2c_exception_frame_1;  static ErrorCatchSite _x2c_macro_site_1 ={
-              NULL, -1, 1, ERROR_CATCH_STATIC, - 1, _x2c_catch_select_1
+              NULL, -1, 1, ERROR_CATCH_STATIC, - 1, _x2c_catch_select_0
             }
             ;  volatile ErrorHandler _x2c_error_handler_1 = x2c_error_catch_site_push(& _x2c_exception_frame_1, & _x2c_macro_site_1, NULL);  x2c_exception_push(& _x2c_exception_frame_1);  if(! sigsetjmp(_x2c_exception_frame_1.env, 0)) Compiler__expand_unit_macro(c);  else{
               x2c_exception_landed(& _x2c_exception_frame_1);  if(x2c_exception_is_error_target(& _x2c_exception_frame_1)){
@@ -3977,16 +3975,6 @@ static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4){
 
 static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5){
   _x2c_defer_env_5 * _x2c_defer_data_5 =(_x2c_defer_env_5 *) _x2c_defer_opaque_5;  *(*(int * *) _x2c_defer_data_5->_x2c_defer_capture_9) =(*(int *) _x2c_defer_data_5->_x2c_defer_capture_10);
-}
-
-static int _x2c_catch_select_1(List _x2c_catch_error_1, Var * _x2c_catch_captures_1, int * _x2c_catch_count_1){
-  List _x2c_cursor0_1 = _x2c_catch_error_1; {
-    _x2c_cursor0_1 = _x2c_catch_error_1;  if(List_car(_x2c_cursor0_1).u64 ==(Symbol_var(28682226919752)).u64){
-      _x2c_cursor0_1 = List_cdr(_x2c_cursor0_1);  return 0;
-    }
-
-  }
-  return -1;
 }
 
 static void _x2c_defer_cleanup_6(void * _x2c_defer_opaque_6){

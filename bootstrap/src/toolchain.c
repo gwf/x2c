@@ -109,8 +109,6 @@ Func x2c_func_shared(FuncAdapter, List);
 
 
 _x2c_initializer_choice_242786A8_0((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _132)))
-static int _x2c_catch_select_1(List _x2c_catch_error_1, Var * _x2c_catch_captures_1, int * _x2c_catch_count_1);
-
 static Var _x2c_lambda_1(Var directory);
 
 static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func_argv_1);
@@ -651,7 +649,7 @@ int Toolchain_preprocess(Toolchain t, const char * fname, List include_dirs, con
   {
     ExceptionFrame _x2c_exception_frame_2;
     static ErrorCatchSite _x2c_macro_site_2 ={
-      NULL, -1, 1, ERROR_CATCH_STATIC, - 1, _x2c_catch_select_1
+      NULL, -1, 1, ERROR_CATCH_STATIC, - 1, _x2c_catch_select_0
     }
     ;
     volatile ErrorHandler _x2c_error_handler_2 = x2c_error_catch_site_push(& _x2c_exception_frame_2, & _x2c_macro_site_2, NULL);
@@ -889,19 +887,6 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
   Var a0 = x2c_func_value_argument(_x2c_func_binding_0, _x2c_func_argv_0, 0, 45156);
   return _x2c_lambda_0(a0);
   ;
-}
-
-static int _x2c_catch_select_1(List _x2c_catch_error_1, Var * _x2c_catch_captures_1, int * _x2c_catch_count_1){
-  List _x2c_cursor0_1 = _x2c_catch_error_1;
-  {
-    _x2c_cursor0_1 = _x2c_catch_error_1;
-    if(List_car(_x2c_cursor0_1).u64 ==(Symbol_var(31862161386376)).u64){
-      _x2c_cursor0_1 = List_cdr(_x2c_cursor0_1);
-      return 0;
-    }
-
-  }
-  return -1;
 }
 
 static Var _x2c_lambda_1(Var directory){

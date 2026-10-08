@@ -125,8 +125,6 @@ static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
 static int _x2c_catch_select_0(List _x2c_catch_error_0, Var * _x2c_catch_captures_0, int * _x2c_catch_count_0);
 
-static int _x2c_catch_select_1(List _x2c_catch_error_1, Var * _x2c_catch_captures_1, int * _x2c_catch_count_1);
-
 #include "exception.h"
 
 
@@ -481,7 +479,7 @@ static Var Format_number(Format * f, Var arg, Symbol target){
   {
     ExceptionFrame _x2c_exception_frame_1;
     static ErrorCatchSite _x2c_macro_site_1 ={
-      NULL, -1, 1, ERROR_CATCH_STATIC, - 1, _x2c_catch_select_1
+      NULL, -1, 1, ERROR_CATCH_STATIC, - 1, _x2c_catch_select_0
     }
     ;
     volatile ErrorHandler _x2c_error_handler_1 = x2c_error_catch_site_push(& _x2c_exception_frame_1, & _x2c_macro_site_1, NULL);
@@ -570,24 +568,6 @@ static int _x2c_catch_select_0(List _x2c_catch_error_0, Var * _x2c_catch_capture
       _x2c_catch_captures_0[0] = code;
       _x2c_catch_captures_0[1] = List_var(details);
       * _x2c_catch_count_0 = 2;
-      return 0;
-    }
-
-  }
-  return -1;
-}
-
-static int _x2c_catch_select_1(List _x2c_catch_error_1, Var * _x2c_catch_captures_1, int * _x2c_catch_count_1){
-  List _x2c_cursor0_1 = _x2c_catch_error_1;
-  {
-    _x2c_cursor0_1 = _x2c_catch_error_1;
-    if(List_truth(_x2c_cursor0_1)){
-      Var code = List_car(_x2c_cursor0_1);
-      _x2c_cursor0_1 = List_cdr(_x2c_cursor0_1);
-      List details = _x2c_cursor0_1;
-      _x2c_catch_captures_1[0] = code;
-      _x2c_catch_captures_1[1] = List_var(details);
-      * _x2c_catch_count_1 = 2;
       return 0;
     }
 
