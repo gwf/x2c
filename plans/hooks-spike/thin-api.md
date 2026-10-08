@@ -47,7 +47,7 @@ component's file is included and replay through interfaces.
 | Entry | Status | Notes |
 | --- | --- | --- |
 | `x2c_syntax_type(expr)` | public | type of a bound expression |
-| Typing queries from project meta code | missing | they fail in the helper process; in-process meta code can call them |
+| Typing queries from project meta code | prototype (wave 2) | nested query request answered at the call site; about 0.17 M instructions per query |
 | `x2c_type_resolve`, `x2c_type_fields`, `x2c_type_members`, `x2c_type_is_*`, `x2c_type_element` | public (lib/meta.x) | |
 | `x2c_method_resolve(type, name)` | public | member resolution, including the self type |
 | `x2c_protocol_member(participant, base, member)` | public | |

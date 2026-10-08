@@ -4795,14 +4795,14 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_8(void){
   _4428 = List_var(_4427);
   _4429 = String_new("src/meta-helper-client.x");
   _4430 = String_var(_4429);
-  _4431 = String_new("8917541a");
+  _4431 = String_new("9de696cd");
   _4432 = String_var(_4431);
   _4433 = cons(_4432, NULL);
   _4434 = cons(_4430, _4433);
   _4435 = List_var(_4434);
   _4436 = String_new("src/meta-native.x");
   _4437 = String_var(_4436);
-  _4438 = String_new("6a4c3946");
+  _4438 = String_new("e0e85d02");
   _4439 = String_var(_4438);
   _4440 = cons(_4439, NULL);
   _4441 = cons(_4437, _4440);

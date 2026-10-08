@@ -28,7 +28,6 @@
 
 ## Later waves (ranked by `thin-api.md`)
 
-- Typing queries from project meta code (gap found in wave 1).
 - Patterns to `if` tests, with `catch` selection and `match` arms as clients.
 - Fact registration at collection, with `delegate` as the first client.
 - Declaration-position hook, with `$auto` as the client (deletes
@@ -55,9 +54,25 @@
   whether a typedef reaches String.
 - Bootstrap refreshed on the branch; 26 focused fixtures pass.
 
+## Wave 2
+
+- W2-A: project meta code asks typing queries through a nested request on
+  the reply pipe, answered by the compiler at the call site (about 0.17 M
+  instructions and 30 us per query). The typed switch now declines a named
+  subject that does not reach a C string.
+- W2-B stopped before editing: deleting `managed-init` through a general
+  declaration hook would change seven fixture diagnostics (all categories,
+  five positions) and tax every declaration with a meta call. Decision: add
+  a category argument to the diagnostic API; replace `managed-init` with a
+  generic claimed-initializer node whose tag selects a registered
+  declaration hook, so only claiming declarations call it and unconsumed
+  claims report at today's positions; let built-in components register
+  hooks that survive reinstall and name compiled-in functions.
+
 ## Log
 
 - 2026-10-07: merged `origin/dev` `7e946b86`; migrated spike files to
   prefix splices (`@fn(...)`); spike tests pass; pushed `15e561fb`.
 - 2026-10-07: wave 1 integrated (W1-A typed hook, W1-B effects API);
   bootstrap and docs refreshed; typed switch ported to the effects API.
+- 2026-10-07: W2-A integrated; bootstrap and docs refreshed.
