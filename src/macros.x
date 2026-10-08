@@ -222,11 +222,6 @@ static macro Stmt $report.parse.keyword_name(Expr $c) =>
     <parse>, "keyword alias requires an identifier",
     $c.token, NULL);
 
-static macro Stmt $report.parse.typed_hook_kind(Expr $c) =>
-  $c.report_error(
-    <parse>, %"typed hook cannot name node kind '${$c.token.text}'",
-    $c.token, %("typed hooks support <switch>"));
-
 static macro Stmt $report.parse.typed_hook_target(Expr $c, Expr $origin) =>
   $c.report_error(
     <parse>, "typed hook requires a meta function name", $origin, NULL);
@@ -2358,7 +2353,8 @@ void Compiler.install_compile_time_effects(Compiler c, List rows) {
     case %(compile-time keyword ?alias ?definition): {
       if (!c.kw_aliases) c.kw_aliases = {};
       c.kw_aliases[alias] = %(imported-macro $definition);
-      if (definition is <string>) c.typed_hooks = 1;
+      if (definition is <string> && alias.str().startswith("hook:"))
+        c.typed_hooks = 1;
     }
     case %(compile-time lisp ?form (source ?path ?site)): {
       Token token = c.thaw_declaration_syntax(site);
@@ -2409,8 +2405,8 @@ int Compiler.local_macro_form_is_definition(Compiler c) {
 }
 
 /** Returns whether the current tokens begin a `keyword NAME $macro` alias,
-    a `hook NAME $macro` parse hook, or a `hook <KIND> f` typed node hook.
-    This query does not consume tokens.
+    a `hook NAME $macro` parse hook, or a `hook <KIND> f` typed node or
+    claim hook. This query does not consume tokens.
 */
 int Compiler.keyword_form_is_definition(Compiler c) {
   Token token = c.token;
@@ -2422,11 +2418,12 @@ int Compiler.keyword_form_is_definition(Compiler c) {
          c.peek(offset + 2) == <$>;
 }
 
-/** Parses and installs one source-local `keyword` alias.
-    The named macro must already be visible; the alias captures that definition
-    and consumes its terminating semicolon.
+/** Parses and installs one source-local `keyword` alias or `hook`, and
+    returns the key it is stored under. The named macro must already be
+    visible; the alias captures that definition and consumes its terminating
+    semicolon.
 */
-void Compiler.parse_keyword_definition(Compiler c) {
+Atom Compiler.parse_keyword_definition(Compiler c) {
   Token declaration = c.token;
   int storage = c.test(<static>) || c.source_private;
   int hook = c.token.text == "hook";
@@ -2455,6 +2452,7 @@ void Compiler.parse_keyword_definition(Compiler c) {
     c.record_compile_time_effect(
       %(compile-time keyword $alias
         ${c.freeze_declaration_syntax(definition)}), declaration);
+  return alias;
 }
 
 /** Returns the decorator a `hook` declaration registered for `syntax`
@@ -2476,43 +2474,62 @@ List Compiler.apply_hook(
   Compiler c, List definition, Token invocation, AstPos position) =>
   c._decorate(definition, invocation, position, 0);
 
-/* typed node hooks
+/* typed node hooks and claim hooks
 
    `hook <switch> f;` registers the meta function `List f(List node)` for
    each bound and typed `switch` statement. Transformation passes the node
    to `f` before its built-in lowering. Returning the node declines; any
    other result binds as a statement in its place and is transformed
-   again, so a hook declines on what it produced. Storage and include
-   export are those of a keyword alias. */
+   again, so a hook declines on what it produced.
+
+   `hook <TAG> f;` with any other TAG registers `f` as the declaration hook
+   of claim TAG. A claim, `(claim TAG MESSAGE VALUE)`, has the type of
+   VALUE. Binding passes each block declarator whose complete initializer
+   is a claim to `f`, alone and initialized with VALUE; returning it
+   declines, and any other result binds as block items in its place. A
+   claim no hook takes reports MESSAGE when it is transformed.
+
+   Storage and include export are those of a keyword alias. Built-in
+   source names a meta function the compiler links. */
 
 static const SymbolSet typed_hook_kinds = %<<switch>>;
 
 /* Parses the rest of a `hook <KIND> f;` declaration begun at
-   `declaration`. */
-static void Compiler._typed_hook_definition(
+   `declaration` and returns its key. */
+static Atom Compiler._typed_hook_definition(
   Compiler c, Token declaration, int storage) {
   Symbol kind = Symbol.parse(c.token.text);
-  if (!(kind in typed_hook_kinds)) $report.parse.typed_hook_kind(c);
-  Atom alias = _typed_hook_alias(kind);
+  int typed = kind in typed_hook_kinds;
+  Atom alias = typed ? _typed_hook_alias(kind) : _claim_hook_alias(kind);
   c.next();
-  Token reference = c.token;
-  List callee = c.parse_variable();
-  String name = NULL;
-  match (callee)
-    case %(expr ((func *) *)
-           ${$source_identifier_content(%((binding ? ?spelling)))}):
-      name = spelling;
-  if (!name) $report.parse.typed_hook_target(c, reference);
+  String name = c._hook_target();
   c.expect(<;>);
   c.kw_aliases[alias] = name;
-  c.typed_hooks = 1;
+  if (typed) c.typed_hooks = 1;
   if (!storage)
     c.record_compile_time_effect(
       %(compile-time keyword $alias $name), declaration);
+  return alias;
+}
+
+/* The name of the meta function a hook registers. */
+static String Compiler._hook_target(Compiler c) {
+  Token reference = c.token;
+  if (c.builtin_defs) {
+    c.expect(<ident>);
+    return Atom.intern(reference.text).str();
+  }
+  match (c.parse_variable())
+    case %(expr ((func *) *)
+           ${$source_identifier_content(%((binding ? ?spelling)))}):
+      return spelling;
+  $report.parse.typed_hook_target(c, reference);
 }
 
 static Atom _typed_hook_alias(Symbol kind) =>
   Atom.intern(%"hook:<$kind>");
+
+static Atom _claim_hook_alias(Var tag) => Atom.intern(%"claim:<$tag>");
 
 /** Returns what the typed hook registered for `tag` makes of the bound node
     `ast`: `ast` itself when no hook is visible or the hook declines, else
@@ -2528,6 +2545,20 @@ List Compiler.apply_typed_hook(Compiler c, List ast, Symbol tag) {
   return c.bind_syntax(result, AST_STATEMENT, c.return_type);
 }
 
+/** Returns the block items the declaration hook of claim `tag` makes of
+    `declaration`, which declares one claimed declarator initialized with
+    the claim's value, or NULL when no hook is visible or it declines. A
+    failure the hook reports without a position is located at `site`.
+*/
+List Compiler.apply_claim_hook(
+  Compiler c, Var tag, List declaration, Token site) {
+  Var name;
+  if (!c._try_macro(c.kw_aliases, _claim_hook_alias(tag), name)) return NULL;
+  Var result = c.apply_meta_function(name.str(), %($declaration), site);
+  if (result is void || result.equal(declaration)) return NULL;
+  return c.bind_syntax(result, AST_BLOCK, c.return_type);
+}
+
 /* Only the built-in sources define `with` or replace a built-in alias. */
 static int Compiler._fixed_alias(Compiler c, Atom alias) {
   Var existing;
@@ -2540,13 +2571,9 @@ static int Compiler._fixed_alias(Compiler c, Atom alias) {
 static const SymbolSet alias_kinds =
   %<<expression block-item field enumerator map-entry unit decorator>>;
 
-/* Parses one keyword alias of `c`'s source into `aliases`. */
+/* Parses one keyword alias or hook of `c`'s source into `aliases`. */
 static void Compiler._record_alias(Compiler c, Map aliases) {
-  Token token = c.token;
-  if (token.type == <static>) token = Token.skip_trivia(token + 1);
-  token = Token.skip_trivia(token + 1);
-  Atom alias = Atom.intern(token.text);
-  c.parse_keyword_definition();
+  Atom alias = c.parse_keyword_definition();
   aliases[alias] = c.kw_aliases[alias];
 }
 

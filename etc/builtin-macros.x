@@ -50,7 +50,12 @@ macro Decorator $lock(Stmt $body, Expr $mutex) {
 }
 
 macro Expression $auto(Expr $value) =>
-  $(list 'managed-init $value);
+  $(list 'expr nil
+    (list 'claim 'auto
+      "managed initializer requires a complete block-local initializer"
+      $value));
+
+hook <auto> builtin_auto_declaration;
 
 macro Decorator $class(NamedType $definition) {
   @(class.expand $definition)

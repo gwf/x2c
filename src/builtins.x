@@ -31,6 +31,29 @@ static List _scope_expand(List body, List destinations) {
   return $!{ { $enter; { defer $leave; $body } } };
 }
 
+// $auto
+
+/* The declaration hook of the `auto` claim: `T x = $auto(v);` declares `x`
+   and defers its Cleanup to the end of the block. */
+static List _auto_declaration(List declaration) {
+  match (declaration)
+    case %(declare ?base (bindings (op = (bind ?binding ?) ?))): {
+      match (base) case %(* (!or static extern threaded) *):
+        x2c_diagnostic_fail_at(
+          NULL, <parse>,
+          "managed initializer requires automatic local storage", %());
+      List type = x2c_syntax_type(declaration);
+      if (!x2c_protocol_member(type, %("Cleanup"), "cleanup"))
+        x2c_diagnostic_fail_at(
+          NULL, <protocol>,
+          "managed initializer requires Cleanup participation",
+          %("type: ${type.repr()}"));
+      List receiver = $!($type){ $binding };
+      return %(seq $declaration ${$!{ defer $receiver.cleanup(); }});
+    }
+  return declaration;
+}
+
 /* foreach
 
    A collection whose owner declares a matching `try_next` runs a cursor
@@ -850,6 +873,7 @@ List builtin_try_cleanup_placement(Var cleanup) {
 Map builtin_targets(void) {
   Map rows = {};
   $builtin.row(rows, "builtin_scope_expand", _scope_expand);
+  $builtin.row(rows, "builtin_auto_declaration", _auto_declaration);
   $builtin.row(rows, "x2c_func_call_arguments", x2c_func_call_arguments);
   $builtin.row(rows, "builtin_defer_captures", builtin_defer_captures);
   $builtin.row(rows, "builtin_try_catch_site", builtin_try_catch_site);

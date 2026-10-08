@@ -73,13 +73,15 @@ int Compiler_local_macro_form_is_definition(Compiler c);
 
 int Compiler_keyword_form_is_definition(Compiler c);
 
-void Compiler_parse_keyword_definition(Compiler c);
+Atom Compiler_parse_keyword_definition(Compiler c);
 
 List Compiler_hook_for(Compiler c, String syntax);
 
 List Compiler_apply_hook(Compiler c, List definition, Token invocation, AstPos position);
 
 List Compiler_apply_typed_hook(Compiler c, List ast, Symbol tag);
+
+List Compiler_apply_claim_hook(Compiler c, Var tag, List declaration, Token site);
 
 int Compiler_macro_starts_target_at(Compiler c, AstPos position);
 

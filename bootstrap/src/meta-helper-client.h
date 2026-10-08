@@ -18,7 +18,7 @@
 #include <sys/wait.h>
 #include <time.h>
 #include <unistd.h>
-void Compiler_report_meta_error(Compiler c, Var node, String message, Token site, List notes);
+void Compiler_report_meta_error(Compiler c, Var node, Symbol category, String message, Token site, List notes);
 
 Var Compiler_meta_helper_call(Compiler c, String name, Token site, List arguments, String provider);
 

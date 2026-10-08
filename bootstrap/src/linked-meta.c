@@ -1282,7 +1282,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_1(void){
   _936 = List_var(_935);
   _937 = String_new("lib/meta.x");
   _938 = String_var(_937);
-  _939 = String_new("8c21191f");
+  _939 = String_new("b1cf1037");
   _940 = String_var(_939);
   _941 = cons(_940, NULL);
   _942 = cons(_938, _941);
@@ -4666,7 +4666,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_8(void){
   _4299 = cons(_918, _4298);
   _4300 = String_new("src/builtins.x");
   _4301 = String_var(_4300);
-  _4302 = String_new("600adec4");
+  _4302 = String_new("63ff2a6b");
   _4303 = String_var(_4302);
   _4304 = String_new("cwd:./lisp.x");
   _4305 = String_var(_4304);
@@ -4686,7 +4686,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_8(void){
   _4319 = List_var(_4318);
   _4320 = String_new("src/macros.x");
   _4321 = String_var(_4320);
-  _4322 = String_new("3f6a9207");
+  _4322 = String_new("db510ccf");
   _4323 = String_var(_4322);
   _4324 = cons(_4323, NULL);
   _4325 = cons(_4321, _4324);
@@ -4697,7 +4697,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_8(void){
   _4330 = List_var(_4329);
   _4331 = String_new("src/transform.x");
   _4332 = String_var(_4331);
-  _4333 = String_new("67d2fbef");
+  _4333 = String_new("01e7dd82");
   _4334 = String_var(_4333);
   _4335 = cons(_4334, NULL);
   _4336 = cons(_4332, _4335);
@@ -4764,7 +4764,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_8(void){
   _4397 = List_var(_4396);
   _4398 = String_new("src/expressions.x");
   _4399 = String_var(_4398);
-  _4400 = String_new("59addcc4");
+  _4400 = String_new("b64e8598");
   _4401 = String_var(_4400);
   _4402 = cons(_4401, NULL);
   _4403 = cons(_4399, _4402);
@@ -4795,7 +4795,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_8(void){
   _4428 = List_var(_4427);
   _4429 = String_new("src/meta-helper-client.x");
   _4430 = String_var(_4429);
-  _4431 = String_new("9de696cd");
+  _4431 = String_new("5c4b7a9d");
   _4432 = String_var(_4431);
   _4433 = cons(_4432, NULL);
   _4434 = cons(_4430, _4433);
@@ -4809,14 +4809,14 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_8(void){
   _4442 = List_var(_4441);
   _4443 = String_new("src/meta-sdk.x");
   _4444 = String_var(_4443);
-  _4445 = String_new("67ebe66c");
+  _4445 = String_new("bd3e7b8f");
   _4446 = String_var(_4445);
   _4447 = cons(_4446, NULL);
   _4448 = cons(_4444, _4447);
   _4449 = List_var(_4448);
   _4450 = String_new("src/parse.x");
   _4451 = String_var(_4450);
-  _4452 = String_new("5b9e73f1");
+  _4452 = String_new("3543e99e");
   _4453 = String_var(_4452);
   _4454 = cons(_4453, NULL);
   _4455 = cons(_4451, _4454);
@@ -4848,7 +4848,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_8(void){
   _4481 = List_var(_4480);
   _4482 = String_new("src/statements.x");
   _4483 = String_var(_4482);
-  _4484 = String_new("23c09586");
+  _4484 = String_new("bd696745");
   _4485 = String_var(_4484);
   _4486 = cons(_4485, NULL);
   _4487 = cons(_4483, _4486);

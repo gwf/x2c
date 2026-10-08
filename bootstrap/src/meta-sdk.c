@@ -1215,9 +1215,9 @@ void x2c_diagnostic_fail(String message, List notes){
   if(! _init_guard_) _file_init_();  _sdk_check_notes(_308, notes);  MetaContext_reject(message, notes);
 }
 
-void Compiler_report_meta_error(Compiler, Var, String, Token, List);
-void x2c_diagnostic_fail_at(Var node, String message, List notes){
-  if(! _init_guard_) _file_init_();  _sdk_check_notes(_309, notes);  Compiler_report_meta_error(active.expander, node, message, active.site, notes);
+void Compiler_report_meta_error(Compiler, Var, Symbol, String, Token, List);
+void x2c_diagnostic_fail_at(Var node, Symbol category, String message, List notes){
+  if(! _init_guard_) _file_init_();  _sdk_check_notes(_309, notes);  Compiler_report_meta_error(active.expander, node, category, message, active.site, notes);
 }
 
 void Compiler_report_warning(Compiler, Symbol, String, Token, List);
@@ -1363,7 +1363,7 @@ void Compiler_report_error(Compiler, Symbol, String, Token, List);
 _Noreturn void MetaContext_reject(String message, List notes){
   Compiler c = active.evaluator;  if(c) Compiler_report_error(c, 27335838, message, active.site, notes); {
     Var _x2c_literal_part_29 = String_var(String_join(NULL, cons(String_var(String_new("x2c SDK rejection")), NULL))); {
-      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/meta-sdk.x",.function = "MetaContext_reject",.line = 789};  x2c_error_raise_n(& _x2c_error_site_1, 4477477457162, 2, Symbol_var(34096809266140), _x2c_literal_part_29, Symbol_var(1218550748), String_var(message));  __builtin_unreachable();
+      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/meta-sdk.x",.function = "MetaContext_reject",.line = 791};  x2c_error_raise_n(& _x2c_error_site_1, 4477477457162, 2, Symbol_var(34096809266140), _x2c_literal_part_29, Symbol_var(1218550748), String_var(message));  __builtin_unreachable();
     }
 
   }

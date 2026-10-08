@@ -1379,7 +1379,7 @@ static void _debug_tokens(Token start, Token end){
   ));
 }
 
-void Compiler_parse_keyword_definition(Compiler);
+Atom Compiler_parse_keyword_definition(Compiler);
 
 List Compiler_parse_macro_definition(Compiler);
 

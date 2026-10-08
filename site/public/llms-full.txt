@@ -3830,13 +3830,15 @@ runtime's fixed capacity and worker-start freeze rules.
 
 ### Managed-initializer syntax
 
-`(managed-init EXPR)` is a constructible initializer form. `$auto(value)`
-produces it; an equivalent List built by another macro or compile-time Lisp
-has the same meaning. It may be wrapped in typed `expr` nodes and parentheses.
-Only the complete initializer of an initialized automatic declaration that is
-a compound-statement item consumes the form. The declaration keeps its type,
-binding identity, initialization conversions, and enclosing scope, followed by
-an ordinary deferred call to the type's selected `cleanup` method.
+`$auto(value)` produces the claim `(claim auto MESSAGE EXPR)` in an `expr`
+node; an equivalent List built by another macro or compile-time Lisp has the
+same meaning. A claim has the type of `EXPR`. It may be wrapped in typed
+`expr` nodes and parentheses. Only the complete initializer of a declarator
+that is a compound-statement item passes the claim to the declaration hook
+its tag registered, `hook <auto> f;`; a claim no hook takes is an error that
+reports `MESSAGE`. For `auto`, the declaration keeps its type, binding
+identity, initialization conversions, and enclosing scope, followed by an
+ordinary deferred call to the type's selected `cleanup` method.
 
 The declared type must participate in `Cleanup(T)`, whose member is
 `void T.cleanup(T)`, directly or through its ordinary typedef ancestry.

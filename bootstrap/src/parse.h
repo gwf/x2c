@@ -92,7 +92,7 @@ List Compiler_parse_function_definition(Compiler c);
 
 List Compiler_parse_function_target(Compiler c);
 
-List Compiler_finish_managed_declaration(Compiler c, List declaration, Token origin);
+List Compiler_finish_claims(Compiler c, List declaration, Token origin);
 
 List Compiler_bind_syntax(Compiler c, Var syntax, AstPos context, Type return_type);
 

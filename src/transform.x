@@ -38,11 +38,9 @@
 
 /* transform diagnostics. */
 
-static macro Stmt $report.parse.init_incomplete(Expr $c) =>
-  $c.report_error(
-    <parse>,
-    "managed initializer requires a complete block-local initializer",
-    NULL, NULL);
+/* A claim no declaration hook took reports the message it carries. */
+static macro Stmt $report.parse.claim_unconsumed(Expr $c, Expr $claim) =>
+  $c.report_error(<parse>, $claim.caddr().str(), NULL, NULL);
 
 static macro Stmt $report.xform.index_unsupported(Expr $c, Expr $type) =>
   $c.report_error(
@@ -204,9 +202,6 @@ Ast Compiler.normalize(Compiler c, Ast ast) => c._step(ast);
 
 static Ast Compiler._step(Compiler c, Ast ast) {
   if (!ast) return NULL;
-  match (ast)
-    case %(managed-init ?):
-      $report.parse.init_incomplete(c);
   Var head = ast.car();
   if (head is not <symbol>) return c._default_node(ast);
   match (ast) {
@@ -252,6 +247,7 @@ static Ast Compiler._step_tag(Compiler c, Ast ast, Symbol tag) {
     case <defer>: next = c._defer_node(ast); break;
     case <return>: next = c._return(ast); break;
     case <raise>: return c._raise_node(ast);
+    case <claim>: $report.parse.claim_unconsumed(c, ast);
     case <if>: case <while>: case <do>: case <for>:
       next = c._truthy(ast); break;
     case <call>: next = c._call(ast); break;

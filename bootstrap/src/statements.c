@@ -1150,9 +1150,9 @@ static List Compiler__local_macro(Compiler c){
 }
 
 List Compiler_parse_declaration_row(Compiler);
-List Compiler_finish_managed_declaration(Compiler, List, Token);
+List Compiler_finish_claims(Compiler, List, Token);
 static List Compiler__declaration_item(Compiler c){
-  Token origin = c -> token;  List decl = Compiler_parse_declaration_row(c);  Compiler_expect(c, 119);  return Compiler_finish_managed_declaration(c, decl, origin);
+  Token origin = c -> token;  List decl = Compiler_parse_declaration_row(c);  Compiler_expect(c, 119);  return Compiler_finish_claims(c, decl, origin);
 }
 
 List Compiler_parse_block_items(Compiler c, int anchor_items);

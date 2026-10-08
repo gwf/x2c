@@ -79,7 +79,7 @@ String x2c_embed_text(Var path);
 
 void x2c_diagnostic_fail(String message, List notes);
 
-void x2c_diagnostic_fail_at(Var node, String message, List notes);
+void x2c_diagnostic_fail_at(Var node, Symbol category, String message, List notes);
 
 void x2c_diagnostic_warn(String message, List notes);
 
