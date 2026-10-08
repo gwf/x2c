@@ -4666,7 +4666,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_8(void){
   _4299 = cons(_918, _4298);
   _4300 = String_new("src/builtins.x");
   _4301 = String_var(_4300);
-  _4302 = String_new("7082e5c2");
+  _4302 = String_new("39d57d05");
   _4303 = String_var(_4302);
   _4304 = String_new("cwd:./lisp.x");
   _4305 = String_var(_4304);
@@ -4686,7 +4686,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_8(void){
   _4319 = List_var(_4318);
   _4320 = String_new("src/macros.x");
   _4321 = String_var(_4320);
-  _4322 = String_new("9d212e09");
+  _4322 = String_new("97f5895a");
   _4323 = String_var(_4322);
   _4324 = cons(_4323, NULL);
   _4325 = cons(_4321, _4324);
@@ -4934,7 +4934,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_8(void){
   _4567 = List_var(_4566);
   _4568 = String_new("src/cleanup.x");
   _4569 = String_var(_4568);
-  _4570 = String_new("26583761");
+  _4570 = String_new("0a3ed4f3");
   _4571 = String_var(_4570);
   _4572 = cons(_4571, NULL);
   _4573 = cons(_4569, _4572);

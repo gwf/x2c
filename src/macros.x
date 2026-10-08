@@ -2489,10 +2489,15 @@ List Compiler.apply_hook(
    returning it declines, and any other result binds as block items in its
    place. A claim no hook takes reports MESSAGE when it is transformed.
 
+   `hook <try> f;` registers `f` as the cleanup hook of `try`, described
+   at `Compiler.apply_cleanup_hook`.
+
    Storage and include export are those of a keyword alias. Built-in
    source names a meta function the compiler links. */
 
 static const SymbolSet typed_hook_kinds = %<<switch match>>;
+
+static const SymbolSet cleanup_hook_kinds = %<<try>>;
 
 /* Parses the rest of a `hook <KIND> f;` declaration begun at
    `declaration` and returns its key. */
@@ -2501,7 +2506,9 @@ static Atom Compiler._typed_hook_definition(
   Symbol kind = Symbol.parse(c.token.text);
   int typed = kind in typed_hook_kinds;
   Atom alias = kind == <member> ? _fallback_alias()
-             : typed ? _typed_hook_alias(kind) : _claim_hook_alias(kind);
+             : typed ? _typed_hook_alias(kind)
+             : kind in cleanup_hook_kinds ? _cleanup_hook_alias(kind)
+             : _claim_hook_alias(kind);
   c.next();
   String name = c._hook_target();
   c.expect(<;>);
@@ -2538,6 +2545,9 @@ static int _typed_hook_row(Var alias, Var definition) =>
 
 static Atom _claim_hook_alias(Var tag) => Atom.intern(%"claim:<$tag>");
 
+static Atom _cleanup_hook_alias(Symbol kind) =>
+  Atom.intern(%"cleanup:<$kind>");
+
 /** Returns what the typed hook registered for `tag` makes of the bound node
     `ast`: `ast` itself when no hook is visible or the hook declines, else
     the hook's result bound as a statement.
@@ -2564,6 +2574,37 @@ List Compiler.apply_claim_hook(
   Var result = c.apply_meta_function(name.str(), %($declaration), site);
   if (result is void || result.equal(declaration)) return NULL;
   return c.bind_syntax(result, AST_BLOCK, c.return_type);
+}
+
+/** Returns what the cleanup hook registered for the kind of the bound node
+    `ast` makes of it, or `ast` when no hook is visible or it declines.
+
+    The hook runs when its function is complete, before the cleanup walk,
+    on a node whose nested hooked nodes it has already lowered; it changes
+    no state. It returns code, or a code value whose effects take part in
+    the walk, in order, beside the ordinary rows:
+
+    - `(outer TOKEN NODE)` lowers NODE in the enclosing regions.
+    - `(exits TOKEN CODE)` binds CODE as the exits of the regions after
+      it. CODE holds lowered parts only, and binding lowers nothing more.
+    - `(region TOKEN NODE)` lowers NODE inside a region that runs those
+      exits on every transfer out of it, and that no `goto` may enter.
+    - `(landing)` says control comes back through `siglongjmp`, so the
+      locals the nodes of `outer` and `region` write stay valid.
+
+    TOKEN is replaced by the lowered result in the code and in later rows,
+    and the code then binds in place of the node. */
+List Compiler.apply_cleanup_hook(Compiler c, List ast) {
+  Var name, head = ast.car();
+  if (head is not <symbol>) return ast;
+  Symbol kind = head;
+  if (!(kind in cleanup_hook_kinds) ||
+      !c._try_macro(c.kw_aliases, _cleanup_hook_alias(kind), name))
+    return ast;
+  Var result = c.apply_meta_function(name.str(), %($ast), c.token);
+  if (result is void || result.equal(ast)) return ast;
+  match (result) case %(code-value *): return result;
+  return %(code-value "source" $result ());
 }
 
 /* member-resolution fallbacks
@@ -4363,30 +4404,47 @@ int Compiler.take_code_value(
    effect's token in the code. */
 static Map Compiler._code_effects(Compiler c, Var effects) {
   Map replacements = {};
-  foreach (List effect, effects)
-    match (effect) {
-      case %(new-name ?token ?(String role)):
-        replacements[token] = c.sym.introduce(c.fresh_name(role));
-      case %(cleanup ?token ?placed): {
-        replacements[token] = placed;
-        c.needs_exception = 1;
-      }
-      case %(early ?key ?binding ?declaration): {
-        $adapter.memo(c, key, replacements[binding]) {
-          c.add_early(c.bind_syntax(
-            _replace_bindings(declaration, replacements), AST_UNIT, NULL));
-        }
-      }
-      case %(initialize
-              (!set ?area (!or protocol prepare statics finish)) ?statement):
-        c.add_init(area, c.normalize(c.bind_syntax(
-          _replace_bindings(statement, replacements), AST_BLOCK, NULL)));
-      default:
-        c.report_error(
-          <macro>, "a meta call returned an unknown code effect", c.token,
-          %("effect: ${effect.repr()}"));
-    }
+  foreach (List effect, effects) c.apply_code_effect(effect, replacements);
   return replacements;
+}
+
+/** Applies one effect row of a carrier, after the rows whose tokens
+    `replacements` maps, and adds what replaces its own token. */
+void Compiler.apply_code_effect(Compiler c, List effect, Map replacements) {
+  match (effect) {
+    case %(new-name ?token ?(String role)):
+      replacements[token] = c.sym.introduce(c.fresh_name(role));
+    case %(cleanup ?token ?placed): {
+      replacements[token] = placed;
+      c.needs_exception = 1;
+    }
+    case %(early ?key ?binding ?declaration): {
+      $adapter.memo(c, key, replacements[binding]) {
+        c.add_early(c.bind_syntax(
+          _replace_bindings(declaration, replacements), AST_UNIT, NULL));
+      }
+    }
+    case %(initialize
+            (!set ?area (!or protocol prepare statics finish)) ?statement):
+      c.add_init(area, c.normalize(c.bind_syntax(
+        _replace_bindings(statement, replacements), AST_BLOCK, NULL)));
+    default:
+      c.report_error(
+        <macro>, "a meta call returned an unknown code effect", c.token,
+        %("effect: ${effect.repr()}"));
+  }
+}
+
+/** Returns `code` with each token `replacements` maps replaced. The
+    definition a template applies holds none, so only its values are
+    searched. */
+Var Compiler.replace_code_tokens(Compiler c, Var code, Map replacements) {
+  match (code) case %("x2c.template" ?definition ?values): {
+    Var replaced = _replace_bindings(values, replacements);
+    return replaced == values ? code
+                              : %("x2c.template" $definition $replaced);
+  }
+  return _replace_bindings(code, replacements);
 }
 
 /** Binds a code-value carrier that a meta call returned outside a macro

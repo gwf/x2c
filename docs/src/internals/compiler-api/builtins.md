@@ -12,10 +12,37 @@ The built-in macros' compile-time algorithms.
 
 | Function | Summary |
 | --- | --- |
+| [`builtin_catch_cases`](#builtin_catch_cases) | Returns each lowered arm of `arms` chosen by its index in `selected`; `$catch_landing` calls this in a slot. |
+| [`builtin_catch_patterns`](#builtin_catch_patterns) | Returns the statement that prepares each of `items` into its slot of the catch site's `patterns`; `$catch_site` calls this in a slot. |
 | [`builtin_targets`](#builtin_targets) | Returns each built-in algorithm by the name compile-time code calls it with. |
+| [`builtin_try_catch_site`](#builtin_try_catch_site) | Returns the catch site `frame` pushes for the clause `clause` describes, or nothing for a try without one; the `$compiler_try` template calls this in a slot. |
 | [`builtin_try_cleanup_placement`](#builtin_try_cleanup_placement) | Places the lowered statements that leave a try region after it, with the effect that marks the unit as needing exception support. |
+| [`builtin_try_landing`](#builtin_try_landing) | Returns what runs when `frame` lands: the catch arm the clause's handler selected, or `cleanup` and no return; the `$compiler_try` template calls this in a slot. |
 
 ### Functions
+
+#### builtin_catch_cases
+
+`List builtin_catch_cases(List selected, List arms)`
+
+Returns each lowered arm of `arms` chosen by its index in `selected`;
+`$catch_landing` calls this in a slot. Each arm is its own statement, so
+a `break` or `continue` in it still reaches the enclosing loop, and only
+one test holds because `selected` does not change. When every arm
+returns or raises, control cannot leave them, and a final unreachable
+mark tells C so that a function ending in such a `try` needs no return
+after it.
+
+Source: `src/builtins.x:1022`
+
+#### builtin_catch_patterns
+
+`List builtin_catch_patterns(List patterns, List items)`
+
+Returns the statement that prepares each of `items` into its slot of
+the catch site's `patterns`; `$catch_site` calls this in a slot.
+
+Source: `src/builtins.x:1005`
 
 #### builtin_targets
 
@@ -24,7 +51,17 @@ The built-in macros' compile-time algorithms.
 Returns each built-in algorithm by the name compile-time code calls it
 with.
 
-Source: `src/builtins.x:1006`
+Source: `src/builtins.x:1240`
+
+#### builtin_try_catch_site
+
+`List builtin_try_catch_site(List frame, List clause)`
+
+Returns the catch site `frame` pushes for the clause `clause`
+describes, or nothing for a try without one; the `$compiler_try`
+template calls this in a slot.
+
+Source: `src/builtins.x:1069`
 
 #### builtin_try_cleanup_placement
 
@@ -33,7 +70,18 @@ Source: `src/builtins.x:1006`
 Places the lowered statements that leave a try region after it, with
 the effect that marks the unit as needing exception support.
 
-Source: `src/builtins.x:995`
+Source: `src/builtins.x:994`
+
+#### builtin_try_landing
+
+`List builtin_try_landing(List frame, List clause, List cleanup)`
+
+Returns what runs when `frame` lands: the catch arm the clause's
+handler selected, or `cleanup` and no return; the `$compiler_try`
+template calls this in a slot. A landing no catch arm handles runs the
+region's exits, and control does not come back.
+
+Source: `src/builtins.x:1086`
 
 ## Design notes
 

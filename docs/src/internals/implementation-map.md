@@ -262,8 +262,10 @@ inline-lisp example
 ### Raise, filtered catch, finally, and defer
 
 - Parse: `src/statements.x`
-- Lower/generate: `src/transform.x`; `src/cleanup.x` places cleanup on every
-  exit from a region; `src/emit.x`
+- Lower/generate: `src/transform.x`; the `try` component in
+  `src/builtins.x`, registered by `hook <try>` in `etc/builtin-macros.x`,
+  writes a try's frame, catch site, landing, and exits; `src/cleanup.x`
+  places cleanup on every exit from a region; `src/emit.x`
 - Runtime: `lib/exception.x` owns the frame/jump engine for transfer and
   cleanup; `lib/error.x` owns handlers, policy, watermarks, accumulated
   records, matching, and transferring registration lifetime
@@ -305,8 +307,9 @@ The main translation steps are:
 4. `src/type.x` supplies type facts and canonical forms.
 5. `src/transform.x` lowers most extensions; `src/callables.x` owns lambda
    helper and adapter synthesis.
-6. `src/cleanup.x` names each `defer` and `try` region's runtime record and
-   places its cleanup statements on every exit that leaves the region.
+6. `src/cleanup.x` names each `defer` region's runtime record, lowers the
+   regions a cleanup hook such as the `try` component opens, and places
+   their cleanup statements on every exit that leaves the region.
 7. `src/generate.x` partitions the translation unit and installs init
    scaffolding; `src/cache.x` owns literal-cache initialization.
 8. `src/emit.x` emits C tokens and `src/format.x` formats them.

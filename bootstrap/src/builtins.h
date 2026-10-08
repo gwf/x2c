@@ -15,6 +15,14 @@ List x2c_param_make(List type, Var name);
 
 List builtin_try_cleanup_placement(Var cleanup);
 
+List builtin_catch_patterns(List patterns, List items);
+
+List builtin_catch_cases(List selected, List arms);
+
+List builtin_try_catch_site(List frame, List clause);
+
+List builtin_try_landing(List frame, List clause, List cleanup);
+
 Map builtin_targets(void);
 
 

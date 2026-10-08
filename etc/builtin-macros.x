@@ -59,6 +59,8 @@ hook <auto> builtin_auto_declaration;
 
 hook <member> builtin_delegate_member;
 
+hook <try> builtin_try_lowering;
+
 macro Decorator $class(NamedType $definition) {
   @(class.expand $definition)
 }

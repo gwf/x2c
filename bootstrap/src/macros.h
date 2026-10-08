@@ -83,6 +83,8 @@ List Compiler_apply_typed_hook(Compiler c, List ast, Symbol tag);
 
 List Compiler_apply_claim_hook(Compiler c, Var tag, List declaration, Token site);
 
+List Compiler_apply_cleanup_hook(Compiler c, List ast);
+
 List Compiler_member_fallback(Compiler c, Type type, String member, Token site);
 
 int Compiler_macro_starts_target_at(Compiler c, AstPos position);
@@ -130,6 +132,10 @@ List Compiler_try_parse_macro_subpattern(Compiler c, int content);
 List Compiler_capture_macro_value(Compiler c, List definition);
 
 int Compiler_take_code_value(Compiler c, Var input, Var * value, int * retained);
+
+void Compiler_apply_code_effect(Compiler c, List effect, Map replacements);
+
+Var Compiler_replace_code_tokens(Compiler c, Var code, Map replacements);
 
 List Compiler_bind_code_value(Compiler c, List carrier, AstPos position, Type return_type);
 
