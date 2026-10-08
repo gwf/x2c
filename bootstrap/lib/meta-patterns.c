@@ -2,11 +2,11 @@
 
 #define __GUARD_0xA0DD8BCB__
 #include "meta.h"
-static List _45, _43, _39, _38, _37, _35, _34, _32, _31, _27, _19, _17, _16, _14, _13, _12, _10;
+static List _92, _91, _90, _88, _87, _86, _84, _83, _81, _80, _79, _77, _76, _75, _72, _67, _66, _65, _63, _62, _61, _60, _52, _51, _50, _45, _43, _39, _38, _37, _35, _34, _32, _31, _27, _19, _17, _16, _14, _13, _12, _10;
 
-static String _49, _48, _41, _25;
+static String _93, _70, _54, _53, _41, _25;
 
-static Var _50, _47, _46, _44, _42, _40, _36, _33, _30, _29, _28, _26, _24, _23, _22, _21, _20, _18, _15, _11, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static Var _89, _85, _82, _78, _74, _73, _71, _69, _68, _64, _59, _58, _57, _56, _55, _49, _48, _47, _46, _44, _42, _40, _36, _33, _30, _29, _28, _26, _24, _23, _22, _21, _20, _18, _15, _11, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
@@ -20,7 +20,11 @@ static List _pattern_assign(Var name, List value);
 
 static List _pattern_same(List value, Symbol symbol);
 
-static int _pattern_segment(List pattern, List constant, int depth, Array cursors, Array steps, Array binders);
+static List _pattern_parts(List constant);
+
+static List _pattern_built(List expression);
+
+static List _pattern_sublist(List literal);
 
 static Var Symbol_var(Symbol);
 
@@ -81,10 +85,53 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _44 = List_var(_43);
   _45 = cons(_44, NULL);
   _46 = Symbol_var(15739);
-  _47 = Symbol_var(1322216);
-  _48 = String_new("car");
-  _49 = String_new("cdr");
-  _50 = Symbol_var(60);
+  _47 = Symbol_var(228262);
+  _48 = Symbol_var(2004418898856);
+  _49 = Symbol_var(62008552);
+  _50 = cons(_49, NULL);
+  _51 = cons(_48, _50);
+  _52 = cons(_47, _51);
+  _53 = String_new("car");
+  _54 = String_new("cdr");
+  _55 = Symbol_var(58);
+  _56 = Symbol_var(62054);
+  _57 = Symbol_var(1951746856);
+  _58 = Symbol_var(1362954);
+  _59 = Symbol_var(806120);
+  _60 = cons(_59, NULL);
+  _61 = cons(_58, _60);
+  _62 = cons(_57, _61);
+  _63 = cons(_56, _62);
+  _64 = List_var(_63);
+  _65 = cons(_64, NULL);
+  _66 = cons(_55, _65);
+  _67 = cons(_0, _66);
+  _68 = Symbol_var(2005352);
+  _69 = Symbol_var(61623528);
+  _70 = String_new("List");
+  _71 = String_var(_70);
+  _72 = cons(_71, NULL);
+  _73 = List_var(_72);
+  _74 = Symbol_var(54);
+  _75 = cons(_74, NULL);
+  _76 = cons(_73, _75);
+  _77 = cons(_0, _76);
+  _78 = List_var(_77);
+  _79 = cons(_78, NULL);
+  _80 = cons(_69, _79);
+  _81 = cons(_68, _80);
+  _82 = List_var(_81);
+  _83 = cons(_82, NULL);
+  _84 = cons(_8, _83);
+  _85 = List_var(_84);
+  _86 = cons(_85, NULL);
+  _87 = cons(_55, _86);
+  _88 = cons(_6, _87);
+  _89 = List_var(_88);
+  _90 = cons(_89, NULL);
+  _91 = cons(_55, _90);
+  _92 = cons(_0, _91);
+  _93 = String_new("list");
 }
 
 static int List_truth(List);
@@ -148,35 +195,64 @@ static List _pattern_same(List value, Symbol symbol){
   )), NULL)));
 }
 
-Var Array_getindex(Array, int);
+static List _pattern_parts(List constant){
 
-int Var_is_list_binder(Var);
+  {
+    List _x2c_match_expr = _pattern_built(constant);
+    Var _x2c_match_values[2];
+  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
 
-int Array_contains(Array, Var);
+    switch (Var_symbol(car(_x2c_match_expr))) {
+      case 228262: ;
+  { List _x2c_match_cursor;
+  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936761846694ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var element = _x2c_match_values[0];
+  Var rest = _x2c_match_values[1];
+  return cons(element, cons(rest, NULL));
+  break; } } default: break;
 
-void _pattern_declare(Var, List, Array, Array);
-
-int Var_is_atom_binder(Var);
-
-int _pattern_element(Var, List, List, int, Array, Array, Array);
-
-static int _pattern_segment(List pattern, List constant, int depth, Array cursors, Array steps, Array binders){
-  List cursor = _pattern_read(Array_getindex(cursors, depth));
-  for(;  List_truth(pattern);  pattern = List_cdr(pattern)){
-    Var part = List_car(pattern);
-    if(Var_is_list_binder(part)){
-      if(List_truth(List_cdr(pattern)) || Array_contains(binders, part)) return 0;
-      if(! Var_equal(part, Symbol_var(54))) _pattern_declare(part, cursor, steps, binders);
-      return 1;
     }
-    if(Var_is_atom_binder(part)) Array_push(steps, List_var(cons(_47, cons(List_var(cursor), NULL))));
-    List value = _pattern_call(cursor, _48);
-    List literal = _pattern_call(constant, _48);
-    if(! _pattern_element(part, value, literal, depth, cursors, steps, binders)) return 0;
-    Array_push(steps, List_var(_pattern_assign(Array_getindex(cursors, depth), _pattern_call(cursor, _49))));
-    constant = _pattern_call(constant, _49);
   }
-  Array_push(steps, List_var(cons(_47, cons(List_var(cons(_0, cons(_1, cons(List_var(cons(_2, cons(_50, cons(List_var(cursor), NULL)))), NULL)))), NULL))));
-  return 1;
+return({
+    Var _x2c_literal_part_6 = List_var(_pattern_call(constant, _53));  Var _x2c_literal_part_7 = List_var(_pattern_call(constant, _54));  cons(_x2c_literal_part_6, cons(_x2c_literal_part_7, NULL));
+  }
+  );
+}
+
+static List _pattern_built(List expression){
+
+  {
+    List _x2c_match_expr = expression;
+    Var _x2c_match_values[1];
+  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
+
+    switch (Var_symbol(car(_x2c_match_expr))) {
+      case 377892: ;
+  static MatchCaptureSite _x2c_match_site_0;
+  if (x2c_match_site_try_capture(& _x2c_match_site_0, _x2c_match_expr, List_var(_67), &_x2c_match_capture)) {Var built = _x2c_match_values[0]; {
+    Var _x2c_match_value_2 = built; {
+      List built = Var_list(_x2c_match_value_2);  return _pattern_built(built);
+    }
+
+  }
+  break;
+}
+default: break;
+    }
+  }
+return expression;
+}
+
+static List _pattern_sublist(List literal){
+
+  {
+    List _x2c_match_expr = literal;
+    Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
+    switch (Var_symbol(car(_x2c_match_expr))) {
+      case 377892: ;  static MatchCaptureSite _x2c_match_site_1;  if (x2c_match_site_try_capture(& _x2c_match_site_1, _x2c_match_expr, List_var(_92), &_x2c_match_capture)) {Var list = _x2c_match_values[0];  return Var_list(list);  break;
+}
+default: break;
+    }
+  }
+return _pattern_call(literal, _93);
 }
 
