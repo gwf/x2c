@@ -86,7 +86,7 @@ forms after it.
 | --- | --- | --- |
 | Pattern value for meta code: `x2c_pattern_value(pattern)` | prototype (wave 3) | bound patterns hold literals as cache entries project meta code cannot read |
 | Pattern to test and binders | internal (Match runtime, `match_pattern_binders`) | one compiler for `match`, `catch`, macro recognition, typed captures |
-| Static pattern to nested `if` tests | prototype in match-component.x (wave 3) | shared form waits for the catch predicate as a second client |
+| Static pattern to nested `if` tests: `x2c_pattern_steps(pattern, subject)` returns `(STEPS BINDERS CURSORS)`, `x2c_pattern_nest(steps, inner)` makes the block | prototype in lib/meta-patterns.x (wave 5); see catch-predicate.md | clients: match-component.x (project meta, one query per arm) and the compiled-in catch selector |
 | Dynamic pattern to `MatchPlan` | public runtime (lib/match.x) | |
 
 ## 7. Diagnostics

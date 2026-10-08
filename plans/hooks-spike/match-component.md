@@ -33,6 +33,9 @@ built-in's.
 - No pattern helper went into lib/meta.x. The pattern compiler emits steps
   for a `match` arm in place; a catch predicate would need the same steps
   as one expression, so a shared form waits for that second client.
+  Wave 5 added it: the steps are now `x2c_pattern_steps` and
+  `x2c_pattern_nest` in lib/meta-patterns.x (catch-predicate.md), and this
+  component keeps only its arm and hook code.
 
 ## Lowering
 
