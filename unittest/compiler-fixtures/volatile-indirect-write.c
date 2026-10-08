@@ -12,6 +12,8 @@ Point;
 
 static void boom(void);
 
+static int _x2c_catch_select_0(List _x2c_catch_error_0, Var * _x2c_catch_captures_0, int * _x2c_catch_count_0);
+
 #include "error.h"
 
 
@@ -29,12 +31,6 @@ static void boom(void){
   }
 
 }
-
-int x2c_error_catch_site_pending(ErrorCatchSite *);
-
-static Var List_var(List);
-
-static Var Symbol_var(Symbol);
 
 ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
 
@@ -78,16 +74,11 @@ int main(void){
   * quiet = 9;
   {
     ExceptionFrame _x2c_exception_frame_0;
-    static MatchCaptureSite _x2c_macro_arms_0[1];
-    Var _x2c_macro_patterns_0[1];
     static ErrorCatchSite _x2c_macro_site_0 ={
-      _x2c_macro_arms_0, -1, 1, ERROR_CATCH_PENDING, - 1
+      NULL, -1, 1, ERROR_CATCH_STATIC, - 1, _x2c_catch_select_0
     }
     ;
-    if(x2c_error_catch_site_pending(& _x2c_macro_site_0)){
-      _x2c_macro_patterns_0[0] = List_var(cons(Symbol_var(1014822), cons(Symbol_var(54), NULL)));
-    }
-    volatile ErrorHandler _x2c_error_handler_0 = x2c_error_catch_site_push(& _x2c_exception_frame_0, & _x2c_macro_site_0, _x2c_macro_patterns_0);
+    volatile ErrorHandler _x2c_error_handler_0 = x2c_error_catch_site_push(& _x2c_exception_frame_0, & _x2c_macro_site_0, NULL);
     x2c_exception_push(& _x2c_exception_frame_0);
     if(! sigsetjmp(_x2c_exception_frame_0.env, 0)){
       direct = 5;
@@ -123,5 +114,24 @@ int main(void){
   }
   printf("%d %d %d %d %d %d %d %d\n", direct, through, slot, point.x, outside, later, twin, * mates);
   return 0;
+}
+
+static Var List_car(List);
+
+static Var Symbol_var(Symbol);
+
+static List List_cdr(List);
+
+static int _x2c_catch_select_0(List _x2c_catch_error_0, Var * _x2c_catch_captures_0, int * _x2c_catch_count_0){
+  List _x2c_cursor0_0 = _x2c_catch_error_0;
+  {
+    _x2c_cursor0_0 = _x2c_catch_error_0;
+    if(List_car(_x2c_cursor0_0).u64 ==(Symbol_var(1014822)).u64){
+      _x2c_cursor0_0 = List_cdr(_x2c_cursor0_0);
+      return 0;
+    }
+
+  }
+  return -1;
 }
 

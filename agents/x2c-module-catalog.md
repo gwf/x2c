@@ -9,7 +9,7 @@ not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
 - Compiler modules: 52
-- Runtime modules: 75
+- Runtime modules: 76
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
 ## Compiler modules
@@ -331,10 +331,10 @@ shipped `meta` code compiled into the compiler.
 
 Public functions:
 
-`x2c_expr_field`, `x2c_expr_cast`, `x2c_decl_make`, `x2c_param_make`,
-`x2c_type_members`, `_dedent_expand`, `_macros_location`, `_tag_decode_group`,
-`_tag_decode_groups`, `_tag_id_checks`, `linked_meta_targets`,
-`linked_meta_hashes`
+`x2c_pattern_steps`, `x2c_expr_field`, `x2c_expr_cast`, `x2c_decl_make`,
+`x2c_param_make`, `x2c_type_members`, `_dedent_expand`, `_macros_location`,
+`_tag_decode_group`, `_tag_decode_groups`, `_tag_id_checks`,
+`linked_meta_targets`, `linked_meta_hashes`
 
 ### [src/literals.x](../src/literals.x)
 
@@ -1230,6 +1230,14 @@ Public functions:
 `x2c_match_site_search_replace`, `x2c_match_try_capture`, `List.try_match`,
 `List.match`, `List.try_match_replace`, `List.match_replace`, `List.search`,
 `List.try_search`, `List.search_replace`, `x2c_match_initialize`
+
+### [lib/meta-patterns.x](../lib/meta-patterns.x)
+
+static patterns as tests a component writes.
+
+Public functions:
+
+`x2c_pattern_nest`
 
 ### [lib/meta.x](../lib/meta.x)
 

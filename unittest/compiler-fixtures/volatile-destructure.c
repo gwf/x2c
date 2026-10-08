@@ -12,6 +12,8 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
+static int _x2c_catch_select_0(List _x2c_catch_error_0, Var * _x2c_catch_captures_0, int * _x2c_catch_count_0);
+
 static Var int_var(int);
 
 List cons(Var, List);
@@ -37,8 +39,6 @@ Var List_getindex(List, int);
 
 
 
-
-int x2c_error_catch_site_pending(ErrorCatchSite *);
 
 ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
 
@@ -70,16 +70,11 @@ int main(void){
   second = List_getindex(_x2c_destructure_0, 1);
   {
     ExceptionFrame _x2c_exception_frame_0;
-    static MatchCaptureSite _x2c_macro_arms_0[1];
-    Var _x2c_macro_patterns_0[1];
     static ErrorCatchSite _x2c_macro_site_0 ={
-      _x2c_macro_arms_0, 0, 1, ERROR_CATCH_PENDING, - 1
+      NULL, 0, 1, ERROR_CATCH_STATIC, - 1, _x2c_catch_select_0
     }
     ;
-    if(x2c_error_catch_site_pending(& _x2c_macro_site_0)){
-
-    }
-    volatile ErrorHandler _x2c_error_handler_0 = x2c_error_catch_site_push(& _x2c_exception_frame_0, & _x2c_macro_site_0, _x2c_macro_patterns_0);
+    volatile ErrorHandler _x2c_error_handler_0 = x2c_error_catch_site_push(& _x2c_exception_frame_0, & _x2c_macro_site_0, NULL);
     x2c_exception_push(& _x2c_exception_frame_0);
     if(! sigsetjmp(_x2c_exception_frame_0.env, 0)){
       second = int_var(3);
@@ -111,5 +106,9 @@ int main(void){
     x2c_exception_leave(& _x2c_exception_frame_0);
   }
   return Var_int(first) == 1 && Var_int(second) == 3 ? 0 : 1;
+}
+
+static int _x2c_catch_select_0(List _x2c_catch_error_0, Var * _x2c_catch_captures_0, int * _x2c_catch_count_0){
+  return 0;
 }
 

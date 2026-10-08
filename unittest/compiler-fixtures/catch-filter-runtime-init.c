@@ -19,6 +19,8 @@ static Symbol _observe_relabel(List errors, Var data);
 
 static void _relabel_nested_pattern(void);
 
+static int _x2c_catch_select_0(List _x2c_catch_error_0, Var * _x2c_catch_captures_0, int * _x2c_catch_count_0);
+
 #include "exception.h"
 
 
@@ -55,19 +57,17 @@ static Symbol _observe_relabel(List errors, Var data){
 
 
 
-int x2c_error_catch_site_pending(ErrorCatchSite *);
-
-static Var List_var(List);
-
-static Var String_var(String);
-
 ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
 
 void x2c_exception_push(ExceptionFrame *);
 
 List cons(Var, List);
 
+static Var String_var(String);
+
 String String_new(const char *);
+
+static Var List_var(List);
 
 void x2c_exception_landed(ExceptionFrame *);
 
@@ -86,16 +86,11 @@ void x2c_exception_leave(ExceptionFrame *);
 static void _relabel_nested_pattern(void){
   {
     ExceptionFrame _x2c_exception_frame_0;
-    static MatchCaptureSite _x2c_macro_arms_0[1];
-    Var _x2c_macro_patterns_0[1];
     static ErrorCatchSite _x2c_macro_site_0 ={
-      _x2c_macro_arms_0, -1, 1, ERROR_CATCH_PENDING, - 1
+      NULL, -1, 1, ERROR_CATCH_STATIC, - 1, _x2c_catch_select_0
     }
     ;
-    if(x2c_error_catch_site_pending(& _x2c_macro_site_0)){
-      _x2c_macro_patterns_0[0] = List_var(cons(Symbol_var(33820664566756), cons(List_var(cons(Symbol_var(280234584), cons(List_var(cons(Symbol_var(951296328), cons(String_var(_0), NULL))), NULL))), NULL)));
-    }
-    volatile ErrorHandler _x2c_error_handler_0 = x2c_error_catch_site_push(& _x2c_exception_frame_0, & _x2c_macro_site_0, _x2c_macro_patterns_0);
+    volatile ErrorHandler _x2c_error_handler_0 = x2c_error_catch_site_push(& _x2c_exception_frame_0, & _x2c_macro_site_0, NULL);
     x2c_exception_push(& _x2c_exception_frame_0);
     if(! sigsetjmp(_x2c_exception_frame_0.env, 0)){
       List detail = cons(Symbol_var(951296328), cons(String_var(String_new("marker")), NULL));
@@ -151,5 +146,61 @@ int main(void){
   if(old_seen != 0 || new_seen != 1) return 1;
   puts("catch patterns initialize at registration");
   return 0;
+}
+
+static Var List_car(List);
+
+static List List_cdr(List);
+
+static int Var_is_row(Var, unsigned, unsigned long, unsigned long);
+
+int Var_equal(Var, Var);
+
+static int List_truth(List);
+
+static int _x2c_catch_select_0(List _x2c_catch_error_0, Var * _x2c_catch_captures_0, int * _x2c_catch_count_0){
+  List _x2c_cursor0_0 = _x2c_catch_error_0;
+  List _x2c_cursor1_0 = _x2c_catch_error_0;
+  List _x2c_cursor2_0 = _x2c_catch_error_0;
+  {
+    _x2c_cursor0_0 = _x2c_catch_error_0;
+    if(List_car(_x2c_cursor0_0).u64 ==(Symbol_var(33820664566756)).u64){
+      _x2c_cursor0_0 = List_cdr(_x2c_cursor0_0);
+      if(Var_is_row(List_car(_x2c_cursor0_0), 9, 7, 4)){
+        _x2c_cursor1_0 = Var_list(List_car(_x2c_cursor0_0));
+        if(List_car(_x2c_cursor1_0).u64 ==(Symbol_var(280234584)).u64){
+          _x2c_cursor1_0 = List_cdr(_x2c_cursor1_0);
+          if(Var_is_row(List_car(_x2c_cursor1_0), 9, 7, 4)){
+            _x2c_cursor2_0 = Var_list(List_car(_x2c_cursor1_0));
+            if(List_car(_x2c_cursor2_0).u64 ==(Symbol_var(951296328)).u64){
+              _x2c_cursor2_0 = List_cdr(_x2c_cursor2_0);
+              if(Var_equal(List_car(_x2c_cursor2_0), String_var(_0))){
+                _x2c_cursor2_0 = List_cdr(_x2c_cursor2_0);
+                if(! List_truth(_x2c_cursor2_0)){
+                  _x2c_cursor1_0 = List_cdr(_x2c_cursor1_0);
+                  if(! List_truth(_x2c_cursor1_0)){
+                    _x2c_cursor0_0 = List_cdr(_x2c_cursor0_0);
+                    if(! List_truth(_x2c_cursor0_0)){
+                      return 0;
+                    }
+
+                  }
+
+                }
+
+              }
+
+            }
+
+          }
+
+        }
+
+      }
+
+    }
+
+  }
+  return -1;
 }
 
