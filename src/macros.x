@@ -2368,7 +2368,9 @@ void Compiler.install_compile_time_effects(Compiler c, List rows) {
       c.kw_aliases[alias] = %(imported-macro $definition);
     }
     case %(compile-time rewrite ?point ?kind ?name ?shape ?holes):
-      c._register_rewrite(point, kind, name, shape, holes);
+      c._register_rewrite(
+        point, c.thaw_declaration_syntax(kind), name,
+        c.thaw_declaration_syntax(shape), c.thaw_declaration_syntax(holes));
     case %(compile-time lisp ?form (source ?path ?site)): {
       Token token = c.thaw_declaration_syntax(site);
       String file = home_absolute_path(path), text = NULL;
@@ -4317,7 +4319,9 @@ static Map Compiler._code_effects(Compiler c, Var effects) {
       case %(rewrite ?point ?kind ?name ?shape ?holes): {
         c._register_rewrite(point, kind, name, shape, holes);
         c.record_compile_time_effect(
-          %(compile-time rewrite $point $kind $name $shape $holes), c.token);
+          %(compile-time rewrite $point ${c.freeze_declaration_syntax(kind)}
+            $name ${c.freeze_declaration_syntax(shape)}
+            ${c.freeze_declaration_syntax(holes)}), c.token);
       }
       case %(new-name ?token ?(String role)):
         replacements[token] = c.sym.introduce(c.fresh_name(role));
