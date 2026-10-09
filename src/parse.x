@@ -3558,10 +3558,10 @@ Var source_clause(Symbol kind) {
   return Token.var(clause);
 }
 
-// The clause a source clause names, or 0 for any other value.
+// Any value other than a table entry is constructed syntax, kind 0.
 static Symbol _source_clause_kind(Var value) {
   if (value is not <token>) return 0;
-  Token clause = value.token();
+  Token clause = value;
   Token end =
     source_clauses + sizeof(source_clauses) / sizeof(*source_clauses);
   return clause >= source_clauses && clause < end ? clause.type : 0;
@@ -3575,8 +3575,8 @@ List Compiler.bind_source_statement(Compiler c) {
   c.next();
   switch (keyword) {
     case <if>:
-      return c._bind_if_else(source_clause(<test>),
-        source_clause(<then>), source_clause(<else>));
+      return c._bind_if_else(
+        source_clause(<test>), source_clause(<then>), source_clause(<else>));
     case <while>:
       return c._bind_while(source_clause(<test>), source_clause(<body>));
     case <do>:
@@ -3584,11 +3584,13 @@ List Compiler.bind_source_statement(Compiler c) {
     case <match>:
       return c._bind_match(source_clause(<test>), source_clause(<arms>));
     case <try>:
-      return c._bind_try(source_clause(<try>), source_clause(<catches>),
+      return c._bind_try(
+        source_clause(<try>), source_clause(<catches>),
         source_clause(<finally>));
   }
-  return c._bind_for(source_clause(<init>), source_clause(<cond>),
-    source_clause(<next>), source_clause(<body>));
+  return c._bind_for(
+    source_clause(<init>), source_clause(<cond>), source_clause(<next>),
+    source_clause(<body>));
 }
 
 static List Compiler._bind_do(Compiler c, Var body, Var condition) {
@@ -3744,7 +3746,7 @@ static int _declares_binders(List body, List bindings) {
   return 0;
 }
 
-// A source `try` parses its parts in the order they bind.
+// Source clauses parse here, so body, arms, and finalizer go in token order.
 static List Compiler._bind_try(
   Compiler c, Var body, Var catches, Var cleanup) {
   List bound = c._bind_statement(body);
