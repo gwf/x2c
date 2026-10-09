@@ -45,8 +45,9 @@ execution.
 ### Current work
 
 - [How small the compiler kernel can get](compiler-kernel-minimal.md):
-  2026-10-09 analysis of this foundation branch; the fixed and per-use rule
-  costs measured, six architectural changes, and a migration catalog.
+  2026-10-09 analysis against the foundation branch. Two primitives,
+  recognition through rewrite families and contribution through placement
+  and ancestry, the measured driver costs, and a migration catalog.
   Reference input to the foundation plan; Gary selects what to execute.
 - [Language component foundation](language-components-foundation.md): local
   recovery on `codex/language-components-foundation`; collection mutation
