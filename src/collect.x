@@ -88,6 +88,9 @@ static Map process_cache = NULL, static Scope process_cache_scope = NULL;
    for its meta calls. */
 static Map provisional_entries = NULL;
 
+/* Each entry's declared function names; see `_declared_functions`. */
+static Map declared_functions = NULL;
+
 static Map _process_cache(void) {
   if (process_cache != NULL) return process_cache;
   $scope(&process_cache_scope) {
@@ -102,6 +105,7 @@ static void _cache_shutdown(void) {
   process_cache_scope = NULL;
   process_cache = NULL;
   provisional_entries = NULL;
+  declared_functions = NULL;
 }
 
 static Map _cache_map(void) {
@@ -758,14 +762,27 @@ static void Compiler._add_function_declarations(
   if (path == _canonical_path(c.filename)) return;
   Var entry = _process_cache()[path];
   if (entry is not <list>) return;
-  foreach (Var part, entry.list().car()) {
-    if (part is not <map>) continue;
-    foreach (Var (key, value), part.map())
-      match (key) case %(?(String name))
-        if (!(name in c.meta_comptime) && !(name in c.project_meta) &&
-            value is <list> &&
-            value.list().type().is_function()):
-          available[%(native $name)] = 1;
+  foreach (String name, _declared_functions(entry))
+    if (!(name in c.meta_comptime) && !(name in c.project_meta))
+      available[%(native $name)] = 1;
+}
+
+/* The function names an entry's rows declare, read once per entry. */
+static Array _declared_functions(List entry) {
+  if (!declared_functions) declared_functions = _cache_map();
+  Var cached = declared_functions[entry];
+  if (cached is <array>) return cached;
+  $scope(&process_cache_scope) {
+    Array names = [];
+    foreach (Var part, entry.car()) {
+      if (part is not <map>) continue;
+      foreach (Var (key, value), part.map())
+        match (key) case %(?(String name))
+          if (value is <list> && value.list().type().is_function()):
+            names.push(name);
+    }
+    declared_functions[entry] = names;
+    return names;
   }
 }
 
