@@ -13,8 +13,6 @@
 #include "transform.h"
 List x2c_param_make(List type, Var name);
 
-List builtin_try_cleanup_placement(Var cleanup);
-
 Map builtin_targets(void);
 
 

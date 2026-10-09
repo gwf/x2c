@@ -3381,7 +3381,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_5(void){
   _2961 = String_new("23ff0783ec30f4ec");
   _2962 = String_var(_2961);
   _2963 = cons(_2962, _2152);
-  _2964 = String_new("46c6a376");
+  _2964 = String_new("0d8eb48c");
   _2965 = String_var(_2964);
   _2966 = String_new("24d203b3");
   _2967 = String_var(_2966);
@@ -7113,7 +7113,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_13(void){
   _6669 = cons(_532, _6668);
   _6670 = String_new("src/collect.x");
   _6671 = String_var(_6670);
-  _6672 = String_new("946ea378");
+  _6672 = String_new("b487d000");
   _6673 = String_var(_6672);
   _6674 = cons(_6673, NULL);
   _6675 = cons(_6671, _6674);
@@ -7265,7 +7265,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_13(void){
   _6821 = cons(_532, _6820);
   _6822 = String_new("src/builtins.x");
   _6823 = String_var(_6822);
-  _6824 = String_new("bf4e9fb1");
+  _6824 = String_new("f8015fa1");
   _6825 = String_var(_6824);
   _6826 = String_new("cwd:./lisp.x");
   _6827 = String_var(_6826);
@@ -7533,7 +7533,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_13(void){
   _7089 = List_var(_7088);
   _7090 = String_new("src/cleanup.x");
   _7091 = String_var(_7090);
-  _7092 = String_new("f3a38920");
+  _7092 = String_new("85490179");
   _7093 = String_var(_7092);
   _7094 = cons(_7093, NULL);
   _7095 = cons(_7091, _7094);
