@@ -427,12 +427,23 @@ static Var _meta_call_value(Compiler c, List expression, Token site) {
 }
 
 /* Applies the session's `name` to `arguments`, recorded as the call a
-   failure renders. */
+   failure renders. A compiled function the compiler links is called
+   through its Func. */
 static Var _meta_named_value(
   Compiler c, String name, List arguments, Token site) {
   Var function = c._meta_function(name, site);
   meta_call_form = cons(Atom.intern(name), arguments);
+  if (function === _linked_module()[name])
+    return _apply_linked(function.pointer(), arguments);
   return c._meta_apply(function, arguments);
+}
+
+static Var _apply_linked(Func function, List arguments) {
+  unsigned count = arguments.len(), index = 0;
+  FuncArg *argv = Scope.calloc(count + 1, sizeof(FuncArg));
+  defer Scope.free(argv);
+  foreach (Var argument, arguments) argv[index++] = FuncArg.value(argument);
+  return function.apply(count, argv);
 }
 
 /* Each argument evaluates as the type its parameter declares wants. */
