@@ -6242,7 +6242,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_11(void){
   _5847 = List_var(_5846);
   _5848 = String_new("src/parse.x");
   _5849 = String_var(_5848);
-  _5850 = String_new("c6c08009");
+  _5850 = String_new("f62f02c4");
   _5851 = String_var(_5850);
   _5852 = cons(_5851, NULL);
   _5853 = cons(_5849, _5852);
@@ -6274,7 +6274,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_11(void){
   _5879 = List_var(_5878);
   _5880 = String_new("src/statements.x");
   _5881 = String_var(_5880);
-  _5882 = String_new("02ff0fc6");
+  _5882 = String_new("af355d72");
   _5883 = String_var(_5882);
   _5884 = cons(_5883, NULL);
   _5885 = cons(_5881, _5884);

@@ -17,6 +17,8 @@ List Compiler_parse_statement(Compiler c);
 
 List Compiler_with_binding(Compiler c);
 
+List Compiler_parse_source_clause(Compiler c, Symbol kind);
+
 List Compiler_finish_return_statement(Compiler c, List expr);
 
 List Compiler_parse_match_row_argument(Compiler c);

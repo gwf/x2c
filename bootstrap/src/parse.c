@@ -295,6 +295,8 @@ static List Compiler__resolve(Compiler c, List expr);
 
 static List Compiler__bind_statement(Compiler c, Var stmt);
 
+static List Compiler__bind_clause(Compiler c, Var expr);
+
 static List Compiler__bind_invocation(Compiler c, Var definition, Var arguments, Var invocation, AstPos context, int pending);
 
 static List Compiler__anchor(Compiler c, Var origin, List bound);
@@ -351,6 +353,39 @@ static List Compiler__bind_targets(Compiler c, Var base, List targets, Var sourc
 
 static List Compiler__bind_typed_targets(Compiler c, List parameters, Var source);
 
+static struct Token source_clauses[] ={
+  {
+    .type = 1322216
+  }
+  , {
+    .type = 1327452
+  }
+  , {
+    .type = 353482
+  }
+  , {
+    .type = 162098
+  }
+  , {
+    .type = 286
+  }
+  , {
+    .type = 619112
+  }
+  , {
+    .type = 228232
+  }
+  , {
+    .type = 929320
+  }
+
+}
+;
+
+static Var _source_clause(Symbol kind);
+
+static Symbol _source_clause_kind(Var value);
+
 static List Compiler__bind_do(Compiler c, Var body, Var condition);
 
 static List Compiler__bind_while(Compiler c, Var condition, Var body);
@@ -364,6 +399,8 @@ static List Compiler__bind_if_else(Compiler c, Var condition, Var ontrue, Var on
 static List Compiler__bind_branch(Compiler c, Var arm, List binding, int present);
 
 static List Compiler__bind_for(Compiler c, Var init, Var condition, Var increment, Var body);
+
+static Var Compiler__bind_header(Compiler c, Var clause);
 
 static List Compiler__bind_raise(Compiler c, Var code, List details);
 
@@ -5608,7 +5645,11 @@ static List Compiler__resolve(Compiler c, List expr){
 }
 
 static List Compiler__bind_statement(Compiler c, Var stmt){
-  return Compiler_bind_syntax(c, stmt, AST_STATEMENT, List_type(c -> return_type));
+  Symbol kind = _source_clause_kind(stmt);  if(kind) return Compiler_parse_source_clause(c, kind);  return Compiler_bind_syntax(c, stmt, AST_STATEMENT, List_type(c -> return_type));
+}
+
+static List Compiler__bind_clause(Compiler c, Var expr){
+  Symbol kind = _source_clause_kind(expr);  if(kind) return Compiler_parse_source_clause(c, kind);  return Compiler__resolve(c, Var_list(expr));
 }
 
 SymTxn Compiler_begin_semantic_transaction(Compiler);
@@ -6239,16 +6280,31 @@ return({
 );
 }
 
+static Var _source_clause(Symbol kind){
+  Token clause = source_clauses;  while(clause -> type != kind) clause ++;  return Token_var(clause);
+}
+
+static Symbol _source_clause_kind(Var value){
+  if(! Var_is_row(value, 11, 7, 5)) return 0;  Token clause = Var_token(value);  Token end = source_clauses + sizeof(source_clauses) / sizeof(* source_clauses);  return clause >= source_clauses && clause < end ? clause -> type : 0;
+}
+
+List Compiler_bind_source_statement(Compiler c){
+  if(! _init_guard_) _file_init_();  Symbol keyword = Compiler_peek(c, 0);  Compiler_next(c);  switch(keyword){
+    case 588 : return Compiler__bind_if_else(c, _source_clause(1322216), _source_clause(1327452), _source_clause(353482));  case 48777994 : return Compiler__bind_while(c, _source_clause(1322216), _source_clause(162098));  case 286 : return Compiler__bind_do(c, _source_clause(286), _source_clause(1322216));
+  }
+  return Compiler__bind_for(c, _source_clause(619112), _source_clause(228232), _source_clause(929320), _source_clause(162098));
+}
+
 static List Compiler__bind_do(Compiler c, Var body, Var condition){
-  return({
-    Var _x2c_literal_part_103 = List_var(Compiler__bind_statement(c, body));  Var _x2c_literal_part_104 = List_var(Compiler__resolve(c, Var_list(condition)));  cons(_1005, cons(_x2c_literal_part_103, cons(_x2c_literal_part_104, NULL)));
+  List bound = Compiler__bind_statement(c, body);  return({
+    Var _x2c_literal_part_103 = List_var(bound);  Var _x2c_literal_part_104 = List_var(Compiler__bind_clause(c, condition));  cons(_1005, cons(_x2c_literal_part_103, cons(_x2c_literal_part_104, NULL)));
   }
   );
 }
 
 static List Compiler__bind_while(Compiler c, Var condition, Var body){
-  return({
-    Var _x2c_literal_part_105 = List_var(Compiler__resolve(c, Var_list(condition)));  Var _x2c_literal_part_106 = List_var(Compiler__bind_statement(c, body));  cons(_930, cons(_x2c_literal_part_105, cons(_x2c_literal_part_106, NULL)));
+  List test = Compiler__bind_clause(c, condition);  return({
+    Var _x2c_literal_part_105 = List_var(test);  Var _x2c_literal_part_106 = List_var(Compiler__bind_statement(c, body));  cons(_930, cons(_x2c_literal_part_105, cons(_x2c_literal_part_106, NULL)));
   }
   );
 }
@@ -6261,11 +6317,11 @@ static List Compiler__bind_switch(Compiler c, Var expr, Var body){
 }
 
 static List Compiler__bind_if(Compiler c, Var condition, Var ontrue){
-  List test = Compiler__resolve(c, Var_list(condition));  int true_is_present = 1;  List binding = Compiler_optional_reference_test(c, test, &(true_is_present));  List yes = Compiler__bind_branch(c, ontrue, binding, true_is_present);  Compiler_settle_reference(c, binding, true_is_present, yes, NULL);  return cons(_690, cons(List_var(test), cons(List_var(yes), NULL)));
+  List test = Compiler__bind_clause(c, condition);  int true_is_present = 1;  List binding = Compiler_optional_reference_test(c, test, &(true_is_present));  List yes = Compiler__bind_branch(c, ontrue, binding, true_is_present);  Compiler_settle_reference(c, binding, true_is_present, yes, NULL);  return cons(_690, cons(List_var(test), cons(List_var(yes), NULL)));
 }
 
 static List Compiler__bind_if_else(Compiler c, Var condition, Var ontrue, Var onfalse){
-  List test = Compiler__resolve(c, Var_list(condition));  int true_is_present = 1;  List binding = Compiler_optional_reference_test(c, test, &(true_is_present));  List yes = Compiler__bind_branch(c, ontrue, binding, true_is_present);  List no = Compiler__bind_branch(c, onfalse, binding, ! true_is_present);  Compiler_settle_reference(c, binding, true_is_present, yes, no);  return cons(_690, cons(List_var(test), cons(List_var(yes), cons(List_var(no), NULL))));
+  List test = Compiler__bind_clause(c, condition);  int true_is_present = 1;  List binding = Compiler_optional_reference_test(c, test, &(true_is_present));  List yes = Compiler__bind_branch(c, ontrue, binding, true_is_present);  List no = Compiler__bind_branch(c, onfalse, binding, ! true_is_present);  Compiler_settle_reference(c, binding, true_is_present, yes, no);  return List_truth(no) ? cons(_690, cons(List_var(test), cons(List_var(yes), cons(List_var(no), NULL)))) : cons(_690, cons(List_var(test), cons(List_var(yes), NULL)));
 }
 
 static List Compiler__bind_branch(Compiler c, Var arm, List binding, int present){
@@ -6281,10 +6337,7 @@ static List Compiler__bind_for(Compiler c, Var init, Var condition, Var incremen
       .fn = _x2c_defer_cleanup_27, .env = & _x2c_macro_environment_27
     }
     ;  x2c_cleanup_push(& _x2c_defer_record_27); {
-      if(Var_is_row(init, 9, 7, 4)){
-        List node = Var_list(init);  init = List_var(Var_equal(List_car(node), Symbol_var(272600)) ? Compiler_bind_syntax(c, List_var(node), AST_BLOCK, List_type(c -> return_type)) : Compiler__resolve(c, node));
-      }
-      if(Var_is_row(condition, 9, 7, 4)) condition = List_var(Compiler__resolve(c, Var_list(condition)));  if(Var_is_row(increment, 9, 7, 4)) increment = List_var(Compiler__resolve(c, Var_list(increment))); {
+      init = Compiler__bind_header(c, init);  condition = Compiler__bind_header(c, condition);  increment = Compiler__bind_header(c, increment); {
         List _x2c_return_value_21 =({
           Var _x2c_literal_part_109 = init;  Var _x2c_literal_part_110 = condition;  Var _x2c_literal_part_111 = increment;  Var _x2c_literal_part_112 = List_var(Compiler__bind_statement(c, body));  cons(_1120, cons(_x2c_literal_part_109, cons(_x2c_literal_part_110, cons(_x2c_literal_part_111, cons(_x2c_literal_part_112, NULL)))));
         }
@@ -6298,6 +6351,10 @@ static List Compiler__bind_for(Compiler c, Var init, Var condition, Var incremen
     x2c_cleanup_leave(& _x2c_defer_record_27);
   }
 
+}
+
+static Var Compiler__bind_header(Compiler c, Var clause){
+  Symbol kind = _source_clause_kind(clause);  if(kind) return List_var(Compiler_parse_source_clause(c, kind));  return Var_is_row(clause, 9, 7, 4) ? List_var(Compiler__resolve(c, Var_list(clause))) : clause;
 }
 
 static List Compiler__bind_raise(Compiler c, Var code, List details){

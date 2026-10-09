@@ -14,6 +14,7 @@ X2c declarations, parsed from source or constructed.
 | --- | --- |
 | [`Compiler.bind_callable_body`](#Compiler.bind_callable_body) | Binds a callable's outer block in its active parameter scope. |
 | [`Compiler.bind_parameter`](#Compiler.bind_parameter) | Binds one constructed parameter in the current scope, including nested function modifiers and reference parameter facts. |
+| [`Compiler.bind_source_statement`](#Compiler.bind_source_statement) | Binds the source `if`, `while`, `do`, or `for` at the cursor through the same binders as constructed syntax. |
 | [`Compiler.bind_syntax`](#Compiler.bind_syntax) | Binds parser-shaped `syntax` at `context` into current compiler state. |
 | [`Compiler.bind_template_local`](#Compiler.bind_template_local) | Installs a definition-local template binding or typedef provisionally. |
 | [`Compiler.check_reference_placement`](#Compiler.check_reference_placement) | Rejects transparent references in object and function-result types. |
@@ -69,7 +70,7 @@ X2c declarations, parsed from source or constructed.
 Binds a callable's outer block in its active parameter scope. Ordinary
 constructed blocks open their own scope before using this operation.
 
-Source: `src/parse.x:3695`
+Source: `src/parse.x:3758`
 
 <a id="Compiler.bind_parameter"></a>
 #### Compiler.bind_parameter
@@ -80,6 +81,16 @@ Binds one constructed parameter in the current scope, including nested
 function modifiers and reference parameter facts.
 
 Source: `src/parse.x:2386`
+
+<a id="Compiler.bind_source_statement"></a>
+#### Compiler.bind_source_statement
+
+`List Compiler.bind_source_statement(Compiler c)`
+
+Binds the source `if`, `while`, `do`, or `for` at the cursor through the
+same binders as constructed syntax.
+
+Source: `src/parse.x:3557`
 
 <a id="Compiler.bind_syntax"></a>
 #### Compiler.bind_syntax
@@ -184,7 +195,7 @@ Constructs a foreign alias from one direct function declaration and target.
 typed, a function. Storage is limited to `static` or `inline`, when
 present, and variadic parameters are rejected.
 
-Source: `src/parse.x:3839`
+Source: `src/parse.x:3902`
 
 <a id="Compiler.finish_initializers"></a>
 #### Compiler.finish_initializers

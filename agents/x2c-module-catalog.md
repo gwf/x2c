@@ -536,7 +536,8 @@ Public functions:
 `Compiler.enter`, `Compiler.enclosing`, `Compiler.place_after`,
 `Compiler.close_placements`, `Compiler.leave_item`,
 `Compiler.finish_initializers`, `Compiler.bind_syntax`,
-`Compiler.bind_callable_body`, `Compiler.finish_foreign_alias`
+`Compiler.bind_source_statement`, `Compiler.bind_callable_body`,
+`Compiler.finish_foreign_alias`
 
 ### [src/preprocess.x](../src/preprocess.x)
 
@@ -630,11 +631,11 @@ x2c statement parsing.
 Public functions:
 
 `Compiler.parse_statement`, `Compiler.with_binding`,
-`Compiler.finish_return_statement`, `Compiler.parse_match_row_argument`,
-`Compiler.begin_match_arm`, `Compiler.begin_catch_arm`,
-`Compiler.parse_governed`, `Compiler.parse_block_item`,
-`Compiler.parse_compound_statement`, `Compiler.parse_block_items`,
-`Compiler.parse_callable_body`
+`Compiler.parse_source_clause`, `Compiler.finish_return_statement`,
+`Compiler.parse_match_row_argument`, `Compiler.begin_match_arm`,
+`Compiler.begin_catch_arm`, `Compiler.parse_governed`,
+`Compiler.parse_block_item`, `Compiler.parse_compound_statement`,
+`Compiler.parse_block_items`, `Compiler.parse_callable_body`
 
 ### [src/symbols.x](../src/symbols.x)
 
