@@ -38,12 +38,6 @@
 
 /* transform diagnostics. */
 
-static macro Stmt $report.parse.init_incomplete(Expr $c) =>
-  $c.report_error(
-    <parse>,
-    "managed initializer requires a complete block-local initializer",
-    NULL, NULL);
-
 static macro Stmt $report.xform.index_unsupported(Expr $c, Expr $type) =>
   $c.report_error(
     <xform>, %"type ${$type} does not support bracket indexing",
@@ -193,9 +187,6 @@ Ast Compiler.normalize(Compiler c, Ast ast) => c._step(ast);
 
 static Ast Compiler._step(Compiler c, Ast ast) {
   if (!ast) return NULL;
-  match (ast)
-    case %(managed-init ?):
-      $report.parse.init_incomplete(c);
   Var head = ast.car();
   if (head is not <symbol>) return c._default_node(ast);
   match (ast) {

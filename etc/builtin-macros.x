@@ -49,8 +49,12 @@ macro Decorator $lock(Stmt $body, Expr $mutex) {
   }
 }
 
-macro Expression $auto(Expr $value) =>
-  $(list 'managed-init $value);
+macro Expression $auto(Expr $value) => $(auto.expand $value);
+
+macro Stmt $x2c.auto.release(Decl $local, Expr $binding) {
+  @(auto.release $local)
+  defer $binding.cleanup();
+}
 
 macro Decorator $class(NamedType $definition) {
   @(class.expand $definition)

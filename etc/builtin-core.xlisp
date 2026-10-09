@@ -3,6 +3,8 @@
 
 (def scope.expand builtin_scope_expand)
 (def foreach.expand builtin_foreach_expand)
+(def auto.expand builtin_auto_expand)
+(def auto.release builtin_auto_release)
 
 (def class.expand builtin_class_expand)
 (def class.defaults builtin_class_defaults)

@@ -214,17 +214,6 @@ static macro Stmt $report.parse.lifecycle_signature(
   }
 }
 
-static macro Stmt $report.protocols.managed_cleanup(
-  Expr $c, Expr $origin, Expr $type) =>
-  $c.report_error(
-    <protocol>, "managed initializer requires Cleanup participation",
-    $origin, %("type: ${$type.repr()}"));
-
-static macro Stmt $report.parse.managed_storage(Expr $c, Expr $origin) =>
-  $c.report_error(
-    <parse>, "managed initializer requires automatic local storage",
-    $origin, NULL);
-
 static macro Stmt $report.parse.init_incomplete(Expr $c, Expr $origin) =>
   $c.report_error(
     <parse>,
@@ -2784,8 +2773,8 @@ List Compiler.leave_item(Compiler c) {
 */
 List Compiler.finish_initializers(
   Compiler c, List declaration, Token origin) {
-  if (c.macro_holes || (!c.placements.len() && !_has_managed(declaration) &&
-      !c.has_rewrites(<decl>, <init>)))
+  if (c.macro_holes ||
+      (!c.placements.len() && !c.has_rewrites(<decl>, <init>)))
     return declaration;
   Array output = [];
   c._append_managed(declaration, output, origin);
@@ -2842,14 +2831,7 @@ static List Compiler._after_declarator(
   Compiler c, Var base, List &declarator, Token origin) {
   match (declarator)
     case %(op = (bind ?name ?mods) ?value): {
-      List result = _managed_initializer(value);
-      if (result) {
-        List modifiers = mods;
-        Type type = modifiers.append(base).type().declared();
-        c._require_cleanup(base, type, origin);
-        declarator = %(op = (bind $name $mods) $result);
-        return c._cleanup_statement(type, name);
-      }
+      List result = NULL;
       List placed = c._take_placed(name, value, result, origin);
       if (placed) {
         declarator = %(op = (bind $name $mods) $result);
@@ -2886,46 +2868,6 @@ static List Compiler._take_placed(
   foreach (Var item, code)
     _push_items(items, c.bind_syntax(item, AST_BLOCK, c.return_type));
   return %(seq @{items.list_free()});
-}
-
-static int _has_managed(List declaration) {
-  match (declaration) {
-    case %(seq *rows):
-      foreach (List row, rows)
-        if (_has_managed(row)) return 1;
-    case %(declare ? (bindings *declarators)):
-      foreach (List declarator, declarators)
-        match (declarator)
-          case %(op = (bind ? ?) ?value):
-            if (_managed_initializer(value)) return 1;
-  }
-  return 0;
-}
-
-static List _managed_initializer(List syntax) {
-  match (syntax) {
-    case %(managed-init ?value): return value;
-    case %(expr ? ?inner):
-      return _managed_initializer(inner);
-    case $source_content_pattern($grouped, %(?inner)):
-      return _managed_initializer(inner);
-  }
-  return NULL;
-}
-
-static void Compiler._require_cleanup(
-  Compiler c, Var base, Type type, Token origin) {
-  match (base)
-    case %(* (!or static extern threaded) *):
-      $report.parse.managed_storage(c, origin);
-  if (!c.protocol_members_for(type, %("Cleanup")))
-    $report.protocols.managed_cleanup(c, origin, type);
-}
-
-static List Compiler._cleanup_statement(Compiler c, Type type, List binding) {
-  List receiver = $!($type){ $binding };
-  return c.bind_syntax(
-    $!{ defer $receiver.cleanup(); }, AST_STATEMENT, c.return_type);
 }
 
 /* Parentheses and typed expression shells preserve the position of a
@@ -3077,8 +3019,6 @@ static List Compiler._bind_form(
       return c._bind_assert(test, message);
     case %(falias ?decl ?native_syntax) if (unit):
       return c._bind_alias(decl, native_syntax);
-    case %(!set ?initializer (managed-init ?)) if (context == AST_EXPRESSION):
-      return c._resolve(%(expr () $initializer));
     case %(!set ?expr (expr *)) if (context == AST_EXPRESSION):
       return c._resolve(expr);
     case %((!set ?tag (!or declare decl typedef))

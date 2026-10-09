@@ -1055,7 +1055,6 @@ static List Resolve._content(Resolve &r, List content) {
   }
   match (r.input) case $called(?callee, *args): return r._call(callee, args);
   match (content) {
-    case %(managed-init ?value): return r._managed_init(value);
     case $source_identifier_content(%(?value)):
       return r.c._resolve_identifier(value, r.type, r.origin);
     case %(!set ?binding (binding ? ?)): return r._binding(binding);
@@ -3051,12 +3050,6 @@ static List Resolve._destructure(Resolve &r, List targets, List source) {
   source = r.c.resolve_expression(source, r.origin);
   return %(expr ${source.cadr()}
            (dstrasgn (targets @{resolved.list_free()}) $source));
-}
-
-static List Resolve._managed_init(Resolve &r, List initializer) {
-  initializer = r.c.resolve_expression(initializer, r.origin);
-  Type type = initializer.cadr();
-  return %(expr $type (managed-init $initializer));
 }
 
 static List Resolve._generic(Resolve &r, List control, List associations) {

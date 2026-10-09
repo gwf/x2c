@@ -33,34 +33,40 @@ static List _scope_expand(List body, List destinations) {
 
 // $auto
 
-/* `$auto(value)` stands for `value` as the complete initializer of a block
-   declarator, which the declaration finisher verifies before it binds the
-   release placed after the declarator. The release checks the declared
-   storage and Cleanup participation and defers the binding's cleanup. */
+/* `$auto(value)` stands for `value` as the complete initializer of a
+   declarator in a function, which the declaration verifies before it binds
+   the release placed after the declarator. */
 static List _auto_expand(List value) {
   Code local = x2c_enclosing(<declarator>);
-  Code item = x2c_enclosing(<statement>);
-  if (!local || !item)
-    x2c_diagnostic_fail_at(item, <parse>,
-      "managed initializer requires a complete block-local initializer", %());
-  x2c_place(%(after-statement), x2c_template_call("x2c.auto.release", %($local)));
+  if (!local || !x2c_enclosing(<function>))
+    _auto_fail(<parse>,
+      "managed initializer requires a complete block-local initializer",
+      %());
+  match (local) case %(declare ? (bindings (bind ?binding ?))):
+    x2c_place(%(after-statement),
+      x2c_template_call("x2c.auto.release", %($local $binding)));
   return value;
 }
 
+/* The release defers the cleanup of a declaration whose storage is
+   automatic and whose type participates in Cleanup. */
 static List _auto_release(Code local) {
-  Code item = x2c_enclosing(<statement>);
-  match (local) case %(declare ?(Type base) (bindings (bind ?binding ?))): {
-    if (base.is_static() || base.is_extern() || base.is_threaded())
-      x2c_diagnostic_fail_at(item, <parse>,
-        "managed initializer requires automatic local storage", %());
-    Type type = local.type();
-    if (!type.protocol_member("cleanup"))
-      x2c_diagnostic_fail_at(item, <protocol>,
-        "managed initializer requires Cleanup participation",
-        %("type: ${type.repr()}"));
-    return $!{ defer $binding.cleanup(); };
-  }
+  Type base = local.cadr();
+  if (base.is_static() || base.is_extern() || base.is_threaded())
+    _auto_fail(<parse>,
+      "managed initializer requires automatic local storage", %());
+  Type type = local.type();
+  if (!type.protocol_member("cleanup"))
+    _auto_fail(<protocol>,
+      "managed initializer requires Cleanup participation",
+      %("type: ${type.repr()}"));
   return NULL;
+}
+
+// Reports at the block item that holds the managed declaration.
+static void _auto_fail(Symbol category, String message, List notes) {
+  x2c_diagnostic_fail_at(
+    x2c_enclosing(<statement>), category, message, notes);
 }
 
 /* foreach
