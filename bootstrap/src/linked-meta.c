@@ -4860,7 +4860,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_8(void){
   _4474 = List_var(_4473);
   _4475 = String_new("etc/lisp-bindings.xlisp");
   _4476 = String_var(_4475);
-  _4477 = String_new("f64ca6f9");
+  _4477 = String_new("e5fdd05b");
   _4478 = String_var(_4477);
   _4479 = cons(_4478, NULL);
   _4480 = cons(_4476, _4479);
