@@ -216,7 +216,7 @@ presents it rather than adding it.
 
 ### `$auto` on the two primitives
 
-The marker approach today: [etc/builtin-macros.x:52](etc/builtin-macros.x:52)
+The marker approach today: `etc/builtin-macros.x:52`
 expands `$auto(v)` to `(managed-init v)`, and five kernel sites recognize
 the marker: typing it (expressions.x:3043), binding it (parse.x:2899),
 finding it as a complete initializer and splitting the declaration

@@ -215,6 +215,50 @@ the remaining access cost is binding each replacement, which is the
 prepared-replacements work. Item 4, `try` on `block-exit`, starts from
 this head.
 
+### Milestone 0 item 4 and the binder extension, 2026-10-09
+
+Integrated on this branch after the results above; `make verify` passes
+(1,115 fixtures, 942 unit tests, probes), 17 of 17 examples pass, and
+bootstrap equals stage 0 across 264 C/H files.
+
+- `try`, `catch`, and `finally` are lowered by the shipped component
+  `src/component-try.x` (274 lines), registered through `$rewrite` on the
+  `try` statement head and dispatched where the cleanup walk met `try`. The
+  kernel keeps one generic form, `(landing CODE ROWS)` with `new-name`,
+  `outer`, `exits`, and `region` rows, which the component returns as a
+  lowered code value; Preserve, label collection, and the statement
+  expression test read only the rows. `src/cleanup.x` went from 1,417 to
+  1,256 lines; kernel and SDK together lost 144 lines, kernel plus component
+  grew by 130. Per `try`: about +0.3 M instructions, under the spike's
+  0.73 M. Byte-identical C on all 72 try, catch, defer, raise, cleanup,
+  exception, and volatile fixtures and on every unedited module.
+- Two findings. The try body and arm regions do not use `%(block-exit)`:
+  a `defer` lowers to a runtime cleanup record and thunk, while try's exits
+  are lexical, so the C would differ. `%(block-exit)` exists (it contributes
+  `(defer STMT)` after the statement; fixture `meta-place-block-exit`), but
+  the shared primitive between `defer` and `try` is the region form, not
+  the placement. And `src/grammar.x` had to become a prelude source so the
+  component's `$tried` and `$caught` recognizers resolve in every unit; the
+  kernel's `defer` still produces a `try` form on its landing path and so
+  depends on the shipped component.
+- Binder extension: `match` and the `try` statement enter the constructed
+  binders directly; `bind_match_arm` and `bind_catch_arm` are the one
+  implementation of arm binding for source and constructed syntax. `with`
+  has no constructed form and was left alone. statements.x lost 52 lines,
+  parse.x gained 71; self-translation within noise.
+
+Fresh translations against dev, instructions retired, median of 3:
+
+| Workload | dev | after milestone 0 items 1 to 3 | after this batch |
+| --- | ---: | ---: | ---: |
+| Empty unit | 1.96 G | 2.06 G | 2.13 G |
+| Native, 300 functions | 4.21 G | 4.34 G | 4.43 G |
+| Access, 5,400 mutations | 10.28 G | 14.37 G | 14.48 G |
+
+The added fixed cost (about 0.07 G) is reading `grammar.x` and the try
+component as prelude sources; it belongs to the driver work, together with
+the remaining access cost, which is binding each replacement.
+
 ## Next bounded milestone
 
 1. Establish a complete declaration use case for initializer-only `$auto`.
