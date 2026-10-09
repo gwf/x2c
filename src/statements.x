@@ -50,19 +50,6 @@ static macro Stmt $report.parse.match_pattern(
     <parse>, "match case pattern must be a %() list literal",
     $origin, %( "pattern:" ${$pattern.repr()} ));
 
-static macro Stmt $report.type.binder_conflict(
-  Expr $c, Expr $role, Expr $origin, Expr $name) =>
-  $c.report_error(
-    <type>, %"${$role} binder has conflicting capture kinds",
-    $origin, %( "binder:" ${$name} "use either '?' or '*' consistently"));
-
-static macro Stmt $report.type.binder_unassigned(
-  Expr $c, Expr $role, Expr $origin, Expr $binder) =>
-  $c.report_error(
-    <type>, %"${$role} binder is not definitely assigned",
-    $origin, %( "binder:" ${$binder.str()}
-                "bind it in every alternative and never under !not"));
-
 static macro Stmt $report.parse.try_handler(Expr $c) =>
   $c.report_error(
     <parse>, "expected 'catch' or 'finally' after try block",
@@ -484,35 +471,6 @@ static void Compiler._require_list_literal(
       $report.parse.match_pattern(c, start, pattern);
 }
 
-/** Opens a `Sym` scope for one match arm and optionally defines its definite
-    pattern binders. The caller must pop the scope after parsing or binding the
-    arm body; binder diagnostics use `start`.
-*/
-void Compiler.begin_match_arm(
-  Compiler c, List pattern, Token start, int binds) {
-  c.sym.push_new_scope();
-  if (!binds) return;
-  c._check_binders(pattern, start, "match");
-  c.define_match_binders(pattern);
-}
-
-/* Rejects the two ways a match or catch pattern can name a binder it does
-   not reliably bind. `role` is the keyword the diagnostics name. */
-static void Compiler._check_binders(
-  Compiler c, List pattern, Token start, String role) {
-  List possible = NULL;
-  List definite = c.match_pattern_binders(pattern, possible);
-  foreach (Var binder, possible) {
-    if (!(binder in definite))
-      $report.type.binder_unassigned(c, role, start, binder);
-    String name = binder.str()[1:];
-    foreach (Var other, possible) {
-      if (other == binder || other.str()[1:] != name) continue;
-      $report.type.binder_conflict(c, role, start, name);
-    }
-  }
-}
-
 /** Parses a source match arm's guard and body, declaring its typed
     `types` captures, inside the arm scope that the binder opened.
 */
@@ -642,18 +600,6 @@ static List Compiler._catch_filter(Compiler c) {
   List pattern = c.parse_catch_pattern_literal();
   c.expect(<:>);
   return pattern;
-}
-
-/** Opens a `Sym` scope for one catch arm and defines a nonempty filter's
-    definite pattern binders. Returns their capture-token/binding pairs.
-    The caller must pop the scope after parsing or binding the arm body;
-    binder diagnostics use `start`.
-*/
-List Compiler.begin_catch_arm(Compiler c, List pattern, Token start) {
-  c.sym.push_new_scope();
-  if (!pattern) return NULL;
-  c._check_binders(pattern, start, "catch");
-  return c.define_catch_binders(pattern);
 }
 
 // governed statements

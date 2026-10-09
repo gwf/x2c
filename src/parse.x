@@ -275,6 +275,19 @@ static macro Stmt $report.type.reference_placement(Expr $c) =>
     <type>, "transparent references are only supported on parameters",
     NULL, NULL);
 
+static macro Stmt $report.type.binder_conflict(
+  Expr $c, Expr $role, Expr $origin, Expr $name) =>
+  $c.report_error(
+    <type>, %"${$role} binder has conflicting capture kinds",
+    $origin, %( "binder:" ${$name} "use either '?' or '*' consistently"));
+
+static macro Stmt $report.type.binder_unassigned(
+  Expr $c, Expr $role, Expr $origin, Expr $binder) =>
+  $c.report_error(
+    <type>, %"${$role} binder is not definitely assigned",
+    $origin, %( "binder:" ${$binder.str()}
+                "bind it in every alternative and never under !not"));
+
 // top-level forms
 
 /** Parses one top-level form and applies its source-ordered compiler effects.
@@ -3674,14 +3687,33 @@ static List Compiler._bind_catchcases(Compiler c, Var arms, List handler) {
 */
 List Compiler.bind_catch_arm(
   Compiler c, List pattern, Var body, Token start, List handle) {
-  List bindings = c.begin_catch_arm(pattern, start);
+  c.sym.push_new_scope();
   defer c.sym.pop_scope();
+  if (pattern) c._check_binders(pattern, start, "catch");
+  List bindings = pattern ? c.define_catch_binders(pattern) : NULL;
   int source = !!_source_clause_kind(body);
   List statement = c._bind_statement(body);
   if (source ? !!c.macro_holes : _declares_binders(body, bindings))
     return %($pattern $statement);
   return %($pattern (block
     @{c.catch_binder_declarations(bindings, handle)} $statement));
+}
+
+/* Rejects the two ways a match or catch pattern can name a binder it does
+   not reliably bind. `role` is the keyword the diagnostics name. */
+static void Compiler._check_binders(
+  Compiler c, List pattern, Token start, String role) {
+  List possible = NULL;
+  List definite = c.match_pattern_binders(pattern, possible);
+  foreach (Var binder, possible) {
+    if (!(binder in definite))
+      $report.type.binder_unassigned(c, role, start, binder);
+    String name = binder.str()[1:];
+    foreach (Var other, possible) {
+      if (other == binder || other.str()[1:] != name) continue;
+      $report.type.binder_conflict(c, role, start, name);
+    }
+  }
 }
 
 /* Whether a catch arm's `body` begins with the binder declarations that
@@ -3756,8 +3788,10 @@ static List Compiler._bind_rows(Compiler c, List cases) {
 */
 List Compiler.bind_match_arm(
   Compiler c, List pattern, Var body, Token start, int binds, List types) {
-  c.begin_match_arm(pattern, start, binds);
+  c.sym.push_new_scope();
   defer c.sym.pop_scope();
+  if (binds) c._check_binders(pattern, start, "match");
+  if (binds) c.define_match_binders(pattern);
   return %($pattern ${c._bind_arm_body(body, types)});
 }
 
