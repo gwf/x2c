@@ -13,7 +13,6 @@ The built-in macros' compile-time algorithms.
 | Function | Summary |
 | --- | --- |
 | [`builtin_targets`](#builtin_targets) | Returns each built-in algorithm by the name compile-time code calls it with. |
-| [`builtin_try_cleanup_placement`](#builtin_try_cleanup_placement) | Places the lowered statements that leave a try region after it, with the effect that marks the unit as needing exception support. |
 
 ### Functions
 
@@ -23,15 +22,6 @@ The built-in macros' compile-time algorithms.
 
 Returns each built-in algorithm by the name compile-time code calls it
 with.
-
-Source: `src/builtins.x:898`
-
-#### builtin_try_cleanup_placement
-
-`List builtin_try_cleanup_placement(Var cleanup)`
-
-Places the lowered statements that leave a try region after it, with
-the effect that marks the unit as needing exception support.
 
 Source: `src/builtins.x:887`
 

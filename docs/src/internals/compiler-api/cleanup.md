@@ -12,12 +12,8 @@ Cleanup regions and the transfers that leave them.
 
 | Function | Summary |
 | --- | --- |
-| [`builtin_catch_cases`](#builtin_catch_cases) | Returns each lowered arm of `arms` chosen by its index in `selected`; `$catch_landing` calls this in a slot. |
-| [`builtin_catch_patterns`](#builtin_catch_patterns) | Returns the statement that prepares each of `items` into its slot of the catch site's `patterns`; `$catch_site` calls this in a slot. |
 | [`builtin_defer_captures`](#builtin_defer_captures) | Writes captured addresses in the order capture selection established. |
 | [`builtin_defer_record`](#builtin_defer_record) | Selects the record shape; captured records keep the environment beside the record in the region's scope. |
-| [`builtin_try_catch_site`](#builtin_try_catch_site) | Returns the catch site `frame` pushes for the clause `clause` describes, or nothing for a try without one; the `$compiler_try` template calls this in a slot. |
-| [`builtin_try_landing`](#builtin_try_landing) | Returns what runs when `frame` lands: the catch arm the clause's handler selected, or `cleanup` and no return; the `$compiler_try` template calls this in a slot. |
 | [`Compiler.lower_cleanup`](#Compiler.lower_cleanup) | Lowers the cleanup regions and transfers of the completed top-level `node`; other nodes pass through. |
 | [`Compiler.lower_defer_region`](#Compiler.lower_defer_region) | Returns the region that runs `finalizer` when `body` leaves. |
 | [`Compiler.rewrite_defer_list`](#Compiler.rewrite_defer_list) | Returns `stmts` with each `defer` statement and the statements after it replaced by one region; a list without `defer` returns unchanged. |
@@ -25,36 +21,13 @@ Cleanup regions and the transfers that leave them.
 
 ### Functions
 
-#### builtin_catch_cases
-
-`List builtin_catch_cases(List selected, List arms)`
-
-Returns each lowered arm of `arms` chosen by its index in `selected`;
-`$catch_landing` calls this in a slot. Each arm is its own statement, so
-a `break` or `continue` in it still reaches the enclosing loop, and only
-one test holds because `selected` does not change. When every arm
-returns or raises, control cannot leave them, and a final unreachable
-mark tells C so that a function ending in such a `try` needs no return
-after it.
-
-Source: `src/cleanup.x:860`
-
-#### builtin_catch_patterns
-
-`List builtin_catch_patterns(List patterns, List items)`
-
-Returns the statement that prepares each of `items` into its slot of
-the catch site's `patterns`; `$catch_site` calls this in a slot.
-
-Source: `src/cleanup.x:822`
-
 #### builtin_defer_captures
 
 `List builtin_defer_captures(List environment, List records)`
 
 Writes captured addresses in the order capture selection established.
 
-Source: `src/cleanup.x:917`
+Source: `src/cleanup.x:754`
 
 #### builtin_defer_record
 
@@ -63,28 +36,7 @@ Source: `src/cleanup.x:917`
 Selects the record shape; captured records keep the environment beside
 the record in the region's scope.
 
-Source: `src/cleanup.x:904`
-
-#### builtin_try_catch_site
-
-`List builtin_try_catch_site(List frame, List clause)`
-
-Returns the catch site `frame` pushes for the clause `clause`
-describes, or nothing for a try without one; the `$compiler_try`
-template calls this in a slot.
-
-Source: `src/cleanup.x:807`
-
-#### builtin_try_landing
-
-`List builtin_try_landing(List frame, List clause, List cleanup)`
-
-Returns what runs when `frame` lands: the catch arm the clause's
-handler selected, or `cleanup` and no return; the `$compiler_try`
-template calls this in a slot. A landing no catch arm handles runs the
-region's exits, and control does not come back.
-
-Source: `src/cleanup.x:836`
+Source: `src/cleanup.x:741`
 
 ### `Compiler`
 
@@ -98,7 +50,7 @@ Lowers the cleanup regions and transfers of the completed top-level
 function completion. Expressions cannot contain an unlifted function, so
 no second unit-tree traversal is needed.
 
-Source: `src/cleanup.x:118`
+Source: `src/cleanup.x:127`
 
 <a id="Compiler.lower_defer_region"></a>
 #### Compiler.lower_defer_region
@@ -109,7 +61,7 @@ Returns the region that runs `finalizer` when `body` leaves. Ordinary
 cleanup statements take the callable chain; lexical transfers and
 unsupported capture types keep the landing-frame path.
 
-Source: `src/cleanup.x:1265`
+Source: `src/cleanup.x:1104`
 
 <a id="Compiler.rewrite_defer_list"></a>
 #### Compiler.rewrite_defer_list
@@ -119,7 +71,7 @@ Source: `src/cleanup.x:1265`
 Returns `stmts` with each `defer` statement and the statements after
 it replaced by one region; a list without `defer` returns unchanged.
 
-Source: `src/cleanup.x:1240`
+Source: `src/cleanup.x:1079`
 
 <a id="Compiler.static_value_is_runtime"></a>
 #### Compiler.static_value_is_runtime
@@ -131,13 +83,15 @@ because it calls, allocates, or reads an object other than a function
 name. `runtime` holds the function-local statics already known to run
 that way, or is `NULL` at file scope.
 
-Source: `src/cleanup.x:245`
+Source: `src/cleanup.x:273`
 
 ## Design notes
 
-A cleanup region is a `try` body or catch arm, a `defer` body, or the
-rest of a block after a static local whose initializer runs at runtime.
-Normalization turns each `defer` statement into a region. When a
-function is complete, one walk places each region's exits on every
-transfer that leaves it, rejects a jump into a region, and keeps the
-locals a `sigsetjmp` landing reads either `volatile` or escaped.
+A cleanup region is a `defer` body, a region of a landing form such as
+a `try` body or catch arm, or the rest of a block after a static local
+whose initializer runs at runtime. Normalization turns each `defer`
+statement into a region. When a function is complete, each `try` takes
+the landing form its component answers, and one walk places each
+region's exits on every transfer that leaves it, rejects a jump into a
+region, and keeps the locals a `sigsetjmp` landing reads either
+`volatile` or escaped.

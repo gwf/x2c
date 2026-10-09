@@ -115,6 +115,7 @@
   - [src/collect.x](internals/compiler-api/collect.md)
   - [src/compiler.x](internals/compiler-api/compiler.md)
   - [src/component-access.x](internals/compiler-api/component-access.md)
+  - [src/component-try.x](internals/compiler-api/component-try.md)
   - [src/deps.x](internals/compiler-api/deps.md)
   - [src/diagnostics.x](internals/compiler-api/diagnostics.md)
   - [src/editor.x](internals/compiler-api/editor.md)

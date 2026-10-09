@@ -3399,6 +3399,9 @@ effect. `WHERE` is one of these Lists:
   the compiler reports `managed initializer requires a complete block-local
   initializer` at the block item. Code placed outside any block item is
   rejected.
+- `(block-exit)` runs code on every transfer that leaves the enclosing
+  block after that declarator or block item, as `defer CODE` placed there
+  with `(after-statement)` runs, under the same rules.
 - `(unit-support)` adds declarations among the unit's file-scope support
   code; `(unit-support KEY)` adds them only for the first placement under
   `KEY`.

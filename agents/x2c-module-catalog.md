@@ -8,7 +8,7 @@ non-static function definition discovered in source order. It does
 not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
-- Compiler modules: 53
+- Compiler modules: 54
 - Runtime modules: 77
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
@@ -65,7 +65,7 @@ the built-in macros' compile-time algorithms.
 
 Public functions:
 
-`builtin_try_cleanup_placement`, `builtin_targets`
+`builtin_targets`
 
 ### [src/cache.x](../src/cache.x)
 
@@ -95,8 +95,7 @@ cleanup regions and the transfers that leave them.
 Public functions:
 
 `Compiler.lower_cleanup`, `Compiler.static_value_is_runtime`,
-`builtin_try_catch_site`, `builtin_catch_patterns`, `builtin_try_landing`,
-`builtin_catch_cases`, `builtin_defer_record`, `builtin_defer_captures`,
+`builtin_defer_record`, `builtin_defer_captures`,
 `Compiler.rewrite_defer_list`, `Compiler.lower_defer_region`
 
 ### [src/cli.x](../src/cli.x)
@@ -184,6 +183,14 @@ Array/Map mutation policy; getter resolution remains with admission.
 Public functions:
 
 None. This module has no non-static function definitions.
+
+### [src/component-try.x](../src/component-try.x)
+
+try, catch, and finally.
+
+Public functions:
+
+`try_catch_patterns`, `try_catch_site`, `try_landing`, `try_exits_placement`
 
 ### [src/deps.x](../src/deps.x)
 
@@ -345,7 +352,8 @@ Public functions:
 `x2c_type_members`, `register_rewrite`, `_dedent_expand`, `_macros_location`,
 `_tag_decode_group`, `_tag_decode_groups`, `_tag_id_checks`,
 `collection_store`, `collection_update`, `collection_prefix`,
-`collection_postfix`, `linked_meta_targets`, `linked_meta_hashes`
+`collection_postfix`, `try_catch_cases`, `try_lowering`, `linked_meta_targets`,
+`linked_meta_hashes`
 
 ### [src/literals.x](../src/literals.x)
 
@@ -473,9 +481,9 @@ Public functions:
 
 `MetaContext.current`, `Compiler.expanding`, `Type.is_named`, `Type.numeric`,
 `Type.is_text`, `Type.protocol_member`, `Code.type`, `Code.value`,
-`Code.register_rewrite`, `Code.register_after_initialization`,
-`x2c_syntax_type`, `x2c_protocol_member`, `x2c_method_resolve`,
-`builtin_foreach_bindings`, `builtin_foreach_reference`,
+`Code.exits`, `Code.is_static_pattern`, `Code.register_rewrite`,
+`Code.register_after_initialization`, `x2c_syntax_type`, `x2c_protocol_member`,
+`x2c_method_resolve`, `builtin_foreach_bindings`, `builtin_foreach_reference`,
 `x2c_type_is_integral`, `x2c_type_is_pointer`, `x2c_type_element`,
 `x2c_type_parameters`, `x2c_type_return`, `x2c_type_parts`,
 `x2c_type_reverse_name`, `x2c_type_resolve`, `x2c_type_layout`,

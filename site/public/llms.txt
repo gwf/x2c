@@ -121,6 +121,7 @@
 - [src/collect.x](https://x2c-lang.dev/docs/internals/compiler-api/collect.html)
 - [src/compiler.x](https://x2c-lang.dev/docs/internals/compiler-api/compiler.html)
 - [src/component-access.x](https://x2c-lang.dev/docs/internals/compiler-api/component-access.html)
+- [src/component-try.x](https://x2c-lang.dev/docs/internals/compiler-api/component-try.html)
 - [src/deps.x](https://x2c-lang.dev/docs/internals/compiler-api/deps.html)
 - [src/diagnostics.x](https://x2c-lang.dev/docs/internals/compiler-api/diagnostics.html)
 - [src/editor.x](https://x2c-lang.dev/docs/internals/compiler-api/editor.html)

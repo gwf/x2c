@@ -19,6 +19,8 @@ Shipped `meta` code compiled into the compiler.
 | [`linked_meta_hashes`](#linked_meta_hashes) | Returns linked definition hashes and provider source dependencies. |
 | [`linked_meta_targets`](#linked_meta_targets) | Returns the linked copies, and the runtime builders, by name. |
 | [`register_rewrite`](#register_rewrite) | Registers the decorated translator with its macro and hole patterns. |
+| [`try_catch_cases`](#try_catch_cases) | Returns each lowered arm of `arms` chosen by its index in `selected`; `$try_handled` calls this in a slot. |
+| [`try_lowering`](#try_lowering) | Lowers the parsed try `node` to its landing form. |
 | [`x2c_decl_make`](#x2c_decl_make) | Declares `name` with `type` and an optional initializer. |
 | [`x2c_expr_cast`](#x2c_expr_cast) | Returns `expression` cast to `type`, which is a declared type rather than syntax. |
 | [`x2c_expr_field`](#x2c_expr_field) | Returns the expression `receiver.name`. |
@@ -33,7 +35,7 @@ Shipped `meta` code compiled into the compiler.
 
 Stores the updated collection value and returns its previous value.
 
-Source: `src/linked-meta.x:351`
+Source: `src/linked-meta.x:352`
 
 #### collection_prefix
 
@@ -41,7 +43,7 @@ Source: `src/linked-meta.x:351`
 
 Stores and returns the incremented or decremented collection value.
 
-Source: `src/linked-meta.x:340`
+Source: `src/linked-meta.x:341`
 
 #### collection_store
 
@@ -49,7 +51,7 @@ Source: `src/linked-meta.x:340`
 
 Selects the adopted collection setter for indexed assignment.
 
-Source: `src/linked-meta.x:285`
+Source: `src/linked-meta.x:286`
 
 #### collection_update
 
@@ -57,7 +59,7 @@ Source: `src/linked-meta.x:285`
 
 Selects collection compound updates and checks accepted operands.
 
-Source: `src/linked-meta.x:313`
+Source: `src/linked-meta.x:314`
 
 #### linked_meta_hashes
 
@@ -65,7 +67,7 @@ Source: `src/linked-meta.x:313`
 
 Returns linked definition hashes and provider source dependencies.
 
-Source: `src/linked-meta.x:537`
+Source: `src/linked-meta.x:688`
 
 #### linked_meta_targets
 
@@ -73,7 +75,7 @@ Source: `src/linked-meta.x:537`
 
 Returns the linked copies, and the runtime builders, by name.
 
-Source: `src/linked-meta.x:412`
+Source: `src/linked-meta.x:551`
 
 #### register_rewrite
 
@@ -81,7 +83,29 @@ Source: `src/linked-meta.x:412`
 
 Registers the decorated translator with its macro and hole patterns.
 
-Source: `src/linked-meta.x:145`
+Source: `src/linked-meta.x:146`
+
+#### try_catch_cases
+
+`List try_catch_cases(List selected, List arms)`
+
+Returns each lowered arm of `arms` chosen by its index in `selected`;
+`$try_handled` calls this in a slot. Each arm is its own
+statement, so a `break` or `continue` in it still reaches the enclosing
+loop, and only one test holds because `selected` does not change. When
+every arm returns or raises, control cannot leave them, and a final
+unreachable mark tells C so that a function ending in such a `try`
+needs no return after it.
+
+Source: `src/linked-meta.x:384`
+
+#### try_lowering
+
+`Code try_lowering(Code node)`
+
+Lowers the parsed try `node` to its landing form.
+
+Source: `src/linked-meta.x:495`
 
 #### x2c_decl_make
 
@@ -89,7 +113,7 @@ Source: `src/linked-meta.x:145`
 
 Declares `name` with `type` and an optional initializer.
 
-Source: `src/linked-meta.x:95`
+Source: `src/linked-meta.x:96`
 
 #### x2c_expr_cast
 
@@ -99,7 +123,7 @@ Returns `expression` cast to `type`, which is a declared type rather
 than syntax. A generator needs it where the value it holds and the
 parameter it reaches differ in width or sign.
 
-Source: `src/linked-meta.x:88`
+Source: `src/linked-meta.x:89`
 
 #### x2c_expr_field
 
@@ -107,7 +131,7 @@ Source: `src/linked-meta.x:88`
 
 Returns the expression `receiver.name`.
 
-Source: `src/linked-meta.x:80`
+Source: `src/linked-meta.x:81`
 
 #### x2c_param_make
 
@@ -115,7 +139,7 @@ Source: `src/linked-meta.x:80`
 
 Returns a parameter named `name` with `type`.
 
-Source: `src/linked-meta.x:103`
+Source: `src/linked-meta.x:104`
 
 #### x2c_type_members
 
@@ -124,7 +148,7 @@ Source: `src/linked-meta.x:103`
 Returns enum members as `(name value)` rows in declaration order.
 An implicit value is nil; a literal value retains its spelling.
 
-Source: `src/linked-meta.x:132`
+Source: `src/linked-meta.x:133`
 
 ## Design notes
 

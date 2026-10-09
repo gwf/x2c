@@ -369,17 +369,19 @@ the owning unit's initializer. Those synthesized declarations go onto a
 compiler-owned early-declaration queue, are normalized by the same driver,
 and are appended to the unit.
 
-Cleanup lowering completes each function after its body is normalized. It
-assigns a name to the runtime record of every `defer` and `try`
-region, builds the statements that leave the region, and runs them wherever
+Cleanup lowering completes each function after its body is normalized. A
+`try` first takes the landing form the shipped try component answers, an
+ordinary statement rewrite registered in `src/component-try.x`. The pass then
+assigns a name to the runtime record of every `defer` region and landing
+frame, builds the statements that leave each region, and runs them wherever
 control leaves it:
 the region's own end, a `return` -- after saving the value, since cleanup may
 change what the expression read -- a `break` or `continue` that leaves the
 construct that bounds it, and an outward `goto`. The pass rejects a jump into
 a region, including the region a static local's runtime initializer opens
 over the rest of its block. The pass also marks the locals
-and parameters a `try` writes as `volatile`, which C requires of automatic
-state changed across `sigsetjmp`. Transfer rewriting follows expression and
+and parameters a landing's parts write as `volatile`, which C requires of
+automatic state changed across `sigsetjmp`. Transfer rewriting follows expression and
 lambda normalization within the function.
 
 ```sh
@@ -498,6 +500,8 @@ The modules under `src/` divide ownership as follows:
 
 - `src/component-access.x` -- builtin Array/Map mutation policies registered
   through ordinary macro patterns and quotations;
+- `src/component-try.x` -- the try, catch, and finally lowering and its
+  templates, registered as a statement rewrite;
 - `src/operator-ledger.x` -- operator precedence, compound assignment,
   and protocol-member mappings from one compile-time ledger;
 - `src/cli.x`, `src/main.x` -- option metadata and parsing, dispatch, logging,
@@ -706,8 +710,18 @@ order that depends on addresses, or a generated-name counter that carries
 across translation units, shows up here while every suite still passes. The
 same phase run twice has to produce the same bytes.
 
-### Builtin collection component
+### Builtin components
 
 `src/component-access.x` registers Array and Map mutations through ordinary
 macro patterns and quotations. `lib/rewrite.x` supplies the decorator. Binding,
 index admission, evaluation order, and cleanup remain compiler responsibilities.
+
+`src/component-try.x` registers `try` through the same decorator, on the
+statement family keyed by the `try` head. Its translator answers a landing
+form, `(landing CODE ROWS)`: the frame and catch-site template, the
+finalizer, the exits that close the catch site, claim the finalizer, and
+leave the frame, and the body and each catch arm as regions. The cleanup
+walk lowers the rows in order, places the exits on every transfer out of a
+region, rejects a `goto` into one, and keeps the locals the rows write
+valid when control lands. Both components and `src/grammar.x`, whose source
+forms they recognize, are compiler prelude sources.

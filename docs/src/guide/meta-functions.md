@@ -1539,9 +1539,10 @@ instead of at the invocation.
 around the invocation: the initialized `<declarator>`, the block item
 (`<statement>`), the `<function>`, or the `<unit>`. `x2c_place` adds code
 the result cannot hold: `%(after-statement)` after that declarator or block
-item, `%(unit-support KEY)` among the unit's file-scope declarations once for
-each key, and `%(unit-init)` in the unit's initialization. A failed expansion
-leaves none of it behind. Here the counter runs after each statement that
+item, `%(block-exit)` on every exit from the block after it, as a `defer`
+there runs, `%(unit-support KEY)` among the unit's file-scope declarations
+once for each key, and `%(unit-init)` in the unit's initialization. A failed
+expansion leaves none of it behind. Here the counter runs after each statement that
 traces a value:
 
 ```x2c

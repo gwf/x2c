@@ -34,7 +34,7 @@ The compiler surface a `meta` function calls.
 Returns the suffix of `type` that begins at its typedef name or base
 keyword, sharing `type`, or `NULL` when it has none.
 
-Source: `lib/meta.x:423`
+Source: `lib/meta.x:434`
 
 #### type_declaration_parts
 
@@ -44,7 +44,7 @@ Returns `(base modifiers)` for reconstructing a declaration of `type`.
 Function modifiers hold parameter syntax, and modifier order retains C
 declarator precedence.
 
-Source: `lib/meta.x:453`
+Source: `lib/meta.x:464`
 
 #### type_name_error
 
@@ -55,7 +55,7 @@ other than a C type keyword, as `%(String)` and `%(* Point)` do, or
 `NULL`. A type name is a String, as in `%("String")` and `%(* "Point")`;
 neither a short Symbol nor a long Atom supplies that representation.
 
-Source: `lib/meta.x:436`
+Source: `lib/meta.x:447`
 
 #### x2c_block_make
 
@@ -106,7 +106,7 @@ Source: `lib/meta.x:102`
 
 Returns the statements in the body of `function`.
 
-Source: `lib/meta.x:223`
+Source: `lib/meta.x:232`
 
 #### x2c_literal_int
 
@@ -140,7 +140,7 @@ Returns the argument expressions that forward a parameter list, which is
 a `params` form or the parameters themselves. A `(void)` parameter list
 answers nothing.
 
-Source: `lib/meta.x:231`
+Source: `lib/meta.x:240`
 
 #### x2c_stmnt_make
 
@@ -237,9 +237,9 @@ written.
 Two operations let a macro contribute code beyond its result.
 `x2c_enclosing` answers the initialized declarator, block item,
 function, or unit around the invocation, and `x2c_place` puts code
-after that declarator or block item, among the unit's support
-declarations, or in its initialization, under the expansion's
-transaction. `$auto` is built on them.
+after that declarator or block item, on the exits of its block, among
+the unit's support declarations, or in its initialization, under the
+expansion's transaction. `$auto` is built on them.
 
 The library builds it as an optional module, but the prelude's
 `varops.x` includes it for its own `meta` rows, so every unit sees its
