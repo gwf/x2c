@@ -22,6 +22,7 @@
 #include "var-tags.x"
 #include "varops.x"
 #include "component-access.x"
+#include "component-try.x"
 #include "fields.x"
 #include "grammar.x"
 #include "operator-ledger.x"
@@ -363,6 +364,144 @@ Code collection_postfix(Code code) {
   return code;
 }
 
+/* --- src/component-try.x ------------------------------------------------- */
+
+/** Returns each lowered arm of `arms` chosen by its index in `selected`;
+    `$try_handled` calls this in a slot. Each arm is its own
+    statement, so a `break` or `continue` in it still reaches the enclosing
+    loop, and only one test holds because `selected` does not change. When
+    every arm returns or raises, control cannot leave them, and a final
+    unreachable mark tells C so that a function ending in such a `try`
+    needs no return after it. */
+List try_catch_cases(List selected, List arms) {
+  Array cases = [];
+  int index = 0, exits = 1;
+  foreach (List arm, arms) {
+    cases.push($!{ if ($selected == $index) $arm });
+    index++;
+    exits &= _try_arm_exits(arm);
+  }
+  if (exits) cases.push($!{ __builtin_unreachable(); });
+  return cases.list_free();
+}
+
+static int _try_arm_exits(List arm) {
+  match (arm) case %(code-value ? ?statement ?): {
+    Code lowered = statement;
+    return lowered.exits();
+  }
+  return 0;
+}
+
+/** Lowers the parsed try `node` to its landing form. */
+Code try_lowering(Code node) {
+  match (node) {
+    case $caught(?body, ?finalizer, *arms):
+      return _try_landing(node, body, arms, finalizer);
+    case $tried(?body, ?finalizer):
+      return _try_landing(node, body, NULL, finalizer);
+  }
+  return node;
+}
+
+static Code _try_landing(
+  Code node, List body, List arms, List finalizer) {
+  _try_check_label(finalizer);
+  Atom frame = Atom.intern("?__exception_frame");
+  Atom exits = Atom.intern("?__try_exits");
+  Atom lowered = Atom.intern("?__try_body");
+  Atom finished = NULL;
+  List handle = arms ? catch_handle(node) : NULL;
+  Array rows = [%(new-name $frame "exception_frame")];
+  if (finalizer) {
+    finished = Atom.intern("?__try_finalizer");
+    rows.push(%(outer $finished $finalizer));
+  }
+  rows.push(%(exits $exits ${_try_exits(frame, handle, finished)}));
+  rows.push(%(region $lowered $body));
+  List clause = _try_catch_clause(handle, arms, rows);
+  Macro shape = $try_frame;
+  List code = shape(frame, clause, lowered, exits);
+  return %(code-value "lowered" (landing $code ${rows.list_free()}) ());
+}
+
+static List _try_exits(Atom frame, List handle, Atom finalizer) {
+  List before = NULL;
+  if (handle) {
+    List handler = %(expr (("ErrorHandler")) (ident $handle));
+    List close = $!{ x2c_error_catch_close($handler); $handler = NULL; };
+    before = %($close);
+  }
+  Type type = %(("ExceptionFrame")), pointer = %(* ("ExceptionFrame"));
+  List address = %(expr $pointer (op & (expr $type (ident $frame))));
+  if (finalizer)
+    return $!{
+      if (x2c_exception_claim($address)) {
+        @before
+        $finalizer
+      }
+      x2c_exception_leave($address);
+    };
+  return $!{ @before x2c_exception_leave($address); };
+}
+
+static List _try_catch_clause(List handle, List records, Array rows) {
+  if (!records) return NULL;
+  String state = "ERROR_CATCH_PENDING";
+  Array arms = [], patterns = [];
+  foreach (List record, records) {
+    Code pattern = record.car();
+    if (pattern) {
+      if (!pattern.is_static_pattern()) state = "ERROR_CATCH_TRANSIENT";
+      patterns.push(pattern);
+    }
+    Atom arm = Atom.intern(%"?__try_arm_${arms.len()}");
+    rows.push(%(region $arm ${record.cadr()}));
+    arms.push(arm);
+  }
+  return %($handle $state ${arms.list_free()} @{patterns.list_free()});
+}
+
+static void _try_check_label(List finalizer) {
+  List at = finalizer;
+  Var label = _try_finalizer_label(finalizer, at);
+  if (!label) return;
+  x2c_diagnostic_fail_at(at, <emit>, "a finally body cannot define a label",
+    %("a finalizer runs on every path that leaves its region, so '${
+      x2c_binding_spelling(label)}' would be defined once for each"));
+}
+
+static Var _try_finalizer_label(Var value, List &at) {
+  Array pending = [value], around = [at];
+  Var found = NULL;
+  while (!found && pending.len()) {
+    Var current = pending.take_last();
+    List here = around.take_last();
+    if (current is not <list> || current.is_nil()) continue;
+    List node = current;
+    match (node) {
+      case %(function *): continue;
+      case %(at ? ?wrapped): {
+        pending.push(wrapped);
+        around.push(node);
+        continue;
+      }
+      case %(label ?name *): {
+        found = name;
+        at = here;
+        continue;
+      }
+    }
+    foreach (Var child, node) {
+      pending.push(child);
+      around.push(here);
+    }
+  }
+  pending.free();
+  around.free();
+  return found;
+}
+
 /* --- src/operator-ledger.x ----------------------------------------------- */
 
 static List _operator_rows(void) => %(
@@ -449,6 +588,14 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "collection_update", collection_update);
   $linked.row(rows, "collection_prefix", collection_prefix);
   $linked.row(rows, "collection_postfix", collection_postfix);
+  $linked.row(rows, "try_catch_cases", try_catch_cases);
+  $linked.row(rows, "_try_arm_exits", _try_arm_exits);
+  $linked.row(rows, "try_lowering", try_lowering);
+  $linked.row(rows, "_try_landing", _try_landing);
+  $linked.row(rows, "_try_exits", _try_exits);
+  $linked.row(rows, "_try_catch_clause", _try_catch_clause);
+  $linked.row(rows, "_try_check_label", _try_check_label);
+  $linked.row(rows, "_try_finalizer_label", _try_finalizer_label);
   $linked.row(rows, "_operator_rows", _operator_rows);
   $linked.row(rows, "_operator_cases", _operator_cases);
   $linked.row(rows, "x2c_literal_string", x2c_literal_string);
@@ -502,6 +649,10 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_tag_constant_rows", _tag_constant_rows);
   $linked.row(rows, "_tag_group_top", _tag_group_top);
   $linked.row(rows, "_tag_types", _tag_types);
+  $linked.row(rows, "try_catch_patterns", try_catch_patterns);
+  $linked.row(rows, "try_catch_site", try_catch_site);
+  $linked.row(rows, "try_landing", try_landing);
+  $linked.row(rows, "try_exits_placement", try_exits_placement);
   $linked.row(rows, "_field_copies", _field_copies);
   $linked.row(rows, "_field_sets", _field_sets);
   $linked.row(rows, "source_return_type", source_return_type);
