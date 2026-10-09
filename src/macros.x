@@ -2367,10 +2367,7 @@ void Compiler.install_compile_time_effects(Compiler c, List rows) {
       if (!c.kw_aliases) c.kw_aliases = {};
       c.kw_aliases[alias] = %(imported-macro $definition);
     }
-    case %(compile-time rewrite ?point ?kind ?name ?shape ?holes):
-      c._register_rewrite(
-        point, c.thaw_declaration_syntax(kind), name,
-        c.thaw_declaration_syntax(shape), c.thaw_declaration_syntax(holes));
+    case %(compile-time rewrite *): c._install_rewrite(row);
     case %(compile-time lisp ?form (source ?path ?site)): {
       Token token = c.thaw_declaration_syntax(site);
       String file = home_absolute_path(path), text = NULL;
@@ -2485,32 +2482,124 @@ static void Compiler._record_alias(Compiler c, Map aliases) {
 
 static typedef struct RewriteRule {
   String name;
+  Symbol point;
+  Var kind;
   MacroMatcher matcher;
-  int builtin;
+  int builtin, prepared;
 } *RewriteRule;
 
 static Var RewriteRule.var(RewriteRule rule) => Var.new(<p48>, rule);
 static RewriteRule Var.rewrite_rule(Var value) => value.pointer();
 
+/* A unit's own rule derives its matcher when it is registered. */
+static RewriteRule _rewrite_rule(
+  Symbol point, Var kind, String name, Macro shape, List holes,
+  int builtin) {
+  RewriteRule rule = Scope.calloc(1, sizeof(struct RewriteRule));
+  *rule = (struct RewriteRule){
+    name, point, kind, shape.matcher(holes), builtin, 1};
+  return rule;
+}
+
+/* Rules the compiler prelude installs, by frozen row. Each is thawed once
+   per process and shared by every unit; its matcher is derived on the first
+   probe of its family. A row whose thawing records a cache key, binding, or
+   origin in its unit is thawed for each unit instead. */
+static Map shipped_rules = NULL, static Scope shipped_scope = NULL;
+
+static void _shipped_shutdown(void) {
+  shipped_scope.destroy();
+  shipped_scope = NULL;
+  shipped_rules = NULL;
+}
+
+/* Registers an installed rewrite row. */
+static void Compiler._install_rewrite(Compiler c, List row) {
+  Var shared = shipped_rules ? shipped_rules[row] : void;
+  if (shared is void && c.builtin_defs) shared = c._ship_rewrite(row);
+  if (shared is <p48>) {
+    c._register_rewrite(shared.rewrite_rule());
+    return;
+  }
+  match (row) case %(compile-time rewrite ?point ?kind ?name ?shape ?holes):
+    c._register_rewrite(_rewrite_rule(
+      point, c.thaw_declaration_syntax(kind), name,
+      c.thaw_declaration_syntax(shape), c.thaw_declaration_syntax(holes),
+      c.builtin_defs));
+}
+
+/* The shared rule for a prelude row, or 0 when the row is bound to its
+   unit. The shared rule derives its matcher on first use. */
+static Var Compiler._ship_rewrite(Compiler c, List row) {
+  $scope(&shipped_scope) {
+    if (!shipped_rules) {
+      Scope.shutdown_hook(_shipped_shutdown);
+      shipped_rules = {};
+    }
+    _require_owned(row.try_own());
+    Var shared = 0;
+    match (row)
+      case %(compile-time rewrite ?point ?kind ?name ?shape ?holes): {
+        if (_unit_bound(row)) break;
+        List thawed = %(${c.thaw_declaration_syntax(kind)}
+          ${c.thaw_declaration_syntax(shape)}
+          ${c.thaw_declaration_syntax(holes)});
+        _require_owned(thawed.try_own());
+        Var (own_kind, own_shape, own_holes) = thawed;
+        RewriteRule rule = Scope.calloc(1, sizeof(struct RewriteRule));
+        *rule = (struct RewriteRule){
+          name, point, own_kind, {own_shape, own_holes, NULL}, 1, 0};
+        shared = rule.var();
+      }
+    shipped_rules[row] = shared;
+    return shared;
+  }
+}
+
+static void _require_owned(int owned) {
+  if (owned) return;
+  fprintf(stderr, "x2c: could not retain a shipped rewrite rule\n");
+  abort();
+}
+
+static int _unit_bound(Var syntax) {
+  if (syntax is not <list>) return 0;
+  match (syntax)
+    case %((!or declaration-cache declaration-binding declaration-origin) *):
+      return 1;
+  foreach (Var child, syntax.list()) if (_unit_bound(child)) return 1;
+  return 0;
+}
+
+/* The first probe of a shared rule's family derives its matcher with the
+   process lifetime of the rule. */
+static MacroMatcher *RewriteRule.prepared_matcher(RewriteRule rule) {
+  if (!rule.prepared) {
+    $scope(&shipped_scope) {
+      MacroMatcher matcher = rule.matcher.shape.matcher(rule.matcher.holes);
+      _require_owned(matcher.pattern.try_own());
+      rule.matcher = matcher;
+    }
+    rule.prepared = 1;
+  }
+  return &rule.matcher;
+}
+
 /* A coarse category selects candidates; each retained pattern decides whether
    the translator applies. Only the active translator is excluded while its
    replacement binds, so independent translations can compose. User rules
    retain registration order ahead of builtin defaults. */
-static void Compiler._register_rewrite(
-  Compiler c, Symbol point, Var kind, String name, Macro shape, List holes) {
+static void Compiler._register_rewrite(Compiler c, RewriteRule rule) {
   if (!c.rewrite_rules) c.rewrite_rules = {};
   Var stored;
   Map kinds;
-  if (c.rewrite_rules.try_get(point, stored)) kinds = stored;
-  else c.rewrite_rules[point] = kinds = {};
-  List rows = kinds.try_get(kind, stored) ? stored.list() : NULL;
+  if (c.rewrite_rules.try_get(rule.point, stored)) kinds = stored;
+  else c.rewrite_rules[rule.point] = kinds = {};
+  List rows = kinds.try_get(rule.kind, stored) ? stored.list() : NULL;
   foreach (RewriteRule prior, rows)
-    if (prior.name == name && prior.matcher.shape == shape &&
-        prior.matcher.holes == holes) return;
-  RewriteRule rule = Scope.calloc(1, sizeof(struct RewriteRule));
-  rule.name = name;
-  rule.matcher = shape.matcher(holes);
-  rule.builtin = c.builtin_defs;
+    if (prior.name == rule.name &&
+        prior.matcher.shape == rule.matcher.shape &&
+        prior.matcher.holes == rule.matcher.holes) return;
   Array ordered = [];
   int inserted = 0;
   foreach (RewriteRule prior, rows) {
@@ -2521,7 +2610,7 @@ static void Compiler._register_rewrite(
     ordered.push(prior);
   }
   if (!inserted) ordered.push(rule);
-  kinds[kind] = ordered.list_free();
+  kinds[rule.kind] = ordered.list_free();
 }
 
 static List Compiler._rewrite_candidates(Compiler c, Symbol point, Var kind) {
@@ -2555,7 +2644,7 @@ static List Compiler._rewrite(
   if (c.meta_body || c.macro_holes) return NULL;
   foreach (RewriteRule rule, c._rewrite_candidates(point, kind)) {
     if (c.active_rewrites.contains(rule) ||
-        !c.matches_macro(rule.matcher, source)) continue;
+        !c.matches_macro(*rule.prepared_matcher(), source)) continue;
     Var result = c.apply_meta_function(rule.name, %($source), site);
     if (result is void || result.equal(source) ||
         (result is <list> && !result.list())) continue;
@@ -4317,7 +4406,7 @@ static Map Compiler._code_effects(Compiler c, Var effects) {
   foreach (List effect, effects)
     match (effect) {
       case %(rewrite ?point ?kind ?name ?shape ?holes): {
-        c._register_rewrite(point, kind, name, shape, holes);
+        c._register_rewrite(_rewrite_rule(point, kind, name, shape, holes, 0));
         c.record_compile_time_effect(
           %(compile-time rewrite $point ${c.freeze_declaration_syntax(kind)}
             $name ${c.freeze_declaration_syntax(shape)}
