@@ -47,8 +47,6 @@ static long double _integer_limit(int bits);
 
 static Var _convert_to_float(X2CVarNumeric * source, Symbol target);
 
-static Var Symbol_var(Symbol);
-
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -57,19 +55,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _1 = Symbol_var(1307939018);
 }
 
-int Var_encoding_valid(Var);
-
-int Var_is_void(Var);
-
-static Var String_var(String);
-
-int Var_known_tag(Symbol);
-
-Symbol Var_tag(Var);
-
 int Var_numeric_info(Symbol tag, X2CVarNumericInfo * out);
-
-static Var List_var(List);
 
 #include "error.h"
 
@@ -120,8 +106,6 @@ Var Var_convert(Var value, Symbol target){
   return info.floating ? _convert_to_float(&(source), target) : _convert_to_integer(&(source), target, info.unsigned_value, info.bits);
 }
 
-int SymbolSet_index(SymbolSet, Symbol);
-
 int Var_numeric_info(Symbol tag, X2CVarNumericInfo * out){
   if(! out) return 0;
   if(tag == 28764 || tag == 2050956 || tag == 1854348) tag = 3356265;
@@ -161,23 +145,7 @@ void Var_numeric_decode(Var value, X2CVarNumeric * out){
   _numeric_decode(value, info, &((* out)));
 }
 
-static unsigned Var_payload32(Var);
-
 unsigned long long Var_width_mask(int bits);
-
-long Var_long_value(Var);
-
-unsigned long Var_ulong_value(Var);
-
-long long Var_long_long_value(Var);
-
-unsigned long long Var_ulong_long_value(Var);
-
-static float Var_decode_f32(Var);
-
-static double Var_decode_f64(Var);
-
-long double Var_long_double_value(Var);
 
 static void _numeric_decode(Var value, X2CVarNumericInfo info, X2CVarNumeric * out){
   X2CVarNumeric decoded ={
@@ -245,28 +213,6 @@ static long double _integer_limit(int bits){
   return(long double)(1ull << bits);
 }
 
-static Var Var_box_i8(char);
-
-static Var Var_box_u8(uchar);
-
-static Var Var_box_i16(short);
-
-static Var Var_box_u16(ushort);
-
-static Var Var_box_i32_bits(unsigned);
-
-static Var Var_box_u32(unsigned);
-
-Var Var_new(Symbol, ...);
-
-Var Var_box_long(long);
-
-Var Var_box_ulong(unsigned long);
-
-Var Var_box_long_long(long long);
-
-Var Var_box_ulong_long(unsigned long long);
-
 Var Var_integer_box(Symbol target, unsigned long long raw){
   X2CVarNumericInfo info;
   if(! Var_numeric_info(target, &(info)) || info.floating){
@@ -322,15 +268,9 @@ long long Var_signed_from_bits(unsigned long long raw, int bits){
   return value;
 }
 
-static Var Var_box_f32(float);
-
 float X2CVarNumeric_f32(X2CVarNumeric * value);
 
-static Var Var_box_f64(double);
-
 double X2CVarNumeric_f64(X2CVarNumeric * value);
-
-Var Var_box_long_double(long double);
 
 long double X2CVarNumeric_ldouble(X2CVarNumeric * value);
 

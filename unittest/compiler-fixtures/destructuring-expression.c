@@ -14,10 +14,6 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
-static Var int_var(int);
-
-List cons(Var, List);
-
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -27,10 +23,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _2 = cons(_1, NULL);
   _3 = cons(_0, _2);
 }
-
-Var List_getindex(List, int);
-
-long Var_integer(Var);
 
 int main(void){
   x2c_initialize();

@@ -7,8 +7,6 @@
 #include "include-recursion-a.h"  /* a trailing comment is not a target */
 static const char * red_herring = "/*";
 
-RecursionPair recursion_pair(int);
-
 int main(void){
   x2c_initialize();
   RecursionPair pair = recursion_pair(4);

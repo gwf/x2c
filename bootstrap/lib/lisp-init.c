@@ -88,10 +88,6 @@ static List _list(Var value, String operation){
   return Var_list(value);
 }
 
-Var lisp_cdr(Var);
-
-Var lisp_car(Var);
-
 Var lisp_last(Var values){
   if(_nil(values)) return values;
   while(! _nil(lisp_cdr(values))) values = lisp_cdr(values);
@@ -257,8 +253,6 @@ Var lisp_bound(Var bindings, Var name){
 
 List List_search_replace(List, Var, Var);
 
-Var lisp_match_replace(List, Var, Var);
-
 Var lisp_search_replace(Var input, Var pat, Var template){
   if(! _init_guard_) _file_init_();
   List list = _list(input, _1);
@@ -321,8 +315,6 @@ Var lisp_binder_lets(Var bindings, Var binders){
   }
   return List_var(List_reverse(reversed));
 }
-
-Var lisp_string_append(String, String);
 
 Var lisp_string_append_all(List strings){
   if(! _init_guard_) _file_init_();

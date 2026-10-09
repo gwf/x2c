@@ -362,11 +362,7 @@ Buffer Tokenizer_write_str(Tokenizer value, Buffer out){
 
 Buffer Buffer_new(size_t);
 
-void x2c_cleanup_push(X2CCleanup *);
-
 String Buffer_str(Buffer);
-
-void x2c_cleanup_leave(X2CCleanup *);
 
 String Tokenizer_str(Tokenizer value){
   Buffer _x2c_macro_out_0 = Buffer_new(0);

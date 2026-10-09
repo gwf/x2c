@@ -58,12 +58,6 @@ static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
 static Var _x2c_lambda_0(Var value);
 
-static Var int_var(int);
-
-List cons(Var, List);
-
-static Var Symbol_var(Symbol);
-
 #include "exception.h"
 
 
@@ -106,44 +100,10 @@ int ast_phase1_Pair_bump(ast_phase1_Pair pair, int delta){
   return pair.value;
 }
 
-Var List_getindex(List, int);
-
-int Var_int(Var);
-
-int List_try_next(List, List *, Var *);
-
-void x2c_cleanup_push(X2CCleanup *);
-
-void x2c_cleanup_leave(X2CCleanup *);
-
 #include "error.h"
 
 
 
-
-int x2c_error_catch_site_pending(ErrorCatchSite *);
-
-static Var List_var(List);
-
-ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
-
-void x2c_exception_push(ExceptionFrame *);
-
-void x2c_exception_landed(ExceptionFrame *);
-
-int x2c_exception_is_error_target(ExceptionFrame *);
-
-int x2c_error_catch_selected(ErrorHandler);
-
-void x2c_error_catch_detach(ErrorHandler);
-
-void x2c_exception_mark_handled(ExceptionFrame *);
-
-int x2c_exception_claim(ExceptionFrame *);
-
-void x2c_error_catch_close(ErrorHandler);
-
-void x2c_exception_leave(ExceptionFrame *);
 
 int main(void){
   x2c_initialize();

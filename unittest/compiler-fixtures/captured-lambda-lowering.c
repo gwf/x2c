@@ -80,14 +80,6 @@ _x2c_lambda_context_12;
 
 static Var _x2c_lambda_6(Func _x2c_lambda_closure_6, const FuncArg * _x2c_lambda_argv_6);
 
-static Var Symbol_var(Symbol);
-
-List cons(Var, List);
-
-static Var List_var(List);
-
-static Var String_var(String);
-
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -116,10 +108,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _21 = cons(_20, _11);
   _x2c_static_initialize_0();
 }
-
-static Var int_var(int);
-
-Func Func_new_context(FuncAdapter, List, const void *, size_t);
 
 static Func add_to(int bias){
   return({
@@ -151,8 +139,6 @@ static Func nest(int first){
   );
 }
 
-void * Scope_memdup(const void *, size_t);
-
 static Func counter(int value){
   int * _x2c_lambda_cell_0 = Scope_memdup((const void *) &(int){
     value
@@ -166,20 +152,6 @@ static Func counter(int value){
   }
   );
 }
-
-Func Var_func(Var);
-
-static int List_truth(List);
-
-List x2c_func_reference_type(Func, unsigned, unsigned);
-
-static FuncArg FuncArg_reference(const void *, List);
-
-static FuncArg FuncArg_value(Var);
-
-Var Func_apply(Func, unsigned, const FuncArg *);
-
-long Var_integer(Var);
 
 int main(void){
   x2c_initialize();
@@ -224,10 +196,6 @@ int main(void){
   return 0;
 }
 
-Var x2c_func_value_argument(Func, const FuncArg *, unsigned, Symbol);
-
-const void * Func_context(Func);
-
 static Var _x2c_lambda_0(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0){
   int value = Var_int(Var_convert(x2c_func_value_argument(_x2c_lambda_closure_0, _x2c_lambda_argv_0, 0, 3453797), 3453797));
   const _x2c_lambda_context_0 * _x2c_lambda_context_value_0 =(const _x2c_lambda_context_0 *) Func_context(_x2c_lambda_closure_0);
@@ -248,8 +216,6 @@ static Var _x2c_lambda_3(Func _x2c_lambda_closure_3, const FuncArg * _x2c_lambda
   return int_var(value + Var_int(Var_convert(_x2c_lambda_context_value_3 -> _x2c_lambda_capture_4, 3453797)) + Var_int(Var_convert(_x2c_lambda_context_value_3 -> _x2c_lambda_capture_5, 3453797)));
   ;
 }
-
-Var Func_var(Func);
 
 static Var _x2c_lambda_2(Func _x2c_lambda_closure_2, const FuncArg * _x2c_lambda_argv_2){
   int second = Var_int(Var_convert(x2c_func_value_argument(_x2c_lambda_closure_2, _x2c_lambda_argv_2, 0, 3453797), 3453797));

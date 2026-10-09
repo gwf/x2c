@@ -64,48 +64,12 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _5 = String_new(".h");
 }
 
-int CliRequest_inspects(CliRequest);
-
-static int String_truth(String);
-
-static Var String_var(String);
-
-String String_rstrip(String, char *);
-
 String Path_stem(Path);
 
 #include "error.h"
 
 
 
-
-int x2c_error_catch_site_pending(ErrorCatchSite *);
-
-static Var List_var(List);
-
-static Var Symbol_var(Symbol);
-
-ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
-
-void x2c_exception_push(ExceptionFrame *);
-
-void file_publish(List);
-
-void x2c_error_catch_close(ErrorHandler);
-
-void x2c_exception_leave(ExceptionFrame *);
-
-void x2c_exception_landed(ExceptionFrame *);
-
-int x2c_exception_is_error_target(ExceptionFrame *);
-
-int x2c_error_catch_selected(ErrorHandler);
-
-void x2c_error_catch_detach(ErrorHandler);
-
-void x2c_exception_mark_handled(ExceptionFrame *);
-
-Var List_assoc(List, Var);
 
 int translation_depfile_write(CliRequest request, Compiler compiler, String input, String output_dir){
   if(! _init_guard_) _file_init_();
@@ -174,35 +138,7 @@ int translation_depfile_write(CliRequest request, Compiler compiler, String inpu
   return 0;
 }
 
-Array Array_new(void);
-
-void x2c_cleanup_push(X2CCleanup *);
-
-int Map_try_next(Map, unsigned *, Var *, Var *);
-
-static int Var_is_row(Var, unsigned, unsigned long, unsigned long);
-
-int String_startswith(String, String);
-
-static String Var_string(Var);
-
-Var Array_push(Array, Var);
-
-Array Array_sort(Array);
-
-Buffer Buffer_new(size_t);
-
-Buffer Buffer_write_char(Buffer, char);
-
-int Array_try_next(Array, int *, Var *);
-
 Path Path_absolute(Path);
-
-Buffer Buffer_write(Buffer, const char *);
-
-String Buffer_str(Buffer);
-
-void x2c_cleanup_leave(X2CCleanup *);
 
 static String _contents(CliRequest request, Compiler compiler, String input, String output_dir){
   Array paths = Array_new();
@@ -341,8 +277,6 @@ static void _write_targets(Buffer out, CliRequest request, String input, String 
   _write_word(out, String_join(NULL, cons(String_var(base), cons(String_var(_5), NULL))));
 }
 
-int String_equal(String, String);
-
 static void _write_phony(Buffer out, Array paths, String primary){
   {
     String path;
@@ -361,8 +295,6 @@ static void _write_phony(Buffer out, Array paths, String primary){
   }
 
 }
-
-int String_try_next(String, int *, int *);
 
 static void _write_word(Buffer out, String word){
   if(! String_truth(word)) Buffer_write(out, "\\ ");
@@ -384,10 +316,6 @@ static void _write_word(Buffer out, String word){
   }
 
 }
-
-void Buffer_free(Buffer);
-
-List Array_list_free(Array);
 
 List translation_depfile_parse(String text){
   const char * ch = text;
@@ -417,24 +345,16 @@ List translation_depfile_parse(String text){
   return Array_list_free(paths);
 }
 
-size_t Buffer_len(Buffer);
-
-Buffer Buffer_clear(Buffer);
-
 static void _push_word(Array paths, Buffer word){
   if(! Buffer_len(word)) return;
   Array_push(paths, String_var(Buffer_str(word)));
   Buffer_clear(word);
 }
 
-void Buffer_cleanup(Buffer);
-
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;
   Buffer_cleanup((*(Buffer *) _x2c_defer_data_0->_x2c_defer_capture_0));
 }
-
-void Array_cleanup(Array);
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
   _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;

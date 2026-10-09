@@ -9,7 +9,11 @@
 #include "string.h"
 #include "symbol.h"
 #include "symbolset.h"
+typedef List Macro;
+
 typedef List Type;
+
+typedef List Code;
 
 typedef List TypeInfo;
 
@@ -32,6 +36,22 @@ String x2c_source_text(Var syntax);
 String x2c_binding_spelling(Var syntax);
 
 List x2c_syntax_type(List value);
+
+Type Code_type(Code value);
+
+Var Code_value(Code code);
+
+Code Code_register_rewrite(Code function, Macro shape, List holes);
+
+Code Code_register_after_initialization(Code function, Macro shape, List holes);
+
+int Type_is_named(Type type, String name);
+
+Type Type_numeric(Type type);
+
+int Type_is_text(Type type);
+
+Code Type_protocol_member(Type type, String name);
 
 Var x2c_literal_value(Var syntax);
 
@@ -79,6 +99,8 @@ String x2c_embed_text(Var path);
 
 void x2c_diagnostic_fail(String message, List notes);
 
+void x2c_diagnostic_fail_at(Var node, Symbol category, String message, List notes);
+
 void x2c_diagnostic_warn(String message, List notes);
 
 Map x2c_meta_definition_hashes(void);
@@ -88,14 +110,6 @@ static const SymbolSet _base_keywords =(SymbolSet) "\001\000\000\000\015\000\000
 static const SymbolSet _type_qualifiers =(SymbolSet) "\001\000\000\000\003\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\000\003\001\000\000\000\350\164\157\000\000\000\000\000\350\110\222\316\042\001\000\000\012\113\064\260\147\001\000\000";
 
 static Var _modifier_syntax(Var modifier);
-
-static Var Symbol_var(Symbol);
-
-static Var String_var(String);
-
-List cons(Var, List);
-
-static Var List_var(List);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -194,14 +208,10 @@ List x2c_literal_string(String value){
   return cons(_0, cons(_4, cons(List_var(cons(_5, cons(List_var(cons(_6, cons(List_var(cons(_0, cons(_4, cons(List_var(cons(_7, cons(_4, cons(String_var(value), NULL)))), NULL)))), NULL))), NULL))), NULL)));
 }
 
-static String int_str(int);
-
 List x2c_literal_int(int value){
   if(! _init_guard_) _file_init_();
   return cons(_0, cons(_10, cons(List_var(cons(_7, cons(_10, cons(String_var(int_str(value)), NULL)))), NULL)));
 }
-
-String Symbol_str(Symbol);
 
 List x2c_literal_symbol(Symbol value){
   if(! _init_guard_) _file_init_();
@@ -268,9 +278,6 @@ default: break;
 return NULL;
 }
 
-int List_try_next(List, List *, Var *);
-static List Var_list(Var);
-List List_reverse(List);
 List x2c_parameters_arguments(List value){
   if(! _init_guard_) _file_init_();
   {
@@ -325,12 +332,6 @@ default: ;  static MatchCaptureSite _x2c_match_site_5;  if (x2c_match_site_try_c
 return List_var(node);
 }
 
-static int List_truth(List);
-static List List_cdr(List);
-static Var List_car(List);
-static int Var_is_row(Var, unsigned, unsigned long, unsigned long);
-int Var_is(Var, Symbol);
-int SymbolSet_contains(SymbolSet, Symbol);
 List type_base_suffix(List type){
   for(;  List_truth(type);  type = List_cdr(type)){
     Var head = List_car(type);  if(Var_is_row(head, 11, 7, 1) ||(Var_is(head, 1328354264) && SymbolSet_contains(_base_keywords, Var_symbol(head)))) return type;
@@ -338,12 +339,6 @@ List type_base_suffix(List type){
   return NULL;
 }
 
-Var List_last(List);
-Array Array_new(void);
-Var Array_push(Array, Var);
-String Var_str(Var);
-String List_repr(List);
-List Array_list_free(Array);
 String type_name_error(List type){
   if(! _init_guard_) _file_init_();  Var name = List_last(type);  if(! Var_is(name, 826970) &&(! Var_is(name, 1328354264) || Var_equal(name, Symbol_var(54)) || SymbolSet_contains(_base_keywords, Var_symbol(name)) || SymbolSet_contains(_type_qualifiers, Var_symbol(name)))) return NULL;  Array fixed = Array_new();  for(List rest = type;  List_truth(List_cdr(rest));  rest = List_cdr(rest)) Array_push(fixed, List_car(rest));  Array_push(fixed, String_var(Var_str(name)));  String wanted = List_repr(Array_list_free(fixed));  return({
     Var _x2c_literal_part_3 = String_var(Var_str(name));  String_join(NULL, cons(String_var(_70), cons(_x2c_literal_part_3, cons(String_var(_71), cons(String_var(wanted), NULL)))));
@@ -351,7 +346,6 @@ String type_name_error(List type){
   );
 }
 
-List List_append(List, List);
 List type_declaration_parts(List type){
   if(! _init_guard_) _file_init_();  List base = type_base_suffix(type);  if(! List_truth(base)) return cons(List_var(type), _72);  List reversed = NULL, qualifiers = NULL;  for(List rest = type;  rest != base;  rest = List_cdr(rest)) reversed = cons(List_car(rest), reversed);  while(List_truth(reversed) && Var_is(List_car(reversed), 1328354264) && SymbolSet_contains(_type_qualifiers, Var_symbol(List_car(reversed)))){
     qualifiers = cons(List_car(reversed), qualifiers);  reversed = List_cdr(reversed);
@@ -368,7 +362,6 @@ List type_declaration_parts(List type){
   );
 }
 
-Var List_getindex(List, int);
 static Var _modifier_syntax(Var modifier){
 
   {

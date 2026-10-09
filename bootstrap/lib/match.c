@@ -293,12 +293,6 @@ static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3);
 
 static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4);
 
-static Var Symbol_var(Symbol);
-
-static Var List_var(List);
-
-List cons(Var, List);
-
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -326,8 +320,6 @@ int Var_is_binder(Var atom){
   return _binder_kind(atom) > 0;
 }
 
-int Var_is(Var, Symbol);
-
 int Var_is_match_op(Var atom){
   if(! _init_guard_) _file_init_();
   if(! Var_is(atom, 1328354264)) return 0;
@@ -337,16 +329,6 @@ int Var_is_match_op(Var atom){
   }
   return 0;
 }
-
-char Atom_first(Atom);
-
-void Symbol_decode(Symbol, char *);
-
-void * Var_pointer(Var);
-
-static int scan_ascii_alpha(int);
-
-static int scan_ascii_digit(int);
 
 static int _binder_kind(Var atom){
   char sigil = Atom_first(atom);
@@ -376,12 +358,6 @@ static int _reserved_predicate(Var atom){
   return Var_is(atom, 1328354264) &&(Var_equal(atom, Symbol_var(1997793406138)) || Var_equal(atom, Symbol_var(1860354452666)) || Var_equal(atom, Symbol_var(1997882)));
 }
 
-static int List_truth(List);
-
-static Var List_car(List);
-
-static List List_cdr(List);
-
 static List _normalize_pattern(List pattern){
   if(! List_truth(pattern) || Var_equal(List_car(pattern), Symbol_var(2050325770))) return pattern;
   List normalized = _normalize_elements(pattern);
@@ -396,22 +372,6 @@ static List _normalize_pattern(List pattern){
   }
   );
 }
-
-Block Block_new(size_t);
-
-void x2c_cleanup_push(X2CCleanup *);
-
-static int Var_is_row(Var, unsigned, unsigned long, unsigned long);
-
-static List Var_list(Var);
-
-static void Block_push(Block, const void *);
-
-int Var_equal(Var, Var);
-
-int List_equal(List, List);
-
-void x2c_cleanup_leave(X2CCleanup *);
 
 static List _normalize_elements(List elements){
   Block spine = Block_new(sizeof(NormalizedCell));
@@ -475,8 +435,6 @@ MatchCaptureLayout MatchCaptureLayout_analyze(Var pattern){
   return layout;
 }
 
-int Var_is_nil(Var);
-
 static void MatchLayoutBuilder__collect(MatchLayoutBuilder * b, Var pattern){
   if(! Var_is_row(pattern, 9, 7, 4)){
     MatchLayoutBuilder__atom(&((* b)), pattern);
@@ -520,8 +478,6 @@ static const char * MatchLayoutBuilder__malformed(MatchLayoutBuilder * b){
   if((* b).past_capacity) return "binder-capacity";
   return NULL;
 }
-
-void * Scope_calloc(size_t, size_t);
 
 static MatchCaptureLayout MatchLayoutBuilder__layout(MatchLayoutBuilder * b, Var normalized, const char * malformed){
   size_t bytes = sizeof(struct MatchCaptureLayout) + sizeof(Atom) *(* b).count;
@@ -569,13 +525,9 @@ static MatchSlots MatchCaptureLayout__guard_slots(MatchCaptureLayout m, Var op, 
   ;
 }
 
-static List List_cddr(List);
-
 static int _set_capture(List args){
   return List_truth(args) && List_truth(List_cdr(args)) && ! List_truth(List_cddr(args)) && Var_is_atom_binder(List_car(args));
 }
-
-int List_try_next(List, List *, Var *);
 
 static MatchSlots MatchCaptureLayout__sequence_slots(MatchCaptureLayout m, List patterns){
   MatchSlots slots ={
@@ -644,8 +596,6 @@ static int MatchCaptureLayout__find(MatchCaptureLayout layout, Atom binder){
   return - 1;
 }
 
-void Scope_free(void *);
-
 void MatchCaptureLayout_free(MatchCaptureLayout layout){
   if(! _init_guard_) _file_init_();
   if(layout) Scope_free(layout);
@@ -681,10 +631,6 @@ int MatchCaptureBuffer_has(MatchCaptureBuffer * m, int index){
 static int _capture_bit(unsigned long bits, int index){
   return(int)((bits >> index) & 1UL);
 }
-
-String String_new(const char *);
-
-static Var String_var(String);
 
 #include "error.h"
 
@@ -726,12 +672,6 @@ int MatchPlan_try_capture(MatchPlan plan, List input, MatchCaptureBuffer * captu
 
 int MatchPlan_admits(MatchPlan plan, Var input, Var(* view)(Var));
 
-MatchMachine * MatchMachine_acquire(MachineStats *);
-
-MachineView MachineProgram_view(MachineProgram);
-
-void MatchMachine_release(MatchMachine *);
-
 static int MatchPlan__capture(MatchPlan m, Var input, MatchCaptureBuffer * captures, MachineStats * stats){
   if(! MatchPlan_admits(m, input, NULL)) return 0;
   MatchMachine * machine = MatchMachine_acquire(stats);
@@ -772,12 +712,6 @@ static int MatchPlan__key_equal(MatchPlan plan, Var value, Var key){
   return plan -> key_bits ? value.u64 == key.u64 : Var_equal(value, key);
 }
 
-void MatchMachine_begin(MatchMachine *, MachineView, Var);
-
-void MatchMachine_run(MatchMachine *);
-
-void MatchMachine_finish(MatchMachine *);
-
 static int _run_capture(MachineView view, MatchMachine * m, Var input, MatchCaptureBuffer * captures){
   if(! captures || captures -> capacity < view.binder_count ||(view.binder_count && ! captures -> values)) return - 1;
   MatchMachine_begin(&((* m)), view, input);
@@ -788,8 +722,6 @@ static int _run_capture(MachineView view, MatchMachine * m, Var input, MatchCapt
   MatchMachine_finish(&((* m)));
   return result;
 }
-
-List MatchMachine_materialize_span(MatchMachine *, MachineSpan);
 
 static int _commit(MachineView view, MatchMachine * m, MatchCaptureBuffer * captures){
   Var values[MACHINE_BINDER_MAX];
@@ -855,8 +787,6 @@ int MatchPlan_try_search(MatchPlan plan, List input, Var * out_match, List * out
   if(! MatchPlan__prepared(plan, "MatchPlan.try_search") || ! out_match || ! out_bindings) return - 1;
   return MatchPlan__first(plan, input, out_match, out_bindings);
 }
-
-void Block_free(Block);
 
 static int MatchPlan__first(MatchPlan plan, List input, Var * out_match, List * out_bindings){
   MatchMachine * machine = MatchMachine_acquire(NULL);
@@ -971,8 +901,6 @@ static int MatchWalk__all(MatchWalk * walk, Var input, int include_empty){
   return 0;
 }
 
-static void Block_truncate(Block, size_t);
-
 static void MatchWalk__answer(MatchWalk * walk, size_t base){
   Block hits =(* walk).spine;
   for(size_t i = hits -> length;  i > base;  i --)(* walk).results = cons(_spine_get(hits, i - 1), (* walk).results);
@@ -1075,10 +1003,6 @@ static int MatchPlan__replace(MatchPlan plan, List input, Var template, Var * ou
   return 1;
 }
 
-Var List_assoc(List, Var);
-
-int Var_is_void(Var);
-
 static Var ReplacementSource__value(ReplacementSource * source, Var binder){
   if((* source).captures) return MatchCaptureLayout__captured((* source).layout, (* source).captures, binder);
   Var bound = List_assoc((* source).bindings, binder);
@@ -1101,8 +1025,6 @@ List List_replace(List template, List bindings){
   ;
   return Var_list(_replace(List_var(template), &(source)));
 }
-
-static Var List_cadr(List);
 
 static Var _replace(Var input, ReplacementSource * source){
   if(_named_binder(input)) return ReplacementSource__value(&((* source)), input);
@@ -1163,8 +1085,6 @@ static Var _replace(Var input, ReplacementSource * source){
 
 }
 
-Symbol Var_kind(Var);
-
 static int _pattern_borrowable(Var value, int depth, int permanent_lists){
   if(depth >= 128) return 0;
   switch(Var_kind(value)){
@@ -1176,10 +1096,6 @@ static int _pattern_borrowable(Var value, int depth, int permanent_lists){
 }
 
 int String_is_permanent(String);
-
-static String Var_string(Var);
-
-int Pool_is_permanent(Var);
 
 static int _object_borrowable(Var value, int depth, int permanent_lists){
   if(Var_is(value, 826970)) return String_is_permanent((String) Var_pointer(value));
@@ -1250,12 +1166,6 @@ static MatchPlan MatchCaptureSite__publish(MatchCaptureSite * m, Var pattern){
 
 }
 
-void Scope_push(Scope *);
-
-MatchPlan MatchPlan_prepare(Var);
-
-int List_try_own(List);
-
 static void MatchCaptureSite__prepare(MatchCaptureSite * site, Var pattern){
   if(! MatchPlan_borrowable(pattern, 1)){
     __atomic_store_n(& site -> refused, 1, __ATOMIC_RELEASE);
@@ -1288,8 +1198,6 @@ static void MatchCaptureSite__prepare(MatchCaptureSite * site, Var pattern){
   if(Var_is_row(plan -> layout -> normalized, 9, 7, 4)) List_try_own(Var_list(plan -> layout -> normalized));
   __atomic_store_n(& site -> plan, plan, __ATOMIC_RELEASE);
 }
-
-Scope Scope_new_named(const char *);
 
 void x2c_match_initialize(void);
 
@@ -1415,17 +1323,11 @@ List x2c_match_site_search_replace(MatchCaptureSite * site, List input, Var pat,
   return result;
 }
 
-int MatchCache_try_capture(MatchCache, List, Var, MatchCaptureBuffer *, const char *);
-
-MatchCache MatchCache_current(void);
-
 int x2c_match_try_capture(List input, Var pattern, MatchCaptureBuffer * captures){
   if(! _init_guard_) _file_init_();
   if(! captures) return 0;
   return MatchCache_try_capture(MatchCache_current(), input, pattern, &(* captures), "match");
 }
-
-int MatchCache_try_match(MatchCache, List, Var, List *, const char *);
 
 int List_try_match(List input, Var pat, List * out_bindings){
   if(! _init_guard_) _file_init_();
@@ -1439,8 +1341,6 @@ List List_match(List input, Var pat){
   return List_truth(bindings) ? bindings : _3;
 }
 
-int MatchCache_try_match_replace(MatchCache, List, Var, Var, Var *, const char *);
-
 int List_try_match_replace(List input, Var pat, Var template, Var * out){
   if(! _init_guard_) _file_init_();
   return out && MatchCache_try_match_replace(MatchCache_current(), input, pat, template, out, "List.try_match_replace");
@@ -1453,8 +1353,6 @@ List List_match_replace(List input, Var pat, Var template){
   return Var_is_row(result, 9, 7, 4) ? Var_list(result) : NULL;
 }
 
-int MatchCache_search(MatchCache, List, Var, List *, const char *);
-
 List List_search(List input, Var pat){
   if(! _init_guard_) _file_init_();
   List results;
@@ -1462,14 +1360,10 @@ List List_search(List input, Var pat){
   return results;
 }
 
-int MatchCache_try_search(MatchCache, List, Var, Var *, List *, const char *);
-
 int List_try_search(List input, Var pat, Var * out_match, List * out_bindings){
   if(! _init_guard_) _file_init_();
   return out_match && out_bindings && MatchCache_try_search(MatchCache_current(), input, pat, out_match, out_bindings, "List.try_search");
 }
-
-int MatchCache_search_replace(MatchCache, List, Var, Var, List *, const char *);
 
 List List_search_replace(List input, Var pat, Var template){
   if(! _init_guard_) _file_init_();
@@ -1484,22 +1378,14 @@ void x2c_match_initialize(void){
   _thread_check(status, "register shutdown");
 }
 
-void Scope_shutdown_hook(void(*)(void));
-
 static void _register_shutdown_once(void){
   Scope_shutdown_hook(_shutdown);
 }
-
-void x2c_match_thread_release(void);
 
 static void _shutdown(void){
   x2c_match_thread_release();
   _sites_shutdown();
 }
-
-void MatchPlan_free(MatchPlan);
-
-void Scope_destroy(Scope);
 
 static void _sites_shutdown(void){
   if(! match_capture_site_scope) return;
@@ -1515,8 +1401,6 @@ static void _sites_shutdown(void){
   match_capture_site_scope = NULL;
 }
 
-void Block_cleanup(Block);
-
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;
   Block_cleanup((*(Block *) _x2c_defer_data_0->_x2c_defer_capture_0));
@@ -1530,8 +1414,6 @@ static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
   _site_unlock();
 }
-
-void Scope_pop(void);
 
 static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3){
   Scope_pop();

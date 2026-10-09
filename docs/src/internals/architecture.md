@@ -496,6 +496,8 @@ status per fixture, so a change in any phase shows up as a diff.
 
 The modules under `src/` divide ownership as follows:
 
+- `src/component-access.x` -- builtin Array/Map mutation policies registered
+  through ordinary macro patterns and quotations;
 - `src/operator-ledger.x` -- operator precedence, compound assignment,
   and protocol-member mappings from one compile-time ledger;
 - `src/cli.x`, `src/main.x` -- option metadata and parsing, dispatch, logging,
@@ -703,3 +705,9 @@ A byte comparison can catch problems that behavioral tests miss. An iteration
 order that depends on addresses, or a generated-name counter that carries
 across translation units, shows up here while every suite still passes. The
 same phase run twice has to produce the same bytes.
+
+### Builtin collection component
+
+`src/component-access.x` registers Array and Map mutations through ordinary
+macro patterns and quotations. `lib/rewrite.x` supplies the decorator. Binding,
+index admission, evaluation order, and cleanup remain compiler responsibilities.

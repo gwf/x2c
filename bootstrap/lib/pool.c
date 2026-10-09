@@ -466,10 +466,6 @@ _x2c_defer_env_14;
 static void _x2c_defer_cleanup_16(void * _x2c_defer_opaque_16);
 static void _x2c_defer_cleanup_17(void * _x2c_defer_opaque_17);
 static void _x2c_defer_cleanup_18(void * _x2c_defer_opaque_18);
-static Var String_var(String);
-static Var Symbol_var(Symbol);
-static Var unsigned_var(unsigned);
-static Var int_var(int);
 #include "error.h"
 
 
@@ -503,19 +499,10 @@ static Var * _record_value(PoolTable _x2c_macro_map_1, unsigned _x2c_macro_index
   struct PoolRecord * _x2c_macro_records_1 = _x2c_macro_map_1 -> entries;  return & _x2c_macro_records_1[_x2c_macro_index_1].val;
 }
 
-unsigned Var_hash(Var);
 static unsigned _table_hash(Var * _x2c_macro_key_0){
   return Var_hash(_x2c_macro_key_0[0]);
 }
 
-static List Var_list(Var);
-static int List_truth(List);
-int List_equal(List, List);
-static String Var_string(Var);
-static int String_truth(String);
-int String_equal(String, String);
-int Var_is(Var, Symbol);
-int Var_equal(Var, Var);
 static int _table_key_equal(Var * _x2c_macro_a_0, Var * _x2c_macro_b_0){
   if(Var_same(_x2c_macro_a_0[0], _x2c_macro_b_0[0])) return 1;  List _x2c_macro_alist_0 = Var_list(_x2c_macro_a_0[0]), _x2c_macro_blist_0 = Var_list(_x2c_macro_b_0[0]);  if(List_truth(_x2c_macro_alist_0) && List_truth(_x2c_macro_blist_0)) return List_equal(_x2c_macro_alist_0, _x2c_macro_blist_0);  String _x2c_macro_astr_0 = Var_string(_x2c_macro_a_0[0]), _x2c_macro_bstr_0 = Var_string(_x2c_macro_b_0[0]);  if(String_truth(_x2c_macro_astr_0) && String_truth(_x2c_macro_bstr_0)) return String_equal(_x2c_macro_astr_0, _x2c_macro_bstr_0);  return ! Var_is(_x2c_macro_a_0[0], 3313778) && ! Var_is(_x2c_macro_a_0[0], 26720) && Var_equal(_x2c_macro_a_0[0], _x2c_macro_b_0[0]);
 }
@@ -524,7 +511,6 @@ static int _table_value_equal(Var * _x2c_macro_a_1, Var * _x2c_macro_b_1){
   return Var_equal(_x2c_macro_a_1[0], _x2c_macro_b_1[0]);
 }
 
-int Var_is_void(Var);
 static void _table_value_valid(Var * _x2c_macro_value_0){
   if(Var_is_void(_x2c_macro_value_0[0])){
     static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/pool.x",.function = "_table_value_valid",.line = 77};  x2c_error_raise_n(& _x2c_error_site_2, 48270474208, 0);  __builtin_unreachable();
@@ -532,15 +518,10 @@ static void _table_value_valid(Var * _x2c_macro_value_0){
 
 }
 
-void Scope_free(void *);
 static void PoolTable__core_free(PoolTable _x2c_macro_map_2){
   if((void *) _x2c_macro_map_2 == 0) return;  Bytes_free(_x2c_macro_map_2 -> hashes);  Bytes_free(_x2c_macro_map_2 -> entries);  Scope_free(_x2c_macro_map_2);
 }
 
-void * Scope_malloc(size_t);
-Scope * Scope_top(void);
-Bytes Bytes_new(size_t);
-static Bytes Bytes_append(Bytes, const void *, size_t);
 static PoolTable PoolTable__core_new_capacity(PoolTable _x2c_macro_unused_0, unsigned _x2c_macro_capacity_2){
   (void) _x2c_macro_unused_0;  PoolTable _x2c_macro_map_3 = Scope_malloc(sizeof(struct PoolTable));  _x2c_macro_map_3 -> scope = * Scope_top();  _x2c_macro_map_3 -> hashes = Bytes_new(sizeof(unsigned));  _x2c_macro_map_3 -> hashes = Bytes_append(_x2c_macro_map_3 -> hashes, 0, _x2c_macro_capacity_2);  _x2c_macro_map_3 -> entries = Bytes_new(sizeof(struct PoolRecord));  _x2c_macro_map_3 -> entries = Bytes_append(_x2c_macro_map_3 -> entries, 0, _x2c_macro_capacity_2);  _x2c_macro_map_3 -> capacity = _x2c_macro_capacity_2;  _x2c_macro_map_3 -> mask = _x2c_macro_capacity_2 - 1;  _x2c_macro_map_3 -> used = 0;  return _x2c_macro_map_3;
 }
@@ -573,10 +554,6 @@ static void PoolTable__core_reinsert(PoolTable _x2c_macro_map_7, unsigned _x2c_m
   (void) _reinsert_error(_x2c_macro_cap_1, _x2c_macro_psl_0);
 }
 
-void x2c_cleanup_push(X2CCleanup *);
-void Scope_move(void *, Scope *);
-static Block Bytes_block(Bytes);
-void x2c_cleanup_leave(X2CCleanup *);
 static void PoolTable__core_expand(PoolTable _x2c_macro_map_8){
   unsigned * _x2c_macro_hashes_2 = _x2c_macro_map_8 -> hashes;  struct PoolRecord * _x2c_macro_entries_1 = _x2c_macro_map_8 -> entries;  unsigned _x2c_macro_cap_2 = _x2c_macro_map_8 -> capacity;  if(_x2c_macro_cap_2 > ~ 0u / 2){
     static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/pool.x",.function = "PoolTable__core_expand",.line = 80};  x2c_error_raise_n(& _x2c_error_site_3, 1358596898646632, 1, Symbol_var(1265290), unsigned_var(_x2c_macro_cap_2));  __builtin_unreachable();
@@ -925,8 +902,6 @@ static int Pool__owns_locked(Pool pool, Var key){
   Var found = PoolTable__get_hashed(pool -> table, key, Var_hash(key));
   return ! Var_is_void(found) && Var_same(found, key);
 }
-
-void * Scope_malloc_in(Scope *, size_t);
 
 void * Pool_malloc(Pool inner, size_t size){
   if(! _init_guard_) Pool_initialize();
@@ -1465,12 +1440,6 @@ PoolStats Pool_stats(Pool inner){
 
 }
 
-Scope Scope_new_named(const char *);
-
-void Mutex_recursive_initialize(pthread_mutex_t *, const char *);
-
-void Scope_push(Scope *);
-
 Pool Pool_retain_named(Pool inner, const char * name){
   if(! _init_guard_) Pool_initialize();
   _storage_initialize();
@@ -1534,8 +1503,6 @@ Pool Pool_retain_named(Pool inner, const char * name){
 
 }
 
-void Scope_shutdown_hook(void(*)(void));
-
 static void _storage_initialize(void){
   _storage_lock();
   {
@@ -1569,8 +1536,6 @@ Pool Pool_retain(Pool inner){
   if(! _init_guard_) Pool_initialize();
   return Pool_retain_named(inner, NULL);
 }
-
-void Scope_destroy(Scope);
 
 Pool Pool_release(Pool inner){
   if(! _init_guard_) Pool_initialize();
@@ -1690,8 +1655,6 @@ unsigned long Pool_epoch(void){
   return __atomic_load_n(& value_epoch, __ATOMIC_ACQUIRE);
 }
 
-void Bytes_cleanup(Bytes);
-
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;
   Bytes_cleanup((*(Bytes *) _x2c_defer_data_0->_x2c_defer_capture_0));
@@ -1778,8 +1741,6 @@ static void _x2c_defer_cleanup_16(void * _x2c_defer_opaque_16){
   }
 
 }
-
-void Scope_pop(void);
 
 static void _x2c_defer_cleanup_17(void * _x2c_defer_opaque_17){
   Scope_pop();

@@ -46,16 +46,12 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
 
 }
 
-void * Scope_malloc(size_t);
-
 geo__Vec geo__Vec_new(double x, double y){
   geo__Vec v = Scope_malloc(sizeof(struct geo__VecData));
   v -> x = x;
   v -> y = y;
   return v;
 }
-
-double sqrt(double);
 
 double geo__Vec_norm(geo__Vec v){
   geo__Magnitude m = sqrt(v -> x * v -> x + v -> y * v -> y);
@@ -85,23 +81,13 @@ geo__Vec geo__Vec_mul(geo__Vec a, geo__Vec b){
   return geo__Vec_new(a -> x * b -> x, a -> y * b -> y);
 }
 
-static List List_cdr(List);
-
 geo__Chain geo__Chain_rest(geo__Chain values){
   return List_cdr(values);
 }
 
-int List_len(List);
-
 int geo__ChainLeaf_leaf_len(geo__ChainLeaf values){
   return List_len(values);
 }
-
-long Var_integer(Var);
-
-static Var int_var(int);
-
-static Var double_var(double);
 
 static int _vec_next(Iter iter, Var * out){
   int index = Var_integer(iter -> state);
@@ -110,8 +96,6 @@ static int _vec_next(Iter iter, Var * out){
   * out = double_var(index ? geo__Var_vec(iter -> obj) -> y : geo__Var_vec(iter -> obj) -> x);
   return 1;
 }
-
-Iter Iter_init(Iter, Var, IterNextFn, Var);
 
 Iter geo__Vec_iter(geo__Vec v, Iter dest){
   return Iter_init(dest, geo__Vec_var(v), _vec_next, int_var(0));

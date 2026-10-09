@@ -26,14 +26,6 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
 
 static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func_argv_1);
 
-static Var Symbol_var(Symbol);
-
-static Var String_var(String);
-
-List cons(Var, List);
-
-static Var List_var(List);
-
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -71,10 +63,6 @@ static Text echo(Text value){
   return value;
 }
 
-Func Func_new(FuncAdapter, List);
-
-void Lisp_bind(Lisp, String, Func);
-
 void install_bindings(Lisp lisp){
   if(! _init_guard_) _file_init_();
   Func _x2c_macro_callable_0 = Func_new(_x2c_func_adapt_0, _10);
@@ -82,15 +70,11 @@ void install_bindings(Lisp lisp){
   Lisp_bind(lisp, _12, Func_new(_x2c_func_adapt_1, _22));
 }
 
-Var x2c_func_value_argument(Func, const FuncArg *, unsigned, Symbol);
-
 static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0){
   Byte a0 = Var_uchar(Var_convert(x2c_func_value_argument(_x2c_func_binding_0, _x2c_func_argv_0, 0, 30065), 30065));
   return Var_new(30065, increment(a0));
   ;
 }
-
-static String Var_string(Var);
 
 static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func_argv_1){
   Text a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_1, _x2c_func_argv_1, 0, 1318210446));

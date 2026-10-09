@@ -1645,6 +1645,13 @@ static List CallSite._method(CallSite &k, List receiver, List field) {
     List callee = %(expr (<macro-expr>) (op . ${k.receiver} ${k.field}));
     return k._finish(k.result_type, callee, NULL, NULL);
   }
+  if (!resolution && !k.c.macro_holes && k.c.rewrite_rules) {
+    List source = %(expr () (call
+      (expr () (op . ${k.receiver} ${k.field})) (args @{k.supplied})));
+    List rewritten = k.c.rewrite(
+      <member>, k.type.canonicalize(), source, AST_EXPRESSION, NULL, k.origin);
+    if (rewritten) return rewritten;
+  }
   if (!resolution) {
     Var name = k.field.car();
     $report.type.method_missing(k.c, k.type, name, k.origin);
@@ -2421,6 +2428,12 @@ static List Compiler._binary_expression(
       rhs = c.convert_expression(rhs, type);
     return source_operator_expression(type, %($operator $lhs $rhs));
   }
+  if (c.rewrite_rules && c.has_rewrites(<binary>, operator)) {
+    List source = source_operator_expression(NULL, %($operator $lhs $rhs));
+    List rewritten = c.rewrite(
+      <binary>, operator, source, AST_EXPRESSION, NULL, origin);
+    if (rewritten) return rewritten;
+  }
   c._convert_string_comparison(operator, lhs, rhs);
   int constant_string = c._convert_string_addition(operator, lhs, rhs);
   List lowered = c._protocol_operator_expression(operator, lhs, rhs);
@@ -3092,6 +3105,9 @@ static void Compiler._note_explicit_converter(
   Type result = call.cadr();
   if (!result.match(%(?))) return;
   match (call) case $called(?callee, ?argument): {
+    match (callee) case %(expr ? (ident ?binding)):
+      if (Compiler.supplies_native_meta(binding_identity_spelling(binding)))
+        return;
     String spelled = result.car().str().lower();
     if (method != spelled && (method != "str" || result !== %("String")))
       return;

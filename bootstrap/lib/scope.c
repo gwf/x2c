@@ -477,9 +477,7 @@ void Scope_shutdown_hook(void(* hook)(void)){
   hooks = _raw_grow(hooks, hook_count, &(hook_capacity), sizeof(* hooks));  hooks[hook_count ++] = hook;
 }
 
-void x2c_static_shutdown(void);
 void x2c_scope_thread_release(void);
-void x2c_thread_state_release(void);
 void Scope_shutdown(void){
   if(! _init_guard_) Scope_initialize();  if(scope_state == 1324301450716 || scope_state == 1324302486414) return;  if(scope_state == 1439265384){
     scope_state = 1324301450716;  return;

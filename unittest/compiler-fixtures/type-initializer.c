@@ -49,8 +49,6 @@ void InitializerFixture_initialize(void){
   label = _0;
 }
 
-int String_equal(String, String);
-
 int main(void){
   x2c_initialize();
   if(! _init_guard_) InitializerFixture_initialize();

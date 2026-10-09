@@ -25,7 +25,7 @@
  (bind (binding 1 "calculate") 
   ((fnmod (params (param (int) (bind (binding 2 "value") ())))))) 
  (block 
-  (at 34 
+  (at 38 
    (return (int) 
     (expr (int) 
      (op + (expr (int) (ident (binding 2 "value"))) 
@@ -35,7 +35,7 @@
  (bind (binding 3 "before_alias") 
   ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 35 
+  (at 39 
    (return (int) 
     (expr (int) 
      (call (expr ((func ((int))) int) (ident (binding 1 "calculate"))) 
@@ -44,7 +44,7 @@
 (function (static int) 
  (bind (binding 4 "first_alias") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 37 
+  (at 41 
    (return (int) 
     (expr (int) 
      (parens 
@@ -55,7 +55,7 @@
  (bind (binding 5 "frozen_before_redefinition") 
   ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 39 
+  (at 43 
    (return (int) 
     (expr (int) 
      (parens 
@@ -68,7 +68,7 @@
  (bind (binding 6 "frozen_after_redefinition") 
   ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 42 
+  (at 46 
    (return (int) 
     (expr (int) 
      (parens 
@@ -99,23 +99,23 @@
 (function (static int) 
  (bind (binding 13 "direct_function") 
   ((fnmod (params (param (void) (bind () ())))))) 
- (block (at 49 (return (int) (expr (int) (literal (int) "7"))))))
+ (block (at 53 (return (int) (expr (int) (literal (int) "7"))))))
 
 (function (static int) 
  (bind (binding 14 "aliased_function") 
   ((fnmod (params (param (void) (bind () ())))))) 
- (block (at 51 (return (int) (expr (int) (literal (int) "8"))))))
+ (block (at 55 (return (int) (expr (int) (literal (int) "8"))))))
 
 (function (static int) 
  (bind (binding 15 "stacked_function") 
   ((fnmod (params (param (void) (bind () ())))))) 
- (block (at 53 (return (int) (expr (int) (literal (int) "9"))))))
+ (block (at 57 (return (int) (expr (int) (literal (int) "9"))))))
 
 (function (static int) 
  (bind (binding 16 "second_alias") 
   ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 57 
+  (at 61 
    (return (int) 
     (expr (int) 
      (parens 
@@ -125,7 +125,7 @@
 (function (int) 
  (bind (binding 17 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 58 
+  (at 62 
    (declare ("KeywordRecord") 
     (bindings 
      (op = (bind (binding 18 "record") ()) 
@@ -133,47 +133,47 @@
        (composite 
         (commas (expr (int) (literal (int) "1")) 
          (expr (int) (literal (int) "2"))))))))) 
-  (at 59 
+  (at 63 
    (declare (int) 
     (bindings 
      (op = (bind (binding 19 "imported") ()) (expr (int) (literal (int) "6")))))) 
-  (at 60 
+  (at 64 
    (declare (int) 
     (bindings 
      (op = (bind (binding 20 "statements") ()) 
       (expr (int) (literal (int) "0")))))) 
-  (at 61 
+  (at 65 
    (declare (int) 
     (bindings 
      (op = (bind (binding 21 "conditional") ()) 
       (expr (int) (literal (int) "0")))))) 
-  (at 63 
-   (stmnt 
-    (expr (int) (postfix ++ (expr (int) (ident (binding 20 "statements"))))))) 
-  (at 64 
-   (stmnt 
-    (expr (int) (postfix ++ (expr (int) (ident (binding 20 "statements"))))))) 
   (at 67 
-   (block 
-    (at 65 
-     (stmnt 
-      (expr (int) 
-       (op += (expr (int) (ident (binding 20 "statements"))) 
-        (expr (int) (literal (int) "2")))))))) 
+   (stmnt 
+    (expr (int) (postfix ++ (expr (int) (ident (binding 20 "statements"))))))) 
   (at 68 
+   (stmnt 
+    (expr (int) (postfix ++ (expr (int) (ident (binding 20 "statements"))))))) 
+  (at 71 
    (block 
-    (at 65 
+    (at 69 
      (stmnt 
       (expr (int) 
        (op += (expr (int) (ident (binding 20 "statements"))) 
         (expr (int) (literal (int) "2")))))))) 
-  (at 71 
+  (at 72 
+   (block 
+    (at 69 
+     (stmnt 
+      (expr (int) 
+       (op += (expr (int) (ident (binding 20 "statements"))) 
+        (expr (int) (literal (int) "2")))))))) 
+  (at 75 
    (if (expr (int) (literal (int) "1")) 
     (block 
-     (at 69 
+     (at 73 
       (stmnt 
        (expr (int) (postfix ++ (expr (int) (ident (binding 21 "conditional")))))))))) 
-  (at 74 
+  (at 78 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 22 "printf"))) 
@@ -229,16 +229,16 @@
         (call (expr ((func ((void))) int) 
                (ident (binding 15 "stacked_function"))) 
          (args (expr (void) ())))) (expr (int) (ident (binding 19 "imported")))))))) 
-  (at 75 (return (int) (expr (int) (literal (int) "0"))))))
+  (at 79 (return (int) (expr (int) (literal (int) "0"))))))
 
 (function (static void) 
  (bind (binding 23 "direct_captured_raise") 
   ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 78 
+  (at 82 
    (block 
     (block 
-     (at 76 
+     (at 80 
       (if (expr (int) (literal (int) "0")) 
        (raise (expr ("Symbol") (literal ("Symbol") "invariant" invariant)) 
         (args)))))))))
@@ -247,10 +247,10 @@
  (bind (binding 24 "aliased_captured_raise") 
   ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 81 
+  (at 85 
    (block 
     (block 
-     (at 79 
+     (at 83 
       (if (expr (int) (literal (int) "0")) 
        (raise (expr ("Symbol") (literal ("Symbol") "invariant" invariant)) 
         (args)))))))))

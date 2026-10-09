@@ -71,14 +71,6 @@ _x2c_defer_env_2;
 
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
 
-static Var Symbol_var(Symbol);
-
-List cons(Var, List);
-
-static Var List_var(List);
-
-static Var String_var(String);
-
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -348,18 +340,10 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _x2c_static_initialize_0();
 }
 
-static Var int_var(int);
-
 List binding_identity_new(int identity, String spelling){
   if(! _init_guard_) _file_init_();
   return cons(_0, cons(int_var(identity), cons(String_var(spelling), NULL)));
 }
-
-static String Var_string(Var);
-
-int Var_is_integer(Var);
-
-long Var_integer(Var);
 
 int binding_identity_try_parts(List binding, int * identity, String * spelling){
   if(! _init_guard_) _file_init_();
@@ -400,22 +384,6 @@ String binding_identity_spelling(List binding){
   String spelling = NULL;
   return binding_identity_try_parts(binding, NULL, &(spelling)) ? spelling : NULL;
 }
-
-Array Array_new(void);
-
-Iter Var_iter(Var, Iter);
-
-static Var List_caddr(List);
-
-int Iter_try_next(Iter, Var *);
-
-static List Var_list(Var);
-
-Var Array_push(Array, Var);
-
-static Var List_cadr(List);
-
-List Array_list_free(Array);
 
 List ast_prototype_declarator(List declarator){
   if(! _init_guard_) _file_init_();
@@ -460,7 +428,6 @@ return({
 );
 }
 
-int List_try_next(List, List *, Var *);
 static List _prototype_params(List parameters, int * changed){
   Array rebuilt = Array_new(); {
     List parameter;  List _x2c_macro_object_1 = parameters;  List _x2c_macro_cursor_1 = _x2c_macro_object_1;  Var _x2c_macro_cursor_output_0;  while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_0))){
@@ -493,7 +460,6 @@ Array_push(rebuilt, List_var(parameter));
 return cons(_14, cons(List_var(cons(_15, List_append(Array_list_free(rebuilt), NULL))), NULL));
 }
 
-static int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 List Ast_designated(Var value){
   if(! _init_guard_) _file_init_();  while(Var_is_row(value, 9, 7, 4)){
     List node = Var_list(value);
@@ -581,7 +547,6 @@ static MatchCaptureSite _x2c_match_site_13;  if (x2c_match_site_try_capture(& _x
 return NULL;
 }
 
-int Var_is(Var, Symbol);
 int ast_changes_left_operand(Symbol op);
 List Ast_written_operand(Ast node){
   if(! _init_guard_) _file_init_();
@@ -599,15 +564,6 @@ default: break;
 return NULL;
 }
 
-static int List_truth(List);
-static List List_cdr(List);
-static Var List_car(List);
-List x2c_func_reference_type(Func, unsigned, unsigned);
-static FuncArg FuncArg_reference(const void *, List);
-static FuncArg FuncArg_value(Var);
-Var Func_apply(Func, unsigned, const FuncArg *);
-int Var_equal(Var, Var);
-int List_equal(List, List);
 Ast Ast_rewrite_children(Ast ast, Func per_child){
   if(! _init_guard_) _file_init_();  Var child;  List _x2c_macro_original_0 = ast;  Array _x2c_macro_rewritten_0 = NULL;  for(List _x2c_macro_cursor_2 = _x2c_macro_original_0;  List_truth(_x2c_macro_cursor_2);  _x2c_macro_cursor_2 = List_cdr(_x2c_macro_cursor_2)){
     Var _x2c_macro_item_2 = List_car(_x2c_macro_cursor_2), _x2c_macro_value_0 = _x2c_macro_item_2;  if(Var_is_row(_x2c_macro_item_2, 9, 7, 4)){
@@ -624,11 +580,6 @@ Ast Ast_rewrite_children(Ast ast, Func per_child){
   return(void *) _x2c_macro_rewritten_0 ? Array_list_free(_x2c_macro_rewritten_0) : _x2c_macro_original_0;
 }
 
-Array Array_update_n(Array, unsigned, ...);
-void x2c_cleanup_push(X2CCleanup *);
-Var Array_take_last(Array);
-int Var_is_nil(Var);
-void x2c_cleanup_leave(X2CCleanup *);
 int ast_contains_head(Var value, Symbol kind){
   if(! _init_guard_) _file_init_();  List node;  Array _x2c_macro_pending_0 = Array_update_n(Array_new(), 1, value); {
     _x2c_defer_env_0 _x2c_macro_environment_0 ={
@@ -660,7 +611,6 @@ int ast_contains_head(Var value, Symbol kind){
 
 }
 
-Var Map_setindex(Map, Var, Var);
 void ast_collect_binding_references(Var node, Map referenced){
   if(! _init_guard_) _file_init_();  if(! Var_is_row(node, 9, 7, 4)) return;  List syntax = Var_list(node);
   {
@@ -714,9 +664,6 @@ Ast Ast_rewrap_origin(Ast original, Ast replacement){
 return replacement;
 }
 
-int SymbolSet_contains(SymbolSet, Symbol);
-int List_contains(List, Var);
-Var List_last(List);
 int Ast_never_returns(Ast ast){
   if(! _init_guard_) _file_init_();
   {
@@ -794,8 +741,6 @@ default: break;
 return List_cdr(ast);
 }
 
-int List_len(List);
-List Array_list(Array);
 List Ast_initializer_functions(Ast ast, List * source){
   if(! _init_guard_) _file_init_();  List header = NULL;  List cases = Ast_initializer_cases(ast, &(header));  if(! List_truth(header) || List_len(List_cdr(header)) != 1) return NULL;  List input = Var_list(List_cadr(header));  List value = Var_list(List_cadr(input));  List argument =({
     Var _x2c_literal_part_8 = List_cadr(value);  Var _x2c_literal_part_9 = List_car(input);  cons(_37, cons(_x2c_literal_part_8, cons(_x2c_literal_part_9, NULL)));
@@ -836,7 +781,6 @@ List Ast_initializer_functions(Ast ast, List * source){
 
 }
 
-Var List_getindex(List, int);
 static List _arm_function(List choice, List argument){
   List _x2c_destructure_0 = choice;  List condition = Var_list(List_getindex(_x2c_destructure_0, 0));  List path = Var_list(List_getindex(_x2c_destructure_0, 1));  List destination = Var_list(List_getindex(_x2c_destructure_0, 2));  List expression = Var_list(List_getindex(_x2c_destructure_0, 3));
   {
@@ -854,7 +798,6 @@ default: break;
 return NULL;
 }
 
-void Array_cleanup(Array);
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;  Array_cleanup((*(Array *) _x2c_defer_data_0->_x2c_defer_capture_0));
 }

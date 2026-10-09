@@ -4,10 +4,6 @@
 #include "x2c.h"
 
 #include "x2c.h"
-static Var int_var(int);
-
-int Var_int(Var);
-
 int main(void){
   x2c_initialize();
   Var boxed = int_var(5);

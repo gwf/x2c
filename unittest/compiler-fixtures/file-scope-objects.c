@@ -46,8 +46,6 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
-Map Map_new(void);
-
 _x2c_initializer_choice_EB67B464_0((file_object_registry = Map_new()))
 double file_object_scale(double factor);
 
@@ -65,13 +63,7 @@ static List file_object_items;
 _x2c_initializer_choice_EB67B464_3((file_object_items = _6))
 static char * file_object_text;
 
-String String_new(const char *);
-
 _x2c_initializer_choice_EB67B464_4((file_object_text = String_new("xyz")))
-static Var int_var(int);
-
-List cons(Var, List);
-
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -90,14 +82,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _x2c_static_initialize_3();
   _x2c_static_initialize_4();
 }
-
-Var Map_setindex(Map, Var, Var);
-
-unsigned Map_len(Map);
-
-int String_len(String);
-
-int List_len(List);
 
 int main(void){
   x2c_initialize();

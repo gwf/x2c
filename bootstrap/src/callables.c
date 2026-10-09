@@ -252,8 +252,6 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
 
 static Func _x2c_func_handle_0;
 
-Func x2c_func_shared(FuncAdapter, List);
-
 #include "exception.h"
 
 
@@ -312,16 +310,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _x2c_static_initialize_2();
   _x2c_static_initialize_3();
 }
-
-static Var Symbol_var(Symbol);
-
-static Var String_var(String);
-
-List cons(Var, List);
-
-static Var List_var(List);
-
-static Var int_var(int);
 
 __attribute__((noinline, cold)) static void _x2c_cache_initialize_0(void){
   _0 = Symbol_var(437126);
@@ -2324,47 +2312,17 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_3(void){
   _1988 = cons(_1986, _12);
 }
 
-static Var List_car(List);
-
-Ast Ast_rewrite_children(Ast, Func);
-
-Var Compiler_var(Compiler);
-
-Func Func_new_context(FuncAdapter, List, const void *, size_t);
-
-static List Var_list(Var);
-
 List Compiler_rebuild_expression(Compiler, Type, List);
 
 static Type Var_type(Var);
-
-List Macro_apply(Macro, List);
-
-List Macro_case_pattern(Macro, List);
-
-static Var List_cadr(List);
-
-static int List_truth(List);
-
-List List_match(List, Var);
 
 static List Type_list(Type);
 
 static Type List_type(List);
 
-List Compiler_lambda_param_types(Compiler, List);
-
 List Compiler_lift_func_expression(Compiler c, List expression);
 
-String Compiler_fresh_name(Compiler, String);
-
 List Sym_introduce(Sym, String);
-
-void Compiler_add_early(Compiler, List);
-
-List Compiler_wrapper_function(Compiler, Type, List, List, List);
-
-static List List_cdr(List);
 
 List Compiler_lower_lambda_expr(Compiler c, List expression){
   if(! _init_guard_) _file_init_();
@@ -2406,10 +2364,6 @@ break;
 return expression;
 }
 
-Array Array_new(void);
-int List_try_next(List, List *, Var *);
-Var Array_push(Array, Var);
-List Array_list_free(Array);
 static List _params_to_decl_params(List names){
   if(! List_truth(names)) return _491;  Array out = Array_new(); {
     Var item;  List _x2c_macro_object_0 = names;  List _x2c_macro_cursor_0 = _x2c_macro_object_0;  Var _x2c_macro_cursor_output_0;  while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
@@ -2431,7 +2385,6 @@ return cons(_153, List_append(Array_list_free(out), NULL));
 }
 
 List source_block_content(List);
-List Compiler_convert_expression(Compiler, List, Type);
 static List Compiler__helper_body(Compiler c, List body){
 
   {
@@ -2475,7 +2428,6 @@ static List _no_value_return(void){
   return _529;
 }
 
-Map Map_new(void);
 void Compiler_set_fact(Compiler, Var, Var);
 static List Compiler__captured_lambda(Compiler c, List entries, List captures, List body){
   CaptureBuild b ={
@@ -2495,7 +2447,6 @@ static void CaptureBuild_declare(CaptureBuild * b, List type_binding, List captu
   Compiler_add_early((* b).c, Compiler_capture_environment((* b).c, type_binding, Array_list_free(fields)));
 }
 
-List Compiler_bind_syntax(Compiler, Var, AstPos, Type);
 List Compiler_capture_environment(Compiler c, List name, List fields){
   if(! _init_guard_) _file_init_();  return Compiler_bind_syntax(c, List_var(cons(_538, cons(_31, cons(List_var(cons(_539, cons(List_var(({
     Var _x2c_literal_part_6 = List_var(({
@@ -2508,9 +2459,6 @@ List Compiler_capture_environment(Compiler c, List name, List fields){
 
 Type Type_reference(Type);
 List Compiler_rebuild_statement(Compiler, List);
-Var Map_setindex(Map, Var, Var);
-List Type_declaration_parts(Type);
-Var List_getindex(List, int);
 static void CaptureBuild__field(CaptureBuild * b, Array fields, List capture){
 
   {
@@ -2532,9 +2480,6 @@ static void CaptureBuild__field(CaptureBuild * b, Array fields, List capture){
 }
 
 Type Sym_resolve_key(Sym, Type);
-List List_map(List, Func);
-Ast Compiler_normalize(Compiler, Ast);
-List Compiler_cache_literal_list(Compiler, List);
 static void CaptureBuild_publish(CaptureBuild * b, List entries, List body, List closure, List argv){
   Compiler c =(* b).c;  List params = Compiler_lambda_param_types(c, entries);  List locals = Compiler__func_argument_locals(c, Sym_resolve_key(c -> sym, List_type(_728)), List_truth(entries) ? params : NULL, List_map(entries, _x2c_func_handle_1), closure, argv);  List setup = Compiler__context_local(c, (* b).value_type, (* b).environment, closure);  List rewritten = Compiler_normalize(c, CaptureBuild__rewrite(&((* b)), body));  Compiler__publish_func_adapter(c, (* b).adapter, closure, argv, rewritten, List_append(locals, cons(List_var(setup), NULL))); (* b).signature = Compiler_cache_literal_list(c, cons(List_var(cons(_0, cons(List_var(params), NULL))), _12));
 }
@@ -2555,9 +2500,6 @@ static MatchCaptureSite _x2c_match_site_8;  if (x2c_match_site_try_capture(& _x2
 return NULL;
 }
 
-int List_equal(List, List);
-static int Var_is_row(Var, unsigned, unsigned long, unsigned long);
-int Var_equal(Var, Var);
 static List CaptureBuild__rewrite(CaptureBuild * b, List ast){
   if(! List_truth(ast)) return ast;  Macro lambda = _249, captured = _351;  if(Var_equal(List_car(ast), Symbol_var(377892))){
 
@@ -2618,10 +2560,6 @@ static List CaptureBuild__row(CaptureBuild * b, List row){
 return row;
 }
 
-int Map_try_get(Map, Var, Var *);
-String binding_identity_spelling(List);
-Var Macro_inserted(Var, int, int);
-static Var List_caddr(List);
 static List CaptureBuild__read(CaptureBuild * b, List ast, Type source_type, List bound){
   Var stored;  if(! Map_try_get((* b).slots, List_var(bound), &(stored))) return ast;  List _x2c_destructure_1 = Var_list(stored);  List field = Var_list(List_getindex(_x2c_destructure_1, 0));  Type storage_type = Var_type(List_getindex(_x2c_destructure_1, 1));  String field_name = binding_identity_spelling(field);  List environment = _func_bound((* b).pointer_type, (* b).environment);  List read =({
     Var _x2c_literal_part_13 = List_var(storage_type);  Var _x2c_literal_part_14 = List_var(({
@@ -2651,8 +2589,6 @@ default: break;
 return converted;
 }
 
-int Array_try_next(Array, int *, Var *);
-List Type_parameter_ast(Type, List);
 static List CaptureBuild_bridged(CaptureBuild * b){
   Compiler c =(* b).c;  List bridge = Compiler__func_bridge_binding(c, _762);  Array parameters = Array_new(), factory_values = Array_new(); {
     Type field_type;  Array _x2c_macro_object_2 =(* b).field_types;  int _x2c_macro_cursor_4 = 0;  Var _x2c_macro_cursor_output_2;  while(Array_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_2))){
@@ -2693,7 +2629,6 @@ static List CaptureBuild__construct(CaptureBuild * b, List context){
   Compiler c =(* b).c;  Type constructor_type = NULL;  List constructor = Compiler__adapter_helper(c, _777, &(constructor_type));  Type adapter_type = Sym_resolve_key(c -> sym, List_type(_728));  return Compiler__func_context_call(c, (* b).value_type, context, _func_bound(adapter_type, (* b).adapter), (* b).signature, _func_bound(constructor_type, constructor));
 }
 
-List List_append(List, List);
 static List CaptureBuild__result(CaptureBuild * b, List storage, List value){
   List setup = Array_list_free((* b).locals);  if(List_truth(storage)) setup = List_append(setup, cons(List_var(storage), NULL));  Macro shape = _899;  return Compiler_rebuild_expression((* b).c, List_type(_474), Macro_apply(shape, cons(List_var(value), cons(List_var(setup), NULL))));
 }
@@ -2712,8 +2647,6 @@ default: break;
 return Compiler__prepare_lambda_region(c, entries, body);
 }
 
-int ast_contains_head(Var, Symbol);
-unsigned Map_len(Map);
 List Compiler_prepend_setup(Compiler c, List body, List setup);
 static List Compiler__prepare_lambda_region(Compiler c, List entries, List body){
   if(! ast_contains_head(List_var(body), 808259842)) return body;  body = Compiler__prepare_nested_regions(c, body);  CellRegion r ={
@@ -2761,17 +2694,12 @@ Var child;  List _x2c_macro_original_2 = ast;  Array _x2c_macro_rewritten_2 = NU
 return(void *) _x2c_macro_rewritten_2 ? Array_list_free(_x2c_macro_rewritten_2) : _x2c_macro_original_2;
 }
 
-int Map_contains(Map, Var);
 Map Compiler_semantic_binding_facts(Compiler);
 int Type_is_static(Type);
 static void CellRegion_own(CellRegion * r, List binding){
   if(! List_truth(binding) || Map_contains((* r).owned, List_var(binding))) return;  Var automatic, stored_type;  Map facts = Compiler_semantic_binding_facts((* r).c);  if(! Map_try_get(facts, List_var(cons(_535, cons(List_var(binding), NULL))), &(automatic)) || ! Map_try_get(facts, List_var(cons(_536, cons(List_var(binding), NULL))), &(stored_type))) return;  Type type = Var_type(stored_type);  if(! List_truth(Type_list(type)) || Type_is_static(type)) return;  Map_setindex((* r).owned, List_var(binding), List_var(type));  Array_push((* r).order, List_var(binding));
 }
 
-void x2c_cleanup_push(X2CCleanup *);
-void x2c_cleanup_leave(X2CCleanup *);
-Var Array_take_last(Array);
-int Var_is_nil(Var);
 static void CellRegion_collect(CellRegion * r, List ast){
   if(! List_truth(ast)) return;  Array resume = Array_new(); {
     _x2c_defer_env_0 _x2c_macro_environment_0 ={
@@ -2817,8 +2745,6 @@ x2c_cleanup_leave(& _x2c_defer_record_0);
 }
 }
 
-Array Array_update_n(Array, unsigned, ...);
-List Ast_lvalue_binding(Ast);
 static void _collect_reference_captures(List ast, Map owned, Map candidates){
   List node;  Array _x2c_macro_pending_0 = Array_update_n(Array_new(), 1, List_var(ast)); {
     _x2c_defer_env_1 _x2c_macro_environment_1 ={
@@ -2866,7 +2792,6 @@ static void CellRegion_allocate(CellRegion * r, Map candidates){
 
 }
 
-Var Var_car(Var);
 static List CellRegion_rewrite(CellRegion * r, List ast){
   if(! List_truth(ast)) return ast;
   {
@@ -2901,7 +2826,6 @@ Var child;  List _x2c_macro_original_3 = ast;  Array _x2c_macro_rewritten_3 = NU
 return(void *) _x2c_macro_rewritten_3 ? Array_list_free(_x2c_macro_rewritten_3) : _x2c_macro_original_3;
 }
 
-int Var_truth(Var);
 static List CellRegion__declaration(CellRegion * r, List target, List bindings){
   int has_cell = 0; {
     List item;  List _x2c_macro_object_5 = bindings;  List _x2c_macro_cursor_10 = _x2c_macro_object_5;  Var _x2c_macro_cursor_output_5;  while(List_try_next(_x2c_macro_object_5, &(_x2c_macro_cursor_10), &(_x2c_macro_cursor_output_5))){
@@ -3088,13 +3012,10 @@ static List Compiler__direct_func_handle(Compiler c, List source_binding, Type s
   return _func_bound(List_type(_474), handle);
 }
 
-String String_printf(String, ...);
-unsigned String_hash(String);
 static List Compiler__func_bridge_binding(Compiler c, String stem){
   String hash = String_printf(_1424, String_hash(c -> filename));  return Sym_introduce(c -> sym, Compiler_fresh_name(c, String_join(NULL, cons(String_var(stem), cons(String_var(_1425), cons(String_var(hash), NULL))))));
 }
 
-Var Macro_declared(Var);
 static List Compiler__func_bridge_call(Compiler c, List bridge, List parameters, Type function_type, List arguments){
   List call = Compiler__func_call(c, List_type(_474), _func_bound(function_type, bridge), arguments);  return({
     List _x2c_hole_3 = List_cdr(parameters);  cons(_42, cons(_1426, cons(List_var(cons(_354, cons(List_var(({
@@ -3296,8 +3217,6 @@ static List Compiler__direct_func_adapter(Compiler c, Type diagnostic_type, List
 }
 
 int Type_function_parts(Type, List *, Type *);
-int List_len(List);
-List List_zip_with(List, List, Func);
 static List Compiler__build_func_adapter(Compiler c, Type diagnostic_type, Type source_type, List target, List supplied_fn_binding, List prefix){
   List params = NULL;  Type return_type = NULL;  Type_function_parts(source_type, &(params), &(return_type));  if(_typed_params_variadic(params)){
     Type func_type = Sym_resolve_key(c -> sym, List_type(_474));  String _x2c_macro_message_0 = List_equal(Type_list(Sym_resolve_key(c -> sym, diagnostic_type)), Type_list(func_type)) ? _1577 : _1578;  Compiler__adapter_error(c, _x2c_macro_message_0, diagnostic_type, source_type, NULL);
@@ -3305,7 +3224,6 @@ static List Compiler__build_func_adapter(Compiler c, Type diagnostic_type, Type 
   source_type = Type_canonicalize(source_type);  return_type = Type_canonicalize(return_type);  Compiler__require_func_readers(c, diagnostic_type, source_type);  String name = Compiler_fresh_name(c, _1579);  List adapter_binding = Sym_introduce(c -> sym, name);  List fn_binding = List_truth(supplied_fn_binding) ? supplied_fn_binding : Sym_introduce(c -> sym, Compiler_fresh_name(c, _1439));  List argv_binding = Sym_introduce(c -> sym, Compiler_fresh_name(c, _1580));  List names = Compiler__auto_names(c, List_len(params));  List locals = Compiler__func_argument_locals(c, diagnostic_type, params, names, fn_binding, argv_binding);  List arguments = List_zip_with(params, names, _x2c_func_handle_2);  List call = Compiler__func_call(c, return_type, target, arguments);  Type resolved_result = Sym_resolve_key(c -> sym, return_type);  if(List_truth(Type_list(resolved_result)) && Var_equal(List_car(Type_list(resolved_result)), Symbol_var(1318234344))) call = Compiler__func_record_call(c, return_type, call);  Compiler__publish_func_adapter(c, adapter_binding, fn_binding, argv_binding, call, List_append(prefix, List_append(locals, NULL)));  return adapter_binding;
 }
 
-static String Var_string(Var);
 static void Compiler__require_func_readers(Compiler c, Type diagnostic_type, Type source_type){
   {
     String helper_name;  List _x2c_macro_object_8 = _1586;  List _x2c_macro_cursor_13 = _x2c_macro_object_8;  Var _x2c_macro_cursor_output_8;  while(List_try_next(_x2c_macro_object_8, &(_x2c_macro_cursor_13), &(_x2c_macro_cursor_output_8))){
@@ -3365,7 +3283,6 @@ static List FuncReaders__value(FuncReaders * r, Type parameter_type, Symbol tag,
   if(! tag) Compiler__adapter_error((* r).c, _1592, (* r).diagnostic_type, parameter_type, NULL);  List picked = FuncReaders__call(&((* r)), List_type(_12), (* r).value, index, cons(List_var(_adapter_symbol_literal(tag)), NULL)); (* storage_type) = parameter_type;  return Compiler_convert_expression((* r).c, picked, parameter_type);
 }
 
-List Macro_typed(List, Var);
 List x2c_literal_int(int);
 static List FuncReaders__call(FuncReaders * r, Type result_type, List target, int index, List details){
   List fn =({
@@ -3435,7 +3352,6 @@ static List Compiler__func_return_body(Compiler c, List value){
   Macro shape = _1916;  return List_cdr(Compiler_rebuild_statement(c, Macro_apply(shape, cons(List_var(value), NULL))));
 }
 
-static String int_str(int);
 static List Compiler__auto_names(Compiler c, int count){
   Array out = Array_new();  for(int index = 0;  index < count;  index ++) Array_push(out, List_var(Sym_introduce(c -> sym, String_join(NULL, cons(String_var(_1917), cons(String_var(int_str(index)), NULL))))));  return Array_list_free(out);
 }
@@ -3507,7 +3423,6 @@ static void Callback_check_signature(Callback * cb){
   (* cb).result = Type_canonicalize((* cb).result); (* cb).source_result = Type_canonicalize((* cb).source_result);  if((* cb).result == _478 ||(* cb).source_result == _478) Callback__fail(&((* cb)), _1940, NULL);  if(! List_equal(Type_list((* cb).result), Type_list((* cb).source_result))) Callback__fail(&((* cb)), _1941, NULL);
 }
 
-String List_repr(List);
 static void Callback_check_params(Callback * cb){
   int index = 0;  List targets =(* cb).params, sources =(* cb).source_params;  for(;  List_truth(targets);  targets = List_cdr(targets), sources = List_cdr(sources), index ++){
     Type target = Var_type(List_car(targets));  Type source = Var_type(List_car(sources));  if(Callback__allows(&((* cb)), target, source)) continue;  String _x2c_macro_detail_1 = String_printf(_1942, index + 1, List_repr(Type_list(target)), List_repr(Type_list(source)));  Callback__fail(&((* cb)), _1943, cons(String_var(_x2c_macro_detail_1), NULL));
@@ -3541,7 +3456,6 @@ static List Callback_publish_typed(Callback * cb, Type spelling){
   return _func_bound(spelling, binding);
 }
 
-List Compiler_forward_parameters(Compiler, List);
 Type Type_apply(Type);
 static List Callback_function(Callback * cb, List binding){
   Compiler c =(* cb).c;  List _x2c_destructure_6 = Compiler_forward_parameters(c, (* cb).params);  List declarations = Var_list(List_getindex(_x2c_destructure_6, 0));  List arguments = Var_list(List_getindex(_x2c_destructure_6, 1));  List source =({
@@ -3609,7 +3523,6 @@ break;
 return 0;
 }
 
-Type List_type_from_ast(List);
 static int _collect_param_types(List raw_params, List * out_types){
   Array types = Array_new();  int all_var = 1; {
     Var entry;  List _x2c_macro_object_11 = raw_params;  List _x2c_macro_cursor_16 = _x2c_macro_object_11;  Var _x2c_macro_cursor_output_11;  while(List_try_next(_x2c_macro_object_11, &(_x2c_macro_cursor_16), &(_x2c_macro_cursor_output_11))){
@@ -3658,9 +3571,6 @@ static void Compiler__adapter_error(Compiler c, String message, Type target, Typ
   String target_note = List_truth(Type_list(target)) ? String_join(NULL, cons(String_var(_1973), cons(String_var(List_repr(Type_list(target))), NULL))) : _1974;  String source_note = List_truth(Type_list(source)) ? String_join(NULL, cons(String_var(_1975), cons(String_var(List_repr(Type_list(source))), NULL))) : _1976;  Compiler_report_error(c, 1362954, message, NULL, cons(String_var(target_note), cons(String_var(source_note), List_append(details, NULL))));
 }
 
-Var x2c_func_value_argument(Func, const FuncArg *, unsigned, Symbol);
-const void * Func_context(Func);
-Compiler Var_compiler(Var);
 static Var _x2c_lambda_0(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0){
   List child = Var_list(x2c_func_value_argument(_x2c_lambda_closure_0, _x2c_lambda_argv_0, 0, 806120));  const _x2c_lambda_context_0 * _x2c_lambda_context_value_0 =(const _x2c_lambda_context_0 *) Func_context(_x2c_lambda_closure_0);  return List_var(Compiler_lower_lambda_expr(Var_compiler(_x2c_lambda_context_value_0 -> _x2c_lambda_capture_0), child)); ;
 }
@@ -3673,7 +3583,6 @@ static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func
   List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_1, _x2c_func_argv_1, 0, 806120));  return List_var(_entry_binding(a0)); ;
 }
 
-void Array_cleanup(Array);
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;  Array_cleanup((*(Array *) _x2c_defer_data_0->_x2c_defer_capture_0));
 }

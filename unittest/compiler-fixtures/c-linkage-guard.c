@@ -22,8 +22,6 @@ int Span_len(Span span){
   return span.stop - span.start;
 }
 
-int Point_sum(Point);
-
 int main(void){
   x2c_initialize();
   Point point ={

@@ -44,6 +44,10 @@ execution.
 
 ### Current work
 
+- [Language component foundation](language-components-foundation.md): local
+  recovery on `codex/language-components-foundation`; collection mutation
+  component and ordinary authoring proofs, with dev semantic owners retained.
+
 - [Ordinary switch over String](string-switch.md): planned against dev
   0916ff92. String and String-alias selectors with string-literal labels,
   dispatched through one memoized helper in unit support; awaiting

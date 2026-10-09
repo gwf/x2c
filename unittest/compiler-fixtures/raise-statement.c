@@ -30,40 +30,6 @@ static void raise_empty(void){
 
 }
 
-void Error_initialize(void);
-
-void Error_policy_set(Symbol, Symbol);
-
-int Error_mark(void);
-
-static Var int_var(int);
-
-static Var String_var(String);
-
-static Var Symbol_var(Symbol);
-
-static List Var_list(Var);
-
-static Var List_car(List);
-
-List Error_since(int);
-
-Var List_assoc(List, Var);
-
-String Symbol_str(Symbol);
-
-static Symbol Var_symbol(Var);
-
-long Var_integer(Var);
-
-static Var List_cadr(List);
-
-Var List_getindex(List, int);
-
-static String Var_string(Var);
-
-int List_len(List);
-
 int main(void){
   x2c_initialize();
   Error_initialize();
@@ -109,28 +75,6 @@ static void raise_after_return(int code){
   }
 
 }
-
-int x2c_error_catch_site_pending(ErrorCatchSite *);
-
-static Var List_var(List);
-
-ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
-
-void x2c_exception_push(ExceptionFrame *);
-
-void x2c_exception_landed(ExceptionFrame *);
-
-int x2c_exception_is_error_target(ExceptionFrame *);
-
-int x2c_error_catch_selected(ErrorHandler);
-
-void x2c_error_catch_detach(ErrorHandler);
-
-void x2c_exception_mark_handled(ExceptionFrame *);
-
-void x2c_error_catch_close(ErrorHandler);
-
-void x2c_exception_leave(ExceptionFrame *);
 
 static void raise_caught(void){
   {

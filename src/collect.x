@@ -182,19 +182,26 @@ Map Compiler.collect_symbols(Compiler c, Map globs) {
   return globs;
 }
 
+/* Builtin components contribute compile-time definitions beside the runtime
+   prelude. They do not add compiler headers to a user's generated C. */
+/** Returns the compiler-owned prelude sources relative to its home. Their
+    runtime implementations are already linked into the shipped binaries. */
+List compiler_prelude_sources(void) =>
+  %("lib/x2c.x" "src/component-access.x");
+
 static void Compiler._add_prelude(Compiler c, Map globs, Map visited) {
-  String runtime = %"${x2c_get_root()}/lib/x2c.x";
-  String canonical = _canonical_path(runtime);
-  visited[canonical] = 1;
-  c.add_translation_dependency(canonical);
-  if (c.runtime_hdrs)
-    c._walk_file(
-      canonical, c._runtime_text(runtime), Path.dirname(runtime), globs,
-      visited);
-  else
-    c._replay_cached(
-      c._prelude_entry(runtime, canonical), canonical, globs, visited,
-      NULL);
+  foreach (String source, compiler_prelude_sources()) {
+    String path = %"${x2c_get_root()}/$source";
+    String canonical = _canonical_path(path);
+    visited[canonical] = 1;
+    c.add_translation_dependency(canonical);
+    if (c.runtime_hdrs)
+      c._walk_file(canonical, c._runtime_text(path), Path.dirname(path),
+        globs, visited);
+    else
+      c._replay_cached(c._prelude_entry(path, canonical), canonical,
+        globs, visited, NULL);
+  }
 }
 
 /* The prelude contribution is `lib/x2c.x`'s entry: cached in this process,
@@ -722,6 +729,44 @@ static void Compiler._add_type_dependencies(
       case %(?(String include)):
         c._add_type_dependencies(types, include, seen);
     }
+}
+
+/** Adds the public functions an included unit itself declares. Its collected
+    include closure also contains private source includes, which its generated
+    header need not publish. Those cannot supply declarations here. Meta
+    signatures alone do not establish a runtime declaration either. Emission
+    reads the entries collection already installed without invalidating them. */
+void Compiler.include_function_declarations(
+  Compiler c, String target, int angle, Map available) {
+  String path = collect_resolve_include(
+    c.sources, c.include_dirs, Path.dirname(c.filename), target, angle);
+  if (path) c._add_function_declarations(_canonical_path(path), available);
+}
+
+/** The runtime umbrella includes each listed module's generated header.
+    Compiler components in the semantic prelude supply no runtime header. */
+void Compiler.runtime_function_declarations(Compiler c, Map available) {
+  String path = _canonical_path(%"${x2c_get_root()}/lib/x2c.x");
+  Var entry = _process_cache()[path];
+  if (entry is not <list>) return;
+  foreach (Var part, entry.list().car())
+    if (part is <string>) c._add_function_declarations(part, available);
+}
+
+static void Compiler._add_function_declarations(
+  Compiler c, String path, Map available) {
+  if (path == _canonical_path(c.filename)) return;
+  Var entry = _process_cache()[path];
+  if (entry is not <list>) return;
+  foreach (Var part, entry.list().car()) {
+    if (part is not <map>) continue;
+    foreach (Var (key, value), part.map())
+      match (key) case %(?(String name))
+        if (!(name in c.meta_comptime) && !(name in c.project_meta) &&
+            value is <list> &&
+            value.list().type().is_function()):
+          available[%(native $name)] = 1;
+  }
 }
 
 /** Reports whether a linked provider and the files it read are unchanged.
@@ -1502,6 +1547,15 @@ static void Compiler._import_package(
 */
 Map Compiler.included_compile_time_effects(Compiler c, Map globs) {
   Map visited = {}, delivered = {};
+  if (c.prelude) {
+    Array effects = [];
+    foreach (String source, compiler_prelude_sources()) {
+      String path = _canonical_path(%"${x2c_get_root()}/$source");
+      c._replay_included(globs, path, visited, effects, NULL);
+    }
+    $let(c.builtin_defs, 1)
+      c.install_compile_time_effects(effects.list_free());
+  }
   String unit = _canonical_path(c.filename);
   visited[unit] = 1;
   List entry = c._entry(unit);

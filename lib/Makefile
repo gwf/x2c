@@ -5,8 +5,8 @@ SHELL := /bin/sh
 # Optional x2c system modules are built with the runtime but require an
 # explicit source include. They are not part of the implicit standard prelude.
 OPTIONAL_SOURCES := args.x datum.x diff.x digest.x json.x list-selectors.x \
-                    meta.x path.x process.x regex.x \
-                    scripting.x typed-array.x typed-list.x typed-map.x \
+                    meta.x type.x path.x process.x regex.x \
+                    rewrite.x scripting.x typed-array.x typed-list.x typed-map.x \
                     var-ledger.x lisp-init.x lisp-targets.x \
                     array-generics.x cleanup.x error-macros.x error-private.x \
                     func-errors.x integer-ops.x map-generics.x \

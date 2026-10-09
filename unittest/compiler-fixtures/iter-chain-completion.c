@@ -35,8 +35,6 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
 
 static Func _x2c_func_handle_0;
 
-Func x2c_func_shared(FuncAdapter, List);
-
 _x2c_initializer_choice_DC10D477_0((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _12)))
 static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func_argv_1);
 
@@ -48,14 +46,6 @@ static Var _x2c_func_adapt_2(Func _x2c_func_binding_2, const FuncArg * _x2c_func
 static Func _x2c_func_handle_2;
 
 _x2c_initializer_choice_DC10D477_2((_x2c_func_handle_2 = x2c_func_shared(_x2c_func_adapt_2, _19)))
-static Var Symbol_var(Symbol);
-
-static Var String_var(String);
-
-List cons(Var, List);
-
-static Var List_var(List);
-
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -85,8 +75,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _x2c_static_initialize_2();
 }
 
-static Var int_var(int);
-
 static Var double_value(Var value){
   return Var_binary(value, 54, int_var(2));
 }
@@ -95,35 +83,9 @@ static int is_even(Var value){
   return Var_equal(Var_binary(value, 75, int_var(2)), int_var(0));
 }
 
-Var Var_add(Var, Var);
-
 static Var add_pair(Var left, Var right){
   return Var_add(left, right);
 }
-
-void Scope_retain(void);
-
-List Iter_list(Iter);
-
-Iter Iter_filter(Iter, Func, Iter);
-
-Iter Iter_map(Iter, Func, Iter);
-
-Iter range(int, int, int, Iter);
-
-Var Iter_sum(Iter);
-
-Iter Iter_map2(Iter, Iter, Func, Iter);
-
-int Iter_try_next(Iter, Var *);
-
-Iter Iter_head(Iter, int, Iter);
-
-int List_len(List);
-
-int Var_int(Var);
-
-void Scope_release(void);
 
 int main(void){
   x2c_initialize();
@@ -196,8 +158,6 @@ int main(void){
   Scope_release();
   return 0;
 }
-
-Var x2c_func_value_argument(Func, const FuncArg *, unsigned, Symbol);
 
 static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0){
   Var a0 = x2c_func_value_argument(_x2c_func_binding_0, _x2c_func_argv_0, 0, 45156);

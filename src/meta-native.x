@@ -240,6 +240,15 @@ static Array _stub_arguments(Func function, const FuncArg *argv) {
   return values;
 }
 
+/** Tests a registered macro with the candidate's global and source bindings. */
+int Compiler.matches_macro(Compiler c, MacroMatcher &matcher, List code) {
+  Var previous = Macro.subject();
+  Array arguments = $auto([code]);
+  Macro.use_subject(c._subject_rows(arguments));
+  defer Macro.use_subject(previous);
+  return matcher.matches(code);
+}
+
 /* The caller's global bindings and source-name projections for bindings in
    the arguments, carried through the existing helper subject context. */
 static List Compiler._subject_rows(Compiler c, Array values) {
@@ -354,10 +363,35 @@ static int Compiler._code_result(Compiler c, Var value) {
     an expression takes a placeholder, and a template `slot`, which has
     none, is reported. */
 Var Compiler.run_meta_call(
-  Compiler c, List expression, Token site, int slot) {
+  Compiler c, List expression, Token site, int slot) =>
+  c._run_meta(expression, NULL, NULL, site, slot);
+
+/** Applies the meta function spelled `name` to the evaluated `arguments`
+    at `site`, outside any expansion. A call the project meta build leaves
+    for the translation returns void. */
+Var Compiler.apply_meta_function(
+  Compiler c, String name, List arguments, Token site) {
+  c.ensure_macro_lisp();
+  MetaContext *context = MetaContext.current();
+  $let(context.has_bindings, 0)
+  $let(context.captures, {})
+  $let(context.definition_file, c.filename)
+  $let(context.expander, c)
+  $let(context.evaluator, c)
+  $let(context.site, site)
+  $let(meta_call_form, meta_call_form)
+    return c._run_meta(NULL, name, arguments, site, 0);
+}
+
+/* Runs the meta call `expression`, or else `name` applied to `arguments`,
+   and reports its failure at `site`. */
+static Var Compiler._run_meta(
+  Compiler c, List expression, String name, List arguments, Token site,
+  int slot) {
   Var value;
   meta_call_form = NULL;
-  try value = _meta_call_value(c, expression, site);
+  try value = expression ? _meta_call_value(c, expression, site)
+                         : _meta_named_value(c, name, arguments, site);
   catch %(meta-later *): {
     value = void;
     if (slot)
@@ -386,14 +420,19 @@ static Var _meta_call_value(Compiler c, List expression, Token site) {
                  ((!or binding-name binding-global) ?name))))})
         (args *arguments))): {
       if (name is not <string>) break;
-      String spelling = name;
       Array values = c._meta_values(callee, arguments, site);
-      Var function = c._meta_function(spelling, site);
-      List applied = values.list_free();
-      meta_call_form = cons(Atom.intern(spelling), applied);
-      return c._meta_apply(function, applied);
+      return _meta_named_value(c, name, values.list_free(), site);
     }
   $report.macro.call_target(c, site);
+}
+
+/* Applies the session's `name` to `arguments`, recorded as the call a
+   failure renders. */
+static Var _meta_named_value(
+  Compiler c, String name, List arguments, Token site) {
+  Var function = c._meta_function(name, site);
+  meta_call_form = cons(Atom.intern(name), arguments);
+  return c._meta_apply(function, arguments);
 }
 
 /* Each argument evaluates as the type its parameter declares wants. */
@@ -1004,7 +1043,7 @@ static Scope native_module_scope = NULL;
    `meta` prototype, the `x2c_` targets, as the native module
    `compiler_supplier`, which every request selects first. */
 static macro Expression $compiler.targets() => $(lisp.native.targets
-  (filter (lambda (row) (not (eq? (String.startswith (car row) "x2c_") 0)))
+  (filter lisp.compiler.target?
     (_x2c.native-meta.targets)));
 
 static String compiler_supplier = "<compiler>";

@@ -5,26 +5,19 @@
 
 #include "x2c.h"
 #include "foreign-qualifier-upstream.h"
-int upstream_monitor_index(const char *);
-
 #ifndef X2CCPP
 _Static_assert(_Generic(& upstream_monitor_index, int(*)(const char *) : 1, default: 0), "native alias aliased_index does not match upstream_monitor_index");
 #endif
 #define aliased_index upstream_monitor_index
-const int upstream_monitor_width(int);
 #ifndef X2CCPP
 _Static_assert(_Generic(& upstream_monitor_width, const int(*)(int) : 1, default: 0), "native alias aliased_width does not match upstream_monitor_width");
 #endif
 #define aliased_width upstream_monitor_width
 static const char * left_label(int index);
-const char * upstream_monitor_label(int);
 static const char * left_label(int index){
   return upstream_monitor_label(index);
 }
 
-const upstream_monitor * upstream_monitor_at(int);
-int upstream_count_labels(upstream_label_fn);
-int String_len(String);
 int main(void){
   x2c_initialize();  const char * first = upstream_monitor_label(0);  const char * version = upstream_version;  const upstream_monitor * second = upstream_monitor_at(1);  upstream_label_fn callback = left_label;  String owned = String_new(first);  printf("%s %s %s %d %d %d %d\n", version, first, second -> label, upstream_count_labels(callback), aliased_index(first), aliased_width(1), String_len(owned));  return 0;
 }

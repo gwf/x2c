@@ -37,12 +37,6 @@ _x2c_defer_env_0;
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
-static Var Symbol_var(Symbol);
-
-List cons(Var, List);
-
-static Var List_var(List);
-
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -67,12 +61,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _17 = cons(_9, _16);
   _x2c_static_initialize_0();
 }
-
-void x2c_cleanup_push(X2CCleanup *);
-
-static List Var_list(Var);
-
-void x2c_cleanup_leave(X2CCleanup *);
 
 static int deferred(Var item){
   int n = 0;
@@ -117,16 +105,6 @@ static int deferred(Var item){
   }
 
 }
-
-int List_try_next(List, List *, Var *);
-
-void x2c_exception_push(ExceptionFrame *);
-
-int x2c_exception_claim(ExceptionFrame *);
-
-void x2c_exception_leave(ExceptionFrame *);
-
-void x2c_exception_landed(ExceptionFrame *);
 
 static int guarded(List items){
   int volatile kept = 0;

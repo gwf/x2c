@@ -26,12 +26,6 @@ static int note(String name);
 
 static List items(String name);
 
-static Var Symbol_var(Symbol);
-
-List cons(Var, List);
-
-static Var String_var(String);
-
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -67,8 +61,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _x2c_static_initialize_0();
 }
 
-int String_len(String);
-
 static int note(String name){
   trail = String_join(NULL, cons(String_var(trail), cons(String_var(name), NULL)));
   return String_len(trail);
@@ -78,24 +70,6 @@ static List items(String name){
   note(name);
   return _1;
 }
-
-static Var int_var(int);
-
-static String int_str(int);
-
-Array Array_update_n(Array, unsigned, ...);
-
-Array Array_new(void);
-
-Map Map_update_n(Map, unsigned, ...);
-
-Map Map_new(void);
-
-static Var List_var(List);
-
-int List_len(List);
-
-unsigned Map_len(Map);
 
 int main(void){
   x2c_initialize();

@@ -127,14 +127,6 @@ static void * _input(Thread thread){
   return(unsigned char *) thread + _input_offset();
 }
 
-static Var Symbol_var(Symbol);
-
-static Var String_var(String);
-
-void Error_policy_release(void *);
-
-void Pool_thread_start(void);
-
 #include "error.h"
 
 
@@ -166,8 +158,6 @@ Thread Thread_start(ThreadFn function, const void * input, size_t input_size){
   return thread;
 }
 
-void * Error_policy_capture(void);
-
 static Thread _new_handle(ThreadFn function, const void * input, size_t input_size){
   size_t input_offset = _input_offset();
   if(input_size > SIZE_MAX - input_offset){
@@ -196,12 +186,6 @@ static Thread _new_handle(ThreadFn function, const void * input, size_t input_si
   return thread;
 }
 
-void Context_initialize(void);
-
-void x2c_match_initialize(void);
-
-void Scope_shutdown_hook(void(*)(void));
-
 static void _register_shutdown(void){
   Context_initialize();
   x2c_match_initialize();
@@ -216,10 +200,6 @@ static void _shutdown(void){
   }
 
 }
-
-void x2c_descriptor_thread_start_begin(void);
-
-void x2c_descriptor_thread_start_end(int);
 
 static int _create_native(Thread thread){
   pthread_attr_t attributes;
@@ -239,8 +219,6 @@ static void _stack_attributes(pthread_attr_t * attributes){
 
 }
 
-static Var int_var(int);
-
 _Noreturn static void _error(const char * operation, int error){
   String name = String_new(operation);
   {
@@ -250,28 +228,6 @@ _Noreturn static void _error(const char * operation, int error){
   }
 
 }
-
-Scope * Scope_top(void);
-
-void Pool_thread_initialize(void);
-
-void Error_initialize_raw(void);
-
-void Error_policy_adopt(void *);
-
-Scope Scope_new_named(const char *);
-
-void Scope_push(Scope *);
-
-Pool Pool_open_named(const char *);
-
-Pool Pool_detach(void);
-
-void Scope_pop(void);
-
-void Error_shutdown_raw(void);
-
-void x2c_thread_state_release(void);
 
 static void * _run(void * argument){
   Thread thread = argument;
@@ -290,34 +246,6 @@ static void * _run(void * argument){
   x2c_thread_state_release();
   return NULL;
 }
-
-Context Context_open_isolated_named(const char *);
-
-int Error_mark(void);
-
-int x2c_error_catch_site_pending(ErrorCatchSite *);
-
-static Var List_var(List);
-
-ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
-
-void x2c_exception_push(ExceptionFrame *);
-
-void x2c_exception_landed(ExceptionFrame *);
-
-int x2c_exception_is_error_target(ExceptionFrame *);
-
-int x2c_error_catch_selected(ErrorHandler);
-
-void x2c_error_catch_detach(ErrorHandler);
-
-void x2c_exception_mark_handled(ExceptionFrame *);
-
-void x2c_error_catch_close(ErrorHandler);
-
-void x2c_exception_leave(ExceptionFrame *);
-
-void Context_close(Context);
 
 static void _work(Thread thread){
   Context work = Context_open_isolated_named("Thread callback");
@@ -366,16 +294,6 @@ static void _work(Thread thread){
   Context_close(work);
 }
 
-ErrorHandler Error_push(ErrorHandlerFn, Var);
-
-void x2c_cleanup_push(X2CCleanup *);
-
-Symbol Logger_error_handler(List, Var);
-
-Var Context_export(Context, Var);
-
-void x2c_cleanup_leave(X2CCleanup *);
-
 static void _call(Thread thread, Context work){
   ErrorHandler observer = Error_push(_capture_errors, Var_new(1360144456, thread));
   {
@@ -415,22 +333,6 @@ static void _call(Thread thread, Context work){
 
 }
 
-static int List_truth(List);
-
-Var List_last(List);
-
-static int Var_is_row(Var, unsigned, unsigned long, unsigned long);
-
-static List Var_list(Var);
-
-Var List_assoc(List, Var);
-
-int Var_is(Var, Symbol);
-
-Symbol Error_policy_get(Symbol);
-
-Var Error_snapshot_in(Var, Scope *, Pool);
-
 static Symbol _capture_errors(List errors, Var data){
   Thread thread = Var_pointer(data);
   if(! List_truth(errors)) return 285842436424;
@@ -451,14 +353,10 @@ static Symbol _capture_errors(List errors, Var data){
 
 int Var_is_void(Var);
 
-List Error_since_in(int, Scope *, Pool);
-
 static void _worker_failed(Thread thread, int mark){
   if(Var_is_void(thread -> errors)) thread -> errors = List_var(Error_since_in(mark, & thread -> result_scope, thread -> result_pool));
   thread -> result =((void) 0, Void);
 }
-
-Var Context_export_scope(Scope, Pool, Var);
 
 Var Thread_join(Thread t){
   if(! _init_guard_) _file_init_();
@@ -517,10 +415,6 @@ Var Thread_join(Thread t){
 
 }
 
-Pool Pool_release(Pool);
-
-void Scope_destroy(Scope);
-
 static void _finish_join(Thread thread){
   if(thread -> result_pool) Pool_release(thread -> result_pool);
   thread -> result_pool = NULL;
@@ -538,8 +432,6 @@ void Thread_free(Thread t){
   }
   free(t);
 }
-
-void Error_pop(ErrorHandler);
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;

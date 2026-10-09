@@ -53,19 +53,13 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
 
 }
 
-Var Var_new(Symbol, ...);
-
 Var Split_var(Split split){
   return Var_new(40919656, split);
 }
 
-void * Var_pointer(Var);
-
 Split Var_split(Var value){
   return(Split) Var_pointer(value);
 }
-
-int String_len(String);
 
 static int String_truth(String);
 
@@ -98,15 +92,7 @@ static inline int _line_end(String str, int start, int keep_ends, int * next){
   return keep_ends ?(* next) : end;
 }
 
-Array Array_new(void);
-
-String String_new_len(const char *, int);
-
-Var Array_push(Array, Var);
-
 static Var String_var(String);
-
-List Array_list_free(Array);
 
 List String_split_n(String str, String sep, int max_splits){
   if(! String_truth(str)) return NULL;
@@ -139,8 +125,6 @@ List String_split_lines(String str, int keep_ends){
   }
   return Array_list_free(results);
 }
-
-void * Scope_malloc(size_t);
 
 static Split _new(String str, String sep, int(* next)(Split split, int * cursor, String * out)){
   Split split = Scope_malloc(sizeof(struct Split));
@@ -216,8 +200,6 @@ static int _iter_next(Iter iter, Var * out){
 }
 
 static int Iter_truth(Iter);
-
-Iter Iter_init(Iter, Var, IterNextFn, Var);
 
 Iter Split_iter(Split split, Iter dest){
   if(! Iter_truth(dest)) return NULL;

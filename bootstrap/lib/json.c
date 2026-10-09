@@ -280,8 +280,6 @@ Var Json_parse(String source){
   return _parse(source, NULL);
 }
 
-String Path_read_text(Path);
-
 Var Json_read_file(Path path){
   if(! _init_guard_) _file_init_();
   return _parse(Path_read_text(path), path);
@@ -639,8 +637,6 @@ String Var_pretty_json(Var value){
   if(! _init_guard_) _file_init_();
   return _json(value, 1);
 }
-
-void Path_write_text(Path, String);
 
 void Json_write_file(Var value, Path path){
   if(! _init_guard_) _file_init_();

@@ -4,16 +4,6 @@
 #include "x2c.h"
 
 #include "typed-array.h"
-ArrayInt Array_arrayint(Array);
-
-Array Array_update_n(Array, unsigned, ...);
-
-Array Array_new(void);
-
-static Var int_var(int);
-
-int ArrayInt_try_next(ArrayInt, int *, int *);
-
 int main(void){
   x2c_initialize();
   ArrayInt values = Array_arrayint(Array_update_n(Array_new(), 3, int_var(2), int_var(4), int_var(6)));

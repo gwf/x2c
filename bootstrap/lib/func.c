@@ -105,14 +105,6 @@ static Func _new(FuncAdapter adapter, List signature, int rest, const void * con
 
 static VarMethods _x2c__x2c_protocol_methods_0;
 
-static Var Symbol_var(Symbol);
-
-static Var String_var(String);
-
-List cons(Var, List);
-
-static Var List_var(List);
-
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -166,12 +158,6 @@ static void * Func__context(Func f){
   return(unsigned char *) f + _context_offset();
 }
 
-static Var unsigned_var(unsigned);
-
-static int List_truth(List);
-
-int Var_is_void(Var);
-
 #include "error.h"
 
 
@@ -216,8 +202,6 @@ Var Func_apply(Func f, unsigned argc, const FuncArg * argv){
   return f -> adapter(f, & packed);
 }
 
-static List List_cdr(List);
-
 List x2c_func_reference_type(Func fn, unsigned argc, unsigned index){
   if(! fn || index >= argc){
     Var _x2c_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("Func.apply")), NULL)));
@@ -243,12 +227,6 @@ List x2c_func_reference_type(Func fn, unsigned argc, unsigned index){
   return _is_reference(parameter) ? List_cdr(parameter) : NULL;
 }
 
-static int Var_is_row(Var, unsigned, unsigned long, unsigned long);
-
-static Var List_car(List);
-
-static List Var_list(Var);
-
 static List Func__parameter(Func fn, unsigned index){
   if(! fn || index >= fn -> nparams) return NULL;
   List params = fn -> params;
@@ -259,36 +237,6 @@ static List Func__parameter(Func fn, unsigned index){
 static int _is_reference(List parameter){
   return List_truth(parameter) &&(Var_equal(List_car(parameter), Symbol_var(77)) || Var_equal(List_car(parameter), Symbol_var(33330008396)));
 }
-
-int Var_numeric_info(Symbol, X2CVarNumericInfo *);
-
-int x2c_error_catch_site_pending(ErrorCatchSite *);
-
-ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
-
-void x2c_exception_push(ExceptionFrame *);
-
-Var Var_convert(Var, Symbol);
-
-void x2c_exception_landed(ExceptionFrame *);
-
-int x2c_exception_is_error_target(ExceptionFrame *);
-
-int x2c_error_catch_selected(ErrorHandler);
-
-void x2c_error_catch_detach(ErrorHandler);
-
-void x2c_exception_mark_handled(ExceptionFrame *);
-
-void x2c_error_catch_close(ErrorHandler);
-
-void x2c_exception_leave(ExceptionFrame *);
-
-int Var_is(Var, Symbol);
-
-int Var_is_null(Var);
-
-Symbol Var_tag(Var);
 
 Var x2c_func_value_argument(Func fn, const FuncArg * argv, unsigned i, Symbol want){
   List sig = fn ? fn -> sig : NULL;
@@ -378,10 +326,6 @@ Var x2c_func_value_argument(Func fn, const FuncArg * argv, unsigned i, Symbol wa
   return value;
 }
 
-Symbol Var_kind(Var);
-
-void * Var_pointer(Var);
-
 void * x2c_func_pointer_argument(Func fn, const FuncArg * argv, unsigned i){
   Var value = argv[i].data.value;
   Symbol kind = Var_kind(value);
@@ -413,10 +357,6 @@ _Noreturn FuncArg x2c_func_unrepresentable_argument(Func fn, unsigned i, List so
 
 }
 
-Var Var_new(Symbol, ...);
-
-void * Scope_memdup(const void *, size_t);
-
 Var x2c_func_record_result(const void * bytes, size_t size){
   return Var_new(3683441, Scope_memdup(bytes, size));
 }
@@ -428,8 +368,6 @@ void * x2c_func_reference_argument(Func fn, const FuncArg * argv, unsigned i, Li
 void * x2c_func_declared_reference_argument(Func fn, const FuncArg * argv, unsigned i, List declared_target, List want){
   return Func__reference_argument(fn, argv, i, declared_target, want);
 }
-
-int List_equal(List, List);
 
 static void * Func__reference_argument(Func fn, const FuncArg * argv, unsigned i, List declared_target, List want){
   List declared = Func__parameter(fn, i), source = argv[i].reference_type;
@@ -493,12 +431,6 @@ Func x2c_func_shared(FuncAdapter adapter, List signature){
   return fn;
 }
 
-List List_match(List, Var);
-
-int List_len(List);
-
-void * Scope_calloc(size_t, size_t);
-
 static Func _new(FuncAdapter adapter, List signature, int rest, const void * context, size_t context_size){
   if(rest && ! List_truth(({ static MatchCaptureSite _x2c_match_site_0;  x2c_match_site_match(& _x2c_match_site_0, signature, List_var(_14)); }))){
     static const X2CErrorSite _x2c_error_site_13 = {.file = "../../lib/func.x",.function = "_new",.line = 401};
@@ -554,8 +486,6 @@ const void * Func_context(Func function){
   }
   return function -> context_size ? Func__context(function) : NULL;
 }
-
-void Scope_move(void *, Scope *);
 
 void Func_move(Func function, Scope * slot){
   if(function && ! function -> shared) Scope_move(function, slot);

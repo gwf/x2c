@@ -245,8 +245,6 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
 
 static Func _x2c_func_handle_0;
 
-Func x2c_func_shared(FuncAdapter, List);
-
 #include "exception.h"
 
 
@@ -280,14 +278,6 @@ typedef struct _x2c_lambda_context_2{
 _x2c_lambda_context_2;
 
 static Var _x2c_lambda_4(Func _x2c_lambda_closure_1, const FuncArg * _x2c_lambda_argv_1);
-
-static Var String_var(String);
-
-List cons(Var, List);
-
-static Var Symbol_var(Symbol);
-
-static Var List_var(List);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -444,13 +434,7 @@ ProjectBuild project_plan(CliRequest request){
   return p -> head;
 }
 
-void * Scope_calloc(size_t, size_t);
-
-Map Map_new(void);
-
 String project_manifest(CliRequest c);
-
-static int String_truth(String);
 
 Path Path_absolute(Path);
 
@@ -474,8 +458,6 @@ static Project _open_project(CliRequest request){
 Path Path_join(Path, Path);
 
 int SourceView_exists(SourceView, String);
-
-int String_equal(String, String);
 
 String project_manifest(CliRequest c){
   if(! _init_guard_) _file_init_();
@@ -508,12 +490,6 @@ static String _build_root(Project p){
   return String_join(NULL, cons(String_var(p -> root), cons(String_var(_8), NULL)));
 }
 
-List String_split_lines(String, int);
-
-int List_try_next(List, List *, Var *);
-
-static String Var_string(Var);
-
 static void _parse_manifest(Project p){
   Manifest m ={
     .project = p
@@ -541,8 +517,6 @@ static void _parse_manifest(Project p){
   if(String_truth(m.key)) _error(p, m.start, _9);
   if(! p -> targets) _error(p, 0, _10);
 }
-
-void * Scope_malloc(size_t);
 
 static char * _content(String text){
   int length = String_truth(text) ? strlen(text) : 0;
@@ -575,8 +549,6 @@ static char * _trim(char * text){
   return text;
 }
 
-String String_new(const char *);
-
 static void Manifest_header(Manifest * m, char * line){
   int length = strlen(line);
   if(length < 3 || line[length - 1] != ']') _error((* m).project, (* m).line, _11);
@@ -601,12 +573,6 @@ static void Manifest_enter_dependencies(Manifest * m){
   p -> dependency_seen = Map_new();
   (* m).section = DEPENDENCIES;
 }
-
-String String_remove_prefix(String, String);
-
-int String_find(String, String);
-
-int String_startswith(String, String);
 
 static void Manifest_target_header(Manifest * m, String header){
   Project p =(* m).project;
@@ -661,12 +627,6 @@ static void Manifest_extend(Manifest * m, char * line){
   );
   Manifest_settle(&((* m)));
 }
-
-int Map_contains(Map, Var);
-
-Var Map_setindex(Map, Var, Var);
-
-static Var int_var(int);
 
 static void Manifest_claim(Manifest * m, String key){
   Map keys = Manifest_keys(&((* m)));
@@ -762,12 +722,6 @@ static String _string_value(Project p, int line, String value){
   return text;
 }
 
-Array Array_new(void);
-
-Var Array_push(Array, Var);
-
-List Array_list_free(Array);
-
 static List _string_array(Project p, int line, String value){
   char * at = _skip_space(String_truth(value) ? value : "");
   if(* at != '[') _error(p, line, _48);
@@ -782,12 +736,6 @@ static List _string_array(Project p, int line, String value){
   if(* _skip_space(at + 1)) _error(p, line, _50);
   return Array_list_free(values);
 }
-
-Buffer Buffer_new(size_t);
-
-Buffer Buffer_write_char(Buffer, char);
-
-String Buffer_str_free(Buffer);
 
 static String _parse_string(Project p, int line, char * * cursor){
   char * at = _skip_space(* cursor ? * cursor : "");
@@ -829,10 +777,6 @@ static int _array_open(String value){
   }
   return depth > 0;
 }
-
-int String_getindex(String, int);
-
-int String_try_next(String, int *, int *);
 
 static int _name_ok(String name){
   if(! String_truth(name) || ! String_getindex(name, 0)) return 0;
@@ -915,8 +859,6 @@ static void _validate_target(Project p, ProjectTarget target){
   target -> visited = 1;
 }
 
-List List_append(List, List);
-
 static List _prerequisites(ProjectTarget target){
   return List_append(target -> dependencies, target -> native_modules);
 }
@@ -928,36 +870,14 @@ static ProjectProfile _selected_profile(Project p, ProjectTarget target, String 
   return profile;
 }
 
+void Path_remove_file(Path);
+
+void host_error(List);
+
 #include "error.h"
 
 
 
-
-int x2c_error_catch_site_pending(ErrorCatchSite *);
-
-ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
-
-void x2c_exception_push(ExceptionFrame *);
-
-void Path_remove_file(Path);
-
-void x2c_exception_landed(ExceptionFrame *);
-
-int x2c_exception_is_error_target(ExceptionFrame *);
-
-int x2c_error_catch_selected(ErrorHandler);
-
-void x2c_error_catch_detach(ErrorHandler);
-
-void x2c_exception_mark_handled(ExceptionFrame *);
-
-void host_error(List);
-
-void x2c_error_catch_close(ErrorHandler);
-
-void x2c_exception_leave(ExceptionFrame *);
-
-List install_require(CliRequest, String, String, List);
 
 static void _resolve_dependencies(Project p){
   CliRequest request = p -> command;
@@ -1014,8 +934,6 @@ static void _resolve_dependencies(Project p){
 
 String Path_read_text(Path);
 
-List install_rows(String);
-
 static List _read_lock(String path){
   String volatile text = NULL;
   {
@@ -1068,10 +986,6 @@ static List _read_lock(String path){
   return install_rows(text);
 }
 
-static int List_truth(List);
-
-String install_version(String);
-
 static int _lock_satisfies(Project p, List rows){
   if(! List_truth(rows)) return 0;
   for(ProjectDependency entry = p -> dependencies;  entry;  entry = entry -> next){
@@ -1080,12 +994,6 @@ static int _lock_satisfies(Project p, List rows){
   }
   return 1;
 }
-
-static List Var_list(Var);
-
-static Var List_car(List);
-
-static Var List_cadr(List);
 
 static List _locked_row(List rows, ProjectDependency entry){
   List found = NULL;
@@ -1102,8 +1010,6 @@ static List _locked_row(List rows, ProjectDependency entry){
   }
   return found;
 }
-
-String String_join(String, List);
 
 void file_publish(List);
 
@@ -1278,15 +1184,7 @@ static List _target_modules(Project p, ProjectTarget target){
   return Array_list_free(modules);
 }
 
-int Array_try_next(Array, int *, Var *);
-
-int Array_contains(Array, Var);
-
-Array Array_sort(Array);
-
 int is_source_file(String);
-
-int String_endswith(String, String);
 
 static Array _target_sources(Project p, ProjectTarget target){
   if(! List_truth(target -> sources)) _error_name(p, 0, _71, target -> name);
@@ -1368,10 +1266,6 @@ static int _has_glob(String pattern){
 
 List Path_glob(Path);
 
-List Iter_list(Iter);
-
-Iter Map_keys(Map, Iter);
-
 int Path_glob_match(Path, Path);
 
 static Array _glob(Project p, String pattern){
@@ -1396,8 +1290,6 @@ static Array _glob(Project p, String pattern){
   return matches;
 }
 
-String String_replace(String, String, String);
-
 static String _glob_literal(String text){
   return String_replace(String_replace(String_replace(String_replace(text, _77, _78), _79, _80), _81, _82), _83, _84);
 }
@@ -1408,8 +1300,6 @@ static Array _named_file(Project p, String pattern){
   if(SourceView_exists(p -> sources, path)) Array_push(matches, String_var(path));
   return matches;
 }
-
-List List_map(List, Func);
 
 static void _set_flags(Project p, ProjectTarget target, CliRequest request){
   CliRequest command = p -> command;
@@ -1437,10 +1327,6 @@ static ProjectProfile _target_profile(Project p, ProjectTarget target){
   if(target == p -> selected) return _selected_profile(p, target, name);
   return String_truth(name) ? _profile(target, name) : NULL;
 }
-
-int List_any(List, Func);
-
-int List_contains(List, Var);
 
 static List _profile_flags(Project p, ProjectProfile profile){
   List cc_args = p -> command -> cc_args;
@@ -1475,8 +1361,6 @@ static List _defines(List values){
   return List_map(values, _x2c_func_handle_2);
 }
 
-Func Func_new_context(FuncAdapter, List, const void *, size_t);
-
 static List _paths(String root, List values){
   return List_map(values, ({
     Var _x2c_lambda_capture_value_0 = String_var(root);  _x2c_lambda_context_0 _x2c_lambda_context_1 ={
@@ -1487,8 +1371,6 @@ static List _paths(String root, List values){
   ));
 }
 
-List List_flatten(List);
-
 static List _path_options(String root, List values, String option){
   return List_flatten(List_map(_paths(root, values), ({
     Var _x2c_lambda_capture_value_1 = String_var(option);  _x2c_lambda_context_2 _x2c_lambda_context_3 ={
@@ -1498,8 +1380,6 @@ static List _path_options(String root, List values, String option){
   }
   )));
 }
-
-String String_printf(String, ...);
 
 _Noreturn static void _error(Project p, int line, String message){
   String at = line ? String_printf(_114, line) : NULL;
@@ -1594,8 +1474,6 @@ static Var _x2c_lambda_0(Var library){
   ;
 }
 
-Var x2c_func_value_argument(Func, const FuncArg *, unsigned, Symbol);
-
 static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0){
   Var a0 = x2c_func_value_argument(_x2c_func_binding_0, _x2c_func_argv_0, 0, 45156);
   return _x2c_lambda_0(a0);
@@ -1623,8 +1501,6 @@ static Var _x2c_func_adapt_2(Func _x2c_func_binding_2, const FuncArg * _x2c_func
   return _x2c_lambda_2(a0);
   ;
 }
-
-const void * Func_context(Func);
 
 static Var _x2c_lambda_3(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0){
   String value = Var_string(x2c_func_value_argument(_x2c_lambda_closure_0, _x2c_lambda_argv_0, 0, 1318210446));

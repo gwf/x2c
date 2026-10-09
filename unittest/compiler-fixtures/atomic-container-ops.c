@@ -67,37 +67,15 @@ static int next_index(int value){
   return value;
 }
 
-static Var String_var(String);
-
 static Var next_key(String value){
   selector_calls ++;
   return String_var(value);
 }
 
-static Var int_var(int);
-
 static Var next_rhs(int value){
   rhs_calls ++;
   return int_var(value);
 }
-
-Array Array_update_n(Array, unsigned, ...);
-
-Array Array_new(void);
-
-Map Map_update_n(Map, unsigned, ...);
-
-Map Map_new(void);
-
-Var Array_getindex(Array, int);
-
-Var Map_getindex(Map, Var);
-
-Var Var_new(Symbol, ...);
-
-int Var_int(Var);
-
-static String Var_string(Var);
 
 int main(void){
   x2c_initialize();
@@ -135,8 +113,6 @@ int main(void){
   printf("calls=%d,%d,%d\n", base_calls, selector_calls, rhs_calls);
   return 0;
 }
-
-String String_add(String, String);
 
 static String _x2c_proto_string_add_update(volatile String * _x2c_macro_lhs_0, Symbol _x2c_macro_op_0, String _x2c_macro_rhs_0){
   _x2c_macro_lhs_0[0] = String_add(_x2c_macro_lhs_0[0], _x2c_macro_rhs_0);

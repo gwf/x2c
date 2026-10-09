@@ -14,10 +14,6 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
-static Var int_var(int);
-
-List cons(Var, List);
-
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -30,24 +26,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _5 = cons(_0, _4);
   _6 = String_new("payload");
 }
-
-static Var List_var(List);
-
-static String Var_string(Var);
-
-static List Var_list(Var);
-
-static Var String_var(String);
-
-static Var Map_var(Map);
-
-Map Map_update_n(Map, unsigned, ...);
-
-Map Map_new(void);
-
-static Var Symbol_var(Symbol);
-
-static Map Var_map(Var);
 
 int main(void){
   x2c_initialize();

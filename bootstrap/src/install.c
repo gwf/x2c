@@ -135,8 +135,6 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
 
 static Func _x2c_func_handle_0;
 
-Func x2c_func_shared(FuncAdapter, List);
-
 _x2c_initializer_choice_3CFE94DA_2((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _81)))
 typedef struct _x2c_defer_env_0{
   const void * _x2c_defer_capture_0;
@@ -153,14 +151,6 @@ static Func _x2c_func_handle_1;
 
 _x2c_initializer_choice_3CFE94DA_3((_x2c_func_handle_1 = x2c_func_shared(_x2c_func_adapt_1, _81)))
 static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3);
-
-static Var String_var(String);
-
-static Var Symbol_var(Symbol);
-
-List cons(Var, List);
-
-static Var List_var(List);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -297,34 +287,14 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _x2c_static_initialize_3();
 }
 
+void Path_make_dirs(Path);
+
+int file_lock(Path, int);
+
 #include "error.h"
 
 
 
-
-int x2c_error_catch_site_pending(ErrorCatchSite *);
-
-ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
-
-void x2c_exception_push(ExceptionFrame *);
-
-void Path_make_dirs(Path);
-
-void x2c_exception_landed(ExceptionFrame *);
-
-int x2c_exception_is_error_target(ExceptionFrame *);
-
-int x2c_error_catch_selected(ErrorHandler);
-
-void x2c_error_catch_detach(ErrorHandler);
-
-void x2c_exception_mark_handled(ExceptionFrame *);
-
-void x2c_error_catch_close(ErrorHandler);
-
-void x2c_exception_leave(ExceptionFrame *);
-
-int file_lock(Path, int);
 
 static String _locked_packages(String command, int quiet){
   Path packages = _home_packages(command), lock = String_join(NULL, cons(String_var(packages), cons(String_var(_0), NULL)));
@@ -379,15 +349,7 @@ static String _locked_packages(String command, int quiet){
 
 List Path_list_dir(Path);
 
-int List_try_next(List, List *, Var *);
-
-static String Var_string(Var);
-
-int String_startswith(String, String);
-
 void Path_remove_tree(Path);
-
-String String_printf(String, ...);
 
 static String _work_directory(String packages){
   {
@@ -406,8 +368,6 @@ static String _work_directory(String packages){
   _staging = work;
   return work;
 }
-
-static int String_truth(String);
 
 static void _release_packages(void){
   String work = _staging;
@@ -473,12 +433,6 @@ static void _host_error(List detail){
   host_error(detail);
 }
 
-static Var List_car(List);
-
-void x2c_cleanup_push(X2CCleanup *);
-
-void x2c_cleanup_leave(X2CCleanup *);
-
 int install_command(CliRequest request){
   if(! _init_guard_) _file_init_();
   Install i = _locked_install(request, Var_string(List_car(request -> inputs)));
@@ -506,12 +460,6 @@ int install_command(CliRequest request){
   }
 
 }
-
-static int List_truth(List);
-
-Var List_getindex(List, int);
-
-int String_equal(String, String);
 
 List install_require(CliRequest request, String name, String version, List locked){
   if(! _init_guard_) _file_init_();
@@ -554,8 +502,6 @@ static Install _locked_install(CliRequest request, String spec){
 }
 
 int Path_exists(Path);
-
-int String_is_identifier(String);
 
 static void Install_locate(Install * i){
   String spec =(* i).spec;
@@ -649,17 +595,7 @@ Path Path_absolute(Path);
 
 String cli_version(void);
 
-Map Map_update_n(Map, unsigned, ...);
-
-Map Map_new(void);
-
-Var Map_setindex(Map, Var, Var);
-
 void Path_write_text(Path, String);
-
-String Var_pretty_json(Var);
-
-static Var Map_var(Map);
 
 static void Install_mark_source(Install * i, String staged, String name){
   String version =(* i).version;
@@ -731,10 +667,6 @@ static void _build_source(String package, String name, String spec){
   Path_write_text(String_join(NULL, cons(String_var(builds), cons(String_var(_2), cons(String_var(name), cons(String_var(_53), NULL))))), NULL);
 }
 
-List List_append(List, List);
-
-int List_contains(List, Var);
-
 static List _source_units(String src, String name, String spec){
   List volatile units = NULL;
   {
@@ -780,8 +712,6 @@ static List _source_units(String src, String name, String spec){
   if(!(List_contains(units, String_var(String_join(NULL, cons(String_var(src), cons(String_var(_2), cons(String_var(name), cons(String_var(_56), NULL)))))))) && !(List_contains(units, String_var(String_join(NULL, cons(String_var(src), cons(String_var(_2), cons(String_var(name), cons(String_var(_57), NULL))))))))) _error(String_join(NULL, cons(String_var(spec), cons(String_var(_58), cons(String_var(name), cons(String_var(_59), NULL))))));
   return units;
 }
-
-int String_endswith(String, String);
 
 String Path_stem(Path);
 
@@ -845,10 +775,6 @@ static Path _empty_builds(String package){
   return builds;
 }
 
-int List_any(List, Func);
-
-Func Func_new_context(FuncAdapter, List, const void *, size_t);
-
 static int _native_meta(String builds, String name){
   String row = String_join(NULL, cons(String_var(_65), cons(String_var(name), cons(String_var(_66), NULL))));
   return List_any(_files_with(builds, _67), ({
@@ -868,8 +794,6 @@ String install_version(String name){
   ));
 }
 
-String String_upper(String);
-
 static String _installed_version(String package){
   String kind = _installed_kind(package);
   if(! String_truth(kind)) return NULL;
@@ -883,14 +807,6 @@ static String _installed_kind(String package){
   if(Path_exists(String_join(NULL, cons(String_var(package), cons(String_var(_12), NULL))))) return _83;
   return Path_exists(String_join(NULL, cons(String_var(package), cons(String_var(_19), NULL)))) ? _15 : NULL;
 }
-
-Var Json_read_file(Path);
-
-int Var_is(Var, Symbol);
-
-Var Var_getindex(Var, Var);
-
-static int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 
 static String _marker_string(String path, String field){
   Var volatile marker = Var_null();
@@ -946,20 +862,6 @@ static String _marker_string(String path, String field){
   return Var_is_row(value, 11, 7, 1) ? Var_string(value) : NULL;
 }
 
-Array Array_new(void);
-
-List String_split_lines(String, int);
-
-List List_filter(List, Func);
-
-List String_split(String, String);
-
-int List_len(List);
-
-Var Array_push(Array, Var);
-
-List Array_list_free(Array);
-
 List install_rows(String text){
   if(! _init_guard_) _file_init_();
   Array rows = Array_new();
@@ -982,8 +884,6 @@ List install_rows(String text){
 }
 
 String Path_read_text(Path);
-
-static List Var_list(Var);
 
 static List _index_row(CliRequest request, String name, String work){
   String location = String_truth(request -> index) ? request -> index : _87;
@@ -1058,10 +958,6 @@ static String _home_packages(String command){
   return packages;
 }
 
-String String_lower(String);
-
-String String_new(const char *);
-
 static String _platform(void){
   struct utsname host;
   if(uname(& host)) _error("cannot identify the host platform");
@@ -1077,11 +973,7 @@ Job Job_options(Job, Map);
 
 Job List_job(List);
 
-Var List_assoc(List, Var);
-
 int Job_status(Job);
-
-String String_strip(String, char *);
 
 static void _run(List arguments, const char * what){
   Job volatile job = NULL;
@@ -1150,10 +1042,6 @@ static String _fetch(String url, String directory, String name){
   return target;
 }
 
-File File_open(const char *, const char *);
-
-String File_sha256(File);
-
 static void _verify(Path p, String expected){
   File input = File_open(p, "rb");
   {
@@ -1175,8 +1063,6 @@ static void _verify(Path p, String expected){
   }
 
 }
-
-static List List_cdr(List);
 
 static String _unpack(String tarball, String work){
   Path extracted = String_join(NULL, cons(String_var(work), cons(String_var(_111), NULL)));
@@ -1322,14 +1208,6 @@ static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
   _release_packages();
 }
 
-Var x2c_func_value_argument(Func, const FuncArg *, unsigned, Symbol);
-
-const void * Func_context(Func);
-
-static Var int_var(int);
-
-int String_contains(String, String);
-
 static Var _x2c_lambda_0(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0){
   String path = Var_string(x2c_func_value_argument(_x2c_lambda_closure_0, _x2c_lambda_argv_0, 0, 1318210446));
   const _x2c_lambda_context_0 * _x2c_lambda_context_value_0 =(const _x2c_lambda_context_0 *) Func_context(_x2c_lambda_closure_0);
@@ -1347,8 +1225,6 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
   return _x2c_lambda_1(a0);
   ;
 }
-
-void File_cleanup(File);
 
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
   _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_2;

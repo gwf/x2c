@@ -8,8 +8,6 @@ typedef int MacroBoxFirst;
 
 typedef int MacroBoxSecond;
 
-Var Var_new(Symbol, ...);
-
 static inline Var MacroBoxFirst_var(MacroBoxFirst _x2c_macro_value_0){
   return Var_new(3453797, _x2c_macro_value_0);
 }
@@ -17,8 +15,6 @@ static inline Var MacroBoxFirst_var(MacroBoxFirst _x2c_macro_value_0){
 static inline Var MacroBoxSecond_var(MacroBoxSecond _x2c_macro_value_1){
   return Var_new(3453797, _x2c_macro_value_1);
 }
-
-long Var_integer(Var);
 
 int main(void){
   x2c_initialize();

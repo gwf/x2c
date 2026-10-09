@@ -165,14 +165,6 @@ _x2c_defer_env_7;
 
 static void _x2c_defer_cleanup_7(void * _x2c_defer_opaque_7);
 
-static Var String_var(String);
-
-static Var Symbol_var(Symbol);
-
-static Var unsigned_var(unsigned);
-
-static Var int_var(int);
-
 #include "error.h"
 
 
@@ -219,27 +211,9 @@ static Var * _record_value(Map _x2c_macro_map_1, unsigned _x2c_macro_index_1){
   return & _x2c_macro_records_1[_x2c_macro_index_1].val;
 }
 
-unsigned Var_hash(Var);
-
 static unsigned _map_key_hash(Var * _x2c_macro_key_0){
   return Var_hash(_x2c_macro_key_0[0]);
 }
-
-static List Var_list(Var);
-
-static int List_truth(List);
-
-int List_equal(List, List);
-
-static String Var_string(Var);
-
-static int String_truth(String);
-
-int String_equal(String, String);
-
-int Var_is(Var, Symbol);
-
-int Var_equal(Var, Var);
 
 static int _map_key_equal(Var * _x2c_macro_a_0, Var * _x2c_macro_b_0){
   if(Var_same(_x2c_macro_a_0[0], _x2c_macro_b_0[0])) return 1;
@@ -254,8 +228,6 @@ static int _map_value_equal(Var * _x2c_macro_a_1, Var * _x2c_macro_b_1){
   return Var_equal(_x2c_macro_a_1[0], _x2c_macro_b_1[0]);
 }
 
-int Var_is_void(Var);
-
 static void _map_value_valid(Var * _x2c_macro_value_0){
   if(Var_is_void(_x2c_macro_value_0[0])){
     static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/map.x",.function = "_map_value_valid",.line = 62};
@@ -265,22 +237,12 @@ static void _map_value_valid(Var * _x2c_macro_value_0){
 
 }
 
-void Scope_free(void *);
-
 static void Map__core_free(Map _x2c_macro_map_2){
   if((void *) _x2c_macro_map_2 == 0) return;
   Bytes_free(_x2c_macro_map_2 -> hashes);
   Bytes_free(_x2c_macro_map_2 -> entries);
   Scope_free(_x2c_macro_map_2);
 }
-
-void * Scope_malloc(size_t);
-
-Scope * Scope_top(void);
-
-Bytes Bytes_new(size_t);
-
-static Bytes Bytes_append(Bytes, const void *, size_t);
 
 static Map Map__core_new_capacity(Map _x2c_macro_unused_0, unsigned _x2c_macro_capacity_2){
   (void) _x2c_macro_unused_0;
@@ -352,14 +314,6 @@ static void Map__core_reinsert(Map _x2c_macro_map_7, unsigned _x2c_macro_todo_ha
   }
   (void) _reinsert_error(_x2c_macro_cap_1, _x2c_macro_psl_0);
 }
-
-void x2c_cleanup_push(X2CCleanup *);
-
-void Scope_move(void *, Scope *);
-
-static Block Bytes_block(Bytes);
-
-void x2c_cleanup_leave(X2CCleanup *);
 
 static void Map__core_expand(Map _x2c_macro_map_8){
   unsigned * _x2c_macro_hashes_2 = _x2c_macro_map_8 -> hashes;
@@ -641,8 +595,6 @@ _Noreturn static void _bad_op(Symbol op){
 
 }
 
-Var Var_update(Var *, Symbol, Var);
-
 static Var _update_var(Var * slot, Symbol op, Var rhs){
   return Var_update(&(slot[0]), op, rhs);
 }
@@ -725,12 +677,6 @@ Var Map_setindex(Map _x2c_macro_map_30, Var _x2c_macro_key_20, Var _x2c_macro_va
   return _x2c_macro_val_6;
 }
 
-int Var_encoding_valid(Var);
-
-int Var_numeric_info(Symbol, X2CVarNumericInfo *);
-
-Symbol Var_tag(Var);
-
 Var Map_updateindex(Map _x2c_macro_map_31, Var _x2c_macro_key_21, Symbol _x2c_macro_op_0, Var _x2c_macro_rhs_0){
   if((void *) _x2c_macro_map_31 == 0)(void) _bad_arg(0);
   int _x2c_macro_insert_0 = ! 1;
@@ -768,8 +714,6 @@ Var Map_updateindex(Map _x2c_macro_map_31, Var _x2c_macro_key_21, Symbol _x2c_ma
   Var * _x2c_macro_stored_6 = _record_value(_x2c_macro_map_31, (unsigned) _x2c_macro_index_8);
   return _update_var(_x2c_macro_stored_6, _x2c_macro_op_0, _x2c_macro_rhs_0);
 }
-
-Var Var_postfix(Var *, Symbol);
 
 Var Map_postfixindex(Map _x2c_macro_map_32, Var _x2c_macro_key_22, Symbol _x2c_macro_op_1){
   if((void *) _x2c_macro_map_32 == 0)(void) _bad_arg(0);
@@ -850,8 +794,6 @@ Map Map_update_n(Map map, unsigned pair_count, ...){
   va_end(ap);
   return map;
 }
-
-void Block_move_to(Block, Scope *);
 
 void Map_export_to(Map map, Context source, VarExportContextFn export_value, Scope * scope){
   if(map == NULL || ! export_value || ! scope) return;
@@ -934,8 +876,6 @@ static Var _box_var(Var value){
   return value;
 }
 
-int Var_compare(Var, Var);
-
 static int _compare_var(Var a, Var b){
   return Var_compare(a, b);
 }
@@ -945,10 +885,6 @@ static int _x2c_macro_record_compare_0(const void * _x2c_macro_ap_0, const void 
   int _x2c_macro_comparison_0 = _compare_var(_x2c_macro_a_4 -> key, _x2c_macro_b_4 -> key);
   return _x2c_macro_comparison_0 ? _x2c_macro_comparison_0 : _compare_var(_x2c_macro_a_4 -> val, _x2c_macro_b_4 -> val);
 }
-
-Scope Scope_new(void);
-
-void * Scope_malloc_in(Scope *, size_t);
 
 static int Map__core_compare(Map _x2c_macro_a_5, Map _x2c_macro_b_5){
   if((void *) _x2c_macro_a_5 ==(void *) _x2c_macro_b_5) return 0;
@@ -1013,14 +949,6 @@ static int Map__core_compare(Map _x2c_macro_a_5, Map _x2c_macro_b_5){
   }
 
 }
-
-int RenderPath_enter(RenderPath *, const void *);
-
-Buffer Buffer_printf(Buffer, const char *, ...);
-
-Buffer Buffer_write(Buffer, const char *);
-
-Buffer Var_write_str(Var, Buffer);
 
 Buffer Var_write_repr(Var, Buffer);
 
@@ -1087,10 +1015,6 @@ Buffer Map_write_str(Map _x2c_macro_map_41, Buffer _x2c_macro_out_11){
   return Map__core_write(_x2c_macro_map_41, _x2c_macro_out_11, 40228);
 }
 
-Buffer Buffer_new(size_t);
-
-String Buffer_str_free(Buffer);
-
 String Map_str(Map _x2c_macro_map_42){
   Buffer _x2c_macro_out_12 = Buffer_new(0);
   Map_write_str(_x2c_macro_map_42, _x2c_macro_out_12);
@@ -1102,8 +1026,6 @@ String Map_repr(Map _x2c_macro_map_43){
   Map_write_repr(_x2c_macro_map_43, _x2c_macro_out_13);
   return Buffer_str_free(_x2c_macro_out_13);
 }
-
-static Map Var_map(Var);
 
 static int _x2c_macro_step_0(Iter _x2c_macro_iter_0, Var * _x2c_macro_key_28, Var * _x2c_macro_val_8){
   Map _x2c_macro_map_44 = Var_map(_x2c_macro_iter_0 -> obj);
@@ -1130,10 +1052,6 @@ static int _x2c_macro_keys_next_0(Iter _x2c_macro_iter_2, Var * _x2c_macro_out_1
   return 1;
 }
 
-static Var List_var(List);
-
-List cons(Var, List);
-
 static int _x2c_macro_enumerate_next_0(Iter _x2c_macro_iter_3, Var * _x2c_macro_out_16){
   Var _x2c_macro_key_31;
   Var _x2c_macro_val_11;
@@ -1142,10 +1060,6 @@ static int _x2c_macro_enumerate_next_0(Iter _x2c_macro_iter_3, Var * _x2c_macro_
   * _x2c_macro_out_16 = List_var(cons(_x2c_macro_boxed_key_1, cons(_x2c_macro_boxed_value_2, NULL)));
   return 1;
 }
-
-Iter Iter_init(Iter, Var, IterNextFn, Var);
-
-static Var Map_var(Map);
 
 Iter Map_iter(Map _x2c_macro_map_45, Iter _x2c_macro_dest_0){
   if((void *) _x2c_macro_dest_0 == 0) return 0;
@@ -1165,8 +1079,6 @@ Iter Map_enumerate(Map _x2c_macro_map_47, Iter _x2c_macro_dest_2){
 void Map_cleanup(Map value){
   Map__core_free(value);
 }
-
-void Bytes_cleanup(Bytes);
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;
@@ -1198,14 +1110,10 @@ static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5){
   if(!(*(int *) _x2c_defer_data_5->_x2c_defer_capture_9)) Bytes_free((*(Bytes *) _x2c_defer_data_5->_x2c_defer_capture_10));
 }
 
-void Scope_cleanup(Scope);
-
 static void _x2c_defer_cleanup_6(void * _x2c_defer_opaque_6){
   _x2c_defer_env_6 * _x2c_defer_data_6 =(_x2c_defer_env_6 *) _x2c_defer_opaque_6;
   Scope_cleanup((*(Scope *) _x2c_defer_data_6->_x2c_defer_capture_11));
 }
-
-void RenderPath_leave(RenderPath *);
 
 static void _x2c_defer_cleanup_7(void * _x2c_defer_opaque_7){
   _x2c_defer_env_7 * _x2c_defer_data_7 =(_x2c_defer_env_7 *) _x2c_defer_opaque_7;

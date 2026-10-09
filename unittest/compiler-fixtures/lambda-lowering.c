@@ -28,8 +28,6 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
 
 static Func _x2c_func_handle_0;
 
-Func x2c_func_shared(FuncAdapter, List);
-
 _x2c_initializer_choice_6E559A01_0((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _24)))
 static Var _x2c_lambda_1(Var value);
 
@@ -38,16 +36,6 @@ static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func
 static Func _x2c_func_handle_1;
 
 _x2c_initializer_choice_6E559A01_1((_x2c_func_handle_1 = x2c_func_shared(_x2c_func_adapt_1, _24)))
-static Var int_var(int);
-
-List cons(Var, List);
-
-static Var List_var(List);
-
-static Var Symbol_var(Symbol);
-
-static Var String_var(String);
-
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -81,12 +69,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _x2c_static_initialize_1();
 }
 
-List List_map(List, Func);
-
-int Var_int(Var);
-
-Var List_getindex(List, int);
-
 int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
@@ -104,15 +86,11 @@ static Var _x2c_lambda_0(Var value){
   ;
 }
 
-Var x2c_func_value_argument(Func, const FuncArg *, unsigned, Symbol);
-
 static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0){
   Var a0 = x2c_func_value_argument(_x2c_func_binding_0, _x2c_func_argv_0, 0, 45156);
   return _x2c_lambda_0(a0);
   ;
 }
-
-static List Var_list(Var);
 
 static Var _x2c_lambda_1(Var value){
   return List_getindex(Var_list(value), 0);

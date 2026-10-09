@@ -120,7 +120,7 @@ commits need not rebuild from their own bootstrap.
   loads native modules, `meta-group`, which emits a unit's meta group,
   `stage`, which carries values across the compile-time boundary, and
   `builtins` and `linked-meta`, the compile-time code compiled into the
-  compiler)/
+  compiler, with `component-access` supplying collection mutation policy)/
   `literals` (+ `lambdas`) -> `ast` (+ `ast-rewrite`, AST traversal and
   rewriting, and `grammar`, source forms used by lowering) ->
   `type` (+ `type-ledger`)/`protocol`

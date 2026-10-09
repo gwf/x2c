@@ -35,12 +35,6 @@ static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
 
-static Var int_var(int);
-
-List cons(Var, List);
-
-static Var String_var(String);
-
 #include "exception.h"
 
 
@@ -82,8 +76,6 @@ static Map counted_map(Map map){
   return map;
 }
 
-Split String_words(String);
-
 static Split counted_words(String text){
   split_evaluations ++;
   return String_words(text);
@@ -98,92 +90,10 @@ static void record_cleanup(void){
   cleanups ++;
 }
 
-Map Map_update_n(Map, unsigned, ...);
-
-Map Map_new(void);
-
-int List_try_next(List, List *, Var *);
-
-int Map_try_next(Map, unsigned *, Var *, Var *);
-
-long Var_integer(Var);
-
-int String_len(String);
-
-static String Var_string(Var);
-
-Iter Map_keys(Map, Iter);
-
-int Iter_try_next(Iter, Var *);
-
-int Var_truth(Var);
-
-void x2c_cleanup_push(X2CCleanup *);
-
-static int String_truth(String);
-
-void x2c_cleanup_leave(X2CCleanup *);
-
 #include "error.h"
 
 
 
-
-int x2c_error_catch_site_pending(ErrorCatchSite *);
-
-static Var List_var(List);
-
-static Var Symbol_var(Symbol);
-
-ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
-
-void x2c_exception_push(ExceptionFrame *);
-
-void x2c_exception_landed(ExceptionFrame *);
-
-int x2c_exception_is_error_target(ExceptionFrame *);
-
-int x2c_error_catch_selected(ErrorHandler);
-
-void x2c_error_catch_detach(ErrorHandler);
-
-void x2c_exception_mark_handled(ExceptionFrame *);
-
-void x2c_error_catch_close(ErrorHandler);
-
-void x2c_exception_leave(ExceptionFrame *);
-
-int Split_try_next(Split, int *, String *);
-
-Split String_lines(String);
-
-Split String_splits(String, String);
-
-Iter List_iter(List, Iter);
-
-Iter range(int, int, int, Iter);
-
-Iter Iter_zip(Iter, Iter, Iter);
-
-static List Var_list(Var);
-
-Var List_getindex(List, int);
-
-MapIntInt MapIntInt_new(void);
-
-void MapIntInt_set(MapIntInt, int, int);
-
-int MapIntInt_try_next(MapIntInt, unsigned *, int *, int *);
-
-MapStringString MapStringString_new(void);
-
-void MapStringString_set(MapStringString, String, String);
-
-int MapStringString_try_next(MapStringString, unsigned *, String *, String *);
-
-int Var_is_void(Var);
-
-int String_equal(String, String);
 
 int main(void){
   x2c_initialize();

@@ -18,8 +18,6 @@ static int identity(int value);
 
 static inline int StaticParticipant_read(StaticParticipant a0, const int * a1, int * * a2, int a3[3], int(* a4)(int));
 
-void * Scope_malloc(size_t);
-
 StaticBase StaticParticipant_staticbase(StaticParticipant value){
   StaticBase result = Scope_malloc(sizeof(struct StaticBase));
   result -> value = value -> value;

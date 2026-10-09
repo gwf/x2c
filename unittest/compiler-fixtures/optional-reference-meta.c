@@ -20,15 +20,7 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
 
 static Func _x2c_func_handle_0;
 
-Func x2c_func_shared(FuncAdapter, List);
-
 _x2c_initializer_choice_842CEF8E_0((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _11)))
-static Var Symbol_var(Symbol);
-
-List cons(Var, List);
-
-static Var List_var(List);
-
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -55,18 +47,6 @@ int maybe(int * value){
   return(* value);
 }
 
-int Var_int(Var);
-
-static int List_truth(List);
-
-List x2c_func_reference_type(Func, unsigned, unsigned);
-
-static FuncArg FuncArg_reference(const void *, List);
-
-FuncArg x2c_func_unrepresentable_argument(Func, unsigned, List);
-
-Var Func_apply(Func, unsigned, const FuncArg *);
-
 int forward(int * value){
   if(! _init_guard_) _file_init_();
   Func function = _x2c_func_handle_0;
@@ -75,10 +55,6 @@ int forward(int * value){
   }
   ));
 }
-
-static FuncArg FuncArg_value(Var);
-
-static Var int_var(int);
 
 int exercise(int n){
   if(! _init_guard_) _file_init_();
@@ -103,8 +79,6 @@ int main(void){
   if(! _init_guard_) _file_init_();
   return 50 != 50;
 }
-
-void * x2c_func_declared_reference_argument(Func, const FuncArg *, unsigned, List, List);
 
 static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0){
   int * a0 = x2c_func_declared_reference_argument(_x2c_func_binding_0, _x2c_func_argv_0, 0, _1, _1);

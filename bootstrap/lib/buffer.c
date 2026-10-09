@@ -64,12 +64,6 @@ void Buffer_cleanup(Buffer _x2c_macro_value_0){
   Buffer_free(_x2c_macro_value_0);
 }
 
-static Var Symbol_var(Symbol);
-
-static Var int_var(int);
-
-void Block_append(Block, const void *, size_t);
-
 #include "error.h"
 
 
@@ -103,12 +97,6 @@ Buffer Buffer_write(Buffer buf, const char * text){
   }
   return Buffer_write_len(buf, text, strlen(text));
 }
-
-void * Scope_malloc(size_t);
-
-void x2c_cleanup_push(X2CCleanup *);
-
-void x2c_cleanup_leave(X2CCleanup *);
 
 Buffer Buffer_printf(Buffer buf, const char * format, ...){
   char stack[160];
@@ -173,8 +161,6 @@ static Buffer _write_char(Buffer buf, char value){
   return buf;
 }
 
-void Block_append_fill(Block, const void *, size_t);
-
 Buffer Buffer_write_repeat(Buffer buf, char value, size_t count){
   if(! count) return buf;
   if(! value){
@@ -186,8 +172,6 @@ Buffer Buffer_write_repeat(Buffer buf, char value, size_t count){
   _advance(buf, value, count);
   return buf;
 }
-
-static void Block_truncate(Block, size_t);
 
 Buffer Buffer_unwrite(Buffer buf, size_t count){
   if(count > buf -> content -> length) count = buf -> content -> length;
@@ -270,10 +254,6 @@ Buffer Buffer_push(Buffer buf){
   return buf;
 }
 
-int Block_truth(Block);
-
-static int Block_try_pop(Block, void *);
-
 Buffer Buffer_pop(Buffer buf){
   if(Block_truth(buf -> indents)) Block_try_pop(buf -> indents, NULL);
   return buf;
@@ -313,8 +293,6 @@ int Buffer_getindex(Buffer buf, int index){
 size_t Buffer_len(Buffer buf){
   return Buffer_truth(buf) ? buf -> content -> length : 0;
 }
-
-String String_new_len(const char *, int);
 
 String Buffer_str(Buffer buf){
   if(! Buffer_truth(buf)) return NULL;
@@ -363,8 +341,6 @@ String Buffer_str_free(Buffer buf){
 
 }
 
-String String_repr(String);
-
 String Buffer_repr(Buffer buf){
   if(! Buffer_truth(buf)) return String_repr(NULL);
   String str = Buffer_str(buf);
@@ -375,8 +351,6 @@ int Buffer_truth(Buffer b){
   return b != NULL && b -> content -> length != 0;
 }
 
-Block Block_new(size_t);
-
 Buffer Buffer_new(size_t padding){
   Buffer buf = Scope_malloc(sizeof(struct Buffer));
   buf -> content = Block_new(sizeof(char));
@@ -386,14 +360,10 @@ Buffer Buffer_new(size_t padding){
   return buf;
 }
 
-void Block_reserve(Block, size_t);
-
 Buffer Buffer_reserve(Buffer buf, size_t minimum){
   Block_reserve(buf -> content, minimum);
   return buf;
 }
-
-static void Block_clear(Block);
 
 Buffer Buffer_clear(Buffer buf){
   Block_clear(buf -> content);
@@ -402,20 +372,12 @@ Buffer Buffer_clear(Buffer buf){
   return buf;
 }
 
-void Block_move_to(Block, Scope *);
-
-void Scope_move(void *, Scope *);
-
 void Buffer_move_to(Buffer buf, Scope * scope){
   if(buf == NULL) return;
   Block_move_to(buf -> content, scope);
   Block_move_to(buf -> indents, scope);
   Scope_move(buf, scope);
 }
-
-void Block_free(Block);
-
-void Scope_free(void *);
 
 void Buffer_free(Buffer buf){
   if(buf == NULL) return;

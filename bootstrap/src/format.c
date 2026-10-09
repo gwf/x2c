@@ -62,24 +62,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _6 = String_new("\n");
 }
 
-Buffer Buffer_new(size_t);
-
-static int List_truth(List);
-
-static List List_cdr(List);
-
-static Var List_car(List);
-
-static Var Symbol_var(Symbol);
-
-String Var_str(Var);
-
-static int String_truth(String);
-
-int String_getindex(String, int);
-
-String Buffer_str_free(Buffer);
-
 char * Compiler_code_pretty_string(Compiler c, List code, String output_file){
   if(! _init_guard_) _file_init_();
   Pretty p ={
@@ -112,28 +94,6 @@ char * Compiler_code_pretty_string(Compiler c, List code, String output_file){
 }
 
 List Compiler_origin_location(Compiler, int);
-
-size_t Buffer_len(Buffer);
-
-int Buffer_getindex(Buffer, int);
-
-Buffer Buffer_unwrite(Buffer, size_t);
-
-static String Var_string(Var);
-
-Var List_assoc(List, Var);
-
-static Var String_var(String);
-
-static Var int_var(int);
-
-String String_replace(String, String, String);
-
-String String_escape(String);
-
-Buffer Buffer_write(Buffer, const char *);
-
-static String int_str(int);
 
 static void Pretty_source_marker(Pretty * p, Var value){
   List location = Compiler_origin_location((* p).c, Var_int(Var_convert(value, 3453797)));
@@ -228,8 +188,6 @@ static int _need_space(String prev, String curr){
   return 1;
 }
 
-int String_len(String);
-
 static int _token_is(String token, char ch){
   return String_truth(token) && String_len(token) == 1 && String_getindex(token, 0) == ch;
 }
@@ -237,8 +195,6 @@ static int _token_is(String token, char ch){
 static int _is_preprocessor(String token){
   return String_truth(token) && String_getindex(token, 0) == '#';
 }
-
-Buffer Buffer_write_len(Buffer, const char *, size_t);
 
 static void _write_indent(Buffer buff, int indent){
   static const char spaces[] = "                                                                ";
@@ -250,8 +206,6 @@ static void _write_indent(Buffer buff, int indent){
   }
 
 }
-
-Buffer Buffer_newline(Buffer);
 
 static void _write_newline(Buffer buff){
   while(Buffer_len(buff) > 0 && Buffer_getindex(buff, - 1) == ' ') Buffer_unwrite(buff, 1);

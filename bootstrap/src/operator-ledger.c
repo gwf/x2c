@@ -18,16 +18,6 @@ static List _operator_rows(void);
 
 static List _operator_cases(int key, int value, int derived);
 
-static Var Symbol_var(Symbol);
-
-static Var int_var(int);
-
-List cons(Var, List);
-
-static Var List_var(List);
-
-static Var String_var(String);
-
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -215,20 +205,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
 static List _operator_rows(void){
   return _153;
 }
-
-Array Array_new(void);
-
-int List_try_next(List, List *, Var *);
-
-static List Var_list(Var);
-
-int Var_truth(Var);
-
-Var List_getindex(List, int);
-
-Var Array_push(Array, Var);
-
-List Array_list_free(Array);
 
 static List _operator_cases(int key, int value, int derived){
   Array cases = Array_new();

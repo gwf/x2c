@@ -122,8 +122,6 @@ static inline UnzipSharedRef Var_unzipsharedref(Var _x2c_macro_value_3){
   return _x2c_macro_value_3.p64;
 }
 
-static int Iter_truth(Iter);
-
 Iter Iter_init(Iter iter, Var obj, IterNextFn next, Var state){
   if(! Iter_truth(iter)) return NULL;
   iter -> obj = obj;
@@ -133,17 +131,9 @@ Iter Iter_init(Iter iter, Var obj, IterNextFn next, Var state){
   return iter;
 }
 
-void * Scope_calloc(size_t, size_t);
-
 Iter Iter_new(void){
   return Scope_calloc(1, sizeof(struct Iter));
 }
-
-int Var_is_void(Var);
-
-static Var Symbol_var(Symbol);
-
-static Var String_var(String);
 
 #include "error.h"
 
@@ -174,8 +164,6 @@ Iter Iter_iter(Iter x, Iter dest){
   (void) dest;
   return x;
 }
-
-static Var int_var(int);
 
 Iter range(int start, int end, int step, Iter iter){
   if(! Iter_truth(iter)) return NULL;
@@ -250,16 +238,12 @@ static int _range_raw_high(Var value){
   return(int)((long long) high + INT_MIN);
 }
 
-static Var Iter_var(Iter);
-
 Iter Iter_map(Iter iter, Func func, Iter dest){
   if(! Iter_truth(dest)) return NULL;
   Iter_init(dest, Iter_var(iter), _map_next, ((void) 0, Void));
   dest -> aux = func;
   return dest;
 }
-
-static Var Func_apply_value(Func, Var);
 
 static int _map_next(Iter iter, Var * out){
   Iter source = Var_pointer(iter -> obj);
@@ -274,8 +258,6 @@ Iter Iter_filter(Iter iter, Func func, Iter dest){
   dest -> aux = func;
   return dest;
 }
-
-int Var_truth(Var);
 
 static int _filter_next(Iter iter, Var * out){
   Iter source = Var_pointer(iter -> obj);
@@ -308,8 +290,6 @@ Iter Iter_scan(Iter iter, Var seed, Func fn, Iter dest){
   return dest;
 }
 
-static Var Func_apply_values(Func, Var, Var);
-
 static int _scan_next(Iter iter, Var * out){
   Iter source = Var_pointer(iter -> obj);
   if(! Iter_truth(source) || ! iter -> aux) return 0;
@@ -323,8 +303,6 @@ static int _scan_next(Iter iter, Var * out){
 Iter Iter_accumulate(Iter iter, Var initial, Iter dest){
   return Iter_init(dest, Iter_var(iter), _accumulate_next, Var_is_void(initial) ? int_var(0) : initial);
 }
-
-Var Var_binary(Var, Symbol, Var);
 
 static int _accumulate_next(Iter iter, Var * out){
   Iter source = Var_pointer(iter -> obj);
@@ -347,8 +325,6 @@ Iter Iter_zip_with(Iter left, Iter right, Func fn, Iter dest){
   dest -> aux = fn;
   return dest;
 }
-
-static Var List_var(List);
 
 static int _zip_with_next(Iter iter, Var * out){
   Iter left_iter = Var_pointer(iter -> obj), right_iter = Var_pointer(iter -> state);
@@ -421,20 +397,12 @@ static int _repeat_next(Iter iter, Var * out){
   return 1;
 }
 
-static Var Map_var(Map);
-
 Map Map_new(void);
 
 Iter Iter_unique(Iter iter, Iter dest){
   if(! Iter_truth(dest)) return NULL;
   return Iter_init(dest, Iter_var(iter), _unique_next, Map_var(Map_new()));
 }
-
-static Map Var_map(Var);
-
-int Map_contains(Map, Var);
-
-Var Map_setindex(Map, Var, Var);
 
 static int _unique_next(Iter iter, Var * out){
   Iter source = Var_pointer(iter -> obj);
@@ -458,8 +426,6 @@ Iter Iter_unzip(Iter iter, UnzipShared * shared, Iter dest){
   _unzip_shared_init(shared, iter);
   return Iter_init(dest, UnzipSharedRef_var((UnzipSharedRef) shared), _unzip_next, int_var(0));
 }
-
-Array Array_new(void);
 
 static void _unzip_shared_init(UnzipShared * u, Iter source){
   u -> source = source;
@@ -486,8 +452,6 @@ static int _unzip_next(Iter iter, Var * out){
   return 1;
 }
 
-Var Array_getindex(Array, int);
-
 static int _unzip_column_next(Iter iter, Var * out){
   UnzipColumnRef state = Var_unzipcolumnref(iter -> obj);
   if(! state) return 0;
@@ -511,18 +475,6 @@ static int _unzip_ensure(UnzipShared * shared, int column){
   }
   return 1;
 }
-
-static int Var_is_row(Var, unsigned, unsigned long, unsigned long);
-
-static List Var_list(Var);
-
-static int List_truth(List);
-
-static List List_cdr(List);
-
-Var List_getindex(List, int);
-
-Var Array_push(Array, Var);
 
 static void _unzip_buffer_push(UnzipShared * shared, Var pair){
   if(! Var_is_row(pair, 9, 7, 4)){
@@ -553,8 +505,6 @@ static void _unzip_buffer_push(UnzipShared * shared, Var pair){
   Array_push(shared -> buffers[0], first);
   Array_push(shared -> buffers[1], second);
 }
-
-Array Array_setslice(Array, int, int, Array);
 
 static void _unzip_compact(UnzipShared * shared, int column){
   int consumed = shared -> heads[column];
@@ -659,8 +609,6 @@ Var Iter_product(Iter iter){
   }
   return total;
 }
-
-int Var_compare(Var, Var);
 
 Var Iter_max(Iter iter){
   Var best;

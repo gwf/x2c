@@ -157,8 +157,6 @@ static void _append_in_place(Block b, const void * source, size_t count){
   b -> length += count;
 }
 
-static Var Symbol_var(Symbol);
-
 static void _append_growing(Block b, const void * source, size_t count){
   if(count > SIZE_MAX - b -> length || count > SIZE_MAX / b -> width){
     size_t width = b -> width;
@@ -231,8 +229,6 @@ static void _fill(Block b, const void * element, size_t count){
   else for(size_t i = 0;  i < count;  i ++) memmove(end + i * b -> width, element, b -> width);
 }
 
-void * Scope_realloc(void *, size_t);
-
 void Block_reserve(Block block, size_t minimum){
   if(block == NULL){
     static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/block.x",.function = "Block_reserve",.line = 206};
@@ -273,8 +269,6 @@ int Block_truth(Block block){
   return block != NULL && block -> length != 0;
 }
 
-void * Scope_malloc(size_t);
-
 Block Block_new(size_t width){
   if(! width){
     static const X2CErrorSite _x2c_error_site_9 = {.file = "../../lib/block.x",.function = "Block_new",.line = 289};
@@ -300,15 +294,11 @@ Bytes Bytes_new(size_t width){
   return Block_new(width) -> bytes;
 }
 
-void Scope_free(void *);
-
 void Block_free(Block b){
   if(b == NULL) return;
   if(b -> bytes != NULL) Scope_free(_allocation(b));
   Scope_free(b);
 }
-
-void Scope_move(void *, Scope *);
 
 void Block_move_to(Block block, Scope * scope){
   if(block == NULL) return;

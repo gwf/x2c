@@ -369,6 +369,19 @@ static void _interpreter_ownership(ReplSession s) {
   _expect(s, "returned.x;", <value>, 23);
 }
 
+static void _delegate_completion(ReplSession session) {
+  _expect(session, "typedef struct ReplPart { int value; } ReplPart;",
+          <defined>, void);
+  _expect(session, "int ReplPart.read(ReplPart part) { return part.value; }",
+          <defined>, void);
+  _expect(session, "struct ReplOwner { delegate ReplPart part; };",
+          <defined>, void);
+  _expect(session, "struct ReplOwner owner={{7}};", <executed>, void);
+  _completion(session, "owner.", "part", "read");
+  _completion(session, "owner.part.", "read", NULL);
+  _expect(session, "owner.read();", <value>, 7);
+}
+
 static void _completion_does_not_publish_meta(ReplSession session) {
   Compiler compiler = session.compiler;
   size_t values = compiler.meta_group.len();
@@ -445,6 +458,7 @@ int main(int argc, char **argv) {
         _meta_records(session);
         _interpreter_ownership(session);
         _reference_arguments(session);
+        _delegate_completion(session);
         _completion_does_not_publish_meta(session);
         session.close();
       }

@@ -55,12 +55,6 @@ static String source_dual(void);
 
 static String take_string(String value);
 
-static Var Symbol_var(Symbol);
-
-static Var String_var(String);
-
-List cons(Var, List);
-
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -93,26 +87,6 @@ static String source_dual(void){
 static String take_string(String value){
   return value;
 }
-
-Pool Pool_open_named(const char *);
-
-PoolStats Pool_stats(Pool);
-
-void Pool_close(void);
-
-int String_equal(String, String);
-
-int List_equal(List, List);
-
-int List_len(List);
-
-int String_len(String);
-
-int String_getindex(String, int);
-
-static String Var_string(Var);
-
-static Var List_cadr(List);
 
 int main(void){
   x2c_initialize();

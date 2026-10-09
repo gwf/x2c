@@ -74,26 +74,6 @@ static String echo(String value){
   return value;
 }
 
-void Scope_retain(void);
-
-static Var String_var(String);
-
-static Var Symbol_var(Symbol);
-
-Array Array_new(void);
-
-Var Array_push(Array, Var);
-
-static Var int_var(int);
-
-static Var Array_var(Array);
-
-int Iter_try_next(Iter, Var *);
-
-int Var_int(Var);
-
-void Scope_release(void);
-
 int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
@@ -115,10 +95,6 @@ int main(void){
   return 0;
 }
 
-String String_str(String);
-
-static String Var_string(Var);
-
 static String _x2c_callback_adapt_0(Var a0){
   return String_str(Var_string(a0));
 }
@@ -127,23 +103,13 @@ static String _x2c_callback_adapt_1(Var a0){
   return echo(Var_string(a0));
 }
 
-int Symbol_compare(Symbol, Symbol);
-
 static int _x2c_callback_adapt_2(Var a0, Var a1){
   return Symbol_compare(Var_symbol(a0), Var_symbol(a1));
 }
 
-int File_equal(File, File);
-
-static File Var_file(Var);
-
 static int _x2c_callback_adapt_3(Var a0, Var a1){
   return File_equal(Var_file(a0), Var_file(a1));
 }
-
-Iter Array_iter(Array, Iter);
-
-static Array Var_array(Var);
 
 static Iter _x2c_callback_adapt_4(Var a0, Iter a1){
   return Array_iter(Var_array(a0), a1);

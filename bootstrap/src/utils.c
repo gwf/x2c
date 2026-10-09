@@ -138,14 +138,6 @@ void x2c_initialize_environment(const char * argv0){
   _initialize_environment(argv0, NULL);
 }
 
-String Env_get(String);
-
-static int String_truth(String);
-
-int String_equal(String, String);
-
-static Var String_var(String);
-
 _Noreturn void driver_error(const char * message);
 
 void x2c_initialize_command_environment(const char * argv0, String embedded_identity){
@@ -157,12 +149,6 @@ void x2c_initialize_command_environment(const char * argv0, String embedded_iden
   }
   _initialize_environment(argv0, embedded_identity);
 }
-
-int String_getindex(String, int);
-
-String String_rstrip(String, char *);
-
-Path Path_absolute(Path);
 
 static void _initialize_environment(const char * argv0, String embedded_identity){
   if(String_truth(root_path)) return;
@@ -177,13 +163,7 @@ static void _initialize_environment(const char * argv0, String embedded_identity
   _prepare_include_dirs();
 }
 
-String String_new(const char *);
-
-int String_contains(String, String);
-
 String find_program(String name);
-
-int Path_exists(Path);
 
 static String _executable(const char * argv0){
   char buffer[PATH_MAX];
@@ -203,10 +183,6 @@ static String _identity(void){
   return file_identity(Path_exists(_7) ? _7 : executable_path);
 }
 
-int Path_is_dir(Path);
-
-Path Path_dirname(Path);
-
 static String _locate_home(Path p){
   if(! String_truth(p)) return NULL;
   Path directory = Path_is_dir(p) ? p : Path_dirname(p);
@@ -217,15 +193,9 @@ static String _locate_home(Path p){
   return directory;
 }
 
-Path Path_join(Path, Path);
-
-int Path_is_file(Path);
-
 static int _is_home(Path p){
   return Path_is_dir(Path_join(p, _8)) && Path_is_file(Path_join(p, _9));
 }
-
-List cons(Var, List);
 
 static void _prepare_include_dirs(void){
   if(! String_truth(root_path)) return;
@@ -290,14 +260,6 @@ List cpp_include_dirs(void){
   return cpp_includes;
 }
 
-List String_split(String, String);
-
-int List_try_next(List, List *, Var *);
-
-static String Var_string(Var);
-
-int Path_is_executable(Path);
-
 String find_program(String name){
   if(! _init_guard_) _file_init_();
   {
@@ -318,8 +280,6 @@ String find_program(String name){
   return NULL;
 }
 
-int String_endswith(String, String);
-
 int is_source_file(String path){
   if(! _init_guard_) _file_init_();
   if(String_endswith(path, _19) || String_endswith(path, _20)) return 1;
@@ -336,14 +296,6 @@ int is_layout_file(String path){
   if(! _init_guard_) _file_init_();
   return String_truth(path) && String_endswith(path, _20);
 }
-
-int String_startswith(String, String);
-
-static Var List_car(List);
-
-String String_remove_prefix(String, String);
-
-int String_is_identifier(String);
 
 String package_directory(List roots, String path){
   if(! _init_guard_) _file_init_();
@@ -367,8 +319,6 @@ String package_directory(List roots, String path){
   }
   return NULL;
 }
-
-int SourceView_exists(SourceView, String);
 
 String package_entry(SourceView sources, List roots, String name, String * directory){
   if(! _init_guard_) _file_init_();
@@ -397,8 +347,6 @@ String package_entry(SourceView sources, List roots, String name, String * direc
   return NULL;
 }
 
-int String_rfind(String, String);
-
 int package_source(String directory, String path){
   if(! _init_guard_) _file_init_();
   if(String_startswith(path, String_join(NULL, cons(String_var(directory), cons(String_var(_26), NULL))))) return 1;
@@ -418,8 +366,6 @@ String build_module_stamp(void){
 }
 
 uint64_t fnv_file(uint64_t hash, String path, int * ok);
-
-String String_printf(String, ...);
 
 String file_identity(String path){
   if(! _init_guard_) _file_init_();
@@ -456,8 +402,6 @@ uint64_t fnv_bytes(uint64_t hash, const void * bytes, size_t length){
   return hash;
 }
 
-int String_try_next(String, int *, int *);
-
 String filename_hash(String filename){
   if(! _init_guard_) _file_init_();
   unsigned hash = 0;
@@ -487,22 +431,6 @@ int file_lock(Path p, int wait){
   }
   return lock;
 }
-
-void x2c_cleanup_push(X2CCleanup *);
-
-static int List_truth(List);
-
-static List List_cddr(List);
-
-void Path_write_text(Path, String);
-
-static Var List_cadr(List);
-
-void File_path_error(Var, String, int);
-
-static Var Symbol_var(Symbol);
-
-void x2c_cleanup_leave(X2CCleanup *);
 
 void file_publish(List outputs){
   if(! _init_guard_) _file_init_();
@@ -579,10 +507,6 @@ _Noreturn void driver_error(const char * message){
   _exit(2);
 }
 
-Var List_assoc(List, Var);
-
-int Var_is_void(Var);
-
 void host_error(List detail){
   if(! _init_guard_) _file_init_();
   Var subject = List_assoc(detail, Symbol_var(1051920));
@@ -593,8 +517,6 @@ void host_error(List detail){
   }
   ));
 }
-
-void Path_remove_file(Path);
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;

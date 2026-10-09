@@ -26,10 +26,6 @@ _x2c_initializer_choice_AED211B6_0((first = _17))
 static List second;
 
 _x2c_initializer_choice_AED211B6_1((second = _17))
-static Var Symbol_var(Symbol);
-
-List cons(Var, List);
-
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -55,20 +51,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _x2c_static_initialize_0();
   _x2c_static_initialize_1();
 }
-
-Lisp Lisp_new(void);
-
-Symbol Lisp_read(Lisp, String, unsigned *, Var *);
-
-String List_repr(List);
-
-int List_equal(List, List);
-
-void * Var_pointer(Var);
-
-Var List_getindex(List, int);
-
-void Lisp_destroy(Lisp);
 
 int main(void){
   x2c_initialize();

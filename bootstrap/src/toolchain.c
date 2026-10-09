@@ -99,8 +99,6 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
 
 static Func _x2c_func_handle_0;
 
-Func x2c_func_shared(FuncAdapter, List);
-
 #include "exception.h"
 
 
@@ -114,14 +112,6 @@ static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func
 static Func _x2c_func_handle_1;
 
 _x2c_initializer_choice_242786A8_1((_x2c_func_handle_1 = x2c_func_shared(_x2c_func_adapt_1, _132)))
-static Var String_var(String);
-
-List cons(Var, List);
-
-static Var Symbol_var(Symbol);
-
-static Var List_var(List);
-
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -279,8 +269,6 @@ Toolchain toolchain_meta(String cc){
   return _toolchain(cc, NULL);
 }
 
-void * Scope_calloc(size_t, size_t);
-
 static Toolchain _toolchain(String cc, String ar){
   Toolchain t = Scope_calloc(1, sizeof(struct Toolchain));
   t -> cc = _tool(cc, _0, _1);
@@ -288,10 +276,6 @@ static Toolchain _toolchain(String cc, String ar){
   Toolchain__layout(t);
   return t;
 }
-
-static int String_truth(String);
-
-String Env_get(String);
 
 static String _tool(String explicit, String name, String fallback){
   if(String_truth(explicit)) return explicit;
@@ -301,44 +285,10 @@ static String _tool(String explicit, String name, String fallback){
   return String_truth(value) ? value : fallback;
 }
 
-String home_dir(void);
-
 #include "error.h"
 
 
 
-
-int x2c_error_catch_site_pending(ErrorCatchSite *);
-
-ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
-
-void x2c_exception_push(ExceptionFrame *);
-
-String Path_read_text(Path);
-
-void x2c_exception_landed(ExceptionFrame *);
-
-int x2c_exception_is_error_target(ExceptionFrame *);
-
-int x2c_error_catch_selected(ErrorHandler);
-
-void x2c_error_catch_detach(ErrorHandler);
-
-void x2c_exception_mark_handled(ExceptionFrame *);
-
-void x2c_error_catch_close(ErrorHandler);
-
-void x2c_exception_leave(ExceptionFrame *);
-
-List String_split_lines(String, int);
-
-int List_try_next(List, List *, Var *);
-
-static String Var_string(Var);
-
-int String_startswith(String, String);
-
-String String_remove_prefix(String, String);
 
 static String _recorded_tool(String name){
   String home = home_dir();
@@ -398,14 +348,6 @@ static String _recorded_tool(String name){
   return NULL;
 }
 
-String stage_dir(void);
-
-String x2c_get_executable(void);
-
-Path Path_dirname(Path);
-
-int Path_is_file(Path);
-
 static void Toolchain__layout(Toolchain t){
   String home = home_dir(), stage = stage_dir();
   String executable = x2c_get_executable(), prefix = home;
@@ -457,10 +399,6 @@ ToolAction Toolchain_preprocess_action(Toolchain t, String source, String output
   ));
 }
 
-List List_flatten(List);
-
-List List_map(List, Func);
-
 static List Toolchain__compile_arguments(Toolchain t, List gen_dirs){
   return({
     Var _x2c_literal_part_2 = String_var(t -> cc);  List _x2c_literal_part_3 = List_flatten(List_map(gen_dirs, _x2c_func_handle_0));  cons(_x2c_literal_part_2, cons(_28, List_append(_x2c_literal_part_3, cons(_30, cons(String_var(t -> include_dir), List_append(t -> cc_args, NULL))))));
@@ -504,14 +442,6 @@ int ToolAction_run(ToolAction action){
   return ToolRun_wait(ToolAction_start(action));
 }
 
-void report_suspend(void);
-
-Job Job_live(Job);
-
-Job List_job(List);
-
-static Var List_car(List);
-
 ToolRun ToolAction_start(ToolAction action){
   if(! _init_guard_) _file_init_();
   if(action -> verbose || action -> dry_run){
@@ -526,16 +456,10 @@ ToolRun ToolAction_start(ToolAction action){
   return execution;
 }
 
-int Job_ready(Job);
-
 int ToolRun_ready(ToolRun t){
   if(! _init_guard_) _file_init_();
   return ! t -> job || Job_ready(t -> job);
 }
-
-int Job_status(Job);
-
-String Symbol_str(Symbol);
 
 int ToolRun_wait(ToolRun execution){
   if(! _init_guard_) _file_init_();
@@ -566,17 +490,9 @@ static int _capture(Job command, String program, String * output, String * error
   return status;
 }
 
-Job Job_options(Job, Map);
-
-Map Map_update_n(Map, unsigned, ...);
-
-Map Map_new(void);
-
 static Job _captured(List arguments){
   return Job_options(List_job(arguments), Map_update_n(Map_new(), 2, Symbol_var(1317305704), Symbol_var(6544469130), Symbol_var(1317285028), Symbol_var(6544469130)));
 }
-
-Job Job_start(Job);
 
 static Job _start_tool(Job command, String program, String * failure){
   Job volatile job = NULL;
@@ -622,19 +538,11 @@ static Job _start_tool(Job command, String program, String * failure){
   return job;
 }
 
-Var List_assoc(List, Var);
-
-String String_new(const char *);
-
 static String _start_failure(String program, List detail){
   long error = Var_long(Var_convert(List_assoc(detail, Symbol_var(11703198)), 818062));
   String reason = String_new(strerror((int) error));
   return String_join(NULL, cons(String_var(_45), cons(String_var(program), cons(String_var(_46), cons(String_var(reason), cons(String_var(_47), NULL))))));
 }
-
-Path Path_temp_dir(void);
-
-void Path_remove_tree(Path);
 
 int Toolchain_preprocess(Toolchain t, const char * fname, List include_dirs, const char * imacros, String * output, String * errors, String * dependencies){
   if(! _init_guard_) _file_init_();
@@ -699,8 +607,6 @@ static int _keeps_system_includes(String cc){
   return tool_capture(probe, &(output), &(errors)) == 0 ? 1 : - 1;
 }
 
-List cpp_include_dirs(void);
-
 static List Toolchain__cpp_arguments(Toolchain t, List include_dirs, String macros, String depfile, String source){
   return({
     Var _x2c_literal_part_8 = String_var(t -> cc);  List _x2c_literal_part_9 = t -> keep_system_includes > 0 ? _63 : NULL;  List _x2c_literal_part_10 = _includes(cpp_include_dirs());  List _x2c_literal_part_11 = _includes(include_dirs);  List _x2c_literal_part_12 = t -> cpp_args;  List _x2c_literal_part_13 = String_truth(macros) ? cons(_65, cons(String_var(macros), NULL)) : NULL;  cons(_x2c_literal_part_8, cons(_26, cons(_51, cons(_53, cons(_67, cons(_69, cons(_71, cons(_73, cons(_75, cons(_77, cons(_79, cons(_81, cons(_83, cons(_85, cons(_87, cons(_89, cons(_91, cons(_93, List_append(_x2c_literal_part_9, cons(_95, cons(_97, List_append(_x2c_literal_part_10, List_append(_x2c_literal_part_11, List_append(_x2c_literal_part_12, List_append(_x2c_literal_part_13, cons(_14, cons(_18, cons(String_var(depfile), cons(_20, cons(_99, cons(_101, cons(String_var(source), _104))))))))))))))))))))))))))))))));
@@ -712,10 +618,6 @@ static List _includes(List directories){
   return List_flatten(List_map(directories, _x2c_func_handle_1));
 }
 
-Array Array_new(void);
-
-List Array_list_free(Array);
-
 List Toolchain_search_directories(Toolchain t){
   if(! _init_guard_) _file_init_();
   Array directories = Array_new();
@@ -726,8 +628,6 @@ List Toolchain_search_directories(Toolchain t){
   if(! tool_capture(cons(String_var(t -> cc), List_append(flags, _113)), &(output), &(errors))) _add_library_directories(directories, output);
   return Array_list_free(directories);
 }
-
-int String_contains(String, String);
 
 static void _add_include_directories(Array directories, String listing){
   int listed = 0;
@@ -750,16 +650,6 @@ static void _add_include_directories(Array directories, String listing){
 
 }
 
-String String_strip(String, char *);
-
-int String_find(String, String);
-
-Var Array_push(Array, Var);
-
-int String_endswith(String, String);
-
-Path Path_join(Path, Path);
-
 static void _add_include_directory(Array directories, String line){
   String directory = String_strip(line, " ");
   int note = String_find(directory, _116);
@@ -767,8 +657,6 @@ static void _add_include_directory(Array directories, String line){
   Array_push(directories, String_var(directory));
   if(String_endswith(directory, _117)) Array_push(directories, String_var(Path_join(Path_dirname(directory), _118)));
 }
-
-List String_split(String, String);
 
 static void _add_library_directories(Array directories, String output){
   {
@@ -821,8 +709,6 @@ static void _print_action(Symbol phase, List arguments){
   fputc('\n', stderr);
 }
 
-int String_try_next(String, int *, int *);
-
 static void _print_argument(String argument){
   if(_shell_safe(argument)){
     fputs(argument, stderr);
@@ -846,8 +732,6 @@ static void _print_argument(String argument){
   }
   fputc('\'', stderr);
 }
-
-int String_getindex(String, int);
 
 static int _shell_safe(String argument){
   if(! String_truth(argument) || ! String_getindex(argument, 0)) return 0;
@@ -873,8 +757,6 @@ static Var _x2c_lambda_0(Var directory){
   return List_var(cons(_30, cons(directory, NULL)));
   ;
 }
-
-Var x2c_func_value_argument(Func, const FuncArg *, unsigned, Symbol);
 
 static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0){
   Var a0 = x2c_func_value_argument(_x2c_func_binding_0, _x2c_func_argv_0, 0, 45156);

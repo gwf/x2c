@@ -26,6 +26,22 @@ MetaContext * MetaContext_current(void);
 
 Compiler Compiler_expanding(void);
 
+int Type_is_named(Type type, String name);
+
+Type Type_numeric(Type type);
+
+int Type_is_text(Type type);
+
+Code Type_protocol_member(Type type, String name);
+
+Type Code_type(Code value);
+
+Var Code_value(Code code);
+
+Code Code_register_rewrite(Code function, Macro shape, List holes);
+
+Code Code_register_after_initialization(Code function, Macro shape, List holes);
+
 List x2c_syntax_type(List value);
 
 List x2c_protocol_member(List participant, List base, String member);
@@ -91,6 +107,8 @@ int x2c_invocation_line(void);
 int x2c_invocation_column(void);
 
 void x2c_diagnostic_fail(String message, List notes);
+
+void x2c_diagnostic_fail_at(Var node, Symbol category, String message, List notes);
 
 void x2c_diagnostic_warn(String message, List notes);
 

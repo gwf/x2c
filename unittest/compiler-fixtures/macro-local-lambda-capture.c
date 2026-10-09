@@ -8,10 +8,6 @@ static Var _x2c_lambda_0(int base);
 
 static Var _x2c_lambda_1(Var base);
 
-static Var int_var(int);
-
-long Var_integer(Var);
-
 int main(void){
   x2c_initialize();
   Var typed =(_x2c_lambda_0)(10);

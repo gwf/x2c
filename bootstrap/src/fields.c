@@ -14,16 +14,6 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
-static Var String_var(String);
-
-static Var List_var(List);
-
-static Var Symbol_var(Symbol);
-
-List cons(Var, List);
-
-static Var int_var(int);
-
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -66,12 +56,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _35 = Symbol_var(93);
   _36 = Symbol_var(123);
 }
-
-static int List_truth(List);
-
-static Var List_car(List);
-
-static List List_cdr(List);
 
 List _field_copies(List to, List from, List fields){
   if(! _init_guard_) _file_init_();

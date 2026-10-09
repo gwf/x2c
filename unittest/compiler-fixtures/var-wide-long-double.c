@@ -16,8 +16,6 @@ static long double unbox_value(Var value){
   return Var_long_double(Var_convert(value, 26071077642));
 }
 
-int Var_is(Var, Symbol);
-
 int main(void){
   x2c_initialize();
   long double value = 1.25L;

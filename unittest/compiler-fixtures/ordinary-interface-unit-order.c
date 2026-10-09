@@ -23,7 +23,6 @@ int second(void){
   return later;
 }
 
-int abs(int);
 int captured_parameter(int value){
   return abs(value);
 }

@@ -21,12 +21,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 _x2c_initializer_choice_C720FE3A_0((calls = 0))
 static List values(void);
 
-static Var int_var(int);
-
-List cons(Var, List);
-
-static Var double_var(double);
-
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -50,14 +44,6 @@ static List values(void){
   calls ++;
   return _7;
 }
-
-Var List_getindex(List, int);
-
-static Var char_var(char);
-
-long Var_integer(Var);
-
-int Var_is_void(Var);
 
 int main(void){
   x2c_initialize();

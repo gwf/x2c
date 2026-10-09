@@ -19,6 +19,8 @@
 #include <unistd.h>
 Map Compiler_collect_symbols(Compiler c, Map globs);
 
+List compiler_prelude_sources(void);
+
 void Compiler_configure_package(Compiler c, List roots, String filename);
 
 String collect_resolve_include(SourceView sources, List dirs, String includer_dir, String target, int angle);
@@ -26,6 +28,10 @@ String collect_resolve_include(SourceView sources, List dirs, String includer_di
 List Compiler_include_typedef_names(Compiler c, String target, int angle, Map seen);
 
 List Compiler_include_type_dependencies(Compiler c, String target, int angle, Map seen);
+
+void Compiler_include_function_declarations(Compiler c, String target, int angle, Map available);
+
+void Compiler_runtime_function_declarations(Compiler c, Map available);
 
 int Compiler_linked_meta_provider_current(Compiler c, String path);
 

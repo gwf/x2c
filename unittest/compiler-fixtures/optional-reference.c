@@ -40,8 +40,6 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
 
 static Func _x2c_func_handle_0;
 
-Func x2c_func_shared(FuncAdapter, List);
-
 #include "exception.h"
 
 
@@ -55,14 +53,6 @@ static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func
 static Func _x2c_func_handle_1;
 
 _x2c_initializer_choice_93350478_1((_x2c_func_handle_1 = x2c_func_shared(_x2c_func_adapt_1, _15)))
-static Var Symbol_var(Symbol);
-
-List cons(Var, List);
-
-static Var List_var(List);
-
-static Var String_var(String);
-
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -102,18 +92,6 @@ static int postfix(int * value){
   return(* value) ++;
 }
 
-int Var_int(Var);
-
-static int List_truth(List);
-
-List x2c_func_reference_type(Func, unsigned, unsigned);
-
-static FuncArg FuncArg_reference(const void *, List);
-
-FuncArg x2c_func_unrepresentable_argument(Func, unsigned, List);
-
-Var Func_apply(Func, unsigned, const FuncArg *);
-
 static int forward_func(int * value){
   Func function = _x2c_func_handle_0;
   return Var_int(({
@@ -132,34 +110,10 @@ static void set_with_macro(int * value){
   (* value) = 9;
 }
 
-static FuncArg FuncArg_value(Var);
-
-static Var int_var(int);
-
 #include "error.h"
 
 
 
-
-int x2c_error_catch_site_pending(ErrorCatchSite *);
-
-ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
-
-void x2c_exception_push(ExceptionFrame *);
-
-void x2c_exception_landed(ExceptionFrame *);
-
-int x2c_exception_is_error_target(ExceptionFrame *);
-
-int x2c_error_catch_selected(ErrorHandler);
-
-void x2c_error_catch_detach(ErrorHandler);
-
-void x2c_exception_mark_handled(ExceptionFrame *);
-
-void x2c_error_catch_close(ErrorHandler);
-
-void x2c_exception_leave(ExceptionFrame *);
 
 int main(void){
   x2c_initialize();
@@ -243,8 +197,6 @@ int main(void){
   }
   return caught != 1;
 }
-
-void * x2c_func_declared_reference_argument(Func, const FuncArg *, unsigned, List, List);
 
 static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0){
   int * a0 = x2c_func_declared_reference_argument(_x2c_func_binding_0, _x2c_func_argv_0, 0, _1, _1);

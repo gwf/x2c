@@ -106,34 +106,6 @@ static int apply_int(int(* fn)(int)){
 
 
 
-int x2c_error_catch_site_pending(ErrorCatchSite *);
-
-static Var List_var(List);
-
-static Var Symbol_var(Symbol);
-
-ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
-
-void x2c_exception_push(ExceptionFrame *);
-
-void x2c_cleanup_push(X2CCleanup *);
-
-void x2c_cleanup_leave(X2CCleanup *);
-
-void x2c_exception_landed(ExceptionFrame *);
-
-int x2c_exception_is_error_target(ExceptionFrame *);
-
-int x2c_error_catch_selected(ErrorHandler);
-
-void x2c_error_catch_detach(ErrorHandler);
-
-void x2c_exception_mark_handled(ExceptionFrame *);
-
-void x2c_error_catch_close(ErrorHandler);
-
-void x2c_exception_leave(ExceptionFrame *);
-
 int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
@@ -207,10 +179,6 @@ int main(void){
   printf("%d %d %d\n", mapped, cleaned, sentinels);
   return mapped == 2 && cleaned == 1 && sentinels == 27 ? 0 : 1;
 }
-
-static Var int_var(int);
-
-int Var_int(Var);
 
 static Var _x2c_lambda_0(Var value){
   return int_var(Var_int(value) + 1);

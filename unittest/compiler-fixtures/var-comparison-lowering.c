@@ -36,24 +36,6 @@ static Var mark_right(Var value){
   return value;
 }
 
-static Var long_var(long);
-
-int Var_equal(Var, Var);
-
-int Var_compare(Var, Var);
-
-static Var String_var(String);
-
-Array Array_update_n(Array, unsigned, ...);
-
-Array Array_new(void);
-
-static Var int_var(int);
-
-Array Array_copy(Array);
-
-static Var Array_var(Array);
-
 int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();

@@ -148,17 +148,6 @@ static macro Stmt $report.xform.compound_enum(Expr $c) =>
     <xform>, "dynamic compound assignment cannot target an enum",
     NULL, NULL);
 
-static macro Stmt $report.xform.index_operand(
-  Expr $c, Expr $op, Expr $rhs_type) {
-  {
-    String details = %"right type: ${$rhs_type.repr()}";
-    String message = $op == <+>
-      ? "indexed += requires a numeric, Var, or String operand"
-      : "indexed compound assignment requires a numeric or Var operand";
-    $c.report_error(<xform>, message, NULL, %($details));
-  }
-}
-
 static macro Stmt $report.xform.index_update(
   Expr $c, Expr $base_type, Expr $postfix) {
   {
@@ -251,6 +240,7 @@ static Ast Compiler._step_tag(Compiler c, Ast ast, Symbol tag) {
     case <defer>: next = c._defer_node(ast); break;
     case <return>: next = c._return(ast); break;
     case <raise>: return c._raise_node(ast);
+    case <switch>: next = c._statement_rewrite(ast, tag); break;
     case <if>: case <while>: case <do>: case <for>:
       next = c._truthy(ast); break;
     case <call>: next = c._call(ast); break;
@@ -260,6 +250,13 @@ static Ast Compiler._step_tag(Compiler c, Ast ast, Symbol tag) {
   }
   if (next != ast) return c._step(next);
   return c._default_node(ast);
+}
+
+/* Ordinary registered patterns may replace a typed statement. */
+static Ast Compiler._statement_rewrite(Compiler c, Ast ast, Symbol tag) {
+  List rewritten = c.rewrite_rules ? c.lower_rewrite(
+    <node>, tag, ast, AST_STATEMENT, c.return_type, NULL) : NULL;
+  return rewritten ? rewritten : ast;
 }
 
 static Ast Compiler._default_node(Compiler c, Ast ast) {
@@ -418,11 +415,8 @@ static Ast Compiler._setindex_node(
   List resolved = c.resolve_protocol_member(type, "setindex");
   if (!resolved)
     $report.xform.index_assignment(c, type);
-  if (!c._indexed_builtin_helper(type))
-    return c._step(
-      c._sequenced_protocol_call(resolved, %($expression $index $value)));
   return c._step(
-    c._indexed_call_expr(resolved, %($expression $index $value)).caddr());
+    c._sequenced_protocol_call(resolved, %($expression $index $value)));
 }
 
 static Ast Compiler._slice_node(
@@ -442,7 +436,54 @@ static Ast Compiler._slice_node(
   return c._step(%(call "$fnname" (args $expression $start $stop $step)));
 }
 
+/* Access admission has established the getter signature, but its target is
+   still intact here. Dispatch before lowering a read or an enclosing update. */
+static List _access_source(List expression) {
+  match (expression) {
+    case %(expr ?type (getindex ?base ?key)):
+      return %(expr $type (index $base $key));
+    case %(expr ?type (parens ?inner)):
+      return %(expr $type (parens ${_access_source(inner)}));
+  }
+  return expression;
+}
+
+static List Compiler._access_rewrite(Compiler c, List expression) {
+  if (!c.rewrite_rules) return NULL;
+  Symbol kind = 0;
+  List source = expression;
+  match (expression) {
+    case %(expr ? (getindex ? ?)): {
+      kind = <read>;
+      source = _access_source(expression);
+    }
+    case %(expr ?type (op ?operator ?left ?right)):
+      if (operator.symbol().is_assignment_op()) {
+        List target = _access_source(left);
+        if (target == left) return NULL;
+        kind = operator;
+        source = source_operator_expression(type, %($operator $target $right));
+      }
+    case %(expr ?type (op (!set ?operator (!or ++ --)) ?operand)): {
+      List target = _access_source(operand);
+      if (target == operand) return NULL;
+      kind = <prefix>;
+      source = source_operator_expression(type, %($operator $target));
+    }
+    case %(expr ?type (postfix ?operator ?operand)): {
+      List target = _access_source(operand);
+      if (target == operand) return NULL;
+      kind = <postfix>;
+      source = source_postfix_expression(type, %($operator $target));
+    }
+  }
+  return kind ? c.lower_rewrite(
+    <access>, kind, source, AST_EXPRESSION, expression.cadr(), NULL) : NULL;
+}
+
 static Ast Compiler._expression_node(Compiler c, Ast ast) {
+  List rewritten = c._access_rewrite(ast);
+  if (rewritten) return rewritten;
   Ast expression = c.lower_typed_adapter_expr(ast);
   expression = c.lower_lambda_expr(expression);
   if (_op_chain_first(expression)) return c._op_chain(expression);
@@ -1722,64 +1763,18 @@ static int Compiler._string_operand(Compiler c, Type type) =>
 
 static List Compiler._indexed_change(
   Compiler c, List target, Symbol op, List rhs) {
-  Symbol owner, List base, selector, Type base_type;
-  if (!c._indexed_parts(target, owner, base, base_type, selector))
-    return NULL;
+  List base, selector;
+  Type type;
+  if (!_resolved_index_parts(target, base, type, selector)) return NULL;
   int postfix = !rhs;
-  List resolved = c._indexed_resolution(base_type, owner, op, rhs);
-
+  List resolved = c.resolve_protocol_member(
+    type, postfix ? "postfixindex" : "updateindex");
+  if (!resolved) $report.xform.index_update(c, type, postfix);
   List operation = _symbol_expression(op);
   List arguments = postfix
     ? %($base $selector $operation)
     : %($base $selector $operation $rhs);
-  if (!owner) return c._sequenced_protocol_call(resolved, arguments);
-  c._convert_indexed_parts(owner, base, selector);
-  String helper = owner == <array>
-    ? (postfix ? "Array_postfixindex" : "Array_updateindex")
-    : (postfix ? "Map_postfixindex" : "Map_updateindex");
-  if (!postfix) rhs = c.convert_expression(rhs, %("Var"));
-  arguments = postfix
-    ? %($base $selector $operation)
-    : %($base $selector $operation $rhs);
-  return %(call $helper (args @arguments));
-}
-
-/* Compound, prefix and postfix brackets share the same resolved element,
-   protocol lookup, and built-in conversion. A missing rhs means postfix. */
-static List Compiler._indexed_resolution(
-  Compiler c, Type base_type, Symbol owner, Symbol op, List rhs) {
-  int postfix = !rhs;
-  List resolved = c.resolve_protocol_member(
-    base_type, postfix ? "postfixindex" : "updateindex");
-  if (!resolved)
-    $report.xform.index_update(c, base_type, postfix);
-  if (owner && !postfix) {
-    Type rhs_type = rhs.cadr();
-    if (!c.sym.is_var_type(rhs_type) && !c._scalar_operand(op, rhs_type))
-      $report.xform.index_operand(c, op, rhs_type);
-  }
-  return resolved;
-}
-
-// Helper-backed indexes bypass getindex lowering.
-static int Compiler._indexed_parts(
-  Compiler c, List expr, Symbol &owner, List &base, Type &base_type,
-  List &selector) {
-  if (!_resolved_index_parts(expr, base, base_type, selector)) return 0;
-  owner = c._indexed_builtin_helper(base_type);
-  return 1;
-}
-
-static void Compiler._convert_indexed_parts(
-  Compiler c, Symbol owner, List &base, List &selector) {
-  if (owner == <array>) {
-    base = c.convert_expression(base, %("Array"));
-    selector = c.convert_expression(selector, %(int));
-  }
-  else {
-    base = c.convert_expression(base, %("Map"));
-    selector = c.convert_expression(selector, %("Var"));
-  }
+  return c._sequenced_protocol_call(resolved, arguments);
 }
 
 static List Compiler._indexed_call_expr(

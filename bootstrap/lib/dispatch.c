@@ -178,10 +178,6 @@ String Var_str(Var v){
   return Var_fallback_str(v);
 }
 
-Symbol Var_tag(Var);
-
-Symbol Var_kind(Var);
-
 String Var_pointer_string(Var v);
 
 String Var_fallback_str(Var v){
@@ -194,12 +190,6 @@ String Var_fallback_str(Var v){
   }
   return Var_pointer_string(v);
 }
-
-String String_printf(String, ...);
-
-static Var String_var(String);
-
-String Symbol_str(Symbol);
 
 static String _primitive_str(Var v, Symbol tag){
   switch(tag){
@@ -216,8 +206,6 @@ static String _primitive_str(Var v, Symbol tag){
   }
   return Var_pointer_string(v);
 }
-
-void * Var_pointer(Var);
 
 String Var_pointer_string(Var v){
   if(! _init_guard_) _file_init_();
@@ -237,10 +225,6 @@ Buffer Var_write_str(Var v, Buffer out){
   return Var_fallback_write_str(v, out);
 }
 
-static int String_truth(String);
-
-Buffer Buffer_write(Buffer, const char *);
-
 static Buffer _write_text(Buffer out, String text){
   return String_truth(text) ? Buffer_write(out, text) : out;
 }
@@ -255,8 +239,6 @@ Buffer Var_fallback_write_str(Var v, Buffer out){
   }
   return Buffer_write(out, Var_pointer_string(v));
 }
-
-Buffer Buffer_printf(Buffer, const char *, ...);
 
 static Buffer _write_primitive_str(Var v, Symbol tag, Buffer out){
   switch(tag){
@@ -295,10 +277,6 @@ String Var_fallback_repr(Var v){
   return Var_pointer_string(v);
 }
 
-String Buffer_str_free(Buffer);
-
-Buffer Buffer_new(size_t);
-
 static String _primitive_repr(Var v, Symbol tag){
   return Buffer_str_free(_write_primitive_repr(v, tag, Buffer_new(0)));
 }
@@ -327,18 +305,6 @@ Buffer Var_fallback_write_repr(Var v, Buffer out){
   }
   return Var_write_pointer_repr(v, out);
 }
-
-long Var_long(Var);
-
-ulong Var_ulong(Var);
-
-long long Var_long_long(Var);
-
-unsigned long long Var_ulong_long(Var);
-
-double Var_floating(Var);
-
-long double Var_long_double(Var);
 
 static Buffer _write_primitive_repr(Var v, Symbol tag, Buffer out){
   switch(tag){
@@ -391,8 +357,6 @@ static Buffer _write_float_repr(Buffer out, long double value, Symbol width, Str
   return String_truth(suffix) ? Buffer_write(out, suffix) : out;
 }
 
-void Symbol_decode(Symbol, char *);
-
 Buffer Var_write_pointer_repr(Var v, Buffer out){
   if(! _init_guard_) _file_init_();
   Symbol tag = Var_tag(v);
@@ -418,22 +382,6 @@ void RenderPath_leave(RenderPath * path){
   if(! _init_guard_) _file_init_();
   render_path = path -> previous;
 }
-
-static Var Symbol_var(Symbol);
-
-static int Var_is_wide(Var);
-
-unsigned Var_wide_hash(Var);
-
-static List Var_list(Var);
-
-static int List_truth(List);
-
-unsigned List_hash(List);
-
-static String Var_string(Var);
-
-unsigned String_hash(String);
 
 #include "error.h"
 
@@ -472,13 +420,9 @@ unsigned Var_fallback_hash(Var v){
   return _default_hash(v);
 }
 
-static unsigned x2c_hash_word(unsigned long);
-
 static unsigned _default_hash(Var v){
   return x2c_hash_word(v.u64);
 }
-
-int Var_wide_equal(Var, Var);
 
 int Var_equal(Var a, Var b){
   if(! _init_guard_) _file_init_();
@@ -563,8 +507,6 @@ static int _is_numeric_kind(Symbol kind){
   return(kind == 20309162340) ||(kind == 439096724366);
 }
 
-int Symbol_compare(Symbol, Symbol);
-
 static int _group_compare(Var a, Var b, Symbol kind, Symbol atag, Symbol btag){
   int tc = Symbol_compare(atag, btag);
   if(tc) return tc;
@@ -583,10 +525,6 @@ static int _compare_bits(Var a, Var b){
   return(a.u64 < b.u64) ? - 1 : 1;
 }
 
-int Var_integer_compare(Var, Var);
-
-int Var_integer_floating_compare(Var, Var);
-
 static int _numeric_compare(Var a, Var b, Symbol ak, Symbol bk, Symbol atag, Symbol btag){
   int awide = Var_is_wide(a), bwide = Var_is_wide(b);
   long double da = _float_value(a, ak, awide), db = _float_value(b, bk, bwide);
@@ -603,8 +541,6 @@ static int _numeric_compare(Var a, Var b, Symbol ak, Symbol bk, Symbol atag, Sym
   return _numeric_tie(a, b, atag, btag, awide && bwide);
 }
 
-long double Var_long_double_value(Var);
-
 static long double _float_value(Var v, Symbol kind, int wide){
   if(kind != 439096724366) return 0.0L;
   return wide ? Var_long_double_value(v) :(long double) Var_floating(v);
@@ -619,8 +555,6 @@ static int _numeric_class(Symbol tag, long double value){
   return 1;
 }
 
-int Var_wide_compare(Var, Var);
-
 static int _numeric_tie(Var a, Var b, Symbol atag, Symbol btag, int wide){
   int ra = _numeric_rank(atag), rb = _numeric_rank(btag);
   if(ra != rb) return(ra < rb) ? 1 : - 1;
@@ -630,16 +564,12 @@ static int _numeric_tie(Var a, Var b, Symbol atag, Symbol btag, int wide){
   return _compare_bits(a, b);
 }
 
-int Var_numeric_info(Symbol, X2CVarNumericInfo *);
-
 static int _numeric_rank(Symbol tag){
   if(tag == 13400168) tag = 3355493;
   if(tag == 301273866) tag = 3356265;
   X2CVarNumericInfo info;
   return Var_numeric_info(tag, &(info)) ? info.rank : 0;
 }
-
-static int Iter_truth(Iter);
 
 Iter Var_fallback_iter(Var x, Iter dest);
 
@@ -655,8 +585,6 @@ Iter Var_iter(Var x, Iter dest){
   if(descriptor && descriptor -> methods.iter) return descriptor -> methods.iter(x, dest);
   return Var_fallback_iter(x, dest);
 }
-
-Iter Iter_init(Iter, Var, IterNextFn, Var);
 
 Iter Var_fallback_iter(Var x, Iter dest){
   if(! _init_guard_) _file_init_();
@@ -757,10 +685,6 @@ Var Var_postfixindex(Var value, Var key, Symbol op){
 
 }
 
-int Var_encoding_valid(Var);
-
-int Var_is_void(Var);
-
 static void _valid_member_operand(Var value, String side){
   if(! Var_encoding_valid(value)){
     unsigned long bits = value.u64;
@@ -845,10 +769,6 @@ int Var_try_export_context(Var value, Context source, Var * out){
   (* out) = descriptor -> methods.export_context(value, source);
   return 1;
 }
-
-void x2c_cleanup_push(X2CCleanup *);
-
-void x2c_cleanup_leave(X2CCleanup *);
 
 void x2c_register_type(String name){
   if(! _init_guard_) _file_init_();
@@ -1010,12 +930,6 @@ void x2c_register_tagged_descriptor(Symbol tag, String name, VarMethods methods)
 
 }
 
-int String_equal(String, String);
-
-String String_lower(String);
-
-Symbol Symbol_new(const char *);
-
 static VarDescriptor * _reserve(String name){
   if(! String_truth(name) || ! String_equal(name, String_lower(name))) return 0;
   Symbol tag = Symbol_new(name);
@@ -1064,19 +978,13 @@ static void _install_methods(VarDescriptor * descriptor, VarMethods methods){
 
 }
 
-void Mutex_recursive_lock(pthread_mutex_t *, pthread_once_t *, void(*)(void), const char *);
-
 static void _lock(void){
   Mutex_recursive_lock(& descriptor_mutex, & descriptor_mutex_once, _mutex_initialize, "Var descriptor: could not lock mutex");
 }
 
-void Mutex_recursive_unlock(pthread_mutex_t *, const char *);
-
 static void _unlock(void){
   Mutex_recursive_unlock(& descriptor_mutex, "Var descriptor: could not unlock mutex");
 }
-
-void Mutex_recursive_initialize(pthread_mutex_t *, const char *);
 
 static void _mutex_initialize(void){
   Mutex_recursive_initialize(& descriptor_mutex, "Var descriptor: could not initialize mutex");

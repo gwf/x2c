@@ -17,9 +17,11 @@
 #include "list-selectors.x"
 #include "meta.x"
 #include "native-scalar-types.x"
+#include "rewrite.x"
 #include "system-macros.x"
 #include "var-tags.x"
 #include "varops.x"
+#include "component-access.x"
 #include "fields.x"
 #include "grammar.x"
 #include "operator-ledger.x"
@@ -135,6 +137,16 @@ List x2c_type_members(List type) {
   List rows = %();
   foreach (List member, members) rows = cons(_meta_member(member), rows);
   return rows.reverse();
+}
+
+/* --- lib/rewrite.x ------------------------------------------------------- */
+
+/** Registers the decorated translator with its macro and hole patterns. */
+Code register_rewrite(Code function, Code pattern, List holes) {
+  Macro shape = pattern.value();
+  Array patterns = [];
+  foreach (Code hole, holes) patterns.push(hole.value());
+  return function.register_rewrite(shape, patterns.list_free());
 }
 
 /* --- lib/system-macros.x ------------------------------------------------- */
@@ -262,6 +274,95 @@ static List _update_decode(List id, List value) {
   return decoded;
 }
 
+/* --- src/component-access.x ---------------------------------------------- */
+
+static int _collection_family(Code base) {
+  Type type = base.type();
+  return type.is_named("Array") ? 1 : type.is_named("Map") ? 2 : 0;
+}
+
+/** Selects the adopted collection setter for indexed assignment. */
+Code collection_store(Code code) {
+  match (code) case $collection_store(?base, ?key, ?value): {
+    if (!_collection_family(base)) return code;
+    Code receiver = base;
+    Code setter = receiver.type().protocol_member("setindex");
+    if (setter) return $!Var{ $setter($base, $key, $value) };
+  }
+  return code;
+}
+
+static Code _collection_update(
+  Code base, Code key, Code value, Symbol op) {
+  int family = _collection_family(base);
+  if (!family || !base.type().protocol_member("updateindex")) return NULL;
+  Type type = value.type();
+  if (!type.is_named("Var") && !type.numeric() &&
+      !(op == <+> && type.is_text())) {
+    String message = op == <+>
+      ? "indexed += requires a numeric, Var, or String operand"
+      : "indexed compound assignment requires a numeric or Var operand";
+    x2c_diagnostic_fail_at(NULL, <xform>, message,
+      %("right type: ${type.repr()}"));
+  }
+  if (family == 1) return $!Var{ Array_updateindex($base, $key, $op, $value) };
+  return $!Var{ Map_updateindex($base, $key, $op, $value) };
+}
+
+/** Selects collection compound updates and checks accepted operands. */
+Code collection_update(Code code) {
+  match (code) {
+    case $collection_add(?base, ?key, ?value):
+      return _collection_update(base, key, value, <"+">);
+    case $collection_subtract(?base, ?key, ?value):
+      return _collection_update(base, key, value, <"-">);
+    case $collection_multiply(?base, ?key, ?value):
+      return _collection_update(base, key, value, <"*">);
+    case $collection_divide(?base, ?key, ?value):
+      return _collection_update(base, key, value, <"/">);
+    case $collection_remainder(?base, ?key, ?value):
+      return _collection_update(base, key, value, <"%">);
+    case $collection_and(?base, ?key, ?value):
+      return _collection_update(base, key, value, <"&">);
+    case $collection_or(?base, ?key, ?value):
+      return _collection_update(base, key, value, <"|">);
+    case $collection_xor(?base, ?key, ?value):
+      return _collection_update(base, key, value, <"^">);
+    case $collection_left(?base, ?key, ?value):
+      return _collection_update(base, key, value, <"<<">);
+    case $collection_right(?base, ?key, ?value):
+      return _collection_update(base, key, value, <">>">);
+  }
+  return code;
+}
+
+/** Stores and returns the incremented or decremented collection value. */
+Code collection_prefix(Code code) {
+  match (code) {
+    case $collection_increment(?base, ?key):
+      return _collection_update(base, key, $!int{1}, <+>);
+    case $collection_decrement(?base, ?key):
+      return _collection_update(base, key, $!int{1}, <->);
+  }
+  return code;
+}
+
+/** Stores the updated collection value and returns its previous value. */
+Code collection_postfix(Code code) {
+  Code base, key;
+  Symbol op;
+  match (code) {
+    case $collection_postincrement(?b, ?k): { base = b; key = k; op = <++>; }
+    case $collection_postdecrement(?b, ?k): { base = b; key = k; op = <-->; }
+    default: return code;
+  }
+  int family = _collection_family(base);
+  if (!family || !base.type().protocol_member("postfixindex")) return code;
+  if (family == 1) return $!Var{ Array_postfixindex($base, $key, $op) };
+  if (family == 2) return $!Var{ Map_postfixindex($base, $key, $op) };
+  return code;
+}
+
 /* --- src/operator-ledger.x ----------------------------------------------- */
 
 static List _operator_rows(void) => %(
@@ -326,6 +427,7 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_meta_fail", _meta_fail);
   $linked.row(rows, "_meta_member", _meta_member);
   $linked.row(rows, "x2c_type_members", x2c_type_members);
+  $linked.row(rows, "register_rewrite", register_rewrite);
   $linked.row(rows, "_dedent_expand", _dedent_expand);
   $linked.row(rows, "_macros_location", _macros_location);
   $linked.row(rows, "_tag_decode_group", _tag_decode_group);
@@ -341,6 +443,12 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_update_cast_out", _update_cast_out);
   $linked.row(rows, "_update_box", _update_box);
   $linked.row(rows, "_update_decode", _update_decode);
+  $linked.row(rows, "_collection_family", _collection_family);
+  $linked.row(rows, "collection_store", collection_store);
+  $linked.row(rows, "_collection_update", _collection_update);
+  $linked.row(rows, "collection_update", collection_update);
+  $linked.row(rows, "collection_prefix", collection_prefix);
+  $linked.row(rows, "collection_postfix", collection_postfix);
   $linked.row(rows, "_operator_rows", _operator_rows);
   $linked.row(rows, "_operator_cases", _operator_cases);
   $linked.row(rows, "x2c_literal_string", x2c_literal_string);

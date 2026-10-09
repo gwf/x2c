@@ -10,9 +10,11 @@
 #include "list-selectors.h"
 #include "meta.h"
 #include "native-scalar-types.h"
+#include "rewrite.h"
 #include "system-macros.h"
 #include "var-tags.h"
 #include "varops.h"
+#include "component-access.h"
 #include "fields.h"
 #include "grammar.h"
 #include "operator-ledger.h"
@@ -26,6 +28,8 @@ List x2c_param_make(List type, Var name);
 
 List x2c_type_members(List type);
 
+Code register_rewrite(Code function, Code pattern, List holes);
+
 List _dedent_expand(List node);
 
 List _macros_location(void);
@@ -35,6 +39,14 @@ List _tag_decode_group(List rows, Map counts, int top);
 List _tag_decode_groups(void);
 
 List _tag_id_checks(void);
+
+Code collection_store(Code code);
+
+Code collection_update(Code code);
+
+Code collection_prefix(Code code);
+
+Code collection_postfix(Code code);
 
 Map linked_meta_targets(void);
 

@@ -114,12 +114,6 @@ static Type Sym__local_alias(Sym s, Type type, Type base);
 
 static Map builtin_typedef_scalars;
 
-static Var List_var(List);
-
-Map Map_update_n(Map, unsigned, ...);
-
-Map Map_new(void);
-
 #include "exception.h"
 
 
@@ -163,12 +157,6 @@ typedef struct _x2c_defer_env_0{
 _x2c_defer_env_0;
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
-
-static Var Symbol_var(Symbol);
-
-List cons(Var, List);
-
-static Var String_var(String);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -417,10 +405,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _x2c_static_initialize_0();
 }
 
-void * Scope_calloc(size_t, size_t);
-
-Block Block_new(size_t);
-
 Sym Sym_new(Compiler c){
   if(! _init_guard_) _file_init_();
   Sym s = Scope_calloc(1, sizeof(struct Sym));
@@ -432,25 +416,17 @@ Sym Sym_new(Compiler c){
   return s;
 }
 
-Var Map_setindex(Map, Var, Var);
-
 void Sym_put(Sym s, Map map, Var key, Var value){
   if(! _init_guard_) _file_init_();
   Sym__remember(s, map, key);
   Map_setindex(map, key, value);
 }
 
-Var Map_del(Map, Var);
-
 void Sym_drop(Sym s, Map map, Var key){
   if(! _init_guard_) _file_init_();
   Sym__remember(s, map, key);
   Map_del(map, key);
 }
-
-int Map_try_get(Map, Var, Var *);
-
-static void Block_push(Block, const void *);
 
 static void Sym__remember(Sym s, Map map, Var key){
   if(! s -> transactions) return;
@@ -462,8 +438,6 @@ static void Sym__remember(Sym s, Map map, Var key){
   ;
   Block_push(s -> undo, & row);
 }
-
-static size_t Block_len(Block);
 
 static SymScope * Sym__scope_at(Sym s, int index){
   int count = Block_len(s -> scopes);
@@ -485,8 +459,6 @@ void Sym_reset_overlay(Sym s, Map base, Map overlay){
   Sym__push_symbols(s, base != NULL ? base : Map_new());
   Sym__push_symbols(s, s -> globals);
 }
-
-static void Block_clear(Block);
 
 static void Sym__clear_symbols(Sym s, Map globals, int base_scopes){
   Block_clear(s -> scopes);
@@ -515,10 +487,6 @@ void Sym_push_scope(Sym s, SymScope scope){
   Block_push(s -> scopes, & scope);
 }
 
-static int Block_try_pop(Block, void *);
-
-unsigned Map_len(Map);
-
 SymScope Sym_pop_scope(Sym s){
   if(! _init_guard_) _file_init_();
   struct SymScope scope ={
@@ -545,8 +513,6 @@ Map Sym_global_symbols(Sym s){
   return s -> globals;
 }
 
-Map Map_merge(Map, Map);
-
 Map Sym_base_symbols(Sym s){
   if(! _init_guard_) _file_init_();
   Map seed = Map_new();
@@ -572,26 +538,10 @@ Map Sym_file_statics(Sym s){
   return s -> statics;
 }
 
-static Var int_var(int);
-
 void Sym_mark_static(Sym s, List key){
   if(! _init_guard_) _file_init_();
   Sym_put(s, s -> statics, List_var(key), int_var(1));
 }
-
-Array Array_new(void);
-
-int Map_try_next(Map, unsigned *, Var *, Var *);
-
-static List Var_list(Var);
-
-static String Var_string(Var);
-
-Var Array_push(Array, Var);
-
-static int Var_is_row(Var, unsigned, unsigned long, unsigned long);
-
-List Array_list_free(Array);
 
 List Sym_visible_symbols(Sym s){
   if(! _init_guard_) _file_init_();
@@ -643,18 +593,14 @@ List Sym_visible_symbols(Sym s){
 return Array_list_free(rows);
 }
 
-int Map_contains(Map, Var);
 static int _unseen(Map seen, Var name){
   if(Map_contains(seen, name)) return 0;  Map_setindex(seen, name, int_var(1));  return 1;
 }
 
-Var List_assoc(List, Var);
 static Symbol _macro_kind(Var definition){
   Symbol kind = Var_symbol(Var_is_row(definition, 9, 7, 4) ? List_assoc(Var_list(definition), Symbol_var(740232)) : int_var(0));  return kind == 1362954 ? 45733174647966 : 27335838;
 }
 
-int log_should_log(Symbol, Symbol);
-void log_debug(Symbol, List);
 void Sym_set(Sym s, List key, List type){
   if(! _init_guard_) _file_init_();  Map scope = Sym__scope_at(s, - 1) -> symbols;  if(log_should_log(8721742, 1328390212)) log_debug(1328390212, ({
     Var _x2c_literal_part_2 = List_var(cons(_10, cons(List_var(key), NULL)));  Var _x2c_literal_part_3 = List_var(cons(_11, cons(List_var(type), NULL)));  cons(_17, cons(_x2c_literal_part_2, cons(_x2c_literal_part_3, NULL)));
@@ -662,8 +608,6 @@ void Sym_set(Sym s, List key, List type){
   ));  Sym_put(s, scope, List_var(key), List_var(type));  if(_retained_member(key)) Sym_put(s, s -> binding_facts, List_var(cons(_18, cons(List_var(key), NULL))), List_var(type));
 }
 
-static int List_truth(List);
-List List_match(List, Var);
 static int _retained_member(List key){
   return ! ! List_truth(({ static MatchCaptureSite _x2c_match_site_1;  x2c_match_site_match(& _x2c_match_site_1, key, List_var(_43)); }));
 }
@@ -672,14 +616,12 @@ List Sym_define(Sym s, List key, List type){
   if(! _init_guard_) _file_init_();  SymScope * scope = Sym__scope_at(s, - 1);  Sym_set(s, key, type);  _seed_var_tag(key, type);  return Sym__scope_binding(s, &(* scope), key);
 }
 
-static int String_truth(String);
 static Type List_type(List);
 void Type_register_var_tag(Type, String, String);
 static void _seed_var_tag(List key, List type){
   String owner = _var_converter_owner(key, type);  if(! String_truth(owner)) return;  String converter = String_join(NULL, cons(String_var(owner), cons(String_var(_44), NULL)));  Type declared = List_type(cons(String_var(owner), NULL));  Type_register_var_tag(declared, owner, converter);
 }
 
-int String_equal(String, String);
 static String _var_converter_owner(List key, List type){
 
   {
@@ -715,7 +657,6 @@ break;
 return NULL;
 }
 
-int Map_truth(Map);
 void Sym_seed_var_tags(Sym s, Map symbols){
   if(! _init_guard_) _file_init_();  if(! Map_truth(symbols)) return; {
     Var key, type;  Map _x2c_macro_object_2 = symbols;  unsigned _x2c_macro_cursor_2 = 0;  Var _x2c_macro_cursor_output_4;  Var _x2c_macro_cursor_output_5;  while(Map_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_4), &(_x2c_macro_cursor_output_5))){
@@ -734,7 +675,6 @@ void Sym_declare_enumerator(Sym s, List key, Symbol owner){
   if(! _init_guard_) _file_init_();  SymScope * scope = Sym__scope_at(s, - 1);  if(scope) Sym_put(s, scope -> enumerators, List_var(key), Symbol_var(owner));
 }
 
-Var List_getindex(List, int);
 static List Sym__scope_binding(Sym s, SymScope * scope, List key){
   Var found;  List binding;  if(Map_try_get((* scope).bindings, List_var(key), &(found))) binding = Var_list(found);  else{
     binding = Sym__new_binding(s, key);  Sym_put(s, (* scope).bindings, List_var(key), List_var(binding));
@@ -745,7 +685,6 @@ static List Sym__scope_binding(Sym s, SymScope * scope, List key){
   if(s -> c -> source_facts) Sym__note_source_key(s, &((* scope)), key, binding);  return binding;
 }
 
-static Var Map_var(Map);
 static void Sym__note_source_key(Sym s, SymScope * scope, List key, List binding){
   Compiler c = s -> c;  List source_key =({
     Var _x2c_literal_part_4 = Map_var((* scope).symbols);  cons(_x2c_literal_part_4, cons(List_var(key), NULL));
@@ -753,7 +692,6 @@ static void Sym__note_source_key(Sym s, SymScope * scope, List key, List binding
   );  Sym_put(s, s -> binding_facts, List_var(cons(_67, cons(List_var(binding), NULL))), List_var(source_key));  Var declaration;  if(c -> source_primary && ! c -> shallow && Map_try_get(c -> source_declarations, List_var(source_key), &(declaration))) Map_setindex(c -> source_definitions, List_var(binding), declaration);
 }
 
-Var List_last(List);
 List binding_identity_new(int, String);
 static List Sym__new_binding(Sym s, List key){
   int identity = ++ s -> c -> names -> next_binding;  Var name = List_last(key);  List binding = binding_identity_new(identity, Var_string(name));  Sym_put(s, s -> binding_facts, List_var(cons(_65, cons(int_var(identity), NULL))), name);  return binding;
@@ -776,7 +714,6 @@ int Sym_binding_is_local(Sym s, List binding){
   if(! _init_guard_) _file_init_();  return Sym_binding_is_local_before(s, binding, Block_len(s -> scopes));
 }
 
-int List_equal(List, List);
 int Sym_binding_is_local_before(Sym s, List binding, int scope_count){
   if(! _init_guard_) _file_init_();  if(scope_count >(int) Block_len(s -> scopes)) scope_count = Block_len(s -> scopes);  for(int i = scope_count - 1;  i >= s -> base_scopes;  i --){
     Var _, candidate;  Map _x2c_macro_object_3 = Sym__scope_at(s, i) -> bindings;  unsigned _x2c_macro_cursor_3 = 0;  Var _x2c_macro_cursor_output_6;  Var _x2c_macro_cursor_output_7;  while(Map_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_6), &(_x2c_macro_cursor_output_7))){
@@ -811,8 +748,6 @@ List Sym_get_exact(Sym s, List key){
   if(_retained_member(key) && Map_try_get(s -> binding_facts, List_var(cons(_18, cons(List_var(key), NULL))), &(val))) return Var_list(val);  return NULL;
 }
 
-static List List_cdr(List);
-static Var List_car(List);
 String Compiler_package_spelling(Compiler c, String name);
 static List Sym__package_retry_key(Sym s, List key){
   String package = s -> c -> package;  if(! String_truth(package) || ! List_truth(key) || List_truth(List_cdr(key)) || ! Var_is_row(List_car(key), 11, 7, 1)) return NULL;  String spelling = Var_string(List_car(key));  String prefixed = Compiler_package_spelling(s -> c, spelling);  return String_equal(prefixed, spelling) ? NULL : cons(String_var(prefixed), NULL);
@@ -858,7 +793,6 @@ List Sym_declare(Sym s, List context, List key, List ast){
 }
 
 int Type_is_static(Type);
-static List List_cddr(List);
 static List Sym__package_declared_key(Sym s, List context, List key, List ast){
   Compiler c = s -> c;  if((int) Block_len(s -> scopes) != s -> base_scopes) return key;  if(List_truth(context) && !(context == _69)) return key;  if(Type_is_static(List_type(ast))) return key;  Var head, tag;  List _x2c_destructure_1 = key;  head = List_getindex(_x2c_destructure_1, 0);  tag = List_getindex(_x2c_destructure_1, 1);  if(Var_is_row(head, 11, 7, 1) && ! List_truth(List_cdr(key))) return cons(String_var(Compiler_package_spelling(c, Var_string(head))), NULL);  if((Var_equal(head, Symbol_var(1318234344)) || Var_equal(head, Symbol_var(44977116)) || Var_equal(head, Symbol_var(357722))) && List_truth(List_cdr(key)) && ! List_truth(List_cddr(key)) && Var_is_row(tag, 11, 7, 1)) return({
     Var _x2c_literal_part_5 = head;  Var _x2c_literal_part_6 = String_var(Compiler_package_spelling(c, Var_string(tag)));  cons(_x2c_literal_part_5, cons(_x2c_literal_part_6, NULL));
@@ -875,9 +809,6 @@ static void Compiler__check_spelling(Compiler c, String spelling){
   if(! c -> shallow && _is_reserved_spelling(spelling)) Compiler_report_error(c, 33658058, String_join(NULL, cons(String_var(_70), cons(String_var(spelling), cons(String_var(_71), NULL)))), c -> token, NULL);  String owner = Compiler__package_reserved_owner(c, spelling);  if(String_truth(owner)) Compiler_report_error(c, 33658058, String_join(NULL, cons(String_var(_70), cons(String_var(spelling), cons(String_var(_72), cons(String_var(owner), cons(String_var(_70), NULL)))))), c -> token, NULL);
 }
 
-int String_startswith(String, String);
-int String_len(String);
-int String_getindex(String, int);
 static int _is_reserved_spelling(String s){
   if(! String_truth(s)) return 0;  if(String_startswith(s, _73) || String_equal(s, _74) || String_equal(s, _75)) return 1;  if(String_len(s) < 2 || String_getindex(s, 0) != '_') return 0;  for(int i = 1;  i < String_len(s);  i ++) if(String_getindex(s, i) < '0' || String_getindex(s, i) > '9') return 0;  return 1;
 }
@@ -909,7 +840,6 @@ static Type _stored_type(Type type, Type key, List ast){
   return Type_declared(type);
 }
 
-String Compiler_fresh_name(Compiler, String);
 static void Sym__local_typedef(Sym s, Type type, List binding){
   if(Sym_at_file_scope(s)) return;  if(Type_is_aggregate_tag(type)) Sym_put(s, s -> binding_facts, List_var(cons(_77, cons(List_var(binding), NULL))), List_var(type));  Sym_put(s, s -> binding_facts, List_var(cons(_78, cons(List_var(binding), NULL))), String_var(Compiler_fresh_name(s -> c, _79)));
 }
@@ -931,7 +861,6 @@ List Sym_bind_identity(Sym s, List context, List binding, List ast){
 }
 
 List Compiler_macro_tag_name(Compiler, Symbol, String, int);
-static Var List_cadr(List);
 Type Sym_local_type(Sym s, Type type);
 Var Compiler_aggregate_name(Compiler c, Symbol kind, Var name, int definition){
   if(! _init_guard_) _file_init_();  Sym s = c -> sym;  if(! Var_is_row(name, 11, 7, 1)) return name;  if(Map_truth(c -> macro_holes)){
@@ -943,9 +872,7 @@ Var Compiler_aggregate_name(Compiler c, Symbol kind, Var name, int definition){
   if(! definition && List_truth(Sym_get_exact(s, Type_list(type)))) return List_cadr(Type_list(Sym_local_type(s, type)));  if(! definition && c -> shallow) return name;  List binding = Sym_current_binding(s, Type_list(type));  return List_var(List_truth(binding) ? binding : Sym_declare(s, NULL, Type_list(type), Type_list(type)));
 }
 
-int List_try_next(List, List *, Var *);
 Type Type_base_type(Type);
-int Var_truth(Var);
 void Compiler_record_declaration_visibility(Compiler c, List declaration){
   if(! _init_guard_) _file_init_();  int private = c -> source_private > 0;
   {
@@ -989,8 +916,6 @@ break;
 
 int Type_is_extern(Type);
 int is_source_file(String);
-String home_portable_path(String);
-String Compiler_canonical_path(Compiler, String);
 int Type_is_function(Type);
 static void Compiler__record_native_objects(Compiler c, Type spec, List rows){
   if(! c -> shallow || c -> source_private < 0 || Type_is_extern(spec) || ! is_source_file(c -> filename)) return;  String path = home_portable_path(Compiler_canonical_path(c, c -> filename)); {
@@ -1058,8 +983,6 @@ String Compiler_package_spelling(Compiler c, String name){
   if(! _init_guard_) _file_init_();  if(! String_truth(c -> package) || ! String_truth(name)) return name;  String prefix = String_join(NULL, cons(String_var(c -> package), cons(String_var(_76), NULL)));  return String_startswith(name, prefix) ? name : String_join(NULL, cons(String_var(prefix), cons(String_var(name), NULL)));
 }
 
-Var Map_getindex(Map, Var);
-int Var_is_void(Var);
 void Compiler_register_package_alias(Compiler c, String name, String alias, Token token){
   if(! _init_guard_) _file_init_();  Var bound = Map_getindex(c -> package_aliases, String_var(alias));  if(! Var_is_void(bound) && Var_equal(bound, String_var(name))) return;  Compiler__check_package_binding(c, _153, alias, token);  Map_setindex(c -> package_aliases, String_var(alias), String_var(name));
 }
@@ -1079,7 +1002,6 @@ String Compiler_package_member_spelling(Compiler c, String name){
   if(! _init_guard_) _file_init_();  if(! Map_len(c -> package_members)) return NULL;  Var bound = Map_getindex(c -> package_members, String_var(name));  if(Var_is_void(bound) || List_truth(Sym_get_exact(c -> sym, cons(String_var(name), NULL)))) return NULL;  List pair = Var_list(bound);  List _x2c_destructure_5 = pair;  String package = Var_string(List_getindex(_x2c_destructure_5, 0));  String member_name = Var_string(List_getindex(_x2c_destructure_5, 1));  return String_join(NULL, cons(String_var(package), cons(String_var(_76), cons(String_var(member_name), NULL))));
 }
 
-List List_sort(List);
 List Compiler_imported_providers(Compiler c, String name){
   if(! _init_guard_) _file_init_();  if(! String_truth(name) || ! Map_len(c -> package_roots)) return NULL;  List packages = NULL; {
     Var key, root;  Map _x2c_macro_object_8 = c -> package_roots;  unsigned _x2c_macro_cursor_8 = 0;  Var _x2c_macro_cursor_output_13;  Var _x2c_macro_cursor_output_14;  while(Map_try_next(_x2c_macro_object_8, &(_x2c_macro_cursor_8), &(_x2c_macro_cursor_output_13), &(_x2c_macro_cursor_output_14))){
@@ -1115,8 +1037,6 @@ List Sym_lookup_macro(Sym s, Atom name){
   return NULL;
 }
 
-int Var_is(Var, Symbol);
-static Map Var_map(Var);
 Map Compiler_macro_definition_locals(Compiler c){
   if(! _init_guard_) _file_init_();  Var stored = Map_getindex(c -> macro_holes, List_var(_164));  return Var_is(stored, 26720) ? Var_map(stored) : NULL;
 }
@@ -1153,7 +1073,6 @@ static Type Sym__resolve_chain(Sym s, Type key, Type stop, Type origin, int hops
 return key;
 }
 
-String List_repr(List);
 static void Sym__typedef_budget_error(Sym s, Type origin){
   Compiler_report_error(s -> c, 1362954, String_join(NULL, cons(String_var(_177), cons(String_var(List_repr(Type_list(origin))), NULL))), NULL, NULL);
 }
@@ -1246,7 +1165,6 @@ Type Sym_resolve_numeric_type(Sym s, Type type){
   if(! _init_guard_) _file_init_();  Type scalar = Type_scalar(type);  if(List_truth(Type_list(scalar))) return scalar;  Type resolved = Sym_resolve_key(s, type);  if(Type_is_number(resolved)) return resolved;  return _builtin_typedef_scalar(resolved);
 }
 
-Var Map_getdefault(Map, Var, Var);
 static Type _builtin_typedef_scalar(Type key){
   if(! Type_is_bare_typedef_name(key)) return NULL;  return Var_type(Map_getdefault(builtin_typedef_scalars, List_car(Type_list(key)), List_var((List) NULL)));
 }
@@ -1303,7 +1221,6 @@ Type Sym_lookup_field(Sym s, Type type, List field){
 }
 
 Ast Ast_without_origin(Ast);
-static Var List_caddr(List);
 void Sym_declare_field_order(Sym s, Type type, List fields){
   if(! _init_guard_) _file_init_();  Array rows = Array_new(); {
     List declaration;  List _x2c_macro_object_12 = fields;  List _x2c_macro_cursor_12 = _x2c_macro_object_12;  Var _x2c_macro_cursor_output_19;  while(List_try_next(_x2c_macro_object_12, &(_x2c_macro_cursor_12), &(_x2c_macro_cursor_output_19))){
@@ -1356,7 +1273,6 @@ Type Sym_delegate_aggregate(Sym s, Type type){
   return List_truth(Type_list(type)) && Type_is_aggregate_tag(type) ? type : NULL;
 }
 
-Map Map_copy(Map);
 SymTxn Compiler_begin_semantic_transaction(Compiler c){
   if(! _init_guard_) _file_init_();  SymTxn transaction ={
     .c = c
@@ -1365,10 +1281,9 @@ SymTxn Compiler_begin_semantic_transaction(Compiler c){
 }
 
 static void SymTxn__save(SymTxn * s, SymScope scope){
-  Compiler c =(* s).c; (* s).scope = scope; (* s).mark = Block_len(c -> sym -> undo); (* s).counters = c -> names -> counters; (* s).statics = c -> sym -> statics; (* s).binding_facts = Compiler_semantic_binding_facts(c); (* s).next_binding = c -> names -> next_binding; (* s).local_macro_names = c -> sym -> local_macro_names; (* s).initializer_name = c -> init_fn; (* s).shutdown_name = c -> fini_fn; (* s).extended = c -> macro_application > 0;
+  Compiler c =(* s).c; (* s).scope = scope; (* s).mark = Block_len(c -> sym -> undo); (* s).meta_group_size = Array_len(c -> meta_group); (* s).counters = c -> names -> counters; (* s).statics = c -> sym -> statics; (* s).binding_facts = Compiler_semantic_binding_facts(c); (* s).next_binding = c -> names -> next_binding; (* s).local_macro_names = c -> sym -> local_macro_names; (* s).initializer_name = c -> init_fn; (* s).shutdown_name = c -> fini_fn; (* s).extended = c -> macro_application > 0;
 }
 
-PendingMark Pending_checkpoint(Pending *);
 static void SymTxn__save_effects(SymTxn * s){
   Compiler c =(* s).c; (* s).adapters = c -> names -> adapters; (* s).pending = Pending_checkpoint(&(c -> pending)); (* s).origin_count = Array_len(c -> origins); (* s).origin = c -> origin; (* s).needs_exception = c -> needs_exception;  c -> names -> adapters = Map_copy(c -> names -> adapters);
 }
@@ -1385,7 +1300,6 @@ static int _same(Map a, Map b){
   return(void *) a ==(void *) b;
 }
 
-int Var_equal(Var, Var);
 int SymTxn_local_macros_changed(SymTxn * s){
   if(! _init_guard_) _file_init_();  SymScope * scope = Sym__scope_at((* s).c -> sym, (* s).scope_index);  Map before =(* s).scope.macros, after = scope -> macros;  if(before == NULL || after == NULL) return ! _same(before, after);  Block undo =(* s).c -> sym -> undo;  SymUndo * rows = undo -> bytes;  Map seen = Map_new();  for(int i =(* s).mark;  i <(int) Block_len(undo);  i ++){
     SymUndo row = rows[i];  if(! _same(row.map, after) || Map_contains(seen, row.key)) continue;  Map_setindex(seen, row.key, int_var(1));  if(Var_is_void(row.value) || ! Var_equal(row.value, Map_getindex(after, row.key))) return 1;
@@ -1412,11 +1326,6 @@ void SymTxn_commit_transient(SymTxn * s){
   if(! _init_guard_) _file_init_();  Compiler c =(* s).c;  Map counters = c -> names -> counters;  SymTxn_commit(&((* s)));  c -> names -> counters =(* s).counters;  _replace_map((* s).counters, counters);
 }
 
-Array Iter_array(Iter);
-Iter Map_keys(Map, Iter);
-void x2c_cleanup_push(X2CCleanup *);
-int Array_try_next(Array, int *, Var *);
-void x2c_cleanup_leave(X2CCleanup *);
 static void _replace_map(Map original, Map staged){
   Array keys = Iter_array(Map_keys(original, &(struct Iter){
     int_var(0)
@@ -1446,7 +1355,6 @@ void SymTxn_rollback(SymTxn * s){
   if(! _init_guard_) _file_init_();  if(! s) return;  if(!(* s).active) return;  Compiler c =(* s).c;  SymTxn__undo(&((* s)));  SymTxn__restore(&((* s)));  if((* s).extended) SymTxn__restore_effects(&((* s)));  if(c -> source_facts && c -> source_primary) SymTxn__restore_sources(&((* s)));  SymTxn__finish(&((* s)));
 }
 
-static void Block_truncate(Block, size_t);
 static void SymTxn__undo(SymTxn * s){
   Block undo =(* s).c -> sym -> undo;  SymUndo * rows = undo -> bytes;  int end = Block_len(undo), kept =(* s).mark;  for(int i = end - 1;  i >=(* s).mark;  i --){
     SymUndo row = rows[i];  if(! SymTxn__tracks(&((* s)), row.map)) continue;  if(Var_is_void(row.value)) Map_del(row.map, row.key);  else Map_setindex(row.map, row.key, row.value);
@@ -1455,11 +1363,9 @@ static void SymTxn__undo(SymTxn * s){
 }
 
 static void SymTxn__restore(SymTxn * s){
-  Compiler c =(* s).c;  SymScope * scope = Sym__scope_at(c -> sym, (* s).scope_index);  * scope =(* s).scope;  c -> sym -> statics =(* s).statics;  c -> sym -> binding_facts =(* s).binding_facts;  c -> names -> next_binding =(* s).next_binding;  c -> sym -> local_macro_names =(* s).local_macro_names;  c -> names -> counters =(* s).counters;  c -> init_fn =(* s).initializer_name;  c -> fini_fn =(* s).shutdown_name;
+  Compiler c =(* s).c;  SymScope * scope = Sym__scope_at(c -> sym, (* s).scope_index);  * scope =(* s).scope;  c -> sym -> statics =(* s).statics;  c -> sym -> binding_facts =(* s).binding_facts;  c -> names -> next_binding =(* s).next_binding;  Array_resize(c -> meta_group, (* s).meta_group_size);  c -> sym -> local_macro_names =(* s).local_macro_names;  c -> names -> counters =(* s).counters;  c -> init_fn =(* s).initializer_name;  c -> fini_fn =(* s).shutdown_name;
 }
 
-void Pending_restore(Pending *, PendingMark);
-void Array_resize(Array, size_t);
 static void SymTxn__restore_effects(SymTxn * s){
   Compiler c =(* s).c;  c -> names -> adapters =(* s).adapters;  Pending_restore(&(c -> pending), (* s).pending);  Array_resize(c -> origins, (* s).origin_count);  c -> origin =(* s).origin;  c -> needs_exception =(* s).needs_exception;
 }
@@ -1468,7 +1374,6 @@ static void SymTxn__restore_sources(SymTxn * s){
   Compiler c =(* s).c;  Array_resize(c -> source_occurrences, (* s).source_occurrences);  _replace_map(c -> source_definitions, (* s).source_definitions);
 }
 
-void Array_cleanup(Array);
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;  Array_cleanup((*(Array *) _x2c_defer_data_0->_x2c_defer_capture_0));
 }

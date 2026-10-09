@@ -13,12 +13,6 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
-static Var Symbol_var(Symbol);
-
-List cons(Var, List);
-
-static Var List_var(List);
-
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -97,8 +91,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _71 = Symbol_var(2050325770);
 }
 
-static List Var_list(Var);
-
 List source_return_type(List node){
   if(! _init_guard_) _file_init_();
 
@@ -176,13 +168,10 @@ List source_postfix_expression(List type, List parts){
   );
 }
 
-static Var List_caddr(List);
-List Macro_pattern(Macro, List);
 List source_content_pattern(Macro shape, List names){
   return Var_list(List_caddr(Macro_pattern(shape, names)));
 }
 
-List List_replace(List, List);
 List source_call_content(Macro call, List callee, List arguments){
   if(! _init_guard_) _file_init_();  List pattern = Macro_pattern(call, _43);  return List_replace(Var_list(List_caddr(pattern)), ({
     Var _x2c_literal_part_4 = List_var(cons(_40, cons(List_var(callee), NULL)));  Var _x2c_literal_part_5 = List_var(cons(_41, cons(List_var(arguments), NULL)));  cons(_x2c_literal_part_4, cons(_x2c_literal_part_5, NULL));
@@ -246,8 +235,6 @@ default: break;
 return NULL;
 }
 
-static Var Var_caddr(Var);
-List List_search_replace(List, Var, Var);
 List retain_catch_handle(List rebuilt, List handle){
   if(! _init_guard_) _file_init_();  Var marker = Var_caddr(List_caddr(rebuilt));  return List_search_replace(rebuilt, List_var(cons(_71, cons(marker, NULL))), List_var(handle));
 }

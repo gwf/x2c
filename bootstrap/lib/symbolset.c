@@ -131,20 +131,12 @@ int SymbolSet_contains(SymbolSet x, Symbol symbol){
   return SymbolSet_index(x, symbol) >= 0;
 }
 
-int x2c_normalize_index(int, int);
-
 Symbol SymbolSet_getindex(SymbolSet x, int index){
   int count =(int) SymbolSet_len(x);
   index = x2c_normalize_index(index, count);
   if(index < 0) return 0;
   return(Symbol) _u64(x, _order_offset(x, _u32(x, 8) + 1) +(size_t) index * sizeof(Symbol));
 }
-
-void * Var_pointer(Var);
-
-static Var Symbol_var(Symbol);
-
-static Var int_var(int);
 
 static int _next(Iter iter, Var * out){
   SymbolSet x =(SymbolSet) Var_pointer(iter -> obj);
@@ -155,22 +147,10 @@ static int _next(Iter iter, Var * out){
   return 1;
 }
 
-static int Iter_truth(Iter);
-
-Iter Iter_init(Iter, Var, IterNextFn, Var);
-
 Iter SymbolSet_iter(SymbolSet x, Iter dest){
   if(! Iter_truth(dest)) return NULL;
   return Iter_init(dest, Var_new(3683441, (void *) x), _next, int_var(0));
 }
-
-Block Block_new(size_t);
-
-static Symbol Var_symbol(Var);
-
-Var Array_getindex(Array, int);
-
-void Scope_free(void *);
 
 Block SymbolSet_encode(Array symbols){
   Hash h = _hash(symbols);
@@ -188,8 +168,6 @@ Block SymbolSet_encode(Array symbols){
   return bytes;
 }
 
-static void Block_push(Block, const void *);
-
 static void _put(Block bytes, uint64_t value, int size){
   for(int byte = 0;  byte < size;  byte ++){
     unsigned char low = value & 0xff;
@@ -198,8 +176,6 @@ static void _put(Block bytes, uint64_t value, int size){
   }
 
 }
-
-void * Scope_calloc(size_t, size_t);
 
 static Hash _hash(Array symbols){
   int count =(int) Array_len(symbols), built = count == 0;
@@ -224,8 +200,6 @@ static Hash _hash(Array symbols){
   }
   return h;
 }
-
-void Scope_retain(void);
 
 void x2c_cleanup_push(X2CCleanup *);
 
@@ -333,8 +307,6 @@ static void Graph_assign(Graph * g, uint32_t * table){
   }
 
 }
-
-void Scope_release(void);
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   Scope_release();

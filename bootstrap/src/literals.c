@@ -182,16 +182,6 @@ static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5);
 
 static void _x2c_defer_cleanup_6(void * _x2c_defer_opaque_6);
 
-static Var Symbol_var(Symbol);
-
-static Var String_var(String);
-
-List cons(Var, List);
-
-static Var List_var(List);
-
-static Var int_var(int);
-
 #include "exception.h"
 
 
@@ -449,22 +439,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _245 = String_new("encoded spelling: ");
 }
 
-Symbol Compiler_peek(Compiler, int);
-
-void Compiler_next(Compiler);
-
-static int Compiler_test(Compiler, Symbol);
-
-void x2c_cleanup_push(X2CCleanup *);
-
-static int List_truth(List);
-
-void x2c_cleanup_leave(X2CCleanup *);
-
-int String_equal(String, String);
-
-Symbol Compiler_expect(Compiler, Symbol);
-
 List Compiler_literal_cell(Compiler c, List head, List tail);
 
 List Compiler_parse_list_literal(Compiler c){
@@ -548,14 +522,6 @@ List Compiler_parse_list_literal(Compiler c){
 
 }
 
-Atom Atom_intern(String);
-
-String String_unescape(String);
-
-int Var_is(Var, Symbol);
-
-static Symbol Var_symbol(Var);
-
 static Symbol Compiler__match_operator_head(Compiler c){
   if(! c -> in_pattern) return 0;
   if(Compiler_peek(c, 0) == 845368370138){
@@ -586,10 +552,6 @@ static List Compiler__parse_reader_prefix(Compiler c){
   return Compiler_literal_cell(c, Compiler__atom_element(c, spelling), tail);
 }
 
-static Var List_cadr(List);
-
-List Compiler_cache(Compiler, List);
-
 static List Compiler__atom_element(Compiler c, String spelling){
   Atom atom = Atom_intern(spelling);
   List literal = Var_is(atom, 1328354264) ?({
@@ -613,12 +575,6 @@ static List Compiler__parse_list_head(Compiler c){
   if(List_truth(inserted)) return inserted;
   return Compiler__cache_if_stable(c, Compiler__parse_literal_element(c));
 }
-
-int List_try_search(List, Var, Var *, List *);
-
-int Compiler_needs_resolution(Compiler, Var);
-
-List List_match(List, Var);
 
 static List Compiler__cache_if_stable(Compiler c, List elem){
   Var matched;
@@ -646,12 +602,6 @@ static List Compiler__parse_shell_tail(Compiler c){
   return Compiler_literal_cell(c, type, Compiler_literal_cell(c, content, Compiler__parse_list_tail(c)));
 }
 
-Array Array_new(void);
-
-Var Array_push(Array, Var);
-
-List Array_list_free(Array);
-
 List Compiler_parse_macro_pattern_arguments(Compiler c){
   if(! _init_guard_) _file_init_();
   Compiler_expect(c, 81);
@@ -664,15 +614,9 @@ List Compiler_parse_macro_pattern_arguments(Compiler c){
   return Array_list_free(patterns);
 }
 
-String String_add(String, String);
-
 List Compiler_try_parse_macro_subpattern(Compiler, int);
 
 void Compiler_report_error(Compiler, Symbol, String, Token, List);
-
-Var Compiler_match_pattern_value(Compiler, Var);
-
-int match_value_is_static(Var);
 
 static Var Compiler__macro_pattern_argument(Compiler c){
   Token origin = c -> token;
@@ -695,8 +639,6 @@ static Var Compiler__macro_pattern_argument(Compiler c){
   return value;
 }
 
-Token Token_skip_trivia(Token);
-
 Token Compiler_macro_pattern_at(Compiler, Token, String *, Var *);
 
 List Compiler_try_parse_macro_pattern_insertion(Compiler c, int content){
@@ -714,8 +656,6 @@ List Compiler_try_parse_macro_pattern_insertion(Compiler c, int content){
   return derived;
 }
 
-List Compiler_parse_expression(Compiler);
-
 static List Compiler__parse_splice(Compiler c){
   if(Compiler_peek(c, 0) == 129){
     List expr = Compiler__parse_named_reference(c, 129);
@@ -726,8 +666,6 @@ static List Compiler__parse_splice(Compiler c){
   Compiler_expect(c, 251);
   return cons(_58, cons(List_var(expr), NULL));
 }
-
-void Compiler_check_explicit_converter(Compiler, List, Type, int);
 
 static Type List_type(List);
 
@@ -742,10 +680,6 @@ static List Compiler__parse_insertion(Compiler c){
   Compiler_expect(c, 251);
   return expr;
 }
-
-String Symbol_str(Symbol);
-
-List Compiler_parse_variable(Compiler);
 
 static List Compiler__parse_named_reference(Compiler c, Symbol sigil){
   Compiler_expect(c, sigil);
@@ -782,12 +716,6 @@ static List Compiler__parse_element(Compiler c){
   return List_truth(inserted) ? inserted : Compiler__parse_literal_element(c);
 }
 
-static List Var_list(Var);
-
-List Compiler_convert_expression(Compiler, List, Type);
-
-List Compiler_cache_cons_cell(Compiler, List, List);
-
 List Compiler_literal_cell(Compiler c, List head, List tail){
   if(! _init_guard_) _file_init_();
 
@@ -811,14 +739,10 @@ static List Compiler__append_splice(Compiler c, List head, List tail){
   if(Sym_is_var_type(c -> sym, Var_type(List_cadr(head)))) head = cons(_0, cons(_4, cons(List_var(cons(_94, cons(_96, cons(List_var(cons(_97, cons(List_var(head), NULL))), NULL)))), NULL)));  else head = Compiler_convert_expression(c, head, List_type(_3));  return cons(_0, cons(_4, cons(List_var(cons(_98, cons(List_var(head), cons(List_var(tail), NULL)))), NULL)));
 }
 
-Var Array_getindex(Array, int);
 static List Compiler__cons_list(Compiler c, Array elements, List tail){
   for(int i =(int) Array_len(elements) - 1;  i >= 0;  i --) tail = Compiler_literal_cell(c, Var_list(Array_getindex(elements, i)), tail);  return cons(_0, cons(_4, cons(List_var(tail), NULL)));
 }
 
-Type Compiler_parse_type_name(Compiler);
-List Compiler_var_tag_expression(Compiler, Type, Token);
-String Atom_str(Atom);
 static List Compiler__parse_typed_capture(Compiler c){
   Token origin = c -> token;  Compiler_expect(c, 16209);  Type type = Compiler_parse_type_name(c);  String name = c -> token -> text;  Compiler_expect(c, 19147688);  Compiler_expect(c, 83);  Atom binder = Atom_intern(String_join(NULL, cons(String_var(_99), cons(String_var(name), NULL))));
   List tag = Compiler_var_tag_expression(c, type, origin);
@@ -829,10 +753,6 @@ static List Compiler__parse_typed_capture(Compiler c){
   }
   return Compiler__tag_test(c, binder, tag);
 }
-
-int Array_try_next(Array, int *, Var *);
-
-int List_equal(List, List);
 
 static List Type_list(Type);
 
@@ -865,10 +785,6 @@ static int Compiler__recorded(Compiler c, String name, Type type, List tag, Toke
 return repeated;
 }
 
-int Var_is_atom_binder(Var);
-List List_reverse(List);
-int List_try_next(List, List *, Var *);
-String Var_str(Var);
 static List Compiler__tag_test(Compiler c, Atom binder, List tag){
   List elements = Var_is_atom_binder(binder) ? cons(_104, cons(binder, _106)) : _107;
   {
@@ -889,8 +805,6 @@ List tail = Compiler_literal_cell(c, tag, _6); {
 return cons(_0, cons(_4, cons(List_var(tail), NULL)));
 }
 
-Map Map_new(void);
-Var Map_setindex(Map, Var, Var);
 List Compiler_typed_match_pattern(Compiler c, List pattern, List types){
   if(! _init_guard_) _file_init_();  Map tags = Map_new(); {
     List row;  List _x2c_macro_object_2 = types;  List _x2c_macro_cursor_2 = _x2c_macro_object_2;  Var _x2c_macro_cursor_output_2;  while(List_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
@@ -910,7 +824,6 @@ List Compiler_typed_match_pattern(Compiler c, List pattern, List types){
 return Compiler__typed_pattern(c, pattern, tags);
 }
 
-int Map_try_get(Map, Var, Var *);
 static List Compiler__typed_pattern(Compiler c, List node, Map tags){
   Var value = Compiler_match_pattern_value(c, List_var(node)), tag;  if(Var_is_atom_binder(value) && Map_try_get(tags, value, &(tag))) return Compiler__tag_test(c, value, Var_list(tag));  List content = Compiler__pattern_content(c, node);
   {
@@ -925,7 +838,6 @@ default: break;
 return node;
 }
 
-int Compiler_is_builtin_converter_call(Compiler, List);
 static List Compiler__pattern_content(Compiler c, List node){
 
   {
@@ -942,8 +854,6 @@ case 6363658: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_exp
 return node;
 }
 
-int Var_is_match_op(Var);
-Var Array_setindex(Array, int, Var);
 static List Compiler__typed_list(Compiler c, List node, List content, Map tags){
   Array elements = Array_new(); {
     _x2c_defer_env_2 _x2c_macro_environment_2 ={
@@ -1001,7 +911,6 @@ static List Compiler__and_tag_test(Compiler c, List pattern, List tag){
 }
 
 List Compiler_try_parse_macro_slot(Compiler, Symbol);
-List Array_list(Array);
 List Compiler_parse_raise_literal(Compiler c){
   if(! _init_guard_) _file_init_();  Compiler_expect(c, 9553); {
     int * _x2c_macro_address_2 = & c -> runtime_literals;  int _x2c_macro_previous_2 = * _x2c_macro_address_2; {
@@ -1102,8 +1011,6 @@ static List Compiler__parse_catch_code(Compiler c){
   if(Compiler_peek(c, 0) != 845368370138) return Compiler__parse_list_head(c);  return Compiler__parse_bare_symbol(c, 6398160, 0);
 }
 
-int String_getindex(String, int);
-Array Array_update_n(Array, unsigned, ...);
 static void Compiler__parse_catch_detail(Compiler c, Array elements){
   Token origin = c -> token;  if(Compiler_peek(c, 0) == 845368370138 && String_getindex(String_unescape(c -> token -> text), 0) == '*'){
     Array_push(elements, List_var(Compiler__parse_list_head(c)));  return;
@@ -1111,10 +1018,7 @@ static void Compiler__parse_catch_detail(Compiler c, Array elements){
   if(! Compiler_test(c, 81)) Compiler_report_error(c, 33658058, _159, origin, _162);  List key = Compiler__parse_bare_symbol(c, 6398160, 1);  List value = Compiler__parse_detail_value(c, origin, _163, _164, _167);  Array pair = Array_update_n(Array_new(), 2, List_var(key), List_var(value));  Array_push(elements, List_var(Compiler__cons_list(c, pair, _6)));  Array_free(pair);
 }
 
-static Var Token_var(Token);
 List Compiler_symbol_set_expression(Compiler c, List values, int * duplicate);
-static Token Var_token(Var);
-String Symbol_repr(Symbol);
 List Compiler_parse_symbol_set_literal(Compiler c){
   if(! _init_guard_) _file_init_();  Compiler_expect(c, 1227897);  Array symbols = Array_new(), tokens = Array_new();  while(Compiler_peek(c, 0) != 15997){
     Array_push(symbols, Symbol_var(Compiler__member_symbol(c)));  Array_push(tokens, Token_var(c -> token));  Compiler_next(c);
@@ -1129,19 +1033,14 @@ static Symbol Compiler__member_symbol(Compiler c){
   Token token = c -> token;  Symbol kind = Compiler_peek(c, 0);  if(kind != 845368370138 && kind != 865658429314008) Compiler_report_error(c, 33658058, _171, token, _174);  String spelling = kind == 865658429314008 ? _angle_spelling(token -> text) : _member_spelling(token -> text);  return Compiler__exact_symbol(c, token, spelling);
 }
 
-static int String_truth(String);
-String String_new_len(const char *, int);
-int String_len(String);
 static String _member_spelling(String text){
   if(String_truth(text) && String_getindex(text, 0) == '"') return String_unescape(String_new_len(text + 1, String_len(text) - 2));  return String_unescape(text);
 }
 
-Array List_array(List);
 List Compiler_symbol_set_expression(Compiler c, List values, int * duplicate){
   if(! _init_guard_) _file_init_(); (* duplicate) = _duplicate_index(values);  if((* duplicate) >= 0) return NULL;  Array symbols = List_array(values);  List set = _set_expression(symbols);  Array_free(symbols);  return set;
 }
 
-int Map_contains(Map, Var);
 static int _duplicate_index(List values){
   Map seen = Map_new();  int index = 0; {
     Symbol value;  List _x2c_macro_object_3 = values;  List _x2c_macro_cursor_3 = _x2c_macro_object_3;  Var _x2c_macro_cursor_output_3;  while(List_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_3))){
@@ -1155,8 +1054,6 @@ static int _duplicate_index(List values){
   return - 1;
 }
 
-void Scope_retain(void);
-Block SymbolSet_encode(Array);
 static List _set_expression(Array symbols){
   {
     Scope_retain(); {
@@ -1185,11 +1082,6 @@ static List _set_expression(Array symbols){
 
 }
 
-Buffer Buffer_new(size_t);
-Buffer Buffer_write(Buffer, const char *);
-static size_t Block_len(Block);
-Buffer Buffer_printf(Buffer, const char *, ...);
-String Buffer_str_free(Buffer);
 static String _octal_literal(Block bytes){
   unsigned char * data = bytes -> bytes;  Buffer output = Buffer_new(0);  Buffer_write(output, "\"");  for(size_t at = 0;  at < Block_len(bytes);  at ++) Buffer_printf(output, "\\%03o", (unsigned) data[at]);  Buffer_write(output, "\"");  return Buffer_str_free(output);
 }
@@ -1220,10 +1112,6 @@ static List Compiler__parse_quoted_entries(Compiler c){
   return Array_list_free(entries);
 }
 
-static Var List_car(List);
-Iter List_iter(List, Iter);
-static List List_cdr(List);
-int Iter_try_next(Iter, Var *);
 static void _push_entry(Array entries, Ast entry){
   if(List_truth(entry) && Var_equal(List_car(entry), Symbol_var(39266))){
     Var row;  Iter _x2c_macro_iterator_4 = List_iter(List_cdr(entry), &(struct Iter){
@@ -1245,7 +1133,6 @@ static List Compiler__parse_quoted_entry(Compiler c){
   List key = Compiler_parse_expression(c);  Compiler_expect(c, 251);  return Compiler__entry_value(c, key, origin);
 }
 
-List Compiler_resolve_map_entry(Compiler, List, Token);
 static List Compiler__entry_value(Compiler c, List key, Token origin){
   Compiler_expect(c, 117);  List value = Compiler__parse_element(c);  return Compiler_resolve_map_entry(c, cons(_200, cons(List_var(key), cons(List_var(value), NULL))), origin);
 }
@@ -1258,7 +1145,6 @@ List Compiler_parse_map_entries(Compiler c){
   return Array_list_free(entries);
 }
 
-List Compiler_parse_assignment(Compiler);
 List Compiler_parse_map_entry(Compiler c){
   if(! _init_guard_) _file_init_();  List slot = Compiler_try_parse_macro_slot(c, 28692473357490);  if(List_truth(slot)) return slot;  List macro = Compiler_try_parse_macro_target_at(c, AST_MAP_ENTRY);  if(List_truth(macro)) return macro;  Token origin = c -> token;  List key = NULL;  if(Compiler_peek(c, 0) == 19147688 && Compiler_peek(c, 1) == 117){
     List literal = Compiler__atom_literal(c, c -> token -> text);  Compiler_next(c);  key =({
@@ -1292,7 +1178,6 @@ static List Compiler__parse_text_segment(Compiler c){
   List cached = Compiler_cache(c, cons(_213, cons(List_var(cons(_0, cons(_204, cons(List_var(cons(_16, cons(_204, cons(String_var(text), NULL)))), NULL)))), NULL)));  Compiler_next(c);  return cached;
 }
 
-List Compiler_convert_segment_to_string(Compiler, List);
 static List Compiler__parse_named_segment(Compiler c){
   List expr = Compiler__parse_named_reference(c, 73);  expr = Compiler_convert_segment_to_string(c, expr);  return cons(_214, cons(List_var(expr), NULL));
 }
@@ -1301,13 +1186,10 @@ static List Compiler__parse_braced_segment(Compiler c){
   Compiler_next(c);  List expr = Compiler_parse_expression(c);  Compiler_check_explicit_converter(c, expr, List_type(_203), 1);  expr = Compiler_convert_segment_to_string(c, expr);  Compiler_expect(c, 251);  return cons(_212, cons(List_var(expr), NULL));
 }
 
-String String_replace(String, String, String);
 static String _decode_segment(String raw){
   if(! String_truth(raw)) return _215;  return String_replace(String_unescape(_normalize_newlines(raw)), _216, _217);
 }
 
-void * Scope_malloc(size_t);
-void Scope_free(void *);
 static String _normalize_newlines(String raw){
   int n = String_len(raw);  char * buf = Scope_malloc(n + 1);  int dst = 0, changed = 0, i = 0;  while(i < n){
     char ch = String_getindex(raw, i);  int skip = ch == '\\' ? _continuation(raw, i, n) : 0;  if(skip){
@@ -1350,8 +1232,6 @@ static List Compiler__number_literal(Compiler c, String text, int floating){
   Type type = Type_numeric_literal(text, floating);  if(! List_truth(Type_list(type)) && c -> shallow) type = List_type(floating ? _229 : _231);  if(! List_truth(Type_list(type))) Compiler_report_error(c, 1362954, _232, c -> token, cons(_234, cons(String_var(text), NULL)));  return cons(_16, cons(List_var(type), cons(String_var(text), NULL)));
 }
 
-int Map_truth(Map);
-int Var_is_binder(Var);
 static List Compiler__atom_literal(Compiler c, String text){
   String spelling = String_unescape(text);  Atom atom = Atom_intern(spelling);  Compiler__check_binder(c, atom);  if(Map_contains(c -> object_macros, String_var(spelling))) Compiler__warn_macro_name(c, spelling);  if(Var_is(atom, 1328354264)) return({
     Var _x2c_literal_part_9 = String_var(text);  Var _x2c_literal_part_10 = Symbol_var(Var_symbol(atom));  cons(_16, cons(_20, cons(_x2c_literal_part_9, cons(_x2c_literal_part_10, NULL))));
@@ -1359,8 +1239,6 @@ static List Compiler__atom_literal(Compiler c, String text){
   );  Var value = Map_truth(c -> macro_holes) && Var_is_binder(atom) ? List_var(cons(_235, cons(atom, NULL))) : atom;  return cons(_16, cons(_24, cons(String_var(spelling), cons(value, NULL))));
 }
 
-int Var_is_atom(Var);
-char Atom_first(Atom);
 static void Compiler__check_binder(Compiler c, Atom atom){
   if(! c -> in_pattern || ! Var_is_atom(atom)) return;  char first = Atom_first(atom);  if((first != '?' && first != '*') || Var_is_binder(atom)) return;  int reserved = Var_equal(atom, Symbol_var(1997793406138)) || Var_equal(atom, Symbol_var(1860354452666));  if(reserved && c -> match_is && Compiler_peek(c, 1) == 83) return;  Compiler_report_error(c, 33658058, _236, c -> token, cons(_238, cons(String_var(Atom_str(atom)), NULL)));
 }
@@ -1378,8 +1256,6 @@ static String _angle_spelling(String text){
   int len = String_len(text);  if(len >= 4 && String_getindex(text, 1) == '"') return String_unescape(String_new_len(text + 2, len - 4));  return String_new_len(text + 1, len - 2);
 }
 
-int Symbol_try_new(String, Symbol *);
-Symbol Symbol_new(const char *);
 static Symbol Compiler__exact_symbol(Compiler c, Token token, String spelling){
   Symbol symbol;  if(Symbol_try_new(spelling, & symbol)) return symbol;  Symbol lossy = String_truth(spelling) ? Symbol_new(spelling) : 0;  Compiler_report_error(c, 33658058, _243, token, ({
     Var _x2c_literal_part_11 = String_var(String_join(NULL, cons(String_var(_244), cons(String_var(spelling), NULL))));  Var _x2c_literal_part_12 = String_var(String_join(NULL, cons(String_var(_245), cons(String_var(Symbol_str(lossy)), NULL))));  cons(_x2c_literal_part_11, cons(_x2c_literal_part_12, NULL));
@@ -1396,8 +1272,6 @@ static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
   _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;
   *(*(Array * *) _x2c_defer_data_1->_x2c_defer_capture_2) =(*(Array *) _x2c_defer_data_1->_x2c_defer_capture_3);
 }
-
-void Array_cleanup(Array);
 
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
   _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_2;
@@ -1418,8 +1292,6 @@ static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5){
   _x2c_defer_env_5 * _x2c_defer_data_5 =(_x2c_defer_env_5 *) _x2c_defer_opaque_5;
   *(*(int * *) _x2c_defer_data_5->_x2c_defer_capture_9) =(*(int *) _x2c_defer_data_5->_x2c_defer_capture_10);
 }
-
-void Scope_release(void);
 
 static void _x2c_defer_cleanup_6(void * _x2c_defer_opaque_6){
   Scope_release();

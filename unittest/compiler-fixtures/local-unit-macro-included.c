@@ -5,12 +5,6 @@
 
 #include "x2c.h"
 #include "local-unit-macro-included/scale.h"
-int int_twice(int);
-
-int String_len(String);
-
-String twice_label(int);
-
 int main(void){
   x2c_initialize();
   int n = 21;

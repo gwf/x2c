@@ -12,6 +12,7 @@ Caches of prepared Match plans.
 | [`x2c_match_thread_release`](#x2c_match_thread_release) | Disposes this thread's default `Match` plan cache. |
 | [`MatchCache.context_close`](#MatchCache.context_close) | Disposes and removes the top `Context`'s default `Match` cache. |
 | [`MatchCache.context_open`](#MatchCache.context_open) | Opens one `Context`-local default `Match`-cache state. |
+| [`MatchLease.plan`](#MatchLease.plan) | Borrows the acquired program until this active lease is released. |
 
 ### Functions
 
@@ -59,6 +60,17 @@ active `Scope` and must be passed to `MatchCache.context_close` before that
 **Raises:** `<alloc-fail>` when the state cannot be allocated.
 
 Source: `lib/match-cache.x:494`
+
+### `MatchLease`
+
+<a id="MatchLease.plan"></a>
+#### MatchLease.plan
+
+`MatchPlan MatchLease.plan(MatchLease *m)`
+
+Borrows the acquired program until this active lease is released.
+
+Source: `lib/match-cache.x:321`
 
 ## Runtime-internal callables
 

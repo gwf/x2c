@@ -39,24 +39,6 @@ static ulong_alias unbox_alias(Var value){
   return Var_ulong(Var_convert(value, 44858254));
 }
 
-static Var long_var(long);
-
-static Var unsigned_var(unsigned);
-
-static Var float_var(float);
-
-int Var_is(Var, Symbol);
-
-long Var_long(Var);
-
-uint Var_uint(Var);
-
-unsigned long long Var_ulong_long(Var);
-
-double Var_floating(Var);
-
-long double Var_long_double(Var);
-
 int main(void){
   x2c_initialize();
   Var vlong = long_var(11L);

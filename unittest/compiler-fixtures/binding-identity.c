@@ -30,10 +30,6 @@ binding_phase5_Value binding_phase5_Box_bump(binding_phase5_Box box, binding_pha
   return box.value + value;
 }
 
-static Var int_var(int);
-
-int Var_int(Var);
-
 int main(void){
   x2c_initialize();
   binding_phase5_Box box ={

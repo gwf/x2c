@@ -153,17 +153,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _18 = String_new("value conversion failed");
 }
 
-Buffer Buffer_new(size_t);
-
-void x2c_cleanup_push(X2CCleanup *);
-
-int String_len(String);
-
 static int List_truth(List);
-
-String Buffer_str(Buffer);
-
-void x2c_cleanup_leave(X2CCleanup *);
 
 String String_format(String fmt, List values){
   if(! _init_guard_) _file_init_();
@@ -203,8 +193,6 @@ String String_format(String fmt, List values){
 
 }
 
-Buffer Buffer_write_char(Buffer, char);
-
 static void Format_conversion(Format * f){
   Format_write_literal(&((* f)));
   (* f).offset =(* f).cursor ++;
@@ -220,8 +208,6 @@ static void Format_conversion(Format * f){
   (* f).literal =(* f).cursor;
 }
 
-Buffer Buffer_write_len(Buffer, const char *, size_t);
-
 static void Format_write_literal(Format * f){
   if((* f).cursor ==(* f).literal) return;
   Buffer_write_len((* f).out, (* f).fmt +(* f).literal, (size_t)((* f).cursor -(* f).literal));
@@ -230,8 +216,6 @@ static void Format_write_literal(Format * f){
 static void Format_need_byte(Format * f){
   if((* f).cursor ==(* f).length) Format_fail(&((* f)), _2);
 }
-
-int String_getindex(String, int);
 
 static Spec Format_spec(Format * f){
   Spec spec ={
@@ -270,8 +254,6 @@ static void Format_width(Format * f, Spec * spec){
   }
   else(* spec).width = Format_decimal(&((* f)), _4);
 }
-
-long Var_integer(Var);
 
 static int Format_star(Format * f){
   return(int) Var_integer(Format_number(&((* f)), Format_take(&((* f)), _5), 3453797));
@@ -340,10 +322,6 @@ static void Format_check(Format * f, Spec spec){
   if(ch == 'c' && spec.precision >= 0) Format_fail(&((* f)), _15);
 }
 
-static Var List_car(List);
-
-static List List_cdr(List);
-
 static Var Format_take(Format * f, String reason){
   if(! List_truth((* f).args)) Format_fail(&((* f)), reason);
   Var arg = List_car((* f).args);
@@ -371,8 +349,6 @@ static void Spec_spell(Spec s, char * out){
   snprintf(out + n, 8, "%s%c", _format_modifiers[s.modifier], s.conversion);
 }
 
-Buffer Buffer_printf(Buffer, const char *, ...);
-
 unsigned long long Var_ulong_long(Var);
 
 long long Var_long_long(Var);
@@ -386,10 +362,6 @@ static Buffer Format_integer(Format * f, Spec spec, Var arg){
   if(is_unsigned) return Buffer_printf((* f).out, text, Var_ulong_long(value));
   return Buffer_printf((* f).out, text, Var_long_long(value));
 }
-
-long double Var_long_double_value(Var);
-
-double Var_floating(Var);
 
 static Buffer Format_floating(Format * f, const char * text, int modifier, Var arg){
   if(modifier == FORMAT_CAP_L) return Buffer_printf((* f).out, text, Var_long_double_value(Format_number(&((* f)), arg, 26071077642)));
@@ -415,23 +387,13 @@ static Var Symbol_var(Symbol);
 
 ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
 
-void x2c_exception_push(ExceptionFrame *);
-
 String Var_str(Var);
-
-void x2c_exception_landed(ExceptionFrame *);
-
-int x2c_exception_is_error_target(ExceptionFrame *);
 
 int x2c_error_catch_selected(ErrorHandler);
 
 void x2c_error_catch_detach(ErrorHandler);
 
-void x2c_exception_mark_handled(ExceptionFrame *);
-
 void x2c_error_catch_close(ErrorHandler);
-
-void x2c_exception_leave(ExceptionFrame *);
 
 static int String_truth(String);
 
@@ -544,8 +506,6 @@ static void Format_fail(Format * f, String reason){
   _format_error((* f).offset, reason);
 }
 
-List cons(Var, List);
-
 _Noreturn static void Format_nested(Format * f, String reason, Var code, List details){
   List cause = cons(code, details);
   {
@@ -559,8 +519,6 @@ _Noreturn static void Format_nested(Format * f, String reason, Var code, List de
   }
 
 }
-
-void Buffer_cleanup(Buffer);
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;

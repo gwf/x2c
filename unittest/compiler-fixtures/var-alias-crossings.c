@@ -32,12 +32,6 @@ static long take_alias(DynamicAlias value){
   return Var_long(Var_convert(value, 818062));
 }
 
-static Var long_var(long);
-
-int Var_equal(Var, Var);
-
-int Var_compare(Var, Var);
-
 int main(void){
   x2c_initialize();
   long precise = 9007199254740993L;

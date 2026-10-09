@@ -79,14 +79,10 @@ SourceView SourceView_new(){
   return value;
 }
 
-void * Scope_calloc(size_t, size_t);
-
 SourceView SourceView_alloc(){
   SourceView _x2c_macro_value_0 = Scope_calloc(1, sizeof(* _x2c_macro_value_0));
   return _x2c_macro_value_0;
 }
-
-void Scope_free(void *);
 
 void SourceView_free(SourceView value){
   Scope_free(value);
@@ -96,13 +92,9 @@ void SourceView_cleanup(SourceView value){
   SourceView_free(value);
 }
 
-Var Var_new(Symbol, ...);
-
 Var SourceView_var(SourceView value){
   return Var_new(261698358342, value);
 }
-
-void * Var_pointer(Var);
 
 SourceView Var_sourceview(Var value){
   return(SourceView) Var_pointer(value);
@@ -112,25 +104,13 @@ int SourceView_equal(SourceView left, SourceView right){
   return(void *) left ==(void *) right;
 }
 
-static unsigned x2c_hash_word(unsigned long);
-
 unsigned SourceView_hash(SourceView value){
   return x2c_hash_word((unsigned long) value);
 }
 
-Buffer Buffer_printf(Buffer, const char *, ...);
-
 Buffer SourceView_write_str(SourceView value, Buffer out){
   return Buffer_printf(out, "<SourceView: 0x%012lX>", (long) value);
 }
-
-Buffer Buffer_new(size_t);
-
-void x2c_cleanup_push(X2CCleanup *);
-
-String Buffer_str(Buffer);
-
-void x2c_cleanup_leave(X2CCleanup *);
 
 String SourceView_str(SourceView value){
   Buffer _x2c_macro_out_0 = Buffer_new(0);
@@ -161,12 +141,6 @@ String SourceView_str(SourceView value){
   }
 
 }
-
-int RenderPath_enter(RenderPath *, const void *);
-
-Buffer Buffer_write(Buffer, const char *);
-
-Buffer Map_write_repr(Map, Buffer);
 
 Buffer SourceView_write_repr(SourceView value, Buffer out){
   if((void *) value ==(void *) 0) return Buffer_printf(out, "<SourceView: 0x%012lX>", (long) value);
@@ -235,27 +209,15 @@ String SourceView_repr(SourceView value){
 
 }
 
-Map Map_new(void);
-
 void SourceView_init(SourceView sources){
   sources -> overlays = Map_new();
   sources -> dirty_paths = Map_new();
 }
 
-Var Map_setindex(Map, Var, Var);
-
-static Var String_var(String);
-
-Path Path_absolute(Path);
-
-static Var int_var(int);
-
 void SourceView_set(SourceView s, String path, String text, int changed){
   Map_setindex(s -> overlays, String_var(Path_absolute(path)), String_var(text));
   if(changed) Map_setindex(s -> dirty_paths, String_var(Path_absolute(path)), int_var(1));
 }
-
-int Map_contains(Map, Var);
 
 int SourceView_is_changed(SourceView sources, String path){
   return sources && Map_contains(sources -> dirty_paths, String_var(Path_absolute(path)));
@@ -267,42 +229,10 @@ int SourceView_exists(SourceView sources, String path){
   return ! access(path, R_OK) && ! stat(path, & info) && S_ISREG(info.st_mode);
 }
 
-int Map_try_get(Map, Var, Var *);
-
-static String Var_string(Var);
-
-static int File_stat(File, struct stat *);
-
 #include "error.h"
 
 
 
-
-int x2c_error_catch_site_pending(ErrorCatchSite *);
-
-static Var List_var(List);
-
-static Var Symbol_var(Symbol);
-
-ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
-
-void x2c_exception_push(ExceptionFrame *);
-
-String File_string_close(File);
-
-void x2c_exception_landed(ExceptionFrame *);
-
-int x2c_exception_is_error_target(ExceptionFrame *);
-
-int x2c_error_catch_selected(ErrorHandler);
-
-void x2c_error_catch_detach(ErrorHandler);
-
-void x2c_exception_mark_handled(ExceptionFrame *);
-
-void x2c_error_catch_close(ErrorHandler);
-
-void x2c_exception_leave(ExceptionFrame *);
 
 int SourceView_read(SourceView sources, String path, String volatile * text){
   Var value;
@@ -391,14 +321,10 @@ static inline int _x2c_proto_sourceview_equal_0(Var a0, Var a1){
   return SourceView_equal(Var_sourceview(a0), Var_sourceview(a1));
 }
 
-void Buffer_free(Buffer);
-
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;
   Buffer_free((*(Buffer *) _x2c_defer_data_0->_x2c_defer_capture_0));
 }
-
-void RenderPath_leave(RenderPath *);
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
   _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;

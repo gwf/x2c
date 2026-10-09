@@ -45,56 +45,6 @@ static int bump(int * value){
   return ++ * value;
 }
 
-static Var Array_var(Array);
-
-Array Array_update_n(Array, unsigned, ...);
-
-Array Array_new(void);
-
-static Var Symbol_var(Symbol);
-
-static Var int_var(int);
-
-static Var Map_var(Map);
-
-Map Map_update_n(Map, unsigned, ...);
-
-Map Map_new(void);
-
-static Var String_var(String);
-
-static Var long_var(long);
-
-static Var char_var(char);
-
-static Var double_var(double);
-
-long Var_integer(Var);
-
-Var Array_getindex(Array, int);
-
-static Array Var_array(Var);
-
-Var List_getindex(List, int);
-
-Var Map_getindex(Map, Var);
-
-static Map Var_map(Var);
-
-int String_equal(String, String);
-
-String Var_str(Var);
-
-static String Var_string(Var);
-
-char Var_char(Var);
-
-static Symbol Var_symbol(Var);
-
-double Var_floating(Var);
-
-int Var_is_null(Var);
-
 int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();

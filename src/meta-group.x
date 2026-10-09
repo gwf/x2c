@@ -176,15 +176,14 @@ void Compiler.finish_meta_functions(Compiler c, Array nodes) {
           grew = 1;
         }
   }
-  Map staged = {};
+  int check_calls = 0;
   foreach (List entry, c.meta_group)
-    match (entry) case %(function ?fn ?(String name) ?):
-      if (name in c.meta_comptime) staged[fn] = 1;
-  if (!staged.len()) return;
+    match (entry) case %(function ? ?(String name) ?):
+      if (name in c.meta_comptime) check_calls = 1;
   int retained = 0;
   foreach (List node, nodes) {
-    if (node in staged) continue;
-    c._check_runtime_meta_calls(node);
+    if (c.meta_is_comptime_only(node)) continue;
+    if (check_calls) c._check_runtime_meta_calls(node);
     nodes[retained++] = node;
   }
   nodes.resize(retained);

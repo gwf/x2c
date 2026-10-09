@@ -8,8 +8,6 @@ Path runtimeinc__home_path(void);
 
 int runtimeinc__twice(int);
 
-int String_len(String);
-
 Path Path_basename(Path);
 
 int runtime_include(void){

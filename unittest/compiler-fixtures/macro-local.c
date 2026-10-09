@@ -26,18 +26,6 @@ static int fixture_select(int value){
   return 1000 + value;
 }
 
-Map Map_update_n(Map, unsigned, ...);
-
-Map Map_new(void);
-
-static Var int_var(int);
-
-int Var_int(Var);
-
-Var Map_getindex(Map, Var);
-
-static Var String_var(String);
-
 static int local_macros(int base){
   int before = fixture_select(1);
   int first = 0, explicit_global = 0, explicit_call = 0;

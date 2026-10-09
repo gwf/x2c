@@ -24,10 +24,6 @@ _x2c_defer_env_1;
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
 
-void x2c_cleanup_push(X2CCleanup *);
-
-void x2c_cleanup_leave(X2CCleanup *);
-
 #include "exception.h"
 
 
@@ -61,14 +57,6 @@ static int outward_defer(void){
   }
   done : return value;
 }
-
-void x2c_exception_push(ExceptionFrame *);
-
-int x2c_exception_claim(ExceptionFrame *);
-
-void x2c_exception_leave(ExceptionFrame *);
-
-void x2c_exception_landed(ExceptionFrame *);
 
 static int outward_finally(void){
   int volatile value = 0;
@@ -143,24 +131,6 @@ static int same_region(void){
 
 
 
-
-int x2c_error_catch_site_pending(ErrorCatchSite *);
-
-static Var List_var(List);
-
-static Var Symbol_var(Symbol);
-
-ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
-
-int x2c_exception_is_error_target(ExceptionFrame *);
-
-int x2c_error_catch_selected(ErrorHandler);
-
-void x2c_error_catch_detach(ErrorHandler);
-
-void x2c_exception_mark_handled(ExceptionFrame *);
-
-void x2c_error_catch_close(ErrorHandler);
 
 int main(void){
   x2c_initialize();

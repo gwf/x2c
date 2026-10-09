@@ -42,6 +42,7 @@ lib/match-machine.x|internal|Private `Match` wordcode decoder.
 lib/match-plan.x|api|
 lib/match.x|api|
 lib/meta.x|optional|Syntax builders and compiler operations for `meta` functions. Pure builders also run at runtime; operations that query the compiler remain compile-time only. Every unit reaches it through the prelude's `varops.x`; include `meta.x` explicitly where `meta` functions are written.
+lib/type.x|optional|Structural operations on captured Type values, available at runtime and compile time; include `type.x` to use them.
 lib/mutex.x|api|
 lib/pool.x|api|
 lib/protocols.x|internal|The built-in `Cleanup`, `Block`, `Iter`, and `Var` protocol declarations used to generate runtime dispatch adapters.
@@ -87,3 +88,4 @@ lib/private-keywords.x|internal|Keyword aliases used by runtime implementation c
 lib/system-macros.x|optional|Compile-time convenience macros; explicitly include system-macros.x to use them.
 lib/var-adapters.x|internal|Pointer converter templates shared by runtime owners.
 lib/var-tags.x|internal|The Var tag ledger shared by runtime and compiler projections.
+lib/rewrite.x|optional|Register macro-pattern translators with the $rewrite decorator; include `rewrite.x`.

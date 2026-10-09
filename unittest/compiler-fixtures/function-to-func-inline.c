@@ -53,8 +53,6 @@ static inline Func inline_noncapturing(void){
   );
 }
 
-static Var long_var(long);
-
 Func _x2c_func_from_capture_e915dee0_0(Var _x2c_lambda_capture_1);
 
 static inline Func inline_capturing(long bias){
@@ -70,8 +68,6 @@ static inline Func inline_capturing(long bias){
 static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0);
 
 static Func _x2c_func_handle_0;
-
-Func x2c_func_shared(FuncAdapter, List);
 
 _x2c_initializer_choice_EB5855FF_0((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _10)))
 typedef struct _x2c_func_pointer_context_0{
@@ -94,14 +90,6 @@ typedef struct _x2c_lambda_context_0{
 _x2c_lambda_context_0;
 
 static Var _x2c_lambda_1(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0);
-
-static Var Symbol_var(Symbol);
-
-List cons(Var, List);
-
-static Var List_var(List);
-
-static Var String_var(String);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -134,20 +122,6 @@ static long add(long left, long right){
   return left + right;
 }
 
-long Var_integer(Var);
-
-static int List_truth(List);
-
-List x2c_func_reference_type(Func, unsigned, unsigned);
-
-static FuncArg FuncArg_reference(const void *, List);
-
-static FuncArg FuncArg_value(Var);
-
-static Var int_var(int);
-
-Var Func_apply(Func, unsigned, const FuncArg *);
-
 int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
@@ -171,8 +145,6 @@ int main(void){
   return 0;
 }
 
-Var x2c_func_value_argument(Func, const FuncArg *, unsigned, Symbol);
-
 static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0){
   long a0 = Var_long(Var_convert(x2c_func_value_argument(_x2c_func_binding_0, _x2c_func_argv_0, 0, 818062), 818062));
   long a1 = Var_long(Var_convert(x2c_func_value_argument(_x2c_func_binding_0, _x2c_func_argv_0, 1, 818062), 818062));
@@ -185,8 +157,6 @@ Func _x2c_func_get_e915dee0_0(void){
   return _x2c_func_handle_0;
 }
 
-const void * Func_context(Func);
-
 static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func_argv_1){
   const _x2c_func_pointer_context_0 * _x2c_func_pointer_context_1 =(const _x2c_func_pointer_context_0 *) Func_context(_x2c_func_binding_1);
   long a0 = Var_long(Var_convert(x2c_func_value_argument(_x2c_func_binding_1, _x2c_func_argv_1, 0, 818062), 818062));
@@ -194,8 +164,6 @@ static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func
   return long_var(_x2c_func_pointer_context_1 -> _x2c_func_pointer_1(a0, a1));
   ;
 }
-
-Func Func_new_context(FuncAdapter, List, const void *, size_t);
 
 Func _x2c_func_from_pointer_e915dee0_0(long(* _x2c_func_pointer_0)(long, long)){
   if(! _init_guard_) _file_init_();

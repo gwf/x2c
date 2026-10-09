@@ -17,10 +17,6 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
-static Var int_var(int);
-
-List cons(Var, List);
-
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -33,15 +29,9 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _5 = cons(_0, _4);
 }
 
-Iter List_iter(List, Iter);
-
 Iter Bag_iter(Bag bag, Iter dest){
   return List_iter(bag -> values, dest);
 }
-
-void * Scope_malloc(size_t);
-
-int Iter_try_next(Iter, Var *);
 
 int main(void){
   x2c_initialize();

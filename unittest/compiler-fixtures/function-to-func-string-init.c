@@ -31,20 +31,10 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
 
 static Func _x2c_func_handle_0;
 
-Func x2c_func_shared(FuncAdapter, List);
-
 _x2c_initializer_choice_AEDFDE3A_1((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _10)))
 static String identity(String value){
   return value;
 }
-
-static Var Symbol_var(Symbol);
-
-static Var String_var(String);
-
-List cons(Var, List);
-
-static Var List_var(List);
 
 void String_initialize(void){
   if(_init_guard_) return;
@@ -63,10 +53,6 @@ void String_initialize(void){
   _x2c_static_initialize_1();
   _x2c_static_initialize_0();
 }
-
-static String Var_string(Var);
-
-Var x2c_func_value_argument(Func, const FuncArg *, unsigned, Symbol);
 
 static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0){
   String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_0, _x2c_func_argv_0, 0, 1318210446));

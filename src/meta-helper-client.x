@@ -4,8 +4,9 @@
 
     The project meta build (`meta-project.x`) compiles each unit's `meta`
     group (`meta-group.x`) into one helper program. This file owns the
-    compiler's side of that helper: starting it, one request and one reply
-    per call, and reporting a body that fails, crashes, or runs too long.
+    compiler's side of that helper: starting it, one request and its
+    replies per call, answers to the queries a body asks, and reporting a
+    body that fails, crashes, or runs too long.
 */
 #pragma once
 #include "compiler.x"
@@ -38,6 +39,28 @@ static macro Stmt $report.macro.helper_stopped(
     <macro>,
     "this meta call stopped the compile-time helper",
     $site, %("function: ${$name}" "reason: ${$reason}"));
+}
+
+/** Reports a meta function's failure `message` with `notes` under
+    `category` at the position recorded first in or around `node`, or at
+    `site` when it has none. This does not return. */
+void Compiler.report_meta_error(
+  Compiler c, Var node, Symbol category, String message, Token site,
+  List notes) {
+  int origin = _syntax_origin(node);
+  $let(c.origin, origin ? origin : c.origin)
+    c.report_error(category, message, origin ? NULL : site, notes);
+}
+
+/* The `N` of the first `(at N ...)` in or around `node`, or 0. */
+static int _syntax_origin(Var node) {
+  if (node is not <list>) return 0;
+  match (node) case %(at ?(int origin) ?): return origin;
+  foreach (Var child, node.list()) {
+    int origin = _syntax_origin(child);
+    if (origin) return origin;
+  }
+  return 0;
 }
 
 /* The project's helper, its tables' failures by index, and the table of
@@ -95,13 +118,30 @@ Var Compiler.meta_helper_call(
       case %(void): return void;
       case %(error ?(String message) ?(List notes)):
         c.report_error(<macro>, message, site, notes);
+      case %(error ?(String message) ?(List notes) (at ?node ?category)):
+        c.report_meta_error(node, category, message, site, notes);
       case %(dependency ?(String path) ?(String hash)):
         c.deps.merge_translation_dependency(path, hash);
+      case %(query ?(String operation) ?(List operands)):
+        call.answer(operation, operands);
       case %(missing): call.refuse(c.meta_call_missing(name));
       case %(failure (?code *detail)): Error.raise(code, detail);
       default: call.stopped("the helper sent an unknown reply");
     }
   }
+}
+
+/* Answers the body's query with the compiler's own `operation` applied to
+   `operands` at the call's site, in the state the call sees. A failed
+   answer ends the helper, which waits for it, before the failure leaves. */
+static void Call.answer(Call &call, String operation, List operands) {
+  Var value = void;
+  try value = call.compiler.apply_meta_function(operation, operands, call.site);
+  catch %(?code *detail): {
+    _helper_stop(SIGKILL);
+    Error.raise(code, detail);
+  }
+  call.send_frame(%(answer $value));
 }
 
 /* Refuses the call when the project's helper or the call's table did not

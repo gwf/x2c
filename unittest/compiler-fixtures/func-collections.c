@@ -32,8 +32,6 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
 
 static Func _x2c_func_handle_0;
 
-Func x2c_func_shared(FuncAdapter, List);
-
 _x2c_initializer_choice_EC4193E6_0((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _16)))
 typedef struct _x2c_func_pointer_context_0{
   Var(* _x2c_func_pointer_0)(Var);
@@ -61,16 +59,6 @@ static Var _x2c_func_adapt_2(Func _x2c_func_binding_2, const FuncArg * _x2c_func
 static Func _x2c_func_handle_1;
 
 _x2c_initializer_choice_EC4193E6_1((_x2c_func_handle_1 = x2c_func_shared(_x2c_func_adapt_2, _29)))
-static Var int_var(int);
-
-List cons(Var, List);
-
-static Var Symbol_var(Symbol);
-
-static Var String_var(String);
-
-static Var List_var(List);
-
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -117,22 +105,6 @@ static int next_byte(char value){
   return value + 1;
 }
 
-List List_map(List, Func);
-
-Array Array_map(Array, Func);
-
-Array Array_update_n(Array, unsigned, ...);
-
-Array Array_new(void);
-
-Func Func_new_context(FuncAdapter, List, const void *, size_t);
-
-String String_map(String, Func);
-
-String List_repr(List);
-
-String Array_repr(Array);
-
 int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
@@ -166,15 +138,11 @@ int main(void){
   return 0;
 }
 
-Var x2c_func_value_argument(Func, const FuncArg *, unsigned, Symbol);
-
 static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0){
   Var a0 = x2c_func_value_argument(_x2c_func_binding_0, _x2c_func_argv_0, 0, 45156);
   return increment(a0);
   ;
 }
-
-const void * Func_context(Func);
 
 static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func_argv_1){
   const _x2c_func_pointer_context_0 * _x2c_func_pointer_context_1 =(const _x2c_func_pointer_context_0 *) Func_context(_x2c_func_binding_1);

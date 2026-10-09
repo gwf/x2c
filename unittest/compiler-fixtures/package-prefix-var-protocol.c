@@ -4,14 +4,6 @@
 #include "x2c.h"
 
 #include "geo.h"
-geo__Vec geo__Vec_new(double, double);
-
-Var geo__Vec_var(geo__Vec);
-
-geo__Vec geo__Var_vec(Var);
-
-double geo__Vec_norm(geo__Vec);
-
 double geo__roundtrip_norm(double x, double y){
   geo__Vec v = geo__Vec_new(x, y);
   Var boxed = geo__Vec_var(v);

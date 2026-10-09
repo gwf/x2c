@@ -159,18 +159,6 @@ typedef struct MatchMachine{
 }
 MatchMachine;
 
-static List Var_list(Var);
-
-static int List_truth(List);
-
-int Var_equal(Var, Var);
-
-static Var List_car(List);
-
-static List List_cdr(List);
-
-int List_equal(List, List);
-
 #include "exception.h"
 
 
@@ -281,8 +269,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_register_tagged_descriptor(230845831880, String_new("MachineProgram"), _x2c__x2c_protocol_methods_0);
 }
 
-void * Scope_memdup(const void *, size_t);
-
 MachineProgram MachineProgram_new(int field_length, int field_const_count, int field_binder_count, int field_root){
   struct MachineProgram value ={
     field_length, field_const_count, field_binder_count, field_root
@@ -291,14 +277,10 @@ MachineProgram MachineProgram_new(int field_length, int field_const_count, int f
   return Scope_memdup(& value, sizeof(value));
 }
 
-void * Scope_calloc(size_t, size_t);
-
 MachineProgram MachineProgram_alloc(){
   MachineProgram _x2c_macro_value_0 = Scope_calloc(1, sizeof(* _x2c_macro_value_0));
   return _x2c_macro_value_0;
 }
-
-void Scope_free(void *);
 
 void MachineProgram_free(MachineProgram value){
   Scope_free(value);
@@ -308,13 +290,9 @@ void MachineProgram_cleanup(MachineProgram value){
   MachineProgram_free(value);
 }
 
-Var Var_new(Symbol, ...);
-
 Var MachineProgram_var(MachineProgram value){
   return Var_new(230845831880, value);
 }
-
-void * Var_pointer(Var);
 
 MachineProgram Var_machineprogram(Var value){
   return(MachineProgram) Var_pointer(value);
@@ -323,8 +301,6 @@ MachineProgram Var_machineprogram(Var value){
 int MachineProgram_equal(MachineProgram left, MachineProgram right){
   return(void *) left ==(void *) right;
 }
-
-static unsigned x2c_hash_word(unsigned long);
 
 unsigned MachineProgram_hash(MachineProgram value){
   return x2c_hash_word((unsigned long) value);
@@ -337,12 +313,6 @@ Buffer MachineProgram_write_str(MachineProgram value, Buffer out){
 }
 
 Buffer Buffer_new(size_t);
-
-void x2c_cleanup_push(X2CCleanup *);
-
-String Buffer_str(Buffer);
-
-void x2c_cleanup_leave(X2CCleanup *);
 
 String MachineProgram_str(MachineProgram value){
   Buffer _x2c_macro_out_0 = Buffer_new(0);
@@ -374,13 +344,9 @@ String MachineProgram_str(MachineProgram value){
 
 }
 
-int RenderPath_enter(RenderPath *, const void *);
-
 Buffer Buffer_write(Buffer, const char *);
 
 Buffer Var_write_repr(Var, Buffer);
-
-static Var int_var(int);
 
 Buffer MachineProgram_write_repr(MachineProgram value, Buffer out){
   if((void *) value ==(void *) 0) return Buffer_printf(out, "<MachineProgram: 0x%012lX>", (long) value);
@@ -465,8 +431,6 @@ int MachineBuilder_emit(MachineBuilder * b, int op, int a, int operand_b, int c,
   return(* b).length ++;
 }
 
-void * Scope_realloc(void *, size_t);
-
 static int MachineBuilder__grow_code(MachineBuilder * b){
   if((* b).length <(* b).code_capacity) return 0;
   if((* b).code_capacity >= MACHINE_CODE_MAX) return MachineBuilder__fail(&((* b)), "code-capacity");
@@ -505,10 +469,6 @@ int MachineBuilder_binder(MachineBuilder * b, Atom binder){
   return(* b).binder_count ++;
 }
 
-static Var String_var(String);
-
-static Var Symbol_var(Symbol);
-
 #include "error.h"
 
 
@@ -540,8 +500,6 @@ static int MachineBuilder__fail(MachineBuilder * b, const char * reason){
   }
   return - 1;
 }
-
-void * Scope_malloc(size_t);
 
 MachineProgram MachineBuilder_freeze(MachineBuilder * b){
   if((* b).status != MACHINE_PREPARED ||(* b).root < 0) return NULL;
@@ -633,8 +591,6 @@ static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;
   Buffer_free((*(Buffer *) _x2c_defer_data_0->_x2c_defer_capture_0));
 }
-
-void RenderPath_leave(RenderPath *);
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
   _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;

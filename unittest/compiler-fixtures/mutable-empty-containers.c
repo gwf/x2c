@@ -25,8 +25,6 @@ static int rejected(void(* action)(void)){
   return WIFSIGNALED(status) && WTERMSIG(status) == SIGABRT;
 }
 
-Var Var_new(Symbol, ...);
-
 static void box_null_array(void){
   Var_new(3313778, NULL);
 }
@@ -34,36 +32,6 @@ static void box_null_array(void){
 static void box_null_map(void){
   Var_new(26720, NULL);
 }
-
-void Scope_retain(void);
-
-Array Array_new(void);
-
-Map Map_new(void);
-
-static Var Array_var(Array);
-
-static Var Map_var(Map);
-
-Var Array_push(Array, Var);
-
-static Var int_var(int);
-
-Var Map_setindex(Map, Var, Var);
-
-static Var Symbol_var(Symbol);
-
-int Array_equal(Array, Array);
-
-int Map_equal(Map, Map);
-
-unsigned Map_len(Map);
-
-static Array Var_array(Var);
-
-static Map Var_map(Var);
-
-void Scope_release(void);
 
 int main(void){
   x2c_initialize();

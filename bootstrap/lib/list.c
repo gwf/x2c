@@ -37,8 +37,6 @@ static void _promote_node(Var node);
 
 static int _try_own_node(Var node);
 
-static int List_truth(List);
-
 #include "exception.h"
 
 
@@ -59,8 +57,6 @@ static inline Var List_car(List lst){
 static inline List List_cdr(List lst){
   return cdr(lst);
 }
-
-static List Var_list(Var);
 
 static inline Var List_caar(List lst){
   return car(Var_list(car(lst)));
@@ -313,16 +309,6 @@ _x2c_defer_env_23;
 
 static void _x2c_defer_cleanup_24(void * _x2c_defer_opaque_24);
 
-int Var_is_void(Var);
-
-Var Pool_lookup(Pool, Var);
-
-static Var List_var(List);
-
-void * Pool_malloc(Pool, size_t);
-
-Var Pool_intern_new(Pool, Var, void *);
-
 List List_cons_in(Pool pool, Var head, List tail){
   if(! pool || Var_is_void(head)) return NULL;
   struct List query ={
@@ -336,12 +322,6 @@ List List_cons_in(Pool pool, Var head, List tail){
   cell -> cdr = tail;
   return Var_list(Pool_intern_new(pool, List_var(cell), cell));
 }
-
-static Var Symbol_var(Symbol);
-
-static Var String_var(String);
-
-Pool Pool_current(void);
 
 #include "error.h"
 
@@ -380,8 +360,6 @@ int List_equal(List a, List b){
   return Var_same(a -> car, b -> car) && a -> cdr == b -> cdr;
 }
 
-int Var_compare(Var, Var);
-
 int List_compare(List a, List b){
   if((void *) a ==(void *) b) return 0;
   while(List_truth(a) && List_truth(b)){
@@ -400,18 +378,6 @@ List List_promote(List lst){
   return lst;
 }
 
-static int Var_is_row(Var, unsigned, unsigned long, unsigned long);
-
-String String_promote(String);
-
-static String Var_string(Var);
-
-int Var_is(Var, Symbol);
-
-Atom Atom_promote(Atom);
-
-int Pool_promote(Pool, Var, void *);
-
 static void _promote_node(Var node){
   if(Var_is_row(node, 11, 7, 1)) return(void) String_promote(Var_string(node));
   if(Var_is(node, 826970)) return(void) Atom_promote(node);
@@ -427,12 +393,6 @@ int List_try_own(List lst){
   return ! List_truth(lst) || _try_own_node(List_var(lst));
 }
 
-int String_try_own(String);
-
-String Var_str(Var);
-
-int Pool_own(Pool, Var, void *);
-
 static int _try_own_node(Var node){
   if(Var_is_row(node, 11, 7, 1)) return String_try_own(Var_string(node));
   if(Var_is(node, 826970)) return String_try_own(Var_str(node));
@@ -443,8 +403,6 @@ static int _try_own_node(Var node){
   }
   return 1;
 }
-
-void * Var_pointer(Var);
 
 Var Var_car(Var var){
   return car(Var_pointer(var));
@@ -463,10 +421,6 @@ int List_try_next(List lst, List * cursor, Var * out){
   (* cursor) = rest -> cdr;
   return 1;
 }
-
-static int Iter_truth(Iter);
-
-Iter Iter_init(Iter, Var, IterNextFn, Var);
 
 Iter List_iter(List lst, Iter dest){
   if(! Iter_truth(dest)) return NULL;
@@ -491,10 +445,6 @@ static List _prepend_array(Array values, List tail){
   for(size_t i = Array_len(values);  i;  i --) tail = cons(items[i - 1], tail);
   return tail;
 }
-
-void x2c_cleanup_push(X2CCleanup *);
-
-void x2c_cleanup_leave(X2CCleanup *);
 
 List Array_list_free(Array arr){
   {
@@ -523,10 +473,6 @@ List Array_list_free(Array arr){
   }
 
 }
-
-Array Array_new(void);
-
-Var Array_push(Array, Var);
 
 Array List_array(List lst){
   Array output = Array_new(), result = NULL;
@@ -569,8 +515,6 @@ Array List_array(List lst){
 
 }
 
-int Map_try_next(Map, unsigned *, Var *, Var *);
-
 List Map_list(Map map){
   Array pairs = Array_new();
   {
@@ -588,8 +532,6 @@ List Map_list(Map map){
   }
   return Array_list_free(pairs);
 }
-
-int Iter_try_next(Iter, Var *);
 
 List Iter_list(Iter iter){
   Array values = Array_new();
@@ -669,8 +611,6 @@ List List_concat_n(unsigned list_count, ...){
   return out;
 }
 
-static Var unsigned_var(unsigned);
-
 static List _concat_va(unsigned n, va_list ap){
   if(n > INT_MAX){
     Var _x2c_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("List.concat_n")), NULL)));
@@ -709,8 +649,6 @@ static List _concat_va(unsigned n, va_list ap){
   }
 
 }
-
-Var Array_getindex(Array, int);
 
 static List _concat_lists(Array lists){
   List tail = NULL;
@@ -800,8 +738,6 @@ Var List_last(List lst){
   return List_car(lst);
 }
 
-int Var_equal(Var, Var);
-
 int List_index(List l, Var key){
   for(int index = 0;  List_truth(l);  l = List_cdr(l), index ++) if(Var_equal(l -> car, key)) return index;
   return - 1;
@@ -835,11 +771,7 @@ Var List_getindex(List list, int index){
   return List_truth(nth) ? nth -> car :((void) 0, Void);
 }
 
-Symbol Var_kind(Var);
-
 Var List_assoc(List list, Var key);
-
-long long Var_long_long(Var);
 
 Var List_get(List list, Var key){
   if(Var_kind(key) != 20309162340) return List_assoc(list, key);
@@ -926,10 +858,6 @@ List List_tail(List list, unsigned count){
   }
   return lag;
 }
-
-static Var int_var(int);
-
-int x2c_normalize_slice(int *, int *, int, int);
 
 List List_subseq(List list, int start, int stop, int step){
   if(step < 1){
@@ -1045,8 +973,6 @@ static int _is_active_canonical(List list){
   return Var_same(Pool_lookup(Pool_current(), List_var(list)), List_var(list));
 }
 
-static Var Func_apply_value(Func, Var);
-
 List List_map(List lst, Func fn){
   if(! List_truth(lst)) return NULL;
   Array values = Array_new();
@@ -1087,8 +1013,6 @@ List List_map(List lst, Func fn){
   }
 
 }
-
-int Var_truth(Var);
 
 List List_filter(List lst, Func pred){
   if(! List_truth(lst)) return NULL;
@@ -1131,36 +1055,26 @@ List List_filter(List lst, Func pred){
 
 }
 
-Var Iter_foldl(Iter, Var, Func);
-
 Var List_foldl(List lst, Var seed, Func fn){
   if(! fn) return Var_is_void(seed) && List_truth(lst) ? lst -> car : seed;
   struct Iter storage;
   return Iter_foldl(List_iter(lst, & storage), seed, fn);
 }
 
-Var Iter_find(Iter, Func);
-
 Var List_find(List lst, Func pred){
   struct Iter storage;
   return Iter_find(List_iter(lst, & storage), pred);
 }
-
-int Iter_any(Iter, Func);
 
 int List_any(List lst, Func pred){
   struct Iter storage;
   return Iter_any(List_iter(lst, & storage), pred);
 }
 
-int Iter_all(Iter, Func);
-
 int List_all(List lst, Func pred){
   struct Iter storage;
   return Iter_all(List_iter(lst, & storage), pred);
 }
-
-static Var Func_apply_values(Func, Var, Var);
 
 List List_zip_with(List a, List b, Func fn){
   Array values = Array_new();
@@ -1201,8 +1115,6 @@ List List_map2(List a, List b, Func fn){
   return List_zip_with(a, b, fn);
 }
 
-Array Array_sort(Array);
-
 List List_sort(List lst){
   if(! List_truth(lst) || ! List_truth(List_cdr(lst))) return lst;
   Array values = List_array(lst);
@@ -1233,8 +1145,6 @@ List List_sort(List lst){
   }
 
 }
-
-Array Array_sort_with(Array, Func);
 
 List List_sort_with(List lst, Func compare){
   if(! List_truth(lst) || ! List_truth(List_cdr(lst))) return lst;
@@ -1267,8 +1177,6 @@ List List_sort_with(List lst, Func compare){
 
 }
 
-Array Array_sort_by(Array, Func);
-
 List List_sort_by(List lst, Func key){
   if(! List_truth(lst)) return lst;
   Array values = List_array(lst);
@@ -1299,10 +1207,6 @@ List List_sort_by(List lst, Func key){
   }
 
 }
-
-void Scope_retain(void);
-
-Iter Iter_unique(Iter, Iter);
 
 List List_unique(List lst){
   if(! List_truth(lst) || ! List_truth(List_cdr(lst))) return lst;
@@ -1542,11 +1446,7 @@ static int _unpack_va(List src, unsigned n, va_list ap, int lists){
   return count;
 }
 
-Buffer Buffer_new(size_t);
-
 Buffer List_write_str(List lst, Buffer out);
-
-String Buffer_str(Buffer);
 
 String List_str(List lst){
   Buffer buf = Buffer_new(0);
@@ -1577,14 +1477,6 @@ String List_str(List lst){
   }
 
 }
-
-void x2c_exception_push(ExceptionFrame *);
-
-void x2c_exception_landed(ExceptionFrame *);
-
-int x2c_exception_claim(ExceptionFrame *);
-
-void x2c_exception_leave(ExceptionFrame *);
 
 Buffer List_write_str(List lst, Buffer out){
   Render r ={
@@ -1664,8 +1556,6 @@ Buffer List_write_repr(List lst, Buffer out){
   return out;
 }
 
-Buffer Buffer_newline_indent(Buffer);
-
 static void Render__value(Render * r, Var elem){
   Buffer out =(* r).out;
   if(out -> pos >= _WIDTH - 1 || out -> pos - out -> _indent > 40) Buffer_newline_indent(out);
@@ -1673,8 +1563,6 @@ static void Render__value(Render * r, Var elem){
   else if(! List_truth(Var_list(elem))) _nil(out);
   else if(! Render__fits(&((* r)), elem)) Render__items(&((* r)), elem);
 }
-
-Buffer Buffer_unwrite(Buffer, size_t);
 
 static void Render__leaf(Render * r, Var elem){
   Buffer out =(* r).out;
@@ -1687,14 +1575,10 @@ static void Render__leaf(Render * r, Var elem){
   Render__write_leaf(&((* r)), elem);
 }
 
-Buffer Buffer_write(Buffer, const char *);
-
 static void _nil(Buffer out){
   if(out -> pos + 2 > _WIDTH) Buffer_newline_indent(out);
   Buffer_write(out, "()");
 }
-
-Buffer Buffer_write_len(Buffer, const char *, size_t);
 
 static int Render__fits(Render * r, Var elem){
   Buffer line = Buffer_new((* r).out -> padding);
@@ -1739,11 +1623,7 @@ static int Render__fits(Render * r, Var elem){
 
 }
 
-int RenderPath_enter(RenderPath *, const void *);
-
 Buffer Var_write_pointer_repr(Var, Buffer);
-
-size_t Buffer_tabstop(Buffer);
 
 static void Render__items(Render * r, Var elem){
   List lst = Var_list(elem);
@@ -1810,10 +1690,6 @@ static void Render__flat_items(Render * r, Var elem){
 
 }
 
-Buffer Var_write_str(Var, Buffer);
-
-Buffer Atom_write_repr(Atom, Buffer);
-
 Buffer Var_write_repr(Var, Buffer);
 
 static void Render__write_leaf(Render * r, Var elem){
@@ -1822,19 +1698,11 @@ static void Render__write_leaf(Render * r, Var elem){
   else Var_write_repr(elem, (* r).out);
 }
 
-Buffer Buffer_pad(Buffer);
-
-Buffer Buffer_push(Buffer);
-
 static void _open(List lst, Buffer out){
   Buffer_write(out, "(");
   if(! Var_is_row(List_car(lst), 9, 7, 4)) Buffer_pad(out);
   Buffer_push(out);
 }
-
-int Buffer_getindex(Buffer, int);
-
-Buffer Buffer_pop(Buffer);
 
 static void _close(Buffer out){
   if(Buffer_getindex(out, - 1) != ')') Buffer_pad(out);
@@ -1851,8 +1719,6 @@ static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
   _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;
   if((*(Array *) _x2c_defer_data_1->_x2c_defer_capture_1) == NULL) Array_free((*(Array *) _x2c_defer_data_1->_x2c_defer_capture_2));
 }
-
-void Array_cleanup(Array);
 
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
   _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_2;
@@ -1924,8 +1790,6 @@ static void _x2c_defer_cleanup_15(void * _x2c_defer_opaque_15){
   Array_cleanup((*(Array *) _x2c_defer_data_15->_x2c_defer_capture_16));
 }
 
-void Scope_release(void);
-
 static void _x2c_defer_cleanup_16(void * _x2c_defer_opaque_16){
   Scope_release();
 }
@@ -1945,8 +1809,6 @@ static void _x2c_defer_cleanup_19(void * _x2c_defer_opaque_19){
   Array_cleanup((*(Array *) _x2c_defer_data_18->_x2c_defer_capture_19));
 }
 
-void Buffer_cleanup(Buffer);
-
 static void _x2c_defer_cleanup_20(void * _x2c_defer_opaque_20){
   _x2c_defer_env_19 * _x2c_defer_data_19 =(_x2c_defer_env_19 *) _x2c_defer_opaque_20;
   Buffer_cleanup((*(Buffer *) _x2c_defer_data_19->_x2c_defer_capture_20));
@@ -1961,8 +1823,6 @@ static void _x2c_defer_cleanup_22(void * _x2c_defer_opaque_22){
   _x2c_defer_env_21 * _x2c_defer_data_21 =(_x2c_defer_env_21 *) _x2c_defer_opaque_22;
   Buffer_cleanup((*(Buffer *) _x2c_defer_data_21->_x2c_defer_capture_22));
 }
-
-void RenderPath_leave(RenderPath *);
 
 static void _x2c_defer_cleanup_23(void * _x2c_defer_opaque_23){
   _x2c_defer_env_22 * _x2c_defer_data_22 =(_x2c_defer_env_22 *) _x2c_defer_opaque_23;

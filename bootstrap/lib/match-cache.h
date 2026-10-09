@@ -27,6 +27,8 @@ int MatchCache_acquire(MatchCache m, Var pattern, MatchLease * lease, const char
 
 void MatchLease_release(MatchLease * lease);
 
+MatchPlan MatchLease_plan(MatchLease * m);
+
 int MatchCache_try_capture(MatchCache cache, List input, Var pattern, MatchCaptureBuffer * captures, const char * owner);
 
 int MatchCache_try_match(MatchCache cache, List input, Var pattern, List * out_bindings, const char * owner);

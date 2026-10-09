@@ -798,7 +798,7 @@ static List Compiler._declaration_item(Compiler c) {
   Token origin = c.token;
   List decl = c.parse_declaration_row();
   c.expect(<;>);
-  return c.finish_managed_declaration(decl, origin);
+  return c.finish_initializers(decl, origin);
 }
 
 /** Parses a compound body after its opening brace and consumes the closing

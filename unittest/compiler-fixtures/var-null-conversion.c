@@ -4,8 +4,6 @@
 #include "x2c.h"
 
 #include "x2c.h"
-int Var_is_null(Var);
-
 int main(void){
   x2c_initialize();
   Var value = Var_null();

@@ -405,16 +405,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _x2c_static_initialize_2();
 }
 
-static Var Symbol_var(Symbol);
-
-static Var String_var(String);
-
-List cons(Var, List);
-
-static Var List_var(List);
-
-static Var int_var(int);
-
 __attribute__((noinline, cold)) static void _x2c_cache_initialize_0(void){
   _0 = String_new("ExceptionFrame");
   _1 = String_new("X2CCleanup");
@@ -2814,30 +2804,6 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2383 = int_var(1416);
 }
 
-Array Array_new(void);
-
-Array Array_update_n(Array, unsigned, ...);
-
-void x2c_cleanup_push(X2CCleanup *);
-
-Var Array_take_last(Array);
-
-static int Var_is_row(Var, unsigned, unsigned long, unsigned long);
-
-int Var_is_nil(Var);
-
-static List Var_list(Var);
-
-static Var List_car(List);
-
-Var Array_push(Array, Var);
-
-static int List_truth(List);
-
-static List List_cdr(List);
-
-void x2c_cleanup_leave(X2CCleanup *);
-
 static Array _expression_blocks(List expression){
   Array blocks = Array_new();
   List node;
@@ -2878,22 +2844,6 @@ static Array _expression_blocks(List expression){
   }
 
 }
-
-Map Map_new(void);
-
-List x2c_func_reference_type(Func, unsigned, unsigned);
-
-static FuncArg FuncArg_reference(const void *, List);
-
-static FuncArg FuncArg_value(Var);
-
-Var Func_apply(Func, unsigned, const FuncArg *);
-
-int List_equal(List, List);
-
-Var Map_setindex(Map, Var, Var);
-
-unsigned Map_len(Map);
 
 static List _rewrite_expression(List expression, Func rewrite){
   Array levels = Array_new();
@@ -3016,16 +2966,10 @@ static List _rewrite_expression(List expression, Func rewrite){
 
 }
 
-int Map_try_get(Map, Var, Var *);
-
 static List _expression_child(List child, Map changed){
   Var replacement;
   return Map_try_get(changed, Var_new(3683441, (void *) child), &(replacement)) ? Var_list(replacement) : child;
 }
-
-int Var_equal(Var, Var);
-
-List Array_list_free(Array);
 
 static List _expression_children(List node, Map changed){
   Var child;
@@ -3045,8 +2989,6 @@ static List _expression_children(List node, Map changed){
   }
   return(void *) _x2c_macro_rewritten_0 ? Array_list_free(_x2c_macro_rewritten_0) : _x2c_macro_original_0;
 }
-
-int ast_contains_head(Var, Symbol);
 
 static int _expression_holds_try(List body){
   List node;
@@ -3122,9 +3064,7 @@ return node;
 
 Type Type_declared(Type);
 static Type List_type(List);
-static List cdr(List);
 static List Type_list(Type);
-Type List_type_from_ast(List);
 static List Compiler__lower_function(Compiler c, List node){
 
   {
@@ -3167,12 +3107,6 @@ static List Compiler__lower_function(Compiler c, List node){
   }
 return node;
 }
-
-Var Compiler_var(Compiler);
-
-static Var Map_var(Map);
-
-Func Func_new_context(FuncAdapter, List, const void *, size_t);
 
 static Type Var_type(Var);
 
@@ -3224,7 +3158,6 @@ Var child;  List _x2c_macro_original_1 = ast;  Array _x2c_macro_rewritten_1 = NU
 return(void *) _x2c_macro_rewritten_1 ? Array_list_free(_x2c_macro_rewritten_1) : _x2c_macro_original_1;
 }
 
-int List_try_next(List, List *, Var *);
 int Type_is_static(Type);
 int Compiler_static_value_is_runtime(Compiler c, List value, Map runtime);
 static List Compiler__static_initializers(Compiler c, Type type, List bindings, Map runtime){
@@ -3350,7 +3283,6 @@ static int RuntimeScan__push(RuntimeScan * s, Var node, int address){
 
 int Type_is_array(Type);
 int Type_is_pointer(Type);
-int List_contains(List, Var);
 static int RuntimeScan__value(RuntimeScan * s, List node){
 
   {
@@ -3376,7 +3308,6 @@ static MatchCaptureSite _x2c_match_site_13;  if (x2c_match_site_try_capture(& _x
 return - 1;
 }
 
-int Map_contains(Map, Var);
 Map Compiler_semantic_binding_facts(Compiler);
 int Type_is_enum(Type);
 int Type_is_function(Type);
@@ -3405,12 +3336,10 @@ static MatchCaptureSite _x2c_match_site_16;  if (x2c_match_site_try_capture(& _x
 return 1;
 }
 
-int Map_truth(Map);
 static int RuntimeScan__input(RuntimeScan * s, List binding){
   return(Map_truth((* s).runtime) && Map_contains((* s).runtime, List_var(binding))) || Compiler__automatic_static_input((* s).c, binding);
 }
 
-int Var_truth(Var);
 static int RuntimeScan__sizeof_dimensions(RuntimeScan * s, List operand){
   List node;  Array _x2c_macro_pending_3 = Array_update_n(Array_new(), 1, List_var(operand)); {
     _x2c_defer_env_8 _x2c_macro_environment_8 ={
@@ -3480,7 +3409,6 @@ default: ;  Walk__collect_children(&((* w)), node, path);  break;
   }
 }
 
-int Array_try_next(Array, int *, Var *);
 static void Walk__collect_blocks(Walk * w, List node, List path){
   Array blocks = _expression_blocks(node); {
     _x2c_defer_env_9 _x2c_macro_environment_9 ={
@@ -3503,7 +3431,6 @@ static void Walk__collect_blocks(Walk * w, List node, List path){
 
 }
 
-static int String_truth(String);
 static void Walk__collect_label(Walk * w, Var name, List rest, List path){
   String spelling = _label_spelling(name);  if(String_truth(spelling)) Map_setindex((* w).labels, String_var(spelling), List_var(path));  Walk__collect_children(&((* w)), rest, path);
 }
@@ -3512,9 +3439,6 @@ static void Walk__collect_try(Walk * w, Var body, Var clause, Var finalizer, Lis
   Walk_collect_labels(&((* w)), body, cons(body, path));  Walk__collect_catches(&((* w)), clause, path);  Walk_collect_labels(&((* w)), finalizer, path);
 }
 
-Iter Var_iter(Var, Iter);
-int Iter_try_next(Iter, Var *);
-static Var List_cadr(List);
 static void Walk__collect_catches(Walk * w, Var clause, List path){
 
   {
@@ -3552,8 +3476,6 @@ static void Walk__collect_children(Walk * w, List node, List path){
 
 }
 
-static String Var_string(Var);
-String binding_identity_spelling(List);
 static String _label_spelling(Var label){
   if(Var_is_row(label, 11, 7, 1)) return Var_string(label);  if(! Var_is_row(label, 9, 7, 4)) return NULL;  List node = Var_list(label);
   {
@@ -3645,8 +3567,6 @@ static List Walk__lower_return(Walk * w, List node, List expression){
   List value = Var_list(Walk_rewrite(&((* w)), List_var(expression)));  if(! List_equal(value, expression)) node = source_return_content(cons(List_var(value), NULL));  List cleanup = Walk__unwind(&((* w)), 0);  return List_truth(cleanup) ? Walk__return_value(&((* w)), value, cleanup) : node;
 }
 
-List Type_declaration_parts(Type);
-Var List_getindex(List, int);
 static List Walk__return_value(Walk * w, List expression, List cleanup){
   List binding = Compiler__region_binding((* w).c, _374);  Type type =(* w).return_type;  List base, mods;  List _x2c_destructure_0 = Type_declaration_parts(type);  base = Var_list(List_getindex(_x2c_destructure_0, 0));  mods = Var_list(List_getindex(_x2c_destructure_0, 1));  List declaration =({
     Var _x2c_literal_part_7 = List_var(base);  Var _x2c_literal_part_8 = List_var(cons(_28, cons(List_var(({
@@ -3738,7 +3658,6 @@ static List Walk__transfer(Walk * w, int stop, List statement){
   List cleanup = Walk__unwind(&((* w)), stop);  return List_truth(cleanup) ? source_block_content(List_append(cleanup, cons(List_var(statement), NULL))) : statement;
 }
 
-Var Array_getindex(Array, int);
 static List Walk__unwind(Walk * w, int stop){
   Array statements = Array_new();  for(int i =(int) Array_len((* w).regions) - 1;  i >= stop;  i --){
     List statement;  List _x2c_macro_object_6 = Var_list(List_car(Var_list(Array_getindex((* w).regions, i))));  List _x2c_macro_cursor_13 = _x2c_macro_object_6;  Var _x2c_macro_cursor_output_5;  while(List_try_next(_x2c_macro_object_6, &(_x2c_macro_cursor_13), &(_x2c_macro_cursor_output_5))){
@@ -3749,7 +3668,6 @@ static List Walk__unwind(Walk * w, int stop){
   return Array_list_free(statements);
 }
 
-int List_len(List);
 static int Walk__goto_stop(Walk * w, Var label){
   String name = _label_spelling(label);  Var stored;  if(! String_truth(name) || ! Map_try_get((* w).labels, String_var(name), &(stored))){
     Walk__report_at(&((* w)), (* w).origin, _381, NULL);  return(int) Array_len((* w).regions);
@@ -3791,7 +3709,6 @@ static void Walk__report_at(Walk * w, int origin, String message, List note){
 }
 
 List Sym_introduce(Sym, String);
-String Compiler_fresh_name(Compiler, String);
 static List Compiler__region_binding(Compiler c, String role){
   return Sym_introduce(c -> sym, Compiler_fresh_name(c, role));
 }
@@ -3808,8 +3725,6 @@ static List _address_of(String spelling, List binding){
 }
 
 List catch_handle(List);
-List Compiler_bind_syntax(Compiler, Var, AstPos, Type);
-List Macro_apply(Macro, List);
 static List Walk__lower_try(Walk * w, List node, List body, List arms, List finalizer){
   Compiler c =(* w).c;  Walk__check_finalizer_label(&((* w)), finalizer);  List frame = Compiler__region_binding(c, _386);  List handle = List_truth(arms) ? catch_handle(node) : NULL;  List cleanup = Compiler__try_cleanup(c, frame, handle, Var_list(Walk_rewrite(&((* w)), List_var(finalizer))), ! ! List_truth(arms));  List lowered = Walk__try_region(&((* w)), cleanup, body);  Macro shape = _927;  return Compiler_bind_syntax(c, List_var(Macro_apply(shape, ({
     Var _x2c_literal_part_32 = List_var(frame);  Var _x2c_literal_part_33 = List_var(Walk__catch_clause(&((* w)), handle, cleanup, arms));  cons(_x2c_literal_part_32, cons(_x2c_literal_part_33, cons(List_var(lowered), cons(List_var(cleanup), NULL))));
@@ -3928,7 +3843,6 @@ static List Walk__try_region(Walk * w, List cleanup, List body){
   return cons(_375, cons(_974, cons(Walk__inside(&((* w)), cleanup, body, List_var(body)), _976)));
 }
 
-int Compiler_match_pattern_is_static(Compiler, List);
 static List Walk__catch_clause(Walk * w, List handle, List cleanup, List records){
   if(! List_truth(records)) return NULL;  String state = _1009;  Array arms = Array_new(), patterns = Array_new(); {
     List record;  List _x2c_macro_object_9 = records;  List _x2c_macro_cursor_16 = _x2c_macro_object_9;  Var _x2c_macro_cursor_output_8;  while(List_try_next(_x2c_macro_object_9, &(_x2c_macro_cursor_16), &(_x2c_macro_cursor_output_8))){
@@ -4008,7 +3922,6 @@ List builtin_try_landing(List frame, List clause, List cleanup){
 return otherwise;
 }
 
-int reference_guard_exits(List);
 static int _arm_exits(List arm){
 
   {
@@ -4067,8 +3980,6 @@ List builtin_defer_record(List record, List callback, List environment, List rec
   )), NULL))), NULL)))), NULL))), NULL)));  Type type = List_type(cons(String_var(binding_identity_spelling(environment)), NULL));  return cons(String_var(_1836), cons(List_var(_2102), cons(List_var(cons(List_var(type), cons(List_var(records), cons(List_var(record), cons(List_var(callback), NULL))))), NULL)));
 }
 
-List Macro_typed(List, Var);
-static Var List_caddr(List);
 List builtin_defer_captures(List environment, List records){
   if(! _init_guard_) _file_init_();  Array assignments = Array_new(); {
     List row;  List _x2c_macro_object_12 = records;  List _x2c_macro_cursor_19 = _x2c_macro_object_12;  Var _x2c_macro_cursor_output_11;  while(List_try_next(_x2c_macro_object_12, &(_x2c_macro_cursor_19), &(_x2c_macro_cursor_output_11))){
@@ -4170,9 +4081,6 @@ x2c_cleanup_leave(& _x2c_defer_record_13);
 }
 }
 
-String ast_addressed_identifier(Var);
-String ast_direct_identifier(Var);
-String ast_indirect_identifier(Var);
 static void Preserve__write(Preserve * p, List node){
   Var operand = Compiler__changed_operand((* p).c, node);  if(! Var_truth(operand)){
 
@@ -4199,11 +4107,8 @@ return;
 String name = ast_direct_identifier(operand);  if(String_truth(name)) Map_setindex((* p).names, String_var(name), int_var(1));  String holder = ast_indirect_identifier(operand);  if(String_truth(holder)) Map_setindex((* p).holders, String_var(holder), int_var(1));
 }
 
-List Ast_written_operand(Ast);
-int String_equal(String, String);
 Type Sym_resolve_numeric_type(Sym, Type);
 String Type_var_numeric_update_helper(Type);
-int Map_try_next(Map, unsigned *, Var *, Var *);
 static Var Compiler__changed_operand(Compiler c, List node){
   List written = Ast_written_operand(node);  if(List_truth(written)) return List_var(written);
   {
@@ -4401,7 +4306,6 @@ static void Preserve__split(Preserve * p, Array output, int origin, List declara
   Preserve__escape_declared(&((* p)), output, List_cdr(bindings));
 }
 
-List List_flatten_all(List);
 static List Preserve__declaration(Preserve * p, List declaration, Map escaped){
   if(! _is_automatic(declaration)) return declaration;  Symbol head = Var_symbol(List_car(declaration));  Type type = Var_type(List_cadr(declaration));  List bindings = Var_list(List_caddr(declaration));  if(Preserve__declares_pointee(&((* p)), bindings) && !(List_contains(Type_list(List_flatten_all(List_type(Type_list(type)))), Symbol_var(1544849476362)))) type = List_type(cons(Symbol_var(1544849476362), Type_list(type)));  Array preserved = Array_new(); {
     List binding;  List _x2c_macro_object_21 = List_cdr(bindings);  List _x2c_macro_cursor_30 = _x2c_macro_object_21;  Var _x2c_macro_cursor_output_20;  while(List_try_next(_x2c_macro_object_21, &(_x2c_macro_cursor_30), &(_x2c_macro_cursor_output_20))){
@@ -4428,7 +4332,6 @@ return({
 );
 }
 
-int Var_contains(Var, Var);
 static List Preserve__binding(Preserve * p, List bind, Map escaped){
 
   {
@@ -4552,7 +4455,6 @@ static void Preserve__escape_declared(Preserve * p, Array output, List binds){
 }
 }
 
-List Compiler_prepend_setup(Compiler, List, List);
 static List Preserve_escape_parameters(Preserve * p, List body, List bindings){
   Array output = Array_new();
   {
@@ -4582,9 +4484,6 @@ default: break;
 return Compiler_prepend_setup((* p).c, body, Array_list_free(output));
 }
 
-Ast Ast_without_origin(Ast);
-List Macro_case_pattern(Macro, List);
-Ast Ast_rewrap_origin(Ast, Ast);
 List Compiler_lower_defer_region(Compiler c, List body, List finalizer);
 List Compiler_rewrite_defer_list(Compiler c, List stmts){
   if(! _init_guard_) _file_init_();  Macro deferred = _2339;  for(List suffix = stmts;  List_truth(suffix);  suffix = List_cdr(suffix)){
@@ -4649,7 +4548,6 @@ for(List _x2c_macro_cursor_35 = node;  List_truth(_x2c_macro_cursor_35);  _x2c_m
 }
 }
 
-void Compiler_add_early(Compiler, List);
 void Compiler_set_fact(Compiler, Var, Var);
 static List Compiler__callable_defer(Compiler c, List body, List finalizer){
   DeferCaptures d ={
@@ -4664,7 +4562,6 @@ static List Compiler__callable_defer(Compiler c, List body, List finalizer){
   List opaque = Sym_introduce(c -> sym, Compiler_fresh_name(c, _2356));  List callback = Sym_introduce(c -> sym, Compiler_fresh_name(c, _2357));  String env_name = List_truth(env_local) ? binding_identity_spelling(env_local) : NULL;  List rewritten = String_truth(env_name) ? DeferCaptures__rewrite(&(d), finalizer, env_name) : finalizer;  Compiler_add_early(c, Compiler__defer_callback(c, callback, opaque, env_binding, env_local, rewritten));  if(String_truth(c -> fn_name)) Compiler_set_fact(c, List_var(cons(_2358, cons(List_var(callback), NULL))), String_var(c -> fn_name));  return cons(_231, cons(List_var(body), cons(List_var(env_binding), cons(List_var(callback), cons(List_var(records), cons(List_var(d.written), NULL))))));
 }
 
-List Ast_lvalue_binding(Ast);
 static void DeferCaptures_collect(DeferCaptures * d, List ast){
   if(! List_truth(ast) ||(* d).unsupported) return;
   {
@@ -4701,7 +4598,6 @@ List modified = Ast_lvalue_binding(Ast_written_operand(ast)); {
 Var field;  List changed =(* d).written;  if(List_truth(modified) && Map_try_get((* d).captures, List_var(modified), &(field)) && !(List_contains(changed, List_var(modified))))(* d).written = cons(List_var(modified), changed);
 }
 
-Var Map_getindex(Map, Var);
 static void DeferCaptures__capture(DeferCaptures * d, List binding){
   Compiler c =(* d).c;  Map facts = Compiler_semantic_binding_facts(c);  if(! List_truth(binding) || List_contains((* d).declared, List_var(binding)) || !(Map_contains(facts, List_var(cons(_217, cons(List_var(binding), NULL))))) || Map_contains((* d).captures, List_var(binding))) return;  Var stored_type = Map_getindex(facts, List_var(cons(_218, cons(List_var(binding), NULL))));  if(! Compiler__defer_type_hoistable(c, Var_type(stored_type))){
     (* d).unsupported = 1;  return;
@@ -4751,7 +4647,6 @@ return(void *) _x2c_macro_rewritten_4 ? Array_list_free(_x2c_macro_rewritten_4) 
 }
 
 List Compiler_rebuild_statement(Compiler, List);
-List Compiler_capture_environment(Compiler, List, List);
 static List Compiler__defer_environment(Compiler c, List env_binding, List records){
   Array fields = Array_new(); {
     List record;  List _x2c_macro_object_27 = records;  List _x2c_macro_cursor_38 = _x2c_macro_object_27;  Var _x2c_macro_cursor_output_26;  while(List_try_next(_x2c_macro_object_27, &(_x2c_macro_cursor_38), &(_x2c_macro_cursor_output_26))){
@@ -4796,7 +4691,6 @@ static List Compiler__defer_callback(Compiler c, List callback, List opaque, Lis
   )), NULL))))), NULL))), NULL)))), AST_UNIT, NULL);
 }
 
-void Array_cleanup(Array);
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;  Array_cleanup((*(Array *) _x2c_defer_data_0->_x2c_defer_capture_0));
 }
@@ -4805,7 +4699,6 @@ static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
   _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;  Array_cleanup((*(Array *) _x2c_defer_data_1->_x2c_defer_capture_1));
 }
 
-void Map_cleanup(Map);
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
   _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_2;  Map_cleanup((*(Map *) _x2c_defer_data_2->_x2c_defer_capture_2));
 }
@@ -4822,10 +4715,6 @@ static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5){
   _x2c_defer_env_5 * _x2c_defer_data_5 =(_x2c_defer_env_5 *) _x2c_defer_opaque_5;  Array_cleanup((*(Array *) _x2c_defer_data_5->_x2c_defer_capture_5));
 }
 
-Var x2c_func_value_argument(Func, const FuncArg *, unsigned, Symbol);
-const void * Func_context(Func);
-Compiler Var_compiler(Var);
-static Map Var_map(Var);
 static Var _x2c_lambda_0(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0){
   List block = Var_list(x2c_func_value_argument(_x2c_lambda_closure_0, _x2c_lambda_argv_0, 0, 806120));  const _x2c_lambda_context_0 * _x2c_lambda_context_value_0 =(const _x2c_lambda_context_0 *) Func_context(_x2c_lambda_closure_0);  return List_var(Compiler__static_regions(Var_compiler(_x2c_lambda_context_value_0 -> _x2c_lambda_capture_0), block, Var_map(_x2c_lambda_context_value_0 -> _x2c_lambda_capture_1))); ;
 }

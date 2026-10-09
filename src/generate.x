@@ -84,16 +84,16 @@ static List Compiler._generated_code(Compiler c, List ast, String basename) {
   );
 }
 
-static List Compiler._emit_header(Compiler c, List header) =>
-  c.emit(
-    c._include_guard(_vertical_spacing(c._forward_declarations(header))),
-    NULL);
+static List Compiler._emit_header(Compiler c, List header) {
+  header = c._forward_declarations(header, 0);
+  return c.emit(c._include_guard(_vertical_spacing(header)), NULL);
+}
 
 /* Each source use follows the declarations it needs. */
 static List Compiler._emit_source(
   Compiler c, List source, Map bindings, Map inline_bodies) {
   source = c._forward_declarations(
-    _move_bodies(c._file_init(source), inline_bodies));
+    _move_bodies(c._file_init(source), inline_bodies), 1);
   return c.emit(c._source_text(source), bindings);
 }
 
@@ -1116,15 +1116,26 @@ static int _record_calls(Var value, Var caller, Map callers) {
 
 // prototypes and bodies
 
-/* Header and source nodes follow the declarations they need. This also
-   supplies prototypes when a cyclic include reaches an inline body first. */
-static List Compiler._forward_declarations(Compiler c, List source) {
+/* A source starts with only its own header guarded and can use the complete
+   includes it emits. A header can be entered through a cycle with any
+   enclosing header guarded, so its inline bodies still need forwards. */
+static List Compiler._forward_declarations(
+  Compiler c, List source, int source_includes) {
   Forward f = {
-    .c = c, .available = {}, .statics = {}, .seen = {}, .out = []};
+    .c = c, .available = {}, .statics = {}, .seen = {},
+    .out = []};
+  if (c.runtime_inc && source_includes)
+    c.runtime_function_declarations(f.available);
   _source_declarations(source, f.statics);
   foreach (List node, source) {
     node = c._inline_prototype(node);
     if (node.car() == <typedef> && node in f.seen) continue;
+    if (source_includes) match (node) case %(preproc ?(String text)): {
+      int angle = 0;
+      String target = preproc_include_target(text, angle);
+      if (target)
+        c.include_function_declarations(target, angle, f.available);
+    }
     _collect_declared(node, f.available);
     f.dependencies(node);
     f.out.push(node);
@@ -1372,7 +1383,8 @@ static void Forward.global(Forward &f, Var binding, String spelling) {
   Type type = NULL;
   List global = spelling ? c.sym.resolve_global(%($spelling), type) : NULL;
   if (!global || !global.equal(binding) || !type.is_function()) return;
-  if (global in f.available || global in f.seen) return;
+  if (global in f.available || %(native $spelling) in f.available ||
+      global in f.seen) return;
   if (c.sym.get(%("generated-protocol" $spelling)) &&
       (!c.meta_build || c.native_protocol_alias(spelling))) return;
   f.seen[global] = 1;

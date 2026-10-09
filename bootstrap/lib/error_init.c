@@ -7,8 +7,6 @@ typedef struct Error * Error;
 #include "error.h"
 static int _init_guard_ = 0;
 
-void Error_initialize_raw(void);
-
 void Error_shutdown(void);
 
 void Error_initialize(void){
@@ -17,8 +15,6 @@ void Error_initialize(void){
   Error_initialize_raw();
   Scope_shutdown_hook(Error_shutdown);
 }
-
-void Error_shutdown_raw(void);
 
 void Error_shutdown(void){
   if(! _init_guard_) Error_initialize();

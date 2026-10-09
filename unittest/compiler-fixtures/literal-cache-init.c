@@ -50,8 +50,6 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
-static Var String_var(String);
-
 static String root;
 
 _x2c_initializer_choice_D1E0FCF3_0((path = String_join(NULL, cons(String_var(root), cons(String_var(_0), NULL)))))
@@ -63,18 +61,8 @@ static List values;
 _x2c_initializer_choice_D1E0FCF3_2((values = cons(_2, cons(String_var(root), cons(String_var(path), NULL)))))
 static Array positions;
 
-Array Array_update_n(Array, unsigned, ...);
-
-Array Array_new(void);
-
 _x2c_initializer_choice_D1E0FCF3_3((positions = Array_update_n(Array_new(), 2, String_var(root), String_var(path))))
 static Map lookup;
-
-Map Map_update_n(Map, unsigned, ...);
-
-Map Map_new(void);
-
-static Var Symbol_var(Symbol);
 
 _x2c_initializer_choice_D1E0FCF3_4((lookup = Map_update_n(Map_new(), 2, Symbol_var(1211368), String_var(root), Symbol_var(1051920), String_var(path))))
 static Var boxed_string;
@@ -82,17 +70,11 @@ static Var boxed_string;
 _x2c_initializer_choice_D1E0FCF3_5((boxed_string = String_var(String_join(NULL, cons(String_var(_3), cons(String_var(path), NULL))))))
 static Var boxed_list;
 
-static Var List_var(List);
-
 _x2c_initializer_choice_D1E0FCF3_6((boxed_list = List_var(cons(_4, cons(String_var(root), NULL)))))
 static Var boxed_array;
 
-static Var Array_var(Array);
-
 _x2c_initializer_choice_D1E0FCF3_7((boxed_array = Array_var(Array_update_n(Array_new(), 1, String_var(path)))))
 static Var boxed_map;
-
-static Var Map_var(Map);
 
 _x2c_initializer_choice_D1E0FCF3_8((boxed_map = Map_var(Map_update_n(Map_new(), 1, Symbol_var(1051920), String_var(path)))))
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
@@ -114,20 +96,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _x2c_static_initialize_7();
   _x2c_static_initialize_8();
 }
-
-String List_repr(List);
-
-String Array_repr(Array);
-
-String Map_repr(Map);
-
-static String Var_string(Var);
-
-static List Var_list(Var);
-
-static Array Var_array(Var);
-
-static Map Var_map(Var);
 
 int main(void){
   x2c_initialize();

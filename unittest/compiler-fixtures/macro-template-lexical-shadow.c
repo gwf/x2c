@@ -46,8 +46,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _0 = String_new("hello");
 }
 
-int String_len(String);
-
 int first(void){
   if(! _init_guard_) _file_init_();
   struct _x2c_macro_Node_0c4b38f1 _x2c_macro_outside_0 ={

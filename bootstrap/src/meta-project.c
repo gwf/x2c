@@ -137,8 +137,6 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
 
 static Func _x2c_func_handle_0;
 
-Func x2c_func_shared(FuncAdapter, List);
-
 #include "exception.h"
 
 
@@ -187,14 +185,6 @@ typedef struct _x2c_defer_env_5{
 _x2c_defer_env_5;
 
 static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5);
-
-static Var String_var(String);
-
-List cons(Var, List);
-
-static Var Symbol_var(Symbol);
-
-static Var List_var(List);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -318,21 +308,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _x2c_static_initialize_1();
 }
 
-Array Array_new(void);
-
-Map Map_new(void);
-
 String Compiler_meta_cc(String *);
-
-String script_cache_root(void);
-
-String build_module_stamp(void);
-
-static int String_truth(String);
-
-void Compiler_use_meta_helper(String, Map, Map);
-
-Toolchain toolchain_meta(String);
 
 String Compiler_meta_cc_identity(String);
 
@@ -360,14 +336,6 @@ void Frontend_prepare_meta(Frontend f, List inputs){
 }
 
 void Path_make_dirs(Path);
-
-int file_lock(Path, int);
-
-void x2c_cleanup_push(X2CCleanup *);
-
-static int List_truth(List);
-
-void x2c_cleanup_leave(X2CCleanup *);
 
 static List Helper_manifest(Helper * h){
   Path_make_dirs((* h).directory);
@@ -407,30 +375,6 @@ static List Helper_manifest(Helper * h){
   }
 
 }
-
-Iter Var_iter(Var, Iter);
-
-Var List_assoc(List, Var);
-
-static Var int_var(int);
-
-int Iter_try_next(Iter, Var *);
-
-Var Map_setindex(Map, Var, Var);
-
-static List Var_list(Var);
-
-static Var List_car(List);
-
-static Var List_cadr(List);
-
-int Array_try_next(Array, int *, Var *);
-
-static String Var_string(Var);
-
-int Map_contains(Map, Var);
-
-int String_len(String);
 
 static void Helper_use(Helper * h, List manifest){
   Map failures = Map_new(), units = Map_new(), groups = Map_new();
@@ -483,8 +427,6 @@ static void Helper_use(Helper * h, List manifest){
 
 Compiler Compiler_new(void);
 
-int List_try_next(List, List *, Var *);
-
 Path Path_absolute(Path);
 
 void collect_forget_provisional_entries(void);
@@ -530,54 +472,24 @@ static void Helper_scan(Helper * h, List inputs){
   collect_forget_provisional_entries();
 }
 
-Var Array_push(Array, Var);
-
 static void Helper_own(Helper * h, String path, Map owned){
   if(Map_contains(owned, String_var(path))) return;
   Map_setindex(owned, String_var(path), int_var(1));
   Array_push((* h).owners, String_var(path));
 }
 
-int Map_try_get(Map, Var, Var *);
-
 int Compiler_linked_meta_provider_current(Compiler, String);
+
+String Path_read_text(Path);
+
+Path Path_dirname(Path);
+
+int Compiler_linked_meta_definitions_current(Compiler, String);
 
 #include "error.h"
 
 
 
-
-int x2c_error_catch_site_pending(ErrorCatchSite *);
-
-ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
-
-void x2c_exception_push(ExceptionFrame *);
-
-String Path_read_text(Path);
-
-void x2c_exception_landed(ExceptionFrame *);
-
-int x2c_exception_is_error_target(ExceptionFrame *);
-
-int x2c_error_catch_selected(ErrorHandler);
-
-void x2c_error_catch_detach(ErrorHandler);
-
-void x2c_exception_mark_handled(ExceptionFrame *);
-
-void x2c_error_catch_close(ErrorHandler);
-
-void x2c_exception_leave(ExceptionFrame *);
-
-Tokenizer Tokenizer_new(char *, Symbol);
-
-int is_layout_file(String);
-
-void Tokenizer_scan(Tokenizer);
-
-Path Path_dirname(Path);
-
-int Compiler_linked_meta_definitions_current(Compiler, String);
 
 static int Scan_file(Scan * s, String path){
   Var found;
@@ -641,10 +553,6 @@ static int Scan_file(Scan * s, String path){
   return meta;
 }
 
-Token Tokenizer_next(Tokenizer);
-
-int String_equal(String, String);
-
 static int Scan_file_scope(Scan * s, Tokenizer tokens, String directory){
   int depth = 0, meta = 0;
   for(Token token = Tokenizer_next(tokens);  token -> type != 11212;  token = Tokenizer_next(tokens)){
@@ -684,8 +592,6 @@ static int _marker(Token token){
   return 0;
 }
 
-String package_entry(SourceView, List, String, String *);
-
 List CliRequest_package_roots(CliRequest);
 
 String absolute_path(String);
@@ -702,8 +608,6 @@ static int Scan_package(Scan * s, Tokenizer tokens){
 
 String preproc_include_target(String, int *);
 
-int String_endswith(String, String);
-
 String collect_resolve_include(SourceView, List, String, String, int);
 
 static int Scan_include(Scan * s, String directive, String directory){
@@ -719,19 +623,9 @@ static int Scan_include(Scan * s, String directive, String directory){
   return ! ! meta;
 }
 
-int String_getindex(String, int);
-
-String String_unescape(String);
-
-String String_new_len(const char *, int);
-
 static String _quoted(Token token){
   return token -> len >= 2 && String_getindex(token -> text, 0) == '"' ? String_unescape(String_new_len(token -> text + 1, token -> len - 2)) : NULL;
 }
-
-String x2c_get_root(void);
-
-int String_startswith(String, String);
 
 static int _compiler_owns(String path){
   String root = x2c_get_root();
@@ -748,12 +642,6 @@ static int _compiler_owns(String path){
   }
   return 0;
 }
-
-List List_flatten(List);
-
-List List_map(List, Func);
-
-int Map_try_next(Map, unsigned *, Var *, Var *);
 
 String Compiler_extension_archive(void);
 
@@ -790,10 +678,6 @@ static List _group_flags(CliRequest request, Map packages){
   return flags;
 }
 
-static List List_cdr(List);
-
-List Array_list(Array);
-
 static List _host_args(List cc_args){
   Array kept = Array_new();
   for(List rest = cc_args;  List_truth(rest);  rest = List_cdr(rest)){
@@ -806,15 +690,11 @@ static List _host_args(List cc_args){
   return Array_list(kept);
 }
 
-Array List_array(List);
-
 Path Path_basename(Path);
 
 int Compiler_links_extension(String);
 
 int Path_is_file(Path);
-
-int Array_contains(Array, Var);
 
 static Array _modules(CliRequest request, Map packages){
   Array modules = List_array(List_map(request -> native_modules, _x2c_func_handle_1));
@@ -842,18 +722,6 @@ static Array _modules(CliRequest request, Map packages){
   return modules;
 }
 
-String String_add(String, String);
-
-String List_repr(List);
-
-List List_sort(List);
-
-List Iter_list(Iter);
-
-Iter Map_keys(Map, Iter);
-
-String String_sha256(String);
-
 static String Helper_identify(Helper * h, String stamp, String compiler){
   String loop = _loop_source();
   return String_add(String_add(String_add(String_add(String_add(({
@@ -875,10 +743,6 @@ static List _cc_flags(void){
 static String _loop_source(void){
   return String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_39), NULL)));
 }
-
-Array Array_update_n(Array, unsigned, ...);
-
-String String_join(String, List);
 
 static String _directory(String root, String identity, Array owners){
   Array key = Array_update_n(Array_new(), 1, String_var(identity));
@@ -957,8 +821,6 @@ static List Helper_build(Helper * h){
   return Helper_write_manifest(&((* h)), Helper_link(&((* h)), count));
 }
 
-static String int_str(int);
-
 static String Helper_base(Helper * h, int index){
   return({
     Var _x2c_literal_part_17 = String_var((* h).directory);  String_join(NULL, cons(_x2c_literal_part_17, cons(String_var(_43), cons(String_var(int_str(index)), NULL))));
@@ -988,8 +850,6 @@ static void _clear(String base){
   }
 
 }
-
-List List_append(List, List);
 
 static void Helper_parse(Helper * h, String path, int index){
   Frontend f =(* h).frontend;
@@ -1035,13 +895,7 @@ static void Helper_parse(Helper * h, String path, int index){
 
 }
 
-int Frontend_start(Frontend, String, ParsedUnit *);
-
-int ParsedUnit_collect(ParsedUnit *, Frontend);
-
 void Diagnostics_reset(Diagnostics);
-
-int ParsedUnit_parse(ParsedUnit *);
 
 static void Helper_parse_source(Helper * h, Frontend f, String path, int index){
   ParsedUnit unit;
@@ -1104,8 +958,6 @@ static String Helper_compile(Helper * h, int index, String unit){
   return failure;
 }
 
-List translation_depfile_parse(String);
-
 static void _add_depfile(String path, Map deps){
   if(! Path_is_file(path)) return;
   {
@@ -1121,8 +973,6 @@ static void _add_depfile(String path, Map deps){
   }
 
 }
-
-Var Map_getindex(Map, Var);
 
 static void Helper_record(Helper * h, int index, String failure){
   String base = Helper_base(&((* h)), index);
@@ -1210,12 +1060,6 @@ static String Helper_support(Helper * h, String * failure){
 
 }
 
-int tool_capture(List, String *, String *);
-
-String x2c_get_executable(void);
-
-String String_strip(String, char *);
-
 static String Helper_compile_support(Helper * h, String source, String directory, String object){
   String printed = NULL, errors = NULL;
   if(tool_capture(({
@@ -1235,22 +1079,12 @@ static String Helper_compile_support(Helper * h, String source, String directory
   return failure;
 }
 
-String String_printf(String, ...);
-
 static String _temporary(String path){
   return({
     Var _x2c_literal_part_38 = String_var(path);  Var _x2c_literal_part_39 = String_var(String_printf(_74, (long) getpid()));  String_join(NULL, cons(_x2c_literal_part_38, cons(String_var(_75), cons(_x2c_literal_part_39, NULL))));
   }
   );
 }
-
-Buffer Buffer_new(size_t);
-
-Buffer Buffer_write(Buffer, const char *);
-
-Buffer Buffer_printf(Buffer, const char *, ...);
-
-String Buffer_str(Buffer);
 
 static String _tables(Array built, int count){
   Buffer out = Buffer_new(0);
@@ -1283,8 +1117,6 @@ static String _tables(Array built, int count){
   return Buffer_str(out);
 }
 
-ToolAction Toolchain_link_action(Toolchain, String, List);
-
 static List Helper_link_arguments(Helper * h, String output, String tables, String support){
   Toolchain t =(* h).toolchain;
 #ifdef __APPLE__
@@ -1304,8 +1136,6 @@ static List Helper_link_arguments(Helper * h, String output, String tables, Stri
   }
   );
 }
-
-int datum_write(Buffer, Var, int);
 
 static List Helper_write_manifest(Helper * h, String failure){
   List manifest =({
@@ -1342,8 +1172,6 @@ static List Helper_write_manifest(Helper * h, String failure){
 
 }
 
-Array Array_sort(Array);
-
 static List _digests(Map paths){
   Array rows = Array_new();
   {
@@ -1365,14 +1193,6 @@ static List _digests(Map paths){
   }
   return Array_list(Array_sort(rows));
 }
-
-int datum_read(String, unsigned *, Var *);
-
-static int Var_is_row(Var, unsigned, unsigned long, unsigned long);
-
-int Var_truth(Var);
-
-Var List_getindex(List, int);
 
 static List _current(String directory){
   String path = String_join(NULL, cons(String_var(directory), cons(String_var(_87), NULL)));
@@ -1456,8 +1276,6 @@ static List _current(String directory){
 
 int SourceView_exists(SourceView, String);
 
-String File_sha256(File);
-
 static String _digest(String path){
   if(String_startswith(path, _88)) path = String_getslice(path, 4, -2147483648, 1);
   if(! SourceView_exists(NULL, path)) return _89;
@@ -1503,8 +1321,6 @@ static Var _x2c_lambda_0(Var dir){
   ;
 }
 
-Var x2c_func_value_argument(Func, const FuncArg *, unsigned, Symbol);
-
 static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0){
   Var a0 = x2c_func_value_argument(_x2c_func_binding_0, _x2c_func_argv_0, 0, 45156);
   return _x2c_lambda_0(a0);
@@ -1527,8 +1343,6 @@ static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
   *(*(List * *) _x2c_defer_data_1->_x2c_defer_capture_1) =(*(List *) _x2c_defer_data_1->_x2c_defer_capture_2);
 }
 
-void ParsedUnit_close(ParsedUnit *);
-
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
   _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_2;
   ParsedUnit_close(&((*(ParsedUnit *) _x2c_defer_data_2->_x2c_defer_capture_3)));
@@ -1538,8 +1352,6 @@ static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3){
   _x2c_defer_env_3 * _x2c_defer_data_3 =(_x2c_defer_env_3 *) _x2c_defer_opaque_3;
   close((*(int *) _x2c_defer_data_3->_x2c_defer_capture_4));
 }
-
-void Buffer_cleanup(Buffer);
 
 static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4){
   _x2c_defer_env_4 * _x2c_defer_data_4 =(_x2c_defer_env_4 *) _x2c_defer_opaque_4;

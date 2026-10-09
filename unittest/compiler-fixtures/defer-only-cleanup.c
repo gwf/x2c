@@ -19,10 +19,6 @@ static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
 
-void x2c_cleanup_push(X2CCleanup *);
-
-void x2c_cleanup_leave(X2CCleanup *);
-
 #include "exception.h"
 
 

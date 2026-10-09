@@ -16,12 +16,6 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
-static Var String_var(String);
-
-List cons(Var, List);
-
-static Var List_var(List);
-
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -42,16 +36,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _13 = cons(_9, _12);
   _14 = String_new("imported");
 }
-
-String String_str(String);
-
-String List_repr(List);
-
-int List_equal(List, List);
-
-static List Var_list(Var);
-
-static Var List_car(List);
 
 int main(void){
   x2c_initialize();

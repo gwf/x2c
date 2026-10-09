@@ -46,6 +46,13 @@ static keyword loop $private.loop;
 
 /* macros diagnostics. */
 
+static macro Stmt $report.rewrite.result_type(
+  Expr $c, Expr $site, Expr $expected, Expr $actual) =>
+  $c.report_error(
+    <type>, "indexed rewrite must preserve the getter result type", $site,
+    %("expected: ${$expected.repr()}" "actual: ${$actual.repr()}"
+      "return an explicitly converted expression"));
+
 static macro Stmt $report.macro.expansion_count(Expr $c, Expr $origin) =>
   $c.report_error(
     <macro>, "macro expansion count exceeds 10000",
@@ -1594,6 +1601,8 @@ List Compiler.parse_macro_quotation(Compiler c) {
   }
   if (!c.macro_holes) locals = locals.append(c._expression_holes(holes));
   List built = c._quotation(start, kind, holes, type);
+  if (typed && !(%(dynamic) in holes) && c.folded_constant(built) is not void)
+    return built;
   return locals
        ? %(expr ("List") (parens (block @locals (stmnt $built))))
        : built;
@@ -1659,6 +1668,9 @@ static List Compiler._hole_local(Compiler c, Map holes, int position) {
   c.expect(<"}">);
   String name = c.fresh_name("hole");
   holes[%(expression $position)] = name;
+  Var constant = c.folded_constant(value);
+  if (constant is void) holes[%(dynamic)] = 1;
+  else holes[%(constant $name)] = constant;
   return c.bind_syntax(
     %(declare ${value.cadr()}
       (bindings (op = (bind ${c.sym.introduce(name)} ()) $value))),
@@ -1734,7 +1746,7 @@ static List Compiler._quotation(
     d.body();
   }
   d.finish();
-  List built = d.construction();
+  List built = d.construction(holes);
   if (built) return built;
   /* Each local supplies one hole, a sequence included, so the quotation
      builds its pending invocation with the values already grouped. */
@@ -1761,9 +1773,9 @@ static List Compiler._quoted_cons(
    where it is written (see "quoted syntax"). Any other quotation, or one
    whose template uses a projection only an expansion makes, returns NULL
    and keeps its definition. */
-static List Definition.construction(Definition &d) {
+static List Definition.construction(Definition &d, Map holes) {
   Compiler c = d.c;
-  if (d.type) return d.typed_construction();
+  if (d.type) return d.typed_construction(holes);
   if (d.kind == <type> || d.kind == <param>) return d.part_construction();
   if (!d.rebuild || d.nested || d.kind == <decl-unit> || c.runtime_literals)
     return NULL;
@@ -1848,7 +1860,7 @@ static List Compiler._built_hole(
    quotation binds nothing, so it may declare no name and apply no
    template. */
 
-static List Definition.typed_construction(Definition &d) {
+static List Definition.typed_construction(Definition &d, Map holes) {
   Compiler c = d.c;
   Map keys = d.written_keys();
   match (d.rebuild.car()) case %(expr ? *content):
@@ -1858,6 +1870,11 @@ static List Definition.typed_construction(Definition &d) {
   /* The rebuild template of an expression that is one hole is empty; the
      definition's template names the hole, which `Macro.typed` inserts. */
   List hole = keys[d.template.last()].list().car();
+  // Constant interpolation uses the same constructor without a runtime local.
+  Var type = c.folded_constant(d.type), constant;
+  if (type is <list> &&
+      holes.try_get(%(constant ${_hole_name(hole).str()}), constant))
+    return c.cache_literal_list(Macro.typed(type, constant));
   List callee = c.resolve_expression(
     %(expr () (ident "Macro_typed")), d.start);
   List value = c._hole_value(hole, d.start);
@@ -2350,6 +2367,8 @@ void Compiler.install_compile_time_effects(Compiler c, List rows) {
       if (!c.kw_aliases) c.kw_aliases = {};
       c.kw_aliases[alias] = %(imported-macro $definition);
     }
+    case %(compile-time rewrite ?point ?kind ?name ?shape ?holes):
+      c._register_rewrite(point, kind, name, shape, holes);
     case %(compile-time lisp ?form (source ?path ?site)): {
       Token token = c.thaw_declaration_syntax(site);
       String file = home_absolute_path(path), text = NULL;
@@ -2460,6 +2479,97 @@ static void Compiler._record_alias(Compiler c, Map aliases) {
   Atom alias = Atom.intern(token.text);
   c.parse_keyword_definition();
   aliases[alias] = c.kw_aliases[alias];
+}
+
+static typedef struct RewriteRule {
+  String name;
+  MacroMatcher matcher;
+  int builtin;
+} *RewriteRule;
+
+static Var RewriteRule.var(RewriteRule rule) => Var.new(<p48>, rule);
+static RewriteRule Var.rewrite_rule(Var value) => value.pointer();
+
+/* A coarse category selects candidates; each retained pattern decides whether
+   the translator applies. Only the active translator is excluded while its
+   replacement binds, so independent translations can compose. User rules
+   retain registration order ahead of builtin defaults. */
+static void Compiler._register_rewrite(
+  Compiler c, Symbol point, Var kind, String name, Macro shape, List holes) {
+  if (!c.rewrite_rules) c.rewrite_rules = {};
+  Var stored;
+  Map kinds;
+  if (c.rewrite_rules.try_get(point, stored)) kinds = stored;
+  else c.rewrite_rules[point] = kinds = {};
+  List rows = kinds.try_get(kind, stored) ? stored.list() : NULL;
+  foreach (RewriteRule prior, rows)
+    if (prior.name == name && prior.matcher.shape == shape &&
+        prior.matcher.holes == holes) return;
+  RewriteRule rule = Scope.calloc(1, sizeof(struct RewriteRule));
+  rule.name = name;
+  rule.matcher = shape.matcher(holes);
+  rule.builtin = c.builtin_defs;
+  Array ordered = [];
+  int inserted = 0;
+  foreach (RewriteRule prior, rows) {
+    if (!rule.builtin && prior.builtin && !inserted) {
+      ordered.push(rule);
+      inserted = 1;
+    }
+    ordered.push(prior);
+  }
+  if (!inserted) ordered.push(rule);
+  kinds[kind] = ordered.list_free();
+}
+
+static List Compiler._rewrite_candidates(Compiler c, Symbol point, Var kind) {
+  Var stored;
+  if (!c.rewrite_rules || !c.rewrite_rules.try_get(point, stored)) return NULL;
+  Map kinds = stored;
+  return kinds.try_get(kind, stored) ? stored.list() : NULL;
+}
+
+/** Tests one operation's registry without invoking a translator. */
+int Compiler.has_rewrites(Compiler c, Symbol point, Var kind) =>
+  !!c._rewrite_candidates(point, kind);
+
+/** Matches registered patterns for one operation, then binds the first
+    replacement that differs from its input. Active rules cannot re-enter. */
+List Compiler.rewrite(
+  Compiler c, Symbol point, Var kind, List source, AstPos position,
+  Type expected, Token site) =>
+  c._rewrite(point, kind, source, position, expected, site, 0);
+
+/** Binds and lowers a replacement while its rule remains active. An
+    expression retains the result type already established for its parent. */
+List Compiler.lower_rewrite(
+  Compiler c, Symbol point, Var kind, List source, AstPos position,
+  Type expected, Token site) =>
+  c._rewrite(point, kind, source, position, expected, site, 1);
+
+static List Compiler._rewrite(
+  Compiler c, Symbol point, Var kind, List source, AstPos position,
+  Type expected, Token site, int lower) {
+  if (c.meta_body || c.macro_holes) return NULL;
+  foreach (RewriteRule rule, c._rewrite_candidates(point, kind)) {
+    if (c.active_rewrites.contains(rule) ||
+        !c.matches_macro(rule.matcher, source)) continue;
+    Var result = c.apply_meta_function(rule.name, %($source), site);
+    if (result is void || result.equal(source) ||
+        (result is <list> && !result.list())) continue;
+    $let(c.active_rewrites, cons(rule, c.active_rewrites)) {
+      List bound = c.bind_syntax(result, position, expected);
+      if (!lower) return bound;
+      if (position == AST_EXPRESSION) {
+        bound = c.convert_expression(bound, expected);
+        Type actual = bound.cadr();
+        if (actual.canonicalize() != expected.canonicalize())
+          $report.rewrite.result_type(c, site, expected, actual);
+      }
+      return c.normalize(bound);
+    }
+  }
+  return NULL;
 }
 
 /* invocation recognition
@@ -2642,8 +2752,8 @@ static int Compiler._try_macro(
 /** Returns how collection treats the macro invocation at the cursor.
     `<required>` covers every file-scope `Unit` macro, declaration-unit macro,
     named-type decorator, and local `Unit` macro whose template contains
-    protocol or adoption rows. `<tried>` covers any other local `Unit`
-    macro. Other invocations return zero.
+    protocol or adoption rows. `<tried>` covers Unit decorators and other
+    local `Unit` macros. Other invocations return zero.
 */
 Symbol Compiler.macro_invocation_collection(Compiler c) =>
   _collection(c._peek_invocation());
@@ -2652,6 +2762,7 @@ static Symbol _collection(List definition) {
   if (!definition) return 0;
   if (definition.assoc(<kind>) == <decl-unit> ||
       definition.assoc(<target>) == <named-type>) return <required>;
+  if (definition.assoc(<target>) == <unit>) return <tried>;
   if (definition.assoc(<kind>) != <unit>) return 0;
   if (!definition.assoc(<local>).int()) return <required>;
   List template = definition.assoc(<template>), bindings;
@@ -3187,7 +3298,8 @@ static List Decoration.target(Decoration &d) {
 
 static List Compiler._positional_target(Compiler c, AstPos position) {
   switch (position) {
-    case AST_UNIT:       return c.parse_top_level();
+    case AST_UNIT:
+      $let(c.capture_unit, 1) return c.parse_top_level();
     case AST_BLOCK: case AST_STATEMENT:
       return c.parse_governed(position);
     case AST_FIELD:      return c.parse_field(c.aggregate_type);
@@ -4174,8 +4286,9 @@ static List Compiler._captured_pair(Compiler c, List binding, Type type) {
 }
 
 /** Consumes a `(code-value STAGE CODE EFFECTS)` carrier a producer returned
-    into a macro value application. Effects are applied in order under the
-    application's transaction, and their tokens are replaced in the code.
+    into a macro value application, or that `Compiler.bind_code_value`
+    binds as one. Effects are applied in order under the application's
+    transaction, and their tokens are replaced in the code.
     `retained` reports a bound or lowered stage, which ordinary binding
     leaves untouched. Lowered code is not searched for a leftover binder.
     Returns 0 for any other value.
@@ -4201,6 +4314,11 @@ static Map Compiler._code_effects(Compiler c, Var effects) {
   Map replacements = {};
   foreach (List effect, effects)
     match (effect) {
+      case %(rewrite ?point ?kind ?name ?shape ?holes): {
+        c._register_rewrite(point, kind, name, shape, holes);
+        c.record_compile_time_effect(
+          %(compile-time rewrite $point $kind $name $shape $holes), c.token);
+      }
       case %(new-name ?token ?(String role)):
         replacements[token] = c.sym.introduce(c.fresh_name(role));
       case %(cleanup ?token ?placed): {
@@ -4209,11 +4327,33 @@ static Map Compiler._code_effects(Compiler c, Var effects) {
       }
       case %(early ?key ?binding ?declaration): {
         $adapter.memo(c, key, replacements[binding]) {
-          c.add_early(_replace_bindings(declaration, replacements));
+          c.add_early(c.bind_syntax(
+            _replace_bindings(declaration, replacements), AST_UNIT, NULL));
         }
       }
+      default:
+        c.report_error(
+          <macro>, "a meta call returned an unknown code effect", c.token,
+          %("effect: ${effect.repr()}"));
     }
   return replacements;
+}
+
+/** Binds a code-value carrier that a meta call returned outside a macro
+    value application as an application binds it, under a transaction that
+    also covers its effects. */
+List Compiler.bind_code_value(
+  Compiler c, List carrier, AstPos position, Type return_type) {
+  List bound = NULL;
+  $let(c.macro_application, c.macro_application + 1) {
+    SymTxn transaction = { 0 };
+    if (c.recovery_depth > 0)
+      transaction = c.begin_semantic_transaction();
+    defer transaction.rollback();
+    bound = c.bind_syntax(carrier, position, return_type);
+    transaction.commit();
+  }
+  return bound;
 }
 
 /* A named binder left as a carrier's code, identifier, or declarator

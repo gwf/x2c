@@ -5,20 +5,6 @@
 
 #include "x2c.h"
 #include "c-annotation-macro-values.h"
-Pair pair_make(int, int);
-
-const char * pair_name(int);
-
-int pair_sum(Pair);
-
-int String_len(String);
-
-int pair_diff(Pair);
-
-int pair_max(Pair);
-
-void pair_abort(int);
-
 int main(void){
   x2c_initialize();
   Pair pair = pair_make(3, 4);

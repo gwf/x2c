@@ -16,8 +16,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _0 = String_new("implicit");
 }
 
-int String_len(String);
-
 int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();

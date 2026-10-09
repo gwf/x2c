@@ -12,10 +12,6 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
-static Var int_var(int);
-
-List cons(Var, List);
-
 #include "exception.h"
 
 
@@ -31,34 +27,10 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _3 = cons(_0, _2);
 }
 
-Var List_getindex(List, int);
-
 #include "error.h"
 
 
 
-
-int x2c_error_catch_site_pending(ErrorCatchSite *);
-
-ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
-
-void x2c_exception_push(ExceptionFrame *);
-
-void x2c_exception_landed(ExceptionFrame *);
-
-int x2c_exception_is_error_target(ExceptionFrame *);
-
-int x2c_error_catch_selected(ErrorHandler);
-
-void x2c_error_catch_detach(ErrorHandler);
-
-void x2c_exception_mark_handled(ExceptionFrame *);
-
-void x2c_error_catch_close(ErrorHandler);
-
-void x2c_exception_leave(ExceptionFrame *);
-
-int Var_int(Var);
 
 int main(void){
   x2c_initialize();

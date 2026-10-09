@@ -15,10 +15,6 @@
 #include "common.x"
 #include "match.x"
 
-/** A macro as a value: called to build code, or used in a Match `case` to
-   recognize code and capture its parameters. */
-typedef List Macro;
-
 /** Records fixed-local slots for distinct-identity checks and Name slots
     for member-spelling comparisons during recognition. */
 typedef struct MacroFixedSlots {
@@ -53,6 +49,7 @@ typedef struct MacroCaseSite {
 #include "atom.x"
 #include "list.x"
 #include "match-machine.x"
+#include "match-cache.x"
 #include "meta.x"
 #include "string.x"
 #include "varconvert.x"
@@ -135,6 +132,8 @@ List Macro.inserted_items(List values) => _macro_expr_values(values);
     local holds `value`: the inserted expression with the type `type`. A
     String typed `String` is a String literal. */
 List Macro.typed(List type, Var value) {
+  if (value is <list> && value.list().car().is_match_op())
+    return %(expr $type $value);
   if (value is <string> && List.compare(type, %("String")) == 0)
     value = x2c_literal_string(value);
   List expression = Macro.inserted(value, 1, 1);
@@ -211,6 +210,9 @@ static List _macro_binder_rows(Macro t, List names, int case_pattern) {
       selected = Atom.intern("*" + selected.str()[1:]);
     int sequence = hole.assoc(<sequence>);
     Var projected = sequence ? %($selected).var() : selected;
+    // An explicit expression pattern owns its type constraint.
+    if (!sequence && selected is <list> && selected.list().car() == <expr>)
+      projected = %(!and $selected);
     if (case_pattern && kind == <name>)
       projected = %(!and $selected ${_macro_name_identity(hole)});
     Var expression = !sequence && kind == <name>
@@ -412,6 +414,8 @@ static Var _macro_pattern_view(Var value) {
   if (value is not <list>)
     return value == <*> || value == <?> ? %(!quote $value).var() : value;
   List node = value;
+  /* Explicit Match operands already describe recognition, not source code. */
+  if (node.car().is_match_op()) return node;
   match (node) {
     case %(expr ?type ?body): return _macro_expr_view(type, body);
     case %(literal *): return %(!quote $node);
@@ -432,6 +436,8 @@ static Var _macro_pattern_view(Var value) {
 static Var _macro_expr_view(Var type, Var body) {
   int shell = type === %(<macro-expr>);
   if (shell && body.is_binder()) return body;
+  if (shell && body is <list> && body.list().car().is_match_op())
+    return body;
   if (shell && body is <list> && body.list().car() == <expr>)
     return _macro_pattern_view(body);
   return %(expr ? ${_macro_pattern_view(body)});
@@ -489,6 +495,44 @@ int Macro_case_capture_at(
     return _macro_capture(
       code, site.match.plan, &site.policy, &site.route, published);
   return _macro_derived_capture(site, code, t, names, published);
+}
+
+/** Retains a macro and hole patterns for repeated recognition. A pattern
+    independent of subject bindings is derived once; contextual references
+    are resolved against each subject. The caller keeps the source values
+    alive as long as this record. Match plans use the active Match cache. */
+typedef struct MacroMatcher {
+  Macro shape;
+  List holes, pattern;
+} MacroMatcher;
+
+/** Prepares repeated recognition without retaining subject-specific bindings. */
+MacroMatcher Macro.matcher(Macro shape, List holes) {
+  Var previous = Macro.subject();
+  Macro.use_subject(%());
+  defer Macro.use_subject(previous);
+  macro_subject_used = 0;
+  List pattern = _macro_case_shape(shape, holes);
+  return (MacroMatcher){shape, holes, macro_subject_used ? NULL : pattern};
+}
+
+/** Tests code with the same source views and identity rules as a macro case. */
+int MacroMatcher.matches(MacroMatcher &m, List code) {
+  List pattern = m.pattern ? m.pattern : _macro_case_shape(m.shape, m.holes);
+  MatchLease lease;
+  int status = MatchCache.current().acquire(pattern, lease, "Macro.matches");
+  defer lease.release();
+  if (status != MACHINE_PREPARED) return 0;
+  MatchPlan plan = lease.plan();
+  MacroFixedSlots policy = _macro_fixed_slots(m.shape, m.holes, plan);
+  return _macro_case_match(code, plan, &policy, NULL);
+}
+
+/** Tests complete code against a macro and its hole patterns. Repeated
+    recognition can retain `Macro.matcher` to avoid deriving the same pattern. */
+int Macro.matches(Macro t, List code, List holes) {
+  MacroMatcher matcher = {t, holes, NULL};
+  return matcher.matches(code);
 }
 
 /* A retained invocation of this same definition matches by its arguments,
@@ -678,7 +722,7 @@ static MacroFixedSlots _macro_fixed_slots(
 }
 
 /* Runs `plan` over `code` with the fixed-local relation and the unwrapping
-   view, and copies its captures. A plan that is not prepared takes Match's
+   view, and copies captures when requested. An unprepared plan takes Match's
    ordinary route, which reports why. */
 static int _macro_case_match(
   List code, MatchPlan plan, MacroFixedSlots *policy,
@@ -693,7 +737,8 @@ static int _macro_case_match(
   machine.view = _macro_unwrap;
   machine.begin(plan.program.view(), code);
   machine.run();
-  int matched = machine.status == <ok> && _macro_take_slots(machine, captured);
+  int matched = machine.status == <ok> &&
+    (!captured || _macro_take_slots(machine, captured));
   machine.finish();
   machine.dispose();
   return matched;

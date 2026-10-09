@@ -731,14 +731,15 @@ initializers again before the first call a unit makes. What those
 initializers allocate, a Job one starts included, lasts until the next
 unit's reset or the end of the helper.
 
-A project `meta` function receives what it needs as arguments and returns
-a value; it does not query the compiler. The syntax builders of
-`lib/meta.x`, `x2c_ident`, `x2c_function_name`, `x2c_diagnostic_fail`,
-and `x2c_diagnostic_warn` work in the helper, and a builder that needs a
-type's parts is finished by the compiler when the call returns. The
-operations that read other compiler state, such as `x2c_source_text` and
-`x2c_type_fields`, report that they are not available to project meta
-code.
+A project `meta` function receives arguments and returns a value. The
+syntax builders of `lib/meta.x`, `x2c_ident`, `x2c_function_name`,
+`x2c_diagnostic_fail`, and `x2c_diagnostic_warn` work in the helper. The
+typing and invocation queries, such as `x2c_type_resolve`,
+`x2c_type_fields`, `x2c_syntax_type`, and `x2c_method_resolve`, ask the
+compiler while the call waits. The compiler answers in the state of the `$`
+call's site, so a project function gets the answer that compiler-linked
+meta code gets at the same place. `x2c_source_text` reads only the text a
+`Source` parameter carries.
 
 Running compile-time code needs what building the program needs: the C
 compiler and the runtime headers. A project meta module that does not
@@ -1416,11 +1417,10 @@ declarations.
 `x2c_ident`, `x2c_function_name`, `x2c_diagnostic_fail` and
 `x2c_diagnostic_warn` work in every `meta` function. The queries that read
 the compiler's symbol table, such as `x2c_syntax_type`,
-`x2c_type_fields` and `x2c_type_resolve`, run only in the compiler's own
-`meta` code: the source modules and `lib/meta.x` that are linked into
-the compiler. A project `meta` function receives those answers as `TypeInfo`
-and `Source` parameters instead; calling such a query from the project
-meta module reports that it is not available to project meta code. Each
+`x2c_type_fields` and `x2c_type_resolve`, also work in every `meta`
+function: the compiler answers a project function's query while the call
+waits, in the state of the call's site. `TypeInfo` and `Source`
+parameters still deliver a description in one argument. Each
 operation is a plain function whose name is the compile-time Lisp name with `_`
 for `.`, so `x2c.type.fields` is `x2c_type_fields` from x2c. They are grouped
 here by the task, not by signature; the
@@ -1467,16 +1467,14 @@ int main(void) {
 twice 42
 ```
 
-**Asking about types and fields.** A program's `meta` function receives a
-type as a `TypeInfo` parameter, described above, and asks the compiler
-nothing. The queries below answer the same questions for the compiler's
-own `meta` code in `lib/`. `x2c_syntax_type` answers the canonical `Type`
+**Asking about types and fields.** A `meta` function receives a type as a
+`TypeInfo` parameter, described above, or asks the compiler with the
+queries below. `x2c_syntax_type` answers the canonical `Type`
 of an expression or binding. `x2c_type_fields` answers the named fields
 of a struct or union `Type`, each as a metadata row whose first element is
 the field name. `x2c_type_layout`, `x2c_type_resolve` and
 `x2c_type_is_value` answer the remaining generated-code questions.
-`x2c_type_parts` reads only the `Type` it receives, so it also works in a
-project `meta` function.
+`x2c_type_parts` reads only the `Type` it receives.
 `x2c_method_resolve` answers which operation a member call selects. These
 answers live in the compiler's symbol table, so a macro body cannot derive
 them from the code it captured.
@@ -1532,6 +1530,10 @@ sample.x:15:23: macro: this argument must be one word
   printf("word %s\n", $probe.word(seconds * 2));
                       ^
 ```
+
+`x2c_diagnostic_fail_at` reports under a category, such as `<macro>` or
+`<type>`, at a node the macro received, such as one captured statement,
+instead of at the invocation.
 
 The compiler binds each of these under its x2c name and derives the Lisp
 name from it: `_` becomes `.`, and a predicate `x2c_type_is_X` becomes

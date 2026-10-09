@@ -24,14 +24,6 @@ static int first_call(List form);
 
 static List dropped(List form, Var leaf);
 
-static Var Symbol_var(Symbol);
-
-List cons(Var, List);
-
-static Var int_var(int);
-
-static Var List_var(List);
-
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -102,16 +94,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _63 = cons(_57, _62);
 }
 
-List List_match(List, Var);
-
-static int List_truth(List);
-
-int List_len(List);
-
-static List Var_list(Var);
-
-Var List_assoc(List, Var);
-
 static int bound(List form){
   List bindings =({ static MatchCaptureSite _x2c_match_site_0;
   x2c_match_site_match(& _x2c_match_site_0, form, List_var(_5)); });
@@ -123,21 +105,15 @@ static int sentinel(List form){
   return List_truth(({ static MatchCaptureSite _x2c_match_site_1;  x2c_match_site_match(& _x2c_match_site_1, form, List_var(_9)); })) ? 1 : 0;
 }
 
-List List_match_replace(List, Var, Var);
-
 static List renamed(List form){
   return({ static MatchCaptureSite _x2c_match_site_2;
   x2c_match_site_match_replace(& _x2c_match_site_2, form, List_var(_5), List_var(_11)); });
 }
 
-List List_search_replace(List, Var, Var);
-
 static List retagged(List form){
   return({ static MatchCaptureSite _x2c_match_site_3;
   x2c_match_site_search_replace(& _x2c_match_site_3, form, List_var(_15), List_var(_17)); });
 }
-
-int List_try_search(List, Var, Var *, List *);
 
 static int first_call(List form){
   Var found;
@@ -149,8 +125,6 @@ static int first_call(List form){
 static List dropped(List form, Var leaf){
   return List_search_replace(form, List_var(cons(_22, cons(leaf, NULL))), List_var(_24));
 }
-
-String List_repr(List);
 
 int main(void){
   x2c_initialize();

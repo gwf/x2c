@@ -7,8 +7,6 @@
 
 #include "common.h"
 #include "match.h"
-typedef List Macro;
-
 typedef struct MacroFixedSlots{
   int count, slots[MACHINE_BINDER_MAX];
   int names, name_slots[MACHINE_BINDER_MAX];
@@ -35,6 +33,7 @@ MacroCaseSite;
 #include "atom.h"
 #include "list.h"
 #include "match-machine.h"
+#include "match-cache.h"
 #include "meta.h"
 #include "string.h"
 #include "varconvert.h"
@@ -66,6 +65,18 @@ List Macro_number_literal(List result, List type, Var value);
 List Macro_case_pattern(Macro t, List names);
 
 int Macro_case_capture_at(MacroCaseSite * site, List code, Macro t, List names, MatchCaptureBuffer * published);
+
+typedef struct MacroMatcher{
+  Macro shape;
+  List holes, pattern;
+}
+MacroMatcher;
+
+MacroMatcher Macro_matcher(Macro shape, List holes);
+
+int MacroMatcher_matches(MacroMatcher * m, List code);
+
+int Macro_matches(Macro t, List code, List holes);
 
 
 #endif /* __GUARD_0x55030A90__ */

@@ -13,7 +13,11 @@
 #include "string.h"
 #include "symbol.h"
 #include "symbolset.h"
+typedef List Macro;
+
 typedef List Type;
+
+typedef List Code;
 
 typedef List TypeInfo;
 
@@ -46,6 +50,22 @@ String x2c_source_text(Var syntax);
 String x2c_binding_spelling(Var syntax);
 
 List x2c_syntax_type(List value);
+
+Type Code_type(Code value);
+
+Var Code_value(Code code);
+
+Code Code_register_rewrite(Code function, Macro shape, List holes);
+
+Code Code_register_after_initialization(Code function, Macro shape, List holes);
+
+int Type_is_named(Type type, String name);
+
+Type Type_numeric(Type type);
+
+int Type_is_text(Type type);
+
+Code Type_protocol_member(Type type, String name);
 
 Var x2c_literal_value(Var syntax);
 
@@ -94,6 +114,8 @@ int x2c_invocation_column(void);
 String x2c_embed_text(Var path);
 
 void x2c_diagnostic_fail(String message, List notes);
+
+void x2c_diagnostic_fail_at(Var node, Symbol category, String message, List notes);
 
 void x2c_diagnostic_warn(String message, List notes);
 

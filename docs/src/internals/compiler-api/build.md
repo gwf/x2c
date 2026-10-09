@@ -169,7 +169,7 @@ executable is never reused for source it was not built from.
 
 **Raises:** `<io-fail>` when the executable cannot be moved.
 
-Source: `src/build.x:1109`
+Source: `src/build.x:1111`
 
 <a id="Build.record_translation"></a>
 #### Build.record_translation
@@ -251,7 +251,7 @@ Source: `src/build.x:181`
 Reports whether the script executable under `directory` still matches
 everything recorded when it was built.
 
-Source: `src/build.x:1183`
+Source: `src/build.x:1185`
 
 ## Public types
 

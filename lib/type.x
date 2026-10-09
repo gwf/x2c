@@ -1,0 +1,617 @@
+/*  type.x -- semantic type values and their structural operations
+
+    Copyright (c) 2026 Gary William Flake
+
+    These operations inspect captured types without compiler state. Name
+    resolution and translation-unit registrations belong to the compiler.
+*/
+
+#pragma once
+#include "meta.x"
+#include "array.x"
+#include "list.x"
+#include "match.x"
+#include "symbolset.x"
+#include "native-scalar-types.x"
+#include <limits.h>
+
+// views
+
+/** Returns the `List` payload of `x` as a `Type`, or `NULL` for another tag.
+*/
+inline Type Var.type(Var x) => x is <list> ? (Type) x.pointer() : (Type) NULL;
+
+/** Views `x` as its underlying `List` without validating its type shape. */
+inline List Type.list(Type x) => (List) x;
+
+/** Views `x` as a `Type` without validating its type shape. */
+inline Type List.type(List x) => (void *) x;
+
+// specifier symbols
+
+static const SymbolSet storage_classes =
+  %<<typedef static auto extern register threaded>>;
+static const SymbolSet type_qualifiers = %<<const restrict volatile>>;
+static const SymbolSet type_modifiers = %<<long short signed unsigned>>;
+static const SymbolSet number_types =
+  %<<double float char short int long signed unsigned enum>>;
+static const SymbolSet tagged_types = %<<struct union enum>>;
+
+/** Returns whether `sym` is a storage-class specifier. */
+int Symbol.is_storage_class(Symbol sym) => sym in storage_classes;
+
+/** Returns whether `sym` is the `inline` function specifier. */
+int Symbol.is_inline(Symbol sym) => sym == <inline>;
+
+/** Returns whether `sym` is `const`, `restrict`, or `volatile`. */
+int Symbol.is_type_qualifier(Symbol sym) => sym in type_qualifiers;
+
+/** Returns whether `sym` modifies the width or signedness of a scalar. */
+int Symbol.is_type_modifier(Symbol sym) => sym in type_modifiers;
+
+static int Symbol._is_number_type(Symbol sym) => sym in number_types;
+
+static int Symbol._is_tagged(Symbol sym) => sym in tagged_types;
+
+/** Returns whether `sym` can begin a builtin C type specifier. */
+int Symbol.is_builtin_type(Symbol sym) =>
+  sym._is_number_type() || sym._is_tagged() || sym == <void>;
+
+// aggregates and enums
+
+/** Returns whether `type` is any struct or union shape. */
+int Type.is_aggregate(Type type) => !!type.match(%((!or struct union) *));
+
+/** Returns whether `t` is a body-free struct or union tag reference. */
+int Type.is_aggregate_tag(Type t) =>
+  !!t.match(%((!or struct union) (!or (!not (*)) (gensym ? ?) (binding ? ?))));
+
+static int Type._is_aggregate_body(Type type) =>
+  !!type.match(%((!or struct union) (*)));
+
+/** Returns whether `type` is a tagged struct or union definition. */
+int Type.is_aggregate_tag_body(Type type) =>
+  !!type.match(%((!or struct union) ? (*)));
+
+/** Returns whether `type` is any enum shape. */
+int Type.is_enum(Type type) => !!type.match(%(enum *));
+
+/** Returns whether `type` is a body-free enum tag reference. */
+int Type.is_enum_tag(Type type) =>
+  !!type.match(%(enum (!or (!not (*)) (gensym ? ?))));
+
+static int Type._is_enum_body(Type type) => !!type.match(%(enum (*)));
+
+/** Returns whether `type` is a tagged enum definition. */
+int Type.is_enum_tag_body(Type type) => !!type.match(%(enum ? (*)));
+
+/** Returns the one-element tag `List` of an enum, struct, or union `Type`.
+    For a compiler-generated anonymous tag, that element is a gensym node. A
+    shape with no tag slot returns `NULL`.
+*/
+List Type.tag(Type type) {
+  if (type.is_enum_tag() || type.is_enum_tag_body() ||
+      type.is_aggregate_tag() || type.is_aggregate_tag_body())
+    return %( ${type.cadr()} );
+  return NULL;
+}
+
+/** Returns the stored body portion of an enum, struct, or union `Type`.
+    Tag references and `Type`s without a stored body return `NULL`.
+*/
+List Type.body(Type t) {
+  if (t._is_enum_body() || t._is_aggregate_body()) return cdr(t);
+  if (t.is_enum_tag_body() || t.is_aggregate_tag_body()) return t.cddr();
+  return NULL;
+}
+
+// declarators
+
+/** Returns whether `t` begins with a pointer-like modifier. */
+int Type.is_pointer(Type t) => !!t.match(%((!or (!quote *) & opt-ref ^) *));
+
+/** Returns whether `t` is a reference or an optional reference. */
+int Type.is_reference(Type t) => t.car() == <&> || t.car() == <opt-ref>;
+
+/** Returns whether the outer declarator represented by `type` is an array. */
+int Type.is_array(Type type) => _declarator_kind(type) == <dim>;
+
+/** Returns whether the outer declarator is a function or inline function. */
+int Type.is_function(Type type) {
+  Symbol kind = _declarator_kind(type);
+  return kind == <func> || kind == <inline>;
+}
+
+/** Returns whether the outer declarator represented by `type` is a
+    bitfield.
+*/
+int Type.is_bitfield(Type type) => _declarator_kind(type) == <bitfield>;
+
+static Symbol _declarator_kind(Type type) {
+  while (type && type.car() is <list>) type = type.car();
+  return type && type.car() is <symbol> ? type.car() : 0;
+}
+
+/** Removes one outer pointer-like or array modifier, or returns `NULL`. */
+Type Type.dereference(Type type) {
+  Type declared = type;
+  _qualifiers(type);
+  if (type.is_array()) return cdr(type).type().qualify(declared);
+  if (type.is_pointer()) return cdr(type);
+  return NULL;
+}
+
+/** Applies `source`'s outer qualifiers to `type`. */
+Type Type.qualify(Type type, Type source) {
+  if (source.car() is not <symbol> ||
+      !source.car().symbol().is_type_qualifier()) return type;
+  Array out = [];
+  foreach (Var item, source) {
+    if (item is not <symbol> || !item.symbol().is_type_qualifier()) break;
+    out.push(item);
+  }
+  foreach (Var item, type) out.push(item);
+  return out.list_free();
+}
+
+/** Returns the pointer `Type` formed by prefixing `type` with `*`. */
+Type Type.reference(Type type) => $!Type{ $type * };
+
+/** Returns the result `Type` of a function `Type`, following pointer and array
+    modifiers, or `NULL` when the chain does not end at a function.
+*/
+Type Type.apply(Type type) {
+  if (!type) return NULL;
+  if (type.is_pointer()) return cdr(type).type().apply();
+  Symbol kind = _declarator_kind(type);
+  if (kind == <dim>) return cdr(type).type().apply();
+  if (kind == <func> || kind == <inline>) return cdr(type);
+  return NULL;
+}
+
+/** Splits a direct or pointer function `type` into its fixed `params`,
+    which are `NULL` for `(void)`, and its `return_type` when one is asked
+    for. Returns 0 and leaves both unchanged when `type` is not a function.
+*/
+int Type.function_parts(Type type, List &params, Type &?return_type) {
+  if (!type) return 0;
+  type = type.canonicalize();
+  if (type.is_pointer()) type = type.dereference();
+  match (type)
+    case %((func (*parameters)) ?return_head *return_tail): {
+      List values = parameters;
+      match (values)
+        case %(?(Type only)) if (only.canonicalize() === %(void)):
+          values = NULL;
+      params = values;
+      if (return_type) return_type = %($return_head @return_tail);
+      return 1;
+    }
+  return 0;
+}
+
+// storage classes
+
+/** Returns whether `type` carries the `static` storage class. */
+int Type.is_static(Type type) => !!type.match(%(* static *));
+
+/** Returns whether `type` carries the `inline` function specifier. */
+int Type.is_inline(Type type) => !!type.match(%(* inline *));
+
+/** Returns whether `type` carries the `extern` storage class. */
+int Type.is_extern(Type type) => !!type.match(%(* extern *));
+
+/** Returns whether `type` carries the `threaded` storage class. */
+int Type.is_threaded(Type type) => !!type.match(%(* threaded *));
+
+/** Returns whether `type` begins with the `typedef` storage class. */
+int Type.is_typedef(Type type) => type && type.car() == <typedef>;
+
+// canonical forms
+
+/** Returns the suffix of `type` beginning at its builtin or typedef base.
+    The result shares the original `List` and is `NULL` when no base is
+    present.
+*/
+Type Type.base_type(Type type) => type_base_suffix(type);
+
+/** Removes non-typedef storage classes, `inline`, and type qualifiers from
+    `type`.
+*/
+Type Type.canonicalize(Type type) => _canonical(type, 0);
+
+/** Returns the stored declaration `Type` after removing non-typedef storage
+    classes and `inline`. Those specifiers describe declaration placement;
+    `const`, `restrict`, and `volatile` describe the stored value and remain.
+*/
+Type Type.declared(Type type) => _canonical(type, 1);
+
+/* A type that omits nothing returns itself without a copy. */
+static Type _canonical(Type type, int keep_qualifiers) {
+  List rest = type;
+  while (rest && _kept(rest.car(), keep_qualifiers)) rest = rest.cdr();
+  if (!rest) return type;
+  Array out = [];
+  foreach (Var item, type) if (_kept(item, keep_qualifiers)) out.push(item);
+  return out.list_free();
+}
+
+static int _kept(Var item, int keep_qualifiers) =>
+  item is not <symbol> || !_omit_specifier(item, keep_qualifiers);
+
+static int _omit_specifier(Symbol first, int keep_qualifiers) =>
+  (first.is_storage_class() ||
+   (!keep_qualifiers && first.is_type_qualifier()) || first.is_inline()) &&
+  first != <typedef>;
+
+/** Returns whether handing a `source` value to a `target` declaration would
+    silently drop a qualifier the target does not keep. The leading
+    qualifiers of each type describe the copied value, not what it points
+    at, so only the deeper levels are compared. Callers use this where the
+    two types are otherwise the same, or where one points at `void`, which
+    has no deeper levels to compare; a conversion through a converter
+    function copies instead of aliasing.
+*/
+int Type.discards_qualifiers(Type source, Type target) {
+  _qualifiers(source);
+  _qualifiers(target);
+  while (source && target) {
+    source = source.cdr();
+    target = target.cdr();
+    unsigned wanted = _qualifiers(source), offered = _qualifiers(target);
+    if (wanted & ~offered) return 1;
+    if (target === %(void)) return 0;
+  }
+  return 0;
+}
+
+/* Consume the qualifiers at the front of one type and report them as a set.
+   The cursor advances past them so a caller can walk a pointer chain one
+   level at a time. */
+static unsigned _qualifiers(Type &cursor) {
+  unsigned found = 0;
+  Type type = cursor;
+  while (type && type.car() is <symbol>) {
+    Symbol head = type.car();
+    if (!head.is_type_qualifier()) break;
+    switch (head) {
+      case <const>:    found |= 1; break;
+      case <volatile>: found |= 2; break;
+      case <restrict>: found |= 4; break;
+    }
+    type = type.cdr();
+  }
+  cursor = type;
+  return found;
+}
+
+// classification
+
+/** Returns whether `type` is exactly a pointer or array of `char` or
+    `const char`, without resolving typedefs or removing qualifiers. */
+int Type.is_char_pointer_like(Type type) {
+  return type &&
+         (type.match(%((!or (dim *) (!quote *)) char)) ||
+          type.match(%((!or (dim *) (!quote *)) const char)));
+}
+
+/** Returns whether `type` is a builtin scalar, struct, union, or enum. */
+int Type.is_builtin(Type type) => !!type.scalar() || type._is_tagged();
+
+static int Type._is_tagged(Type type) {
+  if (!type) return 0;
+  Var first = type.car();
+  if (first is <symbol>) return Symbol._is_tagged(first);
+  return 0;
+}
+
+/** Returns whether the base of `type` is exactly one typedef-name `String`. */
+int Type.is_typedef_name(Type type) {
+  type = type.base_type();
+  return type && type.len() == 1 && type.car() is <string>;
+}
+
+/** Returns whether `type` is one bare typedef-name `String`.
+    Unlike `is_typedef_name`, this rejects pointer and array wrappers.
+*/
+int Type.is_bare_typedef_name(Type type) =>
+  !!type.match(%(?)) && type.car() is <string>;
+
+/** Returns whether `type` is a fixed numeric scalar or an enum. */
+int Type.is_number(Type type) => !!type.scalar_tag() || type.is_enum();
+
+/** Returns whether `type` is a fixed integral scalar or an enum. */
+int Type.is_integral(Type type) {
+  if (type.is_enum()) return 1;
+  X2CVarNumericInfo info;
+  return Var.numeric_info(type.scalar_tag(), info) && !info.floating;
+}
+
+// scalars
+
+/* The count of each scalar specifier in one type. `sign` is -1 after
+   `signed` and 1 after `unsigned`, and `signs` counts both. */
+static typedef struct Specifiers {
+  int sign, signs, shorts, longs, ints, chars, floats, doubles, voids, count;
+} Specifiers;
+
+/** Returns the normalized builtin scalar spelling, or `NULL` when `t` is not
+    one valid scalar combination. Storage classes and qualifiers do not
+    affect the result.
+*/
+Type Type.scalar(Type t) {
+  Specifiers s = { 0 };
+  foreach (Var item, t) if (item is not <symbol> || !s.add(item)) return NULL;
+  return s.spelling();
+}
+
+/* Counts one specifier; storage classes, qualifiers, and `inline` count as
+   nothing. Any other symbol means the type is no scalar. */
+static int Specifiers.add(Specifiers &s, Symbol symbol) {
+  if (_omit_specifier(symbol, 0)) return 1;
+  s.count++;
+  switch (symbol) {
+    case <signed>:   s.sign = -1; s.signs++; break;
+    case <unsigned>: s.sign = 1;  s.signs++; break;
+    case <short>:    s.shorts++;  break;
+    case <long>:     s.longs++;   break;
+    case <int>:      s.ints++;    break;
+    case <char>:     s.chars++;   break;
+    case <float>:    s.floats++;  break;
+    case <double>:   s.doubles++; break;
+    case <void>:     s.voids++;   break;
+    default: return 0;
+  }
+  return 1;
+}
+
+/* The one spelling C gives a valid combination of counts, or `NULL`. */
+static Type Specifiers.spelling(Specifiers &s) {
+  if (!s.count || s.signs > 1 || s.shorts > 1 || s.longs > 2 || s.ints > 1 ||
+      s.chars > 1 || s.floats > 1 || s.doubles > 1 || s.voids > 1)
+    return NULL;
+  if (s.voids) return s.count == 1 ? %(void) : NULL;
+  if (s.floats) return s.count == 1 ? %(float) : NULL;
+  if (s.doubles) {
+    if (s.longs <= 1 && s.count == s.doubles + s.longs)
+      return s.longs ? %(long double) : %(double);
+    return NULL;
+  }
+  if (s.chars) {
+    if (s.shorts || s.longs || s.ints || s.count != s.chars + s.signs)
+      return NULL;
+    if (s.sign > 0) return %(unsigned char);
+    if (s.sign < 0) return %(signed char);
+    return %(char);
+  }
+  if (s.shorts && s.longs) return NULL;
+  if (s.count != s.signs + s.shorts + s.longs + s.ints) return NULL;
+  if (s.shorts) return s.sign > 0 ? %(unsigned short) : %(short);
+  if (s.longs == 1) return s.sign > 0 ? %(unsigned long) : %(long);
+  if (s.longs == 2) return s.sign > 0 ? %(unsigned long long) : %(long long);
+  return s.sign > 0 ? %(unsigned) : %(int);
+}
+
+/* Process-lifetime scalar table. Its keys are the spellings Type.scalar
+   produces, so the lookup needs no separate discriminator; each row carries
+   the Var tag, the reader that follows Var.convert, and the helper that
+   performs an atomic native update. */
+static Map scalartypes = $native_scalar_types();
+
+static List _scalar_row(Type type) {
+  Type scalar = type.scalar();
+  if (!scalar) return NULL;
+  Var row = scalartypes[scalar];
+  return row is <list> ? row : NULL;
+}
+
+static int _scalar_numeric_info(Type type, X2CVarNumericInfo &info) {
+  Var row = scalartypes[type];
+  return row is <list> && Var.numeric_info(row.list().car(), info);
+}
+
+/** Returns the fixed `Var` numeric tag for `type`, or zero when none exists.
+*/
+Symbol Type.scalar_tag(Type type) {
+  List row = _scalar_row(type);
+  return row ? row.car() : (Symbol) 0;
+}
+
+/** Returns the numeric `Var` reader for `type`, or `NULL` when unsupported.
+    Enums use `Var_int` after conversion to their shared integer tag.
+*/
+String Type.var_numeric_extractor(Type type) {
+  if (type.is_enum()) return "Var_int";
+  List row = _scalar_row(type);
+  return row ? row.cadr() : NULL;
+}
+
+/** Returns the native numeric update helper for `type`, or `NULL` when the
+    scalar has no registered update helper.
+*/
+String Type.var_numeric_update_helper(Type type) {
+  List row = _scalar_row(type);
+  return row ? row.caddr() : NULL;
+}
+
+// arithmetic conversions
+
+/** Applies integer promotion to `type`.
+    Enums and narrow integers become `int`; other scalars retain their
+    canonical spelling, and a non-scalar returns `NULL`.
+*/
+Type Type.promote(Type type) {
+  if (type.is_enum()) return %(int);
+  type = type.scalar();
+  if (!type) return NULL;
+  X2CVarNumericInfo info;
+  if (_scalar_numeric_info(type, info) && !info.floating && info.rank < 3)
+    return %(int);
+  return type;
+}
+
+/** Returns the usual arithmetic result `Type` for two scalar operands.
+    A missing or non-scalar operand produces `NULL`.
+*/
+Type Type.widest(Type a, Type b) {
+  if (!a || !b) return NULL;
+  a = a.promote();
+  b = b.promote();
+  if (!a || !b) return NULL;
+  X2CVarNumericInfo ai = { 0 }, bi = { 0 };
+  _scalar_numeric_info(a, ai);
+  _scalar_numeric_info(b, bi);
+  if (ai.floating || bi.floating) return ai.rank >= bi.rank ? a : b;
+  int ua = ai.unsigned_value, ub = bi.unsigned_value;
+  int ra = ai.rank, rb = bi.rank;
+  if (ua == ub) return ra >= rb ? a : b;
+  if (ua && ra >= rb) return a;
+  if (ub && rb >= ra) return b;
+  Type signed_type = ua ? b : a;
+  int signed_bits = ua ? bi.bits : ai.bits;
+  int unsigned_bits = ua ? ai.bits : bi.bits;
+  if (signed_bits > unsigned_bits) return signed_type;
+  return _unsigned_scalar(signed_type);
+}
+
+static Type _unsigned_scalar(Type type) {
+  switch (type.scalar_tag()) {
+    case <i8>:    return %(unsigned char);
+    case <i16>:   return %(unsigned short);
+    case <i32>:   return %(unsigned);
+    case <long>:  return %(unsigned long);
+    case <llong>: return %(unsigned long long);
+  }
+  return type;
+}
+
+// numeric literals
+
+/** Returns the native type selected by a validated numeric token.
+    `floating` selects floating suffix rules; an integer outside all supported
+    native families returns `NULL`.
+*/
+Type Type.numeric_literal(String text, int floating) {
+  int length = text.len();
+  if (floating) {
+    int last = text[length - 1];
+    if (last == 'f' || last == 'F') return %(float);
+    if (last == 'l' || last == 'L') return %(long double);
+    return %(double);
+  }
+  int suffix = _integer_literal_end(text);
+  int is_unsigned = 0, longs = 0;
+  for (int i = suffix; i < length; i++) {
+    int ch = text[i];
+    if (ch == 'u' || ch == 'U') is_unsigned = 1;
+    else longs++;
+  }
+  unsigned long long magnitude;
+  int decimal;
+  if (!_literal_magnitude(text, suffix, magnitude, decimal)) return NULL;
+  return _integer_literal_type(magnitude, decimal, is_unsigned, longs);
+}
+
+/** Reads a validated numeric literal at its semantic type's precision.
+    Returns `void` when its magnitude exceeds the integer representation.
+*/
+Var Type.numeric_literal_value(Type type, String text) {
+  Symbol tag = type.scalar_tag();
+  if (tag == <f32>) { float value = strtof(text, NULL); return value; }
+  if (tag == <f64>) { double value = strtod(text, NULL); return value; }
+  if (tag == <ldouble>) {
+    long double value = strtold(text, NULL);
+    return value;
+  }
+  int negative = text[0] == '-';
+  if (negative || text[0] == '+') text = text[1:];
+  int end = _integer_literal_end(text);
+  unsigned long long magnitude;
+  int decimal;
+  if (!_literal_magnitude(text, end, magnitude, decimal)) return void;
+  Var value = negative ? 0ULL - magnitude : magnitude;
+  return value.convert(tag);
+}
+
+/** Reads an integer literal of `type` spelled in digits, with any suffix,
+    into `value`. Returns 0 for any other literal. */
+int Type.integer_literal_magnitude(
+  Type type, String text, unsigned long long &value) {
+  if (!type.is_integral() || !text || text[0] < '0' || text[0] > '9')
+    return 0;
+  int decimal;
+  return _literal_magnitude(
+    text, _integer_literal_end(text), value, decimal);
+}
+
+static int _integer_literal_end(String text) {
+  int end = text.len();
+  while (end > 0) {
+    int ch = text[end - 1];
+    if (ch != 'u' && ch != 'U' && ch != 'l' && ch != 'L') break;
+    end--;
+  }
+  return end;
+}
+
+/* Reads a validated integer token's unsigned magnitude. `decimal` is 1 when
+   the token has no radix prefix and no octal leading zero. */
+static int _literal_magnitude(
+  String text, int end, unsigned long long &magnitude, int &decimal) {
+  int pos = 0, base = _radix(text, end, pos);
+  decimal = base == 10;
+  unsigned long long sum = 0;
+  for (; pos < end; pos++) {
+    unsigned digit = scan_ascii_hex_value((unsigned char) text[pos]);
+    if (sum > (ULLONG_MAX - digit) / (unsigned) base) return 0;
+    sum = sum * (unsigned) base + digit;
+  }
+  magnitude = sum;
+  return 1;
+}
+
+/* The radix of an integer token, with `pos` advanced past a `0x`, `0b`, or
+   `0o` prefix. A leading zero before an octal digit selects radix 8. */
+static int _radix(String text, int end, int &pos) {
+  if (end < 2 || text[0] != '0') return 10;
+  switch (text[1]) {
+    case 'x': case 'X': pos = 2; return 16;
+    case 'b': case 'B': pos = 2; return 2;
+    case 'o': case 'O': pos = 2; return 8;
+  }
+  return text[1] >= '0' && text[1] <= '7' ? 8 : 10;
+}
+
+/* C gives an integer literal the first type of its suffix's list that holds
+   the value; a decimal literal without `u` skips the unsigned types. */
+static Type _integer_literal_type(
+  unsigned long long magnitude, int decimal, int is_unsigned, int longs) {
+  if (!is_unsigned && !longs) {
+    if (magnitude <= INT_MAX) return %(int);
+    if (!decimal && magnitude <= UINT_MAX) return %(unsigned);
+    if (magnitude <= LONG_MAX) return %(long);
+    if (!decimal && magnitude <= ULONG_MAX) return %(unsigned long);
+    if (magnitude <= LLONG_MAX) return %(long long);
+    if (!decimal) return %(unsigned long long);
+    return NULL;
+  }
+  if (is_unsigned && !longs) {
+    if (magnitude <= UINT_MAX) return %(unsigned);
+    if (magnitude <= ULONG_MAX) return %(unsigned long);
+    return %(unsigned long long);
+  }
+  if (!is_unsigned && longs == 1) {
+    if (magnitude <= LONG_MAX) return %(long);
+    if (!decimal && magnitude <= ULONG_MAX) return %(unsigned long);
+    if (magnitude <= LLONG_MAX) return %(long long);
+    if (!decimal) return %(unsigned long long);
+    return NULL;
+  }
+  if (is_unsigned && longs == 1)
+    return magnitude <= ULONG_MAX ? %(unsigned long) : %(unsigned long long);
+  if (!is_unsigned && longs == 2) {
+    if (magnitude <= LLONG_MAX) return %(long long);
+    return decimal ? NULL : %(unsigned long long);
+  }
+  return %(unsigned long long);
+}

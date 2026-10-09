@@ -58,10 +58,6 @@ Symbol Symbol_new(const char * str){
   return Symbol_new_len(str, strlen(str));
 }
 
-static int String_truth(String);
-
-int String_equal(String, String);
-
 String Symbol_str(Symbol symbol);
 
 int Symbol_try_new(String spelling, Symbol * out){
@@ -101,8 +97,6 @@ void Symbol_decode(Symbol symbol, char * dest){
   dest[len] = '\0';
 }
 
-String String_new_len(const char *, int);
-
 String Symbol_str(Symbol symbol){
   char text[SYMBOL_MAX_5BIT + 1];
   if(! symbol) return NULL;
@@ -124,19 +118,13 @@ int Symbol_compare(Symbol a, Symbol b){
   return a < b ? - 1 : 1;
 }
 
-Buffer Buffer_new(size_t);
-
 Buffer Symbol_write_repr(Symbol symbol, Buffer out);
-
-String Buffer_str_free(Buffer);
 
 String Symbol_repr(Symbol symbol){
   Buffer out = Buffer_new(0);
   Symbol_write_repr(symbol, out);
   return Buffer_str_free(out);
 }
-
-Buffer Buffer_write(Buffer, const char *);
 
 Buffer Symbol_write_str(Symbol symbol, Buffer out){
   if(! symbol) return out;
@@ -150,8 +138,6 @@ Buffer Symbol_write_str(Symbol symbol, Buffer out){
   Symbol_decode(symbol, text);
   return Buffer_write(out, text);
 }
-
-Buffer Buffer_write_char(Buffer, char);
 
 Buffer Symbol_write_repr(Symbol symbol, Buffer out){
   if(! symbol) return Buffer_write(out, "<>");

@@ -93,21 +93,13 @@ int PublicBase_read(PublicBase value){
   return value -> value;
 }
 
-Var Var_new(Symbol, ...);
-
 static Var PrivateBox_var(PrivateBox value){
   return Var_new(1166148154758128, value);
 }
 
-void * Var_pointer(Var);
-
 static PrivateBox Var_privatebox(Var value){
   return Var_pointer(value);
 }
-
-static Var String_var(String);
-
-static String int_str(int);
 
 static String PrivateBox_str(PrivateBox value){
   return String_join(NULL, cons(String_var(_0), cons(String_var(int_str(value -> value)), NULL)));
@@ -142,10 +134,6 @@ static PrivateLeft PrivateLeft_shift(PrivateLeft value){
   value -> value += 2;
   return value;
 }
-
-void * Scope_malloc(size_t);
-
-String Var_str(Var);
 
 int main(void){
   x2c_initialize();

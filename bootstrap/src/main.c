@@ -194,14 +194,6 @@ _x2c_defer_env_3;
 
 static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4);
 
-static Var Symbol_var(Symbol);
-
-List cons(Var, List);
-
-static Var List_var(List);
-
-static Var String_var(String);
-
 #include "exception.h"
 
 
@@ -276,27 +268,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _62 = String_new("cannot open diagnostics file \'");
 }
 
-int Frontend_start(Frontend, String, ParsedUnit *);
-
-void x2c_cleanup_push(X2CCleanup *);
-
-void Compiler_own_diagnostics(Compiler);
-
 void Compiler_dump_tokens(Compiler);
-
-void x2c_cleanup_leave(X2CCleanup *);
-
-int ParsedUnit_collect(ParsedUnit *, Frontend);
-
-int ParsedUnit_parse(ParsedUnit *);
-
-List Compiler_generate_protocol_adapters(Compiler, List);
-
-void generate_code(Compiler, List, String);
-
-int translation_depfile_write(CliRequest, Compiler, String, String);
-
-static int List_truth(List);
 
 List Compiler_diagnostics(Compiler);
 
@@ -360,13 +332,7 @@ _Noreturn static void _fail(Compiler c){
   exit(1);
 }
 
-void report_suspend(void);
-
-int List_try_next(List, List *, Var *);
-
 void Compiler_print_diagnostic(Compiler, List);
-
-static List Var_list(Var);
 
 static void _report_diagnostics(Compiler c){
   if(c -> diagnostics -> printer) return;
@@ -395,8 +361,6 @@ static List _transform_ast(Compiler c, List ast){
   if(Compiler_error_count(c)) _fail(c);
   return ast;
 }
-
-static int String_truth(String);
 
 void Compiler_dump_symbol_table(Compiler, Map);
 
@@ -435,12 +399,6 @@ static int _inspect_parsed(ParsedUnit * unit, String filename, Symbol dump){
   return 1;
 }
 
-void Compiler_dump_definitions(Compiler, List);
-
-char * Compiler_code_pretty_string(Compiler, List, String);
-
-List Compiler_emit(Compiler, List, Map);
-
 static int _inspect_transformed(Compiler c, List ast, Symbol dump){
   switch(dump){
     case 1447057375073126 : _print_ast(ast);
@@ -453,8 +411,6 @@ static int _inspect_transformed(Compiler c, List ast, Symbol dump){
   }
   return 1;
 }
-
-void Compiler_dump_conformance(Compiler, Map);
 
 static void _print_conformance(Compiler c, String filename, Map globals){
   printf("(unit %s)\n", filename);
@@ -476,8 +432,6 @@ static void _print_ast(List ast){
 
 }
 
-String List_repr(List);
-
 static String _node_repr(List node){
 
   {
@@ -496,12 +450,6 @@ default: break;
 return List_repr(node);
 }
 
-unsigned long report_now_us(void);
-int List_len(List);
-Frontend Frontend_new(CliRequest);
-int Frontend_preload_macro_libraries(Frontend);
-void Frontend_prepare_meta(Frontend, List);
-int CliRequest_inspects(CliRequest);
 static int _run_translation(CliRequest request, Map unit_dirs, Build build){
   unsigned long started_at = report_now_us();  if(! String_truth(request -> out_dir)) request -> out_dir = _12;  Translation t ={
     .request = request, .unit_dirs = unit_dirs, .build = build, .total = List_len(request -> inputs)
@@ -512,16 +460,7 @@ static int _run_translation(CliRequest request, Map unit_dirs, Build build){
   else Translation_translate_serial(&(t));  if(! build && ! CliRequest_inspects(request)) Translation_report(&(t), started_at);  return 0;
 }
 
-int Map_truth(Map);
-Map Map_new(void);
-static String Var_string(Var);
-void build_check_input(String);
-int is_source_file(String);
-void driver_error(const char *);
 String Path_stem(Path);
-int Map_contains(Map, Var);
-Var Map_getindex(Map, Var);
-Var Map_setindex(Map, Var, Var);
 static void Translation_preflight(Translation * t){
   CliRequest request =(* t).request;  if(! CliRequest_inspects(request)) _check_out_dir(request -> out_dir);  int shared = ! CliRequest_inspects(request) && ! Map_truth((* t).unit_dirs);  Map stems = Map_new(); {
     String input;  List _x2c_macro_object_2 = request -> inputs;  List _x2c_macro_cursor_2 = _x2c_macro_object_2;  Var _x2c_macro_cursor_output_2;  while(List_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
@@ -570,17 +509,9 @@ static void _print_command(CliRequest request){
   fputc('\n', stderr);
 }
 
-int File_printf(File, const char *, ...);
-
 static void _preprocessor_errors(String text){
   File_printf(Stderr, "%s", text);
 }
-
-void Build_begin_translation(Build, String);
-
-void report_progress(Symbol, int, int, String);
-
-void Build_end_translation(Build, String, int);
 
 static void Translation_translate_serial(Translation * t){
   int done = 0;
@@ -614,16 +545,6 @@ static String Translation_output_dir(Translation * t, String input){
   if(! Map_truth((* t).unit_dirs)) return(* t).request -> out_dir;
   return Var_string(Map_getindex((* t).unit_dirs, String_var(input)));
 }
-
-unsigned long long report_file_bytes(String);
-
-String report_duration(unsigned long);
-
-void report_line(Symbol, String);
-
-static String int_str(int);
-
-void report_generated(int, unsigned long long);
 
 static void Translation_report(Translation * t, unsigned long started_at){
   String out_dir =(* t).request -> out_dir;
@@ -660,16 +581,6 @@ static int Translation_translate_parallel(Translation * t){
   return failed;
 }
 
-List CliRequest_package_roots(CliRequest);
-
-Iter Map_keys(Map, Iter);
-
-static Var int_var(int);
-
-int Iter_try_next(Iter, Var *);
-
-String package_entry(SourceView, List, String, String *);
-
 int Compiler_links_extension(String);
 
 int Path_is_file(Path);
@@ -701,38 +612,14 @@ static void Translation_preload_modules(Translation * t){
 
 }
 
+String Path_read_text(Path);
+
+Path Path_basename(Path);
+
 #include "error.h"
 
 
 
-
-int x2c_error_catch_site_pending(ErrorCatchSite *);
-
-ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
-
-void x2c_exception_push(ExceptionFrame *);
-
-String Path_read_text(Path);
-
-void x2c_exception_landed(ExceptionFrame *);
-
-int x2c_exception_is_error_target(ExceptionFrame *);
-
-int x2c_error_catch_selected(ErrorHandler);
-
-void x2c_error_catch_detach(ErrorHandler);
-
-void x2c_exception_mark_handled(ExceptionFrame *);
-
-void x2c_error_catch_close(ErrorHandler);
-
-void x2c_exception_leave(ExceptionFrame *);
-
-List translation_depfile_parse(String);
-
-String package_directory(List, String);
-
-Path Path_basename(Path);
 
 static Map Translation_package_names(Translation * t, List roots){
   Map names = Map_new();
@@ -830,20 +717,6 @@ static Map Translation_package_names(Translation * t, List roots){
   return names;
 }
 
-Tokenizer Tokenizer_new(char *, Symbol);
-
-void Tokenizer_scan(Tokenizer);
-
-Array Array_new(void);
-
-Token Tokenizer_next(Tokenizer);
-
-int String_equal(String, String);
-
-Var Array_push(Array, Var);
-
-List Array_list_free(Array);
-
 static List _imported_packages(String path){
   String volatile text = NULL;
   {
@@ -909,10 +782,6 @@ static List _imported_packages(String path){
   return Array_list_free(names);
 }
 
-static List List_cdr(List);
-
-static Var List_car(List);
-
 static Array _slices(List inputs, int total, int count){
   if(count > total) count = total;
   if(count < 1) count = 1;
@@ -926,10 +795,6 @@ static Array _slices(List inputs, int total, int count){
   }
   return slices;
 }
-
-void * Scope_calloc(size_t, size_t);
-
-void Scope_free(void *);
 
 static int Translation_run_workers(Translation * t, Array slices){
   int jobs =(* t).request -> jobs, count = Array_len(slices);
@@ -955,10 +820,6 @@ static int Translation_run_workers(Translation * t, Array slices){
   Scope_free(_workers.pids);
   return _workers.failed;
 }
-
-Var Array_getindex(Array, int);
-
-long worker_fork(void);
 
 static void Workers_start(Workers * w){
   int index =(* w).started ++;
@@ -988,8 +849,6 @@ static void Workers_start(Workers * w){
 
 void Compiler_stop_meta_helper(void);
 
-void worker_exit(int);
-
 static void Translation_work(Translation * t, List slice){
   {
     String input;
@@ -1005,12 +864,6 @@ static void Translation_work(Translation * t, List slice){
   Compiler_stop_meta_helper();
   worker_exit(0);
 }
-
-int worker_wait_any(long *, int, int *);
-
-Block Block_new(size_t);
-
-FileReadStatus File_read_into(File, Block);
 
 static void Workers_reap(Workers * w){
   int status, slot = worker_wait_any((* w).pids, (* w).live, &(status));
@@ -1048,8 +901,6 @@ static void Workers_reap(Workers * w){
   }
 
 }
-
-int File_write_all(File, const void *, size_t);
 
 static void Workers_show(Workers * w){
   while((* w).shown <(* w).started && ! Workers_carries(&((* w)), (* w).shown)){
@@ -1110,8 +961,6 @@ static sigset_t _block_stop_signals(void){
   return previous;
 }
 
-int compile_commands_write(String, Array);
-
 static int _run_build(CliRequest request){
   Array commands = String_truth(request -> compile_commands) && ! request -> dry_run ? Array_new() : NULL;
   int status = List_truth(request -> inputs) ? _build_inputs(request, commands) : _build_manifest(request, commands);
@@ -1126,8 +975,6 @@ static int _build_inputs(CliRequest request, Array commands){
   return _build_target(request, commands);
 }
 
-ProjectBuild project_plan(CliRequest);
-
 static int _build_manifest(CliRequest request, Array commands){
   if(request -> compile_only) driver_error("--compile-only needs input operands, not a manifest");
   for(ProjectBuild node = project_plan(request);  node;  node = node -> next){
@@ -1136,22 +983,6 @@ static int _build_manifest(CliRequest request, Array commands){
   }
   return 0;
 }
-
-Context Context_open_isolated_named(const char *);
-
-Build CliRequest_prepare(CliRequest);
-
-Var Context_export(Context, Var);
-
-int Build_finish(Build);
-
-void Build_cleanup(Build, int);
-
-void Build_report_success(Build);
-
-int Build_run_program(Build);
-
-void Build_publish_script(Build, String);
 
 static int _build_target(CliRequest request, Array commands){
   Context target = Context_open_isolated_named("build target");
@@ -1218,12 +1049,6 @@ static int _build_target(CliRequest request, Array commands){
 
 }
 
-List Build_script_helpers(Build);
-
-CliRequest Build_module_entry(Build);
-
-CliRequest Build_extension_entries(Build);
-
 static int _translate_target(CliRequest request, Build b){
   int status = _translate_units(request, b, request -> inputs);
   if(! status && request -> command == 1282559016 && ! request -> dry_run) status = _translate_units(request, b, Build_script_helpers(b));
@@ -1232,8 +1057,6 @@ static int _translate_target(CliRequest request, Build b){
   CliRequest entry = request -> kind == 904178442 ? Build_module_entry(b) : Build_extension_entries(b);
   return _translate_units(entry, b, entry -> inputs);
 }
-
-int Array_try_next(Array, int *, Var *);
 
 static int _add_commands(CliRequest request, Build b, Context target, Array commands){
   if(commands == NULL) return 0;
@@ -1252,8 +1075,6 @@ static int _add_commands(CliRequest request, Build b, Context target, Array comm
   return ! compile_commands_write(request -> compile_commands, commands);
 }
 
-void * Scope_memdup(const void *, size_t);
-
 static int _translate_units(CliRequest request, Build b, List units){
   Map stale = Map_new();
   List inputs = _stale_inputs(b, units, stale);
@@ -1266,10 +1087,6 @@ static int _translate_units(CliRequest request, Build b, List units){
   _register_units(request, b, units, stale);
   return 0;
 }
-
-String Build_generated_dir(Build, String);
-
-int Build_translation_current(Build, String, String);
 
 static List _stale_inputs(Build b, List units, Map stale){
   Array inputs = Array_new();
@@ -1298,10 +1115,6 @@ static List _stale_inputs(Build b, List units, Map stale){
   return Array_list_free(inputs);
 }
 
-void Build_record_translation(Build, String, String);
-
-void Build_add_generated(Build, String, String);
-
 static void _register_units(CliRequest request, Build b, List units, Map stale){
   {
     String input;
@@ -1327,8 +1140,6 @@ static void _register_units(CliRequest request, Build b, List units, Map stale){
   }
 
 }
-
-Var List_getindex(List, int);
 
 static int _run_env(CliRequest request){
   String wanted = NULL;
@@ -1361,24 +1172,6 @@ static int _run_env(CliRequest request){
   return 0;
 }
 
-Toolchain toolchain_new(CliRequest);
-
-String x2c_get_executable(void);
-
-String String_join(String, List);
-
-void interface_configure(String, int);
-
-String x2c_get_root(void);
-
-String home_libexec(void);
-
-String compiler_identity(void);
-
-String interface_prelude(void);
-
-String script_cache_root(void);
-
 static List _env_rows(CliRequest request){
   Toolchain toolchain = toolchain_new(request);
   String executable = x2c_get_executable();
@@ -1389,8 +1182,6 @@ static List _env_rows(CliRequest request){
   }
   );
 }
-
-int strcmp(const char *, const char *);
 
 static void _run_external(int argc, char * * argv){
   String path = _external_path(argv[1]);
@@ -1403,8 +1194,6 @@ static void _run_external(int argc, char * * argv){
   path = _external_path(argv[2]);
   if(String_truth(path)) _exec(path, args);
 }
-
-int cli_builtin_command(const char *);
 
 int Path_is_executable(Path);
 
@@ -1425,10 +1214,6 @@ static int _external_name(const char * name){
   return 1;
 }
 
-String home_dir(void);
-
-String String_new(const char *);
-
 static void _exec(String path, char * * args){
   String home = home_dir(), executable = x2c_get_executable();
   String identity = compiler_identity();
@@ -1443,25 +1228,7 @@ static void _exec(String path, char * * args){
   ));
 }
 
-void x2c_initialize_environment(const char *);
-
-int editor_request(int, char * *);
-
-CliRequest cli_parse(int, char * *);
-
 int diagnostics_write_json(String);
-
-int script_prepare(CliRequest);
-
-void report_configure(int, int, Symbol, int, int, int);
-
-int install_command(CliRequest);
-
-int remove_command(CliRequest);
-
-int list_command(CliRequest);
-
-int new_command(CliRequest);
 
 int main(int argc, char * * argv){
   x2c_initialize();
@@ -1487,12 +1254,6 @@ int main(int argc, char * * argv){
   return _run_compiler(request);
 }
 
-void Frontend_load_support(CliRequest);
-
-void Context_close(Context);
-
-int script_run(CliRequest);
-
 static int _run_compiler(CliRequest request){
   _configure_logging(request -> debugging);
   Frontend_load_support(request);
@@ -1503,14 +1264,6 @@ static int _run_compiler(CliRequest request){
   return status;
 }
 
-Logger log_get_global_logger(void);
-
-void Logger_clear_sinks(Logger);
-
-int Logger_set_min_level(Logger, Symbol);
-
-LogSink Logger_add_stderr_sink(Logger);
-
 static void _configure_logging(int debugging){
   Logger logger = log_get_global_logger();
   if(! logger) return;
@@ -1519,8 +1272,6 @@ static void _configure_logging(int debugging){
   Logger_set_min_level(logger, 8721742);
   Logger_add_stderr_sink(logger);
 }
-
-void ParsedUnit_close(ParsedUnit *);
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;
@@ -1532,8 +1283,6 @@ static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
   File_close((*(File *) _x2c_defer_data_1->_x2c_defer_capture_1));
 }
 
-void Block_free(Block);
-
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
   _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_2;
   Block_free((*(Block *) _x2c_defer_data_2->_x2c_defer_capture_2));
@@ -1544,8 +1293,6 @@ void macro_library_reset(void);
 static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3){
   macro_library_reset();
 }
-
-void Context_cleanup(Context);
 
 static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4){
   _x2c_defer_env_3 * _x2c_defer_data_3 =(_x2c_defer_env_3 *) _x2c_defer_opaque_4;

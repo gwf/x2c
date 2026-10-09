@@ -29,18 +29,10 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
 
 static Func _x2c_func_handle_0;
 
-Func x2c_func_shared(FuncAdapter, List);
-
 _x2c_initializer_choice_76696E0D_1((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _9)))
 static long identity(long value){
   return value;
 }
-
-static Var Symbol_var(Symbol);
-
-List cons(Var, List);
-
-static Var List_var(List);
 
 void List_initialize(void){
   if(_init_guard_) return;
@@ -58,10 +50,6 @@ void List_initialize(void){
   _x2c_static_initialize_1();
   _x2c_static_initialize_0();
 }
-
-Var x2c_func_value_argument(Func, const FuncArg *, unsigned, Symbol);
-
-static Var long_var(long);
 
 static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0){
   long a0 = Var_long(Var_convert(x2c_func_value_argument(_x2c_func_binding_0, _x2c_func_argv_0, 0, 818062), 818062));

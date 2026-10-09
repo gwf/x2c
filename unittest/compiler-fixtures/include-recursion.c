@@ -6,8 +6,6 @@
 #include "x2c.h"
 #include "include-recursion-a.h"
 #include "include-recursion-b.h"
-RecursionPair recursion_pair(int);
-
 int main(void){
   x2c_initialize();
   RecursionPair pair = recursion_pair(21);

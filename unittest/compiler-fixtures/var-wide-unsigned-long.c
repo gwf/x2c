@@ -17,8 +17,6 @@ static unsigned long unbox_value(Var value){
   return Var_ulong(Var_convert(value, 44858254));
 }
 
-int Var_is(Var, Symbol);
-
 int main(void){
   x2c_initialize();
   unsigned long value = ULONG_MAX;

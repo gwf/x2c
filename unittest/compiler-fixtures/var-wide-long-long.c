@@ -17,8 +17,6 @@ static long long unbox_value(Var value){
   return Var_long_long(Var_convert(value, 25983886));
 }
 
-int Var_is(Var, Symbol);
-
 int main(void){
   x2c_initialize();
   long long value = LLONG_MIN;

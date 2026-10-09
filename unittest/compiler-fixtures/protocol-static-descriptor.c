@@ -37,30 +37,18 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _0 = String_new("private:");
 }
 
-Var Var_new(Symbol, ...);
-
 static Var StaticDescriptor_var(StaticDescriptor value){
   return Var_new(1381098884181190, value);
 }
-
-void * Var_pointer(Var);
 
 static StaticDescriptor Var_staticdescriptor(Var value){
   return Var_pointer(value);
 }
 
-static Var String_var(String);
-
-static String int_str(int);
-
 String StaticDescriptor_str(StaticDescriptor value){
   if(! _init_guard_) _file_init_();
   return String_join(NULL, cons(String_var(_0), cons(String_var(int_str(value -> value)), NULL)));
 }
-
-void * Scope_malloc(size_t);
-
-String Var_str(Var);
 
 int main(void){
   x2c_initialize();

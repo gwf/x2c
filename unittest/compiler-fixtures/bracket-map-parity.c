@@ -4,22 +4,6 @@
 #include "x2c.h"
 
 #include "x2c.h"
-Map Map_update_n(Map, unsigned, ...);
-
-Map Map_new(void);
-
-static Var Symbol_var(Symbol);
-
-static Var int_var(int);
-
-Var Map_getindex(Map, Var);
-
-Var Map_setindex(Map, Var, Var);
-
-int Var_int(Var);
-
-int Var_is_void(Var);
-
 int main(void){
   x2c_initialize();
   Map scores = Map_update_n(Map_new(), 2, Symbol_var(31626), int_var(1), Symbol_var(42462), int_var(2));

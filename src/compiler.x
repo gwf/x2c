@@ -186,6 +186,10 @@ typedef struct Compiler {
      what lets a call to a compile-time-only one be refused everywhere
      else. */
   int meta_body;
+  /* A Unit target retains meta code and complete initializers. */
+  int capture_unit;
+  List active_rewrites;
+  Map rewrite_rules;
   /* Where the expression statement being parsed starts. A meta call there
      that the statement's `;` ends is evaluated as the statement. */
   Token meta_statement;
@@ -228,7 +232,7 @@ typedef struct SymTxn {
   Compiler c;
   int scope_index, next_binding, active, String initializer_name;
   String shutdown_name, Map counters;
-  int local_macro_names, mark;
+  int local_macro_names, mark, meta_group_size;
   SymScope scope;
   Map statics, binding_facts;
   Map source_definitions;
@@ -1215,6 +1219,8 @@ static void Compiler._reset_parse(Compiler c, Map globs, int generated) {
 static void Compiler._reset_macros(Compiler c) {
   c.macros = {};
   c.kw_aliases = {};
+  c.rewrite_rules = NULL;
+  c.active_rewrites = NULL;
   c.install_builtin_macros();
   if (!c.declaration_produced) c.imports = {};
   c.import_stack.clear();

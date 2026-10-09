@@ -1125,10 +1125,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _x2c_static_initialize_2();
 }
 
-int strcmp(const char *, const char *);
-
-String Symbol_str(Symbol);
-
 static CliCommand * _command_row(const char * word){
   for(CliCommand * row = cli_commands;  row -> name;  row ++) if(row -> mask != CLI_TOP && strcmp(word, Symbol_str(row -> name)) == 0) return row;
   return NULL;
@@ -1139,27 +1135,7 @@ static int _command_mask(Symbol command){
   return CLI_TOP;
 }
 
-Array Array_new(void);
-
-void x2c_cleanup_push(X2CCleanup *);
-
-static String Var_string(Var);
-
-Var Array_getindex(Array, int);
-
-static int String_truth(String);
-
-void driver_error(const char *);
-
-void x2c_cleanup_leave(X2CCleanup *);
-
-int String_equal(String, String);
-
 String cli_version(void);
-
-static Var String_var(String);
-
-int String_getindex(String, int);
 
 CliRequest cli_parse(int argc, char * * argv){
   if(! _init_guard_) _file_init_();
@@ -1206,10 +1182,6 @@ CliRequest cli_parse(int argc, char * * argv){
 
 }
 
-Var Array_push(Array, Var);
-
-String String_new(const char *);
-
 static void _read_arguments(Array args, int argc, char * * argv){
   int script = argc > 1 && ! strcmp(argv[1], "script");
   for(int i = 1;  i < argc;  i ++){
@@ -1240,13 +1212,9 @@ static void Parse_word(Parse * p, int * i){
   else Parse_option(&((* p)), arg, &((* i)));
 }
 
-int String_startswith(String, String);
-
 static int Parse_expands(Parse * p, String arg, int i){
   return(* p).mask == CLI_SCRIPT && !(* p).operands && i >=(* p).expanded && String_startswith(arg, _86);
 }
-
-Array Array_splice(Array, int, int, Array);
 
 static void Parse_expand(Parse * p, String arg, int * i){
   Array words = Array_new();
@@ -1262,10 +1230,6 @@ static void Parse_operand(Parse * p, String arg, int * i){
   if((* p).mask == CLI_SCRIPT) while(++(* i) < Array_len((* p).args)) Array_push((* p).run_args, Array_getindex((* p).args, (* i)));
 }
 
-List Array_list_free(Array);
-
-List List_reverse(List);
-
 static void Parse_finish(Parse * p){
   CliRequest r =(* p).request;
   r -> inputs = Array_list_free((* p).inputs);
@@ -1278,10 +1242,6 @@ static void Parse_finish(Parse * p){
   r -> native_modules = List_reverse(r -> native_modules);
   r -> extensions = List_reverse(r -> extensions);
 }
-
-static int List_truth(List);
-
-static List List_cdr(List);
 
 static void CliRequest__check(CliRequest r, int mask){
   Symbol name = r -> command;
@@ -1317,15 +1277,11 @@ static void Parse_option(Parse * p, String arg, int * i){
   Parse_apply(&((* p)), given);
 }
 
-String String_remove_prefix(String, String);
-
 static void CliRequest__save_temps_dir(CliRequest r, String arg){
   r -> save_temps = 1;
   r -> temps_dir = String_remove_prefix(arg, _90);
   if(! String_truth(r -> temps_dir)) driver_error("--save-temps= requires a directory");
 }
-
-int String_find(String, String);
 
 static Given _take_option(Array args, int * i, int mask){
   String arg = Var_string(Array_getindex(args, (* i))), written = arg, joined = NULL, suffix = NULL;
@@ -1348,8 +1304,6 @@ static Given _take_option(Array args, int * i, int mask){
   }
   return given;
 }
-
-int String_len(String);
 
 static CliOption * _find_option(String spelling, int mask, String * attached){
   (* attached) = NULL;
@@ -1525,14 +1479,10 @@ static String _xcc_argument(String value){
   return value;
 }
 
-int String_contains(String, String);
-
 int cli_dependency_pass_through(String s){
   if(! _init_guard_) _file_init_();
   return String_truth(s) &&(String_startswith(s, _117) || String_startswith(s, _118) || String_startswith(s, _119) || String_startswith(s, _120) || String_contains(s, _121) || String_contains(s, _122) || String_contains(s, _123) || String_contains(s, _124));
 }
-
-List cons(Var, List);
 
 static void CliRequest__set_field(CliRequest r, CliOption * option, String value){
   char * field =(char *) r +(* option).offset;
@@ -1555,12 +1505,6 @@ static void CliRequest__set_field(CliRequest r, CliOption * option, String value
 }
 
 List cli_response_arguments(String path);
-
-int List_try_next(List, List *, Var *);
-
-String String_replace(String, String, String);
-
-void * Scope_calloc(size_t, size_t);
 
 CliRequest cli_package_options(String path, String package){
   if(! _init_guard_) _file_init_();
@@ -1614,8 +1558,6 @@ CliRequest cli_package_options(String path, String package){
 
 }
 
-int String_endswith(String, String);
-
 static void Parse_native(Parse * p, int * i){
   String arg = Var_string(Array_getindex((* p).args, (* i)));
   if(! String_truth(arg)) driver_error("empty package native argument");
@@ -1629,8 +1571,6 @@ static void Parse_native(Parse * p, int * i){
 }
 
 Path Path_absolute(Path);
-
-int List_contains(List, Var);
 
 static void _expand_argument(Array out, String arg, List stack){
   if(! String_truth(arg) || String_getindex(arg, 0) != '@'){
@@ -1659,8 +1599,6 @@ static void _expand_argument(Array out, String arg, List stack){
 
 }
 
-void Scope_free(void *);
-
 List cli_response_arguments(String path){
   if(! _init_guard_) _file_init_();
   size_t length = 0;
@@ -1669,8 +1607,6 @@ List cli_response_arguments(String path){
   Scope_free(text);
   return Array_list_free(words);
 }
-
-void * Scope_malloc(size_t);
 
 static char * _read_response_file(String path, size_t * length){
   FILE * file = fopen(path, "rb");
@@ -1699,8 +1635,6 @@ static long _response_size(FILE * file, String path){
   return end;
 }
 
-int scan_utf8_length(const unsigned char *);
-
 static int _valid_utf8(const unsigned char * text){
   while(* text){
     int length = scan_utf8_length(text);
@@ -1709,10 +1643,6 @@ static int _valid_utf8(const unsigned char * text){
   }
   return 1;
 }
-
-Buffer Buffer_new(size_t);
-
-void Buffer_free(Buffer);
 
 static Array _response_words(String path, const char * text, size_t length){
   Words w ={
@@ -1762,8 +1692,6 @@ static void Words_bare(Words * w, int c){
 
 }
 
-Buffer Buffer_write_char(Buffer, char);
-
 static void Words_put(Words * w, int c){
   Buffer_write_char((* w).word, c);
   (* w).started = 1;
@@ -1775,10 +1703,6 @@ static void Words_newline(Words * w){
   (* w).blank = 1;
   (* w).line ++;
 }
-
-String Buffer_str(Buffer);
-
-Buffer Buffer_clear(Buffer);
 
 static void Words_flush(Words * w){
   if(!(* w).started) return;
@@ -1816,8 +1740,6 @@ static void _print_top_help(void){
   puts("");
   puts(_129);
 }
-
-String home_libexec(void);
 
 static void _print_external_commands(void){
   String libexec = home_libexec();
@@ -1953,8 +1875,6 @@ CliRequest cli_request(Symbol command){
   return request;
 }
 
-int report_make_owned(void);
-
 static int _default_jobs(void){
   if(report_make_owned()) return 1;
   long count = sysconf(_SC_NPROCESSORS_ONLN);
@@ -1976,11 +1896,7 @@ int CliRequest_inspects(CliRequest request){
   return request -> dump != 0;
 }
 
-String home_packages(void);
-
 int Path_is_dir(Path);
-
-List List_append(List, List);
 
 List CliRequest_package_roots(CliRequest request){
   if(! _init_guard_) _file_init_();
@@ -1988,8 +1904,6 @@ List CliRequest_package_roots(CliRequest request){
   if(! Path_is_dir(home)) return request -> package_dirs;
   return List_append(request -> package_dirs, cons(String_var(home), NULL));
 }
-
-void Array_cleanup(Array);
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;

@@ -127,22 +127,12 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
 
 static Func _x2c_func_handle_0;
 
-Func x2c_func_shared(FuncAdapter, List);
-
 #include "exception.h"
 
 
 
 
 _x2c_initializer_choice_1A2A7247_0((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _74)))
-static Var String_var(String);
-
-List cons(Var, List);
-
-static Var Symbol_var(Symbol);
-
-static Var List_var(List);
-
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -236,15 +226,9 @@ int Frontend_open(Frontend f, String filename, ParsedUnit * unit){
   return Frontend_start(f, filename, &((* unit))) && ParsedUnit_collect(&((* unit)), f) && ParsedUnit_parse(&((* unit)));
 }
 
-void Compiler_own_diagnostics(Compiler);
-
 List Compiler_diagnostics(Compiler);
 
-int List_try_next(List, List *, Var *);
-
 void Compiler_print_diagnostic(Compiler, List);
-
-static List Var_list(Var);
 
 void ParsedUnit_close(ParsedUnit * unit);
 
@@ -281,38 +265,16 @@ int Frontend_start(Frontend frontend, String filename, ParsedUnit * unit){
   return _start(frontend, filename, &((* unit)), _unit_context(), NULL);
 }
 
-#include "error.h"
-
-
-
-
-int x2c_error_catch_site_pending(ErrorCatchSite *);
-
-ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
-
-void x2c_exception_push(ExceptionFrame *);
-
 void Compiler_take_diagnostics(Compiler, Compiler);
 
 void Sym_seed_var_tags(Sym, Map);
 
-void x2c_exception_landed(ExceptionFrame *);
-
-int x2c_exception_is_error_target(ExceptionFrame *);
-
-int x2c_error_catch_selected(ErrorHandler);
-
-void x2c_error_catch_detach(ErrorHandler);
-
-void x2c_exception_mark_handled(ExceptionFrame *);
-
-void Compiler_close_child(Compiler, Compiler);
-
-void x2c_error_catch_close(ErrorHandler);
-
-void x2c_exception_leave(ExceptionFrame *);
-
 int Compiler_error_count(Compiler);
+
+#include "error.h"
+
+
+
 
 int ParsedUnit_collect(ParsedUnit * unit, Frontend frontend){
   if(! _init_guard_) _file_init_();
@@ -376,8 +338,6 @@ int ParsedUnit_collect(ParsedUnit * unit, Frontend frontend){
   return ! Compiler_error_count(c);
 }
 
-List Compiler_full_parse(Compiler, Map, int);
-
 int ParsedUnit_parse(ParsedUnit * p){
   if(! _init_guard_) _file_init_();
   Compiler c =(* p).compiler;
@@ -432,11 +392,7 @@ int ParsedUnit_parse(ParsedUnit * p){
   return ! Compiler_error_count(c);
 }
 
-void Compiler_free_lisp(Compiler);
-
 void Type_end_unit(void);
-
-void Context_close(Context);
 
 void ParsedUnit_close(ParsedUnit * unit){
   if(! _init_guard_) _file_init_();
@@ -451,12 +407,6 @@ void ParsedUnit_close(ParsedUnit * unit){
   }
   ;
 }
-
-static int String_truth(String);
-
-List CliRequest_package_roots(CliRequest);
-
-void Compiler_configure_package(Compiler, List, String);
 
 int Compiler_inherits_import(String);
 
@@ -526,19 +476,11 @@ static int _start(Frontend frontend, String filename, ParsedUnit * unit, Context
   return ! Compiler_error_count(c);
 }
 
-Context Context_open_isolated_named(const char *);
-
 static Context _unit_context(void){
   return Context_open_isolated_named("translation unit");
 }
 
 void Type_begin_unit(void);
-
-Compiler Compiler_new(void);
-
-Array Array_new(void);
-
-Map Map_new(void);
 
 static Compiler _begin_unit(Frontend frontend, ParsedUnit * unit, Context context){
   CliRequest request = frontend -> request;
@@ -566,18 +508,12 @@ static Compiler _begin_unit(Frontend frontend, ParsedUnit * unit, Context contex
   return c;
 }
 
-void Compiler_tokenize(Compiler, char *);
-
 static void _tokenize_session(Frontend frontend, Compiler c, String source){
   c -> filename = _1;
   c -> prelude = c -> runtime_inc = 1;
   c -> include_dirs = frontend -> include_dirs;
   Compiler_tokenize(c, String_truth(source) ? source : "$(begin)");
 }
-
-int String_startswith(String, String);
-
-String String_new(const char *);
 
 int Compiler_defines_main(Compiler);
 
@@ -595,15 +531,9 @@ static void _tokenize_input(Frontend frontend, ParsedUnit * unit, String filenam
   if(c -> script) c -> script -> defines_main = Compiler_defines_main(c);
 }
 
-String Compiler_canonical_path(Compiler, String);
-
 Path Path_dirname(Path);
 
 Path Path_basename(Path);
-
-int String_equal(String, String);
-
-String home_portable_path(String);
 
 static String _input_name(Compiler c, String filename){
   if(! String_startswith(filename, _3)) return filename;
@@ -614,10 +544,6 @@ static String _input_name(Compiler c, String filename){
   return ! String_equal(home_portable_path(canonical), canonical) ? canonical : filename;
 }
 
-String x2c_get_root(void);
-
-int strcmp(const char *, const char *);
-
 static void _runtime_roles(Compiler c, const char * source){
   char runtime[PATH_MAX], lib[PATH_MAX];
   String dir = String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_5), NULL)));
@@ -625,14 +551,10 @@ static void _runtime_roles(Compiler c, const char * source){
   c -> runtime_inc = !(source && realpath(dir, lib) && _inside(source, lib));
 }
 
-int strncmp(const char *, const char *, size_t);
-
 static int _inside(const char * path, const char * dir){
   size_t n = strlen(dir);
   return ! strncmp(path, dir, n) && path[n] == '/';
 }
-
-int Compiler_read_source(Compiler, String, volatile String *);
 
 void Compiler_report_error(Compiler, Symbol, String, Token, List);
 
@@ -641,10 +563,6 @@ static String _read_input(Compiler c){
   if(Compiler_read_source(c, filename, &(text))) return text;
   Compiler_report_error(c, 306819428, _7, NULL, cons(_9, cons(String_var(String_join(NULL, cons(String_var(_10), cons(String_var(filename), NULL)))), _13)));
 }
-
-int String_find(String, String);
-
-void * Scope_calloc(size_t, size_t);
 
 static String _script(Compiler c, String text, String path){
   int end = String_find(text, _14);
@@ -655,10 +573,6 @@ static String _script(Compiler c, String text, String path){
   return String_join(NULL, cons(String_var(_15), cons(String_var(end < 0 ? _16 : String_getslice(text, end, -2147483648, 1)), NULL)));
 }
 
-int String_getindex(String, int);
-
-int String_len(String);
-
 static int _source_lines(String text){
   if(! String_truth(text)) return 0;
   int lines = String_getindex(text, String_len(text) - 1) == '\n' ? 0 : 1;
@@ -666,27 +580,7 @@ static int _source_lines(String text){
   return lines;
 }
 
-int SymbolSet_contains(SymbolSet, Symbol);
-
-void Compiler_shallow_parse(Compiler, Map);
-
-void x2c_cleanup_push(X2CCleanup *);
-
-Map Map_copy(Map);
-
-void x2c_cleanup_leave(X2CCleanup *);
-
 Map Sym_global_symbols(Sym);
-
-int List_len(List);
-
-Var Map_del(Map, Var);
-
-static Var List_car(List);
-
-Var Map_setindex(Map, Var, Var);
-
-static Var List_cadr(List);
 
 static Map _preprocess_input(Frontend frontend, ParsedUnit * unit){
   Compiler c =(* unit).compiler;
@@ -747,16 +641,6 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit * unit){
   return symbols;
 }
 
-int Map_try_next(Map, unsigned *, Var *, Var *);
-
-String home_absolute_path(String);
-
-static String Var_string(Var);
-
-Var Array_push(Array, Var);
-
-List Array_list_free(Array);
-
 static List _unit_private_rows(Compiler c, Map globs){
   Array rows = Array_new();
   String unit = Compiler_canonical_path(c, c -> filename);
@@ -790,13 +674,10 @@ static List _unit_private_rows(Compiler c, Map globs){
 return Array_list_free(rows);
 }
 
-Var Map_getindex(Map, Var);
-int Var_is_void(Var);
 static List _unit_private_row(Map globs, List key){
   Var value = Map_getindex(globs, List_var(key));  return Var_is_void(value) ? cons(List_var(key), NULL) : cons(List_var(key), cons(value, NULL));
 }
 
-Map Compiler_collect_symbols(Compiler, Map);
 static Map _collect_input(Frontend frontend, ParsedUnit * unit){
   Compiler c =(* unit).compiler; (* unit).globals = Map_new(); {
     String * _x2c_macro_address_1 = & c -> package;  String _x2c_macro_previous_1 = * _x2c_macro_address_1; {
@@ -837,11 +718,6 @@ static Token _first_directive(Compiler c){
   for(Token token = c -> tokenizer -> tokens;  token -> type != 11212;  token ++) if(token -> type == 35579270086) return token;  return c -> token;
 }
 
-Compiler Compiler_new_shared(Compiler);
-int Toolchain_preprocess(Toolchain, const char *, List, const char *, String *, String *, String *);
-static String int_str(int);
-List translation_depfile_parse(String);
-void Compiler_add_translation_dependency(Compiler, String);
 static Compiler _run_cpp(Frontend frontend, ParsedUnit * unit){
   Compiler c =(* unit).compiler, cpp = Compiler_new_shared(c); (* unit).preprocessor = cpp;  cpp -> filename = c -> filename;  String text = NULL, errors = NULL, dependency_text = NULL;  String runtime = c -> prelude ? String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_40), NULL))) : NULL;  int status = Toolchain_preprocess(frontend -> toolchain, c -> filename, c -> include_dirs, runtime, &(text), &(errors), &(dependency_text)); (* unit).preprocessor_output = String_truth(text) ? _take_line_markers(cpp, text) : NULL; (* unit).preprocessor_errors = errors;  if(String_truth(errors) && frontend -> preprocessor_errors) frontend -> preprocessor_errors(errors);  if(status) Compiler_report_error(c, 306819428, _41, _first_directive(c), cons(_43, cons(String_var(String_join(NULL, cons(String_var(_44), cons(String_var(int_str(status)), NULL)))), NULL))); {
     String dependency;  List _x2c_macro_object_3 = translation_depfile_parse(dependency_text);  List _x2c_macro_cursor_3 = _x2c_macro_object_3;  Var _x2c_macro_cursor_output_4;  while(List_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_4))){
@@ -852,10 +728,7 @@ static Compiler _run_cpp(Frontend frontend, ParsedUnit * unit){
   return cpp;
 }
 
-List String_split(String, String);
 String preproc_marker_file(String, int *);
-static Var int_var(int);
-String String_join(String, List);
 static String _take_line_markers(Compiler cpp, String text){
   Array kept = Array_new(), markers = Array_new();  int position = 0, text_line = 1; {
     String line;  List _x2c_macro_object_4 = String_split(text, _14);  List _x2c_macro_cursor_4 = _x2c_macro_object_4;  Var _x2c_macro_cursor_output_5;  while(List_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_5))){
@@ -876,15 +749,12 @@ static void _tokenize_cpp(Compiler cpp, String text){
   Compiler_tokenize(cpp, text);  cpp -> source_facts = 0;  cpp -> source_private = - 1;  cpp -> collect_protocols = 0;
 }
 
-void Compiler_share_meta_group(Compiler, Compiler);
 static void _share_session(Compiler cpp, Compiler c){
   cpp -> imports = c -> imports;  cpp -> macro_lisp = c -> macro_lisp;  cpp -> borrowed_lisp = cpp -> macro_lisp != NULL;  Compiler_share_meta_group(cpp, c);
 }
 
 Lisp Compiler_open_macro_library(Compiler);
-void Lisp_destroy(Lisp);
 void Compiler_publish_macro_library(Compiler, Lisp);
-void collect_forget_provisional_entries(void);
 int Frontend_preload_macro_libraries(Frontend frontend){
   if(! _init_guard_) _file_init_();  Compiler c = Compiler_new();  Lisp shared = Compiler_open_macro_library(c);  if(shared && ! _preload_meta_surface(frontend, shared)){
     Lisp_destroy(shared);  Compiler_publish_macro_library(c, NULL);  collect_forget_provisional_entries();  return 0;
@@ -892,10 +762,6 @@ int Frontend_preload_macro_libraries(Frontend frontend){
   Compiler_publish_macro_library(c, shared);  collect_forget_provisional_entries();  return 1;
 }
 
-Context Context_open_named(const char *);
-Iter Map_keys(Map, Iter);
-int Iter_try_next(Iter, Var *);
-int Lisp_try_get(Lisp, String, Var *);
 void Compiler_bind_meta_operation(Lisp, String, Var);
 static int _preload_meta_surface(Frontend frontend, Lisp shared){
   struct CliRequest request = * frontend -> request;  request.dump = 0;  request.no_cpp = request.live_symbols = request.cpp_symbols = 0;  struct Frontend session = * frontend;  session.request = & request;  ParsedUnit unit;  String path = String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_47), NULL)));
@@ -969,8 +835,6 @@ static int _preload_meta_surface(Frontend frontend, Lisp shared){
 
 }
 
-void Lisp_set_global(Lisp, String, Var);
-
 static void _declare_builders(Compiler c, Lisp shared){
   List names = _60;
   {
@@ -991,11 +855,7 @@ static void _declare_builders(Compiler c, Lisp shared){
 
 }
 
-void interface_configure(String, int);
-
 void Compiler_select_native_modules(List);
-
-List List_map(List, Func);
 
 void Frontend_load_support(CliRequest request){
   if(! _init_guard_) _file_init_();
@@ -1003,15 +863,7 @@ void Frontend_load_support(CliRequest request){
   Compiler_select_native_modules(List_map(request -> native_modules, _x2c_func_handle_0));
 }
 
-List List_append(List, List);
-
-List default_include_dirs(void);
-
-Toolchain toolchain_new(CliRequest);
-
 void Compiler_use_meta_toolchain(String, String);
-
-String toolchain_meta_cc(String);
 
 Frontend Frontend_new(CliRequest request){
   if(! _init_guard_) _file_init_();
@@ -1045,8 +897,6 @@ static Var _x2c_lambda_0(String path){
   return String_var(Compiler_load_native_module(path));
   ;
 }
-
-Var x2c_func_value_argument(Func, const FuncArg *, unsigned, Symbol);
 
 static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0){
   String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_0, _x2c_func_argv_0, 0, 1318210446));

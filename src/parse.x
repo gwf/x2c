@@ -696,7 +696,10 @@ static List Compiler._defined(
   $let(c.meta_body, staged != NULL) function = c._finish_function(decl, NULL);
   c._record_meta_hash(function, first, 0);
   c._publish_definition(decl, function, meta, staged);
-  if (staged && c.meta_is_comptime_only(function)) return NULL;
+  if (staged && c.capture_unit && c.shallow)
+    c.record_project_meta_effect(decl, staged);
+  if (!c.capture_unit && staged && c.meta_is_comptime_only(function))
+    return NULL;
   if (c.macro_holes)
     return %(api-source ${first.line} ${c.definition_doc(first)} $function);
   c._definition_source(function, first.line, NULL, %($start $body));
@@ -1927,7 +1930,7 @@ static List Compiler._initialized(
     Token tokens = c.tokenizer.tokens;
     c.init_tokens[binding] = origin - tokens;
   }
-  if (c.shallow) {
+  if (c.shallow && !c.capture_unit) {
     c._skip_shallow_expression(1);
     return bind;
   }
@@ -2679,9 +2682,10 @@ static List Compiler._expression_body(Compiler c) {
 /** Lowers managed block declarations to declaration/defer pairs in source
     order, preserving their installed bindings and the enclosing lifetime.
 */
-List Compiler.finish_managed_declaration(
+List Compiler.finish_initializers(
   Compiler c, List declaration, Token origin) {
-  if (c.macro_holes || !_has_managed(declaration))
+  if (c.macro_holes || (!_has_managed(declaration) &&
+      !c.has_rewrites(<decl>, <init>)))
     return declaration;
   Array output = [];
   c._append_managed(declaration, output, origin);
@@ -2736,23 +2740,38 @@ static void Compiler._append_managed(
 static void Compiler._append_managed_rows(
   Compiler c, Var base, List declarators, Array output, Token origin) {
   Array ordinary = $auto([]);
+  Var source_base = base;
+  size_t remaining = declarators.len();
   foreach (List declarator, declarators) {
+    remaining--;
+    List after = NULL;
     List initializer = NULL, binding = NULL, modifiers = NULL;
     match (declarator)
       case %(op = (bind ?name ?mods) ?value): {
         initializer = _managed_initializer(value);
         binding = name;
         modifiers = mods;
+        if (!initializer)
+          after = c.rewrite(<decl>, <init>,
+            %(declare $source_base (bindings $declarator)),
+            AST_BLOCK, c.return_type, origin);
       }
-    if (!initializer) {
+    if (!initializer && !after) {
       ordinary.push(declarator);
       continue;
     }
     Type type = modifiers.append(base).type().declared();
-    c._require_cleanup(base, type, origin);
+    if (initializer) c._require_cleanup(base, type, origin);
+    if (after && remaining && base.type().base_type().body())
+      base = c._share_declaration_type(base, output);
+    if (after) ordinary.push(declarator);
     if (ordinary.len()) {
       output.push(%(declare $base (bindings @{ordinary})));
       ordinary.clear();
+    }
+    if (after) {
+      _push_items(output, after);
+      continue;
     }
     output.push(
       %(declare $base
@@ -2776,6 +2795,23 @@ static List Compiler._cleanup_statement(Compiler c, Type type, List binding) {
   List receiver = $!($type){ $binding };
   return c.bind_syntax(
     $!{ defer $receiver.cleanup(); }, AST_STATEMENT, c.return_type);
+}
+
+/* A split declaration still defines its shared type once. An ordinary local
+   typedef retains qualified aggregate and enum identity without copying the
+   definition into each emitted declaration. Variable storage stays outside. */
+static Type Compiler._share_declaration_type(
+  Compiler c, Type base, Array output) {
+  List name = c.sym.introduce(c.fresh_name("declaration_type"));
+  Type value = base.declared();
+  List alias = c.bind_syntax($!{ typedef $value $name; },
+    AST_BLOCK, c.return_type);
+  _push_items(output, alias);
+  Array storage = [];
+  foreach (Var item, base)
+    if (item is <symbol> && item.symbol().is_storage_class())
+      storage.push(item);
+  return %(@{storage.list_free()} $name);
 }
 
 // constructed syntax
@@ -2869,6 +2905,8 @@ static List Compiler._bind_form(
     case %(macro-invoke ?def ?args ?site):
       return c._bind_invocation(def, args, site, context, pending);
     case %(macro-slot ? ? *) if (c.macro_holes): return input;
+    case %(code-value ? ? ?):
+      return c.bind_code_value(input, context, c.return_type);
     case %(src ? ?syntax):
       return c.bind_syntax(syntax, context, c.return_type);
     case %(api-source ?line ?doc ?syntax) if (unit):
@@ -3312,7 +3350,7 @@ static List Compiler._bind_declaration(
   if (c.shallow && context == AST_UNIT && initializes)
     return %(declaration-initialized $decl ${c.macro_stack});
   if (context == AST_BLOCK && tag == <declare>)
-    return c.finish_managed_declaration(decl, c.token);
+    return c.finish_initializers(decl, c.token);
   return decl;
 }
 

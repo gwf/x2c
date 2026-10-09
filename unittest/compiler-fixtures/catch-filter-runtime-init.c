@@ -31,14 +31,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _0 = String_new("marker");
 }
 
-Var List_assoc(List, Var);
-
-static List Var_list(Var);
-
-Var List_last(List);
-
-static Var Symbol_var(Symbol);
-
 static Symbol _observe_relabel(List errors, Var data){
   (void) data;
   Symbol code = Var_symbol(List_assoc(Var_list(List_last(errors)), Symbol_var(227594)));
@@ -54,34 +46,6 @@ static Symbol _observe_relabel(List errors, Var data){
 
 
 
-
-int x2c_error_catch_site_pending(ErrorCatchSite *);
-
-static Var List_var(List);
-
-static Var String_var(String);
-
-ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
-
-void x2c_exception_push(ExceptionFrame *);
-
-List cons(Var, List);
-
-String String_new(const char *);
-
-void x2c_exception_landed(ExceptionFrame *);
-
-int x2c_exception_is_error_target(ExceptionFrame *);
-
-int x2c_error_catch_selected(ErrorHandler);
-
-void x2c_error_catch_detach(ErrorHandler);
-
-void x2c_exception_mark_handled(ExceptionFrame *);
-
-void x2c_error_catch_close(ErrorHandler);
-
-void x2c_exception_leave(ExceptionFrame *);
 
 static void _relabel_nested_pattern(void){
   {
@@ -134,12 +98,6 @@ static void _relabel_nested_pattern(void){
   }
 
 }
-
-void Error_initialize(void);
-
-ErrorHandler Error_push(ErrorHandlerFn, Var);
-
-void Error_pop(ErrorHandler);
 
 int main(void){
   x2c_initialize();

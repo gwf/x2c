@@ -34,7 +34,7 @@ The compiler surface a `meta` function calls.
 Returns the suffix of `type` that begins at its typedef name or base
 keyword, sharing `type`, or `NULL` when it has none.
 
-Source: `lib/meta.x:348`
+Source: `lib/meta.x:391`
 
 #### type_declaration_parts
 
@@ -44,7 +44,7 @@ Returns `(base modifiers)` for reconstructing a declaration of `type`.
 Function modifiers hold parameter syntax, and modifier order retains C
 declarator precedence.
 
-Source: `lib/meta.x:378`
+Source: `lib/meta.x:421`
 
 #### type_name_error
 
@@ -55,7 +55,7 @@ other than a C type keyword, as `%(String)` and `%(* Point)` do, or
 `NULL`. A type name is a String, as in `%("String")` and `%(* "Point")`;
 neither a short Symbol nor a long Atom supplies that representation.
 
-Source: `lib/meta.x:361`
+Source: `lib/meta.x:404`
 
 #### x2c_block_make
 
@@ -63,7 +63,7 @@ Source: `lib/meta.x:361`
 
 Returns a block containing `items` in order.
 
-Source: `lib/meta.x:127`
+Source: `lib/meta.x:132`
 
 #### x2c_expr_call
 
@@ -72,7 +72,7 @@ Source: `lib/meta.x:127`
 Returns the expression calling `callee` with `arguments`, a `List` of
 expressions.
 
-Source: `lib/meta.x:101`
+Source: `lib/meta.x:106`
 
 #### x2c_expr_composite
 
@@ -81,7 +81,7 @@ Source: `lib/meta.x:101`
 Returns the comma-separated composite initializer holding `items`, a
 `List` of expressions.
 
-Source: `lib/meta.x:106`
+Source: `lib/meta.x:111`
 
 #### x2c_expr_ident
 
@@ -90,7 +90,7 @@ Source: `lib/meta.x:106`
 Returns an expression reading the identifier `name`, which is the syntax
 `x2c_ident` returned or a binding the compiler resolved.
 
-Source: `lib/meta.x:87`
+Source: `lib/meta.x:92`
 
 #### x2c_expr_index
 
@@ -98,7 +98,7 @@ Source: `lib/meta.x:87`
 
 Returns the expression `base[subscript]`.
 
-Source: `lib/meta.x:90`
+Source: `lib/meta.x:95`
 
 #### x2c_function_body
 
@@ -106,7 +106,7 @@ Source: `lib/meta.x:90`
 
 Returns the statements in the body of `function`.
 
-Source: `lib/meta.x:181`
+Source: `lib/meta.x:216`
 
 #### x2c_literal_int
 
@@ -114,7 +114,7 @@ Source: `lib/meta.x:181`
 
 Returns an `int` expression holding `value`.
 
-Source: `lib/meta.x:71`
+Source: `lib/meta.x:76`
 
 #### x2c_literal_string
 
@@ -122,7 +122,7 @@ Source: `lib/meta.x:71`
 
 Returns a `String` expression holding `value`.
 
-Source: `lib/meta.x:66`
+Source: `lib/meta.x:71`
 
 #### x2c_literal_symbol
 
@@ -130,7 +130,7 @@ Source: `lib/meta.x:66`
 
 Returns a `Symbol` expression holding `value`.
 
-Source: `lib/meta.x:75`
+Source: `lib/meta.x:80`
 
 #### x2c_parameters_arguments
 
@@ -140,7 +140,7 @@ Returns the argument expressions that forward a parameter list, which is
 a `params` form or the parameters themselves. A `(void)` parameter list
 answers nothing.
 
-Source: `lib/meta.x:189`
+Source: `lib/meta.x:224`
 
 #### x2c_stmnt_make
 
@@ -148,7 +148,7 @@ Source: `lib/meta.x:189`
 
 Returns an expression statement.
 
-Source: `lib/meta.x:121`
+Source: `lib/meta.x:126`
 
 #### x2c_stmnt_return
 
@@ -156,15 +156,36 @@ Source: `lib/meta.x:121`
 
 Returns a return statement carrying `expression`.
 
-Source: `lib/meta.x:124`
+Source: `lib/meta.x:129`
 
 ## Public types
 
 | Type | Kind | Summary |
 | --- | --- | --- |
+| [`Code`](#Code) | alias | Captured code parsed from source or produced by a quotation. |
+| [`Macro`](#Macro) | alias | A macro as a value: called to build code, or used in a Match `case` to recognize code and capture its parameters. |
 | [`Source`](#Source) | alias | A `meta` parameter declared `Source` receives, at a `$` call, captured syntax with the source text it came from: `((text T) (file F) (syntax S))`. |
-| [`Type`](#Type) | alias | Type syntax, such as `%(double)` or `%((* char))`, the representation the compiler's own types use. |
+| [`Type`](#Type) | alias | Semantic type syntax with canonical List-pool lifetime. |
 | [`TypeInfo`](#TypeInfo) | alias | A `meta` parameter declared `TypeInfo` receives, at a `$` call, the description of its argument's type: `((name N) (kind K) (type T) (fields F) (methods M))`. |
+
+<a id="Code"></a>
+### Code
+
+`typedef List Code`
+
+Captured code parsed from source or produced by a quotation.
+
+Source: `lib/meta.x:44`
+
+<a id="Macro"></a>
+### Macro
+
+`typedef List Macro`
+
+A macro as a value: called to build code, or used in a Match `case` to
+recognize code and capture its parameters.
+
+Source: `lib/meta.x:38`
 
 <a id="Source"></a>
 ### Source
@@ -175,18 +196,16 @@ A `meta` parameter declared `Source` receives, at a `$` call, captured
 syntax with the source text it came from: `((text T) (file F) (syntax
 S))`. `x2c_source_text` and `x2c_embed_text` read it directly.
 
-Source: `lib/meta.x:51`
+Source: `lib/meta.x:56`
 
 <a id="Type"></a>
 ### Type
 
 `typedef List Type`
 
-Type syntax, such as `%(double)` or `%((* char))`, the representation
-the compiler's own types use. A quotation fills a type position from a
-local declared `Type`.
+Semantic type syntax with canonical List-pool lifetime.
 
-Source: `lib/meta.x:39`
+Source: `lib/meta.x:41`
 
 <a id="TypeInfo"></a>
 ### TypeInfo
@@ -197,7 +216,7 @@ A `meta` parameter declared `TypeInfo` receives, at a `$` call, the
 description of its argument's type: `((name N) (kind K) (type T)
 (fields F) (methods M))`. Read a part with `List.assoc`.
 
-Source: `lib/meta.x:46`
+Source: `lib/meta.x:51`
 
 ## Design notes
 

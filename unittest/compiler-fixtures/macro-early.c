@@ -23,14 +23,6 @@ static int _x2c_tally_0;
 
 static int _x2c_tally_2;
 
-static Var Symbol_var(Symbol);
-
-List cons(Var, List);
-
-static Var List_var(List);
-
-static Var String_var(String);
-
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -64,10 +56,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _26 = String_var(_25);
 }
 
-Atom Atom_intern(String);
-
-static String int_str(int);
-
 static List tally(String key, int amount){
   Atom token = Atom_intern(_0);
   String digits = String_join(NULL, cons(String_var(int_str(amount)), NULL));
@@ -85,8 +73,6 @@ static List tally(String key, int amount){
   }
   );
 }
-
-List Macro_apply(Macro, List);
 
 static List run_macro(Macro m){
   return Macro_apply(m, NULL);

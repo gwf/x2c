@@ -340,12 +340,6 @@ int Error_depth(void){
 
 int Error_bound(void);
 
-static List Var_list(Var);
-
-static Var List_var(List);
-
-static void Block_push(Block, const void *);
-
 static void _record(const X2CErrorSite * site, Symbol code, List detail){
   if(Error_count() >= Error_bound()) _floor(code, "error stack exceeded its bound");
   ErrorThreadState state = _thread();
@@ -374,12 +368,6 @@ static void _record_n(const X2CErrorSite * site, Symbol code, unsigned pair_coun
   state -> floor_only --;
 }
 
-Block Block_new(size_t);
-
-void Block_free(Block);
-
-void Scope_pop(void);
-
 static List ErrorRegion__counted_detail(ErrorRegion * region, Symbol code, unsigned count, va_list args){
   int pushed = _scope_push(code, "could not enter error scope for counted detail");
   Block pairs = Block_new(sizeof(ErrorPair));
@@ -399,8 +387,6 @@ static List ErrorRegion__counted_detail(ErrorRegion * region, Symbol code, unsig
   return detail;
 }
 
-static Var Symbol_var(Symbol);
-
 static List ErrorRegion__entry(ErrorRegion * region, const X2CErrorSite * site, Symbol code, List detail){
   List location = ErrorRegion__location(region, site), entry = NULL;
   entry = ErrorRegion__field(region, Symbol_var(857050729436), List_var(location), entry);
@@ -408,10 +394,6 @@ static List ErrorRegion__entry(ErrorRegion * region, const X2CErrorSite * site, 
   entry = ErrorRegion__field(region, Symbol_var(227594), Symbol_var(code), entry);
   return entry;
 }
-
-static Var String_var(String);
-
-static Var int_var(int);
 
 static List ErrorRegion__location(ErrorRegion * e, const X2CErrorSite * site){
   if(! site) return NULL;
@@ -421,8 +403,6 @@ static List ErrorRegion__location(ErrorRegion * e, const X2CErrorSite * site){
   location = ErrorRegion__field(e, Symbol_var(805770), int_var(site -> line), location);
   return ErrorRegion__field(e, Symbol_var(412426), String_var(file), location);
 }
-
-String String_new_in(Pool, const char *, int);
 
 static String ErrorRegion__site_text(ErrorRegion * region, const char * text){
   if(! text) text = "<unknown>";
@@ -437,8 +417,6 @@ static List ErrorRegion__pair(ErrorRegion * region, Var key, Var value){
   return ErrorRegion__cons(region, key, ErrorRegion__cons(region, value, NULL));
 }
 
-List List_cons_in(Pool, Var, List);
-
 static List ErrorRegion__cons(ErrorRegion * region, Var head, List tail){
   return List_cons_in(region -> pool, head, tail);
 }
@@ -447,8 +425,6 @@ static ErrorRecord * _record_at(int index){
   ErrorRecord * records = _thread() -> stack -> bytes;
   return & records[index];
 }
-
-static void Block_pop(Block);
 
 static void _truncate(int mark){
   if(! Error_ready() || mark < 0) return;
@@ -459,22 +435,6 @@ static void _truncate(int mark){
   }
 
 }
-
-int Var_is_void(Var);
-
-int Var_is_null(Var);
-
-int Var_is_nil(Var);
-
-int Var_is(Var, Symbol);
-
-static int Var_is_wide(Var);
-
-int Var_is_integer(Var);
-
-int Var_is_floating(Var);
-
-static int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 
 static Var ErrorRegion__copy_value(ErrorRegion * region, Var value){
   if(Var_is_void(value)) _floor(4477479911782, region ? "void is not an admissible error detail" : "void is not an admissible error snapshot");
@@ -490,18 +450,12 @@ static Var ErrorRegion__copy_wide(ErrorRegion * region, Var value){
   return region ? _clone_in(& region -> values, value) : _snapshot_wide(value);
 }
 
-Scope * Scope_top(void);
-
-Var Var_clone_wide(Var);
-
 static Var _snapshot_wide(Var v){
   Scope owner = * Scope_top();
   if(! owner) return Var_clone_wide(v);
   while(owner -> down) owner = owner -> down;
   return _clone_in(& owner, v);
 }
-
-void Scope_push(Scope *);
 
 static Var _clone_in(Scope * owner, Var v){
   Scope_push(owner);
@@ -510,24 +464,12 @@ static Var _clone_in(Scope * owner, Var v){
   return copy;
 }
 
-String Var_str(Var);
-
-static String Var_string(Var);
-
-int String_len(String);
-
-Var Var_new(Symbol, ...);
-
 static Var ErrorRegion__copy_text(ErrorRegion * region, Var value){
   String source = Var_is(value, 826970) ? Var_str(value) : Var_string(value);
   if(! region) return _snapshot_text(value, source);
   String owned = String_new_in(region -> pool, source, String_len(source));
   return Var_is(value, 826970) ? Var_new(826970, owned) : String_var(owned);
 }
-
-String String_new_len(const char *, int);
-
-int String_try_own(String);
 
 static Var _snapshot_text(Var value, String source){
   String owned = String_new_len(source, String_len(source));
@@ -540,14 +482,6 @@ static Var _snapshot_text(Var value, String source){
   return atom;
 }
 
-static Var List_car(List);
-
-static List List_cdr(List);
-
-List cons(Var, List);
-
-int List_try_own(List);
-
 static List ErrorRegion__copy_list(ErrorRegion * region, List source){
   Var head = ErrorRegion__copy_value(region, List_car(source));
   List tail = Var_list(ErrorRegion__copy_value(region, List_var(List_cdr(source))));
@@ -556,10 +490,6 @@ static List ErrorRegion__copy_list(ErrorRegion * region, List source){
   List_try_own(owned);
   return owned;
 }
-
-Scope Scope_new_named(const char *);
-
-Pool Pool_retain_named(Pool, const char *);
 
 static ErrorRegion _region_new(void){
   ErrorRegion region ={
@@ -570,10 +500,6 @@ static ErrorRegion _region_new(void){
   region.pool = Pool_retain_named(NULL, "Error record canonical values");
   return region;
 }
-
-Pool Pool_release(Pool);
-
-void Scope_destroy(Scope);
 
 static void ErrorRegion__destroy(ErrorRegion * region){
   if(region -> pool) region -> pool = Pool_release(region -> pool);
@@ -614,10 +540,6 @@ static Symbol ErrorThreadState__offer(ErrorThreadState e, ErrorHandler h, Symbol
   return 285842436424;
 }
 
-void x2c_cleanup_push(X2CCleanup *);
-
-void x2c_cleanup_leave(X2CCleanup *);
-
 static Symbol ErrorThreadState__observe(ErrorThreadState e, ErrorHandler h){
   {
     _x2c_defer_env_0 _x2c_macro_environment_0 ={
@@ -650,8 +572,6 @@ static Symbol ErrorThreadState__observe(ErrorThreadState e, ErrorHandler h){
 
 }
 
-void ExceptionFrame_unwind(void *);
-
 static void ErrorThreadState__transfer(ErrorThreadState state, ErrorHandler h, Symbol code, Symbol disposition){
   state -> handler_top = state -> dispatch_saved;
   state -> dispatch_saved = state -> dispatch_running = NULL;
@@ -672,8 +592,6 @@ static void ErrorThreadState__apply_policy(ErrorThreadState e, ErrorRaise r){
   else if(policy == 619609226) _truncate(r.raised_at);
 }
 
-void Symbol_decode(Symbol, char *);
-
 static void _report(Symbol code){
   char spelling[SYMBOL_MAX_5BIT + 1] ={
     __builtin_choose_expr(0ULL <(sizeof(spelling) /(sizeof(spelling[0]))), 0, (__typeof__(spelling[0ULL])){
@@ -692,12 +610,6 @@ void Error_note_rendered(void){
   ErrorThreadState state = _thread();
   if(state -> depth > 0 && state -> depth <= ERROR_MAX_DEPTH) state -> rendered[state -> depth] = 1;
 }
-
-static Var List_cadr(List);
-
-Pool Pool_open_named(const char *);
-
-void Pool_close(void);
 
 static Symbol ErrorHandler__catch_match(ErrorHandler h){
   if(Error_count() <= h -> watermark) return 285842436424;
@@ -723,12 +635,6 @@ static int ErrorHandler__catch_select(ErrorHandler h, ErrorRecord * record, List
   return 0;
 }
 
-void * Scope_malloc(size_t);
-
-int MatchPlan_execute_capture(MatchPlan, Var, MatchCaptureBuffer *, MachineStats *);
-
-void Scope_free(void *);
-
 static int ErrorHandler__catch_arm(ErrorHandler h, ErrorRecord * record, List projection, int i){
   MatchPlan plan = ErrorHandler__arm_plan(h, i);
   MatchCaptureLayout layout = plan ? plan -> layout : NULL;
@@ -749,10 +655,6 @@ static MatchPlan ErrorHandler__arm_plan(ErrorHandler h, int i){
   MatchPlan * plans = h -> plans != NULL ? h -> plans -> bytes : NULL;
   return plans ? plans[i] : h -> site -> arms[i].plan;
 }
-
-void Block_append(Block, const void *, size_t);
-
-int MatchCaptureBuffer_has(MatchCaptureBuffer *, int);
 
 static void ErrorHandler__commit_captures(ErrorHandler handle, ErrorRecord * record, MatchCaptureLayout layout, MatchCaptureBuffer * captures){
   if(handle -> capture_values != NULL){
@@ -790,13 +692,9 @@ static void _retained_destroy(Block retained){
   Block_free(retained);
 }
 
-int SymbolSet_contains(SymbolSet, Symbol);
-
 static int _never_returns(Symbol code){
   return SymbolSet_contains(error_nonreturning_causes, code);
 }
-
-Var Map_setindex(Map, Var, Var);
 
 void Error_policy_set(Symbol code, Symbol disposition){
   if(! _init_guard_) _file_init_();
@@ -828,8 +726,6 @@ void Error_policy_set(Symbol code, Symbol disposition){
   state -> floor_only --;
 }
 
-Var Map_getindex(Map, Var);
-
 Symbol Error_policy_get(Symbol code){
   if(! _init_guard_) _file_init_();
   if(! Error_ready()) return 2260136;
@@ -857,8 +753,6 @@ void Error_bound_set(int bound){
   else state -> bound = bound;
 }
 
-unsigned Map_len(Map);
-
 void * Error_policy_capture(void){
   if(! _init_guard_) _file_init_();
   if(! Error_ready()) return NULL;
@@ -883,8 +777,6 @@ static int _fill_contexts(ErrorContextState context, Symbol * pairs, int at, int
   at = _fill_contexts(context -> prev, pairs, at, capacity);
   return _fill_pairs(context -> policy, pairs, at, capacity);
 }
-
-int Map_try_next(Map, unsigned *, Var *, Var *);
 
 static int _fill_pairs(Map policy, Symbol * pairs, int at, int capacity){
   unsigned cursor = 0;
@@ -925,8 +817,6 @@ ErrorHandler Error_push(ErrorHandlerFn fn, Var data){
   _thread() -> handler_top = h;
   return h;
 }
-
-void * Scope_malloc_in(Scope *, size_t);
 
 static ErrorHandler _handler_new(ErrorHandlerFn fn, Var data){
   ErrorThreadState state = _thread();
@@ -1003,8 +893,6 @@ void * Error_handler_head(void){
   return _thread() -> handler_top;
 }
 
-String String_new(const char *);
-
 ErrorHandler x2c_error_catch_site_push(void * target, ErrorCatchSite * site, Var * patterns){
   if(! _init_guard_) _file_init_();
   if(! Error_ready() || ! target || ! site || ! site -> arm_count) _floor(20800632064936, "could not register transferring catch");
@@ -1047,10 +935,6 @@ static int ErrorCatchSite__state(ErrorCatchSite * site){
   return __atomic_load_n(& site -> state, __ATOMIC_ACQUIRE);
 }
 
-int x2c_match_pattern_retainable(Var);
-
-MatchPlan x2c_match_site_prepare(MatchCaptureSite *, Var);
-
 static void ErrorCatchSite__bind(ErrorCatchSite * site, Var * patterns){
   _site_lock();
   {
@@ -1078,19 +962,13 @@ static void ErrorCatchSite__bind(ErrorCatchSite * site, Var * patterns){
 
 }
 
-void Mutex_recursive_initialize(pthread_mutex_t *, const char *);
-
 static void _site_mutex_initialize(void){
   Mutex_recursive_initialize(& catch_site_mutex, "Error: could not initialize catch site mutex");
 }
 
-void Mutex_recursive_lock(pthread_mutex_t *, pthread_once_t *, void(*)(void), const char *);
-
 static void _site_lock(void){
   Mutex_recursive_lock(& catch_site_mutex, & catch_site_mutex_once, _site_mutex_initialize, "Error: could not lock catch site");
 }
-
-void Mutex_recursive_unlock(pthread_mutex_t *, const char *);
 
 static void _site_unlock(void){
   Mutex_recursive_unlock(& catch_site_mutex, "Error: could not unlock catch site");
@@ -1145,8 +1023,6 @@ int x2c_error_catch_selected(ErrorHandler handle){
   if(! _init_guard_) _file_init_();
   return handle ? handle -> selected : - 1;
 }
-
-int Block_truth(Block);
 
 Var x2c_error_catch_capture(ErrorHandler handle, int index){
   if(! _init_guard_) _file_init_();
@@ -1211,8 +1087,6 @@ void Error_restore(int handler_depth, int stack_height){
   ErrorThreadState__unwind_to(state, ErrorThreadState__handler_at_depth(state, handler_depth), 1);
   _truncate(stack_height);
 }
-
-Map Map_new(void);
 
 void * Error_context_open(void){
   if(! _init_guard_) _file_init_();
@@ -1331,8 +1205,6 @@ static int _scope_push(Symbol code, const char * message){
   if(Scope_top() != & state -> scope) _floor(code, message);
   return 1;
 }
-
-Iter SymbolSet_iter(SymbolSet, Iter);
 
 int Iter_try_next(Iter, Var *);
 

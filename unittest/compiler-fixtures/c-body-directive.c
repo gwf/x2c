@@ -34,10 +34,6 @@ _x2c_defer_env_0;
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
-static Var int_var(int);
-
-List cons(Var, List);
-
 #include "exception.h"
 
 
@@ -136,10 +132,6 @@ static int branch(int a){
   return a;
 }
 
-int List_try_next(List, List *, Var *);
-
-int Var_int(Var);
-
 static int sum(List items){
   int total = 0;
   {
@@ -159,40 +151,10 @@ static int sum(List items){
   return total;
 }
 
-void x2c_cleanup_push(X2CCleanup *);
-
-void x2c_cleanup_leave(X2CCleanup *);
-
-void x2c_exception_push(ExceptionFrame *);
-
-void x2c_exception_landed(ExceptionFrame *);
-
-int x2c_exception_claim(ExceptionFrame *);
-
-void x2c_exception_leave(ExceptionFrame *);
-
 #include "error.h"
 
 
 
-
-int x2c_error_catch_site_pending(ErrorCatchSite *);
-
-static Var List_var(List);
-
-static Var Symbol_var(Symbol);
-
-ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
-
-int x2c_exception_is_error_target(ExceptionFrame *);
-
-int x2c_error_catch_selected(ErrorHandler);
-
-void x2c_error_catch_detach(ErrorHandler);
-
-void x2c_exception_mark_handled(ExceptionFrame *);
-
-void x2c_error_catch_close(ErrorHandler);
 
 static int governed(List items){
   int volatile total = 0;

@@ -39,10 +39,6 @@ static void record_cleanup(void){
   cleanup ++;
 }
 
-static Var Symbol_var(Symbol);
-
-static Var int_var(int);
-
 #include "error.h"
 
 
@@ -56,28 +52,6 @@ _Noreturn static void raise_from_callee(void){
   }
 
 }
-
-int x2c_error_catch_site_pending(ErrorCatchSite *);
-
-static Var List_var(List);
-
-ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
-
-void x2c_exception_push(ExceptionFrame *);
-
-void x2c_exception_landed(ExceptionFrame *);
-
-int x2c_exception_is_error_target(ExceptionFrame *);
-
-int x2c_error_catch_selected(ErrorHandler);
-
-void x2c_error_catch_detach(ErrorHandler);
-
-void x2c_exception_mark_handled(ExceptionFrame *);
-
-void x2c_error_catch_close(ErrorHandler);
-
-void x2c_exception_leave(ExceptionFrame *);
 
 static int preserve_parameter(int volatile value){
   {
@@ -130,12 +104,6 @@ static int preserve_parameter(int volatile value){
   }
   return value;
 }
-
-void x2c_cleanup_push(X2CCleanup *);
-
-void x2c_cleanup_leave(X2CCleanup *);
-
-int Var_int(Var);
 
 int main(void){
   x2c_initialize();

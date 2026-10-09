@@ -317,8 +317,8 @@ void MatchLease.release(MatchLease *lease) {
   lease.active = 0;
 }
 
-/* Acquisition must remain active while reading the retained program. */
-static MatchPlan MatchLease._plan(MatchLease *m) =>
+/** Borrows the acquired program until this active lease is released. */
+MatchPlan MatchLease.plan(MatchLease *m) =>
   m.transient_plan ? m.transient_plan
     : m.cache.entries[m.slot].plan;
 
@@ -345,7 +345,7 @@ static macro Stmt $match.plan(
   MatchLease *lease = &storage;
   int status = $cache.acquire($pattern, *lease, $owner);
   defer lease.release();
-  MatchPlan $plan = status == MACHINE_PREPARED ? lease._plan() : NULL;
+  MatchPlan $plan = status == MACHINE_PREPARED ? lease.plan() : NULL;
 }
 
 /** Matches through `cache` into caller-owned positional storage.

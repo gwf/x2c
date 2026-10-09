@@ -90,14 +90,6 @@ _x2c_defer_env_3;
 
 static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3);
 
-static Var Symbol_var(Symbol);
-
-List cons(Var, List);
-
-static Var List_var(List);
-
-static Var String_var(String);
-
 #include "exception.h"
 
 
@@ -427,8 +419,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _317 = cons(_301, _316);
 }
 
-static int List_truth(List);
-
 static List Type_list(Type);
 
 int Sym_is_named_value_type(Sym, Type, String);
@@ -437,27 +427,15 @@ List meta_type_description(Var);
 
 List meta_source_description(Var);
 
-static List Var_list(Var);
-
 List Compiler_capture_macro_value(Compiler, List);
-
-Var Var_binary(Var, Symbol, Var);
 
 static Type Var_type(Var);
 
-static Var int_var(int);
-
-int SymbolSet_contains(SymbolSet, Symbol);
-
 Type Sym_resolve_numeric_type(Sym, Type);
-
-static Var List_cadr(List);
 
 Type Type_widest(Type, Type);
 
 Var Compiler_folded_constant(Compiler c, Var node);
-
-int Var_is_void(Var);
 
 Var Compiler_meta_argument(Compiler c, List node, Type want, Token site, MetaCall call){
   if(! _init_guard_) _file_init_();
@@ -509,7 +487,6 @@ if(Var_is_void(value)) value = _name_syntax(c, node, site);  return _scalar_valu
 }
 
 int Sym_is_var_type(Sym, Type);
-static int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 static Var _captured_value(Compiler c, Var captured, Type want){
   if(! List_truth(Type_list(want)) || Sym_is_var_type(c -> sym, want) || Sym_is_named_value_type(c -> sym, want, _66)) return captured;  Var literal = Var_is_row(captured, 9, 7, 4) ? _constant_leaf(c, Var_list(captured)) :((void) 0, Void);  if(Var_is_void(literal) || Var_is_row(literal, 9, 7, 4)) return captured;  return literal;
 }
@@ -530,14 +507,10 @@ Compiler_report_error(c, 27335838, _74, site, _77);
 }
 
 Symbol Type_scalar_tag(Type);
-int Var_is_integer(Var);
-int Var_is_floating(Var);
-Var Var_convert(Var, Symbol);
 static Var _scalar_value(Compiler c, Var value, Type want){
   Type numeric = List_truth(Type_list(want)) ? Sym_resolve_numeric_type(c -> sym, want) : NULL;  Symbol tag = List_truth(Type_list(numeric)) ? Type_scalar_tag(numeric) : 0;  if(tag &&(Var_is_integer(value) || Var_is_floating(value))) return Var_convert(value, tag);  return value;
 }
 
-Var Array_getindex(Array, int);
 Var Compiler_folded_constant(Compiler c, Var node){
   if(! _init_guard_) _file_init_();
   {
@@ -569,9 +542,7 @@ return List_var(key);
 }
 
 Var literal_text_value(String spelling);
-static String Var_string(Var);
 Var Type_numeric_literal_value(Type, String);
-static Var List_car(List);
 static Var _constant_leaf(Compiler c, List expr){
 
   {
@@ -620,16 +591,10 @@ static Var _cast_constant(Compiler c, Var type, List inner){
   Var constant = _constant_leaf(c, inner);  if(Var_is_void(constant)) return((void) 0, Void);  Symbol tag = Type_scalar_tag((Var_type(type)));  return tag ? Var_convert(constant, tag) : constant;
 }
 
-String String_add(String, String);
 static Var _joined_constant(Compiler c, Var left, Var right){
   Var a = Compiler_folded_constant(c, left), b = Compiler_folded_constant(c, right);  if(Var_is_void(a) || Var_is_void(b)) return((void) 0, Void);  return String_var(String_add(Var_string(a), Var_string(b)));
 }
 
-int String_len(String);
-int String_getindex(String, int);
-String String_unescape(String);
-String String_new_len(const char *, int);
-static Var char_var(char);
 Var literal_text_value(String spelling){
   if(! _init_guard_) _file_init_();  int len = String_len(spelling);  if(len >= 2 && String_getindex(spelling, 0) == '"'){
     String text = _243;  for(int i = 0;  i < len;  i ++){
@@ -644,13 +609,8 @@ Var literal_text_value(String spelling){
 }
 
 static Type List_type(List);
-List Macro_number_type(Var);
 List Compiler_macro_value_literal(Compiler, List);
-static Var List_caddr(List);
 Symbol Sym_var_tag_for_type(Sym, Type, Type *);
-int Var_is(Var, Symbol);
-String Symbol_str(Symbol);
-static Symbol Var_symbol(Var);
 List Compiler_meta_value_expression(Compiler c, Type declared, Var value, Token site){
   if(! _init_guard_) _file_init_();  if(! Var_is_row(value, 9, 7, 4)) _refuse(c, value, site);  Type type = List_truth(Type_list(declared)) ? declared : List_type(Macro_number_type(value));  if(Var_is_row(value, 9, 7, 4) && Sym_is_named_value_type(c -> sym, declared, _244)){
     List expression = Compiler_macro_value_literal(c, Var_list(value));  return cons(_0, cons(_248, cons(List_caddr(expression), NULL)));
@@ -661,10 +621,6 @@ List Compiler_meta_value_expression(Compiler c, Type declared, Var value, Token 
   )), NULL)));  return NULL;
 }
 
-Map Map_new(void);
-void x2c_cleanup_push(X2CCleanup *);
-List datum_result_problem(Var, Map);
-void x2c_cleanup_leave(X2CCleanup *);
 static void _refuse(Compiler c, Var value, Token site){
   Map marks = Map_new(); {
     _x2c_defer_env_0 _x2c_macro_environment_0 ={
@@ -681,8 +637,6 @@ static void _refuse(Compiler c, Var value, Token site){
 
 }
 
-String Var_repr(Var);
-List Compiler_cache(Compiler, List);
 static List _string_literal(Compiler c, Type declared, Type type, Var value){
   if(! List_truth(Type_list(declared)) || type == _237) return cons(_0, cons(_238, cons(List_var(cons(_140, cons(_238, cons(String_var(Var_repr(value)), NULL)))), NULL)));  if(type != _152) return NULL;  List literal = cons(_0, cons(_153, cons(List_var(cons(_140, cons(_153, cons(value, NULL)))), NULL)));  return({
     Var _x2c_literal_part_2 = List_var(declared);  Var _x2c_literal_part_3 = List_var(Compiler_cache(c, cons(_102, cons(List_var(literal), NULL))));  cons(_0, cons(_x2c_literal_part_2, cons(_x2c_literal_part_3, NULL)));
@@ -690,7 +644,6 @@ static List _string_literal(Compiler c, Type declared, Type type, Var value){
   );
 }
 
-List Macro_number_literal(List, List, Var);
 static List _number_literal(Compiler c, Type declared, Type type, Var value){
   type = Sym_resolve_numeric_type(c -> sym, type);  Symbol tag = List_truth(Type_list(type)) ? Type_scalar_tag(type) : 0;  if(! tag) return NULL;  return Macro_number_literal(Type_list(List_truth(Type_list(declared)) ? declared : type), Type_list(type), Var_convert(value, tag));
 }
@@ -700,9 +653,6 @@ static List _data_literal(Compiler c, Type declared, Var value, Token site){
   _refuse(c, value, site);  List expression = _data_form(c, value);  return List_truth(expression) && List_truth(Type_list(declared)) ? Compiler_convert_expression(c, expression, declared) : expression;
 }
 
-int Var_is_null(Var);
-List Compiler_cache_literal_list(Compiler, List);
-List Compiler_cache_literal_var(Compiler, Var);
 static List _data_form(Compiler c, Var value){
   if(Var_is_null(value)) return _272;  if(_immutable(value)){
     if(Var_is_row(value, 9, 7, 4)) return Compiler_cache_literal_list(c, Var_list(value));  return cons(_0, cons(_200, cons(List_var(Compiler_cache_literal_var(c, value)), NULL)));
@@ -710,8 +660,6 @@ static List _data_form(Compiler c, Var value){
   if(Var_is_row(value, 9, 7, 4)) return _list_form(c, value);  if(Var_is(value, 3313778)) return _array_form(c, value);  if(! Var_is(value, 26720)) return NULL;  return _map_form(c, value);
 }
 
-int List_try_next(List, List *, Var *);
-int Var_is_atom(Var);
 static int _immutable(Var value){
   if(Var_is_row(value, 9, 7, 4)){
     {
@@ -725,7 +673,6 @@ static int _immutable(Var value){
   return Var_is_row(value, 11, 7, 1) || Var_is_atom(value) || Var_is_integer(value) || Var_is_floating(value);
 }
 
-List List_reverse(List);
 static List _list_form(Compiler c, Var value){
   List tail = _97; {
     Var item;  List _x2c_macro_object_1 = List_reverse(Var_list(value));  List _x2c_macro_cursor_1 = _x2c_macro_object_1;  Var _x2c_macro_cursor_output_1;  while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
@@ -739,11 +686,6 @@ static List _list_form(Compiler c, Var value){
   return tail;
 }
 
-Array Array_new(void);
-static Array Var_array(Var);
-int Array_try_next(Array, int *, Var *);
-Var Array_push(Array, Var);
-List Array_list(Array);
 static List _array_form(Compiler c, Var value){
   Array items = Array_new(); {
     _x2c_defer_env_1 _x2c_macro_environment_1 ={
@@ -781,10 +723,6 @@ static List _array_form(Compiler c, Var value){
 
 }
 
-static Map Var_map(Var);
-int Map_try_next(Map, unsigned *, Var *, Var *);
-Array Array_sort(Array);
-Var Map_getindex(Map, Var);
 static List _map_form(Compiler c, Var value){
   Map map = Var_map(value);  Array keys = Array_new(); {
     _x2c_defer_env_3 _x2c_macro_environment_3 ={
@@ -840,8 +778,6 @@ static List _map_form(Compiler c, Var value){
 
 }
 
-unsigned Map_len(Map);
-int Map_contains(Map, Var);
 void Compiler_check_meta_call(Compiler c, List callee, Token origin){
   if(! _init_guard_) _file_init_();  if(c -> meta_body || ! Map_len(c -> meta_comptime)) return;
   {
@@ -878,12 +814,10 @@ default: break;
 return 0;
 }
 
-void Map_cleanup(Map);
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;  Map_cleanup((*(Map *) _x2c_defer_data_0->_x2c_defer_capture_0));
 }
 
-void Array_cleanup(Array);
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
   _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;  Array_cleanup((*(Array *) _x2c_defer_data_1->_x2c_defer_capture_1));
 }

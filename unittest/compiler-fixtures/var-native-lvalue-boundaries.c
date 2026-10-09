@@ -4,8 +4,6 @@
 #include "x2c.h"
 
 #include "x2c.h"
-static Var int_var(int);
-
 int main(void){
   x2c_initialize();
   Var increment = int_var(1);

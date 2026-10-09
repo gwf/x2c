@@ -22,24 +22,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _1 = String_new("string:%hhd/%hu/%Lf/%s");
 }
 
-static Var int_var(int);
-
-static Var String_var(String);
-
-static Var char_var(char);
-
-String String_printf(String, ...);
-
-int File_printf(File, const char *, ...);
-
-Buffer Buffer_new(size_t);
-
-Buffer Buffer_printf(Buffer, const char *, ...);
-
-String Buffer_str(Buffer);
-
-void Buffer_free(Buffer);
-
 int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();

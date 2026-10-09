@@ -37,10 +37,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
 
 static int String_truth(String);
 
-String String_malloc(int);
-
-String String_intern_free(String);
-
 String String_escape(String str){
   if(! String_truth(str)) return NULL;
   int bytes = 0;
@@ -93,17 +89,11 @@ static inline char _escape_letter(unsigned char ch){
   return 0;
 }
 
-String String_printf(String, ...);
-
 String String_repr(String str){
   if(! _init_guard_) _file_init_();
   if(! String_truth(str) || ! * str) return _0;
   return String_printf(_1, String_escape(str));
 }
-
-Buffer Buffer_write_char(Buffer, char);
-
-Buffer Buffer_write_len(Buffer, const char *, size_t);
 
 Buffer String_write_repr(String str, Buffer out){
   Buffer_write_char(out, '"');
@@ -114,12 +104,6 @@ Buffer String_write_repr(String str, Buffer out){
   }
   return Buffer_write_char(out, '"');
 }
-
-int String_len(String);
-
-int String_contains(String, String);
-
-void String_free(String);
 
 static Var Symbol_var(Symbol);
 
@@ -175,8 +159,6 @@ static inline int _decode_escape(const char * * at){
   return _named_escape(esc);
 }
 
-static int scan_ascii_hex_value(int);
-
 static inline int _hex_escape(const char * * at, int esc){
   int byte = 0, digits = 0;
   for(;  *(* at) && digits < 2; (* at) ++, digits ++){
@@ -222,10 +204,6 @@ int String_parse_char(String str){
   }
   return * at == '\'' ? byte : - 1;
 }
-
-int String_getindex(String, int);
-
-String String_new_len(const char *, int);
 
 String String_parse(String str){
   if(! _init_guard_) _file_init_();

@@ -32,10 +32,6 @@ static int _decodes_to(Symbol compact, String canonical, int length);
 
 void Atom_initialize(void);
 
-int Var_is(Var, Symbol);
-
-String String_promote(String);
-
 String Atom_str(Atom atom);
 
 Atom Atom_promote(Atom atom){
@@ -43,14 +39,6 @@ Atom Atom_promote(Atom atom){
   if(Var_is(atom, 826970)) String_promote(Atom_str(atom));
   return atom;
 }
-
-static int String_truth(String);
-
-int String_getindex(String, int);
-
-int String_len(String);
-
-int scan_atom(char *);
 
 int Atom_bare_spelling(String spelling){
   if(! _init_guard_) Atom_initialize();
@@ -62,22 +50,12 @@ int Atom_bare_spelling(String spelling){
   return scan_atom(spelling) == length;
 }
 
-Buffer Symbol_write_str(Symbol, Buffer);
-
-Buffer Buffer_write(Buffer, const char *);
-
-void * Var_pointer(Var);
-
 Buffer Atom_write_str(Atom atom, Buffer out){
   if(! _init_guard_) Atom_initialize();
   if(Var_is(atom, 1328354264)) return Symbol_write_str(Var_symbol(atom), out);
   if(Var_is(atom, 826970)) return Buffer_write(out, (String) Var_pointer(atom));
   return out;
 }
-
-Buffer Buffer_write_char(Buffer, char);
-
-Buffer Buffer_write_len(Buffer, const char *, size_t);
 
 Buffer Atom_write_repr(Atom value, Buffer out){
   if(! _init_guard_) Atom_initialize();
@@ -103,18 +81,12 @@ int Var_is_atom(Var value){
   return Var_is(value, 1328354264) || Var_is(value, 826970);
 }
 
-String Symbol_str(Symbol);
-
-static Symbol Var_symbol(Var);
-
 String Atom_str(Atom atom){
   if(! _init_guard_) Atom_initialize();
   if(Var_is(atom, 1328354264)) return Symbol_str(Var_symbol(atom));
   if(Var_is(atom, 826970)) return(String) Var_pointer(atom);
   return NULL;
 }
-
-char Symbol_first(Symbol);
 
 char Atom_first(Atom atom){
   if(! _init_guard_) Atom_initialize();
@@ -142,17 +114,11 @@ static int _escape_byte(String spelling, int index){
   return 0;
 }
 
-Buffer Buffer_new(size_t);
-
-String Buffer_str_free(Buffer);
-
 static String _repr(Var value){
   Buffer out = Buffer_new(0);
   Atom_write_repr(value, out);
   return Buffer_str_free(out);
 }
-
-unsigned String_hash(String);
 
 static unsigned _hash(Var value){
   return String_hash(((String) Var_pointer(value)));
@@ -164,8 +130,6 @@ static int _equal(Var left, Var right){
   return 0;
 }
 
-int String_compare(String, String);
-
 static int _compare(Var left, Var right){
   return String_compare(((String) Var_pointer(left)), (String) Var_pointer(right));
 }
@@ -173,12 +137,6 @@ static int _compare(Var left, Var right){
 static int _truth(Var value){
   return Var_pointer(value) != NULL;
 }
-
-int x2c_try_register_descriptor(String, VarMethods);
-
-static Var Symbol_var(Symbol);
-
-static Var String_var(String);
 
 #include "error.h"
 
@@ -203,8 +161,6 @@ void Atom_initialize(void){
   initialized = 1;
 }
 
-int String_try_next(String, int *, int *);
-
 static Symbol _exact_7bit(String spelling){
   int length = String_len(spelling);
   if(length > SYMBOL_MAX_7BIT) return 0;
@@ -228,20 +184,12 @@ static Symbol _exact_7bit(String spelling){
   return(result << 1) | 1;
 }
 
-void Symbol_decode(Symbol, char *);
-
 static int _decodes_to(Symbol compact, String canonical, int length){
   if(! compact) return 0;
   char text[SYMBOL_MAX_5BIT + 1];
   Symbol_decode(compact, text);
   return(int) strlen(text) == length && ! memcmp(text, canonical, length);
 }
-
-String String_new(const char *);
-
-Symbol Symbol_new_len(const char *, int);
-
-Var Var_new(Symbol, ...);
 
 Atom Atom_intern(String spelling){
   if(! _init_guard_) Atom_initialize();

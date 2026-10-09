@@ -32,17 +32,7 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
 
 static Func _x2c_func_handle_0;
 
-Func x2c_func_shared(FuncAdapter, List);
-
 _x2c_initializer_choice_BA788DBF_0((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _10)))
-static Var Symbol_var(Symbol);
-
-static Var String_var(String);
-
-List cons(Var, List);
-
-static Var List_var(List);
-
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -61,8 +51,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _x2c_static_initialize_0();
 }
 
-Iter List_iter(List, Iter);
-
 Iter Bag_iter(Bag bag, Iter dest){
   if(! _init_guard_) _file_init_();
   return List_iter(bag -> items, dest);
@@ -73,24 +61,10 @@ Iter Box_iter(Box box, Iter dest){
   return List_iter(box -> items, dest);
 }
 
-static Var int_var(int);
-
 Var twice(Var value){
   if(! _init_guard_) _file_init_();
   return Var_binary(value, 54, int_var(2));
 }
-
-int Var_int(Var);
-
-Var Iter_sum(Iter);
-
-Iter Iter_head(Iter, int, Iter);
-
-Iter Iter_map(Iter, Func, Iter);
-
-Iter range(int, int, int, Iter);
-
-int Iter_count(Iter);
 
 int heads(int offset){
   if(! _init_guard_) _file_init_();
@@ -115,8 +89,6 @@ int main(int argc, char * * argv){
   printf("%d %d\n", 63, heads(argc - 1));
   return 0;
 }
-
-Var x2c_func_value_argument(Func, const FuncArg *, unsigned, Symbol);
 
 static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0){
   Var a0 = x2c_func_value_argument(_x2c_func_binding_0, _x2c_func_argv_0, 0, 45156);

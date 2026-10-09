@@ -49,8 +49,6 @@ int Text_done(Text value){
   return value != NULL;
 }
 
-int Var_is_void(Var);
-
 int Name_done(Name value){
   return ! Var_is_void(value);
 }
@@ -67,136 +65,46 @@ int LogFile_done(LogFile value){
   return value != NULL;
 }
 
-static Bytes Bytes_push(Bytes, const void *);
-
-static Bytes Bytes_append_fill(Bytes, const void *, size_t);
-
-static Bytes Bytes_append(Bytes, const void *, size_t);
-
-static Bytes Bytes_reserve(Bytes, size_t);
-
 int bytes_chain(Packet value, const void * source){
   return Packet_done(Bytes_push(Bytes_append_fill(Bytes_append(Bytes_reserve(value, 8), source, 1), source, 1), source));
 }
-
-Array Array_sort(Array);
-
-Array Array_reverse(Array);
-
-Array Array_concat(Array, Array);
-
-Array Array_splice(Array, int, int, Array);
-
-Array Array_remslice(Array, int, int);
-
-Array Array_setslice(Array, int, int, Array);
-
-Array Array_getslice(Array, int, int, int);
-
-Array Array_copy(Array);
-
-Array Array_update_n(Array, unsigned, ...);
 
 int array_chain(Scores value, Scores other){
   return Scores_done(Array_sort(Array_reverse(Array_concat(Array_splice(Array_remslice(Array_setslice(Array_getslice(Array_copy(Array_update_n(value, 0)), 0, 0, 1), 0, 0, other), 0, 0), 0, 0, other), other))));
 }
 
-ArrayInt ArrayInt_reverse(ArrayInt);
-
-ArrayInt ArrayInt_concat(ArrayInt, ArrayInt);
-
-ArrayInt ArrayInt_splice(ArrayInt, int, int, ArrayInt);
-
-ArrayInt ArrayInt_remslice(ArrayInt, int, int);
-
-ArrayInt ArrayInt_setslice(ArrayInt, int, int, ArrayInt);
-
-ArrayInt ArrayInt_getslice(ArrayInt, int, int, int);
-
-ArrayInt ArrayInt_copy(ArrayInt);
-
 int packed_array_chain(Measurements value, Measurements other){
   return Measurements_done(ArrayInt_reverse(ArrayInt_concat(ArrayInt_splice(ArrayInt_remslice(ArrayInt_setslice(ArrayInt_getslice(ArrayInt_copy(value), 0, 0, 1), 0, 0, other), 0, 0), 0, 0, other), other)));
 }
-
-Buffer Buffer_pop(Buffer);
-
-Buffer Buffer_push(Buffer);
-
-Buffer Buffer_newline_indent(Buffer);
-
-Buffer Buffer_indent(Buffer);
-
-Buffer Buffer_newline(Buffer);
-
-Buffer Buffer_pad(Buffer);
-
-Buffer Buffer_unwrite(Buffer, size_t);
-
-Buffer Buffer_write_repeat(Buffer, char, size_t);
-
-Buffer Buffer_write_char(Buffer, char);
-
-Buffer Buffer_printf(Buffer, const char *, ...);
-
-Buffer Buffer_write(Buffer, const char *);
-
-Buffer Buffer_write_len(Buffer, const char *, size_t);
-
-Buffer Buffer_clear(Buffer);
-
-Buffer Buffer_reserve(Buffer, size_t);
 
 int buffer_chain(TextBuffer value){
   return TextBuffer_done(Buffer_pop(Buffer_push(Buffer_newline_indent(Buffer_indent(Buffer_newline(Buffer_pad(Buffer_unwrite(Buffer_write_repeat(Buffer_write_char(Buffer_printf(Buffer_write(Buffer_write_len(Buffer_clear(Buffer_reserve(value, 32)), "", 0), ""), "%s", ""), 'x'), 'y', 1), 1))))))));
 }
 
-Map Map_merge(Map, Map);
-
-Map Map_copy(Map);
-
-Map Map_update_n(Map, unsigned, ...);
-
 int map_chain(Headers value, Headers other){
   return Headers_done(Map_merge(Map_copy(Map_update_n(value, 0)), other));
 }
-
-String String_intern(String);
-
-String String_promote(String);
 
 int string_chain(Text value){
   return Text_done(String_intern(String_promote(value)));
 }
 
-String String_intern_free(String);
-
 int string_owned_chain(Text value){
   return Text_done(String_intern_free(value));
 }
-
-Atom Atom_promote(Atom);
 
 int atom_chain(Name value){
   return Name_done(Atom_promote(value));
 }
 
-Var Var_move_wide_to(Var, Scope *);
-
 int var_chain(Dynamic value, Scope * scope){
   return Dynamic_done(Var_move_wide_to(value, scope));
 }
-
-Iter Iter_init(Iter, Var, IterNextFn, Var);
-
-static Var int_var(int);
 
 int iter_chain(Cursor value, Var object, IterNextFn next, Cursor dest){
   (void) dest;
   return Cursor_done(Iter_init(value, object, next, int_var(0)));
 }
-
-File File_reopen(File, const char *, const char *);
 
 int file_chain(LogFile value, const char * path, const char * mode){
   return LogFile_done(File_reopen(value, path, mode));

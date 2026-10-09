@@ -172,10 +172,39 @@ MetaContext *MetaContext.current(void) => &active;
 Compiler Compiler.expanding(void) =>
   active.expander ? active.expander : active.evaluator;
 
+/** Tests type ancestry through the active symbol table. */
+int Type.is_named(Type type, String name) {
+  _sdk_guard("Type.is_named");
+  return active.expander.sym.is_named_value_type(type, name);
+}
+
+/** Resolves numeric typedefs through the active symbol table. */
+Type Type.numeric(Type type) {
+  _sdk_guard("Type.numeric");
+  return active.expander.sym.resolve_numeric_type(type);
+}
+
+/** Tests the text forms accepted by string arithmetic. */
+int Type.is_text(Type type) {
+  _sdk_guard("Type.is_text");
+  return active.expander.sym.is_string_type(type) ||
+    type.canonicalize().is_char_pointer_like();
+}
+
+/** Selects a callable protocol member in the current compilation context.
+    The member's own implementation receives no recursive selection. */
+Code Type.protocol_member(Type type, String name) {
+  _sdk_guard("Type.protocol_member");
+  List resolved = active.expander.resolve_protocol_member(type, name);
+  if (!resolved) return NULL;
+  (List binding, Type signature) = resolved;
+  return $!($signature){ $binding };
+}
+
 // syntax queries
 
-/** Answers `x2c.syntax.type`, declared in `lib/meta.x`. */
-List x2c_syntax_type(List value) {
+/** Answers the compiler-backed captured-code type query. */
+Type Code.type(Code value) {
   _sdk_guard("x2c.syntax.type");
   match (value) {
     case %(expr ?matched_type ?): {
@@ -197,8 +226,85 @@ List x2c_syntax_type(List value) {
       case %(bind (!set ?captured (*)) *): binding = captured;
     }
   if (binding) return _sdk_binding_type(binding).canonicalize();
-  return value.type().canonicalize();
+  return List.type(value).canonicalize();
 }
+
+/** Reads a constant through the compiler's existing constant decoder. */
+Var Code.value(Code code) {
+  _sdk_guard("Code.value");
+  Compiler compiler = Compiler.expanding();
+  match (code) {
+    case %(expr ? (macro-value ?definition)):
+      code = compiler.capture_macro_value(definition);
+  }
+  Var value = compiler.folded_constant(code);
+  if (value is void)
+    MetaContext.reject("captured code is not a compile-time constant", NULL);
+  return value;
+}
+
+/* Default holes retain the macro's declared capture names and cardinality. */
+static List _rewrite_holes(Macro shape, List supplied) {
+  if (supplied) return supplied;
+  Array holes = [];
+  foreach (List parameter, shape.assoc(<parameters>).list()) {
+    String binder = parameter.assoc(<binder>).str();
+    holes.push(Atom.intern((parameter.assoc(<sequence>).int() ? "*" : "?") +
+      binder[1:]));
+  }
+  return holes.list_free();
+}
+
+static Code _rewrite_registration(
+  Code function, Macro shape, List holes, Symbol point, Var kind) {
+  String name = x2c_function_name(function);
+  return %((code-value "bound" $function ((rewrite $point $kind $name $shape $holes))));
+}
+
+/** Registers a captured translator for a complete parsed pattern. */
+Code Code.register_rewrite(Code function, Macro shape, List holes) {
+  _sdk_guard("Code.register_rewrite");
+  holes = _rewrite_holes(shape, holes);
+  List pattern = shape.pattern(holes);
+  Symbol point = 0;
+  Var kind = void;
+  match (pattern) {
+    case %(expr ? (index ? ?)): { point = <access>; kind = <read>; }
+    case %(expr ? (op ((!quote !quote) ?operator) ?left ?right)): {
+      point = operator.symbol().is_assignment_op() ? 0 : <binary>;
+      kind = operator;
+      match (left) case %(expr ? (index ? ?)):
+        if (operator.symbol().is_assignment_op()) point = <access>;
+    }
+    case %(expr ? (op ((!quote !quote) (!set ?operator (!or ++ --)))
+                    (expr ? (index ? ?)))):
+      { point = <access>; kind = <prefix>; }
+    case %(expr ? (postfix ? (expr ? (index ? ?)))):
+      { point = <access>; kind = <postfix>; }
+    case %(expr ? (call (expr ? (op ((!quote !quote) .)
+            ((!quote !and) (expr ?type *)) ?)) ?)):
+      { point = <member>; kind = type; }
+    case %((!quote !or) (switch *) *):
+      { point = <node>; kind = <switch>; }
+    case %(switch *): { point = <node>; kind = <switch>; }
+  }
+  if (!point) MetaContext.reject("unsupported rewrite pattern in spike", NULL);
+  return _rewrite_registration(function, shape, holes, point, kind);
+}
+
+/** Adds post-initialization block items while the declaration owner retains
+    the original declarators, their type identity, and initialization order. */
+Code Code.register_after_initialization(Code function, Macro shape, List holes) {
+  _sdk_guard("Code.register_after_initialization");
+  holes = _rewrite_holes(shape, holes);
+  List pattern = shape.pattern(holes);
+  match (pattern) case %(declare *):
+    return _rewrite_registration(function, shape, holes, <decl>, <init>);
+  MetaContext.reject("after-initialization requires a declaration pattern", NULL);
+}
+
+/** Compatibility entry point for the existing Lisp and meta SDK. */
+List x2c_syntax_type(List value) => Code.type(value);
 
 static Type _sdk_binding_type(List binding) =>
   active.expander.semantic_binding_facts()[%(type $binding)];
@@ -664,6 +770,14 @@ int x2c_invocation_column(void) =>
 void x2c_diagnostic_fail(String message, List notes) {
   _sdk_check_notes("x2c.diagnostic.fail", notes);
   MetaContext.reject(message, notes);
+}
+
+/** Answers `x2c.diagnostic.fail.at`, declared in `lib/meta.x`. */
+void x2c_diagnostic_fail_at(
+  Var node, Symbol category, String message, List notes) {
+  _sdk_check_notes("x2c.diagnostic.fail.at", notes);
+  active.expander.report_meta_error(
+    node, category, message, active.site, notes);
 }
 
 /** A warning reports where it is raised and returns, so a macro can keep

@@ -25,17 +25,7 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
 
 static Func _x2c_func_handle_0;
 
-Func x2c_func_shared(FuncAdapter, List);
-
 _x2c_initializer_choice_7300E546_0((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _12)))
-static Var Symbol_var(Symbol);
-
-static Var String_var(String);
-
-List cons(Var, List);
-
-static Var List_var(List);
-
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -56,102 +46,54 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _x2c_static_initialize_0();
 }
 
-int Var_truth(Var);
-
 static int keep(Var value){
   return Var_truth(value);
 }
-
-List List_reverse(List);
-
-List List_append(List, List);
-
-static List List_cdr(List);
 
 ListInt structural(ListInt left, ListInt right){
   if(! _init_guard_) _file_init_();
   return List_reverse(List_append(List_cdr(left), right));
 }
 
-static int ListInt_car(ListInt);
-
 int second(ListInt values){
   if(! _init_guard_) _file_init_();
   return ListInt_car(List_cdr(values));
 }
-
-static List List_cdddr(List);
 
 ListInt after_three(ListInt values){
   if(! _init_guard_) _file_init_();
   return List_cdddr(values);
 }
 
-static List List_cddddr(List);
-
 ListInt after_four(ListInt values){
   if(! _init_guard_) _file_init_();
   return List_cddddr(values);
 }
-
-List List_promote(List);
 
 ListInt promoted(ListInt values){
   if(! _init_guard_) _file_init_();
   return List_promote(values);
 }
 
-static List List_cdar(List);
-
-static List List_cdaar(List);
-
-static List List_cdadr(List);
-
-static List List_cddar(List);
-
-static List List_cdaaar(List);
-
-static List List_cdaadr(List);
-
-static List List_cdadar(List);
-
-static List List_cdaddr(List);
-
-static List List_cddaar(List);
-
-static List List_cddadr(List);
-
-static List List_cdddar(List);
-
 ListInt branch_tails(ListInt values){
   if(! _init_guard_) _file_init_();
   return List_append(List_append(List_append(List_append(List_append(List_append(List_append(List_append(List_append(List_append(List_cdar(values), List_cdaar(values)), List_cdadr(values)), List_cddar(values)), List_cdaaar(values)), List_cdaadr(values)), List_cdadar(values)), List_cdaddr(values)), List_cddaar(values)), List_cddadr(values)), List_cdddar(values));
 }
-
-List List_filter(List, Func);
 
 ListInt filtered(ListInt values){
   if(! _init_guard_) _file_init_();
   return List_filter(values, _x2c_func_handle_0);
 }
 
-List List_flatten(List);
-
 ListInt flattened(ListInt values){
   if(! _init_guard_) _file_init_();
   return List_flatten(values);
 }
 
-List List_flatten_all(List);
-
 ListInt flattened_all(ListInt values){
   if(! _init_guard_) _file_init_();
   return List_flatten_all(values);
 }
-
-Var x2c_func_value_argument(Func, const FuncArg *, unsigned, Symbol);
-
-static Var int_var(int);
 
 static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0){
   Var a0 = x2c_func_value_argument(_x2c_func_binding_0, _x2c_func_argv_0, 0, 45156);

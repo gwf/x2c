@@ -201,8 +201,6 @@ int Var_known_tag(Symbol tag){
   return _tag2id(tag) != _invalid_ || _declared(tag) != NULL;
 }
 
-int SymbolSet_index(SymbolSet, Symbol);
-
 static TagId _tag2id(Symbol tag){
   return(TagId) SymbolSet_index(x2c_var_tags, tag);
 }
@@ -226,10 +224,6 @@ static inline unsigned _bottom_bits(Var v){
 static void * _address(Var value){
   return(void *)(value.u64 &(_bitmask(48) - 0x7));
 }
-
-static Var String_var(String);
-
-static Var Symbol_var(Symbol);
 
 #include "error.h"
 
@@ -267,8 +261,6 @@ unsigned long Var_tag_bottom(Symbol tag){
 static VarWideBox _wide_box(Var v){
   return(VarWideBox) _address(v);
 }
-
-Var Map_getindex(Map, Var);
 
 int Var_is_void(Var v);
 
@@ -685,17 +677,7 @@ static Var _new_symbol(unsigned long u){
   ;
 }
 
-int String_try_long(String, long *);
-
-static Var int_var(int);
-
-int String_try_double(String, double *);
-
-static Var double_var(double);
-
 String String_parse(String);
-
-Symbol Symbol_parse(char *);
 
 int String_parse_char(String);
 
@@ -718,10 +700,6 @@ Var Var_parse(String str, Symbol kind){
   }
 
 }
-
-void * Scope_memdup(const void *, size_t);
-
-void * Scope_malloc(size_t);
 
 Var Var_box_record(Symbol tag, const void * record, size_t size){
   VarDescriptor * descriptor = NULL;
@@ -748,12 +726,6 @@ static int _custom_row(Symbol tag, VarDescriptor * * descriptor){
   (* descriptor) = _declared(tag);
   return(* descriptor) ? _assign_row((* descriptor)) : - 1;
 }
-
-void x2c_descriptor_thread_start_begin(void);
-
-void x2c_cleanup_push(X2CCleanup *);
-
-void x2c_cleanup_leave(X2CCleanup *);
 
 static int _assign_row(VarDescriptor * descriptor){
   int row = __atomic_load_n(& descriptor -> row, __ATOMIC_ACQUIRE);
@@ -796,12 +768,6 @@ static int _assign_row(VarDescriptor * descriptor){
   }
 
 }
-
-void Scope_push(Scope *);
-
-Map Map_new(void);
-
-Var Map_setindex(Map, Var, Var);
 
 static VarCell * _cell(VarDescriptor * descriptor, void * pointer){
   x2c_descriptor_thread_start_begin();
@@ -877,8 +843,6 @@ static Var _new_custom_pointer(int id, void * ptr){
   return v;
 }
 
-void Scope_free(void *);
-
 static Var _new_wide(TagId id, VarWideValue value){
   VarWideBox box = Scope_malloc(sizeof(struct VarWideBox));
   box -> tag = x2c_var_taginfo[id].tag;
@@ -947,8 +911,6 @@ Var Var_box_long_double(long double value){
   return _new_wide(_ldouble_, wide);
 }
 
-static int Var_is_wide(Var);
-
 Var Var_clone_wide(Var value){
   if(! Var_is_wide(value)) return((void) 0, Void);
   VarWideBox source = _wide_box(value);
@@ -970,21 +932,15 @@ Var Var_clone_wide(Var value){
   return clone;
 }
 
-void Scope_move(void *, Scope *);
-
 Var Var_move_wide_to(Var value, Scope * scope){
   if(! Var_is_wide(value)) return value;
   Scope_move(_wide_box(value), scope);
   return value;
 }
 
-Scope Scope_owner(void *);
-
 Scope Var_wide_owner(Var v){
   return Var_is_wide(v) ? Scope_owner(_wide_box(v)) : NULL;
 }
-
-static float Var_decode_f32(Var);
 
 double Var_floating(Var v){
   switch(Var_tag(v)){
@@ -1093,8 +1049,6 @@ unsigned Var_wide_hash(Var v){
   return 0;
 }
 
-static unsigned x2c_hash_bytes(unsigned long, const void *, size_t);
-
 static unsigned _hash_wide(Symbol tag, VarWideValue * value, size_t width){
   return x2c_hash_bytes((unsigned) tag, value, width);
 }
@@ -1186,8 +1140,6 @@ int Var_wide_compare(Var a, Var b){
   return cmp < 0 ? - 1 : cmp > 0 ? 1 : 0;
 }
 
-int x2c_descriptor_registration_frozen(void);
-
 VarDescriptor * x2c_var_declare(Symbol tag);
 
 int Var_register_object_tag(Symbol tag){
@@ -1236,12 +1188,6 @@ int Var_register_object_tag(Symbol tag){
 
 }
 
-Scope Scope_new_named(const char *);
-
-void Scope_shutdown_hook(void(*)(void));
-
-void * Scope_calloc(size_t, size_t);
-
 VarDescriptor * x2c_var_declare(Symbol tag){
   VarDescriptor * descriptor = _declared(tag);
   if(descriptor) return descriptor;
@@ -1277,16 +1223,12 @@ VarDescriptor * x2c_var_declare(Symbol tag){
   return descriptor;
 }
 
-void Scope_destroy(Scope);
-
 static void _classes_shutdown(void){
   Scope_destroy(class_scope);
   class_scope = NULL;
   declared = cells = NULL;
   row_count = 0;
 }
-
-void x2c_descriptor_thread_start_end(int);
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   x2c_descriptor_thread_start_end(0);
@@ -1295,8 +1237,6 @@ static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
   x2c_descriptor_thread_start_end(0);
 }
-
-void Scope_pop(void);
 
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
   Scope_pop();

@@ -98,6 +98,9 @@ typedef struct Compiler{
   Array pending_inline_bodies;
   int layout;
   int meta_body;
+  int capture_unit;
+  List active_rewrites;
+  Map rewrite_rules;
   Token meta_statement;
   int import_protocols;
   int in_pattern, match_is, runtime_literals, inline_header;
@@ -131,7 +134,7 @@ typedef struct SymTxn{
   String initializer_name;
   String shutdown_name;
   Map counters;
-  int local_macro_names, mark;
+  int local_macro_names, mark, meta_group_size;
   SymScope scope;
   Map statics, binding_facts;
   Map source_definitions;

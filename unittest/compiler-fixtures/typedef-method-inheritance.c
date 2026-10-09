@@ -39,17 +39,7 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
 
 static Func _x2c_func_handle_0;
 
-Func x2c_func_shared(FuncAdapter, List);
-
 _x2c_initializer_choice_9D320F3A_0((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _26)))
-static Var Symbol_var(Symbol);
-
-List cons(Var, List);
-
-static Var String_var(String);
-
-static Var List_var(List);
-
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -84,14 +74,10 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _x2c_static_initialize_0();
 }
 
-static List List_cdr(List);
-
 method_inherit_Base method_inherit_Base_rest(method_inherit_Base value){
   if(! _init_guard_) _file_init_();
   return List_cdr(value);
 }
-
-List List_append(List, List);
 
 method_inherit_Base method_inherit_Base_merge(method_inherit_Base left, method_inherit_Base right){
   if(! _init_guard_) _file_init_();
@@ -107,8 +93,6 @@ const method_self_Record * method_self_Record_choose(const method_self_Record * 
   if(! _init_guard_) _file_init_();
   return value -> value >= other -> value ? value : other;
 }
-
-static int List_truth(List);
 
 String method_inherit_Base_root(method_inherit_Base value){
   if(! _init_guard_) _file_init_();
@@ -150,14 +134,6 @@ static Var _mapped_string(Var value){
   return String_var(_7);
 }
 
-List List_map(List, Func);
-
-String List_repr(List);
-
-String Var_repr(Var);
-
-static Var List_car(List);
-
 int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
@@ -191,8 +167,6 @@ int main(void){
   printf("%d\n", chosen -> value);
   return 0;
 }
-
-Var x2c_func_value_argument(Func, const FuncArg *, unsigned, Symbol);
 
 static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0){
   Var a0 = x2c_func_value_argument(_x2c_func_binding_0, _x2c_func_argv_0, 0, 45156);

@@ -14,8 +14,6 @@ static String suffix(void);
 
 static String _x2c_proto_string_add_update(volatile String * _x2c_macro_lhs_0, Symbol _x2c_macro_op_0, String _x2c_macro_rhs_0);
 
-String String_add(String, String);
-
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -32,10 +30,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
 static String suffix(void){
   return _0;
 }
-
-void Scope_retain(void);
-
-void Scope_release(void);
 
 int main(void){
   x2c_initialize();

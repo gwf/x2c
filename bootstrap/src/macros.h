@@ -75,6 +75,12 @@ int Compiler_keyword_form_is_definition(Compiler c);
 
 void Compiler_parse_keyword_definition(Compiler c);
 
+int Compiler_has_rewrites(Compiler c, Symbol point, Var kind);
+
+List Compiler_rewrite(Compiler c, Symbol point, Var kind, List source, AstPos position, Type expected, Token site);
+
+List Compiler_lower_rewrite(Compiler c, Symbol point, Var kind, List source, AstPos position, Type expected, Token site);
+
 int Compiler_macro_starts_target_at(Compiler c, AstPos position);
 
 Symbol Compiler_macro_invocation_collection(Compiler c);
@@ -120,6 +126,8 @@ List Compiler_try_parse_macro_subpattern(Compiler c, int content);
 List Compiler_capture_macro_value(Compiler c, List definition);
 
 int Compiler_take_code_value(Compiler c, Var input, Var * value, int * retained);
+
+List Compiler_bind_code_value(Compiler c, List carrier, AstPos position, Type return_type);
 
 void Compiler_ensure_macro_lisp(Compiler c);
 

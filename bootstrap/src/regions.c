@@ -66,14 +66,6 @@ Walk;
 
 static Map runtime;
 
-Map Map_update_n(Map, unsigned, ...);
-
-Map Map_new(void);
-
-static Var String_var(String);
-
-static Var List_var(List);
-
 #include "exception.h"
 
 
@@ -81,8 +73,6 @@ static Var List_var(List);
 
 _x2c_initializer_choice_3FB21E3E_0((runtime = Map_update_n(Map_new(), 191, String_var(_0), List_var(_2), String_var(_3), List_var(_2), String_var(_4), List_var(_2), String_var(_5), List_var(_2), String_var(_6), List_var(_9), String_var(_10), List_var(_13), String_var(_14), List_var(_13), String_var(_15), List_var(_13), String_var(_16), List_var(_13), String_var(_17), List_var(_2), String_var(_18), List_var(_2), String_var(_19), List_var(_2), String_var(_20), List_var(_2), String_var(_21), List_var(_2), String_var(_22), List_var(_25), String_var(_26), List_var(_25), String_var(_27), List_var(_25), String_var(_28), List_var(_25), String_var(_29), List_var(_12), String_var(_30), List_var(_12), String_var(_31), List_var(_12), String_var(_32), List_var(_34), String_var(_35), List_var(_34), String_var(_36), List_var(_34), String_var(_37), List_var(_34), String_var(_38), List_var(_34), String_var(_39), List_var(_34), String_var(_40), List_var(_34), String_var(_41), List_var(_34), String_var(_42), List_var(_44), String_var(_45), List_var(_44), String_var(_46), List_var(_52), String_var(_53), List_var(_52), String_var(_54), List_var(_52), String_var(_55), List_var(_52), String_var(_56), List_var(_52), String_var(_57), List_var(_52), String_var(_58), List_var(_52), String_var(_59), List_var(_52), String_var(_60), List_var(_52), String_var(_61), List_var(_52), String_var(_62), List_var(_52), String_var(_63), List_var(_13), String_var(_64), List_var(_52), String_var(_65), List_var(_52), String_var(_66), List_var(_52), String_var(_67), List_var(_52), String_var(_68), List_var(_52), String_var(_69), List_var(_52), String_var(_70), List_var(_52), String_var(_71), List_var(_52), String_var(_72), List_var(_2), String_var(_73), List_var(_2), String_var(_74), List_var(_44), String_var(_75), List_var(_84), String_var(_85), List_var(_84), String_var(_86), List_var(_89), String_var(_90), List_var(_89), String_var(_91), List_var(_89), String_var(_92), List_var(_89), String_var(_93), List_var(_102), String_var(_103), List_var(_52), String_var(_104), List_var(_52), String_var(_105), List_var(_52), String_var(_106), List_var(_44), String_var(_107), List_var(_44), String_var(_108), List_var(_44), String_var(_109), List_var(_44), String_var(_110), List_var(_44), String_var(_111), List_var(_44), String_var(_112), List_var(_44), String_var(_113), List_var(_44), String_var(_114), List_var(_44), String_var(_115), List_var(_44), String_var(_116), List_var(_118), String_var(_119), List_var(_118), String_var(_120), List_var(_118), String_var(_121), List_var(_118), String_var(_122), List_var(_118), String_var(_123), List_var(_118), String_var(_124), List_var(_118), String_var(_125), List_var(_118), String_var(_126), List_var(_118), String_var(_127), List_var(_118), String_var(_128), List_var(_118), String_var(_129), List_var(_132), String_var(_133), List_var(_135), String_var(_136), List_var(_135), String_var(_137), List_var(_139), String_var(_140), List_var(_142), String_var(_143), List_var(_144), String_var(_145), List_var(_146), String_var(_147), List_var(_148), String_var(_149), List_var(_150), String_var(_151), List_var(_153), String_var(_154), List_var(_156), String_var(_157), List_var(_156), String_var(_158), List_var(_156), String_var(_159), List_var(_156), String_var(_160), List_var(_44), String_var(_161), List_var(_44), String_var(_162), List_var(_44), String_var(_163), List_var(_44), String_var(_164), List_var(_44), String_var(_165), List_var(_44), String_var(_166), List_var(_44), String_var(_167), List_var(_44), String_var(_168), List_var(_44), String_var(_169), List_var(_44), String_var(_170), List_var(_44), String_var(_171), List_var(_44), String_var(_172), List_var(_44), String_var(_173), List_var(_44), String_var(_174), List_var(_44), String_var(_175), List_var(_44), String_var(_176), List_var(_44), String_var(_177), List_var(_44), String_var(_178), List_var(_44), String_var(_179), List_var(_44), String_var(_180), List_var(_44), String_var(_181), List_var(_44), String_var(_182), List_var(_44), String_var(_183), List_var(_44), String_var(_184), List_var(_44), String_var(_185), List_var(_44), String_var(_186), List_var(_44), String_var(_187), List_var(_44), String_var(_188), List_var(_44), String_var(_189), List_var(_44), String_var(_190), List_var(_44), String_var(_191), List_var(_44), String_var(_192), List_var(_44), String_var(_193), List_var(_44), String_var(_194), List_var(_44), String_var(_195), List_var(_44), String_var(_196), List_var(_199), String_var(_200), List_var(_84), String_var(_201), List_var(_210), String_var(_211), List_var(_210), String_var(_212), List_var(_220), String_var(_221), List_var(_225), String_var(_226), List_var(_225), String_var(_227), List_var(_225), String_var(_228), List_var(_225), String_var(_229), List_var(_225), String_var(_230), List_var(_84), String_var(_231), List_var(_84), String_var(_232), List_var(_84), String_var(_233), List_var(_84), String_var(_234), List_var(_84), String_var(_235), List_var(_84), String_var(_236), List_var(_84), String_var(_237), List_var(_84), String_var(_238), List_var(_84), String_var(_239), List_var(_84), String_var(_240), List_var(_84), String_var(_241), List_var(_84), String_var(_242), List_var(_84), String_var(_243), List_var(_52), String_var(_244), List_var(_52), String_var(_245), List_var(_52), String_var(_246), List_var(_52), String_var(_247), List_var(_2), String_var(_248), List_var(_2), String_var(_249), List_var(_13), String_var(_250), List_var(_52), String_var(_251), List_var(_52), String_var(_252), List_var(_52), String_var(_253), List_var(_52), String_var(_254), List_var(_52), String_var(_255), List_var(_52), String_var(_256), List_var(_268), String_var(_269), List_var(_268), String_var(_270), List_var(_268), String_var(_271), List_var(_268), String_var(_272), List_var(_268), String_var(_273), List_var(_268), String_var(_274), List_var(_268), String_var(_275), List_var(_283), String_var(_284), List_var(_301), String_var(_302), List_var(_301), String_var(_303), List_var(_301), String_var(_304), List_var(_301), String_var(_305), List_var(_301), String_var(_306), List_var(_311), String_var(_312), List_var(_311), String_var(_313), List_var(_311), String_var(_314), List_var(_316), String_var(_317), List_var(_334), String_var(_335), List_var(_334), String_var(_336), List_var(_334))))
 static Map pooled_results;
-
-static Var int_var(int);
 
 _x2c_initializer_choice_3FB21E3E_1((pooled_results = Map_update_n(Map_new(), 5, String_var(_119), int_var(1), String_var(_337), int_var(1), String_var(_338), int_var(1), String_var(_339), int_var(1), String_var(_340), int_var(1))))
 static Var Walk_effect(Walk * w, String name);
@@ -271,10 +261,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _x2c_static_initialize_0();
   _x2c_static_initialize_1();
 }
-
-static Var Symbol_var(Symbol);
-
-List cons(Var, List);
 
 __attribute__((noinline, cold)) static void _x2c_cache_initialize_0(void){
   _0 = String_new("Scope_malloc");
@@ -1573,33 +1559,19 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void){
   _1287 = cons(_346, _1286);
 }
 
-Var Var_new(Symbol, ...);
-
 static Var Fact_var(Fact fact){
   return Var_new(3683441, fact);
 }
 
-void * Var_pointer(Var);
-
 static Fact Var_fact(Var value){
   return Var_pointer(value);
 }
-
-Var Map_getindex(Map, Var);
-
-int Map_truth(Map);
-
-int Map_try_get(Map, Var, Var *);
 
 static Var Walk_effect(Walk * w, String name){
   if(!(* w).audit) return Map_getindex(runtime, String_var(name));
   Var effect;
   return Map_truth((* w).effects) && Map_try_get((* w).effects, String_var(name), &(effect)) ? effect : Map_getindex(runtime, String_var(name));
 }
-
-static List Var_list(Var);
-
-int Map_contains(Map, Var);
 
 Symbol Compiler_region_result(String name){
   if(! _init_guard_) _file_init_();
@@ -1631,20 +1603,6 @@ int Compiler_has_region_row(String name){
   if(! _init_guard_) _file_init_();  return Map_contains(runtime, String_var(name));
 }
 
-void * Scope_calloc(size_t, size_t);
-Array Array_new(void);
-void x2c_cleanup_push(X2CCleanup *);
-int Array_try_next(Array, int *, Var *);
-int Var_is_void(Var);
-static Var List_car(List);
-Var Map_setindex(Map, Var, Var);
-Var Array_push(Array, Var);
-int Var_int(Var);
-Var Array_getindex(Array, int);
-Var Array_setindex(Array, int, Var);
-static Var Array_var(Array);
-static Array Var_array(Var);
-void x2c_cleanup_leave(X2CCleanup *);
 static void Walk_fixpoint(Walk * w, List ast){
   (* w).frame = Scope_calloc(1, sizeof(struct Region)); (* w).frame -> kind = 13765450;  Array functions = Array_new(); {
     _x2c_defer_env_1 _x2c_macro_environment_1 ={
@@ -1700,8 +1658,6 @@ static void Walk_fixpoint(Walk * w, List ast){
 
 }
 
-int List_try_next(List, List *, Var *);
-List Array_list_free(Array);
 static void _collect_functions(Var node, Array found){
 
   {
@@ -1746,13 +1702,6 @@ break;
   }
 }
 
-static String Var_string(Var);
-Var List_getindex(List, int);
-Iter Map_keys(Map, Iter);
-int Iter_try_next(Iter, Var *);
-Array Array_sort(Array);
-int List_equal(List, List);
-Iter Var_iter(Var, Iter);
 static void Walk_analyze(Walk * w, List function){
   List _x2c_destructure_0 = function;  String name = Var_string(List_getindex(_x2c_destructure_0, 0));  List parameters = Var_list(List_getindex(_x2c_destructure_0, 1));  Var body = List_getindex(_x2c_destructure_0, 2); (* w).function = name;  List _x2c_destructure_1 = Var_list(Map_getindex((* w).summaries, String_var(name)));  int fresh = Var_int(Var_convert(List_getindex(_x2c_destructure_1, 0), 3453797));  List sinks = Var_list(List_getindex(_x2c_destructure_1, 1)); (* w).facts = Map_new(); (* w).sinks = Map_new(); (* w).restored = Map_new(); (* w).open = NULL; (* w).depth =(* w).origin = 0; (* w).fresh = fresh; {
     Var row;  List _x2c_macro_object_5 = sinks;  List _x2c_macro_cursor_5 = _x2c_macro_object_5;  Var _x2c_macro_cursor_output_5;  while(List_try_next(_x2c_macro_object_5, &(_x2c_macro_cursor_5), &(_x2c_macro_cursor_output_5))){
@@ -1790,10 +1739,8 @@ static void Walk_analyze(Walk * w, List function){
 
 }
 
-List Macro_case_pattern(Macro, List);
 static Type List_type(List);
 List source_return_type(List);
-List Var_cdr(Var);
 static void Walk_walk(Walk * w, Var node){
   Macro statement = _575;  Macro deferred = _667;  Macro returned = _721;
   {
@@ -1857,7 +1804,6 @@ static void Walk_walk_return(Walk * w, Type type, Var result){
   Walk_scan(&((* w)), result, 0);  Walk_flow(&((* w)), result, type, 1219800220, NULL);  Walk_revive(&((* w)));
 }
 
-int Map_try_next(Map, unsigned *, Var *, Var *);
 static void Walk_revive(Walk * w){
   {
     Var known;  Map _x2c_macro_object_11 =(* w).facts;  unsigned _x2c_macro_cursor_11 = 0;  Var _x2c_macro_cursor_output_9;  Var _x2c_macro_cursor_output_10;  while(Map_try_next(_x2c_macro_object_11, &(_x2c_macro_cursor_11), &(_x2c_macro_cursor_output_9), &(_x2c_macro_cursor_output_10))){
@@ -1871,7 +1817,6 @@ static void Walk_revive(Walk * w){
 
 }
 
-static int String_truth(String);
 static void Walk_walk_expression(Walk * w, Var expression){
   List arguments = NULL;  String callee = _callee_of(expression, &(arguments));  if(String_truth(callee) && Walk_region_call(&((* w)), callee, arguments)) return;
   {
@@ -1885,7 +1830,6 @@ Walk_scan(&((* w)), expression, 0);  break;
   }
 }
 
-static Var List_cadr(List);
 static int Walk_region_call(Walk * w, String callee, List arguments){
   Fact fact = Walk_fact_of(&((* w)), List_car(arguments), NULL);
   {
@@ -1911,7 +1855,6 @@ static void Walk_walk_conditional(Walk * w, List children){
   (* w).depth -= 1; (* w).restored = restored;
 }
 
-static List List_cdr(List);
 static void Walk_walk_rows(Walk * w, List rows){
   {
     List row;  List _x2c_macro_object_14 = rows;  List _x2c_macro_cursor_14 = _x2c_macro_object_14;  Var _x2c_macro_cursor_output_13;  while(List_try_next(_x2c_macro_object_14, &(_x2c_macro_cursor_14), &(_x2c_macro_cursor_output_13))){
@@ -1931,7 +1874,6 @@ static void Walk_walk_rows(Walk * w, List rows){
 
 }
 
-Map Map_copy(Map);
 static void Walk_walk_defer(Walk * w, Var body){
   List arguments = NULL;  String callee = NULL;  Macro statement = _575;
   {
@@ -1966,7 +1908,6 @@ break; } } default: break;
 if(Walk_note_restored(&((* w)), body)) return; (* w).restored = Map_copy((* w).restored);  Walk_note_deferred_stores(&((* w)), body);  Walk_scan(&((* w)), body, 1);
 }
 
-int Var_equal(Var, Var);
 static int Walk_note_restored(Walk * w, Var body){
   Macro statement = _575;
   {
@@ -2026,7 +1967,6 @@ break;
   }
 }
 
-Var Array_take_last(Array);
 static void Walk_scan(Walk * w, Var value, int deferred){
   Var root = _unwrap(value);  int base = Array_len((* w).pending), mark = Array_len((* w).freed);  Array_push((* w).pending, value);  while((int) Array_len((* w).pending) > base){
     Var node = Array_take_last((* w).pending);  if(Walk_scan_call_node(&((* w)), node)) continue;  if(Walk_scan_assignment(&((* w)), node, root)) continue;  Walk_scan_node(&((* w)), node);
@@ -2037,8 +1977,6 @@ static void Walk_scan(Walk * w, Var value, int deferred){
 
 }
 
-static int List_truth(List);
-String binding_identity_spelling(List);
 static int Walk_scan_call_node(Walk * w, Var node){
   List call = _source_call(node);  if(! List_truth(call)) return 0;  List _x2c_destructure_2 = call;  Var function = List_getindex(_x2c_destructure_2, 0);  List arguments = Var_list(List_getindex(_x2c_destructure_2, 1));  String callee = binding_identity_spelling(_binding_of(function));
   {
@@ -2074,7 +2012,6 @@ if(String_truth(op) &&(literal ||(storage &&(storage -> region ==(* w).frame || 
 Fact fact = Walk_fact_of(&((* w)), argument, NULL);  if(! fact || fact -> depth !=(* w).depth) return;  fact -> ending = how;  Array_push((* w).freed, Fact_var(fact));
 }
 
-int List_len(List);
 static void Walk_scan_call(Walk * w, Var call, String callee, List arguments){
   int count = List_len(arguments);  List types = _parameter_types(call); {
     List row;  Iter _x2c_macro_iterator_16 = Var_iter(List_cadr(Walk_summary(&((* w)), callee)), &(struct Iter){
@@ -2201,7 +2138,6 @@ static void Walk_assign(Walk * w, Fact fact, Var value, Type type, int store){
 }
 
 Map Compiler_semantic_binding_facts(Compiler);
-int Var_contains(Var, Var);
 static Type Var_type(Var);
 static void Walk_declare(Walk * w, Var specifiers, List bindings){
   Map types = Compiler_semantic_binding_facts((* w).c);  if(Var_contains(specifiers, Symbol_var(1317118534)) || Var_contains(specifiers, Symbol_var(387198108))){
@@ -2590,8 +2526,6 @@ static void Walk_warn(Walk * w, Symbol code, int origin, String message, List no
 }
 
 List Compiler_origin_location(Compiler, int);
-static String int_str(int);
-Var List_assoc(List, Var);
 static List Walk_opened(Walk * w, Region region){
   List location = Compiler_origin_location((* w).c, region -> origin);  return cons(String_var(String_join(NULL, cons(String_var(_1193), cons(String_var(int_str(Var_int(List_assoc(location, Symbol_var(805770))))), NULL)))), NULL);
 }
@@ -2751,9 +2685,7 @@ static List _parameter_types(Var call){
 return NULL;
 }
 
-static int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 int Type_is_reference(Type);
-static List cdr(List);
 Type Type_reference(Type);
 static Var _passed(List types, List arguments, int index, Type * type){
   Var argument = List_getindex(arguments, index);  Var declared = index < List_len(types) ? List_getindex(types, index) :((void) 0, Void); (* type) = Var_is_row(declared, 9, 7, 4) ? List_type(Var_list(declared)) : NULL;  if(! Type_is_reference((* type))) return argument;  Type given = List_type(_expression_type(argument));  if(Type_is_reference(given)) return argument;  Type object = List_type(cdr(Type_list((* type)))); (* type) = Type_reference(object);  return List_var(({
@@ -2763,7 +2695,6 @@ static Var _passed(List types, List arguments, int index, Type * type){
 }
 
 Symbol Sym_var_tag_for_type(Sym, Type, Type *);
-int List_contains(List, Var);
 static Symbol Walk_value_class(Walk * w, Type type){
   Symbol tag = Sym_var_tag_for_type((* w).c -> sym, type, NULL);  if(List_contains(_1266, Symbol_var(tag))) return 6696890603608;  return List_contains(_1271, Symbol_var(tag)) ? 7659271582052 : 0;
 }
@@ -2853,7 +2784,6 @@ Map Compiler_audit_regions(Compiler c, List ast, Map seed, Map effects, Array fi
   return w.summaries;
 }
 
-void Array_cleanup(Array);
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;  Array_cleanup((*(Array *) _x2c_defer_data_0->_x2c_defer_capture_0));
 }

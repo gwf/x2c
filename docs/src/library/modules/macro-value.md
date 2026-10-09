@@ -17,11 +17,14 @@ Macros as values that build and recognize code.
 | [`Macro.declared`](#Macro.declared) | Returns the name a typed quotation declares with a Name hole whose local holds `value`: the name form of an `x2c_ident` spelling or a String, or a binding as it is. |
 | [`Macro.inserted`](#Macro.inserted) | Returns what a typed quotation inserts for one use of a hole whose local holds `value`, as a rebuild inserts it. |
 | [`Macro.inserted_items`](#Macro.inserted_items) | Returns the items a typed quotation splices for an expression sequence hole whose local holds `values`: each number, String, or Symbol becomes its literal, as a spliced data List's items do. |
+| [`Macro.matcher`](#Macro.matcher) | Prepares repeated recognition without retaining subject-specific bindings. |
+| [`Macro.matches`](#Macro.matches) | Tests complete code against a macro and its hole patterns. |
 | [`Macro.number_literal`](#Macro.number_literal) | Returns the literal expression of type `result` that holds `value`, a number of the scalar type `type`. |
 | [`Macro.number_type`](#Macro.number_type) | Returns the C type of a number's Var family, or NULL when `value` is not a number. |
 | [`Macro.subject`](#Macro.subject) | Returns the table `Macro.use_subject` last set, or void. |
 | [`Macro.typed`](#Macro.typed) | Returns what a typed quotation builds when its code is one hole whose local holds `value`: the inserted expression with the type `type`. |
 | [`Macro.use_subject`](#Macro.use_subject) | Sets the `(SPELLING BINDING)` rows for global references and the `(source-spelling BINDING SPELLING)` rows for renamed local bindings in a compile-time call's syntax arguments. |
+| [`MacroMatcher.matches`](#MacroMatcher.matches) | Tests code with the same source views and identity rules as a macro case. |
 
 ### Functions
 
@@ -33,7 +36,7 @@ Macros as values that build and recognize code.
 Applies a macro value to code values. The result is a pending
 invocation; inserting it into a program expands and binds it there.
 
-Source: `lib/macro-value.x:70`
+Source: `lib/macro-value.x:67`
 
 <a id="Macro_case_capture_at"></a>
 #### Macro_case_capture_at
@@ -45,7 +48,7 @@ may be NULL, and publishes the captures under `names`. A pattern that
 does not depend on the current call's subject is prepared once and kept
 in the site; generated `match` code calls this for a macro-valued case.
 
-Source: `lib/macro-value.x:482`
+Source: `lib/macro-value.x:488`
 
 <a id="Macro_case_pattern"></a>
 #### Macro_case_pattern
@@ -55,7 +58,7 @@ Source: `lib/macro-value.x:482`
 The pattern a macro-valued `case` compiles to; the compiler lowers a
 call of this to `Macro_case_capture_at` over the match subject.
 
-Source: `lib/macro-value.x:475`
+Source: `lib/macro-value.x:481`
 
 <a id="Macro_close"></a>
 #### Macro_close
@@ -65,7 +68,7 @@ Source: `lib/macro-value.x:475`
 Records the Macro values an anonymous macro captured where it was
 created, so applying it later applies the same children.
 
-Source: `lib/macro-value.x:65`
+Source: `lib/macro-value.x:62`
 
 <a id="Macro_pattern"></a>
 #### Macro_pattern
@@ -75,7 +78,7 @@ Source: `lib/macro-value.x:65`
 Derives the Match pattern that recognizes code this macro builds,
 capturing each parameter under the given binder.
 
-Source: `lib/macro-value.x:185`
+Source: `lib/macro-value.x:184`
 
 ### `Macro`
 
@@ -88,7 +91,7 @@ Returns the name a typed quotation declares with a Name hole whose local
 holds `value`: the name form of an `x2c_ident` spelling or a String,
 or a binding as it is.
 
-Source: `lib/macro-value.x:124`
+Source: `lib/macro-value.x:121`
 
 <a id="Macro.inserted"></a>
 #### Macro.inserted
@@ -103,7 +106,7 @@ spelling, or a Name hole's String becomes an identifier expression;
 in a Name hole's member position, an `x2c_ident` spelling is its
 String.
 
-Source: `lib/macro-value.x:111`
+Source: `lib/macro-value.x:108`
 
 <a id="Macro.inserted_items"></a>
 #### Macro.inserted_items
@@ -114,7 +117,26 @@ Returns the items a typed quotation splices for an expression sequence
 hole whose local holds `values`: each number, String, or Symbol becomes
 its literal, as a spliced data List's items do.
 
-Source: `lib/macro-value.x:132`
+Source: `lib/macro-value.x:129`
+
+<a id="Macro.matcher"></a>
+#### Macro.matcher
+
+`MacroMatcher Macro.matcher(Macro shape, List holes)`
+
+Prepares repeated recognition without retaining subject-specific bindings.
+
+Source: `lib/macro-value.x:510`
+
+<a id="Macro.matches"></a>
+#### Macro.matches
+
+`int Macro.matches(Macro t, List code, List holes)`
+
+Tests complete code against a macro and its hole patterns. Repeated
+recognition can retain `Macro.matcher` to avoid deriving the same pattern.
+
+Source: `lib/macro-value.x:533`
 
 <a id="Macro.number_literal"></a>
 #### Macro.number_literal
@@ -125,7 +147,7 @@ Returns the literal expression of type `result` that holds `value`, a
 number of the scalar type `type`. An `int` value is its decimal
 literal; another number is its exact bits cast to `type`.
 
-Source: `lib/macro-value.x:352`
+Source: `lib/macro-value.x:354`
 
 <a id="Macro.number_type"></a>
 #### Macro.number_type
@@ -135,7 +157,7 @@ Source: `lib/macro-value.x:352`
 Returns the C type of a number's Var family, or NULL when `value` is not
 a number. An untyped integer is an `int` when it fits one.
 
-Source: `lib/macro-value.x:326`
+Source: `lib/macro-value.x:328`
 
 <a id="Macro.subject"></a>
 #### Macro.subject
@@ -144,7 +166,7 @@ Source: `lib/macro-value.x:326`
 
 Returns the table `Macro.use_subject` last set, or void.
 
-Source: `lib/macro-value.x:155`
+Source: `lib/macro-value.x:154`
 
 <a id="Macro.typed"></a>
 #### Macro.typed
@@ -155,7 +177,7 @@ Returns what a typed quotation builds when its code is one hole whose
 local holds `value`: the inserted expression with the type `type`. A
 String typed `String` is a String literal.
 
-Source: `lib/macro-value.x:137`
+Source: `lib/macro-value.x:134`
 
 <a id="Macro.use_subject"></a>
 #### Macro.use_subject
@@ -169,7 +191,18 @@ recognizes only the recorded global binding; with void it recognizes
 any binding of its spelling. The compiler sets these rows for each
 `meta` call and carries them through the helper.
 
-Source: `lib/macro-value.x:163`
+Source: `lib/macro-value.x:162`
+
+### `MacroMatcher`
+
+<a id="MacroMatcher.matches"></a>
+#### MacroMatcher.matches
+
+`int MacroMatcher.matches(MacroMatcher &m, List code)`
+
+Tests code with the same source views and identity rules as a macro case.
+
+Source: `lib/macro-value.x:520`
 
 ## Runtime-internal callables
 
@@ -192,26 +225,16 @@ whose binder is `binder`. Splice and construction projections are
 always sequences; return, declarator, and member projections never
 are; source, value, and expression follow the hole's `sequence`.
 
-Source: `lib/macro-value.x:231`
+Source: `lib/macro-value.x:233`
 
 ## Public types
 
 | Type | Kind | Summary |
 | --- | --- | --- |
-| [`Macro`](#Macro) | alias | A macro as a value: called to build code, or used in a Match `case` to recognize code and capture its parameters. |
 | [`MacroCaseSite`](#MacroCaseSite) | struct | Holds one macro-valued `case` site's prepared recognition for the process: the plan Match keeps, the slots of the macro's fixed locals, and where each binder reads its capture. |
 | [`MacroFixedSlots`](#MacroFixedSlots) | struct | Records fixed-local slots for distinct-identity checks and Name slots for member-spelling comparisons during recognition. |
+| [`MacroMatcher`](#MacroMatcher) | struct | Retains a macro and hole patterns for repeated recognition. |
 | [`MacroPublishing`](#MacroPublishing) | struct | Records where each of a `case`'s binders reads its capture: the slot of its internal binder in the pattern that captured, and its own slot in the `case`, which need not share the parameters' order. |
-
-<a id="Macro"></a>
-### Macro
-
-`typedef List Macro`
-
-A macro as a value: called to build code, or used in a Match `case` to
-recognize code and capture its parameters.
-
-Source: `lib/macro-value.x:20`
 
 <a id="MacroCaseSite"></a>
 ### MacroCaseSite
@@ -223,7 +246,7 @@ process: the plan Match keeps, the slots of the macro's fixed locals, and
 where each binder reads its capture. The compiler emits one
 zero-initialized static site per `case`.
 
-Source: `lib/macro-value.x:45`
+Source: `lib/macro-value.x:41`
 
 <a id="MacroFixedSlots"></a>
 ### MacroFixedSlots
@@ -233,7 +256,19 @@ Source: `lib/macro-value.x:45`
 Records fixed-local slots for distinct-identity checks and Name slots
 for member-spelling comparisons during recognition.
 
-Source: `lib/macro-value.x:24`
+Source: `lib/macro-value.x:20`
+
+<a id="MacroMatcher"></a>
+### MacroMatcher
+
+`typedef struct MacroMatcher { Macro shape; List holes, pattern; } MacroMatcher`
+
+Retains a macro and hole patterns for repeated recognition. A pattern
+independent of subject bindings is derived once; contextual references
+are resolved against each subject. The caller keeps the source values
+alive as long as this record. Match plans use the active Match cache.
+
+Source: `lib/macro-value.x:504`
 
 <a id="MacroPublishing"></a>
 ### MacroPublishing
@@ -244,7 +279,7 @@ Records where each of a `case`'s binders reads its capture: the slot
 of its internal binder in the pattern that captured, and its own slot
 in the `case`, which need not share the parameters' order.
 
-Source: `lib/macro-value.x:33`
+Source: `lib/macro-value.x:29`
 
 ## Design notes
 

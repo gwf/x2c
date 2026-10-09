@@ -39,10 +39,6 @@ static inline Cell Var_cell(Var value);
 
 static VarMethods _x2c__x2c_protocol_methods_0;
 
-static Var Symbol_var(Symbol);
-
-List cons(Var, List);
-
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -61,23 +57,13 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _8 = cons(_5, _7);
 }
 
-Var Var_new(Symbol, ...);
-
 static inline Var Row_var(Row value){
   return Var_new(806120, value);
 }
 
-static List Var_list(Var);
-
 static inline Row Var_row(Var value){
   return Var_list(value);
 }
-
-static Var String_var(String);
-
-static String int_str(int);
-
-int List_len(List);
 
 String Row_summary(Row value){
   if(! _init_guard_) _file_init_();
@@ -87,8 +73,6 @@ String Row_summary(Row value){
 static inline Var PlainRow_var(PlainRow value){
   return Var_new(1125368370158, value);
 }
-
-void * Var_pointer(Var);
 
 static inline PlainRow Var_plainrow(Var value){
   return(PlainRow) Var_pointer(value);
@@ -101,14 +85,6 @@ static inline Var Cell_var(Cell value){
 static inline Cell Var_cell(Var value){
   return Var_pointer(value);
 }
-
-void * Scope_malloc(size_t);
-
-String Var_str(Var);
-
-static int Var_is_row(Var, unsigned, unsigned long, unsigned long);
-
-int Var_is(Var, Symbol);
 
 int main(void){
   x2c_initialize();

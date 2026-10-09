@@ -24,10 +24,6 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
-static Var Symbol_var(Symbol);
-
-List cons(Var, List);
-
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -44,22 +40,14 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _9 = cons(_6, _8);
 }
 
-int List_len(List);
-
 converter_inherit_Count converter_inherit_Base_converter_inherit_count(converter_inherit_Base values){
   return List_len(values);
 }
-
-static int List_truth(List);
 
 converter_inherit_Text converter_inherit_Override_str(converter_inherit_Override values){
   if(! _init_guard_) _file_init_();
   return List_truth(values) ? _0 : _1;
 }
-
-String List_str(List);
-
-static Var String_var(String);
 
 int main(void){
   x2c_initialize();

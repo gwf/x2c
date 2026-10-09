@@ -52,8 +52,6 @@ static int pick_index(void){
   return 1;
 }
 
-static Var int_var(int);
-
 static Var counted_rhs(int value){
   rhs_calls ++;
   return int_var(value);
@@ -64,46 +62,10 @@ static Var skipped_rhs(void){
   return int_var(1);
 }
 
-static Var double_var(double);
-
-static Var String_var(String);
-
-int Var_truth(Var);
-
 #include "error.h"
 
 
 
-
-int x2c_error_catch_site_pending(ErrorCatchSite *);
-
-static Var List_var(List);
-
-static Var Symbol_var(Symbol);
-
-ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
-
-void x2c_exception_push(ExceptionFrame *);
-
-void x2c_exception_landed(ExceptionFrame *);
-
-int x2c_exception_is_error_target(ExceptionFrame *);
-
-int x2c_error_catch_selected(ErrorHandler);
-
-void x2c_error_catch_detach(ErrorHandler);
-
-void x2c_exception_mark_handled(ExceptionFrame *);
-
-int x2c_exception_claim(ExceptionFrame *);
-
-void x2c_error_catch_close(ErrorHandler);
-
-void x2c_exception_leave(ExceptionFrame *);
-
-long Var_long(Var);
-
-double Var_double(Var);
 
 int main(void){
   x2c_initialize();

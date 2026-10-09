@@ -1282,6 +1282,7 @@ static void SymTxn._save(SymTxn &s, SymScope scope) {
   Compiler c = s.c;
   s.scope = scope;
   s.mark = c.sym.undo.len();
+  s.meta_group_size = c.meta_group.len();
   s.counters = c.names.counters;
   s.statics = c.sym.statics;
   s.binding_facts = c.semantic_binding_facts();
@@ -1432,6 +1433,7 @@ static void SymTxn._restore(SymTxn &s) {
   c.sym.statics = s.statics;
   c.sym.binding_facts = s.binding_facts;
   c.names.next_binding = s.next_binding;
+  c.meta_group.resize(s.meta_group_size);
   c.sym.local_macro_names = s.local_macro_names;
   c.names.counters = s.counters;
   c.init_fn = s.initializer_name;

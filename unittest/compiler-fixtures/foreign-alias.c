@@ -7,8 +7,6 @@
 #include <stdlib.h>
 typedef int Alias;
 
-int abs(int);
-
 #ifndef X2CCPP
 _Static_assert(_Generic(& abs, int(*)(int) : 1, default: 0), "native alias Alias_absolute does not match abs");
 #endif
@@ -17,7 +15,6 @@ _Static_assert(_Generic(& abs, int(*)(int) : 1, default: 0), "native alias Alias
 _Static_assert(_Generic(& abs, int(*)(int) : 1, default: 0), "native alias alias_absolute does not match abs");
 #endif
 #define alias_absolute abs
-long labs(long);
 #ifndef X2CCPP
 _Static_assert(_Generic(& labs, long(*)(long) : 1, default: 0), "native alias private_absolute does not match labs");
 #endif

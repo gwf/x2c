@@ -33,10 +33,15 @@
 #include "symbol.x"
 #include "symbolset.x"
 
-/** Type syntax, such as `%(double)` or `%((* char))`, the representation
-   the compiler's own types use. A quotation fills a type position from a
-   local declared `Type`. */
+/** A macro as a value: called to build code, or used in a Match `case` to
+    recognize code and capture its parameters. */
+typedef List Macro;
+
+/** Semantic type syntax with canonical List-pool lifetime. */
 typedef List Type;
+
+/** Captured code parsed from source or produced by a quotation. */
+typedef List Code;
 
 // meta parameter types
 
@@ -159,6 +164,36 @@ meta String x2c_binding_spelling(Var syntax);
 /** Returns the canonical `Type` of the expression, parameter, declaration,
     or binding `value`. */
 meta List x2c_syntax_type(List value);
+
+/** Returns the canonical semantic type of captured code in the current
+    expansion. Unbound expressions are resolved in that expansion. */
+meta Type Code.type(Code value);
+
+/** Returns the value of captured constant code, including a macro value.
+    Rejects expressions that require runtime evaluation. */
+meta Var Code.value(Code code);
+
+/** Registers a translator with its macro and optional hole patterns.
+    NULL holes use the macro's named captures. Recognition uses the source
+    views and binding identity rules of a macro-valued case. */
+meta Code Code.register_rewrite(Code function, Macro shape, List holes);
+
+/** Registers block items to follow matching local initializations. */
+meta Code Code.register_after_initialization(
+  Code function, Macro shape, List holes);
+
+/** Tests named-type ancestry without resolving through the named owner. */
+meta int Type.is_named(Type type, String name);
+
+/** Returns the numeric type reached through typedefs, or NULL. */
+meta Type Type.numeric(Type type);
+
+/** Tests String ancestry or a canonical char pointer/array type. */
+meta int Type.is_text(Type type);
+
+/** Returns the selected protocol callable, or null if unavailable in the
+    current function. Selection includes explicit protocol adoption. */
+meta Code Type.protocol_member(Type type, String name);
 
 /** Returns the `String`, `int`, or `Symbol` a literal expression holds.
     Fails the expansion when `syntax` is not such a literal. */
@@ -320,6 +355,14 @@ meta String x2c_embed_text(Var path);
 /** Reports `message` with `notes` at the macro invocation and fails the
     expansion. This does not return. */
 meta void x2c_diagnostic_fail(String message, List notes);
+
+/** Reports `message` with `notes` under `category`, such as `<parse>` or
+    `<type>`, at `node`, syntax the macro received, and fails the
+    expansion. The position is the first one recorded in or around `node`,
+    such as a captured statement's; a node without one reports at the macro
+    invocation. This does not return. */
+meta void x2c_diagnostic_fail_at(
+  Var node, Symbol category, String message, List notes);
 
 /** Reports `message` with `notes` as a warning where it is raised, and
     returns so the expansion continues. */

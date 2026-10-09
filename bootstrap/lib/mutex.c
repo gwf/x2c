@@ -49,12 +49,6 @@ void Mutex_recursive_unlock(pthread_mutex_t * mutex, const char * failure){
 
 }
 
-static Var Symbol_var(Symbol);
-
-static Var String_var(String);
-
-static Var int_var(int);
-
 #include "error.h"
 
 
@@ -69,10 +63,6 @@ _Noreturn static void _error(const char * operation, int error){
   }
 
 }
-
-void * Scope_malloc(size_t);
-
-void Scope_free(void *);
 
 Mutex Mutex_new(void){
   Mutex mutex = Scope_malloc(sizeof(struct Mutex));

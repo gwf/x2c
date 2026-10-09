@@ -181,8 +181,6 @@ static int Array__core_shift(Array _x2c_macro_array_0, Var * _x2c_macro_out_0){
   return 1;
 }
 
-void Block_append(Block, const void *, size_t);
-
 static int Array__core_insert(Array _x2c_macro_array_1, int _x2c_macro_index_0, Var _x2c_macro_value_0){
   int _x2c_macro_n_1 =(int) _x2c_macro_array_1 -> length;
   if(_x2c_macro_index_0 < 0) _x2c_macro_index_0 += _x2c_macro_n_1 + 1;
@@ -193,8 +191,6 @@ static int Array__core_insert(Array _x2c_macro_array_1, int _x2c_macro_index_0, 
   _x2c_macro_data_1[_x2c_macro_index_0] = _x2c_macro_value_0;
   return 1;
 }
-
-int x2c_normalize_index(int, int);
 
 static int Array__core_remove(Array _x2c_macro_array_2, int _x2c_macro_index_1, Var * _x2c_macro_out_1){
   if(_x2c_macro_array_2 == NULL || ! _x2c_macro_out_1) return 0;
@@ -208,16 +204,12 @@ static int Array__core_remove(Array _x2c_macro_array_2, int _x2c_macro_index_1, 
   return 1;
 }
 
-Block Block_new(size_t);
-
 static Array Array__core_copy(Array _x2c_macro_array_3){
   if(_x2c_macro_array_3 == NULL) return NULL;
   Array _x2c_macro_copy_0 =(Array) Block_new(sizeof(Var));
   Block_append((Block) _x2c_macro_copy_0, _x2c_macro_array_3 -> bytes, _x2c_macro_array_3 -> length);
   return _x2c_macro_copy_0;
 }
-
-int x2c_normalize_slice(int *, int *, int, int);
 
 static Array Array__core_getslice(Array _x2c_macro_array_4, int _x2c_macro_start_0, int _x2c_macro_end_0, int _x2c_macro_step_0){
   if(_x2c_macro_array_4 == NULL || ! _x2c_macro_step_0) return NULL;
@@ -256,12 +248,6 @@ static inline void Array__core_normalize_span(Array _x2c_macro_array_6, int * _x
 }
 
 int Array_truth(Array a0);
-
-void x2c_cleanup_push(X2CCleanup *);
-
-static Var Symbol_var(Symbol);
-
-void x2c_cleanup_leave(X2CCleanup *);
 
 #include "error.h"
 
@@ -341,8 +327,6 @@ static Array Array__core_splice(Array _x2c_macro_array_9, int _x2c_macro_index_3
   return _x2c_macro_removed_1;
 }
 
-int Var_equal(Var, Var);
-
 static int Array__core_find(Array _x2c_macro_array_10, Var _x2c_macro_value_1){
   Var * _x2c_macro_data_6 =(Var *) _x2c_macro_array_10 -> bytes;
   int _x2c_macro_n_6 =(int) _x2c_macro_array_10 -> length;
@@ -393,8 +377,6 @@ _Noreturn static void _size_limit(String owner, size_t size){
 
 }
 
-static Var String_var(String);
-
 _Noreturn static void _bad_operation(String owner, Symbol operation){
   (void) owner;
   {
@@ -408,8 +390,6 @@ _Noreturn static void _bad_operation(String owner, Symbol operation){
   }
 
 }
-
-static Var int_var(int);
 
 _Noreturn static void _bad_index(String owner, int index, size_t size){
   (void) owner;
@@ -457,8 +437,6 @@ int Array_try_next(Array _x2c_macro_array_15, int * _x2c_macro_cursor_1, Var * _
   return 1;
 }
 
-int Var_is_void(Var);
-
 Var Array_push(Array _x2c_macro_array_16, Var _x2c_macro_value_3){
   if(1 && Var_is_void(_x2c_macro_value_3)){
     static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/array.x",.function = "Array_push",.line = 72};
@@ -470,8 +448,6 @@ Var Array_push(Array _x2c_macro_array_16, Var _x2c_macro_value_3){
   Block_append((Block) _x2c_macro_array_16, & _x2c_macro_value_3, 1);
   return _x2c_macro_value_3;
 }
-
-static int Block_try_pop(Block, void *);
 
 int Array_try_take_last(Array _x2c_macro_array_17, Var * _x2c_macro_out_5){
   return _x2c_macro_array_17 != NULL && _x2c_macro_out_5 ? Block_try_pop((Block) _x2c_macro_array_17, _x2c_macro_out_5) : 0;
@@ -628,8 +604,6 @@ Var Array_setindex(Array _x2c_macro_array_34, int _x2c_macro_index_8, Var _x2c_m
   return((Var *) _x2c_macro_array_34 -> bytes)[_x2c_macro_index_8] = _x2c_macro_value_13;
 }
 
-static void Block_truncate(Block, size_t);
-
 void Array_resize(Array arr, size_t size){
   if(size > INT_MAX){
     static const X2CErrorSite _x2c_error_site_9 = {.file = "../../lib/array.x",.function = "Array_resize",.line = 102};
@@ -664,8 +638,6 @@ Array Array_update_n(Array array, unsigned element_count, ...){
   return array;
 }
 
-Var Var_update(Var *, Symbol, Var);
-
 Var Array_updateindex(Array array, int index, Symbol op, Var rhs){
   if(array == NULL){
     static const X2CErrorSite _x2c_error_site_11 = {.file = "../../lib/array.x",.function = "Array_updateindex",.line = 133};
@@ -696,8 +668,6 @@ Var Array_updateindex(Array array, int index, Symbol op, Var rhs){
   return Var_update(&(arr[index]), op, rhs);
 }
 
-Var Var_postfix(Var *, Symbol);
-
 Var Array_postfixindex(Array array, int index, Symbol op){
   if(array == NULL){
     static const X2CErrorSite _x2c_error_site_14 = {.file = "../../lib/array.x",.function = "Array_postfixindex",.line = 153};
@@ -718,8 +688,6 @@ Var Array_postfixindex(Array array, int index, Symbol op){
   Var * arr =(Var *) array -> bytes;
   return Var_postfix(&(arr[index]), op);
 }
-
-static Var Func_apply_value(Func, Var);
 
 Array Array_map(Array array, Func func){
   Array output = Array_new(), result = NULL;
@@ -764,8 +732,6 @@ Array Array_map(Array array, Func func){
 
 size_t Array_len(Array a0);
 
-static Var Func_apply_values(Func, Var, Var);
-
 Array Array_map2(Array a, Array b, Func func){
   Array output = Array_new(), result = NULL;
   {
@@ -809,8 +775,6 @@ Var Array_foldl(Array array, Var seed, Func fn){
   return acc;
 }
 
-int Var_compare(Var, Var);
-
 static int _compare_var(Var a, Var b){
   return Var_compare(a, b);
 }
@@ -830,14 +794,6 @@ static int Array__core_compare(Array _x2c_macro_a_5, Array _x2c_macro_b_5){
   if(_x2c_macro_asz_0 == _x2c_macro_bsz_0) return 0;
   return _x2c_macro_asz_0 < _x2c_macro_bsz_0 ? - 1 : 1;
 }
-
-int RenderPath_enter(RenderPath *, const void *);
-
-Buffer Buffer_printf(Buffer, const char *, ...);
-
-Buffer Buffer_write(Buffer, const char *);
-
-Buffer Var_write_str(Var, Buffer);
 
 Buffer Var_write_repr(Var, Buffer);
 
@@ -892,10 +848,6 @@ Buffer Array_write_str(Array _x2c_macro_array_36, Buffer _x2c_macro_out_7){
   return Array__core_write(_x2c_macro_array_36, _x2c_macro_out_7, 40228);
 }
 
-Buffer Buffer_new(size_t);
-
-String Buffer_str_free(Buffer);
-
 String Array_str(Array _x2c_macro_array_37){
   Buffer _x2c_macro_out_8 = Buffer_new(0);
   Array_write_str(_x2c_macro_array_37, _x2c_macro_out_8);
@@ -908,10 +860,6 @@ String Array_repr(Array _x2c_macro_array_38){
   return Buffer_str_free(_x2c_macro_out_9);
 }
 
-static Array Var_array(Var);
-
-int Var_int(Var);
-
 static int _x2c_macro_next_0(Iter _x2c_macro_iter_0, Var * _x2c_macro_out_11){
   Array _x2c_macro_array_40 = Var_array(_x2c_macro_iter_0 -> obj);
   int _x2c_macro_index_9 = Var_int(_x2c_macro_iter_0 -> state);
@@ -921,10 +869,6 @@ static int _x2c_macro_next_0(Iter _x2c_macro_iter_0, Var * _x2c_macro_out_11){
   _x2c_macro_iter_0 -> state = int_var(_x2c_macro_index_9);
   return 1;
 }
-
-Iter Iter_init(Iter, Var, IterNextFn, Var);
-
-static Var Array_var(Array);
 
 Iter Array_iter(Array _x2c_macro_array_41, Iter _x2c_macro_dest_0){
   if(_x2c_macro_dest_0 == NULL) return NULL;
@@ -1107,8 +1051,6 @@ void Array_heapify(Array heap){
   for(int i =(n / 2) - 1;  i >= 0;  i --) _heap_shift_down(heap, i);
 }
 
-static int String_truth(String);
-
 String Array_join(Array array, String separator){
   if(! _init_guard_) _file_init_();
   size_t n = array -> length;
@@ -1121,8 +1063,6 @@ String Array_join(Array array, String separator){
   }
   return Buffer_str_free(buf);
 }
-
-int Iter_try_next(Iter, Var *);
 
 Array Iter_array(Iter iter){
   Array output = Array_new(), result = NULL;
@@ -1168,37 +1108,25 @@ void Array_cleanup(Array value){
   Array_free(value);
 }
 
-static void Block_clear(Block);
-
 void Array_clear(Array a0){
   return Block_clear(Array_block(a0));
 }
-
-static size_t Block_len(Block);
 
 size_t Array_len(Array a0){
   return Block_len(Array_block(a0));
 }
 
-static size_t Block_capacity(Block);
-
 size_t Array_capacity(Array a0){
   return Block_capacity(Array_block(a0));
 }
-
-int Block_truth(Block);
 
 int Array_truth(Array a0){
   return Block_truth(Array_block(a0));
 }
 
-static void Block_pop(Block);
-
 void Array_pop(Array a0){
   return Block_pop(Array_block(a0));
 }
-
-void Block_free(Block);
 
 void Array_free(Array a0){
   return Block_free(Array_block(a0));
@@ -1222,8 +1150,6 @@ static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
   _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_2;
   if((*(Array *) _x2c_defer_data_2->_x2c_defer_capture_4) == NULL) Array_free((*(Array *) _x2c_defer_data_2->_x2c_defer_capture_5));
 }
-
-void RenderPath_leave(RenderPath *);
 
 static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3){
   _x2c_defer_env_3 * _x2c_defer_data_3 =(_x2c_defer_env_3 *) _x2c_defer_opaque_3;

@@ -65,10 +65,6 @@ typedef struct DirectThree{
 }
 * DirectThree;
 
-static Var int_var(int);
-
-List cons(Var, List);
-
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -93,17 +89,9 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _17 = cons(_12, _16);
 }
 
-Iter List_iter(List, Iter);
-
 Iter DirectOne_iter(DirectOne bag, Iter dest){
   return List_iter(bag -> values, dest);
 }
-
-int List_len(List);
-
-long Var_integer(Var);
-
-Var List_getindex(List, int);
 
 int DirectOne_try_next(DirectOne bag, unsigned * cursor, int * out){
   direct_one_calls ++;
@@ -211,10 +199,6 @@ int DirectThree_try_next(DirectThree bag, unsigned * cursor, int * first, int * 
   ++ * cursor;
   return 1;
 }
-
-void * Scope_malloc(size_t);
-
-int Iter_try_next(Iter, Var *);
 
 int main(void){
   x2c_initialize();

@@ -98,8 +98,6 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
 
 static Func _x2c_func_handle_0;
 
-Func x2c_func_shared(FuncAdapter, List);
-
 _x2c_initializer_choice_B8F5462B_1((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _124)))
 typedef struct _x2c_defer_env_0{
   const void * _x2c_defer_capture_0;
@@ -107,16 +105,6 @@ typedef struct _x2c_defer_env_0{
 _x2c_defer_env_0;
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
-
-static Var Symbol_var(Symbol);
-
-List cons(Var, List);
-
-static Var List_var(List);
-
-static Var int_var(int);
-
-static Var String_var(String);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -257,12 +245,6 @@ static void _emit_entry(Diagnostics diag, List entry){
   if(diag -> printer) Compiler_print_diagnostic(diag -> printer, entry);
 }
 
-void * Scope_malloc(size_t);
-
-Array Array_new(void);
-
-Map Map_new(void);
-
 Diagnostics Diagnostics_new(Compiler printer, int limit){
   if(! _init_guard_) _file_init_();
   Diagnostics diag = Scope_malloc(sizeof(struct Diagnostics));
@@ -291,12 +273,6 @@ DiagnosticsHold Diagnostics_hold(Diagnostics diag){
   return hold;
 }
 
-static List Var_list(Var);
-
-Var Array_getindex(Array, int);
-
-void Array_resize(Array, size_t);
-
 void Diagnostics_release(Diagnostics diag, DiagnosticsHold hold, int keep){
   if(! _init_guard_) _file_init_();
   diag -> printer = hold.printer;
@@ -309,8 +285,6 @@ void Diagnostics_release(Diagnostics diag, DiagnosticsHold hold, int keep){
   diag -> count = hold.count;
   diag -> limit_notified = hold.limit_notified;
 }
-
-List Array_list(Array);
 
 List Diagnostics_entries(Diagnostics diag){
   if(! _init_guard_) _file_init_();
@@ -332,8 +306,6 @@ static List _build_entry(Symbol code, Symbol severity, String message, List loca
   );
 }
 
-int Map_contains(Map, Var);
-
 static int Diagnostics__publish(Diagnostics diag, List entry){
   if(Map_contains(diag -> published, List_var(entry))) return 0;
   Diagnostics__store(diag, entry);
@@ -341,20 +313,10 @@ static int Diagnostics__publish(Diagnostics diag, List entry){
   return 1;
 }
 
-Var Map_setdefault(Map, Var, Var);
-
-Var Array_push(Array, Var);
-
 static void Diagnostics__store(Diagnostics diag, List entry){
   Map_setdefault(diag -> published, List_var(entry), Var_box_ulong(Array_len(diag -> entries)));
   Array_push(diag -> entries, List_var(entry));
 }
-
-int Map_try_get(Map, Var, Var *);
-
-int Var_int(Var);
-
-Var Map_del(Map, Var);
 
 static void Diagnostics__forget(Diagnostics diag, int from){
   for(int i = from;  i < Array_len(diag -> entries);  i ++){
@@ -395,12 +357,6 @@ static void Diagnostics__warn(Diagnostics diag, Symbol code, String message, Lis
   Diagnostics__publish(diag, _build_entry(code, 49497918350, message, location, notes));
 }
 
-List List_filter(List, Func);
-
-static int List_truth(List);
-
-String String_join(String, List);
-
 static String _note_line(List l){
   List strings = List_filter(l, _x2c_func_handle_0);
   return List_truth(strings) ? String_join(_6, strings) : NULL;
@@ -412,17 +368,11 @@ int diagnostics_write_json(String path){
   return diagnostics_json >= 0;
 }
 
-static int String_truth(String);
-
-int String_startswith(String, String);
-
 int Path_exists(Path);
 
 Path Path_join(Path, Path);
 
 Path Path_absolute(Path);
-
-String String_remove_prefix(String, String);
 
 static String Compiler__json_path(Compiler compiler, String path){
   if(! String_truth(path) || String_startswith(path, _7)) return path;
@@ -431,20 +381,6 @@ static String Compiler__json_path(Compiler compiler, String path){
   String directory = String_join(NULL, cons(String_var(Path_absolute(_9)), cons(String_var(_10), NULL)));
   return String_startswith(path, directory) ? String_remove_prefix(path, directory) : path;
 }
-
-Buffer Buffer_new(size_t);
-
-void x2c_cleanup_push(X2CCleanup *);
-
-Buffer Buffer_write(Buffer, const char *);
-
-String Var_json(Var);
-
-static Var Array_var(Array);
-
-Array Array_update_n(Array, unsigned, ...);
-
-void x2c_cleanup_leave(X2CCleanup *);
 
 static void Compiler__write_json(Compiler c, Symbol code, Symbol severity, String message, List location, String note){
   Buffer out = Buffer_new(0);
@@ -474,8 +410,6 @@ static void Compiler__write_json(Compiler c, Symbol code, Symbol severity, Strin
   }
 
 }
-
-static String Var_string(Var);
 
 static void Compiler__write_json_location(Compiler c, Buffer out, List location){
 
@@ -526,7 +460,6 @@ void Compiler_print_diagnostic(Compiler compiler, List entry){
   }
 }
 
-String Symbol_str(Symbol);
 static void Compiler__write_heading(Compiler c, Symbol code, String message, List location){
 
   {
@@ -547,7 +480,6 @@ static void Compiler__write_heading(Compiler c, Symbol code, String message, Lis
 fprintf(stderr, "%s: %s\n", Symbol_str(code), message);
 }
 
-int Array_try_next(Array, int *, Var *);
 static int Compiler__text_line(Compiler c, int position){
   int line = 0; {
     Var start;  Array _x2c_macro_object_0 = Compiler__line_starts(c);  int _x2c_macro_cursor_0 = 0;  Var _x2c_macro_cursor_output_0;  while(Array_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
@@ -584,8 +516,6 @@ __builtin_unreachable();
 return NULL;
 }
 
-int String_len(String);
-int String_getindex(String, int);
 String Compiler_display_path(Compiler compiler, String path){
   if(! _init_guard_) _file_init_();  if(! String_truth(path) || String_startswith(path, _7)) return path;  if(compiler -> source_facts) return Path_absolute(path);  String root = compiler -> root_dir;  if(String_truth(root) && String_truth(path) && String_startswith(path, root) && String_len(path) > String_len(root) && String_getindex(path, String_len(root)) == '/') return String_getslice(path, String_len(root) + 1, -2147483648, 1);  return path;
 }
@@ -598,7 +528,6 @@ List Compiler_token_location(Compiler compiler, Token token){
   );
 }
 
-Var List_getindex(List, int);
 String Compiler_token_source(Compiler c, Token token, int * line){
   if(! _init_guard_) _file_init_();  if(line)(* line) = token -> line;  if(! Array_truth(c -> line_markers)) return c -> filename;  Token base = c -> tokenizer -> tokens;  if(token < base || token >= base + Bytes_len(c -> tokenizer -> tokens)) return c -> filename;  String file = c -> filename; {
     List row;  Array _x2c_macro_object_1 = c -> line_markers;  int _x2c_macro_cursor_1 = 0;  Var _x2c_macro_cursor_output_1;  while(Array_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
@@ -619,8 +548,6 @@ static List _compiler_location(Compiler compiler, Token token){
   return Compiler_token_location(compiler, token);
 }
 
-void report_suspend(void);
-int List_try_next(List, List *, Var *);
 #include "error.h"
 
 
@@ -705,7 +632,6 @@ void Compiler_dump_tokens(Compiler compiler){
 
 }
 
-int Map_try_next(Map, unsigned *, Var *, Var *);
 void Compiler_dump_symbol_table(Compiler compiler, Map map){
   if(! _init_guard_) _file_init_(); {
     Var key, value;  Map _x2c_macro_object_4 = map;  unsigned _x2c_macro_cursor_4 = 0;  Var _x2c_macro_cursor_output_4;  Var _x2c_macro_cursor_output_5;  while(Map_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_4), &(_x2c_macro_cursor_output_5))){
@@ -716,7 +642,6 @@ void Compiler_dump_symbol_table(Compiler compiler, Map map){
 
 }
 
-String Var_repr(Var);
 void Compiler_dump_cache(Compiler compiler){
   if(! _init_guard_) _file_init_(); {
     Var key, value;  Map _x2c_macro_object_5 = compiler -> key_ids;  unsigned _x2c_macro_cursor_5 = 0;  Var _x2c_macro_cursor_output_6;  Var _x2c_macro_cursor_output_7;  while(Map_try_next(_x2c_macro_object_5, &(_x2c_macro_cursor_5), &(_x2c_macro_cursor_output_6), &(_x2c_macro_cursor_output_7))){
@@ -727,17 +652,14 @@ void Compiler_dump_cache(Compiler compiler){
 
 }
 
-static int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 static Var _x2c_lambda_0(Var entry){
   return int_var(Var_is_row(entry, 11, 7, 1)); ;
 }
 
-Var x2c_func_value_argument(Func, const FuncArg *, unsigned, Symbol);
 static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0){
   Var a0 = x2c_func_value_argument(_x2c_func_binding_0, _x2c_func_argv_0, 0, 45156);  return _x2c_lambda_0(a0); ;
 }
 
-void Buffer_cleanup(Buffer);
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;  Buffer_cleanup((*(Buffer *) _x2c_defer_data_0->_x2c_defer_capture_0));
 }

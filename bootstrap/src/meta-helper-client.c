@@ -63,17 +63,19 @@
 #include <sys/wait.h>
 #include <time.h>
 #include <unistd.h>
-static String helper_path;
+static List _102, _93, _89, _84, _83, _81, _80, _76, _74, _73, _72, _70, _69, _66, _65, _62, _61, _60, _58, _57, _54, _53, _50, _49, _48, _47, _45, _44, _43, _40, _38, _36, _35, _32, _31, _30, _28, _27, _26, _25, _21, _20, _19, _18, _13, _12, _11, _8, _7, _6, _5;
 
-static List _67, _58, _54, _50, _49, _47, _46, _42, _40, _39, _38, _36, _35, _32, _31, _28, _26, _24, _23, _20, _19, _18, _16, _15, _14, _13, _9, _8, _7, _6;
+static String _104, _103, _100, _99, _98, _97, _96, _95, _94, _91, _87, _85, _14;
 
-static String _69, _68, _65, _64, _63, _62, _61, _60, _59, _56, _52, _51, _0;
-
-static Var _66, _57, _55, _53, _48, _45, _44, _43, _41, _37, _34, _33, _30, _29, _27, _25, _22, _21, _17, _12, _11, _10, _5, _4, _3, _2, _1;
+static Var _101, _92, _90, _88, _86, _82, _79, _78, _77, _75, _71, _68, _67, _64, _63, _59, _56, _55, _52, _51, _46, _42, _41, _39, _37, _34, _33, _29, _24, _23, _22, _17, _16, _15, _10, _9, _4, _3, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
+
+static int _syntax_origin(Var node);
+
+static String helper_path;
 
 #include "exception.h"
 
@@ -112,6 +114,8 @@ typedef struct Call{
   double limit, deadline;
 }
 Call;
+
+static void Call_answer(Call * call, String operation, List operands);
 
 static void Call_check(Call * call);
 
@@ -157,95 +161,130 @@ static void _helper_shutdown(void);
 
 typedef struct _x2c_defer_env_0{
   const void * _x2c_defer_capture_0;
+  const void * _x2c_defer_capture_1;
 }
 _x2c_defer_env_0;
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
+typedef struct _x2c_defer_env_1{
+  const void * _x2c_defer_capture_2;
+}
+_x2c_defer_env_1;
+
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
 
-static Var Symbol_var(Symbol);
-
-List cons(Var, List);
-
-static Var List_var(List);
-
-static Var String_var(String);
+static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  _0 = String_new("the compile-time helper did not start");
-  _1 = Symbol_var(49497918350);
-  _2 = Symbol_var(62054);
-  _3 = Symbol_var(2021158750666);
-  _4 = Symbol_var(1362954);
-  _5 = Symbol_var(1318210446);
-  _6 = cons(_5, NULL);
-  _7 = cons(_4, _6);
-  _8 = cons(_3, _7);
-  _9 = cons(_2, _8);
-  _10 = List_var(_9);
-  _11 = Symbol_var(1976541542);
-  _12 = Symbol_var(806120);
-  _13 = cons(_12, NULL);
-  _14 = cons(_4, _13);
-  _15 = cons(_11, _14);
-  _16 = cons(_2, _15);
-  _17 = List_var(_16);
+  _0 = Symbol_var(104);
+  _1 = Symbol_var(62054);
+  _2 = Symbol_var(63322012252);
+  _3 = Symbol_var(1362954);
+  _4 = Symbol_var(3453797);
+  _5 = cons(_4, NULL);
+  _6 = cons(_3, _5);
+  _7 = cons(_2, _6);
+  _8 = cons(_1, _7);
+  _9 = List_var(_8);
+  _10 = Symbol_var(58);
+  _11 = cons(_10, NULL);
+  _12 = cons(_9, _11);
+  _13 = cons(_0, _12);
+  _14 = String_new("the compile-time helper did not start");
+  _15 = Symbol_var(49497918350);
+  _16 = Symbol_var(2021158750666);
+  _17 = Symbol_var(1318210446);
   _18 = cons(_17, NULL);
-  _19 = cons(_10, _18);
-  _20 = cons(_1, _19);
-  _21 = Symbol_var(46228810);
-  _22 = Symbol_var(1992385866);
-  _23 = cons(_22, NULL);
-  _24 = cons(_21, _23);
-  _25 = Symbol_var(1473096);
-  _26 = cons(_25, NULL);
-  _27 = Symbol_var(11703268);
-  _28 = cons(_27, _19);
-  _29 = Symbol_var(293581290303730);
-  _30 = Symbol_var(61869328);
-  _31 = cons(_30, _7);
-  _32 = cons(_2, _31);
-  _33 = List_var(_32);
-  _34 = Symbol_var(61344976);
-  _35 = cons(_34, _7);
-  _36 = cons(_2, _35);
-  _37 = List_var(_36);
+  _19 = cons(_3, _18);
+  _20 = cons(_16, _19);
+  _21 = cons(_1, _20);
+  _22 = List_var(_21);
+  _23 = Symbol_var(1976541542);
+  _24 = Symbol_var(806120);
+  _25 = cons(_24, NULL);
+  _26 = cons(_3, _25);
+  _27 = cons(_23, _26);
+  _28 = cons(_1, _27);
+  _29 = List_var(_28);
+  _30 = cons(_29, NULL);
+  _31 = cons(_22, _30);
+  _32 = cons(_15, _31);
+  _33 = Symbol_var(46228810);
+  _34 = Symbol_var(1992385866);
+  _35 = cons(_34, NULL);
+  _36 = cons(_33, _35);
+  _37 = Symbol_var(1473096);
   _38 = cons(_37, NULL);
-  _39 = cons(_33, _38);
-  _40 = cons(_29, _39);
-  _41 = Symbol_var(28562377614);
-  _42 = cons(_41, NULL);
-  _43 = Symbol_var(12971715722);
-  _44 = Symbol_var(61045002);
-  _45 = Symbol_var(58262293080);
-  _46 = cons(_45, NULL);
-  _47 = cons(_44, _46);
-  _48 = List_var(_47);
-  _49 = cons(_48, NULL);
-  _50 = cons(_43, _49);
-  _51 = String_new("the helper sent an unknown reply");
-  _52 = String_new("the project meta module was not built");
-  _53 = Symbol_var(38115688);
-  _54 = cons(_53, NULL);
-  _55 = Symbol_var(199448);
-  _56 = String_new("X2C_META_TIMEOUT");
-  _57 = Symbol_var(1157736);
-  _58 = cons(_57, NULL);
-  _59 = String_new("the body exited with status ");
-  _60 = String_new("the body crashed or overflowed the stack (signal ");
-  _61 = String_new(": ");
-  _62 = String_new(")");
-  _63 = String_new("%s%g s");
-  _64 = String_new("function: ");
-  _65 = String_new("set X2C_META_TIMEOUT to a larger limit in seconds, or 0 for none");
-  _66 = String_var(_65);
-  _67 = cons(_66, NULL);
-  _68 = String_new("this meta call stopped the compile-time helper");
-  _69 = String_new("reason: ");
+  _39 = Symbol_var(11703268);
+  _40 = cons(_39, _31);
+  _41 = Symbol_var(61765898);
+  _42 = Symbol_var(63981333478578);
+  _43 = cons(_42, NULL);
+  _44 = cons(_41, _43);
+  _45 = cons(_0, _44);
+  _46 = List_var(_45);
+  _47 = cons(_46, NULL);
+  _48 = cons(_29, _47);
+  _49 = cons(_22, _48);
+  _50 = cons(_39, _49);
+  _51 = Symbol_var(293581290303730);
+  _52 = Symbol_var(61869328);
+  _53 = cons(_52, _19);
+  _54 = cons(_1, _53);
+  _55 = List_var(_54);
+  _56 = Symbol_var(61344976);
+  _57 = cons(_56, _19);
+  _58 = cons(_1, _57);
+  _59 = List_var(_58);
+  _60 = cons(_59, NULL);
+  _61 = cons(_55, _60);
+  _62 = cons(_51, _61);
+  _63 = Symbol_var(37039282);
+  _64 = Symbol_var(2074790390418396);
+  _65 = cons(_64, _19);
+  _66 = cons(_1, _65);
+  _67 = List_var(_66);
+  _68 = Symbol_var(64837199687974);
+  _69 = cons(_68, _26);
+  _70 = cons(_1, _69);
+  _71 = List_var(_70);
+  _72 = cons(_71, NULL);
+  _73 = cons(_67, _72);
+  _74 = cons(_63, _73);
+  _75 = Symbol_var(28562377614);
+  _76 = cons(_75, NULL);
+  _77 = Symbol_var(12971715722);
+  _78 = Symbol_var(61045002);
+  _79 = Symbol_var(58262293080);
+  _80 = cons(_79, NULL);
+  _81 = cons(_78, _80);
+  _82 = List_var(_81);
+  _83 = cons(_82, NULL);
+  _84 = cons(_77, _83);
+  _85 = String_new("the helper sent an unknown reply");
+  _86 = Symbol_var(97761636);
+  _87 = String_new("the project meta module was not built");
+  _88 = Symbol_var(38115688);
+  _89 = cons(_88, NULL);
+  _90 = Symbol_var(199448);
+  _91 = String_new("X2C_META_TIMEOUT");
+  _92 = Symbol_var(1157736);
+  _93 = cons(_92, NULL);
+  _94 = String_new("the body exited with status ");
+  _95 = String_new("the body crashed or overflowed the stack (signal ");
+  _96 = String_new(": ");
+  _97 = String_new(")");
+  _98 = String_new("%s%g s");
+  _99 = String_new("function: ");
+  _100 = String_new("set X2C_META_TIMEOUT to a larger limit in seconds, or 0 for none");
+  _101 = String_var(_100);
+  _102 = cons(_101, NULL);
+  _103 = String_new("this meta call stopped the compile-time helper");
+  _104 = String_new("reason: ");
   _x2c_static_initialize_0();
   _x2c_static_initialize_1();
   _x2c_static_initialize_2();
@@ -260,58 +299,91 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _x2c_static_initialize_11();
 }
 
-static int String_truth(String);
-
-String real_path(String);
-
-String home_absolute_path(String);
-
-String Compiler_token_source(Compiler, Token, int *);
-
-static List Var_list(Var);
-
-static String Var_string(Var);
-
-void Compiler_report_warning(Compiler, Symbol, String, Token, List);
-
 void Compiler_report_error(Compiler, Symbol, String, Token, List);
 
-void Map_merge_translation_dependency(Map, String, Var);
-
-String Compiler_meta_call_missing(Compiler, String);
-
-Symbol Error_raise(Symbol, List);
-
-Var Compiler_meta_helper_call(Compiler c, String name, Token site, List arguments, String provider){
+void Compiler_report_meta_error(Compiler c, Var node, Symbol category, String message, Token site, List notes){
   if(! _init_guard_) _file_init_();
-  String file = String_truth(provider) ? real_path(home_absolute_path(provider)) : real_path(Compiler_token_source(c, site, NULL));
-  Call call ={
-    .compiler = c, .name = name, .site = site, .table = _table_of(file, helper_table)
+  int origin = _syntax_origin(node);
+  {
+    int * _x2c_macro_address_0 = & c -> origin;
+    int _x2c_macro_previous_0 = * _x2c_macro_address_0;
+    {
+      _x2c_defer_env_0 _x2c_macro_environment_0 ={
+        0
+      }
+      ;
+      _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & _x2c_macro_address_0;
+      _x2c_macro_environment_0._x2c_defer_capture_1 =(const void *) & _x2c_macro_previous_0;
+      X2CCleanup _x2c_defer_record_0 ={
+        .fn = _x2c_defer_cleanup_0, .env = & _x2c_macro_environment_0
+      }
+      ;
+      x2c_cleanup_push(& _x2c_defer_record_0);
+      {
+        * _x2c_macro_address_0 = origin ? origin : c -> origin;
+        Compiler_report_error(c, category, message, origin ? NULL : site, notes);
+      }
+      x2c_cleanup_leave(& _x2c_defer_record_0);
+    }
+
   }
-  ;
-  Call_check(&(call));
-  Call_set_deadline(&(call));
-  if(! _helper_start()) Call_refuse(&(call), _0);
-  Call_send(&(call), arguments);
-  for(; ; ){
-    Var reply = Call_next_reply(&(call));
+
+}
+
+static int _syntax_origin(Var node){
+  if(! Var_is_row(node, 9, 7, 4)) return 0;
 
   {
-    List _x2c_match_expr = Var_list(reply);
-    Var _x2c_match_values[2];
-    MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
+    List _x2c_match_expr = Var_list(node);
+    Var _x2c_match_values[1];
+  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
 
     switch (Var_symbol(car(_x2c_match_expr))) {
-      case 49497918350: ;
-    { List _x2c_match_cursor;
-    if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497986259536782ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 1318210446) && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var message = _x2c_match_values[0];
+      case 104: ;
+  static MatchCaptureSite _x2c_match_site_0;
+  if (x2c_match_site_try_capture(& _x2c_match_site_0, _x2c_match_expr, List_var(_13), &_x2c_match_capture)) {Var origin = _x2c_match_values[0]; {
+    Var _x2c_match_value_0 = origin; {
+      int origin = Var_int(Var_convert(_x2c_match_value_0, 3453797));  return origin;
+    }
+
+  }
+  break;
+}
+default: break;
+    }
+  }
+{
+  Var child;  List _x2c_macro_object_0 = Var_list(node);  List _x2c_macro_cursor_0 = _x2c_macro_object_0;  Var _x2c_macro_cursor_output_0;  while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
+    child = _x2c_macro_cursor_output_0; {
+      int origin = _syntax_origin(child);  if(origin) return origin;
+    }
+
+  }
+
+}
+return 0;
+}
+
+String Compiler_token_source(Compiler, Token, int *);
+void Compiler_report_warning(Compiler, Symbol, String, Token, List);
+Var Compiler_meta_helper_call(Compiler c, String name, Token site, List arguments, String provider){
+  if(! _init_guard_) _file_init_();  String file = String_truth(provider) ? real_path(home_absolute_path(provider)) : real_path(Compiler_token_source(c, site, NULL));  Call call ={
+    .compiler = c, .name = name, .site = site, .table = _table_of(file, helper_table)
+  }
+  ;  Call_check(&(call));  Call_set_deadline(&(call));  if(! _helper_start()) Call_refuse(&(call), _14);  Call_send(&(call), arguments);  for(; ; ){
+    Var reply = Call_next_reply(&(call));
+  {
+    List _x2c_match_expr = Var_list(reply);
+    Var _x2c_match_values[4];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 4 };
+    switch (Var_symbol(car(_x2c_match_expr))) {
+      case 49497918350: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497986259536782ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 1318210446) && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var message = _x2c_match_values[0];
     Var notes = _x2c_match_values[1];
     {
-      Var _x2c_match_value_0 = message;
-      Var _x2c_match_value_1 = notes;
+      Var _x2c_match_value_1 = message;
+      Var _x2c_match_value_2 = notes;
       {
-        String message = Var_string(_x2c_match_value_0);
-        List notes = Var_list(_x2c_match_value_1);
+        String message = Var_string(_x2c_match_value_1);
+        List notes = Var_list(_x2c_match_value_2);
         Compiler_report_warning(c, 27335838, message, site, notes);
       }
 
@@ -328,57 +400,107 @@ Var Compiler_meta_helper_call(Compiler c, String name, Token site, List argument
     if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936773321700ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 1318210446) && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var message = _x2c_match_values[0];
     Var notes = _x2c_match_values[1];
     {
-      Var _x2c_match_value_2 = message;
-      Var _x2c_match_value_3 = notes;
+      Var _x2c_match_value_3 = message;
+      Var _x2c_match_value_4 = notes;
       {
-        String message = Var_string(_x2c_match_value_2);
-        List notes = Var_list(_x2c_match_value_3);
+        String message = Var_string(_x2c_match_value_3);
+        List notes = Var_list(_x2c_match_value_4);
         Compiler_report_error(c, 27335838, message, site, notes);
       }
 
     }
-    break; } } case 293581290303730: ;
-    { List _x2c_match_cursor;
-    if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224791518051922162ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 1318210446) && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 1318210446) && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var path = _x2c_match_values[0];
-    Var hash = _x2c_match_values[1];
-    {
-      Var _x2c_match_value_4 = path;
-      Var _x2c_match_value_5 = hash;
-      {
-        String path = Var_string(_x2c_match_value_4);
-        String hash = Var_string(_x2c_match_value_5);
-        Map_merge_translation_dependency(c -> deps, path, String_var(hash));
+    break; } } static MatchCaptureSite _x2c_match_site_1;
+    if (x2c_match_site_try_capture(& _x2c_match_site_1, _x2c_match_expr, List_var(_50), &_x2c_match_capture)) {Var message = _x2c_match_values[0];  Var notes = _x2c_match_values[1];  Var node = _x2c_match_values[2];  Var category = _x2c_match_values[3]; {
+      Var _x2c_match_value_5 = message;  Var _x2c_match_value_6 = notes; {
+        String message = Var_string(_x2c_match_value_5);  List notes = Var_list(_x2c_match_value_6);  Compiler_report_meta_error(c, node, Var_symbol(category), message, site, notes);
       }
 
     }
-    break; } } case 28562377614: ;
-    { List _x2c_match_cursor;
-    if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497965323996046ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && !_x2c_match_cursor) {Call_refuse(&(call), Compiler_meta_call_missing(c, name));
-    break; } } case 12971715722: ;
-    static MatchCaptureSite _x2c_match_site_0;
-    if (x2c_match_site_try_capture(& _x2c_match_site_0, _x2c_match_expr, List_var(_50), &_x2c_match_capture)) {Var code = _x2c_match_values[0];  List detail = Var_list(_x2c_match_values[1]);  Error_raise(Var_symbol(code), detail);  break;
+    break;
   }
-  default: ;  Call_stopped(&(call), _51);  break;
+  case 293581290303730: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224791518051922162ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 1318210446) && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 1318210446) && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var path = _x2c_match_values[0];
+  Var hash = _x2c_match_values[1];
+  {
+    Var _x2c_match_value_7 = path;
+    Var _x2c_match_value_8 = hash;
+    {
+      String path = Var_string(_x2c_match_value_7);
+      String hash = Var_string(_x2c_match_value_8);
+      Map_merge_translation_dependency(c -> deps, path, String_var(hash));
+    }
+
+  }
+  break; } } case 37039282: ;
+  { List _x2c_match_cursor;
+  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936798657714ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 1318210446) && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var operation = _x2c_match_values[0];
+  Var operands = _x2c_match_values[1];
+  {
+    Var _x2c_match_value_9 = operation;
+    Var _x2c_match_value_10 = operands;
+    {
+      String operation = Var_string(_x2c_match_value_9);
+      List operands = Var_list(_x2c_match_value_10);
+      Call_answer(&(call), operation, operands);
+    }
+
+  }
+  break; } } case 28562377614: ;
+  { List _x2c_match_cursor;
+  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497965323996046ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && !_x2c_match_cursor) {Call_refuse(&(call), Compiler_meta_call_missing(c, name));
+  break; } } case 12971715722: ;
+  static MatchCaptureSite _x2c_match_site_2;
+  if (x2c_match_site_try_capture(& _x2c_match_site_2, _x2c_match_expr, List_var(_84), &_x2c_match_capture)) {Var code = _x2c_match_values[0];  List detail = Var_list(_x2c_match_values[1]);  Error_raise(Var_symbol(code), detail);  break;
+}
+default: ;  Call_stopped(&(call), _85);  break;
     }
   }
 }
 }
 
-int Map_truth(Map);
-int Map_try_get(Map, Var, Var *);
-static Var int_var(int);
-void Compiler_refuse_record_meta_call(Compiler, String, Token);
-static void Call_check(Call * call){
-  Var failure;  if(! String_truth(helper_path) && Map_truth(helper_failures) && Map_try_get(helper_failures, int_var(- 1), &(failure))) Call_refuse(&((* call)), Var_string(failure));  if(! String_truth(helper_path)) Call_refuse(&((* call)), _52);  if(Map_truth(helper_failures) && Map_try_get(helper_failures, int_var((* call).table), &(failure))) Call_refuse(&((* call)), Var_string(failure));  Compiler_refuse_record_meta_call((* call).compiler, (* call).name, (* call).site);
+Var Compiler_apply_meta_function(Compiler, String, List, Token);
+#include "error.h"
+
+
+
+
+static void Call_answer(Call * call, String operation, List operands){
+  Var volatile value =((void) 0, Void); {
+    ExceptionFrame _x2c_exception_frame_0;  static MatchCaptureSite _x2c_macro_arms_0[1];  Var _x2c_macro_patterns_0[1];  static ErrorCatchSite _x2c_macro_site_0 ={
+      _x2c_macro_arms_0, -1, 1, ERROR_CATCH_PENDING, - 1
+    }
+    ;  if(x2c_error_catch_site_pending(& _x2c_macro_site_0)){
+      _x2c_macro_patterns_0[0] = List_var(cons(Symbol_var(61045002), cons(Symbol_var(58262293080), NULL)));
+    }
+    volatile ErrorHandler _x2c_error_handler_0 = x2c_error_catch_site_push(& _x2c_exception_frame_0, & _x2c_macro_site_0, _x2c_macro_patterns_0);  x2c_exception_push(& _x2c_exception_frame_0);  if(! sigsetjmp(_x2c_exception_frame_0.env, 0)) value = Compiler_apply_meta_function((* call).compiler, operation, operands, (* call).site);  else{
+      x2c_exception_landed(& _x2c_exception_frame_0);  if(x2c_exception_is_error_target(& _x2c_exception_frame_0)){
+        int _x2c_macro_selected_0 = x2c_error_catch_selected(_x2c_error_handler_0);  x2c_error_catch_detach(_x2c_error_handler_0);  x2c_exception_mark_handled(& _x2c_exception_frame_0);  if(_x2c_macro_selected_0 == 0){
+          Var volatile code;  code = x2c_error_catch_capture(_x2c_error_handler_0, 0);  List volatile detail;  detail = Var_list(x2c_error_catch_capture(_x2c_error_handler_0, 1)); {
+            _helper_stop(SIGKILL);  Error_raise(Var_symbol(code), detail);
+          }
+
+        }
+
+      }
+      else{
+        x2c_error_catch_close(_x2c_error_handler_0);  _x2c_error_handler_0 = NULL;  x2c_exception_leave(& _x2c_exception_frame_0);  __builtin_unreachable();
+      }
+
+    }
+    x2c_error_catch_close(_x2c_error_handler_0);  _x2c_error_handler_0 = NULL;  x2c_exception_leave(& _x2c_exception_frame_0);
+  }
+  Call_send_frame(&((* call)), cons(_86, cons(value, NULL)));
 }
 
-Var Macro_subject(void);
+static void Call_check(Call * call){
+  Var failure;  if(! String_truth(helper_path) && Map_truth(helper_failures) && Map_try_get(helper_failures, int_var(- 1), &(failure))) Call_refuse(&((* call)), Var_string(failure));  if(! String_truth(helper_path)) Call_refuse(&((* call)), _87);  if(Map_truth(helper_failures) && Map_try_get(helper_failures, int_var((* call).table), &(failure))) Call_refuse(&((* call)), Var_string(failure));  Compiler_refuse_record_meta_call((* call).compiler, (* call).name, (* call).site);
+}
+
 static void Call_send(Call * c, List arguments){
   if(helper_reset){
-    Call_send_frame(&((* c)), _54);  helper_reset = 0;
+    Call_send_frame(&((* c)), _89);  helper_reset = 0;
   }
   Call_send_frame(&((* c)), ({
-    Var _x2c_literal_part_0 = int_var((* c).table);  Var _x2c_literal_part_1 = String_var((* c).name);  Var _x2c_literal_part_2 = List_var(arguments);  Var _x2c_literal_part_3 = Macro_subject();  cons(_55, cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, cons(_x2c_literal_part_2, cons(_x2c_literal_part_3, NULL)))));
+    Var _x2c_literal_part_0 = int_var((* c).table);  Var _x2c_literal_part_1 = String_var((* c).name);  Var _x2c_literal_part_2 = List_var(arguments);  Var _x2c_literal_part_3 = Macro_subject();  cons(_90, cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, cons(_x2c_literal_part_2, cons(_x2c_literal_part_3, NULL)))));
   }
   ));
 }
@@ -388,9 +510,8 @@ static void Call_send_frame(Call * call, List message){
 }
 
 String Env_get(String);
-double atof(const char *);
 static void Call_set_deadline(Call * call){
-  String text = Env_get(_56); (* call).limit = String_truth(text) ? atof(text) : 60.0; (* call).deadline =(* call).limit > 0 ? _now() +(* call).limit : 0;
+  String text = Env_get(_91); (* call).limit = String_truth(text) ? atof(text) : 60.0; (* call).deadline =(* call).limit > 0 ? _now() +(* call).limit : 0;
 }
 
 static double _now(void){
@@ -401,8 +522,6 @@ static Var Call_next_reply(Call * call){
   Var reply;  int status = _helper_receive((* call).deadline, &(reply));  if(status < 0) Call_overdue(&((* call)));  if(! status) Call_stopped(&((* call)), _helper_ending());  return reply;
 }
 
-int Buffer_truth(Buffer);
-Buffer Buffer_clear(Buffer);
 static int _helper_start(void){
   if(_helper_running()) return 1;  helper_pid = 0;  int requests[2], replies[2];  if(pipe(requests)) return 0;  if(pipe(replies)){
     close(requests[0]);  close(requests[1]);  return 0;
@@ -433,48 +552,36 @@ static int _helper_reaped(void){
 
 static int _helper_stop(int signal){
   int status = 0;  if(_helper_running()){
-    if(signal) killpg(helper_pid, signal);  else _helper_send(_58, 0);  close(helper_to);  close(helper_from);  if(helper_status < 0) waitpid(helper_pid, & helper_status, 0);  killpg(helper_pid, SIGKILL);  status = helper_status;
+    if(signal) killpg(helper_pid, signal);  else _helper_send(_93, 0);  close(helper_to);  close(helper_from);  if(helper_status < 0) waitpid(helper_pid, & helper_status, 0);  killpg(helper_pid, SIGKILL);  status = helper_status;
   }
   helper_pid = 0;  helper_status = - 1;  helper_to = helper_from = - 1;  if(Buffer_truth(helper_input)) Buffer_clear(helper_input);  return status;
 }
 
 int shell_status(int, int *);
-static String int_str(int);
-String String_new(const char *);
 static String _helper_ending(void){
-  int signal, code = shell_status(_helper_stop(0), &(signal));  if(! signal) return String_join(NULL, cons(String_var(_59), cons(String_var(int_str(code)), NULL)));  String name = String_new(strsignal(signal));  return String_join(NULL, cons(String_var(_60), cons(String_var(int_str(signal)), cons(String_var(_61), cons(String_var(name), cons(String_var(_62), NULL))))));
+  int signal, code = shell_status(_helper_stop(0), &(signal));  if(! signal) return String_join(NULL, cons(String_var(_94), cons(String_var(int_str(code)), NULL)));
+  String name = String_new(strsignal(signal));
+  return String_join(NULL, cons(String_var(_95), cons(String_var(int_str(signal)), cons(String_var(_96), cons(String_var(name), cons(String_var(_97), NULL))))));
 }
-
-Buffer Buffer_new(size_t);
-
-void x2c_cleanup_push(X2CCleanup *);
-
-int datum_frame(Buffer, Var);
-
-void x2c_cleanup_leave(X2CCleanup *);
-
-String Buffer_str(Buffer);
-
-int String_len(String);
 
 static int _helper_send(List message, double deadline){
   Buffer out = Buffer_new(0);
   {
-    _x2c_defer_env_0 _x2c_macro_environment_0 ={
+    _x2c_defer_env_1 _x2c_macro_environment_1 ={
       0
     }
     ;
-    _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & out;
-    X2CCleanup _x2c_defer_record_0 ={
-      .fn = _x2c_defer_cleanup_0, .env = & _x2c_macro_environment_0
+    _x2c_macro_environment_1._x2c_defer_capture_2 =(const void *) & out;
+    X2CCleanup _x2c_defer_record_1 ={
+      .fn = _x2c_defer_cleanup_1, .env = & _x2c_macro_environment_1
     }
     ;
-    x2c_cleanup_push(& _x2c_defer_record_0);
+    x2c_cleanup_push(& _x2c_defer_record_1);
     {
       if(! datum_frame(out, List_var(message))){
         int _x2c_return_value_0 = 0;
         {
-          x2c_cleanup_leave(& _x2c_defer_record_0);
+          x2c_cleanup_leave(& _x2c_defer_record_1);
           return _x2c_return_value_0;
         }
 
@@ -518,73 +625,48 @@ static int _helper_send(List message, double deadline){
       {
         int _x2c_return_value_1 = status;
         {
-          x2c_cleanup_leave(& _x2c_defer_record_0);
+          x2c_cleanup_leave(& _x2c_defer_record_1);
           return _x2c_return_value_1;
         }
 
       }
 
     }
-    x2c_cleanup_leave(& _x2c_defer_record_0);
+    x2c_cleanup_leave(& _x2c_defer_record_1);
   }
 
 }
-
-#include "error.h"
-
-
-
-
-int x2c_error_catch_site_pending(ErrorCatchSite *);
-
-ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
-
-void x2c_exception_push(ExceptionFrame *);
-
-void x2c_exception_landed(ExceptionFrame *);
-
-int x2c_exception_is_error_target(ExceptionFrame *);
-
-int x2c_error_catch_selected(ErrorHandler);
-
-void x2c_error_catch_detach(ErrorHandler);
-
-void x2c_exception_mark_handled(ExceptionFrame *);
-
-void x2c_error_catch_close(ErrorHandler);
-
-void x2c_exception_leave(ExceptionFrame *);
 
 static int _helper_receive(double deadline, Var * reply){
   for(; ; ){
     int volatile framed = 0;
     {
-      ExceptionFrame _x2c_exception_frame_0;
-      static MatchCaptureSite _x2c_macro_arms_0[1];
-      Var _x2c_macro_patterns_0[1];
-      static ErrorCatchSite _x2c_macro_site_0 ={
-        _x2c_macro_arms_0, -1, 1, ERROR_CATCH_PENDING, - 1
+      ExceptionFrame _x2c_exception_frame_1;
+      static MatchCaptureSite _x2c_macro_arms_1[1];
+      Var _x2c_macro_patterns_1[1];
+      static ErrorCatchSite _x2c_macro_site_1 ={
+        _x2c_macro_arms_1, -1, 1, ERROR_CATCH_PENDING, - 1
       }
       ;
-      if(x2c_error_catch_site_pending(& _x2c_macro_site_0)){
-        _x2c_macro_patterns_0[0] = List_var(cons(List_var(cons(Symbol_var(62436), cons(Symbol_var(664344300629258), cons(Symbol_var(28682226919752), NULL)))), cons(Symbol_var(54), NULL)));
+      if(x2c_error_catch_site_pending(& _x2c_macro_site_1)){
+        _x2c_macro_patterns_1[0] = List_var(cons(List_var(cons(Symbol_var(62436), cons(Symbol_var(664344300629258), cons(Symbol_var(28682226919752), NULL)))), cons(Symbol_var(54), NULL)));
       }
-      volatile ErrorHandler _x2c_error_handler_0 = x2c_error_catch_site_push(& _x2c_exception_frame_0, & _x2c_macro_site_0, _x2c_macro_patterns_0);
-      x2c_exception_push(& _x2c_exception_frame_0);
-      if(! sigsetjmp(_x2c_exception_frame_0.env, 0)) framed = _take_frame(&((* reply)));
+      volatile ErrorHandler _x2c_error_handler_1 = x2c_error_catch_site_push(& _x2c_exception_frame_1, & _x2c_macro_site_1, _x2c_macro_patterns_1);
+      x2c_exception_push(& _x2c_exception_frame_1);
+      if(! sigsetjmp(_x2c_exception_frame_1.env, 0)) framed = _take_frame(&((* reply)));
       else{
-        x2c_exception_landed(& _x2c_exception_frame_0);
-        if(x2c_exception_is_error_target(& _x2c_exception_frame_0)){
-          int _x2c_macro_selected_0 = x2c_error_catch_selected(_x2c_error_handler_0);
-          x2c_error_catch_detach(_x2c_error_handler_0);
-          x2c_exception_mark_handled(& _x2c_exception_frame_0);
-          if(_x2c_macro_selected_0 == 0){
+        x2c_exception_landed(& _x2c_exception_frame_1);
+        if(x2c_exception_is_error_target(& _x2c_exception_frame_1)){
+          int _x2c_macro_selected_1 = x2c_error_catch_selected(_x2c_error_handler_1);
+          x2c_error_catch_detach(_x2c_error_handler_1);
+          x2c_exception_mark_handled(& _x2c_exception_frame_1);
+          if(_x2c_macro_selected_1 == 0){
             {
               int _x2c_return_value_2 = 0;
               {
-                x2c_error_catch_close(_x2c_error_handler_0);
-                _x2c_error_handler_0 = NULL;
-                x2c_exception_leave(& _x2c_exception_frame_0);
+                x2c_error_catch_close(_x2c_error_handler_1);
+                _x2c_error_handler_1 = NULL;
+                x2c_exception_leave(& _x2c_exception_frame_1);
                 return _x2c_return_value_2;
               }
 
@@ -594,16 +676,16 @@ static int _helper_receive(double deadline, Var * reply){
           __builtin_unreachable();
         }
         else{
-          x2c_error_catch_close(_x2c_error_handler_0);
-          _x2c_error_handler_0 = NULL;
-          x2c_exception_leave(& _x2c_exception_frame_0);
+          x2c_error_catch_close(_x2c_error_handler_1);
+          _x2c_error_handler_1 = NULL;
+          x2c_exception_leave(& _x2c_exception_frame_1);
           __builtin_unreachable();
         }
 
       }
-      x2c_error_catch_close(_x2c_error_handler_0);
-      _x2c_error_handler_0 = NULL;
-      x2c_exception_leave(& _x2c_exception_frame_0);
+      x2c_error_catch_close(_x2c_error_handler_1);
+      _x2c_error_handler_1 = NULL;
+      x2c_exception_leave(& _x2c_exception_frame_1);
     }
     if(framed) return 1;
     int more = _read_input(deadline);
@@ -611,10 +693,6 @@ static int _helper_receive(double deadline, Var * reply){
   }
 
 }
-
-int datum_unframe(String, size_t *, Var *);
-
-Buffer Buffer_write(Buffer, const char *);
 
 static int _take_frame(Var * reply){
   String input = Buffer_str(helper_input);
@@ -625,8 +703,6 @@ static int _take_frame(Var * reply){
   if(String_truth(rest)) Buffer_write(helper_input, rest);
   return 1;
 }
-
-String String_new_len(const char *, int);
 
 static int _read_input(double deadline){
   int wait = 100;
@@ -650,32 +726,22 @@ static int _read_input(double deadline){
   return 1;
 }
 
-void Compiler_refuse_meta_call(Compiler, String, Token, String);
-
 static void Call_refuse(Call * call, String why){
   Compiler_refuse_meta_call((* call).compiler, (* call).name, (* call).site, why);
 }
 
-String String_printf(String, ...);
-
 static void Call_overdue(Call * c){
   _helper_stop(SIGKILL);
-  Compiler_report_error((* c).compiler, 27335838, String_printf(_63, "this meta call ran longer than ", (* c).limit), (* c).site, cons(String_var(String_join(NULL, cons(String_var(_64), cons(String_var((* c).name), NULL)))), _67));
+  Compiler_report_error((* c).compiler, 27335838, String_printf(_98, "this meta call ran longer than ", (* c).limit), (* c).site, cons(String_var(String_join(NULL, cons(String_var(_99), cons(String_var((* c).name), NULL)))), _102));
 }
 
 static void Call_stopped(Call * call, String reason){
-  Compiler_report_error((* call).compiler, 27335838, _68, (* call).site, ({
-    Var _x2c_literal_part_4 = String_var(String_join(NULL, cons(String_var(_64), cons(String_var((* call).name), NULL))));  Var _x2c_literal_part_5 = String_var(String_join(NULL, cons(String_var(_69), cons(String_var(reason), NULL))));
+  Compiler_report_error((* call).compiler, 27335838, _103, (* call).site, ({
+    Var _x2c_literal_part_4 = String_var(String_join(NULL, cons(String_var(_99), cons(String_var((* call).name), NULL))));  Var _x2c_literal_part_5 = String_var(String_join(NULL, cons(String_var(_104), cons(String_var(reason), NULL))));
     cons(_x2c_literal_part_4, cons(_x2c_literal_part_5, NULL));
   }
   ));
 }
-
-void Scope_shutdown_hook(void(*)(void));
-
-void Scope_push(Scope *);
-
-Map Map_copy(Map);
 
 void Compiler_use_meta_helper(String path, Map failures, Map units){
   if(! _init_guard_) _file_init_();
@@ -685,11 +751,11 @@ void Compiler_use_meta_helper(String path, Map failures, Map units){
     Scope_push(& helper_scope);
     {
       {
-        X2CCleanup _x2c_defer_record_1 ={
-          .fn = _x2c_defer_cleanup_1, .env = 0
+        X2CCleanup _x2c_defer_record_2 ={
+          .fn = _x2c_defer_cleanup_2, .env = 0
         }
         ;
-        x2c_cleanup_push(& _x2c_defer_record_1);
+        x2c_cleanup_push(& _x2c_defer_record_2);
         {
           {
             helper_path = String_truth(path) ? String_new(path) : NULL;
@@ -699,7 +765,7 @@ void Compiler_use_meta_helper(String path, Map failures, Map units){
           }
 
         }
-        x2c_cleanup_leave(& _x2c_defer_record_1);
+        x2c_cleanup_leave(& _x2c_defer_record_2);
       }
 
     }
@@ -716,8 +782,6 @@ void Compiler_begin_meta_unit(String filename){
   helper_reset = 1;
 }
 
-long Var_integer(Var);
-
 static int _table_of(String path, int otherwise){
   Var table;
   return Map_truth(helper_units) && String_truth(path) && Map_try_get(helper_units, String_var(path), &(table)) ? Var_integer(table) : otherwise;
@@ -728,8 +792,6 @@ void Compiler_stop_meta_helper(void){
   _helper_stop(0);
 }
 
-void Scope_destroy(Scope);
-
 static void _helper_shutdown(void){
   _helper_stop(0);
   Scope_destroy(helper_scope);
@@ -739,16 +801,17 @@ static void _helper_shutdown(void){
   helper_input = NULL;
 }
 
-void Buffer_cleanup(Buffer);
-
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;
-  Buffer_cleanup((*(Buffer *) _x2c_defer_data_0->_x2c_defer_capture_0));
+  *(*(int * *) _x2c_defer_data_0->_x2c_defer_capture_0) =(*(int *) _x2c_defer_data_0->_x2c_defer_capture_1);
 }
 
-void Scope_pop(void);
-
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
+  _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;
+  Buffer_cleanup((*(Buffer *) _x2c_defer_data_1->_x2c_defer_capture_2));
+}
+
+static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
   Scope_pop();
 }
 

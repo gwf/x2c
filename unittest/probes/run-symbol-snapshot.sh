@@ -102,6 +102,8 @@ cp "$ROOT/etc/"*.xlisp "$ROOT/etc/"*.x "$cold_root/etc/"
 # Staging a meta group compiles it against the runtime headers.
 cp -RL "$ROOT/include/." "$cold_root/include/"
 copy_runtime_sources "$cold_root/lib/"
+mkdir -p "$cold_root/src"
+cp "$ROOT/src/component-access.x" "$cold_root/src/"
 [[ -z "$("$cold_root/bin/x2c" env prelude)" ]]
 "$cold_root/bin/x2c" translate --out-dir "$BUILD/cold" "$ROOT/examples/foreach.x"
 diff -u "$BUILD/cold/foreach.c" "$BUILD/default/foreach.c"

@@ -1086,11 +1086,13 @@ List Build.script_helpers(Build b) {
   String script = b.request.inputs.car(), root = x2c_get_root();
   List excluded = %("$root/lib/" "$root/include/" "$root/builds/")
     .append(b.request.package_roots().map(%!(dir) => %"$dir/"));
+  List prelude = compiler_prelude_sources().map(%!(String source) =>
+    Path.join(root, source));
   String depfile = _unit_file(b._unit_dir(script), script, ".d");
   Array helpers = [];
   foreach (String path, _depfile_inputs(depfile)) {
     if (path.startswith("search:") || !is_source_file(path) ||
-        path == script || path in helpers) continue;
+        path == script || path in helpers || path in prelude) continue;
     if (excluded.any(%!(String prefix) => path.startswith(prefix))) continue;
     helpers.push(path);
     b.xlat_n++;

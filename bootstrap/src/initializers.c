@@ -189,16 +189,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _x2c_cache_initialize_1();
 }
 
-static Var Symbol_var(Symbol);
-
-List cons(Var, List);
-
-static Var List_var(List);
-
-static Var int_var(int);
-
-static Var String_var(String);
-
 __attribute__((noinline, cold)) static void _x2c_cache_initialize_0(void){
   _0 = Symbol_var(377892);
   _1 = Symbol_var(58);
@@ -1149,11 +1139,7 @@ List Compiler_convert_initializer(Compiler c, List value, Type type, List target
   return Compiler__convert_initializer(c, value, type, target, NULL);
 }
 
-List Var_cdr(Var);
-
 Type Type_canonicalize(Type);
-
-List Compiler_convert_expression(Compiler, List, Type);
 
 Type Type_declared(Type);
 
@@ -1175,7 +1161,6 @@ default: break;
 return Compiler_convert_expression(c, value, Type_declared(type));
 }
 
-static int List_truth(List);
 static List Type_list(Type);
 Type Sym_resolve_key(Sym, Type);
 Type Sym_next_typedef(Sym, Type, int *);
@@ -1186,12 +1171,6 @@ static Type Compiler__initializer_shape(Compiler c, Type type){
 
 }
 
-Array Array_new(void);
-int List_try_next(List, List *, Var *);
-static List Var_list(Var);
-Var Array_push(Array, Var);
-List Array_list_free(Array);
-List Macro_inserted_items(List);
 static List Compiler__convert_composite(Compiler c, List items, Type target, List native_target, List parent_condition, int * native_used){
   if(! List_truth(items)){
     List fresh = Compiler__empty_collection(c, target);  if(List_truth(fresh)) return fresh;
@@ -1212,11 +1191,7 @@ static List Compiler__convert_composite(Compiler c, List items, Type target, Lis
 }
 
 static Type List_type(List);
-List Compiler_rebuild_expression(Compiler, Type, List);
-List Macro_apply(Macro, List);
 int Sym_is_var_type(Sym, Type);
-int List_equal(List, List);
-List Compiler_converter_call(Compiler, List, Type, Type);
 static List Compiler__empty_collection(Compiler c, Type target){
   for(int kind = 0;  kind < 2;  kind ++){
     Macro shape = kind ? _195 : _297;  Type source = List_type(kind ? _103 : _243);  List literal = Compiler_rebuild_expression(c, source, Macro_apply(shape, cons(List_var(NULL), NULL)));  if(! kind && Sym_is_var_type(c -> sym, target)) return Compiler_convert_expression(c, literal, target);  if(List_equal(Type_list(Sym_resolve_key(c -> sym, target)), Type_list(Sym_resolve_key(c -> sym, source)))) return Compiler_convert_expression(c, literal, target);  List converted = Compiler_converter_call(c, literal, source, target);  if(List_truth(converted)) return converted;
@@ -1242,9 +1217,6 @@ static List _zero_pointer_target(Type viewed, Type native){
 }
 
 List Compiler_initializer_rows(Compiler c, Type root, List items, List target);
-static Var List_cadr(List);
-int Var_truth(Var);
-static Var List_caddr(List);
 static List Compiler__composite_rows(Compiler c, Type target, List items, List native_target, List parent_condition, int * discarded){
   Array rows = Array_new();  int initialized = 0; {
     List row;  List _x2c_macro_object_2 = Compiler_initializer_rows(c, target, items, native_target);  List _x2c_macro_cursor_2 = _x2c_macro_object_2;  Var _x2c_macro_cursor_output_2;  while(List_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
@@ -1270,7 +1242,6 @@ static List Compiler__composite_rows(Compiler c, Type target, List items, List n
   return Array_list_free(rows);
 }
 
-Var Macro_inserted(Var, int, int);
 static List _composite_excess_check(List parent_condition){
   List zero = x2c_literal_int(0);  List one = x2c_literal_int(1);  List size = cons(_0, cons(_303, cons(List_var(({
     Var _x2c_literal_part_10 = Macro_inserted(List_var(parent_condition), 1, 1);  Var _x2c_literal_part_11 = Macro_inserted(List_var(zero), 1, 1);  Var _x2c_literal_part_12 = Macro_inserted(List_var(one), 1, 1);  cons(_299, cons(_1, cons(_x2c_literal_part_10, cons(_x2c_literal_part_11, cons(_x2c_literal_part_12, NULL)))));
@@ -1306,8 +1277,6 @@ List Compiler_initializer_rows(Compiler c, Type root, List items, List target){
   return Array_list_free(rows);
 }
 
-static Var List_car(List);
-Var List_getindex(List, int);
 static Type Var_type(Var);
 static List Compiler__initializer_row(Compiler c, Type root, List original, List target, List * states, int first){
   List value = original;  if(Var_equal(List_car(original), Symbol_var(9639129704)) || Var_equal(List_car(original), Symbol_var(20762258403944))){
@@ -1325,7 +1294,6 @@ static List Compiler__initializer_row(Compiler c, Type root, List original, List
   (* states) = _initializer_merge(following);  return cons(List_var(original), cons(List_var(cases), NULL));
 }
 
-List Ast_initializer_cases(Ast, List *);
 static List Compiler__row_cases(Compiler c, Type root, List value, List states, int first){
 
   {
@@ -1358,10 +1326,8 @@ Array cases = Array_new(); {
 return Array_list_free(cases);
 }
 
-Var Var_car(Var);
 Type Sym_lookup_field(Sym, Type, List);
 Type Type_dereference(Type);
-List List_append(List, List);
 static List Compiler__initializer_designated(Compiler c, Type root, List node, List * value, List * normalized){
   List path = NULL, selectors = NULL;  Type type = root;  while(1){
     Type owner = Compiler__initializer_shape(c, type);
@@ -1408,11 +1374,7 @@ static List Compiler__initializer_designated(Compiler c, Type root, List node, L
 
 }
 
-static List List_cdr(List);
-
 List Sym_field_order(Sym, Type);
-
-int Var_equal(Var, Var);
 
 int Type_is_aggregate(Type);
 
@@ -1440,13 +1402,7 @@ List Compiler_initializer_field_path(Compiler c, Type type, List field){
 
 List Sym_introduce(Sym, String);
 
-String Compiler_fresh_name(Compiler, String);
-
 List Sym_bind_identity(Sym, List, List, List);
-
-List Type_declaration_ast(Type, List);
-
-List Macro_typed(List, Var);
 
 static List Compiler__initializer_index(Compiler c, List index, List * reference){
 
@@ -1478,12 +1434,6 @@ Type type = Var_type(List_cadr(index));  List binding = Sym_introduce(c -> sym, 
 );
 }
 
-Map Map_new(void);
-int Array_try_next(Array, int *, Var *);
-int Map_try_get(Map, Var, Var *);
-Var Map_setindex(Map, Var, Var);
-Var Array_getindex(Array, int);
-Var Array_setindex(Array, int, Var);
 static List _initializer_merge(Array states){
   Map positions = Map_new();  Array merged = Array_new(); {
     List state;  Array _x2c_macro_object_7 = states;  int _x2c_macro_cursor_7 = 0;  Var _x2c_macro_cursor_output_7;  while(Array_try_next(_x2c_macro_object_7, &(_x2c_macro_cursor_7), &(_x2c_macro_cursor_output_7))){
@@ -1500,7 +1450,6 @@ static List _initializer_merge(Array states){
   Array_free(states);  return Array_list_free(merged);
 }
 
-List List_match(List, Var);
 int Type_is_array(Type);
 static int Compiler__initializer_whole(Compiler c, Type type, List value){
   if(List_truth(({ static MatchCaptureSite _x2c_match_site_3;  x2c_match_site_match(& _x2c_match_site_3, value, List_var(_379)); }))) return 1;  Type source = Var_type(List_cadr(value)), resolved = Compiler__initializer_shape(c, type);  if(List_equal(Type_list(Compiler__initializer_shape(c, source)), Type_list(resolved))) return 1;  if(Sym_is_var_type(c -> sym, type)) return 1;  if(Compiler__initializer_string_array(c, type, value)) return 1;  return ! Type_is_array(resolved) && ! Type_is_aggregate(resolved);
@@ -1583,8 +1532,6 @@ static void Compiler__initializer_next(Compiler c, List target, List path, List 
   Array_push(states, List_var(_395));
 }
 
-static Var Var_cadr(Var);
-
 static int Compiler__next_index(Compiler c, List target, List frame, List parent, List * condition, Array states){
   List _x2c_destructure_5 = frame;
   Type owner = Var_type(List_getindex(_x2c_destructure_5, 0));
@@ -1649,8 +1596,6 @@ static List Compiler__index_inside(Compiler c, List target, List parent, Type ty
   }
   )), NULL)));
 }
-
-List List_reverse(List);
 
 List Compiler_initializer_slot(Compiler c, List target, List path){
   if(! _init_guard_) _file_init_();
@@ -1781,9 +1726,6 @@ static List Compiler__array_layout(Compiler c, Type type, Type owner, List targe
   );
 }
 
-void x2c_cleanup_push(X2CCleanup *);
-void x2c_cleanup_leave(X2CCleanup *);
-List Array_list(Array);
 static List Compiler__record_layout(Compiler c, Type type, Type owner, List target, List string, int * symbolic){
   Array children = Array_new(); {
     _x2c_defer_env_0 _x2c_macro_environment_0 ={
@@ -1945,25 +1887,13 @@ List result = Compiler__speculate(c, value, type, condition, target, native_used
 }
 
 SymTxn Compiler_begin_semantic_transaction(Compiler);
-PendingMark Pending_checkpoint(Pending *);
-Map Map_copy(Map);
 DiagnosticsHold Diagnostics_hold(Diagnostics);
+void SymTxn_commit(SymTxn *);
 #include "error.h"
 
 
 
 
-int x2c_error_catch_site_pending(ErrorCatchSite *);
-ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
-void x2c_exception_push(ExceptionFrame *);
-void SymTxn_commit(SymTxn *);
-void x2c_exception_landed(ExceptionFrame *);
-int x2c_exception_is_error_target(ExceptionFrame *);
-int x2c_error_catch_selected(ErrorHandler);
-void x2c_error_catch_detach(ErrorHandler);
-void x2c_exception_mark_handled(ExceptionFrame *);
-void x2c_error_catch_close(ErrorHandler);
-void x2c_exception_leave(ExceptionFrame *);
 static List Compiler__speculate(Compiler c, List value, Type type, List condition, List target, int * native_used){
   SymTxn transaction = Compiler_begin_semantic_transaction(c);  x2c_exception_escaped = & transaction;  Map keys = c -> key_ids, adapters = c -> names -> adapters;  int key_count = Array_len(c -> id_keys);  PendingMark mark = Pending_checkpoint(&(c -> pending));  c -> key_ids = Map_copy(keys);  c -> names -> adapters = Map_copy(adapters);  DiagnosticsHold hold = Diagnostics_hold(c -> diagnostics);  int depth = c -> recovery_depth;  int volatile completed = 0;  int volatile rejected = 0;  List volatile result = NULL; {
     {
@@ -2139,7 +2069,6 @@ default: break;
 return 0;
 }
 
-List List_search_replace(List, Var, Var);
 static List Compiler__materialize_mixed_row(Compiler c, List original, List source, Array converted, Array captured){
   String formal = Compiler_fresh_name(c, _526);  List placeholder =({
     Var _x2c_literal_part_98 = List_cadr(source);  cons(_0, cons(_x2c_literal_part_98, cons(String_var(formal), NULL)));
@@ -2156,7 +2085,6 @@ static List Compiler__materialize_mixed_row(Compiler c, List original, List sour
   List choices = Array_list_free(replaced);  if(uses_input) inputs = cons(List_var(cons(String_var(formal), cons(List_var(source), NULL))), inputs);  if(List_truth(inputs)) choices = cons(List_var(cons(_551, List_append(inputs, NULL))), choices);  List result = cons(_0, cons(_312, cons(List_var(cons(_317, List_append(choices, NULL))), NULL)));  return _initializer_replace(original, result);
 }
 
-int ast_contains_head(Var, Symbol);
 Type Type_apply(Type);
 static List Compiler__initializer_adapters(Compiler c, List source, List choices, List placeholder){
   Type from = Compiler__initializer_value_type(c, Var_type(List_cadr(source)));  if(! List_truth(Type_list(from)) || ! ast_contains_head(List_var(source), 421880102)) return NULL;  Array prepared = Array_new(); {
@@ -2230,9 +2158,7 @@ static List Compiler__initializer_adapters(Compiler c, List source, List choices
 }
 }
 
-void Compiler_add_early(Compiler, List);
 List Compiler_wrapper_function(Compiler, Type, List, List, List);
-List Type_parameter_ast(Type, List);
 static List Compiler__initializer_adapter(Compiler c, List source, List converted){
   Type from = Compiler__initializer_value_type(c, Var_type(List_cadr(source)));  Type result = Compiler__initializer_value_type(c, Var_type(List_cadr(converted)));  List formal = cons(_0, cons(List_cadr(source), _705));  List body = List_search_replace(converted, List_var(cons(_550, cons(List_var(source), NULL))), List_var(formal));  List key = cons(_706, cons(List_var(from), cons(List_var(result), cons(List_var(body), NULL)))), adapter = NULL;  Var _x2c_macro_cached_0;  if(Map_try_get(c -> names -> adapters, List_var(key), &(_x2c_macro_cached_0))) adapter = Var_list(_x2c_macro_cached_0);  else{
     {
@@ -2317,7 +2243,6 @@ default: break;
 }
 
 int Type_integer_literal_magnitude(Type, String, unsigned long long *);
-static String Var_string(Var);
 static int _initializer_integer(List expression, unsigned long long * value){
 
   {
@@ -2409,14 +2334,11 @@ break; } } default: break;
 return modifier;
 }
 
-void Array_cleanup(Array);
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;  Array_cleanup((*(Array *) _x2c_defer_data_0->_x2c_defer_capture_0));
 }
 
 void Diagnostics_release(Diagnostics, DiagnosticsHold, int);
-void Array_resize(Array, size_t);
-void Pending_restore(Pending *, PendingMark);
 void SymTxn_rollback(SymTxn *);
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
   _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1; {

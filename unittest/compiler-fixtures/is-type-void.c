@@ -14,14 +14,6 @@ static void touch(void){
   calls ++;
 }
 
-int Var_is_void(Var);
-
-int Var_is(Var, Symbol);
-
-int Var_equal(Var, Var);
-
-static Var int_var(int);
-
 int main(void){
   x2c_initialize();
   Var bare =((void) 0, Void);

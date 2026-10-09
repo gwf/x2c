@@ -5,34 +5,6 @@
 
 #include "x2c.h"
 #include <stdio.h>
-void Error_initialize(void);
-
-void Error_policy_set(Symbol, Symbol);
-
-int Error_mark(void);
-
-static Var Symbol_var(Symbol);
-
-static Var List_var(List);
-
-static Var String_var(String);
-
-static List Var_list(Var);
-
-static Var List_car(List);
-
-List Error_since(int);
-
-Var List_assoc(List, Var);
-
-static Var List_cadr(List);
-
-Var List_getindex(List, int);
-
-static String Var_string(Var);
-
-String Symbol_str(Symbol);
-
 #include "error.h"
 
 

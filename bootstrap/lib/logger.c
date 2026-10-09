@@ -323,13 +323,9 @@ static void _x2c_defer_cleanup_30(void * _x2c_defer_opaque_30);
 
 static void _x2c_defer_cleanup_31(void * _x2c_defer_opaque_31);
 
-Var Var_new(Symbol, ...);
-
 static inline Var LogTextSink_var(LogTextSink _x2c_macro_value_0){
   return Var_new(3683441, _x2c_macro_value_0);
 }
-
-void * Var_pointer(Var);
 
 static inline LogTextSink Var_logtextsink(Var _x2c_macro_value_1){
   return Var_pointer(_x2c_macro_value_1);
@@ -343,29 +339,19 @@ static inline LogMemorySink Var_logmemorysink(Var _x2c_macro_value_3){
   return Var_pointer(_x2c_macro_value_3);
 }
 
-void Mutex_recursive_initialize(pthread_mutex_t *, const char *);
-
 static void _mutex_initialize(void){
   Mutex_recursive_initialize(& logger_mutex, "Logger: could not initialize mutex");
 }
 
-void Mutex_recursive_lock(pthread_mutex_t *, pthread_once_t *, void(*)(void), const char *);
-
 static void _lock(void){
   Mutex_recursive_lock(& logger_mutex, & logger_mutex_once, _mutex_initialize, "Logger: could not lock mutex");
 }
-
-void Mutex_recursive_unlock(pthread_mutex_t *, const char *);
 
 static void _unlock(void){
   Mutex_recursive_unlock(& logger_mutex, "Logger: could not unlock mutex");
 }
 
 void Logger_initialize(void);
-
-void x2c_cleanup_push(X2CCleanup *);
-
-void x2c_cleanup_leave(X2CCleanup *);
 
 void Logger_flush(Logger logger);
 
@@ -744,8 +730,6 @@ void Logger_flush(Logger logger){
 
 }
 
-void * Scope_calloc_in(Scope *, size_t, size_t);
-
 static LogSink _new_sink(Logger logger, LogEmitter emit, LogFlusher flush, Var data, LogDataDestructor destroy){
   LogSink result = NULL;
   {
@@ -790,10 +774,6 @@ static LogSink _new_sink(Logger logger, LogEmitter emit, LogFlusher flush, Var d
   }
 
 }
-
-static Var Symbol_var(Symbol);
-
-static Var String_var(String);
 
 static void _require_quiescent(Logger logger, String owner){
   if(logger && logger -> emission_depth != 0){
@@ -880,10 +860,6 @@ LogSink Logger_add_file_sink(Logger logger, File file){
 
 }
 
-void Scope_push(Scope *);
-
-Block Block_new(size_t);
-
 static LogSink _add_text_sink(Logger logger, File file, int color, int flush_each){
   if(! logger || ! file) return NULL;
   LogTextSink context = Scope_calloc_in(& logger -> storage, 1, sizeof(struct LogTextSink));
@@ -942,10 +918,6 @@ static LogSink _add_text_sink(Logger logger, File file, int color, int flush_eac
 
 }
 
-Buffer Buffer_clear(Buffer);
-
-static size_t File_write(File, const void *, size_t, size_t);
-
 static void _emit_text(Logger logger, const LogEvent * event, Var data){
   LogTextSink context = Var_logtextsink(data);
   if(! logger || ! context || ! context -> file || context -> depth < 0) return;
@@ -982,10 +954,6 @@ static void _emit_text(Logger logger, const LogEvent * event, Var data){
   }
 
 }
-
-Buffer Buffer_new(size_t);
-
-void Block_append(Block, const void *, size_t);
 
 static void _add_scratch(Logger logger, LogTextSink context){
   {
@@ -1037,12 +1005,6 @@ static void _flush_text(Logger logger, Var data){
   if(context && context -> file) fflush(context -> file);
 }
 
-void Buffer_free(Buffer);
-
-void Block_free(Block);
-
-void Scope_free(void *);
-
 static void _destroy_text(Var data){
   LogTextSink context = Var_logtextsink(data);
   if(! context) return;
@@ -1054,16 +1016,6 @@ static void _destroy_text(Var data){
   }
   Scope_free(context);
 }
-
-int List_try_next(List, List *, Var *);
-
-static List Var_list(Var);
-
-static int List_truth(List);
-
-Buffer Buffer_write(Buffer, const char *);
-
-Buffer Buffer_write_char(Buffer, char);
 
 static void _render_text(Buffer out, const LogEvent * event, int color){
   _write_elapsed(out, event -> elapsed_us, color);
@@ -1087,8 +1039,6 @@ static void _render_text(Buffer out, const LogEvent * event, int color){
   }
   Buffer_write_char(out, '\n');
 }
-
-Buffer Buffer_printf(Buffer, const char *, ...);
 
 static void _write_elapsed(Buffer out, long long elapsed_us, int color){
   long long milliseconds = elapsed_us / 1000LL;
@@ -1124,8 +1074,6 @@ static void _write_start_time(Buffer out, long long wall_time_us, int color){
   if(color) Buffer_write(out, _color_reset);
 }
 
-Var List_getindex(List, int);
-
 Buffer Var_write_repr(Var, Buffer);
 
 static void _write_field(Buffer out, List field, int color){
@@ -1143,19 +1091,11 @@ static void _write_field(Buffer out, List field, int color){
   if(color) Buffer_write(out, _color_reset);
 }
 
-int Var_is(Var, Symbol);
-
-static int Var_is_row(Var, unsigned, unsigned long, unsigned long);
-
-Buffer Var_write_str(Var, Buffer);
-
 static Buffer _write_field_key(Buffer out, Var key){
   if(Var_is(key, 1328354264)) return _write_symbol(out, Var_symbol(key));
   if(Var_is_row(key, 11, 7, 1)) return Buffer_write(out, Var_pointer(key));
   return Var_write_str(key, out);
 }
-
-void Symbol_decode(Symbol, char *);
 
 static Buffer _write_symbol(Buffer out, Symbol symbol){
   char bytes[32] ={
@@ -1192,8 +1132,6 @@ static const char * _level_color(Symbol level){
   return _color_string;
 }
 
-Symbol Var_kind(Var);
-
 static const char * _value_color(Var value){
   if(Var_is_row(value, 11, 7, 1)) return _color_string;
   if(Var_is(value, 1328354264)) return _color_symbol;
@@ -1201,8 +1139,6 @@ static const char * _value_color(Var value){
   if(kind == 20309162340 || kind == 439096724366) return _color_literal;
   return _color_other;
 }
-
-Scope Scope_new_named(const char *);
 
 LogSink Logger_add_memory_sink(Logger logger, List * destination){
   if(! _init_guard_) Logger_initialize();
@@ -1263,14 +1199,6 @@ LogSink Logger_add_memory_sink(Logger logger, List * destination){
 
 }
 
-static Var List_var(List);
-
-List List_cons_in(Pool, Var, List);
-
-Var Var_box_long_long(long long);
-
-Var Var_box_ulong(unsigned long);
-
 static void _emit_memory(Logger logger, const LogEvent * event, Var data){
   (void) logger;
   LogMemorySink l = Var_logmemorysink(data);
@@ -1287,10 +1215,6 @@ static List LogMemorySink__cons_retained(LogMemorySink l, Var value, List tail){
   return List_cons_in(l -> pool, LogMemorySink__retain(l, value), tail);
 }
 
-Var Var_move_wide_to(Var, Scope *);
-
-void Scope_destroy(Scope);
-
 static void _destroy_memory(Var data){
   LogMemorySink context = Var_logmemorysink(data);
   Var * values = context -> wide_values -> bytes;
@@ -1299,16 +1223,6 @@ static void _destroy_memory(Var data){
   Scope_destroy(context -> values);
   Scope_free(context);
 }
-
-int Var_is_null(Var);
-
-int Var_is_nil(Var);
-
-static int Var_is_wide(Var);
-
-int Var_is_integer(Var);
-
-int Var_is_floating(Var);
 
 static Var LogMemorySink__retain(LogMemorySink l, Var value){
   if(Var_is_null(value) || Var_is_nil(value) || Var_is(value, 1328354264)) return value;
@@ -1319,10 +1233,6 @@ static Var LogMemorySink__retain(LogMemorySink l, Var value){
   if(Var_is_row(value, 9, 7, 4)) return List_var(LogMemorySink__retain_list(l, Var_list(value)));
   return value;
 }
-
-Var Var_clone_wide(Var);
-
-static void Block_push(Block, const void *);
 
 static Var LogMemorySink__retain_wide(LogMemorySink l, Var value){
   Var copy;
@@ -1351,19 +1261,11 @@ static Var LogMemorySink__retain_wide(LogMemorySink l, Var value){
   return copy;
 }
 
-static String Var_string(Var);
-
-String String_new_in(Pool, const char *, int);
-
-int String_len(String);
-
 static Var LogMemorySink__retain_string(LogMemorySink l, Var value){
   if(_pool_chain_owns(l -> pool, value)) return value;
   String string = Var_string(value);
   return String_var(String_new_in(l -> pool, string, String_len(string)));
 }
-
-String Var_str(Var);
 
 static Var LogMemorySink__retain_lisp_symbol(LogMemorySink l, Var value){
   String spelling = Var_str(value);
@@ -1409,8 +1311,6 @@ static List LogMemorySink__retain_list(LogMemorySink l, List list){
   }
 
 }
-
-int Pool_owns(Pool, Var);
 
 static int _pool_chain_owns(Pool pool, Var value){
   for(Pool owner = pool;  owner;  owner = owner -> up) if(Pool_owns(owner, value)) return 1;
@@ -1485,14 +1385,6 @@ void log_event(Symbol level, Symbol category, List fields){
   }
 
 }
-
-Var List_last(List);
-
-Var List_assoc(List, Var);
-
-Symbol Error_policy_get(Symbol);
-
-void Error_note_rendered(void);
 
 Symbol Logger_error_handler(List errors, Var data){
   if(! _init_guard_) Logger_initialize();
@@ -1619,12 +1511,6 @@ void log_fatal(Symbol category, List fields){
   log_event(12689496, category, fields);
 }
 
-void * Scope_calloc(size_t, size_t);
-
-Scope * Scope_top(void);
-
-Pool Pool_current(void);
-
 Logger Logger_new(Symbol min_level){
   if(! _init_guard_) Logger_initialize();
   _lock();
@@ -1691,12 +1577,6 @@ void Logger_free(Logger logger){
 
 }
 
-void Error_initialize(void);
-
-int Error_mark(void);
-
-ErrorHandler Error_push(ErrorHandlerFn, Var);
-
 void Logger_shutdown(void);
 
 void Logger_initialize(void){
@@ -1730,12 +1610,6 @@ void Logger_initialize(void){
   Scope_shutdown_hook(Logger_shutdown);
 }
 
-void Error_trim(void *, int);
-
-int Error_count(void);
-
-void Error_pop(ErrorHandler);
-
 void Logger_shutdown(void){
   if(! _init_guard_) Logger_initialize();
   _lock();
@@ -1765,12 +1639,6 @@ void Logger_shutdown(void){
   }
 
 }
-
-Pool Pool_open_named(const char *);
-
-List Error_since(int);
-
-void Pool_close(void);
 
 static void _log_pending(Logger active){
   Pool_open_named("Logger shutdown errors");
@@ -1857,8 +1725,6 @@ static void _x2c_defer_cleanup_15(void * _x2c_defer_opaque_15){
   if(!(*(int *) _x2c_defer_data_3->_x2c_defer_capture_7)) _destroy_text((*(Var *) _x2c_defer_data_3->_x2c_defer_capture_8));
 }
 
-void Scope_pop(void);
-
 static void _x2c_defer_cleanup_16(void * _x2c_defer_opaque_16){
   Scope_pop();
 }
@@ -1888,8 +1754,6 @@ static void _x2c_defer_cleanup_21(void * _x2c_defer_opaque_21){
 static void _x2c_defer_cleanup_22(void * _x2c_defer_opaque_22){
   Scope_pop();
 }
-
-void Block_cleanup(Block);
 
 static void _x2c_defer_cleanup_23(void * _x2c_defer_opaque_23){
   _x2c_defer_env_6 * _x2c_defer_data_6 =(_x2c_defer_env_6 *) _x2c_defer_opaque_23;

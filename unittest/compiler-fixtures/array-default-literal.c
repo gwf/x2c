@@ -17,20 +17,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _0 = String_new("two");
 }
 
-Array Array_update_n(Array, unsigned, ...);
-
-Array Array_new(void);
-
-static Var int_var(int);
-
-static Var String_var(String);
-
-int Var_int(Var);
-
-Var Array_getindex(Array, int);
-
-static String Var_string(Var);
-
 int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();

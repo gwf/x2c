@@ -116,10 +116,6 @@ static ContextThreadState _thread(void){
 
 void Context_initialize(void);
 
-static Var Symbol_var(Symbol);
-
-static Var String_var(String);
-
 #include "error.h"
 
 
@@ -135,10 +131,6 @@ Var Context_export(Context context, Var value){
   return Context__export_value(context, value);
 }
 
-Scope * Scope_top(void);
-
-Pool Pool_current(void);
-
 Var Context_export_scope(Scope source_scope, Pool pool, Var value){
   if(! _init_guard_) Context_initialize();
   struct Context source ={
@@ -147,30 +139,6 @@ Var Context_export_scope(Scope source_scope, Pool pool, Var value){
   ;
   return Context__export_value(& source, value);
 }
-
-int Var_is_void(Var);
-
-int Var_is_null(Var);
-
-int Var_is_nil(Var);
-
-int Var_is(Var, Symbol);
-
-static int Var_is_wide(Var);
-
-int Var_is_integer(Var);
-
-int Var_is_floating(Var);
-
-static int Var_is_row(Var, unsigned, unsigned long, unsigned long);
-
-static Var List_var(List);
-
-static List Var_list(Var);
-
-int Var_try_export_context(Var, Context, Var *);
-
-Symbol Var_tag(Var);
 
 static Var Context__export_value(Context c, Var v){
   if(Var_is_void(v) || Var_is_null(v) || Var_is_nil(v) || Var_is(v, 1328354264)) return v;
@@ -197,22 +165,10 @@ static Var Context__export_value(Context c, Var v){
 
 }
 
-Scope Var_wide_owner(Var);
-
-Var Var_move_wide_to(Var, Scope *);
-
 static Var Context__export_wide(Context c, Var v){
   if(! Context__owns_scope(c, Var_wide_owner(v))) return v;
   return Var_move_wide_to(v, c -> destination_scope);
 }
-
-int Pool_owns(Pool, Var);
-
-static String Var_string(Var);
-
-String String_new_in(Pool, const char *, int);
-
-int String_len(String);
 
 static Var Context__export_string(Context c, Var value){
   if(! c -> pool || ! Pool_owns(c -> pool, value)) return value;
@@ -220,30 +176,12 @@ static Var Context__export_string(Context c, Var value){
   return String_var(String_new_in(c -> destination_pool, string, String_len(string)));
 }
 
-String Var_str(Var);
-
-Var Var_new(Symbol, ...);
-
 static Var Context__export_atom(Context c, Var value){
   String spelling = Var_str(value);
   if(! c -> pool || ! Pool_owns(c -> pool, String_var(spelling))) return value;
   String result = String_new_in(c -> destination_pool, spelling, String_len(spelling));
   return Var_new(826970, result);
 }
-
-static int List_truth(List);
-
-Block Block_new(size_t);
-
-void x2c_cleanup_push(X2CCleanup *);
-
-static void Block_push(Block, const void *);
-
-List List_cons_in(Pool, Var, List);
-
-List List_cons(Var, List);
-
-void x2c_cleanup_leave(X2CCleanup *);
 
 static List Context__export_list(Context c, List list){
   if(! List_truth(list) ||(c -> pool && ! Pool_owns(c -> pool, List_var(list)))) return list;
@@ -283,17 +221,7 @@ static List Context__export_list(Context c, List list){
 
 }
 
-static Array Var_array(Var);
-
 int Context_owns(Context context, void * allocation);
-
-Scope Scope_owner(void *);
-
-void Scope_move(void *, Scope *);
-
-void Block_move_to(Block, Scope *);
-
-static Block Array_block(Array);
 
 static Var Context__export_array(Context c, Var value){
   Array array = Var_array(value);
@@ -333,10 +261,6 @@ static Var Context__export_array(Context c, Var value){
   }
 
 }
-
-static Map Var_map(Var);
-
-void Map_export_to(Map, Context, VarExportContextFn, Scope *);
 
 static Var Context__export_map(Context c, Var value){
   Map map = Var_map(value);
@@ -378,14 +302,6 @@ static Var Context__export_map(Context c, Var value){
 static Var _export_callback(Var value, Context c){
   return Context__export_value(c, value);
 }
-
-static Block Bytes_block(Bytes);
-
-static Bytes Var_bytes(Var);
-
-void * Var_pointer(Var);
-
-void Buffer_move_to(Buffer, Scope *);
 
 static Var Context__export_storage(Context c, Var v){
   void * allocation = Var_is_row(v, 8, 7, 3) ? Bytes_block(Var_bytes(v)) : Var_pointer(v);
@@ -441,20 +357,6 @@ Context Context_open_isolated_named(const char * name){
   return _open(name, 1);
 }
 
-void * Scope_calloc(size_t, size_t);
-
-Scope Scope_new_named(const char *);
-
-Scope Scope_new(void);
-
-void Scope_push(Scope *);
-
-Pool Pool_open_named(const char *);
-
-void * Error_context_open(void);
-
-void * MatchCache_context_open(void);
-
 static Context _open(const char * name, int isolated){
   Context_initialize();
   Context context = Scope_calloc(1, sizeof(struct Context));
@@ -509,20 +411,6 @@ Context Context_current(void){
   return _thread() -> current;
 }
 
-void MatchCache_context_close(void *);
-
-void Error_context_close(void *, int);
-
-int x2c_exception_unwinding(void);
-
-void Pool_close(void);
-
-void Scope_pop(void);
-
-void Scope_destroy(Scope);
-
-void Scope_free(void *);
-
 void Context_close(Context c){
   if(! _init_guard_) Context_initialize();
   if(! c || _thread() -> current != c){
@@ -562,13 +450,9 @@ static void _shutdown(void){
   while(_thread() -> current) Context_close(_thread() -> current);
 }
 
-void Scope_shutdown_hook(void(*)(void));
-
 static void _register_shutdown(void){
   Scope_shutdown_hook(_shutdown);
 }
-
-void Block_cleanup(Block);
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;

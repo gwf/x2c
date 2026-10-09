@@ -19,22 +19,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _2 = String_new("three");
 }
 
-Map Map_update_n(Map, unsigned, ...);
-
-Map Map_new(void);
-
-static Var int_var(int);
-
-static Var String_var(String);
-
-static Block Bytes_block(Bytes);
-
-static String Var_string(Var);
-
-Var Map_getindex(Map, Var);
-
-long Var_integer(Var);
-
 int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();

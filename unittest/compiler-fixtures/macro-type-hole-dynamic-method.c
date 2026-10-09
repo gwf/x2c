@@ -7,8 +7,6 @@
 #include <stdio.h>
 typedef int MacroDynamicOwner;
 
-Var Var_new(Symbol, ...);
-
 static inline Var MacroDynamicOwner_var(MacroDynamicOwner _x2c_macro_value_0){
   return Var_new(3453797, _x2c_macro_value_0);
 }
@@ -16,8 +14,6 @@ static inline Var MacroDynamicOwner_var(MacroDynamicOwner _x2c_macro_value_0){
 static inline Var MacroDynamicOwner_box(MacroDynamicOwner _x2c_macro_value_1){
   return Var_new(3453797, _x2c_macro_value_1);
 }
-
-int Var_int(Var);
 
 int main(void){
   x2c_initialize();

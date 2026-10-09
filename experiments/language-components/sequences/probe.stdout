@@ -1,0 +1,11 @@
+single 1
+cleanup 1
+pair 2 3
+cleanup 3
+cleanup 2
+mixed 8 9
+borrowed 6 7
+cleanup 7
+cleanup 6
+cleanup 5
+caught later

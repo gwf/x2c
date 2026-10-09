@@ -75,10 +75,6 @@ static int _cycle(X2CStatic * guard, StaticThread * self){
   return 0;
 }
 
-static Var String_var(String);
-
-static Var Symbol_var(Symbol);
-
 void x2c_static_abort(void * data);
 
 #include "error.h"

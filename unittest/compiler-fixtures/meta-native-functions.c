@@ -15,8 +15,6 @@ MetaCount MetaCount_new(int initial){
   return value;
 }
 
-static Var int_var(int);
-
 Var MetaCount_var(MetaCount value){
   return int_var((int) value);
 }
@@ -24,10 +22,6 @@ Var MetaCount_var(MetaCount value){
 MetaCount Var_metacount(Var value){
   return(MetaCount) Var_int(Var_convert(value, 3453797));
 }
-
-double sin(double);
-
-double sqrt(double);
 
 static double native_total(double value){
   return sin(value) + sqrt(4.0);

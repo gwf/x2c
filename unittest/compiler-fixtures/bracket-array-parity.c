@@ -4,18 +4,6 @@
 #include "x2c.h"
 
 #include "x2c.h"
-Array Array_update_n(Array, unsigned, ...);
-
-Array Array_new(void);
-
-static Var int_var(int);
-
-Var Array_getindex(Array, int);
-
-Var Array_setindex(Array, int, Var);
-
-int Var_int(Var);
-
 int main(void){
   x2c_initialize();
   Array values = Array_update_n(Array_new(), 3, int_var(10), int_var(20), int_var(30));

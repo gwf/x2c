@@ -17,12 +17,6 @@ static List same_items(List code);
 
 static List omit_second_capture(List code);
 
-static Var Symbol_var(Symbol);
-
-List cons(Var, List);
-
-static Var List_var(List);
-
 #include "exception.h"
 
 
@@ -97,24 +91,11 @@ default: break;
 return cons(List_var(code), NULL);
 }
 
-void x2c_exception_push(ExceptionFrame *);
-void x2c_exception_landed(ExceptionFrame *);
-int x2c_exception_claim(ExceptionFrame *);
-void x2c_exception_leave(ExceptionFrame *);
 #include "error.h"
 
 
 
 
-int x2c_error_catch_site_pending(ErrorCatchSite *);
-ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
-static Var int_var(int);
-int x2c_exception_is_error_target(ExceptionFrame *);
-int x2c_error_catch_selected(ErrorHandler);
-void x2c_error_catch_detach(ErrorHandler);
-void x2c_exception_mark_handled(ExceptionFrame *);
-int List_len(List);
-void x2c_error_catch_close(ErrorHandler);
 int main(void){
   x2c_initialize();  int volatile total = 0; {
     ExceptionFrame _x2c_exception_frame_0;  x2c_exception_push(& _x2c_exception_frame_0);  if(! sigsetjmp(_x2c_exception_frame_0.env, 0)) total += 1;  else{

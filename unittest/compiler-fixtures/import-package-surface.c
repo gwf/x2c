@@ -14,12 +14,6 @@ geo__Vec geo__Var_vec(Var);
 
 Iter geo__Vec_iter(geo__Vec, Iter);
 
-static Var int_var(int);
-
-int Iter_try_next(Iter, Var *);
-
-double Var_floating(Var);
-
 double first_component(double x, double y){
   geo__Vec v = geo__Vec_new(x, y);
   Packed boxed = geo__Vec_var(v);

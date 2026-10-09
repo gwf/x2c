@@ -71,12 +71,6 @@ void x2c_cleanup_leave(X2CCleanup * record){
   record -> fn(record -> env);
 }
 
-void * Error_handler_head(void);
-
-int Error_depth(void);
-
-int Error_count(void);
-
 void x2c_exception_push(ExceptionFrame * e){
   if(! e) return;
   ExceptionThreadState state = _thread();
@@ -100,8 +94,6 @@ void x2c_exception_push(ExceptionFrame * e){
   state -> exception_top = e;
 }
 
-void * Error_unwind_head(void);
-
 void ExceptionFrame_unwind(void * target_ptr){
   ExceptionFrame * target = target_ptr, * frame = _landable();
   int found = 0;
@@ -115,8 +107,6 @@ void ExceptionFrame_unwind(void * target_ptr){
   frame -> error_landing_head = Error_unwind_head();
   siglongjmp(frame -> env, 1);
 }
-
-void Error_restore_landing(void *, int);
 
 void x2c_exception_landed(ExceptionFrame * frame){
   if(! frame) return;
@@ -165,8 +155,6 @@ static ExceptionFrame * _landable(void){
   return at;
 }
 
-void Error_trim(void *, int);
-
 static void _frame_trim(ExceptionFrame * frame, int unwinding){
   if(! x2c_error_runtime_ready) return;
   Error_trim(frame -> error_handler_head, unwinding ? frame -> error_stack_height : Error_count());
@@ -176,10 +164,6 @@ _Noreturn static void _fatal(const char * message){
   fprintf(stderr, "Fatal: uncaught exception %s\n", message);
   exit(1);
 }
-
-int Error_handler_depth(void);
-
-void Error_restore(int, int);
 
 static void _cleanup_drain(X2CCleanup * watermark){
   ExceptionThreadState state = _thread();

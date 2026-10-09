@@ -26,10 +26,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static int width(int value);
 
-static Var Symbol_var(Symbol);
-
-List cons(Var, List);
-
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -45,8 +41,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
 static int width(int value){
   return _Generic(value, int : 32, long : 64, default : 0);
 }
-
-static Var int_var(int);
 
 int main(void){
   x2c_initialize();

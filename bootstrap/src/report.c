@@ -108,17 +108,9 @@ void report_configure(int quiet, int plain, Symbol color_mode, int verbose, int 
   report.color = _use_color(plain, color_mode, terminal);
 }
 
-int String_equal(String, String);
-
-String Env_get(String);
-
 static int _terminal(void){
   return isatty(fileno(stderr)) && ! String_equal(Env_get(_0), _1);
 }
-
-int String_is_digit(String);
-
-int atoi(const char *);
 
 static int _columns(void){
   struct winsize size;
@@ -127,8 +119,6 @@ static int _columns(void){
   int parsed = String_is_digit(columns) ? atoi(columns) : 0;
   return parsed >= 20 && parsed <= 1000 ? parsed : 80;
 }
-
-static int String_truth(String);
 
 static int _use_color(int plain, Symbol mode, int terminal){
   if(plain || mode == 29733220) return 0;
@@ -139,8 +129,6 @@ static int _use_color(int plain, Symbol mode, int terminal){
 int report_receipts(void){
   return report.receipts;
 }
-
-long atol(const char *);
 
 int report_make_owned(void){
   if(! _init_guard_) _file_init_();
@@ -173,10 +161,6 @@ static int _own_line(void){
   report.owner = report.terminal >= 0 && ! flock(report.terminal, LOCK_EX | LOCK_NB);
   return report.owner;
 }
-
-String String_capitalize(String);
-
-String Symbol_str(Symbol);
 
 static void _draw(Symbol phase, int done, int total, String detail){
   char bar[BAR_WIDTH + 1];
@@ -218,10 +202,6 @@ void report_line(Symbol tone, String line){
 }
 
 String report_duration(unsigned long microseconds);
-
-static Var String_var(String);
-
-static String int_str(int);
 
 void report_phase(Symbol phase, int count, String noun, int cached, unsigned long microseconds){
   if(! _init_guard_) _file_init_();
@@ -290,8 +270,6 @@ unsigned long long report_file_bytes(String path){
   if(! String_truth(path) || stat(path, & info) || ! S_ISREG(info.st_mode)) return 0;
   return(unsigned long long) info.st_size;
 }
-
-String String_printf(String, ...);
 
 String report_duration(unsigned long microseconds){
   if(! _init_guard_) _file_init_();

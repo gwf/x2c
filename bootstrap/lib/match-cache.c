@@ -72,8 +72,6 @@ static void MatchCache__remove(MatchCache cache, int slot);
 
 static void MatchCache__activate(MatchCache m, int slot, MatchLease * lease);
 
-static MatchPlan MatchLease__plan(MatchLease * m);
-
 static MatchCacheEntry * MatchLease__entry(MatchLease * lease);
 
 typedef struct MatchContextState{
@@ -174,8 +172,6 @@ static int MatchCache__transient(MatchCache cache, Var pattern, MatchLease * lea
   return plan -> status;
 }
 
-void Scope_push(Scope *);
-
 void x2c_cleanup_push(X2CCleanup *);
 
 void x2c_cleanup_leave(X2CCleanup *);
@@ -208,8 +204,6 @@ static MatchPlan MatchCache__prepare(MatchCache cache, Var pattern, const char *
 
 void MatchPlan_free(MatchPlan);
 
-void MatchPlan_raise_ineligible(const char *, const char *);
-
 static MatchPlan _unfenced(MatchPlan plan, const char * owner){
   if(plan -> status == MACHINE_INELIGIBLE){
     const char * reason = plan -> reason;
@@ -232,8 +226,6 @@ static void MatchCache__insert(MatchCache cache, int slot, unsigned long key, Ma
   cache -> size ++;
 }
 
-int MatchPlan_borrowable(Var, int);
-
 static int MatchCache__admitted(MatchCache cache, Var pattern){
   unsigned long key = pattern.u64;
   if(! key) return 0;
@@ -248,8 +240,6 @@ static int MatchCache__admitted(MatchCache cache, Var pattern){
   cache -> admitted_memo[slot] = key;
   return 1;
 }
-
-unsigned long Pool_epoch(void);
 
 static int MatchCache__resync(MatchCache cache){
   unsigned long epoch = Pool_epoch();
@@ -387,7 +377,7 @@ void MatchLease_release(MatchLease * lease){
   lease -> active = 0;
 }
 
-static MatchPlan MatchLease__plan(MatchLease * m){
+MatchPlan MatchLease_plan(MatchLease * m){
   return m -> transient_plan ? m -> transient_plan : m -> cache -> entries[m -> slot].plan;
 }
 
@@ -397,8 +387,6 @@ static MatchCacheEntry * MatchLease__entry(MatchLease * lease){
   MatchCacheEntry * entry = & cache -> entries[lease -> slot];
   return entry -> occupied && entry -> generation == lease -> generation ? entry : NULL;
 }
-
-int MatchPlan_try_capture(MatchPlan, List, MatchCaptureBuffer *);
 
 int MatchCache_try_capture(MatchCache cache, List input, Var pattern, MatchCaptureBuffer * captures, const char * owner){
   MatchLease _x2c_macro_storage_0;
@@ -416,7 +404,7 @@ int MatchCache_try_capture(MatchCache cache, List input, Var pattern, MatchCaptu
     ;
     x2c_cleanup_push(& _x2c_defer_record_1);
     {
-      MatchPlan plan = _x2c_macro_status_0 == MACHINE_PREPARED ? MatchLease__plan(_x2c_macro_lease_0) : NULL;
+      MatchPlan plan = _x2c_macro_status_0 == MACHINE_PREPARED ? MatchLease_plan(_x2c_macro_lease_0) : NULL;
       {
         int _x2c_return_value_0 = plan && MatchPlan_try_capture(plan, input, captures) == 1;
         {
@@ -431,8 +419,6 @@ int MatchCache_try_capture(MatchCache cache, List input, Var pattern, MatchCaptu
   }
 
 }
-
-int MatchPlan_try_match(MatchPlan, List, List *);
 
 int MatchCache_try_match(MatchCache cache, List input, Var pattern, List * out_bindings, const char * owner){
   MatchLease _x2c_macro_storage_1;
@@ -450,7 +436,7 @@ int MatchCache_try_match(MatchCache cache, List input, Var pattern, List * out_b
     ;
     x2c_cleanup_push(& _x2c_defer_record_2);
     {
-      MatchPlan plan = _x2c_macro_status_1 == MACHINE_PREPARED ? MatchLease__plan(_x2c_macro_lease_1) : NULL;
+      MatchPlan plan = _x2c_macro_status_1 == MACHINE_PREPARED ? MatchLease_plan(_x2c_macro_lease_1) : NULL;
       {
         int _x2c_return_value_1 = plan && MatchPlan_try_match(plan, input, out_bindings) == 1;
         {
@@ -465,8 +451,6 @@ int MatchCache_try_match(MatchCache cache, List input, Var pattern, List * out_b
   }
 
 }
-
-int MatchPlan_try_search(MatchPlan, List, Var *, List *);
 
 int MatchCache_try_search(MatchCache cache, List input, Var pattern, Var * out_match, List * out_bindings, const char * owner){
   MatchLease _x2c_macro_storage_2;
@@ -484,7 +468,7 @@ int MatchCache_try_search(MatchCache cache, List input, Var pattern, Var * out_m
     ;
     x2c_cleanup_push(& _x2c_defer_record_3);
     {
-      MatchPlan plan = _x2c_macro_status_2 == MACHINE_PREPARED ? MatchLease__plan(_x2c_macro_lease_2) : NULL;
+      MatchPlan plan = _x2c_macro_status_2 == MACHINE_PREPARED ? MatchLease_plan(_x2c_macro_lease_2) : NULL;
       {
         int _x2c_return_value_2 = plan && MatchPlan_try_search(plan, input, out_match, out_bindings) == 1;
         {
@@ -499,8 +483,6 @@ int MatchCache_try_search(MatchCache cache, List input, Var pattern, Var * out_m
   }
 
 }
-
-int MatchPlan_search(MatchPlan, List, List *);
 
 int MatchCache_search(MatchCache cache, List input, Var pattern, List * out_results, const char * owner){
   MatchLease _x2c_macro_storage_3;
@@ -518,7 +500,7 @@ int MatchCache_search(MatchCache cache, List input, Var pattern, List * out_resu
     ;
     x2c_cleanup_push(& _x2c_defer_record_4);
     {
-      MatchPlan plan = _x2c_macro_status_3 == MACHINE_PREPARED ? MatchLease__plan(_x2c_macro_lease_3) : NULL;
+      MatchPlan plan = _x2c_macro_status_3 == MACHINE_PREPARED ? MatchLease_plan(_x2c_macro_lease_3) : NULL;
       List results = NULL;
       if(plan) MatchPlan_search(plan, input, &(results));
       (* out_results) = results;
@@ -537,8 +519,6 @@ int MatchCache_search(MatchCache cache, List input, Var pattern, List * out_resu
 
 }
 
-int MatchPlan_try_match_replace(MatchPlan, List, Var, Var *);
-
 int MatchCache_try_match_replace(MatchCache cache, List input, Var pattern, Var template, Var * out, const char * owner){
   MatchLease _x2c_macro_storage_4;
   MatchLease * _x2c_macro_lease_4 = & _x2c_macro_storage_4;
@@ -555,7 +535,7 @@ int MatchCache_try_match_replace(MatchCache cache, List input, Var pattern, Var 
     ;
     x2c_cleanup_push(& _x2c_defer_record_5);
     {
-      MatchPlan plan = _x2c_macro_status_4 == MACHINE_PREPARED ? MatchLease__plan(_x2c_macro_lease_4) : NULL;
+      MatchPlan plan = _x2c_macro_status_4 == MACHINE_PREPARED ? MatchLease_plan(_x2c_macro_lease_4) : NULL;
       {
         int _x2c_return_value_4 = plan && MatchPlan_try_match_replace(plan, input, template, out) == 1;
         {
@@ -570,8 +550,6 @@ int MatchCache_try_match_replace(MatchCache cache, List input, Var pattern, Var 
   }
 
 }
-
-int MatchPlan_search_replace(MatchPlan, List, Var, List *);
 
 int MatchCache_search_replace(MatchCache cache, List input, Var pattern, Var template, List * out, const char * owner){
   MatchLease _x2c_macro_storage_5;
@@ -589,7 +567,7 @@ int MatchCache_search_replace(MatchCache cache, List input, Var pattern, Var tem
     ;
     x2c_cleanup_push(& _x2c_defer_record_6);
     {
-      MatchPlan plan = _x2c_macro_status_5 == MACHINE_PREPARED ? MatchLease__plan(_x2c_macro_lease_5) : NULL;
+      MatchPlan plan = _x2c_macro_status_5 == MACHINE_PREPARED ? MatchLease_plan(_x2c_macro_lease_5) : NULL;
       List result = input;
       int answered = plan && MatchPlan_search_replace(plan, input, template, &(result)) >= 0;
       (* out) = result;
@@ -609,8 +587,6 @@ int MatchCache_search_replace(MatchCache cache, List input, Var pattern, Var tem
 }
 
 MatchCache MatchCache_new(int capacity);
-
-void x2c_match_initialize(void);
 
 MatchCache MatchCache_current(void){
   MatchCache * slot = _default_slot();
@@ -632,8 +608,6 @@ void MatchCache_flush_default(void){
   MatchCache_dispose((* slot));
   * slot = NULL;
 }
-
-void * Scope_malloc(size_t);
 
 void * MatchCache_context_open(void){
   MatchContextState state = Scope_malloc(sizeof(struct MatchContextState));
@@ -665,10 +639,6 @@ void x2c_match_thread_release(void){
 }
 
 static Var int_var(int);
-
-Scope Scope_new_named(const char *);
-
-void * Scope_calloc(size_t, size_t);
 
 MatchCache MatchCache_new(int capacity){
   if(capacity <= 0){
@@ -723,8 +693,6 @@ MatchCache MatchCache_new(int capacity){
   return cache;
 }
 
-void Scope_destroy(Scope);
-
 void MatchCache_dispose(MatchCache cache){
   if(! cache) return;
   if(cache -> active_leases){
@@ -738,8 +706,6 @@ void MatchCache_dispose(MatchCache cache){
   }
   Scope_destroy(cache -> scope);
 }
-
-void Scope_pop(void);
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   Scope_pop();

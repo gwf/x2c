@@ -12,16 +12,6 @@ _x2c_defer_env_0;
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
-Box Box_new(int);
-
-void x2c_cleanup_push(X2CCleanup *);
-
-Var Box_var(Box);
-
-String Var_repr(Var);
-
-void x2c_cleanup_leave(X2CCleanup *);
-
 #include "exception.h"
 
 
@@ -58,8 +48,6 @@ int main(void){
   }
 
 }
-
-void Box_cleanup(Box);
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;

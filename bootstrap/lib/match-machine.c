@@ -226,14 +226,6 @@ static void MatchMachine__tag(MatchMachine * m, const MachineWord * w){
   if(! Var_is((* m).value, tag))(* m).pc =(* w).target;
 }
 
-int Var_is_atom_binder(Var);
-
-int Var_is_list_binder(Var);
-
-int Var_is_binder(Var);
-
-int Var_is_match_op(Var);
-
 static int _is_kind(Var value, int kind){
   switch(kind){
     case MACHINE_KIND_ATOM_BINDER : return Var_is_atom_binder(value);
@@ -419,15 +411,7 @@ static void MatchMachine__eq_prefix(MatchMachine * m, const MachineWord * w){
   if(! MatchMachine__sequence_equal(&((* m)), (* w).a, * MatchMachine__cursor(&((* m)), (* w).b), length, 0))(* m).pc =(* w).target;
 }
 
-static int MachineSlot_final_equal(MachineSlot *, List, MachineStats *);
-
-static int MachineSlot_prefix_equal(MachineSlot *, List, int, MachineStats *);
-
 List MatchMachine_materialize_span(MatchMachine * m, MachineSpan span);
-
-Array Array_new(void);
-
-Var Array_push(Array, Var);
 
 List Array_list_free(Array);
 
@@ -491,8 +475,6 @@ static int MatchMachine__copy_span(MatchMachine * m, MachineSpan span){
   }
   return List_equal(at, span.end);
 }
-
-void * Scope_realloc(void *, size_t);
 
 static void MatchMachine__ensure_scratch(MatchMachine * m, int length){
   if(length <=(* m).scratch_capacity) return;
@@ -606,8 +588,6 @@ int MatchMachine_clean(MatchMachine * m){
   if((* m).running ||(* m).program.code ||(* m).fp ||(* m).undo_count ||(* m).slot_count) return 0;
   return(* m).status == 598794 && Var_is_void((* m).error);
 }
-
-void Scope_free(void *);
 
 void MatchMachine_dispose(MatchMachine * m){
   if((* m).scratch) Scope_free((* m).scratch);

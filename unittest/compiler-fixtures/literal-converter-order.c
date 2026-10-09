@@ -12,14 +12,10 @@ static int observed;
 
 static Var shadowed(List value);
 
-static Var int_var(int);
-
 Var Score_var(Score value){
   observed = observed * 10 +(int) value;
   return int_var((int) value);
 }
-
-static String int_str(int);
 
 String Score_str(Score value){
   observed = observed * 10 +(int) value;
@@ -31,26 +27,10 @@ Packed int_packed(int value){
   return int_var(value);
 }
 
-static Var List_var(List);
-
 static Var shadowed(List value){
   observed = observed * 10 + 1;
   return List_var(value);
 }
-
-int List_len(List);
-
-Array Array_update_n(Array, unsigned, ...);
-
-Array Array_new(void);
-
-Map Map_update_n(Map, unsigned, ...);
-
-Map Map_new(void);
-
-unsigned Map_len(Map);
-
-static Var String_var(String);
 
 int main(void){
   x2c_initialize();

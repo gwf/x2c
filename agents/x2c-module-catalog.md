@@ -8,8 +8,8 @@ non-static function definition discovered in source order. It does
 not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
-- Compiler modules: 52
-- Runtime modules: 75
+- Compiler modules: 53
+- Runtime modules: 77
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
 ## Compiler modules
@@ -116,9 +116,12 @@ source-ordered shallow symbol collection and replay.
 
 Public functions:
 
-`Compiler.collect_symbols`, `Compiler.configure_package`,
-`collect_resolve_include`, `Compiler.include_typedef_names`,
-`Compiler.include_type_dependencies`, `Compiler.linked_meta_provider_current`,
+`Compiler.collect_symbols`, `compiler_prelude_sources`,
+`Compiler.configure_package`, `collect_resolve_include`,
+`Compiler.include_typedef_names`, `Compiler.include_type_dependencies`,
+`Compiler.include_function_declarations`,
+`Compiler.runtime_function_declarations`,
+`Compiler.linked_meta_provider_current`,
 `Compiler.linked_meta_definitions_current`, `Compiler.complete_meta_hashes`,
 `Compiler.meta_provider_hashes`, `Compiler.add_linked_meta_provider_hashes`,
 `Compiler.name_meta_provider_bindings`, `Compiler.publishes_typedef`,
@@ -173,6 +176,14 @@ Public functions:
 `Compiler.add_translation_dependency`,
 `Compiler.merge_translation_dependencies`, `Compiler.new`,
 `Compiler.new_shared`, `Compiler.free_lisp`
+
+### [src/component-access.x](../src/component-access.x)
+
+Array/Map mutation policy; getter resolution remains with admission.
+
+Public functions:
+
+None. This module has no non-static function definitions.
 
 ### [src/deps.x](../src/deps.x)
 
@@ -331,9 +342,10 @@ shipped `meta` code compiled into the compiler.
 Public functions:
 
 `x2c_expr_field`, `x2c_expr_cast`, `x2c_decl_make`, `x2c_param_make`,
-`x2c_type_members`, `_dedent_expand`, `_macros_location`, `_tag_decode_group`,
-`_tag_decode_groups`, `_tag_id_checks`, `linked_meta_targets`,
-`linked_meta_hashes`
+`x2c_type_members`, `register_rewrite`, `_dedent_expand`, `_macros_location`,
+`_tag_decode_group`, `_tag_decode_groups`, `_tag_id_checks`,
+`collection_store`, `collection_update`, `collection_prefix`,
+`collection_postfix`, `linked_meta_targets`, `linked_meta_hashes`
 
 ### [src/literals.x](../src/literals.x)
 
@@ -365,6 +377,7 @@ Public functions:
 `Compiler.record_compile_time_effect`, `Compiler.install_compile_time_effects`,
 `Compiler.macro_form_is_definition`, `Compiler.local_macro_form_is_definition`,
 `Compiler.keyword_form_is_definition`, `Compiler.parse_keyword_definition`,
+`Compiler.has_rewrites`, `Compiler.rewrite`, `Compiler.lower_rewrite`,
 `Compiler.macro_starts_target_at`, `Compiler.macro_invocation_collection`,
 `Compiler.skip_macro_invocation`, `Compiler.skip_named_type_declaration`,
 `Compiler.macro_targets_unit`, `Compiler.try_parse_macro_target_at`,
@@ -376,17 +389,17 @@ Public functions:
 `Compiler.land_quotation`, `Compiler.macro_value_literal`,
 `Compiler.try_parse_macro_pattern`, `Compiler.macro_pattern_at`,
 `Compiler.try_parse_macro_subpattern`, `Compiler.capture_macro_value`,
-`Compiler.take_code_value`, `Compiler.ensure_macro_lisp`,
-`Compiler.parse_macro_lisp_top_level`, `Compiler.parse_macro_lisp_shallow`,
-`Compiler.evaluate_declaration_effect`, `Compiler.parse_macro_lisp_expression`,
-`Compiler.lift_macro_lisp_expression`, `Compiler.bind_macro_lisp_statement`,
-`Compiler.source_path`, `Compiler.open_macro_library`,
-`Compiler.publish_macro_library`, `Compiler.inherits_import`,
-`Compiler.record_comptime`, `Compiler.inherit_library_comptime`,
-`macro_library_filling`, `Compiler.shared_definitions`,
-`Compiler.shares_meta_definition`, `Compiler.install_builtin_macros`,
-`Compiler.bind_meta_operation`, `Compiler.report_lisp_failure`,
-`macro_library_reset`
+`Compiler.take_code_value`, `Compiler.bind_code_value`,
+`Compiler.ensure_macro_lisp`, `Compiler.parse_macro_lisp_top_level`,
+`Compiler.parse_macro_lisp_shallow`, `Compiler.evaluate_declaration_effect`,
+`Compiler.parse_macro_lisp_expression`, `Compiler.lift_macro_lisp_expression`,
+`Compiler.bind_macro_lisp_statement`, `Compiler.source_path`,
+`Compiler.open_macro_library`, `Compiler.publish_macro_library`,
+`Compiler.inherits_import`, `Compiler.record_comptime`,
+`Compiler.inherit_library_comptime`, `macro_library_filling`,
+`Compiler.shared_definitions`, `Compiler.shares_meta_definition`,
+`Compiler.install_builtin_macros`, `Compiler.bind_meta_operation`,
+`Compiler.report_lisp_failure`, `macro_library_reset`
 
 ### [src/main.x](../src/main.x)
 
@@ -416,8 +429,9 @@ the compiler's side of the project meta helper.
 
 Public functions:
 
-`Compiler.meta_helper_call`, `Compiler.use_meta_helper`,
-`Compiler.begin_meta_unit`, `Compiler.stop_meta_helper`
+`Compiler.report_meta_error`, `Compiler.meta_helper_call`,
+`Compiler.use_meta_helper`, `Compiler.begin_meta_unit`,
+`Compiler.stop_meta_helper`
 
 ### [src/meta-native.x](../src/meta-native.x)
 
@@ -426,8 +440,9 @@ meta functions and the native code they call.
 Public functions:
 
 `Compiler.install_meta_function`, `Compiler.install_collected_meta_function`,
-`Compiler.install_meta_declaration`, `Compiler.evaluate_meta_expression`,
-`Compiler.evaluate_meta_statement`, `Compiler.run_meta_call`,
+`Compiler.matches_macro`, `Compiler.install_meta_declaration`,
+`Compiler.evaluate_meta_expression`, `Compiler.evaluate_meta_statement`,
+`Compiler.run_meta_call`, `Compiler.apply_meta_function`,
 `Compiler.record_project_meta_effect`, `Compiler.install_project_meta_effect`,
 `Compiler.bind_project_meta`, `Compiler.project_meta_uses_linked`,
 `Compiler.record_native_meta_effect`, `Compiler.install_native_meta_effects`,
@@ -456,10 +471,13 @@ the compiler's answers to `lib/meta.x` operations.
 
 Public functions:
 
-`MetaContext.current`, `Compiler.expanding`, `x2c_syntax_type`,
-`x2c_protocol_member`, `x2c_method_resolve`, `builtin_foreach_bindings`,
-`builtin_foreach_reference`, `x2c_type_is_integral`, `x2c_type_is_pointer`,
-`x2c_type_element`, `x2c_type_parameters`, `x2c_type_return`, `x2c_type_parts`,
+`MetaContext.current`, `Compiler.expanding`, `Type.is_named`, `Type.numeric`,
+`Type.is_text`, `Type.protocol_member`, `Code.type`, `Code.value`,
+`Code.register_rewrite`, `Code.register_after_initialization`,
+`x2c_syntax_type`, `x2c_protocol_member`, `x2c_method_resolve`,
+`builtin_foreach_bindings`, `builtin_foreach_reference`,
+`x2c_type_is_integral`, `x2c_type_is_pointer`, `x2c_type_element`,
+`x2c_type_parameters`, `x2c_type_return`, `x2c_type_parts`,
 `x2c_type_reverse_name`, `x2c_type_resolve`, `x2c_type_layout`,
 `x2c_type_is_value`, `x2c_type_tag_name`, `x2c_type_fields`,
 `x2c_binding_spelling`, `x2c_ident`, `builtin_foreach_unique`,
@@ -467,8 +485,8 @@ Public functions:
 `binding_native_type`, `binding_literal_list`, `x2c_source_text`,
 `x2c_embed_text`, `x2c_literal_value`, `builtin_class_location`,
 `x2c_invocation_file`, `x2c_invocation_line`, `x2c_invocation_column`,
-`x2c_diagnostic_fail`, `x2c_diagnostic_warn`, `meta_type_description`,
-`meta_source_description`, `builtin_foreach_complete`,
+`x2c_diagnostic_fail`, `x2c_diagnostic_fail_at`, `x2c_diagnostic_warn`,
+`meta_type_description`, `meta_source_description`, `builtin_foreach_complete`,
 `builtin_foreach_collection`, `MetaContext.reject`,
 `Compiler.bind_sdk_primitives`
 
@@ -514,7 +532,7 @@ Public functions:
 `Compiler.parse_complex_identifier`, `Compiler.package_alias_spelling`,
 `Compiler.parse_basic_identifier`, `Compiler.parse_optional_identifier`,
 `Compiler.parse_function_definition`, `Compiler.parse_function_target`,
-`Compiler.finish_managed_declaration`, `Compiler.bind_syntax`,
+`Compiler.finish_initializers`, `Compiler.bind_syntax`,
 `Compiler.bind_callable_body`, `Compiler.finish_foreign_alias`
 
 ### [src/preprocess.x](../src/preprocess.x)
@@ -684,23 +702,8 @@ x2c semantic types.
 
 Public functions:
 
-`Var.type`, `Type.list`, `List.type`, `List.type_from_ast`,
-`Type.declaration_parts`, `Type.declaration_ast`, `Type.parameter_ast`,
-`Symbol.is_storage_class`, `Symbol.is_inline`, `Symbol.is_type_qualifier`,
-`Symbol.is_type_modifier`, `Symbol.is_builtin_type`, `Type.is_aggregate`,
-`Type.is_aggregate_tag`, `Type.is_aggregate_tag_body`, `Type.is_enum`,
-`Type.is_enum_tag`, `Type.is_enum_tag_body`, `Type.tag`, `Type.body`,
-`Type.is_pointer`, `Type.is_reference`, `Type.is_array`, `Type.is_function`,
-`Type.is_bitfield`, `Type.dereference`, `Type.qualify`, `Type.reference`,
-`Type.apply`, `Type.function_parts`, `Type.is_static`, `Type.is_inline`,
-`Type.is_extern`, `Type.is_threaded`, `Type.is_typedef`, `Type.base_type`,
-`Type.canonicalize`, `Type.declared`, `Type.discards_qualifiers`,
-`Type.is_char_pointer_like`, `Type.is_builtin`, `Type.is_typedef_name`,
-`Type.is_bare_typedef_name`, `Type.is_number`, `Type.is_integral`,
-`Type.scalar`, `Type.scalar_tag`, `Type.var_numeric_extractor`,
-`Type.var_numeric_update_helper`, `Type.promote`, `Type.widest`,
-`Type.numeric_literal`, `Type.numeric_literal_value`,
-`Type.integer_literal_magnitude`, `Type.var_tag`, `Type.fixed_var_tag`,
+`List.type_from_ast`, `Type.declaration_parts`, `Type.declaration_ast`,
+`Type.parameter_ast`, `Type.var_tag`, `Type.fixed_var_tag`,
 `Type.var_converter`, `Type.var_tag_row`, `Type.register_var_tag`,
 `Type.register_var_adoption`, `Type.begin_unit`, `Type.end_unit`
 
@@ -1142,7 +1145,8 @@ Public functions:
 `Macro_close`, `Macro_apply`, `Macro.inserted`, `Macro.declared`,
 `Macro.inserted_items`, `Macro.typed`, `Macro.subject`, `Macro.use_subject`,
 `Macro_pattern`, `Macro.binder`, `Macro.number_type`, `Macro.number_literal`,
-`Macro_case_pattern`, `Macro_case_capture_at`
+`Macro_case_pattern`, `Macro_case_capture_at`, `Macro.matcher`,
+`MacroMatcher.matches`, `Macro.matches`
 
 ### [lib/map-generics.x](../lib/map-generics.x)
 
@@ -1172,12 +1176,12 @@ caches of prepared Match plans.
 
 Public functions:
 
-`MatchCache.acquire`, `MatchLease.release`, `MatchCache.try_capture`,
-`MatchCache.try_match`, `MatchCache.try_search`, `MatchCache.search`,
-`MatchCache.try_match_replace`, `MatchCache.search_replace`,
-`MatchCache.current`, `MatchCache.flush_default`, `MatchCache.context_open`,
-`MatchCache.context_close`, `x2c_match_thread_release`, `MatchCache.new`,
-`MatchCache.dispose`
+`MatchCache.acquire`, `MatchLease.release`, `MatchLease.plan`,
+`MatchCache.try_capture`, `MatchCache.try_match`, `MatchCache.try_search`,
+`MatchCache.search`, `MatchCache.try_match_replace`,
+`MatchCache.search_replace`, `MatchCache.current`, `MatchCache.flush_default`,
+`MatchCache.context_open`, `MatchCache.context_close`,
+`x2c_match_thread_release`, `MatchCache.new`, `MatchCache.dispose`
 
 ### [lib/match-machine.x](../lib/match-machine.x)
 
@@ -1316,6 +1320,14 @@ Public functions:
 `RegexMatch.capture`, `RegexMatch.getindex`, `RegexCapture.index`,
 `RegexCapture.name`, `RegexCapture.matched`, `RegexCapture.text`,
 `RegexCapture.start`, `RegexCapture.end`, `Var.regexcapture`, `Var.regexmatch`
+
+### [lib/rewrite.x](../lib/rewrite.x)
+
+Macro-pattern registration for compiler rewrites.
+
+Public functions:
+
+None. This module has no non-static function definitions.
 
 ### [lib/scan.x](../lib/scan.x)
 
@@ -1484,6 +1496,28 @@ Public functions:
 `Var.token`, `Token.var`, `Token.hash`, `Token.equal`, `Token.str`,
 `Token.repr`, `Tokenizer.scan`, `Tokenizer.tokenize`, `Tokenizer.do_scanner`,
 `Tokenizer.error`, `Tokenizer.init`, `Tokenizer.next`, `Tokenizer.status`
+
+### [lib/type.x](../lib/type.x)
+
+semantic type values and their structural operations.
+
+Public functions:
+
+`Var.type`, `Type.list`, `List.type`, `Symbol.is_storage_class`,
+`Symbol.is_inline`, `Symbol.is_type_qualifier`, `Symbol.is_type_modifier`,
+`Symbol.is_builtin_type`, `Type.is_aggregate`, `Type.is_aggregate_tag`,
+`Type.is_aggregate_tag_body`, `Type.is_enum`, `Type.is_enum_tag`,
+`Type.is_enum_tag_body`, `Type.tag`, `Type.body`, `Type.is_pointer`,
+`Type.is_reference`, `Type.is_array`, `Type.is_function`, `Type.is_bitfield`,
+`Type.dereference`, `Type.qualify`, `Type.reference`, `Type.apply`,
+`Type.function_parts`, `Type.is_static`, `Type.is_inline`, `Type.is_extern`,
+`Type.is_threaded`, `Type.is_typedef`, `Type.base_type`, `Type.canonicalize`,
+`Type.declared`, `Type.discards_qualifiers`, `Type.is_char_pointer_like`,
+`Type.is_builtin`, `Type.is_typedef_name`, `Type.is_bare_typedef_name`,
+`Type.is_number`, `Type.is_integral`, `Type.scalar`, `Type.scalar_tag`,
+`Type.var_numeric_extractor`, `Type.var_numeric_update_helper`, `Type.promote`,
+`Type.widest`, `Type.numeric_literal`, `Type.numeric_literal_value`,
+`Type.integer_literal_magnitude`
 
 ### [lib/typed-array.x](../lib/typed-array.x)
 

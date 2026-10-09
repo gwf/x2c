@@ -9,8 +9,6 @@ typedef Var Packed;
 
 static int Var_vec(Var value);
 
-int Var_truth(Var);
-
 static int Var_vec(Var value){
   return Var_truth(value) + 7;
 }

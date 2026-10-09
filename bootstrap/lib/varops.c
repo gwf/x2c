@@ -97,14 +97,6 @@ _Noreturn static void _bad_bits(Var value);
 
 _Noreturn static void _bad_side(Var value, Symbol side);
 
-static Var Symbol_var(Symbol);
-
-static Var String_var(String);
-
-List cons(Var, List);
-
-static Var List_var(List);
-
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -414,8 +406,6 @@ static List _update_rows(void){
   return _288;
 }
 
-static List Var_list(Var);
-
 Var List_assoc(List, Var);
 
 static List _update_row(List id){
@@ -436,12 +426,10 @@ default: break;
 return NULL;
 }
 
-Var List_getindex(List, int);
 static Symbol _update_tag(List id){
   return Var_symbol(List_getindex(_update_row(id), 0));
 }
 
-static String Var_string(Var);
 static String _update_boxer(List id){
   return Var_string(List_getindex(_update_row(id), 1));
 }
@@ -465,9 +453,6 @@ static List _update_cast_out(List id){
   return Var_list(List_car(Var_cdr(List_getindex(_update_row(id), 4))));
 }
 
-static Var Var_box_i8(char);
-int Var_is_void(Var);
-long Var_integer(Var);
 #include "error.h"
 
 
@@ -498,8 +483,6 @@ signed char x2c_var_update_schar(volatile signed char * lhs, Symbol op, Var rhs)
   return _x2c_macro_value_1;
 }
 
-static Var Var_box_u8(uchar);
-
 uchar x2c_var_update_u8(volatile uchar * lhs, Symbol op, Var rhs){
   if(! lhs){
     {
@@ -515,8 +498,6 @@ uchar x2c_var_update_u8(volatile uchar * lhs, Symbol op, Var rhs){
   (lhs)[0] = _x2c_macro_value_2;
   return _x2c_macro_value_2;
 }
-
-static Var Var_box_i16(short);
 
 short x2c_var_update_i16(volatile short * lhs, Symbol op, Var rhs){
   if(! lhs){
@@ -534,8 +515,6 @@ short x2c_var_update_i16(volatile short * lhs, Symbol op, Var rhs){
   return _x2c_macro_value_3;
 }
 
-static Var Var_box_u16(ushort);
-
 ushort x2c_var_update_u16(volatile ushort * lhs, Symbol op, Var rhs){
   if(! lhs){
     {
@@ -551,8 +530,6 @@ ushort x2c_var_update_u16(volatile ushort * lhs, Symbol op, Var rhs){
   (lhs)[0] = _x2c_macro_value_4;
   return _x2c_macro_value_4;
 }
-
-static Var Var_box_i32_bits(unsigned);
 
 int x2c_var_update_i32(volatile int * lhs, Symbol op, Var rhs){
   if(! lhs){
@@ -570,8 +547,6 @@ int x2c_var_update_i32(volatile int * lhs, Symbol op, Var rhs){
   return _x2c_macro_value_5;
 }
 
-static Var Var_box_u32(unsigned);
-
 uint x2c_var_update_u32(volatile uint * lhs, Symbol op, Var rhs){
   if(! lhs){
     {
@@ -587,10 +562,6 @@ uint x2c_var_update_u32(volatile uint * lhs, Symbol op, Var rhs){
   (lhs)[0] = _x2c_macro_value_6;
   return _x2c_macro_value_6;
 }
-
-Var Var_box_long(long);
-
-long Var_long_value(Var);
 
 long x2c_var_update_long(volatile long * lhs, Symbol op, Var rhs){
   if(! lhs){
@@ -608,10 +579,6 @@ long x2c_var_update_long(volatile long * lhs, Symbol op, Var rhs){
   return _x2c_macro_value_7;
 }
 
-Var Var_box_ulong(unsigned long);
-
-unsigned long Var_ulong_value(Var);
-
 ulong x2c_var_update_ulong(volatile ulong * lhs, Symbol op, Var rhs){
   if(! lhs){
     {
@@ -627,10 +594,6 @@ ulong x2c_var_update_ulong(volatile ulong * lhs, Symbol op, Var rhs){
   (lhs)[0] = _x2c_macro_value_8;
   return _x2c_macro_value_8;
 }
-
-Var Var_box_long_long(long long);
-
-long long Var_long_long_value(Var);
 
 long long x2c_var_update_long_long(volatile long long * lhs, Symbol op, Var rhs){
   if(! lhs){
@@ -648,10 +611,6 @@ long long x2c_var_update_long_long(volatile long long * lhs, Symbol op, Var rhs)
   return _x2c_macro_value_9;
 }
 
-Var Var_box_ulong_long(unsigned long long);
-
-unsigned long long Var_ulong_long_value(Var);
-
 unsigned long long x2c_var_update_ulong_long(volatile unsigned long long * lhs, Symbol op, Var rhs){
   if(! lhs){
     {
@@ -667,10 +626,6 @@ unsigned long long x2c_var_update_ulong_long(volatile unsigned long long * lhs, 
   (lhs)[0] = _x2c_macro_value_10;
   return _x2c_macro_value_10;
 }
-
-static Var Var_box_f32(float);
-
-static float Var_decode_f32(Var);
 
 float x2c_var_update_f32(volatile float * lhs, Symbol op, Var rhs){
   if(! lhs){
@@ -688,10 +643,6 @@ float x2c_var_update_f32(volatile float * lhs, Symbol op, Var rhs){
   return _x2c_macro_value_11;
 }
 
-static Var Var_box_f64(double);
-
-static double Var_decode_f64(Var);
-
 double x2c_var_update_f64(volatile double * lhs, Symbol op, Var rhs){
   if(! lhs){
     {
@@ -708,10 +659,6 @@ double x2c_var_update_f64(volatile double * lhs, Symbol op, Var rhs){
   return _x2c_macro_value_12;
 }
 
-Var Var_box_long_double(long double);
-
-long double Var_long_double_value(Var);
-
 long double x2c_var_update_long_double(volatile long double * lhs, Symbol op, Var rhs){
   if(! lhs){
     {
@@ -727,10 +674,6 @@ long double x2c_var_update_long_double(volatile long double * lhs, Symbol op, Va
   (lhs)[0] = _x2c_macro_value_13;
   return _x2c_macro_value_13;
 }
-
-unsigned long long Var_width_mask(int);
-
-long long Var_signed_from_bits(unsigned long long, int);
 
 static inline unsigned long long _integer_raw(Symbol _x2c_macro_op_0, unsigned long long _x2c_macro_a_0, unsigned long long _x2c_macro_b_0, int _x2c_macro_bits_0, int _x2c_macro_unsigned_value_0){
   unsigned long long _x2c_macro_mask_0 = Var_width_mask(_x2c_macro_bits_0), _x2c_macro_raw_0;
@@ -813,10 +756,6 @@ Var Var_div(Var lhs, Var rhs);
 
 Var Var_mod(Var lhs, Var rhs);
 
-int Var_equal(Var, Var);
-
-int Var_compare(Var, Var);
-
 Var Var_binary(Var lhs, Symbol op, Var rhs){
   switch(op){
     case 56 : return Var_add(lhs, rhs);
@@ -890,16 +829,6 @@ Var Var_mod(Var lhs, Var rhs){
   return _protocol_arithmetic(lhs, 27592, 75, rhs);
 }
 
-static int Var_is_row(Var, unsigned, unsigned long, unsigned long);
-
-String String_add(String, String);
-
-int Var_try_dispatch_binary(Var, Symbol, Var, Var *);
-
-Symbol Var_kind(Var);
-
-Symbol Var_tag(Var);
-
 static Var _protocol_arithmetic(Var lhs, Symbol member, Symbol op, Var rhs){
   Var result = _fast_numeric(op, lhs, rhs);
   if(result.u64 != VAR_VOID_BITS) return result;
@@ -924,10 +853,6 @@ static Var _protocol_arithmetic(Var lhs, Symbol member, Symbol op, Var rhs){
   return _general_numeric_binary(op, lhs, rhs);
 }
 
-int Var_try_dispatch_unary(Var, Symbol, Var *);
-
-static Var int_var(int);
-
 Var Var_neg(Var value){
   _valid_operand(value);
   if(Var_is_void(value)){
@@ -948,8 +873,6 @@ Var Var_neg(Var value){
   }
   return Var_sub(int_var(0), value);
 }
-
-static unsigned Var_payload32(Var);
 
 static Var _fast_numeric(Symbol op, Var lhs, Var rhs){
   if(! _numeric_operator(op)) return((void) 0, Void);
@@ -999,8 +922,6 @@ static inline Symbol _fast_numeric_tag(Var lhs, Var rhs){
   return left_f64 && right_f64 ? 3356265 : 0;
 }
 
-static Var unsigned_var(unsigned);
-
 static Var _fast_i32(Symbol op, unsigned a, unsigned b, int unsigned_value){
   if((op == 15481 || op == 15997) && b >= 32){
     static const X2CErrorSite _x2c_error_site_22 = {.file = "../../lib/varops.x",.function = "_fast_i32",.line = 365};
@@ -1010,8 +931,6 @@ static Var _fast_i32(Symbol op, unsigned a, unsigned b, int unsigned_value){
   unsigned raw = _integer_raw(op, a, b, 32, unsigned_value);
   return unsigned_value ? Var_box_u32(raw) : Var_box_i32_bits(raw);
 }
-
-void Var_numeric_decode(Var, X2CVarNumeric *);
 
 static Var _general_numeric_binary(Symbol op, Var lhs, Var rhs){
   X2CVarNumeric left, right;
@@ -1041,10 +960,6 @@ static Var _general_numeric_binary(Symbol op, Var lhs, Var rhs){
   return _integer_binary(op, left, right);
 }
 
-int Var_numeric_info(Symbol, X2CVarNumericInfo *);
-
-Var Var_integer_box(Symbol, unsigned long long);
-
 static Var _integer_binary(Symbol op, X2CVarNumeric lhs, X2CVarNumeric rhs){
   Symbol tag = _integer_result_tag(&(lhs), &(rhs));
   X2CVarNumericInfo info;
@@ -1056,8 +971,6 @@ static Var _integer_binary(Symbol op, X2CVarNumeric lhs, X2CVarNumeric rhs){
   unsigned long long raw = _integer_raw(op, _raw_for_width(&(lhs), info.bits), _raw_for_width(&(rhs), info.bits), info.bits, info.unsigned_value);
   return Var_integer_box(tag, raw);
 }
-
-Symbol Var_integer_tag(int, int);
 
 static Symbol _integer_result_tag(X2CVarNumeric * lhs, X2CVarNumeric * rhs){
   _promote_integer(&((* lhs)));
@@ -1119,12 +1032,6 @@ static Symbol _floating_tag(X2CVarNumeric * lhs, X2CVarNumeric * rhs){
   return(* lhs).rank >=(* rhs).rank ?(* lhs).tag :(* rhs).tag;
 }
 
-float X2CVarNumeric_f32(X2CVarNumeric *);
-
-double X2CVarNumeric_f64(X2CVarNumeric *);
-
-long double X2CVarNumeric_ldouble(X2CVarNumeric *);
-
 static Var _floating_binary(Symbol op, X2CVarNumeric lhs, X2CVarNumeric rhs, Symbol tag){
   if(tag == 3355493){
     float a = X2CVarNumeric_f32(&(lhs)), b = X2CVarNumeric_f32(&(rhs));
@@ -1138,21 +1045,13 @@ static Var _floating_binary(Symbol op, X2CVarNumeric lhs, X2CVarNumeric rhs, Sym
   return Var_box_long_double(_ldouble_step(op, a, b));
 }
 
-int Var_encoding_valid(Var);
-
 int Var_fallback_truth(Var value);
-
-int Var_dispatch_truth(Var, int *);
 
 int Var_truth(Var value){
   if(! Var_encoding_valid(value) || Var_is_void(value)) return Var_fallback_truth(value);
   int handled = 0, truth = Var_dispatch_truth(value, &(handled));
   return handled ? ! ! truth : Var_fallback_truth(value);
 }
-
-static Symbol Var_symbol(Var);
-
-void * Var_pointer(Var);
 
 int Var_fallback_truth(Var value){
   _valid_operand(value);
@@ -1192,8 +1091,6 @@ Var Var_update(Var * lhs, Symbol op, Var rhs){
   return x2c_var_update_volatile(lhs, op, rhs);
 }
 
-Var Var_convert(Var, Symbol);
-
 Var x2c_var_update_volatile(volatile Var * lhs, Symbol op, Var rhs){
   if(! lhs){
     static const X2CErrorSite _x2c_error_site_31 = {.file = "../../lib/varops.x",.function = "x2c_var_update_volatile",.line = 539};
@@ -1217,8 +1114,6 @@ Var x2c_var_update_volatile(volatile Var * lhs, Symbol op, Var rhs){
   (* lhs) = stored;
   return stored;
 }
-
-static int Var_is_wide(Var);
 
 static inline int _same_tag_update(Var lhs, Var rhs){
   unsigned long left = lhs.u64 & 0xFFFFFFFF00000000ul;
@@ -1284,8 +1179,6 @@ _Noreturn static void _bad_bits(Var value){
   }
 
 }
-
-String Symbol_str(Symbol);
 
 _Noreturn static void _bad_side(Var value, Symbol side){
   unsigned long bits = value.u64;

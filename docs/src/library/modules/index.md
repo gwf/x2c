@@ -46,6 +46,7 @@ points used by generated code, native callers, and compiler setup.
 | [`lib/pool.x`](pool.md) | nested interning pools with region-backed object storage. |
 | [`lib/process.x`](process.md) | run commands and pipelines without a shell. |
 | [`lib/regex.x`](regex.md) | regular expressions over the bytes of a String. |
+| [`lib/rewrite.x`](rewrite.md) | Macro-pattern registration for compiler rewrites. |
 | [`lib/scope.x`](scope.md) | memory allocation scope management. |
 | [`lib/scripting.x`](scripting.md) | the modules every script unit includes. |
 | [`lib/split.x`](split.md) | `String` field splitting and repeatable typed cursors. |
@@ -58,6 +59,7 @@ points used by generated code, native callers, and compiler setup.
 | [`lib/symbolset.x`](symbolset.md) | immutable ordered sets of compact `Symbol`s. |
 | [`lib/system-macros.x`](system-macros.md) | convenience macros for text, timing, and processes. |
 | [`lib/thread.x`](thread.md) | `Context`-backed native worker threads. |
+| [`lib/type.x`](type.md) | semantic type values and their structural operations. |
 | [`lib/typed-array.x`](typed-array.md) | packed typed `Array`s generated from shared methods. |
 | [`lib/typed-list.x`](typed-list.md) | typed cons chains generated from typed methods. |
 | [`lib/typed-map.x`](typed-map.md) | typed `Map`s generated from shared storage. |
@@ -79,8 +81,10 @@ prelude. Include one explicitly to use its declarations.
 - [`lib/path.x`](path.md) - Filesystem operations on path `String`s; explicitly include `path.x` to use them.
 - [`lib/process.x`](process.md) - Commands, pipelines, and background jobs without a shell; explicitly include `process.x` to use them.
 - [`lib/regex.x`](regex.md) - Regular expressions over the bytes of a `String`; explicitly include `regex.x` to use them.
+- [`lib/rewrite.x`](rewrite.md) - Register macro-pattern translators with the $rewrite decorator; include `rewrite.x`.
 - [`lib/scripting.x`](scripting.md) - The `args.x`, `diff.x`, `digest.x`, `path.x`, `process.x`, and `regex.x` modules that every script unit includes; include `scripting.x` to use all six.
 - [`lib/system-macros.x`](system-macros.md) - Compile-time convenience macros; explicitly include system-macros.x to use them.
+- [`lib/type.x`](type.md) - Structural operations on captured Type values, available at runtime and compile time; include `type.x` to use them.
 - [`lib/typed-array.x`](typed-array.md) - Packed typed storage with a raw native bracket; explicitly include `typed-array.x` to use it.
 - [`lib/typed-list.x`](typed-list.md) - Typed views over canonical `List` cells; explicitly include `typed-list.x` to use them.
 - [`lib/typed-map.x`](typed-map.md) - Typed maps over native numeric or canonical `String` fields; explicitly include `typed-map.x` to use them.

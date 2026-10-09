@@ -190,8 +190,6 @@ static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
 static Var Symbol_var(Symbol);
 
-List cons(Var, List);
-
 #include "exception.h"
 
 
@@ -212,10 +210,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _8 = Symbol_var(992);
   _9 = cons(_8, NULL);
 }
-
-void * Scope_malloc(size_t);
-
-MatchCaptureLayout MatchCaptureLayout_analyze(Var);
 
 MatchPlan MatchPlan_prepare(Var pattern){
   if(! _init_guard_) _file_init_();
@@ -238,8 +232,6 @@ void x2c_cleanup_push(X2CCleanup *);
 int MachineBuilder_binder(MachineBuilder *, Atom);
 
 MachineProgram MachineBuilder_freeze(MachineBuilder *);
-
-void Scope_free(void *);
 
 void x2c_cleanup_leave(X2CCleanup *);
 
@@ -275,8 +267,6 @@ static void MatchPlan__lower(MatchPlan plan, Var pattern){
 
 void MachineProgram_free(MachineProgram);
 
-void MatchCaptureLayout_free(MatchCaptureLayout);
-
 void MatchPlan_free(MatchPlan plan){
   if(! plan) return;
   MachineProgram_free(plan -> program);
@@ -284,19 +274,11 @@ void MatchPlan_free(MatchPlan plan){
   Scope_free(plan);
 }
 
-int Var_is_atom_binder(Var);
-
 static int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 
 static List Var_list(Var);
 
 static int List_truth(List);
-
-int Var_is_match_op(Var);
-
-static Var List_car(List);
-
-static List List_cdr(List);
 
 static int MatchLower__compile_value(MatchLower * l, Var pattern){
   if(Var_is_atom_binder(pattern)) return MatchLower__compile_binder(&((* l)), pattern);
@@ -349,8 +331,6 @@ Symbol Var_tag(Var);
 
 void * Var_pointer(Var);
 
-int List_try_next(List, List *, Var *);
-
 static int _bits_unique(Var value){
   switch(Var_tag(value)){
     case 1328354264 : case 826970 : case 26993 : case 30065 : case 3453293 : case 3846509 : case 3453797 : case 3847013 : case 3454065 : case 3847281 : return 1;
@@ -384,8 +364,6 @@ static int MatchLower__emit_literal(MatchLower * l, Var pattern){
   int constant = MachineBuilder_constant(&((* l).b), pattern);
   return constant >= 0 && MatchLower__fail_site(&((* l)), MW_EQ_VALUE_CONST, constant, 0, 0, _compare_mode(pattern));
 }
-
-int Var_is_binder(Var);
 
 static int _is_list_literal(List pat){
   {
@@ -427,8 +405,6 @@ static int MatchLower__compile_child(MatchLower * l, Var pattern){
   (* l).depth --;
   return entry;
 }
-
-void * Scope_realloc(void *, size_t);
 
 static int MatchLower__fail_site(MatchLower * l, int op, int a, int b, int c, int d){
   int site = MachineBuilder_emit(&((* l).b), op, a, b, c, d, - 1);
@@ -558,8 +534,6 @@ static int MatchLower__compile_not(MatchLower * l, List args){
   return entry;
 }
 
-Var List_getindex(List, int);
-
 static int MatchLower__compile_set(MatchLower * l, List args){
   if(! _set_binds(args)) return MatchLower__compile_or(&((* l)), args);
   Var binder, test;
@@ -571,8 +545,6 @@ static int MatchLower__compile_set(MatchLower * l, List args){
   int entry =(* l).b.length, base =(* l).site_count;
   return MatchLower__emit_binder(&((* l)), binder) && MatchLower__emit_test(&((* l)), test, child) ? MatchLower__finish(&((* l)), entry, base) : - 1;
 }
-
-static List List_cddr(List);
 
 static int _set_binds(List args){
   return List_truth(args) && List_truth(List_cdr(args)) && ! List_truth(List_cddr(args)) && Var_is_atom_binder(List_car(args));
@@ -590,10 +562,6 @@ static int MatchLower__compile_quote(MatchLower * l, List args){
   if(! List_truth(args) || List_truth(List_cdr(args))) return MatchLower__fail(&((* l)), "quote-arity");
   return MatchLower__compile_literal(&((* l)), List_car(args));
 }
-
-int List_equal(List, List);
-
-static Var List_cadr(List);
 
 static int MatchLower__compile_is(MatchLower * l, List args){
   int kind = _match_kind(args);
@@ -661,8 +629,6 @@ static int MatchLower__compile_segment(MatchLower * l, List pattern){
   if(! MatchLower__fail_site(&((* l)), MW_INPUT_LIST, 0, 0, 0, 0) || ! MatchLower__emit_prefix(&((* l)), &(s)) || ! MatchLower__segment_end(&((* l)), &(s.star))) return - 1;
   return MatchLower__finish_failure(&((* l)), entry, base);
 }
-
-int Var_is_list_binder(Var);
 
 static int MatchLower__segment_prefix(MatchLower * l, MatchSegment * s, List pattern){
   int n = 0;

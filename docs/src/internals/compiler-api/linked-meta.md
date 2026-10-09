@@ -12,8 +12,13 @@ Shipped `meta` code compiled into the compiler.
 
 | Function | Summary |
 | --- | --- |
+| [`collection_postfix`](#collection_postfix) | Stores the updated collection value and returns its previous value. |
+| [`collection_prefix`](#collection_prefix) | Stores and returns the incremented or decremented collection value. |
+| [`collection_store`](#collection_store) | Selects the adopted collection setter for indexed assignment. |
+| [`collection_update`](#collection_update) | Selects collection compound updates and checks accepted operands. |
 | [`linked_meta_hashes`](#linked_meta_hashes) | Returns linked definition hashes and provider source dependencies. |
 | [`linked_meta_targets`](#linked_meta_targets) | Returns the linked copies, and the runtime builders, by name. |
+| [`register_rewrite`](#register_rewrite) | Registers the decorated translator with its macro and hole patterns. |
 | [`x2c_decl_make`](#x2c_decl_make) | Declares `name` with `type` and an optional initializer. |
 | [`x2c_expr_cast`](#x2c_expr_cast) | Returns `expression` cast to `type`, which is a declared type rather than syntax. |
 | [`x2c_expr_field`](#x2c_expr_field) | Returns the expression `receiver.name`. |
@@ -22,13 +27,45 @@ Shipped `meta` code compiled into the compiler.
 
 ### Functions
 
+#### collection_postfix
+
+`Code collection_postfix(Code code)`
+
+Stores the updated collection value and returns its previous value.
+
+Source: `src/linked-meta.x:351`
+
+#### collection_prefix
+
+`Code collection_prefix(Code code)`
+
+Stores and returns the incremented or decremented collection value.
+
+Source: `src/linked-meta.x:340`
+
+#### collection_store
+
+`Code collection_store(Code code)`
+
+Selects the adopted collection setter for indexed assignment.
+
+Source: `src/linked-meta.x:285`
+
+#### collection_update
+
+`Code collection_update(Code code)`
+
+Selects collection compound updates and checks accepted operands.
+
+Source: `src/linked-meta.x:313`
+
 #### linked_meta_hashes
 
 `Map linked_meta_hashes(void)`
 
 Returns linked definition hashes and provider source dependencies.
 
-Source: `src/linked-meta.x:429`
+Source: `src/linked-meta.x:537`
 
 #### linked_meta_targets
 
@@ -36,7 +73,15 @@ Source: `src/linked-meta.x:429`
 
 Returns the linked copies, and the runtime builders, by name.
 
-Source: `src/linked-meta.x:311`
+Source: `src/linked-meta.x:412`
+
+#### register_rewrite
+
+`Code register_rewrite(Code function, Code pattern, List holes)`
+
+Registers the decorated translator with its macro and hole patterns.
+
+Source: `src/linked-meta.x:145`
 
 #### x2c_decl_make
 
@@ -44,7 +89,7 @@ Source: `src/linked-meta.x:311`
 
 Declares `name` with `type` and an optional initializer.
 
-Source: `src/linked-meta.x:93`
+Source: `src/linked-meta.x:95`
 
 #### x2c_expr_cast
 
@@ -54,7 +99,7 @@ Returns `expression` cast to `type`, which is a declared type rather
 than syntax. A generator needs it where the value it holds and the
 parameter it reaches differ in width or sign.
 
-Source: `src/linked-meta.x:86`
+Source: `src/linked-meta.x:88`
 
 #### x2c_expr_field
 
@@ -62,7 +107,7 @@ Source: `src/linked-meta.x:86`
 
 Returns the expression `receiver.name`.
 
-Source: `src/linked-meta.x:78`
+Source: `src/linked-meta.x:80`
 
 #### x2c_param_make
 
@@ -70,7 +115,7 @@ Source: `src/linked-meta.x:78`
 
 Returns a parameter named `name` with `type`.
 
-Source: `src/linked-meta.x:101`
+Source: `src/linked-meta.x:103`
 
 #### x2c_type_members
 
@@ -79,7 +124,7 @@ Source: `src/linked-meta.x:101`
 Returns enum members as `(name value)` rows in declaration order.
 An implicit value is nil; a literal value retains its spelling.
 
-Source: `src/linked-meta.x:130`
+Source: `src/linked-meta.x:132`
 
 ## Design notes
 

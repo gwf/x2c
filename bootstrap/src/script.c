@@ -60,10 +60,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
 
 String Env_get(String);
 
-static int String_truth(String);
-
-static Var String_var(String);
-
 String script_cache_root(void){
   if(! _init_guard_) _file_init_();
   String explicit = Env_get(_0), xdg = Env_get(_1);
@@ -75,50 +71,20 @@ void driver_error(const char *);
 
 Path Path_absolute(Path);
 
-static String Var_string(Var);
-
-static Var List_car(List);
-
 int Path_is_file(Path);
-
-#include "error.h"
-
-
-
-
-int x2c_error_catch_site_pending(ErrorCatchSite *);
-
-static Var List_var(List);
-
-static Var Symbol_var(Symbol);
-
-ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
-
-void x2c_exception_push(ExceptionFrame *);
 
 void Path_make_dirs(Path);
 
-void x2c_exception_landed(ExceptionFrame *);
-
-int x2c_exception_is_error_target(ExceptionFrame *);
-
-int x2c_error_catch_selected(ErrorHandler);
-
-void x2c_error_catch_detach(ErrorHandler);
-
-void x2c_exception_mark_handled(ExceptionFrame *);
-
 void host_error(List);
-
-void x2c_error_catch_close(ErrorHandler);
-
-void x2c_exception_leave(ExceptionFrame *);
 
 int file_lock(Path, int);
 
 void Path_write_text(Path, String);
 
-String String_printf(String, ...);
+#include "error.h"
+
+
+
 
 int script_prepare(CliRequest c){
   if(! _init_guard_) _file_init_();
@@ -186,8 +152,6 @@ int script_prepare(CliRequest c){
 
 String Path_stem(Path);
 
-unsigned String_hash(String);
-
 static String _entry(String root, String script){
   String stem = Path_stem(script), digest = String_printf(_11, String_hash(script));
   return String_join(NULL, cons(String_var(root), cons(String_var(_12), cons(String_var(stem), cons(String_var(_13), cons(String_var(digest), NULL))))));
@@ -253,15 +217,11 @@ static String _executable(CliRequest c){
   return String_join(NULL, cons(String_var(c -> build_dir), cons(String_var(_15), NULL)));
 }
 
-int CliRequest_script_current(CliRequest, String);
-
 static void _exec_current(CliRequest c){
   if(! c -> rebuild && CliRequest_script_current(c, c -> build_dir)) _exec(c);
 }
 
 List Path_list_dir(Path);
-
-int List_try_next(List, List *, Var *);
 
 Path Path_join(Path, Path);
 
@@ -339,14 +299,6 @@ int script_run(CliRequest c){
   _print_run(c);
   return 0;
 }
-
-void * Scope_calloc(size_t, size_t);
-
-int List_len(List);
-
-String Var_str(Var);
-
-String String_new(const char *);
 
 static void _exec(CliRequest c){
   String executable = _executable(c);
