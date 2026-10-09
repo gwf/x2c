@@ -52,7 +52,7 @@ each of `arguments`, preparing it into `storage` for the call through
 `function`; the `$func_call` template calls this in a slot. The choice
 of address, type and by-value alternative follows the argument's type.
 
-Source: `src/expressions.x:2134`
+Source: `src/expressions.x:2133`
 
 ### `Compiler`
 
@@ -63,7 +63,7 @@ Source: `src/expressions.x:2134`
 
 Identifies the Array or Map helper family for built-in indexed mutation.
 
-Source: `src/expressions.x:2465`
+Source: `src/expressions.x:2464`
 
 <a id="Compiler._nominal_getindex"></a>
 #### Compiler._nominal_getindex
@@ -73,7 +73,7 @@ Source: `src/expressions.x:2465`
 Resolves the exact nominal getter shared by bracket admission and lowering.
 A collection getter's own body uses the inherited implementation instead.
 
-Source: `src/expressions.x:1429`
+Source: `src/expressions.x:1428`
 
 <a id="Compiler.apply_macro_value"></a>
 #### Compiler.apply_macro_value
@@ -100,7 +100,7 @@ for a typed destination, 1 for an interpolation hole, which displays
 every value through `Var.str`, and 2 for a printf-family value, which
 the format converts when it is a Var.
 
-Source: `src/expressions.x:3127`
+Source: `src/expressions.x:3120`
 
 <a id="Compiler.complete_iter_chain"></a>
 #### Compiler.complete_iter_chain
@@ -114,7 +114,7 @@ the last formal in `P` canonicalize to `Iter`. `Iter` arguments are
 completed recursively; a call missing only that last formal receives the
 hidden destination. Variadic calls and `Iter_unzip` are returned unchanged.
 
-Source: `src/expressions.x:2264`
+Source: `src/expressions.x:2263`
 
 <a id="Compiler.convert_expression"></a>
 #### Compiler.convert_expression
@@ -128,7 +128,7 @@ performs the conversion implicitly; an unsupported x2c conversion reports
 a type error through `c`. Synthesized operations may add generated
 bindings or immutable literal entries to compiler state.
 
-Source: `src/expressions.x:3363`
+Source: `src/expressions.x:3356`
 
 <a id="Compiler.convert_segment_to_string"></a>
 #### Compiler.convert_segment_to_string
@@ -147,7 +147,7 @@ not equivalent: it
 extracts only a `String` payload and yields empty `String` for every other
 tag.
 
-Source: `src/expressions.x:3556`
+Source: `src/expressions.x:3549`
 
 <a id="Compiler.converter_call"></a>
 #### Compiler.converter_call
@@ -158,7 +158,7 @@ The call to the converter that `type`, or the first of its typedef names
 that declares one, provides for `target`, applied to `expr`, or NULL
 when none declares one.
 
-Source: `src/expressions.x:3691`
+Source: `src/expressions.x:3684`
 
 <a id="Compiler.func_call_parts"></a>
 #### Compiler.func_call_parts
@@ -172,7 +172,7 @@ Var, or `(no-value)` when it has no Var form; its address, or 0; and its
 type, which is `(expr ("List") (ident reference))` for a null argument
 that takes the callee's own type.
 
-Source: `src/expressions.x:2203`
+Source: `src/expressions.x:2202`
 
 <a id="Compiler.is_builtin_converter_call"></a>
 #### Compiler.is_builtin_converter_call
@@ -182,7 +182,7 @@ Source: `src/expressions.x:2203`
 The global builtin boxers and scalar formatters only observe their
 arguments. A custom converter or a shadowed callee may change state.
 
-Source: `src/expressions.x:3744`
+Source: `src/expressions.x:3737`
 
 <a id="Compiler.needs_resolution"></a>
 #### Compiler.needs_resolution
@@ -282,7 +282,7 @@ Source: `src/expressions.x:675`
 Returns sorted visible field and method names that resolve on `receiver`
 through `access`.
 
-Source: `src/expressions.x:1996`
+Source: `src/expressions.x:1995`
 
 <a id="Compiler.printf_static_format"></a>
 #### Compiler.printf_static_format
@@ -296,7 +296,7 @@ format, such as a variable or an object macro, is not readable here.
 `raw` reports C spelling, whose quotes and escape sequences the caller
 steps over.
 
-Source: `src/expressions.x:3258`
+Source: `src/expressions.x:3251`
 
 <a id="Compiler.promote_string_literal"></a>
 #### Compiler.promote_string_literal
@@ -308,7 +308,7 @@ method receiver, a `foreach` collection, or a raise detail. Parentheses
 and a conditional whose arms are both literals count as the literal; any
 other expression is returned unchanged.
 
-Source: `src/expressions.x:3315`
+Source: `src/expressions.x:3308`
 
 <a id="Compiler.require_var_tag"></a>
 #### Compiler.require_var_tag
@@ -318,7 +318,7 @@ Source: `src/expressions.x:3315`
 Returns the exact Var tag for a type test, rejecting types without one.
 Enums retain no identity after boxing and cannot be tested this way.
 
-Source: `src/expressions.x:2849`
+Source: `src/expressions.x:2848`
 
 <a id="Compiler.resolve_expression"></a>
 #### Compiler.resolve_expression
@@ -342,7 +342,7 @@ Source: `src/expressions.x:941`
 Resolves the key and value of one `(map-entry key value)` AST row.
 Any other shape is reported at `origin` as a parse error.
 
-Source: `src/expressions.x:2975`
+Source: `src/expressions.x:2974`
 
 <a id="Compiler.resolve_postfix_member"></a>
 #### Compiler.resolve_postfix_member
@@ -356,7 +356,7 @@ Resolves one field or method selection without consuming parser tokens.
 row, or NULL when no member is visible. Method lookup is enabled only by
 `call_context` and records the selected binding in `c.sym`.
 
-Source: `src/expressions.x:1744`
+Source: `src/expressions.x:1743`
 
 <a id="Compiler.var_tag_expression"></a>
 #### Compiler.var_tag_expression
@@ -366,7 +366,7 @@ Source: `src/expressions.x:1744`
 Builds an exact tag expression, deferring macro type slots until
 binding.
 
-Source: `src/expressions.x:2862`
+Source: `src/expressions.x:2861`
 
 ### `List`
 
@@ -378,7 +378,7 @@ Source: `src/expressions.x:2862`
 Returns the printf-family entry a callee names, or `NULL`. A resolved
 user function that happens to use a libc spelling is not one.
 
-Source: `src/expressions.x:3236`
+Source: `src/expressions.x:3229`
 
 ## Public types
 

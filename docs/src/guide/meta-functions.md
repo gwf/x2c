@@ -1535,6 +1535,44 @@ sample.x:15:23: macro: this argument must be one word
 `<type>`, at a node the macro received, such as one captured statement,
 instead of at the invocation.
 
+**Placing code beyond the result.** `x2c_enclosing` answers the syntax
+around the invocation: the initialized `<declarator>`, the block item
+(`<statement>`), the `<function>`, or the `<unit>`. `x2c_place` adds code
+the result cannot hold: `%(after-statement)` after that declarator or block
+item, `%(unit-support KEY)` among the unit's file-scope declarations once for
+each key, and `%(unit-init)` in the unit's initialization. A failed expansion
+leaves none of it behind. Here the counter runs after each statement that
+traces a value:
+
+```x2c
+#include "x2c.x"
+#include "meta.x"
+
+static int traced = 0;
+
+meta static List trace_after(List value) {
+  x2c_place(%(after-statement), $!{ traced++; });
+  return value;
+}
+
+macro Expression $trace(Expr $value) => $trace_after($value);
+
+int main(void) {
+  printf("%d %d\n", $trace(1), traced);
+  printf("%d\n", traced);
+  return 0;
+}
+```
+
+```text
+1 0
+1
+```
+
+`$auto` is written this way: it places a release after the declarator it
+initializes, and the declaration checks that the expansion is its complete
+initializer before it binds that release.
+
 The compiler binds each of these under its x2c name and derives the Lisp
 name from it: `_` becomes `.`, and a predicate `x2c_type_is_X` becomes
 `x2c.type.X?`. Only `x2c.type.tag-name` and `x2c.type.reverse-name`, which

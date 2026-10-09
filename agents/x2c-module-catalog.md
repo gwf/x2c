@@ -389,7 +389,7 @@ Public functions:
 `Compiler.land_quotation`, `Compiler.macro_value_literal`,
 `Compiler.try_parse_macro_pattern`, `Compiler.macro_pattern_at`,
 `Compiler.try_parse_macro_subpattern`, `Compiler.capture_macro_value`,
-`Compiler.take_code_value`, `Compiler.bind_code_value`,
+`Compiler.take_code_value`, `Compiler.place`, `Compiler.bind_code_value`,
 `Compiler.ensure_macro_lisp`, `Compiler.parse_macro_lisp_top_level`,
 `Compiler.parse_macro_lisp_shallow`, `Compiler.evaluate_declaration_effect`,
 `Compiler.parse_macro_lisp_expression`, `Compiler.lift_macro_lisp_expression`,
@@ -486,7 +486,8 @@ Public functions:
 `x2c_embed_text`, `x2c_literal_value`, `builtin_class_location`,
 `x2c_invocation_file`, `x2c_invocation_line`, `x2c_invocation_column`,
 `x2c_diagnostic_fail`, `x2c_diagnostic_fail_at`, `x2c_diagnostic_warn`,
-`meta_type_description`, `meta_source_description`, `builtin_foreach_complete`,
+`x2c_enclosing`, `x2c_place`, `meta_type_description`,
+`meta_source_description`, `builtin_foreach_complete`,
 `builtin_foreach_collection`, `MetaContext.reject`,
 `Compiler.bind_sdk_primitives`
 
@@ -532,6 +533,8 @@ Public functions:
 `Compiler.parse_complex_identifier`, `Compiler.package_alias_spelling`,
 `Compiler.parse_basic_identifier`, `Compiler.parse_optional_identifier`,
 `Compiler.parse_function_definition`, `Compiler.parse_function_target`,
+`Compiler.enter`, `Compiler.enclosing`, `Compiler.place_after`,
+`Compiler.close_placements`, `Compiler.leave_item`,
 `Compiler.finish_initializers`, `Compiler.bind_syntax`,
 `Compiler.bind_callable_body`, `Compiler.finish_foreign_alias`
 

@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/meta-place-unknown.x:10:25: macro: unknown placement
+  int main(void) { return $misplaced(); }
+                          ^
+  note: where: (before-statement)
+

@@ -2696,8 +2696,9 @@ void Compiler.enter(Compiler c, Ancestor row) {
 /** Returns the innermost `what` around the parser as captured code, or
     NULL when there is none: the declarator whose initializer is being
     parsed directly in the current block item, as its one-declarator
-    declaration; the block item, as its origin anchor; the function, as
-    its declaration; or the unit, as a `String` expression of its path. */
+    declaration; the block item, as its origin anchor; the function, as a
+    definition whose body is still the empty `(seq)`; or the unit, as a
+    `String` expression of its path. */
 List Compiler.enclosing(Compiler c, Symbol what) {
   if (what == <unit>) {
     String path = c.filename ? c.display_path(c.filename) : "<stdin>";
@@ -2715,7 +2716,9 @@ List Compiler.enclosing(Compiler c, Symbol what) {
 static List Compiler._ancestor_code(Compiler c, Ancestor row) {
   if (row.what == <declarator>)
     return %(declare ${row.base} (bindings ${row.node}));
-  if (row.what == <function>) return row.node;
+  if (row.what == <function>)
+    match (row.node) case %(declare ?type (bindings ?declarator)):
+      return %(function $type $declarator (seq));
   int origin = row.origin ? row.origin : c.record_origin(row.token);
   return %(at $origin (seq));
 }
@@ -2751,12 +2754,13 @@ List Compiler.leave_item(Compiler c) {
   Ancestor row = ((Ancestor *) c.ancestors.bytes)[depth];
   c.ancestors.pop();
   int first = c.placements.len();
-  while (first && c.placements[first - 1].list().car().int() == depth) first--;
+  while (first && c.placements[first - 1].list().car().int() == depth)
+    first--;
   if (first == (int) c.placements.len()) return NULL;
   Array items = [];
   for (int i = first; i < (int) c.placements.len(); i++) {
-    (int placed_depth, List binding, List result, Var code) =
-      c.placements[i].list();
+    (Var placed, List binding, Var result, Var code) = c.placements[i].list();
+    (void) placed, (void) result;
     if (binding)
       $let(c.origin, row.origin ? row.origin : c.origin)
         $report.parse.init_incomplete(c, row.token);
@@ -2852,7 +2856,8 @@ static List Compiler._take_placed(
   if (!c.placements.len()) return NULL;
   Array kept = [], code = [];
   foreach (List row, c.placements) {
-    (int depth, List anchor, List placed, Var item) = row;
+    (Var depth, List anchor, List placed, Var item) = row;
+    (void) depth;
     if (anchor !== binding) {
       kept.push(row);
       continue;
@@ -3137,7 +3142,8 @@ static List Compiler._anchor(Compiler c, Var origin, List bound) {
 static List Compiler._bind_item(Compiler c, Var origin, List node) {
   int anchor = origin == <m-origin> ? c.origin : origin.int();
   c.enter((Ancestor){ .what = <statement>, .origin = anchor });
-  List bound = c._anchor(origin, c.bind_syntax(node, AST_BLOCK, c.return_type));
+  List bound =
+    c._anchor(origin, c.bind_syntax(node, AST_BLOCK, c.return_type));
   List after = c.leave_item();
   return after ? %(seq $bound @after) : bound;
 }

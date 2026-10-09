@@ -3278,6 +3278,8 @@ The compiler supplies these contextual Lisp operations:
 (x2c.literal.value literal)
 (x2c.type.members type)
 (x2c.diagnostic.warn message notes)
+(x2c.enclosing what)
+(x2c.place where code)
 (x2c.stmnt.make expression)
 (x2c.stmnt.return expression)
 (x2c.block.make items)
@@ -3369,6 +3371,42 @@ with `string?` when both kinds can occur. A non-enum `Type` is rejected.
 The Lisp operation `x2c.diagnostic.warn` reports a macro warning at the
 invocation with `String` notes and returns `nil`, so expansion continues.
 `x2c.diagnostic.fail` does not return.
+
+`x2c.enclosing` answers the innermost syntax of one kind around the
+invocation, or `nil` when there is none. `<declarator>` is the initialized
+declarator whose initializer directly holds the invocation, answered as its
+one-declarator declaration `(declare BASE (bindings (bind NAME MODIFIERS)))`;
+`BASE` keeps the storage class, and `x2c.syntax.type` reads its declared
+type. A block item begun inside that initializer, as in a statement
+expression, hides the declarator. `<statement>` is the enclosing block item,
+answered as its origin anchor `(at N (seq))`, which `x2c.diagnostic.fail.at`
+reports at. `<function>` is the enclosing function definition with the empty
+body `(seq)`, which the `x2c.function.*` operations read. `<unit>` is a
+`String` expression holding the unit's path. Another kind is rejected.
+
+`x2c.place` contributes code beyond the expansion's result and returns `nil`.
+It applies under the expansion's semantic transaction, as the effects of a
+code-value carrier do, and a carrier may hold the same `(place WHERE CODE)`
+effect. `WHERE` is one of these Lists:
+
+- `(after-statement)` places code after the initialized declarator that
+  `x2c.enclosing` answers, or otherwise after the enclosing block item. A
+  declaration split after the declarator keeps the declarators before it in
+  their own declaration, its shared inline type, and initialization order.
+  The placing expansion's result must be that declarator's complete
+  initializer, through parentheses and typed expression shells. Otherwise,
+  or when the declarator is not an item of a block, as in a `for` header,
+  the compiler reports `managed initializer requires a complete block-local
+  initializer` at the block item. Code placed outside any block item is
+  rejected.
+- `(unit-support)` adds declarations among the unit's file-scope support
+  code; `(unit-support KEY)` adds them only for the first placement under
+  `KEY`.
+- `(unit-init)` adds statements to the `finish` area of the unit's
+  initialization, and `(unit-init AREA)` to the `protocol`, `prepare`,
+  `statics`, or `finish` area, which run in that order.
+
+Any other `WHERE` is rejected as an unknown placement.
 
 The statement and declaration constructors build one node each from operands
 that are themselves nodes, as the `x2c.expr.*` family does. `x2c.block.make`
@@ -3828,15 +3866,17 @@ and uses addresses for opaque pointers and fixed arrays. Repeated identities
 on the active rendering path print their pointer form. Descriptor registration retains the
 runtime's fixed capacity and worker-start freeze rules.
 
-### Managed-initializer syntax
+### Managed initializers
 
-`(managed-init EXPR)` is a constructible initializer form. `$auto(value)`
-produces it; an equivalent List built by another macro or compile-time Lisp
-has the same meaning. It may be wrapped in typed `expr` nodes and parentheses.
-Only the complete initializer of an initialized automatic declaration that is
-a compound-statement item consumes the form. The declaration keeps its type,
-binding identity, initialization conversions, and enclosing scope, followed by
-an ordinary deferred call to the type's selected `cleanup` method.
+`$auto(value)` is an ordinary expression macro. Its expansion asks
+`x2c.enclosing` for the initialized declarator, places a release after that
+declarator with `x2c.place`, and returns `value` unchanged. Forwarding through
+another macro or parentheses keeps that result the complete initializer.
+When the declaration finishes, it checks that the result is the declarator's
+complete initializer and then binds the release, which requires automatic
+storage and Cleanup participation and defers the binding's `cleanup` call.
+The declaration keeps its type, binding identity, initialization conversions,
+and enclosing scope.
 
 The declared type must participate in `Cleanup(T)`, whose member is
 `void T.cleanup(T)`, directly or through its ordinary typedef ancestry.

@@ -33,15 +33,17 @@ static List _scope_expand(List body, List destinations) {
 
 // $auto
 
-/* The release a managed declaration is followed by. */
+/* The release placed after a managed declarator: its checks, then the
+   deferred cleanup of the declared binding. */
 static macro Stmt $auto_release(Decl $local, Expr $binding) {
   @(auto.release $local)
   defer $binding.cleanup();
 }
 
-/* `$auto(value)` stands for `value` as the complete initializer of a
-   declarator in a function, which the declaration verifies before it binds
-   the release placed after the declarator. */
+/* `$auto(value)` returns `value` and places the release after the
+   declarator it initializes. The declaration checks that the result is its
+   complete initializer before it binds the release, so a partial use
+   reports that first. */
 static List _auto_expand(List value) {
   Code local = x2c_enclosing(<declarator>);
   if (!local || !x2c_enclosing(<function>))
@@ -56,8 +58,8 @@ static List _auto_expand(List value) {
   return value;
 }
 
-/* The release defers the cleanup of a declaration whose storage is
-   automatic and whose type participates in Cleanup. */
+/* A managed declaration has automatic storage and a type that participates
+   in Cleanup. */
 static List _auto_release(Code local) {
   Type base = local.cadr();
   if (base.is_static() || base.is_extern() || base.is_threaded())

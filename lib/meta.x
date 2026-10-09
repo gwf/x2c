@@ -16,6 +16,13 @@
     emits no run-time form for it and diagnoses a run-time call where it is
     written.
 
+    Two operations let a macro contribute code beyond its result.
+    `x2c_enclosing` answers the initialized declarator, block item,
+    function, or unit around the invocation, and `x2c_place` puts code
+    after that declarator or block item, among the unit's support
+    declarations, or in its initialization, under the expansion's
+    transaction. `$auto` is built on them.
+
     The library builds it as an optional module, but the prelude's
     `varops.x` includes it for its own `meta` rows, so every unit sees its
     declarations. Include it explicitly where `meta` functions are written.
@@ -357,8 +364,8 @@ meta String x2c_embed_text(Var path);
     initializer directly holds the invocation, as its one-declarator
     declaration; `<statement>` the enclosing block item, as its origin
     anchor for `x2c_diagnostic_fail_at`; `<function>` the enclosing
-    function's declaration; `<unit>` a `String` expression of the unit's
-    path. */
+    function definition, whose body is still the empty `(seq)`; and
+    `<unit>` a `String` expression of the unit's path. */
 meta Code x2c_enclosing(Symbol what);
 
 /** Places `code` under the expansion's transaction. `where` is
