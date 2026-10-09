@@ -2507,7 +2507,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2133 = String_var(_2132);
   _2134 = String_new("lib/meta.x");
   _2135 = String_var(_2134);
-  _2136 = String_new("8146e40d");
+  _2136 = String_new("d589a65d");
   _2137 = String_var(_2136);
   _2138 = cons(_2137, NULL);
   _2139 = cons(_2135, _2138);
@@ -6112,7 +6112,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_11(void){
   _5717 = List_var(_5716);
   _5718 = String_new("src/macros.x");
   _5719 = String_var(_5718);
-  _5720 = String_new("6ea4512b");
+  _5720 = String_new("6e4b5f42");
   _5721 = String_var(_5720);
   _5722 = cons(_5721, NULL);
   _5723 = cons(_5719, _5722);
@@ -6235,7 +6235,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_11(void){
   _5840 = List_var(_5839);
   _5841 = String_new("src/meta-sdk.x");
   _5842 = String_var(_5841);
-  _5843 = String_new("b7067134");
+  _5843 = String_new("6c7429cf");
   _5844 = String_var(_5843);
   _5845 = cons(_5844, NULL);
   _5846 = cons(_5842, _5845);
@@ -6360,7 +6360,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_11(void){
   _5965 = List_var(_5964);
   _5966 = String_new("src/cleanup.x");
   _5967 = String_var(_5966);
-  _5968 = String_new("26583761");
+  _5968 = String_new("f3a38920");
   _5969 = String_var(_5968);
   _5970 = cons(_5969, NULL);
   _5971 = cons(_5967, _5970);

@@ -38,6 +38,10 @@ Type Code_type(Code value);
 
 Var Code_value(Code code);
 
+int Code_exits(Code statement);
+
+int Code_is_static_pattern(Code pattern);
+
 Code Code_register_rewrite(Code function, Macro shape, List holes);
 
 Code Code_register_after_initialization(Code function, Macro shape, List holes);
