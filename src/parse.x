@@ -3101,15 +3101,16 @@ static List Compiler._bind_expression_statement(
 static List Compiler._resolve(Compiler c, List expr) =>
   c.resolve_expression(expr, c.token);
 
-/* A `(source-clause KIND)` child is source the token parser reads when the
-   binder reaches it; it parses already bound. */
+/* A source clause parses, already bound, when the binder reaches it. */
 static List Compiler._bind_statement(Compiler c, Var stmt) {
-  match (stmt) case %(source-clause ?kind): return c.parse_source_clause(kind);
+  Symbol kind = _source_clause_kind(stmt);
+  if (kind) return c.parse_source_clause(kind);
   return c.bind_syntax(stmt, AST_STATEMENT, c.return_type);
 }
 
 static List Compiler._bind_clause(Compiler c, Var expr) {
-  match (expr) case %(source-clause ?kind): return c.parse_source_clause(kind);
+  Symbol kind = _source_clause_kind(expr);
+  if (kind) return c.parse_source_clause(kind);
   return c._resolve(expr);
 }
 
@@ -3524,6 +3525,50 @@ static List Compiler._bind_typed_targets(
 
 // constructed statements
 
+/* A source `if`, `while`, `do`, or `for` binds here with a Token Var into
+   this table for each clause, which the binder parses when it reaches it,
+   so its scopes and optional-reference facts govern that parse. Syntax
+   from a template or compile-time Lisp cannot hold these addresses. Each
+   entry's type names its clause. */
+static struct Token source_clauses[] = {
+  { .type = <test> }, { .type = <then> }, { .type = <else> },
+  { .type = <body> }, { .type = <do> },   { .type = <init> },
+  { .type = <cond> }, { .type = <next> }
+};
+
+static Var _source_clause(Symbol kind) {
+  Token clause = source_clauses;
+  while (clause.type != kind) clause++;
+  return Token.var(clause);
+}
+
+// The clause a source clause names, or 0 for any other value.
+static Symbol _source_clause_kind(Var value) {
+  if (value is not <token>) return 0;
+  Token clause = value.token();
+  Token end = source_clauses + sizeof(source_clauses) / sizeof(*source_clauses);
+  return clause >= source_clauses && clause < end ? clause.type : 0;
+}
+
+/** Binds the source `if`, `while`, `do`, or `for` at the cursor through the
+    same binders as constructed syntax.
+*/
+List Compiler.bind_source_statement(Compiler c) {
+  Symbol keyword = c.peek(0);
+  c.next();
+  switch (keyword) {
+    case <if>:
+      return c._bind_if_else(_source_clause(<test>),
+        _source_clause(<then>), _source_clause(<else>));
+    case <while>:
+      return c._bind_while(_source_clause(<test>), _source_clause(<body>));
+    case <do>:
+      return c._bind_do(_source_clause(<do>), _source_clause(<test>));
+  }
+  return c._bind_for(_source_clause(<init>), _source_clause(<cond>),
+    _source_clause(<next>), _source_clause(<body>));
+}
+
 static List Compiler._bind_do(Compiler c, Var body, Var condition) {
   List bound = c._bind_statement(body);
   return %(do $bound ${c._bind_clause(condition)});
@@ -3575,11 +3620,18 @@ static List Compiler._bind_for(
   Compiler c, Var init, Var condition, Var increment, Var body) {
   c.sym.push_new_scope();
   defer c.sym.pop_scope();
-  // The resolver binds a declaring initializer as a block declaration.
-  if (init is <list>) init = c._bind_clause(init);
-  if (condition is <list>) condition = c._bind_clause(condition);
-  if (increment is <list>) increment = c._bind_clause(increment);
+  init = c._bind_header(init);
+  condition = c._bind_header(condition);
+  increment = c._bind_header(increment);
   return %(for $init $condition $increment ${c._bind_statement(body)});
+}
+
+/* A header clause may be absent. The resolver binds a declaring
+   initializer as a block declaration. */
+static Var Compiler._bind_header(Compiler c, Var clause) {
+  Symbol kind = _source_clause_kind(clause);
+  if (kind) return c.parse_source_clause(kind);
+  return clause is <list> ? c._resolve(clause) : clause;
 }
 
 static List Compiler._bind_raise(Compiler c, Var code, List details) {

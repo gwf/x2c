@@ -96,18 +96,8 @@ static List Compiler._statement(Compiler c, AstPos position) {
   if (!c.with_binding() && c.macro_starts_target_at(AST_STATEMENT))
     return c._macro_statement();
   switch (c.peek(0)) {
-    case <if>:
-      return c._source_statement(%(if (source-clause test)
-        (source-clause then) (source-clause else)));
-    case <while>:
-      return c._source_statement(
-        %(while (source-clause test) (source-clause body)));
-    case <for>:
-      return c._source_statement(%(for (source-clause init)
-        (source-clause cond) (source-clause next) (source-clause body)));
-    case <do>:
-      return c._source_statement(
-        %(do (source-clause do) (source-clause test)));
+    case <if>: case <while>: case <for>: case <do>:
+      return c.bind_source_statement();
     case <return>:      return c._return_statement();
     case <case>:        return c._case_statement();
     case <break>:       return c._break_statement();
@@ -239,15 +229,6 @@ List Compiler.with_binding(Compiler c) {
 }
 
 // conditionals and loops
-
-/* `if`, `while`, `do`, and `for` bind through the constructed binder. Each
-   `(source-clause KIND)` child parses from the tokens when the binder
-   reaches it, so the binder's scopes and optional-reference facts govern
-   that parse. */
-static List Compiler._source_statement(Compiler c, List syntax) {
-  c.next();
-  return c.bind_syntax(syntax, AST_STATEMENT, c.return_type);
-}
 
 /** Parses the clause `kind` of a source `if`, `while`, `do`, or `for`, with
     the punctuation after it, when the binder reaches that clause. An absent
