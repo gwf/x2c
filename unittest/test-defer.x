@@ -355,8 +355,8 @@ static void managed_local_allows_constructed_syntax(void) {
   defer_reset();
   managed_acquisitions = 0;
   {
-    ManagedResource resource = $(list 'managed-init
-      (list 'expr (list 'int) (list 'literal (list 'int) "6")));
+    ManagedResource resource = $auto(
+      $(list 'expr (list 'int) (list 'literal (list 'int) "6")));
     EXPECT_INT_EQ(resource, 6);
   }
   EXPECT_INT_EQ(_managed_return(), 5);
