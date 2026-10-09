@@ -12,43 +12,19 @@ X2c statement parsing.
 
 | Function | Summary |
 | --- | --- |
-| [`Compiler.begin_catch_arm`](#Compiler.begin_catch_arm) | Opens a `Sym` scope for one catch arm and defines a nonempty filter's definite pattern binders. |
-| [`Compiler.begin_match_arm`](#Compiler.begin_match_arm) | Opens a `Sym` scope for one match arm and optionally defines its definite pattern binders. |
 | [`Compiler.finish_return_statement`](#Compiler.finish_return_statement) | Builds a return node for an optional expression without consuming tokens. |
 | [`Compiler.parse_block_item`](#Compiler.parse_block_item) | Parses one block-position declaration, statement, or macro insertion. |
 | [`Compiler.parse_block_items`](#Compiler.parse_block_items) | Parses block items after an already-consumed opening brace through `}` in a new lexical scope. |
 | [`Compiler.parse_callable_body`](#Compiler.parse_callable_body) | Parses a callable's outer block in its active parameter scope. |
+| [`Compiler.parse_case_body`](#Compiler.parse_case_body) | Parses a source match arm's guard and body, declaring its typed `types` captures, inside the arm scope that the binder opened. |
 | [`Compiler.parse_compound_statement`](#Compiler.parse_compound_statement) | Parses a compound body after its opening brace and consumes the closing `}`, returning an origin-anchored `(block ...)` node. |
 | [`Compiler.parse_governed`](#Compiler.parse_governed) | Parses the statement a control keyword or statement macro governs, or a block item at `AST_BLOCK`. |
 | [`Compiler.parse_match_row_argument`](#Compiler.parse_match_row_argument) | Parses one MatchRow macro argument with the ordinary match-arm owner. |
-| [`Compiler.parse_source_clause`](#Compiler.parse_source_clause) | Parses the clause `kind` of a source `if`, `while`, `do`, or `for`, with the punctuation after it, when the binder reaches that clause. |
+| [`Compiler.parse_source_clause`](#Compiler.parse_source_clause) | Parses the clause `kind` of a source `if`, `while`, `do`, `for`, `match`, or `try`, with the punctuation after it, when the binder reaches that clause. |
 | [`Compiler.parse_statement`](#Compiler.parse_statement) | Parses and binds one statement or statement-position macro at the current token. |
 | [`Compiler.with_binding`](#Compiler.with_binding) | Returns the binding of the current identifier when it names a live `with` expression, or NULL. |
 
 ### `Compiler`
-
-<a id="Compiler.begin_catch_arm"></a>
-#### Compiler.begin_catch_arm
-
-`List Compiler.begin_catch_arm(Compiler c, List pattern, Token start)`
-
-Opens a `Sym` scope for one catch arm and defines a nonempty filter's
-definite pattern binders. Returns their capture-token/binding pairs.
-The caller must pop the scope after parsing or binding the arm body;
-binder diagnostics use `start`.
-
-Source: `src/statements.x:653`
-
-<a id="Compiler.begin_match_arm"></a>
-#### Compiler.begin_match_arm
-
-`void Compiler.begin_match_arm( Compiler c, List pattern, Token start, int binds)`
-
-Opens a `Sym` scope for one match arm and optionally defines its definite
-pattern binders. The caller must pop the scope after parsing or binding the
-arm body; binder diagnostics use `start`.
-
-Source: `src/statements.x:489`
 
 <a id="Compiler.finish_return_statement"></a>
 #### Compiler.finish_return_statement
@@ -59,7 +35,7 @@ Builds a return node for an optional expression without consuming tokens.
 A present expression is resolved in the current `Sym` scope and includes
 the current `return_type` for later conversion.
 
-Source: `src/statements.x:312`
+Source: `src/statements.x:303`
 
 <a id="Compiler.parse_block_item"></a>
 #### Compiler.parse_block_item
@@ -70,7 +46,7 @@ Parses one block-position declaration, statement, or macro insertion.
 The caller owns the surrounding scope; a macro insertion may return a
 `(seq ...)` node containing several block items.
 
-Source: `src/statements.x:753`
+Source: `src/statements.x:701`
 
 <a id="Compiler.parse_block_items"></a>
 #### Compiler.parse_block_items
@@ -80,7 +56,7 @@ Source: `src/statements.x:753`
 Parses block items after an already-consumed opening brace through `}` in
 a new lexical scope. `anchor_items` records statement origins.
 
-Source: `src/statements.x:796`
+Source: `src/statements.x:744`
 
 <a id="Compiler.parse_callable_body"></a>
 #### Compiler.parse_callable_body
@@ -89,7 +65,17 @@ Source: `src/statements.x:796`
 
 Parses a callable's outer block in its active parameter scope.
 
-Source: `src/statements.x:803`
+Source: `src/statements.x:751`
+
+<a id="Compiler.parse_case_body"></a>
+#### Compiler.parse_case_body
+
+`List Compiler.parse_case_body(Compiler c, List types)`
+
+Parses a source match arm's guard and body, declaring its typed
+`types` captures, inside the arm scope that the binder opened.
+
+Source: `src/statements.x:475`
 
 <a id="Compiler.parse_compound_statement"></a>
 #### Compiler.parse_compound_statement
@@ -99,7 +85,7 @@ Source: `src/statements.x:803`
 Parses a compound body after its opening brace and consumes the closing
 `}`, returning an origin-anchored `(block ...)` node.
 
-Source: `src/statements.x:791`
+Source: `src/statements.x:739`
 
 <a id="Compiler.parse_governed"></a>
 #### Compiler.parse_governed
@@ -115,7 +101,7 @@ statement macro that wraps its body in braces keeps the whole group
 inside them. A later statement in the same arm follows the governed one,
 as in C.
 
-Source: `src/statements.x:671`
+Source: `src/statements.x:619`
 
 <a id="Compiler.parse_match_row_argument"></a>
 #### Compiler.parse_match_row_argument
@@ -124,18 +110,19 @@ Source: `src/statements.x:671`
 
 Parses one MatchRow macro argument with the ordinary match-arm owner.
 
-Source: `src/statements.x:439`
+Source: `src/statements.x:427`
 
 <a id="Compiler.parse_source_clause"></a>
 #### Compiler.parse_source_clause
 
 `List Compiler.parse_source_clause(Compiler c, Symbol kind)`
 
-Parses the clause `kind` of a source `if`, `while`, `do`, or `for`, with
-the punctuation after it, when the binder reaches that clause. An absent
-`else` or `for` header clause is NULL.
+Parses the clause `kind` of a source `if`, `while`, `do`, `for`,
+`match`, or `try`, with the punctuation after it, when the binder
+reaches that clause. An absent `else`, `for` header, `catch`, or
+`finally` clause is NULL.
 
-Source: `src/statements.x:237`
+Source: `src/statements.x:223`
 
 <a id="Compiler.parse_statement"></a>
 #### Compiler.parse_statement
@@ -146,7 +133,7 @@ Parses and binds one statement or statement-position macro at the current
 token. On return, the cursor follows the complete statement and any
 temporary `Sym` scopes opened by the statement have been closed.
 
-Source: `src/statements.x:87`
+Source: `src/statements.x:74`
 
 <a id="Compiler.with_binding"></a>
 #### Compiler.with_binding
@@ -156,7 +143,7 @@ Source: `src/statements.x:87`
 Returns the binding of the current identifier when it names a live
 `with` expression, or NULL.
 
-Source: `src/statements.x:221`
+Source: `src/statements.x:206`
 
 ## Design notes
 

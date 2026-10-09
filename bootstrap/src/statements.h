@@ -23,9 +23,7 @@ List Compiler_finish_return_statement(Compiler c, List expr);
 
 List Compiler_parse_match_row_argument(Compiler c);
 
-void Compiler_begin_match_arm(Compiler c, List pattern, Token start, int binds);
-
-List Compiler_begin_catch_arm(Compiler c, List pattern, Token start);
+List Compiler_parse_case_body(Compiler c, List types);
 
 List Compiler_parse_governed(Compiler c, AstPos position);
 

@@ -106,7 +106,13 @@ List Compiler_finish_initializers(Compiler c, List declaration, Token origin);
 
 List Compiler_bind_syntax(Compiler c, Var syntax, AstPos context, Type return_type);
 
+Var source_clause(Symbol kind);
+
 List Compiler_bind_source_statement(Compiler c);
+
+List Compiler_bind_catch_arm(Compiler c, List pattern, Var body, Token start, List handle);
+
+List Compiler_bind_match_arm(Compiler c, List pattern, Var body, Token start, int binds, List types);
 
 List Compiler_bind_callable_body(Compiler c, List syntax, Type return_type);
 

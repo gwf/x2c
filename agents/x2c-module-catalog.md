@@ -543,8 +543,9 @@ Public functions:
 `Compiler.parse_function_definition`, `Compiler.parse_function_target`,
 `Compiler.enter`, `Compiler.enclosing`, `Compiler.place_after`,
 `Compiler.close_placements`, `Compiler.leave_item`,
-`Compiler.finish_initializers`, `Compiler.bind_syntax`,
-`Compiler.bind_source_statement`, `Compiler.bind_callable_body`,
+`Compiler.finish_initializers`, `Compiler.bind_syntax`, `source_clause`,
+`Compiler.bind_source_statement`, `Compiler.bind_catch_arm`,
+`Compiler.bind_match_arm`, `Compiler.bind_callable_body`,
 `Compiler.finish_foreign_alias`
 
 ### [src/preprocess.x](../src/preprocess.x)
@@ -640,10 +641,10 @@ Public functions:
 
 `Compiler.parse_statement`, `Compiler.with_binding`,
 `Compiler.parse_source_clause`, `Compiler.finish_return_statement`,
-`Compiler.parse_match_row_argument`, `Compiler.begin_match_arm`,
-`Compiler.begin_catch_arm`, `Compiler.parse_governed`,
-`Compiler.parse_block_item`, `Compiler.parse_compound_statement`,
-`Compiler.parse_block_items`, `Compiler.parse_callable_body`
+`Compiler.parse_match_row_argument`, `Compiler.parse_case_body`,
+`Compiler.parse_governed`, `Compiler.parse_block_item`,
+`Compiler.parse_compound_statement`, `Compiler.parse_block_items`,
+`Compiler.parse_callable_body`
 
 ### [src/symbols.x](../src/symbols.x)
 
