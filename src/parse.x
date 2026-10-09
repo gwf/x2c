@@ -1095,7 +1095,7 @@ static List Compiler._destructure_declaration(
   List bindings = c._destructure_targets(binding_type);
   /* A foreach destructures each element rather than an initializer, so the
      same `(a, b)` spelling stands without `=`. It reduces to the
-     multi-binding declaration `_for_statement` already knows how to
+     multi-binding declaration a `for` header already knows how to
      carry across `in`. */
   if (allow_uninitialized || c.peek(0) == <in>)
     return %(declare $type (bindings @{_destructure_binds(bindings)}));
@@ -3101,8 +3101,17 @@ static List Compiler._bind_expression_statement(
 static List Compiler._resolve(Compiler c, List expr) =>
   c.resolve_expression(expr, c.token);
 
-static List Compiler._bind_statement(Compiler c, Var stmt) =>
-  c.bind_syntax(stmt, AST_STATEMENT, c.return_type);
+/* A `(source-clause KIND)` child is source the token parser reads when the
+   binder reaches it; it parses already bound. */
+static List Compiler._bind_statement(Compiler c, Var stmt) {
+  match (stmt) case %(source-clause ?kind): return c.parse_source_clause(kind);
+  return c.bind_syntax(stmt, AST_STATEMENT, c.return_type);
+}
+
+static List Compiler._bind_clause(Compiler c, Var expr) {
+  match (expr) case %(source-clause ?kind): return c.parse_source_clause(kind);
+  return c._resolve(expr);
+}
 
 /* A macro invocation expands at the position that holds it. A Macro value
    applied directly stands for one statement or unit item. Inside a
@@ -3515,11 +3524,15 @@ static List Compiler._bind_typed_targets(
 
 // constructed statements
 
-static List Compiler._bind_do(Compiler c, Var body, Var condition) =>
-  %(do ${c._bind_statement(body)} ${c._resolve(condition)});
+static List Compiler._bind_do(Compiler c, Var body, Var condition) {
+  List bound = c._bind_statement(body);
+  return %(do $bound ${c._bind_clause(condition)});
+}
 
-static List Compiler._bind_while(Compiler c, Var condition, Var body) =>
-  %(while ${c._resolve(condition)} ${c._bind_statement(body)});
+static List Compiler._bind_while(Compiler c, Var condition, Var body) {
+  List test = c._bind_clause(condition);
+  return %(while $test ${c._bind_statement(body)});
+}
 
 static List Compiler._bind_switch(Compiler c, Var expr, Var body) =>
   %(switch ${c._resolve(expr)} ${c._bind_statement(body)});
@@ -3528,7 +3541,7 @@ static List Compiler._bind_switch(Compiler c, Var expr, Var body) =>
    present, and marks it present after the `if` when the other arm cannot
    fall through. */
 static List Compiler._bind_if(Compiler c, Var condition, Var ontrue) {
-  List test = c._resolve(condition);
+  List test = c._bind_clause(condition);
   int true_is_present = 1;
   List binding = c.optional_reference_test(test, true_is_present);
   List yes = c._bind_branch(ontrue, binding, true_is_present);
@@ -3538,13 +3551,14 @@ static List Compiler._bind_if(Compiler c, Var condition, Var ontrue) {
 
 static List Compiler._bind_if_else(
   Compiler c, Var condition, Var ontrue, Var onfalse) {
-  List test = c._resolve(condition);
+  List test = c._bind_clause(condition);
   int true_is_present = 1;
   List binding = c.optional_reference_test(test, true_is_present);
   List yes = c._bind_branch(ontrue, binding, true_is_present);
   List no = c._bind_branch(onfalse, binding, !true_is_present);
   c.settle_reference(binding, true_is_present, yes, no);
-  return %(if $test $yes $no);
+  // A source `if` without `else` parses no false arm.
+  return no ? %(if $test $yes $no) : %(if $test $yes);
 }
 
 static List Compiler._bind_branch(
@@ -3561,14 +3575,10 @@ static List Compiler._bind_for(
   Compiler c, Var init, Var condition, Var increment, Var body) {
   c.sym.push_new_scope();
   defer c.sym.pop_scope();
-  if (init is <list>) {
-    List node = init;
-    init = node.car() == <decl>
-         ? c.bind_syntax(node, AST_BLOCK, c.return_type)
-         : c._resolve(node);
-  }
-  if (condition is <list>) condition = c._resolve(condition);
-  if (increment is <list>) increment = c._resolve(increment);
+  // The resolver binds a declaring initializer as a block declaration.
+  if (init is <list>) init = c._bind_clause(init);
+  if (condition is <list>) condition = c._bind_clause(condition);
+  if (increment is <list>) increment = c._bind_clause(increment);
   return %(for $init $condition $increment ${c._bind_statement(body)});
 }
 

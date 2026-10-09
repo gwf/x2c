@@ -96,10 +96,18 @@ static List Compiler._statement(Compiler c, AstPos position) {
   if (!c.with_binding() && c.macro_starts_target_at(AST_STATEMENT))
     return c._macro_statement();
   switch (c.peek(0)) {
-    case <if>:          return c._if_statement();
-    case <while>:       return c._while_statement();
-    case <for>:         return c._for_statement();
-    case <do>:          return c._do_statement();
+    case <if>:
+      return c._source_statement(%(if (source-clause test)
+        (source-clause then) (source-clause else)));
+    case <while>:
+      return c._source_statement(
+        %(while (source-clause test) (source-clause body)));
+    case <for>:
+      return c._source_statement(%(for (source-clause init)
+        (source-clause cond) (source-clause next) (source-clause body)));
+    case <do>:
+      return c._source_statement(
+        %(do (source-clause do) (source-clause test)));
     case <return>:      return c._return_statement();
     case <case>:        return c._case_statement();
     case <break>:       return c._break_statement();
@@ -232,79 +240,74 @@ List Compiler.with_binding(Compiler c) {
 
 // conditionals and loops
 
-static List Compiler._if_statement(Compiler c) {
-  List cond = c._keyword_paren_expr(<if>);
-  int true_is_present = 1;
-  List binding = c.optional_reference_test(cond, true_is_present);
-  List ontrue = c._if_arm(binding, true_is_present);
-  c.__complete_here(<continue>, %("else"));
-  if (c.peek(0) != <else>) {
-    c.settle_reference(binding, true_is_present, ontrue, NULL);
-    return %(if $cond $ontrue);
-  }
-  ontrue = c._continued(ontrue);
+/* `if`, `while`, `do`, and `for` bind through the constructed binder. Each
+   `(source-clause KIND)` child parses from the tokens when the binder
+   reaches it, so the binder's scopes and optional-reference facts govern
+   that parse. */
+static List Compiler._source_statement(Compiler c, List syntax) {
   c.next();
-  List onfalse = c._if_arm(binding, !true_is_present);
-  c.settle_reference(binding, true_is_present, ontrue, onfalse);
-  return %(if $cond $ontrue $onfalse);
+  return c.bind_syntax(syntax, AST_STATEMENT, c.return_type);
+}
+
+/** Parses the clause `kind` of a source `if`, `while`, `do`, or `for`, with
+    the punctuation after it, when the binder reaches that clause. An absent
+    `else` or `for` header clause is NULL.
+*/
+List Compiler.parse_source_clause(Compiler c, Symbol kind) {
+  switch (kind) {
+    case <test>: return c._paren_expr();
+    case <then>: return c._then_arm();
+    case <else>:
+      return c.test(<else>) ? c.parse_governed(AST_STATEMENT) : NULL;
+    case <do>:   return c._do_body();
+    case <init>: return c._for_init();
+    case <cond>: return c._for_clause(<;>);
+    case <next>: return c._for_clause(<)>);
+  }
+  return c.parse_governed(AST_STATEMENT);
 }
 
 static List Compiler._keyword_paren_expr(Compiler c, Symbol keyword) {
   c.expect(keyword);
+  return c._paren_expr();
+}
+
+static List Compiler._paren_expr(Compiler c) {
   c.expect(<(>);
   List expr = c.parse_expression();
   c.expect(<)>);
   return expr;
 }
 
-/* Parses one arm of an `if`. When the condition tests the optional
-   reference `binding`, the arm parses with it marked present if `present`
-   says the arm runs only with the reference present. */
-static List Compiler._if_arm(Compiler c, List binding, int present) {
-  if (!binding) return c.parse_governed(AST_STATEMENT);
-  List before = c.present_references();
-  if (present) c.mark_reference_present(binding);
+/* Directives before an `else` follow the arm it continues. */
+static List Compiler._then_arm(Compiler c) {
   List arm = c.parse_governed(AST_STATEMENT);
-  c.restore_reference_presence(before);
-  return arm;
+  c.__complete_here(<continue>, %("else"));
+  return c.peek(0) == <else> ? c._continued(arm) : arm;
 }
 
-static List Compiler._while_statement(Compiler c) {
-  List cond = c._keyword_paren_expr(<while>);
-  List body = c.parse_governed(AST_STATEMENT);
-  return %(while $cond $body);
-}
-
-static List Compiler._for_statement(Compiler c) {
-  c.sym.push_new_scope();
-  defer c.sym.pop_scope();
-  c.expect(<for>);
-  c.expect(<(>);
-  /* Each clause peeks for its terminator and leaves the token for the
-     expect below, so an omitted clause consumes exactly what a present
-     one does. */
-  List init = c._for_init();
-  c.expect(<;>);
-  List cond = c.peek(0) == <;> ? NULL : c.parse_expression();
-  c.expect(<;>);
-  List inc = c.peek(0) == <)> ? NULL : c.parse_expression();
-  c.expect(<)>);
-  List body = c.parse_governed(AST_STATEMENT);
-  return %(for $init $cond $inc $body);
-}
-
-/* An initializer that declares becomes a `(decl ...)` node. */
-static List Compiler._for_init(Compiler c) {
-  if (c.peek(0) == <;>) return NULL;
-  if (!c.test_declaration()) return c.parse_expression();
-  return c.parse_type_operand(NULL);
-}
-
-static List Compiler._do_statement(Compiler c) {
-  c.expect(<do>);
+static List Compiler._do_body(Compiler c) {
   List body = c._continued(c.parse_governed(AST_STATEMENT));
-  List cond = c._keyword_paren_expr(<while>);
-  return %(do $body $cond);
+  c.expect(<while>);
+  return body;
+}
+
+/* An initializer that declares becomes a `(decl ...)` node. Each clause
+   peeks for its terminator, so an omitted clause consumes exactly what a
+   present one does. */
+static List Compiler._for_init(Compiler c) {
+  c.expect(<(>);
+  List init = c.peek(0) == <;> ? NULL
+            : c.test_declaration() ? c.parse_type_operand(NULL)
+            : c.parse_expression();
+  c.expect(<;>);
+  return init;
+}
+
+static List Compiler._for_clause(Compiler c, Symbol end) {
+  List clause = c.peek(0) == end ? NULL : c.parse_expression();
+  c.expect(end);
+  return clause;
 }
 
 // keyword statements
