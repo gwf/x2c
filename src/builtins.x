@@ -874,23 +874,12 @@ static List _binding_name_signature(String name) =>
 /* the Lisp names
 
    Each algorithm is bound into the compile-time Lisp session under the
-   name its callers use, as are the slot functions that the try templates
-   in `src/transform.x` call. */
+   name its callers use, as are the slot functions that quotations in
+   `src/cleanup.x` call. */
 
 static macro Stmt $builtin.row(Expr $rows, Expr $name, Expr $function) {
   $rows[$name] = Func.new(
     $function, $(_x2c.literal.list (_x2c.function.native-type $function)));
-}
-
-/** Places the lowered statements that leave a try region after it, with
-    the effect that marks the unit as needing exception support. */
-List builtin_try_cleanup_placement(Var cleanup) {
-  Atom token = Atom.intern("?__try_cleanup");
-  match (cleanup)
-    case %(code-value ? ?statements ?):
-      return %(code-value "lowered" $token ((cleanup $token $statements)));
-  x2c_diagnostic_fail("try cleanup must be lowered statements", %());
-  return NULL;
 }
 
 /** Returns each built-in algorithm by the name compile-time code calls it
@@ -900,12 +889,6 @@ Map builtin_targets(void) {
   $builtin.row(rows, "builtin_scope_expand", _scope_expand);
   $builtin.row(rows, "x2c_func_call_arguments", x2c_func_call_arguments);
   $builtin.row(rows, "builtin_defer_captures", builtin_defer_captures);
-  $builtin.row(rows, "builtin_try_catch_site", builtin_try_catch_site);
-  $builtin.row(rows, "builtin_try_landing", builtin_try_landing);
-  $builtin.row(rows, "builtin_catch_patterns", builtin_catch_patterns);
-  $builtin.row(rows, "builtin_catch_cases", builtin_catch_cases);
-  $builtin.row(
-    rows, "builtin_try_cleanup_placement", builtin_try_cleanup_placement);
   $builtin.row(rows, "builtin_foreach_expand", _foreach_expand);
   $builtin.row(rows, "builtin_auto_expand", _auto_expand);
   $builtin.row(rows, "builtin_auto_release", _auto_release);

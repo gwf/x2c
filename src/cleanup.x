@@ -2,12 +2,14 @@
 
     Copyright (c) 2026 Gary William Flake.
 
-    A cleanup region is a `try` body or catch arm, a `defer` body, or the
-    rest of a block after a static local whose initializer runs at runtime.
-    Normalization turns each `defer` statement into a region. When a
-    function is complete, one walk places each region's exits on every
-    transfer that leaves it, rejects a jump into a region, and keeps the
-    locals a `sigsetjmp` landing reads either `volatile` or escaped.
+    A cleanup region is a `defer` body, a region of a landing form such as
+    a `try` body or catch arm, or the rest of a block after a static local
+    whose initializer runs at runtime. Normalization turns each `defer`
+    statement into a region. When a function is complete, each `try` takes
+    the landing form its component answers, and one walk places each
+    region's exits on every transfer that leaves it, rejects a jump into a
+    region, and keeps the locals a `sigsetjmp` landing reads either
+    `volatile` or escaped.
 */
 
 #pragma once
@@ -22,10 +24,8 @@
 #include "parse.x"
 #include "callables.x"
 
-/* The runtime types a region's record and frame have. */
-static String _frame_type = "ExceptionFrame";
+/* The runtime type of a defer region's record. */
 static String _record_type = "X2CCleanup";
-static String _handler_type = "ErrorHandler";
 
 /* The walk state for one function body: the open regions, the depths a
    `break` and `continue` unwind to, and each label's region ancestry. */
@@ -43,7 +43,7 @@ static typedef struct Walk {
 static typedef struct Preserve {
   Compiler c;
   Map names, holders, pointers, escaped;
-  int expression_tries;
+  int expression_landings;
 } Preserve;
 
 /* Expressions may nest one level per operator. Visit blocks without
@@ -98,12 +98,11 @@ static List _expression_children(List node, Map changed) {
 }
 
 /* Whether a statement expression in `body`, before its regions lower,
-   holds a `try`. */
-static int _expression_holds_try(List body) {
+   holds a landing form. */
+static int _expression_holds_landing(List body) {
   List node;
   $ast.walk(body, node) match (node) case %(expr *): {
-    if (ast_contains_head(node, <try>) || ast_contains_head(node, <landing>))
-      return 1;
+    if (ast_contains_head(node, <landing>)) return 1;
     continue;
   }
   return 0;
@@ -144,7 +143,7 @@ static List Compiler._lower_function(Compiler c, List node) {
       p.collect(body);
       List rewritten = w.rewrite(body);
       if (p.names.len() || p.escaped.len()) {
-        p.expression_tries = _expression_holds_try(body);
+        p.expression_landings = _expression_holds_landing(body);
         rewritten = p.rewrite(rewritten);
         bindings = p.rewrite(bindings);
         rewritten = p.escape_parameters(rewritten, bindings);
@@ -205,8 +204,7 @@ static List Compiler._landing_form(Compiler c, List node, Map runtime) {
       }
     return %(landing $code ${parts.list_free()});
   }
-  Var child;
-  $ast.rewrite_children(node, child, c._static_regions(child, runtime));
+  return node;
 }
 
 /* The pending initializer and the emitter share one cleanup record. Its
@@ -376,8 +374,6 @@ static void Walk.collect_labels(Walk &w, Var value, List path) {
   match (node) {
     case %(expr *): w._collect_blocks(node, path);
     case %(label ?name *rest): w._collect_label(name, rest, path);
-    case %(try ?body ?clause ?finalizer *):
-      w._collect_try(body, clause, finalizer, path);
     case %(landing ? ?rows): w._collect_rows(rows, path);
     case %(defer ?body *): w.collect_labels(body, cons(body, path));
     case %(localinit ?guard ?body):
@@ -397,25 +393,6 @@ static void Walk._collect_label(Walk &w, Var name, List rest, List path) {
   String spelling = _label_spelling(name);
   if (spelling) w.labels[spelling] = path;
   w._collect_children(rest, path);
-}
-
-/* Each region a construct opens has its own identity: a `try` protects
-   its body and each catch arm separately, while its guards and its
-   finalizer run outside the region and keep the enclosing path. */
-static void Walk._collect_try(
-  Walk &w, Var body, Var clause, Var finalizer, List path) {
-  w.collect_labels(body, cons(body, path));
-  w._collect_catches(clause, path);
-  w.collect_labels(finalizer, path);
-}
-
-static void Walk._collect_catches(Walk &w, Var clause, List path) {
-  match (clause) case %(catchcases ?records ?handle):
-    foreach (List record, records) {
-      w.collect_labels(record.car(), path);
-      List arm = record.cadr();
-      w.collect_labels(arm, cons(arm, path));
-    }
 }
 
 /* Each region a landing opens has its own identity, such as a `try` body
@@ -467,10 +444,6 @@ static Var Walk.rewrite(Walk &w, Var value) {
     case %(at ?(int origin) ?inner): return w._lower_at(origin, inner);
     case %(defer ?body ?env ?callback ?records ?):
       return w._lower_defer(body, env, callback, records);
-    case ${$caught(?body, ?finalizer, *arms)}:
-      return w._lower_try(node, body, arms, finalizer);
-    case ${$tried(?body, ?finalizer)}:
-      return w._lower_try(node, body, NULL, finalizer);
     case %(landing ?code ?rows): return w._lower_landing(code, rows);
     case %(localinit ?guard ?body):
       return w._rewrite_localinit(node, guard, body);
@@ -713,241 +686,6 @@ static List Compiler._bind_parts(Compiler c, Var code, List parts) {
   return c.bind_syntax(replaced, AST_BLOCK, c.return_type);
 }
 
-/* try
-
-   A try region: its frame, its catch site, its landing and its exits, each
-   written by a template below. A clause's facts are
-   `(HANDLE STATE (ARM...) PATTERN...)`: the handler the parser introduced,
-   the catch site's initial state, the lowered arms, and the patterns of
-   the filtered arms, which precede the default arm. */
-
-/* Four helpers below are defined here; placement is defined in builtins.x.
-   Bind template names before builtins registers their native slots. */
-// lint: allow forward-declaration FI-6: template binding
-List builtin_try_catch_site(List frame, List clause);
-// lint: allow forward-declaration FI-6: template binding
-List builtin_catch_patterns(List patterns, List items);
-// lint: allow forward-declaration FI-6: template binding
-List builtin_try_landing(List frame, List clause, List cleanup);
-// lint: allow forward-declaration FI-6: template binding
-List builtin_catch_cases(List selected, List arms);
-// lint: allow src-forward-declaration FI-6: native target binding
-List builtin_try_cleanup_placement(Var cleanup);
-
-/* A try region pushes its frame and lands on it when something raises. */
-static macro Stmt $compiler_try(Name $frame, Expr $clause,
-    Stmt $body, Stmt $cleanup) {
-  {
-    ExceptionFrame $frame;
-    @builtin_try_catch_site($frame, $clause)
-    x2c_exception_push(&$frame);
-    if (!sigsetjmp($frame.env, 0)) $body
-    else {
-      x2c_exception_landed(&$frame);
-      @builtin_try_landing($frame, $clause, $cleanup)
-    }
-    @builtin_try_cleanup_placement($cleanup)
-  }
-}
-
-static macro Stmt $catch_site(Name $frame, Name $handle, Expr $count,
-    Expr $fallback, Expr $state, Expr @patterns) {
-  static MatchCaptureSite arms[$count];
-  Var patterns[$count];
-  static ErrorCatchSite site = {arms, $fallback, $count, $state, -1};
-  if (x2c_error_catch_site_pending(&site)) {
-    @builtin_catch_patterns(patterns, $patterns)
-  }
-  volatile ErrorHandler $handle =
-    x2c_error_catch_site_push(&$frame, &site, patterns);
-}
-
-/* A landing that hands a raised error to the arm its handler selected. */
-static macro Stmt $catch_landing(Name $frame, Name $handle,
-    Stmt $unhandled, Stmt @arms) {
-  if (x2c_exception_is_error_target(&$frame)) {
-    int selected = x2c_error_catch_selected($handle);
-    x2c_error_catch_detach($handle);
-    x2c_exception_mark_handled(&$frame);
-    @builtin_catch_cases(selected, $arms)
-  }
-  else $unhandled
-}
-
-/* Lowers the parsed try `node`: its body, its catch arms, which may be
-   NULL, and its finalizer, which may be NULL. */
-static List Walk._lower_try(
-  Walk &w, List node, List body, List arms, List finalizer) {
-  Compiler c = w.c;
-  w._check_finalizer_label(finalizer);
-  List frame = c._region_binding("exception_frame");
-  List handle = arms ? catch_handle(node) : NULL;
-  List cleanup = c._try_cleanup(frame, handle, w.rewrite(finalizer), !!arms);
-  List lowered = w._region(cleanup, body);
-  Macro shape = $compiler_try;
-  return c.bind_syntax(
-    shape(frame, w._catch_clause(handle, cleanup, arms), lowered, cleanup),
-    AST_BLOCK, c.return_type);
-}
-
-/* Reports a label the finalizer defines: it runs on every path that
-   leaves its region, so the label would be defined once for each. */
-static void Walk._check_finalizer_label(Walk &w, List finalizer) {
-  int labelled_at = w.origin;
-  Var labelled = _finalizer_label(finalizer, w.origin, labelled_at);
-  if (!labelled) return;
-  String name = _label_spelling(labelled);
-  w._report_at(
-    labelled_at, "a finally body cannot define a label",
-    %("a finalizer runs on every path that leaves its region, so '${
-      name ? name : "this label"}' would be defined once for each"));
-}
-
-/* The first label a finalizer defines, or NULL. The statements that leave a
-   region run on every path that leaves it, so a label among them would be
-   defined once per path. */
-static Var _finalizer_label(Var value, int origin, int &at) {
-  Array pending = $auto([value]), origins = $auto([origin]);
-  while (pending.len()) {
-    Var current = pending.take_last();
-    int here = origins.take_last();
-    if (current is not <list> || current.is_nil()) continue;
-    List node = current;
-    match (node) {
-      case %(function *): continue;
-      case %(at ?(int inner) ?wrapped): {
-        pending.push(wrapped);
-        origins.push(inner);
-        continue;
-      }
-      case %(label ?name *): {
-        at = here;
-        return name;
-      }
-    }
-    foreach (Var child, node) {
-      pending.push(child);
-      origins.push(here);
-    }
-  }
-  return NULL;
-}
-
-/* A catch closes before a claimed finalizer, then the frame leaves. The
-   finalizer is already lowered and retains its stage through the template. */
-static List Compiler._try_cleanup(
-  Compiler c, List frame, List handle, List finalizer, int has_clause) {
-  List before = NULL;
-  if (has_clause) {
-    List handler = %(expr (($_handler_type)) (ident $handle));
-    List close = $!{ x2c_error_catch_close($handler); $handler = NULL; };
-    before = %($close);
-  }
-  List address = _address_of(_frame_type, frame), syntax = NULL;
-  if (finalizer) {
-    List lowered = %(code-value "lowered" (seq $finalizer) ());
-    syntax = $!{
-      if (x2c_exception_claim($address)) {
-        @before
-        $lowered
-      }
-      x2c_exception_leave($address);
-    };
-  }
-  else syntax = $!{ @before x2c_exception_leave($address); };
-  List result = c.bind_syntax(syntax, AST_BLOCK, c.return_type);
-  return %(code-value "lowered" $result ());
-}
-
-/* The facts `$compiler_try` writes a try's catch site and landing from,
-   or NULL for a try without catches. Each arm is its own region, which a
-   jump from the body may not enter, and leaves `cleanup` on its exits. A
-   pattern with a dynamic part is prepared again on each entry. */
-static List Walk._catch_clause(
-  Walk &w, List handle, List cleanup, List records) {
-  if (!records) return NULL;
-  String state = "ERROR_CATCH_PENDING";
-  Array arms = [], patterns = [];
-  foreach (List record, records) {
-    List pattern = record.car();
-    if (pattern) {
-      if (!w.c.match_pattern_is_static(pattern))
-        state = "ERROR_CATCH_TRANSIENT";
-      patterns.push(pattern);
-    }
-    arms.push(w._region(cleanup, record.cadr()));
-  }
-  return %($handle $state ${arms.list_free()} @{patterns.list_free()});
-}
-
-/** Returns the catch site `frame` pushes for the clause `clause`
-    describes, or nothing for a try without one; the `$compiler_try`
-    template calls this in a slot. */
-List builtin_try_catch_site(List frame, List clause) {
-  Macro site = $catch_site;
-  match (clause)
-    case %(?handle ?(String state) ?(List arms) *patterns): {
-      int count = arms.len(), filtered = patterns.len();
-      return site(
-        frame, handle, x2c_literal_int(count),
-        x2c_literal_int(filtered < count ? filtered : -1),
-        %(expr (int) $state), patterns);
-    }
-  return NULL;
-}
-
-/** Returns the statement that prepares each of `items` into its slot of
-    the catch site's `patterns`; `$catch_site` calls this in a slot. */
-List builtin_catch_patterns(List patterns, List items) {
-  Array prepared = [];
-  int index = 0;
-  foreach (List pattern, items) {
-    prepared.push($!{ $patterns[$index] = $pattern; });
-    index++;
-  }
-  return prepared.list_free();
-}
-
-/** Returns what runs when `frame` lands: the catch arm the clause's
-    handler selected, or `cleanup` and no return; the `$compiler_try`
-    template calls this in a slot. A landing no catch arm handles runs the
-    region's exits, and control does not come back. */
-List builtin_try_landing(List frame, List clause, List cleanup) {
-  Macro landing = $catch_landing;
-  List otherwise = $!{ { $cleanup __builtin_unreachable(); } };
-  match (clause)
-    case %(?handle ? ?arms *):
-      return landing(frame, handle, otherwise, arms);
-  return otherwise;
-}
-
-/* Whether a lowered arm, a code value around its statement, returns or
-   raises on every path out of it. */
-static int _arm_exits(List arm) {
-  match (arm) case %(code-value ? ?statement ?):
-    return reference_guard_exits(statement);
-  return 0;
-}
-
-/** Returns each lowered arm of `arms` chosen by its index in `selected`;
-    `$catch_landing` calls this in a slot. Each arm is its own statement, so
-    a `break` or `continue` in it still reaches the enclosing loop, and only
-    one test holds because `selected` does not change. When every arm
-    returns or raises, control cannot leave them, and a final unreachable
-    mark tells C so that a function ending in such a `try` needs no return
-    after it. */
-List builtin_catch_cases(List selected, List arms) {
-  Array cases = [];
-  int index = 0, exits = 1;
-  foreach (List arm, arms) {
-    cases.push($!{ if ($selected == $index) $arm });
-    index++;
-    exits &= _arm_exits(arm);
-  }
-  if (exits) cases.push($!{ __builtin_unreachable(); });
-  return cases.list_free();
-}
-
 /* defer regions
 
    Registration and its captured addresses share the body's region scope. */
@@ -1007,11 +745,12 @@ List builtin_defer_captures(List environment, List records) {
 
 // volatile locals
 
-/* Names whose storage a transfer may leave stale: those a `try` body writes,
-   and those a `defer` inside one writes through its environment. The flag
-   covers a subtree, so a write outside every `try` preserves nothing. A
-   long expression chain nests as deeply as it is long, so the walk keeps
-   its pending work off the C stack. */
+/* Names whose storage a transfer may leave stale: those the parts of a
+   landing form write, such as a `try` body, and those a `defer` inside one
+   writes through its environment. The flag covers a subtree, so a write
+   outside every landing preserves nothing. A long expression chain nests
+   as deeply as it is long, so the walk keeps its pending work off the C
+   stack. */
 static void Preserve.collect(Preserve &p, List body) {
   Array pending = $auto([body]), flags = $auto([0]);
   while (pending.len()) {
@@ -1030,13 +769,6 @@ static void Preserve.collect(Preserve &p, List body) {
           }
         pending.push(body);
         flags.push(inside);
-        continue;
-      }
-      case %(try ?body ?clause ?finalizer *): {
-        foreach (Var part, %($body $clause $finalizer)) {
-          pending.push(part);
-          flags.push(1);
-        }
         continue;
       }
       case %(landing ? ?rows): {
@@ -1125,10 +857,10 @@ static Var Preserve.rewrite(Preserve &p, Var value) {
   if (value is not <list> || value.is_nil()) return value;
   List node = value;
   // Only declarations and parameters carry a qualifier. A statement
-  // expression's own locals follow any `try` around it, so they need one
-  // only when a statement expression in the function holds a `try`.
+  // expression's own locals follow any landing around it, so they need one
+  // only when a statement expression in the function holds a landing.
   match (node) case %(expr *):
-    return p.expression_tries
+    return p.expression_landings
       ? _rewrite_expression(node, %!(List block) using &p => p.rewrite(block))
       : node;
   match (node) {

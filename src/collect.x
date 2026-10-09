@@ -191,7 +191,7 @@ Map Compiler.collect_symbols(Compiler c, Map globs) {
 /** Returns the compiler-owned prelude sources relative to its home. Their
     runtime implementations are already linked into the shipped binaries. */
 List compiler_prelude_sources(void) =>
-  %("lib/x2c.x" "src/component-access.x");
+  %("lib/x2c.x" "src/component-access.x" "src/component-try.x");
 
 static void Compiler._add_prelude(Compiler c, Map globs, Map visited) {
   foreach (String source, compiler_prelude_sources()) {

@@ -259,6 +259,8 @@ meta static Code _try_landing(
   return %(code-value "lowered" (landing $code ${rows.list_free()}) ());
 }
 
+$rewrite($caught)
+$rewrite($tried)
 /** Lowers the parsed try `node` to its landing form. */
 meta Code try_lowering(Code node) {
   match (node) {

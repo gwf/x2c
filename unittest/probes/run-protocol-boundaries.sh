@@ -115,7 +115,7 @@ cp "$X2C" "$FAKE/builds/0/x2c"
 cp "$ROOT/etc/"*.xlisp "$ROOT/etc/"*.x "$FAKE/etc/"
 copy_runtime_sources "$FAKE/lib/"
 mkdir -p "$FAKE/src"
-cp "$ROOT/src/component-access.x" "$FAKE/src/"
+cp "$ROOT"/src/{component-access,component-try,grammar}.x "$FAKE/src/"
 cp "$SOURCE"/protocol-conflict-{a,b,primer-a,primer-b,unit}.x "$FAKE/src/"
 (cd "$FAKE" && ./builds/0/x2c translate --out-dir conflict-out \
   src/protocol-conflict-a.x src/protocol-conflict-b.x \
