@@ -96,14 +96,13 @@ static List Compiler._statement(Compiler c, AstPos position) {
   if (!c.with_binding() && c.macro_starts_target_at(AST_STATEMENT))
     return c._macro_statement();
   switch (c.peek(0)) {
-    case <if>: case <while>: case <for>: case <do>: case <match>:
+    case <if>: case <while>: case <for>: case <do>: case <match>: case <try>:
       return c.bind_source_statement();
     case <return>:      return c._return_statement();
     case <case>:        return c._case_statement();
     case <break>:       return c._break_statement();
     case <continue>:    return c._continue_statement();
     case <goto>:        return c._goto_statement();
-    case <try>:         return c._try_statement();
     case <raise>:       return c._raise_statement();
     case <defer>:       return c._defer_statement();
     case <switch>:      return c._switch_statement();
@@ -229,9 +228,10 @@ List Compiler.with_binding(Compiler c) {
 
 // conditionals and loops
 
-/** Parses the clause `kind` of a source `if`, `while`, `do`, `for`, or
-    `match`, with the punctuation after it, when the binder reaches that
-    clause. An absent `else` or `for` header clause is NULL.
+/** Parses the clause `kind` of a source `if`, `while`, `do`, `for`,
+    `match`, or `try`, with the punctuation after it, when the binder
+    reaches that clause. An absent `else`, `for` header, `catch`, or
+    `finally` clause is NULL.
 */
 List Compiler.parse_source_clause(Compiler c, Symbol kind) {
   switch (kind) {
@@ -244,6 +244,12 @@ List Compiler.parse_source_clause(Compiler c, Symbol kind) {
     case <cond>: return c._for_clause(<;>);
     case <next>: return c._for_clause(<)>);
     case <arms>: return c._match_arms();
+    case <try>:  return c._continued(c.parse_governed(AST_STATEMENT));
+    case <catches>: return c._catches();
+    case <catch>: return c._catch_body();
+    case <finally>:
+      c.__complete_here(<continue>, %("finally"));
+      return c.test(<finally>) ? c.parse_governed(AST_STATEMENT) : NULL;
   }
   return c.parse_governed(AST_STATEMENT);
 }
@@ -579,15 +585,13 @@ static List Compiler._capture_locals(Compiler c, Array locals) {
 
 // try statements
 
-static List Compiler._try_statement(Compiler c) {
-  c.expect(<try>);
-  List body = c._continued(c.parse_governed(AST_STATEMENT)), catches = NULL;
+/* A `try` needs a `catch` or a `finally` after its body. */
+static List Compiler._catches(Compiler c) {
   c.__complete_here(<continue>, %("catch" "finally"));
-  if (c.test(<catch>)) catches = c._catch_cases();
-  c.__complete_here(<continue>, %("finally"));
-  List cleanup = c.test(<finally>) ? c.parse_governed(AST_STATEMENT) : NULL;
-  if (catches || cleanup) return %(try $body $catches $cleanup);
-  $report.parse.try_handler(c);
+  if (c.test(<catch>)) return c._catch_cases();
+  if (c.peek(0) != <finally>)
+    $report.parse.try_handler(c);
+  return NULL;
 }
 
 static List Compiler._catch_cases(Compiler c) {
@@ -621,16 +625,15 @@ static List Compiler._catch_arm(Compiler c, int &is_default, List handle) {
   List pattern = NULL;
   if (c.test(<:>)) is_default = 1;
   else pattern = c._catch_filter();
-  List bindings = c.begin_catch_arm(pattern, start);
+  return c.bind_catch_arm(pattern, source_clause(<catch>), start, handle);
+}
+
+/* Directives before a later `catch` or `finally` follow the arm. */
+static List Compiler._catch_body(Compiler c) {
   List body = c.parse_governed(AST_STATEMENT);
   c.__complete_here(<continue>, %("catch" "finally"));
-  if (c.peek(0) == <catch> || c.peek(0) == <finally>)
-    body = c._continued(body);
-  c.sym.pop_scope();
-  /* A template's arm declares its binders where its expansion binds it. */
-  if (c.macro_holes) return %($pattern $body);
-  return %($pattern (block
-    @{c.catch_binder_declarations(bindings, handle)} $body));
+  return c.peek(0) == <catch> || c.peek(0) == <finally>
+       ? c._continued(body) : body;
 }
 
 static List Compiler._catch_filter(Compiler c) {

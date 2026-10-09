@@ -3525,8 +3525,8 @@ static List Compiler._bind_typed_targets(
 
 // constructed statements
 
-/* A source `if`, `while`, `do`, `for`, or `match` binds here with a Token
-   Var into this table for each clause, which the binder parses when it
+/* A source `if`, `while`, `do`, `for`, `match`, or `try` binds here with a
+   Token Var into this table for each clause, which the binder parses when it
    reaches it, so its scopes and optional-reference facts govern that parse.
    Syntax from a template or compile-time Lisp cannot hold these addresses.
    Each entry's type names its clause. */
@@ -3534,7 +3534,8 @@ static struct Token source_clauses[] = {
   { .type = <test> }, { .type = <then> }, { .type = <else> },
   { .type = <body> }, { .type = <do> },   { .type = <init> },
   { .type = <cond> }, { .type = <next> }, { .type = <arms> },
-  { .type = <arm> }
+  { .type = <arm> },  { .type = <try> },  { .type = <catches> },
+  { .type = <catch> }, { .type = <finally> }
 };
 
 /** The source clause `kind`, which the binder parses when it reaches it. */
@@ -3553,8 +3554,8 @@ static Symbol _source_clause_kind(Var value) {
   return clause >= source_clauses && clause < end ? clause.type : 0;
 }
 
-/** Binds the source `if`, `while`, `do`, `for`, or `match` at the cursor
-    through the same binders as constructed syntax.
+/** Binds the source `if`, `while`, `do`, `for`, `match`, or `try` at the
+    cursor through the same binders as constructed syntax.
 */
 List Compiler.bind_source_statement(Compiler c) {
   Symbol keyword = c.peek(0);
@@ -3569,6 +3570,9 @@ List Compiler.bind_source_statement(Compiler c) {
       return c._bind_do(source_clause(<do>), source_clause(<test>));
     case <match>:
       return c._bind_match(source_clause(<test>), source_clause(<arms>));
+    case <try>:
+      return c._bind_try(source_clause(<try>), source_clause(<catches>),
+        source_clause(<finally>));
   }
   return c._bind_for(source_clause(<init>), source_clause(<cond>),
     source_clause(<next>), source_clause(<body>));
@@ -3645,9 +3649,7 @@ static List Compiler._bind_raise(Compiler c, Var code, List details) {
   return %(raise ${c._resolve(code)} (args @{bound.list_free()}));
 }
 
-/* Binds each catch arm's pattern names in a scope of its own, with the
-   arm's binder declarations before its body. A parsed arm's body already
-   begins with them, so it binds unchanged. */
+/* Binds each catch arm's pattern names in a scope of its own. */
 static List Compiler._bind_catchcases(Compiler c, Var arms, List handler) {
   List handle = handler ? handler.car().list()
     : c.sym.introduce(c.fresh_name("error_handler"));
@@ -3657,19 +3659,29 @@ static List Compiler._bind_catchcases(Compiler c, Var arms, List handler) {
   Array bound = [];
   foreach (Var value, arms.list())
     foreach (List arm, c.evaluate_macro_rows(value)) {
-      List pattern = arm.car(), body = arm.cadr();
+      List pattern = arm.car();
       if (pattern) pattern = c._resolve(pattern);
-      List bindings = c.begin_catch_arm(pattern, c.token);
-      {
-        defer c.sym.pop_scope();
-        List statement = c._bind_statement(body);
-        if (!_declares_binders(body, bindings))
-          statement = %(block
-            @{c.catch_binder_declarations(bindings, handle)} $statement);
-        bound.push(%($pattern $statement));
-      }
+      bound.push(c.bind_catch_arm(pattern, arm.cadr(), c.token, handle));
     }
   return %(catchcases ${bound.list_free()} $handle);
+}
+
+/** Binds one catch arm's `body` in a scope of its own, with declarations of
+    the definite binders of `pattern`, read through `handle`, before it.
+    Binder diagnostics use `start`. A source arm's body parses here, and a
+    template's declares its binders where its expansion binds it. A parsed
+    arm's body already begins with them, so it binds unchanged.
+*/
+List Compiler.bind_catch_arm(
+  Compiler c, List pattern, Var body, Token start, List handle) {
+  List bindings = c.begin_catch_arm(pattern, start);
+  defer c.sym.pop_scope();
+  int source = !!_source_clause_kind(body);
+  List statement = c._bind_statement(body);
+  if (source ? !!c.macro_holes : _declares_binders(body, bindings))
+    return %($pattern $statement);
+  return %($pattern (block
+    @{c.catch_binder_declarations(bindings, handle)} $statement));
 }
 
 /* Whether a catch arm's `body` begins with the binder declarations that
@@ -3697,17 +3709,18 @@ static int _declares_binders(List body, List bindings) {
   return 0;
 }
 
+/* A source `try` parses its body, its catch arms, and its finalizer in
+   that order. */
 static List Compiler._bind_try(
-  Compiler c, List body, List catches, List cleanup) {
-  if (catches) catches = c._bind_statement(catches);
-  if (cleanup) cleanup = c._bind_statement(cleanup);
-  body = c._bind_statement(body);
+  Compiler c, Var body, Var catches, Var cleanup) {
+  List bound = c._bind_statement(body);
+  List arms = catches ? c._bind_statement(catches) : NULL;
+  List finalizer = cleanup ? c._bind_statement(cleanup) : NULL;
   Macro tried = $tried, caught = $caught;
-  List statement = catches
-    ? caught(body, cleanup, catches.cadr()) : tried(body, cleanup);
+  List statement = arms
+    ? caught(bound, finalizer, arms.cadr()) : tried(bound, finalizer);
   List rebuilt = c.rebuild_statement(statement).cadr();
-  return catches
-    ? retain_catch_handle(rebuilt, catches.caddr()) : rebuilt;
+  return arms ? retain_catch_handle(rebuilt, arms.caddr()) : rebuilt;
 }
 
 /* Binds each `match` arm's captures in a scope of its own. A source
