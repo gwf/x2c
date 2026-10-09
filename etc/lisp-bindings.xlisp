@@ -33,5 +33,7 @@
       (eq? (car row) "Type_protocol_member")
       (eq? (car row) "Code_type")
       (eq? (car row) "Code_value")
+      (eq? (car row) "Code_exits")
+      (eq? (car row) "Code_is_static_pattern")
       (eq? (car row) "Code_register_rewrite")
       (eq? (car row) "Code_register_after_initialization")))
