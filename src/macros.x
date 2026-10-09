@@ -2491,13 +2491,15 @@ static typedef struct RewriteRule {
 static Var RewriteRule.var(RewriteRule rule) => Var.new(<p48>, rule);
 static RewriteRule Var.rewrite_rule(Var value) => value.pointer();
 
-/* A unit's own rule derives its matcher when it is registered. */
+/* A rule derives its matcher now, or else on the first probe of its
+   family. */
 static RewriteRule _rewrite_rule(
   Symbol point, Var kind, String name, Macro shape, List holes,
-  int builtin) {
+  int builtin, int prepared) {
   RewriteRule rule = Scope.calloc(1, sizeof(struct RewriteRule));
-  *rule = (struct RewriteRule){
-    name, point, kind, shape.matcher(holes), builtin, 1};
+  MacroMatcher matcher =
+    prepared ? shape.matcher(holes) : (MacroMatcher){shape, holes, NULL};
+  *rule = (struct RewriteRule){name, point, kind, matcher, builtin, prepared};
   return rule;
 }
 
@@ -2525,7 +2527,7 @@ static void Compiler._install_rewrite(Compiler c, List row) {
     c._register_rewrite(_rewrite_rule(
       point, c.thaw_declaration_syntax(kind), name,
       c.thaw_declaration_syntax(shape), c.thaw_declaration_syntax(holes),
-      c.builtin_defs));
+      c.builtin_defs, 1));
 }
 
 /* The shared rule for a prelude row, or 0 when the row is bound to its
@@ -2546,10 +2548,8 @@ static Var Compiler._ship_rewrite(Compiler c, List row) {
           ${c.thaw_declaration_syntax(holes)});
         _require_owned(thawed.try_own());
         Var (own_kind, own_shape, own_holes) = thawed;
-        RewriteRule rule = Scope.calloc(1, sizeof(struct RewriteRule));
-        *rule = (struct RewriteRule){
-          name, point, own_kind, {own_shape, own_holes, NULL}, 1, 0};
-        shared = rule.var();
+        shared = _rewrite_rule(
+          point, own_kind, name, own_shape, own_holes, 1, 0).var();
       }
     shipped_rules[row] = shared;
     return shared;
@@ -4408,7 +4408,8 @@ static Map Compiler._code_effects(Compiler c, Var effects) {
   foreach (List effect, effects)
     match (effect) {
       case %(rewrite ?point ?kind ?name ?shape ?holes): {
-        c._register_rewrite(_rewrite_rule(point, kind, name, shape, holes, 0));
+        c._register_rewrite(
+          _rewrite_rule(point, kind, name, shape, holes, 0, 1));
         c.record_compile_time_effect(
           %(compile-time rewrite $point ${c.freeze_declaration_syntax(kind)}
             $name ${c.freeze_declaration_syntax(shape)}
