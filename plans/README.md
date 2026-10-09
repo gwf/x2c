@@ -44,6 +44,10 @@ execution.
 
 ### Current work
 
+- [How small the compiler kernel can get](compiler-kernel-minimal.md):
+  2026-10-09 analysis of this foundation branch; the fixed and per-use rule
+  costs measured, six architectural changes, and a migration catalog.
+  Reference input to the foundation plan; Gary selects what to execute.
 - [Language component foundation](language-components-foundation.md): local
   recovery on `codex/language-components-foundation`; collection mutation
   component and ordinary authoring proofs, with dev semantic owners retained.

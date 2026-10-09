@@ -3,6 +3,8 @@
 > Status: retired
 > Historical hypothesis catalogue. Its LOC and speed projections are unvalidated.
 > Execution is owned solely by ../language-components-foundation.md.
+> Superseded by ../compiler-kernel-minimal.md, the version updated against
+> this foundation branch on 2026-10-09.
 > Analysis written 2026-10-09 against `dev` 7e946b86 and the component
 > branch `gwf/language-components` at 5b7a7769. It anticipates the
 > architectural changes the component plan in
