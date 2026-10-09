@@ -9,6 +9,10 @@
     `(HANDLE STATE (ARM...) PATTERN...)`: the handler the parser
     introduced, the catch site's initial state, the arms' tokens, and the
     patterns of the filtered arms, which precede the default arm.
+
+    Each definition precedes the definitions that call it: the compiler
+    settles whether a linked copy reaches a compile-time operation when the
+    copy binds.
 */
 #pragma once
 #include "rewrite.x"
@@ -60,6 +64,16 @@ meta List try_catch_site(List frame, List clause) {
 
 // landings
 
+/* Whether a lowered arm, a code value around its statement, returns or
+   raises on every path out of it. */
+meta static int _try_arm_exits(List arm) {
+  match (arm) case %(code-value ? ?statement ?): {
+    Code lowered = statement;
+    return lowered.exits();
+  }
+  return 0;
+}
+
 /** Returns each lowered arm of `arms` chosen by its index in `selected`;
     `$try_handled` calls this in a slot. Each arm is its own
     statement, so a `break` or `continue` in it still reaches the enclosing
@@ -77,16 +91,6 @@ meta List try_catch_cases(List selected, List arms) {
   }
   if (exits) cases.push($!{ __builtin_unreachable(); });
   return cases.list_free();
-}
-
-/* Whether a lowered arm, a code value around its statement, returns or
-   raises on every path out of it. */
-meta static int _try_arm_exits(List arm) {
-  match (arm) case %(code-value ? ?statement ?): {
-    Code lowered = statement;
-    return lowered.exits();
-  }
-  return 0;
 }
 
 /* A landing that hands a raised error to the arm its handler selected. */
@@ -145,38 +149,49 @@ macro Stmt $try_frame(Name $frame, Expr $clause,
 
 // the lowering
 
-/** Lowers the parsed try `node` to its landing form. */
-meta Code try_lowering(Code node) {
-  match (node) {
-    case $caught(?body, ?finalizer, *arms):
-      return _try_landing(node, body, arms, finalizer);
-    case $tried(?body, ?finalizer):
-      return _try_landing(node, body, NULL, finalizer);
+/* The first label a finalizer defines, or NULL, with `at` the innermost
+   position around it. A finalizer may nest as deeply as an expression
+   chain is long, so the search keeps its pending work off the C stack. */
+meta static Var _try_finalizer_label(Var value, List &at) {
+  Array pending = [value], around = [at];
+  Var found = NULL;
+  while (!found && pending.len()) {
+    Var current = pending.take_last();
+    List here = around.take_last();
+    if (current is not <list> || current.is_nil()) continue;
+    List node = current;
+    match (node) {
+      case %(function *): continue;
+      case %(at ? ?wrapped): {
+        pending.push(wrapped);
+        around.push(node);
+        continue;
+      }
+      case %(label ?name *): {
+        found = name;
+        at = here;
+        continue;
+      }
+    }
+    foreach (Var child, node) {
+      pending.push(child);
+      around.push(here);
+    }
   }
-  return node;
+  pending.free();
+  around.free();
+  return found;
 }
 
-/* The landing form of the try `node`: its frame, its finalizer outside
-   its regions, its exits, then its body and each arm inside them. */
-meta static Code _try_landing(
-  Code node, List body, List arms, List finalizer) {
-  _try_check_label(finalizer);
-  Atom frame = Atom.intern("?__exception_frame");
-  Atom exits = Atom.intern("?__try_exits");
-  Atom lowered = Atom.intern("?__try_body");
-  Atom finished = NULL;
-  List handle = arms ? catch_handle(node) : NULL;
-  Array rows = [%(new-name $frame "exception_frame")];
-  if (finalizer) {
-    finished = Atom.intern("?__try_finalizer");
-    rows.push(%(outer $finished $finalizer));
-  }
-  rows.push(%(exits $exits ${_try_exits(frame, handle, finished)}));
-  rows.push(%(region $lowered $body));
-  List clause = _try_catch_clause(handle, arms, rows);
-  Macro shape = $try_frame;
-  List code = shape(frame, clause, lowered, exits);
-  return %(code-value "lowered" (landing $code ${rows.list_free()}) ());
+/* Reports a label the finalizer defines: it runs on every path that
+   leaves its region, so the label would be defined once for each. */
+meta static void _try_check_label(List finalizer) {
+  List at = finalizer;
+  Var label = _try_finalizer_label(finalizer, at);
+  if (!label) return;
+  x2c_diagnostic_fail_at(at, <emit>, "a finally body cannot define a label",
+    %("a finalizer runs on every path that leaves its region, so '${
+      x2c_binding_spelling(label)}' would be defined once for each"));
 }
 
 /* A catch closes before a claimed finalizer, then the frame leaves. */
@@ -221,47 +236,37 @@ meta static List _try_catch_clause(List handle, List records, Array rows) {
   return %($handle $state ${arms.list_free()} @{patterns.list_free()});
 }
 
-/* Reports a label the finalizer defines: it runs on every path that
-   leaves its region, so the label would be defined once for each. */
-meta static void _try_check_label(List finalizer) {
-  List at = finalizer;
-  Var label = _try_finalizer_label(finalizer, at);
-  if (!label) return;
-  x2c_diagnostic_fail_at(at, <emit>, "a finally body cannot define a label",
-    %("a finalizer runs on every path that leaves its region, so '${
-      x2c_binding_spelling(label)}' would be defined once for each"));
+/* The landing form of the try `node`: its frame, its finalizer outside
+   its regions, its exits, then its body and each arm inside them. */
+meta static Code _try_landing(
+  Code node, List body, List arms, List finalizer) {
+  _try_check_label(finalizer);
+  Atom frame = Atom.intern("?__exception_frame");
+  Atom exits = Atom.intern("?__try_exits");
+  Atom lowered = Atom.intern("?__try_body");
+  Atom finished = NULL;
+  List handle = arms ? catch_handle(node) : NULL;
+  Array rows = [%(new-name $frame "exception_frame")];
+  if (finalizer) {
+    finished = Atom.intern("?__try_finalizer");
+    rows.push(%(outer $finished $finalizer));
+  }
+  rows.push(%(exits $exits ${_try_exits(frame, handle, finished)}));
+  rows.push(%(region $lowered $body));
+  List clause = _try_catch_clause(handle, arms, rows);
+  Macro shape = $try_frame;
+  List code = shape(frame, clause, lowered, exits);
+  return %(code-value "lowered" (landing $code ${rows.list_free()}) ());
 }
 
-/* The first label a finalizer defines, or NULL, with `at` the innermost
-   position around it. A finalizer may nest as deeply as an expression
-   chain is long, so the search keeps its pending work off the C stack. */
-meta static Var _try_finalizer_label(Var value, List &at) {
-  Array pending = [value], around = [at];
-  Var found = NULL;
-  while (!found && pending.len()) {
-    Var current = pending.take_last();
-    List here = around.take_last();
-    if (current is not <list> || current.is_nil()) continue;
-    List node = current;
-    match (node) {
-      case %(function *): continue;
-      case %(at ? ?wrapped): {
-        pending.push(wrapped);
-        around.push(node);
-        continue;
-      }
-      case %(label ?name *): {
-        found = name;
-        at = here;
-        continue;
-      }
-    }
-    foreach (Var child, node) {
-      pending.push(child);
-      around.push(here);
-    }
+/** Lowers the parsed try `node` to its landing form. */
+meta Code try_lowering(Code node) {
+  match (node) {
+    case $caught(?body, ?finalizer, *arms):
+      return _try_landing(node, body, arms, finalizer);
+    case $tried(?body, ?finalizer):
+      return _try_landing(node, body, NULL, finalizer);
   }
-  pending.free();
-  around.free();
-  return found;
+  return node;
 }
+
