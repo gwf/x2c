@@ -2555,7 +2555,7 @@ static Var Compiler._ship_rewrite(Compiler c, List row) {
         _require_owned(thawed.try_own());
         Var (own_kind, own_shape, own_holes) = thawed;
         shared = _rewrite_rule(
-          point, own_kind, name, own_shape, own_holes, 1, 0).var();
+          point, own_kind, name, own_shape, own_holes, 1, 0);
       }
     shipped_rules[row] = shared;
     return shared;
