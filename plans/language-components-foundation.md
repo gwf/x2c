@@ -166,6 +166,55 @@ branch, integrated here in one batch:
    (`gwf/hooks-spike`, W4-A) as the reference. Guard: byte-identical C on
    the corpus and the try fixtures.
 
+### Milestone 0 results, 2026-10-09
+
+Items 1 to 3 are integrated on this branch at the commit after this one.
+Items landed as sixteen authored commits from three Opus worktrees plus one
+generated refresh; `make verify` passes (1,114 fixtures, 942 unit tests,
+probes), 17 of 17 optional examples pass, and bootstrap equals stage 0
+across 262 C/H files.
+
+- Driver. The 0.34 G fixed cost was mostly a defect: the shipped
+  component's `.xi` could not be read back because a `<<=` Symbol in a
+  rewrite effect row did not round-trip through the datum writer, so every
+  translation walked `src/component-access.x` cold (about 0.29 G). Effect
+  rows are now frozen for interfaces; shipped rules are thawed once per
+  process and their matchers derived on first probe; linked translators are
+  called through their `Func`; declines test identity; the runtime
+  declaration inventory is read once per entry. The second match inside a
+  translator (about 35 K per application) was measured and left, because
+  removing it changes the translator contract.
+- Primitives. `x2c_enclosing(what)` for `declarator`, `statement`,
+  `function`, `unit`, and `x2c_place(where, code)` for `%(after-statement)`,
+  `%(unit-support [KEY])`, `%(unit-init [AREA])`; `where` is a List because
+  Symbols hold ten characters. `$auto` keeps its spelling on them through a
+  linked release macro; `managed-init` and its five recognizers are gone.
+  Checks run at declaration completion so the eight managed-init fixtures
+  keep their diagnostics. Per use: +28 K instructions over the baseline on
+  an 11.3 M `defer` lowering. `$auto` arguments now receive the ordinary
+  unnecessary-conversion warning; seven `.array()` calls in lib were
+  removed with byte-identical C.
+- Binder. `if`, `while`, `do`, and `for` enter the constructed binders
+  directly with deferred children marked by a static Token table that Lisp
+  cannot construct. Per statement within noise; self-translation +0.04
+  percent; +47 source lines, mostly one-time machinery. Extension to other
+  statements awaits Gary's decision; `match`, `catch`, and `with` are the
+  candidates that would delete lines.
+
+Fresh translations against dev, instructions retired, median of 3:
+
+| Workload | dev | before milestone 0 | after |
+| --- | ---: | ---: | ---: |
+| Empty unit | 1.94 G | 2.30 G | 2.06 G |
+| Native, 300 functions | 4.22 G | 4.59 G | 4.34 G |
+| Access, 5,400 mutations | 10.30 G | 14.71 G | 14.37 G |
+
+Authored src/lib/etc lines: 640 added, 226 removed. The remaining fixed
+cost is reading the component interface (about 0.06 G) and effect install;
+the remaining access cost is binding each replacement, which is the
+prepared-replacements work. Item 4, `try` on `block-exit`, starts from
+this head.
+
 ## Next bounded milestone
 
 1. Establish a complete declaration use case for initializer-only `$auto`.
