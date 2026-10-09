@@ -3546,7 +3546,8 @@ static Var _source_clause(Symbol kind) {
 static Symbol _source_clause_kind(Var value) {
   if (value is not <token>) return 0;
   Token clause = value.token();
-  Token end = source_clauses + sizeof(source_clauses) / sizeof(*source_clauses);
+  Token end =
+    source_clauses + sizeof(source_clauses) / sizeof(*source_clauses);
   return clause >= source_clauses && clause < end ? clause.type : 0;
 }
 
