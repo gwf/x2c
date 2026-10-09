@@ -122,6 +122,50 @@ foundation; that measurement and profiling remain necessary before accepting
 the combined architecture. Recovery establishes a working basis, not a
 performance acceptance decision.
 
+## Decisions of 2026-10-09
+
+Gary accepted [the kernel analysis](compiler-kernel-minimal.md) as the
+design: two primitives, recognition through rewrite families and
+contribution through placement and ancestry, with the kernel's own lowerings
+as their first clients. He decided:
+
+- `$auto` keeps its spelling and becomes an ordinary macro on
+  `enclosing(<declarator>)` and `place(<after-statement>)`; the
+  `managed-init` marker and its recognizers go.
+- `try`, `catch`, and `finally` become a component on the `block-exit`
+  placement, with the cleanup walk as that point's scheduler and the landing
+  as the only try-specific part.
+- The token statement parsers get a measured unification prototype against
+  the constructed-form binder.
+- The initial scope is ten recognition families, six placement points, and
+  five ancestors. A lowering that needs another presents it first.
+- Implementation workers run on Opus; the orchestrator integrates here.
+  Publication stays held; everything remains local on this branch.
+
+## Milestone 0: the primitives and the driver
+
+Runs before the milestone below, in parallel worktrees branched from this
+branch, integrated here in one batch:
+
+1. Driver cost. Profile the empty unit's 0.34 G fixed cost and remove it with
+   a process-scoped rule table; call linked translators through their `Func`;
+   decline by void or NULL with an identity test; match once. Guard: the
+   empty unit within one percent of dev, the access workload at or under dev.
+2. Primitives and `$auto`. `x2c_enclosing(what)` for `declarator`,
+   `statement`, `function`, and `unit`; `x2c_place(where, code)` for
+   `after-statement`, `unit-support`, and `unit-init`, applied under the
+   expansion's transaction through the existing code-value effects. Port
+   `$auto`; delete `managed-init` and its five recognizers; keep every
+   managed-init diagnostic and byte-identical C.
+3. Binder prototype. `if`, `while`, `do`, and `for` parsed to canonical
+   unbound syntax and bound through `_bind_form`; measure a self-translation;
+   report the number and recommend.
+4. After 2 lands: `defer` as the kernel's `block-exit` placement, the
+   cleanup walk as its scheduler, `x2c_place(<block-exit>)`, and
+   `src/component-try.x` on it, with the spike's try component
+   (`gwf/hooks-spike`, W4-A) as the reference. Guard: byte-identical C on
+   the corpus and the try fixtures.
+
 ## Next bounded milestone
 
 1. Establish a complete declaration use case for initializer-only `$auto`.
