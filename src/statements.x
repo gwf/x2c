@@ -96,7 +96,7 @@ static List Compiler._statement(Compiler c, AstPos position) {
   if (!c.with_binding() && c.macro_starts_target_at(AST_STATEMENT))
     return c._macro_statement();
   switch (c.peek(0)) {
-    case <if>: case <while>: case <for>: case <do>:
+    case <if>: case <while>: case <for>: case <do>: case <match>:
       return c.bind_source_statement();
     case <return>:      return c._return_statement();
     case <case>:        return c._case_statement();
@@ -106,7 +106,6 @@ static List Compiler._statement(Compiler c, AstPos position) {
     case <try>:         return c._try_statement();
     case <raise>:       return c._raise_statement();
     case <defer>:       return c._defer_statement();
-    case <match>:       return c._match_statement();
     case <switch>:      return c._switch_statement();
     case <default>:     return c._default_statement();
     case <;>:           return c._empty_statement();
@@ -230,9 +229,9 @@ List Compiler.with_binding(Compiler c) {
 
 // conditionals and loops
 
-/** Parses the clause `kind` of a source `if`, `while`, `do`, or `for`, with
-    the punctuation after it, when the binder reaches that clause. An absent
-    `else` or `for` header clause is NULL.
+/** Parses the clause `kind` of a source `if`, `while`, `do`, `for`, or
+    `match`, with the punctuation after it, when the binder reaches that
+    clause. An absent `else` or `for` header clause is NULL.
 */
 List Compiler.parse_source_clause(Compiler c, Symbol kind) {
   switch (kind) {
@@ -244,6 +243,7 @@ List Compiler.parse_source_clause(Compiler c, Symbol kind) {
     case <init>: return c._for_init();
     case <cond>: return c._for_clause(<;>);
     case <next>: return c._for_clause(<)>);
+    case <arms>: return c._match_arms();
   }
   return c.parse_governed(AST_STATEMENT);
 }
@@ -375,14 +375,11 @@ static List Compiler._empty_statement(Compiler c) {
 
 // match statements
 
-static List Compiler._match_statement(Compiler c) {
-  List cases = NULL, expr = c._keyword_paren_expr(<match>);
-  if (c.test(<"{">)) {
-    cases = c._match_cases();
-    c.expect(<"}">);
-  }
-  else cases = cons(c._match_case(), NULL);
-  return %(match ${c.resolve_expression(expr, c.token)} $cases);
+static List Compiler._match_arms(Compiler c) {
+  if (!c.test(<"{">)) return cons(c._match_case(), NULL);
+  List cases = c._match_cases();
+  c.expect(<"}">);
+  return cases;
 }
 
 static List Compiler._match_cases(Compiler c) {
@@ -447,9 +444,8 @@ static List Compiler._match_case(Compiler c) {
   else if (c.test(<default>)) pattern = %(*);
   else
     $report.parse.match_arm(c);
-  c.begin_match_arm(pattern, start, peek == <case>);
-  List body = c._case_body(types);
-  return %($pattern $body);
+  return c.bind_match_arm(
+    pattern, source_clause(<arm>), start, peek == <case>, types);
 }
 
 /* Typed captures rewrite the pattern after `case` and leave their rows in
@@ -511,9 +507,10 @@ static void Compiler._check_binders(
   }
 }
 
-/* Parses an arm's guard and body inside the scope `begin_match_arm` opened,
-   and closes that scope. */
-static List Compiler._case_body(Compiler c, List types) {
+/** Parses a source match arm's guard and body, declaring its typed
+    `types` captures, inside the arm scope that the binder opened.
+*/
+List Compiler.parse_case_body(Compiler c, List types) {
   List temporaries = NULL;
   List declarations = types ? c._typed_captures(types, temporaries) : NULL;
   List guard = c.peek(0) == <if> ? c._keyword_paren_expr(<if>) : NULL;
@@ -525,7 +522,6 @@ static List Compiler._case_body(Compiler c, List types) {
     c.sym.pop_scope();
   }
   if (guard) body = %(guarded $body);
-  c.sym.pop_scope();
   return body;
 }
 

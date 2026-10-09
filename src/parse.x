@@ -3525,18 +3525,20 @@ static List Compiler._bind_typed_targets(
 
 // constructed statements
 
-/* A source `if`, `while`, `do`, or `for` binds here with a Token Var into
-   this table for each clause, which the binder parses when it reaches it,
-   so its scopes and optional-reference facts govern that parse. Syntax
-   from a template or compile-time Lisp cannot hold these addresses. Each
-   entry's type names its clause. */
+/* A source `if`, `while`, `do`, `for`, or `match` binds here with a Token
+   Var into this table for each clause, which the binder parses when it
+   reaches it, so its scopes and optional-reference facts govern that parse.
+   Syntax from a template or compile-time Lisp cannot hold these addresses.
+   Each entry's type names its clause. */
 static struct Token source_clauses[] = {
   { .type = <test> }, { .type = <then> }, { .type = <else> },
   { .type = <body> }, { .type = <do> },   { .type = <init> },
-  { .type = <cond> }, { .type = <next> }
+  { .type = <cond> }, { .type = <next> }, { .type = <arms> },
+  { .type = <arm> }
 };
 
-static Var _source_clause(Symbol kind) {
+/** The source clause `kind`, which the binder parses when it reaches it. */
+Var source_clause(Symbol kind) {
   Token clause = source_clauses;
   while (clause.type != kind) clause++;
   return Token.var(clause);
@@ -3551,23 +3553,25 @@ static Symbol _source_clause_kind(Var value) {
   return clause >= source_clauses && clause < end ? clause.type : 0;
 }
 
-/** Binds the source `if`, `while`, `do`, or `for` at the cursor through the
-    same binders as constructed syntax.
+/** Binds the source `if`, `while`, `do`, `for`, or `match` at the cursor
+    through the same binders as constructed syntax.
 */
 List Compiler.bind_source_statement(Compiler c) {
   Symbol keyword = c.peek(0);
   c.next();
   switch (keyword) {
     case <if>:
-      return c._bind_if_else(_source_clause(<test>),
-        _source_clause(<then>), _source_clause(<else>));
+      return c._bind_if_else(source_clause(<test>),
+        source_clause(<then>), source_clause(<else>));
     case <while>:
-      return c._bind_while(_source_clause(<test>), _source_clause(<body>));
+      return c._bind_while(source_clause(<test>), source_clause(<body>));
     case <do>:
-      return c._bind_do(_source_clause(<do>), _source_clause(<test>));
+      return c._bind_do(source_clause(<do>), source_clause(<test>));
+    case <match>:
+      return c._bind_match(source_clause(<test>), source_clause(<arms>));
   }
-  return c._bind_for(_source_clause(<init>), _source_clause(<cond>),
-    _source_clause(<next>), _source_clause(<body>));
+  return c._bind_for(source_clause(<init>), source_clause(<cond>),
+    source_clause(<next>), source_clause(<body>));
 }
 
 static List Compiler._bind_do(Compiler c, Var body, Var condition) {
@@ -3706,8 +3710,17 @@ static List Compiler._bind_try(
     ? retain_catch_handle(rebuilt, catches.caddr()) : rebuilt;
 }
 
-/* Binds each `match` arm's captures in a scope of its own. */
-static List Compiler._bind_match(Compiler c, Var subject, List cases) {
+/* Binds each `match` arm's captures in a scope of its own. A source
+   subject parses before the arms, and source arms parse as they bind. */
+static List Compiler._bind_match(Compiler c, Var subject, Var cases) {
+  Symbol kind = _source_clause_kind(subject);
+  if (kind) subject = c.parse_source_clause(kind);
+  kind = _source_clause_kind(cases);
+  List rows = kind ? c.parse_source_clause(kind) : c._bind_rows(cases);
+  return %(match ${c._resolve(subject)} $rows);
+}
+
+static List Compiler._bind_rows(Compiler c, List cases) {
   Array bound = [];
   foreach (Var value, cases)
     foreach (List row, c.evaluate_macro_rows(value)) {
@@ -3718,23 +3731,28 @@ static List Compiler._bind_match(Compiler c, Var subject, List cases) {
       List pattern = row.car();
       int binds = pattern !== %(*);
       if (binds) pattern = c._resolve(pattern);
-      c.begin_match_arm(pattern, c.token, binds);
-      {
-        defer c.sym.pop_scope();
-        List body = c._bind_arm_body(row.cadr());
-        bound.push(%($pattern $body));
-      }
+      bound.push(c.bind_match_arm(pattern, row.cadr(), c.token, binds, NULL));
     }
-  return %(match ${c._resolve(subject)} ${bound.list_free()});
+  return bound.list_free();
 }
 
-static List Compiler._bind_arm_body(Compiler c, List body) {
-  match (body) {
-    case %(guarded ?statements):
-      body = %(guarded ${c._bind_statement(statements)});
-    default: body = c._bind_statement(body);
-  }
-  return body;
+/** Binds one match arm's `body` in a scope of its own, which defines the
+    definite binders of `pattern` when the arm `binds`. Binder diagnostics
+    use `start`. A source arm's body parses here with the typed captures
+    `types` that its pattern recorded.
+*/
+List Compiler.bind_match_arm(
+  Compiler c, List pattern, Var body, Token start, int binds, List types) {
+  c.begin_match_arm(pattern, start, binds);
+  defer c.sym.pop_scope();
+  return %($pattern ${c._bind_arm_body(body, types)});
+}
+
+static List Compiler._bind_arm_body(Compiler c, Var body, List types) {
+  if (_source_clause_kind(body)) return c.parse_case_body(types);
+  match (body) case %(guarded ?statements):
+    return %(guarded ${c._bind_statement(statements)});
+  return c._bind_statement(body);
 }
 
 /* A constructed block opens its own scope; a callable's outer block binds
