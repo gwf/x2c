@@ -33,6 +33,12 @@ static List _scope_expand(List body, List destinations) {
 
 // $auto
 
+/* The release a managed declaration is followed by. */
+static macro Stmt $auto_release(Decl $local, Expr $binding) {
+  @(auto.release $local)
+  defer $binding.cleanup();
+}
+
 /* `$auto(value)` stands for `value` as the complete initializer of a
    declarator in a function, which the declaration verifies before it binds
    the release placed after the declarator. */
@@ -42,9 +48,11 @@ static List _auto_expand(List value) {
     _auto_fail(<parse>,
       "managed initializer requires a complete block-local initializer",
       %());
-  match (local) case %(declare ? (bindings (bind ?binding ?))):
+  match (local) case %(declare ? (bindings (bind ?binding ?))): {
+    Macro release = $auto_release;
     x2c_place(%(after-statement),
-      x2c_template_call("x2c.auto.release", %($local $binding)));
+      x2c_template_call(release, %($local $binding)));
+  }
   return value;
 }
 

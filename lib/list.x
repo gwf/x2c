@@ -361,7 +361,7 @@ meta native List Iter.list(Iter iter) {
 Self List.append(Self a, Self b) {
   if (!a) return b;
   if (!b) return a;
-  Array values = $auto(a.array());
+  Array values = $auto(a);
   return _prepend_array(values, b);
 }
 
@@ -709,7 +709,7 @@ List List.map2(List a, List b, Func fn) {
 */
 Self List.sort(Self lst) {
   if (!lst || !lst.cdr()) return lst;
-  Array values = $auto(lst.array());
+  Array values = $auto(lst);
   values.sort();
   return values;
 }
@@ -720,7 +720,7 @@ Self List.sort(Self lst) {
 */
 Self List.sort_with(Self lst, Func compare) {
   if (!lst || !lst.cdr()) return lst;
-  Array values = $auto(lst.array());
+  Array values = $auto(lst);
   values.sort_with(compare);
   return values;
 }
@@ -732,7 +732,7 @@ Self List.sort_with(Self lst, Func compare) {
 */
 Self List.sort_by(Self lst, Func key) {
   if (!lst) return lst;
-  Array values = $auto(lst.array());
+  Array values = $auto(lst);
   values.sort_by(key);
   return values;
 }

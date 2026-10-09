@@ -34,8 +34,8 @@ static typedef struct Script {
     by one run of insertions.
 */
 meta native List Diff.lines(String old, String new) {
-  Array old_lines = $auto(old.split_lines(0).array());
-  Array new_lines = $auto(new.split_lines(0).array());
+  Array old_lines = $auto(old.split_lines(0));
+  Array new_lines = $auto(new.split_lines(0));
   Script s = {old_lines, new_lines};
   s.trim();
   if (s.myers() < 0) s.replace();
@@ -179,7 +179,7 @@ static typedef struct Hunk {
 */
 meta native String Diff.unified(
   String old, String new, String old_name, String new_name) {
-  Array edits = $auto(Diff.lines(old, new).array());
+  Array edits = $auto(Diff.lines(old, new));
   Buffer out = $auto(Buffer.new(0));
   int count = edits.len(), at = 0, old_line = 0, new_line = 0;
   while (at < count) {
