@@ -833,25 +833,26 @@ static List Compiler._block_items(Compiler c, int anchor_items) {
   return cons(<block>, block);
 }
 
-/* Parses one item into `block`, anchored to the token that opens it.
-   Transform-phase diagnostics have no useful current token, so this
-   occurrence lets them name a line inside the function instead of the end
-   of the file. The anchor precedes parsing, which leaves the cursor on the
-   following token. */
+/* Parses one item into `block`, anchored to the token that opens it, and
+   then the code placed after it. Transform-phase diagnostics have no
+   useful current token, so this occurrence lets them name a line inside
+   the function instead of the end of the file. The anchor precedes
+   parsing, which leaves the cursor on the following token. */
 static void Compiler._push_item(Compiler c, Array block, int anchor_items) {
   Token origin = c.token;
   int expansion = c._expands();
+  c.enter((Ancestor){ .what = <statement>, .token = origin });
   List stmt = c.parse_block_item();
+  List after = c.leave_item();
   if (c.macro_holes &&
       (stmt.car() == <macro-bind> || stmt.car() == <macro-slot>)) {
     block.push(stmt);
     return;
   }
-  if (!expansion) {
+  if (!expansion)
     block.push(anchor_items ? c.anchor_origin(stmt, origin) : stmt);
-    return;
-  }
-  foreach (List item, stmt.cdr())
+  else after = stmt.cdr().append(after);
+  foreach (List item, after)
     block.push(
       !anchor_items || item.car() == <at>
         ? item : c.anchor_origin(item, origin)

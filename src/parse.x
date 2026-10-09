@@ -225,6 +225,17 @@ static macro Stmt $report.parse.managed_storage(Expr $c, Expr $origin) =>
     <parse>, "managed initializer requires automatic local storage",
     $origin, NULL);
 
+static macro Stmt $report.parse.init_incomplete(Expr $c, Expr $origin) =>
+  $c.report_error(
+    <parse>,
+    "managed initializer requires a complete block-local initializer",
+    $origin, NULL);
+
+static macro Stmt $report.parse.placement_item(Expr $c) =>
+  $c.report_error(
+    <macro>, "code placed after a statement needs an enclosing block item",
+    $c.token, NULL);
+
 static macro Stmt $report.parse.syntax_expected(Expr $c) =>
   $c.report_error(
     <parse>, "expected syntax",
@@ -1934,7 +1945,9 @@ static List Compiler._initialized(
     c._skip_shallow_expression(1);
     return bind;
   }
+  c.enter((Ancestor){ .what = <declarator>, .base = type, .node = bind });
   List init = c.parse_assignment();
+  c.ancestors.pop();
   c.check_explicit_converter(
     init, %(declare $type (bindings $bind)).type_from_ast(), 0);
   return %( op = $bind $init );
@@ -2227,8 +2240,11 @@ static List Compiler._install_declarator(
       %(interface-types $exact (($owner))));
   }
   List bound = %(bind $binding $mods);
-  if (initializer && !c.shallow)
+  if (initializer && !c.shallow) {
+    c.enter((Ancestor){ .what = <declarator>, .base = base, .node = bound });
     initializer = c.resolve_expression(initializer, c.token);
+    c.ancestors.pop();
+  }
   return initializer ? %(op = $bound $initializer) : bound;
 }
 
@@ -2592,9 +2608,11 @@ static List Compiler._function_body(
   String old_fn = c.fn_name;
   c.fn_name = name;
   c.sym.push_scope(c.params);
+  c.enter((Ancestor){ .what = <function>, .node = declaration });
   List body = NULL;
   {
     defer {
+      c.ancestors.pop();
       c.sym.pop_scope();
       c.return_type = old_return;
       c.fn_name = old_fn;
@@ -2677,46 +2695,101 @@ static List Compiler._expression_body(Compiler c) {
   }
 }
 
-// managed declarations
+// placement and ancestry
 
-/** Lowers managed block declarations to declaration/defer pairs in source
-    order, preserving their installed bindings and the enclosing lifetime.
+/** Enters `row` as the innermost syntax `Compiler.enclosing` answers. Its
+    owner leaves it with `Block.pop`, or with `Compiler.leave_item` for a
+    block item. */
+void Compiler.enter(Compiler c, Ancestor row) {
+  c.ancestors.push(&row);
+}
+
+/** Returns the innermost `what` around the parser as captured code, or
+    NULL when there is none: the declarator whose initializer is being
+    parsed directly in the current block item, as its one-declarator
+    declaration; the block item, as its origin anchor; the function, as
+    its declaration; or the unit, as a `String` expression of its path. */
+List Compiler.enclosing(Compiler c, Symbol what) {
+  if (what == <unit>) {
+    String path = c.filename ? c.display_path(c.filename) : "<stdin>";
+    return x2c_literal_string(path);
+  }
+  Ancestor *rows = c.ancestors.bytes;
+  for (int i = (int) c.ancestors.len() - 1; i >= 0; i--) {
+    Ancestor row = rows[i];
+    if (row.what == what) return c._ancestor_code(row);
+    if (what == <declarator> || row.what == <function>) return NULL;
+  }
+  return NULL;
+}
+
+static List Compiler._ancestor_code(Compiler c, Ancestor row) {
+  if (row.what == <declarator>)
+    return %(declare ${row.base} (bindings ${row.node}));
+  if (row.what == <function>) return row.node;
+  int origin = row.origin ? row.origin : c.record_origin(row.token);
+  return %(at $origin (seq));
+}
+
+/** Records `code` to follow the innermost block item, or the initialized
+    declarator whose initializer is being parsed directly in it. The
+    expansion that placed it gives it its result when it finishes. */
+void Compiler.place_after(Compiler c, Var code) {
+  Ancestor *rows = c.ancestors.bytes;
+  int depth = (int) c.ancestors.len() - 1;
+  List binding = NULL;
+  if (depth >= 0 && rows[depth].what == <declarator>)
+    binding = rows[depth--].node.cadr();
+  if (depth < 0 || rows[depth].what != <statement>)
+    $report.parse.placement_item(c);
+  c.placements.push(%($depth $binding () $code));
+}
+
+/** Gives the placements made since `first` the `result` of the expansion
+    that made them. */
+void Compiler.close_placements(Compiler c, int first, List result) {
+  for (int i = first; i < (int) c.placements.len(); i++) {
+    (int depth, List binding, List placed, Var code) = c.placements[i].list();
+    if (!placed) c.placements[i] = %($depth $binding $result $code);
+  }
+}
+
+/** Leaves the block item `enter` began and returns the code placed after
+    it, bound in its block, or NULL. A declarator in the item that placed
+    code is incomplete unless its block declaration took that code. */
+List Compiler.leave_item(Compiler c) {
+  int depth = (int) c.ancestors.len() - 1;
+  Ancestor row = ((Ancestor *) c.ancestors.bytes)[depth];
+  c.ancestors.pop();
+  int first = c.placements.len();
+  while (first && c.placements[first - 1].list().car().int() == depth) first--;
+  if (first == (int) c.placements.len()) return NULL;
+  Array items = [];
+  for (int i = first; i < (int) c.placements.len(); i++) {
+    (int placed_depth, List binding, List result, Var code) =
+      c.placements[i].list();
+    if (binding)
+      $let(c.origin, row.origin ? row.origin : c.origin)
+        $report.parse.init_incomplete(c, row.token);
+    _push_items(items, c.bind_syntax(code, AST_BLOCK, c.return_type));
+  }
+  c.placements.resize(first);
+  return items.list_free();
+}
+
+/** Lowers block declarations whose declarators placed code after
+    themselves, or that an after-initialization rewrite follows, to
+    declarations followed by that code in source order, preserving their
+    installed bindings and the enclosing lifetime.
 */
 List Compiler.finish_initializers(
   Compiler c, List declaration, Token origin) {
-  if (c.macro_holes || (!_has_managed(declaration) &&
+  if (c.macro_holes || (!c.placements.len() && !_has_managed(declaration) &&
       !c.has_rewrites(<decl>, <init>)))
     return declaration;
   Array output = [];
   c._append_managed(declaration, output, origin);
   return %(seq @{output.list_free()});
-}
-
-static int _has_managed(List declaration) {
-  match (declaration) {
-    case %(seq *rows):
-      foreach (List row, rows)
-        if (_has_managed(row)) return 1;
-    case %(declare ? (bindings *declarators)):
-      foreach (List declarator, declarators)
-        match (declarator)
-          case %(op = (bind ? ?) ?value):
-            if (_managed_initializer(value)) return 1;
-  }
-  return 0;
-}
-
-/* Only the complete initializer admits management. Parentheses and typed
-   expression shells preserve that position; operators do not. */
-static List _managed_initializer(List syntax) {
-  match (syntax) {
-    case %(managed-init ?value): return value;
-    case %(expr ? ?inner):
-      return _managed_initializer(inner);
-    case $source_content_pattern($grouped, %(?inner)):
-      return _managed_initializer(inner);
-  }
-  return NULL;
 }
 
 static void Compiler._append_managed(
@@ -2735,8 +2808,8 @@ static void Compiler._append_managed(
   output.push(declaration);
 }
 
-/* A managed declarator ends the declaration of the ordinary declarators
-   before it and is followed by its deferred cleanup. */
+/* A declarator followed by code ends the declaration of the ordinary
+   declarators before it, is declared alone, and is followed by its code. */
 static void Compiler._append_managed_rows(
   Compiler c, Var base, List declarators, Array output, Token origin) {
   Array ordinary = $auto([]);
@@ -2744,42 +2817,100 @@ static void Compiler._append_managed_rows(
   size_t remaining = declarators.len();
   foreach (List declarator, declarators) {
     remaining--;
-    List after = NULL;
-    List initializer = NULL, binding = NULL, modifiers = NULL;
-    match (declarator)
-      case %(op = (bind ?name ?mods) ?value): {
-        initializer = _managed_initializer(value);
-        binding = name;
-        modifiers = mods;
-        if (!initializer)
-          after = c.rewrite(<decl>, <init>,
-            %(declare $source_base (bindings $declarator)),
-            AST_BLOCK, c.return_type, origin);
-      }
-    if (!initializer && !after) {
+    List after = c._after_declarator(source_base, declarator, origin);
+    if (!after) {
       ordinary.push(declarator);
       continue;
     }
-    Type type = modifiers.append(base).type().declared();
-    if (initializer) c._require_cleanup(base, type, origin);
-    if (after && remaining && base.type().base_type().body())
+    if ((remaining || ordinary.len()) && base.type().base_type().body())
       base = c._share_declaration_type(base, output);
-    if (after) ordinary.push(declarator);
     if (ordinary.len()) {
       output.push(%(declare $base (bindings @{ordinary})));
       ordinary.clear();
     }
-    if (after) {
-      _push_items(output, after);
-      continue;
-    }
-    output.push(
-      %(declare $base
-        (bindings (op = (bind $binding $modifiers) $initializer))));
-    output.push(c._cleanup_statement(type, binding));
+    output.push(%(declare $base (bindings $declarator)));
+    _push_items(output, after);
   }
   if (ordinary.len())
     output.push(%(declare $base (bindings @{ordinary})));
+}
+
+/* The code placed after an initialized `declarator`, which then takes the
+   placing expansion's result as its initializer, or else the items an
+   after-initialization rewrite adds, or NULL. */
+static List Compiler._after_declarator(
+  Compiler c, Var base, List &declarator, Token origin) {
+  match (declarator)
+    case %(op = (bind ?name ?mods) ?value): {
+      List result = _managed_initializer(value);
+      if (result) {
+        List modifiers = mods;
+        Type type = modifiers.append(base).type().declared();
+        c._require_cleanup(base, type, origin);
+        declarator = %(op = (bind $name $mods) $result);
+        return c._cleanup_statement(type, name);
+      }
+      List placed = c._take_placed(name, value, result, origin);
+      if (placed) {
+        declarator = %(op = (bind $name $mods) $result);
+        return placed;
+      }
+      return c.rewrite(<decl>, <init>,
+        %(declare $base (bindings $declarator)),
+        AST_BLOCK, c.return_type, origin);
+    }
+  return NULL;
+}
+
+/* Takes the placements anchored at `binding` and returns their code bound
+   in the block, or NULL. Each placing expansion's result must be the
+   complete initializer `value`, and becomes the declarator's initializer. */
+static List Compiler._take_placed(
+  Compiler c, List binding, List value, List &result, Token origin) {
+  if (!c.placements.len()) return NULL;
+  Array kept = [], code = [];
+  foreach (List row, c.placements) {
+    (int depth, List anchor, List placed, Var item) = row;
+    if (anchor !== binding) {
+      kept.push(row);
+      continue;
+    }
+    if (!_complete(value, placed))
+      $report.parse.init_incomplete(c, origin);
+    result = placed;
+    code.push(item);
+  }
+  if (!code.len()) return NULL;
+  c.placements = kept;
+  Array items = [];
+  foreach (Var item, code)
+    _push_items(items, c.bind_syntax(item, AST_BLOCK, c.return_type));
+  return %(seq @{items.list_free()});
+}
+
+static int _has_managed(List declaration) {
+  match (declaration) {
+    case %(seq *rows):
+      foreach (List row, rows)
+        if (_has_managed(row)) return 1;
+    case %(declare ? (bindings *declarators)):
+      foreach (List declarator, declarators)
+        match (declarator)
+          case %(op = (bind ? ?) ?value):
+            if (_managed_initializer(value)) return 1;
+  }
+  return 0;
+}
+
+static List _managed_initializer(List syntax) {
+  match (syntax) {
+    case %(managed-init ?value): return value;
+    case %(expr ? ?inner):
+      return _managed_initializer(inner);
+    case $source_content_pattern($grouped, %(?inner)):
+      return _managed_initializer(inner);
+  }
+  return NULL;
 }
 
 static void Compiler._require_cleanup(
@@ -2795,6 +2926,18 @@ static List Compiler._cleanup_statement(Compiler c, Type type, List binding) {
   List receiver = $!($type){ $binding };
   return c.bind_syntax(
     $!{ defer $receiver.cleanup(); }, AST_STATEMENT, c.return_type);
+}
+
+/* Parentheses and typed expression shells preserve the position of a
+   complete initializer; operators do not. */
+static int _complete(List syntax, List result) {
+  if (syntax === result) return 1;
+  match (syntax) {
+    case %(expr ? ?inner): return _complete(inner, result);
+    case $source_content_pattern($grouped, %(?inner)):
+      return _complete(inner, result);
+  }
+  return 0;
 }
 
 /* A split declaration still defines its shared type once. An ordinary local
@@ -2953,6 +3096,7 @@ static List Compiler._bind_form(
     case %(!set ?def (macrodef *)): return c._bind_macrodef(def, context);
     case %(preproc ?(String directive)) if (unit || block):
       return c._bind_preproc(input);
+    case %(at ?origin ?node) if (block): return c._bind_item(origin, node);
     case %(at ?origin ?node):
       return c._anchor(origin, c.bind_syntax(node, context, c.return_type));
     case return_empty() if (statement): return c.finish_return_statement(NULL);
@@ -3047,6 +3191,15 @@ static List Compiler._anchor(Compiler c, Var origin, List bound) {
   match (bound) case %(seq ?only): bound = only;
   Var anchor = origin == <m-origin> ? c.origin : origin;
   return %(at $anchor $bound);
+}
+
+/* An anchored block item is followed by the code placed after it. */
+static List Compiler._bind_item(Compiler c, Var origin, List node) {
+  int anchor = origin == <m-origin> ? c.origin : origin.int();
+  c.enter((Ancestor){ .what = <statement>, .origin = anchor });
+  List bound = c._anchor(origin, c.bind_syntax(node, AST_BLOCK, c.return_type));
+  List after = c.leave_item();
+  return after ? %(seq $bound @after) : bound;
 }
 
 // constructed file-scope forms

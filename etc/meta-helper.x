@@ -231,6 +231,8 @@ Code Code.register_after_initialization(Code f, Macro p, List h) =>
 List x2c_syntax_type(List v) => Code.type(v);
 Var x2c_literal_value(Var v) => _ask("x2c_literal_value", %($v));
 
+Code x2c_enclosing(Symbol w) => _ask("x2c_enclosing", %($w));
+void x2c_place(List w, Code v) { _ask("x2c_place", %($w $v)); }
 String x2c_invocation_file(void) => _ask("x2c_invocation_file", %());
 int x2c_invocation_line(void) => _ask("x2c_invocation_line", %());
 int x2c_invocation_column(void) => _ask("x2c_invocation_column", %());

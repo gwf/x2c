@@ -1261,8 +1261,9 @@ Type Sym.delegate_aggregate(Sym s, Type type) {
 /** Begins a reversible transaction over the current semantic scope.
 
     The transaction restores the current scope maps, file-static and binding
-    facts, binding and generated-name counters, and initializer names. It
-    does not snapshot parser position or other compiler state.
+    facts, binding and generated-name counters, initializer names, and the
+    parser's ancestors and placements. It does not snapshot parser position
+    or other compiler state.
 */
 SymTxn Compiler.begin_semantic_transaction(Compiler c) {
   SymTxn transaction = { .c = c };
@@ -1283,6 +1284,8 @@ static void SymTxn._save(SymTxn &s, SymScope scope) {
   s.scope = scope;
   s.mark = c.sym.undo.len();
   s.meta_group_size = c.meta_group.len();
+  s.ancestors = c.ancestors.len();
+  s.placements = c.placements.len();
   s.counters = c.names.counters;
   s.statics = c.sym.statics;
   s.binding_facts = c.semantic_binding_facts();
@@ -1434,6 +1437,8 @@ static void SymTxn._restore(SymTxn &s) {
   c.sym.binding_facts = s.binding_facts;
   c.names.next_binding = s.next_binding;
   c.meta_group.resize(s.meta_group_size);
+  c.ancestors.truncate(s.ancestors);
+  c.placements.resize(s.placements);
   c.sym.local_macro_names = s.local_macro_names;
   c.names.counters = s.counters;
   c.init_fn = s.initializer_name;

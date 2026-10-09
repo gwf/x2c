@@ -31,6 +31,38 @@ static List _scope_expand(List body, List destinations) {
   return $!{ { $enter; { defer $leave; $body } } };
 }
 
+// $auto
+
+/* `$auto(value)` stands for `value` as the complete initializer of a block
+   declarator, which the declaration finisher verifies before it binds the
+   release placed after the declarator. The release checks the declared
+   storage and Cleanup participation and defers the binding's cleanup. */
+static List _auto_expand(List value) {
+  Code local = x2c_enclosing(<declarator>);
+  Code item = x2c_enclosing(<statement>);
+  if (!local || !item)
+    x2c_diagnostic_fail_at(item, <parse>,
+      "managed initializer requires a complete block-local initializer", %());
+  x2c_place(%(after-statement), x2c_template_call("x2c.auto.release", %($local)));
+  return value;
+}
+
+static List _auto_release(Code local) {
+  Code item = x2c_enclosing(<statement>);
+  match (local) case %(declare ?(Type base) (bindings (bind ?binding ?))): {
+    if (base.is_static() || base.is_extern() || base.is_threaded())
+      x2c_diagnostic_fail_at(item, <parse>,
+        "managed initializer requires automatic local storage", %());
+    Type type = local.type();
+    if (!type.protocol_member("cleanup"))
+      x2c_diagnostic_fail_at(item, <protocol>,
+        "managed initializer requires Cleanup participation",
+        %("type: ${type.repr()}"));
+    return $!{ defer $binding.cleanup(); };
+  }
+  return NULL;
+}
+
 /* foreach
 
    A collection whose owner declares a matching `try_next` runs a cursor
@@ -859,6 +891,8 @@ Map builtin_targets(void) {
   $builtin.row(
     rows, "builtin_try_cleanup_placement", builtin_try_cleanup_placement);
   $builtin.row(rows, "builtin_foreach_expand", _foreach_expand);
+  $builtin.row(rows, "builtin_auto_expand", _auto_expand);
+  $builtin.row(rows, "builtin_auto_release", _auto_release);
   $builtin.row(rows, "builtin_class_initializer", _class_initializer);
   $builtin.row(rows, "builtin_class_write_fields", _class_write_fields);
   $builtin.row(rows, "builtin_class_expand", _class_expand);

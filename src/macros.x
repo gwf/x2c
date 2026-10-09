@@ -353,6 +353,10 @@ static macro Stmt $report.macro.import_extension(
     <macro>, "compile-time import requires .xlisp",
     $origin, $path_note);
 
+static macro Stmt $report.macro.placement(Expr $c, Expr $where) =>
+  $c.report_error(
+    <macro>, "unknown placement", $c.token, %("where: ${$where.repr()}"));
+
 static macro Stmt $report.macro.builtin_form(Expr $c) =>
   $c.report_error(
     <macro>, "unexpected form in built-in macro source",
@@ -494,6 +498,7 @@ static List Expansion.bind(Expansion &x, AstPos position) {
     (${x.definition} ${x.input} $lisp_bindings ${x.invocation}) @old_stack
   );
   int expansion_origin = c.record_origin(x.invocation);
+  int placed = c.placements.len();
   Ast constructed = matched ? x.construct(template_bindings) : NULL;
   List result = NULL;
   $let(c.origin, expansion_origin) {
@@ -501,6 +506,7 @@ static List Expansion.bind(Expansion &x, AstPos position) {
       matched ? constructed : void,
       position, c.return_type);
   }
+  c.close_placements(placed, result);
   return result;
 }
 
@@ -4427,12 +4433,37 @@ static Map Compiler._code_effects(Compiler c, Var effects) {
             _replace_bindings(declaration, replacements), AST_UNIT, NULL));
         }
       }
+      case %(place ?(List where) ?code): c.place(where, code);
       default:
         c.report_error(
           <macro>, "a meta call returned an unknown code effect", c.token,
           %("effect: ${effect.repr()}"));
     }
   return replacements;
+}
+
+/** Places `code` where `where` says, under the active expansion's
+    transaction: `(after-statement)` after the enclosing block item or
+    initialized declarator; `(unit-support)` among the unit's support
+    declarations, once per KEY with `(unit-support KEY)`; or `(unit-init)`
+    in the unit's file initialization, in AREA with `(unit-init AREA)`. */
+void Compiler.place(Compiler c, List where, Var code) {
+  match (where) {
+    case %(after-statement): c.place_after(code);
+    case %(unit-support): c.add_early(c.bind_syntax(code, AST_UNIT, NULL));
+    case %(unit-support ?key): {
+      Var placed;
+      $adapter.memo(c, key, placed) {
+        c.add_early(c.bind_syntax(code, AST_UNIT, NULL));
+        placed = 1;
+      }
+    }
+    case %(unit-init):
+      c.add_init(<finish>, c.bind_syntax(code, AST_BLOCK, NULL));
+    case %(unit-init (!set ?area (!or protocol prepare statics finish))):
+      c.add_init(area, c.bind_syntax(code, AST_BLOCK, NULL));
+    default: $report.macro.placement(c, where);
+  }
 }
 
 /** Binds a code-value carrier that a meta call returned outside a macro

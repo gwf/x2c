@@ -73,6 +73,17 @@ typedef struct PendingMark { int lengths[PENDING_AREAS]; } PendingMark;
 /** Names the scope-owned semantic table belonging to one compiler. */
 typedef struct Sym *Sym;
 
+/** One syntax the parser is inside, which `x2c_enclosing` answers: a
+    function body with its declaration in `node`, a block item with the
+    token or origin it starts at, or an initialized declarator with its
+    declaration base in `base` and its `(bind ...)` node in `node`. */
+typedef struct Ancestor {
+  Symbol what;
+  Token token;
+  int origin;
+  List base, node;
+} Ancestor;
+
 /** Holds mutable state for one source translation.
 
     The structure, its state, and its owned compile-time `Lisp` session belong
@@ -206,6 +217,12 @@ typedef struct Compiler {
   // Linkage groups that earlier segments of the collected file left open.
   int open_linkage;
   String fn_name, Diagnostics diagnostics, Array braces, import_stack;
+  /* The `Ancestor` rows of the syntax being parsed, innermost last, and
+     the code placed after a block item or initialized declarator, each
+     `(depth binding result code)`: the item's row index, the declarator's
+     binding or nil, and the placing expansion's result. */
+  Block ancestors;
+  Array placements;
   // Where each line of `lines_text` starts, for showing diagnostic lines.
   String lines_text, Array line_starts;
   // The unit's script record, and the same record on the compiler whose own
@@ -232,7 +249,7 @@ typedef struct SymTxn {
   Compiler c;
   int scope_index, next_binding, active, String initializer_name;
   String shutdown_name, Map counters;
-  int local_macro_names, mark, meta_group_size;
+  int local_macro_names, mark, meta_group_size, ancestors, placements;
   SymScope scope;
   Map statics, binding_facts;
   Map source_definitions;
@@ -2781,7 +2798,9 @@ static Compiler _new(Compiler owner) {
   c.diagnostics = Diagnostics.new(
     owner && owner.diagnostics.printer ? c : NULL,
     owner ? owner.diagnostics.limit : 1);
-  $set_fields(c, [], braces, line_starts, import_stack, meta_group);
+  $set_fields(
+    c, [], braces, line_starts, import_stack, meta_group, placements);
+  c.ancestors = Block.new(sizeof(Ancestor));
   c.origins = owner ? owner.origins : [];
   c.root_dir = x2c_get_root();
   return c;

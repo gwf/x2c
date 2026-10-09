@@ -132,8 +132,9 @@ Var Compiler.meta_helper_call(
 }
 
 /* Answers the body's query with the compiler's own `operation` applied to
-   `operands` at the call's site, in the state the call sees. A failed
-   answer ends the helper, which waits for it, before the failure leaves. */
+   `operands` at the call's site, in the state the call sees; a `void`
+   operation answers nil. A failed answer ends the helper, which waits for
+   it, before the failure leaves. */
 static void Call.answer(Call &call, String operation, List operands) {
   Var value = void;
   try value = call.compiler.apply_meta_function(operation, operands, call.site);
@@ -141,6 +142,7 @@ static void Call.answer(Call &call, String operation, List operands) {
     _helper_stop(SIGKILL);
     Error.raise(code, detail);
   }
+  if (value is void) value = %();
   call.send_frame(%(answer $value));
 }
 

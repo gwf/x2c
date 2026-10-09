@@ -795,6 +795,23 @@ static void _sdk_check_notes(String operation, List notes) {
       $report.sdk.notes_string(operation, note);
 }
 
+// ancestry and placement
+
+/** Answers `x2c.enclosing`, declared in `lib/meta.x`. */
+Code x2c_enclosing(Symbol what) {
+  _sdk_guard("x2c.enclosing");
+  if (!(what in %<<declarator statement function unit>>))
+    _sdk_reject_value(
+      "x2c.enclosing names declarator, statement, function, or unit", what);
+  return active.expander.enclosing(what);
+}
+
+/** Answers `x2c.place`, declared in `lib/meta.x`. */
+void x2c_place(List where, Code code) {
+  _sdk_guard("x2c.place");
+  active.expander.place(where, code);
+}
+
 // meta parameter descriptions
 
 /** Returns what a `meta` parameter declared `TypeInfo` receives for the

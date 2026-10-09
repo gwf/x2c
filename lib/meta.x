@@ -347,6 +347,31 @@ meta int x2c_invocation_column(void);
     cannot be read. */
 meta String x2c_embed_text(Var path);
 
+/* ancestry and placement
+
+   A macro that contributes code beyond its own result asks where it
+   stands and places that code where the compiler finishes it. */
+
+/** Returns the innermost `what` around the invocation, or nothing when
+    there is none. `<declarator>` answers the initialized declarator whose
+    initializer directly holds the invocation, as its one-declarator
+    declaration; `<statement>` the enclosing block item, as its origin
+    anchor for `x2c_diagnostic_fail_at`; `<function>` the enclosing
+    function's declaration; `<unit>` a `String` expression of the unit's
+    path. */
+meta Code x2c_enclosing(Symbol what);
+
+/** Places `code` under the expansion's transaction. `where` is
+    `%(after-statement)`, after the enclosing block item or the
+    initialized declarator whose initializer holds the invocation;
+    `%(unit-support)` among the unit's file-scope support declarations, or
+    `%(unit-support KEY)` once for each KEY; or `%(unit-init)` in the
+    unit's initialization, or `%(unit-init AREA)` in its `protocol`,
+    `prepare`, `statics`, or `finish` area. Code placed after a declarator
+    requires the expansion's result to be that declarator's complete
+    initializer. */
+meta void x2c_place(List where, Code code);
+
 /* failing
 
    A macro that checks its argument needs to say what is wrong at the site
