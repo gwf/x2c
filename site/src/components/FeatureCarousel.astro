@@ -7,17 +7,16 @@ import { absoluteSiteUrl, sitePath } from "../../site-config.mjs";
 interface Props {
   name: string;
   label: string;
-  tone: "dark" | "light";
   slides: any[];
   codeLabel?: string;
 }
 
-const { name, label, tone, slides, codeLabel } = Astro.props;
+const { name, label, slides, codeLabel } = Astro.props;
 const count = String(slides.length).padStart(2, "0");
 ---
 
-<div class={`feature-carousel feature-carousel-${tone}`} data-carousel>
-  <div class={`carousel-toolbar${tone === "dark" ? " carousel-toolbar-dark" : ""}`}>
+<div class="feature-carousel" data-carousel>
+  <div class="carousel-toolbar">
     <div role="tablist" aria-label={label} class="carousel-tabs">
       {slides.map((slide, position) => (
         <button
@@ -33,7 +32,7 @@ const count = String(slides.length).padStart(2, "0");
     </div>
     <div class="carousel-controls">
       <span data-carousel-count
-        class={`carousel-count${tone === "dark" ? " carousel-count-dark" : ""}`}
+        class="carousel-count"
         >01 / {count}</span>
       <button type="button" data-carousel-prev aria-label="previous"
         class="carousel-arrow">&#8592;</button>

@@ -30,7 +30,7 @@ const base = import.meta.env.BASE_URL;
 ---
 
 {part !== "notes" && <div
-  class={panel.panel === "steps" ? "descent-diagram" : "feature-code"}
+  class="feature-code"
   data-code-section={section}>
   {codeLabel && <small class="feature-code-label">{codeLabel}</small>}
   <Fragment set:html={left} />

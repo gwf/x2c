@@ -78,7 +78,7 @@ code:not(pre code) {
 }
 
 .landing-section:nth-of-type(odd) code:not(pre code),
-.feature-carousel-dark code:not(pre code) {
+.feature-carousel code:not(pre code) {
   border-color: var(--coral-chip-border);
   background: var(--coral-chip-bg);
   color: var(--coral);
@@ -129,12 +129,7 @@ main:focus {
 }
 
 .feature-carousel {
-  border: 1px solid var(--line);
-  background: var(--white);
-}
-
-.feature-carousel-dark {
-  border-color: var(--hairline-on-dark);
+  border: 1px solid var(--hairline-on-dark);
   background: var(--carousel-dark);
   color: var(--paper);
 }
@@ -146,54 +141,32 @@ main:focus {
   border: 0;
   border-bottom: 2px solid transparent;
   background: none;
-  color: var(--dark);
+  color: var(--paper);
   font:
     500 12px/1 "JetBrains Mono",
     monospace;
 }
 
-.feature-carousel-dark [data-carousel-tab] {
-  color: var(--paper);
-}
-
-.feature-carousel-light [data-carousel-tab][aria-selected="true"] {
-  border-bottom-color: var(--red);
-}
-
-.feature-carousel-dark [data-carousel-tab][aria-selected="true"] {
+[data-carousel-tab][aria-selected="true"] {
   border-bottom-color: var(--coral);
 }
 
-.feature-carousel-light [data-carousel-tab]:hover {
-  background: var(--paper);
-}
-
-.feature-carousel-dark [data-carousel-tab]:hover {
+[data-carousel-tab]:hover {
   background: rgba(244, 241, 236, 0.06);
 }
 
 .carousel-arrow {
   width: 34px;
   height: 34px;
-  border: 1px solid var(--line-strong);
+  border: 1px solid var(--button-secondary-border);
   background: none;
-  color: var(--dark);
+  color: var(--paper);
   font:
     500 13px/1 "JetBrains Mono",
     monospace;
 }
 
-.feature-carousel-dark .carousel-arrow {
-  border-color: var(--button-secondary-border);
-  color: var(--paper);
-}
-
-.feature-carousel-light .carousel-arrow:hover {
-  background: var(--dark);
-  color: var(--paper);
-}
-
-.feature-carousel-dark .carousel-arrow:hover {
+.carousel-arrow:hover {
   background: var(--paper);
   color: var(--dark);
 }
@@ -204,11 +177,7 @@ main:focus {
 }
 
 .feature-carousel:not([data-carousel-ready]) .carousel-slide+.carousel-slide {
-  border-top: 1px solid var(--line);
-}
-
-.feature-carousel-dark:not([data-carousel-ready]) .carousel-slide+.carousel-slide {
-  border-top-color: var(--hairline-on-dark);
+  border-top: 1px solid var(--hairline-on-dark);
 }
 
 [data-carousel-ready] .carousel-track {
@@ -669,7 +638,7 @@ html:has(.landing-header) {
 
 .carousel-toolbar {
   display: none;
-  border-bottom: 1px solid var(--hairline);
+  border-bottom: 1px solid var(--hairline-on-dark);
   align-items: center;
   justify-content: space-between;
   overflow: hidden;
@@ -678,10 +647,6 @@ html:has(.landing-header) {
 
 [data-carousel-ready] .carousel-toolbar {
   display: flex;
-}
-
-.carousel-toolbar-dark {
-  border-bottom-color: var(--hairline-on-dark);
 }
 
 .carousel-tabs,
@@ -721,14 +686,10 @@ html:has(.landing-header) {
 }
 
 .carousel-count {
-  color: var(--nav-muted);
+  color: var(--muted-light);
   font:
     500 11.5px/1 "JetBrains Mono",
     monospace;
-}
-
-.carousel-count-dark {
-  color: var(--muted-light);
 }
 
 .carousel-viewport {
@@ -765,7 +726,7 @@ html:has(.landing-header) {
   border-top: 1px solid var(--hairline);
 }
 
-.feature-carousel-dark .feature-copy {
+.feature-carousel .feature-copy {
   border-top-color: var(--hairline-on-dark);
 }
 
@@ -777,7 +738,7 @@ html:has(.landing-header) {
     serif;
 }
 
-.feature-carousel-dark .feature-copy h3 {
+.feature-carousel .feature-copy h3 {
   color: var(--paper);
 }
 
@@ -788,7 +749,7 @@ html:has(.landing-header) {
   line-height: 1.6;
 }
 
-.feature-carousel-dark .feature-copy p {
+.feature-carousel .feature-copy p {
   color: var(--muted-light);
 }
 
@@ -814,7 +775,7 @@ html:has(.landing-header) {
   color: var(--muted-dark);
 }
 
-.feature-carousel-dark .caption-links .copy-button {
+.feature-carousel .caption-links .copy-button {
   color: var(--caption-muted);
 }
 
@@ -1014,58 +975,9 @@ html:has(.landing-header) {
   font-variant-ligatures: none;
 }
 
-.section-heading strong,
-.descent-diagram strong {
+.section-heading strong {
   color: var(--coral);
   font-weight: 700;
-}
-
-/* The descent is an ordinary Markdown ordered list; the step numbers and the
-   loop marker on the last item are drawn by CSS, not typed by the author. */
-.descent-diagram {
-  display: grid;
-  padding: clamp(20px, 2.4vw, 28px);
-  background: var(--code);
-  align-content: start;
-}
-
-.descent-diagram ol {
-  margin: 0;
-  padding: 0;
-  counter-reset: descent;
-  list-style: none;
-}
-
-/* The marker is positioned rather than a grid cell so that inline `code` and
-   **bold** inside an item stay part of one paragraph. */
-.descent-diagram li {
-  position: relative;
-  padding-block: 9px;
-  padding-left: 66px;
-  color: var(--code-ink);
-  font-size: 14px;
-  line-height: 1.5;
-  counter-increment: descent;
-}
-
-.descent-diagram li::before {
-  position: absolute;
-  left: 0;
-  content: "0" counter(descent);
-  color: var(--coral);
-  font:
-    500 11px/2 "JetBrains Mono",
-    monospace;
-}
-
-.descent-diagram li:last-child {
-  margin-top: 6px;
-  border-top: 1px solid var(--hairline-on-dark);
-}
-
-.descent-diagram li:last-child::before {
-  content: "\21ba";
-  font-size: 14px;
 }
 
 .number-stats {
