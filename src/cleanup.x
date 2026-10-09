@@ -98,12 +98,21 @@ static List _expression_children(List node, Map changed) {
 }
 
 /* Whether a statement expression in `body`, before its regions lower,
-   holds a landing form. */
+   holds a landing form. Only a landing's rows hold source the walk
+   lowers, so only they are searched. */
 static int _expression_holds_landing(List body) {
   List node;
-  $ast.walk(body, node) match (node) case %(expr *): {
-    if (ast_contains_head(node, <landing>)) return 1;
-    continue;
+  $ast.walk(body, node) match (node) {
+    case %(expr *): {
+      if (ast_contains_head(node, <landing>)) return 1;
+      continue;
+    }
+    case %(landing ? ?rows): {
+      foreach (List row, rows)
+        match (row) case %((!or outer region) ? ?part):
+          if (_expression_holds_landing(part)) return 1;
+      continue;
+    }
   }
   return 0;
 }
@@ -654,20 +663,19 @@ static List _address_of(String spelling, List binding) {
 
 static List Walk._lower_landing(Walk &w, Var code, List rows) {
   Compiler c = w.c;
-  List parts = %(), exits = NULL;
-  foreach (List row, rows) {
-    Var token = row.cadr(), part = NULL;
+  Map parts = $auto({});
+  List exits = NULL;
+  foreach (List row, rows)
     match (row) {
-      case %(new-name ? ?(String role)): part = c._region_binding(role);
-      case %(outer ? ?node):
-        part = %(code-value "lowered" (seq ${w.rewrite(node)}) ());
-      case %(exits ? ?statements):
-        part = exits =
+      case %(new-name ?token ?(String role)):
+        parts[token] = c._region_binding(role);
+      case %(outer ?token ?node):
+        parts[token] = %(code-value "lowered" (seq ${w.rewrite(node)}) ());
+      case %(exits ?token ?statements):
+        parts[token] = exits =
           %(code-value "lowered" ${c._bind_parts(statements, parts)} ());
-      case %(region ? ?node): part = w._region(exits, node);
+      case %(region ?token ?node): parts[token] = w._region(exits, node);
     }
-    parts = cons(%($token $part), parts);
-  }
   return c._bind_parts(code, parts);
 }
 
@@ -675,15 +683,27 @@ static List Walk._lower_landing(Walk &w, Var code, List rows) {
 static List Walk._region(Walk &w, List cleanup, List body) =>
   %(code-value "lowered" ${w._inside(cleanup, body, body)} ());
 
-/* Binds `code` with each token of `parts`, `(TOKEN PART)` rows, replaced.
-   A template's definition holds none, so only the values it applies are
-   searched. */
-static List Compiler._bind_parts(Compiler c, Var code, List parts) {
-  List replaced = NULL;
-  match (code) case %("x2c.template" ?definition ?(List values)):
-    replaced = %("x2c.template" $definition ${values.replace(parts)});
-  if (!replaced) replaced = code.list().replace(parts);
-  return c.bind_syntax(replaced, AST_BLOCK, c.return_type);
+/* Binds `code` with each token `parts` maps replaced. A template's
+   definition holds none, so only the values it applies are searched. */
+static List Compiler._bind_parts(Compiler c, Var code, Map parts) {
+  match (code) case %("x2c.template" ?definition ?values): {
+    Var replaced = _replaced(values, parts);
+    if (replaced != values)
+      code = %("x2c.template" $definition $replaced);
+    return c.bind_syntax(code, AST_BLOCK, c.return_type);
+  }
+  return c.bind_syntax(_replaced(code, parts), AST_BLOCK, c.return_type);
+}
+
+/* `value` with each token `parts` maps replaced. A List without one is
+   returned as it is, so only the cells along a replaced path are new. */
+static Var _replaced(Var value, Map parts) {
+  Var part;
+  if (value.is_binder() && parts.try_get(value, part)) return part;
+  if (value is not <list> || value.is_nil()) return value;
+  List list = value;
+  Var head = _replaced(list.car(), parts), tail = _replaced(list.cdr(), parts);
+  return head == list.car() && tail == list.cdr() ? value : cons(head, tail);
 }
 
 /* defer regions
