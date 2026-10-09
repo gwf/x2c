@@ -4444,12 +4444,18 @@ static Map Compiler._code_effects(Compiler c, Var effects) {
 
 /** Places `code` where `where` says, under the active expansion's
     transaction: `(after-statement)` after the enclosing block item or
-    initialized declarator; `(unit-support)` among the unit's support
-    declarations, once per KEY with `(unit-support KEY)`; or `(unit-init)`
-    in the unit's file initialization, in AREA with `(unit-init AREA)`. */
+    initialized declarator; `(block-exit)` on every exit from the enclosing
+    block from that point on, as a `defer` placed after it; `(unit-support)`
+    among the unit's support declarations, once per KEY with
+    `(unit-support KEY)`; or `(unit-init)` in the unit's file
+    initialization, in AREA with `(unit-init AREA)`. */
 void Compiler.place(Compiler c, List where, Var code) {
   match (where) {
     case %(after-statement): c.place_after(code);
+    case %(block-exit): {
+      Macro deferred = $deferred;
+      c.place_after(deferred(code));
+    }
     case %(unit-support): c.add_early(c.bind_syntax(code, AST_UNIT, NULL));
     case %(unit-support ?key): {
       Var placed;

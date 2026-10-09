@@ -19,9 +19,9 @@
     Two operations let a macro contribute code beyond its result.
     `x2c_enclosing` answers the initialized declarator, block item,
     function, or unit around the invocation, and `x2c_place` puts code
-    after that declarator or block item, among the unit's support
-    declarations, or in its initialization, under the expansion's
-    transaction. `$auto` is built on them.
+    after that declarator or block item, on the exits of its block, among
+    the unit's support declarations, or in its initialization, under the
+    expansion's transaction. `$auto` is built on them.
 
     The library builds it as an optional module, but the prelude's
     `varops.x` includes it for its own `meta` rows, so every unit sees its
@@ -179,6 +179,15 @@ meta Type Code.type(Code value);
 /** Returns the value of captured constant code, including a macro value.
     Rejects expressions that require runtime evaluation. */
 meta Var Code.value(Code code);
+
+/** Tests whether control cannot reach the end of the statement
+    `statement`, because it ends in a `return` or in a raise or call that
+    does not return. */
+meta int Code.exits(Code statement);
+
+/** Tests whether the Match pattern expression `pattern` builds the same
+    value each time it runs, so it can be prepared once. */
+meta int Code.is_static_pattern(Code pattern);
 
 /** Registers a translator with its macro and optional hole patterns.
     NULL holes use the macro's named captures. Recognition uses the source
@@ -371,6 +380,8 @@ meta Code x2c_enclosing(Symbol what);
 /** Places `code` under the expansion's transaction. `where` is
     `%(after-statement)`, after the enclosing block item or the
     initialized declarator whose initializer holds the invocation;
+    `%(block-exit)`, run on every transfer that leaves the enclosing block
+    after that item or declarator, as `defer code` written after it runs;
     `%(unit-support)` among the unit's file-scope support declarations, or
     `%(unit-support KEY)` once for each KEY; or `%(unit-init)` in the
     unit's initialization, or `%(unit-init AREA)` in its `protocol`,

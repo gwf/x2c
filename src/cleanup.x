@@ -102,7 +102,8 @@ static List _expression_children(List node, Map changed) {
 static int _expression_holds_try(List body) {
   List node;
   $ast.walk(body, node) match (node) case %(expr *): {
-    if (ast_contains_head(node, <try>)) return 1;
+    if (ast_contains_head(node, <try>) || ast_contains_head(node, <landing>))
+      return 1;
     continue;
   }
   return 0;
@@ -166,6 +167,7 @@ static List Compiler._static_regions(Compiler c, List ast, Map runtime) {
       return _rewrite_expression(
         ast, %!(List block) => c._static_regions(block, runtime));
     case %((!or function localinit typedef) *): return ast;
+    case %(try *): return c._landing_form(ast, runtime);
     case %(declare ?type ?bindings):
       return c._static_initializers(type, bindings, runtime);
     case $source_block_content(%(*statements)): {
@@ -186,6 +188,25 @@ static List Compiler._static_regions(Compiler c, List ast, Map runtime) {
   }
   Var child;
   $ast.rewrite_children(ast, child, c._static_regions(child, runtime));
+}
+
+/* A `try` takes the landing form its component's statement rule answers,
+   and the parts of that form take theirs after it. */
+static List Compiler._landing_form(Compiler c, List node, Map runtime) {
+  List form = c.rewrite(
+    <node>, <try>, node, AST_STATEMENT, c.return_type, NULL);
+  match (form) case %(landing ?code ?rows): {
+    Array parts = [];
+    foreach (List row, rows)
+      match (row) {
+        case %((!set ?kind (!or outer region)) ?token ?part):
+          parts.push(%($kind $token ${c._static_regions(part, runtime)}));
+        default: parts.push(row);
+      }
+    return %(landing $code ${parts.list_free()});
+  }
+  Var child;
+  $ast.rewrite_children(node, child, c._static_regions(child, runtime));
 }
 
 /* The pending initializer and the emitter share one cleanup record. Its
@@ -357,6 +378,7 @@ static void Walk.collect_labels(Walk &w, Var value, List path) {
     case %(label ?name *rest): w._collect_label(name, rest, path);
     case %(try ?body ?clause ?finalizer *):
       w._collect_try(body, clause, finalizer, path);
+    case %(landing ? ?rows): w._collect_rows(rows, path);
     case %(defer ?body *): w.collect_labels(body, cons(body, path));
     case %(localinit ?guard ?body):
       w._collect_local(node, guard, body, path);
@@ -393,6 +415,16 @@ static void Walk._collect_catches(Walk &w, Var clause, List path) {
       w.collect_labels(record.car(), path);
       List arm = record.cadr();
       w.collect_labels(arm, cons(arm, path));
+    }
+}
+
+/* Each region a landing opens has its own identity, such as a `try` body
+   and each catch arm, while its outer parts keep the enclosing path. */
+static void Walk._collect_rows(Walk &w, List rows, List path) {
+  foreach (List row, rows)
+    match (row) {
+      case %(outer ? ?node): w.collect_labels(node, path);
+      case %(region ? ?node): w.collect_labels(node, cons(node, path));
     }
 }
 
@@ -439,6 +471,7 @@ static Var Walk.rewrite(Walk &w, Var value) {
       return w._lower_try(node, body, arms, finalizer);
     case ${$tried(?body, ?finalizer)}:
       return w._lower_try(node, body, NULL, finalizer);
+    case %(landing ?code ?rows): return w._lower_landing(code, rows);
     case %(localinit ?guard ?body):
       return w._rewrite_localinit(node, guard, body);
     case %(staticinit ?record ?initial):
@@ -629,6 +662,57 @@ static List _address_of(String spelling, List binding) {
   return %(expr ${type.reference()} (op & (expr $type (ident $binding))));
 }
 
+/* landings
+
+   A construct whose parts control re-enters through `siglongjmp` takes
+   the form `(landing CODE ROWS)`. The walk applies its rows in order, and
+   each row's TOKEN, a binder in CODE and in the rows after it, is replaced
+   by what the row lowered:
+
+   - `(new-name TOKEN ROLE)` introduces a fresh binding for ROLE.
+   - `(outer TOKEN NODE)` lowers NODE in the enclosing regions.
+   - `(exits TOKEN CODE)` binds CODE as the exits of the regions after it.
+     CODE holds lowered parts only, so binding lowers nothing more.
+   - `(region TOKEN NODE)` lowers NODE inside a region that runs those exits
+     on every transfer out of it, and that no `goto` may enter.
+
+   CODE then binds in place of the construct. The locals that the nodes of
+   `outer` and `region` rows write stay valid when control lands. */
+
+static List Walk._lower_landing(Walk &w, Var code, List rows) {
+  Compiler c = w.c;
+  List parts = %(), exits = NULL;
+  foreach (List row, rows) {
+    Var token = row.cadr(), part = NULL;
+    match (row) {
+      case %(new-name ? ?(String role)): part = c._region_binding(role);
+      case %(outer ? ?node):
+        part = %(code-value "lowered" (seq ${w.rewrite(node)}) ());
+      case %(exits ? ?statements):
+        part = exits =
+          %(code-value "lowered" ${c._bind_parts(statements, parts)} ());
+      case %(region ? ?node): part = w._region(exits, node);
+    }
+    parts = cons(%($token $part), parts);
+  }
+  return c._bind_parts(code, parts);
+}
+
+/* A region's body, lowered inside the region `cleanup` leaves. */
+static List Walk._region(Walk &w, List cleanup, List body) =>
+  %(code-value "lowered" ${w._inside(cleanup, body, body)} ());
+
+/* Binds `code` with each token of `parts`, `(TOKEN PART)` rows, replaced.
+   A template's definition holds none, so only the values it applies are
+   searched. */
+static List Compiler._bind_parts(Compiler c, Var code, List parts) {
+  List replaced = NULL;
+  match (code) case %("x2c.template" ?definition ?(List values)):
+    replaced = %("x2c.template" $definition ${values.replace(parts)});
+  if (!replaced) replaced = code.list().replace(parts);
+  return c.bind_syntax(replaced, AST_BLOCK, c.return_type);
+}
+
 /* try
 
    A try region: its frame, its catch site, its landing and its exits, each
@@ -699,7 +783,7 @@ static List Walk._lower_try(
   List frame = c._region_binding("exception_frame");
   List handle = arms ? catch_handle(node) : NULL;
   List cleanup = c._try_cleanup(frame, handle, w.rewrite(finalizer), !!arms);
-  List lowered = w._try_region(cleanup, body);
+  List lowered = w._region(cleanup, body);
   Macro shape = $compiler_try;
   return c.bind_syntax(
     shape(frame, w._catch_clause(handle, cleanup, arms), lowered, cleanup),
@@ -775,11 +859,6 @@ static List Compiler._try_cleanup(
   return %(code-value "lowered" $result ());
 }
 
-/* A try region's body or catch arm, lowered inside the region `cleanup`
-   leaves. */
-static List Walk._try_region(Walk &w, List cleanup, List body) =>
-  %(code-value "lowered" ${w._inside(cleanup, body, body)} ());
-
 /* The facts `$compiler_try` writes a try's catch site and landing from,
    or NULL for a try without catches. Each arm is its own region, which a
    jump from the body may not enter, and leaves `cleanup` on its exits. A
@@ -796,7 +875,7 @@ static List Walk._catch_clause(
         state = "ERROR_CATCH_TRANSIENT";
       patterns.push(pattern);
     }
-    arms.push(w._try_region(cleanup, record.cadr()));
+    arms.push(w._region(cleanup, record.cadr()));
   }
   return %($handle $state ${arms.list_free()} @{patterns.list_free()});
 }
@@ -885,8 +964,8 @@ static List Walk._lower_defer(
     $!{ {
       ${builtin_defer_record(record, callback, env, records)}
       x2c_cleanup_push(&$record);
-      ${w._try_region(cleanup, body)}
-      ${builtin_try_cleanup_placement(cleanup)}
+      ${w._region(cleanup, body)}
+      $cleanup
     }
   }, AST_BLOCK, c.return_type);
 }
@@ -958,6 +1037,14 @@ static void Preserve.collect(Preserve &p, List body) {
           pending.push(part);
           flags.push(1);
         }
+        continue;
+      }
+      case %(landing ? ?rows): {
+        foreach (List row, rows)
+          match (row) case %((!or outer region) ? ?part): {
+            pending.push(part);
+            flags.push(1);
+          }
         continue;
       }
     }

@@ -224,6 +224,8 @@ List x2c_function_parameter(List v, String w) =>
   _ask("x2c_function_parameter", %($v $w));
 Type Code.type(Code v) => _ask("Code_type", %($v));
 Var Code.value(Code v) => _ask("Code_value", %($v));
+int Code.exits(Code v) => _ask("Code_exits", %($v));
+int Code.is_static_pattern(Code v) => _ask("Code_is_static_pattern", %($v));
 Code Code.register_rewrite(Code f, Macro p, List h) =>
   _ask("Code_register_rewrite", %($f $p $h));
 Code Code.register_after_initialization(Code f, Macro p, List h) =>

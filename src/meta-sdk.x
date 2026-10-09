@@ -243,6 +243,18 @@ Var Code.value(Code code) {
   return value;
 }
 
+/** Answers `Code.exits`, declared in `lib/meta.x`. */
+int Code.exits(Code statement) {
+  _sdk_guard("Code.exits");
+  return reference_guard_exits(statement);
+}
+
+/** Answers `Code.is_static_pattern`, declared in `lib/meta.x`. */
+int Code.is_static_pattern(Code pattern) {
+  _sdk_guard("Code.is_static_pattern");
+  return active.expander.match_pattern_is_static(pattern);
+}
+
 /* Default holes retain the macro's declared capture names and cardinality. */
 static List _rewrite_holes(Macro shape, List supplied) {
   if (supplied) return supplied;
@@ -284,9 +296,9 @@ Code Code.register_rewrite(Code function, Macro shape, List holes) {
     case %(expr ? (call (expr ? (op ((!quote !quote) .)
             ((!quote !and) (expr ?type *)) ?)) ?)):
       { point = <member>; kind = type; }
-    case %((!quote !or) (switch *) *):
-      { point = <node>; kind = <switch>; }
-    case %(switch *): { point = <node>; kind = <switch>; }
+    case %((!quote !or) ((!set ?head (!or switch try)) *) *):
+      { point = <node>; kind = head; }
+    case %((!set ?head (!or switch try)) *): { point = <node>; kind = head; }
   }
   if (!point) MetaContext.reject("unsupported rewrite pattern in spike", NULL);
   return _rewrite_registration(function, shape, holes, point, kind);
