@@ -1281,7 +1281,7 @@ SymTxn Compiler_begin_semantic_transaction(Compiler c){
 }
 
 static void SymTxn__save(SymTxn * s, SymScope scope){
-  Compiler c =(* s).c; (* s).scope = scope; (* s).mark = Block_len(c -> sym -> undo); (* s).meta_group_size = Array_len(c -> meta_group); (* s).counters = c -> names -> counters; (* s).statics = c -> sym -> statics; (* s).binding_facts = Compiler_semantic_binding_facts(c); (* s).next_binding = c -> names -> next_binding; (* s).local_macro_names = c -> sym -> local_macro_names; (* s).initializer_name = c -> init_fn; (* s).shutdown_name = c -> fini_fn; (* s).extended = c -> macro_application > 0;
+  Compiler c =(* s).c; (* s).scope = scope; (* s).mark = Block_len(c -> sym -> undo); (* s).meta_group_size = Array_len(c -> meta_group); (* s).ancestors = Block_len(c -> ancestors); (* s).placements = Array_len(c -> placements); (* s).counters = c -> names -> counters; (* s).statics = c -> sym -> statics; (* s).binding_facts = Compiler_semantic_binding_facts(c); (* s).next_binding = c -> names -> next_binding; (* s).local_macro_names = c -> sym -> local_macro_names; (* s).initializer_name = c -> init_fn; (* s).shutdown_name = c -> fini_fn; (* s).extended = c -> macro_application > 0;
 }
 
 static void SymTxn__save_effects(SymTxn * s){
@@ -1363,7 +1363,7 @@ static void SymTxn__undo(SymTxn * s){
 }
 
 static void SymTxn__restore(SymTxn * s){
-  Compiler c =(* s).c;  SymScope * scope = Sym__scope_at(c -> sym, (* s).scope_index);  * scope =(* s).scope;  c -> sym -> statics =(* s).statics;  c -> sym -> binding_facts =(* s).binding_facts;  c -> names -> next_binding =(* s).next_binding;  Array_resize(c -> meta_group, (* s).meta_group_size);  c -> sym -> local_macro_names =(* s).local_macro_names;  c -> names -> counters =(* s).counters;  c -> init_fn =(* s).initializer_name;  c -> fini_fn =(* s).shutdown_name;
+  Compiler c =(* s).c;  SymScope * scope = Sym__scope_at(c -> sym, (* s).scope_index);  * scope =(* s).scope;  c -> sym -> statics =(* s).statics;  c -> sym -> binding_facts =(* s).binding_facts;  c -> names -> next_binding =(* s).next_binding;  Array_resize(c -> meta_group, (* s).meta_group_size);  Block_truncate(c -> ancestors, (* s).ancestors);  Array_resize(c -> placements, (* s).placements);  c -> sym -> local_macro_names =(* s).local_macro_names;  c -> names -> counters =(* s).counters;  c -> init_fn =(* s).initializer_name;  c -> fini_fn =(* s).shutdown_name;
 }
 
 static void SymTxn__restore_effects(SymTxn * s){

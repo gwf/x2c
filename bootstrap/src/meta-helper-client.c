@@ -488,7 +488,7 @@ static void Call_answer(Call * call, String operation, List operands){
     }
     x2c_error_catch_close(_x2c_error_handler_0);  _x2c_error_handler_0 = NULL;  x2c_exception_leave(& _x2c_exception_frame_0);
   }
-  Call_send_frame(&((* call)), cons(_86, cons(value, NULL)));
+  if(Var_is_void(value)) value = List_var(NULL);  Call_send_frame(&((* call)), cons(_86, cons(value, NULL)));
 }
 
 static void Call_check(Call * call){

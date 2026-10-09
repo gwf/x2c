@@ -49,6 +49,14 @@ PendingMark;
 
 typedef struct Sym * Sym;
 
+typedef struct Ancestor{
+  Symbol what;
+  Token token;
+  int origin;
+  List base, node;
+}
+Ancestor;
+
 typedef struct Compiler{
   String filename, text, root_dir;
   String package;
@@ -112,6 +120,8 @@ typedef struct Compiler{
   String fn_name;
   Diagnostics diagnostics;
   Array braces, import_stack;
+  Block ancestors;
+  Array placements;
   String lines_text;
   Array line_starts;
   ScriptUnit unit_script, script;
@@ -134,7 +144,7 @@ typedef struct SymTxn{
   String initializer_name;
   String shutdown_name;
   Map counters;
-  int local_macro_names, mark, meta_group_size;
+  int local_macro_names, mark, meta_group_size, ancestors, placements;
   SymScope scope;
   Map statics, binding_facts;
   Map source_definitions;

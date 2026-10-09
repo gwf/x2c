@@ -92,6 +92,16 @@ List Compiler_parse_function_definition(Compiler c);
 
 List Compiler_parse_function_target(Compiler c);
 
+void Compiler_enter(Compiler c, Ancestor row);
+
+List Compiler_enclosing(Compiler c, Symbol what);
+
+void Compiler_place_after(Compiler c, Var code);
+
+void Compiler_close_placements(Compiler c, int first, List result);
+
+List Compiler_leave_item(Compiler c);
+
 List Compiler_finish_initializers(Compiler c, List declaration, Token origin);
 
 List Compiler_bind_syntax(Compiler c, Var syntax, AstPos context, Type return_type);

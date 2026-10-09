@@ -1130,14 +1130,14 @@ static List Compiler__block_items(Compiler c, int anchor_items){
 }
 
 static void Compiler__push_item(Compiler c, Array block, int anchor_items){
-  Token origin = c -> token;  int expansion = Compiler__expands(c);  List stmt = Compiler_parse_block_item(c);  if(Map_truth(c -> macro_holes) &&(Var_equal(List_car(stmt), Symbol_var(917238582496136)) || Var_equal(List_car(stmt), Symbol_var(917238583616488)))){
+  Token origin = c -> token;  int expansion = Compiler__expands(c);  Compiler_enter(c, (Ancestor){
+    .what = 43159332400040, .token = origin
+  }
+  );  List stmt = Compiler_parse_block_item(c);  List after = Compiler_leave_item(c);  if(Map_truth(c -> macro_holes) &&(Var_equal(List_car(stmt), Symbol_var(917238582496136)) || Var_equal(List_car(stmt), Symbol_var(917238583616488)))){
     Array_push(block, List_var(stmt));  return;
   }
-  if(! expansion){
-    Array_push(block, List_var(anchor_items ? Compiler_anchor_origin(c, stmt, origin) : stmt));  return;
-  }
-  {
-    List item;  List _x2c_macro_object_8 = List_cdr(stmt);  List _x2c_macro_cursor_8 = _x2c_macro_object_8;  Var _x2c_macro_cursor_output_8;  while(List_try_next(_x2c_macro_object_8, &(_x2c_macro_cursor_8), &(_x2c_macro_cursor_output_8))){
+  if(! expansion) Array_push(block, List_var(anchor_items ? Compiler_anchor_origin(c, stmt, origin) : stmt));  else after = List_append(List_cdr(stmt), after); {
+    List item;  List _x2c_macro_object_8 = after;  List _x2c_macro_cursor_8 = _x2c_macro_object_8;  Var _x2c_macro_cursor_output_8;  while(List_try_next(_x2c_macro_object_8, &(_x2c_macro_cursor_8), &(_x2c_macro_cursor_output_8))){
       item = Var_list(_x2c_macro_cursor_output_8);  Array_push(block, List_var(! anchor_items || Var_equal(List_car(item), Symbol_var(104)) ? item : Compiler_anchor_origin(c, item, origin)));
     }
 

@@ -112,6 +112,10 @@ void x2c_diagnostic_fail_at(Var node, Symbol category, String message, List note
 
 void x2c_diagnostic_warn(String message, List notes);
 
+Code x2c_enclosing(Symbol what);
+
+void x2c_place(List where, Code code);
+
 List meta_type_description(Var value);
 
 List meta_source_description(Var value);

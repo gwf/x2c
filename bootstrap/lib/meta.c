@@ -97,6 +97,10 @@ int x2c_invocation_column(void);
 
 String x2c_embed_text(Var path);
 
+Code x2c_enclosing(Symbol what);
+
+void x2c_place(List where, Code code);
+
 void x2c_diagnostic_fail(String message, List notes);
 
 void x2c_diagnostic_fail_at(Var node, Symbol category, String message, List notes);
