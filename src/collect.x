@@ -187,11 +187,12 @@ Map Compiler.collect_symbols(Compiler c, Map globs) {
 }
 
 /* Builtin components contribute compile-time definitions beside the runtime
-   prelude. They do not add compiler headers to a user's generated C. */
+   prelude, with the shared source forms they recognize. They do not add
+   compiler headers to a user's generated C. */
 /** Returns the compiler-owned prelude sources relative to its home. Their
     runtime implementations are already linked into the shipped binaries. */
-List compiler_prelude_sources(void) =>
-  %("lib/x2c.x" "src/component-access.x" "src/component-try.x");
+List compiler_prelude_sources(void) => %(
+  "lib/x2c.x" "src/grammar.x" "src/component-access.x" "src/component-try.x");
 
 static void Compiler._add_prelude(Compiler c, Map globs, Map visited) {
   foreach (String source, compiler_prelude_sources()) {
