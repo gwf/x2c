@@ -20,9 +20,10 @@ python3 experiments/language-components/run.py
 
 `$rewrite` derives a dispatch category from the macro pattern, retains a
 prepared matcher, and binds the first accepted replacement through the ordinary
-compiler. Returning the original input or null declines. Only the active rule
-is suppressed while binding its replacement; independent rules can compose.
-Rules belong to compiler scope, not a process-global registry.
+compiler. Returning void, null, or the original input itself declines. Only the
+active rule is suppressed while binding its replacement; independent rules can
+compose. Each compiler orders its own rules; the rules its prelude ships are
+prepared once per process and shared.
 
 The [post-initialization boundary](sequences/README.md) keeps declarations,
 bindings, and initialization in the compiler. A component contributes following

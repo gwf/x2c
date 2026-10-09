@@ -13,7 +13,7 @@ meta Code register_rewrite(Code function, Code pattern, List holes) {
 
 /** Tests the full macro pattern at its derived compiler operation. User
     translators run in registration order before builtin defaults. Returning
-    the input or null declines the rewrite. */
+    void, null, or the input itself declines the rewrite. */
 macro Decorator $rewrite(Unit $function, Expr $pattern, Expr @holes) {
   @register_rewrite($function, $pattern, $holes)
 }

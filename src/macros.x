@@ -2625,7 +2625,8 @@ int Compiler.has_rewrites(Compiler c, Symbol point, Var kind) =>
   !!c._rewrite_candidates(point, kind);
 
 /** Matches registered patterns for one operation, then binds the first
-    replacement that differs from its input. Active rules cannot re-enter. */
+    replacement. A translator declines with void, null, or its input itself.
+    Active rules cannot re-enter. */
 List Compiler.rewrite(
   Compiler c, Symbol point, Var kind, List source, AstPos position,
   Type expected, Token site) =>
@@ -2646,8 +2647,9 @@ static List Compiler._rewrite(
     if (c.active_rewrites.contains(rule) ||
         !c.matches_macro(*rule.prepared_matcher(), source)) continue;
     Var result = c.apply_meta_function(rule.name, %($source), site);
-    if (result is void || result.equal(source) ||
-        (result is <list> && !result.list())) continue;
+    if (result is void ||
+        (result is <list> && (!result.list() || result.list() === source)))
+      continue;
     $let(c.active_rewrites, cons(rule, c.active_rewrites)) {
       List bound = c.bind_syntax(result, position, expected);
       if (!lower) return bound;
