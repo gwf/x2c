@@ -234,9 +234,7 @@ List Compiler.parse_source_clause(Compiler c, Symbol kind) {
     case <try>:  return c._continued(c.parse_governed(AST_STATEMENT));
     case <catches>: return c._catches();
     case <catch>: return c._catch_body();
-    case <finally>:
-      c.__complete_here(<continue>, %("finally"));
-      return c.test(<finally>) ? c.parse_governed(AST_STATEMENT) : NULL;
+    case <finally>: return c._finally();
   }
   return c.parse_governed(AST_STATEMENT);
 }
@@ -550,6 +548,11 @@ static List Compiler._catches(Compiler c) {
   if (c.peek(0) != <finally>)
     $report.parse.try_handler(c);
   return NULL;
+}
+
+static List Compiler._finally(Compiler c) {
+  c.__complete_here(<continue>, %("finally"));
+  return c.test(<finally>) ? c.parse_governed(AST_STATEMENT) : NULL;
 }
 
 static List Compiler._catch_cases(Compiler c) {

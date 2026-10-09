@@ -3689,8 +3689,11 @@ List Compiler.bind_catch_arm(
   Compiler c, List pattern, Var body, Token start, List handle) {
   c.sym.push_new_scope();
   defer c.sym.pop_scope();
-  if (pattern) c._check_binders(pattern, start, "catch");
-  List bindings = pattern ? c.define_catch_binders(pattern) : NULL;
+  List bindings = NULL;
+  if (pattern) {
+    c._check_binders(pattern, start, "catch");
+    bindings = c.define_catch_binders(pattern);
+  }
   int source = !!_source_clause_kind(body);
   List statement = c._bind_statement(body);
   if (source ? !!c.macro_holes : _declares_binders(body, bindings))
@@ -3741,8 +3744,7 @@ static int _declares_binders(List body, List bindings) {
   return 0;
 }
 
-/* A source `try` parses its body, its catch arms, and its finalizer in
-   that order. */
+// A source `try` parses its parts in the order they bind.
 static List Compiler._bind_try(
   Compiler c, Var body, Var catches, Var cleanup) {
   List bound = c._bind_statement(body);
@@ -3790,8 +3792,10 @@ List Compiler.bind_match_arm(
   Compiler c, List pattern, Var body, Token start, int binds, List types) {
   c.sym.push_new_scope();
   defer c.sym.pop_scope();
-  if (binds) c._check_binders(pattern, start, "match");
-  if (binds) c.define_match_binders(pattern);
+  if (binds) {
+    c._check_binders(pattern, start, "match");
+    c.define_match_binders(pattern);
+  }
   return %($pattern ${c._bind_arm_body(body, types)});
 }
 
