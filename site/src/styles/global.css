@@ -10,6 +10,23 @@
   --code: #101011;
   --muted-dark: #514c47;
   --muted-light: #a8a29b;
+  --code-ink: #e9e5df;
+  --nav-muted: #6b655f;
+  --caption-muted: #bdb7b0;
+  --code-chip-ink: #9e1f16;
+  --code-chip-bg: rgba(218, 41, 28, 0.07);
+  --code-chip-border: rgba(218, 41, 28, 0.24);
+  --coral-chip-bg: rgba(255, 113, 90, 0.1);
+  --coral-chip-border: rgba(255, 113, 90, 0.34);
+  --white: #fff;
+  --carousel-dark: #222;
+  --panel: #dedbd5;
+  --panel-rule: #cbc7bf;
+  --hairline: rgba(23, 23, 23, 0.14);
+  --line: rgba(23, 23, 23, 0.18);
+  --line-strong: rgba(23, 23, 23, 0.35);
+  --hairline-on-dark: rgba(244, 241, 236, 0.18);
+  --button-secondary-border: rgba(244, 241, 236, 0.35);
 }
 
 * {
@@ -51,9 +68,9 @@ code {
 
 code:not(pre code) {
   padding: 0.06em 0.26em;
-  border: 1px solid rgba(218, 41, 28, 0.24);
-  background: rgba(218, 41, 28, 0.07);
-  color: #9e1f16;
+  border: 1px solid var(--code-chip-border);
+  background: var(--code-chip-bg);
+  color: var(--code-chip-ink);
   font-family: "JetBrains Mono", monospace;
   font-size: 0.9em;
   font-weight: 500;
@@ -62,8 +79,8 @@ code:not(pre code) {
 
 .landing-section:nth-of-type(odd) code:not(pre code),
 .feature-carousel-dark code:not(pre code) {
-  border-color: rgba(255, 113, 90, 0.34);
-  background: rgba(255, 113, 90, 0.1);
+  border-color: var(--coral-chip-border);
+  background: var(--coral-chip-bg);
   color: var(--coral);
 }
 
@@ -112,13 +129,13 @@ main:focus {
 }
 
 .feature-carousel {
-  border: 1px solid rgba(23, 23, 23, 0.18);
-  background: #fff;
+  border: 1px solid var(--line);
+  background: var(--white);
 }
 
 .feature-carousel-dark {
-  border-color: rgba(244, 241, 236, 0.18);
-  background: #222;
+  border-color: var(--hairline-on-dark);
+  background: var(--carousel-dark);
   color: var(--paper);
 }
 
@@ -158,7 +175,7 @@ main:focus {
 .carousel-arrow {
   width: 34px;
   height: 34px;
-  border: 1px solid rgba(23, 23, 23, 0.3);
+  border: 1px solid var(--line-strong);
   background: none;
   color: var(--dark);
   font:
@@ -167,7 +184,7 @@ main:focus {
 }
 
 .feature-carousel-dark .carousel-arrow {
-  border-color: rgba(244, 241, 236, 0.35);
+  border-color: var(--button-secondary-border);
   color: var(--paper);
 }
 
@@ -187,11 +204,11 @@ main:focus {
 }
 
 .feature-carousel:not([data-carousel-ready]) .carousel-slide+.carousel-slide {
-  border-top: 1px solid rgba(23, 23, 23, 0.18);
+  border-top: 1px solid var(--line);
 }
 
 .feature-carousel-dark:not([data-carousel-ready]) .carousel-slide+.carousel-slide {
-  border-top-color: rgba(244, 241, 236, 0.18);
+  border-top-color: var(--hairline-on-dark);
 }
 
 [data-carousel-ready] .carousel-track {
@@ -443,7 +460,7 @@ main:focus {
   grid-row: 2;
   min-width: 0;
   margin: 0 0 28px;
-  border: 1px solid rgba(23, 23, 23, 0.22);
+  border: 1px solid var(--line);
   border-top: 4px solid var(--red);
   background: rgba(255, 255, 255, 0.5);
 }
@@ -451,7 +468,7 @@ main:focus {
 .hero-feature-table h2 {
   margin: 0;
   padding: 14px clamp(10px, 1.5vw, 18px);
-  border-bottom: 1px solid rgba(23, 23, 23, 0.18);
+  border-bottom: 1px solid var(--line);
   color: var(--dark);
   font:
     400 22px/1.12 "Instrument Serif",
@@ -469,7 +486,7 @@ main:focus {
 .hero-feature-table th,
 .hero-feature-table td {
   padding: 10px clamp(8px, 1vw, 12px);
-  border-bottom: 1px solid rgba(23, 23, 23, 0.12);
+  border-bottom: 1px solid var(--hairline);
   text-align: left;
   vertical-align: top;
 }
@@ -525,7 +542,7 @@ main:focus {
 .install-window figcaption {
   margin: 0;
   padding: 11px 16px;
-  border-bottom: 1px solid rgba(244, 241, 236, 0.14);
+  border-bottom: 1px solid var(--hairline-on-dark);
   color: var(--muted-light);
   font:
     500 11.5px/1 "JetBrains Mono",
@@ -536,7 +553,7 @@ main:focus {
 .install-code {
   margin: 0;
   overflow-x: auto;
-  color: #e9e5df;
+  color: var(--code-ink);
   font-family: "JetBrains Mono", monospace;
 }
 
@@ -558,7 +575,7 @@ html:has(.landing-header) {
 }
 
 .landing-section:nth-of-type(even) {
-  border-bottom: 1px solid rgba(23, 23, 23, 0.14);
+  border-bottom: 1px solid var(--hairline);
   background: var(--paper);
 }
 
@@ -652,7 +669,7 @@ html:has(.landing-header) {
 
 .carousel-toolbar {
   display: none;
-  border-bottom: 1px solid rgba(23, 23, 23, 0.14);
+  border-bottom: 1px solid var(--hairline);
   align-items: center;
   justify-content: space-between;
   overflow: hidden;
@@ -664,7 +681,7 @@ html:has(.landing-header) {
 }
 
 .carousel-toolbar-dark {
-  border-bottom-color: rgba(244, 241, 236, 0.18);
+  border-bottom-color: var(--hairline-on-dark);
 }
 
 .carousel-tabs,
@@ -704,7 +721,7 @@ html:has(.landing-header) {
 }
 
 .carousel-count {
-  color: #6b655f;
+  color: var(--nav-muted);
   font:
     500 11.5px/1 "JetBrains Mono",
     monospace;
@@ -745,11 +762,11 @@ html:has(.landing-header) {
 .feature-copy {
   flex: 0 0 auto;
   padding: clamp(16px, 2.6vw, 32px);
-  border-top: 1px solid rgba(23, 23, 23, 0.14);
+  border-top: 1px solid var(--hairline);
 }
 
 .feature-carousel-dark .feature-copy {
-  border-top-color: rgba(244, 241, 236, 0.18);
+  border-top-color: var(--hairline-on-dark);
 }
 
 .feature-copy h3 {
@@ -798,7 +815,7 @@ html:has(.landing-header) {
 }
 
 .feature-carousel-dark .caption-links .copy-button {
-  color: #bdb7b0;
+  color: var(--caption-muted);
 }
 
 .feature-status {
@@ -865,7 +882,7 @@ html:has(.landing-header) {
 
 #packages .feature-copy {
   border-top: 0;
-  border-left: 1px solid rgba(244, 241, 236, 0.18);
+  border-left: 1px solid var(--hairline-on-dark);
 }
 
 #packages .carousel-slide {
@@ -882,7 +899,7 @@ html:has(.landing-header) {
 #packages .carousel-slide:nth-child(even) .feature-copy {
   grid-column: 1;
   grid-row: 1;
-  border-right: 1px solid rgba(244, 241, 236, 0.18);
+  border-right: 1px solid var(--hairline-on-dark);
   border-left: 0;
 }
 
@@ -900,7 +917,7 @@ html:has(.landing-header) {
   #packages .carousel-slide .feature-copy,
   #packages .carousel-slide:nth-child(even) .feature-copy {
     border: 0;
-    border-top: 1px solid rgba(244, 241, 236, 0.18);
+    border-top: 1px solid var(--hairline-on-dark);
   }
 }
 
@@ -916,7 +933,7 @@ html:has(.landing-header) {
   margin: 18px 0;
   padding: 16px;
   overflow-x: auto;
-  background: #cbc7bf !important;
+  background: var(--panel-rule) !important;
   color: var(--dark) !important;
   font: 12px/1.65 "JetBrains Mono", monospace;
 }
@@ -926,7 +943,7 @@ html:has(.landing-header) {
 }
 
 #packages .feature-copy {
-  background: #dedbd5;
+  background: var(--panel);
   color: var(--dark);
 }
 
@@ -944,9 +961,9 @@ html:has(.landing-header) {
 }
 
 #packages .feature-copy code:not(pre code) {
-  border-color: rgba(218, 41, 28, 0.24);
-  background: rgba(218, 41, 28, 0.07);
-  color: #9e1f16;
+  border-color: var(--code-chip-border);
+  background: var(--code-chip-bg);
+  color: var(--code-chip-ink);
 }
 
 #packages .feature-copy pre span {
@@ -957,7 +974,7 @@ html:has(.landing-header) {
   display: block;
   margin: -8px auto 18px;
   padding: 4px 8px;
-  border: 1px solid rgba(23, 23, 23, 0.2);
+  border: 1px solid var(--line);
   border-radius: 3px;
   background: transparent;
   color: var(--muted-dark);
@@ -1025,7 +1042,7 @@ html:has(.landing-header) {
   position: relative;
   padding-block: 9px;
   padding-left: 66px;
-  color: #e9e5df;
+  color: var(--code-ink);
   font-size: 14px;
   line-height: 1.5;
   counter-increment: descent;
@@ -1043,7 +1060,7 @@ html:has(.landing-header) {
 
 .descent-diagram li:last-child {
   margin-top: 6px;
-  border-top: 1px solid rgba(244, 241, 236, 0.14);
+  border-top: 1px solid var(--hairline-on-dark);
 }
 
 .descent-diagram li:last-child::before {
@@ -1097,8 +1114,8 @@ html:has(.landing-header) {
 }
 
 .landing-section:nth-of-type(odd) .docs-cards {
-  border-color: rgba(244, 241, 236, 0.18);
-  background: rgba(244, 241, 236, 0.18);
+  border-color: var(--hairline-on-dark);
+  background: var(--hairline-on-dark);
 }
 
 .landing-section:nth-of-type(odd) .docs-card {
@@ -1143,7 +1160,7 @@ html:has(.landing-header) {
 .docs-copy p {
   max-width: 34ch;
   margin: 0;
-  color: #6b655f;
+  color: var(--nav-muted);
   font-size: 15px;
   line-height: 1.55;
 }
@@ -1154,8 +1171,8 @@ html:has(.landing-header) {
 
 .docs-cards {
   display: grid;
-  border: 1px solid rgba(23, 23, 23, 0.16);
-  background: rgba(23, 23, 23, 0.16);
+  border: 1px solid var(--line);
+  background: var(--line);
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 1px;
 }
@@ -1168,11 +1185,11 @@ html:has(.landing-header) {
 }
 
 a.docs-card:hover {
-  background: #fff;
+  background: var(--white);
 }
 
 .number-stats .stat-card {
-  background: #fff;
+  background: var(--white);
 }
 
 .docs-card small {
@@ -1192,7 +1209,7 @@ a.docs-card:hover {
 
 .docs-card p {
   margin: 0;
-  color: #6b655f;
+  color: var(--nav-muted);
   font-size: 13.5px;
 }
 
@@ -1238,7 +1255,7 @@ a.docs-card:hover {
 }
 
 .landing-section:nth-of-type(even) .button-secondary {
-  border-color: rgba(23, 23, 23, 0.35);
+  border-color: var(--line-strong);
   color: var(--dark);
 }
 
@@ -1272,7 +1289,7 @@ a.docs-card:hover {
 }
 
 .button-secondary {
-  border: 1px solid rgba(244, 241, 236, 0.35);
+  border: 1px solid var(--button-secondary-border);
 }
 
 .button:hover {
@@ -1283,7 +1300,7 @@ a.docs-card:hover {
 
 .install-window {
   margin: 0;
-  border: 1px solid rgba(244, 241, 236, 0.18);
+  border: 1px solid var(--hairline-on-dark);
   background: var(--code);
   scroll-margin-top: 90px;
 }
@@ -1299,7 +1316,7 @@ a.docs-card:hover {
   width: min(100%, 1180px);
   margin-inline: auto;
   padding: 28px clamp(20px, 3.2vw, 44px) 44px;
-  color: #6b655f;
+  color: var(--nav-muted);
   font-size: 13px;
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
