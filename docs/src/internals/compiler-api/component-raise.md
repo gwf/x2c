@@ -14,8 +14,9 @@ A raise records one structured Error. Its rule converts the code to a
 Symbol and each detail key and value to a Var, promoting a C string
 literal value to a String first. A value whose type is not immutable is
 reported and replaced by null, so the translation goes on and fails
-when it finishes. The compiler lowers the converted raise's parts in
-source order and builds their literals when the raise runs.
+when it finishes; the runtime rejects what a List or Var detail holds.
+The compiler lowers the converted raise's parts in source order and
+builds their literals when the raise runs.
 
 Each definition precedes the definitions that call it: the compiler
 settles whether a linked copy reaches a compile-time operation when the

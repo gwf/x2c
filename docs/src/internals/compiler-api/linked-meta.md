@@ -127,7 +127,7 @@ Source: `src/linked-meta.x:581`
 
 Returns linked definition hashes and provider source dependencies.
 
-Source: `src/linked-meta.x:1150`
+Source: `src/linked-meta.x:1116`
 
 #### linked_meta_targets
 
@@ -135,7 +135,7 @@ Source: `src/linked-meta.x:1150`
 
 Returns the linked copies, and the runtime builders, by name.
 
-Source: `src/linked-meta.x:991`
+Source: `src/linked-meta.x:959`
 
 #### printf_values
 
@@ -152,7 +152,7 @@ Source: `src/linked-meta.x:721`
 Converts a raise's code and details, or declines a raise whose parts
 already have their types.
 
-Source: `src/linked-meta.x:789`
+Source: `src/linked-meta.x:757`
 
 #### register_rewrite
 
@@ -174,7 +174,7 @@ every arm returns or raises, control cannot leave them, and a final
 unreachable mark tells C so that a function ending in such a `try`
 needs no return after it.
 
-Source: `src/linked-meta.x:823`
+Source: `src/linked-meta.x:791`
 
 #### try_lowering
 
@@ -182,7 +182,7 @@ Source: `src/linked-meta.x:823`
 
 Lowers the parsed try `node` to its landing form.
 
-Source: `src/linked-meta.x:935`
+Source: `src/linked-meta.x:903`
 
 ## Design notes
 
