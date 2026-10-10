@@ -42,7 +42,7 @@ typedef struct ModuleScan{
 }
 ModuleScan;
 
-static int ModuleScan_member(ModuleScan * scan, Token token);
+static int ModuleScan_member(ModuleScan * m, Token token);
 
 static Token ModuleScan_block(ModuleScan * scan, Token open);
 
@@ -109,23 +109,23 @@ static void ModuleTree__report(ModuleTree tree, String path, String message){
 
 Path Path_join(Path, Path);
 
-static int ModuleScan_member(ModuleScan * scan, Token token){
+static int ModuleScan_member(ModuleScan * m, Token token){
   String spelling = String_unescape(String_new_len(token -> text + 1, token -> len - 2));
-  String path = Path_absolute(Path_join((* scan).directory, spelling));
-  if(! String_startswith(path, String_add((* scan).companion, _3))){
-    ModuleTree__report((* scan).tree, (* scan).entry -> path, String_join(NULL, cons(String_var(_4), cons(String_var(spelling), cons(String_var(_5), NULL)))));
+  String path = Path_absolute(Path_join((* m).directory, spelling));
+  if(! String_startswith(path, String_add((* m).companion, _3))){
+    ModuleTree__report((* m).tree, (* m).entry -> path, String_join(NULL, cons(String_var(_4), cons(String_var(spelling), cons(String_var(_5), NULL)))));
     return 0;
   }
-  if(! is_source_file(path) || ! SourceView_exists((* scan).tree -> compiler -> sources, path)){
-    ModuleTree__report((* scan).tree, (* scan).entry -> path, String_join(NULL, cons(String_var(_4), cons(String_var(spelling), cons(String_var(_6), NULL)))));
+  if(! is_source_file(path) || ! SourceView_exists((* m).tree -> compiler -> sources, path)){
+    ModuleTree__report((* m).tree, (* m).entry -> path, String_join(NULL, cons(String_var(_4), cons(String_var(spelling), cons(String_var(_6), NULL)))));
     return 0;
   }
-  if(Map_contains((* scan).seen, String_var(path))){
-    ModuleTree__report((* scan).tree, (* scan).entry -> path, String_join(NULL, cons(String_var(_4), cons(String_var(spelling), cons(String_var(_7), NULL)))));
+  if(Map_contains((* m).seen, String_var(path))){
+    ModuleTree__report((* m).tree, (* m).entry -> path, String_join(NULL, cons(String_var(_4), cons(String_var(spelling), cons(String_var(_7), NULL)))));
     return 0;
   }
-  Map_setindex((* scan).seen, String_var(path), int_var(1));
-  Array_push((* scan).members, String_var(path));
+  Map_setindex((* m).seen, String_var(path), int_var(1));
+  Array_push((* m).members, String_var(path));
   return 1;
 }
 
@@ -184,15 +184,15 @@ static ModuleEntry ModuleTree__scan(ModuleTree tree, String path){
   return entry;
 }
 
-ModuleEntry ModuleTree_entry(ModuleTree tree, String canonical_path){
+ModuleEntry ModuleTree_entry(ModuleTree m, String canonical_path){
   if(! _init_guard_) _file_init_();
   String path = Path_absolute(canonical_path);
-  Map_merge_translation_dependency(tree -> dependencies, path, SourceView_exists(tree -> compiler -> sources, path) ? int_var(1) : String_var(_14));
+  Map_merge_translation_dependency(m -> dependencies, path, SourceView_exists(m -> compiler -> sources, path) ? int_var(1) : String_var(_14));
   Var cached;
-  if(Map_try_get(tree -> entries, String_var(path), &(cached))) return Var_pointer(cached);
-  ModuleEntry entry = ModuleTree__scan(tree, path);
-  Map_setindex(tree -> entries, String_var(path), Var_new(3683441, entry));
-  if(entry) Map_setindex(tree -> owners, String_var(path), String_var(path));
+  if(Map_try_get(m -> entries, String_var(path), &(cached))) return Var_pointer(cached);
+  ModuleEntry entry = ModuleTree__scan(m, path);
+  Map_setindex(m -> entries, String_var(path), Var_new(3683441, entry));
+  if(entry) Map_setindex(m -> owners, String_var(path), String_var(path));
   return entry;
 }
 

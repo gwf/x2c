@@ -28,7 +28,7 @@ ModuleTree ModuleTree_new(Compiler c);
 
 String module_support_header(String path);
 
-ModuleEntry ModuleTree_entry(ModuleTree tree, String canonical_path);
+ModuleEntry ModuleTree_entry(ModuleTree m, String canonical_path);
 
 Map ModuleTree_ownership_dependencies(ModuleTree tree, String path);
 

@@ -302,7 +302,8 @@
            (bindings 
             (op = (bind (binding 38 "_x2c_literal_part_1") ()) 
              (expr ("Var") 
-              (call (expr ((func (("Map"))) "Var") (ident (binding 39 "Map_var"))) 
+              (call (expr ((func (("Map"))) "Var") 
+                     (ident (binding 39 "Map_var"))) 
                (args (expr ("Map") 
                       (call (expr ((func (("Map") (unsigned) (...))) "Map") 
                              (ident (binding 25 "Map_update_n"))) 

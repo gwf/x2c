@@ -460,7 +460,7 @@ static int _run_translation(CliRequest request, Map unit_dirs, Build build){
   unsigned long started_at = report_now_us();  if(! String_truth(request -> out_dir)) request -> out_dir = _12;  Translation t ={
     .request = request, .unit_dirs = unit_dirs, .build = build, .total = List_len(request -> inputs)
   }
-  ;  if(! Map_truth(unit_dirs) && ! request -> dry_run && ! CliRequest_inspects(request)) Translation_enroll_modules(&(t));  Translation_preflight(&(t));  if(request -> verbose || request -> dry_run) _print_command(request);  if(request -> dry_run) return 0;  t.frontend = Frontend_new(request);  t.frontend -> preprocessor_errors = _preprocessor_errors;  if(! Frontend_preload_macro_libraries(t.frontend)) return 1;  Frontend_prepare_meta(t.frontend, request -> inputs);  List all_inputs = request -> inputs;  int all_units = t.total;  if(! CliRequest_inspects(request)){
+  ;  if(! Map_truth(unit_dirs) && ! request -> dry_run &&(! CliRequest_inspects(request) || request -> dump == 10268258347430)) Translation_enroll_modules(&(t));  Translation_preflight(&(t));  if(request -> verbose || request -> dry_run) _print_command(request);  if(request -> dry_run) return 0;  t.frontend = Frontend_new(request);  t.frontend -> preprocessor_errors = _preprocessor_errors;  if(! Frontend_preload_macro_libraries(t.frontend)) return 1;  Frontend_prepare_meta(t.frontend, request -> inputs);  List all_inputs = request -> inputs;  int all_units = t.total;  if(! CliRequest_inspects(request)){
     request -> inputs = Translation_translate_modules(&(t));  t.total = List_len(request -> inputs);
   }
   if(request -> jobs > 1 && t.total > 1 && ! CliRequest_inspects(request)){
@@ -486,7 +486,7 @@ static void Translation_enroll_modules(Translation * t){
     }
 
   }
-  if(! modules) return; {
+  if(! modules) return;  if(! CliRequest_inspects((* t).request)){
     Var key, directory;  Map _x2c_macro_object_3 = directories;  unsigned _x2c_macro_cursor_3 = 0;  Var _x2c_macro_cursor_output_3;  Var _x2c_macro_cursor_output_4;  while(Map_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_3), &(_x2c_macro_cursor_output_4))){
       key = _x2c_macro_cursor_output_3;  directory = _x2c_macro_cursor_output_4;  Path_make_dirs(Var_string(directory));
     }

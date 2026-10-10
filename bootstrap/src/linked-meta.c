@@ -9059,7 +9059,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_16(void){
   _8555 = cons(_532, _8554);
   _8556 = String_new("src/build.x");
   _8557 = String_var(_8556);
-  _8558 = String_new("b0f8694c");
+  _8558 = String_new("2670b76b");
   _8559 = String_var(_8558);
   _8560 = String_new("cwd:./json.x");
   _8561 = String_var(_8560);
@@ -9090,7 +9090,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_16(void){
   _8586 = List_var(_8585);
   _8587 = String_new("src/module-tree.x");
   _8588 = String_var(_8587);
-  _8589 = String_new("9da3cacc");
+  _8589 = String_new("0e246f94");
   _8590 = String_var(_8589);
   _8591 = cons(_8590, NULL);
   _8592 = cons(_8588, _8591);
@@ -9248,14 +9248,14 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_17(void){
   _8741 = cons(_532, _8740);
   _8742 = String_new("src/collect.x");
   _8743 = String_var(_8742);
-  _8744 = String_new("6681720d");
+  _8744 = String_new("b2d74638");
   _8745 = String_var(_8744);
   _8746 = cons(_8745, NULL);
   _8747 = cons(_8743, _8746);
   _8748 = List_var(_8747);
   _8749 = String_new("src/compiler.x");
   _8750 = String_var(_8749);
-  _8751 = String_new("6b577d0c");
+  _8751 = String_new("df09f18e");
   _8752 = String_var(_8751);
   _8753 = cons(_8752, NULL);
   _8754 = cons(_8750, _8753);
@@ -9589,7 +9589,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_17(void){
   _9082 = List_var(_9081);
   _9083 = String_new("src/expressions.x");
   _9084 = String_var(_9083);
-  _9085 = String_new("d59f3c9f");
+  _9085 = String_new("e4b104ab");
   _9086 = String_var(_9085);
   _9087 = cons(_9086, NULL);
   _9088 = cons(_9084, _9087);
@@ -9643,7 +9643,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_17(void){
   _9136 = List_var(_9135);
   _9137 = String_new("src/meta-group.x");
   _9138 = String_var(_9137);
-  _9139 = String_new("bd6eb689");
+  _9139 = String_new("1dad719f");
   _9140 = String_var(_9139);
   _9141 = cons(_9140, NULL);
   _9142 = cons(_9138, _9141);
@@ -9671,7 +9671,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_17(void){
   _9164 = List_var(_9163);
   _9165 = String_new("src/parse.x");
   _9166 = String_var(_9165);
-  _9167 = String_new("f8a0cd65");
+  _9167 = String_new("6ed44d94");
   _9168 = String_var(_9167);
   _9169 = cons(_9168, NULL);
   _9170 = cons(_9166, _9169);
@@ -9822,7 +9822,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_18(void){
   _9312 = List_var(_9311);
   _9313 = String_new("src/protocol.x");
   _9314 = String_var(_9313);
-  _9315 = String_new("296c4d83");
+  _9315 = String_new("e51fd049");
   _9316 = String_var(_9315);
   _9317 = cons(_9316, NULL);
   _9318 = cons(_9314, _9317);
@@ -9905,7 +9905,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_18(void){
   _9395 = List_var(_9394);
   _9396 = String_new("src/generate.x");
   _9397 = String_var(_9396);
-  _9398 = String_new("0909d93f");
+  _9398 = String_new("9107eb35");
   _9399 = String_var(_9398);
   _9400 = cons(_9399, NULL);
   _9401 = cons(_9397, _9400);
@@ -10002,7 +10002,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_18(void){
   _9492 = List_var(_9491);
   _9493 = String_new("src/module-access.x");
   _9494 = String_var(_9493);
-  _9495 = String_new("8b1be6a5");
+  _9495 = String_new("50b6451d");
   _9496 = String_var(_9495);
   _9497 = cons(_9496, NULL);
   _9498 = cons(_9494, _9497);
@@ -10016,7 +10016,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_18(void){
   _9506 = List_var(_9505);
   _9507 = String_new("src/symbols.x");
   _9508 = String_var(_9507);
-  _9509 = String_new("9f3dfea7");
+  _9509 = String_new("9216ea53");
   _9510 = String_var(_9509);
   _9511 = cons(_9510, NULL);
   _9512 = cons(_9508, _9511);

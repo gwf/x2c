@@ -953,7 +953,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_0(void){
   _503 = String_var(_502);
   _504 = List_var(NULL);
   _505 = Symbol_var(106239471489226);
-  _506 = int_var(2198);
+  _506 = int_var(2204);
   _507 = String_new("");
   _508 = String_var(_507);
   _509 = String_new("x2c.hole");
@@ -1251,7 +1251,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_1(void){
   _798 = cons(_790, _797);
   _799 = cons(_784, _798);
   _800 = List_var(_799);
-  _801 = int_var(2263);
+  _801 = int_var(2269);
   _802 = Symbol_var(1544849476362);
   _803 = List_var(_150);
   _804 = cons(_803, NULL);
@@ -1350,7 +1350,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_1(void){
   _897 = cons(_790, _896);
   _898 = cons(_784, _897);
   _899 = List_var(_898);
-  _900 = int_var(2270);
+  _900 = int_var(2276);
   _901 = cons(_823, NULL);
   _902 = cons(_853, _890);
   _903 = cons(_609, _902);
@@ -1960,7 +1960,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void){
   _1504 = cons(_1503, NULL);
   _1505 = cons(_716, _1504);
   _1506 = List_var(_1505);
-  _1507 = int_var(2653);
+  _1507 = int_var(2662);
   _1508 = cons(_1507, NULL);
   _1509 = cons(_722, _1508);
   _1510 = List_var(_1509);
@@ -1968,7 +1968,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void){
   _1512 = cons(_1511, NULL);
   _1513 = cons(_730, _1512);
   _1514 = List_var(_1513);
-  _1515 = int_var(98668);
+  _1515 = int_var(98745);
   _1516 = cons(_1515, NULL);
   _1517 = cons(_735, _1516);
   _1518 = List_var(_1517);
@@ -2047,11 +2047,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_3(void){
   _1588 = cons(_1587, NULL);
   _1589 = cons(_686, _1588);
   _1590 = List_var(_1589);
-  _1591 = int_var(2780);
+  _1591 = int_var(2789);
   _1592 = cons(_1591, NULL);
   _1593 = cons(_722, _1592);
   _1594 = List_var(_1593);
-  _1595 = int_var(103648);
+  _1595 = int_var(103725);
   _1596 = cons(_1595, NULL);
   _1597 = cons(_735, _1596);
   _1598 = List_var(_1597);
