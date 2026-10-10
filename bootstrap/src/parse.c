@@ -4385,8 +4385,9 @@ static void Compiler__declare_delegates(Compiler c, List context, List rows){
 }
 }
 
+void Sym_mark_field(Sym, Type, Symbol, String);
 static void Compiler__declare_delegate(Compiler c, List context, Var binding){
-  String name = binding_identity_spelling(Var_list(binding));  if(! String_truth(name)) Compiler_report_error(c, 33658058, _270, c -> token, NULL);  if(! Map_truth(c -> macro_holes)) Compiler_mark_field(c, List_type(context), 286431579402, name);
+  String name = binding_identity_spelling(Var_list(binding));  if(! String_truth(name)) Compiler_report_error(c, 33658058, _270, c -> token, NULL);  if(! Map_truth(c -> macro_holes)) Sym_mark_field(c -> sym, List_type(context), 286431579402, name);
 }
 
 static List Compiler__field_row(Compiler c, List context){

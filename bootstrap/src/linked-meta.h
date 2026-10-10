@@ -15,6 +15,7 @@
 #include "var-tags.h"
 #include "varops.h"
 #include "component-access.h"
+#include "component-delegate.h"
 #include "component-try.h"
 #include "fields.h"
 #include "grammar.h"
@@ -50,6 +51,8 @@ Code collection_update(Code code);
 Code collection_prefix(Code code);
 
 Code collection_postfix(Code code);
+
+Code delegate_member(Code code);
 
 List try_catch_cases(List selected, List arms);
 

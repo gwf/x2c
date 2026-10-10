@@ -1260,6 +1260,9 @@ void Sym_mark_field(Sym s, Type aggregate, Symbol mark, String name){
   if(! _init_guard_) _file_init_();  Sym_set(s, ({
     List _x2c_literal_part_24 = Type_list(aggregate);  List_append(_x2c_literal_part_24, cons(Symbol_var(mark), cons(String_var(name), NULL)));
   }
+  ), cons(Symbol_var(mark), NULL));  Sym_set(s, ({
+    List _x2c_literal_part_25 = Type_list(aggregate);  List_append(_x2c_literal_part_25, cons(Symbol_var(mark), NULL));
+  }
   ), cons(Symbol_var(mark), NULL));
 }
 
@@ -1268,7 +1271,7 @@ List Sym_marked_fields(Sym s, Type aggregate, Symbol mark){
     List row;  List _x2c_macro_object_13 = List_truth(order) ? List_cdr(order) : NULL;  List _x2c_macro_cursor_13 = _x2c_macro_object_13;  Var _x2c_macro_cursor_output_20;  while(List_try_next(_x2c_macro_object_13, &(_x2c_macro_cursor_13), &(_x2c_macro_cursor_output_20))){
       row = Var_list(_x2c_macro_cursor_output_20); {
         String name = Var_string(List_car(row));  if(String_truth(name) && List_truth(Sym_get(s, ({
-          List _x2c_literal_part_25 = Type_list(aggregate);  List_append(_x2c_literal_part_25, cons(Symbol_var(mark), cons(String_var(name), NULL)));
+          List _x2c_literal_part_26 = Type_list(aggregate);  List_append(_x2c_literal_part_26, cons(Symbol_var(mark), cons(String_var(name), NULL)));
         }
         )))) Array_push(rows, List_var(row));
       }
