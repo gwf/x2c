@@ -196,11 +196,8 @@ static Ast Compiler._step(Compiler c, Ast ast) {
   match (ast) {
     case %(at ?origin ?inner): return c._at_node(ast, origin, inner);
     case %(function ?return_type
-           (!set ?declarator (bind ?binding ?)) ?body): {
-      List replaced = c._function_rewrite(ast, return_type);
-      return replaced
-        ? replaced : c._function_node(return_type, declarator, binding, body);
-    }
+           (!set ?declarator (bind ?binding ?)) ?body):
+      return c._function_node(ast, return_type, declarator, binding, body);
     case %(getindex
            (!set ?expression (expr ?matched_type ?)) ?index):
       return c._getindex_node(expression, matched_type, index);
@@ -389,7 +386,10 @@ static List Compiler._function_rewrite(
 }
 
 static Ast Compiler._function_node(
-  Compiler c, List return_type, List declarator, List binding, List body) {
+  Compiler c, List function, List return_type, List declarator,
+  List binding, List body) {
+  List replaced = c._function_rewrite(function, return_type);
+  if (replaced) return replaced;
   String owner = binding_identity_spelling(binding);
   Var stored_owner;
   if (c.semantic_binding_facts().try_get(%(defer-ownr $binding), stored_owner))

@@ -2640,8 +2640,7 @@ static List Compiler._function_body(
 static List Compiler._entry_code(Compiler c, int depth) {
   Array items = [];
   foreach (List row, c._take_placements(depth))
-    _push_items(
-      items, c.bind_syntax(row[3], AST_BLOCK, c.return_type));
+    _push_items(items, c.bind_syntax(row[3], AST_BLOCK, c.return_type));
   return items.list_free();
 }
 
