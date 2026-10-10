@@ -454,16 +454,18 @@ assembly, and the rule driver, with every language feature a file under
 
 | Feature | Family and placement | Kernel lines | Uses in src and lib |
 | --- | --- | ---: | ---: |
-| printf Var formats | call, by callee binding | 380 | 260 |
-| raise | statement; the include anchor as a unit placement | 200 | 416 |
-| collection literals and literal order | literal, by head | 290 | many |
-| runtime static locals | declaration; the landing form | 320 | 12 |
+| printf Var formats | call, by callee binding; delivered in wave 1 | 380 | 260 |
+| raise | statement; delivered in wave 1, simplification follows | 200 | 416 |
+| collection literals and literal order | literal, by head; delivered in wave 1 | 290 | many |
 | destructuring | statement, plus the function pre-pass | 330 | few |
 | string interpolation | literal `segments`; prepared replacements carry the cost | 200 | 730 |
-| truthiness, getindex, dynamic operators | unary, binary, access | 410 | 620 |
-| class defaults | unit declaration, mark-keyed as delegate is | 780 | 7 |
+| truthiness, getindex, dynamic operators | unary, binary, access; delivered in wave 1 | 410 | 620 |
 | lambda lowering | function family; function-entry and unit-support placements | 1,500 | 586 |
 | protocols: declarations, conformance, owners, adapters | unit declaration marks; unit placements | 1,850 | 153 |
+
+Runtime static locals and class defaults stay in the kernel; the log of
+2026-10-10 records why. `match` moves from the research list to the table
+once `plans/match-component.md` is accepted.
 
 Kernel deletions no feature blocks: the twelve feature fields on `Compiler`;
 the translator-call overhead in the driver (the second match and the per-call
@@ -499,6 +501,51 @@ client until lambdas and destructuring land.
 
 - 2026-10-10: printf Var formats started as the first extraction under the
   deletion rule.
+- 2026-10-10, wave 1 (held for review on `kernel/sdk-cleanup`): four shipped
+  components landed in one batch over c09d9a91. `component-printf.x` (208
+  lines) owns Var formats; `component-literals.x` (47) owns Array and Map
+  literals; `component-operators.x` (147) owns dynamic operators and
+  participant indexing, with `component-access.x` taking bracket access for
+  every participant; `component-raise.x` (97) owns raise. Kernel
+  `src/` outside the components lost 906 lines and gained 491; `lib/` lost
+  309 and gained 229. Gary accepted the authored growth because the
+  components read as the feature's whole implementation; the deletion rule
+  is now judged by kernel removed against component added, with shared
+  infrastructure counted once.
+- 2026-10-10, stays in the kernel: runtime static locals (the landing form
+  would carry more than the arm it replaces) and class defaults (class is
+  already a component; the runtime core embeds it). Both rows leave the
+  migration table.
+- 2026-10-10, plumbing: one `$rewrite(PATTERN, HOLES...)` decorator in
+  `lib/rewrite.x` registers every family; `(!or OP...)` spells operator
+  sets and typed holes give type keys. `tools/gen-meta-queries.sh` generates
+  `etc/meta-queries.x`, the meta helper's forwarders, from `lib/meta.x`.
+  `Code.lowered` marks a translator result as lowered; typed quotations
+  produce lowered trees without it.
+- 2026-10-10, SDK cleanup: public meta operations went from 62 to 49
+  (Code 17, Type 20, `x2c_` 12). The 14 `x2c_expr_*`, `x2c_literal_*`, and
+  `*_make` constructors are gone; quotations build what they built. The 23
+  `x2c_type_*`, `x2c_function_*`, and `x2c_source_text` queries became
+  `Type.*` and `Code.*` methods. Kept: `x2c_ident` (144 call sites), the
+  diagnostics, invocation position, `x2c_enclosing`, `x2c_place`. Lisp keeps
+  `x2c.literal.*` in `etc/compiler-sdk.xlisp` under one naming rule.
+  Diagnostics now name the method. Costs against ceda17c0: empty unit -5.0%,
+  native -1.2%, access -0.9%, self-translation -0.8%.
+- 2026-10-10, raise follow-up: the component is kept at +24 over the kernel
+  arm it replaced and is scheduled for a deliberate simplification.
+- 2026-10-10, match research (`plans/match-component.md`, branch
+  `kernel/match-research`): a match component is feasible at 4.75 M per use
+  against 4.62 M for the kernel arm on a three-arm workload, with runtime
+  3.6-10x faster than the plan cache, deleting about 334 kernel lines. It
+  needs a documented verbatim-C-text emitter rule, `Code.pattern_value`,
+  `x2c_fresh_binding`, match as a rewrite point, and lowered results that
+  skip the prepared walk.
+- 2026-10-10, facts learned: `function-entry` placement is parse-time, so
+  lambda cells need a transform-time entry placement before lambdas move; a
+  plain `make build` after editing a shipped component leaves a degraded
+  compiler (stale embedded prelude records, 9.2 G for the empty unit) until
+  `make bootstrap-refresh`; the printf family table is spelled twice because
+  the `.str()` warning reads it before the component runs.
 
 ## Next bounded milestone
 
