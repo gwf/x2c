@@ -9570,7 +9570,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_17(void){
   _8996 = List_var(_8995);
   _8997 = String_new("src/meta-sdk.x");
   _8998 = String_var(_8997);
-  _8999 = String_new("4d0f0ae6");
+  _8999 = String_new("9d8f76ce");
   _9000 = String_var(_8999);
   _9001 = cons(_9000, NULL);
   _9002 = cons(_8998, _9001);

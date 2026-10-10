@@ -508,8 +508,7 @@ List meta_function_reference(String name) {
 // type queries
 
 /** Answers `Type.element`, declared in `lib/meta.x`. */
-Type Type.element(Type type) =>
-  type.canonicalize().dereference().canonicalize();
+Type Type.element(Type t) => t.canonicalize().dereference().canonicalize();
 
 /** Answers `Type.parameters`, declared in `lib/meta.x`. */
 List Type.parameters(Type type) {

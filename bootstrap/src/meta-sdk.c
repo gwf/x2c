@@ -1269,8 +1269,8 @@ List meta_function_reference(String name){
 }
 
 Type Type_dereference(Type);
-Type Type_element(Type type){
-  return Type_canonicalize(Type_dereference(Type_canonicalize(type)));
+Type Type_element(Type t){
+  return Type_canonicalize(Type_dereference(Type_canonicalize(t)));
 }
 
 int Type_is_pointer(Type);
@@ -1913,7 +1913,7 @@ void Compiler_report_error(Compiler, Symbol, String, Token, List);
 _Noreturn void MetaContext_reject(String message, List notes){
   Compiler c = active.evaluator;  if(c) Compiler_report_error(c, 27335838, message, active.site, notes); {
     Var _x2c_literal_part_25 = String_var(String_join(NULL, cons(String_var(String_new("x2c SDK rejection")), NULL))); {
-      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/meta-sdk.x",.function = "MetaContext_reject",.line = 1036};  x2c_error_raise_n(& _x2c_error_site_1, 4477477457162, 2, Symbol_var(34096809266140), _x2c_literal_part_25, Symbol_var(1218550748), String_var(message));  __builtin_unreachable();
+      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/meta-sdk.x",.function = "MetaContext_reject",.line = 1035};  x2c_error_raise_n(& _x2c_error_site_1, 4477477457162, 2, Symbol_var(34096809266140), _x2c_literal_part_25, Symbol_var(1218550748), String_var(message));  __builtin_unreachable();
     }
 
   }

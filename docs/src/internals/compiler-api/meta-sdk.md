@@ -83,7 +83,7 @@ The compiler's answers to `lib/meta.x` operations.
 Returns `values`, such as a Lisp-built signature, as a cached literal
 of the expanding unit.
 
-Source: `src/meta-sdk.x:750`
+Source: `src/meta-sdk.x:749`
 
 #### binding_native_type
 
@@ -92,7 +92,7 @@ Source: `src/meta-sdk.x:750`
 Returns the `Func` signature of the function syntax `syntax`. A native
 binding stores the same signature as an ordinary Func adapter.
 
-Source: `src/meta-sdk.x:740`
+Source: `src/meta-sdk.x:739`
 
 #### builtin_foreach_bindings
 
@@ -108,7 +108,7 @@ Source: `src/meta-sdk.x:471`
 
 Returns `expression` with the iterator chain `foreach` reads completed.
 
-Source: `src/meta-sdk.x:1023`
+Source: `src/meta-sdk.x:1022`
 
 #### builtin_foreach_unique
 
@@ -116,7 +116,7 @@ Source: `src/meta-sdk.x:1023`
 
 Returns a fresh binding whose spelling starts with `stem`.
 
-Source: `src/meta-sdk.x:655`
+Source: `src/meta-sdk.x:654`
 
 #### meta_function_reference
 
@@ -135,7 +135,7 @@ Source: `src/meta-sdk.x:499`
 
 Returns the location of the active macro invocation.
 
-Source: `src/meta-sdk.x:892`
+Source: `src/meta-sdk.x:891`
 
 #### meta_source_description
 
@@ -145,7 +145,7 @@ Returns what a `meta` parameter declared `Source` receives for the
 captured syntax `value`: `((text T) (file F) (syntax value))`, where `T`
 is the text the developer wrote and `F` the file it is in.
 
-Source: `src/meta-sdk.x:1014`
+Source: `src/meta-sdk.x:1013`
 
 #### meta_type_description
 
@@ -159,7 +159,7 @@ none. `K` is `struct`, `union`, `enum`, `pointer`, `scalar`, or `other`,
 `F` lists the `(name type)` rows of a struct or union's named fields,
 and `M` the names of its direct dotted methods.
 
-Source: `src/meta-sdk.x:973`
+Source: `src/meta-sdk.x:972`
 
 #### x2c_diagnostic_error_at
 
@@ -167,7 +167,7 @@ Source: `src/meta-sdk.x:973`
 
 Answers `x2c.diagnostic.error.at`, declared in `lib/meta.x`.
 
-Source: `src/meta-sdk.x:925`
+Source: `src/meta-sdk.x:924`
 
 #### x2c_diagnostic_fail
 
@@ -175,7 +175,7 @@ Source: `src/meta-sdk.x:925`
 
 Answers `x2c.diagnostic.fail`, declared in `lib/meta.x`.
 
-Source: `src/meta-sdk.x:911`
+Source: `src/meta-sdk.x:910`
 
 #### x2c_diagnostic_fail_at
 
@@ -183,7 +183,7 @@ Source: `src/meta-sdk.x:911`
 
 Answers `x2c.diagnostic.fail.at`, declared in `lib/meta.x`.
 
-Source: `src/meta-sdk.x:917`
+Source: `src/meta-sdk.x:916`
 
 #### x2c_diagnostic_warn
 
@@ -192,7 +192,7 @@ Source: `src/meta-sdk.x:917`
 A warning reports where it is raised and returns, so a macro can keep
 expanding. Failure stays separate because it never returns.
 
-Source: `src/meta-sdk.x:934`
+Source: `src/meta-sdk.x:933`
 
 #### x2c_embed_text
 
@@ -200,7 +200,7 @@ Source: `src/meta-sdk.x:934`
 
 Answers `x2c.embed.text`, declared in `lib/meta.x`.
 
-Source: `src/meta-sdk.x:792`
+Source: `src/meta-sdk.x:791`
 
 #### x2c_enclosing
 
@@ -208,7 +208,7 @@ Source: `src/meta-sdk.x:792`
 
 Answers `x2c.enclosing`, declared in `lib/meta.x`.
 
-Source: `src/meta-sdk.x:950`
+Source: `src/meta-sdk.x:949`
 
 #### x2c_ident
 
@@ -216,7 +216,7 @@ Source: `src/meta-sdk.x:950`
 
 Answers `x2c.ident`, declared in `lib/meta.x`.
 
-Source: `src/meta-sdk.x:647`
+Source: `src/meta-sdk.x:646`
 
 #### x2c_invocation_column
 
@@ -224,7 +224,7 @@ Source: `src/meta-sdk.x:647`
 
 Answers `x2c.invocation.column`, declared in `lib/meta.x`.
 
-Source: `src/meta-sdk.x:907`
+Source: `src/meta-sdk.x:906`
 
 #### x2c_invocation_file
 
@@ -232,7 +232,7 @@ Source: `src/meta-sdk.x:907`
 
 Answers `x2c.invocation.file`, declared in `lib/meta.x`.
 
-Source: `src/meta-sdk.x:899`
+Source: `src/meta-sdk.x:898`
 
 #### x2c_invocation_line
 
@@ -240,7 +240,7 @@ Source: `src/meta-sdk.x:899`
 
 Answers `x2c.invocation.line`, declared in `lib/meta.x`.
 
-Source: `src/meta-sdk.x:903`
+Source: `src/meta-sdk.x:902`
 
 #### x2c_meta_definition_hashes
 
@@ -248,7 +248,7 @@ Source: `src/meta-sdk.x:903`
 
 Answers `x2c.meta.definition.hashes`, declared in `lib/meta.x`.
 
-Source: `src/meta-sdk.x:664`
+Source: `src/meta-sdk.x:663`
 
 #### x2c_place
 
@@ -256,7 +256,7 @@ Source: `src/meta-sdk.x:664`
 
 Answers `x2c.place`, declared in `lib/meta.x`.
 
-Source: `src/meta-sdk.x:959`
+Source: `src/meta-sdk.x:958`
 
 ### `Code`
 
@@ -267,7 +267,7 @@ Source: `src/meta-sdk.x:959`
 
 Answers `Code.arguments`, declared in `lib/meta.x`.
 
-Source: `src/meta-sdk.x:711`
+Source: `src/meta-sdk.x:710`
 
 <a id="Code.binding_spelling"></a>
 #### Code.binding_spelling
@@ -276,7 +276,7 @@ Source: `src/meta-sdk.x:711`
 
 Answers `Code.binding_spelling`, declared in `lib/meta.x`.
 
-Source: `src/meta-sdk.x:609`
+Source: `src/meta-sdk.x:608`
 
 <a id="Code.body"></a>
 #### Code.body
@@ -285,7 +285,7 @@ Source: `src/meta-sdk.x:609`
 
 Answers `Code.body`, declared in `lib/meta.x`.
 
-Source: `src/meta-sdk.x:705`
+Source: `src/meta-sdk.x:704`
 
 <a id="Code.call_in_order"></a>
 #### Code.call_in_order
@@ -351,7 +351,7 @@ Source: `src/meta-sdk.x:272`
 
 Answers `Code.name`, declared in `lib/meta.x`.
 
-Source: `src/meta-sdk.x:698`
+Source: `src/meta-sdk.x:697`
 
 <a id="Code.parameter"></a>
 #### Code.parameter
@@ -360,7 +360,7 @@ Source: `src/meta-sdk.x:698`
 
 Answers `Code.parameter`, declared in `lib/meta.x`.
 
-Source: `src/meta-sdk.x:723`
+Source: `src/meta-sdk.x:722`
 
 <a id="Code.promoted"></a>
 #### Code.promoted
@@ -400,7 +400,7 @@ Source: `src/meta-sdk.x:398`
 
 Answers `Code.source_text`, declared in `lib/meta.x`.
 
-Source: `src/meta-sdk.x:779`
+Source: `src/meta-sdk.x:778`
 
 <a id="Code.type"></a>
 #### Code.type
@@ -430,7 +430,7 @@ Source: `src/meta-sdk.x:248`
 Binds the internal primitives the compile-time SDK library wraps into
 `lisp`, under their `_x2c.` names.
 
-Source: `src/meta-sdk.x:1053`
+Source: `src/meta-sdk.x:1052`
 
 <a id="Compiler.expanding"></a>
 #### Compiler.expanding
@@ -463,7 +463,7 @@ Reports `message` and `notes` at the active invocation and never
 returns, so the rejected operation's caller cannot continue with a
 missing answer. With no active invocation it is a bad state.
 
-Source: `src/meta-sdk.x:1033`
+Source: `src/meta-sdk.x:1032`
 
 ### `Type`
 
@@ -479,7 +479,7 @@ Source: `src/meta-sdk.x:173`
 <a id="Type.element"></a>
 #### Type.element
 
-`Type Type.element(Type type)`
+`Type Type.element(Type t)`
 
 Answers `Type.element`, declared in `lib/meta.x`.
 
@@ -492,7 +492,7 @@ Source: `src/meta-sdk.x:511`
 
 Answers `Type.fields`, declared in `lib/meta.x`.
 
-Source: `src/meta-sdk.x:593`
+Source: `src/meta-sdk.x:592`
 
 <a id="Type.getter"></a>
 #### Type.getter
@@ -529,7 +529,7 @@ Source: `src/meta-sdk.x:166`
 
 Answers `Type.is_value`, declared in `lib/meta.x`.
 
-Source: `src/meta-sdk.x:544`
+Source: `src/meta-sdk.x:543`
 
 <a id="Type.layout"></a>
 #### Type.layout
@@ -538,7 +538,7 @@ Source: `src/meta-sdk.x:544`
 
 Answers `Type.layout`, declared in `lib/meta.x`.
 
-Source: `src/meta-sdk.x:538`
+Source: `src/meta-sdk.x:537`
 
 <a id="Type.marked_fields"></a>
 #### Type.marked_fields
@@ -556,7 +556,7 @@ Source: `src/meta-sdk.x:179`
 
 Answers `Type.members`, declared in `lib/meta.x`.
 
-Source: `src/meta-sdk.x:570`
+Source: `src/meta-sdk.x:569`
 
 <a id="Type.numeric"></a>
 #### Type.numeric
@@ -574,7 +574,7 @@ Source: `src/meta-sdk.x:160`
 
 Answers `Type.parameters`, declared in `lib/meta.x`.
 
-Source: `src/meta-sdk.x:515`
+Source: `src/meta-sdk.x:514`
 
 <a id="Type.protocol_member"></a>
 #### Type.protocol_member
@@ -593,7 +593,7 @@ Source: `src/meta-sdk.x:192`
 
 Answers `Type.resolve`, declared in `lib/meta.x`.
 
-Source: `src/meta-sdk.x:532`
+Source: `src/meta-sdk.x:531`
 
 <a id="Type.resolve_member"></a>
 #### Type.resolve_member
@@ -611,7 +611,7 @@ Source: `src/meta-sdk.x:185`
 
 Answers `Type.return_type`, declared in `lib/meta.x`.
 
-Source: `src/meta-sdk.x:522`
+Source: `src/meta-sdk.x:521`
 
 <a id="Type.reverse_name"></a>
 #### Type.reverse_name
@@ -620,7 +620,7 @@ Source: `src/meta-sdk.x:522`
 
 Answers `Type.reverse_name`, declared in `lib/meta.x`.
 
-Source: `src/meta-sdk.x:526`
+Source: `src/meta-sdk.x:525`
 
 <a id="Type.tag_name"></a>
 #### Type.tag_name
@@ -629,7 +629,7 @@ Source: `src/meta-sdk.x:526`
 
 Answers `Type.tag_name`, declared in `lib/meta.x`.
 
-Source: `src/meta-sdk.x:554`
+Source: `src/meta-sdk.x:553`
 
 <a id="Type.update_helper"></a>
 #### Type.update_helper

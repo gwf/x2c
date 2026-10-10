@@ -70,7 +70,7 @@ List builtin_foreach_bindings(List declaration);
 
 List meta_function_reference(String name);
 
-Type Type_element(Type type);
+Type Type_element(Type t);
 
 List Type_parameters(Type type);
 
