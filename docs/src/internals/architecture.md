@@ -508,6 +508,9 @@ The modules under `src/` divide ownership as follows:
   registered as literal rewrites for their heads;
 - `src/component-printf.x` -- Var values in printf-family formats,
   registered as a call rewrite for each family member;
+- `src/component-operators.x` -- the dynamic `Var` operators, compound
+  assignments, and increments, and the bracket read, store, and update of a
+  protocol participant that no collection rule took;
 - `src/operator-ledger.x` -- operator precedence, compound assignment,
   and protocol-member mappings from one compile-time ledger;
 - `src/cli.x`, `src/main.x` -- option metadata and parsing, dispatch, logging,
@@ -748,6 +751,25 @@ conversion consumes converted with `Code.convert` to the C type that
 conversion reads, or displayed through `Var.str` for `%s`. The redundant
 `.str()` warning for those values stays with the conversion checks in
 `src/expressions.x`.
+
+`src/component-operators.x` registers each dynamic operator through
+`$rewrite_typed(Var, ...)`, on the binary family for binary operators and
+compound assignments and the unary family for increments, decrements, and
+unary operators, keyed by the operator and `Var`. The transform dispatches
+an operation to those rules only when an operand has `Var` identity, after
+protocol operators resolved, and normalizes the bound replacement as it
+would its own lowering. A binary operator returns a `Var.binary` call; an
+update returns the call of its storage's update helper with the target's
+address, the form the cleanup walk recognizes as a write. The same component
+adds rules after `src/component-access.x` for the bracket read, store, and
+update of any protocol participant; they call the getter, `setindex`,
+`updateindex`, or `postfixindex` member through `Code.call_in_order`, which
+evaluates each operand once, in order. Truthiness stays a conversion the
+transform applies at condition positions, and slices, comparisons, and a
+participant's direct compound update remain in the transform. When a rewrite
+lowers its replacement, the source expressions the replacement holds lower
+outside the active rule, so a store nested in another store's value applies
+the same rule again.
 
 The components and `src/grammar.x`, whose source forms they recognize, are
 compiler prelude sources.

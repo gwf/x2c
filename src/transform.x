@@ -1136,9 +1136,10 @@ static List Compiler._operator(Compiler c, List ast) {
     case $source_operator_content(%(
              (!set ?operator (!or + - ~))
              (!set ?argument (expr ?argument_type ?)))):
-      if (c.sym.is_var_type(argument_type))
-        return c._dynamic(<unary>, %($operator ("Var")), argument_type,
-          source_operator_content(%($operator $argument)));
+      if (c.sym.is_var_type(argument_type)) {
+        List operation = source_operator_content(%($operator $argument));
+        return c._dynamic(<unary>, argument_type, operation);
+      }
     case $source_operator_content(%(
              (!set ?operator (!or ++ --))
              (!set ?argument (expr ?argument_type ?)))):
@@ -1167,18 +1168,18 @@ static List Compiler._change(
       : c._protocol_update(type, binary, arg, one, binary);
     return updated ? updated : ast;
   }
-  return postfix
-    ? c._dynamic(<unary>, %(postfix $op ("Var")), type,
-        source_postfix_content(%($op $arg)))
-    : c._dynamic(<unary>, %($op ("Var")), type,
-        source_operator_content(%($op $arg)));
+  List operation = postfix ? source_postfix_content(%($op $arg))
+                           : source_operator_content(%($op $arg));
+  return c._dynamic(<unary>, type, operation);
 }
 
 /* An operation with a `Var` operand lowers through the rule a component
    registered for its operator on `Var`. The rule's replacement normalizes
    here like any other node. */
 static List Compiler._dynamic(
-  Compiler c, Symbol point, List kind, Type type, List operation) {
+  Compiler c, Symbol point, Type type, List operation) {
+  List kind = operation.car() == <postfix>
+    ? %(postfix ${operation.cadr()} ("Var")) : %(${operation.cadr()} ("Var"));
   List rewritten = c.rewrite(
     point, kind, %(expr $type $operation), AST_EXPRESSION, type, NULL);
   return rewritten ? rewritten.caddr() : operation;
@@ -1282,8 +1283,8 @@ static List Compiler._binary_operator(
      assignment spelling; `Var_binary` accepts the same operators. */
   if (operator.compound_assignment() &&
       (c.sym.is_var_type(lhs_type) || c.sym.is_var_type(rhs_type)))
-    return c._dynamic(<binary>, %($operator ("Var")), %("Var"),
-      source_operator_content(%($operator $lhs $rhs)));
+    return c._dynamic(
+      <binary>, %("Var"), source_operator_content(%($operator $lhs $rhs)));
   return ast;
 }
 
@@ -1310,9 +1311,9 @@ static List Compiler._compound(
     if (updated) return updated;
   }
   if (!lhs_is_var && !c.sym.is_var_type(rhs_type)) return ast;
-  Symbol assignment = op.compound_assignment();
-  return c._dynamic(<binary>, %($assignment ("Var")), lhs_type,
-    source_operator_content(%($assignment $lhs $rhs)));
+  List operation = source_operator_content(
+    %(${op.compound_assignment()} $lhs $rhs));
+  return c._dynamic(<binary>, lhs_type, operation);
 }
 
 static int Compiler._string_operand(Compiler c, Type type) =>

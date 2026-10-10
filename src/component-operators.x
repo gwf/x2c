@@ -46,7 +46,9 @@ $rewrite_typed(Var, $dynamic_xor)
 $rewrite_typed(Var, $dynamic_or)
 /** Boxes both operands of an arithmetic, shift, or bitwise operator for
     `Var.binary`, after rejecting an operand that is neither a number nor,
-    for `+` beside text, text. */
+    for `+` beside text, text. The call is returned lowered, because an
+    operator chain applies this rule once for each term and binding would
+    search the whole remaining chain each time. */
 meta Code dynamic_binary(Code code) {
   match (code) case %(expr ? (op ?(Symbol op) ?left ?right)): {
     Code lhs = left, rhs = right;
@@ -60,9 +62,11 @@ meta Code dynamic_binary(Code code) {
         NULL, <xform>, "dynamic numeric operators require numeric operands",
         %("operator: $op left type: $left_name right type: $right_name"));
     }
-    Code boxed_left = lhs.convert(%("Var"));
-    Code boxed_right = rhs.convert(%("Var"));
-    return $!Var{ Var_binary($boxed_left, $op, $boxed_right) };
+    List callee = %(expr (<macro-expr>) (ident (binding-name "Var_binary")));
+    List symbol = %(expr ("Symbol") (literal ("Symbol") ${op.str()} $op));
+    List call = %(call $callee (args ${lhs.convert(%("Var"))} $symbol
+                                     ${rhs.convert(%("Var"))}));
+    return %(code-value "lowered" (expr ("Var") $call) ());
   }
   return code;
 }
@@ -254,11 +258,12 @@ meta static Code _indexed_update(
   Code code, Code base, Code key, Symbol op, Code value) {
   Type type = base.cadr();
   Code member = type.protocol_member(value ? "updateindex" : "postfixindex");
-  if (!member)
-    x2c_diagnostic_fail_at(NULL, <xform>, value
-      ? %"type ${type.repr()} does not support indexed compound assignment"
-      : %"type ${type.repr()} does not support indexed increment or decrement",
-      NULL);
+  if (!member) {
+    String what = value ? "compound assignment" : "increment or decrement";
+    x2c_diagnostic_fail_at(
+      NULL, <xform>,
+      %"type ${type.repr()} does not support indexed $what", NULL);
+  }
   List operation = _dynamic_symbol(op);
   List arguments = value
     ? %($base $key $operation $value) : %($base $key $operation);

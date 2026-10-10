@@ -3206,6 +3206,16 @@ For `+`, when each operand is a `String`, an alias reaching `String`, a
 the result is the `String` that `String.add` returns, so `path + ".o"`
 concatenates.
 
+These lowerings, the dynamic compound assignments and increments below, and
+the rejection of unary `+`, `-`, and `~` on a `Var` belong to the shipped
+component `src/component-operators.x`. It registers each operator on `Var`
+with `$rewrite_typed(Var, ...)`, which keys a rule by the operator and `Var`.
+The rules run after protocol operators resolve, only when an operand has
+`Var` identity, so native operands never reach them. A program's rule
+registered the same way for the same operator is tried first; its hole
+patterns decide which operands it takes, so a rule for `$!Money{...}` with
+`typedef Var Money` leaves other `Var` operands to the shipped rules.
+
 Direct runtime calls to `Var.binary` additionally accept comparisons and eager
 `&&`/`||`. The compiler does not use that eager logical path. It converts each
 `Var` operand at its original C short-circuit position.
