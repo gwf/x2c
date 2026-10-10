@@ -106,6 +106,7 @@ static void _cache_shutdown(void) {
   process_cache = NULL;
   provisional_entries = NULL;
   declared_functions = NULL;
+  linked_records = NULL;
 }
 
 static Map _cache_map(void) {
@@ -1666,6 +1667,11 @@ void interface_configure(String out_dir, int cold) {
    under inspection through a SourceView never reads interfaces. */
 static List Compiler._interface_read(Compiler c, String canonical) {
   if (c.source_facts || !interface_mirror) return NULL;
+  Var record;
+  if (_linked_records().try_get(home_portable_path(canonical), record)) {
+    List entry = c._stored_entry(canonical, record);
+    if (entry) return entry;
+  }
   foreach (String path, _interface_candidates(canonical)) {
     List entry = c._interface_load(canonical, path);
     if (entry) return entry;
@@ -1990,18 +1996,31 @@ Map Compiler.linked_prelude_records(Compiler c) {
   walker.sources = c.sources;
   walker.include_dirs = c.include_dirs;
   walker.filename = c.filename;
-  foreach (String source, _linked_prelude_sources()) {
-    String path = %"${x2c_get_root()}/$source";
-    String canonical = _canonical_path(path);
-    Map visited = {};
-    visited[canonical] = 1;
-    walker._walk_apart(canonical, walker._runtime_text(path), {}, visited);
-    Var record = _read_back(
-      _stored_record(canonical, _process_cache()[canonical]));
-    if (record is <list>) records[home_portable_path(canonical)] = record;
-  }
+  $let(interface_mirror, NULL)
+    foreach (String source, _linked_prelude_sources()) {
+      String path = %"${x2c_get_root()}/$source";
+      String canonical = _canonical_path(path);
+      Map visited = {};
+      visited[canonical] = 1;
+      walker._walk_apart(canonical, walker._runtime_text(path), {}, visited);
+      Var record = _read_back(
+        _stored_record(canonical, _process_cache()[canonical]));
+      if (record is <list>) records[home_portable_path(canonical)] = record;
+    }
   foreach (Var (canonical, entry), saved) _process_cache()[canonical] = entry;
   return records;
+}
+
+static macro Expression $linked.prelude() => $(_x2c.prelude.linked);
+
+/* The records this compiler was translated with, by home-portable path. */
+static Map linked_records = NULL;
+
+static Map _linked_records(void) {
+  if (linked_records) return linked_records;
+  _process_cache();
+  $scope(&process_cache_scope) linked_records = $linked.prelude();
+  return linked_records;
 }
 
 /* The compiler-owned prelude sources after the runtime's own. */
