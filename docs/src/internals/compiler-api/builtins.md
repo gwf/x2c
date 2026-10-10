@@ -23,7 +23,7 @@ The built-in macros' compile-time algorithms.
 Returns each built-in algorithm by the name compile-time code calls it
 with.
 
-Source: `src/builtins.x:887`
+Source: `src/builtins.x:904`
 
 ## Design notes
 

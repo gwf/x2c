@@ -117,7 +117,7 @@ static List _foreach_expand(
 
 /* The function that makes an Iter of a `type` value. */
 static List _converter(Type type) =>
-  type == %("Var") ? builtin_foreach_reference("Var_iter")
+  type == %("Var") ? meta_function_reference("Var_iter")
                     : type.protocol_member("iter");
 
 /* The cursor loop's `(function cursor-type output-types)` for a
@@ -127,7 +127,7 @@ static List _converter(Type type) =>
 static List _cursor_spec(List collection_type) {
   if (!_atom_type(collection_type)) return %();
   String owner = collection_type.car().str();
-  Code function = builtin_foreach_reference(owner + "_try_next");
+  Code function = meta_function_reference(owner + "_try_next");
   if (!function) return %();
   Type type = function.type();
   List parameters = type.parameters();
@@ -208,7 +208,7 @@ static List Foreach.with_iter(Foreach &f, List converter) {
   List item_expression = _expr(%("Var"), f.item);
   List initializer = builtin_foreach_complete(
     constructor ? _iter_call(constructor, f.collection) : f.collection);
-  Code next = builtin_foreach_reference("Iter_try_next");
+  Code next = meta_function_reference("Iter_try_next");
   List output = next.type().parameters()[1];
   List item_argument = output.car() == <*>
     ? _address(item_expression) : item_expression;
@@ -237,7 +237,7 @@ static List Foreach.constructor(Foreach &f, List converter) {
   String owner = atom ? type.car().str() : "";
   List enumerate = %();
   if (f.targets.len() == 2 && atom && type != %("Iter"))
-    enumerate = builtin_foreach_reference(owner + "_enumerate");
+    enumerate = meta_function_reference(owner + "_enumerate");
   return enumerate ? enumerate : converter;
 }
 
@@ -279,7 +279,7 @@ static List _class_expand(List capture) {
       "representation: Var has no fixed tag for an enum",
       %("give the enum a typedef and name that typedef instead"));
   return %($capture (declaration-recipe class.defaults
-    ($owner $type ${builtin_class_location()})));
+    ($owner $type ${meta_invocation_location()})));
 }
 
 /* One class declaration: its name `owner`, its declared `type`, and where
@@ -886,7 +886,7 @@ static List _binding_target(String bind_name, String name, String maker) {
 }
 
 static List _binding_name_signature(String name) =>
-  binding_native_type(builtin_foreach_reference(name));
+  binding_native_type(meta_function_reference(name));
 
 /* the Lisp names
 

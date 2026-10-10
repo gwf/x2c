@@ -388,13 +388,12 @@ shipped `meta` code compiled into the compiler.
 
 Public functions:
 
-`x2c_expr_field`, `x2c_expr_cast`, `x2c_decl_make`, `x2c_param_make`,
-`x2c_type_members`, `register_rewrite`, `_dedent_expand`, `_macros_location`,
-`_tag_decode_group`, `_tag_decode_groups`, `_tag_id_checks`, `access_read`,
-`access_store`, `access_update`, `access_prefix`, `access_postfix`,
-`delegate_member`, `dynamic_binary`, `dynamic_compound`, `dynamic_change`,
-`dynamic_unary`, `printf_values`, `raise_lowering`, `try_catch_cases`,
-`try_lowering`, `linked_meta_targets`, `linked_meta_hashes`
+`register_rewrite`, `_dedent_expand`, `_macros_location`, `_tag_decode_group`,
+`_tag_decode_groups`, `_tag_id_checks`, `access_read`, `access_store`,
+`access_update`, `access_prefix`, `access_postfix`, `delegate_member`,
+`dynamic_binary`, `dynamic_compound`, `dynamic_change`, `dynamic_unary`,
+`printf_values`, `raise_lowering`, `try_catch_cases`, `try_lowering`,
+`linked_meta_targets`, `linked_meta_hashes`
 
 ### [src/literals.x](../src/literals.x)
 
@@ -528,16 +527,13 @@ Public functions:
 `Code.value`, `Code.call_in_order`, `Code.lowered`, `Code.exits`,
 `Code.convert`, `Code.format`, `Code.is_static_pattern`, `Code.promoted`,
 `Code.register_rewrite`, `Code.register_after_initialization`,
-`x2c_syntax_type`, `x2c_protocol_member`, `x2c_method_resolve`,
-`builtin_foreach_bindings`, `builtin_foreach_reference`,
-`x2c_type_is_integral`, `x2c_type_is_pointer`, `x2c_type_element`,
-`x2c_type_parameters`, `x2c_type_return`, `x2c_type_parts`,
-`x2c_type_reverse_name`, `x2c_type_resolve`, `x2c_type_layout`,
-`x2c_type_is_value`, `x2c_type_tag_name`, `x2c_type_fields`,
-`x2c_binding_spelling`, `x2c_ident`, `builtin_foreach_unique`,
-`x2c_meta_definition_hashes`, `x2c_function_name`, `x2c_function_parameter`,
-`binding_native_type`, `binding_literal_list`, `x2c_source_text`,
-`x2c_embed_text`, `x2c_literal_value`, `builtin_class_location`,
+`builtin_foreach_bindings`, `meta_function_reference`, `Type.element`,
+`Type.parameters`, `Type.return_type`, `Type.reverse_name`, `Type.resolve`,
+`Type.layout`, `Type.is_value`, `Type.tag_name`, `Type.members`, `Type.fields`,
+`Code.binding_spelling`, `x2c_ident`, `builtin_foreach_unique`,
+`x2c_meta_definition_hashes`, `Code.name`, `Code.body`, `Code.arguments`,
+`Code.parameter`, `binding_native_type`, `binding_literal_list`,
+`Code.source_text`, `x2c_embed_text`, `meta_invocation_location`,
 `x2c_invocation_file`, `x2c_invocation_line`, `x2c_invocation_column`,
 `x2c_diagnostic_fail`, `x2c_diagnostic_fail_at`, `x2c_diagnostic_error_at`,
 `x2c_diagnostic_warn`, `x2c_enclosing`, `x2c_place`, `meta_type_description`,
@@ -759,7 +755,7 @@ x2c semantic types.
 
 Public functions:
 
-`List.type_from_ast`, `Type.declaration_parts`, `Type.declaration_ast`,
+`List.type_from_ast`, `Type.parts`, `Type.declaration_ast`,
 `Type.parameter_ast`, `Type.var_tag`, `Type.fixed_var_tag`,
 `Type.var_converter`, `Type.var_tag_row`, `Type.register_var_tag`,
 `Type.register_var_adoption`, `Type.begin_unit`, `Type.end_unit`
@@ -1288,11 +1284,7 @@ the compiler surface a `meta` function calls.
 
 Public functions:
 
-`x2c_literal_string`, `x2c_literal_int`, `x2c_literal_symbol`,
-`x2c_expr_ident`, `x2c_expr_index`, `x2c_expr_call`, `x2c_expr_composite`,
-`x2c_stmnt_make`, `x2c_stmnt_return`, `x2c_block_make`, `x2c_function_body`,
-`x2c_parameters_arguments`, `type_base_suffix`, `type_name_error`,
-`type_declaration_parts`
+`type_base_suffix`, `type_name_error`, `type_declaration_parts`
 
 ### [lib/mutex.x](../lib/mutex.x)
 

@@ -731,11 +731,11 @@ initializers again before the first call a unit makes. What those
 initializers allocate, a Job one starts included, lasts until the next
 unit's reset or the end of the helper.
 
-A project `meta` function receives arguments and returns a value. The
-syntax builders of `lib/meta.x`, `x2c_ident`, `Code.name`,
+A project `meta` function receives arguments and returns a value.
+Quotations, `x2c_ident`, `Code.name`, `Code.binding_spelling`, `Type.parts`,
 `x2c_diagnostic_fail`, and `x2c_diagnostic_warn` work in the helper. The
 typing and invocation queries, such as `Type.resolve`,
-`Type.fields`, `Code.type`, and `x2c_method_resolve`, ask the
+`Type.fields`, `Code.type`, and `Type.resolve_member`, ask the
 compiler while the call waits. The compiler answers in the state of the `$`
 call's site, so a project function gets the answer that compiler-linked
 meta code gets at the same place. `Code.source_text` reads only the text a
@@ -941,7 +941,8 @@ with the code being compiled. A `meta` function can take that code as a
 
 For this part, read [Compile-time Macros](macros.md) first. The macro declares
 what code to capture; the `meta` function implements the transformation
-in x2c. Include `meta.x` to use the compiler's `x2c_*` operations.
+in x2c. Include `meta.x` to use the compiler's operations: the methods of
+`Code` and `Type`, and the `x2c_` helpers.
 
 ## Calling a meta function from a macro body
 
@@ -958,7 +959,7 @@ for text and location queries; constructed subtrees do not acquire it.
 typedef struct Point { int x, y, z; } Point;
 
 meta static List field_count(TypeInfo type) =>
-  x2c_literal_int(((List) type.assoc(<fields>)).len());
+  $!int{ ${((List) type.assoc(<fields>)).len()} };
 
 macro Expression $probe.count(Expr $value) => $field_count($value);
 
@@ -993,9 +994,10 @@ named fields in declaration order. `methods` lists the names of the type's
 direct dotted methods. Read a part with `List.assoc`. Pass the same hole twice when a function needs both the code
 and its type, as `shape_reads` does below.
 
-What the function returns decides what the expansion is. A `List` one of the
-compiler operations built represents code. `x2c_literal_int`, `x2c_literal_string`
-and `x2c_literal_symbol` each return an expression holding a value.
+What the function returns decides what the expansion is. A `List` that a
+quotation built represents code. A typed quotation of one value, such as
+`$!int{ $count }` or `$!String{ $name }`, is an expression holding that
+value.
 
 A `Stmt` macro can use the same arrow form. Its body is then the statement
 `$helper(args);`, and the helper may return any statement that fits where
@@ -1413,44 +1415,37 @@ declarations.
 
 ## What the compiler answers
 
-`lib/meta.x` declares the compiler operations. The code builders and
-`x2c_ident`, `Code.name`, `x2c_diagnostic_fail` and
-`x2c_diagnostic_warn` work in every `meta` function. The queries that read
-the compiler's symbol table, such as `Code.type`,
-`Type.fields` and `Type.resolve`, also work in every `meta`
+`lib/meta.x` declares the compiler operations. An operation on a value is
+a method of its type: `Code` for captured code and `Type` for a semantic
+type. The rest are `x2c_` helpers with no value to act on, such as
+`x2c_ident`, `x2c_invocation_line` and `x2c_diagnostic_fail`. Code is built
+with quotations, so the module declares no constructors.
+
+`x2c_ident`, `Code.name`, `Code.binding_spelling`, `Type.parts`,
+`x2c_diagnostic_fail` and `x2c_diagnostic_warn` work in every `meta`
+function. The queries that read the compiler's symbol table, such as
+`Code.type`, `Type.fields` and `Type.resolve`, also work in every `meta`
 function: the compiler answers a project function's query while the call
 waits, in the state of the call's site. `TypeInfo` and `Source`
-parameters still deliver a description in one argument. Each
-operation is a plain function whose name is the compile-time Lisp name with `_`
-for `.`, so `Type.fields` is `Type.fields` from x2c. They are grouped
-here by the task, not by signature; the
+parameters still deliver a description in one argument. The operations
+are grouped here by the task, not by signature; the
 [module reference](../library/modules/meta.md) lists every declaration, and
 the [language reference](../reference/language.md#the-same-operations-from-x2c)
 gives their semantics.
 
-The code builders are `meta` bodies in `lib/meta.x`. The Lisp functions
-call those same implementations. The three literal-building functions also
-check their Lisp arguments. Builders that only assemble Lists can also run in a
-linked program; `x2c_expr_field` and `x2c_expr_cast` still need compiler
-queries and therefore remain compile-time only. The same is true of
-`x2c_decl_make`, `x2c_param_make` and `Type.members`;
-`x2c_stmnt_make`, `x2c_stmnt_return` and `x2c_block_make` only assemble
-code.
-
-**Building identifiers, literals and expressions.** `x2c_ident` checks a
-name and returns identifier code. `x2c_literal_int`,
-`x2c_literal_string` and `x2c_literal_symbol` return an expression holding
-a value. `x2c_expr_ident`, `x2c_expr_field`, `x2c_expr_index`,
-`x2c_expr_call`, `x2c_expr_composite` and `x2c_expr_cast` assemble the
-six expression shapes a generator needs. Compose them rather than writing
-node shapes by hand, so the compiler binds and types the result:
+**Building code.** A quotation builds the code, and a typed quotation of
+one value, such as `$!int{ $count }`, is the literal expression that holds
+it. `x2c_ident` checks a name and returns identifier code, which a
+quotation uses where the code reads the name:
 
 ```x2c
 #include "x2c.x"
 #include "meta.x"
 
-meta static List call_of(String callee, List argument) =>
-  x2c_expr_call(x2c_expr_ident(x2c_ident(callee)), %($argument));
+meta static List call_of(String callee, List argument) {
+  List name = x2c_ident(callee);
+  return $!( $name($argument) );
+}
 
 macro Expression $probe.twice(Expr $value) => $call_of("twice", $value);
 
@@ -1475,7 +1470,8 @@ of a struct or union `Type`, each as a metadata row whose first element is
 the field name. `Type.layout`, `Type.resolve` and
 `Type.is_value` answer the remaining generated-code questions.
 `Type.parts` reads only the `Type` it receives.
-`x2c_method_resolve` answers which operation a member call selects. These
+`Type.resolve_member` answers which field or method a member access
+selects. These
 answers live in the compiler's symbol table, so a macro body cannot derive
 them from the code it captured.
 
@@ -1502,7 +1498,7 @@ meta static List one_word(Source node) {
   String text = Code.source_text(node);
   if (text.contains(" "))
     x2c_diagnostic_fail("this argument must be one word", %());
-  return x2c_literal_string(text);
+  return $!String{ $text };
 }
 
 macro Expression $probe.word(Expr $value) => $one_word($value);
@@ -1620,11 +1616,12 @@ int main(void) {
 ```
 
 The compiler binds each of these under its x2c name and derives the Lisp
-name from it: `_` becomes `.`, and a predicate `x2c_type_is_X` becomes
-`x2c.type.X?`. Only `Type.tag_name` and `Type.reverse_name`, which
-carry a hyphen, are listed by hand. Two signatures differ from the
-corresponding Lisp functions. `x2c_expr_call` takes its arguments as one
-`List`, and `Type.is_value` returns `int`.
+name from it: a method keeps its spelling, so `Code.binding_spelling` is
+`Code.binding_spelling` in Lisp, and in a helper each `_` becomes `.`, so
+`x2c_invocation_line` is `x2c.invocation.line`. A Lisp form has no
+quotation, so the Lisp library also defines `x2c.literal.string`,
+`x2c.literal.int` and `x2c.literal.symbol`, which build the literal a
+`$(...)` form returns for a value.
 
 ## Functions that need the compiler
 
@@ -1671,7 +1668,7 @@ meta static List shape_fields(TypeInfo type) => type.assoc(<fields>);
 meta List shape_names(TypeInfo type) {
   Array names = [];
   foreach (List field, shape_fields(type)) names.push(field.car());
-  return x2c_literal_string(String.join(", ", names));
+  return $!String{ ${String.join(", ", names)} };
 }
 
 /* `{ p.x, p.y, p.z }`, built from the fields rather than written out. */

@@ -1189,7 +1189,6 @@ guards trustworthy.
 
 | Signal | Rules | Tool |
 | --- | --- | --- |
-| `x2c_expr_*` or `x2c_literal_*` builders whose result is not inspected before it is returned | MA-5 | none |
 | a macro used once through `Macro shape = $m;` | MA-5 | none |
 | raw `case %(` on a head with a grammar form | MA-7 | none |
 | new `.xlisp` | LI-1 | none |
@@ -1392,7 +1391,7 @@ These results set the rules above; the evidence is in the adoption plan.
 | a computed part | `${expr}` hole |
 | a name shared by quotations | `x2c_ident` local |
 | a type needed before landing | `$!T{ }` |
-| code inspected before it is returned | `lib/meta.x` builders such as `x2c_expr_call` |
+| code inspected before it is returned | `$!T{ }`, built where it is written |
 | a pattern, data row, internal node | `%(...)` |
 
 ## Appendix B: role names

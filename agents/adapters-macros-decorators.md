@@ -532,7 +532,8 @@ machinery without a capability or ownership benefit.
 
 ### Shipped expression constructors for generators
 
-Status: proven
+Status: proven; revised 2026-10-10, when quotations replaced the x2c
+constructors and only the Lisp literal builders remained
 Checked: 2026-08-02 at `d2a51d85`
 Owner: `etc/compiler-sdk.xlisp` compile-time Lisp SDK
 
@@ -553,17 +554,10 @@ $(defun var.tag.symbol-expr (value)
   `(expr ("Symbol") (literal ("Symbol") ,(str value) ,value)))
 ```
 
-Adapter/macro/decorator form: `x2c.literal.int`, `x2c.literal.symbol`,
-`x2c.expr.ident`, `x2c.expr.index`, `x2c.expr.call`, and
-`x2c.expr.composite`, all taking expression ASTs as operands so a generator
-composes them.
-
-The retained constructors have shipped callers or a concrete documentation
-example. Statement, declaration, and type construction joined them later:
-`x2c.stmnt.make`, `x2c.stmnt.return`, `x2c.block.make`, `x2c.decl.make`,
-`x2c.param.make`, and `x2c.expr.cast` are public in
-`etc/compiler-sdk.xlisp` and documented in
-[the language reference](../docs/src/reference/language.md). A wrong literal
+Adapter/macro/decorator form: `x2c.literal.string`, `x2c.literal.int`, and
+`x2c.literal.symbol` in `etc/compiler-sdk.xlisp`, which Lisp needs because it
+has no quotation. Other code is a quotation in a `meta` function, or a
+quasiquoted List where the generator manipulates structure. A wrong literal
 argument reports `x2c.literal.int requires a number` instead of failing later
 inside an expansion.
 

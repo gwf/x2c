@@ -100,7 +100,7 @@ Source: `src/macros.x:5304`
 Ends the shared compile-time library before its build-target Context is
 reclaimed. A later target creates a fresh session in its own Context.
 
-Source: `src/macros.x:5502`
+Source: `src/macros.x:5490`
 
 #### x2c_template_call
 
@@ -161,11 +161,10 @@ Source: `src/macros.x:4998`
 `void Compiler.bind_meta_operation(Lisp lisp, String name, Var function)`
 
 Binds `function`, the operation `lib/meta.x` declares as `name`, under
-its Lisp name in `lisp`. A predicate answers a Lisp truth value where the
-x2c spelling answers `int`. A definition the compile-time libraries
+its Lisp name in `lisp`. A definition the compile-time libraries
 already give that name wins, because it adapts the arguments.
 
-Source: `src/macros.x:5442`
+Source: `src/macros.x:5437`
 
 <a id="Compiler.capture_macro_value"></a>
 #### Compiler.capture_macro_value
@@ -678,7 +677,7 @@ Source: `src/macros.x:5288`
 Reports that the compile-time Lisp `source` failed with `error` at
 `invocation`.
 
-Source: `src/macros.x:5474`
+Source: `src/macros.x:5462`
 
 <a id="Compiler.rewrite"></a>
 #### Compiler.rewrite

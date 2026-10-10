@@ -12,18 +12,6 @@ The compiler surface a `meta` function calls.
 | [`type_base_suffix`](#type_base_suffix) | Returns the suffix of `type` that begins at its typedef name or base keyword, sharing `type`, or `NULL` when it has none. |
 | [`type_declaration_parts`](#type_declaration_parts) | Returns `(base modifiers)` for reconstructing a declaration of `type`. |
 | [`type_name_error`](#type_name_error) | Returns the diagnostic for a `type` that names its type with an Atom other than a C type keyword, as `%(String)` and `%(* Point)` do, or `NULL`. |
-| [`x2c_block_make`](#x2c_block_make) | Returns a block containing `items` in order. |
-| [`x2c_expr_call`](#x2c_expr_call) | Returns the expression calling `callee` with `arguments`, a `List` of expressions. |
-| [`x2c_expr_composite`](#x2c_expr_composite) | Returns the comma-separated composite initializer holding `items`, a `List` of expressions. |
-| [`x2c_expr_ident`](#x2c_expr_ident) | Returns an expression reading the identifier `name`, which is the syntax `x2c_ident` returned or a binding the compiler resolved. |
-| [`x2c_expr_index`](#x2c_expr_index) | Returns the expression `base[subscript]`. |
-| [`x2c_function_body`](#x2c_function_body) | Returns the statements in the body of `function`. |
-| [`x2c_literal_int`](#x2c_literal_int) | Returns an `int` expression holding `value`. |
-| [`x2c_literal_string`](#x2c_literal_string) | Returns a `String` expression holding `value`. |
-| [`x2c_literal_symbol`](#x2c_literal_symbol) | Returns a `Symbol` expression holding `value`. |
-| [`x2c_parameters_arguments`](#x2c_parameters_arguments) | Returns the argument expressions that forward a parameter list, which is a `params` form or the parameters themselves. |
-| [`x2c_stmnt_make`](#x2c_stmnt_make) | Returns an expression statement. |
-| [`x2c_stmnt_return`](#x2c_stmnt_return) | Returns a return statement carrying `expression`. |
 
 ### Functions
 
@@ -34,7 +22,7 @@ The compiler surface a `meta` function calls.
 Returns the suffix of `type` that begins at its typedef name or base
 keyword, sharing `type`, or `NULL` when it has none.
 
-Source: `lib/meta.x:519`
+Source: `lib/meta.x:385`
 
 #### type_declaration_parts
 
@@ -44,7 +32,7 @@ Returns `(base modifiers)` for reconstructing a declaration of `type`.
 Function modifiers hold parameter syntax, and modifier order retains C
 declarator precedence.
 
-Source: `lib/meta.x:549`
+Source: `lib/meta.x:415`
 
 #### type_name_error
 
@@ -55,108 +43,7 @@ other than a C type keyword, as `%(String)` and `%(* Point)` do, or
 `NULL`. A type name is a String, as in `%("String")` and `%(* "Point")`;
 neither a short Symbol nor a long Atom supplies that representation.
 
-Source: `lib/meta.x:532`
-
-#### x2c_block_make
-
-`meta List x2c_block_make(List items)`
-
-Returns a block containing `items` in order.
-
-Source: `lib/meta.x:140`
-
-#### x2c_expr_call
-
-`meta List x2c_expr_call(List callee, List arguments)`
-
-Returns the expression calling `callee` with `arguments`, a `List` of
-expressions.
-
-Source: `lib/meta.x:114`
-
-#### x2c_expr_composite
-
-`meta List x2c_expr_composite(List items)`
-
-Returns the comma-separated composite initializer holding `items`, a
-`List` of expressions.
-
-Source: `lib/meta.x:119`
-
-#### x2c_expr_ident
-
-`meta List x2c_expr_ident(List name)`
-
-Returns an expression reading the identifier `name`, which is the syntax
-`x2c_ident` returned or a binding the compiler resolved.
-
-Source: `lib/meta.x:100`
-
-#### x2c_expr_index
-
-`meta List x2c_expr_index(List base, List subscript)`
-
-Returns the expression `base[subscript]`.
-
-Source: `lib/meta.x:103`
-
-#### x2c_function_body
-
-`meta List x2c_function_body(List function)`
-
-Returns the statements in the body of `function`.
-
-Source: `lib/meta.x:307`
-
-#### x2c_literal_int
-
-`meta List x2c_literal_int(int value)`
-
-Returns an `int` expression holding `value`.
-
-Source: `lib/meta.x:84`
-
-#### x2c_literal_string
-
-`meta List x2c_literal_string(String value)`
-
-Returns a `String` expression holding `value`.
-
-Source: `lib/meta.x:79`
-
-#### x2c_literal_symbol
-
-`meta List x2c_literal_symbol(Symbol value)`
-
-Returns a `Symbol` expression holding `value`.
-
-Source: `lib/meta.x:88`
-
-#### x2c_parameters_arguments
-
-`meta List x2c_parameters_arguments(List value)`
-
-Returns the argument expressions that forward a parameter list, which is
-a `params` form or the parameters themselves. A `(void)` parameter list
-answers nothing.
-
-Source: `lib/meta.x:315`
-
-#### x2c_stmnt_make
-
-`meta List x2c_stmnt_make(List expression)`
-
-Returns an expression statement.
-
-Source: `lib/meta.x:134`
-
-#### x2c_stmnt_return
-
-`meta List x2c_stmnt_return(List expression)`
-
-Returns a return statement carrying `expression`.
-
-Source: `lib/meta.x:137`
+Source: `lib/meta.x:398`
 
 ## Public types
 
@@ -175,7 +62,7 @@ Source: `lib/meta.x:137`
 
 Captured code parsed from source or produced by a quotation.
 
-Source: `lib/meta.x:52`
+Source: `lib/meta.x:59`
 
 <a id="Macro"></a>
 ### Macro
@@ -185,7 +72,7 @@ Source: `lib/meta.x:52`
 A macro as a value: called to build code, or used in a Match `case` to
 recognize code and capture its parameters.
 
-Source: `lib/meta.x:46`
+Source: `lib/meta.x:53`
 
 <a id="Source"></a>
 ### Source
@@ -194,9 +81,9 @@ Source: `lib/meta.x:46`
 
 A `meta` parameter declared `Source` receives, at a `$` call, captured
 syntax with the source text it came from: `((text T) (file F) (syntax
-S))`. `x2c_source_text` and `x2c_embed_text` read it directly.
+S))`. `Code.source_text` and `x2c_embed_text` read it directly.
 
-Source: `lib/meta.x:64`
+Source: `lib/meta.x:71`
 
 <a id="Type"></a>
 ### Type
@@ -205,7 +92,7 @@ Source: `lib/meta.x:64`
 
 Semantic type syntax with canonical List-pool lifetime.
 
-Source: `lib/meta.x:49`
+Source: `lib/meta.x:56`
 
 <a id="TypeInfo"></a>
 ### TypeInfo
@@ -216,23 +103,30 @@ A `meta` parameter declared `TypeInfo` receives, at a `$` call, the
 description of its argument's type: `((name N) (kind K) (type T)
 (fields F) (methods M))`. Read a part with `List.assoc`.
 
-Source: `lib/meta.x:59`
+Source: `lib/meta.x:66`
 
 ## Design notes
 
 A `meta` function runs inside the compiler, so it can ask the compiler
 questions and build syntax for it to bind. This module declares those
 operations in x2c; the macro values a `meta` function applies and
-recognizes are in `macro-value.x`. Each operation's semantics and Lisp
-name are specified under "Compile-time Lisp and imports" in the language
-reference.
+recognizes are in `macro-value.x`. Code builds code with quotations
+(`$!( ... )`, `$!{ ... }`, `$!T{ ... }`) and `%(...)` Lists, so the
+surface declares no constructors.
 
-A syntax builder's `meta` body is shared by compile time and run time.
-A bodyless `meta` prototype names an operation the compiler supplies
-from its declaration here. A `meta` function that reaches one, directly
-or through another `meta` function, is compile-time only: the compiler
-emits no run-time form for it and diagnoses a run-time call where it is
-written.
+The operations on a value are methods of the value's type: `Code`,
+captured code, and `Type`, a semantic type. The rest are `x2c_` helpers
+that have no captured receiver: the identifier check, the invocation
+site, embedded text, ancestry and placement, diagnostics, and the
+definition hashes. Compile-time Lisp names a method `Owner.member`,
+as in `Code.binding_spelling`, and a helper with each `_` of its name
+as `.`, as in `x2c.invocation.line`. The semantics are specified under
+"Compile-time Lisp and imports" in the language reference.
+
+Each operation is a bodyless `meta` prototype the compiler supplies. A
+`meta` function that reaches one, directly or through another `meta`
+function, is compile-time only: the compiler emits no run-time form for
+it and diagnoses a run-time call where it is written.
 
 Two operations let a macro contribute code beyond its result.
 `x2c_enclosing` answers the initialized declarator, block item,

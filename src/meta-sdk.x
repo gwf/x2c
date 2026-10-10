@@ -496,7 +496,7 @@ List builtin_foreach_bindings(List declaration) {
     List when no function of that name is visible. This reads the symbol
     table only, so any compile-time Lisp evaluation may call it, including
     one outside a macro expansion. */
-List builtin_foreach_reference(String name) {
+List meta_function_reference(String name) {
   Compiler c = active.evaluator;
   if (!c) raise %(bad-state (operation "_x2c.function.reference"));
   Type type = NULL;
@@ -889,7 +889,7 @@ static int _literal_string(Var syntax, String &value) {
 // invocations and diagnostics
 
 /** Returns the location of the active macro invocation. */
-List builtin_class_location(void) {
+List meta_invocation_location(void) {
   if (!active.expander || !active.site)
     $report.sdk.invocation_missing();
   return active.expander.token_location(active.site);
@@ -897,15 +897,15 @@ List builtin_class_location(void) {
 
 /** Answers `x2c.invocation.file`, declared in `lib/meta.x`. */
 String x2c_invocation_file(void) =>
-  builtin_class_location().assoc(<file>);
+  meta_invocation_location().assoc(<file>);
 
 /** Answers `x2c.invocation.line`, declared in `lib/meta.x`. */
 int x2c_invocation_line(void) =>
-  builtin_class_location().assoc(<line>);
+  meta_invocation_location().assoc(<line>);
 
 /** Answers `x2c.invocation.column`, declared in `lib/meta.x`. */
 int x2c_invocation_column(void) =>
-  builtin_class_location().assoc(<column>);
+  meta_invocation_location().assoc(<column>);
 
 /** Answers `x2c.diagnostic.fail`, declared in `lib/meta.x`. */
 void x2c_diagnostic_fail(String message, List notes) {
@@ -1053,7 +1053,7 @@ static void _sdk_reject_value(String message, Var value) {
 void Compiler.bind_sdk_primitives(Lisp lisp) {
   $lisp.bind(lisp, "_x2c.meta.linked.hashes", _sdk_linked_hashes);
   $lisp.bind(lisp, "_x2c.prelude.linked", _sdk_linked_prelude);
-  $lisp.bind(lisp, "_x2c.function.reference", builtin_foreach_reference);
+  $lisp.bind(lisp, "_x2c.function.reference", meta_function_reference);
   $lisp.bind(lisp, "_x2c.function.native-type", binding_native_type);
   $lisp.bind(lisp, "_x2c.literal.list", binding_literal_list);
   $lisp.bind(lisp, "_x2c.native-meta.targets", _sdk_meta_targets);

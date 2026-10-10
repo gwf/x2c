@@ -11,7 +11,6 @@ prefix.
 
 | Function | Source | Signature |
 | --- | --- | --- |
-| [`x2c_block_make`](meta.md#x2c_block_make) | `lib/meta.x` | `meta List x2c_block_make(List items)` |
 | [`x2c_cleanup_leave`](exception.md#x2c_cleanup_leave) | `lib/exception.x` | `void x2c_cleanup_leave(X2CCleanup *record)` |
 | [`x2c_cleanup_push`](exception.md#x2c_cleanup_push) | `lib/exception.x` | `void x2c_cleanup_push(X2CCleanup *record)` |
 | [`x2c_descriptor_registration_frozen`](dispatch.md#x2c_descriptor_registration_frozen) | `lib/dispatch.x` | `int x2c_descriptor_registration_frozen(void)` |
@@ -33,10 +32,6 @@ prefix.
 | [`x2c_exception_mark_handled`](exception.md#x2c_exception_mark_handled) | `lib/exception.x` | `void x2c_exception_mark_handled(ExceptionFrame *frame)` |
 | [`x2c_exception_push`](exception.md#x2c_exception_push) | `lib/exception.x` | `void x2c_exception_push(ExceptionFrame *e)` |
 | [`x2c_exception_unwinding`](exception.md#x2c_exception_unwinding) | `lib/exception.x` | `int x2c_exception_unwinding(void)` |
-| [`x2c_expr_call`](meta.md#x2c_expr_call) | `lib/meta.x` | `meta List x2c_expr_call(List callee, List arguments)` |
-| [`x2c_expr_composite`](meta.md#x2c_expr_composite) | `lib/meta.x` | `meta List x2c_expr_composite(List items)` |
-| [`x2c_expr_ident`](meta.md#x2c_expr_ident) | `lib/meta.x` | `meta List x2c_expr_ident(List name)` |
-| [`x2c_expr_index`](meta.md#x2c_expr_index) | `lib/meta.x` | `meta List x2c_expr_index(List base, List subscript)` |
 | [`x2c_func_declared_reference_argument`](func.md#x2c_func_declared_reference_argument) | `lib/func.x` | `void *x2c_func_declared_reference_argument( Func fn, const FuncArg *argv, unsigned i, List declared_target, List want)` |
 | [`x2c_func_pointer_argument`](func.md#x2c_func_pointer_argument) | `lib/func.x` | `void *x2c_func_pointer_argument(Func fn, const FuncArg *argv, unsigned i)` |
 | [`x2c_func_record_result`](func.md#x2c_func_record_result) | `lib/func.x` | `Var x2c_func_record_result(const void *bytes, size_t size)` |
@@ -45,7 +40,6 @@ prefix.
 | [`x2c_func_shared`](func.md#x2c_func_shared) | `lib/func.x` | `Func x2c_func_shared(FuncAdapter adapter, List signature)` |
 | [`x2c_func_unrepresentable_argument`](func.md#x2c_func_unrepresentable_argument) | `lib/func.x` | `FuncArg x2c_func_unrepresentable_argument(Func fn, unsigned i, List source)` |
 | [`x2c_func_value_argument`](func.md#x2c_func_value_argument) | `lib/func.x` | `Var x2c_func_value_argument( Func fn, const FuncArg *argv, unsigned i, Symbol want)` |
-| [`x2c_function_body`](meta.md#x2c_function_body) | `lib/meta.x` | `meta List x2c_function_body(List function)` |
 | `x2c_get_executable` | `src/utils.x` | `String x2c_get_executable(void)` |
 | `x2c_get_root` | `src/utils.x` | `String x2c_get_root(void)` |
 | [`x2c_hash_bytes`](common.md#x2c_hash_bytes) | `lib/common.x` | `inline unsigned x2c_hash_bytes( unsigned long seed, const void *data, size_t width)` |
@@ -54,9 +48,6 @@ prefix.
 | `x2c_initialize_command_environment` | `src/utils.x` | `void x2c_initialize_command_environment( const char *argv0, String embedded_identity)` |
 | `x2c_initialize_environment` | `src/utils.x` | `void x2c_initialize_environment(const char *argv0)` |
 | [`x2c_initialize_protocols`](common.md#x2c_initialize_protocols) | `lib/common.x` | `void x2c_initialize_protocols(void)` |
-| [`x2c_literal_int`](meta.md#x2c_literal_int) | `lib/meta.x` | `meta List x2c_literal_int(int value)` |
-| [`x2c_literal_string`](meta.md#x2c_literal_string) | `lib/meta.x` | `meta List x2c_literal_string(String value)` |
-| [`x2c_literal_symbol`](meta.md#x2c_literal_symbol) | `lib/meta.x` | `meta List x2c_literal_symbol(Symbol value)` |
 | [`x2c_match_initialize`](match.md#x2c_match_initialize) | `lib/match.x` | `void x2c_match_initialize(void)` |
 | [`x2c_match_pattern_retainable`](match.md#x2c_match_pattern_retainable) | `lib/match.x` | `int x2c_match_pattern_retainable(Var pattern)` |
 | [`x2c_match_site_match`](match.md#x2c_match_site_match) | `lib/match.x` | `List x2c_match_site_match(MatchCaptureSite *site, List input, Var pat)` |
@@ -73,15 +64,12 @@ prefix.
 | [`x2c_mix64`](common.md#x2c_mix64) | `lib/common.x` | `inline unsigned long x2c_mix64(unsigned long word)` |
 | [`x2c_normalize_index`](common.md#x2c_normalize_index) | `lib/common.x` | `int x2c_normalize_index(int index, int length)` |
 | [`x2c_normalize_slice`](common.md#x2c_normalize_slice) | `lib/common.x` | `int x2c_normalize_slice(int *start, int *stop, int step, int length)` |
-| [`x2c_parameters_arguments`](meta.md#x2c_parameters_arguments) | `lib/meta.x` | `meta List x2c_parameters_arguments(List value)` |
 | [`x2c_register_builtin_descriptor`](dispatch.md#x2c_register_builtin_descriptor) | `lib/dispatch.x` | `int x2c_register_builtin_descriptor(Symbol tag, VarMethods methods)` |
 | [`x2c_register_descriptor`](dispatch.md#x2c_register_descriptor) | `lib/dispatch.x` | `void x2c_register_descriptor(String name, VarMethods methods)` |
 | [`x2c_register_tagged_descriptor`](dispatch.md#x2c_register_tagged_descriptor) | `lib/dispatch.x` | `void x2c_register_tagged_descriptor( Symbol tag, String name, VarMethods methods)` |
 | [`x2c_register_type`](dispatch.md#x2c_register_type) | `lib/dispatch.x` | `void x2c_register_type(String name)` |
 | [`x2c_scope_thread_release`](scope.md#x2c_scope_thread_release) | `lib/scope.x` | `void x2c_scope_thread_release(void)` |
 | `x2c_set_root` | `src/utils.x` | `void x2c_set_root(String root)` |
-| [`x2c_stmnt_make`](meta.md#x2c_stmnt_make) | `lib/meta.x` | `meta List x2c_stmnt_make(List expression)` |
-| [`x2c_stmnt_return`](meta.md#x2c_stmnt_return) | `lib/meta.x` | `meta List x2c_stmnt_return(List expression)` |
 | [`x2c_try_register_descriptor`](dispatch.md#x2c_try_register_descriptor) | `lib/dispatch.x` | `int x2c_try_register_descriptor(String name, VarMethods methods)` |
 | [`x2c_try_register_tagged_descriptor`](dispatch.md#x2c_try_register_tagged_descriptor) | `lib/dispatch.x` | `int x2c_try_register_tagged_descriptor( Symbol tag, String name, VarMethods methods)` |
 | [`x2c_var_custom_descriptor`](var.md#x2c_var_custom_descriptor) | `lib/var.x` | `VarDescriptor *x2c_var_custom_descriptor(Var value)` |
@@ -105,4 +93,4 @@ prefix.
 | [`x2c_var_update_ulong_long`](varops.md#x2c_var_update_ulong_long) | `lib/varops.x` | `unsigned long long x2c_var_update_ulong_long(volatile unsigned long long *lhs, Symbol op, Var rhs)` |
 | [`x2c_var_update_volatile`](varops.md#x2c_var_update_volatile) | `lib/varops.x` | `Var x2c_var_update_volatile(volatile Var &?lhs, Symbol op, Var rhs)` |
 
-Total: 93 functions.
+Total: 81 functions.

@@ -48,7 +48,7 @@ may be NULL, and publishes the captures under `names`. A pattern that
 does not depend on the current call's subject is prepared once and kept
 in the site; generated `match` code calls this for a macro-valued case.
 
-Source: `lib/macro-value.x:488`
+Source: `lib/macro-value.x:490`
 
 <a id="Macro_case_pattern"></a>
 #### Macro_case_pattern
@@ -58,7 +58,7 @@ Source: `lib/macro-value.x:488`
 The pattern a macro-valued `case` compiles to; the compiler lowers a
 call of this to `Macro_case_capture_at` over the match subject.
 
-Source: `lib/macro-value.x:481`
+Source: `lib/macro-value.x:483`
 
 <a id="Macro_close"></a>
 #### Macro_close
@@ -78,7 +78,7 @@ Source: `lib/macro-value.x:62`
 Derives the Match pattern that recognizes code this macro builds,
 capturing each parameter under the given binder.
 
-Source: `lib/macro-value.x:184`
+Source: `lib/macro-value.x:185`
 
 ### `Macro`
 
@@ -127,7 +127,7 @@ Source: `lib/macro-value.x:129`
 Prepares repeated recognition without retaining subject-specific
 bindings.
 
-Source: `lib/macro-value.x:511`
+Source: `lib/macro-value.x:513`
 
 <a id="Macro.matches"></a>
 #### Macro.matches
@@ -137,7 +137,7 @@ Source: `lib/macro-value.x:511`
 Tests complete code against a macro and its hole patterns. Repeated
 recognition can retain `Macro.matcher` so the pattern is derived once.
 
-Source: `lib/macro-value.x:536`
+Source: `lib/macro-value.x:538`
 
 <a id="Macro.number_literal"></a>
 #### Macro.number_literal
@@ -148,7 +148,7 @@ Returns the literal expression of type `result` that holds `value`, a
 number of the scalar type `type`. An `int` value is its decimal
 literal; another number is its exact bits cast to `type`.
 
-Source: `lib/macro-value.x:354`
+Source: `lib/macro-value.x:356`
 
 <a id="Macro.number_type"></a>
 #### Macro.number_type
@@ -158,7 +158,7 @@ Source: `lib/macro-value.x:354`
 Returns the C type of a number's Var family, or NULL when `value` is not
 a number. An untyped integer is an `int` when it fits one.
 
-Source: `lib/macro-value.x:328`
+Source: `lib/macro-value.x:330`
 
 <a id="Macro.subject"></a>
 #### Macro.subject
@@ -167,7 +167,7 @@ Source: `lib/macro-value.x:328`
 
 Returns the table `Macro.use_subject` last set, or void.
 
-Source: `lib/macro-value.x:154`
+Source: `lib/macro-value.x:155`
 
 <a id="Macro.typed"></a>
 #### Macro.typed
@@ -192,7 +192,7 @@ recognizes only the recorded global binding; with void it recognizes
 any binding of its spelling. The compiler sets these rows for each
 `meta` call and carries them through the helper.
 
-Source: `lib/macro-value.x:162`
+Source: `lib/macro-value.x:163`
 
 ### `MacroMatcher`
 
@@ -204,7 +204,7 @@ Source: `lib/macro-value.x:162`
 Tests code with the same source views and identity rules as a macro
 case.
 
-Source: `lib/macro-value.x:522`
+Source: `lib/macro-value.x:524`
 
 ## Runtime-internal callables
 
@@ -227,7 +227,7 @@ whose binder is `binder`. Splice and construction projections are
 always sequences; return, declarator, and member projections never
 are; source, value, and expression follow the hole's `sequence`.
 
-Source: `lib/macro-value.x:233`
+Source: `lib/macro-value.x:234`
 
 ## Public types
 
@@ -270,7 +270,7 @@ independent of subject bindings is derived once; contextual references
 are resolved against each subject. The caller keeps the source values
 alive as long as this record. Match plans use the active Match cache.
 
-Source: `lib/macro-value.x:504`
+Source: `lib/macro-value.x:506`
 
 <a id="MacroPublishing"></a>
 ### MacroPublishing
