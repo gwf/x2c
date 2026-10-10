@@ -204,6 +204,11 @@ meta int Code.is_static_pattern(Code pattern);
     in order, before the call. */
 meta Code Code.call_in_order(Code member, List arguments, Type type);
 
+/** Returns `code`, which is already bound, typed, and lowered, marked so
+    that a translator's result is placed as written instead of bound and
+    lowered again. */
+meta Code Code.lowered(Code code);
+
 /** Registers a translator with its macro and optional hole patterns.
     NULL holes use the macro's named captures. Recognition uses the source
     views and binding identity rules of a macro-valued case.

@@ -17,6 +17,7 @@ int Code.is_static_pattern(Code pattern) =>
   _ask("Code_is_static_pattern", %($pattern));
 Code Code.call_in_order(Code member, List arguments, Type type) =>
   _ask("Code_call_in_order", %($member $arguments $type));
+Code Code.lowered(Code code) => _ask("Code_lowered", %($code));
 Code Code.register_rewrite(Code function, Macro shape, List holes) =>
   _ask("Code_register_rewrite", %($function $shape $holes));
 Code Code.register_marked_rewrite(

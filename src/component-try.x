@@ -257,7 +257,7 @@ meta static Code _try_landing(
   List clause = _try_catch_clause(handle, arms, rows);
   Macro shape = $try_frame;
   List code = shape(frame, clause, lowered, exits);
-  return %(code-value "lowered" (landing $code ${rows.list_free()}) ());
+  return Code.lowered(%(landing $code ${rows.list_free()}));
 }
 
 $rewrite($caught)

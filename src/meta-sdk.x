@@ -286,8 +286,12 @@ Var Code.value(Code code) {
 Code Code.call_in_order(Code member, List arguments, Type type) {
   _sdk_guard("Code.call_in_order");
   List call = active.expander.call_in_order(member, arguments);
-  return %(code-value "lowered" (expr $type $call) ());
+  return Code.lowered(%(expr $type $call));
 }
+
+/** Answers `Code.lowered`, declared in `lib/meta.x`, with the carrier
+    `Compiler.take_code_value` consumes. */
+Code Code.lowered(Code code) => %(code-value "lowered" $code ());
 
 /** Answers `Code.exits`, declared in `lib/meta.x`. */
 int Code.exits(Code statement) {

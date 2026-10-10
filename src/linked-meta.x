@@ -590,7 +590,7 @@ Code dynamic_binary(Code code) {
     List symbol = %(expr ("Symbol") (literal ("Symbol") ${op.str()} $op));
     List call = %(call $callee (args ${lhs.convert(%("Var"))} $symbol
                                      ${rhs.convert(%("Var"))}));
-    return %(code-value "lowered" (expr ("Var") $call) ());
+    return Code.lowered(%(expr ("Var") $call));
   }
   return code;
 }
@@ -614,7 +614,7 @@ static Code _dynamic_update(
   List call = value
     ? %(call $helper (args $address $operation $value))
     : %(call $helper (args $address $operation));
-  return %(code-value "lowered" (expr $type $call) ());
+  return Code.lowered(%(expr $type $call));
 }
 
 static String _dynamic_helper(Type type) {
@@ -955,7 +955,7 @@ static Code _try_landing(
   List clause = _try_catch_clause(handle, arms, rows);
   Macro shape = $try_frame;
   List code = shape(frame, clause, lowered, exits);
-  return %(code-value "lowered" (landing $code ${rows.list_free()}) ());
+  return Code.lowered(%(landing $code ${rows.list_free()}));
 }
 
 /** Lowers the parsed try `node` to its landing form. */

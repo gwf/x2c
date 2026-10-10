@@ -43,7 +43,7 @@ meta Code dynamic_binary(Code code) {
     List symbol = %(expr ("Symbol") (literal ("Symbol") ${op.str()} $op));
     List call = %(call $callee (args ${lhs.convert(%("Var"))} $symbol
                                      ${rhs.convert(%("Var"))}));
-    return %(code-value "lowered" (expr ("Var") $call) ());
+    return Code.lowered(%(expr ("Var") $call));
   }
   return code;
 }
@@ -73,7 +73,7 @@ meta static Code _dynamic_update(
   List call = value
     ? %(call $helper (args $address $operation $value))
     : %(call $helper (args $address $operation));
-  return %(code-value "lowered" (expr $type $call) ());
+  return Code.lowered(%(expr $type $call));
 }
 
 /* The update helper for a target of `type`, which must be numeric and not
