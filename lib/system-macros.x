@@ -117,7 +117,7 @@ macro Stmt $assert(Expr $check) {
   {
     if (!($check)) {
       raise %(invariant
-        (check ${$(x2c.literal.string (x2c.source.text $check))})
+        (check ${$(x2c.literal.string (Code.source_text $check))})
         (at ${$(_macros_location)}));
     }
   }

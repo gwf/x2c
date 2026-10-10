@@ -4892,7 +4892,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_8(void){
   _4345 = String_var(_4344);
   _4346 = cons(_4345, NULL);
   _4347 = cons(_4343, _4346);
-  _4348 = String_new("fe436d9a");
+  _4348 = String_new("7e6fd004");
   _4349 = String_var(_4348);
   _4350 = String_new("lib/meta.x");
   _4351 = String_var(_4350);
