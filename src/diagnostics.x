@@ -419,16 +419,25 @@ static List _compiler_location(Compiler compiler, Token token) {
 void Compiler.report_error(
   Compiler compiler, Symbol code, String message, Token token, List notes) {
   report_suspend();
+  compiler.report_problem(code, message, token, notes);
   Diagnostics diag = compiler.diagnostics;
-  message = message ? message : "compiler error";
-  List loc = _compiler_location(compiler, token);
-  diag.report(code, message, loc, notes);
   if (compiler.recovery_depth > 0) raise %(malformed (category $code));
   /* A unit that holds its diagnostics until it finishes has no printer yet.
      The floor reports what it collected before it leaves. */
   if (!diag.printer)
     foreach (Var held, diag.entries()) compiler.print_diagnostic(held);
   exit(1);
+}
+
+/** Records and emits a located compiler error, then returns so the
+    translation continues; it fails when it finishes. Location and the
+    message default match `Compiler.report_error`.
+*/
+void Compiler.report_problem(
+  Compiler compiler, Symbol code, String message, Token token, List notes) {
+  message = message ? message : "compiler error";
+  compiler.diagnostics.report(
+    code, message, _compiler_location(compiler, token), notes);
 }
 
 /** Records and emits a located warning without consuming the error limit.

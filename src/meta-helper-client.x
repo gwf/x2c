@@ -41,15 +41,18 @@ static macro Stmt $report.macro.helper_stopped(
     $site, %("function: ${$name}" "reason: ${$reason}"));
 }
 
-/** Reports a meta function's failure `message` with `notes` under
+/** Reports a meta function's error `message` with `notes` under
     `category` at the position recorded first in or around `node`, or at
-    `site` when it has none. This does not return. */
+    `site` when it has none. A `fatal` report does not return. */
 void Compiler.report_meta_error(
   Compiler c, Var node, Symbol category, String message, Token site,
-  List notes) {
+  List notes, int fatal) {
   int origin = _syntax_origin(node);
-  $let(c.origin, origin ? origin : c.origin)
-    c.report_error(category, message, origin ? NULL : site, notes);
+  Token token = origin ? NULL : site;
+  $let(c.origin, origin ? origin : c.origin) {
+    if (fatal) c.report_error(category, message, token, notes);
+    c.report_problem(category, message, token, notes);
+  }
 }
 
 /* The `N` of the first `(at N ...)` in or around `node`, or 0. */
@@ -120,7 +123,7 @@ Var Compiler.meta_helper_call(
       case %(error ?(String message) ?(List notes)):
         c.report_error(<macro>, message, site, notes);
       case %(error ?(String message) ?(List notes) (at ?node ?category)):
-        c.report_meta_error(node, category, message, site, notes);
+        c.report_meta_error(node, category, message, site, notes, 1);
       case %(dependency ?(String path) ?(String hash)):
         c.deps.merge_translation_dependency(path, hash);
       case %(query ?(String operation) ?(List operands)):

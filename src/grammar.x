@@ -22,6 +22,11 @@ macro Stmt $caught(Stmt $body, Stmt $finalizer,
   try $body catch @arms finally $finalizer
 }
 
+/* A raise with its code and its detail keys and values, alternating. */
+macro Stmt $raised(Expr $code, Expr @details) {
+  raise %($code @details);
+}
+
 /* A match with its complete source-ordered arm and directive rows. */
 macro Stmt $matched(Expr $subject, MatchRow @rows) {
   match ($subject) { @rows }

@@ -317,6 +317,12 @@ int Code.is_static_pattern(Code pattern) {
   return active.expander.match_pattern_is_static(pattern);
 }
 
+/** Answers `Code.promoted`, declared in `lib/meta.x`. */
+Code Code.promoted(Code value) {
+  _sdk_guard("Code.promoted");
+  return active.expander.promote_string_literal(value);
+}
+
 /* Default holes retain the macro's declared capture names and cardinality. */
 static List _rewrite_holes(Macro shape, List supplied) {
   if (supplied) return supplied;
@@ -457,9 +463,9 @@ Code Code.register_rewrite(Code function, List pattern, List holes) {
       { point = <call>; kinds = %($callee); }
     case %(expr ? ((!set ?head (!or array map)) *)):
       { point = <literal>; kinds = %($head); }
-    case %((!quote !or) ((!set ?head (!or switch try)) *) *):
+    case %((!quote !or) ((!set ?head (!or switch try raise)) *) *):
       { point = <node>; kinds = %($head); }
-    case %((!set ?head (!or switch try)) *):
+    case %((!set ?head (!or switch try raise)) *):
       { point = <node>; kinds = %($head); }
     case %(!or (api-source ? ? (function ?type *)) (function ?type *)):
       { point = <function>; kinds = %(${_function_rule_key(type)}); }
@@ -961,7 +967,15 @@ void x2c_diagnostic_fail_at(
   Var node, Symbol category, String message, List notes) {
   _sdk_check_notes("x2c.diagnostic.fail.at", notes);
   active.expander.report_meta_error(
-    node, category, message, active.site, notes);
+    node, category, message, active.site, notes, 1);
+}
+
+/** Answers `x2c.diagnostic.error.at`, declared in `lib/meta.x`. */
+void x2c_diagnostic_error_at(
+  Var node, Symbol category, String message, List notes) {
+  _sdk_check_notes("x2c.diagnostic.error.at", notes);
+  active.expander.report_meta_error(
+    node, category, message, active.site, notes, 0);
 }
 
 /** A warning reports where it is raised and returns, so a macro can keep
@@ -1058,13 +1072,6 @@ List meta_source_description(Var value) {
 List builtin_foreach_complete(List expression) {
   _sdk_guard("private foreach iterator completion");
   return active.expander.complete_iter_chain(expression);
-}
-
-/** Returns the collection `foreach` iterates for `expression`, promoting a
-    String literal. */
-List builtin_foreach_collection(List expression) {
-  _sdk_guard("private foreach string conversion");
-  return active.expander.promote_string_literal(expression);
 }
 
 // rejection

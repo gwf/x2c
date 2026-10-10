@@ -204,6 +204,12 @@ meta int Code.is_static_pattern(Code pattern);
     in order, before the call. */
 meta Code Code.call_in_order(Code member, List arguments, Type type);
 
+/** Returns `value` as a `String` when it is a C string literal, or one in
+    parentheses or in both arms of a conditional, as a method receiver,
+    a `foreach` collection, or a raise detail converts one; returns any
+    other `value` itself. */
+meta Code Code.promoted(Code value);
+
 /** Returns `code`, which is already bound, typed, and lowered, marked so
     that a translator's result is placed as written instead of bound and
     lowered again. */
@@ -478,6 +484,12 @@ meta void x2c_diagnostic_fail(String message, List notes);
     such as a captured statement's; a node without one reports at the macro
     invocation. This does not return. */
 meta void x2c_diagnostic_fail_at(
+  Var node, Symbol category, String message, List notes);
+
+/** Reports `message` with `notes` under `category` at `node`, located as
+    `x2c_diagnostic_fail_at` locates it, and returns so the expansion
+    continues. The translation fails when it finishes. */
+meta void x2c_diagnostic_error_at(
   Var node, Symbol category, String message, List notes);
 
 /** Reports `message` with `notes` as a warning where it is raised, and

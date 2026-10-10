@@ -95,7 +95,7 @@ static typedef struct Foreach {
 static List _foreach_expand(
   List declaration, List collection, List body, Var iterator, Var item,
   Var pair, Var object, Var cursor) {
-  collection = builtin_foreach_collection(collection);
+  collection = ((Code) collection).promoted();
   List targets = builtin_foreach_bindings(declaration);
   List type = x2c_syntax_type(collection);
   int direct = type == %("Iter");

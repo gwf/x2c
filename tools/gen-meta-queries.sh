@@ -83,7 +83,10 @@ END {
     target = names[i]
     sub(/\./, "_", target)
     ask = "_ask(\"" target "\", %(" arguments "))"
-    if (signature ~ /^void /) print signature " { " ask "; }"
+    if (signature ~ /^void /) {
+      if (length(one " { " ask "; }") <= 79) print one " { " ask "; }"
+      else print signature " {\n  " ask ";\n}"
+    }
     else if (length(one " => " ask ";") <= 79) print one " => " ask ";"
     else print signature " =>\n  " ask ";"
   }
