@@ -402,11 +402,18 @@ equals stage 0 across 266 files.
   `datum_write` quotes them; unit cases in test-atom and test-lisp. The install
   payload's two explicit `.str()` conversions are gone and `make install` is
   warning-free.
-- Found, not fixed: in untagged mode `datum_write` writes a non-bare compact
-  Symbol through `Symbol.write_repr` as `<\"...\">`, which does not read back
-  (`<<`, `<x`, `a b`). This is the general cause of the `<<=` rewrite-row
-  defect the driver work froze around. Whether interface writing reaches that
-  path is unverified.
+- Fixed in the publication batch: `Symbol.write_repr` wrote a general Symbol
+  with escaped quotes, which `Symbol.parse` and the Lisp reader could not read
+  back, so untagged `datum_write` produced unreadable interfaces for `<<`,
+  `<x`, `a b`, and `<<=`; and `Atom.bare_spelling` accepted a backslash the
+  reader takes as an escape. The repr now writes the source literal
+  `<"...">`, untagged `datum_write` refuses the empty Symbol (which has no
+  plain spelling) instead of writing `<>`, and bare spellings reject every
+  backslash. Unit cases in test-symbol, test-lisp, and test-atom. The
+  interface writer does reach this path, so the rewrite-row freeze stays: the
+  rows hold the empty Symbol `(target <>)`, which was the malformed read the
+  driver work attributed to `<<=`, and an unfrozen `<"<<=">` kind would send
+  the whole record to `Lisp.read`, 3.5x slower than the plain reader.
 
 Milestone 0 and the milestone below's items 1 and 2 are complete. Authored
 src, lib, and etc against dev: 4,000 added, 1,663 removed, of which 617 are
