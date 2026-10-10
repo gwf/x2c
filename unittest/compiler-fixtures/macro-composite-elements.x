@@ -10,11 +10,10 @@ static int twice(int n) { return n + n; }
 
 macro Unit $probe.pair(Name $fn) {
   static Pair $fn(void) {
-    Pair value = $(x2c.expr.composite (list
-      (x2c.expr.call
-        (x2c.expr.ident (x2c.ident "twice"))
-        (x2c.literal.int 3))
-      (x2c.literal.int 2)));
+    Pair value = $(begin `(expr () (composite (commas
+      (expr () (call (expr () (ident ,(x2c.ident "twice")))
+        (args ,(x2c.literal.int 3))))
+      ,(x2c.literal.int 2)))));
     return value;
   }
 }

@@ -13,7 +13,7 @@
 #include "ast-rewrite.h"
 Type List_type_from_ast(List ast);
 
-List Type_declaration_parts(Type type);
+List Type_parts(Type type);
 
 List Type_declaration_ast(Type type, List binding);
 

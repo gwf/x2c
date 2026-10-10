@@ -2672,7 +2672,7 @@ static List Compiler._builtin_registration(
 
 static List Compiler._tagged_registration(
   Compiler c, List methods, String name, Symbol tag) {
-  List symbol = x2c_literal_symbol(tag);
+  List symbol = $!Symbol{ $tag };
   List table = $!VarMethods{ $methods };
   return c._helper_call(
     %(void), "x2c_register_tagged_descriptor",

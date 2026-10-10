@@ -57,12 +57,14 @@ macro Expression $boxed(Expr $value) => ((Boxed){ $value });
 static void report(int value) { printf("%d\n", value); }
 meta static List reported(List v) {
   List bumped = $!( $v + 1 );
-  return x2c_expr_call(x2c_expr_ident(x2c_ident("report")), %($bumped));
+  List callee = %(expr () (ident ${x2c_ident("report")}));
+  return %(expr () (call $callee (args $bumped)));
 }
 macro Expression $report_next(Expr $v) => $reported($v);
 meta static List doubled_local(List v) {
   List twice = $!( $v * 2 );
-  List declaration = x2c_decl_make(%(int), "twice", twice);
+  List declaration =
+    %(declare (int) (bindings (op = (bind ("twice") ()) $twice)));
   List shown = $!{ report(twice); };
   return %($declaration $shown);
 }

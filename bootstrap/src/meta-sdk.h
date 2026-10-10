@@ -76,8 +76,6 @@ List Type_parameters(Type type);
 
 Type Type_return_type(Type type);
 
-List Type_parts(Type type);
-
 List x2c_type_parts(List value);
 
 List x2c_type_resolve(List value);

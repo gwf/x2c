@@ -1210,7 +1210,7 @@ static List Emitter._semantic_type(Emitter &e, Type type) {
 }
 
 static List Emitter._semantic_name(Emitter &e, Type type, String name) {
-  List (base, mods) = type.declaration_parts();
+  List (base, mods) = type.parts();
   List declarator = e._declarator(%($name), mods);
   return %(${e._emit(base)} @declarator);
 }

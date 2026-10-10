@@ -17,7 +17,7 @@ meta static List chain(List x, List r, int n) {
   Macro pick = $pick, none = $none, is = $is, set = $set;
   List out = none(r);
   for (int i = n - 1; i >= 0; i--) {
-    List v = x2c_literal_int(i * 10);
+    List v = $!int{ ${i * 10} };
     out = pick(is(x, v), set(r, v), out);
   }
   return out;

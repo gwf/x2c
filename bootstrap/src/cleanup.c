@@ -1185,7 +1185,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_1(void){
   _810 = cons(_808, _809);
   _811 = List_var(_810);
   _812 = Symbol_var(1133019155420);
-  _813 = int_var(28391);
+  _813 = int_var(28379);
   _814 = cons(_813, NULL);
   _815 = cons(_812, _814);
   _816 = List_var(_815);
@@ -2347,7 +2347,7 @@ static List Walk__lower_return(Walk * w, List node, List expression){
 }
 
 static List Walk__return_value(Walk * w, List expression, List cleanup){
-  List binding = Compiler__region_binding((* w).c, _363);  Type type =(* w).return_type;  List base, mods;  List _x2c_destructure_0 = Type_declaration_parts(type);  base = Var_list(List_getindex(_x2c_destructure_0, 0));  mods = Var_list(List_getindex(_x2c_destructure_0, 1));  List declaration =({
+  List binding = Compiler__region_binding((* w).c, _363);  Type type =(* w).return_type;  List base, mods;  List _x2c_destructure_0 = Type_parts(type);  base = Var_list(List_getindex(_x2c_destructure_0, 0));  mods = Var_list(List_getindex(_x2c_destructure_0, 1));  List declaration =({
     Var _x2c_literal_part_12 = List_var(base);  Var _x2c_literal_part_13 = List_var(cons(_43, cons(List_var(({
       Var _x2c_literal_part_11 = List_var(cons(_109, cons(List_var(binding), cons(List_var(mods), NULL))));  cons(_85, cons(_86, cons(_x2c_literal_part_11, cons(List_var(expression), NULL))));
     }

@@ -1197,7 +1197,7 @@ static List _declaration_base(Type t, List &modifiers) {
   foreach (Var item, t)
     if (item is <list> && car(item) is <string>) text.push(item);
     else typed.push(item);
-  List (base, mods) = typed.list().type().declared().declaration_parts();
+  List (base, mods) = typed.list().type().declared().parts();
   modifiers = mods;
   if (!mods) return t;
   foreach (Var item, t)
@@ -2733,7 +2733,7 @@ void Compiler.enter(Compiler c, Ancestor row) {
 List Compiler.enclosing(Compiler c, Symbol what) {
   if (what == <unit>) {
     String path = c.filename ? c.display_path(c.filename) : "<stdin>";
-    return x2c_literal_string(path);
+    return $!String{ $path };
   }
   Ancestor *rows = c.ancestors.bytes;
   for (int i = (int) c.ancestors.len() - 1; i >= 0; i--) {

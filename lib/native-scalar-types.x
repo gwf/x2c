@@ -97,9 +97,9 @@ macro Unit $native.scalar.access.all() {
 
 $(defun native.scalar.access-entry (entry)
   `(map-entry ,(native.scalar.list (map x2c.literal.symbol (car entry)))
-    ,(x2c.expr.cast '(* void) `(expr () (op &
-      ,(x2c.expr.ident
-        (x2c.ident (native.scalar.access-name (car entry)))))))))
+    (expr (* void) (cast (decl (void) (bindings (bind () (*))))
+      (expr () (op & (expr () (ident
+        ,(x2c.ident (native.scalar.access-name (car entry)))))))))))
 
 /* `native_scalar_access`'s lookup, in sorted order so emission does not
    depend on hash layout: each row's type to its access record,

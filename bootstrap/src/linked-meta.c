@@ -3824,7 +3824,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_6(void){
   _3233 = cons(_3232, NULL);
   _3234 = cons(_634, _3233);
   _3235 = List_var(_3234);
-  _3236 = int_var(4894);
+  _3236 = int_var(4925);
   _3237 = cons(_3236, NULL);
   _3238 = cons(_647, _3237);
   _3239 = List_var(_3238);
@@ -4849,7 +4849,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_8(void){
   _4252 = cons(_4240, _4251);
   _4253 = cons(_4248, _4252);
   _4254 = cons(_532, _4253);
-  _4255 = String_new("75dd33ffb7eccc11");
+  _4255 = String_new("402114ad1d9fd1cb");
   _4256 = String_var(_4255);
   _4257 = cons(_4256, _3229);
   _4258 = String_new("b2492e71ed3d96c0");
@@ -4858,9 +4858,9 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_8(void){
   _4261 = String_new("23ff0783ec30f4ec");
   _4262 = String_var(_4261);
   _4263 = cons(_4262, _3229);
-  _4264 = String_new("fef47e86");
+  _4264 = String_new("3c22dcca");
   _4265 = String_var(_4264);
-  _4266 = String_new("bdc1fe30");
+  _4266 = String_new("a6980d57");
   _4267 = String_var(_4266);
   _4268 = cons(_4267, NULL);
   _4269 = cons(_4225, _4268);
@@ -5984,7 +5984,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_10(void){
   _5381 = String_var(_5380);
   _5382 = cons(_5381, NULL);
   _5383 = cons(_5379, _5382);
-  _5384 = String_new("21244ddc");
+  _5384 = String_new("5cef6b76");
   _5385 = String_var(_5384);
   _5386 = cons(_4171, NULL);
   _5387 = cons(_4164, _5386);
@@ -8023,7 +8023,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_14(void){
   _7408 = List_var(_7407);
   _7409 = String_new("lib/varops.x");
   _7410 = String_var(_7409);
-  _7411 = String_new("58025db5");
+  _7411 = String_new("9947aa82");
   _7412 = String_var(_7411);
   _7413 = cons(_7412, NULL);
   _7414 = cons(_7410, _7413);
@@ -9753,7 +9753,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_17(void){
   _9129 = cons(_532, _9128);
   _9130 = String_new("src/builtins.x");
   _9131 = String_var(_9130);
-  _9132 = String_new("2a8cd754");
+  _9132 = String_new("9e8a0fbf");
   _9133 = String_var(_9132);
   _9134 = String_new("cwd:./lisp.x");
   _9135 = String_var(_9134);
@@ -9773,7 +9773,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_17(void){
   _9149 = List_var(_9148);
   _9150 = String_new("src/macros.x");
   _9151 = String_var(_9150);
-  _9152 = String_new("9c002775");
+  _9152 = String_new("058aaba7");
   _9153 = String_var(_9152);
   _9154 = cons(_9153, NULL);
   _9155 = cons(_9151, _9154);
@@ -9784,7 +9784,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_17(void){
   _9160 = List_var(_9159);
   _9161 = String_new("src/transform.x");
   _9162 = String_var(_9161);
-  _9163 = String_new("c40cea83");
+  _9163 = String_new("222c9951");
   _9164 = String_var(_9163);
   _9165 = cons(_9164, NULL);
   _9166 = cons(_9162, _9165);
@@ -9854,7 +9854,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_18(void){
   _9227 = List_var(_9226);
   _9228 = String_new("src/expressions.x");
   _9229 = String_var(_9228);
-  _9230 = String_new("8f1822d0");
+  _9230 = String_new("86227ad0");
   _9231 = String_var(_9230);
   _9232 = cons(_9231, NULL);
   _9233 = cons(_9229, _9232);
@@ -9878,7 +9878,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_18(void){
   _9251 = List_var(_9250);
   _9252 = String_new("src/meta-group.x");
   _9253 = String_var(_9252);
-  _9254 = String_new("d8a7d7e3");
+  _9254 = String_new("99fd3023");
   _9255 = String_var(_9254);
   _9256 = cons(_9255, NULL);
   _9257 = cons(_9253, _9256);
@@ -9899,14 +9899,14 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_18(void){
   _9272 = List_var(_9271);
   _9273 = String_new("src/meta-sdk.x");
   _9274 = String_var(_9273);
-  _9275 = String_new("4d903a7f");
+  _9275 = String_new("712c6b61");
   _9276 = String_var(_9275);
   _9277 = cons(_9276, NULL);
   _9278 = cons(_9274, _9277);
   _9279 = List_var(_9278);
   _9280 = String_new("src/parse.x");
   _9281 = String_var(_9280);
-  _9282 = String_new("342f7b47");
+  _9282 = String_new("fb71c0d2");
   _9283 = String_var(_9282);
   _9284 = cons(_9283, NULL);
   _9285 = cons(_9281, _9284);
@@ -10017,14 +10017,14 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_18(void){
   _9390 = List_var(_9389);
   _9391 = String_new("src/callables.x");
   _9392 = String_var(_9391);
-  _9393 = String_new("ce402524");
+  _9393 = String_new("dc7457bf");
   _9394 = String_var(_9393);
   _9395 = cons(_9394, NULL);
   _9396 = cons(_9392, _9395);
   _9397 = List_var(_9396);
   _9398 = String_new("src/cleanup.x");
   _9399 = String_var(_9398);
-  _9400 = String_new("fbed032f");
+  _9400 = String_new("aaf3dba9");
   _9401 = String_var(_9400);
   _9402 = cons(_9401, NULL);
   _9403 = cons(_9399, _9402);
@@ -10035,7 +10035,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_18(void){
   _9408 = List_var(_9407);
   _9409 = String_new("src/protocol.x");
   _9410 = String_var(_9409);
-  _9411 = String_new("f8651b0c");
+  _9411 = String_new("d79179da");
   _9412 = String_var(_9411);
   _9413 = cons(_9412, NULL);
   _9414 = cons(_9410, _9413);
@@ -10050,7 +10050,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_18(void){
   _9423 = List_var(_9422);
   _9424 = String_new("src/type.x");
   _9425 = String_var(_9424);
-  _9426 = String_new("c8360590");
+  _9426 = String_new("cce2f1f9");
   _9427 = String_var(_9426);
   _9428 = cons(_9427, NULL);
   _9429 = cons(_9425, _9428);
@@ -10222,7 +10222,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_18(void){
   _9595 = cons(_532, _9594);
   _9596 = String_new("src/initializers.x");
   _9597 = String_var(_9596);
-  _9598 = String_new("7637744c");
+  _9598 = String_new("c7620b5a");
   _9599 = String_var(_9598);
   _9600 = cons(_9599, NULL);
   _9601 = cons(_9597, _9600);
@@ -10250,7 +10250,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_18(void){
   _9623 = List_var(_9622);
   _9624 = String_new("src/emit.x");
   _9625 = String_var(_9624);
-  _9626 = String_new("798495a5");
+  _9626 = String_new("b0d113ce");
   _9627 = String_var(_9626);
   _9628 = cons(_9627, NULL);
   _9629 = cons(_9625, _9628);

@@ -102,7 +102,7 @@ static List Compiler._empty_collection(Compiler c, Type target) {
    rows name their slots. */
 static List _zero_pointer_target(Type viewed, Type native) {
   Type pointer = cons(<*>, native);
-  List zero = x2c_literal_int(0);
+  List zero = $!int{ 0 };
   return %(expr $viewed (parens (expr $viewed
     (op * (expr $pointer (parens (expr $pointer (cast $pointer $zero))))))));
 }
@@ -129,8 +129,8 @@ static List Compiler._composite_rows(
 
 /* Keep C's excess warning on one retained value of this alternative. */
 static List _composite_excess_check(List parent_condition) {
-  List zero = x2c_literal_int(0);
-  List one = x2c_literal_int(1);
+  List zero = $!int{ 0 };
+  List one = $!int{ 1 };
   List size = $!int{ $parent_condition ? $zero : $one };
   Type array = %((dim $size) char);
   List probe = %(expr $array (cast $array
@@ -351,7 +351,7 @@ static List Compiler._initializer_first(
   Compiler c, Type type, List parent) {
   Type owner = c._initializer_shape(type);
   if (owner.is_array()) {
-    List zero = x2c_literal_int(0);
+    List zero = $!int{ 0 };
     return cons(%($owner index $zero ${owner.cdr()} ()), parent);
   }
   if (owner.is_aggregate())
@@ -431,7 +431,7 @@ static int Compiler._next_index(
 static List Compiler._index_inside(
   Compiler c, List target, List parent, Type type, List index) {
   List array = c.initializer_slot(target, parent);
-  List element = %(expr $type (index $array ${x2c_literal_int(0)}));
+  List element = %(expr $type (index $array ${$!int{ 0 }}));
   List length = %(expr (unsigned)
     (op / (expr (unsigned) (sizeof (parens $array)))
           (expr (unsigned) (sizeof (parens $element)))));
@@ -584,7 +584,7 @@ static List _ordinal_index(
   List frame, List ordinal, List units, List one, List &position) {
   (Type owner, Symbol kind, Var selector, Type selected, List rest) = frame;
   List index = ordinal;
-  position = x2c_literal_int(0);
+  position = $!int{ 0 };
   if (units !== one) {
     // Empty native subarrays leave these selectors well-formed.
     List divisor = %(expr (unsigned long long)
@@ -609,7 +609,7 @@ static void _ordinal_field(
   }
   List test = units === one
     ? %(expr (int) (op == (expr (unsigned long long) (parens $position))
-                         ${x2c_literal_int(0)}))
+                         ${$!int{ 0 }}))
     : %(expr (int)
         (op < (expr (unsigned long long) (parens $position))
               (expr (unsigned long long) (parens $units))));
@@ -776,14 +776,14 @@ static List _initializer_zero(Type type, List target) {
   Type native = type.is_bitfield() ? type.base_type()
     : target ? %("__typeof__" (parens $target)) : type;
   return %(expr $type (cast $native (expr $type
-    (composite (commas ${x2c_literal_int(0)})))));
+    (composite (commas ${$!int{ 0 }})))));
 }
 
 static List _rejected_initializer(
   Type type, List condition, List zero) {
   List size = %(expr (int) (op ? $condition
     (expr (int) (literal (int) "-1"))
-    ${x2c_literal_int(1)}));
+    ${$!int{ 1 }}));
   List check = %(expr (unsigned)
     (sizeof ("(" "char[" $size "]" ")")));
   Symbol comma = <,>;

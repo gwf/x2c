@@ -7,7 +7,7 @@ macro Expression $lam(Expr $body, Param @params) => %!(@params) => $body;
 meta static List lambda_body(List code) {
   Macro lam = $lam;
   match (code) { case lam(?body, *params): return body; }
-  return x2c_literal_int(0);
+  return $!int{ 0 };
 }
 macro Expression $body_of(Expr $code) => $lambda_body($code);
 int main(void) {

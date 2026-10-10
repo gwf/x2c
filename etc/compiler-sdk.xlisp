@@ -5,16 +5,15 @@
 (defun x2c.diagnostic.warn (message notes)
   (let ((discarded (x2c_diagnostic_warn message notes))) nil))
 
-// The Lisp boundary retains its argument checks around the shared bodies.
+// Lisp has no quotation, so these build the literal expressions a `$(...)`
+// form returns for a String, a number, or a Symbol.
 (defun x2c.literal.string (value) (if (string? value)
-  (x2c_literal_string value)
+  `(expr ("String")
+     (segments (segexp (expr ("String") (literal ("String") ,value)))))
   (_x2c.fail "x2c.literal.string requires a String" value)))
 (defun x2c.literal.int (value) (if (number? value)
-  (x2c_literal_int value)
+  `(expr (int) (literal (int) ,(str value)))
   (_x2c.fail "x2c.literal.int requires a number" value)))
 (defun x2c.literal.symbol (value) (if (symbol? value)
-  (x2c_literal_symbol value)
+  `(expr ("Symbol") (literal ("Symbol") ,(str value) ,value))
   (_x2c.fail "x2c.literal.symbol requires a Symbol" value)))
-
-// The x2c spelling takes its arguments as one List; the Lisp one spreads them.
-(defun x2c.expr.call (callee . arguments) (x2c_expr_call callee arguments))

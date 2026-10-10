@@ -26,7 +26,7 @@ meta static List sequence_hits(List expanded, int expected) {
   match (expanded) case pack(*items): body = items.len() == expected;
   if (!direct || !pending || !body)
     x2c_diagnostic_fail("macro sequence case failed", %());
-  return x2c_literal_int(1);
+  return $!int{ 1 };
 }
 
 meta static List mixed_hits(List expanded) {
@@ -43,7 +43,7 @@ meta static List mixed_hits(List expanded) {
     body = List.compare(first, args.car()) == 0 && rest.len() == 2;
   if (!pending || !body)
     x2c_diagnostic_fail("mixed macro sequence case failed", %());
-  return x2c_literal_int(1);
+  return $!int{ 1 };
 }
 
 meta static List reordered_hits(List expanded, List same) {
@@ -64,7 +64,7 @@ meta static List reordered_hits(List expanded, List same) {
   match (expanded) case reverse(?equal, ?equal): unequal = 1;
   if (!pending || !body || !repeated || unequal)
     x2c_diagnostic_fail("reordered macro case failed", %());
-  return x2c_literal_int(1);
+  return $!int{ 1 };
 }
 
 meta static List fixed_hits(List expanded) {
@@ -75,7 +75,7 @@ meta static List fixed_hits(List expanded) {
   match (expanded) case fixed(): body = 1;
   if (!pending || !body)
     x2c_diagnostic_fail("binder-free macro case failed", %());
-  return x2c_literal_int(1);
+  return $!int{ 1 };
 }
 
 macro Expression $empty_hit(Expr $expanded) =>

@@ -513,7 +513,7 @@ static List Walk._return_value(Walk &w, List expression, List cleanup) {
   Type type = w.return_type;
   /* The declarator carries the type's pointer and array modifiers, so the
      saved value declares the way the function's result is spelled. */
-  List (base, mods) = type.declaration_parts();
+  List (base, mods) = type.parts();
   List declaration = %(declare $base
     (bindings (op = (bind $binding $mods) $expression)));
   List returned = source_return_content(%((expr $type (ident $binding))));

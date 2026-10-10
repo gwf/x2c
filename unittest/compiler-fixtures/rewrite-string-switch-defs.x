@@ -26,7 +26,7 @@ meta static Var _tswitch_rewrite(Var node, Array labels, Array others) {
   match (list) {
     case %(switch *): return list;
     case %(case ?label) if (_tswitch_literal(label)):
-      return %(case ${x2c_literal_int(_tswitch_index(label, labels))});
+      return %(case ${$!int{ ${_tswitch_index(label, labels)} }});
     case %(at ? (case ?label)) if (!_tswitch_literal(label)):
       others.push(list);
   }
@@ -37,8 +37,8 @@ meta static Var _tswitch_rewrite(Var node, Array labels, Array others) {
 
 /* `selected == label1 ? 1 : selected == label2 ? 2 : ... : 0`. */
 meta static List _tswitch_dispatch(Code selected, Array labels, int i) {
-  if (i == labels.len()) return x2c_literal_int(0);
-  List label = labels[i], index = x2c_literal_int(i + 1);
+  if (i == labels.len()) return $!int{ 0 };
+  List label = labels[i], index = $!int{ ${i + 1} };
   List rest = _tswitch_dispatch(selected, labels, i + 1);
   return $!( $selected == $label ? $index : $rest );
 }
@@ -79,7 +79,7 @@ meta Code string_switch(Code node) {
       x2c_diagnostic_fail_at(
         others[0], <macro>,
         "a string switch label must be a string literal", %());
-    Code value = x2c_expr_cast(%("String"), subject);
+    Code value = $!String{ (String)$subject };
     String selected = "switch_subject";
     Code dispatch = _tswitch_dispatch(x2c_ident(selected), labels, 0);
     return $!{ { String $selected = $value;

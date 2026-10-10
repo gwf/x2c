@@ -1764,7 +1764,7 @@ static List Compiler._quotation(
   List definition = c.capture_macro_value(d.publish());
   List empty = %(expr ("List") (nil));
   return c._quoted_cons(
-    x2c_literal_string("x2c.template"), c._quoted_cons(
+    $!String{ ${"x2c.template"} }, c._quoted_cons(
       definition, c._quoted_cons(values, empty, start), start), start);
 }
 
@@ -1951,7 +1951,7 @@ static List Compiler._typed_hole(Compiler c, List row, Token start) {
   if (!lifts && !expression && kind != <name>) return local;
   return c._runtime_call(
     "Macro_inserted",
-    %($local ${x2c_literal_int(lifts)} ${x2c_literal_int(expression)}), start);
+    %($local ${$!int{ $lifts }} ${$!int{ $expression }}), start);
 }
 
 static List Compiler._runtime_call(
@@ -5411,13 +5411,9 @@ static void Compiler._install_native_operations(Compiler c) {
   }
 }
 
-/* Cold declaration collection needs literals before the meta surface is
-   parsed, so the runtime's own compiled builders come first. Internal
-   primitives carry the `_x2c.` prefix. */
+/* The internal primitives, which carry the `_x2c.` prefix, come before the
+   meta surface is parsed. */
 static void _bind_primitives(Lisp lisp) {
-  $lisp.bind(lisp, "x2c_literal_string", x2c_literal_string);
-  $lisp.bind(lisp, "x2c_literal_int", x2c_literal_int);
-  $lisp.bind(lisp, "x2c_literal_symbol", x2c_literal_symbol);
   $lisp.bind(lisp, "_x2c.import-hook", _lisp_import_hook);
   Compiler.bind_sdk_primitives(lisp);
 }

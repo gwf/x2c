@@ -3,14 +3,12 @@
 $(defun responses ()
   '((200 "OK") (404 "Not Found") (503 "Unavailable")))
 
-static const int codes[] = $(x2c.expr.composite
-  (map (lambda (row) (x2c.literal.int (car row)))
-       (responses)));
+static const int codes[] = $(begin `(expr () (composite (commas
+  ,@(map (lambda (row) (x2c.literal.int (car row))) (responses))))));
 
 int main(void) {
-String labels[] = $(x2c.expr.composite
-  (map (lambda (row) (x2c.literal.string (cadr row)))
-       (responses)));
+String labels[] = $(begin `(expr () (composite (commas
+  ,@(map (lambda (row) (x2c.literal.string (cadr row))) (responses))))));
 
 // The generated program uses ordinary C arrays.
 for (size_t i = 0; i < sizeof(codes) / sizeof(*codes); i++)

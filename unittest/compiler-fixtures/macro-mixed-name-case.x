@@ -44,17 +44,17 @@ meta static List mixed_hit(List code) {
           List.compare(name, declared) != 0 ||
           List.compare(record, receiver) != 0)
         x2c_diagnostic_fail("mixed Name capture lost source subtree", %());
-      return x2c_literal_int(1);
+      return $!int{ 1 };
     }
   }
-  return x2c_literal_int(0);
+  return $!int{ 0 };
 }
 macro Expression $is_mixed(Stmt $code) => $mixed_hit($code);
 
 meta static List member_first_hit(List code) {
   Macro shape = $member_first;
-  match (code) case shape(?name, ?record): return x2c_literal_int(1);
-  return x2c_literal_int(0);
+  match (code) case shape(?name, ?record): return $!int{ 1 };
+  return $!int{ 0 };
 }
 macro Expression $is_member_first(Stmt $code) =>
   $member_first_hit($code);
@@ -63,9 +63,9 @@ meta static List pending_hit(Var name, List record) {
   Macro shape = $mixed;
   List pending = shape(name, record);
   match (pending) case shape(?same, ?receiver):
-    return x2c_literal_int(same == name &&
-                           List.compare(receiver, record) == 0);
-  return x2c_literal_int(0);
+    return $!int{ ${same == name &&
+                           List.compare(receiver, record) == 0} };
+  return $!int{ 0 };
 }
 macro Expression $is_pending(Name $name, Expr $record) =>
   $pending_hit($name, $record);
@@ -76,7 +76,7 @@ meta static List single_role_hits(List reference, List member) {
   match (reference) case read_name(?name): binding_hit = name is <list>;
   match (member) case read_member(?record, ?name):
     member_hit = name == "subtotal";
-  return x2c_literal_int(binding_hit + member_hit);
+  return $!int{ ${binding_hit + member_hit} };
 }
 macro Expression $single_roles(Expr $reference, Expr $member) =>
   $single_role_hits($reference, $member);

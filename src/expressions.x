@@ -991,7 +991,7 @@ int Compiler.needs_resolution(Compiler c, Var value) {
         else return 1;
       // A Type hole can supply declarators with the base they bind to.
       case %(decl ?(List base) *):
-        if (base.type().declaration_parts().cadr()) return 1;
+        if (base.type().parts().cadr()) return 1;
     }
   return 0;
 }
@@ -2003,11 +2003,11 @@ List x2c_func_call_arguments(List function, List storage, List arguments) {
   Compiler c = Compiler.expanding();
   Macro prepare = $func_argument, absent = $func_null_argument,
         boxed = $func_value, opaque = $func_opaque;
-  List count = x2c_literal_int(arguments.len());
+  List count = $!int{ ${arguments.len()} };
   Array prepared = [];
   int position = 0;
   foreach (List argument, arguments) {
-    List index = x2c_literal_int(position++);
+    List index = $!int{ ${position++} };
     Type type = argument.cadr();
     int forwarded = type.car() == <opt-ref>;
     List source = c.cache_literal_list(
@@ -2024,8 +2024,8 @@ List x2c_func_call_arguments(List function, List storage, List arguments) {
     int addressable = c._expression_is_addressable(argument);
     List address = forwarded ? argument
       : addressable ? %(expr ${type.reference()} (op & (parens $argument)))
-      : x2c_literal_int(0);
-    List carrier = forwarded || addressable ? source : x2c_literal_int(0);
+      : $!int{ 0 };
+    List carrier = forwarded || addressable ? source : $!int{ 0 };
     prepared.push(
       prepare(function, storage, count, index, address, carrier, value));
   }
@@ -2100,7 +2100,7 @@ static List _func_arg_part(List argument) {
     }
     case absent(?function, ?storage, ?count, ?index, ?alternative): {
       match (alternative) case boxed(?boxed_value): value = boxed_value;
-      address = x2c_literal_int(0);
+      address = $!int{ 0 };
       source = %(expr ("List") (ident reference));
     }
     default: return NULL;
@@ -2180,7 +2180,7 @@ static int _exact_iter_type(Var value) {
 }
 
 static List _iter_destination(void) {
-  List values = source_commas_content(%(${x2c_literal_int(0)}));
+  List values = source_commas_content(%(${$!int{ 0 }}));
   return %(expr (* struct "Iter")
     (op & (expr (struct "Iter")
       (cast (decl (struct "Iter") (bindings (bind () ())))
@@ -2514,7 +2514,7 @@ static List Compiler._protocol_operator_expression(
   List call = c.rebuild_expression(result, called(callee, arguments));
   if (!derived) return call;
   if (derived == <equal>) return %(expr (int) (op ! $call));
-  List zero = x2c_literal_int(0);
+  List zero = $!int{ 0 };
   return %(expr (int) (op $op $call $zero));
 }
 

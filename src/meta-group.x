@@ -621,8 +621,8 @@ static List Compiler._native_symbol(
   c.add_translation_dependency(module);
   Type pointer = type.reference();
   List target = %(expr (* void) (call $lookup
-    (args ${x2c_literal_string(module)}
-          ${x2c_literal_string(name)})));
+    (args ${$!String{ $module }}
+          ${$!String{ $name }})));
   return %(expr $pointer (cast $pointer $target));
 }
 
@@ -711,7 +711,7 @@ static void Compiler._native_entries(Compiler c, Array units, List start) {
     if (!_function_identity(item, identity, name) ||
         !c._public_native(item, name)) continue;
     match (item) case %(function ?type ?declarator (block *body)): {
-      List argument = x2c_literal_string(name);
+      List argument = $!String{ $name };
       List enter = c.rebuild_statement($!{ $start($argument); }).cadr();
       units[i] = %(function $type $declarator (block $enter @body));
     }
@@ -783,7 +783,7 @@ static List Compiler._targets(Compiler c, List named, List functions) {
   Array entries = [];
   if (c.meta_build)
     entries.push(
-      %(map-entry ${x2c_literal_symbol(<functions>)}
+      %(map-entry ${$!Symbol{ ${<functions>} }}
         ${c.cache_literal_list(functions)}));
   foreach (List row, named) {
     (String name, List binding, Type type) = row;
@@ -791,7 +791,7 @@ static List Compiler._targets(Compiler c, List named, List functions) {
     try function = c.convert_expression(
       %(expr $type (ident $binding)), %("Func"));
     catch %(malformed *): continue;
-    entries.push(%(map-entry ${x2c_literal_string(name)} $function));
+    entries.push(%(map-entry ${$!String{ $name }} $function));
   }
   Macro shape = $map_value;
   return c.rebuild_expression(%("Map"), shape(entries.list_free()));

@@ -522,9 +522,6 @@ List Type.parameters(Type type) {
 Type Type.return_type(Type type) =>
   type.canonicalize().apply().canonicalize();
 
-/** Answers `Type.parts`, declared in `lib/meta.x`. */
-List Type.parts(Type type) => type.declaration_parts();
-
 /** Answers `x2c.type.parts`, declared in `lib/meta.x`. */
 List x2c_type_parts(List value) => Type.parts(value);
 

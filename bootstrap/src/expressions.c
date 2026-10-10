@@ -2748,7 +2748,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2183 = cons(_2182, NULL);
   _2184 = cons(_266, _2183);
   _2185 = List_var(_2184);
-  _2186 = int_var(74501);
+  _2186 = int_var(74489);
   _2187 = cons(_2186, NULL);
   _2188 = cons(_271, _2187);
   _2189 = List_var(_2188);
@@ -2945,7 +2945,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2380 = cons(_2379, NULL);
   _2381 = cons(_258, _2380);
   _2382 = List_var(_2381);
-  _2383 = int_var(74863);
+  _2383 = int_var(74851);
   _2384 = cons(_2383, NULL);
   _2385 = cons(_271, _2384);
   _2386 = List_var(_2385);
@@ -3062,7 +3062,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2497 = cons(_2496, NULL);
   _2498 = cons(_258, _2497);
   _2499 = List_var(_2498);
-  _2500 = int_var(75275);
+  _2500 = int_var(75263);
   _2501 = cons(_2500, NULL);
   _2502 = cons(_271, _2501);
   _2503 = List_var(_2502);
@@ -3163,7 +3163,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_5(void){
   _2595 = cons(_2594, NULL);
   _2596 = cons(_258, _2595);
   _2597 = List_var(_2596);
-  _2598 = int_var(75359);
+  _2598 = int_var(75347);
   _2599 = cons(_2598, NULL);
   _2600 = cons(_271, _2599);
   _2601 = List_var(_2600);
@@ -3255,7 +3255,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_5(void){
   _2687 = cons(_2686, NULL);
   _2688 = cons(_258, _2687);
   _2689 = List_var(_2688);
-  _2690 = int_var(75566);
+  _2690 = int_var(75554);
   _2691 = cons(_2690, NULL);
   _2692 = cons(_271, _2691);
   _2693 = List_var(_2692);
@@ -3466,7 +3466,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_5(void){
   _2898 = cons(_2897, NULL);
   _2899 = cons(_258, _2898);
   _2900 = List_var(_2899);
-  _2901 = int_var(77695);
+  _2901 = int_var(77657);
   _2902 = cons(_2901, NULL);
   _2903 = cons(_271, _2902);
   _2904 = List_var(_2903);
@@ -4967,7 +4967,7 @@ else{
 }
 break; } } static MatchCaptureSite _x2c_match_site_30;  if (x2c_match_site_try_capture(& _x2c_match_site_30, _x2c_match_expr, List_var(_1139), &_x2c_match_capture)) {Var base = _x2c_match_values[0]; {
   Var _x2c_match_value_3 = base; {
-    List base = Var_list(_x2c_match_value_3);  if(Var_truth(List_cadr(Type_declaration_parts(List_type(base))))){
+    List base = Var_list(_x2c_match_value_3);  if(Var_truth(List_cadr(Type_parts(List_type(base))))){
       int _x2c_return_value_7 = 1; {
         x2c_cleanup_leave(& _x2c_defer_record_0);  return _x2c_return_value_7;
       }
@@ -5905,19 +5905,24 @@ static int _null_literal(List expr){
 }
 
 Compiler Compiler_expanding(void);
-List x2c_literal_int(int);
 Symbol Sym_var_tag_for_type(Sym, Type, Type *);
 List x2c_func_call_arguments(List function, List storage, List arguments){
-  if(! _init_guard_) _file_init_();  Compiler c = Compiler_expanding();  Macro prepare = _2222, absent = _2408, boxed = _2525, opaque = _2623;  List count = x2c_literal_int(List_len(arguments));  Array prepared = Array_new();  int position = 0; {
+  if(! _init_guard_) _file_init_();  Compiler c = Compiler_expanding();  Macro prepare = _2222, absent = _2408, boxed = _2525, opaque = _2623;  List count =({
+    int _x2c_hole_0 = List_len(arguments);  Macro_typed(_2283, int_var(_x2c_hole_0));
+  }
+  );  Array prepared = Array_new();  int position = 0; {
     List argument;  List _x2c_macro_object_16 = arguments;  List _x2c_macro_cursor_17 = _x2c_macro_object_16;  Var _x2c_macro_cursor_output_17;  while(List_try_next(_x2c_macro_object_16, &(_x2c_macro_cursor_17), &(_x2c_macro_cursor_output_17))){
       argument = Var_list(_x2c_macro_cursor_output_17); {
-        List index = x2c_literal_int(position ++);  Type type = Var_type(List_cadr(argument));  int forwarded = Var_equal(List_car(Type_list(type)), Symbol_var(33330008396));  List source = Compiler_cache_literal_list(c, Type_list(Sym_normalize_declared_type(c -> sym, forwarded ? List_cdr(type) : type)));  List value = Compiler_bind_syntax(c, List_var(Sym_var_tag_for_type(c -> sym, type, NULL) ? Macro_apply(boxed, cons(List_var(Compiler_convert_expression(c, argument, List_type(_766))), NULL)) : Macro_apply(opaque, cons(List_var(function), cons(List_var(index), cons(List_var(source), NULL))))), AST_EXPRESSION, NULL);  if(_null_literal(argument)){
+        List index =({
+          int _x2c_hole_1 = position ++;  Macro_typed(_2283, int_var(_x2c_hole_1));
+        }
+        );  Type type = Var_type(List_cadr(argument));  int forwarded = Var_equal(List_car(Type_list(type)), Symbol_var(33330008396));  List source = Compiler_cache_literal_list(c, Type_list(Sym_normalize_declared_type(c -> sym, forwarded ? List_cdr(type) : type)));  List value = Compiler_bind_syntax(c, List_var(Sym_var_tag_for_type(c -> sym, type, NULL) ? Macro_apply(boxed, cons(List_var(Compiler_convert_expression(c, argument, List_type(_766))), NULL)) : Macro_apply(opaque, cons(List_var(function), cons(List_var(index), cons(List_var(source), NULL))))), AST_EXPRESSION, NULL);  if(_null_literal(argument)){
           Array_push(prepared, List_var(Macro_apply(absent, cons(List_var(function), cons(List_var(storage), cons(List_var(count), cons(List_var(index), cons(List_var(value), NULL))))))));  continue;
         }
         int addressable = Compiler__expression_is_addressable(c, argument);  List address = forwarded ? argument : addressable ?({
           Var _x2c_literal_part_90 = List_var(Type_reference(type));  Var _x2c_literal_part_91 = List_var(cons(_43, cons(_49, cons(List_var(cons(_9, cons(List_var(argument), NULL))), NULL))));  cons(_0, cons(_x2c_literal_part_90, cons(_x2c_literal_part_91, NULL)));
         }
-        ) : x2c_literal_int(0);  List carrier = forwarded || addressable ? source : x2c_literal_int(0);  Array_push(prepared, List_var(Macro_apply(prepare, cons(List_var(function), cons(List_var(storage), cons(List_var(count), cons(List_var(index), cons(List_var(address), cons(List_var(carrier), cons(List_var(value), NULL))))))))));
+        ) : _2290;  List carrier = forwarded || addressable ? source : _2290;  Array_push(prepared, List_var(Macro_apply(prepare, cons(List_var(function), cons(List_var(storage), cons(List_var(count), cons(List_var(index), cons(List_var(address), cons(List_var(carrier), cons(List_var(value), NULL))))))))));
       }
 
     }
@@ -6033,7 +6038,7 @@ static MacroCaseSite _x2c_macro_site_11;  if (Macro_case_capture_at(& _x2c_macro
 
     }
   }
-address = List_var(x2c_literal_int(0));  source = List_var(_2952);
+address = List_var(_2290);  source = List_var(_2952);
 }
 break;
 }
@@ -6114,7 +6119,7 @@ static int _exact_iter_type(Var value){
 }
 
 static List _iter_destination(void){
-  List values = source_commas_content(cons(List_var(x2c_literal_int(0)), NULL));  return cons(_0, cons(_2985, cons(List_var(cons(_43, cons(_49, cons(List_var(cons(_0, cons(_2986, cons(List_var(cons(_1497, cons(_2996, cons(List_var(cons(_0, cons(_414, cons(List_var(cons(_811, cons(List_var(values), NULL))), NULL)))), NULL)))), NULL)))), NULL)))), NULL)));
+  List values = source_commas_content(cons(List_var(_2290), NULL));  return cons(_0, cons(_2985, cons(List_var(cons(_43, cons(_49, cons(List_var(cons(_0, cons(_2986, cons(List_var(cons(_1497, cons(_2996, cons(List_var(cons(_0, cons(_414, cons(List_var(cons(_811, cons(List_var(values), NULL))), NULL)))), NULL)))), NULL)))), NULL)))), NULL)));
 }
 
 Type Type_promote(Type);
@@ -6260,7 +6265,7 @@ static List Compiler__protocol_operator_expression(Compiler c, Symbol op, List l
   Macro called = _728;  List callee =({
     Var _x2c_literal_part_94 = List_var(signature);  Var _x2c_literal_part_95 = List_var(cons(_37, cons(List_var(binding), NULL)));  cons(_0, cons(_x2c_literal_part_94, cons(_x2c_literal_part_95, NULL)));
   }
-  );  List call = Compiler_rebuild_expression(c, result, Macro_apply(called, cons(List_var(callee), cons(List_var(arguments), NULL))));  if(! derived) return call;  if(derived == 11642968) return cons(_0, cons(_2284, cons(List_var(cons(_43, cons(_415, cons(List_var(call), NULL)))), NULL)));  List zero = x2c_literal_int(0);  return cons(_0, cons(_2284, cons(List_var(cons(_43, cons(Symbol_var(op), cons(List_var(call), cons(List_var(zero), NULL))))), NULL)));
+  );  List call = Compiler_rebuild_expression(c, result, Macro_apply(called, cons(List_var(callee), cons(List_var(arguments), NULL))));  if(! derived) return call;  if(derived == 11642968) return cons(_0, cons(_2284, cons(List_var(cons(_43, cons(_415, cons(List_var(call), NULL)))), NULL)));  List zero = _2290;  return cons(_0, cons(_2284, cons(List_var(cons(_43, cons(Symbol_var(op), cons(List_var(call), cons(List_var(zero), NULL))))), NULL)));
 }
 
 static List Compiler__resolve_protocol_operator(Compiler c, Symbol op, List * lhs, List * rhs, Symbol * derived){

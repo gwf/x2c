@@ -275,19 +275,19 @@ static Type Type__modify(Type type, List mods){
   ));
 }
 
-List Type_declaration_parts(Type type){
+List Type_parts(Type type){
   if(! _init_guard_) _file_init_();  return type_declaration_parts(Type_list(type));
 }
 
 List Type_declaration_ast(Type type, List binding){
-  if(! _init_guard_) _file_init_();  List base, mods;  List _x2c_destructure_0 = Type_declaration_parts(type);  base = Var_list(List_getindex(_x2c_destructure_0, 0));  mods = Var_list(List_getindex(_x2c_destructure_0, 1));  return({
+  if(! _init_guard_) _file_init_();  List base, mods;  List _x2c_destructure_0 = Type_parts(type);  base = Var_list(List_getindex(_x2c_destructure_0, 0));  mods = Var_list(List_getindex(_x2c_destructure_0, 1));  return({
     Var _x2c_literal_part_4 = List_var(base);  Var _x2c_literal_part_5 = List_var(cons(_36, cons(List_var(cons(_8, cons(List_var(binding), cons(List_var(mods), NULL)))), NULL)));  cons(_20, cons(_x2c_literal_part_4, cons(_x2c_literal_part_5, NULL)));
   }
   );
 }
 
 List Type_parameter_ast(Type type, List binding){
-  if(! _init_guard_) _file_init_();  List base, mods;  List _x2c_destructure_1 = Type_declaration_parts(type);  base = Var_list(List_getindex(_x2c_destructure_1, 0));  mods = Var_list(List_getindex(_x2c_destructure_1, 1));  return({
+  if(! _init_guard_) _file_init_();  List base, mods;  List _x2c_destructure_1 = Type_parts(type);  base = Var_list(List_getindex(_x2c_destructure_1, 0));  mods = Var_list(List_getindex(_x2c_destructure_1, 1));  return({
     Var _x2c_literal_part_6 = List_var(base);  Var _x2c_literal_part_7 = List_var(cons(_8, cons(List_var(binding), cons(List_var(mods), NULL))));  cons(_47, cons(_x2c_literal_part_6, cons(_x2c_literal_part_7, NULL)));
   }
   );

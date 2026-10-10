@@ -12,7 +12,7 @@ meta List describe(TypeInfo type) {
                  ? %"(methods len ${methods.contains("len")})"
                  : part.repr());
   }
-  return x2c_literal_string(String.join("\n  ", parts));
+  return $!String{ ${String.join("\n  ", parts)} };
 }
 
 macro Expression $type.describe(Expr $value) => $describe($value);

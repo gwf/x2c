@@ -280,7 +280,7 @@ static void CaptureBuild._field(CaptureBuild &b, Array fields, List capture) {
 
       List temporary = c.sym.introduce(c.fresh_name("lambda_capture_value"));
       List value = c.convert_expression(expression, storage_type);
-      List (base, mods) = storage_type.declaration_parts();
+      List (base, mods) = storage_type.parts();
       Macro local = $func_local;
       List row = %(op = (bind $temporary $mods) $value);
       b.locals.push(c.rebuild_statement(local(base, row)).cadr());
@@ -969,7 +969,7 @@ static void Compiler._func_pointer_context(
   context_name = c.fresh_name("func_pointer_context");
   List context_binding = c.sym.introduce(context_name);
   field_binding = c.sym.introduce(c.fresh_name("func_pointer"));
-  List (field_base, field_mods) = pointer_type.declaration_parts();
+  List (field_base, field_mods) = pointer_type.parts();
   c.add_early(
     %(
     typedef
@@ -1189,7 +1189,7 @@ static List Compiler._func_argument_locals(
     names = names.cdr();
     Type storage_type = NULL;
     List value = readers.read(type, index++, storage_type);
-    List (base, mods) = storage_type.declaration_parts();
+    List (base, mods) = storage_type.parts();
     List row = %(op = (bind $binding $mods) $value);
     locals.push(c.rebuild_statement(local(base, row)).cadr());
   }
@@ -1255,7 +1255,7 @@ static List FuncReaders._call(
   List details) {
   List fn = $!Func{ ${r.fn} };
   List argv = $!(const FuncArg *){ ${r.argv} };
-  List arguments = %($fn $argv ${x2c_literal_int(index)} @details);
+  List arguments = %($fn $argv ${$!int{ $index }} @details);
   return r.c._func_call(result_type, target, arguments);
 }
 
@@ -1280,7 +1280,7 @@ static List Compiler._func_record_call(
   List result_helper = c._adapter_helper(
     "x2c_func_record_result", result_type);
   List result = c.sym.introduce(c.fresh_name("func_record"));
-  List (base, mods) = return_type.declaration_parts();
+  List (base, mods) = return_type.parts();
   List value = _func_bound(return_type, result);
   Macro address_shape = $func_address, size_shape = $func_size;
   List address = c.rebuild_expression(

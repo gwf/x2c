@@ -1,28 +1,23 @@
-/*  meta-comptime-only-call.x -- a syntax builder can now run at runtime
+/*  meta-comptime-only-call.x -- a syntax builder can run at runtime
 
-    Literal construction has a meta body rather than a compiler-only
-    declaration. Its callers therefore have runtime definitions too.
+    A typed quotation builds its literal where it is written, so a meta
+    function that returns one has a runtime definition, as do its callers.
 */
 
 #include "x2c.x"
 #include "meta.x"
 
-meta static List mc_name(String text) => x2c_literal_string(text);
+meta static List mc_name(String text) => $!String{ $text };
 
 meta static List mc_wrap(String text) => mc_name(text);
 
-macro Expression $builder.aliases() =>$(x2c.literal.int (if (and
-    (equal? (x2c_literal_string "hi")
-      (x2c.literal.string "hi"))
-    (equal? (x2c_literal_int 17)
-      (x2c.literal.int 17))
-    (equal? (x2c_literal_symbol '<builders>)
-      (x2c.literal.symbol '<builders>))
-    (eq? x2c_expr_ident x2c.expr.ident)
-    (eq? x2c_expr_index x2c.expr.index)
-    (eq? x2c_expr_field x2c.expr.field)
-    (eq? x2c_expr_composite x2c.expr.composite)
-    (eq? x2c_expr_cast x2c.expr.cast)
+macro Expression $builder.aliases() => $(x2c.literal.int (if (and
+    (equal? (x2c.literal.string "hi")
+      '(expr ("String") (segments
+        (segexp (expr ("String") (literal ("String") "hi"))))))
+    (equal? (x2c.literal.int 17) '(expr (int) (literal (int) "17")))
+    (equal? (x2c.literal.symbol '<builders>)
+      '(expr ("Symbol") (literal ("Symbol") "builders" <builders>)))
     (eq? Code.body Code.body)
     (eq? Code.arguments Code.arguments)) 1 0));
 

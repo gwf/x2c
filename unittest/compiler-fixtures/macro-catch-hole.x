@@ -15,10 +15,10 @@ meta static List shape_of(List code) {
   Macro caught = $caught, tried = $tried;
   match (code) {
     case caught(?body, ?finalizer, *arms):
-      return x2c_literal_int(10 + arms.len());
-    case tried(?body, ?finalizer): return x2c_literal_int(1);
+      return $!int{ ${10 + arms.len()} };
+    case tried(?body, ?finalizer): return $!int{ 1 };
   }
-  return x2c_literal_int(0);
+  return $!int{ 0 };
 }
 macro Expression $shape(Stmt $code) => $shape_of($code);
 

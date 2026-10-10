@@ -6,7 +6,7 @@
    stays data, and a pattern takes a code-shaped List as a pattern. */
 macro Expression $sum(Expr $a, Expr $b) => $a + $b;
 
-meta static List literal(void) => x2c_literal_int(3);
+meta static List literal(void) => $!int{ 3 };
 meta static List quoted(int n) => $!( ${n} + 2 );
 meta static List applied(void) {
   Macro s = $sum;

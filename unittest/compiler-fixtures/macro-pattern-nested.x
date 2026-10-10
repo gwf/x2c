@@ -10,12 +10,12 @@ macro Expression $add(Expr $a, Expr $b) => $a + $b;
 
 meta static List classify(List e) {
   match (e) {
-    case $add(?a, $neg(?b)): return x2c_literal_int(1);
+    case $add(?a, $neg(?b)): return $!int{ 1 };
     case %(expr ?type ${$add(?a, ?b)}):
-      return x2c_literal_int(type.repr() == "(int)" ? 2 : 3);
-    case %(!or ${$neg(%(expr ? (literal *)))}): return x2c_literal_int(4);
+      return $!int{ ${type.repr() == "(int)" ? 2 : 3} };
+    case %(!or ${$neg(%(expr ? (literal *)))}): return $!int{ 4 };
   }
-  return x2c_literal_int(0);
+  return $!int{ 0 };
 }
 macro Expression $kind(Expr $e) => $classify($e);
 

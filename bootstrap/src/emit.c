@@ -2198,9 +2198,9 @@ static List Emitter__semantic_type(Emitter * e, Type type){
   List declaration = Type_declaration_ast(type, NULL);  return Emitter__declare(&((* e)), declaration);
 }
 
-List Type_declaration_parts(Type);
+List Type_parts(Type);
 static List Emitter__semantic_name(Emitter * e, Type type, String name){
-  List base, mods;  List _x2c_destructure_12 = Type_declaration_parts(type);  base = Var_list(List_getindex(_x2c_destructure_12, 0));  mods = Var_list(List_getindex(_x2c_destructure_12, 1));  List declarator = Emitter__declarator(&((* e)), cons(String_var(name), NULL), mods);  return({
+  List base, mods;  List _x2c_destructure_12 = Type_parts(type);  base = Var_list(List_getindex(_x2c_destructure_12, 0));  mods = Var_list(List_getindex(_x2c_destructure_12, 1));  List declarator = Emitter__declarator(&((* e)), cons(String_var(name), NULL), mods);  return({
     Var _x2c_literal_part_107 = List_var(Emitter__emit(&((* e)), base));  cons(_x2c_literal_part_107, List_append(declarator, NULL));
   }
   );

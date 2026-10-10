@@ -880,7 +880,7 @@ static List Compiler._destructure_value(Compiler c, List ast) {
 }
 
 static List _value_declaration(Type type, List binding, List value) {
-  (List base, List mods) = type.declaration_parts();
+  (List base, List mods) = type.parts();
   return value
     ? %(declare $base (bindings (op = (bind $binding $mods) $value)))
     : %(declare $base (bindings (bind $binding $mods)));
@@ -1088,7 +1088,7 @@ static List Compiler._change(
   Compiler c, List ast, Symbol op, List arg, Type type, int postfix) {
   if (!c.sym.is_var_type(type)) {
     Symbol binary = op == <++> ? <+> : <->;
-    List one = x2c_literal_int(1);
+    List one = $!int{ 1 };
     List updated = postfix
       ? c._protocol_update(type, binary, arg, NULL, op)
       : c._protocol_update(type, binary, arg, one, binary);
@@ -1190,7 +1190,7 @@ static List Compiler._comparison(
     case <!==>: return $!int{ !Var_same($lhs, $rhs) };
   }
   List call = %(call "Var_compare" (args $lhs $rhs));
-  List zero = x2c_literal_int(0);
+  List zero = $!int{ 0 };
   return %(expr (int) (op $op $call $zero));
 }
 

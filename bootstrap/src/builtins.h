@@ -11,8 +11,6 @@
 #include "lisp.h"
 #include "macros.h"
 #include "transform.h"
-List x2c_param_make(List type, Var name);
-
 Map builtin_targets(void);
 
 

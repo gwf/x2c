@@ -71,16 +71,16 @@ macro Expression $inc_operand(Expr $code) => $increment_operand($code);
 static int decrement(int value) { return value - 1; }
 meta static List increment_hit(List code) {
   match (code) {
-    case $inc(?value): return x2c_literal_int(1);
+    case $inc(?value): return $!int{ 1 };
   }
-  return x2c_literal_int(0);
+  return $!int{ 0 };
 }
 macro Expression $is_inc(Expr $code) => $increment_hit($code);
 macro Expression $inc_again(Expr $code) => $increment($code);
 macro Expression $global_inc(Expr $value) using bump => bump($value);
 meta static List global_increment_hit(List code) {
-  match (code) case $global_inc(?value): return x2c_literal_int(1);
-  return x2c_literal_int(0);
+  match (code) case $global_inc(?value): return $!int{ 1 };
+  return $!int{ 0 };
 }
 macro Expression $is_global_inc(Expr $code) => $global_increment_hit($code);
 

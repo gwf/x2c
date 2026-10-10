@@ -7,7 +7,7 @@
 typedef struct Point { int x, y, z; } Point;
 
 meta static List field_count(TypeInfo type) =>
-  x2c_literal_int(((List) type.assoc(<fields>)).len());
+  $!int{ ${((List) type.assoc(<fields>)).len()} };
 
 macro Expression $probe.count(Expr $value) => $field_count($value);
 

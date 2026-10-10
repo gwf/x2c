@@ -29,7 +29,7 @@ meta static List summary(List code) {
     case outer(?head, *items):
       foreach (List item, items) match (item) { case add(?x): n++; }
   }
-  return x2c_literal_int(n);
+  return $!int{ $n };
 }
 macro Stmt $built(Expr $h, Expr $a, Expr $b) { @build($h, $a, $b) }
 macro Expression $count_adds(Stmt $s) => $summary($s);

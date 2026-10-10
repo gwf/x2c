@@ -16,7 +16,7 @@ macro Expression $trace(Expr $value) => $trace_after($value);
 meta static List function_name(void) {
   if (x2c_enclosing(<declarator>))
     x2c_diagnostic_fail("an argument has no declarator", %());
-  return x2c_literal_string(Code.name(x2c_enclosing(<function>)));
+  return $!String{ ${Code.name(x2c_enclosing(<function>))} };
 }
 macro Expression $here() => $function_name();
 
@@ -24,7 +24,7 @@ meta static List support_counter(String key) {
   List name = x2c_ident(key);
   x2c_place(%(unit-support $key), $!Unit{ static int $name = 1; });
   x2c_place(%(unit-init), $!{ $name += 10; });
-  return x2c_expr_ident(name);
+  return %(expr () (ident $name));
 }
 macro Expression $counter() => $support_counter("counter");
 

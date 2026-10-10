@@ -163,16 +163,15 @@ static Type Type._modify(Type type, List mods) => %( @mods @type );
    Synthesized compiler declarations go through here so pointer, array,
    qualifier, and function-pointer precedence matches parsed source. */
 
-/** Returns `(base modifiers)` for reconstructing a declaration of `type`,
-    through `type_declaration_parts` in `lib/meta.x`, which a project's
-    helper shares. */
-List Type.declaration_parts(Type type) => type_declaration_parts(type);
+/** Answers `Type.parts`, declared in `lib/meta.x`, through
+    `type_declaration_parts`, which a project's helper shares. */
+List Type.parts(Type type) => type_declaration_parts(type);
 
 /** Returns a complete `(declare ...)` AST for `type` and `binding`.
     A `NULL` binding produces an abstract declaration.
 */
 List Type.declaration_ast(Type type, List binding) {
-  List (base, mods) = type.declaration_parts();
+  List (base, mods) = type.parts();
   return %(declare $base (bindings (bind $binding $mods)));
 }
 
@@ -180,7 +179,7 @@ List Type.declaration_ast(Type type, List binding) {
     A `NULL` binding produces an unnamed parameter.
 */
 List Type.parameter_ast(Type type, List binding) {
-  List (base, mods) = type.declaration_parts();
+  List (base, mods) = type.parts();
   return %(param $base (bind $binding $mods));
 }
 

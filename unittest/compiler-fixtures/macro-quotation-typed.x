@@ -48,7 +48,7 @@ meta static List doubled(List value) {
   return twice;
 }
 meta static List type_of(List value) =>
-  x2c_literal_string($!double{ $value * 2 }.cadr().repr());
+  $!String{ ${$!double{ $value * 2 }.cadr().repr()} };
 meta static List plus_total(List value) {
   List total = x2c_ident("total");
   return $!int{ $total + $value };

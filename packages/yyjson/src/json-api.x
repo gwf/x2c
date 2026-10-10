@@ -12,6 +12,6 @@
    is a plain source identifier, which binds to the native declaration. */
 meta List _json_call(String prefix, String name, List argument) {
   String spelling = %"$prefix$name";
-  List callee = x2c_expr_ident(%($spelling));
+  List callee = %(expr () (ident ($spelling)));
   return $!( $callee($argument) );
 }

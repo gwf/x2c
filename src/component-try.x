@@ -54,9 +54,9 @@ meta List try_catch_site(List frame, List clause) {
   match (clause)
     case %(?handle ?(String state) ?(List arms) *patterns): {
       int count = arms.len(), filtered = patterns.len();
+      String fallback = filtered < count ? filtered.str() : "-1";
       return site(
-        frame, handle, x2c_literal_int(count),
-        x2c_literal_int(filtered < count ? filtered : -1),
+        frame, handle, count, %(expr (int) (literal (int) $fallback)),
         %(expr (int) $state), patterns);
     }
   return NULL;

@@ -36,8 +36,7 @@ macro Unit $check_included(Type $type) {
                               (list (repr actual)))))
 }
 
-macro Expression $first(Expr $receiver) =>
-  $(x2c.expr.field $receiver "first");
+macro Expression $first(Expr $receiver) => $receiver.first;
 
 typedef struct ReflectedRecord {
   int first, second;

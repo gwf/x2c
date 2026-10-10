@@ -2,7 +2,7 @@
 #include "meta.x"
 
 meta static List _call(String name) =>
-  x2c_expr_call(x2c_expr_ident(%(%"$name")), NULL);
+  %(expr () (call (expr () (ident (%"$name"))) (args)));
 
 macro Expression $call() => $_call("abs");
 

@@ -115,7 +115,7 @@ static macro Unit $native.update(Type $type, Name $function, Literal $row) {
       $(_update_box $row (x2c.ident "lhs")),
       $(_update_tag $row), $(x2c.ident "op"), $(x2c.ident "rhs"));
     if ($converted is void) return $(_update_zero $row);
-    $type value = $(_update_decode $row (x2c.expr.ident $converted));
+    $type value = $(_update_decode $row `(expr () (ident ,$converted)));
     ($(x2c.ident "lhs"))[0] = value;
     return value;
   }

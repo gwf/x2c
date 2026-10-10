@@ -2023,7 +2023,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_3(void){
   _1576 = cons(_1575, NULL);
   _1577 = cons(_707, _1576);
   _1578 = List_var(_1577);
-  _1579 = int_var(99268);
+  _1579 = int_var(99261);
   _1580 = cons(_1579, NULL);
   _1581 = cons(_720, _1580);
   _1582 = List_var(_1581);
@@ -4432,9 +4432,8 @@ static List Compiler__builtin_registration(Compiler c, List methods, String name
   List symbol = cons(_225, cons(_235, cons(List_var(cons(_236, cons(_235, cons(String_var(name), cons(Symbol_var(tag), NULL))))), NULL)));  List table = Macro_typed(_396, List_var(methods));  return Compiler__helper_call(c, List_type(_819), _1555, cons(List_var(symbol), cons(List_var(table), NULL)));
 }
 
-List x2c_literal_symbol(Symbol);
 static List Compiler__tagged_registration(Compiler c, List methods, String name, Symbol tag){
-  List symbol = x2c_literal_symbol(tag);  List table = Macro_typed(_396, List_var(methods));  return Compiler__helper_call(c, List_type(_915), _1556, ({
+  List symbol = Macro_typed(_234, Symbol_var(tag));  List table = Macro_typed(_396, List_var(methods));  return Compiler__helper_call(c, List_type(_915), _1556, ({
     Var _x2c_literal_part_139 = List_var(symbol);  Var _x2c_literal_part_140 = List_var(_string_literal(name));  cons(_x2c_literal_part_139, cons(_x2c_literal_part_140, cons(List_var(table), NULL)));
   }
   ));

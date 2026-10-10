@@ -16,7 +16,7 @@ macro Expression $entered(Expr $value, Expr $label) =>
   $note_entry($value, $label);
 
 meta static List function_name(void) =>
-  x2c_literal_string(Code.name(x2c_enclosing(<function>)));
+  $!String{ ${Code.name(x2c_enclosing(<function>))} };
 macro Expression $here() => $function_name();
 
 static int sum(int count) {
