@@ -222,6 +222,8 @@ static void atom_bare_spelling_owns_writer_contract(void) {
   EXPECT_TRUE(Atom.bare_spelling("*"));
   EXPECT_TRUE(Atom.bare_spelling("set!"));
   EXPECT_TRUE(Atom.bare_spelling("+"));
+  EXPECT_TRUE(Atom.bare_spelling("/"));
+  EXPECT_TRUE(Atom.bare_spelling("/="));
   EXPECT_FALSE(Atom.bare_spelling(NULL));
   EXPECT_FALSE(Atom.bare_spelling(""));
   EXPECT_FALSE(Atom.bare_spelling("1x"));
@@ -233,6 +235,8 @@ static void atom_bare_spelling_owns_writer_contract(void) {
   EXPECT_FALSE(Atom.bare_spelling("a b"));
   EXPECT_FALSE(Atom.bare_spelling("a\"b"));
   EXPECT_FALSE(Atom.bare_spelling("a//b"));
+  EXPECT_FALSE(Atom.bare_spelling("//b"));
+  EXPECT_FALSE(Atom.bare_spelling("/*b"));
 }
 
 #include "test-macros.x"

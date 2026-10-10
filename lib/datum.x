@@ -226,10 +226,7 @@ static int _plain_integer(char *s, unsigned &at, Var &out) {
   return 1;
 }
 
-/* A comment opener starts no atom for the tokenizer, though
-   `Atom.bare_spelling` accepts one there. */
 static int _plain_atom(char *s, unsigned &at, Var &out) {
-  if (s[at] == '/' && (s[at + 1] == '/' || s[at + 1] == '*')) return 0;
   int length = 0;
   while (!_token_end(s[at + length])) length++;
   String spelling = String.new_len(s + at, length);

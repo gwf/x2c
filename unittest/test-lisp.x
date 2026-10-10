@@ -986,6 +986,20 @@ static void lisp_plain_datum_read_matches_reader(void) {
   lisp.destroy();
 }
 
+/* A written Atom reads back as itself, including a spelling that opens a
+   reader comment. */
+static void lisp_datum_atom_round_trips(void) {
+  foreach (String spelling, %("/" "/=" "//b" "/*b" "//" "/*")) {
+    Buffer out = $auto(Buffer.new(0));
+    EXPECT_TRUE(datum_write(out, Atom.intern(spelling), 1));
+    unsigned cursor = 0;
+    Var back = void;
+    EXPECT_TRUE(datum_read(out.str(), cursor, back));
+    EXPECT_TRUE(back.is_atom());
+    EXPECT_STR_EQ(back.str(), spelling);
+  }
+}
+
 
 static void lisp_pattern_matching_operations(void) {
   Lisp lisp = Lisp.new();
@@ -1960,6 +1974,7 @@ void lisp_suite(void) {
   $test.run(lisp_numeric_comparison_reads_the_value);
   $test.run(lisp_read_fences_nesting_depth);
   $test.run(lisp_plain_datum_read_matches_reader);
+  $test.run(lisp_datum_atom_round_trips);
   $test.run(lisp_pattern_matching_operations);
   $test.run(lisp_match_case_dispatch);
   $test.run(lisp_bare_session_has_only_primitives);
