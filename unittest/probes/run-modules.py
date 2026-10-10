@@ -10,6 +10,7 @@ import hashlib
 import json
 from pathlib import Path
 import re
+import shutil
 import subprocess
 import tempfile
 
@@ -132,7 +133,7 @@ def extended_cases():
     }, {}, None
     yield "opaque_public_forward", {
         "box.x": 'typedef struct Opaque *Opaque;\nmodule {"box/value.x"}\n',
-        "box/value.x": 'static typedef struct Opaque {int value;} *Opaque;\nstatic struct Opaque storage = {42};\nOpaque acquire(void) => &storage;\nint opaque_read(Opaque object) => object.value;\n',
+        "box/value.x": 'module typedef struct Opaque {int value;} *Opaque;\nmodule struct Opaque storage = {42};\nOpaque acquire(void) => &storage;\nint opaque_read(Opaque object) => object.value;\n',
         "main.x": consumer("box.x", "opaque_read(acquire()) == 42"),
     }, {}, None
     yield "module_meta_function", {
@@ -163,6 +164,82 @@ def extended_cases():
         "interface_inputs_after": ["box.x", "box/second.x", "main.x"],
         "mutations": [{"box.x": 'module {"box/second.x"}\n',
                        "main.x": consumer("box.x", "answer() == 43")}]}, None
+
+
+def final_cases():
+    hidden = {
+        "box.x": 'module {"box/value.x"}\n',
+        "box/value.x": 'module typedef struct Hidden {int value;} Hidden;\nint answer(void) => 42;\n',
+    }
+    yield "hidden_module_type_rejected", {
+        **hidden,
+        "main.x": '#include "box.x"\nint main(void) { Hidden value = {42}; return value.value == 42 ? 0 : 1; }\n',
+    }, {}, r"Hidden"
+    yield "public_signature_private_type_rejected", {
+        **hidden,
+        "box/value.x": 'module typedef struct Hidden {int value;} Hidden;\nHidden acquire(void) { Hidden value = {42}; return value; }\n',
+        "main.x": '#include "box.x"\nint main(void) => 0;\n',
+    }, {}, r"Hidden|private|public"
+    yield "module_static_conflict", {
+        "box.x": 'module {}\nmodule static int helper(void) => 42;\n',
+        "main.x": '#include "box.x"\nint main(void) => 0;\n',
+    }, {"rejection_phase": "parse"}, r"module.*static|static.*module"
+    yield "prototype_visibility_conflict", {
+        "box.x": 'module {}\nint helper(void);\nmodule int helper(void) => 42;\n',
+        "main.x": '#include "box.x"\nint main(void) => 0;\n',
+    }, {}, r"helper|visibility|private|public"
+    yield "duplicate_membership_rejected", {
+        "box.x": 'module {"box/value.x", "box/value.x"}\n',
+        "box/value.x": 'int answer(void) => 42;\n',
+        "main.x": consumer("box.x", "answer() == 42"),
+    }, {"rejection_phase": "parse"}, r"duplicate|more than once"
+    yield "missing_member_rejected", {
+        "box.x": 'module {"box/missing.x"}\n',
+        "main.x": '#include "box.x"\nint main(void) => 0;\n',
+    }, {"rejection_phase": "parse"}, r"missing|readable|not found"
+    yield "escaping_member_rejected", {
+        "box.x": 'module {"outside.x"}\n',
+        "outside.x": 'int answer(void) => 42;\n',
+        "main.x": consumer("box.x", "answer() == 42"),
+    }, {"rejection_phase": "parse"}, r"escape|companion"
+    yield "ancestor_child_enrollment_rejected", {
+        "box.x": 'module {"box/child.x", "box/child/value.x"}\n',
+        "box/child.x": 'module {"child/value.x"}\n',
+        "box/child/value.x": 'module int helper(void) => 42;\nint answer(void) => helper();\n',
+        "main.x": consumer("box.x", "answer() == 42"),
+    }, {"rejection_phase": "parse"}, r"both|ancestor|belongs|enroll"
+    yield "unlisted_ordinary_file_rejected", {
+        **FLAT,
+        "box/unlisted.x": '#include "../box.x"\nint leak(void) => increment(41);\n',
+        "main.x": consumer("box.x", "answer() == 42"),
+    }, {}, r"increment|private"
+    yield "native_header_nearest_and_invalidation", {
+        "box.x": 'module {"box/child.x"}\n',
+        "box/child.x": 'module {"child/deep/value.x"}\n',
+        "settings.h": '#define MODULE_HEADER_VALUE 7\n',
+        "box/settings.h": '#define MODULE_HEADER_VALUE 42\n',
+        "box/child/deep/value.x": '#include "settings.h"\nint answer(void) => MODULE_HEADER_VALUE;\n',
+        "main.x": consumer("box.x", "answer() == 42"),
+    }, {"inputs": ["box.x", "main.x"], "warm_builds": 1,
+        "mutations": [{"box/settings.h": '#define MODULE_HEADER_VALUE 43\n',
+                       "main.x": consumer("box.x", "answer() == 43")}]}, None
+    yield "runtime_initialized_shared_map", {
+        "box.x": 'module {"box/state.x", "box/work.x"}\n',
+        "box/state.x": 'module Map shared = {answer: 41};\nmodule int read_state(void) => shared[<answer>];\n',
+        "box/work.x": 'int answer(void) { shared[<answer>] = 42; return read_state(); }\n',
+        "main.x": consumer("box.x", "answer() == 42"),
+    }, {}, None
+    yield "nested_package_public_prefixes", {
+        "packages/demo/src/demo.x": 'module {"demo/child.x"}\nint root_answer(void) => child_answer();\n',
+        "packages/demo/src/demo/child.x": 'module {"child/value.x"}\n',
+        "packages/demo/src/demo/child/value.x": 'module int helper(void) => 42;\nint child_answer(void) => helper();\n',
+        "main.x": 'import "demo" as d with child_answer as local_child;\nint main(void) => d.root_answer() == 42 && local_child() == 42 ? 0 : 1;\n',
+    }, {"package_dirs": ["packages"], "package_driver": True}, None
+    yield "static_opaque_forward_regression", {
+        "box.x": 'typedef struct Opaque *Opaque;\nmodule {"box/value.x"}\n',
+        "box/value.x": 'static typedef struct Opaque {int value;} *Opaque;\nstatic struct Opaque storage = {42};\nOpaque acquire(void) => &storage;\nint opaque_read(Opaque object) => object.value;\n',
+        "main.x": consumer("box.x", "opaque_read(acquire()) == 42"),
+    }, {}, None
 
 
 def interface_replay(compiler, directory, inputs, fresh):
@@ -204,13 +281,29 @@ def run_case(compiler, base, name, files, options, rejection):
             (package / "Makefile").write_text(
                 f"PACKAGE := {package.name}\n"
                 f"include {repository / 'packages/package.mk'}\n")
-            preparation = ["make", "-C", str(package), "build",
-                           f"X2C={compiler}", f"ROOT={compiler.parents[2]}"]
+            if options.get("package_driver"):
+                builds = package / "builds"
+                builds.mkdir()
+                preparation = [str(compiler), "build", "--kind", "static-library",
+                               "--package-dir", str(directory / relative),
+                               "--output", str(builds / f"lib{package.name}.a"),
+                               "--build-dir", str(builds / "cc"),
+                               str(package / "src" / f"{package.name}.x")]
+            else:
+                preparation = ["make", "-C", str(package), "build",
+                               f"X2C={compiler}", f"ROOT={compiler.parents[2]}"]
             prepared = subprocess.run(preparation, text=True,
                                       stdout=subprocess.PIPE,
                                       stderr=subprocess.STDOUT)
             log = directory / "package-build.log"
             log.write_text(prepared.stdout)
+            if not prepared.returncode and options.get("package_driver"):
+                header = next((builds / "cc" / "gen").glob(
+                    f"*/{package.name}.h"))
+                shutil.copytree(header.parent, builds, dirs_exist_ok=True)
+                for support in (builds / "cc" / "gen").rglob("*.h"):
+                    shutil.copy2(support, builds / support.name)
+                (builds / f"{package.name}.native.rsp").write_text("")
             if prepared.returncode:
                 return {"name": name, "command": preparation,
                         "build_status": prepared.returncode, "passed": False,
@@ -294,7 +387,7 @@ def main():
             Path(tempfile.mkdtemp(prefix="x2c-module-probes-", dir="/tmp")))
     base.mkdir(parents=True, exist_ok=True)
     compiler_start = hashlib.sha256(compiler.read_bytes()).hexdigest()
-    selected = list(cases()) + list(extended_cases())
+    selected = list(cases()) + list(extended_cases()) + list(final_cases())
     names = {case[0] for case in selected}
     unknown = set(args.case) - names
     if unknown:
