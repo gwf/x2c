@@ -16,7 +16,6 @@
 #include "x2c.x"
 #include "common.x"
 #include "list-selectors.x"
-#include "meta.x"
 #include "native-scalar-types.x"
 #include "rewrite.x"
 #include "system-macros.x"
@@ -81,71 +80,6 @@ static List _selector_units(List middles, Macro car, Macro cdr) {
 static List _selector_definitions(Macro car, Macro cdr) =>
   _selector_units(_selector_middles(), car, cdr);
 
-/* --- lib/meta.x ---------------------------------------------------------- */
-
-/** Returns the expression `receiver.name`. */
-List x2c_expr_field(List receiver, String name) {
-  List checked = x2c_ident(name);
-  return %(expr () (op . $receiver (${checked[1]})));
-}
-
-/** Returns `expression` cast to `type`, which is a declared type rather
-    than syntax. A generator needs it where the value it holds and the
-    parameter it reaches differ in width or sign. */
-List x2c_expr_cast(List type, List expression) {
-  List parts = x2c_type_parts(type);
-  return %(expr $type
-    (cast (decl ${parts[0]} (bindings (bind () ${parts[1]}))) $expression));
-}
-
-/** Declares `name` with `type` and an optional initializer. */
-List x2c_decl_make(List type, Var name, List initializer) {
-  List parts = x2c_type_parts(type);
-  List binding = %(bind ($name) ${parts[1]});
-  if (initializer) binding = %(op = $binding $initializer);
-  return %(declare ${parts[0]} (bindings $binding));
-}
-
-/** Returns a parameter named `name` with `type`. */
-List x2c_param_make(List type, Var name) {
-  List parts = x2c_type_parts(type);
-  return %(param ${parts[0]} (bind ($name) ${parts[1]}));
-}
-
-static Var _meta_initializer(List node) {
-  match (node) {
-    case %(expr ? (literal ? ?text)): return text;
-    case %(?text): return text;
-  }
-  return node;
-}
-
-static void _meta_fail(String message, Var value) {
-  x2c_diagnostic_fail(message, %("value: ${value.repr()}"));
-}
-
-static List _meta_member(List node) {
-  match (node) {
-    case %(op = (?name) ?value):
-      return %($name ${_meta_initializer(value)});
-    case %(?name): return %($name ());
-  }
-  _meta_fail("x2c.type.members found an unreadable member", node);
-  return %();
-}
-
-/** Returns enum members as `(name value)` rows in declaration order.
-    An implicit value is nil; a literal value retains its spelling. */
-List x2c_type_members(List type) {
-  List resolved = x2c_type_resolve(type);
-  if (resolved.car() != <enum>)
-    _meta_fail("x2c.type.members requires an enum Type", type);
-  List members = resolved.reverse().car();
-  List rows = %();
-  foreach (List member, members) rows = cons(_meta_member(member), rows);
-  return rows.reverse();
-}
-
 /* --- lib/rewrite.x ------------------------------------------------------- */
 
 /** Registers the decorated translator with its pattern and hole patterns. */
@@ -159,7 +93,7 @@ Code register_rewrite(Code function, Code pattern, List holes) {
 /* --- lib/system-macros.x ------------------------------------------------- */
 
 List _dedent_expand(List node) {
-  String source = x2c_source_text(node);
+  String source = Code.source_text(node);
   int length = source.len(), open = 0;
   if (length >= 3 && source.startswith("%\""))
     open = 2;
@@ -169,12 +103,11 @@ List _dedent_expand(List node) {
       "$" in source)
     return $!( $node.dedent() );
   String body = source.getslice(open, length - 1, 1);
-  return x2c_literal_string(body.dedent());
+  return $!String{ ${body.dedent()} };
 }
 
 List _macros_location(void) =>
-  x2c_literal_string(
-    x2c_invocation_file() + ":" + x2c_invocation_line().str());
+  $!String{ ${x2c_invocation_file() + ":" + x2c_invocation_line().str()} };
 
 /* --- lib/var-tags.x ------------------------------------------------------ */
 
@@ -187,7 +120,7 @@ List _tag_decode_group(List rows, Map counts, int top) {
   foreach (List row, rows) {
     if (_tag_top(row) != top) continue;
     int selector = immediate ? _tag_middle(row) : _tag_bottom(row) & mask;
-    ids[selector] = x2c_expr_ident(x2c_ident(_tag_id(row)));
+    ids[selector] = %(expr () (ident ${x2c_ident(_tag_id(row))}));
   }
   return $!( { $mask, $immediate, { @{ids.list_free()} } } );
 }
@@ -1065,14 +998,6 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_selector_middles", _selector_middles);
   $linked.row(rows, "_selector_units", _selector_units);
   $linked.row(rows, "_selector_definitions", _selector_definitions);
-  $linked.row(rows, "x2c_expr_field", x2c_expr_field);
-  $linked.row(rows, "x2c_expr_cast", x2c_expr_cast);
-  $linked.row(rows, "x2c_decl_make", x2c_decl_make);
-  $linked.row(rows, "x2c_param_make", x2c_param_make);
-  $linked.row(rows, "_meta_initializer", _meta_initializer);
-  $linked.row(rows, "_meta_fail", _meta_fail);
-  $linked.row(rows, "_meta_member", _meta_member);
-  $linked.row(rows, "x2c_type_members", x2c_type_members);
   $linked.row(rows, "register_rewrite", register_rewrite);
   $linked.row(rows, "_dedent_expand", _dedent_expand);
   $linked.row(rows, "_macros_location", _macros_location);
@@ -1145,18 +1070,6 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "try_lowering", try_lowering);
   $linked.row(rows, "_operator_rows", _operator_rows);
   $linked.row(rows, "_operator_cases", _operator_cases);
-  $linked.row(rows, "x2c_literal_string", x2c_literal_string);
-  $linked.row(rows, "x2c_literal_int", x2c_literal_int);
-  $linked.row(rows, "x2c_literal_symbol", x2c_literal_symbol);
-  $linked.row(rows, "x2c_expr_ident", x2c_expr_ident);
-  $linked.row(rows, "x2c_expr_index", x2c_expr_index);
-  $linked.row(rows, "x2c_expr_call", x2c_expr_call);
-  $linked.row(rows, "x2c_expr_composite", x2c_expr_composite);
-  $linked.row(rows, "x2c_stmnt_make", x2c_stmnt_make);
-  $linked.row(rows, "x2c_stmnt_return", x2c_stmnt_return);
-  $linked.row(rows, "x2c_block_make", x2c_block_make);
-  $linked.row(rows, "x2c_function_body", x2c_function_body);
-  $linked.row(rows, "x2c_parameters_arguments", x2c_parameters_arguments);
   $linked.row(rows, "native_scalar_types", native_scalar_types);
   $linked.row(rows, "_scalar_access_units", _scalar_access_units);
   $linked.row(rows, "_cases_label", _cases_label);

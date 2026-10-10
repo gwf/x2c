@@ -32,7 +32,9 @@
     replies `(query OPERATION (ARG ...))` in the middle of its call and
     waits for the `(answer V)` request. The compiler applies its own
     OPERATION at the call's site, so the answer is the one the call site's
-    state gives. The builders compute what the compiler would. A template
+    state gives. The operations this unit defines, such as
+    `Code.binding_spelling` and `Type.parts`, compute what the compiler
+    would from the value alone. A template
     call returns `("x2c.template" STORED VALUES)`, which the compiler
     replaces by the invocation after the call returns.
 */
@@ -166,36 +168,11 @@ String Code.name(Code function) {
   return Code.binding_spelling(identity);
 }
 
-
 List x2c_template_call(Var stored, List values) =>
   %("x2c.template" $stored $values);
 
-List x2c_expr_field(List receiver, String name) {
-  List checked = x2c_ident(name);
-  return %(expr () (op . $receiver (${checked[1]})));
-}
-
+/* A type's declaration parts are read from the type alone. */
 List Type.parts(Type type) => type_declaration_parts(type);
-List x2c_type_parts(List type) => type_declaration_parts(type);
-
-/* The three builders below are the bodies in `lib/meta.x`. */
-List x2c_expr_cast(List type, List expression) {
-  List (base, mods) = type_declaration_parts(type);
-  return %(expr $type
-    (cast (decl $base (bindings (bind () $mods))) $expression));
-}
-
-List x2c_decl_make(List type, Var name, List initializer) {
-  List (base, mods) = type_declaration_parts(type);
-  List binding = %(bind ($name) $mods);
-  if (initializer) binding = %(op = $binding $initializer);
-  return %(declare $base (bindings $binding));
-}
-
-List x2c_param_make(List type, Var name) {
-  List (base, mods) = type_declaration_parts(type);
-  return %(param $base (bind ($name) $mods));
-}
 
 /* A `Source` parameter's description carries its text. */
 String Code.source_text(Var syntax) {
@@ -206,9 +183,9 @@ String Code.source_text(Var syntax) {
 
 /* The operations that read compiler state ask the compiler through the
    forwarders in `etc/meta-queries.x`, which the helper compiles after this
-   file as part of the same unit. */
+   file as part of the same unit.
 
-/* A `Source` holding a String literal is read beside its file; a String
+   A `Source` holding a String literal is read beside its file; a String
    must be absolute, since the helper does not know the definition's file.
    The compiler records each file read as a translation dependency. */
 String x2c_embed_text(Var path) {

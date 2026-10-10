@@ -491,7 +491,6 @@ static int _preload_meta_surface(Frontend frontend, Lisp shared) {
   c.macro_lisp = shared;
   c.borrowed_lisp = 1;
   defer unit.close();
-  _declare_builders(c, shared);
   /* As in `Frontend.open_reporting`, the compiler that reports a diagnostic
      prints it, so an imported file's location shows that file's line. */
   if (started) c.own_diagnostics();
@@ -504,18 +503,6 @@ static int _preload_meta_surface(Frontend frontend, Lisp shared) {
       Compiler.bind_meta_operation(shared, name, function);
   }
   return 1;
-}
-
-/* `lib/meta.x` includes `lib/varops.x`, whose included helpers lower calls
-   to these builders before they are parsed. Until the parse installs them,
-   each is a compile-time-only name. */
-static void _declare_builders(Compiler c, Lisp shared) {
-  List names =
-    %("x2c_expr_ident" "x2c_expr_index" "x2c_expr_call" "x2c_expr_cast");
-  foreach (String name, names) {
-    shared.set_global(name, %());
-    c.meta_comptime[name] = 1;
-  }
 }
 
 // lifecycle

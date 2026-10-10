@@ -205,7 +205,7 @@ meta List _tag_numeric_names(void) {
 
 /* A literal width stays a literal; a C type becomes sizeof(T) * CHAR_BIT,
    which is still a constant expression in a static initializer. Any other
-   spelling is refused by `x2c_literal_int`, which takes a number. */
+   spelling is refused where the width is held as an `int`. */
 meta List _tag_bits_expr(List row) {
   Var bits = _tag_bits(row);
   /* `bits is <list>` would compile to the `Var.is_row` fast path, which has
@@ -214,7 +214,8 @@ meta List _tag_bits_expr(List row) {
     Type type = bits;
     return $!( sizeof($type) * CHAR_BIT );
   }
-  return x2c_literal_int(bits);
+  int width = bits;
+  return $!int{ $width };
 }
 
 meta List _tag_numeric_row(List row) => $!( {
@@ -285,12 +286,13 @@ meta Map _tag_sibling_counts(List rows) {
   return counts;
 }
 
-meta List _tag_row_entry(List row, Map counts) =>
-  %(map-entry ${x2c_literal_symbol(row[0])}
-    ${_tag_list(
-      [x2c_literal_int(_tag_top(row)),
-       x2c_literal_int(_tag_group_mask(counts[_tag_top(row)])),
-       x2c_literal_int(_tag_bottom(row))])});
+meta List _tag_row_entry(List row, Map counts) {
+  Symbol tag = row[0];
+  int top = _tag_top(row), mask = _tag_group_mask(counts[top]),
+      bottom = _tag_bottom(row);
+  return %(map-entry ${$!Symbol{ $tag }}
+    ${_tag_list([$!int{ $top }, $!int{ $mask }, $!int{ $bottom }])});
+}
 
 meta List _tag_constant_rows(void) {
   List rows = _tag_decode_rows();
@@ -321,7 +323,7 @@ meta List _tag_decode_group(List rows, Map counts, int top) {
   foreach (List row, rows) {
     if (_tag_top(row) != top) continue;
     int selector = immediate ? _tag_middle(row) : _tag_bottom(row) & mask;
-    ids[selector] = x2c_expr_ident(x2c_ident(_tag_id(row)));
+    ids[selector] = %(expr () (ident ${x2c_ident(_tag_id(row))}));
   }
   return $!( { $mask, $immediate, { @{ids.list_free()} } } );
 }

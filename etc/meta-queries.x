@@ -7,23 +7,22 @@
     etc/meta-helper.x, as one unit.
 */
 
-String x2c_source_text(Var syntax) => _ask("x2c_source_text", %($syntax));
 Type Code.type(Code value) => _ask("Code_type", %($value));
 Var Code.value(Code code) => _ask("Code_value", %($code));
-int Code.exits(Code statement) => _ask("Code_exits", %($statement));
-Code Code.convert(Code value, Type target) =>
-  _ask("Code_convert", %($value $target));
-String Code.format(Code value) => _ask("Code_format", %($value));
-int Code.is_static_pattern(Code pattern) =>
-  _ask("Code_is_static_pattern", %($pattern));
-Code Code.call_in_order(Code member, List arguments, Type type) =>
-  _ask("Code_call_in_order", %($member $arguments $type));
-Code Code.promoted(Code value) => _ask("Code_promoted", %($value));
-Code Code.lowered(Code code) => _ask("Code_lowered", %($code));
 Code Code.parameter(Code function, String name) =>
   _ask("Code_parameter", %($function $name));
 List Code.body(Code function) => _ask("Code_body", %($function));
 List Code.arguments(Code parameters) => _ask("Code_arguments", %($parameters));
+int Code.exits(Code statement) => _ask("Code_exits", %($statement));
+String Code.format(Code value) => _ask("Code_format", %($value));
+int Code.is_static_pattern(Code pattern) =>
+  _ask("Code_is_static_pattern", %($pattern));
+Code Code.convert(Code value, Type target) =>
+  _ask("Code_convert", %($value $target));
+Code Code.promoted(Code value) => _ask("Code_promoted", %($value));
+Code Code.call_in_order(Code member, List arguments, Type type) =>
+  _ask("Code_call_in_order", %($member $arguments $type));
+Code Code.lowered(Code code) => _ask("Code_lowered", %($code));
 Code Code.register_rewrite(Code function, List pattern, List holes) =>
   _ask("Code_register_rewrite", %($function $pattern $holes));
 Code Code.register_after_initialization(
@@ -33,28 +32,26 @@ int Type.is_named(Type type, String name) =>
   _ask("Type_is_named", %($type $name));
 Type Type.numeric(Type type) => _ask("Type_numeric", %($type));
 int Type.is_text(Type type) => _ask("Type_is_text", %($type));
+int Type.is_value(Type type) => _ask("Type_is_value", %($type));
+Type Type.resolve(Type type) => _ask("Type_resolve", %($type));
+Type Type.element(Type type) => _ask("Type_element", %($type));
+List Type.parameters(Type type) => _ask("Type_parameters", %($type));
+Type Type.return_type(Type type) => _ask("Type_return_type", %($type));
+Type Type.aggregate(Type type) => _ask("Type_aggregate", %($type));
+List Type.fields(Type type) => _ask("Type_fields", %($type));
+List Type.layout(Type type) => _ask("Type_layout", %($type));
+List Type.marked_fields(Type aggregate, Symbol mark) =>
+  _ask("Type_marked_fields", %($aggregate $mark));
+List Type.members(Type type) => _ask("Type_members", %($type));
+List Type.resolve_member(Type type, String name, int call) =>
+  _ask("Type_resolve_member", %($type $name $call));
 Code Type.protocol_member(Type type, String name) =>
   _ask("Type_protocol_member", %($type $name));
 Code Type.getter(Type type) => _ask("Type_getter", %($type));
 String Type.update_helper(Type type) => _ask("Type_update_helper", %($type));
-Type Type.aggregate(Type type) => _ask("Type_aggregate", %($type));
-List Type.marked_fields(Type aggregate, Symbol mark) =>
-  _ask("Type_marked_fields", %($aggregate $mark));
-List Type.resolve_member(Type type, String name, int call) =>
-  _ask("Type_resolve_member", %($type $name $call));
-List Type.fields(Type type) => _ask("Type_fields", %($type));
-List Type.layout(Type type) => _ask("Type_layout", %($type));
-Type Type.resolve(Type type) => _ask("Type_resolve", %($type));
-List Type.members(Type type) => _ask("Type_members", %($type));
-int Type.is_value(Type type) => _ask("Type_is_value", %($type));
-Type Type.element(Type type) => _ask("Type_element", %($type));
-List Type.parameters(Type type) => _ask("Type_parameters", %($type));
-Type Type.return_type(Type type) => _ask("Type_return_type", %($type));
 Symbol Type.tag_name(String name) => _ask("Type_tag_name", %($name));
 String Type.reverse_name(String base, String participant) =>
   _ask("Type_reverse_name", %($base $participant));
-List x2c_type_resolve(List value) => _ask("x2c_type_resolve", %($value));
-List x2c_type_members(List type) => _ask("x2c_type_members", %($type));
 String x2c_invocation_file(void) => _ask("x2c_invocation_file", %());
 int x2c_invocation_line(void) => _ask("x2c_invocation_line", %());
 int x2c_invocation_column(void) => _ask("x2c_invocation_column", %());

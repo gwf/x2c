@@ -10,7 +10,7 @@
    Escaped, interpolated and computed values keep their meaning by calling
    String.dedent at run time. */
 meta List _dedent_expand(List node) {
-  String source = x2c_source_text(node);
+  String source = Code.source_text(node);
   int length = source.len(), open = 0;
   if (length >= 3 && source.startswith("%\""))
     open = 2;
@@ -20,7 +20,7 @@ meta List _dedent_expand(List node) {
       "$" in source)
     return $!( $node.dedent() );
   String body = source.getslice(open, length - 1, 1);
-  return x2c_literal_string(body.dedent());
+  return $!String{ ${body.dedent()} };
 }
 
 /* Normalizes the indentation a block of text was written with. The literal
@@ -96,8 +96,7 @@ macro Decorator $switch(Stmt $body, Expr $condition) {
 }
 
 meta List _macros_location(void) =>
-  x2c_literal_string(
-    x2c_invocation_file() + ":" + x2c_invocation_line().str());
+  $!String{ ${x2c_invocation_file() + ":" + x2c_invocation_line().str()} };
 
 /* Marks a path that is not written yet. Reaching it raises `<invariant>`
    naming the note and the source line the macro was written on. */

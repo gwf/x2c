@@ -135,7 +135,8 @@ List Macro.typed(List type, Var value) {
   if (value is <list> && value.list().car().is_match_op())
     return %(expr $type $value);
   if (value is <string> && List.compare(type, %("String")) == 0)
-    value = x2c_literal_string(value);
+    value = %(expr ("String") (segments
+      (segexp (expr ("String") (literal ("String") $value)))));
   List expression = Macro.inserted(value, 1, 1);
   return %(expr $type @{expression.cddr()});
 }
@@ -310,7 +311,8 @@ static List _macro_value_rows(Macro t, List values) {
 static Var _macro_expr_value(Var value) {
   if (value is <string>)
     return %(expr (* char) (literal (* char) ${value.repr()}));
-  if (value is <symbol>) return x2c_literal_symbol(value);
+  if (value is <symbol>)
+    return %(expr ("Symbol") (literal ("Symbol") ${value.str()} $value));
   Type type = Macro.number_type(value);
   return type ? Macro.number_literal(type, type, value) : value;
 }

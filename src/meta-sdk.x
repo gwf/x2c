@@ -522,15 +522,6 @@ List Type.parameters(Type type) {
 Type Type.return_type(Type type) =>
   type.canonicalize().apply().canonicalize();
 
-/** Answers `x2c.type.parts`, declared in `lib/meta.x`. */
-List x2c_type_parts(List value) => Type.parts(value);
-
-/** Answers `x2c.type.resolve`, declared in `lib/meta.x`. */
-List x2c_type_resolve(List value) => Type.resolve(value);
-
-/** Answers `x2c.source.text`, declared in `lib/meta.x`. */
-String x2c_source_text(Var value) => Code.source_text(value);
-
 /** Answers `Type.reverse_name`, declared in `lib/meta.x`. */
 String Type.reverse_name(String base, String participant) {
   _sdk_guard("Type.reverse_name");
