@@ -286,7 +286,7 @@ static inline int _is_composite(List value) {
 static List _assignment(List binding, List type, List rhs) =>
   %( stmnt (expr $type (op = (expr $type (ident $binding)) $rhs)));
 
-/* Preserve native initializer shape so C infers dimensions and checks
+/** Preserves native initializer shape so C infers dimensions and checks
    designators before cached values are assigned during initialization. */
 List Compiler.zero_initializer(Compiler c, List value) {
   List zero = %(expr (int) (literal (int) "0"));
