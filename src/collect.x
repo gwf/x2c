@@ -5,7 +5,9 @@
     cache and interface replay consume that same order so declaration
     precedence does not depend on whether a file was already collected. A
     translated unit writes its own contribution beside its generated C as a
-    `.xi` interface, and the runtime prelude is `lib/x2c.xi`.
+    `.xi` interface, and the runtime prelude is `lib/x2c.xi`. The compiler's
+    own prelude components are linked into it as the records their
+    interfaces would hold.
 */
 
 #pragma once
@@ -210,8 +212,9 @@ static void Compiler._add_prelude(Compiler c, Map globs, Map visited) {
   }
 }
 
-/* The prelude contribution is `lib/x2c.x`'s entry: cached in this process,
-   read from `lib/x2c.xi` beside a stage build, or walked cold once. */
+/* A prelude source's entry: cached in this process, linked into the
+   compiler, read from its interface beside a stage build, or walked cold
+   once. */
 static List Compiler._prelude_entry(
   Compiler c, String runtime, String canonical) {
   List entry = c._entry(canonical);
@@ -1663,8 +1666,10 @@ void interface_configure(String out_dir, int cold) {
   interface_mirror = cold ? NULL : stage ? stage : x2c_get_root();
 }
 
-/* Find and validate the interface of one canonical source path. A source
-   under inspection through a SourceView never reads interfaces. */
+/* Find and validate the interface of one canonical source path: the
+   record linked into the compiler for a prelude component, else its `.xi`.
+   A source under inspection through a SourceView, or a cold process, reads
+   neither. */
 static List Compiler._interface_read(Compiler c, String canonical) {
   if (c.source_facts || !interface_mirror) return NULL;
   Var record;
@@ -2007,7 +2012,8 @@ Map Compiler.linked_prelude_records(Compiler c) {
         _stored_record(canonical, _process_cache()[canonical]));
       if (record is <list>) records[home_portable_path(canonical)] = record;
     }
-  foreach (Var (canonical, entry), saved) _process_cache()[canonical] = entry;
+  foreach (Var (canonical, entry), saved)
+    if (entry is <list>) _process_cache()[canonical] = entry;
   return records;
 }
 
