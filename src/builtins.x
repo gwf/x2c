@@ -47,13 +47,13 @@ static macro Stmt $auto_release(Decl $local, Expr $binding) {
 static List _auto_expand(List value) {
   Code local = x2c_enclosing(<declarator>);
   if (!local || !x2c_enclosing(<function>))
-    _auto_fail(<parse>,
-      "managed initializer requires a complete block-local initializer",
-      %());
+    _auto_fail(
+      <parse>,
+      "managed initializer requires a complete block-local initializer", %());
   match (local) case %(declare ? (bindings (bind ?binding ?))): {
     Macro release = $auto_release;
-    x2c_place(%(after-statement),
-      x2c_template_call(release, %($local $binding)));
+    x2c_place(
+      %(after-statement), x2c_template_call(release, %($local $binding)));
   }
   return value;
 }
@@ -63,12 +63,12 @@ static List _auto_expand(List value) {
 static List _auto_release(Code local) {
   Type base = local.cadr();
   if (base.is_static() || base.is_extern() || base.is_threaded())
-    _auto_fail(<parse>,
-      "managed initializer requires automatic local storage", %());
+    _auto_fail(
+      <parse>, "managed initializer requires automatic local storage", %());
   Type type = local.type();
   if (!type.protocol_member("cleanup"))
-    _auto_fail(<protocol>,
-      "managed initializer requires Cleanup participation",
+    _auto_fail(
+      <protocol>, "managed initializer requires Cleanup participation",
       %("type: ${type.repr()}"));
   return NULL;
 }

@@ -432,7 +432,8 @@ static Ast Compiler._slice_node(
 }
 
 /* Access admission has established the getter signature, but its target is
-   still intact here. Dispatch before lowering a read or an enclosing update. */
+   still intact here. Dispatch before lowering a read or an enclosing
+   update. */
 static List _access_source(List expression) {
   match (expression) {
     case %(expr ?type (getindex ?base ?key)):

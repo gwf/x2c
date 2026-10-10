@@ -246,7 +246,8 @@ static Array _stub_arguments(Func function, const FuncArg *argv) {
   return values;
 }
 
-/** Tests a registered macro with the candidate's global and source bindings. */
+/** Tests a registered macro with the candidate's global and source
+    bindings. */
 int Compiler.matches_macro(Compiler c, MacroMatcher &matcher, List code) {
   Var previous = Macro.subject();
   Array arguments = $auto([code]);

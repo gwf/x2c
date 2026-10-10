@@ -170,8 +170,8 @@ int datum_read_plain(String text, unsigned &cursor, Var &out) {
    every value is the reader's. `items` holds the elements of the Lists
    being read. */
 
-static int _plain_form(char *s, unsigned &at, Var &out, Array items,
-                       int depth) {
+static int _plain_form(
+  char *s, unsigned &at, Var &out, Array items, int depth) {
   char c = s[at];
   if (c == '(') return _plain_list(s, at, out, items, depth);
   if (c == '"') return _plain_string(s, at, out);
@@ -180,8 +180,8 @@ static int _plain_form(char *s, unsigned &at, Var &out, Array items,
   return _plain_atom(s, at, out);
 }
 
-static int _plain_list(char *s, unsigned &at, Var &out, Array items,
-                       int depth) {
+static int _plain_list(
+  char *s, unsigned &at, Var &out, Array items, int depth) {
   if (depth >= LISP_READ_DEPTH_MAX) return 0;
   int first = items.len();
   for (at++; ; ) {

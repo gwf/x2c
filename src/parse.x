@@ -2854,9 +2854,9 @@ static List Compiler._after_declarator(
         declarator = %(op = (bind $name $mods) $result);
         return placed;
       }
-      return c.rewrite(<decl>, <init>,
-        %(declare $base (bindings $declarator)),
-        AST_BLOCK, c.return_type, origin);
+      return c.rewrite(
+        <decl>, <init>, %(declare $base (bindings $declarator)), AST_BLOCK,
+        c.return_type, origin);
     }
   return NULL;
 }
@@ -2907,8 +2907,8 @@ static Type Compiler._share_declaration_type(
   Compiler c, Type base, Array output) {
   List name = c.sym.introduce(c.fresh_name("declaration_type"));
   Type value = base.declared();
-  List alias = c.bind_syntax($!{ typedef $value $name; },
-    AST_BLOCK, c.return_type);
+  List alias =
+    c.bind_syntax($!{ typedef $value $name; }, AST_BLOCK, c.return_type);
   _push_items(output, alias);
   Array storage = [];
   foreach (Var item, base)

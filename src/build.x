@@ -1086,8 +1086,8 @@ List Build.script_helpers(Build b) {
   String script = b.request.inputs.car(), root = x2c_get_root();
   List excluded = %("$root/lib/" "$root/include/" "$root/builds/")
     .append(b.request.package_roots().map(%!(dir) => %"$dir/"));
-  List prelude = compiler_prelude_sources().map(%!(String source) =>
-    Path.join(root, source));
+  List prelude = compiler_prelude_sources().map(
+    %!(String source) => Path.join(root, source));
   String depfile = _unit_file(b._unit_dir(script), script, ".d");
   Array helpers = [];
   foreach (String path, _depfile_inputs(depfile)) {

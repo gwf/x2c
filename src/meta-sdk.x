@@ -279,8 +279,8 @@ static List _rewrite_holes(Macro shape, List supplied) {
   Array holes = [];
   foreach (List parameter, shape.assoc(<parameters>).list()) {
     String binder = parameter.assoc(<binder>).str();
-    holes.push(Atom.intern((parameter.assoc(<sequence>).int() ? "*" : "?") +
-      binder[1:]));
+    String prefix = parameter.assoc(<sequence>).int() ? "*" : "?";
+    holes.push(Atom.intern(prefix + binder[1:]));
   }
   return holes.list_free();
 }
@@ -337,12 +337,12 @@ Code Code.register_marked_rewrite(
 
 /** Adds post-initialization block items while the declaration owner retains
     the original declarators, their type identity, and initialization order. */
-Code Code.register_after_initialization(Code function, Macro shape, List holes) {
+Code Code.register_after_initialization(Code c, Macro shape, List holes) {
   _sdk_guard("Code.register_after_initialization");
   holes = _rewrite_holes(shape, holes);
   List pattern = shape.pattern(holes);
   match (pattern) case %(declare *):
-    return _rewrite_registration(function, shape, holes, <decl>, <init>);
+    return _rewrite_registration(c, shape, holes, <decl>, <init>);
   MetaContext.reject("after-initialization requires a declaration pattern", NULL);
 }
 

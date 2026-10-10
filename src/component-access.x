@@ -26,8 +26,10 @@ macro Expression $collection_right(Expr $base, Expr $key, Expr $value) =>
   $base[$key] >>= $value;
 macro Expression $collection_increment(Expr $base, Expr $key) => ++$base[$key];
 macro Expression $collection_decrement(Expr $base, Expr $key) => --$base[$key];
-macro Expression $collection_postincrement(Expr $base, Expr $key) => $base[$key]++;
-macro Expression $collection_postdecrement(Expr $base, Expr $key) => $base[$key]--;
+macro Expression $collection_postincrement(Expr $base, Expr $key) =>
+  $base[$key]++;
+macro Expression $collection_postdecrement(Expr $base, Expr $key) =>
+  $base[$key]--;
 
 meta static int _collection_family(Code base) {
   Type type = base.type();
@@ -56,8 +58,8 @@ meta static Code _collection_update(
     String message = op == <+>
       ? "indexed += requires a numeric, Var, or String operand"
       : "indexed compound assignment requires a numeric or Var operand";
-    x2c_diagnostic_fail_at(NULL, <xform>, message,
-      %("right type: ${type.repr()}"));
+    x2c_diagnostic_fail_at(
+      NULL, <xform>, message, %("right type: ${type.repr()}"));
   }
   if (family == 1) return $!Var{ Array_updateindex($base, $key, $op, $value) };
   return $!Var{ Map_updateindex($base, $key, $op, $value) };

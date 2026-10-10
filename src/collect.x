@@ -205,8 +205,8 @@ static void Compiler._add_prelude(Compiler c, Map globs, Map visited) {
     visited[canonical] = 1;
     c.add_translation_dependency(canonical);
     if (c.runtime_hdrs)
-      c._walk_file(canonical, c._runtime_text(path), Path.dirname(path),
-        globs, visited);
+      c._walk_file(
+        canonical, c._runtime_text(path), Path.dirname(path), globs, visited);
     else {
       List entry = c._prelude_entry(path, canonical);
       // Its compile-time effects install as the compiler's own.
@@ -748,7 +748,8 @@ static void Compiler._add_type_dependencies(
     include closure also contains private source includes, which its generated
     header need not publish. Those cannot supply declarations here. Meta
     signatures alone do not establish a runtime declaration either. Emission
-    reads the entries collection already installed without invalidating them. */
+    reads the entries collection already installed without invalidating
+    them. */
 void Compiler.include_function_declarations(
   Compiler c, String target, int angle, Map available) {
   String path = collect_resolve_include(
@@ -2047,7 +2048,7 @@ static List _linked_record(String canonical) {
   return _read_record(text);
 }
 
-/* The compiler-owned prelude sources after the runtime's own. */
+/* Every prelude source but `lib/x2c.x`, whose interface stays a file. */
 static List _linked_prelude_sources(void) => compiler_prelude_sources().cdr();
 
 /* `record` as an interface spells it, or NULL when it cannot be spelled. */

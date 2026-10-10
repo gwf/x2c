@@ -2530,11 +2530,13 @@ static void Compiler._install_rewrite(Compiler c, List row) {
     c._register_rewrite(shared.rewrite_rule());
     return;
   }
-  match (row) case %(compile-time rewrite ?point ?kind ?name ?shape ?holes):
-    c._register_rewrite(_rewrite_rule(
+  match (row) case %(compile-time rewrite ?point ?kind ?name ?shape ?holes): {
+    RewriteRule rule = _rewrite_rule(
       point, c.thaw_declaration_syntax(kind), name,
       c.thaw_declaration_syntax(shape), c.thaw_declaration_syntax(holes),
-      c.builtin_defs, 1));
+      c.builtin_defs, 1);
+    c._register_rewrite(rule);
+  }
 }
 
 /* The shared rule for a prelude row, or 0 when the row is bound to its
@@ -4716,8 +4718,9 @@ static Map Compiler._code_effects(Compiler c, Var effects) {
       }
       case %(early ?key ?binding ?declaration): {
         $adapter.memo(c, key, replacements[binding]) {
-          c.add_early(c.bind_syntax(
-            _replace_bindings(declaration, replacements), AST_UNIT, NULL));
+          List early = c.bind_syntax(
+            _replace_bindings(declaration, replacements), AST_UNIT, NULL);
+          c.add_early(early);
         }
       }
       case %(place ?(List where) ?code): c.place(where, code);

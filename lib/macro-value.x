@@ -506,7 +506,8 @@ typedef struct MacroMatcher {
   List holes, pattern;
 } MacroMatcher;
 
-/** Prepares repeated recognition without retaining subject-specific bindings. */
+/** Prepares repeated recognition without retaining subject-specific
+    bindings. */
 MacroMatcher Macro.matcher(Macro shape, List holes) {
   Var previous = Macro.subject();
   Macro.use_subject(%());
@@ -516,9 +517,11 @@ MacroMatcher Macro.matcher(Macro shape, List holes) {
   return (MacroMatcher){shape, holes, macro_subject_used ? NULL : pattern};
 }
 
-/** Tests code with the same source views and identity rules as a macro case. */
+/** Tests code with the same source views and identity rules as a macro
+    case. */
 int MacroMatcher.matches(MacroMatcher &m, List code) {
-  List pattern = m.pattern ? m.pattern : _macro_case_shape(m.shape, m.holes);
+  List pattern =
+    m.pattern ? m.pattern : _macro_case_shape(m.shape, m.holes);
   MatchLease lease;
   int status = MatchCache.current().acquire(pattern, lease, "Macro.matches");
   defer lease.release();
@@ -529,7 +532,7 @@ int MacroMatcher.matches(MacroMatcher &m, List code) {
 }
 
 /** Tests complete code against a macro and its hole patterns. Repeated
-    recognition can retain `Macro.matcher` to avoid deriving the same pattern. */
+    recognition can retain `Macro.matcher` so the pattern is derived once. */
 int Macro.matches(Macro t, List code, List holes) {
   MacroMatcher matcher = {t, holes, NULL};
   return matcher.matches(code);
