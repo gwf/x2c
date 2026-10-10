@@ -2640,7 +2640,9 @@ List Compiler.rewrite(
   c._rewrite(point, kind, source, position, expected, site, 0);
 
 /** Binds and lowers a replacement while its rule remains active. An
-    expression retains the result type already established for its parent. */
+    expression retains the result type already established for its parent.
+    A replacement whose template and slot signatures an earlier use in the
+    unit prepared lowers only its captured values. */
 List Compiler.lower_rewrite(
   Compiler c, Symbol point, Var kind, List source, AstPos position,
   Type expected, Token site) =>
@@ -2745,7 +2747,7 @@ static List Compiler._prepared(
   Array sources = $auto([]), values = $auto([]);
   _typed_nodes(source, sources);
   int refused = 0;
-  Var shape = _template(result, sources, values, refused);
+  Var shape = c._template(result, sources, values, refused);
   if (refused) return c._lowered(result, position, expected, site);
   List key = %(${(int) position} $expected $shape);
   if (!c.prepared_rewrites) c.prepared_rewrites = {};
@@ -2754,6 +2756,10 @@ static List Compiler._prepared(
     return stored is <list>
       ? c._fill(stored, values)
       : c._lowered(result, position, expected, site);
+  if (_carries(shape)) {
+    c.prepared_rewrites[key] = 0;
+    return c._lowered(result, position, expected, site);
+  }
   if (c.sym.transacting()) return c._lowered(result, position, expected, site);
   struct SlotWatch watch = {values.list(), [], []};
   foreach (Var value, values) watch.outputs.push(NULL);
@@ -2761,10 +2767,11 @@ static List Compiler._prepared(
   List lowered;
   $let(c.slot_watch, &watch)
     lowered = c._lowered(result, position, expected, site);
-  List skeleton = NULL;
-  if (c._effects().since(before).same(watch.inner) && !watch.repeated &&
-      watch.order.len() == values.len() && !_carries(shape))
-    skeleton = _skeleton(lowered, watch.outputs);
+  /* A memo the template fills on its first lowering adds state only then,
+     so a lowering with effects of its own prepares on a later use. */
+  if (!c._effects().since(before).same(watch.inner)) return lowered;
+  List skeleton = !watch.repeated && watch.order.len() == values.len()
+    ? _skeleton(lowered, watch.outputs) : NULL;
   c.prepared_rewrites[key] =
     skeleton ? %($skeleton ${watch.order.list()}) : 0;
   return lowered;
@@ -2780,29 +2787,33 @@ static void _typed_nodes(Var node, Array found) {
 }
 
 /* `node` with each typed expression from `sources` replaced by its slot
-   signature `("x2c.slot" TYPE SHAPE)` and pushed onto `values`. Sets
+   signature `("x2c.slot" TYPE SHAPE)` and pushed onto `values`. A literal
+   stays in the template, which then lowers it as written. Sets
    `refused` for a value inserted twice or a value whose content conversion
    or lowering reads beyond its signature. */
-static Var _template(Var node, Array sources, Array values, int &refused) {
+static Var Compiler._template(
+  Compiler c, Var node, Array sources, Array values, int &refused) {
   if (node is not <list> || node.is_nil()) return node;
   List syntax = node;
   if (syntax.car() == <expr>)
     foreach (List value, sources)
-      if (value === syntax) return _slot(syntax, values, refused);
-  return _template_items(syntax, sources, values, refused);
+      if (value === syntax) return c._slot(syntax, values, refused);
+  return c._template_items(syntax, sources, values, refused);
 }
 
-static List _template_items(
-  List items, Array sources, Array values, int &refused) {
+static List Compiler._template_items(
+  Compiler c, List items, Array sources, Array values, int &refused) {
   if (!items) return NULL;
-  Var head = _template(items.car(), sources, values, refused);
-  List tail = _template_items(items.cdr(), sources, values, refused);
+  Var head = c._template(items.car(), sources, values, refused);
+  List tail = c._template_items(items.cdr(), sources, values, refused);
   return head === items.car() && tail === items.cdr()
     ? items : cons(head, tail);
 }
 
-static Var _slot(List value, Array values, int &refused) {
-  Var shape = _slot_shape(value.caddr());
+static Var Compiler._slot(
+  Compiler c, List value, Array values, int &refused) {
+  if (value.caddr().list().car() == <literal>) return value;
+  Var shape = c._slot_shape(value.caddr());
   foreach (List prior, values) if (prior === value) shape = void;
   if (shape is void) {
     refused = 1;
@@ -2813,33 +2824,36 @@ static Var _slot(List value, Array values, int &refused) {
 }
 
 /* What conversion and lowering read of a slot value's content besides its
-   type: a literal's value, an operator with its single operand or a member
-   access with its base, a group's content, or else the content's head.
-   Void for content they read further, such as a conditional or a
-   composite. */
-static Var _slot_shape(Var content) {
+   type: a literal's value, whether a name is a lambda's snapshot, an
+   operator with its single operand or a member access with its base, a
+   group's content, or else the content's head. Void for content they read
+   further, such as a conditional or a composite. */
+static Var Compiler._slot_shape(Compiler c, Var content) {
   if (content is not <list>) return void;
   List parts = content;
   Var head = parts.car();
   if (head == <literal>) return content;
-  if (head == <ident> || head == <call> || head == <index> ||
-      head == <getindex> || head == <postfix> || head == <cast>)
+  if (head == <ident>)
+    return %(lambda-snapshot ${parts.cadr()}) in c.semantic_binding_facts()
+      ? %(ident snapshot) : head;
+  if (head == <call> || head == <index> || head == <getindex> ||
+      head == <postfix> || head == <cast>)
     return head;
   List operands = parts.cdr().cdr();
   if (head == <parens> && parts.cadr().list().car() == <expr>)
-    return _nested_shape(head, parts.cadr());
+    return c._nested_shape(head, parts.cadr());
   if (head != <op>) return void;
   Var op = parts.cadr();
-  if (op == <.>) return _nested_shape(%(op .), operands.car());
+  if (op == <.>) return c._nested_shape(%(op .), operands.car());
   if (op == <?> || op == <,>) return void;
-  if (!operands.cdr()) return _nested_shape(%(op $op), operands.car());
+  if (!operands.cdr()) return c._nested_shape(%(op $op), operands.car());
   return %(op $op);
 }
 
 /* `prefix` followed by the shape of the typed expression `operand`'s
    content, or void when that content has none. */
-static Var _nested_shape(Var prefix, Var operand) {
-  Var shape = _slot_shape(operand.list().caddr());
+static Var Compiler._nested_shape(Compiler c, Var prefix, Var operand) {
+  Var shape = c._slot_shape(operand.list().caddr());
   return shape is void ? void : %($prefix $shape);
 }
 
@@ -2855,8 +2869,9 @@ static int _carries(Var shape) {
 }
 
 /* `lowered` with each watched output replaced by its `("x2c.slot" I)`
-   marker, or NULL unless each occurs exactly once and nothing between the
-   root and a slot gives lowering a context of its own. */
+   marker, or NULL unless each occurs exactly once and the code holds no
+   anchor, block, sequence, statement, or declaration, whose lowering gives
+   a slot a context that lowering the value alone would not. */
 static List _skeleton(List lowered, Array outputs) {
   Array found = $auto([]);
   foreach (Var output, outputs) found.push(0);

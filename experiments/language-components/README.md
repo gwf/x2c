@@ -23,7 +23,9 @@ prepared matcher, and binds the first accepted replacement through the ordinary
 compiler. Returning void, null, or the original input itself declines. Only the
 active rule is suppressed while binding its replacement; independent rules can
 compose. Each compiler orders its own rules; the rules its prelude ships are
-prepared once per process and shared.
+prepared once per process and shared. A replacement lowered during the
+transform is lowered once per unit for each template and hole signature; later
+uses lower only their captured values and fill that skeleton.
 
 The [post-initialization boundary](sequences/README.md) keeps declarations,
 bindings, and initialization in the compiler. A component contributes following
