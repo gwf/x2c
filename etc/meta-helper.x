@@ -228,6 +228,8 @@ int Code.exits(Code v) => _ask("Code_exits", %($v));
 int Code.is_static_pattern(Code v) => _ask("Code_is_static_pattern", %($v));
 Code Code.register_rewrite(Code f, Macro p, List h) =>
   _ask("Code_register_rewrite", %($f $p $h));
+Code Code.register_marked_rewrite(Code f, Symbol m, Macro p, List h) =>
+  _ask("Code_register_marked_rewrite", %($f $m $p $h));
 Code Code.register_after_initialization(Code f, Macro p, List h) =>
   _ask("Code_register_after_initialization", %($f $p $h));
 List x2c_syntax_type(List v) => Code.type(v);
@@ -470,3 +472,8 @@ Type Type.numeric(Type t) => _ask("Type_numeric", %($t));
 int Type.is_text(Type t) => _ask("Type_is_text", %($t));
 Code Type.protocol_member(Type t, String n) =>
   _ask("Type_protocol_member", %($t $n));
+Type Type.aggregate(Type t) => _ask("Type_aggregate", %($t));
+List Type.marked_fields(Type t, Symbol m) =>
+  _ask("Type_marked_fields", %($t $m));
+List Type.resolve_member(Type t, String n, int c) =>
+  _ask("Type_resolve_member", %($t $n $c));

@@ -194,6 +194,13 @@ meta int Code.is_static_pattern(Code pattern);
     views and binding identity rules of a macro-valued case. */
 meta Code Code.register_rewrite(Code function, Macro shape, List holes);
 
+/** Registers a translator for member calls that find no member on a
+    receiver whose aggregate declares a field with the field keyword `mark`,
+    such as `delegate`. Each such aggregate keys the rule when that field is
+    declared, so a call on any other receiver never tests it. */
+meta Code Code.register_marked_rewrite(
+  Code function, Symbol mark, Macro shape, List holes);
+
 /** Registers block items to follow matching local initializations. */
 meta Code Code.register_after_initialization(
   Code function, Macro shape, List holes);
@@ -210,6 +217,22 @@ meta int Type.is_text(Type type);
 /** Returns the selected protocol callable, or null if unavailable in the
     current function. Selection includes explicit protocol adoption. */
 meta Code Type.protocol_member(Type type, String name);
+
+/** Returns the struct or union tag `type` reaches through typedefs or one
+    pointer level, or NULL. */
+meta Type Type.aggregate(Type type);
+
+/** Returns the `(NAME TYPE)` layout rows of the fields of the aggregate tag
+    `aggregate` declared with the field keyword `mark`, such as `delegate`,
+    in declaration order. */
+meta List Type.marked_fields(Type aggregate, Symbol mark);
+
+/** Returns how ordinary member lookup selects `name` on a `type` receiver
+    with `.`: `(field ACCESS TYPE)`, `(method BINDING SIGNATURE)`,
+    `(ambiguous PACKAGE...)` when imported packages each provide the method,
+    or NULL. Methods are selected only when `call` is nonzero, as for a
+    call. */
+meta List Type.resolve_member(Type type, String name, int call);
 
 /** Returns the `String`, `int`, or `Symbol` a literal expression holds.
     Fails the expansion when `syntax` is not such a literal. */

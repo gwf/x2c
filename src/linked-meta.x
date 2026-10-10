@@ -150,6 +150,16 @@ Code register_rewrite(Code function, Code pattern, List holes) {
   return function.register_rewrite(shape, patterns.list_free());
 }
 
+/** Registers the decorated translator for member calls that find no member
+    on a receiver whose aggregate declares a field with the keyword `mark`. */
+Code register_marked_rewrite(
+  Code function, Code mark, Code pattern, List holes) {
+  Array patterns = [];
+  foreach (Code hole, holes) patterns.push(hole.value());
+  return function.register_marked_rewrite(
+    mark.value(), pattern.value(), patterns.list_free());
+}
+
 /* --- lib/system-macros.x ------------------------------------------------- */
 
 List _dedent_expand(List node) {
@@ -567,6 +577,7 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_meta_member", _meta_member);
   $linked.row(rows, "x2c_type_members", x2c_type_members);
   $linked.row(rows, "register_rewrite", register_rewrite);
+  $linked.row(rows, "register_marked_rewrite", register_marked_rewrite);
   $linked.row(rows, "_dedent_expand", _dedent_expand);
   $linked.row(rows, "_macros_location", _macros_location);
   $linked.row(rows, "_tag_decode_group", _tag_decode_group);

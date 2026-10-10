@@ -191,6 +191,24 @@ int Type.is_text(Type type) {
     type.canonicalize().is_char_pointer_like();
 }
 
+/** Answers `Type.aggregate`, declared in `lib/meta.x`. */
+Type Type.aggregate(Type type) {
+  _sdk_guard("Type.aggregate");
+  return active.expander.sym.aggregate_of(type);
+}
+
+/** Answers `Type.marked_fields`, declared in `lib/meta.x`. */
+List Type.marked_fields(Type aggregate, Symbol mark) {
+  _sdk_guard("Type.marked_fields");
+  return active.expander.sym.marked_fields(aggregate, mark);
+}
+
+/** Answers `Type.resolve_member`, declared in `lib/meta.x`. */
+List Type.resolve_member(Type type, String name, int call) {
+  _sdk_guard("Type.resolve_member");
+  return active.expander.resolve_postfix_member(type, %($name), <.>, call);
+}
+
 /** Selects a callable protocol member in the current compilation context.
     The member's own implementation receives no recursive selection. */
 Code Type.protocol_member(Type type, String name) {
@@ -302,6 +320,19 @@ Code Code.register_rewrite(Code function, Macro shape, List holes) {
   }
   if (!point) MetaContext.reject("unsupported rewrite pattern in spike", NULL);
   return _rewrite_registration(function, shape, holes, point, kind);
+}
+
+/** Registers a translator for member calls that find no member on a
+    receiver whose aggregate declares a field with `mark`. */
+Code Code.register_marked_rewrite(
+  Code function, Symbol mark, Macro shape, List holes) {
+  _sdk_guard("Code.register_marked_rewrite");
+  holes = _rewrite_holes(shape, holes);
+  match (shape.pattern(holes))
+    case %(expr ? (call (expr ? (op ((!quote !quote) .) ? ?)) ?)):
+      return _rewrite_registration(function, shape, holes, <member>, mark);
+  MetaContext.reject("a marked-field rewrite requires a member call pattern",
+    NULL);
 }
 
 /** Adds post-initialization block items while the declaration owner retains

@@ -1242,13 +1242,26 @@ static List Sym._field_row(
 /** Returns recorded fields in source order, or `NULL`. */
 List Sym.field_order(Sym s, Type type) => s.get(%(@type "field-order"));
 
-/** Marks one named aggregate field as a delegate. */
-void Sym.declare_delegate_field(Sym s, Type aggregate, String name) {
-  s.set(%(@aggregate delegate $name), %(delegate));
+/** Records that the named field `name` of `aggregate` was declared with the
+    field keyword `mark`, such as `delegate`. */
+void Sym.mark_field(Sym s, Type aggregate, Symbol mark, String name) {
+  s.set(%(@aggregate $mark $name), %($mark));
+}
+
+/** Returns the `(NAME TYPE)` rows of the fields of `aggregate` declared with
+    `mark`, in declaration order. */
+List Sym.marked_fields(Sym s, Type aggregate, Symbol mark) {
+  List order = s.field_order(aggregate);
+  Array rows = [];
+  foreach (List row, order ? order.cdr() : NULL) {
+    String name = row.car();
+    if (name && s.get(%(@aggregate $mark $name))) rows.push(row);
+  }
+  return rows.list_free();
 }
 
 /** Resolves typedefs or one pointer layer to an aggregate tag, or `NULL`. */
-Type Sym.delegate_aggregate(Sym s, Type type) {
+Type Sym.aggregate_of(Sym s, Type type) {
   type = type.canonicalize();
   int hops = 0;
   while (type && !type.is_aggregate_tag()) {

@@ -1651,7 +1651,7 @@ static void Compiler._declare_delegate(Compiler c, List context, Var binding) {
   String name = binding_identity_spelling(binding);
   if (!name)
     $report.parse.delegate_name(c);
-  if (!c.macro_holes) c.sym.declare_delegate_field(context, name);
+  if (!c.macro_holes) c.mark_field(context, <delegate>, name);
 }
 
 static List Compiler._field_row(Compiler c, List context) {

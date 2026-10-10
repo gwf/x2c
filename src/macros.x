@@ -2596,13 +2596,16 @@ static MacroMatcher *RewriteRule.prepared_matcher(RewriteRule rule) {
    the translator applies. Only the active translator is excluded while its
    replacement binds, so independent translations can compose. User rules
    retain registration order ahead of builtin defaults. */
-static void Compiler._register_rewrite(Compiler c, RewriteRule rule) {
+static void Compiler._register_rewrite(Compiler c, RewriteRule rule) =>
+  c._register_rule(rule, rule.kind);
+
+static void Compiler._register_rule(Compiler c, RewriteRule rule, Var kind) {
   if (!c.rewrite_rules) c.rewrite_rules = {};
   Var stored;
   Map kinds;
   if (c.rewrite_rules.try_get(rule.point, stored)) kinds = stored;
   else c.rewrite_rules[rule.point] = kinds = {};
-  List rows = kinds.try_get(rule.kind, stored) ? stored.list() : NULL;
+  List rows = kinds.try_get(kind, stored) ? stored.list() : NULL;
   foreach (RewriteRule prior, rows)
     if (prior.name == rule.name &&
         prior.matcher.shape == rule.matcher.shape &&
@@ -2617,7 +2620,17 @@ static void Compiler._register_rewrite(Compiler c, RewriteRule rule) {
     ordered.push(prior);
   }
   if (!inserted) ordered.push(rule);
-  kinds[rule.kind] = ordered.list_free();
+  kinds[kind] = ordered.list_free();
+}
+
+/** Records that the field `name` of `aggregate` was declared with the field
+    keyword `mark`, and keys by `aggregate` the member rules registered for
+    `mark`, so they see only calls on receivers that reach it. */
+void Compiler.mark_field(
+  Compiler c, Type aggregate, Symbol mark, String name) {
+  c.sym.mark_field(aggregate, mark, name);
+  foreach (RewriteRule rule, c._rewrite_candidates(<member>, mark))
+    c._register_rule(rule, aggregate);
 }
 
 static List Compiler._rewrite_candidates(Compiler c, Symbol point, Var kind) {

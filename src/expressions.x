@@ -1645,10 +1645,7 @@ static List CallSite._method(CallSite &k, List receiver, List field) {
     return k._finish(k.result_type, callee, NULL, NULL);
   }
   if (!resolution && !k.c.macro_holes && k.c.rewrite_rules) {
-    List source = %(expr () (call
-      (expr () (op . ${k.receiver} ${k.field})) (args @{k.supplied})));
-    List rewritten = k.c.rewrite(
-      <member>, k.type.canonicalize(), source, AST_EXPRESSION, NULL, k.origin);
+    List rewritten = k._member_rewrite();
     if (rewritten) return rewritten;
   }
   if (!resolution) {
@@ -1675,6 +1672,20 @@ static List CallSite._method(CallSite &k, List receiver, List field) {
     }
   }
   return NULL;
+}
+
+/* Member rules are keyed by the receiver's type, then by the aggregate it
+   reaches through typedefs or one pointer, which a marked field keys. */
+static List CallSite._member_rewrite(CallSite &k) {
+  List source = %(expr () (call
+    (expr () (op . ${k.receiver} ${k.field})) (args @{k.supplied})));
+  Type type = k.type.canonicalize(), aggregate = k.c.sym.aggregate_of(k.type);
+  List rewritten = k.c.rewrite(
+    <member>, type, source, AST_EXPRESSION, NULL, k.origin);
+  if (!rewritten && aggregate && aggregate != type)
+    rewritten = k.c.rewrite(
+      <member>, aggregate, source, AST_EXPRESSION, NULL, k.origin);
+  return rewritten;
 }
 
 static List CallSite._lookup(CallSite &k) {
@@ -1892,7 +1903,7 @@ static List Compiler._resolve_delegate_method(
 
 static void DelegateSearch._find(
   DelegateSearch &d, Type receiver, List reverse_path, List seen) {
-  Type aggregate = d.c.sym.delegate_aggregate(receiver);
+  Type aggregate = d.c.sym.aggregate_of(receiver);
   if (!aggregate) return;
   if (aggregate in seen) {
     if (!d.first_cycle)
@@ -2064,7 +2075,7 @@ static void Compiler._completion_owner_methods(
 
 static void Compiler._completion_delegates(
   Compiler c, Type receiver, Map seen, Array names, Map visited) {
-  Type aggregate = c.sym.delegate_aggregate(receiver);
+  Type aggregate = c.sym.aggregate_of(receiver);
   if (!aggregate || aggregate in visited) return;
   visited[aggregate] = 1;
   List order = c.sym.field_order(aggregate);
