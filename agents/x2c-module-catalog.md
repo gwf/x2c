@@ -8,7 +8,7 @@ non-static function definition discovered in source order. It does
 not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
-- Compiler modules: 54
+- Compiler modules: 55
 - Runtime modules: 77
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
@@ -184,6 +184,14 @@ Public functions:
 
 None. This module has no non-static function definitions.
 
+### [src/component-delegate.x](../src/component-delegate.x)
+
+delegate fields.
+
+Public functions:
+
+None. This module has no non-static function definitions.
+
 ### [src/component-try.x](../src/component-try.x)
 
 try, catch, and finally.
@@ -349,10 +357,11 @@ shipped `meta` code compiled into the compiler.
 Public functions:
 
 `x2c_expr_field`, `x2c_expr_cast`, `x2c_decl_make`, `x2c_param_make`,
-`x2c_type_members`, `register_rewrite`, `_dedent_expand`, `_macros_location`,
-`_tag_decode_group`, `_tag_decode_groups`, `_tag_id_checks`,
-`collection_store`, `collection_update`, `collection_prefix`,
-`collection_postfix`, `try_catch_cases`, `try_lowering`, `linked_meta_targets`,
+`x2c_type_members`, `register_rewrite`, `register_marked_rewrite`,
+`_dedent_expand`, `_macros_location`, `_tag_decode_group`,
+`_tag_decode_groups`, `_tag_id_checks`, `collection_store`,
+`collection_update`, `collection_prefix`, `collection_postfix`,
+`delegate_member`, `try_catch_cases`, `try_lowering`, `linked_meta_targets`,
 `linked_meta_hashes`
 
 ### [src/literals.x](../src/literals.x)
@@ -385,30 +394,31 @@ Public functions:
 `Compiler.record_compile_time_effect`, `Compiler.install_compile_time_effects`,
 `Compiler.macro_form_is_definition`, `Compiler.local_macro_form_is_definition`,
 `Compiler.keyword_form_is_definition`, `Compiler.parse_keyword_definition`,
-`Compiler.has_rewrites`, `Compiler.rewrite`, `Compiler.lower_rewrite`,
-`Compiler.watched_step`, `Compiler.macro_starts_target_at`,
-`Compiler.macro_invocation_collection`, `Compiler.skip_macro_invocation`,
-`Compiler.skip_named_type_declaration`, `Compiler.macro_targets_unit`,
-`Compiler.try_parse_macro_target_at`, `Compiler.try_parse_macro_expression`,
-`Compiler.evaluate_macro_slot`, `Compiler.evaluate_macro_rows`,
-`Compiler.evaluate_meta_value`, `Compiler.evaluate_declaration_recipe`,
-`x2c_template_call`, `Compiler.rebuild_expression`,
-`Compiler.rebuild_statement`, `Compiler.rebuild_unit_function`,
-`Compiler.rebuild_function`, `Compiler.land_quotation`,
-`Compiler.macro_value_literal`, `Compiler.try_parse_macro_pattern`,
-`Compiler.macro_pattern_at`, `Compiler.try_parse_macro_subpattern`,
-`Compiler.capture_macro_value`, `Compiler.take_code_value`, `Compiler.place`,
-`Compiler.bind_code_value`, `Compiler.ensure_macro_lisp`,
-`Compiler.parse_macro_lisp_top_level`, `Compiler.parse_macro_lisp_shallow`,
-`Compiler.evaluate_declaration_effect`, `Compiler.parse_macro_lisp_expression`,
-`Compiler.lift_macro_lisp_expression`, `Compiler.bind_macro_lisp_statement`,
-`Compiler.source_path`, `Compiler.open_macro_library`,
-`Compiler.add_library_dependencies`, `Compiler.publish_macro_library`,
-`Compiler.inherits_import`, `Compiler.record_comptime`,
-`Compiler.inherit_library_comptime`, `macro_library_filling`,
-`Compiler.shared_definitions`, `Compiler.shares_meta_definition`,
-`Compiler.install_builtin_macros`, `Compiler.bind_meta_operation`,
-`Compiler.report_lisp_failure`, `macro_library_reset`
+`Compiler.marked_rewrite`, `Compiler.has_rewrites`, `Compiler.rewrite`,
+`Compiler.lower_rewrite`, `Compiler.watched_step`,
+`Compiler.macro_starts_target_at`, `Compiler.macro_invocation_collection`,
+`Compiler.skip_macro_invocation`, `Compiler.skip_named_type_declaration`,
+`Compiler.macro_targets_unit`, `Compiler.try_parse_macro_target_at`,
+`Compiler.try_parse_macro_expression`, `Compiler.evaluate_macro_slot`,
+`Compiler.evaluate_macro_rows`, `Compiler.evaluate_meta_value`,
+`Compiler.evaluate_declaration_recipe`, `x2c_template_call`,
+`Compiler.rebuild_expression`, `Compiler.rebuild_statement`,
+`Compiler.rebuild_unit_function`, `Compiler.rebuild_function`,
+`Compiler.land_quotation`, `Compiler.macro_value_literal`,
+`Compiler.try_parse_macro_pattern`, `Compiler.macro_pattern_at`,
+`Compiler.try_parse_macro_subpattern`, `Compiler.capture_macro_value`,
+`Compiler.take_code_value`, `Compiler.place`, `Compiler.bind_code_value`,
+`Compiler.ensure_macro_lisp`, `Compiler.parse_macro_lisp_top_level`,
+`Compiler.parse_macro_lisp_shallow`, `Compiler.evaluate_declaration_effect`,
+`Compiler.parse_macro_lisp_expression`, `Compiler.lift_macro_lisp_expression`,
+`Compiler.bind_macro_lisp_statement`, `Compiler.source_path`,
+`Compiler.open_macro_library`, `Compiler.add_library_dependencies`,
+`Compiler.publish_macro_library`, `Compiler.inherits_import`,
+`Compiler.record_comptime`, `Compiler.inherit_library_comptime`,
+`macro_library_filling`, `Compiler.shared_definitions`,
+`Compiler.shares_meta_definition`, `Compiler.install_builtin_macros`,
+`Compiler.bind_meta_operation`, `Compiler.report_lisp_failure`,
+`macro_library_reset`
 
 ### [src/main.x](../src/main.x)
 
@@ -481,10 +491,12 @@ the compiler's answers to `lib/meta.x` operations.
 Public functions:
 
 `MetaContext.current`, `Compiler.expanding`, `Type.is_named`, `Type.numeric`,
-`Type.is_text`, `Type.protocol_member`, `Code.type`, `Code.value`,
-`Code.exits`, `Code.is_static_pattern`, `Code.register_rewrite`,
-`Code.register_after_initialization`, `x2c_syntax_type`, `x2c_protocol_member`,
-`x2c_method_resolve`, `builtin_foreach_bindings`, `builtin_foreach_reference`,
+`Type.is_text`, `Type.aggregate`, `Type.marked_fields`, `Type.resolve_member`,
+`Type.protocol_member`, `Code.type`, `Code.value`, `Code.exits`,
+`Code.is_static_pattern`, `Code.register_rewrite`,
+`Code.register_marked_rewrite`, `Code.register_after_initialization`,
+`x2c_syntax_type`, `x2c_protocol_member`, `x2c_method_resolve`,
+`builtin_foreach_bindings`, `builtin_foreach_reference`,
 `x2c_type_is_integral`, `x2c_type_is_pointer`, `x2c_type_element`,
 `x2c_type_parameters`, `x2c_type_return`, `x2c_type_parts`,
 `x2c_type_reverse_name`, `x2c_type_resolve`, `x2c_type_layout`,
@@ -675,8 +687,8 @@ Public functions:
 `Sym.local_type`, `Sym.resolve_numeric_type`, `Sym.var_tag_for_type`,
 `Sym.is_var_type`, `Sym.is_string_type`, `Sym.is_array_type`,
 `Sym.is_map_type`, `Sym.is_named_value_type`, `Sym.lookup_field`,
-`Sym.declare_field_order`, `Sym.field_order`, `Sym.declare_delegate_field`,
-`Sym.delegate_aggregate`, `Compiler.begin_semantic_transaction`,
+`Sym.declare_field_order`, `Sym.field_order`, `Sym.mark_field`,
+`Sym.marked_fields`, `Sym.aggregate_of`, `Compiler.begin_semantic_transaction`,
 `SymTxn.local_macros_changed`, `Sym.transacting`, `Sym.end_log`,
 `SymTxn.commit`, `SymTxn.commit_transient`, `SymTxn.rollback`
 

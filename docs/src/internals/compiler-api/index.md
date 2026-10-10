@@ -22,6 +22,7 @@ Functions and types exposed by each compiler module.
 | [`src/collect.x`](collect.md) | source-ordered shallow symbol collection and replay. |
 | [`src/compiler.x`](compiler.md) | one x2c unit's translation state and its two parses. |
 | [`src/component-access.x`](component-access.md) | Array/Map mutation policy; getter resolution remains with admission. |
+| [`src/component-delegate.x`](component-delegate.md) | delegate fields. |
 | [`src/component-try.x`](component-try.md) | try, catch, and finally. |
 | [`src/deps.x`](deps.md) | Make dependency output for x2c translation units. |
 | [`src/diagnostics.x`](diagnostics.md) | compiler diagnostic storage and rendering. |

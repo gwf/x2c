@@ -26,6 +26,7 @@ The compiler's semantic symbol table.
 | [`Compiler.register_package_member`](#Compiler.register_package_member) | Registers one package member under a bare local spelling. |
 | [`Compiler.semantic_binding_facts`](#Compiler.semantic_binding_facts) | Returns the borrowed semantic-facts map indexed by binding. |
 | [`Compiler.set_fact`](#Compiler.set_fact) | Sets one semantic binding fact. |
+| [`Sym.aggregate_of`](#Sym.aggregate_of) | Resolves typedefs or one pointer layer to an aggregate tag, or `NULL`. |
 | [`Sym.at_file_scope`](#Sym.at_file_scope) | Returns whether declarations currently bind at file scope. |
 | [`Sym.base_symbols`](#Sym.base_symbols) | Copies all base-scope symbols into a fresh map in source order. |
 | [`Sym.bind_identity`](#Sym.bind_identity) | Installs an existing binding with `ast`'s qualifier-preserving type. |
@@ -34,13 +35,11 @@ The compiler's semantic symbol table.
 | [`Sym.current_binding`](#Sym.current_binding) | Returns `key`'s binding in the current scope, or `NULL`. |
 | [`Sym.current_symbols`](#Sym.current_symbols) | Returns the current scope's mutable symbol map, or `NULL`. |
 | [`Sym.declare`](#Sym.declare) | Analyzes a complete declaration type and installs its stored declared type. |
-| [`Sym.declare_delegate_field`](#Sym.declare_delegate_field) | Marks one named aggregate field as a delegate. |
 | [`Sym.declare_enumerator`](#Sym.declare_enumerator) | Associates an enumerator key with its owner in the active scope. |
 | [`Sym.declare_field_order`](#Sym.declare_field_order) | Records declaration AST fields in source order after binding finishes. |
 | [`Sym.define`](#Sym.define) | Defines `key` and returns its stable binding in the active scope. |
 | [`Sym.define_global`](#Sym.define_global) | Defines `key` in the unit's writable base scope. |
 | [`Sym.define_macro`](#Sym.define_macro) | Defines or replaces a macro in the active lexical scope. |
-| [`Sym.delegate_aggregate`](#Sym.delegate_aggregate) | Resolves typedefs or one pointer layer to an aggregate tag, or `NULL`. |
 | [`Sym.drop`](#Sym.drop) | Deletes `key` from `map` so that an active transaction can restore it. |
 | [`Sym.end_log`](#Sym.end_log) | Stops one transaction's semantic write log. |
 | [`Sym.enumerator_owner`](#Sym.enumerator_owner) | Returns the current scope's enum owner for `key`, or zero. |
@@ -61,7 +60,9 @@ The compiler's semantic symbol table.
 | [`Sym.lookup`](#Sym.lookup) | Resolves an existing key and optionally stores its semantic type. |
 | [`Sym.lookup_field`](#Sym.lookup_field) | Returns an aggregate field's declared type, or `NULL`. |
 | [`Sym.lookup_macro`](#Sym.lookup_macro) | Returns the innermost visible local macro named `name`, or `NULL`. |
+| [`Sym.mark_field`](#Sym.mark_field) | Records that the field `name` of `aggregate` was declared with the field keyword `mark`, such as `delegate`, and that `aggregate` declares one. |
 | [`Sym.mark_static`](#Sym.mark_static) | Marks a declaration key as file-static. |
+| [`Sym.marked_fields`](#Sym.marked_fields) | Returns the `(NAME TYPE)` rows of the fields of `aggregate` declared with `mark`, in declaration order. |
 | [`Sym.new`](#Sym.new) | Creates the empty symbol table that compiler `c` owns. |
 | [`Sym.next_typedef`](#Sym.next_typedef) | Resolves one typedef hop and counts against the shared cycle budget. |
 | [`Sym.normalize_declared_type`](#Sym.normalize_declared_type) | Resolves typedef bases while retaining every declarator qualifier. |
@@ -116,7 +117,7 @@ facts, binding and generated-name counters, initializer names, and the
 parser's ancestors and placements. It does not snapshot parser position
 or other compiler state.
 
-Source: `src/symbols.x:1278`
+Source: `src/symbols.x:1292`
 
 <a id="Compiler.drop_fact"></a>
 #### Compiler.drop_fact
@@ -250,6 +251,15 @@ Source: `src/symbols.x:438`
 
 ### `Sym`
 
+<a id="Sym.aggregate_of"></a>
+#### Sym.aggregate_of
+
+`Type Sym.aggregate_of(Sym s, Type type)`
+
+Resolves typedefs or one pointer layer to an aggregate tag, or `NULL`.
+
+Source: `src/symbols.x:1265`
+
 <a id="Sym.at_file_scope"></a>
 #### Sym.at_file_scope
 
@@ -332,15 +342,6 @@ facts. Stored types discard storage and `inline` while retaining `const`,
 
 Source: `src/symbols.x:539`
 
-<a id="Sym.declare_delegate_field"></a>
-#### Sym.declare_delegate_field
-
-`void Sym.declare_delegate_field(Sym s, Type aggregate, String name)`
-
-Marks one named aggregate field as a delegate.
-
-Source: `src/symbols.x:1246`
-
 <a id="Sym.declare_enumerator"></a>
 #### Sym.declare_enumerator
 
@@ -397,15 +398,6 @@ local macro count.
 
 Source: `src/symbols.x:896`
 
-<a id="Sym.delegate_aggregate"></a>
-#### Sym.delegate_aggregate
-
-`Type Sym.delegate_aggregate(Sym s, Type type)`
-
-Resolves typedefs or one pointer layer to an aggregate tag, or `NULL`.
-
-Source: `src/symbols.x:1251`
-
 <a id="Sym.drop"></a>
 #### Sym.drop
 
@@ -422,7 +414,7 @@ Source: `src/symbols.x:134`
 
 Stops one transaction's semantic write log.
 
-Source: `src/symbols.x:1364`
+Source: `src/symbols.x:1378`
 
 <a id="Sym.enumerator_owner"></a>
 #### Sym.enumerator_owner
@@ -597,6 +589,16 @@ Returns the innermost visible local macro named `name`, or `NULL`.
 
 Source: `src/symbols.x:907`
 
+<a id="Sym.mark_field"></a>
+#### Sym.mark_field
+
+`void Sym.mark_field(Sym s, Type aggregate, Symbol mark, String name)`
+
+Records that the field `name` of `aggregate` was declared with the field
+keyword `mark`, such as `delegate`, and that `aggregate` declares one.
+
+Source: `src/symbols.x:1247`
+
 <a id="Sym.mark_static"></a>
 #### Sym.mark_static
 
@@ -605,6 +607,16 @@ Source: `src/symbols.x:907`
 Marks a declaration key as file-static.
 
 Source: `src/symbols.x:243`
+
+<a id="Sym.marked_fields"></a>
+#### Sym.marked_fields
+
+`List Sym.marked_fields(Sym s, Type aggregate, Symbol mark)`
+
+Returns the `(NAME TYPE)` rows of the fields of `aggregate` declared with
+`mark`, in declaration order.
+
+Source: `src/symbols.x:1254`
 
 <a id="Sym.new"></a>
 #### Sym.new
@@ -803,7 +815,7 @@ Source: `src/symbols.x:1021`
 
 Returns whether a semantic transaction is open.
 
-Source: `src/symbols.x:1361`
+Source: `src/symbols.x:1375`
 
 <a id="Sym.unit_symbols"></a>
 #### Sym.unit_symbols
@@ -849,7 +861,7 @@ Its writes are already in the scope maps, so code holding a borrowed
 map observes a committed expansion. An absent or inactive transaction
 has no effect.
 
-Source: `src/symbols.x:1375`
+Source: `src/symbols.x:1389`
 
 <a id="SymTxn.commit_transient"></a>
 #### SymTxn.commit_transient
@@ -860,7 +872,7 @@ Commits an active transaction, retaining the original counters map.
 The caller may then release the transaction's construction scope.
 Parsing and evaluation must allocate outside that temporary scope.
 
-Source: `src/symbols.x:1397`
+Source: `src/symbols.x:1411`
 
 <a id="SymTxn.local_macros_changed"></a>
 #### SymTxn.local_macros_changed
@@ -869,7 +881,7 @@ Source: `src/symbols.x:1397`
 
 Returns whether the transaction's active scope changed its macro map.
 
-Source: `src/symbols.x:1344`
+Source: `src/symbols.x:1358`
 
 <a id="SymTxn.rollback"></a>
 #### SymTxn.rollback
@@ -879,7 +891,7 @@ Source: `src/symbols.x:1344`
 Restores every semantic value captured by an active transaction.
 An absent or inactive transaction has no effect.
 
-Source: `src/symbols.x:1417`
+Source: `src/symbols.x:1431`
 
 ## Public types
 

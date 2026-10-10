@@ -1893,7 +1893,11 @@ temporary, runtime check, symbol, or dispatch table.
 
 Normal method lookup remains first, including direct methods, imported methods,
 protocol-selected methods, and typedef ancestors in their existing order.
-Delegate fields are searched only if those lookups fail. The search visits
+Delegate fields are searched only if those lookups fail, and a member rewrite a
+program registers for the receiver's own type is tried before them. The search
+belongs to the shipped component `src/component-delegate.x`, a translator for
+missed calls that `$rewrite_marked(<delegate>, ...)` registers. It runs only
+for a receiver whose aggregate declares a delegate field. The search visits
 marked fields in source order to produce consistent diagnostics. One resolving
 path is used; two or more are an ambiguity error, regardless of field order. An
 explicit outer method therefore resolves an otherwise ambiguous pair.

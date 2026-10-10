@@ -502,6 +502,8 @@ The modules under `src/` divide ownership as follows:
   through ordinary macro patterns and quotations;
 - `src/component-try.x` -- the try, catch, and finally lowering and its
   templates, registered as a statement rewrite;
+- `src/component-delegate.x` -- the delegate field search, registered as a
+  member rewrite for aggregates that declare a delegate field;
 - `src/operator-ledger.x` -- operator precedence, compound assignment,
   and protocol-member mappings from one compile-time ledger;
 - `src/cli.x`, `src/main.x` -- option metadata and parsing, dispatch, logging,
@@ -723,5 +725,15 @@ finalizer, the exits that close the catch site, claim the finalizer, and
 leave the frame, and the body and each catch arm as regions. The cleanup
 walk lowers the rows in order, places the exits on every transfer out of a
 region, rejects a `goto` into one, and keeps the locals the rows write
-valid when control lands. Both components and `src/grammar.x`, whose source
-forms they recognize, are compiler prelude sources.
+valid when control lands.
+
+`src/component-delegate.x` registers a member call pattern through
+`$rewrite_marked(<delegate>, ...)`. The parser marks each `delegate` field
+of an aggregate; a method call that ordinary lookup misses tests the rules
+registered for the marks its receiver's aggregate declares, after those
+keyed by the receiver's own type. The translator searches the delegate
+fields with `Type.marked_fields` and `Type.resolve_member`, reports an
+ambiguous path or a cycle, and returns the call through the field path as
+a quotation, which ordinary call resolution binds. The components and
+`src/grammar.x`, whose source forms they recognize, are compiler prelude
+sources.

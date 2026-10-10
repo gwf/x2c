@@ -16,8 +16,10 @@ Shipped `meta` code compiled into the compiler.
 | [`collection_prefix`](#collection_prefix) | Stores and returns the incremented or decremented collection value. |
 | [`collection_store`](#collection_store) | Selects the adopted collection setter for indexed assignment. |
 | [`collection_update`](#collection_update) | Selects collection compound updates and checks accepted operands. |
+| [`delegate_member`](#delegate_member) | Rebuilds a call that finds no member on its receiver through the one delegate field path that provides the method. |
 | [`linked_meta_hashes`](#linked_meta_hashes) | Returns linked definition hashes and provider source dependencies. |
 | [`linked_meta_targets`](#linked_meta_targets) | Returns the linked copies, and the runtime builders, by name. |
+| [`register_marked_rewrite`](#register_marked_rewrite) | Registers the decorated translator for member calls that find no member on a receiver whose aggregate declares a field with the keyword `mark`. |
 | [`register_rewrite`](#register_rewrite) | Registers the decorated translator with its macro and hole patterns. |
 | [`try_catch_cases`](#try_catch_cases) | Returns each lowered arm of `arms` chosen by its index in `selected`; `$try_handled` calls this in a slot. |
 | [`try_lowering`](#try_lowering) | Lowers the parsed try `node` to its landing form. |
@@ -35,7 +37,7 @@ Shipped `meta` code compiled into the compiler.
 
 Stores the updated collection value and returns its previous value.
 
-Source: `src/linked-meta.x:352`
+Source: `src/linked-meta.x:363`
 
 #### collection_prefix
 
@@ -43,7 +45,7 @@ Source: `src/linked-meta.x:352`
 
 Stores and returns the incremented or decremented collection value.
 
-Source: `src/linked-meta.x:341`
+Source: `src/linked-meta.x:352`
 
 #### collection_store
 
@@ -51,7 +53,7 @@ Source: `src/linked-meta.x:341`
 
 Selects the adopted collection setter for indexed assignment.
 
-Source: `src/linked-meta.x:286`
+Source: `src/linked-meta.x:297`
 
 #### collection_update
 
@@ -59,7 +61,16 @@ Source: `src/linked-meta.x:286`
 
 Selects collection compound updates and checks accepted operands.
 
-Source: `src/linked-meta.x:314`
+Source: `src/linked-meta.x:325`
+
+#### delegate_member
+
+`Code delegate_member(Code code)`
+
+Rebuilds a call that finds no member on its receiver through the one
+delegate field path that provides the method.
+
+Source: `src/linked-meta.x:465`
 
 #### linked_meta_hashes
 
@@ -67,7 +78,7 @@ Source: `src/linked-meta.x:314`
 
 Returns linked definition hashes and provider source dependencies.
 
-Source: `src/linked-meta.x:688`
+Source: `src/linked-meta.x:808`
 
 #### linked_meta_targets
 
@@ -75,7 +86,16 @@ Source: `src/linked-meta.x:688`
 
 Returns the linked copies, and the runtime builders, by name.
 
-Source: `src/linked-meta.x:551`
+Source: `src/linked-meta.x:662`
+
+#### register_marked_rewrite
+
+`Code register_marked_rewrite( Code function, Code mark, Code pattern, List holes)`
+
+Registers the decorated translator for member calls that find no member
+on a receiver whose aggregate declares a field with the keyword `mark`.
+
+Source: `src/linked-meta.x:156`
 
 #### register_rewrite
 
@@ -83,7 +103,7 @@ Source: `src/linked-meta.x:551`
 
 Registers the decorated translator with its macro and hole patterns.
 
-Source: `src/linked-meta.x:146`
+Source: `src/linked-meta.x:147`
 
 #### try_catch_cases
 
@@ -97,7 +117,7 @@ every arm returns or raises, control cannot leave them, and a final
 unreachable mark tells C so that a function ending in such a `try`
 needs no return after it.
 
-Source: `src/linked-meta.x:384`
+Source: `src/linked-meta.x:495`
 
 #### try_lowering
 
@@ -105,7 +125,7 @@ Source: `src/linked-meta.x:384`
 
 Lowers the parsed try `node` to its landing form.
 
-Source: `src/linked-meta.x:495`
+Source: `src/linked-meta.x:606`
 
 #### x2c_decl_make
 
@@ -113,7 +133,7 @@ Source: `src/linked-meta.x:495`
 
 Declares `name` with `type` and an optional initializer.
 
-Source: `src/linked-meta.x:96`
+Source: `src/linked-meta.x:97`
 
 #### x2c_expr_cast
 
@@ -123,7 +143,7 @@ Returns `expression` cast to `type`, which is a declared type rather
 than syntax. A generator needs it where the value it holds and the
 parameter it reaches differ in width or sign.
 
-Source: `src/linked-meta.x:89`
+Source: `src/linked-meta.x:90`
 
 #### x2c_expr_field
 
@@ -131,7 +151,7 @@ Source: `src/linked-meta.x:89`
 
 Returns the expression `receiver.name`.
 
-Source: `src/linked-meta.x:81`
+Source: `src/linked-meta.x:82`
 
 #### x2c_param_make
 
@@ -139,7 +159,7 @@ Source: `src/linked-meta.x:81`
 
 Returns a parameter named `name` with `type`.
 
-Source: `src/linked-meta.x:104`
+Source: `src/linked-meta.x:105`
 
 #### x2c_type_members
 
@@ -148,7 +168,7 @@ Source: `src/linked-meta.x:104`
 Returns enum members as `(name value)` rows in declaration order.
 An implicit value is nil; a literal value retains its spelling.
 
-Source: `src/linked-meta.x:133`
+Source: `src/linked-meta.x:134`
 
 ## Design notes
 
