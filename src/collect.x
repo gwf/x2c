@@ -1676,8 +1676,8 @@ void interface_configure(String out_dir, int cold) {
    neither. */
 static List Compiler._interface_read(Compiler c, String canonical) {
   if (c.source_facts || !interface_mirror) return NULL;
-  Var record;
-  if (_linked_records().try_get(home_portable_path(canonical), record)) {
+  List record = _linked_record(canonical);
+  if (record) {
     List entry = c._stored_entry(canonical, record);
     if (entry) return entry;
   }
@@ -1743,6 +1743,11 @@ static List _interface_record(String path) {
   String identity = compiler_identity();
   if (!identity || !source.startswith(%"(interface 6 \"$identity\" "))
     return NULL;
+  return _read_record(source);
+}
+
+/* The one List form `source` spells, or NULL. */
+static List _read_record(String source) {
   unsigned cursor = 0;
   Var record = void;
   Symbol status = 0;
@@ -1828,14 +1833,13 @@ static int _read_parts(Array parts, List stored) {
   return 1;
 }
 
-/* A stored row is a two-element list of key and value. A linked record's
-   rows are literals the process root already owns. */
+/* A stored row is a two-element list of key and value. */
 static Map _read_rows(List stored) {
   Map rows = _cache_map();
   foreach (Var row, stored) {
     if (row is not <list> || row.list().len() != 2) return NULL;
     List pair = row;
-    if (!Pool.is_permanent(pair)) _require_retained(pair.try_own());
+    _require_retained(pair.try_own());
     Var (key, value) = pair;
     if (value is <list>) match (value)
       case %(meta-hashes ?provider ?(List stored)): {
@@ -1989,12 +1993,12 @@ static List _renumber_bindings(List node, Map identities) {
 
 // linked prelude
 
-/** Returns the interface record of each prelude component the compiler
-    links, by home-portable path, in the form a loader reads from a `.xi`.
-    Each is walked cold by a compiler of its own, so the records hold this
-    compiler's collection rather than a table linked into it; the unit's
-    own entries for them are restored afterwards. A record that would not
-    read back from its interface is left out. */
+/** Returns the interface record text of each prelude component the
+    compiler links, by home-portable path: the datum its `.xi` holds after
+    the compiler identity. Each is walked cold by a compiler of its own, so
+    the records hold this compiler's collection rather than a table linked
+    into it; the unit's own entries for them are restored afterwards. A
+    record the interface grammar cannot spell is left out. */
 Map Compiler.linked_prelude_records(Compiler c) {
   Map records = {}, saved = {};
   foreach (String source, _linked_prelude_sources()) {
@@ -2013,9 +2017,9 @@ Map Compiler.linked_prelude_records(Compiler c) {
       Map visited = {};
       visited[canonical] = 1;
       walker._walk_apart(canonical, walker._runtime_text(path), {}, visited);
-      Var record = _read_back(
+      String text = _record_text(
         _stored_record(canonical, _process_cache()[canonical]));
-      if (record is <list>) records[home_portable_path(canonical)] = record;
+      if (text) records[home_portable_path(canonical)] = text;
     }
   foreach (Var (canonical, entry), saved)
     if (entry is <list>) _process_cache()[canonical] = entry;
@@ -2024,28 +2028,31 @@ Map Compiler.linked_prelude_records(Compiler c) {
 
 static macro Expression $linked.prelude() => $(_x2c.prelude.linked);
 
-/* The records this compiler was translated with, by home-portable path. */
+/* The record texts this compiler was translated with, by home-portable
+   path. */
 static Map linked_records = NULL;
 
-static Map _linked_records(void) {
-  if (linked_records) return linked_records;
-  _process_cache();
-  $scope(&process_cache_scope) linked_records = $linked.prelude();
-  return linked_records;
+/* The record linked for `canonical`, read as its interface would be, or
+   NULL. */
+static List _linked_record(String canonical) {
+  if (!linked_records) {
+    _process_cache();
+    $scope(&process_cache_scope) linked_records = $linked.prelude();
+  }
+  Var text;
+  if (!linked_records.try_get(home_portable_path(canonical), text))
+    return NULL;
+  return _read_record(text);
 }
 
 /* The compiler-owned prelude sources after the runtime's own. */
 static List _linked_prelude_sources(void) => compiler_prelude_sources().cdr();
 
-/* `record` as the interface reader reads its written form, or void. */
-static Var _read_back(List record) {
+/* `record` as an interface spells it, or NULL when it cannot be spelled. */
+static String _record_text(List record) {
   Buffer out = $auto(Buffer.new(0));
-  if (!datum_write(out, record, 0)) return void;
-  unsigned cursor = 0;
-  Var value = void;
-  try Lisp.read(_interface_lisp(), out, cursor, value);
-  catch %((!or incomplete malformed) *): return void;
-  return value;
+  if (datum_write(out, record, 0)) return out;
+  return NULL;
 }
 
 // cache lifecycle
