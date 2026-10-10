@@ -1923,16 +1923,16 @@ static List _foreach_expand(List declaration, List collection, List body, Var it
   ;  if(List_truth(spec) &&(List_len(targets) == 1 || List_len(Var_list(List_getindex(spec, 2))) >= 2)) return Foreach_with_cursor(&(f), spec);  return Foreach_with_iter(&(f), converter);
 }
 
-List builtin_foreach_reference(String);
+List meta_function_reference(String);
 static List _converter(Type type){
-  return List_equal(Type_list(type), _388) ? builtin_foreach_reference(_389) : Type_protocol_member(type, _390);
+  return List_equal(Type_list(type), _388) ? meta_function_reference(_389) : Type_protocol_member(type, _390);
 }
 
 int Type_is_pointer(Type);
 Type Type_canonicalize(Type);
 int Type_is_integral(Type);
 static List _cursor_spec(List collection_type){
-  if(! _atom_type(List_var(collection_type))) return NULL;  String owner = Var_str(List_car(collection_type));  Code function = builtin_foreach_reference(String_add(owner, _391));  if(! List_truth(function)) return NULL;  Type type = Code_type(function);  List parameters = Type_parameters(type);  List rest = List_cdr(parameters);  Type cursor_parameter = Var_type(List_truth(rest) ? List_car(rest) : List_var(NULL));  List outputs = List_truth(rest) ? List_cdr(rest) : NULL;  if(! List_equal(Type_list(Type_return_type(type)), _393) || ! Var_equal(List_car(parameters), List_var(collection_type)) || ! Type_is_pointer(Type_canonicalize(cursor_parameter))) return NULL;  Type cursor_type = Type_element(cursor_parameter);  if(! Type_is_integral(cursor_type) && ! List_equal(Type_list(cursor_type), collection_type)) return NULL;  if(! List_truth(outputs)) return NULL;  if(! _valid_outputs(outputs)) return NULL;  List output_types = List_map(outputs, _x2c_func_handle_0);  if(Var_equal(List_car(Type_list(cursor_parameter)), Symbol_var(54))) return cons(List_var(function), cons(List_var(cursor_type), cons(List_var(output_types), NULL)));  return cons(List_var(function), cons(List_var(cursor_type), cons(List_var(output_types), _395)));
+  if(! _atom_type(List_var(collection_type))) return NULL;  String owner = Var_str(List_car(collection_type));  Code function = meta_function_reference(String_add(owner, _391));  if(! List_truth(function)) return NULL;  Type type = Code_type(function);  List parameters = Type_parameters(type);  List rest = List_cdr(parameters);  Type cursor_parameter = Var_type(List_truth(rest) ? List_car(rest) : List_var(NULL));  List outputs = List_truth(rest) ? List_cdr(rest) : NULL;  if(! List_equal(Type_list(Type_return_type(type)), _393) || ! Var_equal(List_car(parameters), List_var(collection_type)) || ! Type_is_pointer(Type_canonicalize(cursor_parameter))) return NULL;  Type cursor_type = Type_element(cursor_parameter);  if(! Type_is_integral(cursor_type) && ! List_equal(Type_list(cursor_type), collection_type)) return NULL;  if(! List_truth(outputs)) return NULL;  if(! _valid_outputs(outputs)) return NULL;  List output_types = List_map(outputs, _x2c_func_handle_0);  if(Var_equal(List_car(Type_list(cursor_parameter)), Symbol_var(54))) return cons(List_var(function), cons(List_var(cursor_type), cons(List_var(output_types), NULL)));  return cons(List_var(function), cons(List_var(cursor_type), cons(List_var(output_types), _395)));
 }
 
 static int _atom_type(Var type){
@@ -1978,7 +1978,7 @@ static List _cursor_assignments(List targets, List outputs){
 
 List builtin_foreach_complete(List);
 static List Foreach_with_iter(Foreach * f, List converter){
-  List constructor = Foreach_constructor(&((* f)), converter);  List item_expression = _expr(_388, (* f).item);  List initializer = builtin_foreach_complete(List_truth(constructor) ? _iter_call(constructor, (* f).collection) :(* f).collection);  Code next = builtin_foreach_reference(_414);  List output = Var_list(List_getindex(Type_parameters(Code_type(next)), 1));  List item_argument = Var_equal(List_car(output), Symbol_var(54)) ? _address(item_expression) : item_expression;  List condition =({
+  List constructor = Foreach_constructor(&((* f)), converter);  List item_expression = _expr(_388, (* f).item);  List initializer = builtin_foreach_complete(List_truth(constructor) ? _iter_call(constructor, (* f).collection) :(* f).collection);  Code next = meta_function_reference(_414);  List output = Var_list(List_getindex(Type_parameters(Code_type(next)), 1));  List item_argument = Var_equal(List_car(output), Symbol_var(54)) ? _address(item_expression) : item_expression;  List condition =({
     List _x2c_hole_2 = _expr(_379, (* f).iterator);  cons(_2, cons(_3, cons(List_var(cons(_4, cons(_7, cons(List_var(({
       Var _x2c_literal_part_17 = List_var(cons(_25, cons(_129, cons(_130, cons(List_var(next), NULL)))));  Var _x2c_literal_part_18 = List_var(({
         Var _x2c_literal_part_15 = List_var(cons(_25, cons(_129, cons(_130, cons(List_var(_x2c_hole_2), NULL)))));  Var _x2c_literal_part_16 = List_var(cons(_25, cons(_129, cons(_130, cons(List_var(item_argument), NULL)))));  cons(_23, cons(_x2c_literal_part_15, cons(_x2c_literal_part_16, NULL)));
@@ -2013,7 +2013,7 @@ static List Foreach_loop(Foreach * f, List condition, List body, List setup){
 }
 
 static List Foreach_constructor(Foreach * f, List converter){
-  List type =(* f).type;  int atom = _atom_type(List_var(type));  String owner = atom ? Var_str(List_car(type)) : _416;  List enumerate = NULL;  if(List_len((* f).targets) == 2 && atom && ! List_equal(type, _379)) enumerate = builtin_foreach_reference(String_add(owner, _417));  return List_truth(enumerate) ? enumerate : converter;
+  List type =(* f).type;  int atom = _atom_type(List_var(type));  String owner = atom ? Var_str(List_car(type)) : _416;  List enumerate = NULL;  if(List_len((* f).targets) == 2 && atom && ! List_equal(type, _379)) enumerate = meta_function_reference(String_add(owner, _417));  return List_truth(enumerate) ? enumerate : converter;
 }
 
 static List _iter_call(List function, List collection){
@@ -2067,12 +2067,12 @@ static List _assign(List target, List value){
   )), NULL)))), NULL))), NULL))), NULL)));
 }
 
-List builtin_class_location(void);
+List meta_invocation_location(void);
 static List _class_expand(List capture){
   String owner = Var_string(List_getindex(capture, 1));  Type type = Var_type(List_getindex(capture, 2));  if(! List_truth(Type_list(type))) return cons(List_var(capture), NULL);  if(! Type_is_pointer(Type_canonicalize(type)) && Var_equal(List_car(Type_list(type)), Symbol_var(357722))) x2c_diagnostic_fail(String_add(String_join(NULL, cons(String_var(_450), cons(String_var(owner), cons(String_var(_451), NULL)))), _452), _455);
   return({
     Var _x2c_literal_part_50 = List_var(capture);  Var _x2c_literal_part_51 = List_var(cons(_456, cons(_457, cons(List_var(({
-      Var _x2c_literal_part_47 = String_var(owner);  Var _x2c_literal_part_48 = List_var(type);  Var _x2c_literal_part_49 = List_var(builtin_class_location());  cons(_x2c_literal_part_47, cons(_x2c_literal_part_48, cons(_x2c_literal_part_49, NULL)));
+      Var _x2c_literal_part_47 = String_var(owner);  Var _x2c_literal_part_48 = List_var(type);  Var _x2c_literal_part_49 = List_var(meta_invocation_location());  cons(_x2c_literal_part_47, cons(_x2c_literal_part_48, cons(_x2c_literal_part_49, NULL)));
     }
     )), NULL))));  cons(_x2c_literal_part_50, cons(_x2c_literal_part_51, NULL));
   }
@@ -2880,7 +2880,7 @@ static List _binding_target(String bind_name, String name, String maker){
 }
 
 static List _binding_name_signature(String name){
-  return binding_native_type(builtin_foreach_reference(name));
+  return binding_native_type(meta_function_reference(name));
 }
 
 Map builtin_targets(void){

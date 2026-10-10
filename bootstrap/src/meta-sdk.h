@@ -68,7 +68,7 @@ Code Code_register_after_initialization(Code c, Macro shape, List holes);
 
 List builtin_foreach_bindings(List declaration);
 
-List builtin_foreach_reference(String name);
+List meta_function_reference(String name);
 
 Type Type_element(Type type);
 
@@ -114,7 +114,7 @@ String Code_source_text(Var value);
 
 String x2c_embed_text(Var requested);
 
-List builtin_class_location(void);
+List meta_invocation_location(void);
 
 String x2c_invocation_file(void);
 

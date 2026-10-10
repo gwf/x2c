@@ -1258,9 +1258,9 @@ int Type_is_function(Type);
 
 
 
-List builtin_foreach_reference(String name){
+List meta_function_reference(String name){
   if(! _init_guard_) _file_init_();  Compiler c = active.evaluator;  if(! c){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/meta-sdk.x",.function = "builtin_foreach_reference",.line = 501};  x2c_error_raise_n(& _x2c_error_site_0, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("_x2c.function.reference")), NULL))));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/meta-sdk.x",.function = "meta_function_reference",.line = 501};  x2c_error_raise_n(& _x2c_error_site_0, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("_x2c.function.reference")), NULL))));  __builtin_unreachable();
   }
   Type type = NULL;  List binding = Sym_lookup(c -> sym, cons(String_var(name), NULL), &(type));  if(! List_truth(binding) || ! List_truth(Type_list(type)) || ! Type_is_function(type)) return NULL;  return({
     Var _x2c_literal_part_8 = List_var(type);  Var _x2c_literal_part_9 = List_var(cons(_34, cons(List_var(binding), NULL)));  cons(_11, cons(_x2c_literal_part_8, cons(_x2c_literal_part_9, NULL)));
@@ -1766,20 +1766,20 @@ return 0;
 }
 
 List Compiler_token_location(Compiler, Token);
-List builtin_class_location(void){
+List meta_invocation_location(void){
   if(! _init_guard_) _file_init_();  if(! active.expander || ! active.site) MetaContext_reject(_546, NULL);  return Compiler_token_location(active.expander, active.site);
 }
 
 String x2c_invocation_file(void){
-  if(! _init_guard_) _file_init_();  return Var_string(List_assoc(builtin_class_location(), Symbol_var(412426)));
+  if(! _init_guard_) _file_init_();  return Var_string(List_assoc(meta_invocation_location(), Symbol_var(412426)));
 }
 
 int x2c_invocation_line(void){
-  if(! _init_guard_) _file_init_();  return Var_int(Var_convert(List_assoc(builtin_class_location(), Symbol_var(805770)), 3453797));
+  if(! _init_guard_) _file_init_();  return Var_int(Var_convert(List_assoc(meta_invocation_location(), Symbol_var(805770)), 3453797));
 }
 
 int x2c_invocation_column(void){
-  if(! _init_guard_) _file_init_();  return Var_int(Var_convert(List_assoc(builtin_class_location(), Symbol_var(233614172)), 3453797));
+  if(! _init_guard_) _file_init_();  return Var_int(Var_convert(List_assoc(meta_invocation_location(), Symbol_var(233614172)), 3453797));
 }
 
 void x2c_diagnostic_fail(String message, List notes){
@@ -1941,7 +1941,7 @@ static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func
 }
 
 static Var _x2c_func_adapt_2(Func _x2c_func_binding_2, const FuncArg * _x2c_func_argv_2){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_2, _x2c_func_argv_2, 0, 1318210446));  return List_var(builtin_foreach_reference(a0)); ;
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_2, _x2c_func_argv_2, 0, 1318210446));  return List_var(meta_function_reference(a0)); ;
 }
 
 static Var _x2c_func_adapt_3(Func _x2c_func_binding_3, const FuncArg * _x2c_func_argv_3){

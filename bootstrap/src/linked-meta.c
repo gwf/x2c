@@ -9427,7 +9427,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_17(void){
   _8853 = cons(_513, _8852);
   _8854 = String_new("src/builtins.x");
   _8855 = String_var(_8854);
-  _8856 = String_new("9e8a0fbf");
+  _8856 = String_new("25293c5c");
   _8857 = String_var(_8856);
   _8858 = String_new("cwd:./lisp.x");
   _8859 = String_var(_8858);
@@ -9570,7 +9570,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_17(void){
   _8996 = List_var(_8995);
   _8997 = String_new("src/meta-sdk.x");
   _8998 = String_var(_8997);
-  _8999 = String_new("79609b85");
+  _8999 = String_new("4d0f0ae6");
   _9000 = String_var(_8999);
   _9001 = cons(_9000, NULL);
   _9002 = cons(_8998, _9001);
