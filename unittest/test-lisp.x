@@ -1000,6 +1000,27 @@ static void lisp_datum_atom_round_trips(void) {
   }
 }
 
+/* A written Symbol reads back as itself in both modes, and plain data reads
+   back through `Lisp.read` too. The empty Symbol has no plain spelling. */
+static void lisp_datum_symbol_round_trips(void) {
+  foreach (String spelling, %("<<" "<x" "a b" "<<=" "a\"b" "a\\b" "line\n"))
+    for (int tagged = 0; tagged < 2; tagged++) {
+      Symbol symbol = Symbol.new(spelling);
+      Buffer out = $auto(Buffer.new(0));
+      EXPECT_TRUE(datum_write(out, symbol, tagged));
+      unsigned cursor = 0;
+      Var back = void;
+      EXPECT_TRUE(datum_read(out.str(), cursor, back));
+      EXPECT_VAR_EQ(back, Symbol.var(symbol));
+      if (tagged) continue;
+      cursor = 0;
+      EXPECT_INT_EQ(Lisp.read(NULL, out.str(), cursor, back), <value>);
+      EXPECT_VAR_EQ(back, Symbol.var(symbol));
+    }
+  Buffer out = $auto(Buffer.new(0));
+  EXPECT_FALSE(datum_write(out, (Symbol) 0, 0));
+}
+
 
 static void lisp_pattern_matching_operations(void) {
   Lisp lisp = Lisp.new();
@@ -1975,6 +1996,7 @@ void lisp_suite(void) {
   $test.run(lisp_read_fences_nesting_depth);
   $test.run(lisp_plain_datum_read_matches_reader);
   $test.run(lisp_datum_atom_round_trips);
+  $test.run(lisp_datum_symbol_round_trips);
   $test.run(lisp_pattern_matching_operations);
   $test.run(lisp_match_case_dispatch);
   $test.run(lisp_bare_session_has_only_primitives);

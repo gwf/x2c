@@ -90,7 +90,8 @@ static int _write_atom(Buffer out, Var value, int tagged) {
     out.printf(
       "(%s %s)", value is <symbol> ? "x2c.symbol" : "x2c.atom",
       (char *) text.repr());
-  else if (value is <symbol>) out.write(value.repr());  // `<"<<">`
+  else if (value is <symbol> && value.symbol())
+    out.write(value.repr());  // `<"<<">`
   else return 0;
   return 1;
 }
@@ -231,7 +232,7 @@ static int _plain_atom(char *s, unsigned &at, Var &out) {
   while (!_token_end(s[at + length])) length++;
   String spelling = String.new_len(s + at, length);
   if (!Atom.bare_spelling(spelling)) return 0;
-  out = Atom.intern(_unescaped(spelling));
+  out = Atom.intern(spelling);
   at += length;
   return 1;
 }

@@ -232,6 +232,7 @@ static void atom_bare_spelling_owns_writer_contract(void) {
   EXPECT_FALSE(Atom.bare_spelling("}x"));
   EXPECT_FALSE(Atom.bare_spelling("<x"));
   EXPECT_FALSE(Atom.bare_spelling(%"\\x"));
+  EXPECT_FALSE(Atom.bare_spelling(%"a\\b"));
   EXPECT_FALSE(Atom.bare_spelling("a b"));
   EXPECT_FALSE(Atom.bare_spelling("a\"b"));
   EXPECT_FALSE(Atom.bare_spelling("a//b"));

@@ -220,12 +220,12 @@ Buffer Symbol.write_repr(Symbol symbol, Buffer out) {
   out.write_char('<');
   if (!(symbol & 1)) out.write(text);
   else {
-    out.write("\\\"");
+    out.write_char('"');
     for (const char *src = text; *src; src++) {
       if (*src == '\\' || *src == '"') out.write_char('\\');
       out.write_char(*src);
     }
-    out.write("\\\"");
+    out.write_char('"');
   }
   return out.write_char('>');
 }

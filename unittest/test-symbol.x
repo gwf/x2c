@@ -73,23 +73,23 @@ static void symbol_repr_variants(void) {
 
   Symbol complex = <"Token@!">;
   String repr_complex = complex.repr();
-  EXPECT_STR_EQ(repr_complex, "<\\\"Token@!\\\">");
+  EXPECT_STR_EQ(repr_complex, "<\"Token@!\">");
 
   Symbol escaped = Symbol.new("line\n");
-  String repr_escaped = escaped.repr(), repr_expected = "<\\\"line\n\\\">";
+  String repr_escaped = escaped.repr(), repr_expected = "<\"line\n\">";
   EXPECT_STR_EQ(repr_escaped, repr_expected);
 }
 
 static void symbol_repr_short_7bit_values(void) {
   Symbol one = Symbol.new("@"), two = Symbol.new("@#");
-  EXPECT_STR_EQ(one.repr(), "<\\\"@\\\">");
-  EXPECT_STR_EQ(two.repr(), "<\\\"@#\\\">");
+  EXPECT_STR_EQ(one.repr(), "<\"@\">");
+  EXPECT_STR_EQ(two.repr(), "<\"@#\">");
 }
 
 static void symbol_repr_uses_encoding(void) {
   Symbol forced = ((((((Symbol) 'A' << 7) | 'B') << 7) | 'C') << 1) | 1;
   EXPECT_STR_EQ(forced.str(), "ABC");
-  EXPECT_STR_EQ(forced.repr(), "<\\\"ABC\\\">");
+  EXPECT_STR_EQ(forced.repr(), "<\"ABC\">");
 
   Buffer out = Buffer.new(0);
   forced.write_repr(out);
@@ -109,6 +109,15 @@ static void symbol_repr_escapes_match_writer(void) {
   out.clear();
   slash.write_repr(out);
   EXPECT_STR_EQ(out.str_free(), slash.repr());
+}
+
+/* A repr is the Symbol literal, which parses back as the same Symbol. */
+static void symbol_repr_parses_back(void) {
+  foreach (String spelling,
+           %("alpha" "<<" "<<=" "a b" "a\"b" "a\\b" ">>" "Token@!")) {
+    Symbol symbol = Symbol.new(spelling);
+    EXPECT_INT_EQ(Symbol.parse(symbol.repr()), symbol);
+  }
 }
 
 static void symbol_parse_modes(void) {
@@ -170,6 +179,7 @@ void symbol_suite(void) {
   $test.run(symbol_repr_short_7bit_values);
   $test.run(symbol_repr_uses_encoding);
   $test.run(symbol_repr_escapes_match_writer);
+  $test.run(symbol_repr_parses_back);
   $test.run(symbol_parse_modes);
   $test.run(symbol_parse_malformed_returns_zero);
   $test.run(symbol_parse_empty_quoted);
