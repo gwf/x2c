@@ -1293,4 +1293,76 @@ printf '%s\n' '#include "lib.x"' \
 cmp -s "$redeclared/cold/unit.c" "$redeclared/warm/unit.c" ||
   fail "a declaration after an include replayed differently"
 
+# Declaration bounds may execute native code with provider-local state.
+# Cached parents, repeated includes and serial consumers preserve cold order.
+native="$BUILD/native-effects"
+mkdir -p "$native/cold" "$native/warm" "$native/serial"
+cat >"$native/provider.x" <<'EOF'
+#pragma once
+meta static int count = 0;
+meta int cache_next(void) { return ++count; }
+int first[$cache_next()];
+int second[$cache_next()];
+EOF
+cat >"$native/parent.x" <<'EOF'
+#pragma once
+#include "provider.x"
+int third[$cache_next()];
+EOF
+for unit in a b; do
+  cat >"$native/$unit.x" <<'EOF'
+#include "parent.x"
+#include "provider.x"
+int answer(void) => $cache_next();
+EOF
+done
+"$X2C" translate -j1 --out-dir "$native/cold" "$native/a.x" >/dev/null
+"$X2C" translate -j1 --out-dir "$native/warm" \
+  "$native/provider.x" "$native/parent.x" >/dev/null
+for repeat in 1 2; do
+  "$X2C" translate -j1 --out-dir "$native/warm" "$native/a.x" >/dev/null
+  cmp "$native/cold/a.c" "$native/warm/a.c" ||
+    fail "native declaration effects changed with interface replay"
+done
+"$X2C" translate -j1 --out-dir "$native/serial" \
+  "$native/a.x" "$native/b.x" >/dev/null
+for unit in a b; do
+  grep -q 'return 4;' "$native/serial/$unit.c" ||
+    fail "native declaration effects changed between units"
+done
+
+# Native arrays use the same per-unit reset as mutable meta scalars.
+cat >"$native/arrays.x" <<'EOF'
+#pragma once
+meta static int seed = 0;
+meta static int start(void) => ++seed + 2;
+meta static int counts[2][2] = {{0, 1}, [1] = {2, 3}};
+meta static struct { int value; } records[2] = {{4}, {5}};
+meta static char chars[8] = "abc";
+meta static int inferred[] = {1, 2, 3};
+meta static char text[] = "abc";
+meta static int dynamic[2] = {start(), start() + 1};
+meta static int dynamic_inferred[] = {start(), start()};
+meta int arrays_next(void) {
+  if (seed != 4 || dynamic_inferred[0] != 5 ||
+      dynamic_inferred[1] != 6 ||
+      (counts[1][1] == 3 && chars[7])) return 999;
+  chars[7] = 1;
+  return ++counts[1][1] + ++records[1].value + ++chars[0] +
+         ++inferred[2] + ++text[0] + ++dynamic[0];
+}
+EOF
+for unit in aa bb; do
+  printf '#include "arrays.x"\nint %s[$arrays_next()];\n' "$unit" >"$native/$unit.x"
+done
+for jobs in 1 2; do
+  mkdir -p "$native/arrays-$jobs"
+  "$X2C" translate -j"$jobs" --out-dir "$native/arrays-$jobs" \
+    "$native/aa.x" "$native/bb.x" >/dev/null
+  for unit in aa bb; do
+    grep -q "int $unit\[220\];" "$native/arrays-$jobs/$unit.c" ||
+      fail "mutable meta arrays did not reset with $jobs workers"
+  done
+done
+
 echo "header cache probes passed"

@@ -130,6 +130,19 @@ static List Compiler._entry(Compiler c, String canonical) {
   return c._interface_read(canonical);
 }
 
+/* Native declaration calls can change provider state. Only their cold walk
+   reproduces both the signatures and effects in the provider's own session. */
+static List Compiler._collection_entry(Compiler c, String path) {
+  List entry = c._entry(path);
+  if (!entry || path in c.collection_native_files) return entry;
+  foreach (Var part, entry.car())
+    if (part is <map> && %("collection-native") in part.map()) {
+      _process_cache().del(path);
+      return NULL;
+    }
+  return entry;
+}
+
 static String _content_hash(String text) => "%08x".printf(text.hash());
 
 static void _cache_dependency(Map dependencies, String path, Var hash) {
@@ -266,6 +279,7 @@ static void Compiler._walk_file(
   tokenizer.scan();
   /* Keyword aliases are file-local, and every segment parses in the syntax
      the whole file selected. */
+  $let(c.collection_native, 0)
   $let(c.declaration_effects, NULL) $let(c.kw_aliases, {})
   $let(c.layout, tokenizer.layout) {
     FileWalk w = {
@@ -361,6 +375,7 @@ static void FileWalk.parse(FileWalk &w, String segment, Map overlay) {
   defer w.c.close_child(shadow);
   w.prepare(shadow, segment);
   shadow.shallow_parse_overlay(w.globs, overlay);
+  w.c.collection_native |= shadow.collection_native;
   w.linkage = shadow.open_linkage;
   shadow.return_unit_state(w.c);
   w.merge(shadow, overlay);
@@ -543,10 +558,10 @@ static void FileWalk.include(FileWalk &w, String target, int angle) {
     w.c.sources, w.c.include_dirs, w.dir, target, angle, covered, w);
   if (!path || (covered && !is_source_file(path))) return;
   String canonical = _canonical_path(path);
-  List entry = w.c._entry(canonical);
   w.c.add_translation_dependency(canonical);
   if (!(canonical in w.visited)) {
     w.visited[canonical] = 1;
+    List entry = w.c._collection_entry(canonical);
     if (!entry) entry = w.c._walk_cold(target, canonical, w.globs, w.visited);
     w.c._replay_cached(
       entry, canonical, w.globs, w.visited, NULL);
@@ -1113,6 +1128,10 @@ static void FileWalk.publish(FileWalk &w) {
   if (w.unit) {
     Map metadata = _cache_map();
     String provider = home_portable_path(w.path);
+    if (w.c.collection_native) {
+      metadata[%("collection-native")] = 1;
+      w.c.collection_native_files[w.path] = 1;
+    }
     // Keep the walk's proof before inline typing enriches entry dependencies.
     metadata[%("source-node" (provider-source $provider 0))] =
       %(source $hash ${_stored_dependencies(w.dependencies)});
@@ -1317,7 +1336,7 @@ static void Compiler._replay_include(
   c.add_translation_dependency(path);
   if (path in visited) return;
   visited[path] = 1;
-  List entry = c._entry(path);
+  List entry = effects != NULL ? c._entry(path) : c._collection_entry(path);
   if (!entry) entry = c._walk_cold(path, path, globs, visited);
   c._replay_cached(entry, path, globs, visited, effects);
 }

@@ -100,6 +100,7 @@ static typedef struct Call {
     does, or else the unit's. */
 Var Compiler.meta_helper_call(
   Compiler c, String name, Token site, List arguments, String provider) {
+  if (c.shallow) c.collection_native = 1;
   String file = provider ? real_path(home_absolute_path(provider))
                          : real_path(c.token_source(site, NULL));
   Call call = {

@@ -236,7 +236,7 @@ static List Compiler._defer_binding(
             List target = $!($declared){ $name };
             List assign = c._array_block(target, resolved, items);
             List binding = q.record(name, mods, assign);
-            List zero = c._zero_initializer(value);
+            List zero = c.zero_initializer(value);
             return %(op = $binding (expr $type $zero));
           }
         return bound;
@@ -288,7 +288,7 @@ static List _assignment(List binding, List type, List rhs) =>
 
 /* Preserve native initializer shape so C infers dimensions and checks
    designators before cached values are assigned during initialization. */
-static List Compiler._zero_initializer(Compiler c, List value) {
+List Compiler.zero_initializer(Compiler c, List value) {
   List zero = %(expr (int) (literal (int) "0"));
   match (value) {
     case %(expr ?type (!set ?body (initval *))): {
@@ -297,7 +297,7 @@ static List Compiler._zero_initializer(Compiler c, List value) {
       Array zeroed = [];
       foreach (List choice, cases) {
         (List condition, List path, Type destination, List input) = choice;
-        List zero = c._zero_initializer(input);
+        List zero = c.zero_initializer(input);
         match (zero)
           case %(expr ?type (!set ?body (composite *))):
             zero = _initializer_rhs(type, NULL, NULL, type, body);
@@ -306,7 +306,7 @@ static List Compiler._zero_initializer(Compiler c, List value) {
       return %(expr $type (initval @{zeroed.list_free()}));
     }
     case %(expr ?type (!set ?inner (composite *))):
-      return %(expr $type ${c._zero_initializer(inner)});
+      return %(expr $type ${c.zero_initializer(inner)});
     case %(expr ?type ?): {
       Type resolved = c.sym.resolve_key(type);
       return resolved.is_aggregate()
@@ -315,11 +315,11 @@ static List Compiler._zero_initializer(Compiler c, List value) {
     case %(composite (commas *items)): {
       Array zeroed = [];
       foreach (List item, items)
-        zeroed.push(c._zero_initializer(item));
+        zeroed.push(c.zero_initializer(item));
       return %(composite (commas @{zeroed.list_free()}));
     }
     case %((!set ?tag (!or dotinit indexinit)) ?key ?inner):
-      return %($tag $key ${c._zero_initializer(inner)});
+      return %($tag $key ${c.zero_initializer(inner)});
   }
   return zero;
 }

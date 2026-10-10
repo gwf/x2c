@@ -641,7 +641,17 @@ static Map Compiler._initial_copies(Compiler c, Array units) {
                                      ?initializer))))): {
         Type type =
           %(declare $spec (bindings $bound)).type_from_ast().declared();
-        if (<const> in type || type.is_array()) continue;
+        if (<const> in type) continue;
+        if (type.is_array()) {
+          List zero = _braced(initializer)
+            ? c.zero_initializer(initializer) : initializer;
+          if (c.meta_build)
+            for (int i = 0; i < (int) units.len(); i++)
+              if (units[i] == declaration)
+                units[i] = %(declare $spec (bindings
+                  (op = $bound $zero)));
+          continue;
+        }
         int copied = _braced(initializer) &&
                      (!c.meta_build || type.tag().car() is <list>);
         if (!c.meta_build && !copied) continue;
@@ -736,11 +746,20 @@ static List Compiler._resets(Compiler c, Map initials) {
                                      ?initializer)))): {
         Type type =
           %(declare $spec (bindings $bound)).type_from_ast().declared();
-        if (<const> in type || type.is_array()) continue;
+        if (<const> in type) continue;
         Var initial;
         if (initials.try_get(binding, initial)) initializer = initial;
         List target = %(expr $type (ident $binding));
-        resets.push(
+        if (type.is_array()) {
+          if (!_braced(initializer))
+            initializer = %(expr () (composite (commas $initializer)));
+          Type native = %("__typeof__" (parens $target));
+          initializer = %(expr $type (cast $native
+            ${c.convert_initializer(initializer, type, target)}));
+          resets.push(c.rebuild_statement(
+            $!{ memcpy($target, $initializer, sizeof($target)); }).cadr());
+        }
+        else resets.push(
           c.rebuild_statement($!{ $target = $initializer; }).cadr());
       }
   return resets.list_free();

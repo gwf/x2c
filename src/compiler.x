@@ -193,6 +193,8 @@ typedef struct Compiler {
   int runtime_inc, runtime_hdrs, collect_protocols, shallow, source_private;
   int public_bodies;  // Cold interfaces bind only exposed inline bodies.
   int interface_provider, signature_only;
+  int collection_native;  // Declaration collection executed project meta code.
+  Map collection_native_files;  // Providers collected in this unit.
   Array pending_inline_bodies;
   /* Whether the source is in the indentation syntax whatever its name, as
      when collection parses a segment of a file whose pragma it saw. */
@@ -2836,13 +2838,15 @@ static void Compiler._share_unit(Compiler c, Compiler owner) {
                source_map, recovery_depth, sources, declaration_produced,
                source_facts, source_occurrences, source_definitions,
                source_declarations, source_texts, unit_script, include_dirs,
-               meta_build, evaluated_effects, pending_inline_bodies);
+               meta_build, evaluated_effects, pending_inline_bodies,
+               collection_native_files);
 }
 
 /* The first compiler of a unit creates the state its children share and
    starts from the shared session's compile-time-only definitions. */
 static void Compiler._own_unit(Compiler c) {
   c.pending_inline_bodies = [];
+  c.collection_native_files = {};
   c.inherit_library_comptime();
   $set_fields(c, {}, package_roots, package_aliases, package_members,
               package_effects);
