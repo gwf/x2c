@@ -5013,7 +5013,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_8(void){
   _4416 = String_var(_4415);
   _4417 = String_new("lib/meta.x");
   _4418 = String_var(_4417);
-  _4419 = String_new("4dc1387e");
+  _4419 = String_new("3e3c67b5");
   _4420 = String_var(_4419);
   _4421 = cons(_4420, NULL);
   _4422 = cons(_4418, _4421);
@@ -9773,7 +9773,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_17(void){
   _9149 = List_var(_9148);
   _9150 = String_new("src/macros.x");
   _9151 = String_var(_9150);
-  _9152 = String_new("8d68f3b7");
+  _9152 = String_new("b4e6671d");
   _9153 = String_var(_9152);
   _9154 = cons(_9153, NULL);
   _9155 = cons(_9151, _9154);
@@ -9899,7 +9899,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_18(void){
   _9272 = List_var(_9271);
   _9273 = String_new("src/meta-sdk.x");
   _9274 = String_var(_9273);
-  _9275 = String_new("9c54e2eb");
+  _9275 = String_new("bccad266");
   _9276 = String_var(_9275);
   _9277 = cons(_9276, NULL);
   _9278 = cons(_9274, _9277);

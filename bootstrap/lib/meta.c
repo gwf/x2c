@@ -55,6 +55,18 @@ Code Code_promoted(Code value);
 
 Code Code_lowered(Code code);
 
+String Code_binding_spelling(Var syntax);
+
+String Code_source_text(Var syntax);
+
+String Code_name(Code function);
+
+Code Code_parameter(Code function, String name);
+
+List Code_body(Code function);
+
+List Code_arguments(Code parameters);
+
 Code Code_register_rewrite(Code function, List pattern, List holes);
 
 Code Code_register_after_initialization(Code function, Macro shape, List holes);
@@ -76,6 +88,28 @@ Type Type_aggregate(Type type);
 List Type_marked_fields(Type aggregate, Symbol mark);
 
 List Type_resolve_member(Type type, String name, int call);
+
+List Type_fields(Type type);
+
+List Type_layout(Type type);
+
+List Type_parts(Type type);
+
+Type Type_resolve(Type type);
+
+List Type_members(Type type);
+
+int Type_is_value(Type type);
+
+Type Type_element(Type type);
+
+List Type_parameters(Type type);
+
+Type Type_return_type(Type type);
+
+Symbol Type_tag_name(String name);
+
+String Type_reverse_name(String base, String participant);
 
 Var x2c_literal_value(Var syntax);
 

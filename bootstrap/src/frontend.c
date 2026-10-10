@@ -38,11 +38,11 @@ ParsedUnit;
 #include "collect.h"
 #include "deps.h"
 #include "utils.h"
-static List _74, _73, _69, _68, _66, _64, _60, _59, _58, _57, _39, _38, _32, _31, _30, _21, _20, _13;
+static List _76, _75, _71, _70, _68, _66, _62, _61, _60, _59, _39, _38, _32, _31, _30, _21, _20, _13;
 
-static String _71, _62, _55, _53, _51, _49, _48, _47, _46, _45, _44, _42, _41, _40, _36, _34, _33, _28, _26, _24, _23, _17, _16, _15, _14, _11, _10, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _73, _64, _57, _55, _53, _51, _50, _49, _48, _47, _46, _45, _44, _42, _41, _40, _36, _34, _33, _28, _26, _24, _23, _17, _16, _15, _14, _11, _10, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
-static Var _72, _70, _67, _65, _63, _61, _56, _54, _52, _50, _43, _37, _35, _29, _27, _25, _22, _19, _18, _12, _9;
+static Var _74, _72, _69, _67, _65, _63, _58, _56, _54, _52, _43, _37, _35, _29, _27, _25, _22, _19, _18, _12, _9;
 
 static int _init_guard_ = 0;
 
@@ -132,7 +132,7 @@ static Func _x2c_func_handle_0;
 
 
 
-_x2c_initializer_choice_1A2A7247_0((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _74)))
+_x2c_initializer_choice_1A2A7247_0((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _76)))
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -186,32 +186,34 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _46 = String_new("<");
   _47 = String_new("/lib/meta.x");
   _48 = String_new("x2c_");
-  _49 = String_new("x2c_expr_ident");
-  _50 = String_var(_49);
-  _51 = String_new("x2c_expr_index");
+  _49 = String_new("Code_");
+  _50 = String_new("Type_");
+  _51 = String_new("x2c_expr_ident");
   _52 = String_var(_51);
-  _53 = String_new("x2c_expr_call");
+  _53 = String_new("x2c_expr_index");
   _54 = String_var(_53);
-  _55 = String_new("x2c_expr_cast");
+  _55 = String_new("x2c_expr_call");
   _56 = String_var(_55);
-  _57 = cons(_56, NULL);
-  _58 = cons(_54, _57);
-  _59 = cons(_52, _58);
-  _60 = cons(_50, _59);
-  _61 = Symbol_var(437126);
-  _62 = String_new("String");
-  _63 = String_var(_62);
-  _64 = cons(_63, NULL);
-  _65 = List_var(_64);
+  _57 = String_new("x2c_expr_cast");
+  _58 = String_var(_57);
+  _59 = cons(_58, NULL);
+  _60 = cons(_56, _59);
+  _61 = cons(_54, _60);
+  _62 = cons(_52, _61);
+  _63 = Symbol_var(437126);
+  _64 = String_new("String");
+  _65 = String_var(_64);
   _66 = cons(_65, NULL);
   _67 = List_var(_66);
   _68 = cons(_67, NULL);
-  _69 = cons(_61, _68);
-  _70 = List_var(_69);
-  _71 = String_new("Var");
-  _72 = String_var(_71);
-  _73 = cons(_72, NULL);
-  _74 = cons(_70, _73);
+  _69 = List_var(_68);
+  _70 = cons(_69, NULL);
+  _71 = cons(_63, _70);
+  _72 = List_var(_71);
+  _73 = String_new("Var");
+  _74 = String_var(_73);
+  _75 = cons(_74, NULL);
+  _76 = cons(_72, _75);
   _x2c_static_initialize_0();
 }
 
@@ -815,7 +817,7 @@ static int _preload_meta_surface(Frontend frontend, Lisp shared){
           name = Var_string(_x2c_macro_item_6);
           {
             Var function;
-            if(String_startswith(name, _48) && Lisp_try_get(shared, name, &(function))) Compiler_bind_meta_operation(shared, name, function);
+            if((String_startswith(name, _48) || String_startswith(name, _49) || String_startswith(name, _50)) && Lisp_try_get(shared, name, &(function))) Compiler_bind_meta_operation(shared, name, function);
           }
 
         }
@@ -837,7 +839,7 @@ static int _preload_meta_surface(Frontend frontend, Lisp shared){
 }
 
 static void _declare_builders(Compiler c, Lisp shared){
-  List names = _60;
+  List names = _62;
   {
     String name;
     List _x2c_macro_object_7 = names;

@@ -80,27 +80,29 @@ int x2c_type_is_integral(List value);
 
 int x2c_type_is_pointer(List value);
 
-List x2c_type_element(List value);
+Type Type_element(Type type);
 
-List x2c_type_parameters(List value);
+List Type_parameters(Type type);
 
-List x2c_type_return(List value);
+Type Type_return_type(Type type);
 
-List x2c_type_parts(List value);
+List Type_parts(Type type);
 
-String x2c_type_reverse_name(String base, String participant);
+String Type_reverse_name(String base, String participant);
 
-List x2c_type_resolve(List value);
+Type Type_resolve(Type type);
 
-List x2c_type_layout(List value);
+List Type_layout(Type type);
 
-int x2c_type_is_value(List value);
+int Type_is_value(Type type);
 
-Symbol x2c_type_tag_name(String name);
+Symbol Type_tag_name(String name);
 
-List x2c_type_fields(List value);
+List Type_members(Type type);
 
-String x2c_binding_spelling(Var syntax);
+List Type_fields(Type type);
+
+String Code_binding_spelling(Var syntax);
 
 List x2c_ident(String spelling);
 
@@ -108,15 +110,19 @@ Var builtin_foreach_unique(String stem);
 
 Map x2c_meta_definition_hashes(void);
 
-String x2c_function_name(List function);
+String Code_name(Code function);
 
-List x2c_function_parameter(List function, String wanted);
+List Code_body(Code function);
+
+List Code_arguments(Code parameters);
+
+Code Code_parameter(Code function, String wanted);
 
 List binding_native_type(List syntax);
 
 List binding_literal_list(List values);
 
-String x2c_source_text(Var value);
+String Code_source_text(Var value);
 
 String x2c_embed_text(Var requested);
 
@@ -141,6 +147,34 @@ void x2c_diagnostic_warn(String message, List notes);
 Code x2c_enclosing(Symbol what);
 
 void x2c_place(List where, Code code);
+
+List x2c_type_element(List value);
+
+List x2c_type_parameters(List value);
+
+List x2c_type_return(List value);
+
+List x2c_type_parts(List value);
+
+String x2c_type_reverse_name(String base, String participant);
+
+List x2c_type_resolve(List value);
+
+List x2c_type_layout(List value);
+
+int x2c_type_is_value(List value);
+
+Symbol x2c_type_tag_name(String name);
+
+List x2c_type_fields(List value);
+
+String x2c_binding_spelling(Var syntax);
+
+String x2c_function_name(List function);
+
+List x2c_function_parameter(List function, String wanted);
+
+String x2c_source_text(Var value);
 
 List meta_type_description(Var value);
 
