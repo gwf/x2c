@@ -299,7 +299,21 @@ static macro Stmt $report.type.binder_unassigned(
     This continuation is independent of the compiler's shallow-parse state.
 */
 List Compiler.parse_top_level_mode(Compiler c, int skip_body) {
+  int module_visibility = c.source_module;
+  defer c.source_module = module_visibility;
   c._leading_directives(skip_body);
+  if (c.peek(0) == <ident> && c.token.text == "module") {
+    if (c.peek(1) == <"{">) return c.parse_module_members();
+    if (c.module_form_is_declaration()) {
+      c.next();
+      $let(c.source_module, 1) {
+        List retained = skip_body ? NULL : c.replay_declaration_source();
+        List form = retained ? retained : c.parse_top_level_mode(skip_body);
+        c.record_module_declaration(form);
+        return form;
+      }
+    }
+  }
   if (c.skip_linkage_brace()) return NULL;
   if (skip_body && c.skip_collected_script_statement()) return NULL;
   if (c.test_static_assert()) return c.parse_static_assert();
@@ -566,6 +580,8 @@ int Compiler.script_statement_executes(Compiler c) =>
     tokens. */
 int Compiler.protocol_form_starts(Compiler c) {
   int at = c.at_word("meta");
+  Token modifier = Token.skip_trivia(c.token + at);
+  if (modifier.text == "module") at++;
   if (c.peek(at) == <static>) at++;
   return c.peek(at) == <protocol>;
 }
@@ -579,6 +595,17 @@ int Compiler.meta_form_is_declaration(Compiler c) {
   int marker = c.test_declaration();
   c.token = head;
   return marker;
+}
+
+int Compiler.module_form_is_declaration(Compiler c) {
+  if (!c.at_word("module")) return 0;
+  Token start = c.token;
+  c.next();
+  int declaration = c.test_declaration() || c.macro_form_is_definition() ||
+    c.keyword_form_is_definition() || c.at_word("protocol") ||
+    c.at_word("adopt") || c.peek(0) == <"$(">;
+  c.token = start;
+  return declaration;
 }
 
 /** Consumes the `meta` marker at the cursor and the contextual `native`
@@ -1029,6 +1056,7 @@ static int Compiler._test_declaration_start(
   if (sym.is_storage_class() || sym.is_type_qualifier() ||
       sym.is_builtin_type() || sym == <inline>) return 1;
   if (sym != <ident>) return 0;
+  if (c.module_form_is_declaration()) return 1;
   // A leading attribute belongs to a declaration in every position.
   if (c.token.text == "__attribute__" && c._attribute_starts()) return 1;
   /* A prefix macro contributes declaration specifiers, so `LOCAL int x = 1;`
@@ -1292,6 +1320,13 @@ static List Compiler._storage_class(Compiler c) {
   defer { storage.free(); text.free(); }
   loop {
     Symbol symbol = c.peek(0);
+    if (symbol == <ident> && c.module_form_is_declaration()) {
+      if (!c.module_owner)
+        c.report_error(<parse>, "module declaration has no owning module", c.token, NULL);
+      c.source_module = 1;
+      c.next();
+      continue;
+    }
     String attribute = c._attribute();
     if (attribute) text.push(%($attribute));
     else if (c.take_word("_Noreturn")) text.push(%("_Noreturn"));
@@ -1457,8 +1492,9 @@ static List Compiler._typedef_name(Compiler c) {
   String name = c._package_alias_member();
   if (!name) name = c.package_member_spelling(c.token.text);
   if (!name) name = c.token.text;
+  c.check_module_binding(name, c.token);
   c.next();
-  if (c.package) name = c._package_type_reference(0, name);
+  name = c._package_type_reference(0, name);
   return %($name);
 }
 
@@ -1467,6 +1503,9 @@ static List Compiler._typedef_name(Compiler c) {
    strings and emit literally. */
 static String Compiler._package_type_reference(
   Compiler c, Symbol tag, String name) {
+  List key = tag ? %($tag $name) : %($name);
+  List module_key = c.module_reference_key(key);
+  if (module_key != key) return module_key.last();
   String prefixed = c.package_spelling(name);
   if (prefixed == name) return name;
   List bare = tag ? %($tag $name) : %($name);
@@ -1483,7 +1522,8 @@ static List Compiler._struct_or_union(Compiler c) {
   c.next();
   c._skip_attributes();
   List name = c._tag_name();
-  if (name && c.package) name = c._package_aggregate_name(tag, name);
+  if (name && (c.package || c.module_owner))
+    name = c._package_aggregate_name(tag, name);
   List usedname = name ? name : c.gensym();
   usedname = %(${c.aggregate_name(
     tag, usedname.car(), c.peek(0) == <"{"> || c.peek(0) == <;>)});
@@ -1531,6 +1571,20 @@ static List Compiler._package_aggregate_name(
   // A template's tag slot supplies its exact spelling where it expands.
   if (name.car() is not <string>) return name;
   String spelling = name.car();
+  if (c.source_module && c.peek(0) == <"{"> && tag != <enum>) {
+    List key = %($tag $spelling);
+    Type alias = c.sym.get_exact(%(typedef $spelling));
+    if ((c.sym.get_exact(key) || (alias && alias.base_type() == key)) &&
+        (!c.sym.field_order(key) ||
+        c.sym.get_exact(%("module-layout" $tag $spelling)))) {
+      c.sym.set(%("module-layout" $tag $spelling),
+        %(${home_portable_path(c.module_owner)}));
+      c.sym.set(%("module-opaque" $spelling), %(public));
+      return name;
+    }
+  }
+  if (c.source_module && c.peek(0) == <"{">)
+    return %(${c._module_type_spelling(spelling)});
   if (c.peek(0) == <"{">) return %(${c.package_spelling(spelling)});
   return %(${c._package_type_reference(tag, spelling)});
 }
@@ -1740,7 +1794,8 @@ static List Compiler._enum(Compiler c) {
   c.expect(<enum>);
   c._skip_attributes();
   List name = c._tag_name();
-  if (name && c.package) name = c._package_aggregate_name(<enum>, name);
+  if (name && (c.package || c.module_owner))
+    name = c._package_aggregate_name(<enum>, name);
   if (name && c.macro_holes)
     name = %(${c.aggregate_name(
       <enum>, name.car(), c.peek(0) == <"{"> || c.peek(0) == <;>)});
@@ -1945,6 +2000,7 @@ static List Compiler._initialized(
   }
   if (c.shallow && !c.capture_unit) {
     c._skip_shallow_expression(1);
+    c.record_module_initializer(type, bind);
     return bind;
   }
   c.enter((Ancestor){ .what = <declarator>, .base = type, .node = bind });
@@ -3005,6 +3061,7 @@ static List Compiler._bind_form(
   int unit = context == AST_UNIT, block = context == AST_BLOCK;
   int statement = block || context == AST_STATEMENT;
   match (input) {
+    case %(module-members ?members) if (unit): return input;
     case %(macro-invoke ?def ?args ?site):
       return c._bind_invocation(def, args, site, context, pending);
     case %(macro-slot ? ? *) if (c.macro_holes): return input;
@@ -3023,11 +3080,14 @@ static List Compiler._bind_form(
     case %(declaration-recipe ?callback ?args) if (unit):
       return c._bind_decl_recipe(callback, args);
     case %(default-forward ?own ?base ?name *form) if (unit):
-      return %(declaration-forward $own $base $name $form ${c.source_private});
+      return %(declaration-forward $own $base $name $form
+               ${c.source_private} ${c.source_module});
     case %(default ?function) if (unit): return c._bind_default(function);
     case %(declaration-function
-             (declare ?type (bindings ?decl)) ?body ?source) if (unit):
-      return c._bind_collected_function(input, type, decl, body, source);
+             (declare ?type (bindings ?decl)) ?body ?source *module) if (unit): {
+      $let(c.source_module, module ? (int) module.car() : 0)
+        return c._bind_collected_function(input, type, decl, body, source);
+    }
     case %(declaration-initialized ?decl ?source) if (unit):
       return c._bind_collected_initializers(input, decl, source);
     case %(seq *items): return c._bind_items(items, context);
@@ -3238,7 +3298,9 @@ static Map Compiler._hole_spellings(Compiler c) {
 
 static List Compiler._bind_named_type(Compiler c, String name, Var type) {
   List key = %($name);
-  if (!c.sym.get_exact(key)) c.sym.define(key, %(typedef $name));
+  List binding_key = c.module_declared_key(%(typedef), key);
+  if (!c.sym.get_exact(binding_key))
+    c.sym.define(binding_key, %(typedef ${binding_key.car()}));
   if (!type.list()) return %(seq);
   List declaration = type.type().declaration_ast(key);
   match (declaration)
@@ -3285,14 +3347,14 @@ static List Compiler._bind_decl_recipe(
   Compiler c, Var callback, Var arguments) {
   if (c.shallow)
     return %(declaration-pending $callback $arguments
-              ${c.macro_stack} ${c.source_private});
+              ${c.macro_stack} ${c.source_private} ${c.source_module});
   return c._bind_recipe(callback, arguments, AST_UNIT);
 }
 
 static List Compiler._bind_default(Compiler c, Var function) {
   if (c.shallow)
     return %(declaration-default $function ${c.macro_stack}
-              ${c.source_private});
+              ${c.source_private} ${c.source_module});
   return c.bind_syntax(function, AST_UNIT, c.return_type);
 }
 
@@ -3401,19 +3463,26 @@ static List Compiler._collected_function(
       else c.fn_defs[name] = 1;
       c.record_declaration_visibility(declaration);
       List method = c._method_identity(binding);
-      if (method)
+      if (method) {
+        List source = c.sym.get_exact(%("module-source" ${method.car()}));
+        if (source) method = %(${source.car()} ${method.cadr()});
         declaration = %(declare $type
           (bindings (bind ((${method.car()}) ${method.cadr()}) $modifiers)));
+      }
       else {
         /* Renamed locals keep their identity; exact names complete
            prototypes. */
         Var source;
         if (!c.semantic_binding_facts().try_get(
-          %(source-spelling $binding), source) || source == name)
-          declaration = %(declare $type (bindings (bind $name $modifiers)));
+          %(source-spelling $binding), source) || source == name) {
+          List module_source = c.sym.get_exact(%("module-source" $name));
+          String spelling = module_source ? module_source.car() : name;
+          declaration = %(declare $type (bindings (bind $spelling $modifiers)));
+        }
       }
     }
-  return %(declaration-function $declaration $body ${c.macro_stack});
+  return %(declaration-function $declaration $body
+           ${c.macro_stack} ${c.source_module});
 }
 
 // constructed declarations and expressions
@@ -3886,6 +3955,10 @@ static Var Compiler._finish_type_spec(Compiler c, Var spec) {
   if (slot && spec is <list>) {
     Type type = spec.type().canonicalize();
     return %(seq @type);
+  }
+  if (spec is <string> && c.module_owner) {
+    c.check_module_binding(spec, c.token);
+    return c._package_type_reference(0, spec);
   }
   if (spec is not <list>) return spec;
   match (spec) {

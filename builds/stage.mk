@@ -75,7 +75,8 @@ MAKEFLAGS        += -S
 .PRECIOUS: $(BIN_BUILD)/%.c $(BIN_BUILD)/%.d $(BIN_BUILD)/%.c.d
 ###############################################################################
 # Library source files and generated files
-LIB_X_FILES  = $(wildcard $(LIB_SOURCE)/*.x)
+recursive_files = $(wildcard $1$2) $(foreach entry,$(wildcard $1*),$(call recursive_files,$(entry)/,$2))
+LIB_X_FILES  = $(sort $(call recursive_files,$(LIB_SOURCE)/,*.x))
 LIB_H_FILES  = $(patsubst $(LIB_SOURCE)/%.x,$(LIB_BUILD)/%.h,$(LIB_X_FILES))
 LIB_C_FILES  = $(patsubst $(LIB_SOURCE)/%.x,$(LIB_BUILD)/%.c,$(LIB_X_FILES))
 LIB_XI_FILES = $(patsubst $(LIB_SOURCE)/%.x,$(LIB_BUILD)/%.xi,$(LIB_X_FILES))
@@ -84,7 +85,7 @@ LIB_X_DEPS   = $(patsubst $(LIB_SOURCE)/%.x,$(LIB_BUILD)/%.d,$(LIB_X_FILES))
 LIB_C_DEPS   = $(patsubst $(LIB_SOURCE)/%.x,$(LIB_BUILD)/%.c.d,$(LIB_X_FILES))
 ###############################################################################
 # Binary source files and generated files
-BIN_X_FILES  = $(wildcard $(BIN_SOURCE)/*.x)
+BIN_X_FILES  = $(sort $(call recursive_files,$(BIN_SOURCE)/,*.x))
 BIN_H_FILES  = $(patsubst $(BIN_SOURCE)/%.x,$(BIN_BUILD)/%.h,$(BIN_X_FILES))
 BIN_C_FILES  = $(patsubst $(BIN_SOURCE)/%.x,$(BIN_BUILD)/%.c,$(BIN_X_FILES))
 BIN_XI_FILES = $(patsubst $(BIN_SOURCE)/%.x,$(BIN_BUILD)/%.xi,$(BIN_X_FILES))
@@ -122,7 +123,9 @@ X2C_TRANSLATE_DEPS = $(X2C_COMPILER) $(LIB_X_FILES) \
 	$(wildcard $(LIB_SOURCE)/*.xlisp) \
 	$(wildcard $(ROOT)/etc/*.x)
 LIB_MISSING_GENERATED = $(filter-out \
-	$(wildcard $(LIB_BUILD)/*.c $(LIB_BUILD)/*.h $(LIB_BUILD)/*.xi), \
+	$(call recursive_files,$(LIB_BUILD)/,*.c) \
+	$(call recursive_files,$(LIB_BUILD)/,*.h) \
+	$(call recursive_files,$(LIB_BUILD)/,*.xi), \
 	$(LIB_C_FILES) $(LIB_H_FILES) $(LIB_XI_FILES))
 LIB_MISSING_X = $(sort $(patsubst $(LIB_BUILD)/%,$(LIB_SOURCE)/%.x, \
 	$(basename $(LIB_MISSING_GENERATED))))
@@ -148,7 +151,7 @@ LIB-FORCE-TRANSLATE:
 endif
 # compile library object files
 $(LIB_BUILD)/%.o: $(LIB_BUILD)/%.c | $(LIB_H_FILES)
-	$(CC) $(CFLAGS) -iquote $(LIB_BUILD) -MMD -MP \
+	$(CC) $(CFLAGS) $(foreach directory,$(sort $(dir $(LIB_C_FILES))),-iquote $(directory)) -MMD -MP \
 		-MF $(LIB_BUILD)/$*.c.d -MT $@ -c $< -o $@
 
 # create library archive
@@ -161,7 +164,9 @@ $(BIN_BUILD):
 	mkdir -p $(BIN_BUILD)
 # Translate binary .x files in one batch invocation (see library note).
 BIN_MISSING_GENERATED = $(filter-out \
-	$(wildcard $(BIN_BUILD)/*.c $(BIN_BUILD)/*.h $(BIN_BUILD)/*.xi), \
+	$(call recursive_files,$(BIN_BUILD)/,*.c) \
+	$(call recursive_files,$(BIN_BUILD)/,*.h) \
+	$(call recursive_files,$(BIN_BUILD)/,*.xi), \
 	$(BIN_C_FILES) $(BIN_H_FILES) $(BIN_XI_FILES))
 BIN_MISSING_X = $(sort $(patsubst $(BIN_BUILD)/%,$(BIN_SOURCE)/%.x, \
 	$(basename $(BIN_MISSING_GENERATED))))
@@ -186,7 +191,8 @@ BIN-FORCE-TRANSLATE:
 endif
 # compile binary object files
 $(BIN_BUILD)/%.o: $(BIN_BUILD)/%.c | $(LIB_H_FILES)
-	$(CC) $(CFLAGS) -iquote $(LIB_BUILD) -iquote $(BIN_BUILD) \
+	$(CC) $(CFLAGS) -iquote $(LIB_BUILD) \
+		$(foreach directory,$(sort $(dir $(LIB_C_FILES) $(BIN_C_FILES))),-iquote $(directory)) \
 		-MMD -MP -MF $(BIN_BUILD)/$*.c.d -MT $@ -c $< -o $@
 # link binary executable
 $(BINARY): $(BIN_OBJECTS) $(LIBRARY)

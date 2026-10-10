@@ -16,7 +16,7 @@
 #include "ast-rewrite.h"
 #include "type.h"
 #include "generate.h"
-#include "macros.h"
+#include "_x2c_module_6922FA3C.h"
 #include "script.h"
 #include "toolchain.h"
 #include "transform.h"

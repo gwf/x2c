@@ -8,7 +8,7 @@
 #include "x2c.h"
 #include "compiler.h"
 #include "grammar.h"
-#include "macros.h"
+#include "_x2c_module_6922FA3C.h"
 #include "meta-group.h"
 #include "meta-sdk.h"
 #include "meta.h"

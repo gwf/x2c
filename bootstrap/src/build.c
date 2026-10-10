@@ -8,6 +8,7 @@
 #include "x2c.h"
 
 #include "cli.h"
+#include "module-tree.h"
 #include "deps.h"
 #include "toolchain.h"
 typedef struct Build{
@@ -499,10 +500,16 @@ static String _process_suffix(void){
 
 void driver_error(const char *);
 
+Compiler Compiler_new(void);
+
 Build CliRequest_prepare(CliRequest request){
   if(! _init_guard_) _file_init_();
   CliRequest__add_extensions(request);
   if(! List_truth(request -> inputs)) driver_error("build requires input operands or a project manifest");
+  if(! request -> dry_run){
+    Compiler discovery = Compiler_new();
+    request -> inputs = ModuleTree_units(ModuleTree_new(discovery), request -> inputs);
+  }
   Build b = Scope_calloc(1, sizeof(struct Build));
   * b =(struct Build){
     .request = request, .c_sources = Array_new(), .gen_dirs = Array_new(), .units = Array_new(), .native_inputs = Array_new(), .objects = Array_new()
@@ -719,6 +726,8 @@ String Build_generated_dir(Build b, String input){
   return directory;
 }
 
+Path Path_join(Path, Path);
+
 int Build_translation_current(Build b, String input, String directory){
   if(! _init_guard_) _file_init_();
   if(! String_truth(b -> state_root) || b -> request -> dry_run) return 0;
@@ -733,6 +742,8 @@ int Build_translation_current(Build b, String input, String directory){
     }
 
   }
+  Compiler discovery = Compiler_new();
+  if(String_truth(ModuleTree_owner(discovery -> module_tree, input)) && ! Path_is_file(Path_join(directory, module_support_header(input)))) return 0;
   int ok = 1;
   uint64_t hash = Build__translation_fingerprint(b, input, directory, &(ok));
   int current = ok && _state_matches(Build__state_path(b, _36, input), hash);
@@ -920,8 +931,6 @@ static CliRequest Build__entry_request(Build b, List entries){
 
 String x2c_get_root(void);
 
-Path Path_join(Path, Path);
-
 void Path_symlink_to(Path, Path);
 
 void Path_write_text(Path, String);
@@ -1045,12 +1054,15 @@ static void Build__place_unit_headers(Build b){
 
 }
 
+List Compiler_module_include_dirs(Compiler, String);
+
 String Path_read_text(Path);
 
 static void Build__place_includes(Build b, Map headers, String unit){
   String directory = Build__unit_dir(b, unit);
+  Compiler discovery = Compiler_new();
   List searched =({
-    Var _x2c_literal_part_7 = String_var(Path_dirname(unit));  cons(_x2c_literal_part_7, List_append(b -> request -> include_dirs, NULL));
+    Var _x2c_literal_part_7 = String_var(Path_dirname(unit));  List _x2c_literal_part_8 = Compiler_module_include_dirs(discovery, unit);  cons(_x2c_literal_part_7, List_append(_x2c_literal_part_8, List_append(b -> request -> include_dirs, NULL)));
   }
   );
   {
@@ -1193,7 +1205,7 @@ static CcJob Build__compile_job(Build b, String source, List directories){
   if(! String_truth(b -> state_root)) return job;
   job.state_path = Build__state_path(b, _82, source);
   if(! b -> request -> dry_run) job.preprocessed =({
-    Var _x2c_literal_part_8 = String_var(b -> dep_root);  Var _x2c_literal_part_9 = String_var(key);  Var _x2c_literal_part_10 = String_var(_process_suffix());  String_join(NULL, cons(_x2c_literal_part_8, cons(String_var(_2), cons(_x2c_literal_part_9, cons(String_var(_83), cons(_x2c_literal_part_10, cons(String_var(_84), NULL)))))));
+    Var _x2c_literal_part_9 = String_var(b -> dep_root);  Var _x2c_literal_part_10 = String_var(key);  Var _x2c_literal_part_11 = String_var(_process_suffix());  String_join(NULL, cons(_x2c_literal_part_9, cons(String_var(_2), cons(_x2c_literal_part_10, cons(String_var(_83), cons(_x2c_literal_part_11, cons(String_var(_84), NULL)))))));
   }
   );
   return job;
@@ -1402,7 +1414,7 @@ void Path_remove_tree(Path);
 static int Build__publish(Build b, List inputs){
   String name = Path_basename(b -> output);
   String staging =({
-    Var _x2c_literal_part_11 = String_var(Path_dirname(b -> output));  Var _x2c_literal_part_12 = String_var(name);  Var _x2c_literal_part_13 = String_var(_process_suffix());  String_join(NULL, cons(_x2c_literal_part_11, cons(String_var(_95), cons(_x2c_literal_part_12, cons(String_var(_83), cons(_x2c_literal_part_13, NULL))))));
+    Var _x2c_literal_part_12 = String_var(Path_dirname(b -> output));  Var _x2c_literal_part_13 = String_var(name);  Var _x2c_literal_part_14 = String_var(_process_suffix());  String_join(NULL, cons(_x2c_literal_part_12, cons(String_var(_95), cons(_x2c_literal_part_13, cons(String_var(_83), cons(_x2c_literal_part_14, NULL))))));
   }
   );
   Path_make_dirs(staging);
@@ -1628,7 +1640,7 @@ void Build_report_success(Build b){
   }
   if(! b -> request -> compile_only) report_line(28680520, Build__final_tool(b));
   report_line(28680520, ({
-    Var _x2c_literal_part_14 = String_var(b -> work_dir);  Var _x2c_literal_part_15 = String_var(Build__retention(b));  String_join(NULL, cons(String_var(_145), cons(_x2c_literal_part_14, cons(String_var(_146), cons(_x2c_literal_part_15, cons(String_var(_147), NULL))))));
+    Var _x2c_literal_part_15 = String_var(b -> work_dir);  Var _x2c_literal_part_16 = String_var(Build__retention(b));  String_join(NULL, cons(String_var(_145), cons(_x2c_literal_part_15, cons(String_var(_146), cons(_x2c_literal_part_16, cons(String_var(_147), NULL))))));
   }
   ));
   if(b -> request -> compile_only) return;
@@ -1643,7 +1655,7 @@ static String Build__headline(Build b){
   String label = String_truth(b -> request -> label) ? String_join(NULL, cons(String_var(_151), cons(String_var(b -> request -> label), cons(String_var(_152), NULL)))) : _66;
   String built = String_join(NULL, cons(String_var(_153), cons(String_var(label), NULL))), tail = String_join(NULL, cons(String_var(_154), cons(String_var(duration), cons(String_var(cache), NULL))));
   if(! b -> request -> compile_only) return({
-    Var _x2c_literal_part_16 = String_var(built);  Var _x2c_literal_part_17 = String_var(TargetKind_of(b -> request -> kind) -> noun);  String_join(NULL, cons(_x2c_literal_part_16, cons(String_var(_155), cons(_x2c_literal_part_17, cons(String_var(_155), cons(String_var(b -> output), cons(String_var(_155), cons(String_var(tail), NULL))))))));
+    Var _x2c_literal_part_17 = String_var(built);  Var _x2c_literal_part_18 = String_var(TargetKind_of(b -> request -> kind) -> noun);  String_join(NULL, cons(_x2c_literal_part_17, cons(String_var(_155), cons(_x2c_literal_part_18, cons(String_var(_155), cons(String_var(b -> output), cons(String_var(_155), cons(String_var(tail), NULL))))))));
   }
   );
   int objects = Array_len(b -> objects);
@@ -1725,9 +1737,9 @@ List Build_script_helpers(Build b){
   if(! _init_guard_) _file_init_();
   String script = Var_string(List_car(b -> request -> inputs)), root = x2c_get_root();
   List excluded = List_append(({
-    Var _x2c_literal_part_18 = String_var(String_join(NULL, cons(String_var(root), cons(String_var(_164), NULL))));  Var _x2c_literal_part_19 = String_var(String_join(NULL, cons(String_var(root), cons(String_var(_165), NULL))));
-    Var _x2c_literal_part_20 = String_var(String_join(NULL, cons(String_var(root), cons(String_var(_166), NULL))));
-    cons(_x2c_literal_part_18, cons(_x2c_literal_part_19, cons(_x2c_literal_part_20, NULL)));
+    Var _x2c_literal_part_19 = String_var(String_join(NULL, cons(String_var(root), cons(String_var(_164), NULL))));  Var _x2c_literal_part_20 = String_var(String_join(NULL, cons(String_var(root), cons(String_var(_165), NULL))));
+    Var _x2c_literal_part_21 = String_var(String_join(NULL, cons(String_var(root), cons(String_var(_166), NULL))));
+    cons(_x2c_literal_part_19, cons(_x2c_literal_part_20, cons(_x2c_literal_part_21, NULL)));
   }
   ), List_map(CliRequest_package_roots(b -> request), _x2c_func_handle_0));
   List prelude = List_map(compiler_prelude_sources(), ({
@@ -1807,7 +1819,7 @@ static List Build__script_files(Build b){
       {
         String path;
         List _x2c_macro_object_24 = _depfile_inputs(({
-          Var _x2c_literal_part_21 = String_var(b -> dep_root);  Var _x2c_literal_part_22 = String_var(_key(source));  String_join(NULL, cons(_x2c_literal_part_21, cons(String_var(_2), cons(_x2c_literal_part_22, cons(String_var(_81), NULL)))));
+          Var _x2c_literal_part_22 = String_var(b -> dep_root);  Var _x2c_literal_part_23 = String_var(_key(source));  String_join(NULL, cons(_x2c_literal_part_22, cons(String_var(_2), cons(_x2c_literal_part_23, cons(String_var(_81), NULL)))));
         }
         ));
         List _x2c_macro_cursor_24 = _x2c_macro_object_24;

@@ -459,7 +459,8 @@ String x2c_type_reverse_name(String base, String participant) {
 /** Answers `x2c.type.resolve`, declared in `lib/meta.x`. */
 List x2c_type_resolve(List value) {
   _sdk_guard("x2c.type.resolve");
-  return active.expander.sym.resolve_key(value).type_from_ast();
+  Compiler c = active.expander;
+  return c.sym.resolve_key(c.module_reference_key(value)).type_from_ast();
 }
 
 /** Answers `x2c.type.layout`, declared in `lib/meta.x`. */

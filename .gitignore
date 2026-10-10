@@ -46,6 +46,8 @@ examples/*
 !examples/tours/**
 !examples/deprecated/
 !examples/deprecated/**
+!examples/research/
+!examples/research/**
 !examples/README.md
 !examples/check.sh
 !examples/manifest.txt

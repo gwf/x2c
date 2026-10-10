@@ -1180,6 +1180,7 @@ static List Compiler._resolve_identifier(
   if (!binding) $report.type.binding_unknown(c, value, origin);
   Map binding_facts = c.semantic_binding_facts();
   String spelling = binding_identity_spelling(binding);
+  c.check_module_binding(spelling, origin);
   c._capture_identifier(binding);
   int kept = 0;
   match (value) case %(binding-global *): kept = 1;
@@ -1190,6 +1191,15 @@ static List Compiler._resolve_identifier(
   if (!type && require_type)
     $report.type.ident_semantic(c, value, origin);
   List result = %(expr $type (ident $binding));
+  List recipe = !c.shallow && !c.macro_holes
+    ? c.module_initializer(binding) : NULL;
+  if (recipe && home_absolute_path(recipe.cadr()) != c.canonical_path(c.filename)) {
+    String entry = module_initializer_entry(recipe.cadr());
+    List call = %(expr (void) (call $entry (args)));
+    List address = %(expr ${type.reference()} (op & (parens $result)));
+    List ordered = %(expr ${type.reference()} (commas $call $address));
+    result = %(expr $type (op * (parens $ordered)));
+  }
   result = c._capture_lambda_value(result, binding, type, read_reference);
   return c._read_bound_reference(
     result, binding, type, read_reference, binding_facts);
@@ -1782,6 +1792,15 @@ static List Compiler._field_member(
   Compiler c, Type receiver, List field, Symbol access) {
   Type object = access == <"->">
     ? c.sym.normalize_declared_type(receiver).dereference() : receiver;
+  Type aggregate = c.sym.resolve_key(object).base_type();
+  match (aggregate)
+    case %((!set ?tag (!or struct union)) ?(String name) *): {
+      List owner = c.sym.get_exact(%("module-layout" $tag $name));
+      if (owner && !c.module_accessible(
+          c.canonical_path(home_absolute_path(owner.car()))))
+        c.report_error(<type>, %"module-private aggregate body '$name' is not accessible",
+          c.token, %("module:" ${owner.car()}));
+    }
   Type declared = c.sym.lookup_field(object, field);
   return declared ? %(field $access $declared) : NULL;
 }
@@ -1802,6 +1821,21 @@ static List Compiler._method_member(
   Compiler c, Type receiver_type, Type type, List field) {
   String method = %"${type.base_type().car()}_${field.car()}";
   Type signature = c.sym.get(%($method));
+  if (!signature) {
+    List source = c.sym.get_exact(%("module-source" ${type.base_type().car()}));
+    if (source) {
+      String local = %"${source.car()}_${field.car()}";
+      Type local_type = c.sym.get_exact(%($local));
+      List owner = c.sym.get_exact(%("unit-static" $local));
+      int own = owner && c.canonical_path(home_absolute_path(owner.car())) ==
+        c.canonical_path(c.filename);
+      if (local_type && (own || local_type.is_static() ||
+          %(function $local) in c.sym.file_statics())) {
+        method = local;
+        signature = local_type;
+      }
+    }
+  }
   int rejected =
     c.protocol_rejects_direct_member(type, field.car().str());
   if (signature && rejected) signature = NULL;

@@ -9,6 +9,7 @@
 
 #pragma once
 #include "cli.x"
+#include "module-tree.x"
 #include "deps.x"
 #include "toolchain.x"
 
@@ -182,6 +183,10 @@ Build CliRequest.prepare(CliRequest request) {
   request._add_extensions();
   if (!request.inputs)
     driver_error("build requires input operands or a project manifest");
+  if (!request.dry_run) {
+    Compiler discovery = Compiler.new();
+    request.inputs = ModuleTree.new(discovery).units(request.inputs);
+  }
   Build b = Scope.calloc(1, sizeof(struct Build));
   *b = (struct Build) {
     .request = request, .c_sources = [], .gen_dirs = [], .units = [],
@@ -334,6 +339,9 @@ int Build.translation_current(Build b, String input, String directory) {
   if (!b.state_root || b.request.dry_run) return 0;
   foreach (String suffix, %(".c" ".h" ".xi"))
     if (!Path.is_file(_unit_file(directory, input, suffix))) return 0;
+  Compiler discovery = Compiler.new();
+  if (discovery.module_tree.owner(input) &&
+      !Path.is_file(Path.join(directory, module_support_header(input)))) return 0;
   int ok = 1;
   uint64_t hash = b._translation_fingerprint(input, directory, ok);
   int current = ok && _state_matches(b._state_path("x", input), hash);
@@ -602,7 +610,9 @@ static void Build._place_unit_headers(Build b) {
 
 static void Build._place_includes(Build b, Map headers, String unit) {
   String directory = b._unit_dir(unit);
-  List searched = %(${Path.dirname(unit)} @{b.request.include_dirs});
+  Compiler discovery = Compiler.new();
+  List searched = %(${Path.dirname(unit)}
+    @{discovery.module_include_dirs(unit)} @{b.request.include_dirs});
   foreach (String suffix, %(".h" ".c")) {
     String text = Path.read_text(_unit_file(directory, unit, suffix));
     foreach (String line, text.split_lines(0)) {

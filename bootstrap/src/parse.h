@@ -15,7 +15,7 @@
 #include "expressions.h"
 #include "literals.h"
 #include "collect.h"
-#include "macros.h"
+#include "_x2c_module_6922FA3C.h"
 #include "protocol.h"
 #include "utils.h"
 List Compiler_parse_top_level_mode(Compiler c, int skip_body);
@@ -35,6 +35,8 @@ int Compiler_script_statement_executes(Compiler c);
 int Compiler_protocol_form_starts(Compiler c);
 
 int Compiler_meta_form_is_declaration(Compiler c);
+
+int Compiler_module_form_is_declaration(Compiler c);
 
 Token Compiler_take_meta_marker(Compiler c, int * native);
 

@@ -248,8 +248,7 @@ bootstrap-build:					## Build the bootstrap compiler
 
 bootstrap-refresh: build				## Refresh the portable bootstrap
 	$(MAKE) -C bootstrap realclean
-	cp builds/0/lib/*.[ch] bootstrap/lib/
-	cp builds/0/src/*.[ch] bootstrap/src/
+	python3 tools/copy-bootstrap.py
 	$(MAKE) bootstrap-build
 
 stage-1: build						## Build through compiler stage 1

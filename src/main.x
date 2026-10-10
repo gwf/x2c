@@ -8,6 +8,7 @@
 
 #pragma once
 #include "build.x"
+#include "module-tree.x"
 #include "project.x"
 #include "frontend.x"
 #include "meta-project.x"
@@ -90,30 +91,41 @@ static macro Stmt $report.main.diagnostics_unwritable(Expr $diagnostics) =>
    input still fails the command. */
 static void _translate_unit(
   Frontend frontend, String filename, String output_dir) {
+  ParsedUnit unit;
+  int ready = _parse_unit(frontend, filename, unit);
+  defer unit.close();
+  if (ready) _emit_unit(frontend, unit, filename, output_dir);
+}
+
+/* A unit completes parsing and transformation before another meta epoch. */
+static int _parse_unit(Frontend frontend, String filename, ParsedUnit &unit) {
   CliRequest request = frontend.request;
   Symbol dump = request.dump;
-  ParsedUnit unit;
   int started = frontend.start(filename, unit);
-  defer unit.close();
   Compiler c = unit.compiler;
   if (!started) _fail(c);
   c.own_diagnostics();
   if (dump == <tokens>) {
     c.dump_tokens();
-    return;
+    return 0;
   }
   int collected = unit.collect(frontend);
   _report_diagnostics(c);
   if (!collected) exit(1);
-  if (_inspect_collected(unit, dump)) return;
+  if (_inspect_collected(unit, dump)) return 0;
   if (!unit.parse()) _fail(c);
   c.recovery_depth = 0;
-  if (_inspect_parsed(unit, filename, dump)) return;
-  List ast = _transform_ast(c, c.generate_protocol_adapters(unit.ast));
-  if (_inspect_transformed(c, ast, dump)) return;
-  generate_code(c, ast, output_dir);
+  if (_inspect_parsed(unit, filename, dump)) return 0;
+  unit.ast = _transform_ast(c, c.generate_protocol_adapters(unit.ast));
+  return !_inspect_transformed(c, unit.ast, dump);
+}
+
+static void _emit_unit(
+  Frontend frontend, ParsedUnit &unit, String filename, String output_dir) {
+  CliRequest request = frontend.request;
+  Compiler c = unit.compiler;
+  generate_code(c, unit.ast, output_dir);
   if (!translation_depfile_write(request, c, filename, output_dir)) exit(1);
-  // A unit that reaches here has no errors, so any diagnostic is a warning.
   if (request.fatal_warnings && c.diagnostics()) exit(1);
 }
 
@@ -205,6 +217,8 @@ static int _run_translation(CliRequest request, Map unit_dirs, Build build) {
   Translation t = {
     .request = request, .unit_dirs = unit_dirs, .build = build,
     .total = request.inputs.len()};
+  if (!unit_dirs && !request.dry_run && !request.inspects())
+    t.enroll_modules();
   t.preflight();
   if (request.verbose || request.dry_run) _print_command(request);
   if (request.dry_run) return 0;
@@ -214,14 +228,49 @@ static int _run_translation(CliRequest request, Map unit_dirs, Build build) {
      parent builds it once for all of them. */
   if (!t.frontend.preload_macro_libraries()) return 1;
   t.frontend.prepare_meta(request.inputs);
+  List all_inputs = request.inputs;
+  int all_units = t.total;
+  if (!request.inspects()) {
+    request.inputs = t.translate_modules();
+    t.total = request.inputs.len();
+  }
   /* A dump writes one ordered stream to stdout, and inspection modes report
      per unit, so those stay in this process. The rest may run in parallel. */
   if (request.jobs > 1 && t.total > 1 && !request.inspects()) {
     if (t.translate_parallel()) return 1;
   }
   else t.translate_serial();
+  request.inputs = all_inputs;
+  t.total = all_units;
   if (!build && !request.inspects()) t.report(started_at);
   return 0;
+}
+
+/* Module members keep their source-relative directories in a translation
+   batch. Native builds already supply their per-unit directories. */
+static void Translation.enroll_modules(Translation &t) {
+  Compiler discovery = Compiler.new();
+  ModuleTree tree = ModuleTree.new(discovery);
+  List inputs = tree.units(t.request.inputs);
+  Map directories = {};
+  int modules = 0;
+  foreach (String input, inputs) {
+    String directory = t.request.out_dir;
+    List ancestry = tree.ancestors(input);
+    if (ancestry) {
+      String root = ancestry.reverse().car();
+      String root_dir = Path.dirname(root), source_dir = Path.dirname(Path.absolute(input));
+      if (source_dir != root_dir)
+        directory = Path.join(directory, source_dir[root_dir.len() + 1:]);
+      modules = 1;
+    }
+    directories[input] = directory;
+  }
+  if (!modules) return;
+  foreach (Var (key, directory), directories) Path.make_dirs(directory);
+  t.unit_dirs = directories;
+  t.request.inputs = inputs;
+  t.total = inputs.len();
 }
 
 /* Each input must be a regular `.x` file. Units that write to the shared
@@ -229,12 +278,13 @@ static int _run_translation(CliRequest request, Map unit_dirs, Build build) {
 static void Translation.preflight(Translation &t) {
   CliRequest request = t.request;
   if (!request.inspects()) _check_out_dir(request.out_dir);
-  int shared = !request.inspects() && !t.unit_dirs, Map stems = {};
+  int shared = !request.inspects(), Map stems = {};
   foreach (String input, request.inputs) {
     build_check_input(input);
     if (!is_source_file(input))
       $report.main.input_not_x(input);
     String stem = Path.stem(input);
+    if (t.unit_dirs) stem = Path.join(t.output_dir(input), stem);
     if (shared && stem in stems)
       _stem_collision(stem, stems[stem], input, request.out_dir);
     stems[stem] = input;
@@ -267,6 +317,43 @@ static void _preprocessor_errors(String text) {
   Stderr.printf("%s", text);
 }
 
+/* Module providers parse once before any member is emitted. Their Contexts
+   remain nested; reverse emission restores each unit's pool and Type rows. */
+static List Translation.translate_modules(Translation &t) {
+  Compiler discovery = Compiler.new();
+  ModuleTree tree = discovery.module_tree;
+  Array modules = [], ordinary = [];
+  foreach (String input, t.request.inputs) {
+    if (tree.owner(input)) modules.push(input);
+    else ordinary.push(input);
+  }
+  int count = modules.len();
+  if (!count) return ordinary.list_free();
+  ParsedUnit *units = Scope.calloc(count, sizeof(ParsedUnit));
+  for (int i = 0; i < count; i++) {
+    String input = modules[i];
+    if (t.build) t.build.begin_translation(input);
+    else report_progress(<translate>, i, t.total, input);
+    (void) _parse_unit(t.frontend, input, units[i]);
+  }
+  Array prerequisites = [];
+  for (int i = 0; i < count; i++)
+    foreach (List row, units[i].compiler.module_initializer_rows())
+      prerequisites.push(row);
+  List rows = prerequisites.list_free();
+  for (int i = count - 1; i >= 0; i--) {
+    String input = modules[i];
+    units[i].compiler.merge_module_initializers(rows);
+    _emit_unit(t.frontend, units[i], input, t.output_dir(input));
+    if (i) rows = units[i].context.export(rows);
+    units[i].close();
+    if (t.build) t.build.end_translation(input, 0);
+    else report_progress(<translate>, count - i, t.total, input);
+  }
+  Scope.free(units);
+  return ordinary.list_free();
+}
+
 static void Translation.translate_serial(Translation &t) {
   int done = 0;
   foreach (String input, t.request.inputs) {
@@ -295,8 +382,9 @@ static void Translation.report(Translation &t, unsigned long started_at) {
   unsigned long long bytes = 0;
   foreach (String input, t.request.inputs) {
     String stem = Path.stem(input);
-    bytes += report_file_bytes(%"$out_dir/$stem.c");
-    bytes += report_file_bytes(%"$out_dir/$stem.h");
+    String directory = t.output_dir(input);
+    bytes += report_file_bytes(%"$directory/$stem.c");
+    bytes += report_file_bytes(%"$directory/$stem.h");
   }
   String duration = report_duration(report_now_us() - started_at);
   int n = t.total;
@@ -659,15 +747,26 @@ static List _stale_inputs(Build b, List units, Map stale) {
   foreach (String input, units) {
     if (!is_source_file(input)) continue;
     String directory = b.generated_dir(input);
-    if (b.translation_current(input, directory)) {
+    if (!b.translation_current(input, directory)) {
+      stale[input] = directory;
+      inputs.push(input);
+    }
+  }
+  Compiler discovery = Compiler.new();
+  Map spellings = {};
+  foreach (String input, units) spellings[Path.absolute(input)] = input;
+  Array enrolled = [];
+  foreach (String found, discovery.module_tree.units(inputs.list_free())) {
+    String input = spellings.getdefault(Path.absolute(found), found);
+    if (!(input in stale)) stale[input] = b.generated_dir(input);
+    enrolled.push(input);
+  }
+  foreach (String input, units)
+    if (is_source_file(input) && !(input in stale)) {
       b.begin_translation(input);
       b.end_translation(input, 1);
-      continue;
     }
-    stale[input] = directory;
-    inputs.push(input);
-  }
-  return inputs.list_free();
+  return enrolled.list_free();
 }
 
 /* Registers every unit's generated files in input order, including package

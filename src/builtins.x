@@ -549,8 +549,11 @@ static List _class_initializer(String owner, Var heap_value) {
     List signature = x2c_syntax_type(method);
     List function = signature.car();
     List declared = function[1];
-    int reference = !heap && declared.car() == %(& @type);
+    int reference = !heap &&
+      x2c_type_resolve(declared.car()) == x2c_type_resolve(%(& @type));
     if (reference) receiver = declared.car();
+    else if (x2c_type_resolve(declared.car()) == x2c_type_resolve(receiver))
+      receiver = declared.car();
     List parameters = cons(receiver, declared.cdr());
     int refusable = heap && signature == %((func $parameters) int);
     if (refusable || signature == %((func $parameters) void)) {
@@ -731,7 +734,9 @@ static List _pointer_output(String owner, List value) {
    to one it inherits. */
 static List _own_method(String owner, String member) {
   List found = x2c_method_resolve(%($owner), member);
-  if (found && x2c_binding_spelling(found) == %"${owner}_${member}")
+  List direct = builtin_foreach_reference(%"${owner}_${member}");
+  if (found && direct &&
+      x2c_binding_spelling(found) == x2c_binding_spelling(direct))
     return found;
   return %();
 }

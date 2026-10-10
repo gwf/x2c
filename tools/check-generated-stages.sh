@@ -49,12 +49,20 @@ if ! diff -u "$scratch/left.files" "$scratch/right.files"; then
 fi
 
 count=0
+reconnected=0
 while IFS= read -r relative; do
   if ! cmp -s "$left/$relative" "$right/$relative"; then
-    echo "generated-stage comparison: bytes differ: $relative" >&2
-    exit 1
+    if ! python3 "$(dirname "$0")/copy-bootstrap.py" \
+         --compare "$left" "$right" "$relative"; then
+      echo "generated-stage comparison: bytes differ: $relative" >&2
+      exit 1
+    fi
+    reconnected=$((reconnected + 1))
   fi
   count=$((count + 1))
 done <"$scratch/left.files"
 
 echo "generated-stage comparison: $left == $right ($count $label files)"
+if [[ $reconnected -gt 0 ]]; then
+  echo "bootstrap include paths reconnected in $reconnected files"
+fi

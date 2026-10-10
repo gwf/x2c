@@ -13,7 +13,7 @@
 #include "adapter-memo.h"
 #include "ast.h"
 #include "expressions.h"
-#include "macros.h"
+#include "_x2c_module_6922FA3C.h"
 List Compiler_convert_initializer(Compiler c, List value, Type type, List target);
 
 List Compiler_initializer_rows(Compiler c, Type root, List items, List target);

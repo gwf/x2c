@@ -50,6 +50,9 @@ void generate_code(Compiler c, List ast, String dir) {
   ast = _without_trivia(ast);
   String basename = %"${dir.rstrip("/")}/${Path.stem(c.filename)}";
   List outputs = c._generated_code(ast, basename);
+  if (c.module_owner)
+    outputs = outputs.append(%(
+      "${dir.rstrip("/")}/${module_support_header(c.filename)}" ${outputs.cadr()}));
   String interface = c.source_facts ? NULL : interface_text(c);
   if (interface) outputs = outputs.append(%("$basename.xi" $interface));
   c._publish(outputs);
@@ -75,6 +78,9 @@ static List Compiler._generated_code(Compiler c, List ast, String basename) {
     header, source, %"_x2c_hcache_${hash}_", %"_x2c_hcache_guard_$hash",
     %"_x2c_hcache_init_$hash");
   defer bindings.cleanup();
+  if (c.module_owner)
+    header = header.append(%((preproc
+      "void ${module_initializer_entry(c.filename)}(void);")));
   List hcode = c._emit_header(header);
   List ccode = c._emit_source(source, bindings, inline_bodies);
   String hfile = %"$basename.h", cfile = %"$basename.c";
@@ -131,6 +137,9 @@ static List Compiler._header_and_source(
   Partition p = {
     .c = c, .header = [], .pending = [], .open = [], .forwarded = {},
     .included = {}, .statics = {}, .source_groups = {}};
+  foreach (String owner, c.module_ancestors().reverse())
+    if (owner != c.canonical_path(c.filename))
+      p.header.push(%(preproc "#include \"${module_support_header(owner)}\""));
   foreach (Ast node, ast) p.add(node);
   return %(${p.finish()} ${c._source_projection(ast, inline_bodies)});
 }
@@ -141,8 +150,17 @@ static List Compiler._header_and_source(
 static List Compiler._source_projection(
   Compiler c, List ast, Map inline_bodies) {
   Array source = [];
+  foreach (String owner, c.module_ancestors().reverse())
+    if (owner != c.canonical_path(c.filename))
+      source.push(%(preproc "#include \"${module_support_header(owner)}\""));
   foreach (List node, ast) {
     match (node) {
+      case %(module-members ?members): {
+        foreach (String member, members)
+          source.push(%(preproc "#include \"${module_support_header(
+            Path.join(Path.dirname(c.filename), member))}\""));
+        continue;
+      }
       case %((!or protocol adopt macrodef) *): continue;
       case %(preproc ?(String content)):
         if (_is_pragma_once(content)) continue;
@@ -169,6 +187,10 @@ static List Compiler._source_projection(
 
 static void Partition.add(Partition &p, Ast node) {
   match (node) {
+    case %(module-members ?members):
+      foreach (String member, members)
+        p.header.push(%(preproc "#include \"${module_support_header(
+          Path.join(Path.dirname(p.c.filename), member))}\""));
     case %((!or protocol adopt macrodef c-assert) *): return;
     case %(typedef ? (bindings *)): p.add_typedef(node);
     case %(function (!set ?type (*)) ?declarator (!set ?body (block *))):
@@ -820,7 +842,8 @@ typedef struct Init {
    The helpers are functions, so the guard and synthetic initializer follow
    the slots and precede the helpers, and cache reachability sees them. */
 static List Compiler._file_init(Compiler c, List source) {
-  if (!c.pending.initializes() && !c.fini_fn && !c.init_fn) return source;
+  if (!c.pending.initializes() && !c.fini_fn && !c.init_fn &&
+      !c.module_owner) return source;
   Init init = {.c = c, .initializer = c.init_fn};
   init.prepare(source);
   Array entries = [];
@@ -838,7 +861,7 @@ static void Init.prepare(Init &i, List source) {
   i.guard = c.sym.reference(%("_init_guard_"), NULL);
   i.shutdown = c._shutdown_registration(source);
   List arms = i.initializer ? _definition_arms(source, i.initializer) : NULL;
-  if (!i.initializer || arms) i.synthetic = i.synthesize(arms);
+  if (!i.initializer || arms || c.module_owner) i.synthetic = i.synthesize(arms);
   else i.entry = c.sym.reference(%(${i.initializer}), NULL);
   if (c._cache_only()) i.reachable = _cache_reachable(source);
 }
@@ -963,7 +986,8 @@ static macro Decorator $initialized_entry(
    of line and cold: a small initializer inlined into each entry costs
    every call its frame setup. */
 static List Init.synthesize(Init &i, List arms) {
-  List binding = i.entry = i.c.sym.introduce("_file_init_");
+  List binding = i.entry = i.c.sym.introduce(
+    i.c.module_owner ? module_initializer_entry(i.c.filename) : "_file_init_");
   List type =
     %(("__attribute__((constructor, noinline, cold))") static void);
   String entry = "x2c_initialize_protocols";
@@ -971,6 +995,10 @@ static List Init.synthesize(Init &i, List arms) {
     type = %(("__attribute__((noinline, cold))") static void);
     entry = i.initializer;
   }
+  if (i.c.module_owner)
+    type = i.initializer
+      ? %(("__attribute__((noinline, cold))") void)
+      : %(("__attribute__((constructor, noinline, cold))") void);
   List statements =
     i.statements(_within_definitions(arms, _entry_call(entry)), NULL);
   return _initializer_function(i.c, type, binding, statements);

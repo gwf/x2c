@@ -14,7 +14,7 @@ typedef struct MetaContext{
 MetaContext;
 
 #include "grammar.h"
-#include "macros.h"
+#include "_x2c_module_6922FA3C.h"
 #include "meta.h"
 #include <limits.h>
 #include <stdint.h>
@@ -1061,8 +1061,9 @@ String x2c_type_reverse_name(String base, String participant){
 }
 
 Type Sym_resolve_key(Sym, Type);
+List Compiler_module_reference_key(Compiler, List);
 List x2c_type_resolve(List value){
-  if(! _init_guard_) _file_init_();  _sdk_guard(_250);  return Type_list(List_type_from_ast(Type_list(Sym_resolve_key(active.expander -> sym, List_type(value)))));
+  if(! _init_guard_) _file_init_();  _sdk_guard(_250);  Compiler c = active.expander;  return Type_list(List_type_from_ast(Type_list(Sym_resolve_key(c -> sym, List_type(Compiler_module_reference_key(c, value))))));
 }
 
 List Sym_field_order(Sym, Type);
@@ -1627,7 +1628,7 @@ void Compiler_report_error(Compiler, Symbol, String, Token, List);
 _Noreturn void MetaContext_reject(String message, List notes){
   Compiler c = active.evaluator;  if(c) Compiler_report_error(c, 27335838, message, active.site, notes); {
     Var _x2c_literal_part_29 = String_var(String_join(NULL, cons(String_var(String_new("x2c SDK rejection")), NULL))); {
-      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/meta-sdk.x",.function = "MetaContext_reject",.line = 944};  x2c_error_raise_n(& _x2c_error_site_1, 4477477457162, 2, Symbol_var(34096809266140), _x2c_literal_part_29, Symbol_var(1218550748), String_var(message));  __builtin_unreachable();
+      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/meta-sdk.x",.function = "MetaContext_reject",.line = 945};  x2c_error_raise_n(& _x2c_error_site_1, 4477477457162, 2, Symbol_var(34096809266140), _x2c_literal_part_29, Symbol_var(1218550748), String_var(message));  __builtin_unreachable();
     }
 
   }

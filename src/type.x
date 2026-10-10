@@ -195,8 +195,13 @@ Map Type.var_tag_rows(void);
 
 /* Source-declared rows are rebuilt for each translation unit because their
    canonical Type keys and converter names may belong to that unit's pools;
-   end_unit drops the table before those pools are released. */
+   end_unit restores the enclosing table before those pools are released. */
 static Map declared_typetags = NULL;
+static typedef struct TypeUnit {
+  Map previous;
+  struct TypeUnit *parent;
+} TypeUnit;
+static TypeUnit *type_units = NULL;
 
 /** Returns the unit-local `Var` tag for `type`, falling back to its fixed
     tag.
@@ -273,6 +278,9 @@ void Type.register_var_adoption(Type type, Type representation, Symbol tag) {
     unit.
 */
 void Type.begin_unit(void) {
+  TypeUnit *unit = Scope.malloc(sizeof(TypeUnit));
+  *unit = (TypeUnit){.previous = declared_typetags, .parent = type_units};
+  type_units = unit;
   declared_typetags = {};
 }
 
@@ -280,5 +288,8 @@ void Type.begin_unit(void) {
     released.
 */
 void Type.end_unit(void) {
-  declared_typetags = NULL;
+  TypeUnit *unit = type_units;
+  declared_typetags = unit.previous;
+  type_units = unit.parent;
+  Scope.free(unit);
 }

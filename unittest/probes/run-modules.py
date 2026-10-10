@@ -275,6 +275,23 @@ def run_case(compiler, base, name, files, options, rejection):
         path = directory / relative
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(text, encoding="ascii")
+    if options.get("capture_private_binding"):
+        provider = directory / options["capture_private_binding"]
+        captured = subprocess.run(
+            [str(compiler), "translate", "--dump-transforms", str(provider)],
+            cwd=directory, text=True, stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT)
+        (directory / "binding-capture.log").write_text(captured.stdout)
+        binding = re.search(r'\(binding \d+ ("_x2c_mod_[A-Z0-9]+_helper")\)',
+                            captured.stdout)
+        if captured.returncode or not binding:
+            return {"name": name, "passed": False,
+                    "expected": "capture canonical private binding",
+                    "log": str(directory / "binding-capture.log")}
+        for relative in options["binding_targets"]:
+            target = directory / relative
+            target.write_text(target.read_text().replace(
+                "CAPTURED_PRIVATE_BINDING", f"(binding-global {binding[1]})"))
     repository = Path(__file__).resolve().parents[2]
     for relative in options.get("package_dirs", []):
         for package in (directory / relative).iterdir():
@@ -343,6 +360,25 @@ def run_case(compiler, base, name, files, options, rejection):
     (directory / "run.log").write_text(program.stdout)
     record["run_status"] = program.returncode
     record["passed"] = program.returncode == 0
+    if options.get("run_log_counts"):
+        counts = {text: program.stdout.count(text)
+                  for text in options["run_log_counts"]}
+        record["run_log_counts"] = counts
+        record["passed"] &= counts == options["run_log_counts"]
+    if options.get("build_log_counts"):
+        counts = {text: result.stdout.count(text)
+                  for text in options["build_log_counts"]}
+        record["build_log_counts"] = counts
+        record["passed"] &= counts == options["build_log_counts"]
+    for relative, pattern in options.get("forbidden_transforms", {}).items():
+        inspected = subprocess.run(
+            [str(compiler), "translate", "--dump-transforms",
+             str(directory / relative)], cwd=directory, text=True,
+            stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        (directory / "transforms.log").write_text(inspected.stdout)
+        record["transform_status"] = inspected.returncode
+        record["forbidden_transform"] = bool(re.search(pattern, inspected.stdout))
+        record["passed"] &= inspected.returncode == 0 and not record["forbidden_transform"]
     if options.get("interface_inputs"):
         record["interface_replay"] = interface_replay(
             compiler, directory, options["interface_inputs"], True)
@@ -370,10 +406,321 @@ def run_case(compiler, base, name, files, options, rejection):
                                    stdout=subprocess.PIPE,
                                    stderr=subprocess.STDOUT)
             status["run"] = rerun.returncode
+            if options.get("run_log_counts"):
+                counts = {text: rerun.stdout.count(text)
+                          for text in options["run_log_counts"]}
+                status["run_log_counts"] = counts
+                record["passed"] &= counts == options["run_log_counts"]
             (directory / f"rerun-{index}.log").write_text(rerun.stdout)
         record["repeat_statuses"].append(status)
         record["passed"] &= status.get("run") == 0
     return record
+
+
+
+def protocol_cases():
+    native = {
+        "box.x": 'typedef int Amount;\nmodule {"box/protocol.x", "box/value.x"}\n',
+        "box/protocol.x": 'module protocol int(T) {int T.absolute(T) = abs;}\nmodule protocol int(Amount);\n',
+        "box/value.x": 'int answer(void) {Amount value = -42; return value.absolute();}\n',
+    }
+    yield "module_native_protocol_sibling", {
+        **native, "main.x": consumer("box.x", "answer() == 42"),
+    }, {"inputs": ["box.x", "main.x"], "warm_builds": 1}, None
+    yield "module_protocol_meta_adoption", {
+        "box.x": 'typedef int Amount;\nmodule {"box/protocol.x", "box/meta.x", "box/value.x"}\n',
+        "box/protocol.x": 'module protocol int(T) {int T.absolute(T) = abs;}\nmeta module protocol int(Amount);\n',
+        "box/meta.x": 'meta module int magnitude(int number) {Amount value = number; return value.absolute();}\n',
+        "box/value.x": 'int answer(void) => $magnitude(-42);\n',
+        "main.x": consumer("box.x", "answer() == 42"),
+    }, {"inputs": ["box.x", "main.x"]}, None
+    yield "module_protocol_external_rejected", {
+        **native, "main.x": '#include "box.x"\nint main(void) {Amount value = -42; return value.absolute();}\n',
+    }, {}, r"member|absolute|protocol"
+    ordinary = {
+        "box.x": 'typedef struct Base {int value;} Base;\ntypedef struct Amount {int value;} Amount;\nmodule {"box/protocol.x", "box/value.x"}\n',
+        "box/protocol.x": 'module protocol Base(T) {int T.amount(T);}\nmodule int Base.amount(Base value) => value.value;\nmodule Base Amount.base(Amount value) => (Base) {value.value};\nmodule protocol Base(Amount);\n',
+        "box/value.x": 'int answer(void) {Amount value = {42}; return value.amount();}\n',
+    }
+    yield "module_ordinary_protocol_default", {
+        **ordinary, "main.x": consumer("box.x", "answer() == 42"),
+    }, {"inputs": ["box.x", "main.x"]}, None
+    yield "module_protocol_static_conflict", {
+        "box.x": 'module {"box/protocol.x"}\n',
+        "box/protocol.x": 'module static protocol int(T) {int T.absolute(T) = abs;}\n',
+        "main.x": consumer("box.x", "1"),
+    }, {"rejection_phase": "parse"}, r"module and static"
+    yield "module_protocol_nested_ancestor", {
+        "box.x": 'typedef int Amount;\nmodule {"box/protocol.x", "box/child.x"}\n',
+        "box/protocol.x": native["box/protocol.x"],
+        "box/child.x": 'module {"child/value.x"}\n',
+        "box/child/value.x": native["box/value.x"],
+        "main.x": consumer("box.x", "answer() == 42"),
+    }, {"inputs": ["box.x", "main.x"]}, None
+    yield "module_protocol_repeated_public_base", {
+        "common.x": 'typedef int Amount;\n',
+        "left.x": '#include "common.x"\nmodule {"left/protocol.x", "left/value.x"}\n',
+        "left/protocol.x": native["box/protocol.x"],
+        "left/value.x": 'int first(void) {Amount value = -17; return value.absolute();}\n',
+        "right.x": '#include "common.x"\nmodule {"right/protocol.x", "right/value.x"}\n',
+        "right/protocol.x": native["box/protocol.x"],
+        "right/value.x": 'int second(void) {Amount value = -25; return value.absolute();}\n',
+        "main.x": '#include "left.x"\n#include "right.x"\nint main(void) => first() + second() == 42 ? 0 : 1;\n',
+    }, {"inputs": ["common.x", "left.x", "right.x", "main.x"]}, None
+
+
+"""Additional optional module scenarios; append ordering_cases() to selection."""
+
+
+def ordering_cases():
+    yield "keyword_alias_prefix_capture", {
+        "box.x": (
+            'macro Expression $offset() => 17;\n'
+            'keyword captured $offset;\n'
+            'module {"box/value.x"}\n'
+            'macro Expression $offset() => 25;\n'
+        ),
+        "box/value.x": 'int answer(void) => captured();\n',
+        "main.x": consumer(
+            "box.x", "answer() == 17 && captured() == 17 && $offset() == 25"),
+    }, {}, None
+    yield "keyword_alias_suffix_rebinding", {
+        "box.x": (
+            'macro Expression $offset() => 17;\n'
+            'keyword captured $offset;\n'
+            'module {"box/value.x"}\n'
+            'macro Expression $offset() => 25;\n'
+            'keyword captured $offset;\n'
+        ),
+        "box/value.x": 'int answer(void) => captured();\n',
+        "main.x": consumer("box.x", "answer() == 17 && captured() == 25"),
+    }, {}, None
+    prefix = 'macro Unit $produce(Name $name, Expr $value) { int $name(void) => $value; }\n'
+    yield "declaration_producer_prefix", {
+        "box.x": prefix + 'module {"box/value.x"}\n',
+        "box/value.x": '$produce(answer, 42);\n',
+        "main.x": consumer("box.x", "answer() == 42"),
+    }, {}, None
+    yield "declaration_producer_suffix_not_inherited", {
+        "box.x": 'module {"box/value.x"}\n' + prefix,
+        "box/value.x": '$produce(answer, 42);\n',
+        "main.x": consumer("box.x", "answer() == 42"),
+    }, {"rejection_phase": "parse"}, r"unknown or forward-referenced macro.*produce"
+    siblings = {
+        "box.x": 'module {"box/producer.x", "box/value.x"}\n',
+        "box/producer.x": prefix,
+        "box/value.x": '$produce(answer, 42);\n',
+        "main.x": consumer("box.x", "answer() == 42"),
+    }
+    yield "sibling_declaration_producer_isolation", siblings, {
+        "rejection_phase": "parse"}, r"unknown or forward-referenced macro.*produce"
+    yield "sibling_declaration_producer_explicit_include", {
+        **siblings,
+        "box/value.x": '#include "producer.x"\n$produce(answer, 42);\n',
+    }, {}, None
+    yield "file_static_initializer_prerequisite_cycle", {
+        "box.x": 'module {"box/state.x"}\n',
+        "box/state.x": (
+            'static String left = %"$right";\n'
+            'static String right = %"$left";\n'
+            'int answer(void) => 42;\n'
+        ),
+        "main.x": consumer("box.x", "answer() == 42"),
+    }, {"rejection_phase": "cache"}, r"file-static x2c initializer dependency cycle"
+    yield "ordinary_include_cycle_is_not_initializer_cycle", {
+        "box.x": 'module {"box/left.x", "box/right.x"}\n',
+        "box/left.x": '#include "right.x"\nint first(void) => 20;\n',
+        "box/right.x": '#include "left.x"\nint second(void) => 22;\n',
+        "main.x": consumer("box.x", "first() + second() == 42"),
+    }, {}, None
+
+
+def privacy_cases():
+    yield "nested_private_type_shadows_public_parent", {
+        "box.x": 'typedef struct Choice {int parent;} Choice;\nint parent_answer(void) {Choice value = {2}; return value.parent;}\nmodule {"box/child.x"}\n',
+        "box/child.x": 'module typedef struct Choice {int hidden;} Choice;\nmodule {"child/value.x"}\n',
+        "box/child/value.x": 'int child_answer(void) {Choice value = {40}; return value.hidden;}\n',
+        "main.x": consumer("box.x", "parent_answer() + child_answer() == 42"),
+    }, {"inputs": ["box.x", "main.x"]}, None
+    opaque = {
+        "box.x": 'typedef struct Opaque *Opaque;\nmodule {"box/value.x"}\n',
+        "box/value.x": 'module typedef struct Opaque {int value;} *Opaque;\nmodule struct Opaque storage = {42};\nOpaque acquire(void) => &storage;\n',
+    }
+    yield "opaque_public_forward_external_field_rejected", {
+        **opaque, "main.x": '#include "box.x"\nint main(void) => acquire().value;\n',
+    }, {}, r"field|member|aggregate|Opaque"
+    captured = {
+        "box.x": 'module int helper(void) => 42;\nmodule {"box/value.x"}\n',
+        "box/value.x": 'int answer(void) => helper();\n',
+    }
+    constructed = 'macro Expression $captured() => $(quote (expr ((func ()) int) (ident CAPTURED_PRIVATE_BINDING)))();\n'
+    yield "constructed_private_binding_inside_module", {
+        **captured, "box/constructed.x": constructed + 'int copied_answer(void) => $captured();\n',
+        "box.x": captured["box.x"].replace('"box/value.x"', '"box/value.x", "box/constructed.x"'),
+        "main.x": consumer("box.x", "answer() == 42 && copied_answer() == 42"),
+    }, {"inputs": ["box.x", "main.x"], "capture_private_binding": "box/value.x",
+        "binding_targets": ["box/constructed.x"]}, None
+    yield "constructed_private_binding_external_rejected", {
+        **captured, "main.x": '#include "box.x"\n' + constructed + 'int main(void) => $captured();\n',
+    }, {"capture_private_binding": "box/value.x", "binding_targets": ["main.x"]}, r"module-private declaration.*not accessible"
+
+
+def initialization_cases():
+    strings = {
+        "box.x": 'module {"box/consumer.x", "box/provider.x"}\n',
+        "box/consumer.x": 'module String copy = seed;\nint answer(void) => copy == "ready";\n',
+        "box/provider.x": 'module String seed = "ready";\n',
+        "main.x": consumer("box.x", "answer() == 1"),
+    }
+    yield "cross_file_initializer_reverse_order", strings, {
+        "inputs": ["box/consumer.x", "box/provider.x", "box.x", "main.x"],
+    }, None
+    yield "cross_file_initializer_forward_order", strings, {
+        "inputs": ["box/provider.x", "box/consumer.x", "box.x", "main.x"],
+    }, None
+    yield "cross_file_initializer_cycle_rejected", {
+        "box.x": 'module {"box/left.x", "box/right.x"}\n',
+        "box/left.x": 'module String left = %"L:$right";\nString first(void) => left;\n',
+        "box/right.x": 'module String right = %"R:$left";\nString second(void) => right;\n',
+        "main.x": consumer("box.x", "first() != NULL && second() != NULL"),
+    }, {"inputs": ["box/left.x", "box/right.x", "box.x", "main.x"],
+        "rejection_phase": "cache"}, r"initializer dependency cycle"
+    yield "cross_file_map_identity_and_mutation", {
+        "box.x": 'module {"box/consumer.x", "box/provider.x"}\n',
+        "box/consumer.x": 'module Map alias = shared;\nint answer(void) { alias[<answer>] = 42; return alias == shared && shared[<answer>] == 42; }\n',
+        "box/provider.x": 'module Map shared = {answer: 41};\n',
+        "main.x": consumer("box.x", "answer() == 1 && answer() == 1"),
+    }, {"inputs": ["box/consumer.x", "box/provider.x", "box.x", "main.x"]}, None
+
+
+def staged_initialization_cases():
+    files = {
+        "box.x": 'module {"box/consumer.x", "box/provider.x"}\n',
+        "box/consumer.x": 'module String copy = seed;\nint answer(void) => copy == "ready";\n',
+        "box/provider.x": 'module String seed = "ready";\n',
+        "main.x": consumer("box.x", "answer() == 1"),
+    }
+    yield "cross_file_initializer_provider_static_helper", {
+        **files,
+        "box/provider.x": 'static String make_seed(void) => "ready";\nmodule String seed = make_seed();\n',
+    }, {"inputs": ["box.x", "main.x"]}, None
+    yield "ordinary_consumer_public_module_initializer", {
+        "box.x": 'module {"box/provider.x"}\n',
+        "box/provider.x": 'String seed = "ready";\n',
+        "main.x": '#include "box.x"\nString copy = seed;\nint main(void) => copy == "ready" ? 0 : 1;\n',
+    }, {"inputs": ["main.x", "box.x"], "warm_builds": 1}, None
+    yield "provider_local_initializer_macro", {
+        **files,
+        "box/provider.x": 'macro Expression $seed() => "ready";\nmodule String seed = $seed();\n',
+    }, {"inputs": ["box.x", "main.x"]}, None
+    yield "provider_initializer_owner_lisp_context", {
+        **files,
+        "box/provider.x": '$(defun initializer-owner-value () "ready")\nmacro Expression $seed() => $(x2c.literal.string (initializer-owner-value));\nmodule String seed = $seed();\n',
+    }, {"inputs": ["box.x", "main.x"]}, None
+    yield "initializer_macro_executes_once", {
+        **files,
+        "box.x": 'macro Expression $seed() => $(let ((seen (x2c.diagnostic.warn "MODULE_INITIALIZER_ONCE" nil))) (x2c.literal.string "ready"));\nmodule {"box/consumer.x", "box/provider.x"}\n',
+        "box/provider.x": 'module String seed = $seed();\n',
+    }, {"inputs": ["box.x", "main.x"],
+        "build_log_counts": {"macro: MODULE_INITIALIZER_ONCE": 1}}, None
+    yield "cross_file_initializer_retained_membership", files, {
+        "inputs": ["box.x", "main.x"], "warm_builds": 1,
+        "mutations": [{
+            "box.x": 'module {"box/consumer.x", "box/provider.x", "box/new.x"}\n',
+            "box/provider.x": 'module String seed = extra;\n',
+            "box/new.x": 'module String extra = "ready";\n',
+        }],
+    }, None
+
+
+def acceptance_cases():
+    yield "exported_macro_private_capture_rejected", {
+        "box.x": 'module int helper(void) => 42;\nmacro Expression $leak() using helper => helper();\nmodule {}\n',
+        "main.x": '#include "box.x"\nint main(void) => $leak();\n',
+    }, {}, r"module-private declaration.*not accessible"
+    yield "parent_child_private_rejected", {
+        "box.x": 'module {"box/child.x", "box/parent.x"}\n',
+        "box/child.x": 'module {"child/value.x"}\n',
+        "box/child/value.x": 'module int hidden(void) => 42;\n',
+        "box/parent.x": 'int answer(void) => hidden();\n',
+        "main.x": consumer("box.x", "answer() == 42"),
+    }, {}, r"hidden|private"
+    yield "contextual_module_identifier", {
+        "box.x": 'module {"box/value.x"}\n',
+        "box/value.x": 'int module(int value) => value;\nint answer(void) { int module = 42; return module; }\n',
+        "main.x": consumer("box.x", "answer() == 42 && module(42) == 42"),
+    }, {}, None
+    yield "unlisted_ordinary_file_positive", {
+        **FLAT,
+        "box/unlisted.x": '#include "../box.x"\nint ordinary(void) => answer();\n',
+        "main.x": '#include "box/unlisted.x"\nint main(void) => ordinary() == 42 ? 0 : 1;\n',
+    }, {}, None
+    yield "external_private_variable_rejected", {
+        "box.x": 'module {"box/value.x"}\n',
+        "box/value.x": 'module int hidden = 42;\nint answer(void) => hidden;\n',
+        "main.x": consumer("box.x", "hidden == 42"),
+    }, {}, r"hidden|private"
+    yield "retained_preamble_mutation", {
+        "box.x": 'macro Expression $offset() => 17;\nmodule {"box/value.x"}\n',
+        "box/value.x": 'int answer(void) => $offset();\n',
+        "main.x": consumer("box.x", "answer() == $offset()"),
+    }, {"inputs": ["box.x", "main.x"], "warm_builds": 1,
+        "mutations": [{"box.x": 'macro Expression $offset() => 25;\nmodule {"box/value.x"}\n'}]}, None
+    yield "retained_new_nearer_native_header", {
+        "box.x": 'module {"box/child.x"}\n',
+        "box/child.x": 'module {"child/deep/value.x"}\n',
+        "settings.h": '#define MODULE_HEADER_VALUE 42\n',
+        "box/child/deep/value.x": '#include "settings.h"\nint answer(void) => MODULE_HEADER_VALUE;\n',
+        "main.x": consumer("box.x", "answer() == 42"),
+    }, {"inputs": ["box.x", "main.x"], "warm_builds": 1,
+        "mutations": [{"box/settings.h": '#define MODULE_HEADER_VALUE 43\n',
+                       "main.x": consumer("box.x", "answer() == 43")}]}, None
+    layout = {
+        "box.x": 'module typedef struct Inner Inner;\nmodule typedef struct Outer Outer;\nmodule {"box/outer.x", "box/inner.x"}\n',
+        "box/inner.x": 'module typedef struct Inner {int value;} Inner;\n',
+        "box/outer.x": 'module typedef struct Outer {Inner inner;} Outer;\nint answer(void) { Outer value = {{42}}; return value.inner.value; }\n',
+        "main.x": consumer("box.x", "answer() == 42"),
+    }
+    yield "acyclic_by_value_layout", layout, {"inputs": ["box.x", "main.x"]}, None
+    yield "cyclic_by_value_layout_rejected", {
+        **layout, "box/inner.x": 'module typedef struct Inner {Outer outer;} Inner;\n',
+        "box/outer.x": 'module typedef struct Outer {Inner inner;} Outer;\nint answer(void) => 42;\n',
+    }, {"inputs": ["box.x", "main.x"], "rejection_phase": "any"}, r"incomplete|cycle|recursive"
+    yield "module_global_class_shutdown_once", {
+        "box.x": 'module {"box/state.x", "box/work.x"}\n',
+        "box/state.x": 'module class Ticket struct {int value;} *;\nmodule void Ticket.init(Ticket ticket) { ticket.value = 42; puts("GLOBAL_INIT"); }\nmodule void Ticket.free(Ticket ticket) { puts("GLOBAL_FREE"); Scope.free(ticket); }\nmodule Ticket shared = Ticket.new();\nmodule void Ticket.shutdown(void) { shared.free(); puts("GLOBAL_SHUTDOWN"); }\n',
+        "box/work.x": 'int answer(void) => shared.value;\n',
+        "main.x": consumer("box.x", "answer() == 42 && answer() == 42"),
+    }, {"inputs": ["box/work.x", "box/state.x", "box.x", "main.x"],
+        "warm_builds": 1,
+        "run_log_counts": {"GLOBAL_INIT": 1, "GLOBAL_FREE": 1, "GLOBAL_SHUTDOWN": 1}}, None
+
+
+def forward_static_cases():
+    files = {
+        'box.x': 'module typedef struct Record { int value; } Record;\nmodule {"box/value.x"}\n',
+        'box/value.x': 'int answer(void) { Record record = {42}; return record.head(); }\nstatic int Record.head(Record record) => record.value;\n',
+        'main.x': '#include "box.x"\nint main(void) => answer() == 42 ? 0 : 1;\n',
+    }
+    yield 'forward_file_static_method_module_typedef', files, {'warm_builds':1, 'interface_inputs':list(files)}, None
+    yield 'forward_file_static_method_external_rejected', {
+        **files,
+        'box.x':'typedef struct Record { int value; } Record;\nmodule {"box/value.x"}\n',
+        'main.x':'#include "box.x"\nint main(void) { Record record = {42}; return record.head(); }\n',
+    }, {}, r'head|member'
+    yield 'forward_file_static_method_sibling_rejected', {
+        **files,
+        'box.x':'module typedef struct Record { int value; } Record;\nmodule {"box/value.x", "box/other.x"}\n',
+        'box/other.x':'int sibling(void) { Record record = {42}; return record.head(); }\n',
+    }, {}, r'head|member'
+
+
+def local_shadow_cases():
+    yield "local_shadow_of_initialized_module_object", {
+        "box.x": 'module {"box/state.x"}\n',
+        "box/state.x": 'static int create(void) => 42;\nint shared = create();\n',
+        "main.x": '#include "box.x"\nint main(void) {int shared = 7; return shared == 7 ? 0 : 1;}\n',
+    }, {"forbidden_transforms": {"main.x": r"_x2c_module_init_"}}, None
 
 
 def main():
@@ -387,7 +734,7 @@ def main():
             Path(tempfile.mkdtemp(prefix="x2c-module-probes-", dir="/tmp")))
     base.mkdir(parents=True, exist_ok=True)
     compiler_start = hashlib.sha256(compiler.read_bytes()).hexdigest()
-    selected = list(cases()) + list(extended_cases()) + list(final_cases())
+    selected = list(cases()) + list(extended_cases()) + list(final_cases()) + list(protocol_cases()) + list(ordering_cases()) + list(privacy_cases()) + list(initialization_cases()) + list(staged_initialization_cases()) + list(acceptance_cases()) + list(forward_static_cases()) + list(local_shadow_cases())
     names = {case[0] for case in selected}
     unknown = set(args.case) - names
     if unknown:

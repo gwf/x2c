@@ -1,8 +1,10 @@
 ###############################################################################
 
-CFLAGS   =	-iquote ../lib $(FLAGS)
+recursive_files = $(wildcard $1$2) $(foreach entry,$(wildcard $1*),$(call recursive_files,$(entry)/,$2))
+LIB_SRCS =  $(sort $(call recursive_files,../lib/,*.c))
+CFLAGS   =	-iquote ../lib $(foreach directory,$(sort $(dir $(LIB_SRCS) $(SRCS))),-iquote $(directory)) $(FLAGS)
 LDFLAGS  =	-L../lib -lx2c -lm
-SRCS     =  $(wildcard *.c)
+SRCS     =  $(sort $(call recursive_files,./,*.c))
 OBJS     =  $(SRCS:%.c=%.o)
 # A native module binds to the compiler's own runtime, so the compiler links
 # the whole runtime archive, and a Linux executable exports its functions
@@ -30,10 +32,10 @@ install:
 	ln -s x2c-bootstrap ../../bin/x2c
 
 clean:
-	rm -f x2c *.[od]
+	rm -f x2c $(call recursive_files,./,*.o) $(call recursive_files,./,*.d)
 
 realclean:
-	rm -f x2c *.[odch]
+	rm -f x2c $(call recursive_files,./,*.o) $(call recursive_files,./,*.d) $(call recursive_files,./,*.c) $(call recursive_files,./,*.h)
 
 .PHONY: clean realclean
 

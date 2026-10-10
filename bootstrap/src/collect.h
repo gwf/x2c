@@ -7,6 +7,7 @@
 
 #include "x2c.h"
 #include "compiler.h"
+#include "module-tree.h"
 #include "ast-rewrite.h"
 #include "buffer.h"
 #include "datum.h"
@@ -23,9 +24,13 @@ List compiler_prelude_sources(void);
 
 int is_prelude_source(String path);
 
+void Compiler__module_preamble(Compiler c, String path, Map globs, Map active);
+
 void Compiler_configure_package(Compiler c, List roots, String filename);
 
 String collect_resolve_include(SourceView sources, List dirs, String includer_dir, String target, int angle);
+
+String Compiler_resolve_source_include(Compiler c, String target, int angle);
 
 List Compiler_include_typedef_names(Compiler c, String target, int angle, Map seen);
 
@@ -62,6 +67,8 @@ void Compiler_collect_package(Compiler c, String name, Token token);
 void Compiler_replay_package_imports(Compiler c, Map globs, Map rows, Array exports);
 
 Map Compiler_included_compile_time_effects(Compiler c, Map globs);
+
+void Compiler_module_member_effects(Compiler c, String path, Map visited, Array effects);
 
 void Compiler_install_included_effects(Compiler c);
 

@@ -948,8 +948,8 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_1(void){
   _669 = String_new("Symbol_var(Symbol_new(");
   _670 = String_new("))");
   _671 = String_new("Atom_intern(String_new(");
-  _672 = String_new(".");
-  _673 = String_new("#include \"");
+  _672 = String_new("#include \"");
+  _673 = String_new(".");
   _674 = String_new(".h\"");
   _675 = Symbol_var(272600);
   _676 = Atom_intern(String_new("*declaration"));
@@ -2022,8 +2022,17 @@ static List _atom_intern(String spelling){
 
 String preproc_include_target(String, int *);
 int is_source_file(String);
+String Compiler_resolve_source_include(Compiler, String, int);
+String ModuleTree_owner(ModuleTree, String);
+String module_support_header(String);
 static List Emitter__preproc(Emitter * e, List ast){
-  int angle = 0;  String target = preproc_include_target(Var_string(List_cadr(ast)), &(angle));  if(! String_truth(target) || ! is_source_file(target)) return List_cdr(ast);  String stem = String_getslice(target, -2147483648, String_rfind(target, _672), 1);  String out = String_join(NULL, cons(String_var(_673), cons(String_var(stem), cons(String_var(_674), NULL))));  return cons(String_var(out), NULL);
+  int angle = 0;  String target = preproc_include_target(Var_string(List_cadr(ast)), &(angle));  if(String_truth(target) && ! angle && String_truth((* e).c -> module_owner) && ! is_source_file(target)){
+    String path = Compiler_resolve_source_include((* e).c, target, angle);  if(String_truth(path)) return cons(String_var(String_join(NULL, cons(String_var(_672), cons(String_var(path), cons(String_var(_647), NULL))))), NULL);
+  }
+  if(! String_truth(target) || ! is_source_file(target)) return List_cdr(ast);  if(! angle){
+    String path = Compiler_resolve_source_include((* e).c, target, angle);  if(String_truth(path) && String_truth(ModuleTree_owner((* e).c -> module_tree, path))) return cons(String_var(String_join(NULL, cons(String_var(_672), cons(String_var(module_support_header(path)), cons(String_var(_647), NULL))))), NULL);
+  }
+  String stem = String_getslice(target, -2147483648, String_rfind(target, _673), 1);  String out = String_join(NULL, cons(String_var(_672), cons(String_var(stem), cons(String_var(_674), NULL))));  return cons(String_var(out), NULL);
 }
 
 static List Emitter__declare_stmt(Emitter * e, List ast){

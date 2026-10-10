@@ -87,6 +87,8 @@ List Sym_reference_global(Sym s, List key);
 
 List Sym_declare(Sym s, List context, List key, List ast);
 
+void Sym_check_module_type_spelling(Sym s, String spelling);
+
 List Sym_bind_identity(Sym s, List context, List binding, List ast);
 
 Var Compiler_aggregate_name(Compiler c, Symbol kind, Var name, int definition);

@@ -13,21 +13,24 @@
 
 typedef struct ModuleEntry {
   String path, prefix, preamble;
-  List members;
+  List members, preamble_parts;
   int block_start, block_end;
 } *ModuleEntry;
 
 typedef struct ModuleTree {
   Compiler compiler;
-  Map entries, owners;
+  Map entries, owners, dependencies;
 } *ModuleTree;
 
 ModuleTree ModuleTree.new(Compiler c) {
   ModuleTree tree = Scope.malloc(sizeof(struct ModuleTree));
   *tree = (struct ModuleTree) {
-    .compiler = c, .entries = {}, .owners = {}};
+    .compiler = c, .entries = {}, .owners = {}, .dependencies = {}};
   return tree;
 }
+
+String module_support_header(String path) =>
+  %"_x2c_module_${filename_hash(home_portable_path(Path.absolute(path)))}.h";
 
 static void ModuleTree._report(
   ModuleTree tree, String path, String message) {
@@ -125,6 +128,8 @@ static ModuleEntry ModuleTree._scan(ModuleTree tree, String path) {
 /** Reads an entry once. Non-entry files also retain their absent result. */
 ModuleEntry ModuleTree.entry(ModuleTree tree, String canonical_path) {
   String path = Path.absolute(canonical_path);
+  tree.dependencies.merge_translation_dependency(path,
+    tree.compiler.sources.exists(path) ? (Var) 1 : (Var) "search:absent");
   Var cached;
   if (tree.entries.try_get(path, cached)) return cached.pointer();
   ModuleEntry entry = tree._scan(path);
@@ -135,19 +140,38 @@ ModuleEntry ModuleTree.entry(ModuleTree tree, String canonical_path) {
 
 // ownership
 
+/** The ownership search facts of this file, independent of prior walks. */
+Map ModuleTree.ownership_dependencies(ModuleTree tree, String path) {
+  path = Path.absolute(path);
+  Map dependencies = {};
+  (void) tree.entry(path);
+  dependencies.merge_translation_dependency(path, tree.dependencies[path]);
+  for (String dir = Path.dirname(path); dir != "/";
+       dir = Path.dirname(dir))
+    foreach (String suffix, %(".x" ".xp")) {
+      String candidate = dir + suffix;
+      (void) tree.entry(candidate);
+      dependencies.merge_translation_dependency(candidate,
+        tree.dependencies[candidate]);
+    }
+  return dependencies;
+}
+
 /* A path can be named by more than one ancestor entry. Discovery examines
    all candidates before retaining its owner, rather than taking the first. */
 static String ModuleTree._parent(ModuleTree tree, String path) {
   String parent = NULL;
   for (String dir = Path.dirname(path); dir != "/";
        dir = Path.dirname(dir)) {
-    ModuleEntry entry = tree.entry(dir + ".x");
-    if (!entry || !entry.members.contains(path)) continue;
-    if (parent && parent != entry.path) {
-      tree._report(path, %"source belongs to both '$parent' and '${entry.path}'");
-      return NULL;
+    foreach (String suffix, %(".x" ".xp")) {
+      ModuleEntry entry = tree.entry(dir + suffix);
+      if (!entry || !entry.members.contains(path)) continue;
+      if (parent && parent != entry.path) {
+        tree._report(path, %"source belongs to both '$parent' and '${entry.path}'");
+        return NULL;
+      }
+      parent = entry.path;
     }
-    parent = entry.path;
   }
   return parent;
 }
@@ -179,4 +203,33 @@ List ModuleTree.ancestors(ModuleTree tree, String path) {
     owner = parent is <string> ? parent.string() : NULL;
   }
   return entries;
+}
+
+List ModuleTree.units(ModuleTree tree, List inputs) {
+  Array units = [];
+  Map seen = {};
+  foreach (String input, inputs) tree._enroll(input, units, seen);
+  return units.list_free();
+}
+
+static void ModuleTree._enroll(
+  ModuleTree tree, String path, Array units, Map seen) {
+  String canonical = Path.absolute(path);
+  if (canonical in seen) return;
+  seen[canonical] = 1;
+  units.push(path);
+  if (!is_source_file(canonical)) return;
+  List ancestry = tree.ancestors(canonical);
+  if (ancestry) {
+    String root = ancestry.reverse().car();
+    if (root != canonical) tree._enroll(root, units, seen);
+  }
+  ModuleEntry entry = tree.entry(canonical);
+  if (!entry) return;
+  foreach (String member, entry.members) {
+    String owner = tree.owner(member);
+    if (owner != canonical && owner != member)
+      tree._report(member, "ancestor directly enrolls a nested implementation member");
+    tree._enroll(member, units, seen);
+  }
 }

@@ -23,7 +23,7 @@ PrintfFn;
 #include "transform.h"
 #include "stage.h"
 #include "initializers.h"
-#include "macros.h"
+#include "_x2c_module_6922FA3C.h"
 #include "expressions-reports.h"
 List Compiler_parse_expression(Compiler c);
 

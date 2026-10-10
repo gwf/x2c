@@ -12,7 +12,7 @@
 #include "parse.h"
 #include "expressions.h"
 #include "literals.h"
-#include "macros.h"
+#include "_x2c_module_6922FA3C.h"
 List Compiler_parse_statement(Compiler c);
 
 List Compiler_with_binding(Compiler c);

@@ -1310,7 +1310,7 @@ static void StaticQueue_queue(StaticQueue * q, Symbol deferred_kind){
 static Symbol StaticQueue_visit(StaticQueue * q, List binding){
   Var status = Map_getindex((* q).state, List_var(binding));  if(Var_equal(status, Symbol_var(1532451113870))) StaticQueue_report_cycle(&((* q)));  if(! Var_is_void(status)) return Var_symbol(status);  Map_setindex((* q).state, List_var(binding), Symbol_var(1532451113870));  Array definitions = Var_array(Map_getindex((* q).pending, List_var(binding)));  Symbol area = StaticQueue_deferred(&((* q)), definitions) ? 422464720 : 42147793126;  List dependencies = Var_list(Map_getdefault((* q).c -> static_init_deps, List_var(binding), List_var(NULL))); {
     List dependency;  List _x2c_macro_object_20 = dependencies;  List _x2c_macro_cursor_21 = _x2c_macro_object_20;  Var _x2c_macro_cursor_output_19;  while(List_try_next(_x2c_macro_object_20, &(_x2c_macro_cursor_21), &(_x2c_macro_cursor_output_19))){
-      dependency = Var_list(_x2c_macro_cursor_output_19);  if(Map_contains((* q).pending, List_var(dependency)) && StaticQueue_visit(&((* q)), dependency) == 422464720) area = 422464720;
+      dependency = Var_list(_x2c_macro_cursor_output_19);  if((Map_contains((* q).pending, List_var(dependency)) || Map_contains((* q).c -> static_init_deps, List_var(dependency))) && StaticQueue_visit(&((* q)), dependency) == 422464720) area = 422464720;
     }
 
   }

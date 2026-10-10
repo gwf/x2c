@@ -1037,7 +1037,16 @@ static List _atom_intern(String spelling) {
 static List Emitter._preproc(Emitter &e, List ast) {
   int angle = 0;
   String target = preproc_include_target(ast.cadr(), angle);
+  if (target && !angle && e.c.module_owner && !is_source_file(target)) {
+    String path = e.c.resolve_source_include(target, angle);
+    if (path) return %("#include \"$path\"");
+  }
   if (!target || !is_source_file(target)) return ast.cdr();
+  if (!angle) {
+    String path = e.c.resolve_source_include(target, angle);
+    if (path && e.c.module_tree.owner(path))
+      return %("#include \"${module_support_header(path)}\"");
+  }
   String stem = target[:target.rfind(".")];
   String out = %"#include \"$stem.h\"";
   return %( $out );

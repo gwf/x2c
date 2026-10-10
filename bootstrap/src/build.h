@@ -7,6 +7,7 @@
 
 #include "x2c.h"
 #include "cli.h"
+#include "module-tree.h"
 #include "deps.h"
 #include "toolchain.h"
 typedef struct Build{

@@ -41,7 +41,7 @@
 
 #include "compiler.h"
 #include "grammar.h"
-#include "macros.h"
+#include "_x2c_module_6922FA3C.h"
 #include "meta-group.h"
 #include "meta-sdk.h"
 #include "meta.h"
@@ -1368,6 +1368,7 @@ default: break;
 Compiler_report_error(c, 33658058, _58, marker, NULL);
 }
 
+Var Compiler_evaluate_meta_value(Compiler, List, Token, int);
 List Compiler_evaluate_meta_expression(Compiler c, List expression, Token site){
   if(! _init_guard_) _file_init_();  return Compiler__meta_result(c, expression, Compiler_evaluate_meta_value(c, expression, site, 0), site);
 }

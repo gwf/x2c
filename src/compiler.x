@@ -76,6 +76,7 @@ typedef struct Sym *Sym;
 /** Names the slots a rewrite's first lowering watches; see "prepared
     replacements" in macros.x. */
 typedef struct SlotWatch *SlotWatch;
+typedef struct ModuleTree *ModuleTree;
 
 /** One syntax the parser is inside, which `x2c_enclosing` answers: a
     function body with its declaration in `node`, a block item with the
@@ -96,6 +97,10 @@ typedef struct Ancestor {
 */
 typedef struct Compiler {
   String filename, text, root_dir;
+  ModuleTree module_tree;
+  String module_owner;
+  int source_module;
+  Map collected_statics;
   /* Package-mode unit: NULL outside. package_dirs holds import search roots;
      package_source_dirs holds the explicit roots that select source ownership.
      package_roots holds each collected package directory, package_aliases each
@@ -391,6 +396,7 @@ static macro Stmt $report.debug.token(Expr $token) =>
   ));
 
 #include "fields.x"
+#include "module-access.x"
 
 // shallow collection
 
@@ -952,6 +958,7 @@ Map Compiler.select_declaration_defaults(
 static void Compiler._prepare_shadow(
   Compiler c, Compiler owner, String path, Map symbols) {
   c.filename = path;
+  c.configure_module(path);
   c.macro_lisp = owner.macro_lisp;
   c.borrowed_lisp = c.macro_lisp != NULL;
   c.share_meta_group(owner);
@@ -989,9 +996,10 @@ static void Compiler._produce(Compiler c, List rows, Array selected) {
   foreach (List row, rows) {
     match (row)
       case %(declaration-pending ?callback ?arguments
-               ?construction ?privacy): {
+               ?construction ?privacy *module): {
         $let(c.macro_stack, construction)
         $let(c.source_private, privacy)
+        $let(c.source_module, module ? (int) module.car() : 0)
           c._produce(c._generated_rows(callback, arguments), selected);
         continue;
       }
@@ -1029,9 +1037,10 @@ static List Defaults._select_rows(Defaults &d, List rows) {
   Array selected = [];
   foreach (List row, rows) {
     match (row)
-      case %(declaration-default ?function ?construction ?privacy): {
+      case %(declaration-default ?function ?construction ?privacy *module): {
         $let(c.macro_stack, construction)
-        $let(c.source_private, privacy) {
+        $let(c.source_private, privacy)
+        $let(c.source_module, module ? (int) module.car() : 0) {
           Var syntax = d._unless_taken(function);
           if (syntax is not void) selected.push(c._bind_default(syntax));
         }
@@ -1067,6 +1076,10 @@ static int Defaults._taken(Defaults &d, String spelling) {
   List key = %($spelling);
   Type declared = c.sym.get(key);
   if (!declared) return 0;
+  if (c.source_module || !c.sym.get_exact(key)) {
+    List resolved = c.module_retry_key(key);
+    if (resolved) spelling = resolved.last();
+  }
   if (!declared.is_function() || spelling in d.definitions ||
       spelling in c.fn_defs || %(function $spelling) in c.sym.file_statics())
     return 1;
@@ -1104,9 +1117,10 @@ static List Defaults._forward_rows(Defaults &d, List rows, int &remaining) {
   Array selected = [];
   foreach (List row, rows) {
     match (row)
-      case %(declaration-forward ?child ?parent ?member ?fallback ?privacy): {
+      case %(declaration-forward ?child ?parent ?member ?fallback ?privacy *module): {
         List bound = NULL;
         $let(d.c.source_private, privacy)
+        $let(d.c.source_module, module ? (int) module.car() : 0)
           bound = d._forwarded(child, parent, member, fallback);
         if (!bound) {
           remaining++;
@@ -1235,12 +1249,14 @@ static void Compiler._reset_parse(Compiler c, Map globs, int generated) {
   c.braces.clear();
   c.arms = NULL;
   c.sym.reset(globs);
+  if (c.collected_statics) c.sym.file_statics().merge(c.collected_statics);
   c.rebuild_protocols(globs);
   c._reset_macros();
   c.resolve_protocols();
   if (generated) c.install_generated_protocol_symbols();
   c.install_native_meta_effects(globs);
   c.included_effects = c.included_compile_time_effects(globs);
+  c._module_preamble(c.canonical_path(c.filename), globs, {});
 }
 
 static void Compiler._reset_macros(Compiler c) {
@@ -1753,18 +1769,86 @@ static int _omitted_specifier(Var item, int keep_qualifiers) {
 
 static void Compiler._record_static_object(
   Compiler c, Type declared, List bindings) {
-  if (!declared.is_static()) return;
+  if (!declared.is_static() && !c.module_owner) return;
   int declared_var = c.sym.is_var_type(declared);
-  if (!declared_var && !c._initializable_type(declared)) return;
+  if (!c.module_owner && !declared_var &&
+      !c._initializable_type(declared)) return;
   foreach (List binding_init, bindings)
     match (binding_init)
       case %(op = (bind (!set ?binding (binding ? ?)) ?)
              (expr (!set ?initializer_type (*)) ?value)): {
-        if (declared_var && !c._initializable_type(initializer_type)) continue;
+        if (!c.module_owner && declared_var &&
+            !c._initializable_type(initializer_type)) continue;
         Map references = {}, Array ordered = [];
         _collect_references(value, references, ordered);
         c.static_init_deps[binding] = ordered.list_free();
       }
+}
+
+/** Records the supplying file of a module's initialized object. */
+void Compiler.record_module_initializer(
+  Compiler c, Type type, List bind) {
+  if (!c.module_owner || type.is_static()) return;
+  String name = binding_identity_spelling(bind.cadr());
+  String path = home_portable_path(c.canonical_path(c.filename));
+  c.sym.set(%("native-object-initializer" $name),
+    %(native-object $name (initializer $path)));
+}
+
+/** Returns an initialized module object's supplying-file record. */
+List Compiler.module_initializer(Compiler c, List binding) {
+  String name = binding_identity_spelling(binding);
+  List record = c.sym.get_exact(%("native-object-initializer" $name));
+  match (record)
+    case %(native-object ${name} (!set ?recipe (initializer *))): {
+      if (c.sym.resolve_global(%($name), NULL) == binding) return recipe;
+    }
+  return NULL;
+}
+
+/** The once-only initializer entry for one module source file. */
+String module_initializer_entry(String path) =>
+  %"_x2c_module_init_${filename_hash(home_portable_path(Path.absolute(path)))}";
+
+/** Projects ordinary parsed prerequisites into portable spelling rows.
+    File-static objects stay in their own compiler's initializer queue. */
+List Compiler.module_initializer_rows(Compiler c) {
+  Array rows = [];
+  Map statics = c.sym.file_statics();
+  foreach (Var (binding, dependencies), c.static_init_deps) {
+    String name = binding_identity_spelling(binding);
+    if (%($name) in statics) continue;
+    Array names = [];
+    foreach (List dependency, dependencies.list()) {
+      String spelling = binding_identity_spelling(dependency);
+      if (!(%($spelling) in statics)) names.push(spelling);
+    }
+    rows.push(%($name ${names.list_free()}));
+  }
+  return rows.list_free();
+}
+
+/** Rebinds other module units' parsed prerequisites into this unit's table. */
+void Compiler.merge_module_initializers(Compiler c, List rows) {
+  foreach (List row, rows) {
+    (String name, List dependencies) = row;
+    List binding = c._module_initializer_binding(name);
+    if (!binding || binding in c.static_init_deps) continue;
+    Array bound = [];
+    foreach (String spelling, dependencies) {
+      List dependency = c._module_initializer_binding(spelling);
+      if (dependency) bound.push(dependency);
+    }
+    c.static_init_deps[binding] = bound.list_free();
+  }
+}
+
+static List Compiler._module_initializer_binding(Compiler c, String spelling) {
+  if (!c.sym.get_exact(%($spelling))) return NULL;
+  List owner = c.sym.get_exact(%("module-owner" $spelling));
+  if (owner && !c.module_accessible(c.canonical_path(home_absolute_path(owner.car()))))
+    return NULL;
+  return c.sym.lookup(%($spelling), NULL);
 }
 
 static int Compiler._initializable_type(Compiler c, Type type) =>
@@ -1802,9 +1886,12 @@ static void Compiler._check_static_inits(Compiler c) {
   Map statics = c.sym.file_statics();
   foreach (Var (key, value), c.static_init_deps) {
     List binding = key, dependencies = value;
+    if (c.module_owner &&
+        !(%(${binding_identity_spelling(binding)}) in statics)) continue;
     foreach (List reference, dependencies) {
       String name = binding_identity_spelling(reference);
-      if (!name || %($name) in statics) continue;
+      if (!name || %($name) in statics ||
+          c.module_initializer(reference)) continue;
       String target = binding_identity_spelling(binding);
       $report.parse.static_dependency(c, c._init_token(binding), name, target);
     }
@@ -2826,6 +2913,7 @@ static void Compiler._init_tables(Compiler c) {
               static_init_deps, fn_defs, meta_comptime, meta_regions,
               meta_hashes, meta_calls, native_meta, project_meta,
               evaluated_effects, meta_group_bound);
+  c.module_tree = ModuleTree.new(c);
 }
 
 /* A child compiler owns its tokens, symbols, and diagnostics. Package
@@ -2840,6 +2928,7 @@ static void Compiler._share_unit(Compiler c, Compiler owner) {
                source_declarations, source_texts, unit_script, include_dirs,
                meta_build, evaluated_effects, pending_inline_bodies,
                collection_native_files);
+  $copy_fields(c, owner, module_tree, module_owner);
 }
 
 /* The first compiler of a unit creates the state its children share and

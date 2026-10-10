@@ -37,43 +37,25 @@
 #include <string.h>
 #include <sys/stat.h>
 #include "expressions-reports.h"
-List Compiler_expand_macro_invocation_node(Compiler c, Var stored, List arguments, Token invocation, AstPos position);
+typedef struct _x2c_mod_6922FA3C_Definition{
+  Compiler c;
+  Token start;
+  Atom name;
+  Symbol kind;
+  List target, parameters, template, fresh, captures, pattern, rebuild, type;
+  List origin;
+  String file;
+  Map locals;
+  Array using;
+  int anonymous, local, nested, quotation, leaf, storage;
+}
+_x2c_mod_6922FA3C_Definition;
 
-Token Compiler_macro_invocation_site(Compiler c, Var site);
-
-List Compiler_parse_macro_definition(Compiler c);
-
-#define MACRO_CATEGORY_COUNT \
-  (int) (sizeof(macro_categories) / sizeof(macro_categories[0]))
-List Compiler_try_parse_macro_slot(Compiler c, Symbol role);
-
-List Compiler_peek_macro_hole(Compiler c);
-
-Token Compiler_after_hole(Compiler c);
-
-List Compiler_parse_macro_quotation(Compiler c);
-
-int Compiler_macro_lisp_starts_declaration(Compiler c);
-
-List Compiler_try_parse_macro_member(Compiler c);
-
-List Compiler_macro_introduced_name(Compiler c, String spelling);
-
-List Compiler_macro_tag_name(Compiler c, Symbol kind, String name, int definition);
-
-List Compiler_publish_macro_definition_node(Compiler c, List node);
-
-void Compiler_record_compile_time_effect(Compiler c, List row, Token start);
-
-void Compiler_install_compile_time_effects(Compiler c, List rows);
-
-int Compiler_macro_form_is_definition(Compiler c);
-
-int Compiler_local_macro_form_is_definition(Compiler c);
-
-int Compiler_keyword_form_is_definition(Compiler c);
-
-void Compiler_parse_keyword_definition(Compiler c);
+#include "_x2c_module_A28B3F63.h"
+#include "_x2c_module_71BA58ED.h"
+#include "_x2c_module_5F5AD92C.h"
+#include "_x2c_module_24E8AEEE.h"
+void _x2c_mod_6922FA3C_Compiler__install_rewrite(Compiler c, List row);
 
 List Compiler_marked_rewrite(Compiler c, Type aggregate, List source, Token site);
 
@@ -98,41 +80,11 @@ struct SlotWatch{
 
 Ast Compiler_watched_step(Compiler c, Ast ast);
 
-int Compiler_macro_starts_target_at(Compiler c, AstPos position);
-
-Symbol Compiler_macro_invocation_collection(Compiler c);
-
-void Compiler_skip_macro_invocation(Compiler c);
-
-int Compiler_skip_named_type_declaration(Compiler c);
-
-int Compiler_macro_targets_unit(Compiler c);
-
-List Compiler_try_parse_macro_target_at(Compiler c, AstPos position);
-
-List Compiler_try_parse_macro_expression(Compiler c);
-
-Var Compiler_evaluate_macro_slot(Compiler c, Var value);
-
-List Compiler_evaluate_macro_rows(Compiler c, Var value);
-
-Var Compiler_evaluate_meta_value(Compiler c, List expression, Token site, int slot);
-
-Var Compiler_evaluate_declaration_recipe(Compiler c, Atom callback, List arguments);
-
-List x2c_template_call(Var stored, List values);
-
-List Compiler_rebuild_expression(Compiler c, Type type, List application);
-
-List Compiler_rebuild_statement(Compiler c, List application);
-
-List Compiler_rebuild_unit_function(Compiler c, List application);
-
-List Compiler_rebuild_function(Compiler c, List target, List application);
-
-List Compiler_land_quotation(Compiler c, List fresh, Var syntax, AstPos position, Type return_type);
-
 List Compiler_macro_value_literal(Compiler c, List value);
+
+Var _x2c_mod_6922FA3C__macro_value_names(Var value);
+
+List _x2c_mod_6922FA3C_Compiler__macro_value(Compiler c, Atom name);
 
 List Compiler_try_parse_macro_pattern(Compiler c);
 
@@ -150,6 +102,10 @@ List Compiler_bind_code_value(Compiler c, List carrier, AstPos position, Type re
 
 void Compiler_ensure_macro_lisp(Compiler c);
 
+Var _x2c_mod_6922FA3C_Compiler__eval_string(Compiler c, String source, Token invocation);
+
+String _x2c_mod_6922FA3C_Compiler__lisp_form(Compiler c);
+
 List Compiler_parse_macro_lisp_top_level(Compiler c);
 
 void Compiler_parse_macro_lisp_shallow(Compiler c);
@@ -162,7 +118,13 @@ List Compiler_lift_macro_lisp_expression(Compiler c, Var value, Token invocation
 
 List Compiler_bind_macro_lisp_statement(Compiler c, List value, AstPos context);
 
+List _x2c_mod_6922FA3C_Compiler__import(Compiler c, String requested, Token invocation);
+
+Var _x2c_mod_6922FA3C_Compiler__rebind_imported(Compiler c, Var stored);
+
 String Compiler_source_path(Compiler c, String file);
+
+String _x2c_mod_6922FA3C__definition_file(List definition);
 
 Lisp Compiler_open_macro_library(Compiler c);
 
@@ -184,11 +146,19 @@ int Compiler_shares_meta_definition(Compiler c, String name);
 
 void Compiler_install_builtin_macros(Compiler c);
 
+void _x2c_mod_6922FA3C_Compiler__use_lisp_bindings(Compiler c, int install);
+
 void Compiler_bind_meta_operation(Lisp lisp, String name, Var function);
+
+String _x2c_mod_6922FA3C__definition_note(List definition);
 
 void Compiler_report_lisp_failure(Compiler c, Token invocation, List error, String source);
 
+void _x2c_mod_6922FA3C_Compiler__unbound(Compiler c, String spelling, Token token);
+
 void macro_library_reset(void);
+
+void _x2c_module_init_6922FA3C(void);
 
 
 #endif /* __GUARD_0x28FCBFDC__ */

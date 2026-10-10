@@ -51,6 +51,8 @@ typedef struct Sym * Sym;
 
 typedef struct SlotWatch * SlotWatch;
 
+typedef struct ModuleTree * ModuleTree;
+
 typedef struct Ancestor{
   Symbol what;
   Token token;
@@ -61,6 +63,10 @@ Ancestor;
 
 typedef struct Compiler{
   String filename, text, root_dir;
+  ModuleTree module_tree;
+  String module_owner;
+  int source_module;
+  Map collected_statics;
   String package;
   List package_dirs, package_source_dirs;
   Map package_roots, package_aliases, package_members, package_effects;
@@ -204,6 +210,16 @@ List Compiler_full_parse(Compiler c, Map globs, int generated_symbols);
 int Compiler_skip_collected_script_statement(Compiler c);
 
 void Compiler_skip_script_statement(Compiler c);
+
+void Compiler_record_module_initializer(Compiler c, Type type, List bind);
+
+List Compiler_module_initializer(Compiler c, List binding);
+
+String module_initializer_entry(String path);
+
+List Compiler_module_initializer_rows(Compiler c);
+
+void Compiler_merge_module_initializers(Compiler c, List rows);
 
 void Compiler_tokenize(Compiler c, char * text);
 

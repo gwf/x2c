@@ -447,6 +447,9 @@ void Compiler.drop_fact(Compiler c, Var key) =>
 /** Returns `key`'s type, retrying a bare key in package space, or `NULL`. */
 List Sym.get(Sym s, List key) {
   List found = s.get_exact(key);
+  if (found && found != %(typedef @{key})) return found;
+  List module_key = s.c.module_retry_key(key);
+  if (module_key) return s.get_exact(module_key);
   if (found) return found;
   List retry = s._package_retry_key(key);
   return retry ? s.get_exact(retry) : NULL;
@@ -520,6 +523,9 @@ static List Sym._lookup_from(
       return found;
     }
   }
+  List module_key = s.c.module_retry_key(key);
+  if (module_key)
+    return s._lookup_from(module_key, type, first, forward);
   List retry = s._package_retry_key(key);
   if (retry && (!forward || s.get_exact(retry)))
     return s._lookup_from(retry, type, first, forward);
@@ -537,8 +543,11 @@ static List Sym._lookup_from(
     `restrict`, and `volatile`.
 */
 List Sym.declare(Sym s, List context, List key, List ast) {
+  String spelling = _declared_spelling(key);
+  if (!s.c.source_module || !s.get_exact(%("module-tag" $spelling)))
+    s.c._check_spelling(spelling);
+  key = s.c.module_declared_key(context, key);
   if (s.c.package) key = s._package_declared_key(context, key, ast);
-  s.c._check_spelling(_declared_spelling(key));
   Type ctxkey = %( @context @key ), type = ast.type_from_ast();
   Type declared_type = type;
   if ((int) s.scopes.len() == s.base_scopes && !context)
@@ -555,6 +564,9 @@ List Sym.declare(Sym s, List context, List key, List ast) {
     s._local_object(key, binding, declared_type);
   return binding;
 }
+
+void Sym.check_module_type_spelling(Sym s, String spelling) =>
+  s.c._check_spelling(spelling);
 
 /* Package mode rewrites file-scope non-static declaration keys into the
    package's `name__` space, so binding spellings, aggregate tags, and
@@ -715,6 +727,7 @@ Var Compiler.aggregate_name(
     retained for placing generated protocol declarations at the same boundary.
 */
 void Compiler.record_declaration_visibility(Compiler c, List declaration) {
+  c.record_module_declaration(declaration);
   int private = c.source_private > 0;
   match (declaration) {
     case %(seq *rows):

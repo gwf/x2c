@@ -9,7 +9,7 @@
 #include "parse.h"
 #include "expressions.h"
 #include "literals.h"
-#include "macros.h"
+#include "_x2c_module_6922FA3C.h"
 static List _186, _184, _183, _182, _181, _180, _179, _178, _177, _176, _156, _150, _145, _144, _139, _138, _137, _132, _125, _121, _120, _115, _109, _108, _106, _105, _103, _96, _92, _90, _86, _81, _79, _76, _74, _69, _68, _67, _59, _58, _57, _55, _54, _48, _47, _46, _45, _44, _43, _42, _41, _40, _39, _38, _37, _36, _35, _34, _33;
 
 static String _174, _172, _170, _168, _166, _164, _162, _160, _158, _154, _153, _152, _148, _147, _146, _142, _140, _128, _123, _122, _111, _110, _101, _98, _97, _94, _93, _84, _83, _72, _65, _64, _63, _62, _61, _31, _29, _27, _25, _23, _21, _19, _17, _15, _13, _11, _9, _7, _5, _3, _1, _0;
@@ -411,7 +411,11 @@ List Compiler_parse_statement(Compiler c){
   return Compiler__statement(c, AST_STATEMENT);
 }
 
+List Compiler_try_parse_macro_slot(Compiler, Symbol);
+
 List Compiler_with_binding(Compiler c);
+
+int Compiler_macro_starts_target_at(Compiler, AstPos);
 
 static List Compiler__statement(Compiler c, AstPos position){
   Compiler___complete_here(c, 43159332400040, _statement_keywords());
@@ -440,6 +444,12 @@ static List Compiler__statement(Compiler c, AstPos position){
 static List _statement_keywords(void){
   return _48;
 }
+
+List Compiler_peek_macro_hole(Compiler);
+
+List Compiler_try_parse_macro_target_at(Compiler, AstPos);
+
+List Compiler_try_parse_macro_expression(Compiler);
 
 static List Compiler__macro_statement(Compiler c){
   List hole = Compiler_peek_macro_hole(c);
@@ -504,6 +514,7 @@ default: break;
 return cons(_49, cons(List_var(expr), NULL));
 }
 
+Token Compiler_after_hole(Compiler);
 static List Compiler__label_statement(Compiler c){
   Token head = c -> token;  if(Compiler_peek(c, 0) == 19147688 ||(Map_truth(c -> macro_holes) && List_truth(Compiler_peek_macro_hole(c)) && Compiler_after_hole(c) -> type == 117)){
     List label = Compiler_try_parse_macro_slot(c, 920394);  if(! List_truth(label)) label = Compiler_parse_optional_identifier(c);  if(Compiler_test(c, 117)) return cons(_60, cons(List_var(label), NULL));  c -> token = head;
@@ -815,6 +826,7 @@ static List Compiler__capture_temporaries(Compiler c, List types, Array locals){
 return Array_list_free(declarations);
 }
 
+List Compiler_macro_introduced_name(Compiler, String);
 static List Type_list(Type);
 List Sym_introduce(Sym, String);
 static List Compiler__capture_declaration(Compiler c, Type type, String name, List initializer, int temporary){
@@ -954,6 +966,7 @@ static List Compiler__continued(Compiler c, List statement){
   if(c -> token == c -> directives_taken) return statement;  List directives = Compiler_leading_preproc(c);  return List_truth(directives) ? cons(_157, cons(List_var(statement), List_append(directives, NULL))) : statement;
 }
 
+int Compiler_local_macro_form_is_definition(Compiler);
 List Compiler_parse_block_item(Compiler c){
   if(! _init_guard_) _file_init_();  Compiler___complete_here(c, 5011670, _block_keywords());  if(Compiler_test_static_assert(c)) return Compiler_parse_static_assert(c);  List slot = Compiler_try_parse_macro_slot(c, 5011670);  if(List_truth(slot)) return slot;  if(Compiler_local_macro_form_is_definition(c)) return Compiler__local_macro(c);  if(Compiler_at_word(c, _0)) return Compiler_parse_statement(c);  int with_expression = ! ! List_truth(Compiler_with_binding(c));  List macro = with_expression ? NULL : Compiler_try_parse_macro_target_at(c, AST_BLOCK);  if(List_truth(macro)) return macro;  if(Compiler_test_declaration(c)) return Compiler__declaration_item(c);  return Compiler__statement(c, AST_BLOCK);
 }
@@ -962,6 +975,7 @@ static List _block_keywords(void){
   return _184;
 }
 
+List Compiler_parse_macro_definition(Compiler);
 static List Compiler__local_macro(Compiler c){
   List definition = Compiler_parse_macro_definition(c);  return Map_truth(c -> macro_holes) ? definition : _186;
 }

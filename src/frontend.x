@@ -17,7 +17,7 @@
 typedef void (*FrontendErrorSink)(String text);
 
 /** Borrows a configured request and owns shared native-preprocessor setup.
-    Units open sequentially; process caches must outlive the session.
+    Nested units close in reverse open order; process caches outlive the session.
     The optional stderr sink runs synchronously; units also retain that text.
 */
 typedef struct Frontend {
@@ -169,8 +169,7 @@ void ParsedUnit.close(ParsedUnit &unit) {
 /* Opens and tokenizes a source unit in `context` without printing
    diagnostics: the file `filename`, or the session text `source` when
    `filename` is NULL. A failed unit remains open so its diagnostics can be
-   inspected. Close it before opening the next unit; Type and collection
-   caches are process-global. */
+   inspected. Nested units close in reverse open order. */
 static int _start(
   Frontend frontend, String filename, ParsedUnit &unit, Context context,
   String source) {

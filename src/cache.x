@@ -617,7 +617,8 @@ static Symbol StaticQueue.visit(StaticQueue &q, List binding) {
   Symbol area = q.deferred(definitions) ? <finish> : <statics>;
   List dependencies = q.c.static_init_deps.getdefault(binding, %());
   foreach (List dependency, dependencies)
-    if (dependency in q.pending && q.visit(dependency) == <finish>)
+    if ((dependency in q.pending || dependency in q.c.static_init_deps) &&
+        q.visit(dependency) == <finish>)
       area = <finish>;
   q.add_calls(definitions, area);
   q.state[binding] = area;

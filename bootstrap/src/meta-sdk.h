@@ -17,7 +17,7 @@ typedef struct MetaContext{
 MetaContext;
 
 #include "grammar.h"
-#include "macros.h"
+#include "_x2c_module_6922FA3C.h"
 #include "meta.h"
 #include <limits.h>
 #include <stdint.h>

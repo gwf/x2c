@@ -4,6 +4,7 @@
 #include "x2c.h"
 
 #include "build.h"
+#include "module-tree.h"
 #include "project.h"
 #include "frontend.h"
 #include "meta-project.h"
@@ -42,6 +43,10 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static void _translate_unit(Frontend frontend, String filename, String output_dir);
 
+static int _parse_unit(Frontend frontend, String filename, ParsedUnit * unit);
+
+static void _emit_unit(Frontend frontend, ParsedUnit * unit, String filename, String output_dir);
+
 _Noreturn static void _fail(Compiler c);
 
 static void _report_diagnostics(Compiler c);
@@ -71,6 +76,8 @@ Translation;
 
 static int _run_translation(CliRequest request, Map unit_dirs, Build build);
 
+static void Translation_enroll_modules(Translation * t);
+
 static void Translation_preflight(Translation * t);
 
 static void _check_out_dir(String out_dir);
@@ -80,6 +87,8 @@ _Noreturn static void _stem_collision(String stem, String first, String other, S
 static void _print_command(CliRequest request);
 
 static void _preprocessor_errors(String text);
+
+static List Translation_translate_modules(Translation * t);
 
 static void Translation_translate_serial(Translation * t);
 
@@ -268,15 +277,9 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _62 = String_new("cannot open diagnostics file \'");
 }
 
-void Compiler_dump_tokens(Compiler);
-
-List Compiler_diagnostics(Compiler);
-
 static void _translate_unit(Frontend frontend, String filename, String output_dir){
-  CliRequest request = frontend -> request;
-  Symbol dump = request -> dump;
   ParsedUnit unit;
-  int started = Frontend_start(frontend, filename, &(unit));
+  int ready = _parse_unit(frontend, filename, &(unit));
   {
     _x2c_defer_env_0 _x2c_macro_environment_0 ={
       0
@@ -289,42 +292,45 @@ static void _translate_unit(Frontend frontend, String filename, String output_di
     ;
     x2c_cleanup_push(& _x2c_defer_record_0);
     {
-      Compiler c = unit.compiler;
-      if(! started) _fail(c);
-      Compiler_own_diagnostics(c);
-      if(dump == 1374366630){
-        Compiler_dump_tokens(c);
-        {
-          x2c_cleanup_leave(& _x2c_defer_record_0);
-          return;
-        }
-
-      }
-      int collected = ParsedUnit_collect(&(unit), frontend);
-      _report_diagnostics(c);
-      if(! collected) exit(1);
-      if(_inspect_collected(&(unit), dump)){
-        x2c_cleanup_leave(& _x2c_defer_record_0);
-        return;
-      }
-      if(! ParsedUnit_parse(&(unit))) _fail(c);
-      c -> recovery_depth = 0;
-      if(_inspect_parsed(&(unit), filename, dump)){
-        x2c_cleanup_leave(& _x2c_defer_record_0);
-        return;
-      }
-      List ast = _transform_ast(c, Compiler_generate_protocol_adapters(c, unit.ast));
-      if(_inspect_transformed(c, ast, dump)){
-        x2c_cleanup_leave(& _x2c_defer_record_0);
-        return;
-      }
-      generate_code(c, ast, output_dir);
-      if(! translation_depfile_write(request, c, filename, output_dir)) exit(1);
-      if(request -> fatal_warnings && List_truth(Compiler_diagnostics(c))) exit(1);
+      if(ready) _emit_unit(frontend, &(unit), filename, output_dir);
     }
     x2c_cleanup_leave(& _x2c_defer_record_0);
   }
 
+}
+
+void Compiler_dump_tokens(Compiler);
+
+static int _parse_unit(Frontend frontend, String filename, ParsedUnit * unit){
+  CliRequest request = frontend -> request;
+  Symbol dump = request -> dump;
+  int started = Frontend_start(frontend, filename, &((* unit)));
+  Compiler c =(* unit).compiler;
+  if(! started) _fail(c);
+  Compiler_own_diagnostics(c);
+  if(dump == 1374366630){
+    Compiler_dump_tokens(c);
+    return 0;
+  }
+  int collected = ParsedUnit_collect(&((* unit)), frontend);
+  _report_diagnostics(c);
+  if(! collected) exit(1);
+  if(_inspect_collected(&((* unit)), dump)) return 0;
+  if(! ParsedUnit_parse(&((* unit)))) _fail(c);
+  c -> recovery_depth = 0;
+  if(_inspect_parsed(&((* unit)), filename, dump)) return 0;
+  (* unit).ast = _transform_ast(c, Compiler_generate_protocol_adapters(c, (* unit).ast));
+  return ! _inspect_transformed(c, (* unit).ast, dump);
+}
+
+List Compiler_diagnostics(Compiler);
+
+static void _emit_unit(Frontend frontend, ParsedUnit * unit, String filename, String output_dir){
+  CliRequest request = frontend -> request;
+  Compiler c =(* unit).compiler;
+  generate_code(c, (* unit).ast, output_dir);
+  if(! translation_depfile_write(request, c, filename, output_dir)) exit(1);
+  if(request -> fatal_warnings && List_truth(Compiler_diagnostics(c))) exit(1);
 }
 
 _Noreturn static void _fail(Compiler c){
@@ -454,19 +460,49 @@ static int _run_translation(CliRequest request, Map unit_dirs, Build build){
   unsigned long started_at = report_now_us();  if(! String_truth(request -> out_dir)) request -> out_dir = _12;  Translation t ={
     .request = request, .unit_dirs = unit_dirs, .build = build, .total = List_len(request -> inputs)
   }
-  ;  Translation_preflight(&(t));  if(request -> verbose || request -> dry_run) _print_command(request);  if(request -> dry_run) return 0;  t.frontend = Frontend_new(request);  t.frontend -> preprocessor_errors = _preprocessor_errors;  if(! Frontend_preload_macro_libraries(t.frontend)) return 1;  Frontend_prepare_meta(t.frontend, request -> inputs);  if(request -> jobs > 1 && t.total > 1 && ! CliRequest_inspects(request)){
+  ;  if(! Map_truth(unit_dirs) && ! request -> dry_run && ! CliRequest_inspects(request)) Translation_enroll_modules(&(t));  Translation_preflight(&(t));  if(request -> verbose || request -> dry_run) _print_command(request);  if(request -> dry_run) return 0;  t.frontend = Frontend_new(request);  t.frontend -> preprocessor_errors = _preprocessor_errors;  if(! Frontend_preload_macro_libraries(t.frontend)) return 1;  Frontend_prepare_meta(t.frontend, request -> inputs);  List all_inputs = request -> inputs;  int all_units = t.total;  if(! CliRequest_inspects(request)){
+    request -> inputs = Translation_translate_modules(&(t));  t.total = List_len(request -> inputs);
+  }
+  if(request -> jobs > 1 && t.total > 1 && ! CliRequest_inspects(request)){
     if(Translation_translate_parallel(&(t))) return 1;
   }
-  else Translation_translate_serial(&(t));  if(! build && ! CliRequest_inspects(request)) Translation_report(&(t), started_at);  return 0;
+  else Translation_translate_serial(&(t));  request -> inputs = all_inputs;  t.total = all_units;  if(! build && ! CliRequest_inspects(request)) Translation_report(&(t), started_at);  return 0;
+}
+
+Path Path_dirname(Path);
+Path Path_absolute(Path);
+Path Path_join(Path, Path);
+void Path_make_dirs(Path);
+static void Translation_enroll_modules(Translation * t){
+  Compiler discovery = Compiler_new();  ModuleTree tree = ModuleTree_new(discovery);  List inputs = ModuleTree_units(tree, (* t).request -> inputs);  Map directories = Map_new();  int modules = 0; {
+    String input;  List _x2c_macro_object_2 = inputs;  List _x2c_macro_cursor_2 = _x2c_macro_object_2;  Var _x2c_macro_cursor_output_2;  while(List_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
+      input = Var_string(_x2c_macro_cursor_output_2); {
+        String directory =(* t).request -> out_dir;  List ancestry = ModuleTree_ancestors(tree, input);  if(List_truth(ancestry)){
+          String root = Var_string(List_car(List_reverse(ancestry)));  String root_dir = Path_dirname(root), source_dir = Path_dirname(Path_absolute(input));  if(! String_equal(source_dir, root_dir)) directory = Path_join(directory, String_getslice(source_dir, String_len(root_dir) + 1, -2147483648, 1));  modules = 1;
+        }
+        Map_setindex(directories, String_var(input), String_var(directory));
+      }
+
+    }
+
+  }
+  if(! modules) return; {
+    Var key, directory;  Map _x2c_macro_object_3 = directories;  unsigned _x2c_macro_cursor_3 = 0;  Var _x2c_macro_cursor_output_3;  Var _x2c_macro_cursor_output_4;  while(Map_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_3), &(_x2c_macro_cursor_output_4))){
+      key = _x2c_macro_cursor_output_3;  directory = _x2c_macro_cursor_output_4;  Path_make_dirs(Var_string(directory));
+    }
+
+  }
+  (* t).unit_dirs = directories; (* t).request -> inputs = inputs; (* t).total = List_len(inputs);
 }
 
 String Path_stem(Path);
 static void Translation_preflight(Translation * t){
-  CliRequest request =(* t).request;  if(! CliRequest_inspects(request)) _check_out_dir(request -> out_dir);  int shared = ! CliRequest_inspects(request) && ! Map_truth((* t).unit_dirs);  Map stems = Map_new(); {
-    String input;  List _x2c_macro_object_2 = request -> inputs;  List _x2c_macro_cursor_2 = _x2c_macro_object_2;  Var _x2c_macro_cursor_output_2;  while(List_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
-      input = Var_string(_x2c_macro_cursor_output_2); {
+  CliRequest request =(* t).request;  if(! CliRequest_inspects(request)) _check_out_dir(request -> out_dir);  int shared = ! CliRequest_inspects(request);  Map stems = Map_new(); {
+    String input;  List _x2c_macro_object_4 = request -> inputs;  List _x2c_macro_cursor_4 = _x2c_macro_object_4;  Var _x2c_macro_cursor_output_5;  while(List_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_5))){
+      input = Var_string(_x2c_macro_cursor_output_5); {
         build_check_input(input);  if(! is_source_file(input)) driver_error(String_join(NULL, cons(String_var(_13), cons(String_var(input), NULL))));
         String stem = Path_stem(input);
+        if(Map_truth((* t).unit_dirs)) stem = Path_join(Translation_output_dir(&((* t)), input), stem);
         if(shared && Map_contains(stems, String_var(stem))) _stem_collision(stem, Var_string(Map_getindex(stems, String_var(stem))), input, request -> out_dir);
         Map_setindex(stems, String_var(stem), String_var(input));
       }
@@ -497,11 +533,11 @@ static void _print_command(CliRequest request){
   fprintf(stderr, " --out-dir %s", request -> out_dir);
   {
     String input;
-    List _x2c_macro_object_3 = request -> inputs;
-    List _x2c_macro_cursor_3 = _x2c_macro_object_3;
-    Var _x2c_macro_cursor_output_3;
-    while(List_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_3))){
-      input = Var_string(_x2c_macro_cursor_output_3);
+    List _x2c_macro_object_5 = request -> inputs;
+    List _x2c_macro_cursor_5 = _x2c_macro_object_5;
+    Var _x2c_macro_cursor_output_6;
+    while(List_try_next(_x2c_macro_object_5, &(_x2c_macro_cursor_5), &(_x2c_macro_cursor_output_6))){
+      input = Var_string(_x2c_macro_cursor_output_6);
       fprintf(stderr, " %s", input);
     }
 
@@ -513,15 +549,69 @@ static void _preprocessor_errors(String text){
   File_printf(Stderr, "%s", text);
 }
 
+static List Translation_translate_modules(Translation * t){
+  Compiler discovery = Compiler_new();
+  ModuleTree tree = discovery -> module_tree;
+  Array modules = Array_new(), ordinary = Array_new();
+  {
+    String input;
+    List _x2c_macro_object_6 =(* t).request -> inputs;
+    List _x2c_macro_cursor_6 = _x2c_macro_object_6;
+    Var _x2c_macro_cursor_output_7;
+    while(List_try_next(_x2c_macro_object_6, &(_x2c_macro_cursor_6), &(_x2c_macro_cursor_output_7))){
+      input = Var_string(_x2c_macro_cursor_output_7);
+      {
+        if(String_truth(ModuleTree_owner(tree, input))) Array_push(modules, String_var(input));
+        else Array_push(ordinary, String_var(input));
+      }
+
+    }
+
+  }
+  int count = Array_len(modules);
+  if(! count) return Array_list_free(ordinary);
+  ParsedUnit * units = Scope_calloc(count, sizeof(ParsedUnit));
+  for(int i = 0;  i < count;  i ++){
+    String input = Var_string(Array_getindex(modules, i));
+    if((* t).build) Build_begin_translation((* t).build, input);
+    else report_progress(45220543335690, i, (* t).total, input);
+    (void) _parse_unit((* t).frontend, input, &(units[i]));
+  }
+  Array prerequisites = Array_new();
+  for(int i = 0;  i < count;  i ++){
+    List row;
+    List _x2c_macro_object_7 = Compiler_module_initializer_rows(units[i].compiler);
+    List _x2c_macro_cursor_7 = _x2c_macro_object_7;
+    Var _x2c_macro_cursor_output_8;
+    while(List_try_next(_x2c_macro_object_7, &(_x2c_macro_cursor_7), &(_x2c_macro_cursor_output_8))){
+      row = Var_list(_x2c_macro_cursor_output_8);
+      Array_push(prerequisites, List_var(row));
+    }
+
+  }
+  List rows = Array_list_free(prerequisites);
+  for(int i = count - 1;  i >= 0;  i --){
+    String input = Var_string(Array_getindex(modules, i));
+    Compiler_merge_module_initializers(units[i].compiler, rows);
+    _emit_unit((* t).frontend, &(units[i]), input, Translation_output_dir(&((* t)), input));
+    if(i) rows = Var_list(Context_export(units[i].context, List_var(rows)));
+    ParsedUnit_close(&(units[i]));
+    if((* t).build) Build_end_translation((* t).build, input, 0);
+    else report_progress(45220543335690, count - i, (* t).total, input);
+  }
+  Scope_free(units);
+  return Array_list_free(ordinary);
+}
+
 static void Translation_translate_serial(Translation * t){
   int done = 0;
   {
     String input;
-    List _x2c_macro_object_4 =(* t).request -> inputs;
-    List _x2c_macro_cursor_4 = _x2c_macro_object_4;
-    Var _x2c_macro_cursor_output_4;
-    while(List_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_4))){
-      input = Var_string(_x2c_macro_cursor_output_4);
+    List _x2c_macro_object_8 =(* t).request -> inputs;
+    List _x2c_macro_cursor_8 = _x2c_macro_object_8;
+    Var _x2c_macro_cursor_output_9;
+    while(List_try_next(_x2c_macro_object_8, &(_x2c_macro_cursor_8), &(_x2c_macro_cursor_output_9))){
+      input = Var_string(_x2c_macro_cursor_output_9);
       {
         if((* t).build) Build_begin_translation((* t).build, input);
         else report_progress(45220543335690, done, (* t).total, input);
@@ -551,15 +641,16 @@ static void Translation_report(Translation * t, unsigned long started_at){
   unsigned long long bytes = 0;
   {
     String input;
-    List _x2c_macro_object_5 =(* t).request -> inputs;
-    List _x2c_macro_cursor_5 = _x2c_macro_object_5;
-    Var _x2c_macro_cursor_output_5;
-    while(List_try_next(_x2c_macro_object_5, &(_x2c_macro_cursor_5), &(_x2c_macro_cursor_output_5))){
-      input = Var_string(_x2c_macro_cursor_output_5);
+    List _x2c_macro_object_9 =(* t).request -> inputs;
+    List _x2c_macro_cursor_9 = _x2c_macro_object_9;
+    Var _x2c_macro_cursor_output_10;
+    while(List_try_next(_x2c_macro_object_9, &(_x2c_macro_cursor_9), &(_x2c_macro_cursor_output_10))){
+      input = Var_string(_x2c_macro_cursor_output_10);
       {
         String stem = Path_stem(input);
-        bytes += report_file_bytes(String_join(NULL, cons(String_var(out_dir), cons(String_var(_17), cons(String_var(stem), cons(String_var(_18), NULL))))));
-        bytes += report_file_bytes(String_join(NULL, cons(String_var(out_dir), cons(String_var(_17), cons(String_var(stem), cons(String_var(_19), NULL))))));
+        String directory = Translation_output_dir(&((* t)), input);
+        bytes += report_file_bytes(String_join(NULL, cons(String_var(directory), cons(String_var(_17), cons(String_var(stem), cons(String_var(_18), NULL))))));
+        bytes += report_file_bytes(String_join(NULL, cons(String_var(directory), cons(String_var(_17), cons(String_var(stem), cons(String_var(_19), NULL))))));
       }
 
     }
@@ -592,13 +683,13 @@ static void Translation_preload_modules(Translation * t){
   if(! List_truth(roots)) return;
   {
     String name;
-    Iter _x2c_macro_iterator_6 = Map_keys(Translation_package_names(&((* t)), roots), &(struct Iter){
+    Iter _x2c_macro_iterator_10 = Map_keys(Translation_package_names(&((* t)), roots), &(struct Iter){
       int_var(0)
     }
     );
-    Var _x2c_macro_item_6;
-    while(Iter_try_next(_x2c_macro_iterator_6, &(_x2c_macro_item_6))){
-      name = Var_string(_x2c_macro_item_6);
+    Var _x2c_macro_item_10;
+    while(Iter_try_next(_x2c_macro_iterator_10, &(_x2c_macro_item_10))){
+      name = Var_string(_x2c_macro_item_10);
       {
         String root = NULL;
         if(! String_truth(package_entry((* t).request -> sources, roots, name, &(root))) || Compiler_links_extension(name)) continue;
@@ -625,19 +716,19 @@ static Map Translation_package_names(Translation * t, List roots){
   Map names = Map_new();
   {
     String input;
-    List _x2c_macro_object_9 =(* t).request -> inputs;
-    List _x2c_macro_cursor_9 = _x2c_macro_object_9;
-    Var _x2c_macro_cursor_output_8;
-    while(List_try_next(_x2c_macro_object_9, &(_x2c_macro_cursor_9), &(_x2c_macro_cursor_output_8))){
-      input = Var_string(_x2c_macro_cursor_output_8);
+    List _x2c_macro_object_13 =(* t).request -> inputs;
+    List _x2c_macro_cursor_13 = _x2c_macro_object_13;
+    Var _x2c_macro_cursor_output_13;
+    while(List_try_next(_x2c_macro_object_13, &(_x2c_macro_cursor_13), &(_x2c_macro_cursor_output_13))){
+      input = Var_string(_x2c_macro_cursor_output_13);
       {
         {
           String name;
-          List _x2c_macro_object_7 = _imported_packages(input);
-          List _x2c_macro_cursor_7 = _x2c_macro_object_7;
-          Var _x2c_macro_cursor_output_6;
-          while(List_try_next(_x2c_macro_object_7, &(_x2c_macro_cursor_7), &(_x2c_macro_cursor_output_6))){
-            name = Var_string(_x2c_macro_cursor_output_6);
+          List _x2c_macro_object_11 = _imported_packages(input);
+          List _x2c_macro_cursor_11 = _x2c_macro_object_11;
+          Var _x2c_macro_cursor_output_11;
+          while(List_try_next(_x2c_macro_object_11, &(_x2c_macro_cursor_11), &(_x2c_macro_cursor_output_11))){
+            name = Var_string(_x2c_macro_cursor_output_11);
             Map_setindex(names, String_var(name), int_var(1));
           }
 
@@ -695,11 +786,11 @@ static Map Translation_package_names(Translation * t, List roots){
         }
         {
           String dependency;
-          List _x2c_macro_object_8 = translation_depfile_parse(text);
-          List _x2c_macro_cursor_8 = _x2c_macro_object_8;
-          Var _x2c_macro_cursor_output_7;
-          while(List_try_next(_x2c_macro_object_8, &(_x2c_macro_cursor_8), &(_x2c_macro_cursor_output_7))){
-            dependency = Var_string(_x2c_macro_cursor_output_7);
+          List _x2c_macro_object_12 = translation_depfile_parse(text);
+          List _x2c_macro_cursor_12 = _x2c_macro_object_12;
+          Var _x2c_macro_cursor_output_12;
+          while(List_try_next(_x2c_macro_object_12, &(_x2c_macro_cursor_12), &(_x2c_macro_cursor_output_12))){
+            dependency = Var_string(_x2c_macro_cursor_output_12);
             {
               String package = package_directory(roots, dependency);
               if(String_truth(package)) Map_setindex(names, String_var(Path_basename(package)), int_var(1));
@@ -852,11 +943,11 @@ void Compiler_stop_meta_helper(void);
 static void Translation_work(Translation * t, List slice){
   {
     String input;
-    List _x2c_macro_object_10 = slice;
-    List _x2c_macro_cursor_10 = _x2c_macro_object_10;
-    Var _x2c_macro_cursor_output_9;
-    while(List_try_next(_x2c_macro_object_10, &(_x2c_macro_cursor_10), &(_x2c_macro_cursor_output_9))){
-      input = Var_string(_x2c_macro_cursor_output_9);
+    List _x2c_macro_object_14 = slice;
+    List _x2c_macro_cursor_14 = _x2c_macro_object_14;
+    Var _x2c_macro_cursor_output_14;
+    while(List_try_next(_x2c_macro_object_14, &(_x2c_macro_cursor_14), &(_x2c_macro_cursor_output_14))){
+      input = Var_string(_x2c_macro_cursor_output_14);
       Translation_translate(&((* t)), input);
     }
 
@@ -1062,11 +1153,11 @@ static int _add_commands(CliRequest request, Build b, Context target, Array comm
   if(commands == NULL) return 0;
   {
     String entry;
-    Array _x2c_macro_object_11 = b -> compile_commands;
-    int _x2c_macro_cursor_11 = 0;
-    Var _x2c_macro_cursor_output_10;
-    while(Array_try_next(_x2c_macro_object_11, &(_x2c_macro_cursor_11), &(_x2c_macro_cursor_output_10))){
-      entry = Var_string(_x2c_macro_cursor_output_10);
+    Array _x2c_macro_object_15 = b -> compile_commands;
+    int _x2c_macro_cursor_15 = 0;
+    Var _x2c_macro_cursor_output_15;
+    while(Array_try_next(_x2c_macro_object_15, &(_x2c_macro_cursor_15), &(_x2c_macro_cursor_output_15))){
+      entry = Var_string(_x2c_macro_cursor_output_15);
       Array_push(commands, Context_export(target, String_var(entry)));
     }
 
@@ -1092,37 +1183,80 @@ static List _stale_inputs(Build b, List units, Map stale){
   Array inputs = Array_new();
   {
     String input;
-    List _x2c_macro_object_12 = units;
-    List _x2c_macro_cursor_12 = _x2c_macro_object_12;
-    Var _x2c_macro_cursor_output_11;
-    while(List_try_next(_x2c_macro_object_12, &(_x2c_macro_cursor_12), &(_x2c_macro_cursor_output_11))){
-      input = Var_string(_x2c_macro_cursor_output_11);
+    List _x2c_macro_object_16 = units;
+    List _x2c_macro_cursor_16 = _x2c_macro_object_16;
+    Var _x2c_macro_cursor_output_16;
+    while(List_try_next(_x2c_macro_object_16, &(_x2c_macro_cursor_16), &(_x2c_macro_cursor_output_16))){
+      input = Var_string(_x2c_macro_cursor_output_16);
       {
         if(! is_source_file(input)) continue;
         String directory = Build_generated_dir(b, input);
-        if(Build_translation_current(b, input, directory)){
-          Build_begin_translation(b, input);
-          Build_end_translation(b, input, 1);
-          continue;
+        if(! Build_translation_current(b, input, directory)){
+          Map_setindex(stale, String_var(input), String_var(directory));
+          Array_push(inputs, String_var(input));
         }
-        Map_setindex(stale, String_var(input), String_var(directory));
-        Array_push(inputs, String_var(input));
+
       }
 
     }
 
   }
-  return Array_list_free(inputs);
+  Compiler discovery = Compiler_new();
+  Map spellings = Map_new();
+  {
+    String input;
+    List _x2c_macro_object_17 = units;
+    List _x2c_macro_cursor_17 = _x2c_macro_object_17;
+    Var _x2c_macro_cursor_output_17;
+    while(List_try_next(_x2c_macro_object_17, &(_x2c_macro_cursor_17), &(_x2c_macro_cursor_output_17))){
+      input = Var_string(_x2c_macro_cursor_output_17);
+      Map_setindex(spellings, String_var(Path_absolute(input)), String_var(input));
+    }
+
+  }
+  Array enrolled = Array_new();
+  {
+    String found;
+    List _x2c_macro_object_18 = ModuleTree_units(discovery -> module_tree, Array_list_free(inputs));
+    List _x2c_macro_cursor_18 = _x2c_macro_object_18;
+    Var _x2c_macro_cursor_output_18;
+    while(List_try_next(_x2c_macro_object_18, &(_x2c_macro_cursor_18), &(_x2c_macro_cursor_output_18))){
+      found = Var_string(_x2c_macro_cursor_output_18);
+      {
+        String input = Var_string(Map_getdefault(spellings, String_var(Path_absolute(found)), String_var(found)));
+        if(!(Map_contains(stale, String_var(input)))) Map_setindex(stale, String_var(input), String_var(Build_generated_dir(b, input)));
+        Array_push(enrolled, String_var(input));
+      }
+
+    }
+
+  }
+  {
+    String input;
+    List _x2c_macro_object_19 = units;
+    List _x2c_macro_cursor_19 = _x2c_macro_object_19;
+    Var _x2c_macro_cursor_output_19;
+    while(List_try_next(_x2c_macro_object_19, &(_x2c_macro_cursor_19), &(_x2c_macro_cursor_output_19))){
+      input = Var_string(_x2c_macro_cursor_output_19);
+      if(is_source_file(input) && !(Map_contains(stale, String_var(input)))){
+        Build_begin_translation(b, input);
+        Build_end_translation(b, input, 1);
+      }
+
+    }
+
+  }
+  return Array_list_free(enrolled);
 }
 
 static void _register_units(CliRequest request, Build b, List units, Map stale){
   {
     String input;
-    List _x2c_macro_object_13 = units;
-    List _x2c_macro_cursor_13 = _x2c_macro_object_13;
-    Var _x2c_macro_cursor_output_12;
-    while(List_try_next(_x2c_macro_object_13, &(_x2c_macro_cursor_13), &(_x2c_macro_cursor_output_12))){
-      input = Var_string(_x2c_macro_cursor_output_12);
+    List _x2c_macro_object_20 = units;
+    List _x2c_macro_cursor_20 = _x2c_macro_object_20;
+    Var _x2c_macro_cursor_output_20;
+    while(List_try_next(_x2c_macro_object_20, &(_x2c_macro_cursor_20), &(_x2c_macro_cursor_output_20))){
+      input = Var_string(_x2c_macro_cursor_output_20);
       {
         if(! is_source_file(input)) continue;
         String directory = Build_generated_dir(b, input);
@@ -1146,11 +1280,11 @@ static int _run_env(CliRequest request){
   if(List_truth(request -> inputs)) wanted = Var_string(List_car(request -> inputs));
   {
     List row;
-    List _x2c_macro_object_14 = _env_rows(request);
-    List _x2c_macro_cursor_14 = _x2c_macro_object_14;
-    Var _x2c_macro_cursor_output_13;
-    while(List_try_next(_x2c_macro_object_14, &(_x2c_macro_cursor_14), &(_x2c_macro_cursor_output_13))){
-      row = Var_list(_x2c_macro_cursor_output_13);
+    List _x2c_macro_object_21 = _env_rows(request);
+    List _x2c_macro_cursor_21 = _x2c_macro_object_21;
+    Var _x2c_macro_cursor_output_21;
+    while(List_try_next(_x2c_macro_object_21, &(_x2c_macro_cursor_21), &(_x2c_macro_cursor_output_21))){
+      row = Var_list(_x2c_macro_cursor_output_21);
       {
         String name, value;
         List _x2c_destructure_0 = row;

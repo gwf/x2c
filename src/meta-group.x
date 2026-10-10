@@ -230,7 +230,12 @@ static List Compiler._emit(
     List lowered = c._lower(units, stamp, suffix);
     /* The unit's protocol adapters and their registration belong to the
        program; group code reaches the runtime's own. */
-    List ast = c.transform(lowered);
+    List ast;
+    $let(c.filename, provider)
+    $let(c.module_owner, saved.module_owner) {
+      if (c.module_owner) lowered = c.generate_protocol_adapters(lowered);
+      ast = c.transform(lowered);
+    }
     code = generate_code_text(c, ast, stem);
   }
   catch %(?kind *detail): {
@@ -306,6 +311,7 @@ static void Compiler._isolate(
     _.source_facts = 0;
     _.recovery_depth = saved.recovery_depth + 1;
     _.filename = %"$stem.x";
+    _.module_owner = NULL;
     _.diagnostics = Diagnostics.new(NULL, 1);
   }
 }
@@ -366,6 +372,10 @@ static int _after_directives(Array units) {
 static Array Compiler._units(Compiler c) {
   String lib = %"${x2c_get_root()}/lib/";
   Array ordered = c._runtime_includes(lib);
+  if (c.meta_build)
+    foreach (String owner, c.module_ancestors().reverse())
+      if (owner != c.canonical_path(c.filename))
+        c._provider_include(ordered, owner);
   c._source_order(ordered, lib);
   Map reached = c._roots(ordered);
   _close(ordered, reached);
@@ -399,6 +409,13 @@ static Array Compiler._runtime_includes(Compiler c, String lib) {
 static void Compiler._source_order(Compiler c, Array ordered, String lib) {
   Map placeholders = c._placeholders();
   foreach (Var unit, c.unit_nodes) {
+    match (unit) case %(module-members ?(List members)): {
+      if (c.meta_build)
+        foreach (String member, members)
+          c._provider_include(ordered,
+            c.canonical_path(Path.join(Path.dirname(c.filename), member)));
+      continue;
+    }
     Var node = c._group_include(unit, lib);
     if (node is not void) ordered.push(_uninitialized(node, placeholders));
   }
@@ -430,6 +447,16 @@ static Var Compiler._group_include(Compiler c, Var node, String lib) {
     return void;
   }
   return node;
+}
+
+/* A module provider keeps its source identity while its native group uses
+   the project's table header. Session groups emit their reached bodies
+   together and do not consume separately generated runtime headers. */
+static void Compiler._provider_include(
+  Compiler c, Array includes, String path) {
+  Var index;
+  if (meta_build_tables.try_get(Path.absolute(path), index))
+    includes.push(%(preproc ${%"#include \"meta_group_$index.h\""}));
 }
 
 /* `node`, a declaration whose initializer holds a placeholder, without

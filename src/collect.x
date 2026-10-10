@@ -12,6 +12,7 @@
 
 #pragma once
 #include "compiler.x"
+#include "module-tree.x"
 
 #include "ast-rewrite.x"
 #include "buffer.x"
@@ -185,6 +186,7 @@ Map Compiler.collect_symbols(Compiler c, Map globs) {
   c.kw_aliases = {};
   Map visited = {}, String canonical = _canonical_path(c.filename);
   c.deps = {};
+  c.configure_module(canonical);
   c.add_translation_dependency(canonical);
   if (c.prelude) c._add_prelude(globs, visited);
   /* The prelude needs this file's signatures to close include cycles.
@@ -197,6 +199,12 @@ Map Compiler.collect_symbols(Compiler c, Map globs) {
       c.fn_defs.del(name);
     }
   visited[canonical] = 1;
+  if (c.module_owner) {
+    Array effects = [];
+    foreach (String owner, c.module_tree.ancestors(canonical).reverse())
+      if (owner != canonical) c._replay_include(owner, globs, visited, effects);
+  }
+  c._module_preamble(canonical, globs, visited);
   c._walk_file(canonical, c.text, Path.dirname(c.filename), globs, visited);
   c.bind_pending_inline_bodies(globs, canonical);
   return globs;
@@ -254,7 +262,8 @@ static String Compiler._runtime_text(Compiler c, String runtime) {
 
 /* Rows enter the unit's symbols and its source declarations together. */
 static void Compiler._merge_rows(Compiler c, Map globs, Map rows) {
-  globs.merge(rows);
+  foreach (Var (key, value), rows)
+    if (c.module_row_accessible(key, rows)) globs[key] = value;
   c.merge_source_declarations(globs, rows);
 }
 
@@ -277,6 +286,7 @@ static typedef struct FileWalk {
 static void Compiler._walk_file(
   Compiler c, String path, String text, String dir, Map globs,
   Map visited) {
+  if (!c.module_tree) c.module_tree = ModuleTree.new(c);
   if (path in _process_cache()) (void) c._entry(path);
   Tokenizer tokenizer = Tokenizer.new(text, <x2c>);
   tokenizer.layout = is_layout_file(path);
@@ -306,6 +316,7 @@ static void Compiler._walk_file(
     w.split(tokenizer.tokens);
     visited[path] = 1;
     w.add_defaults();
+    if (path == _canonical_path(c.filename)) c.collected_statics = w.statics;
     w.queue_public_bodies();
     w.select_public();
     w.publish();
@@ -314,11 +325,36 @@ static void Compiler._walk_file(
 
 static void FileWalk.split(FileWalk &w, Token first) {
   Array arms = $auto([]);
+  ModuleEntry module = w.unit ? w.c.module_tree.entry(w.path) : NULL;
   for (Token token = first; token.type != <eof>; token++) {
+    if (module && token.pos == module.block_start) {
+      w.flush(w.text[w.pos:module.block_start]);
+      w.capture_module_preamble(module);
+      foreach (String member, module.members) w.include(member, 0);
+      while (token.type != <eof> && token.pos < module.block_end) token++;
+      w.line = token.line;
+      w.pos = module.block_end;
+      if (token.type == <eof>) break;
+    }
     if (token.type != <preproc> || !_starts_line(first, token)) continue;
     if (!_track_arms(arms, token.text)) w.directive(token, _hidden(arms));
   }
   w.flush(w.text[w.pos:]);
+}
+
+/* Retain the selected prefix before members or suffix producers run. */
+static void FileWalk.capture_module_preamble(FileWalk &w, ModuleEntry module) {
+  Array parts = [];
+  foreach (Var part, w.parts)
+    parts.push(part is <map> ? (Var) part.map().copy() : part);
+  FileWalk prefix = w;
+  prefix.parts = parts;
+  prefix.select_public();
+  module.preamble_parts = parts.list_free();
+  Map boundary = _cache_map();
+  boundary[%("source-node" (module-boundary
+    ${home_portable_path(w.path)} ${module.block_start}))] = %(module-boundary);
+  w.parts.push(boundary);
 }
 
 /* An include ends the segment unless its conditional arm is never taken. */
@@ -390,10 +426,13 @@ static void FileWalk.parse(FileWalk &w, String segment, Map overlay) {
 static void FileWalk.prepare(FileWalk &w, Compiler shadow, String segment) {
   if (!w.unit || !w.c._package_owns(w.path)) shadow.package = NULL;
   shadow.filename = w.path;
+  if (w.unit) shadow.configure_module(w.path);
+  else shadow.module_owner = NULL;
   // Every segment hashes its provider, including its private helpers.
   shadow.meta_hashes = w.hashes;
   shadow.layout = w.c.layout;
   shadow.source_private = 0;
+  shadow.source_module = 0;
   shadow.signature_only = w.c.signature_only;
   shadow.interface_provider = w.c.interface_provider;
   shadow.open_linkage = w.linkage;
@@ -409,6 +448,62 @@ static void _shift_tokens(Tokenizer t, int line, int pos) {
     Token token = &((struct Token *) t.tokens)[i];
     token.line += line - 1;
     token.pos += pos;
+  }
+}
+
+/* Each member starts from ancestor prefixes, not from a preceding sibling's
+   mutable macro session. Only recorded visible effects cross this boundary. */
+void Compiler._module_preamble(Compiler c, String path, Map globs, Map active) {
+  if (!c.module_owner) return;
+  List ancestors = c.module_tree.ancestors(path).reverse();
+  foreach (String owner, ancestors) {
+    if (owner == path) continue;
+    ModuleEntry entry = c.module_tree.entry(owner);
+    List parts = entry.preamble_parts;
+    if (!parts) {
+      List cached = c._entry(owner);
+      Array prefix_parts = [];
+      if (cached) foreach (Var part, cached.car()) {
+        int boundary = 0;
+        if (part is <map>) foreach (Var value, part.map())
+          if (value == %(module-boundary)) boundary = 1;
+        if (boundary) break;
+        prefix_parts.push(part);
+      }
+      parts = prefix_parts.list_free();
+    }
+    if (parts) {
+      Map visited = active.copy();
+      foreach (String ancestor, ancestors) visited[ancestor] = 1;
+      foreach (Var part, parts) {
+        if (part is <map>) {
+          c._merge_rows(globs, part);
+          c.replay_package_imports(globs, part, NULL);
+        }
+        else if (part is <string>) c._replay_include(part, globs, visited, NULL);
+      }
+      c.add_translation_dependency(owner);
+      continue;
+    }
+    Compiler prefix = Compiler.new_shared(c);
+    defer c.close_child(prefix);
+    prefix.filename = owner;
+    prefix.configure_module(owner);
+    FileWalk walk = {
+      .c = prefix, .path = owner, .text = entry.preamble,
+      .dir = Path.dirname(owner), .globs = globs.copy(), .visited = active.copy(),
+      .parts = [], .definitions = {}, .dependencies = _cache_map(),
+      .statics = {}, .hashes = _cache_map(), .unit = 1, .line = 1};
+    Tokenizer tokenizer = Tokenizer.new(entry.preamble, <x2c>);
+    tokenizer.scan();
+    walk.split(tokenizer.tokens);
+    walk.select_public();
+    foreach (Var part, walk.parts) if (part is <map>) {
+      c._merge_rows(globs, part);
+      c.replay_package_imports(globs, part, NULL);
+    }
+    c.add_translation_dependency(owner);
+    c.merge_translation_dependencies(walk.dependencies);
   }
 }
 
@@ -562,6 +657,12 @@ static void FileWalk.include(FileWalk &w, String target, int angle) {
     w.c.sources, w.c.include_dirs, w.dir, target, angle, covered, w);
   if (!path || (covered && !is_source_file(path))) return;
   String canonical = _canonical_path(path);
+  if (is_source_file(canonical)) {
+    String owner = w.c.module_tree.owner(canonical);
+    if (owner && owner != canonical && !w.c.module_accessible(owner))
+      w.c.report_error(<parse>, "implementation member requires its module entry",
+        NULL, %("module:" $owner));
+  }
   w.c.add_translation_dependency(canonical);
   if (!(canonical in w.visited)) {
     w.visited[canonical] = 1;
@@ -633,6 +734,7 @@ static List Compiler._walk_cold(
   Compiler file = Compiler.new_shared(c);
   defer c.close_child(file);
   file.interface_provider = 1;
+  file.configure_module(canonical);
   file.configure_package(c.package_source_dirs, canonical);
   file.signature_only = c.signature_only;
   file.filename = c.filename;
@@ -647,7 +749,9 @@ static List Compiler._walk_cold(
   Map own_visited = {};
   foreach (Var (path, state), visited)
     if (state is <array>) own_visited[path] = state;
-  file._walk_apart(canonical, text, globs.copy(), own_visited);
+  Map symbols = globs.copy();
+  file._module_preamble(canonical, symbols, own_visited);
+  file._walk_apart(canonical, text, symbols, own_visited);
   c.merge_translation_dependencies(file.deps);
   c.declaration_produced |= file.declaration_produced;
   return _process_cache()[canonical];
@@ -673,6 +777,17 @@ static String _resolve_include(
   }
   Array dirs = $auto(_include_dirs(
     extra_dirs, angle ? NULL : includer_dir, !walk));
+  if (walk) if (!angle) {
+    Array ordered = [];
+    if (includer_dir) ordered.push(_canonical_path(includer_dir));
+    foreach (String dir, walk.c.module_include_dirs(walk.path))
+      if (!(dir in ordered)) ordered.push(dir);
+    foreach (String dir, dirs)
+      if (!(dir in ordered)) ordered.push(dir);
+    dirs.clear();
+    foreach (String dir, ordered) dirs.push(dir);
+    ordered.free();
+  }
   for (int i = 0; i < dirs.len(); i++) {
     String dir = dirs[i], path = %"$dir/$target";
     covered = dir == _canonical_lib() || dir == _canonical_include();
@@ -710,6 +825,17 @@ String collect_resolve_include(
     sources, dirs, includer_dir, target, angle, covered, NULL);
 }
 
+String Compiler.resolve_source_include(Compiler c, String target, int angle) {
+  FileWalk walk = {
+    .c = c, .path = c.canonical_path(c.filename),
+    .dir = Path.dirname(c.filename), .dependencies = _cache_map()};
+  int covered = 0;
+  String path = _resolve_include(
+    c.sources, c.include_dirs, walk.dir, target, angle, covered, walk);
+  c.merge_translation_dependencies(walk.dependencies);
+  return path;
+}
+
 /** The typedef names published by the files that the current unit's
     include of `target` reaches, including its transitive includes.
     A file already in `seen`
@@ -718,8 +844,7 @@ String collect_resolve_include(
     module adds nothing the prelude has not declared. */
 List Compiler.include_typedef_names(
   Compiler c, String target, int angle, Map seen) {
-  String path = collect_resolve_include(
-    c.sources, c.include_dirs, Path.dirname(c.filename), target, angle);
+  String path = c.resolve_source_include(target, angle);
   if (!path || !is_source_file(path)) return NULL;
   Array names = [];
   c._add_typedef_names(names, _canonical_path(path), seen);
@@ -731,8 +856,7 @@ List Compiler.include_typedef_names(
     through a cycle back to its own still-open header. */
 List Compiler.include_type_dependencies(
   Compiler c, String target, int angle, Map seen) {
-  String path = collect_resolve_include(
-    c.sources, c.include_dirs, Path.dirname(c.filename), target, angle);
+  String path = c.resolve_source_include(target, angle);
   if (!path || !is_source_file(path)) return NULL;
   seen[_canonical_path(c.filename)] = 1;
   Array types = [];
@@ -771,8 +895,7 @@ static void Compiler._add_type_dependencies(
     them. */
 void Compiler.include_function_declarations(
   Compiler c, String target, int angle, Map available) {
-  String path = collect_resolve_include(
-    c.sources, c.include_dirs, Path.dirname(c.filename), target, angle);
+  String path = c.resolve_source_include(target, angle);
   if (path) c._add_function_declarations(_canonical_path(path), available);
 }
 
@@ -1098,6 +1221,7 @@ static void Compiler.bind_pending_inline_bodies(
     body.filename = path;
     body.meta_hashes = hashes;
     body.tokenize(text);
+    body.collected_statics = statics;
     List ast = body.full_parse(symbols, 0);
     Map additions = body.inline_type_dependencies(ast);
     body.publish_inline_dependencies(path, own, statics, additions);
@@ -1445,6 +1569,7 @@ static void Surface.merge(Surface &s, String path, Map rows) {
   s.take_exports(rows);
   foreach (Var (key, value), rows) {
     if (key is not <list> || key.is_nil()) continue;
+    if (!s.c.module_row_accessible(key, rows)) continue;
     String spelling = _package_key_spelling(key);
     if (_package_protocol_row(key, value)) s.take(rows, key, value);
     else if (spelling && (keeps || spelling.startswith(prefix)))
@@ -1639,6 +1764,10 @@ static void Compiler._replay_included(
   }
 }
 
+void Compiler.module_member_effects(
+  Compiler c, String path, Map visited, Array effects) =>
+  c._replay_included(c.sym.global_symbols(), path, visited, effects, NULL);
+
 /** Installs the definitions of each include among the directives before
     the cursor. */
 void Compiler.install_included_effects(Compiler c) {
@@ -1654,8 +1783,7 @@ void Compiler.install_included_effects(Compiler c) {
     String target = token.type == <preproc>
                   ? preproc_include_target(token.text, angle) : NULL;
     if (!target) continue;
-    String path = collect_resolve_include(
-      c.sources, c.include_dirs, Path.dirname(c.filename), target, angle);
+    String path = c.resolve_source_include(target, angle);
     if (!path) continue;
     String canonical = _canonical_path(path);
     Var exports = c.included_effects[canonical];
@@ -1738,7 +1866,7 @@ static List Compiler._interface_load(
   Compiler c, String canonical, String path) {
   String identity = compiler_identity();
   match (_interface_record(path))
-    case %(interface 6 ?(String compiler) *stored):
+    case %(interface 9 ?(String compiler) *stored):
       if (identity && compiler == identity)
         return c._stored_entry(canonical, stored);
   return NULL;
@@ -1766,7 +1894,7 @@ static List _interface_record(String path) {
   try source = input.string_close();
   catch %(io-fail *): return NULL;
   String identity = compiler_identity();
-  if (!identity || !source.startswith(%"(interface 6 \"$identity\" "))
+  if (!identity || !source.startswith(%"(interface 9 \"$identity\" "))
     return NULL;
   return _read_record(source);
 }
@@ -1908,7 +2036,7 @@ String interface_prelude(void) {
   String identity = compiler_identity();
   if (!identity) return NULL;
   String runtime = _canonical_path(%"${x2c_get_root()}/lib/x2c.x");
-  String header = %"(interface 6 \"$identity\" ";
+  String header = %"(interface 9 \"$identity\" ";
   foreach (String path, _interface_candidates(runtime)) {
     String text = NULL;
     try text = Path.read_text(path);
@@ -1939,7 +2067,7 @@ String interface_text(Compiler c) {
 static int _write_interface_entry(
   Buffer out, String canonical, List entry) {
   List record = %(
-    interface 6 ${compiler_identity()} @{_stored_record(canonical, entry)});
+    interface 9 ${compiler_identity()} @{_stored_record(canonical, entry)});
   /* An interface is plain data, which a loader never evaluates. */
   if (!datum_write(out, record, 0)) return 0;
   out.write_char('\n');
@@ -1961,6 +2089,8 @@ static List _stored_record(String canonical, List entry) {
 static List Compiler._interface_include_dirs(
   Compiler c, String canonical) {
   Array dirs = [];
+  foreach (String dir, c.module_include_dirs(canonical))
+    dirs.push(%(module-root ${home_portable_path(dir)}));
   foreach (String dir, c.include_dirs) {
     String portable = home_portable_path(dir);
     dirs.push(

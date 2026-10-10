@@ -27,7 +27,7 @@
 #include "meta.h"
 #include "grammar.h"
 #include "lisp.h"
-#include "macros.h"
+#include "_x2c_module_6922FA3C.h"
 #include "transform.h"
 List x2c_param_make(List type, Var name);
 
@@ -1837,6 +1837,8 @@ static List _scope_expand(List body, List destinations){
   )), NULL))), NULL)));
 }
 
+List x2c_template_call(Var, List);
+
 static List _auto_expand(List value){
   Code local = x2c_enclosing(292702126187492);
   if(! List_truth(local) || ! List_truth(x2c_enclosing(458361162716))) _auto_fail(33658058, _140, NULL);
@@ -2328,8 +2330,9 @@ static List _class_initializer(String owner, Var heap_value){
     List signature = x2c_syntax_type(method);
     List function = Var_list(List_car(signature));
     List declared = Var_list(List_getindex(function, 1));
-    int reference = ! heap && Var_equal(List_car(declared), List_var(cons(_442, List_append(type, NULL))));
+    int reference = ! heap && List_equal(x2c_type_resolve(Var_list(List_car(declared))), x2c_type_resolve(cons(_442, List_append(type, NULL))));
     if(reference) receiver = Var_list(List_car(declared));
+    else if(List_equal(x2c_type_resolve(Var_list(List_car(declared))), x2c_type_resolve(receiver))) receiver = Var_list(List_car(declared));
     List parameters = cons(List_var(receiver), List_cdr(declared));
     int refusable = heap && List_equal(signature, cons(List_var(cons(_767, cons(List_var(parameters), NULL))), _393));
     if(refusable || List_equal(signature, cons(List_var(cons(_767, cons(List_var(parameters), NULL))), _54))){
@@ -2543,7 +2546,8 @@ static List _pointer_output(String owner, List value){
 }
 
 static List _own_method(String owner, String member){
-  List found = x2c_method_resolve(cons(String_var(owner), NULL), member);  if(List_truth(found) && String_equal(x2c_binding_spelling(List_var(found)), String_join(NULL, cons(String_var(owner), cons(String_var(_1316), cons(String_var(member), NULL)))))) return found;
+  List found = x2c_method_resolve(cons(String_var(owner), NULL), member);  List direct = builtin_foreach_reference(String_join(NULL, cons(String_var(owner), cons(String_var(_1316), cons(String_var(member), NULL)))));
+  if(List_truth(found) && List_truth(direct) && String_equal(x2c_binding_spelling(List_var(found)), x2c_binding_spelling(List_var(direct)))) return found;
   return NULL;
 }
 
