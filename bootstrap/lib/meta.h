@@ -65,13 +65,9 @@ int Code_is_static_pattern(Code pattern);
 
 Code Code_call_in_order(Code member, List arguments, Type type);
 
-Code Code_register_rewrite(Code function, Macro shape, List holes);
+Code Code_lowered(Code code);
 
-Code Code_register_marked_rewrite(Code function, Symbol mark, Macro shape, List holes);
-
-Code Code_register_typed_rewrite(Code function, Type type, Macro shape, List holes);
-
-Code Code_register_operator_rewrite(Code function, Type type, Symbol form, List operators);
+Code Code_register_rewrite(Code function, List pattern, List holes);
 
 Code Code_register_after_initialization(Code function, Macro shape, List holes);
 

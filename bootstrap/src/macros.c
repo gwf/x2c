@@ -481,7 +481,7 @@ static Var RewriteRule_var(RewriteRule rule);
 
 static RewriteRule Var_rewrite_rule(Var value);
 
-static RewriteRule _rewrite_rule(Symbol point, Var kind, String name, Macro shape, List holes, int builtin, int prepared);
+static RewriteRule _rewrite_rule(Symbol point, Var kind, String name, List pattern, List holes, int builtin, int prepared);
 
 static Map shipped_rules;
 
@@ -4434,11 +4434,17 @@ static RewriteRule Var_rewrite_rule(Var value){
   return Var_pointer(value);
 }
 
-static RewriteRule _rewrite_rule(Symbol point, Var kind, String name, Macro shape, List holes, int builtin, int prepared){
-  RewriteRule rule = Scope_calloc(1, sizeof(struct RewriteRule));  MacroMatcher matcher = prepared && List_truth(shape) ? Macro_matcher(shape, holes) :(MacroMatcher){
-    shape, holes, NULL
+static RewriteRule _rewrite_rule(Symbol point, Var kind, String name, List pattern, List holes, int builtin, int prepared){
+  RewriteRule rule = Scope_calloc(1, sizeof(struct RewriteRule));  MacroMatcher matcher ={
+    NULL, NULL, pattern
   }
-  ;  * rule =(struct RewriteRule){
+  ;  if(Var_equal(List_car(pattern), Symbol_var(895740748108))){
+    Macro shape = pattern;  matcher = prepared ? Macro_matcher(shape, holes) :(MacroMatcher){
+      shape, holes
+    }
+    ;
+  }
+  * rule =(struct RewriteRule){
     name, point, kind, matcher, builtin, prepared
   }
   ;  return rule;
@@ -4565,7 +4571,7 @@ static MacroMatcher * RewriteRule_prepared_matcher(RewriteRule rule){
 static void Compiler__register_rewrite(Compiler c, RewriteRule rule){
   if(! Map_truth(c -> rewrite_rules)) c -> rewrite_rules = Map_new();  Var stored;  Map kinds;  if(Map_try_get(c -> rewrite_rules, Symbol_var(rule -> point), &(stored))) kinds = Var_map(stored);  else Map_setindex(c -> rewrite_rules, Symbol_var(rule -> point), Map_var(kinds = Map_new()));  List rows = Map_try_get(kinds, rule -> kind, &(stored)) ? Var_list(stored) : NULL; {
     RewriteRule prior;  List _x2c_macro_object_34 = rows;  List _x2c_macro_cursor_36 = _x2c_macro_object_34;  Var _x2c_macro_cursor_output_34;  while(List_try_next(_x2c_macro_object_34, &(_x2c_macro_cursor_36), &(_x2c_macro_cursor_output_34))){
-      prior = Var_pointer(_x2c_macro_cursor_output_34);  if(String_equal(prior -> name, rule -> name) && List_equal(prior -> matcher.shape, rule -> matcher.shape) && List_equal(prior -> matcher.holes, rule -> matcher.holes)) return;
+      prior = Var_pointer(_x2c_macro_cursor_output_34);  if(String_equal(prior -> name, rule -> name) && List_equal(prior -> matcher.shape, rule -> matcher.shape) && List_equal(prior -> matcher.holes, rule -> matcher.holes) &&(List_truth(rule -> matcher.shape) || List_equal(prior -> matcher.pattern, rule -> matcher.pattern))) return;
     }
 
   }
@@ -4621,7 +4627,7 @@ static List Compiler__rewrite(Compiler c, Symbol point, Var kind, List source, A
   if(Map_truth(c -> macro_holes) ||(c -> meta_body && point != 883757412 && point != 199448)) return NULL; {
     RewriteRule rule;  List _x2c_macro_object_37 = Compiler__rewrite_candidates(c, point, kind);  List _x2c_macro_cursor_39 = _x2c_macro_object_37;  Var _x2c_macro_cursor_output_38;  while(List_try_next(_x2c_macro_object_37, &(_x2c_macro_cursor_39), &(_x2c_macro_cursor_output_38))){
       rule = Var_pointer(_x2c_macro_cursor_output_38); {
-        if(List_contains(c -> active_rewrites, RewriteRule_var(rule))) continue;  MacroMatcher * matcher = RewriteRule_prepared_matcher(rule);  if(List_truth(matcher -> shape) && ! Compiler_matches_macro(c, &(* matcher), source)) continue;  Var result = Compiler_apply_meta_function(c, rule -> name, cons(List_var(source), NULL), site);  if(Var_is_void(result) ||(Var_is_row(result, 9, 7, 4) &&(! List_truth(Var_list(result)) || Var_list(result) == source))) continue; {
+        if(List_contains(c -> active_rewrites, RewriteRule_var(rule))) continue;  MacroMatcher * matcher = RewriteRule_prepared_matcher(rule);  if(List_truth(matcher -> shape) ? ! Compiler_matches_macro(c, &(* matcher), source) : ! List_truth(List_match(source, List_var(matcher -> pattern)))) continue;  Var result = Compiler_apply_meta_function(c, rule -> name, cons(List_var(source), NULL), site);  if(Var_is_void(result) ||(Var_is_row(result, 9, 7, 4) &&(! List_truth(Var_list(result)) || Var_list(result) == source))) continue; {
           List * _x2c_macro_address_18 = & c -> active_rewrites;  List _x2c_macro_previous_18 = * _x2c_macro_address_18; {
             _x2c_defer_env_23 _x2c_macro_environment_23 ={
               0
@@ -7050,7 +7056,7 @@ static Var Compiler__eval_string(Compiler c, String source, Token invocation){
                     x2c_exception_landed(& _x2c_exception_frame_0);  if(x2c_exception_is_error_target(& _x2c_exception_frame_0)){
                       int _x2c_macro_selected_0 = x2c_error_catch_selected(_x2c_error_handler_0);  x2c_error_catch_detach(_x2c_error_handler_0);  x2c_exception_mark_handled(& _x2c_exception_frame_0);  if(_x2c_macro_selected_0 == 0){
                         Var volatile category;  category = x2c_error_catch_capture(_x2c_error_handler_0, 0); {
-                          static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/macros.x",.function = "Compiler__eval_string",.line = 4879};  x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(209659067570), category);  __builtin_unreachable();
+                          static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/macros.x",.function = "Compiler__eval_string",.line = 4884};  x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(209659067570), category);  __builtin_unreachable();
                         }
 
                       }
@@ -7208,7 +7214,7 @@ return Var_is_row(value, 9, 7, 4) && binding_identity_try_parts(Var_list(value),
 
 static Var _lisp_import_hook(String path){
   MetaContext * context = MetaContext_current();  Compiler c = context -> evaluator;  if(! c){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/macros.x",.function = "_lisp_import_hook",.line = 5027};  x2c_error_raise_n(& _x2c_error_site_1, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("compile-time import")), NULL))));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/macros.x",.function = "_lisp_import_hook",.line = 5032};  x2c_error_raise_n(& _x2c_error_site_1, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("compile-time import")), NULL))));  __builtin_unreachable();
   }
   Compiler__import(c, path, context -> site);  return List_var(NULL);
 }

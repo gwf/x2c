@@ -46,7 +46,7 @@ points used by generated code, native callers, and compiler setup.
 | [`lib/pool.x`](pool.md) | nested interning pools with region-backed object storage. |
 | [`lib/process.x`](process.md) | run commands and pipelines without a shell. |
 | [`lib/regex.x`](regex.md) | regular expressions over the bytes of a String. |
-| [`lib/rewrite.x`](rewrite.md) | Macro-pattern registration for compiler rewrites. |
+| [`lib/rewrite.x`](rewrite.md) | Pattern registration for compiler rewrites. |
 | [`lib/scope.x`](scope.md) | memory allocation scope management. |
 | [`lib/scripting.x`](scripting.md) | the modules every script unit includes. |
 | [`lib/split.x`](split.md) | `String` field splitting and repeatable typed cursors. |

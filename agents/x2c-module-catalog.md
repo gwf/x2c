@@ -381,13 +381,12 @@ shipped `meta` code compiled into the compiler.
 Public functions:
 
 `x2c_expr_field`, `x2c_expr_cast`, `x2c_decl_make`, `x2c_param_make`,
-`x2c_type_members`, `register_rewrite`, `register_marked_rewrite`,
-`register_typed_rewrite`, `register_operator_rewrite`, `_dedent_expand`,
-`_macros_location`, `_tag_decode_group`, `_tag_decode_groups`,
-`_tag_id_checks`, `access_read`, `access_store`, `access_update`,
-`access_prefix`, `access_postfix`, `delegate_member`, `dynamic_binary`,
-`dynamic_compound`, `dynamic_change`, `dynamic_unary`, `printf_values`,
-`try_catch_cases`, `try_lowering`, `linked_meta_targets`, `linked_meta_hashes`
+`x2c_type_members`, `register_rewrite`, `_dedent_expand`, `_macros_location`,
+`_tag_decode_group`, `_tag_decode_groups`, `_tag_id_checks`, `access_read`,
+`access_store`, `access_update`, `access_prefix`, `access_postfix`,
+`delegate_member`, `dynamic_binary`, `dynamic_compound`, `dynamic_change`,
+`dynamic_unary`, `printf_values`, `try_catch_cases`, `try_lowering`,
+`linked_meta_targets`, `linked_meta_hashes`
 
 ### [src/literals.x](../src/literals.x)
 
@@ -518,10 +517,9 @@ Public functions:
 `MetaContext.current`, `Compiler.expanding`, `Type.is_named`, `Type.numeric`,
 `Type.is_text`, `Type.aggregate`, `Type.marked_fields`, `Type.resolve_member`,
 `Type.protocol_member`, `Type.getter`, `Type.update_helper`, `Code.type`,
-`Code.value`, `Code.call_in_order`, `Code.exits`, `Code.convert`,
-`Code.format`, `Code.is_static_pattern`, `Code.register_rewrite`,
-`Code.register_typed_rewrite`, `Code.register_operator_rewrite`,
-`Code.register_marked_rewrite`, `Code.register_after_initialization`,
+`Code.value`, `Code.call_in_order`, `Code.lowered`, `Code.exits`,
+`Code.convert`, `Code.format`, `Code.is_static_pattern`,
+`Code.register_rewrite`, `Code.register_after_initialization`,
 `x2c_syntax_type`, `x2c_protocol_member`, `x2c_method_resolve`,
 `builtin_foreach_bindings`, `builtin_foreach_reference`,
 `x2c_type_is_integral`, `x2c_type_is_pointer`, `x2c_type_element`,
@@ -1375,7 +1373,7 @@ Public functions:
 
 ### [lib/rewrite.x](../lib/rewrite.x)
 
-Macro-pattern registration for compiler rewrites.
+Pattern registration for compiler rewrites.
 
 Public functions:
 

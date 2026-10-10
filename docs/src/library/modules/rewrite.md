@@ -3,4 +3,4 @@
 
 # `lib/rewrite.x`
 
-Macro-pattern registration for compiler rewrites.
+Pattern registration for compiler rewrites.

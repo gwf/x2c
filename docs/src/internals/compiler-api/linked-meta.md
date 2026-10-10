@@ -25,10 +25,7 @@ Shipped `meta` code compiled into the compiler.
 | [`linked_meta_hashes`](#linked_meta_hashes) | Returns linked definition hashes and provider source dependencies. |
 | [`linked_meta_targets`](#linked_meta_targets) | Returns the linked copies, and the runtime builders, by name. |
 | [`printf_values`](#printf_values) | Reads the Var values a printf-family call's static format consumes. |
-| [`register_marked_rewrite`](#register_marked_rewrite) | Registers the decorated translator for member calls that find no member on a receiver whose aggregate declares a field with the keyword `mark`. |
-| [`register_operator_rewrite`](#register_operator_rewrite) | Registers the decorated translator for each operator in `operators` applied to an operand of `type`, in `form`. |
-| [`register_rewrite`](#register_rewrite) | Registers the decorated translator with its macro and hole patterns. |
-| [`register_typed_rewrite`](#register_typed_rewrite) | Registers the decorated translator for the operator its macro pattern spells applied to an operand of `type`. |
+| [`register_rewrite`](#register_rewrite) | Registers the decorated translator with its pattern and hole patterns. |
 | [`try_catch_cases`](#try_catch_cases) | Returns each lowered arm of `arms` chosen by its index in `selected`; `$try_handled` calls this in a slot. |
 | [`try_lowering`](#try_lowering) | Lowers the parsed try `node` to its landing form. |
 | [`x2c_decl_make`](#x2c_decl_make) | Declares `name` with `type` and an optional initializer. |
@@ -45,7 +42,7 @@ Shipped `meta` code compiled into the compiler.
 
 Stores the updated element and returns its previous value.
 
-Source: `src/linked-meta.x:451`
+Source: `src/linked-meta.x:421`
 
 #### access_prefix
 
@@ -53,7 +50,7 @@ Source: `src/linked-meta.x:451`
 
 Stores and returns the incremented or decremented element.
 
-Source: `src/linked-meta.x:440`
+Source: `src/linked-meta.x:410`
 
 #### access_read
 
@@ -61,7 +58,7 @@ Source: `src/linked-meta.x:440`
 
 Calls the getter bracket admission selected.
 
-Source: `src/linked-meta.x:324`
+Source: `src/linked-meta.x:294`
 
 #### access_store
 
@@ -70,7 +67,7 @@ Source: `src/linked-meta.x:324`
 Selects the adopted collection setter for indexed assignment, or a
 participant's `setindex` member.
 
-Source: `src/linked-meta.x:375`
+Source: `src/linked-meta.x:345`
 
 #### access_update
 
@@ -79,7 +76,7 @@ Source: `src/linked-meta.x:375`
 Selects collection compound updates and checks accepted operands, or a
 participant's `updateindex` member.
 
-Source: `src/linked-meta.x:406`
+Source: `src/linked-meta.x:376`
 
 #### delegate_member
 
@@ -88,7 +85,7 @@ Source: `src/linked-meta.x:406`
 Rebuilds a call that finds no member on its receiver through the one
 delegate field path that provides the method.
 
-Source: `src/linked-meta.x:553`
+Source: `src/linked-meta.x:523`
 
 #### dynamic_binary
 
@@ -100,7 +97,7 @@ for `+` beside text, text. The call is returned lowered, because an
 operator chain applies this rule once for each term and binding would
 search the whole remaining chain each time.
 
-Source: `src/linked-meta.x:576`
+Source: `src/linked-meta.x:546`
 
 #### dynamic_change
 
@@ -109,7 +106,7 @@ Source: `src/linked-meta.x:576`
 Adds or subtracts one through the `Var` update helpers; the postfix
 forms return the value before the change.
 
-Source: `src/linked-meta.x:664`
+Source: `src/linked-meta.x:631`
 
 #### dynamic_compound
 
@@ -118,7 +115,7 @@ Source: `src/linked-meta.x:664`
 Updates a `Var` or numeric lvalue with a `Var` or numeric operand
 through the update helper of its storage.
 
-Source: `src/linked-meta.x:638`
+Source: `src/linked-meta.x:605`
 
 #### dynamic_unary
 
@@ -126,7 +123,7 @@ Source: `src/linked-meta.x:638`
 
 Rejects a unary numeric operator on a `Var`.
 
-Source: `src/linked-meta.x:680`
+Source: `src/linked-meta.x:647`
 
 #### linked_meta_hashes
 
@@ -134,7 +131,7 @@ Source: `src/linked-meta.x:680`
 
 Returns linked definition hashes and provider source dependencies.
 
-Source: `src/linked-meta.x:1195`
+Source: `src/linked-meta.x:1159`
 
 #### linked_meta_targets
 
@@ -142,7 +139,7 @@ Source: `src/linked-meta.x:1195`
 
 Returns the linked copies, and the runtime builders, by name.
 
-Source: `src/linked-meta.x:1018`
+Source: `src/linked-meta.x:985`
 
 #### printf_values
 
@@ -150,42 +147,15 @@ Source: `src/linked-meta.x:1018`
 
 Reads the Var values a printf-family call's static format consumes.
 
-Source: `src/linked-meta.x:820`
-
-#### register_marked_rewrite
-
-`Code register_marked_rewrite( Code function, Code mark, Code pattern, List holes)`
-
-Registers the decorated translator for member calls that find no member
-on a receiver whose aggregate declares a field with the keyword `mark`.
-
-Source: `src/linked-meta.x:160`
-
-#### register_operator_rewrite
-
-`Code register_operator_rewrite( Code function, List type, Code form, List operators)`
-
-Registers the decorated translator for each operator in `operators`
-applied to an operand of `type`, in `form`.
-
-Source: `src/linked-meta.x:180`
+Source: `src/linked-meta.x:787`
 
 #### register_rewrite
 
 `Code register_rewrite(Code function, Code pattern, List holes)`
 
-Registers the decorated translator with its macro and hole patterns.
+Registers the decorated translator with its pattern and hole patterns.
 
 Source: `src/linked-meta.x:151`
-
-#### register_typed_rewrite
-
-`Code register_typed_rewrite( Code function, List type, Code pattern, List holes)`
-
-Registers the decorated translator for the operator its macro pattern
-spells applied to an operand of `type`.
-
-Source: `src/linked-meta.x:170`
 
 #### try_catch_cases
 
@@ -199,7 +169,7 @@ every arm returns or raises, control cannot leave them, and a final
 unreachable mark tells C so that a function ending in such a `try`
 needs no return after it.
 
-Source: `src/linked-meta.x:850`
+Source: `src/linked-meta.x:817`
 
 #### try_lowering
 
@@ -207,7 +177,7 @@ Source: `src/linked-meta.x:850`
 
 Lowers the parsed try `node` to its landing form.
 
-Source: `src/linked-meta.x:962`
+Source: `src/linked-meta.x:929`
 
 #### x2c_decl_make
 

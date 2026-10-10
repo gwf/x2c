@@ -4363,7 +4363,7 @@ static List Compiler__change(Compiler c, List ast, Symbol op, List arg, Type typ
 #ifndef X2C_TRANSFORM_SOURCE
 List Compiler_rewrite(Compiler, Symbol, Var, List, AstPos, Type, Token);
 static List Compiler__dynamic(Compiler c, Symbol point, Type type, List operation){
-  List kind = Var_equal(List_car(operation), Symbol_var(35407540848)) ? cons(_187, cons(List_cadr(operation), _1873)) : cons(List_cadr(operation), _1873);  List rewritten = Compiler_rewrite(c, point, List_var(kind), cons(_28, cons(List_var(type), cons(List_var(operation), NULL))), AST_EXPRESSION, type, NULL);  return Var_list(List_truth(rewritten) ? List_caddr(rewritten) : List_var(operation));
+  List kind = Var_equal(List_car(operation), Symbol_var(35407540848)) ? cons(_187, cons(List_cadr(operation), _1873)) : cons(List_cadr(operation), _1873);  List rewritten = Compiler_rewrite(c, point, List_var(kind), cons(_28, cons(_1506, cons(List_var(operation), NULL))), AST_EXPRESSION, type, NULL);  return Var_list(List_truth(rewritten) ? List_caddr(rewritten) : List_var(operation));
 }
 
 #endif

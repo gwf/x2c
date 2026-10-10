@@ -4,11 +4,11 @@
 #include "x2c.h"
 
 #include "rewrite.h"
-static List _75, _63, _59, _58, _57, _56, _55, _54, _53, _52, _51, _50, _48, _47, _43, _42, _38, _37, _33, _32, _28, _27, _23, _22, _18, _17, _13, _12, _8, _7, _3, _2;
+static List _63, _59, _58, _57, _56, _55, _54, _53, _52, _51, _50, _48, _47, _43, _42, _38, _37, _33, _32, _28, _27, _23, _22, _18, _17, _13, _12, _8, _7, _3, _2;
 
-static String _72, _61;
+static String _61;
 
-static Var _74, _73, _71, _70, _69, _68, _67, _66, _65, _64, _62, _60, _49, _46, _45, _44, _41, _40, _39, _36, _35, _34, _31, _30, _29, _26, _25, _24, _21, _20, _19, _16, _15, _14, _11, _10, _9, _6, _5, _4, _1, _0;
+static Var _64, _62, _60, _49, _46, _45, _44, _41, _40, _39, _36, _35, _34, _31, _30, _29, _26, _25, _24, _21, _20, _19, _16, _15, _14, _11, _10, _9, _6, _5, _4, _1, _0;
 
 static int _init_guard_ = 0;
 
@@ -17,8 +17,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 static Symbol _dynamic_operation(Symbol assignment);
 
 static List _dynamic_symbol(Symbol op);
-
-static Code _dynamic_update(Type type, Code target, Symbol op, Code value, String helper);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -89,17 +87,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _62 = String_var(_61);
   _63 = cons(_62, NULL);
   _64 = List_var(_63);
-  _65 = Symbol_var(54);
-  _66 = Symbol_var(992);
-  _67 = Symbol_var(77);
-  _68 = Symbol_var(1077029798);
-  _69 = Symbol_var(102886);
-  _70 = Symbol_var(199448);
-  _71 = Symbol_var(244379323295050);
-  _72 = String_new("lowered");
-  _73 = String_var(_72);
-  _74 = List_var(NULL);
-  _75 = cons(_74, NULL);
 }
 
 static Symbol _dynamic_operation(Symbol assignment){
@@ -119,22 +106,5 @@ static Symbol _dynamic_operation(Symbol assignment){
 
 static List _dynamic_symbol(Symbol op){
   return cons(_60, cons(_64, cons(String_var(String_join(NULL, cons(String_var(Var_str(Var_box_ulong((unsigned long) op))), NULL))), NULL)));
-}
-
-static Code _dynamic_update(Type type, Code target, Symbol op, Code value, String helper){
-  Type target_type = Var_list(List_cadr(target)), address_type = cons(_65, List_append(target_type, NULL));
-  List address =({
-    Var _x2c_literal_part_0 = List_var(address_type);  Var _x2c_literal_part_1 = List_var(cons(_66, cons(_67, cons(List_var(cons(_68, cons(List_var(target), NULL))), NULL))));  cons(_60, cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, NULL)));
-  }
-  );
-  List operation = _dynamic_symbol(op);
-  List call = List_truth(value) ?({
-    Var _x2c_literal_part_2 = String_var(helper);  Var _x2c_literal_part_3 = List_var(cons(_69, cons(List_var(address), cons(List_var(operation), cons(List_var(value), NULL)))));  cons(_70, cons(_x2c_literal_part_2, cons(_x2c_literal_part_3, NULL)));
-  }
-  ) :({
-    Var _x2c_literal_part_4 = String_var(helper);  Var _x2c_literal_part_5 = List_var(cons(_69, cons(List_var(address), cons(List_var(operation), NULL))));  cons(_70, cons(_x2c_literal_part_4, cons(_x2c_literal_part_5, NULL)));
-  }
-  );
-  return cons(_71, cons(_73, cons(List_var(cons(_60, cons(List_var(type), cons(List_var(call), NULL)))), _75)));
 }
 
