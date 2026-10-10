@@ -1748,7 +1748,7 @@ static List _interface_record(String path) {
 
 /* The one List form `source` spells, or NULL. */
 static List _read_record(String source) {
-  _interface_lisp();
+  _interface_lisp();  // a reader session, for text the plain read leaves
   unsigned cursor = 0;
   Var record = void;
   int read = 0;

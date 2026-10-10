@@ -149,30 +149,25 @@ int datum_read(String text, unsigned &cursor, Var &out) {
 
    Raises: `<incomplete>` or `<malformed>` for text that is not a form. */
 int datum_read_plain(String text, unsigned &cursor, Var &out) {
-  if (text) {
-    unsigned at = cursor;
-    while (_blank(text[at])) at++;
-    Array items = $auto([]);
-    Var value = void;
-    if (text[at] && _plain_form(text, at, value, items, 0)) {
-      cursor = at;
-      out = value;
-      return 1;
-    }
-  }
   Var value = void;
-  if (Lisp.read(NULL, text, cursor, value) != <value>) return 0;
+  unsigned at = cursor;
+  if (text) while (_blank(text[at])) at++;
+  Array items = $auto([]);
+  if (text && text[at] && _plain_form(text, at, value, items, 0))
+    cursor = at;
+  else if (Lisp.read(NULL, text, cursor, value) != <value>) return 0;
   out = value;
   return 1;
 }
 
 /* plain spellings
 
-   The forms `datum_write` spells, Lists of Strings, decimal integers, and
-   bare Atoms, are read here without the Lisp tokenizer, which costs most
-   of an interface read. Each reader returns 0 for any other spelling, and
-   `Lisp.read` then reads the form from its start, so every value is the
-   reader's. `items` holds the elements of the Lists being read. */
+   The forms `datum_write` spells as plain data, Lists, Strings, decimal
+   integers, and bare Atoms, are read here without the Lisp tokenizer,
+   which costs most of an interface read. Each reader returns 0 for any
+   other spelling, and `Lisp.read` then reads the form from its start, so
+   every value is the reader's. `items` holds the elements of the Lists
+   being read. */
 
 static int _plain_form(char *s, unsigned &at, Var &out, Array items,
                        int depth) {
@@ -209,8 +204,7 @@ static int _plain_string(char *s, unsigned &at, Var &out) {
     if (!s[end] || s[end] == '\n' || (s[end] == '\\' && !s[end + 1]))
       return 0;
   if (!_token_end(s[end + 1])) return 0;
-  String text = String.new_len(s + at + 1, end - at - 1);
-  out = memchr(text, '\\', text.len()) ? text.unescape() : text;
+  out = _unescaped(String.new_len(s + at + 1, end - at - 1));
   at = end + 1;
   return 1;
 }
@@ -232,20 +226,22 @@ static int _plain_integer(char *s, unsigned &at, Var &out) {
   return 1;
 }
 
-/* A spelling `Atom.bare_spelling` accepts reads as that Atom. */
+/* A comment opener starts no atom for the tokenizer, though `scan_atom`
+   would read one there. */
 static int _plain_atom(char *s, unsigned &at, Var &out) {
-  unsigned char first = (unsigned char) s[at];
-  if (first < 33 || first > 126 || strchr("'`,#@$[]{}<\\", first) ||
-      ((first == '+' || first == '.') && _digit(s[at + 1])))
-    return 0;
+  if (s[at] == '/' && (s[at + 1] == '/' || s[at + 1] == '*')) return 0;
   int length = scan_atom(s + at);
-  if (length <= 0 || !_token_end(s[at + length]) ||
-      memchr(s + at, '\\', length))
-    return 0;
-  out = Atom.intern(String.new_len(s + at, length));
+  if (length <= 0 || !_token_end(s[at + length])) return 0;
+  String spelling = String.new_len(s + at, length);
+  if (!Atom.bare_spelling(spelling)) return 0;
+  out = Atom.intern(_unescaped(spelling));
   at += length;
   return 1;
 }
+
+/* `text.unescape()`, which leaves text without a backslash as it is. */
+static String _unescaped(String text) =>
+  memchr(text, '\\', text.len()) ? text.unescape() : text;
 
 static int _digit(char c) => c >= '0' && c <= '9';
 
