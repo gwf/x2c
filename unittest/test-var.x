@@ -1419,11 +1419,13 @@ static void var_recursive_rendering(void) {
   EXPECT_STR_EQ(map.repr(), %"{ 1: $pointer }");
   EXPECT_STR_EQ(map.str(), %"{ 1: $pointer }");
 
+  // A cycle through an immutable list stops at the mutable container that
+  // closes it, so the array's address appears one level inside the list.
   array.truncate(0);
   List list = %(1 $array);
   array.push(list);
-  pointer = list.var().pointer_string();
-  EXPECT_STR_EQ(list.repr(), %"(1 [ $pointer ])");
+  pointer = array.var().pointer_string();
+  EXPECT_STR_EQ(list.repr(), %"(1 [ (1 $pointer) ])");
   EXPECT_STR_EQ(list.var().repr(), list.repr());
   EXPECT_TRUE(list.str().contains(pointer));
 
@@ -1439,7 +1441,7 @@ static void var_recursive_rendering(void) {
   List long_list = %("abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz"
                     "abcdefghijklmnopqrstuvwxyz" $long_cycle);
   long_cycle.push(long_list);
-  EXPECT_TRUE(long_list.repr().contains(long_list.var().pointer_string()));
+  EXPECT_TRUE(long_list.repr().contains(long_cycle.var().pointer_string()));
 }
 
 static Buffer _rendering_failure(Var value, Buffer out) {
