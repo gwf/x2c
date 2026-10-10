@@ -2522,7 +2522,10 @@ static void _shipped_shutdown(void) {
   shipped_rules = NULL;
 }
 
-/* Registers an installed rewrite row. */
+/* Registers an installed rewrite row. A prelude rule whose translator
+   this compiler does not link was added after it was built, so the form
+   keeps this compiler's own lowering, as a prelude component added after
+   it would. */
 static void Compiler._install_rewrite(Compiler c, List row) {
   Var shared = shipped_rules ? shipped_rules[row] : void;
   if (shared is void && c.builtin_defs) shared = c._ship_rewrite(row);
@@ -2531,6 +2534,7 @@ static void Compiler._install_rewrite(Compiler c, List row) {
     return;
   }
   match (row) case %(compile-time rewrite ?point ?kind ?name ?shape ?holes): {
+    if (c.builtin_defs && !links_meta_function(name)) return;
     RewriteRule rule = _rewrite_rule(
       point, c.thaw_declaration_syntax(kind), name,
       c.thaw_declaration_syntax(shape), c.thaw_declaration_syntax(holes),
@@ -2540,7 +2544,8 @@ static void Compiler._install_rewrite(Compiler c, List row) {
 }
 
 /* The shared rule for a prelude row, or 0 when the row is bound to its
-   unit. The shared rule derives its matcher on first use. */
+   unit or names a translator the compiler does not link. The shared rule
+   derives its matcher on first use. */
 static Var Compiler._ship_rewrite(Compiler c, List row) {
   $scope(&shipped_scope) {
     if (!shipped_rules) {
@@ -2551,7 +2556,7 @@ static Var Compiler._ship_rewrite(Compiler c, List row) {
     Var shared = 0;
     match (row)
       case %(compile-time rewrite ?point ?kind ?name ?shape ?holes): {
-        if (_unit_bound(row)) break;
+        if (_unit_bound(row) || !links_meta_function(name)) break;
         List thawed = %(${c.thaw_declaration_syntax(kind)}
           ${c.thaw_declaration_syntax(shape)}
           ${c.thaw_declaration_syntax(holes)});

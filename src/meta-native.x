@@ -1005,6 +1005,9 @@ static Map _linked_module(void) {
   return native_modules[linked_supplier];
 }
 
+/** Reports whether the compiler links the `meta` function `name`. */
+int links_meta_function(String name) => name in _linked_module();
+
 /** Returns a linked provider's source and dependency hashes. */
 List linked_meta_provider_source(String provider) {
   _linked_module();
