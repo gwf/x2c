@@ -1827,7 +1827,15 @@ static List _statement_expression(List declarations, List expression) =>
 
 static List Compiler._sequenced_protocol_call(
   Compiler c, List resolved, List arguments) {
-  Type signature = resolved.cadr();
+  (List binding, Type signature) = resolved;
+  return c.call_in_order($!($signature){ $binding }, arguments);
+}
+
+/** Calls the typed callable `callee` with `arguments`, each converted to
+    its parameter and evaluated once, in source order, as a statement
+    expression. */
+List Compiler.call_in_order(Compiler c, List callee, List arguments) {
+  Type signature = callee.cadr();
   List parameters = signature.car().list().cadr();
   Array converted = [];
   for (List actual = arguments, expected = parameters;
@@ -1840,7 +1848,9 @@ static List Compiler._sequenced_protocol_call(
   foreach (List value, converted)
     arguments_out.push(c._sequenced(value, "protocol_arg", declarations));
   converted.free();
-  List call = c._indexed_call_expr(resolved, arguments_out.list_free());
+  Macro called = $called;
+  List call = c.rebuild_expression(
+    signature.cdr(), called(callee, arguments_out.list_free()));
   return _statement_expression(declarations.list_free(), call);
 }
 

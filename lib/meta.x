@@ -199,6 +199,15 @@ meta String Code.format(Code value);
     value each time it runs, so it can be prepared once. */
 meta int Code.is_static_pattern(Code pattern);
 
+/** Returns the captured expression `value` converted to `type` as an
+    argument or assignment converts it. */
+meta Code Code.convert(Code value, Type type);
+
+/** Returns a `type` expression that calls the protocol member `member`
+    with `arguments`, each converted to its parameter and evaluated once,
+    in order, before the call. */
+meta Code Code.call_in_order(Code member, List arguments, Type type);
+
 /** Registers a translator with its macro and optional hole patterns.
     NULL holes use the macro's named captures. Recognition uses the source
     views and binding identity rules of a macro-valued case.
@@ -221,6 +230,13 @@ meta Code Code.register_rewrite(Code function, Macro shape, List holes);
 meta Code Code.register_marked_rewrite(
   Code function, Symbol mark, Macro shape, List holes);
 
+/** Registers a translator for the operator its macro pattern spells when
+    an operand has type `type`, `Var` or an alias of it: a binary operator
+    that no protocol member resolved, a compound assignment, an increment
+    or decrement, or a unary operator. */
+meta Code Code.register_typed_rewrite(
+  Code function, Type type, Macro shape, List holes);
+
 /** Registers block items to follow matching local initializations. */
 meta Code Code.register_after_initialization(
   Code function, Macro shape, List holes);
@@ -237,6 +253,14 @@ meta int Type.is_text(Type type);
 /** Returns the selected protocol callable, or null if unavailable in the
     current function. Selection includes explicit protocol adoption. */
 meta Code Type.protocol_member(Type type, String name);
+
+/** Returns the callable a bracket read on a `type` value calls: its own
+    `getindex`, else the selected protocol member, or null. */
+meta Code Type.getter(Type type);
+
+/** Returns the runtime helper that applies a dynamic update to a `type`
+    lvalue, a numeric scalar, or null for any other type. */
+meta String Type.update_helper(Type type);
 
 /** Returns the struct or union tag `type` reaches through typedefs or one
     pointer level, or NULL. */

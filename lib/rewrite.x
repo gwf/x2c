@@ -35,3 +35,21 @@ macro Decorator $rewrite_marked(
     Unit $function, Expr $mark, Expr $pattern, Expr @holes) {
   @register_marked_rewrite($function, $mark, $pattern, $holes)
 }
+
+/** Registers the decorated translator for the operator its macro pattern
+    spells applied to an operand of `type`. */
+meta Code register_typed_rewrite(
+  Code function, List type, Code pattern, List holes) {
+  Array patterns = [];
+  foreach (Code hole, holes) patterns.push(hole.value());
+  return function.register_typed_rewrite(
+    type, pattern.value(), patterns.list_free());
+}
+
+/** Tests the full macro pattern on dynamic operations, those with an
+    operand of `type`, which must be `Var` or an alias of it. Returning
+    void, null, or the input itself declines the rewrite. */
+macro Decorator $rewrite_typed(
+    Unit $function, Type $type, Expr $pattern, Expr @holes) {
+  @register_typed_rewrite($function, $type, $pattern, $holes)
+}

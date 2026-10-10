@@ -2662,10 +2662,12 @@ List Compiler.rewrite(
   Type expected, Token site) =>
   c._rewrite(point, kind, source, position, expected, site, 0);
 
-/** Binds and lowers a replacement while its rule remains active. An
-    expression retains the result type already established for its parent.
-    A replacement whose template and slot signatures an earlier use in the
-    unit prepared lowers only its captured values. */
+/** Binds and lowers a replacement while its rule remains active. The
+    source expressions the replacement holds lower outside the rule, so a
+    nested use of the rule applies again. An expression retains the result
+    type already established for its parent. A replacement whose template
+    and slot signatures an earlier use in the unit prepared lowers only its
+    captured values. */
 List Compiler.lower_rewrite(
   Compiler c, Symbol point, Var kind, List source, AstPos position,
   Type expected, Token site) =>
@@ -2750,6 +2752,7 @@ struct SlotWatch {
   Array outputs, order;
   Effects inner;
   int repeated;
+  List outer;
 };
 
 static Effects Compiler._effects(Compiler c) {
@@ -2776,28 +2779,32 @@ static int Effects.same(Effects a, Effects b) =>
   !memcmp(&a, &b, sizeof(Effects));
 
 /* Lowers `result` from the skeleton its template and slot signatures
-   prepared in this unit, preparing one on their first use. */
+   prepared in this unit, preparing one on their first use. The source's
+   own expressions lower outside the active rule, as they would have
+   without it, so a rule applies again to a nested use. */
 static List Compiler._prepared(
   Compiler c, List source, Var result, AstPos position, Type expected,
   Token site) {
   Array sources = $auto([]), values = $auto([]);
-  _typed_nodes(source, sources);
+  foreach (Var part, source) _typed_nodes(part, sources);
   int refused = 0;
   Var shape = c._template(result, sources, values, refused);
-  if (refused) return c._lowered(result, position, expected, site);
+  if (refused) return c._watched(result, sources, position, expected, site);
   List key = %(${(int) position} $expected $shape);
   if (!c.prepared_rewrites) c.prepared_rewrites = {};
   Var stored;
   if (c.prepared_rewrites.try_get(key, stored))
     return stored is <list>
       ? c._fill(stored, values)
-      : c._lowered(result, position, expected, site);
+      : c._watched(result, sources, position, expected, site);
   if (_carries(shape)) {
     c.prepared_rewrites[key] = 0;
-    return c._lowered(result, position, expected, site);
+    return c._watched(result, sources, position, expected, site);
   }
-  if (c.sym.transacting()) return c._lowered(result, position, expected, site);
+  if (c.sym.transacting())
+    return c._watched(result, sources, position, expected, site);
   struct SlotWatch watch = {values.list(), [], []};
+  watch.outer = c.active_rewrites.cdr();
   foreach (Var value, values) watch.outputs.push(NULL);
   Effects before = c._effects();
   List lowered;
@@ -2810,6 +2817,18 @@ static List Compiler._prepared(
   c.prepared_rewrites[key] =
     skeleton ? %($skeleton ${watch.order.list()}) : 0;
   return lowered;
+}
+
+/* Lowers `result` as written, with the source expressions in it lowered
+   outside the active rule. */
+static List Compiler._watched(
+  Compiler c, Var result, Array sources, AstPos position, Type expected,
+  Token site) {
+  struct SlotWatch watch = {sources.list(), [], []};
+  watch.outer = c.active_rewrites.cdr();
+  foreach (Var value, sources) watch.outputs.push(NULL);
+  $let(c.slot_watch, &watch)
+    return c._lowered(result, position, expected, site);
 }
 
 /* Pushes each typed expression in `node`, which a translator may insert
@@ -2936,8 +2955,9 @@ static Var _marked(Var node, Array outputs, Array found, int &refused) {
 static List Compiler._fill(Compiler c, List prepared, Array values) {
   (List skeleton, List order) = prepared;
   Array lowered = $auto(values.copy());
-  foreach (Var slot, order)
-    lowered[slot.int()] = c.normalize(values[slot.int()]);
+  $let(c.active_rewrites, c.active_rewrites.cdr())
+    foreach (Var slot, order)
+      lowered[slot.int()] = c.normalize(values[slot.int()]);
   return _filled(skeleton, lowered);
 }
 
@@ -2968,7 +2988,8 @@ Ast Compiler.watched_step(Compiler c, Ast ast) {
   if (slot == (int) watch.outputs.len()) return NULL;
   Effects before = c._effects();
   Ast lowered;
-  $let(c.slot_watch, NULL) lowered = c.normalize(ast);
+  $let(c.slot_watch, NULL) $let(c.active_rewrites, watch.outer)
+    lowered = c.normalize(ast);
   watch.inner = watch.inner.add(c._effects().since(before));
   if (watch.outputs[slot].list()) watch.repeated = 1;
   watch.outputs[slot] = lowered;

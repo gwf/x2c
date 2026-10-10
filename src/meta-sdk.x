@@ -219,6 +219,25 @@ Code Type.protocol_member(Type type, String name) {
   return $!($signature){ $binding };
 }
 
+/** Answers `Type.getter`, declared in `lib/meta.x`, with the getter that
+    bracket admission selected. */
+Code Type.getter(Type type) {
+  _sdk_guard("Type.getter");
+  Compiler c = active.expander;
+  List resolved = c._nominal_getindex(type);
+  if (!resolved) resolved = c.resolve_protocol_member(type, "getindex");
+  if (!resolved) return NULL;
+  (List binding, Type signature) = resolved;
+  return $!($signature){ $binding };
+}
+
+/** Answers `Type.update_helper`, declared in `lib/meta.x`. */
+String Type.update_helper(Type type) {
+  _sdk_guard("Type.update_helper");
+  Type scalar = active.expander.sym.resolve_numeric_type(type);
+  return scalar ? scalar.var_numeric_update_helper() : NULL;
+}
+
 // syntax queries
 
 /** Answers the compiler-backed captured-code type query. */
@@ -259,6 +278,21 @@ Var Code.value(Code code) {
   if (value is void)
     MetaContext.reject("captured code is not a compile-time constant", NULL);
   return value;
+}
+
+/** Answers `Code.convert`, declared in `lib/meta.x`. */
+Code Code.convert(Code value, Type type) {
+  _sdk_guard("Code.convert");
+  return active.expander.convert_expression(value, type);
+}
+
+/** Answers `Code.call_in_order`, declared in `lib/meta.x`. The call binds
+    its temporaries here, so the result is a carrier that binds no
+    further. */
+Code Code.call_in_order(Code member, List arguments, Type type) {
+  _sdk_guard("Code.call_in_order");
+  List call = active.expander.call_in_order(member, arguments);
+  return %(code-value "lowered" (expr $type $call) ());
 }
 
 /** Answers `Code.exits`, declared in `lib/meta.x`. */
@@ -365,6 +399,31 @@ Code Code.register_rewrite(Code function, Macro shape, List holes) {
       { point = <literal>; kind = head; }
   }
   if (!point) MetaContext.reject("unsupported rewrite pattern in spike", NULL);
+  return _rewrite_registration(function, shape, holes, point, kind);
+}
+
+/** Registers a translator for an operator applied to an operand of
+    `type`, keyed by the operator and `Var` for a `Var` type or alias. */
+Code Code.register_typed_rewrite(
+  Code function, Type type, Macro shape, List holes) {
+  _sdk_guard("Code.register_typed_rewrite");
+  if (!active.expander.sym.is_var_type(type))
+    MetaContext.reject("a typed rewrite requires Var or an alias of it", NULL);
+  holes = _rewrite_holes(shape, holes);
+  Symbol point = <unary>;
+  Var kind = void;
+  match (shape.pattern(holes)) {
+    case %(expr ? (op ((!quote !quote) ?operator) ? ?)): {
+      point = <binary>;
+      kind = %(${operator.symbol()} ("Var"));
+    }
+    case %(expr ? (op ((!quote !quote) ?operator) ?)):
+      kind = %(${operator.symbol()} ("Var"));
+    case %(expr ? (postfix ?operator ?)):
+      kind = %(postfix ${operator.symbol()} ("Var"));
+  }
+  if (kind is void || kind.list().car() == <=>)
+    MetaContext.reject("a typed rewrite requires an operator pattern", NULL);
   return _rewrite_registration(function, shape, holes, point, kind);
 }
 

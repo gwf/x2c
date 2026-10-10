@@ -228,10 +228,14 @@ int Code.exits(Code v) => _ask("Code_exits", %($v));
 int Code.is_static_pattern(Code v) => _ask("Code_is_static_pattern", %($v));
 Code Code.convert(Code v, Type t) => _ask("Code_convert", %($v $t));
 String Code.format(Code v) => _ask("Code_format", %($v));
+Code Code.call_in_order(Code m, List a, Type t) =>
+  _ask("Code_call_in_order", %($m $a $t));
 Code Code.register_rewrite(Code f, Macro p, List h) =>
   _ask("Code_register_rewrite", %($f $p $h));
 Code Code.register_marked_rewrite(Code f, Symbol m, Macro p, List h) =>
   _ask("Code_register_marked_rewrite", %($f $m $p $h));
+Code Code.register_typed_rewrite(Code f, Type t, Macro p, List h) =>
+  _ask("Code_register_typed_rewrite", %($f $t $p $h));
 Code Code.register_after_initialization(Code f, Macro p, List h) =>
   _ask("Code_register_after_initialization", %($f $p $h));
 List x2c_syntax_type(List v) => Code.type(v);
@@ -479,3 +483,5 @@ List Type.marked_fields(Type t, Symbol m) =>
   _ask("Type_marked_fields", %($t $m));
 List Type.resolve_member(Type t, String n, int c) =>
   _ask("Type_resolve_member", %($t $n $c));
+Code Type.getter(Type t) => _ask("Type_getter", %($t));
+String Type.update_helper(Type t) => _ask("Type_update_helper", %($t));
