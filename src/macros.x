@@ -2701,8 +2701,8 @@ static List Compiler._lowered(
    placement, or diagnostic. A replacement that fails, or whose template
    holds pending code or a carrier, lowers as written on every use. */
 
-/* Counts of compiler state that lowering adds and a skipped lowering would
-   not add. A name a scope resolves binds once, so it is not counted. */
+/** Counts compiler state that lowering adds and a skipped lowering would
+    not add. A name a scope resolves binds once, so it is not counted. */
 static typedef struct Effects {
   int bindings, names, origins, pending, placements, diagnostics;
 } Effects;
