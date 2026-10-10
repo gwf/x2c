@@ -506,6 +506,8 @@ The modules under `src/` divide ownership as follows:
   member rewrite for aggregates that declare a delegate field;
 - `src/component-literals.x` -- the Array and Map literal constructors,
   registered as literal rewrites for their heads;
+- `src/component-printf.x` -- Var values in printf-family formats,
+  registered as a call rewrite for each family member;
 - `src/operator-ledger.x` -- operator precedence, compound assignment,
   and protocol-member mappings from one compile-time ledger;
 - `src/cli.x`, `src/main.x` -- option metadata and parsing, dispatch, logging,
@@ -736,9 +738,19 @@ registered for the marks its receiver's aggregate declares, after those
 keyed by the receiver's own type. The translator searches the delegate
 fields with `Type.marked_fields` and `Type.resolve_member`, reports an
 ambiguous path or a cycle, and returns the call through the field path as
-constructed syntax, which ordinary call resolution binds. The components and
-`src/grammar.x`, whose source forms they recognize, are compiler prelude
-sources.
+constructed syntax, which ordinary call resolution binds.
+
+`src/component-printf.x` registers one call pattern for each printf-family
+member, on the call family keyed by the callee's spelling, so a call to any
+other function only looks its spelling up. The translator reads the static
+format with `Code.format`, walks it once, and has each `Var` value a
+conversion consumes converted with `Code.convert` to the C type that
+conversion reads, or displayed through `Var.str` for `%s`. The redundant
+`.str()` warning for those values stays with the conversion checks in
+`src/expressions.x`.
+
+The components and `src/grammar.x`, whose source forms they recognize, are
+compiler prelude sources.
 
 A compiler runs its own linked copies of the components' translators, as it
 runs its own kernel. An edited component therefore changes the compiler built

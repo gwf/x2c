@@ -4,10 +4,9 @@
     value the format consumes as the C type its conversion reads: a numeric
     conversion converts the value through `Var.convert`, `%c` and a `*`
     width or precision read an int, and `%s` displays it through `Var.str`.
-    The format is read once, left to right, into steps that the call's
-    arguments then follow in order. A Var value that no conversion consumes,
-    or one at a conversion with no native reading, is an error. Each family
-    member is one call pattern, keyed by its callee.
+    The format is read once, left to right. A Var value that no conversion
+    consumes, or one at a conversion with no native reading, is an error.
+    Each family member is one call pattern, keyed by its callee.
 
     Each definition precedes the definitions that call it: the compiler
     settles whether a linked copy reaches a compile-time operation when the
@@ -16,42 +15,16 @@
 #pragma once
 #include "rewrite.x"
 
-// format steps
+// reading values
 
-/* Adds `(error MESSAGE)`, the last step of a format that cannot be read. */
-meta static int _printf_stop(Array steps, String message) {
-  steps.push(%(error $message));
-  return 0;
-}
+meta static int _printf_is_var(Code value) => value.type().is_named("Var");
 
-/* Whether the conversion at `cursor` names its argument, as `N$` does. */
-meta static int _printf_positional(String format, int cursor) {
-  while (isdigit(format[cursor])) cursor++;
-  return format[cursor] == '$';
-}
-
-/* Steps over a width or precision, adding `(star)` for a `*`, which reads
-   an argument. */
-meta static int _printf_count(String format, int &cursor, Array steps) {
-  if (format[cursor] != '*') {
-    while (isdigit(format[cursor])) cursor++;
-    return 1;
-  }
-  if (_printf_positional(format, ++cursor))
-    return _printf_stop(
-      steps, "positional formats cannot infer Var argument types");
-  steps.push(%(star));
-  return 1;
-}
-
-/* Consumes the length modifier at the cursor: `hh`, `h`, `ll`, `l`, `j`,
-   `z`, `t`, `L`, or none. */
-meta static String _printf_length(String format, int &cursor) {
-  int start = cursor, letter = format[cursor];
-  if (!letter || !strchr("hljztL", letter)) return "";
-  if (format[++cursor] == letter && (letter == 'h' || letter == 'l'))
-    cursor++;
-  return format[start:cursor];
+/* Reports `message` about the printf-family call `call`. */
+meta static void _printf_fail(Code call, String message) {
+  match (call) case %(expr ? (call ?callee *)):
+    x2c_diagnostic_fail_at(
+      call, <xform>, message,
+      %("printf-family call: ${x2c_binding_spelling(callee)}"));
 }
 
 meta static int _printf_valid(String length, int conversion) {
@@ -62,52 +35,6 @@ meta static int _printf_valid(String length, int conversion) {
     return length == "" || length == "l";
   return conversion == 'p' && length == "";
 }
-
-/* Adds the steps of the conversion after the `%` at `cursor`: a `(star)`
-   for each `*` width or precision, then `(value LENGTH CONVERSION)`. */
-meta static int _printf_conversion(String format, int &cursor, Array steps) {
-  int end = format.len() - 1;
-  if (_printf_positional(format, cursor))
-    return _printf_stop(
-      steps, "positional formats cannot infer Var argument types");
-  while (cursor < end && strchr("-+ #0", format[cursor])) cursor++;
-  if (!_printf_count(format, cursor, steps)) return 0;
-  if (format[cursor] == '.') {
-    cursor++;
-    if (!_printf_count(format, cursor, steps)) return 0;
-  }
-  String length = _printf_length(format, cursor);
-  if (cursor >= end)
-    return _printf_stop(steps, "incomplete format conversion");
-  int conversion = format[cursor++];
-  if (!_printf_valid(length, conversion))
-    return _printf_stop(
-      steps,
-      "unsupported or malformed format conversion %%%c".printf(conversion));
-  steps.push(%(value $length $conversion));
-  return 1;
-}
-
-/* The steps of the C spelling `format`, stepping over escape sequences and
-   `%%`, up to the first one that cannot be read. */
-meta static List _printf_steps(String format) {
-  Array steps = [];
-  int cursor = 1, end = format.len() - 1, read = 1;
-  while (read && cursor < end) {
-    int ch = format[cursor++];
-    if (ch == '\\') cursor++;
-    else if (ch != '%') continue;
-    else if (cursor >= end)
-      read = _printf_stop(steps, "incomplete format conversion");
-    else if (format[cursor] == '%') cursor++;
-    else read = _printf_conversion(format, cursor, steps);
-  }
-  return steps.list_free();
-}
-
-// reading values
-
-meta static int _printf_is_var(Code value) => value.type().is_named("Var");
 
 /* The C type a Var value has where `conversion` with `length` reads it, or
    NULL when no native reading applies. */
@@ -125,8 +52,8 @@ meta static Type _printf_type(String length, int conversion) {
   return NULL;
 }
 
-/* `value` as `conversion` with `length` reads it, or NULL for a Var with
-   no native reading. A native value keeps C's calling semantics. */
+/* `value` as `conversion` with `length` reads it, or NULL for a Var that no
+   native reading takes. A native value keeps C's calling semantics. */
 meta static Code _printf_read(Code value, String length, int conversion) {
   if (!_printf_is_var(value)) return value;
   if (conversion == 's' && length == "")
@@ -135,49 +62,82 @@ meta static Code _printf_read(Code value, String length, int conversion) {
   return type ? value.convert(type) : NULL;
 }
 
-/* Reports `message` about the call `call`. */
-meta static void _printf_fail(Code call, String message) {
-  match (call) case %(expr ? (call ?callee *)):
-    x2c_diagnostic_fail_at(
-      call, <xform>, message,
-      %("printf-family call: ${x2c_binding_spelling(callee)}"));
+// the format walk
+
+/* Reports a conversion at `at` that names its argument, as `N$` does. */
+meta static void _printf_position(Code call, const char *at) {
+  while (isdigit(*at)) at++;
+  if (*at == '$')
+    _printf_fail(call, "positional formats cannot infer Var argument types");
 }
 
-/* The arguments of `call` with each value its `steps` read from `first`
-   on read as the C type its conversion selects. */
-meta static List _printf_arguments(
-  Code call, List arguments, int first, List steps) {
-  Array read = [];
-  foreach (Var argument, arguments) read.push(argument);
-  int next = first;
-  foreach (List step, steps) {
-    match (step) {
-      case %(error ?message): _printf_fail(call, message);
-      case %(star): {
-        if (next >= read.len())
-          _printf_fail(call, "format consumes a missing '*' argument");
-        Code value = read[next];
-        if (_printf_is_var(value)) read[next] = value.convert(%(int));
-      }
-      case %(value ?length ?(int conversion)): {
-        if (next >= read.len())
-          _printf_fail(
-            call, "format conversion %%%c consumes a missing argument"
-              .printf(conversion));
-        Code value = _printf_read(read[next], length, conversion);
-        if (!value)
-          _printf_fail(call, "%s%c%s".printf(
-            "cannot infer a native argument for Var at %", conversion,
-            "; use an explicit converter for this format conversion"));
-        read[next] = value;
-      }
-    }
-    next++;
+/* Steps over a width or precision at `at`. A `*` reads the next argument
+   as an int. */
+meta static void _printf_count(
+  Code call, const char *&at, Array arguments, int &next) {
+  if (*at != '*') {
+    while (isdigit(*at)) at++;
+    return;
   }
-  for (; next < read.len(); next++)
-    if (_printf_is_var(read[next]))
-      _printf_fail(call, "Var argument has no corresponding format conversion");
-  return read.list_free();
+  _printf_position(call, ++at);
+  if (next >= arguments.len())
+    _printf_fail(call, "format consumes a missing '*' argument");
+  Code value = arguments[next];
+  if (_printf_is_var(value)) arguments[next] = value.convert(%(int));
+  next++;
+}
+
+/* Consumes the length modifier at `at`: `hh`, `h`, `ll`, `l`, `j`, `z`,
+   `t`, `L`, or none. */
+meta static String _printf_length(const char *&at) {
+  const char *start = at;
+  if (*at && strchr("hljztL", *at))
+    at += (*at == 'h' || *at == 'l') && at[1] == *at ? 2 : 1;
+  return String.new_len(start, (int) (at - start));
+}
+
+/* Reads the conversion after a `%` at `at`, with the arguments its
+   position, flags, width, precision, length, and letter read. */
+meta static void _printf_conversion(
+  Code call, const char *&at, Array arguments, int &next) {
+  _printf_position(call, at);
+  while (*at && strchr("-+ #0", *at)) at++;
+  _printf_count(call, at, arguments, next);
+  if (*at == '.') {
+    at++;
+    _printf_count(call, at, arguments, next);
+  }
+  String length = _printf_length(at);
+  if (!*at) _printf_fail(call, "incomplete format conversion");
+  int conversion = *at++;
+  if (!_printf_valid(length, conversion))
+    _printf_fail(
+      call, "unsupported or malformed format conversion %%%c"
+        .printf(conversion));
+  if (next >= arguments.len())
+    _printf_fail(
+      call, "format conversion %%%c consumes a missing argument"
+        .printf(conversion));
+  Code read = _printf_read(arguments[next], length, conversion);
+  if (!read)
+    _printf_fail(call, "%s%c%s".printf(
+      "cannot infer a native argument for Var at %", conversion,
+      "; use an explicit converter for this format conversion"));
+  arguments[next++] = read;
+}
+
+/* Reads each conversion of the format text `at` in order, stepping over
+   escape sequences and `%%`. */
+meta static void _printf_scan(
+  Code call, const char *at, Array arguments, int &next) {
+  while (*at) {
+    int ch = *at++;
+    if (ch == '\\' && *at) at++;
+    if (ch != '%') continue;
+    if (!*at) _printf_fail(call, "incomplete format conversion");
+    if (*at == '%') at++;
+    else _printf_conversion(call, at, arguments, next);
+  }
 }
 
 /* The call `code` with each Var value its static `format` consumes read as
@@ -190,12 +150,23 @@ meta static Code _printf_lowered(Code code, Code format, List values) {
   String spelling = format.format();
   if (!spelling)
     _printf_fail(code, "Var arguments require a single static format literal");
-  match (code) case %(expr ?type (call ?callee (args *arguments))): {
-    List read = _printf_arguments(
-      code, arguments, arguments.len() - values.len(),
-      _printf_steps(spelling));
-    return %(expr $type (call $callee (args @read)));
+  match (code) case %(expr ?type (call ?callee (args *given))): {
+    Array arguments = given;
+    int next = given.len() - values.len();
+    _printf_scan(code, spelling[1:spelling.len() - 1], arguments, next);
+    for (; next < arguments.len(); next++)
+      if (_printf_is_var(arguments[next]))
+        _printf_fail(
+          code, "Var argument has no corresponding format conversion");
+    return %(expr $type (call $callee (args @{arguments.list_free()})));
   }
+  return code;
+}
+
+/* A C library member names only a function no declaration resolves. */
+meta static Code _printf_library(Code code, Code format, List values) {
+  match (code) case %(expr ? (call (expr () ?) ?)):
+    return _printf_lowered(code, format, values);
   return code;
 }
 
@@ -222,35 +193,19 @@ $rewrite($printf_format)
 $rewrite($fprintf_format)
 $rewrite($sprintf_format)
 $rewrite($snprintf_format)
-/** Reads the Var values of a C library printf-family call. A function the
-    unit declares with one of these names is not that call. */
-meta Code printf_library(Code code) {
-  match (code) {
-    case %(expr ? (call (expr (? *) ?) ?)): return code;
-    case $printf_format(?format, *values):
-      return _printf_lowered(code, format, values);
-    case $fprintf_format(?, ?format, *values):
-      return _printf_lowered(code, format, values);
-    case $sprintf_format(?, ?format, *values):
-      return _printf_lowered(code, format, values);
-    case $snprintf_format(?, ?, ?format, *values):
-      return _printf_lowered(code, format, values);
-  }
-  return code;
-}
-
 $rewrite($string_printf_format)
 $rewrite($file_printf_format)
 $rewrite($buffer_printf_format)
-/** Reads the Var values of a runtime printf-family call. */
-meta Code printf_runtime(Code code) {
+/** Reads the Var values a printf-family call's static format consumes. */
+meta Code printf_values(Code code) {
   match (code) {
-    case $string_printf_format(?format, *values):
-      return _printf_lowered(code, format, values);
-    case $file_printf_format(?, ?format, *values):
-      return _printf_lowered(code, format, values);
-    case $buffer_printf_format(?, ?format, *values):
-      return _printf_lowered(code, format, values);
+    case $printf_format(?f, *v): return _printf_library(code, f, v);
+    case $fprintf_format(?, ?f, *v): return _printf_library(code, f, v);
+    case $sprintf_format(?, ?f, *v): return _printf_library(code, f, v);
+    case $snprintf_format(?, ?, ?f, *v): return _printf_library(code, f, v);
+    case $string_printf_format(?f, *v): return _printf_lowered(code, f, v);
+    case $file_printf_format(?, ?f, *v): return _printf_lowered(code, f, v);
+    case $buffer_printf_format(?, ?f, *v): return _printf_lowered(code, f, v);
   }
   return code;
 }

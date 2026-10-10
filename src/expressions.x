@@ -3017,8 +3017,8 @@ static void Compiler._check_converter_args(
   }
   /* A static printf-family format converts each Var value it consumes. The
      family's positions count the receiver a method call spells before the
-     dot, which `arguments` has already dropped. A format the transform
-     cannot read leaves those values unlowered, so nothing converts them. */
+     dot, which `arguments` has already dropped. A format the printf
+     component cannot read leaves those values as written. */
   const PrintfFn *info = callee.printf_family();
   if (!info || !c.printf_static_format(supplied[info.fmt_arg])) return;
   int first = info.first_arg - method, index = 0;

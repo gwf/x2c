@@ -3144,7 +3144,10 @@ format specifiers convert it to the required promoted C type through
 static format literal. Automatic lowering covers numeric conversions, `%c`,
 `%s`, `*` width and precision, and the `hh`, `h`, `l`, `ll`, and `L` modifiers.
 Other modifiers, pointer and count conversions, wide strings and characters,
-and positional formats require explicit native arguments.
+and positional formats require explicit native arguments. This lowering is
+the compiler component `src/component-printf.x`, which registers a `$rewrite`
+call pattern for each family member. A project can register its own call
+pattern the same way, for example for its own logging function.
 
 ### Dynamic truthiness and binary operators
 
