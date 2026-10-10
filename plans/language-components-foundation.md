@@ -334,6 +334,43 @@ and the cold fallback. Folding `lib/x2c.x` (about 1.47 G of every empty unit,
 paid by dev too) into the same table is the larger prize and the same trade,
 and is also Gary's decision.
 
+### Item 6 result, 2026-10-09: integrated with cheaper emission
+
+Gary chose the linked prelude with a cheaper emission. It is integrated at the
+commit above this one; `make verify` passes (1,115 fixtures, 943 unit tests,
+probes), 17 of 17 examples pass, bootstrap equals stage 0 across 264 files,
+`tools/check-cold-collection.sh` passes, and an installed home builds and
+runs a program using `$auto`, `try`/`catch`, and an Array store.
+
+The three components' records are three C string literals in `collect.c`
+(270 KB, compiled in its old 0.29 s), read once per process by the interface
+reader with the same staleness checks and fallbacks. Meeting the empty-unit
+guard needed a second change, which goes beyond the component work and is
+flagged for Gary's review: `datum_read_plain` in `lib/datum.x` reads the
+spellings `datum_write` makes for plain data (Lists, Strings, decimal
+integers, bare Atoms) without the Lisp tokenizer, falling back to `Lisp.read`
+for anything else. Every `.xi` read uses it, so the gain reaches dev's own
+cost. Equivalence was checked against `Lisp.read` over all 268 interface forms
+in two stage directories plus 475 edge spellings, one edge (an Atom beginning
+with a comment opener) was fixed, and `lisp_plain_datum_read_matches_reader`
+covers the edges. A pre-existing defect remains: `Atom.bare_spelling` accepts
+spellings beginning with `//` or `/*`, which the Lisp reader reads as comments.
+
+| Workload | dev | before item 6 | after |
+| --- | ---: | ---: | ---: |
+| Empty unit | 1.96 G | 2.15 G | 1.32 G |
+| Native, 300 functions | 4.23 G | 4.45 G | 3.61 G |
+| Access, 5,400 mutations | 10.30 G | 10.20 G | 9.35 G |
+| Empty unit, installed home | | 2.51 G | 1.34 G |
+| `make stage-3`, one run on the integrated tree | 13.2 s | 14.1 s | 13.2 s |
+
+With the cheap reader the linked table itself pays only in an installed home
+(0.38 G per translation, which ships no component `.xi`); in the repository
+layout it is neutral and costs a 0.45 G component walk once per stage.
+Shipping the component interfaces in the home instead is an unevaluated
+simpler alternative. Folding `lib/x2c.x` into the table is no longer the
+prize it was, since its `.xi` reads are now cheap.
+
 ## Next bounded milestone
 
 1. Establish a complete declaration use case for initializer-only `$auto`.
