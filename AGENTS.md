@@ -124,8 +124,9 @@ commits need not rebuild from their own bootstrap.
   `component-try` lowering try, catch, and finally,
   `component-delegate` searching delegate fields,
   `component-literals` building Array and Map literals,
-  `component-printf` converting Var values in printf-family formats, and
-  `component-operators` lowering dynamic operators)/
+  `component-printf` converting Var values in printf-family formats,
+  `component-operators` lowering dynamic operators, and
+  `component-raise` lowering raise)/
   `literals` (+ `lambdas`) -> `ast` (+ `ast-rewrite`, AST traversal and
   rewriting, and `grammar`, source forms used by lowering) ->
   `type` (+ `type-ledger`)/`protocol`
