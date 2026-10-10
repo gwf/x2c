@@ -530,10 +530,36 @@ static int Compiler._bind_project_meta(
   Var bound;
   if (!install && c.macro_lisp.try_get(name, bound)) return 1;
   Var (signature, provider) = target;
-  if (c.project_meta_uses_linked(name, provider) &&
-      c._bind_linked_target(name, signature)) return 1;
-  c._install_stub(name, signature, provider, NULL);
+  Var function = c._linked_target(name, signature, provider);
+  if (function is not <func>) c._install_stub(name, signature, provider, NULL);
+  else if (!c.macro_lisp.try_get(name, bound) || !bound.equal(function))
+    c.macro_lisp.set_global(name, function);
   return 1;
+}
+
+/* The linked bodies that prelude advertisements have bound. A body whose
+   texts and signature agreed once in the process agrees in every later
+   unit, since the prelude's providers do not change; a refusal can come
+   from a context that has not installed the provider's callees yet. */
+static Map shipped_targets = NULL;
+
+/* The linked body an advertisement binds when its texts and signature
+   agree, or 0. */
+static Var Compiler._linked_target(
+  Compiler c, String name, List signature, String provider) {
+  List key = %($name $signature $provider);
+  Var function = 0;
+  if (shipped_targets && shipped_targets.try_get(key, function))
+    return function;
+  if (!c.project_meta_uses_linked(name, provider)) return 0;
+  function = _linked_module()[name];
+  if (!c.native_meta_accepts(function, signature)) return 0;
+  if (c.builtin_defs) $scope(&native_module_scope) {
+    if (!shipped_targets) shipped_targets = {};
+    key.try_own();
+    shipped_targets[key] = function;
+  }
+  return function;
 }
 
 /** Answers whether a provider's function can use its linked body.
@@ -547,18 +573,6 @@ int Compiler.project_meta_uses_linked(
   $let(c.filename, home_absolute_path(provider))
   $let(c.meta_hashes, hashes) $let(c.meta_calls, {})
     return c._linked_copy(name, linked);
-}
-
-/* Shipped meta definitions already have Func adapters in their linked
-   inventory, separately from the ordinary native prototype registry. */
-static int Compiler._bind_linked_target(
-  Compiler c, String name, List signature) {
-  Var function = _linked_module()[name];
-  if (!c.native_meta_accepts(function, signature)) return 0;
-  Var bound;
-  if (!c.macro_lisp.try_get(name, bound) || !bound.equal(function))
-    c.macro_lisp.set_global(name, function);
-  return 1;
 }
 
 /* native meta functions

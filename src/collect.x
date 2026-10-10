@@ -206,9 +206,12 @@ static void Compiler._add_prelude(Compiler c, Map globs, Map visited) {
     if (c.runtime_hdrs)
       c._walk_file(canonical, c._runtime_text(path), Path.dirname(path),
         globs, visited);
-    else
-      c._replay_cached(c._prelude_entry(path, canonical), canonical,
-        globs, visited, NULL);
+    else {
+      List entry = c._prelude_entry(path, canonical);
+      // Its compile-time effects install as the compiler's own.
+      $let(c.builtin_defs, 1)
+        c._replay_cached(entry, canonical, globs, visited, NULL);
+    }
   }
 }
 
@@ -1534,6 +1537,7 @@ static void Compiler._import_all(
   Compiler shadow = Compiler.new_shared(c);
   defer c.close_child(shadow);
   shadow.take_unit_state(c);
+  shadow.builtin_defs = c.builtin_defs;
   shadow.sym.reset(globs);
   shadow.start_collection();
   foreach (List entry, imports)
@@ -1824,13 +1828,14 @@ static int _read_parts(Array parts, List stored) {
   return 1;
 }
 
-/* A stored row is a two-element list of key and value. */
+/* A stored row is a two-element list of key and value. A linked record's
+   rows are literals the process root already owns. */
 static Map _read_rows(List stored) {
   Map rows = _cache_map();
   foreach (Var row, stored) {
     if (row is not <list> || row.list().len() != 2) return NULL;
     List pair = row;
-    _require_retained(pair.try_own());
+    if (!Pool.is_permanent(pair)) _require_retained(pair.try_own());
     Var (key, value) = pair;
     if (value is <list>) match (value)
       case %(meta-hashes ?provider ?(List stored)): {
