@@ -533,6 +533,14 @@ client until lambdas and destructuring land.
   native -1.2%, access -0.9%, self-translation -0.8%.
 - 2026-10-10, raise follow-up: the component is kept at +24 over the kernel
   arm it replaced and is scheduled for a deliberate simplification.
+- 2026-10-10, raise simplified: `component-raise.x` went from 97 lines to
+  61. The static check keeps the flat type test and drops the walk over List
+  contents and `*_var` boxing calls, which repeated the runtime's
+  `ErrorRegion._copy_value` check at the `<bad-types>` floor. The book now
+  says a value's own invalid type is a compiler error and invalid contents of
+  a List or Var value reach the floor when the raise runs; the
+  `raise-invalid-nested` fixture is gone, and a probe confirmed the floor
+  message for its program.
 - 2026-10-10, match research (`plans/match-component.md`, branch
   `kernel/match-research`): a match component is feasible at 4.75 M per use
   against 4.62 M for the kernel arm on a three-arm workload, with runtime

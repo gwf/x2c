@@ -3618,9 +3618,9 @@ or `$name`, a variable converted to `Symbol`; each `VALUE` is one
 expression. Values are restricted recursively to `Null`/`nil`, numeric and enum
 values, `Symbol`s, `Atom`s, `String`s, and `List`s of permitted values. `void`,
 pointers, mutable containers, resources, custom objects, and other
-identity-bearing values are invalid. Statically known violations are compiler
-errors; invalid contents supplied dynamically through `Var` reach `Error`'s
-`<bad-types>` raw floor. The conversions and the check belong to the shipped
+identity-bearing values are invalid. A value whose own type is invalid is a
+compiler error; invalid contents of a `List` or `Var` value reach `Error`'s
+`<bad-types>` raw floor when the `raise` runs. The conversions and the check belong to the shipped
 component `src/component-raise.x`, a translator that `$rewrite($raised)`
 registers on the `raise` statement head; a rule a program registers there runs
 first. The compiler evaluates the converted code and values once each, left to
