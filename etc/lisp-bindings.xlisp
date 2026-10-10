@@ -36,7 +36,6 @@
       (eq? (car row) "Type_resolve_member")
       (eq? (car row) "Type_getter")
       (eq? (car row) "Type_update_helper")
-      (eq? (car row) "Code_convert")
       (eq? (car row) "Code_call_in_order")
       (eq? (car row) "Code_register_typed_rewrite")
       (eq? (car row) "Code_register_operator_rewrite")

@@ -280,12 +280,6 @@ Var Code.value(Code code) {
   return value;
 }
 
-/** Answers `Code.convert`, declared in `lib/meta.x`. */
-Code Code.convert(Code value, Type type) {
-  _sdk_guard("Code.convert");
-  return active.expander.convert_expression(value, type);
-}
-
 /** Answers `Code.call_in_order`, declared in `lib/meta.x`. The call binds
     its temporaries here, so the result is a carrier that binds no
     further. */
@@ -359,8 +353,11 @@ static int _function_hole(Macro shape) {
   return 0;
 }
 
-/** Registers a captured translator for a complete parsed pattern. A
-    function definition pattern registers in the `function` family, which
+/** Registers a captured translator for a complete parsed pattern. The
+    pattern's form selects the family and its key: an indexed access or
+    assignment, a binary operator, a member call by receiver type, a call
+    by callee spelling, an Array or Map literal by head, a `switch` or
+    `try` node, or a function definition by return type, which
     `Compiler.normalize` dispatches once per definition before its body
     lowers. */
 Code Code.register_rewrite(Code function, Macro shape, List holes) {
@@ -390,13 +387,13 @@ Code Code.register_rewrite(Code function, Macro shape, List holes) {
       { point = <member>; kind = type; }
     case %(expr ? (call (expr ? (ident (binding ? ?(String callee)))) ?)):
       { point = <call>; kind = callee; }
+    case %(expr ? ((!set ?head (!or array map)) *)):
+      { point = <literal>; kind = head; }
     case %((!quote !or) ((!set ?head (!or switch try)) *) *):
       { point = <node>; kind = head; }
     case %((!set ?head (!or switch try)) *): { point = <node>; kind = head; }
     case %(!or (api-source ? ? (function ?type *)) (function ?type *)):
       { point = <function>; kind = _function_rule_key(type); }
-    case %(expr ? ((!set ?head (!or array map)) *)):
-      { point = <literal>; kind = head; }
   }
   if (!point) MetaContext.reject("unsupported rewrite pattern in spike", NULL);
   return _rewrite_registration(function, shape, holes, point, kind);

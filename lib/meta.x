@@ -199,10 +199,6 @@ meta String Code.format(Code value);
     value each time it runs, so it can be prepared once. */
 meta int Code.is_static_pattern(Code pattern);
 
-/** Returns the captured expression `value` converted to `type` as an
-    argument or assignment converts it. */
-meta Code Code.convert(Code value, Type type);
-
 /** Returns a `type` expression that calls the protocol member `member`
     with `arguments`, each converted to its parameter and evaluated once,
     in order, before the call. */
