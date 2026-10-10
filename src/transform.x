@@ -1306,6 +1306,7 @@ static List Compiler._compound(
     member_type = %("String");
   }
   if (!lhs_is_var) {
+    // A member without an update helper leaves the rule the operand as written.
     List converted = rhs;
     List updated = c._protocol_update(member_type, op, lhs, converted, op);
     if (updated) return updated;
