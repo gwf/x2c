@@ -259,6 +259,22 @@ The added fixed cost (about 0.07 G) is reading `grammar.x` and the try
 component as prelude sources; it belongs to the driver work, together with
 the remaining access cost, which is binding each replacement.
 
+### Milestone 0 items 5 and 6, authorized 2026-10-09
+
+Gary authorized both remaining driver costs, in parallel worktrees from this
+head, integrated here as one batch:
+
+5. Prepared replacements. A translator's quotation is bound once per template
+   and hole-type signature into a bound skeleton; each use substitutes the
+   bound hole values. Guard: the access workload moves toward dev's 10.28 G
+   with byte-identical C; `try` and `$auto` stay at or under their current
+   per-use cost.
+6. Linked prelude. The shipped components' collected interfaces are compiled
+   into the compiler rather than read from `.xi` files per process. Guard:
+   the empty unit moves toward dev's 1.96 G; `make stage-3` wall time moves
+   toward dev's 13.2 s (foundation: 14.1 s); package-install and header-cache
+   probes pass.
+
 ## Next bounded milestone
 
 1. Establish a complete declaration use case for initializer-only `$auto`.
