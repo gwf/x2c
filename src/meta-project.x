@@ -176,10 +176,28 @@ static int Scan.file(Scan &s, String path) {
   tokens.layout = is_layout_file(path);
   tokens.scan();
   int meta = s.file_scope(tokens, Path.dirname(path));
+  meta |= s.module_sources(path);
   if ((meta & 1) && _compiler_owns(path) &&
       (is_prelude_source(path) ||
        s.c.linked_meta_definitions_current(path))) meta &= ~1;
   s.seen[path] = meta;
+  return meta;
+}
+
+/* Module providers share the project's native tables just as included
+   providers do, including ordinary helpers reached by a meta body. */
+static int Scan.module_sources(Scan &s, String path) {
+  int meta = 0;
+  foreach (String owner, s.c.module_tree.ancestors(path)) {
+    s.units.push(owner);
+    if (owner != path && s.file(owner)) meta = 2;
+  }
+  ModuleEntry entry = s.c.module_tree.entry(path);
+  if (entry)
+    foreach (String member, entry.members) {
+      s.units.push(member);
+      if (s.file(member)) meta = 2;
+    }
   return meta;
 }
 
