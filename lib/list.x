@@ -969,13 +969,11 @@ static int Render._fits(Render &r, Var elem) {
 }
 
 /* Writes a List's elements in turn, each rendered as `Render._value`
-   does. */
+   does. Cells are immutable, so a chain cannot reach itself; a cycle through
+   a mutable container in a car stops at that container's own guard. */
 static void Render._items(Render &r, Var elem) {
   List lst = elem;
   Buffer out = r.out;
-  RenderPath path;
-  if (!path.enter(lst)) return (void) elem.write_pointer_repr(out);
-  defer path.leave();
   if (out.pos - out.tabstop() > 5) out.newline_indent();
   _open(lst, out);
   for (List l = lst; l; l = l.cdr()) {
@@ -995,9 +993,6 @@ static void Render._flat(Render &r, Var elem) {
 static void Render._flat_items(Render &r, Var elem) {
   List lst = elem;
   Buffer out = r.out;
-  RenderPath path;
-  if (!path.enter(lst)) return (void) elem.write_pointer_repr(out);
-  defer path.leave();
   _open(lst, out);
   for (List l = lst; l; l = l.cdr()) {
     r._flat(l.car());
