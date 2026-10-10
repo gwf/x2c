@@ -217,7 +217,7 @@ fi
 mkdir -p home/bin home/lib home/include/x2c home/etc
 cp "$ROOT"/lib/*.x home/lib/
 mkdir -p home/src
-cp "$ROOT"/src/{component-access,component-try,component-delegate,component-literals,component-printf,component-operators,grammar}.x home/src/
+cp "$ROOT"/src/{component-access,component-try,component-delegate,component-literals,component-printf,component-operators,component-raise,grammar}.x home/src/
 cp "$ROOT"/lib/*.x "$(dirname "$X2C")"/lib/*.h \
   home/include/x2c/
 cp "$ROOT"/etc/*.xlisp "$ROOT"/etc/*.x \

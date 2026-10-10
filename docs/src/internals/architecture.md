@@ -511,6 +511,8 @@ The modules under `src/` divide ownership as follows:
   registered as a call rewrite for each family member;
 - `src/component-operators.x` -- the dynamic `Var` operators, compound
   assignments, and increments;
+- `src/component-raise.x` -- the raise conversions and detail type check,
+  registered as a statement rewrite;
 - `src/operator-ledger.x` -- operator precedence, compound assignment,
   and protocol-member mappings from one compile-time ledger;
 - `src/cli.x`, `src/main.x` -- option metadata and parsing, dispatch, logging,
@@ -774,6 +776,16 @@ transform. When a rewrite lowers its replacement, the source expressions the
 replacement holds lower outside the active rule, so a store nested in
 another store's value applies the same rule again. A rule whose pattern was
 derived without the subject's bindings matches without collecting them.
+
+`src/component-raise.x` registers `raise` on the statement family keyed by
+the `raise` head. Its translator converts the code to a `Symbol` and each
+detail key and value to a `Var` with `Code.convert`, promotes a C string
+literal value with `Code.promoted`, and reports a value whose type is not
+immutable with `x2c_diagnostic_error_at`, which returns so the translation
+goes on. It answers the converted raise as a lowered carrier, which binding
+leaves as it is. The compiler lowers that raise's parts in source order,
+moving them into temporaries as literal parts move, and builds its literals
+at run time.
 
 The components and `src/grammar.x`, whose source forms they recognize, are
 compiler prelude sources.

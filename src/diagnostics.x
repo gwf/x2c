@@ -434,10 +434,9 @@ void Compiler.report_error(
     message default match `Compiler.report_error`.
 */
 void Compiler.report_problem(
-  Compiler compiler, Symbol code, String message, Token token, List notes) {
+  Compiler c, Symbol code, String message, Token token, List notes) {
   message = message ? message : "compiler error";
-  compiler.diagnostics.report(
-    code, message, _compiler_location(compiler, token), notes);
+  c.diagnostics.report(code, message, _compiler_location(c, token), notes);
 }
 
 /** Records and emits a located warning without consuming the error limit.

@@ -478,18 +478,34 @@ static Ast Compiler._block_node(
   return source_block_content(lowered);
 }
 
+/* A raise takes its statement rule's replacement. A raise its rules leave
+   lowers its parts in source order. All of it builds its literals when it
+   runs, never in constructors. */
 static Ast Compiler._raise_node(Compiler c, Ast ast) {
-  // Raise details intern at raise time, never in constructors.
   $let(c.runtime_literals, 1) {
-    match (ast)
-      case %(raise ?cause (args *arguments)):
-        ast = c._raise(ast, cause, arguments);
-    ast = c._children(ast);
-    match (ast)
-      case %(raise ?cause (args *arguments)):
-        ast = c._ordered_raise(cause, arguments);
+    List rewritten = c._statement_rewrite(ast, <raise>);
+    if (rewritten !== ast) ast = rewritten;
+    else {
+      ast = c._children(ast);
+      match (ast)
+        case %(raise ?cause (args *arguments)):
+          ast = c._ordered_raise(cause, arguments);
+    }
   }
   return ast;
+}
+
+static List Compiler._ordered_raise(
+  Compiler c, List cause, List arguments) {
+  Array values = [cause], orders = $auto([c._part_order(cause)]);
+  foreach (List argument, arguments) {
+    values.push(argument);
+    orders.push(c._part_order(argument));
+  }
+  List declarations = c._ordered_parts(values, orders);
+  List parts = values.list_free();
+  List raised = %(raise ${parts.car()} (args @{parts.cdr()}));
+  return declarations ? %(block @declarations $raised) : raised;
 }
 
 // collection literals
@@ -981,96 +997,6 @@ static List Compiler._return(Compiler c, List ast) {
       return source_return_content(%($value));
     }
   return ast;
-}
-
-// raise details
-
-static List Compiler._ordered_raise(
-  Compiler c, List cause, List arguments) {
-  Array values = [cause], orders = $auto([c._part_order(cause)]);
-  foreach (List argument, arguments) {
-    values.push(argument);
-    orders.push(c._part_order(argument));
-  }
-  List declarations = c._ordered_parts(values, orders);
-  List parts = values.list_free();
-  List raised = %(raise ${parts.car()} (args @{parts.cdr()}));
-  return declarations ? %(block @declarations $raised) : raised;
-}
-
-static List Compiler._raise(Compiler c, List ast, Var cause, List arguments) {
-  Array values = [], int index = 0;
-  List code = c.convert_expression(cause, %("Symbol"));
-  int changed = code != cause;
-  foreach (List value, arguments) {
-    Type invalid = NULL;
-    if (index & 1) value = c.promote_string_literal(value);
-    if (index & 1)
-      match (value)
-        case %(expr ?value_type ?content): {
-          Type type = value_type;
-          if (!c._raise_detail_type_allowed(type)) invalid = type;
-          else if (c.sym.is_named_value_type(type, "List"))
-            invalid = c._raise_nested_invalid_type(content);
-        }
-    if (invalid) {
-      String message = %"raise detail type ${invalid.repr()} is not immutable";
-      List location = c.origin_location(c.origin);
-      c.diagnostics.report(
-        <type>, message, location,
-        %("use a numeric value, enum, Symbol, Atom, String, List, or Var"));
-      // Null replaces the reported detail, so a later pass never sees it.
-      value = %(expr ("Var") (call "Var_null" (args)));
-    }
-    List converted = c.convert_expression(value, %("Var"));
-    if (converted != value) changed = 1;
-    values.push(converted);
-    index++;
-  }
-  if (!changed) {
-    values.free();
-    return ast;
-  }
-  List converted = values.list_free();
-  return %(raise $code (args @converted));
-}
-
-static int Compiler._raise_detail_type_allowed(Compiler c, Type type) {
-  if (!type) return 0;
-  with c.sym {
-    if (_.is_var_type(type) ||
-        _.is_string_type(type) ||
-        _.is_named_value_type(type, "List") ||
-        _.is_named_value_type(type, "Symbol") ||
-        _.is_named_value_type(type, "Atom"))
-      return 1;
-    return !!_.resolve_numeric_type(type);
-  }
-}
-
-static Type Compiler._raise_nested_invalid_type(Compiler c, Var node) {
-  if (node is not <list>) return NULL;
-  List ast = node;
-  match (ast)
-    case %(expr ?expr_type ?value): {
-      Type type = expr_type;
-      if (!c._raise_detail_type_allowed(type)) return type;
-      if (c.sym.is_var_type(type)) {
-        List payload = value;
-        match (payload)
-          case %(call ?(String callee) ?arguments):
-            if (callee.endswith("_var"))
-              return c._raise_nested_invalid_type(arguments);
-        return NULL;
-      }
-      if (!c.sym.is_named_value_type(type, "List")) return NULL;
-      return c._raise_nested_invalid_type(value);
-    }
-  foreach (Var child, ast) {
-    Type invalid = c._raise_nested_invalid_type(child);
-    if (invalid) return invalid;
-  }
-  return NULL;
 }
 
 // calls

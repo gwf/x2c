@@ -27,6 +27,7 @@
 #include "component-literals.x"
 #include "component-operators.x"
 #include "component-printf.x"
+#include "component-raise.x"
 #include "component-try.x"
 #include "fields.x"
 #include "grammar.x"
@@ -797,6 +798,78 @@ Code printf_values(Code code) {
   return code;
 }
 
+/* --- src/component-raise.x ----------------------------------------------- */
+
+static int _raise_immutable(Type type) {
+  if (!type) return 0;
+  foreach (String name, %("Var" "String" "List" "Symbol" "Atom"))
+    if (type.is_named(name)) return 1;
+  return type.numeric() != NULL;
+}
+
+static int _raise_mutable_part(Type type, Var value, Array pending) {
+  if (!_raise_immutable(type)) return 1;
+  if (type.is_named("List")) pending.push(%($value));
+  else if (type.is_named("Var"))
+    match (value) case %(call ?(String callee) ?arguments):
+      if (callee.endswith("_var")) pending.push(%($arguments));
+  return 0;
+}
+
+static Type _raise_nested_mutable(Var content) {
+  Array pending = [%($content)];
+  Type found = NULL;
+  while (!found && pending.len()) {
+    List rest = pending.take_last();
+    if (!rest) continue;
+    pending.push(rest.cdr());
+    Var item = rest.car();
+    if (item is not <list>) continue;
+    List node = item;
+    match (node) {
+      case %(expr ?type ?value):
+        if (_raise_mutable_part(type, value, pending)) found = type;
+      default: pending.push(node);
+    }
+  }
+  pending.free();
+  return found;
+}
+
+static Code _raise_value(Code value) {
+  value = value.promoted();
+  Type mutable = NULL;
+  match (value) case %(expr ?matched ?content): {
+    Type type = matched;
+    if (!_raise_immutable(type)) mutable = type;
+    else if (type.is_named("List")) mutable = _raise_nested_mutable(content);
+  }
+  if (!mutable) return value;
+  x2c_diagnostic_error_at(
+    NULL, <type>, %"raise detail type ${mutable.repr()} is not immutable",
+    %("use a numeric value, enum, Symbol, Atom, String, List, or Var"));
+  return %(expr ("Var") (call "Var_null" (args)));
+}
+
+/** Converts a raise's code and details, or declines a raise whose parts
+    already have their types. */
+Code raise_lowering(Code node) {
+  match (node) case $raised(?code, *details): {
+    Code symbol = ((Code) code).convert(%("Symbol"));
+    int changed = symbol != code, index = 0;
+    Array converted = [];
+    foreach (Code detail, details) {
+      Code part = index++ & 1 ? _raise_value(detail) : detail;
+      Code value = part.convert(%("Var"));
+      if (value != part) changed = 1;
+      converted.push(value);
+    }
+    if (changed)
+      return Code.lowered(%(raise $symbol (args @{converted.list_free()})));
+  }
+  return node;
+}
+
 /* --- src/component-try.x ------------------------------------------------- */
 
 static int _try_arm_exits(List arm) {
@@ -1057,6 +1130,11 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_printf_lowered", _printf_lowered);
   $linked.row(rows, "_printf_library", _printf_library);
   $linked.row(rows, "printf_values", printf_values);
+  $linked.row(rows, "_raise_immutable", _raise_immutable);
+  $linked.row(rows, "_raise_mutable_part", _raise_mutable_part);
+  $linked.row(rows, "_raise_nested_mutable", _raise_nested_mutable);
+  $linked.row(rows, "_raise_value", _raise_value);
+  $linked.row(rows, "raise_lowering", raise_lowering);
   $linked.row(rows, "_try_arm_exits", _try_arm_exits);
   $linked.row(rows, "try_catch_cases", try_catch_cases);
   $linked.row(rows, "_try_finalizer_label", _try_finalizer_label);
