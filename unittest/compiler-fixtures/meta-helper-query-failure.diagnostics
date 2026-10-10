@@ -1,4 +1,4 @@
-unittest/compiler-fixtures/meta-helper-query-failure.x:12:18: macro: x2c.type.fields requires a struct or union Type
+unittest/compiler-fixtures/meta-helper-query-failure.x:12:18: macro: Type.fields requires a struct or union Type
     printf("%d\n", $count());
                    ^
   note: value: ("Nonrecord")

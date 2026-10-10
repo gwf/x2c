@@ -5,7 +5,7 @@ macro Decorator $fixture.tag(
   Expr $value
 ) {
   printf("%d ", $value);
-  @(x2c.function.body $target)
+  @(Code.body $target)
 }
 
 macro Decorator $fixture.annotate_field(

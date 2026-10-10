@@ -3,7 +3,7 @@
 import "geo" as g;
 
 macro Unit $check_imported(Type $type) {
-  @(let ((actual (x2c.type.fields $type)))
+  @(let ((actual (Type.fields $type)))
      (if (equal? actual
            '(("a" (struct "geo__VecData"))
              ("b" (struct "geo__VecData"))))

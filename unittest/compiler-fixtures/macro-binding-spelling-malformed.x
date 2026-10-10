@@ -1,6 +1,6 @@
 #include "x2c.x"
 
 macro Expression $spelling() =>
-  $(x2c.binding.spelling '(binding "malformed"));
+  $(Code.binding_spelling '(binding "malformed"));
 
 char *value = $spelling();

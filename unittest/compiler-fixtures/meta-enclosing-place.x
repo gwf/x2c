@@ -16,7 +16,7 @@ macro Expression $trace(Expr $value) => $trace_after($value);
 meta static List function_name(void) {
   if (x2c_enclosing(<declarator>))
     x2c_diagnostic_fail("an argument has no declarator", %());
-  return x2c_literal_string(x2c_function_name(x2c_enclosing(<function>)));
+  return x2c_literal_string(Code.name(x2c_enclosing(<function>)));
 }
 macro Expression $here() => $function_name();
 

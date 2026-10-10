@@ -1,20 +1,20 @@
 #include "x2c.x"
 
 macro Expression $expr_spelling(Expr $value) =>
-  $(x2c.binding.spelling $value);
+  $(Code.binding_spelling $value);
 
 macro Expression $name_spelling(Name $value) =>
-  $(x2c.binding.spelling $value);
+  $(Code.binding_spelling $value);
 
 macro Expression $ident_spelling(Expr $value) =>
-  $(x2c.binding.spelling (car (cdr (cdr $value))));
+  $(Code.binding_spelling (car (cdr (cdr $value))));
 
 macro Expression $identity_spelling(Expr $value) =>
-  $(x2c.binding.spelling
+  $(Code.binding_spelling
     (car (cdr (car (cdr (cdr $value))))));
 
 macro Expression $bind_spelling(Expr $value) =>
-  $(x2c.binding.spelling
+  $(Code.binding_spelling
     (list 'bind
       (car (cdr (car (cdr (cdr $value)))))
       nil));

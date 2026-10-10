@@ -1,7 +1,7 @@
 #include "x2c.x"
 
 macro Expression $spelling(Expr $value) =>
-  $(x2c.binding.spelling
+  $(Code.binding_spelling
     (list 'binding
       (car
         (cdr

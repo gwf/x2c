@@ -1,7 +1,7 @@
 #include "x2c.x"
 
 macro Unit $computed(Expr $value, Name $public) {
-  static $(x2c.syntax.type $value)
+  static $(Code.type $value)
   $(x2c.ident "macro_slot_helper")(void) {
     return $value;
   }

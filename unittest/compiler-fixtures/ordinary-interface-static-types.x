@@ -15,7 +15,7 @@ inline int ordinary_inline_value(int value) {
 
 static macro Expression $ordinary.fields(Expr $value) =>
   $(x2c.literal.int
-    (length (x2c.type.fields (x2c.syntax.type $value))));
+    (length (Type.fields (Code.type $value))));
 
 int main(void) {
   OrdinaryAlias visible = {{13}};

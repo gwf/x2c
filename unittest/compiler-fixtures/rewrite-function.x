@@ -15,10 +15,10 @@ macro Unit $any_function(Function $function) { $function }
    other function. */
 $rewrite($any_function)
 meta Code count_entries(Code function) {
-  if (!x2c_function_name(function).startswith("counted_")) return function;
+  if (!Code.name(function).startswith("counted_")) return function;
   match (function) case %(function ?type ?declarator ?):
     return %(function $type $declarator
-      (block ${$!{ entries++; }} @{x2c_function_body(function)}));
+      (block ${$!{ entries++; }} @{Code.body(function)}));
   return function;
 }
 

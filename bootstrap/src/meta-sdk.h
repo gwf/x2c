@@ -66,19 +66,9 @@ Code Code_register_rewrite(Code function, List pattern, List holes);
 
 Code Code_register_after_initialization(Code c, Macro shape, List holes);
 
-List x2c_syntax_type(List value);
-
-List x2c_protocol_member(List participant, List base, String member);
-
-List x2c_method_resolve(List type_value, String name);
-
 List builtin_foreach_bindings(List declaration);
 
 List builtin_foreach_reference(String name);
-
-int x2c_type_is_integral(List value);
-
-int x2c_type_is_pointer(List value);
 
 Type Type_element(Type type);
 
@@ -87,6 +77,12 @@ List Type_parameters(Type type);
 Type Type_return_type(Type type);
 
 List Type_parts(Type type);
+
+List x2c_type_parts(List value);
+
+List x2c_type_resolve(List value);
+
+String x2c_source_text(Var value);
 
 String Type_reverse_name(String base, String participant);
 
@@ -126,8 +122,6 @@ String Code_source_text(Var value);
 
 String x2c_embed_text(Var requested);
 
-Var x2c_literal_value(Var syntax);
-
 List builtin_class_location(void);
 
 String x2c_invocation_file(void);
@@ -147,34 +141,6 @@ void x2c_diagnostic_warn(String message, List notes);
 Code x2c_enclosing(Symbol what);
 
 void x2c_place(List where, Code code);
-
-List x2c_type_element(List value);
-
-List x2c_type_parameters(List value);
-
-List x2c_type_return(List value);
-
-List x2c_type_parts(List value);
-
-String x2c_type_reverse_name(String base, String participant);
-
-List x2c_type_resolve(List value);
-
-List x2c_type_layout(List value);
-
-int x2c_type_is_value(List value);
-
-Symbol x2c_type_tag_name(String name);
-
-List x2c_type_fields(List value);
-
-String x2c_binding_spelling(Var syntax);
-
-String x2c_function_name(List function);
-
-List x2c_function_parameter(List function, String wanted);
-
-String x2c_source_text(Var value);
 
 List meta_type_description(Var value);
 

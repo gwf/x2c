@@ -8,12 +8,12 @@ typedef enum { RED, GREEN } Color;
 typedef String Name;
 typedef struct { int x; double y; } Point;
 
-meta static int members(void) => x2c_type_members(%("Color")).len();
+meta static int members(void) => Type.members(%("Color")).len();
 
 meta static String resolved(String name) =>
-  x2c_type_resolve(%($name)).repr();
+  Type.resolve(%($name)).repr();
 
-meta static String fields(void) => x2c_type_fields(%("Point")).repr();
+meta static String fields(void) => Type.fields(%("Point")).repr();
 
 int main(void) {
   printf("%d %s %s\n", $members(), $resolved("Name"), $fields());

@@ -33,10 +33,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 String x2c_source_text(Var syntax);
 
-String x2c_binding_spelling(Var syntax);
-
-List x2c_syntax_type(List value);
-
 Type Code_type(Code value);
 
 Var Code_value(Code code);
@@ -111,41 +107,11 @@ Symbol Type_tag_name(String name);
 
 String Type_reverse_name(String base, String participant);
 
-Var x2c_literal_value(Var syntax);
-
-String x2c_function_name(List function);
-
-List x2c_function_parameter(List function, String wanted);
-
-List x2c_type_fields(List value);
-
-List x2c_type_layout(List value);
-
 List x2c_type_parts(List value);
 
 List x2c_type_resolve(List value);
 
 static Var _meta_initializer(List node);
-
-int x2c_type_is_value(List value);
-
-int x2c_type_is_integral(List value);
-
-int x2c_type_is_pointer(List value);
-
-List x2c_type_element(List value);
-
-List x2c_type_parameters(List value);
-
-List x2c_type_return(List value);
-
-Symbol x2c_type_tag_name(String name);
-
-String x2c_type_reverse_name(String base, String participant);
-
-List x2c_method_resolve(List type, String name);
-
-List x2c_protocol_member(List participant, List base, String member);
 
 String x2c_invocation_file(void);
 

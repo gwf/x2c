@@ -23,8 +23,8 @@ macro Expression $builder.aliases() =>$(x2c.literal.int (if (and
     (eq? x2c_expr_field x2c.expr.field)
     (eq? x2c_expr_composite x2c.expr.composite)
     (eq? x2c_expr_cast x2c.expr.cast)
-    (eq? x2c_function_body x2c.function.body)
-    (eq? x2c_parameters_arguments x2c.parameters.arguments)) 1 0));
+    (eq? Code.body Code.body)
+    (eq? Code.arguments Code.arguments)) 1 0));
 
 int main(void) {
   List node = mc_wrap("hi");

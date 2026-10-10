@@ -3,7 +3,7 @@
 #include "macro-map-entry-import.x"
 
 macro Entry $handler(Name $name) {
-  $(x2c.literal.string (x2c.binding.spelling $name)): $name
+  $(x2c.literal.string (Code.binding_spelling $name)): $name
 }
 
 macro Entry $two() {

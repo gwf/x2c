@@ -13,7 +13,7 @@ meta static int string_hashes(Map hashes) {
 }
 
 macro Expression $hash_present(Literal $key) =>
-  $(has_hash (x2c.meta.definition.hashes) (x2c.literal.value $key));
+  $(has_hash (x2c.meta.definition.hashes) (Code.value $key));
 
 macro Expression $hash_strings() =>
   $(string_hashes (x2c.meta.definition.hashes));

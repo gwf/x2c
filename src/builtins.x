@@ -97,7 +97,7 @@ static List _foreach_expand(
   Var pair, Var object, Var cursor) {
   collection = ((Code) collection).promoted();
   List targets = builtin_foreach_bindings(declaration);
-  List type = x2c_syntax_type(collection);
+  Type type = ((Code) collection).type();
   int direct = type == %("Iter");
   List converter = direct ? %() : _converter(type);
   List spec = direct ? %() : _cursor_spec(type);
@@ -121,9 +121,9 @@ static List _foreach_expand(
 }
 
 /* The function that makes an Iter of a `type` value. */
-static List _converter(List type) =>
+static List _converter(Type type) =>
   type == %("Var") ? builtin_foreach_reference("Var_iter")
-                    : x2c_protocol_member(type, %("Iter"), "iter");
+                    : type.protocol_member("iter");
 
 /* The cursor loop's `(function cursor-type output-types)` for a
    collection whose owner declares `int T_try_next(T, C *, O *...)` with an
@@ -132,22 +132,22 @@ static List _converter(List type) =>
 static List _cursor_spec(List collection_type) {
   if (!_atom_type(collection_type)) return %();
   String owner = collection_type.car().str();
-  List function = builtin_foreach_reference(owner + "_try_next");
+  Code function = builtin_foreach_reference(owner + "_try_next");
   if (!function) return %();
-  List type = x2c_syntax_type(function);
-  List parameters = x2c_type_parameters(type);
+  Type type = function.type();
+  List parameters = type.parameters();
   List rest = parameters.cdr();
-  List cursor_parameter = rest ? rest.car() : %();
+  Type cursor_parameter = rest ? rest.car() : %();
   List outputs = rest ? rest.cdr() : %();
-  if (x2c_type_return(type) != %(int) ||
+  if (type.return_type() != %(int) ||
       parameters.car() != collection_type ||
-      !x2c_type_is_pointer(cursor_parameter)) return %();
-  List cursor_type = x2c_type_element(cursor_parameter);
-  if (!x2c_type_is_integral(cursor_type) &&
-      cursor_type != collection_type) return %();
+      !cursor_parameter.canonicalize().is_pointer()) return %();
+  Type cursor_type = cursor_parameter.element();
+  if (!cursor_type.is_integral() && cursor_type != collection_type)
+    return %();
   if (!outputs) return %();
   if (!_valid_outputs(outputs)) return %();
-  List output_types = outputs.map(%!(Var output) => x2c_type_element(output));
+  List output_types = outputs.map(%!(Type output) => output.element());
   /* A fourth element marks reference parameters. */
   if (cursor_parameter.car() == <*>)
     return %($function $cursor_type $output_types);
@@ -165,9 +165,9 @@ static int _atom_type(Var type) {
 
 /* Whether each output parameter points to a named type. */
 static int _valid_outputs(List outputs) {
-  foreach (List output, outputs)
-    if (!x2c_type_is_pointer(output) ||
-        !_atom_type(x2c_type_element(output))) return 0;
+  foreach (Type output, outputs)
+    if (!output.canonicalize().is_pointer() || !_atom_type(output.element()))
+      return 0;
   return 1;
 }
 
@@ -213,8 +213,8 @@ static List Foreach.with_iter(Foreach &f, List converter) {
   List item_expression = _expr(%("Var"), f.item);
   List initializer = builtin_foreach_complete(
     constructor ? _iter_call(constructor, f.collection) : f.collection);
-  List next = builtin_foreach_reference("Iter_try_next");
-  List output = x2c_type_parameters(x2c_syntax_type(next))[1];
+  Code next = builtin_foreach_reference("Iter_try_next");
+  List output = next.type().parameters()[1];
   List item_argument = output.car() == <*>
     ? _address(item_expression) : item_expression;
   List condition =
@@ -276,9 +276,9 @@ static List _assign(List target, List value) => $!{ $target = $value; };
 
 static List _class_expand(List capture) {
   String owner = capture[1];
-  List type = capture[2];
+  Type type = capture[2];
   if (!type) return %($capture);
-  if (!x2c_type_is_pointer(type) && type.car() == <enum>)
+  if (!type.canonicalize().is_pointer() && type.car() == <enum>)
     x2c_diagnostic_fail(
       %"class $owner cannot take an enum value " +
       "representation: Var has no fixed tag for an enum",
@@ -310,15 +310,14 @@ static List _class_defaults(String owner, List type, List location) {
   return %(seq @body);
 }
 
-static Shape _shape(String owner, List type, List location) {
-  int heap = x2c_type_is_pointer(type);
+static Shape _shape(String owner, Type type, List location) {
+  int heap = type.canonicalize().is_pointer();
   int alias = type.len() == 1 && type.car() is <string>;
-  List pointee = heap ? x2c_type_element(type) : type;
-  List representation = x2c_type_is_value(pointee) ? pointee :
-                        x2c_type_resolve(pointee);
+  Type pointee = heap ? type.element() : type;
+  Type representation = pointee.is_value() ? pointee : pointee.resolve();
   int aggregate = representation.car() == <struct> ||
                   representation.car() == <union>;
-  List fields = aggregate ? x2c_type_layout(representation) : %();
+  List fields = aggregate ? representation.layout() : %();
   List named = _named(fields);
   int positional = aggregate && representation.car() == <struct> &&
                    _positional(fields);
@@ -327,7 +326,7 @@ static Shape _shape(String owner, List type, List location) {
     .representation = representation, .named = named, .heap = heap,
     .alias = alias, .aggregate = aggregate, .positional = positional};
   s.parameter = x2c_param_make(%($owner), "value");
-  s.tag = x2c_type_tag_name(owner);
+  s.tag = Type.tag_name(owner);
   return s;
 }
 
@@ -341,7 +340,7 @@ static List _named(List fields) {
 }
 
 static int _positional(List fields) {
-  foreach (List field, fields) if (!x2c_type_is_value(field[1])) return 0;
+  foreach (List field, fields) if (!Type.is_value(field[1])) return 0;
   return 1;
 }
 
@@ -354,11 +353,11 @@ static List Shape.constructor(Shape &s) {
   List extras = %();
   List initialize = _own_method(owner, "init");
   if (s.aggregate && !s.alias && initialize) {
-    List function = x2c_syntax_type(initialize).car();
+    List function = ((Code) initialize).type().car();
     List declared = function[1];
     extras = declared.cdr();
   }
-  if (s.heap && !s.aggregate && !x2c_type_is_value(s.pointee))
+  if (s.heap && !s.aggregate && !((Type) s.pointee).is_value())
     x2c_diagnostic_fail(
       %"class $owner requires an explicit constructor", %());
   List constructor = _new(
@@ -376,7 +375,7 @@ static List Shape.release(Shape &s) {
   List drop = _own_method(s.owner, "drop");
   List release = drop
     ? $!{
-        if (value) ${_ref(x2c_binding_spelling(drop))}(value);
+        if (value) ${_ref(((Code) drop).binding_spelling())}(value);
         Scope_free(value);
       }
     : $!{ Scope_free(value); };
@@ -437,8 +436,8 @@ static List Shape.comparison(Shape &s) {
   if (s.heap || s.positional)
     return %(${_equal(owner, s.heap, s.named)}
              ${_hash(owner, s.heap, s.named)});
-  if (!x2c_method_resolve(%($owner), "equal") ||
-      !x2c_method_resolve(%($owner), "hash"))
+  if (!_method(%($owner), "equal") ||
+      !_method(%($owner), "hash"))
     x2c_diagnostic_fail(
       %"value class $owner requires compatible equal " +
       "and hash methods", %());
@@ -544,9 +543,9 @@ static List _class_initializer(String owner, Var heap_value) {
   int heap = heap_value != %();
   List type = %($owner);
   List receiver = heap ? type : $!Type{ $type * };
-  List method = x2c_method_resolve(type, "init");
+  Code method = _method(type, "init");
   if (method) {
-    List signature = x2c_syntax_type(method);
+    List signature = method.type();
     List function = signature.car();
     List declared = function[1];
     int reference = !heap && declared.car() == %(& @type);
@@ -554,7 +553,7 @@ static List _class_initializer(String owner, Var heap_value) {
     List parameters = cons(receiver, declared.cdr());
     int refusable = heap && signature == %((func $parameters) int);
     if (refusable || signature == %((func $parameters) void)) {
-      List init = _ref(x2c_binding_spelling(method));
+      List init = _ref(method.binding_spelling());
       List arguments = _init_arguments(parameters);
       List call = heap || reference ? $!( $init(value, @arguments) )
                                     : $!( $init(&value, @arguments) );
@@ -586,7 +585,7 @@ static List _box(Symbol tag, int heap) {
 static List _unbox(String owner, List expression) {
   List returned = $!{ return $expression; };
   return %(default ${_function(
-    x2c_type_reverse_name("Var", owner), %($owner),
+    Type.reverse_name("Var", owner), %($owner),
     %(${x2c_param_make(%("Var"), "value")}), %($returned))});
 }
 
@@ -693,16 +692,17 @@ static List _class_write_fields(String owner, List fields) {
 /* One field's repr: its type's own `write_repr`, its Var form's repr, or
    else its address. */
 static List _field_write(List field) {
-  List value = _field_value(field), type = field[1];
+  List value = _field_value(field);
+  Type type = field[1];
   int array = 0;
   match (type) case %((dim *) *): array = 1;
   List writer = %();
-  if (!array && !x2c_type_is_pointer(type))
-    writer = x2c_method_resolve(type, "write_repr");
+  if (!array && !type.canonicalize().is_pointer())
+    writer = _method(type, "write_repr");
   if (writer) return $!{ $value.write_repr(out); };
-  if (!array && x2c_type_is_value(type))
+  if (!array && type.is_value())
     return $!{ ((Var)$value).write_repr(out); };
-  if (!array && !x2c_type_is_pointer(x2c_type_resolve(type)))
+  if (!array && !type.resolve().canonicalize().is_pointer())
     value = $!( &$value );
   return $!{ ${_pointer_output("opaque", value)}; };
 }
@@ -727,11 +727,28 @@ static List _pointer_output(String owner, List value) {
 
 // class syntax
 
+/* The callee a member call `name` on a `type` receiver selects, or an empty
+   List. Methods that imported packages each provide are an error. */
+static List _method(Type type, String name) {
+  match (type.resolve_member(name, 1)) {
+    case %(method ?binding ?signature):
+      return %(expr $signature (ident $binding));
+    case %(ambiguous *packages): {
+      Array notes = [];
+      foreach (String package, packages) notes.push(%"package: '$package'");
+      x2c_diagnostic_fail(
+        %"method '${type.base_type().car()}.$name' is provided by " +
+        "multiple imported packages", notes.list_free());
+    }
+  }
+  return %();
+}
+
 /* The method `member` of `owner` when the class defines it, as opposed
    to one it inherits. */
 static List _own_method(String owner, String member) {
-  List found = x2c_method_resolve(%($owner), member);
-  if (found && x2c_binding_spelling(found) == %"${owner}_${member}")
+  Code found = _method(%($owner), member);
+  if (found && found.binding_spelling() == %"${owner}_${member}")
     return found;
   return %();
 }
@@ -762,7 +779,7 @@ static List _field_value(List field) => _field_on(field, _ref("value"));
 static List _ref(String name) => x2c_expr_ident(%($name));
 
 static List _function(String name, List result, List parameters, List body) {
-  List parts = x2c_type_parts(result);
+  List parts = Type.parts(result);
   return %(function ${parts[0]}
     (bind ($name) ((fnmod (params @parameters)) @{parts[1]}))
     (block @body));
@@ -780,9 +797,9 @@ static List _default(
 
 static List _binding_record(
   Var group, Var name, List function, List all_rows, List sealed) {
-  String group_name = x2c_binding_spelling(group);
+  String group_name = Code.binding_spelling(group);
   String lisp_name = _binding_name(name);
-  String function_name = x2c_function_name(function);
+  String function_name = Code.name(function);
   List type = binding_native_type(function);
   List rows = _binding_rows_for(group_name, all_rows);
   foreach (Var installed, sealed)
@@ -799,7 +816,7 @@ static List _binding_record(
 }
 
 static String _binding_name(Var node) {
-  Var value = x2c_literal_value(node);
+  Var value = Code.value(node);
   if (value is <string>) return value;
   x2c_diagnostic_fail(
     "native Lisp binding name requires a String literal",

@@ -32,8 +32,8 @@ macro Decorator $scope(Stmt $body, Expr @destination) {
 
 macro Decorator $let(Stmt $body, Expr $place, Expr $value) {
   {
-    $(x2c.syntax.type $place) *address = &$place;
-    $(x2c.syntax.type $place) previous = *address;
+    $(Code.type $place) *address = &$place;
+    $(Code.type $place) previous = *address;
     defer *address = previous;
     *address = $value;
     $body

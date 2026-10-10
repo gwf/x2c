@@ -6,11 +6,11 @@ macro Stmt $test.scoped() {
 }
 
 macro Stmt $test.run(Name $function) {
-  TestHarness_run($(x2c.binding.spelling $function), $function);
+  TestHarness_run($(Code.binding_spelling $function), $function);
 }
 
 macro Stmt $test.suite(Name $suite) {
-  if (TestSuite_begin($(x2c.binding.spelling $suite))) $suite();
+  if (TestSuite_begin($(Code.binding_spelling $suite))) $suite();
 }
 
 macro Expression $test.incrementing_lambda(Name $binding) =>

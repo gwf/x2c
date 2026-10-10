@@ -550,10 +550,10 @@ mkdir -p "$BUILD/keyword/src" "$BUILD/keyword/alias-first" \
   "$BUILD/keyword/main-first"
 cat >"$BUILD/keyword/src/private-keywords.x" <<'EOF'
 macro Decorator $cache.identity(Function $target) {
-  @(x2c.function.body $target)
+  @(Code.body $target)
 }
 macro Decorator $cache.outer(Function $target) {
-  @(x2c.function.body $target)
+  @(Code.body $target)
 }
 keyword identity $cache.identity;
 keyword outer $cache.outer;

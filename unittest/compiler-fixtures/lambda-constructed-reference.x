@@ -2,11 +2,11 @@
 
 macro Expression $raw_reference(Expr $value) =>
   $(let* ((binding (car (cdr (car (cdr (cdr $value))))))
-          (type (cons '& (x2c.syntax.type $value)))
+          (type (cons '& (Code.type $value)))
           (address (list 'expr type (list 'op '& $value)))
           (capture (list 'capture binding type address))
           (alias (list 'expr type (list 'ident binding)))
-          (read (list 'expr (x2c.syntax.type $value)
+          (read (list 'expr (Code.type $value)
                   (list 'op '* alias))))
      (list 'expr '("Func")
        (list 'lambda '(params) (list 'captures capture) read)));

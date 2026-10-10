@@ -9,7 +9,7 @@ static int sdk_sum(int left, int right) {
 }
 
 macro Unit $sdk_functions(Expr $value) {
-  static $(x2c.syntax.type $value)
+  static $(Code.type $value)
   $(x2c.ident "sdk_exact")(void) {
     return $value;
   }
@@ -42,7 +42,7 @@ macro Stmt $print_value(Expr $value) {
 macro Unit $project_parameters(Name $name, Param @parameters) {
   static int $name(@parameters) {
     return sdk_sum(
-      @(x2c.parameters.arguments $parameters)
+      @(Code.arguments $parameters)
     );
   }
 }

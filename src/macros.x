@@ -5435,33 +5435,21 @@ static void _install_builtins(Lisp lisp) {
 }
 
 /** Binds `function`, the operation `lib/meta.x` declares as `name`, under
-    its Lisp name in `lisp`. A predicate answers a Lisp truth value where the
-    x2c spelling answers `int`. A definition the compile-time libraries
+    its Lisp name in `lisp`. A definition the compile-time libraries
     already give that name wins, because it adapts the arguments.
 */
 void Compiler.bind_meta_operation(Lisp lisp, String name, Var function) {
   String dotted = _meta_lisp_name(name);
   Var bound;
-  if (lisp.try_get(dotted, bound)) return;
-  if (name.startswith("x2c_type_is_"))
-    function = lisp.eval(
-      %(lambda (value) (if (eq? ((quote $function) value) 0) nil true)));
-  lisp.set_global(dotted, function);
+  if (!lisp.try_get(dotted, bound)) lisp.set_global(dotted, function);
 }
 
 /* The Lisp name of the operation `lib/meta.x` declares as `name`: a method
    `Owner_member` is `Owner.member`, as the Lisp value operations spell
-   theirs; in another name each `_` becomes `.`, a predicate
-   `x2c_type_is_X` is `x2c.type.X?`, and two names keep the hyphen of
-   their Lisp spelling. */
-static String _meta_lisp_name(String name) {
-  if (name.startswith("Code_") || name.startswith("Type_"))
-    return %"${name[:4]}.${name[5:]}";
-  if (name == "x2c_type_tag_name") return "x2c.type.tag-name";
-  if (name == "x2c_type_reverse_name") return "x2c.type.reverse-name";
-  if (name.startswith("x2c_type_is_")) return %"x2c.type.${name[12:]}?";
-  return name.replace("_", ".");
-}
+   theirs, and in an `x2c_` helper each `_` becomes `.`. */
+static String _meta_lisp_name(String name) =>
+  name.startswith("x2c_") ? name.replace("_", ".")
+                          : %"${name[:4]}.${name[5:]}";
 
 // diagnostics
 

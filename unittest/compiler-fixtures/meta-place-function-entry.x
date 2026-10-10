@@ -7,7 +7,7 @@
    function from any depth of its body. */
 
 meta static List note_entry(List value, List label) {
-  List count = x2c_function_parameter(x2c_enclosing(<function>), "count");
+  List count = Code.parameter(x2c_enclosing(<function>), "count");
   x2c_place(
     %(function-entry), $!{ printf("entry %s count %d\n", $label, $count); });
   return value;
@@ -16,7 +16,7 @@ macro Expression $entered(Expr $value, Expr $label) =>
   $note_entry($value, $label);
 
 meta static List function_name(void) =>
-  x2c_literal_string(x2c_function_name(x2c_enclosing(<function>)));
+  x2c_literal_string(Code.name(x2c_enclosing(<function>)));
 macro Expression $here() => $function_name();
 
 static int sum(int count) {

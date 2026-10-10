@@ -81,7 +81,7 @@ meta static void _delegate_search(
 meta static void _delegate_ambiguous(Type outer, String member, List paths) {
   Array notes = [];
   foreach (List path, paths) {
-    String spelling = x2c_binding_spelling(path.cadr());
+    String spelling = Code.binding_spelling(path.cadr());
     String description = _delegate_path(outer, path.car(), member);
     notes.push(%"delegate path: $description -> $spelling");
   }
@@ -122,7 +122,7 @@ $rewrite($delegate_call, %(expr <delegate> *), <?member>, <*arguments>)
     delegate field path that provides the method. */
 meta Code delegate_member(Code code) {
   match (code) case $delegate_call(?receiver, ?member, *arguments): {
-    String name = x2c_binding_spelling(member);
+    String name = Code.binding_spelling(member);
     List fields = _delegate_fields(receiver.cadr(), name);
     if (!fields) return code;
     Code callee = receiver;

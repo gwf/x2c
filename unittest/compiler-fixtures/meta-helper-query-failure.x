@@ -6,7 +6,7 @@
 
 typedef int Nonrecord;
 
-meta static int count(void) => x2c_type_fields(%("Nonrecord")).len();
+meta static int count(void) => Type.fields(%("Nonrecord")).len();
 
 int main(void) {
   printf("%d\n", $count());

@@ -1,3 +1,3 @@
 #include "x2c.x"
 
-$(x2c.source.text '(expr (int) (literal (int) "1")))
+$(Code.source_text '(expr (int) (literal (int) "1")))

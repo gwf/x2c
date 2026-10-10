@@ -24,7 +24,7 @@ meta static void _printf_fail(Code call, String message) {
   match (call) case %(expr ? (call ?callee *)):
     x2c_diagnostic_fail_at(
       call, <xform>, message,
-      %("printf-family call: ${x2c_binding_spelling(callee)}"));
+      %("printf-family call: ${Code.binding_spelling(callee)}"));
 }
 
 meta static int _printf_valid(String length, int conversion) {

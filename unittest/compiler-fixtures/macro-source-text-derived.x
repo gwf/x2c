@@ -2,6 +2,6 @@
 
 macro Expression $derived(Expr $syntax) =>
   $(x2c.literal.string
-    (x2c.source.text (x2c.syntax.type $syntax)));
+    (Code.source_text (Code.type $syntax)));
 
 int value = $derived(1 + 2);

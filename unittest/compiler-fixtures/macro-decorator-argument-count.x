@@ -4,7 +4,7 @@ macro Decorator $tag(
   Function $function,
   Expr $value
 ) {
-  @(x2c.function.body $function)
+  @(Code.body $function)
 }
 
 $tag()

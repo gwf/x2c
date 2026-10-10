@@ -5,7 +5,7 @@
     Each macro body below does nothing but call a `meta` function, and the
     `meta` functions do the work through `Meta`, the compiler surface
     `lib/meta.x` declares. Before that surface existed the same bodies had to
-    be written in compile-time Lisp, because `x2c.type.fields`,
+    be written in compile-time Lisp, because `Type.fields`,
     `x2c.expr.field` and the rest were reachable only from there.
 
     A parameter declared `TypeInfo` receives the description of its argument's
@@ -51,7 +51,7 @@ meta List ms_count(TypeInfo type) =>
 /* The spelling the developer wrote, which only the source text answers.
    A `Source` argument carries that text with the captured syntax. */
 meta List ms_spelling(Source node) =>
-  x2c_literal_string(x2c_source_text(node));
+  x2c_literal_string(Code.source_text(node));
 
 /* A `meta` function that reaches no `Meta` operation, so it keeps both of
    its forms the way M1 and M2 left it. */

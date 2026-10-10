@@ -65,17 +65,17 @@ $(defun cstar._record-proof (kind helper arguments)
    (let ((id (cstar._next-id)))
      (begin
        (cstar._record
-         (append (list kind id (x2c.binding.spelling helper)
+         (append (list kind id (Code.binding_spelling helper)
                        (map cstar._text arguments))
                  (cstar._where)))
        (x2c.literal.int id))))
 
 $(defun cstar._record-function (function ghosts pre post)
-   (let ((body (x2c.function.body function)))
+   (let ((body (Code.body function)))
      (let ((erased (cstar._erase body)))
        (begin
          (cstar._record
-           (append (list 'function (x2c.function.name function)
+           (append (list 'function (Code.name function)
                          (cstar._text pre) (cstar._text post) ghosts)
                    (cstar._where)
                    (list body erased)))

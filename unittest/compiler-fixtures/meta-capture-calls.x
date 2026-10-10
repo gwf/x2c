@@ -4,12 +4,12 @@
 
 meta static String capture_text(Source code) {
   Source saved = code;
-  return x2c_source_text(saved);
+  return Code.source_text(saved);
 }
 meta static List capture_type(TypeInfo type) => type.assoc(<type>);
 meta static List capture_name(String name) => x2c_ident(name);
-meta static String capture_function_name(List fn) => x2c_function_name(fn);
-meta static List capture_function_body(List fn) => x2c_function_body(fn);
+meta static String capture_function_name(List fn) => Code.name(fn);
+meta static List capture_function_body(List fn) => Code.body(fn);
 
 macro Expression $capture.text(Expr $value) => $capture_text($value);
 macro Expression $capture.forward($value) => $capture.text($value);

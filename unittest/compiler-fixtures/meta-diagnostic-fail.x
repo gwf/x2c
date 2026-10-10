@@ -4,14 +4,14 @@
 #include "meta.x"
 
 meta static List one_word(Source node) {
-  String text = x2c_source_text(node);
+  String text = Code.source_text(node);
   if (text.contains(" "))
     x2c_diagnostic_fail("this argument must be one word", %());
   return x2c_literal_string(text);
 }
 
 meta static void require_word(Source node) {
-  if (x2c_source_text(node).contains(" "))
+  if (Code.source_text(node).contains(" "))
     x2c_diagnostic_fail("this statement needs one word", %());
 }
 
@@ -20,7 +20,7 @@ meta static void fail_inner(String text) {
 }
 
 meta static List fail_outer(Source node) {
-  fail_inner(x2c_source_text(node));
+  fail_inner(Code.source_text(node));
   return x2c_literal_string("unreached");
 }
 

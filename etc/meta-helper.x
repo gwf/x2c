@@ -28,7 +28,7 @@
     crashes or exits ends the helper, which the compiler reports at the
     call.
 
-    An operation that reads compiler state, such as `x2c_type_resolve`,
+    An operation that reads compiler state, such as `Type.resolve`,
     replies `(query OPERATION (ARG ...))` in the middle of its call and
     waits for the `(answer V)` request. The compiler applies its own
     OPERATION at the call's site, so the answer is the one the call site's
@@ -156,7 +156,7 @@ String Code.binding_spelling(Var syntax) {
     case %(binding ? (!is ?name type string)): return name;
   }
   _fail(
-    "x2c.binding.spelling requires an identifier or binding",
+    "Code.binding_spelling requires an identifier or binding",
     %("value: ${syntax.repr()}"));
 }
 
@@ -166,8 +166,6 @@ String Code.name(Code function) {
   return Code.binding_spelling(identity);
 }
 
-String x2c_binding_spelling(Var syntax) => Code.binding_spelling(syntax);
-String x2c_function_name(List function) => Code.name(function);
 
 List x2c_template_call(Var stored, List values) =>
   %("x2c.template" $stored $values);
@@ -203,14 +201,12 @@ List x2c_param_make(List type, Var name) {
 String Code.source_text(Var syntax) {
   match (syntax)
     case %((text ?(String text)) (file ?) (syntax ?)): return text;
-  _unavailable("x2c.source.text");
+  _unavailable("Code.source_text");
 }
 
 /* The operations that read compiler state ask the compiler through the
    forwarders in `etc/meta-queries.x`, which the helper compiles after this
    file as part of the same unit. */
-List x2c_syntax_type(List v) => Code.type(v);
-String x2c_source_text(Var syntax) => Code.source_text(syntax);
 
 /* A `Source` holding a String literal is read beside its file; a String
    must be absolute, since the helper does not know the definition's file.

@@ -7,6 +7,7 @@
     etc/meta-helper.x, as one unit.
 */
 
+String x2c_source_text(Var syntax) => _ask("x2c_source_text", %($syntax));
 Type Code.type(Code value) => _ask("Code_type", %($value));
 Var Code.value(Code code) => _ask("Code_value", %($code));
 int Code.exits(Code statement) => _ask("Code_exits", %($statement));
@@ -52,27 +53,8 @@ Type Type.return_type(Type type) => _ask("Type_return_type", %($type));
 Symbol Type.tag_name(String name) => _ask("Type_tag_name", %($name));
 String Type.reverse_name(String base, String participant) =>
   _ask("Type_reverse_name", %($base $participant));
-Var x2c_literal_value(Var syntax) => _ask("x2c_literal_value", %($syntax));
-List x2c_function_parameter(List function, String wanted) =>
-  _ask("x2c_function_parameter", %($function $wanted));
-List x2c_type_fields(List value) => _ask("x2c_type_fields", %($value));
-List x2c_type_layout(List value) => _ask("x2c_type_layout", %($value));
 List x2c_type_resolve(List value) => _ask("x2c_type_resolve", %($value));
 List x2c_type_members(List type) => _ask("x2c_type_members", %($type));
-int x2c_type_is_value(List value) => _ask("x2c_type_is_value", %($value));
-int x2c_type_is_integral(List value) =>
-  _ask("x2c_type_is_integral", %($value));
-int x2c_type_is_pointer(List value) => _ask("x2c_type_is_pointer", %($value));
-List x2c_type_element(List value) => _ask("x2c_type_element", %($value));
-List x2c_type_parameters(List value) => _ask("x2c_type_parameters", %($value));
-List x2c_type_return(List value) => _ask("x2c_type_return", %($value));
-Symbol x2c_type_tag_name(String name) => _ask("x2c_type_tag_name", %($name));
-String x2c_type_reverse_name(String base, String participant) =>
-  _ask("x2c_type_reverse_name", %($base $participant));
-List x2c_method_resolve(List type, String name) =>
-  _ask("x2c_method_resolve", %($type $name));
-List x2c_protocol_member(List participant, List base, String member) =>
-  _ask("x2c_protocol_member", %($participant $base $member));
 String x2c_invocation_file(void) => _ask("x2c_invocation_file", %());
 int x2c_invocation_line(void) => _ask("x2c_invocation_line", %());
 int x2c_invocation_column(void) => _ask("x2c_invocation_column", %());

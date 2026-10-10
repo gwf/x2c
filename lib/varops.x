@@ -108,7 +108,7 @@ static macro Unit $native.update(Type $type, Name $function, Literal $row) {
     Var $(x2c.ident "rhs")) {
     if (!$(x2c.ident "lhs")) {
       raise %(bad-arg (operation ${
-        $(x2c.literal.string (x2c.binding.spelling $function))
+        $(x2c.literal.string (Code.binding_spelling $function))
       }));
     }
     Var $converted = _native_update(

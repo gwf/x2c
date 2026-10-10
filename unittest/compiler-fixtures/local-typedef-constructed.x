@@ -23,7 +23,7 @@ macro Unit $constructed_types() {
 
 macro Expression $constructed_capture(Expr $value) =>
   $(let* ((binding (car (cdr (car (cdr (cdr $value))))))
-          (type (x2c.syntax.type $value)))
+          (type (Code.type $value)))
     `(expr ("Func")
       (lambda (params)
         (captures (capture ,binding ,type ,$value))
@@ -31,7 +31,7 @@ macro Expression $constructed_capture(Expr $value) =>
 
 macro Expression $constructed_reference(Expr $value) =>
   $(let* ((binding (car (cdr (car (cdr (cdr $value))))))
-          (value-type (x2c.syntax.type $value))
+          (value-type (Code.type $value))
           (type (cons '& value-type))
           (address `(expr ,type (op & ,$value)))
           (read `(expr ,value-type

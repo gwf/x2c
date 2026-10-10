@@ -2534,7 +2534,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_3(void){
   _1952 = cons(_1951, NULL);
   _1953 = cons(_634, _1952);
   _1954 = List_var(_1953);
-  _1955 = int_var(4590);
+  _1955 = int_var(4591);
   _1956 = cons(_1955, NULL);
   _1957 = cons(_647, _1956);
   _1958 = List_var(_1957);
@@ -2886,7 +2886,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2301 = cons(_2300, NULL);
   _2302 = cons(_634, _2301);
   _2303 = List_var(_2302);
-  _2304 = int_var(6664);
+  _2304 = int_var(6665);
   _2305 = cons(_2304, NULL);
   _2306 = cons(_647, _2305);
   _2307 = List_var(_2306);
@@ -3033,7 +3033,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2448 = cons(_2447, NULL);
   _2449 = cons(_634, _2448);
   _2450 = List_var(_2449);
-  _2451 = int_var(7121);
+  _2451 = int_var(7122);
   _2452 = cons(_2451, NULL);
   _2453 = cons(_647, _2452);
   _2454 = List_var(_2453);
@@ -4754,7 +4754,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_8(void){
   _4157 = List_var(_4156);
   _4158 = String_new("lib/common.x");
   _4159 = String_var(_4158);
-  _4160 = String_new("448b45ec");
+  _4160 = String_new("6e461fe4");
   _4161 = String_var(_4160);
   _4162 = cons(_4161, NULL);
   _4163 = cons(_4159, _4162);
@@ -4826,7 +4826,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_8(void){
   _4229 = cons(_4225, _4228);
   _4230 = cons(_4198, _4229);
   _4231 = cons(_532, _4230);
-  _4232 = String_new("8321a895");
+  _4232 = String_new("75446c16");
   _4233 = String_var(_4232);
   _4234 = cons(_4209, _4217);
   _4235 = cons(_4157, _4234);
@@ -4835,15 +4835,15 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_8(void){
   _4238 = cons(_4145, _4237);
   _4239 = cons(_4202, _4238);
   _4240 = List_var(_4239);
-  _4241 = String_new("f1e9bb3b");
+  _4241 = String_new("4aaac2e0");
   _4242 = String_var(_4241);
   _4243 = cons(_4242, NULL);
   _4244 = cons(_4240, _4243);
   _4245 = cons(_4233, _4244);
   _4246 = cons(_532, _4245);
-  _4247 = String_new("9f2449fa");
+  _4247 = String_new("69fcfc92");
   _4248 = String_var(_4247);
-  _4249 = String_new("ee5d33cf");
+  _4249 = String_new("2ee47097");
   _4250 = String_var(_4249);
   _4251 = cons(_4250, NULL);
   _4252 = cons(_4240, _4251);
@@ -4858,9 +4858,9 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_8(void){
   _4261 = String_new("23ff0783ec30f4ec");
   _4262 = String_var(_4261);
   _4263 = cons(_4262, _3229);
-  _4264 = String_new("c85359e9");
+  _4264 = String_new("fef47e86");
   _4265 = String_var(_4264);
-  _4266 = String_new("6e88f626");
+  _4266 = String_new("bdc1fe30");
   _4267 = String_var(_4266);
   _4268 = cons(_4267, NULL);
   _4269 = cons(_4225, _4268);
@@ -5013,7 +5013,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_8(void){
   _4416 = String_var(_4415);
   _4417 = String_new("lib/meta.x");
   _4418 = String_var(_4417);
-  _4419 = String_new("3e3c67b5");
+  _4419 = String_new("8f13dd37");
   _4420 = String_var(_4419);
   _4421 = cons(_4420, NULL);
   _4422 = cons(_4418, _4421);
@@ -5098,7 +5098,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_8(void){
   _4501 = cons(_4499, _4500);
   _4502 = String_new("_delegate_ambiguous");
   _4503 = String_var(_4502);
-  _4504 = String_new("630fd01ec89ecb67");
+  _4504 = String_new("2121dd5f074f2158");
   _4505 = String_var(_4504);
   _4506 = String_new("paths");
   _4507 = String_var(_4506);
@@ -5114,7 +5114,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_8(void){
   _4517 = String_var(_4516);
   _4518 = String_new("Var_list");
   _4519 = String_var(_4518);
-  _4520 = String_new("x2c_binding_spelling");
+  _4520 = String_new("Code_binding_spelling");
   _4521 = String_var(_4520);
   _4522 = String_new("_delegate_path");
   _4523 = String_var(_4522);
@@ -5732,7 +5732,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_10(void){
   _5129 = List_var(_5128);
   _5130 = cons(_5129, NULL);
   _5131 = cons(_5120, _5130);
-  _5132 = String_new("97d9b3a93fdbb9fa");
+  _5132 = String_new("70cacaa8a64fe33b");
   _5133 = String_var(_5132);
   _5134 = String_new("callee");
   _5135 = String_var(_5134);
@@ -6467,7 +6467,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_11(void){
   _5861 = cons(_5811, _5860);
   _5862 = String_new("_try_check_label");
   _5863 = String_var(_5862);
-  _5864 = String_new("91a3945be948d619");
+  _5864 = String_new("30e2e32b407b202c");
   _5865 = String_var(_5864);
   _5866 = String_new("finalizer");
   _5867 = String_var(_5866);
@@ -6823,7 +6823,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_12(void){
   _6214 = cons(_532, _6213);
   _6215 = String_new("delegate_member");
   _6216 = String_var(_6215);
-  _6217 = String_new("4255327786e99d94");
+  _6217 = String_new("a8ce1ce802fbe179");
   _6218 = String_var(_6217);
   _6219 = String_new("_x2c_macro_object_8");
   _6220 = String_var(_6219);
@@ -7932,14 +7932,14 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_14(void){
   _7317 = List_var(_7316);
   _7318 = String_new("lib/lisp.x");
   _7319 = String_var(_7318);
-  _7320 = String_new("2d6332bf");
+  _7320 = String_new("f891d541");
   _7321 = String_var(_7320);
   _7322 = cons(_7321, NULL);
   _7323 = cons(_7319, _7322);
   _7324 = List_var(_7323);
   _7325 = String_new("lib/logger.x");
   _7326 = String_var(_7325);
-  _7327 = String_new("24d1703d");
+  _7327 = String_new("e46d197f");
   _7328 = String_var(_7327);
   _7329 = cons(_7328, NULL);
   _7330 = cons(_7326, _7329);
@@ -8023,7 +8023,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_14(void){
   _7408 = List_var(_7407);
   _7409 = String_new("lib/varops.x");
   _7410 = String_var(_7409);
-  _7411 = String_new("56871d7b");
+  _7411 = String_new("58025db5");
   _7412 = String_var(_7411);
   _7413 = cons(_7412, NULL);
   _7414 = cons(_7410, _7413);
@@ -8366,7 +8366,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_15(void){
   _7748 = List_var(_7747);
   _7749 = String_new("etc/lisp-bindings.xlisp");
   _7750 = String_var(_7749);
-  _7751 = String_new("4a1840e2");
+  _7751 = String_new("bc37b0f1");
   _7752 = String_var(_7751);
   _7753 = cons(_7752, NULL);
   _7754 = cons(_7750, _7753);
@@ -9753,7 +9753,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_17(void){
   _9129 = cons(_532, _9128);
   _9130 = String_new("src/builtins.x");
   _9131 = String_var(_9130);
-  _9132 = String_new("324f8ac5");
+  _9132 = String_new("2a8cd754");
   _9133 = String_var(_9132);
   _9134 = String_new("cwd:./lisp.x");
   _9135 = String_var(_9134);
@@ -9773,7 +9773,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_17(void){
   _9149 = List_var(_9148);
   _9150 = String_new("src/macros.x");
   _9151 = String_var(_9150);
-  _9152 = String_new("b4e6671d");
+  _9152 = String_new("9c002775");
   _9153 = String_var(_9152);
   _9154 = cons(_9153, NULL);
   _9155 = cons(_9151, _9154);
@@ -9864,7 +9864,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_18(void){
   _9237 = List_var(_9236);
   _9238 = String_new("src/linked-meta.x");
   _9239 = String_var(_9238);
-  _9240 = String_new("17088b5f");
+  _9240 = String_new("e797bc28");
   _9241 = String_var(_9240);
   _9242 = cons(_9241, NULL);
   _9243 = cons(_9239, _9242);
@@ -9899,7 +9899,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_18(void){
   _9272 = List_var(_9271);
   _9273 = String_new("src/meta-sdk.x");
   _9274 = String_var(_9273);
-  _9275 = String_new("bccad266");
+  _9275 = String_new("4d903a7f");
   _9276 = String_var(_9275);
   _9277 = cons(_9276, NULL);
   _9278 = cons(_9274, _9277);
@@ -10787,7 +10787,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_19(void){
   _10157 = cons(_10060, _10156);
   _10158 = cons(_4137, _10157);
   _10159 = List_var(_10158);
-  _10160 = String_new("84abcb6a");
+  _10160 = String_new("c6b4b5e8");
   _10161 = String_var(_10160);
   _10162 = cons(_10161, NULL);
   _10163 = cons(_10159, _10162);
@@ -11450,7 +11450,7 @@ static void _delegate_ambiguous(Type outer, String member, List paths){
   Array notes = Array_new(); {
     List path;  List _x2c_macro_object_7 = paths;  List _x2c_macro_cursor_7 = _x2c_macro_object_7;  Var _x2c_macro_cursor_output_7;  while(List_try_next(_x2c_macro_object_7, &(_x2c_macro_cursor_7), &(_x2c_macro_cursor_output_7))){
       path = Var_list(_x2c_macro_cursor_output_7); {
-        String spelling = x2c_binding_spelling(List_cadr(path));  String description = _delegate_path(outer, Var_list(List_car(path)), member);  Array_push(notes, String_var(String_join(NULL, cons(String_var(_1798), cons(String_var(description), cons(String_var(_1812), cons(String_var(spelling), NULL)))))));
+        String spelling = Code_binding_spelling(List_cadr(path));  String description = _delegate_path(outer, Var_list(List_car(path)), member);  Array_push(notes, String_var(String_join(NULL, cons(String_var(_1798), cons(String_var(description), cons(String_var(_1812), cons(String_var(spelling), NULL)))))));
       }
 
     }
@@ -11480,7 +11480,7 @@ Code delegate_member(Code code){
     Var _x2c_match_values[3];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 3 };
     switch (0) {
       default: ;  static MacroCaseSite _x2c_macro_site_16;  if (Macro_case_capture_at(& _x2c_macro_site_16, _x2c_match_expr, _1981, _1983, &_x2c_match_capture)) {Var receiver = _x2c_match_values[0];  Var member = _x2c_match_values[1];  List arguments = Var_list(_x2c_match_values[2]); {
-    String name = x2c_binding_spelling(member);  List fields = _delegate_fields(Var_type(Var_cadr(receiver)), name);  if(! List_truth(fields)) return code;  Code callee = Var_list(receiver); {
+    String name = Code_binding_spelling(member);  List fields = _delegate_fields(Var_type(Var_cadr(receiver)), name);  if(! List_truth(fields)) return code;  Code callee = Var_list(receiver); {
       String step;  List _x2c_macro_object_8 = List_append(fields, cons(String_var(name), NULL));  List _x2c_macro_cursor_8 = _x2c_macro_object_8;  Var _x2c_macro_cursor_output_8;  while(List_try_next(_x2c_macro_object_8, &(_x2c_macro_cursor_8), &(_x2c_macro_cursor_output_8))){
         step = Var_string(_x2c_macro_cursor_output_8);  callee = cons(_0, cons(_82, cons(List_var(({
           Var _x2c_literal_part_64 = List_var(callee);  Var _x2c_literal_part_65 = List_var(cons(String_var(step), NULL));  cons(_83, cons(_84, cons(_x2c_literal_part_64, cons(_x2c_literal_part_65, NULL))));
@@ -11657,7 +11657,7 @@ static void _printf_fail(Code call, String message){
     List _x2c_match_expr = call;
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (Var_symbol(car(_x2c_match_expr))) {
-      case 377892: ;  static MatchCaptureSite _x2c_match_site_15;  if (x2c_match_site_try_capture(& _x2c_match_site_15, _x2c_match_expr, List_var(_2123), &_x2c_match_capture)) {Var callee = _x2c_match_values[0];  x2c_diagnostic_fail_at(List_var(call), 50756762, message, cons(String_var(String_join(NULL, cons(String_var(_2124), cons(String_var(x2c_binding_spelling(callee)), NULL)))), NULL));  break;
+      case 377892: ;  static MatchCaptureSite _x2c_match_site_15;  if (x2c_match_site_try_capture(& _x2c_match_site_15, _x2c_match_expr, List_var(_2123), &_x2c_match_capture)) {Var callee = _x2c_match_values[0];  x2c_diagnostic_fail_at(List_var(call), 50756762, message, cons(String_var(String_join(NULL, cons(String_var(_2124), cons(String_var(Code_binding_spelling(callee)), NULL)))), NULL));  break;
 }
 default: break;
     }
@@ -11932,7 +11932,7 @@ Array_free(pending);  Array_free(around);  return found;
 }
 
 static void _try_check_label(List finalizer){
-  List at = finalizer;  Var label = _try_finalizer_label(List_var(finalizer), &(at));  if(! Var_truth(label)) return;  x2c_diagnostic_fail_at(List_var(at), 354920, _2755, cons(String_var(String_join(NULL, cons(String_var(_2756), cons(String_var(x2c_binding_spelling(label)), cons(String_var(_2757), NULL))))), NULL));
+  List at = finalizer;  Var label = _try_finalizer_label(List_var(finalizer), &(at));  if(! Var_truth(label)) return;  x2c_diagnostic_fail_at(List_var(at), 354920, _2755, cons(String_var(String_join(NULL, cons(String_var(_2756), cons(String_var(Code_binding_spelling(label)), cons(String_var(_2757), NULL))))), NULL));
 }
 
 static List _try_exits(Atom frame, List handle, Atom finalizer){

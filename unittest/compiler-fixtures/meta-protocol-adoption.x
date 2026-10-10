@@ -21,7 +21,7 @@ $(defun probe.row (name rows)
          ((equal? (car (car rows)) name) (car rows))
          (true (probe.row name (cdr rows)))))
 macro Expression $target(Expr $name) =>
-  $(repr (probe.row (x2c.literal.value $name)
+  $(repr (probe.row (Code.value $name)
                           (_x2c.native-meta.targets)));
 
 meta Var twice(Var value) => value * 2;

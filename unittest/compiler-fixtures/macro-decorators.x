@@ -17,17 +17,17 @@ macro Decorator $twice(Stmt $target) {
 macro Decorator $named(Function $function) {
   printf(
     "%s\n",
-    $(x2c.literal.string (x2c.function.name $function))
+    $(x2c.literal.string (Code.name $function))
   );
-  @(x2c.function.body $function)
+  @(Code.body $function)
 }
 
 macro Decorator $return_parameter(
   Function $function,
   Name $parameter
 ) {
-  $(x2c.syntax.type (x2c.function.parameter $function $parameter)) result =
-    $(x2c.function.parameter $function $parameter);
+  $(Code.type (Code.parameter $function $parameter)) result =
+    $(Code.parameter $function $parameter);
   return result;
 }
 
@@ -35,7 +35,7 @@ macro Decorator $return_parameter_direct(
   Function $function,
   Name $parameter
 ) {
-  return $(x2c.function.parameter $function $parameter);
+  return $(Code.parameter $function $parameter);
 }
 
 typedef struct DecoratedRecord {

@@ -1,4 +1,4 @@
-unittest/compiler-fixtures/macro-type-fields-incomplete.x:9:1: macro: x2c.type.fields requires a complete struct or union Type
+unittest/compiler-fixtures/macro-type-fields-incomplete.x:9:1: macro: Type.fields requires a complete struct or union Type
   $inspect(struct IncompleteRecord);
   ^
   note: value: (struct "IncompleteRecord")

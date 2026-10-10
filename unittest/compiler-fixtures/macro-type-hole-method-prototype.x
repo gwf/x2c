@@ -7,7 +7,7 @@ macro Unit $box(
 ) {
   inline Var $type.var($parameter) {
     return Var.new(
-      $tag, @(x2c.parameters.arguments (list $parameter))
+      $tag, @(Code.arguments (list $parameter))
     );
   }
 }

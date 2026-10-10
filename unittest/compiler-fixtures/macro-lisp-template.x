@@ -2,7 +2,7 @@
 
 macro Expression $through_lisp(Expr $value) => $(car (list $value));
 macro Expression $binding_name(Expr $value) =>
-  $(x2c.binding.spelling $value);
+  $(Code.binding_spelling $value);
 macro Expression $prefix_names(Expr $value, Expr $values) =>
   $(car (list $values));
 

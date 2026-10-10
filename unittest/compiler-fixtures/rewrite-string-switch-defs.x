@@ -73,7 +73,7 @@ meta Code string_switch(Code node) {
     List rewritten = _tswitch_rewrite(body, labels, others);
     if (!labels.len()) return node;
     if (!_tswitch_c_string(type) &&
-        !_tswitch_c_string(x2c_type_resolve(type)))
+        !_tswitch_c_string(Type.resolve(type)))
       return node;
     if (others.len())
       x2c_diagnostic_fail_at(

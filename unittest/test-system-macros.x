@@ -179,7 +179,7 @@ macro Expression $member_table(Type $T) =>
          (let ((value (cadr row)))
            (if (not value) "-" (if (string? value) value "<expr>")))
          ","))
-     "" (x2c.type.members $T)));
+     "" (Type.members $T)));
 
 static void system_macro_type_members_reads_an_enum(void) {
   String table = $member_table(Shade);

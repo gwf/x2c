@@ -14,7 +14,7 @@ macro Unit $same_use(Expr @values) {
 }
 
 macro Stmt $swap(Expr $left, Expr $right) {
-  $(x2c.syntax.type $left) temporary = $left;
+  $(Code.type $left) temporary = $left;
   $left = $right;
   $right = temporary;
 }

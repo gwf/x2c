@@ -39,47 +39,30 @@ typedef struct MetaContext {
 
 /* Compile-time SDK rejection messages and notes. */
 
-static macro Stmt $report.sdk.method_name(Expr $name) =>
-  _sdk_reject_value(
-    "x2c.method.resolve requires an identifier String", $name);
-
-static macro Stmt $report.sdk.method_ambiguous(
-  Expr $type, Expr $name, Expr $packages) {
-  {
-    Array notes = [];
-    foreach (String package, $packages)
-      notes.push(%"package: '$package'");
-    String owner = $type.base_type().car().str();
-    MetaContext.reject(
-      %"method '$owner.${$name}' is provided by multiple imported packages",
-      notes.list_free());
-  }
-}
-
 static macro Stmt $report.sdk.fields_type(Expr $value) =>
   _sdk_reject_value(
-    "x2c.type.fields requires a struct or union Type", $value);
+    "Type.fields requires a struct or union Type", $value);
 
 static macro Stmt $report.sdk.fields_complete(Expr $value) =>
   _sdk_reject_value(
-    "x2c.type.fields requires a complete struct or union Type", $value);
+    "Type.fields requires a complete struct or union Type", $value);
 
 static macro Stmt $report.sdk.binding_spelling(Expr $syntax) =>
   _sdk_reject_value(
-    "x2c.binding.spelling requires an identifier spelling", $syntax);
+    "Code.binding_spelling requires an identifier spelling", $syntax);
 
 static macro Stmt $report.sdk.binding_syntax(Expr $syntax) =>
   _sdk_reject_value(
-    "x2c.binding.spelling requires binding syntax", $syntax);
+    "Code.binding_spelling requires binding syntax", $syntax);
 
 static macro Stmt $report.sdk.binding_known(Expr $value) =>
   MetaContext.reject(
-    "x2c.binding.spelling requires a known binding",
+    "Code.binding_spelling requires a known binding",
     %("binding: ${$value.repr()}"));
 
 static macro Stmt $report.sdk.binding_identifier(Expr $syntax) =>
   _sdk_reject_value(
-    "x2c.binding.spelling requires an identifier or binding", $syntax);
+    "Code.binding_spelling requires an identifier or binding", $syntax);
 
 static macro Stmt $report.sdk.identifier(Expr $spelling) =>
   _sdk_reject_value(
@@ -92,8 +75,8 @@ static macro Stmt $report.sdk.unique_stem(Expr $stem) =>
 static macro Stmt $report.sdk.parameter_missing(
   Expr $function, Expr $wanted) =>
   MetaContext.reject(
-    %"x2c.function.parameter cannot find '${$wanted}'",
-    %("function: ${x2c_function_name($function).repr()}"));
+    %"Code.parameter cannot find '${$wanted}'",
+    %("function: ${Code.name($function).repr()}"));
 
 static macro Stmt $report.sdk.symbol_set_value(Expr $value) =>
   MetaContext.reject(
@@ -112,7 +95,7 @@ static macro Stmt $report.sdk.native_declarations() =>
 
 static macro Stmt $report.sdk.source_capture(Expr $value) =>
   MetaContext.reject(
-    "x2c.source.text requires complete captured syntax",
+    "Code.source_text requires complete captured syntax",
     active.has_bindings ? NULL : %("value: ${$value.repr()}"));
 
 static macro Stmt $report.sdk.embed_path_empty() =>
@@ -137,11 +120,6 @@ static macro Stmt $report.sdk.embed_file(Expr $c, Expr $path) =>
 
 static macro Stmt $report.sdk.embed_open(Expr $c, Expr $path) =>
   $c._embed_reject("cannot open embedded text", $path);
-
-static macro Stmt $report.sdk.literal_value(Expr $syntax) =>
-  MetaContext.reject(
-    "x2c.literal.value requires a String, int, or Symbol literal",
-    %("value: ${$syntax.repr()}"));
 
 static macro Stmt $report.sdk.invocation_missing() =>
   MetaContext.reject(
@@ -242,7 +220,7 @@ String Type.update_helper(Type type) {
 
 /** Answers the compiler-backed captured-code type query. */
 Type Code.type(Code value) {
-  _sdk_guard("x2c.syntax.type");
+  _sdk_guard("Code.type");
   match (value) {
     case %(expr ?matched_type ?): {
       Type type = matched_type;
@@ -338,7 +316,7 @@ static List _rewrite_holes(Macro shape, List supplied) {
 /* One rule row for each of `kinds`. */
 static Code _rewrite_registration(
   Code function, List shape, List holes, Symbol point, List kinds) {
-  String name = x2c_function_name(function);
+  String name = Code.name(function);
   Array rows = [];
   foreach (Var kind, kinds)
     rows.push(%(rewrite $point $kind $name $shape $holes));
@@ -486,44 +464,8 @@ Code Code.register_after_initialization(Code c, Macro shape, List holes) {
   MetaContext.reject("after-initialization requires a declaration pattern", NULL);
 }
 
-/** Compatibility entry point for the existing Lisp and meta SDK. */
-List x2c_syntax_type(List value) => Code.type(value);
-
 static Type _sdk_binding_type(List binding) =>
   active.expander.semantic_binding_facts()[%(type $binding)];
-
-/** Answers `x2c.protocol.member`, declared in `lib/meta.x`. */
-List x2c_protocol_member(List participant, List base, String member) {
-  List conformance =
-    active.expander.protocol_members_for(participant, base);
-  if (!conformance) return %();
-  foreach (List row, conformance.last().list().cdr())
-    match (row)
-      case %(?(String own) implmntd ?source ?signature *):
-        if (own == member) {
-          List binding = active.expander.sym.lookup(%($source), NULL);
-          return binding ? %(expr $signature (ident $binding)) : %();
-        }
-  return %();
-}
-
-/** Answers `x2c.method.resolve`, declared in `lib/meta.x`. */
-List x2c_method_resolve(List type_value, String name) {
-  _sdk_guard("x2c.method.resolve");
-  if (!name.is_identifier())
-    $report.sdk.method_name(name);
-  Type type = type_value;
-  List resolution = active.expander.resolve_postfix_member(
-    type, %($name), <.>, 1);
-  match (resolution) {
-    case %(ambiguous *packages): {
-      $report.sdk.method_ambiguous(type, name, packages);
-    }
-    case %(method ?binding ?signature):
-      return %(expr $signature (ident $binding));
-  }
-  return %();
-}
 
 /** Returns an expression reading each binding `declaration` declares. */
 List builtin_foreach_bindings(List declaration) {
@@ -565,13 +507,6 @@ List builtin_foreach_reference(String name) {
 
 // type queries
 
-/** Answers `x2c.type.integral?`, declared in `lib/meta.x`. */
-int x2c_type_is_integral(List value) => value.type().is_integral();
-
-/** Answers `x2c.type.pointer?`, declared in `lib/meta.x`. */
-int x2c_type_is_pointer(List value) =>
-  value.type().canonicalize().is_pointer();
-
 /** Answers `Type.element`, declared in `lib/meta.x`. */
 Type Type.element(Type type) =>
   type.canonicalize().dereference().canonicalize();
@@ -589,6 +524,15 @@ Type Type.return_type(Type type) =>
 
 /** Answers `Type.parts`, declared in `lib/meta.x`. */
 List Type.parts(Type type) => type.declaration_parts();
+
+/** Answers `x2c.type.parts`, declared in `lib/meta.x`. */
+List x2c_type_parts(List value) => Type.parts(value);
+
+/** Answers `x2c.type.resolve`, declared in `lib/meta.x`. */
+List x2c_type_resolve(List value) => Type.resolve(value);
+
+/** Answers `x2c.source.text`, declared in `lib/meta.x`. */
+String x2c_source_text(Var value) => Code.source_text(value);
 
 /** Answers `Type.reverse_name`, declared in `lib/meta.x`. */
 String Type.reverse_name(String base, String participant) {
@@ -810,7 +754,7 @@ List binding_native_type(List syntax) {
     case %(function ?rtype ?declarator ?):
       return active.expander.func_signature(
         %(declare $rtype (bindings $declarator)).type_from_ast());
-  return active.expander.func_signature(x2c_syntax_type(syntax));
+  return active.expander.func_signature(Code.type(syntax));
 }
 
 /** Returns `values`, such as a Lisp-built signature, as a cached literal
@@ -954,27 +898,6 @@ static int _literal_string(Var syntax, String &value) {
   return 0;
 }
 
-/** Answers `x2c.literal.value`, declared in `lib/meta.x`. */
-Var x2c_literal_value(Var syntax) {
-  _sdk_guard("x2c.literal.value");
-  String value = NULL;
-  if (_literal_string(syntax, value)) return value;
-  match (syntax) case %(expr ? ${$source_literal_content(
-      %((int) ?digits))}): {
-    if (digits is not <string>) break;
-    String text = digits;
-    long parsed = 0;
-    if (text.try_long(&parsed)) return parsed;
-  }
-  match (syntax) case %(expr ? ${$source_literal_content(
-      %(("Symbol") ? ?tag))}): {
-    if (tag is not <symbol>) break;
-    Symbol found = tag;
-    return found;
-  }
-  $report.sdk.literal_value(syntax);
-}
-
 // invocations and diagnostics
 
 /** Returns the location of the active macro invocation. */
@@ -1050,39 +973,6 @@ void x2c_place(List where, Code code) {
   active.expander.place(where, code);
 }
 
-// the previous spellings
-
-/** Answers `x2c.type.element`, declared in `lib/meta.x`. */
-List x2c_type_element(List value) => Type.element(value);
-/** Answers `x2c.type.parameters`, declared in `lib/meta.x`. */
-List x2c_type_parameters(List value) => Type.parameters(value);
-/** Answers `x2c.type.return`, declared in `lib/meta.x`. */
-List x2c_type_return(List value) => Type.return_type(value);
-/** Answers `x2c.type.parts`, declared in `lib/meta.x`. */
-List x2c_type_parts(List value) => Type.parts(value);
-/** Answers `x2c.type.reverse-name`, declared in `lib/meta.x`. */
-String x2c_type_reverse_name(String base, String participant) =>
-  Type.reverse_name(base, participant);
-/** Answers `x2c.type.resolve`, declared in `lib/meta.x`. */
-List x2c_type_resolve(List value) => Type.resolve(value);
-/** Answers `x2c.type.layout`, declared in `lib/meta.x`. */
-List x2c_type_layout(List value) => Type.layout(value);
-/** Answers `x2c.type.value?`, declared in `lib/meta.x`. */
-int x2c_type_is_value(List value) => Type.is_value(value);
-/** Answers `x2c.type.tag-name`, declared in `lib/meta.x`. */
-Symbol x2c_type_tag_name(String name) => Type.tag_name(name);
-/** Answers `x2c.type.fields`, declared in `lib/meta.x`. */
-List x2c_type_fields(List value) => Type.fields(value);
-/** Answers `x2c.binding.spelling`, declared in `lib/meta.x`. */
-String x2c_binding_spelling(Var syntax) => Code.binding_spelling(syntax);
-/** Answers `x2c.function.name`, declared in `lib/meta.x`. */
-String x2c_function_name(List function) => Code.name(function);
-/** Answers `x2c.function.parameter`, declared in `lib/meta.x`. */
-List x2c_function_parameter(List function, String wanted) =>
-  Code.parameter(function, wanted);
-/** Answers `x2c.source.text`, declared in `lib/meta.x`. */
-String x2c_source_text(Var value) => Code.source_text(value);
-
 // meta parameter descriptions
 
 /** Returns what a `meta` parameter declared `TypeInfo` receives for the
@@ -1093,8 +983,8 @@ String x2c_source_text(Var value) => Code.source_text(value);
     `F` lists the `(name type)` rows of a struct or union's named fields,
     and `M` the names of its direct dotted methods. */
 List meta_type_description(Var value) {
-  Type type = x2c_syntax_type(value);
-  Type shape = x2c_type_resolve(type);
+  Type type = Code.type(value);
+  Type shape = Type.resolve(type);
   String name = "";
   match (type) {
     case %(?(String own)): name = own;
@@ -1114,7 +1004,7 @@ List meta_type_description(Var value) {
       if (shape.is_pointer()) kind = <pointer>;
       else if (_symbol_words(shape)) kind = <scalar>;
   }
-  if (kind == <struct> || kind == <union>) fields = x2c_type_fields(type);
+  if (kind == <struct> || kind == <union>) fields = Type.fields(type);
   Compiler c = active.expander;
   Array methods = [];
   foreach (String member, c.postfix_completions(type, <.>))
@@ -1134,7 +1024,7 @@ static int _symbol_words(List type) {
     captured syntax `value`: `((text T) (file F) (syntax value))`, where `T`
     is the text the developer wrote and `F` the file it is in. */
 List meta_source_description(Var value) {
-  String text = x2c_source_text(value);
+  String text = Code.source_text(value);
   List source = active.captures[((ulong) value.u64)];
   return %((text $text) (file ${source.cadr()}) (syntax $value));
 }

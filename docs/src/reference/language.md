@@ -1268,8 +1268,8 @@ from the expression or source item following its application:
 
 ```x2c
 #include "meta.x"
-meta static String trace_name(List fn) => x2c_function_name(fn);
-meta static List trace_body(List fn) => x2c_function_body(fn);
+meta static String trace_name(List fn) => Code.name(fn);
+meta static List trace_body(List fn) => Code.body(fn);
 
 macro Decorator $trace(
   Function $function,
@@ -1446,7 +1446,7 @@ target of the required kind for the outer decorator:
 
 ```x2c
 ~#include "meta.x"
-~meta static List old_body(List fn) => x2c_function_body(fn);
+~meta static List old_body(List fn) => Code.body(fn);
 ~macro Decorator $logged(Function $function) {
 ~  @old_body($function)
 ~}
@@ -1900,9 +1900,9 @@ construct syntax for you.
 The compiler supplies these contextual Lisp operations:
 
 ```text
-(x2c.syntax.type syntax)
-(x2c.binding.spelling syntax)
-(x2c.source.text syntax)
+(Code.type syntax)
+(Code.binding_spelling syntax)
+(Code.source_text syntax)
 (x2c.embed.text path)
 (x2c.diagnostic.fail message notes)
 (x2c.ident spelling)
@@ -1910,24 +1910,24 @@ The compiler supplies these contextual Lisp operations:
 (x2c.invocation.line)
 (x2c.invocation.column)
 (x2c.method.resolve type name)
-(x2c.function.name function)
-(x2c.function.parameter function name)
-(x2c.function.body function)
-(x2c.type.fields type)
-(x2c.type.resolve type)
-(x2c.type.layout type)
-(x2c.type.value? type)
-(x2c.type.tag-name name)
-(x2c.type.reverse-name base participant)
-(x2c.type.parts type)
-(x2c.type.parameters type)
-(x2c.type.return type)
-(x2c.type.element type)
+(Code.name function)
+(Code.parameter function name)
+(Code.body function)
+(Type.fields type)
+(Type.resolve type)
+(Type.layout type)
+(Type.is_value type)
+(Type.tag_name name)
+(Type.reverse_name base participant)
+(Type.parts type)
+(Type.parameters type)
+(Type.return_type type)
+(Type.element type)
 (x2c.type.integral? type)
 (x2c.type.pointer? type)
 (x2c.protocol.member participant base member)
-(x2c.literal.value literal)
-(x2c.type.members type)
+(Code.value literal)
+(Type.members type)
 (x2c.diagnostic.warn message notes)
 (x2c.enclosing what)
 (x2c.place where code)
@@ -1942,17 +1942,17 @@ The compiler supplies these contextual Lisp operations:
 A supported operation is spelled `x2c.<noun>.<verb>`. A name beginning `_x2c.`
 is a compiler internal with no compatibility promise.
 
-`x2c.syntax.type` returns the canonical semantic `Type` for supported typed
+`Code.type` returns the canonical semantic `Type` for supported typed
 syntax. During expansion, syntax a template left untyped is resolved where the
 expansion stands, so a template's locals, casts, and method results report
 their declared types.
 
-`x2c.binding.spelling` accepts a name hole's valid identifier `String` or
+`Code.binding_spelling` accepts a name hole's valid identifier `String` or
 compiler-issued identifier and binding syntax, and returns its source spelling
 without exposing the numeric identity. Unknown, malformed, and forged binding
 identities are rejected.
 
-`x2c.source.text` returns the exact source spelling of one complete captured
+`Code.source_text` returns the exact source spelling of one complete captured
 macro argument or decorator target, including its interior whitespace,
 comments, parentheses, newlines, and literal escapes. Imported macros still
 read the caller's source, and syntax forwarded through another macro retains
@@ -1976,7 +1976,7 @@ The `x2c.function.*` operations inspect a decorator's captured function. `name`
 returns its free-function or dotted method name as written in source,
 `parameter` resolves a named parameter to bound identifier syntax, and `body`
 returns the block-item sequence for an explicit `@` splice. Use
-`x2c.syntax.type` on a resolved parameter when its canonical `Type` is needed.
+`Code.type` on a resolved parameter when its canonical `Type` is needed.
 These operations do not construct or mutate functions.
 
 `x2c.method.resolve` performs direct method lookup for a `Type` and identifier
@@ -1985,34 +1985,34 @@ when the method is absent; callers supply arguments according to the returned
 function `Type`. It does not search delegate fields. The returned callee cannot
 represent the receiver's field access.
 
-`x2c.type.fields` resolves a typedef or qualified `Type` to a complete struct
+`Type.fields` resolves a typedef or qualified `Type` to a complete struct
 or union and returns its named fields in source order as `(("name"
 DECLARED_TYPE) ...)`. Unnamed fields are omitted; incomplete and non-aggregate
 `Type`s are rejected. Each declared `Type` retains pointer, array, qualifier,
 and bitfield modifiers.
 
-`x2c.type.resolve` follows the ordinary typedef chain and returns its canonical
-type representation. `x2c.type.layout` returns the ordered field records of
+`Type.resolve` follows the ordinary typedef chain and returns its canonical
+type representation. `Type.layout` returns the ordered field records of
 that representation, including unnamed members and padding. Each record is
 `(NAME DECLARED_TYPE)`; an unnamed field has an empty name. Use `fields` for
 named-member access and `layout` when every declared field affects a decision.
-`x2c.type.parts` separates a semantic type into its declaration base and
-declarator modifiers as `(BASE MODIFIERS)`. `x2c.type.parameters` and
-`x2c.type.return` split a function type into its parameter types and its
-result. `x2c.type.element` returns a pointer or array element type, and
+`Type.parts` separates a semantic type into its declaration base and
+declarator modifiers as `(BASE MODIFIERS)`. `Type.parameters` and
+`Type.return_type` split a function type into its parameter types and its
+result. `Type.element` returns a pointer or array element type, and
 `x2c.type.integral?` and `x2c.type.pointer?` classify a type without
 resolving it.
 
 `x2c.protocol.member` looks up one member of a participant's conformance to a
 base protocol and returns `nil` when the participant does not adopt it.
 
-`x2c.literal.value` returns a captured literal's value: a `String`, a number,
+`Code.value` returns a captured literal's value: a `String`, a number,
 or a `Symbol`, according to the literal. It is the inverse of
 `x2c.literal.string`, which builds a literal from a value. A literal whose text
 the parser has already consumed, such as a multi-line interpolated `%"..."`, is
-rejected; read its spelling with `x2c.source.text` instead.
+rejected; read its spelling with `Code.source_text` instead.
 
-`x2c.type.members` returns an enum's members in source order as `(("NAME"
+`Type.members` returns an enum's members in source order as `(("NAME"
 VALUE) ...)`. `VALUE` is `nil` when the member takes its position's value, the
 literal's exact spelling as a `String` when the initializer is one literal,
 carrying its base, suffix, and character quotes, and otherwise the
@@ -2027,7 +2027,7 @@ invocation with `String` notes and returns `nil`, so expansion continues.
 invocation, or `nil` when there is none. `<declarator>` is the initialized
 declarator whose initializer directly holds the invocation, answered as its
 one-declarator declaration `(declare BASE (bindings (bind NAME MODIFIERS)))`;
-`BASE` keeps the storage class, and `x2c.syntax.type` reads its declared
+`BASE` keeps the storage class, and `Code.type` reads its declared
 type. A block item begun inside that initializer, as in a statement
 expression, hides the declarator. `<statement>` is the enclosing block item,
 answered as its origin anchor `(at N (seq))`, which `x2c.diagnostic.fail.at`
@@ -2069,16 +2069,16 @@ takes a `List` of block items; `x2c.decl.make` and `x2c.param.make` take a
 initializer expression. `x2c.expr.cast` applies a `Type` to an expression,
 carrying that type's declarator modifiers.
 
-`x2c.type.value?` recognizes numeric scalars and enums, Symbol, Var, Atom,
+`Type.is_value` recognizes numeric scalars and enums, Symbol, Var, Atom,
 String, List, and their typedef aliases. Pointer-shaped runtime handles such
-as Array are not classified as values by this operation. `x2c.type.tag-name`
+as Array are not classified as values by this operation. `Type.tag_name`
 returns a round-tripping compact Symbol from the full type-name String and
 the current owning source file, relative to the compiler root when applicable.
 This keeps private types with the same spelling in different files distinct.
 Descriptor registration still checks collisions and capacity; a compact tag
 does not establish type equality.
 
-`x2c.type.reverse-name` returns the conventional reverse-converter spelling
+`Type.reverse_name` returns the conventional reverse-converter spelling
 for base and participant name Strings, using the protocol registry's package
 naming rules. For example, base `"Var"` and a registered package participant
 `"geometry__Point"` produce `"geometry__Var_point"`.
@@ -2088,13 +2088,13 @@ expressions:
 
 - Literals and parameters: `x2c.literal.string`,
   `x2c.literal.int`, `x2c.literal.symbol`, `x2c.embed.text`, and
-  `x2c.parameters.arguments`.
+  `Code.arguments`.
 - Expression construction: `x2c.expr.ident`, `x2c.expr.index`,
   `x2c.expr.field`, `x2c.expr.call`, and `x2c.expr.composite`.
 
 `x2c.literal.string` turns a compile-time `String` into a runtime `String`
 literal expression, and `x2c.literal.int` and `x2c.literal.symbol` do the same
-for a number and a `Symbol`. `x2c.parameters.arguments` accepts either a
+for a number and a `Symbol`. `Code.arguments` accepts either a
 `(params ...)` node or a `List` of parameter nodes and returns their bound
 identifier expressions.
 
@@ -2292,19 +2292,19 @@ Every public operation above is also declared in x2c, in the optional module
 directly and a macro's implementation does not have to be written in Lisp. The
 declarations are the signatures; the semantics are the ones described above.
 The queries that read the compiler's symbol table, such as
-`x2c_syntax_type` and `x2c_type_fields`, run only in the compiler's own
+`Code.type` and `Type.fields`, run only in the compiler's own
 `meta` code. A project `meta` function receives a type through a `TypeInfo`
 parameter and source text through a `Source` parameter; see
 [What the compiler answers](../guide/meta-functions.md#what-the-compiler-answers).
 
 The compiler binds each operation under its x2c name and derives the Lisp
-name from it: each `_` becomes `.`. `x2c_type_fields` is `x2c.type.fields`,
+name from it: each `_` becomes `.`. `Type.fields` is `Type.fields`,
 `x2c_invocation_line` is `x2c.invocation.line`, `x2c_ident` is `x2c.ident`.
-A predicate `x2c_type_is_X` is `x2c.type.X?`, so `x2c_type_is_value` is
-`x2c.type.value?`; the x2c function returns `int`, 1 or 0, and the Lisp one
+A predicate `x2c_type_is_X` is `x2c.type.X?`, so `Type.is_value` is
+`Type.is_value`; the x2c function returns `int`, 1 or 0, and the Lisp one
 a Lisp truth value. Two Lisp names carry a hyphen and are the only listed
-exceptions: `x2c_type_tag_name` is `x2c.type.tag-name`, and
-`x2c_type_reverse_name` is `x2c.type.reverse-name`. Where the Lisp library
+exceptions: `Type.tag_name` is `Type.tag_name`, and
+`Type.reverse_name` is `Type.reverse_name`. Where the Lisp library
 defines the derived name itself, that definition stands. One answer differs
 in shape for that reason, because x2c has no spelling for the Lisp one:
 `x2c_expr_call(List callee, List arguments)` takes its arguments as one
@@ -2419,10 +2419,10 @@ Lisp sees the canonical parsed, typed `List` AST used by `--dump-ast`, with
 source `(at ID NODE)` wrappers removed. Tags and semantic `Type`s remain
 `List`s. Binding records are visible so syntax can be preserved and compared,
 but their numeric IDs are opaque and must not be forged. Use
-`x2c.binding.spelling` when text is required.
+`Code.binding_spelling` when text is required.
 
 The compiler records where syntax was written separately from its AST value.
-`x2c.source.text` exposes it only for a complete captured argument or decorator
+`Code.source_text` exposes it only for a complete captured argument or decorator
 target; arbitrary AST `List`s do not acquire source text by structural
 equality. Diagnostics retain the definition, invocation, import, and generated
 ancestry even after a macro returns a new `List`. Returned syntax must be valid

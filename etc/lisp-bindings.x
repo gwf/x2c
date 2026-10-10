@@ -14,7 +14,7 @@ macro Decorator $lisp.binding(
   Function $function, Name $group, Literal $name
 ) {
   @(lisp.binding.record $group $name $function)
-  @(x2c.function.body $function)
+  @(Code.body $function)
 }
 
 macro Stmt $lisp.install(Expr $lisp, Name $group) {

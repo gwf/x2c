@@ -192,7 +192,7 @@ meta static void _try_check_label(List finalizer) {
   x2c_diagnostic_fail_at(
     at, <emit>, "a finally body cannot define a label",
     %("a finalizer runs on every path that leaves its region, so '${
-      x2c_binding_spelling(label)}' would be defined once for each"));
+      Code.binding_spelling(label)}' would be defined once for each"));
 }
 
 /* A catch closes before a claimed finalizer, then the frame leaves. */

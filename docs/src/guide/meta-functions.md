@@ -732,13 +732,13 @@ initializers allocate, a Job one starts included, lasts until the next
 unit's reset or the end of the helper.
 
 A project `meta` function receives arguments and returns a value. The
-syntax builders of `lib/meta.x`, `x2c_ident`, `x2c_function_name`,
+syntax builders of `lib/meta.x`, `x2c_ident`, `Code.name`,
 `x2c_diagnostic_fail`, and `x2c_diagnostic_warn` work in the helper. The
-typing and invocation queries, such as `x2c_type_resolve`,
-`x2c_type_fields`, `x2c_syntax_type`, and `x2c_method_resolve`, ask the
+typing and invocation queries, such as `Type.resolve`,
+`Type.fields`, `Code.type`, and `x2c_method_resolve`, ask the
 compiler while the call waits. The compiler answers in the state of the `$`
 call's site, so a project function gets the answer that compiler-linked
-meta code gets at the same place. `x2c_source_text` reads only the text a
+meta code gets at the same place. `Code.source_text` reads only the text a
 `Source` parameter carries.
 
 Running compile-time code needs what building the program needs: the C
@@ -1089,8 +1089,8 @@ macro Stmt $sample.plain(Stmt @body) {
 }
 
 meta static List choose_body(List function) {
-  List body = x2c_function_body(function);
-  String name = x2c_function_name(function);
+  List body = Code.body(function);
+  String name = Code.name(function);
   List node = name == "tracked" ? $sample.counted(body) : $sample.plain(body);
   return %($node);
 }
@@ -1295,7 +1295,7 @@ the expression:
 ```x2c,ignore
 meta static List doubled(List value) {
   List twice = $!double{ $value * 2 };
-  // x2c_syntax_type(twice) is (double) already.
+  // Code.type(twice) is (double) already.
   return twice;
 }
 ```
@@ -1414,15 +1414,15 @@ declarations.
 ## What the compiler answers
 
 `lib/meta.x` declares the compiler operations. The code builders and
-`x2c_ident`, `x2c_function_name`, `x2c_diagnostic_fail` and
+`x2c_ident`, `Code.name`, `x2c_diagnostic_fail` and
 `x2c_diagnostic_warn` work in every `meta` function. The queries that read
-the compiler's symbol table, such as `x2c_syntax_type`,
-`x2c_type_fields` and `x2c_type_resolve`, also work in every `meta`
+the compiler's symbol table, such as `Code.type`,
+`Type.fields` and `Type.resolve`, also work in every `meta`
 function: the compiler answers a project function's query while the call
 waits, in the state of the call's site. `TypeInfo` and `Source`
 parameters still deliver a description in one argument. Each
 operation is a plain function whose name is the compile-time Lisp name with `_`
-for `.`, so `x2c.type.fields` is `x2c_type_fields` from x2c. They are grouped
+for `.`, so `Type.fields` is `Type.fields` from x2c. They are grouped
 here by the task, not by signature; the
 [module reference](../library/modules/meta.md) lists every declaration, and
 the [language reference](../reference/language.md#the-same-operations-from-x2c)
@@ -1433,7 +1433,7 @@ call those same implementations. The three literal-building functions also
 check their Lisp arguments. Builders that only assemble Lists can also run in a
 linked program; `x2c_expr_field` and `x2c_expr_cast` still need compiler
 queries and therefore remain compile-time only. The same is true of
-`x2c_decl_make`, `x2c_param_make` and `x2c_type_members`;
+`x2c_decl_make`, `x2c_param_make` and `Type.members`;
 `x2c_stmnt_make`, `x2c_stmnt_return` and `x2c_block_make` only assemble
 code.
 
@@ -1469,24 +1469,24 @@ twice 42
 
 **Asking about types and fields.** A `meta` function receives a type as a
 `TypeInfo` parameter, described above, or asks the compiler with the
-queries below. `x2c_syntax_type` answers the canonical `Type`
-of an expression or binding. `x2c_type_fields` answers the named fields
+queries below. `Code.type` answers the canonical `Type`
+of an expression or binding. `Type.fields` answers the named fields
 of a struct or union `Type`, each as a metadata row whose first element is
-the field name. `x2c_type_layout`, `x2c_type_resolve` and
-`x2c_type_is_value` answer the remaining generated-code questions.
-`x2c_type_parts` reads only the `Type` it receives.
+the field name. `Type.layout`, `Type.resolve` and
+`Type.is_value` answer the remaining generated-code questions.
+`Type.parts` reads only the `Type` it receives.
 `x2c_method_resolve` answers which operation a member call selects. These
 answers live in the compiler's symbol table, so a macro body cannot derive
 them from the code it captured.
 
 **Source text and location.** A parameter declared `Source` receives a
 captured hole together with the text the developer wrote for it:
-`((text T) (file F) (syntax S))`. `x2c_source_text` returns that text, and
+`((text T) (file F) (syntax S))`. `Code.source_text` returns that text, and
 `x2c_embed_text` reads the file a captured `String` literal names beside
 the source that wrote it and records it as a translation dependency. Both
 read what the argument carries. `x2c_embed_text` also accepts an
 absolute `String` path.
-`x2c_binding_spelling` returns the name a binding was declared with.
+`Code.binding_spelling` returns the name a binding was declared with.
 `x2c_invocation_file`, `x2c_invocation_line` and `x2c_invocation_column`
 give the site of the macro invocation.
 
@@ -1499,7 +1499,7 @@ argument is wrong in a way the macro can see:
 #include "meta.x"
 
 meta static List one_word(Source node) {
-  String text = x2c_source_text(node);
+  String text = Code.source_text(node);
   if (text.contains(" "))
     x2c_diagnostic_fail("this argument must be one word", %());
   return x2c_literal_string(text);
@@ -1519,7 +1519,7 @@ word seconds
 ```
 
 The helper receives the complete capture with its source text, which
-`x2c_source_text` reads. A computed subtree is code data, not a new source
+`Code.source_text` reads. A computed subtree is code data, not a new source
 capture, and cannot be passed as a `Source`.
 
 Writing `$probe.word(seconds * 2)` instead reports the message at that
@@ -1598,10 +1598,10 @@ macro Unit $any_function(Function $function) { $function }
 
 $rewrite($any_function)
 meta Code count_entries(Code function) {
-  if (!x2c_function_name(function).startswith("counted_")) return function;
+  if (!Code.name(function).startswith("counted_")) return function;
   match (function) case %(function ?type ?declarator ?):
     return %(function $type $declarator
-      (block ${$!{ entries++; }} @{x2c_function_body(function)}));
+      (block ${$!{ entries++; }} @{Code.body(function)}));
   return function;
 }
 
@@ -1621,10 +1621,10 @@ int main(void) {
 
 The compiler binds each of these under its x2c name and derives the Lisp
 name from it: `_` becomes `.`, and a predicate `x2c_type_is_X` becomes
-`x2c.type.X?`. Only `x2c.type.tag-name` and `x2c.type.reverse-name`, which
+`x2c.type.X?`. Only `Type.tag_name` and `Type.reverse_name`, which
 carry a hyphen, are listed by hand. Two signatures differ from the
 corresponding Lisp functions. `x2c_expr_call` takes its arguments as one
-`List`, and `x2c_type_is_value` returns `int`.
+`List`, and `Type.is_value` returns `int`.
 
 ## Functions that need the compiler
 

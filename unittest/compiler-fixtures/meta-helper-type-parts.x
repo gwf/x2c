@@ -4,7 +4,7 @@
 #include "meta.x"
 #include <stdio.h>
 
-meta static int parts(void) { return x2c_type_parts(%(int)).len(); }
+meta static int parts(void) { return Type.parts(%(int)).len(); }
 
 meta static int cast(void) =>
   x2c_expr_cast(%(* const char), %(expr (int) (literal (int) "0"))).equal(

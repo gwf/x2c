@@ -370,8 +370,8 @@ first parameter. Invocation arguments follow normally:
 ```x2c
 ~
 #include "meta.x"
-meta static String project_name(List fn) => x2c_function_name(fn);
-meta static List project_body(List fn) => x2c_function_body(fn);
+meta static String project_name(List fn) => Code.name(fn);
+meta static List project_body(List fn) => Code.body(fn);
 
 macro Decorator $project.trace(
   Function $function,
@@ -615,11 +615,11 @@ field-projected receiver, which this operation does not return. Generated
 dotted calls still use delegation during ordinary expression resolution.
 
 To read the exact source text of a complete captured argument, declare
-the parameter `Source` and use `x2c_source_text`:
+the parameter `Source` and use `Code.source_text`:
 
 ```x2c
 #include "meta.x"
-meta static String project_text(Source value) => x2c_source_text(value);
+meta static String project_text(Source value) => Code.source_text(value);
 macro Expression $project.source(Expr $value) => $project_text($value);
 
 int main(void) {

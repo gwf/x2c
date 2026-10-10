@@ -14,7 +14,7 @@
     nil))
 (def lisp.binding.call _x2c.binding_statement)
 (defun lisp.binding.install (lisp group)
-  (let* ((group-name (x2c.binding.spelling group))
+  (let* ((group-name (Code.binding_spelling group))
          (rows (_x2c.binding_install_rows group-name lisp.binding.rows)))
     (begin
       (if (member group-name lisp.binding.sealed) nil

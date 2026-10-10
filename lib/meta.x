@@ -165,14 +165,6 @@ meta List x2c_param_make(List type, Var name) {
     expansion when the captured syntax is incomplete. */
 meta String x2c_source_text(Var syntax);
 
-/** Returns the spelling of the binding `syntax` names. Fails the expansion
-    when `syntax` is not an identifier or a known binding. */
-meta String x2c_binding_spelling(Var syntax);
-
-/** Returns the canonical `Type` of the expression, parameter, declaration,
-    or binding `value`. */
-meta List x2c_syntax_type(List value);
-
 /** Returns the canonical semantic type of captured code in the current
     expansion. Unbound expressions are resolved in that expansion. */
 meta Type Code.type(Code value);
@@ -353,22 +345,11 @@ meta Symbol Type.tag_name(String name);
     `base` to the type named `participant`. */
 meta String Type.reverse_name(String base, String participant);
 
-/** Returns the `String`, `int`, or `Symbol` a literal expression holds.
-    Fails the expansion when `syntax` is not such a literal. */
-meta Var x2c_literal_value(Var syntax);
-
 /* reading a captured function
 
    A decorator receives a whole function, and these four take it apart: its
    name, one parameter by spelling, its body, and the argument list that
    forwards its parameters. */
-
-/** Returns the spelling of the function `function` defines. */
-meta String x2c_function_name(List function);
-
-/** Returns the expression reading the parameter spelled `wanted`. Fails the
-    expansion when `function` has no such parameter. */
-meta List x2c_function_parameter(List function, String wanted);
 
 /** Returns the statements in the body of `function`. */
 meta List x2c_function_body(List function) {
@@ -397,15 +378,6 @@ meta List x2c_parameters_arguments(List value) {
    a `Var`, and which operation a member call selects. This is the group a
    macro family needs, and the one a body cannot derive from syntax at all,
    because the answers live in the symbol table. */
-
-/** Returns the named fields of a struct or union `Type`, in declaration
-    order, each as a metadata row. Fails the expansion when `value` is not a
-    complete aggregate `Type`. */
-meta List x2c_type_fields(List value);
-
-/** Returns the layout rows of the `Type` `value` resolves to, including its
-    unnamed members. */
-meta List x2c_type_layout(List value);
 
 /** Returns the declaration parts of the `Type` `value`, which spell it in
     source. */
@@ -447,42 +419,6 @@ meta List x2c_type_members(List type) {
   foreach (List member, members) rows = cons(_meta_member(member), rows);
   return rows.reverse();
 }
-
-/** Returns whether a value of the `Type` `value` can be held in a `Var`. */
-meta int x2c_type_is_value(List value);
-
-/** Returns whether the `Type` `value` is an integral type. */
-meta int x2c_type_is_integral(List value);
-
-/** Returns whether the `Type` `value` is a pointer type. */
-meta int x2c_type_is_pointer(List value);
-
-/** Returns the `Type` the pointer or array `Type` `value` refers to. */
-meta List x2c_type_element(List value);
-
-/** Returns the parameter `Type`s of the function `Type` `value`, or of the
-    function a pointer or array `Type` refers to. */
-meta List x2c_type_parameters(List value);
-
-/** Returns the result `Type` of the function `Type` `value`. */
-meta List x2c_type_return(List value);
-
-/** Returns the generated tag name for `name`, unique to this source file. */
-meta Symbol x2c_type_tag_name(String name);
-
-/** Returns the spelling of the reverse converter from `base` to
-    `participant`. */
-meta String x2c_type_reverse_name(String base, String participant);
-
-/** Returns the expression naming the operation the member call `name` on the
-    `Type` `type` selects, or nothing when there is none. Fails the
-    expansion when imported packages provide it ambiguously. */
-meta List x2c_method_resolve(List type, String name);
-
-/** Returns the expression naming the function that implements `member` in
-    the conformance of `participant` to the protocol `base`, or nothing when
-    there is none. */
-meta List x2c_protocol_member(List participant, List base, String member);
 
 /* the invocation site
 

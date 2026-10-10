@@ -56,23 +56,23 @@ meta int mi_next(void) {
 meta String mi_tag(String path) => %"<${path.replace(".", "/")}>";
 
 macro Expression $probe.constant(Expr $path) =>
-  $(x2c.literal.string (mi_constant (x2c.source.text $path)));
+  $(x2c.literal.string (mi_constant (Code.source_text $path)));
 
 macro Expression $probe.accessor(Expr $path) =>
-  $(x2c.literal.string (mi_accessor (x2c.source.text $path)));
+  $(x2c.literal.string (mi_accessor (Code.source_text $path)));
 
 macro Expression $probe.depth(Expr $path) =>
-  $(x2c.literal.int (mi_depth (x2c.source.text $path)));
+  $(x2c.literal.int (mi_depth (Code.source_text $path)));
 
 macro Expression $probe.score(Expr $path) =>
-  $(x2c.literal.int (mi_score (x2c.source.text $path)));
+  $(x2c.literal.int (mi_score (Code.source_text $path)));
 
 macro Expression $probe.tag(Expr $path) =>
-  $(x2c.literal.string (mi_tag (x2c.source.text $path)));
+  $(x2c.literal.string (mi_tag (Code.source_text $path)));
 
 macro Expression $probe.next() => $mi_next();
 
 /* `mi_dashed` arrives through this file's own import, so the nested
    definition has to reach the consuming unit too. */
 macro Expression $probe.dashed(Expr $path) =>
-  $(x2c.literal.string (mi_dashed (x2c.source.text $path)));
+  $(x2c.literal.string (mi_dashed (Code.source_text $path)));
