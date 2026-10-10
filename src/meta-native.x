@@ -271,18 +271,18 @@ static List Compiler._subject_rows(Compiler c, Array values) {
 /* Records global identities and source spellings from argument syntax. */
 static void Compiler._subject_globals(
   Compiler c, Var value, Map globals, Map source_names) {
-  if (value is not <list>) return;
-  String spelling = NULL;
-  if (binding_identity_try_parts(value, NULL, spelling)) {
-    Var source;
-    if (c.semantic_binding_facts().try_get(%(source-spelling $value), source))
-      source_names[value] = source;
-    List global = c.sym.resolve_global(%($spelling), NULL);
-    if (global && List.compare(global, value) == 0) globals[spelling] = value;
-    return;
+  List node;
+  $ast.walk(value, node) {
+    String spelling = NULL;
+    if (binding_identity_try_parts(node, NULL, spelling)) {
+      Var source;
+      if (c.semantic_binding_facts().try_get(%(source-spelling $node), source))
+        source_names[node] = source;
+      List global = c.sym.resolve_global(%($spelling), NULL);
+      if (global && List.compare(global, node) == 0) globals[spelling] = node;
+      continue;
+    }
   }
-  foreach (Var child, value.list())
-    c._subject_globals(child, globals, source_names);
 }
 
 /* Calls the session value `function` with the evaluated `arguments`. */

@@ -571,4 +571,18 @@ mkdir -p "$private_class_build"
   -L"$ROOT/builds/0" -lx2c -lm -o "$private_class_build/class-private"
 "$private_class_build/class-private"
 
+# Collection assignment patterns inspect their full subject without making
+# one native stack frame for each term in a long operator chain.
+deep_subject="$BUILD/deep-subject"
+mkdir -p "$deep_subject"
+awk 'BEGIN {
+  print "#include \"x2c.x\""
+  printf "int main(void) { Array a = [0]; int n = 1; a[0] = n"
+  for (i = 1; i < 50000; i++) printf "+n"
+  print "; return a[0].int() != 50000; }"
+}' >"$deep_subject/store.x"
+"$X2C" translate -j 1 --out-dir "$deep_subject" "$deep_subject/store.x"
+grep -Fq 'Array_setindex(' "$deep_subject/store.c" ||
+  fail "deep collection subject lost its assignment"
+
 printf 'protocol boundary probes passed\n'

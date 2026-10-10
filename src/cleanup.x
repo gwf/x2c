@@ -198,8 +198,8 @@ static List Compiler._static_regions(Compiler c, List ast, Map runtime) {
   $ast.rewrite_children(ast, child, c._static_regions(child, runtime));
 }
 
-/* A `try` takes the landing form its component's statement rule answers,
-   and the parts of that form take theirs after it. */
+/* A `try` takes its statement rule's replacement. Landing rows and ordinary
+   replacements both pass through static-region processing. */
 static List Compiler._landing_form(Compiler c, List node, Map runtime) {
   List form = c.rewrite(
     <node>, <try>, node, AST_STATEMENT, c.return_type, NULL);
@@ -213,7 +213,7 @@ static List Compiler._landing_form(Compiler c, List node, Map runtime) {
       }
     return %(landing $code ${parts.list_free()});
   }
-  return node;
+  return form ? c._static_regions(c.normalize(form), runtime) : node;
 }
 
 /* The pending initializer and the emitter share one cleanup record. Its
