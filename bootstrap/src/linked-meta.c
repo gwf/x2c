@@ -5513,7 +5513,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_9(void){
   _5081 = cons(_532, _5080);
   _5082 = String_new("lib/datum.x");
   _5083 = String_var(_5082);
-  _5084 = String_new("d913a39d");
+  _5084 = String_new("2c15b6ca");
   _5085 = String_var(_5084);
   _5086 = String_new("lib/x2c.x");
   _5087 = String_var(_5086);

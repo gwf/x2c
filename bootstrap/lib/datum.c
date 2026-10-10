@@ -447,14 +447,12 @@ static int _plain_integer(char * s, unsigned * at, Var * out){
   return 1;
 }
 
-int scan_atom(char *);
-
 Atom Atom_intern(String);
 
 static int _plain_atom(char * s, unsigned * at, Var * out){
   if(s[(* at)] == '/' &&(s[(* at) + 1] == '/' || s[(* at) + 1] == '*')) return 0;
-  int length = scan_atom(s +(* at));
-  if(length <= 0 || ! _token_end(s[(* at) + length])) return 0;
+  int length = 0;
+  while(! _token_end(s[(* at) + length])) length ++;
   String spelling = String_new_len(s +(* at), length);
   if(! Atom_bare_spelling(spelling)) return 0;
   (* out) = Atom_intern(_unescaped(spelling));
