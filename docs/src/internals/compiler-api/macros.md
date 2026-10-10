@@ -15,6 +15,7 @@ Source macros and the compile-time Lisp they run.
 | [`macro_library_filling`](#macro_library_filling) | Answers whether the shared compile-time session is still being filled, before `lib/meta.x` has defined the syntax builders. |
 | [`macro_library_reset`](#macro_library_reset) | Ends the shared compile-time library before its build-target Context is reclaimed. |
 | [`x2c_template_call`](#x2c_template_call) | Returns the syntax that invokes the template `stored`, a macro name spelled as a String or a local definition, with `values`: what a template call in a staged `meta` body evaluates to. |
+| [`Compiler.add_library_dependencies`](#Compiler.add_library_dependencies) | Records the compile-time Lisp libraries as dependencies of `c`, as each use of its session does. |
 | [`Compiler.after_hole`](#Compiler.after_hole) | Returns the token after the named or expression hole at the cursor. |
 | [`Compiler.bind_code_value`](#Compiler.bind_code_value) | Binds a code-value carrier that a meta call returned outside a macro value application as an application binds it, under a transaction that also covers its effects. |
 | [`Compiler.bind_macro_lisp_statement`](#Compiler.bind_macro_lisp_statement) | Binds a compile-time Lisp code `value` returned to a statement at `context`. |
@@ -89,7 +90,7 @@ Source macros and the compile-time Lisp they run.
 Answers whether the shared compile-time session is still being filled,
 before `lib/meta.x` has defined the syntax builders.
 
-Source: `src/macros.x:5228`
+Source: `src/macros.x:5235`
 
 #### macro_library_reset
 
@@ -98,7 +99,7 @@ Source: `src/macros.x:5228`
 Ends the shared compile-time library before its build-target Context is
 reclaimed. A later target creates a fresh session in its own Context.
 
-Source: `src/macros.x:5426`
+Source: `src/macros.x:5433`
 
 #### x2c_template_call
 
@@ -111,6 +112,16 @@ call in a staged `meta` body evaluates to.
 Source: `src/macros.x:4137`
 
 ### `Compiler`
+
+<a id="Compiler.add_library_dependencies"></a>
+#### Compiler.add_library_dependencies
+
+`void Compiler.add_library_dependencies(Compiler c)`
+
+Records the compile-time Lisp libraries as dependencies of `c`, as each
+use of its session does.
+
+Source: `src/macros.x:5172`
 
 <a id="Compiler.after_hole"></a>
 #### Compiler.after_hole
@@ -153,7 +164,7 @@ its Lisp name in `lisp`. A predicate answers a Lisp truth value where the
 x2c spelling answers `int`. A definition the compile-time libraries
 already give that name wins, because it adapts the arguments.
 
-Source: `src/macros.x:5366`
+Source: `src/macros.x:5373`
 
 <a id="Compiler.capture_macro_value"></a>
 #### Compiler.capture_macro_value
@@ -260,7 +271,7 @@ Source: `src/macros.x:2631`
 Marks the shared session's compile-time-only definitions in a fresh
 compiler pass, which reads them without defining them.
 
-Source: `src/macros.x:5221`
+Source: `src/macros.x:5228`
 
 <a id="Compiler.inherits_import"></a>
 #### Compiler.inherits_import
@@ -270,7 +281,7 @@ Source: `src/macros.x:5221`
 Whether the shared session evaluated the file at `path`. A unit that is
 that file, as when a library is linted, inherits its Lisp forms.
 
-Source: `src/macros.x:5204`
+Source: `src/macros.x:5211`
 
 <a id="Compiler.install_builtin_macros"></a>
 #### Compiler.install_builtin_macros
@@ -279,7 +290,7 @@ Source: `src/macros.x:5204`
 
 Installs the compiler-shipped source macros into `c` once.
 
-Source: `src/macros.x:5266`
+Source: `src/macros.x:5273`
 
 <a id="Compiler.install_compile_time_effects"></a>
 #### Compiler.install_compile_time_effects
@@ -578,7 +589,7 @@ Source: `src/macros.x:2338`
 Prepares and freezes the shared session and makes it every unit's parent.
 `shared` must be the session `Compiler.open_macro_library` returned.
 
-Source: `src/macros.x:5186`
+Source: `src/macros.x:5193`
 
 <a id="Compiler.rebuild_expression"></a>
 #### Compiler.rebuild_expression
@@ -641,7 +652,7 @@ Source: `src/macros.x:2348`
 Records that `name` is compile-time only in `c`, and in the shared
 session when it is being filled.
 
-Source: `src/macros.x:5212`
+Source: `src/macros.x:5219`
 
 <a id="Compiler.report_lisp_failure"></a>
 #### Compiler.report_lisp_failure
@@ -651,7 +662,7 @@ Source: `src/macros.x:5212`
 Reports that the compile-time Lisp `source` failed with `error` at
 `invocation`.
 
-Source: `src/macros.x:5398`
+Source: `src/macros.x:5405`
 
 <a id="Compiler.rewrite"></a>
 #### Compiler.rewrite
@@ -672,7 +683,7 @@ Source: `src/macros.x:2637`
 Returns the published definition keys, or null before publication.
 The borrowed map is the shared session's source identity table.
 
-Source: `src/macros.x:5233`
+Source: `src/macros.x:5240`
 
 <a id="Compiler.shares_meta_definition"></a>
 #### Compiler.shares_meta_definition
@@ -683,7 +694,7 @@ Answers whether the published shared session already holds the
 definition of `name` from this file, which a unit reading the file again
 leaves alone.
 
-Source: `src/macros.x:5241`
+Source: `src/macros.x:5248`
 
 <a id="Compiler.skip_macro_invocation"></a>
 #### Compiler.skip_macro_invocation

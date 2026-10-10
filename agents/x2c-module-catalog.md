@@ -129,7 +129,7 @@ Public functions:
 `Compiler.collect_package`, `Compiler.replay_package_imports`,
 `Compiler.included_compile_time_effects`, `Compiler.install_included_effects`,
 `interface_configure`, `interface_prelude`, `interface_text`,
-`collect_forget_provisional_entries`
+`Compiler.linked_prelude_records`, `collect_forget_provisional_entries`
 
 ### [src/compiler.x](../src/compiler.x)
 
@@ -403,12 +403,12 @@ Public functions:
 `Compiler.evaluate_declaration_effect`, `Compiler.parse_macro_lisp_expression`,
 `Compiler.lift_macro_lisp_expression`, `Compiler.bind_macro_lisp_statement`,
 `Compiler.source_path`, `Compiler.open_macro_library`,
-`Compiler.publish_macro_library`, `Compiler.inherits_import`,
-`Compiler.record_comptime`, `Compiler.inherit_library_comptime`,
-`macro_library_filling`, `Compiler.shared_definitions`,
-`Compiler.shares_meta_definition`, `Compiler.install_builtin_macros`,
-`Compiler.bind_meta_operation`, `Compiler.report_lisp_failure`,
-`macro_library_reset`
+`Compiler.add_library_dependencies`, `Compiler.publish_macro_library`,
+`Compiler.inherits_import`, `Compiler.record_comptime`,
+`Compiler.inherit_library_comptime`, `macro_library_filling`,
+`Compiler.shared_definitions`, `Compiler.shares_meta_definition`,
+`Compiler.install_builtin_macros`, `Compiler.bind_meta_operation`,
+`Compiler.report_lisp_failure`, `macro_library_reset`
 
 ### [src/main.x](../src/main.x)
 
@@ -874,8 +874,8 @@ values as Lisp reader text.
 
 Public functions:
 
-`datum_write`, `datum_read`, `datum_frame`, `datum_unframe`,
-`datum_result_problem`
+`datum_write`, `datum_read`, `datum_read_plain`, `datum_frame`,
+`datum_unframe`, `datum_result_problem`
 
 ### [lib/diff.x](../lib/diff.x)
 
