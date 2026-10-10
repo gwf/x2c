@@ -965,7 +965,9 @@ static String _read_outcome(Lisp lisp, String source, int plain) {
     if (!plain) status = lisp.read(source, cursor, value);
     else if (datum_read_plain(source, cursor, value)) status = <value>;
   }
-  catch %((!or incomplete malformed size-limit) *): status = <error>;
+  catch %(incomplete *): status = <incomplete>;
+  catch %(malformed *): status = <malformed>;
+  catch %(size-limit *): status = <size-limit>;
   Buffer out = $auto(Buffer.new(0));
   out.printf("%s %u ", (char *) status.str(), cursor);
   if (value is not void) datum_write(out, value, 1);
@@ -979,10 +981,23 @@ static void lisp_plain_datum_read_matches_reader(void) {
   foreach (String source, %(
       "(head \"a\\\"b\" \"x\\\\y\" -5 -0 2147483648 tail)"
       "  ( a ( b ) () )  " "++" ".x" ".5" "+5" "007" "1234567890123456789"
+      "999999999999999999" "-999999999999999999"
+      "9223372036854775807" "9223372036854775808"
+      "-9223372036854775808" "-9223372036854775809"
+      "9999999999999999999" "10000000000000000000"
       "//b" "/*b*/" "a//b" "<sym>" "'q" "1.5" "0x10" "foo\\ bar"
       "\"\\x41\"" "(a . b)" "(a" "" "x\"y\""))
     EXPECT_STR_EQ(_read_outcome(lisp, source, 1),
                   _read_outcome(lisp, source, 0));
+  for (int depth = LISP_READ_DEPTH_MAX - 1;
+       depth <= LISP_READ_DEPTH_MAX; depth++) {
+    Buffer source = $auto(Buffer.new(0));
+    for (int i = 0; i < depth; i++) source.write("(");
+    source.write("x");
+    for (int i = 0; i < depth; i++) source.write(")");
+    EXPECT_STR_EQ(_read_outcome(lisp, source, 1),
+                  _read_outcome(lisp, source, 0));
+  }
   lisp.destroy();
 }
 

@@ -13,6 +13,7 @@
 #pragma once
 #include "x2c.x"
 
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -154,7 +155,7 @@ int datum_read_plain(String text, unsigned &cursor, Var &out) {
   unsigned at = cursor;
   if (text) while (_blank(text[at])) at++;
   Array items = $auto([]);
-  if (text && text[at] && _plain_form(text, at, value, items, 0))
+  if (text && text[at] && _plain_form(text, at, value, items, 1))
     cursor = at;
   else if (Lisp.read(NULL, text, cursor, value) != <value>) return 0;
   out = value;
@@ -210,14 +211,15 @@ static int _plain_string(char *s, unsigned &at, Var &out) {
   return 1;
 }
 
-/* An integer of at most 18 digits, which cannot overflow a `long`. */
+/* A decimal integer whose magnitude fits a positive `long`. */
 static int _plain_integer(char *s, unsigned &at, Var &out) {
   unsigned end = at + (s[at] == '-');
   if (s[end] == '0' && _digit(s[end + 1])) return 0;
   long value = 0;
   for (; _digit(s[end]); end++) {
-    if (end - at > 18) return 0;
-    value = value * 10 + (s[end] - '0');
+    int digit = s[end] - '0';
+    if (value > (LONG_MAX - digit) / 10) return 0;
+    value = value * 10 + digit;
   }
   if (!_token_end(s[end])) return 0;
   if (s[at] == '-') value = -value;
