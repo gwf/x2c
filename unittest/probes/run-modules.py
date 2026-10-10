@@ -58,8 +58,13 @@ def cases():
         "box/right/value.x": 'int answer(void) => hidden();\n',
         "main.x": consumer("box.x", "answer() == 42"),
     }, {}, r"hidden"
-    yield "direct_member_include", {
-        **FLAT, "main.x": consumer("box/value.x", "answer() == 42")}, {}, None
+    yield "direct_member_translation", {
+        **FLAT,
+        "box/value.x": "int main(void) => increment(41) == 42 ? 0 : 1;\n",
+    }, {"inputs": ["box/value.x"]}, None
+    yield "external_member_include_rejected", {
+        **FLAT, "main.x": consumer("box/value.x", "answer() == 42"),
+    }, {"rejection_phase": "parse"}, r"entry|owning|module"
     yield "configured_include_root", {
         "library/box.x": 'module { "box/value.x" }\n',
         "library/box/value.x": 'module int helper(void) => 42;\nint answer(void) => helper();\n',
@@ -108,8 +113,8 @@ def run_case(compiler, base, name, files, options, rejection):
         command.extend(["-I", str(directory / relative)])
     for relative in options.get("package_dirs", []):
         command.extend(["--package-dir", str(directory / relative)])
-    sources = [relative for relative in files
-               if relative.endswith(".x") and not relative.startswith("packages/")]
+    sources = options.get("inputs", [relative for relative in files
+               if relative.endswith(".x") and not relative.startswith("packages/")])
     command.extend(str(directory / relative) for relative in sources)
     result = subprocess.run(command, cwd=directory, text=True,
                             stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
@@ -118,10 +123,11 @@ def run_case(compiler, base, name, files, options, rejection):
               "log": str(directory / "build.log")}
     if rejection:
         record["expected"] = "translation rejection"
+        phase = options.get("rejection_phase", "type")
         record["passed"] = (result.returncode != 0 and
                             re.search(rejection, result.stdout, re.I) is not None and
-                            ": type:" in result.stdout and
-                            ": parse:" not in result.stdout and
+                            f": {phase}:" in result.stdout and
+                            (phase == "parse" or ": parse:" not in result.stdout) and
                             "undefined symbol" not in result.stdout.lower())
         return record
     record["expected"] = "executable exit 0"
