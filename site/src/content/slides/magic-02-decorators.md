@@ -8,10 +8,10 @@ tab: decorators
 ~#include <assert.h>
 macro Decorator $trace(Function $function) {
   printf("enter %s\n",
-    $(x2c.literal.string (x2c.function.name $function)));
+    $(x2c.literal.string (Code.name $function)));
   defer printf("leave %s\n",
-    $(x2c.literal.string (x2c.function.name $function)));
-  @(x2c.function.body $function)
+    $(x2c.literal.string (Code.name $function)));
+  @(Code.body $function)
 }
 
 $trace()
@@ -26,6 +26,6 @@ int result = answer();
 ```
 
 `$trace` receives a parsed `Function` and wraps its body while
-preserving its signature. `x2c.function.name` supplies the trace label;
+preserving its signature. `Code.name` supplies the trace label;
 `defer` prints the exit trace even when the body returns. Callers still
 use an ordinary function.

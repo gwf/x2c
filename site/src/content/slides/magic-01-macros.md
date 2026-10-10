@@ -7,7 +7,7 @@ tab: macros
 ```x2c
 ~#include <assert.h>
 macro Stmt $swap(Expr $left, Expr $right) {
-  $(x2c.syntax.type $left) temporary = $left;
+  $(Code.type $left) temporary = $left;
   $left = $right;
   $right = temporary;
 }
@@ -26,7 +26,7 @@ printf("%d %d; %s %s\n", left, right, first, last);
 ~}
 ```
 
-`$swap` receives parsed expressions, and `x2c.syntax.type` supplies
+`$swap` receives parsed expressions, and `Code.type` supplies
 the temporary's type. A declaration written in a macro body is hygienic,
 so `temporary` cannot collide with caller names. The same three generated
 statements swap integers or strings, without a separate macro for each type.

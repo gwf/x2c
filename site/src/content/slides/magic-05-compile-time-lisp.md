@@ -10,14 +10,12 @@ tab: compile-time
 $(defun responses ()
   '((200 "OK") (404 "Not Found") (503 "Unavailable")))
 
-static const int codes[] = $(x2c.expr.composite
-  (map (lambda (row) (x2c.literal.int (car row)))
-       (responses)));
+static const int codes[] = $(begin `(expr () (composite (commas
+  ,@(map (lambda (row) (x2c.literal.int (car row))) (responses))))));
 
 ~int main(void) {
-String labels[] = $(x2c.expr.composite
-  (map (lambda (row) (x2c.literal.string (cadr row)))
-       (responses)));
+String labels[] = $(begin `(expr () (composite (commas
+  ,@(map (lambda (row) (x2c.literal.string (cadr row))) (responses))))));
 
 // The generated program uses ordinary C arrays.
 for (size_t i = 0; i < sizeof(codes) / sizeof(*codes); i++)
@@ -28,6 +26,6 @@ for (size_t i = 0; i < sizeof(codes) / sizeof(*codes); i++)
 ```
 
 A Lisp interpreter runs inside the compiler. `$()` can compute values
-or generate code; here `x2c.expr.composite` builds two C array initializers
-from one response table. The generated program contains the codes and
+or generate code; here a quasiquoted `composite` form builds two C array
+initializers from one response table. The generated program contains the codes and
 string literals, and changing the table updates both arrays.
