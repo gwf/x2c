@@ -347,6 +347,8 @@ Code Code.register_rewrite(Code function, Macro shape, List holes) {
     case %((!set ?head (!or switch try)) *): { point = <node>; kind = head; }
     case %(!or (api-source ? ? (function ?type *)) (function ?type *)):
       { point = <function>; kind = _function_rule_key(type); }
+    case %(expr ? ((!set ?head (!or array map)) *)):
+      { point = <literal>; kind = head; }
   }
   if (!point) MetaContext.reject("unsupported rewrite pattern in spike", NULL);
   return _rewrite_registration(function, shape, holes, point, kind);
