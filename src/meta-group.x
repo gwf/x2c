@@ -756,8 +756,9 @@ static List Compiler._resets(Compiler c, Map initials) {
           Type native = %("__typeof__" (parens $target));
           initializer = %(expr $type (cast $native
             ${c.convert_initializer(initializer, type, target)}));
-          resets.push(c.rebuild_statement(
-            $!{ memcpy($target, $initializer, sizeof($target)); }).cadr());
+          resets.push(
+            c.rebuild_statement(
+              $!{ memcpy($target, $initializer, sizeof($target)); }).cadr());
         }
         else resets.push(
           c.rebuild_statement($!{ $target = $initializer; }).cadr());

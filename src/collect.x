@@ -1968,8 +1968,8 @@ static List Compiler._interface_include_dirs(
   String package = root && package_source(root, canonical)
                  ? Path.basename(root)
                  : c._package_owns(canonical) ? c.package : NULL;
-  dirs.push(is_source_file(canonical) && package
-              ? %(package $package) : %(package));
+  dirs.push(
+    is_source_file(canonical) && package ? %(package $package) : %(package));
   return dirs.list_free();
 }
 

@@ -99,8 +99,8 @@ typedef struct Compiler {
   /* Package-mode unit: NULL outside. package_dirs holds import search roots;
      package_source_dirs holds the explicit roots that select source ownership.
      package_roots holds each collected package directory, package_aliases each
-     resolution-only spelling alias -> package name, package_members each `with` local
-     spelling -> (package member), and package_effects each collected
+     resolution-only spelling alias -> package name, package_members each
+     `with` local spelling -> (package member), and package_effects each collected
      package's public compile-time definitions in its include order. */
   String package, List package_dirs, package_source_dirs;
   Map package_roots, package_aliases, package_members, package_effects;
