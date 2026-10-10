@@ -371,6 +371,50 @@ Shipping the component interfaces in the home instead is an unevaluated
 simpler alternative. Folding `lib/x2c.x` into the table is no longer the
 prize it was, since its `.xi` reads are now cheap.
 
+### Delegation and two repairs, 2026-10-09
+
+Integrated at the commit above this one; `make verify` passes (1,115
+fixtures, 944 unit tests, probes), 17 of 17 examples pass, and bootstrap
+equals stage 0 across 266 files.
+
+- Delegation runs in `src/component-delegate.x` (134 lines); the kernel lost
+  80 lines (`DelegateSearch`, the `delegate` resolution arm,
+  `_completion_delegates`, two report macros, `declare_delegate_field`).
+  Registration is keyed by a declaration-time fact, not by a parse-time rule
+  copy: a rule registered when the parser saw the field never reached an
+  importing unit, because interfaces and packages copy Sym rows and never
+  run the importer's rule table. So the parser records a general field mark
+  (`Sym.mark_field`, with a per-aggregate `(AGG delegate)` row that crosses
+  interfaces), and the component registers once on the mark with
+  `$rewrite_marked(<delegate>, f)` over `Code.register_marked_rewrite`; a
+  lookup miss checks the receiver's aggregate marks after the `member` family.
+  New SDK queries: `Type.aggregate`, `Type.marked_fields`,
+  `Type.resolve_member`. Byte-identical C and diagnostics on 52 fixtures and
+  extra probes. Documented changes: a member rewrite for the receiver's own
+  type now precedes delegation; missed member calls in `meta` bodies now reach
+  member rules. Delegated completion was dead at baseline (added, then
+  filtered) and is removed. Cost: direct calls unchanged; a delegated call is
+  0.26 M over a direct call (kernel search: 0.09 M), mostly binding the
+  rebuilt call; the fourth prelude component adds about 15 M per unit. A
+  shipped component cannot call `lib/meta.x` meta builders without failing its
+  linked-copy check in meta builds; the component builds lists instead.
+- `Atom.bare_spelling` now rejects spellings opening a reader comment, so
+  `datum_write` quotes them; unit cases in test-atom and test-lisp. The install
+  payload's two explicit `.str()` conversions are gone and `make install` is
+  warning-free.
+- Found, not fixed: in untagged mode `datum_write` writes a non-bare compact
+  Symbol through `Symbol.write_repr` as `<\"...\">`, which does not read back
+  (`<<`, `<x`, `a b`). This is the general cause of the `<<=` rewrite-row
+  defect the driver work froze around. Whether interface writing reaches that
+  path is unverified.
+
+Milestone 0 and the milestone below's items 1 and 2 are complete. Authored
+src, lib, and etc against dev: 4,000 added, 1,663 removed, of which 617 are
+the `type.x` move to the library. The three component files hold 540 lines;
+the kernel's feature files lost 159 (expressions), 280 (cleanup), 152
+(statements), and 12 (expressions-reports); the mechanism grew macros.x by
+577, parse.x by 398, collect.x by 208, and meta-sdk.x by 185.
+
 ## Next bounded milestone
 
 1. Establish a complete declaration use case for initializer-only `$auto`.
