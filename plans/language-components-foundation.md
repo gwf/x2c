@@ -275,6 +275,65 @@ head, integrated here as one batch:
    toward dev's 13.2 s (foundation: 14.1 s); package-install and header-cache
    probes pass.
 
+### Item 5 result, 2026-10-09
+
+Prepared replacements are integrated at the commit above this one;
+`make verify` passes (1,115 fixtures, 942 unit tests, probes), 17 of 17
+examples pass, bootstrap equals stage 0 across 264 files, and generated C is
+byte-identical for both synthetic workloads and for all of lib and src.
+
+The driver lowers a rewrite's replacement once per unit while watching which
+typed source expressions it consumed, keeps the lowered result as a skeleton
+with slots when that lowering was pure (no introduced binding, name, origin,
+placement, or diagnostic), and fills the skeleton on later uses after
+lowering only the slot values. The memo key is the position, the expected
+type, and the template with each slot reduced to its type and a small shape
+(`Compiler._slot_shape` in src/macros.x): a literal's value, an identifier
+with its lambda-snapshot status, the head of a call, index, postfix, or
+cast, an operator with a unary operand's shape, a member access with its
+base's shape, or a group's inner shape; a conditional, comma, composite,
+collection literal, interpolation, or statement expression refuses. The
+shape list is derived from what `convert_expression` reads and proven by
+the byte-identical results, not by construction; an unlisted shape refuses,
+so a miss costs speed, not correctness. All of component-access.x's
+quotations prepare; component-try.x returns lowered code and is unaffected.
+macros.x gained 280 lines.
+
+| Workload | dev | before | after |
+| --- | ---: | ---: | ---: |
+| Access, 5,400 mutations | 10.30 G | 14.47 G | 10.19 G |
+| Empty unit | 1.97 G | 2.15 G | 2.15 G |
+| Native, 300 functions | 4.23 G | 4.44 G | 4.44 G |
+
+The translator call is now the largest remaining per-use cost (about 77 K of
+213 K per application): its own match, quotation building, and the Lisp
+session setup per call.
+
+### Item 6 result, 2026-10-09: held on `kernel/linked-prelude` at 19236c74
+
+The three shipped components' collected records are linked into `collect.c`
+as a literal Map built by a compile-time builtin during the translation of
+`collect.x`, read before the `.xi` lookup with the same staleness checks, and
+their rules installed once per process. It also fixes a determinism defect in
+`grammar.x`'s collected dependencies. Byte-identical C, 1,115 fixtures,
+`make verify`, the five home-building probes, and an installed-home run pass.
+
+| Measurement | before | with | dev |
+| --- | ---: | ---: | ---: |
+| Empty unit, repository build | 2.16 G | 2.04 G | 1.96 G |
+| Empty unit, installed home | 2.49 G | 2.06 G | |
+| `make stage-3`, median of 3 on a loaded machine | 15.5 s | 16.0 s | 15.3 s |
+
+It trades per-process cost for per-stage cost: `collect.c` grew from 175 KB
+to 443 KB, its translation walks the three components, and its `-O2` compile
+takes 0.5 s longer in every stage, while a stage batch saves only one prelude
+read. The stage-3 guard was missed, so integration awaits Gary's choice:
+take it as is, take it after a cheaper emission of large literals, or leave
+it out. Component sources stay in the installed home for hashing, depfiles,
+and the cold fallback. Folding `lib/x2c.x` (about 1.47 G of every empty unit,
+paid by dev too) into the same table is the larger prize and the same trade,
+and is also Gary's decision.
+
 ## Next bounded milestone
 
 1. Establish a complete declaration use case for initializer-only `$auto`.
