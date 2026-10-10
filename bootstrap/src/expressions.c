@@ -6778,7 +6778,7 @@ void Compiler_check_explicit_converter(Compiler c, List parsed, Type target, int
 }
 
 const PrintfFn * List_printf_family(List l);
-String Compiler_printf_static_format(Compiler c, Var format, int * raw);
+String Compiler_printf_static_format(Compiler c, Var format);
 static void Compiler__check_converter_args(Compiler c, List result, int method, List notes){
   List callee = NULL, params = NULL, arguments = NULL, supplied = NULL;
   {
@@ -6805,7 +6805,7 @@ break;
 List n = notes;  for(List p = params, a = arguments;  List_truth(p) && List_truth(a);  p = cdr(p), a = cdr(a), n = cdr(n)){
   if(! Var_is_row(car(p), 9, 7, 4) || ! Var_is_row(car(a), 9, 7, 4)) continue;  List param = Var_list(car(p)), argument = Var_list(car(a));  Type expected = Var_equal(List_car(param), Symbol_var(33656922)) ? List_type_from_ast(param) : List_type(param);  Compiler__check_noted_converter(c, Var_list(car(n)), argument, expected, 0);
 }
-const PrintfFn * info = List_printf_family(callee);  int raw = 0;  if(! info || ! String_truth(Compiler_printf_static_format(c, List_getindex(supplied, info -> fmt_arg), &(raw)))) return;  int first = info -> first_arg - method, index = 0;  for(List a = arguments, n = notes;  List_truth(a);  a = cdr(a), n = cdr(n)) if(index ++ >= first && Var_is_row(car(a), 9, 7, 4)) Compiler__check_noted_converter(c, Var_list(car(n)), Var_list(car(a)), Var_type(List_cadr(Var_list(car(a)))), 2);
+const PrintfFn * info = List_printf_family(callee);  if(! info || ! String_truth(Compiler_printf_static_format(c, List_getindex(supplied, info -> fmt_arg)))) return;  int first = info -> first_arg - method, index = 0;  for(List a = arguments, n = notes;  List_truth(a);  a = cdr(a), n = cdr(n)) if(index ++ >= first && Var_is_row(car(a), 9, 7, 4)) Compiler__check_noted_converter(c, Var_list(car(n)), Var_list(car(a)), Var_type(List_cadr(Var_list(car(a)))), 2);
 }
 
 void Compiler_report_warning_at(Compiler, Symbol, String, List, List);
@@ -6850,14 +6850,14 @@ default: break;
 return NULL;
 }
 
-String Compiler_printf_static_format(Compiler c, Var format, int * raw){
+String Compiler_printf_static_format(Compiler c, Var format){
   if(! _init_guard_) _file_init_();
   {
     List _x2c_match_expr = Var_list(format);
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 377892: ;  static MatchCaptureSite _x2c_match_site_106;  if (x2c_match_site_try_capture(& _x2c_match_site_106, _x2c_match_expr, List_var(_3336), &_x2c_match_capture)) {Var spelled = _x2c_match_values[0]; {
-    String spelling = Var_string(spelled);  int length = String_truth(spelling) ? String_len(spelling) : 0;  if(length < 2 || String_getindex(spelling, 0) != '"' || String_getindex(spelling, length - 1) != '"') return NULL; (* raw) = 1;  return spelling;
+    String spelling = Var_string(spelled);  int length = String_truth(spelling) ? String_len(spelling) : 0;  if(length < 2 || String_getindex(spelling, 0) != '"' || String_getindex(spelling, length - 1) != '"') return NULL;  return spelling;
   }
   break;
 }
@@ -6868,7 +6868,7 @@ static MatchCaptureSite _x2c_match_site_109;  if (x2c_match_site_try_capture(& _
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 1318210446: ;  static MatchCaptureSite _x2c_match_site_107;  if (x2c_match_site_try_capture(& _x2c_match_site_107, _x2c_match_expr, List_var(_3354), &_x2c_match_capture)) {Var text = _x2c_match_values[0]; {
-    (* raw) = 0;  return Var_string(text);
+    String spelling = Var_string(text);  return String_repr(spelling);
   }
   break;
 }
@@ -6880,7 +6880,7 @@ default: break;
     List _x2c_match_expr = key;
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (Var_symbol(car(_x2c_match_expr))) {
-      case 1318210446: ;  static MatchCaptureSite _x2c_match_site_108;  if (x2c_match_site_try_capture(& _x2c_match_site_108, _x2c_match_expr, List_var(_3370), &_x2c_match_capture)) {Var literal = _x2c_match_values[0];  return Compiler_printf_static_format(c, literal, &((* raw)));  break;
+      case 1318210446: ;  static MatchCaptureSite _x2c_match_site_108;  if (x2c_match_site_try_capture(& _x2c_match_site_108, _x2c_match_expr, List_var(_3370), &_x2c_match_capture)) {Var literal = _x2c_match_values[0];  return Compiler_printf_static_format(c, literal);  break;
 }
 default: break;
     }

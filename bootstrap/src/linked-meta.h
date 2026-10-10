@@ -34,6 +34,10 @@ Code register_rewrite(Code function, Code pattern, List holes);
 
 Code register_marked_rewrite(Code function, Code mark, Code pattern, List holes);
 
+Code register_typed_rewrite(Code function, List type, Code pattern, List holes);
+
+Code register_operator_rewrite(Code function, List type, Code form, List operators);
+
 List _dedent_expand(List node);
 
 List _macros_location(void);

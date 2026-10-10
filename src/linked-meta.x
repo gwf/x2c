@@ -162,6 +162,26 @@ Code register_marked_rewrite(
     mark.value(), pattern.value(), patterns.list_free());
 }
 
+/** Registers the decorated translator for the operator its macro pattern
+    spells applied to an operand of `type`. */
+Code register_typed_rewrite(
+  Code function, List type, Code pattern, List holes) {
+  Array patterns = [];
+  foreach (Code hole, holes) patterns.push(hole.value());
+  return function.register_typed_rewrite(
+    type, pattern.value(), patterns.list_free());
+}
+
+/** Registers the decorated translator for each operator in `operators`
+    applied to an operand of `type`, in `form`. */
+Code register_operator_rewrite(
+  Code function, List type, Code form, List operators) {
+  Array symbols = [];
+  foreach (Code op, operators) symbols.push(op.value());
+  return function.register_operator_rewrite(
+    type, form.value(), symbols.list_free());
+}
+
 /* --- lib/system-macros.x ------------------------------------------------- */
 
 List _dedent_expand(List node) {
@@ -681,6 +701,8 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "x2c_type_members", x2c_type_members);
   $linked.row(rows, "register_rewrite", register_rewrite);
   $linked.row(rows, "register_marked_rewrite", register_marked_rewrite);
+  $linked.row(rows, "register_typed_rewrite", register_typed_rewrite);
+  $linked.row(rows, "register_operator_rewrite", register_operator_rewrite);
   $linked.row(rows, "_dedent_expand", _dedent_expand);
   $linked.row(rows, "_macros_location", _macros_location);
   $linked.row(rows, "_tag_decode_group", _tag_decode_group);

@@ -96,6 +96,8 @@ void Compiler_enter(Compiler c, Ancestor row);
 
 List Compiler_enclosing(Compiler c, Symbol what);
 
+void Compiler_place_entry(Compiler c, Var code);
+
 void Compiler_place_after(Compiler c, Var code);
 
 void Compiler_close_placements(Compiler c, int first, List result);

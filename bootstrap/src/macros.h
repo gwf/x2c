@@ -93,6 +93,7 @@ struct SlotWatch{
   Array outputs, order;
   Effects inner;
   int repeated;
+  List outer;
 }
 ;
 

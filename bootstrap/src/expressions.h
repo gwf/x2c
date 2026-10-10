@@ -69,7 +69,7 @@ void Compiler_check_explicit_converter(Compiler c, List parsed, Type target, int
 
 const PrintfFn * List_printf_family(List l);
 
-String Compiler_printf_static_format(Compiler c, Var format, int * raw);
+String Compiler_printf_static_format(Compiler c, Var format);
 
 List Compiler_promote_string_literal(Compiler c, List expr);
 

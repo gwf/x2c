@@ -40,15 +40,29 @@ List Type_resolve_member(Type type, String name, int call);
 
 Code Type_protocol_member(Type type, String name);
 
+Code Type_getter(Type type);
+
+String Type_update_helper(Type type);
+
 Type Code_type(Code value);
 
 Var Code_value(Code code);
 
+Code Code_call_in_order(Code member, List arguments, Type type);
+
 int Code_exits(Code statement);
+
+Code Code_convert(Code value, Type target);
+
+String Code_format(Code value);
 
 int Code_is_static_pattern(Code pattern);
 
 Code Code_register_rewrite(Code function, Macro shape, List holes);
+
+Code Code_register_typed_rewrite(Code c, Type type, Macro shape, List holes);
+
+Code Code_register_operator_rewrite(Code c, Type type, Symbol form, List operators);
 
 Code Code_register_marked_rewrite(Code function, Symbol mark, Macro shape, List holes);
 
