@@ -756,10 +756,11 @@ conversion reads, or displayed through `Var.str` for `%s`. The redundant
 `.str()` warning for those values stays with the conversion checks in
 `src/expressions.x`.
 
-`src/component-operators.x` registers each dynamic operator through
-`$rewrite_typed(Var, ...)`, on the binary family for binary operators and
-compound assignments and the unary family for increments, decrements, and
-unary operators, keyed by the operator and `Var`. The transform dispatches
+`src/component-operators.x` registers its translators through
+`$rewrite_operators(Var, ...)`, on the binary family for binary operators
+and compound assignments and the unary family for increments, decrements,
+and unary operators, keyed by the operator and `Var`. A rule registered
+this way has no pattern; its key alone selects it. The transform dispatches
 an operation to those rules only when an operand has `Var` identity, after
 protocol operators resolved, and normalizes the replacement as it would its
 own lowering. A binary operator returns a lowered `Var.binary` call, so an

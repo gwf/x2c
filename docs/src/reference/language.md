@@ -3208,13 +3208,17 @@ concatenates.
 
 These lowerings, the dynamic compound assignments and increments below, and
 the rejection of unary `+`, `-`, and `~` on a `Var` belong to the shipped
-component `src/component-operators.x`. It registers each operator on `Var`
-with `$rewrite_typed(Var, ...)`, which keys a rule by the operator and `Var`.
-The rules run after protocol operators resolve, only when an operand has
-`Var` identity, so native operands never reach them. A program's rule
-registered the same way for the same operator is tried first; its hole
-patterns decide which operands it takes, so a rule for `$!Money{...}` with
-`typedef Var Money` leaves other `Var` operands to the shipped rules.
+component `src/component-operators.x`. It registers its translators with
+`$rewrite_operators(Var, FORM, OPERATORS...)`, which keys a rule by each
+operator and `Var` and gives it every such operation without a pattern.
+`FORM` is `<binary>` for binary operators and compound assignments,
+`<prefix>` for prefix and unary operators, and `<postfix>`. The rules run
+after protocol operators resolve, only when an operand has `Var` identity,
+so native operands never reach them. A program's rule registered for the
+same operator is tried first. `$rewrite_typed(Var, MACRO, HOLES...)`
+registers one with a macro pattern whose holes decide which operands it
+takes, so a rule for `$!Money{...}` with `typedef Var Money` leaves other
+`Var` operands to the shipped rules.
 
 Direct runtime calls to `Var.binary` additionally accept comparisons and eager
 `&&`/`||`. The compiler does not use that eager logical path. It converts each

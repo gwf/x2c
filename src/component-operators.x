@@ -15,31 +15,12 @@
 
 // dynamic operators
 
-macro Expression $dynamic_add(Expr $a, Expr $b) => $a + $b;
-macro Expression $dynamic_subtract(Expr $a, Expr $b) => $a - $b;
-macro Expression $dynamic_multiply(Expr $a, Expr $b) => $a * $b;
-macro Expression $dynamic_divide(Expr $a, Expr $b) => $a / $b;
-macro Expression $dynamic_remainder(Expr $a, Expr $b) => $a % $b;
-macro Expression $dynamic_left(Expr $a, Expr $b) => $a << $b;
-macro Expression $dynamic_right(Expr $a, Expr $b) => $a >> $b;
-macro Expression $dynamic_and(Expr $a, Expr $b) => $a & $b;
-macro Expression $dynamic_xor(Expr $a, Expr $b) => $a ^ $b;
-macro Expression $dynamic_or(Expr $a, Expr $b) => $a | $b;
-
 /* A `Var` operand, or a value `+` beside text or a number combines with. */
 meta static int _dynamic_operand(Type type, int text) =>
   type.is_named("Var") || (text ? type.is_text() : !!type.numeric());
 
-$rewrite_typed(Var, $dynamic_add)
-$rewrite_typed(Var, $dynamic_subtract)
-$rewrite_typed(Var, $dynamic_multiply)
-$rewrite_typed(Var, $dynamic_divide)
-$rewrite_typed(Var, $dynamic_remainder)
-$rewrite_typed(Var, $dynamic_left)
-$rewrite_typed(Var, $dynamic_right)
-$rewrite_typed(Var, $dynamic_and)
-$rewrite_typed(Var, $dynamic_xor)
-$rewrite_typed(Var, $dynamic_or)
+$rewrite_operators(Var, <binary>, <+>, <->, <*>, </>, <%>, <"<<">, <">>">,
+  <&>, <^>, <|>)
 /** Boxes both operands of an arithmetic, shift, or bitwise operator for
     `Var.binary`, after rejecting an operand that is neither a number nor,
     for `+` beside text, text. The call is returned lowered, because an
@@ -68,21 +49,6 @@ meta Code dynamic_binary(Code code) {
 }
 
 // dynamic updates
-
-macro Expression $dynamic_add_to(Expr $a, Expr $b) => $a += $b;
-macro Expression $dynamic_subtract_from(Expr $a, Expr $b) => $a -= $b;
-macro Expression $dynamic_multiply_by(Expr $a, Expr $b) => $a *= $b;
-macro Expression $dynamic_divide_by(Expr $a, Expr $b) => $a /= $b;
-macro Expression $dynamic_remainder_by(Expr $a, Expr $b) => $a %= $b;
-macro Expression $dynamic_left_by(Expr $a, Expr $b) => $a <<= $b;
-macro Expression $dynamic_right_by(Expr $a, Expr $b) => $a >>= $b;
-macro Expression $dynamic_and_with(Expr $a, Expr $b) => $a &= $b;
-macro Expression $dynamic_xor_with(Expr $a, Expr $b) => $a ^= $b;
-macro Expression $dynamic_or_with(Expr $a, Expr $b) => $a |= $b;
-macro Expression $dynamic_increment(Expr $a) => ++$a;
-macro Expression $dynamic_decrement(Expr $a) => --$a;
-macro Expression $dynamic_postincrement(Expr $a) => $a++;
-macro Expression $dynamic_postdecrement(Expr $a) => $a--;
 
 /* The operation a compound assignment applies before it stores. */
 meta static Symbol _dynamic_operation(Symbol assignment) {
@@ -128,16 +94,8 @@ meta static String _dynamic_helper(Type type) {
   return helper;
 }
 
-$rewrite_typed(Var, $dynamic_add_to)
-$rewrite_typed(Var, $dynamic_subtract_from)
-$rewrite_typed(Var, $dynamic_multiply_by)
-$rewrite_typed(Var, $dynamic_divide_by)
-$rewrite_typed(Var, $dynamic_remainder_by)
-$rewrite_typed(Var, $dynamic_left_by)
-$rewrite_typed(Var, $dynamic_right_by)
-$rewrite_typed(Var, $dynamic_and_with)
-$rewrite_typed(Var, $dynamic_xor_with)
-$rewrite_typed(Var, $dynamic_or_with)
+$rewrite_operators(Var, <binary>, <+=>, <-=>, <*=>, </=>, <%=>, <"<<=">,
+  <">>=">, <&=>, <^=>, <|=>)
 /** Updates a `Var` or numeric lvalue with a `Var` or numeric operand
     through the update helper of its storage. */
 meta Code dynamic_compound(Code code) {
@@ -164,10 +122,8 @@ meta Code dynamic_compound(Code code) {
   return code;
 }
 
-$rewrite_typed(Var, $dynamic_increment)
-$rewrite_typed(Var, $dynamic_decrement)
-$rewrite_typed(Var, $dynamic_postincrement)
-$rewrite_typed(Var, $dynamic_postdecrement)
+$rewrite_operators(Var, <prefix>, <++>, <-->)
+$rewrite_operators(Var, <postfix>, <++>, <-->)
 /** Adds or subtracts one through the `Var` update helpers; the postfix
     forms return the value before the change. */
 meta Code dynamic_change(Code code) {
@@ -185,13 +141,7 @@ meta Code dynamic_change(Code code) {
   return code;
 }
 
-macro Expression $dynamic_plus(Expr $a) => +$a;
-macro Expression $dynamic_negate(Expr $a) => -$a;
-macro Expression $dynamic_complement(Expr $a) => ~$a;
-
-$rewrite_typed(Var, $dynamic_plus)
-$rewrite_typed(Var, $dynamic_negate)
-$rewrite_typed(Var, $dynamic_complement)
+$rewrite_operators(Var, <prefix>, <+>, <->, <~>)
 /** Rejects a unary numeric operator on a `Var`. */
 meta Code dynamic_unary(Code code) {
   x2c_diagnostic_fail_at(
