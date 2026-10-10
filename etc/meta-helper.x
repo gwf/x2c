@@ -236,6 +236,8 @@ Code Code.register_marked_rewrite(Code f, Symbol m, Macro p, List h) =>
   _ask("Code_register_marked_rewrite", %($f $m $p $h));
 Code Code.register_typed_rewrite(Code f, Type t, Macro p, List h) =>
   _ask("Code_register_typed_rewrite", %($f $t $p $h));
+Code Code.register_operator_rewrite(Code f, Type t, Symbol w, List o) =>
+  _ask("Code_register_operator_rewrite", %($f $t $w $o));
 Code Code.register_after_initialization(Code f, Macro p, List h) =>
   _ask("Code_register_after_initialization", %($f $p $h));
 List x2c_syntax_type(List v) => Code.type(v);

@@ -2504,8 +2504,8 @@ static RewriteRule _rewrite_rule(
   Symbol point, Var kind, String name, Macro shape, List holes,
   int builtin, int prepared) {
   RewriteRule rule = Scope.calloc(1, sizeof(struct RewriteRule));
-  MacroMatcher matcher =
-    prepared ? shape.matcher(holes) : (MacroMatcher){shape, holes, NULL};
+  MacroMatcher matcher = prepared && shape
+    ? shape.matcher(holes) : (MacroMatcher){shape, holes, NULL};
   *rule = (struct RewriteRule){name, point, kind, matcher, builtin, prepared};
   return rule;
 }
@@ -2588,7 +2588,7 @@ static int _unit_bound(Var syntax) {
 /* The first probe of a shared rule's family derives its matcher with the
    process lifetime of the rule. */
 static MacroMatcher *RewriteRule.prepared_matcher(RewriteRule rule) {
-  if (!rule.prepared) {
+  if (!rule.prepared && rule.matcher.shape) {
     $scope(&shipped_scope) {
       MacroMatcher matcher = rule.matcher.shape.matcher(rule.matcher.holes);
       _require_owned(matcher.pattern.try_own());
@@ -2680,8 +2680,10 @@ static List Compiler._rewrite(
   if (c.macro_holes || (c.meta_body && point != <member> && point != <call>))
     return NULL;
   foreach (RewriteRule rule, c._rewrite_candidates(point, kind)) {
-    if (c.active_rewrites.contains(rule) ||
-        !c.matches_macro(*rule.prepared_matcher(), source)) continue;
+    if (c.active_rewrites.contains(rule)) continue;
+    // A rule without a pattern takes every operation its key selects.
+    MacroMatcher *matcher = rule.prepared_matcher();
+    if (matcher.shape && !c.matches_macro(*matcher, source)) continue;
     Var result = c.apply_meta_function(rule.name, %($source), site);
     if (result is void ||
         (result is <list> && (!result.list() || result.list() === source)))

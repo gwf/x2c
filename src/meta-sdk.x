@@ -426,6 +426,24 @@ Code Code.register_typed_rewrite(Code c, Type type, Macro shape, List holes) {
   return _rewrite_registration(c, shape, holes, point, kind);
 }
 
+/** Registers a translator without a pattern for each operator applied to
+    an operand of `type` in `form`. */
+Code Code.register_operator_rewrite(
+  Code c, Type type, Symbol form, List operators) {
+  _sdk_guard("Code.register_operator_rewrite");
+  if (!active.expander.sym.is_var_type(type))
+    MetaContext.reject(
+      "an operator rewrite requires Var or an alias of it", NULL);
+  String name = x2c_function_name(c);
+  Symbol point = form == <binary> ? <binary> : <unary>;
+  Array rows = [];
+  foreach (Symbol op, operators) {
+    List kind = form == <postfix> ? %(postfix $op ("Var")) : %($op ("Var"));
+    rows.push(%(rewrite $point $kind $name () ()));
+  }
+  return %((code-value "bound" $c ${rows.list_free()}));
+}
+
 /** Registers a translator for member calls that find no member on a
     receiver whose aggregate declares a field with `mark`. */
 Code Code.register_marked_rewrite(

@@ -39,6 +39,7 @@
       (eq? (car row) "Code_convert")
       (eq? (car row) "Code_call_in_order")
       (eq? (car row) "Code_register_typed_rewrite")
+      (eq? (car row) "Code_register_operator_rewrite")
       (eq? (car row) "Code_type")
       (eq? (car row) "Code_value")
       (eq? (car row) "Code_exits")

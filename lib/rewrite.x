@@ -53,3 +53,22 @@ macro Decorator $rewrite_typed(
     Unit $function, Type $type, Expr $pattern, Expr @holes) {
   @register_typed_rewrite($function, $type, $pattern, $holes)
 }
+
+/** Registers the decorated translator for each operator in `operators`
+    applied to an operand of `type`, in `form`. */
+meta Code register_operator_rewrite(
+  Code function, List type, Code form, List operators) {
+  Array symbols = [];
+  foreach (Code op, operators) symbols.push(op.value());
+  return function.register_operator_rewrite(
+    type, form.value(), symbols.list_free());
+}
+
+/** Gives the decorated translator every dynamic operation, one with an
+    operand of `type`, that applies one of `operators` in `form`:
+    `<binary>`, `<prefix>`, or `<postfix>`. Returning void, null, or the
+    input itself declines the rewrite. */
+macro Decorator $rewrite_operators(
+    Unit $function, Type $type, Expr $form, Expr @operators) {
+  @register_operator_rewrite($function, $type, $form, $operators)
+}

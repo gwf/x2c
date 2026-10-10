@@ -237,6 +237,14 @@ meta Code Code.register_marked_rewrite(
 meta Code Code.register_typed_rewrite(
   Code function, Type type, Macro shape, List holes);
 
+/** Registers a translator for each operator in `operators` applied to an
+    operand of `type`, `Var` or an alias of it, in `form`: `<binary>` for a
+    binary operator or compound assignment, `<prefix>` for a prefix or
+    unary operator, or `<postfix>`. The translator has no pattern; it
+    receives every such operation. */
+meta Code Code.register_operator_rewrite(
+  Code function, Type type, Symbol form, List operators);
+
 /** Registers block items to follow matching local initializations. */
 meta Code Code.register_after_initialization(
   Code function, Macro shape, List holes);
