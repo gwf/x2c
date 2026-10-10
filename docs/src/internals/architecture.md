@@ -757,9 +757,10 @@ conversion reads, or displayed through `Var.str` for `%s`. The redundant
 compound assignments and the unary family for increments, decrements, and
 unary operators, keyed by the operator and `Var`. The transform dispatches
 an operation to those rules only when an operand has `Var` identity, after
-protocol operators resolved, and normalizes the bound replacement as it
-would its own lowering. A binary operator returns a `Var.binary` call; an
-update returns the call of its storage's update helper with the target's
+protocol operators resolved, and normalizes the replacement as it would its
+own lowering. A binary operator returns a lowered `Var.binary` call, so an
+operator chain does not rebind its remaining terms at each level; an update
+returns the lowered call of its storage's update helper with the target's
 address, the form the cleanup walk recognizes as a write. The same component
 adds rules after `src/component-access.x` for the bracket read, store, and
 update of any protocol participant; they call the getter, `setindex`,
@@ -769,7 +770,8 @@ transform applies at condition positions, and slices, comparisons, and a
 participant's direct compound update remain in the transform. When a rewrite
 lowers its replacement, the source expressions the replacement holds lower
 outside the active rule, so a store nested in another store's value applies
-the same rule again.
+the same rule again. A rule whose pattern was derived without the subject's
+bindings matches without collecting them.
 
 The components and `src/grammar.x`, whose source forms they recognize, are
 compiler prelude sources.
