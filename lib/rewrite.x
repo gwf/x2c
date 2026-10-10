@@ -30,8 +30,7 @@ meta Code register_marked_rewrite(
 
 /** Tests the full member call pattern on calls that find no member on a
     receiver whose aggregate declares a field with `mark`, such as
-    `<delegate>`. Each such aggregate keys the rule when that field is
-    declared. Returning void, null, or the input itself declines. */
+    `<delegate>`. Returning void, null, or the input itself declines. */
 macro Decorator $rewrite_marked(
     Unit $function, Expr $mark, Expr $pattern, Expr @holes) {
   @register_marked_rewrite($function, $mark, $pattern, $holes)

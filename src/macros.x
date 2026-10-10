@@ -2596,16 +2596,13 @@ static MacroMatcher *RewriteRule.prepared_matcher(RewriteRule rule) {
    the translator applies. Only the active translator is excluded while its
    replacement binds, so independent translations can compose. User rules
    retain registration order ahead of builtin defaults. */
-static void Compiler._register_rewrite(Compiler c, RewriteRule rule) =>
-  c._register_rule(rule, rule.kind);
-
-static void Compiler._register_rule(Compiler c, RewriteRule rule, Var kind) {
+static void Compiler._register_rewrite(Compiler c, RewriteRule rule) {
   if (!c.rewrite_rules) c.rewrite_rules = {};
   Var stored;
   Map kinds;
   if (c.rewrite_rules.try_get(rule.point, stored)) kinds = stored;
   else c.rewrite_rules[rule.point] = kinds = {};
-  List rows = kinds.try_get(kind, stored) ? stored.list() : NULL;
+  List rows = kinds.try_get(rule.kind, stored) ? stored.list() : NULL;
   foreach (RewriteRule prior, rows)
     if (prior.name == rule.name &&
         prior.matcher.shape == rule.matcher.shape &&
@@ -2620,17 +2617,7 @@ static void Compiler._register_rule(Compiler c, RewriteRule rule, Var kind) {
     ordered.push(prior);
   }
   if (!inserted) ordered.push(rule);
-  kinds[kind] = ordered.list_free();
-}
-
-/** Records that the field `name` of `aggregate` was declared with the field
-    keyword `mark`, and keys by `aggregate` the member rules registered for
-    `mark`, so they see only calls on receivers that reach it. */
-void Compiler.mark_field(
-  Compiler c, Type aggregate, Symbol mark, String name) {
-  c.sym.mark_field(aggregate, mark, name);
-  foreach (RewriteRule rule, c._rewrite_candidates(<member>, mark))
-    c._register_rule(rule, aggregate);
+  kinds[rule.kind] = ordered.list_free();
 }
 
 static List Compiler._rewrite_candidates(Compiler c, Symbol point, Var kind) {
@@ -2638,6 +2625,22 @@ static List Compiler._rewrite_candidates(Compiler c, Symbol point, Var kind) {
   if (!c.rewrite_rules || !c.rewrite_rules.try_get(point, stored)) return NULL;
   Map kinds = stored;
   return kinds.try_get(kind, stored) ? stored.list() : NULL;
+}
+
+/** Matches the member rules registered for each field keyword that
+    `aggregate` declares a field with, as `Compiler.rewrite` matches those
+    keyed by a receiver type. */
+List Compiler.marked_rewrite(
+  Compiler c, Type aggregate, List source, Token site) {
+  Var stored;
+  if (!c.rewrite_rules.try_get(<member>, stored)) return NULL;
+  foreach (Var (mark, _), stored.map()) {
+    if (mark is not <symbol> || !c.sym.get(%(@aggregate $mark))) continue;
+    List rewritten = c.rewrite(
+      <member>, mark, source, AST_EXPRESSION, NULL, site);
+    if (rewritten) return rewritten;
+  }
+  return NULL;
 }
 
 /** Tests one operation's registry without invoking a translator. */

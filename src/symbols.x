@@ -1242,10 +1242,11 @@ static List Sym._field_row(
 /** Returns recorded fields in source order, or `NULL`. */
 List Sym.field_order(Sym s, Type type) => s.get(%(@type "field-order"));
 
-/** Records that the named field `name` of `aggregate` was declared with the
-    field keyword `mark`, such as `delegate`. */
+/** Records that the field `name` of `aggregate` was declared with the field
+    keyword `mark`, such as `delegate`, and that `aggregate` declares one. */
 void Sym.mark_field(Sym s, Type aggregate, Symbol mark, String name) {
   s.set(%(@aggregate $mark $name), %($mark));
+  s.set(%(@aggregate $mark), %($mark));
 }
 
 /** Returns the `(NAME TYPE)` rows of the fields of `aggregate` declared with

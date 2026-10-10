@@ -22,6 +22,7 @@
 #include "var-tags.x"
 #include "varops.x"
 #include "component-access.x"
+#include "component-delegate.x"
 #include "component-try.x"
 #include "fields.x"
 #include "grammar.x"
@@ -374,6 +375,96 @@ Code collection_postfix(Code code) {
   return code;
 }
 
+/* --- src/component-delegate.x -------------------------------------------- */
+
+static String _delegate_type_name(Type type) {
+  List base = type_base_suffix(type);
+  match (base)
+    case %((!or struct union)
+           (!set ?tag (!or (!not (*)) (gensym ? ?) (binding ? ?)))):
+      return tag.str();
+  return base.car().str();
+}
+
+static String _delegate_path(Type type, List fields, String member) {
+  Array parts = [_delegate_type_name(type)];
+  foreach (String field, fields) parts.push(field);
+  if (member) parts.push(member);
+  return ".".join(parts.list_free());
+}
+
+static void _delegate_packages(
+  Type outer, Type type, String member, List fields, List packages) {
+  Array notes = [%"delegate path: ${_delegate_path(outer, fields, NULL)}"];
+  foreach (String package, packages) notes.push(%"package: '$package'");
+  String method = %"${_delegate_type_name(type)}.$member";
+  x2c_diagnostic_fail_at(NULL, <type>,
+    %"method '$method' is provided by multiple imported packages",
+    notes.list_free());
+}
+
+static void _delegate_search(
+  Type outer, String member, Type receiver, List reverse, List seen,
+  Array found, List &cycle) {
+  Type aggregate = receiver.aggregate();
+  if (!aggregate) return;
+  if (aggregate in seen) {
+    if (!cycle) cycle = reverse.reverse();
+    return;
+  }
+  seen = cons(aggregate, seen);
+  foreach (List row, aggregate.marked_fields(<delegate>)) {
+    String name = row.car();
+    Type type = receiver.resolve_member(name, 0).caddr();
+    List path = cons(name, reverse);
+    List resolution = type.resolve_member(member, 1);
+    match (resolution) {
+      case %(method ?binding ?):
+        found.push(%(${path.reverse()} $binding));
+      case %(ambiguous *packages):
+        _delegate_packages(outer, type, member, path.reverse(), packages);
+    }
+    if (!resolution)
+      _delegate_search(outer, member, type, path, seen, found, cycle);
+  }
+}
+
+static void _delegate_ambiguous(Type outer, String member, List paths) {
+  Array notes = [];
+  foreach (List path, paths) {
+    String spelling = x2c_binding_spelling(path.cadr());
+    String description = _delegate_path(outer, path.car(), member);
+    notes.push(%"delegate path: $description -> $spelling");
+  }
+  String method = %"${_delegate_type_name(outer)}.$member";
+  x2c_diagnostic_fail_at(NULL, <type>,
+    %"method '$method' has multiple delegate paths", notes.list_free());
+}
+
+/** Rebuilds a call that finds no member on its receiver through the one
+    delegate field path that provides the method. */
+Code delegate_member(Code code) {
+  match (code) case $delegate_call(?receiver, ?member, *arguments): {
+    Type outer = receiver.cadr();
+    String name = x2c_binding_spelling(member);
+    Array found = [];
+    List cycle = NULL;
+    _delegate_search(outer, name, outer, NULL, NULL, found, cycle);
+    List paths = found.list_free();
+    if (paths && paths.cdr()) _delegate_ambiguous(outer, name, paths);
+    if (!paths && cycle)
+      x2c_diagnostic_fail_at(NULL, <type>,
+        %"delegation cycle resolving ${_delegate_type_name(outer)}.$name",
+        %("delegate path: ${_delegate_path(outer, cycle, NULL)}"));
+    if (!paths) return code;
+    Code target = receiver;
+    foreach (String field, paths.car().car())
+      target = x2c_expr_field(target, field);
+    return $!($target.$member(@arguments));
+  }
+  return code;
+}
+
 /* --- src/component-try.x ------------------------------------------------- */
 
 static int _try_arm_exits(List arm) {
@@ -599,6 +690,12 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "collection_update", collection_update);
   $linked.row(rows, "collection_prefix", collection_prefix);
   $linked.row(rows, "collection_postfix", collection_postfix);
+  $linked.row(rows, "_delegate_type_name", _delegate_type_name);
+  $linked.row(rows, "_delegate_path", _delegate_path);
+  $linked.row(rows, "_delegate_packages", _delegate_packages);
+  $linked.row(rows, "_delegate_search", _delegate_search);
+  $linked.row(rows, "_delegate_ambiguous", _delegate_ambiguous);
+  $linked.row(rows, "delegate_member", delegate_member);
   $linked.row(rows, "_try_arm_exits", _try_arm_exits);
   $linked.row(rows, "try_catch_cases", try_catch_cases);
   $linked.row(rows, "_try_finalizer_label", _try_finalizer_label);

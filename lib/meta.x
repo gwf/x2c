@@ -196,8 +196,7 @@ meta Code Code.register_rewrite(Code function, Macro shape, List holes);
 
 /** Registers a translator for member calls that find no member on a
     receiver whose aggregate declares a field with the field keyword `mark`,
-    such as `delegate`. Each such aggregate keys the rule when that field is
-    declared, so a call on any other receiver never tests it. */
+    such as `delegate`. A call on any other receiver never tests it. */
 meta Code Code.register_marked_rewrite(
   Code function, Symbol mark, Macro shape, List holes);
 
