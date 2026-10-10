@@ -162,10 +162,10 @@ meta Code Code.lowered(Code code);
 
     The pattern's form selects the operations that test it: an indexed
     access or assignment, a binary operator, a member call by receiver
-    type, a call by callee spelling, an Array or Map literal by head, a
-    `switch`, `try`, `raise`, or `match` node, or a function definition. An
-    operator the pattern writes as `(!or OP...)` registers it for each
-    operator. An
+    type, a call by callee spelling, an Array, Map, or `%""` literal by
+    head, a `switch`, `try`, `raise`, or `match` node, or a function
+    definition. An operator the pattern writes as `(!or OP...)` registers it
+    for each operator. An
     operator pattern that types the operation or an operand `Var`, or an
     alias of it, takes the dynamic operations instead: those with an
     operand of `Var` identity that no protocol member resolved, each

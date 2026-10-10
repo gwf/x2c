@@ -445,7 +445,7 @@ Code Code.register_rewrite(Code function, List pattern, List holes) {
     }
     case %(expr ? (call (expr ? (ident (binding ? ?(String callee)))) ?)):
       { point = <call>; kinds = %($callee); }
-    case %(expr ? ((!set ?head (!or array map)) *)):
+    case %(expr ? ((!set ?head (!or array map segments)) *)):
       { point = <literal>; kinds = %($head); }
     case %((!quote !or) ((!set ?head (!or switch try raise match)) *) *):
       { point = <node>; kinds = %($head); }
