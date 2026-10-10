@@ -74,7 +74,7 @@ cached literal slots and deferred file-static initializers.
 Public functions:
 
 `Compiler.setup_cache_init`, `_initializer_function`, `_run_once`,
-`_entry_call`, `Compiler.initialization_guard`
+`_entry_call`, `Compiler.zero_initializer`, `Compiler.initialization_guard`
 
 ### [src/callables.x](../src/callables.x)
 

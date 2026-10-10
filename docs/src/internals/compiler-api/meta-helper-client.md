@@ -28,7 +28,7 @@ The compiler's side of the project meta helper.
 Selects the table of the unit at `filename` for the calls that follow,
 and resets the unit's `meta static` values before the first one.
 
-Source: `src/meta-helper-client.x:436`
+Source: `src/meta-helper-client.x:437`
 
 <a id="Compiler.meta_helper_call"></a>
 #### Compiler.meta_helper_call
@@ -65,7 +65,7 @@ Source: `src/meta-helper-client.x:47`
 Stops the helper this process runs, which a translation worker does
 when its units are done and every process does as it ends.
 
-Source: `src/meta-helper-client.x:450`
+Source: `src/meta-helper-client.x:451`
 
 <a id="Compiler.use_meta_helper"></a>
 #### Compiler.use_meta_helper
@@ -76,7 +76,7 @@ Uses the helper at `path`, or none when it is NULL, whose tables named
 in `failures` could not be built, each with why, and whose table for
 each input or included file path is in `units`.
 
-Source: `src/meta-helper-client.x:423`
+Source: `src/meta-helper-client.x:424`
 
 ## Design notes
 
