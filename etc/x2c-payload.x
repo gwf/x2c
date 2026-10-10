@@ -312,7 +312,7 @@ try {
 }
 catch %(?code *detail): {
   Var why = detail.assoc(<reason>);
-  if (why is void) Stderr.printf("x2c: %s %s\n", code.str(), detail.repr());
-  else Stderr.printf("x2c: %s\n", why.str());
+  if (why is void) Stderr.printf("x2c: %s %s\n", code, detail.repr());
+  else Stderr.printf("x2c: %s\n", why);
   return 1;
 }
