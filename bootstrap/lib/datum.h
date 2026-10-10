@@ -12,6 +12,8 @@ int datum_write(Buffer out, Var value, int tagged);
 
 int datum_read(String text, unsigned * cursor, Var * out);
 
+int datum_read_plain(String text, unsigned * cursor, Var * out);
+
 int datum_frame(Buffer out, Var value);
 
 int datum_unframe(String input, size_t * used, Var * value);
