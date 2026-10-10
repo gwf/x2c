@@ -2615,12 +2615,14 @@ static List Compiler._function_body(
   String old_fn = c.fn_name;
   c.fn_name = name;
   c.sym.push_scope(c.params);
-  int depth = c.ancestors.len();
+  int depth = c.ancestors.len(), placed = c.placements.len();
   c.enter((Ancestor){ .what = <function>, .node = declaration });
   List body = NULL;
   {
+    // A failed body leaves no rows or placements of its own behind.
     defer {
-      c._leave_function(depth);
+      c.ancestors.truncate(depth);
+      c.placements.resize(placed);
       c.sym.pop_scope();
       c.return_type = old_return;
       c.fn_name = old_fn;
@@ -2641,18 +2643,6 @@ static List Compiler._entry_code(Compiler c, int depth) {
     _push_items(
       items, c.bind_syntax(row[3], AST_BLOCK, c.return_type));
   return items.list_free();
-}
-
-/* Leaves the function whose row is at `depth`, with the rows and
-   placements a failed body left inside it. */
-static void Compiler._leave_function(Compiler c, int depth) {
-  c.ancestors.truncate(depth);
-  int kept = 0;
-  for (int i = 0; i < (int) c.placements.len(); i++) {
-    List row = c.placements[i];
-    if (row.car().int() < depth) c.placements[kept++] = row;
-  }
-  c.placements.resize(kept);
 }
 
 static String Compiler._prepare_lifecycle(
