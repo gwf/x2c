@@ -2674,8 +2674,9 @@ List Compiler.lower_rewrite(
 static List Compiler._rewrite(
   Compiler c, Symbol point, Var kind, List source, AstPos position,
   Type expected, Token site, int lower) {
-  // A meta body still completes the calls ordinary lookup misses.
-  if (c.macro_holes || (c.meta_body && point != <member>)) return NULL;
+  // A meta body still completes and formats the calls it makes.
+  if (c.macro_holes || (c.meta_body && point != <member> && point != <call>))
+    return NULL;
   foreach (RewriteRule rule, c._rewrite_candidates(point, kind)) {
     if (c.active_rewrites.contains(rule) ||
         !c.matches_macro(*rule.prepared_matcher(), source)) continue;

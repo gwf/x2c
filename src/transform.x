@@ -457,11 +457,18 @@ static List _access_source(List expression) {
   return expression;
 }
 
-static List Compiler._access_rewrite(Compiler c, List expression) {
+/* Access and call rules see a typed expression before its children lower.
+   A call is keyed by the spelling of its callee. */
+static List Compiler._expression_rewrite(Compiler c, List expression) {
   if (!c.rewrite_rules) return NULL;
-  Symbol kind = 0;
+  Symbol point = <access>;
+  Var kind = 0;
   List source = expression;
   match (expression) {
+    case %(expr ? (call (expr ? (ident ?binding)) ?)): {
+      point = <call>;
+      kind = binding_identity_spelling(binding);
+    }
     case %(expr ? (getindex ? ?)): {
       kind = <read>;
       source = _access_source(expression);
@@ -487,11 +494,11 @@ static List Compiler._access_rewrite(Compiler c, List expression) {
     }
   }
   return kind ? c.lower_rewrite(
-    <access>, kind, source, AST_EXPRESSION, expression.cadr(), NULL) : NULL;
+    point, kind, source, AST_EXPRESSION, expression.cadr(), NULL) : NULL;
 }
 
 static Ast Compiler._expression_node(Compiler c, Ast ast) {
-  List rewritten = c._access_rewrite(ast);
+  List rewritten = c._expression_rewrite(ast);
   if (rewritten) return rewritten;
   Ast expression = c.lower_typed_adapter_expr(ast);
   expression = c.lower_lambda_expr(expression);
@@ -1292,8 +1299,8 @@ static List Compiler._lower_printf_vars(Compiler c, List ast) {
   String family = (String) info.name;
   if (info.fmt_arg >= values.len())
     c._printf_error(family, "call has no format argument");
-  List format_arg = values[info.fmt_arg], int raw = 0;
-  String format = c.printf_static_format(format_arg, raw);
+  List format_arg = values[info.fmt_arg], int raw = 1;
+  String format = c.printf_static_format(format_arg);
   if (!format)
     c._printf_error(
       family, "Var arguments require a single static format literal");

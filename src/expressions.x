@@ -3019,10 +3019,8 @@ static void Compiler._check_converter_args(
      family's positions count the receiver a method call spells before the
      dot, which `arguments` has already dropped. A format the transform
      cannot read leaves those values unlowered, so nothing converts them. */
-  const PrintfFn *info = callee.printf_family(), int raw = 0;
-  if (!info ||
-      !c.printf_static_format(supplied[info.fmt_arg], raw))
-    return;
+  const PrintfFn *info = callee.printf_family();
+  if (!info || !c.printf_static_format(supplied[info.fmt_arg])) return;
   int first = info.first_arg - method, index = 0;
   for (List a = arguments, n = notes; a; a = cdr(a), n = cdr(n))
     if (index++ >= first && car(a) is <list>)
@@ -3110,15 +3108,13 @@ const PrintfFn *List.printf_family(List l) {
   return NULL;
 }
 
-/** Returns the format a printf-family call consumes when it is known at
-    translation time, or `NULL`. That is a quoted C string literal, the
-    canonical `String` one becomes, or the `String_new` of one; any other
-    format, such as a variable or an object macro, is not readable here.
-    `raw` reports C spelling, whose quotes and escape sequences the caller
-    steps over.
+/** Returns the C spelling of the format a printf-family call consumes when
+    it is known at translation time, or `NULL`. That is a quoted C string
+    literal, the canonical `String` one becomes, or the `String_new` of one;
+    any other format, such as a variable or an object macro, is not readable
+    here. A `String` literal's text is spelled as a C literal.
 */
-String Compiler.printf_static_format(
-  Compiler c, Var format, int &raw) {
+String Compiler.printf_static_format(Compiler c, Var format) {
   match (format) {
     case %(expr (* char) ${$source_literal_content(
         %((* char) ?spelled))}): {
@@ -3126,7 +3122,6 @@ String Compiler.printf_static_format(
       int length = spelling ? spelling.len() : 0;
       if (length < 2 || spelling[0] != '"' || spelling[length - 1] != '"')
         return NULL;
-      raw = 1;
       return spelling;
     }
     case %(expr ("String") (cache ?id)): {
@@ -3134,12 +3129,12 @@ String Compiler.printf_static_format(
       match (key)
         case %(string (expr ("String") ${$source_literal_content(
             %(("String") ?text))})): {
-          raw = 0;
-          return text;
+          String spelling = text;
+          return spelling.repr();
         }
       match (key)
         case %(string (expr ("String") (call "String_new" (args ?literal)))):
-          return c.printf_static_format(literal, raw);
+          return c.printf_static_format(literal);
       return NULL;
     }
   }

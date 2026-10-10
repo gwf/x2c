@@ -226,6 +226,8 @@ Type Code.type(Code v) => _ask("Code_type", %($v));
 Var Code.value(Code v) => _ask("Code_value", %($v));
 int Code.exits(Code v) => _ask("Code_exits", %($v));
 int Code.is_static_pattern(Code v) => _ask("Code_is_static_pattern", %($v));
+Code Code.convert(Code v, Type t) => _ask("Code_convert", %($v $t));
+String Code.format(Code v) => _ask("Code_format", %($v));
 Code Code.register_rewrite(Code f, Macro p, List h) =>
   _ask("Code_register_rewrite", %($f $p $h));
 Code Code.register_marked_rewrite(Code f, Symbol m, Macro p, List h) =>

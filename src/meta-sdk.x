@@ -267,6 +267,18 @@ int Code.exits(Code statement) {
   return reference_guard_exits(statement);
 }
 
+/** Answers `Code.convert`, declared in `lib/meta.x`. */
+Code Code.convert(Code value, Type target) {
+  _sdk_guard("Code.convert");
+  return active.expander.convert_expression(value, target);
+}
+
+/** Answers `Code.format`, declared in `lib/meta.x`. */
+String Code.format(Code value) {
+  _sdk_guard("Code.format");
+  return active.expander.printf_static_format(value);
+}
+
 /** Answers `Code.is_static_pattern`, declared in `lib/meta.x`. */
 int Code.is_static_pattern(Code pattern) {
   _sdk_guard("Code.is_static_pattern");
@@ -342,6 +354,8 @@ Code Code.register_rewrite(Code function, Macro shape, List holes) {
     case %(expr ? (call (expr ? (op ((!quote !quote) .)
             ((!quote !and) (expr ?type *)) ?)) ?)):
       { point = <member>; kind = type; }
+    case %(expr ? (call (expr ? (ident (binding ? ?(String callee)))) ?)):
+      { point = <call>; kind = callee; }
     case %((!quote !or) ((!set ?head (!or switch try)) *) *):
       { point = <node>; kind = head; }
     case %((!set ?head (!or switch try)) *): { point = <node>; kind = head; }

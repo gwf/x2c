@@ -186,6 +186,15 @@ meta Var Code.value(Code code);
     does not return. */
 meta int Code.exits(Code statement);
 
+/** Returns the expression `value` converted to `target` as a destination of
+    that type converts it. */
+meta Code Code.convert(Code value, Type target);
+
+/** Returns the C spelling of the static string literal `value` holds as a
+    printf-family format, or NULL when the format is not known until the
+    program runs. A `String` literal's text is spelled as a C literal. */
+meta String Code.format(Code value);
+
 /** Tests whether the Match pattern expression `pattern` builds the same
     value each time it runs, so it can be prepared once. */
 meta int Code.is_static_pattern(Code pattern);
