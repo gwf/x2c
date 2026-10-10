@@ -183,9 +183,9 @@ def interface_replay(compiler, directory, inputs, fresh):
                   "status": translated.returncode}
         if not translated.returncode:
             generated = {path.name: path.read_bytes()
-                         for path in output.glob("*.c")}
+                         for path in output.iterdir() if path.suffix in {".c", ".h"}}
             if mode == "warm":
-                record["same_generated_c"] = generated == snapshots
+                record["same_generated_code"] = generated == snapshots
             snapshots = generated
         records.append(record)
     return records
@@ -232,8 +232,9 @@ def run_case(compiler, base, name, files, options, rejection):
     record = {"name": name, "command": command, "build_status": result.returncode,
               "log": str(directory / "build.log")}
     if rejection:
-        record["expected"] = "translation rejection"
         phase = options.get("rejection_phase", "type")
+        record["expected"] = ("build rejection" if phase == "any" else
+                              "translation rejection")
         record["passed"] = (result.returncode != 0 and
                             re.search(rejection, result.stdout, re.I) is not None and
                             (phase == "any" or f": {phase}:" in result.stdout) and
@@ -253,7 +254,7 @@ def run_case(compiler, base, name, files, options, rejection):
         record["interface_replay"] = interface_replay(
             compiler, directory, options["interface_inputs"], True)
         record["passed"] &= all(
-            item["status"] == 0 and item.get("same_generated_c", True)
+            item["status"] == 0 and item.get("same_generated_code", True)
             for item in record["interface_replay"])
     rounds = ([{}] * options.get("warm_builds", 0) +
               options.get("mutations", []))
