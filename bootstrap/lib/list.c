@@ -295,20 +295,6 @@ _x2c_defer_env_21;
 
 static void _x2c_defer_cleanup_22(void * _x2c_defer_opaque_22);
 
-typedef struct _x2c_defer_env_22{
-  const void * _x2c_defer_capture_23;
-}
-_x2c_defer_env_22;
-
-static void _x2c_defer_cleanup_23(void * _x2c_defer_opaque_23);
-
-typedef struct _x2c_defer_env_23{
-  const void * _x2c_defer_capture_24;
-}
-_x2c_defer_env_23;
-
-static void _x2c_defer_cleanup_24(void * _x2c_defer_opaque_24);
-
 List List_cons_in(Pool pool, Var head, List tail){
   if(! pool || Var_is_void(head)) return NULL;
   struct List query ={
@@ -1623,36 +1609,16 @@ static int Render__fits(Render * r, Var elem){
 
 }
 
-Buffer Var_write_pointer_repr(Var, Buffer);
-
 static void Render__items(Render * r, Var elem){
   List lst = Var_list(elem);
   Buffer out =(* r).out;
-  RenderPath path;
-  if(! RenderPath_enter(&(path), lst)) return(void) Var_write_pointer_repr(elem, out);
-  {
-    _x2c_defer_env_22 _x2c_macro_environment_22 ={
-      0
-    }
-    ;
-    _x2c_macro_environment_22._x2c_defer_capture_23 =(const void *) & path;
-    X2CCleanup _x2c_defer_record_23 ={
-      .fn = _x2c_defer_cleanup_23, .env = & _x2c_macro_environment_22
-    }
-    ;
-    x2c_cleanup_push(& _x2c_defer_record_23);
-    {
-      if(out -> pos - Buffer_tabstop(out) > 5) Buffer_newline_indent(out);
-      _open(lst, out);
-      for(List l = lst;  List_truth(l);  l = List_cdr(l)){
-        Render__value(&((* r)), List_car(l));
-        if(List_truth(List_cdr(l))) Buffer_write(out, " ");
-      }
-      _close(out);
-    }
-    x2c_cleanup_leave(& _x2c_defer_record_23);
+  if(out -> pos - Buffer_tabstop(out) > 5) Buffer_newline_indent(out);
+  _open(lst, out);
+  for(List l = lst;  List_truth(l);  l = List_cdr(l)){
+    Render__value(&((* r)), List_car(l));
+    if(List_truth(List_cdr(l))) Buffer_write(out, " ");
   }
-
+  _close(out);
 }
 
 static void Render__flat(Render * r, Var elem){
@@ -1664,30 +1630,12 @@ static void Render__flat(Render * r, Var elem){
 static void Render__flat_items(Render * r, Var elem){
   List lst = Var_list(elem);
   Buffer out =(* r).out;
-  RenderPath path;
-  if(! RenderPath_enter(&(path), lst)) return(void) Var_write_pointer_repr(elem, out);
-  {
-    _x2c_defer_env_23 _x2c_macro_environment_23 ={
-      0
-    }
-    ;
-    _x2c_macro_environment_23._x2c_defer_capture_24 =(const void *) & path;
-    X2CCleanup _x2c_defer_record_24 ={
-      .fn = _x2c_defer_cleanup_24, .env = & _x2c_macro_environment_23
-    }
-    ;
-    x2c_cleanup_push(& _x2c_defer_record_24);
-    {
-      _open(lst, out);
-      for(List l = lst;  List_truth(l);  l = List_cdr(l)){
-        Render__flat(&((* r)), List_car(l));
-        if(List_truth(List_cdr(l))) Buffer_write(out, " ");
-      }
-      _close(out);
-    }
-    x2c_cleanup_leave(& _x2c_defer_record_24);
+  _open(lst, out);
+  for(List l = lst;  List_truth(l);  l = List_cdr(l)){
+    Render__flat(&((* r)), List_car(l));
+    if(List_truth(List_cdr(l))) Buffer_write(out, " ");
   }
-
+  _close(out);
 }
 
 Buffer Var_write_repr(Var, Buffer);
@@ -1822,15 +1770,5 @@ static void _x2c_defer_cleanup_21(void * _x2c_defer_opaque_21){
 static void _x2c_defer_cleanup_22(void * _x2c_defer_opaque_22){
   _x2c_defer_env_21 * _x2c_defer_data_21 =(_x2c_defer_env_21 *) _x2c_defer_opaque_22;
   Buffer_cleanup((*(Buffer *) _x2c_defer_data_21->_x2c_defer_capture_22));
-}
-
-static void _x2c_defer_cleanup_23(void * _x2c_defer_opaque_23){
-  _x2c_defer_env_22 * _x2c_defer_data_22 =(_x2c_defer_env_22 *) _x2c_defer_opaque_23;
-  RenderPath_leave(&((*(RenderPath *) _x2c_defer_data_22->_x2c_defer_capture_23)));
-}
-
-static void _x2c_defer_cleanup_24(void * _x2c_defer_opaque_24){
-  _x2c_defer_env_23 * _x2c_defer_data_23 =(_x2c_defer_env_23 *) _x2c_defer_opaque_24;
-  RenderPath_leave(&((*(RenderPath *) _x2c_defer_data_23->_x2c_defer_capture_24)));
 }
 
