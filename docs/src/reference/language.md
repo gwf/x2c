@@ -542,8 +542,9 @@ protocol-selected methods, and typedef ancestors in their existing order.
 Delegate fields are searched only if those lookups fail, and a member rewrite a
 program registers for the receiver's own type is tried before them. The search
 belongs to the shipped component `src/component-delegate.x`, a translator for
-missed calls that `$rewrite_marked(<delegate>, ...)` registers. It runs only
-for a receiver whose aggregate declares a delegate field. The search visits
+missed calls that `$rewrite` registers with the receiver pattern
+`%(expr <delegate> *)`. It runs only for a receiver whose aggregate declares a
+delegate field. The search visits
 marked fields in source order to produce consistent diagnostics. One resolving
 path is used; two or more are an ambiguity error, regardless of field order. An
 explicit outer method therefore resolves an otherwise ambiguous pair.
@@ -3208,17 +3209,17 @@ concatenates.
 
 These lowerings, the dynamic compound assignments and increments below, and
 the rejection of unary `+`, `-`, and `~` on a `Var` belong to the shipped
-component `src/component-operators.x`. It registers its translators with
-`$rewrite_operators(Var, FORM, OPERATORS...)`, which keys a rule by each
-operator and `Var` and gives it every such operation without a pattern.
-`FORM` is `<binary>` for binary operators and compound assignments,
-`<prefix>` for prefix and unary operators, and `<postfix>`. The rules run
-after protocol operators resolve, only when an operand has `Var` identity,
-so native operands never reach them. A program's rule registered for the
-same operator is tried first. `$rewrite_typed(Var, MACRO, HOLES...)`
-registers one with a macro pattern whose holes decide which operands it
-takes, so a rule for `$!Money{...}` with `typedef Var Money` leaves other
-`Var` operands to the shipped rules.
+component `src/component-operators.x`. It registers each translator with
+`$rewrite` and a Match pattern typed `Var`, such as
+`%(expr ("Var") (op (!or + - (!quote *) / % ...) ? ?))`, which keys the rule
+by each operator the pattern names and `Var`. A pattern that types the
+operation or an operand `Var`, or an alias of it, takes the dynamic
+operations. They run after protocol operators resolve, only when an operand
+has `Var` identity, so native operands never reach them; each operation
+arrives typed `Var`. A program's rule registered for the same operator is
+tried first. A macro pattern's holes decide which operands it takes, so a
+rule for `$!Money{...}` with `typedef Var Money` leaves other `Var` operands
+to the shipped rules.
 
 Direct runtime calls to `Var.binary` additionally accept comparisons and eager
 `&&`/`||`. The compiler does not use that eager logical path. It converts each

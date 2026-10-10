@@ -209,9 +209,23 @@ meta Code Code.call_in_order(Code member, List arguments, Type type);
     lowered again. */
 meta Code Code.lowered(Code code);
 
-/** Registers a translator with its macro and optional hole patterns.
-    NULL holes use the macro's named captures. Recognition uses the source
-    views and binding identity rules of a macro-valued case.
+/** Registers a translator for the code `pattern` recognizes: a macro with
+    optional hole patterns, whose recognition uses the source views and
+    binding identity rules of a macro-valued case, or a Match pattern.
+    NULL holes use the macro's named captures.
+
+    The pattern's form selects the operations that test it: an indexed
+    access or assignment, a binary operator, a member call by receiver
+    type, a call by callee spelling, an Array or Map literal by head, a
+    `switch` or `try` node, or a function definition. An operator the
+    pattern writes as `(!or OP...)` registers it for each operator. An
+    operator pattern that types the operation or an operand `Var`, or an
+    alias of it, takes the dynamic operations instead: those with an
+    operand of `Var` identity that no protocol member resolved, each
+    presented typed `Var`. A member call whose receiver pattern is
+    `(expr MARK *)`, with a field keyword Symbol for its type, takes the
+    calls that find no member on a receiver whose aggregate declares a field
+    with that keyword, such as `delegate`.
 
     A `Unit` macro whose body is one function definition, or only its one
     `Function` hole, registers a function rule. The compiler offers each
@@ -223,28 +237,7 @@ meta Code Code.lowered(Code code);
     call. A replacement is a function definition to bind, or a bound or
     lowered code-value carrier; it is lowered as written and offered to
     the other rules, but not again to the rule that returned it. */
-meta Code Code.register_rewrite(Code function, Macro shape, List holes);
-
-/** Registers a translator for member calls that find no member on a
-    receiver whose aggregate declares a field with the field keyword `mark`,
-    such as `delegate`. A call on any other receiver never tests it. */
-meta Code Code.register_marked_rewrite(
-  Code function, Symbol mark, Macro shape, List holes);
-
-/** Registers a translator for the operator its macro pattern spells when
-    an operand has type `type`, `Var` or an alias of it: a binary operator
-    that no protocol member resolved, a compound assignment, an increment
-    or decrement, or a unary operator. */
-meta Code Code.register_typed_rewrite(
-  Code function, Type type, Macro shape, List holes);
-
-/** Registers a translator for each operator in `operators` applied to an
-    operand of `type`, `Var` or an alias of it, in `form`: `<binary>` for a
-    binary operator or compound assignment, `<prefix>` for a prefix or
-    unary operator, or `<postfix>`. The translator has no pattern; it
-    receives every such operation. */
-meta Code Code.register_operator_rewrite(
-  Code function, Type type, Symbol form, List operators);
+meta Code Code.register_rewrite(Code function, List pattern, List holes);
 
 /** Registers block items to follow matching local initializations. */
 meta Code Code.register_after_initialization(

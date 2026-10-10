@@ -329,10 +329,14 @@ static List _rewrite_holes(Macro shape, List supplied) {
   return holes.list_free();
 }
 
+/* One rule row for each of `kinds`. */
 static Code _rewrite_registration(
-  Code function, Macro shape, List holes, Symbol point, Var kind) {
+  Code function, List shape, List holes, Symbol point, List kinds) {
   String name = x2c_function_name(function);
-  return %((code-value "bound" $function ((rewrite $point $kind $name $shape $holes))));
+  Array rows = [];
+  foreach (Var kind, kinds)
+    rows.push(%(rewrite $point $kind $name $shape $holes));
+  return %((code-value "bound" $function ${rows.list_free()}));
 }
 
 /* A function pattern is keyed by the return type it spells, or by `<any>`
@@ -357,105 +361,112 @@ static int _function_hole(Macro shape) {
   return 0;
 }
 
-/** Registers a captured translator for a complete parsed pattern. The
-    pattern's form selects the family and its key: an indexed access or
-    assignment, a binary operator, a member call by receiver type, a call
-    by callee spelling, an Array or Map literal by head, a `switch` or
-    `try` node, or a function definition by return type, which
-    `Compiler.normalize` dispatches once per definition before its body
-    lowers. */
-Code Code.register_rewrite(Code function, Macro shape, List holes) {
+/* The operators an operator position names: one operator, or each of
+   `(!or OP...)`, any of them quoted. */
+static List _rule_operators(Var position) {
+  List operators = %($position);
+  match (position) case %((!quote !or) *choices): operators = choices;
+  Array found = [];
+  foreach (Var operator, operators) {
+    match (operator) case %((!quote !quote) ?quoted): operator = quoted;
+    found.push(operator);
+  }
+  return found.list_free();
+}
+
+/* Whether an operator pattern types its operation, `type`, or one of
+   `operands` with `Var` or an alias of it, which selects the dynamic
+   operations. */
+static int _rule_dynamic(Var type, List operands) {
+  if (_rule_var(type)) return 1;
+  foreach (Var operand, operands) {
+    match (operand) case %((!quote !and) ?inner): operand = inner;
+    match (operand) case %(expr ?operand_type *):
+      if (_rule_var(operand_type)) return 1;
+  }
+  return 0;
+}
+
+static int _rule_var(Var type) =>
+  type is <list> && active.expander.sym.is_var_type(type);
+
+/* The dynamic family's keys for `operators` in `form`, `op` or `postfix`. */
+static List _rule_dynamic_kinds(List operators, Symbol form) {
+  Array kinds = [];
+  foreach (Symbol operator, operators)
+    kinds.push(
+      form == <postfix> ? %(postfix $operator ("Var")) : %($operator ("Var")));
+  return kinds.list_free();
+}
+
+/* `holes` with a receiver hole `(expr MARK *)` matching any receiver. */
+static List _unmarked(List holes, Symbol mark) {
+  Array kept = [];
+  foreach (Var hole, holes)
+    kept.push(hole == %(expr $mark *) ? %(expr ? *) : hole);
+  return kept.list_free();
+}
+
+/** Answers `Code.register_rewrite`, declared in `lib/meta.x`: the
+    pattern's form selects the family and its keys. A function rule is
+    keyed by return type, which `Compiler.normalize` dispatches once per
+    definition before its body lowers. */
+Code Code.register_rewrite(Code function, List pattern, List holes) {
   _sdk_guard("Code.register_rewrite");
-  if (!holes && _function_hole(shape))
-    return _rewrite_registration(
-      function, shape, %((!and ?function (function *))), <function>, <any>);
-  holes = _rewrite_holes(shape, holes);
-  List pattern = shape.pattern(holes);
+  Macro shape = NULL;
+  match (pattern) case %(macrodef *): {
+    shape = pattern;
+    if (!holes && _function_hole(shape))
+      return _rewrite_registration(
+        function, shape, %((!and ?function (function *))), <function>,
+        %(any));
+    holes = _rewrite_holes(shape, holes);
+    pattern = shape.pattern(holes);
+  }
   Symbol point = 0;
-  Var kind = void;
+  List kinds = NULL;
   match (pattern) {
-    case %(expr ? (index ? ?)): { point = <access>; kind = <read>; }
-    case %(expr ? (op ((!quote !quote) ?operator) ?left ?right)): {
-      point = operator.symbol().is_assignment_op() ? 0 : <binary>;
-      kind = operator;
+    case %(expr ? (index ? ?)): { point = <access>; kinds = %(read); }
+    case %(expr ?type (op ?position ?left ?right)): {
+      kinds = _rule_operators(position);
+      Symbol operator = kinds.car();
+      point = operator.is_assignment_op() ? 0 : <binary>;
       match (left) case %(expr ? (index ? ?)):
-        if (operator.symbol().is_assignment_op()) point = <access>;
+        if (operator.is_assignment_op()) point = <access>;
+      if (_rule_dynamic(type, %($left $right))) {
+        point = <binary>;
+        kinds = _rule_dynamic_kinds(kinds, <op>);
+      }
     }
-    case %(expr ? (op ((!quote !quote) (!set ?operator (!or ++ --)))
-                    (expr ? (index ? ?)))):
-      { point = <access>; kind = <prefix>; }
+    case %(expr ? (op ((!quote !quote) (!or ++ --)) (expr ? (index ? ?)))):
+      { point = <access>; kinds = %(prefix); }
     case %(expr ? (postfix ? (expr ? (index ? ?)))):
-      { point = <access>; kind = <postfix>; }
+      { point = <access>; kinds = %(postfix); }
+    case %(expr ?type ((!set ?form (!or op postfix)) ?position ?operand)):
+      if (_rule_dynamic(type, %($operand))) {
+        point = <unary>;
+        kinds = _rule_dynamic_kinds(_rule_operators(position), form);
+      }
     case %(expr ? (call (expr ? (op ((!quote !quote) .)
-            ((!quote !and) (expr ?type *)) ?)) ?)):
-      { point = <member>; kind = type; }
-    case %(expr ? (call (expr ? (ident (binding ? ?(String callee)))) ?)):
-      { point = <call>; kind = callee; }
-    case %(expr ? ((!set ?head (!or array map)) *)):
-      { point = <literal>; kind = head; }
-    case %((!quote !or) ((!set ?head (!or switch try)) *) *):
-      { point = <node>; kind = head; }
-    case %((!set ?head (!or switch try)) *): { point = <node>; kind = head; }
-    case %(!or (api-source ? ? (function ?type *)) (function ?type *)):
-      { point = <function>; kind = _function_rule_key(type); }
-  }
-  if (!point) MetaContext.reject("unsupported rewrite pattern in spike", NULL);
-  return _rewrite_registration(function, shape, holes, point, kind);
-}
-
-/** Registers a translator for an operator applied to an operand of
-    `type`, keyed by the operator and `Var` for a `Var` type or alias. */
-Code Code.register_typed_rewrite(Code c, Type type, Macro shape, List holes) {
-  _sdk_guard("Code.register_typed_rewrite");
-  if (!active.expander.sym.is_var_type(type))
-    MetaContext.reject("a typed rewrite requires Var or an alias of it", NULL);
-  holes = _rewrite_holes(shape, holes);
-  Symbol point = <unary>;
-  Var kind = void;
-  match (shape.pattern(holes)) {
-    case %(expr ? (op ((!quote !quote) ?operator) ? ?)): {
-      point = <binary>;
-      kind = %(${operator.symbol()} ("Var"));
+            ((!quote !and) (expr ?type *)) ?)) ?)): {
+      point = <member>;
+      kinds = %($type);
+      if (type is <symbol>) holes = _unmarked(holes, type);
     }
-    case %(expr ? (op ((!quote !quote) ?operator) ?)):
-      kind = %(${operator.symbol()} ("Var"));
-    case %(expr ? (postfix ?operator ?)):
-      kind = %(postfix ${operator.symbol()} ("Var"));
+    case %(expr ? (call (expr ? (ident (binding ? ?(String callee)))) ?)):
+      { point = <call>; kinds = %($callee); }
+    case %(expr ? ((!set ?head (!or array map)) *)):
+      { point = <literal>; kinds = %($head); }
+    case %((!quote !or) ((!set ?head (!or switch try)) *) *):
+      { point = <node>; kinds = %($head); }
+    case %((!set ?head (!or switch try)) *):
+      { point = <node>; kinds = %($head); }
+    case %(!or (api-source ? ? (function ?type *)) (function ?type *)):
+      { point = <function>; kinds = %(${_function_rule_key(type)}); }
   }
-  if (kind is void || kind.list().car() == <=>)
-    MetaContext.reject("a typed rewrite requires an operator pattern", NULL);
-  return _rewrite_registration(c, shape, holes, point, kind);
-}
-
-/** Registers a translator without a pattern for each operator applied to
-    an operand of `type` in `form`. */
-Code Code.register_operator_rewrite(
-  Code c, Type type, Symbol form, List operators) {
-  _sdk_guard("Code.register_operator_rewrite");
-  if (!active.expander.sym.is_var_type(type))
-    MetaContext.reject(
-      "an operator rewrite requires Var or an alias of it", NULL);
-  String name = x2c_function_name(c);
-  Symbol point = form == <binary> ? <binary> : <unary>;
-  Array rows = [];
-  foreach (Symbol op, operators) {
-    List kind = form == <postfix> ? %(postfix $op ("Var")) : %($op ("Var"));
-    rows.push(%(rewrite $point $kind $name () ()));
-  }
-  return %((code-value "bound" $c ${rows.list_free()}));
-}
-
-/** Registers a translator for member calls that find no member on a
-    receiver whose aggregate declares a field with `mark`. */
-Code Code.register_marked_rewrite(
-  Code function, Symbol mark, Macro shape, List holes) {
-  _sdk_guard("Code.register_marked_rewrite");
-  holes = _rewrite_holes(shape, holes);
-  match (shape.pattern(holes))
-    case %(expr ? (call (expr ? (op ((!quote !quote) .) ? ?)) ?)):
-      return _rewrite_registration(function, shape, holes, <member>, mark);
-  MetaContext.reject(
-    "a marked-field rewrite requires a member call pattern", NULL);
+  if (!point) MetaContext.reject("unsupported rewrite pattern", NULL);
+  return _rewrite_registration(
+    function, shape ? shape : pattern, holes, point, kinds);
 }
 
 /** Adds post-initialization block items while the declaration owner retains
@@ -465,7 +476,7 @@ Code Code.register_after_initialization(Code c, Macro shape, List holes) {
   holes = _rewrite_holes(shape, holes);
   List pattern = shape.pattern(holes);
   match (pattern) case %(declare *):
-    return _rewrite_registration(c, shape, holes, <decl>, <init>);
+    return _rewrite_registration(c, shape, holes, <decl>, %(init));
   MetaContext.reject("after-initialization requires a declaration pattern", NULL);
 }
 

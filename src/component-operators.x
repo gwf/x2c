@@ -19,8 +19,8 @@
 meta static int _dynamic_operand(Type type, int text) =>
   type.is_named("Var") || (text ? type.is_text() : !!type.numeric());
 
-$rewrite_operators(Var, <binary>, <+>, <->, <*>, </>, <%>, <"<<">, <">>">,
-  <&>, <^>, <|>)
+$rewrite(%(expr ("Var")
+  (op (!or + - (!quote *) / % <"<<"> <">>"> & ^ |) ? ?)))
 /** Boxes both operands of an arithmetic, shift, or bitwise operator for
     `Var.binary`, after rejecting an operand that is neither a number nor,
     for `+` beside text, text. The call is returned lowered, because an
@@ -94,14 +94,14 @@ meta static String _dynamic_helper(Type type) {
   return helper;
 }
 
-$rewrite_operators(Var, <binary>, <+=>, <-=>, <*=>, </=>, <%=>, <"<<=">,
-  <">>=">, <&=>, <^=>, <|=>)
+$rewrite(%(expr ("Var") (op (!or <+=> <-=> (!quote *=) </=> <%=> <"<<=">
+  <">>="> <&=> <^=> <|=>) ? ?)))
 /** Updates a `Var` or numeric lvalue with a `Var` or numeric operand
     through the update helper of its storage. */
 meta Code dynamic_compound(Code code) {
-  match (code) case %(expr ?(Type type) (op ?(Symbol op) ?left ?right)): {
+  match (code) case %(expr ? (op ?(Symbol op) ?left ?right)): {
     Code target = left, rhs = right;
-    Type right_type = rhs.cadr();
+    Type type = target.cadr(), right_type = rhs.cadr();
     Symbol operation = _dynamic_operation(op);
     match (type)
       case %((bitfield *) *):
@@ -122,26 +122,26 @@ meta Code dynamic_compound(Code code) {
   return code;
 }
 
-$rewrite_operators(Var, <prefix>, <++>, <-->)
-$rewrite_operators(Var, <postfix>, <++>, <-->)
+$rewrite(%(expr ("Var") (op (!or ++ --) ?)))
+$rewrite(%(expr ("Var") (postfix (!or ++ --) ?)))
 /** Adds or subtracts one through the `Var` update helpers; the postfix
     forms return the value before the change. */
 meta Code dynamic_change(Code code) {
   match (code) {
-    case %(expr ?(Type type) (op ?(Symbol op) ?target)): {
+    case %(expr ? (op ?(Symbol op) ?(Code target))): {
       Code one = %(expr (int) (literal (int) "1"));
       return _dynamic_update(
-        type, target, op == <++> ? <+> : <->, one.convert(%("Var")),
-        "x2c_var_update_volatile");
+        target.cadr(), target, op == <++> ? <+> : <->,
+        one.convert(%("Var")), "x2c_var_update_volatile");
     }
-    case %(expr ?(Type type) (postfix ?(Symbol op) ?target)):
+    case %(expr ? (postfix ?(Symbol op) ?(Code target))):
       return _dynamic_update(
-        type, target, op, NULL, "x2c_var_postfix_volatile");
+        target.cadr(), target, op, NULL, "x2c_var_postfix_volatile");
   }
   return code;
 }
 
-$rewrite_operators(Var, <prefix>, <+>, <->, <~>)
+$rewrite(%(expr ("Var") (op (!or + - ~) ?)))
 /** Rejects a unary numeric operator on a `Var`. */
 meta Code dynamic_unary(Code code) {
   x2c_diagnostic_fail_at(

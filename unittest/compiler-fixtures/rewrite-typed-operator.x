@@ -15,8 +15,7 @@ static Money money_scale(Money amount, int factor) {
 macro Expression $money_times(Expr $amount, Expr $factor) =>
   $amount * $factor;
 
-$rewrite_typed(Var, $money_times,
-  $!Money{${%(!and ?amount)}}, $!int{${%(!and ?factor)}})
+$rewrite($money_times, $!Money{${%(!and ?amount)}}, $!int{${%(!and ?factor)}})
 meta Code money_times(Code code) {
   match (code) case $money_times(?amount, ?factor):
     return $!Money{ money_scale($amount, $factor) };

@@ -117,7 +117,7 @@ macro Expression $delegate_call(
     Expr $receiver, Name $member, Expr @arguments) =>
   $receiver.$member(@arguments);
 
-$rewrite_marked(<delegate>, $delegate_call)
+$rewrite($delegate_call, %(expr <delegate> *), <?member>, <*arguments>)
 /** Rebuilds a call that finds no member on its receiver through the one
     delegate field path that provides the method. */
 meta Code delegate_member(Code code) {

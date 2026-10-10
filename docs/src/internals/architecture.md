@@ -738,8 +738,9 @@ walk lowers the rows in order, places the exits on every transfer out of a
 region, rejects a `goto` into one, and keeps the locals the rows write
 valid when control lands.
 
-`src/component-delegate.x` registers a member call pattern through
-`$rewrite_marked(<delegate>, ...)`. The parser marks each `delegate` field
+`src/component-delegate.x` registers a member call pattern whose receiver
+hole is `%(expr <delegate> *)`, a field keyword where a type would go. The
+parser marks each `delegate` field
 of an aggregate; a method call that ordinary lookup misses tests the rules
 registered for the marks its receiver's aggregate declares, after those
 keyed by the receiver's own type. The translator searches the delegate
@@ -756,17 +757,17 @@ conversion reads, or displayed through `Var.str` for `%s`. The redundant
 `.str()` warning for those values stays with the conversion checks in
 `src/expressions.x`.
 
-`src/component-operators.x` registers its translators through
-`$rewrite_operators(Var, ...)`, on the binary family for binary operators
-and compound assignments and the unary family for increments, decrements,
-and unary operators, keyed by the operator and `Var`. A rule registered
-this way has no pattern; its key alone selects it. The transform dispatches
-an operation to those rules only when an operand has `Var` identity, after
-protocol operators resolved, and normalizes the replacement as it would its
-own lowering. A binary operator returns a lowered `Var.binary` call, so an
-operator chain does not rebind its remaining terms at each level; an update
-returns the lowered call of its storage's update helper with the target's
-address, the form the cleanup walk recognizes as a write. Truthiness stays a
+`src/component-operators.x` registers its translators with Match patterns
+typed `Var` whose operator positions name a set, `(!or OP...)`, on the
+binary family for binary operators and compound assignments and the unary
+family for increments, decrements, and unary operators, keyed by each
+operator and `Var`. The transform dispatches an operation to those rules
+only when an operand has `Var` identity, after protocol operators resolved,
+presents it typed `Var`, and normalizes the replacement as it would its own
+lowering. A binary operator returns a `Var.binary` call through
+`Code.lowered`, so an operator chain does not rebind its remaining terms at
+each level; an update returns the lowered call of its storage's update helper
+with the target's address, the form the cleanup walk recognizes as a write. Truthiness stays a
 conversion the transform applies at condition positions, and slices,
 comparisons, and a participant's direct compound update remain in the
 transform. When a rewrite lowers its replacement, the source expressions the

@@ -18,17 +18,8 @@ int Code.is_static_pattern(Code pattern) =>
 Code Code.call_in_order(Code member, List arguments, Type type) =>
   _ask("Code_call_in_order", %($member $arguments $type));
 Code Code.lowered(Code code) => _ask("Code_lowered", %($code));
-Code Code.register_rewrite(Code function, Macro shape, List holes) =>
-  _ask("Code_register_rewrite", %($function $shape $holes));
-Code Code.register_marked_rewrite(
-  Code function, Symbol mark, Macro shape, List holes) =>
-  _ask("Code_register_marked_rewrite", %($function $mark $shape $holes));
-Code Code.register_typed_rewrite(
-  Code function, Type type, Macro shape, List holes) =>
-  _ask("Code_register_typed_rewrite", %($function $type $shape $holes));
-Code Code.register_operator_rewrite(
-  Code function, Type type, Symbol form, List operators) =>
-  _ask("Code_register_operator_rewrite", %($function $type $form $operators));
+Code Code.register_rewrite(Code function, List pattern, List holes) =>
+  _ask("Code_register_rewrite", %($function $pattern $holes));
 Code Code.register_after_initialization(
   Code function, Macro shape, List holes) =>
   _ask("Code_register_after_initialization", %($function $shape $holes));

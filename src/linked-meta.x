@@ -147,42 +147,12 @@ List x2c_type_members(List type) {
 
 /* --- lib/rewrite.x ------------------------------------------------------- */
 
-/** Registers the decorated translator with its macro and hole patterns. */
+/** Registers the decorated translator with its pattern and hole patterns. */
 Code register_rewrite(Code function, Code pattern, List holes) {
   Macro shape = pattern.value();
   Array patterns = [];
   foreach (Code hole, holes) patterns.push(hole.value());
   return function.register_rewrite(shape, patterns.list_free());
-}
-
-/** Registers the decorated translator for member calls that find no member
-    on a receiver whose aggregate declares a field with the keyword `mark`. */
-Code register_marked_rewrite(
-  Code function, Code mark, Code pattern, List holes) {
-  Array patterns = [];
-  foreach (Code hole, holes) patterns.push(hole.value());
-  return function.register_marked_rewrite(
-    mark.value(), pattern.value(), patterns.list_free());
-}
-
-/** Registers the decorated translator for the operator its macro pattern
-    spells applied to an operand of `type`. */
-Code register_typed_rewrite(
-  Code function, List type, Code pattern, List holes) {
-  Array patterns = [];
-  foreach (Code hole, holes) patterns.push(hole.value());
-  return function.register_typed_rewrite(
-    type, pattern.value(), patterns.list_free());
-}
-
-/** Registers the decorated translator for each operator in `operators`
-    applied to an operand of `type`, in `form`. */
-Code register_operator_rewrite(
-  Code function, List type, Code form, List operators) {
-  Array symbols = [];
-  foreach (Code op, operators) symbols.push(op.value());
-  return function.register_operator_rewrite(
-    type, form.value(), symbols.list_free());
 }
 
 /* --- lib/system-macros.x ------------------------------------------------- */
@@ -636,9 +606,9 @@ static String _dynamic_helper(Type type) {
 /** Updates a `Var` or numeric lvalue with a `Var` or numeric operand
     through the update helper of its storage. */
 Code dynamic_compound(Code code) {
-  match (code) case %(expr ?(Type type) (op ?(Symbol op) ?left ?right)): {
+  match (code) case %(expr ? (op ?(Symbol op) ?left ?right)): {
     Code target = left, rhs = right;
-    Type right_type = rhs.cadr();
+    Type type = target.cadr(), right_type = rhs.cadr();
     Symbol operation = _dynamic_operation(op);
     match (type)
       case %((bitfield *) *):
@@ -663,15 +633,15 @@ Code dynamic_compound(Code code) {
     forms return the value before the change. */
 Code dynamic_change(Code code) {
   match (code) {
-    case %(expr ?(Type type) (op ?(Symbol op) ?target)): {
+    case %(expr ? (op ?(Symbol op) ?(Code target))): {
       Code one = %(expr (int) (literal (int) "1"));
       return _dynamic_update(
-        type, target, op == <++> ? <+> : <->, one.convert(%("Var")),
-        "x2c_var_update_volatile");
+        target.cadr(), target, op == <++> ? <+> : <->,
+        one.convert(%("Var")), "x2c_var_update_volatile");
     }
-    case %(expr ?(Type type) (postfix ?(Symbol op) ?target)):
+    case %(expr ? (postfix ?(Symbol op) ?(Code target))):
       return _dynamic_update(
-        type, target, op, NULL, "x2c_var_postfix_volatile");
+        target.cadr(), target, op, NULL, "x2c_var_postfix_volatile");
   }
   return code;
 }
@@ -1034,9 +1004,6 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_meta_member", _meta_member);
   $linked.row(rows, "x2c_type_members", x2c_type_members);
   $linked.row(rows, "register_rewrite", register_rewrite);
-  $linked.row(rows, "register_marked_rewrite", register_marked_rewrite);
-  $linked.row(rows, "register_typed_rewrite", register_typed_rewrite);
-  $linked.row(rows, "register_operator_rewrite", register_operator_rewrite);
   $linked.row(rows, "_dedent_expand", _dedent_expand);
   $linked.row(rows, "_macros_location", _macros_location);
   $linked.row(rows, "_tag_decode_group", _tag_decode_group);

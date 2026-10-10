@@ -1174,14 +1174,15 @@ static List Compiler._change(
 }
 
 /* An operation with a `Var` operand lowers through the rule a component
-   registered for its operator on `Var`. The rule's replacement normalizes
-   here like any other node. */
+   registered for its operator on `Var`, which receives it typed `Var` and
+   returns a result of `type`. The rule's replacement normalizes here like
+   any other node. */
 static List Compiler._dynamic(
   Compiler c, Symbol point, Type type, List operation) {
   List kind = operation.car() == <postfix>
     ? %(postfix ${operation.cadr()} ("Var")) : %(${operation.cadr()} ("Var"));
   List rewritten = c.rewrite(
-    point, kind, %(expr $type $operation), AST_EXPRESSION, type, NULL);
+    point, kind, %(expr ("Var") $operation), AST_EXPRESSION, type, NULL);
   return rewritten ? rewritten.caddr() : operation;
 }
 

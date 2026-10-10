@@ -2498,14 +2498,17 @@ static typedef struct RewriteRule {
 static Var RewriteRule.var(RewriteRule rule) => Var.new(<p48>, rule);
 static RewriteRule Var.rewrite_rule(Var value) => value.pointer();
 
-/* A rule derives its matcher now, or else on the first probe of its
-   family. */
+/* A rule derives a macro's matcher now, or else on the first probe of its
+   family; a Match pattern is its own. */
 static RewriteRule _rewrite_rule(
-  Symbol point, Var kind, String name, Macro shape, List holes,
+  Symbol point, Var kind, String name, List pattern, List holes,
   int builtin, int prepared) {
   RewriteRule rule = Scope.calloc(1, sizeof(struct RewriteRule));
-  MacroMatcher matcher = prepared && shape
-    ? shape.matcher(holes) : (MacroMatcher){shape, holes, NULL};
+  MacroMatcher matcher = {NULL, NULL, pattern};
+  if (pattern.car() == <macrodef>) {
+    Macro shape = pattern;
+    matcher = prepared ? shape.matcher(holes) : (MacroMatcher){shape, holes};
+  }
   *rule = (struct RewriteRule){name, point, kind, matcher, builtin, prepared};
   return rule;
 }
@@ -2613,7 +2616,9 @@ static void Compiler._register_rewrite(Compiler c, RewriteRule rule) {
   foreach (RewriteRule prior, rows)
     if (prior.name == rule.name &&
         prior.matcher.shape == rule.matcher.shape &&
-        prior.matcher.holes == rule.matcher.holes) return;
+        prior.matcher.holes == rule.matcher.holes &&
+        (rule.matcher.shape || prior.matcher.pattern == rule.matcher.pattern))
+      return;
   Array ordered = [];
   int inserted = 0;
   foreach (RewriteRule prior, rows) {
@@ -2681,9 +2686,9 @@ static List Compiler._rewrite(
     return NULL;
   foreach (RewriteRule rule, c._rewrite_candidates(point, kind)) {
     if (c.active_rewrites.contains(rule)) continue;
-    // A rule without a pattern takes every operation its key selects.
     MacroMatcher *matcher = rule.prepared_matcher();
-    if (matcher.shape && !c.matches_macro(*matcher, source)) continue;
+    if (matcher.shape ? !c.matches_macro(*matcher, source)
+                      : !source.match(matcher.pattern)) continue;
     Var result = c.apply_meta_function(rule.name, %($source), site);
     if (result is void ||
         (result is <list> && (!result.list() || result.list() === source)))
