@@ -7780,7 +7780,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_14(void){
   _7297 = cons(_532, _7296);
   _7298 = String_new("src/collect.x");
   _7299 = String_var(_7298);
-  _7300 = String_new("5752f037");
+  _7300 = String_new("abd9319b");
   _7301 = String_var(_7300);
   _7302 = cons(_7301, NULL);
   _7303 = cons(_7299, _7302);

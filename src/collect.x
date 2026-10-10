@@ -213,7 +213,7 @@ List compiler_prelude_sources(void) => %(
 
 /** Reports whether the canonical `path` is a compiler prelude source. */
 int is_prelude_source(String path) =>
-  compiler_prelude_sources().contains(home_portable_path(path));
+  home_portable_path(path) in compiler_prelude_sources();
 
 static void Compiler._add_prelude(Compiler c, Map globs, Map visited) {
   foreach (String source, compiler_prelude_sources()) {
