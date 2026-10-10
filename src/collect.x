@@ -211,6 +211,10 @@ List compiler_prelude_sources(void) => %(
   "lib/x2c.x" "src/grammar.x" "src/component-access.x" "src/component-try.x"
   "src/component-delegate.x");
 
+/** Reports whether the canonical `path` is a compiler prelude source. */
+int is_prelude_source(String path) =>
+  compiler_prelude_sources().contains(home_portable_path(path));
+
 static void Compiler._add_prelude(Compiler c, Map globs, Map visited) {
   foreach (String source, compiler_prelude_sources()) {
     String path = %"${x2c_get_root()}/$source";

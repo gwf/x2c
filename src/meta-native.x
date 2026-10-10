@@ -966,8 +966,9 @@ static Map linked_hashes = NULL;
 
 /** Binds the bodied `meta` definition `fn`, of function type `type`, to the
     compiler's linked copy of it when the two definition texts hash the
-    same, instead of staging it. Returns whether it did; an edited
-    definition is staged as user code.
+    same, or always for a prelude component's, instead of staging it.
+    Returns whether it did; another edited definition is staged as user
+    code.
 */
 int Compiler.bind_linked_meta(Compiler c, List fn, Type type) {
   if (c.meta_build) return 0;
@@ -1026,7 +1027,8 @@ static int Compiler._linked_copy(Compiler c, String name, Map linked) {
 static int Compiler._linked_texts_match(
   Compiler c, String name, Map linked, Map reached) {
   Var hash, own, names = void;
-  String key = %"${home_portable_path(c.canonical_path(c.filename))}:$name";
+  String file = c.canonical_path(c.filename);
+  String key = %"${home_portable_path(file)}:$name";
   if (!c.meta_hashes.try_get(name, own)) {
     Var advertisement;
     if (c.project_meta.try_get(name, advertisement)) {
@@ -1039,6 +1041,10 @@ static int Compiler._linked_texts_match(
     }
     return !(name in linked_hashes);
   }
+  /* A prelude component's definitions belong to this compiler, as its
+     kernel does: an edited one keeps its linked copy until a compiler is
+     built from the edit, so no translation needs a helper for it. */
+  if (is_prelude_source(file)) return name in linked;
   if (key in reached) return 1;
   reached[key] = 1;
   if (linked_hashes.try_get(name, hash)) {

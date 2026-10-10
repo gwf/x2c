@@ -177,7 +177,8 @@ static int Scan.file(Scan &s, String path) {
   tokens.scan();
   int meta = s.file_scope(tokens, Path.dirname(path));
   if ((meta & 1) && _compiler_owns(path) &&
-      s.c.linked_meta_definitions_current(path)) meta &= ~1;
+      (is_prelude_source(path) ||
+       s.c.linked_meta_definitions_current(path))) meta &= ~1;
   s.seen[path] = meta;
   return meta;
 }
