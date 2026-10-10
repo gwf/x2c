@@ -4,3 +4,31 @@
 #include "x2c.h"
 
 #include "rewrite.h"
+#include "grammar.h"
+static List _3;
+
+static String _1;
+
+static Var _4, _2, _0;
+
+static int _init_guard_ = 0;
+
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
+
+static List _access_symbol(Symbol op);
+
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
+  x2c_initialize_protocols();
+  if(_init_guard_) return;
+  _init_guard_ = 1;
+  _0 = Symbol_var(377892);
+  _1 = String_new("Symbol");
+  _2 = String_var(_1);
+  _3 = cons(_2, NULL);
+  _4 = List_var(_3);
+}
+
+static List _access_symbol(Symbol op){
+  return cons(_0, cons(_4, cons(String_var(String_join(NULL, cons(String_var(Var_str(Var_box_ulong((unsigned long) op))), NULL))), NULL)));
+}
+

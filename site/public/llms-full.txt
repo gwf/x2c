@@ -4498,7 +4498,10 @@ format specifiers convert it to the required promoted C type through
 static format literal. Automatic lowering covers numeric conversions, `%c`,
 `%s`, `*` width and precision, and the `hh`, `h`, `l`, `ll`, and `L` modifiers.
 Other modifiers, pointer and count conversions, wide strings and characters,
-and positional formats require explicit native arguments.
+and positional formats require explicit native arguments. This lowering is
+the compiler component `src/component-printf.x`, which registers a `$rewrite`
+call pattern for each family member. A project can register its own call
+pattern the same way, for example for its own logging function.
 
 ### Dynamic truthiness and binary operators
 
@@ -4556,6 +4559,20 @@ For `+`, when each operand is a `String`, an alias reaching `String`, a
 `char` array, a `char *`, or a `const char *`, both convert to `String` and
 the result is the `String` that `String.add` returns, so `path + ".o"`
 concatenates.
+
+These lowerings, the dynamic compound assignments and increments below, and
+the rejection of unary `+`, `-`, and `~` on a `Var` belong to the shipped
+component `src/component-operators.x`. It registers its translators with
+`$rewrite_operators(Var, FORM, OPERATORS...)`, which keys a rule by each
+operator and `Var` and gives it every such operation without a pattern.
+`FORM` is `<binary>` for binary operators and compound assignments,
+`<prefix>` for prefix and unary operators, and `<postfix>`. The rules run
+after protocol operators resolve, only when an operand has `Var` identity,
+so native operands never reach them. A program's rule registered for the
+same operator is tried first. `$rewrite_typed(Var, MACRO, HOLES...)`
+registers one with a macro pattern whose holes decide which operands it
+takes, so a rule for `$!Money{...}` with `typedef Var Money` leaves other
+`Var` operands to the shipped rules.
 
 Direct runtime calls to `Var.binary` additionally accept comparisons and eager
 `&&`/`||`. The compiler does not use that eager logical path. It converts each

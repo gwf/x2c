@@ -21,8 +21,11 @@ Functions and types exposed by each compiler module.
 | [`src/cli.x`](cli.md) | x2c command-line parsing and presentation. |
 | [`src/collect.x`](collect.md) | source-ordered shallow symbol collection and replay. |
 | [`src/compiler.x`](compiler.md) | one x2c unit's translation state and its two parses. |
-| [`src/component-access.x`](component-access.md) | Array/Map mutation policy; getter resolution remains with admission. |
+| [`src/component-access.x`](component-access.md) | Bracket access policy: Array and Map mutation through their typed helpers, and any other participant's read, store, and update through its indexing members, with each operand evaluated once, in order. Getter resolution remains with admission. |
 | [`src/component-delegate.x`](component-delegate.md) | delegate fields. |
+| [`src/component-literals.x`](component-literals.md) | Array and Map literals. |
+| [`src/component-operators.x`](component-operators.md) | dynamic operators. |
+| [`src/component-printf.x`](component-printf.md) | Var values in printf-family formats. |
 | [`src/component-try.x`](component-try.md) | try, catch, and finally. |
 | [`src/deps.x`](deps.md) | Make dependency output for x2c translation units. |
 | [`src/diagnostics.x`](diagnostics.md) | compiler diagnostic storage and rendering. |

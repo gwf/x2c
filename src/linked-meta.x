@@ -24,6 +24,9 @@
 #include "varops.x"
 #include "component-access.x"
 #include "component-delegate.x"
+#include "component-literals.x"
+#include "component-operators.x"
+#include "component-printf.x"
 #include "component-try.x"
 #include "fields.x"
 #include "grammar.x"
@@ -314,21 +317,77 @@ static int _collection_family(Code base) {
   return type.is_named("Array") ? 1 : type.is_named("Map") ? 2 : 0;
 }
 
-/** Selects the adopted collection setter for indexed assignment. */
-Code collection_store(Code code) {
-  match (code) case $collection_store(?base, ?key, ?value): {
-    if (!_collection_family(base)) return code;
-    Code receiver = base;
-    Code setter = receiver.type().protocol_member("setindex");
-    if (setter) return $!Var{ $setter($base, $key, $value) };
+static List _access_symbol(Symbol op) =>
+  %(expr ("Symbol") "${(unsigned long) op}");
+
+/** Calls the getter bracket admission selected. */
+Code access_read(Code code) {
+  match (code) case $indexed(?base, ?key): {
+    Type type = base.cadr(), result = code.cadr();
+    Code getter = type.getter();
+    if (!getter)
+      x2c_diagnostic_fail_at(
+        NULL, <xform>, %"type ${type.repr()} does not support bracket indexing",
+        NULL);
+    return $!($result){ $getter($base, $key) };
   }
   return code;
 }
 
-static Code _collection_update(
-  Code base, Code key, Code value, Symbol op) {
+static Code _participant_store(
+  Code code, Code base, Code key, Code value) {
+  Type type = base.cadr();
+  if (type.is_named("String")) {
+    String note = "String is immutable: use the copy-producing "
+                  "String.withindex, or bind a char * to write a "
+                  "transient String.malloc buffer";
+    x2c_diagnostic_fail_at(
+      NULL, <xform>, "String does not support bracket assignment",
+      %($note));
+  }
+  Code setter = type.protocol_member("setindex");
+  if (!setter)
+    x2c_diagnostic_fail_at(
+      NULL, <xform>,
+      %"type ${type.repr()} does not support bracket assignment",
+      %("use an explicit copy-producing method where available"));
+  return setter.call_in_order(%($base $key $value), code.cadr());
+}
+
+static Code _participant_update(
+  Code code, Code base, Code key, Symbol op, Code value) {
+  Type type = base.cadr();
+  Code member = type.protocol_member(value ? "updateindex" : "postfixindex");
+  if (!member) {
+    String what = value ? "compound assignment" : "increment or decrement";
+    x2c_diagnostic_fail_at(
+      NULL, <xform>,
+      %"type ${type.repr()} does not support indexed $what", NULL);
+  }
+  List operation = _access_symbol(op);
+  List arguments = value
+    ? %($base $key $operation $value) : %($base $key $operation);
+  return member.call_in_order(arguments, code.cadr());
+}
+
+/** Selects the adopted collection setter for indexed assignment, or a
+    participant's `setindex` member. */
+Code access_store(Code code) {
+  match (code) case $collection_store(?base, ?key, ?value): {
+    Code receiver = base;
+    Code setter = _collection_family(base)
+      ? receiver.type().protocol_member("setindex") : NULL;
+    if (setter) return $!Var{ $setter($base, $key, $value) };
+    return _participant_store(code, base, key, value);
+  }
+  return code;
+}
+
+static Code _access_update(
+  Code code, Code base, Code key, Code value, Symbol op) {
   int family = _collection_family(base);
-  if (!family || !base.type().protocol_member("updateindex")) return NULL;
+  if (!family || !base.type().protocol_member("updateindex"))
+    return _participant_update(code, base, key, op, value);
   Type type = value.type();
   if (!type.is_named("Var") && !type.numeric() &&
       !(op == <+> && type.is_text())) {
@@ -342,46 +401,54 @@ static Code _collection_update(
   return $!Var{ Map_updateindex($base, $key, $op, $value) };
 }
 
-/** Selects collection compound updates and checks accepted operands. */
-Code collection_update(Code code) {
+/** Selects collection compound updates and checks accepted operands, or a
+    participant's `updateindex` member. */
+Code access_update(Code code) {
   match (code) {
     case $collection_add(?base, ?key, ?value):
-      return _collection_update(base, key, value, <"+">);
+      return _access_update(code, base, key, value, <"+">);
     case $collection_subtract(?base, ?key, ?value):
-      return _collection_update(base, key, value, <"-">);
+      return _access_update(code, base, key, value, <"-">);
     case $collection_multiply(?base, ?key, ?value):
-      return _collection_update(base, key, value, <"*">);
+      return _access_update(code, base, key, value, <"*">);
     case $collection_divide(?base, ?key, ?value):
-      return _collection_update(base, key, value, <"/">);
+      return _access_update(code, base, key, value, <"/">);
     case $collection_remainder(?base, ?key, ?value):
-      return _collection_update(base, key, value, <"%">);
+      return _access_update(code, base, key, value, <"%">);
     case $collection_and(?base, ?key, ?value):
-      return _collection_update(base, key, value, <"&">);
+      return _access_update(code, base, key, value, <"&">);
     case $collection_or(?base, ?key, ?value):
-      return _collection_update(base, key, value, <"|">);
+      return _access_update(code, base, key, value, <"|">);
     case $collection_xor(?base, ?key, ?value):
-      return _collection_update(base, key, value, <"^">);
+      return _access_update(code, base, key, value, <"^">);
     case $collection_left(?base, ?key, ?value):
-      return _collection_update(base, key, value, <"<<">);
+      return _access_update(code, base, key, value, <"<<">);
     case $collection_right(?base, ?key, ?value):
-      return _collection_update(base, key, value, <">>">);
+      return _access_update(code, base, key, value, <">>">);
   }
   return code;
 }
 
-/** Stores and returns the incremented or decremented collection value. */
-Code collection_prefix(Code code) {
+static Code _access_step(Code code, Code base, Code key, Symbol op) {
+  if (!_collection_family(base))
+    return _participant_update(
+      code, base, key, op, %(expr (int) (literal (int) "1")));
+  return _access_update(code, base, key, $!int{1}, op);
+}
+
+/** Stores and returns the incremented or decremented element. */
+Code access_prefix(Code code) {
   match (code) {
     case $collection_increment(?base, ?key):
-      return _collection_update(base, key, $!int{1}, <+>);
+      return _access_step(code, base, key, <+>);
     case $collection_decrement(?base, ?key):
-      return _collection_update(base, key, $!int{1}, <->);
+      return _access_step(code, base, key, <->);
   }
   return code;
 }
 
-/** Stores the updated collection value and returns its previous value. */
-Code collection_postfix(Code code) {
+/** Stores the updated element and returns its previous value. */
+Code access_postfix(Code code) {
   Code base, key;
   Symbol op;
   match (code) {
@@ -390,10 +457,10 @@ Code collection_postfix(Code code) {
     default: return code;
   }
   int family = _collection_family(base);
-  if (!family || !base.type().protocol_member("postfixindex")) return code;
+  if (!family || !base.type().protocol_member("postfixindex"))
+    return _participant_update(code, base, key, op, NULL);
   if (family == 1) return $!Var{ Array_postfixindex($base, $key, $op) };
-  if (family == 2) return $!Var{ Map_postfixindex($base, $key, $op) };
-  return code;
+  return $!Var{ Map_postfixindex($base, $key, $op) };
 }
 
 /* --- src/component-delegate.x -------------------------------------------- */
@@ -492,6 +559,273 @@ Code delegate_member(Code code) {
     foreach (String step, fields.append(%($name)))
       callee = %(expr () (op . $callee ($step)));
     return %(expr () (call $callee (args @arguments)));
+  }
+  return code;
+}
+
+/* --- src/component-operators.x ------------------------------------------- */
+
+static int _dynamic_operand(Type type, int text) =>
+  type.is_named("Var") || (text ? type.is_text() : !!type.numeric());
+
+/** Boxes both operands of an arithmetic, shift, or bitwise operator for
+    `Var.binary`, after rejecting an operand that is neither a number nor,
+    for `+` beside text, text. The call is returned lowered, because an
+    operator chain applies this rule once for each term and binding would
+    search the whole remaining chain each time. */
+Code dynamic_binary(Code code) {
+  match (code) case %(expr ? (op ?(Symbol op) ?left ?right)): {
+    Code lhs = left, rhs = right;
+    Type left_type = lhs.cadr(), right_type = rhs.cadr();
+    int text = op == <+> && _dynamic_operand(left_type, 1) &&
+      _dynamic_operand(right_type, 1);
+    if (!text && (!_dynamic_operand(left_type, 0) ||
+                  !_dynamic_operand(right_type, 0))) {
+      String left_name = left_type.repr(), right_name = right_type.repr();
+      x2c_diagnostic_fail_at(
+        NULL, <xform>, "dynamic numeric operators require numeric operands",
+        %("operator: $op left type: $left_name right type: $right_name"));
+    }
+    List callee = %(expr (<macro-expr>) (ident (binding-name "Var_binary")));
+    List symbol = %(expr ("Symbol") (literal ("Symbol") ${op.str()} $op));
+    List call = %(call $callee (args ${lhs.convert(%("Var"))} $symbol
+                                     ${rhs.convert(%("Var"))}));
+    return %(code-value "lowered" (expr ("Var") $call) ());
+  }
+  return code;
+}
+
+static Symbol _dynamic_operation(Symbol assignment) {
+  foreach (List row, %((<+=> <+>) (<-=> <->) (<*=> <*>) (</=> </>)
+                       (<%=> <%>) (<"<<="> <"<<">) (<">>="> <">>">)
+                       (<&=> <&>) (<^=> <^>) (<|=> <|>)))
+    if (row.car() == assignment) return row.cadr();
+  return 0;
+}
+
+static List _dynamic_symbol(Symbol op) =>
+  %(expr ("Symbol") "${(unsigned long) op}");
+
+static Code _dynamic_update(
+  Type type, Code target, Symbol op, Code value, String helper) {
+  Type target_type = target.cadr(), address_type = %(* @target_type);
+  List address = %(expr $address_type (op & (parens $target)));
+  List operation = _dynamic_symbol(op);
+  List call = value
+    ? %(call $helper (args $address $operation $value))
+    : %(call $helper (args $address $operation));
+  return %(code-value "lowered" (expr $type $call) ());
+}
+
+static String _dynamic_helper(Type type) {
+  if (type.is_named("Var")) return "x2c_var_update_volatile";
+  Type scalar = type.numeric();
+  match (scalar)
+    case %(enum *):
+      x2c_diagnostic_fail_at(
+        NULL, <xform>, "dynamic compound assignment cannot target an enum",
+        NULL);
+  String helper = type.update_helper();
+  if (!helper)
+    x2c_diagnostic_fail_at(
+      NULL, <xform>, "dynamic compound assignment requires a numeric lvalue",
+      %("left type: ${type.repr()}"));
+  return helper;
+}
+
+/** Updates a `Var` or numeric lvalue with a `Var` or numeric operand
+    through the update helper of its storage. */
+Code dynamic_compound(Code code) {
+  match (code) case %(expr ?(Type type) (op ?(Symbol op) ?left ?right)): {
+    Code target = left, rhs = right;
+    Type right_type = rhs.cadr();
+    Symbol operation = _dynamic_operation(op);
+    match (type)
+      case %((bitfield *) *):
+        x2c_diagnostic_fail_at(
+          NULL, <xform>,
+          "dynamic compound assignment cannot target a bitfield", NULL);
+    if (!right_type.is_named("Var") && !right_type.numeric() &&
+        !(operation == <+> && right_type.is_text()))
+      x2c_diagnostic_fail_at(
+        NULL, <xform>, operation == <+>
+          ? "dynamic += requires a numeric, Var, or String operand"
+          : "dynamic compound assignment requires a numeric or Var operand",
+        %("right type: ${right_type.repr()}"));
+    String helper = _dynamic_helper(type);
+    return _dynamic_update(
+      type, target, operation, rhs.convert(%("Var")), helper);
+  }
+  return code;
+}
+
+/** Adds or subtracts one through the `Var` update helpers; the postfix
+    forms return the value before the change. */
+Code dynamic_change(Code code) {
+  match (code) {
+    case %(expr ?(Type type) (op ?(Symbol op) ?target)): {
+      Code one = %(expr (int) (literal (int) "1"));
+      return _dynamic_update(
+        type, target, op == <++> ? <+> : <->, one.convert(%("Var")),
+        "x2c_var_update_volatile");
+    }
+    case %(expr ?(Type type) (postfix ?(Symbol op) ?target)):
+      return _dynamic_update(
+        type, target, op, NULL, "x2c_var_postfix_volatile");
+  }
+  return code;
+}
+
+/** Rejects a unary numeric operator on a `Var`. */
+Code dynamic_unary(Code code) {
+  x2c_diagnostic_fail_at(
+    NULL, <xform>, "dynamic unary numeric operators are not supported",
+    %("use Var.binary with an explicit numeric operand"));
+  return code;
+}
+
+/* --- src/component-printf.x ---------------------------------------------- */
+
+static int _printf_is_var(Code value) => value.type().is_named("Var");
+
+static void _printf_fail(Code call, String message) {
+  match (call) case %(expr ? (call ?callee *)):
+    x2c_diagnostic_fail_at(
+      call, <xform>, message,
+      %("printf-family call: ${x2c_binding_spelling(callee)}"));
+}
+
+static int _printf_valid(String length, int conversion) {
+  if (strchr("diouxXn", conversion)) return length != "L";
+  if (strchr("fFeEgGaA", conversion))
+    return length == "" || length == "l" || length == "L";
+  if (conversion == 'c' || conversion == 's')
+    return length == "" || length == "l";
+  return conversion == 'p' && length == "";
+}
+
+static Type _printf_type(String length, int conversion) {
+  if (strchr("fFeEgGaA", conversion))
+    return length == "L" ? %(long double) : %(double);
+  if (conversion == 'c') return length == "" ? %(int) : NULL;
+  if (!strchr("diouxX", conversion)) return NULL;
+  int is_signed = conversion == 'd' || conversion == 'i';
+  if (length == "hh" || length == "h") return %(int);
+  if (length == "") return is_signed ? %(int) : %(unsigned);
+  if (length == "l") return is_signed ? %(long) : %(unsigned long);
+  if (length == "ll")
+    return is_signed ? %(long long) : %(unsigned long long);
+  return NULL;
+}
+
+static Code _printf_read(Code value, String length, int conversion) {
+  if (!_printf_is_var(value)) return value;
+  if (conversion == 's' && length == "")
+    return %(expr ("String") (call "Var_str" (args $value)));
+  Type type = _printf_type(length, conversion);
+  return type ? value.convert(type) : NULL;
+}
+
+static void _printf_position(Code call, const char *at) {
+  while (isdigit(*at)) at++;
+  if (*at == '$')
+    _printf_fail(call, "positional formats cannot infer Var argument types");
+}
+
+static void _printf_count(
+  Code call, const char *&at, Array arguments, int &next) {
+  if (*at != '*') {
+    while (isdigit(*at)) at++;
+    return;
+  }
+  _printf_position(call, ++at);
+  if (next >= arguments.len())
+    _printf_fail(call, "format consumes a missing '*' argument");
+  Code value = arguments[next];
+  if (_printf_is_var(value)) arguments[next] = value.convert(%(int));
+  next++;
+}
+
+static String _printf_length(const char *&at) {
+  const char *start = at;
+  if (*at && strchr("hljztL", *at))
+    at += (*at == 'h' || *at == 'l') && at[1] == *at ? 2 : 1;
+  return String.new_len(start, (int) (at - start));
+}
+
+static void _printf_conversion(
+  Code call, const char *&at, Array arguments, int &next) {
+  _printf_position(call, at);
+  while (*at && strchr("-+ #0", *at)) at++;
+  _printf_count(call, at, arguments, next);
+  if (*at == '.') {
+    at++;
+    _printf_count(call, at, arguments, next);
+  }
+  String length = _printf_length(at);
+  if (!*at) _printf_fail(call, "incomplete format conversion");
+  int conversion = *at++;
+  String spec = "%%%c".printf(conversion);
+  if (!_printf_valid(length, conversion))
+    _printf_fail(call, %"unsupported or malformed format conversion $spec");
+  if (next >= arguments.len())
+    _printf_fail(call, %"format conversion $spec consumes a missing argument");
+  Code read = _printf_read(arguments[next], length, conversion);
+  if (!read)
+    _printf_fail(
+      call, %"cannot infer a native argument for Var at $spec; use an " +
+        "explicit converter for this format conversion");
+  arguments[next++] = read;
+}
+
+static void _printf_scan(
+  Code call, const char *at, Array arguments, int &next) {
+  while (*at) {
+    int ch = *at++;
+    if (ch == '\\' && *at) at++;
+    if (ch != '%') continue;
+    if (!*at) _printf_fail(call, "incomplete format conversion");
+    if (*at == '%') at++;
+    else _printf_conversion(call, at, arguments, next);
+  }
+}
+
+static Code _printf_lowered(Code code, Code format, List values) {
+  int has_var = 0;
+  foreach (Code value, values) has_var |= _printf_is_var(value);
+  if (!has_var) return code;
+  String spelling = format.format();
+  if (!spelling)
+    _printf_fail(code, "Var arguments require a single static format literal");
+  match (code) case %(expr ?type (call ?callee (args *given))): {
+    Array arguments = given;
+    int next = given.len() - values.len();
+    _printf_scan(code, spelling[1:spelling.len() - 1], arguments, next);
+    for (; next < arguments.len(); next++)
+      if (_printf_is_var(arguments[next]))
+        _printf_fail(
+          code, "Var argument has no corresponding format conversion");
+    return %(expr $type (call $callee (args @{arguments.list_free()})));
+  }
+  return code;
+}
+
+static Code _printf_library(Code code, Code format, List values) {
+  match (code) case %(expr ? (call (expr () ?) ?)):
+    return _printf_lowered(code, format, values);
+  return code;
+}
+
+/** Reads the Var values a printf-family call's static format consumes. */
+Code printf_values(Code code) {
+  match (code) {
+    case $printf_format(?f, *v): return _printf_library(code, f, v);
+    case $fprintf_format(?, ?f, *v): return _printf_library(code, f, v);
+    case $sprintf_format(?, ?f, *v): return _printf_library(code, f, v);
+    case $snprintf_format(?, ?, ?f, *v): return _printf_library(code, f, v);
+    case $string_printf_format(?f, *v): return _printf_lowered(code, f, v);
+    case $file_printf_format(?, ?f, *v): return _printf_lowered(code, f, v);
+    case $buffer_printf_format(?, ?f, *v): return _printf_lowered(code, f, v);
   }
   return code;
 }
@@ -719,11 +1053,16 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_update_box", _update_box);
   $linked.row(rows, "_update_decode", _update_decode);
   $linked.row(rows, "_collection_family", _collection_family);
-  $linked.row(rows, "collection_store", collection_store);
-  $linked.row(rows, "_collection_update", _collection_update);
-  $linked.row(rows, "collection_update", collection_update);
-  $linked.row(rows, "collection_prefix", collection_prefix);
-  $linked.row(rows, "collection_postfix", collection_postfix);
+  $linked.row(rows, "_access_symbol", _access_symbol);
+  $linked.row(rows, "access_read", access_read);
+  $linked.row(rows, "_participant_store", _participant_store);
+  $linked.row(rows, "_participant_update", _participant_update);
+  $linked.row(rows, "access_store", access_store);
+  $linked.row(rows, "_access_update", _access_update);
+  $linked.row(rows, "access_update", access_update);
+  $linked.row(rows, "_access_step", _access_step);
+  $linked.row(rows, "access_prefix", access_prefix);
+  $linked.row(rows, "access_postfix", access_postfix);
   $linked.row(rows, "_delegate_type_name", _delegate_type_name);
   $linked.row(rows, "_delegate_path", _delegate_path);
   $linked.row(rows, "_delegate_packages", _delegate_packages);
@@ -732,6 +1071,28 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_delegate_cycle", _delegate_cycle);
   $linked.row(rows, "_delegate_fields", _delegate_fields);
   $linked.row(rows, "delegate_member", delegate_member);
+  $linked.row(rows, "_dynamic_operand", _dynamic_operand);
+  $linked.row(rows, "dynamic_binary", dynamic_binary);
+  $linked.row(rows, "_dynamic_operation", _dynamic_operation);
+  $linked.row(rows, "_dynamic_symbol", _dynamic_symbol);
+  $linked.row(rows, "_dynamic_update", _dynamic_update);
+  $linked.row(rows, "_dynamic_helper", _dynamic_helper);
+  $linked.row(rows, "dynamic_compound", dynamic_compound);
+  $linked.row(rows, "dynamic_change", dynamic_change);
+  $linked.row(rows, "dynamic_unary", dynamic_unary);
+  $linked.row(rows, "_printf_is_var", _printf_is_var);
+  $linked.row(rows, "_printf_fail", _printf_fail);
+  $linked.row(rows, "_printf_valid", _printf_valid);
+  $linked.row(rows, "_printf_type", _printf_type);
+  $linked.row(rows, "_printf_read", _printf_read);
+  $linked.row(rows, "_printf_position", _printf_position);
+  $linked.row(rows, "_printf_count", _printf_count);
+  $linked.row(rows, "_printf_length", _printf_length);
+  $linked.row(rows, "_printf_conversion", _printf_conversion);
+  $linked.row(rows, "_printf_scan", _printf_scan);
+  $linked.row(rows, "_printf_lowered", _printf_lowered);
+  $linked.row(rows, "_printf_library", _printf_library);
+  $linked.row(rows, "printf_values", printf_values);
   $linked.row(rows, "_try_arm_exits", _try_arm_exits);
   $linked.row(rows, "try_catch_cases", try_catch_cases);
   $linked.row(rows, "_try_finalizer_label", _try_finalizer_label);
@@ -793,6 +1154,8 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_tag_constant_rows", _tag_constant_rows);
   $linked.row(rows, "_tag_group_top", _tag_group_top);
   $linked.row(rows, "_tag_types", _tag_types);
+  $linked.row(rows, "array_literal", array_literal);
+  $linked.row(rows, "map_literal", map_literal);
   $linked.row(rows, "try_catch_patterns", try_catch_patterns);
   $linked.row(rows, "try_catch_site", try_catch_site);
   $linked.row(rows, "try_landing", try_landing);

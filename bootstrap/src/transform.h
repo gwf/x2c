@@ -30,10 +30,6 @@ List Compiler_transform(Compiler c, List ast);
 
 Ast Compiler_normalize(Compiler c, Ast ast);
 
-List transform_array_literal(Compiler c, List ast);
-
-List transform_map_literal(Compiler c, List ast);
-
 List Compiler_call_in_order(Compiler c, List callee, List arguments);
 
 #endif

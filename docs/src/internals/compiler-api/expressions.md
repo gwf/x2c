@@ -32,7 +32,7 @@ Expression syntax and its resolution.
 | [`Compiler.parse_primary`](#Compiler.parse_primary) | Parses one primary expression or expression-valued macro slot. |
 | [`Compiler.parse_variable`](#Compiler.parse_variable) | Parses and resolves one complex identifier expression. |
 | [`Compiler.postfix_completions`](#Compiler.postfix_completions) | Returns sorted visible field and method names that resolve on `receiver` through `access`. |
-| [`Compiler.printf_static_format`](#Compiler.printf_static_format) | Returns the format a printf-family call consumes when it is known at translation time, or `NULL`. |
+| [`Compiler.printf_static_format`](#Compiler.printf_static_format) | Returns the C spelling of the format a printf-family call consumes when it is known at translation time, or `NULL`. |
 | [`Compiler.promote_string_literal`](#Compiler.promote_string_literal) | Converts a C string literal to `String` where no C meaning applies: as a method receiver, a `foreach` collection, or a raise detail. |
 | [`Compiler.require_var_tag`](#Compiler.require_var_tag) | Returns the exact Var tag for a type test, rejecting types without one. |
 | [`Compiler.resolve_expression`](#Compiler.resolve_expression) | Resolves and type-annotates one expression AST in current compiler state. |
@@ -128,7 +128,7 @@ performs the conversion implicitly; an unsupported x2c conversion reports
 a type error through `c`. Synthesized operations may add generated
 bindings or immutable literal entries to compiler state.
 
-Source: `src/expressions.x:3225`
+Source: `src/expressions.x:3220`
 
 <a id="Compiler.convert_segment_to_string"></a>
 #### Compiler.convert_segment_to_string
@@ -147,7 +147,7 @@ not equivalent: it
 extracts only a `String` payload and yields empty `String` for every other
 tag.
 
-Source: `src/expressions.x:3418`
+Source: `src/expressions.x:3413`
 
 <a id="Compiler.converter_call"></a>
 #### Compiler.converter_call
@@ -158,7 +158,7 @@ The call to the converter that `type`, or the first of its typedef names
 that declares one, provides for `target`, applied to `expr`, or NULL
 when none declares one.
 
-Source: `src/expressions.x:3553`
+Source: `src/expressions.x:3548`
 
 <a id="Compiler.func_call_parts"></a>
 #### Compiler.func_call_parts
@@ -182,7 +182,7 @@ Source: `src/expressions.x:2071`
 The global builtin boxers and scalar formatters only observe their
 arguments. A custom converter or a shadowed callee may change state.
 
-Source: `src/expressions.x:3606`
+Source: `src/expressions.x:3601`
 
 <a id="Compiler.needs_resolution"></a>
 #### Compiler.needs_resolution
@@ -287,16 +287,15 @@ Source: `src/expressions.x:1886`
 <a id="Compiler.printf_static_format"></a>
 #### Compiler.printf_static_format
 
-`String Compiler.printf_static_format( Compiler c, Var format, int &raw)`
+`String Compiler.printf_static_format(Compiler c, Var format)`
 
-Returns the format a printf-family call consumes when it is known at
-translation time, or `NULL`. That is a quoted C string literal, the
-canonical `String` one becomes, or the `String_new` of one; any other
-format, such as a variable or an object macro, is not readable here.
-`raw` reports C spelling, whose quotes and escape sequences the caller
-steps over.
+Returns the C spelling of the format a printf-family call consumes when
+it is known at translation time, or `NULL`. That is a quoted C string
+literal, the canonical `String` one becomes, or the `String_new` of one;
+any other format, such as a variable or an object macro, is not readable
+here. A `String` literal's text is spelled as a C literal.
 
-Source: `src/expressions.x:3120`
+Source: `src/expressions.x:3117`
 
 <a id="Compiler.promote_string_literal"></a>
 #### Compiler.promote_string_literal
@@ -308,7 +307,7 @@ method receiver, a `foreach` collection, or a raise detail. Parentheses
 and a conditional whose arms are both literals count as the literal; any
 other expression is returned unchanged.
 
-Source: `src/expressions.x:3177`
+Source: `src/expressions.x:3172`
 
 <a id="Compiler.require_var_tag"></a>
 #### Compiler.require_var_tag
@@ -378,7 +377,7 @@ Source: `src/expressions.x:2730`
 Returns the printf-family entry a callee names, or `NULL`. A resolved
 user function that happens to use a libc spelling is not one.
 
-Source: `src/expressions.x:3098`
+Source: `src/expressions.x:3096`
 
 ## Public types
 

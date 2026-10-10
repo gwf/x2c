@@ -16,6 +16,9 @@
 #include "varops.h"
 #include "component-access.h"
 #include "component-delegate.h"
+#include "component-literals.h"
+#include "component-operators.h"
+#include "component-printf.h"
 #include "component-try.h"
 #include "fields.h"
 #include "grammar.h"
@@ -48,15 +51,27 @@ List _tag_decode_groups(void);
 
 List _tag_id_checks(void);
 
-Code collection_store(Code code);
+Code access_read(Code code);
 
-Code collection_update(Code code);
+Code access_store(Code code);
 
-Code collection_prefix(Code code);
+Code access_update(Code code);
 
-Code collection_postfix(Code code);
+Code access_prefix(Code code);
+
+Code access_postfix(Code code);
 
 Code delegate_member(Code code);
+
+Code dynamic_binary(Code code);
+
+Code dynamic_compound(Code code);
+
+Code dynamic_change(Code code);
+
+Code dynamic_unary(Code code);
+
+Code printf_values(Code code);
 
 List try_catch_cases(List selected, List arms);
 

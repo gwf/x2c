@@ -12,32 +12,22 @@ X2c AST transformation pipeline.
 
 | Function | Summary |
 | --- | --- |
-| [`transform_array_literal`](#transform_array_literal) | Converts an array literal to source-ordered Var arguments for its counted constructor. |
-| [`transform_map_literal`](#transform_map_literal) | Converts a map literal to alternating Var key/value arguments for its counted constructor. |
+| [`Compiler.call_in_order`](#Compiler.call_in_order) | Calls the typed callable `callee` with `arguments`, each converted to its parameter and evaluated once, in source order, as a statement expression. |
 | [`Compiler.normalize`](#Compiler.normalize) | Normalizes one bound and typed node. |
 | [`Compiler.transform`](#Compiler.transform) | Lowers a bound and typed top-level AST to the normalized form consumed by emission. |
 
-### Functions
-
-#### transform_array_literal
-
-`List transform_array_literal(Compiler c, List ast)`
-
-Converts an array literal to source-ordered Var arguments for its
-counted constructor.
-
-Source: `src/transform.x:586`
-
-#### transform_map_literal
-
-`List transform_map_literal(Compiler c, List ast)`
-
-Converts a map literal to alternating Var key/value arguments for its
-counted constructor.
-
-Source: `src/transform.x:600`
-
 ### `Compiler`
+
+<a id="Compiler.call_in_order"></a>
+#### Compiler.call_in_order
+
+`List Compiler.call_in_order(Compiler c, List callee, List arguments)`
+
+Calls the typed callable `callee` with `arguments`, each converted to
+its parameter and evaluated once, in source order, as a statement
+expression.
+
+Source: `src/transform.x:1351`
 
 <a id="Compiler.normalize"></a>
 #### Compiler.normalize
@@ -48,7 +38,7 @@ Normalizes one bound and typed node. Newly constructed syntax is
 normalized where it is produced; children enter the same operation, so
 completed units do not require another unit walk.
 
-Source: `src/transform.x:186`
+Source: `src/transform.x:101`
 
 <a id="Compiler.transform"></a>
 #### Compiler.transform
@@ -63,7 +53,7 @@ support declarations are lowered and appended after the input units. Their
 storage determines their interface visibility. The call may add
 generated origins or diagnostics to `c`.
 
-Source: `src/transform.x:166`
+Source: `src/transform.x:81`
 
 ## Design notes
 

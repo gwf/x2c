@@ -12,15 +12,23 @@ Shipped `meta` code compiled into the compiler.
 
 | Function | Summary |
 | --- | --- |
-| [`collection_postfix`](#collection_postfix) | Stores the updated collection value and returns its previous value. |
-| [`collection_prefix`](#collection_prefix) | Stores and returns the incremented or decremented collection value. |
-| [`collection_store`](#collection_store) | Selects the adopted collection setter for indexed assignment. |
-| [`collection_update`](#collection_update) | Selects collection compound updates and checks accepted operands. |
+| [`access_postfix`](#access_postfix) | Stores the updated element and returns its previous value. |
+| [`access_prefix`](#access_prefix) | Stores and returns the incremented or decremented element. |
+| [`access_read`](#access_read) | Calls the getter bracket admission selected. |
+| [`access_store`](#access_store) | Selects the adopted collection setter for indexed assignment, or a participant's `setindex` member. |
+| [`access_update`](#access_update) | Selects collection compound updates and checks accepted operands, or a participant's `updateindex` member. |
 | [`delegate_member`](#delegate_member) | Rebuilds a call that finds no member on its receiver through the one delegate field path that provides the method. |
+| [`dynamic_binary`](#dynamic_binary) | Boxes both operands of an arithmetic, shift, or bitwise operator for `Var.binary`, after rejecting an operand that is neither a number nor, for `+` beside text, text. |
+| [`dynamic_change`](#dynamic_change) | Adds or subtracts one through the `Var` update helpers; the postfix forms return the value before the change. |
+| [`dynamic_compound`](#dynamic_compound) | Updates a `Var` or numeric lvalue with a `Var` or numeric operand through the update helper of its storage. |
+| [`dynamic_unary`](#dynamic_unary) | Rejects a unary numeric operator on a `Var`. |
 | [`linked_meta_hashes`](#linked_meta_hashes) | Returns linked definition hashes and provider source dependencies. |
 | [`linked_meta_targets`](#linked_meta_targets) | Returns the linked copies, and the runtime builders, by name. |
+| [`printf_values`](#printf_values) | Reads the Var values a printf-family call's static format consumes. |
 | [`register_marked_rewrite`](#register_marked_rewrite) | Registers the decorated translator for member calls that find no member on a receiver whose aggregate declares a field with the keyword `mark`. |
+| [`register_operator_rewrite`](#register_operator_rewrite) | Registers the decorated translator for each operator in `operators` applied to an operand of `type`, in `form`. |
 | [`register_rewrite`](#register_rewrite) | Registers the decorated translator with its macro and hole patterns. |
+| [`register_typed_rewrite`](#register_typed_rewrite) | Registers the decorated translator for the operator its macro pattern spells applied to an operand of `type`. |
 | [`try_catch_cases`](#try_catch_cases) | Returns each lowered arm of `arms` chosen by its index in `selected`; `$try_handled` calls this in a slot. |
 | [`try_lowering`](#try_lowering) | Lowers the parsed try `node` to its landing form. |
 | [`x2c_decl_make`](#x2c_decl_make) | Declares `name` with `type` and an optional initializer. |
@@ -31,37 +39,47 @@ Shipped `meta` code compiled into the compiler.
 
 ### Functions
 
-#### collection_postfix
+#### access_postfix
 
-`Code collection_postfix(Code code)`
+`Code access_postfix(Code code)`
 
-Stores the updated collection value and returns its previous value.
+Stores the updated element and returns its previous value.
 
-Source: `src/linked-meta.x:364`
+Source: `src/linked-meta.x:451`
 
-#### collection_prefix
+#### access_prefix
 
-`Code collection_prefix(Code code)`
+`Code access_prefix(Code code)`
 
-Stores and returns the incremented or decremented collection value.
+Stores and returns the incremented or decremented element.
 
-Source: `src/linked-meta.x:353`
+Source: `src/linked-meta.x:440`
 
-#### collection_store
+#### access_read
 
-`Code collection_store(Code code)`
+`Code access_read(Code code)`
 
-Selects the adopted collection setter for indexed assignment.
+Calls the getter bracket admission selected.
 
-Source: `src/linked-meta.x:298`
+Source: `src/linked-meta.x:324`
 
-#### collection_update
+#### access_store
 
-`Code collection_update(Code code)`
+`Code access_store(Code code)`
 
-Selects collection compound updates and checks accepted operands.
+Selects the adopted collection setter for indexed assignment, or a
+participant's `setindex` member.
 
-Source: `src/linked-meta.x:326`
+Source: `src/linked-meta.x:375`
+
+#### access_update
+
+`Code access_update(Code code)`
+
+Selects collection compound updates and checks accepted operands, or a
+participant's `updateindex` member.
+
+Source: `src/linked-meta.x:406`
 
 #### delegate_member
 
@@ -70,7 +88,45 @@ Source: `src/linked-meta.x:326`
 Rebuilds a call that finds no member on its receiver through the one
 delegate field path that provides the method.
 
-Source: `src/linked-meta.x:466`
+Source: `src/linked-meta.x:553`
+
+#### dynamic_binary
+
+`Code dynamic_binary(Code code)`
+
+Boxes both operands of an arithmetic, shift, or bitwise operator for
+`Var.binary`, after rejecting an operand that is neither a number nor,
+for `+` beside text, text. The call is returned lowered, because an
+operator chain applies this rule once for each term and binding would
+search the whole remaining chain each time.
+
+Source: `src/linked-meta.x:576`
+
+#### dynamic_change
+
+`Code dynamic_change(Code code)`
+
+Adds or subtracts one through the `Var` update helpers; the postfix
+forms return the value before the change.
+
+Source: `src/linked-meta.x:664`
+
+#### dynamic_compound
+
+`Code dynamic_compound(Code code)`
+
+Updates a `Var` or numeric lvalue with a `Var` or numeric operand
+through the update helper of its storage.
+
+Source: `src/linked-meta.x:638`
+
+#### dynamic_unary
+
+`Code dynamic_unary(Code code)`
+
+Rejects a unary numeric operator on a `Var`.
+
+Source: `src/linked-meta.x:680`
 
 #### linked_meta_hashes
 
@@ -78,7 +134,7 @@ Source: `src/linked-meta.x:466`
 
 Returns linked definition hashes and provider source dependencies.
 
-Source: `src/linked-meta.x:810`
+Source: `src/linked-meta.x:1195`
 
 #### linked_meta_targets
 
@@ -86,7 +142,15 @@ Source: `src/linked-meta.x:810`
 
 Returns the linked copies, and the runtime builders, by name.
 
-Source: `src/linked-meta.x:664`
+Source: `src/linked-meta.x:1018`
+
+#### printf_values
+
+`Code printf_values(Code code)`
+
+Reads the Var values a printf-family call's static format consumes.
+
+Source: `src/linked-meta.x:820`
 
 #### register_marked_rewrite
 
@@ -95,7 +159,16 @@ Source: `src/linked-meta.x:664`
 Registers the decorated translator for member calls that find no member
 on a receiver whose aggregate declares a field with the keyword `mark`.
 
-Source: `src/linked-meta.x:157`
+Source: `src/linked-meta.x:160`
+
+#### register_operator_rewrite
+
+`Code register_operator_rewrite( Code function, List type, Code form, List operators)`
+
+Registers the decorated translator for each operator in `operators`
+applied to an operand of `type`, in `form`.
+
+Source: `src/linked-meta.x:180`
 
 #### register_rewrite
 
@@ -103,7 +176,16 @@ Source: `src/linked-meta.x:157`
 
 Registers the decorated translator with its macro and hole patterns.
 
-Source: `src/linked-meta.x:148`
+Source: `src/linked-meta.x:151`
+
+#### register_typed_rewrite
+
+`Code register_typed_rewrite( Code function, List type, Code pattern, List holes)`
+
+Registers the decorated translator for the operator its macro pattern
+spells applied to an operand of `type`.
+
+Source: `src/linked-meta.x:170`
 
 #### try_catch_cases
 
@@ -117,7 +199,7 @@ every arm returns or raises, control cannot leave them, and a final
 unreachable mark tells C so that a function ending in such a `try`
 needs no return after it.
 
-Source: `src/linked-meta.x:496`
+Source: `src/linked-meta.x:850`
 
 #### try_lowering
 
@@ -125,7 +207,7 @@ Source: `src/linked-meta.x:496`
 
 Lowers the parsed try `node` to its landing form.
 
-Source: `src/linked-meta.x:608`
+Source: `src/linked-meta.x:962`
 
 #### x2c_decl_make
 
@@ -133,7 +215,7 @@ Source: `src/linked-meta.x:608`
 
 Declares `name` with `type` and an optional initializer.
 
-Source: `src/linked-meta.x:98`
+Source: `src/linked-meta.x:101`
 
 #### x2c_expr_cast
 
@@ -143,7 +225,7 @@ Returns `expression` cast to `type`, which is a declared type rather
 than syntax. A generator needs it where the value it holds and the
 parameter it reaches differ in width or sign.
 
-Source: `src/linked-meta.x:91`
+Source: `src/linked-meta.x:94`
 
 #### x2c_expr_field
 
@@ -151,7 +233,7 @@ Source: `src/linked-meta.x:91`
 
 Returns the expression `receiver.name`.
 
-Source: `src/linked-meta.x:83`
+Source: `src/linked-meta.x:86`
 
 #### x2c_param_make
 
@@ -159,7 +241,7 @@ Source: `src/linked-meta.x:83`
 
 Returns a parameter named `name` with `type`.
 
-Source: `src/linked-meta.x:106`
+Source: `src/linked-meta.x:109`
 
 #### x2c_type_members
 
@@ -168,7 +250,7 @@ Source: `src/linked-meta.x:106`
 Returns enum members as `(name value)` rows in declaration order.
 An implicit value is nil; a literal value retains its spelling.
 
-Source: `src/linked-meta.x:135`
+Source: `src/linked-meta.x:138`
 
 ## Design notes
 

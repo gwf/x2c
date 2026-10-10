@@ -34,7 +34,7 @@ The compiler surface a `meta` function calls.
 Returns the suffix of `type` that begins at its typedef name or base
 keyword, sharing `type`, or `NULL` when it has none.
 
-Source: `lib/meta.x:456`
+Source: `lib/meta.x:509`
 
 #### type_declaration_parts
 
@@ -44,7 +44,7 @@ Returns `(base modifiers)` for reconstructing a declaration of `type`.
 Function modifiers hold parameter syntax, and modifier order retains C
 declarator precedence.
 
-Source: `lib/meta.x:486`
+Source: `lib/meta.x:539`
 
 #### type_name_error
 
@@ -55,7 +55,7 @@ other than a C type keyword, as `%(String)` and `%(* Point)` do, or
 `NULL`. A type name is a String, as in `%("String")` and `%(* "Point")`;
 neither a short Symbol nor a long Atom supplies that representation.
 
-Source: `lib/meta.x:469`
+Source: `lib/meta.x:522`
 
 #### x2c_block_make
 
@@ -63,7 +63,7 @@ Source: `lib/meta.x:469`
 
 Returns a block containing `items` in order.
 
-Source: `lib/meta.x:139`
+Source: `lib/meta.x:140`
 
 #### x2c_expr_call
 
@@ -72,7 +72,7 @@ Source: `lib/meta.x:139`
 Returns the expression calling `callee` with `arguments`, a `List` of
 expressions.
 
-Source: `lib/meta.x:113`
+Source: `lib/meta.x:114`
 
 #### x2c_expr_composite
 
@@ -81,7 +81,7 @@ Source: `lib/meta.x:113`
 Returns the comma-separated composite initializer holding `items`, a
 `List` of expressions.
 
-Source: `lib/meta.x:118`
+Source: `lib/meta.x:119`
 
 #### x2c_expr_ident
 
@@ -90,7 +90,7 @@ Source: `lib/meta.x:118`
 Returns an expression reading the identifier `name`, which is the syntax
 `x2c_ident` returned or a binding the compiler resolved.
 
-Source: `lib/meta.x:99`
+Source: `lib/meta.x:100`
 
 #### x2c_expr_index
 
@@ -98,7 +98,7 @@ Source: `lib/meta.x:99`
 
 Returns the expression `base[subscript]`.
 
-Source: `lib/meta.x:102`
+Source: `lib/meta.x:103`
 
 #### x2c_function_body
 
@@ -106,7 +106,7 @@ Source: `lib/meta.x:102`
 
 Returns the statements in the body of `function`.
 
-Source: `lib/meta.x:254`
+Source: `lib/meta.x:303`
 
 #### x2c_literal_int
 
@@ -114,7 +114,7 @@ Source: `lib/meta.x:254`
 
 Returns an `int` expression holding `value`.
 
-Source: `lib/meta.x:83`
+Source: `lib/meta.x:84`
 
 #### x2c_literal_string
 
@@ -122,7 +122,7 @@ Source: `lib/meta.x:83`
 
 Returns a `String` expression holding `value`.
 
-Source: `lib/meta.x:78`
+Source: `lib/meta.x:79`
 
 #### x2c_literal_symbol
 
@@ -130,7 +130,7 @@ Source: `lib/meta.x:78`
 
 Returns a `Symbol` expression holding `value`.
 
-Source: `lib/meta.x:87`
+Source: `lib/meta.x:88`
 
 #### x2c_parameters_arguments
 
@@ -140,7 +140,7 @@ Returns the argument expressions that forward a parameter list, which is
 a `params` form or the parameters themselves. A `(void)` parameter list
 answers nothing.
 
-Source: `lib/meta.x:262`
+Source: `lib/meta.x:311`
 
 #### x2c_stmnt_make
 
@@ -148,7 +148,7 @@ Source: `lib/meta.x:262`
 
 Returns an expression statement.
 
-Source: `lib/meta.x:133`
+Source: `lib/meta.x:134`
 
 #### x2c_stmnt_return
 
@@ -156,7 +156,7 @@ Source: `lib/meta.x:133`
 
 Returns a return statement carrying `expression`.
 
-Source: `lib/meta.x:136`
+Source: `lib/meta.x:137`
 
 ## Public types
 
@@ -175,7 +175,7 @@ Source: `lib/meta.x:136`
 
 Captured code parsed from source or produced by a quotation.
 
-Source: `lib/meta.x:51`
+Source: `lib/meta.x:52`
 
 <a id="Macro"></a>
 ### Macro
@@ -185,7 +185,7 @@ Source: `lib/meta.x:51`
 A macro as a value: called to build code, or used in a Match `case` to
 recognize code and capture its parameters.
 
-Source: `lib/meta.x:45`
+Source: `lib/meta.x:46`
 
 <a id="Source"></a>
 ### Source
@@ -196,7 +196,7 @@ A `meta` parameter declared `Source` receives, at a `$` call, captured
 syntax with the source text it came from: `((text T) (file F) (syntax
 S))`. `x2c_source_text` and `x2c_embed_text` read it directly.
 
-Source: `lib/meta.x:63`
+Source: `lib/meta.x:64`
 
 <a id="Type"></a>
 ### Type
@@ -205,7 +205,7 @@ Source: `lib/meta.x:63`
 
 Semantic type syntax with canonical List-pool lifetime.
 
-Source: `lib/meta.x:48`
+Source: `lib/meta.x:49`
 
 <a id="TypeInfo"></a>
 ### TypeInfo
@@ -216,7 +216,7 @@ A `meta` parameter declared `TypeInfo` receives, at a `$` call, the
 description of its argument's type: `((name N) (kind K) (type T)
 (fields F) (methods M))`. Read a part with `List.assoc`.
 
-Source: `lib/meta.x:58`
+Source: `lib/meta.x:59`
 
 ## Design notes
 
@@ -237,9 +237,10 @@ written.
 Two operations let a macro contribute code beyond its result.
 `x2c_enclosing` answers the initialized declarator, block item,
 function, or unit around the invocation, and `x2c_place` puts code
-after that declarator or block item, on the exits of its block, among
-the unit's support declarations, or in its initialization, under the
-expansion's transaction. `$auto` is built on them.
+after that declarator or block item, on the exits of its block, at the
+entry of its function, among the unit's support declarations, or in its
+initialization, under the expansion's transaction. `$auto` is built on
+them.
 
 The library builds it as an optional module, but the prelude's
 `varops.x` includes it for its own `meta` rows, so every unit sees its

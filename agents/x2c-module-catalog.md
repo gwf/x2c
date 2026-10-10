@@ -8,7 +8,7 @@ non-static function definition discovered in source order. It does
 not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
-- Compiler modules: 55
+- Compiler modules: 58
 - Runtime modules: 77
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
@@ -178,7 +178,7 @@ Public functions:
 
 ### [src/component-access.x](../src/component-access.x)
 
-Array/Map mutation policy; getter resolution remains with admission.
+Bracket access policy: Array and Map mutation through their typed helpers, and any other participant's read, store, and update through its indexing members, with each operand evaluated once, in order. Getter resolution remains with admission.
 
 Public functions:
 
@@ -187,6 +187,30 @@ None. This module has no non-static function definitions.
 ### [src/component-delegate.x](../src/component-delegate.x)
 
 delegate fields.
+
+Public functions:
+
+None. This module has no non-static function definitions.
+
+### [src/component-literals.x](../src/component-literals.x)
+
+Array and Map literals.
+
+Public functions:
+
+`array_literal`, `map_literal`
+
+### [src/component-operators.x](../src/component-operators.x)
+
+dynamic operators.
+
+Public functions:
+
+None. This module has no non-static function definitions.
+
+### [src/component-printf.x](../src/component-printf.x)
+
+Var values in printf-family formats.
 
 Public functions:
 
@@ -358,11 +382,12 @@ Public functions:
 
 `x2c_expr_field`, `x2c_expr_cast`, `x2c_decl_make`, `x2c_param_make`,
 `x2c_type_members`, `register_rewrite`, `register_marked_rewrite`,
-`_dedent_expand`, `_macros_location`, `_tag_decode_group`,
-`_tag_decode_groups`, `_tag_id_checks`, `collection_store`,
-`collection_update`, `collection_prefix`, `collection_postfix`,
-`delegate_member`, `try_catch_cases`, `try_lowering`, `linked_meta_targets`,
-`linked_meta_hashes`
+`register_typed_rewrite`, `register_operator_rewrite`, `_dedent_expand`,
+`_macros_location`, `_tag_decode_group`, `_tag_decode_groups`,
+`_tag_id_checks`, `access_read`, `access_store`, `access_update`,
+`access_prefix`, `access_postfix`, `delegate_member`, `dynamic_binary`,
+`dynamic_compound`, `dynamic_change`, `dynamic_unary`, `printf_values`,
+`try_catch_cases`, `try_lowering`, `linked_meta_targets`, `linked_meta_hashes`
 
 ### [src/literals.x](../src/literals.x)
 
@@ -492,8 +517,10 @@ Public functions:
 
 `MetaContext.current`, `Compiler.expanding`, `Type.is_named`, `Type.numeric`,
 `Type.is_text`, `Type.aggregate`, `Type.marked_fields`, `Type.resolve_member`,
-`Type.protocol_member`, `Code.type`, `Code.value`, `Code.exits`,
-`Code.is_static_pattern`, `Code.register_rewrite`,
+`Type.protocol_member`, `Type.getter`, `Type.update_helper`, `Code.type`,
+`Code.value`, `Code.call_in_order`, `Code.exits`, `Code.convert`,
+`Code.format`, `Code.is_static_pattern`, `Code.register_rewrite`,
+`Code.register_typed_rewrite`, `Code.register_operator_rewrite`,
 `Code.register_marked_rewrite`, `Code.register_after_initialization`,
 `x2c_syntax_type`, `x2c_protocol_member`, `x2c_method_resolve`,
 `builtin_foreach_bindings`, `builtin_foreach_reference`,
@@ -554,8 +581,8 @@ Public functions:
 `Compiler.parse_complex_identifier`, `Compiler.package_alias_spelling`,
 `Compiler.parse_basic_identifier`, `Compiler.parse_optional_identifier`,
 `Compiler.parse_function_definition`, `Compiler.parse_function_target`,
-`Compiler.enter`, `Compiler.enclosing`, `Compiler.place_after`,
-`Compiler.close_placements`, `Compiler.leave_item`,
+`Compiler.enter`, `Compiler.enclosing`, `Compiler.place_entry`,
+`Compiler.place_after`, `Compiler.close_placements`, `Compiler.leave_item`,
 `Compiler.finish_initializers`, `Compiler.bind_syntax`, `source_clause`,
 `Compiler.bind_source_statement`, `Compiler.bind_catch_arm`,
 `Compiler.bind_match_arm`, `Compiler.bind_callable_body`,
@@ -711,8 +738,7 @@ x2c AST transformation pipeline.
 
 Public functions:
 
-`Compiler.transform`, `Compiler.normalize`, `transform_array_literal`,
-`transform_map_literal`
+`Compiler.transform`, `Compiler.normalize`, `Compiler.call_in_order`
 
 ### [src/type-ledger.x](../src/type-ledger.x)
 

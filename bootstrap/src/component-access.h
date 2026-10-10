@@ -7,5 +7,6 @@
 
 #include "x2c.h"
 #include "rewrite.h"
+#include "grammar.h"
 
 #endif /* __GUARD_0xFA81E4E9__ */

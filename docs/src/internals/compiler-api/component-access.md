@@ -6,4 +6,4 @@
 
 # `src/component-access.x`
 
-Array/Map mutation policy; getter resolution remains with admission.
+Bracket access policy: Array and Map mutation through their typed helpers, and any other participant's read, store, and update through its indexing members, with each operand evaluated once, in order. Getter resolution remains with admission.
