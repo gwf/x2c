@@ -556,11 +556,8 @@ Code dynamic_binary(Code code) {
         NULL, <xform>, "dynamic numeric operators require numeric operands",
         %("operator: $op left type: $left_name right type: $right_name"));
     }
-    List callee = %(expr (<macro-expr>) (ident (binding-name "Var_binary")));
-    List symbol = %(expr ("Symbol") (literal ("Symbol") ${op.str()} $op));
-    List call = %(call $callee (args ${lhs.convert(%("Var"))} $symbol
-                                     ${rhs.convert(%("Var"))}));
-    return Code.lowered(%(expr ("Var") $call));
+    Code left_var = lhs.convert(%("Var")), right_var = rhs.convert(%("Var"));
+    return Code.lowered($!Var{ Var_binary($left_var, $op, $right_var) });
   }
   return code;
 }

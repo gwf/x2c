@@ -19,8 +19,7 @@
 meta static int _dynamic_operand(Type type, int text) =>
   type.is_named("Var") || (text ? type.is_text() : !!type.numeric());
 
-$rewrite(%(expr ("Var")
-  (op (!or + - (!quote *) / % <"<<"> <">>"> & ^ |) ? ?)))
+$rewrite(%(expr ("Var") (op (!or + - (!quote *) / % <"<<"> <">>"> & ^ |) ? ?)))
 /** Boxes both operands of an arithmetic, shift, or bitwise operator for
     `Var.binary`, after rejecting an operand that is neither a number nor,
     for `+` beside text, text. The call is returned lowered, because an
@@ -39,11 +38,8 @@ meta Code dynamic_binary(Code code) {
         NULL, <xform>, "dynamic numeric operators require numeric operands",
         %("operator: $op left type: $left_name right type: $right_name"));
     }
-    List callee = %(expr (<macro-expr>) (ident (binding-name "Var_binary")));
-    List symbol = %(expr ("Symbol") (literal ("Symbol") ${op.str()} $op));
-    List call = %(call $callee (args ${lhs.convert(%("Var"))} $symbol
-                                     ${rhs.convert(%("Var"))}));
-    return Code.lowered(%(expr ("Var") $call));
+    Code left_var = lhs.convert(%("Var")), right_var = rhs.convert(%("Var"));
+    return Code.lowered($!Var{ Var_binary($left_var, $op, $right_var) });
   }
   return code;
 }
