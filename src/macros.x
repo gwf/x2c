@@ -2720,7 +2720,8 @@ static List Compiler._lowered(
 /* prepared replacements
 
    A translator's replacement is its quotation's template filled with Code
-   values it captured from the source, which are already bound and typed.
+   values it captured from the source, which are already bound, typed when
+   they resolved, as an undeclared C function's name does not.
    Binding, conversion, and lowering treat the template's own syntax alike
    for every use with the same template and slot signatures, so the first
    lowering in a unit keeps that syntax as a skeleton with a slot for each
@@ -2786,7 +2787,7 @@ static List Compiler._prepared(
   Compiler c, List source, Var result, AstPos position, Type expected,
   Token site) {
   Array sources = $auto([]), values = $auto([]);
-  foreach (Var part, source) _typed_nodes(part, sources);
+  foreach (Var part, source) _expression_nodes(part, sources);
   int refused = 0;
   Var shape = c._template(result, sources, values, refused);
   if (refused) return c._watched(result, sources, position, expected, site);
@@ -2831,16 +2832,15 @@ static List Compiler._watched(
     return c._lowered(result, position, expected, site);
 }
 
-/* Pushes each typed expression in `node`, which a translator may insert
-   whole, onto `found`. */
-static void _typed_nodes(Var node, Array found) {
-  if (node is not <list>) return;
-  List syntax = node;
-  if (syntax.car() == <expr> && syntax.cadr().list()) found.push(syntax);
-  for (; syntax; syntax = syntax.cdr()) _typed_nodes(syntax.car(), found);
+/* Pushes each expression in `node`, which a translator may insert whole,
+   onto `found`. A chain nests as deeply as it is long, so the walk keeps
+   its pending work off the C stack. */
+static void _expression_nodes(Var node, Array found) {
+  List syntax;
+  $ast.walk(node, syntax) if (syntax.car() == <expr>) found.push(syntax);
 }
 
-/* `node` with each typed expression from `sources` replaced by its slot
+/* `node` with each expression from `sources` replaced by its slot
    signature `("x2c.slot" TYPE SHAPE)` and pushed onto `values`. A literal
    stays in the template, which then lowers it as written. Sets
    `refused` for a value inserted twice or a value whose content conversion
@@ -2891,7 +2891,7 @@ static Var Compiler._slot_shape(Compiler c, Var content) {
     return %(lambda-snapshot ${parts.cadr()}) in c.semantic_binding_facts()
       ? %(ident snapshot) : head;
   if (head == <call> || head == <index> || head == <getindex> ||
-      head == <postfix> || head == <cast>)
+      head == <postfix> || head == <cast> || head == <cache>)
     return head;
   List operands = parts.cdr().cdr();
   if (head == <parens> && parts.cadr().list().car() == <expr>)
