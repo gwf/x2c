@@ -47,7 +47,7 @@ typedef struct ScriptUnit {
 */
 typedef struct GenNames {
   Map counters, adapters, file_scope_owners;
-  int next_binding;
+  int next_binding, issued;
 } *GenNames;
 
 /** Holds the three mutable maps that form one lexical semantic scope.
@@ -72,6 +72,10 @@ typedef struct PendingMark { int lengths[PENDING_AREAS]; } PendingMark;
 
 /** Names the scope-owned semantic table belonging to one compiler. */
 typedef struct Sym *Sym;
+
+/** Names the slots a rewrite's first lowering watches; see "prepared
+    replacements" in macros.x. */
+typedef struct SlotWatch *SlotWatch;
 
 /** One syntax the parser is inside, which `x2c_enclosing` answers: a
     function body with its declaration in `node`, a block item with the
@@ -201,6 +205,10 @@ typedef struct Compiler {
   int capture_unit;
   List active_rewrites;
   Map rewrite_rules;
+  /* Each rewrite replacement lowered once in this unit, by its template and
+     slot signature, and the slots its first lowering watches. */
+  Map prepared_rewrites;
+  SlotWatch slot_watch;
   /* Where the expression statement being parsed starts. A meta call there
      that the statement's `;` ends is evaluated as the statement. */
   Token meta_statement;
@@ -1238,6 +1246,7 @@ static void Compiler._reset_macros(Compiler c) {
   c.kw_aliases = {};
   c.rewrite_rules = NULL;
   c.active_rewrites = NULL;
+  c.prepared_rewrites = NULL;
   c.install_builtin_macros();
   if (!c.declaration_produced) c.imports = {};
   c.import_stack.clear();
@@ -2284,6 +2293,7 @@ String Compiler.fresh_name(Compiler c, String stem) {
   int count = c.names.counters.try_get(key, stored) ? stored : 0;
   String name = %"_x2c_${key}_${count++}";
   c.names.counters[key] = count;
+  c.names.issued++;
   return name;
 }
 
@@ -2299,6 +2309,7 @@ List Compiler.gensym(Compiler c) {
   Var stored;
   int count = c.names.counters.try_get(key, stored) ? stored.int() + 1 : 1;
   c.names.counters[key] = count;
+  c.names.issued++;
   return %((gensym $owner $count));
 }
 

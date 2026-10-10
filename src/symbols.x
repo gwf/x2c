@@ -384,6 +384,16 @@ static List Sym._new_binding(Sym s, List key) {
   return binding;
 }
 
+/** Returns how many introduced bindings no scope holds: those
+    `Sym.introduce` made, as opposed to the ones each scope makes once for
+    a name it resolves. */
+int Sym.introduced(Sym s) {
+  int held = 0;
+  for (int i = 0; i < (int) s.scopes.len(); i++)
+    held += s._scope_at(i).bindings.len();
+  return s.c.names.next_binding - held;
+}
+
 /** Allocates a fresh binding identity for a compiler-introduced spelling. */
 List Sym.introduce(Sym s, String spelling) => s._new_binding(%($spelling));
 
@@ -1346,6 +1356,9 @@ int SymTxn.local_macros_changed(SymTxn &s) {
   }
   return 0;
 }
+
+/** Returns whether a semantic transaction is open. */
+int Sym.transacting(Sym s) => s.transactions > 0;
 
 /** Stops one transaction's semantic write log. */
 void Sym.end_log(Sym s) {

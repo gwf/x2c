@@ -187,6 +187,10 @@ Ast Compiler.normalize(Compiler c, Ast ast) => c._step(ast);
 
 static Ast Compiler._step(Compiler c, Ast ast) {
   if (!ast) return NULL;
+  if (c.slot_watch) {
+    Ast watched = c.watched_step(ast);
+    if (watched) return watched;
+  }
   Var head = ast.car();
   if (head is not <symbol>) return c._default_node(ast);
   match (ast) {
