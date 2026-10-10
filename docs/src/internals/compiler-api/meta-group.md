@@ -38,7 +38,7 @@ A unit's meta group, emitted as C.
 Binds the session's group function `name` when it is not bound yet, by
 staging the group, and reports at `site` a function that cannot run.
 
-Source: `src/meta-group.x:914`
+Source: `src/meta-group.x:915`
 
 <a id="Compiler.finish_meta_functions"></a>
 #### Compiler.finish_meta_functions
@@ -79,7 +79,7 @@ Source: `src/meta-group.x:129`
 Returns why the group function `name` has no compile-time entry, from
 its type.
 
-Source: `src/meta-group.x:803`
+Source: `src/meta-group.x:804`
 
 <a id="Compiler.meta_cc"></a>
 #### Compiler.meta_cc
@@ -131,7 +131,7 @@ Source: `src/meta-group.x:147`
 Reports at `site` that the `meta` function `name` cannot run at compile
 time, and `why`.
 
-Source: `src/meta-group.x:822`
+Source: `src/meta-group.x:823`
 
 <a id="Compiler.refuse_record_meta_call"></a>
 #### Compiler.refuse_record_meta_call
@@ -142,7 +142,7 @@ Reports at `site` that the group function `name` cannot run at compile
 time when its result is a struct or union, which its type alone
 decides.
 
-Source: `src/meta-group.x:830`
+Source: `src/meta-group.x:831`
 
 <a id="Compiler.stage_meta_in_process"></a>
 #### Compiler.stage_meta_in_process
@@ -161,7 +161,7 @@ Source: `src/meta-group.x:124`
 Directs each provider group into `directory`, using `owners` to name
 their headers by table, or stops that when `directory` is NULL.
 
-Source: `src/meta-group.x:875`
+Source: `src/meta-group.x:876`
 
 <a id="Compiler.use_meta_toolchain"></a>
 #### Compiler.use_meta_toolchain
@@ -185,7 +185,7 @@ x2c sources it read in `group-K.deps`, or its failure in
 `group-K.failure`. Included native and type providers use the same
 group header and object even when they have no `meta` functions.
 
-Source: `src/meta-group.x:887`
+Source: `src/meta-group.x:888`
 
 ## Design notes
 
