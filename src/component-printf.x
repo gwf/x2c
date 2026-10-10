@@ -110,19 +110,16 @@ meta static void _printf_conversion(
   String length = _printf_length(at);
   if (!*at) _printf_fail(call, "incomplete format conversion");
   int conversion = *at++;
+  String spec = "%%%c".printf(conversion);
   if (!_printf_valid(length, conversion))
-    _printf_fail(
-      call, "unsupported or malformed format conversion %%%c"
-        .printf(conversion));
+    _printf_fail(call, %"unsupported or malformed format conversion $spec");
   if (next >= arguments.len())
-    _printf_fail(
-      call, "format conversion %%%c consumes a missing argument"
-        .printf(conversion));
+    _printf_fail(call, %"format conversion $spec consumes a missing argument");
   Code read = _printf_read(arguments[next], length, conversion);
   if (!read)
-    _printf_fail(call, "%s%c%s".printf(
-      "cannot infer a native argument for Var at %", conversion,
-      "; use an explicit converter for this format conversion"));
+    _printf_fail(
+      call, %"cannot infer a native argument for Var at $spec; use an " +
+        "explicit converter for this format conversion");
   arguments[next++] = read;
 }
 
