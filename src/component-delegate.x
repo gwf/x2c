@@ -125,10 +125,10 @@ meta Code delegate_member(Code code) {
     String name = x2c_binding_spelling(member);
     List fields = _delegate_fields(receiver.cadr(), name);
     if (!fields) return code;
-    Code target = receiver;
-    foreach (String field, fields)
-      target = %(expr () (op . $target ($field)));
-    return %(expr () (call (expr () (op . $target ($name))) (args @arguments)));
+    Code callee = receiver;
+    foreach (String step, fields.append(%($name)))
+      callee = %(expr () (op . $callee ($step)));
+    return %(expr () (call $callee (args @arguments)));
   }
   return code;
 }

@@ -734,6 +734,6 @@ registered for the marks its receiver's aggregate declares, after those
 keyed by the receiver's own type. The translator searches the delegate
 fields with `Type.marked_fields` and `Type.resolve_member`, reports an
 ambiguous path or a cycle, and returns the call through the field path as
-a quotation, which ordinary call resolution binds. The components and
+constructed syntax, which ordinary call resolution binds. The components and
 `src/grammar.x`, whose source forms they recognize, are compiler prelude
 sources.
