@@ -5016,7 +5016,12 @@ values, `Symbol`s, `Atom`s, `String`s, and `List`s of permitted values. `void`,
 pointers, mutable containers, resources, custom objects, and other
 identity-bearing values are invalid. Statically known violations are compiler
 errors; invalid contents supplied dynamically through `Var` reach `Error`'s
-`<bad-types>` raw floor. A `try` may have adjacent `catch` arms:
+`<bad-types>` raw floor. The conversions and the check belong to the shipped
+component `src/component-raise.x`, a translator that `$rewrite($raised)`
+registers on the `raise` statement head; a rule a program registers there runs
+first. The compiler evaluates the converted code and values once each, left to
+right, and builds their literals when the `raise` runs. A `try` may have
+adjacent `catch` arms:
 
 <!-- ignore: illustrative `Block` and reporting callbacks are omitted -->
 ```x2c,ignore

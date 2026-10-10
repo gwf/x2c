@@ -8,7 +8,7 @@ non-static function definition discovered in source order. It does
 not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
-- Compiler modules: 58
+- Compiler modules: 59
 - Runtime modules: 77
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
@@ -216,6 +216,14 @@ Public functions:
 
 None. This module has no non-static function definitions.
 
+### [src/component-raise.x](../src/component-raise.x)
+
+raise.
+
+Public functions:
+
+None. This module has no non-static function definitions.
+
 ### [src/component-try.x](../src/component-try.x)
 
 try, catch, and finally.
@@ -242,10 +250,10 @@ Public functions:
 `Diagnostics.release`, `Diagnostics.entries`, `Diagnostics.reached_limit`,
 `Diagnostics.report`, `diagnostics_write_json`, `Compiler.print_diagnostic`,
 `Compiler.origin_location`, `Compiler.display_path`, `Compiler.token_location`,
-`Compiler.token_source`, `Compiler.report_error`, `Compiler.report_warning`,
-`Compiler.report_warning_at`, `Compiler.take_diagnostics`,
-`Compiler.error_count`, `Compiler.diagnostics`, `Compiler.dump_tokens`,
-`Compiler.dump_symbol_table`, `Compiler.dump_cache`
+`Compiler.token_source`, `Compiler.report_error`, `Compiler.report_problem`,
+`Compiler.report_warning`, `Compiler.report_warning_at`,
+`Compiler.take_diagnostics`, `Compiler.error_count`, `Compiler.diagnostics`,
+`Compiler.dump_tokens`, `Compiler.dump_symbol_table`, `Compiler.dump_cache`
 
 ### [src/editor.x](../src/editor.x)
 
@@ -385,8 +393,8 @@ Public functions:
 `_tag_decode_group`, `_tag_decode_groups`, `_tag_id_checks`, `access_read`,
 `access_store`, `access_update`, `access_prefix`, `access_postfix`,
 `delegate_member`, `dynamic_binary`, `dynamic_compound`, `dynamic_change`,
-`dynamic_unary`, `printf_values`, `try_catch_cases`, `try_lowering`,
-`linked_meta_targets`, `linked_meta_hashes`
+`dynamic_unary`, `printf_values`, `raise_lowering`, `try_catch_cases`,
+`try_lowering`, `linked_meta_targets`, `linked_meta_hashes`
 
 ### [src/literals.x](../src/literals.x)
 
@@ -518,7 +526,7 @@ Public functions:
 `Type.is_text`, `Type.aggregate`, `Type.marked_fields`, `Type.resolve_member`,
 `Type.protocol_member`, `Type.getter`, `Type.update_helper`, `Code.type`,
 `Code.value`, `Code.call_in_order`, `Code.lowered`, `Code.exits`,
-`Code.convert`, `Code.format`, `Code.is_static_pattern`,
+`Code.convert`, `Code.format`, `Code.is_static_pattern`, `Code.promoted`,
 `Code.register_rewrite`, `Code.register_after_initialization`,
 `x2c_syntax_type`, `x2c_protocol_member`, `x2c_method_resolve`,
 `builtin_foreach_bindings`, `builtin_foreach_reference`,
@@ -531,10 +539,9 @@ Public functions:
 `binding_native_type`, `binding_literal_list`, `x2c_source_text`,
 `x2c_embed_text`, `x2c_literal_value`, `builtin_class_location`,
 `x2c_invocation_file`, `x2c_invocation_line`, `x2c_invocation_column`,
-`x2c_diagnostic_fail`, `x2c_diagnostic_fail_at`, `x2c_diagnostic_warn`,
-`x2c_enclosing`, `x2c_place`, `meta_type_description`,
-`meta_source_description`, `builtin_foreach_complete`,
-`builtin_foreach_collection`, `MetaContext.reject`,
+`x2c_diagnostic_fail`, `x2c_diagnostic_fail_at`, `x2c_diagnostic_error_at`,
+`x2c_diagnostic_warn`, `x2c_enclosing`, `x2c_place`, `meta_type_description`,
+`meta_source_description`, `builtin_foreach_complete`, `MetaContext.reject`,
 `Compiler.bind_sdk_primitives`
 
 ### [src/operator-ledger.x](../src/operator-ledger.x)

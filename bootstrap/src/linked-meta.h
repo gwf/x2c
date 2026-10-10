@@ -19,6 +19,7 @@
 #include "component-literals.h"
 #include "component-operators.h"
 #include "component-printf.h"
+#include "component-raise.h"
 #include "component-try.h"
 #include "fields.h"
 #include "grammar.h"
@@ -66,6 +67,8 @@ Code dynamic_change(Code code);
 Code dynamic_unary(Code code);
 
 Code printf_values(Code code);
+
+Code raise_lowering(Code node);
 
 List try_catch_cases(List selected, List arms);
 

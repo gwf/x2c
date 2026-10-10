@@ -26,6 +26,7 @@ Functions and types exposed by each compiler module.
 | [`src/component-literals.x`](component-literals.md) | Array and Map literals. |
 | [`src/component-operators.x`](component-operators.md) | dynamic operators. |
 | [`src/component-printf.x`](component-printf.md) | Var values in printf-family formats. |
+| [`src/component-raise.x`](component-raise.md) | raise. |
 | [`src/component-try.x`](component-try.md) | try, catch, and finally. |
 | [`src/deps.x`](deps.md) | Make dependency output for x2c translation units. |
 | [`src/diagnostics.x`](diagnostics.md) | compiler diagnostic storage and rendering. |

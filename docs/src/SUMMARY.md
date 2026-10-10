@@ -119,6 +119,7 @@
   - [src/component-literals.x](internals/compiler-api/component-literals.md)
   - [src/component-operators.x](internals/compiler-api/component-operators.md)
   - [src/component-printf.x](internals/compiler-api/component-printf.md)
+  - [src/component-raise.x](internals/compiler-api/component-raise.md)
   - [src/component-try.x](internals/compiler-api/component-try.md)
   - [src/deps.x](internals/compiler-api/deps.md)
   - [src/diagnostics.x](internals/compiler-api/diagnostics.md)

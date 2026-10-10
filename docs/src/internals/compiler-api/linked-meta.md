@@ -25,6 +25,7 @@ Shipped `meta` code compiled into the compiler.
 | [`linked_meta_hashes`](#linked_meta_hashes) | Returns linked definition hashes and provider source dependencies. |
 | [`linked_meta_targets`](#linked_meta_targets) | Returns the linked copies, and the runtime builders, by name. |
 | [`printf_values`](#printf_values) | Reads the Var values a printf-family call's static format consumes. |
+| [`raise_lowering`](#raise_lowering) | Converts a raise's code and details, or declines a raise whose parts already have their types. |
 | [`register_rewrite`](#register_rewrite) | Registers the decorated translator with its pattern and hole patterns. |
 | [`try_catch_cases`](#try_catch_cases) | Returns each lowered arm of `arms` chosen by its index in `selected`; `$try_handled` calls this in a slot. |
 | [`try_lowering`](#try_lowering) | Lowers the parsed try `node` to its landing form. |
@@ -42,7 +43,7 @@ Shipped `meta` code compiled into the compiler.
 
 Stores the updated element and returns its previous value.
 
-Source: `src/linked-meta.x:421`
+Source: `src/linked-meta.x:422`
 
 #### access_prefix
 
@@ -50,7 +51,7 @@ Source: `src/linked-meta.x:421`
 
 Stores and returns the incremented or decremented element.
 
-Source: `src/linked-meta.x:410`
+Source: `src/linked-meta.x:411`
 
 #### access_read
 
@@ -58,7 +59,7 @@ Source: `src/linked-meta.x:410`
 
 Calls the getter bracket admission selected.
 
-Source: `src/linked-meta.x:294`
+Source: `src/linked-meta.x:295`
 
 #### access_store
 
@@ -67,7 +68,7 @@ Source: `src/linked-meta.x:294`
 Selects the adopted collection setter for indexed assignment, or a
 participant's `setindex` member.
 
-Source: `src/linked-meta.x:345`
+Source: `src/linked-meta.x:346`
 
 #### access_update
 
@@ -76,7 +77,7 @@ Source: `src/linked-meta.x:345`
 Selects collection compound updates and checks accepted operands, or a
 participant's `updateindex` member.
 
-Source: `src/linked-meta.x:376`
+Source: `src/linked-meta.x:377`
 
 #### delegate_member
 
@@ -85,7 +86,7 @@ Source: `src/linked-meta.x:376`
 Rebuilds a call that finds no member on its receiver through the one
 delegate field path that provides the method.
 
-Source: `src/linked-meta.x:523`
+Source: `src/linked-meta.x:524`
 
 #### dynamic_binary
 
@@ -97,7 +98,7 @@ for `+` beside text, text. The call is returned lowered, because an
 operator chain applies this rule once for each term and binding would
 search the whole remaining chain each time.
 
-Source: `src/linked-meta.x:546`
+Source: `src/linked-meta.x:547`
 
 #### dynamic_change
 
@@ -106,7 +107,7 @@ Source: `src/linked-meta.x:546`
 Adds or subtracts one through the `Var` update helpers; the postfix
 forms return the value before the change.
 
-Source: `src/linked-meta.x:631`
+Source: `src/linked-meta.x:632`
 
 #### dynamic_compound
 
@@ -115,7 +116,7 @@ Source: `src/linked-meta.x:631`
 Updates a `Var` or numeric lvalue with a `Var` or numeric operand
 through the update helper of its storage.
 
-Source: `src/linked-meta.x:605`
+Source: `src/linked-meta.x:606`
 
 #### dynamic_unary
 
@@ -123,7 +124,7 @@ Source: `src/linked-meta.x:605`
 
 Rejects a unary numeric operator on a `Var`.
 
-Source: `src/linked-meta.x:647`
+Source: `src/linked-meta.x:648`
 
 #### linked_meta_hashes
 
@@ -131,7 +132,7 @@ Source: `src/linked-meta.x:647`
 
 Returns linked definition hashes and provider source dependencies.
 
-Source: `src/linked-meta.x:1159`
+Source: `src/linked-meta.x:1237`
 
 #### linked_meta_targets
 
@@ -139,7 +140,7 @@ Source: `src/linked-meta.x:1159`
 
 Returns the linked copies, and the runtime builders, by name.
 
-Source: `src/linked-meta.x:985`
+Source: `src/linked-meta.x:1058`
 
 #### printf_values
 
@@ -147,7 +148,16 @@ Source: `src/linked-meta.x:985`
 
 Reads the Var values a printf-family call's static format consumes.
 
-Source: `src/linked-meta.x:787`
+Source: `src/linked-meta.x:788`
+
+#### raise_lowering
+
+`Code raise_lowering(Code node)`
+
+Converts a raise's code and details, or declines a raise whose parts
+already have their types.
+
+Source: `src/linked-meta.x:856`
 
 #### register_rewrite
 
@@ -155,7 +165,7 @@ Source: `src/linked-meta.x:787`
 
 Registers the decorated translator with its pattern and hole patterns.
 
-Source: `src/linked-meta.x:151`
+Source: `src/linked-meta.x:152`
 
 #### try_catch_cases
 
@@ -169,7 +179,7 @@ every arm returns or raises, control cannot leave them, and a final
 unreachable mark tells C so that a function ending in such a `try`
 needs no return after it.
 
-Source: `src/linked-meta.x:817`
+Source: `src/linked-meta.x:890`
 
 #### try_lowering
 
@@ -177,7 +187,7 @@ Source: `src/linked-meta.x:817`
 
 Lowers the parsed try `node` to its landing form.
 
-Source: `src/linked-meta.x:929`
+Source: `src/linked-meta.x:1002`
 
 #### x2c_decl_make
 
@@ -185,7 +195,7 @@ Source: `src/linked-meta.x:929`
 
 Declares `name` with `type` and an optional initializer.
 
-Source: `src/linked-meta.x:101`
+Source: `src/linked-meta.x:102`
 
 #### x2c_expr_cast
 
@@ -195,7 +205,7 @@ Returns `expression` cast to `type`, which is a declared type rather
 than syntax. A generator needs it where the value it holds and the
 parameter it reaches differ in width or sign.
 
-Source: `src/linked-meta.x:94`
+Source: `src/linked-meta.x:95`
 
 #### x2c_expr_field
 
@@ -203,7 +213,7 @@ Source: `src/linked-meta.x:94`
 
 Returns the expression `receiver.name`.
 
-Source: `src/linked-meta.x:86`
+Source: `src/linked-meta.x:87`
 
 #### x2c_param_make
 
@@ -211,7 +221,7 @@ Source: `src/linked-meta.x:86`
 
 Returns a parameter named `name` with `type`.
 
-Source: `src/linked-meta.x:109`
+Source: `src/linked-meta.x:110`
 
 #### x2c_type_members
 
@@ -220,7 +230,7 @@ Source: `src/linked-meta.x:109`
 Returns enum members as `(name value)` rows in declaration order.
 An implicit value is nil; a literal value retains its spelling.
 
-Source: `src/linked-meta.x:138`
+Source: `src/linked-meta.x:139`
 
 ## Design notes
 

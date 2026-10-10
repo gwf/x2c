@@ -548,7 +548,7 @@ static List _compiler_location(Compiler compiler, Token token){
   return Compiler_token_location(compiler, token);
 }
 
-void Compiler_report_problem(Compiler compiler, Symbol code, String message, Token token, List notes);
+void Compiler_report_problem(Compiler c, Symbol code, String message, Token token, List notes);
 #include "error.h"
 
 
@@ -567,8 +567,8 @@ _Noreturn void Compiler_report_error(Compiler compiler, Symbol code, String mess
   exit(1);
 }
 
-void Compiler_report_problem(Compiler compiler, Symbol code, String message, Token token, List notes){
-  if(! _init_guard_) _file_init_();  message = String_truth(message) ? message : _112;  Diagnostics_report(compiler -> diagnostics, code, message, _compiler_location(compiler, token), notes);
+void Compiler_report_problem(Compiler c, Symbol code, String message, Token token, List notes){
+  if(! _init_guard_) _file_init_();  message = String_truth(message) ? message : _112;  Diagnostics_report(c -> diagnostics, code, message, _compiler_location(c, token), notes);
 }
 
 void Compiler_report_warning_at(Compiler compiler, Symbol code, String message, List location, List notes);
