@@ -7235,6 +7235,19 @@ static List _library_files(void){
   return _1082;
 }
 
+void Compiler_add_library_dependencies(Compiler c){
+  if(! _init_guard_) _file_init_(); {
+    List library;  List _x2c_macro_object_72 = _library_files();  List _x2c_macro_cursor_78 = _x2c_macro_object_72;  Var _x2c_macro_cursor_output_70;  while(List_try_next(_x2c_macro_object_72, &(_x2c_macro_cursor_78), &(_x2c_macro_cursor_output_70))){
+      library = Var_list(_x2c_macro_cursor_output_70);  Compiler_add_translation_dependency(c, ({
+        Var _x2c_literal_part_139 = String_var(c -> root_dir);  Var _x2c_literal_part_140 = String_var(Var_str(List_car(library)));  String_join(NULL, cons(_x2c_literal_part_139, cons(String_var(_62), cons(_x2c_literal_part_140, NULL))));
+      }
+      ));
+    }
+
+  }
+
+}
+
 static void Compiler__eval_library(Compiler c, int loaded, String relative, String message){
   String path = String_join(NULL, cons(String_var(c -> root_dir), cons(String_var(_62), cons(String_var(relative), NULL))));  Compiler_add_translation_dependency(c, path);  if(library_filling) Map_setindex(library_imports, String_var(path), int_var(1));  if(loaded || Compiler_inherits_import(path)) return;  String text = Compiler__source_text(c, path, message, c -> token, cons(_1084, cons(String_var(path), NULL)));  Compiler__eval_string(c, text, c -> token);
 }
@@ -7271,11 +7284,11 @@ void Compiler_record_comptime(Compiler c, String name){
 
 void Compiler_inherit_library_comptime(Compiler c){
   if(! _init_guard_) _file_init_();  if(library_filling || library_comptime == NULL) return; {
-    String name;  Iter _x2c_macro_iterator_72 = Map_keys(library_comptime, &(struct Iter){
+    String name;  Iter _x2c_macro_iterator_73 = Map_keys(library_comptime, &(struct Iter){
       int_var(0)
     }
-    );  Var _x2c_macro_item_77;  while(Iter_try_next(_x2c_macro_iterator_72, &(_x2c_macro_item_77))){
-      name = Var_string(_x2c_macro_item_77);  Map_setindex(c -> meta_comptime, String_var(name), int_var(1));
+    );  Var _x2c_macro_item_78;  while(Iter_try_next(_x2c_macro_iterator_73, &(_x2c_macro_item_78))){
+      name = Var_string(_x2c_macro_item_78);  Map_setindex(c -> meta_comptime, String_var(name), int_var(1));
     }
 
   }
@@ -7292,7 +7305,7 @@ Map Compiler_shared_definitions(Compiler c){
 
 int Compiler_shares_meta_definition(Compiler c, String name){
   if(! _init_guard_) _file_init_();  if(library_filling || library_definitions == NULL || ! String_truth(c -> filename)) return 0;  String key =({
-    Var _x2c_literal_part_139 = String_var(Path_absolute(c -> filename));  String_join(NULL, cons(_x2c_literal_part_139, cons(String_var(_1085), cons(String_var(name), NULL))));
+    Var _x2c_literal_part_141 = String_var(Path_absolute(c -> filename));  String_join(NULL, cons(_x2c_literal_part_141, cons(String_var(_1085), cons(String_var(name), NULL))));
   }
   );  return Map_contains(library_definitions, String_var(key));
 }
@@ -7334,8 +7347,8 @@ static void Compiler__use_lisp_bindings(Compiler c, int install){
 void Compiler_bind_meta_operation(Lisp lisp, String name, Var function);
 static void Compiler__install_native_operations(Compiler c){
   _bind_primitives(c -> macro_lisp); {
-    Var name, function;  Map _x2c_macro_object_73 = Compiler_compiler_targets();  unsigned _x2c_macro_cursor_79 = 0;  Var _x2c_macro_cursor_output_70;  Var _x2c_macro_cursor_output_71;  while(Map_try_next(_x2c_macro_object_73, &(_x2c_macro_cursor_79), &(_x2c_macro_cursor_output_70), &(_x2c_macro_cursor_output_71))){
-      name = _x2c_macro_cursor_output_70;  function = _x2c_macro_cursor_output_71; {
+    Var name, function;  Map _x2c_macro_object_74 = Compiler_compiler_targets();  unsigned _x2c_macro_cursor_80 = 0;  Var _x2c_macro_cursor_output_71;  Var _x2c_macro_cursor_output_72;  while(Map_try_next(_x2c_macro_object_74, &(_x2c_macro_cursor_80), &(_x2c_macro_cursor_output_71), &(_x2c_macro_cursor_output_72))){
+      name = _x2c_macro_cursor_output_71;  function = _x2c_macro_cursor_output_72; {
         Lisp_set_global(c -> macro_lisp, Var_string(name), function);  Compiler_bind_meta_operation(c -> macro_lisp, Var_string(name), function);
       }
 
@@ -7351,8 +7364,8 @@ static void _bind_primitives(Lisp lisp){
 
 static void _install_builtins(Lisp lisp){
   {
-    Var name, function;  Map _x2c_macro_object_74 = builtin_targets();  unsigned _x2c_macro_cursor_80 = 0;  Var _x2c_macro_cursor_output_72;  Var _x2c_macro_cursor_output_73;  while(Map_try_next(_x2c_macro_object_74, &(_x2c_macro_cursor_80), &(_x2c_macro_cursor_output_72), &(_x2c_macro_cursor_output_73))){
-      name = _x2c_macro_cursor_output_72;  function = _x2c_macro_cursor_output_73; {
+    Var name, function;  Map _x2c_macro_object_75 = builtin_targets();  unsigned _x2c_macro_cursor_81 = 0;  Var _x2c_macro_cursor_output_73;  Var _x2c_macro_cursor_output_74;  while(Map_try_next(_x2c_macro_object_75, &(_x2c_macro_cursor_81), &(_x2c_macro_cursor_output_73), &(_x2c_macro_cursor_output_74))){
+      name = _x2c_macro_cursor_output_73;  function = _x2c_macro_cursor_output_74; {
         String spelling = Var_string(name);  Lisp_set_global(lisp, String_startswith(spelling, _1142) ? String_join(NULL, cons(String_var(_1143), cons(String_var(spelling), NULL))) : spelling, function);
       }
 

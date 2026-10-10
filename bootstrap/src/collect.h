@@ -69,6 +69,8 @@ String interface_prelude(void);
 
 String interface_text(Compiler c);
 
+Map Compiler_linked_prelude_records(Compiler c);
+
 void collect_forget_provisional_entries(void);
 
 

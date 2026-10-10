@@ -164,6 +164,8 @@ String Compiler_source_path(Compiler c, String file);
 
 Lisp Compiler_open_macro_library(Compiler c);
 
+void Compiler_add_library_dependencies(Compiler c);
+
 void Compiler_publish_macro_library(Compiler c, Lisp shared);
 
 int Compiler_inherits_import(String path);
