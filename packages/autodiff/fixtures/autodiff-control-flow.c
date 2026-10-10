@@ -16,16 +16,6 @@ static double replay(double x, double y, int n);
 
 static double replay_grad(double x, double y, int n, double * x_grad, double * y_grad);
 
-double fabs(double);
-
-double hypot(double, double);
-
-double sin(double);
-
-double atan2(double, double);
-
-double fmax(double, double);
-
 static double walk(double x, double y, int n){
   double s = 0.0;
   for(int i = 0;  i < n;  i ++){
@@ -44,14 +34,6 @@ static double walk(double x, double y, int n){
   ;
   return s * atan2(y, x) + fmax(x, y);
 }
-
-ArrayDbl ArrayDbl_new(void);
-
-double ArrayDbl_push(ArrayDbl, double);
-
-double ArrayDbl_take_last(ArrayDbl);
-
-double cos(double);
 
 static double walk_grad(double x, double y, int n, double * x_grad, double * y_grad){
   ArrayDbl _x2c_macro_tape_0 = ArrayDbl_new();

@@ -614,7 +614,7 @@ static List Compiler._walk_cold(
   Compiler file = Compiler.new_shared(c);
   defer c.close_child(file);
   file.interface_provider = 1;
-  file.configure_package(c.package_dirs, canonical);
+  file.configure_package(c.package_source_dirs, canonical);
   file.signature_only = c.signature_only;
   file.filename = c.filename;
   // Every file the shared session preloads defines its Lisp there.
@@ -1945,9 +1945,12 @@ static List Compiler._interface_include_dirs(
       portable != dir ? %(home $portable) :
       dir.startswith("/") ? %(absolute $dir) : %(relative $dir));
   }
-  dirs.push(
-    is_source_file(canonical) && c._package_owns(canonical)
-      ? %(package ${c.package}) : %(package));
+  String root = package_directory(c.package_source_dirs, canonical);
+  String package = root && package_source(root, canonical)
+                 ? Path.basename(root)
+                 : c._package_owns(canonical) ? c.package : NULL;
+  dirs.push(is_source_file(canonical) && package
+              ? %(package $package) : %(package));
   return dirs.list_free();
 }
 

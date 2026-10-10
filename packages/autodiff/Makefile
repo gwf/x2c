@@ -31,7 +31,7 @@ run: $(EXAMPLE_PROGRAMS)
 	done
 
 # The test build owns builds/autodiff, so examples build beside it.
-builds/example-%: examples/%.x | builds
+builds/example-%: examples/%.x $(PACKAGE_ARCHIVE) | builds
 	"$(X2C)" build --output $@ --build-dir builds/$*-build \
 	  $(PACKAGE_X_FLAGS) $(PACKAGE_C_FLAGS) $<
 

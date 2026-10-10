@@ -96,13 +96,13 @@ typedef struct Ancestor {
 */
 typedef struct Compiler {
   String filename, text, root_dir;
-  /* Package-mode unit: NULL outside. package_dirs holds the registered
-     --package-dir roots, package_roots the directory of every package this
-     unit has already collected, package_aliases the resolution-only
-     spelling alias -> package name, package_members each `with` local
+  /* Package-mode unit: NULL outside. package_dirs holds import search roots;
+     package_source_dirs holds the explicit roots that select source ownership.
+     package_roots holds each collected package directory, package_aliases each
+     resolution-only spelling alias -> package name, package_members each `with` local
      spelling -> (package member), and package_effects each collected
      package's public compile-time definitions in its include order. */
-  String package, List package_dirs;
+  String package, List package_dirs, package_source_dirs;
   Map package_roots, package_aliases, package_members, package_effects;
   Token token;
   // Optional end of supplied input; NULL keeps ordinary file diagnostics.
@@ -2830,8 +2830,9 @@ static void Compiler._init_tables(Compiler c) {
    registries and generated-name state belong to the whole translation
    unit, so every child must mutate the owner's exact objects. */
 static void Compiler._share_unit(Compiler c, Compiler owner) {
-  $copy_fields(c, owner, package, package_dirs, package_roots,
-               package_aliases, package_members, package_effects, names,
+  $copy_fields(c, owner, package, package_dirs, package_source_dirs,
+               package_roots, package_aliases, package_members,
+               package_effects, names,
                source_map, recovery_depth, sources, declaration_produced,
                source_facts, source_occurrences, source_definitions,
                source_declarations, source_texts, unit_script, include_dirs,

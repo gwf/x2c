@@ -179,7 +179,7 @@ static int _start(
     if (!filename) _tokenize_session(frontend, c, source);
     else {
       c.package_dirs = frontend.request.package_roots();
-      c.configure_package(frontend.request.package_dirs, filename);
+      c.configure_package(c.package_source_dirs, filename);
       _tokenize_input(frontend, unit, filename);
       c.inherited_lisp = Compiler.inherits_import(Path.absolute(filename));
       Compiler.begin_meta_unit(c.filename);
@@ -207,6 +207,7 @@ static Compiler _begin_unit(
   c.diagnostics.limit = request.max_errors;
   c.source_map = request.source_map;
   c.sources = request.sources;
+  c.package_source_dirs = request.package_dirs;
   c.source_facts = request.source_facts;
   c.source_primary = 1;
   if (c.source_facts) {
