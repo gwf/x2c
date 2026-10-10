@@ -331,8 +331,8 @@ Code Code.register_marked_rewrite(
   match (shape.pattern(holes))
     case %(expr ? (call (expr ? (op ((!quote !quote) .) ? ?)) ?)):
       return _rewrite_registration(function, shape, holes, <member>, mark);
-  MetaContext.reject("a marked-field rewrite requires a member call pattern",
-    NULL);
+  MetaContext.reject(
+    "a marked-field rewrite requires a member call pattern", NULL);
 }
 
 /** Adds post-initialization block items while the declaration owner retains

@@ -398,7 +398,8 @@ static void _delegate_packages(
   Array notes = [%"delegate path: ${_delegate_path(outer, fields, NULL)}"];
   foreach (String package, packages) notes.push(%"package: '$package'");
   String method = %"${_delegate_type_name(type)}.$member";
-  x2c_diagnostic_fail_at(NULL, <type>,
+  x2c_diagnostic_fail_at(
+    NULL, <type>,
     %"method '$method' is provided by multiple imported packages",
     notes.list_free());
 }
@@ -437,29 +438,37 @@ static void _delegate_ambiguous(Type outer, String member, List paths) {
     notes.push(%"delegate path: $description -> $spelling");
   }
   String method = %"${_delegate_type_name(outer)}.$member";
-  x2c_diagnostic_fail_at(NULL, <type>,
-    %"method '$method' has multiple delegate paths", notes.list_free());
+  x2c_diagnostic_fail_at(
+    NULL, <type>, %"method '$method' has multiple delegate paths",
+    notes.list_free());
+}
+
+static void _delegate_cycle(Type outer, String member, List fields) {
+  String method = %"${_delegate_type_name(outer)}.$member";
+  x2c_diagnostic_fail_at(
+    NULL, <type>, %"delegation cycle resolving $method",
+    %("delegate path: ${_delegate_path(outer, fields, NULL)}"));
+}
+
+static List _delegate_fields(Type outer, String member) {
+  Array found = [];
+  List cycle = NULL;
+  _delegate_search(outer, member, outer, NULL, NULL, found, cycle);
+  List paths = found.list_free();
+  if (paths && paths.cdr()) _delegate_ambiguous(outer, member, paths);
+  if (!paths && cycle) _delegate_cycle(outer, member, cycle);
+  return paths ? paths.car().car() : NULL;
 }
 
 /** Rebuilds a call that finds no member on its receiver through the one
     delegate field path that provides the method. */
 Code delegate_member(Code code) {
   match (code) case $delegate_call(?receiver, ?member, *arguments): {
-    Type outer = receiver.cadr();
-    String name = x2c_binding_spelling(member);
-    Array found = [];
-    List cycle = NULL;
-    _delegate_search(outer, name, outer, NULL, NULL, found, cycle);
-    List paths = found.list_free();
-    if (paths && paths.cdr()) _delegate_ambiguous(outer, name, paths);
-    if (!paths && cycle)
-      x2c_diagnostic_fail_at(NULL, <type>,
-        %"delegation cycle resolving ${_delegate_type_name(outer)}.$name",
-        %("delegate path: ${_delegate_path(outer, cycle, NULL)}"));
-    if (!paths) return code;
+    List fields =
+      _delegate_fields(receiver.cadr(), x2c_binding_spelling(member));
+    if (!fields) return code;
     Code target = receiver;
-    foreach (String field, paths.car().car())
-      target = x2c_expr_field(target, field);
+    foreach (String field, fields) target = x2c_expr_field(target, field);
     return $!($target.$member(@arguments));
   }
   return code;
@@ -695,6 +704,8 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_delegate_packages", _delegate_packages);
   $linked.row(rows, "_delegate_search", _delegate_search);
   $linked.row(rows, "_delegate_ambiguous", _delegate_ambiguous);
+  $linked.row(rows, "_delegate_cycle", _delegate_cycle);
+  $linked.row(rows, "_delegate_fields", _delegate_fields);
   $linked.row(rows, "delegate_member", delegate_member);
   $linked.row(rows, "_try_arm_exits", _try_arm_exits);
   $linked.row(rows, "try_catch_cases", try_catch_cases);
