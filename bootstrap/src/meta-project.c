@@ -484,6 +484,8 @@ String Path_read_text(Path);
 
 Path Path_dirname(Path);
 
+int is_prelude_source(String);
+
 int Compiler_linked_meta_definitions_current(Compiler, String);
 
 #include "error.h"
@@ -548,7 +550,7 @@ static int Scan_file(Scan * s, String path){
   tokens -> layout = is_layout_file(path);
   Tokenizer_scan(tokens);
   int meta = Scan_file_scope(&((* s)), tokens, Path_dirname(path));
-  if((meta & 1) && _compiler_owns(path) && Compiler_linked_meta_definitions_current((* s).c, path)) meta &= ~ 1;
+  if((meta & 1) && _compiler_owns(path) &&(is_prelude_source(path) || Compiler_linked_meta_definitions_current((* s).c, path))) meta &= ~ 1;
   Map_setindex((* s).seen, String_var(path), int_var(meta));
   return meta;
 }

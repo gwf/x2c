@@ -4420,7 +4420,7 @@ static void Compiler__install_rewrite(Compiler c, List row){
     Var _x2c_match_values[5];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 5 };
     switch (0) {
       default: ;  static MatchCaptureSite _x2c_match_site_34;  if (x2c_match_site_try_capture(& _x2c_match_site_34, _x2c_match_expr, List_var(_488), &_x2c_match_capture)) {Var point = _x2c_match_values[0];  Var kind = _x2c_match_values[1];  Var name = _x2c_match_values[2];  Var shape = _x2c_match_values[3];  Var holes = _x2c_match_values[4]; {
-    RewriteRule rule = _rewrite_rule(Var_symbol(point), Compiler_thaw_declaration_syntax(c, kind), Var_string(name), Var_list(Compiler_thaw_declaration_syntax(c, shape)), Var_list(Compiler_thaw_declaration_syntax(c, holes)), c -> builtin_defs, 1);  Compiler__register_rewrite(c, rule);
+    if(c -> builtin_defs && ! links_meta_function(Var_string(name))) return;  RewriteRule rule = _rewrite_rule(Var_symbol(point), Compiler_thaw_declaration_syntax(c, kind), Var_string(name), Var_list(Compiler_thaw_declaration_syntax(c, shape)), Var_list(Compiler_thaw_declaration_syntax(c, holes)), c -> builtin_defs, 1);  Compiler__register_rewrite(c, rule);
   }
   break;
 }
@@ -4447,7 +4447,7 @@ static Var Compiler__ship_rewrite(Compiler c, List row){
     Var _x2c_match_values[5];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 5 };
     switch (0) {
       default: ;  static MatchCaptureSite _x2c_match_site_35;  if (x2c_match_site_try_capture(& _x2c_match_site_35, _x2c_match_expr, List_var(_488), &_x2c_match_capture)) {Var point = _x2c_match_values[0];  Var kind = _x2c_match_values[1];  Var name = _x2c_match_values[2];  Var shape = _x2c_match_values[3];  Var holes = _x2c_match_values[4]; {
-              if(_unit_bound(List_var(row))) break;  List thawed =({
+              if(_unit_bound(List_var(row)) || ! links_meta_function(Var_string(name))) break;  List thawed =({
                 Var _x2c_literal_part_80 = Compiler_thaw_declaration_syntax(c, kind);  Var _x2c_literal_part_81 = Compiler_thaw_declaration_syntax(c, shape);  Var _x2c_literal_part_82 = Compiler_thaw_declaration_syntax(c, holes);  cons(_x2c_literal_part_80, cons(_x2c_literal_part_81, cons(_x2c_literal_part_82, NULL)));
               }
               );  _require_owned(List_try_own(thawed));  Var own_kind, own_shape, own_holes;  List _x2c_destructure_7 = thawed;  own_kind = List_getindex(_x2c_destructure_7, 0);  own_shape = List_getindex(_x2c_destructure_7, 1);  own_holes = List_getindex(_x2c_destructure_7, 2);  shared = RewriteRule_var(_rewrite_rule(Var_symbol(point), own_kind, Var_string(name), Var_list(own_shape), Var_list(own_holes), 1, 0));
@@ -6897,7 +6897,7 @@ static Var Compiler__eval_string(Compiler c, String source, Token invocation){
                     x2c_exception_landed(& _x2c_exception_frame_0);  if(x2c_exception_is_error_target(& _x2c_exception_frame_0)){
                       int _x2c_macro_selected_0 = x2c_error_catch_selected(_x2c_error_handler_0);  x2c_error_catch_detach(_x2c_error_handler_0);  x2c_exception_mark_handled(& _x2c_exception_frame_0);  if(_x2c_macro_selected_0 == 0){
                         Var volatile category;  category = x2c_error_catch_capture(_x2c_error_handler_0, 0); {
-                          static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/macros.x",.function = "Compiler__eval_string",.line = 4835};  x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(209659067570), category);  __builtin_unreachable();
+                          static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/macros.x",.function = "Compiler__eval_string",.line = 4840};  x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(209659067570), category);  __builtin_unreachable();
                         }
 
                       }
@@ -7055,7 +7055,7 @@ return Var_is_row(value, 9, 7, 4) && binding_identity_try_parts(Var_list(value),
 
 static Var _lisp_import_hook(String path){
   MetaContext * context = MetaContext_current();  Compiler c = context -> evaluator;  if(! c){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/macros.x",.function = "_lisp_import_hook",.line = 4983};  x2c_error_raise_n(& _x2c_error_site_1, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("compile-time import")), NULL))));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/macros.x",.function = "_lisp_import_hook",.line = 4988};  x2c_error_raise_n(& _x2c_error_site_1, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("compile-time import")), NULL))));  __builtin_unreachable();
   }
   Compiler__import(c, path, context -> site);  return List_var(NULL);
 }

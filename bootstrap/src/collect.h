@@ -21,6 +21,8 @@ Map Compiler_collect_symbols(Compiler c, Map globs);
 
 List compiler_prelude_sources(void);
 
+int is_prelude_source(String path);
+
 void Compiler_configure_package(Compiler c, List roots, String filename);
 
 String collect_resolve_include(SourceView sources, List dirs, String includer_dir, String target, int angle);

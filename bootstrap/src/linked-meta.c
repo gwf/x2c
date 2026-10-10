@@ -7780,7 +7780,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_14(void){
   _7297 = cons(_532, _7296);
   _7298 = String_new("src/collect.x");
   _7299 = String_var(_7298);
-  _7300 = String_new("60a7680a");
+  _7300 = String_new("5752f037");
   _7301 = String_var(_7300);
   _7302 = cons(_7301, NULL);
   _7303 = cons(_7299, _7302);
@@ -7952,7 +7952,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_14(void){
   _7469 = List_var(_7468);
   _7470 = String_new("src/macros.x");
   _7471 = String_var(_7470);
-  _7472 = String_new("85d82110");
+  _7472 = String_new("09d9bf12");
   _7473 = String_var(_7472);
   _7474 = cons(_7473, NULL);
   _7475 = cons(_7471, _7474);
@@ -8068,7 +8068,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_14(void){
   _7585 = List_var(_7584);
   _7586 = String_new("src/meta-native.x");
   _7587 = String_var(_7586);
-  _7588 = String_new("dedc7a90");
+  _7588 = String_new("072485d7");
   _7589 = String_var(_7588);
   _7590 = cons(_7589, NULL);
   _7591 = cons(_7587, _7590);

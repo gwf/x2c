@@ -2290,6 +2290,10 @@ static Map _linked_module(void){
   return Var_map(Map_getindex(native_modules, String_var(linked_supplier)));
 }
 
+int links_meta_function(String name){
+  if(! _init_guard_) _file_init_();  return Map_contains(_linked_module(), String_var(name));
+}
+
 List linked_meta_provider_source(String provider){
   if(! _init_guard_) _file_init_();  _linked_module();  return Var_list(Map_getindex(linked_hashes, String_var(provider)));
 }
@@ -2299,10 +2303,11 @@ static int Compiler__linked_copy(Compiler c, String name, Map linked){
   if(Map_contains(linked_hashes, String_var(name))) return Compiler__linked_texts_match(c, name, linked, Map_new());  return String_truth(c -> filename) && String_equal(Path_absolute(c -> filename), String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_338), NULL))));
 }
 
+int is_prelude_source(String);
 int Compiler_linked_meta_definitions_current(Compiler, String);
 static int Compiler__linked_texts_match(Compiler c, String name, Map linked, Map reached){
-  Var hash, own, names =((void) 0, Void);  String key =({
-    Var _x2c_literal_part_26 = String_var(home_portable_path(Compiler_canonical_path(c, c -> filename)));  String_join(NULL, cons(_x2c_literal_part_26, cons(String_var(_339), cons(String_var(name), NULL))));
+  Var hash, own, names =((void) 0, Void);  String file = Compiler_canonical_path(c, c -> filename);  String key =({
+    Var _x2c_literal_part_26 = String_var(home_portable_path(file));  String_join(NULL, cons(_x2c_literal_part_26, cons(String_var(_339), cons(String_var(name), NULL))));
   }
   );  if(! Map_try_get(c -> meta_hashes, String_var(name), &(own))){
     Var advertisement;  if(Map_try_get(c -> project_meta, String_var(name), &(advertisement))){
@@ -2361,7 +2366,7 @@ static int Compiler__linked_texts_match(Compiler c, String name, Map linked, Map
     }
     return !(Map_contains(linked_hashes, String_var(name)));
   }
-  if(Map_contains(reached, String_var(key))) return 1;  Map_setindex(reached, String_var(key), int_var(1));  if(Map_try_get(linked_hashes, String_var(name), &(hash))){
+  if(is_prelude_source(file)) return Map_contains(linked, String_var(name));  if(Map_contains(reached, String_var(key))) return 1;  Map_setindex(reached, String_var(key), int_var(1));  if(Map_try_get(linked_hashes, String_var(name), &(hash))){
     List row = Var_list(hash);  hash = List_car(row);  names = List_cadr(row);  if(! Var_equal(hash, own)) return 0;
   }
   else if(!(Map_contains(linked, String_var(name))) && !(Map_contains(c -> native_meta, String_var(name)))) return 0;  Map_try_get(c -> meta_calls, String_var(name), &(names));  if(Var_is_row(names, 11, 7, 1)) return Compiler_linked_meta_definitions_current(c, home_absolute_path(Var_string(names)));  if(Var_is_row(names, 9, 7, 4)){

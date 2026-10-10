@@ -1148,6 +1148,11 @@ List compiler_prelude_sources(void){
   return _19;
 }
 
+int is_prelude_source(String path){
+  if(! _init_guard_) _file_init_();
+  return List_contains(compiler_prelude_sources(), String_var(home_portable_path(path)));
+}
+
 static void Compiler__add_prelude(Compiler c, Map globs, Map visited){
   {
     String source;
