@@ -121,8 +121,9 @@ commits need not rebuild from their own bootstrap.
   `stage`, which carries values across the compile-time boundary, and
   `builtins` and `linked-meta`, the compile-time code compiled into the
   compiler, with `component-access` supplying collection mutation policy,
-  `component-try` lowering try, catch, and finally, and
-  `component-delegate` searching delegate fields)/
+  `component-try` lowering try, catch, and finally,
+  `component-delegate` searching delegate fields, and
+  `component-literals` building Array and Map literals)/
   `literals` (+ `lambdas`) -> `ast` (+ `ast-rewrite`, AST traversal and
   rewriting, and `grammar`, source forms used by lowering) ->
   `type` (+ `type-ledger`)/`protocol`

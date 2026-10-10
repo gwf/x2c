@@ -209,7 +209,7 @@ Map Compiler.collect_symbols(Compiler c, Map globs) {
     runtime implementations are already linked into the shipped binaries. */
 List compiler_prelude_sources(void) => %(
   "lib/x2c.x" "src/grammar.x" "src/component-access.x" "src/component-try.x"
-  "src/component-delegate.x");
+  "src/component-delegate.x" "src/component-literals.x");
 
 /** Reports whether the canonical `path` is a compiler prelude source. */
 int is_prelude_source(String path) =>

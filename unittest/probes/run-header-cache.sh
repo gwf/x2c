@@ -178,7 +178,7 @@ cp "$ROOT/etc/"*.xlisp "$ROOT/etc/"*.x "$FAKE/etc/"
 cp -RL "$ROOT/include/." "$FAKE/include/"
 copy_runtime_sources "$FAKE/lib/"
 mkdir -p "$FAKE/src"
-cp "$ROOT"/src/{component-access,component-try,component-delegate,grammar}.x "$FAKE/src/"
+cp "$ROOT"/src/{component-access,component-try,component-delegate,component-literals,grammar}.x "$FAKE/src/"
 cp "$BUILD/src/bar.x" "$BUILD/src/hdr.x" "$BUILD/src/anon.x" \
   "$BUILD/src/unit.x" "$FAKE/src/"
 
@@ -686,7 +686,7 @@ cp "$X2C" "$embed_root/builds/0/x2c"
 cp "$ROOT/etc/"*.xlisp "$ROOT/etc/"*.x "$embed_root/etc/"
 copy_runtime_sources "$embed_root/lib/"
 mkdir -p "$embed_root/src"
-cp "$ROOT"/src/{component-access,component-try,component-delegate,grammar}.x "$embed_root/src/"
+cp "$ROOT"/src/{component-access,component-try,component-delegate,component-literals,grammar}.x "$embed_root/src/"
 cat >"$embed_root/src/embed.x" <<'EOF'
 macro Unit $cache.declare() {
   int $(x2c.ident (x2c.embed.text "name.txt"))(void);
@@ -867,7 +867,7 @@ cp "$X2C" "$declaration_root/builds/0/x2c"
 cp "$ROOT/etc/"*.xlisp "$ROOT/etc/"*.x "$declaration_root/etc/"
 copy_runtime_sources "$declaration_root/lib/"
 mkdir -p "$declaration_root/src"
-cp "$ROOT"/src/{component-access,component-try,component-delegate,grammar}.x "$declaration_root/src/"
+cp "$ROOT"/src/{component-access,component-try,component-delegate,component-literals,grammar}.x "$declaration_root/src/"
 cat >"$declaration_root/src/producer.x" <<'EOF2'
 $(def read-file (bind "lisp_read_file" '((func (("String"))) "Var")))
 $(def write-file

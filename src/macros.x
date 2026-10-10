@@ -2748,8 +2748,10 @@ static typedef struct Effects {
   int bindings, names, origins, pending, placements, diagnostics;
 } Effects;
 
-/** Records the values a replacement's first lowering watches and what
-    lowering each produced, in the order lowering reached them. */
+/** Records the values a replacement's lowering watches and what lowering
+    each produced, in the order lowering reached them. A watched value is
+    source the translator captured, so it lowers under the `outer` rules,
+    those active outside the translator's own. */
 struct SlotWatch {
   List values;
   Array outputs, order;
@@ -2952,8 +2954,8 @@ static Var _marked(Var node, Array outputs, Array found, int &refused) {
     syntax, child, _marked(child, outputs, found, refused));
 }
 
-/* Lowers each slot's value in the order the first lowering reached them
-   and fills the skeleton with the results. */
+/* Lowers each slot's value, outside the active rule, in the order the
+   first lowering reached them and fills the skeleton with the results. */
 static List Compiler._fill(Compiler c, List prepared, Array values) {
   (List skeleton, List order) = prepared;
   Array lowered = $auto(values.copy());

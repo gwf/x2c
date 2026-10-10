@@ -761,10 +761,6 @@ static List Compiler._cache_value(Compiler c, List expr, Map bindings) {
               ( args $head $tail ))
       );
     }
-    case %((!or array varray) *):
-      return %(expr ("Array") ${transform_array_literal(c, expr)});
-    case %((!or map vmap) *):
-      return %(expr ("Map") ${transform_map_literal(c, expr)});
     case %(string *):
       // Keep String initializer nodes; literal folding is handled elsewhere.
       return expr;

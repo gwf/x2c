@@ -220,8 +220,8 @@ static Ast Compiler._step_tag(Compiler c, Ast ast, Symbol tag) {
     case <protocol>: case <adopt>: case <macrodef>: case <literal>:
       return ast;
     case <expr>: return c._expression_node(ast);
-    case <array>: case <varray>: next = transform_array_literal(c, ast); break;
-    case <map>: case <vmap>: next = transform_map_literal(c, ast); break;
+    case <array>: case <varray>: case <map>: case <vmap>:
+      return c._collection_literal(ast, tag);
     case <cast>: next = c._cast(ast); break;
     case <index>: next = c._index(ast); break;
     case <cons>: case <append>: return c._ordered_list(ast);
@@ -498,6 +498,9 @@ static List Compiler._expression_rewrite(Compiler c, List expression) {
 }
 
 static Ast Compiler._expression_node(Compiler c, Ast ast) {
+  Var content = ast.caddr();
+  if (content is <list> && content.list().car() == <var>)
+    return c._step(c._to_var(content.list().cadr()));
   List rewritten = c._expression_rewrite(ast);
   if (rewritten) return rewritten;
   Ast expression = c.lower_typed_adapter_expr(ast);
@@ -601,61 +604,31 @@ static Ast Compiler._raise_node(Compiler c, Ast ast) {
 
 // collection literals
 
-/** Converts an array literal to source-ordered Var arguments for its
-    counted constructor. */
-List transform_array_literal(Compiler c, List ast) {
-  Array values = [], orders = $auto([]);
-  foreach (List elem, ast.cdr()) {
-    List value = c._literal_element(elem);
-    values.push(value);
-    orders.push(c._part_order(value));
-  }
-  List declarations = c._ordered_parts(values, orders);
-  List literal = c._var_array_literal(values.list_free());
-  return _ordered(declarations, %("Array"), literal);
-}
-
-/** Converts a map literal to alternating Var key/value arguments for its
-    counted constructor. */
-List transform_map_literal(Compiler c, List ast) {
-  Array values = [], orders = $auto([]);
-  foreach (List entry, ast.cdr())
-    foreach (List part, entry.cdr()) {
-      List value = c._literal_element(part);
-      values.push(value);
-      orders.push(c._part_order(value));
+/* A collection literal lowers through the literal rule for its head. The
+   constructor call that rule returns receives the literal's parts as its
+   `Var` arguments, or as C values with no x2c type, which pass as `Var`;
+   they keep their source order. */
+static Ast Compiler._collection_literal(Compiler c, Ast ast, Symbol tag) {
+  int map = tag == <map> || tag == <vmap>;
+  Type type = map ? %("Map") : %("Array");
+  Symbol head = map ? <map> : <array>;
+  List lowered = c.lower_rewrite(
+    <literal>, head, %(expr $type ($head @{ast.cdr()})), AST_EXPRESSION,
+    type, NULL);
+  match (lowered) case %(expr ? (call ?callee (args *arguments))): {
+    Array values = $auto([]), orders = $auto([]);
+    foreach (List argument, arguments) {
+      Type passed = argument.cadr();
+      values.push(argument);
+      orders.push(!passed || passed == %("Var") ? c._part_order(argument) : 0);
     }
-  List declarations = c._ordered_parts(values, orders);
-  List literal = c._var_map_literal(values.list_free());
-  return _ordered(declarations, %("Map"), literal);
-}
-
-/* The containing typed expression already fixes the result type. */
-static List Compiler._var_literal_content(Compiler c, List application) {
-  List bound = c.bind_syntax(application, AST_EXPRESSION, NULL);
-  match (bound) case %(expr ? ?content): return content;
-  __builtin_unreachable();
-}
-
-/* The converted Var values enter the native counted constructors unchanged.
-   Empty literals need only allocate their container. */
-static List Compiler._var_array_literal(Compiler c, List values) {
-  if (!values) return c._var_literal_content($!( Array.new() ));
-  return c._var_literal_content(
-    $!( Array.update_n(Array.new(), ${values.len()}, @values) ));
-}
-
-static List Compiler._var_map_literal(Compiler c, List entries) {
-  if (!entries) return c._var_literal_content($!( Map.new() ));
-  return c._var_literal_content(
-    $!( Map.update_n(Map.new(), ${entries.len() / 2}, @entries) ));
-}
-
-/* A literal element is a `Var`, and an empty brace there is an empty Map. */
-static List Compiler._literal_element(Compiler c, List element) {
-  if (element.match(%(expr ? (composite (commas)))))
-    element = %(expr ("Map") (map));
-  return c._step(c.convert_expression(element, %("Var")));
+    List declarations = c._ordered_parts(values, orders);
+    if (declarations) {
+      List call = %(call $callee (args @{values.list()}));
+      return c._step(_ordered(declarations, type, call));
+    }
+  }
+  return lowered.caddr();
 }
 
 static List Compiler._to_list(Compiler c, List expr) =>

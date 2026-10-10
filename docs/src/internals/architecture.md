@@ -504,6 +504,8 @@ The modules under `src/` divide ownership as follows:
   templates, registered as a statement rewrite;
 - `src/component-delegate.x` -- the delegate field search, registered as a
   member rewrite for aggregates that declare a delegate field;
+- `src/component-literals.x` -- the Array and Map literal constructors,
+  registered as literal rewrites for their heads;
 - `src/operator-ledger.x` -- operator precedence, compound assignment,
   and protocol-member mappings from one compile-time ledger;
 - `src/cli.x`, `src/main.x` -- option metadata and parsing, dispatch, logging,
