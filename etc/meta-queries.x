@@ -19,6 +19,10 @@ Code Code.call_in_order(Code member, List arguments, Type type) =>
   _ask("Code_call_in_order", %($member $arguments $type));
 Code Code.promoted(Code value) => _ask("Code_promoted", %($value));
 Code Code.lowered(Code code) => _ask("Code_lowered", %($code));
+Code Code.parameter(Code function, String name) =>
+  _ask("Code_parameter", %($function $name));
+List Code.body(Code function) => _ask("Code_body", %($function));
+List Code.arguments(Code parameters) => _ask("Code_arguments", %($parameters));
 Code Code.register_rewrite(Code function, List pattern, List holes) =>
   _ask("Code_register_rewrite", %($function $pattern $holes));
 Code Code.register_after_initialization(
@@ -37,6 +41,17 @@ List Type.marked_fields(Type aggregate, Symbol mark) =>
   _ask("Type_marked_fields", %($aggregate $mark));
 List Type.resolve_member(Type type, String name, int call) =>
   _ask("Type_resolve_member", %($type $name $call));
+List Type.fields(Type type) => _ask("Type_fields", %($type));
+List Type.layout(Type type) => _ask("Type_layout", %($type));
+Type Type.resolve(Type type) => _ask("Type_resolve", %($type));
+List Type.members(Type type) => _ask("Type_members", %($type));
+int Type.is_value(Type type) => _ask("Type_is_value", %($type));
+Type Type.element(Type type) => _ask("Type_element", %($type));
+List Type.parameters(Type type) => _ask("Type_parameters", %($type));
+Type Type.return_type(Type type) => _ask("Type_return_type", %($type));
+Symbol Type.tag_name(String name) => _ask("Type_tag_name", %($name));
+String Type.reverse_name(String base, String participant) =>
+  _ask("Type_reverse_name", %($base $participant));
 Var x2c_literal_value(Var syntax) => _ask("x2c_literal_value", %($syntax));
 List x2c_function_parameter(List function, String wanted) =>
   _ask("x2c_function_parameter", %($function $wanted));

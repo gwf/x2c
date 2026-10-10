@@ -143,7 +143,7 @@ void x2c_diagnostic_warn(String message, List notes) {
   helper_notices.push(%(warning $message $notes));
 }
 
-String x2c_binding_spelling(Var syntax) {
+String Code.binding_spelling(Var syntax) {
   if (syntax is <string>) return syntax;
   List value = syntax;
   match (value) case %(expr ? (? *)): value = value.caddr();
@@ -160,11 +160,14 @@ String x2c_binding_spelling(Var syntax) {
     %("value: ${syntax.repr()}"));
 }
 
-String x2c_function_name(List function) {
+String Code.name(Code function) {
   List identity = function.match_replace(
     %(function ? (bind ?binding ?) ?), <?binding>);
-  return x2c_binding_spelling(identity);
+  return Code.binding_spelling(identity);
 }
+
+String x2c_binding_spelling(Var syntax) => Code.binding_spelling(syntax);
+String x2c_function_name(List function) => Code.name(function);
 
 List x2c_template_call(Var stored, List values) =>
   %("x2c.template" $stored $values);
@@ -174,6 +177,7 @@ List x2c_expr_field(List receiver, String name) {
   return %(expr () (op . $receiver (${checked[1]})));
 }
 
+List Type.parts(Type type) => type_declaration_parts(type);
 List x2c_type_parts(List type) => type_declaration_parts(type);
 
 /* The three builders below are the bodies in `lib/meta.x`. */
@@ -196,7 +200,7 @@ List x2c_param_make(List type, Var name) {
 }
 
 /* A `Source` parameter's description carries its text. */
-String x2c_source_text(Var syntax) {
+String Code.source_text(Var syntax) {
   match (syntax)
     case %((text ?(String text)) (file ?) (syntax ?)): return text;
   _unavailable("x2c.source.text");
@@ -206,6 +210,7 @@ String x2c_source_text(Var syntax) {
    forwarders in `etc/meta-queries.x`, which the helper compiles after this
    file as part of the same unit. */
 List x2c_syntax_type(List v) => Code.type(v);
+String x2c_source_text(Var syntax) => Code.source_text(syntax);
 
 /* A `Source` holding a String literal is read beside its file; a String
    must be absolute, since the helper does not know the definition's file.

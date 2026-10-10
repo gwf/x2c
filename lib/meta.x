@@ -215,6 +215,31 @@ meta Code Code.promoted(Code value);
     lowered again. */
 meta Code Code.lowered(Code code);
 
+/** Returns the spelling of the binding `syntax` names: an identifier
+    `String`, or identifier or binding syntax. Fails the expansion when
+    `syntax` is neither or names an unknown binding. */
+meta String Code.binding_spelling(Var syntax);
+
+/** Returns the source text the developer wrote for `syntax`, exactly as it
+    appears in the file: the text a `Source` argument carries. Fails the
+    expansion when the captured syntax is incomplete. */
+meta String Code.source_text(Var syntax);
+
+/** Returns the spelling of the function `function` defines. */
+meta String Code.name(Code function);
+
+/** Returns the expression reading the parameter of `function` spelled
+    `name`. Fails the expansion when `function` has no such parameter. */
+meta Code Code.parameter(Code function, String name);
+
+/** Returns the statements in the body of `function`. */
+meta List Code.body(Code function);
+
+/** Returns the argument expressions that forward `parameters`, a `params`
+    form or the parameters themselves. A `(void)` parameter list answers
+    nothing. */
+meta List Code.arguments(Code parameters);
+
 /** Registers a translator for the code `pattern` recognizes: a macro with
     optional hole patterns, whose recognition uses the source views and
     binding identity rules of a macro-valued case, or a Match pattern.
@@ -285,6 +310,48 @@ meta List Type.marked_fields(Type aggregate, Symbol mark);
     or NULL. Methods are selected only when `call` is nonzero, as for a
     call. */
 meta List Type.resolve_member(Type type, String name, int call);
+
+/** Returns the named fields of the struct or union `type`, in declaration
+    order, each as a `(NAME TYPE)` row. Fails the expansion when `type` is
+    not a complete aggregate. */
+meta List Type.fields(Type type);
+
+/** Returns the `(NAME TYPE)` layout rows of the type `type` resolves to,
+    including its unnamed members. */
+meta List Type.layout(Type type);
+
+/** Returns `(BASE MODIFIERS)`, the declaration parts that spell `type` in
+    source. */
+meta List Type.parts(Type type);
+
+/** Returns the type the type key `type` resolves to through its typedefs. */
+meta Type Type.resolve(Type type);
+
+/** Returns the members of the enum `type` as `(NAME VALUE)` rows in
+    declaration order. An implicit value is nil; a literal value retains
+    its spelling, and another value is its expression. */
+meta List Type.members(Type type);
+
+/** Tests whether a `Var` can hold a value of `type`. */
+meta int Type.is_value(Type type);
+
+/** Returns the type the pointer or array `type` refers to. */
+meta Type Type.element(Type type);
+
+/** Returns the parameter types of the function `type`, or of the function
+    a pointer or array `type` refers to. */
+meta List Type.parameters(Type type);
+
+/** Returns the result type of the function `type`. */
+meta Type Type.return_type(Type type);
+
+/** Returns the generated tag name for the type named `name`, unique to
+    this source file. */
+meta Symbol Type.tag_name(String name);
+
+/** Returns the spelling of the reverse converter from the type named
+    `base` to the type named `participant`. */
+meta String Type.reverse_name(String base, String participant);
 
 /** Returns the `String`, `int`, or `Symbol` a literal expression holds.
     Fails the expansion when `syntax` is not such a literal. */

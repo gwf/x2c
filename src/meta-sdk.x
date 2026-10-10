@@ -572,55 +572,55 @@ int x2c_type_is_integral(List value) => value.type().is_integral();
 int x2c_type_is_pointer(List value) =>
   value.type().canonicalize().is_pointer();
 
-/** Answers `x2c.type.element`, declared in `lib/meta.x`. */
-List x2c_type_element(List value) =>
-  value.type().canonicalize().dereference().canonicalize();
+/** Answers `Type.element`, declared in `lib/meta.x`. */
+Type Type.element(Type type) =>
+  type.canonicalize().dereference().canonicalize();
 
-/** Answers `x2c.type.parameters`, declared in `lib/meta.x`. */
-List x2c_type_parameters(List value) {
-  Type type = value.type().canonicalize();
+/** Answers `Type.parameters`, declared in `lib/meta.x`. */
+List Type.parameters(Type type) {
+  type = type.canonicalize();
   while (type.is_pointer() || type.is_array()) type = type.dereference();
   return type.match_replace(%((func ?params) *), <?params>);
 }
 
-/** Answers `x2c.type.return`, declared in `lib/meta.x`. */
-List x2c_type_return(List value) =>
-  value.type().canonicalize().apply().canonicalize();
+/** Answers `Type.return_type`, declared in `lib/meta.x`. */
+Type Type.return_type(Type type) =>
+  type.canonicalize().apply().canonicalize();
 
-/** Answers `x2c.type.parts`, declared in `lib/meta.x`. */
-List x2c_type_parts(List value) => value.type().declaration_parts();
+/** Answers `Type.parts`, declared in `lib/meta.x`. */
+List Type.parts(Type type) => type.declaration_parts();
 
-/** Answers `x2c.type.reverse-name`, declared in `lib/meta.x`. */
-String x2c_type_reverse_name(String base, String participant) {
-  _sdk_guard("x2c.type.reverse-name");
+/** Answers `Type.reverse_name`, declared in `lib/meta.x`. */
+String Type.reverse_name(String base, String participant) {
+  _sdk_guard("Type.reverse_name");
   return active.expander.reverse_converter_spelling(base, "", participant);
 }
 
-/** Answers `x2c.type.resolve`, declared in `lib/meta.x`. */
-List x2c_type_resolve(List value) {
-  _sdk_guard("x2c.type.resolve");
-  return active.expander.sym.resolve_key(value).type_from_ast();
+/** Answers `Type.resolve`, declared in `lib/meta.x`. */
+Type Type.resolve(Type type) {
+  _sdk_guard("Type.resolve");
+  return active.expander.sym.resolve_key(type).type_from_ast();
 }
 
-/** Answers `x2c.type.layout`, declared in `lib/meta.x`. */
-List x2c_type_layout(List value) {
-  _sdk_guard("x2c.type.layout");
-  return active.expander.sym.field_order(x2c_type_resolve(value)).cdr();
+/** Answers `Type.layout`, declared in `lib/meta.x`. */
+List Type.layout(Type type) {
+  _sdk_guard("Type.layout");
+  return active.expander.sym.field_order(type.resolve()).cdr();
 }
 
-/** Answers `x2c.type.value?`, declared in `lib/meta.x`. */
-int x2c_type_is_value(List value) {
-  _sdk_guard("x2c.type.value?");
-  Type type = value.type().canonicalize();
+/** Answers `Type.is_value`, declared in `lib/meta.x`. */
+int Type.is_value(Type type) {
+  _sdk_guard("Type.is_value");
+  type = type.canonicalize();
   match (type) case %((bitfield ?) *rest): type = rest;
   foreach (String name, %("Symbol" "Var" "Atom" "String" "List"))
     if (active.expander.sym.is_named_value_type(type, name)) return 1;
   return active.expander.sym.resolve_key(type).is_number();
 }
 
-/** Answers `x2c.type.tag-name`, declared in `lib/meta.x`. */
-Symbol x2c_type_tag_name(String name) {
-  _sdk_guard("x2c.type.tag-name");
+/** Answers `Type.tag_name`, declared in `lib/meta.x`. */
+Symbol Type.tag_name(String name) {
+  _sdk_guard("Type.tag_name");
   String file = active.expander.source_path(active.expander.filename);
   file = active.expander.display_path(file);
   String identity = %"$file:$name";
@@ -634,16 +634,38 @@ Symbol x2c_type_tag_name(String name) {
   return Symbol.new(encoded);
 }
 
-/** Answers `x2c.type.fields`, declared in `lib/meta.x`. */
-List x2c_type_fields(List value) {
-  _sdk_guard("x2c.type.fields");
-  Type type = value;
+/** Answers `Type.members`, declared in `lib/meta.x`. */
+List Type.members(Type type) {
+  Type resolved = type.resolve();
+  if (resolved.car() != <enum>)
+    _sdk_reject_value("Type.members requires an enum Type", type);
+  Array rows = [];
+  foreach (List member, resolved.last()) rows.push(_enum_member(member));
+  return rows.list_free();
+}
+
+/* One enum member's `(NAME VALUE)` row: no value, a literal's spelling,
+   or the initializer's expression. */
+static List _enum_member(List member) {
+  match (member) {
+    case %(op = (?name) (expr ? (literal ? ?text))): return %($name $text);
+    case %(op = (?name) (?text)): return %($name $text);
+    case %(op = (?name) ?value): return %($name $value);
+    case %(?name): return %($name ());
+  }
+  _sdk_reject_value("Type.members found an unreadable member", member);
+  return %();
+}
+
+/** Answers `Type.fields`, declared in `lib/meta.x`. */
+List Type.fields(Type type) {
+  _sdk_guard("Type.fields");
   Type resolved = active.expander.sym.resolve_key(type.canonicalize());
   if (!resolved || !resolved.is_aggregate_tag())
-    $report.sdk.fields_type(value);
+    $report.sdk.fields_type(type);
   List metadata = active.expander.sym.field_order(resolved);
   if (!metadata)
-    $report.sdk.fields_complete(value);
+    $report.sdk.fields_complete(type);
   Array named = [];
   foreach (List row, metadata.cdr()) if (row.car()) named.push(row);
   return named.list_free();
@@ -651,9 +673,9 @@ List x2c_type_fields(List value) {
 
 // names and functions
 
-/** Answers `x2c.binding.spelling`, declared in `lib/meta.x`. */
-String x2c_binding_spelling(Var syntax) {
-  _sdk_guard("x2c.binding.spelling");
+/** Answers `Code.binding_spelling`, declared in `lib/meta.x`. */
+String Code.binding_spelling(Var syntax) {
+  _sdk_guard("Code.binding_spelling");
   if (syntax is <string>) {
     String spelling = syntax;
     if (spelling.is_identifier()) return spelling;
@@ -740,21 +762,39 @@ static Map _sdk_linked_prelude(void) {
   return active.expander.linked_prelude_records();
 }
 
-/** Answers `x2c.function.name`, declared in `lib/meta.x`. */
-String x2c_function_name(List function) {
+/** Answers `Code.name`, declared in `lib/meta.x`. */
+String Code.name(Code function) {
   List identity = function.match_replace(
     %(function ? (bind ?binding ?) ?), <?binding>);
-  return x2c_binding_spelling(identity);
+  return Code.binding_spelling(identity);
 }
 
-/** Answers `x2c.function.parameter`, declared in `lib/meta.x`. */
-List x2c_function_parameter(List function, String wanted) {
+/** Answers `Code.body`, declared in `lib/meta.x`. */
+List Code.body(Code function) {
+  match (function) case %(function ? ? (block *body)): return body;
+  return %();
+}
+
+/** Answers `Code.arguments`, declared in `lib/meta.x`. */
+List Code.arguments(Code parameters) {
+  match (parameters) case %(params *items): parameters = items;
+  match (parameters) case %((param (void) (bind () ?))): return %();
+  Array arguments = [];
+  foreach (List parameter, parameters)
+    match (parameter)
+      case %(param ? (bind ?identity *)):
+        arguments.push(%(expr () (ident $identity)));
+  return arguments.list_free();
+}
+
+/** Answers `Code.parameter`, declared in `lib/meta.x`. */
+Code Code.parameter(Code function, String wanted) {
   List parameters = function.match_replace(
     %(function ? (bind ? ((fnmod (params *bound)) *)) ?), %(*bound));
   foreach (List parameter, parameters) {
     match (parameter) {
       case %(param ? (bind ?identity *)):
-        if (x2c_binding_spelling(identity) == wanted) {
+        if (Code.binding_spelling(identity) == wanted) {
           Type type = parameter.type_from_ast().canonicalize();
           return %(expr $type (ident $identity));
         }
@@ -803,10 +843,10 @@ static List _sdk_meta_declared(List paths) {
 
 // source and literals
 
-/** Answers `x2c.source.text`, declared in `lib/meta.x`. */
-String x2c_source_text(Var value) {
+/** Answers `Code.source_text`, declared in `lib/meta.x`. */
+String Code.source_text(Var value) {
   match (value) case %((text ?(String text)) (file ?) (syntax ?)): return text;
-  _sdk_guard("x2c.source.text");
+  _sdk_guard("Code.source_text");
   Var stored = void;
   if (!active.captures ||
       !active.captures.try_get(((ulong) value.u64), stored))
@@ -1009,6 +1049,39 @@ void x2c_place(List where, Code code) {
   _sdk_guard("x2c.place");
   active.expander.place(where, code);
 }
+
+// the previous spellings
+
+/** Answers `x2c.type.element`, declared in `lib/meta.x`. */
+List x2c_type_element(List value) => Type.element(value);
+/** Answers `x2c.type.parameters`, declared in `lib/meta.x`. */
+List x2c_type_parameters(List value) => Type.parameters(value);
+/** Answers `x2c.type.return`, declared in `lib/meta.x`. */
+List x2c_type_return(List value) => Type.return_type(value);
+/** Answers `x2c.type.parts`, declared in `lib/meta.x`. */
+List x2c_type_parts(List value) => Type.parts(value);
+/** Answers `x2c.type.reverse-name`, declared in `lib/meta.x`. */
+String x2c_type_reverse_name(String base, String participant) =>
+  Type.reverse_name(base, participant);
+/** Answers `x2c.type.resolve`, declared in `lib/meta.x`. */
+List x2c_type_resolve(List value) => Type.resolve(value);
+/** Answers `x2c.type.layout`, declared in `lib/meta.x`. */
+List x2c_type_layout(List value) => Type.layout(value);
+/** Answers `x2c.type.value?`, declared in `lib/meta.x`. */
+int x2c_type_is_value(List value) => Type.is_value(value);
+/** Answers `x2c.type.tag-name`, declared in `lib/meta.x`. */
+Symbol x2c_type_tag_name(String name) => Type.tag_name(name);
+/** Answers `x2c.type.fields`, declared in `lib/meta.x`. */
+List x2c_type_fields(List value) => Type.fields(value);
+/** Answers `x2c.binding.spelling`, declared in `lib/meta.x`. */
+String x2c_binding_spelling(Var syntax) => Code.binding_spelling(syntax);
+/** Answers `x2c.function.name`, declared in `lib/meta.x`. */
+String x2c_function_name(List function) => Code.name(function);
+/** Answers `x2c.function.parameter`, declared in `lib/meta.x`. */
+List x2c_function_parameter(List function, String wanted) =>
+  Code.parameter(function, wanted);
+/** Answers `x2c.source.text`, declared in `lib/meta.x`. */
+String x2c_source_text(Var value) => Code.source_text(value);
 
 // meta parameter descriptions
 
