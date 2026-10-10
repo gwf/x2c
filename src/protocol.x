@@ -352,7 +352,8 @@ static List Compiler._visible_adoption(
   if (local) return local;
   Var stored;
   foreach (String owner, c.module_ancestors())
-    if (c.adoptions.try_get(%($base $participant (module $owner)), stored)) return stored;
+    if (c.adoptions.try_get(%($base $participant (module $owner)), stored))
+      return stored;
   return c._adoption_row(base, participant, <external>);
 }
 
@@ -444,7 +445,7 @@ static String _member_spelling(Type participant, String member) =>
   %"${participant.car()}_$member";
 
 /* Generated witnesses have native external linkage inside a module and
-   retain the same owner used to select the adoption. */
+   retain the owner that selects the adoption. */
 static String Compiler._protocol_member_spelling(
   Compiler c, Type base, Type participant, String member) {
   String spelling = _member_spelling(participant, member);
@@ -533,7 +534,8 @@ static void ProtocolSyntax.head(ProtocolSyntax &p) {
   }
   if (c.test(<static>)) p.storage = <static>;
   if (c.source_module && (p.storage == <static> || c.source_private > 0))
-    c.report_error(<parse>, "module and static visibility cannot be combined",
+    c.report_error(
+      <parse>, "module and static visibility cannot be combined",
       p.start, NULL);
   if (c.source_module) p.storage = <module>;
   c.expect(<protocol>);
@@ -965,7 +967,8 @@ static Symbol AdoptionDraft.published_storage(
   String alternate = base_name
     ? c.reverse_converter_spelling(base_name, "as_", spelling) : NULL;
   List occurrence = c._protocol_occurrence(a.base);
-  if (occurrence && _occurrence_storage(occurrence) == <module>) return <module>;
+  if (occurrence && _occurrence_storage(occurrence) == <module>)
+    return <module>;
   int private = c.source_private > 0 ||
     (occurrence && _occurrence_storage(occurrence) == <static>) ||
     c._is_private(spelling) ||
@@ -1012,7 +1015,8 @@ static void AdoptionDraft.install(AdoptionDraft &a) {
   List key = a.storage == <static>
            ? %(${a.base} ${a.participant} $path)
            : a.storage == <module>
-             ? %(${a.base} ${a.participant} (module ${c._protocol_module(a.location)}))
+             ? %(${a.base} ${a.participant}
+                 (module ${c._protocol_module(a.location)}))
              : %(${a.base} ${a.participant});
   List row = a.node();
   Var stored;
@@ -1202,7 +1206,8 @@ static List Compiler._resolve_native(
   if (c.conforms.try_get(key, stored)) {
     if (stored is not <list>) return NULL;
     List conformance = stored;
-    c._install_native_bindings(base, participant, conformance.last().list().cdr());
+    c._install_native_bindings(
+      base, participant, conformance.last().list().cdr());
     return conformance;
   }
   if (!participant.is_bare_typedef_name() || !participant_definition) {
@@ -1308,7 +1313,8 @@ static void Compiler._install_native_bindings(
   foreach (List row, rows)
     match (row)
       case %(?(String member) ? ? ? ? ?(Type signature)): {
-        String generated = c._protocol_member_spelling(base, participant, member);
+        String generated = c._protocol_member_spelling(
+          base, participant, member);
         if (!c.sym.get(%($generated)))
           c.sym.define_global(%($generated), signature);
       }
@@ -2467,7 +2473,8 @@ int Compiler.native_protocol_alias(Compiler c, String name) {
              (members *rows)):
         if (_native_rows(rows))
           foreach (List row, rows)
-            if (c._protocol_member_spelling(base, participant, row.car()) == name)
+            if (c._protocol_member_spelling(
+              base, participant, row.car()) == name)
               return 1;
   return 0;
 }
@@ -2537,14 +2544,16 @@ static void ProtocolAdapters.default_member(
   match (decision) {
     case %(owner ? ? ? ?storage): {
       int make_static = storage == <static>;
-      String generated = a.c._protocol_member_spelling(a.base, a.participant, member);
+      String generated = a.c._protocol_member_spelling(
+        a.base, a.participant, member);
       AdapterFunction adapter = {
         .c = a.c, .name = generated, .source = source,
         .reverse = a.forward, .binder = a.binder, .target = expected,
         .signature = a.c.sym.get(%($source)), .template = template,
         .variables = a.variables, .make_static = make_static};
       a.c.add_early(adapter.generate());
-      if (storage == <external>) a.c.record_generated_symbol(generated, expected);
+      if (storage == <external>)
+        a.c.record_generated_symbol(generated, expected);
     }
     case %((!set ?kind (!or linkage conflict)) ?first ?second *):
       a.c._report_collision(a.participant, member, kind, first, second);

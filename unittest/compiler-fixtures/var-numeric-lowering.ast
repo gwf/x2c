@@ -305,7 +305,8 @@
   (at 71 
    (declare ("Var") 
     (bindings 
-     (op = (bind (binding 46 "for_cond") ()) (expr (int) (literal (int) "0")))))) 
+     (op = (bind (binding 46 "for_cond") ()) 
+      (expr (int) (literal (int) "0")))))) 
   (at 72 
    (for (expr ("Var") 
          (op = (expr ("Var") (ident (binding 46 "for_cond"))) 

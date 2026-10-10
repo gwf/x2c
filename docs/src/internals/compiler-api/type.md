@@ -48,7 +48,7 @@ Source: `src/type.x:27`
 Starts an empty set of source-declared `Var` rows for one translation
 unit.
 
-Source: `src/type.x:275`
+Source: `src/type.x:280`
 
 <a id="Type.declaration_ast"></a>
 #### Type.declaration_ast
@@ -79,7 +79,7 @@ Source: `src/type.x:169`
 Ends the source-declared `Var`-row lifetime before the unit `Scope` is
 released.
 
-Source: `src/type.x:282`
+Source: `src/type.x:290`
 
 <a id="Type.fixed_var_tag"></a>
 #### Type.fixed_var_tag
@@ -88,7 +88,7 @@ Source: `src/type.x:282`
 
 Returns the process-lifetime `Var` tag fixed for `type`, or zero.
 
-Source: `src/type.x:214`
+Source: `src/type.x:219`
 
 <a id="Type.parameter_ast"></a>
 #### Type.parameter_ast
@@ -109,7 +109,7 @@ Replaces a registered type's inferred `Var` tag with `tag`, or with the
 fixed tag of `representation` when `tag` is zero. Missing rows and
 untagged representations leave the table unchanged.
 
-Source: `src/type.x:263`
+Source: `src/type.x:268`
 
 <a id="Type.register_var_tag"></a>
 #### Type.register_var_tag
@@ -120,7 +120,7 @@ Registers one named type's unit-local `Var` tag and exact forward
 converter. The first row for a canonical `Type` wins. A `NULL` type,
 name, or converter, or no active unit, leaves the table unchanged.
 
-Source: `src/type.x:251`
+Source: `src/type.x:256`
 
 <a id="Type.var_converter"></a>
 #### Type.var_converter
@@ -130,7 +130,7 @@ Source: `src/type.x:251`
 Returns the unit-local forward `Var` converter for the canonical form of
 `type`, or `NULL`.
 
-Source: `src/type.x:225`
+Source: `src/type.x:230`
 
 <a id="Type.var_tag"></a>
 #### Type.var_tag
@@ -140,7 +140,7 @@ Source: `src/type.x:225`
 Returns the unit-local `Var` tag for `type`, falling back to its fixed
 tag.
 
-Source: `src/type.x:204`
+Source: `src/type.x:209`
 
 <a id="Type.var_tag_row"></a>
 #### Type.var_tag_row
@@ -151,7 +151,7 @@ Reads the encoding row of `tag` into `top`, `mask`, and `bottom` and
 reports whether one exists. A tag whose decoded form carries a validity
 clause, an immediate width, or a user registration has no constant row.
 
-Source: `src/type.x:236`
+Source: `src/type.x:241`
 
 ## Design notes
 

@@ -217,7 +217,8 @@ static int _run_translation(CliRequest request, Map unit_dirs, Build build) {
   Translation t = {
     .request = request, .unit_dirs = unit_dirs, .build = build,
     .total = request.inputs.len()};
-  if (!unit_dirs && !request.dry_run && !request.inspects())
+  if (!unit_dirs && !request.dry_run &&
+      (!request.inspects() || request.dump == <dump-defs>))
     t.enroll_modules();
   t.preflight();
   if (request.verbose || request.dry_run) _print_command(request);
@@ -259,7 +260,8 @@ static void Translation.enroll_modules(Translation &t) {
     List ancestry = tree.ancestors(input);
     if (ancestry) {
       String root = ancestry.reverse().car();
-      String root_dir = Path.dirname(root), source_dir = Path.dirname(Path.absolute(input));
+      String root_dir = Path.dirname(root),
+        source_dir = Path.dirname(Path.absolute(input));
       if (source_dir != root_dir)
         directory = Path.join(directory, source_dir[root_dir.len() + 1:]);
       modules = 1;
@@ -267,7 +269,8 @@ static void Translation.enroll_modules(Translation &t) {
     directories[input] = directory;
   }
   if (!modules) return;
-  foreach (Var (key, directory), directories) Path.make_dirs(directory);
+  if (!t.request.inspects())
+    foreach (Var (key, directory), directories) Path.make_dirs(directory);
   t.unit_dirs = directories;
   t.request.inputs = inputs;
   t.total = inputs.len();

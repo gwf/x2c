@@ -1193,7 +1193,8 @@ static List Compiler._resolve_identifier(
   List result = %(expr $type (ident $binding));
   List recipe = !c.shallow && !c.macro_holes
     ? c.module_initializer(binding) : NULL;
-  if (recipe && home_absolute_path(recipe.cadr()) != c.canonical_path(c.filename)) {
+  if (recipe &&
+      home_absolute_path(recipe.cadr()) != c.canonical_path(c.filename)) {
     String entry = module_initializer_entry(recipe.cadr());
     List call = %(expr (void) (call $entry (args)));
     List address = %(expr ${type.reference()} (op & (parens $result)));
@@ -1797,8 +1798,9 @@ static List Compiler._field_member(
     case %((!set ?tag (!or struct union)) ?(String name) *): {
       List owner = c.sym.get_exact(%("module-layout" $tag $name));
       if (owner && !c.module_accessible(
-          c.canonical_path(home_absolute_path(owner.car()))))
-        c.report_error(<type>, %"module-private aggregate body '$name' is not accessible",
+        c.canonical_path(home_absolute_path(owner.car()))))
+        c.report_error(
+          <type>, %"module-private aggregate body '$name' is not accessible",
           c.token, %("module:" ${owner.car()}));
     }
   Type declared = c.sym.lookup_field(object, field);

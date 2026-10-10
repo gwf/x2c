@@ -24,7 +24,8 @@
   ((fnmod (params (param (void) (bind () ())))))) 
  (block 
   (at 19 
-   (stmnt (expr (int) (postfix ++ (expr (int) (ident (binding 2 "tag_calls"))))))) 
+   (stmnt 
+    (expr (int) (postfix ++ (expr (int) (ident (binding 2 "tag_calls"))))))) 
   (at 28 (return (expr ("Symbol") (literal ("Symbol") "<f64>" f64))))))
 
 (function (int) 
@@ -79,11 +80,13 @@
                                          (ident (binding 13 "Var_is"))) 
                                    (args (expr ("Var") 
                                           (call (expr ((func ((void))) "Var") 
-                                                 (ident (binding 3 "next_value"))) 
+                                                 (ident 
+                                                  (binding 3 "next_value"))) 
                                            (args (expr (void) ())))) 
                                     (expr ("Symbol") "3356265")))))) 
                           (expr (int) 
-                           (op == (expr (int) (ident (binding 1 "value_calls"))) 
+                           (op == 
+                            (expr (int) (ident (binding 1 "value_calls"))) 
                             (expr (int) (literal (int) "1")))))) 
                         (expr (int) 
                          (op ! (expr (int) 

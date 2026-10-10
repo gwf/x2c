@@ -557,7 +557,8 @@
     (expr (volatile "String") 
      (op = (expr (volatile "String") 
             (index 
-             (expr (* volatile "String") (ident (binding 55 "_x2c_macro_lhs_0"))) 
+             (expr (* volatile "String") 
+              (ident (binding 55 "_x2c_macro_lhs_0"))) 
              (expr (int) (literal (int) "0")))) 
       (expr ("String") 
        (call (expr ((func (("String") ("String"))) "String") 
@@ -571,5 +572,6 @@
   (at 87 
    (return 
     (expr (volatile "String") 
-     (index (expr (* volatile "String") (ident (binding 55 "_x2c_macro_lhs_0"))) 
+     (index 
+      (expr (* volatile "String") (ident (binding 55 "_x2c_macro_lhs_0"))) 
       (expr (int) (literal (int) "0"))))))))

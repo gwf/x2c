@@ -20,11 +20,15 @@ ast_shape() {
 }
 
 check_ast_parity() {
+  set --
+  for directory in $(find builds/0/src -type d | LC_ALL=C sort); do
+    set -- "$@" --c-include-dir "$directory"
+  done
   builds/0/x2c build --plain ${BUILD_JOBS:+-j "$BUILD_JOBS"} \
     --build-dir builds/0/commands/ast-parity-cc \
     --output builds/0/commands/ast-parity \
     --x-include-dir . --x-include-dir src \
-    --c-include-dir builds/0/src \
+    "$@" \
     commands/graph/tests/ast-parity.x builds/0/libx2c-dev.a
   builds/0/commands/ast-parity "$fixtures/calls.x" |
     ast_shape >"$tmp/embedded.ast"

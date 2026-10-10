@@ -17,7 +17,8 @@
 typedef void (*FrontendErrorSink)(String text);
 
 /** Borrows a configured request and owns shared native-preprocessor setup.
-    Nested units close in reverse open order; process caches outlive the session.
+    Nested units close in reverse open order.
+    Process caches outlive the session.
     The optional stderr sink runs synchronously; units also retain that text.
 */
 typedef struct Frontend {

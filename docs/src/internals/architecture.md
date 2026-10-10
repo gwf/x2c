@@ -563,6 +563,10 @@ The modules under `src/` divide ownership as follows:
 - `src/type-ledger.x` -- the `Var` tag lookups projected from the tag ledger,
   kept in their own unit so the units that include `type.x` do not load it;
 - `src/collect.x` -- global environment discovery and unit interfaces;
+- `src/module-tree.x` -- explicit source membership, module ancestry, and
+  ownership search dependencies;
+- `src/module-access.x` -- module declaration names, ancestor lookup, and
+  private binding visibility;
 - `src/utils.x` -- repository discovery, the driver's fatal error line, and
   forked translation workers;
 - `src/transform.x` -- lowering to emitter-ready AST;

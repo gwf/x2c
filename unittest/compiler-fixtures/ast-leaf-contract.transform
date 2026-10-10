@@ -243,7 +243,8 @@
                  (expr ("List") (ident (binding 49 "_x2c_macro_cursor_0")))))) 
          (expr (opt-ref "Var") 
           (op & (parens 
-                 (expr ("Var") (ident (binding 50 "_x2c_macro_cursor_output_0"))))))))) 
+                 (expr ("Var") 
+                  (ident (binding 50 "_x2c_macro_cursor_output_0"))))))))) 
       (block 
        (stmnt 
         (expr ("Var") 
@@ -590,7 +591,8 @@
   (at 73 
    (stmnt 
     (expr (void) 
-     (cast (void) (expr ("ast_phase1_Consumer") (ident (binding 38 "consumer"))))))) 
+     (cast (void) 
+      (expr ("ast_phase1_Consumer") (ident (binding 38 "consumer"))))))) 
   (at 74 
    (stmnt 
     (expr (void) 

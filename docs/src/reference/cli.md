@@ -138,17 +138,22 @@ selected, expanded, and bound it, one Lisp form per line. Documentation
 generators and repository tools read it instead of scanning source text.
 Each unit starts with `(unit PATH)`, so one command can inspect several
 files. A file that opens with a block comment, after any directives, then
-prints `(module TEXT)` with the comment as written. Each function, including
+prints `(module TEXT)` with the comment as written. An enrolled unit also
+prints
+`(owners PATH ...)`, listing owning entries nearest first as absolute
+paths. Tools can group transitive public members under an entry. Each
+function, including
 static functions, foreign aliases, and functions a Unit macro or `class`
 produced, prints a `function` row, and each `typedef` or `class` prints a
 `type` row:
 
 ```text
 (function (name "Point_add") (display "Point.add") (line 11)
- (span 193 242) (static 0) (origin source) (doc " Adds. ")
+ (span 193 242) (static 0) (module 0) (origin source) (doc " Adds. ")
  (text "int Point.add(Point p, int k)")
  (type ((func (("Point") (int))) int)) (params ("p" "k")))
 (type (name "Point") (kind struct) (line 6) (span 68 113) (private 0)
+ (module 0)
  (doc " A point. ") (text "typedef struct Point { int x; int y; } Point"))
 ```
 
@@ -161,6 +166,8 @@ produced, prints a `function` row, and each `typedef` or `class` prints a
   produced the definition, including decorators and a `meta` keyword. It is
   empty for a definition the compiler made itself, such as a protocol
   adapter, whose `line` is 1.
+- `module` is 1 when binding ownership restricts the definition to
+  its module and descendants. Documentation tools omit these definitions.
 - `origin` is `source` for a function written in the file, `macro` for one a
   Unit macro, `class`, or the compiler produced, and `alias` for a foreign
   alias, whose `line` is that of its alias application.

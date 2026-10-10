@@ -6,10 +6,14 @@ tmp=${TMPDIR:-/tmp}/x2c-repl-tests.$$
 mkdir -p "$tmp"
 trap 'rm -rf "$tmp"' EXIT HUP INT TERM
 
+set --
+for directory in $(find builds/0/src -type d | LC_ALL=C sort); do
+  set -- "$@" --c-include-dir "$directory"
+done
 builds/0/x2c build --plain ${BUILD_JOBS:+-j "$BUILD_JOBS"} \
   --build-dir "$tmp/api-cc" --output "$tmp/api-check" \
   --x-include-dir commands/repl --x-include-dir src \
-  --c-include-dir builds/0/src \
+  "$@" \
   commands/repl/tests/api-check.x commands/repl/repl-session.x \
   commands/repl/repl-lower.x commands/repl/repl-runtime.x \
   commands/repl/decline-errors.x commands/repl/refusal-errors.x \

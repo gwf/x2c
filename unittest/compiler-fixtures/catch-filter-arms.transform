@@ -407,7 +407,8 @@
          (expr () (ident (binding 26 "NULL")))))) 
       (block 
        (at 20 
-        (stmnt (expr (int) (postfix ++ (expr (int) (ident (binding 2 "mode")))))))))) 
+        (stmnt 
+         (expr (int) (postfix ++ (expr (int) (ident (binding 2 "mode")))))))))) 
     (stmnt 
      (expr (void) 
       (call (expr ((func ((* "ExceptionFrame"))) void) 

@@ -47,6 +47,8 @@ Functions and types exposed by each compiler module.
 | [`src/meta-native.x`](meta-native.md) | meta functions and the native code they call. |
 | [`src/meta-project.x`](meta-project.md) | the project meta build. |
 | [`src/meta-sdk.x`](meta-sdk.md) | the compiler's answers to `lib/meta.x` operations. |
+| [`src/module-access.x`](module-access.md) | declaration ownership and module lookup. |
+| [`src/module-tree.x`](module-tree.md) | explicit source membership and module ancestry. |
 | [`src/operator-ledger.x`](operator-ledger.md) | binary operator facts and case projections. |
 | [`src/parse-report-macros.x`](parse-report-macros.md) | package, binding, and alias diagnostics. |
 | [`src/parse.x`](parse.md) | x2c declarations, parsed from source or constructed. |

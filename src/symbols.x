@@ -565,6 +565,7 @@ List Sym.declare(Sym s, List context, List key, List ast) {
   return binding;
 }
 
+/** Checks a type spelling before assigning its module-private name. */
 void Sym.check_module_type_spelling(Sym s, String spelling) =>
   s.c._check_spelling(spelling);
 

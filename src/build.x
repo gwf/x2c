@@ -341,7 +341,8 @@ int Build.translation_current(Build b, String input, String directory) {
     if (!Path.is_file(_unit_file(directory, input, suffix))) return 0;
   Compiler discovery = Compiler.new();
   if (discovery.module_tree.owner(input) &&
-      !Path.is_file(Path.join(directory, module_support_header(input)))) return 0;
+      !Path.is_file(Path.join(directory, module_support_header(input))))
+    return 0;
   int ok = 1;
   uint64_t hash = b._translation_fingerprint(input, directory, ok);
   int current = ok && _state_matches(b._state_path("x", input), hash);

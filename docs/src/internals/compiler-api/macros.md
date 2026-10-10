@@ -91,7 +91,7 @@ Source macros and the compile-time Lisp they run.
 Answers whether the shared compile-time session is still being filled,
 before `lib/meta.x` has defined the syntax builders.
 
-Source: `src/macros.x:5260`
+Source: `src/macros.x:1687`
 
 #### macro_library_reset
 
@@ -100,7 +100,7 @@ Source: `src/macros.x:5260`
 Ends the shared compile-time library before its build-target Context is
 reclaimed. A later target creates a fresh session in its own Context.
 
-Source: `src/macros.x:5458`
+Source: `src/macros.x:1885`
 
 #### x2c_template_call
 
@@ -110,7 +110,7 @@ Returns the syntax that invokes the template `stored`, a macro name
 spelled as a String or a local definition, with `values`: what a template
 call in a staged `meta` body evaluates to.
 
-Source: `src/macros.x:4161`
+Source: `src/macros/expansion.x:1531`
 
 ### `Compiler`
 
@@ -122,7 +122,7 @@ Source: `src/macros.x:4161`
 Records the compile-time Lisp libraries as dependencies of `c`, as each
 use of its session does.
 
-Source: `src/macros.x:5197`
+Source: `src/macros.x:1624`
 
 <a id="Compiler.after_hole"></a>
 #### Compiler.after_hole
@@ -132,7 +132,7 @@ Source: `src/macros.x:5197`
 Returns the token after the named or expression hole at the cursor.
 Consumes neither its `$` or `@` prefix nor its optional braces.
 
-Source: `src/macros.x:1567`
+Source: `src/macros/definitions.x:782`
 
 <a id="Compiler.bind_code_value"></a>
 #### Compiler.bind_code_value
@@ -143,7 +143,7 @@ Binds a code-value carrier that a meta call returned outside a macro
 value application as an application binds it, under a transaction that
 also covers its effects.
 
-Source: `src/macros.x:4773`
+Source: `src/macros.x:1200`
 
 <a id="Compiler.bind_macro_lisp_statement"></a>
 #### Compiler.bind_macro_lisp_statement
@@ -153,7 +153,7 @@ Source: `src/macros.x:4773`
 Binds a compile-time Lisp code `value` returned to a statement at
 `context`.
 
-Source: `src/macros.x:4954`
+Source: `src/macros.x:1381`
 
 <a id="Compiler.bind_meta_operation"></a>
 #### Compiler.bind_meta_operation
@@ -165,7 +165,7 @@ its Lisp name in `lisp`. A predicate answers a Lisp truth value where the
 x2c spelling answers `int`. A definition the compile-time libraries
 already give that name wins, because it adapts the arguments.
 
-Source: `src/macros.x:5398`
+Source: `src/macros.x:1825`
 
 <a id="Compiler.capture_macro_value"></a>
 #### Compiler.capture_macro_value
@@ -176,7 +176,7 @@ Returns an anonymous macro definition as a `Macro` value. Macro values
 the body applies are captured where the literal is written, so a later
 application applies the same children.
 
-Source: `src/macros.x:4651`
+Source: `src/macros.x:1078`
 
 <a id="Compiler.ensure_macro_lisp"></a>
 #### Compiler.ensure_macro_lisp
@@ -187,7 +187,7 @@ Opens the unit's compile-time Lisp session when it has none. An
 Each use records the library files as dependencies,
 and a session loads them once.
 
-Source: `src/macros.x:4820`
+Source: `src/macros.x:1247`
 
 <a id="Compiler.evaluate_declaration_effect"></a>
 #### Compiler.evaluate_declaration_effect
@@ -196,7 +196,7 @@ Source: `src/macros.x:4820`
 
 Evaluates a queued source Lisp form with its original diagnostic site.
 
-Source: `src/macros.x:4905`
+Source: `src/macros.x:1332`
 
 <a id="Compiler.evaluate_declaration_recipe"></a>
 #### Compiler.evaluate_declaration_recipe
@@ -206,7 +206,7 @@ Source: `src/macros.x:4905`
 Evaluates a declaration recipe after its owning source is collected.
 The callback is a Lisp name and arguments are retained canonical values.
 
-Source: `src/macros.x:4141`
+Source: `src/macros/expansion.x:1511`
 
 <a id="Compiler.evaluate_macro_rows"></a>
 #### Compiler.evaluate_macro_rows
@@ -217,7 +217,7 @@ Evaluates a macro slot and returns its syntax as a row sequence.
 `(seq ...)` contributes its children; every other result contributes one
 row.
 
-Source: `src/macros.x:3989`
+Source: `src/macros/expansion.x:1359`
 
 <a id="Compiler.evaluate_macro_slot"></a>
 #### Compiler.evaluate_macro_slot
@@ -229,7 +229,7 @@ Macro value application into the invocation that expands it.
 Non-slots and slots outside an expansion are returned unchanged. A splice
 slot's `List` result is wrapped as `(seq ...)` for its syntax position.
 
-Source: `src/macros.x:3931`
+Source: `src/macros/expansion.x:1301`
 
 <a id="Compiler.evaluate_meta_value"></a>
 #### Compiler.evaluate_meta_value
@@ -240,7 +240,7 @@ Evaluates the explicit meta call `expression` at `site` with the active
 expansion's captures visible to the SDK. A nonzero `slot` marks a
 template slot, which reports a call the project meta build leaves.
 
-Source: `src/macros.x:4028`
+Source: `src/macros/expansion.x:1398`
 
 <a id="Compiler.expand_macro_invocation_node"></a>
 #### Compiler.expand_macro_invocation_node
@@ -253,7 +253,7 @@ supplies Lisp bindings, source location, and recursion checks; the
 definition's fresh rows allocate invocation-local names. This method does
 not begin a semantic transaction.
 
-Source: `src/macros.x:401`
+Source: `src/macros/expansion.x:25`
 
 <a id="Compiler.has_rewrites"></a>
 #### Compiler.has_rewrites
@@ -262,7 +262,7 @@ Source: `src/macros.x:401`
 
 Tests one operation's registry without invoking a translator.
 
-Source: `src/macros.x:2654`
+Source: `src/macros.x:565`
 
 <a id="Compiler.inherit_library_comptime"></a>
 #### Compiler.inherit_library_comptime
@@ -272,7 +272,7 @@ Source: `src/macros.x:2654`
 Marks the shared session's compile-time-only definitions in a fresh
 compiler pass, which reads them without defining them.
 
-Source: `src/macros.x:5253`
+Source: `src/macros.x:1680`
 
 <a id="Compiler.inherits_import"></a>
 #### Compiler.inherits_import
@@ -282,7 +282,7 @@ Source: `src/macros.x:5253`
 Whether the shared session evaluated the file at `path`. A unit that is
 that file, as when a library is linted, inherits its Lisp forms.
 
-Source: `src/macros.x:5236`
+Source: `src/macros.x:1663`
 
 <a id="Compiler.install_builtin_macros"></a>
 #### Compiler.install_builtin_macros
@@ -291,7 +291,7 @@ Source: `src/macros.x:5236`
 
 Installs the compiler-shipped source macros into `c` once.
 
-Source: `src/macros.x:5298`
+Source: `src/macros.x:1725`
 
 <a id="Compiler.install_compile_time_effects"></a>
 #### Compiler.install_compile_time_effects
@@ -302,7 +302,7 @@ Installs included compile-time definitions in their source order.
 Keyword aliases retain the definition visible when their source declared
 them, even if a later macro definition uses the same name.
 
-Source: `src/macros.x:2365`
+Source: `src/macros/definitions.x:1202`
 
 <a id="Compiler.keyword_form_is_definition"></a>
 #### Compiler.keyword_form_is_definition
@@ -312,7 +312,7 @@ Source: `src/macros.x:2365`
 Returns whether the current tokens begin a `keyword NAME $macro` alias.
 This query does not consume tokens.
 
-Source: `src/macros.x:2429`
+Source: `src/macros/definitions.x:1269`
 
 <a id="Compiler.land_quotation"></a>
 #### Compiler.land_quotation
@@ -322,7 +322,7 @@ Source: `src/macros.x:2429`
 Binds quoted `syntax` with its `fresh` rows at `position`, as the
 expansion of its quotation would.
 
-Source: `src/macros.x:4349`
+Source: `src/macros/expansion.x:1719`
 
 <a id="Compiler.lift_macro_lisp_expression"></a>
 #### Compiler.lift_macro_lisp_expression
@@ -334,7 +334,7 @@ Scalars, immutable values, representable Array/Map roots, compiler-issued
 identifiers, and nonempty code `List`s are accepted; `invocation` locates
 an unsupported result.
 
-Source: `src/macros.x:4941`
+Source: `src/macros.x:1368`
 
 <a id="Compiler.local_macro_form_is_definition"></a>
 #### Compiler.local_macro_form_is_definition
@@ -344,7 +344,7 @@ Source: `src/macros.x:4941`
 Returns whether the current tokens begin a local macro definition.
 This query does not consume tokens.
 
-Source: `src/macros.x:2419`
+Source: `src/macros/definitions.x:1259`
 
 <a id="Compiler.lower_rewrite"></a>
 #### Compiler.lower_rewrite
@@ -356,7 +356,7 @@ expression retains the result type already established for its parent.
 A replacement whose template and slot signatures an earlier use in the
 unit prepared lowers only its captured values.
 
-Source: `src/macros.x:2669`
+Source: `src/macros.x:580`
 
 <a id="Compiler.macro_form_is_definition"></a>
 #### Compiler.macro_form_is_definition
@@ -366,7 +366,7 @@ Source: `src/macros.x:2669`
 Returns whether the current tokens have macro-definition introducer form.
 This query does not consume tokens.
 
-Source: `src/macros.x:2405`
+Source: `src/macros/definitions.x:1245`
 
 <a id="Compiler.macro_introduced_name"></a>
 #### Compiler.macro_introduced_name
@@ -376,7 +376,7 @@ Source: `src/macros.x:2405`
 Returns the current declaration's definition-local identity. An active
 macro-definition locals map is required.
 
-Source: `src/macros.x:2178`
+Source: `src/macros/definitions.x:1010`
 
 <a id="Compiler.macro_invocation_collection"></a>
 #### Compiler.macro_invocation_collection
@@ -389,7 +389,7 @@ named-type decorator, and local `Unit` macro whose template contains
 protocol or adoption rows. `<tried>` covers Unit decorators and other
 local `Unit` macros. Other invocations return zero.
 
-Source: `src/macros.x:3151`
+Source: `src/macros/expansion.x:521`
 
 <a id="Compiler.macro_invocation_site"></a>
 #### Compiler.macro_invocation_site
@@ -400,7 +400,7 @@ Resolves a stored macro invocation marker to its source token.
 Nested template markers use the active expansion's invocation; unresolved
 markers return NULL.
 
-Source: `src/macros.x:614`
+Source: `src/macros/expansion.x:238`
 
 <a id="Compiler.macro_lisp_starts_declaration"></a>
 #### Compiler.macro_lisp_starts_declaration
@@ -411,7 +411,7 @@ Returns whether tokens after a Lisp form or explicit meta call continue
 a declaration. The balanced argument group is inspected without moving
 the compiler cursor; a visible source macro retains its own grammar.
 
-Source: `src/macros.x:2071`
+Source: `src/macros/definitions.x:903`
 
 <a id="Compiler.macro_pattern_at"></a>
 #### Compiler.macro_pattern_at
@@ -421,7 +421,7 @@ Source: `src/macros.x:2071`
 Returns the `(` after a visible macro's `$NAME` at `at`, storing its
 spelling and definition, or NULL. The cursor does not move.
 
-Source: `src/macros.x:4538`
+Source: `src/macros.x:965`
 
 <a id="Compiler.macro_starts_target_at"></a>
 #### Compiler.macro_starts_target_at
@@ -432,7 +432,7 @@ Returns whether the parser claims the macro invocation at the cursor for
 `position`. A bare keyword alias is claimed only where its result fits.
 This query does not consume tokens.
 
-Source: `src/macros.x:2978`
+Source: `src/macros/expansion.x:348`
 
 <a id="Compiler.macro_tag_name"></a>
 #### Compiler.macro_tag_name
@@ -445,7 +445,7 @@ declares is a template local, apart from ordinary names of the same
 spelling. A tag it only references keeps its public spelling unless the
 template later defines or declares it.
 
-Source: `src/macros.x:2191`
+Source: `src/macros/definitions.x:1023`
 
 <a id="Compiler.macro_targets_unit"></a>
 #### Compiler.macro_targets_unit
@@ -456,7 +456,7 @@ Reports whether the macro invocation at the cursor produces file-scope
 syntax, directly or through the target it decorates. A script unit keeps
 such an invocation at file scope. This query does not consume tokens.
 
-Source: `src/macros.x:3195`
+Source: `src/macros/expansion.x:565`
 
 <a id="Compiler.macro_value_literal"></a>
 #### Compiler.macro_value_literal
@@ -466,7 +466,7 @@ Source: `src/macros.x:3195`
 Returns the literal expression that carries `value`, a macro definition
 or one of its references, as run-time data.
 
-Source: `src/macros.x:4461`
+Source: `src/macros.x:888`
 
 <a id="Compiler.marked_rewrite"></a>
 #### Compiler.marked_rewrite
@@ -477,7 +477,7 @@ Matches the member rules registered for each field keyword that
 `aggregate` declares a field with, as `Compiler.rewrite` matches those
 keyed by a receiver type.
 
-Source: `src/macros.x:2640`
+Source: `src/macros.x:551`
 
 <a id="Compiler.open_macro_library"></a>
 #### Compiler.open_macro_library
@@ -492,7 +492,7 @@ reports against the unit that needed it.
 The session is not published until `Compiler.publish_macro_library`, so a
 unit opened in between still builds its own.
 
-Source: `src/macros.x:5155`
+Source: `src/macros.x:1582`
 
 <a id="Compiler.parse_keyword_definition"></a>
 #### Compiler.parse_keyword_definition
@@ -503,7 +503,7 @@ Parses and installs one source-local `keyword` alias.
 The named macro must already be visible; the alias captures that definition
 and consumes its terminating semicolon.
 
-Source: `src/macros.x:2441`
+Source: `src/macros/definitions.x:1281`
 
 <a id="Compiler.parse_macro_definition"></a>
 #### Compiler.parse_macro_definition
@@ -514,7 +514,7 @@ Parses the macro definition at the current token into a `macrodef` `List`.
 A source-level definition is published immediately; a definition inside a
 template remains syntax for later binding at its expansion site.
 
-Source: `src/macros.x:736`
+Source: `src/macros/definitions.x:16`
 
 <a id="Compiler.parse_macro_lisp_expression"></a>
 #### Compiler.parse_macro_lisp_expression
@@ -525,7 +525,7 @@ Parses a compile-time Lisp form in an expression position.
 Macro-definition parsing records a deferred slot; ordinary parsing
 evaluates the form in the translation unit's Lisp session and lifts it.
 
-Source: `src/macros.x:4926`
+Source: `src/macros.x:1353`
 
 <a id="Compiler.parse_macro_lisp_shallow"></a>
 #### Compiler.parse_macro_lisp_shallow
@@ -536,7 +536,7 @@ Loads import dependencies and queues source Lisp effects.
 Declaration projection forces preceding effects exactly once; otherwise
 full parsing keeps the ordinary source-order evaluation.
 
-Source: `src/macros.x:4876`
+Source: `src/macros.x:1303`
 
 <a id="Compiler.parse_macro_lisp_top_level"></a>
 #### Compiler.parse_macro_lisp_top_level
@@ -545,7 +545,7 @@ Source: `src/macros.x:4876`
 
 Evaluates one source Lisp form or imports an .xlisp dependency.
 
-Source: `src/macros.x:4859`
+Source: `src/macros.x:1286`
 
 <a id="Compiler.parse_macro_quotation"></a>
 #### Compiler.parse_macro_quotation
@@ -555,7 +555,7 @@ Source: `src/macros.x:4859`
 Parses a quotation at `$!` into the code it builds from the locals its
 body names.
 
-Source: `src/macros.x:1588`
+Source: `src/macros/quotations.x:25`
 
 <a id="Compiler.peek_macro_hole"></a>
 #### Compiler.peek_macro_hole
@@ -566,7 +566,7 @@ Returns the registered hole descriptor for a named or expression hole.
 `$NAME` and `${expression}` insert one value; `@NAME` and `@{expression}`
 splice a sequence. Returns NULL without consuming a non-hole spelling.
 
-Source: `src/macros.x:1553`
+Source: `src/macros/definitions.x:768`
 
 <a id="Compiler.place"></a>
 #### Compiler.place
@@ -581,7 +581,7 @@ among the unit's support declarations, once per KEY with
 `(unit-support KEY)`; or `(unit-init)` in the unit's file
 initialization, in AREA with `(unit-init AREA)`.
 
-Source: `src/macros.x:4747`
+Source: `src/macros.x:1174`
 
 <a id="Compiler.publish_macro_definition_node"></a>
 #### Compiler.publish_macro_definition_node
@@ -591,7 +591,7 @@ Source: `src/macros.x:4747`
 Publishes a canonical `macrodef` in source order and returns `node`.
 A later definition with the same name affects only later invocations.
 
-Source: `src/macros.x:2338`
+Source: `src/macros/definitions.x:1170`
 
 <a id="Compiler.publish_macro_library"></a>
 #### Compiler.publish_macro_library
@@ -601,7 +601,7 @@ Source: `src/macros.x:2338`
 Prepares and freezes the shared session and makes it every unit's parent.
 `shared` must be the session `Compiler.open_macro_library` returned.
 
-Source: `src/macros.x:5218`
+Source: `src/macros.x:1645`
 
 <a id="Compiler.rebuild_expression"></a>
 #### Compiler.rebuild_expression
@@ -613,7 +613,7 @@ its established root `type`, child stage, and source wrappers. Binding,
 capture collection, hygiene, and effects do not run, and a statement
 expression's template-origin wrappers are omitted.
 
-Source: `src/macros.x:4245`
+Source: `src/macros/expansion.x:1615`
 
 <a id="Compiler.rebuild_function"></a>
 #### Compiler.rebuild_function
@@ -623,7 +623,7 @@ Source: `src/macros.x:4245`
 Rebuilds a bound function through a Function decorator without binding it
 again. The template keeps the target's return type and declarator.
 
-Source: `src/macros.x:4267`
+Source: `src/macros/expansion.x:1637`
 
 <a id="Compiler.rebuild_statement"></a>
 #### Compiler.rebuild_statement
@@ -634,7 +634,7 @@ Rebuilds a statement template as a canonical unbraced `seq`. Bound
 children keep their identities and origins; template-origin wrappers
 are omitted because this path does not open an invocation.
 
-Source: `src/macros.x:4253`
+Source: `src/macros/expansion.x:1623`
 
 <a id="Compiler.rebuild_unit_function"></a>
 #### Compiler.rebuild_unit_function
@@ -645,7 +645,7 @@ Constructs a fresh function from a Unit template after lowering. The
 caller supplies its bound name and lowered children; binding does not
 run.
 
-Source: `src/macros.x:4259`
+Source: `src/macros/expansion.x:1629`
 
 <a id="Compiler.record_compile_time_effect"></a>
 #### Compiler.record_compile_time_effect
@@ -654,7 +654,7 @@ Source: `src/macros.x:4259`
 
 Records a public source effect where its completed definition stands.
 
-Source: `src/macros.x:2348`
+Source: `src/macros/definitions.x:1180`
 
 <a id="Compiler.record_comptime"></a>
 #### Compiler.record_comptime
@@ -664,7 +664,7 @@ Source: `src/macros.x:2348`
 Records that `name` is compile-time only in `c`, and in the shared
 session when it is being filled.
 
-Source: `src/macros.x:5244`
+Source: `src/macros.x:1671`
 
 <a id="Compiler.report_lisp_failure"></a>
 #### Compiler.report_lisp_failure
@@ -674,7 +674,7 @@ Source: `src/macros.x:5244`
 Reports that the compile-time Lisp `source` failed with `error` at
 `invocation`.
 
-Source: `src/macros.x:5430`
+Source: `src/macros.x:1857`
 
 <a id="Compiler.rewrite"></a>
 #### Compiler.rewrite
@@ -685,7 +685,7 @@ Matches registered patterns for one operation, then binds the first
 replacement. A translator declines with void, null, or its input itself.
 Active rules cannot re-enter.
 
-Source: `src/macros.x:2660`
+Source: `src/macros.x:571`
 
 <a id="Compiler.shared_definitions"></a>
 #### Compiler.shared_definitions
@@ -695,7 +695,7 @@ Source: `src/macros.x:2660`
 Returns the published definition keys, or null before publication.
 The borrowed map is the shared session's source identity table.
 
-Source: `src/macros.x:5265`
+Source: `src/macros.x:1692`
 
 <a id="Compiler.shares_meta_definition"></a>
 #### Compiler.shares_meta_definition
@@ -706,7 +706,7 @@ Answers whether the published shared session already holds the
 definition of `name` from this file, which a unit reading the file again
 leaves alone.
 
-Source: `src/macros.x:5273`
+Source: `src/macros.x:1700`
 
 <a id="Compiler.skip_macro_invocation"></a>
 #### Compiler.skip_macro_invocation
@@ -716,7 +716,7 @@ Source: `src/macros.x:5273`
 Consumes a macro invocation name and its balanced argument list.
 The invocation terminator or following decorator target remains current.
 
-Source: `src/macros.x:3171`
+Source: `src/macros/expansion.x:541`
 
 <a id="Compiler.skip_named_type_declaration"></a>
 #### Compiler.skip_named_type_declaration
@@ -726,7 +726,7 @@ Source: `src/macros.x:3171`
 Consumes a NamedType target already projected by owning-source collection.
 CPP scanning does not produce the declaration or parse its fields again.
 
-Source: `src/macros.x:3182`
+Source: `src/macros/expansion.x:552`
 
 <a id="Compiler.source_path"></a>
 #### Compiler.source_path
@@ -736,7 +736,7 @@ Source: `src/macros.x:3182`
 Returns the canonical path of the source `file`. A relative name that
 is not a file resolves against the home.
 
-Source: `src/macros.x:5093`
+Source: `src/macros.x:1520`
 
 <a id="Compiler.take_code_value"></a>
 #### Compiler.take_code_value
@@ -751,7 +751,7 @@ transaction, and their tokens are replaced in the code.
 leaves untouched. Lowered code is not searched for a leftover binder.
 Returns 0 for any other value.
 
-Source: `src/macros.x:4689`
+Source: `src/macros.x:1116`
 
 <a id="Compiler.try_parse_macro_expression"></a>
 #### Compiler.try_parse_macro_expression
@@ -762,7 +762,7 @@ Parses and resolves a direct or keyword-alias expression macro.
 Returns NULL without consuming an identifier that is not an applicable
 alias; a direct `$` invocation must resolve to a visible expression form.
 
-Source: `src/macros.x:3779`
+Source: `src/macros/expansion.x:1149`
 
 <a id="Compiler.try_parse_macro_member"></a>
 #### Compiler.try_parse_macro_member
@@ -772,7 +772,7 @@ Source: `src/macros.x:3779`
 Parses a member name in a template. A singular `Name` hole there
 supplies the spelling it captured, without hygienic renaming.
 
-Source: `src/macros.x:2086`
+Source: `src/macros/definitions.x:918`
 
 <a id="Compiler.try_parse_macro_pattern"></a>
 #### Compiler.try_parse_macro_pattern
@@ -783,7 +783,7 @@ Parses `case NAME(?a, *b)` where NAME selects a macro, as `$name` or as
 a `Macro` variable, into the pattern expression that recognizes code the
 macro builds. Returns NULL without consuming tokens for any other case.
 
-Source: `src/macros.x:4489`
+Source: `src/macros.x:916`
 
 <a id="Compiler.try_parse_macro_slot"></a>
 #### Compiler.try_parse_macro_slot
@@ -795,7 +795,7 @@ Returns role-shaped syntax containing `(macro-bind ...)` or
 `(macro-slot ...)`, or NULL when ordinary grammar owns the current tokens;
 successful parsing advances the cursor.
 
-Source: `src/macros.x:1466`
+Source: `src/macros/definitions.x:681`
 
 <a id="Compiler.try_parse_macro_subpattern"></a>
 #### Compiler.try_parse_macro_subpattern
@@ -809,7 +809,7 @@ selects the content alone, for a position whose pattern already writes
 the `(expr TYPE ...)` shell. Returns NULL without consuming tokens when
 no macro NAME is visible.
 
-Source: `src/macros.x:4574`
+Source: `src/macros.x:1001`
 
 <a id="Compiler.try_parse_macro_target_at"></a>
 #### Compiler.try_parse_macro_target_at
@@ -822,7 +822,7 @@ Returns NULL without consuming a macro hole or an invocation that
 deferred `(seq (macro-invoke ...))`, and ordinary parsing returns the bound
 expansion.
 
-Source: `src/macros.x:3523`
+Source: `src/macros/expansion.x:893`
 
 <a id="Compiler.watched_step"></a>
 #### Compiler.watched_step
@@ -832,7 +832,7 @@ Source: `src/macros.x:3523`
 Lowers `ast` when it is a value the active first lowering watches and
 records what its lowering produced; NULL otherwise.
 
-Source: `src/macros.x:2952`
+Source: `src/macros.x:863`
 
 ## Public types
 
@@ -848,7 +848,7 @@ Source: `src/macros.x:2952`
 Counts compiler state that lowering adds and a skipped lowering would
 not add. A name a scope resolves binds once, so it is not counted.
 
-Source: `src/macros.x:2731`
+Source: `src/macros.x:642`
 
 ## Design notes
 

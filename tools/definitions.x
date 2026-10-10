@@ -11,8 +11,9 @@
 #include <unistd.h>
 
 /** One unit's projection: `path`, `module` (its opening comment, or NULL),
-    and `functions` and `types`, each an `Array` of row `Map`s in the order
-    the compiler defines them.
+    and `functions` and `types`, each an `Array` of row `Map`s. Definitions
+    retain their physical `source`. Enrolled units also carry `owners`, the
+    owning entries nearest first.
 */
 typedef Map Unit
 
@@ -36,7 +37,7 @@ static Unit _unit(String path):
 
 /* The units of one dump, each starting at its `unit` row. The dump is read
    as one list: each read scans the rest of its text. */
-static List _units(String dump):
+static List _units(String dump, Path root):
   Array units = []
   Unit unit = NULL
   Lisp lisp = Lisp.new()
@@ -48,15 +49,22 @@ static List _units(String dump):
     Symbol kind = row.car()
     if kind == <unit>:
       unit = _unit(row.cadr())
+      String source = root.join(unit["path"]).absolute(), prefix = %"$root/"
+      if source.startswith(prefix): source = source[prefix.len():]
+      unit["source"] = source
       units.push(unit)
     else if kind == <module>: unit["module"] = row.cadr()
-    else if kind == <function>: unit["functions"].array().push(_fields(row))
-    else: unit["types"].array().push(_fields(row))
+    else if kind == <owners>: unit["owners"] = row.cdr()
+    else:
+      Map fields = _fields(row)
+      fields["source"] = unit["source"]
+      unit[kind == <function> ? "functions" : "types"].array().push(fields)
   return units.list_free()
 
 /** Returns the `Unit` of each path in `paths`, in order, as the compiler
-    `x2c` translates it from the directory `root`. The paths are dealt into
-    one batch per processor, and the batches translate at once.
+    `x2c` translates it from the directory `root`. Public surfaces include
+    transitive enrolled members, preserving their physical source paths.
+    The paths are dealt into one batch per processor; batches run at once.
     Raises: `<cmd-fail>` when a unit does not translate.
 */
 Array Unit.load(Path x2c, Path root, List paths):
@@ -77,31 +85,45 @@ Array Unit.load(Path x2c, Path root, List paths):
   for (int batch = 0; batch < batches; batch++):
     Job job = jobs[batch]
     job.check()
-    foreach Unit unit in _units(work.join(%"$batch").read_text()):
+    foreach Unit unit in _units(work.join(%"$batch").read_text(), root):
       found[unit["path"]] = unit
-  foreach String path in paths: units.push(found[path])
+  foreach String path in paths:
+    Unit surface = found[path].map().copy()
+    foreach String kind in %("functions" "types"):
+      Array rows = surface[kind].array().copy()
+      foreach Var (member_path, member_value) in found:
+        Unit member = member_value
+        if member["path"] == path || member["owners"] is not <list>:
+          continue
+        if !member["owners"].list().contains(root.join(path).absolute()):
+          continue
+        foreach Map row in member[kind].array(): rows.push(row)
+      surface[kind] = rows
+    units.push(surface)
   return units
 
 /** Returns `unit`'s public definitions as the reference names them, in line
-    order: `(name signature line doc)`, where a written definition keeps its
-    declarator and a Unit macro's product is spelled from its type. A
+    order: `(name signature line doc source)`. A written definition keeps
+    its declarator; a Unit macro's product is spelled from its type. A
     definition without authored source is omitted. `doc` is normalized, or
     NULL.
 */
 List Unit.callables(Unit unit):
   Array found = []
   foreach Map row in unit["functions"].array():
-    if row["static"].integer(): continue
+    if row["static"].integer() || row["module"].integer(): continue
     String display = row["display"], doc = row["doc"]
     int line = row["line"].integer()
     if row["origin"] == <alias>: continue
     if row["origin"] == <source>:
-      found.push(%($display ${row["text"]} $line ${Prose.normalize(doc)}))
+      found.push(%($display ${row["text"]} $line
+                   ${Prose.normalize(doc)} ${row["source"]}))
       continue
     if line == 1 && !doc: continue
     found.push(%($display ${Unit.signature(display, row["type"], row["params"])}
-                 $line ${Prose.normalize(doc)}))
-  return found.sort_by(%!(List item) => item.caddr()).list_free()
+                 $line ${Prose.normalize(doc)} ${row["source"]}))
+  return found.sort_by(%!(List item) => %(${item[4]} ${item.caddr()}))
+    .list_free()
 
 // Type rendering follows the canonical Type lists of unit interfaces.
 

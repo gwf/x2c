@@ -5,7 +5,8 @@
  (bindings (bind (binding 1 "InitializerFixture") (*))))
 
 (declare (static int) 
- (bindings (op = (bind (binding 2 "calls") ()) (expr (int) (literal (int) "0")))))
+ (bindings 
+  (op = (bind (binding 2 "calls") ()) (expr (int) (literal (int) "0")))))
 
 (declare (static int) 
  (bindings 

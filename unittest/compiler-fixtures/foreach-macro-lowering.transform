@@ -231,10 +231,12 @@
                  (expr (unsigned) (ident (binding 37 "_x2c_macro_cursor_2")))))) 
          (expr (opt-ref "Var") 
           (op & (parens 
-                 (expr ("Var") (ident (binding 38 "_x2c_macro_cursor_output_3")))))) 
+                 (expr ("Var") 
+                  (ident (binding 38 "_x2c_macro_cursor_output_3")))))) 
          (expr (opt-ref "Var") 
           (op & (parens 
-                 (expr ("Var") (ident (binding 39 "_x2c_macro_cursor_output_4"))))))))) 
+                 (expr ("Var") 
+                  (ident (binding 39 "_x2c_macro_cursor_output_4"))))))))) 
       (block 
        (stmnt 
         (expr (int) 
@@ -286,10 +288,12 @@
                  (expr (unsigned) (ident (binding 44 "_x2c_macro_cursor_3")))))) 
          (expr (opt-ref "Var") 
           (op & (parens 
-                 (expr ("Var") (ident (binding 45 "_x2c_macro_cursor_output_5")))))) 
+                 (expr ("Var") 
+                  (ident (binding 45 "_x2c_macro_cursor_output_5")))))) 
          (expr (opt-ref "Var") 
           (op & (parens 
-                 (expr ("Var") (ident (binding 46 "_x2c_macro_cursor_output_6"))))))))) 
+                 (expr ("Var") 
+                  (ident (binding 46 "_x2c_macro_cursor_output_6"))))))))) 
       (block 
        (stmnt 
         (expr ("Var") 
@@ -319,7 +323,8 @@
   (at 347 
    (block 
     (declare ("Var") 
-     (bindings (bind (binding 49 "name") ()) (bind (binding 50 "count") ()))) 
+     (bindings (bind (binding 49 "name") ()) 
+      (bind (binding 50 "count") ()))) 
     (declare ("Map") 
      (bindings 
       (op = (bind (binding 51 "_x2c_macro_object_4") ()) 
@@ -344,10 +349,12 @@
                  (expr (unsigned) (ident (binding 52 "_x2c_macro_cursor_4")))))) 
          (expr (opt-ref "Var") 
           (op & (parens 
-                 (expr ("Var") (ident (binding 53 "_x2c_macro_cursor_output_7")))))) 
+                 (expr ("Var") 
+                  (ident (binding 53 "_x2c_macro_cursor_output_7")))))) 
          (expr (opt-ref "Var") 
           (op & (parens 
-                 (expr ("Var") (ident (binding 54 "_x2c_macro_cursor_output_8"))))))))) 
+                 (expr ("Var") 
+                  (ident (binding 54 "_x2c_macro_cursor_output_8"))))))))) 
       (block 
        (stmnt 
         (expr ("Var") 
@@ -435,7 +442,8 @@
                  (expr (unsigned) (ident (binding 63 "_x2c_macro_cursor_5")))))) 
          (expr (opt-ref "Var") 
           (op & (parens 
-                 (expr ("Var") (ident (binding 64 "_x2c_macro_cursor_output_9")))))) 
+                 (expr ("Var") 
+                  (ident (binding 64 "_x2c_macro_cursor_output_9")))))) 
          (expr (opt-ref "Var") 
           (op & (parens 
                  (expr ("Var") 
@@ -503,7 +511,8 @@
            (call "Var_int" 
             (args (expr ("Var") 
                    (call "Var_convert" 
-                    (args (expr ("Var") (ident (binding 69 "_x2c_macro_item_6"))) 
+                    (args (expr ("Var") 
+                           (ident (binding 69 "_x2c_macro_item_6"))) 
                      (expr ("Symbol") "3453797")))))))))) 
        (stmnt 
         (expr (int) 
@@ -1464,8 +1473,7 @@
         (bindings 
          (op = (bind (binding 192 "_x2c_macro_pair_20") ()) 
           (expr ("List") 
-           (call (expr ((func (("Var"))) "List") 
-                  (ident (binding 193 "Var_list"))) 
+           (call (expr ((func (("Var"))) "List") (ident (binding 193 "Var_list"))) 
             (args (expr ("Var") (ident (binding 191 "_x2c_macro_item_20"))))))))) 
        (stmnt 
         (expr ("Var") 
@@ -1810,7 +1818,7 @@
                                                                                 
                                                                                 binding 
                                                                                 
-                                                                                37 
+                                                                                88 
                                                                                 
                                                                                 "value_total"))) 
                                                                              (
@@ -1842,7 +1850,7 @@
                                                                                 
                                                                                 binding 
                                                                                 
-                                                                                49 
+                                                                                100 
                                                                                 
                                                                                 "typed_total"))) 
                                                                              (
@@ -1867,7 +1875,8 @@
                                                                              ident 
                                                                              (
                                                                               binding 
-                                                                              68 
+                                                                              
+                                                                              119 
                                                                               
                                                                               "key_bytes"))) 
                                                                            (expr 
@@ -1885,7 +1894,7 @@
                                                                           (ident 
                                                                            (
                                                                             binding 
-                                                                            69 
+                                                                            120 
                                                                             
                                                                             "destructured_total"))) 
                                                                          (expr 
@@ -1901,7 +1910,7 @@
                                                                         (ident 
                                                                          (
                                                                           binding 
-                                                                          82 
+                                                                          132 
                                                                           "converted_total"))) 
                                                                        (expr (
                                                                               int) 
@@ -1913,7 +1922,7 @@
                                                                      (expr (int) 
                                                                       (ident 
                                                                        (binding 
-                                                                        101 
+                                                                        151 
                                                                         "skipped"))) 
                                                                      (expr (int) 
                                                                       (literal 
@@ -1923,7 +1932,7 @@
                                                                    (expr (int) 
                                                                     (ident 
                                                                      (binding 
-                                                                      102 
+                                                                      152 
                                                                       "stopped"))) 
                                                                    (expr (int) 
                                                                     (literal 

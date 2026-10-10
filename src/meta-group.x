@@ -412,7 +412,8 @@ static void Compiler._source_order(Compiler c, Array ordered, String lib) {
     match (unit) case %(module-members ?(List members)): {
       if (c.meta_build)
         foreach (String member, members)
-          c._provider_include(ordered,
+          c._provider_include(
+            ordered,
             c.canonical_path(Path.join(Path.dirname(c.filename), member)));
       continue;
     }

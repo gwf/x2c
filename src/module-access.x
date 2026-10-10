@@ -4,6 +4,8 @@
 #include "module-tree.x"
 #include "utils.x"
 
+/** Selects the owning module and records this file's ownership search
+    facts. */
 void Compiler.configure_module(Compiler c, String filename) {
   if (!c.module_tree) c.module_tree = ModuleTree.new(c);
   String path = c.canonical_path(filename);
@@ -11,10 +13,13 @@ void Compiler.configure_module(Compiler c, String filename) {
   c.merge_translation_dependencies(c.module_tree.ownership_dependencies(path));
 }
 
+/** Returns the current module followed by its enclosing modules, nearest
+    first. */
 List Compiler.module_ancestors(Compiler c) =>
   c.module_tree && c.module_owner
     ? c.module_tree.ancestors(c.module_owner) : NULL;
 
+/** Returns enclosing module directories in nearest-first include order. */
 List Compiler.module_include_dirs(Compiler c, String path) {
   Array dirs = [];
   if (!c.module_tree) c.module_tree = ModuleTree.new(c);
@@ -25,6 +30,8 @@ List Compiler.module_include_dirs(Compiler c, String path) {
   return dirs.list_free();
 }
 
+/** Reports whether the current unit can access declarations owned by
+    `owner`. */
 int Compiler.module_accessible(Compiler c, String owner) {
   foreach (String ancestor, c.module_ancestors())
     if (ancestor == owner) return 1;
@@ -37,7 +44,8 @@ static String Compiler._module_spelling(Compiler c, String name) {
   String prefix = c.module_tree.entry(c.module_owner).prefix;
   if (c.package) prefix = c.package_spelling(prefix);
   if (name.startswith(prefix)) return name;
-  c.sym.set(%("module-private" $name),
+  c.sym.set(
+    %("module-private" $name),
     %(${home_portable_path(c.module_owner)}));
   String spelling = %"${c.module_tree.entry(c.module_owner).prefix}$name";
   if (c.package) spelling = c.package_spelling(spelling);
@@ -45,25 +53,32 @@ static String Compiler._module_spelling(Compiler c, String name) {
   return spelling;
 }
 
+/** Assigns a private type its module spelling and records its ownership. */
 String Compiler._module_type_spelling(Compiler c, String name) {
   c.sym.check_module_type_spelling(name);
   String spelling = c._module_spelling(name);
   c.sym.set(%("module-tag" $spelling), %(generated));
-  c.sym.set(%("module-owner" $spelling),
+  c.sym.set(
+    %("module-owner" $spelling),
     %(${home_portable_path(c.module_owner)}));
   return spelling;
 }
 
+/** Rejects a reference to a module-private declaration outside its
+    ancestors. */
 void Compiler.check_module_binding(Compiler c, String spelling, Token origin) {
   List owner = c.sym.get_exact(%("module-owner" $spelling));
   if (!owner && !c.sym.get_exact(%($spelling)))
     owner = c.sym.get_exact(%("module-private" $spelling));
-  if (!owner || c.module_accessible(c.canonical_path(home_absolute_path(owner.car()))))
+  if (!owner || c.module_accessible(
+    c.canonical_path(home_absolute_path(owner.car()))))
     return;
-  c.report_error(<type>, %"module-private declaration '$spelling' is not accessible",
+  c.report_error(
+    <type>, %"module-private declaration '$spelling' is not accessible",
     origin, %("module: ${owner.car()}"));
 }
 
+/** Qualifies a file-scope module declaration key with its owning prefix. */
 List Compiler.module_declared_key(Compiler c, List context, List key) {
   if (!c.source_module || !c.sym.at_file_scope()) return key;
   if (context && context !== %(typedef)) return key;
@@ -75,7 +90,8 @@ List Compiler.module_declared_key(Compiler c, List context, List key) {
         List prior = c.sym.get_exact(%("declaration-module" $name));
         if (prior == %(${home_portable_path(c.module_owner)}) &&
             !c.sym.get_exact(%("module-owner" $name)))
-          c.report_error(<type>, %"declaration visibility disagrees for '$name'",
+          c.report_error(
+            <type>, %"declaration visibility disagrees for '$name'",
             c.token, NULL);
       }
       return %(${c._module_spelling(name)});
@@ -88,6 +104,7 @@ List Compiler.module_declared_key(Compiler c, List context, List key) {
   return key;
 }
 
+/** Finds a declared key in the current module or its ancestors. */
 List Compiler.module_retry_key(Compiler c, List key) {
   foreach (String owner, c.module_ancestors()) {
     String prefix = c.module_tree.entry(owner).prefix;
@@ -103,6 +120,8 @@ List Compiler.module_retry_key(Compiler c, List key) {
   return NULL;
 }
 
+/** Preserves a complete exact key or resolves its module-private
+    counterpart. */
 List Compiler.module_reference_key(Compiler c, List key) {
   List exact = c.sym.get_exact(key);
   if (exact && exact != %(typedef @{key})) return key;
@@ -110,6 +129,7 @@ List Compiler.module_reference_key(Compiler c, List key) {
   return module_key ? module_key : key;
 }
 
+/** Records declaration ownership and checks public signature visibility. */
 void Compiler.record_module_declaration(Compiler c, List syntax) {
   if (c.source_module && !c.module_owner)
     c.report_error(<parse>, "module declaration has no owning module", c.token, NULL);
@@ -149,9 +169,11 @@ static void Compiler._record_module_binding(
         ? c.sym.get_exact(%("module-owner" ${private_key.last()})) : NULL;
       if (owner == %(${home_portable_path(c.module_owner)}) &&
           private_key.last() != name)
-        c.report_error(<type>, %"declaration visibility disagrees for '$name'",
+        c.report_error(
+          <type>, %"declaration visibility disagrees for '$name'",
           c.token, NULL);
-      c.sym.set(%("declaration-module" $name),
+      c.sym.set(
+        %("declaration-module" $name),
         %(${home_portable_path(c.module_owner)}));
     }
     return;
@@ -164,19 +186,21 @@ static void Compiler._check_public_module_type(Compiler c, Var type) {
   if (type is <string>) {
     List owner = c.sym.get_exact(%("module-owner" $type));
     if (owner)
-      c.report_error(<type>, %"public signature uses module-private type '$type'",
+      c.report_error(
+        <type>, %"public signature uses module-private type '$type'",
         c.token, NULL);
   }
   else if (type is <list>)
     foreach (Var child, type.list()) c._check_public_module_type(child);
 }
 
+/** Reports whether a collected declaration row is visible to this unit. */
 int Compiler.module_row_accessible(Compiler c, List key, Map rows) {
   match (key)
     case %((!set ?tag (!or struct union)) ?(String spelling) *): {
       Var layout = rows[%("module-layout" $tag $spelling)];
       if (layout is <list> && !c.module_accessible(
-          c.canonical_path(home_absolute_path(layout.list().car())))) return 0;
+        c.canonical_path(home_absolute_path(layout.list().car())))) return 0;
     }
   String name = NULL;
   match (key) {
@@ -187,9 +211,12 @@ int Compiler.module_row_accessible(Compiler c, List key, Map rows) {
   if (!name) return 1;
   Var record = rows[%("module-owner" $name)];
   if (record is not <list>) return 1;
-  return c.module_accessible(c.canonical_path(home_absolute_path(record.list().car())));
+  return c.module_accessible(
+    c.canonical_path(home_absolute_path(record.list().car())));
 }
 
+/** Parses module membership and installs enrolled members' compile-time
+    effects. */
 List Compiler.parse_module_members(Compiler c) {
   c.next();
   c.expect(<"{">);
@@ -198,7 +225,8 @@ List Compiler.parse_module_members(Compiler c) {
     for (;;) {
       if (c.peek(0) != <lit-char*>)
         c.report_error(<parse>, "expected module member path", c.token, NULL);
-      members.push(String.new_len(c.token.text + 1, c.token.len - 2).unescape());
+      members.push(
+        String.new_len(c.token.text + 1, c.token.len - 2).unescape());
       c.next();
       if (c.test(<"}">)) break;
       c.expect(<,>);
@@ -210,7 +238,8 @@ List Compiler.parse_module_members(Compiler c) {
   if (!c.shallow) {
     Map visited = {};
     Array effects = [];
-    foreach (String path, c.module_tree.entry(c.canonical_path(c.filename)).members)
+    foreach (String path,
+      c.module_tree.entry(c.canonical_path(c.filename)).members)
       c.module_member_effects(path, visited, effects);
     c.install_compile_time_effects(effects.list_free());
   }

@@ -51,7 +51,8 @@ void generate_code(Compiler c, List ast, String dir) {
   String basename = %"${dir.rstrip("/")}/${Path.stem(c.filename)}";
   List outputs = c._generated_code(ast, basename);
   if (c.module_owner)
-    outputs = outputs.append(%(
+    outputs = outputs.append(
+      %(
       "${dir.rstrip("/")}/${module_support_header(c.filename)}" ${outputs.cadr()}));
   String interface = c.source_facts ? NULL : interface_text(c);
   if (interface) outputs = outputs.append(%("$basename.xi" $interface));
@@ -79,7 +80,8 @@ static List Compiler._generated_code(Compiler c, List ast, String basename) {
     %"_x2c_hcache_init_$hash");
   defer bindings.cleanup();
   if (c.module_owner)
-    header = header.append(%((preproc
+    header = header.append(
+      %((preproc
       "void ${module_initializer_entry(c.filename)}(void);")));
   List hcode = c._emit_header(header);
   List ccode = c._emit_source(source, bindings, inline_bodies);
@@ -157,8 +159,9 @@ static List Compiler._source_projection(
     match (node) {
       case %(module-members ?members): {
         foreach (String member, members)
-          source.push(%(preproc "#include \"${module_support_header(
-            Path.join(Path.dirname(c.filename), member))}\""));
+          source.push(
+            %(preproc "#include \"${module_support_header(
+              Path.join(Path.dirname(c.filename), member))}\""));
         continue;
       }
       case %((!or protocol adopt macrodef) *): continue;
@@ -189,8 +192,9 @@ static void Partition.add(Partition &p, Ast node) {
   match (node) {
     case %(module-members ?members):
       foreach (String member, members)
-        p.header.push(%(preproc "#include \"${module_support_header(
-          Path.join(Path.dirname(p.c.filename), member))}\""));
+        p.header.push(
+          %(preproc "#include \"${module_support_header(
+            Path.join(Path.dirname(p.c.filename), member))}\""));
     case %((!or protocol adopt macrodef c-assert) *): return;
     case %(typedef ? (bindings *)): p.add_typedef(node);
     case %(function (!set ?type (*)) ?declarator (!set ?body (block *))):
@@ -861,7 +865,8 @@ static void Init.prepare(Init &i, List source) {
   i.guard = c.sym.reference(%("_init_guard_"), NULL);
   i.shutdown = c._shutdown_registration(source);
   List arms = i.initializer ? _definition_arms(source, i.initializer) : NULL;
-  if (!i.initializer || arms || c.module_owner) i.synthetic = i.synthesize(arms);
+  if (!i.initializer || arms || c.module_owner)
+    i.synthetic = i.synthesize(arms);
   else i.entry = c.sym.reference(%(${i.initializer}), NULL);
   if (c._cache_only()) i.reachable = _cache_reachable(source);
 }
@@ -1646,16 +1651,18 @@ static String Compiler._parameter_name(Compiler c, List binding) {
 */
 void Compiler.dump_definitions(Compiler c, List ast) {
   printf("%s\n", %(unit ${c.filename}).repr());
+  if (c.module_owner)
+    printf("%s\n", %(owners @{c.module_ancestors()}).repr());
   Token tokens = c.tokenizer.tokens, first = tokens;
   while (first.type == <space> || first.type == <preproc>) first++;
   if (first.type == <comment>) printf("%s\n", %(module ${first.text}).repr());
   foreach (List row, c.definition_rows(ast)) match (row) {
-    case %(function *): _print_function(tokens, row);
+    case %(function *): c._print_function(tokens, row);
     case %(typedef *): c._print_type(tokens, row);
   }
 }
 
-static void _print_function(Token tokens, List row) {
+static void Compiler._print_function(Compiler c, Token tokens, List row) {
   match (row)
     case %(function ?name ?display ?type ?names ?line ?doc ?is_static
            ?origin ?declarator ?span): {
@@ -1667,7 +1674,9 @@ static void _print_function(Token tokens, List row) {
       printf(
         "%s\n",
         %(function (name $name) (display $display) (line $line)
-          ${location.cadr()} (static $is_static) (origin $origin)
+          ${location.cadr()} (static $is_static)
+          (module ${!!c.sym.get_exact(%("module-owner" $name))})
+          (origin $origin)
           (doc $doc) (text $text) (type $type) (params $names)).repr());
     }
 }
@@ -1691,7 +1700,9 @@ static void Compiler._print_type(Compiler c, Token tokens, List row) {
         }
       printf(
         "%s\n",
-        %(type (name $name) (kind $kind) @location @privacy (doc $doc)
+        %(type (name $name) (kind $kind) @location @privacy
+          (module ${!!c.sym.get_exact(%("module-owner" $name))})
+          (doc $doc)
           (text $text)).repr());
     }
 }

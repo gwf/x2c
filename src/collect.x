@@ -202,7 +202,8 @@ Map Compiler.collect_symbols(Compiler c, Map globs) {
   if (c.module_owner) {
     Array effects = [];
     foreach (String owner, c.module_tree.ancestors(canonical).reverse())
-      if (owner != canonical) c._replay_include(owner, globs, visited, effects);
+      if (owner != canonical)
+        c._replay_include(owner, globs, visited, effects);
   }
   c._module_preamble(canonical, globs, visited);
   c._walk_file(canonical, c.text, Path.dirname(c.filename), globs, visited);
@@ -353,7 +354,8 @@ static void FileWalk.capture_module_preamble(FileWalk &w, ModuleEntry module) {
   module.preamble_parts = parts.list_free();
   Map boundary = _cache_map();
   boundary[%("source-node" (module-boundary
-    ${home_portable_path(w.path)} ${module.block_start}))] = %(module-boundary);
+    ${home_portable_path(w.path)} ${module.block_start}))] =
+    %(module-boundary);
   w.parts.push(boundary);
 }
 
@@ -451,9 +453,10 @@ static void _shift_tokens(Tokenizer t, int line, int pos) {
   }
 }
 
-/* Each member starts from ancestor prefixes, not from a preceding sibling's
-   mutable macro session. Only recorded visible effects cross this boundary. */
-void Compiler._module_preamble(Compiler c, String path, Map globs, Map active) {
+/** Replays recorded ancestor prefixes into a member's own macro session.
+    Only visible prefix effects cross the boundary between source files. */
+void Compiler._module_preamble(
+  Compiler c, String path, Map globs, Map active) {
   if (!c.module_owner) return;
   List ancestors = c.module_tree.ancestors(path).reverse();
   foreach (String owner, ancestors) {
@@ -480,7 +483,8 @@ void Compiler._module_preamble(Compiler c, String path, Map globs, Map active) {
           c._merge_rows(globs, part);
           c.replay_package_imports(globs, part, NULL);
         }
-        else if (part is <string>) c._replay_include(part, globs, visited, NULL);
+        else if (part is <string>)
+          c._replay_include(part, globs, visited, NULL);
       }
       c.add_translation_dependency(owner);
       continue;
@@ -491,7 +495,8 @@ void Compiler._module_preamble(Compiler c, String path, Map globs, Map active) {
     prefix.configure_module(owner);
     FileWalk walk = {
       .c = prefix, .path = owner, .text = entry.preamble,
-      .dir = Path.dirname(owner), .globs = globs.copy(), .visited = active.copy(),
+      .dir = Path.dirname(owner), .globs = globs.copy(),
+      .visited = active.copy(),
       .parts = [], .definitions = {}, .dependencies = _cache_map(),
       .statics = {}, .hashes = _cache_map(), .unit = 1, .line = 1};
     Tokenizer tokenizer = Tokenizer.new(entry.preamble, <x2c>);
@@ -660,7 +665,8 @@ static void FileWalk.include(FileWalk &w, String target, int angle) {
   if (is_source_file(canonical)) {
     String owner = w.c.module_tree.owner(canonical);
     if (owner && owner != canonical && !w.c.module_accessible(owner))
-      w.c.report_error(<parse>, "implementation member requires its module entry",
+      w.c.report_error(
+        <parse>, "implementation member requires its module entry",
         NULL, %("module:" $owner));
   }
   w.c.add_translation_dependency(canonical);
@@ -825,6 +831,7 @@ String collect_resolve_include(
     sources, dirs, includer_dir, target, angle, covered, NULL);
 }
 
+/** Resolves an include using module search roots and records search facts. */
 String Compiler.resolve_source_include(Compiler c, String target, int angle) {
   FileWalk walk = {
     .c = c, .path = c.canonical_path(c.filename),
@@ -1764,6 +1771,7 @@ static void Compiler._replay_included(
   }
 }
 
+/** Replays a member's exported compile-time effects once per visited file. */
 void Compiler.module_member_effects(
   Compiler c, String path, Map visited, Array effects) =>
   c._replay_included(c.sym.global_symbols(), path, visited, effects, NULL);

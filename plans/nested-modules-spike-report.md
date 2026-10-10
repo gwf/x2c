@@ -53,6 +53,16 @@ command build likewise includes nested compiler objects in its development
 archive and enumerates generated header directories. Its old flat enumeration
 failed in the gate; the focused corrected command build succeeds. Bootstrap
 refresh cleans old generated files before copying the stage tree recursively.
+Definition dumps carry binding visibility and module ancestry. The existing
+documentation tools aggregate public member declarations under their entry,
+retain physical source locations, and omit module-private declarations. The
+external command test builds also enumerate nested generated header directories.
+
+The existing fixture corpus produced 25 changed snapshots after migration.
+Reviewed token comparisons show unchanged syntax except line wrapping and
+transient binding numbers. Candidate output was captured separately before
+those expectations were refreshed. This does not excuse semantic differences.
+
 Public C names are unchanged. Private linkage names are assigned during
 ordinary translation. Bootstrap copying reconnects an absolute quoted include
 only when its resolved target is a copied stage artifact. The replacement is

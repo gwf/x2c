@@ -58,7 +58,8 @@ the generic templates that own published definitions:
   and plain `/*` are never doc comments, so implementation notes stay
   private.
 - In `src/`, non-static callables are future-public unless their names begin
-  with `_` or contain `__`; nonstatic types and types required by public
+  with `_` or contain `__`, and module-private declarations are excluded;
+  nonstatic types and types required by public
   declarations are public. The path-scoped compiler audit requires
   documentation for both. The exact writing standard is in
   CM-5 in `agents/x2c-code-standard.md`.

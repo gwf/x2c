@@ -3,7 +3,8 @@
 
 (declare (static "List") 
  (bindings 
-  (op = (bind (binding 1 "first") ()) (expr ("List") (expr ("List") (cache 17))))))
+  (op = (bind (binding 1 "first") ()) 
+   (expr ("List") (expr ("List") (cache 17))))))
 
 (declare (static "List") 
  (bindings 

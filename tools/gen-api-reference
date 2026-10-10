@@ -140,6 +140,7 @@ static Map _item(List definition, String tier, String label):
   item["method"] = parts.cadr() ? parts.caddr() : name
   item["signature"] = signature
   item["line"] = line
+  item["source"] = definition[4]
   item["tier"] = tier
   item["doc"] = tier ? _api_doc(name, line, doc, tier)
                      : _public_doc(label, name, line, doc)
@@ -156,7 +157,8 @@ static List _declarations(Unit unit):
   Map classes = {}
   foreach Map row in unit["types"].array():
     String text = row["text"]
-    if !row["span"] || row["private"].integer(): continue
+    if !row["span"] || row["private"].integer() ||
+        row["module"].integer(): continue
     if row["name"].str().startswith("x2c_var_abi_"): continue
     if row["kind"] != <class>:
       found.push(row)
@@ -197,6 +199,7 @@ static List _public_surface(Unit unit, int compiler):
     item["kind"] = row["kind"].str()
     item["signature"] = row["text"]
     item["line"] = line
+    item["source"] = row["source"]
     item["doc"] = _public_doc(label, name, line, doc)
     item["summary"] = _first_sentence(doc)
     declarations.push(item)
@@ -388,7 +391,8 @@ static void _entry(Array lines, Map module, Map item, int level):
   _heading(lines, item["name"], level)
   _add(lines, %("" ${%"`${item["signature"]}`"} ""))
   _doc(lines, module, item)
-  _add(lines, %(${%"Source: `${module["path"]}:${item["line"]}`"} ""))
+  String source = item["source"] ? item["source"] : module["path"]
+  _add(lines, %(${%"Source: `$source:${item["line"]}`"} ""))
 
 static List _by_name(Array items) =>
   items.list().sort_by(%!(Map item) => item["name"])

@@ -274,7 +274,8 @@
   (at 91 
    (block 
     (declare ("Var") 
-     (bindings (bind (binding 45 "name") ()) (bind (binding 46 "count") ()))) 
+     (bindings (bind (binding 45 "name") ()) 
+      (bind (binding 46 "count") ()))) 
     (declare ("Map") 
      (bindings 
       (op = (bind (binding 47 "_x2c_macro_object_4") ()) 
@@ -425,7 +426,8 @@
            (call "Var_int" 
             (args (expr ("Var") 
                    (call "Var_convert" 
-                    (args (expr ("Var") (ident (binding 65 "_x2c_macro_item_6"))) 
+                    (args (expr ("Var") 
+                           (ident (binding 65 "_x2c_macro_item_6"))) 
                      (expr ("Symbol") "3453797")))))))))) 
        (stmnt 
         (expr (int) 
@@ -1397,7 +1399,7 @@
                                                                                 
                                                                                 binding 
                                                                                 
-                                                                                37 
+                                                                                88 
                                                                                 
                                                                                 "value_total"))) 
                                                                              (
@@ -1429,7 +1431,7 @@
                                                                                 
                                                                                 binding 
                                                                                 
-                                                                                49 
+                                                                                100 
                                                                                 
                                                                                 "typed_total"))) 
                                                                              (
@@ -1454,7 +1456,8 @@
                                                                              ident 
                                                                              (
                                                                               binding 
-                                                                              68 
+                                                                              
+                                                                              119 
                                                                               
                                                                               "key_bytes"))) 
                                                                            (expr 
@@ -1472,7 +1475,7 @@
                                                                           (ident 
                                                                            (
                                                                             binding 
-                                                                            69 
+                                                                            120 
                                                                             
                                                                             "destructured_total"))) 
                                                                          (expr 
@@ -1488,7 +1491,7 @@
                                                                         (ident 
                                                                          (
                                                                           binding 
-                                                                          82 
+                                                                          132 
                                                                           "converted_total"))) 
                                                                        (expr (
                                                                               int) 
@@ -1500,7 +1503,7 @@
                                                                      (expr (int) 
                                                                       (ident 
                                                                        (binding 
-                                                                        101 
+                                                                        151 
                                                                         "skipped"))) 
                                                                      (expr (int) 
                                                                       (literal 
@@ -1510,7 +1513,7 @@
                                                                    (expr (int) 
                                                                     (ident 
                                                                      (binding 
-                                                                      102 
+                                                                      152 
                                                                       "stopped"))) 
                                                                    (expr (int) 
                                                                     (literal 

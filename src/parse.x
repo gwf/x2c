@@ -597,6 +597,7 @@ int Compiler.meta_form_is_declaration(Compiler c) {
   return marker;
 }
 
+/** Reports whether contextual `module` begins a declaration at the cursor. */
 int Compiler.module_form_is_declaration(Compiler c) {
   if (!c.at_word("module")) return 0;
   Token start = c.token;
@@ -1577,7 +1578,8 @@ static List Compiler._package_aggregate_name(
     if ((c.sym.get_exact(key) || (alias && alias.base_type() == key)) &&
         (!c.sym.field_order(key) ||
         c.sym.get_exact(%("module-layout" $tag $spelling)))) {
-      c.sym.set(%("module-layout" $tag $spelling),
+      c.sym.set(
+        %("module-layout" $tag $spelling),
         %(${home_portable_path(c.module_owner)}));
       c.sym.set(%("module-opaque" $spelling), %(public));
       return name;
@@ -3084,7 +3086,8 @@ static List Compiler._bind_form(
                ${c.source_private} ${c.source_module});
     case %(default ?function) if (unit): return c._bind_default(function);
     case %(declaration-function
-             (declare ?type (bindings ?decl)) ?body ?source *module) if (unit): {
+             (declare ?type (bindings ?decl))
+             ?body ?source *module) if (unit): {
       $let(c.source_module, module ? (int) module.car() : 0)
         return c._bind_collected_function(input, type, decl, body, source);
     }
@@ -3477,7 +3480,8 @@ static List Compiler._collected_function(
           %(source-spelling $binding), source) || source == name) {
           List module_source = c.sym.get_exact(%("module-source" $name));
           String spelling = module_source ? module_source.car() : name;
-          declaration = %(declare $type (bindings (bind $spelling $modifiers)));
+          declaration =
+            %(declare $type (bindings (bind $spelling $modifiers)));
         }
       }
     }

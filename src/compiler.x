@@ -76,6 +76,7 @@ typedef struct Sym *Sym;
 /** Names the slots a rewrite's first lowering watches; see "prepared
     replacements" in macros.x. */
 typedef struct SlotWatch *SlotWatch;
+/** Request-owned source membership and module ancestry discovery. */
 typedef struct ModuleTree *ModuleTree;
 
 /** One syntax the parser is inside, which `x2c_enclosing` answers: a
@@ -1117,7 +1118,8 @@ static List Defaults._forward_rows(Defaults &d, List rows, int &remaining) {
   Array selected = [];
   foreach (List row, rows) {
     match (row)
-      case %(declaration-forward ?child ?parent ?member ?fallback ?privacy *module): {
+      case %(declaration-forward
+               ?child ?parent ?member ?fallback ?privacy *module): {
         List bound = NULL;
         $let(d.c.source_private, privacy)
         $let(d.c.source_module, module ? (int) module.car() : 0)
@@ -1791,7 +1793,8 @@ void Compiler.record_module_initializer(
   if (!c.module_owner || type.is_static()) return;
   String name = binding_identity_spelling(bind.cadr());
   String path = home_portable_path(c.canonical_path(c.filename));
-  c.sym.set(%("native-object-initializer" $name),
+  c.sym.set(
+    %("native-object-initializer" $name),
     %(native-object $name (initializer $path)));
 }
 
@@ -1846,7 +1849,8 @@ void Compiler.merge_module_initializers(Compiler c, List rows) {
 static List Compiler._module_initializer_binding(Compiler c, String spelling) {
   if (!c.sym.get_exact(%($spelling))) return NULL;
   List owner = c.sym.get_exact(%("module-owner" $spelling));
-  if (owner && !c.module_accessible(c.canonical_path(home_absolute_path(owner.car()))))
+  if (owner && !c.module_accessible(
+    c.canonical_path(home_absolute_path(owner.car()))))
     return NULL;
   return c.sym.lookup(%($spelling), NULL);
 }

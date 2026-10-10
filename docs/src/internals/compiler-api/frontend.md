@@ -55,7 +55,7 @@ Source: `src/frontend.x:537`
 Runs the source stages. On either result, the caller must close the
 unit.
 
-Source: `src/frontend.x:90`
+Source: `src/frontend.x:91`
 
 <a id="Frontend.open_reporting"></a>
 #### Frontend.open_reporting
@@ -67,7 +67,7 @@ and parsing print each diagnostic as it is reported; a tokenizing
 failure prints its diagnostics afterward. A failed unit is closed; the
 caller must close a successful one.
 
-Source: `src/frontend.x:98`
+Source: `src/frontend.x:99`
 
 <a id="Frontend.open_session"></a>
 #### Frontend.open_session
@@ -78,7 +78,7 @@ Opens an empty submission unit with the ordinary runtime prelude.
 Preload macro libraries first. The caller must close the unit on either
 result; submissions and inspection results borrow its Context.
 
-Source: `src/frontend.x:112`
+Source: `src/frontend.x:113`
 
 <a id="Frontend.preload_macro_libraries"></a>
 #### Frontend.preload_macro_libraries
@@ -100,7 +100,7 @@ Source: `src/frontend.x:461`
 Tokenizes one input into a fresh unit with its own isolated `Context`.
 The caller must close the unit on either result.
 
-Source: `src/frontend.x:122`
+Source: `src/frontend.x:123`
 
 ### `ParsedUnit`
 
@@ -112,7 +112,7 @@ Source: `src/frontend.x:122`
 Releases the unit after its caller has inspected or exported its
 results.
 
-Source: `src/frontend.x:157`
+Source: `src/frontend.x:158`
 
 <a id="ParsedUnit.collect"></a>
 #### ParsedUnit.collect
@@ -122,7 +122,7 @@ Source: `src/frontend.x:157`
 Collects symbols and retains preprocessor outputs for adapter
 inspection.
 
-Source: `src/frontend.x:128`
+Source: `src/frontend.x:129`
 
 <a id="ParsedUnit.parse"></a>
 #### ParsedUnit.parse
@@ -132,7 +132,7 @@ Source: `src/frontend.x:128`
 Parses a collected unit, retaining both its AST and unsuccessful
 reports.
 
-Source: `src/frontend.x:146`
+Source: `src/frontend.x:147`
 
 ## Public types
 
@@ -148,10 +148,11 @@ Source: `src/frontend.x:146`
 `typedef struct Frontend { CliRequest request; List include_dirs; Toolchain toolchain; FrontendErrorSink preprocessor_errors; } *Frontend`
 
 Borrows a configured request and owns shared native-preprocessor setup.
-Units open sequentially; process caches must outlive the session.
+Nested units close in reverse open order.
+Process caches outlive the session.
 The optional stderr sink runs synchronously; units also retain that text.
 
-Source: `src/frontend.x:23`
+Source: `src/frontend.x:24`
 
 <a id="FrontendErrorSink"></a>
 ### FrontendErrorSink
@@ -171,7 +172,7 @@ Source: `src/frontend.x:17`
 Owns one isolated source lifetime, including unsuccessful diagnostics.
 Results remain borrowed until close; export values that must survive it.
 
-Source: `src/frontend.x:33`
+Source: `src/frontend.x:34`
 
 ## Design notes
 

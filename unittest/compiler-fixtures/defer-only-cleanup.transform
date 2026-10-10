@@ -4,7 +4,8 @@
 (declare (static int) (bindings (bind (binding 1 "observed") ())))
 
 (function (static int) 
- (bind (binding 2 "local_latest") ((fnmod (params (param (void) (bind () ())))))) 
+ (bind (binding 2 "local_latest") 
+  ((fnmod (params (param (void) (bind () ())))))) 
  (block 
   (at 17 
    (declare (int) 

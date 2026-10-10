@@ -109,7 +109,8 @@ commits need not rebuild from their own bootstrap.
   `frontend` (configured source units) -> `meta-project` (project meta
   helper build) and `meta-helper-client` (its calls) -> `compiler`
   (translation state, + `symbols`, its symbol table, and `fields`, which
-  copies named fields) ->
+  copies named fields, `module-access`, which resolves module visibility,
+  and `module-tree`, which discovers explicit source membership) ->
   shared runtime `lib/tokenizer.x` (+ `preprocess`, which reads its
   directives) ->
   `parse` (+ `parse-report-macros`, package and alias diagnostics)/
