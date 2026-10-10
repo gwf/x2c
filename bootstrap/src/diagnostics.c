@@ -548,14 +548,15 @@ static List _compiler_location(Compiler compiler, Token token){
   return Compiler_token_location(compiler, token);
 }
 
+void Compiler_report_problem(Compiler compiler, Symbol code, String message, Token token, List notes);
 #include "error.h"
 
 
 
 
 _Noreturn void Compiler_report_error(Compiler compiler, Symbol code, String message, Token token, List notes){
-  if(! _init_guard_) _file_init_();  report_suspend();  Diagnostics diag = compiler -> diagnostics;  message = String_truth(message) ? message : _112;  List loc = _compiler_location(compiler, token);  Diagnostics_report(diag, code, message, loc, notes);  if(compiler -> recovery_depth > 0){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/diagnostics.x",.function = "Compiler_report_error",.line = 426};  x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(209659067570), Symbol_var(code));  __builtin_unreachable();
+  if(! _init_guard_) _file_init_();  report_suspend();  Compiler_report_problem(compiler, code, message, token, notes);  Diagnostics diag = compiler -> diagnostics;  if(compiler -> recovery_depth > 0){
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/diagnostics.x",.function = "Compiler_report_error",.line = 424};  x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(209659067570), Symbol_var(code));  __builtin_unreachable();
   }
   if(! diag -> printer){
     Var held;  List _x2c_macro_object_2 = Diagnostics_entries(diag);  List _x2c_macro_cursor_2 = _x2c_macro_object_2;  Var _x2c_macro_cursor_output_2;  while(List_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
@@ -564,6 +565,10 @@ _Noreturn void Compiler_report_error(Compiler compiler, Symbol code, String mess
 
   }
   exit(1);
+}
+
+void Compiler_report_problem(Compiler compiler, Symbol code, String message, Token token, List notes){
+  if(! _init_guard_) _file_init_();  message = String_truth(message) ? message : _112;  Diagnostics_report(compiler -> diagnostics, code, message, _compiler_location(compiler, token), notes);
 }
 
 void Compiler_report_warning_at(Compiler compiler, Symbol code, String message, List location, List notes);

@@ -301,9 +301,12 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
 
 void Compiler_report_error(Compiler, Symbol, String, Token, List);
 
-void Compiler_report_meta_error(Compiler c, Var node, Symbol category, String message, Token site, List notes){
+void Compiler_report_problem(Compiler, Symbol, String, Token, List);
+
+void Compiler_report_meta_error(Compiler c, Var node, Symbol category, String message, Token site, List notes, int fatal){
   if(! _init_guard_) _file_init_();
   int origin = _syntax_origin(node);
+  Token token = origin ? NULL : site;
   {
     int * _x2c_macro_address_0 = & c -> origin;
     int _x2c_macro_previous_0 = * _x2c_macro_address_0;
@@ -321,7 +324,11 @@ void Compiler_report_meta_error(Compiler c, Var node, Symbol category, String me
       x2c_cleanup_push(& _x2c_defer_record_0);
       {
         * _x2c_macro_address_0 = origin ? origin : c -> origin;
-        Compiler_report_error(c, category, message, origin ? NULL : site, notes);
+        {
+          if(fatal) Compiler_report_error(c, category, message, token, notes);
+          Compiler_report_problem(c, category, message, token, notes);
+        }
+
       }
       x2c_cleanup_leave(& _x2c_defer_record_0);
     }
@@ -412,7 +419,7 @@ Var Compiler_meta_helper_call(Compiler c, String name, Token site, List argument
     break; } } static MatchCaptureSite _x2c_match_site_1;
     if (x2c_match_site_try_capture(& _x2c_match_site_1, _x2c_match_expr, List_var(_50), &_x2c_match_capture)) {Var message = _x2c_match_values[0];  Var notes = _x2c_match_values[1];  Var node = _x2c_match_values[2];  Var category = _x2c_match_values[3]; {
       Var _x2c_match_value_5 = message;  Var _x2c_match_value_6 = notes; {
-        String message = Var_string(_x2c_match_value_5);  List notes = Var_list(_x2c_match_value_6);  Compiler_report_meta_error(c, node, Var_symbol(category), message, site, notes);
+        String message = Var_string(_x2c_match_value_5);  List notes = Var_list(_x2c_match_value_6);  Compiler_report_meta_error(c, node, Var_symbol(category), message, site, notes, 1);
       }
 
     }

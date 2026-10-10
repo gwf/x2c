@@ -65,6 +65,8 @@ int Code_is_static_pattern(Code pattern);
 
 Code Code_call_in_order(Code member, List arguments, Type type);
 
+Code Code_promoted(Code value);
+
 Code Code_lowered(Code code);
 
 Code Code_register_rewrite(Code function, List pattern, List holes);
@@ -142,6 +144,8 @@ void x2c_place(List where, Code code);
 void x2c_diagnostic_fail(String message, List notes);
 
 void x2c_diagnostic_fail_at(Var node, Symbol category, String message, List notes);
+
+void x2c_diagnostic_error_at(Var node, Symbol category, String message, List notes);
 
 void x2c_diagnostic_warn(String message, List notes);
 

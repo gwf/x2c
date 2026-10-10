@@ -1873,10 +1873,9 @@ static void _auto_fail(Symbol category, String message, List notes){
   x2c_diagnostic_fail_at(List_var(x2c_enclosing(43159332400040)), category, message, notes);
 }
 
-List builtin_foreach_collection(List);
 List builtin_foreach_bindings(List);
 static List _foreach_expand(List declaration, List collection, List body, Var iterator, Var item, Var pair, Var object, Var cursor){
-  collection = builtin_foreach_collection(collection);  List targets = builtin_foreach_bindings(declaration);  List type = x2c_syntax_type(collection);  int direct = List_equal(type, _379);  List converter = direct ? NULL : _converter(type);  List spec = direct ? NULL : _cursor_spec(type);  if(List_len(targets) != 1 && List_len(targets) != 2) x2c_diagnostic_fail(_380, NULL);  if(! direct && ! List_truth(converter)){
+  collection = Code_promoted(((Code) collection));  List targets = builtin_foreach_bindings(declaration);  List type = x2c_syntax_type(collection);  int direct = List_equal(type, _379);  List converter = direct ? NULL : _converter(type);  List spec = direct ? NULL : _cursor_spec(type);  if(List_len(targets) != 1 && List_len(targets) != 2) x2c_diagnostic_fail(_380, NULL);  if(! direct && ! List_truth(converter)){
     Var printable = List_var(type);  x2c_diagnostic_fail(String_add(String_add(_381, Var_repr(printable)), _382), _385);
   }
   Foreach f ={

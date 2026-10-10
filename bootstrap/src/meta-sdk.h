@@ -60,6 +60,8 @@ String Code_format(Code value);
 
 int Code_is_static_pattern(Code pattern);
 
+Code Code_promoted(Code value);
+
 Code Code_register_rewrite(Code function, List pattern, List holes);
 
 Code Code_register_after_initialization(Code c, Macro shape, List holes);
@@ -132,6 +134,8 @@ void x2c_diagnostic_fail(String message, List notes);
 
 void x2c_diagnostic_fail_at(Var node, Symbol category, String message, List notes);
 
+void x2c_diagnostic_error_at(Var node, Symbol category, String message, List notes);
+
 void x2c_diagnostic_warn(String message, List notes);
 
 Code x2c_enclosing(Symbol what);
@@ -143,8 +147,6 @@ List meta_type_description(Var value);
 List meta_source_description(Var value);
 
 List builtin_foreach_complete(List expression);
-
-List builtin_foreach_collection(List expression);
 
 _Noreturn void MetaContext_reject(String message, List notes);
 
