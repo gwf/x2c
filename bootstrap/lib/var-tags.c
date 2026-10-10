@@ -1484,7 +1484,7 @@ List _tag_numeric_names(void){
 
 Symbol Var_tag(Var);
 
-List x2c_literal_int(int);
+List Macro_typed(List, Var);
 
 List _tag_bits_expr(List row){
   if(! _init_guard_) _file_init_();
@@ -1493,7 +1493,8 @@ List _tag_bits_expr(List row){
     Type type = Var_list(bits);
     return cons(_1078, cons(_1079, cons(List_var(cons(_1080, cons(_1168, cons(List_var(cons(_1169, cons(_1170, cons(List_var(cons(_1080, cons(_1174, cons(List_var(cons(_1175, cons(List_var(cons(_1176, cons(List_var(cons(_1177, cons(List_var(cons(List_var(cons(_1083, cons(_1184, cons(_1165, cons(List_var(type), NULL))))), NULL)), _1194))), NULL))), NULL))), NULL)))), _1209)))), NULL)))), NULL)));
   }
-  return x2c_literal_int(Var_int(Var_convert(bits, 3453797)));
+  int width = Var_int(Var_convert(bits, 3453797));
+  return Macro_typed(_1101, int_var(width));
 }
 
 List _tag_numeric_row(List row){
@@ -1608,17 +1609,17 @@ Map _tag_sibling_counts(List rows){
   return counts;
 }
 
-List x2c_literal_symbol(Symbol);
-
 Var Map_getindex(Map, Var);
 
 Array Array_update_n(Array, unsigned, ...);
 
 List _tag_row_entry(List row, Map counts){
   if(! _init_guard_) _file_init_();
+  Symbol tag = Var_symbol(List_getindex(row, 0));
+  int top = _tag_top(row), mask = _tag_group_mask(Var_int(Var_convert(Map_getindex(counts, int_var(top)), 3453797))), bottom = _tag_bottom(row);
   return({
-    Var _x2c_literal_part_17 = List_var(x2c_literal_symbol(Var_symbol(List_getindex(row, 0))));  Var _x2c_literal_part_18 = List_var(_tag_list(Array_list(({
-      Var _x2c_literal_part_14 = List_var(x2c_literal_int(_tag_top(row)));  Var _x2c_literal_part_15 = List_var(x2c_literal_int(_tag_group_mask(Var_int(Var_convert(Map_getindex(counts, int_var(_tag_top(row))), 3453797)))));  Var _x2c_literal_part_16 = List_var(x2c_literal_int(_tag_bottom(row)));  Array_update_n(Array_new(), 3, _x2c_literal_part_14, _x2c_literal_part_15, _x2c_literal_part_16);
+    Var _x2c_literal_part_17 = List_var(Macro_typed(_1116, Symbol_var(tag)));  Var _x2c_literal_part_18 = List_var(_tag_list(Array_list(({
+      Var _x2c_literal_part_14 = List_var(Macro_typed(_1101, int_var(top)));  Var _x2c_literal_part_15 = List_var(Macro_typed(_1101, int_var(mask)));  Var _x2c_literal_part_16 = List_var(Macro_typed(_1101, int_var(bottom)));  Array_update_n(Array_new(), 3, _x2c_literal_part_14, _x2c_literal_part_15, _x2c_literal_part_16);
     }
     ))));  cons(_1244, cons(_x2c_literal_part_17, cons(_x2c_literal_part_18, NULL)));
   }

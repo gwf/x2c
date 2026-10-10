@@ -23,51 +23,13 @@ typedef List TypeInfo;
 
 typedef List Source;
 
-List x2c_ident(String spelling);
-
-List x2c_literal_string(String value);
-
-List x2c_literal_int(int value);
-
-List x2c_literal_symbol(Symbol value);
-
-List x2c_expr_ident(List name);
-
-List x2c_expr_index(List base, List subscript);
-
-List x2c_expr_call(List callee, List arguments);
-
-List x2c_expr_composite(List items);
-
-List x2c_stmnt_make(List expression);
-
-List x2c_stmnt_return(List expression);
-
-List x2c_block_make(List items);
-
-String x2c_source_text(Var syntax);
-
 Type Code_type(Code value);
 
 Var Code_value(Code code);
 
-int Code_exits(Code statement);
-
-Code Code_convert(Code value, Type target);
-
-String Code_format(Code value);
-
-int Code_is_static_pattern(Code pattern);
-
-Code Code_call_in_order(Code member, List arguments, Type type);
-
-Code Code_promoted(Code value);
-
-Code Code_lowered(Code code);
+String Code_source_text(Var syntax);
 
 String Code_binding_spelling(Var syntax);
-
-String Code_source_text(Var syntax);
 
 String Code_name(Code function);
 
@@ -76,6 +38,20 @@ Code Code_parameter(Code function, String name);
 List Code_body(Code function);
 
 List Code_arguments(Code parameters);
+
+int Code_exits(Code statement);
+
+String Code_format(Code value);
+
+int Code_is_static_pattern(Code pattern);
+
+Code Code_convert(Code value, Type target);
+
+Code Code_promoted(Code value);
+
+Code Code_call_in_order(Code member, List arguments, Type type);
+
+Code Code_lowered(Code code);
 
 Code Code_register_rewrite(Code function, List pattern, List holes);
 
@@ -87,29 +63,11 @@ Type Type_numeric(Type type);
 
 int Type_is_text(Type type);
 
-Code Type_protocol_member(Type type, String name);
-
-Code Type_getter(Type type);
-
-String Type_update_helper(Type type);
-
-Type Type_aggregate(Type type);
-
-List Type_marked_fields(Type aggregate, Symbol mark);
-
-List Type_resolve_member(Type type, String name, int call);
-
-List Type_fields(Type type);
-
-List Type_layout(Type type);
-
-List Type_parts(Type type);
+int Type_is_value(Type type);
 
 Type Type_resolve(Type type);
 
-List Type_members(Type type);
-
-int Type_is_value(Type type);
+List Type_parts(Type type);
 
 Type Type_element(Type type);
 
@@ -117,17 +75,29 @@ List Type_parameters(Type type);
 
 Type Type_return_type(Type type);
 
+Type Type_aggregate(Type type);
+
+List Type_fields(Type type);
+
+List Type_layout(Type type);
+
+List Type_marked_fields(Type aggregate, Symbol mark);
+
+List Type_members(Type type);
+
+List Type_resolve_member(Type type, String name, int call);
+
+Code Type_protocol_member(Type type, String name);
+
+Code Type_getter(Type type);
+
+String Type_update_helper(Type type);
+
 Symbol Type_tag_name(String name);
 
 String Type_reverse_name(String base, String participant);
 
-List x2c_function_body(List function);
-
-List x2c_parameters_arguments(List value);
-
-List x2c_type_parts(List value);
-
-List x2c_type_resolve(List value);
+List x2c_ident(String spelling);
 
 String x2c_invocation_file(void);
 

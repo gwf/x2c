@@ -76,12 +76,6 @@ List Type_parameters(Type type);
 
 Type Type_return_type(Type type);
 
-List x2c_type_parts(List value);
-
-List x2c_type_resolve(List value);
-
-String x2c_source_text(Var value);
-
 String Type_reverse_name(String base, String participant);
 
 Type Type_resolve(Type type);

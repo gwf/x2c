@@ -38,11 +38,11 @@ ParsedUnit;
 #include "collect.h"
 #include "deps.h"
 #include "utils.h"
-static List _76, _75, _71, _70, _68, _66, _62, _61, _60, _59, _39, _38, _32, _31, _30, _21, _20, _13;
+static List _64, _63, _59, _58, _56, _54, _39, _38, _32, _31, _30, _21, _20, _13;
 
-static String _73, _64, _57, _55, _53, _51, _50, _49, _48, _47, _46, _45, _44, _42, _41, _40, _36, _34, _33, _28, _26, _24, _23, _17, _16, _15, _14, _11, _10, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _61, _52, _50, _49, _48, _47, _46, _45, _44, _42, _41, _40, _36, _34, _33, _28, _26, _24, _23, _17, _16, _15, _14, _11, _10, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
-static Var _74, _72, _69, _67, _65, _63, _58, _56, _54, _52, _43, _37, _35, _29, _27, _25, _22, _19, _18, _12, _9;
+static Var _62, _60, _57, _55, _53, _51, _43, _37, _35, _29, _27, _25, _22, _19, _18, _12, _9;
 
 static int _init_guard_ = 0;
 
@@ -96,8 +96,6 @@ static void _share_session(Compiler cpp, Compiler c);
 
 static int _preload_meta_surface(Frontend frontend, Lisp shared);
 
-static void _declare_builders(Compiler c, Lisp shared);
-
 typedef struct _x2c_defer_env_0{
   const void * _x2c_defer_capture_0;
   const void * _x2c_defer_capture_1;
@@ -132,7 +130,7 @@ static Func _x2c_func_handle_0;
 
 
 
-_x2c_initializer_choice_1A2A7247_0((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _76)))
+_x2c_initializer_choice_1A2A7247_0((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _64)))
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -188,32 +186,20 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _48 = String_new("x2c_");
   _49 = String_new("Code_");
   _50 = String_new("Type_");
-  _51 = String_new("x2c_expr_ident");
-  _52 = String_var(_51);
-  _53 = String_new("x2c_expr_index");
-  _54 = String_var(_53);
-  _55 = String_new("x2c_expr_call");
-  _56 = String_var(_55);
-  _57 = String_new("x2c_expr_cast");
-  _58 = String_var(_57);
-  _59 = cons(_58, NULL);
-  _60 = cons(_56, _59);
-  _61 = cons(_54, _60);
-  _62 = cons(_52, _61);
-  _63 = Symbol_var(437126);
-  _64 = String_new("String");
-  _65 = String_var(_64);
-  _66 = cons(_65, NULL);
-  _67 = List_var(_66);
-  _68 = cons(_67, NULL);
-  _69 = List_var(_68);
-  _70 = cons(_69, NULL);
-  _71 = cons(_63, _70);
-  _72 = List_var(_71);
-  _73 = String_new("Var");
-  _74 = String_var(_73);
-  _75 = cons(_74, NULL);
-  _76 = cons(_72, _75);
+  _51 = Symbol_var(437126);
+  _52 = String_new("String");
+  _53 = String_var(_52);
+  _54 = cons(_53, NULL);
+  _55 = List_var(_54);
+  _56 = cons(_55, NULL);
+  _57 = List_var(_56);
+  _58 = cons(_57, NULL);
+  _59 = cons(_51, _58);
+  _60 = List_var(_59);
+  _61 = String_new("Var");
+  _62 = String_var(_61);
+  _63 = cons(_62, NULL);
+  _64 = cons(_60, _63);
   _x2c_static_initialize_0();
 }
 
@@ -785,7 +771,6 @@ static int _preload_meta_surface(Frontend frontend, Lisp shared){
     ;
     x2c_cleanup_push(& _x2c_defer_record_2);
     {
-      _declare_builders(c, shared);
       if(started) Compiler_own_diagnostics(c);
       else{
         Var entry;
@@ -834,26 +819,6 @@ static int _preload_meta_surface(Frontend frontend, Lisp shared){
 
     }
     x2c_cleanup_leave(& _x2c_defer_record_2);
-  }
-
-}
-
-static void _declare_builders(Compiler c, Lisp shared){
-  List names = _62;
-  {
-    String name;
-    List _x2c_macro_object_7 = names;
-    List _x2c_macro_cursor_7 = _x2c_macro_object_7;
-    Var _x2c_macro_cursor_output_7;
-    while(List_try_next(_x2c_macro_object_7, &(_x2c_macro_cursor_7), &(_x2c_macro_cursor_output_7))){
-      name = Var_string(_x2c_macro_cursor_output_7);
-      {
-        Lisp_set_global(shared, name, List_var(NULL));
-        Map_setindex(c -> meta_comptime, String_var(name), int_var(1));
-      }
-
-    }
-
   }
 
 }

@@ -8,7 +8,6 @@
 #include "x2c.h"
 #include "common.h"
 #include "list-selectors.h"
-#include "meta.h"
 #include "native-scalar-types.h"
 #include "rewrite.h"
 #include "system-macros.h"
@@ -24,16 +23,6 @@
 #include "fields.h"
 #include "grammar.h"
 #include "operator-ledger.h"
-List x2c_expr_field(List receiver, String name);
-
-List x2c_expr_cast(List type, List expression);
-
-List x2c_decl_make(List type, Var name, List initializer);
-
-List x2c_param_make(List type, Var name);
-
-List x2c_type_members(List type);
-
 Code register_rewrite(Code function, Code pattern, List holes);
 
 List _dedent_expand(List node);

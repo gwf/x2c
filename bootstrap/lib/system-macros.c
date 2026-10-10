@@ -177,8 +177,8 @@ List _cases_split(List items, int labelled){
 
 List _cases_switch(List condition, List body){
   if(! _init_guard_) _file_init_();  List selected =({
-    List _x2c_hole_0 = _cases_split(List_cdr(body), 0);  cons(_47, cons(_48, cons(List_var(cons(_49, cons(List_var(({
-      Var _x2c_literal_part_6 = List_var(cons(_51, cons(_66, cons(_67, cons(List_var(condition), NULL)))));  Var _x2c_literal_part_7 = List_var(cons(_45, cons(List_var(cons(_51, cons(_78, cons(_79, cons(List_var(_x2c_hole_0), NULL))))), NULL)));  cons(_80, cons(_x2c_literal_part_6, cons(_x2c_literal_part_7, NULL)));
+    List _x2c_hole_1 = _cases_split(List_cdr(body), 0);  cons(_47, cons(_48, cons(List_var(cons(_49, cons(List_var(({
+      Var _x2c_literal_part_6 = List_var(cons(_51, cons(_66, cons(_67, cons(List_var(condition), NULL)))));  Var _x2c_literal_part_7 = List_var(cons(_45, cons(List_var(cons(_51, cons(_78, cons(_79, cons(List_var(_x2c_hole_1), NULL))))), NULL)));  cons(_80, cons(_x2c_literal_part_6, cons(_x2c_literal_part_7, NULL)));
     }
     )), NULL))), NULL)));
   }
