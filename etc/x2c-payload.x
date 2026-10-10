@@ -74,6 +74,7 @@ static void copy_support(Path destination) {
     ("lib" ("*.x") ("lib" "include/x2c"))
     ("src" ("component-access.x" "component-try.x" "component-delegate.x"
             "component-literals.x" "component-printf.x"
+            "component-operators.x"
             "grammar.x") ("src"))
     ("builds/0/lib" ("*.h") ("include/x2c"))
     ("etc" ("*.xlisp" "*.x") ("etc"))
