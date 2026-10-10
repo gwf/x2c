@@ -3723,7 +3723,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_6(void){
   _3264 = String_new("23ff0783ec30f4ec");
   _3265 = String_var(_3264);
   _3266 = cons(_3265, _2391);
-  _3267 = String_new("0fdc2b92");
+  _3267 = String_new("3ad11741");
   _3268 = String_var(_3267);
   _3269 = String_new("24d203b3");
   _3270 = String_var(_3269);
