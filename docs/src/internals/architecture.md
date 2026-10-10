@@ -498,8 +498,9 @@ status per fixture, so a change in any phase shows up as a diff.
 
 The modules under `src/` divide ownership as follows:
 
-- `src/component-access.x` -- builtin Array/Map mutation policies registered
-  through ordinary macro patterns and quotations;
+- `src/component-access.x` -- bracket access policy registered through
+  ordinary macro patterns and quotations: Array/Map mutation and any other
+  protocol participant's read, store, and update;
 - `src/component-try.x` -- the try, catch, and finally lowering and its
   templates, registered as a statement rewrite;
 - `src/component-delegate.x` -- the delegate field search, registered as a
@@ -509,8 +510,7 @@ The modules under `src/` divide ownership as follows:
 - `src/component-printf.x` -- Var values in printf-family formats,
   registered as a call rewrite for each family member;
 - `src/component-operators.x` -- the dynamic `Var` operators, compound
-  assignments, and increments, and the bracket read, store, and update of a
-  protocol participant that no collection rule took;
+  assignments, and increments;
 - `src/operator-ledger.x` -- operator precedence, compound assignment,
   and protocol-member mappings from one compile-time ledger;
 - `src/cli.x`, `src/main.x` -- option metadata and parsing, dispatch, logging,
@@ -721,9 +721,13 @@ same phase run twice has to produce the same bytes.
 
 ### Builtin components
 
-`src/component-access.x` registers Array and Map mutations through ordinary
-macro patterns and quotations. `lib/rewrite.x` supplies the decorator. Binding,
-index admission, evaluation order, and cleanup remain compiler responsibilities.
+`src/component-access.x` registers bracket reads, stores, and updates
+through ordinary macro patterns and quotations. `lib/rewrite.x` supplies the
+decorator. Array and Map mutations call their typed helpers; any other
+protocol participant calls its getter, `setindex`, `updateindex`, or
+`postfixindex` member through `Code.call_in_order`, which evaluates each
+operand once, in order. Binding, index admission, evaluation order, and
+cleanup remain compiler responsibilities.
 
 `src/component-try.x` registers `try` through the same decorator, on the
 statement family keyed by the `try` head. Its translator answers a landing
@@ -761,17 +765,13 @@ protocol operators resolved, and normalizes the replacement as it would its
 own lowering. A binary operator returns a lowered `Var.binary` call, so an
 operator chain does not rebind its remaining terms at each level; an update
 returns the lowered call of its storage's update helper with the target's
-address, the form the cleanup walk recognizes as a write. The same component
-adds rules after `src/component-access.x` for the bracket read, store, and
-update of any protocol participant; they call the getter, `setindex`,
-`updateindex`, or `postfixindex` member through `Code.call_in_order`, which
-evaluates each operand once, in order. Truthiness stays a conversion the
-transform applies at condition positions, and slices, comparisons, and a
-participant's direct compound update remain in the transform. When a rewrite
-lowers its replacement, the source expressions the replacement holds lower
-outside the active rule, so a store nested in another store's value applies
-the same rule again. A rule whose pattern was derived without the subject's
-bindings matches without collecting them.
+address, the form the cleanup walk recognizes as a write. Truthiness stays a
+conversion the transform applies at condition positions, and slices,
+comparisons, and a participant's direct compound update remain in the
+transform. When a rewrite lowers its replacement, the source expressions the
+replacement holds lower outside the active rule, so a store nested in
+another store's value applies the same rule again. A rule whose pattern was
+derived without the subject's bindings matches without collecting them.
 
 The components and `src/grammar.x`, whose source forms they recognize, are
 compiler prelude sources.

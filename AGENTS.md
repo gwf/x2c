@@ -120,13 +120,12 @@ commits need not rebuild from their own bootstrap.
   loads native modules, `meta-group`, which emits a unit's meta group,
   `stage`, which carries values across the compile-time boundary, and
   `builtins` and `linked-meta`, the compile-time code compiled into the
-  compiler, with `component-access` supplying collection mutation policy,
+  compiler, with `component-access` supplying bracket access policy,
   `component-try` lowering try, catch, and finally,
   `component-delegate` searching delegate fields,
   `component-literals` building Array and Map literals,
   `component-printf` converting Var values in printf-family formats, and
-  `component-operators` lowering dynamic operators and participant
-  indexing)/
+  `component-operators` lowering dynamic operators)/
   `literals` (+ `lambdas`) -> `ast` (+ `ast-rewrite`, AST traversal and
   rewriting, and `grammar`, source forms used by lowering) ->
   `type` (+ `type-ledger`)/`protocol`
