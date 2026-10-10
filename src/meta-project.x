@@ -77,6 +77,10 @@ void Frontend.prepare_meta(Frontend f, List inputs) {
     .frontend = f, .owners = [],
     .packages = {}, .deps = {}, .before = {}, .groups = [], .built = [],
     .failures = [], .objects = []};
+  if (_support_unit(inputs)) {
+    Compiler.use_meta_helper(NULL, NULL, NULL);
+    return;
+  }
   h.scan(inputs);
   String include = NULL, cc = Compiler.meta_cc(include);
   String root = script_cache_root(), stamp = build_module_stamp();
@@ -92,6 +96,16 @@ void Frontend.prepare_meta(Frontend f, List inputs) {
   h.identity = h.identify(stamp, compiler);
   h.directory = _directory(root, h.identity, h.owners);
   h.use(h.manifest());
+}
+
+/* Whether `inputs` is the helper's own loop unit, which `Helper.support`
+   translates in the cache. It calls no project meta code, and a helper
+   built for it would wait on the translation that builds it, as one would
+   when an edited `lib/meta.x` it includes leaves the linked copies stale. */
+static int _support_unit(List inputs) {
+  if (inputs.len() != 1) return 0;
+  String root = script_cache_root();
+  return root && Path.absolute(inputs.car()).startswith(%"$root/meta/support-");
 }
 
 /* The manifest of the helper in the build directory: the one a previous
