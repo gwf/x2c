@@ -367,7 +367,7 @@ return 0;
 String Compiler_token_source(Compiler, Token, int *);
 void Compiler_report_warning(Compiler, Symbol, String, Token, List);
 Var Compiler_meta_helper_call(Compiler c, String name, Token site, List arguments, String provider){
-  if(! _init_guard_) _file_init_();  String file = String_truth(provider) ? real_path(home_absolute_path(provider)) : real_path(Compiler_token_source(c, site, NULL));  Call call ={
+  if(! _init_guard_) _file_init_();  if(c -> shallow) c -> collection_native = 1;  String file = String_truth(provider) ? real_path(home_absolute_path(provider)) : real_path(Compiler_token_source(c, site, NULL));  Call call ={
     .compiler = c, .name = name, .site = site, .table = _table_of(file, helper_table)
   }
   ;  Call_check(&(call));  Call_set_deadline(&(call));  if(! _helper_start()) Call_refuse(&(call), _14);  Call_send(&(call), arguments);  for(; ; ){

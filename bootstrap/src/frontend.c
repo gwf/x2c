@@ -433,7 +433,7 @@ static int _start(Frontend frontend, String filename, ParsedUnit * unit, Context
       if(! String_truth(filename)) _tokenize_session(frontend, c, source);
       else{
         c -> package_dirs = CliRequest_package_roots(frontend -> request);
-        Compiler_configure_package(c, frontend -> request -> package_dirs, filename);
+        Compiler_configure_package(c, c -> package_source_dirs, filename);
         _tokenize_input(frontend, &((* unit)), filename);
         c -> inherited_lisp = Compiler_inherits_import(Path_absolute(filename));
         Compiler_begin_meta_unit(c -> filename);
@@ -496,6 +496,7 @@ static Compiler _begin_unit(Frontend frontend, ParsedUnit * unit, Context contex
   c -> diagnostics -> limit = request -> max_errors;
   c -> source_map = request -> source_map;
   c -> sources = request -> sources;
+  c -> package_source_dirs = request -> package_dirs;
   c -> source_facts = request -> source_facts;
   c -> source_primary = 1;
   if(c -> source_facts){

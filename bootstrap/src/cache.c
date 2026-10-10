@@ -63,8 +63,6 @@ static inline int _is_composite(List value);
 
 static List _assignment(List binding, List type, List rhs);
 
-static List Compiler__zero_initializer(Compiler c, List value);
-
 static List Compiler__array_block(Compiler c, List target, Type array, List items);
 
 static List Compiler__array_row(Compiler c, List target, List original, List cases);
@@ -838,6 +836,7 @@ static List Type_list(Type);
 Type Type_canonicalize(Type);
 Type Sym_resolve_key(Sym, Type);
 int Type_is_array(Type);
+List Compiler_zero_initializer(Compiler c, List value);
 static List Compiler__defer_binding(Compiler c, List decltype, Ast bound, StaticQueue * q){
 
   {
@@ -860,7 +859,7 @@ case 992: ;  static MatchCaptureSite _x2c_match_site_6;  if (x2c_match_site_try_
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 7656885669130: ;  static MatchCaptureSite _x2c_match_site_5;  if (x2c_match_site_try_capture(& _x2c_match_site_5, _x2c_match_expr, List_var(_206), &_x2c_match_capture)) {List items = Var_list(_x2c_match_values[0]); {
-      List target = Macro_typed(Type_list(declared), name);  List assign = Compiler__array_block(c, target, resolved, items);  List binding = StaticQueue_record(&((* q)), Var_list(name), Var_list(mods), assign);  List zero = Compiler__zero_initializer(c, Var_list(value));  return({
+      List target = Macro_typed(Type_list(declared), name);  List assign = Compiler__array_block(c, target, resolved, items);  List binding = StaticQueue_record(&((* q)), Var_list(name), Var_list(mods), assign);  List zero = Compiler_zero_initializer(c, Var_list(value));  return({
         Var _x2c_literal_part_9 = List_var(binding);  Var _x2c_literal_part_10 = List_var(cons(_78, cons(type, cons(List_var(zero), NULL))));  cons(_94, cons(_95, cons(_x2c_literal_part_9, cons(_x2c_literal_part_10, NULL))));
       }
       );
@@ -931,8 +930,8 @@ static List _assignment(List binding, List type, List rhs){
 List Ast_initializer_cases(Ast, List *);
 static Type Var_type(Var);
 int Type_is_aggregate(Type);
-static List Compiler__zero_initializer(Compiler c, List value){
-  List zero = _228;
+List Compiler_zero_initializer(Compiler c, List value){
+  if(! _init_guard_) _file_init_();  List zero = _228;
   {
     List _x2c_match_expr = value;
     Var _x2c_match_values[3];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 3 };
@@ -941,7 +940,7 @@ static List Compiler__zero_initializer(Compiler c, List value){
     List header = NULL;  List cases = Ast_initializer_cases(Var_list(body), &(header));  Array zeroed = Array_new(); {
       List choice;  List _x2c_macro_object_4 = cases;  List _x2c_macro_cursor_4 = _x2c_macro_object_4;  Var _x2c_macro_cursor_output_3;  while(List_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_3))){
         choice = Var_list(_x2c_macro_cursor_output_3); {
-          List _x2c_destructure_0 = choice;  List condition = Var_list(List_getindex(_x2c_destructure_0, 0));  List path = Var_list(List_getindex(_x2c_destructure_0, 1));  Type destination = Var_type(List_getindex(_x2c_destructure_0, 2));  List input = Var_list(List_getindex(_x2c_destructure_0, 3));  List zero = Compiler__zero_initializer(c, input);
+          List _x2c_destructure_0 = choice;  List condition = Var_list(List_getindex(_x2c_destructure_0, 0));  List path = Var_list(List_getindex(_x2c_destructure_0, 1));  Type destination = Var_type(List_getindex(_x2c_destructure_0, 2));  List input = Var_list(List_getindex(_x2c_destructure_0, 3));  List zero = Compiler_zero_initializer(c, input);
   {
     List _x2c_match_expr = zero;
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
@@ -965,7 +964,7 @@ Array_push(zeroed, List_var(cons(List_var(condition), cons(List_var(path), cons(
 break;
 }
 static MatchCaptureSite _x2c_match_site_10;  if (x2c_match_site_try_capture(& _x2c_match_site_10, _x2c_match_expr, List_var(_254), &_x2c_match_capture)) {Var type = _x2c_match_values[0];  Var inner = _x2c_match_values[1];  return({
-  Var _x2c_literal_part_24 = type;  Var _x2c_literal_part_25 = List_var(Compiler__zero_initializer(c, Var_list(inner)));  cons(_78, cons(_x2c_literal_part_24, cons(_x2c_literal_part_25, NULL)));
+  Var _x2c_literal_part_24 = type;  Var _x2c_literal_part_25 = List_var(Compiler_zero_initializer(c, Var_list(inner)));  cons(_78, cons(_x2c_literal_part_24, cons(_x2c_literal_part_25, NULL)));
 }
 );  break;
 }
@@ -980,7 +979,7 @@ break;
 case 7656885669130: ;  static MatchCaptureSite _x2c_match_site_12;  if (x2c_match_site_try_capture(& _x2c_match_site_12, _x2c_match_expr, List_var(_206), &_x2c_match_capture)) {List items = Var_list(_x2c_match_values[0]); {
   Array zeroed = Array_new(); {
     List item;  List _x2c_macro_object_5 = items;  List _x2c_macro_cursor_5 = _x2c_macro_object_5;  Var _x2c_macro_cursor_output_4;  while(List_try_next(_x2c_macro_object_5, &(_x2c_macro_cursor_5), &(_x2c_macro_cursor_output_4))){
-      item = Var_list(_x2c_macro_cursor_output_4);  Array_push(zeroed, List_var(Compiler__zero_initializer(c, item)));
+      item = Var_list(_x2c_macro_cursor_output_4);  Array_push(zeroed, List_var(Compiler_zero_initializer(c, item)));
     }
 
   }
@@ -989,7 +988,7 @@ case 7656885669130: ;  static MatchCaptureSite _x2c_match_site_12;  if (x2c_matc
 break;
 }
 default: ;  static MatchCaptureSite _x2c_match_site_13;  if (x2c_match_site_try_capture(& _x2c_match_site_13, _x2c_match_expr, List_var(_274), &_x2c_match_capture)) {Var tag = _x2c_match_values[0];  Var key = _x2c_match_values[1];  Var inner = _x2c_match_values[2];  return({
-  Var _x2c_literal_part_28 = tag;  Var _x2c_literal_part_29 = key;  Var _x2c_literal_part_30 = List_var(Compiler__zero_initializer(c, Var_list(inner)));  cons(_x2c_literal_part_28, cons(_x2c_literal_part_29, cons(_x2c_literal_part_30, NULL)));
+  Var _x2c_literal_part_28 = tag;  Var _x2c_literal_part_29 = key;  Var _x2c_literal_part_30 = List_var(Compiler_zero_initializer(c, Var_list(inner)));  cons(_x2c_literal_part_28, cons(_x2c_literal_part_29, cons(_x2c_literal_part_30, NULL)));
 }
 );  break;
 }

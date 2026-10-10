@@ -1185,7 +1185,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_1(void){
   _810 = cons(_808, _809);
   _811 = List_var(_810);
   _812 = Symbol_var(1133019155420);
-  _813 = int_var(28325);
+  _813 = int_var(28391);
   _814 = cons(_813, NULL);
   _815 = cons(_812, _814);
   _816 = List_var(_815);
@@ -1909,6 +1909,7 @@ return(void *) _x2c_macro_rewritten_1 ? Array_list_free(_x2c_macro_rewritten_1) 
 }
 
 List Compiler_rewrite(Compiler, Symbol, Var, List, AstPos, Type, Token);
+Ast Compiler_normalize(Compiler, Ast);
 static List Compiler__landing_form(Compiler c, List node, Map runtime){
   List form = Compiler_rewrite(c, 948490, Symbol_var(42162), node, AST_STATEMENT, List_type(c -> return_type), NULL);
   {
@@ -1945,7 +1946,7 @@ static List Compiler__landing_form(Compiler c, List node, Map runtime){
 break; } } default: break;
     }
   }
-return node;
+return List_truth(form) ? Compiler__static_regions(c, Compiler_normalize(c, form), runtime) : node;
 }
 
 int Type_is_static(Type);

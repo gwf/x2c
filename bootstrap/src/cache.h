@@ -27,6 +27,8 @@ List _run_once(Compiler c, List before, List guard, List after);
 
 List _entry_call(String entry);
 
+List Compiler_zero_initializer(Compiler c, List value);
+
 List Compiler_initialization_guard(Compiler c, List guard);
 
 

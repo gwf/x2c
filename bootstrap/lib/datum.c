@@ -2,6 +2,7 @@
 
 #define __GUARD_0x8E3A3F8F__
 #include "x2c.h"
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 static List _59, _57, _52, _51, _49, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21;
@@ -361,7 +362,7 @@ int datum_read_plain(String text, unsigned * cursor, Var * out){
     ;
     x2c_cleanup_push(& _x2c_defer_record_0);
     {
-      if(String_truth(text) && String_getindex(text, at) && _plain_form(text, &(at), &(value), items, 0))(* cursor) = at;
+      if(String_truth(text) && String_getindex(text, at) && _plain_form(text, &(at), &(value), items, 1))(* cursor) = at;
       else if(Lisp_read(NULL, text, &((* cursor)), &(value)) != 46228810){
         int _x2c_return_value_0 = 0;
         {
@@ -436,8 +437,9 @@ static int _plain_integer(char * s, unsigned * at, Var * out){
   if(s[end] == '0' && _digit(s[end + 1])) return 0;
   long value = 0;
   for(;  _digit(s[end]);  end ++){
-    if(end -(* at) > 18) return 0;
-    value = value * 10 +(s[end] - '0');
+    int digit = s[end] - '0';
+    if(value >(LONG_MAX - digit) / 10) return 0;
+    value = value * 10 + digit;
   }
   if(! _token_end(s[end])) return 0;
   if(s[(* at)] == '-') value = - value;
@@ -635,7 +637,7 @@ int datum_unframe(String input, size_t * used, Var * value){
   unsigned cursor = 0;
   (* value) =((void) 0, Void);
   if(! datum_read(frame, &(cursor), &((* value)))){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/datum.x",.function = "datum_unframe",.line = 323};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/datum.x",.function = "datum_unframe",.line = 325};
     x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(13765450), String_var(frame));
     __builtin_unreachable();
   }

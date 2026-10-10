@@ -6,6 +6,7 @@
 #define __GUARD_0x8E3A3F8F__
 
 #include "x2c.h"
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 int datum_write(Buffer out, Var value, int tagged);

@@ -62,7 +62,7 @@ Ancestor;
 typedef struct Compiler{
   String filename, text, root_dir;
   String package;
-  List package_dirs;
+  List package_dirs, package_source_dirs;
   Map package_roots, package_aliases, package_members, package_effects;
   Token token;
   Token input_boundary;
@@ -105,6 +105,8 @@ typedef struct Compiler{
   int runtime_inc, runtime_hdrs, collect_protocols, shallow, source_private;
   int public_bodies;
   int interface_provider, signature_only;
+  int collection_native;
+  Map collection_native_files;
   Array pending_inline_bodies;
   int layout;
   int meta_body;
