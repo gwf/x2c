@@ -104,7 +104,7 @@ commands: build					## Build checkout external commands
 command-artifacts:
 	@mkdir -p builds/0/libexec builds/0/commands
 	@set --; \
-	  for object in builds/0/src/*.o; do \
+	  for object in `find builds/0/src -type f -name '*.o' | LC_ALL=C sort`; do \
 	    [ "$$object" = builds/0/src/main.o ] || \
 	      set -- "$$@" "$$object"; \
 	  done; \
@@ -118,13 +118,16 @@ command-artifacts:
 	    mv builds/0/commands/identity.x.tmp builds/0/commands/identity.x; \
 	  else rm builds/0/commands/identity.x.tmp; fi
 	@cp commands/manifest.txt builds/0/libexec/commands.txt
-	@. commands/parallel.sh; \
+	@. commands/parallel.sh; set --; \
+	  for directory in `find builds/0/src -type d | LC_ALL=C sort`; do \
+	    set -- "$$@" --c-include-dir "$$directory"; \
+	  done; \
 	  for name in $(COMMAND_NAMES); do \
 	    parallel_start "x2c-$$name" $(STAGE0_X2C) build --plain \
 	      -j $(BUILD_JOBS) --build-dir "builds/0/commands/$$name-cc" \
 	      --output "builds/0/libexec/x2c-$$name" \
 	      --x-include-dir . --x-include-dir src \
-	      --c-include-dir builds/0/src \
+	      "$$@" \
 	      $(COMMAND_LINK_FLAGS) \
 	      commands/$$name/*.x builds/0/commands/identity.x \
 	      builds/0/libx2c-dev.a; \

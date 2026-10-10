@@ -48,7 +48,10 @@ bootstrap/src/macros/quotations/construction.c
 
 Their headers occupy the same directories. Module support aliases are generated
 from the same bindings; no hand-authored private interface is required. Native
-rules enumerate C recursively and preserve relative object paths. Bootstrap
+rules enumerate C recursively and preserve relative object paths. The external
+command build likewise includes nested compiler objects in its development
+archive and enumerates generated header directories. Its old flat enumeration
+failed in the gate; the focused corrected command build succeeds. Bootstrap
 refresh cleans old generated files before copying the stage tree recursively.
 Public C names are unchanged. Private linkage names are assigned during
 ordinary translation. Bootstrap copying reconnects an absolute quoted include

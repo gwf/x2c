@@ -237,7 +237,7 @@ binding facts are not exported. Static helpers remain in their provider.
 Each provider has one function-hash table. Its meta advertisements identify
 the provider; collection and replay install the table before advertisements.
 The file holds one
-`(interface 6 "compiler" "path" "hash" (PARTS...) (DEFINITIONS...)
+`(interface 9 "compiler" "path" "hash" (PARTS...) (DEFINITIONS...)
 (DEPENDENCIES...) (INCLUDE-DIRS...))` form in
 `%()` List syntax, with bare Atoms for its structural words and Strings for
 identifiers; the reader reads that one form without evaluating it.
