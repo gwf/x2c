@@ -1,10 +1,11 @@
 # Language component foundation
 
 > Status: active
-> Local recovery branch `codex/language-components-foundation`, based on dev
-> `7e946b86663f9f069fe14e284c41e2aed73c57e0`. No push or dev/main integration.
-> Working directory: `/Users/gary/.codex/worktrees/language-components-foundation/x2c`.
-> This file alone owns continuation of this branch's component work.
+> Branch `codex/language-components-foundation`, started from dev
+> `7e946b86663f9f069fe14e284c41e2aed73c57e0`. Gary authorized publication to
+> `dev` on 2026-10-09 after Milestone 0, the three component cases, `try`,
+> and the driver work; this plan records what landed and owns the
+> extraction order that follows. `main` is untouched.
 
 ## Goal and current boundary
 
