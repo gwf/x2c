@@ -2698,8 +2698,9 @@ static List Compiler._lowered(
    exactly once through `Compiler.normalize`, the result must hold that
    lowering's output exactly once, and the template's own syntax must
    introduce no binding and add no generated name, origin, pending code,
-   placement, or diagnostic. A replacement that fails, or whose template
-   holds pending code or a carrier, lowers as written on every use. */
+   placement, or diagnostic. A template whose lowering adds such state
+   tries again on its next use; one that fails otherwise, or that holds
+   pending code or a carrier, lowers as written on every use. */
 
 /** Counts compiler state that lowering adds and a skipped lowering would
     not add. A name a scope resolves binds once, so it is not counted. */
@@ -2767,8 +2768,7 @@ static List Compiler._prepared(
   List lowered;
   $let(c.slot_watch, &watch)
     lowered = c._lowered(result, position, expected, site);
-  /* A memo the template fills on its first lowering adds state only then,
-     so a lowering with effects of its own prepares on a later use. */
+  // A memo the template fills adds state only on its first lowering.
   if (!c._effects().since(before).same(watch.inner)) return lowered;
   List skeleton = !watch.repeated && watch.order.len() == values.len()
     ? _skeleton(lowered, watch.outputs) : NULL;

@@ -825,7 +825,7 @@ Source: `src/macros.x:2928`
 Counts compiler state that lowering adds and a skipped lowering would
 not add. A name a scope resolves binds once, so it is not counted.
 
-Source: `src/macros.x:2706`
+Source: `src/macros.x:2707`
 
 ## Design notes
 
