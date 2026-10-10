@@ -55,6 +55,8 @@ void Sym_define_global(Sym s, List key, List type);
 
 void Sym_declare_enumerator(Sym s, List key, Symbol owner);
 
+int Sym_introduced(Sym s);
+
 List Sym_introduce(Sym s, String spelling);
 
 List Sym_current_binding(Sym s, List key);
@@ -154,6 +156,8 @@ Type Sym_delegate_aggregate(Sym s, Type type);
 SymTxn Compiler_begin_semantic_transaction(Compiler c);
 
 int SymTxn_local_macros_changed(SymTxn * s);
+
+int Sym_transacting(Sym s);
 
 void Sym_end_log(Sym s);
 

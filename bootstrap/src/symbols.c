@@ -697,6 +697,10 @@ static List Sym__new_binding(Sym s, List key){
   int identity = ++ s -> c -> names -> next_binding;  Var name = List_last(key);  List binding = binding_identity_new(identity, Var_string(name));  Sym_put(s, s -> binding_facts, List_var(cons(_65, cons(int_var(identity), NULL))), name);  return binding;
 }
 
+int Sym_introduced(Sym s){
+  if(! _init_guard_) _file_init_();  int held = 0;  for(int i = 0;  i <(int) Block_len(s -> scopes);  i ++) held += Map_len(Sym__scope_at(s, i) -> bindings);  return s -> c -> names -> next_binding - held;
+}
+
 List Sym_introduce(Sym s, String spelling){
   if(! _init_guard_) _file_init_();  return Sym__new_binding(s, cons(String_var(spelling), NULL));
 }
@@ -1305,6 +1309,10 @@ int SymTxn_local_macros_changed(SymTxn * s){
     SymUndo row = rows[i];  if(! _same(row.map, after) || Map_contains(seen, row.key)) continue;  Map_setindex(seen, row.key, int_var(1));  if(Var_is_void(row.value) || ! Var_equal(row.value, Map_getindex(after, row.key))) return 1;
   }
   return 0;
+}
+
+int Sym_transacting(Sym s){
+  if(! _init_guard_) _file_init_();  return s -> transactions > 0;
 }
 
 void Sym_end_log(Sym s){

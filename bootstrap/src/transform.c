@@ -1622,7 +1622,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void){
   _1204 = cons(_1203, NULL);
   _1205 = cons(_662, _1204);
   _1206 = List_var(_1205);
-  _1207 = int_var(959);
+  _1207 = int_var(963);
   _1208 = cons(_1207, NULL);
   _1209 = cons(_668, _1208);
   _1210 = List_var(_1209);
@@ -1630,7 +1630,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void){
   _1212 = cons(_1211, NULL);
   _1213 = cons(_673, _1212);
   _1214 = List_var(_1213);
-  _1215 = int_var(35116);
+  _1215 = int_var(35214);
   _1216 = cons(_1215, NULL);
   _1217 = cons(_681, _1216);
   _1218 = List_var(_1217);
@@ -1740,7 +1740,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void){
   _1322 = cons(_1321, NULL);
   _1323 = cons(_632, _1322);
   _1324 = List_var(_1323);
-  _1325 = int_var(867);
+  _1325 = int_var(871);
   _1326 = cons(_1325, NULL);
   _1327 = cons(_668, _1326);
   _1328 = List_var(_1327);
@@ -1748,7 +1748,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void){
   _1330 = cons(_1329, NULL);
   _1331 = cons(_676, _1330);
   _1332 = List_var(_1331);
-  _1333 = int_var(31573);
+  _1333 = int_var(31671);
   _1334 = cons(_1333, NULL);
   _1335 = cons(_681, _1334);
   _1336 = List_var(_1335);
@@ -1836,11 +1836,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void){
   _1418 = cons(_1417, NULL);
   _1419 = cons(_632, _1418);
   _1420 = List_var(_1419);
-  _1421 = int_var(863);
+  _1421 = int_var(867);
   _1422 = cons(_1421, NULL);
   _1423 = cons(_668, _1422);
   _1424 = List_var(_1423);
-  _1425 = int_var(31506);
+  _1425 = int_var(31604);
   _1426 = cons(_1425, NULL);
   _1427 = cons(_681, _1426);
   _1428 = List_var(_1427);
@@ -1980,11 +1980,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_3(void){
   _1559 = cons(_1558, NULL);
   _1560 = cons(_632, _1559);
   _1561 = List_var(_1560);
-  _1562 = int_var(858);
+  _1562 = int_var(862);
   _1563 = cons(_1562, NULL);
   _1564 = cons(_668, _1563);
   _1565 = List_var(_1564);
-  _1566 = int_var(31384);
+  _1566 = int_var(31482);
   _1567 = cons(_1566, NULL);
   _1568 = cons(_681, _1567);
   _1569 = List_var(_1568);
@@ -3126,10 +3126,16 @@ Ast Compiler_normalize(Compiler c, Ast ast){
 
 #endif
 #ifndef X2C_TRANSFORM_SOURCE
+Ast Compiler_watched_step(Compiler, Ast);
+
 static Type Var_type(Var);
 
 static Ast Compiler__step(Compiler c, Ast ast){
   if(! List_truth(ast)) return NULL;
+  if(c -> slot_watch){
+    Ast watched = Compiler_watched_step(c, ast);
+    if(List_truth(watched)) return watched;
+  }
   Var head = List_car(ast);
   if(! Var_is(head, 1328354264)) return Compiler__default_node(c, ast);
 

@@ -7116,7 +7116,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_13(void){
   _6672 = List_var(_6671);
   _6673 = String_new("src/compiler.x");
   _6674 = String_var(_6673);
-  _6675 = String_new("b261e73e");
+  _6675 = String_new("31324857");
   _6676 = String_var(_6675);
   _6677 = cons(_6676, NULL);
   _6678 = cons(_6674, _6677);
@@ -7281,7 +7281,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_13(void){
   _6837 = List_var(_6836);
   _6838 = String_new("src/macros.x");
   _6839 = String_var(_6838);
-  _6840 = String_new("49983d33");
+  _6840 = String_new("740832d2");
   _6841 = String_var(_6840);
   _6842 = cons(_6841, NULL);
   _6843 = cons(_6839, _6842);
@@ -7292,7 +7292,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_13(void){
   _6848 = List_var(_6847);
   _6849 = String_new("src/transform.x");
   _6850 = String_var(_6849);
-  _6851 = String_new("1ed9051c");
+  _6851 = String_new("d276548d");
   _6852 = String_var(_6851);
   _6853 = cons(_6852, NULL);
   _6854 = cons(_6850, _6853);
@@ -7677,7 +7677,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_14(void){
   _7230 = List_var(_7229);
   _7231 = String_new("src/symbols.x");
   _7232 = String_var(_7231);
-  _7233 = String_new("06878bb2");
+  _7233 = String_new("e27cfe9a");
   _7234 = String_var(_7233);
   _7235 = cons(_7234, NULL);
   _7236 = cons(_7232, _7235);

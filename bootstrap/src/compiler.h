@@ -23,7 +23,7 @@ typedef struct ScriptUnit{
 
 typedef struct GenNames{
   Map counters, adapters, file_scope_owners;
-  int next_binding;
+  int next_binding, issued;
 }
 * GenNames;
 
@@ -48,6 +48,8 @@ typedef struct PendingMark{
 PendingMark;
 
 typedef struct Sym * Sym;
+
+typedef struct SlotWatch * SlotWatch;
 
 typedef struct Ancestor{
   Symbol what;
@@ -109,6 +111,8 @@ typedef struct Compiler{
   int capture_unit;
   List active_rewrites;
   Map rewrite_rules;
+  Map prepared_rewrites;
+  SlotWatch slot_watch;
   Token meta_statement;
   int import_protocols;
   int in_pattern, match_is, runtime_literals, inline_header;

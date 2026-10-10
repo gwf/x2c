@@ -81,6 +81,21 @@ List Compiler_rewrite(Compiler c, Symbol point, Var kind, List source, AstPos po
 
 List Compiler_lower_rewrite(Compiler c, Symbol point, Var kind, List source, AstPos position, Type expected, Token site);
 
+typedef struct Effects{
+  int bindings, names, origins, pending, placements, diagnostics;
+}
+Effects;
+
+struct SlotWatch{
+  List values;
+  Array outputs, order;
+  Effects inner;
+  int repeated;
+}
+;
+
+Ast Compiler_watched_step(Compiler c, Ast ast);
+
 int Compiler_macro_starts_target_at(Compiler c, AstPos position);
 
 Symbol Compiler_macro_invocation_collection(Compiler c);
