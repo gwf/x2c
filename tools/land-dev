@@ -25,7 +25,7 @@ DOC_FILES = {
     "site/public/llms.txt", "site/public/llms-full.txt",
 }
 DOC_DIRS = {"docs/src/library/modules", "docs/src/internals/compiler-api"}
-SOURCE_FILES = {"lib/x2c.x", "src/linked-meta.x"}
+SOURCE_FILES = {"lib/x2c.x", "src/linked-meta.x", "etc/meta-queries.x"}
 
 
 def generated(path: str) -> bool:

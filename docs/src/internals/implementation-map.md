@@ -118,7 +118,9 @@ is listed under [compiler options](../reference/cli.md).
 - `meta` arguments and results: `src/stage.x`; a unit's `meta` group and
   in-process staging: `src/meta-group.x`; the project helper:
   `src/meta-project.x` builds it, `src/meta-helper-client.x` calls it, and
-  `etc/meta-helper.x` answers
+  `etc/meta-helper.x` answers, with the compiler queries that
+  `tools/gen-meta-queries.sh` generates from `lib/meta.x` into
+  `etc/meta-queries.x`
 - Embedded native bindings: `etc/lisp-bindings.x`,
   `etc/lisp-bindings.xlisp`, `lib/lisp-targets.x`, `lib/lisp.x`, and
   `lib/func.x`

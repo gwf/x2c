@@ -83,6 +83,7 @@ build: bootstrap-ready					## Build the runtime and compiler
 	$(MAKE) -C include all
 	$(MAKE) -C lib x2c.x
 	tools/gen-linked-meta.sh
+	tools/gen-meta-queries.sh
 	$(PARALLEL_MAKE) -C builds x2c
 
 build-safe: configure					## Conservatively rebuild the compiler
@@ -95,6 +96,7 @@ rebuild-from-bootstrap:
 	$(MAKE) -C include all
 	$(MAKE) -C lib x2c.x
 	tools/gen-linked-meta.sh
+	tools/gen-meta-queries.sh
 	$(PARALLEL_MAKE) -C builds x2c
 
 commands: build					## Build checkout external commands

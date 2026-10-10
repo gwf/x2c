@@ -333,7 +333,8 @@ def run_gate(gate: str) -> int:
 
 
 # Tracked outputs that the gate itself regenerates from digested sources.
-GATE_OUTPUTS = ("bootstrap/", "lib/x2c.x", "src/linked-meta.x")
+GATE_OUTPUTS = (
+    "bootstrap/", "lib/x2c.x", "src/linked-meta.x", "etc/meta-queries.x")
 
 
 def sources(record: dict) -> dict:

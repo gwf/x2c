@@ -318,20 +318,33 @@ static Array _modules(CliRequest request, Map packages) {
    own source is read at build time, not linked into the compiler, so the
    stamp does not cover it. */
 static String Helper.identify(Helper &h, String stamp, String compiler) {
-  String loop = _loop_source();
+  String loop = _loop_text();
   return %"$stamp\n$compiler\n${_cc_flags().repr()}\n"
     + %"${h.flags.repr()}\n${h.include}\n${h.toolchain.runtime_lib}\n"
     + %"${h.modules.list().repr()}\n"
     + %"${h.frontend.request.package_dirs.repr()}\n"
     + %"${h.packages.keys().list().sort().repr()}\n"
-    + (Path.is_file(loop) ? Path.read_text(loop).sha256() : "");
+    + (loop ? loop.sha256() : "");
 }
 
 /* The C compiler flags of meta code, besides its include directories. */
 static List _cc_flags(void) => %("-fsigned-char" "-O1");
 
-/* Every helper links this unit, which answers the compiler's calls. */
-static String _loop_source(void) => %"${x2c_get_root()}/etc/meta-helper.x";
+/* Every helper links one unit that answers the compiler's calls: its
+   protocol loop and the compiler queries generated from `lib/meta.x`. */
+static List _loop_sources(void) => %(
+  ${%"${x2c_get_root()}/etc/meta-helper.x"}
+  ${%"${x2c_get_root()}/etc/meta-queries.x"});
+
+/* The text of that unit, or NULL when a source is missing. */
+static String _loop_text(void) {
+  String text = "";
+  foreach (String path, _loop_sources()) {
+    if (!Path.is_file(path)) return NULL;
+    text += Path.read_text(path);
+  }
+  return text;
+}
 
 /* The build directory is keyed by the identity and the paths of the
    sources. A changed source builds the same directory again, which keeps
@@ -357,8 +370,7 @@ static List Helper.build(Helper &h) {
     h.before[index] = _digest(%"$base.o");
     _clear(base);
   }
-  String loop = _loop_source();
-  foreach (String path, %(@{h.owners} @{h.modules} $loop))
+  foreach (String path, %(@{h.owners} @{h.modules} @{_loop_sources()}))
     h.deps[path] = 1;
   Compiler.use_meta_build_directory(h.directory, h.owners);
   int index = 1;
@@ -480,13 +492,12 @@ static String Helper.link(Helper &h, int count) {
 /* The object of the helper's protocol loop, which this compiler translates
    once per identity, or NULL with `failure` set. */
 static String Helper.support(Helper &h, String &failure) {
-  String source = _loop_source();
-  if (!Path.is_file(source)) {
-    failure = %"cannot read $source";
+  String text = _loop_text();
+  if (!text) {
+    failure = "cannot read the helper's loop sources";
     return NULL;
   }
-  String key = String.sha256(
-    %"${h.identity}\n${Path.read_text(source).sha256()}");
+  String key = String.sha256(%"${h.identity}\n${text.sha256()}");
   String directory = %"${script_cache_root()}/meta/support-$key";
   String object = %"$directory/meta-helper.o";
   if (Path.is_file(object)) return object;
@@ -494,14 +505,16 @@ static String Helper.support(Helper &h, String &failure) {
   int lock = file_lock(%"$directory/lock", 1);
   defer close(lock);
   if (Path.is_file(object)) return object;
-  failure = h.compile_support(source, directory, object);
+  failure = h.compile_support(text, directory, object);
   return failure ? NULL : object;
 }
 
-/* Translates the loop's `source` into `directory` and compiles it to
+/* Translates the loop's `text` into `directory` and compiles it to
    `object`. Returns why not, or NULL. */
 static String Helper.compile_support(
-  Helper &h, String source, String directory, String object) {
+  Helper &h, String text, String directory, String object) {
+  String source = %"$directory/meta-helper.x";
+  Path.write_text(source, text);
   String printed = NULL, errors = NULL;
   if (tool_capture(
     %(${x2c_get_executable()} "translate" "--out-dir" $directory $source),

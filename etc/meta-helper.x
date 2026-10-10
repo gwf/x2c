@@ -202,54 +202,10 @@ String x2c_source_text(Var syntax) {
   _unavailable("x2c.source.text");
 }
 
-/* The operations that read compiler state ask the compiler. */
-List x2c_type_members(List v) => _ask("x2c_type_members", %($v));
-List x2c_type_resolve(List v) => _ask("x2c_type_resolve", %($v));
-List x2c_type_element(List v) => _ask("x2c_type_element", %($v));
-List x2c_type_parameters(List v) => _ask("x2c_type_parameters", %($v));
-List x2c_type_return(List v) => _ask("x2c_type_return", %($v));
-List x2c_type_layout(List v) => _ask("x2c_type_layout", %($v));
-List x2c_type_fields(List v) => _ask("x2c_type_fields", %($v));
-int x2c_type_is_value(List v) => _ask("x2c_type_is_value", %($v));
-int x2c_type_is_integral(List v) => _ask("x2c_type_is_integral", %($v));
-int x2c_type_is_pointer(List v) => _ask("x2c_type_is_pointer", %($v));
-Symbol x2c_type_tag_name(String v) => _ask("x2c_type_tag_name", %($v));
-String x2c_type_reverse_name(String v, String w) =>
-  _ask("x2c_type_reverse_name", %($v $w));
-List x2c_method_resolve(List v, String w) =>
-  _ask("x2c_method_resolve", %($v $w));
-List x2c_protocol_member(List v, List w, String x) =>
-  _ask("x2c_protocol_member", %($v $w $x));
-List x2c_function_parameter(List v, String w) =>
-  _ask("x2c_function_parameter", %($v $w));
-Type Code.type(Code v) => _ask("Code_type", %($v));
-Var Code.value(Code v) => _ask("Code_value", %($v));
-int Code.exits(Code v) => _ask("Code_exits", %($v));
-int Code.is_static_pattern(Code v) => _ask("Code_is_static_pattern", %($v));
-Code Code.convert(Code v, Type t) => _ask("Code_convert", %($v $t));
-String Code.format(Code v) => _ask("Code_format", %($v));
-Code Code.call_in_order(Code m, List a, Type t) =>
-  _ask("Code_call_in_order", %($m $a $t));
-Code Code.register_rewrite(Code f, Macro p, List h) =>
-  _ask("Code_register_rewrite", %($f $p $h));
-Code Code.register_marked_rewrite(Code f, Symbol m, Macro p, List h) =>
-  _ask("Code_register_marked_rewrite", %($f $m $p $h));
-Code Code.register_typed_rewrite(Code f, Type t, Macro p, List h) =>
-  _ask("Code_register_typed_rewrite", %($f $t $p $h));
-Code Code.register_operator_rewrite(Code f, Type t, Symbol w, List o) =>
-  _ask("Code_register_operator_rewrite", %($f $t $w $o));
-Code Code.register_after_initialization(Code f, Macro p, List h) =>
-  _ask("Code_register_after_initialization", %($f $p $h));
+/* The operations that read compiler state ask the compiler through the
+   forwarders in `etc/meta-queries.x`, which the helper compiles after this
+   file as part of the same unit. */
 List x2c_syntax_type(List v) => Code.type(v);
-Var x2c_literal_value(Var v) => _ask("x2c_literal_value", %($v));
-
-Code x2c_enclosing(Symbol w) => _ask("x2c_enclosing", %($w));
-void x2c_place(List w, Code v) { _ask("x2c_place", %($w $v)); }
-String x2c_invocation_file(void) => _ask("x2c_invocation_file", %());
-int x2c_invocation_line(void) => _ask("x2c_invocation_line", %());
-int x2c_invocation_column(void) => _ask("x2c_invocation_column", %());
-Map x2c_meta_definition_hashes(void) =>
-  _ask("x2c_meta_definition_hashes", %());
 
 /* A `Source` holding a String literal is read beside its file; a String
    must be absolute, since the helper does not know the definition's file.
@@ -474,16 +430,3 @@ int main(void) {
   _reset();
   for (;;) _serve(_request(3, helper_input));
 }
-
-int Type.is_named(Type t, String n) => _ask("Type_is_named", %($t $n));
-Type Type.numeric(Type t) => _ask("Type_numeric", %($t));
-int Type.is_text(Type t) => _ask("Type_is_text", %($t));
-Code Type.protocol_member(Type t, String n) =>
-  _ask("Type_protocol_member", %($t $n));
-Type Type.aggregate(Type t) => _ask("Type_aggregate", %($t));
-List Type.marked_fields(Type t, Symbol m) =>
-  _ask("Type_marked_fields", %($t $m));
-List Type.resolve_member(Type t, String n, int c) =>
-  _ask("Type_resolve_member", %($t $n $c));
-Code Type.getter(Type t) => _ask("Type_getter", %($t));
-String Type.update_helper(Type t) => _ask("Type_update_helper", %($t));
