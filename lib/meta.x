@@ -19,9 +19,10 @@
     Two operations let a macro contribute code beyond its result.
     `x2c_enclosing` answers the initialized declarator, block item,
     function, or unit around the invocation, and `x2c_place` puts code
-    after that declarator or block item, on the exits of its block, among
-    the unit's support declarations, or in its initialization, under the
-    expansion's transaction. `$auto` is built on them.
+    after that declarator or block item, on the exits of its block, at the
+    entry of its function, among the unit's support declarations, or in its
+    initialization, under the expansion's transaction. `$auto` is built on
+    them.
 
     The library builds it as an optional module, but the prelude's
     `varops.x` includes it for its own `meta` rows, so every unit sees its
@@ -191,7 +192,18 @@ meta int Code.is_static_pattern(Code pattern);
 
 /** Registers a translator with its macro and optional hole patterns.
     NULL holes use the macro's named captures. Recognition uses the source
-    views and binding identity rules of a macro-valued case. */
+    views and binding identity rules of a macro-valued case.
+
+    A `Unit` macro whose body is one function definition, or only its one
+    `Function` hole, registers a function rule. The compiler offers each
+    function definition the unit emits, including a lifted lambda body, to
+    the function rules once, bound and typed, before its body lowers.
+    Rules keyed by the return type and storage the pattern spells come
+    before rules whose pattern holds a hole there. A rule declines by
+    returning its input, void, or null, and then costs only its match and
+    call. A replacement is a function definition to bind, or a bound or
+    lowered code-value carrier; it is lowered as written and offered to
+    the other rules, but not again to the rule that returned it. */
 meta Code Code.register_rewrite(Code function, Macro shape, List holes);
 
 /** Registers a translator for member calls that find no member on a
@@ -404,6 +416,10 @@ meta Code x2c_enclosing(Symbol what);
     initialized declarator whose initializer holds the invocation;
     `%(block-exit)`, run on every transfer that leaves the enclosing block
     after that item or declarator, as `defer code` written after it runs;
+    `%(function-entry)`, at the entry of the enclosing function
+    definition, after its parameters bind and before its first statement,
+    in placement order; code in a lambda body enters the definition that
+    holds the lambda;
     `%(unit-support)` among the unit's file-scope support declarations, or
     `%(unit-support KEY)` once for each KEY; or `%(unit-init)` in the
     unit's initialization, or `%(unit-init AREA)` in its `protocol`,

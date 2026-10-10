@@ -196,8 +196,11 @@ static Ast Compiler._step(Compiler c, Ast ast) {
   match (ast) {
     case %(at ?origin ?inner): return c._at_node(ast, origin, inner);
     case %(function ?return_type
-           (!set ?declarator (bind ?binding ?)) ?body):
-      return c._function_node(return_type, declarator, binding, body);
+           (!set ?declarator (bind ?binding ?)) ?body): {
+      List replaced = c._function_rewrite(ast, return_type);
+      return replaced
+        ? replaced : c._function_node(return_type, declarator, binding, body);
+    }
     case %(getindex
            (!set ?expression (expr ?matched_type ?)) ?index):
       return c._getindex_node(expression, matched_type, index);
@@ -373,6 +376,16 @@ static Ast Compiler._at_node(Compiler c, Ast ast, int occurrence, List inner) {
   c.origins.push(%(generated $occurrence xform));
   int generated = c.origins.len();
   return %(at $generated $transformed);
+}
+
+/* A function rule sees the bound and typed definition before its body
+   lowers. Rules keyed by its return type come before those keyed by none. */
+static List Compiler._function_rewrite(
+  Compiler c, List function, List return_type) {
+  List replaced = c.lower_rewrite(
+    <function>, return_type, function, AST_UNIT, NULL, NULL);
+  return replaced ? replaced : c.lower_rewrite(
+    <function>, <any>, function, AST_UNIT, NULL, NULL);
 }
 
 static Ast Compiler._function_node(

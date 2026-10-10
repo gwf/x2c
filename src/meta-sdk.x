@@ -291,9 +291,37 @@ static Code _rewrite_registration(
   return %((code-value "bound" $function ((rewrite $point $kind $name $shape $holes))));
 }
 
-/** Registers a captured translator for a complete parsed pattern. */
+/* A function pattern is keyed by the return type it spells, or by `<any>`
+   when a hole stands there. */
+static Var _function_rule_key(Var type) => _ground(type) ? type : <any>;
+
+static int _ground(Var pattern) {
+  if (pattern is not <list>)
+    return !pattern.is_binder() && !pattern.is_match_op();
+  foreach (Var part, pattern.list()) if (!_ground(part)) return 0;
+  return 1;
+}
+
+/* A Unit macro whose body is its one `Function` hole matches every
+   function definition. */
+static int _function_hole(Macro shape) {
+  List parameters = shape.assoc(<parameters>);
+  if (parameters.len() != 1 ||
+      parameters.car().list().assoc(<kind>) != <function>)
+    return 0;
+  match (shape.assoc(<template>)) case %(seq ?only): return only.is_binder();
+  return 0;
+}
+
+/** Registers a captured translator for a complete parsed pattern. A
+    function definition pattern registers in the `function` family, which
+    `Compiler.normalize` dispatches once per definition before its body
+    lowers. */
 Code Code.register_rewrite(Code function, Macro shape, List holes) {
   _sdk_guard("Code.register_rewrite");
+  if (!holes && _function_hole(shape))
+    return _rewrite_registration(
+      function, shape, %((!and ?function (function *))), <function>, <any>);
   holes = _rewrite_holes(shape, holes);
   List pattern = shape.pattern(holes);
   Symbol point = 0;
@@ -317,6 +345,8 @@ Code Code.register_rewrite(Code function, Macro shape, List holes) {
     case %((!quote !or) ((!set ?head (!or switch try)) *) *):
       { point = <node>; kind = head; }
     case %((!set ?head (!or switch try)) *): { point = <node>; kind = head; }
+    case %(!or (api-source ? ? (function ?type *)) (function ?type *)):
+      { point = <function>; kind = _function_rule_key(type); }
   }
   if (!point) MetaContext.reject("unsupported rewrite pattern in spike", NULL);
   return _rewrite_registration(function, shape, holes, point, kind);

@@ -1540,10 +1540,13 @@ around the invocation: the initialized `<declarator>`, the block item
 (`<statement>`), the `<function>`, or the `<unit>`. `x2c_place` adds code
 the result cannot hold: `%(after-statement)` after that declarator or block
 item, `%(block-exit)` on every exit from the block after it, as a `defer`
-there runs, `%(unit-support KEY)` among the unit's file-scope declarations
-once for each key, and `%(unit-init)` in the unit's initialization. A failed
-expansion leaves none of it behind. Here the counter runs after each statement that
-traces a value:
+there runs, `%(function-entry)` at the entry of the enclosing function
+before its first statement, `%(unit-support KEY)` among the unit's
+file-scope declarations once for each key, and `%(unit-init)` in the
+unit's initialization. Code placed at function entry follows the parameters
+and keeps the order of its placements; code in a lambda body enters the
+function that holds the lambda. A failed expansion leaves none of it behind.
+Here the counter runs after each statement that traces a value:
 
 ```x2c
 #include "x2c.x"
@@ -1573,6 +1576,48 @@ int main(void) {
 `$auto` is written this way: it places a release after the declarator it
 initializes, and the declaration checks that the expansion is its complete
 initializer before it binds that release.
+
+**Rewriting a function definition.** `$rewrite` from `rewrite.x` registers
+a `meta` function as a rule for the code its macro builds. When that macro
+is a `Unit` macro whose body is one function definition, or only its one
+`Function` hole, the rule receives each function definition of the unit
+once, after binding and typing and before the body lowers. It returns the
+definition unchanged to decline, or a replacement definition. The
+replacement is lowered as written and offered to the other rules, but not
+again to the rule that returned it. A pattern that spells its return type,
+such as `int $name(...)`, is tried only on definitions with that return
+type and storage, before the rules whose pattern holds a hole there:
+
+```x2c
+#include "x2c.x"
+#include "rewrite.x"
+
+static int entries = 0;
+
+macro Unit $any_function(Function $function) { $function }
+
+$rewrite($any_function)
+meta Code count_entries(Code function) {
+  if (!x2c_function_name(function).startswith("counted_")) return function;
+  match (function) case %(function ?type ?declarator ?):
+    return %(function $type $declarator
+      (block ${$!{ entries++; }} @{x2c_function_body(function)}));
+  return function;
+}
+
+int counted_next(int x) { return x + 1; }
+
+int main(void) {
+  counted_next(1);
+  counted_next(2);
+  printf("%d\n", entries);
+  return 0;
+}
+```
+
+```text
+2
+```
 
 The compiler binds each of these under its x2c name and derives the Lisp
 name from it: `_` becomes `.`, and a predicate `x2c_type_is_X` becomes

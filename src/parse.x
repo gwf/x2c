@@ -225,6 +225,11 @@ static macro Stmt $report.parse.placement_item(Expr $c) =>
     <macro>, "code placed after a statement needs an enclosing block item",
     $c.token, NULL);
 
+static macro Stmt $report.parse.placement_function(Expr $c) =>
+  $c.report_error(
+    <macro>, "code placed at function entry needs an enclosing function",
+    $c.token, NULL);
+
 static macro Stmt $report.parse.syntax_expected(Expr $c) =>
   $c.report_error(
     <parse>, "expected syntax",
@@ -2610,11 +2615,12 @@ static List Compiler._function_body(
   String old_fn = c.fn_name;
   c.fn_name = name;
   c.sym.push_scope(c.params);
+  int depth = c.ancestors.len();
   c.enter((Ancestor){ .what = <function>, .node = declaration });
   List body = NULL;
   {
     defer {
-      c.ancestors.pop();
+      c._leave_function(depth);
       c.sym.pop_scope();
       c.return_type = old_return;
       c.fn_name = old_fn;
@@ -2622,8 +2628,31 @@ static List Compiler._function_body(
     if (syntax) body = c.bind_callable_body(syntax, c.return_type);
     else if (expression_body) body = c._expression_body();
     else body = c.parse_callable_body();
+    body = c.prepend_setup(body, c._entry_code(depth));
   }
   return body;
+}
+
+/* The code placed at the entry of the function whose row is at `depth`,
+   bound in its parameter scope once its body is complete. */
+static List Compiler._entry_code(Compiler c, int depth) {
+  Array items = [];
+  foreach (List row, c._take_placements(depth))
+    _push_items(
+      items, c.bind_syntax(row[3], AST_BLOCK, c.return_type));
+  return items.list_free();
+}
+
+/* Leaves the function whose row is at `depth`, with the rows and
+   placements a failed body left inside it. */
+static void Compiler._leave_function(Compiler c, int depth) {
+  c.ancestors.truncate(depth);
+  int kept = 0;
+  for (int i = 0; i < (int) c.placements.len(); i++) {
+    List row = c.placements[i];
+    if (row.car().int() < depth) c.placements[kept++] = row;
+  }
+  c.placements.resize(kept);
 }
 
 static String Compiler._prepare_lifecycle(
@@ -2736,6 +2765,17 @@ static List Compiler._ancestor_code(Compiler c, Ancestor row) {
   return %(at $origin (seq));
 }
 
+/** Records `code` for the entry of the innermost function definition,
+    after its parameters bind and before its first statement. A lambda body
+    is inside the definition that holds it. */
+void Compiler.place_entry(Compiler c, Var code) {
+  Ancestor *rows = c.ancestors.bytes;
+  int depth = (int) c.ancestors.len() - 1;
+  while (depth >= 0 && rows[depth].what != <function>) depth--;
+  if (depth < 0) $report.parse.placement_function(c);
+  c.placements.push(%($depth () () $code));
+}
+
 /** Records `code` to follow the innermost block item, or the initialized
     declarator whose initializer is being parsed directly in it. The
     expansion that placed it gives it its result when it finishes. */
@@ -2766,21 +2806,33 @@ List Compiler.leave_item(Compiler c) {
   int depth = (int) c.ancestors.len() - 1;
   Ancestor row = ((Ancestor *) c.ancestors.bytes)[depth];
   c.ancestors.pop();
-  int first = c.placements.len();
-  while (first && c.placements[first - 1].list().car().int() == depth)
-    first--;
-  if (first == (int) c.placements.len()) return NULL;
+  List placed = c._take_placements(depth);
+  if (!placed) return NULL;
   Array items = [];
-  for (int i = first; i < (int) c.placements.len(); i++) {
-    (Var placed, List binding, Var result, Var code) = c.placements[i].list();
-    (void) placed, (void) result;
+  foreach (List placement, placed) {
+    (Var anchor, List binding, Var result, Var code) = placement;
+    (void) anchor, (void) result;
     if (binding)
       $let(c.origin, row.origin ? row.origin : c.origin)
         $report.parse.init_incomplete(c, row.token);
     _push_items(items, c.bind_syntax(code, AST_BLOCK, c.return_type));
   }
-  c.placements.resize(first);
   return items.list_free();
+}
+
+/* Removes the placements anchored at the ancestor row `depth` and returns
+   them in placement order. */
+static List Compiler._take_placements(Compiler c, int depth) {
+  if (!c.placements.len()) return NULL;
+  Array taken = [];
+  int kept = 0;
+  for (int i = 0; i < (int) c.placements.len(); i++) {
+    List row = c.placements[i];
+    if (row.car().int() == depth) taken.push(row);
+    else c.placements[kept++] = row;
+  }
+  c.placements.resize(kept);
+  return taken.list_free();
 }
 
 /** Lowers block declarations whose declarators placed code after

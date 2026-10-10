@@ -680,8 +680,12 @@ static List _macro_case_shape(Macro t, List names) {
       replacements);
   }
   pattern = pattern.replace(replacements);
-  match (pattern)
+  /* A Unit body that is one function definition recognizes that bound
+     function, which carries no `api-source` record. */
+  match (pattern) {
     case %(seq *parts): pattern = %(!or (seq @parts) (block @parts));
+    case %(api-source ? ? ?function): pattern = function;
+  }
   return _macro_view(pattern);
 }
 

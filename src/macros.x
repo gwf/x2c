@@ -2685,10 +2685,20 @@ static List Compiler._rewrite(
       continue;
     $let(c.active_rewrites, cons(rule, c.active_rewrites)) {
       if (!lower) return c.bind_syntax(result, position, expected);
+      if (position == AST_UNIT) return c._lowered_definition(result);
       return c._prepared(source, result, position, expected, site);
     }
   }
   return NULL;
+}
+
+/* A replacement definition binds at file scope and lowers as written,
+   unless it is a lowered carrier. */
+static List Compiler._lowered_definition(Compiler c, Var result) {
+  List bound = c.bind_syntax(result, AST_UNIT, NULL);
+  match (bound) case %(seq ?only): bound = only;
+  match (result) case %(code-value "lowered" *): return bound;
+  return c.normalize(bound);
 }
 
 /* Binds, converts, and lowers a replacement as written. */
@@ -4740,13 +4750,16 @@ static Map Compiler._code_effects(Compiler c, Var effects) {
 /** Places `code` where `where` says, under the active expansion's
     transaction: `(after-statement)` after the enclosing block item or
     initialized declarator; `(block-exit)` on every exit from the enclosing
-    block from that point on, as a `defer` placed after it; `(unit-support)`
+    block from that point on, as a `defer` placed after it;
+    `(function-entry)` at the entry of the enclosing function, in placement
+    order before its first statement; `(unit-support)`
     among the unit's support declarations, once per KEY with
     `(unit-support KEY)`; or `(unit-init)` in the unit's file
     initialization, in AREA with `(unit-init AREA)`. */
 void Compiler.place(Compiler c, List where, Var code) {
   match (where) {
     case %(after-statement): c.place_after(code);
+    case %(function-entry): c.place_entry(code);
     case %(block-exit): {
       Macro deferred = $deferred;
       c.place_after(deferred(code));
