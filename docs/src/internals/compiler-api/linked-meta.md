@@ -78,7 +78,7 @@ Source: `src/linked-meta.x:465`
 
 Returns linked definition hashes and provider source dependencies.
 
-Source: `src/linked-meta.x:808`
+Source: `src/linked-meta.x:809`
 
 #### linked_meta_targets
 
@@ -86,7 +86,7 @@ Source: `src/linked-meta.x:808`
 
 Returns the linked copies, and the runtime builders, by name.
 
-Source: `src/linked-meta.x:662`
+Source: `src/linked-meta.x:663`
 
 #### register_marked_rewrite
 
@@ -125,7 +125,7 @@ Source: `src/linked-meta.x:495`
 
 Lowers the parsed try `node` to its landing form.
 
-Source: `src/linked-meta.x:606`
+Source: `src/linked-meta.x:607`
 
 #### x2c_decl_make
 

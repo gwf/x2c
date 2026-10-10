@@ -124,9 +124,10 @@ Source: `lib/macro-value.x:129`
 
 `MacroMatcher Macro.matcher(Macro shape, List holes)`
 
-Prepares repeated recognition without retaining subject-specific bindings.
+Prepares repeated recognition without retaining subject-specific
+bindings.
 
-Source: `lib/macro-value.x:510`
+Source: `lib/macro-value.x:511`
 
 <a id="Macro.matches"></a>
 #### Macro.matches
@@ -134,9 +135,9 @@ Source: `lib/macro-value.x:510`
 `int Macro.matches(Macro t, List code, List holes)`
 
 Tests complete code against a macro and its hole patterns. Repeated
-recognition can retain `Macro.matcher` to avoid deriving the same pattern.
+recognition can retain `Macro.matcher` so the pattern is derived once.
 
-Source: `lib/macro-value.x:533`
+Source: `lib/macro-value.x:536`
 
 <a id="Macro.number_literal"></a>
 #### Macro.number_literal
@@ -200,9 +201,10 @@ Source: `lib/macro-value.x:162`
 
 `int MacroMatcher.matches(MacroMatcher &m, List code)`
 
-Tests code with the same source views and identity rules as a macro case.
+Tests code with the same source views and identity rules as a macro
+case.
 
-Source: `lib/macro-value.x:520`
+Source: `lib/macro-value.x:522`
 
 ## Runtime-internal callables
 

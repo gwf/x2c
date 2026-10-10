@@ -440,7 +440,7 @@ Source: `src/meta-sdk.x:271`
 <a id="Code.register_after_initialization"></a>
 #### Code.register_after_initialization
 
-`Code Code.register_after_initialization(Code function, Macro shape, List holes)`
+`Code Code.register_after_initialization(Code c, Macro shape, List holes)`
 
 Adds post-initialization block items while the declaration owner retains
 the original declarators, their type identity, and initialization order.
