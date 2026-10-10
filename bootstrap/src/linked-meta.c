@@ -5768,7 +5768,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_10(void){
   _5297 = cons(_532, _5296);
   _5298 = String_new("lib/atom.x");
   _5299 = String_var(_5298);
-  _5300 = String_new("81b65d61");
+  _5300 = String_new("5854281f");
   _5301 = String_var(_5300);
   _5302 = String_new("lib/scan.x");
   _5303 = String_var(_5302);
@@ -6138,7 +6138,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_11(void){
   _5664 = cons(_532, _5663);
   _5665 = String_new("lib/datum.x");
   _5666 = String_var(_5665);
-  _5667 = String_new("2c15b6ca");
+  _5667 = String_new("9ad50eca");
   _5668 = String_var(_5667);
   _5669 = String_new("lib/x2c.x");
   _5670 = String_var(_5669);

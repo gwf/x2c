@@ -450,7 +450,6 @@ static int _plain_integer(char * s, unsigned * at, Var * out){
 Atom Atom_intern(String);
 
 static int _plain_atom(char * s, unsigned * at, Var * out){
-  if(s[(* at)] == '/' &&(s[(* at) + 1] == '/' || s[(* at) + 1] == '*')) return 0;
   int length = 0;
   while(! _token_end(s[(* at) + length])) length ++;
   String spelling = String_new_len(s +(* at), length);
@@ -636,7 +635,7 @@ int datum_unframe(String input, size_t * used, Var * value){
   unsigned cursor = 0;
   (* value) =((void) 0, Void);
   if(! datum_read(frame, &(cursor), &((* value)))){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/datum.x",.function = "datum_unframe",.line = 325};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/datum.x",.function = "datum_unframe",.line = 322};
     x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(13765450), String_var(frame));
     __builtin_unreachable();
   }

@@ -27,7 +27,7 @@ its bytes, and a compact `<symbol>` decodes straight into `out`. An invalid
 
 **Raises:** `<size-limit>` or `<alloc-fail>` when `out` cannot grow.
 
-Source: `lib/atom.x:52`
+Source: `lib/atom.x:54`
 
 ### `Var`
 
@@ -38,7 +38,7 @@ Source: `lib/atom.x:52`
 
 Reports whether `value` is an exact-spelling `Atom`.
 
-Source: `lib/atom.x:90`
+Source: `lib/atom.x:92`
 
 ## Advanced and interop API
 
@@ -61,7 +61,7 @@ Source: `lib/atom.x:90`
 
 Reports whether a spelling can round-trip as a bare Lisp `Atom`.
 
-Source: `lib/atom.x:36`
+Source: `lib/atom.x:37`
 
 <a id="Atom.first"></a>
 #### Atom.first
@@ -70,7 +70,7 @@ Source: `lib/atom.x:36`
 
 Returns the first byte of `atom`'s exact spelling, or NUL when invalid.
 
-Source: `lib/atom.x:106`
+Source: `lib/atom.x:108`
 
 <a id="Atom.initialize"></a>
 #### Atom.initialize
@@ -84,7 +84,7 @@ Repeated calls after successful registration have no effect.
 `<alloc-fail>` while lower-casing the descriptor name, or `<init-fail>`
 when registration returns zero.
 
-Source: `lib/atom.x:164`
+Source: `lib/atom.x:166`
 
 <a id="Atom.intern"></a>
 #### Atom.intern
@@ -105,7 +105,7 @@ its canonical `String` cannot be allocated, or `<bad-enc>` if the
 long-`Atom`
 pointer cannot be boxed.
 
-Source: `lib/atom.x:217`
+Source: `lib/atom.x:219`
 
 <a id="Atom.promote"></a>
 #### Atom.promote
@@ -134,7 +134,7 @@ lifetime rule above. An invalid `Atom` returns NULL.
 
 **Raises:** `<alloc-fail>` while canonicalizing a compact spelling.
 
-Source: `lib/atom.x:99`
+Source: `lib/atom.x:101`
 
 <a id="Atom.write_repr"></a>
 #### Atom.write_repr
@@ -149,7 +149,7 @@ The escaping makes the result readable as the same exact `Atom`. An invalid
 `<size-limit>` or
 `<alloc-fail>` when `out` cannot grow.
 
-Source: `lib/atom.x:65`
+Source: `lib/atom.x:67`
 
 ## Design notes
 
