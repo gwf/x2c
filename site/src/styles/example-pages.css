@@ -50,7 +50,7 @@
 }
 .example-demonstration > * { min-width: 0; }
 .walkthrough-code { background: var(--code); }
-.walkthrough-notes { background: #dedbd5; display: flow-root; }
+.walkthrough-notes { background: var(--panel); display: flow-root; }
 .example-demonstration .feature-code { padding: clamp(14px, 2vw, 24px); }
 .example-demonstration .feature-code pre {
   margin: 0;
@@ -112,8 +112,8 @@
 }
 .example-output {
   margin: 34px 0 0;
-  background: #dedbd5;
-  border-top: 1px solid #cbc7bf;
+  background: var(--panel);
+  border-top: 1px solid var(--panel-rule);
 }
 .example-output figcaption {
   display: flex;
@@ -133,7 +133,7 @@
 .example-run {
   margin-top: 48px;
   padding-top: 34px;
-  border-top: 1px solid rgba(23, 23, 23, 0.18);
+  border-top: 1px solid var(--line);
 }
 .example-run .example-eyebrow { margin-bottom: 9px; }
 .example-run h2 { margin-top: 0; }
@@ -144,7 +144,7 @@
   gap: 26px;
   margin-top: 44px;
   padding-top: 24px;
-  border-top: 1px solid rgba(23, 23, 23, 0.18);
+  border-top: 1px solid var(--line);
 }
 .example-next a { display: flex; flex-direction: column; gap: 9px; }
 .example-next a[rel="next"] { text-align: right; align-items: end; }
