@@ -115,7 +115,7 @@ source-ordered shallow symbol collection and replay.
 
 Public functions:
 
-`Compiler.collect_symbols`, `compiler_prelude_sources`,
+`Compiler.collect_symbols`, `compiler_prelude_sources`, `is_prelude_source`,
 `Compiler.configure_package`, `collect_resolve_include`,
 `Compiler.include_typedef_names`, `Compiler.include_type_dependencies`,
 `Compiler.include_function_declarations`,
@@ -468,13 +468,13 @@ Public functions:
 `Compiler.bind_native_meta`, `Compiler.install_native_meta_function`,
 `Compiler.native_meta_accepts`, `Compiler.native_meta_module`,
 `Compiler.native_meta_targets`, `Compiler.bind_linked_meta`,
-`linked_meta_provider_source`, `Compiler.compiler_targets`,
-`Compiler.select_native_modules`, `Compiler.select_package_module`,
-`Compiler.load_native_module`, `Compiler.preload_native_module`,
-`Compiler.add_native_module`, `Compiler.native_module_loaded`,
-`Compiler.native_module_targets`, `Compiler.supplies_native_meta`,
-`x2c_register_extension`, `Compiler.links_extension`,
-`Compiler.extension_archive`
+`links_meta_function`, `linked_meta_provider_source`,
+`Compiler.compiler_targets`, `Compiler.select_native_modules`,
+`Compiler.select_package_module`, `Compiler.load_native_module`,
+`Compiler.preload_native_module`, `Compiler.add_native_module`,
+`Compiler.native_module_loaded`, `Compiler.native_module_targets`,
+`Compiler.supplies_native_meta`, `x2c_register_extension`,
+`Compiler.links_extension`, `Compiler.extension_archive`
 
 ### [src/meta-project.x](../src/meta-project.x)
 

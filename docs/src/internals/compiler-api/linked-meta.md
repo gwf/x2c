@@ -37,7 +37,7 @@ Shipped `meta` code compiled into the compiler.
 
 Stores the updated collection value and returns its previous value.
 
-Source: `src/linked-meta.x:363`
+Source: `src/linked-meta.x:364`
 
 #### collection_prefix
 
@@ -45,7 +45,7 @@ Source: `src/linked-meta.x:363`
 
 Stores and returns the incremented or decremented collection value.
 
-Source: `src/linked-meta.x:352`
+Source: `src/linked-meta.x:353`
 
 #### collection_store
 
@@ -53,7 +53,7 @@ Source: `src/linked-meta.x:352`
 
 Selects the adopted collection setter for indexed assignment.
 
-Source: `src/linked-meta.x:297`
+Source: `src/linked-meta.x:298`
 
 #### collection_update
 
@@ -61,7 +61,7 @@ Source: `src/linked-meta.x:297`
 
 Selects collection compound updates and checks accepted operands.
 
-Source: `src/linked-meta.x:325`
+Source: `src/linked-meta.x:326`
 
 #### delegate_member
 
@@ -70,7 +70,7 @@ Source: `src/linked-meta.x:325`
 Rebuilds a call that finds no member on its receiver through the one
 delegate field path that provides the method.
 
-Source: `src/linked-meta.x:465`
+Source: `src/linked-meta.x:466`
 
 #### linked_meta_hashes
 
@@ -78,7 +78,7 @@ Source: `src/linked-meta.x:465`
 
 Returns linked definition hashes and provider source dependencies.
 
-Source: `src/linked-meta.x:809`
+Source: `src/linked-meta.x:810`
 
 #### linked_meta_targets
 
@@ -86,7 +86,7 @@ Source: `src/linked-meta.x:809`
 
 Returns the linked copies, and the runtime builders, by name.
 
-Source: `src/linked-meta.x:663`
+Source: `src/linked-meta.x:664`
 
 #### register_marked_rewrite
 
@@ -95,7 +95,7 @@ Source: `src/linked-meta.x:663`
 Registers the decorated translator for member calls that find no member
 on a receiver whose aggregate declares a field with the keyword `mark`.
 
-Source: `src/linked-meta.x:156`
+Source: `src/linked-meta.x:157`
 
 #### register_rewrite
 
@@ -103,7 +103,7 @@ Source: `src/linked-meta.x:156`
 
 Registers the decorated translator with its macro and hole patterns.
 
-Source: `src/linked-meta.x:147`
+Source: `src/linked-meta.x:148`
 
 #### try_catch_cases
 
@@ -117,7 +117,7 @@ every arm returns or raises, control cannot leave them, and a final
 unreachable mark tells C so that a function ending in such a `try`
 needs no return after it.
 
-Source: `src/linked-meta.x:495`
+Source: `src/linked-meta.x:496`
 
 #### try_lowering
 
@@ -125,7 +125,7 @@ Source: `src/linked-meta.x:495`
 
 Lowers the parsed try `node` to its landing form.
 
-Source: `src/linked-meta.x:607`
+Source: `src/linked-meta.x:608`
 
 #### x2c_decl_make
 
@@ -133,7 +133,7 @@ Source: `src/linked-meta.x:607`
 
 Declares `name` with `type` and an optional initializer.
 
-Source: `src/linked-meta.x:97`
+Source: `src/linked-meta.x:98`
 
 #### x2c_expr_cast
 
@@ -143,7 +143,7 @@ Returns `expression` cast to `type`, which is a declared type rather
 than syntax. A generator needs it where the value it holds and the
 parameter it reaches differ in width or sign.
 
-Source: `src/linked-meta.x:90`
+Source: `src/linked-meta.x:91`
 
 #### x2c_expr_field
 
@@ -151,7 +151,7 @@ Source: `src/linked-meta.x:90`
 
 Returns the expression `receiver.name`.
 
-Source: `src/linked-meta.x:82`
+Source: `src/linked-meta.x:83`
 
 #### x2c_param_make
 
@@ -159,7 +159,7 @@ Source: `src/linked-meta.x:82`
 
 Returns a parameter named `name` with `type`.
 
-Source: `src/linked-meta.x:105`
+Source: `src/linked-meta.x:106`
 
 #### x2c_type_members
 
@@ -168,7 +168,7 @@ Source: `src/linked-meta.x:105`
 Returns enum members as `(name value)` rows in declaration order.
 An implicit value is nil; a literal value retains its spelling.
 
-Source: `src/linked-meta.x:134`
+Source: `src/linked-meta.x:135`
 
 ## Design notes
 
@@ -177,6 +177,7 @@ functions and initialized static values from shipped source
 modules appear without their `meta` markers,
 so their functions and initializers execute as native code.
 `Compiler.bind_linked_meta` binds an included definition to its
-copy only when its definition hashes agree. Public
+copy when its definition hashes agree, and a prelude component's
+definition always. Public
 functions with a run-time form bind to their ordinary provider's
 definitions and have no copy here.

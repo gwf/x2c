@@ -5,7 +5,8 @@
     modules appear without their `meta` markers,
     so their functions and initializers execute as native code.
     `Compiler.bind_linked_meta` binds an included definition to its
-    copy only when its definition hashes agree. Public
+    copy when its definition hashes agree, and a prelude component's
+    definition always. Public
     functions with a run-time form bind to their ordinary provider's
     definitions and have no copy here.
 */

@@ -230,4 +230,26 @@ env -u X2C_HOME home/bin/x2c translate --out-dir installed installed/p.x \
   >out.log 2>&1 || fail "installed meta call: $(cat out.log)"
 grep -q "int n = 1;" installed/p.c || fail "installed meta call: wrong value"
 
+# An edited shipped component keeps the compiler's linked translators: its
+# stores translate, the helper's own loop translates with them, and the
+# edit shows only in a compiler built from it.
+sed -i.orig 's/Var, or String operand/Var, or String edited/' \
+  home/src/component-access.x
+cat > installed/store.x <<'EOF'
+meta int good(void) => 1;
+int main(void) {
+  Map m = {};
+  m["a"] = $good();
+  int *p = 0;
+  m["b"] += p;
+}
+EOF
+env -u X2C_HOME X2C_CACHE_DIR="$BUILD/edited" home/bin/x2c translate \
+  --out-dir installed installed/store.x >out.log 2>&1 &&
+  fail "edited component: a pointer update translated"
+grep -q "store.x:6:3: xform: .*Var, or String operand" out.log ||
+  fail "edited component: not the linked translator: $(cat out.log)"
+[ "$(grep -c "error\|xform" out.log)" = 1 ] ||
+  fail "edited component: $(cat out.log)"
+
 echo "meta cache key probes passed"

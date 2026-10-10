@@ -737,3 +737,7 @@ ambiguous path or a cycle, and returns the call through the field path as
 constructed syntax, which ordinary call resolution binds. The components and
 `src/grammar.x`, whose source forms they recognize, are compiler prelude
 sources.
+
+A compiler runs its own linked copies of the components' translators, as it
+runs its own kernel. An edited component therefore changes the compiler built
+from it, not the compiler that translates the edit.
