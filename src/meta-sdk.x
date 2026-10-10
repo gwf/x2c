@@ -404,8 +404,7 @@ Code Code.register_rewrite(Code function, Macro shape, List holes) {
 
 /** Registers a translator for an operator applied to an operand of
     `type`, keyed by the operator and `Var` for a `Var` type or alias. */
-Code Code.register_typed_rewrite(
-  Code function, Type type, Macro shape, List holes) {
+Code Code.register_typed_rewrite(Code c, Type type, Macro shape, List holes) {
   _sdk_guard("Code.register_typed_rewrite");
   if (!active.expander.sym.is_var_type(type))
     MetaContext.reject("a typed rewrite requires Var or an alias of it", NULL);
@@ -424,7 +423,7 @@ Code Code.register_typed_rewrite(
   }
   if (kind is void || kind.list().car() == <=>)
     MetaContext.reject("a typed rewrite requires an operator pattern", NULL);
-  return _rewrite_registration(function, shape, holes, point, kind);
+  return _rewrite_registration(c, shape, holes, point, kind);
 }
 
 /** Registers a translator for member calls that find no member on a

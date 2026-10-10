@@ -247,8 +247,9 @@ static Array _stub_arguments(Func function, const FuncArg *argv) {
 }
 
 /** Tests a registered macro with the candidate's global and source
-    bindings. */
+    bindings. A pattern derived without them reads none. */
 int Compiler.matches_macro(Compiler c, MacroMatcher &matcher, List code) {
+  if (matcher.pattern) return matcher.matches(code);
   Var previous = Macro.subject();
   Array arguments = $auto([code]);
   Macro.use_subject(c._subject_rows(arguments));
