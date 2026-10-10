@@ -423,6 +423,83 @@ the kernel's feature files lost 159 (expressions), 280 (cleanup), 152
 (statements), and 12 (expressions-reports); the mechanism grew macros.x by
 577, parse.x by 398, collect.x by 208, and meta-sdk.x by 185.
 
+### Repairs after publication, 2026-10-10
+
+Gary repaired four defects on `dev` after the publication (d7a652ee through
+d93b759b): the plain datum reader accepted one nesting level more than
+`Lisp.read` and bounded integers by digit count (ours); a user `$rewrite` on
+`try` returning ordinary code was dropped by `_landing_form`, whose fixtures
+covered only the landing form (ours); `_subject_globals` walked a rewrite
+subject recursively, and the access dispatch made that reachable at every
+indexed store, so a 50,000-term chain overflowed the stack (exposed by ours);
+and a provider whose declaration collection ran project meta code was replayed
+from cache, losing its effects (pre-existing; the probe fails on the pre-batch
+dev compiler too). Two rules for every later worker brief: no recursive walks
+over expression chains, and a rule's fixtures include a user component that
+returns something the shipped component does not.
+
+## The campaign from here
+
+The mechanism is built and paid for. From this point each move takes one
+feature out of the kernel as a component on the two primitives, deletes the
+kernel arms, report macros, and `Compiler` fields it owned, and lands on `dev`
+through the gate with three numbers: the empty unit, the feature's own
+workload, and a self-translation. A move that adds more than it deletes stays
+in the kernel, and the catalog records that. The end state is a kernel of
+parser, binder, conversion engine, cleanup walk, macro substrate, unit
+assembly, and the rule driver, with every language feature a file under
+`src/component-*.x` that a user could have written.
+
+### Migrations to deliver, in order
+
+| Feature | Family and placement | Kernel lines | Uses in src and lib |
+| --- | --- | ---: | ---: |
+| printf Var formats | call, by callee binding | 380 | 260 |
+| raise | statement; the include anchor as a unit placement | 200 | 416 |
+| collection literals and literal order | literal, by head | 290 | many |
+| runtime static locals | declaration; the landing form | 320 | 12 |
+| destructuring | statement, plus the function pre-pass | 330 | few |
+| string interpolation | literal `segments`; prepared replacements carry the cost | 200 | 730 |
+| truthiness, getindex, dynamic operators | unary, binary, access | 410 | 620 |
+| class defaults | unit declaration, mark-keyed as delegate is | 780 | 7 |
+| lambda lowering | function family; function-entry and unit-support placements | 1,500 | 586 |
+| protocols: declarations, conformance, owners, adapters | unit declaration marks; unit placements | 1,850 | 153 |
+
+Kernel deletions no feature blocks: the twelve feature fields on `Compiler`;
+the translator-call overhead in the driver (the second match and the per-call
+Lisp session setup, about a third of a rewrite's cost); and the
+`function-entry` and `before-statement` placements, designed but without a
+client until lambdas and destructuring land.
+
+### Open, needing research before a decision
+
+- `match`: 776 sites; the emitter writes arm tests as C text, the fastest
+  form we have. A component must return lowered code and a landing form for
+  the arm barrier, and the static-pattern lowering was removed with the
+  salvage. Whether it can meet 12.4 M per use is the question.
+- Kernel lowerings in the component form: the try and defer templates, the
+  `Func` call construct-and-recognize pair, wrapper synthesis, and scope cells
+  build AST by hand. Rewriting them as quotations needs the open-template
+  rule, free names resolving at the insertion site, which is undesigned.
+- Shipped components and the meta builders: a component cannot call
+  `lib/meta.x` builders without failing its linked-copy check in meta builds
+  (delegate built lists instead). A linked-meta provenance fix comes first.
+- `defer` and the landing form: `defer` lowers to a runtime cleanup record
+  and thunk while try's exits are lexical. Whether `defer` should become a
+  lexical client of the same form is unmeasured for generated C and runtime.
+- Conformance facts across interfaces: `Sym.mark_field` is per field;
+  protocols need per-type facts that cross interfaces and packages.
+- `with`: no constructed form, so unifying or extracting it adds
+  macro-visible syntax, a language decision.
+- The linked prelude's future: with the cheap reader it pays only in
+  installed homes; shipping the component interfaces in the home may replace
+  it, and folding `lib/x2c.x` is no longer the prize it looked like.
+
+### Log
+
+- 2026-10-10: printf Var formats started as the first extraction under the
+  deletion rule.
+
 ## Next bounded milestone
 
 1. Establish a complete declaration use case for initializer-only `$auto`.
