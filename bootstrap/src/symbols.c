@@ -28,11 +28,11 @@ typedef struct SymUndo{
 }
 SymUndo;
 
-static List _239, _236, _229, _227, _224, _206, _202, _197, _196, _192, _188, _187, _184, _183, _182, _181, _178, _176, _175, _173, _172, _171, _169, _168, _167, _166, _164, _152, _151, _150, _148, _147, _146, _142, _141, _139, _138, _137, _133, _131, _130, _129, _127, _126, _125, _122, _121, _120, _118, _117, _116, _115, _112, _111, _110, _108, _105, _104, _103, _101, _100, _99, _95, _94, _93, _91, _90, _85, _84, _69, _64, _62, _61, _59, _58, _54, _53, _51, _49, _47, _46, _43, _42, _41, _40, _37, _36, _35, _33, _30, _29, _28, _24, _23, _22, _16, _15, _9, _7, _6, _5, _4;
+static List _236, _229, _227, _224, _206, _202, _197, _196, _192, _188, _187, _184, _183, _182, _181, _178, _176, _175, _173, _172, _171, _169, _168, _167, _166, _164, _152, _151, _150, _148, _147, _146, _142, _141, _139, _138, _137, _133, _131, _130, _129, _127, _126, _125, _122, _121, _120, _118, _117, _116, _115, _112, _111, _110, _108, _105, _104, _103, _101, _100, _99, _95, _94, _93, _91, _90, _85, _84, _69, _64, _62, _61, _59, _58, _54, _53, _51, _49, _47, _46, _43, _42, _41, _40, _37, _36, _35, _33, _30, _29, _28, _24, _23, _22, _16, _15, _9, _7, _6, _5, _4;
 
 static String _234, _233, _232, _231, _230, _228, _225, _222, _221, _220, _219, _218, _217, _216, _215, _214, _213, _212, _211, _210, _209, _208, _207, _204, _203, _201, _200, _199, _198, _194, _193, _190, _189, _185, _177, _162, _161, _160, _159, _158, _157, _156, _155, _154, _153, _143, _80, _79, _76, _75, _74, _73, _72, _71, _70, _56, _44, _13;
 
-static Var _238, _237, _235, _226, _223, _205, _195, _191, _186, _180, _179, _174, _170, _165, _163, _149, _145, _144, _140, _136, _135, _134, _132, _128, _124, _123, _119, _114, _113, _109, _107, _106, _102, _98, _97, _96, _92, _89, _88, _87, _86, _83, _82, _81, _78, _77, _68, _67, _66, _65, _63, _60, _57, _55, _52, _50, _48, _45, _39, _38, _34, _32, _31, _27, _26, _25, _21, _20, _19, _18, _17, _14, _12, _11, _10, _8, _3, _2, _1, _0;
+static Var _237, _235, _226, _223, _205, _195, _191, _186, _180, _179, _174, _170, _165, _163, _149, _145, _144, _140, _136, _135, _134, _132, _128, _124, _123, _119, _114, _113, _109, _107, _106, _102, _98, _97, _96, _92, _89, _88, _87, _86, _83, _82, _81, _78, _77, _68, _67, _66, _65, _63, _60, _57, _55, _52, _50, _48, _45, _39, _38, _34, _32, _31, _27, _26, _25, _21, _20, _19, _18, _17, _14, _12, _11, _10, _8, _3, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
@@ -400,8 +400,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _235 = String_var(_234);
   _236 = cons(_235, NULL);
   _237 = Symbol_var(421880102);
-  _238 = Symbol_var(286431579402);
-  _239 = cons(_238, NULL);
   _x2c_static_initialize_0();
 }
 
@@ -1258,16 +1256,32 @@ List Sym_field_order(Sym s, Type type){
   if(! _init_guard_) _file_init_();  return Sym_get(s, List_append(Type_list(type), _236));
 }
 
-void Sym_declare_delegate_field(Sym s, Type aggregate, String name){
+void Sym_mark_field(Sym s, Type aggregate, Symbol mark, String name){
   if(! _init_guard_) _file_init_();  Sym_set(s, ({
-    List _x2c_literal_part_24 = Type_list(aggregate);  List_append(_x2c_literal_part_24, cons(_238, cons(String_var(name), NULL)));
+    List _x2c_literal_part_24 = Type_list(aggregate);  List_append(_x2c_literal_part_24, cons(Symbol_var(mark), cons(String_var(name), NULL)));
   }
-  ), _239);
+  ), cons(Symbol_var(mark), NULL));
+}
+
+List Sym_marked_fields(Sym s, Type aggregate, Symbol mark){
+  if(! _init_guard_) _file_init_();  List order = Sym_field_order(s, aggregate);  Array rows = Array_new(); {
+    List row;  List _x2c_macro_object_13 = List_truth(order) ? List_cdr(order) : NULL;  List _x2c_macro_cursor_13 = _x2c_macro_object_13;  Var _x2c_macro_cursor_output_20;  while(List_try_next(_x2c_macro_object_13, &(_x2c_macro_cursor_13), &(_x2c_macro_cursor_output_20))){
+      row = Var_list(_x2c_macro_cursor_output_20); {
+        String name = Var_string(List_car(row));  if(String_truth(name) && List_truth(Sym_get(s, ({
+          List _x2c_literal_part_25 = Type_list(aggregate);  List_append(_x2c_literal_part_25, cons(Symbol_var(mark), cons(String_var(name), NULL)));
+        }
+        )))) Array_push(rows, List_var(row));
+      }
+
+    }
+
+  }
+  return Array_list_free(rows);
 }
 
 int Type_is_pointer(Type);
 Type Type_dereference(Type);
-Type Sym_delegate_aggregate(Sym s, Type type){
+Type Sym_aggregate_of(Sym s, Type type){
   if(! _init_guard_) _file_init_();  type = Type_canonicalize(type);  int hops = 0;  while(List_truth(Type_list(type)) && ! Type_is_aggregate_tag(type)){
     if(Type_is_pointer(type)){
       type = Sym_resolve_key(s, Type_dereference(type));  break;
@@ -1347,8 +1361,8 @@ static void _replace_map(Map original, Map staged){
     }
     ;  x2c_cleanup_push(& _x2c_defer_record_0); {
       {
-        Var key;  Array _x2c_macro_object_13 = keys;  int _x2c_macro_cursor_13 = 0;  Var _x2c_macro_cursor_output_20;  while(Array_try_next(_x2c_macro_object_13, &(_x2c_macro_cursor_13), &(_x2c_macro_cursor_output_20))){
-          key = _x2c_macro_cursor_output_20;  if(!(Map_contains(staged, key))) Map_del(original, key);
+        Var key;  Array _x2c_macro_object_14 = keys;  int _x2c_macro_cursor_14 = 0;  Var _x2c_macro_cursor_output_21;  while(Array_try_next(_x2c_macro_object_14, &(_x2c_macro_cursor_14), &(_x2c_macro_cursor_output_21))){
+          key = _x2c_macro_cursor_output_21;  if(!(Map_contains(staged, key))) Map_del(original, key);
         }
 
       }

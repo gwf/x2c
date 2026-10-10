@@ -32,6 +32,12 @@ Type Type_numeric(Type type);
 
 int Type_is_text(Type type);
 
+Type Type_aggregate(Type type);
+
+List Type_marked_fields(Type aggregate, Symbol mark);
+
+List Type_resolve_member(Type type, String name, int call);
+
 Code Type_protocol_member(Type type, String name);
 
 Type Code_type(Code value);
@@ -43,6 +49,8 @@ int Code_exits(Code statement);
 int Code_is_static_pattern(Code pattern);
 
 Code Code_register_rewrite(Code function, Macro shape, List holes);
+
+Code Code_register_marked_rewrite(Code function, Symbol mark, Macro shape, List holes);
 
 Code Code_register_after_initialization(Code function, Macro shape, List holes);
 

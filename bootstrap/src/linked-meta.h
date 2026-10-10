@@ -31,6 +31,8 @@ List x2c_type_members(List type);
 
 Code register_rewrite(Code function, Code pattern, List holes);
 
+Code register_marked_rewrite(Code function, Code mark, Code pattern, List holes);
+
 List _dedent_expand(List node);
 
 List _macros_location(void);

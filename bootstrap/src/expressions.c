@@ -265,6 +265,8 @@ static List Compiler__discarding_callee(Compiler c, List callee, Type callee_typ
 
 static List CallSite__method(CallSite * k, List receiver, List field);
 
+static List CallSite__member_rewrite(CallSite * k);
+
 static List CallSite__lookup(CallSite * k);
 
 static List CallSite__bound(CallSite * k, List binding, Type signature, List declared, List parameters, List returns);
@@ -2776,7 +2778,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2187 = cons(_2186, NULL);
   _2188 = cons(_252, _2187);
   _2189 = List_var(_2188);
-  _2190 = int_var(2095);
+  _2190 = int_var(2106);
   _2191 = cons(_2190, NULL);
   _2192 = cons(_258, _2191);
   _2193 = List_var(_2192);
@@ -2784,7 +2786,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2195 = cons(_2194, NULL);
   _2196 = cons(_266, _2195);
   _2197 = List_var(_2196);
-  _2198 = int_var(79202);
+  _2198 = int_var(79659);
   _2199 = cons(_2198, NULL);
   _2200 = cons(_271, _2199);
   _2201 = List_var(_2200);
@@ -2977,11 +2979,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2388 = cons(_2387, NULL);
   _2389 = cons(_218, _2388);
   _2390 = List_var(_2389);
-  _2391 = int_var(2103);
+  _2391 = int_var(2114);
   _2392 = cons(_2391, NULL);
   _2393 = cons(_258, _2392);
   _2394 = List_var(_2393);
-  _2395 = int_var(79564);
+  _2395 = int_var(80021);
   _2396 = cons(_2395, NULL);
   _2397 = cons(_271, _2396);
   _2398 = List_var(_2397);
@@ -3094,11 +3096,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2505 = cons(_2504, NULL);
   _2506 = cons(_218, _2505);
   _2507 = List_var(_2506);
-  _2508 = int_var(2114);
+  _2508 = int_var(2125);
   _2509 = cons(_2508, NULL);
   _2510 = cons(_258, _2509);
   _2511 = List_var(_2510);
-  _2512 = int_var(79976);
+  _2512 = int_var(80433);
   _2513 = cons(_2512, NULL);
   _2514 = cons(_271, _2513);
   _2515 = List_var(_2514);
@@ -3195,11 +3197,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_5(void){
   _2603 = cons(_2602, NULL);
   _2604 = cons(_218, _2603);
   _2605 = List_var(_2604);
-  _2606 = int_var(2117);
+  _2606 = int_var(2128);
   _2607 = cons(_2606, NULL);
   _2608 = cons(_258, _2607);
   _2609 = List_var(_2608);
-  _2610 = int_var(80060);
+  _2610 = int_var(80517);
   _2611 = cons(_2610, NULL);
   _2612 = cons(_271, _2611);
   _2613 = List_var(_2612);
@@ -3287,11 +3289,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_5(void){
   _2695 = cons(_2694, NULL);
   _2696 = cons(_218, _2695);
   _2697 = List_var(_2696);
-  _2698 = int_var(2121);
+  _2698 = int_var(2132);
   _2699 = cons(_2698, NULL);
   _2700 = cons(_258, _2699);
   _2701 = List_var(_2700);
-  _2702 = int_var(80267);
+  _2702 = int_var(80724);
   _2703 = cons(_2702, NULL);
   _2704 = cons(_271, _2703);
   _2705 = List_var(_2704);
@@ -3498,11 +3500,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_5(void){
   _2906 = List_var(_2905);
   _2907 = cons(_218, _100);
   _2908 = List_var(_2907);
-  _2909 = int_var(2170);
+  _2909 = int_var(2181);
   _2910 = cons(_2909, NULL);
   _2911 = cons(_258, _2910);
   _2912 = List_var(_2911);
-  _2913 = int_var(82396);
+  _2913 = int_var(82853);
   _2914 = cons(_2913, NULL);
   _2915 = cons(_271, _2914);
   _2916 = List_var(_2915);
@@ -5648,17 +5650,11 @@ static List CallSite__method(CallSite * k, List receiver, List field){
     )), NULL)));  return CallSite__finish(&((* k)), (* k).result_type, callee, NULL, NULL);
   }
   if(! List_truth(resolution) && ! Map_truth((* k).c -> macro_holes) && Map_truth((* k).c -> rewrite_rules)){
-    List source = cons(_0, cons(_414, cons(List_var(({
-      Var _x2c_literal_part_69 = List_var(cons(_0, cons(_414, cons(List_var(({
-        Var _x2c_literal_part_67 = List_var((* k).receiver);  Var _x2c_literal_part_68 = List_var((* k).field);  cons(_43, cons(_729, cons(_x2c_literal_part_67, cons(_x2c_literal_part_68, NULL))));
-      }
-      )), NULL))));  Var _x2c_literal_part_70 = List_var(cons(_146, List_append((* k).supplied, NULL)));  cons(_657, cons(_x2c_literal_part_69, cons(_x2c_literal_part_70, NULL)));
-    }
-    )), NULL)));  List rewritten = Compiler_rewrite((* k).c, 883757412, List_var(Type_canonicalize((* k).type)), source, AST_EXPRESSION, NULL, (* k).origin);  if(List_truth(rewritten)) return rewritten;
+    List rewritten = CallSite__member_rewrite(&((* k)));  if(List_truth(rewritten)) return rewritten;
   }
   if(! List_truth(resolution)){
     Var name = List_car((* k).field);  Compiler_report_error((* k).c, 1362954, ({
-      Var _x2c_literal_part_71 = String_var(List_repr(Type_list((* k).type)));  Var _x2c_literal_part_72 = String_var(Var_str(name));  String_join(NULL, cons(String_var(_1669), cons(_x2c_literal_part_71, cons(String_var(_1738), cons(_x2c_literal_part_72, NULL)))));
+      Var _x2c_literal_part_67 = String_var(List_repr(Type_list((* k).type)));  Var _x2c_literal_part_68 = String_var(Var_str(name));  String_join(NULL, cons(String_var(_1669), cons(_x2c_literal_part_67, cons(String_var(_1738), cons(_x2c_literal_part_68, NULL)))));
     }
     ), (* k).origin, NULL);
   }
@@ -5678,10 +5674,10 @@ break;
 }
 case 13183752: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936774802184ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var access = _x2c_match_values[0];  Var field_type = _x2c_match_values[1]; {
   List callee =({
-    Var _x2c_literal_part_76 = field_type;  Var _x2c_literal_part_77 = List_var(({
-      Var _x2c_literal_part_73 = access;  Var _x2c_literal_part_74 = List_var((* k).receiver);  Var _x2c_literal_part_75 = List_var((* k).field);  cons(_43, cons(_x2c_literal_part_73, cons(_x2c_literal_part_74, cons(_x2c_literal_part_75, NULL))));
+    Var _x2c_literal_part_72 = field_type;  Var _x2c_literal_part_73 = List_var(({
+      Var _x2c_literal_part_69 = access;  Var _x2c_literal_part_70 = List_var((* k).receiver);  Var _x2c_literal_part_71 = List_var((* k).field);  cons(_43, cons(_x2c_literal_part_69, cons(_x2c_literal_part_70, cons(_x2c_literal_part_71, NULL))));
     }
-    ));  cons(_0, cons(_x2c_literal_part_76, cons(_x2c_literal_part_77, NULL)));
+    ));  cons(_0, cons(_x2c_literal_part_72, cons(_x2c_literal_part_73, NULL)));
   }
   );  return CallSite__finish(&((* k)), (* k).result_type, callee, Var_type(field_type), NULL);
 }
@@ -5689,6 +5685,17 @@ break; } } default: break;
     }
   }
 return NULL;
+}
+
+Type Sym_aggregate_of(Sym, Type);
+static List CallSite__member_rewrite(CallSite * k){
+  List source = cons(_0, cons(_414, cons(List_var(({
+    Var _x2c_literal_part_76 = List_var(cons(_0, cons(_414, cons(List_var(({
+      Var _x2c_literal_part_74 = List_var((* k).receiver);  Var _x2c_literal_part_75 = List_var((* k).field);  cons(_43, cons(_729, cons(_x2c_literal_part_74, cons(_x2c_literal_part_75, NULL))));
+    }
+    )), NULL))));  Var _x2c_literal_part_77 = List_var(cons(_146, List_append((* k).supplied, NULL)));  cons(_657, cons(_x2c_literal_part_76, cons(_x2c_literal_part_77, NULL)));
+  }
+  )), NULL)));  Type type = Type_canonicalize((* k).type), aggregate = Sym_aggregate_of((* k).c -> sym, (* k).type);  List rewritten = Compiler_rewrite((* k).c, 883757412, List_var(type), source, AST_EXPRESSION, NULL, (* k).origin);  if(! List_truth(rewritten) && List_truth(Type_list(aggregate)) && ! List_equal(Type_list(aggregate), Type_list(type))) rewritten = Compiler_rewrite((* k).c, 883757412, List_var(aggregate), source, AST_EXPRESSION, NULL, (* k).origin);  return rewritten;
 }
 
 List Compiler_promote_string_literal(Compiler c, List expr);
@@ -5831,10 +5838,9 @@ static List Compiler__resolve_delegate_method(Compiler c, Type receiver, String 
   ;  DelegateSearch__find(&(search), receiver, NULL, NULL);  List candidates = Array_list_free(search.candidates);  if(List_truth(candidates) && List_truth(List_cdr(candidates))) DelegateSearch__report_paths(&(search), candidates);  if(List_truth(candidates)) return Var_list(List_car(candidates));  if(List_truth(search.first_cycle)) DelegateSearch__report_cycle(&(search));  return NULL;
 }
 
-Type Sym_delegate_aggregate(Sym, Type);
 List Sym_field_order(Sym, Type);
 static void DelegateSearch__find(DelegateSearch * d, Type receiver, List reverse_path, List seen){
-  Type aggregate = Sym_delegate_aggregate((* d).c -> sym, receiver);  if(! List_truth(Type_list(aggregate))) return;  if(List_contains(seen, List_var(aggregate))){
+  Type aggregate = Sym_aggregate_of((* d).c -> sym, receiver);  if(! List_truth(Type_list(aggregate))) return;  if(List_contains(seen, List_var(aggregate))){
     if(! List_truth((* d).first_cycle))(* d).first_cycle = cons(Symbol_var(1051920), List_reverse(reverse_path));  return;
   }
   seen = cons(List_var(aggregate), seen);  List order = Sym_field_order((* d).c -> sym, aggregate); {
@@ -6019,7 +6025,7 @@ static void Compiler__completion_owner_methods(Compiler c, String prefix, Map se
 }
 
 static void Compiler__completion_delegates(Compiler c, Type receiver, Map seen, Array names, Map visited){
-  Type aggregate = Sym_delegate_aggregate(c -> sym, receiver);  if(! List_truth(Type_list(aggregate)) || Map_contains(visited, List_var(aggregate))) return;  Map_setindex(visited, List_var(aggregate), int_var(1));  List order = Sym_field_order(c -> sym, aggregate); {
+  Type aggregate = Sym_aggregate_of(c -> sym, receiver);  if(! List_truth(Type_list(aggregate)) || Map_contains(visited, List_var(aggregate))) return;  Map_setindex(visited, List_var(aggregate), int_var(1));  List order = Sym_field_order(c -> sym, aggregate); {
     List row;  List _x2c_macro_object_20 = List_truth(order) ? List_cdr(order) : NULL;  List _x2c_macro_cursor_21 = _x2c_macro_object_20;  Var _x2c_macro_cursor_output_21;  while(List_try_next(_x2c_macro_object_20, &(_x2c_macro_cursor_21), &(_x2c_macro_cursor_output_21))){
       row = Var_list(_x2c_macro_cursor_output_21); {
         String field = Var_string(List_car(row));  if(! String_truth(field) || ! List_truth(Sym_get(c -> sym, ({

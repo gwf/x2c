@@ -149,9 +149,11 @@ void Sym_declare_field_order(Sym s, Type type, List fields);
 
 List Sym_field_order(Sym s, Type type);
 
-void Sym_declare_delegate_field(Sym s, Type aggregate, String name);
+void Sym_mark_field(Sym s, Type aggregate, Symbol mark, String name);
 
-Type Sym_delegate_aggregate(Sym s, Type type);
+List Sym_marked_fields(Sym s, Type aggregate, Symbol mark);
+
+Type Sym_aggregate_of(Sym s, Type type);
 
 SymTxn Compiler_begin_semantic_transaction(Compiler c);
 

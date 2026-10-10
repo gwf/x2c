@@ -75,6 +75,8 @@ int Compiler_keyword_form_is_definition(Compiler c);
 
 void Compiler_parse_keyword_definition(Compiler c);
 
+void Compiler_mark_field(Compiler c, Type aggregate, Symbol mark, String name);
+
 int Compiler_has_rewrites(Compiler c, Symbol point, Var kind);
 
 List Compiler_rewrite(Compiler c, Symbol point, Var kind, List source, AstPos position, Type expected, Token site);
