@@ -2,6 +2,7 @@
 
 #include "test-support.x"
 #include "test-macros.x"
+#include "datum.x"
 
 // reader - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -952,6 +953,36 @@ static void lisp_read_fences_nesting_depth(void) {
   Symbol status;
   EXPECT_TRUE(_read1(lisp, "((((((((((x))))))))))", &status) is <list>);
   EXPECT_INT_EQ(status, <value>);
+  lisp.destroy();
+}
+
+/* Each read's status, cursor, and value as one comparable text. */
+static String _read_outcome(Lisp lisp, String source, int plain) {
+  unsigned cursor = 0;
+  Var value = void;
+  Symbol status = <eof>;
+  try {
+    if (!plain) status = lisp.read(source, cursor, value);
+    else if (datum_read_plain(source, cursor, value)) status = <value>;
+  }
+  catch %((!or incomplete malformed size-limit) *): status = <error>;
+  Buffer out = $auto(Buffer.new(0));
+  out.printf("%s %u ", (char *) status.str(), cursor);
+  if (value is not void) datum_write(out, value, 1);
+  return out;
+}
+
+/* The plain datum reader agrees with the Lisp reader, including on the
+   spellings it leaves to that reader. */
+static void lisp_plain_datum_read_matches_reader(void) {
+  Lisp lisp = Lisp.kernel();
+  foreach (String source, %(
+      "(head \"a\\\"b\" \"x\\\\y\" -5 -0 2147483648 tail)"
+      "  ( a ( b ) () )  " "++" ".x" ".5" "+5" "007" "1234567890123456789"
+      "//b" "/*b*/" "a//b" "<sym>" "'q" "1.5" "0x10" "foo\\ bar"
+      "\"\\x41\"" "(a . b)" "(a" "" "x\"y\""))
+    EXPECT_STR_EQ(_read_outcome(lisp, source, 1),
+                  _read_outcome(lisp, source, 0));
   lisp.destroy();
 }
 
@@ -1928,6 +1959,7 @@ void lisp_suite(void) {
   $test.run(lisp_standard_operations_check_object_operands);
   $test.run(lisp_numeric_comparison_reads_the_value);
   $test.run(lisp_read_fences_nesting_depth);
+  $test.run(lisp_plain_datum_read_matches_reader);
   $test.run(lisp_pattern_matching_operations);
   $test.run(lisp_match_case_dispatch);
   $test.run(lisp_bare_session_has_only_primitives);
