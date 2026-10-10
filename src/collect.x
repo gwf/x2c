@@ -1748,12 +1748,13 @@ static List _interface_record(String path) {
 
 /* The one List form `source` spells, or NULL. */
 static List _read_record(String source) {
+  _interface_lisp();
   unsigned cursor = 0;
   Var record = void;
-  Symbol status = 0;
-  try status = Lisp.read(_interface_lisp(), source, cursor, record);
+  int read = 0;
+  try read = datum_read_plain(source, cursor, record);
   catch %((!or incomplete malformed) *): return NULL;
-  if (status != <value> || record is not <list>) return NULL;
+  if (!read || record is not <list>) return NULL;
   return record;
 }
 

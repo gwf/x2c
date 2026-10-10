@@ -138,10 +138,121 @@ static int _write_map(Buffer out, Map map) {
    Raises: `<incomplete>` or `<malformed>` for text that is not a datum. */
 int datum_read(String text, unsigned &cursor, Var &out) {
   Var value = void;
-  if (Lisp.read(NULL, text, cursor, value) != <value>) return 0;
+  if (!datum_read_plain(text, cursor, value)) return 0;
   out = _decode(value);
   return 1;
 }
+
+/* Reads the form at `cursor` in `text` into `out` as `Lisp.read` reads it,
+   without decoding tagged spellings, and advances `cursor` past it.
+   Returns 0 at the end of `text`.
+
+   Raises: `<incomplete>` or `<malformed>` for text that is not a form. */
+int datum_read_plain(String text, unsigned &cursor, Var &out) {
+  if (text) {
+    unsigned at = cursor;
+    while (_blank(text[at])) at++;
+    Array items = $auto([]);
+    Var value = void;
+    if (text[at] && _plain_form(text, at, value, items, 0)) {
+      cursor = at;
+      out = value;
+      return 1;
+    }
+  }
+  Var value = void;
+  if (Lisp.read(NULL, text, cursor, value) != <value>) return 0;
+  out = value;
+  return 1;
+}
+
+/* plain spellings
+
+   The forms `datum_write` spells, Lists of Strings, decimal integers, and
+   bare Atoms, are read here without the Lisp tokenizer, which costs most
+   of an interface read. Each reader returns 0 for any other spelling, and
+   `Lisp.read` then reads the form from its start, so every value is the
+   reader's. `items` holds the elements of the Lists being read. */
+
+static int _plain_form(char *s, unsigned &at, Var &out, Array items,
+                       int depth) {
+  char c = s[at];
+  if (c == '(') return _plain_list(s, at, out, items, depth);
+  if (c == '"') return _plain_string(s, at, out);
+  if (_digit(c) || (c == '-' && _digit(s[at + 1])))
+    return _plain_integer(s, at, out);
+  return _plain_atom(s, at, out);
+}
+
+static int _plain_list(char *s, unsigned &at, Var &out, Array items,
+                       int depth) {
+  if (depth >= LISP_READ_DEPTH_MAX) return 0;
+  int first = items.len();
+  for (at++; ; ) {
+    while (_blank(s[at])) at++;
+    if (s[at] == ')') break;
+    Var item = void;
+    if (!_plain_form(s, at, item, items, depth + 1)) return 0;
+    items.push(item);
+  }
+  at++;
+  List list = NULL;
+  for (int i = items.len() - 1; i >= first; i--) list = cons(items[i], list);
+  items.truncate(first);
+  out = list;
+  return 1;
+}
+
+static int _plain_string(char *s, unsigned &at, Var &out) {
+  unsigned end = at + 1;
+  for (; s[end] != '"'; end += s[end] == '\\' ? 2 : 1)
+    if (!s[end] || s[end] == '\n' || (s[end] == '\\' && !s[end + 1]))
+      return 0;
+  if (!_token_end(s[end + 1])) return 0;
+  String text = String.new_len(s + at + 1, end - at - 1);
+  out = memchr(text, '\\', text.len()) ? text.unescape() : text;
+  at = end + 1;
+  return 1;
+}
+
+/* An integer of at most 18 digits, which cannot overflow a `long`. */
+static int _plain_integer(char *s, unsigned &at, Var &out) {
+  unsigned end = at + (s[at] == '-');
+  if (s[end] == '0' && _digit(s[end + 1])) return 0;
+  long value = 0;
+  for (; _digit(s[end]); end++) {
+    if (end - at > 18) return 0;
+    value = value * 10 + (s[end] - '0');
+  }
+  if (!_token_end(s[end])) return 0;
+  if (s[at] == '-') value = -value;
+  if (value == (int) value) out = (int) value;
+  else out = value;
+  at = end;
+  return 1;
+}
+
+/* A spelling `Atom.bare_spelling` accepts reads as that Atom. */
+static int _plain_atom(char *s, unsigned &at, Var &out) {
+  unsigned char first = (unsigned char) s[at];
+  if (first < 33 || first > 126 || strchr("'`,#@$[]{}<\\", first) ||
+      ((first == '+' || first == '.') && _digit(s[at + 1])))
+    return 0;
+  int length = scan_atom(s + at);
+  if (length <= 0 || !_token_end(s[at + length]) ||
+      memchr(s + at, '\\', length))
+    return 0;
+  out = Atom.intern(String.new_len(s + at, length));
+  at += length;
+  return 1;
+}
+
+static int _digit(char c) => c >= '0' && c <= '9';
+
+static int _blank(char c) => c == ' ' || c == '\n' || c == '\t' || c == '\r';
+
+/* Whether the reader's token ends before `c`. */
+static int _token_end(char c) => !c || c == ')' || _blank(c);
 
 /* The value a tagged spelling stands for. */
 static Var _decode(Var value) {
