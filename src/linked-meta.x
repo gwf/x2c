@@ -468,7 +468,8 @@ Code delegate_member(Code code) {
       _delegate_fields(receiver.cadr(), x2c_binding_spelling(member));
     if (!fields) return code;
     Code target = receiver;
-    foreach (String field, fields) target = x2c_expr_field(target, field);
+    foreach (String field, fields)
+      target = %(expr () (op . $target ($field)));
     return $!($target.$member(@arguments));
   }
   return code;
