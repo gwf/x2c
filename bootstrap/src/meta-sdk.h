@@ -52,7 +52,7 @@ Code Code_register_rewrite(Code function, Macro shape, List holes);
 
 Code Code_register_marked_rewrite(Code function, Symbol mark, Macro shape, List holes);
 
-Code Code_register_after_initialization(Code function, Macro shape, List holes);
+Code Code_register_after_initialization(Code c, Macro shape, List holes);
 
 List x2c_syntax_type(List value);
 

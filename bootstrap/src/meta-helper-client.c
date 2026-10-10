@@ -115,7 +115,7 @@ typedef struct Call{
 }
 Call;
 
-static void Call_answer(Call * call, String operation, List operands);
+static void Call_answer(Call * c, String operation, List operands);
 
 static void Call_check(Call * call);
 
@@ -463,7 +463,7 @@ Var Compiler_apply_meta_function(Compiler, String, List, Token);
 
 
 
-static void Call_answer(Call * call, String operation, List operands){
+static void Call_answer(Call * c, String operation, List operands){
   Var volatile value =((void) 0, Void); {
     ExceptionFrame _x2c_exception_frame_0;  static MatchCaptureSite _x2c_macro_arms_0[1];  Var _x2c_macro_patterns_0[1];  static ErrorCatchSite _x2c_macro_site_0 ={
       _x2c_macro_arms_0, -1, 1, ERROR_CATCH_PENDING, - 1
@@ -471,7 +471,7 @@ static void Call_answer(Call * call, String operation, List operands){
     ;  if(x2c_error_catch_site_pending(& _x2c_macro_site_0)){
       _x2c_macro_patterns_0[0] = List_var(cons(Symbol_var(61045002), cons(Symbol_var(58262293080), NULL)));
     }
-    volatile ErrorHandler _x2c_error_handler_0 = x2c_error_catch_site_push(& _x2c_exception_frame_0, & _x2c_macro_site_0, _x2c_macro_patterns_0);  x2c_exception_push(& _x2c_exception_frame_0);  if(! sigsetjmp(_x2c_exception_frame_0.env, 0)) value = Compiler_apply_meta_function((* call).compiler, operation, operands, (* call).site);  else{
+    volatile ErrorHandler _x2c_error_handler_0 = x2c_error_catch_site_push(& _x2c_exception_frame_0, & _x2c_macro_site_0, _x2c_macro_patterns_0);  x2c_exception_push(& _x2c_exception_frame_0);  if(! sigsetjmp(_x2c_exception_frame_0.env, 0)) value = Compiler_apply_meta_function((* c).compiler, operation, operands, (* c).site);  else{
       x2c_exception_landed(& _x2c_exception_frame_0);  if(x2c_exception_is_error_target(& _x2c_exception_frame_0)){
         int _x2c_macro_selected_0 = x2c_error_catch_selected(_x2c_error_handler_0);  x2c_error_catch_detach(_x2c_error_handler_0);  x2c_exception_mark_handled(& _x2c_exception_frame_0);  if(_x2c_macro_selected_0 == 0){
           Var volatile code;  code = x2c_error_catch_capture(_x2c_error_handler_0, 0);  List volatile detail;  detail = Var_list(x2c_error_catch_capture(_x2c_error_handler_0, 1)); {
@@ -488,7 +488,7 @@ static void Call_answer(Call * call, String operation, List operands){
     }
     x2c_error_catch_close(_x2c_error_handler_0);  _x2c_error_handler_0 = NULL;  x2c_exception_leave(& _x2c_exception_frame_0);
   }
-  if(Var_is_void(value)) value = List_var(NULL);  Call_send_frame(&((* call)), cons(_86, cons(value, NULL)));
+  if(Var_is_void(value)) value = List_var(NULL);  Call_send_frame(&((* c)), cons(_86, cons(value, NULL)));
 }
 
 static void Call_check(Call * call){

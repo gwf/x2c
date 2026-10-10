@@ -779,7 +779,7 @@ static List _rewrite_holes(Macro shape, List supplied){
   if(List_truth(supplied)) return supplied;  Array holes = Array_new(); {
     List parameter;  List _x2c_macro_object_0 = Var_list(List_assoc(shape, Symbol_var(1129338912386214)));  List _x2c_macro_cursor_0 = _x2c_macro_object_0;  Var _x2c_macro_cursor_output_0;  while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
       parameter = Var_list(_x2c_macro_cursor_output_0); {
-        String binder = Var_str(List_assoc(parameter, Symbol_var(154018148)));  Array_push(holes, Atom_intern(String_add((Var_int(List_assoc(parameter, Symbol_var(1317592723658))) ? _55 : _56), String_getslice(binder, 1, -2147483648, 1))));
+        String binder = Var_str(List_assoc(parameter, Symbol_var(154018148)));  String prefix = Var_int(List_assoc(parameter, Symbol_var(1317592723658))) ? _55 : _56;  Array_push(holes, Atom_intern(String_add(prefix, String_getslice(binder, 1, -2147483648, 1))));
       }
 
     }
@@ -867,13 +867,13 @@ default: break;
 MetaContext_reject(_178, NULL);
 }
 
-Code Code_register_after_initialization(Code function, Macro shape, List holes){
+Code Code_register_after_initialization(Code c, Macro shape, List holes){
   if(! _init_guard_) _file_init_();  _sdk_guard(_179);  holes = _rewrite_holes(shape, holes);  List pattern = Macro_pattern(shape, holes);
   {
     List _x2c_match_expr = pattern;
     MatchCaptureBuffer _x2c_match_capture = { 0 };
     switch (Var_symbol(car(_x2c_match_expr))) {
-      case 8932560010: ;  static MatchCaptureSite _x2c_match_site_15;  if (x2c_match_site_try_capture(& _x2c_match_site_15, _x2c_match_expr, List_var(_180), &_x2c_match_capture)) {return _rewrite_registration(function, shape, holes, 272600, Symbol_var(619112));  break;
+      case 8932560010: ;  static MatchCaptureSite _x2c_match_site_15;  if (x2c_match_site_try_capture(& _x2c_match_site_15, _x2c_match_expr, List_var(_180), &_x2c_match_capture)) {return _rewrite_registration(c, shape, holes, 272600, Symbol_var(619112));  break;
 }
 default: break;
     }

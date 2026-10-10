@@ -44,8 +44,8 @@ int Atom_bare_spelling(String spelling){
   if(! _init_guard_) Atom_initialize();
   if(! String_truth(spelling) || ! * spelling || _numeric_prefix(spelling)) return 0;
   unsigned char first =(unsigned char) String_getindex(spelling, 0);
-  if(first < 33 || first > 126) return 0;
-  if(strchr("()'`,\"#@$[]{}<\\", first)) return 0;
+  if(first < 33 || first > 126 || strchr(spelling, '\\')) return 0;
+  if(strchr("()'`,\"#@$[]{}<", first)) return 0;
   if(first == '/' &&(String_getindex(spelling, 1) == '/' || String_getindex(spelling, 1) == '*')) return 0;
   int length = String_len(spelling);
   return scan_atom(spelling) == length;

@@ -252,7 +252,7 @@ static int _write_atom(Buffer out, Var value, int tagged){
   String text = Var_str(value);
   if(Atom_bare_spelling(text)) Buffer_write(out, text);
   else if(tagged) Buffer_printf(out, "(%s %s)", Var_is(value, 1328354264) ? "x2c.symbol" : "x2c.atom", (char *) String_repr(text));
-  else if(Var_is(value, 1328354264)) Buffer_write(out, Var_repr(value));
+  else if(Var_is(value, 1328354264) && Var_symbol(value)) Buffer_write(out, Var_repr(value));
   else return 0;
   return 1;
 }
@@ -454,7 +454,7 @@ static int _plain_atom(char * s, unsigned * at, Var * out){
   while(! _token_end(s[(* at) + length])) length ++;
   String spelling = String_new_len(s +(* at), length);
   if(! Atom_bare_spelling(spelling)) return 0;
-  (* out) = Atom_intern(_unescaped(spelling));
+  (* out) = Atom_intern(spelling);
   (* at) += length;
   return 1;
 }
@@ -635,7 +635,7 @@ int datum_unframe(String input, size_t * used, Var * value){
   unsigned cursor = 0;
   (* value) =((void) 0, Void);
   if(! datum_read(frame, &(cursor), &((* value)))){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/datum.x",.function = "datum_unframe",.line = 322};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/datum.x",.function = "datum_unframe",.line = 323};
     x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(13765450), String_var(frame));
     __builtin_unreachable();
   }

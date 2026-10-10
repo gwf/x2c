@@ -152,12 +152,12 @@ Buffer Symbol_write_repr(Symbol symbol, Buffer out){
   Buffer_write_char(out, '<');
   if(!(symbol & 1)) Buffer_write(out, text);
   else{
-    Buffer_write(out, "\\\"");
+    Buffer_write_char(out, '"');
     for(const char * src = text;  * src;  src ++){
       if(* src == '\\' || * src == '"') Buffer_write_char(out, '\\');
       Buffer_write_char(out, * src);
     }
-    Buffer_write(out, "\\\"");
+    Buffer_write_char(out, '"');
   }
   return Buffer_write_char(out, '>');
 }
