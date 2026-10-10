@@ -1696,11 +1696,22 @@ static List _interface_candidates(String canonical) {
    ownership and the same ordered parts representation as a cold walk. */
 static List Compiler._interface_load(
   Compiler c, String canonical, String path) {
+  String identity = compiler_identity();
   match (_interface_record(path))
-    case %(interface 6 ?(String compiler) ?(String owner) ?(String hash)
-           ?(List parts) ?(List definitions) ?(List dependencies)
-           ?(List include_dirs)):
-      if (c._interface_current(canonical, compiler, owner, hash) &&
+    case %(interface 6 ?(String compiler) *stored):
+      if (identity && compiler == identity)
+        return c._stored_entry(canonical, stored);
+  return NULL;
+}
+
+/* The entry of a stored record whose source, hash, and include roots still
+   match `canonical`, or NULL. */
+static List Compiler._stored_entry(Compiler c, String canonical, List stored) {
+  match (stored)
+    case %(?(String owner) ?(String hash) ?(List parts) ?(List definitions)
+           ?(List dependencies) ?(List include_dirs)):
+      if (home_absolute_path(owner) == canonical &&
+          c._hash_matches(canonical, hash) &&
           c._interface_include_dirs(canonical) == include_dirs)
         return c._interface_entry(
           canonical, hash, parts, definitions, dependencies, include_dirs);
@@ -1743,16 +1754,6 @@ static void _interface_shutdown(void) {
   interface_reader = NULL;
   source_hashes = NULL;
   linked_providers = NULL;
-}
-
-/* The interface belongs to this compiler and this source, and the source
-   still hashes as it did when the interface was written. */
-static int Compiler._interface_current(
-  Compiler c, String canonical, String compiler, String owner, String hash) {
-  String identity = compiler_identity();
-  return identity && compiler == identity &&
-    home_absolute_path(owner) == canonical &&
-    c._hash_matches(canonical, hash);
 }
 
 static int Compiler._hash_matches(Compiler c, String path, Var expected) {
@@ -1891,19 +1892,23 @@ String interface_text(Compiler c) {
 
 static int _write_interface_entry(
   Buffer out, String canonical, List entry) {
-  (List cached_parts, Var hash, List definitions, Map dependencies,
-   List include_dirs) = entry;
-  Map identities = {}, Array parts = [];
-  foreach (Var part, cached_parts) parts.push(_stored_part(part, identities));
   List record = %(
-    interface 6 ${compiler_identity()} ${home_portable_path(canonical)}
-    $hash ${parts.list_free()} $definitions
-    ${_stored_dependencies(dependencies)} $include_dirs
-  );
+    interface 6 ${compiler_identity()} @{_stored_record(canonical, entry)});
   /* An interface is plain data, which a loader never evaluates. */
   if (!datum_write(out, record, 0)) return 0;
   out.write_char('\n');
   return 1;
+}
+
+/* An entry as an interface stores it after the compiler identity. */
+static List _stored_record(String canonical, List entry) {
+  (List cached_parts, Var hash, List definitions, Map dependencies,
+   List include_dirs) = entry;
+  Map identities = {}, Array parts = [];
+  foreach (Var part, cached_parts) parts.push(_stored_part(part, identities));
+  return %(
+    ${home_portable_path(canonical)} $hash ${parts.list_free()} $definitions
+    ${_stored_dependencies(dependencies)} $include_dirs);
 }
 
 /* Search roots and the file's package mode must match before replay. */
@@ -1964,6 +1969,53 @@ static List _renumber_bindings(List node, Map identities) {
   Var child;
   $ast.rewrite_children(
     node, child, _renumber_bindings(child, identities));
+}
+
+// linked prelude
+
+/** Returns the interface record of each prelude component the compiler
+    links, by home-portable path, in the form a loader reads from a `.xi`.
+    Each is walked cold by a compiler of its own, so the records hold this
+    compiler's collection rather than a table linked into it; the unit's
+    own entries for them are restored afterwards. A record that would not
+    read back from its interface is left out. */
+Map Compiler.linked_prelude_records(Compiler c) {
+  Map records = {}, saved = {};
+  foreach (String source, _linked_prelude_sources()) {
+    String canonical = _canonical_path(%"${x2c_get_root()}/$source");
+    saved[canonical] = _process_cache()[canonical];
+    (void) _process_cache().del(canonical);
+  }
+  Compiler walker = Compiler.new();
+  walker.sources = c.sources;
+  walker.include_dirs = c.include_dirs;
+  walker.filename = c.filename;
+  foreach (String source, _linked_prelude_sources()) {
+    String path = %"${x2c_get_root()}/$source";
+    String canonical = _canonical_path(path);
+    Map visited = {};
+    visited[canonical] = 1;
+    walker._walk_apart(canonical, walker._runtime_text(path), {}, visited);
+    Var record = _read_back(
+      _stored_record(canonical, _process_cache()[canonical]));
+    if (record is <list>) records[home_portable_path(canonical)] = record;
+  }
+  foreach (Var (canonical, entry), saved) _process_cache()[canonical] = entry;
+  return records;
+}
+
+/* The compiler-owned prelude sources after the runtime's own. */
+static List _linked_prelude_sources(void) => compiler_prelude_sources().cdr();
+
+/* `record` as the interface reader reads its written form, or void. */
+static Var _read_back(List record) {
+  Buffer out = $auto(Buffer.new(0));
+  if (!datum_write(out, record, 0)) return void;
+  unsigned cursor = 0;
+  Var value = void;
+  try Lisp.read(_interface_lisp(), out, cursor, value);
+  catch %((!or incomplete malformed) *): return void;
+  return value;
 }
 
 // cache lifecycle

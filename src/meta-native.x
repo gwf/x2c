@@ -171,7 +171,13 @@ void Compiler.install_meta_function(Compiler c, List fn, Token marker) {
 void Compiler.install_collected_meta_function(
   Compiler c, List declaration, Token marker) {
   if (c.source_private < 0) return;
-  if (c.signature_only || c.macro_holes || macro_library_filling()) return;
+  if (c.signature_only || c.macro_holes) return;
+  /* The definition depends on the compile-time libraries even while the
+     shared session that will answer it is being filled. */
+  if (macro_library_filling()) {
+    c.add_library_dependencies();
+    return;
+  }
   String name = c._native_meta_name(declaration, marker);
   if (c.shares_meta_definition(name)) return;
   c.ensure_macro_lisp();

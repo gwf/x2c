@@ -5167,6 +5167,13 @@ static List _library_files(void) => %(
   ("etc/compiler-sdk.xlisp" "cannot open the compile-time Lisp SDK")
   ("etc/builtin-core.xlisp" "cannot open the built-in macro support"));
 
+/** Records the compile-time Lisp libraries as dependencies of `c`, as each
+    use of its session does. */
+void Compiler.add_library_dependencies(Compiler c) {
+  foreach (List library, _library_files())
+    c.add_translation_dependency(%"${c.root_dir}/${library.car()}");
+}
+
 /* A home Lisp library is evaluated once, when `loaded` is zero, but every use
    records it, so a file's dependencies do not depend on whether an earlier
    file loaded it. */

@@ -562,6 +562,13 @@ static Map _sdk_linked_hashes(void) {
   return rows;
 }
 
+/* The prelude components' interface records, which `src/collect.x` links
+   into the compiler it is translated into. */
+static Map _sdk_linked_prelude(void) {
+  _sdk_guard("_x2c.prelude.linked");
+  return active.expander.linked_prelude_records();
+}
+
 /** Answers `x2c.function.name`, declared in `lib/meta.x`. */
 String x2c_function_name(List function) {
   List identity = function.match_replace(
@@ -922,6 +929,7 @@ static void _sdk_reject_value(String message, Var value) {
     `lisp`, under their `_x2c.` names. */
 void Compiler.bind_sdk_primitives(Lisp lisp) {
   $lisp.bind(lisp, "_x2c.meta.linked.hashes", _sdk_linked_hashes);
+  $lisp.bind(lisp, "_x2c.prelude.linked", _sdk_linked_prelude);
   $lisp.bind(lisp, "_x2c.function.reference", builtin_foreach_reference);
   $lisp.bind(lisp, "_x2c.function.native-type", binding_native_type);
   $lisp.bind(lisp, "_x2c.literal.list", binding_literal_list);
