@@ -292,6 +292,43 @@ def cases():
     ordinary_meta["box/value.x"] = '#include "outer.x"\n' + ordinary_meta["box/value.x"]
     yield "ordinary_native_meta_complete_layout", ordinary_meta, {
         "inputs": ["box.x", "box/inner.x", "box/outer.x", "box/value.x", "main.x"]}, None
+    conditional_pointer = {
+        **pointer_alias,
+        "box/state.x": ('#define USE_FIRST 1\n#if USE_FIRST\n'
+                        'module typedef struct First {int value;} *Ticket;\n'
+                        '#else\nmodule typedef struct Second {long other;} *Ticket;\n'
+                        '#endif\nmodule Ticket ticket = NULL;\n'),
+    }
+    yield "pointer_alias_conditional_variants", conditional_pointer, options, None
+    ordinary_conditional_pointer = {
+        name: text.replace("module ", "")
+        for name, text in conditional_pointer.items()}
+    ordinary_conditional_pointer["box.x"] = '#include "box/state.x"\n#include "box/mirror.x"\n'
+    ordinary_conditional_pointer["box/mirror.x"] = (
+        '#include "state.x"\n' + ordinary_conditional_pointer["box/mirror.x"])
+    yield "ordinary_pointer_alias_conditional_variants", ordinary_conditional_pointer, {
+        "inputs": ["box.x", "box/state.x", "box/mirror.x", "main.x"]}, None
+    native_alias = {
+        "box.x": 'module {"box/state.x", "box/mirror.x"}\n',
+        "settings.h": 'typedef int NativeWord;\n#define WORD_PAD 1\n',
+        "box/state.x": ('#include "settings.h"\n'
+                        'module typedef NativeWord Word;\n'
+                        'module typedef struct Ticket {Word value;} *Ticket;\n'
+                        'module Word number = 17;\nmodule Ticket ticket = NULL;\n'),
+        "box/mirror.x": ('module typedef Word MirrorWord;\n'
+                         'module MirrorWord mirror = 25;\n'
+                         'int answer(void) {return number + mirror;}\n'),
+        "main.x": probes.consumer("box.x", "answer() == 42"),
+    }
+    yield "native_dependent_alias_forward", native_alias, {
+        **options, "include_dirs": ["."]}, None
+    ordinary_native_alias = {name: text.replace("module ", "")
+                             for name, text in native_alias.items()}
+    ordinary_native_alias["box.x"] = '#include "box/state.x"\n#include "box/mirror.x"\n'
+    ordinary_native_alias["box/mirror.x"] = '#include "state.x"\n' + ordinary_native_alias["box/mirror.x"]
+    yield "ordinary_native_dependent_alias_forward", ordinary_native_alias, {
+        "include_dirs": ["."],
+        "inputs": ["box.x", "box/state.x", "box/mirror.x", "main.x"]}, None
     yield "value_layout_three_levels", {
         **layout,
         "box.x": ('module typedef struct Inner Inner;\n'
