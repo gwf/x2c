@@ -185,8 +185,7 @@ static List Layouts.mark_fields(
 List Compiler.module_layout_alias_demands(Compiler c, List node) {
   if (!c.module_layout_plan || node.car() != <typedef>) return NULL;
   String path = c.canonical_path(c.filename);
-  Map rows = c.sym.unit_symbols().copy();
-  foreach (Var (key, value), c.sym.file_statics()) rows[key] = value;
+  Map rows = c.sym.unit_symbols();
   Sym resolver = Sym.new(c);
   resolver.reset_overlay(rows, c.module_layout_plan[%(projection-aliases)]);
   Map namespaces = declaration_type_namespaces(node, rows);
@@ -224,8 +223,7 @@ List Compiler.module_layout_demands(Compiler c, List node) {
     .bodies = c.module_layout_plan[%(projection-bodies)],
     .private_types = private_types};
   Sym resolver = Sym.new(c);
-  Map rows = c.sym.unit_symbols().copy();
-  foreach (Var (key, value), c.sym.file_statics()) rows[key] = value;
+  Map rows = c.sym.unit_symbols();
   resolver.reset_overlay(rows, c.module_layout_plan[%(projection-aliases)]);
   match (node) case %((!or typedef declare) ?base ?bindings): {
     Type type = base;
