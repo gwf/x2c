@@ -36,7 +36,22 @@ meta Code count_value(Code node) {
   return $!(({ reads++; $node; }));
 }
 
+/* In a body with a lambda, a declaration is counted once, and a name the
+   lambda shares by reference lives in a cell. */
+static Func shared(void) {
+  int (a, b) = %(1 2);
+  Func f = %!() using &a => {
+    a++;
+    return a + b;
+  };
+  a = 5;
+  return f;
+}
+
 int main(void) {
+  Func f = shared();
+  int x = f(), y = f();
+  printf("%d %d %d\n", x, y, declarations);
   Var (a, b) = %(1 2);
   (a, b) = %(3 4);
   printf("%ld %ld\n", a.integer(), b.integer());

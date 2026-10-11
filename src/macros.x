@@ -2661,7 +2661,9 @@ int Compiler.has_rewrites(Compiler c, Symbol point, Var kind) =>
 
 /** Matches registered patterns for one operation, then binds the first
     replacement. A translator declines with void, null, or its input itself.
-    Active rules cannot re-enter. */
+    Active rules cannot re-enter. A statement of the same kind that a
+    statement replacement writes or copies, such as its source, takes the
+    rules after the one that replaced it. */
 List Compiler.rewrite(
   Compiler c, Symbol point, Var kind, List source, AstPos position,
   Type expected, Token site) =>
@@ -2696,7 +2698,8 @@ static List Compiler._rewrite(
         (result is <list> && (!result.list() || result.list() === source)))
       continue;
     $let(c.active_rewrites, cons(rule, c.active_rewrites)) {
-      if (!lower) return c.bind_syntax(result, position, expected);
+      if (!lower)
+        return c._bound(point, kind, source, result, position, expected, site);
       if (position == AST_UNIT) return c._lowered_definition(result);
       int held = point == <node>;
       match (result) case %(code-value "lowered" *): held = 1;
@@ -2726,6 +2729,36 @@ static void _held_parts(List source, Symbol point, Array found) {
     if (node.car() is <symbol>) found.push(node);
     if (node.car() == <expr>) continue;
   }
+}
+
+/* A replacement bound without lowering. A statement of the rule's kind
+   that a statement replacement holds, such as its source, and that is not
+   a part its source held, takes the rules after this one now, so lowering
+   never offers it to this rule again. */
+static List Compiler._bound(
+  Compiler c, Symbol point, Var kind, List source, Var result,
+  AstPos position, Type expected, Token site) {
+  List bound = c.bind_syntax(result, position, expected);
+  if (point != <node>) return bound;
+  Array parts = $auto([]);
+  _held_parts(source, point, parts);
+  struct SlotWatch held = {parts.list()};
+  return c._bound_held(&held, kind, bound, position, expected, site);
+}
+
+static Var Compiler._bound_held(
+  Compiler c, SlotWatch held, Symbol kind, Var ast, AstPos position,
+  Type expected, Token site) {
+  if (!ast_contains_head(ast, kind) || held.slot(ast) >= 0) return ast;
+  List node = ast;
+  if (node.car() == kind) {
+    List rewritten =
+      c._rewrite(<node>, kind, node, position, expected, site, 0);
+    return rewritten ? rewritten : node;
+  }
+  Var child;
+  $ast.rewrite_children(
+    node, child, c._bound_held(held, kind, child, position, expected, site));
 }
 
 /* A replacement definition binds at file scope and lowers as written,
