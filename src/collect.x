@@ -405,7 +405,28 @@ static void FileWalk.flush(FileWalk &w, String segment) {
   if (!segment || !*segment) return;
   Map overlay = _cache_map();
   w.parse(segment, overlay);
+  w.record_declaration_providers(overlay);
   if (overlay.len()) w.parts.push(overlay);
+}
+
+/* Capture the contributing file before inline support copies type rows from
+   another provider. Metadata carries no language-visible declaration. */
+static void FileWalk.record_declaration_providers(FileWalk &w, Map overlay) {
+  String path = home_portable_path(w.path);
+  foreach (List key, overlay.keys()) {
+    List declared = NULL;
+    match (key) {
+      case %(?(String name)): declared = key;
+      case %((!or typedef struct union enum) ?(String name) *):
+        declared = key;
+    }
+    if (!declared) continue;
+    List record = %("source-node"
+      (declaration-provider $path ${w.pos} $declared));
+    List value = %(declaration-provider $path $declared);
+    overlay[record] = value;
+    w.globs[record] = value;
+  }
 }
 
 /* A segment resolves names through cumulative globs but writes declarations
@@ -1232,8 +1253,10 @@ static void Compiler.bind_pending_inline_bodies(
       providers.push(path);
       c.declaration_dependencies(path, dependencies);
     }
-    foreach (List group,
-             declaration_components(providers.list_free(), dependencies))
+    List paths = providers.list_free();
+    List groups = c.collected_declaration_components(paths);
+    if (!groups) groups = declaration_work(paths, dependencies);
+    foreach (List group, groups)
       foreach (String path, group)
         if (path in bodies) c.bind_inline_provider(bodies[path], globs);
   }
@@ -1242,6 +1265,54 @@ static void Compiler.bind_pending_inline_bodies(
   Array effects = [];
   List entry = c._entry(unit);
   if (entry) c._replay_cached(entry, unit, globs, visited, effects);
+}
+
+/** Groups collected declaration prerequisites without executing source forms.
+    Provider records retain the contributing file when inline support copies
+    a type family. Body references and ordered producers remain separate.
+    A missing provider record returns NULL, requiring ordinary collection.
+*/
+List Compiler.collected_declaration_components(Compiler c, List providers) {
+  Map dependencies = {}, rows = {}, owners = {}, contributions = {};
+  foreach (String provider, providers)
+    c.declaration_dependencies(provider, dependencies);
+  foreach (String provider, dependencies.keys()) {
+    List entry = c._entry(provider);
+    if (!entry) return NULL;
+    Map own = {};
+    foreach (Var part, entry.car()) if (part is <map>) {
+      rows.merge(part);
+      foreach (Var value, part.map())
+        match (value)
+          case %(declaration-provider ?path ?key): {
+            String defining = c.canonical_path(home_absolute_path(path));
+            if (defining != provider) continue;
+            List family = _type_family(key);
+            if (!family && key.list().car() is <string> &&
+                %(typedef ${key.list().car()}) in part.map())
+              family = %(typedef ${key.list().car()});
+            if (family && (!(family in owners) || key.list().cddr()))
+              owners[family] = provider;
+            own[key] = part.map()[key];
+          }
+    }
+    contributions[provider] = own;
+  }
+  foreach (String provider, contributions.keys()) {
+    Map needed = {}, own = contributions[provider];
+    foreach (Var value, own)
+      if (value is <list>) _needed_types(value, rows, needed);
+    Array edges = [];
+    foreach (String dependency, dependencies[provider].list())
+      edges.push(dependency);
+    foreach (List family, needed.keys()) {
+      Var owner;
+      if (owners.try_get(family, owner) && owner != provider &&
+          !(owner in edges)) edges.push(owner);
+    }
+    dependencies[provider] = edges.list_free();
+  }
+  return declaration_work(providers, dependencies);
 }
 
 /* Recorded include edges carry declaration dependencies. This walks completed
@@ -1693,7 +1764,7 @@ static int _package_protocol_row(List key, Var value) {
   return row && row.car() in
     %(protocol adopt meta-protocol declaration-source native-meta
       compile-time project-meta meta-hashes interface-types native-object
-      package-import);
+      package-import declaration-provider);
 }
 
 // import replay
@@ -1913,7 +1984,7 @@ static List Compiler._interface_load(
   Compiler c, String canonical, String path) {
   String identity = compiler_identity();
   match (_interface_record(path))
-    case %(interface 11 ?(String compiler) *stored):
+    case %(interface 12 ?(String compiler) *stored):
       if (identity && compiler == identity)
         return c._stored_entry(canonical, stored);
   return NULL;
@@ -1941,7 +2012,7 @@ static List _interface_record(String path) {
   try source = input.string_close();
   catch %(io-fail *): return NULL;
   String identity = compiler_identity();
-  if (!identity || !source.startswith(%"(interface 11 \"$identity\" "))
+  if (!identity || !source.startswith(%"(interface 12 \"$identity\" "))
     return NULL;
   return _read_record(source);
 }
@@ -2092,7 +2163,7 @@ String interface_prelude(void) {
   String identity = compiler_identity();
   if (!identity) return NULL;
   String runtime = _canonical_path(%"${x2c_get_root()}/lib/x2c.x");
-  String header = %"(interface 11 \"$identity\" ";
+  String header = %"(interface 12 \"$identity\" ";
   foreach (String path, _interface_candidates(runtime)) {
     String text = NULL;
     try text = Path.read_text(path);
@@ -2123,7 +2194,7 @@ String interface_text(Compiler c) {
 static int _write_interface_entry(
   Buffer out, String canonical, List entry) {
   List record = %(
-    interface 11 ${compiler_identity()} @{_stored_record(canonical, entry)});
+    interface 12 ${compiler_identity()} @{_stored_record(canonical, entry)});
   /* An interface is plain data, which a loader never evaluates. */
   if (!datum_write(out, record, 0)) return 0;
   out.write_char('\n');

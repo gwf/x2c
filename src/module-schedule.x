@@ -30,6 +30,21 @@ List declaration_components(List providers, Map dependencies) {
   return s.groups.list_free();
 }
 
+/** Schedules requested providers in prerequisite component order.
+    Unrequested graph vertices connect components but receive no body work.
+    Members of one component retain their original provider order.
+*/
+List declaration_work(List providers, Map dependencies) {
+  Array work = [];
+  foreach (List component, declaration_components(providers, dependencies)) {
+    Array selected = [];
+    foreach (String provider, providers)
+      if (provider in component) selected.push(provider);
+    if (selected.len()) work.push(selected.list_free());
+  }
+  return work.list_free();
+}
+
 static void DeclarationSchedule.visit(
   DeclarationSchedule &s, String provider) {
   int index = s.next++;
