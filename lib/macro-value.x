@@ -237,9 +237,10 @@ static Var _macro_hidden(Var binder) {
 }
 
 static Var _macro_shown(Var value) {
-  if (!value.is_binder() || value.str()[1:] != "__macro_anonymous")
-    return value;
-  return value.str()[0] == '*' ? <*> : <?>;
+  if (!value.is_binder()) return value;
+  String name = value.str();
+  if (name.len() != 18 || !name.endswith("__macro_anonymous")) return value;
+  return name[0] == '*' ? <*> : <?>;
 }
 
 /** Returns the binder that captures one projection of the template hole
