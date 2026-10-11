@@ -2858,7 +2858,8 @@ String home_absolute_path(String spelling) =>
 
 /** Merges one translation dependency, preserving an existing content hash. */
 void Map.merge_translation_dependency(Map m, String path, Var content_hash) {
-  if (content_hash is <string>) {
+  if (content_hash is <list>) m[path] = content_hash;
+  else if (content_hash is <string>) {
     if (m[path] is not <string>) m[path] = content_hash;
   }
   else m.setdefault(path, 1);
@@ -2917,7 +2918,6 @@ static void Compiler._init_tables(Compiler c) {
               static_init_deps, fn_defs, meta_comptime, meta_regions,
               meta_hashes, meta_calls, native_meta, project_meta,
               evaluated_effects, meta_group_bound);
-  c.module_tree = ModuleTree.new(c);
 }
 
 /* A child compiler owns its tokens, symbols, and diagnostics. Package
@@ -2938,6 +2938,7 @@ static void Compiler._share_unit(Compiler c, Compiler owner) {
 /* The first compiler of a unit creates the state its children share and
    starts from the shared session's compile-time-only definitions. */
 static void Compiler._own_unit(Compiler c) {
+  c.module_tree = ModuleTree.new(c);
   c.pending_inline_bodies = [];
   c.collection_native_files = {};
   c.inherit_library_comptime();

@@ -149,7 +149,8 @@ static int Query.serve(Query &q, CliRequest request) {
 
 /* Whether a file the unit read, or whose text it kept, is unsaved. */
 static int _changed_dependency(Compiler c, SourceView sources) {
-  foreach (Var path, c.deps.keys()) if (sources.is_changed(path)) return 1;
+  foreach (Var path, c.resolved_translation_dependencies().keys())
+    if (sources.is_changed(path)) return 1;
   foreach (Var path, c.source_texts.keys())
     if (sources.is_changed(path)) return 1;
   return 0;

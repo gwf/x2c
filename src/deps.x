@@ -12,6 +12,7 @@
 #include "utils.x"
 
 #include "collect.x"
+#include "module-access.x"
 
 #include <stdio.h>
 #include <string.h>
@@ -52,7 +53,8 @@ int translation_depfile_write(
 static String _contents(
   CliRequest request, Compiler compiler, String input, String output_dir) {
   Array paths = $auto([]), searches = $auto([]);
-  foreach (Var (path, content_hash), compiler.deps) {
+  Map dependencies = compiler.resolved_translation_dependencies();
+  foreach (Var (path, content_hash), dependencies) {
     if (content_hash is <string> && String.startswith(content_hash, "search:")) {
       String candidate = path;
       searches.push(candidate.startswith("cwd:") ? candidate[4:] : candidate);

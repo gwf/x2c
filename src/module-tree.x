@@ -34,7 +34,7 @@ ModuleTree ModuleTree.new(Compiler c) {
 
 /** Returns the generated support-header name for a module source. */
 String module_support_header(String path) =>
-  %"_x2c_module_${filename_hash(home_portable_path(Path.absolute(path)))}.h";
+  %"_x2c_module_${filename_hash(home_portable_path(absolute_path(path)))}.h";
 
 static void ModuleTree._report(
   ModuleTree tree, String path, String message) {
@@ -136,12 +136,13 @@ static ModuleEntry ModuleTree._scan(ModuleTree tree, String path) {
 
 /** Reads an entry once. Non-entry files also retain their absent result. */
 ModuleEntry ModuleTree.entry(ModuleTree m, String canonical_path) {
-  String path = Path.absolute(canonical_path);
+  Var cached;
+  if (m.entries.try_get(canonical_path, cached)) return cached.pointer();
+  String path = absolute_path(canonical_path);
+  if (m.entries.try_get(path, cached)) return cached.pointer();
   m.dependencies.merge_translation_dependency(
     path,
     m.compiler.sources.exists(path) ? (Var) 1 : (Var) "search:absent");
-  Var cached;
-  if (m.entries.try_get(path, cached)) return cached.pointer();
   ModuleEntry entry = m._scan(path);
   m.entries[path] = Var.new(<p48>, entry);
   if (entry) m.owners[path] = path;
@@ -152,7 +153,7 @@ ModuleEntry ModuleTree.entry(ModuleTree m, String canonical_path) {
 
 /** The ownership search facts of this file, independent of prior walks. */
 Map ModuleTree.ownership_dependencies(ModuleTree tree, String path) {
-  path = Path.absolute(path);
+  path = absolute_path(path);
   Map dependencies = {};
   (void) tree.entry(path);
   dependencies.merge_translation_dependency(path, tree.dependencies[path]);
@@ -166,6 +167,16 @@ Map ModuleTree.ownership_dependencies(ModuleTree tree, String path) {
         tree.dependencies[candidate]);
     }
   return dependencies;
+}
+
+/** Records an ownership query independently of its resolved search paths. */
+List ModuleTree.ownership_query(ModuleTree tree, String path) {
+  path = absolute_path(path);
+  Array owners = [];
+  foreach (String owner, tree.ancestors(path))
+    owners.push(home_portable_path(owner));
+  return %(ownership-search ${home_portable_path(path)}
+    ${owners.list_free()});
 }
 
 /* A path can be named by more than one ancestor entry. Discovery examines
@@ -191,7 +202,11 @@ static String ModuleTree._parent(ModuleTree tree, String path) {
     An entry owns itself; its enrollment in a parent is recorded separately.
 */
 String ModuleTree.owner(ModuleTree tree, String path) {
-  path = Path.absolute(path);
+  if (%(checked $path) in tree.owners) {
+    Var owner = tree.owners[path];
+    return owner is <string> ? owner.string() : NULL;
+  }
+  path = absolute_path(path);
   if (!(%(checked $path) in tree.owners)) {
     ModuleEntry entry = tree.entry(path);
     String parent = tree._parent(path);
@@ -205,6 +220,8 @@ String ModuleTree.owner(ModuleTree tree, String path) {
 
 /** Lists the owning entry followed by its parent entries, nearest first. */
 List ModuleTree.ancestors(ModuleTree tree, String path) {
+  Var known;
+  if (tree.owners.try_get(%(ancestors $path), known)) return known.list();
   Array entries = [];
   String owner = tree.owner(path);
   while (owner) {
@@ -213,7 +230,9 @@ List ModuleTree.ancestors(ModuleTree tree, String path) {
     Var parent = tree.owners[%(parent $owner)];
     owner = parent is <string> ? parent.string() : NULL;
   }
-  return entries;
+  List ancestry = entries.list_free();
+  tree.owners[%(ancestors $path)] = ancestry;
+  return ancestry;
 }
 
 /** Expands source inputs into distinct enrolled units, retaining input

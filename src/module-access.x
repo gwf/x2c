@@ -10,7 +10,24 @@ void Compiler.configure_module(Compiler c, String filename) {
   if (!c.module_tree) c.module_tree = ModuleTree.new(c);
   String path = c.canonical_path(filename);
   c.module_owner = c.module_tree.owner(path);
-  c.merge_translation_dependencies(c.module_tree.ownership_dependencies(path));
+  c.deps[%"ownership:$path"] = c.module_tree.ownership_query(path);
+}
+
+/** Resolves ownership queries into this request's actual prerequisites. */
+Map Compiler.resolved_translation_dependencies(Compiler c) {
+  Map dependencies = {};
+  foreach (Var (path, fact), c.deps) {
+    if (fact is <list>)
+      match (fact) case %(ownership-search ?source ?): {
+        Map searches = c.module_tree.ownership_dependencies(
+          home_absolute_path(source));
+        foreach (Var (candidate, hash), searches)
+          dependencies.merge_translation_dependency(candidate, hash);
+        continue;
+      }
+    dependencies.merge_translation_dependency(path, fact);
+  }
+  return dependencies;
 }
 
 /** Returns the current module followed by its enclosing modules, nearest

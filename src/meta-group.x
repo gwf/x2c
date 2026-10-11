@@ -390,7 +390,7 @@ static Array Compiler._runtime_includes(Compiler c, String lib) {
   Array ordered = [];
   foreach (String header, %("x2c.x" "meta.x"))
     ordered.push(%(preproc ${%"#include \"$header\""}));
-  foreach (Var (path, hash), c.deps) {
+  foreach (Var (path, hash), c.resolved_translation_dependencies()) {
     if (hash is <string> && String.startswith(hash, "search:")) continue;
     if (c.canonical_path(path) == c.canonical_path(c.filename)) continue;
     String dependency = path;
@@ -922,7 +922,8 @@ void Compiler.write_meta_build(Compiler c) {
   List code = failure ? NULL : c._emit(
     build_module_stamp(), %"meta_group_$index", %"_$index", failure);
   Array sources = [];
-  foreach (Var (path, _), c.deps) sources.push(path);
+  foreach (Var (path, _), c.resolved_translation_dependencies())
+    sources.push(path);
   Path.write_text(%"$base.deps", "\n".join(sources.list_free()));
   if (!code) {
     Path.write_text(%"$base.failure", failure);

@@ -431,7 +431,8 @@ static void Helper.parse_source(
   unit.collect(f);
   unit.compiler.diagnostics.reset();
   unit.parse();
-  foreach (Var (read, _), unit.compiler.deps) h.deps[read] = 1;
+  foreach (Var (read, _), unit.compiler.resolved_translation_dependencies())
+    h.deps[read] = 1;
 }
 
 /* Compiles the group a parse left for table `index`, adding the headers it

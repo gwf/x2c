@@ -1046,7 +1046,7 @@ Map Compiler.meta_provider_hashes(Compiler c, String provider) =>
 
 /** Retains source proofs and one definition hash per linked provider. */
 void Compiler.add_linked_meta_provider_hashes(Compiler c, Map rows) {
-  foreach (String path, c.deps.keys()) {
+  foreach (String path, c.resolved_translation_dependencies().keys()) {
     if (!is_source_file(path)) continue;
     List entry = c._entry(_canonical_path(path));
     if (!entry) continue;
@@ -1874,7 +1874,7 @@ static List Compiler._interface_load(
   Compiler c, String canonical, String path) {
   String identity = compiler_identity();
   match (_interface_record(path))
-    case %(interface 9 ?(String compiler) *stored):
+    case %(interface 10 ?(String compiler) *stored):
       if (identity && compiler == identity)
         return c._stored_entry(canonical, stored);
   return NULL;
@@ -1902,7 +1902,7 @@ static List _interface_record(String path) {
   try source = input.string_close();
   catch %(io-fail *): return NULL;
   String identity = compiler_identity();
-  if (!identity || !source.startswith(%"(interface 9 \"$identity\" "))
+  if (!identity || !source.startswith(%"(interface 10 \"$identity\" "))
     return NULL;
   return _read_record(source);
 }
@@ -2022,6 +2022,14 @@ static Map Compiler._read_dependencies(Compiler c, List stored) {
   foreach (Var dependency, stored) {
     if (dependency is not <list>) return NULL;
     match (dependency.list())
+      case %(ownership-search ?(String source) ?(List owners)): {
+        String provider = _canonical_path(home_absolute_path(source));
+        List current = c.module_tree.ownership_query(provider);
+        if (current.caddr() != owners) return NULL;
+        _cache_dependency(dependencies, %"ownership:$provider", current);
+        continue;
+      }
+    match (dependency.list())
       case %(?(String name) ?hash): {
         String path = hash is <string> && String.startswith(hash, "search:") ?
           (name.startswith("cwd:") ? name : home_absolute_path(name)) :
@@ -2044,7 +2052,7 @@ String interface_prelude(void) {
   String identity = compiler_identity();
   if (!identity) return NULL;
   String runtime = _canonical_path(%"${x2c_get_root()}/lib/x2c.x");
-  String header = %"(interface 9 \"$identity\" ";
+  String header = %"(interface 10 \"$identity\" ";
   foreach (String path, _interface_candidates(runtime)) {
     String text = NULL;
     try text = Path.read_text(path);
@@ -2075,7 +2083,7 @@ String interface_text(Compiler c) {
 static int _write_interface_entry(
   Buffer out, String canonical, List entry) {
   List record = %(
-    interface 9 ${compiler_identity()} @{_stored_record(canonical, entry)});
+    interface 10 ${compiler_identity()} @{_stored_record(canonical, entry)});
   /* An interface is plain data, which a loader never evaluates. */
   if (!datum_write(out, record, 0)) return 0;
   out.write_char('\n');
@@ -2127,8 +2135,14 @@ static Var _stored_part(Var part, Map identities) {
 
 static List _stored_dependencies(Map dependencies) {
   Array rows = [];
-  foreach (Var (path, hash), dependencies)
+  foreach (Var (path, hash), dependencies) {
+    if (hash is <list>)
+      match (hash) case %(ownership-search ? ?): {
+        rows.push(hash);
+        continue;
+      }
     rows.push(%(${home_portable_path(path)} $hash));
+  }
   rows.sort();
   return rows.list_free();
 }
