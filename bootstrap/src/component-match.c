@@ -5,11 +5,11 @@
 
 #include "rewrite.h"
 #include "grammar.h"
-static List _45, _44, _43, _41, _40, _39, _37, _36, _35, _33, _27, _26, _25, _24, _22, _21, _20, _19, _13, _12, _3, _2;
+static List _43, _42, _41, _39, _38, _37, _35, _34, _33, _31, _30, _23, _22, _21, _20, _18, _17, _16, _15, _9, _8;
 
-static String _52, _51, _50, _49, _48, _47, _46, _29, _28, _9, _8, _7, _6, _5, _4;
+static String _50, _49, _48, _47, _46, _45, _44, _25, _24, _5, _4, _3, _2, _1, _0;
 
-static Var _42, _38, _34, _32, _31, _30, _23, _18, _17, _16, _15, _14, _11, _10, _1, _0;
+static Var _40, _36, _32, _29, _28, _27, _26, _19, _14, _13, _12, _11, _10, _7, _6;
 
 static int _init_guard_ = 0;
 
@@ -51,59 +51,57 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  _0 = Symbol_var(35579270086);
-  _1 = Symbol_var(58);
-  _2 = cons(_1, NULL);
-  _3 = cons(_0, _2);
-  _4 = String_new(" ");
-  _5 = String_new("#");
-  _6 = String_new("endif");
-  _7 = String_new("if");
-  _8 = String_new("_x2c_match_cursor");
-  _9 = String_new("_x2c_match_cursor");
-  _10 = Symbol_var(2050325770);
-  _11 = Symbol_var(62054);
-  _12 = cons(_11, NULL);
-  _13 = cons(_10, _12);
-  _14 = List_var(_13);
-  _15 = Symbol_var(61737802);
-  _16 = Symbol_var(1362954);
-  _17 = Symbol_var(1941582);
-  _18 = Symbol_var(1328354264);
-  _19 = cons(_18, NULL);
-  _20 = cons(_16, _19);
-  _21 = cons(_17, _20);
+  _0 = String_new(" ");
+  _1 = String_new("#");
+  _2 = String_new("endif");
+  _3 = String_new("if");
+  _4 = String_new("_x2c_match_cursor");
+  _5 = String_new("_x2c_match_cursor");
+  _6 = Symbol_var(2050325770);
+  _7 = Symbol_var(62054);
+  _8 = cons(_7, NULL);
+  _9 = cons(_6, _8);
+  _10 = List_var(_9);
+  _11 = Symbol_var(61737802);
+  _12 = Symbol_var(1362954);
+  _13 = Symbol_var(1941582);
+  _14 = Symbol_var(1328354264);
+  _15 = cons(_14, NULL);
+  _16 = cons(_12, _15);
+  _17 = cons(_13, _16);
+  _18 = cons(_7, _17);
+  _19 = List_var(_18);
+  _20 = cons(_19, NULL);
+  _21 = cons(_12, _20);
   _22 = cons(_11, _21);
-  _23 = List_var(_22);
-  _24 = cons(_23, NULL);
-  _25 = cons(_16, _24);
-  _26 = cons(_15, _25);
-  _27 = cons(_14, _26);
-  _28 = String_new("List");
-  _29 = String_new("Var");
-  _30 = Symbol_var(377892);
-  _31 = Symbol_var(62436);
-  _32 = Symbol_var(6363658);
-  _33 = cons(_32, _2);
-  _34 = List_var(_33);
-  _35 = cons(_34, NULL);
-  _36 = cons(_1, _35);
-  _37 = cons(_30, _36);
-  _38 = List_var(_37);
-  _39 = cons(_38, NULL);
-  _40 = cons(_34, _39);
-  _41 = cons(_31, _40);
-  _42 = List_var(_41);
-  _43 = cons(_42, NULL);
-  _44 = cons(_1, _43);
-  _45 = cons(_30, _44);
-  _46 = String_new("");
-  _47 = String_new("->car");
-  _48 = String_new("->car)");
-  _49 = String_new("->cdr");
-  _50 = String_new(" default: ;");
-  _51 = String_new(" case ");
-  _52 = String_new("ULL: ;");
+  _23 = cons(_10, _22);
+  _24 = String_new("List");
+  _25 = String_new("Var");
+  _26 = Symbol_var(377892);
+  _27 = Symbol_var(58);
+  _28 = Symbol_var(62436);
+  _29 = Symbol_var(6363658);
+  _30 = cons(_27, NULL);
+  _31 = cons(_29, _30);
+  _32 = List_var(_31);
+  _33 = cons(_32, NULL);
+  _34 = cons(_27, _33);
+  _35 = cons(_26, _34);
+  _36 = List_var(_35);
+  _37 = cons(_36, NULL);
+  _38 = cons(_32, _37);
+  _39 = cons(_28, _38);
+  _40 = List_var(_39);
+  _41 = cons(_40, NULL);
+  _42 = cons(_27, _41);
+  _43 = cons(_26, _42);
+  _44 = String_new("");
+  _45 = String_new("->car");
+  _46 = String_new("->car)");
+  _47 = String_new("->cdr");
+  _48 = String_new(" default: ;");
+  _49 = String_new(" case ");
+  _50 = String_new("ULL: ;");
 }
 
 static void _match_flush(Buffer b, Array out){
@@ -130,11 +128,14 @@ static List _match_items(Array out){
       piece = _x2c_macro_cursor_output_0;
       {
         {
-          List _x2c_match_expr = Var_list(piece);
-          MatchCaptureBuffer _x2c_match_capture = { 0 };
-          switch(Var_symbol(car(_x2c_match_expr))){
-              case 35579270086: ; static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(_3), &_x2c_match_capture)) {{
-              if(Array_len(run)) Array_push(items, List_var(cons(String_var(_4), Array_list(run))));  Array_clear(run);  Array_push(items, piece);  continue;
+          List _x2c_match_expr = Var_list(piece); List _x2c_match_cursor;
+          switch(_x2c_match_expr ? _x2c_match_expr->car.u64 : 0){
+              case 9224497972340888518ULL: ;
+             _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497972340888518ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
+              if(Array_len(run)) Array_push(items, List_var(cons(String_var(_0), Array_list(run))));
+              Array_clear(run);
+              Array_push(items, piece);
+              continue;
             }
              break; } default: break;
           }
@@ -146,15 +147,18 @@ static List _match_items(Array out){
     }
 
   }
-  if(Array_len(run)) Array_push(items, List_var(cons(String_var(_4), Array_list(run))));  return Array_list_free(items);
+  if(Array_len(run)) Array_push(items, List_var(cons(String_var(_0), Array_list(run))));
+  return Array_list_free(items);
 }
 
 static int _match_nesting(String text){
-  String directive = String_strip(String_remove_prefix(String_strip(text, " \t"), _5), " \t");  if(String_startswith(directive, _6)) return - 1;  return String_startswith(directive, _7);
+  String directive = String_strip(String_remove_prefix(String_strip(text, " \t"), _1), " \t");
+  if(String_startswith(directive, _2)) return - 1;
+  return String_startswith(directive, _3);
 }
 
 static String _match_cursor(int depth){
-  return depth ? String_join(NULL, cons(String_var(_8), cons(String_var(int_str(depth)), NULL))) : _9;
+  return depth ? String_join(NULL, cons(String_var(_4), cons(String_var(int_str(depth)), NULL))) : _5;
 }
 
 static Symbol _match_head(Var value){
@@ -173,10 +177,10 @@ static List _match_binders(Var value){
 
 static Symbol _match_capture_tag(Var element, Var * binder){
   {
-    List _x2c_match_expr = Var_list(element);
-    Var _x2c_match_values[2]; MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
+    List _x2c_match_expr = Var_list(element); Var _x2c_match_values[2]; MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
     switch(0){
-        default: ; static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(_27), &_x2c_match_capture)) { Var name = _x2c_match_values[0]; Var tag = _x2c_match_values[1]; {
+        default: ;
+       static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(_23), &_x2c_match_capture)) { Var name = _x2c_match_values[0]; Var tag = _x2c_match_values[1]; {
         Var _x2c_match_value_0 = tag; {
           Symbol tag = Var_symbol(_x2c_match_value_0);  if(tag != 1059020478773725 && tag != 1479708786 && tag != 1468512){
             (* binder) = name;  return tag;
@@ -200,7 +204,7 @@ static void _match_bind(Buffer b, Var binder, String cell, int * testing, int * 
   if((* testing)){
     Buffer_write(b, ") {"); (* braces) ++; (* testing) = 0;
   }
-  String type = Var_is_list_binder(binder) ? _28 : _29;  String name = String_getslice(Var_str(binder), 1, -2147483648, 1);  Buffer_printf(b, " %s %s = %s;", type, name, cell);
+  String type = Var_is_list_binder(binder) ? _24 : _25;  String name = String_getslice(Var_str(binder), 1, -2147483648, 1);  Buffer_printf(b, " %s %s = %s;", type, name, cell);
 }
 
 static int _match_element(Buffer b, Var part, String cell, Array seen, int * testing, int * braces){
@@ -214,19 +218,19 @@ static int _match_element(Buffer b, Var part, String cell, Array seen, int * tes
 }
 
 static int _match_nested(Buffer b, Array out, List pattern, Var value, int * depths){
-  if(! List_truth(({ static MatchCaptureSite _x2c_match_site_0;  x2c_match_site_match(& _x2c_match_site_0, pattern, List_var(_45)); })) || ! Var_is_row(value, 9, 7, 4)) return - 1;
+  if(! List_truth(({ static MatchCaptureSite _x2c_match_site_0;  x2c_match_site_match(& _x2c_match_site_0, pattern, List_var(_43)); })) || ! Var_is_row(value, 9, 7, 4)) return - 1;
   _match_flush(b, out);
   Array rests = Array_new(), paths = Array_new(), seen = Array_new();
   int mark = Array_len(out), testing = 0, braces = 0, step = 0, deepest = 0;
   List rest = Var_list(value);
-  String path = _46;
+  String path = _44;
   Buffer_write(b, " _x2c_match_cursor = _x2c_match_expr;");
   for(; ; ){
     int levels = Array_len(rests);
     String cursor = _match_cursor(levels);
     Var part = List_truth(rest) ? List_car(rest) : Var_null();
     if(List_truth(rest) && ! Var_is_list_binder(part)){
-      String cell = String_join(NULL, cons(String_var(cursor), cons(String_var(_47), NULL)));
+      String cell = String_join(NULL, cons(String_var(cursor), cons(String_var(_45), NULL)));
       _match_and(b, &(testing));
       Buffer_write(b, cursor);
       step = _match_element(b, part, cell, seen, &(testing), &(braces));
@@ -237,7 +241,7 @@ static int _match_nested(Buffer b, Array out, List pattern, Var value, int * dep
         Array_push(paths, String_var(path));
         if(levels >= deepest) deepest = levels + 1;
         rest = Var_list(part);
-        path = String_add(path, _48);
+        path = String_add(path, _46);
         continue;
       }
       if(step == 2){
@@ -269,7 +273,7 @@ static int _match_nested(Buffer b, Array out, List pattern, Var value, int * dep
     _match_and(b, &(testing));
     Buffer_printf(b, "(%s = %s->cdr, 1)", cursor, cursor);
     rest = List_cdr(rest);
-    path = String_add(path, _49);
+    path = String_add(path, _47);
   }
   if(step < 0){
     while(Array_len(out) > mark) Array_take_last(out);
@@ -310,11 +314,10 @@ static void _match_declare(Buffer b, List binders){
 static void _match_body(Buffer b, Array out, List body, int braces){
   int finish = 1;
   {
-    List _x2c_match_expr = body;
-    Var _x2c_match_values[1]; MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
-    switch(Var_symbol(car(_x2c_match_expr))){
-        case 16444957000: ; { List _x2c_match_cursor; if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497953206575432ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) { Var inner = _x2c_match_values[0];
-      {
+    List _x2c_match_expr = body; List _x2c_match_cursor;
+    switch(_x2c_match_expr ? _x2c_match_expr->car.u64 : 0){
+        case 9224497953206575432ULL: ;
+       _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497953206575432ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor) { Var inner = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
         body = Var_list(inner);
         finish = 0;
       }
@@ -331,12 +334,12 @@ static String _match_label(Symbol head, Array heads, int * labelling){
   if(!(* labelling)) return NULL;
   if(! head){
     (* labelling) = 0;
-    return _50;
+    return _48;
   }
   if(Array_contains(heads, Symbol_var(head))) return NULL;
   Array_push(heads, Symbol_var(head));
   Var literal = Symbol_var(head);
-  return String_join(NULL, cons(String_var(_51), cons(String_var(Var_str(Var_box_ulong_long((unsigned long long) literal.u64))), cons(String_var(_52), NULL))));
+  return String_join(NULL, cons(String_var(_49), cons(String_var(Var_str(Var_box_ulong_long((unsigned long long) literal.u64))), cons(String_var(_50), NULL))));
 }
 
 static String _match_locals(int depths, int values){

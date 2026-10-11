@@ -643,13 +643,16 @@ static List _unit_private_rows(Compiler c, Map globs){
       key = _x2c_macro_cursor_output_2;
       owner = _x2c_macro_cursor_output_3;
       {
-        List _x2c_match_expr = Var_list(key);
-        Var _x2c_match_values[1]; MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
+        List _x2c_match_expr = Var_list(key); List _x2c_match_cursor;
         switch(0){
-            default: ; static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(_21), &_x2c_match_capture)) { Var name = _x2c_match_values[0]; {
-            String path = home_absolute_path(Var_string(List_car(Var_list(owner))));  if(String_equal(Compiler_canonical_path(c, path), unit)) continue;  Array_push(rows, List_var(_unit_private_row(globs, cons(name, NULL))));  Array_push(rows, List_var(_unit_private_row(globs, cons(_22, cons(name, NULL)))));
+            default: ;
+           _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && Var_equal(_x2c_match_cursor->car, _21 ->car) && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor) { Var name = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
+            String path = home_absolute_path(Var_string(List_car(Var_list(owner))));
+            if(String_equal(Compiler_canonical_path(c, path), unit)) continue;
+            Array_push(rows, List_var(_unit_private_row(globs, cons(name, NULL))));
+            Array_push(rows, List_var(_unit_private_row(globs, cons(_22, cons(name, NULL)))));
           }
-           break; }
+           break; } }
         }
 
       }
@@ -661,23 +664,37 @@ static List _unit_private_rows(Compiler c, Map globs){
 }
 
 static List _unit_private_row(Map globs, List key){
-  Var value = Map_getindex(globs, List_var(key));  return Var_is_void(value) ? cons(List_var(key), NULL) : cons(List_var(key), cons(value, NULL));
+  Var value = Map_getindex(globs, List_var(key));
+  return Var_is_void(value) ? cons(List_var(key), NULL) : cons(List_var(key), cons(value, NULL));
 }
 
 static Map _collect_input(Frontend frontend, ParsedUnit * unit){
-  Compiler c =(* unit).compiler; (* unit).globals = Map_new(); {
-    String * _x2c_macro_address_1 = & c -> package;  String _x2c_macro_previous_1 = * _x2c_macro_address_1; {
+  Compiler c =(* unit).compiler;
+  (* unit).globals = Map_new();
+  {
+    String * _x2c_macro_address_1 = & c -> package;
+    String _x2c_macro_previous_1 = * _x2c_macro_address_1;
+    {
       _x2c_defer_env_1 _x2c_macro_environment_1 ={
         0
       }
-      ;  _x2c_macro_environment_1._x2c_defer_capture_2 =(const void *) & _x2c_macro_address_1;  _x2c_macro_environment_1._x2c_defer_capture_3 =(const void *) & _x2c_macro_previous_1;  X2CCleanup _x2c_defer_record_1 ={
+      ;
+      _x2c_macro_environment_1._x2c_defer_capture_2 =(const void *) & _x2c_macro_address_1;
+      _x2c_macro_environment_1._x2c_defer_capture_3 =(const void *) & _x2c_macro_previous_1;
+      X2CCleanup _x2c_defer_record_1 ={
         .fn = _x2c_defer_cleanup_1, .env = & _x2c_macro_environment_1
       }
-      ;  x2c_cleanup_push(& _x2c_defer_record_1); {
-        * _x2c_macro_address_1 = c -> package; {
-          _enter_package(frontend, c); {
-            Map _x2c_return_value_3 = Compiler_collect_symbols(c, (* unit).globals); {
-              x2c_cleanup_leave(& _x2c_defer_record_1);  return _x2c_return_value_3;
+      ;
+      x2c_cleanup_push(& _x2c_defer_record_1);
+      {
+        * _x2c_macro_address_1 = c -> package;
+        {
+          _enter_package(frontend, c);
+          {
+            Map _x2c_return_value_3 = Compiler_collect_symbols(c, (* unit).globals);
+            {
+              x2c_cleanup_leave(& _x2c_defer_record_1);
+              return _x2c_return_value_3;
             }
 
           }
@@ -693,19 +710,30 @@ static Map _collect_input(Frontend frontend, ParsedUnit * unit){
 }
 
 static void _enter_package(Frontend frontend, Compiler c){
-  Map packages = frontend -> request -> collection_packages;  if(packages == NULL) return;  Var root = Map_getindex(packages, String_var(Path_absolute(c -> filename)));  if(Var_is_void(root)) return;  c -> package = Path_basename(Var_string(root));  Map_setindex(c -> package_roots, String_var(c -> package), root);
+  Map packages = frontend -> request -> collection_packages;
+  if(packages == NULL) return;
+  Var root = Map_getindex(packages, String_var(Path_absolute(c -> filename)));
+  if(Var_is_void(root)) return;
+  c -> package = Path_basename(Var_string(root));
+  Map_setindex(c -> package_roots, String_var(c -> package), root);
 }
 
 static void _check_cpp_unit(Compiler c){
-  if(c -> layout) Compiler_report_error(c, 306819428, _23, _first_directive(c), _32);  if(c -> script) Compiler_report_error(c, 306819428, _33, _first_directive(c), _39);
+  if(c -> layout) Compiler_report_error(c, 306819428, _23, _first_directive(c), _32);
+  if(c -> script) Compiler_report_error(c, 306819428, _33, _first_directive(c), _39);
 }
 
 static Token _first_directive(Compiler c){
-  for(Token token = c -> tokenizer -> tokens;  token -> type != 11212;  token ++) if(token -> type == 35579270086) return token;  return c -> token;
+  for(Token token = c -> tokenizer -> tokens;  token -> type != 11212;  token ++) if(token -> type == 35579270086) return token;
+  return c -> token;
 }
 
 static Compiler _run_cpp(Frontend frontend, ParsedUnit * unit){
-  Compiler c =(* unit).compiler, cpp = Compiler_new_shared(c); (* unit).preprocessor = cpp;  cpp -> filename = c -> filename;  String text = NULL, errors = NULL, dependency_text = NULL;  String runtime = c -> prelude ? String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_40), NULL))) : NULL;
+  Compiler c =(* unit).compiler, cpp = Compiler_new_shared(c);
+  (* unit).preprocessor = cpp;
+  cpp -> filename = c -> filename;
+  String text = NULL, errors = NULL, dependency_text = NULL;
+  String runtime = c -> prelude ? String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_40), NULL))) : NULL;
   int status = Toolchain_preprocess(frontend -> toolchain, c -> filename, c -> include_dirs, runtime, &(text), &(errors), &(dependency_text));
   (* unit).preprocessor_output = String_truth(text) ? _take_line_markers(cpp, text) : NULL;
   (* unit).preprocessor_errors = errors;

@@ -410,8 +410,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
 Code array_literal(Code code){
   if(! _init_guard_) _file_init_();
   {
-    List _x2c_match_expr = code;
-    Var _x2c_match_values[1]; MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
+    List _x2c_match_expr = code; Var _x2c_match_values[1]; MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch(0){
         default: ; static MacroCaseSite _x2c_macro_site_0; if (Macro_case_capture_at(&_x2c_macro_site_0, _x2c_match_expr, _186, _25, &_x2c_match_capture)) { List items = Var_list(_x2c_match_values[0]);
       {
@@ -449,8 +448,7 @@ Code array_literal(Code code){
 Code map_literal(Code code){
   if(! _init_guard_) _file_init_();
   {
-    List _x2c_match_expr = code;
-    Var _x2c_match_values[1]; MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
+    List _x2c_match_expr = code; Var _x2c_match_values[1]; MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch(0){
         default: ; static MacroCaseSite _x2c_macro_site_0; if (Macro_case_capture_at(&_x2c_macro_site_0, _x2c_match_expr, _370, _278, &_x2c_match_capture)) { List rows = Var_list(_x2c_match_values[0]);
       {

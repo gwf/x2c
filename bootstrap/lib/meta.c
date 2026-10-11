@@ -201,11 +201,10 @@ List type_declaration_parts(List type){
 
 static Var _modifier_syntax(Var modifier){
   {
-    List _x2c_match_expr = Var_list(modifier);
-    Var _x2c_match_values[1]; MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
-    switch(Var_symbol(car(_x2c_match_expr))){
-        case 437126: ; { List _x2c_match_cursor; if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936762055558ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) { Var parameters = _x2c_match_values[0];
-      {
+    List _x2c_match_expr = Var_list(modifier); List _x2c_match_cursor;
+    switch(_x2c_match_expr ? _x2c_match_expr->car.u64 : 0){
+        case 9224497936762055558ULL: ;
+       _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497936762055558ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120)) { Var parameters = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
         Var _x2c_match_value_0 = parameters;
         {
           List parameters = Var_list(_x2c_match_value_0);

@@ -30,11 +30,9 @@
 #include "generate.h"
 #include "format.h"
 #include "protocol.h"
-static List _9, _8, _7, _4, _3;
+static String _52, _51, _50, _49, _47, _45, _43, _41, _39, _37, _35, _33, _31, _29, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
-static String _62, _61, _60, _59, _57, _55, _53, _51, _49, _47, _45, _43, _41, _39, _37, _36, _35, _34, _33, _32, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10;
-
-static Var _58, _56, _54, _52, _50, _48, _46, _44, _42, _40, _38, _6, _5, _2, _1, _0;
+static Var _48, _46, _44, _42, _40, _38, _36, _34, _32, _30, _28;
 
 static int _init_guard_ = 0;
 
@@ -203,69 +201,59 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  _0 = Symbol_var(895740748108);
-  _1 = Symbol_var(920394);
-  _2 = Symbol_var(61737802);
-  _3 = cons(_2, NULL);
-  _4 = cons(_1, _3);
-  _5 = List_var(_4);
-  _6 = Symbol_var(54);
-  _7 = cons(_6, NULL);
-  _8 = cons(_5, _7);
-  _9 = cons(_0, _8);
-  _10 = String_new("(macrodef <macro ");
-  _11 = String_new(">)");
-  _12 = String_new(".");
-  _13 = String_new("translation input is not an .x file: ");
-  _14 = String_new("output directory does not exist: ");
-  _15 = String_new("output is not a directory: ");
-  _16 = String_new("output directory is not writable: ");
-  _17 = String_new("/");
-  _18 = String_new(".c");
-  _19 = String_new(".h");
-  _20 = String_new("file");
-  _21 = String_new("files");
-  _22 = String_new("Translated ");
-  _23 = String_new(" x2c ");
-  _24 = String_new(" to ");
-  _25 = String_new(" in ");
-  _26 = String_new("/builds/");
-  _27 = String_new(".module");
-  _28 = String_new(".d");
-  _29 = String_new("{");
-  _30 = String_new("}");
-  _31 = String_new("import");
-  _32 = String_new("could not start a translation worker");
-  _33 = String_new("/run");
-  _34 = String_new("unknown env name \'");
-  _35 = String_new("\'");
-  _36 = String_new(":");
-  _37 = String_new("home");
+  _0 = String_new("(macrodef <macro ");
+  _1 = String_new(">)");
+  _2 = String_new(".");
+  _3 = String_new("translation input is not an .x file: ");
+  _4 = String_new("output directory does not exist: ");
+  _5 = String_new("output is not a directory: ");
+  _6 = String_new("output directory is not writable: ");
+  _7 = String_new("/");
+  _8 = String_new(".c");
+  _9 = String_new(".h");
+  _10 = String_new("file");
+  _11 = String_new("files");
+  _12 = String_new("Translated ");
+  _13 = String_new(" x2c ");
+  _14 = String_new(" to ");
+  _15 = String_new(" in ");
+  _16 = String_new("/builds/");
+  _17 = String_new(".module");
+  _18 = String_new(".d");
+  _19 = String_new("{");
+  _20 = String_new("}");
+  _21 = String_new("import");
+  _22 = String_new("could not start a translation worker");
+  _23 = String_new("/run");
+  _24 = String_new("unknown env name \'");
+  _25 = String_new("\'");
+  _26 = String_new(":");
+  _27 = String_new("home");
+  _28 = String_var(_27);
+  _29 = String_new("executable");
+  _30 = String_var(_29);
+  _31 = String_new("libexec");
+  _32 = String_var(_31);
+  _33 = String_new("identity");
+  _34 = String_var(_33);
+  _35 = String_new("include_dir");
+  _36 = String_var(_35);
+  _37 = String_new("runtime_lib");
   _38 = String_var(_37);
-  _39 = String_new("executable");
+  _39 = String_new("prelude");
   _40 = String_var(_39);
-  _41 = String_new("libexec");
+  _41 = String_new("package_dirs");
   _42 = String_var(_41);
-  _43 = String_new("identity");
+  _43 = String_new("cc");
   _44 = String_var(_43);
-  _45 = String_new("include_dir");
+  _45 = String_new("ar");
   _46 = String_var(_45);
-  _47 = String_new("runtime_lib");
+  _47 = String_new("cache_dir");
   _48 = String_var(_47);
-  _49 = String_new("prelude");
-  _50 = String_var(_49);
-  _51 = String_new("package_dirs");
-  _52 = String_var(_51);
-  _53 = String_new("cc");
-  _54 = String_var(_53);
-  _55 = String_new("ar");
-  _56 = String_var(_55);
-  _57 = String_new("cache_dir");
-  _58 = String_var(_57);
-  _59 = String_new("/x2c-");
-  _60 = String_new("cannot run external command \'");
-  _61 = String_new("\': ");
-  _62 = String_new("cannot open diagnostics file \'");
+  _49 = String_new("/x2c-");
+  _50 = String_new("cannot run external command \'");
+  _51 = String_new("\': ");
+  _52 = String_new("cannot open diagnostics file \'");
 }
 
 void Compiler_dump_tokens(Compiler);
@@ -434,11 +422,11 @@ static void _print_ast(List ast){
 
 static String _node_repr(List node){
   {
-    List _x2c_match_expr = node;
-    Var _x2c_match_values[1]; MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
-    switch(Var_symbol(car(_x2c_match_expr))){
-        case 895740748108: ; static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(_9), &_x2c_match_capture)) { Var name = _x2c_match_values[0];  return String_join(NULL, cons(String_var(_10), cons(String_var(Var_str(name)), cons(String_var(_11), NULL))));
-       break; } default: break;
+    List _x2c_match_expr = node; List _x2c_match_cursor, _x2c_match_cursor1;
+    switch(_x2c_match_expr ? _x2c_match_expr->car.u64 : 0){
+        case 9224498832502366540ULL: ;
+       _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224498832502366540ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224497936762538826ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1) { Var name = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1)) {return String_join(NULL, cons(String_var(_0), cons(String_var(Var_str(name)), cons(String_var(_1), NULL))));
+       break; } } default: break;
     }
 
   }
@@ -447,7 +435,7 @@ static String _node_repr(List node){
 
 static int _run_translation(CliRequest request, Map unit_dirs, Build build){
   unsigned long started_at = report_now_us();
-  if(! String_truth(request -> out_dir)) request -> out_dir = _12;
+  if(! String_truth(request -> out_dir)) request -> out_dir = _2;
   Translation t ={
     .request = request, .unit_dirs = unit_dirs, .build = build, .total = List_len(request -> inputs)
   }
@@ -483,7 +471,7 @@ static void Translation_preflight(Translation * t){
       input = Var_string(_x2c_macro_cursor_output_2);
       {
         build_check_input(input);
-        if(! is_source_file(input)) driver_error(String_join(NULL, cons(String_var(_13), cons(String_var(input), NULL))));
+        if(! is_source_file(input)) driver_error(String_join(NULL, cons(String_var(_3), cons(String_var(input), NULL))));
         String stem = Path_stem(input);
         if(shared && Map_contains(stems, String_var(stem))) _stem_collision(stem, Var_string(Map_getindex(stems, String_var(stem))), input, request -> out_dir);
         Map_setindex(stems, String_var(stem), String_var(input));
@@ -500,9 +488,9 @@ int Path_exists(Path);
 int Path_is_dir(Path);
 
 static void _check_out_dir(String out_dir){
-  if(! Path_exists(out_dir)) driver_error(String_join(NULL, cons(String_var(_14), cons(String_var(out_dir), NULL))));
-  if(! Path_is_dir(out_dir)) driver_error(String_join(NULL, cons(String_var(_15), cons(String_var(out_dir), NULL))));
-  if(access(out_dir, W_OK | X_OK)) driver_error(String_join(NULL, cons(String_var(_16), cons(String_var(out_dir), NULL))));
+  if(! Path_exists(out_dir)) driver_error(String_join(NULL, cons(String_var(_4), cons(String_var(out_dir), NULL))));
+  if(! Path_is_dir(out_dir)) driver_error(String_join(NULL, cons(String_var(_5), cons(String_var(out_dir), NULL))));
+  if(access(out_dir, W_OK | X_OK)) driver_error(String_join(NULL, cons(String_var(_6), cons(String_var(out_dir), NULL))));
 }
 
 _Noreturn static void _stem_collision(String stem, String first, String other, String out_dir){
@@ -576,8 +564,8 @@ static void Translation_report(Translation * t, unsigned long started_at){
       input = Var_string(_x2c_macro_cursor_output_5);
       {
         String stem = Path_stem(input);
-        bytes += report_file_bytes(String_join(NULL, cons(String_var(out_dir), cons(String_var(_17), cons(String_var(stem), cons(String_var(_18), NULL))))));
-        bytes += report_file_bytes(String_join(NULL, cons(String_var(out_dir), cons(String_var(_17), cons(String_var(stem), cons(String_var(_19), NULL))))));
+        bytes += report_file_bytes(String_join(NULL, cons(String_var(out_dir), cons(String_var(_7), cons(String_var(stem), cons(String_var(_8), NULL))))));
+        bytes += report_file_bytes(String_join(NULL, cons(String_var(out_dir), cons(String_var(_7), cons(String_var(stem), cons(String_var(_9), NULL))))));
       }
 
     }
@@ -585,8 +573,8 @@ static void Translation_report(Translation * t, unsigned long started_at){
   }
   String duration = report_duration(report_now_us() - started_at);
   int n =(* t).total;
-  String noun = n == 1 ? _20 : _21;
-  report_line(42217975014, String_join(NULL, cons(String_var(_22), cons(String_var(int_str(n)), cons(String_var(_23), cons(String_var(noun), cons(String_var(_24), cons(String_var(out_dir), cons(String_var(_25), cons(String_var(duration), NULL))))))))));
+  String noun = n == 1 ? _10 : _11;
+  report_line(42217975014, String_join(NULL, cons(String_var(_12), cons(String_var(int_str(n)), cons(String_var(_13), cons(String_var(noun), cons(String_var(_14), cons(String_var(out_dir), cons(String_var(_15), cons(String_var(duration), NULL))))))))));
   report_generated(n, bytes);
 }
 
@@ -620,7 +608,7 @@ static void Translation_preload_modules(Translation * t){
       {
         String root = NULL;
         if(! String_truth(package_entry((* t).request -> sources, roots, name, &(root))) || Compiler_links_extension(name)) continue;
-        String module = String_join(NULL, cons(String_var(root), cons(String_var(_26), cons(String_var(name), cons(String_var(_27), NULL)))));
+        String module = String_join(NULL, cons(String_var(root), cons(String_var(_16), cons(String_var(name), cons(String_var(_17), NULL)))));
         if(Path_is_file(module)) Compiler_preload_native_module(module);
       }
 
@@ -661,7 +649,7 @@ static Map Translation_package_names(Translation * t, List roots){
 
         }
         String depfile =({
-          Var _x2c_literal_part_0 = String_var(Translation_output_dir(&((* t)), input));  Var _x2c_literal_part_1 = String_var(Path_stem(input));  String_join(NULL, cons(_x2c_literal_part_0, cons(String_var(_17), cons(_x2c_literal_part_1, cons(String_var(_28), NULL)))));
+          Var _x2c_literal_part_0 = String_var(Translation_output_dir(&((* t)), input));  Var _x2c_literal_part_1 = String_var(Path_stem(input));  String_join(NULL, cons(_x2c_literal_part_0, cons(String_var(_7), cons(_x2c_literal_part_1, cons(String_var(_18), NULL)))));
         }
         );
         String volatile text = NULL;
@@ -789,9 +777,9 @@ static List _imported_packages(String path){
   Array names = Array_new();
   int depth = 0;
   for(Token token = Tokenizer_next(tokens);  token -> type != 11212;  token = Tokenizer_next(tokens)){
-    if(String_equal(token -> text, _29)) depth ++;
-    else if(String_equal(token -> text, _30)) depth --;
-    else if(! depth && String_equal(token -> text, _31)){
+    if(String_equal(token -> text, _19)) depth ++;
+    else if(String_equal(token -> text, _20)) depth --;
+    else if(! depth && String_equal(token -> text, _21)){
       token = Tokenizer_next(tokens);
       if(token -> type == 27051791223990) Array_push(names, String_var(String_getslice(token -> text, 1, - 1, 1)));
     }
@@ -861,7 +849,7 @@ static void Workers_start(Workers * w){
   sigprocmask(SIG_SETMASK, & unblocked, NULL);
   if(pid > 0) return;
   if(capture) File_close(capture);
-  report_line(11703268, _32);
+  report_line(11703268, _22);
   (* w).failed ++;
 }
 
@@ -1045,7 +1033,7 @@ static int _build_target(CliRequest request, Array commands){
           }
           Build_report_success(b);
           if(request -> command == 38236) status = Build_run_program(b);
-          else if(request -> command == 1282559016 && ! request -> dry_run) Build_publish_script(b, String_join(NULL, cons(String_var(request -> build_dir), cons(String_var(_33), NULL))));
+          else if(request -> command == 1282559016 && ! request -> dry_run) Build_publish_script(b, String_join(NULL, cons(String_var(request -> build_dir), cons(String_var(_23), NULL))));
           Build_cleanup(b, 1);
           {
             int _x2c_return_value_2 = status;
@@ -1186,17 +1174,17 @@ static int _run_env(CliRequest request){
     }
 
   }
-  if(String_truth(wanted)) driver_error(String_join(NULL, cons(String_var(_34), cons(String_var(wanted), cons(String_var(_35), NULL)))));
+  if(String_truth(wanted)) driver_error(String_join(NULL, cons(String_var(_24), cons(String_var(wanted), cons(String_var(_25), NULL)))));
   return 0;
 }
 
 static List _env_rows(CliRequest request){
   Toolchain toolchain = toolchain_new(request);
   String executable = x2c_get_executable();
-  String roots = String_join(_36, CliRequest_package_roots(request));
+  String roots = String_join(_26, CliRequest_package_roots(request));
   interface_configure(request -> out_dir, 0);
   return({
-    Var _x2c_literal_part_2 = List_var(cons(_38, cons(String_var(x2c_get_root()), NULL)));  Var _x2c_literal_part_3 = List_var(cons(_40, cons(String_var(executable), NULL)));  Var _x2c_literal_part_4 = List_var(cons(_42, cons(String_var(home_libexec()), NULL)));  Var _x2c_literal_part_5 = List_var(cons(_44, cons(String_var(compiler_identity()), NULL)));  Var _x2c_literal_part_6 = List_var(cons(_46, cons(String_var(toolchain -> include_dir), NULL)));  Var _x2c_literal_part_7 = List_var(cons(_48, cons(String_var(toolchain -> runtime_lib), NULL)));  Var _x2c_literal_part_8 = List_var(cons(_50, cons(String_var(interface_prelude()), NULL)));  Var _x2c_literal_part_9 = List_var(cons(_52, cons(String_var(roots), NULL)));  Var _x2c_literal_part_10 = List_var(cons(_54, cons(String_var(toolchain -> cc), NULL)));  Var _x2c_literal_part_11 = List_var(cons(_56, cons(String_var(toolchain -> ar), NULL)));  Var _x2c_literal_part_12 = List_var(cons(_58, cons(String_var(script_cache_root()), NULL)));  cons(_x2c_literal_part_2, cons(_x2c_literal_part_3, cons(_x2c_literal_part_4, cons(_x2c_literal_part_5, cons(_x2c_literal_part_6, cons(_x2c_literal_part_7, cons(_x2c_literal_part_8, cons(_x2c_literal_part_9, cons(_x2c_literal_part_10, cons(_x2c_literal_part_11, cons(_x2c_literal_part_12, NULL)))))))))));
+    Var _x2c_literal_part_2 = List_var(cons(_28, cons(String_var(x2c_get_root()), NULL)));  Var _x2c_literal_part_3 = List_var(cons(_30, cons(String_var(executable), NULL)));  Var _x2c_literal_part_4 = List_var(cons(_32, cons(String_var(home_libexec()), NULL)));  Var _x2c_literal_part_5 = List_var(cons(_34, cons(String_var(compiler_identity()), NULL)));  Var _x2c_literal_part_6 = List_var(cons(_36, cons(String_var(toolchain -> include_dir), NULL)));  Var _x2c_literal_part_7 = List_var(cons(_38, cons(String_var(toolchain -> runtime_lib), NULL)));  Var _x2c_literal_part_8 = List_var(cons(_40, cons(String_var(interface_prelude()), NULL)));  Var _x2c_literal_part_9 = List_var(cons(_42, cons(String_var(roots), NULL)));  Var _x2c_literal_part_10 = List_var(cons(_44, cons(String_var(toolchain -> cc), NULL)));  Var _x2c_literal_part_11 = List_var(cons(_46, cons(String_var(toolchain -> ar), NULL)));  Var _x2c_literal_part_12 = List_var(cons(_48, cons(String_var(script_cache_root()), NULL)));  cons(_x2c_literal_part_2, cons(_x2c_literal_part_3, cons(_x2c_literal_part_4, cons(_x2c_literal_part_5, cons(_x2c_literal_part_6, cons(_x2c_literal_part_7, cons(_x2c_literal_part_8, cons(_x2c_literal_part_9, cons(_x2c_literal_part_10, cons(_x2c_literal_part_11, cons(_x2c_literal_part_12, NULL)))))))))));
   }
   );
 }
@@ -1220,7 +1208,7 @@ static String _external_path(const char * name){
   String libexec = home_libexec();
   if(! String_truth(libexec)) return NULL;
   String path =({
-    Var _x2c_literal_part_13 = String_var(libexec);  Var _x2c_literal_part_14 = String_var(String_new(name));  String_join(NULL, cons(_x2c_literal_part_13, cons(String_var(_59), cons(_x2c_literal_part_14, NULL))));
+    Var _x2c_literal_part_13 = String_var(libexec);  Var _x2c_literal_part_14 = String_var(String_new(name));  String_join(NULL, cons(_x2c_literal_part_13, cons(String_var(_49), cons(_x2c_literal_part_14, NULL))));
   }
   );
   return Path_is_executable(path) ? path : NULL;
@@ -1241,7 +1229,7 @@ static void _exec(String path, char * * args){
   args[0] = path;
   execv(path, args);
   driver_error(({
-    Var _x2c_literal_part_15 = String_var(path);  Var _x2c_literal_part_16 = String_var(String_new(strerror(errno)));  String_join(NULL, cons(String_var(_60), cons(_x2c_literal_part_15, cons(String_var(_61), cons(_x2c_literal_part_16, NULL)))));
+    Var _x2c_literal_part_15 = String_var(path);  Var _x2c_literal_part_16 = String_var(String_new(strerror(errno)));  String_join(NULL, cons(String_var(_50), cons(_x2c_literal_part_15, cons(String_var(_51), cons(_x2c_literal_part_16, NULL)))));
   }
   ));
 }
@@ -1259,7 +1247,7 @@ int main(int argc, char * * argv){
   if(argc > 1) _run_external(argc, argv);
   CliRequest request = cli_parse(argc, argv);
   String diagnostics = request -> diagnostics_file;
-  if(String_truth(diagnostics) && ! diagnostics_write_json(diagnostics)) driver_error(String_join(NULL, cons(String_var(_62), cons(String_var(diagnostics), cons(String_var(_35), NULL)))));
+  if(String_truth(diagnostics) && ! diagnostics_write_json(diagnostics)) driver_error(String_join(NULL, cons(String_var(_52), cons(String_var(diagnostics), cons(String_var(_25), NULL)))));
   if(request -> command == 1282559016 && script_prepare(request)) return 0;
   report_configure(request -> quiet, request -> plain, request -> color_mode, request -> verbose || request -> debugging, request -> dry_run, CliRequest_inspects(request));
   switch(request -> command){

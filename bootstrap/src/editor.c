@@ -24,11 +24,7 @@ typedef struct Query{
 }
 Query;
 
-static List _45, _44, _43, _42, _41, _39, _38, _34, _33, _29, _28, _25, _24, _23, _22, _21, _18, _17, _13, _12, _8, _7, _3, _2;
-
-static String _47, _46;
-
-static Var _40, _37, _36, _35, _32, _31, _30, _27, _26, _20, _19, _16, _15, _14, _11, _10, _9, _6, _5, _4, _1, _0;
+static String _1, _0;
 
 static int _init_guard_ = 0;
 
@@ -93,54 +89,8 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  _0 = Symbol_var(227594);
-  _1 = Symbol_var(61045002);
-  _2 = cons(_1, NULL);
-  _3 = cons(_0, _2);
-  _4 = List_var(_3);
-  _5 = Symbol_var(1317895556402);
-  _6 = Symbol_var(65089569967410);
-  _7 = cons(_6, NULL);
-  _8 = cons(_5, _7);
-  _9 = List_var(_8);
-  _10 = Symbol_var(28293925322);
-  _11 = Symbol_var(2021158750666);
-  _12 = cons(_11, NULL);
-  _13 = cons(_10, _12);
-  _14 = List_var(_13);
-  _15 = Symbol_var(857050729436);
-  _16 = Symbol_var(64628725140444);
-  _17 = cons(_16, NULL);
-  _18 = cons(_15, _17);
-  _19 = List_var(_18);
-  _20 = Symbol_var(58);
-  _21 = cons(_20, NULL);
-  _22 = cons(_19, _21);
-  _23 = cons(_14, _22);
-  _24 = cons(_9, _23);
-  _25 = cons(_4, _24);
-  _26 = Symbol_var(412426);
-  _27 = Symbol_var(61229834);
-  _28 = cons(_27, NULL);
-  _29 = cons(_26, _28);
-  _30 = List_var(_29);
-  _31 = Symbol_var(816725264);
-  _32 = Symbol_var(63093751056);
-  _33 = cons(_32, NULL);
-  _34 = cons(_31, _33);
-  _35 = List_var(_34);
-  _36 = Symbol_var(1133019155420);
-  _37 = Symbol_var(64904693566428);
-  _38 = cons(_37, NULL);
-  _39 = cons(_36, _38);
-  _40 = List_var(_39);
-  _41 = cons(_40, NULL);
-  _42 = cons(_35, _41);
-  _43 = cons(_20, _42);
-  _44 = cons(_20, _43);
-  _45 = cons(_30, _44);
-  _46 = String_new("definition");
-  _47 = String_new("hover");
+  _0 = String_new("definition");
+  _1 = String_new("hover");
 }
 
 Path Path_absolute(Path);
@@ -354,13 +304,17 @@ static Array Query_diagnostics(Query * q){
 
 static Map Query_diagnostic(Query * q, List entry){
   {
-    List _x2c_match_expr = entry;
-    Var _x2c_match_values[4]; MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 4 };
+    List _x2c_match_expr = entry; List _x2c_match_cursor, _x2c_match_cursor1;
     switch(0){
-        default: ; static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(_25), &_x2c_match_capture)) { Var code = _x2c_match_values[0]; Var severity = _x2c_match_values[1]; Var message = _x2c_match_values[2]; Var location = _x2c_match_values[3]; {
-        Map diagnostic = Query_diagnostic_range(&((* q)), Var_list(location));  Map_setindex(diagnostic, Symbol_var(28293925322), message);  Map_setindex(diagnostic, Symbol_var(227594), code);  Map_setindex(diagnostic, Symbol_var(1317895556402), severity);  return diagnostic;
+        default: ;
+       _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224497936761846026ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1) { Var code = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224499254657174834ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1) { Var severity = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224497965055543754ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1) { Var message = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224498793812347868ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1) { Var location = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
+        Map diagnostic = Query_diagnostic_range(&((* q)), Var_list(location));
+        Map_setindex(diagnostic, Symbol_var(28293925322), message);
+        Map_setindex(diagnostic, Symbol_var(227594), code);
+        Map_setindex(diagnostic, Symbol_var(1317895556402), severity);
+        return diagnostic;
       }
-       break; }
+       break; } } } } }
     }
 
   }
@@ -369,11 +323,14 @@ static Map Query_diagnostic(Query * q, List entry){
 
 static Map Query_diagnostic_range(Query * q, List location){
   {
-    List _x2c_match_expr = location;  Var _x2c_match_values[3]; MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 3 };  switch(0){
-        default: ; static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(_45), &_x2c_match_capture)) { Var file = _x2c_match_values[0]; Var length = _x2c_match_values[1]; Var position = _x2c_match_values[2]; {
-        int start = Var_int(Var_convert(position, 3453797)), width = Var_int(Var_convert(length, 3453797));  return Query_location(&((* q)), Path_absolute(Var_string(file)), start, start + width);
+    List _x2c_match_expr = location; List _x2c_match_cursor, _x2c_match_cursor1;
+    switch(0){
+        default: ;
+       _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224497936762030858ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1) { Var file = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224497937578343696ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1) { Var length = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224499069780773852ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1) { Var position = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
+        int start = Var_int(Var_convert(position, 3453797)), width = Var_int(Var_convert(length, 3453797));
+        return Query_location(&((* q)), Path_absolute(Var_string(file)), start, start + width);
       }
-       break; }
+       break; } } } }
     }
 
   }
@@ -381,18 +338,31 @@ static Map Query_diagnostic_range(Query * q, List location){
 }
 
 static Map Query_location(Query * q, String path, int start, int end){
-  Map_setindex((* q).needed, String_var(path), int_var(1));  return Map_update_n(Map_new(), 3, Symbol_var(412426), String_var(path), Symbol_var(41159848), int_var(start), Symbol_var(11144), int_var(end));
+  Map_setindex((* q).needed, String_var(path), int_var(1));
+  return Map_update_n(Map_new(), 3, Symbol_var(412426), String_var(path), Symbol_var(41159848), int_var(start), Symbol_var(11144), int_var(end));
 }
 
 static void Query_answer(Query * q){
-  List row = _occurrence((* q).compiler, (* q).source, (* q).offset);  if(! List_truth(row)) return;  if(String_equal((* q).kind, _46)) Query_definition(&((* q)), row);  else if(String_equal((* q).kind, _47)) Query_hover(&((* q)), row);
+  List row = _occurrence((* q).compiler, (* q).source, (* q).offset);
+  if(! List_truth(row)) return;
+  if(String_equal((* q).kind, _0)) Query_definition(&((* q)), row);
+  else if(String_equal((* q).kind, _1)) Query_hover(&((* q)), row);
 }
 
 static List _occurrence(Compiler c, String path, int offset){
-  List found = NULL; {
-    List row;  Array _x2c_macro_object_4 = c -> source_occurrences;  int _x2c_macro_cursor_4 = 0;  Var _x2c_macro_cursor_output_2;  while(Array_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_2))){
-      row = Var_list(_x2c_macro_cursor_output_2); {
-        String file = Var_string(List_getindex(row, 0));  int start = Var_int(Var_convert(List_getindex(row, 1), 3453797)), end = Var_int(Var_convert(List_getindex(row, 2), 3453797));  if(! String_equal(file, path) || offset < start || offset >= end) continue;  if(! List_truth(found) || end - start < Var_int(List_getindex(found, 2)) - Var_int(List_getindex(found, 1))) found = row;
+  List found = NULL;
+  {
+    List row;
+    Array _x2c_macro_object_4 = c -> source_occurrences;
+    int _x2c_macro_cursor_4 = 0;
+    Var _x2c_macro_cursor_output_2;
+    while(Array_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_2))){
+      row = Var_list(_x2c_macro_cursor_output_2);
+      {
+        String file = Var_string(List_getindex(row, 0));
+        int start = Var_int(Var_convert(List_getindex(row, 1), 3453797)), end = Var_int(Var_convert(List_getindex(row, 2), 3453797));
+        if(! String_equal(file, path) || offset < start || offset >= end) continue;
+        if(! List_truth(found) || end - start < Var_int(List_getindex(found, 2)) - Var_int(List_getindex(found, 1))) found = row;
       }
 
     }
@@ -402,24 +372,43 @@ static List _occurrence(Compiler c, String path, int offset){
 }
 
 static void Query_definition(Query * q, List row){
-  List binding = Var_list(List_getindex(row, 3));  Var value = Map_getindex((* q).compiler -> source_definitions, List_var(binding));  if(! Var_is_row(value, 9, 7, 4)) return;  List target = Var_list(value);  Map_setindex((* q).reply, Symbol_var(292902696930268), Map_var(Query_location(&((* q)), Var_string(List_getindex(target, 0)), Var_int(Var_convert(List_getindex(target, 1), 3453797)), Var_int(Var_convert(List_getindex(target, 2), 3453797)))));
+  List binding = Var_list(List_getindex(row, 3));
+  Var value = Map_getindex((* q).compiler -> source_definitions, List_var(binding));
+  if(! Var_is_row(value, 9, 7, 4)) return;
+  List target = Var_list(value);
+  Map_setindex((* q).reply, Symbol_var(292902696930268), Map_var(Query_location(&((* q)), Var_string(List_getindex(target, 0)), Var_int(Var_convert(List_getindex(target, 1), 3453797)), Var_int(Var_convert(List_getindex(target, 2), 3453797)))));
 }
 
 static Type Var_type(Var);
+
 static List Type_list(Type);
+
 List Type_declaration_ast(Type, List);
+
 static void Query_hover(Query * q, List row){
-  Type type = Var_type(List_getindex(row, 4));  if(! List_truth(Type_list(type))) return;  Compiler c =(* q).compiler;  List declaration = Type_declaration_ast(type, Var_list(List_getindex(row, 3)));  Map hover = Query_location(&((* q)), Var_string(List_getindex(row, 0)), Var_int(Var_convert(List_getindex(row, 1), 3453797)), Var_int(Var_convert(List_getindex(row, 2), 3453797)));  Map_setindex(hover, Symbol_var(1322536), String_var(String_new(Compiler_code_pretty_string(c, Compiler_emit(c, cons(List_var(declaration), NULL), NULL), NULL))));  Map_setindex((* q).reply, Symbol_var(17805668), Map_var(hover));
+  Type type = Var_type(List_getindex(row, 4));
+  if(! List_truth(Type_list(type))) return;
+  Compiler c =(* q).compiler;
+  List declaration = Type_declaration_ast(type, Var_list(List_getindex(row, 3)));
+  Map hover = Query_location(&((* q)), Var_string(List_getindex(row, 0)), Var_int(Var_convert(List_getindex(row, 1), 3453797)), Var_int(Var_convert(List_getindex(row, 2), 3453797)));
+  Map_setindex(hover, Symbol_var(1322536), String_var(String_new(Compiler_code_pretty_string(c, Compiler_emit(c, cons(List_var(declaration), NULL), NULL), NULL))));
+  Map_setindex((* q).reply, Symbol_var(17805668), Map_var(hover));
 }
 
 static Array Query_texts(Query * q){
-  Array texts = Array_new(); {
-    Var path;  Iter _x2c_macro_iterator_5 = Map_keys((* q).needed, &(struct Iter){
+  Array texts = Array_new();
+  {
+    Var path;
+    Iter _x2c_macro_iterator_5 = Map_keys((* q).needed, &(struct Iter){
       int_var(0)
     }
-    );  Var _x2c_macro_item_5;  while(Iter_try_next(_x2c_macro_iterator_5, &(_x2c_macro_item_5))){
-      path = _x2c_macro_item_5; {
-        Var text;  if(Map_try_get((* q).compiler -> source_texts, path, &(text))) Array_push(texts, Map_var(Map_update_n(Map_new(), 2, Symbol_var(412426), path, Symbol_var(1322536), text)));
+    );
+    Var _x2c_macro_item_5;
+    while(Iter_try_next(_x2c_macro_iterator_5, &(_x2c_macro_item_5))){
+      path = _x2c_macro_item_5;
+      {
+        Var text;
+        if(Map_try_get((* q).compiler -> source_texts, path, &(text))) Array_push(texts, Map_var(Map_update_n(Map_new(), 2, Symbol_var(412426), path, Symbol_var(1322536), text)));
       }
 
     }
@@ -429,10 +418,12 @@ static Array Query_texts(Query * q){
 }
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
-  _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;  ParsedUnit_close(&((*(ParsedUnit *) _x2c_defer_data_0->_x2c_defer_capture_0)));
+  _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;
+  ParsedUnit_close(&((*(ParsedUnit *) _x2c_defer_data_0->_x2c_defer_capture_0)));
 }
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
-  _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;  Context_close((*(Context *) _x2c_defer_data_1->_x2c_defer_capture_1));
+  _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;
+  Context_close((*(Context *) _x2c_defer_data_1->_x2c_defer_capture_1));
 }
 

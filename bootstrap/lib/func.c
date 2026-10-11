@@ -444,10 +444,10 @@ static Func _new(FuncAdapter adapter, List signature, int rest, const void * con
   }
   List params = NULL;
   {
-    List _x2c_match_expr = signature;
-    Var _x2c_match_values[1]; MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
+    List _x2c_match_expr = signature; Var _x2c_match_values[1]; MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch(0){
-        default: ; static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(_31), &_x2c_match_capture)) { Var captured = _x2c_match_values[0];  params = Var_list(captured);  break; }
+        default: ;
+       static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(_31), &_x2c_match_capture)) { Var captured = _x2c_match_values[0];  params = Var_list(captured);  break; }
     }
 
   }

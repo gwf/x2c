@@ -6,11 +6,11 @@
 #include "common.h"
 #include "meta.h"
 #include "varconvert.h"
-static List _298, _297, _296, _294, _293, _292, _291, _288, _287, _286, _285, _284, _283, _282, _281, _280, _279, _278, _277, _276, _275, _273, _272, _270, _269, _268, _267, _265, _264, _263, _261, _260, _259, _255, _248, _247, _245, _244, _243, _242, _240, _239, _238, _236, _235, _234, _230, _222, _221, _219, _218, _217, _216, _214, _213, _212, _210, _209, _208, _204, _196, _195, _193, _192, _191, _184, _183, _181, _180, _179, _172, _171, _169, _168, _167, _160, _159, _157, _156, _155, _154, _153, _151, _150, _143, _142, _140, _139, _138, _137, _136, _134, _133, _131, _124, _123, _121, _120, _119, _118, _117, _115, _114, _112, _106, _105, _103, _102, _101, _100, _99, _97, _96, _94, _87, _86, _84, _83, _82, _81, _80, _78, _77, _75, _69, _68, _66, _65, _64, _63, _62, _60, _59, _57, _50, _49, _47, _46, _45, _44, _43, _41, _40, _38, _34, _33, _31, _30, _29, _28, _27, _25, _24, _22, _19, _18, _17, _15, _14, _13, _8;
+static List _288, _287, _286, _285, _284, _283, _282, _281, _280, _279, _278, _277, _276, _275, _273, _272, _270, _269, _268, _267, _265, _264, _263, _261, _260, _259, _255, _248, _247, _245, _244, _243, _242, _240, _239, _238, _236, _235, _234, _230, _222, _221, _219, _218, _217, _216, _214, _213, _212, _210, _209, _208, _204, _196, _195, _193, _192, _191, _184, _183, _181, _180, _179, _172, _171, _169, _168, _167, _160, _159, _157, _156, _155, _154, _153, _151, _150, _143, _142, _140, _139, _138, _137, _136, _134, _133, _131, _124, _123, _121, _120, _119, _118, _117, _115, _114, _112, _106, _105, _103, _102, _101, _100, _99, _97, _96, _94, _87, _86, _84, _83, _82, _81, _80, _78, _77, _75, _69, _68, _66, _65, _64, _63, _62, _60, _59, _57, _50, _49, _47, _46, _45, _44, _43, _41, _40, _38, _34, _33, _31, _30, _29, _28, _27, _25, _24, _22, _19, _18, _17, _15, _14, _13, _8;
 
 static String _257, _253, _251, _232, _227, _225, _206, _201, _199, _189, _187, _177, _175, _165, _163, _148, _146, _129, _127, _109, _92, _90, _72, _55, _53, _11, _4, _2;
 
-static Var _295, _290, _289, _274, _271, _266, _262, _258, _256, _254, _252, _250, _249, _246, _241, _237, _233, _231, _229, _228, _226, _224, _223, _220, _215, _211, _207, _205, _203, _202, _200, _198, _197, _194, _190, _188, _186, _185, _182, _178, _176, _174, _173, _170, _166, _164, _162, _161, _158, _152, _149, _147, _145, _144, _141, _135, _132, _130, _128, _126, _125, _122, _116, _113, _111, _110, _108, _107, _104, _98, _95, _93, _91, _89, _88, _85, _79, _76, _74, _73, _71, _70, _67, _61, _58, _56, _54, _52, _51, _48, _42, _39, _37, _36, _35, _32, _26, _23, _21, _20, _16, _12, _10, _9, _7, _6, _5, _3, _1, _0;
+static Var _274, _271, _266, _262, _258, _256, _254, _252, _250, _249, _246, _241, _237, _233, _231, _229, _228, _226, _224, _223, _220, _215, _211, _207, _205, _203, _202, _200, _198, _197, _194, _190, _188, _186, _185, _182, _178, _176, _174, _173, _170, _166, _164, _162, _161, _158, _152, _149, _147, _145, _144, _141, _135, _132, _130, _128, _126, _125, _122, _116, _113, _111, _110, _108, _107, _104, _98, _95, _93, _91, _89, _88, _85, _79, _76, _74, _73, _71, _70, _67, _61, _58, _56, _54, _52, _51, _48, _42, _39, _37, _36, _35, _32, _26, _23, _21, _20, _16, _12, _10, _9, _7, _6, _5, _3, _1, _0;
 
 static int _init_guard_ = 0;
 
@@ -390,16 +390,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _286 = cons(_70, _285);
   _287 = cons(_51, _286);
   _288 = cons(_35, _287);
-  _289 = Symbol_var(58);
-  _290 = Symbol_var(1923442);
-  _291 = cons(_290, NULL);
-  _292 = cons(_289, _291);
-  _293 = cons(_289, _292);
-  _294 = cons(_10, _293);
-  _295 = List_var(_294);
-  _296 = cons(_295, NULL);
-  _297 = cons(_289, _296);
-  _298 = cons(_6, _297);
 }
 
 static List _update_rows(void){
@@ -410,10 +400,11 @@ Var List_assoc(List, Var);
 
 static List _update_row(List id){
   {
-    List _x2c_match_expr = id;
-    Var _x2c_match_values[1]; MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
-    switch(Var_symbol(car(_x2c_match_expr))){
-        case 377892: ; static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(_298), &_x2c_match_capture)) { Var key = _x2c_match_values[0];  return Var_list(List_assoc(_update_rows(), key));  break; } default: break;
+    List _x2c_match_expr = id; List _x2c_match_cursor, _x2c_match_cursor1;
+    switch(_x2c_match_expr ? _x2c_match_expr->car.u64 : 0){
+        case 9224497936761996324ULL: ;
+       _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497936761996324ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224497963177709656ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1 && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1 && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1) { Var key = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {return Var_list(List_assoc(_update_rows(), key));
+       break; } } default: break;
     }
 
   }
@@ -437,12 +428,15 @@ static List _update_zero(List id){
 }
 
 Var Var_car(Var);
+
 static List _update_cast_in(List id){
   return Var_list(Var_car(List_getindex(_update_row(id), 4)));
 }
 
 static Var List_car(List);
+
 List Var_cdr(Var);
+
 static List _update_cast_out(List id){
   return Var_list(List_car(Var_cdr(List_getindex(_update_row(id), 4))));
 }
@@ -455,7 +449,8 @@ static List _update_cast_out(List id){
 char x2c_var_update_i8(volatile char * lhs, Symbol op, Var rhs){
   if(! lhs){
     {
-      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/varops.x",.function = "x2c_var_update_i8",.line = 124};  x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("x2c_var_update_i8")), NULL))));
+      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/varops.x",.function = "x2c_var_update_i8",.line = 124};
+      x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("x2c_var_update_i8")), NULL))));
       __builtin_unreachable();
     }
 

@@ -356,8 +356,6 @@ _Static_assert(_Generic(& strcmp, int(*)(const char *, const char *) : 1, defaul
 _Static_assert(_Generic(& strchr, char *(*)(const char *, int) : 1, default: 0), "native alias String_c_find does not match strchr");
 #endif
 #define String_c_find strchr
-static List _11, _10, _9, _7, _6, _5, _4;
-static Var _8, _3, _2, _1, _0;
 static int _init_guard_ = 0;
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 static inline int Iter_truth(Iter iter){
@@ -791,13 +789,13 @@ static inline int _x2c_proto_symbol_compare_0(Var a0, Var a1);
 static VarMethods _x2c__x2c_protocol_methods_9;
 void x2c_initialize_protocols(void);
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
-  x2c_initialize_protocols();  if(_init_guard_) return;  _init_guard_ = 1;  _0 = Symbol_var(377892);  _1 = Symbol_var(58);  _2 = Symbol_var(26416091224);  _3 = Symbol_var(1923442);  _4 = cons(_3, NULL);  _5 = cons(_1, _4);  _6 = cons(_1, _5);  _7 = cons(_2, _6);  _8 = List_var(_7);  _9 = cons(_8, NULL);  _10 = cons(_1, _9);  _11 = cons(_0, _10);
+  x2c_initialize_protocols();  if(_init_guard_) return;  _init_guard_ = 1;
 }
 
 static Symbol _literal_tag(List tag){
   {
-    List _x2c_match_expr = tag;  Var _x2c_match_values[1]; MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };  switch(Var_symbol(car(_x2c_match_expr))){
-        case 377892: ; static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(_11), &_x2c_match_capture)) { Var key = _x2c_match_values[0];  return Var_symbol(key);  break; } default: break;
+    List _x2c_match_expr = tag; List _x2c_match_cursor, _x2c_match_cursor1;  switch(_x2c_match_expr ? _x2c_match_expr->car.u64 : 0){
+        case 9224497936761996324ULL: ;  _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497936761996324ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224497963177709656ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1 && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1 && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1) { Var key = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {return Var_symbol(key);  break; } } default: break;
     }
 
   }
@@ -813,59 +811,59 @@ static int var_tag_bottom(List tag){
 }
 
 char Var_char(Var x){
-  if(Var_is(x, 26993) || Var_is(x, 30065)) return(char) Var_integer(x);  return(char) Var_integer(Var_convert(x, 26993));
+  if(! _init_guard_) _file_init_();  if(Var_is(x, 26993) || Var_is(x, 30065)) return(char) Var_integer(x);  return(char) Var_integer(Var_convert(x, 26993));
 }
 
 uchar Var_uchar(Var x){
-  if(Var_is(x, 30065)) return(uchar) Var_integer(x);  return(uchar) Var_integer(Var_convert(x, 30065));
+  if(! _init_guard_) _file_init_();  if(Var_is(x, 30065)) return(uchar) Var_integer(x);  return(uchar) Var_integer(Var_convert(x, 30065));
 }
 
 short Var_short(Var x){
-  if(Var_is(x, 3453293)) return(short) Var_integer(x);  return(short) Var_integer(Var_convert(x, 3453293));
+  if(! _init_guard_) _file_init_();  if(Var_is(x, 3453293)) return(short) Var_integer(x);  return(short) Var_integer(Var_convert(x, 3453293));
 }
 
 ushort Var_ushort(Var x){
-  if(Var_is(x, 3846509)) return(ushort) Var_integer(x);  return(ushort) Var_integer(Var_convert(x, 3846509));
+  if(! _init_guard_) _file_init_();  if(Var_is(x, 3846509)) return(ushort) Var_integer(x);  return(ushort) Var_integer(Var_convert(x, 3846509));
 }
 
 int Var_int(Var x){
-  if(Var_is(x, 3453797)) return(int) Var_integer(x);  return(int) Var_integer(Var_convert(x, 3453797));
+  if(! _init_guard_) _file_init_();  if(Var_is(x, 3453797)) return(int) Var_integer(x);  return(int) Var_integer(Var_convert(x, 3453797));
 }
 
 uint Var_uint(Var x){
-  if(Var_is(x, 3847013)) return(uint) Var_integer(x);  return(uint) Var_integer(Var_convert(x, 3847013));
+  if(! _init_guard_) _file_init_();  if(Var_is(x, 3847013)) return(uint) Var_integer(x);  return(uint) Var_integer(Var_convert(x, 3847013));
 }
 
 unsigned Var_unsigned(Var x){
-  if(Var_is(x, 3847013)) return(unsigned) Var_integer(x);  return(unsigned) Var_integer(Var_convert(x, 3847013));
+  if(! _init_guard_) _file_init_();  if(Var_is(x, 3847013)) return(unsigned) Var_integer(x);  return(unsigned) Var_integer(Var_convert(x, 3847013));
 }
 
 long Var_long(Var x){
-  if(Var_is(x, 818062)) return Var_long_value(x);  if(Var_is_row(x, 32769, 0, 0) || Var_is(x, 3453797) || Var_is(x, 3847013) || Var_is(x, 3453293) || Var_is(x, 3846509) || Var_is(x, 26993) || Var_is(x, 30065)) return Var_integer(x);  return Var_long_value(Var_convert(x, 818062));
+  if(! _init_guard_) _file_init_();  if(Var_is(x, 818062)) return Var_long_value(x);  if(Var_is_row(x, 32769, 0, 0) || Var_is(x, 3453797) || Var_is(x, 3847013) || Var_is(x, 3453293) || Var_is(x, 3846509) || Var_is(x, 26993) || Var_is(x, 30065)) return Var_integer(x);  return Var_long_value(Var_convert(x, 818062));
 }
 
 ulong Var_ulong(Var x){
-  if(Var_is(x, 44858254)) return Var_ulong_value(x);  if(Var_is_row(x, 32768, 0, 0) || Var_is(x, 3847013) || Var_is(x, 3846509) || Var_is(x, 30065)) return(ulong) Var_integer(x);  return Var_ulong_value(Var_convert(x, 44858254));
+  if(! _init_guard_) _file_init_();  if(Var_is(x, 44858254)) return Var_ulong_value(x);  if(Var_is_row(x, 32768, 0, 0) || Var_is(x, 3847013) || Var_is(x, 3846509) || Var_is(x, 30065)) return(ulong) Var_integer(x);  return Var_ulong_value(Var_convert(x, 44858254));
 }
 
 long long Var_long_long(Var x){
-  if(Var_is(x, 25983886)) return Var_long_long_value(x);  if(Var_is(x, 818062)) return(long long) Var_long_value(x);  if(Var_kind(x) == 20309162340) return(long long) Var_integer(x);  return Var_long_long_value(Var_convert(x, 25983886));
+  if(! _init_guard_) _file_init_();  if(Var_is(x, 25983886)) return Var_long_long_value(x);  if(Var_is(x, 818062)) return(long long) Var_long_value(x);  if(Var_kind(x) == 20309162340) return(long long) Var_integer(x);  return Var_long_long_value(Var_convert(x, 25983886));
 }
 
 unsigned long long Var_ulong_long(Var x){
-  if(Var_is(x, 1435270030)) return Var_ulong_long_value(x);  if(Var_is(x, 44858254)) return(unsigned long long) Var_ulong_value(x);  if(Var_is_row(x, 32768, 0, 0) || Var_is(x, 3847013) || Var_is(x, 3846509) || Var_is(x, 30065)) return(unsigned long long) Var_integer(x);  return Var_ulong_long_value(Var_convert(x, 1435270030));
+  if(! _init_guard_) _file_init_();  if(Var_is(x, 1435270030)) return Var_ulong_long_value(x);  if(Var_is(x, 44858254)) return(unsigned long long) Var_ulong_value(x);  if(Var_is_row(x, 32768, 0, 0) || Var_is(x, 3847013) || Var_is(x, 3846509) || Var_is(x, 30065)) return(unsigned long long) Var_integer(x);  return Var_ulong_long_value(Var_convert(x, 1435270030));
 }
 
 long double Var_long_double(Var x){
-  if(Var_is(x, 26071077642)) return Var_long_double_value(x);  if(Var_is(x, 3356265) || Var_is(x, 3355493)) return(long double) Var_floating(x);  return Var_long_double_value(Var_convert(x, 26071077642));
+  if(! _init_guard_) _file_init_();  if(Var_is(x, 26071077642)) return Var_long_double_value(x);  if(Var_is(x, 3356265) || Var_is(x, 3355493)) return(long double) Var_floating(x);  return Var_long_double_value(Var_convert(x, 26071077642));
 }
 
 float Var_float(Var x){
-  if(Var_is(x, 3355493)) return(float) Var_floating(x);  return(float) Var_floating(Var_convert(x, 3355493));
+  if(! _init_guard_) _file_init_();  if(Var_is(x, 3355493)) return(float) Var_floating(x);  return(float) Var_floating(Var_convert(x, 3355493));
 }
 
 double Var_double(Var x){
-  if(Var_is(x, 3356265)) return Var_floating(x);  return Var_floating(Var_convert(x, 3356265));
+  if(! _init_guard_) _file_init_();  if(Var_is(x, 3356265)) return Var_floating(x);  return Var_floating(Var_convert(x, 3356265));
 }
 
 void x2c_initialize_protocols(void){
@@ -903,7 +901,7 @@ void x2c_initialize_protocols(void){
 }
 
 void x2c_initialize(void){
-  void Atom_initialize(void), File_initialize(void);  void Pool_initialize(void), Scope_initialize(void);  void x2c_match_initialize(void), Logger_initialize(void);  Scope Scope_new(void), * Scope_top(void);  static int initialized = 0;  if(initialized) return;  initialized = 1;  x2c_initialize_protocols();  Scope_initialize();  if(! * Scope_top()) * Scope_top() = Scope_new();  Pool_initialize();  Atom_initialize();  x2c_match_initialize();  File_initialize();  Logger_initialize();
+  if(! _init_guard_) _file_init_();  void Atom_initialize(void), File_initialize(void);  void Pool_initialize(void), Scope_initialize(void);  void x2c_match_initialize(void), Logger_initialize(void);  Scope Scope_new(void), * Scope_top(void);  static int initialized = 0;  if(initialized) return;  initialized = 1;  x2c_initialize_protocols();  Scope_initialize();  if(! * Scope_top()) * Scope_top() = Scope_new();  Pool_initialize();  Atom_initialize();  x2c_match_initialize();  File_initialize();  Logger_initialize();
 }
 
 #include "error.h"
@@ -912,7 +910,7 @@ void x2c_initialize(void){
 
 
 int x2c_normalize_index(int index, int length){
-  if(length < 0){
+  if(! _init_guard_) _file_init_();  if(length < 0){
     Var _x2c_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("x2c_normalize_index")), NULL))); {
       static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/common.x",.function = "x2c_normalize_index",.line = 868};  x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 2, Symbol_var(34096809266140), _x2c_literal_part_0, Symbol_var(816725264), int_var(length));  __builtin_unreachable();
     }
@@ -922,7 +920,7 @@ int x2c_normalize_index(int index, int length){
 }
 
 int x2c_normalize_slice(int * start, int * stop, int step, int length){
-  if(! start || ! stop || ! step || length < 0){
+  if(! _init_guard_) _file_init_();  if(! start || ! stop || ! step || length < 0){
     static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/common.x",.function = "x2c_normalize_slice",.line = 888};  x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("x2c_normalize_slice")), NULL))));  __builtin_unreachable();
   }
   int orig_stop = * stop;  if(* start == INT_MIN) * start =(step > 0) ? 0 : length - 1;  if(* stop == INT_MIN) * stop = - 1;  if(* start < 0){
