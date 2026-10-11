@@ -83,6 +83,39 @@ for expected in "$ROOT"/unittest/compiler-fixtures/*.compile-status; do
     )
   fi
 done
+
+# A fixture companion has no .phases file; fixtures translate it through
+# their quoted includes. Mark each companion with p or n for each positive or
+# negative fixture that reaches it.
+declare -A reached
+reach() {
+  local target
+  while read -r target; do
+    target="$ROOT/unittest/compiler-fixtures/$target"
+    [[ -e "$target" && ! -e "${target%.x}.phases" ]] || continue
+    [[ ${reached[$target]-} == *"$2"* ]] && continue
+    reached[$target]+=$2
+    reach "$target" "$2"
+  done < <(sed -n 's/^#include "\([^"/]*\.x\)".*/\1/p' "$1")
+}
+for phases in "$ROOT"/unittest/compiler-fixtures/*.phases; do
+  [[ -e "$phases" ]] || continue
+  status="${phases%.phases}.compile-status"
+  if [[ -e "$status" && $(<"$status") != 0 ]]; then
+    reach "${phases%.phases}.x" n
+  else
+    reach "${phases%.phases}.x" p
+  fi
+done
+for companion in "${!reached[@]}"; do
+  if [[ ${reached[$companion]} != *p* ]]; then
+    exclusions["$companion"]=$(
+      printf '%s' "fixture companion that only negative fixtures include," \
+        " so no fixture expects it to translate"
+    )
+  fi
+done
+
 for phases in "$ROOT"/unittest/compiler-fixtures/*.phases; do
   [[ -e "$phases" ]] || continue
   if [[ $(tr -d '[:space:]' <"$phases") == tokens ]]; then
