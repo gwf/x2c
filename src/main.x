@@ -375,7 +375,8 @@ static List Translation.translate_modules(Translation &t) {
   if (t.build) t.build.begin_translation(seed_input);
   else report_progress(<translate>, 0, t.total, seed_input);
   (void) _bind_collected_unit(t.frontend, seed_input, seed);
-  List outputs = t.module_provider_outputs(seed, seed_input, registry, NULL);
+  Array outputs = [];
+  t.module_provider_outputs(seed, seed_input, registry, outputs);
   int done = 1;
   foreach (List group, groups)
     foreach (String provider, group) {
@@ -385,13 +386,13 @@ static List Translation.translate_modules(Translation &t) {
       else report_progress(<translate>, done, t.total, input);
       ParsedUnit unit;
       (void) _parse_unit(t.frontend, input, unit);
-      outputs = t.module_provider_outputs(unit, input, registry, outputs);
+      t.module_provider_outputs(unit, input, registry, outputs);
       unit.close();
       done++;
     }
-  outputs = seed.context.export(outputs);
+  List files = seed.context.export(outputs.list_free());
   seed.close();
-  publish_generated_files(outputs);
+  publish_generated_files(files);
   for (int i = 0; i < count; i++) {
     String input = modules[i];
     if (t.build) t.build.end_translation(input, 0);
@@ -400,24 +401,23 @@ static List Translation.translate_modules(Translation &t) {
   return ordinary.list_free();
 }
 
-/* Export only this provider's additions before changing the seed-owned Map.
-   The generated file list is immutable and exports with its new tail. */
-static List Translation.module_provider_outputs(
-  Translation &t, ParsedUnit &unit, String input, Map registry, List outputs) {
+/* Export this provider's additions before changing the seed-owned containers.
+   File pairs retain provider order without copying earlier providers. */
+static void Translation.module_provider_outputs(
+  Translation &t, ParsedUnit &unit, String input, Map registry, Array outputs) {
   Compiler c = unit.compiler;
   Map captured = capture_module_provider(c, unit.ast);
   Map active = registry.copy();
   active.merge(captured);
   c.module_layout_plan = active;
   String directory = t.output_dir(input);
-  outputs = outputs.append(generate_code_files(c, unit.ast, directory));
-  outputs = outputs.append(
+  List files = generate_code_files(c, unit.ast, directory).append(
     translation_depfile_files(t.request, c, input, directory));
   if (t.request.fatal_warnings && c.diagnostics()) exit(1);
   captured[%(binding-references ${c.canonical_path(c.filename)})] =
     c.binding_reference_rows();
   registry.merge(unit.context.export(captured));
-  return unit.context.export(outputs);
+  foreach (Var item, unit.context.export(files)) outputs.push(item);
 }
 
 static void Translation.translate_serial(Translation &t) {
