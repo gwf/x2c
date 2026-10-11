@@ -3,14 +3,19 @@
 
 from pathlib import Path
 import argparse
-import json
-import os
-import re
+import importlib.util
+import sys
 import shutil
 
 
 ROOT = Path(__file__).resolve().parents[1]
-INCLUDE = re.compile(r'^(\s*#\s*include\s*)"([^"\n]+)"', re.MULTILINE)
+PROJECTION_SPEC = importlib.util.spec_from_file_location(
+    'native_layout_project', ROOT / 'tools/native-layout-project.py')
+PROJECTION = importlib.util.module_from_spec(PROJECTION_SPEC)
+sys.modules[PROJECTION_SPEC.name] = PROJECTION
+PROJECTION_SPEC.loader.exec_module(PROJECTION)
+INCLUDE = PROJECTION.INCLUDE
+copied_text = PROJECTION.copied_native_text
 
 
 def generated(tree):
@@ -38,31 +43,6 @@ def native_headers(files, generated_placements, bootstrap):
             headers[target] = bootstrap / 'native' / relative
             pending.append(target)
     return headers
-
-
-def copied_text(source, destination, placements):
-    def reconnect(match):
-        spelling = Path(match[2])
-        target = (spelling if spelling.is_absolute() else
-                  source.parent / spelling).resolve()
-        placed = placements.get(target)
-        if placed is None:
-            return match[0]
-        relative = os.path.relpath(placed, destination.parent)
-        return f'{match[1]}"{relative}"'
-
-    if source.suffix == ".xnm":
-        metadata = json.loads(source.read_text(encoding="ascii"))
-        for row in metadata["regions"]:
-            for field in ("includeTarget", "includePath"):
-                spelling = row.get(field)
-                if not spelling or not Path(spelling).is_absolute():
-                    continue
-                placed = placements.get(Path(spelling).resolve())
-                if placed is not None:
-                    row[field] = os.path.relpath(placed, destination.parent)
-        return json.dumps(metadata, separators=(",", ":"), ensure_ascii=True)
-    return INCLUDE.sub(reconnect, source.read_text(encoding="ascii"))
 
 
 def main():

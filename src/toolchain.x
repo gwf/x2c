@@ -63,6 +63,14 @@ typedef struct ToolRun {
 #include "utils.x"
 #include "json.x"
 
+/** Returns the shipped native projection and copied-include helper. */
+String native_projection_helper(void) {
+  String helper = %"${home_dir()}/tools/native-layout-project.py";
+  return access(helper, R_OK)
+    ? %"${home_dir()}/bootstrap/native-layout-project.py" : helper;
+}
+
+
 // command reports
 
 static macro Stmt $report.toolchain.tool_failed(Expr $phase, Expr $status) {
@@ -238,9 +246,7 @@ int Toolchain.project_native_source(
   projected = %"$directory/${Path.basename(source)}";
   dependencies = %"$directory/${Path.stem(source)}.d";
   String output;
-  String helper = %"${home_dir()}/tools/native-layout-project.py";
-  if (access(helper, R_OK))
-    helper = %"${home_dir()}/bootstrap/native-layout-project.py";
+  String helper = native_projection_helper();
   if (external)
     return tool_capture(
       %("python3" $helper "--external" $source $projected $dependencies

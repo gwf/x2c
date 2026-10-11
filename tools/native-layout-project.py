@@ -2,6 +2,7 @@
 """Project compiler-labelled native regions after configured preprocessing."""
 from dataclasses import dataclass
 import json
+import os
 from pathlib import Path
 import re
 import sys
@@ -11,6 +12,57 @@ MARKER = re.compile(r'^\s*#\s*pragma\s+x2c_region_(begin|end)\s+([A-Za-z0-9_]+)\
 PACK = re.compile(r'^\s*#\s*pragma\s+pack\s*\((.*)\)\s*$')
 PRAGMA = re.compile(r'^\s*#\s*pragma\s+(.*)$')
 LINE = re.compile(r'^\s*#\s+(?:line\s+)?(\d+)\s+("(?:\\.|[^"\\])*")(?:\s+(.*))?$')
+
+INCLUDE = re.compile(r'^(\s*#\s*include\s*)"([^"\n]+)"', re.MULTILINE)
+
+
+def copied_native_text(source, destination, placements, text=None):
+    """Reconnect copied literal includes without changing native declarations."""
+    source, destination = Path(source), Path(destination)
+    if text is None:
+        text = source.read_text(encoding='ascii')
+    def placed_include(spelling):
+        path = Path(spelling)
+        target = (path if path.is_absolute() else source.parent / path).resolve()
+        placed = placements.get(target)
+        return None if placed is None else os.path.relpath(placed, destination.parent)
+    if source.suffix == '.xnm':
+        metadata = json.loads(text)
+        for row in metadata.get('regions', []):
+            for field in ('includeTarget', 'includePath'):
+                spelling = row.get(field)
+                if spelling:
+                    relative = placed_include(spelling)
+                    if relative is not None:
+                        row[field] = relative
+        return json.dumps(metadata, separators=(',', ':'), ensure_ascii=True)
+    def reconnect(match):
+        relative = placed_include(match[2])
+        return match[0] if relative is None else f'{match[1]}"{relative}"'
+    return INCLUDE.sub(reconnect, text)
+
+
+def reconnect_package(copied, original):
+    """Retain copied source-header identity when a package tree is published."""
+    copied, original = Path(copied).resolve(), Path(original).resolve()
+    source = copied / 'src'
+    placements = {(original / path.relative_to(copied)).resolve(): path
+                  for path in source.rglob('*') if path.is_file()}
+    artifacts = list(source.rglob('*'))
+    for path in (copied / 'builds').rglob('*'):
+        relative = path.relative_to(copied / 'builds')
+        if relative.parts[0] not in ('cc', 'module', 'native'):
+            artifacts.append(path)
+    for path in artifacts:
+        if not path.is_file() or path.suffix not in ('.c', '.h', '.x', '.xp', '.xnm'):
+            continue
+        origin = original / path.relative_to(copied)
+        text = path.read_text(encoding='utf-8', errors='surrogateescape')
+        rewritten = copied_native_text(origin, path, placements, text)
+        if rewritten != text:
+            path.write_text(rewritten, encoding='utf-8', errors='surrogateescape')
+    return 0
+
 
 class ProjectionError(Exception):
     pass
@@ -491,6 +543,8 @@ def project_external(arguments):
 
 def main():
     try:
+        if sys.argv[1:2] == ['--reconnect-package']:
+            return reconnect_package(*sys.argv[2:])
         if sys.argv[1:2] == ['--external']:
             return project_external(sys.argv[2:])
         if sys.argv[1:2] == ['--compile']:

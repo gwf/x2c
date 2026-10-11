@@ -149,6 +149,11 @@ foreach (String argument, native_args)
 stage.join("builds").join(%"$name.native.rsp").write_text(response.str());
 
 Path compiler = tool_path(options["compiler"].str());
+Path compiler_home = %($compiler env home).job().output().strip("\n");
+Path helper = compiler_home.join("tools/native-layout-project.py");
+if (!helper.is_file())
+  helper = compiler_home.join("bootstrap/native-layout-project.py");
+%(python3 $helper --reconnect-package $stage $package).job().check();
 Path runtime = compiler.dirname().join("libx2c.a");
 if (!runtime.is_file())
   runtime = compiler.dirname().dirname().join("lib/libx2c.a");
