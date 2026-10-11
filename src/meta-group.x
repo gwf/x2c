@@ -373,6 +373,8 @@ static void Compiler._isolate(
     _.macro_stack = NULL;
     _.macro_holes = NULL;
     _.meta_body = 0;
+    _.shallow = 0;
+    _.public_bodies = 0;
     _.return_type = NULL;
     _.lambda_scopes = NULL;
     _.source_facts = 0;
@@ -1063,10 +1065,21 @@ void Compiler.write_meta_build(Compiler c) {
             c.module_tree.owner(provider))
           companions.push(%"group-$table.xnm");
       metadata["companions"] = companions;
-      Path.write_text(%"$base.xnm", Var.json(metadata));
+      String receipt = Var.json(metadata);
+      _publish_meta_metadata(%"$base.xnm", receipt);
+      if (meta_prefix_sequence)
+        _publish_meta_metadata(
+          %"$meta_build_directory/group-$index.xnm", receipt);
     }
     else Path.write_text(%"$meta_build_directory/$filename", text);
   }
+}
+
+/* A companion receipt names only files already published by this snapshot. */
+static void _publish_meta_metadata(String path, String receipt) {
+  String temporary = %"$path.${"%ld".printf((long) getpid())}";
+  Path.write_text(temporary, receipt);
+  Path.move_to(temporary, path);
 }
 
 /** Emits one additional provider prefix against previously published names. */
