@@ -12,6 +12,7 @@
 #include "module-tree.x"
 #include "deps.x"
 #include "toolchain.x"
+#include "cache.x"
 
 /** Holds `Scope`-owned mutable state for one prepared native build target.
     `CliRequest.prepare` allocates the record in the current `Scope` and
@@ -667,6 +668,7 @@ static typedef struct CcJob {
 /* The jobs one build has running, at most `request.jobs`. */
 static typedef struct CcPool {
   Build b;
+  Map projections;
   CcJob *running;
   int count;
 } CcPool;
@@ -675,8 +677,26 @@ static typedef struct CcPool {
    compile failed. */
 static int Build._compile_sources(Build b) {
   if (b.compile_commands != NULL) b.compile_directory = Path.absolute(".");
+  Map projections = {};
+  Array receipts = [];
+  foreach (String source, b.c_sources) {
+    String projected, native_deps, errors;
+    if (b.toolchain.project_native_source(
+        source, b._include_dirs(source), projected, native_deps, errors)) {
+      fprintf(stderr, "x2c: native layout projection failed: %s\n", errors);
+      return 1;
+    }
+    projections[source] = %($projected $native_deps);
+    if (native_deps) receipts.push(%"$projected.xne");
+  }
+  if (receipts.len()) {
+    Compiler c = Compiler.new();
+    c.own_diagnostics();
+    c.check_native_initializer_receipts(receipts);
+  }
   CcPool pool = {
-    .b = b, .running = Scope.calloc(b.request.jobs, sizeof(CcJob))};
+    .b = b, .projections = projections,
+    .running = Scope.calloc(b.request.jobs, sizeof(CcJob))};
   b.cc_n = b.c_sources.len();
   b.cc_start = report_now_us();
   int failed = 0;
@@ -699,12 +719,8 @@ static int CcPool.add(CcPool &pool, String source) {
   Build b = pool.b;
   report_progress(<compile>, b.cc_done, b.cc_n, source);
   List directories = b._include_dirs(source);
-  String projected, native_deps, errors;
-  if (b.toolchain.project_native_source(
-      source, directories, projected, native_deps, errors)) {
-    fprintf(stderr, "x2c: native layout projection failed: %s\n", errors);
-    return 1;
-  }
+  List projection = pool.projections[source];
+  String projected = projection.car(), native_deps = projection.cadr();
   CcJob job = b._compile_job(projected, directories);
   job.native_deps = native_deps;
   if (pool.reap(0)) return 1;
