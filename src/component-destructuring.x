@@ -58,6 +58,39 @@ meta static Code _destructure_bound(List code, Atom values, Atom result) {
   return %(code-value "bound" $code $names);
 }
 
+$rewrite(%(dstrdecl *))
+/** Declares the names of `T (a, b) = source;` and then reads the source
+    into them, or declares each target of `(T1 a, T2 b) = source;`
+    initialized from its element. */
+meta Code destructure_declaration(Code node) {
+  Atom values = Atom.intern("?__destructure");
+  match (node) {
+    case %(dstrdecl (params *parameters) ?source): {
+      Array items = [_destructure_read(values, source)];
+      int index = 0;
+      foreach (List parameter, parameters)
+        match (parameter) case %(param ?base ?declarator): {
+          Code element = _destructure_element(values, index++);
+          items.push(%(declare $base (bindings (op = $declarator $element))));
+        }
+      return _destructure_bound(%(seq @{items.list_free()}), values, NULL);
+    }
+    case %(dstrdecl ?(Type type) (targets *names) ?source): {
+      Array declarators = [], targets = [];
+      foreach (Var name, names) {
+        declarators.push(%(bind $name ()));
+        targets.push(%(expr $type (ident $name)));
+      }
+      return _destructure_bound(
+        %(seq (declare $type (bindings @{declarators.list_free()}))
+              ${_destructure_read(values, source)}
+              @{_destructure_writes(targets.list_free(), values)}),
+        values, NULL);
+    }
+  }
+  return node;
+}
+
 $rewrite(%(dstrdecl ? (targets *) ?))
 /** Declares the names of `T (a, b) = source;`, then reads the source into
     them. */

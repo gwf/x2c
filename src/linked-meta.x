@@ -509,6 +509,38 @@ static Code _destructure_bound(List code, Atom values, Atom result) {
   return %(code-value "bound" $code $names);
 }
 
+/** Declares the names of `T (a, b) = source;` and then reads the source
+    into them, or declares each target of `(T1 a, T2 b) = source;`
+    initialized from its element. */
+Code destructure_declaration(Code node) {
+  Atom values = Atom.intern("?__destructure");
+  match (node) {
+    case %(dstrdecl (params *parameters) ?source): {
+      Array items = [_destructure_read(values, source)];
+      int index = 0;
+      foreach (List parameter, parameters)
+        match (parameter) case %(param ?base ?declarator): {
+          Code element = _destructure_element(values, index++);
+          items.push(%(declare $base (bindings (op = $declarator $element))));
+        }
+      return _destructure_bound(%(seq @{items.list_free()}), values, NULL);
+    }
+    case %(dstrdecl ?(Type type) (targets *names) ?source): {
+      Array declarators = [], targets = [];
+      foreach (Var name, names) {
+        declarators.push(%(bind $name ()));
+        targets.push(%(expr $type (ident $name)));
+      }
+      return _destructure_bound(
+        %(seq (declare $type (bindings @{declarators.list_free()}))
+              ${_destructure_read(values, source)}
+              @{_destructure_writes(targets.list_free(), values)}),
+        values, NULL);
+    }
+  }
+  return node;
+}
+
 /** Declares the names of `T (a, b) = source;`, then reads the source into
     them. */
 Code destructure_names(Code node) {
@@ -1430,6 +1462,7 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_destructure_element", _destructure_element);
   $linked.row(rows, "_destructure_writes", _destructure_writes);
   $linked.row(rows, "_destructure_bound", _destructure_bound);
+  $linked.row(rows, "destructure_declaration", destructure_declaration);
   $linked.row(rows, "destructure_names", destructure_names);
   $linked.row(rows, "destructure_parameters", destructure_parameters);
   $linked.row(rows, "destructure_statement", destructure_statement);

@@ -140,8 +140,8 @@ static Ast Compiler._step_tag(Compiler c, Ast ast, Symbol tag) {
     case <declare>: case <decl>: next = c._declaration(ast); break;
     case <dstrdecl>: return c._destructuring(ast, tag, AST_BLOCK);
     case <stmnt>:
-      if (!_destructures(ast)) return c._default_node(ast);
-      return c._destructuring(ast, tag, AST_STATEMENT);
+      return _destructures(ast) ? c._destructuring(ast, tag, AST_STATEMENT)
+                                : c._default_node(ast);
     case <dstrasgn>: return c._destructuring_value(ast);
     case <match>: return c._shipped_statement(ast, tag);
     case <defer>: next = c._defer_node(ast); break;
@@ -802,16 +802,15 @@ static List Compiler._declaration(Compiler c, List ast) {
 
 /* Cell rewriting needs declaration sites, so the destructuring
    declarations of a body with a lambda take their rule's replacement,
-   bound but not yet lowered, before its cells are prepared. */
+   bound but not yet lowered, before its cells are prepared. A declaration
+   no rule takes stays for lowering, which reports it. */
 static List Compiler._lower_lambda_destructuring(Compiler c, List ast) {
   if (!ast) return ast;
   match (ast) {
     case %(dstrdecl *): {
       List rewritten = c.rewrite(
         <node>, <dstrdecl>, ast, AST_BLOCK, c.return_type, NULL);
-      if (!rewritten)
-        $report.xform.no_shipped_rule(c, "destructuring declaration");
-      return rewritten;
+      return rewritten ? rewritten : ast;
     }
   }
   // The recursion below then only descends into subtrees it will rewrite.

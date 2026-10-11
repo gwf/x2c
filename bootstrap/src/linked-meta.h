@@ -50,6 +50,8 @@ Code access_postfix(Code code);
 
 Code delegate_member(Code code);
 
+Code destructure_declaration(Code node);
+
 Code destructure_names(Code node);
 
 Code destructure_parameters(Code node);
