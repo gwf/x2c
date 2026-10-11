@@ -1362,9 +1362,11 @@ Map Compiler.collected_declaration_dependencies(Compiler c, List providers) {
   return dependencies;
 }
 
-/** Exports original declaration vertices, including scalar native aliases. */
-List Compiler.declaration_provider_rows(Compiler c, List providers) =>
-  c._declaration_provider_rows(providers, %(declaration-provider).car());
+/** Exports original declaration vertices, including scalar native aliases.
+    Exported includes supply only selected public and inline-support rows. */
+List Compiler.declaration_provider_rows(
+  Compiler c, List providers, int exported = 0) =>
+  c._declaration_provider_rows(providers, %(declaration-provider).car(), exported);
 
 /** Exports original typed declaration rows and their producing-file privacy. */
 List Compiler.declaration_detail_rows(Compiler c, List providers) =>
@@ -1379,13 +1381,32 @@ List Compiler.declaration_prerequisite_rows(Compiler c, List providers) {
 }
 
 static List Compiler._declaration_provider_rows(
-  Compiler c, List providers, Var kind) {
+  Compiler c, List providers, Var kind, int exported = 0) {
   Map closure = {};
   foreach (String provider, providers) c.declaration_dependencies(provider, closure);
   Array rows = [];
   foreach (String provider, closure.keys()) {
     List entry = c._entry(provider);
     if (!entry) continue;
+    if (exported) {
+      Map selected = {}, seen = {};
+      foreach (Var part, entry.car()) if (part is <map>) selected.merge(part);
+      foreach (List key, selected.keys()) {
+        List namespace = _type_family(key);
+        if (!namespace) match (key) case %(?(String name)):
+          namespace = %($name);
+        if (!namespace) continue;
+        Var supplying;
+        if (!selected.try_get(%("declaration-file" $key), supplying)) continue;
+        match (supplying) case %(provider ?path): {
+          List identity = %($path $namespace);
+          if (identity in seen) continue;
+          seen[identity] = 1;
+          rows.push(%($kind $path $namespace));
+        }
+      }
+      continue;
+    }
     foreach (Var part, entry.car()) if (part is <map>)
       foreach (Var value, part.map())
         match (value) case %(?tag ?path *) if (tag == kind):
