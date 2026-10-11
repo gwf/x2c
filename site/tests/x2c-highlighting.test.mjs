@@ -6,7 +6,7 @@ import { createHighlighter } from "shiki";
 import { createSatteriMarkdownProcessor } from "@astrojs/markdown-satteri";
 
 import config from "../astro.config.mjs";
-import { x2cDarkTheme, x2cLang } from "../shiki-x2c.mjs";
+import { x2cDarkTheme, x2cLightTheme, x2cLang } from "../shiki-x2c.mjs";
 
 const slides = new URL("../src/content/slides/", import.meta.url);
 
@@ -102,4 +102,43 @@ test("uses the distinct x2c style throughout the landing galleries", async () =>
     [...seen].sort(),
     ["=>", "catch", "foreach", "match", "raise"]
   );
+});
+
+
+test("site and book themes match approved semantic type, modifier, and sigil styling", async () => {
+  const highlighter = await createHighlighter({
+    themes: [x2cDarkTheme, x2cLightTheme], langs: [x2cLang]
+  });
+  try {
+    for (const [theme, keyword, type] of [
+      [x2cDarkTheme, "#FF4FD8", "#29D3E2"],
+      [x2cLightTheme, "#A626A4", "#007C8A"]
+    ]) {
+      for (const code of [
+        "meta native static Code build(Code value);",
+        "Macro value = $!Stmt{ return $value; };",
+        "TypeInfo info; Source source; Name name;",
+        "consume($);", "Var value = %( ${code} );"
+      ]) {
+        const { tokens } = highlighter.codeToTokens(code, {
+          lang: "x2c", theme: theme.name, includeExplanation: true
+        });
+        for (const token of tokens[0]) {
+          const scopes = token.explanation.flatMap(part =>
+            part.scopes.map(({ scopeName }) => scopeName));
+          if (scopes.some(scope => [
+            "storage.modifier.meta.x2c", "storage.modifier.native.x2c",
+            "punctuation.definition.macro.sigil.x2c"
+          ].includes(scope) || scope.startsWith("punctuation.definition.interpolation"))) {
+            assert.equal(token.color, keyword, `${theme.name}: ${token.content}`);
+            assert.equal(token.fontStyle, 2, `${theme.name}: ${token.content}`);
+          }
+          if (scopes.includes("support.type.prelude.x2c"))
+            assert.equal(token.color, type, `${theme.name}: ${token.content}`);
+        }
+      }
+    }
+  } finally {
+    highlighter.dispose();
+  }
 });
