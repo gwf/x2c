@@ -170,8 +170,9 @@ void Compiler.install_meta_function(Compiler c, List fn, Token marker) {
     that stages in process waits for the full parse. */
 void Compiler.install_collected_meta_function(
   Compiler c, List declaration, Token marker) {
-  if (c.source_private < 0) return;
   if (c.signature_only || c.macro_holes) return;
+  if (c.source_private < 0 && c._install_included_meta(declaration, marker))
+    return;
   /* The definition depends on the compile-time libraries even while the
      shared session that will answer it is being filled. */
   if (macro_library_filling()) {
@@ -185,6 +186,23 @@ void Compiler.install_collected_meta_function(
   if (c.groups_meta() && !(name in linked)) return;
   c._install_stub(
     name, declaration.type_from_ast().canonicalize(), NULL, marker);
+}
+
+/* Host-preprocessed text holds each included file's definitions where the
+   include was. A public one binds as that include advertises it, with its
+   file as the provider whose helper table runs it, and reports that it did.
+   The unit's own and a static one bind as their file's collection binds
+   them, since a call runs in the table of the file that wrote it. */
+static int Compiler._install_included_meta(
+  Compiler c, List declaration, Token marker) {
+  Type type = declaration.type_from_ast().canonicalize();
+  String file = c.canonical_path(c.token_source(marker, NULL));
+  if (type.is_static() || file == c.canonical_path(c.filename)) return 0;
+  String name = c._native_meta_name(declaration, marker);
+  c.install_project_meta_effect(
+    %(project-meta $name ${c.func_signature(type)}
+      ${home_portable_path(file)}));
+  return 1;
 }
 
 /* A host binding remains in this session; installation failures report at
