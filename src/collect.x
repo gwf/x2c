@@ -1345,18 +1345,18 @@ Map Compiler.collected_declaration_dependencies(Compiler c, List providers) {
 
 /** Exports original declaration vertices, including scalar native aliases. */
 List Compiler.declaration_provider_rows(Compiler c, List providers) =>
-  c._declaration_provider_rows(providers, <declaration-provider>);
+  c._declaration_provider_rows(providers, %(declaration-provider).car());
 
 /** Exports exact namespace prerequisite providers from completed collection.
     Native include providers and scalar aliases retain their own vertices.
     Source positions identify contributions without rerunning producers.
 */
 List Compiler.declaration_prerequisite_rows(Compiler c, List providers) {
-  return c._declaration_provider_rows(providers, <declaration-prerequisite>);
+  return c._declaration_provider_rows(providers, %(declaration-prerequisite).car());
 }
 
 static List Compiler._declaration_provider_rows(
-  Compiler c, List providers, Symbol kind) {
+  Compiler c, List providers, Var kind) {
   Map closure = {};
   foreach (String provider, providers) c.declaration_dependencies(provider, closure);
   Array rows = [];
@@ -1365,7 +1365,7 @@ static List Compiler._declaration_provider_rows(
     if (!entry) continue;
     foreach (Var part, entry.car()) if (part is <map>)
       foreach (Var value, part.map())
-        match (value) case %($kind ?path *):
+        match (value) case %(?tag ?path *) if (tag == kind):
           if (c.canonical_path(home_absolute_path(path)) == provider)
             rows.push(value);
   }
