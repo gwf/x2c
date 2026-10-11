@@ -467,9 +467,9 @@ Runtime static locals and class defaults stay in the kernel; the log of
 2026-10-10 records why. `match` moves from the research list to the table
 once `plans/match-component.md` is accepted.
 
-Kernel deletions no feature blocks: the `function-entry` and
-`before-statement` placements, designed but without a client until lambdas
-and destructuring land. The wave 2 audit found no deletable `Compiler` field
+Kernel deletions no feature blocks: none remain; the `function-entry`
+placement now works at transform time for lambdas, and destructuring needed
+no placement. The wave 2 audit found no deletable `Compiler` field
 and no per-call Lisp session setup left in the driver; the prepared
 replacement template and fill steps are the remaining driver cost.
 
@@ -624,6 +624,21 @@ replacement template and fill steps are the remaining driver cost.
   transform time leaks it to later resolution across functions; prelude
   component macro names are global and can collide with user meta names;
   `tools/gen-linked-meta.sh` counts `$type (` inside a quotation as a call.
+- 2026-10-10, transform-time function-entry placement (`kernel/entry-
+  placement`): a `$rewrite` rule running while the transform lowers a
+  function body can call `x2c_place(%(function-entry), code)`. The frame is
+  the parser's own `Ancestor` row, pushed by `Compiler.enter_function` and
+  delivered by `leave_function`, which binds the placed code in a new scope
+  with the function's result type; `_function_node` lowers it with
+  `_sequence` ahead of the body's first statement. A captured lambda's body
+  gets its own frame in `CaptureBuild.publish`; a non-capturing lambda is a
+  lifted function already. A transform-time placement from inside a lambda
+  body lands at the entry of the lambda's own function. `x2c_enclosing
+  (<function>)` now answers at transform time. A carrier's `(place WHERE
+  CODE)` row has earlier `new-name` tokens replaced in CODE. +149/-26
+  authored, byte-identical C, fixture `rewrite-function-entry`. Open: a
+  rule inside a `defer` finalizer at transform time is unchecked; code
+  placed at transform time that places again finds no frame.
 - 2026-10-10, facts learned: `function-entry` placement is parse-time, so
   lambda cells need a transform-time entry placement before lambdas move; a
   plain `make build` after editing a shipped component leaves a degraded
