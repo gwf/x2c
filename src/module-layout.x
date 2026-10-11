@@ -758,13 +758,12 @@ List Compiler.module_layout_demands(Compiler c, List node) {
 /* Declaration collection supplies this registry before any implementation is
    bound. Each provider later contributes generated text while its own unit
    is active; the registry retains no compiler, symbol scope, or AST owner. */
-static List _registry_namespace(List key, List syntax) {
+static List _registry_namespace(List key, List syntax, Map rows) {
   match (key)
     case %((!set ?kind (!or typedef struct union enum)) ?name *):
       return %($kind $name);
-  match (key) case %(?name):
-    match (syntax) case %(typedef ${name}): return %(typedef $name);
-  return key;
+  List family = declaration_type_family(rows, {}, key, syntax);
+  return family ? family : key;
 }
 
 static String _registry_namespace_id(Compiler c, String path, List key) {
@@ -784,12 +783,19 @@ Map prepare_module_layout_registry(Compiler c, List providers) {
     plan[%(files $path)] = %();
   }
   List details = c.declaration_detail_rows(providers);
+  Map original = {};
+  foreach (List row, details) {
+    (Var kind, String path, List key, List syntax, int privacy) = row;
+    (void) kind;
+    (void) privacy;
+    original.setdefault(path, {}).map()[key] = syntax;
+  }
   foreach (List row, details) {
     (Var kind, String path, List key, List syntax, int privacy) = row;
     (void) kind;
     String canonical = c.canonical_path(home_absolute_path(path));
     if (!privacy || !c.module_tree.owner(canonical)) continue;
-    List namespace = _registry_namespace(key, syntax);
+    List namespace = _registry_namespace(key, syntax, original[path]);
     match (namespace)
       case %((!or typedef struct union enum) ?(String name)): {
         Map names = plan.setdefault(%(private-types $canonical), {});
@@ -800,7 +806,7 @@ Map prepare_module_layout_registry(Compiler c, List providers) {
     (Var kind, String path, List key, List syntax, int privacy) = row;
     (void) kind;
     (void) privacy;
-    List namespace = _registry_namespace(key, syntax), emitted = namespace;
+    List namespace = _registry_namespace(key, syntax, original[path]), emitted = namespace;
     String canonical = c.canonical_path(home_absolute_path(path));
     Map names = plan.getdefault(%(private-types $canonical), {});
     Var spelling;
@@ -829,7 +835,7 @@ Map prepare_module_layout_registry(Compiler c, List providers) {
   foreach (List row, c.declaration_prerequisite_rows(providers)) {
     (Var kind, String path, List key, String required, List target) = row;
     (void) kind;
-    List namespace = _registry_namespace(key, NULL);
+    List namespace = _registry_namespace(key, NULL, original.getdefault(path, {}));
     Var consumer, dependency;
     if (!plan.try_get(%(namespace $path $namespace), consumer) ||
         !plan.try_get(%(namespace $required $target), dependency)) continue;

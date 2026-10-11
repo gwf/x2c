@@ -447,10 +447,11 @@ static void FileWalk.record_declaration_prerequisites(
         Map needed = {};
         Var syntax;
         if (!overlay.try_get(key, syntax) || syntax is not <list>) continue;
-        List family = _row_type_family(rows, w.statics, key, syntax);
-        int privacy = _private_row(w.statics, key, family);
-        match (key) case %(?name):
-          if (%(function $name) in w.statics) privacy = 1;
+        List family = declaration_type_family(rows, w.statics, key, syntax);
+        int privacy = syntax.list().type().is_static();
+        Var aggregate;
+        if (family && rows.try_get(family, aggregate) && aggregate is <list>)
+          privacy = privacy || aggregate.list().type().is_static();
         List detail_key = %("source-node"
           (declaration-detail $path ${w.pos} $key));
         List detail = %(declaration-detail $path $key $syntax $privacy);
@@ -618,7 +619,7 @@ static List _type_family(List key) {
   return NULL;
 }
 
-static List _row_type_family(Map rows, Map statics, List key, Var value) {
+List declaration_type_family(Map rows, Map statics, List key, Var value) {
   List family = _type_family(key);
   if (family) return family;
   match (key) case %(?(String name)):
@@ -680,7 +681,7 @@ static void FileWalk.select_public(FileWalk &w) {
   foreach (Var (key, value), rows) {
     // The owning unit replays its recipes before its Context closes.
     match (value) case %(declaration-source *): continue;
-    List family = _row_type_family(rows, w.statics, key, value);
+    List family = declaration_type_family(rows, w.statics, key, value);
     if (_private_row(w.statics, key, family)) continue;
     selected[key] = 1;
     if (family) needed[family] = 1;
@@ -690,7 +691,7 @@ static void FileWalk.select_public(FileWalk &w) {
   do {
     changed = 0;
     foreach (Var (key, value), rows) {
-      List family = _row_type_family(rows, w.statics, key, value);
+      List family = declaration_type_family(rows, w.statics, key, value);
       if (!family || !(family in needed) || key in selected) continue;
       selected[key] = 1;
       if (value is <list>) _needed_types(value, rows, needed);
@@ -1561,7 +1562,7 @@ static void Compiler.publish_inline_dependencies(
   do {
     changed = 0;
     foreach (Var (key, value), all) {
-      List family = _row_type_family(all, statics, key, value);
+      List family = declaration_type_family(all, statics, key, value);
       if (!family || !(family in needed) || key in selected) continue;
       selected[key] = 1;
       additions[key] = value;
