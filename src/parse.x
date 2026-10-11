@@ -362,7 +362,10 @@ static int Compiler._static_interface_form(Compiler c) {
    conditional groups around the form. A template's forms have neither. */
 static void Compiler._leading_directives(Compiler c, int skip_body) {
   if (c.macro_holes) return;
-  c.note_preprocessor_macros(c.leading_preproc());
+  List directives = c.leading_preproc();
+  c.note_preprocessor_macros(directives);
+  if (skip_body && c.meta_build && !c.signature_only && !c.macro_holes && directives)
+    c._retain_native_prefix_nodes(directives);
   if (!skip_body) c._track_conditional_arms();
 }
 
@@ -467,8 +470,7 @@ static List Compiler._declaration_form(Compiler c, int skip_body) {
   int body = c.peek(0) == <"{"> || c._at_function_arrow();
   Type type = decl.type_from_ast();
   if (prefix && decl.car() == <typedef>) {
-    if (!c.unit_nodes) c.unit_nodes = [];
-    c.unit_nodes.push(decl);
+    c._retain_native_prefix_nodes(%($decl));
   }
   if (prefix && !meta && decl.car() == <declare> && !type.is_function()) {
     NativePrefixBody *pending = c._retain_native_prefix_objects(decl, first);
@@ -518,6 +520,15 @@ static typedef struct NativePrefixBody {
   Map macros, aliases, objects;
   int module, private, origin, kind;
 } NativePrefixBody;
+
+/* Ordered native directives and collected types precede later bodies. */
+static void Compiler._retain_native_prefix_nodes(Compiler c, List nodes) {
+  NativePrefixBody *pending = Scope.calloc(1, sizeof(NativePrefixBody));
+  pending->kind = 4;
+  pending->declaration = nodes;
+  if (!c.native_prefix_pending) c.native_prefix_pending = [];
+  c.native_prefix_pending.push(Var.new(<p48>, pending));
+}
 
 static void Compiler._retain_native_prefix_body(
   Compiler c, List declaration, Token meta, Token first) {
@@ -637,6 +648,11 @@ void Compiler.bind_native_meta_prefix(Compiler c) {
     NativePrefixBody *pending = c.native_prefix_pending.shift().pointer();
     if (pending->kind == 3) {
       c.native_prefix_pending.push(Var.new(<p48>, pending));
+      continue;
+    }
+    if (pending->kind == 4) {
+      if (!c.unit_nodes) c.unit_nodes = [];
+      foreach (List node, pending->declaration) c.unit_nodes.push(node);
       continue;
     }
     Token current = c.token;
