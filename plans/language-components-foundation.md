@@ -701,6 +701,31 @@ replacement template and fill steps are the remaining driver cost.
   `make build` after `make bootstrap-refresh`, does the same until
   `make build-safe`; the printf family table is spelled twice because
   the `.str()` warning reads it before the component runs.
+- 2026-10-11, lambda cost recovery (`kernel/lambda-cost`, held for
+  review): the adapter and the context record are bound carriers, so they
+  are not bound again; their fields and the adapter's locals keep their
+  spellings and bind no name, which also fixes a file-scope `c0` colliding
+  with a record field. A lambda body is rebuilt only when it holds a bare
+  return. Carrier token replacement copies only the lists it changes. The
+  cell rule keeps the statements that hold no cell as they are bound, binds
+  only the cells and the statements around them, and builds each cell's
+  allocation as a typed quotation; a nested carrier is searched for
+  leftover binders only where it is taken. Translation per lambda, kernel
+  -> component -> now: non-capturing 7.61 -> 7.37 -> 7.22 M; value capture
+  8.87 -> 12.87 -> 8.60 M; reference capture 9.69 -> 13.86 -> 9.65 M; a
+  60-statement lambda body 28.40 -> 37.35 -> 19.34 M; a 60-statement
+  function whose lambda shares a local 11.75 -> 45.53 -> 13.57 M; the
+  500-function workload with one of each kind 18.19 -> 22.27 -> 17.99 G.
+  Generated C is unchanged for the compiler's sources and for every
+  fixture except two: `local-typedef-constructed` numbers its local
+  typedefs lower and `rewrite-function` loses a redundant block, because a
+  function with cells is no longer bound twice. Not changed: the slot watch
+  scan is linear per step and measured under 1% on every lambda, try, and
+  match shape tried, with no quadratic growth; the adapter keeps calling
+  the lifted function, which costs about 12 to 18 instructions per captured
+  call at `-O0` and none at `-O2`, where the C compiler inlines it, and moving
+  the body into the adapter would place function-entry code ahead of the
+  lambda's parameters.
 
 ## Next bounded milestone
 
