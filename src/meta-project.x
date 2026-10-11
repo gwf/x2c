@@ -186,6 +186,8 @@ static int Scan.file(Scan &s, String path) {
   String text = NULL;
   try text = Path.read_text(path);
   catch %((!or not-found io-fail) *): return 0;
+  ModuleSource module = s.c.module_source(path, text);
+  if (module) text = module.text;
   Tokenizer tokens = Tokenizer.new(text, <x2c>);
   tokens.layout = is_layout_file(path);
   tokens.scan();
