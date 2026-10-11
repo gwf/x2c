@@ -45,24 +45,23 @@ String Compiler.generated_unit_hash(Compiler c) =>
 /** Returns the relocatable identity of an enrolled source. Canonical paths
     still establish ownership. Identity collisions cannot share native names.
 */
-String ModuleTree.identity(ModuleTree tree, String spelling) {
+String ModuleTree.identity(ModuleTree m, String spelling) {
   String path = absolute_path(spelling);
   Var cached;
-  if (tree.owners.try_get(%(identity $path), cached)) return cached;
-  List ancestors = tree.ancestors(path);
+  if (m.owners.try_get(%(identity $path), cached)) return cached;
+  List ancestors = m.ancestors(path);
   String identity = home_portable_path(path), root = NULL;
   if (ancestors) {
     String entry = ancestors.last();
     root = Path.dirname(entry);
-    String package = package_directory(
-      tree.compiler.package_source_dirs, path);
+    String package = package_directory(m.compiler.package_source_dirs, path);
     if (!package)
-      package = package_directory(tree.compiler.package_dirs, path);
+      package = package_directory(m.compiler.package_dirs, path);
     if (package && package_source(package, path))
       identity = %"package:${Path.basename(package)}:${path[package.len() + 1:]}";
     else if (identity.startswith("/")) {
-      String project = tree.compiler.module_project_root;
-      if (!project) project = tree.project_root(path);
+      String project = m.compiler.module_project_root;
+      if (!project) project = m.project_root(path);
       if (project && path.startswith(project + "/")) {
         root = project;
         identity = %"project:${path[project.len() + 1:]}";
@@ -70,14 +69,14 @@ String ModuleTree.identity(ModuleTree tree, String spelling) {
       else identity = %"module:${path[root.len() + 1:]}";
     }
     String native_id = filename_hash(identity);
-    String previous = tree.owners[%(identity-owner $native_id)];
+    String previous = m.owners[%(identity-owner $native_id)];
     if (previous && previous != path)
-      tree._report(
+      m._report(
         path, %"module identity '$identity' collides with '$previous'; " +
         "use distinct entry names or a package/project namespace");
-    tree.owners[%(identity-owner $native_id)] = path;
+    m.owners[%(identity-owner $native_id)] = path;
   }
-  tree.owners[%(identity $path)] = identity;
+  m.owners[%(identity $path)] = identity;
   return identity;
 }
 
