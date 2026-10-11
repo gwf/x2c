@@ -64,12 +64,14 @@ static List _units(String dump, Path root):
 /** Returns the `Unit` of each path in `paths`, in order, as the compiler
     `x2c` translates it from the directory `root`. Public surfaces include
     transitive enrolled members, preserving their physical source paths.
-    The paths are dealt into one batch per processor; batches run at once.
+    JOBS caps the concurrent batches; otherwise one runs per processor.
     Raises: `<cmd-fail>` when a unit does not translate.
 */
 Array Unit.load(Path x2c, Path root, List paths):
   Array pending = paths, jobs = [], units = []
-  int batches = (int) sysconf(_SC_NPROCESSORS_ONLN)
+  String job_limit = Env.get("JOBS")
+  int batches = job_limit ? atoi(job_limit) : (int) sysconf(_SC_NPROCESSORS_ONLN)
+  if batches < 1: batches = 1
   if batches > pending.len(): batches = pending.len()
   Path work = Path.temp_dir()
   defer work.remove_tree()
