@@ -501,11 +501,11 @@ static List Compiler._declaration_form(Compiler c, int skip_body) {
 /* Bodies are parsed only when a prefix needs native execution. Collection
    publishes the ordinary signatures first, without running later producers. */
 static typedef struct NativePrefixBody {
-  List declaration;
+  List declaration, arms;
   Token body, first, meta;
   SymScope params;
   Map macros, aliases, objects;
-  int module;
+  int module, private, origin;
 } NativePrefixBody;
 
 static void Compiler._retain_native_prefix_body(
@@ -516,7 +516,8 @@ static void Compiler._retain_native_prefix_body(
     .params = c.params, .macros = c.macros.copy(),
     .aliases = c.kw_aliases.copy(),
     .objects = c.object_macros ? c.object_macros.copy() : {},
-    .module = c.source_module};
+    .module = c.source_module, .private = c.source_private,
+    .arms = c.arms, .origin = c.origin};
   if (!c.native_prefix_pending) c.native_prefix_pending = [];
   c.native_prefix_pending.push(Var.new(<p48>, pending));
   c.register_native_meta_prefix();
@@ -539,6 +540,9 @@ void Compiler.bind_native_meta_prefix(Compiler c) {
     $let(c.kw_aliases, pending->aliases)
     $let(c.object_macros, pending->objects)
     $let(c.source_module, pending->module)
+    $let(c.source_private, pending->private)
+    $let(c.arms, pending->arms)
+    $let(c.origin, pending->origin)
     $let(c.shallow, 0)
     $let(c.capture_unit, 1)
       node = c._defined(pending->declaration, pending->meta, 0, pending->first);
