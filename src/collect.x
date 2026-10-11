@@ -1294,7 +1294,8 @@ List Compiler.collected_declaration_components(Compiler c, List providers) {
                 %(typedef ${key.list().car()}) in part.map())
               family = %(typedef ${key.list().car()});
             if (family) {
-              List known = owners[family].list();
+              Var stored;
+              List known = owners.try_get(family, stored) ? stored.list() : NULL;
               if (!(provider in known)) owners[family] = cons(provider, known);
             }
             own[key] = part.map()[key];
@@ -1310,7 +1311,9 @@ List Compiler.collected_declaration_components(Compiler c, List providers) {
     foreach (String dependency, dependencies[provider].list())
       edges.push(dependency);
     foreach (List family, needed.keys()) {
-      foreach (String owner, owners[family].list())
+      Var stored;
+      if (!owners.try_get(family, stored)) continue;
+      foreach (String owner, stored.list())
         if (owner != provider && !(owner in edges)) edges.push(owner);
     }
     dependencies[provider] = edges.list_free();
