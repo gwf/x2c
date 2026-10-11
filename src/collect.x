@@ -234,7 +234,7 @@ static void Compiler._collect_module_signatures(
       foreach (Var (key, value), part.map()) {
         if (value is <list>)
           match (value) case %((!or declaration-source compile-time
-                                  package-import) *): continue;
+                                  package-import project-meta) *): continue;
         ordinary[key] = value;
       }
       $let(c.source_facts, 0) c._merge_rows(declarations, ordinary);
