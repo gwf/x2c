@@ -12686,7 +12686,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_23(void){
   _11807 = List_var(_11806);
   _11808 = String_new("src/macros.x");
   _11809 = String_var(_11808);
-  _11810 = String_new("8f4b78f5");
+  _11810 = String_new("dad2757e");
   _11811 = String_var(_11810);
   _11812 = cons(_11811, NULL);
   _11813 = cons(_11809, _11812);
@@ -12934,7 +12934,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_23(void){
   _12055 = List_var(_12054);
   _12056 = String_new("src/cleanup.x");
   _12057 = String_var(_12056);
-  _12058 = String_new("37437a5e");
+  _12058 = String_new("8f073421");
   _12059 = String_var(_12058);
   _12060 = cons(_12059, NULL);
   _12061 = cons(_12057, _12060);
