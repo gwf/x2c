@@ -781,6 +781,18 @@ replacement template and fill steps are the remaining driver cost.
   `--no-interfaces`); the warm empty unit is -26 M. Fixture
   `protocol-recorded-conformance-cold` forces the cold path. Authored total
   for the change: about +400 lines in collect.x and protocol.x.
+- 2026-10-11, defer landing try hidden from program rules
+  (`kernel/defer-try`): `lower_defer_region` and the unsupported-capture
+  path of `_callable_defer` write `(try BODY () FINALIZER kernel)` through
+  `_landing_region`; `_landing_form` strips the mark and lowers it through
+  `Compiler.rewrite_written`, which binds a `shipped` watch so only shipped
+  rules see it. Statements the kernel writes while lowering are not source
+  and reach only shipped rules, now stated in agents/lowering-with-
+  macros.md. +36/-10 in src; fixture `rewrite-try-defer-landing` (program
+  try count 9 -> 2). Open: a program function rule is offered the defer
+  callback `_x2c_defer_cleanup_N` that `_callable_defer` writes, and
+  lambda-lifted functions raise the same question for kernel-written
+  definitions.
 - 2026-10-10, facts learned: `function-entry` placement is parse-time, so
   lambda cells need a transform-time entry placement before lambdas move; a
   plain `make build` after editing a shipped component leaves a degraded
