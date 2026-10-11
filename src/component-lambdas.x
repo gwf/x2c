@@ -138,8 +138,8 @@ meta static Var _lambda_rebuild(Var ast, List none, Map cells, Array named) {
       }
       done.truncate(first);
       List rebuilt = changed ? parts.list_free() : node;
-      done.push(cells ? _lambda_declare_cells(rebuilt, cells, named)
-                      : rebuilt);
+      done.push(
+        cells ? _lambda_declare_cells(rebuilt, cells, named) : rebuilt);
       continue;
     }
     Code read = cells && !mode ? _lambda_cell_read(node, cells) : NULL;
@@ -295,8 +295,9 @@ meta static Code _lambda_adapter(
   int index = 0;
   foreach (List capture, captures) {
     List field = _lambda_field(index++);
-    arguments.push(capture.caddr().list().car() == <&>
-                   ? $!( *$record->$field ) : $!( $record->$field ));
+    arguments.push(
+      capture.caddr().list().car() == <&>
+        ? $!( *$record->$field ) : $!( $record->$field ));
   }
   return $!Unit{
     static Var $adapter(Func $closure, const FuncArg *$argv) {
@@ -348,8 +349,10 @@ meta static Code _lambda_value(
       (List base, List modifiers) = stored.parts();
       Atom local = Atom.intern(%"?__lambda_capture_${types.len()}");
       effects.push(%(new-name $local "lambda_capture_value"));
-      setup.push(%(declare $base (bindings
-        (op = (bind $local $modifiers) ${value.convert(stored)}))));
+      Code converted = value.convert(stored);
+      setup.push(
+        %(declare $base
+          (bindings (op = (bind $local $modifiers) $converted))));
       values.push(%(expr $stored (ident $local)));
       types.push(stored);
     }
@@ -358,8 +361,9 @@ meta static Code _lambda_value(
   if (_lambda_in_public_inline()) {
     Atom bridge = Atom.intern("?__lambda_bridge");
     effects.push(%(new-name $bridge ${_lambda_bridge_role()}));
-    effects.push(%(place (unit-support) ${_lambda_bridge(
-      bridge, adapter, context, signature, types.list_free())}));
+    Code bridged = _lambda_bridge(
+      bridge, adapter, context, signature, types.list_free());
+    effects.push(%(place (unit-support) $bridged));
     made = %(expr ("Func") (call (expr () (ident $bridge)) (args @initial)));
   }
   else {
@@ -367,8 +371,9 @@ meta static Code _lambda_value(
     Type type = %(struct $context);
     Code record = %(expr $type (ident $storage));
     effects.push(%(new-name $storage "lambda_context"));
-    setup.push(%(declare $type (bindings
-      (op = (bind $storage ()) (expr $type (composite (commas @initial)))))));
+    Code initial_record = %(expr $type (composite (commas @initial)));
+    setup.push(
+      %(declare $type (bindings (op = (bind $storage ()) $initial_record))));
     made = %(expr ("Func") (call "Func_new_context" (args
       (expr () (ident $adapter)) $signature
       (expr (* @type) (op & $record)) (expr ("size_t") (sizeof $record)))));
@@ -400,12 +405,14 @@ meta Code lambda_closure(Code node) {
       Array fields = [];
       foreach (List capture, captures)
         fields.push(_lambda_field_type(capture.caddr()));
-      effects.push(%(place (unit-support)
-        ${_lambda_record(context, fields.list_free())}));
-      effects.push(%(place (unit-support) ${_lambda_function(
-        lifted, _lambda_closure_params(params, reads, captures), body)}));
-      effects.push(%(place (unit-support) ${_lambda_adapter(
-        adapter, closure, argv, lifted, context, params, reads, captures)}));
+      Code record_type = _lambda_record(context, fields.list_free());
+      Code function = _lambda_function(
+        lifted, _lambda_closure_params(params, reads, captures), body);
+      Code adapter_function = _lambda_adapter(
+        adapter, closure, argv, lifted, context, params, reads, captures);
+      effects.push(%(place (unit-support) $record_type));
+      effects.push(%(place (unit-support) $function));
+      effects.push(%(place (unit-support) $adapter_function));
       Code value = _lambda_value(
         effects, adapter, context, adapted.car(), captures);
       return %(code-value "bound" $value ${effects.list_free()});

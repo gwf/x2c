@@ -2765,8 +2765,8 @@ static List Compiler._ancestor_code(Compiler c, Ancestor row) {
     entry. Returns the row's depth for `Compiler.leave_function`. */
 int Compiler.enter_function(Compiler c, List declaration) {
   int depth = c.ancestors.len();
-  c.enter((Ancestor){
-    .what = <function>, .node = declaration, .lowering = 1});
+  Ancestor row = {.what = <function>, .node = declaration, .lowering = 1};
+  c.enter(row);
   return depth;
 }
 
