@@ -147,6 +147,9 @@ static List Compiler._generated_code(Compiler c, List ast, String basename) {
       namespaceEdges: c.module_layout_plan[%(namespace-requires)],
       familyEdges: c.module_layout_plan[%(projection-families)]};
     outputs = outputs.append(%("$basename.xnm" ${Var.json(metadata)}));
+  } else if (Path.exists(%"$basename.xnm")) {
+    Map metadata = {format: 2, active: Json.bool(0), regions: []};
+    outputs = outputs.append(%("$basename.xnm" ${Var.json(metadata)}));
   }
   return outputs;
 }

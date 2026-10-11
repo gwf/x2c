@@ -47,6 +47,7 @@ typedef struct ToolRun {
 
 #include "report.x"
 #include "utils.x"
+#include "json.x"
 
 // command reports
 
@@ -198,6 +199,10 @@ int Toolchain.project_native_source(
   if (t.dry_run) return 0;
   Array companions = [];
   int external = access(metadata, R_OK) != 0;
+  if (!external) {
+    Map record = Json.read_file(metadata);
+    if ("active" in record && !Json.boolean(record["active"])) return 0;
+  }
   if (external) {
     List directories = gen_dirs.append(%(${t.include_dir}));
     foreach (String candidate, directories) {
@@ -205,6 +210,8 @@ int Toolchain.project_native_source(
       foreach (String file, Path.list_dir(candidate))
         if (file.endswith(".xnm")) {
           String path = Path.absolute(%"$candidate/$file");
+          Map record = Json.read_file(path);
+          if ("active" in record && !Json.boolean(record["active"])) continue;
           if (!(path in companions)) companions.push(path);
         }
     }

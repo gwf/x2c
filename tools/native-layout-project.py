@@ -165,6 +165,8 @@ def load_metadata(path, streams=()):
             return
         seen.add(current)
         metadata = json.loads(current.read_text())
+        if metadata.get('active') is False:
+            return
         if metadata['format'] != primary['format']:
             raise ProjectionError('mixed native metadata formats')
         provider = metadata.get('provider')
@@ -382,7 +384,7 @@ def compile_native(arguments):
         raise ProjectionError('missing configured native compiler arguments')
     source, destination = Path(source), Path(destination)
     metadata = source.with_suffix('.xnm')
-    if not metadata.exists():
+    if not metadata.exists() or json.loads(metadata.read_text()).get('active') is False:
         return subprocess.run([*compiler, '-MMD', '-MP', '-MF', depfile,
                                '-MT', object_file, '-c', str(source),
                                '-o', object_file]).returncode
