@@ -8,7 +8,7 @@
 #include "utils.x"
 
 static typedef struct Layouts {
-  Map bodies, variants, aliases, owners, edges, visiting, finished;
+  Map bodies, variants, aliases, alias_variants, owners, edges, visiting, finished;
   Map private_types, private_bindings, private_constants, used_aliases;
   Array order;
 } Layouts;
@@ -140,8 +140,12 @@ static void Layouts.provider(Layouts &layouts, Compiler c, List ast) {
           foreach (List declarator, bindings.list().cdr()) {
             String name = binding_identity_spelling(declarator.cadr());
             if (name)
-              layouts.aliases[name] = %(
-                $c (typedef $alias_base (bindings $declarator)));
+              {
+                List alias = %(typedef $alias_base (bindings $declarator));
+                layouts.aliases[name] = %($c $alias);
+                layouts.alias_variants[name] = cons(
+                  %($c $alias ${prefix.list()} $arms), layouts.alias_variants[name]);
+              }
           }
         }
         if (!family) {
@@ -252,39 +256,46 @@ static String _layout_text(Compiler c, List nodes) {
 /* Own source guards suppress support bodies during ancestor includes.
    Named aggregate aliases need declarations before those includes even
    when no cross-file complete-layout edge exists. */
-static String Layouts.forwards(Layouts &layouts, Compiler c, List ast) {
-  Array candidates = [], nodes = [];
-  foreach (List node, ast) {
-    match (node) case %(typedef *): {
-      foreach (List prerequisite, layouts.alias_nodes(node))
-        candidates.push(prerequisite);
-      candidates.push(node);
-    }
+static List _layout_forward(Compiler c, List node) {
+  Type type = node.cadr();
+  if (type.is_static() || type.base_type().car() == <enum>) return NULL;
+  List family = _layout_family(type);
+  if (family) {
+    List core = type.base_type();
+    type = type.list()[:type.list().len() - core.len()].append(family);
   }
-  Map done = {};
-  foreach (List node, candidates)
-    match (node) case %(typedef ?base (bindings *rows)): {
-      Type type = base;
-      if (type.is_static()) continue;
-      List core = type.base_type(), bare = base;
-      match (core) {
-        case %(enum *): continue;
-        case %((!set ?kind (!or struct union)) ?(String name) *):
-          bare = base.list()[:base.list().len() - core.len()]
-            .append(%($kind $name));
-      }
-      foreach (List declarator, rows) {
-        Type alias = %(typedef $base (bindings $declarator)).type_from_ast();
-        Type element = c.sym.normalize_declared_type(alias).canonicalize();
-        int array = element.is_array();
-        while (element.is_array()) element = element.dereference();
-        if (array && !element.is_pointer()) continue;
-        List forward = %(typedef $bare (bindings $declarator));
-        if (forward in done) continue;
-        done[forward] = 1;
-        nodes.push(forward);
-      }
-    }
+  Array rows = [];
+  foreach (List declarator, node.caddr().list().cdr()) {
+    Type alias = %(typedef $type (bindings $declarator)).type_from_ast();
+    Type element = c.sym.normalize_declared_type(alias).canonicalize();
+    int array = element.is_array();
+    while (element.is_array()) element = element.dereference();
+    if (!array || element.is_pointer()) rows.push(declarator);
+  }
+  return rows.len() ? %(typedef $type (bindings @{rows.list_free()})) : NULL;
+}
+
+static List _layout_forward_prefix(Compiler c, List prefix) {
+  Array nodes = [];
+  foreach (List node, prefix) {
+    if (node.car() == <typedef>) node = _layout_forward(c, node);
+    if (node) nodes.push(node);
+  }
+  return nodes.list_free();
+}
+
+static String Layouts.forwards(
+  Layouts &layouts, Compiler c, List ast, Map plan) {
+  Map done = {}, visiting = {};
+  Array nodes = [];
+  foreach (List node, ast)
+    match (node) case %(typedef ?base (bindings *rows)):
+      if (!base.list().type().is_static())
+        foreach (List row, rows) {
+          String name = binding_identity_spelling(row.cadr());
+          if (name && name in layouts.aliases)
+            layouts.alias(name, done, visiting, nodes, plan, 1);
+        }
   return _layout_text(c, nodes.list_free());
 }
 
@@ -299,7 +310,7 @@ static List Layouts.prefix(
       Type type = base;
       match (type.base_type()) case %(?(String dependency)):
         if (dependency in layouts.aliases)
-          foreach (List prerequisite, layouts.alias_nodes(node))
+          foreach (List prerequisite, layouts.alias_nodes(node, plan))
             nodes.push(prerequisite);
     }
     match (node)
@@ -318,25 +329,42 @@ static List Layouts.prefix(
 }
 
 static void Layouts.alias(
-  Layouts &layouts, String name, Map done, Map visiting, Array text) {
+  Layouts &layouts, String name, Map done, Map visiting, Array nodes,
+  Map plan, int forwards) {
   if (name in done) return;
   if (name in visiting) {
     Compiler c = layouts.aliases[name].list().car();
     c.report_error(<type>, "layout typedef prerequisite cycle", NULL, %($name));
   }
   visiting[name] = 1;
-  (Compiler c, List node) = layouts.aliases[name];
-  Type type = node.cadr();
-  match (type.base_type()) case %(?(String dependency)):
-    if (dependency in layouts.aliases)
-      layouts.alias(dependency, done, visiting, text);
+  String text = "";
+  foreach (List variant, layouts.alias_variants[name].list().reverse()) {
+    (Compiler c, List node, List prefix, List arms) = variant;
+    Type type = node.cadr();
+    match (type.base_type()) case %(?(String dependency)):
+      if (dependency in layouts.aliases)
+        layouts.alias(dependency, done, visiting, nodes, plan, forwards);
+    if (forwards) {
+      node = _layout_forward(c, node);
+      prefix = _layout_forward_prefix(c, prefix);
+    }
+    if (!node) continue;
+    List macros = _layout_macro_names(prefix);
+    text += _layout_macro_guards(macros, "push");
+    text += _layout_text(c, layouts.prefix(c, prefix, plan, %($node)));
+    for (int i = arms.len(); i; i--) text += "#endif\n";
+    text += _layout_macro_guards(macros.reverse(), "pop");
+  }
   visiting.del(name);
   done[name] = 1;
   layouts.used_aliases[name] = 1;
-  text.push(node);
+  if (text.len()) {
+    String guard = _layout_guard(%(alias $forwards $name));
+    nodes.push(%(comment ${%"#ifndef $guard\n#define $guard\n$text\n#endif\n"}));
+  }
 }
 
-static List Layouts.alias_nodes(Layouts &layouts, List body) {
+static List Layouts.alias_nodes(Layouts &layouts, List body, Map plan) {
   Map needed = {}, done = {}, visiting = {};
   List node;
   $ast.walk(body, node) {
@@ -346,10 +374,10 @@ static List Layouts.alias_nodes(Layouts &layouts, List body) {
         if (name in layouts.aliases) needed[name] = 1;
     }
   }
-  Array parts = [];
+  Array nodes = [];
   foreach (String name, needed.keys())
-    layouts.alias(name, done, visiting, parts);
-  return parts.list_free();
+    layouts.alias(name, done, visiting, nodes, plan, 0);
+  return nodes.list_free();
 }
 
 /* A copied definition's directives must not set source-position macros
@@ -383,7 +411,7 @@ static String _layout_macro_guards(List names, String operation) {
    Consumers export only Strings and keys as their nested Contexts close. */
 Map prepare_module_layouts(List providers) {
   Layouts layouts = {
-    .bodies = {}, .variants = {}, .aliases = {}, .owners = {},
+    .bodies = {}, .variants = {}, .aliases = {}, .alias_variants = {}, .owners = {},
     .edges = {},
     .visiting = {}, .finished = {}, .order = [],
     .private_types = {}, .private_bindings = {}, .private_constants = {},
@@ -427,7 +455,7 @@ Map prepare_module_layouts(List providers) {
       List body = variant.cadr(), prefix = variant.caddr(), arms = variant.cddr().cadr();
       List macros = _layout_macro_names(prefix);
       text += _layout_macro_guards(macros, "push");
-      List definitions = layouts.alias_nodes(body).append(%($body));
+      List definitions = layouts.alias_nodes(body, plan).append(%($body));
       text += _layout_text(c, layouts.prefix(c, prefix, plan, definitions));
       for (int i = arms.len(); i; i--) text += "#endif\n";
       text += _layout_macro_guards(macros.reverse(), "pop");
@@ -437,7 +465,7 @@ Map prepare_module_layouts(List providers) {
   }
   foreach (List provider, providers) {
     (Compiler c, List ast) = provider;
-    String path = c.canonical_path(c.filename), text = layouts.forwards(c, ast);
+    String path = c.canonical_path(c.filename), text = "";
     Map names = {}, bindings = {};
     Map provider_types = layouts.private_types[path],
       provider_bindings = layouts.private_bindings[path],
@@ -458,6 +486,7 @@ Map prepare_module_layouts(List providers) {
     foreach (List family, layouts.order)
       if (family in active && layouts.owners[family].string() == path)
         text += rendered[family].string();
+    text += layouts.forwards(c, ast, plan);
     if (text.len()) plan[%(prefix $path)] = text;
   }
   return plan;
