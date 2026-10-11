@@ -26,6 +26,7 @@
 #include "expressions.x"
 #include "generate.x"
 #include "logger.x"
+#include "json.x"
 #include <stdio.h>
 #include <stdint.h>
 #include <assert.h>
@@ -622,6 +623,28 @@ void Compiler.check_module_initializer_graph(Compiler c, List rows) {
     queue.dependencies[binding] = dependencies;
   }
   queue.queue(0);
+}
+
+/** Unions the native-selected receipts before checking a complete request.
+    A receipt is the projection owner's JSON array of emitted-name pairs.
+    Its opaque graph vertices grant no source lookup or linkage access.
+*/
+void Compiler.check_native_initializer_receipts(Compiler c, List paths) {
+  Map dependencies = {};
+  foreach (String path, paths) {
+    Array selected = Json.read_file(path);
+    foreach (Array edge, selected) {
+      String source = edge[0], target = edge[1];
+      List binding = binding_identity_new(0, source);
+      List prerequisite = binding_identity_new(0, target);
+      Array targets = dependencies.setdefault(binding, []);
+      if (!(prerequisite in targets)) targets.push(prerequisite);
+    }
+  }
+  Array rows = [];
+  foreach (Var (binding, targets), dependencies)
+    rows.push(%($binding ${targets.array().list()}));
+  c.check_module_initializer_graph(rows.list_free());
 }
 
 /* Queue a stable dependency walk. Dependencies precede their consumers, and
