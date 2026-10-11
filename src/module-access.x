@@ -57,7 +57,8 @@ int Compiler.module_accessible(Compiler c, String owner) {
 
 static String Compiler._module_spelling(Compiler c, String name) {
   if (!c.module_owner)
-    c.report_error(<parse>, "module declaration has no owning module", c.token, NULL);
+    c.report_error(
+      <parse>, "module declaration has no owning module", c.token, NULL);
   String prefix = c.module_tree.prefix(c.module_owner);
   if (c.package) prefix = c.package_spelling(prefix);
   if (name.startswith(prefix)) return name;
@@ -149,7 +150,8 @@ List Compiler.module_reference_key(Compiler c, List key) {
 /** Records declaration ownership and checks public signature visibility. */
 void Compiler.record_module_declaration(Compiler c, List syntax) {
   if (c.source_module && !c.module_owner)
-    c.report_error(<parse>, "module declaration has no owning module", c.token, NULL);
+    c.report_error(
+      <parse>, "module declaration has no owning module", c.token, NULL);
   match (syntax) {
     case %(seq *rows):
       foreach (List row, rows) c.record_module_declaration(row);
@@ -175,7 +177,9 @@ void Compiler.record_module_declaration(Compiler c, List syntax) {
 static void Compiler._record_module_binding(
   Compiler c, List type, List binding) {
   if (c.source_module && type.type().is_static())
-    c.report_error(<parse>, "module and static visibility cannot be combined", c.token, NULL);
+    c.report_error(
+      <parse>, "module and static visibility cannot be combined",
+      c.token, NULL);
   String name = binding_identity_spelling(binding);
   if (!name) return;
   if (c.source_module && c.sym.get_exact(%("module-opaque" $name))) return;
@@ -208,7 +212,7 @@ static void Compiler._check_public_module_type(Compiler c, Var type) {
         c.token, NULL);
   }
   else if (type is <list>) {
-    // Enum initializer values do not expose their expression bindings as types.
+    // Enum values do not expose their expression bindings as types.
     match (type) case %(expr *): return;
     foreach (Var child, type.list()) c._check_public_module_type(child);
   }

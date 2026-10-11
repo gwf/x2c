@@ -347,7 +347,8 @@ int Build.translation_current(Build b, String input, String directory) {
   discovery.module_project_root = b.request.manifest
     ? Path.dirname(absolute_path(b.request.manifest)) : NULL;
   if (discovery.module_tree.owner(input) &&
-      !Path.is_file(Path.join(directory, discovery.module_support_header(input))))
+      !Path.is_file(
+        Path.join(directory, discovery.module_support_header(input))))
     return 0;
   int ok = 1;
   uint64_t hash = b._translation_fingerprint(input, directory, ok);
@@ -655,7 +656,8 @@ static void _place_header(
       Map reference = {format: 2, regions: [], companions: %(
         ${native_projection_relative(metadata, placed.dirname())})};
       sidecar.write_text(Var.json(reference));
-    } else sidecar.remove_file();
+    }
+    else sidecar.remove_file();
     return;
   }
 }

@@ -366,7 +366,8 @@ static void Compiler._leading_directives(Compiler c, int skip_body) {
     c.register_native_meta_prefix();
   List directives = c.leading_preproc();
   c.note_preprocessor_macros(directives);
-  if (skip_body && c.meta_build && !c.signature_only && !c.macro_holes && directives)
+  if (skip_body && c.meta_build && !c.signature_only &&
+      !c.macro_holes && directives)
     c._retain_native_prefix_nodes(directives);
   if (!skip_body) c._track_conditional_arms();
 }
@@ -473,9 +474,8 @@ static List Compiler._declaration_form(Compiler c, int skip_body) {
   Type type = decl.type_from_ast();
   if (prefix && type.is_function() && !body)
     c._retain_native_prefix_nodes(%($decl));
-  if (prefix && decl.car() == <typedef>) {
+  if (prefix && decl.car() == <typedef>)
     c._retain_native_prefix_nodes(%($decl));
-  }
   if (prefix && !meta && decl.car() == <declare> && !type.is_function()) {
     NativePrefixBody *pending = c._retain_native_prefix_objects(decl, first);
     c.finish_collected_declaration(decl, NULL, 0);
@@ -632,7 +632,8 @@ static List Compiler._bind_native_prefix_objects(
     NativePrefixBody *source = slice.pointer();
     if (source->kind == 3) {
       match (source->declaration) case %(declare ? (bindings ?bind)):
-        initialized[bind.car() == <op> ? bind.caddr().cadr() : bind.cadr()] = bind;
+        initialized[bind.car() == <op>
+          ? bind.caddr().cadr() : bind.cadr()] = bind;
       continue;
     }
     c.token = source->body ? source->body : source->end;
@@ -652,7 +653,8 @@ static List Compiler._bind_native_prefix_objects(
         declarations.push(initialized.getdefault(bind.cadr(), bind));
       c.token = pending->end;
       return c._declared(
-        %(declare $type (bindings @{declarations.list_free()})), NULL, pending->first);
+        %(declare $type (bindings @{declarations.list_free()})),
+        NULL, pending->first);
     }
   return pending->declaration;
 }
@@ -688,7 +690,7 @@ static List Compiler._bind_native_prefix_slice(
   return c._declared(declaration, NULL, pending->first);
 }
 
-/** Binds already-collected bodies once through the ordinary function parser. */
+/** Binds collected bodies once through the ordinary function parser. */
 void Compiler.bind_native_meta_prefix(Compiler c) {
   int count = c.native_prefix_pending ? c.native_prefix_pending.len() : 0;
   if (!count) return;
@@ -743,7 +745,8 @@ void Compiler.bind_native_meta_prefix(Compiler c) {
       continue;
     }
     $let(c.source_module, pending->module)
-      c.retain_native_meta_source(node, pending->meta ? pending->meta : pending->first,
+      c.retain_native_meta_source(
+        node, pending->meta ? pending->meta : pending->first,
         c.token, pending->meta != NULL);
   }
 }
@@ -1595,7 +1598,8 @@ static List Compiler._storage_class(Compiler c) {
     Symbol symbol = c.peek(0);
     if (symbol == <ident> && c.module_form_is_declaration()) {
       if (!c.module_owner)
-        c.report_error(<parse>, "module declaration has no owning module", c.token, NULL);
+        c.report_error(
+          <parse>, "module declaration has no owning module", c.token, NULL);
       c.source_module = 1;
       c.next();
       continue;
@@ -2277,7 +2281,8 @@ static List Compiler._declarator_init(
     return c._initialized(type, bind, origin);
   if (c.meta_build && c.shallow && !c.capture_unit &&
       !c.signature_only && !c.macro_holes && !context &&
-      c.sym.at_file_scope() && !%(declare $type (bindings $bind)).type_from_ast().is_function())
+      c.sym.at_file_scope() &&
+      !%(declare $type (bindings $bind)).type_from_ast().is_function())
     c._retain_native_prefix_initializer(type, bind, origin, NULL, c.token);
   return bind;
 }
@@ -3409,7 +3414,8 @@ static List Compiler._bind_form(
     case %(!set ?node ((!or protocol adopt meta-protocol) *)) if (unit):
       return c.publish_protocol_node(node, c.token, NULL);
     case %(!set ?def (macrodef *)): return c._bind_macrodef(def, context);
-    case %(preproc ?(String directive)) if (unit || block || context == AST_FIELD):
+    case %(preproc ?(String directive))
+      if (unit || block || context == AST_FIELD):
       return c._bind_preproc(input);
     case %(at ?origin ?node) if (block): return c._bind_item(origin, node);
     case %(at ?origin ?node):

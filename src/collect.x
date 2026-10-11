@@ -485,7 +485,8 @@ static void FileWalk.record_declaration_providers(FileWalk &w, Map overlay) {
 }
 
 /* Record namespace prerequisites while this segment's actual symbol scopes
-   still distinguish native headers, private names, and earlier declarations. */
+   still distinguish native headers, private names, and earlier
+   declarations. */
 static void FileWalk.record_declaration_prerequisites(
   FileWalk &w, Compiler shadow, Map overlay) {
   Map rows = w.globs;
@@ -518,7 +519,8 @@ static void FileWalk.record_declaration_prerequisites(
             if (path == provider && key == required) continue;
             List record = %("source-node" (declaration-prerequisite
               $path ${w.pos} $key $provider $required));
-            List edge = %(declaration-prerequisite $path $key $provider $required);
+            List edge =
+              %(declaration-prerequisite $path $key $provider $required);
             overlay[record] = edge;
             w.globs[record] = edge;
           }
@@ -675,7 +677,8 @@ static List _type_family(List key) {
 }
 
 /** Returns the aggregate or typedef family that owns this declaration row.
-    Enum values belong to their nonstatic enum family; unrelated rows return NULL.
+    Enum values belong to their nonstatic enum family.
+    Unrelated rows return NULL.
 */
 List declaration_type_family(Map rows, Map statics, List key, Var value) {
   List family = _type_family(key);
@@ -715,7 +718,9 @@ static void _declaration_type_references(
   while (pending.len()) {
     Var item = pending.take_last();
     if (item is not <list>) continue;
-    match (item) case %((!or declaration-provider definition-provider declaration-prerequisite declaration-detail) *):
+    match (item)
+      case %((!or declaration-provider definition-provider
+                  declaration-prerequisite declaration-detail) *):
       continue;
     match (item)
       case %((!or declare typedef function) ?base *)
@@ -1386,7 +1391,8 @@ static void Compiler.bind_pending_inline_bodies(
 }
 
 /** Groups collected declaration prerequisites without executing source forms.
-    Namespace edges retain the actual supplying file selected during collection.
+    Namespace edges retain the actual supplying file selected
+    during collection.
     Copied support and repeated private spellings do not change that provider.
     Body references and ordered producers remain separate.
     A missing provider record returns NULL, requiring ordinary collection.
@@ -1407,7 +1413,8 @@ Map Compiler.collected_declaration_dependencies(Compiler c, List providers) {
   foreach (String provider, dependencies.keys())
     if (!c._entry(provider)) return NULL;
   foreach (List row, c.declaration_prerequisite_rows(providers)) {
-    (Symbol kind, String path, List key, String required, List namespace) = row;
+    (Symbol kind, String path, List key, String required,
+     List namespace) = row;
     (void) kind;
     (void) key;
     (void) namespace;
@@ -1424,9 +1431,10 @@ Map Compiler.collected_declaration_dependencies(Compiler c, List providers) {
     Exported includes supply only selected public and inline-support rows. */
 List Compiler.declaration_provider_rows(
   Compiler c, List providers, int exported) =>
-  c._declaration_provider_rows(providers, %(declaration-provider).car(), exported);
+  c._declaration_provider_rows(
+    providers, %(declaration-provider).car(), exported);
 
-/** Exports original typed declaration rows and their producing-file privacy. */
+/** Exports typed declaration rows with their producing-file privacy. */
 List Compiler.declaration_detail_rows(Compiler c, List providers) =>
   c._declaration_provider_rows(providers, %(declaration-detail).car(), 0);
 
@@ -1435,13 +1443,15 @@ List Compiler.declaration_detail_rows(Compiler c, List providers) =>
     Source positions identify contributions without rerunning producers.
 */
 List Compiler.declaration_prerequisite_rows(Compiler c, List providers) {
-  return c._declaration_provider_rows(providers, %(declaration-prerequisite).car(), 0);
+  return c._declaration_provider_rows(
+    providers, %(declaration-prerequisite).car(), 0);
 }
 
 static List Compiler._declaration_provider_rows(
   Compiler c, List providers, Var kind, int exported) {
   Map closure = {};
-  foreach (String provider, providers) c.declaration_dependencies(provider, closure);
+  foreach (String provider, providers)
+    c.declaration_dependencies(provider, closure);
   Array rows = [];
   foreach (String provider, closure.keys()) {
     List entry = c._entry(provider);
@@ -1937,7 +1947,8 @@ static int _package_protocol_row(List key, Var value) {
   return row && row.car() in
     %(protocol adopt meta-protocol declaration-source native-meta
       compile-time project-meta meta-hashes interface-types native-object
-      package-import declaration-provider definition-provider declaration-prerequisite declaration-detail provider);
+      package-import declaration-provider definition-provider
+      declaration-prerequisite declaration-detail provider);
 }
 
 // import replay

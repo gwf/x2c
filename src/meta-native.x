@@ -314,7 +314,7 @@ void Compiler.install_meta_declaration(
   $report.parse.meta_decl(c, marker);
 }
 
-/** Republishes an already bound prefix without executing its body producers. */
+/** Republishes a bound prefix without executing its body producers. */
 void Compiler.restore_native_meta_source(
   Compiler c, List node, Token marker) {
   if (node.car() == <function>) c.install_meta_function(node, marker);

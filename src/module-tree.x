@@ -38,8 +38,8 @@ String Compiler.module_support_header(Compiler c, String path) =>
 
 /** Keeps module output guards independent of invocation path spelling. */
 String Compiler.generated_unit_hash(Compiler c) =>
-  filename_hash(c.module_owner
-    ? c.module_tree.identity(c.canonical_path(c.filename)) +
+  filename_hash(
+    c.module_owner ? c.module_tree.identity(c.canonical_path(c.filename)) +
       (c.native_fragment ? c.native_fragment : "") : c.filename);
 
 /** Returns the relocatable identity of an enrolled source. Canonical paths
@@ -337,7 +337,8 @@ static void ModuleTree._enroll(
   foreach (String member, entry.members) {
     String owner = tree.owner(member);
     if (owner != canonical && owner != member)
-      tree._report(member, "ancestor directly enrolls a nested implementation member");
+      tree._report(
+        member, "ancestor directly enrolls a nested implementation member");
     tree._enroll(member, units, seen);
   }
 }

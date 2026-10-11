@@ -746,9 +746,11 @@ List Compiler.replay_declaration_source(Compiler c) {
 /** Retains a meta prefix already bound by the ordinary declaration parser. */
 void Compiler.retain_native_meta_source(
   Compiler c, List node, Token first, Token after, int meta) {
-  c.sym.set(c._declaration_source_key(first),
+  c.sym.set(
+    c._declaration_source_key(first),
     %(declaration-source ${after.pos}
-      (native-meta-bound ${c.freeze_declaration_syntax(node)} ${c.source_module} $meta)
+      (native-meta-bound ${c.freeze_declaration_syntax(node)}
+                         ${c.source_module} $meta)
       ${c.semantic_binding_facts()}));
   c.register_native_meta_prefix();
 }
@@ -1876,7 +1878,7 @@ List Compiler.module_initializer_rows(Compiler c) {
   return rows.list_free();
 }
 
-/** Exports initializer dependencies including file-private intermediary objects.
+/** Exports initializer dependencies, including file-private objects.
     Opaque identities distinguish files without adding symbol-table access.
     Existing emission rows remain separate from this complete cycle graph.
 */
@@ -1886,7 +1888,8 @@ List Compiler.module_initializer_graph(Compiler c) {
     Array targets = [];
     foreach (List dependency, dependencies.list())
       targets.push(c._initializer_graph_binding(dependency));
-    rows.push(%(${c._initializer_graph_binding(binding)} ${targets.list_free()}));
+    rows.push(
+      %(${c._initializer_graph_binding(binding)} ${targets.list_free()}));
   }
   return rows.list_free();
 }
@@ -1911,8 +1914,10 @@ List Compiler.module_initializer_variants(Compiler c) {
     seen[binding] = 1;
   }
   foreach (Var (binding, dependencies), c.static_init_deps)
-    if (!(binding in seen)) rows.push(c._initializer_variant(
-      binding, dependencies, c._fact(%(arms $binding))));
+    if (!(binding in seen))
+      rows.push(
+        c._initializer_variant(
+          binding, dependencies, c._fact(%(arms $binding))));
   return rows.list_free();
 }
 
@@ -1921,7 +1926,8 @@ static List Compiler._initializer_variant(
   Array targets = [];
   foreach (List dependency, dependencies)
     targets.push(c._initializer_graph_binding(dependency));
-  return %(${c._initializer_graph_binding(binding)} ${targets.list_free()} $arms);
+  return
+    %(${c._initializer_graph_binding(binding)} ${targets.list_free()} $arms);
 }
 
 static List Compiler._initializer_graph_binding(Compiler c, List binding) =>
@@ -2337,7 +2343,8 @@ void Compiler.record_binding_declaration(Compiler c, List binding) {
   if (!c.filename || c.macro_holes || !c.sym.at_file_scope()) return;
   List key = c._fact(%(namespace $binding));
   if (!key) return;
-  List provider = %(provider ${home_portable_path(c.canonical_path(c.filename))});
+  List provider =
+    %(provider ${home_portable_path(c.canonical_path(c.filename))});
   c.sym.set(%("declaration-file" $key), provider);
   c.set_fact(%(provider $binding), provider);
 }
@@ -2347,7 +2354,8 @@ void Compiler.record_binding_definition(Compiler c, List binding) {
   if (!c.filename || c.macro_holes || !c.sym.at_file_scope()) return;
   List key = c._fact(%(namespace $binding));
   if (!key) return;
-  List provider = %(provider ${home_portable_path(c.canonical_path(c.filename))});
+  List provider =
+    %(provider ${home_portable_path(c.canonical_path(c.filename))});
   c.sym.set(%("definition-file" $key), provider);
   c.set_fact(%(definition-provider $binding), provider);
 }
@@ -2357,12 +2365,12 @@ void Compiler.record_binding_definition(Compiler c, List binding) {
 */
 String Compiler.binding_provider(Compiler c, List binding, int definition) {
   if (!(%(file-binding $binding) in c.semantic_binding_facts())) return NULL;
-  List provider = c._fact(definition
-    ? %(definition-provider $binding) : %(provider $binding));
+  List provider = c._fact(
+    definition ? %(definition-provider $binding) : %(provider $binding));
   if (!provider) {
     List key = c._fact(%(namespace $binding));
-    if (key) provider = c.sym.get_exact(definition
-      ? %("definition-file" $key) : %("declaration-file" $key));
+    if (key) provider = c.sym.get_exact(
+      definition ? %("definition-file" $key) : %("declaration-file" $key));
   }
   match (provider) case %(provider ?path):
     return c.canonical_path(home_absolute_path(path));
@@ -2387,7 +2395,8 @@ List Compiler.binding_reference_rows(Compiler c) {
   Array rows = [];
   foreach (List edge, c.binding_references.keys()) {
     (String consumer, String provider) = edge;
-    rows.push(%(${home_portable_path(consumer)} ${home_portable_path(provider)}));
+    rows.push(
+      %(${home_portable_path(consumer)} ${home_portable_path(provider)}));
   }
   return rows.list_free();
 }
@@ -3102,7 +3111,8 @@ static void Compiler._init_tables(Compiler c) {
   c.id_keys = [];
   $set_fields(c, {}, key_ids, deps, macros, kw_aliases,
               object_macros, proto_cache, imports, init_tokens,
-              static_init_deps, fn_defs, binding_references, meta_comptime, meta_regions,
+              static_init_deps, fn_defs, binding_references, meta_comptime,
+              meta_regions,
               meta_hashes, meta_calls, native_meta, project_meta,
               evaluated_effects, meta_group_bound);
 }
@@ -3117,7 +3127,8 @@ static void Compiler._share_unit(Compiler c, Compiler owner) {
                source_map, recovery_depth, sources, declaration_produced,
                source_facts, source_occurrences, source_definitions,
                source_declarations, source_texts, unit_script, include_dirs,
-               meta_build, signature_only, evaluated_effects, pending_inline_bodies,
+               meta_build, signature_only, evaluated_effects,
+               pending_inline_bodies,
                collection_native_files, binding_references);
   $copy_fields(c, owner, module_tree, module_owner, module_project_root);
 }

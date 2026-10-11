@@ -455,7 +455,8 @@ static String Compiler._protocol_member_spelling(
   String prefix = c.module_tree.prefix(owner);
   if (c.package) prefix = c.package_spelling(prefix);
   spelling = %"$prefix$spelling";
-  c.sym.define_global(%("module-owner" $spelling), %(${home_portable_path(owner)}));
+  c.sym.define_global(
+    %("module-owner" $spelling), %(${home_portable_path(owner)}));
   return spelling;
 }
 

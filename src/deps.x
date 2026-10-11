@@ -67,7 +67,8 @@ static String _contents(
   Array paths = $auto([]), searches = $auto([]);
   Map dependencies = compiler.resolved_translation_dependencies();
   foreach (Var (path, content_hash), dependencies) {
-    if (content_hash is <string> && String.startswith(content_hash, "search:")) {
+    if (content_hash is <string> &&
+        String.startswith(content_hash, "search:")) {
       String candidate = path;
       searches.push(candidate.startswith("cwd:") ? candidate[4:] : candidate);
     }

@@ -133,7 +133,6 @@ List Compiler.module_layout_node(Compiler c, List node) {
   return names ? _layout_private_node(node, names, bindings) : node;
 }
 
-
 /* Enum-valued identifiers in declarators require their defining enumerators,
    even when the declaration's object type contains no enum-valued field. */
 static void Layouts.require_constants(
@@ -172,7 +171,8 @@ static List Layouts.mark_fields(
         declaration = %(declare ${prefix.append(replacement)}
           ${declaration.caddr()});
         field = Ast.rewrap_origin(field, declaration);
-      } else {
+      }
+      else {
         Map namespaces = declaration_type_namespaces(
           declaration, resolver.unit_symbols());
         foreach (List namespace, namespaces.keys()) {
@@ -269,7 +269,8 @@ static List _registry_namespace(List key, List syntax, Map rows) {
 }
 
 static String _registry_namespace_id(Compiler c, String path, List key) {
-  String logical = c.module_tree.identity(c.canonical_path(home_absolute_path(path)));
+  String logical = c.module_tree.identity(
+    c.canonical_path(home_absolute_path(path)));
   return %"n_${filename_hash(%($logical $key).repr())}";
 }
 
@@ -309,7 +310,8 @@ Map prepare_module_layout_registry(Compiler c, List providers) {
     (Var kind, String path, List key, List syntax, int privacy) = row;
     (void) kind;
     (void) privacy;
-    List namespace = _registry_namespace(key, syntax, original[path]), emitted = namespace;
+    List namespace = _registry_namespace(key, syntax, original[path]);
+    List emitted = namespace;
     String canonical = c.canonical_path(home_absolute_path(path));
     Map names = plan.getdefault(%(private-types $canonical), {});
     Var spelling;
@@ -319,13 +321,15 @@ Map prepare_module_layout_registry(Compiler c, List providers) {
     String identity = %($path $emitted).repr();
     Var previous;
     if (identities.try_get(id, previous) && previous != identity)
-      c.report_error(<module>, "module namespace identity collision",
-                     NULL, %($previous $identity));
+      c.report_error(
+        <module>, "module namespace identity collision",
+        NULL, %($previous $identity));
     identities[id] = identity;
     plan[%(namespace $path $key)] = id;
     plan[%(namespace $path $namespace)] = id;
     definitions[%($path $namespace)] = id;
-    if (!is_source_file(canonical)) plan[%(namespace-provider $id)] = canonical;
+    if (!is_source_file(canonical))
+      plan[%(namespace-provider $id)] = canonical;
     match (namespace)
       case %((!set ?tag (!or struct union enum)) ?name):
         plan[%(projection-bodies)].map()[emitted] = 1;
@@ -338,7 +342,8 @@ Map prepare_module_layout_registry(Compiler c, List providers) {
   foreach (List row, c.declaration_prerequisite_rows(providers)) {
     (Var kind, String path, List key, String required, List target) = row;
     (void) kind;
-    List namespace = _registry_namespace(key, NULL, original.getdefault(path, {}));
+    List namespace = _registry_namespace(
+      key, NULL, original.getdefault(path, {}));
     Var consumer, dependency;
     if (!plan.try_get(%(namespace $path $namespace), consumer) ||
         !plan.try_get(%(namespace $required $target), dependency)) continue;
@@ -350,7 +355,7 @@ Map prepare_module_layout_registry(Compiler c, List providers) {
   return plan;
 }
 
-/** Returns an original provider's namespace vertex before private rewriting. */
+/** Returns the provider namespace vertex before private rewriting. */
 String Compiler.module_namespace_id(Compiler c, String path, List key) {
   if (!c.module_layout_plan) return NULL;
   path = home_portable_path(c.canonical_path(home_absolute_path(path)));
@@ -358,7 +363,7 @@ String Compiler.module_namespace_id(Compiler c, String path, List key) {
   return c.module_layout_plan.try_get(%(namespace $path $key), id) ? id : NULL;
 }
 
-/** Retains one active provider's private emitted spellings, without its AST. */
+/** Retains an active provider's private emitted spellings without its AST. */
 Map capture_module_provider(Compiler c, List ast) {
   Layouts layouts = {
     .private_types = {}, .private_bindings = {}};

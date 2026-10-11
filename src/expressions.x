@@ -1199,7 +1199,8 @@ static List Compiler._resolve_identifier(
     ? c.module_initializer(binding) : NULL;
   if (recipe &&
       home_absolute_path(recipe.cadr()) != c.canonical_path(c.filename)) {
-    String entry = c.module_initializer_entry(home_absolute_path(recipe.cadr()));
+    String entry = c.module_initializer_entry(
+      home_absolute_path(recipe.cadr()));
     List call = %(expr (void) (call $entry (args)));
     List address = %(expr ${type.reference()} (op & (parens $result)));
     List ordered = %(expr ${type.reference()} (commas $call $address));
@@ -1828,7 +1829,8 @@ static List Compiler._method_member(
   String method = %"${type.base_type().car()}_${field.car()}";
   Type signature = c.sym.get(%($method));
   if (!signature) {
-    List source = c.sym.get_exact(%("module-source" ${type.base_type().car()}));
+    List source =
+      c.sym.get_exact(%("module-source" ${type.base_type().car()}));
     if (source) {
       String local = %"${source.car()}_${field.car()}";
       Type local_type = c.sym.get_exact(%($local));

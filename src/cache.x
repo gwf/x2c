@@ -615,7 +615,8 @@ static int Compiler._reaches_kind(Compiler c, List code, Symbol kind) {
 */
 void Compiler.check_module_initializer_graph(Compiler c, List rows) {
   StaticQueue queue = {
-    .c = c, .initializers = [], .pending = {}, .state = {}, .dependencies = {}};
+    .c = c, .initializers = [], .pending = {}, .state = {},
+    .dependencies = {}};
   foreach (List row, rows) {
     (List binding, List dependencies) = row;
     queue.initializers.push(%($binding));

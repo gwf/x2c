@@ -63,11 +63,13 @@ List generate_code_files(Compiler c, List ast, String dir) {
   List outputs = c._generated_code(ast, basename);
   if (c.module_owner)
     outputs = outputs.append(
-      %(
-      "${dir.rstrip("/")}/${c.module_support_header(c.filename)}" ${outputs.cadr()}));
+      %("${dir.rstrip("/")}/${c.module_support_header(c.filename)}"
+        ${outputs.cadr()}));
   if (c.module_layout_plan)
-    foreach (List file, c.module_layout_plan[%(files ${c.canonical_path(c.filename)})])
-      outputs = outputs.append(%("${dir.rstrip("/")}/${file.car()}" ${file.cadr()}));
+    foreach (List file,
+      c.module_layout_plan[%(files ${c.canonical_path(c.filename)})])
+      outputs = outputs.append(
+        %("${dir.rstrip("/")}/${file.car()}" ${file.cadr()}));
   String interface = c.source_facts ? NULL : interface_text(c);
   if (interface) outputs = outputs.append(%("$basename.xi" $interface));
   return outputs;
@@ -98,9 +100,9 @@ List generate_code_text(Compiler c, List ast, String basename) =>
 List generate_code_text_files(Compiler c, List ast, String basename) {
   List outputs = c._generated_code(_without_trivia(ast), basename);
   if (c.module_owner)
-    outputs = outputs.append(%(
-      "${Path.dirname(basename)}/${c.module_support_header(c.filename)}"
-      ${outputs.cadr()}));
+    outputs = outputs.append(
+      %("${Path.dirname(basename)}/${c.module_support_header(c.filename)}"
+        ${outputs.cadr()}));
   return outputs;
 }
 
@@ -145,8 +147,9 @@ static List Compiler._generated_code(Compiler c, List ast, String basename) {
     Map directories = c.module_layout_plan;
     foreach (Var (key, directory), directories)
       match (key) case %(directories ?(String provider)):
-        companions.push(native_projection_relative(
-          %"$directory/${Path.stem(provider)}.xnm", Path.dirname(cfile)));
+        companions.push(
+          native_projection_relative(
+            %"$directory/${Path.stem(provider)}.xnm", Path.dirname(cfile)));
     Map metadata = {
       format: 2, source: Path.basename(cfile), header: Path.basename(hfile),
       provider: c.module_tree.identity(c.canonical_path(c.filename)),
@@ -156,16 +159,19 @@ static List Compiler._generated_code(Compiler c, List ast, String basename) {
         c.module_layout_plan[%(namespace-requires)]),
       familyEdges: _projection_sorted_edges(
         c.module_layout_plan[%(projection-families)])};
-    outputs = outputs.append(%("$basename.xnm" ${Var.json(metadata)}));
-  } else if (Path.exists(%"$basename.xnm")) {
+    outputs = outputs.append(
+      %("$basename.xnm" ${Var.json(metadata)}));
+  }
+  else if (Path.exists(%"$basename.xnm")) {
     Map metadata = {format: 2, active: Json.bool(0), regions: []};
-    outputs = outputs.append(%("$basename.xnm" ${Var.json(metadata)}));
+    outputs = outputs.append(
+      %("$basename.xnm" ${Var.json(metadata)}));
   }
   return outputs;
 }
 
 /* Binding provenance selects the namespace owner. Private type rewriting
-   changes emitted spelling, so recover its authoritative original key first. */
+   changes emitted spelling. Recover its authoritative original key first. */
 static List Compiler._original_type_namespace(Compiler c, List key) {
   Map plan = c.module_layout_plan;
   if (!plan) return key;
@@ -239,8 +245,8 @@ static Array Compiler._projection_definitions(Compiler c, List node) {
       ? %(${node.caddr()}) : node.caddr().list().cdr();
     foreach (List row, declarators)
       match (row) case %(bind ?binding *): {
-        String id = c._projection_binding_namespace(binding,
-          kind == <typedef>);
+        String id = c._projection_binding_namespace(
+          binding, kind == <typedef>);
         if (id && !(id in definitions)) definitions.push(id);
       }
   }
@@ -1302,7 +1308,8 @@ static macro Decorator $initialized_entry(
    every call its frame setup. */
 static List Init.synthesize(Init &i, List arms) {
   List binding = i.entry = i.c.sym.introduce(
-    i.c.module_owner ? i.c.module_initializer_entry(i.c.filename) : "_file_init_");
+    i.c.module_owner
+      ? i.c.module_initializer_entry(i.c.filename) : "_file_init_");
   List type =
     %(("__attribute__((constructor, noinline, cold))") static void);
   String entry = "x2c_initialize_protocols";

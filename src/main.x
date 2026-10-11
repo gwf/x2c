@@ -91,7 +91,8 @@ static macro Stmt $report.main.diagnostics_unwritable(Expr $diagnostics) =>
    its stage and returns, so every input is inspected and a failing later
    input still fails the command. */
 static void _translate_unit(
-  Frontend frontend, String filename, String output_dir, Map module_directories) {
+  Frontend frontend, String filename, String output_dir,
+  Map module_directories) {
   ParsedUnit unit;
   int ready = _parse_unit(frontend, filename, unit);
   defer unit.close();
@@ -247,7 +248,8 @@ static String _node_repr(List node) {
    own output directory on the build path, where `build` reports progress;
    `x2c translate` has neither. */
 static typedef struct Translation {
-  CliRequest request, Frontend frontend, Map unit_dirs, module_directories, Build build;
+  CliRequest request, Frontend frontend, Map unit_dirs, module_directories;
+  Build build;
   int total;
 } Translation;
 
@@ -397,7 +399,8 @@ static List Translation.translate_modules(Translation &t) {
   List paths = providers.list_free();
   Map registry = prepare_module_layout_registry(seed.compiler, paths);
   Map declarations = seed.compiler.collected_declaration_dependencies(paths);
-  List groups = declarations ? declaration_work(paths, declarations) : %($paths);
+  List groups = declarations
+    ? declaration_work(paths, declarations) : %($paths);
   if (declarations) registry[%(declaration-dependencies)] = declarations;
   foreach (String provider, paths)
     registry[%(directories $provider)] = t.output_dir(inputs[provider]);
@@ -439,7 +442,8 @@ static List Translation.translate_modules(Translation &t) {
 /* Export this provider's additions before changing the seed-owned containers.
    File pairs retain provider order without copying earlier providers. */
 static void Translation.module_provider_outputs(
-  Translation &t, ParsedUnit &unit, String input, Map registry, Array outputs) {
+  Translation &t, ParsedUnit &unit, String input, Map registry,
+  Array outputs) {
   Compiler c = unit.compiler;
   Map captured = capture_module_provider(c, unit.ast);
   Map active = registry.copy();
@@ -468,7 +472,8 @@ static void Translation.translate_serial(Translation &t) {
 }
 
 static void Translation.translate(Translation &t, String input) =>
-  _translate_unit(t.frontend, input, t.output_dir(input), t.module_directories);
+  _translate_unit(
+    t.frontend, input, t.output_dir(input), t.module_directories);
 
 /* Where one unit's generated C, header, and depfile are written. A build
    gives each unit its own directory so units sharing an output stem cannot

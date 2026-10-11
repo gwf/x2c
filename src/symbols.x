@@ -1302,7 +1302,8 @@ void Sym.declare_field_order(Sym s, Type type, List fields) {
   Array rows = [];
   foreach (List declaration, fields) {
     declaration = Ast.without_origin(declaration);
-    if (declaration.car() == <c-assert> || declaration.car() == <preproc>) continue;
+    if (declaration.car() == <c-assert> || declaration.car() == <preproc>)
+      continue;
     List bindings = declaration.caddr();
     foreach (List declarator, bindings.cdr())
       rows.push(s._field_row(type, declaration, declarator));
