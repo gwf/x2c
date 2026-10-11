@@ -546,13 +546,17 @@ void Compiler.skip_macro_invocation(Compiler c) {
   if (!bare && c.peek(0) == <(>) c.token = c.token.after_group();
 }
 
-/** Consumes a NamedType target already projected by owning-source collection.
-    CPP scanning does not produce the declaration or parse its fields again.
+/** Collects a NamedType signature without executing its decorator.
+    CPP and hash scanning skip targets already projected by their owner.
 */
 int Compiler.skip_named_type_declaration(Compiler c) {
   List definition = c._peek_invocation();
   if (!definition || definition.assoc(<target>) != <named-type>) return 0;
   c.skip_macro_invocation();
+  if (c.signature_only == SIGNATURE_DECLARATIONS) {
+    (void) c.parse_named_type();
+    return 1;
+  }
   c._skip_shallow_expression(0);
   c.expect(<;>);
   return 1;
