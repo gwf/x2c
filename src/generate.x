@@ -262,6 +262,22 @@ static Array Compiler._projection_include_names(
   return definitions;
 }
 
+static Array Compiler._projection_include_families(
+  Compiler c, String path) {
+  Array families = [];
+  if (!path || c.module_tree.owner(path)) return families;
+  foreach (List row, c.declaration_provider_rows(%($path))) {
+    (Var kind, String provider, List key) = row;
+    (void) kind;
+    if (is_source_file(home_absolute_path(provider))) continue;
+    match (key) case %((!or struct union enum) ?): {
+      String id = %"f_${filename_hash(key.repr())}";
+      if (!(id in families)) families.push(id);
+    }
+  }
+  return families;
+}
+
 /* Region identities come from final emitted nodes, after cache/init/body
    placement. They grant no language access and execute no source producer. */
 static List Compiler._projection_nodes(
@@ -333,6 +349,7 @@ static List Compiler._projection_nodes(
       if (resolved) {
         String path = c.canonical_path(resolved);
         definitions = c._projection_include_names(path);
+        record["suppliesFamilies"] = c._projection_include_families(path);
       }
     }
     record["defines"] = definitions;

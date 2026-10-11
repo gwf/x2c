@@ -210,6 +210,8 @@ def project(text, metadata, selected_edges=None, owner_streams=None):
         family = records[name].get('family')
         if family:
             families.setdefault(family, name)
+        for supplied in records[name].get('suppliesFamilies', []):
+            families.setdefault(supplied, name)
     for provider, stream in (owner_streams or {}).items():
         owned = extract(stream)
         for name, region in owned.items():
@@ -225,6 +227,8 @@ def project(text, metadata, selected_edges=None, owner_streams=None):
                             records.get(sibling, {}).get('role') == 'h' or
                             records.get(sibling, {}).get('family')):
                         regions[sibling] = value
+                        for supplied in records.get(sibling, {}).get('suppliesFamilies', []):
+                            families[supplied] = sibling
     namespaces = {}
     for name, region in regions.items():
         for namespace in records[name].get('defines', []):
