@@ -483,7 +483,7 @@ static String Helper.prefix(Helper &h, String owner, int index, String name) {
       case %(static (declare ? (bindings (op = (bind ?binding *) ?)))):
         published[%(state ${binding_identity_spelling(binding)})] = 1;
     }
-  List resets = published.getdefault(%(initializers), %(nil));
+  List resets = published.getdefault(%(initializers), %());
   published[%(initializers)] = resets.append(%(${%"x2c_module_reset_${index}_prefix_$sequence"}));
   return NULL;
 }

@@ -821,7 +821,7 @@ static List Compiler._entry(
   List named = c._named(reset);
   Array previous = [];
   if (meta_prefix_published)
-    foreach (String name, meta_prefix_published.getdefault(%(initializers), %(nil))) {
+    foreach (String name, meta_prefix_published.getdefault(%(initializers), %())) {
       List binding = c.sym.introduce(name);
       previous.push(c.rebuild_statement($!{ void $binding(void); }).cadr());
       named = named.append(%(($name $binding ((func ((void))) void))));
@@ -924,7 +924,7 @@ static List Compiler._named(Compiler c, List reset) {
 static List Compiler._targets(Compiler c, List named, List functions) {
   Array entries = [], initializers = [], initializer_order = [];
   if (meta_prefix_published)
-    foreach (String name, meta_prefix_published.getdefault(%(initializers), %(nil)))
+    foreach (String name, meta_prefix_published.getdefault(%(initializers), %()))
       initializer_order.push(name);
   if (c.meta_build)
     entries.push(
@@ -940,7 +940,7 @@ static List Compiler._targets(Compiler c, List named, List functions) {
     if (name == "x2c_module_reset")
       initializer_order.push(c.emitted_binding_name(binding));
     if (name == "x2c_module_reset" || (meta_prefix_published &&
-        name in meta_prefix_published.getdefault(%(initializers), %(nil))))
+        name in meta_prefix_published.getdefault(%(initializers), %())))
       initializers.push(
         %(map-entry ${x2c_literal_string(c.emitted_binding_name(binding))}
           $function));
