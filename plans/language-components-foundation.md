@@ -729,6 +729,22 @@ replacement template and fill steps are the remaining driver cost.
   `$tried` rule (the try rule runs in the cleanup walk after the return is
   lowered); `c.return_type` is still NULL in the cleanup walk's
   `_landing_form`.
+- 2026-10-11, try-body return fixed (`kernel/try-return`): the try rule
+  runs in the cleanup walk after the body has lowered, so a program rule's
+  replacement around `$node` rebound lowered syntax (`(return EXPR)` with no
+  type slot, and likewise a lowered `defer` or `match`) and failed with
+  "syntax cannot be constructed at this position". `_landing_form` now calls
+  `Compiler.rewrite_lowered`, which wraps the source and its held parts as
+  lowered carriers before a program's replacement binds, and
+  `Compiler.lower_replacement` lowers the replacement under a `kept` watch
+  so those parts are not lowered again; this also stopped user `raise` and
+  `switch` rules applying twice inside try bodies. `_lower_function` binds
+  `c.return_type` around the cleanup walk; `Walk.return_type` is gone.
+  `ast_replace_nodes` in ast.x replaces nodes by address without recursing
+  and replaces cleanup.x's private copies. +120/-68 in src; fixtures
+  `rewrite-try-return` and `rewrite-try-held-statements`. Open: a program
+  `$tried` rule also receives the compiler-written `try` that
+  `lower_defer_region` emits for a defer whose finalizer returns.
 - 2026-10-10, facts learned: `function-entry` placement is parse-time, so
   lambda cells need a transform-time entry placement before lambdas move; a
   plain `make build` after editing a shipped component leaves a degraded
