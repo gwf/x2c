@@ -525,6 +525,8 @@ static void Compiler._retain_native_prefix_body(
 
 /** Binds already-collected bodies once through the ordinary function parser. */
 void Compiler.bind_native_meta_prefix(Compiler c) {
+  int count = c.native_prefix_pending ? c.native_prefix_pending.len() : 0;
+  if (!count) return;
   SymSuspension scopes = c.sym.suspend_locals();
   defer c.sym.restore_locals(scopes);
   Block ancestors = c.ancestors;
@@ -532,7 +534,6 @@ void Compiler.bind_native_meta_prefix(Compiler c) {
   defer { c.ancestors = ancestors; c.placements = placements; }
   c.ancestors = Block.new(sizeof(Ancestor));
   c.placements = [];
-  int count = c.native_prefix_pending ? c.native_prefix_pending.len() : 0;
   while (count-- > 0) {
     NativePrefixBody *pending = c.native_prefix_pending.shift().pointer();
     Token current = c.token;
