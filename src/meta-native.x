@@ -477,7 +477,7 @@ static Var _meta_named_value(
   Var function = c._meta_function(name, site);
   meta_call_form = cons(Atom.intern(name), arguments);
   if (function is void && c.meta_build) {
-    List rows = c._subject_rows(arguments.array());
+    List rows = c._subject_rows(arguments);
     Var previous = Macro.subject();
     Macro.use_subject(rows);
     defer Macro.use_subject(previous);
