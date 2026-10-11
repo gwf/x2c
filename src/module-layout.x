@@ -253,6 +253,7 @@ Map prepare_module_layout_registry(Compiler c, List providers) {
     List namespace = _registry_namespace(key, syntax, original[path]);
     match (namespace)
       case %((!or typedef struct union enum) ?(String name)): {
+        if (c.sym.get_exact(%("module-opaque" $name))) continue;
         Map names = plan.setdefault(%(private-types $canonical), {});
         names[namespace] = c._layout_provider_spelling(canonical, name);
       }
