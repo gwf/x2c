@@ -42,7 +42,7 @@ clean:
 	rm -f x2c $(call recursive_files,./,*.o) $(call recursive_files,./,*.d)
 
 realclean:
-	rm -f x2c $(call recursive_files,./,*.o) $(call recursive_files,./,*.d) $(call recursive_files,./,*.c) $(call recursive_files,./,*.h)
+	rm -f x2c $(call recursive_files,./,*.o) $(call recursive_files,./,*.d) $(call recursive_files,./,*.c) $(call recursive_files,./,*.h) $(call recursive_files,./,*.xnm)
 
 .PHONY: clean realclean
 
