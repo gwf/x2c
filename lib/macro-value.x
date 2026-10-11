@@ -205,17 +205,18 @@ static List _macro_pattern(Macro t, List names, int case_pattern) {
 static List _macro_binder_rows(Macro t, List names, int case_pattern) {
   List rows = NULL;
   foreach (List hole, t.assoc(<parameters>).list()) {
-    Var selected = names.car(), kind = hole.assoc(<kind>);
+    Var given = names.car(), kind = hole.assoc(<kind>);
     names = names.cdr();
     if (kind == <type> || kind == <captures>)
-      selected = Atom.intern("*" + selected.str()[1:]);
+      given = Atom.intern("*" + given.str()[1:]);
+    Var selected = _macro_hidden(given);
     int sequence = hole.assoc(<sequence>);
     Var projected = sequence ? %($selected).var() : selected;
     // An explicit expression pattern owns its type constraint.
     if (!sequence && selected is <list> && selected.list().car() == <expr>)
       projected = %(!and $selected);
     if (case_pattern && kind == <name>)
-      projected = %(!and $selected ${_macro_name_identity(hole)});
+      projected = %(!and $given ${_macro_name_identity(hole)});
     Var expression = !sequence && kind == <name>
                    ? %(expr ? (ident $projected)).var() : projected;
     rows = cons(%(${_macro_key(hole, "expression")} $expression), rows);
@@ -225,6 +226,20 @@ static List _macro_binder_rows(Macro t, List names, int case_pattern) {
     rows = cons(%(${_macro_key(hole, "splice")} ($selected)), rows);
   }
   return rows;
+}
+
+/* Derivation quotes a bare `?` or `*`, which a template writes as an
+   operator, so an anonymous hole's binder passes through it under a
+   hidden name and is shown again where derivation leaves it. */
+static Var _macro_hidden(Var binder) {
+  if (!binder.is_binder() || binder.str().len() != 1) return binder;
+  return Atom.intern(binder.str() + "__macro_anonymous");
+}
+
+static Var _macro_shown(Var value) {
+  if (!value.is_binder() || value.str()[1:] != "__macro_anonymous")
+    return value;
+  return value.str()[0] == '*' ? <*> : <?>;
 }
 
 /** Returns the binder that captures one projection of the template hole
@@ -414,7 +429,8 @@ static String _hex_float(long double n) {
    spelling. */
 static Var _macro_pattern_view(Var value) {
   if (value is not <list>)
-    return value == <*> || value == <?> ? %(!quote $value).var() : value;
+    return value == <*> || value == <?> ? %(!quote $value).var()
+                                        : _macro_shown(value);
   List node = value;
   /* Explicit Match operands already describe recognition, not source code. */
   if (node.car().is_match_op()) return node;
@@ -437,7 +453,7 @@ static Var _macro_pattern_view(Var value) {
    any other expression matches whatever type binding derived. */
 static Var _macro_expr_view(Var type, Var body) {
   int shell = type === %(<macro-expr>);
-  if (shell && body.is_binder()) return body;
+  if (shell && body.is_binder()) return _macro_shown(body);
   if (shell && body is <list> && body.list().car().is_match_op())
     return body;
   if (shell && body is <list> && body.list().car() == <expr>)
@@ -462,7 +478,8 @@ static Var _macro_slot_view(int splice, Var form) {
 /* The first named `*` binder in a slot's arguments, depth first, or NULL. */
 static Var _macro_slot_binder(Var form) {
   if (form.is_binder())
-    return form.str().len() > 1 && form.str()[0] == '*' ? form : NULL;
+    return form.str().len() > 1 && form.str()[0] == '*' &&
+      _macro_shown(form) == form ? form : NULL;
   if (form is not <list>) return NULL;
   foreach (Var child, form.list()) {
     Var binder = _macro_slot_binder(child);
