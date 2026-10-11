@@ -419,9 +419,8 @@ static void Compiler._native_lookups(Compiler c, Array units) {
   List lookup = %(expr $lookup_type (ident $lookup_binding));
   units.push(
     c.rebuild_statement($!{ void *$lookup_binding(String, String); }).cadr());
-  units.push(c.rebuild_statement($!{
-    void x2c_meta_helper_start_provider(int);
-  }).cadr());
+  List start_provider = c.sym.introduce("x2c_meta_helper_start_provider");
+  units.push(c.rebuild_statement($!{ void $start_provider(int); }).cadr());
   for (int i = 0; i < (int) units.len(); i++)
     units[i] = c._native_targets(units[i], lookup);
 }
