@@ -91,11 +91,40 @@ static macro Stmt $report.main.diagnostics_unwritable(Expr $diagnostics) =>
    its stage and returns, so every input is inspected and a failing later
    input still fails the command. */
 static void _translate_unit(
-  Frontend frontend, String filename, String output_dir) {
+  Frontend frontend, String filename, String output_dir, Map module_directories) {
   ParsedUnit unit;
   int ready = _parse_unit(frontend, filename, unit);
   defer unit.close();
-  if (ready) _emit_unit(frontend, unit, filename, output_dir);
+  if (ready) {
+    unit.compiler.module_layout_plan = _ordinary_module_projection(
+      unit, module_directories, output_dir);
+    _emit_unit(frontend, unit, filename, output_dir);
+  }
+}
+
+/* Ordinary consumers retain language visibility while sharing target-selected
+   C layout support. Existing collection chooses only reachable providers. */
+static Map _ordinary_module_projection(
+  ParsedUnit &unit, Map module_directories, String output_dir) {
+  if (!module_directories) return NULL;
+  Compiler c = unit.compiler;
+  String source = c.canonical_path(c.filename);
+  Map dependencies = c.collected_declaration_dependencies(%($source));
+  if (!dependencies) return NULL;
+  Array providers = [];
+  Map directories = {};
+  foreach (Var (provider, directory), module_directories)
+    if (provider in dependencies) {
+      providers.push(provider);
+      directories[%(directories $provider)] = directory;
+    }
+  if (!providers.len()) return NULL;
+  providers.push(source);
+  Map plan = prepare_module_layout_registry(c, providers.list_free());
+  plan.merge(directories);
+  plan[%(directories $source)] = output_dir;
+  plan.merge(capture_module_provider(c, unit.ast));
+  return plan;
 }
 
 /* A unit completes parsing and transformation before another meta epoch. */
@@ -216,7 +245,7 @@ static String _node_repr(List node) {
    own output directory on the build path, where `build` reports progress;
    `x2c translate` has neither. */
 static typedef struct Translation {
-  CliRequest request, Frontend frontend, Map unit_dirs, Build build;
+  CliRequest request, Frontend frontend, Map unit_dirs, module_directories, Build build;
   int total;
 } Translation;
 
@@ -390,6 +419,10 @@ static List Translation.translate_modules(Translation &t) {
       unit.close();
       done++;
     }
+  Map module_directories = {};
+  foreach (String provider, paths)
+    module_directories[provider] = registry[%(directories $provider)];
+  t.module_directories = seed.context.export(module_directories);
   List files = seed.context.export(outputs.list_free());
   seed.close();
   publish_generated_files(files);
@@ -433,7 +466,7 @@ static void Translation.translate_serial(Translation &t) {
 }
 
 static void Translation.translate(Translation &t, String input) =>
-  _translate_unit(t.frontend, input, t.output_dir(input));
+  _translate_unit(t.frontend, input, t.output_dir(input), t.module_directories);
 
 /* Where one unit's generated C, header, and depfile are written. A build
    gives each unit its own directory so units sharing an output stem cannot
