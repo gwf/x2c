@@ -538,7 +538,7 @@ static void Compiler._retain_native_prefix_body(
 static void Compiler._retain_native_prefix_initializer(
   Compiler c, List type, List bind, Token first, Token body, Token end) {
   c._retain_native_prefix_body(%(declare $type (bindings $bind)), NULL, first);
-  NativePrefixBody *pending = c.native_prefix_pending.last().pointer();
+  NativePrefixBody *pending = c.native_prefix_pending[-1].pointer();
   pending->kind = 2;
   pending->body = body;
   pending->end = end;
@@ -548,12 +548,12 @@ static NativePrefixBody *Compiler._retain_native_prefix_objects(
   Compiler c, List declaration, Token first) {
   Array initializers = [];
   while (c.native_prefix_pending && c.native_prefix_pending.len()) {
-    NativePrefixBody *pending = c.native_prefix_pending.last().pointer();
+    NativePrefixBody *pending = c.native_prefix_pending[-1].pointer();
     if (pending->kind != 2 && pending->kind != 3) break;
     initializers.unshift(c.native_prefix_pending.take_last());
   }
   c._retain_native_prefix_body(declaration, NULL, first);
-  NativePrefixBody *pending = c.native_prefix_pending.last().pointer();
+  NativePrefixBody *pending = c.native_prefix_pending[-1].pointer();
   pending->kind = 1;
   pending->initializers = initializers;
   return pending;
