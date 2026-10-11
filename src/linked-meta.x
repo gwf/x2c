@@ -695,10 +695,18 @@ static Var _lambda_rebuild(Var ast, List none, Map cells, Array named) {
 static List _lambda_none(void) =>
   %(return ("Var") (expr ("Var") (literal ("Var") "void")));
 
+static List _lambda_returning(List items, List none) {
+  List node;
+  $ast.walk(items, node) {
+    if (node === %(return)) return _lambda_rebuild(items, none, NULL, NULL);
+    if (node.car() == <lambda>) continue;
+  }
+  return items;
+}
+
 static List _lambda_items(Code body) {
   match (body) case %(block *items):
-    return %(@{_lambda_rebuild(items, _lambda_none(), NULL, NULL)}
-             ${_lambda_none()});
+    return %(@{_lambda_returning(items, _lambda_none())} ${_lambda_none()});
   List items = body.match(%(expr (void) ?))
     ? %((stmnt $body) ${_lambda_none()})
     : %((stmnt (return ${body.convert(%("Var"))})));
@@ -1868,6 +1876,7 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_lambda_declare_cells", _lambda_declare_cells);
   $linked.row(rows, "_lambda_rebuild", _lambda_rebuild);
   $linked.row(rows, "_lambda_none", _lambda_none);
+  $linked.row(rows, "_lambda_returning", _lambda_returning);
   $linked.row(rows, "_lambda_items", _lambda_items);
   $linked.row(rows, "_lambda_params", _lambda_params);
   $linked.row(rows, "_lambda_closure_params", _lambda_closure_params);
