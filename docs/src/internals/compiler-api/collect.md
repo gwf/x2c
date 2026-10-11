@@ -52,7 +52,7 @@ Drops the entries collected without declaration defaults while the shared
 compile-time session was filled, or by a project meta build. Call once
 that session is published, and after the meta build's parses.
 
-Source: `src/collect.x:2096`
+Source: `src/collect.x:2097`
 
 #### collect_resolve_include
 
@@ -61,7 +61,7 @@ Source: `src/collect.x:2096`
 The file the include of `target` from `includer_dir` names, searched as
 collection searches `dirs`, or NULL.
 
-Source: `src/collect.x:709`
+Source: `src/collect.x:710`
 
 #### compiler_prelude_sources
 
@@ -83,7 +83,7 @@ stage directory when it runs from `<home>/builds/`, otherwise under the
 home. A `cold` process reads no interface and still writes its own. Call
 it before opening any translation unit's Context.
 
-Source: `src/collect.x:1695`
+Source: `src/collect.x:1696`
 
 #### interface_prelude
 
@@ -93,7 +93,7 @@ Returns the path of the first prelude interface this compiler wrote, or
 NULL when there is none or the compiler's identity is unknown. Its
 source hashes are not checked.
 
-Source: `src/collect.x:1911`
+Source: `src/collect.x:1912`
 
 #### interface_text
 
@@ -105,7 +105,7 @@ identity is unknown, since no compiler could replay that interface. A
 contribution that the interface grammar cannot spell is reported as an
 `emit` diagnostic.
 
-Source: `src/collect.x:1933`
+Source: `src/collect.x:1934`
 
 #### is_prelude_source
 
@@ -113,7 +113,7 @@ Source: `src/collect.x:1933`
 
 Reports whether the canonical `path` is a compiler prelude source.
 
-Source: `src/collect.x:219`
+Source: `src/collect.x:220`
 
 ### `Compiler`
 
@@ -124,7 +124,7 @@ Source: `src/collect.x:219`
 
 Retains source proofs and one definition hash per linked provider.
 
-Source: `src/collect.x:922`
+Source: `src/collect.x:923`
 
 <a id="Compiler.collect_package"></a>
 #### Compiler.collect_package
@@ -140,7 +140,7 @@ protocol rows enter the current symbol state, and dependencies enter the
 importing compiler. Replay also merges recorded function definitions.
 `token` locates lookup and public-surface errors.
 
-Source: `src/collect.x:1371`
+Source: `src/collect.x:1372`
 
 <a id="Compiler.collect_symbols"></a>
 #### Compiler.collect_symbols
@@ -167,7 +167,7 @@ Source: `src/collect.x:183`
 Completes a linked function's own source hashes before a shallow call.
 A lookahead entry never replaces the file's ordinary contribution.
 
-Source: `src/collect.x:905`
+Source: `src/collect.x:906`
 
 <a id="Compiler.configure_package"></a>
 #### Compiler.configure_package
@@ -177,7 +177,7 @@ Source: `src/collect.x:905`
 Selects a source file's own package, as its standalone translation does.
 A cold provider does not register an import in its including unit.
 
-Source: `src/collect.x:619`
+Source: `src/collect.x:620`
 
 <a id="Compiler.include_function_declarations"></a>
 #### Compiler.include_function_declarations
@@ -191,7 +191,7 @@ signatures alone do not establish a runtime declaration either. Emission
 reads the entries collection already installed without invalidating
 them.
 
-Source: `src/collect.x:776`
+Source: `src/collect.x:777`
 
 <a id="Compiler.include_type_dependencies"></a>
 #### Compiler.include_type_dependencies
@@ -202,7 +202,7 @@ The semantic type rows reached by an ordinary source include. Each
 file contributes once to `seen`; the current unit does not contribute
 through a cycle back to its own still-open header.
 
-Source: `src/collect.x:736`
+Source: `src/collect.x:737`
 
 <a id="Compiler.include_typedef_names"></a>
 #### Compiler.include_typedef_names
@@ -216,7 +216,7 @@ is skipped with the files it reaches, and each file reached is added to
 `seen`. NULL when the include does not resolve to x2c source; a runtime
 module adds nothing the prelude has not declared.
 
-Source: `src/collect.x:723`
+Source: `src/collect.x:724`
 
 <a id="Compiler.included_compile_time_effects"></a>
 #### Compiler.included_compile_time_effects
@@ -228,7 +228,7 @@ The ordered cache walk counts each file once and groups effects by the
 canonical path of the unit's direct include. The parser installs those
 effects when it reaches that include.
 
-Source: `src/collect.x:1603`
+Source: `src/collect.x:1604`
 
 <a id="Compiler.inline_type_dependencies"></a>
 #### Compiler.inline_type_dependencies
@@ -237,7 +237,7 @@ Source: `src/collect.x:1603`
 
 Records the actual type dependencies of typed public inline bodies.
 
-Source: `src/collect.x:1187`
+Source: `src/collect.x:1188`
 
 <a id="Compiler.install_included_effects"></a>
 #### Compiler.install_included_effects
@@ -247,7 +247,7 @@ Source: `src/collect.x:1187`
 Installs the definitions of each include among the directives before
 the cursor.
 
-Source: `src/collect.x:1648`
+Source: `src/collect.x:1649`
 
 <a id="Compiler.linked_meta_definitions_current"></a>
 #### Compiler.linked_meta_definitions_current
@@ -257,7 +257,7 @@ Source: `src/collect.x:1648`
 Reports whether a provider's linked definition hashes still match.
 Changes outside definitions do not require a project helper.
 
-Source: `src/collect.x:866`
+Source: `src/collect.x:867`
 
 <a id="Compiler.linked_meta_provider_current"></a>
 #### Compiler.linked_meta_provider_current
@@ -267,7 +267,7 @@ Source: `src/collect.x:866`
 Reports whether a linked provider and the files it read are unchanged.
 The linked inventory retains the ordinary collector's dependency proof.
 
-Source: `src/collect.x:824`
+Source: `src/collect.x:825`
 
 <a id="Compiler.linked_prelude_records"></a>
 #### Compiler.linked_prelude_records
@@ -281,7 +281,7 @@ the records hold this compiler's collection rather than a table linked
 into it; the unit's own entries for them are restored afterwards. A
 record the interface grammar cannot spell is left out.
 
-Source: `src/collect.x:2035`
+Source: `src/collect.x:2036`
 
 <a id="Compiler.meta_provider_hashes"></a>
 #### Compiler.meta_provider_hashes
@@ -290,7 +290,7 @@ Source: `src/collect.x:2035`
 
 Returns the shared function hashes of an advertised meta provider.
 
-Source: `src/collect.x:918`
+Source: `src/collect.x:919`
 
 <a id="Compiler.name_meta_provider_bindings"></a>
 #### Compiler.name_meta_provider_bindings
@@ -301,7 +301,7 @@ Selects helper C spellings for public definitions owned by `path`.
 Bindings, rather than source tokens, keep unrelated private names and
 fields unchanged. Native supplier declarations retain their C names.
 
-Source: `src/collect.x:953`
+Source: `src/collect.x:954`
 
 <a id="Compiler.publish_inline_types"></a>
 #### Compiler.publish_inline_types
@@ -311,7 +311,7 @@ Source: `src/collect.x:953`
 Promotes the selected type families after the owning ordinary full
 parse. The header and Xi then use the same complete family selection.
 
-Source: `src/collect.x:1231`
+Source: `src/collect.x:1232`
 
 <a id="Compiler.publishes_type_family"></a>
 #### Compiler.publishes_type_family
@@ -320,7 +320,7 @@ Source: `src/collect.x:1231`
 
 Reports whether this unit's interface publishes the type `family`.
 
-Source: `src/collect.x:981`
+Source: `src/collect.x:982`
 
 <a id="Compiler.publishes_typedef"></a>
 #### Compiler.publishes_typedef
@@ -329,7 +329,7 @@ Source: `src/collect.x:981`
 
 Reports whether this unit's selected interface publishes `name`.
 
-Source: `src/collect.x:976`
+Source: `src/collect.x:977`
 
 <a id="Compiler.record_generated_symbol"></a>
 #### Compiler.record_generated_symbol
@@ -341,7 +341,7 @@ current file's collected entry contributes, which is the map its
 interface publishes. A file without a collected declaration map records
 nothing. The cache retains `signature`.
 
-Source: `src/collect.x:1293`
+Source: `src/collect.x:1294`
 
 <a id="Compiler.replay_package_imports"></a>
 #### Compiler.replay_package_imports
@@ -353,7 +353,7 @@ order. The shadow borrows the unit's macro state and package registries.
 The full parse collects effects for the include line and leaves the
 unit's own definitions at their source sites.
 
-Source: `src/collect.x:1539`
+Source: `src/collect.x:1540`
 
 <a id="Compiler.runtime_function_declarations"></a>
 #### Compiler.runtime_function_declarations
@@ -363,7 +363,7 @@ Source: `src/collect.x:1539`
 The runtime umbrella includes each listed module's generated header.
 Compiler components in the semantic prelude supply no runtime header.
 
-Source: `src/collect.x:785`
+Source: `src/collect.x:786`
 
 ## Design notes
 
