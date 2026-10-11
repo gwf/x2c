@@ -54,7 +54,7 @@ typedef struct SlotWatch * SlotWatch;
 typedef struct Ancestor{
   Symbol what;
   Token token;
-  int origin;
+  int origin, lowering;
   List base, node;
 }
 Ancestor;

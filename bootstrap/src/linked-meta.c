@@ -5267,7 +5267,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_9(void){
   _4614 = String_var(_4613);
   _4615 = String_new("lib/meta.x");
   _4616 = String_var(_4615);
-  _4617 = String_new("e06b7d52");
+  _4617 = String_new("778ad6a6");
   _4618 = String_var(_4617);
   _4619 = cons(_4618, NULL);
   _4620 = cons(_4616, _4619);
@@ -10346,7 +10346,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_18(void){
   _9666 = List_var(_9665);
   _9667 = String_new("src/compiler.x");
   _9668 = String_var(_9667);
-  _9669 = String_new("9eacf905");
+  _9669 = String_new("38baf935");
   _9670 = String_var(_9669);
   _9671 = cons(_9670, NULL);
   _9672 = cons(_9668, _9671);
@@ -10637,14 +10637,14 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_19(void){
   _9954 = List_var(_9953);
   _9955 = String_new("src/meta-sdk.x");
   _9956 = String_var(_9955);
-  _9957 = String_new("d493aca3");
+  _9957 = String_new("b4c00ab0");
   _9958 = String_var(_9957);
   _9959 = cons(_9958, NULL);
   _9960 = cons(_9956, _9959);
   _9961 = List_var(_9960);
   _9962 = String_new("src/parse.x");
   _9963 = String_var(_9962);
-  _9964 = String_new("6b744aa2");
+  _9964 = String_new("64fae62c");
   _9965 = String_var(_9964);
   _9966 = cons(_9965, NULL);
   _9967 = cons(_9963, _9966);
@@ -10755,7 +10755,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_19(void){
   _10072 = List_var(_10071);
   _10073 = String_new("src/callables.x");
   _10074 = String_var(_10073);
-  _10075 = String_new("5418a75a");
+  _10075 = String_new("6839b422");
   _10076 = String_var(_10075);
   _10077 = cons(_10076, NULL);
   _10078 = cons(_10074, _10077);
