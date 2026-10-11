@@ -365,8 +365,9 @@ static List Translation.translate_modules(Translation &t) {
   if (!seed.collect(t.frontend)) _fail(seed.compiler);
   List paths = providers.list_free();
   Map registry = prepare_module_layout_registry(seed.compiler, paths);
-  List groups = seed.compiler.collected_declaration_components(paths);
-  if (!groups) groups = %($paths);
+  Map declarations = seed.compiler.collected_declaration_dependencies(paths);
+  List groups = declarations ? declaration_work(paths, declarations) : %($paths);
+  if (declarations) registry[%(declaration-dependencies)] = declarations;
   foreach (String provider, paths)
     registry[%(directories $provider)] = t.output_dir(inputs[provider]);
   String seed_provider = seed.compiler.canonical_path(seed.compiler.filename);
@@ -413,6 +414,8 @@ static List Translation.module_provider_outputs(
   outputs = outputs.append(
     translation_depfile_files(t.request, c, input, directory));
   if (t.request.fatal_warnings && c.diagnostics()) exit(1);
+  captured[%(binding-references ${c.canonical_path(c.filename)})] =
+    c.binding_reference_rows();
   registry.merge(unit.context.export(captured));
   return unit.context.export(outputs);
 }
