@@ -238,7 +238,8 @@ static void Compiler._collect_module_signatures(
                               package-import project-meta) *): continue;
     ordinary[key] = value;
   }
-  c._merge_rows(globs, ordinary);
+  /* Signatures do not replace source metadata from an actual declaration. */
+  $let(c.source_facts, 0) c._merge_rows(globs, ordinary);
   c.merge_translation_dependencies(signatures.deps);
 }
 
