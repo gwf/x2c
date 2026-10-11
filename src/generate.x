@@ -317,6 +317,10 @@ static List Compiler._projection_nodes(
     String include = NULL;
     int angle = 0;
     if (node.car() == <preproc>) {
+      if (preproc_directive(node.cadr()) == "pragma once") {
+        marked.push(node);
+        continue;
+      }
       String target = preproc_include_target(node.cadr(), angle);
       include = target;
       if (!target && !preproc_directive(node.cadr()).startswith("pragma")) {
