@@ -466,6 +466,10 @@ static List Compiler._declaration_form(Compiler c, int skip_body) {
     decl = c.parse_declaration_row();
   int body = c.peek(0) == <"{"> || c._at_function_arrow();
   Type type = decl.type_from_ast();
+  if (prefix && decl.car() == <typedef>) {
+    if (!c.unit_nodes) c.unit_nodes = [];
+    c.unit_nodes.push(decl);
+  }
   if (prefix && body) {
     c._retain_native_prefix_body(decl, meta, first);
     c.finish_collected_declaration(decl, meta, native);
