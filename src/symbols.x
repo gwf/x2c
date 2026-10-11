@@ -359,8 +359,11 @@ static List Sym._scope_binding(Sym s, SymScope &scope, List key) {
     if (scope.symbols.try_get(%(self $spelling), relative))
       s.put(s.binding_facts, self_key, relative);
   }
-  s.put(s.binding_facts, %(namespace $binding), key);
-  s._binding_provider(scope, key, binding);
+  List namespace = %(namespace $binding);
+  if (!(namespace in s.binding_facts)) {
+    s.put(s.binding_facts, namespace, key);
+    s._binding_provider(scope, key, binding);
+  }
   if (s.c.source_facts) s._note_source_key(scope, key, binding);
   return binding;
 }
