@@ -71,6 +71,7 @@ static typedef struct Helper {
   Map native_sources, native_targets, native_loaded;
   Array groups, built, failures, objects, retained_dependencies, retained_tables;
   Scope lifetime;
+  Compiler caller;
   int changed;
 } Helper;
 
@@ -416,29 +417,31 @@ Var Compiler.prepare_meta_call(
   Compiler c, String name, Token site, List arguments, String provider) {
   if (!active_helper) raise %(meta-later (name $name));
   Helper *h = active_helper;
-  Var row;
-  if (!provider.len() && c.project_meta.try_get(name, row))
-    provider = ((List) row).cadr();
-  String path = provider.len() ? real_path(home_absolute_path(provider))
-                              : c.filename;
-  int index = 1;
-  foreach (String owner, h->owners) {
-    if (owner == path) {
-      Var state;
-      if (h->readiness.try_get(owner, state) && state == 1) {
-        String failure = (*h).prefix(owner, index, name);
-        if (failure)
-          c.report_error(<macro>, "native meta prerequisite cycle", site,
-            %("provider: $owner" "function: $name" $failure));
+  $let(h->caller, c) {
+    Var row;
+    if (!provider.len() && c.project_meta.try_get(name, row))
+      provider = ((List) row).cadr();
+    String path = provider.len() ? real_path(home_absolute_path(provider))
+                                : c.filename;
+    int index = 1;
+    foreach (String owner, h->owners) {
+      if (owner == path) {
+        Var state;
+        if (h->readiness.try_get(owner, state) && state == 1) {
+          String failure = (*h).prefix(owner, index, name);
+          if (failure)
+            c.report_error(<macro>, "native meta prerequisite cycle", site,
+              %("provider: $owner" "function: $name" $failure));
+          return c.meta_helper_call(name, site, arguments, owner);
+        }
+        String failure = (*h).ready(owner, index);
+        if (failure) c.refuse_meta_call(name, site, failure);
         return c.meta_helper_call(name, site, arguments, owner);
       }
-      String failure = (*h).ready(owner, index);
-      if (failure) c.refuse_meta_call(name, site, failure);
-      return c.meta_helper_call(name, site, arguments, owner);
+      index++;
     }
-    index++;
+    c.refuse_meta_call(name, site, %"no project provider for $path");
   }
-  c.refuse_meta_call(name, site, %"no project provider for $path");
 }
 
 /** Records the active provider's ordinary-bound prefix for readiness calls. */
@@ -483,7 +486,10 @@ static String Helper.prefix(Helper &h, String owner, int index, String name) {
   if (!h.prefix_compilers.try_get(owner, compiler))
     return "the defining body has not been bound";
   Compiler c = compiler.pointer();
-  c.bind_native_meta_prefix();
+  if (h.caller) {
+    $let(c.diagnostics, h.caller.diagnostics)
+      $let(c.diagnostics.printer, c) c.bind_native_meta_prefix();
+  } else c.bind_native_meta_prefix();
   int found = 0;
   foreach (String target, c.native_prefix_definitions())
     if (target == name) found = 1;
