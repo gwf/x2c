@@ -863,6 +863,22 @@ replacement template and fill steps are the remaining driver cost.
   native-scalar-types.x fails compile-time Lisp evaluation in that unit).
   Fixing that chain would change what the cpp-mode shallow parse collects
   for every unit; it is recorded here as the known gap instead.
+- 2026-10-11, `make proof-raw-symbols` passes (`kernel/raw-sweep`): the
+  cpp-mode shallow parse bound no `meta` stubs for included definitions
+  (`install_collected_meta_function` returned at once when `source_private <
+  0`), so an included file's own `$thirty()` found no binding and a
+  shadowing unit's `$forty()` reached the wrong helper table; the new
+  `Compiler._install_included_meta` binds a public included definition
+  through `install_project_meta_effect` with its file as provider, and the
+  unit's own and static definitions take the ordinary path. The sweep now
+  follows quoted includes from every fixture and classifies a companion that
+  only negative fixtures include as not expected to translate (four
+  companions that failed and two that happened to pass). The probe
+  `source-call-projection.x` called `$source_pattern`, removed 2026-10-02,
+  and nothing ran it; deleted. +20/-1 in meta-native.x, +33 in the sweep.
+  Proofs: raw-symbols 0 failures of 927 required, conformance 141 units,
+  cold-collection 426 files. The remaining cpp-mode gap is the prelude's
+  unit macros, recorded above.
 - 2026-10-10, facts learned: `function-entry` placement is parse-time, so
   lambda cells need a transform-time entry placement before lambdas move; a
   plain `make build` after editing a shipped component leaves a degraded
