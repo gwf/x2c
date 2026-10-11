@@ -55,6 +55,9 @@ void generate_code(Compiler c, List ast, String dir) {
     outputs = outputs.append(
       %(
       "${dir.rstrip("/")}/${c.module_support_header(c.filename)}" ${outputs.cadr()}));
+  if (c.module_layout_plan)
+    foreach (List file, c.module_layout_plan[%(files ${c.canonical_path(c.filename)})])
+      outputs = outputs.append(%("${dir.rstrip("/")}/${file.car()}" ${file.cadr()}));
   String interface = c.source_facts ? NULL : interface_text(c);
   if (interface) outputs = outputs.append(%("$basename.xi" $interface));
   c._publish(outputs);

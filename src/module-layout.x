@@ -17,6 +17,9 @@ static typedef struct Layouts {
 static String _layout_guard(List family) =>
   %"__X2C_LAYOUT_${filename_hash(family.repr())}__";
 
+static String _layout_header(List family) =>
+  %"_x2c_layout_${filename_hash(family.repr())}.h";
+
 static List _layout_family(Type type) {
   match (type.base_type())
     case %((!set ?kind (!or struct union enum)) ?(String name) (*)):
@@ -418,32 +421,45 @@ static String _layout_macro_guards(List names, String operation) {
   return text;
 }
 
-/* Dependencies belong inside the selected native arm. A recursive family
-   expansion stops at its forward declaration, so native C rejects an active
-   value cycle. Only a selected, completed body defines the family guard.
-   Rendered text repeats each dependency path; shared graphs can grow rapidly. */
+/* Array aliases in the preceding prefix need complete elements too. Their
+   prerequisites run at that position, inside any preceding native arms.
+   The final copy also supplies the body when an earlier arm was inactive. */
+static List _layout_prerequisite_prefix(
+  Compiler c, List prefix, String prerequisites) {
+  Array nodes = [];
+  foreach (List node, prefix) {
+    if (node.car() == <typedef> && !_layout_forward(c, node))
+      nodes.push(%(comment $prerequisites));
+    nodes.push(node);
+  }
+  return nodes.list_free();
+}
+
+/* A prerequisite include runs only in its selected native arm. Separate
+   visiting and completion guards diagnose active cycles without expanding
+   shared dependency paths into repeated generated bodies. */
 static String Layouts.render(
-  Layouts &layouts, List family, Map expanding, Map plan) {
-  if (family in expanding) return "";
-  expanding[family] = 1;
-  String guard = _layout_guard(family), text = "";
+  Layouts &layouts, List family, Map plan) {
+  String guard = _layout_guard(family), visiting = %"${guard}_VISITING";
+  String text = %"#ifndef $guard\n#ifdef $visiting\n#error complete aggregate layout cycle\n#else\n#define $visiting\n";
   foreach (List variant, layouts.variants[family].list().reverse()) {
     (Compiler c, List body, List prefix, List arms) = variant;
     String prerequisites = "";
     foreach (List dependency, layouts.variant_edges[variant].list())
-      prerequisites += layouts.render(dependency, expanding, plan);
+      prerequisites += %"#include \"${_layout_header(dependency)}\"\n";
     List macros = _layout_macro_names(prefix);
     List definitions = %((comment $prerequisites))
       .append(layouts.alias_nodes(body, plan))
       .append(%($body (preproc ${%"#define $guard"})));
     text += %"#ifndef $guard\n";
     text += _layout_macro_guards(macros, "push");
-    text += _layout_text(c, layouts.prefix(c, prefix, plan, definitions));
+    text += _layout_text(c, layouts.prefix(
+      c, _layout_prerequisite_prefix(c, prefix, prerequisites), plan, definitions));
     for (int i = arms.len(); i; i--) text += "#endif\n";
     text += _layout_macro_guards(macros.reverse(), "pop");
     text += "#endif\n";
   }
-  expanding.del(family);
+  text += %"#undef $visiting\n#endif\n#endif\n";
   plan[%(body $family)] = guard;
   return text;
 }
@@ -487,12 +503,12 @@ Map prepare_module_layouts(List providers) {
   Map rendered = {}, plan = {};
   foreach (List family, layouts.order) {
     if (!(family in active)) continue;
-    Map expanding = {};
-    rendered[family] = layouts.render(family, expanding, plan);
+    rendered[family] = layouts.render(family, plan);
   }
   foreach (List provider, providers) {
     (Compiler c, List ast) = provider;
     String path = c.canonical_path(c.filename), text = "";
+    Array files = [];
     Map names = {}, bindings = {};
     Map provider_types = layouts.private_types[path],
       provider_bindings = layouts.private_bindings[path],
@@ -511,8 +527,12 @@ Map prepare_module_layouts(List providers) {
     plan[%(private-types $path)] = names;
     plan[%(private-bindings $path)] = bindings;
     foreach (List family, layouts.order)
-      if (family in active && layouts.owners[family].string() == path)
-        text += rendered[family].string();
+      if (family in active && layouts.owners[family].string() == path) {
+        String name = _layout_header(family);
+        files.push(%($name ${rendered[family]}));
+        text += %"#include \"$name\"\n";
+      }
+    plan[%(files $path)] = files.list_free();
     text += layouts.forwards(c, ast, plan);
     if (text.len()) plan[%(prefix $path)] = text;
   }
