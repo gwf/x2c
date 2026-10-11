@@ -659,7 +659,7 @@ static void _place_header(
    when that fingerprint misses. */
 static typedef struct CcJob {
   ToolRun execution, ToolAction action;
-  String source, object, depfile, state_path, preprocessed;
+  String source, object, depfile, state_path, preprocessed, native_deps;
   uint64_t fingerprint;
   int fingerprinted;
 } CcJob;
@@ -699,10 +699,17 @@ static int CcPool.add(CcPool &pool, String source) {
   Build b = pool.b;
   report_progress(<compile>, b.cc_done, b.cc_n, source);
   List directories = b._include_dirs(source);
-  CcJob job = b._compile_job(source, directories);
+  String projected, native_deps, errors;
+  if (b.toolchain.project_native_source(
+      source, directories, projected, native_deps, errors)) {
+    fprintf(stderr, "x2c: native layout projection failed: %s\n", errors);
+    return 1;
+  }
+  CcJob job = b._compile_job(projected, directories);
+  job.native_deps = native_deps;
   if (pool.reap(0)) return 1;
   ToolAction step = job.preprocessed ?
-    b.toolchain.preprocess_action(source, job.preprocessed, directories) :
+    b.toolchain.preprocess_action(projected, job.preprocessed, directories) :
     job.action;
   job.execution = step.start();
   pool.running[pool.count++] = job;
@@ -836,9 +843,13 @@ static int Build._after_preprocess(Build b, CcJob &job, int status) {
 
 /* The preprocessed text is scratch named for this process, so only what it
    says extends the compile fingerprint. */
-static uint64_t Build._compile_fingerprint(Build b, CcJob &job, int &ok) =>
-  fnv_file(
+static uint64_t Build._compile_fingerprint(Build b, CcJob &job, int &ok) {
+  uint64_t hash = fnv_file(
     b._action_fingerprint(job.action, NULL, ok), job.preprocessed, ok);
+  if (job.native_deps)
+    hash = _state_dependencies(hash, job.native_deps, ok);
+  return hash;
+}
 
 static int Build._compile_current(Build b, CcJob &job) {
   if (access(job.object, R_OK) || access(job.depfile, R_OK)) return 0;

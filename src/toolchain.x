@@ -184,6 +184,38 @@ ToolAction Toolchain.preprocess_action(
     <preprocess>,
     %(@{t._compile_arguments(gen_dirs)} "-E" $source "-o" $output));
 
+/** Projects labelled native source using the compilation's configured flags.
+    Portable source and metadata remain unchanged. The returned dependency
+    file records the original preprocessing inputs, including native headers.
+    Returns zero on success and leaves an error message on native failure.
+*/
+int Toolchain.project_native_source(
+  Toolchain t, String source, List gen_dirs,
+  String &projected, String &dependencies, String &errors) {
+  projected = source;
+  dependencies = NULL;
+  String metadata = %"${Path.dirname(source)}/${Path.stem(source)}.xnm";
+  if (access(metadata, R_OK) || t.dry_run) return 0;
+  String directory =
+    %"${home_dir()}/builds/native/${filename_hash(Path.absolute(source))}";
+  Path.make_dirs(directory);
+  String expanded = %"$directory/${Path.stem(source)}.i";
+  projected = %"$directory/${Path.basename(source)}";
+  dependencies = %"$directory/${Path.stem(source)}.d";
+  String output;
+  int status = tool_capture(
+    %(@{t._compile_arguments(gen_dirs)} "-E" "-MMD" "-MF" $dependencies
+      "-MT" $projected $source "-o" $expanded), output, errors);
+  if (status) return status;
+  String helper = %"${home_dir()}/tools/native-layout-project.py";
+  if (access(helper, R_OK))
+    helper = %"${home_dir()}/bootstrap/native-layout-project.py";
+  status = tool_capture(
+    %("python3" $helper $expanded $metadata $projected), output, errors);
+  unlink(expanded);
+  return status;
+}
+
 static List Toolchain._compile_arguments(Toolchain t, List gen_dirs) => %(
   ${t.cc} "-fsigned-char"
   @{gen_dirs.map(%!(directory) => %("-iquote" $directory)).flatten()}

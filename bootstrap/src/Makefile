@@ -22,6 +22,13 @@ endif
 
 ../../bin/x2c: x2c install
 
+%.o: %.c
+	@if test -f "$(@:.o=.xnm)"; then \
+	  python3 ../native-layout-project.py --compile "$<" \
+	    "../../builds/native/bootstrap/src/$*.c" "$@" "$(@:.o=.d)" \
+	    -- $(CC) $(CFLAGS); \
+	else $(CC) $(CFLAGS) -c "$<" -o "$@"; fi
+
 x2c: $(OBJS) ../lib/libx2c.a
 	$(CC) -o $@ $(OBJS) $(LDFLAGS)
 	rm -f ../../bin/x2c-bootstrap

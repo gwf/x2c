@@ -96,6 +96,9 @@ endif
 
 # compile object files; ensure matching header exists and emit dependency file
 $(BUILD)/%.o: $(BUILD)/%.c | $(BUILD)/%.h
-	$(CC) $(CFLAGS) -MMD -MP -MF $(BUILD)/$*.c.d -MT $@ -c $< -o $@
+	@if test -f "$(@:.o=.xnm)"; then \
+	  python3 $(REPO_ROOT)/tools/native-layout-project.py --compile "$<" \
+	    "$(BUILD)/native/$*.c" "$@" "$(BUILD)/$*.c.d" -- $(CC) $(CFLAGS); \
+	else $(CC) $(CFLAGS) -MMD -MP -MF $(BUILD)/$*.c.d -MT $@ -c $< -o $@; fi
 
 -include $(X_DEPS) $(C_DEPS)

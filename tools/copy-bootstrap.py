@@ -15,7 +15,7 @@ INCLUDE = re.compile(r'^(\s*#\s*include\s*)"([^"\n]+)"', re.MULTILINE)
 def generated(tree):
     return sorted(source for component in ("lib", "src")
                   for source in (tree / component).rglob("*")
-                  if source.is_file() and source.suffix in (".c", ".h"))
+                  if source.is_file() and source.suffix in (".c", ".h", ".xnm"))
 
 
 def copied_text(source, destination, placements):
@@ -58,6 +58,8 @@ def main():
             shutil.copyfile(source, destination)
         else:
             destination.write_text(rewritten, encoding="ascii")
+    shutil.copyfile(ROOT / "tools/native-layout-project.py",
+                    bootstrap / "native-layout-project.py")
     return 0
 
 

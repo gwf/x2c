@@ -3,11 +3,11 @@ set -euo pipefail
 
 # --interfaces also compares .xi unit interfaces, for two outputs of one
 # compiler.
-kinds=(-name '*.c' -o -name '*.h')
-label=C/H
+kinds=(-name '*.c' -o -name '*.h' -o -name '*.xnm')
+label=C/H/.xnm
 if [[ ${1-} == --interfaces ]]; then
   kinds+=(-o -name '*.xi')
-  label=C/H/.xi
+  label=C/H/.xnm/.xi
   shift
 fi
 if [[ $# -ne 2 ]]; then

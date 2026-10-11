@@ -588,6 +588,24 @@ Map prepare_module_layouts(List providers) {
         }
   } while (changed);
   Map rendered = {}, plan = {};
+  if (active.len()) plan[%(native-projection)] = 1;
+  Map family_edges = {};
+  foreach (Var (family, dependencies), layouts.fixed_edges) {
+    Array edges = [];
+    foreach (List dependency, dependencies.list())
+      edges.push(%"f_${filename_hash(dependency.repr())}");
+    family_edges[%"f_${filename_hash(family.list().repr())}"] = edges;
+  }
+  plan[%(projection-families)] = family_edges;
+  Map aliases = {}, body_families = {};
+  foreach (List family, layouts.bodies.keys()) body_families[family] = 1;
+  foreach (Var (name, row), layouts.aliases) {
+    List alias = row.list().cadr();
+    aliases[%(typedef $name)] = alias.type_from_ast().declared();
+    aliases[%($name)] = %(typedef $name);
+  }
+  plan[%(projection-aliases)] = aliases;
+  plan[%(projection-bodies)] = body_families;
   foreach (List family, layouts.order) {
     if (!(family in active)) continue;
     rendered[family] = layouts.render(family, plan);
@@ -630,7 +648,8 @@ Map prepare_module_layouts(List providers) {
 /** Supplies complete definitions before recursive ancestor support includes.
     Language visibility still uses the ordinary symbol ownership records. */
 String Compiler.module_layout_prefix(Compiler c) {
-  if (!c.module_layout_plan) return NULL;
+  if (!c.module_layout_plan ||
+      %(native-projection) in c.module_layout_plan) return NULL;
   Var text;
   return c.module_layout_plan.try_get(
     %(prefix ${c.canonical_path(c.filename)}), text) ? text.string() : NULL;
@@ -644,6 +663,7 @@ List Compiler.module_layout_node(Compiler c, List node) {
   Map names = c.module_layout_plan[%(private-types $path)],
     bindings = c.module_layout_plan[%(private-bindings $path)];
   if (names) node = _layout_private_node(node, names, bindings);
+  if (%(native-projection) in c.module_layout_plan) return node;
   match (node)
     case %(function ?type (!set ?declarator (bind ?binding *)) ?):
       if (%(inline ${c.canonical_path(c.filename)} $binding)
@@ -659,5 +679,59 @@ List Compiler.module_layout_node(Compiler c, List node) {
       List bare = base.list()[:base.list().len() - core.len()].append(family);
       return %($kind $bare $bindings);
     }
+  return node;
+}
+
+
+/* A selected native field contributes its actual complete-family demand.
+   The native preprocessor removes markers in inactive conditional fields. */
+static List Layouts.mark_fields(
+  Layouts &l, Compiler c, Sym resolver, List fields) {
+  Array marked = [];
+  foreach (List field, fields) {
+    List declaration = Ast.without_origin(field);
+    Map needed = {};
+    if (declaration.car() == <declare>) {
+      foreach (List row, declaration.caddr().list().cdr()) {
+        Type type = %(declare ${declaration.cadr()} (bindings $row))
+          .type_from_ast();
+        l.require_type(c, resolver, type, needed);
+      }
+    }
+    foreach (List dependency, needed.keys()) {
+      String id = filename_hash(dependency.repr());
+      marked.push(%(preproc "#pragma x2c_family_require f_$id"));
+    }
+    marked.push(field);
+  }
+  return marked.list_free();
+}
+
+/** Marks conditional complete-field demands in the portable native body.
+    Markers refer to already established families and do not bind declarations.
+*/
+List Compiler.module_layout_demands(Compiler c, List node) {
+  if (!c.module_layout_plan) return node;
+  String path = c.canonical_path(c.filename);
+  Map names = c.module_layout_plan[%(private-types $path)];
+  Map private_types = {};
+  private_types[path] = names;
+  Layouts layouts = {
+    .bodies = c.module_layout_plan[%(projection-bodies)],
+    .private_types = private_types};
+  Sym resolver = Sym.new(c);
+  resolver.reset_overlay(
+    c.sym.global_symbols(), c.module_layout_plan[%(projection-aliases)]);
+  match (node) case %((!or typedef declare) ?base ?bindings): {
+    Type type = base;
+    List core = type.base_type();
+    match (core)
+      case %((!set ?tag (!or struct union)) ?name (fields *fields)): {
+        List marked = layouts.mark_fields(c, resolver, fields);
+        List replacement = %($tag $name (fields @marked));
+        List prefix = base.list()[:base.list().len() - core.len()];
+        return %(${node.car()} ${prefix.append(replacement)} $bindings);
+      }
+  }
   return node;
 }

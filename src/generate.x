@@ -22,6 +22,7 @@
 #include "emit.x"
 #include "utils.x"
 #include "module-layout.x"
+#include "json.x"
 
 // diagnostics
 
@@ -88,6 +89,11 @@ void publish_generated_files(List outputs) {
     htext cfile ctext)`, named from `basename`, without writing them. It
     affects the compiler as `generate_code` does. */
 List generate_code_text(Compiler c, List ast, String basename) =>
+  c._generated_code(_without_trivia(ast), basename)[:4];
+
+/** Returns all portable text outputs, including native projection metadata.
+    Like generate_code_text, this generates the unit exactly once. */
+List generate_code_text_files(Compiler c, List ast, String basename) =>
   c._generated_code(_without_trivia(ast), basename);
 
 static List _without_trivia(List ast) =>
@@ -108,26 +114,106 @@ static List Compiler._generated_code(Compiler c, List ast, String basename) {
     header = header.append(
       %((preproc
       "void ${c.module_initializer_entry(c.filename)}(void);")));
-  List hcode = c._emit_header(header);
-  List ccode = c._emit_source(source, bindings, inline_bodies);
-  String hfile = %"$basename.h", cfile = %"$basename.c";
-  return %(
-    $hfile ${c.code_pretty_string(hcode, hfile)}
-    $cfile ${c.code_pretty_string(ccode, cfile)}
-  );
-}
-
-static List Compiler._emit_header(Compiler c, List header) {
-  header = c._forward_declarations(header, 0);
-  return c.emit(c._include_guard(_vertical_spacing(header)), NULL);
-}
-
-/* Each source use follows the declarations it needs. */
-static List Compiler._emit_source(
-  Compiler c, List source, Map bindings, Map inline_bodies) {
-  source = c._forward_declarations(
+  List hnodes = c._forward_declarations(header, 0);
+  hnodes = c._include_guard(_vertical_spacing(hnodes));
+  List cnodes = c._forward_declarations(
     _move_bodies(c._file_init(source), inline_bodies), 1);
-  return c.emit(c._source_text(source), bindings);
+  cnodes = c._source_text(cnodes);
+  Array records = [], horder = [], corder = [];
+  int projected = c.module_layout_plan &&
+    %(native-projection) in c.module_layout_plan;
+  if (projected) {
+    hnodes = c._projection_nodes(hnodes, "h", records, horder);
+    cnodes = c._projection_nodes(cnodes, "c", records, corder);
+  }
+  List hcode = c.emit(hnodes, NULL), ccode = c.emit(cnodes, bindings);
+  String hfile = %"$basename.h", cfile = %"$basename.c";
+  List outputs = %(
+    $hfile ${c.code_pretty_string(hcode, hfile)}
+    $cfile ${c.code_pretty_string(ccode, cfile)});
+  if (projected) {
+    Array companions = [];
+    Map directories = c.module_layout_plan;
+    foreach (Var (key, directory), directories)
+      match (key) case %(directories ?(String provider)):
+        companions.push(_projection_relative(
+          %"$directory/${Path.stem(provider)}.xnm", Path.dirname(cfile)));
+    Map metadata = {
+      format: 2, source: Path.basename(cfile), header: Path.basename(hfile),
+      regions: records, order: corder, headerOrder: horder,
+      companions: companions,
+      familyEdges: c.module_layout_plan[%(projection-families)]};
+    outputs = outputs.append(%("$basename.xnm" ${Var.json(metadata)}));
+  }
+  return outputs;
+}
+
+/* Metadata paths follow output placement, so copying the complete output tree
+   reconnects companions without retaining an absolute checkout location. */
+static String _projection_relative(String path, String directory) {
+  List target = Path.absolute(path).split("/");
+  List base = Path.absolute(directory).split("/");
+  int common = 0;
+  while (common < target.len() && common < base.len() &&
+      target[common] == base[common]) ++common;
+  Array parts = [];
+  for (int i = common; i < base.len(); ++i) parts.push("..");
+  for (int i = common; i < target.len(); ++i) parts.push(target[i]);
+  return "/".join(parts.list());
+}
+
+/* Region identities come from final emitted nodes, after cache/init/body
+   placement. They grant no language access and execute no source producer. */
+static List Compiler._projection_nodes(
+  Compiler c, List nodes, String role, Array records, Array order) {
+  Array marked = [];
+  int ordinal = 0;
+  Array split = [];
+  foreach (List node, nodes) {
+    match (node) case %((!or typedef declare) ?base ?bindings): {
+      Type type = base;
+      match (type.base_type())
+        case %((!set ?kind (!or struct union enum))
+            ?(String name) ?body): {
+          List core = type.base_type();
+          List prefix = base.list()[:base.list().len() - core.len()];
+          split.push(%(declare $core (bindings (bind () ()))));
+          node = %(${node.car()}
+            ${prefix.append(%($kind $name))} $bindings);
+        }
+    }
+    split.push(node);
+  }
+  foreach (List node, split) {
+    if (node.car() == <space> || node.car() == <comment>) {
+      marked.push(node);
+      continue;
+    }
+    if (node.car() == <preproc>) {
+      int angle = 0;
+      String target = preproc_include_target(node.cadr(), angle);
+      if (!target) {
+        marked.push(node);
+        continue;
+      }
+    }
+    String id = %"u_${c.generated_unit_hash()}_${role}_${ordinal++}";
+    String family = NULL;
+    match (node) case %((!or typedef declare) ?base ?): {
+      Type type = base;
+      match (type.base_type())
+        case %((!set ?kind (!or struct union enum)) ?name (*)):
+          family = %"f_${filename_hash(%($kind $name).repr())}";
+    }
+    Map record = {id: id, role: role, family: family,
+      kind: node.car().str(), optional: Json.bool(1)};
+    records.push(record);
+    order.push(id);
+    marked.push(%(preproc "#pragma x2c_region_begin $id"));
+    marked.push(c.module_layout_demands(node));
+    marked.push(%(preproc "#pragma x2c_region_end $id"));
+  }
+  return marked.list_free();
 }
 
 /* A failed write reports its file and the host error. */

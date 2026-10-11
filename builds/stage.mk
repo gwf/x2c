@@ -151,8 +151,12 @@ LIB-FORCE-TRANSLATE:
 endif
 # compile library object files
 $(LIB_BUILD)/%.o: $(LIB_BUILD)/%.c | $(LIB_H_FILES)
-	$(CC) $(CFLAGS) $(foreach directory,$(sort $(dir $(LIB_C_FILES))),-iquote $(directory)) -MMD -MP \
-		-MF $(LIB_BUILD)/$*.c.d -MT $@ -c $< -o $@
+	@if test -f "$(@:.o=.xnm)"; then \
+	  python3 $(ROOT)/tools/native-layout-project.py --compile "$<" \
+	    "native/lib/$*.c" "$@" "$(LIB_BUILD)/$*.c.d" -- $(CC) $(CFLAGS) \
+	    $(foreach directory,$(sort $(dir $(LIB_C_FILES))),-iquote $(directory)); \
+	else $(CC) $(CFLAGS) $(foreach directory,$(sort $(dir $(LIB_C_FILES))),-iquote $(directory)) \
+	  -MMD -MP -MF $(LIB_BUILD)/$*.c.d -MT $@ -c $< -o $@; fi
 
 # create library archive
 $(LIBRARY): $(LIB_OBJECTS)
@@ -191,9 +195,14 @@ BIN-FORCE-TRANSLATE:
 endif
 # compile binary object files
 $(BIN_BUILD)/%.o: $(BIN_BUILD)/%.c | $(LIB_H_FILES)
-	$(CC) $(CFLAGS) -iquote $(LIB_BUILD) \
-		$(foreach directory,$(sort $(dir $(LIB_C_FILES) $(BIN_C_FILES))),-iquote $(directory)) \
-		-MMD -MP -MF $(BIN_BUILD)/$*.c.d -MT $@ -c $< -o $@
+	@if test -f "$(@:.o=.xnm)"; then \
+	  python3 $(ROOT)/tools/native-layout-project.py --compile "$<" \
+	    "native/src/$*.c" "$@" "$(BIN_BUILD)/$*.c.d" -- $(CC) $(CFLAGS) \
+	    -iquote $(LIB_BUILD) \
+	    $(foreach directory,$(sort $(dir $(LIB_C_FILES) $(BIN_C_FILES))),-iquote $(directory)); \
+	else $(CC) $(CFLAGS) -iquote $(LIB_BUILD) \
+	  $(foreach directory,$(sort $(dir $(LIB_C_FILES) $(BIN_C_FILES))),-iquote $(directory)) \
+	  -MMD -MP -MF $(BIN_BUILD)/$*.c.d -MT $@ -c $< -o $@; fi
 # link binary executable
 $(BINARY): $(BIN_OBJECTS) $(LIBRARY)
 	$(CC) $(BIN_OBJECTS) -L. $(LDFLAGS) -lm -o $(BINARY)

@@ -7,6 +7,13 @@ OBJS     =  $(SRCS:%.c=%.o)
 
 .DELETE_ON_ERROR:
 
+%.o: %.c
+	@if test -f "$(@:.o=.xnm)"; then \
+	  python3 ../native-layout-project.py --compile "$<" \
+	    "../../builds/native/bootstrap/lib/$*.c" "$@" "$(@:.o=.d)" \
+	    -- $(CC) $(CFLAGS); \
+	else $(CC) $(CFLAGS) -c "$<" -o "$@"; fi
+
 libx2c.a: $(OBJS)
 	$(RM) $@
 	$(AR) -cr $@ $(OBJS)
