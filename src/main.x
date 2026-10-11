@@ -106,18 +106,20 @@ static void _translate_unit(
    C layout support. Existing collection chooses only reachable providers. */
 static Map _ordinary_module_projection(
   ParsedUnit &unit, Map module_directories, String output_dir) {
-  if (!module_directories) return NULL;
   Compiler c = unit.compiler;
   String source = c.canonical_path(c.filename);
   Map dependencies = c.collected_declaration_dependencies(%($source));
   if (!dependencies) return NULL;
   Array providers = [];
   Map directories = {};
-  foreach (Var (provider, directory), module_directories)
-    if (provider in dependencies) {
-      providers.push(provider);
+  foreach (Var (provider, edges), dependencies) {
+    (void) edges;
+    if (!c.module_tree.owner(provider)) continue;
+    providers.push(provider);
+    Var directory;
+    if (module_directories && module_directories.try_get(provider, directory))
       directories[%(directories $provider)] = directory;
-    }
+  }
   if (!providers.len()) return NULL;
   providers.push(source);
   Map plan = prepare_module_layout_registry(c, providers.list_free());
