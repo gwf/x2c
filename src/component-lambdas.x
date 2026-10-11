@@ -191,7 +191,7 @@ meta static Var _lambda_rebuild(
       if (result !== rebuilt || declares) {
         if (result === rebuilt && rebuilt.car() == <block>) {
           List kept = _lambda_kept_items(
-            rebuilt.cdr().array(), node.cdr(), declaring);
+            rebuilt.cdr(), node.cdr(), declaring);
           result = cons(<block>, kept);
         }
         declaring[result] = 1;
