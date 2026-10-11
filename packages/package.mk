@@ -71,6 +71,12 @@ build: $(PACKAGE_HEADERS) $(PACKAGE_ARCHIVE) $(PACKAGE_RESPONSE) \
   $(PACKAGE_MODULE)
 
 BUNDLE_DIR ?= builds/bundle
+PACKAGE_BUNDLE_PRUNE = $(if \
+  $(filter $(abspath builds),$(abspath $(BUNDLE_DIR))),\
+  $(if $(wildcard builds/$(PACKAGE)/BUNDLE.json),\
+    -path "$(abspath builds)/$(PACKAGE)" -prune -o) \
+  -name '.bundle-*' -prune -o,\
+  -path "$(abspath $(BUNDLE_DIR))" -prune -o)
 bundle: build
 	"$(X2C)" script "$(PACKAGE_SUPPORT)tools/bundle" --package "$(PACKAGE)" \
 	  --compiler "$(X2C)" --manifest "$(DEPENDENCY_MANIFEST)" \
@@ -124,7 +130,7 @@ $(PACKAGE_ARCHIVE): $(PACKAGE_GENERATED) $(PACKAGE_NATIVE) \
 	    -path "$(abspath builds/cc)" -prune -o \
 	    -path "$(abspath builds/module)" -prune -o \
 	    -path "$(abspath builds/native)" -prune -o \
-	    -path "$(abspath $(BUNDLE_DIR))" -prune -o \
+	    $(PACKAGE_BUNDLE_PRUNE) \
 	    -name '*.c' -print | LC_ALL=C sort) $(PACKAGE_NATIVE)
 
 # The interfaces translation wrote record each of the package's own native
