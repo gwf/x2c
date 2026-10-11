@@ -906,7 +906,10 @@ static List Compiler._named(Compiler c, List reset) {
    A function whose values have no Var form, such as C's `bool` or a
    record pointer, is called only from other group code. */
 static List Compiler._targets(Compiler c, List named, List functions) {
-  Array entries = [], initializers = [];
+  Array entries = [], initializers = [], initializer_order = [];
+  if (meta_prefix_published)
+    foreach (String name, meta_prefix_published.getdefault(%(initializers), %(nil)))
+      initializer_order.push(name);
   if (c.meta_build)
     entries.push(
       %(map-entry ${x2c_literal_symbol(<functions>)}
@@ -918,6 +921,8 @@ static List Compiler._targets(Compiler c, List named, List functions) {
       %(expr $type (ident $binding)), %("Func"));
     catch %(malformed *): continue;
     entries.push(%(map-entry ${x2c_literal_string(name)} $function));
+    if (name == "x2c_module_reset")
+      initializer_order.push(c.emitted_binding_name(binding));
     if (name == "x2c_module_reset" || (meta_prefix_published &&
         name in meta_prefix_published.getdefault(%(initializers), %(nil))))
       initializers.push(
@@ -925,10 +930,14 @@ static List Compiler._targets(Compiler c, List named, List functions) {
           $function));
   }
   Macro shape = $map_value;
-  if (c.meta_build)
+  if (c.meta_build) {
     entries.push(
       %(map-entry ${x2c_literal_string("initializers")}
         ${shape(initializers.list_free())}));
+    entries.push(
+      %(map-entry ${x2c_literal_string("initializer-order")}
+        ${c.cache_literal_list(initializer_order.list_free())}));
+  }
   return c.rebuild_expression(%("Map"), shape(entries.list_free()));
 }
 
