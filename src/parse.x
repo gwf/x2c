@@ -794,14 +794,16 @@ static void Compiler._record_meta_bindings(
 
 static void Compiler._store_static_meta(
   Compiler c, Var spec, String name, Var body, Token first) {
-  if (spec.type().is_static()) c._store_meta_hash(name, body, first);
+  if (spec.type().is_static() || c.source_module)
+    c._store_meta_hash(name, body, first);
 }
 
 static void Compiler._store_collected_meta(
   Compiler c, Var spec, List binding, String name,
   Token first, int collected_body) {
   if (!c.shallow || (!collected_body &&
-      (!spec.type().is_static() || !(binding in c.init_tokens)))) return;
+      (!(spec.type().is_static() || c.source_module) ||
+       !(binding in c.init_tokens)))) return;
   c._store_meta_hash(name, void, first);
 }
 

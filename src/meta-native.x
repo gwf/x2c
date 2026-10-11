@@ -40,14 +40,14 @@ static macro Stmt $report.macro.function_install(
 static macro Stmt $report.parse.meta_decl(Expr $c, Expr $site) =>
   $c.report_error(
     <parse>,
-    "meta requires a function or one initialized static value",
+    "meta requires a function or one initialized static or module value",
     $site, NULL);
 
 static macro Stmt $report.parse.meta_storage(
   Expr $c, Expr $site, Expr $name) =>
   $c.report_error(
     <parse>,
-    "a meta value must have file-static storage",
+    "a meta value must have static or module visibility",
     $site, %("declaration: '${$name}'"));
 
 static macro Stmt $report.macro.call_depth(Expr $c, Expr $site) =>
@@ -296,7 +296,7 @@ static Var Compiler._meta_apply(Compiler c, Var function, List arguments) {
   return c.macro_lisp.eval(quoted.list_free());
 }
 
-/** Applies a contextual `meta` marker to one initialized file-static value.
+/** Applies a contextual `meta` marker to one initialized private value.
     The unit's staged `meta` group holds the compile-time instance, which
     its module initializes for each unit. */
 void Compiler.install_meta_declaration(
@@ -305,7 +305,7 @@ void Compiler.install_meta_declaration(
     case %(declare ?spec
            (bindings
              (op = (bind (binding ? ?(String name)) *) ?))): {
-      if (!spec.type().is_static())
+      if (!spec.type().is_static() && !c.source_module)
         $report.parse.meta_storage(c, marker, name);
       if (c.groups_meta()) c.meta_group.push(%(static $declaration));
       return;
@@ -339,16 +339,16 @@ List Compiler.evaluate_meta_statement(
 /* The expression a meta call's `value` becomes at its call. */
 static List Compiler._meta_result(
   Compiler c, List expression, Var value, Token site) {
-  if (value is void && c.meta_build) {
-    List placeholder = %(expr (int) (literal (int) "0"));
-    c.meta_group.push(%(later $placeholder));
-    return placeholder;
-  }
   Type declared = expression.cadr();
   match (expression) case %(expr ? (meta-call (expr ?signature ?) ?)):
     declared = signature.cdr();
   if (declared === %(void))
     return %(expr (void) (cast (void) (expr (int) (literal (int) "0"))));
+  if (value is void && c.meta_build) {
+    List placeholder = %(expr (int) (literal (int) "0"));
+    c.meta_group.push(%(later $placeholder));
+    return placeholder;
+  }
   if (c._code_result(value)) return c.lift_macro_lisp_expression(value, site);
   List result = c.meta_value_expression(declared, value, site);
   return result ? result : c.lift_macro_lisp_expression(value, site);
@@ -389,8 +389,9 @@ Var Compiler.run_meta_call(
     Var retained;
     if (c.evaluated_effects.try_get(key, retained)) return retained;
   }
-  Var value = c._run_meta(expression, NULL, NULL, site, slot);
-  if (key && value is not void) c.evaluated_effects[key] = value;
+  int deferred = 0;
+  Var value = c._run_meta(expression, NULL, NULL, site, slot, deferred);
+  if (key && !deferred) c.evaluated_effects[key] = value;
   return value;
 }
 
@@ -421,19 +422,20 @@ Var Compiler.apply_meta_function(
   $let(context.evaluator, c)
   $let(context.site, site)
   $let(meta_call_form, meta_call_form)
-    return c._run_meta(NULL, name, arguments, site, 0);
+    return c._run_meta(NULL, name, arguments, site, 0, NULL);
 }
 
 /* Runs the meta call `expression`, or else `name` applied to `arguments`,
    and reports its failure at `site`. */
 static Var Compiler._run_meta(
   Compiler c, List expression, String name, List arguments, Token site,
-  int slot) {
+  int slot, int &?deferred) {
   Var value;
   meta_call_form = NULL;
   try value = expression ? _meta_call_value(c, expression, site)
                          : _meta_named_value(c, name, arguments, site);
   catch %(meta-later *): {
+    if (deferred) deferred = 1;
     value = void;
     if (slot)
       $report.macro.call_deferred(c, site);
