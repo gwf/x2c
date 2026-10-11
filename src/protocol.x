@@ -452,7 +452,7 @@ static String Compiler._protocol_member_spelling(
   List adoption = c._visible_adoption(base, participant);
   if (!adoption || _adoption_storage(adoption) != <module>) return spelling;
   String owner = c._protocol_module(_adoption_location(adoption));
-  String prefix = c.module_tree.entry(owner).prefix;
+  String prefix = c.module_tree.prefix(owner);
   if (c.package) prefix = c.package_spelling(prefix);
   spelling = %"$prefix$spelling";
   c.sym.define_global(%("module-owner" $spelling), %(${home_portable_path(owner)}));

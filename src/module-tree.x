@@ -33,8 +33,70 @@ ModuleTree ModuleTree.new(Compiler c) {
 }
 
 /** Returns the generated support-header name for a module source. */
-String module_support_header(String path) =>
-  %"_x2c_module_${filename_hash(home_portable_path(absolute_path(path)))}.h";
+String Compiler.module_support_header(Compiler c, String path) =>
+  %"_x2c_module_${filename_hash(c.module_tree.identity(c.canonical_path(path)))}.h";
+
+/** Keeps module output guards independent of invocation path spelling. */
+String Compiler.generated_unit_hash(Compiler c) =>
+  filename_hash(c.module_owner
+    ? c.module_tree.identity(c.canonical_path(c.filename)) : c.filename);
+
+/** Returns the relocatable identity of an enrolled source. Canonical paths
+    still establish ownership. Identity collisions cannot share native names.
+*/
+String ModuleTree.identity(ModuleTree tree, String spelling) {
+  String path = absolute_path(spelling);
+  Var cached;
+  if (tree.owners.try_get(%(identity $path), cached)) return cached;
+  List ancestors = tree.ancestors(path);
+  String identity = home_portable_path(path), root = NULL;
+  if (ancestors) {
+    String entry = ancestors.last();
+    root = Path.dirname(entry);
+    String package = package_directory(tree.compiler.package_source_dirs, path);
+    if (!package) package = package_directory(tree.compiler.package_dirs, path);
+    if (package && package_source(package, path))
+      identity = %"package:${Path.basename(package)}:${path[package.len() + 1:]}";
+    else if (identity.startswith("/")) {
+      String project = tree.compiler.module_project_root;
+      if (!project) project = tree.project_root(path);
+      if (project && path.startswith(project + "/")) {
+        root = project;
+        identity = %"project:${path[project.len() + 1:]}";
+      }
+      else identity = %"module:${path[root.len() + 1:]}";
+    }
+    String native_id = filename_hash(identity);
+    String previous = tree.owners[%(identity-owner $native_id)];
+    if (previous && previous != path)
+      tree._report(path,
+        %"module identity '$identity' collides with '$previous'; use distinct entry names or a package/project namespace");
+    tree.owners[%(identity-owner $native_id)] = path;
+  }
+  tree.owners[%(identity $path)] = identity;
+  return identity;
+}
+
+static String ModuleTree.project_root(ModuleTree tree, String path) {
+  Map searches = {};
+  tree.owners[%(identity-searches $path)] = searches;
+  for (String dir = Path.dirname(path); dir != "/"; dir = Path.dirname(dir)) {
+    String candidate = Path.join(dir, "x2c.toml");
+    int exists = tree.compiler.sources.exists(candidate);
+    searches.merge_translation_dependency(
+      candidate, exists ? (Var) 1 : (Var) "search:absent");
+    if (exists) return dir;
+  }
+  return NULL;
+}
+
+/** Returns the native prefix using the same identity as support and init. */
+String ModuleTree.prefix(ModuleTree tree, String path) {
+  ModuleEntry entry = tree.entry(path);
+  if (!entry.prefix)
+    entry.prefix = %"_x2c_mod_${filename_hash(tree.identity(path))}_";
+  return entry.prefix;
+}
 
 static void ModuleTree._report(
   ModuleTree tree, String path, String message) {
@@ -117,8 +179,7 @@ static ModuleEntry ModuleTree._scan(ModuleTree tree, String path) {
     }
     entry = Scope.malloc(sizeof(struct ModuleEntry));
     *entry = (struct ModuleEntry) {
-      .path = path, .prefix =
-        %"_x2c_mod_${filename_hash(home_portable_path(path))}_",
+      .path = path,
       .preamble = text[:token.pos], .block_start = token.pos};
     ModuleScan scan = {
       .tree = tree, .entry = entry, .directory = Path.dirname(path),
@@ -166,6 +227,11 @@ Map ModuleTree.ownership_dependencies(ModuleTree tree, String path) {
         candidate,
         tree.dependencies[candidate]);
     }
+  (void) tree.identity(path);
+  Var identity_searches = tree.owners[%(identity-searches $path)];
+  if (identity_searches is <map>)
+    foreach (Var (candidate, hash), identity_searches.map())
+      dependencies.merge_translation_dependency(candidate, hash);
   return dependencies;
 }
 
@@ -176,7 +242,7 @@ List ModuleTree.ownership_query(ModuleTree tree, String path) {
   foreach (String owner, tree.ancestors(path))
     owners.push(home_portable_path(owner));
   return %(ownership-search ${home_portable_path(path)}
-    ${owners.list_free()});
+    ${owners.list_free()} ${tree.identity(path)});
 }
 
 /* A path can be named by more than one ancestor entry. Discovery examines
@@ -235,8 +301,9 @@ List ModuleTree.ancestors(ModuleTree tree, String path) {
   return ancestry;
 }
 
-/** Expands source inputs into distinct enrolled units, retaining input
-    order. */
+/** Expands source inputs into distinct enrolled units. An enrolled tree
+    starts at its outer entry and follows explicit member order, even when
+    the invocation names an implementation member first. */
 List ModuleTree.units(ModuleTree tree, List inputs) {
   Array units = [];
   Map seen = {};
@@ -246,16 +313,22 @@ List ModuleTree.units(ModuleTree tree, List inputs) {
 
 static void ModuleTree._enroll(
   ModuleTree tree, String path, Array units, Map seen) {
-  String canonical = Path.absolute(path);
+  String canonical = absolute_path(path);
   if (canonical in seen) return;
+  if (is_source_file(canonical)) {
+    List ancestry = tree.ancestors(canonical);
+    if (ancestry) {
+      String root = ancestry.reverse().car();
+      if (root != canonical) {
+        tree._enroll(root, units, seen);
+        if (canonical in seen) return;
+      }
+    }
+  }
   seen[canonical] = 1;
   units.push(path);
   if (!is_source_file(canonical)) return;
-  List ancestry = tree.ancestors(canonical);
-  if (ancestry) {
-    String root = ancestry.reverse().car();
-    if (root != canonical) tree._enroll(root, units, seen);
-  }
+  if (tree.owner(canonical)) (void) tree.identity(canonical);
   ModuleEntry entry = tree.entry(canonical);
   if (!entry) return;
   foreach (String member, entry.members) {

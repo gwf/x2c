@@ -131,6 +131,11 @@ process-global state merely to recover throughput.
 
 ### 5. What gives a relocated module a stable identity?
 
+Decision: anonymous trees use the outer entry filename and relative member
+paths. Diagnose collisions before native linkage. Gary selected this rule;
+distinct entry names or existing package/project roots can disambiguate trees.
+This does not authorize new source syntax or a new manifest field.
+
 Keep canonical location for reads, ownership verification, diagnostics, and
 invalidation. Use logical identity for private C names, support aliases, and
 initializer guards. All three must use the same identity operation.

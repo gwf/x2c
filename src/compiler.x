@@ -100,6 +100,7 @@ typedef struct Compiler {
   String filename, text, root_dir;
   ModuleTree module_tree;
   String module_owner;
+  String module_project_root;
   int source_module;
   Map collected_statics;
   /* Package-mode unit: NULL outside. package_dirs holds import search roots;
@@ -1810,8 +1811,8 @@ List Compiler.module_initializer(Compiler c, List binding) {
 }
 
 /** The once-only initializer entry for one module source file. */
-String module_initializer_entry(String path) =>
-  %"_x2c_module_init_${filename_hash(home_portable_path(Path.absolute(path)))}";
+String Compiler.module_initializer_entry(Compiler c, String path) =>
+  %"_x2c_module_init_${filename_hash(c.module_tree.identity(c.canonical_path(path)))}";
 
 /** Projects ordinary parsed prerequisites into portable spelling rows.
     File-static objects stay in their own compiler's initializer queue. */
@@ -2932,7 +2933,7 @@ static void Compiler._share_unit(Compiler c, Compiler owner) {
                source_declarations, source_texts, unit_script, include_dirs,
                meta_build, evaluated_effects, pending_inline_bodies,
                collection_native_files);
-  $copy_fields(c, owner, module_tree, module_owner);
+  $copy_fields(c, owner, module_tree, module_owner, module_project_root);
 }
 
 /* The first compiler of a unit creates the state its children share and

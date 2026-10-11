@@ -1045,7 +1045,7 @@ static List Emitter._preproc(Emitter &e, List ast) {
   if (!angle) {
     String path = e.c.resolve_source_include(target, angle);
     if (path && e.c.module_tree.owner(path))
-      return %("#include \"${module_support_header(path)}\"");
+      return %("#include \"${e.c.module_support_header(path)}\"");
   }
   String stem = target[:target.rfind(".")];
   String out = %"#include \"$stem.h\"";

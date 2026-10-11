@@ -211,6 +211,16 @@ static typedef struct Translation {
   int total;
 } Translation;
 
+static Compiler _module_discovery(CliRequest request) {
+  Compiler c = Compiler.new();
+  c.sources = request.sources;
+  c.package_source_dirs = request.package_dirs;
+  c.package_dirs = request.package_roots();
+  c.module_project_root = request.manifest
+    ? Path.dirname(absolute_path(request.manifest)) : NULL;
+  return c;
+}
+
 static int _run_translation(CliRequest request, Map unit_dirs, Build build) {
   unsigned long started_at = report_now_us();
   if (!request.out_dir) request.out_dir = ".";
@@ -250,8 +260,8 @@ static int _run_translation(CliRequest request, Map unit_dirs, Build build) {
 /* Module members keep their source-relative directories in a translation
    batch. Native builds already supply their per-unit directories. */
 static void Translation.enroll_modules(Translation &t) {
-  Compiler discovery = Compiler.new();
-  ModuleTree tree = ModuleTree.new(discovery);
+  Compiler discovery = _module_discovery(t.request);
+  ModuleTree tree = discovery.module_tree;
   List inputs = tree.units(t.request.inputs);
   Map directories = {};
   int modules = 0;
@@ -323,7 +333,7 @@ static void _preprocessor_errors(String text) {
 /* Module providers parse once before any member is emitted. Their Contexts
    remain nested; reverse emission restores each unit's pool and Type rows. */
 static List Translation.translate_modules(Translation &t) {
-  Compiler discovery = Compiler.new();
+  Compiler discovery = _module_discovery(t.request);
   ModuleTree tree = discovery.module_tree;
   Array modules = [], ordinary = [];
   foreach (String input, t.request.inputs) {
@@ -755,7 +765,7 @@ static List _stale_inputs(Build b, List units, Map stale) {
       inputs.push(input);
     }
   }
-  Compiler discovery = Compiler.new();
+  Compiler discovery = _module_discovery(b.request);
   Map spellings = {};
   foreach (String input, units) spellings[Path.absolute(input)] = input;
   Array enrolled = [];

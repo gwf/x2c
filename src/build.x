@@ -340,8 +340,13 @@ int Build.translation_current(Build b, String input, String directory) {
   foreach (String suffix, %(".c" ".h" ".xi"))
     if (!Path.is_file(_unit_file(directory, input, suffix))) return 0;
   Compiler discovery = Compiler.new();
+  discovery.sources = b.request.sources;
+  discovery.package_source_dirs = b.request.package_dirs;
+  discovery.package_dirs = b.request.package_roots();
+  discovery.module_project_root = b.request.manifest
+    ? Path.dirname(absolute_path(b.request.manifest)) : NULL;
   if (discovery.module_tree.owner(input) &&
-      !Path.is_file(Path.join(directory, module_support_header(input))))
+      !Path.is_file(Path.join(directory, discovery.module_support_header(input))))
     return 0;
   int ok = 1;
   uint64_t hash = b._translation_fingerprint(input, directory, ok);

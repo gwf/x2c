@@ -1195,7 +1195,7 @@ static List Compiler._resolve_identifier(
     ? c.module_initializer(binding) : NULL;
   if (recipe &&
       home_absolute_path(recipe.cadr()) != c.canonical_path(c.filename)) {
-    String entry = module_initializer_entry(recipe.cadr());
+    String entry = c.module_initializer_entry(home_absolute_path(recipe.cadr()));
     List call = %(expr (void) (call $entry (args)));
     List address = %(expr ${type.reference()} (op & (parens $result)));
     List ordered = %(expr ${type.reference()} (commas $call $address));

@@ -237,7 +237,7 @@ binding facts are not exported. Static helpers remain in their provider.
 Each provider has one function-hash table. Its meta advertisements identify
 the provider; collection and replay install the table before advertisements.
 The file holds one
-`(interface 10 "compiler" "path" "hash" (PARTS...) (DEFINITIONS...)
+`(interface 11 "compiler" "path" "hash" (PARTS...) (DEFINITIONS...)
 (DEPENDENCIES...) (INCLUDE-DIRS...))` form in
 `%()` List syntax, with bare Atoms for its structural words and Strings for
 identifiers; the reader reads that one form without evaluating it.
@@ -250,8 +250,9 @@ when its recorded compiler, path, include search roots, and every hash still
 match; otherwise collection walks the source. Include search roots retain
 their order and distinguish home-relative, absolute, and cwd-relative
 spellings.
-Ownership search dependencies record their provider and confirmed ancestry.
-Replay resolves those queries in the consuming home, checks the ancestry, and
+Ownership search dependencies record their provider, confirmed ancestry, and
+logical module identity. Replay resolves those queries in the consuming home,
+checks the ancestry and identity, and
 writes the current canonical search attempts into native build prerequisites.
 Explicit external include searches retain their configured roots.
 Search candidates with cwd-relative spellings are checked in the current

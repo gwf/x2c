@@ -208,6 +208,8 @@ static Compiler _begin_unit(
   c.source_map = request.source_map;
   c.sources = request.sources;
   c.package_source_dirs = request.package_dirs;
+  c.module_project_root = request.manifest
+    ? Path.dirname(absolute_path(request.manifest)) : NULL;
   c.source_facts = request.source_facts;
   c.source_primary = 1;
   if (c.source_facts) {

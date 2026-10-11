@@ -53,7 +53,7 @@ void generate_code(Compiler c, List ast, String dir) {
   if (c.module_owner)
     outputs = outputs.append(
       %(
-      "${dir.rstrip("/")}/${module_support_header(c.filename)}" ${outputs.cadr()}));
+      "${dir.rstrip("/")}/${c.module_support_header(c.filename)}" ${outputs.cadr()}));
   String interface = c.source_facts ? NULL : interface_text(c);
   if (interface) outputs = outputs.append(%("$basename.xi" $interface));
   c._publish(outputs);
@@ -73,7 +73,7 @@ static List _without_trivia(List ast) =>
 static List Compiler._generated_code(Compiler c, List ast, String basename) {
   Map inline_bodies = $auto({});
   List (header, source) = c._header_and_source(ast, inline_bodies);
-  String hash = filename_hash(c.filename);
+  String hash = c.generated_unit_hash();
   Map bindings;
   (header, source, bindings) = c.setup_cache_init(
     header, source, %"_x2c_hcache_${hash}_", %"_x2c_hcache_guard_$hash",
@@ -82,7 +82,7 @@ static List Compiler._generated_code(Compiler c, List ast, String basename) {
   if (c.module_owner)
     header = header.append(
       %((preproc
-      "void ${module_initializer_entry(c.filename)}(void);")));
+      "void ${c.module_initializer_entry(c.filename)}(void);")));
   List hcode = c._emit_header(header);
   List ccode = c._emit_source(source, bindings, inline_bodies);
   String hfile = %"$basename.h", cfile = %"$basename.c";
@@ -141,7 +141,7 @@ static List Compiler._header_and_source(
     .included = {}, .statics = {}, .source_groups = {}};
   foreach (String owner, c.module_ancestors().reverse())
     if (owner != c.canonical_path(c.filename))
-      p.header.push(%(preproc "#include \"${module_support_header(owner)}\""));
+      p.header.push(%(preproc "#include \"${c.module_support_header(owner)}\""));
   foreach (Ast node, ast) p.add(node);
   return %(${p.finish()} ${c._source_projection(ast, inline_bodies)});
 }
@@ -154,13 +154,13 @@ static List Compiler._source_projection(
   Array source = [];
   foreach (String owner, c.module_ancestors().reverse())
     if (owner != c.canonical_path(c.filename))
-      source.push(%(preproc "#include \"${module_support_header(owner)}\""));
+      source.push(%(preproc "#include \"${c.module_support_header(owner)}\""));
   foreach (List node, ast) {
     match (node) {
       case %(module-members ?members): {
         foreach (String member, members)
           source.push(
-            %(preproc "#include \"${module_support_header(
+            %(preproc "#include \"${c.module_support_header(
               Path.join(Path.dirname(c.filename), member))}\""));
         continue;
       }
@@ -193,7 +193,7 @@ static void Partition.add(Partition &p, Ast node) {
     case %(module-members ?members):
       foreach (String member, members)
         p.header.push(
-          %(preproc "#include \"${module_support_header(
+          %(preproc "#include \"${p.c.module_support_header(
             Path.join(Path.dirname(p.c.filename), member))}\""));
     case %((!or protocol adopt macrodef c-assert) *): return;
     case %(typedef ? (bindings *)): p.add_typedef(node);
@@ -992,7 +992,7 @@ static macro Decorator $initialized_entry(
    every call its frame setup. */
 static List Init.synthesize(Init &i, List arms) {
   List binding = i.entry = i.c.sym.introduce(
-    i.c.module_owner ? module_initializer_entry(i.c.filename) : "_file_init_");
+    i.c.module_owner ? i.c.module_initializer_entry(i.c.filename) : "_file_init_");
   List type =
     %(("__attribute__((constructor, noinline, cold))") static void);
   String entry = "x2c_initialize_protocols";
@@ -1469,7 +1469,7 @@ static void _push_line(Array out, Var node) {
 static List Compiler._include_guard(Compiler c, List content) {
   if (c.runtime_inc && !_has_runtime_include(content))
     content = cons(%(preproc "#include \"x2c.x\""), content);
-  String guard = filename_hash(c.filename);
+  String guard = c.generated_unit_hash();
   return %(@{_banner()} @{_header_guard(content, guard)});
 }
 
@@ -1507,7 +1507,7 @@ static List _header_guard(List content, String guard) => %(
    header adds nothing; its own declarations follow in order. The runtime
    headers that lowering needs precede their first uses. */
 static List Compiler._source_text(Compiler c, List content) {
-  String guard = filename_hash(c.filename);
+  String guard = c.generated_unit_hash();
   List runtime = c.runtime_inc ? _include_directive("x2c.x") : NULL;
   Anchors at = _anchors(content, 1);
   List error = at.error >= 0 ? _include_directive("error.h") : NULL;

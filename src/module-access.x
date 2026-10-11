@@ -18,7 +18,7 @@ Map Compiler.resolved_translation_dependencies(Compiler c) {
   Map dependencies = {};
   foreach (Var (path, fact), c.deps) {
     if (fact is <list>)
-      match (fact) case %(ownership-search ?source ?): {
+      match (fact) case %(ownership-search ?source ? ?): {
         Map searches = c.module_tree.ownership_dependencies(
           home_absolute_path(source));
         foreach (Var (candidate, hash), searches)
@@ -58,13 +58,13 @@ int Compiler.module_accessible(Compiler c, String owner) {
 static String Compiler._module_spelling(Compiler c, String name) {
   if (!c.module_owner)
     c.report_error(<parse>, "module declaration has no owning module", c.token, NULL);
-  String prefix = c.module_tree.entry(c.module_owner).prefix;
+  String prefix = c.module_tree.prefix(c.module_owner);
   if (c.package) prefix = c.package_spelling(prefix);
   if (name.startswith(prefix)) return name;
   c.sym.set(
     %("module-private" $name),
     %(${home_portable_path(c.module_owner)}));
-  String spelling = %"${c.module_tree.entry(c.module_owner).prefix}$name";
+  String spelling = %"${c.module_tree.prefix(c.module_owner)}$name";
   if (c.package) spelling = c.package_spelling(spelling);
   c.sym.set(%("module-source" $spelling), %($name));
   return spelling;
@@ -124,7 +124,7 @@ List Compiler.module_declared_key(Compiler c, List context, List key) {
 /** Finds a declared key in the current module or its ancestors. */
 List Compiler.module_retry_key(Compiler c, List key) {
   foreach (String owner, c.module_ancestors()) {
-    String prefix = c.module_tree.entry(owner).prefix;
+    String prefix = c.module_tree.prefix(owner);
     if (c.package) prefix = c.package_spelling(prefix);
     List retry = NULL;
     match (key) {

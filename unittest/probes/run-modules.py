@@ -64,6 +64,32 @@ def cases():
         **FLAT,
         "box/value.x": "int main(void) => increment(41) == 42 ? 0 : 1;\n",
     }, {"inputs": ["box/value.x"]}, None
+    yield "declaration_scc_inline_providers", {
+        "box.x": 'module {"box/left.x", "box/right.x"}\n',
+        "box/left.x": (
+            '#include "right.x"\n'
+            'static typedef struct Left {int value;} Left;\n'
+            'inline int left_value(void) {Left value = {17}; return value.value;}\n'
+        ),
+        "box/right.x": (
+            '#include "left.x"\n'
+            'static typedef struct Right {int value;} Right;\n'
+            'inline int right_value(void) {Right value = {25}; return value.value;}\n'
+        ),
+        "main.x": consumer("box.x", "left_value() + right_value() == 42"),
+    }, {"interface_inputs": ["box.x", "main.x"]}, None
+    yield "nested_entry_member_equivalence", {
+        "box.x": 'module {"box/state.x", "box/child.x"}\n',
+        "box/state.x": 'module int offset = 40;\n',
+        "box/child.x": 'module {"child/leaf.x"}\n',
+        "box/child/leaf.x": 'module {"leaf/value.x"}\n',
+        "box/child/leaf/value.x": (
+            'static int increment(int value) => value + 2;\n'
+            'int answer(void) => increment(offset);\n'
+            'int main(void) => answer() == 42 ? 0 : 1;\n'
+        ),
+    }, {"inputs": ["box.x"], "member_equivalence": [
+        "box.x", "box/child/leaf/value.x"]}, None
     yield "external_member_include_rejected", {
         **FLAT, "main.x": consumer("box/value.x", "answer() == 42"),
     }, {"rejection_phase": "parse"}, r"entry|owning|module"
@@ -242,10 +268,16 @@ def final_cases():
     }, {}, None
 
 
+def generated_snapshot(output):
+    return {path.relative_to(output).as_posix(): path.read_bytes()
+            for path in output.rglob("*")
+            if path.is_file() and path.suffix in {".c", ".h", ".xi"}}
+
+
 def interface_replay(compiler, directory, inputs, fresh):
     output = directory / "interfaces"
     output.mkdir(exist_ok=True)
-    command = [str(compiler), "translate", "--out-dir", str(output)]
+    command = [str(compiler), "translate", "-j", "1", "--out-dir", str(output)]
     sources = [str(directory / path) for path in inputs]
     modes = ["cold", "warm"] if fresh else ["invalidated"]
     snapshots = None
@@ -259,12 +291,82 @@ def interface_replay(compiler, directory, inputs, fresh):
         record = {"mode": mode, "command": current,
                   "status": translated.returncode}
         if not translated.returncode:
-            generated = {path.name: path.read_bytes()
-                         for path in output.iterdir() if path.suffix in {".c", ".h"}}
+            generated = generated_snapshot(output)
+            record["generated_files"] = sorted(generated)
             if mode == "warm":
                 record["same_generated_code"] = generated == snapshots
             snapshots = generated
         records.append(record)
+    return records
+
+
+def member_equivalence(compiler, directory, entry, member):
+    output = directory / "equivalence"
+    records = []
+    reference = None
+    for invocation, source in (("entry", entry), ("member", member)):
+        if output.exists():
+            shutil.rmtree(output)
+        output.mkdir()
+        for mode in ("cold", "warm"):
+            command = [str(compiler), "translate", "-j", "1", "--out-dir", str(output)]
+            if mode == "cold":
+                command.append("--no-interfaces")
+            command.append(str(directory / source))
+            translated = subprocess.run(command, cwd=directory, text=True,
+                                        stdout=subprocess.PIPE,
+                                        stderr=subprocess.STDOUT)
+            log = directory / f"equivalence-{invocation}-{mode}.log"
+            log.write_text(translated.stdout)
+            snapshot = generated_snapshot(output)
+            if reference is None and translated.returncode == 0:
+                reference = snapshot
+            record = {"invocation": invocation, "mode": mode,
+                      "command": command, "status": translated.returncode,
+                      "generated_files": sorted(snapshot),
+                      "same_generated_code": bool(snapshot) and snapshot == reference,
+                      "different_files": sorted(
+                          path for path in set(snapshot) | set(reference or {})
+                          if snapshot.get(path) != (reference or {}).get(path)),
+                      "log": str(log)}
+            records.append(record)
+        executable = directory / f"equivalence-{invocation}"
+        command = [str(compiler), "build", "-j", "1", "--output", str(executable),
+                   "--build-dir", str(directory / f"build-{invocation}"),
+                   str(directory / source)]
+        built = subprocess.run(command, cwd=directory, text=True,
+                               stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        log = directory / f"equivalence-{invocation}-build.log"
+        log.write_text(built.stdout)
+        record = {"invocation": invocation, "mode": "executable",
+                  "command": command, "status": built.returncode,
+                  "log": str(log)}
+        if not built.returncode:
+            run = subprocess.run([str(executable)], cwd=directory, text=True,
+                                 stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            record["run_status"] = run.returncode
+            (directory / f"equivalence-{invocation}-run.log").write_text(run.stdout)
+        records.append(record)
+    return records
+
+
+def producer_execution(compiler, directory, inputs, counts):
+    output = directory / "producer"
+    output.mkdir()
+    records = []
+    for mode in ("cold", "warm"):
+        command = [str(compiler), "translate", "-j", "1", "--out-dir", str(output)]
+        if mode == "cold":
+            command.append("--no-interfaces")
+        command.extend(str(directory / source) for source in inputs)
+        translated = subprocess.run(command, cwd=directory, text=True,
+                                    stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        log = directory / f"producer-{mode}.log"
+        log.write_text(translated.stdout)
+        actual = {text: translated.stdout.count(text) for text in counts}
+        records.append({"mode": mode, "command": command,
+                        "status": translated.returncode, "counts": actual,
+                        "expected_counts": counts, "log": str(log)})
     return records
 
 
@@ -278,7 +380,7 @@ def run_case(compiler, base, name, files, options, rejection):
     if options.get("capture_private_binding"):
         provider = directory / options["capture_private_binding"]
         captured = subprocess.run(
-            [str(compiler), "translate", "--dump-transforms", str(provider)],
+            [str(compiler), "translate", "-j", "1", "--dump-transforms", str(provider)],
             cwd=directory, text=True, stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT)
         (directory / "binding-capture.log").write_text(captured.stdout)
@@ -301,14 +403,15 @@ def run_case(compiler, base, name, files, options, rejection):
             if options.get("package_driver"):
                 builds = package / "builds"
                 builds.mkdir()
-                preparation = [str(compiler), "build", "--kind", "static-library",
+                preparation = [str(compiler), "build", "-j", "1", "--kind", "static-library",
                                "--package-dir", str(directory / relative),
                                "--output", str(builds / f"lib{package.name}.a"),
                                "--build-dir", str(builds / "cc"),
                                str(package / "src" / f"{package.name}.x")]
             else:
                 preparation = ["make", "-C", str(package), "build",
-                               f"X2C={compiler}", f"ROOT={compiler.parents[2]}"]
+                               f"X2C={compiler}", f"ROOT={compiler.parents[2]}",
+                               "BUILD_JOBS=1"]
             prepared = subprocess.run(preparation, text=True,
                                       stdout=subprocess.PIPE,
                                       stderr=subprocess.STDOUT)
@@ -327,7 +430,7 @@ def run_case(compiler, base, name, files, options, rejection):
                         "expected": "package build and executable exit 0",
                         "log": str(log)}
     executable = directory / "program"
-    command = [str(compiler), "build", "--output", str(executable),
+    command = [str(compiler), "build", "-j", "1", "--output", str(executable),
                "--build-dir", str(directory / "build")]
     for relative in options.get("include_dirs", []):
         command.extend(["-I", str(directory / relative)])
@@ -372,7 +475,7 @@ def run_case(compiler, base, name, files, options, rejection):
         record["passed"] &= counts == options["build_log_counts"]
     for relative, pattern in options.get("forbidden_transforms", {}).items():
         inspected = subprocess.run(
-            [str(compiler), "translate", "--dump-transforms",
+            [str(compiler), "translate", "-j", "1", "--dump-transforms",
              str(directory / relative)], cwd=directory, text=True,
             stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         (directory / "transforms.log").write_text(inspected.stdout)
@@ -385,6 +488,20 @@ def run_case(compiler, base, name, files, options, rejection):
         record["passed"] &= all(
             item["status"] == 0 and item.get("same_generated_code", True)
             for item in record["interface_replay"])
+    if options.get("member_equivalence"):
+        record["member_equivalence"] = member_equivalence(
+            compiler, directory, *options["member_equivalence"])
+        record["passed"] &= all(
+            item["status"] == 0 and item.get("same_generated_code", True)
+            and item.get("run_status", 0) == 0
+            for item in record["member_equivalence"])
+    if options.get("producer_execution"):
+        record["producer_execution"] = producer_execution(
+            compiler, directory, options["producer_execution"],
+            options["producer_counts"])
+        record["passed"] &= all(
+            item["status"] == 0 and item["counts"] == item["expected_counts"]
+            for item in record["producer_execution"])
     rounds = ([{}] * options.get("warm_builds", 0) +
               options.get("mutations", []))
     record["repeat_statuses"] = []
@@ -501,6 +618,22 @@ def ordering_cases():
         "box/value.x": '$produce(answer, 42);\n',
         "main.x": consumer("box.x", "answer() == 42"),
     }, {}, None
+    yield "declaration_producer_executes_before_block_once", {
+        "box.x": (
+            'macro Unit $produce(Name $name) {\n'
+            '  typedef $(let ((seen\n'
+            '    (x2c.diagnostic.warn "MODULE_DECLARATION_ONCE" nil)))\n'
+            "    '(int)) $name;\n"
+            '}\n'
+            '$produce(PrefixAmount);\n'
+            'module {"box/value.x"}\n'
+        ),
+        "box/value.x": (
+            'PrefixAmount answer(void) => 42;\n'
+            'int main(void) => answer() == 42 ? 0 : 1;\n'
+        ),
+    }, {"inputs": ["box.x"], "producer_execution": ["box.x"],
+        "producer_counts": {"macro: MODULE_DECLARATION_ONCE": 1}}, None
     yield "declaration_producer_suffix_not_inherited", {
         "box.x": 'module {"box/value.x"}\n' + prefix,
         "box/value.x": '$produce(answer, 42);\n',

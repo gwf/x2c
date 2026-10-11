@@ -669,6 +669,7 @@ static CliRequest _target_request(Project p, ProjectTarget target) {
   CliRequest command = p.command;
   CliRequest request = Scope.malloc(sizeof(struct CliRequest));
   *request = *command;
+  request.manifest = p.path;
   _set_product(p, target, request);
   request.inputs = _target_inputs(p, target, request.kind);
   request.native_modules =

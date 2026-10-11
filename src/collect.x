@@ -13,6 +13,7 @@
 #pragma once
 #include "compiler.x"
 #include "module-tree.x"
+#include "module-schedule.x"
 
 #include "ast-rewrite.x"
 #include "buffer.x"
@@ -1218,31 +1219,69 @@ static void Compiler.bind_pending_inline_bodies(
   Array pending = c.pending_inline_bodies;
   if (!pending.len()) return;
   while (pending.len()) {
-    (Compiler body, String path, String text, Map symbols, Map own,
-     Map statics, Map hashes) = pending.shift();
-    Map visited = {};
-    visited[path] = 1;
-    Array effects = [];
-    body._replay_cached(
-      body._entry(path), path, symbols, visited, effects);
-    body.filename = path;
-    body.meta_hashes = hashes;
-    body.tokenize(text);
-    body.collected_statics = statics;
-    List ast = body.full_parse(symbols, 0);
-    Map additions = body.inline_type_dependencies(ast);
-    body.publish_inline_dependencies(path, own, statics, additions);
-    foreach (Var part, body._entry(path).car())
-      if (part is <map>) c._merge_rows(globs, part);
-    c.merge_translation_dependencies(body.deps);
-    body.public_bodies = 0;
-    c.close_child(body);
+    if (!c.module_owner || pending.len() == 1) {
+      c.bind_inline_provider(pending.shift(), globs);
+      continue;
+    }
+    Map bodies = {}, dependencies = {};
+    Array providers = [];
+    while (pending.len()) {
+      List row = pending.shift();
+      String path = row.cadr();
+      bodies[path] = row;
+      providers.push(path);
+      c.declaration_dependencies(path, dependencies);
+    }
+    foreach (List group,
+             declaration_components(providers.list_free(), dependencies))
+      foreach (String path, group)
+        if (path in bodies) c.bind_inline_provider(bodies[path], globs);
   }
   Map visited = {};
   visited[unit] = 1;
   Array effects = [];
   List entry = c._entry(unit);
   if (entry) c._replay_cached(entry, unit, globs, visited, effects);
+}
+
+/* Recorded include edges carry declaration dependencies. This walks completed
+   records only; discovering a component never invokes a declaration producer.
+   Ordered effects still replay at the recorded source positions. */
+static void Compiler.declaration_dependencies(
+  Compiler c, String path, Map dependencies) {
+  if (path in dependencies) return;
+  dependencies[path] = %();
+  Array edges = [];
+  List entry = c._entry(path);
+  if (entry) foreach (Var part, entry.car())
+    if (part is <string>) {
+      String dependency = part;
+      edges.push(dependency);
+      c.declaration_dependencies(dependency, dependencies);
+    }
+  dependencies[path] = edges.list_free();
+}
+
+static void Compiler.bind_inline_provider(Compiler c, List row, Map globs) {
+  (Compiler body, String path, String text, Map symbols, Map own,
+   Map statics, Map hashes) = row;
+  Map visited = {};
+  visited[path] = 1;
+  Array effects = [];
+  body._replay_cached(
+    body._entry(path), path, symbols, visited, effects);
+  body.filename = path;
+  body.meta_hashes = hashes;
+  body.tokenize(text);
+  body.collected_statics = statics;
+  List ast = body.full_parse(symbols, 0);
+  Map additions = body.inline_type_dependencies(ast);
+  body.publish_inline_dependencies(path, own, statics, additions);
+  foreach (Var part, body._entry(path).car())
+    if (part is <map>) c._merge_rows(globs, part);
+  c.merge_translation_dependencies(body.deps);
+  body.public_bodies = 0;
+  c.close_child(body);
 }
 
 static int FileWalk.produces(FileWalk &w) {
@@ -1874,7 +1913,7 @@ static List Compiler._interface_load(
   Compiler c, String canonical, String path) {
   String identity = compiler_identity();
   match (_interface_record(path))
-    case %(interface 10 ?(String compiler) *stored):
+    case %(interface 11 ?(String compiler) *stored):
       if (identity && compiler == identity)
         return c._stored_entry(canonical, stored);
   return NULL;
@@ -1902,7 +1941,7 @@ static List _interface_record(String path) {
   try source = input.string_close();
   catch %(io-fail *): return NULL;
   String identity = compiler_identity();
-  if (!identity || !source.startswith(%"(interface 10 \"$identity\" "))
+  if (!identity || !source.startswith(%"(interface 11 \"$identity\" "))
     return NULL;
   return _read_record(source);
 }
@@ -2022,10 +2061,11 @@ static Map Compiler._read_dependencies(Compiler c, List stored) {
   foreach (Var dependency, stored) {
     if (dependency is not <list>) return NULL;
     match (dependency.list())
-      case %(ownership-search ?(String source) ?(List owners)): {
+      case %(ownership-search ?(String source) ?(List owners)
+              ?(String identity)): {
         String provider = _canonical_path(home_absolute_path(source));
         List current = c.module_tree.ownership_query(provider);
-        if (current.caddr() != owners) return NULL;
+        if (current.caddr() != owners || current[3] != identity) return NULL;
         _cache_dependency(dependencies, %"ownership:$provider", current);
         continue;
       }
@@ -2052,7 +2092,7 @@ String interface_prelude(void) {
   String identity = compiler_identity();
   if (!identity) return NULL;
   String runtime = _canonical_path(%"${x2c_get_root()}/lib/x2c.x");
-  String header = %"(interface 10 \"$identity\" ";
+  String header = %"(interface 11 \"$identity\" ";
   foreach (String path, _interface_candidates(runtime)) {
     String text = NULL;
     try text = Path.read_text(path);
@@ -2083,7 +2123,7 @@ String interface_text(Compiler c) {
 static int _write_interface_entry(
   Buffer out, String canonical, List entry) {
   List record = %(
-    interface 10 ${compiler_identity()} @{_stored_record(canonical, entry)});
+    interface 11 ${compiler_identity()} @{_stored_record(canonical, entry)});
   /* An interface is plain data, which a loader never evaluates. */
   if (!datum_write(out, record, 0)) return 0;
   out.write_char('\n');
@@ -2137,7 +2177,7 @@ static List _stored_dependencies(Map dependencies) {
   Array rows = [];
   foreach (Var (path, hash), dependencies) {
     if (hash is <list>)
-      match (hash) case %(ownership-search ? ?): {
+      match (hash) case %(ownership-search ? ? ?): {
         rows.push(hash);
         continue;
       }
