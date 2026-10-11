@@ -522,6 +522,8 @@ The modules under `src/` divide ownership as follows:
 - `src/component-destructuring.x` -- flat List destructuring, registered as
   statement rewrites for its declarations and assignment statements and as
   a literal rewrite for its assignment expressions;
+- `src/component-lambdas.x` -- lambdas lifted to static functions,
+  registered as literal rewrites for both lambda forms;
 - `src/operator-ledger.x` -- operator precedence, compound assignment,
   and protocol-member mappings from one compile-time ledger;
 - `src/cli.x`, `src/main.x` -- option metadata and parsing, dispatch, logging,
@@ -825,6 +827,16 @@ declarations alone and they keep their scope and identity; the locals are
 declarations are rewritten, without lowering, before its lambda cells are
 prepared, so a destructured name a lambda shares by reference gets its cell
 at its declaration.
+
+`src/component-lambdas.x` registers both lambda forms on the literal family
+keyed by the `lambda` head, which the transform offers each lambda it meets.
+A noncapturing lambda answers a bound carrier: the name of a static function
+placed among the unit's support declarations, whose body is the lambda's
+bound body as a lowered carrier, so it is not bound again. The function
+lowers with the unit's other support declarations, so it prepares its own
+cells and takes its own entry placements. An expression body carries the
+origin of the item that held the lambda, which `x2c_enclosing(<statement>)`
+answers while lowering, so a diagnostic in it points there.
 
 The components and `src/grammar.x`, whose source forms they recognize, are
 compiler prelude sources.

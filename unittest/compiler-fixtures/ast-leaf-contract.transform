@@ -643,13 +643,14 @@
  (bind (binding 82 "_x2c_lambda_0") 
   ((fnmod (params (param ("Var") (bind (binding 89 "value") ())))))) 
  (block 
-  (stmnt 
-   (return 
-    (expr ("Var") 
-     (call (expr ((func ((int))) "Var") (ident (binding 83 "int_var"))) 
-      (args (expr (int) 
-             (op + (expr (int) 
-                    (call (expr ((func (("Var"))) (int)) 
-                           (ident (binding 46 "Var_int"))) 
-                     (args (expr ("Var") (ident (binding 89 "value")))))) 
-              (expr (int) (literal (int) "1")))))))))))
+  (at 50 
+   (stmnt 
+    (return 
+     (expr ("Var") 
+      (call (expr ((func ((int))) "Var") (ident (binding 83 "int_var"))) 
+       (args (expr (int) 
+              (op + (expr (int) 
+                     (call (expr ((func (("Var"))) (int)) 
+                            (ident (binding 46 "Var_int"))) 
+                      (args (expr ("Var") (ident (binding 89 "value")))))) 
+               (expr (int) (literal (int) "1"))))))))))))

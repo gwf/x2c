@@ -25,6 +25,7 @@
 #include "component-delegate.x"
 #include "component-destructuring.x"
 #include "component-interpolation.x"
+#include "component-lambdas.x"
 #include "component-literals.x"
 #include "component-match.x"
 #include "component-operators.x"
@@ -571,6 +572,89 @@ Code destructure_value(Code node) {
       return _destructure_bound(
         %(expr $type (parens $block)), values, result);
     }
+  return node;
+}
+
+/* --- src/component-lambdas.x --------------------------------------------- */
+
+static Var _lambda_replace(Var ast, Map replaced) {
+  Array pending = [ast], building = [0], done = [];
+  while (pending.len()) {
+    Var node = pending.take_last();
+    if (building.take_last().int()) {
+      int first = done.len() - node.list().len(), index = first;
+      Array parts = [];
+      int changed = 0;
+      foreach (Var part, node.list()) {
+        changed |= done[index] != part;
+        parts.push(done[index++]);
+      }
+      done.truncate(first);
+      done.push(changed ? parts.list_free() : node);
+      continue;
+    }
+    Var replacement;
+    if (replaced.try_get(node, replacement)) done.push(replacement);
+    else if (node is not <list> || node.is_nil() ||
+             node.list().match(%(expr ? (lambda *))))
+      done.push(node);
+    else {
+      pending.push(node);
+      building.push(1);
+      Array parts = [];
+      foreach (Var part, node.list()) parts.push(part);
+      for (int i = parts.len() - 1; i >= 0; i--) {
+        pending.push(parts[i]);
+        building.push(0);
+      }
+    }
+  }
+  return done[0];
+}
+
+static List _lambda_none(void) =>
+  %(return ("Var") (expr ("Var") (literal ("Var") "void")));
+
+static List _lambda_items(Code body) {
+  match (body) case %(block *items): {
+    Map none = {};
+    none[%(return)] = _lambda_none();
+    return %(@{_lambda_replace(items, none)} ${_lambda_none()});
+  }
+  List items = body.match(%(expr (void) ?))
+    ? %((stmnt $body) ${_lambda_none()})
+    : %((stmnt (return ${body.convert(%("Var"))})));
+  match (x2c_enclosing(<statement>)) case %(at ?origin ?):
+    return %((at $origin ${items.car()}) @{items.cdr()});
+  return items;
+}
+
+static List _lambda_params(List params) {
+  Array out = [];
+  foreach (List param, params)
+    match (param) {
+      case %(binding ? ?): out.push(%(param ("Var") (bind $param ())));
+      default: out.push(param);
+    }
+  return out.list_free();
+}
+
+static Code _lambda_function(Atom name, List params, Code body) {
+  if (!params) params = %((param (void) (bind () ())));
+  List lowered = %(code-value "lowered" (seq @{_lambda_items(body)}) ());
+  return %(function (static "Var") (bind $name ((fnmod (params @params))))
+           (block $lowered));
+}
+
+/** Lifts the noncapturing lambda `node` to a static function, whose name
+    is its value. */
+Code lambda_lift(Code node) {
+  match (node) case %(expr ?type ${$lambda_expression(?body, *params)}): {
+    Atom name = Atom.intern("?__lambda");
+    List function = _lambda_function(name, _lambda_params(params), body);
+    return %(code-value "bound" (expr $type (ident $name))
+             ((new-name $name "lambda") (place (unit-support) $function)));
+  }
   return node;
 }
 
@@ -1426,6 +1510,12 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "destructure_declaration", destructure_declaration);
   $linked.row(rows, "destructure_statement", destructure_statement);
   $linked.row(rows, "destructure_value", destructure_value);
+  $linked.row(rows, "_lambda_replace", _lambda_replace);
+  $linked.row(rows, "_lambda_none", _lambda_none);
+  $linked.row(rows, "_lambda_items", _lambda_items);
+  $linked.row(rows, "_lambda_params", _lambda_params);
+  $linked.row(rows, "_lambda_function", _lambda_function);
+  $linked.row(rows, "lambda_lift", lambda_lift);
   $linked.row(rows, "_match_flush", _match_flush);
   $linked.row(rows, "_match_place", _match_place);
   $linked.row(rows, "_match_items", _match_items);

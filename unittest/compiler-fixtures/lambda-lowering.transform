@@ -83,16 +83,17 @@
  (bind (binding 12 "_x2c_lambda_0") 
   ((fnmod (params (param ("Var") (bind (binding 13 "value") ())))))) 
  (block 
-  (stmnt 
-   (return 
-    (expr ("Var") 
-     (call (expr ((func ((int))) "Var") (ident (binding 14 "int_var"))) 
-      (args (expr (int) 
-             (op * (expr (int) 
-                    (call (expr ((func (("Var"))) (int)) 
-                           (ident (binding 10 "Var_int"))) 
-                     (args (expr ("Var") (ident (binding 13 "value")))))) 
-              (expr (int) (literal (int) "2")))))))))))
+  (at 18 
+   (stmnt 
+    (return 
+     (expr ("Var") 
+      (call (expr ((func ((int))) "Var") (ident (binding 14 "int_var"))) 
+       (args (expr (int) 
+              (op * (expr (int) 
+                     (call (expr ((func (("Var"))) (int)) 
+                            (ident (binding 10 "Var_int"))) 
+                      (args (expr ("Var") (ident (binding 13 "value")))))) 
+               (expr (int) (literal (int) "2"))))))))))))
 
 (function (static "Var") 
  (bind (binding 15 "_x2c_func_adapt_0") 
@@ -128,16 +129,17 @@
  (bind (binding 21 "_x2c_lambda_1") 
   ((fnmod (params (param ("Var") (bind (binding 22 "value") ())))))) 
  (block 
-  (stmnt 
-   (return 
-    (expr ("Var") 
-     (call (expr ((func (("List") (int))) "Var") 
-            (ident (binding 11 "List_getindex"))) 
-      (args (expr ("List") 
-             (call (expr ((func (("Var"))) ("List")) 
-                    (ident (binding 23 "Var_list"))) 
-              (args (expr ("Var") (ident (binding 22 "value")))))) 
-       (expr (int) (literal (int) "0")))))))))
+  (at 27 
+   (stmnt 
+    (return 
+     (expr ("Var") 
+      (call (expr ((func (("List") (int))) "Var") 
+             (ident (binding 11 "List_getindex"))) 
+       (args (expr ("List") 
+              (call (expr ((func (("Var"))) ("List")) 
+                     (ident (binding 23 "Var_list"))) 
+               (args (expr ("Var") (ident (binding 22 "value")))))) 
+        (expr (int) (literal (int) "0"))))))))))
 
 (function (static "Var") 
  (bind (binding 24 "_x2c_func_adapt_1") 
