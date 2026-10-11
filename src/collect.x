@@ -202,7 +202,8 @@ Map Compiler.collect_symbols(Compiler c, Map globs) {
     }
   visited[canonical] = 1;
   c._module_preamble(canonical, globs, visited, NULL);
-  if (c.module_owner && !c.signature_only)
+  if (c.module_owner && !c.signature_only &&
+      !c.module_tree.entry(canonical))
     c._collect_module_signatures(canonical, globs);
   c._walk_file(canonical, c.text, Path.dirname(c.filename), globs, visited);
   c.bind_pending_inline_bodies(globs, canonical);
@@ -216,7 +217,7 @@ static void Compiler._collect_module_signatures(
   (void) _process_cache();
   Compiler signatures = Compiler.new_shared(c);
   defer c.close_child(signatures);
-  signatures.filename = c.filename;
+  signatures.filename = canonical;
   signatures.signature_only = 1;
   signatures.interface_provider = 1;
   signatures.source_facts = 0;
@@ -361,6 +362,8 @@ static void FileWalk.split(FileWalk &w, Token first) {
     if (module && token.pos == module.block_start) {
       w.flush(w.text[w.pos:module.block_start]);
       w.capture_module_preamble(module);
+      if (!w.c.signature_only)
+        w.c._collect_module_signatures(w.path, w.globs);
       foreach (String member, module.members) w.include(member, 0);
       while (token.type != <eof> && token.pos < module.block_end) token++;
       w.line = token.line;
