@@ -133,6 +133,19 @@ List Compiler.module_layout_node(Compiler c, List node) {
   return names ? _layout_private_node(node, names, bindings) : node;
 }
 
+
+/* Enum-valued identifiers in declarators require their defining enumerators,
+   even when the declaration's object type contains no enum-valued field. */
+static void Layouts.require_constants(
+  Layouts &l, Compiler c, Sym resolver, List declaration, Map needed) {
+  $ast.walk(declaration, node) {
+    match (node) case %(expr ?type (ident ?)): {
+      Type declared = type;
+      if (declared.is_enum()) l.require_type(c, resolver, declared, needed);
+    }
+  }
+}
+
 /* A selected native field contributes its actual complete-family demand.
    The native preprocessor removes markers in inactive conditional fields. */
 static List Layouts.mark_fields(
@@ -165,6 +178,7 @@ static List Layouts.mark_fields(
           String id = c.module_projection_namespace(namespace);
           if (id) demands.push(%"#pragma x2c_namespace_require $id");
         }
+        l.require_constants(c, resolver, declaration, needed);
         foreach (List row, declaration.caddr().list().cdr()) {
           Type type = %(declare ${declaration.cadr()} (bindings $row))
             .type_from_ast();
@@ -200,6 +214,7 @@ List Compiler.module_layout_alias_demands(Compiler c, List node) {
   Layouts layouts = {
     .bodies = c.module_layout_plan[%(projection-bodies)],
     .private_types = private_types};
+  layouts.require_constants(c, resolver, node, needed);
   foreach (List row, node.caddr().list().cdr()) {
     Type type = %(declare ${node.cadr()} (bindings $row)).type_from_ast();
     if (type.is_array()) layouts.require_type(c, resolver, type, needed);
