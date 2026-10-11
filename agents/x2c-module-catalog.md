@@ -8,7 +8,7 @@ non-static function definition discovered in source order. It does
 not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
-- Compiler modules: 62
+- Compiler modules: 63
 - Runtime modules: 77
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
@@ -85,8 +85,8 @@ Public functions:
 `Compiler.lower_lambda_expr`, `Compiler.capture_environment`,
 `Compiler.prepare_lambda_cells`, `Compiler.prepend_setup`,
 `Compiler.lift_func_expression`, `Compiler.maybe_adapt_func_arg`,
-`Compiler.func_signature`, `Compiler.lower_typed_adapter_expr`,
-`Compiler.adapt_lambda_arg`
+`Compiler.func_parameters`, `Compiler.func_signature`,
+`Compiler.lower_typed_adapter_expr`, `Compiler.adapt_lambda_arg`
 
 ### [src/cleanup.x](../src/cleanup.x)
 
@@ -206,6 +206,14 @@ interpolated Strings.
 Public functions:
 
 `interpolation`
+
+### [src/component-lambdas.x](../src/component-lambdas.x)
+
+lambda lowering.
+
+Public functions:
+
+None. This module has no non-static function definitions.
 
 ### [src/component-literals.x](../src/component-literals.x)
 
@@ -415,9 +423,9 @@ Public functions:
 `_tag_decode_groups`, `_tag_id_checks`, `access_read`, `access_store`,
 `access_update`, `access_prefix`, `access_postfix`, `delegate_member`,
 `destructure_declaration`, `destructure_statement`, `destructure_value`,
-`match_lowering`, `dynamic_binary`, `dynamic_compound`, `dynamic_change`,
-`dynamic_unary`, `printf_values`, `raise_lowering`, `try_catch_cases`,
-`try_lowering`, `linked_meta_targets`, `linked_meta_hashes`
+`lambda_lift`, `match_lowering`, `dynamic_binary`, `dynamic_compound`,
+`dynamic_change`, `dynamic_unary`, `printf_values`, `raise_lowering`,
+`try_catch_cases`, `try_lowering`, `linked_meta_targets`, `linked_meta_hashes`
 
 ### [src/literals.x](../src/literals.x)
 
@@ -548,12 +556,13 @@ Public functions:
 `MetaContext.current`, `Compiler.expanding`, `Type.is_named`, `Type.numeric`,
 `Type.is_text`, `Type.aggregate`, `Type.marked_fields`, `Type.resolve_member`,
 `Type.protocol_member`, `Type.getter`, `Type.update_helper`, `Code.type`,
-`Code.value`, `Code.call_in_order`, `Code.lowered`, `Code.exits`,
-`Code.convert`, `Code.format`, `Code.is_static_pattern`, `Code.pattern_value`,
-`Code.promoted`, `Code.register_rewrite`, `Code.register_after_initialization`,
-`builtin_foreach_bindings`, `meta_function_reference`, `Type.element`,
-`Type.parameters`, `Type.return_type`, `Type.reverse_name`, `Type.resolve`,
-`Type.layout`, `Type.is_value`, `Type.tag_name`, `Type.members`, `Type.fields`,
+`Code.value`, `Code.call_in_order`, `Code.lowered`, `Code.func_parameters`,
+`Code.exits`, `Code.convert`, `Code.format`, `Code.is_static_pattern`,
+`Code.pattern_value`, `Code.promoted`, `Code.register_rewrite`,
+`Code.register_after_initialization`, `builtin_foreach_bindings`,
+`meta_function_reference`, `Type.element`, `Type.parameters`,
+`Type.return_type`, `Type.reverse_name`, `Type.resolve`, `Type.layout`,
+`Type.is_value`, `Type.tag_name`, `Type.members`, `Type.fields`,
 `Code.binding_spelling`, `x2c_ident`, `builtin_foreach_unique`,
 `x2c_meta_definition_hashes`, `Code.name`, `Code.body`, `Code.arguments`,
 `Code.parameter`, `binding_native_type`, `binding_literal_list`,

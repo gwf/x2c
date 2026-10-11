@@ -25,6 +25,7 @@ Functions and types exposed by each compiler module.
 | [`src/component-delegate.x`](component-delegate.md) | delegate fields. |
 | [`src/component-destructuring.x`](component-destructuring.md) | flat List destructuring. |
 | [`src/component-interpolation.x`](component-interpolation.md) | interpolated Strings. |
+| [`src/component-lambdas.x`](component-lambdas.md) | lambda lowering. |
 | [`src/component-literals.x`](component-literals.md) | Array and Map literals. |
 | [`src/component-match.x`](component-match.md) | match statements. |
 | [`src/component-operators.x`](component-operators.md) | dynamic operators. |
