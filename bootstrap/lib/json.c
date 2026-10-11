@@ -252,8 +252,6 @@ int Json_is_bool(Var value){
 
 Symbol Var_tag(Var);
 
-String String_join(String, List);
-
 #include "error.h"
 
 

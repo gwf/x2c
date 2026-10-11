@@ -7559,15 +7559,15 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_13(void){
   _6924 = cons(_6919, _6923);
   _6925 = String_new("interpolation");
   _6926 = String_var(_6925);
-  _6927 = String_new("631290506ebc59c0");
+  _6927 = String_new("14d9bd845c1c5824");
   _6928 = String_var(_6927);
   _6929 = String_new("src/component-interpolation.x");
   _6930 = String_var(_6929);
   _6931 = cons(_6930, NULL);
   _6932 = cons(_6928, _6931);
-  _6933 = String_new("23b683d2");
+  _6933 = String_new("c8980f9a");
   _6934 = String_var(_6933);
-  _6935 = String_new("0cd2581a");
+  _6935 = String_new("762d3ea2");
   _6936 = String_var(_6935);
   _6937 = cons(_6936, NULL);
   _6938 = cons(_4393, _6937);
@@ -10238,7 +10238,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_18(void){
   _9588 = List_var(_9587);
   _9589 = String_new("src/transform.x");
   _9590 = String_var(_9589);
-  _9591 = String_new("d62eb45f");
+  _9591 = String_new("c53d6c1f");
   _9592 = String_var(_9591);
   _9593 = cons(_9592, NULL);
   _9594 = cons(_9590, _9593);

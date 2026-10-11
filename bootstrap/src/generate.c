@@ -1515,7 +1515,8 @@ static void Compiler__publish(Compiler c, List outputs){
   {
     String _x2c_macro_reason_0 = String_new(strerror(Var_int(Var_convert(List_assoc(failure, Symbol_var(11703198)), 3453797))));
     Compiler_report_error(c, 354920, _8, c -> token, ({
-      Var _x2c_literal_part_7 = String_var(String_join(NULL, cons(String_var(_9), cons(String_var(Var_str(List_assoc(failure, Symbol_var(1051920)))), NULL))));  Var _x2c_literal_part_8 = String_var(String_join(NULL, cons(String_var(_10), cons(String_var(_x2c_macro_reason_0), NULL))));  cons(_x2c_literal_part_7, cons(_x2c_literal_part_8, NULL));
+      Var _x2c_literal_part_7 = String_var(String_join(NULL, cons(String_var(_9), cons(String_var(Var_str(List_assoc(failure, Symbol_var(1051920)))), NULL))));  Var _x2c_literal_part_8 = String_var(String_join(NULL, cons(String_var(_10), cons(String_var(_x2c_macro_reason_0), NULL))));
+      cons(_x2c_literal_part_7, cons(_x2c_literal_part_8, NULL));
     }
     ));
   }

@@ -342,8 +342,6 @@ static Var Symbol_var(Symbol);
 
 static Var String_var(String);
 
-String String_join(String, List);
-
 #include "error.h"
 
 

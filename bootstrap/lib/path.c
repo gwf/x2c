@@ -136,8 +136,6 @@ int String_startswith(String, String);
 
 int String_endswith(String, String);
 
-String String_join(String, List);
-
 static Var String_var(String);
 
 Path Path_join(Path base, Path name){
