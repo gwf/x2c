@@ -679,10 +679,10 @@ static void Helper.export(
     seen[index] = 1;
     if (index in h.publications) {
       Map publication = h.publications[index];
-      Map retained = context.export(publication.copy());
-      foreach (Var key, publication.keys()) publication.del(key);
-      publication.merge(retained);
-      h.publications[index] = context.export(publication);
+      publication = context.export(publication);
+      Scope owner = Scope.owner(publication);
+      publication.export_to(context, _export_native_record, &owner);
+      h.publications[index] = publication;
     }
     foreach (Map retained, %(${h.native_sources} ${h.native_targets} ${h.native_loaded}))
       if (index in retained) retained[index] = context.export(retained[index]);
@@ -699,6 +699,9 @@ static void Helper.export(
     h.retained_dependencies[i] = retained;
   }
 }
+
+static Var _export_native_record(Var value, Context context) =>
+  context.export_nested(value);
 
 static void Helper.dependency(Helper &h, String path) {
   if (path in h.deps) return;
