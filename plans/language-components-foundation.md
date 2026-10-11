@@ -804,6 +804,26 @@ replacement template and fill steps are the remaining driver cost.
   0.3 M is the mention walk; recording mentions in the shared walk recovered
   it but cost every lambda-free 60-statement function +0.35 M, so it was not
   taken. +33/-17 authored.
+- 2026-10-11, written definitions reach only shipped function rules
+  (`kernel/generated-definitions`): a definition the kernel or a shipped
+  rule writes (defer callbacks, lifted lambdas and adapters, protocol
+  forwarding members and thunks, a shipped rule's replacement of a
+  definition) carries the `kernel` mark, `(function RT DECL BODY kernel)`,
+  added by `written_definitions` on `Compiler.add_early` and by
+  `Compiler.written_support` when the applying rule is builtin; `_step`
+  strips it and `_function_rewrite` dispatches under a `shipped` watch,
+  which `_rewrite` now honors at the function point. A program rule's own
+  `unit-support` placement and a program `conform` rule's result stay
+  program code; the body of a written definition is still source for
+  statement rules. `Compiler.applying` names the rule whose meta function is
+  running, because the protocol component places support while its function
+  runs, before the rule is in `active_rewrites`. +88/-21 in src; fixture
+  `rewrite-function-written` (offered definitions 10 -> the program's).
+  A `*written` capture in `_step`'s match enlarged the transform's frame and
+  failed `var-chain-stack` at 256 KB; a capture-free case fixed it. Open: the
+  `(early KEY BINDING DECL)` carrier effect has no producer and still goes
+  through `add_early`; a program function rule is offered its own meta
+  function in one case and not others, predating this change.
 - 2026-10-10, facts learned: `function-entry` placement is parse-time, so
   lambda cells need a transform-time entry placement before lambdas move; a
   plain `make build` after editing a shipped component leaves a degraded
