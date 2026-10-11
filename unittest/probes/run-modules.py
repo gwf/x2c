@@ -901,6 +901,81 @@ def local_shadow_cases():
     }, {"forbidden_transforms": {"main.x": r"_x2c_module_init_"}}, None
 
 
+
+def compile_time_visibility_cases():
+    # Each entry changes its binding after enrollment. Descendants receive
+    # only the prefix, including each keyword alias's captured macro.
+    prefixes = {
+        "macro": (
+            'module macro Expression $module_root_value() => 14;\n',
+            'module macro Expression $module_child_value() => '
+            '$module_root_value() + 14;\n',
+            'module macro Expression $module_root_value() => 99;\n',
+            'module macro Expression $module_child_value() => 99;\n',
+            '$module_root_value() == 14 && $module_child_value() == 28'),
+        "keyword": (
+            'macro Expression $module_root_value() => 14;\n'
+            'module keyword module_root_read $module_root_value;\n',
+            'macro Expression $module_child_value() => 28;\n'
+            'module keyword module_child_read $module_child_value;\n',
+            'macro Expression $module_root_value() => 99;\n'
+            'module keyword module_root_read $module_root_value;\n',
+            'macro Expression $module_child_value() => 99;\n'
+            'module keyword module_child_read $module_child_value;\n',
+            'module_root_read() == 14 && module_child_read() == 28'),
+        "lisp": (
+            'module $(defun module-root-lisp () 14)\n',
+            'module $(defun module-child-lisp () (+ (module-root-lisp) 14))\n',
+            'module $(defun module-root-lisp () 99)\n',
+            'module $(defun module-child-lisp () 99)\n',
+            '$(module-root-lisp) == 14 && $(module-child-lisp) == 28'),
+    }
+    for family, (root, child, root_suffix, child_suffix, check) in prefixes.items():
+        yield f"module_{family}_ancestor_child_prefix", {
+            "box.x": root + 'module {"box/child.x"}\n' + root_suffix,
+            "box/child.x": child + 'module {"child/value.x"}\n' + child_suffix,
+            "box/child/value.x": f'int answer(void) => {check} ? 42 : 0;\n',
+            "main.x": consumer("box.x", "answer() == 42"),
+        }, {"interface_inputs": ["box.x", "box/child.x",
+                                 "box/child/value.x", "main.x"]}, None
+
+    # Explicit sibling includes prove the owner filter, rather than merely
+    # the absence of implicit compile-time effects between member files.
+    definitions = {
+        "macro": (
+            'module macro Expression $module_hidden_macro() => 42;\n',
+            '$module_hidden_macro()', "parse", r"module_hidden_macro"),
+        "keyword": (
+            'macro Expression $module_alias_target() => 42;\n'
+            'module keyword module_hidden_alias $module_alias_target;\n',
+            'module_hidden_alias()', "any", r"undeclared function.*module_hidden_alias"),
+        "lisp": (
+            'module $(defun module-hidden-lisp () 42)\n',
+            '$(module-hidden-lisp)', "macro", r"unbound.*module-hidden-lisp"),
+    }
+    for family, (definition, invocation, phase, diagnostic) in definitions.items():
+        yield f"module_{family}_sibling_include_rejected", {
+            "box.x": 'module {"box/left.x", "box/right.x"}\n',
+            "box/left.x": definition + 'module {"left/value.x"}\n',
+            "box/left/value.x": 'int left_answer(void) => 42;\n',
+            "box/right.x": 'module {"right/value.x"}\n',
+            "box/right/value.x": (
+                '#include "../left.x"\n'
+                f'int answer(void) => {invocation};\n'
+            ),
+            "main.x": consumer("box.x", "answer() == 42"),
+        }, {"rejection_phase": phase}, diagnostic
+        yield f"module_{family}_external_rejected", {
+            "box.x": definition + 'module {"box/value.x"}\n',
+            "box/value.x": 'int answer(void) => 42;\n',
+            "main.x": consumer("box.x", f"{invocation} == 42"),
+        }, {"rejection_phase": phase}, diagnostic
+        yield f"module_{family}_entry_suffix_unavailable", {
+            "box.x": 'module {"box/value.x"}\n' + definition,
+            "box/value.x": f'int answer(void) => {invocation};\n',
+            "main.x": consumer("box.x", "answer() == 42"),
+        }, {"rejection_phase": phase}, diagnostic
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("compiler", type=Path)
@@ -912,7 +987,7 @@ def main():
             Path(tempfile.mkdtemp(prefix="x2c-module-probes-", dir="/tmp")))
     base.mkdir(parents=True, exist_ok=True)
     compiler_start = hashlib.sha256(compiler.read_bytes()).hexdigest()
-    selected = list(cases()) + list(extended_cases()) + list(final_cases()) + list(protocol_cases()) + list(ordering_cases()) + list(privacy_cases()) + list(initialization_cases()) + list(staged_initialization_cases()) + list(acceptance_cases()) + list(forward_static_cases()) + list(local_shadow_cases()) + list(multihop_initialization_cases())
+    selected = list(cases()) + list(extended_cases()) + list(final_cases()) + list(protocol_cases()) + list(ordering_cases()) + list(privacy_cases()) + list(initialization_cases()) + list(staged_initialization_cases()) + list(acceptance_cases()) + list(forward_static_cases()) + list(local_shadow_cases()) + list(multihop_initialization_cases()) + list(compile_time_visibility_cases())
     names = {case[0] for case in selected}
     unknown = set(args.case) - names
     if unknown:
