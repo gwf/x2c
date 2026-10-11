@@ -8,16 +8,26 @@
 
 Interpolated Strings.
 
+## Functions
+
+| Function | Summary |
+| --- | --- |
+| [`interpolation`](#interpolation) | Joins an interpolated String's parts. |
+
+### Functions
+
+#### interpolation
+
+`meta Code interpolation(Code code)`
+
+Joins an interpolated String's parts.
+
+Source: `src/component-interpolation.x:14`
+
 ## Design notes
 
 A `%"..."` literal reaches its rule as the `segments` form, each part
 already a `String`: cached text, a converted `$` insertion, or raw text
 that constructed syntax spells. The rule joins the parts with
-`String_join` over a `List` chain of them, which the compiler boxes and
-evaluates once each, left to right. The join is C text the emitter
-places as written around the chain, so a unit gains no declaration of
-`String_join` and the formatter keeps its line breaks.
-
-Each definition precedes the definitions that call it: the compiler
-settles whether a linked copy reaches a compile-time operation when the
-copy binds.
+`String.join` over a `List` chain of them, which the compiler boxes and
+evaluates once each, left to right.

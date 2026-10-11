@@ -7,5 +7,7 @@
 
 #include "x2c.h"
 #include "rewrite.h"
+Code interpolation(Code code);
+
 
 #endif /* __GUARD_0x009943D3__ */

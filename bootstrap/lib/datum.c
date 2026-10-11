@@ -578,6 +578,8 @@ size_t Buffer_len(Buffer);
 
 String Buffer_str(Buffer);
 
+String String_join(String, List);
+
 int datum_frame(Buffer out, Var value){
   if(! _init_guard_) _file_init_();
   Buffer body = Buffer_new(0);
