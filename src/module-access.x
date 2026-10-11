@@ -207,8 +207,11 @@ static void Compiler._check_public_module_type(Compiler c, Var type) {
         <type>, %"public signature uses module-private type '$type'",
         c.token, NULL);
   }
-  else if (type is <list>)
+  else if (type is <list>) {
+    // Enum initializer values do not expose their expression bindings as types.
+    match (type) case %(expr *): return;
     foreach (Var child, type.list()) c._check_public_module_type(child);
+  }
 }
 
 /** Reports whether a collected declaration row is visible to this unit. */
