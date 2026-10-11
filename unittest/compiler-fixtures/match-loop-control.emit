@@ -12,11 +12,12 @@ int main(void){
       {
         List value = Var_list(item);
         {
-          List _x2c_match_expr = value;
-          MatchCaptureBuffer _x2c_match_capture = { 0 };
+          List _x2c_match_expr = value; List _x2c_match_cursor, _x2c_match_cursor1;
           switch(0){
-              default: ; static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(_3), &_x2c_match_capture)) {{
-              matched ++;  break;
+              default: ;
+             _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224497936761619414ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
+              matched ++;
+              break;
             }
              break; }
           }
@@ -28,12 +29,24 @@ int main(void){
     }
 
   }
-  List continue_inputs = _19;  int visited = 0, accepted = 0; {
-    Var item;  List _x2c_macro_object_1 = continue_inputs;  List _x2c_macro_cursor_1 = _x2c_macro_object_1;  Var _x2c_macro_cursor_output_1;  while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
-      item = _x2c_macro_cursor_output_1; {
-        List value = Var_list(item);  visited ++; {
-          List _x2c_match_expr = value;  MatchCaptureBuffer _x2c_match_capture = { 0 };  switch(0){
-              default: ; static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(_10), &_x2c_match_capture)) {continue;  break; }
+  List continue_inputs = _19;
+  int visited = 0, accepted = 0;
+  {
+    Var item;
+    List _x2c_macro_object_1 = continue_inputs;
+    List _x2c_macro_cursor_1 = _x2c_macro_object_1;
+    Var _x2c_macro_cursor_output_1;
+    while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
+      item = _x2c_macro_cursor_output_1;
+      {
+        List value = Var_list(item);
+        visited ++;
+        {
+          List _x2c_match_expr = value; List _x2c_match_cursor, _x2c_match_cursor1;
+          switch(0){
+              default: ;
+             _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224497936762886752ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {continue;
+             break; }
           }
 
         }
@@ -43,6 +56,7 @@ int main(void){
     }
 
   }
-  printf("%d %d %d %d\n", matched, after, visited, accepted);  return matched == 2 && after == 2 && visited == 3 && accepted == 1 ? 0 : 1;
+  printf("%d %d %d %d\n", matched, after, visited, accepted);
+  return matched == 2 && after == 2 && visited == 3 && accepted == 1 ? 0 : 1;
 }
 

@@ -257,16 +257,17 @@ static int governed(List items){
     x2c_exception_leave(& _x2c_exception_frame_1);
   }
   {
-    List _x2c_match_expr = items;
-    MatchCaptureBuffer _x2c_match_capture = { 0 };
+    List _x2c_match_expr = items; List _x2c_match_cursor;
     switch(0){
-        default: ; static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(_3), &_x2c_match_capture)) {
+        default: ;
+       _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && Var_equal(_x2c_match_cursor->car, _3 ->car) && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_equal(_x2c_match_cursor->car, _3 ->cdr->car) && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {
 #ifdef QUIET
       total = 0;
 #else
       total += 10000;
 #endif
-       break; } total = - 1;  break;
+       break; } total = - 1;
+       break;
     }
 
   }
@@ -274,7 +275,12 @@ static int governed(List items){
 }
 
 int main(void){
-  x2c_initialize();  if(! _init_guard_) _file_init_();  printf("%d %d %d %d\n", pick(2), pick(4), width(3), count(5));  printf("%d %d %d\n", chain(0, 1), branch(2), sum(_3));  printf("%d\n", governed(_3));  return 0;
+  x2c_initialize();
+  if(! _init_guard_) _file_init_();
+  printf("%d %d %d %d\n", pick(2), pick(4), width(3), count(5));
+  printf("%d %d %d\n", chain(0, 1), branch(2), sum(_3));
+  printf("%d\n", governed(_3));
+  return 0;
 }
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){

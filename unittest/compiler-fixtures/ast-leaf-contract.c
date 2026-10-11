@@ -34,9 +34,9 @@ enum ast_phase1_Color{
 
 int * ast_phase1_plain_pointer, ast_phase1_plain_array[3], (* ast_phase1_pointer_to_array)[3], (* ast_phase1_function_pointer)(int);
 
-static List _9, _8, _5, _4, _3;
+static List _5, _4, _3;
 
-static Var _7, _6, _2, _1, _0;
+static Var _2, _1, _0;
 
 static int _init_guard_ = 0;
 
@@ -73,10 +73,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _3 = cons(_2, NULL);
   _4 = cons(_1, _3);
   _5 = cons(_0, _4);
-  _6 = Symbol_var(61352008);
-  _7 = Symbol_var(57936472);
-  _8 = cons(_7, NULL);
-  _9 = cons(_6, _8);
 }
 
 static int ast_phase1_zero(void){
@@ -157,13 +153,14 @@ int main(void){
 
   }
   {
-    List _x2c_match_expr = values;
-    Var _x2c_match_values[2]; MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
+    List _x2c_match_expr = values; List _x2c_match_cursor;
     switch(0){
-        default: ; static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(_9), &_x2c_match_capture)) { Var head = _x2c_match_values[0]; List tail = Var_list(_x2c_match_values[1]); {
+        default: ;
+       _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor) { Var head = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1)) { List tail = _x2c_match_cursor;
+      {
         count += 1;
       }
-       break; }{
+       break; } }{
         count = 0;
       }
        break;

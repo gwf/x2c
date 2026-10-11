@@ -77,11 +77,11 @@ static int deferred(Var item){
     x2c_cleanup_push(& _x2c_defer_record_0);
     {
       {
-        List _x2c_match_expr = Var_list(item);
-        MatchCaptureBuffer _x2c_match_capture = { 0 };
-        switch(Var_symbol(car(_x2c_match_expr))){
-            case 731488: ; { List _x2c_match_cursor; if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936762349920ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && !_x2c_match_cursor) {break;
-           break; } } default: ;
+        List _x2c_match_expr = Var_list(item); List _x2c_match_cursor;
+        switch(_x2c_match_expr ? _x2c_match_expr->car.u64 : 0){
+            case 9224497936762349920ULL: ;
+           _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497936762349920ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {break;
+           break; } default: ;
           n = 1;
            break;
         }
@@ -117,18 +117,20 @@ static int guarded(List items){
           x2c_exception_push(& _x2c_exception_frame_0);
           if(! sigsetjmp(_x2c_exception_frame_0.env, 0)){
             {
-              List _x2c_match_expr = Var_list(item);
-              MatchCaptureBuffer _x2c_match_capture = { 0 };
-              switch(Var_symbol(car(_x2c_match_expr))){
-                  case 1268320: ; { List _x2c_match_cursor; if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936762886752ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && !_x2c_match_cursor) {{
+              List _x2c_match_expr = Var_list(item); List _x2c_match_cursor;
+              switch(_x2c_match_expr ? _x2c_match_expr->car.u64 : 0){
+                  case 9224497936762886752ULL: ;
+                 _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497936762886752ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
                   if(x2c_exception_claim(& _x2c_exception_frame_0)){
                     rounds ++;
                   }
                   x2c_exception_leave(& _x2c_exception_frame_0);
                   continue;
                 }
-                 break; } } case 731488: ; { List _x2c_match_cursor; if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936762349920ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && !_x2c_match_cursor) {break;
-                 break; } } case 1287136: ; { List _x2c_match_cursor; if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936762905568ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && !_x2c_match_cursor) {{
+                 break; } case 9224497936762349920ULL: ;
+                 _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497936762349920ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {break;
+                 break; } case 9224497936762905568ULL: ;
+                 _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497936762905568ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
                   int _x2c_return_value_1 = kept + 1000;
                   {
                     if(x2c_exception_claim(& _x2c_exception_frame_0)){
@@ -139,7 +141,7 @@ static int guarded(List items){
                   }
 
                 }
-                 break; } } default: ;
+                 break; } default: ;
                 kept += 100;
                  break;
               }

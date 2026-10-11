@@ -5,9 +5,9 @@
 
 #include <stdio.h>
 #define ON
-static List _64, _63, _62, _61, _60, _59, _58, _57, _56, _55, _54, _53, _52, _51, _50, _48, _45, _42, _39, _36, _34, _33, _29, _28, _26, _25, _19, _18, _16, _15, _13, _12, _9, _7, _5, _3, _2;
+static List _55, _54, _53, _52, _51, _50, _49, _48, _47, _46, _45, _44, _43, _42, _41, _39, _36, _33, _30, _27, _25, _24, _20, _19, _17, _16, _9, _7, _5, _3, _2;
 
-static Var _49, _47, _46, _44, _43, _41, _40, _38, _37, _35, _32, _31, _30, _27, _24, _23, _22, _21, _20, _17, _14, _11, _10, _8, _6, _4, _1, _0;
+static Var _40, _38, _37, _35, _34, _32, _31, _29, _28, _26, _23, _22, _21, _18, _15, _14, _13, _12, _11, _10, _8, _6, _4, _1, _0;
 
 static int _init_guard_ = 0;
 
@@ -25,106 +25,108 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _1 = int_var(1);
   _2 = cons(_1, NULL);
   _3 = cons(_0, _2);
-  _4 = Symbol_var(58);
+  _4 = int_var(2);
   _5 = cons(_4, NULL);
-  _6 = int_var(2);
+  _6 = int_var(3);
   _7 = cons(_6, NULL);
-  _8 = int_var(3);
+  _8 = Symbol_var(54);
   _9 = cons(_8, NULL);
-  _10 = Symbol_var(4196);
-  _11 = Symbol_var(1884);
-  _12 = cons(_11, NULL);
-  _13 = cons(_10, _12);
-  _14 = List_var(_13);
-  _15 = cons(_14, NULL);
-  _16 = cons(_0, _15);
-  _17 = Symbol_var(54);
-  _18 = cons(_17, NULL);
-  _19 = cons(_0, _18);
-  _20 = List_var(_2);
-  _21 = List_var(_7);
-  _22 = List_var(_9);
-  _23 = List_var(_3);
-  _24 = int_var(4);
-  _25 = cons(_24, NULL);
-  _26 = cons(_10, _25);
-  _27 = List_var(_26);
-  _28 = cons(_27, NULL);
-  _29 = cons(_0, _28);
-  _30 = List_var(_29);
-  _31 = Symbol_var(4686);
-  _32 = int_var(9);
+  _10 = List_var(_2);
+  _11 = List_var(_5);
+  _12 = List_var(_7);
+  _13 = List_var(_3);
+  _14 = Symbol_var(4196);
+  _15 = int_var(4);
+  _16 = cons(_15, NULL);
+  _17 = cons(_14, _16);
+  _18 = List_var(_17);
+  _19 = cons(_18, NULL);
+  _20 = cons(_0, _19);
+  _21 = List_var(_20);
+  _22 = Symbol_var(4686);
+  _23 = int_var(9);
+  _24 = cons(_23, NULL);
+  _25 = cons(_22, _24);
+  _26 = List_var(_25);
+  _27 = cons(_22, _2);
+  _28 = List_var(_27);
+  _29 = Symbol_var(40538);
+  _30 = cons(_29, NULL);
+  _31 = List_var(_30);
+  _32 = Symbol_var(31116);
   _33 = cons(_32, NULL);
-  _34 = cons(_31, _33);
-  _35 = List_var(_34);
-  _36 = cons(_31, _2);
+  _34 = List_var(_33);
+  _35 = Symbol_var(46);
+  _36 = cons(_35, _2);
   _37 = List_var(_36);
-  _38 = Symbol_var(40538);
+  _38 = Symbol_var(32784740);
   _39 = cons(_38, NULL);
   _40 = List_var(_39);
-  _41 = Symbol_var(31116);
-  _42 = cons(_41, NULL);
-  _43 = List_var(_42);
-  _44 = Symbol_var(46);
-  _45 = cons(_44, _2);
-  _46 = List_var(_45);
-  _47 = Symbol_var(32784740);
-  _48 = cons(_47, NULL);
-  _49 = List_var(_48);
-  _50 = cons(_49, NULL);
-  _51 = cons(_46, _50);
-  _52 = cons(_43, _51);
-  _53 = cons(_40, _52);
-  _54 = cons(_37, _53);
-  _55 = cons(_35, _54);
-  _56 = cons(_30, _55);
-  _57 = cons(_23, _56);
-  _58 = cons(_22, _57);
-  _59 = cons(_21, _58);
-  _60 = cons(_20, _59);
-  _61 = cons(_43, NULL);
-  _62 = cons(_21, _61);
-  _63 = cons(_21, NULL);
-  _64 = cons(_20, _63);
+  _41 = cons(_40, NULL);
+  _42 = cons(_37, _41);
+  _43 = cons(_34, _42);
+  _44 = cons(_31, _43);
+  _45 = cons(_28, _44);
+  _46 = cons(_26, _45);
+  _47 = cons(_21, _46);
+  _48 = cons(_13, _47);
+  _49 = cons(_12, _48);
+  _50 = cons(_11, _49);
+  _51 = cons(_10, _50);
+  _52 = cons(_34, NULL);
+  _53 = cons(_11, _52);
+  _54 = cons(_11, NULL);
+  _55 = cons(_10, _54);
 }
 
 static void arms(List subject){
   Symbol wanted = 46;
   {
-    List _x2c_match_expr = subject;
-    Var _x2c_match_values[1]; MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
-    switch(Var_symbol(car(_x2c_match_expr))){
-        case 13278: ;
+    List _x2c_match_expr = subject; List _x2c_match_cursor, _x2c_match_cursor1; MatchCaptureBuffer _x2c_match_capture = { 0 };
+    switch(_x2c_match_expr ? _x2c_match_expr->car.u64 : 0){
+        case 9224497936761631710ULL: ;
        default: ;
 #ifdef OFF
-        static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(_3), &_x2c_match_capture)) {puts("off foo");  break; } static MatchCaptureSite _x2c_match_site_1; if (x2c_match_site_try_capture(&_x2c_match_site_1, _x2c_match_expr, List_var(_5), &_x2c_match_capture)) {puts("off any");  break; }
+        _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497936761631710ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_equal(_x2c_match_cursor->car, _3 ->cdr->car) && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {puts("off foo");
+       break; } _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {puts("off any");
+       break; }
 #endif
-        static MatchCaptureSite _x2c_match_site_2; if (x2c_match_site_try_capture(&_x2c_match_site_2, _x2c_match_expr, List_var(_2), &_x2c_match_capture)) {puts("one");  break; }
+        _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && Var_equal(_x2c_match_cursor->car, _2 ->car) && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {puts("one");
+       break; }
 #ifdef ON
-        static MatchCaptureSite _x2c_match_site_3; if (x2c_match_site_try_capture(&_x2c_match_site_3, _x2c_match_expr, List_var(_7), &_x2c_match_capture)) {puts("two");  break; }
+        _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && Var_equal(_x2c_match_cursor->car, _5 ->car) && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {puts("two");
+       break; }
 #endif
 #ifdef OFF
-        static MatchCaptureSite _x2c_match_site_4; if (x2c_match_site_try_capture(&_x2c_match_site_4, _x2c_match_expr, List_var(_9), &_x2c_match_capture)) {puts("off three");  break; }
+        _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && Var_equal(_x2c_match_cursor->car, _7 ->car) && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {puts("off three");
+       break; }
 #else
-        static MatchCaptureSite _x2c_match_site_5; if (x2c_match_site_try_capture(&_x2c_match_site_5, _x2c_match_expr, List_var(_9), &_x2c_match_capture)) {puts("three");  break; }
+        _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && Var_equal(_x2c_match_cursor->car, _7 ->car) && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {puts("three");
+       break; }
 #endif
-        { List _x2c_match_cursor; if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936761623118ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) { Var n = _x2c_match_values[0];  if(Var_int(n) > 5){
-        puts("big");  break;
+        _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497936761623118ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor) { Var n = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {if(Var_int(n) > 5){
+        puts("big");
+        break;
       }
        } }
 #ifndef ON
-        { List _x2c_match_cursor; if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936761631710ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) { Var n = _x2c_match_values[0];  printf("off foo %d\n", Var_int(n));  break; } }
+        _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497936761631710ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor) { Var n = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {printf("off foo %d\n", Var_int(n));
+       break; } }
 #else
-        static MatchCaptureSite _x2c_match_site_6; if (x2c_match_site_try_capture(&_x2c_match_site_6, _x2c_match_expr, List_var(_16), &_x2c_match_capture)) { Var n = _x2c_match_values[0];  printf("foo bar %d\n", Var_int(n));  break; }
+        _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497936761631710ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224497936761622628ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1) { Var n = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {printf("foo bar %d\n", Var_int(n));
+       break; } }
 #endif
-        static MatchCaptureSite _x2c_match_site_7; if (x2c_match_site_try_capture(&_x2c_match_site_7, _x2c_match_expr, List_var(_19), &_x2c_match_capture)) {puts("foo");  break; }
+        _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497936761631710ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1)) {puts("foo");
+       break; }
 #ifdef ON
-        { List _x2c_match_cursor; if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936761658970ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && !_x2c_match_cursor) {puts("sym");  break; } }
+        _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497936761658970ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {puts("sym");
+       break; }
 #endif
 #ifdef OFF
-        { List _x2c_match_cursor; if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936761649548ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && !_x2c_match_cursor) {puts("off sym");  break; } }
+        _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497936761649548ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {puts("off sym");
+       break; }
 #endif
-        if (x2c_match_try_capture(_x2c_match_expr, List_var(cons(Symbol_var(wanted), _18)), &_x2c_match_capture)) {puts("wanted");  break; }
+        if (x2c_match_try_capture(_x2c_match_expr, List_var(cons(Symbol_var(wanted), _9)), &_x2c_match_capture)) {puts("wanted");  break; }
 #if defined(OFF)
        puts("off other");  break;
 #endif
@@ -137,12 +139,12 @@ static void arms(List subject){
 
 static void defaults(List subject){
   {
-    List _x2c_match_expr = subject;  MatchCaptureBuffer _x2c_match_capture = { 0 };  switch(0){
-        default: ; static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(_2), &_x2c_match_capture)) {puts("default one");  break; }
+    List _x2c_match_expr = subject; List _x2c_match_cursor;  switch(0){
+        default: ;  _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && Var_equal(_x2c_match_cursor->car, _2 ->car) && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {puts("default one");  break; }
 #ifdef ON
        puts("default on");  break;
 #elif defined(OFF)
-        static MatchCaptureSite _x2c_match_site_1; if (x2c_match_site_try_capture(&_x2c_match_site_1, _x2c_match_expr, List_var(_7), &_x2c_match_capture)) {puts("default off two");  break; }
+        _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && Var_equal(_x2c_match_cursor->car, _5 ->car) && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {puts("default off two");  break; }
 # ifdef OFF
        puts("default off");  break;
 # else
@@ -158,20 +160,20 @@ static void defaults(List subject){
 
 int main(void){
   x2c_initialize();  if(! _init_guard_) _file_init_(); {
-    List subject;  List _x2c_macro_object_0 = _60;  List _x2c_macro_cursor_0 = _x2c_macro_object_0;  Var _x2c_macro_cursor_output_0;  while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
+    List subject;  List _x2c_macro_object_0 = _51;  List _x2c_macro_cursor_0 = _x2c_macro_object_0;  Var _x2c_macro_cursor_output_0;  while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
       subject = Var_list(_x2c_macro_cursor_output_0);  arms(subject);
     }
 
   }
   {
-    Var item;  List _x2c_macro_object_1 = _62;  List _x2c_macro_cursor_1 = _x2c_macro_object_1;  Var _x2c_macro_cursor_output_1;  while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
+    Var item;  List _x2c_macro_object_1 = _53;  List _x2c_macro_cursor_1 = _x2c_macro_object_1;  Var _x2c_macro_cursor_output_1;  while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
       item = _x2c_macro_cursor_output_1; {
-        List _x2c_match_expr = Var_list(item);  MatchCaptureBuffer _x2c_match_capture = { 0 };  switch(0){
+        List _x2c_match_expr = Var_list(item); List _x2c_match_cursor;  switch(0){
             default: ;
 #ifdef OFF
-            static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(_7), &_x2c_match_capture)) {puts("loop off two");  break; }
+            _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && Var_equal(_x2c_match_cursor->car, _5 ->car) && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {puts("loop off two");  break; }
 #endif
-            static MatchCaptureSite _x2c_match_site_1; if (x2c_match_site_try_capture(&_x2c_match_site_1, _x2c_match_expr, List_var(_7), &_x2c_match_capture)) {puts("loop two");  break; }
+            _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && Var_equal(_x2c_match_cursor->car, _5 ->car) && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {puts("loop two");  break; }
 #ifdef OFF
            puts("loop off");  break;
 #endif
@@ -184,7 +186,7 @@ int main(void){
 
   }
   {
-    List subject;  List _x2c_macro_object_2 = _64;  List _x2c_macro_cursor_2 = _x2c_macro_object_2;  Var _x2c_macro_cursor_output_2;  while(List_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
+    List subject;  List _x2c_macro_object_2 = _55;  List _x2c_macro_cursor_2 = _x2c_macro_object_2;  Var _x2c_macro_cursor_output_2;  while(List_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
       subject = Var_list(_x2c_macro_cursor_output_2);  defaults(subject);
     }
 
