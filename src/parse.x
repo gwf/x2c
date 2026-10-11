@@ -518,7 +518,7 @@ static void Compiler._retain_native_prefix_body(
     .objects = c.object_macros ? c.object_macros.copy() : {},
     .module = c.source_module};
   if (!c.native_prefix_pending) c.native_prefix_pending = [];
-  c.native_prefix_pending.push(Var.new(<pointer>, pending));
+  c.native_prefix_pending.push(Var.new(<p48>, pending));
   c.register_native_meta_prefix();
 }
 

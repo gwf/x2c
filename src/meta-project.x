@@ -440,7 +440,7 @@ void Compiler.register_native_meta_prefix(Compiler c) {
   String path = c.canonical_path(c.filename);
   foreach (String owner, h->owners)
     if (owner == path) {
-      h->prefix_compilers[owner] = Var.new(<pointer>, c);
+      h->prefix_compilers[owner] = Var.new(<p48>, c);
       return;
     }
 }
