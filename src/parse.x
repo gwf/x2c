@@ -449,17 +449,38 @@ static List Compiler._top_level_decorator(Compiler c) {
 /* A declaration row after any `meta` marker. Collection records it; the
    full parse completes a declaration at `;` or a definition at its body. */
 static List Compiler._declaration_form(Compiler c, int skip_body) {
+  if (!skip_body) {
+    List retained = c.replay_declaration_source();
+    if (retained) return retained;
+  }
   Token meta = NULL;
   int native = 0;
   if (c.meta_form_is_declaration()) meta = c.take_meta_marker(native);
   Token first = c.token;
   List decl;
-  $let(c.shallow, c.shallow || c.public_bodies)
+  int prefix = skip_body && c.meta_build && meta && !native &&
+               !c.signature_only && !c.macro_holes;
+  $let(c.shallow, prefix ? 0 : c.shallow || c.public_bodies)
   $let(c.macro_holes, c.signature_only && !c.macro_holes
          ? {} : c.macro_holes)
     decl = c.parse_declaration_row();
   int body = c.peek(0) == <"{"> || c._at_function_arrow();
   Type type = decl.type_from_ast();
+  if (prefix && (body || !type.is_function())) {
+    List node;
+    if (body) {
+      c.record_project_meta_effect(decl, meta);
+      $let(c.shallow, 0)
+      $let(c.capture_unit, 1)
+        node = c._defined(decl, meta, native, first);
+    }
+    else {
+      c.expect(<;>);
+      $let(c.shallow, 0) node = c._declared(decl, meta, first);
+    }
+    c.retain_native_meta_source(node, meta, c.token);
+    return NULL;
+  }
   if (skip_body || (c.public_bodies && body &&
       (!type.is_inline() || type.is_static() || c.source_private))) {
     c.finish_collected_declaration(decl, meta, native);

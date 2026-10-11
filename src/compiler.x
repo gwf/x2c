@@ -708,6 +708,15 @@ static int Compiler._retain_bundle(
 List Compiler.replay_declaration_source(Compiler c) {
   List source = c.sym.get(c._declaration_source_key(c.token));
   match (source)
+    case %(declaration-source ?(int end)
+           (native-meta-bound ?node ?(int module)) ?facts): {
+      c._restore_declaration_bindings(node, facts, {});
+      $let(c.source_module, module)
+        c.restore_native_meta_source(node, c.token);
+      while (c.peek(0) != <eof> && c.token.pos < end) c.next();
+      return node;
+    }
+  match (source)
     case %(declaration-source ?(int end) ?syntax ?facts): {
       c._restore_declaration_bindings(syntax, facts, {});
       List bound = c.bind_syntax(syntax, AST_UNIT, NULL);
@@ -715,6 +724,15 @@ List Compiler.replay_declaration_source(Compiler c) {
       return bound;
     }
   return NULL;
+}
+
+/** Retains a meta prefix already bound by the ordinary declaration parser. */
+void Compiler.retain_native_meta_source(
+  Compiler c, List node, Token first, Token after) {
+  c.sym.set(c._declaration_source_key(first),
+    %(declaration-source ${after.pos}
+      (native-meta-bound $node ${c.source_module})
+      ${c.semantic_binding_facts()}));
 }
 
 /* Register only this production's identities. Shared macro frames are

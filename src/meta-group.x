@@ -502,11 +502,16 @@ static Map Compiler._roots(Compiler c, Array ordered) {
         reached[identity] = 1;
     }
   foreach (List entry, c.meta_group)
-    match (entry) case %(function ?fn *): {
-      ast_collect_binding_references(fn, reached);
-      if (_function_identity(fn, identity, name) && !(identity in present))
-        ordered.push(fn);
-      reached[identity] = 1;
+    match (entry) {
+      case %(static ?declaration): {
+        if (!(declaration in ordered)) ordered.push(declaration);
+      }
+      case %(function ?fn *): {
+        ast_collect_binding_references(fn, reached);
+        if (_function_identity(fn, identity, name) && !(identity in present))
+          ordered.push(fn);
+        reached[identity] = 1;
+      }
     }
   foreach (List item, ordered)
     if (!_function_identity(item, identity, name))

@@ -314,6 +314,14 @@ void Compiler.install_meta_declaration(
   $report.parse.meta_decl(c, marker);
 }
 
+/** Republishes an already bound prefix without executing its body producers. */
+void Compiler.restore_native_meta_source(
+  Compiler c, List node, Token marker) {
+  if (node.car() == <function>) c.install_meta_function(node, marker);
+  else c.install_meta_declaration(node, marker);
+  c.record_declaration_visibility(node);
+}
+
 /* explicit meta calls
 
    A `$f(...)` call of a `meta` function outside a `meta` body runs at
