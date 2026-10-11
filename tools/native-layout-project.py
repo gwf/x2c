@@ -120,7 +120,9 @@ def extract(text, selected_edges=None):
             packing.apply(pack[1])
         else:
             pragma = PRAGMA.match(line)
-            if pragma and pragma[1].strip() != 'once':
+            if pragma and pragma[1].strip() == 'once':
+                continue
+            if pragma:
                 if not stack:
                     raise ProjectionError('unowned native pragma: ' + pragma[1].strip())
                 epoch += 1
@@ -305,6 +307,11 @@ def project(text, metadata, selected_edges=None, owner_streams=None):
         for dependency in dependencies:
             visit(dependency)
         if family in emitted_families:
+            active.remove(name)
+            selected.add(name)
+            return
+        if not any(line.strip() and not LINE.fullmatch(line.strip())
+                   for line in region.text.splitlines()):
             active.remove(name)
             selected.add(name)
             return
