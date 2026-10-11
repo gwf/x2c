@@ -341,11 +341,12 @@ static List Compiler._projection_nodes(
     match (node) case %((!or typedef declare) ?base ?): {
       Type type = base;
       match (type.base_type())
-        case %((!set ?kind (!or struct union enum)) ?name (*)):
+        case %((!set ?kind (!or struct union enum)) ?(String name) (*)):
           family = %"f_${filename_hash(%($kind $name).repr())}";
     }
     Map record = {id: id, role: role, family: family,
-      kind: node.car().str(), optional: Json.bool(1)};
+      kind: node.car() is <list> ? "sequence" : node.car().str(),
+      optional: Json.bool(1)};
     Array declaration_tags = [];
     match (node) case %((!or typedef declare function) ?base *): {
       Type type = base;
