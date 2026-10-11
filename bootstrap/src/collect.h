@@ -57,6 +57,10 @@ void Compiler_publish_inline_types(Compiler c, List ast);
 
 void Compiler_record_generated_symbol(Compiler c, String name, Type signature);
 
+void Compiler_record_conformance_rows(Compiler c, Map rows);
+
+List Compiler_declared_adoptions(Compiler c);
+
 void Compiler_collect_package(Compiler c, String name, Token token);
 
 void Compiler_replay_package_imports(Compiler c, Map globs, Map rows, Array exports);

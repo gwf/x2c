@@ -12511,7 +12511,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_22(void){
   _11635 = cons(_503, _11634);
   _11636 = String_new("src/collect.x");
   _11637 = String_var(_11636);
-  _11638 = String_new("c67cc768");
+  _11638 = String_new("f68e0f81");
   _11639 = String_var(_11638);
   _11640 = cons(_11639, NULL);
   _11641 = cons(_11637, _11640);
@@ -12945,7 +12945,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_23(void){
   _12066 = List_var(_12065);
   _12067 = String_new("src/protocol.x");
   _12068 = String_var(_12067);
-  _12069 = String_new("68b99f27");
+  _12069 = String_new("0172c461");
   _12070 = String_var(_12069);
   _12071 = cons(_12070, NULL);
   _12072 = cons(_12068, _12071);

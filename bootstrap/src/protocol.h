@@ -22,6 +22,10 @@ List Compiler_publish_protocol_node(Compiler c, List node, Token participant_tok
 
 void Compiler_resolve_protocols(Compiler c);
 
+Map Compiler_conformance_rows(Compiler c, List adoptions);
+
+void Compiler_resolve_as_declared(Compiler c, Map symbols);
+
 #define PROTOCOL_VARIABLE 1
 #define PROTOCOL_VARIADIC 2
 List Compiler_protocol_members_for(Compiler c, Type participant, Type base);
