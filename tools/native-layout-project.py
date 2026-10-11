@@ -262,8 +262,12 @@ def project(text, metadata, selected_edges=None, owner_streams=None):
                             families[supplied] = sibling
     namespaces = {}
     for name, region in regions.items():
-        for namespace in records[name].get('defines', []):
-            namespaces.setdefault(namespace, name)
+        row = records[name]
+        for namespace in row.get('defines', []):
+            declaration = namespace in row.get('declarationTags', [])
+            if namespace not in namespaces or (declaration and (
+                    row.get('role') == 'h' or row.get('kind') == 'typedef')):
+                namespaces[namespace] = name
         origins = set(region.origins)
         for namespace, provider in metadata.get('nativeProviders', {}).items():
             if str(Path(provider).resolve()) in origins:
