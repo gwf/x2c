@@ -433,11 +433,16 @@ def run_case(compiler, base, name, files, options, rejection):
             log = directory / "package-build.log"
             log.write_text(prepared.stdout)
             if not prepared.returncode and options.get("package_driver"):
-                header = next((builds / "cc" / "gen").glob(
-                    f"*/{package.name}.h"))
-                shutil.copytree(header.parent, builds, dirs_exist_ok=True)
-                for support in (builds / "cc" / "gen").rglob("*.h"):
-                    shutil.copy2(support, builds / support.name)
+                generated = builds / "cc" / "gen"
+                shutil.copytree(generated, builds / "gen", dirs_exist_ok=True)
+                for support in generated.rglob("*.h"):
+                    if (support.name != f"{package.name}.h" and
+                            not support.name.startswith("_x2c_module_")):
+                        continue
+                    target = builds / "gen" / support.relative_to(generated)
+                    relative = target.relative_to(builds).as_posix()
+                    (builds / support.name).write_text(
+                        f'#include "{relative}"\n')
                 (builds / f"{package.name}.native.rsp").write_text("")
             if prepared.returncode:
                 return {"name": name, "command": preparation,

@@ -325,7 +325,7 @@ static void _build_source(String package, String name, String spec) {
   _run(
     %($x2c "build" "--kind" ${TargetKind.of(<static-lib>).spelling}
       "--output" "$builds/lib$name.a"
-      "--build-dir" "$builds/cc" @{_files_with(builds, ".c")}
+      "--build-dir" "$builds/cc" @{Path.glob(%"$builds/**/*.c")}
       @{_files_with(src, ".c")}),
     "build");
   if (_native_meta(builds, name))
@@ -370,7 +370,7 @@ static Path _empty_builds(String package) {
    owns, so an import loads its module. */
 static int _native_meta(String builds, String name) {
   String row = %"native-meta \"${name}__";
-  return _files_with(builds, ".xi").any(
+  return Path.glob(%"$builds/**/*.xi").any(
     %!(String path) => row in Path.read_text(path));
 }
 

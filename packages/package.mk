@@ -120,7 +120,8 @@ builds/%.c builds/%.h: src/%.x | builds $(DEPENDENCY_PREREQUISITE)
 $(PACKAGE_ARCHIVE): $(PACKAGE_GENERATED) $(PACKAGE_NATIVE) \
   $(PACKAGE_RESPONSE) package-build-force | $(DEPENDENCY_PREREQUISITE)
 	"$(X2C)" build --kind static-library --output $@ --build-dir builds/cc \
-	  $(PACKAGE_C_FLAGS) $(PACKAGE_GENERATED) $(PACKAGE_NATIVE)
+	  $(PACKAGE_C_FLAGS) $$(find builds -path builds/cc -prune -o \
+	    -path builds/module -prune -o -name '*.c' -print) $(PACKAGE_NATIVE)
 
 # The interfaces translation wrote record each of the package's own native
 # `meta` prototypes; without one there is no module to build.
