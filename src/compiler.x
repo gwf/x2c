@@ -477,7 +477,7 @@ static void _debug_tokens(Token start, Token end) {
 */
 void Compiler.collect_compile_time_definition(Compiler c, int keyword) {
   if (!keyword && c.signature_only == SIGNATURE_DECLARATIONS) {
-    c._skip_signature_macro_definition();
+    c.skip_signature_macro_definition();
     return;
   }
   if (c.interface_provider) {
@@ -496,28 +496,6 @@ void Compiler.collect_compile_time_definition(Compiler c, int keyword) {
   }
   c.diagnostics.release(hold, 0);
   if (failed) while (c.peek(0) != <eof>) c.next();
-}
-
-/* Ordinary signatures do not bind macro templates or their future effects.
-   Normal collection owns their grammar and validates their source bodies. */
-static void Compiler._skip_signature_macro_definition(Compiler c) {
-  while (c.peek(0) != <eof>) {
-    if (c._at_function_arrow()) {
-      c.next();
-      c.next();
-      if (c.peek(0) != <"{">) {
-        c._skip_shallow_expression(0);
-        c.expect(<;>);
-        return;
-      }
-    }
-    if (c.peek(0) == <"{">) {
-      c.token = c.token.after_group();
-      return;
-    }
-    if (c.peek(0).group_step() > 0) c.token = c.token.after_group();
-    else c.next();
-  }
 }
 
 /** Records declaration visibility and meta facts, then skips its body.
