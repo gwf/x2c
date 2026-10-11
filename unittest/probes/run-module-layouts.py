@@ -241,6 +241,19 @@ def cases():
     yield "value_layout_static_enum", enum_layout, options, None
     yield "ordinary_static_enum", ordinary(enum_layout), {
         "inputs": ["box.x", "box/inner.x", "box/outer.x", "main.x"]}, None
+    enum_bound_layout = {
+        **layout,
+        "box/inner.x": ('static typedef enum Choice {COUNT = 2} Choice;\n'
+                        'module typedef struct Inner {int items[COUNT];} Inner;\n'
+                        'module Inner make(void) {Inner item = {{17, 25}}; return item;}\n'),
+        "box/outer.x": ('module typedef struct Outer {Inner inner;} Outer;\n'
+                        'int answer(void) {Outer item = {make()}; '
+                        'return sizeof(item.inner.items) == 2 * sizeof(int) '
+                        '? item.inner.items[0] + item.inner.items[1] : 0;}\n'),
+    }
+    yield "value_layout_static_enum_array_bound", enum_bound_layout, options, None
+    yield "ordinary_static_enum_array_bound", ordinary(enum_bound_layout), {
+        "inputs": ["box.x", "box/inner.x", "box/outer.x", "main.x"]}, None
     yield "value_layout_repeated_static_enumerators", {
         "box.x": 'module {"box/left.x", "box/right.x", "box/carrier.x"}\n',
         "box/left.x": ('static typedef enum Choice {MATCH = 17, COUNT = 1} Choice;\n'
