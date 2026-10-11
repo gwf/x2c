@@ -5613,10 +5613,10 @@ static List Compiler__ancestor_code(Compiler c, Ancestor row){
 }
 
 int Compiler_enter_function(Compiler c, List declaration){
-  if(! _init_guard_) _file_init_();  int depth = Block_len(c -> ancestors);  Compiler_enter(c, (Ancestor){
+  if(! _init_guard_) _file_init_();  int depth = Block_len(c -> ancestors);  Ancestor row ={
     .what = 458361162716, .node = declaration, .lowering = 1
   }
-  );  return depth;
+  ;  Compiler_enter(c, row);  return depth;
 }
 
 SymScope Sym_pop_scope(Sym);
