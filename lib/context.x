@@ -41,7 +41,6 @@ protocol Cleanup(Context);
 static struct Context {
   Context parent, Scope scope, *destination_scope, Pool pool;
   Pool destination_pool, void *error_state, *match_state;
-  int ancestor_pools;
 };
 
 static typedef struct ContextThreadState {
@@ -74,20 +73,6 @@ meta native Var Context.export(Context context, Var value) {
   if (!context || _thread().current != context)
     raise %(bad-state (operation "Context.export"));
   return context._export_value(value);
-}
-
-/** Exports current Context values into an explicit enclosing lifetime.
-    Canonical values from intermediate private pools are copied into `pool`;
-    mutable allocations retain the ordinary source ownership checks. */
-Var Context.export_to(Context context, Var value, Scope *scope, Pool pool) {
-  if (!context || _thread().current != context)
-    raise %(bad-state (operation "Context.export_to"));
-  struct Context source = *context;
-  source.pool = Pool.current();
-  source.destination_scope = scope;
-  source.destination_pool = pool;
-  source.ancestor_pools = 1;
-  return Context._export_value(&source, value);
 }
 
 /** Exports a sealed worker result `Scope` into the current `Scope` and pool.
@@ -137,31 +122,24 @@ static Var Context._export_wide(Context c, Var v) {
   return v.move_wide_to(c.destination_scope);
 }
 
-static int Context._exports_canonical(Context c, Var value) {
-  if (!c.ancestor_pools) return c.pool && c.pool.owns(value);
-  for (Pool source = c.pool; source && source != c.destination_pool; source = source.up)
-    if (source.owns(value)) return 1;
-  return 0;
-}
-
 static Var Context._export_string(Context c, Var value) {
-  if (!c._exports_canonical(value)) return value;
+  if (!c.pool || !c.pool.owns(value)) return value;
   String string = value;
   return String.new_in(c.destination_pool, string, string.len());
 }
 
 static Var Context._export_atom(Context c, Var value) {
   String spelling = value.str();
-  if (!c._exports_canonical(spelling)) return value;
+  if (!c.pool || !c.pool.owns(spelling)) return value;
   String result = String.new_in(c.destination_pool, spelling, spelling.len());
   return Var.new(<lsym>, result);
 }
 
 static List Context._export_list(Context c, List list) {
-  if (!list || (c.pool && !c._exports_canonical(list))) return list;
+  if (!list || (c.pool && !c.pool.owns(list))) return list;
   Block heads = $auto(Block.new(sizeof(Var)));
   List tail = list;
-  while (tail && (!c.pool || c._exports_canonical(tail))) {
+  while (tail && (!c.pool || c.pool.owns(tail))) {
     Var head = c._export_value(tail.car);
     heads.push(&head);
     tail = tail.cdr;

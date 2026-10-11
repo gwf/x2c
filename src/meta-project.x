@@ -70,7 +70,7 @@ static typedef struct Helper {
   Map deps, before, readiness, prefix_compilers, publications, prefix_counts;
   Map native_sources, native_targets, native_loaded;
   Array groups, built, failures, objects, retained_dependencies, retained_tables;
-  Scope lifetime, Pool pool;
+  Scope lifetime;
   int changed;
 } Helper;
 
@@ -90,7 +90,6 @@ void Frontend.prepare_meta(Frontend f, List inputs) {
     .failures = [], .objects = [], .retained_dependencies = [],
     .retained_tables = []};
   h.lifetime = Scope.owner(h.publications);
-  h.pool = Pool.current();
   h.scan(inputs);
   String include = NULL, cc = Compiler.meta_cc(include);
   String root = script_cache_root(), stamp = build_module_stamp();
@@ -709,8 +708,10 @@ static Var _export_native_record(Var value, Context context) =>
 
 /* Collection can call readiness inside its own temporary Context. */
 static Var Helper.retain(Helper &h, Var value) {
-  Context source = Context.current();
-  return source ? source.export_to(value, &h.lifetime, h.pool) : value;
+  int retained = value is <list> ? value.list().try_own()
+    : value is <string> ? value.string().try_own() : 1;
+  if (!retained) raise %(bad-state (operation "native helper retention"));
+  return value;
 }
 
 static void Helper.publish(Helper &h, Map publication, List key, Var value) {
