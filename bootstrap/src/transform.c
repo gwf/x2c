@@ -131,8 +131,6 @@ static Ast Compiler__interpolation(Compiler c, Ast ast);
 
 static List Compiler__declaration(Compiler c, List ast);
 
-static List Compiler__lower_lambda_destructuring(Compiler c, List ast);
-
 static List _value_declaration(Type type, List binding, List value);
 
 static List Compiler__return(Compiler c, List ast);
@@ -283,15 +281,6 @@ typedef struct _x2c_defer_env_12{
 _x2c_defer_env_12;
 
 static void _x2c_defer_cleanup_12(void * _x2c_defer_opaque_12);
-
-typedef struct _x2c_lambda_context_2{
-  Var c0;
-}
-_x2c_lambda_context_2;
-
-static Var _x2c_lambda_2(List child, Compiler c);
-
-static Var _x2c_lambda_3(Func _x2c_lambda_closure_1, const FuncArg * _x2c_lambda_argv_1);
 
 #include "exception.h"
 
@@ -2382,10 +2371,10 @@ static Ast Compiler__function_node(Compiler c, List function, List return_type, 
             }
             ;  x2c_cleanup_push(& _x2c_defer_record_3); {
               * _x2c_macro_address_1 = inline_header; {
-                List new_return = Compiler__step(c, return_type);  List new_decl = Compiler__step(c, declarator);  List prepared_body = body;  if(ast_contains_head(List_var(body), 808259842)) prepared_body = Compiler_prepare_lambda_cells(c, declarator, Compiler__lower_lambda_destructuring(c, body));  List declaration =({
+                List new_return = Compiler__step(c, return_type);  List new_decl = Compiler__step(c, declarator);  List declaration =({
                   Var _x2c_literal_part_2 = List_var(return_type);  Var _x2c_literal_part_3 = List_var(cons(_442, cons(List_var(declarator), NULL)));  cons(_443, cons(_x2c_literal_part_2, cons(_x2c_literal_part_3, NULL)));
                 }
-                );  List new_body = Compiler__entered_body(c, declaration, prepared_body);  transformed = cons(_0, cons(List_var(new_return), cons(List_var(new_decl), cons(List_var(new_body), NULL))));
+                );  List new_body = Compiler__entered_body(c, declaration, body);  transformed = cons(_0, cons(List_var(new_return), cons(List_var(new_decl), cons(List_var(new_body), NULL))));
               }
 
             }
@@ -3021,28 +3010,6 @@ static List Compiler__declaration(Compiler c, List ast){
 
 #endif
 #ifndef X2C_TRANSFORM_SOURCE
-List Compiler_rewrite(Compiler, Symbol, Var, List, AstPos, Type, Token);
-static List Compiler__lower_lambda_destructuring(Compiler c, List ast){
-  if(! List_truth(ast)) return ast; {
-    List _x2c_match_expr = ast; List _x2c_match_cursor;  switch(_x2c_match_expr ? _x2c_match_expr->car.u64 : 0){
-        case 9224498253821913304ULL: ;  _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224498253821913304ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1)) {{
-        List rewritten = Compiler_rewrite(c, 948490, Symbol_var(317060294872), ast, AST_BLOCK, List_type(c -> return_type), NULL);  return List_truth(rewritten) ? rewritten : ast;
-      }
-       break; } default: break;
-    }
-
-  }
-  if(! ast_contains_head(List_var(ast), 317060294872)) return ast;  return Ast_rewrite_children(ast, ({
-    Var _x2c_lambda_capture_value_1 = Compiler_var(c);  struct _x2c_lambda_context_2 _x2c_lambda_context_3 ={
-      _x2c_lambda_capture_value_1
-    }
-    ;  Func_new_context(_x2c_lambda_3, _66, & _x2c_lambda_context_3, sizeof _x2c_lambda_context_3);
-  }
-  ));
-}
-
-#endif
-#ifndef X2C_TRANSFORM_SOURCE
 static List _value_declaration(Type type, List binding, List value){
   List _x2c_destructure_1 = Type_parts(type);  List base = Var_list(List_getindex(_x2c_destructure_1, 0));  List mods = Var_list(List_getindex(_x2c_destructure_1, 1));  return List_truth(value) ?({
     Var _x2c_literal_part_39 = List_var(base);  Var _x2c_literal_part_40 = List_var(cons(_442, cons(List_var(({
@@ -3152,6 +3119,7 @@ static List Compiler__change(Compiler c, List ast, Symbol op, List arg, Type typ
 
 #endif
 #ifndef X2C_TRANSFORM_SOURCE
+List Compiler_rewrite(Compiler, Symbol, Var, List, AstPos, Type, Token);
 static List Compiler__dynamic(Compiler c, Symbol point, Type type, List operation){
   List kind = Var_equal(List_car(operation), Symbol_var(35407540848)) ? cons(_1125, cons(List_cadr(operation), _1133)) : cons(List_cadr(operation), _1133);  List rewritten = Compiler_rewrite(c, point, List_var(kind), cons(_22, cons(_1132, cons(List_var(operation), NULL))), AST_EXPRESSION, type, NULL);  return Var_list(List_truth(rewritten) ? List_caddr(rewritten) : List_var(operation));
 }
@@ -3413,13 +3381,5 @@ static void _x2c_defer_cleanup_11(void * _x2c_defer_opaque_11){
 
 static void _x2c_defer_cleanup_12(void * _x2c_defer_opaque_12){
   _x2c_defer_env_12 * _x2c_defer_data_12 =(_x2c_defer_env_12 *) _x2c_defer_opaque_12;  Array_cleanup((*(Array *) _x2c_defer_data_12->_x2c_defer_capture_16));
-}
-
-static Var _x2c_lambda_2(List child, Compiler c){
-  return List_var(Compiler__lower_lambda_destructuring(c, child)); ;
-}
-
-static Var _x2c_lambda_3(Func _x2c_lambda_closure_1, const FuncArg * _x2c_lambda_argv_1){
-  List a0 = Var_list(x2c_func_value_argument(_x2c_lambda_closure_1, _x2c_lambda_argv_1, 0, 806120));  const struct _x2c_lambda_context_2 * record =(const struct _x2c_lambda_context_2 *) Func_context(_x2c_lambda_closure_1);  return _x2c_lambda_2(a0, Var_compiler(record -> c0));
 }
 

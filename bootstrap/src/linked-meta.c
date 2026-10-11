@@ -11871,7 +11871,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_21(void){
   _11069 = List_var(_11068);
   _11070 = String_new("src/transform.x");
   _11071 = String_var(_11070);
-  _11072 = String_new("7cddb9db");
+  _11072 = String_new("46fd84ba");
   _11073 = String_var(_11072);
   _11074 = cons(_11073, NULL);
   _11075 = cons(_11071, _11074);
@@ -12104,7 +12104,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_22(void){
   _11299 = List_var(_11298);
   _11300 = String_new("src/callables.x");
   _11301 = String_var(_11300);
-  _11302 = String_new("462684b1");
+  _11302 = String_new("b0d8e92a");
   _11303 = String_var(_11302);
   _11304 = cons(_11303, NULL);
   _11305 = cons(_11301, _11304);
@@ -12392,7 +12392,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_22(void){
   _11587 = cons(_503, _11586);
   _11588 = String_new("src/lambdas.x");
   _11589 = String_var(_11588);
-  _11590 = String_new("39ca2ecb");
+  _11590 = String_new("eaec24c4");
   _11591 = String_var(_11590);
   _11592 = cons(_11591, NULL);
   _11593 = cons(_11589, _11592);
@@ -12706,7 +12706,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_23(void){
   _11898 = cons(_503, _11897);
   _11899 = String_new("src/component-lambdas.x");
   _11900 = String_var(_11899);
-  _11901 = String_new("ca686aa5");
+  _11901 = String_new("097a9364");
   _11902 = String_var(_11901);
   _11903 = cons(_10722, _4772);
   _11904 = cons(_4763, _11903);
