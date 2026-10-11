@@ -139,14 +139,11 @@ static List Compiler._generated_code(Compiler c, List ast, String basename) {
       match (key) case %(directories ?(String provider)):
         companions.push(_projection_relative(
           %"$directory/${Path.stem(provider)}.xnm", Path.dirname(cfile)));
-    Map native_providers = {};
-    foreach (Var (key, path), c.module_layout_plan)
-      match (key) case %(namespace-provider ?id): native_providers[id] = path;
     Map metadata = {
       format: 2, source: Path.basename(cfile), header: Path.basename(hfile),
       provider: home_portable_path(c.canonical_path(c.filename)),
       regions: records, order: corder, headerOrder: horder,
-      companions: companions, nativeProviders: native_providers,
+      companions: companions,
       namespaceEdges: c.module_layout_plan[%(namespace-requires)],
       familyEdges: c.module_layout_plan[%(projection-families)]};
     outputs = outputs.append(%("$basename.xnm" ${Var.json(metadata)}));
@@ -329,7 +326,6 @@ static List Compiler._projection_nodes(
       String resolved = c.resolve_source_include(include, angle);
       if (resolved) {
         String path = c.canonical_path(resolved);
-        record["includePath"] = path;
         definitions = c._projection_include_names(path);
       }
     }
