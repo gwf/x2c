@@ -473,6 +473,8 @@ static void Compiler._isolate(
     _.shallow = 0;
     _.public_bodies = 0;
     _.return_type = NULL;
+    _.fn_name = NULL;
+    _.inline_header = 0;
     _.lambda_scopes = NULL;
     _.source_facts = 0;
     _.recovery_depth = saved.recovery_depth + 1;
