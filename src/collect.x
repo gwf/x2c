@@ -1282,6 +1282,15 @@ static void Compiler.bind_pending_inline_bodies(
     A missing provider record returns NULL, requiring ordinary collection.
 */
 List Compiler.collected_declaration_components(Compiler c, List providers) {
+  Map dependencies = c.collected_declaration_dependencies(providers);
+  return dependencies ? declaration_work(providers, dependencies) : NULL;
+}
+
+/** Exports completed declaration prerequisites for component staging.
+    Body binding can add its resolved provider edges to this same graph.
+    No collection producer is invoked to discover a scheduling edge.
+*/
+Map Compiler.collected_declaration_dependencies(Compiler c, List providers) {
   Map dependencies = {}, rows = {}, owners = {}, contributions = {};
   foreach (String provider, providers)
     c.declaration_dependencies(provider, dependencies);
@@ -1325,7 +1334,7 @@ List Compiler.collected_declaration_components(Compiler c, List providers) {
     }
     dependencies[provider] = edges.list_free();
   }
-  return declaration_work(providers, dependencies);
+  return dependencies;
 }
 
 /* Recorded include edges carry declaration dependencies. This walks completed
