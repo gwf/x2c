@@ -457,7 +457,7 @@ assembly, and the rule driver, with every language feature a file under
 | printf Var formats | call, by callee binding; delivered in wave 1 | 380 | 260 |
 | raise | statement; delivered in wave 1, simplification follows | 200 | 416 |
 | collection literals and literal order | literal, by head; delivered in wave 1 | 290 | many |
-| destructuring | statement, plus the function pre-pass | 330 | few |
+| destructuring | statement and declaration rules; delivered in wave 3 | 330 | few |
 | string interpolation | literal `segments`; delivered in wave 2 | 200 | 730 |
 | truthiness, getindex, dynamic operators | unary, binary, access; delivered in wave 1 | 410 | 620 |
 | lambda lowering | function family; function-entry and unit-support placements | 1,500 | 586 |
@@ -601,6 +601,29 @@ replacement template and fill steps are the remaining driver cost.
     twice (`rewrite-string-switch` depends on the second pass); a user
     `$rewrite($matched)` returning a quotation around `$node` does not see
     matches nested inside it.
+- 2026-10-10, wave 3 (held for review on `kernel/wave3-integration`):
+  destructuring is `src/component-destructuring.x`, 127 lines, three rules
+  (declarations of both forms, the assignment statement, the assignment
+  expression) returning hand-built `(code-value "bound" CODE ROWS)`
+  carriers with `new-name` rows, so the parser-declared targets keep their
+  scope and the temporaries keep the kernel's names. The kernel lost 188
+  lines and gained 53 (net -135): `_destructure_*`, `_named_destructure`,
+  `_typed_destructure`, `_as_statement`, three template macros, and
+  `$report.type.destructure_list`; parsing and its diagnostics stay. The
+  lambda-cell pre-pass stays and now runs only for bodies that contain a
+  lambda. No SDK operation and no placement were added; the assignment
+  expression registers at the `literal` point keyed `dstrasgn` and the
+  statement at `node` keyed `stmnt`. Generated C is byte-identical to the
+  baseline for every fixture and the compiler's sources. Workload of 1000
+  three-name declarations: 5.84 G -> 5.36 G (-8.1%); empty unit and
+  self-translation within noise. Two fixtures added: `lambda-destructure-
+  cell` (the pre-pass had no coverage) and `rewrite-destructuring` (user
+  rules on all three heads). Open: a user `dstrdecl` rule whose replacement
+  holds `$node` applies twice in a lambda body, the same family as the
+  switch re-lowering defect; binding a declaration of a parser-bound name at
+  transform time leaks it to later resolution across functions; prelude
+  component macro names are global and can collide with user meta names;
+  `tools/gen-linked-meta.sh` counts `$type (` inside a quotation as a call.
 - 2026-10-10, facts learned: `function-entry` placement is parse-time, so
   lambda cells need a transform-time entry placement before lambdas move; a
   plain `make build` after editing a shipped component leaves a degraded
