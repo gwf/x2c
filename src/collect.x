@@ -642,6 +642,15 @@ static int _private_row(Map statics, List key, List family) {
 static void _needed_types(List syntax, Map rows, Map needed) =>
   _declaration_type_references(syntax, rows, needed, 0);
 
+/** Returns the declaration namespaces used by this typed source fragment.
+    Callers retain native arm positions when marking individual fields.
+*/
+Map declaration_type_namespaces(List syntax, Map rows) {
+  Map needed = {};
+  _declaration_type_references(syntax, rows, needed, 1);
+  return needed;
+}
+
 static void _declaration_type_references(
   List syntax, Map rows, Map needed, int include_private) {
   Array pending = $auto([syntax]);
