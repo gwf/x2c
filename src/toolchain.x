@@ -329,8 +329,10 @@ static String _start_failure(String program, List detail) {
 // host preprocessing
 
 /** Runs the configured C preprocessor without a shell.
-    System headers keep their include directives when the host supports
-    that mode. `output`, `errors`, and `dependencies` are cleared before
+    `include_dirs` precede the system directories, and the runtime header
+    directory follows them, so a generated `string.h` never replaces the C
+    library's. System headers keep their include directives when the host
+    supports that mode. `output`, `errors`, and `dependencies` are cleared before
     use. Source and include paths remain distinct argv elements, and stdout
     and stderr are captured separately. The temporary depfile is read into
     `dependencies` when possible and removed on returning paths, including a
@@ -385,13 +387,15 @@ static List Toolchain._cpp_arguments(
     "-D__restrict=" "-D__extension__=" "-Wno-unicode"
     "-Wno-invalid-pp-token"
     @{t.keep_system_includes > 0 ? %("-fkeep-system-includes") : NULL}
-    "-I" "." @{_includes(cpp_include_dirs())} @{_includes(include_dirs)}
+    "-I" "." @{_includes("-I", cpp_include_dirs())}
+    @{_includes("-I", include_dirs)}
+    @{_includes("-idirafter", default_include_dirs())}
     @{t.cpp_args} @{macros ? %("-imacros" $macros) : NULL}
     "-MMD" "-MF" $depfile "-MT" "x2c-dependencies"
     "-include" $source "-");
 
-static List _includes(List directories) =>
-  directories.map(%!(directory) => %("-I" $directory)).flatten();
+static List _includes(String option, List directories) =>
+  directories.map(%!(directory) => %($option $directory)).flatten();
 
 // default search paths
 

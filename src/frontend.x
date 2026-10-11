@@ -400,7 +400,8 @@ static Compiler _run_cpp(Frontend frontend, ParsedUnit &unit) {
   String text = NULL, errors = NULL, dependency_text = NULL;
   String runtime = c.prelude ? %"${x2c_get_root()}/lib/x2c.x" : NULL;
   int status = frontend.toolchain.preprocess(
-    c.filename, c.include_dirs, runtime, text, errors, dependency_text);
+    c.filename, frontend.request.include_dirs, runtime, text, errors,
+    dependency_text);
   unit.preprocessor_output = text ? _take_line_markers(cpp, text) : NULL;
   unit.preprocessor_errors = errors;
   if (errors && frontend.preprocessor_errors)

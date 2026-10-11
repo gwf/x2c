@@ -192,7 +192,7 @@ String home_libexec(void) {
   return home ? %"$home/libexec/x2c" : NULL;
 }
 
-/** Returns the borrowed default include `List` containing `<root>/include`.
+/** Returns the borrowed default include `List`, `<root>/include/x2c`.
     Returns NULL before environment setup.
 */
 List default_include_dirs(void) => default_includes;
