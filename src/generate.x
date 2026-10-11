@@ -153,6 +153,18 @@ static List Compiler._header_and_source(
   return %($header $source);
 }
 
+/** Projects an authored layout prefix with the ordinary header partition.
+    Layout prerequisites supply module support separately. Native directives
+    and public inline bodies keep their authored order within the prefix.
+*/
+List Compiler.module_layout_header_prefix(Compiler c, List ast) {
+  Partition p = {
+    .c = c, .header = [], .pending = [], .open = [], .forwarded = {},
+    .included = {}, .statics = {}, .source_groups = {}};
+  foreach (Ast node, ast) p.add(node);
+  return c._forward_declarations(p.finish(), 0);
+}
+
 /* The unit consumes its declarations where they were written, independently
    of the public projection. In particular, a promoted include must not
    change the native macro state before its source position. */

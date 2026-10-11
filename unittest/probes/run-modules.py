@@ -162,6 +162,21 @@ def extended_cases():
         "box/value.x": 'module typedef struct Opaque {int value;} *Opaque;\nmodule struct Opaque storage = {42};\nOpaque acquire(void) => &storage;\nint opaque_read(Opaque object) => object.value;\n',
         "main.x": consumer("box.x", "opaque_read(acquire()) == 42"),
     }, {}, None
+    yield "native_consumer_inline_and_opaque", {
+        "box.x": 'typedef struct Opaque *Opaque;\nmodule {"box/value.x"}\n',
+        "box/value.x": (
+            'module typedef struct Opaque {int value;} *Opaque;\n'
+            'module struct Opaque storage = {41};\n'
+            'module int increment(int value) => value + 1;\n'
+            'Opaque acquire(void) => &storage;\n'
+            'inline int opaque_answer(Opaque value) => increment(value.value);\n'
+        ),
+        "native.c": (
+            '#include "box.h"\n'
+            'int main(void) {Opaque value = acquire(); '
+            'return opaque_answer(value) == 42 ? 0 : 1;}\n'
+        ),
+    }, {"inputs": ["box.x", "native.c"]}, None
     yield "module_meta_function", {
         "box.x": 'module {"box/meta.x", "box/value.x"}\n',
         "box/meta.x": 'meta module int scale(int value) => value * 2;\n',
@@ -848,6 +863,36 @@ def forward_static_cases():
     }, {}, r'head|member'
 
 
+def multihop_initialization_cases():
+    files = {
+        "box.x": 'module {"box/state.x", "box/alias.x", "box/child.x"}\n',
+        "box/state.x": (
+            'module class Ticket struct {int value;} *;\n'
+            'module void Ticket.init(Ticket ticket) {ticket.value = 42; puts("GLOBAL_INIT");}\n'
+            'module void Ticket.free(Ticket ticket) {puts("GLOBAL_FREE"); Scope.free(ticket);}\n'
+            'module Ticket shared = Ticket.new();\n'
+            'module void Ticket.shutdown(void) {shared.free(); puts("GLOBAL_SHUTDOWN");}\n'
+        ),
+        "box/alias.x": 'module Ticket alias = shared;\n',
+        "box/child.x": 'module {"child/state.x", "child/value.x"}\n',
+        "box/child/state.x": 'module Ticket mirrored = alias;\n',
+        "box/child/value.x": (
+            'int answer(void) => mirrored == alias && alias == shared && mirrored.value == 42;\n'
+        ),
+        "main.x": consumer("box.x", "answer() && answer()"),
+    }
+    options = {"inputs": ["box/child/value.x", "box/alias.x", "box.x", "main.x"],
+        "warm_builds": 1,
+        "run_log_counts": {"GLOBAL_INIT": 1, "GLOBAL_FREE": 1, "GLOBAL_SHUTDOWN": 1}}
+    yield "nested_multihop_member_type_initialization_once", files, options, None
+    shared_type = 'module class Ticket struct {int value;} *;\n'
+    yield "nested_multihop_entry_type_initialization_once", {
+        **files,
+        "box.x": shared_type + files["box.x"],
+        "box/state.x": files["box/state.x"].replace(shared_type, ""),
+    }, options, None
+
+
 def local_shadow_cases():
     yield "local_shadow_of_initialized_module_object", {
         "box.x": 'module {"box/state.x"}\n',
@@ -867,7 +912,7 @@ def main():
             Path(tempfile.mkdtemp(prefix="x2c-module-probes-", dir="/tmp")))
     base.mkdir(parents=True, exist_ok=True)
     compiler_start = hashlib.sha256(compiler.read_bytes()).hexdigest()
-    selected = list(cases()) + list(extended_cases()) + list(final_cases()) + list(protocol_cases()) + list(ordering_cases()) + list(privacy_cases()) + list(initialization_cases()) + list(staged_initialization_cases()) + list(acceptance_cases()) + list(forward_static_cases()) + list(local_shadow_cases())
+    selected = list(cases()) + list(extended_cases()) + list(final_cases()) + list(protocol_cases()) + list(ordering_cases()) + list(privacy_cases()) + list(initialization_cases()) + list(staged_initialization_cases()) + list(acceptance_cases()) + list(forward_static_cases()) + list(local_shadow_cases()) + list(multihop_initialization_cases())
     names = {case[0] for case in selected}
     unknown = set(args.case) - names
     if unknown:

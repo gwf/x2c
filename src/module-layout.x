@@ -3,6 +3,7 @@
 #include "compiler.x"
 #include "ast-rewrite.x"
 #include "format.x"
+#include "generate.x"
 #include "utils.x"
 
 static typedef struct Layouts {
@@ -43,6 +44,10 @@ static void Layouts.provider(Layouts &layouts, Compiler c, List ast) {
         if (text.strip(" \t\r\n") != "#pragma once") prefix.push(node);
         continue;
       }
+      case %(function *): {
+        prefix.push(node);
+        continue;
+      }
       case %((!set ?kind (!or typedef declare)) ?base ?bindings): {
         Type type = base;
         if (type.is_static()) continue;
@@ -61,7 +66,10 @@ static void Layouts.provider(Layouts &layouts, Compiler c, List ast) {
                   $c (typedef $alias_base (bindings $declarator)));
             }
         }
-        if (!family) continue;
+        if (!family) {
+          prefix.push(node);
+          continue;
+        }
         List body = kind == <typedef> ? node
           : %(declare $base (bindings (bind () ())));
         layouts.bodies[family] = %($c $body);
@@ -137,6 +145,27 @@ static void Layouts.visit(Layouts &layouts, List family) {
 static String _layout_text(Compiler c, List nodes) =>
   c.code_pretty_string(c.emit(nodes, NULL), c.filename);
 
+/* Public inline bodies capture native state at their authored position.
+   Keep them with the prefix, under individual guards, rather than moving
+   their native includes ahead of the bodies. */
+static List _layout_prefix(Compiler c, List prefix, Map plan) {
+  Array nodes = [];
+  foreach (List node, prefix) {
+    match (node)
+      case %(function ?type (bind ?binding *) ?): {
+        Type signature = type;
+        if (signature.is_inline() && !signature.is_static()) {
+          String guard = %"__X2C_LAYOUT_INLINE_${filename_hash(binding.repr())}__";
+          plan[%(inline ${c.canonical_path(c.filename)} $binding)] = guard;
+          String body = _layout_text(c, c.module_layout_header_prefix(%($node)));
+          node = %(preproc ${%"#ifndef $guard\n#define $guard\n$body\n#endif\n"});
+        }
+      }
+    nodes.push(node);
+  }
+  return c.module_layout_header_prefix(nodes.list_free());
+}
+
 static void Layouts.alias(
   Layouts &layouts, String name, Map done, Map visiting, Array text) {
   if (name in done) return;
@@ -178,6 +207,7 @@ static String Layouts.alias_text(Layouts &layouts, List body) {
 static List _layout_macro_names(List prefix) {
   Map names = {};
   foreach (List node, prefix) {
+    if (node.car() != <preproc>) continue;
     String directive = preproc_directive(node.cadr());
     if (!directive.startswith("define") && !directive.startswith("undef"))
       continue;
@@ -241,7 +271,7 @@ Map prepare_module_layouts(List providers) {
     List prefix = layouts.prefixes[family];
     List macros = _layout_macro_names(prefix);
     text += _layout_macro_guards(macros, "push");
-    text += _layout_text(c, prefix);
+    text += _layout_text(c, _layout_prefix(c, prefix, plan));
     text += layouts.alias_text(body);
     text += _layout_text(c, %( $body ));
     for (int i = layouts.arms[family].list().len(); i; i--)
@@ -274,6 +304,11 @@ String Compiler.module_layout_prefix(Compiler c) {
     have already been emitted behind independent layout guards. */
 List Compiler.module_layout_node(Compiler c, List node) {
   if (!c.module_layout_plan) return node;
+  match (node)
+    case %(function ?type (!set ?declarator (bind ?binding *)) ?):
+      if (%(inline ${c.canonical_path(c.filename)} $binding)
+          in c.module_layout_plan)
+        return %(declare (static @type) ${ast_prototype_declarator(declarator)});
   match (node)
     case %((!set ?kind (!or typedef declare)) ?base ?bindings): {
       List family = _layout_family(base);

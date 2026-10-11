@@ -145,14 +145,10 @@ home-relative paths are the second. A configured project can use a source-based
 manifest root, independent of invocation cwd. Test alias changes, symlink
 spellings, relocation, repeated basenames, and direct-member invocation.
 
-Anonymous roots remain an open semantic question. Explore outermost enrolled
-entry-relative identity and collision detection when two independent trees use
-the same logical entry path. Also evaluate an existing project/package namespace
-as an explicit disambiguator. Do not silently choose absolute hashes, cwd,
-content hashes, or an invocation-dependent root. The decision must explain
-stability under source edits and how two such roots can coexist in one program.
-If existing configuration cannot express a coherent rule, present that narrow
-choice to Gary before implementing a new caller obligation or source syntax.
+Anonymous roots use outermost entry-relative identity. Two roots with colliding
+emitted identities reject before native linkage. Existing package/project
+namespaces or distinct entry names disambiguate them. Source edits, invocation
+cwd, and physical relocation do not change this identity.
 
 ### 6. Which capabilities are implemented but insufficiently proven?
 
