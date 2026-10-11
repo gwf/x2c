@@ -600,6 +600,7 @@ static void _needed_types(List syntax, Map rows, Map needed) {
   while (pending.len()) {
     Var item = pending.take_last();
     if (item is not <list>) continue;
+    match (item) case %(declaration-provider *): continue;
     match (item)
       case %((!or declare typedef function) ?base *)
         if (base.type().is_static()): continue;
