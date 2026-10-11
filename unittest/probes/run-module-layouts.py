@@ -442,6 +442,25 @@ def cases():
     }, options, None
     yield "value_layout_warm_replay", layout, {
         **options, "warm_builds": 1}, None
+    yield "retained_ordinary_module_dependency_removed", {
+        "box.x": 'module {"box/value.x"}\n',
+        "box/value.x": 'int answer(void) => 42;\n',
+        "main.x": probes.consumer("box.x", "answer() == 42"),
+    }, {"inputs": ["box.x", "main.x"], "warm_builds": 1,
+        "mutations": [{"main.x": 'int main(void) => 0;\n'}],
+        "inactive_metadata": ["main"]}, None
+    for first in ("box.h", "x2c.h"):
+        second = "x2c.h" if first == "box.h" else "box.h"
+        yield "public_c_header_order_" + first.replace(".", "_"), {
+            "box.x": 'module {"box/outer.x", "box/inner.x"}\n',
+            "box/inner.x": 'typedef struct Inner {int value;} Inner;\n',
+            "box/outer.x": ('typedef struct Outer {Inner inner;} Outer;\n'
+                            'int answer(void) {Outer item = {{42}}; '
+                            'return item.inner.value;}\n'),
+            "main.c": (f'#include "{first}"\n#include "{second}"\n'
+                       'int main(void) {Outer item = {{42}}; '
+                       'return answer() == item.inner.value ? 0 : 1;}\n'),
+        }, {"inputs": ["box.x", "main.c"]}, None
 
 
 def main():
@@ -457,6 +476,14 @@ def main():
         if args.case and case[0] not in args.case:
             continue
         result = probes.run_case(args.compiler.resolve(), base, *case)
+        for stem in case[2].get("inactive_metadata", []):
+            metadata = list((base / case[0] / "build" / "gen").rglob(
+                stem + ".xnm"))
+            inactive = bool(metadata) and all(
+                json.loads(path.read_text()).get("active") is False
+                for path in metadata)
+            result.setdefault("inactive_metadata", {})[stem] = inactive
+            result["passed"] &= inactive
         results.append(result)
         print(("PASS " if result["passed"] else "FAIL ") + case[0], flush=True)
     (base / "results.json").write_text(json.dumps(results, indent=2) + "\n")
