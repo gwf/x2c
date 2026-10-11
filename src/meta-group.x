@@ -933,7 +933,7 @@ static List Compiler._targets(Compiler c, List named, List functions) {
   if (c.meta_build) {
     entries.push(
       %(map-entry ${x2c_literal_string("initializers")}
-        ${shape(initializers.list_free())}));
+        ${c.rebuild_expression(%("Map"), shape(initializers.list_free()))}));
     entries.push(
       %(map-entry ${x2c_literal_string("initializer-order")}
         ${c.cache_literal_list(initializer_order.list_free())}));
