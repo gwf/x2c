@@ -65,7 +65,8 @@ static typedef struct Helper {
   Frontend frontend, Array owners, Map packages;
   Toolchain toolchain, String include, identity, directory;
   List flags, Array modules;
-  Map deps, before, readiness, Array groups, built, failures, objects, int changed;
+  Map deps, before, readiness;
+  Array groups, built, failures, objects, retained_dependencies, int changed;
 } Helper;
 
 static Helper *active_helper = NULL;
@@ -79,7 +80,7 @@ void Frontend.prepare_meta(Frontend f, List inputs) {
     .frontend = f, .owners = [],
     .packages = {}, .deps = {}, .before = {}, .readiness = {},
     .groups = [], .built = [],
-    .failures = [], .objects = []};
+    .failures = [], .objects = [], .retained_dependencies = []};
   h.scan(inputs);
   String include = NULL, cc = Compiler.meta_cc(include);
   String root = script_cache_root(), stamp = build_module_stamp();
@@ -490,9 +491,11 @@ static void Helper.parse(Helper &h, String path, int index) {
 static void Helper.parse_source(
   Helper &h, Frontend f, String path, int index) {
   ParsedUnit unit;
+  int dependencies = h.retained_dependencies.len();
+  int failures = h.failures.len(), objects = h.objects.len();
   int started = f.start(path, unit);
   defer unit.close();
-  defer h.export(unit.context);
+  defer h.export(unit.context, dependencies, failures, objects);
   unit.compiler.meta_build = index + 1;
   unit.compiler.diagnostics.limit = 0;
   if (!started) return;
@@ -502,18 +505,30 @@ static void Helper.parse_source(
       unit.compiler.diagnostics.entries().repr());
   }
   foreach (Var (read, _), unit.compiler.resolved_translation_dependencies())
-    h.deps[read] = 1;
+    h.dependency(read);
 }
 
-/* Nested provider parsing can append records while an outer Context is
-   current. Move every retained record into its parent before that closes. */
-static void Helper.export(Helper &h, Context context) {
-  h.deps = context.export(h.deps.copy());
-  h.readiness = context.export(h.readiness.copy());
-  h.groups = context.export(h.groups.copy());
-  h.built = context.export(h.built.copy());
-  h.failures = context.export(h.failures.copy());
-  h.objects = context.export(h.objects.copy());
+/* Only records added during this provider can belong to its Context.
+   Nested providers export into this one before it exports to its parent. */
+static void Helper.export(
+  Helper &h, Context context, int dependencies, int failures, int objects) {
+  for (int i = failures; i < (int) h.failures.len(); i++)
+    h.failures[i] = context.export(h.failures[i]);
+  for (int i = objects; i < (int) h.objects.len(); i++)
+    h.objects[i] = context.export(h.objects[i]);
+  for (int i = dependencies; i < (int) h.retained_dependencies.len(); i++) {
+    String previous = h.retained_dependencies[i];
+    String retained = context.export(previous);
+    h.deps.del(previous);
+    h.deps[retained] = 1;
+    h.retained_dependencies[i] = retained;
+  }
+}
+
+static void Helper.dependency(Helper &h, String path) {
+  if (path in h.deps) return;
+  h.deps[path] = 1;
+  h.retained_dependencies.push(path);
 }
 
 /* Compiles the group a parse left for table `index`, adding the headers it
@@ -529,15 +544,15 @@ static String Helper.compile(Helper &h, int index, String unit) {
       "-iquote" ${Path.dirname(unit)} "-iquote" ${h.include} @{h.flags}
       "-MD" "-MF" ${%"$base.d"} "-c" ${%"$base.c"} "-o" ${%"$base.o"}),
     h.directory);
-  _add_depfile(%"$base.d", h.deps);
+  h.add_depfile(%"$base.d");
   return failure;
 }
 
 /* Adds each dependency of the depfile at `path` to `deps`. */
-static void _add_depfile(String path, Map deps) {
+static void Helper.add_depfile(Helper &h, String path) {
   if (!Path.is_file(path)) return;
   foreach (String dependency, translation_depfile_parse(Path.read_text(path)))
-    deps[Path.absolute(dependency)] = 1;
+    h.dependency(Path.absolute(dependency));
 }
 
 /* A table whose parse left a group joins the groups, with why it does not
