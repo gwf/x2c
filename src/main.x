@@ -114,6 +114,14 @@ static int _parse_unit(Frontend frontend, String filename, ParsedUnit &unit) {
   _report_diagnostics(c);
   if (!collected) exit(1);
   if (_inspect_collected(unit, dump)) return 0;
+  return _bind_collected_unit(frontend, filename, unit);
+}
+
+static int _bind_collected_unit(
+  Frontend frontend, String filename, ParsedUnit &unit) {
+  CliRequest request = frontend.request;
+  Symbol dump = request.dump;
+  Compiler c = unit.compiler;
   if (!unit.parse()) _fail(c);
   c.recovery_depth = 0;
   if (_inspect_parsed(unit, filename, dump)) return 0;
@@ -361,27 +369,22 @@ static List Translation.translate_modules(Translation &t) {
   if (!groups) groups = %($paths);
   foreach (String provider, paths)
     registry[%(directories $provider)] = t.output_dir(inputs[provider]);
-  List outputs = NULL;
-  int done = 0;
+  String seed_provider = seed.compiler.canonical_path(seed.compiler.filename);
+  String seed_input = inputs[seed_provider];
+  if (t.build) t.build.begin_translation(seed_input);
+  else report_progress(<translate>, 0, t.total, seed_input);
+  (void) _bind_collected_unit(t.frontend, seed_input, seed);
+  List outputs = t.module_provider_outputs(seed, seed_input, registry, NULL);
+  int done = 1;
   foreach (List group, groups)
     foreach (String provider, group) {
+      if (provider == seed_provider) continue;
       String input = inputs[provider];
       if (t.build) t.build.begin_translation(input);
       else report_progress(<translate>, done, t.total, input);
       ParsedUnit unit;
       (void) _parse_unit(t.frontend, input, unit);
-      Compiler c = unit.compiler;
-      Map captured = capture_module_provider(c, unit.ast);
-      Map active = registry.copy();
-      active.merge(captured);
-      c.module_layout_plan = active;
-      String directory = t.output_dir(input);
-      outputs = outputs.append(generate_code_files(c, unit.ast, directory));
-      outputs = outputs.append(
-        translation_depfile_files(t.request, c, input, directory));
-      if (t.request.fatal_warnings && c.diagnostics()) exit(1);
-      outputs = unit.context.export(outputs);
-      registry.merge(unit.context.export(captured));
+      outputs = t.module_provider_outputs(unit, input, registry, outputs);
       unit.close();
       done++;
     }
@@ -394,6 +397,24 @@ static List Translation.translate_modules(Translation &t) {
     else report_progress(<translate>, i + 1, t.total, input);
   }
   return ordinary.list_free();
+}
+
+/* Export only this provider's additions before changing the seed-owned Map.
+   The generated file list is immutable and exports with its new tail. */
+static List Translation.module_provider_outputs(
+  Translation &t, ParsedUnit &unit, String input, Map registry, List outputs) {
+  Compiler c = unit.compiler;
+  Map captured = capture_module_provider(c, unit.ast);
+  Map active = registry.copy();
+  active.merge(captured);
+  c.module_layout_plan = active;
+  String directory = t.output_dir(input);
+  outputs = outputs.append(generate_code_files(c, unit.ast, directory));
+  outputs = outputs.append(
+    translation_depfile_files(t.request, c, input, directory));
+  if (t.request.fatal_warnings && c.diagnostics()) exit(1);
+  registry.merge(unit.context.export(captured));
+  return unit.context.export(outputs);
 }
 
 static void Translation.translate_serial(Translation &t) {
