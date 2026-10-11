@@ -7,7 +7,7 @@
 #include "utils.x"
 
 static typedef struct Layouts {
-  Map bodies, aliases, owners, prefixes, arms, edges, visiting, finished;
+  Map bodies, variants, aliases, owners, prefixes, arms, edges, visiting, finished;
   Array order;
 } Layouts;
 
@@ -73,6 +73,8 @@ static void Layouts.provider(Layouts &layouts, Compiler c, List ast) {
         List body = kind == <typedef> ? node
           : %(declare $base (bindings (bind () ())));
         layouts.bodies[family] = %($c $body);
+        layouts.variants[family] = cons(
+          %($c $body ${prefix.list()} $arms), layouts.variants[family]);
         layouts.owners[family] = c.canonical_path(c.filename);
         layouts.prefixes[family] = prefix.list();
         layouts.arms[family] = arms;
@@ -106,6 +108,20 @@ static void Layouts.require_type(
     }
 }
 
+static void Layouts.require_body(
+  Layouts &layouts, Compiler c, Sym resolver, List body, Map needed) {
+  Type type = body.cadr();
+  match (type.base_type())
+    case %((!or struct union) ? (fields *fields)):
+      foreach (List field, fields) {
+        List declaration = Ast.without_origin(field);
+        match (declaration) case %(declare ?base (bindings *declarators)):
+          foreach (List declarator, declarators)
+            layouts.require_type(c, resolver,
+              %(declare $base (bindings $declarator)).type_from_ast(), needed);
+      }
+}
+
 static void Layouts.dependencies(Layouts &layouts) {
   Map aliases = {};
   foreach (Var (name, row), layouts.aliases) {
@@ -118,8 +134,8 @@ static void Layouts.dependencies(Layouts &layouts) {
     Sym resolver = Sym.new(c);
     resolver.reset_overlay(c.sym.global_symbols(), aliases);
     List family = key;
-    foreach (List row, c.sym.field_order(family).cdr())
-      layouts.require_type(c, resolver, row.cadr(), needed);
+    foreach (List variant, layouts.variants[family].list())
+      layouts.require_body(c, resolver, variant.cadr(), needed);
     Array prerequisites = [];
     foreach (List prerequisite, needed.keys()) prerequisites.push(prerequisite);
     layouts.edges[family] = prerequisites.list_free();
@@ -233,7 +249,7 @@ static String _layout_macro_guards(List names, String operation) {
    Consumers export only Strings and keys as their nested Contexts close. */
 Map prepare_module_layouts(List providers) {
   Layouts layouts = {
-    .bodies = {}, .aliases = {}, .owners = {}, .prefixes = {}, .arms = {},
+    .bodies = {}, .variants = {}, .aliases = {}, .owners = {}, .prefixes = {}, .arms = {},
     .edges = {},
     .visiting = {}, .finished = {}, .order = []};
   foreach (List provider, providers) {
@@ -268,15 +284,16 @@ Map prepare_module_layouts(List providers) {
     String text = "";
     foreach (List dependency, layouts.edges[family].list())
       text += rendered[dependency].string();
-    List prefix = layouts.prefixes[family];
-    List macros = _layout_macro_names(prefix);
-    text += _layout_macro_guards(macros, "push");
-    text += _layout_text(c, _layout_prefix(c, prefix, plan));
-    text += layouts.alias_text(body);
-    text += _layout_text(c, %( $body ));
-    for (int i = layouts.arms[family].list().len(); i; i--)
-      text += "#endif\n";
-    text += _layout_macro_guards(macros.reverse(), "pop");
+    foreach (List variant, layouts.variants[family].list().reverse()) {
+      List body = variant.cadr(), prefix = variant.caddr(), arms = variant.cddr().cadr();
+      List macros = _layout_macro_names(prefix);
+      text += _layout_macro_guards(macros, "push");
+      text += _layout_text(c, _layout_prefix(c, prefix, plan));
+      text += layouts.alias_text(body);
+      text += _layout_text(c, %( $body ));
+      for (int i = arms.len(); i; i--) text += "#endif\n";
+      text += _layout_macro_guards(macros.reverse(), "pop");
+    }
     rendered[family] = %"#ifndef $guard\n#define $guard\n$text\n#endif\n";
     plan[%(body $family)] = guard;
   }
