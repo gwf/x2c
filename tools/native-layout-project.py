@@ -58,7 +58,7 @@ class Packing:
             raise ProjectionError(f'unsupported pack arguments: {arguments}')
 
 
-def extract(text):
+def extract(text, selected_edges=None):
     """Keep native tokens intact; region ownership comes from the compiler."""
     packing, regions, stack = Packing(), {}, []
     initializer_edges = {}
@@ -122,6 +122,9 @@ def extract(text):
             raise ProjectionError('unowned preprocessed tokens: ' + line.strip())
     if stack:
         raise ProjectionError(f'unclosed region: {stack[-1]["name"]}')
+    if selected_edges is not None:
+        selected_edges.extend((source, target) for source, targets in
+                              initializer_edges.items() for target in targets)
     visiting, finished = set(), set()
     def check(binding):
         if binding in visiting:
@@ -168,11 +171,11 @@ def load_metadata(path):
     return primary
 
 
-def project(text, metadata):
+def project(text, metadata, selected_edges=None):
     """Order exact regions using producer-supplied binding prerequisites."""
     if metadata['format'] not in (1, 2):
         raise ProjectionError('unknown metadata format')
-    regions = extract(text)
+    regions = extract(text, selected_edges)
     records = {row['id']: row for row in metadata['regions']}
     if len(records) != len(metadata['regions']):
         raise ProjectionError('duplicate metadata identity')
@@ -265,7 +268,9 @@ def compile_native(arguments):
         return status
     try:
         configuration = load_metadata(metadata)
-        destination.write_text(project(expanded.read_text(), configuration))
+        edges = []
+        destination.write_text(project(expanded.read_text(), configuration, edges))
+        Path(str(destination) + ".xne").write_text(json.dumps(sorted(edges)))
         retain_projection_inputs(depfile, configuration)
     finally:
         expanded.unlink(missing_ok=True)
@@ -280,7 +285,9 @@ def main():
             return compile_native(sys.argv[2:])
         expanded, metadata, destination = map(Path, sys.argv[1:4])
         configuration = load_metadata(metadata)
-        result = project(expanded.read_text(), configuration)
+        edges = []
+        result = project(expanded.read_text(), configuration, edges)
+        Path(str(destination) + ".xne").write_text(json.dumps(sorted(edges)))
         if len(sys.argv) == 5:
             retain_projection_inputs(sys.argv[4], configuration)
         destination.write_text(result)
