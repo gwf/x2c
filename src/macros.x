@@ -4933,8 +4933,8 @@ int Compiler.take_code_value(
 }
 
 /* Applies a carrier's effects in order and returns what replaces each
-   effect's token in the code. Placed code and early declarations see the
-   tokens of the effects before them. */
+   effect's token in the code. Placed code sees the tokens of the effects
+   before it. */
 static Map Compiler._code_effects(Compiler c, Var effects) {
   Map replacements = {};
   foreach (List effect, effects)
@@ -4952,13 +4952,6 @@ static Map Compiler._code_effects(Compiler c, Var effects) {
       case %(cleanup ?token ?placed): {
         replacements[token] = placed;
         c.needs_exception = 1;
-      }
-      case %(early ?key ?binding ?declaration): {
-        $adapter.memo(c, key, replacements[binding]) {
-          List early = c.bind_syntax(
-            _replace_bindings(declaration, replacements), AST_UNIT, NULL);
-          c.add_early(early);
-        }
       }
       case %(place ?(List where) ?code):
         c.place(where, _replace_bindings(code, replacements));
