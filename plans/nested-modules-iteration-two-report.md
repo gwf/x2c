@@ -1,21 +1,25 @@
 # Nested modules: iteration-two research report
 
 Status: isolated private spike; full specification remains unproven.
-The compiler at 99f0f4e2 regenerated all 78 runtime and 65 compiler
-sources, compiled their native objects, and linked the regenerated compiler.
-The seven-file macro migration also passes its focused check.
-Evidence: `debug/combined-final-descriptor-current-regeneration.log`.
+Starting revision: c09d9a917f4ab1afc072b3fb2ece71e7bb2a6e04.
+The combined compiler at 74836bfc completed bootstrap refresh and clean
+recovery. Bootstrap and stage zero match across 340 generated C, header and
+native-layout metadata files. Stage zero and strict stage one also match.
+Evidence: `debug/final-private-gate-second-attempt.log`.
 
-Repairs at 01bd3982 add completed ancestor constructor declarations, optional
-package manifest values, and selected native initializer receipts for module
-groups without layout metadata. The combined compiler builds successfully. Its module matrix passes 113/113;
-its native-meta matrix passes 10/17. Bootstrap recovery remains pending.
-The receipt fallback adds one configured preprocessing pass for each previously
-unprojected module-native group.
+The complete correctness gate has not passed. Subsequent checks found native
+header readiness and cleanup-lowering regressions in CLI reuse and book output.
+Bounded repairs are integrated and undergoing serial validation. The gate also
+found authored source formatting violations; baseline allowances are unchanged.
+The focused CLI translation-reuse control now passes its six cold/retained
+include-selection steps after the header readiness repair. Full verification
+is still pending.
+All 102 book output samples also pass after the cleanup and meta-state repairs.
+The first atomicity failure was an obsolete interface-version expectation.
+Its focused rerun passes after the expectation changed from 11 to 15.
 
-Current bootstrap refresh, independently relocated bootstrap recovery,
-fixed-point self-host comparison, and the final existing correctness gate
-remain pending. Successful regeneration does not establish those results.
+Independent relocated bootstrap recovery and matched native artifact costs
+remain pending. The feature matrices below precede these integration repairs.
 Do not integrate or publish the spike without explicit adoption authorization.
 
 ## Latest acceptance evidence
@@ -34,7 +38,7 @@ This source repair does not prove general SCC declaration collection.
 
 | Workload | Latest completed evidence | Result and limit |
 | --- | --- | --- |
-| Current compiler regeneration | 99f0f4e2, `debug/combined-final-descriptor-current-regeneration.log` | All 78 runtime and 65 compiler sources regenerate, native compile and link successfully; bootstrap recovery and fixed-point equality pending |
+| Current compiler regeneration | 99f0f4e2, `debug/combined-final-descriptor-current-regeneration.log` | All 78 runtime and 65 compiler sources regenerate, native compile and link successfully; later combined bootstrap recovery and fixed-point equality pass |
 | Durable native-meta module controls | 01bd3982, `/tmp/x2c-module-native-meta-98tou6tr/results.json` | 10/17 pass; seven required cases fail, detailed below |
 | Module matrix | 01bd3982, `/tmp/x2c-module-probes-za4z56xq/results.json` | 113/113 pass, including the repaired nested entry constructor and retained initialization |
 | Layout matrix | 01bd3982, `/tmp/x2c-layouts-_55e7pvq/results.json` | 70/71 pass; only ordinary packed-provider syntax fails, also unsupported by the baseline |
@@ -42,7 +46,7 @@ This source repair does not prove general SCC declaration collection.
 | Collection order and identity | 01bd3982, `debug/final-receipts-collection-order.log` and `debug/final-receipts-identity.log` | Standalone/after-module parity, relocation identity and collision controls pass |
 | Reversed object order | 01bd3982, `/tmp/x2c-reversed-object-order-o426j671/results.json` | Both member-type and entry-type cases pass original/reversed object orders; initialization, cleanup and shutdown occur once |
 | Package delivery | 01bd3982, `/tmp/x2c-nested-package-delivery-vrhwqble/results.json` | Canonical Make/archive, consumer, bundle, installation and relocated native-C rebuild controls pass |
-| Structured bootstrap | 12942052, `debug/combined-origin-reuse-bootstrap-refresh.log` | Historical hierarchical artifact refresh compiles and links; current and independent relocated recovery pending |
+| Structured bootstrap | 12942052, `debug/combined-origin-reuse-bootstrap-refresh.log` | Historical hierarchical artifact refresh compiles and links; combined recovery now passes; independent relocated recovery pending |
 
 The current native-meta positives that pass are `module_prerequisite`,
 `nested_private_meta`, `ordinary_runtime_cycle`, `package_private_meta`,
@@ -86,6 +90,31 @@ Their focused repairs are implemented. Current matrix receipts must determine
 whether each repaired behavior passes; historical failures are not current
 failure claims.
 
+## Combined integration checks
+
+The existing serial gate reached clean bootstrap recovery and strict stage one.
+Both generated comparisons pass across 340 C/H/XNM files. Its remaining
+components then exposed integration defects, rather than a bootstrap defect.
+
+The CLI include-selection reuse control passes after ordinary provider header
+preparation. The complete book-output check passes all 102 compiled samples
+with matching output after cleanup isolation and binding-based meta-state naming.
+Evidence: `debug/final-doc-output-object-naming.log`.
+
+Preparing inactive module headers by parsing whole providers executed later
+child producers. The guard restores the declaration-only module path.
+Inactive module-header readiness remains an implementation gap.
+
+The final native matrix is 11/17 on compiler 73c791df. Both entry and
+direct-member lifetime pass after retaining borrowed meta-stub signatures.
+The six remaining failures are ordinary active prefixes, ordinary module
+shared state/cleanup, module meta shared state and the indirect initializer cycle.
+Receipt: `/tmp/x2c-module-native-meta-mtrcpz5l/results.json`.
+No native lifetime regression remains in these controls.
+
+The final three lint violations have whitespace repairs at 436c9f71.
+No baseline allowances changed; final lint verification remains pending.
+
 ## Full specification coverage
 
 Passing controls establish their tested cases, not an entire specification row.
@@ -95,12 +124,12 @@ Passing controls establish their tested cases, not an entire specification row.
 | Membership, ownership and nesting | Existing module fixtures cover three levels, duplicate entries, missing members, unlisted consumers, ancestor/sibling privacy and direct members | Current matrix 113/113; comprehensive symlink/ownership-path mutation combinations unattempted |
 | Static/module/public visibility | Function, type, state, macro, alias and protocol fixtures retain exact binding ownership | Full declaration/definition disagreement combinations and repeated private native-meta type spellings insufficiently exercised |
 | Nested public exports and packages | Current durable package meta positives and package-private diagnostic pass; ordinary package naming/aliases/with fixtures exist | Canonical Make/archive, bundle, installation and relocated-C consumer pass; full package protocol/native-module/foreign-name filtering unattempted |
-| Prefix/suffix effects and ordered producers | Lisp, alias, declaration-producer, sibling include and direct-member parity fixtures exist; real macro recipes regenerate compiler | Current reached ordinary prefixes and direct-member native state fail; general readiness contract remains unproven |
+| Prefix/suffix effects and ordered producers | Lisp, alias, declaration-producer, sibling include and direct-member parity fixtures exist; real macro recipes regenerate compiler | 01bd reached ordinary prefixes and direct-member native state fail; subsequent repairs require final reruns |
 | Declaration collection and scheduling | Collection supplies authoritative registry; Tarjan orders provider body work; seed plus current provider limits retained contexts; full compiler regenerates | This is not SCC-driven declaration collection. Seed binds first; actual producer prerequisites remain separate |
 | Native headers, layouts and hidden support | Target preprocessing selects namespace and complete-family demands; private aliases and opaque completion repairs implemented | Current layout matrix 70/71; arbitrary pragmas, header-injected semantic fields and fully conditional semantic layout remain unproven |
-| Shared objects, initialization and cleanup | Existing runtime shared-object fixtures and historical reversed-link controls pass; current native entry lifetime passes | Current native initialized state/cleanup/direct-member cases fail; corrected direct native cycle rejects, while the indirect-call cycle is missed |
+| Shared objects, initialization and cleanup | Existing runtime shared-object fixtures and historical reversed-link controls pass; current native entry lifetime passes | 01bd native state/cleanup/direct-member cases fail; direct cycle rejects and indirect-call cycle is missed; final reruns pending |
 | Cache equivalence and invalidation | Whole-65 exact replay passes at 01bd in two homes; membership/preamble/nearer-header mutation fixtures check outcomes | Complete 01bd replay passes; invalidated-versus-fresh full artifact/binding equality is not established by outcome-only mutation tests |
-| Generated outputs and bootstrap | Seven-file macro migration and current full compiler regeneration pass; historical hierarchical bootstrap refresh works | Current bootstrap refresh, independent relocated recovery, fixed-point equality and final correctness gate pending |
+| Generated outputs and bootstrap | Seven-file macro migration and current full compiler regeneration pass; historical hierarchical bootstrap refresh works | Combined bootstrap recovery and fixed-point equality pass; independent relocated recovery and final correctness gate remain pending |
 | Include portability | Canonical resolved dependencies and native companion metadata implemented | Macro-spelled bootstrap includes, configured-root-only native closure and other platforms insufficiently exercised |
 | Cost and performance | Exact historical matched measurements retained below | Final matched native artifact sizes, whole-workload counts, quiet-host timing and peak memory unmeasured |
 
@@ -173,23 +202,24 @@ as an invalid comparison with the candidate's compiler and runtime objects.
 
 ## Current source size
 
-These counts use committed source 01bd3982 and the exact starting dev baseline.
+These source-only counts use 436c9f71 and the exact starting dev baseline.
 The authored comparison excludes generated `src/linked-meta.x` from both trees.
+The subsequent private signature-retention repair adds two authored lines.
 No generated bootstrap artifacts contribute to these source counts.
 
 | Source corpus | Files | Lines | Bytes |
 | --- | ---: | ---: | ---: |
 | Baseline authored compiler | 54 | 52,413 | 1,963,433 |
-| Current authored compiler | 64 | 56,461 | 2,124,330 |
-| Baseline tracked compiler .x, including linked-meta.x | 55 | 53,225 | 1,994,997 |
-| Current tracked compiler .x, including linked-meta.x | 65 | 57,273 | 2,155,894 |
+| Candidate authored compiler | 64 | 56,595 | 2,126,498 |
+| Baseline tracked compiler, including linked-meta.x | 55 | 53,225 | 1,994,997 |
+| Candidate tracked compiler, including linked-meta.x | 65 | 57,407 | 2,158,062 |
 | Baseline macro implementation | 1 | 5,461 | 209,276 |
-| Current seven-file macro implementation | 7 | 5,543 | 211,361 |
+| Candidate seven-file macro implementation | 7 | 5,545 | 211,388 |
 
-Current authored compiler source adds 4,048 lines and 160,897 bytes versus
-the starting tree. These totals include the complete experimental implementation;
-they do not measure nesting alone. Record:
-`.context/component-scheduling/final-source-size.json` in the scheduling worker.
+Candidate authored compiler source adds 4,182 lines and 163,065 bytes versus
+the starting tree, across 35 changed authored compiler owners. These totals
+include the whole experimental implementation; they do not measure nesting alone.
+Record: `.context/nested-modules/iteration-two/final-source-size.json`.
 
 ## Latest projection work-count evidence
 
@@ -203,10 +233,19 @@ Receipt: /tmp/x2c-origin-reuse-pvcop9hl/results.json.
 This partial workload measures repeated work, not elapsed time or full-build
 throughput. The hot host prevents a useful comparative timing claim.
 
+## Unmeasured nesting costs
+
+The flat/nested ownership comparison holds declarations and file counts fixed,
+but measures only candidate-path probes. The diamond comparison measures two
+layout implementations. Neither is a complete nesting-cost assessment.
+Authored implementation size, owner components, translated units, native artifact
+sizes, retained rebuild work and cold/warm translation cost still need a matched
+flat/nested comparison. Quiet-host timing and peak memory remain unmeasured.
+
 ## Recommendation
 
 Revise and keep isolated. Current native state, readiness and cycle failures
-remain material. Bootstrap recovery, final correctness validation and final
-matched cost evidence are also incomplete. These results reject the tested
+remain material. Combined bootstrap recovery and self-host equality pass. Final correctness
+validation and matched cost evidence remain incomplete. These results reject the tested
 implementation paths; they do not establish that nested modules are impossible.
 Any later adoption requires explicit authorization.

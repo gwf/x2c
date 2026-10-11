@@ -12,12 +12,12 @@ Complete aggregate prerequisites for module emission.
 
 | Function | Summary |
 | --- | --- |
-| [`capture_module_provider`](#capture_module_provider) | Retains one active provider's private emitted spellings, without its AST. |
+| [`capture_module_provider`](#capture_module_provider) | Retains an active provider's private emitted spellings without its AST. |
 | [`prepare_module_layout_registry`](#prepare_module_layout_registry) | Indexes original declaration namespaces and their exact provider edges. |
 | [`Compiler.module_layout_alias_demands`](#Compiler.module_layout_alias_demands) | Marks a typedef's selected namespace and complete array-element needs. |
 | [`Compiler.module_layout_demands`](#Compiler.module_layout_demands) | Marks conditional complete-field demands in the portable native body. |
 | [`Compiler.module_layout_node`](#Compiler.module_layout_node) | Rewrites the indexed file-private spellings without moving declarations. |
-| [`Compiler.module_namespace_id`](#Compiler.module_namespace_id) | Returns an original provider's namespace vertex before private rewriting. |
+| [`Compiler.module_namespace_id`](#Compiler.module_namespace_id) | Returns the provider namespace vertex before private rewriting. |
 
 ### Functions
 
@@ -25,9 +25,9 @@ Complete aggregate prerequisites for module emission.
 
 `Map capture_module_provider(Compiler c, List ast)`
 
-Retains one active provider's private emitted spellings, without its AST.
+Retains an active provider's private emitted spellings without its AST.
 
-Source: `src/module-layout.x:362`
+Source: `src/module-layout.x:367`
 
 #### prepare_module_layout_registry
 
@@ -35,7 +35,7 @@ Source: `src/module-layout.x:362`
 
 Indexes original declaration namespaces and their exact provider edges.
 
-Source: `src/module-layout.x:277`
+Source: `src/module-layout.x:278`
 
 ### `Compiler`
 
@@ -72,6 +72,6 @@ Source: `src/module-layout.x:128`
 
 `String Compiler.module_namespace_id(Compiler c, String path, List key)`
 
-Returns an original provider's namespace vertex before private rewriting.
+Returns the provider namespace vertex before private rewriting.
 
-Source: `src/module-layout.x:354`
+Source: `src/module-layout.x:359`

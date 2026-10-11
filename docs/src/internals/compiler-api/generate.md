@@ -62,7 +62,7 @@ Returns the generated header and source of the lowered `ast` as `(hfile
 htext cfile ctext)`, named from `basename`, without writing them. It
 affects the compiler as `generate_code` does.
 
-Source: `src/generate.x:93`
+Source: `src/generate.x:95`
 
 #### generate_code_text_files
 
@@ -71,7 +71,7 @@ Source: `src/generate.x:93`
 Returns all portable text outputs, including native projection metadata.
 Like generate_code_text, this generates the unit exactly once.
 
-Source: `src/generate.x:98`
+Source: `src/generate.x:100`
 
 #### publish_generated_files
 
@@ -80,7 +80,7 @@ Source: `src/generate.x:98`
 Publishes immutable generated outputs after their semantic Contexts close.
 This operation uses no compiler, symbol, type or source-token state.
 
-Source: `src/generate.x:79`
+Source: `src/generate.x:81`
 
 ### `Compiler`
 
@@ -99,7 +99,7 @@ token range and privacy of the top-level form that produced the
 definition; either is empty when the compiler made the definition.
 `LINE` is 1 and `DOC` empty for a definition without authored source.
 
-Source: `src/generate.x:1869`
+Source: `src/generate.x:1876`
 
 <a id="Compiler.dump_definitions"></a>
 #### Compiler.dump_definitions
@@ -111,7 +111,7 @@ Prints the `--dump-definitions` projection of the lowered unit `ast`:
 with one, then one row per `Compiler.definition_rows` entry. The
 command-line reference in the book describes the fields.
 
-Source: `src/generate.x:1962`
+Source: `src/generate.x:1969`
 
 <a id="Compiler.init_statements"></a>
 #### Compiler.init_statements
@@ -120,7 +120,7 @@ Source: `src/generate.x:1962`
 
 Returns the statements queued for `phase`, in the order they were added.
 
-Source: `src/generate.x:1404`
+Source: `src/generate.x:1411`
 
 <a id="Compiler.module_projection_namespace"></a>
 #### Compiler.module_projection_namespace
@@ -129,7 +129,7 @@ Source: `src/generate.x:1404`
 
 Finds a collected namespace after reversing private emitted spelling.
 
-Source: `src/generate.x:183`
+Source: `src/generate.x:189`
 
 <a id="Compiler.place_source_prelude"></a>
 #### Compiler.place_source_prelude
@@ -142,7 +142,7 @@ conditional containing that first use follows the declarations. A unit
 without such a use gets them at its end, after the declarations they
 may assign.
 
-Source: `src/generate.x:1222`
+Source: `src/generate.x:1228`
 
 ### `Init`
 
@@ -155,7 +155,7 @@ Returns `function` with its entry setup: the protocol initializer and
 the type initializer run once, and a `guarded` entry calls the region's
 initializer unless its guard is set.
 
-Source: `src/generate.x:1187`
+Source: `src/generate.x:1193`
 
 ## Public types
 
@@ -175,7 +175,7 @@ the unit's shutdown function, `synthetic` is the synthetic initializer or
 NULL, and `reachable` holds the entries a cache-only file guards, or is
 NULL when every public entry is guarded.
 
-Source: `src/generate.x:1149`
+Source: `src/generate.x:1155`
 
 ## Design notes
 

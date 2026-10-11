@@ -120,7 +120,7 @@ facts, binding and generated-name counters, initializer names, and the
 parser's ancestors and placements. It does not snapshot parser position
 or other compiler state.
 
-Source: `src/symbols.x:1372`
+Source: `src/symbols.x:1373`
 
 <a id="Compiler.drop_fact"></a>
 #### Compiler.drop_fact
@@ -261,7 +261,7 @@ Source: `src/symbols.x:491`
 
 Resolves typedefs or one pointer layer to an aggregate tag, or `NULL`.
 
-Source: `src/symbols.x:1345`
+Source: `src/symbols.x:1346`
 
 <a id="Sym.at_file_scope"></a>
 #### Sym.at_file_scope
@@ -426,7 +426,7 @@ Source: `src/symbols.x:134`
 
 Stops one transaction's semantic write log.
 
-Source: `src/symbols.x:1459`
+Source: `src/symbols.x:1460`
 
 <a id="Sym.enumerator_owner"></a>
 #### Sym.enumerator_owner
@@ -444,7 +444,7 @@ Source: `src/symbols.x:461`
 
 Returns recorded fields in source order, or `NULL`.
 
-Source: `src/symbols.x:1323`
+Source: `src/symbols.x:1324`
 
 <a id="Sym.file_statics"></a>
 #### Sym.file_statics
@@ -609,7 +609,7 @@ Source: `src/symbols.x:987`
 Records that the field `name` of `aggregate` was declared with the field
 keyword `mark`, such as `delegate`, and that `aggregate` declares one.
 
-Source: `src/symbols.x:1327`
+Source: `src/symbols.x:1328`
 
 <a id="Sym.mark_static"></a>
 #### Sym.mark_static
@@ -628,7 +628,7 @@ Source: `src/symbols.x:275`
 Returns the `(NAME TYPE)` rows of the fields of `aggregate` declared with
 `mark`, in declaration order.
 
-Source: `src/symbols.x:1334`
+Source: `src/symbols.x:1335`
 
 <a id="Sym.new"></a>
 #### Sym.new
@@ -845,7 +845,7 @@ Source: `src/symbols.x:216`
 
 Returns whether a semantic transaction is open.
 
-Source: `src/symbols.x:1456`
+Source: `src/symbols.x:1457`
 
 <a id="Sym.unit_symbols"></a>
 #### Sym.unit_symbols
@@ -891,7 +891,7 @@ Its writes are already in the scope maps, so code holding a borrowed
 map observes a committed expansion. An absent or inactive transaction
 has no effect.
 
-Source: `src/symbols.x:1470`
+Source: `src/symbols.x:1471`
 
 <a id="SymTxn.commit_transient"></a>
 #### SymTxn.commit_transient
@@ -902,7 +902,7 @@ Commits an active transaction, retaining the original counters map.
 The caller may then release the transaction's construction scope.
 Parsing and evaluation must allocate outside that temporary scope.
 
-Source: `src/symbols.x:1492`
+Source: `src/symbols.x:1493`
 
 <a id="SymTxn.local_macros_changed"></a>
 #### SymTxn.local_macros_changed
@@ -911,7 +911,7 @@ Source: `src/symbols.x:1492`
 
 Returns whether the transaction's active scope changed its macro map.
 
-Source: `src/symbols.x:1439`
+Source: `src/symbols.x:1440`
 
 <a id="SymTxn.rollback"></a>
 #### SymTxn.rollback
@@ -921,7 +921,7 @@ Source: `src/symbols.x:1439`
 Restores every semantic value captured by an active transaction.
 An absent or inactive transaction has no effect.
 
-Source: `src/symbols.x:1512`
+Source: `src/symbols.x:1513`
 
 ## Public types
 

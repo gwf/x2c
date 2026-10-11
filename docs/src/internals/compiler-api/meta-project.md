@@ -14,7 +14,7 @@ The project meta build.
 | --- | --- |
 | [`Compiler.prepare_meta_call`](#Compiler.prepare_meta_call) | Makes a project provider ready before publishing the value its call computes. |
 | [`Compiler.register_native_meta_prefix`](#Compiler.register_native_meta_prefix) | Records the active provider's ordinary-bound prefix for readiness calls. |
-| [`Compiler.require_native_meta_header`](#Compiler.require_native_meta_header) | Supplies an ancestor interface without requiring unfinished native bodies. |
+| [`Compiler.require_native_meta_header`](#Compiler.require_native_meta_header) | Supplies a provider interface without loading its native implementation. |
 | [`Frontend.prepare_meta`](#Frontend.prepare_meta) | Builds the helper that runs the project `meta` functions `inputs` reach, or finds it in the cache, and makes it the one their translation calls. |
 
 ### `Compiler`
@@ -27,7 +27,7 @@ The project meta build.
 Makes a project provider ready before publishing the value its call
 computes. Readiness follows calls actually reached by ordinary parsing.
 
-Source: `src/meta-project.x:418`
+Source: `src/meta-project.x:421`
 
 <a id="Compiler.register_native_meta_prefix"></a>
 #### Compiler.register_native_meta_prefix
@@ -36,16 +36,16 @@ Source: `src/meta-project.x:418`
 
 Records the active provider's ordinary-bound prefix for readiness calls.
 
-Source: `src/meta-project.x:450`
+Source: `src/meta-project.x:454`
 
 <a id="Compiler.require_native_meta_header"></a>
 #### Compiler.require_native_meta_header
 
 `void Compiler.require_native_meta_header(Compiler c, String path)`
 
-Supplies an ancestor interface without requiring unfinished native bodies.
+Supplies a provider interface without loading its native implementation.
 
-Source: `src/meta-project.x:462`
+Source: `src/meta-project.x:466`
 
 ### `Frontend`
 
@@ -59,7 +59,7 @@ reach, or finds it in the cache, and makes it the one their translation
 calls. Inputs that reach none use no helper. A group or helper that
 does not build is reported at the first call that needs it.
 
-Source: `src/meta-project.x:86`
+Source: `src/meta-project.x:88`
 
 ## Design notes
 

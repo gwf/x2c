@@ -35,7 +35,7 @@ Declaration ownership and module lookup.
 
 Assigns a private type its module spelling and records its ownership.
 
-Source: `src/module-access.x:74`
+Source: `src/module-access.x:75`
 
 <a id="Compiler.check_module_binding"></a>
 #### Compiler.check_module_binding
@@ -45,7 +45,7 @@ Source: `src/module-access.x:74`
 Rejects a reference to a module-private declaration outside its
 ancestors.
 
-Source: `src/module-access.x:86`
+Source: `src/module-access.x:87`
 
 <a id="Compiler.configure_module"></a>
 #### Compiler.configure_module
@@ -84,7 +84,7 @@ Source: `src/module-access.x:35`
 
 Qualifies a file-scope module declaration key with its owning prefix.
 
-Source: `src/module-access.x:99`
+Source: `src/module-access.x:100`
 
 <a id="Compiler.module_include_dirs"></a>
 #### Compiler.module_include_dirs
@@ -103,7 +103,7 @@ Source: `src/module-access.x:40`
 Preserves a complete exact key or resolves its module-private
 counterpart.
 
-Source: `src/module-access.x:142`
+Source: `src/module-access.x:143`
 
 <a id="Compiler.module_retry_key"></a>
 #### Compiler.module_retry_key
@@ -112,7 +112,7 @@ Source: `src/module-access.x:142`
 
 Finds a declared key in the current module or its ancestors.
 
-Source: `src/module-access.x:125`
+Source: `src/module-access.x:126`
 
 <a id="Compiler.module_row_accessible"></a>
 #### Compiler.module_row_accessible
@@ -121,7 +121,7 @@ Source: `src/module-access.x:125`
 
 Reports whether a collected declaration row is visible to this unit.
 
-Source: `src/module-access.x:218`
+Source: `src/module-access.x:222`
 
 <a id="Compiler.parse_module_members"></a>
 #### Compiler.parse_module_members
@@ -131,7 +131,7 @@ Source: `src/module-access.x:218`
 Parses module membership and installs enrolled members' compile-time
 effects.
 
-Source: `src/module-access.x:240`
+Source: `src/module-access.x:244`
 
 <a id="Compiler.record_module_declaration"></a>
 #### Compiler.record_module_declaration
@@ -140,7 +140,7 @@ Source: `src/module-access.x:240`
 
 Records declaration ownership and checks public signature visibility.
 
-Source: `src/module-access.x:150`
+Source: `src/module-access.x:151`
 
 <a id="Compiler.resolved_translation_dependencies"></a>
 #### Compiler.resolved_translation_dependencies

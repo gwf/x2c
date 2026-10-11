@@ -44,7 +44,7 @@ A unit's meta group, emitted as C.
 Binds the session's group function `name` when it is not bound yet, by
 staging the group, and reports at `site` a function that cannot run.
 
-Source: `src/meta-group.x:1238`
+Source: `src/meta-group.x:1270`
 
 <a id="Compiler.finish_meta_functions"></a>
 #### Compiler.finish_meta_functions
@@ -85,7 +85,7 @@ Source: `src/meta-group.x:132`
 Returns why the group function `name` has no compile-time entry, from
 its type.
 
-Source: `src/meta-group.x:1066`
+Source: `src/meta-group.x:1095`
 
 <a id="Compiler.meta_cc"></a>
 #### Compiler.meta_cc
@@ -137,7 +137,7 @@ Source: `src/meta-group.x:150`
 Returns the names of function and object definitions in the native prefix.
 Collected prototypes do not count as definitions.
 
-Source: `src/meta-group.x:363`
+Source: `src/meta-group.x:367`
 
 <a id="Compiler.native_prefix_functions"></a>
 #### Compiler.native_prefix_functions
@@ -146,7 +146,7 @@ Source: `src/meta-group.x:363`
 
 The reached source bodies whose native storage this prefix publishes.
 
-Source: `src/meta-group.x:319`
+Source: `src/meta-group.x:323`
 
 <a id="Compiler.native_prefix_values"></a>
 #### Compiler.native_prefix_values
@@ -155,7 +155,7 @@ Source: `src/meta-group.x:319`
 
 Ordinary provider objects share the same retained prefix storage.
 
-Source: `src/meta-group.x:396`
+Source: `src/meta-group.x:400`
 
 <a id="Compiler.refuse_meta_call"></a>
 #### Compiler.refuse_meta_call
@@ -165,7 +165,7 @@ Source: `src/meta-group.x:396`
 Reports at `site` that the `meta` function `name` cannot run at compile
 time, and `why`.
 
-Source: `src/meta-group.x:1085`
+Source: `src/meta-group.x:1114`
 
 <a id="Compiler.refuse_record_meta_call"></a>
 #### Compiler.refuse_record_meta_call
@@ -176,7 +176,7 @@ Reports at `site` that the group function `name` cannot run at compile
 time when its result is a struct or union, which its type alone
 decides.
 
-Source: `src/meta-group.x:1093`
+Source: `src/meta-group.x:1122`
 
 <a id="Compiler.stage_meta_in_process"></a>
 #### Compiler.stage_meta_in_process
@@ -195,7 +195,7 @@ Source: `src/meta-group.x:127`
 Directs each provider group into `directory`, using `owners` to name
 their headers by table, or stops that when `directory` is NULL.
 
-Source: `src/meta-group.x:1138`
+Source: `src/meta-group.x:1167`
 
 <a id="Compiler.use_meta_toolchain"></a>
 #### Compiler.use_meta_toolchain
@@ -215,7 +215,7 @@ Source: `src/meta-group.x:53`
 
 Selects publication records while ordinary parsing emits a provider.
 
-Source: `src/meta-group.x:1225`
+Source: `src/meta-group.x:1257`
 
 <a id="Compiler.write_meta_build"></a>
 #### Compiler.write_meta_build
@@ -228,7 +228,7 @@ x2c sources it read in `group-K.deps`, or its failure in
 `group-K.failure`. Included native and type providers use the same
 group header and object even when they have no `meta` functions.
 
-Source: `src/meta-group.x:1150`
+Source: `src/meta-group.x:1179`
 
 <a id="Compiler.write_native_meta_header"></a>
 #### Compiler.write_native_meta_header
@@ -237,16 +237,16 @@ Source: `src/meta-group.x:1150`
 
 Publishes only the active provider's reached declarations for children.
 
-Source: `src/meta-group.x:1214`
+Source: `src/meta-group.x:1246`
 
 <a id="Compiler.write_native_meta_prefix"></a>
 #### Compiler.write_native_meta_prefix
 
-`void Compiler.write_native_meta_prefix(Compiler c, int sequence, Map published)`
+`void Compiler.write_native_meta_prefix( Compiler c, int sequence, Map published)`
 
 Emits one additional provider prefix against previously published names.
 
-Source: `src/meta-group.x:1207`
+Source: `src/meta-group.x:1238`
 
 ## Design notes
 

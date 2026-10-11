@@ -40,7 +40,7 @@ Unions the native-selected receipts before checking a complete request.
 A receipt is the projection owner's JSON array of emitted-name pairs.
 Its opaque graph vertices grant no source lookup or linkage access.
 
-Source: `src/cache.x:632`
+Source: `src/cache.x:633`
 
 <a id="Compiler.initialization_guard"></a>
 #### Compiler.initialization_guard

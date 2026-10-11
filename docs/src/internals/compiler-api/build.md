@@ -51,7 +51,7 @@ Publishes collected native compilation entries as one JSON database.
 The destination's parent must exist. A failed write preserves the
 existing database, reports a diagnostic, and returns zero.
 
-Source: `src/build.x:785`
+Source: `src/build.x:787`
 
 ### `Build`
 
@@ -66,7 +66,7 @@ directories and native compile options for imported packages. Programs
 also add ordered package archives and link flags; an absent archive prints
 a diagnostic and exits with status 2. Static libraries skip link inputs.
 
-Source: `src/build.x:426`
+Source: `src/build.x:427`
 
 <a id="Build.begin_translation"></a>
 #### Build.begin_translation
@@ -75,7 +75,7 @@ Source: `src/build.x:426`
 
 Starts translation reporting for `input` and initializes timing when unset.
 
-Source: `src/build.x:385`
+Source: `src/build.x:386`
 
 <a id="Build.cleanup"></a>
 #### Build.cleanup
@@ -86,7 +86,7 @@ Removes the temporary work tree after a successful real build.
 Failed builds, retained directories, and dry runs are left untouched; a
 removal failure emits a warning and is not returned to the caller.
 
-Source: `src/build.x:1121`
+Source: `src/build.x:1123`
 
 <a id="Build.end_translation"></a>
 #### Build.end_translation
@@ -96,7 +96,7 @@ Source: `src/build.x:1121`
 Records one completed translation and reports the phase when all finish.
 A nonzero `cached` value also increments the cached-translation count.
 
-Source: `src/build.x:393`
+Source: `src/build.x:394`
 
 <a id="Build.extension_entries"></a>
 #### Build.extension_entries
@@ -110,7 +110,7 @@ package's sources declare under the package's name, so any number of
 packages link into one compiler, which selects them without loading a
 module.
 
-Source: `src/build.x:520`
+Source: `src/build.x:521`
 
 <a id="Build.finish"></a>
 #### Build.finish
@@ -129,7 +129,7 @@ previous artifact or the whole new one. Mapped macOS debug executables
 also produce a companion dSYM before cleanup; failed symbol assembly
 fails the build and preserves intermediates.
 
-Source: `src/build.x:583`
+Source: `src/build.x:584`
 
 <a id="Build.generated_dir"></a>
 #### Build.generated_dir
@@ -153,7 +153,7 @@ targets of the native `meta` prototypes the module's x2c sources
 declare, and `x2c_module_stamp`, which holds the stamp the loading
 compiler must match.
 
-Source: `src/build.x:505`
+Source: `src/build.x:506`
 
 <a id="Build.publish_script"></a>
 #### Build.publish_script
@@ -169,7 +169,7 @@ executable is never reused for source it was not built from.
 
 **Raises:** `<io-fail>` when the executable cannot be moved.
 
-Source: `src/build.x:1161`
+Source: `src/build.x:1163`
 
 <a id="Build.record_translation"></a>
 #### Build.record_translation
@@ -183,7 +183,7 @@ match. Writing the private state file is best effort; after a write or
 rename failure, cleanup attempts to unlink the temporary file but cannot
 guarantee its removal.
 
-Source: `src/build.x:411`
+Source: `src/build.x:412`
 
 <a id="Build.report_success"></a>
 #### Build.report_success
@@ -192,7 +192,7 @@ Source: `src/build.x:411`
 
 Prints the completed build receipt and artifact details when enabled.
 
-Source: `src/build.x:1056`
+Source: `src/build.x:1058`
 
 <a id="Build.run_program"></a>
 #### Build.run_program
@@ -202,7 +202,7 @@ Source: `src/build.x:1056`
 Runs the built output with the request's arguments and returns its status.
 A dry run prints the action without launching the program.
 
-Source: `src/build.x:1108`
+Source: `src/build.x:1110`
 
 <a id="Build.script_helpers"></a>
 #### Build.script_helpers
@@ -214,7 +214,7 @@ program must translate and link. The script's translation depfile already
 lists every file the translation read, so helpers of helpers appear too.
 Runtime and package sources are excluded; their objects are archived.
 
-Source: `src/build.x:1135`
+Source: `src/build.x:1137`
 
 <a id="Build.translation_current"></a>
 #### Build.translation_current
@@ -251,7 +251,7 @@ Source: `src/build.x:183`
 Reports whether the script executable under `directory` still matches
 everything recorded when it was built.
 
-Source: `src/build.x:1235`
+Source: `src/build.x:1237`
 
 ## Public types
 
