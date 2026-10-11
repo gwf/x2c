@@ -287,7 +287,7 @@ String ModuleTree.owner(ModuleTree tree, String path) {
 /** Lists the owning entry followed by its parent entries, nearest first. */
 List ModuleTree.ancestors(ModuleTree tree, String path) {
   Var known;
-  if (tree.owners.try_get(%(ancestors $path), known)) return known.list();
+  if (tree.owners.try_get(%(ancestors $path), known)) return known;
   Array entries = [];
   String owner = tree.owner(path);
   while (owner) {
