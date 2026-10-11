@@ -8,7 +8,8 @@
 #include "utils.x"
 
 static typedef struct Layouts {
-  Map bodies, variants, aliases, alias_variants, owners, edges, variant_demands;
+  Map bodies, variants, aliases, alias_variants, owners, edges;
+  Map variant_demands;
   Map fixed_edges, visiting, finished;
   Map private_types, private_bindings, private_constants, used_aliases;
   Array order;
@@ -41,7 +42,7 @@ static String Compiler._layout_file_spelling(Compiler c, String name) {
   return %"_x2c_file_${filename_hash(identity)}__$name";
 }
 
-static void Layouts.private_names(Layouts &layouts, Compiler c, List ast) {
+static void Layouts.private_names(Layouts &l, Compiler c, List ast) {
   Map names = {}, bindings = {}, constants = {};
   if (c.module_owner) foreach (List node, ast)
     match (node) case %((!or typedef declare) ?base (bindings *rows)): {
@@ -68,13 +69,14 @@ static void Layouts.private_names(Layouts &layouts, Compiler c, List ast) {
           if (!name) continue;
           String spelling = c._layout_file_spelling(name);
           names[%(typedef $name)] = spelling;
-          bindings[identity] = binding_identity_new(identity.list().cadr(), spelling);
+          bindings[identity] = binding_identity_new(
+            identity.list().cadr(), spelling);
         }
     }
   String path = c.canonical_path(c.filename);
-  layouts.private_types[path] = names;
-  layouts.private_bindings[path] = bindings;
-  layouts.private_constants[path] = constants;
+  l.private_types[path] = names;
+  l.private_bindings[path] = bindings;
+  l.private_constants[path] = constants;
 }
 
 static Type _layout_private_type(Type type, Map names) {
@@ -103,14 +105,16 @@ static List _layout_private_node(List node, Map names, Map bindings) {
            ?type *rest):
       node = %($kind ${_layout_private_type(type, names)} @rest);
   List child;
-  $ast.rewrite_children(node, child, _layout_private_node(child, names, bindings));
+  $ast.rewrite_children(
+    node, child, _layout_private_node(child, names, bindings));
 }
 
 /* Index already bound source nodes. Native directives retain the provider's
    order; source-module includes are supplied by the layout prerequisites. */
-static void Layouts.provider(Layouts &layouts, Compiler c, List ast) {
+static void Layouts.provider(Layouts &l, Compiler c, List ast) {
   String path = c.canonical_path(c.filename);
-  Map names = layouts.private_types[path], bindings = layouts.private_bindings[path];
+  Map names = l.private_types[path],
+    bindings = l.private_bindings[path];
   Array prefix = [];
   List arms = NULL;
   foreach (List node, ast) {
@@ -146,9 +150,10 @@ static void Layouts.provider(Layouts &layouts, Compiler c, List ast) {
             if (name)
               {
                 List alias = %(typedef $alias_base (bindings $declarator));
-                layouts.aliases[name] = %($c $alias);
-                layouts.alias_variants[name] = cons(
-                  %($c $alias ${prefix.list()} $arms), layouts.alias_variants[name]);
+                l.aliases[name] = %($c $alias);
+                l.alias_variants[name] = cons(
+                  %($c $alias ${prefix.list()} $arms),
+                  l.alias_variants[name]);
               }
           }
         }
@@ -158,10 +163,10 @@ static void Layouts.provider(Layouts &layouts, Compiler c, List ast) {
         }
         List body = kind == <typedef> ? node
           : %(declare $base (bindings (bind () ())));
-        layouts.bodies[family] = %($c $body);
-        layouts.variants[family] = cons(
-          %($c $body ${prefix.list()} $arms), layouts.variants[family]);
-        layouts.owners[family] = c.canonical_path(c.filename);
+        l.bodies[family] = %($c $body);
+        l.variants[family] = cons(
+          %($c $body ${prefix.list()} $arms), l.variants[family]);
+        l.owners[family] = c.canonical_path(c.filename);
       }
     }
   }
@@ -170,33 +175,35 @@ static void Layouts.provider(Layouts &layouts, Compiler c, List ast) {
 /* Array elements require their aggregate's body. A pointer terminates the
    demand, including a typedef that resolves to an array of pointers. */
 static void Layouts.require_type(
-  Layouts &layouts, Compiler c, Sym resolver, Type type, Map needed) {
+  Layouts &l, Compiler c, Sym resolver, Type type, Map needed) {
   type = resolver.normalize_declared_type(type).canonicalize();
-  type = _layout_private_type(type, layouts.private_types[c.canonical_path(c.filename)]);
+  Map private_types = l.private_types[c.canonical_path(c.filename)];
+  type = _layout_private_type(type, private_types);
   while (type.is_array()) type = type.dereference().canonicalize();
   if (type.is_pointer() || type.is_function()) return;
   Type key = resolver.resolve_key(type);
   match (key)
     case %((!set ?kind (!or struct union enum)) ?name): {
       List family = %($kind $name);
-      if (family in layouts.bodies) needed[family] = 1;
+      if (family in l.bodies) needed[family] = 1;
       else foreach (List row, c.sym.field_order(key).cdr())
-        layouts.require_type(c, resolver, row.cadr(), needed);
+        l.require_type(c, resolver, row.cadr(), needed);
       return;
     }
   match (key) case %((!or struct union) (fields *rows)):
     foreach (List row, rows) {
       List declaration = Ast.without_origin(row);
-      if (declaration.car() == <c-assert> || declaration.car() == <preproc>) continue;
+      if (declaration.car() == <c-assert> || declaration.car() == <preproc>)
+        continue;
       Type field = declaration.type_from_ast();
-      layouts.require_type(c, resolver, field, needed);
+      l.require_type(c, resolver, field, needed);
     }
 }
 
 /* Preserve field conditions beside their demands. Inline anonymous bodies
    retain their bound declaration syntax; semantic types omit directives. */
 static void Layouts.require_fields(
-  Layouts &layouts, Compiler c, Sym resolver, List fields, Map needed,
+  Layouts &l, Compiler c, Sym resolver, List fields, Map needed,
   Array demands, Map recorded, List inherited) {
   Array prefix = [];
   List arms = NULL;
@@ -219,7 +226,8 @@ static void Layouts.require_fields(
         foreach (List declarator, declarators) {
           Type type = %(declare $base (bindings $declarator)).type_from_ast();
           Type element = resolver.normalize_declared_type(type).canonicalize();
-          while (element.is_array()) element = element.dereference().canonicalize();
+          while (element.is_array())
+            element = element.dereference().canonicalize();
           if (element.is_pointer() || element.is_function()) continue;
           Type source = base;
           List inline_fields = NULL;
@@ -228,12 +236,13 @@ static void Layouts.require_fields(
             case %((!or struct union) (fields *rows)): inline_fields = rows;
           }
           if (inline_fields) {
-            layouts.require_fields(c, resolver, inline_fields, needed,
+            l.require_fields(
+              c, resolver, inline_fields, needed,
               demands, recorded, prefix);
             continue;
           }
           Map selected = {};
-          layouts.require_type(c, resolver, type, selected);
+          l.require_type(c, resolver, type, selected);
           foreach (List dependency, selected.keys()) {
             needed[dependency] = 1;
             List demand = %($dependency ${prefix.list()} $arms);
@@ -248,38 +257,39 @@ static void Layouts.require_fields(
 }
 
 static void Layouts.require_body(
-  Layouts &layouts, Compiler c, Sym resolver, List body, Map needed,
+  Layouts &l, Compiler c, Sym resolver, List body, Map needed,
   Array demands) {
   Type type = body.cadr();
   Map recorded = {};
   match (type.base_type())
     case %((!or struct union) ? (fields *fields)):
-      layouts.require_fields(c, resolver, fields, needed, demands, recorded, NULL);
+      l.require_fields(
+        c, resolver, fields, needed, demands, recorded, NULL);
 }
 
-static void Layouts.dependencies(Layouts &layouts) {
+static void Layouts.dependencies(Layouts &l) {
   Map aliases = {};
-  foreach (Var (name, row), layouts.aliases) {
+  foreach (Var (name, row), l.aliases) {
     List alias = row.list().cadr();
     aliases[%(typedef $name)] = alias.type_from_ast().declared();
     aliases[%($name)] = %(typedef $name);
   }
-  foreach (List family, layouts.bodies.keys()) {
+  foreach (List family, l.bodies.keys()) {
     Map needed = {};
     Map fixed = NULL;
     int unconditional = 1;
-    foreach (List variant, layouts.variants[family].list()) {
+    foreach (List variant, l.variants[family].list()) {
       (Compiler owner, List body, List prefix, List arms) = variant;
       Sym resolver = Sym.new(owner);
       resolver.reset_overlay(owner.sym.global_symbols(), aliases);
       Map selected = {};
       Array demands = [];
-      layouts.require_body(owner, resolver, body, selected, demands);
+      l.require_body(owner, resolver, body, selected, demands);
       Map fixed_variant = {};
       foreach (List demand, demands.list())
         if (!demand.caddr().list().len()) fixed_variant[demand.car()] = 1;
       foreach (List prerequisite, selected.keys()) needed[prerequisite] = 1;
-      layouts.variant_demands[variant] = demands.list_free();
+      l.variant_demands[variant] = demands.list_free();
       if (!fixed) fixed = fixed_variant;
       else {
         Map intersection = {};
@@ -290,29 +300,30 @@ static void Layouts.dependencies(Layouts &layouts) {
       if (arms.len()) unconditional = 0;
     }
     Array prerequisites = [];
-    foreach (List prerequisite, needed.keys()) prerequisites.push(prerequisite);
-    layouts.edges[family] = prerequisites.list_free();
+    foreach (List prerequisite, needed.keys())
+      prerequisites.push(prerequisite);
+    l.edges[family] = prerequisites.list_free();
     Array fixed_edges = [];
     if (unconditional) foreach (List prerequisite, fixed.keys())
       fixed_edges.push(prerequisite);
-    layouts.fixed_edges[family] = fixed_edges.list_free();
+    l.fixed_edges[family] = fixed_edges.list_free();
   }
 }
 
-static void Layouts.visit(Layouts &layouts, List family) {
-  if (family in layouts.finished) return;
-  if (family in layouts.visiting) {
-    Compiler c = layouts.bodies[family].list().car();
+static void Layouts.visit(Layouts &l, List family) {
+  if (family in l.finished) return;
+  if (family in l.visiting) {
+    Compiler c = l.bodies[family].list().car();
     c.report_error(
       <type>, "complete aggregate layout cycle", NULL,
       %($family "provider: ${layouts.owners[family]}"));
   }
-  layouts.visiting[family] = 1;
-  foreach (List prerequisite, layouts.fixed_edges[family].list())
-    layouts.visit(prerequisite);
-  layouts.visiting.del(family);
-  layouts.finished[family] = 1;
-  layouts.order.push(family);
+  l.visiting[family] = 1;
+  foreach (List prerequisite, l.fixed_edges[family].list())
+    l.visit(prerequisite);
+  l.visiting.del(family);
+  l.finished[family] = 1;
+  l.order.push(family);
 }
 
 static String _layout_text(Compiler c, List nodes) {
@@ -360,7 +371,7 @@ static List _layout_forward_prefix(Compiler c, List prefix) {
 }
 
 static String Layouts.forwards(
-  Layouts &layouts, Compiler c, List ast, Map plan) {
+  Layouts &l, Compiler c, List ast, Map plan) {
   Map done = {}, visiting = {};
   Array nodes = [];
   foreach (List node, ast)
@@ -368,8 +379,8 @@ static String Layouts.forwards(
       if (!base.list().type().is_static())
         foreach (List row, rows) {
           String name = binding_identity_spelling(row.cadr());
-          if (name && name in layouts.aliases)
-            layouts.alias(name, done, visiting, nodes, plan, 1);
+          if (name && name in l.aliases)
+            l.alias(name, done, visiting, nodes, plan, 1);
         }
   return _layout_text(c, nodes.list_free());
 }
@@ -378,24 +389,27 @@ static String Layouts.forwards(
    Keep them with the prefix, under individual guards, rather than moving
    their native includes ahead of the bodies. */
 static List Layouts.prefix(
-  Layouts &layouts, Compiler c, List prefix, Map plan, List definitions) {
+  Layouts &l, Compiler c, List prefix, Map plan, List definitions) {
   Array nodes = [];
   foreach (List node, prefix) {
     match (node) case %(typedef ?base *): {
       Type type = base;
       match (type.base_type()) case %(?(String dependency)):
-        if (dependency in layouts.aliases)
-          foreach (List prerequisite, layouts.alias_nodes(node, plan))
+        if (dependency in l.aliases)
+          foreach (List prerequisite, l.alias_nodes(node, plan))
             nodes.push(prerequisite);
     }
     match (node)
       case %(function ?type (bind ?binding *) ?): {
         Type signature = type;
         if (signature.is_inline() && !signature.is_static()) {
-          String guard = %"__X2C_LAYOUT_INLINE_${filename_hash(binding.repr())}__";
+          String hash = filename_hash(binding.repr());
+          String guard = %"__X2C_LAYOUT_INLINE_${hash}__";
           plan[%(inline ${c.canonical_path(c.filename)} $binding)] = guard;
-          String body = _layout_text(c, c.module_layout_header_prefix(%($node), NULL));
-          node = %(preproc ${%"#ifndef $guard\n#define $guard\n$body\n#endif\n"});
+          List header = c.module_layout_header_prefix(%($node), NULL);
+          String body = _layout_text(c, header);
+          String guarded = %"#ifndef $guard\n#define $guard\n$body\n#endif\n";
+          node = %(preproc $guarded);
         }
       }
     nodes.push(node);
@@ -404,21 +418,22 @@ static List Layouts.prefix(
 }
 
 static void Layouts.alias(
-  Layouts &layouts, String name, Map done, Map visiting, Array nodes,
+  Layouts &l, String name, Map done, Map visiting, Array nodes,
   Map plan, int forwards) {
   if (name in done) return;
   if (name in visiting) {
-    Compiler c = layouts.aliases[name].list().car();
-    c.report_error(<type>, "layout typedef prerequisite cycle", NULL, %($name));
+    Compiler c = l.aliases[name].list().car();
+    c.report_error(
+      <type>, "layout typedef prerequisite cycle", NULL, %($name));
   }
   visiting[name] = 1;
   String text = "";
-  foreach (List variant, layouts.alias_variants[name].list().reverse()) {
+  foreach (List variant, l.alias_variants[name].list().reverse()) {
     (Compiler c, List node, List prefix, List arms) = variant;
     Type type = node.cadr();
     match (type.base_type()) case %(?(String dependency)):
-      if (dependency in layouts.aliases)
-        layouts.alias(dependency, done, visiting, nodes, plan, forwards);
+      if (dependency in l.aliases)
+        l.alias(dependency, done, visiting, nodes, plan, forwards);
     if (forwards) {
       node = _layout_forward(c, node);
       prefix = _layout_forward_prefix(c, prefix);
@@ -426,32 +441,33 @@ static void Layouts.alias(
     if (!node) continue;
     List macros = _layout_macro_names(prefix);
     text += _layout_macro_guards(macros, "push");
-    text += _layout_text(c, layouts.prefix(c, prefix, plan, %($node)));
+    text += _layout_text(c, l.prefix(c, prefix, plan, %($node)));
     for (int i = arms.len(); i; i--) text += "#endif\n";
     text += _layout_macro_guards(macros.reverse(), "pop");
   }
   visiting.del(name);
   done[name] = 1;
-  layouts.used_aliases[name] = 1;
+  l.used_aliases[name] = 1;
   if (text.len()) {
     String guard = _layout_guard(%(alias $forwards $name));
-    nodes.push(%(comment ${%"#ifndef $guard\n#define $guard\n$text\n#endif\n"}));
+    String guarded = %"#ifndef $guard\n#define $guard\n$text\n#endif\n";
+    nodes.push(%(comment $guarded));
   }
 }
 
-static List Layouts.alias_nodes(Layouts &layouts, List body, Map plan) {
+static List Layouts.alias_nodes(Layouts &l, List body, Map plan) {
   Map needed = {}, done = {}, visiting = {};
   List node;
   $ast.walk(body, node) {
     match (node) case %((!or typedef declare) ?base *): {
       Type type = base;
       match (type.base_type()) case %(?(String name)):
-        if (name in layouts.aliases) needed[name] = 1;
+        if (name in l.aliases) needed[name] = 1;
     }
   }
   Array nodes = [];
   foreach (String name, needed.keys())
-    layouts.alias(name, done, visiting, nodes, plan, 0);
+    l.alias(name, done, visiting, nodes, plan, 0);
   return nodes.list_free();
 }
 
@@ -500,13 +516,14 @@ static List _layout_prerequisite_prefix(
    visiting and completion guards diagnose active cycles without expanding
    shared dependency paths into repeated generated bodies. */
 static String Layouts.render(
-  Layouts &layouts, List family, Map plan) {
+  Layouts &l, List family, Map plan) {
   String guard = _layout_guard(family), visiting = %"${guard}_VISITING";
-  String text = %"#ifndef $guard\n#ifdef $visiting\n#error complete aggregate layout cycle\n#else\n#define $visiting\n";
-  foreach (List variant, layouts.variants[family].list().reverse()) {
+  String text = %"#ifndef $guard\n#ifdef $visiting\n" +
+    %"#error complete aggregate layout cycle\n#else\n#define $visiting\n";
+  foreach (List variant, l.variants[family].list().reverse()) {
     (Compiler c, List body, List prefix, List arms) = variant;
     String prerequisites = "";
-    foreach (List demand, layouts.variant_demands[variant].list()) {
+    foreach (List demand, l.variant_demands[variant].list()) {
       (List dependency, List directives, List field_arms) = demand;
       List macros = _layout_macro_names(directives);
       prerequisites += _layout_macro_guards(macros, "push");
@@ -517,12 +534,13 @@ static String Layouts.render(
     }
     List macros = _layout_macro_names(prefix);
     List definitions = %((comment $prerequisites))
-      .append(layouts.alias_nodes(body, plan))
+      .append(l.alias_nodes(body, plan))
       .append(%($body (preproc ${%"#define $guard"})));
     text += %"#ifndef $guard\n";
     text += _layout_macro_guards(macros, "push");
-    text += _layout_text(c, layouts.prefix(
-      c, _layout_prerequisite_prefix(c, prefix, prerequisites), plan, definitions));
+    List preceding = _layout_prerequisite_prefix(c, prefix, prerequisites);
+    List header = l.prefix(c, preceding, plan, definitions);
+    text += _layout_text(c, header);
     for (int i = arms.len(); i; i--) text += "#endif\n";
     text += _layout_macro_guards(macros.reverse(), "pop");
     text += "#endif\n";
@@ -532,11 +550,12 @@ static String Layouts.render(
   return text;
 }
 
-/* Render while the bound provider ASTs and their binding facts are alive.
-   Consumers export only Strings and keys as their nested Contexts close. */
+/** Renders complete-layout headers while bound providers remain alive.
+    Consumers export only Strings and keys as their nested Contexts close. */
 Map prepare_module_layouts(List providers) {
   Layouts layouts = {
-    .bodies = {}, .variants = {}, .aliases = {}, .alias_variants = {}, .owners = {},
+    .bodies = {}, .variants = {}, .aliases = {}, .alias_variants = {},
+    .owners = {},
     .edges = {}, .variant_demands = {}, .fixed_edges = {},
     .visiting = {}, .finished = {}, .order = [],
     .private_types = {}, .private_bindings = {}, .private_constants = {},
@@ -590,7 +609,8 @@ Map prepare_module_layouts(List providers) {
     }
     foreach (Var (binding, renamed), provider_bindings)
       if (binding_identity_spelling(renamed) in layouts.used_aliases ||
-          (binding in provider_constants && provider_constants[binding] in active))
+          (binding in provider_constants &&
+            provider_constants[binding] in active))
         bindings[binding] = renamed;
     plan[%(private-types $path)] = names;
     plan[%(private-bindings $path)] = bindings;
@@ -628,7 +648,8 @@ List Compiler.module_layout_node(Compiler c, List node) {
     case %(function ?type (!set ?declarator (bind ?binding *)) ?):
       if (%(inline ${c.canonical_path(c.filename)} $binding)
           in c.module_layout_plan)
-        return %(declare (static @type) ${ast_prototype_declarator(declarator)});
+        return %(declare (static @type)
+          ${ast_prototype_declarator(declarator)});
   match (node)
     case %((!set ?kind (!or typedef declare)) ?base ?bindings): {
       List family = _layout_family(base);
