@@ -324,34 +324,39 @@ static Var _ask(String operation, List arguments) {
 
 /* Provider groups become available as their ordinary parses complete.
    Global native lookup lets a later group call a previously loaded group. */
-static void _load_provider(int index, String path, String target) {
+static void _load_providers(String path, List targets) {
   void *handle;
   $scope(&helper_module_scope) handle = dlopen(path, RTLD_NOW | RTLD_GLOBAL);
   if (!handle) {
     _reply(%(load-failure ${String.new(dlerror())}));
     return;
   }
-  Map (*table)(void) = (Map (*)(void)) dlsym(handle, target);
-  if (!table) {
-    _reply(%(load-failure ${String.new(dlerror())}));
-    return;
+  Map tables = {};
+  foreach (List row, targets) {
+    (int index, String target) = row;
+    Map (*table)(void) = (Map (*)(void)) dlsym(handle, target);
+    if (!table) {
+      _reply(%(load-failure ${String.new(dlerror())}));
+      return;
+    }
+    Map next;
+    $scope(&helper_module_scope) next = table();
+    Var previous;
+    if (helper_tables.try_get(index, previous))
+      foreach (Var (key, value), previous.map())
+        if (!(key in next)) next[key] = value;
+    tables[index] = next;
   }
   helper_modules[path] = handle;
-  Map next;
-  $scope(&helper_module_scope) next = table();
-  Var previous;
-  if (helper_tables.try_get(index, previous)) {
-    foreach (Var (key, value), previous.map())
-      if (!(key in next)) next[key] = value;
-    if (index in helper_started) {
-      List failure = _initialize(next);
-      if (failure) {
-        _reply(%(load-failure ${failure.repr()}));
-        return;
-      }
+  foreach (Var (index, table), tables) helper_tables[index] = table;
+  foreach (Var (index, table), tables) {
+    if (!(index in helper_started)) continue;
+    List failure = _initialize(table);
+    if (failure) {
+      _reply(%(load-failure ${failure.repr()}));
+      return;
     }
   }
-  helper_tables[index] = next;
   _reply(%(loaded));
 }
 
@@ -362,7 +367,9 @@ static void _serve(Var request) {
   match (request) {
     case %(reset): _reset();
     case %(load ?(int index) ?(String path) ?(String target)):
-      _load_provider(index, path, target);
+      _load_providers(path, %(( $index $target )));
+    case %(load-group ?(String path) ?(List targets)):
+      _load_providers(path, targets);
     case %(call ?(int index) ?(String name) ?(List arguments)
            ?(List globals)): {
       Macro.use_subject(globals);

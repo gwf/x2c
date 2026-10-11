@@ -440,10 +440,15 @@ void Compiler.meta_helper_building(int enabled) { helper_building = enabled; }
 /** Loads one ready provider table without restarting the helper or
     reinitializing any previously started table. Returns its load failure. */
 String Compiler.load_meta_provider(String path, int index, String target) {
-  Call call = {.name = "provider load", .table = index};
+  return Compiler.load_meta_providers(path, %(($index $target)));
+}
+
+/** Installs every table of one native component before starting new resets. */
+String Compiler.load_meta_providers(String path, List targets) {
+  Call call = {.name = "provider load", .table = 0};
   call.set_deadline();
   if (!_helper_start()) return "the compile-time helper did not start";
-  call.send_frame(%(load $index $path $target));
+  call.send_frame(%(load-group $path $targets));
   Var reply = call.next_reply();
   match (reply) {
     case %(loaded): return NULL;
