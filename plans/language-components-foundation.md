@@ -745,6 +745,25 @@ replacement template and fill steps are the remaining driver cost.
   `rewrite-try-return` and `rewrite-try-held-statements`. Open: a program
   `$tried` rule also receives the compiler-written `try` that
   `lower_defer_region` emits for a defer whose finalizer returns.
+- 2026-10-11, recorded conformance (`kernel/recorded-conformance`, Gary's
+  decision after the two-unit divergence was explained): the declaring
+  unit records each ordinary external conformance in its `.xi` as
+  `("source-node" (conformance BASE PARTICIPANT))` -> `(conformance BASE
+  PARTICIPANT FORWARD REVERSE (bindings (NAME TYPE)...) (MEMBER STATUS
+  SOURCE)...)`, 85 rows and 27.7 KB across lib and src (+1.1% interface
+  bytes); an including unit installs the row lazily on first use and skips
+  resolving that adoption; own, static, and native adoptions behave as
+  before; a cold walk of the declaring unit still resolves locally. A member
+  implemented by a function static to the declaring unit is recorded as
+  `no-member`, since no other unit can call it. +196/-22 authored in
+  protocol.x and collect.x. Generated C byte-identical for lib, src, and
+  every fixture except the new divergence fixture, whose including unit now
+  agrees with the declaring unit. Equivalence check: 4,747 reuses in lib and
+  src and 42,854 in fixtures, one difference (the intended fixture). Cost:
+  empty unit -15.8 M (-1.3%) against the plan's -38 M, because rebuilding
+  the expected types and parsing the rows costs about as much as resolving;
+  the declaring unit pays about 0.2 M per recorded conformance (W1 +1.1%);
+  lib/common.x -0.6%.
 - 2026-10-10, facts learned: `function-entry` placement is parse-time, so
   lambda cells need a transform-time entry placement before lambdas move; a
   plain `make build` after editing a shipped component leaves a degraded
