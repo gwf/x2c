@@ -13,6 +13,7 @@ X2c AST transformation pipeline.
 | Function | Summary |
 | --- | --- |
 | [`Compiler.call_in_order`](#Compiler.call_in_order) | Calls the typed callable `callee` with `arguments`, each converted to its parameter and evaluated once, in source order, as a statement expression. |
+| [`Compiler.lower_lambda_expr`](#Compiler.lower_lambda_expr) | Lowers a resolved lambda expression, under any position wrappers and parentheses, through the lambda rule of `src/component-lambdas.x`; other expressions pass through. |
 | [`Compiler.normalize`](#Compiler.normalize) | Normalizes one bound and typed node. |
 | [`Compiler.transform`](#Compiler.transform) | Lowers a bound and typed top-level AST to the normalized form consumed by emission. |
 
@@ -27,7 +28,20 @@ Calls the typed callable `callee` with `arguments`, each converted to
 its parameter and evaluated once, in source order, as a statement
 expression.
 
-Source: `src/transform.x:1130`
+Source: `src/transform.x:1138`
+
+<a id="Compiler.lower_lambda_expr"></a>
+#### Compiler.lower_lambda_expr
+
+`List Compiler.lower_lambda_expr(Compiler c, List expression)`
+
+Lowers a resolved lambda expression, under any position wrappers and
+parentheses, through the lambda rule of `src/component-lambdas.x`;
+other expressions pass through. A noncapturing lambda typed `Func`,
+which only a meta body leaves unlifted, lifts to a `Func` of its native
+signature.
+
+Source: `src/transform.x:191`
 
 <a id="Compiler.normalize"></a>
 #### Compiler.normalize
@@ -38,7 +52,7 @@ Normalizes one bound and typed node. Newly constructed syntax is
 normalized where it is produced; children enter the same operation, so
 completed units do not require another unit walk.
 
-Source: `src/transform.x:102`
+Source: `src/transform.x:103`
 
 <a id="Compiler.transform"></a>
 #### Compiler.transform
@@ -53,13 +67,14 @@ support declarations are lowered and appended after the input units. Their
 storage determines their interface visibility. The call may add
 generated origins or diagnostics to `c`.
 
-Source: `src/transform.x:82`
+Source: `src/transform.x:83`
 
 ## Design notes
 
 Lowers typed expressions, literals, and statements into the AST forms
 consumed by C emission. One recursive normalizer rewrites each node
 where it is produced, and children enter the same operation, so a unit
-is walked once. `callables.x` lowers the lambdas and `Func` conversions
-it meets, and `cleanup.x` lowers each completed function's cleanup
-regions. The active Compiler reports errors.
+is walked once. `callables.x` lowers the `Func` conversions it meets,
+shipped components lower the forms the kernel no longer lowers, and
+`cleanup.x` lowers each completed function's cleanup regions. The
+active Compiler reports errors.

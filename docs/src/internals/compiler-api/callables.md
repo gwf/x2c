@@ -13,13 +13,12 @@ Callable values lowered to C helpers.
 | Function | Summary |
 | --- | --- |
 | [`Compiler.adapt_lambda_arg`](#Compiler.adapt_lambda_arg) | Adapts a lowered noncapturing lambda helper to a typed callback. |
-| [`Compiler.capture_environment`](#Compiler.capture_environment) | Binds the file-static context type `name` with the field rows `fields`, for captured lambdas and callable defers. |
+| [`Compiler.capture_environment`](#Compiler.capture_environment) | Binds the file-static context type `name` with the field rows `fields`, for callable defers. |
+| [`Compiler.func_parameters`](#Compiler.func_parameters) | Returns `(SIGNATURE (STORAGE READ)...)` for an adapter of a `Var` function taking the lambda parameter rows `entries`: its Func signature as a cached `List`, and each argument as `Compiler._func_reads` reads it from `argv` of the Func `fn`. |
 | [`Compiler.func_signature`](#Compiler.func_signature) | Returns the canonical signature shared by native and meta Func adapters. |
 | [`Compiler.lift_func_expression`](#Compiler.lift_func_expression) | Converts a resolved function-like expression to `Func` when supported. |
-| [`Compiler.lower_lambda_expr`](#Compiler.lower_lambda_expr) | Lowers a resolved lambda expression to emitter-ready helper references. |
 | [`Compiler.lower_typed_adapter_expr`](#Compiler.lower_typed_adapter_expr) | Lowers a resolved `tadapt` expression to a typed callback helper. |
 | [`Compiler.maybe_adapt_func_arg`](#Compiler.maybe_adapt_func_arg) | Adapts a direct native function argument when `FuncAdapter` is expected. |
-| [`Compiler.prepare_lambda_cells`](#Compiler.prepare_lambda_cells) | Prepares one resolved function body for shared mutable lambda captures. |
 | [`Compiler.prepend_setup`](#Compiler.prepend_setup) | Puts `setup` at the entry of a block or typed expression `body`. |
 
 ### `Compiler`
@@ -39,7 +38,7 @@ original parameter types before calling it, then converts its `Var` result
 to the expected return type. Already compatible or unsupported shapes pass
 through unchanged.
 
-Source: `src/callables.x:1490`
+Source: `src/callables.x:974`
 
 <a id="Compiler.capture_environment"></a>
 #### Compiler.capture_environment
@@ -47,10 +46,22 @@ Source: `src/callables.x:1490`
 `List Compiler.capture_environment(Compiler c, List name, List fields)`
 
 Binds the file-static context type `name` with the field rows `fields`,
-for captured lambdas and callable defers. The complete typedef is bound
-at once, so each field keeps its member type.
+for callable defers. The complete typedef is bound at once, so each
+field keeps its member type.
 
-Source: `src/callables.x:262`
+Source: `src/callables.x:150`
+
+<a id="Compiler.func_parameters"></a>
+#### Compiler.func_parameters
+
+`List Compiler.func_parameters( Compiler c, List entries, List fn, List argv)`
+
+Returns `(SIGNATURE (STORAGE READ)...)` for an adapter of a `Var`
+function taking the lambda parameter rows `entries`: its Func
+signature as a cached `List`, and each argument as `Compiler._func_reads`
+reads it from `argv` of the Func `fn`.
+
+Source: `src/callables.x:688`
 
 <a id="Compiler.func_signature"></a>
 #### Compiler.func_signature
@@ -59,7 +70,7 @@ Source: `src/callables.x:262`
 
 Returns the canonical signature shared by native and meta Func adapters.
 
-Source: `src/callables.x:1308`
+Source: `src/callables.x:792`
 
 <a id="Compiler.lift_func_expression"></a>
 #### Compiler.lift_func_expression
@@ -74,24 +85,7 @@ pointers producing null `Func`. Lambda expressions are lowered first, and
 unrelated expressions pass through unchanged. Public inline functions
 reach the queued helpers through generated bridge functions.
 
-Source: `src/callables.x:725`
-
-<a id="Compiler.lower_lambda_expr"></a>
-#### Compiler.lower_lambda_expr
-
-`List Compiler.lower_lambda_expr(Compiler c, List expression)`
-
-Lowers a resolved lambda expression to emitter-ready helper references.
-`expression` must retain the resolved `expr`, `lambda`, `params`, and
-optional `captures` rows. A noncapturing lambda becomes a static
-`Var`-returning helper. A lambda with capture rows becomes a `FuncAdapter`
-helper and a `Func` whose copied context stores value snapshots and typed
-reference addresses; capture expressions run once from left to right.
-Nested lambdas lower inside out, block fallthrough and bare returns produce
-no value, and synthesized declarations enter the early queue. Parentheses
-remain around lowered helpers; other non-lambda expressions pass through.
-
-Source: `src/callables.x:140`
+Source: `src/callables.x:183`
 
 <a id="Compiler.lower_typed_adapter_expr"></a>
 #### Compiler.lower_typed_adapter_expr
@@ -105,7 +99,7 @@ Compatible helpers are cached by source binding and target type, queued
 with `Compiler.add_early`, and returned as typed identifiers; other
 expressions pass through unchanged.
 
-Source: `src/callables.x:1378`
+Source: `src/callables.x:862`
 
 <a id="Compiler.maybe_adapt_func_arg"></a>
 #### Compiler.maybe_adapt_func_arg
@@ -119,22 +113,7 @@ cast, or addressed; an indirect function-pointer value is rejected.
 A function already having the adapter's pointee type passes through,
 and new helpers are cached and queued with `Compiler.add_early`.
 
-Source: `src/callables.x:1082`
-
-<a id="Compiler.prepare_lambda_cells"></a>
-#### Compiler.prepare_lambda_cells
-
-`List Compiler.prepare_lambda_cells(Compiler c, List declarator, List body)`
-
-Prepares one resolved function body for shared mutable lambda captures.
-`declarator` must carry a resolved `bind` with `fnmod` parameters, and
-`body` must agree with the automatic-binding and type facts in `Compiler`.
-Before normal body transformation, the method rewrites explicitly shared
-parameters and locals to `Scope`-owned cells, prepares nested bodies,
-and returns the rewritten body with declaration and initializer order
-preserved.
-
-Source: `src/callables.x:472`
+Source: `src/callables.x:540`
 
 <a id="Compiler.prepend_setup"></a>
 #### Compiler.prepend_setup
@@ -143,14 +122,12 @@ Source: `src/callables.x:472`
 
 Puts `setup` at the entry of a block or typed expression `body`.
 
-Source: `src/callables.x:703`
+Source: `src/callables.x:161`
 
 ## Design notes
 
 A callable value that C cannot spell directly becomes a static helper
 queued with `Compiler.add_early`. Every `Func` helper shares one
 `FuncAdapter` ABI: arguments are read in index order from the argument
-vector, and the result is boxed into a `Var`. A capturing lambda copies
-its snapshots and reference addresses into a file-static context, and
-the bindings it shares by reference move into Scope cells before the
-enclosing function body is normalized.
+vector, and the result is boxed into a `Var`. `src/component-lambdas.x`
+lowers lambdas.
