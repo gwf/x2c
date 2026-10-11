@@ -24,10 +24,12 @@ X2c declarations, parsed from source or constructed.
 | [`Compiler.close_placements`](#Compiler.close_placements) | Gives the placements made since `first` the `result` of the expansion that made them. |
 | [`Compiler.defines_main`](#Compiler.defines_main) | Reports whether the unit's tokens define a function named `main` at file scope. |
 | [`Compiler.definition_doc`](#Compiler.definition_doc) | Returns the body of the doc comment that documents the definition starting at `start`, or NULL. |
-| [`Compiler.enclosing`](#Compiler.enclosing) | Returns the innermost `what` around the parser as captured code, or NULL when there is none: the declarator whose initializer is being parsed directly in the current block item, as its one-declarator declaration; the block item, as its origin anchor; the function, as a definition whose body is still the empty `(seq)`; or the unit, as a `String` expression of its path. |
+| [`Compiler.enclosing`](#Compiler.enclosing) | Returns the innermost `what` around the parser, or around the function body the transform lowers, as captured code, or NULL when there is none: the declarator whose initializer is being parsed directly in the current block item, as its one-declarator declaration; the block item, as its origin anchor; the function, as a definition whose body is still the empty `(seq)`; or the unit, as a `String` expression of its path. |
 | [`Compiler.enter`](#Compiler.enter) | Enters `row` as the innermost syntax `Compiler.enclosing` answers. |
+| [`Compiler.enter_function`](#Compiler.enter_function) | Enters the function definition `declaration`, whose body the transform lowers next, so a rule lowering that body places code at its entry. |
 | [`Compiler.finish_foreign_alias`](#Compiler.finish_foreign_alias) | Constructs a foreign alias from one direct function declaration and target. |
 | [`Compiler.finish_initializers`](#Compiler.finish_initializers) | Lowers block declarations whose declarators placed code after themselves, or that an after-initialization rewrite follows, to declarations followed by that code in source order, preserving their installed bindings and the enclosing lifetime. |
+| [`Compiler.leave_function`](#Compiler.leave_function) | Leaves the function row at `depth` that `Compiler.enter_function` began and returns the code placed at its entry, in placement order, or NULL. |
 | [`Compiler.leave_item`](#Compiler.leave_item) | Leaves the block item `enter` began and returns the code placed after it, bound in its block, or NULL. |
 | [`Compiler.meta_form_is_declaration`](#Compiler.meta_form_is_declaration) | Reports whether the cursor begins a contextual top-level `meta` declaration: a function or an initialized file-static value. |
 | [`Compiler.package_alias_spelling`](#Compiler.package_alias_spelling) | Returns the folded package-member spelling at the current token, or NULL. |
@@ -72,7 +74,7 @@ X2c declarations, parsed from source or constructed.
 
 The source clause `kind`, which the binder parses when it reaches it.
 
-Source: `src/parse.x:3596`
+Source: `src/parse.x:3627`
 
 ### `Compiler`
 
@@ -84,7 +86,7 @@ Source: `src/parse.x:3596`
 Binds a callable's outer block in its active parameter scope. Ordinary
 constructed blocks open their own scope before using this operation.
 
-Source: `src/parse.x:3870`
+Source: `src/parse.x:3901`
 
 <a id="Compiler.bind_catch_arm"></a>
 #### Compiler.bind_catch_arm
@@ -97,7 +99,7 @@ Binder diagnostics use `start`. A source arm's body parses here, and a
 template's declares its binders where its expansion binds it. A parsed
 arm's body already begins with them, so it binds unchanged.
 
-Source: `src/parse.x:3731`
+Source: `src/parse.x:3762`
 
 <a id="Compiler.bind_match_arm"></a>
 #### Compiler.bind_match_arm
@@ -109,7 +111,7 @@ definite binders of `pattern` when the arm `binds`. Binder diagnostics
 use `start`. A source arm's body parses here with the typed captures
 `types` that its pattern recorded.
 
-Source: `src/parse.x:3834`
+Source: `src/parse.x:3865`
 
 <a id="Compiler.bind_parameter"></a>
 #### Compiler.bind_parameter
@@ -129,7 +131,7 @@ Source: `src/parse.x:2404`
 Binds the source `if`, `while`, `do`, `for`, `match`, or `try` at the
 cursor through the same binders as constructed syntax.
 
-Source: `src/parse.x:3614`
+Source: `src/parse.x:3645`
 
 <a id="Compiler.bind_syntax"></a>
 #### Compiler.bind_syntax
@@ -142,7 +144,7 @@ The input must evaluate to a nonempty AST `List` valid for the requested
 order; `return_type` applies only while descendants are bound. This method
 mutates `Sym` and does not open a semantic transaction.
 
-Source: `src/parse.x:2969`
+Source: `src/parse.x:3000`
 
 <a id="Compiler.bind_template_local"></a>
 #### Compiler.bind_template_local
@@ -173,7 +175,7 @@ Source: `src/parse.x:1160`
 Gives the placements made since `first` the `result` of the expansion
 that made them.
 
-Source: `src/parse.x:2784`
+Source: `src/parse.x:2815`
 
 <a id="Compiler.defines_main"></a>
 #### Compiler.defines_main
@@ -204,14 +206,14 @@ Source: `src/parse.x:864`
 
 `List Compiler.enclosing(Compiler c, Symbol what)`
 
-Returns the innermost `what` around the parser as captured code, or
-NULL when there is none: the declarator whose initializer is being
-parsed directly in the current block item, as its one-declarator
-declaration; the block item, as its origin anchor; the function, as a
-definition whose body is still the empty `(seq)`; or the unit, as a
-`String` expression of its path.
+Returns the innermost `what` around the parser, or around the function
+body the transform lowers, as captured code, or NULL when there is none:
+the declarator whose initializer is being parsed directly in the current
+block item, as its one-declarator declaration; the block item, as its
+origin anchor; the function, as a definition whose body is still the
+empty `(seq)`; or the unit, as a `String` expression of its path.
 
-Source: `src/parse.x:2733`
+Source: `src/parse.x:2737`
 
 <a id="Compiler.enter"></a>
 #### Compiler.enter
@@ -222,7 +224,18 @@ Enters `row` as the innermost syntax `Compiler.enclosing` answers. Its
 owner leaves it with `Block.pop`, or with `Compiler.leave_item` for a
 block item.
 
-Source: `src/parse.x:2723`
+Source: `src/parse.x:2727`
+
+<a id="Compiler.enter_function"></a>
+#### Compiler.enter_function
+
+`int Compiler.enter_function(Compiler c, List declaration)`
+
+Enters the function definition `declaration`, whose body the
+transform lowers next, so a rule lowering that body places code at its
+entry. Returns the row's depth for `Compiler.leave_function`.
+
+Source: `src/parse.x:2764`
 
 <a id="Compiler.finish_foreign_alias"></a>
 #### Compiler.finish_foreign_alias
@@ -234,7 +247,7 @@ Constructs a foreign alias from one direct function declaration and target.
 typed, a function. Storage is limited to `static` or `inline`, when
 present, and variadic parameters are rejected.
 
-Source: `src/parse.x:4014`
+Source: `src/parse.x:4045`
 
 <a id="Compiler.finish_initializers"></a>
 #### Compiler.finish_initializers
@@ -246,7 +259,19 @@ themselves, or that an after-initialization rewrite follows, to
 declarations followed by that code in source order, preserving their
 installed bindings and the enclosing lifetime.
 
-Source: `src/parse.x:2832`
+Source: `src/parse.x:2863`
+
+<a id="Compiler.leave_function"></a>
+#### Compiler.leave_function
+
+`List Compiler.leave_function(Compiler c, int depth)`
+
+Leaves the function row at `depth` that `Compiler.enter_function`
+began and returns the code placed at its entry, in placement order, or
+NULL. The code binds in a scope of its own with the function's result
+type; its caller lowers it.
+
+Source: `src/parse.x:2774`
 
 <a id="Compiler.leave_item"></a>
 #### Compiler.leave_item
@@ -257,7 +282,7 @@ Leaves the block item `enter` began and returns the code placed after
 it, bound in its block, or NULL. A declarator in the item that placed
 code is incomplete unless its block declaration took that code.
 
-Source: `src/parse.x:2794`
+Source: `src/parse.x:2825`
 
 <a id="Compiler.meta_form_is_declaration"></a>
 #### Compiler.meta_form_is_declaration
@@ -539,7 +564,7 @@ Records `code` to follow the innermost block item, or the initialized
 declarator whose initializer is being parsed directly in it. The
 expansion that placed it gives it its result when it finishes.
 
-Source: `src/parse.x:2771`
+Source: `src/parse.x:2802`
 
 <a id="Compiler.place_entry"></a>
 #### Compiler.place_entry
@@ -547,10 +572,11 @@ Source: `src/parse.x:2771`
 `void Compiler.place_entry(Compiler c, Var code)`
 
 Records `code` for the entry of the innermost function definition,
-after its parameters bind and before its first statement. A lambda body
-is inside the definition that holds it.
+after its parameters bind and before its first statement. While parsing,
+a lambda body is inside the definition that holds it; while lowering, a
+lambda body is the body of its own lifted function.
 
-Source: `src/parse.x:2760`
+Source: `src/parse.x:2791`
 
 <a id="Compiler.protocol_form_starts"></a>
 #### Compiler.protocol_form_starts
