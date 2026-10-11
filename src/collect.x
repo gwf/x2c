@@ -1366,23 +1366,23 @@ Map Compiler.collected_declaration_dependencies(Compiler c, List providers) {
 /** Exports original declaration vertices, including scalar native aliases.
     Exported includes supply only selected public and inline-support rows. */
 List Compiler.declaration_provider_rows(
-  Compiler c, List providers, int exported = 0) =>
+  Compiler c, List providers, int exported) =>
   c._declaration_provider_rows(providers, %(declaration-provider).car(), exported);
 
 /** Exports original typed declaration rows and their producing-file privacy. */
 List Compiler.declaration_detail_rows(Compiler c, List providers) =>
-  c._declaration_provider_rows(providers, %(declaration-detail).car());
+  c._declaration_provider_rows(providers, %(declaration-detail).car(), 0);
 
 /** Exports exact namespace prerequisite providers from completed collection.
     Native include providers and scalar aliases retain their own vertices.
     Source positions identify contributions without rerunning producers.
 */
 List Compiler.declaration_prerequisite_rows(Compiler c, List providers) {
-  return c._declaration_provider_rows(providers, %(declaration-prerequisite).car());
+  return c._declaration_provider_rows(providers, %(declaration-prerequisite).car(), 0);
 }
 
 static List Compiler._declaration_provider_rows(
-  Compiler c, List providers, Var kind, int exported = 0) {
+  Compiler c, List providers, Var kind, int exported) {
   Map closure = {};
   foreach (String provider, providers) c.declaration_dependencies(provider, closure);
   Array rows = [];
