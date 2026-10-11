@@ -164,6 +164,7 @@ def load_metadata(path):
     load(path)
     primary['regions'] = list(records.values())
     primary['familyEdges'] = edges
+    primary['_inputs'] = sorted(str(path) for path in seen)
     return primary
 
 
@@ -231,6 +232,20 @@ def project(text, metadata):
     return ''.join(output)
 
 
+def retain_projection_inputs(depfile, metadata):
+    """Extend the first native dependency rule, retaining its search inputs."""
+    path = Path(depfile)
+    text = path.read_text()
+    end = re.search(r'(?<!\\)\n', text)
+    position = end.start() if end else len(text)
+    inputs = [*metadata['_inputs'], str(Path(__file__).resolve())]
+    def escape(value):
+        return value.replace('\\', '\\\\').replace('$', '$$').replace(
+            ' ', '\\ ').replace('#', '\\#').replace(':', '\\:')
+    insertion = ' \\\n  ' + ' '.join(escape(value) for value in inputs)
+    path.write_text(text[:position] + insertion + text[position:])
+
+
 def compile_native(arguments):
     source, destination, object_file, depfile, *compiler = arguments
     if not compiler or compiler.pop(0) != '--':
@@ -249,7 +264,9 @@ def compile_native(arguments):
     if status:
         return status
     try:
-        destination.write_text(project(expanded.read_text(), load_metadata(metadata)))
+        configuration = load_metadata(metadata)
+        destination.write_text(project(expanded.read_text(), configuration))
+        retain_projection_inputs(depfile, configuration)
     finally:
         expanded.unlink(missing_ok=True)
     # The preprocessing receipt remains authoritative for original headers.
@@ -261,8 +278,11 @@ def main():
     try:
         if sys.argv[1:2] == ['--compile']:
             return compile_native(sys.argv[2:])
-        expanded, metadata, destination = map(Path, sys.argv[1:])
-        result = project(expanded.read_text(), load_metadata(metadata))
+        expanded, metadata, destination = map(Path, sys.argv[1:4])
+        configuration = load_metadata(metadata)
+        result = project(expanded.read_text(), configuration)
+        if len(sys.argv) == 5:
+            retain_projection_inputs(sys.argv[4], configuration)
         destination.write_text(result)
         return 0
     except (ProjectionError, OSError, ValueError) as failure:
