@@ -590,7 +590,7 @@ static void Compiler._required_provider_headers(Compiler c, Array units) {
   foreach (List row, c._native_reference_rows(units))
     foreach (Var (path, index), meta_build_tables)
       if (row.car() == index) providers[path] = 1;
-  Map types = declaration_type_namespaces(units.list(), c.sym.unit_symbols());
+  Map types = declaration_type_namespaces(units, c.sym.unit_symbols());
   foreach (Var key, types.keys()) {
     List owner = c.sym.get_exact(%("declaration-file" $key));
     if (owner) providers[c.canonical_path(home_absolute_path(owner.cadr()))] = 1;

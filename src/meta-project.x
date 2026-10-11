@@ -627,7 +627,7 @@ static String Helper.load_native_closure(Helper &h, int index) {
   if (h.initializer_receipts.len()) {
     Compiler c = Compiler.new();
     c.own_diagnostics();
-    c.check_native_initializer_receipts(h.initializer_receipts.list());
+    c.check_native_initializer_receipts(h.initializer_receipts);
   }
   foreach (List component, declaration_work(providers.list_free(), edges)) {
     Array objects = [], targets = [], indices = [], identities = [];
