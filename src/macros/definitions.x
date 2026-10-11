@@ -36,8 +36,10 @@ List Compiler.parse_macro_definition(Compiler c) {
   return d.publish();
 }
 
-/* Signature collection retains invocation categories and alias targets locally.
-   The temporary signature cache owns these descriptors; no body is bound. */
+/** Collects a macro's invocation signature and skips its body.
+    The temporary signature cache retains categories and alias targets;
+    collection does not expand the macro body.
+*/
 void Compiler.collect_signature_macro_definition(Compiler c) {
   Definition d = {.c = c, .start = c.token};
   d.storage = c.test(<static>) || c.source_private;

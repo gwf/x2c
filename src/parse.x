@@ -547,7 +547,9 @@ static void Compiler._retain_native_prefix_nodes(Compiler c, List nodes) {
   c.native_prefix_pending.push(Var.new(<p48>, pending));
 }
 
-/* A header uses reached signatures without binding pending implementations. */
+/** Returns reached declarations for a native prefix header.
+    Pending function bodies and object initializers remain unbound.
+*/
 Array Compiler.native_meta_prefix_declarations(Compiler c) {
   Array declarations = [];
   foreach (List node, c.unit_nodes) {

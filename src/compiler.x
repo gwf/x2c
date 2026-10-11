@@ -1927,6 +1927,10 @@ static List Compiler._initializer_variant(
 static List Compiler._initializer_graph_binding(Compiler c, List binding) =>
   binding_identity_new(1, c.initializer_identity(binding));
 
+/** Returns a stable native initializer graph name for a binding.
+    File-static names include their defining file's relocatable identity.
+    Other names retain their selected emitted spelling.
+*/
 String Compiler.initializer_identity(Compiler c, List binding) {
   String name = c.emitted_binding_name(binding);
   List key = c._fact(%(namespace $binding));

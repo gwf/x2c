@@ -11,8 +11,10 @@
 #include "path.x"
 #include "process.x"
 
-/* Metadata paths follow output placement, so copying the complete output tree
-   reconnects companions without retaining an absolute checkout location. */
+/** Returns the relative path from `directory` to `path`.
+    Projection metadata uses this path to retain companion placement when
+    the complete generated output tree moves.
+*/
 String native_projection_relative(String path, String directory) {
   List target = Path.absolute(path).split("/");
   List base = Path.absolute(directory).split("/");

@@ -7,6 +7,7 @@
 */
 
 #pragma once
+/** Names the configured source frontend across dependency includes. */
 typedef struct Frontend *Frontend;
 
 #include "cli.x"

@@ -357,7 +357,9 @@ static List Compiler._native_prerequisites(Compiler c) {
   return prerequisites.list_free();
 }
 
-/* Published body and object definitions differ from collected prototypes. */
+/** Returns the names of function and object definitions in the native prefix.
+    Collected prototypes do not count as definitions.
+*/
 List Compiler.native_prefix_definitions(Compiler c) {
   Array names = [];
   Var identity;
