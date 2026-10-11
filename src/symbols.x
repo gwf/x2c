@@ -1423,6 +1423,7 @@ static int SymTxn._tracks(SymTxn &s, Map map) {
   if (_same(map, s.scope.symbols) || _same(map, s.scope.bindings) ||
       _same(map, s.scope.enumerators) || _same(map, s.scope.macros) ||
       _same(map, s.statics) || _same(map, s.binding_facts) ||
+      _same(map, s.c.binding_references) ||
       _same(map, s.c.macros) || _same(map, s.c.kw_aliases)) return 1;
   if (s.c.source_facts && _same(map, s.c.source_declarations)) return 1;
   if (!s.extended) return 0;

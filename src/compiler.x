@@ -2364,7 +2364,7 @@ void Compiler.record_binding_reference(Compiler c, List binding) {
   if (!provider) return;
   String consumer = c.canonical_path(c.filename);
   if (consumer != provider)
-    c.binding_references[%($consumer $provider)] = 1;
+    c.sym.put(c.binding_references, %($consumer $provider), 1);
 }
 
 /** Exports resolved provider edges as portable immutable source names. */
