@@ -8,7 +8,7 @@ non-static function definition discovered in source order. It does
 not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
-- Compiler modules: 60
+- Compiler modules: 61
 - Runtime modules: 77
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
@@ -190,6 +190,14 @@ delegate fields.
 Public functions:
 
 None. This module has no non-static function definitions.
+
+### [src/component-interpolation.x](../src/component-interpolation.x)
+
+interpolated Strings.
+
+Public functions:
+
+`interpolation`
 
 ### [src/component-literals.x](../src/component-literals.x)
 

@@ -39,7 +39,7 @@ Shipped `meta` code compiled into the compiler.
 
 Stores the updated element and returns its previous value.
 
-Source: `src/linked-meta.x:356`
+Source: `src/linked-meta.x:357`
 
 #### access_prefix
 
@@ -47,7 +47,7 @@ Source: `src/linked-meta.x:356`
 
 Stores and returns the incremented or decremented element.
 
-Source: `src/linked-meta.x:345`
+Source: `src/linked-meta.x:346`
 
 #### access_read
 
@@ -55,7 +55,7 @@ Source: `src/linked-meta.x:345`
 
 Calls the getter bracket admission selected.
 
-Source: `src/linked-meta.x:229`
+Source: `src/linked-meta.x:230`
 
 #### access_store
 
@@ -64,7 +64,7 @@ Source: `src/linked-meta.x:229`
 Selects the adopted collection setter for indexed assignment, or a
 participant's `setindex` member.
 
-Source: `src/linked-meta.x:280`
+Source: `src/linked-meta.x:281`
 
 #### access_update
 
@@ -73,7 +73,7 @@ Source: `src/linked-meta.x:280`
 Selects collection compound updates and checks accepted operands, or a
 participant's `updateindex` member.
 
-Source: `src/linked-meta.x:311`
+Source: `src/linked-meta.x:312`
 
 #### delegate_member
 
@@ -82,7 +82,7 @@ Source: `src/linked-meta.x:311`
 Rebuilds a call that finds no member on its receiver through the one
 delegate field path that provides the method.
 
-Source: `src/linked-meta.x:458`
+Source: `src/linked-meta.x:459`
 
 #### dynamic_binary
 
@@ -94,7 +94,7 @@ for `+` beside text, text. The call is returned lowered, because an
 operator chain applies this rule once for each term and binding would
 search the whole remaining chain each time.
 
-Source: `src/linked-meta.x:791`
+Source: `src/linked-meta.x:792`
 
 #### dynamic_change
 
@@ -103,7 +103,7 @@ Source: `src/linked-meta.x:791`
 Adds or subtracts one through the `Var` update helpers; the postfix
 forms return the value before the change.
 
-Source: `src/linked-meta.x:876`
+Source: `src/linked-meta.x:877`
 
 #### dynamic_compound
 
@@ -112,7 +112,7 @@ Source: `src/linked-meta.x:876`
 Updates a `Var` or numeric lvalue with a `Var` or numeric operand
 through the update helper of its storage.
 
-Source: `src/linked-meta.x:850`
+Source: `src/linked-meta.x:851`
 
 #### dynamic_unary
 
@@ -120,7 +120,7 @@ Source: `src/linked-meta.x:850`
 
 Rejects a unary numeric operator on a `Var`.
 
-Source: `src/linked-meta.x:892`
+Source: `src/linked-meta.x:893`
 
 #### linked_meta_hashes
 
@@ -128,7 +128,7 @@ Source: `src/linked-meta.x:892`
 
 Returns linked definition hashes and provider source dependencies.
 
-Source: `src/linked-meta.x:1446`
+Source: `src/linked-meta.x:1448`
 
 #### linked_meta_targets
 
@@ -136,7 +136,7 @@ Source: `src/linked-meta.x:1446`
 
 Returns the linked copies, and the runtime builders, by name.
 
-Source: `src/linked-meta.x:1270`
+Source: `src/linked-meta.x:1271`
 
 #### match_lowering
 
@@ -145,7 +145,7 @@ Source: `src/linked-meta.x:1270`
 Lowers the bound match `node` to C text around its subject, patterns,
 and bodies.
 
-Source: `src/linked-meta.x:775`
+Source: `src/linked-meta.x:776`
 
 #### printf_values
 
@@ -153,7 +153,7 @@ Source: `src/linked-meta.x:775`
 
 Reads the Var values a printf-family call's static format consumes.
 
-Source: `src/linked-meta.x:1032`
+Source: `src/linked-meta.x:1033`
 
 #### raise_lowering
 
@@ -162,7 +162,7 @@ Source: `src/linked-meta.x:1032`
 Converts a raise's code and details, or declines a raise whose parts
 already have their types.
 
-Source: `src/linked-meta.x:1068`
+Source: `src/linked-meta.x:1069`
 
 #### register_rewrite
 
@@ -170,7 +170,7 @@ Source: `src/linked-meta.x:1068`
 
 Registers the decorated translator with its pattern and hole patterns.
 
-Source: `src/linked-meta.x:87`
+Source: `src/linked-meta.x:88`
 
 #### try_catch_cases
 
@@ -184,7 +184,7 @@ every arm returns or raises, control cannot leave them, and a final
 unreachable mark tells C so that a function ending in such a `try`
 needs no return after it.
 
-Source: `src/linked-meta.x:1102`
+Source: `src/linked-meta.x:1103`
 
 #### try_lowering
 
@@ -192,7 +192,7 @@ Source: `src/linked-meta.x:1102`
 
 Lowers the parsed try `node` to its landing form.
 
-Source: `src/linked-meta.x:1214`
+Source: `src/linked-meta.x:1215`
 
 ## Design notes
 
