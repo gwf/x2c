@@ -598,6 +598,10 @@ void Compiler.bind_native_meta_prefix(Compiler c) {
   c.placements = [];
   while (count-- > 0) {
     NativePrefixBody *pending = c.native_prefix_pending.shift().pointer();
+    if (pending->kind == 2) {
+      c.native_prefix_pending.unshift(Var.new(<p48>, pending));
+      break;
+    }
     Token current = c.token;
     SymScope params = c.params;
     Array braces = c.braces;
