@@ -848,12 +848,12 @@ String Compiler.resolve_source_include(Compiler c, String target, int angle) {
     include of `target` reaches, including its transitive includes.
     A file already in `seen`
     is skipped with the files it reaches, and each file reached is added to
-    `seen`. NULL when the include does not resolve to x2c source; a runtime
+    `seen`. Native headers contribute their collected typedefs; a runtime
     module adds nothing the prelude has not declared. */
 List Compiler.include_typedef_names(
   Compiler c, String target, int angle, Map seen) {
   String path = c.resolve_source_include(target, angle);
-  if (!path || !is_source_file(path)) return NULL;
+  if (!path) return NULL;
   Array names = [];
   c._add_typedef_names(names, _canonical_path(path), seen);
   return names.list_free();

@@ -8,8 +8,8 @@
 #include "utils.x"
 
 static typedef struct Layouts {
-  Map bodies, variants, aliases, owners, prefixes, arms, edges, visiting, finished;
-  Map private_types, private_bindings, used_aliases;
+  Map bodies, variants, aliases, owners, edges, visiting, finished;
+  Map private_types, private_bindings, private_constants, used_aliases;
   Array order;
 } Layouts;
 
@@ -32,13 +32,13 @@ static String Compiler._layout_file_spelling(Compiler c, String name) {
   String path = c.canonical_path(c.filename);
   String directory = Path.dirname(c.module_owner);
   String relative = path[directory.len() + 1:];
-  String module = c.module_tree.entry(c.module_owner).prefix;
+  String module = c.module_tree.prefix(c.module_owner);
   String identity = %"$module/$relative";
   return %"_x2c_file_${filename_hash(identity)}__$name";
 }
 
 static void Layouts.private_names(Layouts &layouts, Compiler c, List ast) {
-  Map names = {}, bindings = {};
+  Map names = {}, bindings = {}, constants = {};
   if (c.module_owner) foreach (List node, ast)
     match (node) case %((!or typedef declare) ?base (bindings *rows)): {
       Type type = base;
@@ -46,6 +46,17 @@ static void Layouts.private_names(Layouts &layouts, Compiler c, List ast) {
       match (type.base_type())
         case %((!set ?kind (!or struct union enum)) ?(String name) *):
           names[%($kind $name)] = c._layout_file_spelling(name);
+      match (type.base_type()) case %(enum ?(String tag) ?members): {
+        List family = %(enum ${c._layout_file_spelling(tag)});
+        foreach (List member, members) {
+          match (member) case %(op = ?target ?): member = target;
+          String name = binding_identity_spelling(member);
+          if (!name) continue;
+          bindings[member] = binding_identity_new(
+            member.cadr(), c._layout_file_spelling(name));
+          constants[member] = family;
+        }
+      }
       if (node.car() != <typedef>) continue;
       foreach (List row, rows)
         match (row) case %(bind ?identity *): {
@@ -59,6 +70,7 @@ static void Layouts.private_names(Layouts &layouts, Compiler c, List ast) {
   String path = c.canonical_path(c.filename);
   layouts.private_types[path] = names;
   layouts.private_bindings[path] = bindings;
+  layouts.private_constants[path] = constants;
 }
 
 static Type _layout_private_type(Type type, Map names) {
@@ -122,16 +134,15 @@ static void Layouts.provider(Layouts &layouts, Compiler c, List ast) {
         if (kind == <typedef>) {
           List alias_base = base;
           List core = _layout_core(type);
-          if (core && core.car() != <enum>)
+          if (core)
             alias_base = base.list()[:base.list().len() - core.len()]
               .append(%(${family.car()} ${family.cadr()}));
-          if (!core || core.car() != <enum>)
-            foreach (List declarator, bindings.list().cdr()) {
-              String name = binding_identity_spelling(declarator.cadr());
-              if (name)
-                layouts.aliases[name] = %(
-                  $c (typedef $alias_base (bindings $declarator)));
-            }
+          foreach (List declarator, bindings.list().cdr()) {
+            String name = binding_identity_spelling(declarator.cadr());
+            if (name)
+              layouts.aliases[name] = %(
+                $c (typedef $alias_base (bindings $declarator)));
+          }
         }
         if (!family) {
           prefix.push(node);
@@ -143,8 +154,6 @@ static void Layouts.provider(Layouts &layouts, Compiler c, List ast) {
         layouts.variants[family] = cons(
           %($c $body ${prefix.list()} $arms), layouts.variants[family]);
         layouts.owners[family] = c.canonical_path(c.filename);
-        layouts.prefixes[family] = prefix.list();
-        layouts.arms[family] = arms;
       }
     }
   }
@@ -240,12 +249,59 @@ static String _layout_text(Compiler c, List nodes) {
   return c.code_pretty_string(c.emit(support.list_free(), NULL), c.filename);
 }
 
+/* Own source guards suppress support bodies during ancestor includes.
+   Named aggregate aliases need declarations before those includes even
+   when no cross-file complete-layout edge exists. */
+static String Layouts.forwards(Layouts &layouts, Compiler c, List ast) {
+  Array candidates = [], nodes = [];
+  foreach (List node, ast) {
+    match (node) case %(typedef *): {
+      foreach (List prerequisite, layouts.alias_nodes(node))
+        candidates.push(prerequisite);
+      candidates.push(node);
+    }
+  }
+  Map done = {};
+  foreach (List node, candidates)
+    match (node) case %(typedef ?base (bindings *rows)): {
+      Type type = base;
+      if (type.is_static()) continue;
+      List core = type.base_type(), bare = base;
+      match (core) {
+        case %(enum *): continue;
+        case %((!set ?kind (!or struct union)) ?(String name) *):
+          bare = base.list()[:base.list().len() - core.len()]
+            .append(%($kind $name));
+      }
+      foreach (List declarator, rows) {
+        Type alias = %(typedef $base (bindings $declarator)).type_from_ast();
+        Type element = c.sym.normalize_declared_type(alias).canonicalize();
+        int array = element.is_array();
+        while (element.is_array()) element = element.dereference();
+        if (array && !element.is_pointer()) continue;
+        List forward = %(typedef $bare (bindings $declarator));
+        if (forward in done) continue;
+        done[forward] = 1;
+        nodes.push(forward);
+      }
+    }
+  return _layout_text(c, nodes.list_free());
+}
+
 /* Public inline bodies capture native state at their authored position.
    Keep them with the prefix, under individual guards, rather than moving
    their native includes ahead of the bodies. */
-static List _layout_prefix(Compiler c, List prefix, Map plan, List layouts) {
+static List Layouts.prefix(
+  Layouts &layouts, Compiler c, List prefix, Map plan, List definitions) {
   Array nodes = [];
   foreach (List node, prefix) {
+    match (node) case %(typedef ?base *): {
+      Type type = base;
+      match (type.base_type()) case %(?(String dependency)):
+        if (dependency in layouts.aliases)
+          foreach (List prerequisite, layouts.alias_nodes(node))
+            nodes.push(prerequisite);
+    }
     match (node)
       case %(function ?type (bind ?binding *) ?): {
         Type signature = type;
@@ -258,7 +314,7 @@ static List _layout_prefix(Compiler c, List prefix, Map plan, List layouts) {
       }
     nodes.push(node);
   }
-  return c.module_layout_header_prefix(nodes.list_free(), layouts);
+  return c.module_layout_header_prefix(nodes.list_free(), definitions);
 }
 
 static void Layouts.alias(
@@ -277,10 +333,10 @@ static void Layouts.alias(
   visiting.del(name);
   done[name] = 1;
   layouts.used_aliases[name] = 1;
-  text.push(_layout_text(c, %( $node )));
+  text.push(node);
 }
 
-static String Layouts.alias_text(Layouts &layouts, List body) {
+static List Layouts.alias_nodes(Layouts &layouts, List body) {
   Map needed = {}, done = {}, visiting = {};
   List node;
   $ast.walk(body, node) {
@@ -293,9 +349,7 @@ static String Layouts.alias_text(Layouts &layouts, List body) {
   Array parts = [];
   foreach (String name, needed.keys())
     layouts.alias(name, done, visiting, parts);
-  String text = "";
-  foreach (String part, parts) text += part;
-  return text;
+  return parts.list_free();
 }
 
 /* A copied definition's directives must not set source-position macros
@@ -329,10 +383,11 @@ static String _layout_macro_guards(List names, String operation) {
    Consumers export only Strings and keys as their nested Contexts close. */
 Map prepare_module_layouts(List providers) {
   Layouts layouts = {
-    .bodies = {}, .variants = {}, .aliases = {}, .owners = {}, .prefixes = {}, .arms = {},
+    .bodies = {}, .variants = {}, .aliases = {}, .owners = {},
     .edges = {},
     .visiting = {}, .finished = {}, .order = [],
-    .private_types = {}, .private_bindings = {}, .used_aliases = {}};
+    .private_types = {}, .private_bindings = {}, .private_constants = {},
+    .used_aliases = {}};
   foreach (List provider, providers) {
     (Compiler c, List ast) = provider;
     layouts.private_names(c, ast);
@@ -360,7 +415,6 @@ Map prepare_module_layouts(List providers) {
           changed = 1;
         }
   } while (changed);
-  if (!active.len()) return {};
   Map rendered = {}, plan = {};
   foreach (List family, layouts.order) {
     if (!(family in active)) continue;
@@ -373,8 +427,8 @@ Map prepare_module_layouts(List providers) {
       List body = variant.cadr(), prefix = variant.caddr(), arms = variant.cddr().cadr();
       List macros = _layout_macro_names(prefix);
       text += _layout_macro_guards(macros, "push");
-      List definitions = %((comment ${layouts.alias_text(body)}) $body);
-      text += _layout_text(c, _layout_prefix(c, prefix, plan, definitions));
+      List definitions = layouts.alias_nodes(body).append(%($body));
+      text += _layout_text(c, layouts.prefix(c, prefix, plan, definitions));
       for (int i = arms.len(); i; i--) text += "#endif\n";
       text += _layout_macro_guards(macros.reverse(), "pop");
     }
@@ -383,17 +437,21 @@ Map prepare_module_layouts(List providers) {
   }
   foreach (List provider, providers) {
     (Compiler c, List ast) = provider;
-    String path = c.canonical_path(c.filename), text = "";
+    String path = c.canonical_path(c.filename), text = layouts.forwards(c, ast);
     Map names = {}, bindings = {};
-    foreach (Var (key, spelling), layouts.private_types[path]) {
+    Map provider_types = layouts.private_types[path],
+      provider_bindings = layouts.private_bindings[path],
+      provider_constants = layouts.private_constants[path];
+    foreach (Var (key, spelling), provider_types) {
       List family = key;
       if (family.car() == <typedef>
           ? spelling in layouts.used_aliases
           : %(${family.car()} $spelling) in active)
         names[key] = spelling;
     }
-    foreach (Var (binding, renamed), layouts.private_bindings[path])
-      if (binding_identity_spelling(renamed) in layouts.used_aliases)
+    foreach (Var (binding, renamed), provider_bindings)
+      if (binding_identity_spelling(renamed) in layouts.used_aliases ||
+          (binding in provider_constants && provider_constants[binding] in active))
         bindings[binding] = renamed;
     plan[%(private-types $path)] = names;
     plan[%(private-bindings $path)] = bindings;

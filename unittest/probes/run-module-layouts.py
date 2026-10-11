@@ -153,6 +153,19 @@ def cases():
     yield "value_layout_native_header_state_order", header_state, options, None
     yield "ordinary_native_header_state_order", ordinary(header_state), {
         "include_dirs": ["."], "inputs": ["box.x", "box/inner.x", "box/outer.x", "main.x"]}, None
+    for visibility in ["static", "public"]:
+        prefix = "static " if visibility == "static" else ""
+        function_state = {
+            **header_state,
+            "box/inner.x": (prefix + 'int early_impl(void) {\n#if defined(NATIVE_FEATURE)\n'
+                            'return 99;\n#else\nreturn 17;\n#endif\n}\n'
+                            'int early(void) => early_impl();\n'
+                            '#include "settings.h"\n'
+                            'module typedef struct Inner {NativeWord word;} Inner;\n'),
+        }
+        yield "value_layout_native_header_" + visibility + "_body_order", function_state, options, None
+        yield "ordinary_native_header_" + visibility + "_body_order", ordinary(function_state), {
+            "include_dirs": ["."], "inputs": ["box.x", "box/inner.x", "box/outer.x", "main.x"]}, None
     yield next(case for case in probes.extended_cases()
                if case[0] == "opaque_public_forward")
     yield "value_layout_ancestor_alias_child_shadow", {
@@ -258,6 +271,27 @@ def cases():
                          'module SlotAlias mirror = {NULL, NULL};\n'
                          'int answer(void) {return ticket[0] == NULL && mirror[1] == NULL ? 42 : 0;}\n'),
     }, options, None
+    native_meta = {
+        "box.x": ('module typedef struct Inner Inner;\n'
+                  'module typedef struct Outer Outer;\n'
+                  'meta module int probe(void);\n'
+                  'module {"box/inner.x", "box/outer.x", "box/value.x"}\n'),
+        "box/inner.x": 'module typedef struct Inner {int value;} Inner;\n',
+        "box/outer.x": ('module typedef struct Outer {Inner inner;} Outer;\n'
+                        'meta module int probe(void) {Outer value = {{42}}; '
+                        'return value.inner.value;}\n'),
+        "box/value.x": 'int answer(void) => $probe();\n',
+        "main.x": probes.consumer("box.x", "answer() == 42"),
+    }
+    yield "native_meta_complete_layout", native_meta, options, None
+    ordinary_meta = {name: text.replace("module ", "")
+                     for name, text in native_meta.items()}
+    ordinary_meta["box.x"] = ('#include "box/inner.x"\n#include "box/outer.x"\n'
+                              '#include "box/value.x"\n')
+    ordinary_meta["box/outer.x"] = '#include "inner.x"\n' + ordinary_meta["box/outer.x"]
+    ordinary_meta["box/value.x"] = '#include "outer.x"\n' + ordinary_meta["box/value.x"]
+    yield "ordinary_native_meta_complete_layout", ordinary_meta, {
+        "inputs": ["box.x", "box/inner.x", "box/outer.x", "box/value.x", "main.x"]}, None
     yield "value_layout_three_levels", {
         **layout,
         "box.x": ('module typedef struct Inner Inner;\n'
