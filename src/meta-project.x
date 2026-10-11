@@ -450,6 +450,7 @@ static String Helper.prefix(Helper &h, String owner, int index, String name) {
   if (!h.prefix_compilers.try_get(owner, compiler))
     return "the defining body has not been bound";
   Compiler c = compiler.pointer();
+  c.bind_native_meta_prefix();
   int found = 0;
   foreach (List entry, c.meta_group)
     match (entry) case %(function ? ?target *): if (target == name) found = 1;

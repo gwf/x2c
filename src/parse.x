@@ -458,27 +458,26 @@ static List Compiler._declaration_form(Compiler c, int skip_body) {
   if (c.meta_form_is_declaration()) meta = c.take_meta_marker(native);
   Token first = c.token;
   List decl;
-  int prefix = skip_body && c.meta_build && meta && !native &&
+  int prefix = skip_body && c.meta_build && !native &&
                !c.signature_only && !c.macro_holes;
-  $let(c.shallow, prefix ? 0 : c.shallow || c.public_bodies)
+  $let(c.shallow, prefix && meta ? 0 : c.shallow || c.public_bodies)
   $let(c.macro_holes, c.signature_only && !c.macro_holes
          ? {} : c.macro_holes)
     decl = c.parse_declaration_row();
   int body = c.peek(0) == <"{"> || c._at_function_arrow();
   Type type = decl.type_from_ast();
-  if (prefix && (body || !type.is_function())) {
+  if (prefix && body) {
+    c._retain_native_prefix_body(decl, meta, first);
+    c.finish_collected_declaration(decl, meta, native);
+    c._record_meta_hash(decl, first, body);
+    if (meta) c.install_collected_meta_function(decl, meta);
+    return NULL;
+  }
+  if (prefix && meta && !type.is_function()) {
+    c.expect(<;>);
     List node;
-    if (body) {
-      c.record_project_meta_effect(decl, meta);
-      $let(c.shallow, 0)
-      $let(c.capture_unit, 1)
-        node = c._defined(decl, meta, native, first);
-    }
-    else {
-      c.expect(<;>);
-      $let(c.shallow, 0) node = c._declared(decl, meta, first);
-    }
-    c.retain_native_meta_source(node, meta, c.token);
+    $let(c.shallow, 0) node = c._declared(decl, meta, first);
+    c.retain_native_meta_source(node, meta, c.token, 1);
     return NULL;
   }
   if (skip_body || (c.public_bodies && body &&
@@ -497,6 +496,58 @@ static List Compiler._declaration_form(Compiler c, int skip_body) {
   c.require_input();
   Symbol unexpected = c.peek(0);
   $report.parse.body_expected(c, unexpected);
+}
+
+/* Bodies are parsed only when a prefix needs native execution. Collection
+   publishes the ordinary signatures first, without running later producers. */
+static typedef struct NativePrefixBody {
+  List declaration;
+  Token body, first, meta;
+  SymScope params;
+  Map macros, aliases, objects;
+  int module;
+} NativePrefixBody;
+
+static void Compiler._retain_native_prefix_body(
+  Compiler c, List declaration, Token meta, Token first) {
+  NativePrefixBody *pending = calloc(1, sizeof(NativePrefixBody));
+  *pending = (NativePrefixBody) {
+    .declaration = declaration, .body = c.token, .first = first, .meta = meta,
+    .params = c.params, .macros = c.macros.copy(),
+    .aliases = c.kw_aliases.copy(),
+    .objects = c.object_macros ? c.object_macros.copy() : {},
+    .module = c.source_module};
+  if (!c.native_prefix_pending) c.native_prefix_pending = [];
+  c.native_prefix_pending.push(Var.new(<pointer>, pending));
+  c.register_native_meta_prefix();
+}
+
+/** Binds already-collected bodies once through the ordinary function parser. */
+void Compiler.bind_native_meta_prefix(Compiler c) {
+  int count = c.native_prefix_pending ? c.native_prefix_pending.len() : 0;
+  while (count-- > 0) {
+    NativePrefixBody *pending = c.native_prefix_pending.shift().pointer();
+    Token current = c.token;
+    SymScope params = c.params;
+    Array braces = c.braces;
+    defer { c.token = current; c.params = params; c.braces = braces; }
+    c.token = pending->body;
+    c.params = pending->params;
+    c.braces = braces.copy();
+    List node;
+    $let(c.macros, pending->macros)
+    $let(c.kw_aliases, pending->aliases)
+    $let(c.object_macros, pending->objects)
+    $let(c.source_module, pending->module)
+    $let(c.shallow, 0)
+    $let(c.capture_unit, 1)
+      node = c._defined(pending->declaration, pending->meta, 0, pending->first);
+    if (!c.unit_nodes) c.unit_nodes = [];
+    c.unit_nodes.push(node);
+    $let(c.source_module, pending->module)
+      c.retain_native_meta_source(node, pending->meta ? pending->meta : pending->first,
+        c.token, pending->meta != NULL);
+  }
 }
 
 /** Parses one full top-level form through the shared classifier. */

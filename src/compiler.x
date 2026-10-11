@@ -192,7 +192,7 @@ typedef struct Compiler {
      the translation as `(later PLACEHOLDER)`. `meta_group_bound` holds the
      names the REPL bound to staged native code, the modules it reset, and
      each bodyless `meta` prototype nothing supplies. */
-  Array unit_nodes, meta_group;
+  Array unit_nodes, meta_group, native_prefix_pending;
   Map meta_group_bound;
   /* Zero for ordinary parsing, one for metadata collection, or the
      project helper table index plus one. */
@@ -709,10 +709,12 @@ List Compiler.replay_declaration_source(Compiler c) {
   List source = c.sym.get(c._declaration_source_key(c.token));
   match (source)
     case %(declaration-source ?(int end)
-           (native-meta-bound ?node ?(int module)) ?facts): {
+           (native-meta-bound ?node ?(int module) ?(int meta)) ?facts): {
       c._restore_declaration_bindings(node, facts, {});
-      $let(c.source_module, module)
-        c.restore_native_meta_source(node, c.token);
+      $let(c.source_module, module) {
+        if (meta) c.restore_native_meta_source(node, c.token);
+        else c.record_declaration_visibility(node);
+      }
       while (c.peek(0) != <eof> && c.token.pos < end) c.next();
       return node;
     }
@@ -728,10 +730,10 @@ List Compiler.replay_declaration_source(Compiler c) {
 
 /** Retains a meta prefix already bound by the ordinary declaration parser. */
 void Compiler.retain_native_meta_source(
-  Compiler c, List node, Token first, Token after) {
+  Compiler c, List node, Token first, Token after, int meta) {
   c.sym.set(c._declaration_source_key(first),
     %(declaration-source ${after.pos}
-      (native-meta-bound $node ${c.source_module})
+      (native-meta-bound $node ${c.source_module} $meta)
       ${c.semantic_binding_facts()}));
   c.register_native_meta_prefix();
 }
