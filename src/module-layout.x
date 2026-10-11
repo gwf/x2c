@@ -107,7 +107,7 @@ static void Layouts.require_type(
   List module_key = c.module_retry_key(key);
   if (module_key) key = module_key;
   match (key)
-    case %((!set ?kind (!or struct union enum)) ?name): {
+    case %((!set ?kind (!or struct union enum)) ?(String name) *): {
       List family = %($kind $name);
       if (family in l.bodies) needed[family] = 1;
       else foreach (List row, c.sym.field_order(key).cdr())
