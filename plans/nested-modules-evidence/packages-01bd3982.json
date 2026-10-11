@@ -1,0 +1,342 @@
+[
+  {
+    "name": "make-package",
+    "status": 0,
+    "log": "/tmp/x2c-nested-package-delivery-vrhwqble/make-package.log",
+    "command": [
+      "make",
+      "-j1",
+      "X2C=/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+      "ROOT=/Users/gary/.codex/worktrees/nested-modules-spike/x2c",
+      "BUILD_JOBS=1",
+      "build"
+    ]
+  },
+  {
+    "name": "make-consumer-build",
+    "status": 0,
+    "log": "/tmp/x2c-nested-package-delivery-vrhwqble/make-consumer-build.log",
+    "command": [
+      "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+      "build",
+      "-j",
+      "1",
+      "--package-dir",
+      "/tmp/x2c-nested-package-delivery-vrhwqble/packages",
+      "--output",
+      "/tmp/x2c-nested-package-delivery-vrhwqble/make-consumer",
+      "--build-dir",
+      "/tmp/x2c-nested-package-delivery-vrhwqble/make-consumer-build",
+      "/tmp/x2c-nested-package-delivery-vrhwqble/client.x"
+    ]
+  },
+  {
+    "name": "make-consumer-run",
+    "status": 0,
+    "log": "/tmp/x2c-nested-package-delivery-vrhwqble/make-consumer-run.log",
+    "command": [
+      "/tmp/x2c-nested-package-delivery-vrhwqble/make-consumer"
+    ]
+  },
+  {
+    "name": "bundle-relative-1",
+    "status": 0,
+    "log": "/tmp/x2c-nested-package-delivery-vrhwqble/bundle-relative-1.log",
+    "command": [
+      "make",
+      "-j1",
+      "X2C=/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+      "ROOT=/Users/gary/.codex/worktrees/nested-modules-spike/x2c",
+      "BUILD_JOBS=1",
+      "bundle"
+    ]
+  },
+  {
+    "name": "bundle-relative-2",
+    "status": 0,
+    "log": "/tmp/x2c-nested-package-delivery-vrhwqble/bundle-relative-2.log",
+    "command": [
+      "make",
+      "-j1",
+      "X2C=/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+      "ROOT=/Users/gary/.codex/worktrees/nested-modules-spike/x2c",
+      "BUILD_JOBS=1",
+      "bundle"
+    ]
+  },
+  {
+    "name": "bundle-consumer-build",
+    "status": 0,
+    "log": "/tmp/x2c-nested-package-delivery-vrhwqble/bundle-consumer-build.log",
+    "command": [
+      "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+      "build",
+      "-j",
+      "1",
+      "--package-dir",
+      "/tmp/x2c-nested-package-delivery-vrhwqble/packages/demo/builds/bundle",
+      "--output",
+      "/tmp/x2c-nested-package-delivery-vrhwqble/bundle-consumer",
+      "--build-dir",
+      "/tmp/x2c-nested-package-delivery-vrhwqble/bundle-consumer-build",
+      "/tmp/x2c-nested-package-delivery-vrhwqble/client.x"
+    ]
+  },
+  {
+    "name": "bundle-consumer-run",
+    "status": 0,
+    "log": "/tmp/x2c-nested-package-delivery-vrhwqble/bundle-consumer-run.log",
+    "command": [
+      "/tmp/x2c-nested-package-delivery-vrhwqble/bundle-consumer"
+    ]
+  },
+  {
+    "name": "build-after-relative-bundle",
+    "status": 0,
+    "log": "/tmp/x2c-nested-package-delivery-vrhwqble/build-after-relative-bundle.log",
+    "command": [
+      "make",
+      "-j1",
+      "X2C=/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+      "ROOT=/Users/gary/.codex/worktrees/nested-modules-spike/x2c",
+      "BUILD_JOBS=1",
+      "build"
+    ]
+  },
+  {
+    "name": "bundle-absolute",
+    "status": 0,
+    "log": "/tmp/x2c-nested-package-delivery-vrhwqble/bundle-absolute.log",
+    "command": [
+      "make",
+      "-j1",
+      "X2C=/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+      "ROOT=/Users/gary/.codex/worktrees/nested-modules-spike/x2c",
+      "BUILD_JOBS=1",
+      "bundle",
+      "BUNDLE_DIR=/tmp/x2c-nested-package-delivery-vrhwqble/packages/demo/builds/bundle"
+    ]
+  },
+  {
+    "name": "build-after-absolute-bundle",
+    "status": 0,
+    "log": "/tmp/x2c-nested-package-delivery-vrhwqble/build-after-absolute-bundle.log",
+    "command": [
+      "make",
+      "-j1",
+      "X2C=/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+      "ROOT=/Users/gary/.codex/worktrees/nested-modules-spike/x2c",
+      "BUILD_JOBS=1",
+      "build",
+      "BUNDLE_DIR=/tmp/x2c-nested-package-delivery-vrhwqble/packages/demo/builds/bundle"
+    ]
+  },
+  {
+    "name": "absolute-bundle-consumer-build",
+    "status": 0,
+    "log": "/tmp/x2c-nested-package-delivery-vrhwqble/absolute-bundle-consumer-build.log",
+    "command": [
+      "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+      "build",
+      "-j",
+      "1",
+      "--package-dir",
+      "/tmp/x2c-nested-package-delivery-vrhwqble/packages/demo/builds/bundle",
+      "--output",
+      "/tmp/x2c-nested-package-delivery-vrhwqble/absolute-bundle-consumer",
+      "--build-dir",
+      "/tmp/x2c-nested-package-delivery-vrhwqble/absolute-bundle-consumer-build",
+      "/tmp/x2c-nested-package-delivery-vrhwqble/client.x"
+    ]
+  },
+  {
+    "name": "absolute-bundle-consumer-run",
+    "status": 0,
+    "log": "/tmp/x2c-nested-package-delivery-vrhwqble/absolute-bundle-consumer-run.log",
+    "command": [
+      "/tmp/x2c-nested-package-delivery-vrhwqble/absolute-bundle-consumer"
+    ]
+  },
+  {
+    "name": "relocated-native-bundle-rebuild",
+    "status": 0,
+    "log": "/tmp/x2c-nested-package-delivery-vrhwqble/relocated-native-bundle-rebuild.log",
+    "command": [
+      "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+      "build",
+      "-j",
+      "1",
+      "--kind",
+      "static-library",
+      "--output",
+      "/tmp/x2c-nested-package-delivery-vrhwqble/relocated-packages/demo/builds/libdemo.a",
+      "--build-dir",
+      "/tmp/x2c-nested-package-delivery-vrhwqble/relocated-native-rebuild",
+      "-Xcc",
+      "-iquote",
+      "-Xcc",
+      "/tmp/x2c-nested-package-delivery-vrhwqble/relocated-packages/demo/builds",
+      "-Xcc",
+      "-iquote",
+      "-Xcc",
+      "/tmp/x2c-nested-package-delivery-vrhwqble/relocated-packages/demo/builds/demo",
+      "-Xcc",
+      "-iquote",
+      "-Xcc",
+      "/tmp/x2c-nested-package-delivery-vrhwqble/relocated-packages/demo/builds/demo/child",
+      "/tmp/x2c-nested-package-delivery-vrhwqble/relocated-packages/demo/builds/demo/child/value.c",
+      "/tmp/x2c-nested-package-delivery-vrhwqble/relocated-packages/demo/builds/demo/child.c",
+      "/tmp/x2c-nested-package-delivery-vrhwqble/relocated-packages/demo/builds/demo.c"
+    ]
+  },
+  {
+    "name": "relocated-native-bundle-consumer-build",
+    "status": 0,
+    "log": "/tmp/x2c-nested-package-delivery-vrhwqble/relocated-native-bundle-consumer-build.log",
+    "command": [
+      "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+      "build",
+      "-j",
+      "1",
+      "--package-dir",
+      "/tmp/x2c-nested-package-delivery-vrhwqble/relocated-packages",
+      "--output",
+      "/tmp/x2c-nested-package-delivery-vrhwqble/relocated-native-bundle-consumer",
+      "--build-dir",
+      "/tmp/x2c-nested-package-delivery-vrhwqble/relocated-native-bundle-consumer-build",
+      "/tmp/x2c-nested-package-delivery-vrhwqble/client.x"
+    ]
+  },
+  {
+    "name": "relocated-native-bundle-consumer-run",
+    "status": 0,
+    "log": "/tmp/x2c-nested-package-delivery-vrhwqble/relocated-native-bundle-consumer-run.log",
+    "command": [
+      "/tmp/x2c-nested-package-delivery-vrhwqble/relocated-native-bundle-consumer"
+    ]
+  },
+  {
+    "name": "flat-make",
+    "status": 0,
+    "log": "/tmp/x2c-nested-package-delivery-vrhwqble/flat-make.log",
+    "command": [
+      "make",
+      "-j1",
+      "X2C=/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+      "ROOT=/Users/gary/.codex/worktrees/nested-modules-spike/x2c",
+      "BUILD_JOBS=1",
+      "build"
+    ]
+  },
+  {
+    "name": "bundle-builds-1",
+    "status": 0,
+    "log": "/tmp/x2c-nested-package-delivery-vrhwqble/bundle-builds-1.log",
+    "command": [
+      "make",
+      "-j1",
+      "X2C=/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+      "ROOT=/Users/gary/.codex/worktrees/nested-modules-spike/x2c",
+      "BUILD_JOBS=1",
+      "bundle",
+      "BUNDLE_DIR=builds"
+    ]
+  },
+  {
+    "name": "bundle-builds-2",
+    "status": 0,
+    "log": "/tmp/x2c-nested-package-delivery-vrhwqble/bundle-builds-2.log",
+    "command": [
+      "make",
+      "-j1",
+      "X2C=/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+      "ROOT=/Users/gary/.codex/worktrees/nested-modules-spike/x2c",
+      "BUILD_JOBS=1",
+      "bundle",
+      "BUNDLE_DIR=builds"
+    ]
+  },
+  {
+    "name": "build-after-builds-bundle",
+    "status": 0,
+    "log": "/tmp/x2c-nested-package-delivery-vrhwqble/build-after-builds-bundle.log",
+    "command": [
+      "make",
+      "-j1",
+      "X2C=/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+      "ROOT=/Users/gary/.codex/worktrees/nested-modules-spike/x2c",
+      "BUILD_JOBS=1",
+      "build",
+      "BUNDLE_DIR=builds"
+    ]
+  },
+  {
+    "name": "flat-bundle-consumer-build",
+    "status": 0,
+    "log": "/tmp/x2c-nested-package-delivery-vrhwqble/flat-bundle-consumer-build.log",
+    "command": [
+      "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+      "build",
+      "-j",
+      "1",
+      "--package-dir",
+      "/tmp/x2c-nested-package-delivery-vrhwqble/flat-packages/flat/builds",
+      "--output",
+      "/tmp/x2c-nested-package-delivery-vrhwqble/flat-program",
+      "--build-dir",
+      "/tmp/x2c-nested-package-delivery-vrhwqble/flat-client-build",
+      "/tmp/x2c-nested-package-delivery-vrhwqble/flat-client.x"
+    ]
+  },
+  {
+    "name": "flat-bundle-consumer-run",
+    "status": 0,
+    "log": "/tmp/x2c-nested-package-delivery-vrhwqble/flat-bundle-consumer-run.log",
+    "command": [
+      "/tmp/x2c-nested-package-delivery-vrhwqble/flat-program"
+    ]
+  },
+  {
+    "name": "source-install",
+    "status": 0,
+    "log": "/tmp/x2c-nested-package-delivery-vrhwqble/source-install.log",
+    "command": [
+      "/tmp/x2c-nested-package-delivery-vrhwqble/home/bin/x2c",
+      "install",
+      "-q",
+      "/tmp/x2c-nested-package-delivery-vrhwqble/packages/demo"
+    ]
+  },
+  {
+    "name": "installed-native-header-consumer-build",
+    "status": 0,
+    "log": "/tmp/x2c-nested-package-delivery-vrhwqble/installed-native-header-consumer-build.log",
+    "command": [
+      "/tmp/x2c-nested-package-delivery-vrhwqble/home/bin/x2c",
+      "build",
+      "-j",
+      "1",
+      "--package-dir",
+      "/tmp/x2c-nested-package-delivery-vrhwqble/home/packages",
+      "--output",
+      "/tmp/x2c-nested-package-delivery-vrhwqble/installed-native-header-consumer",
+      "--build-dir",
+      "/tmp/x2c-nested-package-delivery-vrhwqble/installed-native-header-consumer-build",
+      "/tmp/x2c-nested-package-delivery-vrhwqble/client.x"
+    ]
+  },
+  {
+    "name": "installed-native-header-consumer-run",
+    "status": 0,
+    "log": "/tmp/x2c-nested-package-delivery-vrhwqble/installed-native-header-consumer-run.log",
+    "command": [
+      "/tmp/x2c-nested-package-delivery-vrhwqble/installed-native-header-consumer"
+    ]
+  },
+  {
+    "name": "fixture-summary",
+    "status": 0,
+    "passed": true,
+    "completed": 24
+  }
+]

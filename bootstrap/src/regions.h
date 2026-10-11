@@ -5,24 +5,44 @@
 #ifndef __GUARD_0x3FB21E3E__
 #define __GUARD_0x3FB21E3E__
 
+#pragma x2c_region_begin u_3FB21E3E_40BCB7FF_h_0
 #include "x2c.h"
+#pragma x2c_region_end u_3FB21E3E_40BCB7FF_h_0
+#pragma x2c_region_begin u_3FB21E3E_40BCB7FF_h_1
 #include "compiler.h"
+#pragma x2c_region_end u_3FB21E3E_40BCB7FF_h_1
+#pragma x2c_region_begin u_3FB21E3E_40BCB7FF_h_2
 #include "meta.h"
+#pragma x2c_region_end u_3FB21E3E_40BCB7FF_h_2
+#pragma x2c_region_begin u_3FB21E3E_40BCB7FF_h_3
 #include "grammar.h"
+#pragma x2c_region_end u_3FB21E3E_40BCB7FF_h_3
+#pragma x2c_region_begin u_3FB21E3E_40BCB7FF_h_4
 #include "ast.h"
+#pragma x2c_region_end u_3FB21E3E_40BCB7FF_h_4
+#pragma x2c_region_begin u_3FB21E3E_40BCB7FF_h_5
 #include "stage.h"
+#pragma x2c_region_end u_3FB21E3E_40BCB7FF_h_5
+#pragma x2c_region_begin u_3FB21E3E_40BCB7FF_h_6
 #include "type.h"
+#pragma x2c_region_end u_3FB21E3E_40BCB7FF_h_6
+#pragma x2c_region_begin u_3FB21E3E_40BCB7FF_h_7
 Symbol Compiler_region_result(String name);
-
+#pragma x2c_region_end u_3FB21E3E_40BCB7FF_h_7
+#pragma x2c_region_begin u_3FB21E3E_40BCB7FF_h_8
 int Compiler_region_wrapper(String name);
-
+#pragma x2c_region_end u_3FB21E3E_40BCB7FF_h_8
+#pragma x2c_region_begin u_3FB21E3E_40BCB7FF_h_9
 int Compiler_has_region_row(String name);
-
+#pragma x2c_region_end u_3FB21E3E_40BCB7FF_h_9
+#pragma x2c_region_begin u_3FB21E3E_40BCB7FF_h_10
 void Compiler_check_regions(Compiler c, List ast);
-
+#pragma x2c_region_end u_3FB21E3E_40BCB7FF_h_10
+#pragma x2c_region_begin u_3FB21E3E_40BCB7FF_h_11
 void Compiler_check_meta_regions(Compiler c, List fn);
-
+#pragma x2c_region_end u_3FB21E3E_40BCB7FF_h_11
+#pragma x2c_region_begin u_3FB21E3E_40BCB7FF_h_12
 Map Compiler_audit_regions(Compiler c, List ast, Map seed, Map effects, Array findings);
-
+#pragma x2c_region_end u_3FB21E3E_40BCB7FF_h_12
 
 #endif /* __GUARD_0x3FB21E3E__ */

@@ -1,6 +1,11 @@
 # Nested modules: iteration-two research report
 
-Status: isolated private spike; full specification remains unproven.
+Status: paused private spike; full specification remains unproven.
+See the [implementation and integration handoff](nested-modules-integration-handoff.md)
+and [saved evidence](nested-modules-evidence/README.md) for the paused checkpoint.
+The latest native-meta matrix is 11/17 at 73c791df. Six cases remain failures.
+The refreshed bootstrap built; subsequent clean compiler recovery was interrupted
+at Gary's request. Final self-host comparison and the complete gate did not finish.
 Starting revision: c09d9a917f4ab1afc072b3fb2ece71e7bb2a6e04.
 The combined compiler at 74836bfc completed bootstrap refresh and clean
 recovery. Bootstrap and stage zero match across 340 generated C, header and
@@ -9,7 +14,7 @@ Evidence: `debug/final-private-gate-second-attempt.log`.
 
 The complete correctness gate has not passed. Subsequent checks found native
 header readiness and cleanup-lowering regressions in CLI reuse and book output.
-Bounded repairs are integrated and undergoing serial validation. The gate also
+Bounded repairs are integrated; validation stopped when the spike was paused. The gate also
 found authored source formatting violations; baseline allowances are unchanged.
 The focused CLI translation-reuse control now passes its six cold/retained
 include-selection steps after the header readiness repair. Full verification
@@ -20,9 +25,10 @@ Its focused rerun passes after the expectation changed from 11 to 15.
 
 Independent relocated bootstrap recovery and matched native artifact costs
 remain pending. The feature matrices below precede these integration repairs.
-Do not integrate or publish the spike without explicit adoption authorization.
+The private GitHub backup is authorized. Integration and publication to dev/main
+require explicit adoption authorization.
 
-## Latest acceptance evidence
+## Earlier acceptance evidence (01bd3982)
 
 The completed serial batch is pinned to source
 01bd39829b9b66c800bfee74bd14a07808dd0b21 and compiler SHA256
@@ -48,7 +54,7 @@ This source repair does not prove general SCC declaration collection.
 | Package delivery | 01bd3982, `/tmp/x2c-nested-package-delivery-vrhwqble/results.json` | Canonical Make/archive, consumer, bundle, installation and relocated native-C rebuild controls pass |
 | Structured bootstrap | 12942052, `debug/combined-origin-reuse-bootstrap-refresh.log` | Historical hierarchical artifact refresh compiles and links; combined recovery now passes; independent relocated recovery pending |
 
-The current native-meta positives that pass are `module_prerequisite`,
+At 01bd3982, the native-meta positives that pass are `module_prerequisite`,
 `nested_private_meta`, `ordinary_runtime_cycle`, `package_private_meta`,
 `module_lifetime_entry_state`, and `package_public_meta_probe_alias`.
 `module_cycle`, `parent_private_rejection`, and `package_private_rejection`
@@ -58,7 +64,7 @@ The complete module matrix now passes, including the nested entry constructor
 and its retained initialization check. The six added ordinary-body SCC and
 entry/member effect controls also pass.
 
-The current native-meta failures are `active_ordinary_prefix`,
+At 01bd3982, the native-meta failures are `active_ordinary_prefix`,
 `active_reached_ordinary_prefix`, `module_ordinary_shared_variable`,
 `module_ordinary_cleanup`, `module_meta_shared_variable`, and
 `module_lifetime_direct_state`. They fail during build.
@@ -124,12 +130,12 @@ Passing controls establish their tested cases, not an entire specification row.
 | Membership, ownership and nesting | Existing module fixtures cover three levels, duplicate entries, missing members, unlisted consumers, ancestor/sibling privacy and direct members | Current matrix 113/113; comprehensive symlink/ownership-path mutation combinations unattempted |
 | Static/module/public visibility | Function, type, state, macro, alias and protocol fixtures retain exact binding ownership | Full declaration/definition disagreement combinations and repeated private native-meta type spellings insufficiently exercised |
 | Nested public exports and packages | Current durable package meta positives and package-private diagnostic pass; ordinary package naming/aliases/with fixtures exist | Canonical Make/archive, bundle, installation and relocated-C consumer pass; full package protocol/native-module/foreign-name filtering unattempted |
-| Prefix/suffix effects and ordered producers | Lisp, alias, declaration-producer, sibling include and direct-member parity fixtures exist; real macro recipes regenerate compiler | 01bd reached ordinary prefixes and direct-member native state fail; subsequent repairs require final reruns |
+| Prefix/suffix effects and ordered producers | Lisp, alias, declaration-producer, sibling include and direct-member parity fixtures exist; real macro recipes regenerate compiler | 73c ordinary reached prefixes still fail; direct-member native lifetime now passes; broader effects matrix was not rerun |
 | Declaration collection and scheduling | Collection supplies authoritative registry; Tarjan orders provider body work; seed plus current provider limits retained contexts; full compiler regenerates | This is not SCC-driven declaration collection. Seed binds first; actual producer prerequisites remain separate |
 | Native headers, layouts and hidden support | Target preprocessing selects namespace and complete-family demands; private aliases and opaque completion repairs implemented | Current layout matrix 70/71; arbitrary pragmas, header-injected semantic fields and fully conditional semantic layout remain unproven |
-| Shared objects, initialization and cleanup | Existing runtime shared-object fixtures and historical reversed-link controls pass; current native entry lifetime passes | 01bd native state/cleanup/direct-member cases fail; direct cycle rejects and indirect-call cycle is missed; final reruns pending |
+| Shared objects, initialization and cleanup | Existing runtime shared-object fixtures and historical reversed-link controls pass; current native entry lifetime passes | 73c native shared-state/cleanup cases fail; both lifetime controls pass; direct cycle rejects and indirect-call cycle is missed |
 | Cache equivalence and invalidation | Whole-65 exact replay passes at 01bd in two homes; membership/preamble/nearer-header mutation fixtures check outcomes | Complete 01bd replay passes; invalidated-versus-fresh full artifact/binding equality is not established by outcome-only mutation tests |
-| Generated outputs and bootstrap | Seven-file macro migration and current full compiler regeneration pass; historical hierarchical bootstrap refresh works | Combined bootstrap recovery and fixed-point equality pass; independent relocated recovery and final correctness gate remain pending |
+| Generated outputs and bootstrap | Seven-file macro migration and current full compiler regeneration pass; historical hierarchical bootstrap refresh works | Earlier combined recovery and fixed-point equality pass; final recovery was interrupted; relocated recovery and final gate remain incomplete |
 | Include portability | Canonical resolved dependencies and native companion metadata implemented | Macro-spelled bootstrap includes, configured-root-only native closure and other platforms insufficiently exercised |
 | Cost and performance | Exact historical matched measurements retained below | Final matched native artifact sizes, whole-workload counts, quiet-host timing and peak memory unmeasured |
 

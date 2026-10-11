@@ -5,32 +5,50 @@
 #ifndef __GUARD_0x5295F561__
 #define __GUARD_0x5295F561__
 
+#pragma x2c_region_begin u_5295F561_CFFEBE6C_h_0
 #include "x2c.h"
+#pragma x2c_region_end u_5295F561_CFFEBE6C_h_0
+#pragma x2c_region_begin u_5295F561_CFFEBE6C_h_1
 #include "compiler.h"
+#pragma x2c_region_end u_5295F561_CFFEBE6C_h_1
+#pragma x2c_region_begin u_5295F561_CFFEBE6C_h_2
 #include <ctype.h>
+#pragma x2c_region_end u_5295F561_CFFEBE6C_h_2
+#pragma x2c_region_begin u_5295F561_CFFEBE6C_h_3
 String preproc_directive(String text);
-
+#pragma x2c_region_end u_5295F561_CFFEBE6C_h_3
+#pragma x2c_region_begin u_5295F561_CFFEBE6C_h_4
 Symbol preproc_conditional_kind(String text);
-
+#pragma x2c_region_end u_5295F561_CFFEBE6C_h_4
+#pragma x2c_region_begin u_5295F561_CFFEBE6C_h_5
 int preproc_open_state(String text);
-
+#pragma x2c_region_end u_5295F561_CFFEBE6C_h_5
+#pragma x2c_region_begin u_5295F561_CFFEBE6C_h_6
 int preproc_branch_state(int state);
-
+#pragma x2c_region_end u_5295F561_CFFEBE6C_h_6
+#pragma x2c_region_begin u_5295F561_CFFEBE6C_h_7
 String preproc_include_target(String text, int * angle);
-
+#pragma x2c_region_end u_5295F561_CFFEBE6C_h_7
+#pragma x2c_region_begin u_5295F561_CFFEBE6C_h_8
 String preproc_marker_file(String text, int * line);
-
+#pragma x2c_region_end u_5295F561_CFFEBE6C_h_8
+#pragma x2c_region_begin u_5295F561_CFFEBE6C_h_9
 void Compiler_scan_conditionals(Compiler c);
-
+#pragma x2c_region_end u_5295F561_CFFEBE6C_h_9
+#pragma x2c_region_begin u_5295F561_CFFEBE6C_h_10
 List Compiler_leading_preproc(Compiler c);
-
+#pragma x2c_region_end u_5295F561_CFFEBE6C_h_10
+#pragma x2c_region_begin u_5295F561_CFFEBE6C_h_11
 void Compiler_note_preprocessor_macros(Compiler c, List directives);
-
+#pragma x2c_region_end u_5295F561_CFFEBE6C_h_11
+#pragma x2c_region_begin u_5295F561_CFFEBE6C_h_12
 void Compiler_note_object_macro(Compiler c, String content);
-
+#pragma x2c_region_end u_5295F561_CFFEBE6C_h_12
+#pragma x2c_region_begin u_5295F561_CFFEBE6C_h_13
 List preproc_track_arms(List arms, String text);
-
+#pragma x2c_region_end u_5295F561_CFFEBE6C_h_13
+#pragma x2c_region_begin u_5295F561_CFFEBE6C_h_14
 List preproc_within_arms(List arms, List items);
-
+#pragma x2c_region_end u_5295F561_CFFEBE6C_h_14
 
 #endif /* __GUARD_0x5295F561__ */

@@ -1,0 +1,126 @@
+[
+  {
+    "name": "active_ordinary_prefix",
+    "passed": false,
+    "expect_rejection": false,
+    "command": [
+      "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+      "build",
+      "-j",
+      "1",
+      "--build-dir",
+      "/tmp/x2c-module-native-meta-mtrcpz5l/active_ordinary_prefix/build",
+      "--output",
+      "/tmp/x2c-module-native-meta-mtrcpz5l/active_ordinary_prefix/program",
+      "/tmp/x2c-module-native-meta-mtrcpz5l/active_ordinary_prefix/a.x",
+      "/tmp/x2c-module-native-meta-mtrcpz5l/active_ordinary_prefix/b.x",
+      "/tmp/x2c-module-native-meta-mtrcpz5l/active_ordinary_prefix/main.x"
+    ],
+    "build_status": 1,
+    "log": "/tmp/x2c-module-native-meta-mtrcpz5l/active_ordinary_prefix/build.log",
+    "diagnostic": "/private/tmp/x2c-module-native-meta-mtrcpz5l/active_ordinary_prefix/b.x:3:13: parse: unknown or forward-referenced macro 'a'\n  enum {VALUE=$a()};\n              ^\n\n"
+  },
+  {
+    "name": "active_reached_ordinary_prefix",
+    "passed": false,
+    "expect_rejection": false,
+    "command": [
+      "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+      "build",
+      "-j",
+      "1",
+      "--build-dir",
+      "/tmp/x2c-module-native-meta-mtrcpz5l/active_reached_ordinary_prefix/build",
+      "--output",
+      "/tmp/x2c-module-native-meta-mtrcpz5l/active_reached_ordinary_prefix/program",
+      "/tmp/x2c-module-native-meta-mtrcpz5l/active_reached_ordinary_prefix/a.x",
+      "/tmp/x2c-module-native-meta-mtrcpz5l/active_reached_ordinary_prefix/b.x",
+      "/tmp/x2c-module-native-meta-mtrcpz5l/active_reached_ordinary_prefix/main.x"
+    ],
+    "build_status": 1,
+    "log": "/tmp/x2c-module-native-meta-mtrcpz5l/active_reached_ordinary_prefix/build.log",
+    "diagnostic": "/private/tmp/x2c-module-native-meta-mtrcpz5l/active_reached_ordinary_prefix/b.x:3:13: macro: this function cannot run at compile time\n  enum {VALUE=$a()};\n              ^\n  note: function: a reason: (((code macro) (severity error) (message \"native meta prerequisite cycle\") \n  (location \n   ((file \n     \"/private/tmp/x2c-module-native-meta-mtrcpz5l/active_reached_ordinary_prefix/b.x\") \n    (line 3) (column 13) (length 1) (position 50))) \n  (notes \n   (\n    \"provider: /private/tmp/x2c-module-native-meta-mtrcpz5l/active_reached_ordinary_prefix/a.x\" \n    \"function: a\" \n    \"dlopen(/Users/gary/.cache/x2c/meta/project-f6dd3ad7d9982bd344a31ff7e0a511b4b57e09aa1f05afe75d17dc289dba957a/component-7b686cb380b1fa5184a3d9325fa1ffe64da79365b9716ffc8683eb6d8398d320.module, 0x000A): symbol not found in flat namespace \\'_bhelper\\'\"))))\n\n"
+  },
+  {
+    "name": "module_ordinary_shared_variable",
+    "passed": false,
+    "expect_rejection": false,
+    "command": [
+      "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+      "build",
+      "-j",
+      "1",
+      "--build-dir",
+      "/tmp/x2c-module-native-meta-mtrcpz5l/module_ordinary_shared_variable/build",
+      "--output",
+      "/tmp/x2c-module-native-meta-mtrcpz5l/module_ordinary_shared_variable/program",
+      "/tmp/x2c-module-native-meta-mtrcpz5l/module_ordinary_shared_variable/box.x",
+      "/tmp/x2c-module-native-meta-mtrcpz5l/module_ordinary_shared_variable/main.x"
+    ],
+    "build_status": 1,
+    "log": "/tmp/x2c-module-native-meta-mtrcpz5l/module_ordinary_shared_variable/build.log",
+    "diagnostic": "/private/tmp/x2c-module-native-meta-mtrcpz5l/module_ordinary_shared_variable/box/use.x:1:13: macro: this function cannot run at compile time\n  enum {FIRST=$next(),SECOND=$next()};\n              ^\n  note: function: _x2c_mod_202A7687_next reason: In file included from /Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/native/F5BABE39-initializers/consumer-wrapper.c:2:\n/Users/gary/.cache/x2c/meta/project-3b0cb0e07e6e1e494c591283e303459abf541d942de4e73c0c5d85c36713bb71/group-2.c:79:10: fatal error: 'meta_group_1.h' file not found\n   79 | #include \"meta_group_1.h\"\n      |          ^~~~~~~~~~~~~~~~\n1 error generated.\n\n\n"
+  },
+  {
+    "name": "module_ordinary_cleanup",
+    "passed": false,
+    "expect_rejection": false,
+    "command": [
+      "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+      "build",
+      "-j",
+      "1",
+      "--build-dir",
+      "/tmp/x2c-module-native-meta-mtrcpz5l/module_ordinary_cleanup/build",
+      "--output",
+      "/tmp/x2c-module-native-meta-mtrcpz5l/module_ordinary_cleanup/program",
+      "/tmp/x2c-module-native-meta-mtrcpz5l/module_ordinary_cleanup/box.x",
+      "/tmp/x2c-module-native-meta-mtrcpz5l/module_ordinary_cleanup/main.x"
+    ],
+    "build_status": 1,
+    "log": "/tmp/x2c-module-native-meta-mtrcpz5l/module_ordinary_cleanup/build.log",
+    "diagnostic": "/private/tmp/x2c-module-native-meta-mtrcpz5l/module_ordinary_cleanup/box/use.x:1:13: macro: this function cannot run at compile time\n  enum {FIRST=$next(),SECOND=$next()};\n              ^\n  note: function: _x2c_mod_202A7687_next reason: In file included from /Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/native/A8A2BBF0-initializers/consumer-wrapper.c:2:\n/Users/gary/.cache/x2c/meta/project-be2b1034c489272b2cd496d4c5db4e93031eb7ce3f5d8d3924ae0a48b5de99fc/group-2.c:79:10: fatal error: 'meta_group_1.h' file not found\n   79 | #include \"meta_group_1.h\"\n      |          ^~~~~~~~~~~~~~~~\n1 error generated.\n\n\n"
+  },
+  {
+    "name": "module_initializer_cycle",
+    "passed": false,
+    "expect_rejection": true,
+    "command": [
+      "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+      "build",
+      "-j",
+      "1",
+      "--build-dir",
+      "/tmp/x2c-module-native-meta-mtrcpz5l/module_initializer_cycle/build",
+      "--output",
+      "/tmp/x2c-module-native-meta-mtrcpz5l/module_initializer_cycle/program",
+      "/tmp/x2c-module-native-meta-mtrcpz5l/module_initializer_cycle/box.x",
+      "/tmp/x2c-module-native-meta-mtrcpz5l/module_initializer_cycle/main.x"
+    ],
+    "build_status": 0,
+    "log": "/tmp/x2c-module-native-meta-mtrcpz5l/module_initializer_cycle/build.log",
+    "expected_diagnostic": "initializer dependency cycle|selected initializer cycle",
+    "diagnostic_matched": false,
+    "diagnostic": "  Translate 5 x2c files in 534 ms\n  Compile 5 C files in 331 ms\n  Link 5 inputs in 40 ms\nBuilt executable /tmp/x2c-module-native-meta-mtrcpz5l/module_initializer_cycle/program in 4.54 s\n  Generated 5 C files and 5 headers (10.0 KiB)\n  Compiled with cc using 1 job\n  Linked with cc\n  Intermediates /tmp/x2c-module-native-meta-mtrcpz5l/module_initializer_cycle/build (retained)\n  Output /tmp/x2c-module-native-meta-mtrcpz5l/module_initializer_cycle/program (419.2 KiB)\n"
+  },
+  {
+    "name": "module_meta_shared_variable",
+    "passed": false,
+    "expect_rejection": false,
+    "command": [
+      "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+      "build",
+      "-j",
+      "1",
+      "--build-dir",
+      "/tmp/x2c-module-native-meta-mtrcpz5l/module_meta_shared_variable/build",
+      "--output",
+      "/tmp/x2c-module-native-meta-mtrcpz5l/module_meta_shared_variable/program",
+      "/tmp/x2c-module-native-meta-mtrcpz5l/module_meta_shared_variable/box.x",
+      "/tmp/x2c-module-native-meta-mtrcpz5l/module_meta_shared_variable/main.x"
+    ],
+    "build_status": 1,
+    "log": "/tmp/x2c-module-native-meta-mtrcpz5l/module_meta_shared_variable/build.log",
+    "diagnostic": "/private/tmp/x2c-module-native-meta-mtrcpz5l/module_meta_shared_variable/box/use.x:1:13: macro: this function cannot run at compile time\n  enum {FIRST=$next(),SECOND=$next()};\n              ^\n  note: function: _x2c_mod_202A7687_next reason: In file included from /Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/native/A5369097-initializers/consumer-wrapper.c:2:\n/Users/gary/.cache/x2c/meta/project-26a79c56bcb95192afe2f663682a55ff0a7af35e611715c9ad1f6f918de6cf69/group-2.c:75:10: fatal error: 'meta_group_1.h' file not found\n   75 | #include \"meta_group_1.h\"\n      |          ^~~~~~~~~~~~~~~~\n1 error generated.\n\n\n"
+  }
+]

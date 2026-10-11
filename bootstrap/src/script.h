@@ -5,16 +5,29 @@
 #ifndef __GUARD_0x1B2A9980__
 #define __GUARD_0x1B2A9980__
 
+#pragma x2c_region_begin u_1B2A9980_C9E5D0CB_h_0
 #include "x2c.h"
+#pragma x2c_region_end u_1B2A9980_C9E5D0CB_h_0
+#pragma x2c_region_begin u_1B2A9980_C9E5D0CB_h_1
 #include "build.h"
+#pragma x2c_region_end u_1B2A9980_C9E5D0CB_h_1
+#pragma x2c_region_begin u_1B2A9980_C9E5D0CB_h_2
 #include <errno.h>
+#pragma x2c_region_end u_1B2A9980_C9E5D0CB_h_2
+#pragma x2c_region_begin u_1B2A9980_C9E5D0CB_h_3
 #include <string.h>
+#pragma x2c_region_end u_1B2A9980_C9E5D0CB_h_3
+#pragma x2c_region_begin u_1B2A9980_C9E5D0CB_h_4
 #include <unistd.h>
+#pragma x2c_region_end u_1B2A9980_C9E5D0CB_h_4
+#pragma x2c_region_begin u_1B2A9980_C9E5D0CB_h_5
 String script_cache_root(void);
-
+#pragma x2c_region_end u_1B2A9980_C9E5D0CB_h_5
+#pragma x2c_region_begin u_1B2A9980_C9E5D0CB_h_6
 int script_prepare(CliRequest c);
-
+#pragma x2c_region_end u_1B2A9980_C9E5D0CB_h_6
+#pragma x2c_region_begin u_1B2A9980_C9E5D0CB_h_7
 int script_run(CliRequest c);
-
+#pragma x2c_region_end u_1B2A9980_C9E5D0CB_h_7
 
 #endif /* __GUARD_0x1B2A9980__ */

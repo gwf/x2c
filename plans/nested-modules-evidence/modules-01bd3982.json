@@ -1,0 +1,4051 @@
+{
+  "compiler": "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+  "compiler_sha256_start": "17c1c11782aaf31d674cb76d131f546ce2b0ba51ae078f4ec3df29ac380c4958",
+  "compiler_sha256_end": "17c1c11782aaf31d674cb76d131f546ce2b0ba51ae078f4ec3df29ac380c4958",
+  "cases": [
+    {
+      "name": "flat_shared_helper",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/flat_shared_helper/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/flat_shared_helper/build",
+        "/tmp/x2c-module-probes-za4z56xq/flat_shared_helper/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/flat_shared_helper/box/helpers.x",
+        "/tmp/x2c-module-probes-za4z56xq/flat_shared_helper/box/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/flat_shared_helper/main.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/flat_shared_helper/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "repeat_statuses": []
+    },
+    {
+      "name": "external_private_rejected",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/external_private_rejected/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/external_private_rejected/build",
+        "/tmp/x2c-module-probes-za4z56xq/external_private_rejected/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/external_private_rejected/box/helpers.x",
+        "/tmp/x2c-module-probes-za4z56xq/external_private_rejected/box/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/external_private_rejected/main.x"
+      ],
+      "build_status": 1,
+      "log": "/tmp/x2c-module-probes-za4z56xq/external_private_rejected/build.log",
+      "expected": "translation rejection",
+      "passed": true
+    },
+    {
+      "name": "repeated_private_names",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/repeated_private_names/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/repeated_private_names/build",
+        "/tmp/x2c-module-probes-za4z56xq/repeated_private_names/first.x",
+        "/tmp/x2c-module-probes-za4z56xq/repeated_private_names/first/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/repeated_private_names/second.x",
+        "/tmp/x2c-module-probes-za4z56xq/repeated_private_names/second/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/repeated_private_names/main.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/repeated_private_names/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "repeat_statuses": []
+    },
+    {
+      "name": "nested_ancestor_helper",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/nested_ancestor_helper/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/nested_ancestor_helper/build",
+        "/tmp/x2c-module-probes-za4z56xq/nested_ancestor_helper/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/nested_ancestor_helper/box/helpers.x",
+        "/tmp/x2c-module-probes-za4z56xq/nested_ancestor_helper/box/child.x",
+        "/tmp/x2c-module-probes-za4z56xq/nested_ancestor_helper/box/child/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/nested_ancestor_helper/main.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/nested_ancestor_helper/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "repeat_statuses": []
+    },
+    {
+      "name": "nested_nearest_shadow",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/nested_nearest_shadow/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/nested_nearest_shadow/build",
+        "/tmp/x2c-module-probes-za4z56xq/nested_nearest_shadow/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/nested_nearest_shadow/box/helpers.x",
+        "/tmp/x2c-module-probes-za4z56xq/nested_nearest_shadow/box/child.x",
+        "/tmp/x2c-module-probes-za4z56xq/nested_nearest_shadow/box/child/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/nested_nearest_shadow/main.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/nested_nearest_shadow/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "repeat_statuses": []
+    },
+    {
+      "name": "sibling_private_rejected",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/sibling_private_rejected/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/sibling_private_rejected/build",
+        "/tmp/x2c-module-probes-za4z56xq/sibling_private_rejected/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/sibling_private_rejected/box/left.x",
+        "/tmp/x2c-module-probes-za4z56xq/sibling_private_rejected/box/left/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/sibling_private_rejected/box/right.x",
+        "/tmp/x2c-module-probes-za4z56xq/sibling_private_rejected/box/right/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/sibling_private_rejected/main.x"
+      ],
+      "build_status": 1,
+      "log": "/tmp/x2c-module-probes-za4z56xq/sibling_private_rejected/build.log",
+      "expected": "translation rejection",
+      "passed": true
+    },
+    {
+      "name": "direct_member_translation",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/direct_member_translation/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/direct_member_translation/build",
+        "/tmp/x2c-module-probes-za4z56xq/direct_member_translation/box/value.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/direct_member_translation/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "repeat_statuses": []
+    },
+    {
+      "name": "declaration_scc_inline_providers",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/declaration_scc_inline_providers/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/declaration_scc_inline_providers/build",
+        "/tmp/x2c-module-probes-za4z56xq/declaration_scc_inline_providers/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/declaration_scc_inline_providers/box/left.x",
+        "/tmp/x2c-module-probes-za4z56xq/declaration_scc_inline_providers/box/right.x",
+        "/tmp/x2c-module-probes-za4z56xq/declaration_scc_inline_providers/main.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/declaration_scc_inline_providers/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "interface_replay": [
+        {
+          "mode": "cold",
+          "command": [
+            "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+            "translate",
+            "-j",
+            "1",
+            "--out-dir",
+            "/tmp/x2c-module-probes-za4z56xq/declaration_scc_inline_providers/interfaces",
+            "--no-interfaces",
+            "/tmp/x2c-module-probes-za4z56xq/declaration_scc_inline_providers/box.x",
+            "/tmp/x2c-module-probes-za4z56xq/declaration_scc_inline_providers/main.x"
+          ],
+          "status": 0,
+          "generated_files": [
+            "_x2c_module_202A7687.h",
+            "box.c",
+            "box.h",
+            "box.xi",
+            "box.xnm",
+            "box/_x2c_module_C0E84CD4.h",
+            "box/_x2c_module_D278F6E3.h",
+            "box/left.c",
+            "box/left.h",
+            "box/left.xi",
+            "box/left.xnm",
+            "box/right.c",
+            "box/right.h",
+            "box/right.xi",
+            "box/right.xnm",
+            "main.c",
+            "main.h",
+            "main.xi",
+            "main.xnm"
+          ]
+        },
+        {
+          "mode": "warm",
+          "command": [
+            "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+            "translate",
+            "-j",
+            "1",
+            "--out-dir",
+            "/tmp/x2c-module-probes-za4z56xq/declaration_scc_inline_providers/interfaces",
+            "/tmp/x2c-module-probes-za4z56xq/declaration_scc_inline_providers/box.x",
+            "/tmp/x2c-module-probes-za4z56xq/declaration_scc_inline_providers/main.x"
+          ],
+          "status": 0,
+          "generated_files": [
+            "_x2c_module_202A7687.h",
+            "box.c",
+            "box.h",
+            "box.xi",
+            "box.xnm",
+            "box/_x2c_module_C0E84CD4.h",
+            "box/_x2c_module_D278F6E3.h",
+            "box/left.c",
+            "box/left.h",
+            "box/left.xi",
+            "box/left.xnm",
+            "box/right.c",
+            "box/right.h",
+            "box/right.xi",
+            "box/right.xnm",
+            "main.c",
+            "main.h",
+            "main.xi",
+            "main.xnm"
+          ],
+          "same_generated_code": true
+        }
+      ],
+      "repeat_statuses": []
+    },
+    {
+      "name": "nested_entry_member_equivalence",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_equivalence/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_equivalence/build",
+        "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_equivalence/box.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_equivalence/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "member_equivalence": [
+        {
+          "invocation": "entry",
+          "mode": "cold",
+          "command": [
+            "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+            "translate",
+            "-j",
+            "1",
+            "--out-dir",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_equivalence/equivalence",
+            "--no-interfaces",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_equivalence/box.x"
+          ],
+          "status": 0,
+          "generated_files": [
+            "_x2c_module_202A7687.h",
+            "box.c",
+            "box.h",
+            "box.xi",
+            "box.xnm",
+            "box/_x2c_module_08448609.h",
+            "box/_x2c_module_A5D3BFD4.h",
+            "box/child.c",
+            "box/child.h",
+            "box/child.xi",
+            "box/child.xnm",
+            "box/child/_x2c_module_8397FB4D.h",
+            "box/child/leaf.c",
+            "box/child/leaf.h",
+            "box/child/leaf.xi",
+            "box/child/leaf.xnm",
+            "box/child/leaf/_x2c_module_8572F32F.h",
+            "box/child/leaf/value.c",
+            "box/child/leaf/value.h",
+            "box/child/leaf/value.xi",
+            "box/child/leaf/value.xnm",
+            "box/state.c",
+            "box/state.h",
+            "box/state.xi",
+            "box/state.xnm"
+          ],
+          "same_generated_code": true,
+          "different_files": [],
+          "log": "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_equivalence/equivalence-entry-cold.log"
+        },
+        {
+          "invocation": "entry",
+          "mode": "warm",
+          "command": [
+            "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+            "translate",
+            "-j",
+            "1",
+            "--out-dir",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_equivalence/equivalence",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_equivalence/box.x"
+          ],
+          "status": 0,
+          "generated_files": [
+            "_x2c_module_202A7687.h",
+            "box.c",
+            "box.h",
+            "box.xi",
+            "box.xnm",
+            "box/_x2c_module_08448609.h",
+            "box/_x2c_module_A5D3BFD4.h",
+            "box/child.c",
+            "box/child.h",
+            "box/child.xi",
+            "box/child.xnm",
+            "box/child/_x2c_module_8397FB4D.h",
+            "box/child/leaf.c",
+            "box/child/leaf.h",
+            "box/child/leaf.xi",
+            "box/child/leaf.xnm",
+            "box/child/leaf/_x2c_module_8572F32F.h",
+            "box/child/leaf/value.c",
+            "box/child/leaf/value.h",
+            "box/child/leaf/value.xi",
+            "box/child/leaf/value.xnm",
+            "box/state.c",
+            "box/state.h",
+            "box/state.xi",
+            "box/state.xnm"
+          ],
+          "same_generated_code": true,
+          "different_files": [],
+          "log": "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_equivalence/equivalence-entry-warm.log"
+        },
+        {
+          "invocation": "entry",
+          "mode": "executable",
+          "command": [
+            "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+            "build",
+            "-j",
+            "1",
+            "--output",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_equivalence/equivalence-entry",
+            "--build-dir",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_equivalence/build-entry",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_equivalence/box.x"
+          ],
+          "status": 0,
+          "log": "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_equivalence/equivalence-entry-build.log",
+          "run_status": 0
+        },
+        {
+          "invocation": "member",
+          "mode": "cold",
+          "command": [
+            "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+            "translate",
+            "-j",
+            "1",
+            "--out-dir",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_equivalence/equivalence",
+            "--no-interfaces",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_equivalence/box/child/leaf/value.x"
+          ],
+          "status": 0,
+          "generated_files": [
+            "_x2c_module_202A7687.h",
+            "box.c",
+            "box.h",
+            "box.xi",
+            "box.xnm",
+            "box/_x2c_module_08448609.h",
+            "box/_x2c_module_A5D3BFD4.h",
+            "box/child.c",
+            "box/child.h",
+            "box/child.xi",
+            "box/child.xnm",
+            "box/child/_x2c_module_8397FB4D.h",
+            "box/child/leaf.c",
+            "box/child/leaf.h",
+            "box/child/leaf.xi",
+            "box/child/leaf.xnm",
+            "box/child/leaf/_x2c_module_8572F32F.h",
+            "box/child/leaf/value.c",
+            "box/child/leaf/value.h",
+            "box/child/leaf/value.xi",
+            "box/child/leaf/value.xnm",
+            "box/state.c",
+            "box/state.h",
+            "box/state.xi",
+            "box/state.xnm"
+          ],
+          "same_generated_code": true,
+          "different_files": [],
+          "log": "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_equivalence/equivalence-member-cold.log"
+        },
+        {
+          "invocation": "member",
+          "mode": "warm",
+          "command": [
+            "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+            "translate",
+            "-j",
+            "1",
+            "--out-dir",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_equivalence/equivalence",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_equivalence/box/child/leaf/value.x"
+          ],
+          "status": 0,
+          "generated_files": [
+            "_x2c_module_202A7687.h",
+            "box.c",
+            "box.h",
+            "box.xi",
+            "box.xnm",
+            "box/_x2c_module_08448609.h",
+            "box/_x2c_module_A5D3BFD4.h",
+            "box/child.c",
+            "box/child.h",
+            "box/child.xi",
+            "box/child.xnm",
+            "box/child/_x2c_module_8397FB4D.h",
+            "box/child/leaf.c",
+            "box/child/leaf.h",
+            "box/child/leaf.xi",
+            "box/child/leaf.xnm",
+            "box/child/leaf/_x2c_module_8572F32F.h",
+            "box/child/leaf/value.c",
+            "box/child/leaf/value.h",
+            "box/child/leaf/value.xi",
+            "box/child/leaf/value.xnm",
+            "box/state.c",
+            "box/state.h",
+            "box/state.xi",
+            "box/state.xnm"
+          ],
+          "same_generated_code": true,
+          "different_files": [],
+          "log": "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_equivalence/equivalence-member-warm.log"
+        },
+        {
+          "invocation": "member",
+          "mode": "executable",
+          "command": [
+            "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+            "build",
+            "-j",
+            "1",
+            "--output",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_equivalence/equivalence-member",
+            "--build-dir",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_equivalence/build-member",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_equivalence/box/child/leaf/value.x"
+          ],
+          "status": 0,
+          "log": "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_equivalence/equivalence-member-build.log",
+          "run_status": 0
+        }
+      ],
+      "repeat_statuses": []
+    },
+    {
+      "name": "external_member_include_rejected",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/external_member_include_rejected/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/external_member_include_rejected/build",
+        "/tmp/x2c-module-probes-za4z56xq/external_member_include_rejected/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/external_member_include_rejected/box/helpers.x",
+        "/tmp/x2c-module-probes-za4z56xq/external_member_include_rejected/box/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/external_member_include_rejected/main.x"
+      ],
+      "build_status": 1,
+      "log": "/tmp/x2c-module-probes-za4z56xq/external_member_include_rejected/build.log",
+      "expected": "translation rejection",
+      "passed": true
+    },
+    {
+      "name": "configured_include_root",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/configured_include_root/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/configured_include_root/build",
+        "-I",
+        "/tmp/x2c-module-probes-za4z56xq/configured_include_root/library",
+        "/tmp/x2c-module-probes-za4z56xq/configured_include_root/library/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/configured_include_root/library/box/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/configured_include_root/app/main.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/configured_include_root/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "repeat_statuses": []
+    },
+    {
+      "name": "macro_preamble_order",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/macro_preamble_order/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/macro_preamble_order/build",
+        "/tmp/x2c-module-probes-za4z56xq/macro_preamble_order/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/macro_preamble_order/box/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/macro_preamble_order/main.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/macro_preamble_order/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "repeat_statuses": []
+    },
+    {
+      "name": "package_alias_and_with",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/package_alias_and_with/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/package_alias_and_with/build",
+        "--package-dir",
+        "/tmp/x2c-module-probes-za4z56xq/package_alias_and_with/packages",
+        "/tmp/x2c-module-probes-za4z56xq/package_alias_and_with/main.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/package_alias_and_with/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "repeat_statuses": []
+    },
+    {
+      "name": "three_levels_inherited_prefix",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/three_levels_inherited_prefix/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/three_levels_inherited_prefix/build",
+        "/tmp/x2c-module-probes-za4z56xq/three_levels_inherited_prefix/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/three_levels_inherited_prefix/box/child.x",
+        "/tmp/x2c-module-probes-za4z56xq/three_levels_inherited_prefix/box/child/leaf.x",
+        "/tmp/x2c-module-probes-za4z56xq/three_levels_inherited_prefix/box/child/leaf/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/three_levels_inherited_prefix/main.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/three_levels_inherited_prefix/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "repeat_statuses": []
+    },
+    {
+      "name": "private_types_and_shared_object",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/private_types_and_shared_object/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/private_types_and_shared_object/build",
+        "/tmp/x2c-module-probes-za4z56xq/private_types_and_shared_object/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/private_types_and_shared_object/box/state.x",
+        "/tmp/x2c-module-probes-za4z56xq/private_types_and_shared_object/box/write.x",
+        "/tmp/x2c-module-probes-za4z56xq/private_types_and_shared_object/box/read.x",
+        "/tmp/x2c-module-probes-za4z56xq/private_types_and_shared_object/main.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/private_types_and_shared_object/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "repeat_statuses": []
+    },
+    {
+      "name": "public_collision_rejected",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/public_collision_rejected/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/public_collision_rejected/build",
+        "/tmp/x2c-module-probes-za4z56xq/public_collision_rejected/left.x",
+        "/tmp/x2c-module-probes-za4z56xq/public_collision_rejected/left/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/public_collision_rejected/right.x",
+        "/tmp/x2c-module-probes-za4z56xq/public_collision_rejected/right/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/public_collision_rejected/main.x"
+      ],
+      "build_status": 1,
+      "log": "/tmp/x2c-module-probes-za4z56xq/public_collision_rejected/build.log",
+      "expected": "build rejection",
+      "passed": true
+    },
+    {
+      "name": "entry_suffix_declarations",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/entry_suffix_declarations/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/entry_suffix_declarations/build",
+        "/tmp/x2c-module-probes-za4z56xq/entry_suffix_declarations/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/entry_suffix_declarations/box/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/entry_suffix_declarations/main.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/entry_suffix_declarations/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "repeat_statuses": []
+    },
+    {
+      "name": "sibling_macro_isolation",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/sibling_macro_isolation/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/sibling_macro_isolation/build",
+        "/tmp/x2c-module-probes-za4z56xq/sibling_macro_isolation/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/sibling_macro_isolation/box/define.x",
+        "/tmp/x2c-module-probes-za4z56xq/sibling_macro_isolation/box/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/sibling_macro_isolation/main.x"
+      ],
+      "build_status": 1,
+      "log": "/tmp/x2c-module-probes-za4z56xq/sibling_macro_isolation/build.log",
+      "expected": "translation rejection",
+      "passed": true
+    },
+    {
+      "name": "sibling_macro_explicit_include",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/sibling_macro_explicit_include/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/sibling_macro_explicit_include/build",
+        "/tmp/x2c-module-probes-za4z56xq/sibling_macro_explicit_include/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/sibling_macro_explicit_include/box/define.x",
+        "/tmp/x2c-module-probes-za4z56xq/sibling_macro_explicit_include/box/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/sibling_macro_explicit_include/main.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/sibling_macro_explicit_include/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "repeat_statuses": []
+    },
+    {
+      "name": "initializer_shared_cleanup_cycle",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/initializer_shared_cleanup_cycle/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/initializer_shared_cleanup_cycle/build",
+        "/tmp/x2c-module-probes-za4z56xq/initializer_shared_cleanup_cycle/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/initializer_shared_cleanup_cycle/box/objects.x",
+        "/tmp/x2c-module-probes-za4z56xq/initializer_shared_cleanup_cycle/box/work.x",
+        "/tmp/x2c-module-probes-za4z56xq/initializer_shared_cleanup_cycle/main.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/initializer_shared_cleanup_cycle/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "repeat_statuses": []
+    },
+    {
+      "name": "public_inline_private_helper",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/public_inline_private_helper/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/public_inline_private_helper/build",
+        "/tmp/x2c-module-probes-za4z56xq/public_inline_private_helper/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/public_inline_private_helper/box/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/public_inline_private_helper/main.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/public_inline_private_helper/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "repeat_statuses": []
+    },
+    {
+      "name": "opaque_public_forward",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/opaque_public_forward/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/opaque_public_forward/build",
+        "/tmp/x2c-module-probes-za4z56xq/opaque_public_forward/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/opaque_public_forward/box/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/opaque_public_forward/main.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/opaque_public_forward/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "repeat_statuses": []
+    },
+    {
+      "name": "native_consumer_inline_and_opaque",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/native_consumer_inline_and_opaque/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/native_consumer_inline_and_opaque/build",
+        "/tmp/x2c-module-probes-za4z56xq/native_consumer_inline_and_opaque/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/native_consumer_inline_and_opaque/native.c"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/native_consumer_inline_and_opaque/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "repeat_statuses": []
+    },
+    {
+      "name": "module_meta_function",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/module_meta_function/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/module_meta_function/build",
+        "/tmp/x2c-module-probes-za4z56xq/module_meta_function/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/module_meta_function/box/meta.x",
+        "/tmp/x2c-module-probes-za4z56xq/module_meta_function/box/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/module_meta_function/main.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/module_meta_function/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "repeat_statuses": []
+    },
+    {
+      "name": "xp_owner",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/xp_owner/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/xp_owner/build",
+        "/tmp/x2c-module-probes-za4z56xq/xp_owner/box.xp",
+        "/tmp/x2c-module-probes-za4z56xq/xp_owner/box/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/xp_owner/main.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/xp_owner/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "repeat_statuses": []
+    },
+    {
+      "name": "repeated_member_basenames",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/repeated_member_basenames/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/repeated_member_basenames/build",
+        "/tmp/x2c-module-probes-za4z56xq/repeated_member_basenames/left.x",
+        "/tmp/x2c-module-probes-za4z56xq/repeated_member_basenames/left/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/repeated_member_basenames/right.x",
+        "/tmp/x2c-module-probes-za4z56xq/repeated_member_basenames/right/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/repeated_member_basenames/main.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/repeated_member_basenames/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "repeat_statuses": [
+        {
+          "build": 0,
+          "run": 0
+        }
+      ]
+    },
+    {
+      "name": "cold_warm_membership_invalidation",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/cold_warm_membership_invalidation/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/cold_warm_membership_invalidation/build",
+        "/tmp/x2c-module-probes-za4z56xq/cold_warm_membership_invalidation/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/cold_warm_membership_invalidation/main.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/cold_warm_membership_invalidation/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "interface_replay": [
+        {
+          "mode": "cold",
+          "command": [
+            "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+            "translate",
+            "-j",
+            "1",
+            "--out-dir",
+            "/tmp/x2c-module-probes-za4z56xq/cold_warm_membership_invalidation/interfaces",
+            "--no-interfaces",
+            "/tmp/x2c-module-probes-za4z56xq/cold_warm_membership_invalidation/box.x",
+            "/tmp/x2c-module-probes-za4z56xq/cold_warm_membership_invalidation/box/first.x",
+            "/tmp/x2c-module-probes-za4z56xq/cold_warm_membership_invalidation/main.x"
+          ],
+          "status": 0,
+          "generated_files": [
+            "_x2c_module_202A7687.h",
+            "box.c",
+            "box.h",
+            "box.xi",
+            "box.xnm",
+            "box/_x2c_module_46BD8868.h",
+            "box/first.c",
+            "box/first.h",
+            "box/first.xi",
+            "box/first.xnm",
+            "main.c",
+            "main.h",
+            "main.xi",
+            "main.xnm"
+          ]
+        },
+        {
+          "mode": "warm",
+          "command": [
+            "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+            "translate",
+            "-j",
+            "1",
+            "--out-dir",
+            "/tmp/x2c-module-probes-za4z56xq/cold_warm_membership_invalidation/interfaces",
+            "/tmp/x2c-module-probes-za4z56xq/cold_warm_membership_invalidation/box.x",
+            "/tmp/x2c-module-probes-za4z56xq/cold_warm_membership_invalidation/box/first.x",
+            "/tmp/x2c-module-probes-za4z56xq/cold_warm_membership_invalidation/main.x"
+          ],
+          "status": 0,
+          "generated_files": [
+            "_x2c_module_202A7687.h",
+            "box.c",
+            "box.h",
+            "box.xi",
+            "box.xnm",
+            "box/_x2c_module_46BD8868.h",
+            "box/first.c",
+            "box/first.h",
+            "box/first.xi",
+            "box/first.xnm",
+            "main.c",
+            "main.h",
+            "main.xi",
+            "main.xnm"
+          ],
+          "same_generated_code": true
+        },
+        {
+          "mode": "invalidated",
+          "command": [
+            "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+            "translate",
+            "-j",
+            "1",
+            "--out-dir",
+            "/tmp/x2c-module-probes-za4z56xq/cold_warm_membership_invalidation/interfaces",
+            "/tmp/x2c-module-probes-za4z56xq/cold_warm_membership_invalidation/box.x",
+            "/tmp/x2c-module-probes-za4z56xq/cold_warm_membership_invalidation/box/second.x",
+            "/tmp/x2c-module-probes-za4z56xq/cold_warm_membership_invalidation/main.x"
+          ],
+          "status": 0,
+          "generated_files": [
+            "_x2c_module_202A7687.h",
+            "box.c",
+            "box.h",
+            "box.xi",
+            "box.xnm",
+            "box/_x2c_module_46BD8868.h",
+            "box/_x2c_module_E9F6D790.h",
+            "box/first.c",
+            "box/first.h",
+            "box/first.xi",
+            "box/first.xnm",
+            "box/second.c",
+            "box/second.h",
+            "box/second.xi",
+            "box/second.xnm",
+            "main.c",
+            "main.h",
+            "main.xi",
+            "main.xnm"
+          ]
+        }
+      ],
+      "repeat_statuses": [
+        {
+          "build": 0,
+          "run": 0
+        },
+        {
+          "build": 0,
+          "run": 0
+        }
+      ]
+    },
+    {
+      "name": "hidden_module_type_rejected",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/hidden_module_type_rejected/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/hidden_module_type_rejected/build",
+        "/tmp/x2c-module-probes-za4z56xq/hidden_module_type_rejected/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/hidden_module_type_rejected/box/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/hidden_module_type_rejected/main.x"
+      ],
+      "build_status": 1,
+      "log": "/tmp/x2c-module-probes-za4z56xq/hidden_module_type_rejected/build.log",
+      "expected": "translation rejection",
+      "passed": true
+    },
+    {
+      "name": "public_signature_private_type_rejected",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/public_signature_private_type_rejected/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/public_signature_private_type_rejected/build",
+        "/tmp/x2c-module-probes-za4z56xq/public_signature_private_type_rejected/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/public_signature_private_type_rejected/box/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/public_signature_private_type_rejected/main.x"
+      ],
+      "build_status": 1,
+      "log": "/tmp/x2c-module-probes-za4z56xq/public_signature_private_type_rejected/build.log",
+      "expected": "translation rejection",
+      "passed": true
+    },
+    {
+      "name": "module_static_conflict",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/module_static_conflict/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/module_static_conflict/build",
+        "/tmp/x2c-module-probes-za4z56xq/module_static_conflict/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/module_static_conflict/main.x"
+      ],
+      "build_status": 1,
+      "log": "/tmp/x2c-module-probes-za4z56xq/module_static_conflict/build.log",
+      "expected": "translation rejection",
+      "passed": true
+    },
+    {
+      "name": "prototype_visibility_conflict",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/prototype_visibility_conflict/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/prototype_visibility_conflict/build",
+        "/tmp/x2c-module-probes-za4z56xq/prototype_visibility_conflict/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/prototype_visibility_conflict/main.x"
+      ],
+      "build_status": 1,
+      "log": "/tmp/x2c-module-probes-za4z56xq/prototype_visibility_conflict/build.log",
+      "expected": "translation rejection",
+      "passed": true
+    },
+    {
+      "name": "duplicate_membership_rejected",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/duplicate_membership_rejected/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/duplicate_membership_rejected/build",
+        "/tmp/x2c-module-probes-za4z56xq/duplicate_membership_rejected/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/duplicate_membership_rejected/box/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/duplicate_membership_rejected/main.x"
+      ],
+      "build_status": 1,
+      "log": "/tmp/x2c-module-probes-za4z56xq/duplicate_membership_rejected/build.log",
+      "expected": "translation rejection",
+      "passed": true
+    },
+    {
+      "name": "missing_member_rejected",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/missing_member_rejected/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/missing_member_rejected/build",
+        "/tmp/x2c-module-probes-za4z56xq/missing_member_rejected/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/missing_member_rejected/main.x"
+      ],
+      "build_status": 1,
+      "log": "/tmp/x2c-module-probes-za4z56xq/missing_member_rejected/build.log",
+      "expected": "translation rejection",
+      "passed": true
+    },
+    {
+      "name": "escaping_member_rejected",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/escaping_member_rejected/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/escaping_member_rejected/build",
+        "/tmp/x2c-module-probes-za4z56xq/escaping_member_rejected/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/escaping_member_rejected/outside.x",
+        "/tmp/x2c-module-probes-za4z56xq/escaping_member_rejected/main.x"
+      ],
+      "build_status": 1,
+      "log": "/tmp/x2c-module-probes-za4z56xq/escaping_member_rejected/build.log",
+      "expected": "translation rejection",
+      "passed": true
+    },
+    {
+      "name": "ancestor_child_enrollment_rejected",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/ancestor_child_enrollment_rejected/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/ancestor_child_enrollment_rejected/build",
+        "/tmp/x2c-module-probes-za4z56xq/ancestor_child_enrollment_rejected/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/ancestor_child_enrollment_rejected/box/child.x",
+        "/tmp/x2c-module-probes-za4z56xq/ancestor_child_enrollment_rejected/box/child/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/ancestor_child_enrollment_rejected/main.x"
+      ],
+      "build_status": 1,
+      "log": "/tmp/x2c-module-probes-za4z56xq/ancestor_child_enrollment_rejected/build.log",
+      "expected": "translation rejection",
+      "passed": true
+    },
+    {
+      "name": "unlisted_ordinary_file_rejected",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/unlisted_ordinary_file_rejected/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/unlisted_ordinary_file_rejected/build",
+        "/tmp/x2c-module-probes-za4z56xq/unlisted_ordinary_file_rejected/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/unlisted_ordinary_file_rejected/box/helpers.x",
+        "/tmp/x2c-module-probes-za4z56xq/unlisted_ordinary_file_rejected/box/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/unlisted_ordinary_file_rejected/box/unlisted.x",
+        "/tmp/x2c-module-probes-za4z56xq/unlisted_ordinary_file_rejected/main.x"
+      ],
+      "build_status": 1,
+      "log": "/tmp/x2c-module-probes-za4z56xq/unlisted_ordinary_file_rejected/build.log",
+      "expected": "translation rejection",
+      "passed": true
+    },
+    {
+      "name": "native_header_nearest_and_invalidation",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/native_header_nearest_and_invalidation/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/native_header_nearest_and_invalidation/build",
+        "/tmp/x2c-module-probes-za4z56xq/native_header_nearest_and_invalidation/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/native_header_nearest_and_invalidation/main.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/native_header_nearest_and_invalidation/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "repeat_statuses": [
+        {
+          "build": 0,
+          "run": 0
+        },
+        {
+          "build": 0,
+          "run": 0
+        }
+      ]
+    },
+    {
+      "name": "runtime_initialized_shared_map",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/runtime_initialized_shared_map/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/runtime_initialized_shared_map/build",
+        "/tmp/x2c-module-probes-za4z56xq/runtime_initialized_shared_map/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/runtime_initialized_shared_map/box/state.x",
+        "/tmp/x2c-module-probes-za4z56xq/runtime_initialized_shared_map/box/work.x",
+        "/tmp/x2c-module-probes-za4z56xq/runtime_initialized_shared_map/main.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/runtime_initialized_shared_map/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "repeat_statuses": []
+    },
+    {
+      "name": "nested_package_public_prefixes",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/nested_package_public_prefixes/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/nested_package_public_prefixes/build",
+        "--package-dir",
+        "/tmp/x2c-module-probes-za4z56xq/nested_package_public_prefixes/packages",
+        "/tmp/x2c-module-probes-za4z56xq/nested_package_public_prefixes/main.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/nested_package_public_prefixes/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "repeat_statuses": []
+    },
+    {
+      "name": "static_opaque_forward_regression",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/static_opaque_forward_regression/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/static_opaque_forward_regression/build",
+        "/tmp/x2c-module-probes-za4z56xq/static_opaque_forward_regression/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/static_opaque_forward_regression/box/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/static_opaque_forward_regression/main.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/static_opaque_forward_regression/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "repeat_statuses": []
+    },
+    {
+      "name": "module_native_protocol_sibling",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/module_native_protocol_sibling/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/module_native_protocol_sibling/build",
+        "/tmp/x2c-module-probes-za4z56xq/module_native_protocol_sibling/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/module_native_protocol_sibling/main.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/module_native_protocol_sibling/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "repeat_statuses": [
+        {
+          "build": 0,
+          "run": 0
+        }
+      ]
+    },
+    {
+      "name": "module_protocol_meta_adoption",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/module_protocol_meta_adoption/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/module_protocol_meta_adoption/build",
+        "/tmp/x2c-module-probes-za4z56xq/module_protocol_meta_adoption/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/module_protocol_meta_adoption/main.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/module_protocol_meta_adoption/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "repeat_statuses": []
+    },
+    {
+      "name": "module_protocol_external_rejected",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/module_protocol_external_rejected/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/module_protocol_external_rejected/build",
+        "/tmp/x2c-module-probes-za4z56xq/module_protocol_external_rejected/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/module_protocol_external_rejected/box/protocol.x",
+        "/tmp/x2c-module-probes-za4z56xq/module_protocol_external_rejected/box/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/module_protocol_external_rejected/main.x"
+      ],
+      "build_status": 1,
+      "log": "/tmp/x2c-module-probes-za4z56xq/module_protocol_external_rejected/build.log",
+      "expected": "translation rejection",
+      "passed": true
+    },
+    {
+      "name": "module_ordinary_protocol_default",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/module_ordinary_protocol_default/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/module_ordinary_protocol_default/build",
+        "/tmp/x2c-module-probes-za4z56xq/module_ordinary_protocol_default/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/module_ordinary_protocol_default/main.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/module_ordinary_protocol_default/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "repeat_statuses": []
+    },
+    {
+      "name": "module_protocol_static_conflict",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/module_protocol_static_conflict/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/module_protocol_static_conflict/build",
+        "/tmp/x2c-module-probes-za4z56xq/module_protocol_static_conflict/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/module_protocol_static_conflict/box/protocol.x",
+        "/tmp/x2c-module-probes-za4z56xq/module_protocol_static_conflict/main.x"
+      ],
+      "build_status": 1,
+      "log": "/tmp/x2c-module-probes-za4z56xq/module_protocol_static_conflict/build.log",
+      "expected": "translation rejection",
+      "passed": true
+    },
+    {
+      "name": "module_protocol_nested_ancestor",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/module_protocol_nested_ancestor/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/module_protocol_nested_ancestor/build",
+        "/tmp/x2c-module-probes-za4z56xq/module_protocol_nested_ancestor/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/module_protocol_nested_ancestor/main.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/module_protocol_nested_ancestor/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "repeat_statuses": []
+    },
+    {
+      "name": "module_protocol_repeated_public_base",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/module_protocol_repeated_public_base/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/module_protocol_repeated_public_base/build",
+        "/tmp/x2c-module-probes-za4z56xq/module_protocol_repeated_public_base/common.x",
+        "/tmp/x2c-module-probes-za4z56xq/module_protocol_repeated_public_base/left.x",
+        "/tmp/x2c-module-probes-za4z56xq/module_protocol_repeated_public_base/right.x",
+        "/tmp/x2c-module-probes-za4z56xq/module_protocol_repeated_public_base/main.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/module_protocol_repeated_public_base/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "repeat_statuses": []
+    },
+    {
+      "name": "keyword_alias_prefix_capture",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/keyword_alias_prefix_capture/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/keyword_alias_prefix_capture/build",
+        "/tmp/x2c-module-probes-za4z56xq/keyword_alias_prefix_capture/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/keyword_alias_prefix_capture/box/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/keyword_alias_prefix_capture/main.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/keyword_alias_prefix_capture/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "repeat_statuses": []
+    },
+    {
+      "name": "keyword_alias_suffix_rebinding",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/keyword_alias_suffix_rebinding/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/keyword_alias_suffix_rebinding/build",
+        "/tmp/x2c-module-probes-za4z56xq/keyword_alias_suffix_rebinding/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/keyword_alias_suffix_rebinding/box/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/keyword_alias_suffix_rebinding/main.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/keyword_alias_suffix_rebinding/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "repeat_statuses": []
+    },
+    {
+      "name": "declaration_producer_prefix",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/declaration_producer_prefix/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/declaration_producer_prefix/build",
+        "/tmp/x2c-module-probes-za4z56xq/declaration_producer_prefix/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/declaration_producer_prefix/box/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/declaration_producer_prefix/main.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/declaration_producer_prefix/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "repeat_statuses": []
+    },
+    {
+      "name": "declaration_producer_executes_before_block_once",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/declaration_producer_executes_before_block_once/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/declaration_producer_executes_before_block_once/build",
+        "/tmp/x2c-module-probes-za4z56xq/declaration_producer_executes_before_block_once/box.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/declaration_producer_executes_before_block_once/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "producer_execution": [
+        {
+          "mode": "cold",
+          "command": [
+            "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+            "translate",
+            "-j",
+            "1",
+            "--out-dir",
+            "/tmp/x2c-module-probes-za4z56xq/declaration_producer_executes_before_block_once/producer",
+            "--no-interfaces",
+            "/tmp/x2c-module-probes-za4z56xq/declaration_producer_executes_before_block_once/box.x"
+          ],
+          "status": 0,
+          "counts": {
+            "macro: MODULE_DECLARATION_ONCE": 1
+          },
+          "expected_counts": {
+            "macro: MODULE_DECLARATION_ONCE": 1
+          },
+          "log": "/tmp/x2c-module-probes-za4z56xq/declaration_producer_executes_before_block_once/producer-cold.log"
+        },
+        {
+          "mode": "warm",
+          "command": [
+            "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+            "translate",
+            "-j",
+            "1",
+            "--out-dir",
+            "/tmp/x2c-module-probes-za4z56xq/declaration_producer_executes_before_block_once/producer",
+            "/tmp/x2c-module-probes-za4z56xq/declaration_producer_executes_before_block_once/box.x"
+          ],
+          "status": 0,
+          "counts": {
+            "macro: MODULE_DECLARATION_ONCE": 1
+          },
+          "expected_counts": {
+            "macro: MODULE_DECLARATION_ONCE": 1
+          },
+          "log": "/tmp/x2c-module-probes-za4z56xq/declaration_producer_executes_before_block_once/producer-warm.log"
+        }
+      ],
+      "repeat_statuses": []
+    },
+    {
+      "name": "declaration_producer_suffix_not_inherited",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/declaration_producer_suffix_not_inherited/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/declaration_producer_suffix_not_inherited/build",
+        "/tmp/x2c-module-probes-za4z56xq/declaration_producer_suffix_not_inherited/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/declaration_producer_suffix_not_inherited/box/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/declaration_producer_suffix_not_inherited/main.x"
+      ],
+      "build_status": 1,
+      "log": "/tmp/x2c-module-probes-za4z56xq/declaration_producer_suffix_not_inherited/build.log",
+      "expected": "translation rejection",
+      "passed": true
+    },
+    {
+      "name": "sibling_declaration_producer_isolation",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/sibling_declaration_producer_isolation/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/sibling_declaration_producer_isolation/build",
+        "/tmp/x2c-module-probes-za4z56xq/sibling_declaration_producer_isolation/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/sibling_declaration_producer_isolation/box/producer.x",
+        "/tmp/x2c-module-probes-za4z56xq/sibling_declaration_producer_isolation/box/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/sibling_declaration_producer_isolation/main.x"
+      ],
+      "build_status": 1,
+      "log": "/tmp/x2c-module-probes-za4z56xq/sibling_declaration_producer_isolation/build.log",
+      "expected": "translation rejection",
+      "passed": true
+    },
+    {
+      "name": "sibling_declaration_producer_explicit_include",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/sibling_declaration_producer_explicit_include/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/sibling_declaration_producer_explicit_include/build",
+        "/tmp/x2c-module-probes-za4z56xq/sibling_declaration_producer_explicit_include/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/sibling_declaration_producer_explicit_include/box/producer.x",
+        "/tmp/x2c-module-probes-za4z56xq/sibling_declaration_producer_explicit_include/box/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/sibling_declaration_producer_explicit_include/main.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/sibling_declaration_producer_explicit_include/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "repeat_statuses": []
+    },
+    {
+      "name": "file_static_initializer_prerequisite_cycle",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/file_static_initializer_prerequisite_cycle/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/file_static_initializer_prerequisite_cycle/build",
+        "/tmp/x2c-module-probes-za4z56xq/file_static_initializer_prerequisite_cycle/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/file_static_initializer_prerequisite_cycle/box/state.x",
+        "/tmp/x2c-module-probes-za4z56xq/file_static_initializer_prerequisite_cycle/main.x"
+      ],
+      "build_status": 1,
+      "log": "/tmp/x2c-module-probes-za4z56xq/file_static_initializer_prerequisite_cycle/build.log",
+      "expected": "translation rejection",
+      "passed": true
+    },
+    {
+      "name": "ordinary_include_cycle_is_not_initializer_cycle",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/ordinary_include_cycle_is_not_initializer_cycle/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/ordinary_include_cycle_is_not_initializer_cycle/build",
+        "/tmp/x2c-module-probes-za4z56xq/ordinary_include_cycle_is_not_initializer_cycle/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/ordinary_include_cycle_is_not_initializer_cycle/box/left.x",
+        "/tmp/x2c-module-probes-za4z56xq/ordinary_include_cycle_is_not_initializer_cycle/box/right.x",
+        "/tmp/x2c-module-probes-za4z56xq/ordinary_include_cycle_is_not_initializer_cycle/main.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/ordinary_include_cycle_is_not_initializer_cycle/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "repeat_statuses": []
+    },
+    {
+      "name": "nested_private_type_shadows_public_parent",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/nested_private_type_shadows_public_parent/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/nested_private_type_shadows_public_parent/build",
+        "/tmp/x2c-module-probes-za4z56xq/nested_private_type_shadows_public_parent/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/nested_private_type_shadows_public_parent/main.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/nested_private_type_shadows_public_parent/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "repeat_statuses": []
+    },
+    {
+      "name": "opaque_public_forward_external_field_rejected",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/opaque_public_forward_external_field_rejected/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/opaque_public_forward_external_field_rejected/build",
+        "/tmp/x2c-module-probes-za4z56xq/opaque_public_forward_external_field_rejected/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/opaque_public_forward_external_field_rejected/box/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/opaque_public_forward_external_field_rejected/main.x"
+      ],
+      "build_status": 1,
+      "log": "/tmp/x2c-module-probes-za4z56xq/opaque_public_forward_external_field_rejected/build.log",
+      "expected": "translation rejection",
+      "passed": true
+    },
+    {
+      "name": "constructed_private_binding_inside_module",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/constructed_private_binding_inside_module/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/constructed_private_binding_inside_module/build",
+        "/tmp/x2c-module-probes-za4z56xq/constructed_private_binding_inside_module/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/constructed_private_binding_inside_module/main.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/constructed_private_binding_inside_module/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "repeat_statuses": []
+    },
+    {
+      "name": "constructed_private_binding_external_rejected",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/constructed_private_binding_external_rejected/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/constructed_private_binding_external_rejected/build",
+        "/tmp/x2c-module-probes-za4z56xq/constructed_private_binding_external_rejected/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/constructed_private_binding_external_rejected/box/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/constructed_private_binding_external_rejected/main.x"
+      ],
+      "build_status": 1,
+      "log": "/tmp/x2c-module-probes-za4z56xq/constructed_private_binding_external_rejected/build.log",
+      "expected": "translation rejection",
+      "passed": true
+    },
+    {
+      "name": "cross_file_initializer_reverse_order",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/cross_file_initializer_reverse_order/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/cross_file_initializer_reverse_order/build",
+        "/tmp/x2c-module-probes-za4z56xq/cross_file_initializer_reverse_order/box/consumer.x",
+        "/tmp/x2c-module-probes-za4z56xq/cross_file_initializer_reverse_order/box/provider.x",
+        "/tmp/x2c-module-probes-za4z56xq/cross_file_initializer_reverse_order/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/cross_file_initializer_reverse_order/main.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/cross_file_initializer_reverse_order/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "repeat_statuses": []
+    },
+    {
+      "name": "cross_file_initializer_forward_order",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/cross_file_initializer_forward_order/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/cross_file_initializer_forward_order/build",
+        "/tmp/x2c-module-probes-za4z56xq/cross_file_initializer_forward_order/box/provider.x",
+        "/tmp/x2c-module-probes-za4z56xq/cross_file_initializer_forward_order/box/consumer.x",
+        "/tmp/x2c-module-probes-za4z56xq/cross_file_initializer_forward_order/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/cross_file_initializer_forward_order/main.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/cross_file_initializer_forward_order/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "repeat_statuses": []
+    },
+    {
+      "name": "cross_file_initializer_cycle_rejected",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/cross_file_initializer_cycle_rejected/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/cross_file_initializer_cycle_rejected/build",
+        "/tmp/x2c-module-probes-za4z56xq/cross_file_initializer_cycle_rejected/box/left.x",
+        "/tmp/x2c-module-probes-za4z56xq/cross_file_initializer_cycle_rejected/box/right.x",
+        "/tmp/x2c-module-probes-za4z56xq/cross_file_initializer_cycle_rejected/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/cross_file_initializer_cycle_rejected/main.x"
+      ],
+      "build_status": 1,
+      "log": "/tmp/x2c-module-probes-za4z56xq/cross_file_initializer_cycle_rejected/build.log",
+      "expected": "translation rejection",
+      "passed": true
+    },
+    {
+      "name": "cross_file_map_identity_and_mutation",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/cross_file_map_identity_and_mutation/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/cross_file_map_identity_and_mutation/build",
+        "/tmp/x2c-module-probes-za4z56xq/cross_file_map_identity_and_mutation/box/consumer.x",
+        "/tmp/x2c-module-probes-za4z56xq/cross_file_map_identity_and_mutation/box/provider.x",
+        "/tmp/x2c-module-probes-za4z56xq/cross_file_map_identity_and_mutation/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/cross_file_map_identity_and_mutation/main.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/cross_file_map_identity_and_mutation/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "repeat_statuses": []
+    },
+    {
+      "name": "cross_file_initializer_provider_static_helper",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/cross_file_initializer_provider_static_helper/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/cross_file_initializer_provider_static_helper/build",
+        "/tmp/x2c-module-probes-za4z56xq/cross_file_initializer_provider_static_helper/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/cross_file_initializer_provider_static_helper/main.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/cross_file_initializer_provider_static_helper/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "repeat_statuses": []
+    },
+    {
+      "name": "ordinary_consumer_public_module_initializer",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/ordinary_consumer_public_module_initializer/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/ordinary_consumer_public_module_initializer/build",
+        "/tmp/x2c-module-probes-za4z56xq/ordinary_consumer_public_module_initializer/main.x",
+        "/tmp/x2c-module-probes-za4z56xq/ordinary_consumer_public_module_initializer/box.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/ordinary_consumer_public_module_initializer/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "repeat_statuses": [
+        {
+          "build": 0,
+          "run": 0
+        }
+      ]
+    },
+    {
+      "name": "provider_local_initializer_macro",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/provider_local_initializer_macro/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/provider_local_initializer_macro/build",
+        "/tmp/x2c-module-probes-za4z56xq/provider_local_initializer_macro/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/provider_local_initializer_macro/main.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/provider_local_initializer_macro/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "repeat_statuses": []
+    },
+    {
+      "name": "provider_initializer_owner_lisp_context",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/provider_initializer_owner_lisp_context/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/provider_initializer_owner_lisp_context/build",
+        "/tmp/x2c-module-probes-za4z56xq/provider_initializer_owner_lisp_context/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/provider_initializer_owner_lisp_context/main.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/provider_initializer_owner_lisp_context/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "repeat_statuses": []
+    },
+    {
+      "name": "initializer_macro_executes_once",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/initializer_macro_executes_once/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/initializer_macro_executes_once/build",
+        "/tmp/x2c-module-probes-za4z56xq/initializer_macro_executes_once/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/initializer_macro_executes_once/main.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/initializer_macro_executes_once/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "build_log_counts": {
+        "macro: MODULE_INITIALIZER_ONCE": 1
+      },
+      "repeat_statuses": []
+    },
+    {
+      "name": "cross_file_initializer_retained_membership",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/cross_file_initializer_retained_membership/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/cross_file_initializer_retained_membership/build",
+        "/tmp/x2c-module-probes-za4z56xq/cross_file_initializer_retained_membership/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/cross_file_initializer_retained_membership/main.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/cross_file_initializer_retained_membership/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "repeat_statuses": [
+        {
+          "build": 0,
+          "run": 0
+        },
+        {
+          "build": 0,
+          "run": 0
+        }
+      ]
+    },
+    {
+      "name": "exported_macro_private_capture_rejected",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/exported_macro_private_capture_rejected/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/exported_macro_private_capture_rejected/build",
+        "/tmp/x2c-module-probes-za4z56xq/exported_macro_private_capture_rejected/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/exported_macro_private_capture_rejected/main.x"
+      ],
+      "build_status": 1,
+      "log": "/tmp/x2c-module-probes-za4z56xq/exported_macro_private_capture_rejected/build.log",
+      "expected": "translation rejection",
+      "passed": true
+    },
+    {
+      "name": "parent_child_private_rejected",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/parent_child_private_rejected/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/parent_child_private_rejected/build",
+        "/tmp/x2c-module-probes-za4z56xq/parent_child_private_rejected/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/parent_child_private_rejected/box/child.x",
+        "/tmp/x2c-module-probes-za4z56xq/parent_child_private_rejected/box/child/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/parent_child_private_rejected/box/parent.x",
+        "/tmp/x2c-module-probes-za4z56xq/parent_child_private_rejected/main.x"
+      ],
+      "build_status": 1,
+      "log": "/tmp/x2c-module-probes-za4z56xq/parent_child_private_rejected/build.log",
+      "expected": "translation rejection",
+      "passed": true
+    },
+    {
+      "name": "contextual_module_identifier",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/contextual_module_identifier/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/contextual_module_identifier/build",
+        "/tmp/x2c-module-probes-za4z56xq/contextual_module_identifier/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/contextual_module_identifier/box/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/contextual_module_identifier/main.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/contextual_module_identifier/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "repeat_statuses": []
+    },
+    {
+      "name": "unlisted_ordinary_file_positive",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/unlisted_ordinary_file_positive/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/unlisted_ordinary_file_positive/build",
+        "/tmp/x2c-module-probes-za4z56xq/unlisted_ordinary_file_positive/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/unlisted_ordinary_file_positive/box/helpers.x",
+        "/tmp/x2c-module-probes-za4z56xq/unlisted_ordinary_file_positive/box/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/unlisted_ordinary_file_positive/box/unlisted.x",
+        "/tmp/x2c-module-probes-za4z56xq/unlisted_ordinary_file_positive/main.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/unlisted_ordinary_file_positive/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "repeat_statuses": []
+    },
+    {
+      "name": "external_private_variable_rejected",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/external_private_variable_rejected/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/external_private_variable_rejected/build",
+        "/tmp/x2c-module-probes-za4z56xq/external_private_variable_rejected/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/external_private_variable_rejected/box/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/external_private_variable_rejected/main.x"
+      ],
+      "build_status": 1,
+      "log": "/tmp/x2c-module-probes-za4z56xq/external_private_variable_rejected/build.log",
+      "expected": "translation rejection",
+      "passed": true
+    },
+    {
+      "name": "retained_preamble_mutation",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/retained_preamble_mutation/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/retained_preamble_mutation/build",
+        "/tmp/x2c-module-probes-za4z56xq/retained_preamble_mutation/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/retained_preamble_mutation/main.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/retained_preamble_mutation/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "repeat_statuses": [
+        {
+          "build": 0,
+          "run": 0
+        },
+        {
+          "build": 0,
+          "run": 0
+        }
+      ]
+    },
+    {
+      "name": "retained_new_nearer_native_header",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/retained_new_nearer_native_header/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/retained_new_nearer_native_header/build",
+        "/tmp/x2c-module-probes-za4z56xq/retained_new_nearer_native_header/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/retained_new_nearer_native_header/main.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/retained_new_nearer_native_header/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "repeat_statuses": [
+        {
+          "build": 0,
+          "run": 0
+        },
+        {
+          "build": 0,
+          "run": 0
+        }
+      ]
+    },
+    {
+      "name": "acyclic_by_value_layout",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/acyclic_by_value_layout/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/acyclic_by_value_layout/build",
+        "/tmp/x2c-module-probes-za4z56xq/acyclic_by_value_layout/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/acyclic_by_value_layout/main.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/acyclic_by_value_layout/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "repeat_statuses": []
+    },
+    {
+      "name": "cyclic_by_value_layout_rejected",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/cyclic_by_value_layout_rejected/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/cyclic_by_value_layout_rejected/build",
+        "/tmp/x2c-module-probes-za4z56xq/cyclic_by_value_layout_rejected/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/cyclic_by_value_layout_rejected/main.x"
+      ],
+      "build_status": 1,
+      "log": "/tmp/x2c-module-probes-za4z56xq/cyclic_by_value_layout_rejected/build.log",
+      "expected": "build rejection",
+      "passed": true
+    },
+    {
+      "name": "module_global_class_shutdown_once",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/module_global_class_shutdown_once/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/module_global_class_shutdown_once/build",
+        "/tmp/x2c-module-probes-za4z56xq/module_global_class_shutdown_once/box/work.x",
+        "/tmp/x2c-module-probes-za4z56xq/module_global_class_shutdown_once/box/state.x",
+        "/tmp/x2c-module-probes-za4z56xq/module_global_class_shutdown_once/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/module_global_class_shutdown_once/main.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/module_global_class_shutdown_once/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "run_log_counts": {
+        "GLOBAL_INIT": 1,
+        "GLOBAL_FREE": 1,
+        "GLOBAL_SHUTDOWN": 1
+      },
+      "repeat_statuses": [
+        {
+          "build": 0,
+          "run": 0,
+          "run_log_counts": {
+            "GLOBAL_INIT": 1,
+            "GLOBAL_FREE": 1,
+            "GLOBAL_SHUTDOWN": 1
+          }
+        }
+      ]
+    },
+    {
+      "name": "forward_file_static_method_module_typedef",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/forward_file_static_method_module_typedef/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/forward_file_static_method_module_typedef/build",
+        "/tmp/x2c-module-probes-za4z56xq/forward_file_static_method_module_typedef/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/forward_file_static_method_module_typedef/box/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/forward_file_static_method_module_typedef/main.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/forward_file_static_method_module_typedef/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "interface_replay": [
+        {
+          "mode": "cold",
+          "command": [
+            "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+            "translate",
+            "-j",
+            "1",
+            "--out-dir",
+            "/tmp/x2c-module-probes-za4z56xq/forward_file_static_method_module_typedef/interfaces",
+            "--no-interfaces",
+            "/tmp/x2c-module-probes-za4z56xq/forward_file_static_method_module_typedef/box.x",
+            "/tmp/x2c-module-probes-za4z56xq/forward_file_static_method_module_typedef/box/value.x",
+            "/tmp/x2c-module-probes-za4z56xq/forward_file_static_method_module_typedef/main.x"
+          ],
+          "status": 0,
+          "generated_files": [
+            "_x2c_module_202A7687.h",
+            "box.c",
+            "box.h",
+            "box.xi",
+            "box.xnm",
+            "box/_x2c_module_87269AE9.h",
+            "box/value.c",
+            "box/value.h",
+            "box/value.xi",
+            "box/value.xnm",
+            "main.c",
+            "main.h",
+            "main.xi",
+            "main.xnm"
+          ]
+        },
+        {
+          "mode": "warm",
+          "command": [
+            "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+            "translate",
+            "-j",
+            "1",
+            "--out-dir",
+            "/tmp/x2c-module-probes-za4z56xq/forward_file_static_method_module_typedef/interfaces",
+            "/tmp/x2c-module-probes-za4z56xq/forward_file_static_method_module_typedef/box.x",
+            "/tmp/x2c-module-probes-za4z56xq/forward_file_static_method_module_typedef/box/value.x",
+            "/tmp/x2c-module-probes-za4z56xq/forward_file_static_method_module_typedef/main.x"
+          ],
+          "status": 0,
+          "generated_files": [
+            "_x2c_module_202A7687.h",
+            "box.c",
+            "box.h",
+            "box.xi",
+            "box.xnm",
+            "box/_x2c_module_87269AE9.h",
+            "box/value.c",
+            "box/value.h",
+            "box/value.xi",
+            "box/value.xnm",
+            "main.c",
+            "main.h",
+            "main.xi",
+            "main.xnm"
+          ],
+          "same_generated_code": true
+        }
+      ],
+      "repeat_statuses": [
+        {
+          "build": 0,
+          "run": 0
+        }
+      ]
+    },
+    {
+      "name": "forward_file_static_method_external_rejected",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/forward_file_static_method_external_rejected/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/forward_file_static_method_external_rejected/build",
+        "/tmp/x2c-module-probes-za4z56xq/forward_file_static_method_external_rejected/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/forward_file_static_method_external_rejected/box/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/forward_file_static_method_external_rejected/main.x"
+      ],
+      "build_status": 1,
+      "log": "/tmp/x2c-module-probes-za4z56xq/forward_file_static_method_external_rejected/build.log",
+      "expected": "translation rejection",
+      "passed": true
+    },
+    {
+      "name": "forward_file_static_method_sibling_rejected",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/forward_file_static_method_sibling_rejected/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/forward_file_static_method_sibling_rejected/build",
+        "/tmp/x2c-module-probes-za4z56xq/forward_file_static_method_sibling_rejected/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/forward_file_static_method_sibling_rejected/box/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/forward_file_static_method_sibling_rejected/main.x",
+        "/tmp/x2c-module-probes-za4z56xq/forward_file_static_method_sibling_rejected/box/other.x"
+      ],
+      "build_status": 1,
+      "log": "/tmp/x2c-module-probes-za4z56xq/forward_file_static_method_sibling_rejected/build.log",
+      "expected": "translation rejection",
+      "passed": true
+    },
+    {
+      "name": "local_shadow_of_initialized_module_object",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/local_shadow_of_initialized_module_object/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/local_shadow_of_initialized_module_object/build",
+        "/tmp/x2c-module-probes-za4z56xq/local_shadow_of_initialized_module_object/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/local_shadow_of_initialized_module_object/box/state.x",
+        "/tmp/x2c-module-probes-za4z56xq/local_shadow_of_initialized_module_object/main.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/local_shadow_of_initialized_module_object/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "transform_status": 0,
+      "forbidden_transform": false,
+      "repeat_statuses": []
+    },
+    {
+      "name": "nested_multihop_member_type_initialization_once",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/nested_multihop_member_type_initialization_once/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/nested_multihop_member_type_initialization_once/build",
+        "/tmp/x2c-module-probes-za4z56xq/nested_multihop_member_type_initialization_once/box/child/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/nested_multihop_member_type_initialization_once/box/alias.x",
+        "/tmp/x2c-module-probes-za4z56xq/nested_multihop_member_type_initialization_once/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/nested_multihop_member_type_initialization_once/main.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/nested_multihop_member_type_initialization_once/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "run_log_counts": {
+        "GLOBAL_INIT": 1,
+        "GLOBAL_FREE": 1,
+        "GLOBAL_SHUTDOWN": 1
+      },
+      "repeat_statuses": [
+        {
+          "build": 0,
+          "run": 0,
+          "run_log_counts": {
+            "GLOBAL_INIT": 1,
+            "GLOBAL_FREE": 1,
+            "GLOBAL_SHUTDOWN": 1
+          }
+        }
+      ]
+    },
+    {
+      "name": "nested_multihop_entry_type_initialization_once",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/nested_multihop_entry_type_initialization_once/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/nested_multihop_entry_type_initialization_once/build",
+        "/tmp/x2c-module-probes-za4z56xq/nested_multihop_entry_type_initialization_once/box/child/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/nested_multihop_entry_type_initialization_once/box/alias.x",
+        "/tmp/x2c-module-probes-za4z56xq/nested_multihop_entry_type_initialization_once/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/nested_multihop_entry_type_initialization_once/main.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/nested_multihop_entry_type_initialization_once/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "run_log_counts": {
+        "GLOBAL_INIT": 1,
+        "GLOBAL_FREE": 1,
+        "GLOBAL_SHUTDOWN": 1
+      },
+      "repeat_statuses": [
+        {
+          "build": 0,
+          "run": 0,
+          "run_log_counts": {
+            "GLOBAL_INIT": 1,
+            "GLOBAL_FREE": 1,
+            "GLOBAL_SHUTDOWN": 1
+          }
+        }
+      ]
+    },
+    {
+      "name": "module_macro_ancestor_child_prefix",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/module_macro_ancestor_child_prefix/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/module_macro_ancestor_child_prefix/build",
+        "/tmp/x2c-module-probes-za4z56xq/module_macro_ancestor_child_prefix/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/module_macro_ancestor_child_prefix/box/child.x",
+        "/tmp/x2c-module-probes-za4z56xq/module_macro_ancestor_child_prefix/box/child/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/module_macro_ancestor_child_prefix/main.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/module_macro_ancestor_child_prefix/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "interface_replay": [
+        {
+          "mode": "cold",
+          "command": [
+            "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+            "translate",
+            "-j",
+            "1",
+            "--out-dir",
+            "/tmp/x2c-module-probes-za4z56xq/module_macro_ancestor_child_prefix/interfaces",
+            "--no-interfaces",
+            "/tmp/x2c-module-probes-za4z56xq/module_macro_ancestor_child_prefix/box.x",
+            "/tmp/x2c-module-probes-za4z56xq/module_macro_ancestor_child_prefix/box/child.x",
+            "/tmp/x2c-module-probes-za4z56xq/module_macro_ancestor_child_prefix/box/child/value.x",
+            "/tmp/x2c-module-probes-za4z56xq/module_macro_ancestor_child_prefix/main.x"
+          ],
+          "status": 0,
+          "generated_files": [
+            "_x2c_module_202A7687.h",
+            "box.c",
+            "box.h",
+            "box.xi",
+            "box.xnm",
+            "box/_x2c_module_A5D3BFD4.h",
+            "box/child.c",
+            "box/child.h",
+            "box/child.xi",
+            "box/child.xnm",
+            "box/child/_x2c_module_FA34F676.h",
+            "box/child/value.c",
+            "box/child/value.h",
+            "box/child/value.xi",
+            "box/child/value.xnm",
+            "main.c",
+            "main.h",
+            "main.xi",
+            "main.xnm"
+          ]
+        },
+        {
+          "mode": "warm",
+          "command": [
+            "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+            "translate",
+            "-j",
+            "1",
+            "--out-dir",
+            "/tmp/x2c-module-probes-za4z56xq/module_macro_ancestor_child_prefix/interfaces",
+            "/tmp/x2c-module-probes-za4z56xq/module_macro_ancestor_child_prefix/box.x",
+            "/tmp/x2c-module-probes-za4z56xq/module_macro_ancestor_child_prefix/box/child.x",
+            "/tmp/x2c-module-probes-za4z56xq/module_macro_ancestor_child_prefix/box/child/value.x",
+            "/tmp/x2c-module-probes-za4z56xq/module_macro_ancestor_child_prefix/main.x"
+          ],
+          "status": 0,
+          "generated_files": [
+            "_x2c_module_202A7687.h",
+            "box.c",
+            "box.h",
+            "box.xi",
+            "box.xnm",
+            "box/_x2c_module_A5D3BFD4.h",
+            "box/child.c",
+            "box/child.h",
+            "box/child.xi",
+            "box/child.xnm",
+            "box/child/_x2c_module_FA34F676.h",
+            "box/child/value.c",
+            "box/child/value.h",
+            "box/child/value.xi",
+            "box/child/value.xnm",
+            "main.c",
+            "main.h",
+            "main.xi",
+            "main.xnm"
+          ],
+          "same_generated_code": true
+        }
+      ],
+      "repeat_statuses": []
+    },
+    {
+      "name": "module_keyword_ancestor_child_prefix",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/module_keyword_ancestor_child_prefix/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/module_keyword_ancestor_child_prefix/build",
+        "/tmp/x2c-module-probes-za4z56xq/module_keyword_ancestor_child_prefix/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/module_keyword_ancestor_child_prefix/box/child.x",
+        "/tmp/x2c-module-probes-za4z56xq/module_keyword_ancestor_child_prefix/box/child/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/module_keyword_ancestor_child_prefix/main.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/module_keyword_ancestor_child_prefix/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "interface_replay": [
+        {
+          "mode": "cold",
+          "command": [
+            "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+            "translate",
+            "-j",
+            "1",
+            "--out-dir",
+            "/tmp/x2c-module-probes-za4z56xq/module_keyword_ancestor_child_prefix/interfaces",
+            "--no-interfaces",
+            "/tmp/x2c-module-probes-za4z56xq/module_keyword_ancestor_child_prefix/box.x",
+            "/tmp/x2c-module-probes-za4z56xq/module_keyword_ancestor_child_prefix/box/child.x",
+            "/tmp/x2c-module-probes-za4z56xq/module_keyword_ancestor_child_prefix/box/child/value.x",
+            "/tmp/x2c-module-probes-za4z56xq/module_keyword_ancestor_child_prefix/main.x"
+          ],
+          "status": 0,
+          "generated_files": [
+            "_x2c_module_202A7687.h",
+            "box.c",
+            "box.h",
+            "box.xi",
+            "box.xnm",
+            "box/_x2c_module_A5D3BFD4.h",
+            "box/child.c",
+            "box/child.h",
+            "box/child.xi",
+            "box/child.xnm",
+            "box/child/_x2c_module_FA34F676.h",
+            "box/child/value.c",
+            "box/child/value.h",
+            "box/child/value.xi",
+            "box/child/value.xnm",
+            "main.c",
+            "main.h",
+            "main.xi",
+            "main.xnm"
+          ]
+        },
+        {
+          "mode": "warm",
+          "command": [
+            "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+            "translate",
+            "-j",
+            "1",
+            "--out-dir",
+            "/tmp/x2c-module-probes-za4z56xq/module_keyword_ancestor_child_prefix/interfaces",
+            "/tmp/x2c-module-probes-za4z56xq/module_keyword_ancestor_child_prefix/box.x",
+            "/tmp/x2c-module-probes-za4z56xq/module_keyword_ancestor_child_prefix/box/child.x",
+            "/tmp/x2c-module-probes-za4z56xq/module_keyword_ancestor_child_prefix/box/child/value.x",
+            "/tmp/x2c-module-probes-za4z56xq/module_keyword_ancestor_child_prefix/main.x"
+          ],
+          "status": 0,
+          "generated_files": [
+            "_x2c_module_202A7687.h",
+            "box.c",
+            "box.h",
+            "box.xi",
+            "box.xnm",
+            "box/_x2c_module_A5D3BFD4.h",
+            "box/child.c",
+            "box/child.h",
+            "box/child.xi",
+            "box/child.xnm",
+            "box/child/_x2c_module_FA34F676.h",
+            "box/child/value.c",
+            "box/child/value.h",
+            "box/child/value.xi",
+            "box/child/value.xnm",
+            "main.c",
+            "main.h",
+            "main.xi",
+            "main.xnm"
+          ],
+          "same_generated_code": true
+        }
+      ],
+      "repeat_statuses": []
+    },
+    {
+      "name": "module_lisp_ancestor_child_prefix",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/module_lisp_ancestor_child_prefix/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/module_lisp_ancestor_child_prefix/build",
+        "/tmp/x2c-module-probes-za4z56xq/module_lisp_ancestor_child_prefix/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/module_lisp_ancestor_child_prefix/box/child.x",
+        "/tmp/x2c-module-probes-za4z56xq/module_lisp_ancestor_child_prefix/box/child/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/module_lisp_ancestor_child_prefix/main.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/module_lisp_ancestor_child_prefix/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "interface_replay": [
+        {
+          "mode": "cold",
+          "command": [
+            "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+            "translate",
+            "-j",
+            "1",
+            "--out-dir",
+            "/tmp/x2c-module-probes-za4z56xq/module_lisp_ancestor_child_prefix/interfaces",
+            "--no-interfaces",
+            "/tmp/x2c-module-probes-za4z56xq/module_lisp_ancestor_child_prefix/box.x",
+            "/tmp/x2c-module-probes-za4z56xq/module_lisp_ancestor_child_prefix/box/child.x",
+            "/tmp/x2c-module-probes-za4z56xq/module_lisp_ancestor_child_prefix/box/child/value.x",
+            "/tmp/x2c-module-probes-za4z56xq/module_lisp_ancestor_child_prefix/main.x"
+          ],
+          "status": 0,
+          "generated_files": [
+            "_x2c_module_202A7687.h",
+            "box.c",
+            "box.h",
+            "box.xi",
+            "box.xnm",
+            "box/_x2c_module_A5D3BFD4.h",
+            "box/child.c",
+            "box/child.h",
+            "box/child.xi",
+            "box/child.xnm",
+            "box/child/_x2c_module_FA34F676.h",
+            "box/child/value.c",
+            "box/child/value.h",
+            "box/child/value.xi",
+            "box/child/value.xnm",
+            "main.c",
+            "main.h",
+            "main.xi",
+            "main.xnm"
+          ]
+        },
+        {
+          "mode": "warm",
+          "command": [
+            "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+            "translate",
+            "-j",
+            "1",
+            "--out-dir",
+            "/tmp/x2c-module-probes-za4z56xq/module_lisp_ancestor_child_prefix/interfaces",
+            "/tmp/x2c-module-probes-za4z56xq/module_lisp_ancestor_child_prefix/box.x",
+            "/tmp/x2c-module-probes-za4z56xq/module_lisp_ancestor_child_prefix/box/child.x",
+            "/tmp/x2c-module-probes-za4z56xq/module_lisp_ancestor_child_prefix/box/child/value.x",
+            "/tmp/x2c-module-probes-za4z56xq/module_lisp_ancestor_child_prefix/main.x"
+          ],
+          "status": 0,
+          "generated_files": [
+            "_x2c_module_202A7687.h",
+            "box.c",
+            "box.h",
+            "box.xi",
+            "box.xnm",
+            "box/_x2c_module_A5D3BFD4.h",
+            "box/child.c",
+            "box/child.h",
+            "box/child.xi",
+            "box/child.xnm",
+            "box/child/_x2c_module_FA34F676.h",
+            "box/child/value.c",
+            "box/child/value.h",
+            "box/child/value.xi",
+            "box/child/value.xnm",
+            "main.c",
+            "main.h",
+            "main.xi",
+            "main.xnm"
+          ],
+          "same_generated_code": true
+        }
+      ],
+      "repeat_statuses": []
+    },
+    {
+      "name": "module_macro_sibling_include_rejected",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/module_macro_sibling_include_rejected/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/module_macro_sibling_include_rejected/build",
+        "/tmp/x2c-module-probes-za4z56xq/module_macro_sibling_include_rejected/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/module_macro_sibling_include_rejected/box/left.x",
+        "/tmp/x2c-module-probes-za4z56xq/module_macro_sibling_include_rejected/box/left/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/module_macro_sibling_include_rejected/box/right.x",
+        "/tmp/x2c-module-probes-za4z56xq/module_macro_sibling_include_rejected/box/right/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/module_macro_sibling_include_rejected/main.x"
+      ],
+      "build_status": 1,
+      "log": "/tmp/x2c-module-probes-za4z56xq/module_macro_sibling_include_rejected/build.log",
+      "expected": "translation rejection",
+      "passed": true
+    },
+    {
+      "name": "module_macro_external_rejected",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/module_macro_external_rejected/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/module_macro_external_rejected/build",
+        "/tmp/x2c-module-probes-za4z56xq/module_macro_external_rejected/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/module_macro_external_rejected/box/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/module_macro_external_rejected/main.x"
+      ],
+      "build_status": 1,
+      "log": "/tmp/x2c-module-probes-za4z56xq/module_macro_external_rejected/build.log",
+      "expected": "translation rejection",
+      "passed": true
+    },
+    {
+      "name": "module_macro_entry_suffix_unavailable",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/module_macro_entry_suffix_unavailable/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/module_macro_entry_suffix_unavailable/build",
+        "/tmp/x2c-module-probes-za4z56xq/module_macro_entry_suffix_unavailable/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/module_macro_entry_suffix_unavailable/box/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/module_macro_entry_suffix_unavailable/main.x"
+      ],
+      "build_status": 1,
+      "log": "/tmp/x2c-module-probes-za4z56xq/module_macro_entry_suffix_unavailable/build.log",
+      "expected": "translation rejection",
+      "passed": true
+    },
+    {
+      "name": "module_keyword_sibling_include_rejected",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/module_keyword_sibling_include_rejected/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/module_keyword_sibling_include_rejected/build",
+        "/tmp/x2c-module-probes-za4z56xq/module_keyword_sibling_include_rejected/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/module_keyword_sibling_include_rejected/box/left.x",
+        "/tmp/x2c-module-probes-za4z56xq/module_keyword_sibling_include_rejected/box/left/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/module_keyword_sibling_include_rejected/box/right.x",
+        "/tmp/x2c-module-probes-za4z56xq/module_keyword_sibling_include_rejected/box/right/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/module_keyword_sibling_include_rejected/main.x"
+      ],
+      "build_status": 1,
+      "log": "/tmp/x2c-module-probes-za4z56xq/module_keyword_sibling_include_rejected/build.log",
+      "expected": "build rejection",
+      "passed": true
+    },
+    {
+      "name": "module_keyword_external_rejected",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/module_keyword_external_rejected/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/module_keyword_external_rejected/build",
+        "/tmp/x2c-module-probes-za4z56xq/module_keyword_external_rejected/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/module_keyword_external_rejected/box/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/module_keyword_external_rejected/main.x"
+      ],
+      "build_status": 1,
+      "log": "/tmp/x2c-module-probes-za4z56xq/module_keyword_external_rejected/build.log",
+      "expected": "build rejection",
+      "passed": true
+    },
+    {
+      "name": "module_keyword_entry_suffix_unavailable",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/module_keyword_entry_suffix_unavailable/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/module_keyword_entry_suffix_unavailable/build",
+        "/tmp/x2c-module-probes-za4z56xq/module_keyword_entry_suffix_unavailable/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/module_keyword_entry_suffix_unavailable/box/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/module_keyword_entry_suffix_unavailable/main.x"
+      ],
+      "build_status": 1,
+      "log": "/tmp/x2c-module-probes-za4z56xq/module_keyword_entry_suffix_unavailable/build.log",
+      "expected": "build rejection",
+      "passed": true
+    },
+    {
+      "name": "module_lisp_sibling_include_rejected",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/module_lisp_sibling_include_rejected/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/module_lisp_sibling_include_rejected/build",
+        "/tmp/x2c-module-probes-za4z56xq/module_lisp_sibling_include_rejected/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/module_lisp_sibling_include_rejected/box/left.x",
+        "/tmp/x2c-module-probes-za4z56xq/module_lisp_sibling_include_rejected/box/left/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/module_lisp_sibling_include_rejected/box/right.x",
+        "/tmp/x2c-module-probes-za4z56xq/module_lisp_sibling_include_rejected/box/right/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/module_lisp_sibling_include_rejected/main.x"
+      ],
+      "build_status": 1,
+      "log": "/tmp/x2c-module-probes-za4z56xq/module_lisp_sibling_include_rejected/build.log",
+      "expected": "translation rejection",
+      "passed": true
+    },
+    {
+      "name": "module_lisp_external_rejected",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/module_lisp_external_rejected/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/module_lisp_external_rejected/build",
+        "/tmp/x2c-module-probes-za4z56xq/module_lisp_external_rejected/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/module_lisp_external_rejected/box/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/module_lisp_external_rejected/main.x"
+      ],
+      "build_status": 1,
+      "log": "/tmp/x2c-module-probes-za4z56xq/module_lisp_external_rejected/build.log",
+      "expected": "translation rejection",
+      "passed": true
+    },
+    {
+      "name": "module_lisp_entry_suffix_unavailable",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/module_lisp_entry_suffix_unavailable/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/module_lisp_entry_suffix_unavailable/build",
+        "/tmp/x2c-module-probes-za4z56xq/module_lisp_entry_suffix_unavailable/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/module_lisp_entry_suffix_unavailable/box/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/module_lisp_entry_suffix_unavailable/main.x"
+      ],
+      "build_status": 1,
+      "log": "/tmp/x2c-module-probes-za4z56xq/module_lisp_entry_suffix_unavailable/build.log",
+      "expected": "translation rejection",
+      "passed": true
+    },
+    {
+      "name": "module_modifier_outside_membership_rejected",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/module_modifier_outside_membership_rejected/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/module_modifier_outside_membership_rejected/build",
+        "/tmp/x2c-module-probes-za4z56xq/module_modifier_outside_membership_rejected/main.x"
+      ],
+      "build_status": 1,
+      "log": "/tmp/x2c-module-probes-za4z56xq/module_modifier_outside_membership_rejected/build.log",
+      "expected": "build rejection",
+      "passed": true
+    },
+    {
+      "name": "duplicate_immediate_owner_rejected",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/duplicate_immediate_owner_rejected/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/duplicate_immediate_owner_rejected/build",
+        "/tmp/x2c-module-probes-za4z56xq/duplicate_immediate_owner_rejected/box/value.x",
+        "/tmp/x2c-module-probes-za4z56xq/duplicate_immediate_owner_rejected/main.x"
+      ],
+      "build_status": 1,
+      "log": "/tmp/x2c-module-probes-za4z56xq/duplicate_immediate_owner_rejected/build.log",
+      "expected": "build rejection",
+      "passed": true
+    },
+    {
+      "name": "nested_child_public_collision_rejected",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/nested_child_public_collision_rejected/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/nested_child_public_collision_rejected/build",
+        "/tmp/x2c-module-probes-za4z56xq/nested_child_public_collision_rejected/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/nested_child_public_collision_rejected/main.x"
+      ],
+      "build_status": 1,
+      "log": "/tmp/x2c-module-probes-za4z56xq/nested_child_public_collision_rejected/build.log",
+      "expected": "build rejection",
+      "passed": true
+    },
+    {
+      "name": "entry_static_macro_not_inherited",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/entry_static_macro_not_inherited/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/entry_static_macro_not_inherited/build",
+        "/tmp/x2c-module-probes-za4z56xq/entry_static_macro_not_inherited/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/entry_static_macro_not_inherited/main.x"
+      ],
+      "build_status": 1,
+      "log": "/tmp/x2c-module-probes-za4z56xq/entry_static_macro_not_inherited/build.log",
+      "expected": "build rejection",
+      "passed": true
+    },
+    {
+      "name": "external_public_contributions_follow_member_order",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/external_public_contributions_follow_member_order/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/external_public_contributions_follow_member_order/build",
+        "/tmp/x2c-module-probes-za4z56xq/external_public_contributions_follow_member_order/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/external_public_contributions_follow_member_order/main.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/external_public_contributions_follow_member_order/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "repeat_statuses": []
+    },
+    {
+      "name": "package_root_private_reaches_descendants",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/package_root_private_reaches_descendants/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/package_root_private_reaches_descendants/build",
+        "--package-dir",
+        "/tmp/x2c-module-probes-za4z56xq/package_root_private_reaches_descendants/packages",
+        "/tmp/x2c-module-probes-za4z56xq/package_root_private_reaches_descendants/main.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/package_root_private_reaches_descendants/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "repeat_statuses": []
+    },
+    {
+      "name": "package_private_import_rejected",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/package_private_import_rejected/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/package_private_import_rejected/build",
+        "--package-dir",
+        "/tmp/x2c-module-probes-za4z56xq/package_private_import_rejected/packages",
+        "/tmp/x2c-module-probes-za4z56xq/package_private_import_rejected/main.x"
+      ],
+      "build_status": 1,
+      "log": "/tmp/x2c-module-probes-za4z56xq/package_private_import_rejected/build.log",
+      "expected": "build rejection",
+      "passed": true
+    },
+    {
+      "name": "legacy_package_without_module_block",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/legacy_package_without_module_block/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/legacy_package_without_module_block/build",
+        "--package-dir",
+        "/tmp/x2c-module-probes-za4z56xq/legacy_package_without_module_block/packages",
+        "/tmp/x2c-module-probes-za4z56xq/legacy_package_without_module_block/main.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/legacy_package_without_module_block/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "repeat_statuses": []
+    },
+    {
+      "name": "package_public_c_name_unchanged",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/package_public_c_name_unchanged/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/package_public_c_name_unchanged/build",
+        "--package-dir",
+        "/tmp/x2c-module-probes-za4z56xq/package_public_c_name_unchanged/packages",
+        "/tmp/x2c-module-probes-za4z56xq/package_public_c_name_unchanged/main.x",
+        "/tmp/x2c-module-probes-za4z56xq/package_public_c_name_unchanged/consumer.c"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/package_public_c_name_unchanged/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "repeat_statuses": []
+    },
+    {
+      "name": "declaration_scc_ordinary_bodies",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/declaration_scc_ordinary_bodies/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/declaration_scc_ordinary_bodies/build",
+        "/tmp/x2c-module-probes-za4z56xq/declaration_scc_ordinary_bodies/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/declaration_scc_ordinary_bodies/main.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/declaration_scc_ordinary_bodies/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "interface_replay": [
+        {
+          "mode": "cold",
+          "command": [
+            "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+            "translate",
+            "-j",
+            "1",
+            "--out-dir",
+            "/tmp/x2c-module-probes-za4z56xq/declaration_scc_ordinary_bodies/interfaces",
+            "--no-interfaces",
+            "/tmp/x2c-module-probes-za4z56xq/declaration_scc_ordinary_bodies/box.x",
+            "/tmp/x2c-module-probes-za4z56xq/declaration_scc_ordinary_bodies/main.x"
+          ],
+          "status": 0,
+          "generated_files": [
+            "_x2c_module_202A7687.h",
+            "box.c",
+            "box.h",
+            "box.xi",
+            "box.xnm",
+            "box/_x2c_module_C0E84CD4.h",
+            "box/_x2c_module_D278F6E3.h",
+            "box/left.c",
+            "box/left.h",
+            "box/left.xi",
+            "box/left.xnm",
+            "box/right.c",
+            "box/right.h",
+            "box/right.xi",
+            "box/right.xnm",
+            "main.c",
+            "main.h",
+            "main.xi",
+            "main.xnm"
+          ]
+        },
+        {
+          "mode": "warm",
+          "command": [
+            "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+            "translate",
+            "-j",
+            "1",
+            "--out-dir",
+            "/tmp/x2c-module-probes-za4z56xq/declaration_scc_ordinary_bodies/interfaces",
+            "/tmp/x2c-module-probes-za4z56xq/declaration_scc_ordinary_bodies/box.x",
+            "/tmp/x2c-module-probes-za4z56xq/declaration_scc_ordinary_bodies/main.x"
+          ],
+          "status": 0,
+          "generated_files": [
+            "_x2c_module_202A7687.h",
+            "box.c",
+            "box.h",
+            "box.xi",
+            "box.xnm",
+            "box/_x2c_module_C0E84CD4.h",
+            "box/_x2c_module_D278F6E3.h",
+            "box/left.c",
+            "box/left.h",
+            "box/left.xi",
+            "box/left.xnm",
+            "box/right.c",
+            "box/right.h",
+            "box/right.xi",
+            "box/right.xnm",
+            "main.c",
+            "main.h",
+            "main.xi",
+            "main.xnm"
+          ],
+          "same_generated_code": true
+        }
+      ],
+      "repeat_statuses": []
+    },
+    {
+      "name": "nested_entry_member_lisp_equivalence",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_lisp_equivalence/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_lisp_equivalence/build",
+        "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_lisp_equivalence/box.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_lisp_equivalence/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "member_equivalence": [
+        {
+          "invocation": "entry",
+          "mode": "cold",
+          "command": [
+            "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+            "translate",
+            "-j",
+            "1",
+            "--out-dir",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_lisp_equivalence/equivalence",
+            "--no-interfaces",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_lisp_equivalence/box.x"
+          ],
+          "status": 0,
+          "generated_files": [
+            "_x2c_module_202A7687.h",
+            "box.c",
+            "box.h",
+            "box.xi",
+            "box.xnm",
+            "box/_x2c_module_A5D3BFD4.h",
+            "box/child.c",
+            "box/child.h",
+            "box/child.xi",
+            "box/child.xnm",
+            "box/child/_x2c_module_FA34F676.h",
+            "box/child/value.c",
+            "box/child/value.h",
+            "box/child/value.xi",
+            "box/child/value.xnm"
+          ],
+          "same_generated_code": true,
+          "different_files": [],
+          "log": "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_lisp_equivalence/equivalence-entry-cold.log"
+        },
+        {
+          "invocation": "entry",
+          "mode": "warm",
+          "command": [
+            "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+            "translate",
+            "-j",
+            "1",
+            "--out-dir",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_lisp_equivalence/equivalence",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_lisp_equivalence/box.x"
+          ],
+          "status": 0,
+          "generated_files": [
+            "_x2c_module_202A7687.h",
+            "box.c",
+            "box.h",
+            "box.xi",
+            "box.xnm",
+            "box/_x2c_module_A5D3BFD4.h",
+            "box/child.c",
+            "box/child.h",
+            "box/child.xi",
+            "box/child.xnm",
+            "box/child/_x2c_module_FA34F676.h",
+            "box/child/value.c",
+            "box/child/value.h",
+            "box/child/value.xi",
+            "box/child/value.xnm"
+          ],
+          "same_generated_code": true,
+          "different_files": [],
+          "log": "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_lisp_equivalence/equivalence-entry-warm.log"
+        },
+        {
+          "invocation": "entry",
+          "mode": "executable",
+          "command": [
+            "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+            "build",
+            "-j",
+            "1",
+            "--output",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_lisp_equivalence/equivalence-entry",
+            "--build-dir",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_lisp_equivalence/build-entry",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_lisp_equivalence/box.x"
+          ],
+          "status": 0,
+          "log": "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_lisp_equivalence/equivalence-entry-build.log",
+          "run_status": 0
+        },
+        {
+          "invocation": "member",
+          "mode": "cold",
+          "command": [
+            "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+            "translate",
+            "-j",
+            "1",
+            "--out-dir",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_lisp_equivalence/equivalence",
+            "--no-interfaces",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_lisp_equivalence/box/child/value.x"
+          ],
+          "status": 0,
+          "generated_files": [
+            "_x2c_module_202A7687.h",
+            "box.c",
+            "box.h",
+            "box.xi",
+            "box.xnm",
+            "box/_x2c_module_A5D3BFD4.h",
+            "box/child.c",
+            "box/child.h",
+            "box/child.xi",
+            "box/child.xnm",
+            "box/child/_x2c_module_FA34F676.h",
+            "box/child/value.c",
+            "box/child/value.h",
+            "box/child/value.xi",
+            "box/child/value.xnm"
+          ],
+          "same_generated_code": true,
+          "different_files": [],
+          "log": "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_lisp_equivalence/equivalence-member-cold.log"
+        },
+        {
+          "invocation": "member",
+          "mode": "warm",
+          "command": [
+            "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+            "translate",
+            "-j",
+            "1",
+            "--out-dir",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_lisp_equivalence/equivalence",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_lisp_equivalence/box/child/value.x"
+          ],
+          "status": 0,
+          "generated_files": [
+            "_x2c_module_202A7687.h",
+            "box.c",
+            "box.h",
+            "box.xi",
+            "box.xnm",
+            "box/_x2c_module_A5D3BFD4.h",
+            "box/child.c",
+            "box/child.h",
+            "box/child.xi",
+            "box/child.xnm",
+            "box/child/_x2c_module_FA34F676.h",
+            "box/child/value.c",
+            "box/child/value.h",
+            "box/child/value.xi",
+            "box/child/value.xnm"
+          ],
+          "same_generated_code": true,
+          "different_files": [],
+          "log": "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_lisp_equivalence/equivalence-member-warm.log"
+        },
+        {
+          "invocation": "member",
+          "mode": "executable",
+          "command": [
+            "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+            "build",
+            "-j",
+            "1",
+            "--output",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_lisp_equivalence/equivalence-member",
+            "--build-dir",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_lisp_equivalence/build-member",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_lisp_equivalence/box/child/value.x"
+          ],
+          "status": 0,
+          "log": "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_lisp_equivalence/equivalence-member-build.log",
+          "run_status": 0
+        }
+      ],
+      "repeat_statuses": []
+    },
+    {
+      "name": "nested_entry_member_alias_equivalence",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_alias_equivalence/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_alias_equivalence/build",
+        "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_alias_equivalence/box.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_alias_equivalence/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "member_equivalence": [
+        {
+          "invocation": "entry",
+          "mode": "cold",
+          "command": [
+            "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+            "translate",
+            "-j",
+            "1",
+            "--out-dir",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_alias_equivalence/equivalence",
+            "--no-interfaces",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_alias_equivalence/box.x"
+          ],
+          "status": 0,
+          "generated_files": [
+            "_x2c_module_202A7687.h",
+            "box.c",
+            "box.h",
+            "box.xi",
+            "box.xnm",
+            "box/_x2c_module_A5D3BFD4.h",
+            "box/child.c",
+            "box/child.h",
+            "box/child.xi",
+            "box/child.xnm",
+            "box/child/_x2c_module_FA34F676.h",
+            "box/child/value.c",
+            "box/child/value.h",
+            "box/child/value.xi",
+            "box/child/value.xnm"
+          ],
+          "same_generated_code": true,
+          "different_files": [],
+          "log": "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_alias_equivalence/equivalence-entry-cold.log"
+        },
+        {
+          "invocation": "entry",
+          "mode": "warm",
+          "command": [
+            "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+            "translate",
+            "-j",
+            "1",
+            "--out-dir",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_alias_equivalence/equivalence",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_alias_equivalence/box.x"
+          ],
+          "status": 0,
+          "generated_files": [
+            "_x2c_module_202A7687.h",
+            "box.c",
+            "box.h",
+            "box.xi",
+            "box.xnm",
+            "box/_x2c_module_A5D3BFD4.h",
+            "box/child.c",
+            "box/child.h",
+            "box/child.xi",
+            "box/child.xnm",
+            "box/child/_x2c_module_FA34F676.h",
+            "box/child/value.c",
+            "box/child/value.h",
+            "box/child/value.xi",
+            "box/child/value.xnm"
+          ],
+          "same_generated_code": true,
+          "different_files": [],
+          "log": "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_alias_equivalence/equivalence-entry-warm.log"
+        },
+        {
+          "invocation": "entry",
+          "mode": "executable",
+          "command": [
+            "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+            "build",
+            "-j",
+            "1",
+            "--output",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_alias_equivalence/equivalence-entry",
+            "--build-dir",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_alias_equivalence/build-entry",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_alias_equivalence/box.x"
+          ],
+          "status": 0,
+          "log": "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_alias_equivalence/equivalence-entry-build.log",
+          "run_status": 0
+        },
+        {
+          "invocation": "member",
+          "mode": "cold",
+          "command": [
+            "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+            "translate",
+            "-j",
+            "1",
+            "--out-dir",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_alias_equivalence/equivalence",
+            "--no-interfaces",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_alias_equivalence/box/child/value.x"
+          ],
+          "status": 0,
+          "generated_files": [
+            "_x2c_module_202A7687.h",
+            "box.c",
+            "box.h",
+            "box.xi",
+            "box.xnm",
+            "box/_x2c_module_A5D3BFD4.h",
+            "box/child.c",
+            "box/child.h",
+            "box/child.xi",
+            "box/child.xnm",
+            "box/child/_x2c_module_FA34F676.h",
+            "box/child/value.c",
+            "box/child/value.h",
+            "box/child/value.xi",
+            "box/child/value.xnm"
+          ],
+          "same_generated_code": true,
+          "different_files": [],
+          "log": "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_alias_equivalence/equivalence-member-cold.log"
+        },
+        {
+          "invocation": "member",
+          "mode": "warm",
+          "command": [
+            "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+            "translate",
+            "-j",
+            "1",
+            "--out-dir",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_alias_equivalence/equivalence",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_alias_equivalence/box/child/value.x"
+          ],
+          "status": 0,
+          "generated_files": [
+            "_x2c_module_202A7687.h",
+            "box.c",
+            "box.h",
+            "box.xi",
+            "box.xnm",
+            "box/_x2c_module_A5D3BFD4.h",
+            "box/child.c",
+            "box/child.h",
+            "box/child.xi",
+            "box/child.xnm",
+            "box/child/_x2c_module_FA34F676.h",
+            "box/child/value.c",
+            "box/child/value.h",
+            "box/child/value.xi",
+            "box/child/value.xnm"
+          ],
+          "same_generated_code": true,
+          "different_files": [],
+          "log": "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_alias_equivalence/equivalence-member-warm.log"
+        },
+        {
+          "invocation": "member",
+          "mode": "executable",
+          "command": [
+            "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+            "build",
+            "-j",
+            "1",
+            "--output",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_alias_equivalence/equivalence-member",
+            "--build-dir",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_alias_equivalence/build-member",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_alias_equivalence/box/child/value.x"
+          ],
+          "status": 0,
+          "log": "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_alias_equivalence/equivalence-member-build.log",
+          "run_status": 0
+        }
+      ],
+      "repeat_statuses": []
+    },
+    {
+      "name": "nested_entry_member_producer_equivalence",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_producer_equivalence/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_producer_equivalence/build",
+        "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_producer_equivalence/box.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_producer_equivalence/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "member_equivalence": [
+        {
+          "invocation": "entry",
+          "mode": "cold",
+          "command": [
+            "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+            "translate",
+            "-j",
+            "1",
+            "--out-dir",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_producer_equivalence/equivalence",
+            "--no-interfaces",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_producer_equivalence/box.x"
+          ],
+          "status": 0,
+          "generated_files": [
+            "_x2c_module_202A7687.h",
+            "box.c",
+            "box.h",
+            "box.xi",
+            "box.xnm",
+            "box/_x2c_module_A5D3BFD4.h",
+            "box/child.c",
+            "box/child.h",
+            "box/child.xi",
+            "box/child.xnm",
+            "box/child/_x2c_module_FA34F676.h",
+            "box/child/value.c",
+            "box/child/value.h",
+            "box/child/value.xi",
+            "box/child/value.xnm"
+          ],
+          "same_generated_code": true,
+          "different_files": [],
+          "log": "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_producer_equivalence/equivalence-entry-cold.log"
+        },
+        {
+          "invocation": "entry",
+          "mode": "warm",
+          "command": [
+            "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+            "translate",
+            "-j",
+            "1",
+            "--out-dir",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_producer_equivalence/equivalence",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_producer_equivalence/box.x"
+          ],
+          "status": 0,
+          "generated_files": [
+            "_x2c_module_202A7687.h",
+            "box.c",
+            "box.h",
+            "box.xi",
+            "box.xnm",
+            "box/_x2c_module_A5D3BFD4.h",
+            "box/child.c",
+            "box/child.h",
+            "box/child.xi",
+            "box/child.xnm",
+            "box/child/_x2c_module_FA34F676.h",
+            "box/child/value.c",
+            "box/child/value.h",
+            "box/child/value.xi",
+            "box/child/value.xnm"
+          ],
+          "same_generated_code": true,
+          "different_files": [],
+          "log": "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_producer_equivalence/equivalence-entry-warm.log"
+        },
+        {
+          "invocation": "entry",
+          "mode": "executable",
+          "command": [
+            "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+            "build",
+            "-j",
+            "1",
+            "--output",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_producer_equivalence/equivalence-entry",
+            "--build-dir",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_producer_equivalence/build-entry",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_producer_equivalence/box.x"
+          ],
+          "status": 0,
+          "log": "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_producer_equivalence/equivalence-entry-build.log",
+          "run_status": 0
+        },
+        {
+          "invocation": "member",
+          "mode": "cold",
+          "command": [
+            "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+            "translate",
+            "-j",
+            "1",
+            "--out-dir",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_producer_equivalence/equivalence",
+            "--no-interfaces",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_producer_equivalence/box/child/value.x"
+          ],
+          "status": 0,
+          "generated_files": [
+            "_x2c_module_202A7687.h",
+            "box.c",
+            "box.h",
+            "box.xi",
+            "box.xnm",
+            "box/_x2c_module_A5D3BFD4.h",
+            "box/child.c",
+            "box/child.h",
+            "box/child.xi",
+            "box/child.xnm",
+            "box/child/_x2c_module_FA34F676.h",
+            "box/child/value.c",
+            "box/child/value.h",
+            "box/child/value.xi",
+            "box/child/value.xnm"
+          ],
+          "same_generated_code": true,
+          "different_files": [],
+          "log": "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_producer_equivalence/equivalence-member-cold.log"
+        },
+        {
+          "invocation": "member",
+          "mode": "warm",
+          "command": [
+            "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+            "translate",
+            "-j",
+            "1",
+            "--out-dir",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_producer_equivalence/equivalence",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_producer_equivalence/box/child/value.x"
+          ],
+          "status": 0,
+          "generated_files": [
+            "_x2c_module_202A7687.h",
+            "box.c",
+            "box.h",
+            "box.xi",
+            "box.xnm",
+            "box/_x2c_module_A5D3BFD4.h",
+            "box/child.c",
+            "box/child.h",
+            "box/child.xi",
+            "box/child.xnm",
+            "box/child/_x2c_module_FA34F676.h",
+            "box/child/value.c",
+            "box/child/value.h",
+            "box/child/value.xi",
+            "box/child/value.xnm"
+          ],
+          "same_generated_code": true,
+          "different_files": [],
+          "log": "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_producer_equivalence/equivalence-member-warm.log"
+        },
+        {
+          "invocation": "member",
+          "mode": "executable",
+          "command": [
+            "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+            "build",
+            "-j",
+            "1",
+            "--output",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_producer_equivalence/equivalence-member",
+            "--build-dir",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_producer_equivalence/build-member",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_producer_equivalence/box/child/value.x"
+          ],
+          "status": 0,
+          "log": "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_producer_equivalence/equivalence-member-build.log",
+          "run_status": 0
+        }
+      ],
+      "repeat_statuses": []
+    },
+    {
+      "name": "nested_entry_member_native_header_equivalence",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_native_header_equivalence/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_native_header_equivalence/build",
+        "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_native_header_equivalence/box.x"
+      ],
+      "build_status": 0,
+      "log": "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_native_header_equivalence/build.log",
+      "expected": "executable exit 0",
+      "run_status": 0,
+      "passed": true,
+      "member_equivalence": [
+        {
+          "invocation": "entry",
+          "mode": "cold",
+          "command": [
+            "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+            "translate",
+            "-j",
+            "1",
+            "--out-dir",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_native_header_equivalence/equivalence",
+            "--no-interfaces",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_native_header_equivalence/box.x"
+          ],
+          "status": 0,
+          "generated_files": [
+            "_x2c_module_202A7687.h",
+            "box.c",
+            "box.h",
+            "box.xi",
+            "box.xnm",
+            "box/_x2c_module_A5D3BFD4.h",
+            "box/child.c",
+            "box/child.h",
+            "box/child.xi",
+            "box/child.xnm",
+            "box/child/_x2c_module_FA34F676.h",
+            "box/child/value.c",
+            "box/child/value.h",
+            "box/child/value.xi",
+            "box/child/value.xnm"
+          ],
+          "same_generated_code": true,
+          "different_files": [],
+          "log": "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_native_header_equivalence/equivalence-entry-cold.log"
+        },
+        {
+          "invocation": "entry",
+          "mode": "warm",
+          "command": [
+            "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+            "translate",
+            "-j",
+            "1",
+            "--out-dir",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_native_header_equivalence/equivalence",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_native_header_equivalence/box.x"
+          ],
+          "status": 0,
+          "generated_files": [
+            "_x2c_module_202A7687.h",
+            "box.c",
+            "box.h",
+            "box.xi",
+            "box.xnm",
+            "box/_x2c_module_A5D3BFD4.h",
+            "box/child.c",
+            "box/child.h",
+            "box/child.xi",
+            "box/child.xnm",
+            "box/child/_x2c_module_FA34F676.h",
+            "box/child/value.c",
+            "box/child/value.h",
+            "box/child/value.xi",
+            "box/child/value.xnm"
+          ],
+          "same_generated_code": true,
+          "different_files": [],
+          "log": "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_native_header_equivalence/equivalence-entry-warm.log"
+        },
+        {
+          "invocation": "entry",
+          "mode": "executable",
+          "command": [
+            "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+            "build",
+            "-j",
+            "1",
+            "--output",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_native_header_equivalence/equivalence-entry",
+            "--build-dir",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_native_header_equivalence/build-entry",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_native_header_equivalence/box.x"
+          ],
+          "status": 0,
+          "log": "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_native_header_equivalence/equivalence-entry-build.log",
+          "run_status": 0
+        },
+        {
+          "invocation": "member",
+          "mode": "cold",
+          "command": [
+            "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+            "translate",
+            "-j",
+            "1",
+            "--out-dir",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_native_header_equivalence/equivalence",
+            "--no-interfaces",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_native_header_equivalence/box/child/value.x"
+          ],
+          "status": 0,
+          "generated_files": [
+            "_x2c_module_202A7687.h",
+            "box.c",
+            "box.h",
+            "box.xi",
+            "box.xnm",
+            "box/_x2c_module_A5D3BFD4.h",
+            "box/child.c",
+            "box/child.h",
+            "box/child.xi",
+            "box/child.xnm",
+            "box/child/_x2c_module_FA34F676.h",
+            "box/child/value.c",
+            "box/child/value.h",
+            "box/child/value.xi",
+            "box/child/value.xnm"
+          ],
+          "same_generated_code": true,
+          "different_files": [],
+          "log": "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_native_header_equivalence/equivalence-member-cold.log"
+        },
+        {
+          "invocation": "member",
+          "mode": "warm",
+          "command": [
+            "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+            "translate",
+            "-j",
+            "1",
+            "--out-dir",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_native_header_equivalence/equivalence",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_native_header_equivalence/box/child/value.x"
+          ],
+          "status": 0,
+          "generated_files": [
+            "_x2c_module_202A7687.h",
+            "box.c",
+            "box.h",
+            "box.xi",
+            "box.xnm",
+            "box/_x2c_module_A5D3BFD4.h",
+            "box/child.c",
+            "box/child.h",
+            "box/child.xi",
+            "box/child.xnm",
+            "box/child/_x2c_module_FA34F676.h",
+            "box/child/value.c",
+            "box/child/value.h",
+            "box/child/value.xi",
+            "box/child/value.xnm"
+          ],
+          "same_generated_code": true,
+          "different_files": [],
+          "log": "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_native_header_equivalence/equivalence-member-warm.log"
+        },
+        {
+          "invocation": "member",
+          "mode": "executable",
+          "command": [
+            "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+            "build",
+            "-j",
+            "1",
+            "--output",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_native_header_equivalence/equivalence-member",
+            "--build-dir",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_native_header_equivalence/build-member",
+            "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_native_header_equivalence/box/child/value.x"
+          ],
+          "status": 0,
+          "log": "/tmp/x2c-module-probes-za4z56xq/nested_entry_member_native_header_equivalence/equivalence-member-build.log",
+          "run_status": 0
+        }
+      ],
+      "repeat_statuses": []
+    },
+    {
+      "name": "native_meta_sibling_private_rejected",
+      "command": [
+        "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/x2c",
+        "build",
+        "-j",
+        "1",
+        "--output",
+        "/tmp/x2c-module-probes-za4z56xq/native_meta_sibling_private_rejected/program",
+        "--build-dir",
+        "/tmp/x2c-module-probes-za4z56xq/native_meta_sibling_private_rejected/build",
+        "/tmp/x2c-module-probes-za4z56xq/native_meta_sibling_private_rejected/box.x",
+        "/tmp/x2c-module-probes-za4z56xq/native_meta_sibling_private_rejected/main.x"
+      ],
+      "build_status": 1,
+      "log": "/tmp/x2c-module-probes-za4z56xq/native_meta_sibling_private_rejected/build.log",
+      "expected": "build rejection",
+      "passed": true
+    }
+  ]
+}

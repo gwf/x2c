@@ -5,87 +5,158 @@
 #ifndef __GUARD_0x8AA1709E__
 #define __GUARD_0x8AA1709E__
 
+#pragma x2c_region_begin u_8AA1709E_5F68C4DF_h_0
 #include "x2c.h"
+#pragma x2c_region_end u_8AA1709E_5F68C4DF_h_0
+#pragma x2c_region_begin u_8AA1709E_5F68C4DF_h_1
 #include "compiler.h"
+#pragma x2c_region_end u_8AA1709E_5F68C4DF_h_1
+#pragma x2c_region_begin u_8AA1709E_5F68C4DF_h_2
 #include "grammar.h"
+#pragma x2c_region_end u_8AA1709E_5F68C4DF_h_2
+#pragma x2c_region_begin u_8AA1709E_5F68C4DF_h_3
 #include "_x2c_module_6922FA3C.h"
+#pragma x2c_region_end u_8AA1709E_5F68C4DF_h_3
+#pragma x2c_region_begin u_8AA1709E_5F68C4DF_h_4
 #include "meta-group.h"
+#pragma x2c_region_end u_8AA1709E_5F68C4DF_h_4
+#pragma x2c_region_begin u_8AA1709E_5F68C4DF_h_5
+#include "meta-project.h"
+#pragma x2c_region_end u_8AA1709E_5F68C4DF_h_5
+#pragma x2c_region_begin u_8AA1709E_5F68C4DF_h_6
 #include "meta-sdk.h"
+#pragma x2c_region_end u_8AA1709E_5F68C4DF_h_6
+#pragma x2c_region_begin u_8AA1709E_5F68C4DF_h_7
 #include "meta.h"
+#pragma x2c_region_end u_8AA1709E_5F68C4DF_h_7
+#pragma x2c_region_begin u_8AA1709E_5F68C4DF_h_8
 #include "stage.h"
+#pragma x2c_region_end u_8AA1709E_5F68C4DF_h_8
+#pragma x2c_region_begin u_8AA1709E_5F68C4DF_h_9
 #include "utils.h"
+#pragma x2c_region_end u_8AA1709E_5F68C4DF_h_9
+#pragma x2c_region_begin u_8AA1709E_5F68C4DF_h_10
 #include <dlfcn.h>
+#pragma x2c_region_end u_8AA1709E_5F68C4DF_h_10
+#pragma x2c_region_begin u_8AA1709E_5F68C4DF_h_11
 #include <errno.h>
+#pragma x2c_region_end u_8AA1709E_5F68C4DF_h_11
+#pragma x2c_region_begin u_8AA1709E_5F68C4DF_h_12
 #include <stdio.h>
+#pragma x2c_region_end u_8AA1709E_5F68C4DF_h_12
+#pragma x2c_region_begin u_8AA1709E_5F68C4DF_h_13
 #include <stdlib.h>
+#pragma x2c_region_end u_8AA1709E_5F68C4DF_h_13
+#pragma x2c_region_begin u_8AA1709E_5F68C4DF_h_14
 #include <string.h>
+#pragma x2c_region_end u_8AA1709E_5F68C4DF_h_14
+#pragma x2c_region_begin u_8AA1709E_5F68C4DF_h_15
 void Compiler_install_meta_function(Compiler c, List fn, Token marker);
-
+#pragma x2c_region_end u_8AA1709E_5F68C4DF_h_15
+#pragma x2c_region_begin u_8AA1709E_5F68C4DF_h_16
 void Compiler_install_collected_meta_function(Compiler c, List declaration, Token marker);
-
+#pragma x2c_region_end u_8AA1709E_5F68C4DF_h_16
+#pragma x2c_region_begin u_8AA1709E_5F68C4DF_h_17
 int Compiler_matches_macro(Compiler c, MacroMatcher * matcher, List code);
-
+#pragma x2c_region_end u_8AA1709E_5F68C4DF_h_17
+#pragma x2c_region_begin u_8AA1709E_5F68C4DF_h_18
 void Compiler_install_meta_declaration(Compiler c, List declaration, Token marker);
-
+#pragma x2c_region_end u_8AA1709E_5F68C4DF_h_18
+#pragma x2c_region_begin u_8AA1709E_5F68C4DF_h_19
+void Compiler_restore_native_meta_source(Compiler c, List node, Token marker);
+#pragma x2c_region_end u_8AA1709E_5F68C4DF_h_19
+#pragma x2c_region_begin u_8AA1709E_5F68C4DF_h_20
 List Compiler_evaluate_meta_expression(Compiler c, List expression, Token site);
-
+#pragma x2c_region_end u_8AA1709E_5F68C4DF_h_20
+#pragma x2c_region_begin u_8AA1709E_5F68C4DF_h_21
 List Compiler_evaluate_meta_statement(Compiler c, List expression, AstPos context, Token site);
-
+#pragma x2c_region_end u_8AA1709E_5F68C4DF_h_21
+#pragma x2c_region_begin u_8AA1709E_5F68C4DF_h_22
 Var Compiler_run_meta_call(Compiler c, List expression, Token site, int slot);
-
+#pragma x2c_region_end u_8AA1709E_5F68C4DF_h_22
+#pragma x2c_region_begin u_8AA1709E_5F68C4DF_h_23
 Var Compiler_apply_meta_function(Compiler c, String name, List arguments, Token site);
-
+#pragma x2c_region_end u_8AA1709E_5F68C4DF_h_23
+#pragma x2c_region_begin u_8AA1709E_5F68C4DF_h_24
+String Compiler_meta_definition_provider(Compiler c, String name);
+#pragma x2c_region_end u_8AA1709E_5F68C4DF_h_24
+#pragma x2c_region_begin u_8AA1709E_5F68C4DF_h_25
 void Compiler_record_project_meta_effect(Compiler c, List declaration, Token marker);
-
+#pragma x2c_region_end u_8AA1709E_5F68C4DF_h_25
+#pragma x2c_region_begin u_8AA1709E_5F68C4DF_h_26
 void Compiler_install_project_meta_effect(Compiler c, List row);
-
+#pragma x2c_region_end u_8AA1709E_5F68C4DF_h_26
+#pragma x2c_region_begin u_8AA1709E_5F68C4DF_h_27
 int Compiler_bind_project_meta(Compiler c, String name);
-
+#pragma x2c_region_end u_8AA1709E_5F68C4DF_h_27
+#pragma x2c_region_begin u_8AA1709E_5F68C4DF_h_28
 int Compiler_project_meta_uses_linked(Compiler c, String name, String provider);
-
+#pragma x2c_region_end u_8AA1709E_5F68C4DF_h_28
+#pragma x2c_region_begin u_8AA1709E_5F68C4DF_h_29
 void Compiler_record_native_meta_effect(Compiler c, List declaration, Token marker);
-
+#pragma x2c_region_end u_8AA1709E_5F68C4DF_h_29
+#pragma x2c_region_begin u_8AA1709E_5F68C4DF_h_30
 void Compiler_install_native_meta_effects(Compiler c, Map globs);
-
+#pragma x2c_region_end u_8AA1709E_5F68C4DF_h_30
+#pragma x2c_region_begin u_8AA1709E_5F68C4DF_h_31
 int Compiler_bind_native_meta(Compiler c, String name);
-
+#pragma x2c_region_end u_8AA1709E_5F68C4DF_h_31
+#pragma x2c_region_begin u_8AA1709E_5F68C4DF_h_32
 void Compiler_install_native_meta_function(Compiler c, List declaration, Token marker);
-
+#pragma x2c_region_end u_8AA1709E_5F68C4DF_h_32
+#pragma x2c_region_begin u_8AA1709E_5F68C4DF_h_33
 int Compiler_native_meta_accepts(Compiler c, Var function, List signature);
-
+#pragma x2c_region_end u_8AA1709E_5F68C4DF_h_33
+#pragma x2c_region_begin u_8AA1709E_5F68C4DF_h_34
 String Compiler_native_meta_module(Compiler c, String name, Type * type);
-
+#pragma x2c_region_end u_8AA1709E_5F68C4DF_h_34
+#pragma x2c_region_begin u_8AA1709E_5F68C4DF_h_35
 List Compiler_native_meta_targets(List paths);
-
+#pragma x2c_region_end u_8AA1709E_5F68C4DF_h_35
+#pragma x2c_region_begin u_8AA1709E_5F68C4DF_h_36
 int Compiler_bind_linked_meta(Compiler c, List fn, Type type);
-
+#pragma x2c_region_end u_8AA1709E_5F68C4DF_h_36
+#pragma x2c_region_begin u_8AA1709E_5F68C4DF_h_37
 int links_meta_function(String name);
-
+#pragma x2c_region_end u_8AA1709E_5F68C4DF_h_37
+#pragma x2c_region_begin u_8AA1709E_5F68C4DF_h_38
 List linked_meta_provider_source(String provider);
-
+#pragma x2c_region_end u_8AA1709E_5F68C4DF_h_38
+#pragma x2c_region_begin u_8AA1709E_5F68C4DF_h_39
 Map Compiler_compiler_targets(void);
-
+#pragma x2c_region_end u_8AA1709E_5F68C4DF_h_39
+#pragma x2c_region_begin u_8AA1709E_5F68C4DF_h_40
 void Compiler_select_native_modules(List paths);
-
+#pragma x2c_region_end u_8AA1709E_5F68C4DF_h_40
+#pragma x2c_region_begin u_8AA1709E_5F68C4DF_h_41
 void Compiler_select_package_module(Compiler c, String name, String root, Token token);
-
+#pragma x2c_region_end u_8AA1709E_5F68C4DF_h_41
+#pragma x2c_region_begin u_8AA1709E_5F68C4DF_h_42
 String Compiler_load_native_module(String path);
-
+#pragma x2c_region_end u_8AA1709E_5F68C4DF_h_42
+#pragma x2c_region_begin u_8AA1709E_5F68C4DF_h_43
 void Compiler_preload_native_module(String path);
-
+#pragma x2c_region_end u_8AA1709E_5F68C4DF_h_43
+#pragma x2c_region_begin u_8AA1709E_5F68C4DF_h_44
 void Compiler_add_native_module(String path, Map(* entry)(void));
-
+#pragma x2c_region_end u_8AA1709E_5F68C4DF_h_44
+#pragma x2c_region_begin u_8AA1709E_5F68C4DF_h_45
 int Compiler_native_module_loaded(String path);
-
+#pragma x2c_region_end u_8AA1709E_5F68C4DF_h_45
+#pragma x2c_region_begin u_8AA1709E_5F68C4DF_h_46
 Map Compiler_native_module_targets(String path);
-
+#pragma x2c_region_end u_8AA1709E_5F68C4DF_h_46
+#pragma x2c_region_begin u_8AA1709E_5F68C4DF_h_47
 int Compiler_supplies_native_meta(String name);
-
+#pragma x2c_region_end u_8AA1709E_5F68C4DF_h_47
+#pragma x2c_region_begin u_8AA1709E_5F68C4DF_h_48
 void x2c_register_extension(const char * name, Map(* targets)(void));
-
+#pragma x2c_region_end u_8AA1709E_5F68C4DF_h_48
+#pragma x2c_region_begin u_8AA1709E_5F68C4DF_h_49
 int Compiler_links_extension(String name);
-
+#pragma x2c_region_end u_8AA1709E_5F68C4DF_h_49
+#pragma x2c_region_begin u_8AA1709E_5F68C4DF_h_50
 String Compiler_extension_archive(void);
-
+#pragma x2c_region_end u_8AA1709E_5F68C4DF_h_50
 
 #endif /* __GUARD_0x8AA1709E__ */

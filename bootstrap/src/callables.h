@@ -5,36 +5,71 @@
 #ifndef __GUARD_0xB4B5E4BA__
 #define __GUARD_0xB4B5E4BA__
 
+#pragma x2c_region_begin u_B4B5E4BA_C1BA66BB_h_0
 #include "x2c.h"
+#pragma x2c_region_end u_B4B5E4BA_C1BA66BB_h_0
+#pragma x2c_region_begin u_B4B5E4BA_C1BA66BB_h_1
 #include "compiler.h"
+#pragma x2c_region_end u_B4B5E4BA_C1BA66BB_h_1
+#pragma x2c_region_begin u_B4B5E4BA_C1BA66BB_h_2
 #include "adapter-memo.h"
+#pragma x2c_region_end u_B4B5E4BA_C1BA66BB_h_2
+#pragma x2c_region_begin u_B4B5E4BA_C1BA66BB_h_3
 #include "ast-rewrite.h"
+#pragma x2c_region_end u_B4B5E4BA_C1BA66BB_h_3
+#pragma x2c_region_begin u_B4B5E4BA_C1BA66BB_h_4
 #include "meta.h"
+#pragma x2c_region_end u_B4B5E4BA_C1BA66BB_h_4
+#pragma x2c_region_begin u_B4B5E4BA_C1BA66BB_h_5
 #include "grammar.h"
+#pragma x2c_region_end u_B4B5E4BA_C1BA66BB_h_5
+#pragma x2c_region_begin u_B4B5E4BA_C1BA66BB_h_6
 #include "ast.h"
+#pragma x2c_region_end u_B4B5E4BA_C1BA66BB_h_6
+#pragma x2c_region_begin u_B4B5E4BA_C1BA66BB_h_7
 #include "type.h"
+#pragma x2c_region_end u_B4B5E4BA_C1BA66BB_h_7
+#pragma x2c_region_begin u_B4B5E4BA_C1BA66BB_h_8
 #include "parse.h"
+#pragma x2c_region_end u_B4B5E4BA_C1BA66BB_h_8
+#pragma x2c_region_begin u_B4B5E4BA_C1BA66BB_h_9
 #include "expressions.h"
+#pragma x2c_region_end u_B4B5E4BA_C1BA66BB_h_9
+#pragma x2c_region_begin u_B4B5E4BA_C1BA66BB_h_10
 #include "protocol.h"
+#pragma x2c_region_end u_B4B5E4BA_C1BA66BB_h_10
+#pragma x2c_region_begin u_B4B5E4BA_C1BA66BB_h_11
 #include "transform.h"
+#pragma x2c_region_end u_B4B5E4BA_C1BA66BB_h_11
+#pragma x2c_region_begin u_B4B5E4BA_C1BA66BB_h_12
 #include "lambdas.h"
+#pragma x2c_region_end u_B4B5E4BA_C1BA66BB_h_12
+#pragma x2c_region_begin u_B4B5E4BA_C1BA66BB_h_13
 List Compiler_lower_lambda_expr(Compiler c, List expression);
-
+#pragma x2c_region_end u_B4B5E4BA_C1BA66BB_h_13
+#pragma x2c_region_begin u_B4B5E4BA_C1BA66BB_h_14
 List Compiler_capture_environment(Compiler c, List name, List fields);
-
+#pragma x2c_region_end u_B4B5E4BA_C1BA66BB_h_14
+#pragma x2c_region_begin u_B4B5E4BA_C1BA66BB_h_15
 List Compiler_prepare_lambda_cells(Compiler c, List declarator, List body);
-
+#pragma x2c_region_end u_B4B5E4BA_C1BA66BB_h_15
+#pragma x2c_region_begin u_B4B5E4BA_C1BA66BB_h_16
 List Compiler_prepend_setup(Compiler c, List body, List setup);
-
+#pragma x2c_region_end u_B4B5E4BA_C1BA66BB_h_16
+#pragma x2c_region_begin u_B4B5E4BA_C1BA66BB_h_17
 List Compiler_lift_func_expression(Compiler c, List expression);
-
+#pragma x2c_region_end u_B4B5E4BA_C1BA66BB_h_17
+#pragma x2c_region_begin u_B4B5E4BA_C1BA66BB_h_18
 List Compiler_maybe_adapt_func_arg(Compiler c, List argument, List expected_type);
-
+#pragma x2c_region_end u_B4B5E4BA_C1BA66BB_h_18
+#pragma x2c_region_begin u_B4B5E4BA_C1BA66BB_h_19
 List Compiler_func_signature(Compiler c, Type type);
-
+#pragma x2c_region_end u_B4B5E4BA_C1BA66BB_h_19
+#pragma x2c_region_begin u_B4B5E4BA_C1BA66BB_h_20
 List Compiler_lower_typed_adapter_expr(Compiler c, List expression);
-
+#pragma x2c_region_end u_B4B5E4BA_C1BA66BB_h_20
+#pragma x2c_region_begin u_B4B5E4BA_C1BA66BB_h_21
 List Compiler_adapt_lambda_arg(Compiler c, List argument, List expected_type);
-
+#pragma x2c_region_end u_B4B5E4BA_C1BA66BB_h_21
 
 #endif /* __GUARD_0xB4B5E4BA__ */

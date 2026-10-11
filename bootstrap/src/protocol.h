@@ -5,58 +5,97 @@
 #ifndef __GUARD_0xD9CA694D__
 #define __GUARD_0xD9CA694D__
 
+#pragma x2c_region_begin u_D9CA694D_C50A8E98_h_0
 #include "x2c.h"
+#pragma x2c_region_end u_D9CA694D_C50A8E98_h_0
+#pragma x2c_region_begin u_D9CA694D_C50A8E98_h_1
 #include "compiler.h"
+#pragma x2c_region_end u_D9CA694D_C50A8E98_h_1
+#pragma x2c_region_begin u_D9CA694D_C50A8E98_h_2
 #include "grammar.h"
+#pragma x2c_region_end u_D9CA694D_C50A8E98_h_2
+#pragma x2c_region_begin u_D9CA694D_C50A8E98_h_3
 #include "adapter-memo.h"
+#pragma x2c_region_end u_D9CA694D_C50A8E98_h_3
+#pragma x2c_region_begin u_D9CA694D_C50A8E98_h_4
 #include <string.h>
+#pragma x2c_region_end u_D9CA694D_C50A8E98_h_4
+#pragma x2c_region_begin u_D9CA694D_C50A8E98_h_5
 #include "collect.h"
+#pragma x2c_region_end u_D9CA694D_C50A8E98_h_5
+#pragma x2c_region_begin u_D9CA694D_C50A8E98_h_6
 #include "expressions.h"
+#pragma x2c_region_end u_D9CA694D_C50A8E98_h_6
+#pragma x2c_region_begin u_D9CA694D_C50A8E98_h_7
 #include "parse.h"
+#pragma x2c_region_end u_D9CA694D_C50A8E98_h_7
+#pragma x2c_region_begin u_D9CA694D_C50A8E98_h_8
 #include "meta.h"
+#pragma x2c_region_end u_D9CA694D_C50A8E98_h_8
+#pragma x2c_region_begin u_D9CA694D_C50A8E98_h_9
 String Compiler_reverse_converter_spelling(Compiler c, String base_name, String infix, String participant);
-
+#pragma x2c_region_end u_D9CA694D_C50A8E98_h_9
+#pragma x2c_region_begin u_D9CA694D_C50A8E98_h_10
 List Compiler_parse_protocol_declaration(Compiler c);
-
+#pragma x2c_region_end u_D9CA694D_C50A8E98_h_10
+#pragma x2c_region_begin u_D9CA694D_C50A8E98_h_11
 List Compiler_publish_protocol_node(Compiler c, List node, Token participant_token, Token representation_token);
-
+#pragma x2c_region_end u_D9CA694D_C50A8E98_h_11
+#pragma x2c_region_begin u_D9CA694D_C50A8E98_h_12
 void Compiler_resolve_protocols(Compiler c);
-
+#pragma x2c_region_end u_D9CA694D_C50A8E98_h_12
 #define PROTOCOL_VARIABLE 1
 #define PROTOCOL_VARIADIC 2
+#pragma x2c_region_begin u_D9CA694D_C50A8E98_h_13
 List Compiler_protocol_members_for(Compiler c, Type participant, Type base);
-
+#pragma x2c_region_end u_D9CA694D_C50A8E98_h_13
+#pragma x2c_region_begin u_D9CA694D_C50A8E98_h_14
 List Compiler_protocol_member_names(Compiler c, Type participant);
-
+#pragma x2c_region_end u_D9CA694D_C50A8E98_h_14
+#pragma x2c_region_begin u_D9CA694D_C50A8E98_h_15
 int Compiler_protocol_rejects_direct_member(Compiler c, Type participant, String member);
-
+#pragma x2c_region_end u_D9CA694D_C50A8E98_h_15
+#pragma x2c_region_begin u_D9CA694D_C50A8E98_h_16
 void Compiler_dump_conformance(Compiler c, Map globs);
-
+#pragma x2c_region_end u_D9CA694D_C50A8E98_h_16
+#pragma x2c_region_begin u_D9CA694D_C50A8E98_h_17
 Symbol Compiler_operator_member(Compiler c, Symbol op);
-
+#pragma x2c_region_end u_D9CA694D_C50A8E98_h_17
+#pragma x2c_region_begin u_D9CA694D_C50A8E98_h_18
 Symbol Compiler_derived_member(Compiler c, Symbol op);
-
+#pragma x2c_region_end u_D9CA694D_C50A8E98_h_18
+#pragma x2c_region_begin u_D9CA694D_C50A8E98_h_19
 List Compiler_resolve_protocol_member(Compiler c, Type participant, String member_name);
-
+#pragma x2c_region_end u_D9CA694D_C50A8E98_h_19
+#pragma x2c_region_begin u_D9CA694D_C50A8E98_h_20
 List Compiler_wrapper_function(Compiler c, Type result, List binding, List params, List body);
-
+#pragma x2c_region_end u_D9CA694D_C50A8E98_h_20
+#pragma x2c_region_begin u_D9CA694D_C50A8E98_h_21
 List Compiler_forward_parameters(Compiler c, List types);
-
+#pragma x2c_region_end u_D9CA694D_C50A8E98_h_21
+#pragma x2c_region_begin u_D9CA694D_C50A8E98_h_22
 String Compiler_protocol_update_helper(Compiler c, Type participant, String member, int postfix);
-
+#pragma x2c_region_end u_D9CA694D_C50A8E98_h_22
+#pragma x2c_region_begin u_D9CA694D_C50A8E98_h_23
 List Compiler_discard_helper(Compiler c, List binding, Type signature, String stem, int which);
-
+#pragma x2c_region_end u_D9CA694D_C50A8E98_h_23
+#pragma x2c_region_begin u_D9CA694D_C50A8E98_h_24
 List Compiler_protocol_discard_helper(Compiler c, Type participant, String member, int which);
-
+#pragma x2c_region_end u_D9CA694D_C50A8E98_h_24
+#pragma x2c_region_begin u_D9CA694D_C50A8E98_h_25
 List Compiler_generate_protocol_adapters(Compiler c, List ast);
-
+#pragma x2c_region_end u_D9CA694D_C50A8E98_h_25
+#pragma x2c_region_begin u_D9CA694D_C50A8E98_h_26
 void Compiler_install_generated_protocol_symbols(Compiler c);
-
+#pragma x2c_region_end u_D9CA694D_C50A8E98_h_26
+#pragma x2c_region_begin u_D9CA694D_C50A8E98_h_27
 int Compiler_native_protocol_alias(Compiler c, String name);
-
+#pragma x2c_region_end u_D9CA694D_C50A8E98_h_27
+#pragma x2c_region_begin u_D9CA694D_C50A8E98_h_28
 void Compiler_record_source_typedef(Compiler c, String name, List declaration, int private);
-
+#pragma x2c_region_end u_D9CA694D_C50A8E98_h_28
+#pragma x2c_region_begin u_D9CA694D_C50A8E98_h_29
 void Compiler_rebuild_protocols(Compiler c, Map symbols);
-
+#pragma x2c_region_end u_D9CA694D_C50A8E98_h_29
 
 #endif /* __GUARD_0xD9CA694D__ */

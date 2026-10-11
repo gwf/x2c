@@ -5,52 +5,112 @@
 #ifndef __GUARD_0xBF7298EC__
 #define __GUARD_0xBF7298EC__
 
+#pragma x2c_region_begin u_BF7298EC_F234C8B7_h_0
 #include "x2c.h"
+#pragma x2c_region_end u_BF7298EC_F234C8B7_h_0
+#pragma x2c_region_begin u_BF7298EC_F234C8B7_h_1
 #include "compiler.h"
+#pragma x2c_region_end u_BF7298EC_F234C8B7_h_1
 #if defined(_WIN32) || defined(__CYGWIN__)
 #define X2C_NATIVE_MODULES 0
 #else
 #define X2C_NATIVE_MODULES 1
 #endif
+#pragma x2c_region_begin u_BF7298EC_F234C8B7_h_2
 #include "grammar.h"
+#pragma x2c_region_end u_BF7298EC_F234C8B7_h_2
+#pragma x2c_region_begin u_BF7298EC_F234C8B7_h_3
 #include "ast-rewrite.h"
+#pragma x2c_region_end u_BF7298EC_F234C8B7_h_3
+#pragma x2c_region_begin u_BF7298EC_F234C8B7_h_4
 #include "type.h"
+#pragma x2c_region_end u_BF7298EC_F234C8B7_h_4
+#pragma x2c_region_begin u_BF7298EC_F234C8B7_h_5
 #include "generate.h"
+#pragma x2c_region_end u_BF7298EC_F234C8B7_h_5
+#pragma x2c_region_begin u_BF7298EC_F234C8B7_h_6
 #include "_x2c_module_6922FA3C.h"
+#pragma x2c_region_end u_BF7298EC_F234C8B7_h_6
+#pragma x2c_region_begin u_BF7298EC_F234C8B7_h_7
 #include "script.h"
+#pragma x2c_region_end u_BF7298EC_F234C8B7_h_7
+#pragma x2c_region_begin u_BF7298EC_F234C8B7_h_8
 #include "toolchain.h"
+#pragma x2c_region_end u_BF7298EC_F234C8B7_h_8
+#pragma x2c_region_begin u_BF7298EC_F234C8B7_h_9
 #include "transform.h"
+#pragma x2c_region_end u_BF7298EC_F234C8B7_h_9
+#pragma x2c_region_begin u_BF7298EC_F234C8B7_h_10
 #include "utils.h"
+#pragma x2c_region_end u_BF7298EC_F234C8B7_h_10
+#pragma x2c_region_begin u_BF7298EC_F234C8B7_h_11
+#include "json.h"
+#pragma x2c_region_end u_BF7298EC_F234C8B7_h_11
+#pragma x2c_region_begin u_BF7298EC_F234C8B7_h_12
 #include <unistd.h>
+#pragma x2c_region_end u_BF7298EC_F234C8B7_h_12
+#pragma x2c_region_begin u_BF7298EC_F234C8B7_h_13
 void Compiler_use_meta_toolchain(String cc, String include_dir);
-
+#pragma x2c_region_end u_BF7298EC_F234C8B7_h_13
+#pragma x2c_region_begin u_BF7298EC_F234C8B7_h_14
 String Compiler_meta_cc(String * include_dir);
-
+#pragma x2c_region_end u_BF7298EC_F234C8B7_h_14
+#pragma x2c_region_begin u_BF7298EC_F234C8B7_h_15
 String Compiler_meta_cc_identity(String cc);
-
+#pragma x2c_region_end u_BF7298EC_F234C8B7_h_15
+#pragma x2c_region_begin u_BF7298EC_F234C8B7_h_16
 String Compiler_meta_cc_run(List arguments, String directory);
-
+#pragma x2c_region_end u_BF7298EC_F234C8B7_h_16
+#pragma x2c_region_begin u_BF7298EC_F234C8B7_h_17
 void Compiler_stage_meta_in_process(void);
-
+#pragma x2c_region_end u_BF7298EC_F234C8B7_h_17
+#pragma x2c_region_begin u_BF7298EC_F234C8B7_h_18
 int Compiler_groups_meta(Compiler c);
-
+#pragma x2c_region_end u_BF7298EC_F234C8B7_h_18
+#pragma x2c_region_begin u_BF7298EC_F234C8B7_h_19
 void Compiler_group_meta_function(Compiler c, List fn);
-
+#pragma x2c_region_end u_BF7298EC_F234C8B7_h_19
+#pragma x2c_region_begin u_BF7298EC_F234C8B7_h_20
 int Compiler_meta_reaches_compile_time(Compiler c, Var node);
-
+#pragma x2c_region_end u_BF7298EC_F234C8B7_h_20
+#pragma x2c_region_begin u_BF7298EC_F234C8B7_h_21
 void Compiler_finish_meta_functions(Compiler c, Array nodes);
-
+#pragma x2c_region_end u_BF7298EC_F234C8B7_h_21
+#pragma x2c_region_begin u_BF7298EC_F234C8B7_h_22
+List Compiler_native_prefix_functions(Compiler c);
+#pragma x2c_region_end u_BF7298EC_F234C8B7_h_22
+#pragma x2c_region_begin u_BF7298EC_F234C8B7_h_23
+List Compiler_native_prefix_definitions(Compiler c);
+#pragma x2c_region_end u_BF7298EC_F234C8B7_h_23
+#pragma x2c_region_begin u_BF7298EC_F234C8B7_h_24
+List Compiler_native_prefix_values(Compiler c);
+#pragma x2c_region_end u_BF7298EC_F234C8B7_h_24
+#pragma x2c_region_begin u_BF7298EC_F234C8B7_h_25
 String Compiler_meta_call_missing(Compiler c, String name);
-
-void Compiler_refuse_meta_call(Compiler c, String name, Token site, String why);
-
+#pragma x2c_region_end u_BF7298EC_F234C8B7_h_25
+#pragma x2c_region_begin u_BF7298EC_F234C8B7_h_26
+_Noreturn void Compiler_refuse_meta_call(Compiler c, String name, Token site, String why);
+#pragma x2c_region_end u_BF7298EC_F234C8B7_h_26
+#pragma x2c_region_begin u_BF7298EC_F234C8B7_h_27
 void Compiler_refuse_record_meta_call(Compiler c, String name, Token site);
-
+#pragma x2c_region_end u_BF7298EC_F234C8B7_h_27
+#pragma x2c_region_begin u_BF7298EC_F234C8B7_h_28
 void Compiler_use_meta_build_directory(String directory, Array owners);
-
+#pragma x2c_region_end u_BF7298EC_F234C8B7_h_28
+#pragma x2c_region_begin u_BF7298EC_F234C8B7_h_29
 void Compiler_write_meta_build(Compiler c);
-
+#pragma x2c_region_end u_BF7298EC_F234C8B7_h_29
+#pragma x2c_region_begin u_BF7298EC_F234C8B7_h_30
+void Compiler_write_native_meta_prefix(Compiler c, int sequence, Map published);
+#pragma x2c_region_end u_BF7298EC_F234C8B7_h_30
+#pragma x2c_region_begin u_BF7298EC_F234C8B7_h_31
+void Compiler_write_native_meta_header(Compiler c, int sequence);
+#pragma x2c_region_end u_BF7298EC_F234C8B7_h_31
+#pragma x2c_region_begin u_BF7298EC_F234C8B7_h_32
+Map Compiler_use_native_meta_publications(Map published);
+#pragma x2c_region_end u_BF7298EC_F234C8B7_h_32
+#pragma x2c_region_begin u_BF7298EC_F234C8B7_h_33
 void Compiler_bind_meta_group(Compiler c, String name, Token site);
-
+#pragma x2c_region_end u_BF7298EC_F234C8B7_h_33
 
 #endif /* __GUARD_0xBF7298EC__ */

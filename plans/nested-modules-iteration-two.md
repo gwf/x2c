@@ -1,8 +1,9 @@
-> Status: active research implementation; private iteration two.
+> Status: reference; paused at Gary's request on 2026-10-11.
 > Initial timings are affected by host load and are not comparative evidence.
 > Starting candidate: ed1e83032b9bfc8073db5a6a79377e42eeb53b5d.
 > Original dev baseline: c09d9a917f4ab1afc072b3fb2ece71e7bb2a6e04.
-> Continue individual/private isolation. No adoption, push, PR, or integration.
+> Continue individual/private isolation. GitHub branch backup is authorized; adoption, PR and integration are not.
+> Current implementation and gaps: [integration handoff](nested-modules-integration-handoff.md).
 
 # Nested modules: second research iteration
 

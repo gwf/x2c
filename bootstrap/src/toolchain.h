@@ -9,6 +9,8 @@
 #include "cli.h"
 #include "path.h"
 #include "process.h"
+String native_projection_relative(String path, String directory);
+
 typedef struct Toolchain{
   String cc, ar, include_dir, runtime_lib;
   List cpp_args, cc_args, ld_args;
@@ -30,14 +32,8 @@ typedef struct ToolRun{
 }
 * ToolRun;
 
-#include <ctype.h>
-#include <errno.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include "report.h"
-#include "utils.h"
+String native_projection_helper(void);
+
 Toolchain toolchain_new(CliRequest request);
 
 Toolchain toolchain_meta(String cc);
@@ -51,6 +47,10 @@ void ToolAction_as_program(ToolAction action);
 ToolAction Toolchain_compile_action(Toolchain t, String source, String object, String depfile, List gen_dirs);
 
 ToolAction Toolchain_preprocess_action(Toolchain t, String source, String output, List gen_dirs);
+
+int Toolchain_project_native_source(Toolchain t, String source, List gen_dirs, String * projected, String * dependencies, String * errors);
+
+int Toolchain_project_native_initializer_source(Toolchain t, String source, List gen_dirs, String * projected, String * dependencies, String * errors);
 
 ToolAction Toolchain_archive_action(Toolchain t, String output, List objects);
 

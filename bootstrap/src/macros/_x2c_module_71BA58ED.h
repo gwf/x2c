@@ -2,72 +2,109 @@
 
 #pragma once
 
-#ifndef __GUARD_0x442C3713__
-#define __GUARD_0x442C3713__
+#ifndef __GUARD_0x71BA58ED__
+#define __GUARD_0x71BA58ED__
 
+#pragma x2c_region_begin u_71BA58ED_AD9D7580_h_0
 #include "x2c.h"
-#include "_x2c_module_6922FA3C.h"
+#pragma x2c_region_end u_71BA58ED_AD9D7580_h_0
+#pragma x2c_region_begin u_71BA58ED_AD9D7580_h_1
+#include "../_x2c_module_6922FA3C.h"
+#pragma x2c_region_end u_71BA58ED_AD9D7580_h_1
+#pragma x2c_region_begin u_71BA58ED_AD9D7580_h_2
 List Compiler_parse_macro_definition(Compiler c);
-
+#pragma x2c_region_end u_71BA58ED_AD9D7580_h_2
+#pragma x2c_region_begin u_71BA58ED_AD9D7580_h_3
+void Compiler_collect_signature_macro_definition(Compiler c);
+#pragma x2c_region_end u_71BA58ED_AD9D7580_h_3
+#pragma x2c_region_begin u_71BA58ED_AD9D7580_h_4
 Symbol _x2c_mod_6922FA3C_Compiler__result_kind_token(Compiler c, Token token);
-
+#pragma x2c_region_end u_71BA58ED_AD9D7580_h_4
+#pragma x2c_region_begin u_71BA58ED_AD9D7580_h_5
 void _x2c_mod_6922FA3C_Definition_naming(_x2c_mod_6922FA3C_Definition * d);
-
+#pragma x2c_region_end u_71BA58ED_AD9D7580_h_5
+#pragma x2c_region_begin u_71BA58ED_AD9D7580_h_6
 void _x2c_mod_6922FA3C_Definition_announce(_x2c_mod_6922FA3C_Definition * d);
-
+#pragma x2c_region_end u_71BA58ED_AD9D7580_h_6
+#pragma x2c_region_begin u_71BA58ED_AD9D7580_h_7
 void _x2c_mod_6922FA3C_Definition_body(_x2c_mod_6922FA3C_Definition * d);
-
+#pragma x2c_region_end u_71BA58ED_AD9D7580_h_7
+#pragma x2c_region_begin u_71BA58ED_AD9D7580_h_8
 List _x2c_mod_6922FA3C_Compiler__arrow_statement(Compiler c, int open);
-
+#pragma x2c_region_end u_71BA58ED_AD9D7580_h_8
+#pragma x2c_region_begin u_71BA58ED_AD9D7580_h_9
 void _x2c_mod_6922FA3C_Definition_finish(_x2c_mod_6922FA3C_Definition * d);
-
+#pragma x2c_region_end u_71BA58ED_AD9D7580_h_9
+#pragma x2c_region_begin u_71BA58ED_AD9D7580_h_10
 List _x2c_mod_6922FA3C_Definition_publish(_x2c_mod_6922FA3C_Definition * d);
-
+#pragma x2c_region_end u_71BA58ED_AD9D7580_h_10
+#pragma x2c_region_begin u_71BA58ED_AD9D7580_h_11
 List _x2c_mod_6922FA3C__hole(Atom binder, Symbol kind, int sequence);
-
+#pragma x2c_region_end u_71BA58ED_AD9D7580_h_11
+#pragma x2c_region_begin u_71BA58ED_AD9D7580_h_12
 List _x2c_mod_6922FA3C_Compiler__hole_record(Compiler c, Atom name);
-
+#pragma x2c_region_end u_71BA58ED_AD9D7580_h_12
+#pragma x2c_region_begin u_71BA58ED_AD9D7580_h_13
 Atom _x2c_mod_6922FA3C__hole_name(List hole);
-
+#pragma x2c_region_end u_71BA58ED_AD9D7580_h_13
+#pragma x2c_region_begin u_71BA58ED_AD9D7580_h_14
 List Compiler_try_parse_macro_slot(Compiler c, Symbol role);
-
+#pragma x2c_region_end u_71BA58ED_AD9D7580_h_14
+#pragma x2c_region_begin u_71BA58ED_AD9D7580_h_15
 List Compiler_peek_macro_hole(Compiler c);
-
+#pragma x2c_region_end u_71BA58ED_AD9D7580_h_15
+#pragma x2c_region_begin u_71BA58ED_AD9D7580_h_16
 Token Compiler_after_hole(Compiler c);
-
+#pragma x2c_region_end u_71BA58ED_AD9D7580_h_16
+#pragma x2c_region_begin u_71BA58ED_AD9D7580_h_17
 List _x2c_mod_6922FA3C_Compiler__parse_hole(Compiler c, Symbol role);
-
+#pragma x2c_region_end u_71BA58ED_AD9D7580_h_17
+#pragma x2c_region_begin u_71BA58ED_AD9D7580_h_18
 int Compiler_macro_lisp_starts_declaration(Compiler c);
-
+#pragma x2c_region_end u_71BA58ED_AD9D7580_h_18
+#pragma x2c_region_begin u_71BA58ED_AD9D7580_h_19
 List Compiler_try_parse_macro_member(Compiler c);
-
+#pragma x2c_region_end u_71BA58ED_AD9D7580_h_19
+#pragma x2c_region_begin u_71BA58ED_AD9D7580_h_20
 Atom _x2c_mod_6922FA3C__hole_key(List hole, String projection);
-
+#pragma x2c_region_end u_71BA58ED_AD9D7580_h_20
+#pragma x2c_region_begin u_71BA58ED_AD9D7580_h_21
 List Compiler_macro_introduced_name(Compiler c, String spelling);
-
+#pragma x2c_region_end u_71BA58ED_AD9D7580_h_21
+#pragma x2c_region_begin u_71BA58ED_AD9D7580_h_22
 List Compiler_macro_tag_name(Compiler c, Symbol kind, String name, int definition);
-
+#pragma x2c_region_end u_71BA58ED_AD9D7580_h_22
+#pragma x2c_region_begin u_71BA58ED_AD9D7580_h_23
 Var _x2c_mod_6922FA3C__replace_bindings(Var value, Map bindings);
-
+#pragma x2c_region_end u_71BA58ED_AD9D7580_h_23
+#pragma x2c_region_begin u_71BA58ED_AD9D7580_h_24
 List _x2c_mod_6922FA3C__capture_layout(int sequence, List source, List value, List expression, List splice, List trailing);
-
+#pragma x2c_region_end u_71BA58ED_AD9D7580_h_24
+#pragma x2c_region_begin u_71BA58ED_AD9D7580_h_25
 List Compiler_publish_macro_definition_node(Compiler c, List node);
-
+#pragma x2c_region_end u_71BA58ED_AD9D7580_h_25
+#pragma x2c_region_begin u_71BA58ED_AD9D7580_h_26
 void Compiler_record_compile_time_effect(Compiler c, List row, Token start);
-
+#pragma x2c_region_end u_71BA58ED_AD9D7580_h_26
+#pragma x2c_region_begin u_71BA58ED_AD9D7580_h_27
 void Compiler_install_compile_time_effects(Compiler c, List rows);
-
+#pragma x2c_region_end u_71BA58ED_AD9D7580_h_27
+#pragma x2c_region_begin u_71BA58ED_AD9D7580_h_28
 int Compiler_macro_form_is_definition(Compiler c);
-
+#pragma x2c_region_end u_71BA58ED_AD9D7580_h_28
+#pragma x2c_region_begin u_71BA58ED_AD9D7580_h_29
 int Compiler_local_macro_form_is_definition(Compiler c);
-
+#pragma x2c_region_end u_71BA58ED_AD9D7580_h_29
+#pragma x2c_region_begin u_71BA58ED_AD9D7580_h_30
 int Compiler_keyword_form_is_definition(Compiler c);
-
+#pragma x2c_region_end u_71BA58ED_AD9D7580_h_30
+#pragma x2c_region_begin u_71BA58ED_AD9D7580_h_31
 void Compiler_parse_keyword_definition(Compiler c);
-
+#pragma x2c_region_end u_71BA58ED_AD9D7580_h_31
+#pragma x2c_region_begin u_71BA58ED_AD9D7580_h_32
 void _x2c_mod_6922FA3C_Compiler__record_alias(Compiler c, Map aliases);
-
+#pragma x2c_region_end u_71BA58ED_AD9D7580_h_32
 void _x2c_module_init_71BA58ED(void);
 
 
-#endif /* __GUARD_0x442C3713__ */
+#endif /* __GUARD_0x71BA58ED__ */

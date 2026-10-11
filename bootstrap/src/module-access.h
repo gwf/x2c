@@ -5,33 +5,56 @@
 #ifndef __GUARD_0xC8C620E4__
 #define __GUARD_0xC8C620E4__
 
+#pragma x2c_region_begin u_C8C620E4_330CA7E5_h_0
 #include "x2c.h"
+#pragma x2c_region_end u_C8C620E4_330CA7E5_h_0
+#pragma x2c_region_begin u_C8C620E4_330CA7E5_h_1
 #include "compiler.h"
+#pragma x2c_region_end u_C8C620E4_330CA7E5_h_1
+#pragma x2c_region_begin u_C8C620E4_330CA7E5_h_2
 #include "module-tree.h"
+#pragma x2c_region_end u_C8C620E4_330CA7E5_h_2
+#pragma x2c_region_begin u_C8C620E4_330CA7E5_h_3
 #include "utils.h"
+#pragma x2c_region_end u_C8C620E4_330CA7E5_h_3
+#pragma x2c_region_begin u_C8C620E4_330CA7E5_h_4
 void Compiler_configure_module(Compiler c, String filename);
-
+#pragma x2c_region_end u_C8C620E4_330CA7E5_h_4
+#pragma x2c_region_begin u_C8C620E4_330CA7E5_h_5
+Map Compiler_resolved_translation_dependencies(Compiler c);
+#pragma x2c_region_end u_C8C620E4_330CA7E5_h_5
+#pragma x2c_region_begin u_C8C620E4_330CA7E5_h_6
 List Compiler_module_ancestors(Compiler c);
-
+#pragma x2c_region_end u_C8C620E4_330CA7E5_h_6
+#pragma x2c_region_begin u_C8C620E4_330CA7E5_h_7
 List Compiler_module_include_dirs(Compiler c, String path);
-
+#pragma x2c_region_end u_C8C620E4_330CA7E5_h_7
+#pragma x2c_region_begin u_C8C620E4_330CA7E5_h_8
 int Compiler_module_accessible(Compiler c, String owner);
-
+#pragma x2c_region_end u_C8C620E4_330CA7E5_h_8
+#pragma x2c_region_begin u_C8C620E4_330CA7E5_h_9
 String Compiler__module_type_spelling(Compiler c, String name);
-
+#pragma x2c_region_end u_C8C620E4_330CA7E5_h_9
+#pragma x2c_region_begin u_C8C620E4_330CA7E5_h_10
 void Compiler_check_module_binding(Compiler c, String spelling, Token origin);
-
+#pragma x2c_region_end u_C8C620E4_330CA7E5_h_10
+#pragma x2c_region_begin u_C8C620E4_330CA7E5_h_11
 List Compiler_module_declared_key(Compiler c, List context, List key);
-
+#pragma x2c_region_end u_C8C620E4_330CA7E5_h_11
+#pragma x2c_region_begin u_C8C620E4_330CA7E5_h_12
 List Compiler_module_retry_key(Compiler c, List key);
-
+#pragma x2c_region_end u_C8C620E4_330CA7E5_h_12
+#pragma x2c_region_begin u_C8C620E4_330CA7E5_h_13
 List Compiler_module_reference_key(Compiler c, List key);
-
+#pragma x2c_region_end u_C8C620E4_330CA7E5_h_13
+#pragma x2c_region_begin u_C8C620E4_330CA7E5_h_14
 void Compiler_record_module_declaration(Compiler c, List syntax);
-
+#pragma x2c_region_end u_C8C620E4_330CA7E5_h_14
+#pragma x2c_region_begin u_C8C620E4_330CA7E5_h_15
 int Compiler_module_row_accessible(Compiler c, List key, Map rows);
-
+#pragma x2c_region_end u_C8C620E4_330CA7E5_h_15
+#pragma x2c_region_begin u_C8C620E4_330CA7E5_h_16
 List Compiler_parse_module_members(Compiler c);
-
+#pragma x2c_region_end u_C8C620E4_330CA7E5_h_16
 
 #endif /* __GUARD_0xC8C620E4__ */

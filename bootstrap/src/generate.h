@@ -5,39 +5,101 @@
 #ifndef __GUARD_0x3F61ACEA__
 #define __GUARD_0x3F61ACEA__
 
+#pragma x2c_region_begin u_3F61ACEA_6BE81575_h_0
 #include "x2c.h"
+#pragma x2c_region_end u_3F61ACEA_6BE81575_h_0
+#pragma x2c_region_begin u_3F61ACEA_6BE81575_h_1
 #include "compiler.h"
+#pragma x2c_region_end u_3F61ACEA_6BE81575_h_1
+#pragma x2c_region_begin u_3F61ACEA_6BE81575_h_2
 #include "grammar.h"
+#pragma x2c_region_end u_3F61ACEA_6BE81575_h_2
+#pragma x2c_region_begin u_3F61ACEA_6BE81575_h_3
 #include "ast-rewrite.h"
+#pragma x2c_region_end u_3F61ACEA_6BE81575_h_3
+#pragma x2c_region_begin u_3F61ACEA_6BE81575_h_4
 #include <stdio.h>
+#pragma x2c_region_end u_3F61ACEA_6BE81575_h_4
+#pragma x2c_region_begin u_3F61ACEA_6BE81575_h_5
 #include <stdlib.h>
+#pragma x2c_region_end u_3F61ACEA_6BE81575_h_5
+#pragma x2c_region_begin u_3F61ACEA_6BE81575_h_6
 #include <string.h>
+#pragma x2c_region_end u_3F61ACEA_6BE81575_h_6
+#pragma x2c_region_begin u_3F61ACEA_6BE81575_h_7
 #include "cache.h"
+#pragma x2c_region_end u_3F61ACEA_6BE81575_h_7
+#pragma x2c_region_begin u_3F61ACEA_6BE81575_h_8
 #include "collect.h"
+#pragma x2c_region_end u_3F61ACEA_6BE81575_h_8
+#pragma x2c_region_begin u_3F61ACEA_6BE81575_h_9
 #include "format.h"
+#pragma x2c_region_end u_3F61ACEA_6BE81575_h_9
+#pragma x2c_region_begin u_3F61ACEA_6BE81575_h_10
 #include "emit.h"
+#pragma x2c_region_end u_3F61ACEA_6BE81575_h_10
+#pragma x2c_region_begin u_3F61ACEA_6BE81575_h_11
 #include "utils.h"
+#pragma x2c_region_end u_3F61ACEA_6BE81575_h_11
+#pragma x2c_region_begin u_3F61ACEA_6BE81575_h_12
+#include "module-layout.h"
+#pragma x2c_region_end u_3F61ACEA_6BE81575_h_12
+#pragma x2c_region_begin u_3F61ACEA_6BE81575_h_13
+#include "json.h"
+#pragma x2c_region_end u_3F61ACEA_6BE81575_h_13
+#pragma x2c_region_begin u_3F61ACEA_6BE81575_h_14
+#include "toolchain.h"
+#pragma x2c_region_end u_3F61ACEA_6BE81575_h_14
+#pragma x2c_region_begin u_3F61ACEA_6BE81575_h_15
 void generate_code(Compiler c, List ast, String dir);
-
+#pragma x2c_region_end u_3F61ACEA_6BE81575_h_15
+#pragma x2c_region_begin u_3F61ACEA_6BE81575_h_16
+List generate_code_files(Compiler c, List ast, String dir);
+#pragma x2c_region_end u_3F61ACEA_6BE81575_h_16
+#pragma x2c_region_begin u_3F61ACEA_6BE81575_h_17
+void publish_generated_files(List outputs);
+#pragma x2c_region_end u_3F61ACEA_6BE81575_h_17
+#pragma x2c_region_begin u_3F61ACEA_6BE81575_h_18
 List generate_code_text(Compiler c, List ast, String basename);
-
-typedef struct Init{
+#pragma x2c_region_end u_3F61ACEA_6BE81575_h_18
+#pragma x2c_region_begin u_3F61ACEA_6BE81575_h_19
+List generate_code_text_files(Compiler c, List ast, String basename);
+#pragma x2c_region_end u_3F61ACEA_6BE81575_h_19
+#pragma x2c_region_begin u_3F61ACEA_6BE81575_h_20
+String Compiler_module_projection_namespace(Compiler c, List key);
+#pragma x2c_region_end u_3F61ACEA_6BE81575_h_20
+#pragma x2c_region_begin u_3F61ACEA_6BE81575_h_21
+struct Init{
+#pragma x2c_namespace_require n_9F155932
   Compiler c;
+#pragma x2c_namespace_require n_C713742F
   String initializer;
+#pragma x2c_namespace_require n_06420495
   List guard, entry, shutdown, synthetic;
+#pragma x2c_namespace_require n_CD4FE74B
   Map reachable;
 }
-Init;
-
+;
+#pragma x2c_region_end u_3F61ACEA_6BE81575_h_21
+#pragma x2c_region_begin u_3F61ACEA_6BE81575_h_22
+#pragma x2c_namespace_require n_A7D207F5
+#pragma x2c_namespace_require n_CAB3278B
+typedef struct Init Init;
+#pragma x2c_region_end u_3F61ACEA_6BE81575_h_22
+#pragma x2c_region_begin u_3F61ACEA_6BE81575_h_23
 List Init_enter(Init * i, List function, int guarded);
-
+#pragma x2c_region_end u_3F61ACEA_6BE81575_h_23
+#pragma x2c_region_begin u_3F61ACEA_6BE81575_h_24
 List Compiler_place_source_prelude(Compiler c, List source, List declarations);
-
+#pragma x2c_region_end u_3F61ACEA_6BE81575_h_24
+#pragma x2c_region_begin u_3F61ACEA_6BE81575_h_25
 List Compiler_init_statements(Compiler c, Symbol phase);
-
+#pragma x2c_region_end u_3F61ACEA_6BE81575_h_25
+#pragma x2c_region_begin u_3F61ACEA_6BE81575_h_26
 List Compiler_definition_rows(Compiler c, List ast);
-
+#pragma x2c_region_end u_3F61ACEA_6BE81575_h_26
+#pragma x2c_region_begin u_3F61ACEA_6BE81575_h_27
 void Compiler_dump_definitions(Compiler c, List ast);
-
+#pragma x2c_region_end u_3F61ACEA_6BE81575_h_27
 
 #endif /* __GUARD_0x3F61ACEA__ */

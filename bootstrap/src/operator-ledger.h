@@ -5,17 +5,26 @@
 #ifndef __GUARD_0xFCD96F31__
 #define __GUARD_0xFCD96F31__
 
+#pragma x2c_region_begin u_FCD96F31_005BAEB2_h_0
 #include "x2c.h"
+#pragma x2c_region_end u_FCD96F31_005BAEB2_h_0
+#pragma x2c_region_begin u_FCD96F31_005BAEB2_h_1
 #include "compiler.h"
+#pragma x2c_region_end u_FCD96F31_005BAEB2_h_1
+#pragma x2c_region_begin u_FCD96F31_005BAEB2_h_2
 int Symbol_binary_precedence(Symbol op);
-
+#pragma x2c_region_end u_FCD96F31_005BAEB2_h_2
+#pragma x2c_region_begin u_FCD96F31_005BAEB2_h_3
 Symbol Symbol_compound_operator(Symbol op);
-
+#pragma x2c_region_end u_FCD96F31_005BAEB2_h_3
+#pragma x2c_region_begin u_FCD96F31_005BAEB2_h_4
 Symbol Symbol_compound_assignment(Symbol op);
-
+#pragma x2c_region_end u_FCD96F31_005BAEB2_h_4
+#pragma x2c_region_begin u_FCD96F31_005BAEB2_h_5
 Symbol Compiler_operator_member(Compiler c, Symbol op);
-
+#pragma x2c_region_end u_FCD96F31_005BAEB2_h_5
+#pragma x2c_region_begin u_FCD96F31_005BAEB2_h_6
 Symbol Compiler_derived_member(Compiler c, Symbol op);
-
+#pragma x2c_region_end u_FCD96F31_005BAEB2_h_6
 
 #endif /* __GUARD_0xFCD96F31__ */

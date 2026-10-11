@@ -5,62 +5,113 @@
 #ifndef __GUARD_0x5DA47678__
 #define __GUARD_0x5DA47678__
 
+#pragma x2c_region_begin u_5DA47678_AF477939_h_0
 #include "x2c.h"
+#pragma x2c_region_end u_5DA47678_AF477939_h_0
+#pragma x2c_region_begin u_5DA47678_AF477939_h_1
 #include "common.h"
+#pragma x2c_region_end u_5DA47678_AF477939_h_1
+#pragma x2c_region_begin u_5DA47678_AF477939_h_2
 #include "list-selectors.h"
+#pragma x2c_region_end u_5DA47678_AF477939_h_2
+#pragma x2c_region_begin u_5DA47678_AF477939_h_3
 #include "meta.h"
+#pragma x2c_region_end u_5DA47678_AF477939_h_3
+#pragma x2c_region_begin u_5DA47678_AF477939_h_4
 #include "native-scalar-types.h"
+#pragma x2c_region_end u_5DA47678_AF477939_h_4
+#pragma x2c_region_begin u_5DA47678_AF477939_h_5
 #include "rewrite.h"
+#pragma x2c_region_end u_5DA47678_AF477939_h_5
+#pragma x2c_region_begin u_5DA47678_AF477939_h_6
 #include "system-macros.h"
+#pragma x2c_region_end u_5DA47678_AF477939_h_6
+#pragma x2c_region_begin u_5DA47678_AF477939_h_7
 #include "var-tags.h"
+#pragma x2c_region_end u_5DA47678_AF477939_h_7
+#pragma x2c_region_begin u_5DA47678_AF477939_h_8
 #include "varops.h"
+#pragma x2c_region_end u_5DA47678_AF477939_h_8
+#pragma x2c_region_begin u_5DA47678_AF477939_h_9
 #include "component-access.h"
+#pragma x2c_region_end u_5DA47678_AF477939_h_9
+#pragma x2c_region_begin u_5DA47678_AF477939_h_10
 #include "component-delegate.h"
+#pragma x2c_region_end u_5DA47678_AF477939_h_10
+#pragma x2c_region_begin u_5DA47678_AF477939_h_11
 #include "component-try.h"
+#pragma x2c_region_end u_5DA47678_AF477939_h_11
+#pragma x2c_region_begin u_5DA47678_AF477939_h_12
 #include "fields.h"
+#pragma x2c_region_end u_5DA47678_AF477939_h_12
+#pragma x2c_region_begin u_5DA47678_AF477939_h_13
 #include "grammar.h"
+#pragma x2c_region_end u_5DA47678_AF477939_h_13
+#pragma x2c_region_begin u_5DA47678_AF477939_h_14
 #include "operator-ledger.h"
+#pragma x2c_region_end u_5DA47678_AF477939_h_14
+#pragma x2c_region_begin u_5DA47678_AF477939_h_15
 List x2c_expr_field(List receiver, String name);
-
+#pragma x2c_region_end u_5DA47678_AF477939_h_15
+#pragma x2c_region_begin u_5DA47678_AF477939_h_16
 List x2c_expr_cast(List type, List expression);
-
+#pragma x2c_region_end u_5DA47678_AF477939_h_16
+#pragma x2c_region_begin u_5DA47678_AF477939_h_17
 List x2c_decl_make(List type, Var name, List initializer);
-
+#pragma x2c_region_end u_5DA47678_AF477939_h_17
+#pragma x2c_region_begin u_5DA47678_AF477939_h_18
 List x2c_param_make(List type, Var name);
-
+#pragma x2c_region_end u_5DA47678_AF477939_h_18
+#pragma x2c_region_begin u_5DA47678_AF477939_h_19
 List x2c_type_members(List type);
-
+#pragma x2c_region_end u_5DA47678_AF477939_h_19
+#pragma x2c_region_begin u_5DA47678_AF477939_h_20
 Code register_rewrite(Code function, Code pattern, List holes);
-
+#pragma x2c_region_end u_5DA47678_AF477939_h_20
+#pragma x2c_region_begin u_5DA47678_AF477939_h_21
 Code register_marked_rewrite(Code function, Code mark, Code pattern, List holes);
-
+#pragma x2c_region_end u_5DA47678_AF477939_h_21
+#pragma x2c_region_begin u_5DA47678_AF477939_h_22
 List _dedent_expand(List node);
-
+#pragma x2c_region_end u_5DA47678_AF477939_h_22
+#pragma x2c_region_begin u_5DA47678_AF477939_h_23
 List _macros_location(void);
-
+#pragma x2c_region_end u_5DA47678_AF477939_h_23
+#pragma x2c_region_begin u_5DA47678_AF477939_h_24
 List _tag_decode_group(List rows, Map counts, int top);
-
+#pragma x2c_region_end u_5DA47678_AF477939_h_24
+#pragma x2c_region_begin u_5DA47678_AF477939_h_25
 List _tag_decode_groups(void);
-
+#pragma x2c_region_end u_5DA47678_AF477939_h_25
+#pragma x2c_region_begin u_5DA47678_AF477939_h_26
 List _tag_id_checks(void);
-
+#pragma x2c_region_end u_5DA47678_AF477939_h_26
+#pragma x2c_region_begin u_5DA47678_AF477939_h_27
 Code collection_store(Code code);
-
+#pragma x2c_region_end u_5DA47678_AF477939_h_27
+#pragma x2c_region_begin u_5DA47678_AF477939_h_28
 Code collection_update(Code code);
-
+#pragma x2c_region_end u_5DA47678_AF477939_h_28
+#pragma x2c_region_begin u_5DA47678_AF477939_h_29
 Code collection_prefix(Code code);
-
+#pragma x2c_region_end u_5DA47678_AF477939_h_29
+#pragma x2c_region_begin u_5DA47678_AF477939_h_30
 Code collection_postfix(Code code);
-
+#pragma x2c_region_end u_5DA47678_AF477939_h_30
+#pragma x2c_region_begin u_5DA47678_AF477939_h_31
 Code delegate_member(Code code);
-
+#pragma x2c_region_end u_5DA47678_AF477939_h_31
+#pragma x2c_region_begin u_5DA47678_AF477939_h_32
 List try_catch_cases(List selected, List arms);
-
+#pragma x2c_region_end u_5DA47678_AF477939_h_32
+#pragma x2c_region_begin u_5DA47678_AF477939_h_33
 Code try_lowering(Code node);
-
+#pragma x2c_region_end u_5DA47678_AF477939_h_33
+#pragma x2c_region_begin u_5DA47678_AF477939_h_34
 Map linked_meta_targets(void);
-
+#pragma x2c_region_end u_5DA47678_AF477939_h_34
+#pragma x2c_region_begin u_5DA47678_AF477939_h_35
 Map linked_meta_hashes(void);
-
+#pragma x2c_region_end u_5DA47678_AF477939_h_35
 
 #endif /* __GUARD_0x5DA47678__ */

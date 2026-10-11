@@ -5,38 +5,84 @@
 #ifndef __GUARD_0xB6A35E1E__
 #define __GUARD_0xB6A35E1E__
 
+#pragma x2c_region_begin u_B6A35E1E_B608125F_h_0
 #include "x2c.h"
+#pragma x2c_region_end u_B6A35E1E_B608125F_h_0
+#pragma x2c_region_begin u_B6A35E1E_B608125F_h_1
+#pragma x2c_namespace_require n_5DE67F9B
+#pragma x2c_namespace_require n_C0D0D031
 typedef struct ModuleTree * ModuleTree;
-
+#pragma x2c_region_end u_B6A35E1E_B608125F_h_1
+#pragma x2c_region_begin u_B6A35E1E_B608125F_h_2
 #include "compiler.h"
+#pragma x2c_region_end u_B6A35E1E_B608125F_h_2
+#pragma x2c_region_begin u_B6A35E1E_B608125F_h_3
 #include "sourceview.h"
+#pragma x2c_region_end u_B6A35E1E_B608125F_h_3
+#pragma x2c_region_begin u_B6A35E1E_B608125F_h_4
 #include "utils.h"
-typedef struct ModuleEntry{
+#pragma x2c_region_end u_B6A35E1E_B608125F_h_4
+#pragma x2c_region_begin u_B6A35E1E_B608125F_h_5
+struct ModuleEntry{
+#pragma x2c_namespace_require n_C713742F
   String path, prefix, preamble;
+#pragma x2c_namespace_require n_06420495
   List members, preamble_parts;
   int block_start, block_end;
 }
-* ModuleEntry;
-
-typedef struct ModuleTree{
+;
+#pragma x2c_region_end u_B6A35E1E_B608125F_h_5
+#pragma x2c_region_begin u_B6A35E1E_B608125F_h_6
+#pragma x2c_namespace_require n_89F5FCE3
+#pragma x2c_namespace_require n_8F963AB9
+typedef struct ModuleEntry * ModuleEntry;
+#pragma x2c_region_end u_B6A35E1E_B608125F_h_6
+#pragma x2c_region_begin u_B6A35E1E_B608125F_h_7
+struct ModuleTree{
+#pragma x2c_namespace_require n_9F155932
   Compiler compiler;
+#pragma x2c_namespace_require n_CD4FE74B
   Map entries, owners, dependencies;
 }
-* ModuleTree;
-
+;
+#pragma x2c_region_end u_B6A35E1E_B608125F_h_7
+#pragma x2c_region_begin u_B6A35E1E_B608125F_h_8
+#pragma x2c_namespace_require n_5DE67F9B
+#pragma x2c_namespace_require n_C0D0D031
+typedef struct ModuleTree * ModuleTree;
+#pragma x2c_region_end u_B6A35E1E_B608125F_h_8
+#pragma x2c_region_begin u_B6A35E1E_B608125F_h_9
 ModuleTree ModuleTree_new(Compiler c);
-
-String module_support_header(String path);
-
+#pragma x2c_region_end u_B6A35E1E_B608125F_h_9
+#pragma x2c_region_begin u_B6A35E1E_B608125F_h_10
+String Compiler_module_support_header(Compiler c, String path);
+#pragma x2c_region_end u_B6A35E1E_B608125F_h_10
+#pragma x2c_region_begin u_B6A35E1E_B608125F_h_11
+String Compiler_generated_unit_hash(Compiler c);
+#pragma x2c_region_end u_B6A35E1E_B608125F_h_11
+#pragma x2c_region_begin u_B6A35E1E_B608125F_h_12
+String ModuleTree_identity(ModuleTree m, String spelling);
+#pragma x2c_region_end u_B6A35E1E_B608125F_h_12
+#pragma x2c_region_begin u_B6A35E1E_B608125F_h_13
+String ModuleTree_prefix(ModuleTree tree, String path);
+#pragma x2c_region_end u_B6A35E1E_B608125F_h_13
+#pragma x2c_region_begin u_B6A35E1E_B608125F_h_14
 ModuleEntry ModuleTree_entry(ModuleTree m, String canonical_path);
-
+#pragma x2c_region_end u_B6A35E1E_B608125F_h_14
+#pragma x2c_region_begin u_B6A35E1E_B608125F_h_15
 Map ModuleTree_ownership_dependencies(ModuleTree tree, String path);
-
+#pragma x2c_region_end u_B6A35E1E_B608125F_h_15
+#pragma x2c_region_begin u_B6A35E1E_B608125F_h_16
+List ModuleTree_ownership_query(ModuleTree tree, String path);
+#pragma x2c_region_end u_B6A35E1E_B608125F_h_16
+#pragma x2c_region_begin u_B6A35E1E_B608125F_h_17
 String ModuleTree_owner(ModuleTree tree, String path);
-
+#pragma x2c_region_end u_B6A35E1E_B608125F_h_17
+#pragma x2c_region_begin u_B6A35E1E_B608125F_h_18
 List ModuleTree_ancestors(ModuleTree tree, String path);
-
+#pragma x2c_region_end u_B6A35E1E_B608125F_h_18
+#pragma x2c_region_begin u_B6A35E1E_B608125F_h_19
 List ModuleTree_units(ModuleTree tree, List inputs);
-
+#pragma x2c_region_end u_B6A35E1E_B608125F_h_19
 
 #endif /* __GUARD_0xB6A35E1E__ */

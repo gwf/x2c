@@ -5,120 +5,203 @@
 #ifndef __GUARD_0x46021D32__
 #define __GUARD_0x46021D32__
 
+#pragma x2c_region_begin u_46021D32_06581AB3_h_0
 #include "x2c.h"
+#pragma x2c_region_end u_46021D32_06581AB3_h_0
+#pragma x2c_region_begin u_46021D32_06581AB3_h_1
 #include "private-keywords.h"
+#pragma x2c_region_end u_46021D32_06581AB3_h_1
+#pragma x2c_region_begin u_46021D32_06581AB3_h_2
 #include "compiler.h"
+#pragma x2c_region_end u_46021D32_06581AB3_h_2
+#pragma x2c_region_begin u_46021D32_06581AB3_h_3
 #include "type.h"
+#pragma x2c_region_end u_46021D32_06581AB3_h_3
+#pragma x2c_region_begin u_46021D32_06581AB3_h_4
 #include "parse-report-macros.h"
+#pragma x2c_region_end u_46021D32_06581AB3_h_4
+#pragma x2c_region_begin u_46021D32_06581AB3_h_5
 #include "grammar.h"
+#pragma x2c_region_end u_46021D32_06581AB3_h_5
+#pragma x2c_region_begin u_46021D32_06581AB3_h_6
 #include "statements.h"
+#pragma x2c_region_end u_46021D32_06581AB3_h_6
+#pragma x2c_region_begin u_46021D32_06581AB3_h_7
 #include "expressions.h"
+#pragma x2c_region_end u_46021D32_06581AB3_h_7
+#pragma x2c_region_begin u_46021D32_06581AB3_h_8
 #include "literals.h"
+#pragma x2c_region_end u_46021D32_06581AB3_h_8
+#pragma x2c_region_begin u_46021D32_06581AB3_h_9
 #include "collect.h"
+#pragma x2c_region_end u_46021D32_06581AB3_h_9
+#pragma x2c_region_begin u_46021D32_06581AB3_h_10
 #include "_x2c_module_6922FA3C.h"
+#pragma x2c_region_end u_46021D32_06581AB3_h_10
+#pragma x2c_region_begin u_46021D32_06581AB3_h_11
 #include "protocol.h"
+#pragma x2c_region_end u_46021D32_06581AB3_h_11
+#pragma x2c_region_begin u_46021D32_06581AB3_h_12
 #include "utils.h"
+#pragma x2c_region_end u_46021D32_06581AB3_h_12
+#pragma x2c_region_begin u_46021D32_06581AB3_h_13
 List Compiler_parse_top_level_mode(Compiler c, int skip_body);
-
+#pragma x2c_region_end u_46021D32_06581AB3_h_13
+#pragma x2c_region_begin u_46021D32_06581AB3_h_14
 int Compiler_skip_linkage_brace(Compiler c);
-
+#pragma x2c_region_end u_46021D32_06581AB3_h_14
+#pragma x2c_region_begin u_46021D32_06581AB3_h_15
+Array Compiler_native_meta_prefix_declarations(Compiler c);
+#pragma x2c_region_end u_46021D32_06581AB3_h_15
+#pragma x2c_region_begin u_46021D32_06581AB3_h_16
+void Compiler_bind_native_meta_prefix(Compiler c);
+#pragma x2c_region_end u_46021D32_06581AB3_h_16
+#pragma x2c_region_begin u_46021D32_06581AB3_h_17
 List Compiler_parse_top_level(Compiler c);
-
+#pragma x2c_region_end u_46021D32_06581AB3_h_17
+#pragma x2c_region_begin u_46021D32_06581AB3_h_18
 List Compiler_parse_submission(Compiler c, int end_position);
-
+#pragma x2c_region_end u_46021D32_06581AB3_h_18
+#pragma x2c_region_begin u_46021D32_06581AB3_h_19
 int Compiler_defines_main(Compiler c);
-
+#pragma x2c_region_end u_46021D32_06581AB3_h_19
+#pragma x2c_region_begin u_46021D32_06581AB3_h_20
 int Compiler_script_statement_starts(Compiler c);
-
+#pragma x2c_region_end u_46021D32_06581AB3_h_20
+#pragma x2c_region_begin u_46021D32_06581AB3_h_21
 int Compiler_script_statement_executes(Compiler c);
-
+#pragma x2c_region_end u_46021D32_06581AB3_h_21
+#pragma x2c_region_begin u_46021D32_06581AB3_h_22
 int Compiler_protocol_form_starts(Compiler c);
-
+#pragma x2c_region_end u_46021D32_06581AB3_h_22
+#pragma x2c_region_begin u_46021D32_06581AB3_h_23
 int Compiler_meta_form_is_declaration(Compiler c);
-
+#pragma x2c_region_end u_46021D32_06581AB3_h_23
+#pragma x2c_region_begin u_46021D32_06581AB3_h_24
 int Compiler_module_form_is_declaration(Compiler c);
-
+#pragma x2c_region_end u_46021D32_06581AB3_h_24
+#pragma x2c_region_begin u_46021D32_06581AB3_h_25
 Token Compiler_take_meta_marker(Compiler c, int * native);
-
+#pragma x2c_region_end u_46021D32_06581AB3_h_25
+#pragma x2c_region_begin u_46021D32_06581AB3_h_26
 List Compiler_parse_import_declaration(Compiler c);
-
+#pragma x2c_region_end u_46021D32_06581AB3_h_26
+#pragma x2c_region_begin u_46021D32_06581AB3_h_27
 String Compiler_definition_doc(Compiler c, Token start);
-
+#pragma x2c_region_end u_46021D32_06581AB3_h_27
+#pragma x2c_region_begin u_46021D32_06581AB3_h_28
 List Compiler_parse_declaration_row(Compiler c);
-
+#pragma x2c_region_end u_46021D32_06581AB3_h_28
+#pragma x2c_region_begin u_46021D32_06581AB3_h_29
 List Compiler_parse_simple_declaration(Compiler c);
-
+#pragma x2c_region_end u_46021D32_06581AB3_h_29
+#pragma x2c_region_begin u_46021D32_06581AB3_h_30
 List Compiler_parse_type_operand(Compiler c, Type * type);
-
+#pragma x2c_region_end u_46021D32_06581AB3_h_30
+#pragma x2c_region_begin u_46021D32_06581AB3_h_31
 List Compiler_parse_declaration_argument(Compiler c);
-
+#pragma x2c_region_end u_46021D32_06581AB3_h_31
+#pragma x2c_region_begin u_46021D32_06581AB3_h_32
 int Compiler_test_static_assert(Compiler c);
-
+#pragma x2c_region_end u_46021D32_06581AB3_h_32
+#pragma x2c_region_begin u_46021D32_06581AB3_h_33
 List Compiler_parse_static_assert(Compiler c);
-
+#pragma x2c_region_end u_46021D32_06581AB3_h_33
+#pragma x2c_region_begin u_46021D32_06581AB3_h_34
 int Compiler_test_declaration(Compiler c);
-
+#pragma x2c_region_end u_46021D32_06581AB3_h_34
+#pragma x2c_region_begin u_46021D32_06581AB3_h_35
 void Compiler_check_reference_placement(Compiler c, Type type);
-
+#pragma x2c_region_end u_46021D32_06581AB3_h_35
+#pragma x2c_region_begin u_46021D32_06581AB3_h_36
 Type Compiler_parse_type_name(Compiler c);
-
+#pragma x2c_region_end u_46021D32_06581AB3_h_36
+#pragma x2c_region_begin u_46021D32_06581AB3_h_37
 List Compiler_parse_fields(Compiler c, List context);
-
+#pragma x2c_region_end u_46021D32_06581AB3_h_37
+#pragma x2c_region_begin u_46021D32_06581AB3_h_38
 List Compiler_parse_field(Compiler c, List context);
-
+#pragma x2c_region_end u_46021D32_06581AB3_h_38
+#pragma x2c_region_begin u_46021D32_06581AB3_h_39
 List Compiler_parse_named_type(Compiler c);
-
+#pragma x2c_region_end u_46021D32_06581AB3_h_39
+#pragma x2c_region_begin u_46021D32_06581AB3_h_40
 List Compiler_parse_enumerators(Compiler c, List context);
-
+#pragma x2c_region_end u_46021D32_06581AB3_h_40
+#pragma x2c_region_begin u_46021D32_06581AB3_h_41
 List Compiler_parse_enumerator(Compiler c, Type context);
-
+#pragma x2c_region_end u_46021D32_06581AB3_h_41
+#pragma x2c_region_begin u_46021D32_06581AB3_h_42
 List Compiler_parse_declarator_argument(Compiler c);
-
+#pragma x2c_region_end u_46021D32_06581AB3_h_42
+#pragma x2c_region_begin u_46021D32_06581AB3_h_43
 void Compiler_bind_template_local(Compiler c, List key, List type, List context);
-
+#pragma x2c_region_end u_46021D32_06581AB3_h_43
+#pragma x2c_region_begin u_46021D32_06581AB3_h_44
 List Compiler_parse_parameter_list(Compiler c);
-
+#pragma x2c_region_end u_46021D32_06581AB3_h_44
+#pragma x2c_region_begin u_46021D32_06581AB3_h_45
 List Compiler_parse_parameter(Compiler c);
-
+#pragma x2c_region_end u_46021D32_06581AB3_h_45
+#pragma x2c_region_begin u_46021D32_06581AB3_h_46
 List Compiler_bind_parameter(Compiler c, List base, List declarator);
-
+#pragma x2c_region_end u_46021D32_06581AB3_h_46
+#pragma x2c_region_begin u_46021D32_06581AB3_h_47
 List Compiler_parse_complex_identifier(Compiler c);
-
+#pragma x2c_region_end u_46021D32_06581AB3_h_47
+#pragma x2c_region_begin u_46021D32_06581AB3_h_48
 String Compiler_package_alias_spelling(Compiler c);
-
+#pragma x2c_region_end u_46021D32_06581AB3_h_48
+#pragma x2c_region_begin u_46021D32_06581AB3_h_49
 List Compiler_parse_basic_identifier(Compiler c);
-
+#pragma x2c_region_end u_46021D32_06581AB3_h_49
+#pragma x2c_region_begin u_46021D32_06581AB3_h_50
 List Compiler_parse_optional_identifier(Compiler c);
-
+#pragma x2c_region_end u_46021D32_06581AB3_h_50
+#pragma x2c_region_begin u_46021D32_06581AB3_h_51
 List Compiler_parse_function_definition(Compiler c);
-
+#pragma x2c_region_end u_46021D32_06581AB3_h_51
+#pragma x2c_region_begin u_46021D32_06581AB3_h_52
 List Compiler_parse_function_target(Compiler c);
-
+#pragma x2c_region_end u_46021D32_06581AB3_h_52
+#pragma x2c_region_begin u_46021D32_06581AB3_h_53
 void Compiler_enter(Compiler c, Ancestor row);
-
+#pragma x2c_region_end u_46021D32_06581AB3_h_53
+#pragma x2c_region_begin u_46021D32_06581AB3_h_54
 List Compiler_enclosing(Compiler c, Symbol what);
-
+#pragma x2c_region_end u_46021D32_06581AB3_h_54
+#pragma x2c_region_begin u_46021D32_06581AB3_h_55
 void Compiler_place_after(Compiler c, Var code);
-
+#pragma x2c_region_end u_46021D32_06581AB3_h_55
+#pragma x2c_region_begin u_46021D32_06581AB3_h_56
 void Compiler_close_placements(Compiler c, int first, List result);
-
+#pragma x2c_region_end u_46021D32_06581AB3_h_56
+#pragma x2c_region_begin u_46021D32_06581AB3_h_57
 List Compiler_leave_item(Compiler c);
-
+#pragma x2c_region_end u_46021D32_06581AB3_h_57
+#pragma x2c_region_begin u_46021D32_06581AB3_h_58
 List Compiler_finish_initializers(Compiler c, List declaration, Token origin);
-
+#pragma x2c_region_end u_46021D32_06581AB3_h_58
+#pragma x2c_region_begin u_46021D32_06581AB3_h_59
 List Compiler_bind_syntax(Compiler c, Var syntax, AstPos context, Type return_type);
-
+#pragma x2c_region_end u_46021D32_06581AB3_h_59
+#pragma x2c_region_begin u_46021D32_06581AB3_h_60
 Var source_clause(Symbol kind);
-
+#pragma x2c_region_end u_46021D32_06581AB3_h_60
+#pragma x2c_region_begin u_46021D32_06581AB3_h_61
 List Compiler_bind_source_statement(Compiler c);
-
+#pragma x2c_region_end u_46021D32_06581AB3_h_61
+#pragma x2c_region_begin u_46021D32_06581AB3_h_62
 List Compiler_bind_catch_arm(Compiler c, List pattern, Var body, Token start, List handle);
-
+#pragma x2c_region_end u_46021D32_06581AB3_h_62
+#pragma x2c_region_begin u_46021D32_06581AB3_h_63
 List Compiler_bind_match_arm(Compiler c, List pattern, Var body, Token start, int binds, List types);
-
+#pragma x2c_region_end u_46021D32_06581AB3_h_63
+#pragma x2c_region_begin u_46021D32_06581AB3_h_64
 List Compiler_bind_callable_body(Compiler c, List syntax, Type return_type);
-
+#pragma x2c_region_end u_46021D32_06581AB3_h_64
+#pragma x2c_region_begin u_46021D32_06581AB3_h_65
 List Compiler_finish_foreign_alias(Compiler c, List declaration, List native_syntax);
-
+#pragma x2c_region_end u_46021D32_06581AB3_h_65
 
 #endif /* __GUARD_0x46021D32__ */

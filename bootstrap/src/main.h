@@ -5,36 +5,98 @@
 #ifndef __GUARD_0x1E27A9AE__
 #define __GUARD_0x1E27A9AE__
 
+#pragma x2c_region_begin u_1E27A9AE_003305B9_h_0
 #include "x2c.h"
+#pragma x2c_region_end u_1E27A9AE_003305B9_h_0
+#pragma x2c_region_begin u_1E27A9AE_003305B9_h_1
 #include "build.h"
+#pragma x2c_region_end u_1E27A9AE_003305B9_h_1
+#pragma x2c_region_begin u_1E27A9AE_003305B9_h_2
 #include "module-tree.h"
+#pragma x2c_region_end u_1E27A9AE_003305B9_h_2
+#pragma x2c_region_begin u_1E27A9AE_003305B9_h_3
 #include "project.h"
+#pragma x2c_region_end u_1E27A9AE_003305B9_h_3
+#pragma x2c_region_begin u_1E27A9AE_003305B9_h_4
 #include "frontend.h"
+#pragma x2c_region_end u_1E27A9AE_003305B9_h_4
+#pragma x2c_region_begin u_1E27A9AE_003305B9_h_5
 #include "meta-project.h"
+#pragma x2c_region_end u_1E27A9AE_003305B9_h_5
+#pragma x2c_region_begin u_1E27A9AE_003305B9_h_6
 #include "editor.h"
+#pragma x2c_region_end u_1E27A9AE_003305B9_h_6
+#pragma x2c_region_begin u_1E27A9AE_003305B9_h_7
 #include "install.h"
+#pragma x2c_region_end u_1E27A9AE_003305B9_h_7
+#pragma x2c_region_begin u_1E27A9AE_003305B9_h_8
 #include "script.h"
+#pragma x2c_region_end u_1E27A9AE_003305B9_h_8
+#pragma x2c_region_begin u_1E27A9AE_003305B9_h_9
 #include "toolchain.h"
+#pragma x2c_region_end u_1E27A9AE_003305B9_h_9
+#pragma x2c_region_begin u_1E27A9AE_003305B9_h_10
 #include <ctype.h>
+#pragma x2c_region_end u_1E27A9AE_003305B9_h_10
+#pragma x2c_region_begin u_1E27A9AE_003305B9_h_11
 #include <stdio.h>
+#pragma x2c_region_end u_1E27A9AE_003305B9_h_11
+#pragma x2c_region_begin u_1E27A9AE_003305B9_h_12
 #include <stdlib.h>
+#pragma x2c_region_end u_1E27A9AE_003305B9_h_12
+#pragma x2c_region_begin u_1E27A9AE_003305B9_h_13
 #include <string.h>
+#pragma x2c_region_end u_1E27A9AE_003305B9_h_13
+#pragma x2c_region_begin u_1E27A9AE_003305B9_h_14
 #include <errno.h>
+#pragma x2c_region_end u_1E27A9AE_003305B9_h_14
+#pragma x2c_region_begin u_1E27A9AE_003305B9_h_15
 #include <limits.h>
+#pragma x2c_region_end u_1E27A9AE_003305B9_h_15
+#pragma x2c_region_begin u_1E27A9AE_003305B9_h_16
 #include <signal.h>
+#pragma x2c_region_end u_1E27A9AE_003305B9_h_16
+#pragma x2c_region_begin u_1E27A9AE_003305B9_h_17
 #include <unistd.h>
+#pragma x2c_region_end u_1E27A9AE_003305B9_h_17
+#pragma x2c_region_begin u_1E27A9AE_003305B9_h_18
 #include "report.h"
+#pragma x2c_region_end u_1E27A9AE_003305B9_h_18
+#pragma x2c_region_begin u_1E27A9AE_003305B9_h_19
 #include "collect.h"
+#pragma x2c_region_end u_1E27A9AE_003305B9_h_19
+#pragma x2c_region_begin u_1E27A9AE_003305B9_h_20
 #include "cli.h"
+#pragma x2c_region_end u_1E27A9AE_003305B9_h_20
+#pragma x2c_region_begin u_1E27A9AE_003305B9_h_21
 #include "compiler.h"
+#pragma x2c_region_end u_1E27A9AE_003305B9_h_21
+#pragma x2c_region_begin u_1E27A9AE_003305B9_h_22
 #include "deps.h"
+#pragma x2c_region_end u_1E27A9AE_003305B9_h_22
+#pragma x2c_region_begin u_1E27A9AE_003305B9_h_23
 #include "logger.h"
+#pragma x2c_region_end u_1E27A9AE_003305B9_h_23
+#pragma x2c_region_begin u_1E27A9AE_003305B9_h_24
 #include "utils.h"
+#pragma x2c_region_end u_1E27A9AE_003305B9_h_24
+#pragma x2c_region_begin u_1E27A9AE_003305B9_h_25
 #include "emit.h"
+#pragma x2c_region_end u_1E27A9AE_003305B9_h_25
+#pragma x2c_region_begin u_1E27A9AE_003305B9_h_26
 #include "generate.h"
+#pragma x2c_region_end u_1E27A9AE_003305B9_h_26
+#pragma x2c_region_begin u_1E27A9AE_003305B9_h_27
+#include "module-layout.h"
+#pragma x2c_region_end u_1E27A9AE_003305B9_h_27
+#pragma x2c_region_begin u_1E27A9AE_003305B9_h_28
 #include "format.h"
+#pragma x2c_region_end u_1E27A9AE_003305B9_h_28
+#pragma x2c_region_begin u_1E27A9AE_003305B9_h_29
 #include "protocol.h"
+#pragma x2c_region_end u_1E27A9AE_003305B9_h_29
+#pragma x2c_region_begin u_1E27A9AE_003305B9_h_30
 int main(int argc, char * * argv);
-
+#pragma x2c_region_end u_1E27A9AE_003305B9_h_30
 
 #endif /* __GUARD_0x1E27A9AE__ */

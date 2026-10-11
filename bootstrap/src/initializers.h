@@ -5,26 +5,50 @@
 #ifndef __GUARD_0x63A6D8C6__
 #define __GUARD_0x63A6D8C6__
 
+#pragma x2c_region_begin u_63A6D8C6_E82735D1_h_0
 #include "x2c.h"
+#pragma x2c_region_end u_63A6D8C6_E82735D1_h_0
+#pragma x2c_region_begin u_63A6D8C6_E82735D1_h_1
 #include "private-keywords.h"
+#pragma x2c_region_end u_63A6D8C6_E82735D1_h_1
+#pragma x2c_region_begin u_63A6D8C6_E82735D1_h_2
 #include "compiler.h"
+#pragma x2c_region_end u_63A6D8C6_E82735D1_h_2
+#pragma x2c_region_begin u_63A6D8C6_E82735D1_h_3
 #include "type.h"
+#pragma x2c_region_end u_63A6D8C6_E82735D1_h_3
+#pragma x2c_region_begin u_63A6D8C6_E82735D1_h_4
 #include "grammar.h"
+#pragma x2c_region_end u_63A6D8C6_E82735D1_h_4
+#pragma x2c_region_begin u_63A6D8C6_E82735D1_h_5
 #include "adapter-memo.h"
+#pragma x2c_region_end u_63A6D8C6_E82735D1_h_5
+#pragma x2c_region_begin u_63A6D8C6_E82735D1_h_6
 #include "ast.h"
+#pragma x2c_region_end u_63A6D8C6_E82735D1_h_6
+#pragma x2c_region_begin u_63A6D8C6_E82735D1_h_7
 #include "expressions.h"
+#pragma x2c_region_end u_63A6D8C6_E82735D1_h_7
+#pragma x2c_region_begin u_63A6D8C6_E82735D1_h_8
 #include "_x2c_module_6922FA3C.h"
+#pragma x2c_region_end u_63A6D8C6_E82735D1_h_8
+#pragma x2c_region_begin u_63A6D8C6_E82735D1_h_9
 List Compiler_convert_initializer(Compiler c, List value, Type type, List target);
-
+#pragma x2c_region_end u_63A6D8C6_E82735D1_h_9
+#pragma x2c_region_begin u_63A6D8C6_E82735D1_h_10
 List Compiler_initializer_rows(Compiler c, Type root, List items, List target);
-
+#pragma x2c_region_end u_63A6D8C6_E82735D1_h_10
+#pragma x2c_region_begin u_63A6D8C6_E82735D1_h_11
 List Compiler_initializer_field_path(Compiler c, Type type, List field);
-
+#pragma x2c_region_end u_63A6D8C6_E82735D1_h_11
+#pragma x2c_region_begin u_63A6D8C6_E82735D1_h_12
 List Compiler_initializer_slot(Compiler c, List target, List path);
-
+#pragma x2c_region_end u_63A6D8C6_E82735D1_h_12
+#pragma x2c_region_begin u_63A6D8C6_E82735D1_h_13
 List Compiler_convert_compound_literal(Compiler c, List value, Type type, Type native_type);
-
+#pragma x2c_region_end u_63A6D8C6_E82735D1_h_13
+#pragma x2c_region_begin u_63A6D8C6_E82735D1_h_14
 List Compiler_initializer_native_types(Compiler c, Type type);
-
+#pragma x2c_region_end u_63A6D8C6_E82735D1_h_14
 
 #endif /* __GUARD_0x63A6D8C6__ */

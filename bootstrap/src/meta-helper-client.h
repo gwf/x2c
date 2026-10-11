@@ -5,28 +5,68 @@
 #ifndef __GUARD_0xB1CED777__
 #define __GUARD_0xB1CED777__
 
+#pragma x2c_region_begin u_B1CED777_D7190902_h_0
 #include "x2c.h"
+#pragma x2c_region_end u_B1CED777_D7190902_h_0
+#pragma x2c_region_begin u_B1CED777_D7190902_h_1
 #include "compiler.h"
+#pragma x2c_region_end u_B1CED777_D7190902_h_1
+#pragma x2c_region_begin u_B1CED777_D7190902_h_2
 #include "meta-group.h"
+#pragma x2c_region_end u_B1CED777_D7190902_h_2
+#pragma x2c_region_begin u_B1CED777_D7190902_h_3
 #include "datum.h"
+#pragma x2c_region_end u_B1CED777_D7190902_h_3
+#pragma x2c_region_begin u_B1CED777_D7190902_h_4
 #include <errno.h>
+#pragma x2c_region_end u_B1CED777_D7190902_h_4
+#pragma x2c_region_begin u_B1CED777_D7190902_h_5
 #include <fcntl.h>
+#pragma x2c_region_end u_B1CED777_D7190902_h_5
+#pragma x2c_region_begin u_B1CED777_D7190902_h_6
 #include <poll.h>
+#pragma x2c_region_end u_B1CED777_D7190902_h_6
+#pragma x2c_region_begin u_B1CED777_D7190902_h_7
 #include <signal.h>
+#pragma x2c_region_end u_B1CED777_D7190902_h_7
+#pragma x2c_region_begin u_B1CED777_D7190902_h_8
 #include <stdlib.h>
+#pragma x2c_region_end u_B1CED777_D7190902_h_8
+#pragma x2c_region_begin u_B1CED777_D7190902_h_9
 #include <string.h>
+#pragma x2c_region_end u_B1CED777_D7190902_h_9
+#pragma x2c_region_begin u_B1CED777_D7190902_h_10
 #include <sys/wait.h>
+#pragma x2c_region_end u_B1CED777_D7190902_h_10
+#pragma x2c_region_begin u_B1CED777_D7190902_h_11
 #include <time.h>
+#pragma x2c_region_end u_B1CED777_D7190902_h_11
+#pragma x2c_region_begin u_B1CED777_D7190902_h_12
 #include <unistd.h>
+#pragma x2c_region_end u_B1CED777_D7190902_h_12
+#pragma x2c_region_begin u_B1CED777_D7190902_h_13
 void Compiler_report_meta_error(Compiler c, Var node, Symbol category, String message, Token site, List notes);
-
+#pragma x2c_region_end u_B1CED777_D7190902_h_13
+#pragma x2c_region_begin u_B1CED777_D7190902_h_14
 Var Compiler_meta_helper_call(Compiler c, String name, Token site, List arguments, String provider);
-
+#pragma x2c_region_end u_B1CED777_D7190902_h_14
+#pragma x2c_region_begin u_B1CED777_D7190902_h_15
 void Compiler_use_meta_helper(String path, Map failures, Map units);
-
+#pragma x2c_region_end u_B1CED777_D7190902_h_15
+#pragma x2c_region_begin u_B1CED777_D7190902_h_16
+void Compiler_meta_helper_building(int enabled);
+#pragma x2c_region_end u_B1CED777_D7190902_h_16
+#pragma x2c_region_begin u_B1CED777_D7190902_h_17
+String Compiler_load_meta_provider(String path, int index, String target);
+#pragma x2c_region_end u_B1CED777_D7190902_h_17
+#pragma x2c_region_begin u_B1CED777_D7190902_h_18
+String Compiler_load_meta_providers(String path, List targets);
+#pragma x2c_region_end u_B1CED777_D7190902_h_18
+#pragma x2c_region_begin u_B1CED777_D7190902_h_19
 void Compiler_begin_meta_unit(String filename);
-
+#pragma x2c_region_end u_B1CED777_D7190902_h_19
+#pragma x2c_region_begin u_B1CED777_D7190902_h_20
 void Compiler_stop_meta_helper(void);
-
+#pragma x2c_region_end u_B1CED777_D7190902_h_20
 
 #endif /* __GUARD_0xB1CED777__ */

@@ -1,0 +1,216 @@
+/Users/gary/.codex/worktrees/nested-modules-spike/x2c/.context/nested-modules/iteration-two/serial-research.mk:2: warning: overriding commands for target `commands'
+Makefile:101: warning: ignoring old commands for target `commands'
+/Users/gary/.codex/worktrees/nested-modules-spike/x2c/.context/nested-modules/iteration-two/serial-research.mk:5: warning: overriding commands for target `command-artifacts'
+Makefile:105: warning: ignoring old commands for target `command-artifacts'
+/Users/gary/.codex/worktrees/nested-modules-spike/x2c/.context/nested-modules/iteration-two/serial-research.mk:38: warning: overriding commands for target `commands-check'
+Makefile:138: warning: ignoring old commands for target `commands-check'
+/Users/gary/.codex/worktrees/nested-modules-spike/x2c/.context/nested-modules/iteration-two/serial-research.mk:45: warning: overriding commands for target `proof-cold-collection'
+Makefile:286: warning: ignoring old commands for target `proof-cold-collection'
+/Users/gary/.codex/worktrees/nested-modules-spike/x2c/.context/nested-modules/iteration-two/serial-research.mk:48: warning: overriding commands for target `agent-pr-check'
+Makefile:220: warning: ignoring old commands for target `agent-pr-check'
+time /usr/bin/make precommit
+Build prerequisites found.
+/usr/bin/make -C include all
+/usr/bin/make -C lib x2c.x
+tools/gen-linked-meta.sh
+/usr/bin/make -j1 -C builds x2c
+mkdir -p 0
+/usr/bin/make -f ../stage.mk -C 0
+################################################################################
+/usr/bin/make bootstrap-refresh
+Build prerequisites found.
+/usr/bin/make -C include all
+/usr/bin/make -C lib x2c.x
+tools/gen-linked-meta.sh
+/usr/bin/make -j1 -C builds x2c
+mkdir -p 0
+/usr/bin/make -f ../stage.mk -C 0
+################################################################################
+/usr/bin/make -C bootstrap realclean
+/usr/bin/make -C lib realclean
+rm -f libx2c.a ./args.o ./array-generics.o ./array.o ./atom.o ./block.o ./buffer.o ./cleanup.o ./clibc.o ./cmath.o ./common.o ./context.o ./datum.o ./diff.o ./digest.o ./dispatch.o ./error-macros.o ./error-private.o ./error.o ./error_init.o ./exception.o ./file.o ./func-errors.o ./func.o ./integer-ops.o ./iter.o ./json.o ./lib.o ./lisp-init.o ./lisp-targets.o ./lisp.o ./list-selectors.o ./list.o ./logger.o ./machine.o ./macro-value.o ./map-generics.o ./map.o ./match-cache.o ./match-machine.o ./match-plan.o ./match.o ./meta.o ./mutex.o ./native-scalar-types.o ./path.o ./pool.o ./private-keywords.o ./process.o ./protocols.o ./regex.o ./rewrite.o ./scan.o ./scope.o ./scripting.o ./split.o ./static-init.o ./string-classify.o ./string-escape.o ./string-format.o ./string-number.o ./string.o ./symbol.o ./symbolset.o ./system-macros.o ./thread-state.o ./thread.o ./tokenizer.o ./type.o ./typed-array.o ./typed-list.o ./typed-map.o ./var-adapters.o ./var-ledger.o ./var-tags.o ./var.o ./varconvert.o ./varops.o ./x2c.o                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  ./args.c ./array-generics.c ./array.c ./atom.c ./block.c ./buffer.c ./cleanup.c ./clibc.c ./cmath.c ./common.c ./context.c ./datum.c ./diff.c ./digest.c ./dispatch.c ./error-macros.c ./error-private.c ./error.c ./error_init.c ./exception.c ./file.c ./func-errors.c ./func.c ./integer-ops.c ./iter.c ./json.c ./lib.c ./lisp-init.c ./lisp-targets.c ./lisp.c ./list-selectors.c ./list.c ./logger.c ./machine.c ./macro-value.c ./map-generics.c ./map.c ./match-cache.c ./match-machine.c ./match-plan.c ./match.c ./meta.c ./mutex.c ./native-scalar-types.c ./path.c ./pool.c ./private-keywords.c ./process.c ./protocols.c ./regex.c ./rewrite.c ./scan.c ./scope.c ./scripting.c ./split.c ./static-init.c ./string-classify.c ./string-escape.c ./string-format.c ./string-number.c ./string.c ./symbol.c ./symbolset.c ./system-macros.c ./thread-state.c ./thread.c ./tokenizer.c ./type.c ./typed-array.c ./typed-list.c ./typed-map.c ./var-adapters.c ./var-ledger.c ./var-tags.c ./var.c ./varconvert.c ./varops.c ./x2c.c                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         ./args.h ./array-generics.h ./array.h ./atom.h ./block.h ./buffer.h ./cleanup.h ./clibc.h ./cmath.h ./common.h ./context.h ./datum.h ./diff.h ./digest.h ./dispatch.h ./error-macros.h ./error-private.h ./error.h ./error_init.h ./exception.h ./file.h ./func-errors.h ./func.h ./integer-ops.h ./iter.h ./json.h ./lib.h ./lisp-init.h ./lisp-targets.h ./lisp.h ./list-selectors.h ./list.h ./logger.h ./machine.h ./macro-value.h ./map-generics.h ./map.h ./match-cache.h ./match-machine.h ./match-plan.h ./match.h ./meta.h ./mutex.h ./native-scalar-types.h ./path.h ./pool.h ./private-keywords.h ./process.h ./protocols.h ./regex.h ./rewrite.h ./scan.h ./scope.h ./scripting.h ./split.h ./static-init.h ./string-classify.h ./string-escape.h ./string-format.h ./string-number.h ./string.h ./symbol.h ./symbolset.h ./system-macros.h ./thread-state.h ./thread.h ./tokenizer.h ./type.h ./typed-array.h ./typed-list.h ./typed-map.h ./var-adapters.h ./var-ledger.h ./var-tags.h ./var.h ./varconvert.h ./varops.h ./x2c.h
+/usr/bin/make -C src realclean
+rm -f x2c ./adapter-memo.o ./ast-rewrite.o ./ast.o ./build.o ./builtins.o ./cache.o ./callables.o ./cleanup.o ./cli.o ./collect.o ./compiler.o ./component-access.o ./component-delegate.o ./component-try.o ./deps.o ./diagnostics.o ./editor.o ./emit.o ./expressions-reports.o ./expressions.o ./fields.o ./format.o ./frontend.o ./generate.o ./grammar.o ./initializers.o ./install.o ./lambdas.o ./linked-meta.o ./literals.o ./macros.o ./main.o ./meta-group.o ./meta-helper-client.o ./meta-native.o ./meta-project.o ./meta-sdk.o ./module-access.o ./module-layout.o ./module-schedule.o ./module-tree.o ./operator-ledger.o ./parse-report-macros.o ./parse.o ./preprocess.o ./project.o ./protocol.o ./regions.o ./report.o ./script.o ./sourceview.o ./stage.o ./statements.o ./symbols.o ./toolchain.o ./transform.o ./type-ledger.o ./type.o ./utils.o                                                                                                                                                                                                                                                                         ./macros/categories.o ./macros/definitions.o ./macros/expansion.o ./macros/quotations.o                                       ./macros/quotations/construction.o ./macros/quotations/parsing.o                                                                                                                                                                                                                                                                                                       ./build.d ./builtins.d ./cache.d ./callables.d ./cleanup.d ./collect.d ./compiler.d ./deps.d ./diagnostics.d ./editor.d ./emit.d ./expressions.d ./format.d ./frontend.d ./generate.d ./initializers.d ./install.d ./lambdas.d ./linked-meta.d ./literals.d ./macros.d ./main.d ./meta-group.d ./meta-helper-client.d ./meta-native.d ./meta-project.d ./meta-sdk.d ./module-access.d ./module-layout.d ./module-tree.d ./operator-ledger.d ./parse.d ./preprocess.d ./project.d ./protocol.d ./regions.d ./script.d ./stage.d ./statements.d ./symbols.d ./transform.d                                                                                                                                                                                                                                                                         ./macros/categories.d ./macros/definitions.d ./macros/expansion.d ./macros/quotations.d                                       ./macros/quotations/construction.d ./macros/quotations/parsing.d                                                                                                                                                                                                                                                                                                       ./adapter-memo.c ./ast-rewrite.c ./ast.c ./build.c ./builtins.c ./cache.c ./callables.c ./cleanup.c ./cli.c ./collect.c ./compiler.c ./component-access.c ./component-delegate.c ./component-try.c ./deps.c ./diagnostics.c ./editor.c ./emit.c ./expressions-reports.c ./expressions.c ./fields.c ./format.c ./frontend.c ./generate.c ./grammar.c ./initializers.c ./install.c ./lambdas.c ./linked-meta.c ./literals.c ./macros.c ./main.c ./meta-group.c ./meta-helper-client.c ./meta-native.c ./meta-project.c ./meta-sdk.c ./module-access.c ./module-layout.c ./module-schedule.c ./module-tree.c ./operator-ledger.c ./parse-report-macros.c ./parse.c ./preprocess.c ./project.c ./protocol.c ./regions.c ./report.c ./script.c ./sourceview.c ./stage.c ./statements.c ./symbols.c ./toolchain.c ./transform.c ./type-ledger.c ./type.c ./utils.c                                                                                                                                                                                                                                                                         ./macros/categories.c ./macros/definitions.c ./macros/expansion.c ./macros/quotations.c                                       ./macros/quotations/construction.c ./macros/quotations/parsing.c                                                                                                                                                                                                                                                                                                       ./_x2c_module_6922FA3C.h ./adapter-memo.h ./ast-rewrite.h ./ast.h ./build.h ./builtins.h ./cache.h ./callables.h ./cleanup.h ./cli.h ./collect.h ./compiler.h ./component-access.h ./component-delegate.h ./component-try.h ./deps.h ./diagnostics.h ./editor.h ./emit.h ./expressions-reports.h ./expressions.h ./fields.h ./format.h ./frontend.h ./generate.h ./grammar.h ./initializers.h ./install.h ./lambdas.h ./linked-meta.h ./literals.h ./macros.h ./main.h ./meta-group.h ./meta-helper-client.h ./meta-native.h ./meta-project.h ./meta-sdk.h ./module-access.h ./module-layout.h ./module-schedule.h ./module-tree.h ./operator-ledger.h ./parse-report-macros.h ./parse.h ./preprocess.h ./project.h ./protocol.h ./regions.h ./report.h ./script.h ./sourceview.h ./stage.h ./statements.h ./symbols.h ./toolchain.h ./transform.h ./type-ledger.h ./type.h ./utils.h                                                                                                                                                                                                                                                                         ./macros/_x2c_module_24E8AEEE.h ./macros/_x2c_module_5F5AD92C.h ./macros/_x2c_module_71BA58ED.h ./macros/_x2c_module_A28B3F63.h ./macros/categories.h ./macros/definitions.h ./macros/expansion.h ./macros/quotations.h                                       ./macros/quotations/_x2c_module_1F30BA4F.h ./macros/quotations/_x2c_module_B07F9226.h ./macros/quotations/construction.h ./macros/quotations/parsing.h                                                                                                                                                                                                                                                                                                       ./build.xnm ./builtins.xnm ./cache.xnm ./callables.xnm ./cleanup.xnm ./collect.xnm ./compiler.xnm ./deps.xnm ./diagnostics.xnm ./editor.xnm ./emit.xnm ./expressions.xnm ./format.xnm ./frontend.xnm ./generate.xnm ./initializers.xnm ./install.xnm ./lambdas.xnm ./linked-meta.xnm ./literals.xnm ./macros.xnm ./main.xnm ./meta-group.xnm ./meta-helper-client.xnm ./meta-native.xnm ./meta-project.xnm ./meta-sdk.xnm ./module-access.xnm ./module-layout.xnm ./module-tree.xnm ./operator-ledger.xnm ./parse.xnm ./preprocess.xnm ./project.xnm ./protocol.xnm ./regions.xnm ./script.xnm ./stage.xnm ./statements.xnm ./symbols.xnm ./transform.xnm                                                                                                                                                                                                                                                                         ./macros/categories.xnm ./macros/definitions.xnm ./macros/expansion.xnm ./macros/quotations.xnm                                       ./macros/quotations/construction.xnm ./macros/quotations/parsing.xnm
+python3 tools/copy-bootstrap.py
+/usr/bin/make bootstrap-build
+/usr/bin/make -j1 -C bootstrap
+/usr/bin/make -j1 -C lib FLAGS="-fsigned-char -pthread  -O2  "
+rm -f libx2c.a
+ar -cr libx2c.a ./args.o ./array-generics.o ./array.o ./atom.o ./block.o ./buffer.o ./cleanup.o ./clibc.o ./cmath.o ./common.o ./context.o ./datum.o ./diff.o ./digest.o ./dispatch.o ./error-macros.o ./error-private.o ./error.o ./error_init.o ./exception.o ./file.o ./func-errors.o ./func.o ./integer-ops.o ./iter.o ./json.o ./lib.o ./lisp-init.o ./lisp-targets.o ./lisp.o ./list-selectors.o ./list.o ./logger.o ./machine.o ./macro-value.o ./map-generics.o ./map.o ./match-cache.o ./match-machine.o ./match-plan.o ./match.o ./meta.o ./mutex.o ./native-scalar-types.o ./path.o ./pool.o ./private-keywords.o ./process.o ./protocols.o ./regex.o ./rewrite.o ./scan.o ./scope.o ./scripting.o ./split.o ./static-init.o ./string-classify.o ./string-escape.o ./string-format.o ./string-number.o ./string.o ./symbol.o ./symbolset.o ./system-macros.o ./thread-state.o ./thread.o ./tokenizer.o ./type.o ./typed-array.o ./typed-list.o ./typed-map.o ./var-adapters.o ./var-ledger.o ./var-tags.o ./var.o ./varconvert.o ./varops.o ./x2c.o
+/usr/bin/make -j1 -C src FLAGS="-fsigned-char -pthread  -O2  "
+cc -o x2c ./adapter-memo.o ./ast-rewrite.o ./ast.o ./build.o ./builtins.o ./cache.o ./callables.o ./cleanup.o ./cli.o ./collect.o ./compiler.o ./component-access.o ./component-delegate.o ./component-try.o ./deps.o ./diagnostics.o ./editor.o ./emit.o ./expressions-reports.o ./expressions.o ./fields.o ./format.o ./frontend.o ./generate.o ./grammar.o ./initializers.o ./install.o ./lambdas.o ./linked-meta.o ./literals.o ./macros.o ./macros/categories.o ./macros/definitions.o ./macros/expansion.o ./macros/quotations.o ./macros/quotations/construction.o ./macros/quotations/parsing.o ./main.o ./meta-group.o ./meta-helper-client.o ./meta-native.o ./meta-project.o ./meta-sdk.o ./module-access.o ./module-layout.o ./module-schedule.o ./module-tree.o ./operator-ledger.o ./parse-report-macros.o ./parse.o ./preprocess.o ./project.o ./protocol.o ./regions.o ./report.o ./script.o ./sourceview.o ./stage.o ./statements.o ./symbols.o ./toolchain.o ./transform.o ./type-ledger.o ./type.o ./utils.o -Wl,-force_load,../lib/libx2c.a -lm
+rm -f ../../bin/x2c-bootstrap
+cp x2c ../../bin/x2c-bootstrap
+rm -f ../../bin/x2c
+ln -s x2c-bootstrap ../../bin/x2c
+/usr/bin/make rebuild-from-bootstrap
+/usr/bin/make -C builds clean
+rm -rf [0-9]*
+/usr/bin/make -C include all
+/usr/bin/make -C lib x2c.x
+tools/gen-linked-meta.sh
+/usr/bin/make -j1 -C builds x2c
+mkdir -p 0
+/usr/bin/make -f ../stage.mk -C 0
+mkdir -p lib
+../../bin/x2c translate -j 1   --out-dir lib \
+		../../lib/args.x ../../lib/array-generics.x ../../lib/array.x ../../lib/atom.x ../../lib/block.x ../../lib/buffer.x ../../lib/cleanup.x ../../lib/clibc.x ../../lib/cmath.x ../../lib/common.x ../../lib/context.x ../../lib/datum.x ../../lib/diff.x ../../lib/digest.x ../../lib/dispatch.x ../../lib/error-macros.x ../../lib/error-private.x ../../lib/error.x ../../lib/error_init.x ../../lib/exception.x ../../lib/file.x ../../lib/func-errors.x ../../lib/func.x ../../lib/integer-ops.x ../../lib/iter.x ../../lib/json.x ../../lib/lib.x ../../lib/lisp-init.x ../../lib/lisp-targets.x ../../lib/lisp.x ../../lib/list-selectors.x ../../lib/list.x ../../lib/logger.x ../../lib/machine.x ../../lib/macro-value.x ../../lib/map-generics.x ../../lib/map.x ../../lib/match-cache.x ../../lib/match-machine.x ../../lib/match-plan.x ../../lib/match.x ../../lib/meta.x ../../lib/mutex.x ../../lib/native-scalar-types.x ../../lib/path.x ../../lib/pool.x ../../lib/private-keywords.x ../../lib/process.x ../../lib/protocols.x ../../lib/regex.x ../../lib/rewrite.x ../../lib/scan.x ../../lib/scope.x ../../lib/scripting.x ../../lib/split.x ../../lib/static-init.x ../../lib/string-classify.x ../../lib/string-escape.x ../../lib/string-format.x ../../lib/string-number.x ../../lib/string.x ../../lib/symbol.x ../../lib/symbolset.x ../../lib/system-macros.x ../../lib/thread-state.x ../../lib/thread.x ../../lib/tokenizer.x ../../lib/type.x ../../lib/typed-array.x ../../lib/typed-list.x ../../lib/typed-map.x ../../lib/var-adapters.x ../../lib/var-ledger.x ../../lib/var-tags.x ../../lib/var.x ../../lib/varconvert.x ../../lib/varops.x ../../lib/x2c.x
+Translated 78 x2c files to lib in 9.41 s
+  Generated 78 C files and 78 headers (2.6 MiB)
+rm -f libx2c.a
+ar rv libx2c.a lib/args.o lib/array-generics.o lib/array.o lib/atom.o lib/block.o lib/buffer.o lib/cleanup.o lib/clibc.o lib/cmath.o lib/common.o lib/context.o lib/datum.o lib/diff.o lib/digest.o lib/dispatch.o lib/error-macros.o lib/error-private.o lib/error.o lib/error_init.o lib/exception.o lib/file.o lib/func-errors.o lib/func.o lib/integer-ops.o lib/iter.o lib/json.o lib/lib.o lib/lisp-init.o lib/lisp-targets.o lib/lisp.o lib/list-selectors.o lib/list.o lib/logger.o lib/machine.o lib/macro-value.o lib/map-generics.o lib/map.o lib/match-cache.o lib/match-machine.o lib/match-plan.o lib/match.o lib/meta.o lib/mutex.o lib/native-scalar-types.o lib/path.o lib/pool.o lib/private-keywords.o lib/process.o lib/protocols.o lib/regex.o lib/rewrite.o lib/scan.o lib/scope.o lib/scripting.o lib/split.o lib/static-init.o lib/string-classify.o lib/string-escape.o lib/string-format.o lib/string-number.o lib/string.o lib/symbol.o lib/symbolset.o lib/system-macros.o lib/thread-state.o lib/thread.o lib/tokenizer.o lib/type.o lib/typed-array.o lib/typed-list.o lib/typed-map.o lib/var-adapters.o lib/var-ledger.o lib/var-tags.o lib/var.o lib/varconvert.o lib/varops.o lib/x2c.o
+ar: creating archive libx2c.a
+a - lib/args.o
+a - lib/array-generics.o
+a - lib/array.o
+a - lib/atom.o
+a - lib/block.o
+a - lib/buffer.o
+a - lib/cleanup.o
+a - lib/clibc.o
+a - lib/cmath.o
+a - lib/common.o
+a - lib/context.o
+a - lib/datum.o
+a - lib/diff.o
+a - lib/digest.o
+a - lib/dispatch.o
+a - lib/error-macros.o
+a - lib/error-private.o
+a - lib/error.o
+a - lib/error_init.o
+a - lib/exception.o
+a - lib/file.o
+a - lib/func-errors.o
+a - lib/func.o
+a - lib/integer-ops.o
+a - lib/iter.o
+a - lib/json.o
+a - lib/lib.o
+a - lib/lisp-init.o
+a - lib/lisp-targets.o
+a - lib/lisp.o
+a - lib/list-selectors.o
+a - lib/list.o
+a - lib/logger.o
+a - lib/machine.o
+a - lib/macro-value.o
+a - lib/map-generics.o
+a - lib/map.o
+a - lib/match-cache.o
+a - lib/match-machine.o
+a - lib/match-plan.o
+a - lib/match.o
+a - lib/meta.o
+a - lib/mutex.o
+a - lib/native-scalar-types.o
+a - lib/path.o
+a - lib/pool.o
+a - lib/private-keywords.o
+a - lib/process.o
+a - lib/protocols.o
+a - lib/regex.o
+a - lib/rewrite.o
+a - lib/scan.o
+a - lib/scope.o
+a - lib/scripting.o
+a - lib/split.o
+a - lib/static-init.o
+a - lib/string-classify.o
+a - lib/string-escape.o
+a - lib/string-format.o
+a - lib/string-number.o
+a - lib/string.o
+a - lib/symbol.o
+a - lib/symbolset.o
+a - lib/system-macros.o
+a - lib/thread-state.o
+a - lib/thread.o
+a - lib/tokenizer.o
+a - lib/type.o
+a - lib/typed-array.o
+a - lib/typed-list.o
+a - lib/typed-map.o
+a - lib/var-adapters.o
+a - lib/var-ledger.o
+a - lib/var-tags.o
+a - lib/var.o
+a - lib/varconvert.o
+a - lib/varops.o
+a - lib/x2c.o
+mkdir -p src
+../../bin/x2c translate -j 1   --out-dir src \
+		../../src/adapter-memo.x ../../src/ast-rewrite.x ../../src/ast.x ../../src/build.x ../../src/builtins.x ../../src/cache.x ../../src/callables.x ../../src/cleanup.x ../../src/cli.x ../../src/collect.x ../../src/compiler.x ../../src/component-access.x ../../src/component-delegate.x ../../src/component-try.x ../../src/deps.x ../../src/diagnostics.x ../../src/editor.x ../../src/emit.x ../../src/expressions-reports.x ../../src/expressions.x ../../src/fields.x ../../src/format.x ../../src/frontend.x ../../src/generate.x ../../src/grammar.x ../../src/initializers.x ../../src/install.x ../../src/lambdas.x ../../src/linked-meta.x ../../src/literals.x ../../src/macros.x ../../src/macros/categories.x ../../src/macros/definitions.x ../../src/macros/expansion.x ../../src/macros/quotations.x ../../src/macros/quotations/construction.x ../../src/macros/quotations/parsing.x ../../src/main.x ../../src/meta-group.x ../../src/meta-helper-client.x ../../src/meta-native.x ../../src/meta-project.x ../../src/meta-sdk.x ../../src/module-access.x ../../src/module-layout.x ../../src/module-schedule.x ../../src/module-tree.x ../../src/operator-ledger.x ../../src/parse-report-macros.x ../../src/parse.x ../../src/preprocess.x ../../src/project.x ../../src/protocol.x ../../src/regions.x ../../src/report.x ../../src/script.x ../../src/sourceview.x ../../src/stage.x ../../src/statements.x ../../src/symbols.x ../../src/toolchain.x ../../src/transform.x ../../src/type-ledger.x ../../src/type.x ../../src/utils.x
+Translated 65 x2c files to src in 83.74 s
+  Generated 65 C files and 65 headers (6.6 MiB)
+Traceback (most recent call last):
+  File "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/../../tools/native-layout-project.py", line 583, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/../../tools/native-layout-project.py", line 559, in main
+    return compile_native(sys.argv[2:])
+  File "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/../../tools/native-layout-project.py", line 505, in compile_native
+    result, configuration = project_native_text(
+                            ~~~~~~~~~~~~~~~~~~~^
+        consumer_text, metadata, compiler, destination.parent, edges)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/../../tools/native-layout-project.py", line 481, in project_native_text
+    return project(text, configuration, owner_streams=streams,
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                   consumer_regions=regions), configuration
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/../../tools/native-layout-project.py", line 415, in project
+    visit(name)
+    ~~~~~^^^^^^
+  File "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/../../tools/native-layout-project.py", line 401, in visit
+    visit(reference[1])
+    ~~~~~^^^^^^^^^^^^^^
+  File "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/../../tools/native-layout-project.py", line 401, in visit
+    visit(reference[1])
+    ~~~~~^^^^^^^^^^^^^^
+  File "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/../../tools/native-layout-project.py", line 401, in visit
+    visit(reference[1])
+    ~~~~~^^^^^^^^^^^^^^
+  [Previous line repeated 5 more times]
+  File "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/builds/0/../../tools/native-layout-project.py", line 369, in visit
+    continue
+KeyboardInterrupt
+make[4]: *** [src/emit.o] Interrupt: 2
+make[3]: *** [x2c] Interrupt: 2
+make[2]: *** [rebuild-from-bootstrap] Interrupt: 2
+make[1]: *** [precommit] Interrupt: 2
+time: command terminated abnormally
+      411.67 real       381.20 user        24.66 sys
+make: *** [agent-pr-check] Interrupt: 2
+agent-pr-check: stale - build configuration or tools changed; 280 file(s) differ: AGENTS.md, agents/x2c-module-catalog.md, bootstrap/lib/Makefile ...
+Traceback (most recent call last):
+  File "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/.context/nested-modules/iteration-two/run-serial-research-gate.py", line 74, in <module>
+    raise SystemExit(gate.main())
+                     ~~~~~~~~~^^
+  File "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/tools/gate-state.py", line 387, in main
+    return cmd_ensure(args.gate)
+  File "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/tools/gate-state.py", line 353, in cmd_ensure
+    result = run_gate(gate)
+  File "/Users/gary/.codex/worktrees/nested-modules-spike/x2c/.context/nested-modules/iteration-two/run-serial-research-gate.py", line 67, in <lambda>
+    gate.run_gate = lambda name: subprocess.run(
+                                 ~~~~~~~~~~~~~~^
+        ['make', '-j1', '-f', 'Makefile', '-f', str(extra), name],
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        cwd=root, check=False).returncode
+        ^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/subprocess.py", line 557, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/subprocess.py", line 1213, in communicate
+    self.wait()
+    ~~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/subprocess.py", line 1279, in wait
+    return self._wait(timeout=timeout)
+           ~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/subprocess.py", line 2084, in _wait
+    (pid, sts) = self._try_wait(0)
+                 ~~~~~~~~~~~~~~^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/subprocess.py", line 2042, in _try_wait
+    (pid, sts) = os.waitpid(self.pid, wait_flags)
+                 ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+KeyboardInterrupt

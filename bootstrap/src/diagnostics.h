@@ -5,75 +5,134 @@
 #ifndef __GUARD_0xB8F5462B__
 #define __GUARD_0xB8F5462B__
 
+#pragma x2c_region_begin u_B8F5462B_D3DE99AC_h_0
 #include "x2c.h"
+#pragma x2c_region_end u_B8F5462B_D3DE99AC_h_0
+#pragma x2c_region_begin u_B8F5462B_D3DE99AC_h_1
 #include "common.h"
+#pragma x2c_region_end u_B8F5462B_D3DE99AC_h_1
+#pragma x2c_region_begin u_B8F5462B_D3DE99AC_h_2
+#pragma x2c_namespace_require n_7D5E0CAA
+#pragma x2c_namespace_require n_E9CCD946
 typedef struct Diagnostics * Diagnostics;
-
+#pragma x2c_region_end u_B8F5462B_D3DE99AC_h_2
+#pragma x2c_region_begin u_B8F5462B_D3DE99AC_h_3
 #include "compiler.h"
-typedef struct Diagnostics{
+#pragma x2c_region_end u_B8F5462B_D3DE99AC_h_3
+#pragma x2c_region_begin u_B8F5462B_D3DE99AC_h_4
+struct Diagnostics{
+#pragma x2c_namespace_require n_29507A2B
   Array entries;
+#pragma x2c_namespace_require n_CD4FE74B
   Map published;
+#pragma x2c_namespace_require n_9F155932
   Compiler printer;
   int limit;
   int count, limit_notified;
 }
-* Diagnostics;
-
-typedef struct DiagnosticsHold{
+;
+#pragma x2c_region_end u_B8F5462B_D3DE99AC_h_4
+#pragma x2c_region_begin u_B8F5462B_D3DE99AC_h_5
+#pragma x2c_namespace_require n_7D5E0CAA
+#pragma x2c_namespace_require n_E9CCD946
+typedef struct Diagnostics * Diagnostics;
+#pragma x2c_region_end u_B8F5462B_D3DE99AC_h_5
+#pragma x2c_region_begin u_B8F5462B_D3DE99AC_h_6
+struct DiagnosticsHold{
+#pragma x2c_namespace_require n_9F155932
   Compiler printer;
   int entries, count, limit_notified;
 }
-DiagnosticsHold;
-
+;
+#pragma x2c_region_end u_B8F5462B_D3DE99AC_h_6
+#pragma x2c_region_begin u_B8F5462B_D3DE99AC_h_7
+#pragma x2c_namespace_require n_6F10EE07
+#pragma x2c_namespace_require n_A651CF6B
+typedef struct DiagnosticsHold DiagnosticsHold;
+#pragma x2c_region_end u_B8F5462B_D3DE99AC_h_7
+#pragma x2c_region_begin u_B8F5462B_D3DE99AC_h_8
 #include "type.h"
+#pragma x2c_region_end u_B8F5462B_D3DE99AC_h_8
+#pragma x2c_region_begin u_B8F5462B_D3DE99AC_h_9
 #include "json.h"
+#pragma x2c_region_end u_B8F5462B_D3DE99AC_h_9
+#pragma x2c_region_begin u_B8F5462B_D3DE99AC_h_10
 #include "report.h"
+#pragma x2c_region_end u_B8F5462B_D3DE99AC_h_10
+#pragma x2c_region_begin u_B8F5462B_D3DE99AC_h_11
 #include <errno.h>
+#pragma x2c_region_end u_B8F5462B_D3DE99AC_h_11
+#pragma x2c_region_begin u_B8F5462B_D3DE99AC_h_12
 #include <fcntl.h>
+#pragma x2c_region_end u_B8F5462B_D3DE99AC_h_12
+#pragma x2c_region_begin u_B8F5462B_D3DE99AC_h_13
 #include <unistd.h>
+#pragma x2c_region_end u_B8F5462B_D3DE99AC_h_13
+#pragma x2c_region_begin u_B8F5462B_D3DE99AC_h_14
 Diagnostics Diagnostics_new(Compiler printer, int limit);
-
+#pragma x2c_region_end u_B8F5462B_D3DE99AC_h_14
+#pragma x2c_region_begin u_B8F5462B_D3DE99AC_h_15
 void Diagnostics_reset(Diagnostics diag);
-
+#pragma x2c_region_end u_B8F5462B_D3DE99AC_h_15
+#pragma x2c_region_begin u_B8F5462B_D3DE99AC_h_16
 DiagnosticsHold Diagnostics_hold(Diagnostics diag);
-
+#pragma x2c_region_end u_B8F5462B_D3DE99AC_h_16
+#pragma x2c_region_begin u_B8F5462B_D3DE99AC_h_17
 void Diagnostics_release(Diagnostics diag, DiagnosticsHold hold, int keep);
-
+#pragma x2c_region_end u_B8F5462B_D3DE99AC_h_17
+#pragma x2c_region_begin u_B8F5462B_D3DE99AC_h_18
 List Diagnostics_entries(Diagnostics diag);
-
+#pragma x2c_region_end u_B8F5462B_D3DE99AC_h_18
+#pragma x2c_region_begin u_B8F5462B_D3DE99AC_h_19
 int Diagnostics_reached_limit(Diagnostics diag);
-
+#pragma x2c_region_end u_B8F5462B_D3DE99AC_h_19
+#pragma x2c_region_begin u_B8F5462B_D3DE99AC_h_20
 void Diagnostics_report(Diagnostics diag, Symbol code, String message, List location, List notes);
-
+#pragma x2c_region_end u_B8F5462B_D3DE99AC_h_20
+#pragma x2c_region_begin u_B8F5462B_D3DE99AC_h_21
 int diagnostics_write_json(String path);
-
+#pragma x2c_region_end u_B8F5462B_D3DE99AC_h_21
+#pragma x2c_region_begin u_B8F5462B_D3DE99AC_h_22
 void Compiler_print_diagnostic(Compiler compiler, List entry);
-
+#pragma x2c_region_end u_B8F5462B_D3DE99AC_h_22
+#pragma x2c_region_begin u_B8F5462B_D3DE99AC_h_23
 List Compiler_origin_location(Compiler compiler, int occurrence);
-
+#pragma x2c_region_end u_B8F5462B_D3DE99AC_h_23
+#pragma x2c_region_begin u_B8F5462B_D3DE99AC_h_24
 String Compiler_display_path(Compiler compiler, String path);
-
+#pragma x2c_region_end u_B8F5462B_D3DE99AC_h_24
+#pragma x2c_region_begin u_B8F5462B_D3DE99AC_h_25
 List Compiler_token_location(Compiler compiler, Token token);
-
+#pragma x2c_region_end u_B8F5462B_D3DE99AC_h_25
+#pragma x2c_region_begin u_B8F5462B_D3DE99AC_h_26
 String Compiler_token_source(Compiler c, Token token, int * line);
-
+#pragma x2c_region_end u_B8F5462B_D3DE99AC_h_26
+#pragma x2c_region_begin u_B8F5462B_D3DE99AC_h_27
 _Noreturn void Compiler_report_error(Compiler compiler, Symbol code, String message, Token token, List notes);
-
+#pragma x2c_region_end u_B8F5462B_D3DE99AC_h_27
+#pragma x2c_region_begin u_B8F5462B_D3DE99AC_h_28
 void Compiler_report_warning(Compiler c, Symbol code, String message, Token token, List notes);
-
+#pragma x2c_region_end u_B8F5462B_D3DE99AC_h_28
+#pragma x2c_region_begin u_B8F5462B_D3DE99AC_h_29
 void Compiler_report_warning_at(Compiler compiler, Symbol code, String message, List location, List notes);
-
+#pragma x2c_region_end u_B8F5462B_D3DE99AC_h_29
+#pragma x2c_region_begin u_B8F5462B_D3DE99AC_h_30
 void Compiler_take_diagnostics(Compiler c, Compiler child);
-
+#pragma x2c_region_end u_B8F5462B_D3DE99AC_h_30
+#pragma x2c_region_begin u_B8F5462B_D3DE99AC_h_31
 int Compiler_error_count(Compiler compiler);
-
+#pragma x2c_region_end u_B8F5462B_D3DE99AC_h_31
+#pragma x2c_region_begin u_B8F5462B_D3DE99AC_h_32
 List Compiler_diagnostics(Compiler compiler);
-
+#pragma x2c_region_end u_B8F5462B_D3DE99AC_h_32
+#pragma x2c_region_begin u_B8F5462B_D3DE99AC_h_33
 void Compiler_dump_tokens(Compiler compiler);
-
+#pragma x2c_region_end u_B8F5462B_D3DE99AC_h_33
+#pragma x2c_region_begin u_B8F5462B_D3DE99AC_h_34
 void Compiler_dump_symbol_table(Compiler compiler, Map map);
-
+#pragma x2c_region_end u_B8F5462B_D3DE99AC_h_34
+#pragma x2c_region_begin u_B8F5462B_D3DE99AC_h_35
 void Compiler_dump_cache(Compiler compiler);
-
+#pragma x2c_region_end u_B8F5462B_D3DE99AC_h_35
 
 #endif /* __GUARD_0xB8F5462B__ */

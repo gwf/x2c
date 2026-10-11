@@ -5,140 +5,225 @@
 #ifndef __GUARD_0x200088A7__
 #define __GUARD_0x200088A7__
 
+#pragma x2c_region_begin u_200088A7_E514BC72_h_0
 #include "x2c.h"
+#pragma x2c_region_end u_200088A7_E514BC72_h_0
+#pragma x2c_region_begin u_200088A7_E514BC72_h_1
 #include "compiler.h"
-typedef struct MetaContext{
+#pragma x2c_region_end u_200088A7_E514BC72_h_1
+#pragma x2c_region_begin u_200088A7_E514BC72_h_2
+struct MetaContext{
+#pragma x2c_namespace_require n_9F155932
   Compiler expander, evaluator;
+#pragma x2c_namespace_require n_C713742F
   String definition_file;
+#pragma x2c_namespace_require n_CD4FE74B
   Map captures;
   int has_bindings;
+#pragma x2c_namespace_require n_67E082C9
   Token site;
 }
-MetaContext;
-
+;
+#pragma x2c_region_end u_200088A7_E514BC72_h_2
+#pragma x2c_region_begin u_200088A7_E514BC72_h_3
+#pragma x2c_namespace_require n_0C332E1C
+#pragma x2c_namespace_require n_AF384BD8
+typedef struct MetaContext MetaContext;
+#pragma x2c_region_end u_200088A7_E514BC72_h_3
+#pragma x2c_region_begin u_200088A7_E514BC72_h_4
 #include "grammar.h"
+#pragma x2c_region_end u_200088A7_E514BC72_h_4
+#pragma x2c_region_begin u_200088A7_E514BC72_h_5
 #include "_x2c_module_6922FA3C.h"
+#pragma x2c_region_end u_200088A7_E514BC72_h_5
+#pragma x2c_region_begin u_200088A7_E514BC72_h_6
 #include "meta.h"
+#pragma x2c_region_end u_200088A7_E514BC72_h_6
+#pragma x2c_region_begin u_200088A7_E514BC72_h_7
 #include <limits.h>
+#pragma x2c_region_end u_200088A7_E514BC72_h_7
+#pragma x2c_region_begin u_200088A7_E514BC72_h_8
 #include <stdint.h>
+#pragma x2c_region_end u_200088A7_E514BC72_h_8
+#pragma x2c_region_begin u_200088A7_E514BC72_h_9
 #include <sys/stat.h>
+#pragma x2c_region_end u_200088A7_E514BC72_h_9
+#pragma x2c_region_begin u_200088A7_E514BC72_h_10
 MetaContext * MetaContext_current(void);
-
+#pragma x2c_region_end u_200088A7_E514BC72_h_10
+#pragma x2c_region_begin u_200088A7_E514BC72_h_11
 Compiler Compiler_expanding(void);
-
+#pragma x2c_region_end u_200088A7_E514BC72_h_11
+#pragma x2c_region_begin u_200088A7_E514BC72_h_12
 int Type_is_named(Type type, String name);
-
+#pragma x2c_region_end u_200088A7_E514BC72_h_12
+#pragma x2c_region_begin u_200088A7_E514BC72_h_13
 Type Type_numeric(Type type);
-
+#pragma x2c_region_end u_200088A7_E514BC72_h_13
+#pragma x2c_region_begin u_200088A7_E514BC72_h_14
 int Type_is_text(Type type);
-
+#pragma x2c_region_end u_200088A7_E514BC72_h_14
+#pragma x2c_region_begin u_200088A7_E514BC72_h_15
 Type Type_aggregate(Type type);
-
+#pragma x2c_region_end u_200088A7_E514BC72_h_15
+#pragma x2c_region_begin u_200088A7_E514BC72_h_16
 List Type_marked_fields(Type aggregate, Symbol mark);
-
+#pragma x2c_region_end u_200088A7_E514BC72_h_16
+#pragma x2c_region_begin u_200088A7_E514BC72_h_17
 List Type_resolve_member(Type type, String name, int call);
-
+#pragma x2c_region_end u_200088A7_E514BC72_h_17
+#pragma x2c_region_begin u_200088A7_E514BC72_h_18
 Code Type_protocol_member(Type type, String name);
-
+#pragma x2c_region_end u_200088A7_E514BC72_h_18
+#pragma x2c_region_begin u_200088A7_E514BC72_h_19
 Type Code_type(Code value);
-
+#pragma x2c_region_end u_200088A7_E514BC72_h_19
+#pragma x2c_region_begin u_200088A7_E514BC72_h_20
 Var Code_value(Code code);
-
+#pragma x2c_region_end u_200088A7_E514BC72_h_20
+#pragma x2c_region_begin u_200088A7_E514BC72_h_21
 int Code_exits(Code statement);
-
+#pragma x2c_region_end u_200088A7_E514BC72_h_21
+#pragma x2c_region_begin u_200088A7_E514BC72_h_22
 int Code_is_static_pattern(Code pattern);
-
+#pragma x2c_region_end u_200088A7_E514BC72_h_22
+#pragma x2c_region_begin u_200088A7_E514BC72_h_23
 Code Code_register_rewrite(Code function, Macro shape, List holes);
-
+#pragma x2c_region_end u_200088A7_E514BC72_h_23
+#pragma x2c_region_begin u_200088A7_E514BC72_h_24
 Code Code_register_marked_rewrite(Code function, Symbol mark, Macro shape, List holes);
-
+#pragma x2c_region_end u_200088A7_E514BC72_h_24
+#pragma x2c_region_begin u_200088A7_E514BC72_h_25
 Code Code_register_after_initialization(Code c, Macro shape, List holes);
-
+#pragma x2c_region_end u_200088A7_E514BC72_h_25
+#pragma x2c_region_begin u_200088A7_E514BC72_h_26
 List x2c_syntax_type(List value);
-
+#pragma x2c_region_end u_200088A7_E514BC72_h_26
+#pragma x2c_region_begin u_200088A7_E514BC72_h_27
 List x2c_protocol_member(List participant, List base, String member);
-
+#pragma x2c_region_end u_200088A7_E514BC72_h_27
+#pragma x2c_region_begin u_200088A7_E514BC72_h_28
 List x2c_method_resolve(List type_value, String name);
-
+#pragma x2c_region_end u_200088A7_E514BC72_h_28
+#pragma x2c_region_begin u_200088A7_E514BC72_h_29
 List builtin_foreach_bindings(List declaration);
-
+#pragma x2c_region_end u_200088A7_E514BC72_h_29
+#pragma x2c_region_begin u_200088A7_E514BC72_h_30
 List builtin_foreach_reference(String name);
-
+#pragma x2c_region_end u_200088A7_E514BC72_h_30
+#pragma x2c_region_begin u_200088A7_E514BC72_h_31
 int x2c_type_is_integral(List value);
-
+#pragma x2c_region_end u_200088A7_E514BC72_h_31
+#pragma x2c_region_begin u_200088A7_E514BC72_h_32
 int x2c_type_is_pointer(List value);
-
+#pragma x2c_region_end u_200088A7_E514BC72_h_32
+#pragma x2c_region_begin u_200088A7_E514BC72_h_33
 List x2c_type_element(List value);
-
+#pragma x2c_region_end u_200088A7_E514BC72_h_33
+#pragma x2c_region_begin u_200088A7_E514BC72_h_34
 List x2c_type_parameters(List value);
-
+#pragma x2c_region_end u_200088A7_E514BC72_h_34
+#pragma x2c_region_begin u_200088A7_E514BC72_h_35
 List x2c_type_return(List value);
-
+#pragma x2c_region_end u_200088A7_E514BC72_h_35
+#pragma x2c_region_begin u_200088A7_E514BC72_h_36
 List x2c_type_parts(List value);
-
+#pragma x2c_region_end u_200088A7_E514BC72_h_36
+#pragma x2c_region_begin u_200088A7_E514BC72_h_37
 String x2c_type_reverse_name(String base, String participant);
-
+#pragma x2c_region_end u_200088A7_E514BC72_h_37
+#pragma x2c_region_begin u_200088A7_E514BC72_h_38
 List x2c_type_resolve(List value);
-
+#pragma x2c_region_end u_200088A7_E514BC72_h_38
+#pragma x2c_region_begin u_200088A7_E514BC72_h_39
 List x2c_type_layout(List value);
-
+#pragma x2c_region_end u_200088A7_E514BC72_h_39
+#pragma x2c_region_begin u_200088A7_E514BC72_h_40
 int x2c_type_is_value(List value);
-
+#pragma x2c_region_end u_200088A7_E514BC72_h_40
+#pragma x2c_region_begin u_200088A7_E514BC72_h_41
 Symbol x2c_type_tag_name(String name);
-
+#pragma x2c_region_end u_200088A7_E514BC72_h_41
+#pragma x2c_region_begin u_200088A7_E514BC72_h_42
 List x2c_type_fields(List value);
-
+#pragma x2c_region_end u_200088A7_E514BC72_h_42
+#pragma x2c_region_begin u_200088A7_E514BC72_h_43
 String x2c_binding_spelling(Var syntax);
-
+#pragma x2c_region_end u_200088A7_E514BC72_h_43
+#pragma x2c_region_begin u_200088A7_E514BC72_h_44
 List x2c_ident(String spelling);
-
+#pragma x2c_region_end u_200088A7_E514BC72_h_44
+#pragma x2c_region_begin u_200088A7_E514BC72_h_45
 Var builtin_foreach_unique(String stem);
-
+#pragma x2c_region_end u_200088A7_E514BC72_h_45
+#pragma x2c_region_begin u_200088A7_E514BC72_h_46
 Map x2c_meta_definition_hashes(void);
-
+#pragma x2c_region_end u_200088A7_E514BC72_h_46
+#pragma x2c_region_begin u_200088A7_E514BC72_h_47
 String x2c_function_name(List function);
-
+#pragma x2c_region_end u_200088A7_E514BC72_h_47
+#pragma x2c_region_begin u_200088A7_E514BC72_h_48
 List x2c_function_parameter(List function, String wanted);
-
+#pragma x2c_region_end u_200088A7_E514BC72_h_48
+#pragma x2c_region_begin u_200088A7_E514BC72_h_49
 List binding_native_type(List syntax);
-
+#pragma x2c_region_end u_200088A7_E514BC72_h_49
+#pragma x2c_region_begin u_200088A7_E514BC72_h_50
 List binding_literal_list(List values);
-
+#pragma x2c_region_end u_200088A7_E514BC72_h_50
+#pragma x2c_region_begin u_200088A7_E514BC72_h_51
 String x2c_source_text(Var value);
-
+#pragma x2c_region_end u_200088A7_E514BC72_h_51
+#pragma x2c_region_begin u_200088A7_E514BC72_h_52
 String x2c_embed_text(Var requested);
-
+#pragma x2c_region_end u_200088A7_E514BC72_h_52
+#pragma x2c_region_begin u_200088A7_E514BC72_h_53
 Var x2c_literal_value(Var syntax);
-
+#pragma x2c_region_end u_200088A7_E514BC72_h_53
+#pragma x2c_region_begin u_200088A7_E514BC72_h_54
 List builtin_class_location(void);
-
+#pragma x2c_region_end u_200088A7_E514BC72_h_54
+#pragma x2c_region_begin u_200088A7_E514BC72_h_55
 String x2c_invocation_file(void);
-
+#pragma x2c_region_end u_200088A7_E514BC72_h_55
+#pragma x2c_region_begin u_200088A7_E514BC72_h_56
 int x2c_invocation_line(void);
-
+#pragma x2c_region_end u_200088A7_E514BC72_h_56
+#pragma x2c_region_begin u_200088A7_E514BC72_h_57
 int x2c_invocation_column(void);
-
+#pragma x2c_region_end u_200088A7_E514BC72_h_57
+#pragma x2c_region_begin u_200088A7_E514BC72_h_58
 void x2c_diagnostic_fail(String message, List notes);
-
+#pragma x2c_region_end u_200088A7_E514BC72_h_58
+#pragma x2c_region_begin u_200088A7_E514BC72_h_59
 void x2c_diagnostic_fail_at(Var node, Symbol category, String message, List notes);
-
+#pragma x2c_region_end u_200088A7_E514BC72_h_59
+#pragma x2c_region_begin u_200088A7_E514BC72_h_60
 void x2c_diagnostic_warn(String message, List notes);
-
+#pragma x2c_region_end u_200088A7_E514BC72_h_60
+#pragma x2c_region_begin u_200088A7_E514BC72_h_61
 Code x2c_enclosing(Symbol what);
-
+#pragma x2c_region_end u_200088A7_E514BC72_h_61
+#pragma x2c_region_begin u_200088A7_E514BC72_h_62
 void x2c_place(List where, Code code);
-
+#pragma x2c_region_end u_200088A7_E514BC72_h_62
+#pragma x2c_region_begin u_200088A7_E514BC72_h_63
 List meta_type_description(Var value);
-
+#pragma x2c_region_end u_200088A7_E514BC72_h_63
+#pragma x2c_region_begin u_200088A7_E514BC72_h_64
 List meta_source_description(Var value);
-
+#pragma x2c_region_end u_200088A7_E514BC72_h_64
+#pragma x2c_region_begin u_200088A7_E514BC72_h_65
 List builtin_foreach_complete(List expression);
-
+#pragma x2c_region_end u_200088A7_E514BC72_h_65
+#pragma x2c_region_begin u_200088A7_E514BC72_h_66
 List builtin_foreach_collection(List expression);
-
+#pragma x2c_region_end u_200088A7_E514BC72_h_66
+#pragma x2c_region_begin u_200088A7_E514BC72_h_67
 _Noreturn void MetaContext_reject(String message, List notes);
-
+#pragma x2c_region_end u_200088A7_E514BC72_h_67
+#pragma x2c_region_begin u_200088A7_E514BC72_h_68
 void Compiler_bind_sdk_primitives(Lisp lisp);
-
+#pragma x2c_region_end u_200088A7_E514BC72_h_68
 
 #endif /* __GUARD_0x200088A7__ */

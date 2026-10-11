@@ -2,72 +2,106 @@
 
 #pragma once
 
-#ifndef __GUARD_0x94DA08D2__
-#define __GUARD_0x94DA08D2__
+#ifndef __GUARD_0x5F5AD92C__
+#define __GUARD_0x5F5AD92C__
 
+#pragma x2c_region_begin u_5F5AD92C_0110CCBF_h_0
 #include "x2c.h"
-#include "_x2c_module_6922FA3C.h"
+#pragma x2c_region_end u_5F5AD92C_0110CCBF_h_0
+#pragma x2c_region_begin u_5F5AD92C_0110CCBF_h_1
+#include "../_x2c_module_6922FA3C.h"
+#pragma x2c_region_end u_5F5AD92C_0110CCBF_h_1
+#pragma x2c_region_begin u_5F5AD92C_0110CCBF_h_2
 List Compiler_expand_macro_invocation_node(Compiler c, Var stored, List arguments, Token invocation, AstPos position);
-
+#pragma x2c_region_end u_5F5AD92C_0110CCBF_h_2
+#pragma x2c_region_begin u_5F5AD92C_0110CCBF_h_3
 List _x2c_mod_6922FA3C_Compiler__stored_definition(Compiler c, Var stored, Token invocation);
-
+#pragma x2c_region_end u_5F5AD92C_0110CCBF_h_3
+#pragma x2c_region_begin u_5F5AD92C_0110CCBF_h_4
 Token Compiler_macro_invocation_site(Compiler c, Var site);
-
+#pragma x2c_region_end u_5F5AD92C_0110CCBF_h_4
+#pragma x2c_region_begin u_5F5AD92C_0110CCBF_h_5
 void _x2c_mod_6922FA3C__file_scope_locals(List rows, Map locals);
-
+#pragma x2c_region_end u_5F5AD92C_0110CCBF_h_5
+#pragma x2c_region_begin u_5F5AD92C_0110CCBF_h_6
 int Compiler_macro_starts_target_at(Compiler c, AstPos position);
-
+#pragma x2c_region_end u_5F5AD92C_0110CCBF_h_6
+#pragma x2c_region_begin u_5F5AD92C_0110CCBF_h_7
 Symbol _x2c_mod_6922FA3C__result_kind(List definition);
-
+#pragma x2c_region_end u_5F5AD92C_0110CCBF_h_7
+#pragma x2c_region_begin u_5F5AD92C_0110CCBF_h_8
 List _x2c_mod_6922FA3C_Compiler__peek_invocation(Compiler c);
-
+#pragma x2c_region_end u_5F5AD92C_0110CCBF_h_8
+#pragma x2c_region_begin u_5F5AD92C_0110CCBF_h_9
 Token _x2c_mod_6922FA3C_Compiler__scan_name(Compiler c, String * spelling);
-
+#pragma x2c_region_end u_5F5AD92C_0110CCBF_h_9
+#pragma x2c_region_begin u_5F5AD92C_0110CCBF_h_10
 Atom _x2c_mod_6922FA3C_Compiler__name(Compiler c);
-
+#pragma x2c_region_end u_5F5AD92C_0110CCBF_h_10
+#pragma x2c_region_begin u_5F5AD92C_0110CCBF_h_11
 List _x2c_mod_6922FA3C_Compiler__lookup(Compiler c, Atom name, Token invocation);
-
+#pragma x2c_region_end u_5F5AD92C_0110CCBF_h_11
+#pragma x2c_region_begin u_5F5AD92C_0110CCBF_h_12
 int _x2c_mod_6922FA3C_Compiler__try_definition(Compiler c, Atom name, int install_lisp, Var * stored);
-
+#pragma x2c_region_end u_5F5AD92C_0110CCBF_h_12
+#pragma x2c_region_begin u_5F5AD92C_0110CCBF_h_13
 int _x2c_mod_6922FA3C_Compiler__try_macro(Compiler c, Map definitions, Atom name, Var * stored);
-
+#pragma x2c_region_end u_5F5AD92C_0110CCBF_h_13
+#pragma x2c_region_begin u_5F5AD92C_0110CCBF_h_14
 Symbol Compiler_macro_invocation_collection(Compiler c);
-
+#pragma x2c_region_end u_5F5AD92C_0110CCBF_h_14
+#pragma x2c_region_begin u_5F5AD92C_0110CCBF_h_15
 void Compiler_skip_macro_invocation(Compiler c);
-
+#pragma x2c_region_end u_5F5AD92C_0110CCBF_h_15
+#pragma x2c_region_begin u_5F5AD92C_0110CCBF_h_16
 int Compiler_skip_named_type_declaration(Compiler c);
-
+#pragma x2c_region_end u_5F5AD92C_0110CCBF_h_16
+#pragma x2c_region_begin u_5F5AD92C_0110CCBF_h_17
 int Compiler_macro_targets_unit(Compiler c);
-
+#pragma x2c_region_end u_5F5AD92C_0110CCBF_h_17
+#pragma x2c_region_begin u_5F5AD92C_0110CCBF_h_18
 List Compiler_try_parse_macro_target_at(Compiler c, AstPos position);
-
+#pragma x2c_region_end u_5F5AD92C_0110CCBF_h_18
+#pragma x2c_region_begin u_5F5AD92C_0110CCBF_h_19
 List _x2c_mod_6922FA3C_Compiler__target_at(Compiler c, AstPos position, int open);
-
+#pragma x2c_region_end u_5F5AD92C_0110CCBF_h_19
+#pragma x2c_region_begin u_5F5AD92C_0110CCBF_h_20
 List Compiler_try_parse_macro_expression(Compiler c);
-
+#pragma x2c_region_end u_5F5AD92C_0110CCBF_h_20
+#pragma x2c_region_begin u_5F5AD92C_0110CCBF_h_21
 Var Compiler_evaluate_macro_slot(Compiler c, Var value);
-
+#pragma x2c_region_end u_5F5AD92C_0110CCBF_h_21
+#pragma x2c_region_begin u_5F5AD92C_0110CCBF_h_22
 List Compiler_evaluate_macro_rows(Compiler c, Var value);
-
+#pragma x2c_region_end u_5F5AD92C_0110CCBF_h_22
+#pragma x2c_region_begin u_5F5AD92C_0110CCBF_h_23
 Var Compiler_evaluate_meta_value(Compiler c, List expression, Token site, int slot);
-
+#pragma x2c_region_end u_5F5AD92C_0110CCBF_h_23
+#pragma x2c_region_begin u_5F5AD92C_0110CCBF_h_24
 Var Compiler_evaluate_declaration_recipe(Compiler c, Atom callback, List arguments);
-
+#pragma x2c_region_end u_5F5AD92C_0110CCBF_h_24
+#pragma x2c_region_begin u_5F5AD92C_0110CCBF_h_25
 List x2c_template_call(Var stored, List values);
-
+#pragma x2c_region_end u_5F5AD92C_0110CCBF_h_25
+#pragma x2c_region_begin u_5F5AD92C_0110CCBF_h_26
 Var _x2c_mod_6922FA3C_Compiler__helper_result(Compiler c, Var value);
-
+#pragma x2c_region_end u_5F5AD92C_0110CCBF_h_26
+#pragma x2c_region_begin u_5F5AD92C_0110CCBF_h_27
 List Compiler_rebuild_expression(Compiler c, Type type, List application);
-
+#pragma x2c_region_end u_5F5AD92C_0110CCBF_h_27
+#pragma x2c_region_begin u_5F5AD92C_0110CCBF_h_28
 List Compiler_rebuild_statement(Compiler c, List application);
-
+#pragma x2c_region_end u_5F5AD92C_0110CCBF_h_28
+#pragma x2c_region_begin u_5F5AD92C_0110CCBF_h_29
 List Compiler_rebuild_unit_function(Compiler c, List application);
-
+#pragma x2c_region_end u_5F5AD92C_0110CCBF_h_29
+#pragma x2c_region_begin u_5F5AD92C_0110CCBF_h_30
 List Compiler_rebuild_function(Compiler c, List target, List application);
-
+#pragma x2c_region_end u_5F5AD92C_0110CCBF_h_30
+#pragma x2c_region_begin u_5F5AD92C_0110CCBF_h_31
 List Compiler_land_quotation(Compiler c, List fresh, Var syntax, AstPos position, Type return_type);
-
+#pragma x2c_region_end u_5F5AD92C_0110CCBF_h_31
 void _x2c_module_init_5F5AD92C(void);
 
 
-#endif /* __GUARD_0x94DA08D2__ */
+#endif /* __GUARD_0x5F5AD92C__ */

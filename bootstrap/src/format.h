@@ -5,9 +5,14 @@
 #ifndef __GUARD_0x4FB7A5AC__
 #define __GUARD_0x4FB7A5AC__
 
+#pragma x2c_region_begin u_4FB7A5AC_B45FF7F7_h_0
 #include "x2c.h"
+#pragma x2c_region_end u_4FB7A5AC_B45FF7F7_h_0
+#pragma x2c_region_begin u_4FB7A5AC_B45FF7F7_h_1
 #include "compiler.h"
+#pragma x2c_region_end u_4FB7A5AC_B45FF7F7_h_1
+#pragma x2c_region_begin u_4FB7A5AC_B45FF7F7_h_2
 char * Compiler_code_pretty_string(Compiler c, List code, String output_file);
-
+#pragma x2c_region_end u_4FB7A5AC_B45FF7F7_h_2
 
 #endif /* __GUARD_0x4FB7A5AC__ */

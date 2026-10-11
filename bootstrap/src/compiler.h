@@ -5,122 +5,252 @@
 #ifndef __GUARD_0x08246194__
 #define __GUARD_0x08246194__
 
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_0
 #include "x2c.h"
+#pragma x2c_region_end u_08246194_DC43EC9F_h_0
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_1
 #include "private-keywords.h"
+#pragma x2c_region_end u_08246194_DC43EC9F_h_1
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_2
 #include "tokenizer.h"
+#pragma x2c_region_end u_08246194_DC43EC9F_h_2
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_3
 #include "ast.h"
+#pragma x2c_region_end u_08246194_DC43EC9F_h_3
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_4
 #include "type.h"
+#pragma x2c_region_end u_08246194_DC43EC9F_h_4
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_5
 #include "logger.h"
+#pragma x2c_region_end u_08246194_DC43EC9F_h_5
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_6
 #include "sourceview.h"
+#pragma x2c_region_end u_08246194_DC43EC9F_h_6
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_7
 #include "meta.h"
+#pragma x2c_region_end u_08246194_DC43EC9F_h_7
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_8
+enum{
+  SIGNATURE_HASHES = 1, SIGNATURE_DECLARATIONS = 2
+}
+;
+#pragma x2c_region_end u_08246194_DC43EC9F_h_8
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_9
+#pragma x2c_namespace_require n_7E9957C7
+#pragma x2c_namespace_require n_E9CCD946
 typedef struct Diagnostics * Diagnostics;
-
-typedef struct ScriptUnit{
+#pragma x2c_region_end u_08246194_DC43EC9F_h_9
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_10
+struct ScriptUnit{
+#pragma x2c_namespace_require n_C713742F
   String path, shebang;
   int defines_main;
 }
-* ScriptUnit;
-
-typedef struct GenNames{
+;
+#pragma x2c_region_end u_08246194_DC43EC9F_h_10
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_11
+#pragma x2c_namespace_require n_F131C322
+#pragma x2c_namespace_require n_FDB60420
+typedef struct ScriptUnit * ScriptUnit;
+#pragma x2c_region_end u_08246194_DC43EC9F_h_11
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_12
+struct GenNames{
+#pragma x2c_namespace_require n_CD4FE74B
   Map counters, adapters, file_scope_owners;
   int next_binding, issued;
 }
-* GenNames;
-
-typedef struct SymScope{
+;
+#pragma x2c_region_end u_08246194_DC43EC9F_h_12
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_13
+#pragma x2c_namespace_require n_24A60DD7
+#pragma x2c_namespace_require n_8AA9A559
+typedef struct GenNames * GenNames;
+#pragma x2c_region_end u_08246194_DC43EC9F_h_13
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_14
+struct SymScope{
+#pragma x2c_namespace_require n_CD4FE74B
   Map symbols, bindings, enumerators, macros;
 }
-SymScope;
-
+;
+#pragma x2c_region_end u_08246194_DC43EC9F_h_14
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_15
+#pragma x2c_namespace_require n_160783C2
+#pragma x2c_namespace_require n_7C0B1B44
+typedef struct SymScope SymScope;
+#pragma x2c_region_end u_08246194_DC43EC9F_h_15
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_16
 enum{
   PENDING_AREAS = 5
 }
 ;
-
-typedef struct Pending{
+#pragma x2c_region_end u_08246194_DC43EC9F_h_16
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_17
+struct Pending{
+#pragma x2c_namespace_require n_29507A2B
   Array areas[PENDING_AREAS];
 }
-Pending;
-
-typedef struct PendingMark{
+;
+#pragma x2c_region_end u_08246194_DC43EC9F_h_17
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_18
+#pragma x2c_namespace_require n_20BD2C3E
+#pragma x2c_namespace_require n_24079C7C
+typedef struct Pending Pending;
+#pragma x2c_region_end u_08246194_DC43EC9F_h_18
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_19
+struct PendingMark{
   int lengths[PENDING_AREAS];
 }
-PendingMark;
-
+;
+#pragma x2c_region_end u_08246194_DC43EC9F_h_19
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_20
+#pragma x2c_namespace_require n_30221031
+#pragma x2c_namespace_require n_AC1E316F
+typedef struct PendingMark PendingMark;
+#pragma x2c_region_end u_08246194_DC43EC9F_h_20
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_21
+#pragma x2c_namespace_require n_124819CC
 typedef struct Sym * Sym;
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_21
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_22
+#pragma x2c_namespace_require n_3C0FB79C
+#pragma x2c_namespace_require n_BED1FE22
 typedef struct SlotWatch * SlotWatch;
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_22
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_23
+#pragma x2c_namespace_require n_5DE67F9B
+#pragma x2c_namespace_require n_6FCD7E07
 typedef struct ModuleTree * ModuleTree;
-
-typedef struct Ancestor{
+#pragma x2c_region_end u_08246194_DC43EC9F_h_23
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_24
+struct Ancestor{
+#pragma x2c_namespace_require n_C2105E2E
   Symbol what;
+#pragma x2c_namespace_require n_67E082C9
   Token token;
   int origin;
+#pragma x2c_namespace_require n_06420495
   List base, node;
 }
-Ancestor;
-
-typedef struct Compiler{
+;
+#pragma x2c_region_end u_08246194_DC43EC9F_h_24
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_25
+#pragma x2c_namespace_require n_5EDB3F7E
+#pragma x2c_namespace_require n_F8D7A7FC
+typedef struct Ancestor Ancestor;
+#pragma x2c_region_end u_08246194_DC43EC9F_h_25
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_26
+struct Compiler{
+#pragma x2c_namespace_require n_C713742F
   String filename, text, root_dir;
+#pragma x2c_namespace_require n_6FCD7E07
   ModuleTree module_tree;
-  String module_owner;
+#pragma x2c_namespace_require n_C713742F
+  String module_owner, native_fragment;
+#pragma x2c_namespace_require n_C713742F
+  String module_project_root;
   int source_module;
-  Map collected_statics;
+#pragma x2c_namespace_require n_CD4FE74B
+  Map collected_statics, module_layout_plan;
+#pragma x2c_namespace_require n_C713742F
   String package;
+#pragma x2c_namespace_require n_06420495
   List package_dirs, package_source_dirs;
+#pragma x2c_namespace_require n_CD4FE74B
   Map package_roots, package_aliases, package_members, package_effects;
+#pragma x2c_namespace_require n_67E082C9
   Token token;
+#pragma x2c_namespace_require n_67E082C9
   Token input_boundary;
+#pragma x2c_namespace_require n_E474C8EB
   Tokenizer tokenizer;
+#pragma x2c_namespace_require n_29507A2B
   Array line_markers;
+#pragma x2c_namespace_require n_06420495
   List return_type, include_dirs;
+#pragma x2c_namespace_require n_CD4FE74B
   Map deps;
+#pragma x2c_namespace_require n_06420495
   List aggregate_type, macro_stack, declaration_effects;
+#pragma x2c_namespace_require n_124819CC
   Sym sym;
+#pragma x2c_namespace_require n_CD4FE74B
   Map evaluated_effects;
   int expansion_floor;
+#pragma x2c_family_require f_0302F8F3
+#pragma x2c_namespace_require n_7C0B1B44
   SymScope params;
+#pragma x2c_namespace_require n_CD4FE74B
   Map key_ids, macros, kw_aliases;
+#pragma x2c_namespace_require n_CD4FE74B
   Map object_macros;
+#pragma x2c_namespace_require n_06420495
   List arms;
+#pragma x2c_namespace_require n_CD4FE74B
   Map arm_stacks;
+#pragma x2c_namespace_require n_29507A2B
   Array layout_marks, packed_marks;
+#pragma x2c_namespace_require n_67E082C9
   Token directives_taken;
+#pragma x2c_namespace_require n_CD4FE74B
   Map protocols, conforms, protocol_helpers;
+#pragma x2c_namespace_require n_CD4FE74B
   Map proto_cache;
+#pragma x2c_namespace_require n_CD4FE74B
   Map adoptions;
+#pragma x2c_namespace_require n_CD4FE74B
   Map macro_holes;
+#pragma x2c_namespace_require n_CD4FE74B
   Map local_macro_captures;
   int macro_application;
+#pragma x2c_namespace_require n_06420495
   List lambda_scopes;
+#pragma x2c_namespace_require n_29507A2B
   Array match_types;
+#pragma x2c_namespace_require n_CD4FE74B
   Map imports;
+#pragma x2c_namespace_require n_CD4FE74B
   Map included_effects;
-  Map init_tokens, static_init_deps, fn_defs;
-  Array id_keys;
+#pragma x2c_namespace_require n_CD4FE74B
+  Map init_tokens, static_init_deps, fn_defs, binding_references;
+#pragma x2c_namespace_require n_29507A2B
+  Array id_keys, initializer_graph_variants;
+#pragma x2c_namespace_require n_C713742F
   String init_fn, fini_fn;
+#pragma x2c_family_require f_EB8D841F
+#pragma x2c_namespace_require n_24079C7C
   Pending pending;
   int prelude;
+#pragma x2c_namespace_require n_CD4FE74B
   Map meta_comptime, meta_regions, meta_hashes, meta_calls;
+#pragma x2c_namespace_require n_CD4FE74B
   Map native_meta;
+#pragma x2c_namespace_require n_CD4FE74B
   Map project_meta;
-  Array unit_nodes, meta_group;
+#pragma x2c_namespace_require n_29507A2B
+  Array unit_nodes, meta_group, native_prefix_pending;
+#pragma x2c_namespace_require n_CD4FE74B
   Map meta_group_bound;
   int meta_build;
   int runtime_inc, runtime_hdrs, collect_protocols, shallow, source_private;
   int public_bodies;
   int interface_provider, signature_only;
   int collection_native;
+#pragma x2c_namespace_require n_CD4FE74B
   Map collection_native_files;
+#pragma x2c_namespace_require n_29507A2B
   Array pending_inline_bodies;
   int layout;
   int meta_body;
   int capture_unit;
+#pragma x2c_namespace_require n_06420495
   List active_rewrites;
+#pragma x2c_namespace_require n_CD4FE74B
   Map rewrite_rules;
+#pragma x2c_namespace_require n_CD4FE74B
   Map prepared_rewrites;
+#pragma x2c_namespace_require n_BED1FE22
   SlotWatch slot_watch;
+#pragma x2c_namespace_require n_67E082C9
   Token meta_statement;
   int import_protocols;
   int in_pattern, match_is, runtime_literals, inline_header;
@@ -129,237 +259,402 @@ typedef struct Compiler{
   int needs_exception;
   int local_macro_capture_scopes;
   int open_linkage;
+#pragma x2c_namespace_require n_C713742F
   String fn_name;
+#pragma x2c_namespace_require n_7E9957C7
   Diagnostics diagnostics;
+#pragma x2c_namespace_require n_29507A2B
   Array braces, import_stack;
+#pragma x2c_namespace_require n_D9B87EAB
   Block ancestors;
+#pragma x2c_namespace_require n_29507A2B
   Array placements;
+#pragma x2c_namespace_require n_C713742F
   String lines_text;
+#pragma x2c_namespace_require n_29507A2B
   Array line_starts;
+#pragma x2c_namespace_require n_F131C322
   ScriptUnit unit_script, script;
+#pragma x2c_namespace_require n_EC29489D
   Lisp macro_lisp;
   int borrowed_lisp;
   int inherited_lisp;
+#pragma x2c_namespace_require n_8AA9A559
   GenNames names;
+#pragma x2c_namespace_require n_29507A2B
   Array origins;
   int origin, source_map;
+#pragma x2c_namespace_require n_9CD16910
   SourceView sources;
   int source_facts, source_primary;
+#pragma x2c_namespace_require n_29507A2B
   Array source_occurrences;
+#pragma x2c_namespace_require n_CD4FE74B
   Map source_definitions, source_declarations, source_texts;
 }
-* Compiler;
-
-typedef struct SymTxn{
+;
+#pragma x2c_region_end u_08246194_DC43EC9F_h_26
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_27
+#pragma x2c_namespace_require n_3911C1B0
+#pragma x2c_namespace_require n_9F155932
+typedef struct Compiler * Compiler;
+#pragma x2c_region_end u_08246194_DC43EC9F_h_27
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_28
+struct SymTxn{
+#pragma x2c_namespace_require n_9F155932
   Compiler c;
   int scope_index, next_binding, active;
+#pragma x2c_namespace_require n_C713742F
   String initializer_name;
+#pragma x2c_namespace_require n_C713742F
   String shutdown_name;
+#pragma x2c_namespace_require n_CD4FE74B
   Map counters;
   int local_macro_names, mark, meta_group_size, ancestors, placements;
+#pragma x2c_family_require f_0302F8F3
+#pragma x2c_namespace_require n_7C0B1B44
   SymScope scope;
+#pragma x2c_namespace_require n_CD4FE74B
   Map statics, binding_facts;
+#pragma x2c_namespace_require n_CD4FE74B
   Map source_definitions;
   int source_occurrences;
   int extended;
+#pragma x2c_namespace_require n_CD4FE74B
   Map adapters;
+#pragma x2c_family_require f_EF8B4BCC
+#pragma x2c_namespace_require n_AC1E316F
   PendingMark pending;
   int origin_count, origin, needs_exception;
 }
-SymTxn;
-
+;
+#pragma x2c_region_end u_08246194_DC43EC9F_h_28
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_29
+#pragma x2c_namespace_require n_9C95E4EC
+#pragma x2c_namespace_require n_CE3D74EE
+typedef struct SymTxn SymTxn;
+#pragma x2c_region_end u_08246194_DC43EC9F_h_29
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_30
 #include "diagnostics.h"
+#pragma x2c_region_end u_08246194_DC43EC9F_h_30
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_31
 #include "symbols.h"
+#pragma x2c_region_end u_08246194_DC43EC9F_h_31
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_32
 #include "preprocess.h"
+#pragma x2c_region_end u_08246194_DC43EC9F_h_32
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_33
 Var Compiler_var(Compiler c);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_33
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_34
 Compiler Var_compiler(Var value);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_34
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_35
 void Compiler_shallow_parse(Compiler c, Map globals);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_35
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_36
 void Compiler_shallow_parse_overlay(Compiler c, Map base, Map overlay);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_36
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_37
 void Compiler_start_collection(Compiler c);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_37
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_38
 void Compiler_collect_compile_time_definition(Compiler c, int keyword);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_38
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_39
 void Compiler_finish_collected_declaration(Compiler c, List declaration, Token meta, int native);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_39
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_40
 void Compiler_record_inline_function(Compiler c, List declaration);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_40
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_41
 int Compiler__at_function_arrow(Compiler c);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_41
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_42
 void Compiler__skip_shallow_expression(Compiler c, int stop_at_comma);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_42
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_43
 void Compiler_queue_declaration_effect(Compiler c, String form, Token first, Token after);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_43
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_44
 void Compiler_run_declaration_effects(Compiler c);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_44
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_45
 int Compiler_collect_unit_macro(Compiler c);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_45
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_46
 List Compiler_replay_declaration_source(Compiler c);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_46
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_47
+void Compiler_retain_native_meta_source(Compiler c, List node, Token first, Token after, int meta);
+#pragma x2c_region_end u_08246194_DC43EC9F_h_47
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_48
 Var Compiler_freeze_declaration_syntax(Compiler c, Var syntax);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_48
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_49
 Var Compiler_thaw_declaration_syntax(Compiler c, Var syntax);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_49
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_50
 Map Compiler_select_declaration_defaults(Compiler c, String path, Map symbols, Array parts, Map definitions, Map statics);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_50
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_51
 List Compiler_full_parse(Compiler c, Map globs, int generated_symbols);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_51
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_52
 int Compiler_skip_collected_script_statement(Compiler c);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_52
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_53
 void Compiler_skip_script_statement(Compiler c);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_53
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_54
 void Compiler_record_module_initializer(Compiler c, Type type, List bind);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_54
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_55
 List Compiler_module_initializer(Compiler c, List binding);
-
-String module_initializer_entry(String path);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_55
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_56
+String Compiler_module_initializer_entry(Compiler c, String path);
+#pragma x2c_region_end u_08246194_DC43EC9F_h_56
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_57
 List Compiler_module_initializer_rows(Compiler c);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_57
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_58
+List Compiler_module_initializer_graph(Compiler c);
+#pragma x2c_region_end u_08246194_DC43EC9F_h_58
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_59
+List Compiler_module_initializer_variants(Compiler c);
+#pragma x2c_region_end u_08246194_DC43EC9F_h_59
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_60
+String Compiler_initializer_identity(Compiler c, List binding);
+#pragma x2c_region_end u_08246194_DC43EC9F_h_60
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_61
 void Compiler_merge_module_initializers(Compiler c, List rows);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_61
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_62
+List Compiler_initializer_references(Compiler c, Var value);
+#pragma x2c_region_end u_08246194_DC43EC9F_h_62
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_63
 void Compiler_tokenize(Compiler c, char * text);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_63
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_64
 Symbol Compiler_peek(Compiler c, int steps);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_64
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_65
 Token Token_skip_trivia(Token token);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_65
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_66
 void Compiler_require_input(Compiler c);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_66
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_67
 Symbol Compiler_expect(Compiler c, Symbol type);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_67
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_68
 void Compiler_next(Compiler c);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_68
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_69
 static inline int Compiler_test(Compiler c, Symbol type){
   if(c -> token -> type != type) return 0;
   Compiler_next(c);
   return 1;
 }
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_69
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_70
 int Compiler_at_word(Compiler c, String word);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_70
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_71
 int Compiler_take_word(Compiler c, String word);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_71
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_72
 int Symbol_group_step(Symbol s);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_72
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_73
 Token Token_group_close(Token t);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_73
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_74
 Token Token_after_group(Token t);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_74
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_75
 void Compiler_mark_completion(Compiler c, int position);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_75
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_76
 int Compiler_at_completion(Compiler c);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_76
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_77
 void Compiler___complete_here(Compiler c, Symbol role, List keywords);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_77
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_78
 int Compiler_record_origin(Compiler c, Token token);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_78
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_79
 List Compiler_anchor_origin(Compiler c, List node, Token token);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_79
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_80
+void Compiler_record_binding_declaration(Compiler c, List binding);
+#pragma x2c_region_end u_08246194_DC43EC9F_h_80
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_81
+void Compiler_record_binding_definition(Compiler c, List binding);
+#pragma x2c_region_end u_08246194_DC43EC9F_h_81
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_82
+String Compiler_binding_provider(Compiler c, List binding, int definition);
+#pragma x2c_region_end u_08246194_DC43EC9F_h_82
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_83
+void Compiler_record_binding_reference(Compiler c, List binding);
+#pragma x2c_region_end u_08246194_DC43EC9F_h_83
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_84
+List Compiler_binding_reference_rows(Compiler c);
+#pragma x2c_region_end u_08246194_DC43EC9F_h_84
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_85
 void Compiler_record_source_declaration(Compiler c, List binding, Token first, Token after);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_85
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_86
 void Compiler_record_source_reference(Compiler c, List binding, Type type, Token first, Token after);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_86
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_87
 void Compiler_copy_source_declaration(Compiler c, Map target, Map source, List key);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_87
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_88
 void Compiler_merge_source_declarations(Compiler c, Map target, Map source);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_88
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_89
 String Compiler_emitted_binding_name(Compiler c, List binding);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_89
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_90
 List Compiler_present_references(Compiler c);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_90
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_91
 void Compiler_mark_reference_present(Compiler c, List binding);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_91
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_92
 void Compiler_settle_reference(Compiler c, List binding, int true_is_present, List yes, List no);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_92
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_93
 void Compiler_restore_reference_presence(Compiler c, List before);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_93
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_94
 List Compiler_optional_reference_test(Compiler c, List condition, int * truth);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_94
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_95
 int reference_guard_exits(List arm);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_95
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_96
 String Compiler_fresh_name(Compiler c, String stem);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_96
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_97
 List Compiler_gensym(Compiler c);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_97
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_98
 void Compiler_add_early(Compiler c, List decl);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_98
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_99
 void Compiler_add_init(Compiler c, Symbol phase, List stmt);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_99
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_100
 void Pending_reset(Pending * p);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_100
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_101
 Array Pending_area(Pending * p, Symbol area);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_101
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_102
 int Pending_initializes(Pending * p);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_102
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_103
 PendingMark Pending_checkpoint(Pending * p);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_103
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_104
 void Pending_restore(Pending * p, PendingMark mark);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_104
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_105
 List Compiler_cache(Compiler c, List key);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_105
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_106
 List Compiler_cache_cons_cell(Compiler c, List head, List tail);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_106
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_107
 List Compiler_cache_literal_var(Compiler c, Var value);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_107
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_108
 List Compiler_cache_literal_list(Compiler c, List values);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_108
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_109
 Var Compiler_match_pattern_value(Compiler c, Var node);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_109
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_110
 int match_value_is_static(Var value);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_110
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_111
 int Compiler_match_pattern_is_static(Compiler c, List pattern);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_111
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_112
 Symbol match_value_head(Var value);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_112
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_113
 Symbol match_value_flat_head(Var value, List binders, List * tags);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_113
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_114
 List Compiler_match_pattern_binders(Compiler c, List pattern, List * possible);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_114
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_115
 void Compiler_define_match_binders(Compiler c, List pattern);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_115
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_116
 List Compiler_define_catch_binders(Compiler c, List pattern);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_116
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_117
 List Compiler_catch_binder_declarations(Compiler c, List bindings, List handle);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_117
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_118
 void Compiler_own_diagnostics(Compiler c);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_118
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_119
 void Compiler_borrow_diagnostics(Compiler c, Compiler owner);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_119
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_120
 void Compiler_close_child(Compiler c, Compiler child);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_120
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_121
 void Compiler_share_meta_group(Compiler c, Compiler owner);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_121
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_122
 void Compiler_take_unit_state(Compiler c, Compiler owner);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_122
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_123
 void Compiler_return_unit_state(Compiler c, Compiler owner);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_123
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_124
 int Compiler_read_source(Compiler c, String path, String volatile * text);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_124
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_125
 String Compiler_canonical_path(Compiler c, String path);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_125
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_126
 String real_path(String path);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_126
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_127
 String absolute_path(String path);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_127
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_128
 String home_portable_path(String path);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_128
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_129
 String home_absolute_path(String spelling);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_129
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_130
 void Map_merge_translation_dependency(Map m, String path, Var content_hash);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_130
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_131
 void Compiler_add_translation_dependency(Compiler c, String path);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_131
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_132
 void Compiler_merge_translation_dependencies(Compiler c, Map dependencies);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_132
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_133
 Compiler Compiler_new(void);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_133
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_134
 Compiler Compiler_new_shared(Compiler owner);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_134
+#pragma x2c_region_begin u_08246194_DC43EC9F_h_135
 void Compiler_free_lisp(Compiler c);
-
+#pragma x2c_region_end u_08246194_DC43EC9F_h_135
 
 #endif /* __GUARD_0x08246194__ */

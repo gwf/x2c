@@ -5,17 +5,41 @@
 #ifndef __GUARD_0x0F07AB79__
 #define __GUARD_0x0F07AB79__
 
+#pragma x2c_region_begin u_0F07AB79_002EFE44_h_0
 #include "x2c.h"
+#pragma x2c_region_end u_0F07AB79_002EFE44_h_0
+#pragma x2c_region_begin u_0F07AB79_002EFE44_h_1
 #include "cli.h"
+#pragma x2c_region_end u_0F07AB79_002EFE44_h_1
+#pragma x2c_region_begin u_0F07AB79_002EFE44_h_2
 #include "compiler.h"
+#pragma x2c_region_end u_0F07AB79_002EFE44_h_2
+#pragma x2c_region_begin u_0F07AB79_002EFE44_h_3
 #include "utils.h"
+#pragma x2c_region_end u_0F07AB79_002EFE44_h_3
+#pragma x2c_region_begin u_0F07AB79_002EFE44_h_4
 #include "collect.h"
+#pragma x2c_region_end u_0F07AB79_002EFE44_h_4
+#pragma x2c_region_begin u_0F07AB79_002EFE44_h_5
+#include "module-access.h"
+#pragma x2c_region_end u_0F07AB79_002EFE44_h_5
+#pragma x2c_region_begin u_0F07AB79_002EFE44_h_6
 #include <stdio.h>
+#pragma x2c_region_end u_0F07AB79_002EFE44_h_6
+#pragma x2c_region_begin u_0F07AB79_002EFE44_h_7
 #include <string.h>
+#pragma x2c_region_end u_0F07AB79_002EFE44_h_7
+#pragma x2c_region_begin u_0F07AB79_002EFE44_h_8
 #include "buffer.h"
+#pragma x2c_region_end u_0F07AB79_002EFE44_h_8
+#pragma x2c_region_begin u_0F07AB79_002EFE44_h_9
 int translation_depfile_write(CliRequest request, Compiler compiler, String input, String output_dir);
-
+#pragma x2c_region_end u_0F07AB79_002EFE44_h_9
+#pragma x2c_region_begin u_0F07AB79_002EFE44_h_10
+List translation_depfile_files(CliRequest request, Compiler compiler, String input, String output_dir);
+#pragma x2c_region_end u_0F07AB79_002EFE44_h_10
+#pragma x2c_region_begin u_0F07AB79_002EFE44_h_11
 List translation_depfile_parse(String text);
-
+#pragma x2c_region_end u_0F07AB79_002EFE44_h_11
 
 #endif /* __GUARD_0x0F07AB79__ */

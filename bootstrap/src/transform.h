@@ -5,35 +5,73 @@
 #ifndef __GUARD_0x00CB812B__
 #define __GUARD_0x00CB812B__
 
+#pragma x2c_region_begin u_00CB812B_3EBE6B6C_h_0
 #include "x2c.h"
+#pragma x2c_region_end u_00CB812B_3EBE6B6C_h_0
 #ifndef X2C_TRANSFORM_SOURCE
 #ifdef X2CCPP
 #define X2C_TRANSFORM_SOURCE
 #endif
+#pragma x2c_region_begin u_00CB812B_3EBE6B6C_h_1
 #include "compiler.h"
+#pragma x2c_region_end u_00CB812B_3EBE6B6C_h_1
+#pragma x2c_region_begin u_00CB812B_3EBE6B6C_h_2
 #include "ast-rewrite.h"
+#pragma x2c_region_end u_00CB812B_3EBE6B6C_h_2
+#pragma x2c_region_begin u_00CB812B_3EBE6B6C_h_3
 #include "meta.h"
+#pragma x2c_region_end u_00CB812B_3EBE6B6C_h_3
+#pragma x2c_region_begin u_00CB812B_3EBE6B6C_h_4
 #include "grammar.h"
+#pragma x2c_region_end u_00CB812B_3EBE6B6C_h_4
+#pragma x2c_region_begin u_00CB812B_3EBE6B6C_h_5
 #include "ast.h"
+#pragma x2c_region_end u_00CB812B_3EBE6B6C_h_5
+#pragma x2c_region_begin u_00CB812B_3EBE6B6C_h_6
 #include "type.h"
+#pragma x2c_region_end u_00CB812B_3EBE6B6C_h_6
+#pragma x2c_region_begin u_00CB812B_3EBE6B6C_h_7
 #include "parse.h"
+#pragma x2c_region_end u_00CB812B_3EBE6B6C_h_7
+#pragma x2c_region_begin u_00CB812B_3EBE6B6C_h_8
 #include "expressions.h"
+#pragma x2c_region_end u_00CB812B_3EBE6B6C_h_8
+#pragma x2c_region_begin u_00CB812B_3EBE6B6C_h_9
 #include "string.h"
+#pragma x2c_region_end u_00CB812B_3EBE6B6C_h_9
+#pragma x2c_region_begin u_00CB812B_3EBE6B6C_h_10
 #include "symbol.h"
+#pragma x2c_region_end u_00CB812B_3EBE6B6C_h_10
+#pragma x2c_region_begin u_00CB812B_3EBE6B6C_h_11
 #include "var.h"
+#pragma x2c_region_end u_00CB812B_3EBE6B6C_h_11
+#pragma x2c_region_begin u_00CB812B_3EBE6B6C_h_12
 #include "list.h"
+#pragma x2c_region_end u_00CB812B_3EBE6B6C_h_12
+#pragma x2c_region_begin u_00CB812B_3EBE6B6C_h_13
 #include "protocol.h"
+#pragma x2c_region_end u_00CB812B_3EBE6B6C_h_13
+#pragma x2c_region_begin u_00CB812B_3EBE6B6C_h_14
 #include "regions.h"
+#pragma x2c_region_end u_00CB812B_3EBE6B6C_h_14
+#pragma x2c_region_begin u_00CB812B_3EBE6B6C_h_15
 #include "callables.h"
+#pragma x2c_region_end u_00CB812B_3EBE6B6C_h_15
+#pragma x2c_region_begin u_00CB812B_3EBE6B6C_h_16
 #include "cleanup.h"
+#pragma x2c_region_end u_00CB812B_3EBE6B6C_h_16
+#pragma x2c_region_begin u_00CB812B_3EBE6B6C_h_17
 List Compiler_transform(Compiler c, List ast);
-
+#pragma x2c_region_end u_00CB812B_3EBE6B6C_h_17
+#pragma x2c_region_begin u_00CB812B_3EBE6B6C_h_18
 Ast Compiler_normalize(Compiler c, Ast ast);
-
+#pragma x2c_region_end u_00CB812B_3EBE6B6C_h_18
+#pragma x2c_region_begin u_00CB812B_3EBE6B6C_h_19
 List transform_array_literal(Compiler c, List ast);
-
+#pragma x2c_region_end u_00CB812B_3EBE6B6C_h_19
+#pragma x2c_region_begin u_00CB812B_3EBE6B6C_h_20
 List transform_map_literal(Compiler c, List ast);
-
+#pragma x2c_region_end u_00CB812B_3EBE6B6C_h_20
 #endif
 
 #endif /* __GUARD_0x00CB812B__ */

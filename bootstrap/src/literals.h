@@ -5,46 +5,83 @@
 #ifndef __GUARD_0xC5263D59__
 #define __GUARD_0xC5263D59__
 
+#pragma x2c_region_begin u_C5263D59_5123F5A4_h_0
 #include "x2c.h"
+#pragma x2c_region_end u_C5263D59_5123F5A4_h_0
+#pragma x2c_region_begin u_C5263D59_5123F5A4_h_1
 #include "private-keywords.h"
+#pragma x2c_region_end u_C5263D59_5123F5A4_h_1
+#pragma x2c_region_begin u_C5263D59_5123F5A4_h_2
 #include "compiler.h"
+#pragma x2c_region_end u_C5263D59_5123F5A4_h_2
+#pragma x2c_region_begin u_C5263D59_5123F5A4_h_3
 #include "grammar.h"
+#pragma x2c_region_end u_C5263D59_5123F5A4_h_3
+#pragma x2c_region_begin u_C5263D59_5123F5A4_h_4
 #include "parse.h"
+#pragma x2c_region_end u_C5263D59_5123F5A4_h_4
+#pragma x2c_region_begin u_C5263D59_5123F5A4_h_5
 #include "type.h"
+#pragma x2c_region_end u_C5263D59_5123F5A4_h_5
+#pragma x2c_region_begin u_C5263D59_5123F5A4_h_6
 #include "expressions.h"
+#pragma x2c_region_end u_C5263D59_5123F5A4_h_6
+#pragma x2c_region_begin u_C5263D59_5123F5A4_h_7
 #include "transform.h"
+#pragma x2c_region_end u_C5263D59_5123F5A4_h_7
+#pragma x2c_region_begin u_C5263D59_5123F5A4_h_8
 #include "lambdas.h"
+#pragma x2c_region_end u_C5263D59_5123F5A4_h_8
+#pragma x2c_region_begin u_C5263D59_5123F5A4_h_9
 #include <stdint.h>
+#pragma x2c_region_end u_C5263D59_5123F5A4_h_9
+#pragma x2c_region_begin u_C5263D59_5123F5A4_h_10
 #include <string.h>
+#pragma x2c_region_end u_C5263D59_5123F5A4_h_10
+#pragma x2c_region_begin u_C5263D59_5123F5A4_h_11
 List Compiler_parse_list_literal(Compiler c);
-
+#pragma x2c_region_end u_C5263D59_5123F5A4_h_11
+#pragma x2c_region_begin u_C5263D59_5123F5A4_h_12
 List Compiler_parse_macro_pattern_arguments(Compiler c);
-
+#pragma x2c_region_end u_C5263D59_5123F5A4_h_12
+#pragma x2c_region_begin u_C5263D59_5123F5A4_h_13
 List Compiler_try_parse_macro_pattern_insertion(Compiler c, int content);
-
+#pragma x2c_region_end u_C5263D59_5123F5A4_h_13
+#pragma x2c_region_begin u_C5263D59_5123F5A4_h_14
 List Compiler_literal_cell(Compiler c, List head, List tail);
-
+#pragma x2c_region_end u_C5263D59_5123F5A4_h_14
+#pragma x2c_region_begin u_C5263D59_5123F5A4_h_15
 List Compiler_typed_match_pattern(Compiler c, List pattern, List types);
-
+#pragma x2c_region_end u_C5263D59_5123F5A4_h_15
+#pragma x2c_region_begin u_C5263D59_5123F5A4_h_16
 List Compiler_parse_raise_literal(Compiler c);
-
+#pragma x2c_region_end u_C5263D59_5123F5A4_h_16
+#pragma x2c_region_begin u_C5263D59_5123F5A4_h_17
 List Compiler_parse_catch_pattern_literal(Compiler c);
-
+#pragma x2c_region_end u_C5263D59_5123F5A4_h_17
+#pragma x2c_region_begin u_C5263D59_5123F5A4_h_18
 List Compiler_parse_symbol_set_literal(Compiler c);
-
+#pragma x2c_region_end u_C5263D59_5123F5A4_h_18
+#pragma x2c_region_begin u_C5263D59_5123F5A4_h_19
 List Compiler_symbol_set_expression(Compiler c, List values, int * duplicate);
-
+#pragma x2c_region_end u_C5263D59_5123F5A4_h_19
+#pragma x2c_region_begin u_C5263D59_5123F5A4_h_20
 List Compiler_parse_array_literal(Compiler c);
-
+#pragma x2c_region_end u_C5263D59_5123F5A4_h_20
+#pragma x2c_region_begin u_C5263D59_5123F5A4_h_21
 List Compiler_parse_map_literal(Compiler c);
-
+#pragma x2c_region_end u_C5263D59_5123F5A4_h_21
+#pragma x2c_region_begin u_C5263D59_5123F5A4_h_22
 List Compiler_parse_map_entries(Compiler c);
-
+#pragma x2c_region_end u_C5263D59_5123F5A4_h_22
+#pragma x2c_region_begin u_C5263D59_5123F5A4_h_23
 List Compiler_parse_map_entry(Compiler c);
-
+#pragma x2c_region_end u_C5263D59_5123F5A4_h_23
+#pragma x2c_region_begin u_C5263D59_5123F5A4_h_24
 List Compiler_parse_string_literal(Compiler c);
-
+#pragma x2c_region_end u_C5263D59_5123F5A4_h_24
+#pragma x2c_region_begin u_C5263D59_5123F5A4_h_25
 List Compiler_parse_atomic_literal(Compiler c);
-
+#pragma x2c_region_end u_C5263D59_5123F5A4_h_25
 
 #endif /* __GUARD_0xC5263D59__ */

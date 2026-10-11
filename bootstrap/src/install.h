@@ -5,25 +5,47 @@
 #ifndef __GUARD_0x3CFE94DA__
 #define __GUARD_0x3CFE94DA__
 
+#pragma x2c_region_begin u_3CFE94DA_74AE259B_h_0
 #include "x2c.h"
+#pragma x2c_region_end u_3CFE94DA_74AE259B_h_0
+#pragma x2c_region_begin u_3CFE94DA_74AE259B_h_1
 #include "build.h"
+#pragma x2c_region_end u_3CFE94DA_74AE259B_h_1
+#pragma x2c_region_begin u_3CFE94DA_74AE259B_h_2
 #include <stdio.h>
+#pragma x2c_region_end u_3CFE94DA_74AE259B_h_2
+#pragma x2c_region_begin u_3CFE94DA_74AE259B_h_3
 #include <string.h>
+#pragma x2c_region_end u_3CFE94DA_74AE259B_h_3
+#pragma x2c_region_begin u_3CFE94DA_74AE259B_h_4
 #include <sys/utsname.h>
+#pragma x2c_region_end u_3CFE94DA_74AE259B_h_4
+#pragma x2c_region_begin u_3CFE94DA_74AE259B_h_5
 #include <unistd.h>
+#pragma x2c_region_end u_3CFE94DA_74AE259B_h_5
+#pragma x2c_region_begin u_3CFE94DA_74AE259B_h_6
 #include "digest.h"
+#pragma x2c_region_end u_3CFE94DA_74AE259B_h_6
+#pragma x2c_region_begin u_3CFE94DA_74AE259B_h_7
 #include "json.h"
+#pragma x2c_region_end u_3CFE94DA_74AE259B_h_7
+#pragma x2c_region_begin u_3CFE94DA_74AE259B_h_8
 int install_command(CliRequest request);
-
+#pragma x2c_region_end u_3CFE94DA_74AE259B_h_8
+#pragma x2c_region_begin u_3CFE94DA_74AE259B_h_9
 List install_require(CliRequest request, String name, String version, List locked);
-
+#pragma x2c_region_end u_3CFE94DA_74AE259B_h_9
+#pragma x2c_region_begin u_3CFE94DA_74AE259B_h_10
 String install_version(String name);
-
+#pragma x2c_region_end u_3CFE94DA_74AE259B_h_10
+#pragma x2c_region_begin u_3CFE94DA_74AE259B_h_11
 List install_rows(String text);
-
+#pragma x2c_region_end u_3CFE94DA_74AE259B_h_11
+#pragma x2c_region_begin u_3CFE94DA_74AE259B_h_12
 int remove_command(CliRequest request);
-
+#pragma x2c_region_end u_3CFE94DA_74AE259B_h_12
+#pragma x2c_region_begin u_3CFE94DA_74AE259B_h_13
 int list_command(CliRequest request);
-
+#pragma x2c_region_end u_3CFE94DA_74AE259B_h_13
 
 #endif /* __GUARD_0x3CFE94DA__ */

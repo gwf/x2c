@@ -5,81 +5,143 @@
 #ifndef __GUARD_0xAA205D9A__
 #define __GUARD_0xAA205D9A__
 
+#pragma x2c_region_begin u_AA205D9A_0A76C0DB_h_0
 #include "x2c.h"
+#pragma x2c_region_end u_AA205D9A_0A76C0DB_h_0
+#pragma x2c_region_begin u_AA205D9A_0A76C0DB_h_1
 #include "private-keywords.h"
+#pragma x2c_region_end u_AA205D9A_0A76C0DB_h_1
+#pragma x2c_region_begin u_AA205D9A_0A76C0DB_h_2
 #include "compiler.h"
+#pragma x2c_region_end u_AA205D9A_0A76C0DB_h_2
+#pragma x2c_region_begin u_AA205D9A_0A76C0DB_h_3
 #include "type.h"
-typedef struct PrintfFn{
+#pragma x2c_region_end u_AA205D9A_0A76C0DB_h_3
+#pragma x2c_region_begin u_AA205D9A_0A76C0DB_h_4
+struct PrintfFn{
   const char * name;
   int fmt_arg, first_arg, unresolved;
 }
-PrintfFn;
-
+;
+#pragma x2c_region_end u_AA205D9A_0A76C0DB_h_4
+#pragma x2c_region_begin u_AA205D9A_0A76C0DB_h_5
+#pragma x2c_namespace_require n_26E6A23E
+#pragma x2c_namespace_require n_7CA9C9A0
+typedef struct PrintfFn PrintfFn;
+#pragma x2c_region_end u_AA205D9A_0A76C0DB_h_5
+#pragma x2c_region_begin u_AA205D9A_0A76C0DB_h_6
 #include "ast-rewrite.h"
+#pragma x2c_region_end u_AA205D9A_0A76C0DB_h_6
+#pragma x2c_region_begin u_AA205D9A_0A76C0DB_h_7
 #include "grammar.h"
+#pragma x2c_region_end u_AA205D9A_0A76C0DB_h_7
+#pragma x2c_region_begin u_AA205D9A_0A76C0DB_h_8
 #include "parse.h"
+#pragma x2c_region_end u_AA205D9A_0A76C0DB_h_8
+#pragma x2c_region_begin u_AA205D9A_0A76C0DB_h_9
 #include "literals.h"
+#pragma x2c_region_end u_AA205D9A_0A76C0DB_h_9
+#pragma x2c_region_begin u_AA205D9A_0A76C0DB_h_10
 #include "protocol.h"
+#pragma x2c_region_end u_AA205D9A_0A76C0DB_h_10
+#pragma x2c_region_begin u_AA205D9A_0A76C0DB_h_11
 #include "transform.h"
+#pragma x2c_region_end u_AA205D9A_0A76C0DB_h_11
+#pragma x2c_region_begin u_AA205D9A_0A76C0DB_h_12
 #include "stage.h"
+#pragma x2c_region_end u_AA205D9A_0A76C0DB_h_12
+#pragma x2c_region_begin u_AA205D9A_0A76C0DB_h_13
 #include "initializers.h"
+#pragma x2c_region_end u_AA205D9A_0A76C0DB_h_13
+#pragma x2c_region_begin u_AA205D9A_0A76C0DB_h_14
 #include "_x2c_module_6922FA3C.h"
+#pragma x2c_region_end u_AA205D9A_0A76C0DB_h_14
+#pragma x2c_region_begin u_AA205D9A_0A76C0DB_h_15
 #include "expressions-reports.h"
+#pragma x2c_region_end u_AA205D9A_0A76C0DB_h_15
+#pragma x2c_region_begin u_AA205D9A_0A76C0DB_h_16
 List Compiler_parse_expression(Compiler c);
-
+#pragma x2c_region_end u_AA205D9A_0A76C0DB_h_16
+#pragma x2c_region_begin u_AA205D9A_0A76C0DB_h_17
 List Compiler_parse_assignment(Compiler c);
-
+#pragma x2c_region_end u_AA205D9A_0A76C0DB_h_17
+#pragma x2c_region_begin u_AA205D9A_0A76C0DB_h_18
 List Compiler_parse_conditional(Compiler c);
-
+#pragma x2c_region_end u_AA205D9A_0A76C0DB_h_18
+#pragma x2c_region_begin u_AA205D9A_0A76C0DB_h_19
 List Compiler_parse_parenthesized_statement(Compiler c);
-
+#pragma x2c_region_end u_AA205D9A_0A76C0DB_h_19
+#pragma x2c_region_begin u_AA205D9A_0A76C0DB_h_20
 List Compiler_parse_macro_expression_target(Compiler c);
-
+#pragma x2c_region_end u_AA205D9A_0A76C0DB_h_20
+#pragma x2c_region_begin u_AA205D9A_0A76C0DB_h_21
 List Compiler_apply_macro_value(Compiler c, List expr, List supplied, Token origin);
-
+#pragma x2c_region_end u_AA205D9A_0A76C0DB_h_21
+#pragma x2c_region_begin u_AA205D9A_0A76C0DB_h_22
 List Compiler_parse_primary(Compiler c);
-
+#pragma x2c_region_end u_AA205D9A_0A76C0DB_h_22
+#pragma x2c_region_begin u_AA205D9A_0A76C0DB_h_23
 List Compiler_parse_variable(Compiler c);
-
+#pragma x2c_region_end u_AA205D9A_0A76C0DB_h_23
+#pragma x2c_region_begin u_AA205D9A_0A76C0DB_h_24
 List Compiler_resolve_expression(Compiler c, List input, Token origin);
-
+#pragma x2c_region_end u_AA205D9A_0A76C0DB_h_24
+#pragma x2c_region_begin u_AA205D9A_0A76C0DB_h_25
 int Compiler_needs_resolution(Compiler c, Var value);
-
+#pragma x2c_region_end u_AA205D9A_0A76C0DB_h_25
+#pragma x2c_region_begin u_AA205D9A_0A76C0DB_h_26
 List Compiler__nominal_getindex(Compiler c, Type type);
-
+#pragma x2c_region_end u_AA205D9A_0A76C0DB_h_26
+#pragma x2c_region_begin u_AA205D9A_0A76C0DB_h_27
 List Compiler_resolve_postfix_member(Compiler c, Type receiver_type, List field, Symbol access, int call_context);
-
+#pragma x2c_region_end u_AA205D9A_0A76C0DB_h_27
+#pragma x2c_region_begin u_AA205D9A_0A76C0DB_h_28
 List Compiler_postfix_completions(Compiler c, Type receiver, Symbol access);
-
+#pragma x2c_region_end u_AA205D9A_0A76C0DB_h_28
+#pragma x2c_region_begin u_AA205D9A_0A76C0DB_h_29
 List x2c_func_call_arguments(List function, List storage, List arguments);
-
+#pragma x2c_region_end u_AA205D9A_0A76C0DB_h_29
+#pragma x2c_region_begin u_AA205D9A_0A76C0DB_h_30
 List Compiler_func_call_parts(Compiler c, Var content);
-
+#pragma x2c_region_end u_AA205D9A_0A76C0DB_h_30
+#pragma x2c_region_begin u_AA205D9A_0A76C0DB_h_31
 List Compiler_complete_iter_chain(Compiler c, List expression);
-
+#pragma x2c_region_end u_AA205D9A_0A76C0DB_h_31
+#pragma x2c_region_begin u_AA205D9A_0A76C0DB_h_32
 Symbol Compiler__indexed_builtin_helper(Compiler c, Type type);
-
+#pragma x2c_region_end u_AA205D9A_0A76C0DB_h_32
+#pragma x2c_region_begin u_AA205D9A_0A76C0DB_h_33
 Symbol Compiler_require_var_tag(Compiler c, Type target, Token origin);
-
+#pragma x2c_region_end u_AA205D9A_0A76C0DB_h_33
+#pragma x2c_region_begin u_AA205D9A_0A76C0DB_h_34
 List Compiler_var_tag_expression(Compiler c, Type target, Token origin);
-
+#pragma x2c_region_end u_AA205D9A_0A76C0DB_h_34
+#pragma x2c_region_begin u_AA205D9A_0A76C0DB_h_35
 List Compiler_resolve_map_entry(Compiler c, List input, Token origin);
-
+#pragma x2c_region_end u_AA205D9A_0A76C0DB_h_35
+#pragma x2c_region_begin u_AA205D9A_0A76C0DB_h_36
 void Compiler_check_explicit_converter(Compiler c, List parsed, Type target, int context);
-
+#pragma x2c_region_end u_AA205D9A_0A76C0DB_h_36
+#pragma x2c_region_begin u_AA205D9A_0A76C0DB_h_37
 const PrintfFn * List_printf_family(List l);
-
+#pragma x2c_region_end u_AA205D9A_0A76C0DB_h_37
+#pragma x2c_region_begin u_AA205D9A_0A76C0DB_h_38
 String Compiler_printf_static_format(Compiler c, Var format, int * raw);
-
+#pragma x2c_region_end u_AA205D9A_0A76C0DB_h_38
+#pragma x2c_region_begin u_AA205D9A_0A76C0DB_h_39
 List Compiler_promote_string_literal(Compiler c, List expr);
-
+#pragma x2c_region_end u_AA205D9A_0A76C0DB_h_39
+#pragma x2c_region_begin u_AA205D9A_0A76C0DB_h_40
 List Compiler_convert_expression(Compiler c, List expr, Type target);
-
+#pragma x2c_region_end u_AA205D9A_0A76C0DB_h_40
+#pragma x2c_region_begin u_AA205D9A_0A76C0DB_h_41
 List Compiler_convert_segment_to_string(Compiler c, List expr);
-
+#pragma x2c_region_end u_AA205D9A_0A76C0DB_h_41
+#pragma x2c_region_begin u_AA205D9A_0A76C0DB_h_42
 List Compiler_converter_call(Compiler c, List expr, Type type, Type target);
-
+#pragma x2c_region_end u_AA205D9A_0A76C0DB_h_42
+#pragma x2c_region_begin u_AA205D9A_0A76C0DB_h_43
 int Compiler_is_builtin_converter_call(Compiler c, List expr);
-
+#pragma x2c_region_end u_AA205D9A_0A76C0DB_h_43
 
 #endif /* __GUARD_0xAA205D9A__ */

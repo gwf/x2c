@@ -5,26 +5,50 @@
 #ifndef __GUARD_0xEF59A7A3__
 #define __GUARD_0xEF59A7A3__
 
+#pragma x2c_region_begin u_EF59A7A3_331156A4_h_0
 #include "x2c.h"
+#pragma x2c_region_end u_EF59A7A3_331156A4_h_0
+#pragma x2c_region_begin u_EF59A7A3_331156A4_h_1
 #include "compiler.h"
+#pragma x2c_region_end u_EF59A7A3_331156A4_h_1
+#pragma x2c_region_begin u_EF59A7A3_331156A4_h_2
 #include "ast-rewrite.h"
+#pragma x2c_region_end u_EF59A7A3_331156A4_h_2
+#pragma x2c_region_begin u_EF59A7A3_331156A4_h_3
 #include "meta.h"
+#pragma x2c_region_end u_EF59A7A3_331156A4_h_3
+#pragma x2c_region_begin u_EF59A7A3_331156A4_h_4
 #include "grammar.h"
+#pragma x2c_region_end u_EF59A7A3_331156A4_h_4
+#pragma x2c_region_begin u_EF59A7A3_331156A4_h_5
 #include "ast.h"
+#pragma x2c_region_end u_EF59A7A3_331156A4_h_5
+#pragma x2c_region_begin u_EF59A7A3_331156A4_h_6
 #include "type.h"
+#pragma x2c_region_end u_EF59A7A3_331156A4_h_6
+#pragma x2c_region_begin u_EF59A7A3_331156A4_h_7
 #include "parse.h"
+#pragma x2c_region_end u_EF59A7A3_331156A4_h_7
+#pragma x2c_region_begin u_EF59A7A3_331156A4_h_8
 #include "callables.h"
+#pragma x2c_region_end u_EF59A7A3_331156A4_h_8
+#pragma x2c_region_begin u_EF59A7A3_331156A4_h_9
 List Compiler_lower_cleanup(Compiler c, List node);
-
+#pragma x2c_region_end u_EF59A7A3_331156A4_h_9
+#pragma x2c_region_begin u_EF59A7A3_331156A4_h_10
 int Compiler_static_value_is_runtime(Compiler c, List value, Map runtime);
-
+#pragma x2c_region_end u_EF59A7A3_331156A4_h_10
+#pragma x2c_region_begin u_EF59A7A3_331156A4_h_11
 List builtin_defer_record(List record, List callback, List environment, List records);
-
+#pragma x2c_region_end u_EF59A7A3_331156A4_h_11
+#pragma x2c_region_begin u_EF59A7A3_331156A4_h_12
 List builtin_defer_captures(List environment, List records);
-
+#pragma x2c_region_end u_EF59A7A3_331156A4_h_12
+#pragma x2c_region_begin u_EF59A7A3_331156A4_h_13
 List Compiler_rewrite_defer_list(Compiler c, List stmts);
-
+#pragma x2c_region_end u_EF59A7A3_331156A4_h_13
+#pragma x2c_region_begin u_EF59A7A3_331156A4_h_14
 List Compiler_lower_defer_region(Compiler c, List body, List finalizer);
-
+#pragma x2c_region_end u_EF59A7A3_331156A4_h_14
 
 #endif /* __GUARD_0xEF59A7A3__ */

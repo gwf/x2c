@@ -5,171 +5,280 @@
 #ifndef __GUARD_0x23009D1A__
 #define __GUARD_0x23009D1A__
 
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_0
 #include "x2c.h"
+#pragma x2c_region_end u_23009D1A_98153DDB_h_0
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_1
 #include "compiler.h"
+#pragma x2c_region_end u_23009D1A_98153DDB_h_1
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_2
 #include "parse-report-macros.h"
+#pragma x2c_region_end u_23009D1A_98153DDB_h_2
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_3
 #include "grammar.h"
+#pragma x2c_region_end u_23009D1A_98153DDB_h_3
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_4
+#pragma x2c_namespace_require n_1D959DDE
+#pragma x2c_namespace_require n_6BF88C3C
 typedef struct Sym * Sym;
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_4
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_5
 Sym Sym_new(Compiler c);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_5
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_6
 void Sym_put(Sym s, Map map, Var key, Var value);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_6
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_7
 void Sym_drop(Sym s, Map map, Var key);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_7
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_8
 void Sym_reset(Sym s, Map globals);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_8
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_9
 void Sym_reset_overlay(Sym s, Map base, Map overlay);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_9
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_10
 void Sym_push_new_scope(Sym s);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_10
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_11
 void Sym_push_scope(Sym s, SymScope scope);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_11
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_12
 SymScope Sym_pop_scope(Sym s);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_12
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_13
 int Sym_scope_count(Sym s);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_13
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_14
 int Sym_at_file_scope(Sym s);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_14
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_15
+struct SymSuspension{
+#pragma x2c_namespace_require n_D9B87EAB
+  Block scopes;
+  int local_macro_names;
+}
+;
+#pragma x2c_region_end u_23009D1A_98153DDB_h_15
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_16
+#pragma x2c_namespace_require n_460B329F
+#pragma x2c_namespace_require n_C00021C1
+typedef struct SymSuspension SymSuspension;
+#pragma x2c_region_end u_23009D1A_98153DDB_h_16
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_17
+SymSuspension Sym_suspend_locals(Sym s);
+#pragma x2c_region_end u_23009D1A_98153DDB_h_17
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_18
+void Sym_restore_locals(Sym s, SymSuspension saved);
+#pragma x2c_region_end u_23009D1A_98153DDB_h_18
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_19
 Map Sym_global_symbols(Sym s);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_19
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_20
 Map Sym_base_symbols(Sym s);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_20
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_21
 Map Sym_current_symbols(Sym s);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_21
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_22
 Map Sym_unit_symbols(Sym s);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_22
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_23
 Map Sym_file_statics(Sym s);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_23
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_24
 void Sym_mark_static(Sym s, List key);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_24
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_25
 List Sym_visible_symbols(Sym s);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_25
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_26
 void Sym_set(Sym s, List key, List type);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_26
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_27
 List Sym_define(Sym s, List key, List type);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_27
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_28
 void Sym_seed_var_tags(Sym s, Map symbols);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_28
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_29
 void Sym_define_global(Sym s, List key, List type);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_29
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_30
 void Sym_declare_enumerator(Sym s, List key, Symbol owner);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_30
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_31
 int Sym_introduced(Sym s);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_31
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_32
 List Sym_introduce(Sym s, String spelling);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_32
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_33
 List Sym_current_binding(Sym s, List key);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_33
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_34
 Symbol Sym_enumerator_owner(Sym s, List key);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_34
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_35
 int Sym_binding_is_local(Sym s, List binding);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_35
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_36
 int Sym_binding_is_local_before(Sym s, List binding, int scope_count);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_36
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_37
 Map Compiler_semantic_binding_facts(Compiler c);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_37
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_38
 void Compiler_set_fact(Compiler c, Var key, Var value);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_38
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_39
 void Compiler_drop_fact(Compiler c, Var key);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_39
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_40
 List Sym_get(Sym s, List key);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_40
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_41
 List Sym_get_exact(Sym s, List key);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_41
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_42
 List Sym_lookup(Sym s, List key, Type * type);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_42
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_43
 List Sym_reference(Sym s, List key, Type * type);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_43
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_44
 List Sym_resolve_global(Sym s, List key, Type * type);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_44
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_45
 List Sym_reference_global(Sym s, List key);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_45
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_46
 List Sym_declare(Sym s, List context, List key, List ast);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_46
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_47
 void Sym_check_module_type_spelling(Sym s, String spelling);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_47
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_48
 List Sym_bind_identity(Sym s, List context, List binding, List ast);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_48
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_49
 Var Compiler_aggregate_name(Compiler c, Symbol kind, Var name, int definition);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_49
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_50
 void Compiler_record_declaration_visibility(Compiler c, List declaration);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_50
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_51
 String Compiler_package_spelling(Compiler c, String name);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_51
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_52
 void Compiler_register_package_alias(Compiler c, String name, String alias, Token token);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_52
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_53
 void Compiler_register_package_member(Compiler c, String name, String member, String local, Token member_token, Token local_token);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_53
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_54
 String Compiler_package_member_spelling(Compiler c, String name);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_54
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_55
 List Compiler_imported_providers(Compiler c, String name);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_55
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_56
 String Compiler_imported_spelling(Compiler c, String name);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_56
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_57
 void Sym_define_macro(Sym s, Atom name, List definition);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_57
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_58
 int Sym_has_local_macros(Sym s);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_58
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_59
 List Sym_lookup_macro(Sym s, Atom name);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_59
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_60
 Map Compiler_macro_definition_locals(Compiler c);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_60
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_61
 int Compiler_macro_template_local(Compiler c, List binding);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_61
 #define RESOLVE_KEY_MAX_TYPEDEFS 64
 #define RESOLVE_KEY_MAX_HOPS (2 * RESOLVE_KEY_MAX_TYPEDEFS)
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_62
 Type Sym_resolve_key(Sym s, Type key);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_62
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_63
 Type Sym_next_typedef(Sym s, Type type, int * hops);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_63
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_64
 Type Sym_resolve_base_type(Sym s, Type key);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_64
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_65
 Type Sym_sole_typedef(Sym s, Type type);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_65
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_66
 Type Sym_normalize_declared_type(Sym s, Type type);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_66
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_67
 Type Sym_local_type(Sym s, Type type);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_67
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_68
 Type Sym_resolve_numeric_type(Sym s, Type type);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_68
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_69
 Symbol Sym_var_tag_for_type(Sym s, Type type, Type * resolved);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_69
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_70
 int Sym_is_var_type(Sym s, Type type);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_70
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_71
 int Sym_is_string_type(Sym s, Type type);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_71
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_72
 int Sym_is_array_type(Sym s, Type type);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_72
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_73
 int Sym_is_map_type(Sym s, Type type);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_73
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_74
 int Sym_is_named_value_type(Sym s, Type type, String name);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_74
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_75
 Type Sym_lookup_field(Sym s, Type type, List field);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_75
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_76
 void Sym_declare_field_order(Sym s, Type type, List fields);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_76
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_77
 List Sym_field_order(Sym s, Type type);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_77
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_78
 void Sym_mark_field(Sym s, Type aggregate, Symbol mark, String name);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_78
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_79
 List Sym_marked_fields(Sym s, Type aggregate, Symbol mark);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_79
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_80
 Type Sym_aggregate_of(Sym s, Type type);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_80
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_81
 SymTxn Compiler_begin_semantic_transaction(Compiler c);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_81
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_82
 int SymTxn_local_macros_changed(SymTxn * s);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_82
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_83
 int Sym_transacting(Sym s);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_83
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_84
 void Sym_end_log(Sym s);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_84
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_85
 void SymTxn_commit(SymTxn * s);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_85
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_86
 void SymTxn_commit_transient(SymTxn * s);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_86
+#pragma x2c_region_begin u_23009D1A_98153DDB_h_87
 void SymTxn_rollback(SymTxn * s);
-
+#pragma x2c_region_end u_23009D1A_98153DDB_h_87
 
 #endif /* __GUARD_0x23009D1A__ */

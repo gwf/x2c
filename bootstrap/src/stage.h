@@ -5,31 +5,67 @@
 #ifndef __GUARD_0x042BDEBD__
 #define __GUARD_0x042BDEBD__
 
+#pragma x2c_region_begin u_042BDEBD_068AC2FE_h_0
 #include "x2c.h"
+#pragma x2c_region_end u_042BDEBD_068AC2FE_h_0
+#pragma x2c_region_begin u_042BDEBD_068AC2FE_h_1
 #include "compiler.h"
+#pragma x2c_region_end u_042BDEBD_068AC2FE_h_1
+#pragma x2c_region_begin u_042BDEBD_068AC2FE_h_2
 #include "grammar.h"
+#pragma x2c_region_end u_042BDEBD_068AC2FE_h_2
+#pragma x2c_region_begin u_042BDEBD_068AC2FE_h_3
 #include "type.h"
+#pragma x2c_region_end u_042BDEBD_068AC2FE_h_3
+#pragma x2c_region_begin u_042BDEBD_068AC2FE_h_4
 #include "var.h"
+#pragma x2c_region_end u_042BDEBD_068AC2FE_h_4
+#pragma x2c_region_begin u_042BDEBD_068AC2FE_h_5
 #include "string.h"
+#pragma x2c_region_end u_042BDEBD_068AC2FE_h_5
+#pragma x2c_region_begin u_042BDEBD_068AC2FE_h_6
 #include "varconvert.h"
+#pragma x2c_region_end u_042BDEBD_068AC2FE_h_6
+#pragma x2c_region_begin u_042BDEBD_068AC2FE_h_7
 #include "datum.h"
+#pragma x2c_region_end u_042BDEBD_068AC2FE_h_7
+#pragma x2c_region_begin u_042BDEBD_068AC2FE_h_8
 #include <limits.h>
+#pragma x2c_region_end u_042BDEBD_068AC2FE_h_8
+#pragma x2c_region_begin u_042BDEBD_068AC2FE_h_9
 #include <stdio.h>
+#pragma x2c_region_end u_042BDEBD_068AC2FE_h_9
+#pragma x2c_region_begin u_042BDEBD_068AC2FE_h_10
 #include <stdlib.h>
+#pragma x2c_region_end u_042BDEBD_068AC2FE_h_10
+#pragma x2c_region_begin u_042BDEBD_068AC2FE_h_11
 #include <string.h>
+#pragma x2c_region_end u_042BDEBD_068AC2FE_h_11
+#pragma x2c_region_begin u_042BDEBD_068AC2FE_h_12
+#pragma x2c_namespace_require n_02F1BDF9
+#pragma x2c_namespace_require n_06420495
+#pragma x2c_namespace_require n_330E20B7
+#pragma x2c_namespace_require n_67E082C9
+#pragma x2c_namespace_require n_9F155932
 typedef Var(* MetaCall)(Compiler c, List expression, Token site);
-
+#pragma x2c_region_end u_042BDEBD_068AC2FE_h_12
+#pragma x2c_region_begin u_042BDEBD_068AC2FE_h_13
 Var Compiler_meta_argument(Compiler c, List node, Type want, Token site, MetaCall call);
-
+#pragma x2c_region_end u_042BDEBD_068AC2FE_h_13
+#pragma x2c_region_begin u_042BDEBD_068AC2FE_h_14
 Var Compiler_folded_constant(Compiler c, Var node);
-
+#pragma x2c_region_end u_042BDEBD_068AC2FE_h_14
+#pragma x2c_region_begin u_042BDEBD_068AC2FE_h_15
 Var literal_text_value(String spelling);
-
+#pragma x2c_region_end u_042BDEBD_068AC2FE_h_15
+#pragma x2c_region_begin u_042BDEBD_068AC2FE_h_16
 List Compiler_meta_value_expression(Compiler c, Type declared, Var value, Token site);
-
+#pragma x2c_region_end u_042BDEBD_068AC2FE_h_16
+#pragma x2c_region_begin u_042BDEBD_068AC2FE_h_17
 void Compiler_check_meta_call(Compiler c, List callee, Token origin);
-
+#pragma x2c_region_end u_042BDEBD_068AC2FE_h_17
+#pragma x2c_region_begin u_042BDEBD_068AC2FE_h_18
 int Compiler_meta_is_comptime_only(Compiler c, List fn);
-
+#pragma x2c_region_end u_042BDEBD_068AC2FE_h_18
 
 #endif /* __GUARD_0x042BDEBD__ */

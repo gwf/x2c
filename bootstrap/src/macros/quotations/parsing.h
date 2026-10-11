@@ -2,23 +2,34 @@
 
 #pragma once
 
-#ifndef __GUARD_0x8BF5C569__
-#define __GUARD_0x8BF5C569__
+#ifndef __GUARD_0x1F30BA4F__
+#define __GUARD_0x1F30BA4F__
 
+#pragma x2c_region_begin u_1F30BA4F_D0BC56B0_h_0
 #include "x2c.h"
-#include "_x2c_module_6922FA3C.h"
-#include "_x2c_module_24E8AEEE.h"
+#pragma x2c_region_end u_1F30BA4F_D0BC56B0_h_0
+#pragma x2c_region_begin u_1F30BA4F_D0BC56B0_h_1
+#include "../../_x2c_module_6922FA3C.h"
+#pragma x2c_region_end u_1F30BA4F_D0BC56B0_h_1
+#pragma x2c_region_begin u_1F30BA4F_D0BC56B0_h_2
+#include "../_x2c_module_24E8AEEE.h"
+#pragma x2c_region_end u_1F30BA4F_D0BC56B0_h_2
+#pragma x2c_region_begin u_1F30BA4F_D0BC56B0_h_3
 Symbol _x2c_mod_24E8AEEE_Compiler__quotation_kind(Compiler c, Token token);
-
+#pragma x2c_region_end u_1F30BA4F_D0BC56B0_h_3
+#pragma x2c_region_begin u_1F30BA4F_D0BC56B0_h_4
 int _x2c_mod_24E8AEEE_Compiler__typed_quotation(Compiler c);
-
+#pragma x2c_region_end u_1F30BA4F_D0BC56B0_h_4
+#pragma x2c_region_begin u_1F30BA4F_D0BC56B0_h_5
 List _x2c_mod_24E8AEEE_Compiler__expression_holes(Compiler c, Map holes);
-
+#pragma x2c_region_end u_1F30BA4F_D0BC56B0_h_5
+#pragma x2c_region_begin u_1F30BA4F_D0BC56B0_h_6
 List _x2c_mod_24E8AEEE_Compiler__quoted_type(Compiler c, Map holes);
-
+#pragma x2c_region_end u_1F30BA4F_D0BC56B0_h_6
+#pragma x2c_region_begin u_1F30BA4F_D0BC56B0_h_7
 List _x2c_mod_24E8AEEE_Compiler__checked_type(Compiler c, List type, Token origin);
-
+#pragma x2c_region_end u_1F30BA4F_D0BC56B0_h_7
 void _x2c_module_init_1F30BA4F(void);
 
 
-#endif /* __GUARD_0x8BF5C569__ */
+#endif /* __GUARD_0x1F30BA4F__ */

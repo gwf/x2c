@@ -5,28 +5,50 @@
 #ifndef __GUARD_0x57655C8B__
 #define __GUARD_0x57655C8B__
 
+#pragma x2c_region_begin u_57655C8B_FCD5258C_h_0
 #include "x2c.h"
+#pragma x2c_region_end u_57655C8B_FCD5258C_h_0
+#pragma x2c_region_begin u_57655C8B_FCD5258C_h_1
 #include "compiler.h"
+#pragma x2c_region_end u_57655C8B_FCD5258C_h_1
+#pragma x2c_region_begin u_57655C8B_FCD5258C_h_2
 #include "ast-rewrite.h"
+#pragma x2c_region_end u_57655C8B_FCD5258C_h_2
+#pragma x2c_region_begin u_57655C8B_FCD5258C_h_3
 #include "grammar.h"
+#pragma x2c_region_end u_57655C8B_FCD5258C_h_3
+#pragma x2c_region_begin u_57655C8B_FCD5258C_h_4
 #include "parse.h"
+#pragma x2c_region_end u_57655C8B_FCD5258C_h_4
+#pragma x2c_region_begin u_57655C8B_FCD5258C_h_5
 #include "type.h"
+#pragma x2c_region_end u_57655C8B_FCD5258C_h_5
+#pragma x2c_region_begin u_57655C8B_FCD5258C_h_6
 #include "expressions.h"
+#pragma x2c_region_end u_57655C8B_FCD5258C_h_6
+#pragma x2c_region_begin u_57655C8B_FCD5258C_h_7
 List Compiler_parse_lambda_literal(Compiler c);
-
+#pragma x2c_region_end u_57655C8B_FCD5258C_h_7
+#pragma x2c_region_begin u_57655C8B_FCD5258C_h_8
 List Compiler_lambda_param_types(Compiler c, List entries);
-
+#pragma x2c_region_end u_57655C8B_FCD5258C_h_8
+#pragma x2c_region_begin u_57655C8B_FCD5258C_h_9
 List Compiler_bind_lambda_expression(Compiler c, Type type, List parameters, List supplied, List body);
-
+#pragma x2c_region_end u_57655C8B_FCD5258C_h_9
+#pragma x2c_region_begin u_57655C8B_FCD5258C_h_10
 void Compiler_begin_lambda_captures(Compiler c, List references, List supplied);
-
+#pragma x2c_region_end u_57655C8B_FCD5258C_h_10
+#pragma x2c_region_begin u_57655C8B_FCD5258C_h_11
 List Compiler_end_lambda_captures(Compiler c);
-
+#pragma x2c_region_end u_57655C8B_FCD5258C_h_11
+#pragma x2c_region_begin u_57655C8B_FCD5258C_h_12
 int Compiler_lambda_capture_required(Compiler c, List binding);
-
+#pragma x2c_region_end u_57655C8B_FCD5258C_h_12
+#pragma x2c_region_begin u_57655C8B_FCD5258C_h_13
 List Compiler_capture_lambda_identifier(Compiler c, List binding, Type type);
-
+#pragma x2c_region_end u_57655C8B_FCD5258C_h_13
+#pragma x2c_region_begin u_57655C8B_FCD5258C_h_14
 void Compiler_check_lambda_captures(Compiler c, List ast);
-
+#pragma x2c_region_end u_57655C8B_FCD5258C_h_14
 
 #endif /* __GUARD_0x57655C8B__ */

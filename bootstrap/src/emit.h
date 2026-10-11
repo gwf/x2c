@@ -5,16 +5,35 @@
 #ifndef __GUARD_0x112A1548__
 #define __GUARD_0x112A1548__
 
+#pragma x2c_region_begin u_112A1548_002F8FD3_h_0
 #include "x2c.h"
+#pragma x2c_region_end u_112A1548_002F8FD3_h_0
+#pragma x2c_region_begin u_112A1548_002F8FD3_h_1
 #include "compiler.h"
+#pragma x2c_region_end u_112A1548_002F8FD3_h_1
+#pragma x2c_region_begin u_112A1548_002F8FD3_h_2
 #include <stdlib.h>
+#pragma x2c_region_end u_112A1548_002F8FD3_h_2
+#pragma x2c_region_begin u_112A1548_002F8FD3_h_3
 #include <stdio.h>
+#pragma x2c_region_end u_112A1548_002F8FD3_h_3
+#pragma x2c_region_begin u_112A1548_002F8FD3_h_4
 #include "string.h"
+#pragma x2c_region_end u_112A1548_002F8FD3_h_4
+#pragma x2c_region_begin u_112A1548_002F8FD3_h_5
 #include "var.h"
+#pragma x2c_region_end u_112A1548_002F8FD3_h_5
+#pragma x2c_region_begin u_112A1548_002F8FD3_h_6
 #include "ast.h"
+#pragma x2c_region_end u_112A1548_002F8FD3_h_6
+#pragma x2c_region_begin u_112A1548_002F8FD3_h_7
 #include "format.h"
+#pragma x2c_region_end u_112A1548_002F8FD3_h_7
+#pragma x2c_region_begin u_112A1548_002F8FD3_h_8
 #include "cleanup.h"
+#pragma x2c_region_end u_112A1548_002F8FD3_h_8
+#pragma x2c_region_begin u_112A1548_002F8FD3_h_9
 List Compiler_emit(Compiler c, List ast, Map cache_bindings);
-
+#pragma x2c_region_end u_112A1548_002F8FD3_h_9
 
 #endif /* __GUARD_0x112A1548__ */

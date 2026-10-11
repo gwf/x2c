@@ -5,15 +5,29 @@
 #ifndef __GUARD_0x2CF70D65__
 #define __GUARD_0x2CF70D65__
 
+#pragma x2c_region_begin u_2CF70D65_AAC158B0_h_0
 #include "x2c.h"
+#pragma x2c_region_end u_2CF70D65_AAC158B0_h_0
+#pragma x2c_region_begin u_2CF70D65_AAC158B0_h_1
 #include "meta.h"
+#pragma x2c_region_end u_2CF70D65_AAC158B0_h_1
+#pragma x2c_region_begin u_2CF70D65_AAC158B0_h_2
 #include "grammar.h"
+#pragma x2c_region_end u_2CF70D65_AAC158B0_h_2
+#pragma x2c_region_begin u_2CF70D65_AAC158B0_h_3
 #include "lisp.h"
+#pragma x2c_region_end u_2CF70D65_AAC158B0_h_3
+#pragma x2c_region_begin u_2CF70D65_AAC158B0_h_4
 #include "_x2c_module_6922FA3C.h"
+#pragma x2c_region_end u_2CF70D65_AAC158B0_h_4
+#pragma x2c_region_begin u_2CF70D65_AAC158B0_h_5
 #include "transform.h"
+#pragma x2c_region_end u_2CF70D65_AAC158B0_h_5
+#pragma x2c_region_begin u_2CF70D65_AAC158B0_h_6
 List x2c_param_make(List type, Var name);
-
+#pragma x2c_region_end u_2CF70D65_AAC158B0_h_6
+#pragma x2c_region_begin u_2CF70D65_AAC158B0_h_7
 Map builtin_targets(void);
-
+#pragma x2c_region_end u_2CF70D65_AAC158B0_h_7
 
 #endif /* __GUARD_0x2CF70D65__ */

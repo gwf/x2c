@@ -5,35 +5,62 @@
 #ifndef __GUARD_0x670D7DD9__
 #define __GUARD_0x670D7DD9__
 
+#pragma x2c_region_begin u_670D7DD9_F32E04E4_h_0
 #include "x2c.h"
+#pragma x2c_region_end u_670D7DD9_F32E04E4_h_0
+#pragma x2c_region_begin u_670D7DD9_F32E04E4_h_1
 #include "private-keywords.h"
+#pragma x2c_region_end u_670D7DD9_F32E04E4_h_1
+#pragma x2c_region_begin u_670D7DD9_F32E04E4_h_2
 #include "compiler.h"
+#pragma x2c_region_end u_670D7DD9_F32E04E4_h_2
+#pragma x2c_region_begin u_670D7DD9_F32E04E4_h_3
 #include "parse-report-macros.h"
+#pragma x2c_region_end u_670D7DD9_F32E04E4_h_3
+#pragma x2c_region_begin u_670D7DD9_F32E04E4_h_4
 #include "parse.h"
+#pragma x2c_region_end u_670D7DD9_F32E04E4_h_4
+#pragma x2c_region_begin u_670D7DD9_F32E04E4_h_5
 #include "expressions.h"
+#pragma x2c_region_end u_670D7DD9_F32E04E4_h_5
+#pragma x2c_region_begin u_670D7DD9_F32E04E4_h_6
 #include "literals.h"
+#pragma x2c_region_end u_670D7DD9_F32E04E4_h_6
+#pragma x2c_region_begin u_670D7DD9_F32E04E4_h_7
 #include "_x2c_module_6922FA3C.h"
+#pragma x2c_region_end u_670D7DD9_F32E04E4_h_7
+#pragma x2c_region_begin u_670D7DD9_F32E04E4_h_8
 List Compiler_parse_statement(Compiler c);
-
+#pragma x2c_region_end u_670D7DD9_F32E04E4_h_8
+#pragma x2c_region_begin u_670D7DD9_F32E04E4_h_9
 List Compiler_with_binding(Compiler c);
-
+#pragma x2c_region_end u_670D7DD9_F32E04E4_h_9
+#pragma x2c_region_begin u_670D7DD9_F32E04E4_h_10
 List Compiler_parse_source_clause(Compiler c, Symbol kind);
-
+#pragma x2c_region_end u_670D7DD9_F32E04E4_h_10
+#pragma x2c_region_begin u_670D7DD9_F32E04E4_h_11
 List Compiler_finish_return_statement(Compiler c, List expr);
-
+#pragma x2c_region_end u_670D7DD9_F32E04E4_h_11
+#pragma x2c_region_begin u_670D7DD9_F32E04E4_h_12
 List Compiler_parse_match_row_argument(Compiler c);
-
+#pragma x2c_region_end u_670D7DD9_F32E04E4_h_12
+#pragma x2c_region_begin u_670D7DD9_F32E04E4_h_13
 List Compiler_parse_case_body(Compiler c, List types);
-
+#pragma x2c_region_end u_670D7DD9_F32E04E4_h_13
+#pragma x2c_region_begin u_670D7DD9_F32E04E4_h_14
 List Compiler_parse_governed(Compiler c, AstPos position);
-
+#pragma x2c_region_end u_670D7DD9_F32E04E4_h_14
+#pragma x2c_region_begin u_670D7DD9_F32E04E4_h_15
 List Compiler_parse_block_item(Compiler c);
-
+#pragma x2c_region_end u_670D7DD9_F32E04E4_h_15
+#pragma x2c_region_begin u_670D7DD9_F32E04E4_h_16
 List Compiler_parse_compound_statement(Compiler c);
-
+#pragma x2c_region_end u_670D7DD9_F32E04E4_h_16
+#pragma x2c_region_begin u_670D7DD9_F32E04E4_h_17
 List Compiler_parse_block_items(Compiler c, int anchor_items);
-
+#pragma x2c_region_end u_670D7DD9_F32E04E4_h_17
+#pragma x2c_region_begin u_670D7DD9_F32E04E4_h_18
 List Compiler_parse_callable_body(Compiler c);
-
+#pragma x2c_region_end u_670D7DD9_F32E04E4_h_18
 
 #endif /* __GUARD_0x670D7DD9__ */

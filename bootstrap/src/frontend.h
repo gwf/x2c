@@ -5,57 +5,120 @@
 #ifndef __GUARD_0x1A2A7247__
 #define __GUARD_0x1A2A7247__
 
+#pragma x2c_region_begin u_1A2A7247_B5EC8E12_h_0
 #include "x2c.h"
+#pragma x2c_region_end u_1A2A7247_B5EC8E12_h_0
+#pragma x2c_region_begin u_1A2A7247_B5EC8E12_h_1
+#pragma x2c_namespace_require n_231034CC
+#pragma x2c_namespace_require n_8B95FFD0
+typedef struct Frontend * Frontend;
+#pragma x2c_region_end u_1A2A7247_B5EC8E12_h_1
+#pragma x2c_region_begin u_1A2A7247_B5EC8E12_h_2
 #include "cli.h"
+#pragma x2c_region_end u_1A2A7247_B5EC8E12_h_2
+#pragma x2c_region_begin u_1A2A7247_B5EC8E12_h_3
 #include "compiler.h"
+#pragma x2c_region_end u_1A2A7247_B5EC8E12_h_3
+#pragma x2c_region_begin u_1A2A7247_B5EC8E12_h_4
 #include "toolchain.h"
+#pragma x2c_region_end u_1A2A7247_B5EC8E12_h_4
+#pragma x2c_region_begin u_1A2A7247_B5EC8E12_h_5
+#pragma x2c_namespace_require n_7BE5B57D
+#pragma x2c_namespace_require n_C713742F
 typedef void(* FrontendErrorSink)(String text);
-
-typedef struct Frontend{
+#pragma x2c_region_end u_1A2A7247_B5EC8E12_h_5
+#pragma x2c_region_begin u_1A2A7247_B5EC8E12_h_6
+struct Frontend{
+#pragma x2c_namespace_require n_6B66AA8B
   CliRequest request;
+#pragma x2c_namespace_require n_06420495
   List include_dirs;
+#pragma x2c_namespace_require n_8B3FDD0A
   Toolchain toolchain;
+#pragma x2c_namespace_require n_7BE5B57D
   FrontendErrorSink preprocessor_errors;
 }
-* Frontend;
-
-typedef struct ParsedUnit{
+;
+#pragma x2c_region_end u_1A2A7247_B5EC8E12_h_6
+#pragma x2c_region_begin u_1A2A7247_B5EC8E12_h_7
+#pragma x2c_namespace_require n_231034CC
+#pragma x2c_namespace_require n_8B95FFD0
+typedef struct Frontend * Frontend;
+#pragma x2c_region_end u_1A2A7247_B5EC8E12_h_7
+#pragma x2c_region_begin u_1A2A7247_B5EC8E12_h_8
+struct ParsedUnit{
+#pragma x2c_namespace_require n_8087272F
   Context context;
+#pragma x2c_namespace_require n_9F155932
   Compiler compiler, preprocessor;
+#pragma x2c_namespace_require n_CD4FE74B
   Map globals;
+#pragma x2c_namespace_require n_06420495
   List ast;
+#pragma x2c_namespace_require n_C713742F
   String preprocessor_output, preprocessor_errors;
   int source_lines, generated_symbols;
 }
-ParsedUnit;
-
+;
+#pragma x2c_region_end u_1A2A7247_B5EC8E12_h_8
+#pragma x2c_region_begin u_1A2A7247_B5EC8E12_h_9
+#pragma x2c_namespace_require n_234065CD
+#pragma x2c_namespace_require n_C5014BC9
+typedef struct ParsedUnit ParsedUnit;
+#pragma x2c_region_end u_1A2A7247_B5EC8E12_h_9
+#pragma x2c_region_begin u_1A2A7247_B5EC8E12_h_10
 #include <limits.h>
+#pragma x2c_region_end u_1A2A7247_B5EC8E12_h_10
+#pragma x2c_region_begin u_1A2A7247_B5EC8E12_h_11
 #include <stdio.h>
+#pragma x2c_region_end u_1A2A7247_B5EC8E12_h_11
+#pragma x2c_region_begin u_1A2A7247_B5EC8E12_h_12
 #include <stdlib.h>
+#pragma x2c_region_end u_1A2A7247_B5EC8E12_h_12
+#pragma x2c_region_begin u_1A2A7247_B5EC8E12_h_13
 #include <string.h>
+#pragma x2c_region_end u_1A2A7247_B5EC8E12_h_13
+#pragma x2c_region_begin u_1A2A7247_B5EC8E12_h_14
 #include "build.h"
+#pragma x2c_region_end u_1A2A7247_B5EC8E12_h_14
+#pragma x2c_region_begin u_1A2A7247_B5EC8E12_h_15
 #include "collect.h"
+#pragma x2c_region_end u_1A2A7247_B5EC8E12_h_15
+#pragma x2c_region_begin u_1A2A7247_B5EC8E12_h_16
 #include "deps.h"
+#pragma x2c_region_end u_1A2A7247_B5EC8E12_h_16
+#pragma x2c_region_begin u_1A2A7247_B5EC8E12_h_17
 #include "utils.h"
+#pragma x2c_region_end u_1A2A7247_B5EC8E12_h_17
+#pragma x2c_region_begin u_1A2A7247_B5EC8E12_h_18
 int Frontend_open(Frontend f, String filename, ParsedUnit * unit);
-
+#pragma x2c_region_end u_1A2A7247_B5EC8E12_h_18
+#pragma x2c_region_begin u_1A2A7247_B5EC8E12_h_19
 int Frontend_open_reporting(Frontend f, String filename, ParsedUnit * unit);
-
+#pragma x2c_region_end u_1A2A7247_B5EC8E12_h_19
+#pragma x2c_region_begin u_1A2A7247_B5EC8E12_h_20
 int Frontend_open_session(Frontend frontend, ParsedUnit * unit);
-
+#pragma x2c_region_end u_1A2A7247_B5EC8E12_h_20
+#pragma x2c_region_begin u_1A2A7247_B5EC8E12_h_21
 int Frontend_start(Frontend frontend, String filename, ParsedUnit * unit);
-
+#pragma x2c_region_end u_1A2A7247_B5EC8E12_h_21
+#pragma x2c_region_begin u_1A2A7247_B5EC8E12_h_22
 int ParsedUnit_collect(ParsedUnit * unit, Frontend frontend);
-
+#pragma x2c_region_end u_1A2A7247_B5EC8E12_h_22
+#pragma x2c_region_begin u_1A2A7247_B5EC8E12_h_23
 int ParsedUnit_parse(ParsedUnit * p);
-
+#pragma x2c_region_end u_1A2A7247_B5EC8E12_h_23
+#pragma x2c_region_begin u_1A2A7247_B5EC8E12_h_24
 void ParsedUnit_close(ParsedUnit * unit);
-
+#pragma x2c_region_end u_1A2A7247_B5EC8E12_h_24
+#pragma x2c_region_begin u_1A2A7247_B5EC8E12_h_25
 int Frontend_preload_macro_libraries(Frontend frontend);
-
+#pragma x2c_region_end u_1A2A7247_B5EC8E12_h_25
+#pragma x2c_region_begin u_1A2A7247_B5EC8E12_h_26
 void Frontend_load_support(CliRequest request);
-
+#pragma x2c_region_end u_1A2A7247_B5EC8E12_h_26
+#pragma x2c_region_begin u_1A2A7247_B5EC8E12_h_27
 Frontend Frontend_new(CliRequest request);
-
+#pragma x2c_region_end u_1A2A7247_B5EC8E12_h_27
 
 #endif /* __GUARD_0x1A2A7247__ */

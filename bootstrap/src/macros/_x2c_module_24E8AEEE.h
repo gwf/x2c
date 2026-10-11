@@ -2,16 +2,25 @@
 
 #pragma once
 
-#ifndef __GUARD_0x9F4F7408__
-#define __GUARD_0x9F4F7408__
+#ifndef __GUARD_0x24E8AEEE__
+#define __GUARD_0x24E8AEEE__
 
+#pragma x2c_region_begin u_24E8AEEE_46C11C67_h_0
 #include "x2c.h"
-#include "_x2c_module_6922FA3C.h"
-#include "_x2c_module_1F30BA4F.h"
-#include "_x2c_module_B07F9226.h"
+#pragma x2c_region_end u_24E8AEEE_46C11C67_h_0
+#pragma x2c_region_begin u_24E8AEEE_46C11C67_h_1
+#include "../_x2c_module_6922FA3C.h"
+#pragma x2c_region_end u_24E8AEEE_46C11C67_h_1
+#pragma x2c_region_begin u_24E8AEEE_46C11C67_h_2
+#include "quotations/_x2c_module_1F30BA4F.h"
+#pragma x2c_region_end u_24E8AEEE_46C11C67_h_2
+#pragma x2c_region_begin u_24E8AEEE_46C11C67_h_3
+#include "quotations/_x2c_module_B07F9226.h"
+#pragma x2c_region_end u_24E8AEEE_46C11C67_h_3
+#pragma x2c_region_begin u_24E8AEEE_46C11C67_h_4
 List Compiler_parse_macro_quotation(Compiler c);
-
+#pragma x2c_region_end u_24E8AEEE_46C11C67_h_4
 void _x2c_module_init_24E8AEEE(void);
 
 
-#endif /* __GUARD_0x9F4F7408__ */
+#endif /* __GUARD_0x24E8AEEE__ */

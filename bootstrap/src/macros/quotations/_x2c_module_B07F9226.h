@@ -2,17 +2,25 @@
 
 #pragma once
 
-#ifndef __GUARD_0x6887674C__
-#define __GUARD_0x6887674C__
+#ifndef __GUARD_0xB07F9226__
+#define __GUARD_0xB07F9226__
 
+#pragma x2c_region_begin u_B07F9226_890810D1_h_0
 #include "x2c.h"
-#include "_x2c_module_6922FA3C.h"
-#include "_x2c_module_24E8AEEE.h"
+#pragma x2c_region_end u_B07F9226_890810D1_h_0
+#pragma x2c_region_begin u_B07F9226_890810D1_h_1
+#include "../../_x2c_module_6922FA3C.h"
+#pragma x2c_region_end u_B07F9226_890810D1_h_1
+#pragma x2c_region_begin u_B07F9226_890810D1_h_2
+#include "../_x2c_module_24E8AEEE.h"
+#pragma x2c_region_end u_B07F9226_890810D1_h_2
+#pragma x2c_region_begin u_B07F9226_890810D1_h_3
 List _x2c_mod_24E8AEEE_Compiler__quotation(Compiler c, Token start, Symbol kind, Map holes, List type);
-
+#pragma x2c_region_end u_B07F9226_890810D1_h_3
+#pragma x2c_region_begin u_B07F9226_890810D1_h_4
 List _x2c_mod_24E8AEEE_Compiler__runtime_call(Compiler c, String name, List arguments, Token start);
-
+#pragma x2c_region_end u_B07F9226_890810D1_h_4
 void _x2c_module_init_B07F9226(void);
 
 
-#endif /* __GUARD_0x6887674C__ */
+#endif /* __GUARD_0xB07F9226__ */

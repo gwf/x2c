@@ -2,27 +2,41 @@
 
 #pragma once
 
-#ifndef __GUARD_0x1CF2047D__
-#define __GUARD_0x1CF2047D__
+#ifndef __GUARD_0xA28B3F63__
+#define __GUARD_0xA28B3F63__
 
+#pragma x2c_region_begin u_A28B3F63_4D47461C_h_0
 #include "x2c.h"
-#include "_x2c_module_6922FA3C.h"
-typedef struct _x2c_mod_6922FA3C_MacroCategory{
+#pragma x2c_region_end u_A28B3F63_4D47461C_h_0
+#pragma x2c_region_begin u_A28B3F63_4D47461C_h_1
+#include "../_x2c_module_6922FA3C.h"
+#pragma x2c_region_end u_A28B3F63_4D47461C_h_1
+#pragma x2c_region_begin u_A28B3F63_4D47461C_h_2
+struct _x2c_mod_6922FA3C_MacroCategory{
   const char * spelling;
+#pragma x2c_namespace_require n_C2105E2E
   Symbol hole, result;
   int target, named;
 }
-_x2c_mod_6922FA3C_MacroCategory;
-
+;
+#pragma x2c_region_end u_A28B3F63_4D47461C_h_2
+#pragma x2c_region_begin u_A28B3F63_4D47461C_h_3
+#pragma x2c_namespace_require n_58F949CF
+#pragma x2c_namespace_require n_A96CE863
+typedef struct _x2c_mod_6922FA3C_MacroCategory _x2c_mod_6922FA3C_MacroCategory;
+#pragma x2c_region_end u_A28B3F63_4D47461C_h_3
 #define MACRO_CATEGORY_COUNT \
   (int) (sizeof(macro_categories) / sizeof(macro_categories[0]))
+#pragma x2c_region_begin u_A28B3F63_4D47461C_h_4
 const _x2c_mod_6922FA3C_MacroCategory * _x2c_mod_6922FA3C__category(String spelling);
-
+#pragma x2c_region_end u_A28B3F63_4D47461C_h_4
+#pragma x2c_region_begin u_A28B3F63_4D47461C_h_5
 int _x2c_mod_6922FA3C__decorator_target(Symbol hole);
-
+#pragma x2c_region_end u_A28B3F63_4D47461C_h_5
+#pragma x2c_region_begin u_A28B3F63_4D47461C_h_6
 String _x2c_mod_6922FA3C__kind_spelling(Symbol kind);
-
+#pragma x2c_region_end u_A28B3F63_4D47461C_h_6
 void _x2c_module_init_A28B3F63(void);
 
 
-#endif /* __GUARD_0x1CF2047D__ */
+#endif /* __GUARD_0xA28B3F63__ */

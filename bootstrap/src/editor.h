@@ -5,20 +5,47 @@
 #ifndef __GUARD_0x92FF49A2__
 #define __GUARD_0x92FF49A2__
 
+#pragma x2c_region_begin u_92FF49A2_B20C216D_h_0
 #include "x2c.h"
+#pragma x2c_region_end u_92FF49A2_B20C216D_h_0
+#pragma x2c_region_begin u_92FF49A2_B20C216D_h_1
 #include "frontend.h"
+#pragma x2c_region_end u_92FF49A2_B20C216D_h_1
+#pragma x2c_region_begin u_92FF49A2_B20C216D_h_2
 #include "meta-project.h"
+#pragma x2c_region_end u_92FF49A2_B20C216D_h_2
+#pragma x2c_region_begin u_92FF49A2_B20C216D_h_3
 #include "project.h"
+#pragma x2c_region_end u_92FF49A2_B20C216D_h_3
+#pragma x2c_region_begin u_92FF49A2_B20C216D_h_4
 #include "sourceview.h"
+#pragma x2c_region_end u_92FF49A2_B20C216D_h_4
+#pragma x2c_region_begin u_92FF49A2_B20C216D_h_5
 #include "emit.h"
+#pragma x2c_region_end u_92FF49A2_B20C216D_h_5
+#pragma x2c_region_begin u_92FF49A2_B20C216D_h_6
 #include "format.h"
+#pragma x2c_region_end u_92FF49A2_B20C216D_h_6
+#pragma x2c_region_begin u_92FF49A2_B20C216D_h_7
 #include "diagnostics.h"
+#pragma x2c_region_end u_92FF49A2_B20C216D_h_7
+#pragma x2c_region_begin u_92FF49A2_B20C216D_h_8
 #include "report.h"
+#pragma x2c_region_end u_92FF49A2_B20C216D_h_8
+#pragma x2c_region_begin u_92FF49A2_B20C216D_h_9
 #include "utils.h"
+#pragma x2c_region_end u_92FF49A2_B20C216D_h_9
+#pragma x2c_region_begin u_92FF49A2_B20C216D_h_10
 #include <stdio.h>
+#pragma x2c_region_end u_92FF49A2_B20C216D_h_10
+#pragma x2c_region_begin u_92FF49A2_B20C216D_h_11
 #include <stdlib.h>
+#pragma x2c_region_end u_92FF49A2_B20C216D_h_11
+#pragma x2c_region_begin u_92FF49A2_B20C216D_h_12
 #include <string.h>
+#pragma x2c_region_end u_92FF49A2_B20C216D_h_12
+#pragma x2c_region_begin u_92FF49A2_B20C216D_h_13
 int editor_request(int argc, char * * argv);
-
+#pragma x2c_region_end u_92FF49A2_B20C216D_h_13
 
 #endif /* __GUARD_0x92FF49A2__ */

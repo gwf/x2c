@@ -2,163 +2,310 @@
 
 #pragma once
 
-#ifndef __GUARD_0x28FCBFDC__
-#define __GUARD_0x28FCBFDC__
+#ifndef __GUARD_0x6922FA3C__
+#define __GUARD_0x6922FA3C__
 
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_0
 #include "x2c.h"
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_0
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_1
 #include "private-keywords.h"
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_1
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_2
 #include "grammar.h"
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_2
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_3
 #include "ast-rewrite.h"
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_3
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_4
 #include "compiler.h"
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_4
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_5
 #include "adapter-memo.h"
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_5
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_6
 #include "fields.h"
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_6
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_7
 #include "expressions.h"
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_7
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_8
 #include "builtins.h"
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_8
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_9
 #include "linked-meta.h"
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_9
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_10
 #include "literals.h"
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_10
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_11
 #include "stage.h"
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_11
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_12
 #include "meta-group.h"
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_12
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_13
 #include "meta-helper-client.h"
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_13
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_14
 #include "meta-native.h"
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_14
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_15
 #include "meta-sdk.h"
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_15
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_16
 #include "meta.h"
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_16
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_17
 #include "parse.h"
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_17
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_18
 #include "regions.h"
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_18
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_19
 #include "statements.h"
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_19
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_20
 #include "digest.h"
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_20
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_21
 #include "script.h"
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_21
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_22
 #include "toolchain.h"
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_22
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_23
 #include "utils.h"
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_23
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_24
 #include <dlfcn.h>
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_24
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_25
 #include <unistd.h>
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_25
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_26
 #include <errno.h>
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_26
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_27
 #include <limits.h>
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_27
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_28
 #include <stdlib.h>
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_28
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_29
 #include <string.h>
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_29
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_30
 #include <sys/stat.h>
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_30
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_31
 #include "expressions-reports.h"
-typedef struct _x2c_mod_6922FA3C_Definition{
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_31
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_32
+struct _x2c_mod_6922FA3C_Definition{
+#pragma x2c_namespace_require n_9F155932
   Compiler c;
+#pragma x2c_namespace_require n_67E082C9
   Token start;
+#pragma x2c_family_require f_BD311145
+#pragma x2c_namespace_require n_F836E4D5
   Atom name;
+#pragma x2c_namespace_require n_C2105E2E
   Symbol kind;
+#pragma x2c_namespace_require n_06420495
   List target, parameters, template, fresh, captures, pattern, rebuild, type;
+#pragma x2c_namespace_require n_06420495
   List origin;
+#pragma x2c_namespace_require n_C713742F
   String file;
+#pragma x2c_namespace_require n_CD4FE74B
   Map locals;
+#pragma x2c_namespace_require n_29507A2B
   Array using;
   int anonymous, local, nested, quotation, leaf, storage;
 }
-_x2c_mod_6922FA3C_Definition;
-
-#include "_x2c_module_A28B3F63.h"
-#include "_x2c_module_71BA58ED.h"
-#include "_x2c_module_5F5AD92C.h"
-#include "_x2c_module_24E8AEEE.h"
+;
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_32
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_33
+#pragma x2c_namespace_require n_7F42C477
+#pragma x2c_namespace_require n_8C0ACE85
+typedef struct _x2c_mod_6922FA3C_Definition _x2c_mod_6922FA3C_Definition;
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_33
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_34
+#include "macros/_x2c_module_A28B3F63.h"
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_34
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_35
+#include "macros/_x2c_module_71BA58ED.h"
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_35
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_36
+#include "macros/_x2c_module_5F5AD92C.h"
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_36
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_37
+#include "macros/_x2c_module_24E8AEEE.h"
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_37
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_38
 void _x2c_mod_6922FA3C_Compiler__install_rewrite(Compiler c, List row);
-
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_38
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_39
 List Compiler_marked_rewrite(Compiler c, Type aggregate, List source, Token site);
-
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_39
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_40
 int Compiler_has_rewrites(Compiler c, Symbol point, Var kind);
-
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_40
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_41
 List Compiler_rewrite(Compiler c, Symbol point, Var kind, List source, AstPos position, Type expected, Token site);
-
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_41
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_42
 List Compiler_lower_rewrite(Compiler c, Symbol point, Var kind, List source, AstPos position, Type expected, Token site);
-
-typedef struct Effects{
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_42
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_43
+struct _x2c_file_2B8B4FE1__Effects{
   int bindings, names, origins, pending, placements, diagnostics;
 }
-Effects;
-
+;
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_43
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_44
+#pragma x2c_namespace_require n_A0677791
+#pragma x2c_namespace_require n_A83FFB5F
+typedef struct _x2c_file_2B8B4FE1__Effects _x2c_file_2B8B4FE1__Effects;
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_44
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_45
 struct SlotWatch{
+#pragma x2c_namespace_require n_06420495
   List values;
+#pragma x2c_namespace_require n_29507A2B
   Array outputs, order;
-  Effects inner;
+#pragma x2c_family_require f_ABBCABA4
+#pragma x2c_namespace_require n_A83FFB5F
+  _x2c_file_2B8B4FE1__Effects inner;
   int repeated;
 }
 ;
-
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_45
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_46
+struct SlotWatch;
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_46
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_47
 Ast Compiler_watched_step(Compiler c, Ast ast);
-
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_47
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_48
 List Compiler_macro_value_literal(Compiler c, List value);
-
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_48
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_49
 Var _x2c_mod_6922FA3C__macro_value_names(Var value);
-
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_49
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_50
 List _x2c_mod_6922FA3C_Compiler__macro_value(Compiler c, Atom name);
-
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_50
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_51
 List Compiler_try_parse_macro_pattern(Compiler c);
-
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_51
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_52
 Token Compiler_macro_pattern_at(Compiler c, Token at, String * spelling, Var * stored);
-
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_52
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_53
 List Compiler_try_parse_macro_subpattern(Compiler c, int content);
-
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_53
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_54
 List Compiler_capture_macro_value(Compiler c, List definition);
-
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_54
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_55
 int Compiler_take_code_value(Compiler c, Var input, Var * value, int * retained);
-
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_55
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_56
 void Compiler_place(Compiler c, List where, Var code);
-
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_56
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_57
 List Compiler_bind_code_value(Compiler c, List carrier, AstPos position, Type return_type);
-
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_57
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_58
 void Compiler_ensure_macro_lisp(Compiler c);
-
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_58
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_59
 Var _x2c_mod_6922FA3C_Compiler__eval_string(Compiler c, String source, Token invocation);
-
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_59
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_60
 String _x2c_mod_6922FA3C_Compiler__lisp_form(Compiler c);
-
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_60
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_61
 List Compiler_parse_macro_lisp_top_level(Compiler c);
-
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_61
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_62
 void Compiler_parse_macro_lisp_shallow(Compiler c);
-
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_62
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_63
 void Compiler_evaluate_declaration_effect(Compiler c, String form, Token invocation);
-
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_63
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_64
 List Compiler_parse_macro_lisp_expression(Compiler c);
-
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_64
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_65
 List Compiler_lift_macro_lisp_expression(Compiler c, Var value, Token invocation);
-
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_65
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_66
 List Compiler_bind_macro_lisp_statement(Compiler c, List value, AstPos context);
-
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_66
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_67
 List _x2c_mod_6922FA3C_Compiler__import(Compiler c, String requested, Token invocation);
-
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_67
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_68
 Var _x2c_mod_6922FA3C_Compiler__rebind_imported(Compiler c, Var stored);
-
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_68
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_69
 String Compiler_source_path(Compiler c, String file);
-
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_69
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_70
 String _x2c_mod_6922FA3C__definition_file(List definition);
-
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_70
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_71
 Lisp Compiler_open_macro_library(Compiler c);
-
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_71
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_72
 void Compiler_add_library_dependencies(Compiler c);
-
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_72
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_73
 void Compiler_publish_macro_library(Compiler c, Lisp shared);
-
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_73
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_74
 int Compiler_inherits_import(String path);
-
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_74
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_75
 void Compiler_record_comptime(Compiler c, String name);
-
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_75
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_76
 void Compiler_inherit_library_comptime(Compiler c);
-
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_76
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_77
 int macro_library_filling(void);
-
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_77
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_78
 Map Compiler_shared_definitions(Compiler c);
-
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_78
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_79
 int Compiler_shares_meta_definition(Compiler c, String name);
-
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_79
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_80
 void Compiler_install_builtin_macros(Compiler c);
-
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_80
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_81
 void _x2c_mod_6922FA3C_Compiler__use_lisp_bindings(Compiler c, int install);
-
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_81
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_82
 void Compiler_bind_meta_operation(Lisp lisp, String name, Var function);
-
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_82
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_83
 String _x2c_mod_6922FA3C__definition_note(List definition);
-
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_83
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_84
 void Compiler_report_lisp_failure(Compiler c, Token invocation, List error, String source);
-
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_84
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_85
 void _x2c_mod_6922FA3C_Compiler__unbound(Compiler c, String spelling, Token token);
-
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_85
+#pragma x2c_region_begin u_6922FA3C_BF85DE27_h_86
 void macro_library_reset(void);
-
+#pragma x2c_region_end u_6922FA3C_BF85DE27_h_86
 void _x2c_module_init_6922FA3C(void);
 
 
-#endif /* __GUARD_0x28FCBFDC__ */
+#endif /* __GUARD_0x6922FA3C__ */

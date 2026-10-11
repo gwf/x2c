@@ -5,82 +5,164 @@
 #ifndef __GUARD_0xAB8728A9__
 #define __GUARD_0xAB8728A9__
 
+#pragma x2c_region_begin u_AB8728A9_3897612A_h_0
 #include "x2c.h"
+#pragma x2c_region_end u_AB8728A9_3897612A_h_0
+#pragma x2c_region_begin u_AB8728A9_3897612A_h_1
 #include "compiler.h"
+#pragma x2c_region_end u_AB8728A9_3897612A_h_1
+#pragma x2c_region_begin u_AB8728A9_3897612A_h_2
 #include "module-tree.h"
+#pragma x2c_region_end u_AB8728A9_3897612A_h_2
+#pragma x2c_region_begin u_AB8728A9_3897612A_h_3
+#include "module-schedule.h"
+#pragma x2c_region_end u_AB8728A9_3897612A_h_3
+#pragma x2c_region_begin u_AB8728A9_3897612A_h_4
 #include "ast-rewrite.h"
+#pragma x2c_region_end u_AB8728A9_3897612A_h_4
+#pragma x2c_region_begin u_AB8728A9_3897612A_h_5
 #include "buffer.h"
+#pragma x2c_region_end u_AB8728A9_3897612A_h_5
+#pragma x2c_region_begin u_AB8728A9_3897612A_h_6
 #include "datum.h"
+#pragma x2c_region_end u_AB8728A9_3897612A_h_6
+#pragma x2c_region_begin u_AB8728A9_3897612A_h_7
 #include "utils.h"
+#pragma x2c_region_end u_AB8728A9_3897612A_h_7
+#pragma x2c_region_begin u_AB8728A9_3897612A_h_8
 #include <errno.h>
+#pragma x2c_region_end u_AB8728A9_3897612A_h_8
+#pragma x2c_region_begin u_AB8728A9_3897612A_h_9
 #include <limits.h>
+#pragma x2c_region_end u_AB8728A9_3897612A_h_9
+#pragma x2c_region_begin u_AB8728A9_3897612A_h_10
 #include <stdio.h>
+#pragma x2c_region_end u_AB8728A9_3897612A_h_10
+#pragma x2c_region_begin u_AB8728A9_3897612A_h_11
 #include <stdlib.h>
+#pragma x2c_region_end u_AB8728A9_3897612A_h_11
+#pragma x2c_region_begin u_AB8728A9_3897612A_h_12
 #include <string.h>
+#pragma x2c_region_end u_AB8728A9_3897612A_h_12
+#pragma x2c_region_begin u_AB8728A9_3897612A_h_13
 #include <unistd.h>
+#pragma x2c_region_end u_AB8728A9_3897612A_h_13
+#pragma x2c_region_begin u_AB8728A9_3897612A_h_14
 Map Compiler_collect_symbols(Compiler c, Map globs);
-
+#pragma x2c_region_end u_AB8728A9_3897612A_h_14
+#pragma x2c_region_begin u_AB8728A9_3897612A_h_15
 List compiler_prelude_sources(void);
-
+#pragma x2c_region_end u_AB8728A9_3897612A_h_15
+#pragma x2c_region_begin u_AB8728A9_3897612A_h_16
 int is_prelude_source(String path);
-
-void Compiler__module_preamble(Compiler c, String path, Map globs, Map active);
-
+#pragma x2c_region_end u_AB8728A9_3897612A_h_16
+#pragma x2c_region_begin u_AB8728A9_3897612A_h_17
+void Compiler__module_preamble(Compiler c, String path, Map globs, Map active, Array effects);
+#pragma x2c_region_end u_AB8728A9_3897612A_h_17
+#pragma x2c_region_begin u_AB8728A9_3897612A_h_18
+List declaration_type_family(Map rows, Map statics, List key, Var value);
+#pragma x2c_region_end u_AB8728A9_3897612A_h_18
+#pragma x2c_region_begin u_AB8728A9_3897612A_h_19
+Map declaration_type_namespaces(List syntax, Map rows);
+#pragma x2c_region_end u_AB8728A9_3897612A_h_19
+#pragma x2c_region_begin u_AB8728A9_3897612A_h_20
 void Compiler_configure_package(Compiler c, List roots, String filename);
-
+#pragma x2c_region_end u_AB8728A9_3897612A_h_20
+#pragma x2c_region_begin u_AB8728A9_3897612A_h_21
 String collect_resolve_include(SourceView sources, List dirs, String includer_dir, String target, int angle);
-
+#pragma x2c_region_end u_AB8728A9_3897612A_h_21
+#pragma x2c_region_begin u_AB8728A9_3897612A_h_22
 String Compiler_resolve_source_include(Compiler c, String target, int angle);
-
+#pragma x2c_region_end u_AB8728A9_3897612A_h_22
+#pragma x2c_region_begin u_AB8728A9_3897612A_h_23
 List Compiler_include_typedef_names(Compiler c, String target, int angle, Map seen);
-
+#pragma x2c_region_end u_AB8728A9_3897612A_h_23
+#pragma x2c_region_begin u_AB8728A9_3897612A_h_24
 List Compiler_include_type_dependencies(Compiler c, String target, int angle, Map seen);
-
+#pragma x2c_region_end u_AB8728A9_3897612A_h_24
+#pragma x2c_region_begin u_AB8728A9_3897612A_h_25
 void Compiler_include_function_declarations(Compiler c, String target, int angle, Map available);
-
+#pragma x2c_region_end u_AB8728A9_3897612A_h_25
+#pragma x2c_region_begin u_AB8728A9_3897612A_h_26
 void Compiler_runtime_function_declarations(Compiler c, Map available);
-
+#pragma x2c_region_end u_AB8728A9_3897612A_h_26
+#pragma x2c_region_begin u_AB8728A9_3897612A_h_27
 int Compiler_linked_meta_provider_current(Compiler c, String path);
-
+#pragma x2c_region_end u_AB8728A9_3897612A_h_27
+#pragma x2c_region_begin u_AB8728A9_3897612A_h_28
 int Compiler_linked_meta_definitions_current(Compiler c, String path);
-
+#pragma x2c_region_end u_AB8728A9_3897612A_h_28
+#pragma x2c_region_begin u_AB8728A9_3897612A_h_29
 void Compiler_complete_meta_hashes(Compiler c);
-
+#pragma x2c_region_end u_AB8728A9_3897612A_h_29
+#pragma x2c_region_begin u_AB8728A9_3897612A_h_30
 Map Compiler_meta_provider_hashes(Compiler c, String provider);
-
+#pragma x2c_region_end u_AB8728A9_3897612A_h_30
+#pragma x2c_region_begin u_AB8728A9_3897612A_h_31
 void Compiler_add_linked_meta_provider_hashes(Compiler c, Map rows);
-
+#pragma x2c_region_end u_AB8728A9_3897612A_h_31
+#pragma x2c_region_begin u_AB8728A9_3897612A_h_32
 void Compiler_name_meta_provider_bindings(Compiler c, String path, int index);
-
+#pragma x2c_region_end u_AB8728A9_3897612A_h_32
+#pragma x2c_region_begin u_AB8728A9_3897612A_h_33
 int Compiler_publishes_typedef(Compiler c, String name);
-
+#pragma x2c_region_end u_AB8728A9_3897612A_h_33
+#pragma x2c_region_begin u_AB8728A9_3897612A_h_34
 int Compiler_publishes_type_family(Compiler c, List family);
-
+#pragma x2c_region_end u_AB8728A9_3897612A_h_34
+#pragma x2c_region_begin u_AB8728A9_3897612A_h_35
+List Compiler_collected_declaration_components(Compiler c, List providers);
+#pragma x2c_region_end u_AB8728A9_3897612A_h_35
+#pragma x2c_region_begin u_AB8728A9_3897612A_h_36
+Map Compiler_collected_declaration_dependencies(Compiler c, List providers);
+#pragma x2c_region_end u_AB8728A9_3897612A_h_36
+#pragma x2c_region_begin u_AB8728A9_3897612A_h_37
+List Compiler_declaration_provider_rows(Compiler c, List providers, int exported);
+#pragma x2c_region_end u_AB8728A9_3897612A_h_37
+#pragma x2c_region_begin u_AB8728A9_3897612A_h_38
+List Compiler_declaration_detail_rows(Compiler c, List providers);
+#pragma x2c_region_end u_AB8728A9_3897612A_h_38
+#pragma x2c_region_begin u_AB8728A9_3897612A_h_39
+List Compiler_declaration_prerequisite_rows(Compiler c, List providers);
+#pragma x2c_region_end u_AB8728A9_3897612A_h_39
+#pragma x2c_region_begin u_AB8728A9_3897612A_h_40
 Map Compiler_inline_type_dependencies(Compiler c, List ast);
-
+#pragma x2c_region_end u_AB8728A9_3897612A_h_40
+#pragma x2c_region_begin u_AB8728A9_3897612A_h_41
 void Compiler_publish_inline_types(Compiler c, List ast);
-
+#pragma x2c_region_end u_AB8728A9_3897612A_h_41
+#pragma x2c_region_begin u_AB8728A9_3897612A_h_42
 void Compiler_record_generated_symbol(Compiler c, String name, Type signature);
-
+#pragma x2c_region_end u_AB8728A9_3897612A_h_42
+#pragma x2c_region_begin u_AB8728A9_3897612A_h_43
 void Compiler_collect_package(Compiler c, String name, Token token);
-
+#pragma x2c_region_end u_AB8728A9_3897612A_h_43
+#pragma x2c_region_begin u_AB8728A9_3897612A_h_44
 void Compiler_replay_package_imports(Compiler c, Map globs, Map rows, Array exports);
-
+#pragma x2c_region_end u_AB8728A9_3897612A_h_44
+#pragma x2c_region_begin u_AB8728A9_3897612A_h_45
 Map Compiler_included_compile_time_effects(Compiler c, Map globs);
-
+#pragma x2c_region_end u_AB8728A9_3897612A_h_45
+#pragma x2c_region_begin u_AB8728A9_3897612A_h_46
 void Compiler_module_member_effects(Compiler c, String path, Map visited, Array effects);
-
+#pragma x2c_region_end u_AB8728A9_3897612A_h_46
+#pragma x2c_region_begin u_AB8728A9_3897612A_h_47
 void Compiler_install_included_effects(Compiler c);
-
+#pragma x2c_region_end u_AB8728A9_3897612A_h_47
+#pragma x2c_region_begin u_AB8728A9_3897612A_h_48
 void interface_configure(String out_dir, int cold);
-
+#pragma x2c_region_end u_AB8728A9_3897612A_h_48
+#pragma x2c_region_begin u_AB8728A9_3897612A_h_49
 String interface_prelude(void);
-
+#pragma x2c_region_end u_AB8728A9_3897612A_h_49
+#pragma x2c_region_begin u_AB8728A9_3897612A_h_50
 String interface_text(Compiler c);
-
+#pragma x2c_region_end u_AB8728A9_3897612A_h_50
+#pragma x2c_region_begin u_AB8728A9_3897612A_h_51
 Map Compiler_linked_prelude_records(Compiler c);
-
+#pragma x2c_region_end u_AB8728A9_3897612A_h_51
+#pragma x2c_region_begin u_AB8728A9_3897612A_h_52
 void collect_forget_provisional_entries(void);
-
+#pragma x2c_region_end u_AB8728A9_3897612A_h_52
 
 #endif /* __GUARD_0xAB8728A9__ */

@@ -249,7 +249,7 @@ static List _from_fields(List fields, List context){
   Array types = Array_new(); {
     List field;  List _x2c_macro_object_1 = fields;  List _x2c_macro_cursor_2 = _x2c_macro_object_1;  Var _x2c_macro_cursor_output_1;  while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_1))){
       field = Var_list(_x2c_macro_cursor_output_1); {
-        List declaration = Ast_without_origin(field);  if(! Var_equal(List_car(declaration), Symbol_var(272838634664))) Array_push(types, List_var(_from_ast(field, context)));
+        List declaration = Ast_without_origin(field);  if(! Var_equal(List_car(declaration), Symbol_var(272838634664)) && ! Var_equal(List_car(declaration), Symbol_var(35579270086))) Array_push(types, List_var(_from_ast(field, context)));
       }
 
     }

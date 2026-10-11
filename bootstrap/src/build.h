@@ -5,18 +5,38 @@
 #ifndef __GUARD_0x8309C62D__
 #define __GUARD_0x8309C62D__
 
+#pragma x2c_region_begin u_8309C62D_059BC66E_h_0
 #include "x2c.h"
+#pragma x2c_region_end u_8309C62D_059BC66E_h_0
+#pragma x2c_region_begin u_8309C62D_059BC66E_h_1
 #include "cli.h"
+#pragma x2c_region_end u_8309C62D_059BC66E_h_1
+#pragma x2c_region_begin u_8309C62D_059BC66E_h_2
 #include "module-tree.h"
+#pragma x2c_region_end u_8309C62D_059BC66E_h_2
+#pragma x2c_region_begin u_8309C62D_059BC66E_h_3
 #include "deps.h"
+#pragma x2c_region_end u_8309C62D_059BC66E_h_3
+#pragma x2c_region_begin u_8309C62D_059BC66E_h_4
 #include "toolchain.h"
-typedef struct Build{
+#pragma x2c_region_end u_8309C62D_059BC66E_h_4
+#pragma x2c_region_begin u_8309C62D_059BC66E_h_5
+#include "cache.h"
+#pragma x2c_region_end u_8309C62D_059BC66E_h_5
+#pragma x2c_region_begin u_8309C62D_059BC66E_h_6
+struct Build{
+#pragma x2c_namespace_require n_6B66AA8B
   CliRequest request;
+#pragma x2c_namespace_require n_8B3FDD0A
   Toolchain toolchain;
+#pragma x2c_namespace_require n_C713742F
   String work_dir, gen_root, obj_root, dep_root, state_root, output;
   int temporary;
+#pragma x2c_namespace_require n_29507A2B
   Array c_sources, gen_dirs, native_inputs, objects, units;
+#pragma x2c_namespace_require n_C713742F
   String compile_directory;
+#pragma x2c_namespace_require n_29507A2B
   Array compile_commands;
   unsigned long started_at;
   double started_wall;
@@ -24,52 +44,93 @@ typedef struct Build{
   unsigned long long gen_bytes;
   int xlat_n, xlat_done, xlat_cached, cc_n, cc_done, cc_cached, final_cached;
 }
-* Build;
-
+;
+#pragma x2c_region_end u_8309C62D_059BC66E_h_6
+#pragma x2c_region_begin u_8309C62D_059BC66E_h_7
+#pragma x2c_namespace_require n_0EE8D982
+#pragma x2c_namespace_require n_3A037F2A
+typedef struct Build * Build;
+#pragma x2c_region_end u_8309C62D_059BC66E_h_7
+#pragma x2c_region_begin u_8309C62D_059BC66E_h_8
 #include <errno.h>
+#pragma x2c_region_end u_8309C62D_059BC66E_h_8
+#pragma x2c_region_begin u_8309C62D_059BC66E_h_9
 #include <stdio.h>
+#pragma x2c_region_end u_8309C62D_059BC66E_h_9
+#pragma x2c_region_begin u_8309C62D_059BC66E_h_10
 #include <stdint.h>
+#pragma x2c_region_end u_8309C62D_059BC66E_h_10
+#pragma x2c_region_begin u_8309C62D_059BC66E_h_11
 #include <stdlib.h>
+#pragma x2c_region_end u_8309C62D_059BC66E_h_11
+#pragma x2c_region_begin u_8309C62D_059BC66E_h_12
 #include <string.h>
+#pragma x2c_region_end u_8309C62D_059BC66E_h_12
+#pragma x2c_region_begin u_8309C62D_059BC66E_h_13
 #include <time.h>
+#pragma x2c_region_end u_8309C62D_059BC66E_h_13
+#pragma x2c_region_begin u_8309C62D_059BC66E_h_14
 #include <unistd.h>
+#pragma x2c_region_end u_8309C62D_059BC66E_h_14
+#pragma x2c_region_begin u_8309C62D_059BC66E_h_15
 #include "json.h"
+#pragma x2c_region_end u_8309C62D_059BC66E_h_15
+#pragma x2c_region_begin u_8309C62D_059BC66E_h_16
 #include "report.h"
+#pragma x2c_region_end u_8309C62D_059BC66E_h_16
+#pragma x2c_region_begin u_8309C62D_059BC66E_h_17
 Build CliRequest_prepare(CliRequest request);
-
+#pragma x2c_region_end u_8309C62D_059BC66E_h_17
+#pragma x2c_region_begin u_8309C62D_059BC66E_h_18
 void build_check_input(String input);
-
+#pragma x2c_region_end u_8309C62D_059BC66E_h_18
+#pragma x2c_region_begin u_8309C62D_059BC66E_h_19
 String Build_generated_dir(Build b, String input);
-
+#pragma x2c_region_end u_8309C62D_059BC66E_h_19
+#pragma x2c_region_begin u_8309C62D_059BC66E_h_20
 int Build_translation_current(Build b, String input, String directory);
-
+#pragma x2c_region_end u_8309C62D_059BC66E_h_20
+#pragma x2c_region_begin u_8309C62D_059BC66E_h_21
 void Build_begin_translation(Build b, String input);
-
+#pragma x2c_region_end u_8309C62D_059BC66E_h_21
+#pragma x2c_region_begin u_8309C62D_059BC66E_h_22
 void Build_end_translation(Build b, String input, int cached);
-
+#pragma x2c_region_end u_8309C62D_059BC66E_h_22
+#pragma x2c_region_begin u_8309C62D_059BC66E_h_23
 void Build_record_translation(Build b, String input, String directory);
-
+#pragma x2c_region_end u_8309C62D_059BC66E_h_23
+#pragma x2c_region_begin u_8309C62D_059BC66E_h_24
 void Build_add_generated(Build b, String input, String directory);
-
+#pragma x2c_region_end u_8309C62D_059BC66E_h_24
+#pragma x2c_region_begin u_8309C62D_059BC66E_h_25
 CliRequest Build_module_entry(Build b);
-
+#pragma x2c_region_end u_8309C62D_059BC66E_h_25
+#pragma x2c_region_begin u_8309C62D_059BC66E_h_26
 CliRequest Build_extension_entries(Build b);
-
+#pragma x2c_region_end u_8309C62D_059BC66E_h_26
+#pragma x2c_region_begin u_8309C62D_059BC66E_h_27
 int Build_finish(Build b);
-
+#pragma x2c_region_end u_8309C62D_059BC66E_h_27
+#pragma x2c_region_begin u_8309C62D_059BC66E_h_28
 int compile_commands_write(String path, Array commands);
-
+#pragma x2c_region_end u_8309C62D_059BC66E_h_28
+#pragma x2c_region_begin u_8309C62D_059BC66E_h_29
 void Build_report_success(Build b);
-
+#pragma x2c_region_end u_8309C62D_059BC66E_h_29
+#pragma x2c_region_begin u_8309C62D_059BC66E_h_30
 int Build_run_program(Build b);
-
+#pragma x2c_region_end u_8309C62D_059BC66E_h_30
+#pragma x2c_region_begin u_8309C62D_059BC66E_h_31
 void Build_cleanup(Build b, int success);
-
+#pragma x2c_region_end u_8309C62D_059BC66E_h_31
+#pragma x2c_region_begin u_8309C62D_059BC66E_h_32
 List Build_script_helpers(Build b);
-
+#pragma x2c_region_end u_8309C62D_059BC66E_h_32
+#pragma x2c_region_begin u_8309C62D_059BC66E_h_33
 void Build_publish_script(Build b, String executable);
-
+#pragma x2c_region_end u_8309C62D_059BC66E_h_33
+#pragma x2c_region_begin u_8309C62D_059BC66E_h_34
 int CliRequest_script_current(CliRequest request, String directory);
-
+#pragma x2c_region_end u_8309C62D_059BC66E_h_34
 
 #endif /* __GUARD_0x8309C62D__ */

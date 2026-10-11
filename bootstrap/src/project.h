@@ -5,25 +5,52 @@
 #ifndef __GUARD_0x05ED52D8__
 #define __GUARD_0x05ED52D8__
 
+#pragma x2c_region_begin u_05ED52D8_ED904B19_h_0
 #include "x2c.h"
+#pragma x2c_region_end u_05ED52D8_ED904B19_h_0
+#pragma x2c_region_begin u_05ED52D8_ED904B19_h_1
 #include "build.h"
-typedef struct ProjectBuild{
+#pragma x2c_region_end u_05ED52D8_ED904B19_h_1
+#pragma x2c_region_begin u_05ED52D8_ED904B19_h_2
+struct ProjectBuild{
+#pragma x2c_namespace_require n_6B66AA8B
   CliRequest request;
+#pragma x2c_namespace_require n_8D375F8A
   struct ProjectBuild * next;
 }
-* ProjectBuild;
-
+;
+#pragma x2c_region_end u_05ED52D8_ED904B19_h_2
+#pragma x2c_region_begin u_05ED52D8_ED904B19_h_3
+#pragma x2c_namespace_require n_5335C36C
+#pragma x2c_namespace_require n_8D375F8A
+typedef struct ProjectBuild * ProjectBuild;
+#pragma x2c_region_end u_05ED52D8_ED904B19_h_3
+#pragma x2c_region_begin u_05ED52D8_ED904B19_h_4
 #include <ctype.h>
+#pragma x2c_region_end u_05ED52D8_ED904B19_h_4
+#pragma x2c_region_begin u_05ED52D8_ED904B19_h_5
 #include <stdio.h>
+#pragma x2c_region_end u_05ED52D8_ED904B19_h_5
+#pragma x2c_region_begin u_05ED52D8_ED904B19_h_6
 #include <stdlib.h>
+#pragma x2c_region_end u_05ED52D8_ED904B19_h_6
+#pragma x2c_region_begin u_05ED52D8_ED904B19_h_7
 #include <string.h>
+#pragma x2c_region_end u_05ED52D8_ED904B19_h_7
+#pragma x2c_region_begin u_05ED52D8_ED904B19_h_8
 #include "buffer.h"
+#pragma x2c_region_end u_05ED52D8_ED904B19_h_8
+#pragma x2c_region_begin u_05ED52D8_ED904B19_h_9
 #include "install.h"
+#pragma x2c_region_end u_05ED52D8_ED904B19_h_9
+#pragma x2c_region_begin u_05ED52D8_ED904B19_h_10
 ProjectBuild project_plan(CliRequest request);
-
+#pragma x2c_region_end u_05ED52D8_ED904B19_h_10
+#pragma x2c_region_begin u_05ED52D8_ED904B19_h_11
 String project_manifest(CliRequest c);
-
+#pragma x2c_region_end u_05ED52D8_ED904B19_h_11
+#pragma x2c_region_begin u_05ED52D8_ED904B19_h_12
 int new_command(CliRequest request);
-
+#pragma x2c_region_end u_05ED52D8_ED904B19_h_12
 
 #endif /* __GUARD_0x05ED52D8__ */

@@ -5,17 +5,56 @@
 #ifndef __GUARD_0xD04FB246__
 #define __GUARD_0xD04FB246__
 
+#pragma x2c_region_begin u_D04FB246_14386F51_h_0
 #include "x2c.h"
+#pragma x2c_region_end u_D04FB246_14386F51_h_0
+#pragma x2c_region_begin u_D04FB246_14386F51_h_1
 #include "frontend.h"
+#pragma x2c_region_end u_D04FB246_14386F51_h_1
+#pragma x2c_region_begin u_D04FB246_14386F51_h_2
+#include "cache.h"
+#pragma x2c_region_end u_D04FB246_14386F51_h_2
+#pragma x2c_region_begin u_D04FB246_14386F51_h_3
 #include "datum.h"
+#pragma x2c_region_end u_D04FB246_14386F51_h_3
+#pragma x2c_region_begin u_D04FB246_14386F51_h_4
 #include "digest.h"
+#pragma x2c_region_end u_D04FB246_14386F51_h_4
+#pragma x2c_region_begin u_D04FB246_14386F51_h_5
 #include "deps.h"
+#pragma x2c_region_end u_D04FB246_14386F51_h_5
+#pragma x2c_region_begin u_D04FB246_14386F51_h_6
 #include "meta-helper-client.h"
+#pragma x2c_region_end u_D04FB246_14386F51_h_6
+#pragma x2c_region_begin u_D04FB246_14386F51_h_7
+#include "module-schedule.h"
+#pragma x2c_region_end u_D04FB246_14386F51_h_7
+#pragma x2c_region_begin u_D04FB246_14386F51_h_8
+#include "json.h"
+#pragma x2c_region_end u_D04FB246_14386F51_h_8
+#pragma x2c_region_begin u_D04FB246_14386F51_h_9
 #include "script.h"
+#pragma x2c_region_end u_D04FB246_14386F51_h_9
+#pragma x2c_region_begin u_D04FB246_14386F51_h_10
 #include "toolchain.h"
+#pragma x2c_region_end u_D04FB246_14386F51_h_10
+#pragma x2c_region_begin u_D04FB246_14386F51_h_11
 #include "utils.h"
+#pragma x2c_region_end u_D04FB246_14386F51_h_11
+#pragma x2c_region_begin u_D04FB246_14386F51_h_12
 #include <unistd.h>
+#pragma x2c_region_end u_D04FB246_14386F51_h_12
+#pragma x2c_region_begin u_D04FB246_14386F51_h_13
 void Frontend_prepare_meta(Frontend f, List inputs);
-
+#pragma x2c_region_end u_D04FB246_14386F51_h_13
+#pragma x2c_region_begin u_D04FB246_14386F51_h_14
+Var Compiler_prepare_meta_call(Compiler c, String name, Token site, List arguments, String provider);
+#pragma x2c_region_end u_D04FB246_14386F51_h_14
+#pragma x2c_region_begin u_D04FB246_14386F51_h_15
+void Compiler_register_native_meta_prefix(Compiler c);
+#pragma x2c_region_end u_D04FB246_14386F51_h_15
+#pragma x2c_region_begin u_D04FB246_14386F51_h_16
+void Compiler_require_native_meta_header(Compiler c, String path);
+#pragma x2c_region_end u_D04FB246_14386F51_h_16
 
 #endif /* __GUARD_0xD04FB246__ */

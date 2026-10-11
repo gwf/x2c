@@ -5,31 +5,74 @@
 #ifndef __GUARD_0x9578BA41__
 #define __GUARD_0x9578BA41__
 
+#pragma x2c_region_begin u_9578BA41_05A0AF82_h_0
 #include "x2c.h"
+#pragma x2c_region_end u_9578BA41_05A0AF82_h_0
+#pragma x2c_region_begin u_9578BA41_05A0AF82_h_1
 #include "compiler.h"
+#pragma x2c_region_end u_9578BA41_05A0AF82_h_1
+#pragma x2c_region_begin u_9578BA41_05A0AF82_h_2
 #include "ast-rewrite.h"
+#pragma x2c_region_end u_9578BA41_05A0AF82_h_2
+#pragma x2c_region_begin u_9578BA41_05A0AF82_h_3
 #include "type.h"
+#pragma x2c_region_end u_9578BA41_05A0AF82_h_3
+#pragma x2c_region_begin u_9578BA41_05A0AF82_h_4
 #include "var.h"
+#pragma x2c_region_end u_9578BA41_05A0AF82_h_4
+#pragma x2c_region_begin u_9578BA41_05A0AF82_h_5
 #include "string.h"
+#pragma x2c_region_end u_9578BA41_05A0AF82_h_5
+#pragma x2c_region_begin u_9578BA41_05A0AF82_h_6
 #include "transform.h"
+#pragma x2c_region_end u_9578BA41_05A0AF82_h_6
+#pragma x2c_region_begin u_9578BA41_05A0AF82_h_7
 #include "cleanup.h"
+#pragma x2c_region_end u_9578BA41_05A0AF82_h_7
+#pragma x2c_region_begin u_9578BA41_05A0AF82_h_8
 #include "expressions.h"
+#pragma x2c_region_end u_9578BA41_05A0AF82_h_8
+#pragma x2c_region_begin u_9578BA41_05A0AF82_h_9
 #include "generate.h"
+#pragma x2c_region_end u_9578BA41_05A0AF82_h_9
+#pragma x2c_region_begin u_9578BA41_05A0AF82_h_10
 #include "logger.h"
+#pragma x2c_region_end u_9578BA41_05A0AF82_h_10
+#pragma x2c_region_begin u_9578BA41_05A0AF82_h_11
+#include "json.h"
+#pragma x2c_region_end u_9578BA41_05A0AF82_h_11
+#pragma x2c_region_begin u_9578BA41_05A0AF82_h_12
 #include <stdio.h>
+#pragma x2c_region_end u_9578BA41_05A0AF82_h_12
+#pragma x2c_region_begin u_9578BA41_05A0AF82_h_13
 #include <stdint.h>
+#pragma x2c_region_end u_9578BA41_05A0AF82_h_13
+#pragma x2c_region_begin u_9578BA41_05A0AF82_h_14
 #include <assert.h>
+#pragma x2c_region_end u_9578BA41_05A0AF82_h_14
+#pragma x2c_region_begin u_9578BA41_05A0AF82_h_15
 List Compiler_setup_cache_init(Compiler c, List header, List source, String prefix, String guard_name, String initializer_name);
-
+#pragma x2c_region_end u_9578BA41_05A0AF82_h_15
+#pragma x2c_region_begin u_9578BA41_05A0AF82_h_16
 List _initializer_function(Compiler c, Type type, List name, List body);
-
+#pragma x2c_region_end u_9578BA41_05A0AF82_h_16
+#pragma x2c_region_begin u_9578BA41_05A0AF82_h_17
 List _run_once(Compiler c, List before, List guard, List after);
-
+#pragma x2c_region_end u_9578BA41_05A0AF82_h_17
+#pragma x2c_region_begin u_9578BA41_05A0AF82_h_18
 List _entry_call(String entry);
-
+#pragma x2c_region_end u_9578BA41_05A0AF82_h_18
+#pragma x2c_region_begin u_9578BA41_05A0AF82_h_19
 List Compiler_zero_initializer(Compiler c, List value);
-
+#pragma x2c_region_end u_9578BA41_05A0AF82_h_19
+#pragma x2c_region_begin u_9578BA41_05A0AF82_h_20
 List Compiler_initialization_guard(Compiler c, List guard);
-
+#pragma x2c_region_end u_9578BA41_05A0AF82_h_20
+#pragma x2c_region_begin u_9578BA41_05A0AF82_h_21
+void Compiler_check_module_initializer_graph(Compiler c, List rows);
+#pragma x2c_region_end u_9578BA41_05A0AF82_h_21
+#pragma x2c_region_begin u_9578BA41_05A0AF82_h_22
+void Compiler_check_native_initializer_receipts(Compiler c, List paths);
+#pragma x2c_region_end u_9578BA41_05A0AF82_h_22
 
 #endif /* __GUARD_0x9578BA41__ */
