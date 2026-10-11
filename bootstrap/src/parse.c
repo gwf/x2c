@@ -255,8 +255,6 @@ static List Compiler__finish_function_parts(Compiler c, List declaration, List r
 
 static List Compiler__function_body(Compiler c, List declaration, String name, List syntax);
 
-static Type _declared_return(List declaration);
-
 static List Compiler__entry_code(Compiler c, int depth);
 
 static String Compiler__prepare_lifecycle(Compiler c, List declaration, List binding, String * initializer_owner, String * shutdown_owner);
@@ -5476,11 +5474,12 @@ static List Compiler__finish_function_parts(Compiler c, List declaration, List r
 
 }
 
+Type declared_return(List declaration);
 void Sym_push_scope(Sym, SymScope);
 List Compiler_bind_callable_body(Compiler c, List syntax, Type return_type);
 List Compiler_prepend_setup(Compiler, List, List);
 static List Compiler__function_body(Compiler c, List declaration, String name, List syntax){
-  int expression_body = ! List_truth(syntax) && Compiler__at_function_arrow(c);  if(! List_truth(syntax) && ! expression_body) Compiler_expect(c, 247);  Type old_return = List_type(c -> return_type);  c -> return_type = Type_list(_declared_return(declaration));  String old_fn = c -> fn_name;  c -> fn_name = name;  Sym_push_scope(c -> sym, c -> params);  int depth = Block_len(c -> ancestors), placed = Array_len(c -> placements);  Compiler_enter(c, (Ancestor){
+  int expression_body = ! List_truth(syntax) && Compiler__at_function_arrow(c);  if(! List_truth(syntax) && ! expression_body) Compiler_expect(c, 247);  Type old_return = List_type(c -> return_type);  c -> return_type = Type_list(declared_return(declaration));  String old_fn = c -> fn_name;  c -> fn_name = name;  Sym_push_scope(c -> sym, c -> params);  int depth = Block_len(c -> ancestors), placed = Array_len(c -> placements);  Compiler_enter(c, (Ancestor){
     .what = 458361162716, .node = declaration
   }
   );  List body = NULL; {
@@ -5501,8 +5500,8 @@ static List Compiler__function_body(Compiler c, List declaration, String name, L
   return body;
 }
 
-static Type _declared_return(List declaration){
-  {
+Type declared_return(List declaration){
+  if(! _init_guard_) _file_init_(); {
     List _x2c_match_expr = Type_list(List_type_from_ast(declaration)); List _x2c_match_cursor, _x2c_match_cursor1;  switch(0){
         default: ;  _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224497936762055558ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1)) { List result = _x2c_match_cursor;  return Type_declared(List_type(result));  break; }
     }
@@ -5631,7 +5630,7 @@ List Compiler_leave_function(Compiler c, int depth){
           .fn = _x2c_defer_cleanup_17, .env = & _x2c_macro_environment_17
         }
         ;  x2c_cleanup_push(& _x2c_defer_record_17); {
-          * _x2c_macro_address_5 = Type_list(_declared_return(declaration));  entry = Compiler__entry_code(c, depth);
+          * _x2c_macro_address_5 = Type_list(declared_return(declaration));  entry = Compiler__entry_code(c, depth);
         }
         x2c_cleanup_leave(& _x2c_defer_record_17);
       }
@@ -6043,7 +6042,7 @@ static List Compiler__resolve(Compiler c, List expr){
 }
 
 static List Compiler__bind_statement(Compiler c, Var stmt){
-  Symbol kind = _source_clause_kind(stmt);  if(kind) return Compiler_parse_source_clause(c, kind);  return Compiler_bind_syntax(c, stmt, AST_STATEMENT, List_type(c -> return_type));
+  Symbol kind = _source_clause_kind(stmt);  if(kind) return Compiler_parse_source_clause(c, kind);  List bound = Compiler_bind_syntax(c, stmt, AST_STATEMENT, List_type(c -> return_type));  Compiler_rebound(c, stmt, bound);  return bound;
 }
 
 static List Compiler__bind_clause(Compiler c, Var expr){

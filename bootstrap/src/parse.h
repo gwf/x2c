@@ -92,6 +92,8 @@ List Compiler_parse_function_definition(Compiler c);
 
 List Compiler_parse_function_target(Compiler c);
 
+Type declared_return(List declaration);
+
 void Compiler_enter(Compiler c, Ancestor row);
 
 List Compiler_enclosing(Compiler c, Symbol what);

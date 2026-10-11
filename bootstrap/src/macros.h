@@ -92,11 +92,13 @@ struct SlotWatch{
   List values;
   Array outputs, order;
   Effects inner;
-  int repeated, prepares;
+  int repeated, prepares, shipped;
   List outer;
   SlotWatch parent;
 }
 ;
+
+void Compiler_rebound(Compiler c, Var source, List bound);
 
 Ast Compiler_watched_step(Compiler c, Ast ast);
 

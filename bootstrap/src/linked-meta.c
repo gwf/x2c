@@ -12686,7 +12686,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_23(void){
   _11807 = List_var(_11806);
   _11808 = String_new("src/macros.x");
   _11809 = String_var(_11808);
-  _11810 = String_new("8a332bc6");
+  _11810 = String_new("84e85bf9");
   _11811 = String_var(_11810);
   _11812 = cons(_11811, NULL);
   _11813 = cons(_11809, _11812);
@@ -12697,7 +12697,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_23(void){
   _11818 = List_var(_11817);
   _11819 = String_new("src/transform.x");
   _11820 = String_var(_11819);
-  _11821 = String_new("17b40459");
+  _11821 = String_new("cca51440");
   _11822 = String_var(_11821);
   _11823 = cons(_11822, NULL);
   _11824 = cons(_11820, _11823);
@@ -12816,7 +12816,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_23(void){
   _11937 = List_var(_11936);
   _11938 = String_new("src/parse.x");
   _11939 = String_var(_11938);
-  _11940 = String_new("a4eb77ed");
+  _11940 = String_new("9f0b60e9");
   _11941 = String_var(_11940);
   _11942 = cons(_11941, NULL);
   _11943 = cons(_11939, _11942);
