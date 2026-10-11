@@ -135,7 +135,7 @@ static Ast Compiler._step_tag(Compiler c, Ast ast, Symbol tag) {
     case <index>: next = c._index(ast); break;
     case <cons>: case <append>: return c._ordered_list(ast);
     case <var>: next = c._to_var(ast.cadr()); break;
-    case <segments>: next = c._string_segments(ast); break;
+    case <segments>: return c._interpolation(ast);
     case <declare>: case <decl>: next = c._declaration(ast); break;
     case <dstrdecl>: next = c._destructure_declaration(ast); break;
     case <stmnt>: next = c._destructure_statement(ast); break;
@@ -541,7 +541,7 @@ static int Compiler._part_order(Compiler c, Var part) {
   if (part is not <list>) return 0;
   List node = part;
   match (node) {
-    case %(!or (cache ?) (literal *) (nil) (segraw ?)): return 0;
+    case %(!or (cache ?) (literal *) (nil)): return 0;
     case %(expr () (ident ?)): return 2;
     case $source_identifier_content(%(?)): return 1;
     case %(cons ?head ?tail):
@@ -549,8 +549,7 @@ static int Compiler._part_order(Compiler c, Var part) {
     case %(expr ? (call ? (args ?argument))):
       return c.is_builtin_converter_call(node)
         ? c._part_order(argument) : 2;
-    case %(!or (expr ? ?inner) (cast ? ?inner) ((!or segvar segexp) ?inner)
-        ${$grouped(?inner)}):
+    case %(!or (expr ? ?inner) (cast ? ?inner) ${$grouped(?inner)}):
       return c._part_order(inner);
     case $source_operator_content(%((!or . (!quote ->)) ?inner ?)): {
       int order = c._part_order(inner);
@@ -594,8 +593,10 @@ static List _ordered(List declarations, Type type, List content) =>
 static List Compiler._ordered_list(Compiler c, List chain) {
   Array kinds = $auto([]), values = $auto([]), orders = $auto([]);
   List node = chain;
+  int spliced = 0;
   for (List cell = _list_cell(node); cell; cell = _list_cell(node)) {
     (Symbol kind, List part, List rest) = cell;
+    if (kind != <cons>) spliced = 1;
     List value = kind == <cons> ? c._to_var(part)
       : _passed_as(c._spliced(part), %("List"));
     value = c._step(value);
@@ -604,15 +605,28 @@ static List Compiler._ordered_list(Compiler c, List chain) {
     orders.push(c._part_order(value));
     node = rest;
   }
+  int counted = !spliced && node.match(%(nil));
   node = c._step(_passed_as(c._to_list(node), %("List")));
   kinds.push(<nil>);
   values.push(node);
   orders.push(c._part_order(node));
   List declarations = c._ordered_parts(values, orders);
   List rebuilt = values.take_last();
+  if (counted && values.len() > 128)
+    return _ordered(declarations, %("List"), c._list_n(values));
   for (int i = (int) values.len() - 1; i >= 0; i--)
     rebuilt = %(expr ("List") (${kinds[i]} ${values[i]} $rebuilt));
   return _ordered(declarations, %("List"), rebuilt.caddr());
+}
+
+/* A chain of more than 128 cons cells is one `List.list_n` call, which keeps
+   nested cons calls below host-C bracket-depth limits. */
+static List Compiler._list_n(Compiler c, Array values) {
+  String count = %"${values.len()}U";
+  Type signature = NULL;
+  List binding = c.sym.reference(%("List_list_n"), signature);
+  return %(call (expr $signature (ident $binding))
+    (args (expr (unsigned) (literal (unsigned) $count)) @{values.list()}));
 }
 
 static List _list_cell(List node) {
@@ -674,69 +688,36 @@ static List Compiler._index(Compiler c, List ast) {
 
 // interpolated strings
 
-static List Compiler._string_segments(Compiler c, List ast) {
-  /* A lone constant segment is already the whole string. Reuse the parsed
-     literal's cache slot instead of joining a one-element List at runtime.
-     Macro-generated literals arrive in this shape. Raise details are
-     excluded: their cache slots would fill inside _file_init_ constructors,
-     where re-entrant string-pool bootstrap can hand back NULL Strings. */
-  match (ast) {
+/* An interpolated String lowers through the literal rule for `segments`,
+   each insertion converted to `String` as the parser converts its own:
+   constructed syntax that arrives typed is not resolved again. The parts of
+   the List chain the rule joins move ahead of the whole join when they
+   move. A constructed String of one constant text is already the whole
+   string: it reuses the parsed literal's cache slot. Raise details are
+   excluded: their cache slots would fill inside _file_init_ constructors,
+   where re-entrant string-pool bootstrap can hand back NULL Strings. */
+static Ast Compiler._interpolation(Compiler c, Ast ast) {
+  match (ast)
     case $source_string_content(
         %((segexp (expr ("String") (literal ("String") ?text))))):
       if (!c.runtime_literals)
         return c.cache(%(string (expr ("String") (literal ("String") $text))));
+  Array rows = [];
+  foreach (List row, ast.cdr()) match (row) {
+    case %((!set ?tag (!or segvar segexp)) ?value):
+      rows.push(%($tag ${c.convert_segment_to_string(value)}));
+    default: rows.push(row);
   }
-  Array values = [], orders = $auto([]);
-  foreach (List seg, ast.cdr()) {
-    List value = c._step(c._segment_value(seg));
-    values.push(value);
-    orders.push(c._part_order(value));
-  }
-  List declarations = c._ordered_parts(values, orders);
-  int segment_count = values.len();
-  List joined = c._join_segments(values.list_free(), segment_count);
-  return _ordered(declarations, %("String"), joined);
-}
-
-static List Compiler._join_segments(
-  Compiler c, List segments, int segment_count) {
-  // Keep nested cons expressions below host-C bracket-depth limits.
-  if (segment_count <= 128) {
-    segments = _build_cons_list(segments);
-    return %("String_join(NULL, " (expr ("List") $segments) ")");
-  }
-  String count = %"${segment_count}U";
-  Type signature = NULL;
-  List binding = c.sym.reference(%("List_list_n"), signature);
-  List list = %(expr ("List")
-    (call (expr $signature (ident $binding))
-          (args (expr (unsigned) (literal (unsigned) $count)) @segments)));
-  return %("String_join(NULL, " $list ")");
-}
-
-static List Compiler._segment_value(Compiler c, List seg) {
-  Symbol kind = seg.car();
-  switch (kind) {
-    case <segraw>: seg = c._process_raw_segment(seg); break;
-    case <segvar>:
-    case <segexp>: seg = c.convert_segment_to_string(seg.cadr()); break;
-    case <cache>: seg = %(expr ("String") $seg); break;
-  }
-  return c.convert_expression(seg, %("Var"));
-}
-
-static List _build_cons_list(List list) {
-  if (!list) return %(nil);
-  List head = list.car(), tail = _build_cons_list(list.cdr());
-  return %(cons $head $tail);
-}
-
-static List Compiler._process_raw_segment(Compiler c, List seg) {
-  String raw = seg.cadr(), literal = %"\"${raw.escape()}\"";
-  List constructor = c.sym.reference(%("String_new"), NULL);
-  return %(expr ("String") (call
-           (expr ((func ((* char))) "String") (ident $constructor))
-           (args (expr (* char) (literal (* char) $literal)))));
+  List source = source_string_content(rows.list_free());
+  List lowered = c.lower_rewrite(
+    <literal>, <segments>, %(expr ("String") $source), AST_EXPRESSION,
+    %("String"), NULL);
+  match (lowered)
+    case %(expr ?type (call ?callee (args ?separator
+        (expr ? (parens (block *declarations (stmnt ?parts))))))):
+      return _ordered(
+        declarations, type, %(call $callee (args $separator $parts)));
+  return lowered.caddr();
 }
 
 // declarations and statements

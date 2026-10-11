@@ -1333,9 +1333,7 @@ static List _profile_flags(Project p, ProjectProfile profile){
   int optimized = List_any(cc_args, _x2c_func_handle_1);
   int debug = profile -> debug && !(List_contains(cc_args, String_var(_87)));
   return({
-    List _x2c_literal_part_18 = _c_flags(p, profile -> c_flags);  List _x2c_literal_part_19 = String_truth(profile -> optimization) && ! optimized ? cons(String_var(String_join(NULL, cons(String_var(_88), cons(String_var(profile -> optimization), NULL)))), NULL) : NULL;
-    List _x2c_literal_part_20 = debug ? _91 : NULL;
-    List_append(_x2c_literal_part_18, List_append(_x2c_literal_part_19, List_append(_x2c_literal_part_20, NULL)));
+    List _x2c_literal_part_18 = _c_flags(p, profile -> c_flags);  List _x2c_literal_part_19 = String_truth(profile -> optimization) && ! optimized ? cons(String_var(String_join(NULL, cons(String_var(_88), cons(String_var(profile -> optimization), NULL)))), NULL) : NULL;  List _x2c_literal_part_20 = debug ? _91 : NULL;  List_append(_x2c_literal_part_18, List_append(_x2c_literal_part_19, List_append(_x2c_literal_part_20, NULL)));
   }
   );
 }

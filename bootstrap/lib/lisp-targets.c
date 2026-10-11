@@ -4271,6 +4271,8 @@ static Job _lisp_Job_start(Job job){
   return job;
 }
 
+String String_join(String, List);
+
 Buffer Buffer_write_len(Buffer, const char *, size_t);
 
 #include "error.h"
@@ -6984,8 +6986,6 @@ static Var _x2c_func_adapt_333(Func _x2c_func_binding_333, const FuncArg * _x2c_
   return Iter_var(String_iter(a0, a1));
   ;
 }
-
-String String_join(String, List);
 
 static Var _x2c_func_adapt_334(Func _x2c_func_binding_334, const FuncArg * _x2c_func_argv_334){
   String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_334, _x2c_func_argv_334, 0, 1318210446));

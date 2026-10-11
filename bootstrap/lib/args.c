@@ -354,6 +354,8 @@ static int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 
 static int String_truth(String);
 
+String String_join(String, List);
+
 static void Option__read_row(Option * o, List row, Map index, int position){
   String first = Var_str(List_car(row));
   (* o).operand = ! String_startswith(first, _3);

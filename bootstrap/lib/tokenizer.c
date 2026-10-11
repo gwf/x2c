@@ -514,6 +514,8 @@ static Var String_var(String);
 
 String Symbol_str(Symbol);
 
+String String_join(String, List);
+
 static String int_str(int);
 
 String Token_repr(Token token){

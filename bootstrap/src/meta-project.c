@@ -681,9 +681,7 @@ static List _group_flags(CliRequest request, Map packages){
       root = _x2c_macro_cursor_output_4;
       _ = _x2c_macro_cursor_output_5;
       flags =({
-        List _x2c_literal_part_2 = flags;  Var _x2c_literal_part_3 = String_var(String_join(NULL, cons(String_var(Var_str(root)), cons(String_var(_18), NULL))));
-        Var _x2c_literal_part_4 = String_var(String_join(NULL, cons(String_var(Var_str(root)), cons(String_var(_19), NULL))));
-        List_append(_x2c_literal_part_2, cons(_21, cons(_x2c_literal_part_3, cons(_21, cons(_x2c_literal_part_4, NULL)))));
+        List _x2c_literal_part_2 = flags;  Var _x2c_literal_part_3 = String_var(String_join(NULL, cons(String_var(Var_str(root)), cons(String_var(_18), NULL))));  Var _x2c_literal_part_4 = String_var(String_join(NULL, cons(String_var(Var_str(root)), cons(String_var(_19), NULL))));  List_append(_x2c_literal_part_2, cons(_21, cons(_x2c_literal_part_3, cons(_21, cons(_x2c_literal_part_4, NULL)))));
       }
       );
     }
@@ -691,8 +689,7 @@ static List _group_flags(CliRequest request, Map packages){
   }
   String archive = Compiler_extension_archive();
   if(String_truth(archive)) flags =({
-    Var _x2c_literal_part_5 = String_var(String_join(NULL, cons(String_var(Path_dirname(archive)), cons(String_var(_22), NULL))));
-    cons(_21, cons(_x2c_literal_part_5, List_append(flags, NULL)));
+    Var _x2c_literal_part_5 = String_var(String_join(NULL, cons(String_var(Path_dirname(archive)), cons(String_var(_22), NULL))));  cons(_21, cons(_x2c_literal_part_5, List_append(flags, NULL)));
   }
   );
   return flags;
@@ -762,9 +759,7 @@ static List _cc_flags(void){
 
 static List _loop_sources(void){
   return({
-    Var _x2c_literal_part_13 = String_var(String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_40), NULL))));
-    Var _x2c_literal_part_14 = String_var(String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_41), NULL))));
-    cons(_x2c_literal_part_13, cons(_x2c_literal_part_14, NULL));
+    Var _x2c_literal_part_13 = String_var(String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_40), NULL))));  Var _x2c_literal_part_14 = String_var(String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_41), NULL))));  cons(_x2c_literal_part_13, cons(_x2c_literal_part_14, NULL));
   }
   );
 }
@@ -993,9 +988,7 @@ static String Helper_compile(Helper * h, int index, String unit){
   if(Path_is_file(String_join(NULL, cons(String_var(base), cons(String_var(_51), NULL))))) return Path_read_text(String_join(NULL, cons(String_var(base), cons(String_var(_51), NULL))));
   Toolchain t =(* h).toolchain;
   String failure = Compiler_meta_cc_run(({
-    Var _x2c_literal_part_21 = String_var(t -> cc);  List _x2c_literal_part_22 = _cc_flags();  Var _x2c_literal_part_23 = String_var((* h).directory);  Var _x2c_literal_part_24 = String_var(Path_dirname(unit));  Var _x2c_literal_part_25 = String_var((* h).include);  List _x2c_literal_part_26 =(* h).flags;  Var _x2c_literal_part_27 = String_var(String_join(NULL, cons(String_var(base), cons(String_var(_57), NULL))));  Var _x2c_literal_part_28 = String_var(String_join(NULL, cons(String_var(base), cons(String_var(_47), NULL))));
-    Var _x2c_literal_part_29 = String_var(String_join(NULL, cons(String_var(base), cons(String_var(_45), NULL))));
-    cons(_x2c_literal_part_21, List_append(_x2c_literal_part_22, cons(_21, cons(_x2c_literal_part_23, cons(_21, cons(_x2c_literal_part_24, cons(_21, cons(_x2c_literal_part_25, List_append(_x2c_literal_part_26, cons(_59, cons(_61, cons(_x2c_literal_part_27, cons(_63, cons(_x2c_literal_part_28, cons(_65, cons(_x2c_literal_part_29, NULL))))))))))))))));
+    Var _x2c_literal_part_21 = String_var(t -> cc);  List _x2c_literal_part_22 = _cc_flags();  Var _x2c_literal_part_23 = String_var((* h).directory);  Var _x2c_literal_part_24 = String_var(Path_dirname(unit));  Var _x2c_literal_part_25 = String_var((* h).include);  List _x2c_literal_part_26 =(* h).flags;  Var _x2c_literal_part_27 = String_var(String_join(NULL, cons(String_var(base), cons(String_var(_57), NULL))));  Var _x2c_literal_part_28 = String_var(String_join(NULL, cons(String_var(base), cons(String_var(_47), NULL))));  Var _x2c_literal_part_29 = String_var(String_join(NULL, cons(String_var(base), cons(String_var(_45), NULL))));  cons(_x2c_literal_part_21, List_append(_x2c_literal_part_22, cons(_21, cons(_x2c_literal_part_23, cons(_21, cons(_x2c_literal_part_24, cons(_21, cons(_x2c_literal_part_25, List_append(_x2c_literal_part_26, cons(_59, cons(_61, cons(_x2c_literal_part_27, cons(_63, cons(_x2c_literal_part_28, cons(_65, cons(_x2c_literal_part_29, NULL))))))))))))))));
   }
   ), (* h).directory);
   _add_depfile(String_join(NULL, cons(String_var(base), cons(String_var(_57), NULL))), (* h).deps);

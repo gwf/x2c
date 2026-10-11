@@ -656,6 +656,8 @@ static int Parser_peek(Parser * p){
   return(* p).pos <(* p).len ?(unsigned char)(* p).text[(* p).pos] : - 1;
 }
 
+String String_join(String, List);
+
 #include "error.h"
 
 
