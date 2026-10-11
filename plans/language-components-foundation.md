@@ -644,6 +644,25 @@ replacement template and fill steps are the remaining driver cost.
   authored, byte-identical C, fixture `rewrite-function-entry`. Open: a
   rule inside a `defer` finalizer at transform time is unchecked; code
   placed at transform time that places again finds no frame.
+- 2026-10-10, rule driver defects fixed (`kernel/rule-defects`): a switch
+  replacement lowers once through `_watched` with its held parts, so a rule
+  returning a new `switch` terminates and a nested match in a braced arm
+  reaches a `$node`-wrapping rule; anonymous `?` and `*` holes in a
+  macro-valued pattern match as wildcards (the binder stand-in
+  `__macro_anonymous` survives the view that quotes bare operators); a
+  statement replacement bound without lowering gives its own statements of
+  the rule's kind to the later rules at once (`_bound_held`), which also
+  fixed lambda cells never seeing a destructured target (a captured target
+  read garbage) and a user `try` rule crashing the compiler;
+  `tools/gen-linked-meta.sh` blanks comments, strings, quotation data, and
+  `%()` lists before counting calls and copies only functions that reach a
+  compiler prototype. +172/-37 authored in src, lib, and the tool; four new
+  fixtures. Empty unit +0.5%, within spread. Open: a user switch rule is
+  offered the switch the match component emits, and a replacement around it
+  fails because the body holds verbatim C text; an unbraced nested statement
+  that changes when rebound is not re-offered; `c.return_type` is NULL during
+  transform, so a rebound `return` in a statement replacement loses its
+  declared type and conversion.
 - 2026-10-10, facts learned: `function-entry` placement is parse-time, so
   lambda cells need a transform-time entry placement before lambdas move; a
   plain `make build` after editing a shipped component leaves a degraded
