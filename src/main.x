@@ -331,64 +331,66 @@ static void _preprocessor_errors(String text) {
   Stderr.printf("%s", text);
 }
 
-/* Module providers parse once before generation. Reverse generation restores
-   each provider's Type rows; exported text outlives those nested Contexts. */
+/* Keep the declaration seed's Type ledger live while each implementation
+   binds and emits in its own child Context. Only immutable generated files
+   and namespace metadata survive an implementation's close. */
 static List Translation.translate_modules(Translation &t) {
   Compiler discovery = _module_discovery(t.request);
   ModuleTree tree = discovery.module_tree;
-  Array modules = [], ordinary = [];
+  Array modules = [], ordinary = [], providers = [];
+  Map inputs = {};
   foreach (String input, t.request.inputs) {
-    if (tree.owner(input)) modules.push(input);
-    else ordinary.push(input);
+    if (!tree.owner(input)) {
+      ordinary.push(input);
+      continue;
+    }
+    modules.push(input);
+    String canonical = discovery.canonical_path(input);
+    providers.push(canonical);
+    inputs[canonical] = input;
   }
   int count = modules.len();
   if (!count) return ordinary.list_free();
-  ParsedUnit *units = Scope.calloc(count, sizeof(ParsedUnit));
-  for (int i = 0; i < count; i++) {
-    String input = modules[i];
-    if (t.build) t.build.begin_translation(input);
-    else report_progress(<translate>, i, t.total, input);
-    (void) _parse_unit(t.frontend, input, units[i]);
-  }
-  Array providers = [];
-  for (int i = 0; i < count; i++)
-    providers.push(%(${units[i].compiler} ${units[i].ast}));
-  Map layout_plan = prepare_module_layouts(providers.list_free());
-  for (int i = 0; i < count; i++) {
-    Compiler c = units[i].compiler;
-    layout_plan[%(directories ${c.canonical_path(c.filename)})] =
-      t.output_dir(modules[i]);
-  }
-  Array prerequisites = [];
-  for (int i = 0; i < count; i++)
-    foreach (List row, units[i].compiler.module_initializer_rows())
-      prerequisites.push(row);
-  List rows = prerequisites.list_free();
+  ParsedUnit seed;
+  if (!t.frontend.start(modules[0], seed)) _fail(seed.compiler);
+  seed.compiler.own_diagnostics();
+  if (!seed.collect(t.frontend)) _fail(seed.compiler);
+  List paths = providers.list_free();
+  Map registry = prepare_module_layout_registry(seed.compiler, paths);
+  List groups = seed.compiler.collected_declaration_components(paths);
+  if (!groups) groups = %($paths);
+  foreach (String provider, paths)
+    registry[%(directories $provider)] = t.output_dir(inputs[provider]);
   List outputs = NULL;
-  for (int i = count - 1; i >= 0; i--) {
-    String input = modules[i];
-    Compiler c = units[i].compiler;
-    c.module_layout_plan = layout_plan;
-    c.merge_module_initializers(rows);
-    String directory = t.output_dir(input);
-    outputs = outputs.append(generate_code_files(c, units[i].ast, directory));
-    outputs = outputs.append(
-      translation_depfile_files(t.request, c, input, directory));
-    if (t.request.fatal_warnings && c.diagnostics()) exit(1);
-    outputs = units[i].context.export(outputs);
-    if (i) {
-      rows = units[i].context.export(rows);
-      layout_plan = units[i].context.export(layout_plan);
+  int done = 0;
+  foreach (List group, groups)
+    foreach (String provider, group) {
+      String input = inputs[provider];
+      if (t.build) t.build.begin_translation(input);
+      else report_progress(<translate>, done, t.total, input);
+      ParsedUnit unit;
+      (void) _parse_unit(t.frontend, input, unit);
+      Compiler c = unit.compiler;
+      capture_module_provider(c, unit.ast, registry);
+      c.module_layout_plan = registry;
+      String directory = t.output_dir(input);
+      outputs = outputs.append(generate_code_files(c, unit.ast, directory));
+      outputs = outputs.append(
+        translation_depfile_files(t.request, c, input, directory));
+      if (t.request.fatal_warnings && c.diagnostics()) exit(1);
+      outputs = unit.context.export(outputs);
+      registry = unit.context.export(registry);
+      unit.close();
+      done++;
     }
-    units[i].close();
-  }
+  outputs = seed.context.export(outputs);
+  seed.close();
   publish_generated_files(outputs);
   for (int i = 0; i < count; i++) {
     String input = modules[i];
     if (t.build) t.build.end_translation(input, 0);
     else report_progress(<translate>, i + 1, t.total, input);
   }
-  Scope.free(units);
   return ordinary.list_free();
 }
 
