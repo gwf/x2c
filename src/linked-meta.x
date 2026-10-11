@@ -470,11 +470,15 @@ Code delegate_member(Code code) {
 
 /* --- src/component-match.x ----------------------------------------------- */
 
-static void _match_place(Buffer b, Array out, Var node) {
+static void _match_flush(Buffer b, Array out) {
   if (b.len()) {
     out.push(b.str());
     b.clear();
   }
+}
+
+static void _match_place(Buffer b, Array out, Var node) {
+  _match_flush(b, out);
   out.push(node);
 }
 
@@ -499,6 +503,9 @@ static int _match_nesting(String text) {
   return directive.startswith("if");
 }
 
+static String _match_cursor(int depth) =>
+  depth ? %"_x2c_match_cursor$depth" : "_x2c_match_cursor";
+
 static Symbol _match_head(Var value) {
   if (value is not <list> || !value.list()) return 0;
   Var head = value.list().car();
@@ -515,54 +522,135 @@ static List _match_binders(Var value) {
   return binders;
 }
 
-static Symbol _match_capture_tag(Var element, Var binder) {
+static Symbol _match_capture_tag(Var element, Var &binder) {
   match (element)
     case %((!quote !is) ?name type ?(Symbol tag)):
-      if (name == binder && tag != <x2c-dyn> && tag != <varray> &&
-          tag != <vmap>)
+      if (tag != <x2c-dyn> && tag != <varray> && tag != <vmap>) {
+        binder = name;
         return tag;
+      }
   return 0;
 }
 
-static int _match_flat_test(Buffer b, Var value, List binders) {
-  Symbol head = _match_head(value);
-  if (!head) return 0;
-  Var literal = head;
-  size_t start = b.len();
-  b.printf(
-    " { List _x2c_match_cursor; if (_x2c_match_expr && "
-    "_x2c_match_expr->car.u64 == %lluULL && "
-    "(_x2c_match_cursor = _x2c_match_expr->cdr, 1)",
-    (unsigned long long) literal.u64);
-  List elements = value.list().cdr();
-  int index = 0;
-  foreach (Var binder, binders) {
-    Var element = elements ? elements.car() : NULL;
-    Symbol tag = element == binder ? 0 : _match_capture_tag(element, binder);
-    if (!elements || !binder.is_atom_binder() || binder == <?> ||
-        (element != binder && !tag)) {
-      b.unwrite(b.len() - start);
-      return 0;
-    }
-    b.write(" && _x2c_match_cursor");
-    if (tag)
-      b.printf(" && Var_is(_x2c_match_cursor->car, %lu)", (unsigned long) tag);
-    b.printf(
-      " && (_x2c_match_values[%d] = _x2c_match_cursor->car, "
-      "_x2c_match_cursor = _x2c_match_cursor->cdr, 1)", index++);
-    elements = elements.cdr();
-  }
-  if (elements) {
-    b.unwrite(b.len() - start);
-    return 0;
-  }
-  b.write(" && !_x2c_match_cursor) {");
-  return 1;
+static void _match_and(Buffer b, int &testing) {
+  b.write(testing ? " && " : " if (");
+  testing = 1;
 }
 
-static int _match_test(
-  Buffer b, Array out, List pattern, Var value, List binders, int &sites) {
-  if (pattern.car() == <*>) return 0;
+static void _match_bind(
+  Buffer b, Var binder, String cell, int &testing, int &braces) {
+  if (testing) {
+    b.write(") {");
+    braces++;
+    testing = 0;
+  }
+  String type = binder.is_list_binder() ? "List" : "Var";
+  String name = binder.str()[1:];
+  b.printf(" %s %s = %s;", type, name, cell);
+}
+
+static int _match_element(
+  Buffer b, Var part, String cell, Array seen, int &testing, int &braces) {
+  Var binder = part;
+  Symbol tag = part is <list> ? _match_capture_tag(part, binder) : 0;
+  if (tag) {
+    _match_and(b, testing);
+    b.printf("Var_is(%s, %lu)", cell, (unsigned long) tag);
+    part = binder;
+  }
+  if (part == <?>) return 0;
+  if (part.is_atom_binder() && !(part in seen)) {
+    seen.push(part);
+    _match_bind(b, part, cell, testing, braces);
+    return 0;
+  }
+  List list = part is <list> ? part.list() : NULL;
+  if (part.is_binder() || part.is_match_op() || part == <x2c-dyn> ||
+      (list && list.car().is_match_op()))
+    return -1;
+  if (part is not <symbol> && !list) return 2;
+  Var literal = part;
+  Symbol tested = <list>;
+  _match_and(b, testing);
+  if (list) b.printf("Var_is(%s, %lu)", cell, (unsigned long) tested);
+  else b.printf("%s.u64 == %lluULL", cell, (unsigned long long) literal.u64);
+  return !!list;
+}
+
+static int _match_nested(
+  Buffer b, Array out, List pattern, Var value, int &depths) {
+  if (!pattern.match(%(expr ? (!or (cache ?) (expr ? (cache ?))))) ||
+      value is not <list>)
+    return -1;
+  _match_flush(b, out);
+  Array rests = [], paths = [], seen = [];
+  int mark = out.len(), testing = 0, braces = 0, step = 0, deepest = 0;
+  List rest = value;
+  String path = "";
+  b.write(" _x2c_match_cursor = _x2c_match_expr;");
+  for (;;) {
+    int levels = rests.len();
+    String cursor = _match_cursor(levels);
+    Var part = rest ? rest.car() : NULL;
+    if (rest && !part.is_list_binder()) {
+      String cell = %"$cursor->car";
+      _match_and(b, testing);
+      b.write(cursor);
+      step = _match_element(b, part, cell, seen, testing, braces);
+      if (step == 1) {
+        _match_and(b, testing);
+        b.printf("(%s = Var_list(%s), 1)", _match_cursor(levels + 1), cell);
+        rests.push(rest);
+        paths.push(path);
+        if (levels >= deepest) deepest = levels + 1;
+        rest = part;
+        path = path + "->car)";
+        continue;
+      }
+      if (step == 2) {
+        _match_and(b, testing);
+        b.printf("Var_equal(%s, ", cell);
+        for (int level = levels; level; level--) b.write("Var_list(");
+        _match_place(b, out, pattern);
+        if (path) b.write(path);
+        b.write("->car)");
+      }
+    }
+    else {
+      if (!rest) {
+        _match_and(b, testing);
+        b.printf("!%s", cursor);
+      }
+      else if (rest.cdr() || part in seen) step = -1;
+      else if (part != <*>) {
+        seen.push(part);
+        _match_bind(b, part, cursor, testing, braces);
+      }
+      if (step < 0 || !levels) break;
+      rest = rests.take_last();
+      path = paths.take_last();
+      cursor = _match_cursor(levels - 1);
+    }
+    if (step < 0) break;
+    _match_and(b, testing);
+    b.printf("(%s = %s->cdr, 1)", cursor, cursor);
+    rest = rest.cdr();
+    path = path + "->cdr";
+  }
+  if (step < 0) {
+    while (out.len() > mark) out.take_last();
+    b.clear();
+    return -1;
+  }
+  if (testing) {
+    b.write(") {");
+    braces++;
+  }
+  if (deepest > depths) depths = deepest;
+  return braces;
+}
+
+static int _match_test(Buffer b, Array out, List pattern, int &sites) {
   match (pattern)
     case %(expr ? (call (expr ? (ident (binding ? "Macro_case_pattern")))
                         (args ?template ?labels))): {
@@ -577,7 +665,6 @@ static int _match_test(
       b.write(", &_x2c_match_capture)) {");
       return 1;
     }
-  if (_match_flat_test(b, value, binders)) return 2;
   if (((Code) pattern).is_static_pattern()) {
     int site = sites++;
     b.printf(
@@ -603,16 +690,12 @@ static void _match_declare(Buffer b, List binders) {
   }
 }
 
-static void _match_arm(
-  Buffer b, Array out, List pattern, Var value, List binders, List body,
-  int &sites) {
+static void _match_body(Buffer b, Array out, List body, int braces) {
   int finish = 1;
   match (body) case %(guarded ?inner): {
     body = inner;
     finish = 0;
   }
-  int braces = _match_test(b, out, pattern, value, binders, sites);
-  _match_declare(b, binders);
   _match_place(b, out, body);
   if (finish) b.write(" break;");
   while (braces--) b.write(" }");
@@ -626,13 +709,32 @@ static String _match_label(Symbol head, Array heads, int &labelling) {
   }
   if (head in heads) return NULL;
   heads.push(head);
-  return %" case ${(long) head}: ;";
+  Var literal = head;
+  return %" case ${(unsigned long long) literal.u64}ULL: ;";
+}
+
+static String _match_locals(int depths, int values) {
+  Buffer b = Buffer.new(0);
+  b.write(";");
+  for (int depth = 0; depth <= depths; depth++) {
+    b.write(depth ? ", " : " List ");
+    b.write(_match_cursor(depth));
+  }
+  if (depths >= 0) b.write(";");
+  if (values > 0)
+    b.printf(
+      " Var _x2c_match_values[%d]; MatchCaptureBuffer _x2c_match_capture = "
+      "{ .values = _x2c_match_values, .capacity = %d };", values, values);
+  else if (!values)
+    b.write(" MatchCaptureBuffer _x2c_match_capture = { 0 };");
+  return b.str_free();
 }
 
 static Code _match_lowered(Code subject, List rows) {
   Buffer b = Buffer.new(0);
   Array out = [], heads = [];
-  int labelling = 1, opening = 0, depth = 0, values = 0, sites = 0;
+  int labelling = 1, opening = 0, depth = 0, sites = 0;
+  int depths = -1, values = -1;
   foreach (List row, rows) {
     match (row) case %(preproc ?(String text)): {
       int nesting = _match_nesting(text);
@@ -642,26 +744,30 @@ static Code _match_lowered(Code subject, List rows) {
       continue;
     }
     List (pattern, body) = row;
-    Var value = pattern.car() == <*> ? %() : ((Code) pattern).pattern_value();
-    List binders = _match_binders(value);
-    if (binders.len() > values) values = binders.len();
+    int otherwise = pattern.car() == <*>;
+    Var value = otherwise ? %() : ((Code) pattern).pattern_value();
     String label = _match_label(_match_head(value), heads, labelling);
     if (label && depth) out.insert(opening++, label);
     else if (label) b.write(label);
-    _match_arm(b, out, pattern, value, binders, body, sites);
+    int braces =
+      otherwise ? 0 : _match_nested(b, out, pattern, value, depths);
+    if (braces < 0) {
+      List binders = _match_binders(value);
+      if (binders.len() > values) values = binders.len();
+      braces = _match_test(b, out, pattern, sites);
+      _match_declare(b, binders);
+    }
+    _match_body(b, out, body, braces);
   }
   if (labelling) b.write(" default: break;");
-  if (b.len()) out.push(b.str());
-  String buffer = values
-    ? %"Var _x2c_match_values[$values]; MatchCaptureBuffer "
-      + "_x2c_match_capture = { .values = _x2c_match_values, "
-      + %".capacity = $values };"
-    : "MatchCaptureBuffer _x2c_match_capture = { 0 };";
-  String selector = heads.len() ? "Var_symbol(car(_x2c_match_expr))" : "0";
+  _match_flush(b, out);
+  String selector = heads.len()
+    ? "_x2c_match_expr ? _x2c_match_expr->car.u64 : 0" : "0";
   List read = subject.convert(%("List")), items = _match_items(out);
+  String locals = _match_locals(depths, values);
   return Code.lowered(
-    %(block ("List _x2c_match_expr =" $read ";" $buffer)
-            (switch (expr (int) ($selector)) (block @items))));
+    %(block ("List _x2c_match_expr =" $read $locals)
+            (switch (expr ("uint64_t") ($selector)) (block @items))));
 }
 
 /** Lowers the bound match `node` to C text around its subject, patterns,
@@ -1206,17 +1312,23 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_delegate_cycle", _delegate_cycle);
   $linked.row(rows, "_delegate_fields", _delegate_fields);
   $linked.row(rows, "delegate_member", delegate_member);
+  $linked.row(rows, "_match_flush", _match_flush);
   $linked.row(rows, "_match_place", _match_place);
   $linked.row(rows, "_match_items", _match_items);
   $linked.row(rows, "_match_nesting", _match_nesting);
+  $linked.row(rows, "_match_cursor", _match_cursor);
   $linked.row(rows, "_match_head", _match_head);
   $linked.row(rows, "_match_binders", _match_binders);
   $linked.row(rows, "_match_capture_tag", _match_capture_tag);
-  $linked.row(rows, "_match_flat_test", _match_flat_test);
+  $linked.row(rows, "_match_and", _match_and);
+  $linked.row(rows, "_match_bind", _match_bind);
+  $linked.row(rows, "_match_element", _match_element);
+  $linked.row(rows, "_match_nested", _match_nested);
   $linked.row(rows, "_match_test", _match_test);
   $linked.row(rows, "_match_declare", _match_declare);
-  $linked.row(rows, "_match_arm", _match_arm);
+  $linked.row(rows, "_match_body", _match_body);
   $linked.row(rows, "_match_label", _match_label);
+  $linked.row(rows, "_match_locals", _match_locals);
   $linked.row(rows, "_match_lowered", _match_lowered);
   $linked.row(rows, "match_lowering", match_lowering);
   $linked.row(rows, "_dynamic_operand", _dynamic_operand);

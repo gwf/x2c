@@ -1,16 +1,17 @@
 /*  component-match.x -- match statements
 
     A match lowers to C text around its subject, patterns, and bodies: a
-    block that reads the subject once as a List, declares the buffer the
-    arms capture into, and switches on the subject's head Symbol. Lowering
-    steps into the nodes the text holds, and the `switch` is the barrier
-    the cleanup walk knows, so an arm's `break` leaves the match and
-    `continue` reaches the enclosing loop. Each arm tests its pattern,
-    declares its binders, runs its body, and breaks; an arm that fails
-    falls into the next. A flat pattern, a head Symbol and a capture of
-    each binder, is tested in place; a macro-valued case recognizes through
-    its macro; any other pattern calls the Match runtime, through a static
-    site when the pattern's value is the same each time it runs.
+    block that reads the subject once as a List and switches on the bits of
+    its head. Lowering steps into the nodes the text holds, and the
+    `switch` is the barrier the cleanup walk knows, so an arm's `break`
+    leaves the match and `continue` reaches the enclosing loop. Each arm
+    tests its pattern, declares its binders, runs its body, and breaks; an
+    arm that fails falls into the next. A static pattern of literals,
+    unique binders, typed captures, nested Lists, and a final `*` is tested
+    in place by nested `if` tests on cursors over the subject. Any other
+    pattern captures into a buffer: a macro-valued case through its macro,
+    and the rest through the Match runtime, at a static site when the
+    pattern's value is the same each time it runs.
 
     Each definition precedes the definitions that call it: the compiler
     settles whether a linked copy reaches a compile-time operation when the
@@ -22,12 +23,17 @@
 
 // C text
 
-/* Ends the C text written to `b` and places `node` after it in `out`. */
-meta static void _match_place(Buffer b, Array out, Var node) {
+/* Moves the C text written to `b` into `out`. */
+meta static void _match_flush(Buffer b, Array out) {
   if (b.len()) {
     out.push(b.str());
     b.clear();
   }
+}
+
+/* Ends the C text written to `b` and places `node` after it in `out`. */
+meta static void _match_place(Buffer b, Array out, Var node) {
+  _match_flush(b, out);
   out.push(node);
 }
 
@@ -56,6 +62,10 @@ meta static int _match_nesting(String text) {
   return directive.startswith("if");
 }
 
+/* The cursor that walks the List `depth` levels into the subject. */
+meta static String _match_cursor(int depth) =>
+  depth ? %"_x2c_match_cursor$depth" : "_x2c_match_cursor";
+
 // pattern values
 
 /* The head Symbol of a pattern value whose first element is a literal
@@ -78,66 +88,161 @@ meta static List _match_binders(Var value) {
   return binders;
 }
 
-/* The tag a typed capture `(!is ?name type <tag>)` of `binder` tests, or
-   0. The runtime canonicalizes `varray` and `vmap`, so those keep the
-   Match call. */
-meta static Symbol _match_capture_tag(Var element, Var binder) {
+/* The tag the typed capture `(!is ?name type <tag>)` tests, with its
+   binder in `binder`, or 0. The runtime canonicalizes `varray` and
+   `vmap`, so those keep the Match call. */
+meta static Symbol _match_capture_tag(Var element, Var &binder) {
   match (element)
     case %((!quote !is) ?name type ?(Symbol tag)):
-      if (name == binder && tag != <x2c-dyn> && tag != <varray> &&
-          tag != <vmap>)
+      if (tag != <x2c-dyn> && tag != <varray> && tag != <vmap>) {
+        binder = name;
         return tag;
+      }
   return 0;
+}
+
+// nested tests
+
+/* Starts the next test of the condition the arm has open, or opens one
+   after a binder's declaration closed it. */
+meta static void _match_and(Buffer b, int &testing) {
+  b.write(testing ? " && " : " if (");
+  testing = 1;
+}
+
+/* Declares `binder` from `cell`, a `List` for a `*name` binder, after the
+   open condition, whose brace `braces` counts. */
+meta static void _match_bind(
+  Buffer b, Var binder, String cell, int &testing, int &braces) {
+  if (testing) {
+    b.write(") {");
+    braces++;
+    testing = 0;
+  }
+  String type = binder.is_list_binder() ? "List" : "Var";
+  String name = binder.str()[1:];
+  b.printf(" %s %s = %s;", type, name, cell);
+}
+
+/* Writes the tests of the element `part` of a static pattern, read from
+   `cell`, and returns 0 when they are complete, 1 for a nested List the
+   caller walks next, 2 for a literal the caller compares with the
+   pattern's own cell, or -1 outside the form the arm can test in place:
+   an operator, a computed part, or a repeated binder. */
+meta static int _match_element(
+  Buffer b, Var part, String cell, Array seen, int &testing, int &braces) {
+  Var binder = part;
+  Symbol tag = part is <list> ? _match_capture_tag(part, binder) : 0;
+  if (tag) {
+    _match_and(b, testing);
+    b.printf("Var_is(%s, %lu)", cell, (unsigned long) tag);
+    part = binder;
+  }
+  if (part == <?>) return 0;
+  if (part.is_atom_binder() && !(part in seen)) {
+    seen.push(part);
+    _match_bind(b, part, cell, testing, braces);
+    return 0;
+  }
+  List list = part is <list> ? part.list() : NULL;
+  if (part.is_binder() || part.is_match_op() || part == <x2c-dyn> ||
+      (list && list.car().is_match_op()))
+    return -1;
+  if (part is not <symbol> && !list) return 2;
+  Var literal = part;
+  Symbol tested = <list>;
+  _match_and(b, testing);
+  if (list) b.printf("Var_is(%s, %lu)", cell, (unsigned long) tested);
+  else b.printf("%s.u64 == %lluULL", cell, (unsigned long long) literal.u64);
+  return !!list;
+}
+
+/* Writes the static `pattern`, whose value is `value`, as nested tests on
+   cursors over the subject, each binder a local read from its cell, and
+   returns the braces that close them, raising `depths` to the deepest
+   cursor they read; or returns -1 and writes nothing for a pattern outside
+   that form, including a `*` before the end. A nested List waits in
+   `rests` while its cursor walks it, and `path` reaches the List the
+   cursor walks within the cached pattern, whose cells literals compare. */
+meta static int _match_nested(
+  Buffer b, Array out, List pattern, Var value, int &depths) {
+  if (!pattern.match(%(expr ? (!or (cache ?) (expr ? (cache ?))))) ||
+      value is not <list>)
+    return -1;
+  _match_flush(b, out);
+  Array rests = [], paths = [], seen = [];
+  int mark = out.len(), testing = 0, braces = 0, step = 0, deepest = 0;
+  List rest = value;
+  String path = "";
+  b.write(" _x2c_match_cursor = _x2c_match_expr;");
+  for (;;) {
+    int levels = rests.len();
+    String cursor = _match_cursor(levels);
+    Var part = rest ? rest.car() : NULL;
+    if (rest && !part.is_list_binder()) {
+      String cell = %"$cursor->car";
+      _match_and(b, testing);
+      b.write(cursor);
+      step = _match_element(b, part, cell, seen, testing, braces);
+      if (step == 1) {
+        _match_and(b, testing);
+        b.printf("(%s = Var_list(%s), 1)", _match_cursor(levels + 1), cell);
+        rests.push(rest);
+        paths.push(path);
+        if (levels >= deepest) deepest = levels + 1;
+        rest = part;
+        path = path + "->car)";
+        continue;
+      }
+      if (step == 2) {
+        _match_and(b, testing);
+        b.printf("Var_equal(%s, ", cell);
+        for (int level = levels; level; level--) b.write("Var_list(");
+        _match_place(b, out, pattern);
+        if (path) b.write(path);
+        b.write("->car)");
+      }
+    }
+    else {
+      if (!rest) {
+        _match_and(b, testing);
+        b.printf("!%s", cursor);
+      }
+      else if (rest.cdr() || part in seen) step = -1;
+      else if (part != <*>) {
+        seen.push(part);
+        _match_bind(b, part, cursor, testing, braces);
+      }
+      if (step < 0 || !levels) break;
+      rest = rests.take_last();
+      path = paths.take_last();
+      cursor = _match_cursor(levels - 1);
+    }
+    if (step < 0) break;
+    _match_and(b, testing);
+    b.printf("(%s = %s->cdr, 1)", cursor, cursor);
+    rest = rest.cdr();
+    path = path + "->cdr";
+  }
+  if (step < 0) {
+    while (out.len() > mark) out.take_last();
+    b.clear();
+    return -1;
+  }
+  if (testing) {
+    b.write(") {");
+    braces++;
+  }
+  if (deepest > depths) depths = deepest;
+  return braces;
 }
 
 // arms
 
-/* Writes the test of a flat pattern, a head Symbol and a capture of each
-   binder in order, typed or not, and returns 1; or returns 0 and writes
-   nothing. The head is tested even under head dispatch, because a failed
-   arm falls into the next. */
-meta static int _match_flat_test(Buffer b, Var value, List binders) {
-  Symbol head = _match_head(value);
-  if (!head) return 0;
-  Var literal = head;
-  size_t start = b.len();
-  b.printf(
-    " { List _x2c_match_cursor; if (_x2c_match_expr && "
-    "_x2c_match_expr->car.u64 == %lluULL && "
-    "(_x2c_match_cursor = _x2c_match_expr->cdr, 1)",
-    (unsigned long long) literal.u64);
-  List elements = value.list().cdr();
-  int index = 0;
-  foreach (Var binder, binders) {
-    Var element = elements ? elements.car() : NULL;
-    Symbol tag = element == binder ? 0 : _match_capture_tag(element, binder);
-    if (!elements || !binder.is_atom_binder() || binder == <?> ||
-        (element != binder && !tag)) {
-      b.unwrite(b.len() - start);
-      return 0;
-    }
-    b.write(" && _x2c_match_cursor");
-    if (tag)
-      b.printf(" && Var_is(_x2c_match_cursor->car, %lu)", (unsigned long) tag);
-    b.printf(
-      " && (_x2c_match_values[%d] = _x2c_match_cursor->car, "
-      "_x2c_match_cursor = _x2c_match_cursor->cdr, 1)", index++);
-    elements = elements.cdr();
-  }
-  if (elements) {
-    b.unwrite(b.len() - start);
-    return 0;
-  }
-  b.write(" && !_x2c_match_cursor) {");
-  return 1;
-}
-
-/* Writes the test that opens the arm of `pattern`, whose value is
-   `value`, and returns the number of braces that close the arm. `sites`
-   numbers the static sites within the match. */
-meta static int _match_test(
-  Buffer b, Array out, List pattern, Var value, List binders, int &sites) {
-  if (pattern.car() == <*>) return 0;
+/* Writes the test of `pattern` that captures into the buffer and returns
+   the brace that closes it. `sites` numbers the static sites within the
+   match. */
+meta static int _match_test(Buffer b, Array out, List pattern, int &sites) {
   match (pattern)
     case %(expr ? (call (expr ? (ident (binding ? "Macro_case_pattern")))
                         (args ?template ?labels))): {
@@ -152,7 +257,6 @@ meta static int _match_test(
       b.write(", &_x2c_match_capture)) {");
       return 1;
     }
-  if (_match_flat_test(b, value, binders)) return 2;
   if (((Code) pattern).is_static_pattern()) {
     int site = sites++;
     b.printf(
@@ -180,19 +284,14 @@ meta static void _match_declare(Buffer b, List binders) {
   }
 }
 
-/* Writes the arm that runs `body` when `pattern` matches: its test, its
-   binders, and the body, which then breaks unless a guard decides that
-   itself. */
-meta static void _match_arm(
-  Buffer b, Array out, List pattern, Var value, List binders, List body,
-  int &sites) {
+/* Writes the arm's body, which then breaks unless a guard decides that
+   itself, and the `braces` that close the arm's tests. */
+meta static void _match_body(Buffer b, Array out, List body, int braces) {
   int finish = 1;
   match (body) case %(guarded ?inner): {
     body = inner;
     finish = 0;
   }
-  int braces = _match_test(b, out, pattern, value, binders, sites);
-  _match_declare(b, binders);
   _match_place(b, out, body);
   if (finish) b.write(" break;");
   while (braces--) b.write(" }");
@@ -211,20 +310,43 @@ meta static String _match_label(Symbol head, Array heads, int &labelling) {
   }
   if (head in heads) return NULL;
   heads.push(head);
-  return %" case ${(long) head}: ;";
+  Var literal = head;
+  return %" case ${(unsigned long long) literal.u64}ULL: ;";
 }
 
 // the lowering
 
+/* The declarations after the subject: the cursors when an arm reads
+   `depths` levels, the deepest any arm reads or -1 when none tests in
+   place, and the capture buffer when an arm captures `values`, the most
+   any such arm captures or -1 when none does. */
+meta static String _match_locals(int depths, int values) {
+  Buffer b = Buffer.new(0);
+  b.write(";");
+  for (int depth = 0; depth <= depths; depth++) {
+    b.write(depth ? ", " : " List ");
+    b.write(_match_cursor(depth));
+  }
+  if (depths >= 0) b.write(";");
+  if (values > 0)
+    b.printf(
+      " Var _x2c_match_values[%d]; MatchCaptureBuffer _x2c_match_capture = "
+      "{ .values = _x2c_match_values, .capacity = %d };", values, values);
+  else if (!values)
+    b.write(" MatchCaptureBuffer _x2c_match_capture = { 0 };");
+  return b.str_free();
+}
+
 /* The match of `subject` over `rows`: a block that reads the subject once
-   as a List and declares the capture buffer, then switches on the
-   subject's head Symbol. A label sits before the conditional groups
-   around its arm, so the switch still reaches later arms when the
-   preprocessor removes that one. */
+   as a List and declares the arms' cursors and capture buffer, then
+   switches on the bits of the subject's head. A label sits before the
+   conditional groups around its arm, so the switch still reaches later
+   arms when the preprocessor removes that one. */
 meta static Code _match_lowered(Code subject, List rows) {
   Buffer b = Buffer.new(0);
   Array out = [], heads = [];
-  int labelling = 1, opening = 0, depth = 0, values = 0, sites = 0;
+  int labelling = 1, opening = 0, depth = 0, sites = 0;
+  int depths = -1, values = -1;
   foreach (List row, rows) {
     match (row) case %(preproc ?(String text)): {
       int nesting = _match_nesting(text);
@@ -234,26 +356,30 @@ meta static Code _match_lowered(Code subject, List rows) {
       continue;
     }
     List (pattern, body) = row;
-    Var value = pattern.car() == <*> ? %() : ((Code) pattern).pattern_value();
-    List binders = _match_binders(value);
-    if (binders.len() > values) values = binders.len();
+    int otherwise = pattern.car() == <*>;
+    Var value = otherwise ? %() : ((Code) pattern).pattern_value();
     String label = _match_label(_match_head(value), heads, labelling);
     if (label && depth) out.insert(opening++, label);
     else if (label) b.write(label);
-    _match_arm(b, out, pattern, value, binders, body, sites);
+    int braces =
+      otherwise ? 0 : _match_nested(b, out, pattern, value, depths);
+    if (braces < 0) {
+      List binders = _match_binders(value);
+      if (binders.len() > values) values = binders.len();
+      braces = _match_test(b, out, pattern, sites);
+      _match_declare(b, binders);
+    }
+    _match_body(b, out, body, braces);
   }
   if (labelling) b.write(" default: break;");
-  if (b.len()) out.push(b.str());
-  String buffer = values
-    ? %"Var _x2c_match_values[$values]; MatchCaptureBuffer "
-      + "_x2c_match_capture = { .values = _x2c_match_values, "
-      + %".capacity = $values };"
-    : "MatchCaptureBuffer _x2c_match_capture = { 0 };";
-  String selector = heads.len() ? "Var_symbol(car(_x2c_match_expr))" : "0";
+  _match_flush(b, out);
+  String selector = heads.len()
+    ? "_x2c_match_expr ? _x2c_match_expr->car.u64 : 0" : "0";
   List read = subject.convert(%("List")), items = _match_items(out);
+  String locals = _match_locals(depths, values);
   return Code.lowered(
-    %(block ("List _x2c_match_expr =" $read ";" $buffer)
-            (switch (expr (int) ($selector)) (block @items))));
+    %(block ("List _x2c_match_expr =" $read $locals)
+            (switch (expr ("uint64_t") ($selector)) (block @items))));
 }
 
 $rewrite($matched)
