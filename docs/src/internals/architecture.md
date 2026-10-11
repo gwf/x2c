@@ -572,6 +572,9 @@ The modules under `src/` divide ownership as follows:
   ownership search dependencies;
 - `src/module-access.x` -- module declaration names, ancestor lookup, and
   private binding visibility;
+- `src/module-layout.x` -- shared aggregate layouts and their generated
+  support headers;
+- `src/module-schedule.x` -- declaration dependency components;
 - `src/utils.x` -- repository discovery, the driver's fatal error line, and
   forked translation workers;
 - `src/transform.x` -- lowering to emitter-ready AST;

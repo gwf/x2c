@@ -110,7 +110,9 @@ commits need not rebuild from their own bootstrap.
   helper build) and `meta-helper-client` (its calls) -> `compiler`
   (translation state, + `symbols`, its symbol table, and `fields`, which
   copies named fields, `module-access`, which resolves module visibility,
-  and `module-tree`, which discovers explicit source membership) ->
+  `module-tree`, which discovers explicit source membership,
+  `module-layout`, which emits shared aggregate layouts, and
+  `module-schedule`, which groups declaration dependencies) ->
   shared runtime `lib/tokenizer.x` (+ `preprocess`, which reads its
   directives) ->
   `parse` (+ `parse-report-macros`, package and alias diagnostics)/

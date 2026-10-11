@@ -434,7 +434,7 @@ static void FileWalk.prepare(FileWalk &w, Compiler shadow, String segment) {
   // Every segment hashes its provider, including its private helpers.
   shadow.meta_hashes = w.hashes;
   shadow.layout = w.c.layout;
-  shadow.source_private = 0;
+  shadow.source_private = w.unit ? 0 : -1;
   shadow.source_module = 0;
   shadow.signature_only = w.c.signature_only;
   shadow.interface_provider = w.c.interface_provider;
