@@ -70,6 +70,7 @@ static typedef struct Helper {
   Map deps, before, readiness, prefix_compilers, publications, prefix_counts;
   Map native_sources, native_targets, native_loaded;
   Array groups, built, failures, objects, retained_dependencies, retained_tables;
+  Scope lifetime, Pool pool;
   int changed;
 } Helper;
 
@@ -88,6 +89,8 @@ void Frontend.prepare_meta(Frontend f, List inputs) {
     .groups = [], .built = [],
     .failures = [], .objects = [], .retained_dependencies = [],
     .retained_tables = []};
+  h.lifetime = Scope.owner(h.publications);
+  h.pool = Pool.current();
   h.scan(inputs);
   String include = NULL, cc = Compiler.meta_cc(include);
   String root = script_cache_root(), stamp = build_module_stamp();
@@ -468,25 +471,26 @@ static String Helper.prefix(Helper &h, String owner, int index, String name) {
   h.prefix_counts[index] = sequence;
   String base = %"${h.base(index)}_prefix_$sequence";
   $let(c.meta_build, index + 1) c.write_native_meta_prefix(sequence, published);
-  h.native_sources[index] = base;
-  h.native_targets[index] = %"x2c_module_targets_${index}_prefix_$sequence";
+  h.native_sources[index] = h.retain(base);
+  h.native_targets[index] = h.retain(%"x2c_module_targets_${index}_prefix_$sequence");
   h.retained_tables.push(index);
   String failure = h.load_native_closure(index);
   if (failure) return failure;
-  h.objects.push(%"$base.o");
+  h.objects.push(h.retain(%"$base.o"));
   h.changed = 1;
   foreach (String function, c.native_prefix_functions())
-    published[%(function $function)] = 1;
+    h.publish(published, %(function $function), 1);
   foreach (String value, c.native_prefix_values())
-    published[%(state $value)] = 1;
+    h.publish(published, %(state $value), 1);
   foreach (List entry, c.meta_group)
     match (entry) {
-      case %(function ? ?target *): published[%(function $target)] = 1;
+      case %(function ? ?target *): h.publish(published, %(function $target), 1);
       case %(static (declare ? (bindings (op = (bind ?binding *) ?)))):
-        published[%(state ${binding_identity_spelling(binding)})] = 1;
+        h.publish(published, %(state ${binding_identity_spelling(binding)}), 1);
     }
   List resets = published.getdefault(%(initializers), %());
-  published[%(initializers)] = resets.append(%(${%"x2c_module_reset_${index}_prefix_$sequence"}));
+  h.publish(published, %(initializers),
+    resets.append(%(${%"x2c_module_reset_${index}_prefix_$sequence"})));
   return NULL;
 }
 
@@ -523,13 +527,13 @@ static String Helper.prepare_native(Helper &h, int index) {
       if (row.car() == index) return row.cadr();
   }
   h.readiness[owner] = 1;
-  h.publications[index] = {};
+  $scope(&h.lifetime) h.publications[index] = {};
   h.retained_tables.push(index);
   h.parse(owner, index);
   String base = h.base(index);
   if (Path.is_file(%"$base.failure")) return Path.read_text(%"$base.failure");
-  h.native_sources[index] = base;
-  h.native_targets[index] = %"x2c_module_targets_$index";
+  h.native_sources[index] = h.retain(base);
+  h.native_targets[index] = h.retain(%"x2c_module_targets_$index");
   h.retained_tables.push(index);
   h.readiness[owner] = 4;
   return NULL;
@@ -703,7 +707,18 @@ static void Helper.export(
 static Var _export_native_record(Var value, Context context) =>
   context.export_nested(value);
 
+/* Collection can call readiness inside its own temporary Context. */
+static Var Helper.retain(Helper &h, Var value) {
+  Context source = Context.current();
+  return source ? source.export_to(value, &h.lifetime, h.pool) : value;
+}
+
+static void Helper.publish(Helper &h, Map publication, List key, Var value) {
+  publication[h.retain(key)] = h.retain(value);
+}
+
 static void Helper.dependency(Helper &h, String path) {
+  path = h.retain(path);
   if (path in h.deps) return;
   h.deps[path] = 1;
   h.retained_dependencies.push(path);
@@ -751,10 +766,10 @@ static void Helper.record(Helper &h, int index, String failure) {
   String base = h.base(index);
   if (!Path.is_file(%"$base.deps")) return;
   h.groups.push(index);
-  if (failure) h.failures.push(%($index $failure));
+  if (failure) h.failures.push(h.retain(%($index $failure)));
   else {
     h.built.push(index);
-    h.objects.push(%"$base.o");
+    h.objects.push(h.retain(%"$base.o"));
     if (_digest(%"$base.o") != h.before[index]) h.changed = 1;
   }
 }
