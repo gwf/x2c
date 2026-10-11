@@ -10,7 +10,7 @@ import subprocess
 MARKER = re.compile(r'^\s*#\s*pragma\s+x2c_region_(begin|end)\s+([A-Za-z0-9_]+)\s*$')
 PACK = re.compile(r'^\s*#\s*pragma\s+pack\s*\((.*)\)\s*$')
 PRAGMA = re.compile(r'^\s*#\s*pragma\s+(.*)$')
-LINE = re.compile(r'^\s*#\s+(?:line\s+)?(\d+)\s+("(?:\\.|[^"\\])*")(?:\s+.*)?$')
+LINE = re.compile(r'^\s*#\s+(?:line\s+)?(\d+)\s+("(?:\\.|[^"\\])*")(?:\s+(.*))?$')
 
 class ProjectionError(Exception):
     pass
@@ -154,7 +154,7 @@ def extract(text, selected_edges=None):
     return regions
 
 
-def load_metadata(path):
+def load_metadata(path, streams=()):
     """Load immutable portable companion records without inspecting C names."""
     seen, records, edges, namespace_edges, native_providers = set(), {}, {}, {}, {}
     owner_sources, region_providers = {}, {}
@@ -185,6 +185,27 @@ def load_metadata(path):
         for companion in metadata.get('companions', []):
             load(current.parent / companion)
     load(path)
+    for text in streams:
+        physical = None
+        for line in text.splitlines():
+            location = LINE.fullmatch(line.strip())
+            if location:
+                filename = json.loads(location[2])
+                flags = (location[3] or '').split()
+                if '1' in flags or '2' in flags or physical is None:
+                    physical = filename
+                continue
+            marker = MARKER.fullmatch(line.strip())
+            if not marker or marker[1] != 'begin' or marker[2] in records:
+                continue
+            if physical is None or physical.startswith('<'):
+                raise ProjectionError('region has no physical provider: ' + marker[2])
+            provider = Path(physical).with_suffix('.xnm')
+            if not provider.exists():
+                raise ProjectionError('missing selected provider metadata: ' + str(provider))
+            load(provider)
+            if marker[2] not in records:
+                raise ProjectionError('selected provider does not define region: ' + marker[2])
     primary['regions'] = list(records.values())
     primary['familyEdges'] = edges
     primary['namespaceEdges'] = namespace_edges
@@ -373,10 +394,13 @@ def compile_native(arguments):
     if status:
         return status
     try:
-        configuration = load_metadata(metadata)
-        edges = []
         consumer_text = expanded.read_text()
+        configuration = load_metadata(metadata, [consumer_text])
+        edges = []
         streams = preprocess_owners(configuration, compiler, destination.parent, consumer_text)
+        receipts = configuration.get('_ownerReceipts', [])
+        configuration = load_metadata(metadata, [consumer_text, *streams.values()])
+        configuration['_ownerReceipts'] = receipts
         destination.write_text(project(consumer_text, configuration, edges, streams))
         Path(str(destination) + ".xne").write_text(json.dumps(sorted(edges)))
         retain_projection_inputs(depfile, configuration)
@@ -410,10 +434,13 @@ def project_external(arguments):
     if status:
         return status
     try:
-        configuration = load_metadata(metadata)
         text = expanded.read_text()
+        configuration = load_metadata(metadata, [text])
         streams = preprocess_owners(configuration, compiler,
                                     destination.parent, text)
+        receipts = configuration.get('_ownerReceipts', [])
+        configuration = load_metadata(metadata, [text, *streams.values()])
+        configuration['_ownerReceipts'] = receipts
         edges = []
         destination.write_text(project(text, configuration, edges, streams))
         Path(str(destination) + '.xne').write_text(json.dumps(sorted(edges)))
@@ -437,10 +464,14 @@ def main():
             compiler = arguments[divider + 1:]
             arguments = arguments[:divider]
         expanded, metadata, destination = map(Path, arguments[:3])
-        configuration = load_metadata(metadata)
-        edges = []
         consumer_text = expanded.read_text()
+        configuration = load_metadata(metadata, [consumer_text])
+        edges = []
         streams = preprocess_owners(configuration, compiler, destination.parent, consumer_text) if compiler else None
+        receipts = configuration.get('_ownerReceipts', [])
+        if streams:
+            configuration = load_metadata(metadata, [consumer_text, *streams.values()])
+            configuration['_ownerReceipts'] = receipts
         result = project(consumer_text, configuration, edges, streams)
         Path(str(destination) + ".xne").write_text(json.dumps(sorted(edges)))
         if len(arguments) == 4:
