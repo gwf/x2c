@@ -53,6 +53,7 @@ fixture and build durations are not comparative performance evidence.
 | Check | Result | Evidence and scope |
 | --- | --- | --- |
 | General module matrix at 1027d5bc | 98/98 | `/tmp/x2c-module-probes-ecbgywvt/results.json`; before the field-directive repair |
+| Full layout matrix at 92f62c50 | 57/65 | `/tmp/x2c-layouts-a9fy11a4`; eight failures retained, including two introduced native-header regressions |
 | Field conditional controls at 92f62c50 | 8/8 | `/tmp/x2c-layouts-k9vtckvl`; module and ordinary controls, both flags, active-cycle rejection |
 | Bounded family-header controls | 15/15 | `/tmp/x2c-layouts-a5db9qez`; alternative layouts, selected cycles, aliases, private enums, native inline ordering |
 | Inherited Lisp and producer controls | 9/9 | `/tmp/x2c-module-probes-62n1_5ru/results.json`; privacy, source ordering, direct-member equivalence |
@@ -62,9 +63,18 @@ The native region experiment is not an integrated compiler feature. Its input
 was hand-authored C, and it does not prove native declaration closure, arbitrary
 pragma state, binding privacy, cache behavior, or bootstrap portability.
 
-Final full matrices, current-candidate replay, bootstrap recovery, self-hosting,
-and the existing research correctness gate are pending. Earlier gate success
-belongs to the first prototype; it cannot validate this changed implementation.
+Current-candidate replay, bootstrap recovery, self-hosting, and general gate
+results are recorded separately in
+`.context/nested-modules/iteration-two/verification-status.md`, with full logs
+under `debug/`. Earlier first-prototype gate success cannot validate this changed
+implementation. General gate success cannot substitute for the failing layout
+or native-meta controls.
+
+The research gate wrapper invokes the existing `gate-state.py` ensure operation
+with the private research authorization. An ignored supplemental Makefile runs
+the same gate steps, command builds, and command checks serially. It removes
+explicit shell background overlap that `BUILD_JOBS=1` alone does not control.
+No tracked Makefile, recurring gate, or repository process is changed.
 
 ## Remaining correctness failures
 
