@@ -409,6 +409,18 @@ static void Compiler._publish(Compiler c, List outputs) {
 
 // header and source
 
+/* Support includes use the same output placements as companion metadata. */
+static String Compiler._module_support_path(Compiler c, String provider) {
+  String name = c.module_support_header(provider);
+  Map plan = c.module_layout_plan;
+  if (!plan || c.meta_build) return name;
+  Var source, target;
+  if (!plan.try_get(%(directories ${c.canonical_path(c.filename)}), source) ||
+      !plan.try_get(%(directories ${c.canonical_path(provider)}), target))
+    return name;
+  return native_projection_relative(%"$target/$name", source);
+}
+
 /* One unit's split into header and source. `pending` holds each late
    native include as `(names node)`, `open` the conditional groups still
    open, `forwarded` the struct and union tags the header declares,
@@ -436,7 +448,7 @@ static List Compiler._header_and_source(
     foreach (String owner, c.module_ancestors().reverse())
       if (owner != c.canonical_path(c.filename))
         p.header.push(
-          %(preproc "#include \"${c.module_support_header(owner)}\""));
+          %(preproc "#include \"${c._module_support_path(owner)}\""));
   foreach (Ast node, ast) p.add(node);
   List header = p.finish(), source = c._source_projection(ast, inline_bodies);
   return %($header $source);
@@ -452,13 +464,13 @@ static List Compiler._source_projection(
     foreach (String owner, c.module_ancestors().reverse())
       if (owner != c.canonical_path(c.filename))
         source.push(
-          %(preproc "#include \"${c.module_support_header(owner)}\""));
+          %(preproc "#include \"${c._module_support_path(owner)}\""));
   foreach (List node, ast) {
     match (node) {
       case %(module-members ?members): {
         foreach (String member, members)
           source.push(
-            %(preproc "#include \"${c.module_support_header(
+            %(preproc "#include \"${c._module_support_path(
               Path.join(Path.dirname(c.filename), member))}\""));
         continue;
       }
@@ -491,7 +503,7 @@ static void Partition.add(Partition &p, Ast node) {
     case %(module-members ?members):
       foreach (String member, members)
         p.header.push(
-          %(preproc "#include \"${p.c.module_support_header(
+          %(preproc "#include \"${p.c._module_support_path(
             Path.join(Path.dirname(p.c.filename), member))}\""));
     case %((!or protocol adopt macrodef c-assert) *): return;
     case %(typedef ? (bindings *)): p.add_typedef(node);
