@@ -349,7 +349,7 @@ static List Compiler._native_prerequisites(Compiler c) {
 }
 
 /* Published body and object definitions differ from collected prototypes. */
-static List Compiler._native_available(Compiler c) {
+List Compiler.native_prefix_definitions(Compiler c) {
   Array names = [];
   Var identity;
   String name;
@@ -1119,7 +1119,7 @@ void Compiler.write_meta_build(Compiler c) {
     Path.write_text(%"$meta_build_directory/meta_group_$index.h", header);
   Path.write_text(%"$base.c", source);
   Path.write_text(%"$base.native", Var.json(c._native_prerequisites()));
-  Path.write_text(%"$base.available", Var.json(c._native_available()));
+  Path.write_text(%"$base.available", Var.json(c.native_prefix_definitions()));
   for (int i = 4; i < code.len(); i += 2) {
     String filename = code[i], text = code[i + 1];
     if (filename.endswith(".xnm")) {

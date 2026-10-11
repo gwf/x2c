@@ -458,8 +458,8 @@ static String Helper.prefix(Helper &h, String owner, int index, String name) {
   Compiler c = compiler.pointer();
   c.bind_native_meta_prefix();
   int found = 0;
-  foreach (List entry, c.meta_group)
-    match (entry) case %(function ? ?target *): if (target == name) found = 1;
+  foreach (String target, c.native_prefix_definitions())
+    if (target == name) found = 1;
   if (!found) return "the defining body depends on its unfinished prefix";
   Map published = h.publications[index];
   if (%(function $name) in published) return NULL;
@@ -549,13 +549,19 @@ static String Helper.native_closure(
       int dependency = row.array()[0];
       String provider = h.owners[dependency - 1];
       String name = row.array()[1];
-      failure = h.prepare_native(dependency);
+      if (h.readiness.getdefault(provider, 0) == 1 &&
+          !(dependency in h.native_sources))
+        failure = h.prefix(provider, dependency, name);
+      else failure = h.prepare_native(dependency);
       if (failure) return failure;
       if (h.readiness[provider] == 1) {
         String available = %"${h.native_sources[dependency]}.available";
         if (!Path.is_file(available) ||
-            !(name in Json.parse(Path.read_text(available))))
-          return %"native meta prerequisite cycle: $provider has no available definition of $name";
+            !(name in Json.parse(Path.read_text(available)))) {
+          failure = h.prefix(provider, dependency, name);
+          if (failure)
+            return %"native meta prerequisite cycle: $provider has no available definition of $name; $failure";
+        }
       }
       if (!(provider in prerequisites)) prerequisites.push(provider);
       failure = h.native_closure(dependency, seen, providers, edges);
