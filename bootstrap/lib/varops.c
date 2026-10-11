@@ -409,21 +409,15 @@ static List _update_rows(void){
 Var List_assoc(List, Var);
 
 static List _update_row(List id){
-
   {
     List _x2c_match_expr = id;
-    Var _x2c_match_values[1];
-  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
-
-    switch (Var_symbol(car(_x2c_match_expr))) {
-      case 377892: ;
-  static MatchCaptureSite _x2c_match_site_0;
-  if (x2c_match_site_try_capture(& _x2c_match_site_0, _x2c_match_expr, List_var(_298), &_x2c_match_capture)) {Var key = _x2c_match_values[0];  return Var_list(List_assoc(_update_rows(), key));  break;
-}
-default: break;
+    Var _x2c_match_values[1]; MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
+    switch(Var_symbol(car(_x2c_match_expr))){
+        case 377892: ; static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(_298), &_x2c_match_capture)) { Var key = _x2c_match_values[0];  return Var_list(List_assoc(_update_rows(), key));  break; } default: break;
     }
+
   }
-return NULL;
+  return NULL;
 }
 
 static Symbol _update_tag(List id){
@@ -461,17 +455,23 @@ static List _update_cast_out(List id){
 char x2c_var_update_i8(volatile char * lhs, Symbol op, Var rhs){
   if(! lhs){
     {
-      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/varops.x",.function = "x2c_var_update_i8",.line = 124};  x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("x2c_var_update_i8")), NULL))));  __builtin_unreachable();
+      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/varops.x",.function = "x2c_var_update_i8",.line = 124};  x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("x2c_var_update_i8")), NULL))));
+      __builtin_unreachable();
     }
 
   }
-  Var _x2c_macro_converted_0 = _native_update(Var_box_i8(lhs[0]), 26993, op, rhs);  if(Var_is_void(_x2c_macro_converted_0)) return 0;  char _x2c_macro_value_0 =(char) Var_integer(_x2c_macro_converted_0); (lhs)[0] = _x2c_macro_value_0;  return _x2c_macro_value_0;
+  Var _x2c_macro_converted_0 = _native_update(Var_box_i8(lhs[0]), 26993, op, rhs);
+  if(Var_is_void(_x2c_macro_converted_0)) return 0;
+  char _x2c_macro_value_0 =(char) Var_integer(_x2c_macro_converted_0);
+  (lhs)[0] = _x2c_macro_value_0;
+  return _x2c_macro_value_0;
 }
 
 signed char x2c_var_update_schar(volatile signed char * lhs, Symbol op, Var rhs){
   if(! lhs){
     {
-      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/varops.x",.function = "x2c_var_update_schar",.line = 125};  x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("x2c_var_update_schar")), NULL))));
+      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/varops.x",.function = "x2c_var_update_schar",.line = 125};
+      x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("x2c_var_update_schar")), NULL))));
       __builtin_unreachable();
     }
 

@@ -93,21 +93,15 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
 
 List source_return_type(List node){
   if(! _init_guard_) _file_init_();
-
   {
     List _x2c_match_expr = node;
-    Var _x2c_match_values[1];
-  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
-
-    switch (Var_symbol(car(_x2c_match_expr))) {
-      case 1219800220: ;
-  static MatchCaptureSite _x2c_match_site_0;
-  if (x2c_match_site_try_capture(& _x2c_match_site_0, _x2c_match_expr, List_var(_5), &_x2c_match_capture)) {Var type = _x2c_match_values[0];  return Var_list(type);  break;
-}
-default: break;
+    Var _x2c_match_values[1]; MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
+    switch(Var_symbol(car(_x2c_match_expr))){
+        case 1219800220: ; static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(_5), &_x2c_match_capture)) { Var type = _x2c_match_values[0];  return Var_list(type);  break; } default: break;
     }
+
   }
-return NULL;
+  return NULL;
 }
 
 List source_conditional_statement(void){
@@ -204,35 +198,25 @@ List source_declarator_row(List fields){
 
 Var source_expression(Var value){
   if(! _init_guard_) _file_init_();  while(1){
+    {
+      List _x2c_match_expr = Var_list(value);  Var _x2c_match_values[1]; MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };  switch(Var_symbol(car(_x2c_match_expr))){
+          case 377892: ; static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(_54), &_x2c_match_capture)) { Var inner = _x2c_match_values[0];  value = inner;  break; } static MatchCaptureSite _x2c_match_site_1; if (x2c_match_site_try_capture(&_x2c_match_site_1, _x2c_match_expr, List_var(_61), &_x2c_match_capture)) { Var inner = _x2c_match_values[0];  value = inner;  break; } case 1077029798: ; { List _x2c_match_cursor; if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497937838648230ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) { Var inner = _x2c_match_values[0];  value = inner;  break; } } case 199912: ; static MatchCaptureSite _x2c_match_site_2; if (x2c_match_site_try_capture(&_x2c_match_site_2, _x2c_match_expr, List_var(_57), &_x2c_match_capture)) { Var inner = _x2c_match_values[0];  value = inner;  break; } default: ;  return value;  break;
+      }
 
-  {
-    List _x2c_match_expr = Var_list(value);
-    Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
-    switch (Var_symbol(car(_x2c_match_expr))) {
-      case 377892: ;  static MatchCaptureSite _x2c_match_site_1;  if (x2c_match_site_try_capture(& _x2c_match_site_1, _x2c_match_expr, List_var(_54), &_x2c_match_capture)) {Var inner = _x2c_match_values[0];  value = inner;  break;
-  }
-  static MatchCaptureSite _x2c_match_site_2;  if (x2c_match_site_try_capture(& _x2c_match_site_2, _x2c_match_expr, List_var(_61), &_x2c_match_capture)) {Var inner = _x2c_match_values[0];  value = inner;  break;
-}
-case 1077029798: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497937838648230ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var inner = _x2c_match_values[0];  value = inner;  break; } } case 199912: ;  static MatchCaptureSite _x2c_match_site_3;  if (x2c_match_site_try_capture(& _x2c_match_site_3, _x2c_match_expr, List_var(_57), &_x2c_match_capture)) {Var inner = _x2c_match_values[0];  value = inner;  break;
-}
-default: ;  return value;  break;
     }
+
   }
-}
+
 }
 
 List catch_handle(List node){
-  if(! _init_guard_) _file_init_();
-  {
-    List _x2c_match_expr = node;
-    Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
-    switch (Var_symbol(car(_x2c_match_expr))) {
-      case 42162: ;  static MatchCaptureSite _x2c_match_site_4;  if (x2c_match_site_try_capture(& _x2c_match_site_4, _x2c_match_expr, List_var(_70), &_x2c_match_capture)) {Var handle = _x2c_match_values[0];  return Var_list(handle);  break;
-}
-default: break;
+  if(! _init_guard_) _file_init_(); {
+    List _x2c_match_expr = node;  Var _x2c_match_values[1]; MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };  switch(Var_symbol(car(_x2c_match_expr))){
+        case 42162: ; static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(_70), &_x2c_match_capture)) { Var handle = _x2c_match_values[0];  return Var_list(handle);  break; } default: break;
     }
+
   }
-return NULL;
+  return NULL;
 }
 
 List retain_catch_handle(List rebuilt, List handle){

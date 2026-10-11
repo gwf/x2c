@@ -1137,97 +1137,78 @@ List try_catch_patterns(List patterns, List items){
 List try_catch_site(List frame, List clause){
   if(! _init_guard_) _file_init_();
   Macro site = _629;
-
   {
     List _x2c_match_expr = clause;
-    Var _x2c_match_values[4];
-  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 4 };
+    Var _x2c_match_values[4]; MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 4 };
+    switch(0){
+        default: ; static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(_647), &_x2c_match_capture)) { Var handle = _x2c_match_values[0]; Var state = _x2c_match_values[1]; Var arms = _x2c_match_values[2]; List patterns = Var_list(_x2c_match_values[3]); {
+        Var _x2c_match_value_0 = state;  Var _x2c_match_value_1 = arms; {
+          String state = Var_string(_x2c_match_value_0);  List arms = Var_list(_x2c_match_value_1); {
+            int count = List_len(arms), filtered = List_len(patterns);  String fallback = filtered < count ? int_str(filtered) : _648;  return Macro_apply(site, ({
+              Var _x2c_literal_part_4 = List_var(frame);  Var _x2c_literal_part_5 = handle;  Var _x2c_literal_part_6 = int_var(count);  Var _x2c_literal_part_7 = List_var(cons(_5, cons(_337, cons(List_var(cons(_339, cons(_337, cons(String_var(fallback), NULL)))), NULL))));  Var _x2c_literal_part_8 = List_var(cons(_5, cons(_337, cons(String_var(state), NULL))));  cons(_x2c_literal_part_4, cons(_x2c_literal_part_5, cons(_x2c_literal_part_6, cons(_x2c_literal_part_7, cons(_x2c_literal_part_8, cons(List_var(patterns), NULL))))));
+            }
+            ));
+          }
 
-    switch (0) {
-      default: ;  static MatchCaptureSite _x2c_match_site_0;  if (x2c_match_site_try_capture(& _x2c_match_site_0, _x2c_match_expr, List_var(_647), &_x2c_match_capture)) {Var handle = _x2c_match_values[0];  Var state = _x2c_match_values[1];  Var arms = _x2c_match_values[2];  List patterns = Var_list(_x2c_match_values[3]); {
-    Var _x2c_match_value_0 = state;  Var _x2c_match_value_1 = arms; {
-      String state = Var_string(_x2c_match_value_0);  List arms = Var_list(_x2c_match_value_1); {
-        int count = List_len(arms), filtered = List_len(patterns);  String fallback = filtered < count ? int_str(filtered) : _648;  return Macro_apply(site, ({
-          Var _x2c_literal_part_4 = List_var(frame);  Var _x2c_literal_part_5 = handle;  Var _x2c_literal_part_6 = int_var(count);  Var _x2c_literal_part_7 = List_var(cons(_5, cons(_337, cons(List_var(cons(_339, cons(_337, cons(String_var(fallback), NULL)))), NULL))));  Var _x2c_literal_part_8 = List_var(cons(_5, cons(_337, cons(String_var(state), NULL))));  cons(_x2c_literal_part_4, cons(_x2c_literal_part_5, cons(_x2c_literal_part_6, cons(_x2c_literal_part_7, cons(_x2c_literal_part_8, cons(List_var(patterns), NULL))))));
         }
-        ));
+
+      }
+       break; }
+    }
+
+  }
+  return NULL;
+}
+
+List try_landing(List frame, List clause, List exits){
+  if(! _init_guard_) _file_init_();  Macro landing = _940;  List otherwise = cons(_1, cons(_2, cons(List_var(cons(_3, cons(List_var(cons(_426, cons(List_var(cons(_10, cons(_942, cons(_156, cons(List_var(exits), NULL))))), _980))), NULL))), NULL))); {
+    List _x2c_match_expr = clause;  Var _x2c_match_values[2]; MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };  switch(0){
+        default: ; static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(_983), &_x2c_match_capture)) { Var handle = _x2c_match_values[0]; Var arms = _x2c_match_values[1];  return Macro_apply(landing, cons(List_var(frame), cons(handle, cons(List_var(otherwise), cons(arms, NULL)))));  break; }
+    }
+
+  }
+  return otherwise;
+}
+
+List try_exits_placement(List exits){
+  if(! _init_guard_) _file_init_();  Atom token = Atom_intern(_984); {
+    List _x2c_match_expr = exits;  Var _x2c_match_values[1]; MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };  switch(Var_symbol(car(_x2c_match_expr))){
+        case 244379323295050: ; static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(_989), &_x2c_match_capture)) { Var statements = _x2c_match_values[0];  return({
+        Atom _x2c_literal_part_9 = token;  Var _x2c_literal_part_10 = List_var(cons(List_var(cons(_990, cons(token, cons(statements, NULL)))), NULL));  cons(_985, cons(_992, cons(_x2c_literal_part_9, cons(_x2c_literal_part_10, NULL))));
+      }
+      );  break; } default: break;
+    }
+
+  }
+  return NULL;
+}
+
+static Var _try_finalizer_label(Var value, List * at){
+  Array pending = Array_update_n(Array_new(), 1, value), around = Array_update_n(Array_new(), 1, List_var((* at)));  Var found = Var_null();  while(! Var_truth(found) && Array_len(pending)){
+    Var current = Array_take_last(pending);  List here = Var_list(Array_take_last(around));  if(! Var_is_row(current, 9, 7, 4) || Var_is_nil(current)) continue;  List node = Var_list(current); {
+      List _x2c_match_expr = node;  Var _x2c_match_values[1]; MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };  switch(Var_symbol(car(_x2c_match_expr))){
+          case 458361162716: ; static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(_994), &_x2c_match_capture)) {continue;  break; } case 104: ; static MatchCaptureSite _x2c_match_site_1; if (x2c_match_site_try_capture(&_x2c_match_site_1, _x2c_match_expr, List_var(_998), &_x2c_match_capture)) { Var wrapped = _x2c_match_values[0]; {
+          Array_push(pending, wrapped);  Array_push(around, List_var(node));  continue;
+        }
+         break; } case 25235800: ; static MatchCaptureSite _x2c_match_site_2; if (x2c_match_site_try_capture(&_x2c_match_site_2, _x2c_match_expr, List_var(_1002), &_x2c_match_capture)) { Var name = _x2c_match_values[0]; {
+          found = name; (* at) = here;  continue;
+        }
+         break; } default: break;
+      }
+
+    }
+    {
+      Var child;  List _x2c_macro_object_2 = node;  List _x2c_macro_cursor_2 = _x2c_macro_object_2;  Var _x2c_macro_cursor_output_2;  while(List_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
+        child = _x2c_macro_cursor_output_2; {
+          Array_push(pending, child);  Array_push(around, List_var(here));
+        }
+
       }
 
     }
 
   }
-  break;
-}
-
-    }
-  }
-return NULL;
-}
-
-List try_landing(List frame, List clause, List exits){
-  if(! _init_guard_) _file_init_();  Macro landing = _940;  List otherwise = cons(_1, cons(_2, cons(List_var(cons(_3, cons(List_var(cons(_426, cons(List_var(cons(_10, cons(_942, cons(_156, cons(List_var(exits), NULL))))), _980))), NULL))), NULL)));
-  {
-    List _x2c_match_expr = clause;
-    Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
-    switch (0) {
-      default: ;  static MatchCaptureSite _x2c_match_site_1;  if (x2c_match_site_try_capture(& _x2c_match_site_1, _x2c_match_expr, List_var(_983), &_x2c_match_capture)) {Var handle = _x2c_match_values[0];  Var arms = _x2c_match_values[1];  return Macro_apply(landing, cons(List_var(frame), cons(handle, cons(List_var(otherwise), cons(arms, NULL)))));  break;
-}
-
-    }
-  }
-return otherwise;
-}
-
-List try_exits_placement(List exits){
-  if(! _init_guard_) _file_init_();  Atom token = Atom_intern(_984);
-  {
-    List _x2c_match_expr = exits;
-    Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
-    switch (Var_symbol(car(_x2c_match_expr))) {
-      case 244379323295050: ;  static MatchCaptureSite _x2c_match_site_2;  if (x2c_match_site_try_capture(& _x2c_match_site_2, _x2c_match_expr, List_var(_989), &_x2c_match_capture)) {Var statements = _x2c_match_values[0];  return({
-    Atom _x2c_literal_part_9 = token;  Var _x2c_literal_part_10 = List_var(cons(List_var(cons(_990, cons(token, cons(statements, NULL)))), NULL));  cons(_985, cons(_992, cons(_x2c_literal_part_9, cons(_x2c_literal_part_10, NULL))));
-  }
-  );  break;
-}
-default: break;
-    }
-  }
-return NULL;
-}
-
-static Var _try_finalizer_label(Var value, List * at){
-  Array pending = Array_update_n(Array_new(), 1, value), around = Array_update_n(Array_new(), 1, List_var((* at)));  Var found = Var_null();  while(! Var_truth(found) && Array_len(pending)){
-    Var current = Array_take_last(pending);  List here = Var_list(Array_take_last(around));  if(! Var_is_row(current, 9, 7, 4) || Var_is_nil(current)) continue;  List node = Var_list(current);
-  {
-    List _x2c_match_expr = node;
-    Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
-    switch (Var_symbol(car(_x2c_match_expr))) {
-      case 458361162716: ;  static MatchCaptureSite _x2c_match_site_3;  if (x2c_match_site_try_capture(& _x2c_match_site_3, _x2c_match_expr, List_var(_994), &_x2c_match_capture)) {continue;  break;
-  }
-  case 104: ;  static MatchCaptureSite _x2c_match_site_4;  if (x2c_match_site_try_capture(& _x2c_match_site_4, _x2c_match_expr, List_var(_998), &_x2c_match_capture)) {Var wrapped = _x2c_match_values[0]; {
-    Array_push(pending, wrapped);  Array_push(around, List_var(node));  continue;
-  }
-  break;
-}
-case 25235800: ;  static MatchCaptureSite _x2c_match_site_5;  if (x2c_match_site_try_capture(& _x2c_match_site_5, _x2c_match_expr, List_var(_1002), &_x2c_match_capture)) {Var name = _x2c_match_values[0]; {
-  found = name; (* at) = here;  continue;
-}
-break;
-}
-default: break;
-    }
-  }
-{
-  Var child;  List _x2c_macro_object_2 = node;  List _x2c_macro_cursor_2 = _x2c_macro_object_2;  Var _x2c_macro_cursor_output_2;  while(List_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
-    child = _x2c_macro_cursor_output_2; {
-      Array_push(pending, child);  Array_push(around, List_var(here));
-    }
-
-  }
-
-}
-}
-Array_free(pending);  Array_free(around);  return found;
+  Array_free(pending);  Array_free(around);  return found;
 }
 
 static List _try_exits(Atom frame, List handle, Atom finalizer){

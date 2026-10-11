@@ -65,19 +65,15 @@ List type_base_suffix(List);
 
 static String _delegate_type_name(Type type){
   List base = type_base_suffix(type);
-
   {
     List _x2c_match_expr = base;
-    Var _x2c_match_values[1];
-  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
-
-    switch (0) {
-      default: ;  static MatchCaptureSite _x2c_match_site_0;  if (x2c_match_site_try_capture(& _x2c_match_site_0, _x2c_match_expr, List_var(_35), &_x2c_match_capture)) {Var tag = _x2c_match_values[0];  return Var_str(tag);  break;
-}
-
+    Var _x2c_match_values[1]; MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
+    switch(0){
+        default: ; static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(_35), &_x2c_match_capture)) { Var tag = _x2c_match_values[0];  return Var_str(tag);  break; }
     }
+
   }
-return Var_str(List_car(base));
+  return Var_str(List_car(base));
 }
 
 static String _delegate_path(Type type, List fields, String member){

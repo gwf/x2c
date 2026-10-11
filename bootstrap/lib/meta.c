@@ -123,11 +123,11 @@ static const SymbolSet _base_keywords =(SymbolSet) "\001\000\000\000\015\000\000
 
 static const SymbolSet _type_qualifiers =(SymbolSet) "\001\000\000\000\003\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\000\003\001\000\000\000\350\164\157\000\000\000\000\000\350\110\222\316\042\001\000\000\012\113\064\260\147\001\000\000";
 
-static List _15, _14, _12, _11, _10, _9, _3;
+static List _3;
 
 static String _1, _0;
 
-static Var _19, _18, _17, _16, _13, _8, _7, _6, _5, _4, _2;
+static Var _7, _6, _5, _4, _2;
 
 static int _init_guard_ = 0;
 
@@ -143,22 +143,10 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _1 = String_new("\' must be a String: write %");
   _2 = List_var(NULL);
   _3 = cons(_2, NULL);
-  _4 = Symbol_var(437126);
-  _5 = Symbol_var(62054);
-  _6 = Atom_intern(String_new("?parameters"));
-  _7 = Symbol_var(1362954);
-  _8 = Symbol_var(806120);
-  _9 = cons(_8, NULL);
-  _10 = cons(_7, _9);
-  _11 = cons(_6, _10);
-  _12 = cons(_5, _11);
-  _13 = List_var(_12);
-  _14 = cons(_13, NULL);
-  _15 = cons(_4, _14);
-  _16 = Symbol_var(150408);
-  _17 = Symbol_var(33656922);
-  _18 = Symbol_var(13528008);
-  _19 = Symbol_var(1077021542);
+  _4 = Symbol_var(150408);
+  _5 = Symbol_var(33656922);
+  _6 = Symbol_var(13528008);
+  _7 = Symbol_var(1077021542);
 }
 
 List type_base_suffix(List type){
@@ -212,53 +200,48 @@ List type_declaration_parts(List type){
 }
 
 static Var _modifier_syntax(Var modifier){
-
   {
     List _x2c_match_expr = Var_list(modifier);
-    Var _x2c_match_values[1];
-  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
-
-    switch (Var_symbol(car(_x2c_match_expr))) {
-      case 437126: ;
-  { List _x2c_match_cursor;
-  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936762055558ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var parameters = _x2c_match_values[0];
-  {
-    Var _x2c_match_value_0 = parameters;
-    {
-      List parameters = Var_list(_x2c_match_value_0);
+    Var _x2c_match_values[1]; MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
+    switch(Var_symbol(car(_x2c_match_expr))){
+        case 437126: ; { List _x2c_match_cursor; if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936762055558ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) { Var parameters = _x2c_match_values[0];
       {
-        Array params = Array_new();
+        Var _x2c_match_value_0 = parameters;
         {
-          List parameter;
-          List _x2c_macro_object_1 = parameters;
-          List _x2c_macro_cursor_1 = _x2c_macro_object_1;
-          Var _x2c_macro_cursor_output_1;
-          while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
-            parameter = Var_list(_x2c_macro_cursor_output_1);
+          List parameters = Var_list(_x2c_match_value_0);
+          {
+            Array params = Array_new();
             {
-              List base, modifiers;
-              List _x2c_destructure_0 = type_declaration_parts(parameter);
-              base = Var_list(List_getindex(_x2c_destructure_0, 0));
-              modifiers = Var_list(List_getindex(_x2c_destructure_0, 1));
-              Array_push(params, List_var(({
-                Var _x2c_literal_part_3 = List_var(base);  Var _x2c_literal_part_4 = List_var(cons(_16, cons(_2, cons(List_var(modifiers), NULL))));  cons(_17, cons(_x2c_literal_part_3, cons(_x2c_literal_part_4, NULL)));
-              }
-              )));
-            }
+              List parameter;
+              List _x2c_macro_object_1 = parameters;
+              List _x2c_macro_cursor_1 = _x2c_macro_object_1;
+              Var _x2c_macro_cursor_output_1;
+              while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
+                parameter = Var_list(_x2c_macro_cursor_output_1);
+                {
+                  List base, modifiers;
+                  List _x2c_destructure_0 = type_declaration_parts(parameter);
+                  base = Var_list(List_getindex(_x2c_destructure_0, 0));
+                  modifiers = Var_list(List_getindex(_x2c_destructure_0, 1));
+                  Array_push(params, List_var(({
+                    Var _x2c_literal_part_3 = List_var(base);  Var _x2c_literal_part_4 = List_var(cons(_4, cons(_2, cons(List_var(modifiers), NULL))));  cons(_5, cons(_x2c_literal_part_3, cons(_x2c_literal_part_4, NULL)));
+                  }
+                  )));
+                }
 
+              }
+
+            }
+            return List_var(cons(_6, cons(List_var(cons(_7, List_append(Array_list_free(params), NULL))), NULL)));
           }
 
         }
-        return List_var(cons(_18, cons(List_var(cons(_19, List_append(Array_list_free(params), NULL))), NULL)));
+
       }
-
+       break; } } default: break;
     }
 
   }
-  break; } } default: break;
-
-    }
-  }
-return modifier;
+  return modifier;
 }
 

@@ -111,44 +111,25 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
 
 int _cases_label(List item){
   if(! _init_guard_) _file_init_();
-
   {
     List _x2c_match_expr = item;
     MatchCaptureBuffer _x2c_match_capture = { 0 };
-
-    switch (Var_symbol(car(_x2c_match_expr))) {
-      case 104: ;
-  static MatchCaptureSite _x2c_match_site_0;
-  if (x2c_match_site_try_capture(& _x2c_match_site_0, _x2c_match_expr, List_var(_8), &_x2c_match_capture)) {return 1;  break;
-}
-static MatchCaptureSite _x2c_match_site_1;  if (x2c_match_site_try_capture(& _x2c_match_site_1, _x2c_match_expr, List_var(_14), &_x2c_match_capture)) {return 1;  break;
-}
-default: break;
+    switch(Var_symbol(car(_x2c_match_expr))){
+        case 104: ; static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(_8), &_x2c_match_capture)) {return 1;  break; } static MatchCaptureSite _x2c_match_site_1; if (x2c_match_site_try_capture(&_x2c_match_site_1, _x2c_match_expr, List_var(_14), &_x2c_match_capture)) {return 1;  break; } default: break;
     }
+
   }
-return 0;
+  return 0;
 }
 
 int _cases_transfers(List item){
-  if(! _init_guard_) _file_init_();
-  {
-    List _x2c_match_expr = item;
-    MatchCaptureBuffer _x2c_match_capture = { 0 };
-    switch (Var_symbol(car(_x2c_match_expr))) {
-      case 104: ;  static MatchCaptureSite _x2c_match_site_2;  if (x2c_match_site_try_capture(& _x2c_match_site_2, _x2c_match_expr, List_var(_20), &_x2c_match_capture)) {return 1;  break;
-}
-static MatchCaptureSite _x2c_match_site_3;  if (x2c_match_site_try_capture(& _x2c_match_site_3, _x2c_match_expr, List_var(_26), &_x2c_match_capture)) {return 1;  break;
-}
-static MatchCaptureSite _x2c_match_site_4;  if (x2c_match_site_try_capture(& _x2c_match_site_4, _x2c_match_expr, List_var(_32), &_x2c_match_capture)) {return 1;  break;
-}
-static MatchCaptureSite _x2c_match_site_5;  if (x2c_match_site_try_capture(& _x2c_match_site_5, _x2c_match_expr, List_var(_39), &_x2c_match_capture)) {return 1;  break;
-}
-static MatchCaptureSite _x2c_match_site_6;  if (x2c_match_site_try_capture(& _x2c_match_site_6, _x2c_match_expr, List_var(_44), &_x2c_match_capture)) {return 1;  break;
-}
-default: break;
+  if(! _init_guard_) _file_init_(); {
+    List _x2c_match_expr = item;  MatchCaptureBuffer _x2c_match_capture = { 0 };  switch(Var_symbol(car(_x2c_match_expr))){
+        case 104: ; static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(_20), &_x2c_match_capture)) {return 1;  break; } static MatchCaptureSite _x2c_match_site_1; if (x2c_match_site_try_capture(&_x2c_match_site_1, _x2c_match_expr, List_var(_26), &_x2c_match_capture)) {return 1;  break; } static MatchCaptureSite _x2c_match_site_2; if (x2c_match_site_try_capture(&_x2c_match_site_2, _x2c_match_expr, List_var(_32), &_x2c_match_capture)) {return 1;  break; } static MatchCaptureSite _x2c_match_site_3; if (x2c_match_site_try_capture(&_x2c_match_site_3, _x2c_match_expr, List_var(_39), &_x2c_match_capture)) {return 1;  break; } static MatchCaptureSite _x2c_match_site_4; if (x2c_match_site_try_capture(&_x2c_match_site_4, _x2c_match_expr, List_var(_44), &_x2c_match_capture)) {return 1;  break; } default: break;
     }
+
   }
-return 0;
+  return 0;
 }
 
 static int List_truth(List);

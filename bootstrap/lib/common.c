@@ -795,17 +795,13 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
 }
 
 static Symbol _literal_tag(List tag){
-
   {
-    List _x2c_match_expr = tag;
-    Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
-    switch (Var_symbol(car(_x2c_match_expr))) {
-      case 377892: ;  static MatchCaptureSite _x2c_match_site_0;  if (x2c_match_site_try_capture(& _x2c_match_site_0, _x2c_match_expr, List_var(_11), &_x2c_match_capture)) {Var key = _x2c_match_values[0];  return Var_symbol(key);  break;
-}
-default: break;
+    List _x2c_match_expr = tag;  Var _x2c_match_values[1]; MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };  switch(Var_symbol(car(_x2c_match_expr))){
+        case 377892: ; static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(_11), &_x2c_match_capture)) { Var key = _x2c_match_values[0];  return Var_symbol(key);  break; } default: break;
     }
+
   }
-return 0;
+  return 0;
 }
 
 static int var_tag_top(List tag){
