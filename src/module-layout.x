@@ -779,6 +779,10 @@ Map prepare_module_layout_registry(Compiler c, List providers) {
   plan[%(projection-families)] = {};
   plan[%(projection-bodies)] = {};
   plan[%(projection-aliases)] = {};
+  foreach (String provider, providers) {
+    String path = c.canonical_path(provider);
+    plan[%(files $path)] = %();
+  }
   List details = c.declaration_detail_rows(providers);
   foreach (List row, details) {
     (Var kind, String path, List key, List syntax, int privacy) = row;
