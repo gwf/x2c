@@ -5189,7 +5189,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_8(void){
   _4569 = String_var(_4568);
   _4570 = String_new("lib/meta.x");
   _4571 = String_var(_4570);
-  _4572 = String_new("f39f98d7");
+  _4572 = String_new("4338f495");
   _4573 = String_var(_4572);
   _4574 = cons(_4573, NULL);
   _4575 = cons(_4571, _4574);
@@ -10238,7 +10238,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_18(void){
   _9588 = List_var(_9587);
   _9589 = String_new("src/transform.x");
   _9590 = String_var(_9589);
-  _9591 = String_new("b9262673");
+  _9591 = String_new("f434e77d");
   _9592 = String_var(_9591);
   _9593 = cons(_9592, NULL);
   _9594 = cons(_9590, _9593);
@@ -10350,7 +10350,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_18(void){
   _9700 = List_var(_9699);
   _9701 = String_new("src/meta-sdk.x");
   _9702 = String_var(_9701);
-  _9703 = String_new("1a905618");
+  _9703 = String_new("d493aca3");
   _9704 = String_var(_9703);
   _9705 = cons(_9704, NULL);
   _9706 = cons(_9702, _9705);

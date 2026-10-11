@@ -53,6 +53,8 @@ static List Compiler__shipped_lowering(Compiler c, Symbol point, Var kind, List 
 
 static Ast Compiler__shipped_statement(Compiler c, Ast ast, Symbol tag);
 
+static List Compiler__destructure_rule(Compiler c, List ast, Symbol tag);
+
 static Ast Compiler__default_node(Compiler c, Ast ast);
 
 static Ast Compiler__finish(Compiler c, Ast ast);
@@ -1302,7 +1304,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_1(void){
   _976 = cons(_975, NULL);
   _977 = cons(_414, _976);
   _978 = List_var(_977);
-  _979 = int_var(852);
+  _979 = int_var(877);
   _980 = cons(_979, NULL);
   _981 = cons(_420, _980);
   _982 = List_var(_981);
@@ -1310,7 +1312,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_1(void){
   _984 = cons(_983, NULL);
   _985 = cons(_425, _984);
   _986 = List_var(_985);
-  _987 = int_var(31846);
+  _987 = int_var(32731);
   _988 = cons(_987, NULL);
   _989 = cons(_433, _988);
   _990 = List_var(_989);
@@ -1423,7 +1425,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void){
   _1094 = cons(_1093, NULL);
   _1095 = cons(_382, _1094);
   _1096 = List_var(_1095);
-  _1097 = int_var(760);
+  _1097 = int_var(782);
   _1098 = cons(_1097, NULL);
   _1099 = cons(_420, _1098);
   _1100 = List_var(_1099);
@@ -1431,7 +1433,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void){
   _1102 = cons(_1101, NULL);
   _1103 = cons(_428, _1102);
   _1104 = List_var(_1103);
-  _1105 = int_var(28303);
+  _1105 = int_var(29043);
   _1106 = cons(_1105, NULL);
   _1107 = cons(_433, _1106);
   _1108 = List_var(_1107);
@@ -1521,11 +1523,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void){
   _1192 = cons(_1191, NULL);
   _1193 = cons(_382, _1192);
   _1194 = List_var(_1193);
-  _1195 = int_var(756);
+  _1195 = int_var(778);
   _1196 = cons(_1195, NULL);
   _1197 = cons(_420, _1196);
   _1198 = List_var(_1197);
-  _1199 = int_var(28236);
+  _1199 = int_var(28976);
   _1200 = cons(_1199, NULL);
   _1201 = cons(_433, _1200);
   _1202 = List_var(_1201);
@@ -1662,11 +1664,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void){
   _1333 = cons(_1332, NULL);
   _1334 = cons(_382, _1333);
   _1335 = List_var(_1334);
-  _1336 = int_var(751);
+  _1336 = int_var(773);
   _1337 = cons(_1336, NULL);
   _1338 = cons(_420, _1337);
   _1339 = List_var(_1338);
-  _1340 = int_var(28114);
+  _1340 = int_var(28854);
   _1341 = cons(_1340, NULL);
   _1342 = cons(_433, _1341);
   _1343 = List_var(_1342);
@@ -2725,7 +2727,10 @@ static Ast Compiler__step(Compiler c, Ast ast){
 #ifndef X2C_TRANSFORM_SOURCE
 static Ast Compiler__step_tag(Compiler c, Ast ast, Symbol tag){
   Ast next = ast;  switch(tag){
-    case 1139215899608 : case 2391080 : case 895740748108 : case 26416091224 : return ast;  case 377892 : return Compiler__expression_node(c, ast);  case 3313778 : case 1479708786 : case 26720 : case 1468512 : return Compiler__collection_literal(c, ast, tag);  case 199912 : next = Compiler__cast(c, ast);  break;  case 19800432 : next = Compiler__index(c, ast);  break;  case 228262 : case 101723016 : return Compiler__ordered_list(c, ast);  case 45156 : next = Compiler__to_var(c, Var_list(List_cadr(ast)));  break;  case 1316904858918 : return Compiler__interpolation(c, ast);  case 8932560010 : case 272600 : next = Compiler__declaration(c, ast);  break;  case 317060294872 : next = Compiler__destructure_declaration(c, ast);  break;  case 41184168 : next = Compiler__destructure_statement(c, ast);  break;  case 317060127196 : next = Compiler__destructure_value(c, ast);  break;  case 27369680 : return Compiler__shipped_statement(c, ast, tag);  case 8728932 : next = Compiler__defer_node(c, ast);  break;  case 1219800220 : next = Compiler__return(c, ast);  break;  case 37833930 : return Compiler__raise_node(c, ast);  case 1323933904 : next = Compiler__statement_rewrite(c, ast, tag);  break;  case 588 : case 48777994 : case 286 : case 13284 : next = Compiler__truthy(c, ast);  break;  case 199448 : next = Compiler__call(c, ast);  break;  case 992 : next = Compiler__operator(c, ast);  break;  case 35407540848 : next = Compiler__postfix(c, ast);  break;  default: return Compiler__default_node(c, ast);
+    case 1139215899608 : case 2391080 : case 895740748108 : case 26416091224 : return ast;  case 377892 : return Compiler__expression_node(c, ast);  case 3313778 : case 1479708786 : case 26720 : case 1468512 : return Compiler__collection_literal(c, ast, tag);  case 199912 : next = Compiler__cast(c, ast);  break;  case 19800432 : next = Compiler__index(c, ast);  break;  case 228262 : case 101723016 : return Compiler__ordered_list(c, ast);  case 45156 : next = Compiler__to_var(c, Var_list(List_cadr(ast)));  break;  case 1316904858918 : return Compiler__interpolation(c, ast);  case 8932560010 : case 272600 : next = Compiler__declaration(c, ast);  break;  case 317060294872 : case 41184168 : case 317060127196 :{
+      List ruled = Compiler__destructure_rule(c, ast, tag);  if(List_truth(ruled)) return ruled;  if(tag == 317060294872) next = Compiler__destructure_declaration(c, ast);  else if(tag == 41184168) next = Compiler__destructure_statement(c, ast);  else next = Compiler__destructure_value(c, ast);  break;
+    }
+    case 27369680 : return Compiler__shipped_statement(c, ast, tag);  case 8728932 : next = Compiler__defer_node(c, ast);  break;  case 1219800220 : next = Compiler__return(c, ast);  break;  case 37833930 : return Compiler__raise_node(c, ast);  case 1323933904 : next = Compiler__statement_rewrite(c, ast, tag);  break;  case 588 : case 48777994 : case 286 : case 13284 : next = Compiler__truthy(c, ast);  break;  case 199448 : next = Compiler__call(c, ast);  break;  case 992 : next = Compiler__operator(c, ast);  break;  case 35407540848 : next = Compiler__postfix(c, ast);  break;  default: return Compiler__default_node(c, ast);
   }
   if(! List_equal(next, ast)) return Compiler__step(c, next);  return Compiler__default_node(c, ast);
 }
@@ -2749,6 +2754,21 @@ static List Compiler__shipped_lowering(Compiler c, Symbol point, Var kind, List 
 #ifndef X2C_TRANSFORM_SOURCE
 static Ast Compiler__shipped_statement(Compiler c, Ast ast, Symbol tag){
   List lowered = Compiler__shipped_lowering(c, 948490, Symbol_var(tag), ast, AST_STATEMENT, List_type(c -> return_type), String_join(NULL, cons(String_var(Symbol_str(tag)), cons(String_var(_53), NULL))));  return List_truth(lowered) ? lowered : _55;
+}
+
+#endif
+#ifndef X2C_TRANSFORM_SOURCE
+static List Compiler__destructure_rule(Compiler c, List ast, Symbol tag){
+  if(! Map_truth(c -> rewrite_rules)) return NULL;  if(tag == 317060294872) return Compiler_lower_rewrite(c, 948490, Symbol_var(tag), ast, AST_BLOCK, List_type(c -> return_type), NULL);  if(tag == 41184168){
+    {
+      List _x2c_match_expr = ast; List _x2c_match_cursor, _x2c_match_cursor1, _x2c_match_cursor2;  switch(_x2c_match_expr ? _x2c_match_expr->car.u64 : 0){
+          case 9224497936802802600ULL: ;  _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497936802802600ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224497936761996324ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1 && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1 && Var_is(_x2c_match_cursor1->car, 806120) && (_x2c_match_cursor2 = Var_list(_x2c_match_cursor1->car), 1) && _x2c_match_cursor2 && _x2c_match_cursor2->car.u64 == 9224498253821745628ULL && (_x2c_match_cursor2 = _x2c_match_cursor2->cdr, 1) && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {return Compiler_lower_rewrite(c, 948490, Symbol_var(tag), ast, AST_STATEMENT, List_type(c -> return_type), NULL);  break; } default: break;
+      }
+
+    }
+    return NULL;
+  }
+  Type type = Var_type(Var_cadr(List_caddr(ast)));  List lowered = Compiler_lower_rewrite(c, 26416091224, Symbol_var(tag), cons(_22, cons(List_var(type), cons(List_var(ast), NULL))), AST_EXPRESSION, type, NULL);  return List_truth(lowered) ? Var_list(List_caddr(lowered)) : NULL;
 }
 
 #endif
@@ -3569,10 +3589,14 @@ static List Compiler__destructure_declaration(Compiler c, List ast){
 
 #endif
 #ifndef X2C_TRANSFORM_SOURCE
+List Compiler_rewrite(Compiler, Symbol, Var, List, AstPos, Type, Token);
 static List Compiler__lower_lambda_destructuring(Compiler c, List ast){
   if(! List_truth(ast)) return ast; {
     List _x2c_match_expr = ast; List _x2c_match_cursor;  switch(_x2c_match_expr ? _x2c_match_expr->car.u64 : 0){
-        case 9224498253821913304ULL: ;  _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224498253821913304ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1)) {return Compiler__destructure_declaration(c, ast);  break; } default: break;
+        case 9224498253821913304ULL: ;  _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224498253821913304ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1)) {{
+        List ruled = Map_truth(c -> rewrite_rules) ? Compiler_rewrite(c, 948490, Symbol_var(317060294872), ast, AST_BLOCK, List_type(c -> return_type), NULL) : NULL;  return List_truth(ruled) ? ruled : Compiler__destructure_declaration(c, ast);
+      }
+       break; } default: break;
     }
 
   }
@@ -3833,7 +3857,6 @@ static List Compiler__change(Compiler c, List ast, Symbol op, List arg, Type typ
 
 #endif
 #ifndef X2C_TRANSFORM_SOURCE
-List Compiler_rewrite(Compiler, Symbol, Var, List, AstPos, Type, Token);
 static List Compiler__dynamic(Compiler c, Symbol point, Type type, List operation){
   List kind = Var_equal(List_car(operation), Symbol_var(35407540848)) ? cons(_1714, cons(List_cadr(operation), _1721)) : cons(List_cadr(operation), _1721);  List rewritten = Compiler_rewrite(c, point, List_var(kind), cons(_22, cons(_1370, cons(List_var(operation), NULL))), AST_EXPRESSION, type, NULL);  return Var_list(List_truth(rewritten) ? List_caddr(rewritten) : List_var(operation));
 }
