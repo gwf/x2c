@@ -103,6 +103,8 @@ static void Layouts.require_type(
   while (type.is_array()) type = type.dereference().canonicalize();
   if (type.is_pointer() || type.is_function()) return;
   Type key = resolver.resolve_key(type);
+  List module_key = c.module_retry_key(key);
+  if (module_key) key = module_key;
   match (key)
     case %((!set ?kind (!or struct union enum)) ?name): {
       List family = %($kind $name);
