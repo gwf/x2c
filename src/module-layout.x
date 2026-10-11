@@ -5,6 +5,7 @@
 #include "ast-rewrite.x"
 #include "format.x"
 #include "generate.x"
+#include "collect.x"
 #include "utils.x"
 
 static typedef struct Layouts {
@@ -711,10 +712,19 @@ static List Layouts.mark_fields(
         declaration = %(declare ${prefix.append(replacement)}
           ${declaration.caddr()});
         field = Ast.rewrap_origin(field, declaration);
-      } else foreach (List row, declaration.caddr().list().cdr()) {
-        Type type = %(declare ${declaration.cadr()} (bindings $row))
-          .type_from_ast();
-        l.require_type(c, resolver, type, needed);
+      } else {
+        Map namespaces = declaration_type_namespaces(
+          declaration, resolver.unit_symbols());
+        foreach (List namespace, namespaces.keys()) {
+          String id = c.module_projection_namespace(namespace);
+          if (id) marked.push(
+            %(preproc "#pragma x2c_namespace_require $id"));
+        }
+        foreach (List row, declaration.caddr().list().cdr()) {
+          Type type = %(declare ${declaration.cadr()} (bindings $row))
+            .type_from_ast();
+          l.require_type(c, resolver, type, needed);
+        }
       }
     }
     foreach (List dependency, needed.keys()) {

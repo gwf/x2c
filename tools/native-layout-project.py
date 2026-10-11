@@ -25,6 +25,7 @@ class Region:
     demands: tuple[str, ...] = ()
     epoch: int = 0
     origins: tuple[str, ...] = ()
+    namespace_demands: tuple[str, ...] = ()
 
 class Packing:
     def __init__(self):
@@ -80,7 +81,7 @@ def extract(text, selected_edges=None):
                     lines.append(f'#line {origin_line + 1} {json.dumps(origin_file)}\n')
                 stack.append(dict(name=name, lines=lines,
                                   alignment=packing.alignment, pragmas=[],
-                                  children=[], demands=[], epoch=epoch, origins=set()))
+                                  children=[], demands=[], epoch=epoch, origins=set(), namespaces=[]))
             elif not stack or stack[-1]['name'] != name:
                 raise ProjectionError(f'unmatched region end: {name}')
             else:
@@ -88,7 +89,7 @@ def extract(text, selected_edges=None):
                 regions[name] = Region(name, ''.join(row['lines']),
                     row['alignment'], tuple(row['pragmas']),
                     tuple(row['children']), tuple(row['demands']), row['epoch'],
-                    tuple(sorted(row['origins'])))
+                    tuple(sorted(row['origins'])), tuple(row['namespaces']))
             origin_line += 1
             continue
         edge = re.fullmatch(r'\s*#\s*pragma\s+x2c_init_edge\s+(\w+)\s+(\w+)\s*', line)
@@ -100,6 +101,12 @@ def extract(text, selected_edges=None):
             if not stack:
                 raise ProjectionError('family demand outside declaration')
             stack[-1]['demands'].append(demand[1])
+            continue
+        namespace = re.fullmatch(r'\s*#\s*pragma\s+x2c_namespace_require\s+(\w+)\s*', line)
+        if namespace:
+            if not stack:
+                raise ProjectionError('namespace demand outside declaration')
+            stack[-1]['namespaces'].append(namespace[1])
             continue
         location = LINE.fullmatch(line.strip())
         if location:
@@ -240,13 +247,16 @@ def project(text, metadata, selected_edges=None, owner_streams=None):
         row, region = records[name], regions[name]
         dependencies = list(row.get('requires', []))
         defines = row.get('defines', [])
+        requirements = list(region.namespace_demands)
         for definition in defines:
-            for needed in (metadata.get('namespaceEdges') or {}).get(definition, []):
-                if needed in defines:
-                    continue
-                if needed not in namespaces:
-                    raise ProjectionError('missing selected namespace: ' + needed)
-                dependencies.append(namespaces[needed])
+            if not row.get('selectedNamespaces'):
+                requirements.extend((metadata.get('namespaceEdges') or {}).get(definition, []))
+        for needed in requirements:
+            if needed in defines:
+                continue
+            if needed not in namespaces:
+                raise ProjectionError('missing selected namespace: ' + needed)
+            dependencies.append(namespaces[needed])
         family = row.get('family')
         for needed in (*metadata.get('familyEdges', {}).get(family, []),
                        *region.demands):

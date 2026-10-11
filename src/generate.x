@@ -180,7 +180,8 @@ static List Compiler._original_type_namespace(Compiler c, List key) {
 static int Compiler._publishes_emitted_type(Compiler c, List key) =>
   c.publishes_type_family(c._original_type_namespace(key));
 
-static String Compiler._projection_namespace(Compiler c, List key) {
+/** Finds a collected namespace after reversing private emitted spelling. */
+String Compiler.module_projection_namespace(Compiler c, List key) {
   Map plan = c.module_layout_plan;
   if (!plan || !(%(namespace-definitions) in plan)) return NULL;
   String path = c.canonical_path(c.filename);
@@ -217,7 +218,7 @@ static String Compiler._projection_binding_namespace(
   }
   if (!key) return NULL;
   if (alias) key = %(typedef ${key.car()});
-  return c._projection_namespace(key);
+  return c.module_projection_namespace(key);
 }
 
 static Array Compiler._projection_definitions(Compiler c, List node) {
@@ -226,7 +227,7 @@ static Array Compiler._projection_definitions(Compiler c, List node) {
     Type type = base;
     match (type.base_type())
       case %((!set ?tag (!or struct union enum)) ?(String name) *): {
-        String id = c._projection_namespace(%($tag $name));
+        String id = c.module_projection_namespace(%($tag $name));
         if (id) definitions.push(id);
       }
     List declarators = kind == <function> ? %(
@@ -308,6 +309,11 @@ static List Compiler._projection_nodes(
     }
     Map record = {id: id, role: role, family: family,
       kind: node.car().str(), optional: Json.bool(1)};
+    match (node) case %((!or typedef declare) ?base ?): {
+      Type type = base;
+      match (type.base_type()) case %((!or struct union) *):
+        if (family) record["selectedNamespaces"] = Json.bool(1);
+    }
     if (family) {
       match (node) case %((!or typedef declare) ?base ?): {
         Type type = base;
