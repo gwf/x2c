@@ -543,6 +543,15 @@ static String Helper.native_closure(
     foreach (Var row, Json.parse(Path.read_text(receipt))) {
       int dependency = row.array()[0];
       String provider = h.owners[dependency - 1];
+      String name = row.array()[1];
+      failure = h.prepare_native(dependency);
+      if (failure) return failure;
+      if (h.readiness[provider] == 1) {
+        String available = %"${h.native_sources[dependency]}.available";
+        if (!Path.is_file(available) ||
+            !(name in Json.parse(Path.read_text(available))))
+          return %"native meta prerequisite cycle: $provider has no available definition of $name";
+      }
       if (!(provider in prerequisites)) prerequisites.push(provider);
       failure = h.native_closure(dependency, seen, providers, edges);
       if (failure) return failure;
@@ -599,7 +608,7 @@ static String Helper.base(Helper &h, int index) =>
 
 /* Removes what a parse left of the group at `base`. */
 static void _clear(String base) {
-  foreach (String suffix, %(".c" ".xnm" ".native" ".deps" ".failure")) {
+  foreach (String suffix, %(".c" ".xnm" ".native" ".available" ".deps" ".failure")) {
     String file = %"$base$suffix";
     if (Path.exists(file)) Path.remove_file(file);
   }

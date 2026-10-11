@@ -345,6 +345,28 @@ static List Compiler._native_prerequisites(Compiler c) {
   return rows.list_free();
 }
 
+/* Published body and object definitions differ from collected prototypes. */
+static List Compiler._native_available(Compiler c) {
+  Array names = [];
+  Var identity;
+  String name;
+  foreach (List unit, c._units()) {
+    if (_function_identity(unit, identity, name)) names.push(name);
+    else match (unit)
+      case %(declare ? (bindings *bindings)):
+        foreach (List declarator, bindings)
+          match (declarator) {
+            case %(op = (bind ?binding *) ?):
+              names.push(binding_identity_spelling(binding));
+            case %(bind ?binding *)
+              if (!unit.type_from_ast().is_function() &&
+                  !unit.cadr().list().type().is_extern()):
+              names.push(binding_identity_spelling(binding));
+          }
+  }
+  return names.list_free();
+}
+
 static int Compiler._prefix_value(Compiler c, String name) {
   foreach (List entry, c.meta_group)
     match (entry)
@@ -1094,6 +1116,7 @@ void Compiler.write_meta_build(Compiler c) {
     Path.write_text(%"$meta_build_directory/meta_group_$index.h", header);
   Path.write_text(%"$base.c", source);
   Path.write_text(%"$base.native", Var.json(c._native_prerequisites()));
+  Path.write_text(%"$base.available", Var.json(c._native_available()));
   for (int i = 4; i < code.len(); i += 2) {
     String filename = code[i], text = code[i + 1];
     if (filename.endswith(".xnm")) {
