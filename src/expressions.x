@@ -1136,7 +1136,9 @@ static List Resolve._source(Resolve &r, List content) {
 }
 
 static List Resolve._meta_call(Resolve &r) {
-  if (r.c.meta_body || r.c.macro_holes) return r.input;
+  if (r.c.meta_body || r.c.macro_holes ||
+      r.c.signature_only == SIGNATURE_DECLARATIONS)
+    return r.input;
   if (r.origin == r.c.meta_statement && r.c.peek(0) == <;>) return r.input;
   return r.c.evaluate_meta_expression(r.input, r.origin);
 }
@@ -1144,12 +1146,14 @@ static List Resolve._meta_call(Resolve &r) {
 /* An invocation expands where it is resolved, as the binder expands one,
    except in a template, whose expansion expands it. */
 static List Resolve._invocation(Resolve &r, List content) {
-  if (r.c.macro_holes) return r.input;
+  if (r.c.macro_holes || r.c.signature_only == SIGNATURE_DECLARATIONS)
+    return r.input;
   return r.c.bind_syntax(content, AST_EXPRESSION, r.c.return_type);
 }
 
 static List Resolve._macro_slot(Resolve &r, List content) {
-  if (r.c.macro_holes) return r.input;
+  if (r.c.macro_holes || r.c.signature_only == SIGNATURE_DECLARATIONS)
+    return r.input;
   Var value = r.c.evaluate_macro_slot(content);
   match (value)
     case %(!set ?expression (expr ? ?)):

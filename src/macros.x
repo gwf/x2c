@@ -1353,7 +1353,8 @@ void Compiler.evaluate_declaration_effect(
 List Compiler.parse_macro_lisp_expression(Compiler c) {
   Token invocation = c.token;
   String form = c._lisp_form();
-  if (c.macro_holes) return %(expr (<macro-expr>) (macro-slot 0 $form));
+  if (c.macro_holes || c.signature_only == SIGNATURE_DECLARATIONS)
+    return %(expr (<macro-expr>) (macro-slot 0 $form));
   if (!c.collect_protocols) c.run_declaration_effects();
   c.ensure_macro_lisp();
   Var value = c._eval_string(form, invocation);

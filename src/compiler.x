@@ -22,6 +22,11 @@ static keyword loop $private.loop;
 #include "sourceview.x"
 #include "meta.x"
 
+enum {
+  SIGNATURE_HASHES = 1,
+  SIGNATURE_DECLARATIONS = 2,
+};
+
 /** Names the positioned diagnostic store routed by a `Compiler`. */
 typedef struct Diagnostics *Diagnostics;
 

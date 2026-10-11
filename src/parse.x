@@ -466,7 +466,7 @@ static List Compiler._declaration_form(Compiler c, int skip_body) {
   int prefix = skip_body && c.meta_build && !native &&
                !c.signature_only && !c.macro_holes;
   $let(c.shallow, prefix && meta ? 0 : c.shallow || c.public_bodies)
-  $let(c.macro_holes, c.signature_only && !c.macro_holes
+  $let(c.macro_holes, c.signature_only == SIGNATURE_HASHES && !c.macro_holes
          ? {} : c.macro_holes)
     decl = c.parse_declaration_row();
   int body = c.peek(0) == <"{"> || c._at_function_arrow();

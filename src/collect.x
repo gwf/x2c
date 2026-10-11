@@ -218,7 +218,7 @@ static void Compiler._collect_module_signatures(
   Compiler signatures = Compiler.new_shared(c);
   defer c.close_child(signatures);
   signatures.filename = canonical;
-  signatures.signature_only = 1;
+  signatures.signature_only = SIGNATURE_DECLARATIONS;
   signatures.interface_provider = 1;
   signatures.source_facts = 0;
   signatures.source_declarations = {};
@@ -235,7 +235,7 @@ static void Compiler._collect_module_signatures(
   foreach (Var (key, value), declarations) {
     if (value is <list>)
       match (value) case %((!or declaration-source compile-time
-                              package-import project-meta) *): continue;
+                              package-import) *): continue;
     ordinary[key] = value;
   }
   /* Signatures do not replace source metadata from an actual declaration. */
@@ -1137,7 +1137,7 @@ static List Compiler._meta_provider_entry(Compiler c, String canonical) {
   List entry = c._entry(canonical);
   if (!entry) {
     DiagnosticsHold hold = c.diagnostics.hold();
-    $let(c.meta_build, 1) $let(c.signature_only, 1)
+    $let(c.meta_build, 1) $let(c.signature_only, SIGNATURE_HASHES)
     $let(c.recovery_depth, c.recovery_depth + 1) {
       try entry = c._walk_cold(canonical, canonical, {}, {});
       catch %(malformed *): entry = NULL;

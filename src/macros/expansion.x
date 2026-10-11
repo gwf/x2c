@@ -926,7 +926,7 @@ static void Compiler._check_position(
    bindings, enumerators, statics, or generated-name state behind. */
 static List Compiler._invoke_definition(
   Compiler c, List definition, Token invocation, AstPos position, int open) {
-  int deferred = !!c.macro_holes;
+  int deferred = !!c.macro_holes || c.signature_only == SIGNATURE_DECLARATIONS;
   SymTxn transaction = c.begin_semantic_transaction();
   defer transaction.rollback();
   List input = c._invocation_arguments(definition, invocation);
@@ -985,7 +985,7 @@ static List Compiler._decorate(
   Decoration d = {
     .c = c, .definition = definition, .invocation = invocation,
     .position = position, .kind = definition.assoc(<target>), .open = open};
-  int deferred = !!c.macro_holes;
+  int deferred = !!c.macro_holes || c.signature_only == SIGNATURE_DECLARATIONS;
   if (!d.on_body() && _result_kind(definition) != _position(position).kind)
     d.misplaced();
   SymTxn transaction = c.begin_semantic_transaction();
