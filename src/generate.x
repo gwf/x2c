@@ -357,8 +357,8 @@ static List Compiler._projection_nodes(
       if (resolved) {
         String path = c.canonical_path(resolved);
         Map supplies = c._projection_include_supplies(path);
-        definitions = supplies["names"];
-        record["suppliesFamilies"] = supplies["families"];
+        definitions = supplies[<names>];
+        record["suppliesFamilies"] = supplies[<families>];
       }
     }
     record["defines"] = definitions;
