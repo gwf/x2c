@@ -2674,6 +2674,15 @@ List Compiler.rewrite(
   Type expected, Token site) =>
   c._rewrite(point, kind, source, position, expected, site, 0);
 
+/** Matches registered patterns for the statement `source`, which the
+    transform has lowered, then binds the first replacement as
+    `Compiler.rewrite` does. Binding keeps the source, and each part of it
+    the replacement holds, as lowered. */
+List Compiler.rewrite_lowered(
+  Compiler c, Symbol point, Var kind, List source, AstPos position,
+  Type expected, Token site) =>
+  c._rewrite(point, kind, source, position, expected, site, -1);
+
 /** Binds and lowers a replacement while its rule remains active. The
     source expressions the replacement holds lower outside the rule, so a
     nested use of the rule applies again. A statement replacement, or a
@@ -2689,6 +2698,8 @@ List Compiler.lower_rewrite(
   Type expected, Token site) =>
   c._rewrite(point, kind, source, position, expected, site, 1);
 
+/* `lower` is 1 to lower the replacement, 0 to bind it, and -1 to bind it
+   around a lowered source. */
 static List Compiler._rewrite(
   Compiler c, Symbol point, Var kind, List source, AstPos position,
   Type expected, Token site, int lower) {
@@ -2708,8 +2719,9 @@ static List Compiler._rewrite(
         (result is <list> && (!result.list() || result.list() === source)))
       continue;
     $let(c.active_rewrites, cons(rule, c.active_rewrites)) {
-      if (!lower)
-        return c._bound(point, kind, source, result, position, expected, site);
+      if (lower <= 0)
+        return c._bound(
+          point, kind, source, result, position, expected, site, lower);
       if (position == AST_UNIT) return c._lowered_definition(result);
       int held = point == <node>;
       match (result) case %(code-value "lowered" *): held = 1;
@@ -2744,31 +2756,46 @@ static void _held_parts(List source, Symbol point, Array found) {
 /* A replacement bound without lowering. A statement of the rule's kind
    that a statement replacement holds, such as its source, and that is not
    a part its source held, takes the rules after this one now, so lowering
-   never offers it to this rule again. */
+   never offers it to this rule again. With `lower` -1 the source is
+   lowered, so binding keeps it and the parts of it the replacement holds. */
 static List Compiler._bound(
   Compiler c, Symbol point, Var kind, List source, Var result,
-  AstPos position, Type expected, Token site) {
-  List bound = c.bind_syntax(result, position, expected);
-  if (point != <node>) return bound;
+  AstPos position, Type expected, Token site, int lower) {
+  if (point != <node>) return c.bind_syntax(result, position, expected);
   Array parts = $auto([]);
   _held_parts(source, point, parts);
+  if (lower) result = _kept_lowered(result, source, parts);
+  List bound = c.bind_syntax(result, position, expected);
   struct SlotWatch held = {parts.list()};
-  return c._bound_held(&held, kind, bound, position, expected, site);
+  return c._bound_held(&held, kind, bound, position, expected, site, lower);
+}
+
+/* `result` with `source` and each of its `parts` that it holds marked as
+   lowered code, which binding keeps as it is. A lowered carrier binds as it
+   is already. */
+static Var _kept_lowered(Var result, List source, Array parts) {
+  match (result) case %(code-value "lowered" *): return result;
+  Map kept = $auto({});
+  kept[(void *) source] = %(code-value "lowered" $source ());
+  foreach (List part, parts)
+    kept[(void *) part] = %(code-value "lowered" $part ());
+  return ast_replace_nodes(result, kept);
 }
 
 static Var Compiler._bound_held(
   Compiler c, SlotWatch held, Symbol kind, Var ast, AstPos position,
-  Type expected, Token site) {
+  Type expected, Token site, int lower) {
   if (!ast_contains_head(ast, kind) || held.slot(ast) >= 0) return ast;
   List node = ast;
   if (node.car() == kind) {
     List rewritten =
-      c._rewrite(<node>, kind, node, position, expected, site, 0);
+      c._rewrite(<node>, kind, node, position, expected, site, lower);
     return rewritten ? rewritten : node;
   }
   Var child;
   $ast.rewrite_children(
-    node, child, c._bound_held(held, kind, child, position, expected, site));
+    node, child,
+    c._bound_held(held, kind, child, position, expected, site, lower));
 }
 
 /* A replacement definition binds at file scope and lowers as written,

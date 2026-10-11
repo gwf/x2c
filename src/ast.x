@@ -218,6 +218,37 @@ int ast_contains_head(Var value, Symbol kind) {
   return 0;
 }
 
+/** Returns `root` with each list beneath it that `replaced` maps, keyed
+    by its address, swapped for its value, and adds each rebuilt ancestor
+    to `replaced`. Only the ancestors of a swapped list are new, so `root`
+    returns itself when nothing beneath it is swapped. The walk keeps deep
+    expression chains off the C stack. */
+Var ast_replace_nodes(Var root, Map replaced) {
+  Array levels = $auto([]);
+  List node;
+  $ast.walk(root, node) {
+    if (_replaced_node(node, replaced) !== node) continue;
+    levels.push(node);
+  }
+  while (levels.len()) {
+    node = levels.take_last();
+    List rebuilt = _replaced_children(node, replaced);
+    if (rebuilt !== node) replaced[(void *) node] = rebuilt;
+  }
+  return _replaced_node(root, replaced);
+}
+
+static Var _replaced_node(Var node, Map replaced) {
+  Var swapped;
+  return node is <list> && replaced.try_get((void *) node.list(), swapped)
+    ? swapped : node;
+}
+
+static List _replaced_children(List node, Map replaced) {
+  Var child;
+  $ast.rewrite_children(node, child, _replaced_node(child, replaced));
+}
+
 /** Records in `referenced` the identity of every binding `node` names. */
 void ast_collect_binding_references(Var node, Map referenced) {
   if (node is not <list>) return;

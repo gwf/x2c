@@ -34,7 +34,6 @@ static typedef struct Walk {
   Array regions;
   int break_stop, continue_stop, origin;
   Map labels;
-  Type return_type;
 } Walk;
 
 /* The locals of one function that a transfer may leave stale: the names to
@@ -61,40 +60,15 @@ static Array _expression_blocks(List expression) {
 /* Rebuild only the ancestors of changed blocks, from the leaves upward.
    Keys are node addresses: structural hashing would revisit the same spine. */
 static List _rewrite_expression(List expression, Func rewrite) {
-  Array levels = $auto([]), blocks = $auto([]);
+  Array blocks = $auto(_expression_blocks(expression));
   Map changed = $auto({});
-  List node;
-  $ast.walk(expression, node) {
-    if (node.car() == <block>) {
-      blocks.push(node);
-      continue;
-    }
-    levels.push(node);
-  }
   // The worklist visits siblings last first; initializers run in source order.
   while (blocks.len()) {
-    node = blocks.take_last();
-    List replacement = rewrite(node);
-    if (replacement != node) changed[(void *)node] = replacement;
+    List block = blocks.take_last();
+    List replacement = rewrite(block);
+    if (replacement != block) changed[(void *)block] = replacement;
   }
-  if (!changed.len()) return expression;
-  while (levels.len()) {
-    node = levels.take_last();
-    List replacement = _expression_children(node, changed);
-    if (replacement != node) changed[(void *)node] = replacement;
-  }
-  return _expression_child(expression, changed);
-}
-
-static List _expression_child(List child, Map changed) {
-  Var replacement;
-  return changed.try_get((void *)child, replacement) ? replacement.list()
-                                                   : child;
-}
-
-static List _expression_children(List node, Map changed) {
-  Var child;
-  $ast.rewrite_children(node, child, _expression_child(child, changed));
+  return changed.len() ? ast_replace_nodes(expression, changed) : expression;
 }
 
 /* Whether a statement expression in `body`, before its regions lower,
@@ -134,33 +108,38 @@ List Compiler.lower_cleanup(Compiler c, List node) {
 }
 
 /* Each function walks on its own: no loop, switch, or region spans a
-   function boundary, including a lambda body lifted into a sibling. */
+   function boundary, including a lambda body lifted into a sibling. A
+   `return` converts to the function's declared result, including one that
+   a rule's replacement for a `try` writes. */
 static List Compiler._lower_function(Compiler c, List node) {
   match (node)
     case %(function ?type ?bindings ?body): {
       List declaration = %(declare $type (bindings $bindings));
-      Walk w = {
-        .c = c, .regions = [], .labels = {},
-        .return_type = cdr(declaration.type_from_ast()).type().declared()
-      };
-      Map runtime = {};
-      body = c._static_regions(body, runtime);
-      w.collect_labels(body, NULL);
-      Preserve p = {
-        .c = c, .names = {}, .holders = {}, .pointers = {}, .escaped = {}
-      };
-      p.collect(body);
-      List rewritten = w.rewrite(body);
-      if (p.names.len() || p.escaped.len()) {
-        p.expression_landings = _expression_holds_landing(body);
-        rewritten = p.rewrite(rewritten);
-        bindings = p.rewrite(bindings);
-        rewritten = p.escape_parameters(rewritten, bindings);
-      }
-      w.regions.free();
-      return %(function $type $bindings $rewritten);
+      $let(c.return_type, declared_return(declaration))
+        return c._lowered_function(type, bindings, body);
     }
   return node;
+}
+
+static List Compiler._lowered_function(
+  Compiler c, List type, List bindings, List body) {
+  Walk w = {.c = c, .regions = [], .labels = {}};
+  Map runtime = {};
+  body = c._static_regions(body, runtime);
+  w.collect_labels(body, NULL);
+  Preserve p = {
+    .c = c, .names = {}, .holders = {}, .pointers = {}, .escaped = {}
+  };
+  p.collect(body);
+  List rewritten = w.rewrite(body);
+  if (p.names.len() || p.escaped.len()) {
+    p.expression_landings = _expression_holds_landing(body);
+    rewritten = p.rewrite(rewritten);
+    bindings = p.rewrite(bindings);
+    rewritten = p.escape_parameters(rewritten, bindings);
+  }
+  w.regions.free();
+  return %(function $type $bindings $rewritten);
 }
 
 // static initializers
@@ -198,10 +177,11 @@ static List Compiler._static_regions(Compiler c, List ast, Map runtime) {
   $ast.rewrite_children(ast, child, c._static_regions(child, runtime));
 }
 
-/* A `try` takes its statement rule's replacement. Landing rows and ordinary
-   replacements both pass through static-region processing. */
+/* A `try` takes its statement rule's replacement, which holds its lowered
+   parts as they are. Landing rows and ordinary replacements both pass
+   through static-region processing. */
 static List Compiler._landing_form(Compiler c, List node, Map runtime) {
-  List form = c.rewrite(
+  List form = c.rewrite_lowered(
     <node>, <try>, node, AST_STATEMENT, c.return_type, NULL);
   match (form) case %(landing ?code ?rows): {
     Array parts = [];
@@ -508,7 +488,7 @@ static List Walk._lower_return(Walk &w, List node, List expression) {
    state the expression read. */
 static List Walk._return_value(Walk &w, List expression, List cleanup) {
   List binding = w.c._region_binding("return_value");
-  Type type = w.return_type;
+  Type type = w.c.return_type;
   /* The declarator carries the type's pointer and array modifiers, so the
      saved value declares the way the function's result is spelled. */
   List (base, mods) = type.parts();
