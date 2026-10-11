@@ -458,7 +458,7 @@ assembly, and the rule driver, with every language feature a file under
 | raise | statement; delivered in wave 1, simplification follows | 200 | 416 |
 | collection literals and literal order | literal, by head; delivered in wave 1 | 290 | many |
 | destructuring | statement, plus the function pre-pass | 330 | few |
-| string interpolation | literal `segments`; prepared replacements carry the cost | 200 | 730 |
+| string interpolation | literal `segments`; delivered in wave 2 | 200 | 730 |
 | truthiness, getindex, dynamic operators | unary, binary, access; delivered in wave 1 | 410 | 620 |
 | lambda lowering | function family; function-entry and unit-support placements | 1,500 | 586 |
 | protocols: declarations, conformance, owners, adapters | unit declaration marks; unit placements | 1,850 | 153 |
@@ -467,18 +467,17 @@ Runtime static locals and class defaults stay in the kernel; the log of
 2026-10-10 records why. `match` moves from the research list to the table
 once `plans/match-component.md` is accepted.
 
-Kernel deletions no feature blocks: the twelve feature fields on `Compiler`;
-the translator-call overhead in the driver (the second match and the per-call
-Lisp session setup, about a third of a rewrite's cost); and the
-`function-entry` and `before-statement` placements, designed but without a
-client until lambdas and destructuring land.
+Kernel deletions no feature blocks: the `function-entry` and
+`before-statement` placements, designed but without a client until lambdas
+and destructuring land. The wave 2 audit found no deletable `Compiler` field
+and no per-call Lisp session setup left in the driver; the prepared
+replacement template and fill steps are the remaining driver cost.
 
 ### Open, needing research before a decision
 
-- `match`: 776 sites; the emitter writes arm tests as C text, the fastest
-  form we have. A component must return lowered code and a landing form for
-  the arm barrier, and the static-pattern lowering was removed with the
-  salvage. Whether it can meet 12.4 M per use is the question.
+- `match`: delivered in wave 2 as `src/component-match.x` per
+  `plans/match-component.md`; verbatim C text in a lowered carrier is now a
+  documented kernel service.
 - Kernel lowerings in the component form: the try and defer templates, the
   `Func` call construct-and-recognize pair, wrapper synthesis, and scope cells
   build AST by hand. Rewriting them as quotations needs the open-template
@@ -548,6 +547,55 @@ client until lambdas and destructuring land.
   needs a documented verbatim-C-text emitter rule, `Code.pattern_value`,
   `x2c_fresh_binding`, match as a rewrite point, and lowered results that
   skip the prepared walk.
+- 2026-10-10, wave 2 (held for review on `kernel/wave2-integration`): three
+  workers from 9805f3c2, integrated as one batch.
+  - `match` is `src/component-match.x` per `plans/match-component.md`, in
+    two moves. Move 1 ports the emitter: kernel -340 (emit.x match section
+    and templates, transform.x `_match_cases`/`_match_records`/`matchcases`,
+    compiler.x flat-pattern helpers, cleanup.x `matchcases`), shared
+    services +38, component 266 lines, net -30. Move 2 tests static
+    patterns in place with nested `if` tests: component 392 lines, +126
+    against the plan's estimate of about 65; the extra is explicit pending
+    stacks instead of recursion, rollback when a pattern leaves the nested
+    subset, and declaring cursors and the buffer only when used. The one
+    SDK addition is `Code.pattern_value`; the plan's fresh-binding
+    operation was not needed because the `_x2c_match_*` names are scoped to
+    the match's block. Translation per use: W3 4.63 M -> 4.81 M (move 1)
+    -> 4.26 M (move 2); W4 12.32 M -> 10.98 M -> 8.95 M; self-translation
+    of expressions.x 24.66 G -> 24.71 G -> 22.66 G. Runtime: W3 1.39 s ->
+    0.15 s; W4 21.5 ns -> 6.3 ns per match. The compiler's own C has 1,011
+    nested-test arms, 329 static Match sites, 3 dynamic, 75 macro-valued.
+  - String interpolation is `src/component-interpolation.x`, 32 lines, on
+    `$rewrite(%(expr ("String") (segments *)))`; the kernel lost a net 20
+    lines (the segment lowering helpers and the recursive cons builder) and
+    keeps the one-constant cache shortcut, the String conversion of
+    insertions, and the lifting of ordering declarations. Chains longer
+    than 128 cells use `List_list_n` through `_ordered_list`, which also
+    removes the old nesting-depth failure near 256 elements. The join is a
+    typed quotation of `String.join`; the verbatim-text form (byte-identical
+    C) is commit e99a8fe6 on `kernel/interpolation`. Workload of 1000
+    interpolations: 7.61 G -> 6.90 G.
+  - Kernel deletions: no `Compiler` field could go; every field named by
+    the earlier count has a live reader (defer's `needs_exception`, the
+    literal cache's `runtime_literals`/`id_keys`/`key_ids`, protocol and
+    lambda state that has not migrated, match parse state, the driver's own
+    rows, the two primitives' rows). The driver's per-call Lisp session
+    setup was already gone; the trim joins library paths once per process,
+    drops an empty Map per call, sends lowered results past the template
+    step, and collects slot sources in one walk: bracket read 544 K -> 526 K
+    per use, raise 1,294 K -> 1,258 K, byte-identical C. The largest
+    remaining driver cost is the prepared-replacement template and fill
+    (about 28% of the driver on bracket reads).
+  - Defects found, open: a prelude component whose rule is lost during
+    collection lowers its form to nothing without a diagnostic (`String s
+    =;` observed); `tools/gen-linked-meta.sh` copies a public translator
+    that calls a static helper even when the translator has a runtime form,
+    a duplicate symbol at link; `$switched(?, ?)` with two anonymous holes
+    never matches in a rule; a switch rule whose replacement holds a new
+    `switch` recurses forever because the transform lowers the replacement
+    twice (`rewrite-string-switch` depends on the second pass); a user
+    `$rewrite($matched)` returning a quotation around `$node` does not see
+    matches nested inside it.
 - 2026-10-10, facts learned: `function-entry` placement is parse-time, so
   lambda cells need a transform-time entry placement before lambdas move; a
   plain `make build` after editing a shipped component leaves a degraded
