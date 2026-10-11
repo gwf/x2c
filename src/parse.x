@@ -549,7 +549,7 @@ static NativePrefixBody *Compiler._retain_native_prefix_objects(
   Array initializers = [];
   while (c.native_prefix_pending && c.native_prefix_pending.len()) {
     NativePrefixBody *pending = c.native_prefix_pending.last().pointer();
-    if (pending->kind != 2) break;
+    if (pending->kind != 2 && pending->kind != 3) break;
     initializers.unshift(c.native_prefix_pending.take_last());
   }
   c._retain_native_prefix_body(declaration, NULL, first);
@@ -564,14 +564,20 @@ static List Compiler._bind_native_prefix_objects(
   Map initialized = {};
   foreach (Var slice, pending->initializers) {
     NativePrefixBody *source = slice.pointer();
-    c.token = source->body;
+    if (source->kind == 3) {
+      match (source->declaration) case %(declare ? (bindings ?bind)):
+        initialized[bind.car() == <op> ? bind.caddr().cadr() : bind.cadr()] = bind;
+      continue;
+    }
+    c.token = source->body ? source->body : source->end;
     match (source->declaration)
       case %(declare ?type (bindings ?bind)):
         $let(c.macros, source->macros)
         $let(c.kw_aliases, source->aliases)
         $let(c.object_macros, source->objects)
         $let(c.origin, source->origin)
-          initialized[bind.cadr()] = c._initialized(type, bind, source->first);
+          initialized[bind.cadr()] = source->body
+            ? c._initialized(type, bind, source->first) : bind;
   }
   Array declarations = [];
   match (pending->declaration)
@@ -583,6 +589,37 @@ static List Compiler._bind_native_prefix_objects(
         %(declare $type (bindings @{declarations.list_free()})), NULL, pending->first);
     }
   return pending->declaration;
+}
+
+static List _native_prefix_new_objects(List node, Array initializers) {
+  Map published = {};
+  foreach (Var slice, initializers) {
+    NativePrefixBody *source = slice.pointer();
+    if (source->kind != 3) continue;
+    match (source->declaration) case %(declare ? (bindings ?bind)):
+      published[bind.car() == <op> ? bind.caddr().cadr() : bind.cadr()] = 1;
+  }
+  match (node) case %(declare ?type (bindings *bindings)): {
+    Array remaining = [];
+    foreach (List bind, bindings) {
+      List identity = bind.car() == <op> ? bind.caddr().cadr() : bind.cadr();
+      if (!(identity in published)) remaining.push(bind);
+    }
+    return remaining.len()
+      ? %(declare $type (bindings @{remaining.list_free()})) : NULL;
+  }
+  return node;
+}
+
+static List Compiler._bind_native_prefix_slice(
+  Compiler c, NativePrefixBody *pending) {
+  List declaration = pending->declaration;
+  if (pending->body)
+    match (declaration) case %(declare ?type (bindings ?bind)):
+      declaration = %(declare $type
+        (bindings ${c._initialized(type, bind, pending->first)}));
+  c.token = pending->end;
+  return c._declared(declaration, NULL, pending->first);
 }
 
 /** Binds already-collected bodies once through the ordinary function parser. */
@@ -598,15 +635,15 @@ void Compiler.bind_native_meta_prefix(Compiler c) {
   c.placements = [];
   while (count-- > 0) {
     NativePrefixBody *pending = c.native_prefix_pending.shift().pointer();
-    if (pending->kind == 2) {
-      c.native_prefix_pending.unshift(Var.new(<p48>, pending));
-      break;
+    if (pending->kind == 3) {
+      c.native_prefix_pending.push(Var.new(<p48>, pending));
+      continue;
     }
     Token current = c.token;
     SymScope params = c.params;
     Array braces = c.braces;
     defer { c.token = current; c.params = params; c.braces = braces; }
-    c.token = pending->body;
+    c.token = pending->body ? pending->body : pending->end;
     c.params = pending->params;
     c.braces = braces.copy();
     List node;
@@ -622,9 +659,18 @@ void Compiler.bind_native_meta_prefix(Compiler c) {
     $let(c.shallow, 0)
     $let(c.capture_unit, 1)
       node = pending->kind == 1 ? c._bind_native_prefix_objects(pending)
+        : pending->kind == 2 ? c._bind_native_prefix_slice(pending)
         : c._defined(pending->declaration, pending->meta, 0, pending->first);
     if (!c.unit_nodes) c.unit_nodes = [];
-    c.unit_nodes.push(node);
+    List emitted = pending->kind == 1
+      ? _native_prefix_new_objects(node, pending->initializers) : node;
+    if (emitted) c.unit_nodes.push(emitted);
+    if (pending->kind == 2) {
+      pending->kind = 3;
+      pending->declaration = node;
+      c.native_prefix_pending.push(Var.new(<p48>, pending));
+      continue;
+    }
     $let(c.source_module, pending->module)
       c.retain_native_meta_source(node, pending->meta ? pending->meta : pending->first,
         c.token, pending->meta != NULL);
@@ -2147,6 +2193,10 @@ static List Compiler._declarator_init(
     %(declare $type (bindings $bind)).type_from_ast().is_function();
   if (!c.in_proto && !function_arrow && c.test(<=>))
     return c._initialized(type, bind, origin);
+  if (c.meta_build && c.shallow && !c.capture_unit &&
+      !c.signature_only && !c.macro_holes && !context &&
+      c.sym.at_file_scope() && !%(declare $type (bindings $bind)).type_from_ast().is_function())
+    c._retain_native_prefix_initializer(type, bind, origin, NULL, c.token);
   return bind;
 }
 
