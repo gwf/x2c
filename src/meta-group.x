@@ -689,8 +689,10 @@ static Map Compiler._roots(Compiler c, Array ordered) {
       }
       case %(function ?fn *): {
         ast_collect_binding_references(fn, reached);
-        if (_function_identity(fn, identity, name) && !(identity in present))
+        if (_function_identity(fn, identity, name) && !(identity in present)) {
           ordered.push(fn);
+          present[identity] = 1;
+        }
         reached[identity] = 1;
       }
     }
