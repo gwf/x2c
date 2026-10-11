@@ -14,12 +14,18 @@
 
 static String x2c
 
-/* Captures whole dumps first, so a compiler failure stops the check. */
+/* Captures whole dumps first, so a compiler failure stops the check. The
+   prelude itself, lib/x2c.x, is skipped: the live mode checks units against
+   the prelude's symbols, it owns no conformance rows, and its cpp-mode
+   parse does not expand the unit macros its included files rely on. */
 static String _dump(List mode):
   String dump = ""
   foreach String units in %("lib/*.x" "src/*.x"):
-    List sources = Path.glob(units)
-    dump += %($x2c translate @mode --dump-conformance @sources).job().output()
+    Array sources = []
+    foreach String source in Path.glob(units):
+      if source != "lib/x2c.x": sources.push(source)
+    List batch = sources.list_free()
+    dump += %($x2c translate @mode --dump-conformance @batch).job().output()
   return dump
 
 static String _owned(String dump):

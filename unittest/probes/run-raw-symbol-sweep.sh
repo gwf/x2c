@@ -93,6 +93,10 @@ for phases in "$ROOT"/unittest/compiler-fixtures/*.phases; do
   fi
 done
 
+exclusions["$ROOT/lib/x2c.x"]=$(
+  printf '%s' "the prelude itself: CPP symbol modes check units against its" \
+    " symbols and do not expand the unit macros its included files rely on"
+)
 exclusions["$ROOT/unittest/compiler-fixtures/meta-job-lifetime.x"]=$(
   printf '%s' "embeds a compile-time process id, so no two translations match"
 )

@@ -853,6 +853,16 @@ replacement template and fill steps are the remaining driver cost.
   that, `$(defun native.scalar.list ...)` fails compile-time Lisp evaluation
   in lib/x2c.x only. The prelude has failed in the cpp modes at every
   revision checked; it owns no conformance rows.
+- 2026-10-11, the prelude leaves the cpp-mode proofs (Gary's decision):
+  `tools/check-conformance-coherence` and the raw-symbol sweep skip
+  lib/x2c.x. The live and cpp symbol modes check a unit against the
+  prelude's symbols, so checking the prelude against itself has no meaning;
+  it owns no conformance rows; and its cpp-mode parse does not expand the
+  unit macros its included files rely on (a static `ErrorRegion` from
+  `$error.private.types()` is unknown, and a `$(defun ...)` from
+  native-scalar-types.x fails compile-time Lisp evaluation in that unit).
+  Fixing that chain would change what the cpp-mode shallow parse collects
+  for every unit; it is recorded here as the known gap instead.
 - 2026-10-10, facts learned: `function-entry` placement is parse-time, so
   lambda cells need a transform-time entry placement before lambdas move; a
   plain `make build` after editing a shipped component leaves a degraded
