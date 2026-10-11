@@ -545,7 +545,9 @@ static Array Compiler._units(Compiler c) {
   c._source_order(ordered, lib);
   Map reached = c._roots(ordered);
   _close(ordered, reached);
-  return _reachable(ordered, reached);
+  Array selected = _reachable(ordered, reached);
+  if (c.meta_build) c._required_provider_headers(selected);
+  return selected;
 }
 
 /* The runtime prelude declares more than `x2c.h` includes, and a body can
@@ -575,17 +577,31 @@ static Array Compiler._runtime_includes(Compiler c, String lib) {
 static void Compiler._source_order(Compiler c, Array ordered, String lib) {
   Map placeholders = c._placeholders();
   foreach (Var unit, c.unit_nodes) {
-    match (unit) case %(module-members ?(List members)): {
-      if (c.meta_build)
-        foreach (String member, members)
-          c._provider_include(
-            ordered,
-            c.canonical_path(Path.join(Path.dirname(c.filename), member)));
-      continue;
-    }
+    match (unit) case %(module-members ?): continue;
     Var node = c._group_include(unit, lib);
     if (node is not void) ordered.push(_uninitialized(node, placeholders));
   }
+}
+
+/* Native binding prerequisites and type interfaces select headers separately.
+   Membership alone does not require a future provider's implementation. */
+static void Compiler._required_provider_headers(Compiler c, Array units) {
+  Map providers = {};
+  foreach (List row, c._native_reference_rows(units))
+    foreach (Var (path, index), meta_build_tables)
+      if (row.car() == index) providers[path] = 1;
+  Map types = declaration_type_namespaces(units.list(), c.sym.unit_symbols());
+  foreach (Var key, types.keys()) {
+    List owner = c.sym.get_exact(%("declaration-file" $key));
+    if (owner) providers[c.canonical_path(home_absolute_path(owner.cadr()))] = 1;
+  }
+  Array headers = [];
+  foreach (String path, providers.keys())
+    if (path != c.canonical_path(c.filename))
+      c._provider_include(headers, path);
+  int after = _after_directives(units);
+  foreach (List header, headers)
+    if (!(header in units)) units.insert(after++, header);
 }
 
 /* The values the project meta build's parse put in place of calls left for
