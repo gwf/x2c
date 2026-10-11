@@ -372,11 +372,11 @@ appended to the unit.
 Cleanup lowering completes each function after its body is normalized. A
 `try` first takes the landing form the shipped try component answers, an
 ordinary statement rewrite registered in `src/component-try.x`. A program's
-rule on `try` applies here as well, and binding its replacement keeps the
-parts of the `try`, which are already lowered, as they are. The pass then
-assigns a name to the runtime record of every `defer` region and landing
-frame, builds the statements that leave each region, and runs them wherever
-control leaves it:
+rule on `try` applies here as well. Binding and lowering its replacement
+keep the parts of the `try`, which are already lowered, as they are. The
+pass then assigns a name to the runtime record of every `defer` region and
+landing frame, builds the statements that leave each region, and runs them
+wherever control leaves it:
 the region's own end, a `return` -- after saving the value, since cleanup may
 change what the expression read -- a `break` or `continue` that leaves the
 construct that bounds it, and an outward `goto`. The pass rejects a jump into

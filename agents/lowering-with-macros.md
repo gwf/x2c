@@ -54,9 +54,10 @@ The component registers its translator for both forms. `$rewrite` files the
 patterns under the statement family keyed by the `try` head, and the cleanup
 walk applies the rule to each `try` before it collects regions. A program's
 rule on `try` runs there too, after the transform has lowered the parts of
-the `try`, so binding a replacement keeps each part it holds as it is
-(`Compiler.rewrite_lowered`), and a `return` the replacement writes converts
-to the function's declared result.
+the `try`. Binding and lowering the replacement keep each part it holds as
+it is (`Compiler.rewrite_lowered` and `Compiler.lower_replacement`), so no
+statement rule sees a part twice. A `return` that the replacement writes
+converts to the function's declared result.
 
 ```x2c
 $rewrite($caught)

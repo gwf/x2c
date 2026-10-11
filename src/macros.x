@@ -2683,6 +2683,17 @@ List Compiler.rewrite_lowered(
   Type expected, Token site) =>
   c._rewrite(point, kind, source, position, expected, site, -1);
 
+/** Lowers `replacement`, which `Compiler.rewrite_lowered` bound for the
+    lowered statement `source`, and keeps each part of `source` it holds as
+    it is, so no statement rule is offered that part again. */
+List Compiler.lower_replacement(Compiler c, List replacement, List source) {
+  Array parts = $auto([]);
+  _held_parts(source, <node>, parts);
+  struct SlotWatch kept = {parts.list(), [], []};
+  kept.kept = 1;
+  $let(c.slot_watch, &kept) return c.normalize(replacement);
+}
+
 /** Binds and lowers a replacement while its rule remains active. The
     source expressions the replacement holds lower outside the rule, so a
     nested use of the rule applies again. A statement replacement, or a
@@ -2858,12 +2869,13 @@ static typedef struct Effects {
     within another's has that one as its `parent`, whose source it may hold
     as well. A shipped rule's lowered carrier, and any replacement lowered
     within one, is `shipped`: its own statements are not source, so no
-    user statement rule sees them, while the values it watches are. */
+    user statement rule sees them, while the values it watches are. A watch
+    whose values are lowered already has them `kept` as they are. */
 struct SlotWatch {
   List values;
   Array outputs, order;
   Effects inner;
-  int repeated, prepares, shipped;
+  int repeated, prepares, shipped, kept;
   List outer;
   SlotWatch parent;
 };
@@ -3135,6 +3147,7 @@ Ast Compiler.watched_step(Compiler c, Ast ast) {
   int slot = watch.slot(ast);
   if (slot < 0) return NULL;
   while (owner.parent && owner.parent.slot(ast) >= 0) owner = owner.parent;
+  if (owner.kept) return ast;
   Effects before = c._effects();
   Ast lowered;
   $let(c.slot_watch, owner.parent) $let(c.active_rewrites, owner.outer)

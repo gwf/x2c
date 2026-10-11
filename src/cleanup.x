@@ -178,8 +178,8 @@ static List Compiler._static_regions(Compiler c, List ast, Map runtime) {
 }
 
 /* A `try` takes its statement rule's replacement, which holds its lowered
-   parts as they are. Landing rows and ordinary replacements both pass
-   through static-region processing. */
+   parts as they are and lowers only the rest. Landing rows and ordinary
+   replacements both pass through static-region processing. */
 static List Compiler._landing_form(Compiler c, List node, Map runtime) {
   List form = c.rewrite_lowered(
     <node>, <try>, node, AST_STATEMENT, c.return_type, NULL);
@@ -193,7 +193,8 @@ static List Compiler._landing_form(Compiler c, List node, Map runtime) {
       }
     return %(landing $code ${parts.list_free()});
   }
-  return form ? c._static_regions(c.normalize(form), runtime) : node;
+  if (!form) return node;
+  return c._static_regions(c.lower_replacement(form, node), runtime);
 }
 
 /* The pending initializer and the emitter share one cleanup record. Its
