@@ -162,6 +162,9 @@ def cases():
                             'int early(void) => early_impl();\n'
                             '#include "settings.h"\n'
                             'module typedef struct Inner {NativeWord word;} Inner;\n'),
+            # Ordinary bodies follow declarations/directives in generated C.
+            # Public inline bodies above retain their authored position.
+            "main.x": '#include "box.x"\nint main(void) => answer() == 124 ? 0 : 1;\n',
         }
         yield "value_layout_native_header_" + visibility + "_body_order", function_state, options, None
         yield "ordinary_native_header_" + visibility + "_body_order", ordinary(function_state), {
