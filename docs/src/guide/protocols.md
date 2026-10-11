@@ -168,6 +168,13 @@ and any participant methods needed to determine associated types. Put the
 adoption beside its converters. A shared protocol module is suitable only
 when it already includes these declarations.
 
+A unit that includes the declaring unit uses the conformance the declaring
+unit resolved. A participant method that only the including unit can see,
+such as its own `P.member` definition, does not change how that member
+resolves. The declaring unit's interface carries the conformance. A unit
+that collects the declaring unit's source because no current interface
+exists resolves the adoption from what it sees.
+
 The runtime keeps built-in protocol bodies in `lib/protocols.x` and native
 protocols and adoptions beside the participant typedef. User modules have no
 required filename. A fully public native adoption emits aliases in the header;

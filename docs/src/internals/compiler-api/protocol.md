@@ -47,7 +47,7 @@ its `discard` member may release what it owns before the enclosing scope
 ends. Returns null when no selected argument type has a `discard` member,
 or an ordinary pointer or aggregate result may borrow an argument.
 
-Source: `src/protocol.x:2223`
+Source: `src/protocol.x:2356`
 
 <a id="Compiler.dump_conformance"></a>
 #### Compiler.dump_conformance
@@ -59,7 +59,7 @@ Rows are ordered by participant and protocol and identify whether each
 adoption is owned by this unit, so prelude and live symbol modes can be
 compared.
 
-Source: `src/protocol.x:1817`
+Source: `src/protocol.x:1950`
 
 <a id="Compiler.forward_parameters"></a>
 #### Compiler.forward_parameters
@@ -70,7 +70,7 @@ Returns `(declarations arguments)` for a helper that forwards its
 parameters of `types`: each declaration names a fresh parameter `a0`,
 `a1`, ..., and each argument reads it.
 
-Source: `src/protocol.x:2113`
+Source: `src/protocol.x:2246`
 
 <a id="Compiler.generate_protocol_adapters"></a>
 #### Compiler.generate_protocol_adapters
@@ -81,10 +81,11 @@ Generates adapters and descriptor registration for resolved conformances.
 Native aliases are inserted at the participant's inferred public or
 private boundary. Each other conformance whose forward converter the
 unit defines is presented to the rule on the `conform` head, whose
-code joins the unit's pending support. Returns `ast` with native
-insertions applied.
+code joins the unit's pending support. The external conformances the
+unit declares are first recorded in its interface. Returns `ast` with
+native insertions applied.
 
-Source: `src/protocol.x:2306`
+Source: `src/protocol.x:2440`
 
 <a id="Compiler.install_generated_protocol_symbols"></a>
 #### Compiler.install_generated_protocol_symbols
@@ -94,7 +95,7 @@ Source: `src/protocol.x:2306`
 Publishes external native alias and ordinary adapter signatures.
 Protocols must already be resolved in the active symbol table.
 
-Source: `src/protocol.x:2333`
+Source: `src/protocol.x:2479`
 
 <a id="Compiler.native_protocol_alias"></a>
 #### Compiler.native_protocol_alias
@@ -104,7 +105,7 @@ Source: `src/protocol.x:2333`
 Reports whether a generated member names a native protocol host function.
 Its defining header supplies the alias instead of a C prototype.
 
-Source: `src/protocol.x:2369`
+Source: `src/protocol.x:2516`
 
 <a id="Compiler.parse_protocol_declaration"></a>
 #### Compiler.parse_protocol_declaration
@@ -118,7 +119,7 @@ for later binding; shallow parsing publishes only when protocol collection
 is enabled and otherwise returns the uninstalled node. A leading `meta`
 makes an adoption's witnesses available to compile-time code.
 
-Source: `src/protocol.x:474`
+Source: `src/protocol.x:476`
 
 <a id="Compiler.protocol_discard_helper"></a>
 #### Compiler.protocol_discard_helper
@@ -127,7 +128,7 @@ Source: `src/protocol.x:474`
 
 The `discard_helper` for `participant`'s protocol `member`.
 
-Source: `src/protocol.x:2249`
+Source: `src/protocol.x:2382`
 
 <a id="Compiler.protocol_member_names"></a>
 #### Compiler.protocol_member_names
@@ -137,7 +138,7 @@ Source: `src/protocol.x:2249`
 Returns unique member spellings from the participant's visible adopted
 conformances. Resolution remains responsible for selecting a binding.
 
-Source: `src/protocol.x:1760`
+Source: `src/protocol.x:1893`
 
 <a id="Compiler.protocol_members_for"></a>
 #### Compiler.protocol_members_for
@@ -149,7 +150,7 @@ Lookup canonicalizes the participant and may use the nearest adopted
 typedef ancestor. Native conformances install their generated bindings
 before the cached conformance row is returned.
 
-Source: `src/protocol.x:1677`
+Source: `src/protocol.x:1809`
 
 <a id="Compiler.protocol_rejects_direct_member"></a>
 #### Compiler.protocol_rejects_direct_member
@@ -160,7 +161,7 @@ Reports whether conformance supersedes an ambient direct member.
 The answer is cached for the canonical participant and includes the first
 visible adopted ancestor that declares the member.
 
-Source: `src/protocol.x:1783`
+Source: `src/protocol.x:1916`
 
 <a id="Compiler.protocol_update_helper"></a>
 #### Compiler.protocol_update_helper
@@ -173,7 +174,7 @@ A matching helper is emitted once into the unit's pending support;
 `postfix` selects whether it returns the old or stored value. Returns null
 when the member cannot implement this update shape.
 
-Source: `src/protocol.x:2144`
+Source: `src/protocol.x:2277`
 
 <a id="Compiler.publish_protocol_node"></a>
 #### Compiler.publish_protocol_node
@@ -187,7 +188,7 @@ decisions and returns the canonical published node. Generated contexts may
 also retain that node in `Sym` for replay. A `(meta-protocol ADOPTION)`
 node publishes its adoption and marks it for compile-time code.
 
-Source: `src/protocol.x:684`
+Source: `src/protocol.x:686`
 
 <a id="Compiler.rebuild_protocols"></a>
 #### Compiler.rebuild_protocols
@@ -196,10 +197,11 @@ Source: `src/protocol.x:684`
 
 Rebuilds the per-unit protocol and adoption registries from `symbols`.
 Existing rows, helper decisions, and lookup caches are discarded; a null
-map leaves those registries empty. Conformance reset and resolution belong
-to `resolve_protocols`.
+map leaves those registries empty. The conformance rows included
+interfaces recorded are kept for reuse. Conformance reset and resolution
+belong to `resolve_protocols`.
 
-Source: `src/protocol.x:2623`
+Source: `src/protocol.x:2771`
 
 <a id="Compiler.record_source_typedef"></a>
 #### Compiler.record_source_typedef
@@ -209,7 +211,7 @@ Source: `src/protocol.x:2623`
 Remembers a source typedef's declaration and visibility, which native
 alias insertion reads for its participant.
 
-Source: `src/protocol.x:2547`
+Source: `src/protocol.x:2694`
 
 <a id="Compiler.resolve_protocol_member"></a>
 #### Compiler.resolve_protocol_member
@@ -222,7 +224,7 @@ null when no eligible resolved member exists; positive and negative
 results are cached. Inside the selected implementation itself the result
 is null, so the member's own body keeps the native operation.
 
-Source: `src/protocol.x:1883`
+Source: `src/protocol.x:2016`
 
 <a id="Compiler.resolve_protocols"></a>
 #### Compiler.resolve_protocols
@@ -231,9 +233,11 @@ Source: `src/protocol.x:1883`
 
 Resolves every visible adoption into the current conformance registry.
 Resolution starts from an empty registry; diagnostics are located only for
-adoptions owned by the current translation unit.
+adoptions owned by the current translation unit. An adoption another
+unit declared and recorded keeps that conformance, which is installed
+when it is first used.
 
-Source: `src/protocol.x:982`
+Source: `src/protocol.x:986`
 
 <a id="Compiler.reverse_converter_spelling"></a>
 #### Compiler.reverse_converter_spelling
@@ -247,7 +251,7 @@ the package prefix sits at the front of the derived binding instead of
 inside it. The split is keyed on a known package because a foreign
 header may spell `__` in a type name.
 
-Source: `src/protocol.x:431`
+Source: `src/protocol.x:433`
 
 <a id="Compiler.wrapper_function"></a>
 #### Compiler.wrapper_function
@@ -259,7 +263,7 @@ unit. `result` is the storage class and result type, so static, inline
 and external helpers share it; `params` are the parameter declarations,
 and `body` its lowered statements.
 
-Source: `src/protocol.x:2103`
+Source: `src/protocol.x:2236`
 
 ## Design notes
 
@@ -268,4 +272,6 @@ declarations, keeps their rows in per-unit registries, resolves each
 adoption into a conformance, answers member and operator lookups, and
 generates the adapters a conformance needs. Registries are rebuilt per
 translation unit; a static row is visible only when its canonical source
-path is the current unit.
+path is the current unit. The unit that declares an external adoption
+resolves it and records the conformance in its interface, and a unit
+that includes that interface reuses the recorded conformance.

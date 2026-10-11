@@ -125,10 +125,11 @@ Public functions:
 `Compiler.name_meta_provider_bindings`, `Compiler.publishes_typedef`,
 `Compiler.publishes_type_family`, `Compiler.inline_type_dependencies`,
 `Compiler.publish_inline_types`, `Compiler.record_generated_symbol`,
-`Compiler.collect_package`, `Compiler.replay_package_imports`,
-`Compiler.included_compile_time_effects`, `Compiler.install_included_effects`,
-`interface_configure`, `interface_prelude`, `interface_text`,
-`Compiler.linked_prelude_records`, `collect_forget_provisional_entries`
+`Compiler.record_interface_rows`, `Compiler.collect_package`,
+`Compiler.replay_package_imports`, `Compiler.included_compile_time_effects`,
+`Compiler.install_included_effects`, `interface_configure`,
+`interface_prelude`, `interface_text`, `Compiler.linked_prelude_records`,
+`collect_forget_provisional_entries`
 
 ### [src/compiler.x](../src/compiler.x)
 

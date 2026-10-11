@@ -2039,7 +2039,9 @@ Participation must be declared; conversion names and matching typedefs do not
 imply it. The compiler then determines the adoption's visibility. An adoption
 resolves in the unit that contains it, so the protocol, participant, required
 converters, native targets, and constraining participant members must be
-visible there. Ordinary runtime protocol bodies under `lib/` belong in
+visible there. A unit that includes it reuses that conformance from the
+declaring unit's interface; members visible only to the including unit do
+not change it. Ordinary runtime protocol bodies under `lib/` belong in
 `lib/protocols.x`; native declarations and their adoptions sit beside the
 participant typedef.
 

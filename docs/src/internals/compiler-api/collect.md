@@ -39,6 +39,7 @@ Source-ordered shallow symbol collection and replay.
 | [`Compiler.publishes_type_family`](#Compiler.publishes_type_family) | Reports whether this unit's interface publishes the type `family`. |
 | [`Compiler.publishes_typedef`](#Compiler.publishes_typedef) | Reports whether this unit's selected interface publishes `name`. |
 | [`Compiler.record_generated_symbol`](#Compiler.record_generated_symbol) | Records one generated public callable in the declaration map that the current file's collected entry contributes, which is the map its interface publishes. |
+| [`Compiler.record_interface_rows`](#Compiler.record_interface_rows) | Adds `rows` to the declaration map that the current file's interface publishes, as `record_generated_symbol` does. |
 | [`Compiler.replay_package_imports`](#Compiler.replay_package_imports) | Replays package imports and public compile-time definitions in source order. |
 | [`Compiler.runtime_function_declarations`](#Compiler.runtime_function_declarations) | The runtime umbrella includes each listed module's generated header. |
 
@@ -52,7 +53,7 @@ Drops the entries collected without declaration defaults while the shared
 compile-time session was filled, or by a project meta build. Call once
 that session is published, and after the meta build's parses.
 
-Source: `src/collect.x:2097`
+Source: `src/collect.x:2120`
 
 #### collect_resolve_include
 
@@ -83,7 +84,7 @@ stage directory when it runs from `<home>/builds/`, otherwise under the
 home. A `cold` process reads no interface and still writes its own. Call
 it before opening any translation unit's Context.
 
-Source: `src/collect.x:1696`
+Source: `src/collect.x:1719`
 
 #### interface_prelude
 
@@ -93,7 +94,7 @@ Returns the path of the first prelude interface this compiler wrote, or
 NULL when there is none or the compiler's identity is unknown. Its
 source hashes are not checked.
 
-Source: `src/collect.x:1912`
+Source: `src/collect.x:1935`
 
 #### interface_text
 
@@ -105,7 +106,7 @@ identity is unknown, since no compiler could replay that interface. A
 contribution that the interface grammar cannot spell is reported as an
 `emit` diagnostic.
 
-Source: `src/collect.x:1934`
+Source: `src/collect.x:1957`
 
 #### is_prelude_source
 
@@ -140,7 +141,7 @@ protocol rows enter the current symbol state, and dependencies enter the
 importing compiler. Replay also merges recorded function definitions.
 `token` locates lookup and public-surface errors.
 
-Source: `src/collect.x:1372`
+Source: `src/collect.x:1394`
 
 <a id="Compiler.collect_symbols"></a>
 #### Compiler.collect_symbols
@@ -228,7 +229,7 @@ The ordered cache walk counts each file once and groups effects by the
 canonical path of the unit's direct include. The parser installs those
 effects when it reaches that include.
 
-Source: `src/collect.x:1604`
+Source: `src/collect.x:1627`
 
 <a id="Compiler.inline_type_dependencies"></a>
 #### Compiler.inline_type_dependencies
@@ -247,7 +248,7 @@ Source: `src/collect.x:1188`
 Installs the definitions of each include among the directives before
 the cursor.
 
-Source: `src/collect.x:1649`
+Source: `src/collect.x:1672`
 
 <a id="Compiler.linked_meta_definitions_current"></a>
 #### Compiler.linked_meta_definitions_current
@@ -281,7 +282,7 @@ the records hold this compiler's collection rather than a table linked
 into it; the unit's own entries for them are restored afterwards. A
 record the interface grammar cannot spell is left out.
 
-Source: `src/collect.x:2036`
+Source: `src/collect.x:2059`
 
 <a id="Compiler.meta_provider_hashes"></a>
 #### Compiler.meta_provider_hashes
@@ -341,7 +342,18 @@ current file's collected entry contributes, which is the map its
 interface publishes. A file without a collected declaration map records
 nothing. The cache retains `signature`.
 
-Source: `src/collect.x:1294`
+Source: `src/collect.x:1305`
+
+<a id="Compiler.record_interface_rows"></a>
+#### Compiler.record_interface_rows
+
+`void Compiler.record_interface_rows(Compiler c, Map rows)`
+
+Adds `rows` to the declaration map that the current file's interface
+publishes, as `record_generated_symbol` does. The cache retains each
+key and value.
+
+Source: `src/collect.x:1323`
 
 <a id="Compiler.replay_package_imports"></a>
 #### Compiler.replay_package_imports
@@ -353,7 +365,7 @@ order. The shadow borrows the unit's macro state and package registries.
 The full parse collects effects for the include line and leaves the
 unit's own definitions at their source sites.
 
-Source: `src/collect.x:1540`
+Source: `src/collect.x:1563`
 
 <a id="Compiler.runtime_function_declarations"></a>
 #### Compiler.runtime_function_declarations

@@ -226,7 +226,16 @@ macro, Lisp, and embedded-text files the walk read with their hashes. Each
 declaration map holds its public rows: nonstatic declarations and complete
 type families needed by public declarations. Source-position rows also retain
 public macro and keyword definitions, Lisp effects, and provider meta-function
-identities. Cold collection and interface replay use the same ordered parts,
+identities. A translated unit's map also records each ordinary external
+conformance whose adoption it declares, as `(conformance BASE PARTICIPANT
+FORWARD REVERSE (bindings (NAME TYPE)...) (MEMBER STATUS SOURCE)...)`
+keyed by base and participant. It lists each type variable's binding and
+each member that did not resolve as `no-member`; the expected and template
+types follow from the protocol record. A unit that replays the map installs
+that conformance when it first uses it, instead of resolving the adoption.
+A cold walk has no such row, so the including unit then resolves the
+adoption itself. Cold collection and interface replay use the same ordered
+parts,
 while the full parser installs included compile-time definitions at their
 include positions. Macro names become visible immediately; their templates
 are decoded into the current unit only on first use. The existing semantic
