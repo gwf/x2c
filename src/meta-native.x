@@ -193,10 +193,12 @@ void Compiler.install_collected_meta_function(
 static void Compiler._install_stub(
   Compiler c, String name, Type type, String provider, Token marker) {
   String context = %"$name\n${provider ? provider : ""}";
+  List signature = c.func_signature(type);
+  signature.try_own();
   try c.macro_lisp.bind(
     name,
     Func.new_context(
-      _meta_stub, c.func_signature(type),
+      _meta_stub, signature,
       (char *) context, context.len() + 1));
   catch %(?code *detail): {
     List cause = cons(code, detail);
