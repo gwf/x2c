@@ -1649,6 +1649,12 @@ static int Compiler._attribute_since(Compiler c, Token first, Array marks) {
 List Compiler.parse_fields(Compiler c, List context) {
   Array fields = [];
   loop {
+    if (c.token != c.directives_taken) {
+      List directives = c.leading_preproc();
+      c.note_preprocessor_macros(directives);
+      foreach (List directive, directives) fields.push(directive);
+    }
+    if (c.peek(0) == <"}">) return fields.list_free();
     int delegated = c.test(<delegate>);
     List field = delegated
       ? c._field(context, 1) : c.parse_field(context);
@@ -1657,7 +1663,6 @@ List Compiler.parse_fields(Compiler c, List context) {
         foreach (Var row, rows) fields.push(row);
       default: fields.push(field);
     }
-    if (c.peek(0) == <"}">) return fields.list_free();
   }
 }
 
@@ -1759,8 +1764,7 @@ static List Compiler._record_body(Compiler c, String name, Token start) {
   Symbol tag = c.peek(0) == <union> ? <union> : <struct>;
   if (c.peek(0) != <"{">) c.next();
   c.expect(<"{">);
-  List fields = c.peek(0) == <"}">
-              ? NULL : c.parse_fields(%($tag $name));
+  List fields = c.parse_fields(%($tag $name));
   c.expect(<"}">);
   return c.macro_holes ? %($tag $name (fields @fields))
                        : c._publish_aggregate_type(tag, name, fields, start);
@@ -3115,7 +3119,7 @@ static List Compiler._bind_form(
     case %(!set ?node ((!or protocol adopt meta-protocol) *)) if (unit):
       return c.publish_protocol_node(node, c.token, NULL);
     case %(!set ?def (macrodef *)): return c._bind_macrodef(def, context);
-    case %(preproc ?(String directive)) if (unit || block):
+    case %(preproc ?(String directive)) if (unit || block || context == AST_FIELD):
       return c._bind_preproc(input);
     case %(at ?origin ?node) if (block): return c._bind_item(origin, node);
     case %(at ?origin ?node):

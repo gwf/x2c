@@ -116,13 +116,14 @@ static List _from_bind(List mods, List context) {
   return context.type()._modify(_from_ast(typed.list_free(), context));
 }
 
-/* A static assertion among the fields, under any origin wrappers, declares
-   no field. */
+/* Assertions and native directives remain in source bodies but declare
+   no semantic field. */
 static List _from_fields(List fields, List context) {
   Array types = [];
   foreach (List field, fields) {
     List declaration = Ast.without_origin(field);
-    if (declaration.car() != <c-assert>) types.push(_from_ast(field, context));
+    if (declaration.car() != <c-assert> && declaration.car() != <preproc>)
+      types.push(_from_ast(field, context));
   }
   return types.list_free();
 }

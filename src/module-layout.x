@@ -8,7 +8,7 @@
 #include "utils.x"
 
 static typedef struct Layouts {
-  Map bodies, variants, aliases, alias_variants, owners, edges, variant_edges;
+  Map bodies, variants, aliases, alias_variants, owners, edges, variant_demands;
   Map fixed_edges, visiting, finished;
   Map private_types, private_bindings, private_constants, used_aliases;
   Array order;
@@ -187,24 +187,74 @@ static void Layouts.require_type(
   match (key) case %((!or struct union) (fields *rows)):
     foreach (List row, rows) {
       List declaration = Ast.without_origin(row);
-      if (declaration.car() == <c-assert>) continue;
+      if (declaration.car() == <c-assert> || declaration.car() == <preproc>) continue;
       Type field = declaration.type_from_ast();
       layouts.require_type(c, resolver, field, needed);
     }
 }
 
+/* Preserve field conditions beside their demands. Inline anonymous bodies
+   retain their bound declaration syntax; semantic types omit directives. */
+static void Layouts.require_fields(
+  Layouts &layouts, Compiler c, Sym resolver, List fields, Map needed,
+  Array demands, Map recorded, List inherited) {
+  Array prefix = [];
+  List arms = NULL;
+  foreach (List directive, inherited) {
+    prefix.push(directive);
+    arms = preproc_track_arms(arms, directive.cadr());
+  }
+  foreach (List field, fields) {
+    List declaration = Ast.without_origin(field);
+    match (declaration) {
+      case %(preproc ?(String text)): {
+        String directive = preproc_directive(text);
+        if (preproc_conditional_kind(text) || directive.startswith("define") ||
+            directive.startswith("undef")) {
+          prefix.push(declaration);
+          arms = preproc_track_arms(arms, text);
+        }
+      }
+      case %(declare ?base (bindings *declarators)):
+        foreach (List declarator, declarators) {
+          Type type = %(declare $base (bindings $declarator)).type_from_ast();
+          Type element = resolver.normalize_declared_type(type).canonicalize();
+          while (element.is_array()) element = element.dereference().canonicalize();
+          if (element.is_pointer() || element.is_function()) continue;
+          Type source = base;
+          List inline_fields = NULL;
+          match (source.base_type()) {
+            case %((!or struct union) ? (fields *rows)): inline_fields = rows;
+            case %((!or struct union) (fields *rows)): inline_fields = rows;
+          }
+          if (inline_fields) {
+            layouts.require_fields(c, resolver, inline_fields, needed,
+              demands, recorded, prefix.list());
+            continue;
+          }
+          Map selected = {};
+          layouts.require_type(c, resolver, type, selected);
+          foreach (List dependency, selected.keys()) {
+            needed[dependency] = 1;
+            List demand = %($dependency ${prefix.list()} $arms);
+            if (!(demand in recorded)) {
+              recorded[demand] = 1;
+              demands.push(demand);
+            }
+          }
+        }
+    }
+  }
+}
+
 static void Layouts.require_body(
-  Layouts &layouts, Compiler c, Sym resolver, List body, Map needed) {
+  Layouts &layouts, Compiler c, Sym resolver, List body, Map needed,
+  Array demands) {
   Type type = body.cadr();
+  Map recorded = {};
   match (type.base_type())
     case %((!or struct union) ? (fields *fields)):
-      foreach (List field, fields) {
-        List declaration = Ast.without_origin(field);
-        match (declaration) case %(declare ?base (bindings *declarators)):
-          foreach (List declarator, declarators)
-            layouts.require_type(c, resolver,
-              %(declare $base (bindings $declarator)).type_from_ast(), needed);
-      }
+      layouts.require_fields(c, resolver, fields, needed, demands, recorded, NULL);
 }
 
 static void Layouts.dependencies(Layouts &layouts) {
@@ -216,25 +266,36 @@ static void Layouts.dependencies(Layouts &layouts) {
   }
   foreach (List family, layouts.bodies.keys()) {
     Map needed = {};
+    Map fixed = NULL;
     int unconditional = 1;
     foreach (List variant, layouts.variants[family].list()) {
       (Compiler owner, List body, List prefix, List arms) = variant;
       Sym resolver = Sym.new(owner);
       resolver.reset_overlay(owner.sym.global_symbols(), aliases);
       Map selected = {};
-      layouts.require_body(owner, resolver, body, selected);
-      Array selected_edges = [];
-      foreach (List prerequisite, selected.keys()) {
-        needed[prerequisite] = 1;
-        selected_edges.push(prerequisite);
+      Array demands = [];
+      layouts.require_body(owner, resolver, body, selected, demands);
+      Map fixed_variant = {};
+      foreach (List demand, demands.list())
+        if (!demand.caddr().list().len()) fixed_variant[demand.car()] = 1;
+      foreach (List prerequisite, selected.keys()) needed[prerequisite] = 1;
+      layouts.variant_demands[variant] = demands.list_free();
+      if (!fixed) fixed = fixed_variant;
+      else {
+        Map intersection = {};
+        foreach (List prerequisite, fixed.keys())
+          if (prerequisite in fixed_variant) intersection[prerequisite] = 1;
+        fixed = intersection;
       }
-      layouts.variant_edges[variant] = selected_edges.list_free();
       if (arms.len()) unconditional = 0;
     }
     Array prerequisites = [];
     foreach (List prerequisite, needed.keys()) prerequisites.push(prerequisite);
     layouts.edges[family] = prerequisites.list_free();
-    layouts.fixed_edges[family] = unconditional ? layouts.edges[family] : NULL;
+    Array fixed_edges = [];
+    if (unconditional) foreach (List prerequisite, fixed.keys())
+      fixed_edges.push(prerequisite);
+    layouts.fixed_edges[family] = fixed_edges.list_free();
   }
 }
 
@@ -445,8 +506,15 @@ static String Layouts.render(
   foreach (List variant, layouts.variants[family].list().reverse()) {
     (Compiler c, List body, List prefix, List arms) = variant;
     String prerequisites = "";
-    foreach (List dependency, layouts.variant_edges[variant].list())
+    foreach (List demand, layouts.variant_demands[variant].list()) {
+      (List dependency, List directives, List field_arms) = demand;
+      List macros = _layout_macro_names(directives);
+      prerequisites += _layout_macro_guards(macros, "push");
+      prerequisites += _layout_text(c, directives);
       prerequisites += %"#include \"${_layout_header(dependency)}\"\n";
+      for (int i = field_arms.len(); i; i--) prerequisites += "#endif\n";
+      prerequisites += _layout_macro_guards(macros.reverse(), "pop");
+    }
     List macros = _layout_macro_names(prefix);
     List definitions = %((comment $prerequisites))
       .append(layouts.alias_nodes(body, plan))
@@ -469,7 +537,7 @@ static String Layouts.render(
 Map prepare_module_layouts(List providers) {
   Layouts layouts = {
     .bodies = {}, .variants = {}, .aliases = {}, .alias_variants = {}, .owners = {},
-    .edges = {}, .variant_edges = {}, .fixed_edges = {},
+    .edges = {}, .variant_demands = {}, .fixed_edges = {},
     .visiting = {}, .finished = {}, .order = [],
     .private_types = {}, .private_bindings = {}, .private_constants = {},
     .used_aliases = {}};
