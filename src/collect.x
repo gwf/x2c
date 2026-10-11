@@ -206,7 +206,7 @@ Map Compiler.collect_symbols(Compiler c, Map globs) {
       if (owner != canonical)
         c._replay_include(owner, globs, visited, effects);
   }
-  c._module_preamble(canonical, globs, visited);
+  c._module_preamble(canonical, globs, visited, NULL);
   c._walk_file(canonical, c.text, Path.dirname(c.filename), globs, visited);
   c.bind_pending_inline_bodies(globs, canonical);
   return globs;
@@ -457,7 +457,7 @@ static void _shift_tokens(Tokenizer t, int line, int pos) {
 /** Replays recorded ancestor prefixes into a member's own macro session.
     Only visible prefix effects cross the boundary between source files. */
 void Compiler._module_preamble(
-  Compiler c, String path, Map globs, Map active) {
+  Compiler c, String path, Map globs, Map active, Array effects) {
   if (!c.module_owner) return;
   List ancestors = c.module_tree.ancestors(path).reverse();
   foreach (String owner, ancestors) {
@@ -482,10 +482,10 @@ void Compiler._module_preamble(
       foreach (Var part, parts) {
         if (part is <map>) {
           c._merge_rows(globs, part);
-          c.replay_package_imports(globs, part, NULL);
+          c.replay_package_imports(globs, part, effects);
         }
         else if (part is <string>)
-          c._replay_include(part, globs, visited, NULL);
+          c._replay_include(part, globs, visited, effects);
       }
       c.add_translation_dependency(owner);
       continue;
@@ -506,7 +506,7 @@ void Compiler._module_preamble(
     walk.select_public();
     foreach (Var part, walk.parts) if (part is <map>) {
       c._merge_rows(globs, part);
-      c.replay_package_imports(globs, part, NULL);
+      c.replay_package_imports(globs, part, effects);
     }
     c.add_translation_dependency(owner);
     c.merge_translation_dependencies(walk.dependencies);
@@ -757,7 +757,7 @@ static List Compiler._walk_cold(
   foreach (Var (path, state), visited)
     if (state is <array>) own_visited[path] = state;
   Map symbols = globs.copy();
-  file._module_preamble(canonical, symbols, own_visited);
+  file._module_preamble(canonical, symbols, own_visited, NULL);
   file._walk_apart(canonical, text, symbols, own_visited);
   c.merge_translation_dependencies(file.deps);
   c.declaration_produced |= file.declaration_produced;

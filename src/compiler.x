@@ -1259,7 +1259,9 @@ static void Compiler._reset_parse(Compiler c, Map globs, int generated) {
   if (generated) c.install_generated_protocol_symbols();
   c.install_native_meta_effects(globs);
   c.included_effects = c.included_compile_time_effects(globs);
-  c._module_preamble(c.canonical_path(c.filename), globs, {});
+  Array effects = [];
+  c._module_preamble(c.canonical_path(c.filename), globs, {}, effects);
+  c.install_compile_time_effects(effects.list_free());
 }
 
 static void Compiler._reset_macros(Compiler c) {
