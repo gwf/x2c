@@ -94,8 +94,14 @@ List generate_code_text(Compiler c, List ast, String basename) =>
 
 /** Returns all portable text outputs, including native projection metadata.
     Like generate_code_text, this generates the unit exactly once. */
-List generate_code_text_files(Compiler c, List ast, String basename) =>
-  c._generated_code(_without_trivia(ast), basename);
+List generate_code_text_files(Compiler c, List ast, String basename) {
+  List outputs = c._generated_code(_without_trivia(ast), basename);
+  if (c.module_owner)
+    outputs = outputs.append(%(
+      "${Path.dirname(basename)}/${c.module_support_header(c.filename)}"
+      ${outputs.cadr()}));
+  return outputs;
+}
 
 static List _without_trivia(List ast) =>
   ast.filter(%!(node) => !node.list().match(%((!or space comment empty) *)));
