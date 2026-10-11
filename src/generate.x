@@ -244,6 +244,26 @@ static Array Compiler._projection_definitions(Compiler c, List node) {
   return definitions;
 }
 
+/* Unmarked native and ordinary-unit headers provide their collected
+   namespaces through this actual include region. Module headers retain
+   their own labelled declaration regions. */
+static Array Compiler._projection_include_names(
+  Compiler c, String path) {
+  Array definitions = [];
+  if (!path || c.module_tree.owner(path)) return definitions;
+  Map plan = c.module_layout_plan;
+  foreach (List row, c.declaration_provider_rows(%($path))) {
+    (Var kind, String provider, List key) = row;
+    (void) kind;
+    String canonical = c.canonical_path(home_absolute_path(provider));
+    if (c.module_tree.owner(canonical)) continue;
+    Var id;
+    if (plan.try_get(%(namespace $provider $key), id) &&
+        !(id in definitions)) definitions.push(id);
+  }
+  return definitions;
+}
+
 /* Region identities come from final emitted nodes, after cache/init/body
    placement. They grant no language access and execute no source producer. */
 static List Compiler._projection_nodes(
@@ -302,13 +322,18 @@ static List Compiler._projection_nodes(
           home_portable_path(c.canonical_path(c.filename));
       }
     }
+    Array definitions = c._projection_definitions(node);
     if (include) {
       record["includeTarget"] = include;
       record["includeAngle"] = Json.bool(angle);
       String resolved = c.resolve_source_include(include, angle);
-      if (resolved) record["includePath"] = c.canonical_path(resolved);
+      if (resolved) {
+        String path = c.canonical_path(resolved);
+        record["includePath"] = path;
+        definitions = c._projection_include_names(path);
+      }
     }
-    record["defines"] = c._projection_definitions(node);
+    record["defines"] = definitions;
     records.push(record);
     order.push(id);
     marked.push(%(preproc "#pragma x2c_region_begin $id"));
