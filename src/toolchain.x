@@ -332,15 +332,15 @@ static String _start_failure(String program, List detail) {
     `include_dirs` precede the system directories, and the runtime header
     directory follows them, so a generated `string.h` never replaces the C
     library's. System headers keep their include directives when the host
-    supports that mode. `output`, `errors`, and `dependencies` are cleared before
-    use. Source and include paths remain distinct argv elements, and stdout
-    and stderr are captured separately. The temporary depfile is read into
-    `dependencies` when possible and removed on returning paths, including a
-    handled `<io-fail>` while reading it. A non-returning
-    `<bad-arg>`, `<size-limit>`, or `<alloc-fail>` may transfer before removal.
-    Returns the shell-style child status, 127 when the preprocessor cannot
-    start, or -1 for invalid arguments or local setup failure. This operation
-    does not consult `dry_run`.
+    supports that mode. `output`, `errors`, and `dependencies` are cleared
+    before use. Source and include paths remain distinct argv elements, and
+    stdout and stderr are captured separately. The temporary depfile is read
+    into `dependencies` when possible and removed on returning paths, including
+    a handled `<io-fail>` while reading it. A non-returning `<bad-arg>`,
+    `<size-limit>`, or `<alloc-fail>` may transfer before removal. Returns the
+    shell-style child status, 127 when the preprocessor cannot start, or -1 for
+    invalid arguments or local setup failure. This operation does not consult
+    `dry_run`.
 
     Raises: `<io-fail>`, `<bad-arg>`, `<size-limit>`, or `<alloc-fail>` while
     constructing arguments or reading captured text.
