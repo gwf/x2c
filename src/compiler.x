@@ -1248,6 +1248,7 @@ static typedef struct FullParse {
     `generated_symbols` publishes external adapter signatures before parsing.
 */
 List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) {
+  c.register_native_meta_prefix();
   Array nodes = [];
   c.unit_nodes = nodes;
   c._reset_parse(globs, generated_symbols);
