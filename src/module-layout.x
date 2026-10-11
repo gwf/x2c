@@ -181,6 +181,36 @@ static List Layouts.mark_fields(
   return marked.list_free();
 }
 
+/** Marks a typedef's selected namespace and complete array-element needs. */
+List Compiler.module_layout_alias_demands(Compiler c, List node) {
+  if (!c.module_layout_plan || node.car() != <typedef>) return NULL;
+  String path = c.canonical_path(c.filename);
+  Map rows = c.sym.unit_symbols().copy();
+  foreach (Var (key, value), c.sym.file_statics()) rows[key] = value;
+  Sym resolver = Sym.new(c);
+  resolver.reset_overlay(rows, c.module_layout_plan[%(projection-aliases)]);
+  Map namespaces = declaration_type_namespaces(node, rows);
+  Array marked = [];
+  foreach (List namespace, namespaces.keys()) {
+    String id = c.module_projection_namespace(namespace);
+    if (id) marked.push(%(preproc "#pragma x2c_namespace_require $id"));
+  }
+  Map private_types = {}, needed = {};
+  private_types[path] = c.module_layout_plan[%(private-types $path)];
+  Layouts layouts = {
+    .bodies = c.module_layout_plan[%(projection-bodies)],
+    .private_types = private_types};
+  foreach (List row, node.caddr().list().cdr()) {
+    Type type = %(declare ${node.cadr()} (bindings $row)).type_from_ast();
+    if (type.is_array()) layouts.require_type(c, resolver, type, needed);
+  }
+  foreach (List dependency, needed.keys()) {
+    String id = filename_hash(dependency.repr());
+    marked.push(%(preproc "#pragma x2c_family_require f_$id"));
+  }
+  return marked.list_free();
+}
+
 /** Marks conditional complete-field demands in the portable native body.
     Markers refer to already established families and do not bind declarations.
 */
@@ -194,8 +224,9 @@ List Compiler.module_layout_demands(Compiler c, List node) {
     .bodies = c.module_layout_plan[%(projection-bodies)],
     .private_types = private_types};
   Sym resolver = Sym.new(c);
-  resolver.reset_overlay(
-    c.sym.global_symbols(), c.module_layout_plan[%(projection-aliases)]);
+  Map rows = c.sym.unit_symbols().copy();
+  foreach (Var (key, value), c.sym.file_statics()) rows[key] = value;
+  resolver.reset_overlay(rows, c.module_layout_plan[%(projection-aliases)]);
   match (node) case %((!or typedef declare) ?base ?bindings): {
     Type type = base;
     List core = type.base_type();

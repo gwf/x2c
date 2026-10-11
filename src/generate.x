@@ -315,6 +315,8 @@ static List Compiler._projection_nodes(
     split.push(node);
   }
   foreach (List node, split) {
+    List original = node;
+    node = c.module_layout_node(node);
     if (node.car() == <space> || node.car() == <comment>) {
       marked.push(node);
       continue;
@@ -387,7 +389,9 @@ static List Compiler._projection_nodes(
     records.push(record);
     order.push(id);
     marked.push(%(preproc "#pragma x2c_region_begin $id"));
-    marked.push(c.module_layout_demands(node));
+    foreach (List demand, c.module_layout_alias_demands(original))
+      marked.push(demand);
+    marked.push(c.module_layout_node(c.module_layout_demands(original)));
     marked.push(%(preproc "#pragma x2c_region_end $id"));
   }
   return marked.list_free();
@@ -432,7 +436,7 @@ static List Compiler._header_and_source(
       if (owner != c.canonical_path(c.filename))
         p.header.push(
           %(preproc "#include \"${c.module_support_header(owner)}\""));
-  foreach (Ast node, ast) p.add(c.module_layout_node(node));
+  foreach (Ast node, ast) p.add(node);
   List header = p.finish(), source = c._source_projection(ast, inline_bodies);
   return %($header $source);
 }
@@ -449,7 +453,6 @@ static List Compiler._source_projection(
         source.push(
           %(preproc "#include \"${c.module_support_header(owner)}\""));
   foreach (List node, ast) {
-    node = c.module_layout_node(node);
     match (node) {
       case %(module-members ?members): {
         foreach (String member, members)
