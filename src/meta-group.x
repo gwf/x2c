@@ -304,7 +304,22 @@ static int Compiler._prefix_function(Compiler c, String name) {
   foreach (List entry, c.meta_group)
     match (entry) case %(function ? ?target *):
       if (target == name) return 1;
+  Var identity;
+  String spelling;
+  foreach (List node, c.unit_nodes)
+    if (_function_identity(node, identity, spelling) && spelling == name)
+      return 1;
   return 0;
+}
+
+/** The reached source bodies whose native storage this prefix publishes. */
+List Compiler.native_prefix_functions(Compiler c) {
+  Array names = [];
+  Var identity;
+  String spelling;
+  foreach (List node, c._units())
+    if (_function_identity(node, identity, spelling)) names.push(spelling);
+  return names.list_free();
 }
 
 static int Compiler._prefix_value(Compiler c, String name) {
