@@ -27,6 +27,7 @@
 #include "toolchain.x"
 #include "transform.x"
 #include "utils.x"
+#include "json.x"
 #include <unistd.h>
 
 // diagnostics
@@ -236,7 +237,9 @@ static List Compiler._emit(
       if (c.module_owner) lowered = c.generate_protocol_adapters(lowered);
       ast = c.transform(lowered);
     }
-    code = generate_code_text(c, ast, stem);
+    $let(c.filename, provider)
+    $let(c.module_owner, saved.module_owner)
+      code = generate_code_text_files(c, ast, stem);
   }
   catch %(?kind *detail): {
     List entries = c.diagnostics.entries();
@@ -929,9 +932,24 @@ void Compiler.write_meta_build(Compiler c) {
     Path.write_text(%"$base.failure", failure);
     return;
   }
-  (String hfile, String header, String cfile, String source) = code;
+  (String hfile, String header, String cfile, String source) = code[:4];
   Path.write_text(%"$meta_build_directory/$hfile", header);
   Path.write_text(%"$base.c", source);
+  for (int i = 4; i < (int) code.len(); i += 2) {
+    String filename = code[i], text = code[i + 1];
+    if (filename.endswith(".xnm")) {
+      Map metadata = Json.parse(text);
+      metadata["source"] = Path.basename(%"$base.c");
+      Array companions = [];
+      foreach (Var (provider, table), meta_build_tables)
+        if (table != index && provider in c.resolved_translation_dependencies() &&
+            c.module_tree.owner(provider))
+          companions.push(%"group-$table.xnm");
+      metadata["companions"] = companions;
+      Path.write_text(%"$base.xnm", Var.json(metadata));
+    }
+    else Path.write_text(%"$meta_build_directory/$filename", text);
+  }
 }
 
 // a session group, staged in process
@@ -987,7 +1005,7 @@ static String Compiler._module(Compiler c, String &failure) {
   }
   List code = c._emit(stamp, "group", "", failure);
   if (!code) return NULL;
-  (String hfile, String header, String cfile, String source) = code;
+  (String hfile, String header, String cfile, String source) = code[:4];
   String key = String.sha256(
     %"$header\n$source\n$stamp\n" +
     %"${Compiler.meta_cc_identity(meta_cc)}\n$meta_include_dir");
@@ -1002,16 +1020,22 @@ static String Compiler._module(Compiler c, String &failure) {
    or the C compiler's error. The output carries this process's id until it
    moves into place. */
 static String _build_module(String directory, String module, List code) {
-  (String hfile, String header, String cfile, String source) = code;
+  (String hfile, String header, String cfile, String source) = code[:4];
   String output = %"$module.${"%ld".printf((long) getpid())}";
   Path.make_dirs(directory);
-  Path.write_text(%"$directory/$hfile", header);
-  Path.write_text(%"$directory/$cfile", source);
+  for (int i = 0; i < (int) code.len(); i += 2)
+    Path.write_text(%"$directory/${code[i]}", code[i + 1]);
   Toolchain linker = toolchain_meta(meta_cc);
+  linker.include_dir = meta_include_dir;
+  linker.cc_args = %("-fPIC" "-O0");
+  String projected, dependencies, errors;
+  if (linker.project_native_source(
+      %"$directory/$cfile", %($directory), projected, dependencies, errors))
+    return errors;
   List arguments = linker.module_action(
     output,
     %("-fsigned-char" "-fPIC" "-O0" "-iquote" $directory
-      "-iquote" $meta_include_dir ${%"$directory/$cfile"})).arguments;
+      "-iquote" $meta_include_dir $projected)).arguments;
   String failure = Compiler.meta_cc_run(arguments, directory);
   if (!failure) Path.move_to(output, module);
   return failure;

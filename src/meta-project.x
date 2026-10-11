@@ -467,7 +467,7 @@ static String Helper.base(Helper &h, int index) =>
 
 /* Removes what a parse left of the group at `base`. */
 static void _clear(String base) {
-  foreach (String suffix, %(".c" ".deps" ".failure")) {
+  foreach (String suffix, %(".c" ".xnm" ".deps" ".failure")) {
     String file = %"$base$suffix";
     if (Path.exists(file)) Path.remove_file(file);
   }
@@ -539,10 +539,18 @@ static String Helper.compile(Helper &h, int index, String unit) {
   if (!Path.is_file(%"$base.deps")) return "the unit has no group";
   if (Path.is_file(%"$base.failure")) return Path.read_text(%"$base.failure");
   Toolchain t = h.toolchain;
+  t.include_dir = h.include;
+  t.cc_args = %(@{_cc_flags()} @{h.flags});
+  List directories = %(${h.directory} ${Path.dirname(unit)});
+  String projected, native_dependencies, errors;
+  if (t.project_native_source(
+      %"$base.c", directories, projected, native_dependencies, errors))
+    return errors;
+  if (native_dependencies) h.add_depfile(native_dependencies);
   String failure = Compiler.meta_cc_run(
     %(${t.cc} @{_cc_flags()} "-iquote" ${h.directory}
       "-iquote" ${Path.dirname(unit)} "-iquote" ${h.include} @{h.flags}
-      "-MD" "-MF" ${%"$base.d"} "-c" ${%"$base.c"} "-o" ${%"$base.o"}),
+      "-MD" "-MF" ${%"$base.d"} "-c" $projected "-o" ${%"$base.o"}),
     h.directory);
   h.add_depfile(%"$base.d");
   return failure;
