@@ -69,7 +69,8 @@ static typedef struct Helper {
   List flags, Array modules;
   Map deps, before, readiness, prefix_compilers, publications, prefix_counts;
   Map native_sources, native_targets, native_loaded;
-  Array groups, built, failures, objects, retained_dependencies, int changed;
+  Array groups, built, failures, objects, retained_dependencies, retained_tables;
+  int changed;
 } Helper;
 
 static Helper *active_helper = NULL;
@@ -85,7 +86,8 @@ void Frontend.prepare_meta(Frontend f, List inputs) {
     .prefix_compilers = {}, .publications = {}, .prefix_counts = {},
     .native_sources = {}, .native_targets = {}, .native_loaded = {},
     .groups = [], .built = [],
-    .failures = [], .objects = [], .retained_dependencies = []};
+    .failures = [], .objects = [], .retained_dependencies = [],
+    .retained_tables = []};
   h.scan(inputs);
   String include = NULL, cc = Compiler.meta_cc(include);
   String root = script_cache_root(), stamp = build_module_stamp();
@@ -468,6 +470,7 @@ static String Helper.prefix(Helper &h, String owner, int index, String name) {
   $let(c.meta_build, index + 1) c.write_native_meta_prefix(sequence, published);
   h.native_sources[index] = base;
   h.native_targets[index] = %"x2c_module_targets_${index}_prefix_$sequence";
+  h.retained_tables.push(index);
   String failure = h.load_native_closure(index);
   if (failure) return failure;
   h.objects.push(%"$base.o");
@@ -519,11 +522,13 @@ static String Helper.prepare_native(Helper &h, int index) {
   }
   h.readiness[owner] = 1;
   h.publications[index] = {};
+  h.retained_tables.push(index);
   h.parse(owner, index);
   String base = h.base(index);
   if (Path.is_file(%"$base.failure")) return Path.read_text(%"$base.failure");
   h.native_sources[index] = base;
   h.native_targets[index] = %"x2c_module_targets_$index";
+  h.retained_tables.push(index);
   h.readiness[owner] = 4;
   return NULL;
 }
@@ -592,6 +597,7 @@ static String Helper.load_native_closure(Helper &h, int index) {
     if (failure) return failure;
     foreach (int table, indices) {
       h.native_loaded[table] = h.native_sources[table];
+      h.retained_tables.push(table);
       String owner = h.owners[table - 1];
       if (h.readiness[owner] == 4) {
         h.record(table, NULL);
@@ -633,16 +639,12 @@ static void Helper.parse_source(
   Helper &h, Frontend f, String path, int index) {
   ParsedUnit unit;
   int dependencies = h.retained_dependencies.len();
+  int tables = h.retained_tables.len();
   int failures = h.failures.len(), objects = h.objects.len();
   int started = f.start(path, unit);
   defer unit.close();
-  defer h.export(unit.context, dependencies, failures, objects);
+  defer h.export(unit.context, dependencies, failures, objects, tables);
   defer h.prefix_compilers.del(path);
-  defer h.publications[index] = unit.context.export(h.publications[index].map().copy());
-  defer {
-    foreach (Map retained, %( ${h.native_sources} ${h.native_targets} ${h.native_loaded} ))
-      if (index in retained) retained[index] = unit.context.export(retained[index]);
-  }
   unit.compiler.meta_build = index + 1;
   Map previous = Compiler.use_native_meta_publications(h.publications[index]);
   defer Compiler.use_native_meta_publications(previous);
@@ -660,7 +662,18 @@ static void Helper.parse_source(
 /* Only records added during this provider can belong to its Context.
    Nested providers export into this one before it exports to its parent. */
 static void Helper.export(
-  Helper &h, Context context, int dependencies, int failures, int objects) {
+  Helper &h, Context context, int dependencies, int failures, int objects,
+  int tables) {
+  Map seen = {};
+  for (int i = tables; i < (int) h.retained_tables.len(); i++) {
+    int index = h.retained_tables[i];
+    if (index in seen) continue;
+    seen[index] = 1;
+    if (index in h.publications)
+      h.publications[index] = context.export(h.publications[index].map().copy());
+    foreach (Map retained, %(${h.native_sources} ${h.native_targets} ${h.native_loaded}))
+      if (index in retained) retained[index] = context.export(retained[index]);
+  }
   for (int i = failures; i < (int) h.failures.len(); i++)
     h.failures[i] = context.export(h.failures[i]);
   for (int i = objects; i < (int) h.objects.len(); i++)
