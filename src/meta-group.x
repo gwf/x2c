@@ -851,7 +851,7 @@ String Compiler.meta_call_missing(Compiler c, String name) {
 
 /** Reports at `site` that the `meta` function `name` cannot run at compile
     time, and `why`. */
-void Compiler.refuse_meta_call(
+_Noreturn void Compiler.refuse_meta_call(
   Compiler c, String name, Token site, String why) {
   $report.macro.function_unavailable(c, site, name, why);
 }
