@@ -275,7 +275,8 @@ static Array Compiler._projection_include_families(
   foreach (List row, c.declaration_provider_rows(%($path))) {
     (Var kind, String provider, List key) = row;
     (void) kind;
-    if (is_source_file(home_absolute_path(provider))) continue;
+    String canonical = c.canonical_path(home_absolute_path(provider));
+    if (c.module_tree.owner(canonical)) continue;
     match (key) case %((!or struct union enum) ?): {
       String id = %"f_${filename_hash(key.repr())}";
       if (!(id in families)) families.push(id);
