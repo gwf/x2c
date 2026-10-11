@@ -1829,10 +1829,17 @@ static List Compiler._package_aggregate_name(
   // A template's tag slot supplies its exact spelling where it expands.
   if (name.car() is not <string>) return name;
   String spelling = name.car();
-  if (c.source_module && c.peek(0) == <"{"> && tag != <enum>) {
+  if ((c.source_module || (c.module_owner && c.source_private > 0)) &&
+      c.peek(0) == <"{"> && tag != <enum>) {
     List key = %($tag $spelling);
     Type alias = c.sym.get_exact(%(typedef $spelling));
-    if ((c.sym.get_exact(key) || (alias && alias.base_type() == key)) &&
+    Map statics = c.sym.file_statics();
+    int public_forward = !(key in statics) &&
+      !(%(typedef $spelling) in statics) &&
+      !c.sym.get_exact(%("module-private" $spelling)) &&
+      !c.sym.get_exact(%("module-owner" $spelling));
+    if ((c.source_module || public_forward) &&
+        (c.sym.get_exact(key) || (alias && alias.base_type() == key)) &&
         (!c.sym.field_order(key) ||
         c.sym.get_exact(%("module-layout" $tag $spelling)))) {
       c.sym.set(

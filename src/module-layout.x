@@ -33,7 +33,8 @@ static void Layouts.private_names(Layouts &l, Compiler c, List ast) {
       if (!type.is_static()) continue;
       match (type.base_type())
         case %((!set ?kind (!or struct union enum)) ?(String name) *):
-          names[%($kind $name)] = c._layout_file_spelling(name);
+          if (!c.sym.get_exact(%("module-opaque" $name)))
+            names[%($kind $name)] = c._layout_file_spelling(name);
       match (type.base_type()) case %(enum ?(String tag) ?members): {
         (void) tag;
         foreach (List member, members) {
@@ -48,7 +49,7 @@ static void Layouts.private_names(Layouts &l, Compiler c, List ast) {
       foreach (List row, rows)
         match (row) case %(bind ?identity *): {
           String name = binding_identity_spelling(identity);
-          if (!name) continue;
+          if (!name || c.sym.get_exact(%("module-opaque" $name))) continue;
           String spelling = c._layout_file_spelling(name);
           names[%(typedef $name)] = spelling;
           bindings[identity] = binding_identity_new(
