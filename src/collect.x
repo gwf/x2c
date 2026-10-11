@@ -558,6 +558,7 @@ void Compiler._module_preamble(
     }
     Compiler prefix = Compiler.new_shared(c);
     defer c.close_child(prefix);
+    prefix.interface_provider = 1;
     prefix.filename = owner;
     prefix.configure_module(owner);
     FileWalk walk = {
