@@ -32,6 +32,8 @@ Ast Compiler_normalize(Compiler c, Ast ast);
 
 List Compiler_lower_lambda_expr(Compiler c, List expression);
 
+void Compiler_shipped_support(Compiler c, Symbol kind, List source, String form);
+
 List Compiler_call_in_order(Compiler c, List callee, List arguments);
 
 #endif

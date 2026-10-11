@@ -2168,6 +2168,13 @@ List Compiler_lower_lambda_expr(Compiler c, List expression){
 
 #endif
 #ifndef X2C_TRANSFORM_SOURCE
+List Compiler_rewrite(Compiler, Symbol, Var, List, AstPos, Type, Token);
+void Compiler_shipped_support(Compiler c, Symbol kind, List source, String form){
+  if(! _init_guard_) _file_init_();  List bound = Compiler_rewrite(c, 948490, Symbol_var(kind), source, AST_UNIT, NULL, NULL);  if(! List_truth(bound)) Compiler_report_error(c, 50756762, String_join(NULL, cons(String_var(_46), cons(String_var(form), NULL))), NULL, _52);  else Compiler_add_early(c, bound);
+}
+
+#endif
+#ifndef X2C_TRANSFORM_SOURCE
 static Ast Compiler__shipped_statement(Compiler c, Ast ast, Symbol tag){
   return Compiler__shipped_lowering(c, 948490, Symbol_var(tag), ast, AST_STATEMENT, List_type(c -> return_type), String_join(NULL, cons(String_var(Symbol_str(tag)), cons(String_var(_430), NULL))));
 }
@@ -3119,7 +3126,6 @@ static List Compiler__change(Compiler c, List ast, Symbol op, List arg, Type typ
 
 #endif
 #ifndef X2C_TRANSFORM_SOURCE
-List Compiler_rewrite(Compiler, Symbol, Var, List, AstPos, Type, Token);
 static List Compiler__dynamic(Compiler c, Symbol point, Type type, List operation){
   List kind = Var_equal(List_car(operation), Symbol_var(35407540848)) ? cons(_1125, cons(List_cadr(operation), _1133)) : cons(List_cadr(operation), _1133);  List rewritten = Compiler_rewrite(c, point, List_var(kind), cons(_22, cons(_1132, cons(List_var(operation), NULL))), AST_EXPRESSION, type, NULL);  return Var_list(List_truth(rewritten) ? List_caddr(rewritten) : List_var(operation));
 }
