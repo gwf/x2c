@@ -587,8 +587,13 @@ replacement template and fill steps are the remaining driver cost.
     remaining driver cost is the prepared-replacement template and fill
     (about 28% of the driver on bracket reads).
   - Defects found, open: a prelude component whose rule is lost during
-    collection lowers its form to nothing without a diagnostic (`String s
-    =;` observed); `tools/gen-linked-meta.sh` copies a public translator
+    collection lowered its form to nothing without a diagnostic (`String s
+    =;` observed); fixed 2026-10-10: the match, collection literal, and
+    interpolation arms report `no rule lowers this FORM` when no rule
+    answers, since the kernel has no lowering of its own for them. The
+    loss itself is reproduced by a definition in the component that fails
+    to collect, such as a `meta native` call, and is still silent at
+    collection; `tools/gen-linked-meta.sh` copies a public translator
     that calls a static helper even when the translator has a runtime form,
     a duplicate symbol at link; `$switched(?, ?)` with two anonymous holes
     never matches in a rule; a switch rule whose replacement holds a new

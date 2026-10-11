@@ -44,6 +44,12 @@ static macro Stmt $report.xform.slice_unsupported(
     <xform>, %"type ${$type} does not support slicing",
     NULL, $notes);
 
+static macro Stmt $report.xform.no_shipped_rule(Expr $c, Expr $form) =>
+  $c.report_error(
+    <xform>, %"no rule lowers this ${$form}",
+    NULL, %("the shipped component that owns it is not linked or failed to "
+            "collect; rebuild the compiler from the current prelude sources"));
+
 static macro Stmt $report.type.destructure_list(Expr $c, Expr $source_type) =>
   $c.report_error(
     <type>, "destructuring requires a List source",
@@ -140,7 +146,7 @@ static Ast Compiler._step_tag(Compiler c, Ast ast, Symbol tag) {
     case <dstrdecl>: next = c._destructure_declaration(ast); break;
     case <stmnt>: next = c._destructure_statement(ast); break;
     case <dstrasgn>: next = c._destructure_value(ast); break;
-    case <match>: return c._statement_rewrite(ast, tag);
+    case <match>: return c._shipped_statement(ast, tag);
     case <defer>: next = c._defer_node(ast); break;
     case <return>: next = c._return(ast); break;
     case <raise>: return c._raise_node(ast);
@@ -161,6 +167,23 @@ static Ast Compiler._statement_rewrite(Compiler c, Ast ast, Symbol tag) {
   List rewritten = c.rewrite_rules ? c.lower_rewrite(
     <node>, tag, ast, AST_STATEMENT, c.return_type, NULL) : NULL;
   return rewritten ? rewritten : ast;
+}
+
+/* The replacement a shipped rule gives a form the kernel no longer lowers
+   itself, or NULL after a report: this compiler does not link the
+   component that owns the form, or its rule failed to register. */
+static List Compiler._shipped_lowering(
+  Compiler c, Symbol point, Var kind, List source, AstPos position,
+  Type expected, String form) {
+  List lowered = c.lower_rewrite(point, kind, source, position, expected, NULL);
+  if (!lowered) $report.xform.no_shipped_rule(c, form);
+  return lowered;
+}
+
+static Ast Compiler._shipped_statement(Compiler c, Ast ast, Symbol tag) {
+  List lowered = c._shipped_lowering(
+    <node>, tag, ast, AST_STATEMENT, c.return_type, %"$tag statement");
+  return lowered ? lowered : %(block);
 }
 
 static Ast Compiler._default_node(Compiler c, Ast ast) {
@@ -500,9 +523,10 @@ static Ast Compiler._collection_literal(Compiler c, Ast ast, Symbol tag) {
   int map = tag == <map> || tag == <vmap>;
   Type type = map ? %("Map") : %("Array");
   Symbol head = map ? <map> : <array>;
-  List lowered = c.lower_rewrite(
+  List lowered = c._shipped_lowering(
     <literal>, head, %(expr $type ($head @{ast.cdr()})), AST_EXPRESSION,
-    type, NULL);
+    type, %"${type.repr()} literal");
+  if (!lowered) return %(literal (int) "0");
   match (lowered) case %(expr ? (call ?callee (args *arguments))): {
     Array values = $auto([]), orders = $auto([]);
     foreach (List argument, arguments) {
@@ -709,9 +733,10 @@ static Ast Compiler._interpolation(Compiler c, Ast ast) {
     default: rows.push(row);
   }
   List source = source_string_content(rows.list_free());
-  List lowered = c.lower_rewrite(
+  List lowered = c._shipped_lowering(
     <literal>, <segments>, %(expr ("String") $source), AST_EXPRESSION,
-    %("String"), NULL);
+    %("String"), "interpolated String");
+  if (!lowered) return %(literal (int) "0");
   match (lowered)
     case %(expr ?type (call ?callee (args ?separator
         (expr ? (parens (block *declarations (stmnt ?parts))))))):
