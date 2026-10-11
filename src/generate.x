@@ -159,7 +159,7 @@ static String _projection_relative(String path, String directory) {
   Array parts = [];
   for (int i = common; i < base.len(); ++i) parts.push("..");
   for (int i = common; i < target.len(); ++i) parts.push(target[i]);
-  return "/".join(parts.list());
+  return "/".join(parts);
 }
 
 /* Region identities come from final emitted nodes, after cache/init/body
