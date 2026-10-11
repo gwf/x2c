@@ -47,7 +47,15 @@ static macro Stmt $report.emit.file_write(Expr $c, Expr $failure) {
     work to the compiler and is not idempotent. Failures are reported as
     `emit` diagnostics.
 */
-void generate_code(Compiler c, List ast, String dir) {
+void generate_code(Compiler c, List ast, String dir) =>
+  c._publish(generate_code_files(c, ast, dir));
+
+/** Generates one unit's complete portable outputs without publishing them.
+    The returned flat path/text list owns C, H, interface and layout artifacts.
+    Generation mutates the compiler exactly once, as generate_code does.
+    Callers retaining the result after closing a Context must export it first.
+*/
+List generate_code_files(Compiler c, List ast, String dir) {
   ast = _without_trivia(ast);
   String basename = %"${dir.rstrip("/")}/${Path.stem(c.filename)}";
   List outputs = c._generated_code(ast, basename);
@@ -60,8 +68,13 @@ void generate_code(Compiler c, List ast, String dir) {
       outputs = outputs.append(%("${dir.rstrip("/")}/${file.car()}" ${file.cadr()}));
   String interface = c.source_facts ? NULL : interface_text(c);
   if (interface) outputs = outputs.append(%("$basename.xi" $interface));
-  c._publish(outputs);
+  return outputs;
 }
+
+/** Publishes immutable generated outputs after their semantic Contexts close.
+    This operation uses no compiler, symbol, type or source-token state.
+*/
+void publish_generated_files(List outputs) => file_publish(outputs);
 
 /** Returns the generated header and source of the lowered `ast` as `(hfile
     htext cfile ctext)`, named from `basename`, without writing them. It
