@@ -237,10 +237,12 @@ transform and the cleanup walk step into those nodes, so an expression or a
 statement placed in the text is lowered, and its `defer`, `return`, and
 `break` run their exits as they would anywhere else. The parts of the source
 statement lower outside the rule, so a nested statement of the same kind
-applies it again. The walk does not read the text. Text therefore declares
-only locals that no region owns, transfers control only where no region
-opens, and holds a `switch` or a loop as a node, which stays the barrier its
-`break` and `continue` need.
+applies it again. A statement that a shipped rule's carrier writes is not
+source, so a program's statement rules see the source parts but not it.
+The walk does not read the text. Text therefore declares only locals that
+no region owns, transfers control only where no region opens, and holds a
+`switch` or a loop as a node, which stays the barrier its `break` and
+`continue` need.
 `unittest/compiler-fixtures/rewrite-verbatim-text.x` writes a match with only
 a default arm as text around its subject and body:
 

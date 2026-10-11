@@ -2679,9 +2679,11 @@ List Compiler.rewrite(
     nested use of the rule applies again. A statement replacement, or a
     lowered one, also lowers the statements its source held outside the
     rule, and lowers once, so a new statement it writes stays outside the
-    rule. An expression retains the result type already established for its
-    parent. A replacement whose template and slot signatures an earlier use
-    in the unit prepared lowers only its captured values. */
+    rule. A statement a shipped rule's lowered carrier writes is not source,
+    so only shipped rules see it. An expression retains the result type
+    already established for its parent. A replacement whose template and
+    slot signatures an earlier use in the unit prepared lowers only its
+    captured values. */
 List Compiler.lower_rewrite(
   Compiler c, Symbol point, Var kind, List source, AstPos position,
   Type expected, Token site) =>
@@ -2693,8 +2695,11 @@ static List Compiler._rewrite(
   // A meta body still completes and formats the calls it makes.
   if (c.macro_holes || (c.meta_body && point != <member> && point != <call>))
     return NULL;
+  // A shipped rule's lowered carrier writes no source statement.
+  int shipped = point == <node> && c.slot_watch && c.slot_watch.shipped;
   foreach (RewriteRule rule, c._rewrite_candidates(point, kind)) {
-    if (c.active_rewrites.contains(rule)) continue;
+    if (c.active_rewrites.contains(rule) || (shipped && !rule.builtin))
+      continue;
     MacroMatcher *matcher = rule.prepared_matcher();
     if (matcher.shape ? !c.matches_macro(*matcher, source)
                       : !source.match(matcher.pattern)) continue;
@@ -2824,12 +2829,14 @@ static typedef struct Effects {
     those active outside the translator's own. A first lowering `prepares`
     a skeleton from what it records. A replacement lowered as written
     within another's has that one as its `parent`, whose source it may hold
-    as well. */
+    as well. A shipped rule's lowered carrier, and any replacement lowered
+    within one, is `shipped`: its own statements are not source, so no
+    user statement rule sees them, while the values it watches are. */
 struct SlotWatch {
   List values;
   Array outputs, order;
   Effects inner;
-  int repeated, prepares;
+  int repeated, prepares, shipped;
   List outer;
   SlotWatch parent;
 };
@@ -2910,6 +2917,9 @@ static List Compiler._watched(
   struct SlotWatch watch = {sources.list(), [], []};
   watch.outer = c.active_rewrites.cdr();
   if (c.slot_watch && !c.slot_watch.prepares) watch.parent = c.slot_watch;
+  RewriteRule rule = c.active_rewrites.car();
+  watch.shipped = watch.parent && watch.parent.shipped;
+  match (result) case %(code-value "lowered" *): watch.shipped |= rule.builtin;
   foreach (Var value, sources) watch.outputs.push(NULL);
   $let(c.slot_watch, &watch)
     return c._lowered(result, position, expected, site);
