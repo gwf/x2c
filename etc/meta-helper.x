@@ -448,6 +448,27 @@ void x2c_meta_helper_start(String name) {
 }
 
 static List _initialize(Map table) {
+  Var initializers;
+  if (table && table.try_get(<initializers>, initializers)) {
+    foreach (Var (name, function), initializers.map()) {
+      List key = %(initializer $name);
+      Var state;
+      if (helper_started.try_get(key, state)) {
+        if (state is <list>) return state.list();
+        continue;
+      }
+      helper_started[key] = 0;
+      $scope(&helper_unit_scope) {
+        try ((Func) function.pointer()).apply(0, NULL);
+        catch %(?code *detail): {
+          List failure = %(failure ${Error.snapshot(cons(code, detail))});
+          helper_started[key] = failure;
+          return failure;
+        }
+      }
+    }
+    return NULL;
+  }
   Var reset;
   if (!table || !table.try_get("x2c_module_reset", reset)) return NULL;
   $scope(&helper_unit_scope) {

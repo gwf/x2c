@@ -816,7 +816,7 @@ static List Compiler._named(Compiler c, List reset) {
    A function whose values have no Var form, such as C's `bool` or a
    record pointer, is called only from other group code. */
 static List Compiler._targets(Compiler c, List named, List functions) {
-  Array entries = [];
+  Array entries = [], initializers = [];
   if (c.meta_build)
     entries.push(
       %(map-entry ${x2c_literal_symbol(<functions>)}
@@ -828,8 +828,16 @@ static List Compiler._targets(Compiler c, List named, List functions) {
       %(expr $type (ident $binding)), %("Func"));
     catch %(malformed *): continue;
     entries.push(%(map-entry ${x2c_literal_string(name)} $function));
+    if (name == "x2c_module_reset")
+      initializers.push(
+        %(map-entry ${x2c_literal_string(c.emitted_binding_name(binding))}
+          $function));
   }
   Macro shape = $map_value;
+  if (c.meta_build)
+    entries.push(
+      %(map-entry ${x2c_literal_symbol(<initializers>)}
+        ${shape(initializers.list_free())}));
   return c.rebuild_expression(%("Map"), shape(entries.list_free()));
 }
 
