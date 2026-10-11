@@ -628,14 +628,14 @@
 
 (typedef 
  (static struct (binding 6 "_x2c_lambda_context_0") 
-  (fields (declare ("Var") (bindings (bind (binding 67 "c0") ()))))) 
+  (fields (declare ("Var") (bindings (bind ("c0") ()))))) 
  (bindings (bind (binding 6 "_x2c_lambda_context_0") ())))
 
 (function (static "Var") 
- (bind (binding 68 "_x2c_lambda_0") 
+ (bind (binding 67 "_x2c_lambda_0") 
   ((fnmod 
-    (params (param (int) (bind (binding 69 "value") ())) 
-     (param (int) (bind (binding 70 "bias") ())))))) 
+    (params (param (int) (bind (binding 68 "value") ())) 
+     (param (int) (bind (binding 69 "bias") ())))))) 
  (block 
   (at 17 
    (stmnt 
@@ -644,19 +644,19 @@
       (call (expr ((func ((int))) "Var") (ident (binding 5 "int_var"))) 
        (args (expr (int) 
               (op + (expr (int) 
-                     (op + (expr (int) (ident (binding 69 "value"))) 
-                      (expr (int) (ident (binding 70 "bias"))))) 
+                     (op + (expr (int) (ident (binding 68 "value"))) 
+                      (expr (int) (ident (binding 69 "bias"))))) 
                (expr (int) (ident (binding 1 "live")))))))))))))
 
 (function (static "Var") 
  (bind (binding 8 "_x2c_lambda_1") 
   ((fnmod 
-    (params (param ("Func") (bind (binding 71 "_x2c_lambda_closure_0") ())) 
-     (param (const "FuncArg") (bind (binding 72 "_x2c_lambda_argv_0") (*))))))) 
+    (params (param ("Func") (bind (binding 70 "_x2c_lambda_closure_0") ())) 
+     (param (const "FuncArg") (bind (binding 71 "_x2c_lambda_argv_0") (*))))))) 
  (block 
   (declare (int) 
    (bindings 
-    (op = (bind (binding 73 "a0") ()) 
+    (op = (bind ("a0") ()) 
      (expr (int) 
       (call "Var_int" 
        (args (expr ("Var") 
@@ -664,28 +664,28 @@
                (args (expr ("Var") 
                       (call (expr ((func (("Func") (* const "FuncArg") 
                                           (unsigned) ("Symbol"))) "Var") 
-                             (ident (binding 74 "x2c_func_value_argument"))) 
+                             (ident (binding 72 "x2c_func_value_argument"))) 
                        (args (expr ("Func") 
-                              (ident (binding 71 "_x2c_lambda_closure_0"))) 
+                              (ident (binding 70 "_x2c_lambda_closure_0"))) 
                         (expr (* const "FuncArg") 
-                         (ident (binding 72 "_x2c_lambda_argv_0"))) 
+                         (ident (binding 71 "_x2c_lambda_argv_0"))) 
                         (expr (int) (literal (int) "0")) 
                         (expr ("Symbol") "3453797")))) 
                 (expr ("Symbol") "3453797")))))))))) 
   (declare (const struct (binding 6 "_x2c_lambda_context_0")) 
    (bindings 
-    (op = (bind (binding 75 "record") (*)) 
+    (op = (bind ("record") (*)) 
      (expr (* const struct (binding 6 "_x2c_lambda_context_0")) 
       (cast (* const struct (binding 6 "_x2c_lambda_context_0")) 
        (expr (* const void) 
-        (call (expr ((func (("Func"))) * const void) 
-               (ident (binding 76 "Func_context"))) 
-         (args (expr ("Func") (ident (binding 71 "_x2c_lambda_closure_0"))))))))))) 
+        (call (expr ((func (("Func"))) * const void) (ident ("Func_context"))) 
+         (args (expr ("Func") (ident (binding 70 "_x2c_lambda_closure_0"))))))))))) 
   (return 
    (expr ("Var") 
-    (call (expr ((func ((int) (int))) "Var") 
-           (ident (binding 68 "_x2c_lambda_0"))) 
-     (args (expr (int) (ident (binding 73 "a0"))) 
+    (call (expr ((func ((param (int) (bind (binding 68 "value") ())) 
+                        (param (int) (bind (binding 69 "bias") ())))) 
+                 "Var") (ident (binding 67 "_x2c_lambda_0"))) 
+     (args (expr (int) (ident ("a0"))) 
       (expr (int) 
        (call "Var_int" 
         (args (expr ("Var") 
@@ -694,21 +694,21 @@
                        (op -> 
                         (expr (* const struct 
                                (binding 6 "_x2c_lambda_context_0")) 
-                         (ident (binding 75 "record"))) ("c0"))) 
+                         (ident ("record"))) ("c0"))) 
                  (expr ("Symbol") "3453797")))))))))))))
 
 (typedef 
  (static struct (binding 14 "_x2c_lambda_context_2") 
-  (fields (declare ("Var") (bindings (bind (binding 77 "c0") ()))) 
-   (declare ("Var") (bindings (bind (binding 78 "c1") ()))))) 
+  (fields (declare ("Var") (bindings (bind ("c0") ()))) 
+   (declare ("Var") (bindings (bind ("c1") ()))))) 
  (bindings (bind (binding 14 "_x2c_lambda_context_2") ())))
 
 (function (static "Var") 
- (bind (binding 79 "_x2c_lambda_2") 
+ (bind (binding 73 "_x2c_lambda_2") 
   ((fnmod 
-    (params (param (int) (bind (binding 80 "value") ())) 
-     (param (int) (bind (binding 81 "right") ())) 
-     (param (int) (bind (binding 82 "left") ())))))) 
+    (params (param (int) (bind (binding 74 "value") ())) 
+     (param (int) (bind (binding 75 "right") ())) 
+     (param (int) (bind (binding 76 "left") ())))))) 
  (block 
   (at 18 
    (stmnt 
@@ -718,20 +718,20 @@
        (args (expr (int) 
               (op + (expr (int) 
                      (op + (expr (int) 
-                            (op + (expr (int) (ident (binding 80 "value"))) 
-                             (expr (int) (ident (binding 81 "right"))))) 
-                      (expr (int) (ident (binding 82 "left"))))) 
-               (expr (int) (ident (binding 81 "right")))))))))))))
+                            (op + (expr (int) (ident (binding 74 "value"))) 
+                             (expr (int) (ident (binding 75 "right"))))) 
+                      (expr (int) (ident (binding 76 "left"))))) 
+               (expr (int) (ident (binding 75 "right")))))))))))))
 
 (function (static "Var") 
  (bind (binding 16 "_x2c_lambda_3") 
   ((fnmod 
-    (params (param ("Func") (bind (binding 83 "_x2c_lambda_closure_1") ())) 
-     (param (const "FuncArg") (bind (binding 84 "_x2c_lambda_argv_1") (*))))))) 
+    (params (param ("Func") (bind (binding 77 "_x2c_lambda_closure_1") ())) 
+     (param (const "FuncArg") (bind (binding 78 "_x2c_lambda_argv_1") (*))))))) 
  (block 
   (declare (int) 
    (bindings 
-    (op = (bind (binding 85 "a0") ()) 
+    (op = (bind ("a0") ()) 
      (expr (int) 
       (call "Var_int" 
        (args (expr ("Var") 
@@ -739,28 +739,29 @@
                (args (expr ("Var") 
                       (call (expr ((func (("Func") (* const "FuncArg") 
                                           (unsigned) ("Symbol"))) "Var") 
-                             (ident (binding 74 "x2c_func_value_argument"))) 
+                             (ident (binding 72 "x2c_func_value_argument"))) 
                        (args (expr ("Func") 
-                              (ident (binding 83 "_x2c_lambda_closure_1"))) 
+                              (ident (binding 77 "_x2c_lambda_closure_1"))) 
                         (expr (* const "FuncArg") 
-                         (ident (binding 84 "_x2c_lambda_argv_1"))) 
+                         (ident (binding 78 "_x2c_lambda_argv_1"))) 
                         (expr (int) (literal (int) "0")) 
                         (expr ("Symbol") "3453797")))) 
                 (expr ("Symbol") "3453797")))))))))) 
   (declare (const struct (binding 14 "_x2c_lambda_context_2")) 
    (bindings 
-    (op = (bind (binding 86 "record") (*)) 
+    (op = (bind ("record") (*)) 
      (expr (* const struct (binding 14 "_x2c_lambda_context_2")) 
       (cast (* const struct (binding 14 "_x2c_lambda_context_2")) 
        (expr (* const void) 
-        (call (expr ((func (("Func"))) * const void) 
-               (ident (binding 76 "Func_context"))) 
-         (args (expr ("Func") (ident (binding 83 "_x2c_lambda_closure_1"))))))))))) 
+        (call (expr ((func (("Func"))) * const void) (ident ("Func_context"))) 
+         (args (expr ("Func") (ident (binding 77 "_x2c_lambda_closure_1"))))))))))) 
   (return 
    (expr ("Var") 
-    (call (expr ((func ((int) (int) (int))) "Var") 
-           (ident (binding 79 "_x2c_lambda_2"))) 
-     (args (expr (int) (ident (binding 85 "a0"))) 
+    (call (expr ((func ((param (int) (bind (binding 74 "value") ())) 
+                        (param (int) (bind (binding 75 "right") ())) 
+                        (param (int) (bind (binding 76 "left") ())))) 
+                 "Var") (ident (binding 73 "_x2c_lambda_2"))) 
+     (args (expr (int) (ident ("a0"))) 
       (expr (int) 
        (call "Var_int" 
         (args (expr ("Var") 
@@ -769,7 +770,7 @@
                        (op -> 
                         (expr (* const struct 
                                (binding 14 "_x2c_lambda_context_2")) 
-                         (ident (binding 86 "record"))) ("c0"))) 
+                         (ident ("record"))) ("c0"))) 
                  (expr ("Symbol") "3453797"))))))) 
       (expr (int) 
        (call "Var_int" 
@@ -779,74 +780,74 @@
                        (op -> 
                         (expr (* const struct 
                                (binding 14 "_x2c_lambda_context_2")) 
-                         (ident (binding 86 "record"))) ("c1"))) 
+                         (ident ("record"))) ("c1"))) 
                  (expr ("Symbol") "3453797")))))))))))))
 
 (typedef 
  (static struct (binding 20 "_x2c_lambda_context_4") 
-  (fields (declare ("Var") (bindings (bind (binding 87 "c0") ()))))) 
+  (fields (declare ("Var") (bindings (bind ("c0") ()))))) 
  (bindings (bind (binding 20 "_x2c_lambda_context_4") ())))
 
 (function (static "Var") 
- (bind (binding 88 "_x2c_lambda_4") 
+ (bind (binding 79 "_x2c_lambda_4") 
   ((fnmod 
-    (params (param (int) (bind (binding 89 "second") ())) 
-     (param (int) (bind (binding 90 "first") ())))))) 
+    (params (param (int) (bind (binding 80 "second") ())) 
+     (param (int) (bind (binding 81 "first") ())))))) 
  (block 
   (at 41 
    (stmnt 
     (return 
      (expr ("Var") 
-      (call (expr ((func (("Func"))) "Var") (ident (binding 91 "Func_var"))) 
+      (call (expr ((func (("Func"))) "Var") (ident (binding 82 "Func_var"))) 
        (args (expr ("Func") 
               (parens 
                (block 
                 (declare ("Var") 
                  (bindings 
-                  (op = (bind (binding 92 "_x2c_lambda_capture_value_7") ()) 
+                  (op = (bind (binding 83 "_x2c_lambda_capture_value_7") ()) 
                    (expr ("Var") 
                     (call (expr ((func ((int))) "Var") 
                            (ident (binding 5 "int_var"))) 
-                     (args (expr (int) (ident (binding 90 "first"))))))))) 
+                     (args (expr (int) (ident (binding 81 "first"))))))))) 
                 (declare ("Var") 
                  (bindings 
-                  (op = (bind (binding 93 "_x2c_lambda_capture_value_8") ()) 
+                  (op = (bind (binding 84 "_x2c_lambda_capture_value_8") ()) 
                    (expr ("Var") 
                     (call (expr ((func ((int))) "Var") 
                            (ident (binding 5 "int_var"))) 
-                     (args (expr (int) (ident (binding 89 "second"))))))))) 
-                (declare (struct (binding 94 "_x2c_lambda_context_12")) 
+                     (args (expr (int) (ident (binding 80 "second"))))))))) 
+                (declare (struct (binding 85 "_x2c_lambda_context_12")) 
                  (bindings 
-                  (op = (bind (binding 95 "_x2c_lambda_context_13") ()) 
-                   (expr (struct (binding 94 "_x2c_lambda_context_12")) 
+                  (op = (bind (binding 86 "_x2c_lambda_context_13") ()) 
+                   (expr (struct (binding 85 "_x2c_lambda_context_12")) 
                     (composite 
                      (commas 
                       (expr ("Var") 
-                       (ident (binding 92 "_x2c_lambda_capture_value_7"))) 
+                       (ident (binding 83 "_x2c_lambda_capture_value_7"))) 
                       (expr ("Var") 
-                       (ident (binding 93 "_x2c_lambda_capture_value_8"))))))))) 
+                       (ident (binding 84 "_x2c_lambda_capture_value_8"))))))))) 
                 (stmnt 
                  (expr ("Func") 
                   (call "Func_new_context" 
-                   (args (expr () (ident (binding 96 "_x2c_lambda_13"))) 
+                   (args (expr () (ident (binding 87 "_x2c_lambda_13"))) 
                     (expr ("List") (expr ("List") (cache 12))) 
-                    (expr (* struct (binding 94 "_x2c_lambda_context_12")) 
-                     (op & (expr (struct (binding 94 "_x2c_lambda_context_12")) 
-                            (ident (binding 95 "_x2c_lambda_context_13"))))) 
+                    (expr (* struct (binding 85 "_x2c_lambda_context_12")) 
+                     (op & (expr (struct (binding 85 "_x2c_lambda_context_12")) 
+                            (ident (binding 86 "_x2c_lambda_context_13"))))) 
                     (expr ("size_t") 
                      (sizeof 
-                      (expr (struct (binding 94 "_x2c_lambda_context_12")) 
-                       (ident (binding 95 "_x2c_lambda_context_13"))))))))))))))))))))
+                      (expr (struct (binding 85 "_x2c_lambda_context_12")) 
+                       (ident (binding 86 "_x2c_lambda_context_13"))))))))))))))))))))
 
 (function (static "Var") 
  (bind (binding 22 "_x2c_lambda_5") 
   ((fnmod 
-    (params (param ("Func") (bind (binding 97 "_x2c_lambda_closure_2") ())) 
-     (param (const "FuncArg") (bind (binding 98 "_x2c_lambda_argv_2") (*))))))) 
+    (params (param ("Func") (bind (binding 88 "_x2c_lambda_closure_2") ())) 
+     (param (const "FuncArg") (bind (binding 89 "_x2c_lambda_argv_2") (*))))))) 
  (block 
   (declare (int) 
    (bindings 
-    (op = (bind (binding 99 "a0") ()) 
+    (op = (bind ("a0") ()) 
      (expr (int) 
       (call "Var_int" 
        (args (expr ("Var") 
@@ -854,28 +855,28 @@
                (args (expr ("Var") 
                       (call (expr ((func (("Func") (* const "FuncArg") 
                                           (unsigned) ("Symbol"))) "Var") 
-                             (ident (binding 74 "x2c_func_value_argument"))) 
+                             (ident (binding 72 "x2c_func_value_argument"))) 
                        (args (expr ("Func") 
-                              (ident (binding 97 "_x2c_lambda_closure_2"))) 
+                              (ident (binding 88 "_x2c_lambda_closure_2"))) 
                         (expr (* const "FuncArg") 
-                         (ident (binding 98 "_x2c_lambda_argv_2"))) 
+                         (ident (binding 89 "_x2c_lambda_argv_2"))) 
                         (expr (int) (literal (int) "0")) 
                         (expr ("Symbol") "3453797")))) 
                 (expr ("Symbol") "3453797")))))))))) 
   (declare (const struct (binding 20 "_x2c_lambda_context_4")) 
    (bindings 
-    (op = (bind (binding 100 "record") (*)) 
+    (op = (bind ("record") (*)) 
      (expr (* const struct (binding 20 "_x2c_lambda_context_4")) 
       (cast (* const struct (binding 20 "_x2c_lambda_context_4")) 
        (expr (* const void) 
-        (call (expr ((func (("Func"))) * const void) 
-               (ident (binding 76 "Func_context"))) 
-         (args (expr ("Func") (ident (binding 97 "_x2c_lambda_closure_2"))))))))))) 
+        (call (expr ((func (("Func"))) * const void) (ident ("Func_context"))) 
+         (args (expr ("Func") (ident (binding 88 "_x2c_lambda_closure_2"))))))))))) 
   (return 
    (expr ("Var") 
-    (call (expr ((func ((int) (int))) "Var") 
-           (ident (binding 88 "_x2c_lambda_4"))) 
-     (args (expr (int) (ident (binding 99 "a0"))) 
+    (call (expr ((func ((param (int) (bind (binding 80 "second") ())) 
+                        (param (int) (bind (binding 81 "first") ())))) 
+                 "Var") (ident (binding 79 "_x2c_lambda_4"))) 
+     (args (expr (int) (ident ("a0"))) 
       (expr (int) 
        (call "Var_int" 
         (args (expr ("Var") 
@@ -884,17 +885,17 @@
                        (op -> 
                         (expr (* const struct 
                                (binding 20 "_x2c_lambda_context_4")) 
-                         (ident (binding 100 "record"))) ("c0"))) 
+                         (ident ("record"))) ("c0"))) 
                  (expr ("Symbol") "3453797")))))))))))))
 
 (typedef 
  (static struct (binding 28 "_x2c_lambda_context_6") 
-  (fields (declare (int) (bindings (bind (binding 101 "c0") (*)))))) 
+  (fields (declare (int) (bindings (bind ("c0") (*)))))) 
  (bindings (bind (binding 28 "_x2c_lambda_context_6") ())))
 
 (function (static "Var") 
- (bind (binding 102 "_x2c_lambda_6") 
-  ((fnmod (params (param (int) (bind (binding 103 "value") (&))))))) 
+ (bind (binding 90 "_x2c_lambda_6") 
+  ((fnmod (params (param (int) (bind (binding 91 "value") (&))))))) 
  (block 
   (at 20 
    (stmnt 
@@ -905,26 +906,26 @@
               (op ++ 
                (expr (int) 
                 (parens 
-                 (expr (int) (op * (expr (& int) (ident (binding 103 "value")))))))))))))))))
+                 (expr (int) (op * (expr (& int) (ident (binding 91 "value")))))))))))))))))
 
 (function (static "Var") 
  (bind (binding 30 "_x2c_lambda_7") 
   ((fnmod 
-    (params (param ("Func") (bind (binding 104 "_x2c_lambda_closure_3") ())) 
-     (param (const "FuncArg") (bind (binding 105 "_x2c_lambda_argv_3") (*))))))) 
+    (params (param ("Func") (bind (binding 92 "_x2c_lambda_closure_3") ())) 
+     (param (const "FuncArg") (bind (binding 93 "_x2c_lambda_argv_3") (*))))))) 
  (block 
   (declare (const struct (binding 28 "_x2c_lambda_context_6")) 
    (bindings 
-    (op = (bind (binding 106 "record") (*)) 
+    (op = (bind ("record") (*)) 
      (expr (* const struct (binding 28 "_x2c_lambda_context_6")) 
       (cast (* const struct (binding 28 "_x2c_lambda_context_6")) 
        (expr (* const void) 
-        (call (expr ((func (("Func"))) * const void) 
-               (ident (binding 76 "Func_context"))) 
-         (args (expr ("Func") (ident (binding 104 "_x2c_lambda_closure_3"))))))))))) 
+        (call (expr ((func (("Func"))) * const void) (ident ("Func_context"))) 
+         (args (expr ("Func") (ident (binding 92 "_x2c_lambda_closure_3"))))))))))) 
   (return 
    (expr ("Var") 
-    (call (expr ((func ((& int))) "Var") (ident (binding 102 "_x2c_lambda_6"))) 
+    (call (expr ((func ((param (int) (bind (binding 91 "value") (&))))) "Var") 
+           (ident (binding 90 "_x2c_lambda_6"))) 
      (args (expr (& int) 
             (op & (parens 
                    (expr (int) 
@@ -932,18 +933,18 @@
                            (op -> 
                             (expr (* const struct 
                                    (binding 28 "_x2c_lambda_context_6")) 
-                             (ident (binding 106 "record"))) ("c0"))))))))))))))
+                             (ident ("record"))) ("c0"))))))))))))))
 
 (typedef 
  (static struct (binding 50 "_x2c_lambda_context_8") 
-  (fields (declare ("Var") (bindings (bind (binding 107 "c0") ()))))) 
+  (fields (declare ("Var") (bindings (bind ("c0") ()))))) 
  (bindings (bind (binding 50 "_x2c_lambda_context_8") ())))
 
 (function (static "Var") 
- (bind (binding 108 "_x2c_lambda_8") 
+ (bind (binding 94 "_x2c_lambda_8") 
   ((fnmod 
-    (params (param (int) (bind (binding 109 "value") ())) 
-     (param (int) (bind (binding 110 "direct_bias") ())))))) 
+    (params (param (int) (bind (binding 95 "value") ())) 
+     (param (int) (bind (binding 96 "direct_bias") ())))))) 
  (block 
   (at 27 
    (stmnt 
@@ -951,18 +952,18 @@
      (expr ("Var") 
       (call (expr ((func ((int))) "Var") (ident (binding 5 "int_var"))) 
        (args (expr (int) 
-              (op + (expr (int) (ident (binding 109 "value"))) 
-               (expr (int) (ident (binding 110 "direct_bias")))))))))))))
+              (op + (expr (int) (ident (binding 95 "value"))) 
+               (expr (int) (ident (binding 96 "direct_bias")))))))))))))
 
 (function (static "Var") 
  (bind (binding 52 "_x2c_lambda_9") 
   ((fnmod 
-    (params (param ("Func") (bind (binding 111 "_x2c_lambda_closure_4") ())) 
-     (param (const "FuncArg") (bind (binding 112 "_x2c_lambda_argv_4") (*))))))) 
+    (params (param ("Func") (bind (binding 97 "_x2c_lambda_closure_4") ())) 
+     (param (const "FuncArg") (bind (binding 98 "_x2c_lambda_argv_4") (*))))))) 
  (block 
   (declare (int) 
    (bindings 
-    (op = (bind (binding 113 "a0") ()) 
+    (op = (bind ("a0") ()) 
      (expr (int) 
       (call "Var_int" 
        (args (expr ("Var") 
@@ -970,28 +971,28 @@
                (args (expr ("Var") 
                       (call (expr ((func (("Func") (* const "FuncArg") 
                                           (unsigned) ("Symbol"))) "Var") 
-                             (ident (binding 74 "x2c_func_value_argument"))) 
+                             (ident (binding 72 "x2c_func_value_argument"))) 
                        (args (expr ("Func") 
-                              (ident (binding 111 "_x2c_lambda_closure_4"))) 
+                              (ident (binding 97 "_x2c_lambda_closure_4"))) 
                         (expr (* const "FuncArg") 
-                         (ident (binding 112 "_x2c_lambda_argv_4"))) 
+                         (ident (binding 98 "_x2c_lambda_argv_4"))) 
                         (expr (int) (literal (int) "0")) 
                         (expr ("Symbol") "3453797")))) 
                 (expr ("Symbol") "3453797")))))))))) 
   (declare (const struct (binding 50 "_x2c_lambda_context_8")) 
    (bindings 
-    (op = (bind (binding 114 "record") (*)) 
+    (op = (bind ("record") (*)) 
      (expr (* const struct (binding 50 "_x2c_lambda_context_8")) 
       (cast (* const struct (binding 50 "_x2c_lambda_context_8")) 
        (expr (* const void) 
-        (call (expr ((func (("Func"))) * const void) 
-               (ident (binding 76 "Func_context"))) 
-         (args (expr ("Func") (ident (binding 111 "_x2c_lambda_closure_4"))))))))))) 
+        (call (expr ((func (("Func"))) * const void) (ident ("Func_context"))) 
+         (args (expr ("Func") (ident (binding 97 "_x2c_lambda_closure_4"))))))))))) 
   (return 
    (expr ("Var") 
-    (call (expr ((func ((int) (int))) "Var") 
-           (ident (binding 108 "_x2c_lambda_8"))) 
-     (args (expr (int) (ident (binding 113 "a0"))) 
+    (call (expr ((func ((param (int) (bind (binding 95 "value") ())) 
+                        (param (int) (bind (binding 96 "direct_bias") ())))) 
+                 "Var") (ident (binding 94 "_x2c_lambda_8"))) 
+     (args (expr (int) (ident ("a0"))) 
       (expr (int) 
        (call "Var_int" 
         (args (expr ("Var") 
@@ -1000,43 +1001,43 @@
                        (op -> 
                         (expr (* const struct 
                                (binding 50 "_x2c_lambda_context_8")) 
-                         (ident (binding 114 "record"))) ("c0"))) 
+                         (ident ("record"))) ("c0"))) 
                  (expr ("Symbol") "3453797")))))))))))))
 
 (typedef 
  (static struct (binding 56 "_x2c_lambda_context_10") 
-  (fields (declare ("Var") (bindings (bind (binding 115 "c0") ()))))) 
+  (fields (declare ("Var") (bindings (bind ("c0") ()))))) 
  (bindings (bind (binding 56 "_x2c_lambda_context_10") ())))
 
 (function (static "Var") 
- (bind (binding 116 "_x2c_lambda_10") 
-  ((fnmod (params (param (int) (bind (binding 117 "zero_value") ())))))) 
+ (bind (binding 99 "_x2c_lambda_10") 
+  ((fnmod (params (param (int) (bind (binding 100 "zero_value") ())))))) 
  (block 
   (at 28 
    (stmnt 
     (return 
      (expr ("Var") 
       (call (expr ((func ((int))) "Var") (ident (binding 5 "int_var"))) 
-       (args (expr (int) (ident (binding 117 "zero_value")))))))))))
+       (args (expr (int) (ident (binding 100 "zero_value")))))))))))
 
 (function (static "Var") 
  (bind (binding 58 "_x2c_lambda_11") 
   ((fnmod 
-    (params (param ("Func") (bind (binding 118 "_x2c_lambda_closure_5") ())) 
-     (param (const "FuncArg") (bind (binding 119 "_x2c_lambda_argv_5") (*))))))) 
+    (params (param ("Func") (bind (binding 101 "_x2c_lambda_closure_5") ())) 
+     (param (const "FuncArg") (bind (binding 102 "_x2c_lambda_argv_5") (*))))))) 
  (block 
   (declare (const struct (binding 56 "_x2c_lambda_context_10")) 
    (bindings 
-    (op = (bind (binding 120 "record") (*)) 
+    (op = (bind ("record") (*)) 
      (expr (* const struct (binding 56 "_x2c_lambda_context_10")) 
       (cast (* const struct (binding 56 "_x2c_lambda_context_10")) 
        (expr (* const void) 
-        (call (expr ((func (("Func"))) * const void) 
-               (ident (binding 76 "Func_context"))) 
-         (args (expr ("Func") (ident (binding 118 "_x2c_lambda_closure_5"))))))))))) 
+        (call (expr ((func (("Func"))) * const void) (ident ("Func_context"))) 
+         (args (expr ("Func") (ident (binding 101 "_x2c_lambda_closure_5"))))))))))) 
   (return 
    (expr ("Var") 
-    (call (expr ((func ((int))) "Var") (ident (binding 116 "_x2c_lambda_10"))) 
+    (call (expr ((func ((param (int) (bind (binding 100 "zero_value") ())))) 
+                 "Var") (ident (binding 99 "_x2c_lambda_10"))) 
      (args (expr (int) 
             (call "Var_int" 
              (args (expr ("Var") 
@@ -1045,21 +1046,21 @@
                             (op -> 
                              (expr (* const struct 
                                     (binding 56 "_x2c_lambda_context_10")) 
-                              (ident (binding 120 "record"))) ("c0"))) 
+                              (ident ("record"))) ("c0"))) 
                       (expr ("Symbol") "3453797")))))))))))))
 
 (typedef 
- (static struct (binding 94 "_x2c_lambda_context_12") 
-  (fields (declare ("Var") (bindings (bind (binding 121 "c0") ()))) 
-   (declare ("Var") (bindings (bind (binding 122 "c1") ()))))) 
- (bindings (bind (binding 94 "_x2c_lambda_context_12") ())))
+ (static struct (binding 85 "_x2c_lambda_context_12") 
+  (fields (declare ("Var") (bindings (bind ("c0") ()))) 
+   (declare ("Var") (bindings (bind ("c1") ()))))) 
+ (bindings (bind (binding 85 "_x2c_lambda_context_12") ())))
 
 (function (static "Var") 
- (bind (binding 123 "_x2c_lambda_12") 
+ (bind (binding 103 "_x2c_lambda_12") 
   ((fnmod 
-    (params (param (int) (bind (binding 124 "value") ())) 
-     (param (int) (bind (binding 125 "first") ())) 
-     (param (int) (bind (binding 126 "second") ())))))) 
+    (params (param (int) (bind (binding 104 "value") ())) 
+     (param (int) (bind (binding 105 "first") ())) 
+     (param (int) (bind (binding 106 "second") ())))))) 
  (block 
   (at 19 
    (stmnt 
@@ -1068,19 +1069,19 @@
       (call (expr ((func ((int))) "Var") (ident (binding 5 "int_var"))) 
        (args (expr (int) 
               (op + (expr (int) 
-                     (op + (expr (int) (ident (binding 124 "value"))) 
-                      (expr (int) (ident (binding 125 "first"))))) 
-               (expr (int) (ident (binding 126 "second")))))))))))))
+                     (op + (expr (int) (ident (binding 104 "value"))) 
+                      (expr (int) (ident (binding 105 "first"))))) 
+               (expr (int) (ident (binding 106 "second")))))))))))))
 
 (function (static "Var") 
- (bind (binding 96 "_x2c_lambda_13") 
+ (bind (binding 87 "_x2c_lambda_13") 
   ((fnmod 
-    (params (param ("Func") (bind (binding 127 "_x2c_lambda_closure_6") ())) 
-     (param (const "FuncArg") (bind (binding 128 "_x2c_lambda_argv_6") (*))))))) 
+    (params (param ("Func") (bind (binding 107 "_x2c_lambda_closure_6") ())) 
+     (param (const "FuncArg") (bind (binding 108 "_x2c_lambda_argv_6") (*))))))) 
  (block 
   (declare (int) 
    (bindings 
-    (op = (bind (binding 129 "a0") ()) 
+    (op = (bind ("a0") ()) 
      (expr (int) 
       (call "Var_int" 
        (args (expr ("Var") 
@@ -1088,28 +1089,29 @@
                (args (expr ("Var") 
                       (call (expr ((func (("Func") (* const "FuncArg") 
                                           (unsigned) ("Symbol"))) "Var") 
-                             (ident (binding 74 "x2c_func_value_argument"))) 
+                             (ident (binding 72 "x2c_func_value_argument"))) 
                        (args (expr ("Func") 
-                              (ident (binding 127 "_x2c_lambda_closure_6"))) 
+                              (ident (binding 107 "_x2c_lambda_closure_6"))) 
                         (expr (* const "FuncArg") 
-                         (ident (binding 128 "_x2c_lambda_argv_6"))) 
+                         (ident (binding 108 "_x2c_lambda_argv_6"))) 
                         (expr (int) (literal (int) "0")) 
                         (expr ("Symbol") "3453797")))) 
                 (expr ("Symbol") "3453797")))))))))) 
-  (declare (const struct (binding 94 "_x2c_lambda_context_12")) 
+  (declare (const struct (binding 85 "_x2c_lambda_context_12")) 
    (bindings 
-    (op = (bind (binding 130 "record") (*)) 
-     (expr (* const struct (binding 94 "_x2c_lambda_context_12")) 
-      (cast (* const struct (binding 94 "_x2c_lambda_context_12")) 
+    (op = (bind ("record") (*)) 
+     (expr (* const struct (binding 85 "_x2c_lambda_context_12")) 
+      (cast (* const struct (binding 85 "_x2c_lambda_context_12")) 
        (expr (* const void) 
-        (call (expr ((func (("Func"))) * const void) 
-               (ident (binding 76 "Func_context"))) 
-         (args (expr ("Func") (ident (binding 127 "_x2c_lambda_closure_6"))))))))))) 
+        (call (expr ((func (("Func"))) * const void) (ident ("Func_context"))) 
+         (args (expr ("Func") (ident (binding 107 "_x2c_lambda_closure_6"))))))))))) 
   (return 
    (expr ("Var") 
-    (call (expr ((func ((int) (int) (int))) "Var") 
-           (ident (binding 123 "_x2c_lambda_12"))) 
-     (args (expr (int) (ident (binding 129 "a0"))) 
+    (call (expr ((func ((param (int) (bind (binding 104 "value") ())) 
+                        (param (int) (bind (binding 105 "first") ())) 
+                        (param (int) (bind (binding 106 "second") ())))) 
+                 "Var") (ident (binding 103 "_x2c_lambda_12"))) 
+     (args (expr (int) (ident ("a0"))) 
       (expr (int) 
        (call "Var_int" 
         (args (expr ("Var") 
@@ -1117,8 +1119,8 @@
                 (args (expr (const "Var") 
                        (op -> 
                         (expr (* const struct 
-                               (binding 94 "_x2c_lambda_context_12")) 
-                         (ident (binding 130 "record"))) ("c0"))) 
+                               (binding 85 "_x2c_lambda_context_12")) 
+                         (ident ("record"))) ("c0"))) 
                  (expr ("Symbol") "3453797"))))))) 
       (expr (int) 
        (call "Var_int" 
@@ -1127,6 +1129,6 @@
                 (args (expr (const "Var") 
                        (op -> 
                         (expr (* const struct 
-                               (binding 94 "_x2c_lambda_context_12")) 
-                         (ident (binding 130 "record"))) ("c1"))) 
+                               (binding 85 "_x2c_lambda_context_12")) 
+                         (ident ("record"))) ("c1"))) 
                  (expr ("Symbol") "3453797")))))))))))))
