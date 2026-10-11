@@ -1302,7 +1302,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_1(void){
   _976 = cons(_975, NULL);
   _977 = cons(_414, _976);
   _978 = List_var(_977);
-  _979 = int_var(851);
+  _979 = int_var(852);
   _980 = cons(_979, NULL);
   _981 = cons(_420, _980);
   _982 = List_var(_981);
@@ -1310,7 +1310,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_1(void){
   _984 = cons(_983, NULL);
   _985 = cons(_425, _984);
   _986 = List_var(_985);
-  _987 = int_var(31842);
+  _987 = int_var(31846);
   _988 = cons(_987, NULL);
   _989 = cons(_433, _988);
   _990 = List_var(_989);
@@ -1423,7 +1423,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void){
   _1094 = cons(_1093, NULL);
   _1095 = cons(_382, _1094);
   _1096 = List_var(_1095);
-  _1097 = int_var(759);
+  _1097 = int_var(760);
   _1098 = cons(_1097, NULL);
   _1099 = cons(_420, _1098);
   _1100 = List_var(_1099);
@@ -1431,7 +1431,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void){
   _1102 = cons(_1101, NULL);
   _1103 = cons(_428, _1102);
   _1104 = List_var(_1103);
-  _1105 = int_var(28299);
+  _1105 = int_var(28303);
   _1106 = cons(_1105, NULL);
   _1107 = cons(_433, _1106);
   _1108 = List_var(_1107);
@@ -1521,11 +1521,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void){
   _1192 = cons(_1191, NULL);
   _1193 = cons(_382, _1192);
   _1194 = List_var(_1193);
-  _1195 = int_var(755);
+  _1195 = int_var(756);
   _1196 = cons(_1195, NULL);
   _1197 = cons(_420, _1196);
   _1198 = List_var(_1197);
-  _1199 = int_var(28232);
+  _1199 = int_var(28236);
   _1200 = cons(_1199, NULL);
   _1201 = cons(_433, _1200);
   _1202 = List_var(_1201);
@@ -1662,11 +1662,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void){
   _1333 = cons(_1332, NULL);
   _1334 = cons(_382, _1333);
   _1335 = List_var(_1334);
-  _1336 = int_var(750);
+  _1336 = int_var(751);
   _1337 = cons(_1336, NULL);
   _1338 = cons(_420, _1337);
   _1339 = List_var(_1338);
-  _1340 = int_var(28110);
+  _1340 = int_var(28114);
   _1341 = cons(_1340, NULL);
   _1342 = cons(_433, _1341);
   _1343 = List_var(_1342);
