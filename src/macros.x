@@ -2730,15 +2730,16 @@ static List Compiler._rewrite(
   // A meta body still completes and formats the calls it makes.
   if (c.macro_holes || (c.meta_body && point != <member> && point != <call>))
     return NULL;
-  // A shipped rule's lowered carrier writes no source statement.
-  int shipped = point == <node> && c.slot_watch && c.slot_watch.shipped;
+  // A shipped carrier's statements and written definitions are not source.
+  int shipped = (point == <node> || point == <function>) &&
+    c.slot_watch && c.slot_watch.shipped;
   foreach (RewriteRule rule, c._rewrite_candidates(point, kind)) {
     if (c.active_rewrites.contains(rule) || (shipped && !rule.builtin))
       continue;
     MacroMatcher *matcher = rule.prepared_matcher();
     if (matcher.shape ? !c.matches_macro(*matcher, source)
                       : !source.match(matcher.pattern)) continue;
-    Var result = c.apply_meta_function(rule.name, %($source), site);
+    Var result = c._applied(rule, source, site);
     if (result is void ||
         (result is <list> && (!result.list() || result.list() === source)))
       continue;
@@ -2758,6 +2759,14 @@ static List Compiler._rewrite(
     }
   }
   return NULL;
+}
+
+/* What `rule` answers for `source`. The code its meta function places
+   while it runs is that rule's, as its replacement is. */
+static Var Compiler._applied(
+  Compiler c, RewriteRule rule, List source, Token site) {
+  $let(c.applying, cons(rule, c.active_rewrites))
+    return c.apply_meta_function(rule.name, %($source), site);
 }
 
 /* Pushes the parts of `source` that its replacement may hold onto
@@ -2781,7 +2790,8 @@ static void _held_parts(List source, Symbol point, Array found) {
    that a statement replacement holds, such as its source, and that is not
    a part its source held, takes the rules after this one now, so lowering
    never offers it to this rule again. With `lower` -1 the source is
-   lowered, so binding keeps it and the parts of it the replacement holds. */
+   lowered, so binding keeps it and the parts of it the replacement holds.
+   File-scope code that a shipped rule gives is written. */
 static List Compiler._bound(
   Compiler c, Symbol point, Var kind, List source, Var result,
   AstPos position, Type expected, Token site, int lower) {
@@ -2790,6 +2800,7 @@ static List Compiler._bound(
   _held_parts(source, point, parts);
   if (lower) result = _kept_lowered(result, source, parts);
   List bound = c.bind_syntax(result, position, expected);
+  if (position == AST_UNIT) bound = c.written_support(bound);
   struct SlotWatch held = {parts.list()};
   return c._bound_held(&held, kind, bound, position, expected, site, lower);
 }
@@ -2823,12 +2834,25 @@ static Var Compiler._bound_held(
 }
 
 /* A replacement definition binds at file scope and lowers as written,
-   unless it is a lowered carrier. */
+   unless it is a lowered carrier. It lowers outside the watch that chose
+   its rule, as any definition does, and a shipped rule's is written. */
 static List Compiler._lowered_definition(Compiler c, Var result) {
   List bound = c.bind_syntax(result, AST_UNIT, NULL);
   match (bound) case %(seq ?only): bound = only;
   match (result) case %(code-value "lowered" *): return bound;
-  return c.normalize(bound);
+  $let(c.slot_watch, NULL) return c.normalize(c.written_support(bound));
+}
+
+/** The bound file-scope code `bound` that the rule now writing gives,
+    written as the kernel's when that rule is shipped. A rule writes while
+    its meta function runs, until a rule it reaches binds, and while its
+    replacement binds and lowers. What a program writes, or a placement
+    outside any rule, is source. */
+List Compiler.written_support(Compiler c, List bound) {
+  List writers = c.applying && c.applying.cdr() === c.active_rewrites
+    ? c.applying : c.active_rewrites;
+  RewriteRule writer = writers ? writers.car() : NULL;
+  return writer && writer.builtin ? written_definitions(bound) : bound;
 }
 
 /* Binds, converts, and lowers a replacement as written. */
@@ -2881,8 +2905,9 @@ static typedef struct Effects {
     a skeleton from what it records. A replacement lowered as written
     within another's has that one as its `parent`, whose source it may hold
     as well. A shipped rule's lowered carrier, a statement the kernel
-    wrote, and any replacement lowered within either are `shipped`: their
-    own statements are not source, so no user statement rule sees them,
+    wrote, and any replacement lowered within either are `shipped`, as is
+    a written definition while its function rules are chosen: their own
+    statements and definitions are not source, so no user rule sees them,
     while the values a carrier watches are. A watch whose values are
     lowered already has them `kept` as they are. */
 struct SlotWatch {
@@ -4962,11 +4987,11 @@ void Compiler.place(Compiler c, List where, Var code) {
       Macro deferred = $deferred;
       c.place_after(deferred(code));
     }
-    case %(unit-support): c.add_early(c.bind_syntax(code, AST_UNIT, NULL));
+    case %(unit-support): c._place_support(code);
     case %(unit-support ?key): {
       Var placed;
       $adapter.memo(c, key, placed) {
-        c.add_early(c.bind_syntax(code, AST_UNIT, NULL));
+        c._place_support(code);
         placed = 1;
       }
     }
@@ -4976,6 +5001,11 @@ void Compiler.place(Compiler c, List where, Var code) {
       c.add_init(area, c.bind_syntax(code, AST_BLOCK, NULL));
     default: $report.macro.placement(c, where);
   }
+}
+
+/* Adds the file-scope `code` a placement gives to the unit's support. */
+static void Compiler._place_support(Compiler c, Var code) {
+  c.add_support(c.written_support(c.bind_syntax(code, AST_UNIT, NULL)));
 }
 
 /** Binds a code-value carrier that a meta call returned outside a macro

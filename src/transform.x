@@ -114,7 +114,8 @@ static Ast Compiler._step(Compiler c, Ast ast) {
     case %(at ?origin ?inner): return c._at_node(ast, origin, inner);
     case %(function ?return_type
            (!set ?declarator (bind ?binding ?)) ?body):
-      return c._function_node(ast, return_type, declarator, binding, body);
+      return c._function_node(ast, return_type, declarator, binding, body, 0);
+    case %(function ? (bind ? ?) ? kernel): return c._written_function(ast);
     case %(slice
            (!set ?expression
              (expr (!set ?matched_type (*)) ?))
@@ -221,7 +222,7 @@ void Compiler.shipped_support(
   Compiler c, Symbol kind, List source, String form) {
   List bound = c.rewrite(<node>, kind, source, AST_UNIT, NULL, NULL);
   if (!bound) $report.xform.no_shipped_rule(c, form);
-  else c.add_early(bound);
+  else c.add_support(bound);
 }
 
 static Ast Compiler._shipped_statement(Compiler c, Ast ast, Symbol tag) =>
@@ -355,19 +356,33 @@ static Ast Compiler._at_node(Compiler c, Ast ast, int occurrence, List inner) {
 }
 
 /* A function rule sees the bound and typed definition before its body
-   lowers. Rules keyed by its return type come before those keyed by none. */
+   lowers. Rules keyed by its return type come before those keyed by none.
+   A definition the kernel or a shipped rule wrote is not source, so only
+   shipped rules see it. */
 static List Compiler._function_rewrite(
-  Compiler c, List function, List return_type) {
-  List replaced = c.lower_rewrite(
-    <function>, return_type, function, AST_UNIT, NULL, NULL);
-  return replaced ? replaced : c.lower_rewrite(
-    <function>, <any>, function, AST_UNIT, NULL, NULL);
+  Compiler c, List function, List return_type, int written) {
+  struct SlotWatch shipped = {.shipped = 1};
+  $let(c.slot_watch, written ? &shipped : c.slot_watch) {
+    List replaced = c.lower_rewrite(
+      <function>, return_type, function, AST_UNIT, NULL, NULL);
+    return replaced ? replaced : c.lower_rewrite(
+      <function>, <any>, function, AST_UNIT, NULL, NULL);
+  }
+}
+
+/* A definition that `kernel` marks as written lowers as one the source
+   wrote, except that only shipped rules see it. */
+static Ast Compiler._written_function(Compiler c, List function) {
+  (List return_type, List declarator, List body) = function.cdr();
+  return c._function_node(
+    %(function $return_type $declarator $body), return_type, declarator,
+    declarator.cadr(), body, 1);
 }
 
 static Ast Compiler._function_node(
   Compiler c, List function, List return_type, List declarator,
-  List binding, List body) {
-  List replaced = c._function_rewrite(function, return_type);
+  List binding, List body, int written) {
+  List replaced = c._function_rewrite(function, return_type, written);
   if (replaced) return replaced;
   String owner = binding_identity_spelling(binding);
   Var stored_owner;

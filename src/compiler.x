@@ -207,6 +207,9 @@ typedef struct Compiler {
   /* A Unit target retains meta code and complete initializers. */
   int capture_unit;
   List active_rewrites;
+  /* The rules active while a rule's meta function runs, that rule first;
+     see `Compiler.written_support`. */
+  List applying;
   Map rewrite_rules;
   /* Each rewrite replacement lowered once in this unit, by its template and
      slot signature, and the slots its first lowering watches. */
@@ -2316,9 +2319,28 @@ List Compiler.gensym(Compiler c) {
   return %((gensym $owner $count));
 }
 
-/** Appends a generated declaration to the unit's pending support. */
+/** Appends a declaration the kernel generated to the unit's pending
+    support. It is implementation, so its definitions are written. */
 void Compiler.add_early(Compiler c, List decl) {
+  c.add_support(written_definitions(decl));
+}
+
+/** Appends the declaration `decl` to the unit's pending support as it is:
+    a definition offered to every function rule, or a written one. */
+void Compiler.add_support(Compiler c, List decl) {
   c.pending.area(<support>).push(decl);
+}
+
+/** `decl` with each function definition in it marked `kernel` as written,
+    which the transform strips before it offers the definition only to
+    shipped function rules. */
+List written_definitions(List decl) {
+  match (decl) {
+    case %(function ? (bind ? ?) ?): return %(function @{decl.cdr()} kernel);
+    case %((!or at seq) *):
+      return Ast.rewrite_children(decl, written_definitions);
+  }
+  return decl;
 }
 
 /** Appends the lowered statement `stmt` to the file initialization area
