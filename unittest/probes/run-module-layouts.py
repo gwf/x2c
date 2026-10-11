@@ -371,6 +371,41 @@ def cases():
         yield f"ordinary_selected_layout_cycle_flag_{flag}", ordinary(selected_cycle), {
             "inputs": ["box.x", "box/inner.x", "box/outer.x", "main.x"],
             "rejection_phase": "any"}, rejection
+    for flag in (0, 1):
+        for cycle in (False, True):
+            a_condition = "FIELD_FLAG" if cycle else "!FIELD_FLAG"
+            fields = {
+                "box.x": 'module {"box/a.x", "box/b.x", "box/outer.x"}\n',
+                "box/a.x": ('module typedef struct A A;\nmodule typedef struct B B;\n'
+                            f'#define FIELD_FLAG {flag}\n#if {a_condition}\n'
+                            '#include "b.x"\n#endif\n'
+                            'module typedef struct A {\n'
+                            f'#if {a_condition}\nB nested;\n#else\nint value;\n#endif\n'
+                            '} A;\n'),
+                "box/b.x": ('module typedef struct A A;\nmodule typedef struct B B;\n'
+                            f'#define FIELD_FLAG {flag}\n#if FIELD_FLAG\n'
+                            '#include "a.x"\n#endif\n'
+                            'module typedef struct B {\n'
+                            '#if FIELD_FLAG\nA nested;\n#else\nint value;\n#endif\n'
+                            '} B;\n'),
+                "box/outer.x": ('module typedef struct Outer {A first; B second;} Outer;\n'
+                                'int answer(void) {return sizeof(Outer) == 2 * sizeof(int) ? 42 : 0;}\n'),
+                "main.x": probes.consumer("box.x", "answer() == 42"),
+            }
+            name = "selected_field_cycle" if cycle else "exclusive_field_edges"
+            rejection = r"incomplete|cycle|recursive" if cycle and flag else None
+            yield f"{name}_flag_{flag}", fields, {
+                **options, "rejection_phase": "any"}, rejection
+            ordinary_fields = {path: text.replace("module ", "")
+                               for path, text in fields.items()}
+            ordinary_fields["box.x"] = ('#include "box/a.x"\n'
+                                        '#include "box/b.x"\n'
+                                        '#include "box/outer.x"\n')
+            ordinary_fields["box/outer.x"] = ('#include "a.x"\n#include "b.x"\n'
+                                              + ordinary_fields["box/outer.x"])
+            yield f"ordinary_{name}_flag_{flag}", ordinary_fields, {
+                "inputs": ["box.x", "box/a.x", "box/b.x", "box/outer.x", "main.x"],
+                "rejection_phase": "any"}, rejection
     for storage in ("", "static "):
         label = "static" if storage else "public"
         macro_effects = {
