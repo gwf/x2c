@@ -7,6 +7,8 @@
 */
 
 #pragma once
+typedef struct Frontend *Frontend;
+
 #include "cli.x"
 #include "compiler.x"
 #include "toolchain.x"
