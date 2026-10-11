@@ -229,7 +229,7 @@ static void Layouts.require_fields(
           }
           if (inline_fields) {
             layouts.require_fields(c, resolver, inline_fields, needed,
-              demands, recorded, prefix.list());
+              demands, recorded, prefix);
             continue;
           }
           Map selected = {};
