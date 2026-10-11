@@ -629,8 +629,9 @@ replacement template and fill steps are the remaining driver cost.
   plain `make build` after editing a shipped component leaves a degraded
   compiler (stale embedded prelude records, 9.2 G for the empty unit, about
   twelve dump fixtures differing) until `make bootstrap-refresh`, and a
-  timestamp change alone, with content equal to the bootstrap's, does the
-  same until `make build-safe`; the printf family table is spelled twice because
+  timestamp change alone, with content equal to the bootstrap's, or a plain
+  `make build` after `make bootstrap-refresh`, does the same until
+  `make build-safe`; the printf family table is spelled twice because
   the `.str()` warning reads it before the component runs.
 
 ## Next bounded milestone
