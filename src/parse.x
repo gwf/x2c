@@ -470,6 +470,12 @@ static List Compiler._declaration_form(Compiler c, int skip_body) {
     if (!c.unit_nodes) c.unit_nodes = [];
     c.unit_nodes.push(decl);
   }
+  if (prefix && !meta && decl.car() == <declare> && !type.is_function()) {
+    NativePrefixBody *pending = c._retain_native_prefix_objects(decl, first);
+    c.finish_collected_declaration(decl, NULL, 0);
+    pending->end = c.token;
+    return NULL;
+  }
   if (prefix && body) {
     c._retain_native_prefix_body(decl, meta, first);
     c.finish_collected_declaration(decl, meta, native);
@@ -506,10 +512,11 @@ static List Compiler._declaration_form(Compiler c, int skip_body) {
    publishes the ordinary signatures first, without running later producers. */
 static typedef struct NativePrefixBody {
   List declaration, arms;
-  Token body, first, meta;
+  Token body, first, meta, end;
+  Array initializers;
   SymScope params;
   Map macros, aliases, objects;
-  int module, private, origin;
+  int module, private, origin, kind;
 } NativePrefixBody;
 
 static void Compiler._retain_native_prefix_body(
@@ -525,6 +532,57 @@ static void Compiler._retain_native_prefix_body(
   if (!c.native_prefix_pending) c.native_prefix_pending = [];
   c.native_prefix_pending.push(Var.new(<p48>, pending));
   c.register_native_meta_prefix();
+}
+
+/* Collection retains expression cursors without executing initializers. */
+static void Compiler._retain_native_prefix_initializer(
+  Compiler c, List type, List bind, Token first, Token body, Token end) {
+  c._retain_native_prefix_body(%(declare $type (bindings $bind)), NULL, first);
+  NativePrefixBody *pending = c.native_prefix_pending.last().pointer();
+  pending->kind = 2;
+  pending->body = body;
+  pending->end = end;
+}
+
+static NativePrefixBody *Compiler._retain_native_prefix_objects(
+  Compiler c, List declaration, Token first) {
+  Array initializers = [];
+  while (c.native_prefix_pending && c.native_prefix_pending.len()) {
+    NativePrefixBody *pending = c.native_prefix_pending.last().pointer();
+    if (pending->kind != 2) break;
+    initializers.unshift(c.native_prefix_pending.take_last());
+  }
+  c._retain_native_prefix_body(declaration, NULL, first);
+  NativePrefixBody *pending = c.native_prefix_pending.last().pointer();
+  pending->kind = 1;
+  pending->initializers = initializers;
+  return pending;
+}
+
+static List Compiler._bind_native_prefix_objects(
+  Compiler c, NativePrefixBody *pending) {
+  Map initialized = {};
+  foreach (Var slice, pending->initializers) {
+    NativePrefixBody *source = slice.pointer();
+    c.token = source->body;
+    match (source->declaration)
+      case %(declare ?type (bindings ?bind)):
+        $let(c.macros, source->macros)
+        $let(c.kw_aliases, source->aliases)
+        $let(c.object_macros, source->objects)
+        $let(c.origin, source->origin)
+          initialized[bind.cadr()] = c._initialized(type, bind, source->first);
+  }
+  Array declarations = [];
+  match (pending->declaration)
+    case %(declare ?type (bindings *bindings)): {
+      foreach (List bind, bindings)
+        declarations.push(initialized.getdefault(bind.cadr(), bind));
+      c.token = pending->end;
+      return c._declared(
+        %(declare $type (bindings @{declarations.list_free()})), NULL, pending->first);
+    }
+  return pending->declaration;
 }
 
 /** Binds already-collected bodies once through the ordinary function parser. */
@@ -555,9 +613,12 @@ void Compiler.bind_native_meta_prefix(Compiler c) {
     $let(c.source_private, pending->private)
     $let(c.arms, pending->arms)
     $let(c.origin, pending->origin)
+    $let(c.return_type, NULL)
+    $let(c.meta_body, 0)
     $let(c.shallow, 0)
     $let(c.capture_unit, 1)
-      node = c._defined(pending->declaration, pending->meta, 0, pending->first);
+      node = pending->kind == 1 ? c._bind_native_prefix_objects(pending)
+        : c._defined(pending->declaration, pending->meta, 0, pending->first);
     if (!c.unit_nodes) c.unit_nodes = [];
     c.unit_nodes.push(node);
     $let(c.source_module, pending->module)
@@ -2095,7 +2156,10 @@ static List Compiler._initialized(
     c.init_tokens[binding] = origin - tokens;
   }
   if (c.shallow && !c.capture_unit) {
+    Token body = c.token;
     c._skip_shallow_expression(1);
+    if (c.meta_build && !c.signature_only && !c.macro_holes)
+      c._retain_native_prefix_initializer(type, bind, origin, body, c.token);
     c.record_module_initializer(type, bind);
     return bind;
   }

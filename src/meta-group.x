@@ -271,29 +271,31 @@ static List Compiler._prefix_lowered(Compiler c, List units) {
         else if (spec.type().is_static() && c._prefix_function(name))
           node = %(function ${_prefix_spec(spec, 0)} $bound $body);
       }
-      case %(declare ?spec (bindings
-             (op = (!set ?bound (bind ?binding *)) ?initializer))): {
-        String name = binding_identity_spelling(binding);
-        if (!c._prefix_value(name)) break;
-        c.set_fact(%(emitted $binding),
-          %"_x2c_meta_group_${c.meta_build - 1}_$name");
-        node = %(declare ${_prefix_spec(spec,
-          %(state $name) in meta_prefix_published)}
-          (bindings ${%(state $name) in meta_prefix_published
-            ? bound : %(op = $bound $initializer)}));
-      }
-      case %(declare ?spec (bindings (!set ?bound (bind ?binding *)))): {
-        String name = binding_identity_spelling(binding);
-        if (!c._prefix_value(name)) break;
-        c.set_fact(%(emitted $binding),
-          %"_x2c_meta_group_${c.meta_build - 1}_$name");
-        node = %(declare ${_prefix_spec(spec,
-          %(state $name) in meta_prefix_published)} (bindings $bound));
-      }
+      case %(declare ?spec (bindings *bindings)):
+        node = c._prefix_objects(spec, bindings);
     }
     result.push(node);
   }
   return result.list_free();
+}
+
+static List Compiler._prefix_objects(Compiler c, List spec, List bindings) {
+  int external = spec.type().is_extern(), shared = 0;
+  foreach (List declarator, bindings) {
+    List bound = declarator.car() == <op> ? declarator.caddr() : declarator;
+    String name = binding_identity_spelling(bound.cadr());
+    if (!name || !c._prefix_value(name)) continue;
+    shared = 1;
+    c.set_fact(%(emitted ${bound.cadr()}),
+      %"_x2c_meta_group_${c.meta_build - 1}_$name");
+    if (%(state $name) in meta_prefix_published) external = 1;
+  }
+  if (!shared) return %(declare $spec (bindings @bindings));
+  Array output = [];
+  foreach (List declarator, bindings)
+    output.push(external && declarator.car() == <op>
+      ? declarator.caddr() : declarator);
+  return %(declare ${_prefix_spec(spec, external)} (bindings @{output.list_free()}));
 }
 
 static List _prefix_spec(List spec, int external) {
@@ -376,7 +378,24 @@ static int Compiler._prefix_value(Compiler c, String name) {
       case %(static (declare ? (bindings
              (op = (bind ?binding *) ?)))):
         if (binding_identity_spelling(binding) == name) return 1;
+  foreach (String value, c.native_prefix_values())
+    if (value == name) return 1;
   return 0;
+}
+
+/** Ordinary provider objects share the same retained prefix storage. */
+List Compiler.native_prefix_values(Compiler c) {
+  Array names = [];
+  foreach (List node, c.unit_nodes)
+    match (node) case %(declare ?spec (bindings *bindings)):
+      if (!spec.type().is_extern())
+        foreach (List declarator, bindings) {
+          List bound = declarator.car() == <op> ? declarator.caddr() : declarator;
+          String name = binding_identity_spelling(bound.cadr());
+          if (name && !%(declare $spec (bindings $bound)).type_from_ast().is_function())
+            names.push(name);
+        }
+  return names.list_free();
 }
 
 /* A helper owns replacement bodies separately from the linked runtime.

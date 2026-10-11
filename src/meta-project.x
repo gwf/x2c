@@ -477,6 +477,8 @@ static String Helper.prefix(Helper &h, String owner, int index, String name) {
   h.changed = 1;
   foreach (String function, c.native_prefix_functions())
     published[%(function $function)] = 1;
+  foreach (String value, c.native_prefix_values())
+    published[%(state $value)] = 1;
   foreach (List entry, c.meta_group)
     match (entry) {
       case %(function ? ?target *): published[%(function $target)] = 1;
