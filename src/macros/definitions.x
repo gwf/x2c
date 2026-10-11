@@ -36,30 +36,29 @@ List Compiler.parse_macro_definition(Compiler c) {
   return d.publish();
 }
 
-/* Ordinary signatures do not bind macro templates or their future effects.
-   Normal collection owns their grammar and validates their source bodies. */
-void Compiler.skip_signature_macro_definition(Compiler c) {
-  while (c.peek(0) != <eof>) {
-    if (c._at_function_arrow()) {
-      c.next();
-      c.next();
-      if (c._legacy_expression_body()) {
-        c.token = c.token.after_group();
-        return;
-      }
-      if (c.peek(0) != <"{">) {
-        c._skip_shallow_expression(0);
-        c.expect(<;>);
-        return;
-      }
-    }
-    if (c.peek(0) == <"{">) {
-      c.token = c.token.after_group();
-      return;
-    }
-    if (c.peek(0).group_step() > 0) c.token = c.token.after_group();
-    else c.next();
+/* Signature collection retains invocation categories and alias targets locally.
+   The temporary signature cache owns these descriptors; no body is bound. */
+void Compiler.collect_signature_macro_definition(Compiler c) {
+  Definition d = {.c = c, .start = c.token};
+  d.storage = c.test(<static>) || c.source_private;
+  c.expect(<ident>);
+  d.head();
+  d.naming();
+  $let(c.macro_holes, {}) {
+    d.locals = {};
+    c.macro_holes[%(locals)] = d.locals;
+    d.using = [];
+    d.signature();
+    d.arrow();
+    d.announce();
   }
+  (void) d.publish();
+  if (c.peek(0) == <"{"> || c._legacy_expression_body()) {
+    c.token = c.token.after_group();
+    return;
+  }
+  c._skip_shallow_expression(0);
+  c.expect(<;>);
 }
 
 /* Reads the result kind. A local definition names itself without `$`, and
