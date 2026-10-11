@@ -715,6 +715,20 @@ replacement template and fill steps are the remaining driver cost.
   landing and thawing quotations. Fixtures: `rewrite-conform` (a user rule
   on the head) and `protocol-documented-member`, with a new `definitions`
   fixture phase that runs `--dump-definitions`.
+- 2026-10-11, three rule-driver defects fixed (`kernel/rule-defects-2`):
+  a statement that a shipped rule's lowered carrier writes is not source,
+  so only shipped rules see it (`SlotWatch.shipped`; the match component's
+  emitted `switch` no longer reaches user switch rules, while held arm
+  bodies still do); binding that rebuilds a watched unbraced statement
+  tells the active watch (`Compiler.rebound` from `_bind_statement`), so a
+  `$node`-wrapping rule reaches an unbraced arm, `if`, or `while` body;
+  `_entered_body` binds `c.return_type` to the declared result while a
+  function body lowers, so a rebound `return` keeps its conversion. +40/-12
+  in src; three fixtures; self-translation of expressions.x -2.6%, cause
+  unknown. Open: a `return` inside a try body breaks a `$node`-wrapping
+  `$tried` rule (the try rule runs in the cleanup walk after the return is
+  lowered); `c.return_type` is still NULL in the cleanup walk's
+  `_landing_form`.
 - 2026-10-10, facts learned: `function-entry` placement is parse-time, so
   lambda cells need a transform-time entry placement before lambdas move; a
   plain `make build` after editing a shipped component leaves a degraded
