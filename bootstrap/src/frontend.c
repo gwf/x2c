@@ -734,7 +734,7 @@ static Compiler _run_cpp(Frontend frontend, ParsedUnit * unit){
   cpp -> filename = c -> filename;
   String text = NULL, errors = NULL, dependency_text = NULL;
   String runtime = c -> prelude ? String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_40), NULL))) : NULL;
-  int status = Toolchain_preprocess(frontend -> toolchain, c -> filename, c -> include_dirs, runtime, &(text), &(errors), &(dependency_text));
+  int status = Toolchain_preprocess(frontend -> toolchain, c -> filename, frontend -> request -> include_dirs, runtime, &(text), &(errors), &(dependency_text));
   (* unit).preprocessor_output = String_truth(text) ? _take_line_markers(cpp, text) : NULL;
   (* unit).preprocessor_errors = errors;
   if(String_truth(errors) && frontend -> preprocessor_errors) frontend -> preprocessor_errors(errors);

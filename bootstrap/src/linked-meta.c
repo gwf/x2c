@@ -12420,7 +12420,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_22(void){
   _11544 = List_var(_11543);
   _11545 = String_new("src/toolchain.x");
   _11546 = String_var(_11545);
-  _11547 = String_new("2d02844f");
+  _11547 = String_new("d45e644c");
   _11548 = String_var(_11547);
   _11549 = cons(_11548, NULL);
   _11550 = cons(_11546, _11549);
@@ -12484,7 +12484,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_22(void){
   _11608 = List_var(_11607);
   _11609 = String_new("src/utils.x");
   _11610 = String_var(_11609);
-  _11611 = String_new("01703867");
+  _11611 = String_new("33d1334b");
   _11612 = String_var(_11611);
   _11613 = cons(_11612, NULL);
   _11614 = cons(_11610, _11613);
