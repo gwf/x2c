@@ -195,6 +195,31 @@ static String Compiler._projection_namespace(Compiler c, List key) {
   return plan.try_get(%(namespace ${provider.cadr()} $key), id) ? id : NULL;
 }
 
+static String Compiler._projection_binding_namespace(
+  Compiler c, List binding, int alias) {
+  List key = NULL;
+  Var source;
+  if (c.semantic_binding_facts().try_get(%(src-key $binding), source))
+    key = source.list().cadr();
+  if (!key) {
+    String path = c.canonical_path(c.filename);
+    Map names = c.module_layout_plan[%(private-bindings $path)];
+    foreach (Var (original, emitted), names)
+      if (binding == emitted) {
+        String spelling = binding_identity_spelling(original);
+        if (spelling) key = %($spelling);
+        break;
+      }
+  }
+  if (!key) {
+    String spelling = binding_identity_spelling(binding);
+    if (spelling) key = %($spelling);
+  }
+  if (!key) return NULL;
+  if (alias) key = %(typedef ${key.car()});
+  return c._projection_namespace(key);
+}
+
 static Array Compiler._projection_definitions(Compiler c, List node) {
   Array definitions = [];
   match (node) case %((!set ?kind (!or declare typedef function)) ?base *): {
@@ -204,13 +229,14 @@ static Array Compiler._projection_definitions(Compiler c, List node) {
         String id = c._projection_namespace(%($tag $name));
         if (id) definitions.push(id);
       }
-    if (kind == <typedef>)
-      foreach (List row, node.caddr().list().cdr())
-        match (row) case %(bind ?binding *): {
-          String name = binding_identity_spelling(binding);
-          String id = name ? c._projection_namespace(%(typedef $name)) : NULL;
-          if (id && !(id in definitions)) definitions.push(id);
-        }
+    List declarators = kind == <function> ? %(
+      ${node.caddr()}) : node.caddr().list().cdr();
+    foreach (List row, declarators)
+      match (row) case %(bind ?binding *): {
+        String id = c._projection_binding_namespace(binding,
+          kind == <typedef>);
+        if (id && !(id in definitions)) definitions.push(id);
+      }
   }
   return definitions;
 }
