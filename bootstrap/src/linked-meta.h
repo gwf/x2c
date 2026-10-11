@@ -16,6 +16,7 @@
 #include "component-access.h"
 #include "component-delegate.h"
 #include "component-literals.h"
+#include "component-match.h"
 #include "component-operators.h"
 #include "component-printf.h"
 #include "component-raise.h"
@@ -46,6 +47,8 @@ Code access_prefix(Code code);
 Code access_postfix(Code code);
 
 Code delegate_member(Code code);
+
+Code match_lowering(Code node);
 
 Code dynamic_binary(Code code);
 

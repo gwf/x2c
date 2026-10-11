@@ -353,39 +353,31 @@ static Array Query_diagnostics(Query * q){
 }
 
 static Map Query_diagnostic(Query * q, List entry){
-
   {
     List _x2c_match_expr = entry;
-    Var _x2c_match_values[4];
-  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 4 };
-
-    switch (0) {
-      default: ;  static MatchCaptureSite _x2c_match_site_0;  if (x2c_match_site_try_capture(& _x2c_match_site_0, _x2c_match_expr, List_var(_25), &_x2c_match_capture)) {Var code = _x2c_match_values[0];  Var severity = _x2c_match_values[1];  Var message = _x2c_match_values[2];  Var location = _x2c_match_values[3]; {
-    Map diagnostic = Query_diagnostic_range(&((* q)), Var_list(location));  Map_setindex(diagnostic, Symbol_var(28293925322), message);  Map_setindex(diagnostic, Symbol_var(227594), code);  Map_setindex(diagnostic, Symbol_var(1317895556402), severity);  return diagnostic;
-  }
-  break;
-}
-
+    Var _x2c_match_values[4]; MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 4 };
+    switch(0){
+        default: ; static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(_25), &_x2c_match_capture)) { Var code = _x2c_match_values[0]; Var severity = _x2c_match_values[1]; Var message = _x2c_match_values[2]; Var location = _x2c_match_values[3]; {
+        Map diagnostic = Query_diagnostic_range(&((* q)), Var_list(location));  Map_setindex(diagnostic, Symbol_var(28293925322), message);  Map_setindex(diagnostic, Symbol_var(227594), code);  Map_setindex(diagnostic, Symbol_var(1317895556402), severity);  return diagnostic;
+      }
+       break; }
     }
+
   }
-__builtin_unreachable();
+  __builtin_unreachable();
 }
 
 static Map Query_diagnostic_range(Query * q, List location){
-
   {
-    List _x2c_match_expr = location;
-    Var _x2c_match_values[3];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 3 };
-    switch (0) {
-      default: ;  static MatchCaptureSite _x2c_match_site_1;  if (x2c_match_site_try_capture(& _x2c_match_site_1, _x2c_match_expr, List_var(_45), &_x2c_match_capture)) {Var file = _x2c_match_values[0];  Var length = _x2c_match_values[1];  Var position = _x2c_match_values[2]; {
-    int start = Var_int(Var_convert(position, 3453797)), width = Var_int(Var_convert(length, 3453797));  return Query_location(&((* q)), Path_absolute(Var_string(file)), start, start + width);
-  }
-  break;
-}
-
+    List _x2c_match_expr = location;  Var _x2c_match_values[3]; MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 3 };  switch(0){
+        default: ; static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(_45), &_x2c_match_capture)) { Var file = _x2c_match_values[0]; Var length = _x2c_match_values[1]; Var position = _x2c_match_values[2]; {
+        int start = Var_int(Var_convert(position, 3453797)), width = Var_int(Var_convert(length, 3453797));  return Query_location(&((* q)), Path_absolute(Var_string(file)), start, start + width);
+      }
+       break; }
     }
+
   }
-return Query_location(&((* q)), Path_absolute((* q).compiler -> filename), 0, 0);
+  return Query_location(&((* q)), Path_absolute((* q).compiler -> filename), 0, 0);
 }
 
 static Map Query_location(Query * q, String path, int start, int end){

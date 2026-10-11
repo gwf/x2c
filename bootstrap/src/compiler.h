@@ -297,10 +297,6 @@ int match_value_is_static(Var value);
 
 int Compiler_match_pattern_is_static(Compiler c, List pattern);
 
-Symbol match_value_head(Var value);
-
-Symbol match_value_flat_head(Var value, List binders, List * tags);
-
 List Compiler_match_pattern_binders(Compiler c, List pattern, List * possible);
 
 void Compiler_define_match_binders(Compiler c, List pattern);

@@ -433,39 +433,57 @@ static void _print_ast(List ast){
 }
 
 static String _node_repr(List node){
-
   {
     List _x2c_match_expr = node;
-    Var _x2c_match_values[1];
-  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
-
-    switch (Var_symbol(car(_x2c_match_expr))) {
-      case 895740748108: ;
-  static MatchCaptureSite _x2c_match_site_0;
-  if (x2c_match_site_try_capture(& _x2c_match_site_0, _x2c_match_expr, List_var(_9), &_x2c_match_capture)) {Var name = _x2c_match_values[0];  return String_join(NULL, cons(String_var(_10), cons(String_var(Var_str(name)), cons(String_var(_11), NULL))));  break;
-}
-default: break;
+    Var _x2c_match_values[1]; MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
+    switch(Var_symbol(car(_x2c_match_expr))){
+        case 895740748108: ; static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(_9), &_x2c_match_capture)) { Var name = _x2c_match_values[0];  return String_join(NULL, cons(String_var(_10), cons(String_var(Var_str(name)), cons(String_var(_11), NULL))));
+       break; } default: break;
     }
+
   }
-return List_repr(node);
+  return List_repr(node);
 }
 
 static int _run_translation(CliRequest request, Map unit_dirs, Build build){
-  unsigned long started_at = report_now_us();  if(! String_truth(request -> out_dir)) request -> out_dir = _12;  Translation t ={
+  unsigned long started_at = report_now_us();
+  if(! String_truth(request -> out_dir)) request -> out_dir = _12;
+  Translation t ={
     .request = request, .unit_dirs = unit_dirs, .build = build, .total = List_len(request -> inputs)
   }
-  ;  Translation_preflight(&(t));  if(request -> verbose || request -> dry_run) _print_command(request);  if(request -> dry_run) return 0;  t.frontend = Frontend_new(request);  t.frontend -> preprocessor_errors = _preprocessor_errors;  if(! Frontend_preload_macro_libraries(t.frontend)) return 1;  Frontend_prepare_meta(t.frontend, request -> inputs);  if(request -> jobs > 1 && t.total > 1 && ! CliRequest_inspects(request)){
+  ;
+  Translation_preflight(&(t));
+  if(request -> verbose || request -> dry_run) _print_command(request);
+  if(request -> dry_run) return 0;
+  t.frontend = Frontend_new(request);
+  t.frontend -> preprocessor_errors = _preprocessor_errors;
+  if(! Frontend_preload_macro_libraries(t.frontend)) return 1;
+  Frontend_prepare_meta(t.frontend, request -> inputs);
+  if(request -> jobs > 1 && t.total > 1 && ! CliRequest_inspects(request)){
     if(Translation_translate_parallel(&(t))) return 1;
   }
-  else Translation_translate_serial(&(t));  if(! build && ! CliRequest_inspects(request)) Translation_report(&(t), started_at);  return 0;
+  else Translation_translate_serial(&(t));
+  if(! build && ! CliRequest_inspects(request)) Translation_report(&(t), started_at);
+  return 0;
 }
 
 String Path_stem(Path);
+
 static void Translation_preflight(Translation * t){
-  CliRequest request =(* t).request;  if(! CliRequest_inspects(request)) _check_out_dir(request -> out_dir);  int shared = ! CliRequest_inspects(request) && ! Map_truth((* t).unit_dirs);  Map stems = Map_new(); {
-    String input;  List _x2c_macro_object_2 = request -> inputs;  List _x2c_macro_cursor_2 = _x2c_macro_object_2;  Var _x2c_macro_cursor_output_2;  while(List_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
-      input = Var_string(_x2c_macro_cursor_output_2); {
-        build_check_input(input);  if(! is_source_file(input)) driver_error(String_join(NULL, cons(String_var(_13), cons(String_var(input), NULL))));
+  CliRequest request =(* t).request;
+  if(! CliRequest_inspects(request)) _check_out_dir(request -> out_dir);
+  int shared = ! CliRequest_inspects(request) && ! Map_truth((* t).unit_dirs);
+  Map stems = Map_new();
+  {
+    String input;
+    List _x2c_macro_object_2 = request -> inputs;
+    List _x2c_macro_cursor_2 = _x2c_macro_object_2;
+    Var _x2c_macro_cursor_output_2;
+    while(List_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
+      input = Var_string(_x2c_macro_cursor_output_2);
+      {
+        build_check_input(input);
+        if(! is_source_file(input)) driver_error(String_join(NULL, cons(String_var(_13), cons(String_var(input), NULL))));
         String stem = Path_stem(input);
         if(shared && Map_contains(stems, String_var(stem))) _stem_collision(stem, Var_string(Map_getindex(stems, String_var(stem))), input, request -> out_dir);
         Map_setindex(stems, String_var(stem), String_var(input));

@@ -642,25 +642,22 @@ static List _unit_private_rows(Compiler c, Map globs){
     while(Map_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2), &(_x2c_macro_cursor_output_3))){
       key = _x2c_macro_cursor_output_2;
       owner = _x2c_macro_cursor_output_3;
+      {
+        List _x2c_match_expr = Var_list(key);
+        Var _x2c_match_values[1]; MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
+        switch(0){
+            default: ; static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(_21), &_x2c_match_capture)) { Var name = _x2c_match_values[0]; {
+            String path = home_absolute_path(Var_string(List_car(Var_list(owner))));  if(String_equal(Compiler_canonical_path(c, path), unit)) continue;  Array_push(rows, List_var(_unit_private_row(globs, cons(name, NULL))));  Array_push(rows, List_var(_unit_private_row(globs, cons(_22, cons(name, NULL)))));
+          }
+           break; }
+        }
 
-  {
-    List _x2c_match_expr = Var_list(key);
-    Var _x2c_match_values[1];
-      MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
-
-    switch (0) {
-      default: ;  static MatchCaptureSite _x2c_match_site_0;  if (x2c_match_site_try_capture(& _x2c_match_site_0, _x2c_match_expr, List_var(_21), &_x2c_match_capture)) {Var name = _x2c_match_values[0]; {
-        String path = home_absolute_path(Var_string(List_car(Var_list(owner))));  if(String_equal(Compiler_canonical_path(c, path), unit)) continue;  Array_push(rows, List_var(_unit_private_row(globs, cons(name, NULL))));  Array_push(rows, List_var(_unit_private_row(globs, cons(_22, cons(name, NULL)))));
       }
-      break;
-    }
 
     }
-  }
-  }
 
-}
-return Array_list_free(rows);
+  }
+  return Array_list_free(rows);
 }
 
 static List _unit_private_row(Map globs, List key){
@@ -708,9 +705,20 @@ static Token _first_directive(Compiler c){
 }
 
 static Compiler _run_cpp(Frontend frontend, ParsedUnit * unit){
-  Compiler c =(* unit).compiler, cpp = Compiler_new_shared(c); (* unit).preprocessor = cpp;  cpp -> filename = c -> filename;  String text = NULL, errors = NULL, dependency_text = NULL;  String runtime = c -> prelude ? String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_40), NULL))) : NULL;  int status = Toolchain_preprocess(frontend -> toolchain, c -> filename, c -> include_dirs, runtime, &(text), &(errors), &(dependency_text)); (* unit).preprocessor_output = String_truth(text) ? _take_line_markers(cpp, text) : NULL; (* unit).preprocessor_errors = errors;  if(String_truth(errors) && frontend -> preprocessor_errors) frontend -> preprocessor_errors(errors);  if(status) Compiler_report_error(c, 306819428, _41, _first_directive(c), cons(_43, cons(String_var(String_join(NULL, cons(String_var(_44), cons(String_var(int_str(status)), NULL)))), NULL))); {
-    String dependency;  List _x2c_macro_object_3 = translation_depfile_parse(dependency_text);  List _x2c_macro_cursor_3 = _x2c_macro_object_3;  Var _x2c_macro_cursor_output_4;  while(List_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_4))){
-      dependency = Var_string(_x2c_macro_cursor_output_4);  Compiler_add_translation_dependency(c, dependency);
+  Compiler c =(* unit).compiler, cpp = Compiler_new_shared(c); (* unit).preprocessor = cpp;  cpp -> filename = c -> filename;  String text = NULL, errors = NULL, dependency_text = NULL;  String runtime = c -> prelude ? String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_40), NULL))) : NULL;
+  int status = Toolchain_preprocess(frontend -> toolchain, c -> filename, c -> include_dirs, runtime, &(text), &(errors), &(dependency_text));
+  (* unit).preprocessor_output = String_truth(text) ? _take_line_markers(cpp, text) : NULL;
+  (* unit).preprocessor_errors = errors;
+  if(String_truth(errors) && frontend -> preprocessor_errors) frontend -> preprocessor_errors(errors);
+  if(status) Compiler_report_error(c, 306819428, _41, _first_directive(c), cons(_43, cons(String_var(String_join(NULL, cons(String_var(_44), cons(String_var(int_str(status)), NULL)))), NULL)));
+  {
+    String dependency;
+    List _x2c_macro_object_3 = translation_depfile_parse(dependency_text);
+    List _x2c_macro_cursor_3 = _x2c_macro_object_3;
+    Var _x2c_macro_cursor_output_4;
+    while(List_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_4))){
+      dependency = Var_string(_x2c_macro_cursor_output_4);
+      Compiler_add_translation_dependency(c, dependency);
     }
 
   }
@@ -718,12 +726,24 @@ static Compiler _run_cpp(Frontend frontend, ParsedUnit * unit){
 }
 
 String preproc_marker_file(String, int *);
+
 static String _take_line_markers(Compiler cpp, String text){
-  Array kept = Array_new(), markers = Array_new();  int position = 0, text_line = 1; {
-    String line;  List _x2c_macro_object_4 = String_split(text, _14);  List _x2c_macro_cursor_4 = _x2c_macro_object_4;  Var _x2c_macro_cursor_output_5;  while(List_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_5))){
-      line = Var_string(_x2c_macro_cursor_output_5); {
-        int number = 0;  String file = String_startswith(line, _45) ? preproc_marker_file(line, &(number)) : NULL;  if(! String_truth(file)){
-          Array_push(kept, String_var(line));  position += String_len(line) + 1;  text_line ++;
+  Array kept = Array_new(), markers = Array_new();
+  int position = 0, text_line = 1;
+  {
+    String line;
+    List _x2c_macro_object_4 = String_split(text, _14);
+    List _x2c_macro_cursor_4 = _x2c_macro_object_4;
+    Var _x2c_macro_cursor_output_5;
+    while(List_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_5))){
+      line = Var_string(_x2c_macro_cursor_output_5);
+      {
+        int number = 0;
+        String file = String_startswith(line, _45) ? preproc_marker_file(line, &(number)) : NULL;
+        if(! String_truth(file)){
+          Array_push(kept, String_var(line));
+          position += String_len(line) + 1;
+          text_line ++;
         }
         else if(! String_startswith(file, _46)) Array_push(markers, List_var(cons(int_var(position), cons(int_var(text_line), cons(String_var(file), cons(int_var(number), NULL))))));
       }
@@ -731,29 +751,53 @@ static String _take_line_markers(Compiler cpp, String text){
     }
 
   }
-  cpp -> line_markers = markers;  return String_join(_14, Array_list_free(kept));
+  cpp -> line_markers = markers;
+  return String_join(_14, Array_list_free(kept));
 }
 
 static void _tokenize_cpp(Compiler cpp, String text){
-  Compiler_tokenize(cpp, text);  cpp -> source_facts = 0;  cpp -> source_private = - 1;  cpp -> collect_protocols = 0;
+  Compiler_tokenize(cpp, text);
+  cpp -> source_facts = 0;
+  cpp -> source_private = - 1;
+  cpp -> collect_protocols = 0;
 }
 
 static void _share_session(Compiler cpp, Compiler c){
-  cpp -> imports = c -> imports;  cpp -> macro_lisp = c -> macro_lisp;  cpp -> borrowed_lisp = cpp -> macro_lisp != NULL;  Compiler_share_meta_group(cpp, c);
+  cpp -> imports = c -> imports;
+  cpp -> macro_lisp = c -> macro_lisp;
+  cpp -> borrowed_lisp = cpp -> macro_lisp != NULL;
+  Compiler_share_meta_group(cpp, c);
 }
 
 Lisp Compiler_open_macro_library(Compiler);
+
 void Compiler_publish_macro_library(Compiler, Lisp);
+
 int Frontend_preload_macro_libraries(Frontend frontend){
-  if(! _init_guard_) _file_init_();  Compiler c = Compiler_new();  Lisp shared = Compiler_open_macro_library(c);  if(shared && ! _preload_meta_surface(frontend, shared)){
-    Lisp_destroy(shared);  Compiler_publish_macro_library(c, NULL);  collect_forget_provisional_entries();  return 0;
+  if(! _init_guard_) _file_init_();
+  Compiler c = Compiler_new();
+  Lisp shared = Compiler_open_macro_library(c);
+  if(shared && ! _preload_meta_surface(frontend, shared)){
+    Lisp_destroy(shared);
+    Compiler_publish_macro_library(c, NULL);
+    collect_forget_provisional_entries();
+    return 0;
   }
-  Compiler_publish_macro_library(c, shared);  collect_forget_provisional_entries();  return 1;
+  Compiler_publish_macro_library(c, shared);
+  collect_forget_provisional_entries();
+  return 1;
 }
 
 void Compiler_bind_meta_operation(Lisp, String, Var);
+
 static int _preload_meta_surface(Frontend frontend, Lisp shared){
-  struct CliRequest request = * frontend -> request;  request.dump = 0;  request.no_cpp = request.live_symbols = request.cpp_symbols = 0;  struct Frontend session = * frontend;  session.request = & request;  ParsedUnit unit;  String path = String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_47), NULL)));
+  struct CliRequest request = * frontend -> request;
+  request.dump = 0;
+  request.no_cpp = request.live_symbols = request.cpp_symbols = 0;
+  struct Frontend session = * frontend;
+  session.request = & request;
+  ParsedUnit unit;
+  String path = String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_47), NULL)));
   Context context = Context_open_named("shared translation unit");
   int started = _start(& session, path, &(unit), context, NULL);
   Compiler c = unit.compiler;
