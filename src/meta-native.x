@@ -382,7 +382,7 @@ Var Compiler.apply_meta_function(
   c.ensure_macro_lisp();
   MetaContext *context = MetaContext.current();
   $let(context.has_bindings, 0)
-  $let(context.captures, {})
+  $let(context.captures, NULL)
   $let(context.definition_file, c.filename)
   $let(context.expander, c)
   $let(context.evaluator, c)

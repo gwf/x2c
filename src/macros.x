@@ -2815,12 +2815,15 @@ static int Effects.same(Effects a, Effects b) =>
 /* Lowers `result` from the skeleton its template and slot signatures
    prepared in this unit, preparing one on their first use. The source's
    own expressions lower outside the active rule, as they would have
-   without it, so a rule applies again to a nested use. */
+   without it, so a rule applies again to a nested use. A carrier, such as
+   a lowered result, never prepares and lowers as written. */
 static List Compiler._prepared(
   Compiler c, List source, Var result, AstPos position, Type expected,
   Token site) {
   Array sources = $auto([]), values = $auto([]);
-  foreach (Var part, source) _expression_nodes(part, sources);
+  _expression_nodes(source, sources);
+  match (result) case %(code-value *):
+    return c._watched(result, sources, position, expected, site);
   int refused = 0;
   Var shape = c._template(result, sources, values, refused);
   if (refused) return c._watched(result, sources, position, expected, site);
@@ -2865,12 +2868,13 @@ static List Compiler._watched(
     return c._lowered(result, position, expected, site);
 }
 
-/* Pushes each expression in `node`, which a translator may insert whole,
-   onto `found`. A chain nests as deeply as it is long, so the walk keeps
-   its pending work off the C stack. */
-static void _expression_nodes(Var node, Array found) {
+/* Pushes each expression within `source`, which a translator may insert
+   whole, onto `found`. A chain nests as deeply as it is long, so the walk
+   keeps its pending work off the C stack. */
+static void _expression_nodes(List source, Array found) {
   List syntax;
-  $ast.walk(node, syntax) if (syntax.car() == <expr>) found.push(syntax);
+  $ast.walk(source, syntax)
+    if (syntax !== source && syntax.car() == <expr>) found.push(syntax);
 }
 
 /* `node` with each expression from `sources` replaced by its slot
@@ -4893,8 +4897,8 @@ void Compiler.ensure_macro_lisp(Compiler c) {
     c.macro_lisp.adopt(library_session);
   }
   if (!ready) _install_builtins(c.macro_lisp);
-  foreach (Var (relative, message), _library_files())
-    c._eval_library(ready, relative, message);
+  foreach (Var (path, message), _library_files())
+    c._eval_library(ready, path, message);
   if (!ready) c._install_native_operations();
 }
 
@@ -5241,8 +5245,8 @@ static Lisp Compiler._fill_library(Compiler c, Lisp shared) {
   library_filling = 1;
   try {
     _install_builtins(shared);
-    foreach (Var (relative, message), _library_files())
-      c._eval_library(0, relative, message);
+    foreach (Var (path, message), _library_files())
+      c._eval_library(0, path, message);
     c._install_native_operations();
   }
   catch %(? *): {
@@ -5252,27 +5256,37 @@ static Lisp Compiler._fill_library(Compiler c, Lisp shared) {
   return shared;
 }
 
-/* The four libraries and the message each failure reports, in the order a
-   session needs them. */
-static List _library_files(void) => %(
-  ("etc/init.xlisp" "cannot open the compile-time Lisp environment")
-  ("etc/lisp-values.xlisp" "cannot open the compile-time value operations")
-  ("etc/compiler-sdk.xlisp" "cannot open the compile-time Lisp SDK")
-  ("etc/builtin-core.xlisp" "cannot open the built-in macro support"));
+/* The four libraries' paths in the home and the message each failure
+   reports, in the order a session needs them. Every use of a session
+   records them, so the paths are joined once per process. */
+static List library_files = NULL;
+
+static List _library_files(void) {
+  if (library_files) return library_files;
+  Array rows = [];
+  foreach (Var (relative, message), %(
+      ("etc/init.xlisp" "cannot open the compile-time Lisp environment")
+      ("etc/lisp-values.xlisp" "cannot open the compile-time value operations")
+      ("etc/compiler-sdk.xlisp" "cannot open the compile-time Lisp SDK")
+      ("etc/builtin-core.xlisp" "cannot open the built-in macro support")))
+    rows.push(%(${%"${x2c_get_root()}/$relative"} $message));
+  List files = rows.list_free();
+  _require_owned(files.try_own());
+  return library_files = files;
+}
 
 /** Records the compile-time Lisp libraries as dependencies of `c`, as each
     use of its session does. */
 void Compiler.add_library_dependencies(Compiler c) {
   foreach (List library, _library_files())
-    c.add_translation_dependency(%"${c.root_dir}/${library.car()}");
+    c.add_translation_dependency(library.car());
 }
 
 /* A home Lisp library is evaluated once, when `loaded` is zero, but every use
    records it, so a file's dependencies do not depend on whether an earlier
    file loaded it. */
 static void Compiler._eval_library(
-  Compiler c, int loaded, String relative, String message) {
-  String path = %"${c.root_dir}/$relative";
+  Compiler c, int loaded, String path, String message) {
   c.add_translation_dependency(path);
   if (library_filling) library_imports[path] = 1;
   if (loaded || Compiler.inherits_import(path)) return;
@@ -5411,7 +5425,7 @@ static void Compiler._use_lisp_bindings(Compiler c, int install) {
     !install || lisp_bindings_marker in c.macros;
   if (!loaded) c.ensure_macro_lisp();
   c._eval_library(
-    loaded, "etc/lisp-bindings.xlisp",
+    loaded, %"${c.root_dir}/etc/lisp-bindings.xlisp",
     "cannot open the native Lisp macro support");
   if (loaded) return;
   /* Signature imports may preload into the shared parent; group state starts
