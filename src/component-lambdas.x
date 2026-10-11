@@ -261,56 +261,84 @@ meta static String _lambda_bridge_role(void) {
 /* The name of record field `index`. */
 meta static List _lambda_field(int index) => x2c_ident(%"c$index");
 
-/* The record `context`, with a field of each type in `types`. */
+/* The spelling of record field `index`, which names no binding. */
+meta static List _lambda_member(int index) => %(${%"c$index"});
+
+/* The type of the record field that holds a capture of `type`: the
+   referent's address for a reference, and otherwise a `Var`. */
+meta static Type _lambda_field_type(Type type) =>
+  type.car() == <&> ? cons(<*>, type.cdr()) : %("Var");
+
+/* The record `context`, with a field of each type in `types`, as bound
+   code. */
 meta static Code _lambda_record(Atom context, List types) {
   Array fields = [];
   foreach (Type type, types) {
     (List base, List modifiers) = type.parts();
-    List name = _lambda_field(fields.len());
+    List name = _lambda_member(fields.len());
     fields.push(%(declare $base (bindings (bind $name $modifiers))));
   }
-  return %(typedef (static struct $context (fields @{fields.list_free()}))
-           (bindings (bind $context ())));
+  return %(code-value "bound"
+           (typedef (static struct $context (fields @{fields.list_free()}))
+             (bindings (bind $context ())))
+           ());
 }
 
-/* The adapter `adapter` of the Func `closure` with arguments `argv`. It
-   reads the arguments of `params` as `reads` says and calls `lifted` with
-   them and with the field of the `context` record for each of `captures`;
-   a reference passes what the address it holds refers to. */
+/* The adapter `adapter` of the Func `closure` with arguments `argv`, as
+   bound code. It reads the arguments of `params` as `reads` says into
+   locals and calls `lifted`, whose parameters are `declared`, with them
+   and with the field of the `context` record for each of `captures`; a
+   reference passes what the address it holds refers to. */
 meta static Code _lambda_adapter(
   Atom adapter, Atom closure, Atom argv, Atom lifted, Atom context,
-  List params, List reads, List captures) {
-  List record = x2c_ident("record");
-  Array locals = [], arguments = [];
+  List params, List reads, List captures, List declared) {
+  Type pointer = %(* const struct $context);
+  Code record = %(expr $pointer (ident ("record")));
+  Array items = [], arguments = [];
   foreach (List read, reads) {
     (Type type, Code value) = read;
-    List name = x2c_ident(%"a${locals.len()}");
-    locals.push($!{ $type $name = $value; });
+    List name = %(${%"a${items.len()}"});
+    (List base, List modifiers) = type.parts();
+    items.push(
+      %(declare $base (bindings (op = (bind $name $modifiers) $value))));
+    Code local = %(expr $type (ident $name));
     match (params.car()) {
-      case %(param ? (bind ? (& *))): arguments.push($!( *$name ));
-      default: arguments.push($!( $name ));
+      case %(param ? (bind ? (& *))):
+        arguments.push(%(expr ${type.cdr()} (op * $local)));
+      default: arguments.push(local);
     }
     params = params.cdr();
   }
+  Code context_read = %(expr (* const void)
+    (call (expr ((func (("Func"))) * const void) (ident ("Func_context")))
+      (args (expr ("Func") (ident $closure)))));
+  items.push(%(declare (const struct $context)
+    (bindings (op = (bind ("record") (*))
+                   (expr $pointer (cast $pointer $context_read))))));
   int index = 0;
   foreach (List capture, captures) {
-    List field = _lambda_field(index++);
+    Type type = capture.caddr(), stored = _lambda_field_type(type);
+    Code field = %(expr (const @stored)
+                    (op -> $record ${_lambda_member(index++)}));
     arguments.push(
-      capture.caddr().list().car() == <&>
-        ? $!( *$record->$field ) : $!( $record->$field ));
+      type.car() == <&> ? %(expr ${type.cdr()} (op * $field)) : field);
   }
-  return $!Unit{
-    static Var $adapter(Func $closure, const FuncArg *$argv) {
-      @{locals.list_free()}
-      const struct $context *$record =
-        (const struct $context *) Func.context($closure);
-      return $lifted(@{arguments.list_free()});
-    }
-  };
+  Code call = %(expr ("Var")
+    (call (expr ((func $declared) "Var") (ident $lifted))
+      (args @{arguments.list_free()})));
+  items.push(%(return $call));
+  return %(code-value "bound"
+           (function (static "Var")
+             (bind $adapter
+               ((fnmod (params (param ("Func") (bind $closure ()))
+                               (param (const "FuncArg") (bind $argv (*)))))))
+             (block @{items.list_free()}))
+           ());
 }
 
 /* The bridge `bridge` through which a public inline function makes the
-   Func of `adapter` and its `context` record, whose fields have `types`. */
+   Func of `adapter` and its `context` record, whose fields have `types`.
+   The adapter is bound code, so the bridge names it as a typed value. */
 meta static Code _lambda_bridge(
   Atom bridge, Atom adapter, Atom context, Code signature, List types) {
   List record = x2c_ident("record");
@@ -322,18 +350,14 @@ meta static Code _lambda_bridge(
     fields.push($!( $field ));
   }
   List declared = parameters.list_free(), values = fields.list_free();
+  Code made = %(expr ("FuncAdapter") (ident $adapter));
   return $!Unit{
     Func $bridge(@declared) {
       struct $context $record = { @values };
-      return Func.new_context($adapter, $signature, &$record, sizeof $record);
+      return Func.new_context($made, $signature, &$record, sizeof $record);
     }
   };
 }
-
-/* The type of the record field that holds a capture of `type`: the
-   referent's address for a reference, and otherwise a `Var`. */
-meta static Type _lambda_field_type(Type type) =>
-  type.car() == <&> ? cons(<*>, type.cdr()) : %("Var");
 
 /* The bound value of a capturing lambda: it evaluates its `captures`, left
    to right, into locals, and makes a Func of `adapter` from a `context`
@@ -406,10 +430,11 @@ meta Code lambda_closure(Code node) {
       foreach (List capture, captures)
         fields.push(_lambda_field_type(capture.caddr()));
       Code record_type = _lambda_record(context, fields.list_free());
-      Code function = _lambda_function(
-        lifted, _lambda_closure_params(params, reads, captures), body);
+      List declared = _lambda_closure_params(params, reads, captures);
+      Code function = _lambda_function(lifted, declared, body);
       Code adapter_function = _lambda_adapter(
-        adapter, closure, argv, lifted, context, params, reads, captures);
+        adapter, closure, argv, lifted, context, params, reads, captures,
+        declared);
       effects.push(%(place (unit-support) $record_type));
       effects.push(%(place (unit-support) $function));
       effects.push(%(place (unit-support) $adapter_function));
