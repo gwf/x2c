@@ -2694,6 +2694,18 @@ List Compiler.lower_replacement(Compiler c, List replacement, List source) {
   $let(c.slot_watch, &kept) return c.normalize(replacement);
 }
 
+/** Binds the replacement a shipped rule gives the lowered statement
+    `source` of `kind`, which the kernel wrote while lowering, as
+    `Compiler.rewrite_lowered` does. A statement the kernel writes is not
+    source, so no program rule sees it. */
+List Compiler.rewrite_written(
+  Compiler c, Symbol kind, List source, Type expected) {
+  struct SlotWatch written = {.shipped = 1};
+  $let(c.slot_watch, &written)
+    return c.rewrite_lowered(
+      <node>, kind, source, AST_STATEMENT, expected, NULL);
+}
+
 /** Binds and lowers a replacement while its rule remains active. The
     source expressions the replacement holds lower outside the rule, so a
     nested use of the rule applies again. A statement replacement, or a
@@ -2867,10 +2879,11 @@ static typedef struct Effects {
     those active outside the translator's own. A first lowering `prepares`
     a skeleton from what it records. A replacement lowered as written
     within another's has that one as its `parent`, whose source it may hold
-    as well. A shipped rule's lowered carrier, and any replacement lowered
-    within one, is `shipped`: its own statements are not source, so no
-    user statement rule sees them, while the values it watches are. A watch
-    whose values are lowered already has them `kept` as they are. */
+    as well. A shipped rule's lowered carrier, a statement the kernel
+    wrote, and any replacement lowered within either are `shipped`: their
+    own statements are not source, so no user statement rule sees them,
+    while the values a carrier watches are. A watch whose values are
+    lowered already has them `kept` as they are. */
 struct SlotWatch {
   List values;
   Array outputs, order;

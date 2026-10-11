@@ -57,7 +57,11 @@ rule on `try` runs there too, after the transform has lowered the parts of
 the `try`. Binding and lowering the replacement keep each part it holds as
 it is (`Compiler.rewrite_lowered` and `Compiler.lower_replacement`), so no
 statement rule sees a part twice. A `return` that the replacement writes
-converts to the function's declared result.
+converts to the function's declared result. A `defer` whose finalizer needs
+a landing, such as one that returns, lowers to a `try` that the kernel
+writes. That `try` is not source, so only the shipped rule lowers it
+(`Compiler.rewrite_written`); a program's rule sees the finalizer's own
+statements but not the `try`.
 
 ```x2c
 $rewrite($caught)
@@ -242,8 +246,9 @@ transform and the cleanup walk step into those nodes, so an expression or a
 statement placed in the text is lowered, and its `defer`, `return`, and
 `break` run their exits as they would anywhere else. The parts of the source
 statement lower outside the rule, so a nested statement of the same kind
-applies it again. A statement that a shipped rule's carrier writes is not
-source, so a program's statement rules see the source parts but not it.
+applies it again. Statements the kernel writes while lowering, including
+those a shipped rule's carrier writes, are not source and reach only shipped
+rules, so a program's statement rules see the source parts but not them.
 The walk does not read the text. Text therefore declares only locals that
 no region owns, transfers control only where no region opens, and holds a
 `switch` or a loop as a node, which stays the barrier its `break` and

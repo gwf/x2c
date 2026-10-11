@@ -178,11 +178,19 @@ static List Compiler._static_regions(Compiler c, List ast, Map runtime) {
 }
 
 /* A `try` takes its statement rule's replacement, which holds its lowered
-   parts as they are and lowers only the rest. Landing rows and ordinary
-   replacements both pass through static-region processing. */
+   parts as they are and lowers only the rest. A `try` that a `defer`
+   wrote is not source, so only the shipped rule lowers it. Landing rows
+   and ordinary replacements both pass through static-region processing. */
 static List Compiler._landing_form(Compiler c, List node, Map runtime) {
-  List form = c.rewrite_lowered(
-    <node>, <try>, node, AST_STATEMENT, c.return_type, NULL);
+  int written = 0;
+  match (node) case %(try ?body () ?finalizer kernel): {
+    node = %(try $body () $finalizer);
+    written = 1;
+  }
+  List form = written
+    ? c.rewrite_written(<try>, node, c.return_type)
+    : c.rewrite_lowered(
+      <node>, <try>, node, AST_STATEMENT, c.return_type, NULL);
   match (form) case %(landing ?code ?rows): {
     Array parts = [];
     foreach (List row, rows)
@@ -1078,9 +1086,14 @@ List Compiler.rewrite_defer_list(Compiler c, List stmts) {
 */
 List Compiler.lower_defer_region(Compiler c, List body, List finalizer) {
   if (c.source_map && c.origin) finalizer = %(at ${c.origin} $finalizer);
-  if (_defer_needs_landing(finalizer)) return %(try $body () $finalizer);
+  if (_defer_needs_landing(finalizer)) return _landing_region(body, finalizer);
   return c._callable_defer(body, finalizer);
 }
+
+/* A region that lands is a `try` the kernel writes, marked `kernel` until
+   the cleanup walk lowers it. */
+static List _landing_region(List body, List finalizer) =>
+  %(try $body () $finalizer kernel);
 
 static int _defer_needs_landing(List ast) {
   List node;
@@ -1101,7 +1114,7 @@ static List Compiler._callable_defer(Compiler c, List body, List finalizer) {
   d.collect(finalizer);
   if (d.unsupported) {
     d.records.free();
-    return %(try $body () $finalizer);
+    return _landing_region(body, finalizer);
   }
   List env_binding = NULL, env_local = NULL;
   List records = d.records.list_free();
