@@ -295,6 +295,12 @@ int Code.is_static_pattern(Code pattern) {
   return active.expander.match_pattern_is_static(pattern);
 }
 
+/** Answers `Code.pattern_value`, declared in `lib/meta.x`. */
+Var Code.pattern_value(Code pattern) {
+  _sdk_guard("Code.pattern_value");
+  return active.expander.match_pattern_value(pattern);
+}
+
 /** Answers `Code.promoted`, declared in `lib/meta.x`. */
 Code Code.promoted(Code value) {
   _sdk_guard("Code.promoted");
@@ -441,9 +447,9 @@ Code Code.register_rewrite(Code function, List pattern, List holes) {
       { point = <call>; kinds = %($callee); }
     case %(expr ? ((!set ?head (!or array map)) *)):
       { point = <literal>; kinds = %($head); }
-    case %((!quote !or) ((!set ?head (!or switch try raise)) *) *):
+    case %((!quote !or) ((!set ?head (!or switch try raise match)) *) *):
       { point = <node>; kinds = %($head); }
-    case %((!set ?head (!or switch try raise)) *):
+    case %((!set ?head (!or switch try raise match)) *):
       { point = <node>; kinds = %($head); }
     case %(!or (api-source ? ? (function ?type *)) (function ?type *)):
       { point = <function>; kinds = %(${_function_rule_key(type)}); }

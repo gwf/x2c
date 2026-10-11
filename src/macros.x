@@ -2669,10 +2669,11 @@ List Compiler.rewrite(
 
 /** Binds and lowers a replacement while its rule remains active. The
     source expressions the replacement holds lower outside the rule, so a
-    nested use of the rule applies again. An expression retains the result
-    type already established for its parent. A replacement whose template
-    and slot signatures an earlier use in the unit prepared lowers only its
-    captured values. */
+    nested use of the rule applies again; a lowered statement replacement
+    lowers the statements its source held outside the rule as well. An
+    expression retains the result type already established for its parent.
+    A replacement whose template and slot signatures an earlier use in the
+    unit prepared lowers only its captured values. */
 List Compiler.lower_rewrite(
   Compiler c, Symbol point, Var kind, List source, AstPos position,
   Type expected, Token site) =>
@@ -2696,10 +2697,37 @@ static List Compiler._rewrite(
     $let(c.active_rewrites, cons(rule, c.active_rewrites)) {
       if (!lower) return c.bind_syntax(result, position, expected);
       if (position == AST_UNIT) return c._lowered_definition(result);
+      match (result) case %(code-value "lowered" *): {
+        Array parts = $auto([]);
+        _held_parts(source, point, parts);
+        return c._watched(result, parts, position, expected, site);
+      }
       return c._prepared(source, result, position, expected, site);
     }
   }
   return NULL;
+}
+
+/* Pushes the parts of `source` that its replacement may hold onto
+   `found`, to lower outside its rule: each expression, or for a statement
+   each node it holds directly or through the Lists that hold its rows,
+   such as a match's arms. A nested statement of the same kind in one of
+   them applies the rule again. */
+static void _held_parts(List source, Symbol point, Array found) {
+  if (point != <node>) {
+    foreach (Var part, source) _expression_nodes(part, found);
+    return;
+  }
+  Array pending = $auto([source.cdr()]);
+  while (pending.len()) {
+    List items = pending.take_last();
+    foreach (Var item, items)
+      if (item is <list> && !item.is_nil()) {
+        List node = item;
+        if (node.car() is <list>) pending.push(node);
+        else found.push(node);
+      }
+  }
 }
 
 /* A replacement definition binds at file scope and lowers as written,
@@ -2745,7 +2773,8 @@ static List Compiler._lowered(
    introduce no binding and add no generated name, origin, pending code,
    placement, or diagnostic. A template whose lowering adds such state
    tries again on its next use; one that fails otherwise, or that holds
-   pending code or a carrier, lowers as written on every use. */
+   pending code or a carrier, lowers as written on every use. A lowered
+   carrier holds no template to prepare, so it lowers as written at once. */
 
 /** Counts compiler state that lowering adds and a skipped lowering would
     not add. A name a scope resolves binds once, so it is not counted. */

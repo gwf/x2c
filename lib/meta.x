@@ -124,6 +124,10 @@ meta String Code.format(Code value);
     value each time it runs, so it can be prepared once. */
 meta int Code.is_static_pattern(Code pattern);
 
+/** Returns the value the Match pattern expression `pattern` builds, with
+    the Symbol `x2c-dyn` in place of each part computed when it runs. */
+meta Var Code.pattern_value(Code pattern);
+
 /* lowering code
 
    What a translator returns: code converted, promoted, or called as the
@@ -159,8 +163,9 @@ meta Code Code.lowered(Code code);
     The pattern's form selects the operations that test it: an indexed
     access or assignment, a binary operator, a member call by receiver
     type, a call by callee spelling, an Array or Map literal by head, a
-    `switch`, `try`, or `raise` node, or a function definition. An operator the
-    pattern writes as `(!or OP...)` registers it for each operator. An
+    `switch`, `try`, `raise`, or `match` node, or a function definition. An
+    operator the pattern writes as `(!or OP...)` registers it for each
+    operator. An
     operator pattern that types the operation or an operand `Var`, or an
     alias of it, takes the dynamic operations instead: those with an
     operand of `Var` identity that no protocol member resolved, each

@@ -313,8 +313,7 @@ List Compiler.emit(Compiler c, List ast, Map cache_bindings) {
 static List Emitter._emit(Emitter &e, List ast) {
   if (!ast) return ast;
   Var head = ast.car();
-  if (head is <list>) return e._emit_sequence(ast);
-  if (head is not <symbol>) return %( $head @{e._emit(ast.cdr())} );
+  if (head is not <symbol>) return e._emit_sequence(ast);
   if (head != <typedef> &&
       (head.symbol().is_storage_class() ||
        head.symbol().is_type_qualifier() ||
@@ -363,10 +362,14 @@ static List Emitter._emit(Emitter &e, List ast) {
   return e._emit_leaf(ast);
 }
 
+/* A run of nodes and verbatim C text: each node is emitted in place and
+   each String is written as it is, so a lowered carrier can hold C text
+   around the nodes it lowers. A Symbol ends the run and heads a node. */
 static List Emitter._emit_sequence(Emitter &e, List ast) {
   Array emitted = $auto([]);
-  while (ast && ast.car() is <list>) {
-    emitted.push(e._emit(ast.car()));
+  while (ast && ast.car() is not <symbol>) {
+    Var item = ast.car();
+    emitted.push(item is <list> ? e._emit(item) : item);
     ast = ast.cdr();
   }
   List result = e._emit(ast);

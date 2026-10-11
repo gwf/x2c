@@ -17,6 +17,8 @@ int Code.exits(Code statement) => _ask("Code_exits", %($statement));
 String Code.format(Code value) => _ask("Code_format", %($value));
 int Code.is_static_pattern(Code pattern) =>
   _ask("Code_is_static_pattern", %($pattern));
+Var Code.pattern_value(Code pattern) =>
+  _ask("Code_pattern_value", %($pattern));
 Code Code.convert(Code value, Type target) =>
   _ask("Code_convert", %($value $target));
 Code Code.promoted(Code value) => _ask("Code_promoted", %($value));

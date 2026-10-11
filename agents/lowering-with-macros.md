@@ -228,6 +228,29 @@ patterns once. Both are compiler queries declared in `lib/meta.x`.
   ordinary call, so a count the C needs in both a declarator and a call is
   a hole, as in the Func call template.
 
+## Verbatim C text
+
+A translator that returns a lowered carrier may write part of its result as
+C text. A List whose head is a String is verbatim C: the emitter writes each
+String in it as it is and emits each node between the Strings in place. The
+transform and the cleanup walk step into those nodes, so an expression or a
+statement placed in the text is lowered, and its `defer`, `return`, and
+`break` run their exits as they would anywhere else. The parts of the source
+statement lower outside the rule, so a nested statement of the same kind
+applies it again. The walk does not read the text. Text therefore declares
+only locals that no region owns, transfers control only where no region
+opens, and holds a `switch` or a loop as a node, which stays the barrier its
+`break` and `continue` need.
+`unittest/compiler-fixtures/rewrite-verbatim-text.x` writes a match with only
+a default arm as text around its subject and body:
+
+```x2c
+return Code.lowered(
+  %(block ("counted++; (void) (" $subject "); {" $body "}")));
+```
+
+Prefer quotations. C text is for a lowering whose measured cost needs it.
+
 ## Choosing how to build syntax
 
 Compiler and `meta` code that builds C writes it as C. Take the first

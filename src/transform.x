@@ -140,7 +140,7 @@ static Ast Compiler._step_tag(Compiler c, Ast ast, Symbol tag) {
     case <dstrdecl>: next = c._destructure_declaration(ast); break;
     case <stmnt>: next = c._destructure_statement(ast); break;
     case <dstrasgn>: next = c._destructure_value(ast); break;
-    case <match>: next = c._match_cases(ast); break;
+    case <match>: return c._match_statement(ast);
     case <defer>: next = c._defer_node(ast); break;
     case <return>: next = c._return(ast); break;
     case <raise>: return c._raise_node(ast);
@@ -154,6 +154,13 @@ static Ast Compiler._step_tag(Compiler c, Ast ast, Symbol tag) {
   }
   if (next != ast) return c._step(next);
   return c._default_node(ast);
+}
+
+/* A registered rule lowers the match; until the shipped one is in the
+   bootstrap, the match records remain. */
+static Ast Compiler._match_statement(Compiler c, Ast ast) {
+  Ast rewritten = c._statement_rewrite(ast, <match>);
+  return rewritten != ast ? rewritten : c._step(c._match_cases(ast));
 }
 
 /* Ordinary registered patterns may replace a typed statement. */
