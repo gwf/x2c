@@ -167,8 +167,9 @@ static Ast Compiler._statement_rewrite(Compiler c, Ast ast, Symbol tag) {
 }
 
 /* The replacement a shipped rule gives a form the kernel no longer lowers
-   itself, or NULL after a report: this compiler does not link the
-   component that owns the form, or its rule failed to register. */
+   itself. No replacement is an error that ends the translation: this
+   compiler does not link the component that owns the form, or its rule
+   failed to register. */
 static List Compiler._shipped_lowering(
   Compiler c, Symbol point, Var kind, List source, AstPos position,
   Type expected, String form) {
@@ -178,11 +179,9 @@ static List Compiler._shipped_lowering(
   return lowered;
 }
 
-static Ast Compiler._shipped_statement(Compiler c, Ast ast, Symbol tag) {
-  List lowered = c._shipped_lowering(
+static Ast Compiler._shipped_statement(Compiler c, Ast ast, Symbol tag) =>
+  c._shipped_lowering(
     <node>, tag, ast, AST_STATEMENT, c.return_type, %"$tag statement");
-  return lowered ? lowered : %(block);
-}
 
 /* A destructuring declaration or assignment statement, which
    `src/component-destructuring.x` lowers. */
@@ -549,7 +548,6 @@ static Ast Compiler._collection_literal(Compiler c, Ast ast, Symbol tag) {
   List lowered = c._shipped_lowering(
     <literal>, head, %(expr $type ($head @{ast.cdr()})), AST_EXPRESSION,
     type, %"${type.repr()} literal");
-  if (!lowered) return %(literal (int) "0");
   match (lowered) case %(expr ? (call ?callee (args *arguments))): {
     Array values = $auto([]), orders = $auto([]);
     foreach (List argument, arguments) {
@@ -759,7 +757,6 @@ static Ast Compiler._interpolation(Compiler c, Ast ast) {
   List lowered = c._shipped_lowering(
     <literal>, <segments>, %(expr ("String") $source), AST_EXPRESSION,
     %("String"), "interpolated String");
-  if (!lowered) return %(literal (int) "0");
   match (lowered)
     case %(expr ?type (call ?callee (args ?separator
         (expr ? (parens (block *declarations (stmnt ?parts))))))):
