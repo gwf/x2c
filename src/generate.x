@@ -74,7 +74,15 @@ List generate_code_files(Compiler c, List ast, String dir) {
 /** Publishes immutable generated outputs after their semantic Contexts close.
     This operation uses no compiler, symbol, type or source-token state.
 */
-void publish_generated_files(List outputs) => file_publish(outputs);
+void publish_generated_files(List outputs) {
+  try file_publish(outputs);
+  catch %((!or not-found io-fail) *detail): {
+    List failure = Error.snapshot(detail);
+    String path = failure.assoc(<path>);
+    int code = failure.assoc(<"errno">);
+    driver_error(%"failed to write generated file: $path: ${strerror(code)}");
+  }
+}
 
 /** Returns the generated header and source of the lowered `ast` as `(hfile
     htext cfile ctext)`, named from `basename`, without writing them. It
