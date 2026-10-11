@@ -24,6 +24,7 @@ class Region:
     children: tuple[str, ...] = ()
     demands: tuple[str, ...] = ()
     epoch: int = 0
+    origins: tuple[str, ...] = ()
 
 class Packing:
     def __init__(self):
@@ -79,14 +80,15 @@ def extract(text, selected_edges=None):
                     lines.append(f'#line {origin_line + 1} {json.dumps(origin_file)}\n')
                 stack.append(dict(name=name, lines=lines,
                                   alignment=packing.alignment, pragmas=[],
-                                  children=[], demands=[], epoch=epoch))
+                                  children=[], demands=[], epoch=epoch, origins=set()))
             elif not stack or stack[-1]['name'] != name:
                 raise ProjectionError(f'unmatched region end: {name}')
             else:
                 row = stack.pop()
                 regions[name] = Region(name, ''.join(row['lines']),
                     row['alignment'], tuple(row['pragmas']),
-                    tuple(row['children']), tuple(row['demands']), row['epoch'])
+                    tuple(row['children']), tuple(row['demands']), row['epoch'],
+                    tuple(sorted(row['origins'])))
             origin_line += 1
             continue
         edge = re.fullmatch(r'\s*#\s*pragma\s+x2c_init_edge\s+(\w+)\s+(\w+)\s*', line)
@@ -104,6 +106,8 @@ def extract(text, selected_edges=None):
             origin_line, origin_file = int(location[1]), json.loads(location[2])
         else:
             origin_line += 1
+        if stack and origin_file and not origin_file.startswith('<'):
+            stack[-1]['origins'].add(str(Path(origin_file).resolve()))
         pack = PACK.fullmatch(line.strip())
         if pack:
             packing.apply(pack[1])
@@ -145,7 +149,7 @@ def extract(text, selected_edges=None):
 
 def load_metadata(path):
     """Load immutable portable companion records without inspecting C names."""
-    seen, records, edges = set(), {}, {}
+    seen, records, edges, namespace_edges, native_providers = set(), {}, {}, {}, {}
     primary = json.loads(path.read_text())
     def load(current):
         current = current.resolve()
@@ -164,11 +168,15 @@ def load_metadata(path):
             if family in edges and edges[family] != dependencies:
                 raise ProjectionError('conflicting family identity: ' + family)
             edges[family] = dependencies
+        namespace_edges.update(metadata.get('namespaceEdges') or {})
+        native_providers.update(metadata.get('nativeProviders') or {})
         for companion in metadata.get('companions', []):
             load(current.parent / companion)
     load(path)
     primary['regions'] = list(records.values())
     primary['familyEdges'] = edges
+    primary['namespaceEdges'] = namespace_edges
+    primary['nativeProviders'] = native_providers
     primary['_inputs'] = sorted(str(path) for path in seen)
     return primary
 
@@ -188,6 +196,14 @@ def project(text, metadata, selected_edges=None):
         family = records[name].get('family')
         if family:
             families.setdefault(family, name)
+    namespaces = {}
+    for name, region in regions.items():
+        for namespace in records[name].get('defines', []):
+            namespaces.setdefault(namespace, name)
+        origins = set(region.origins)
+        for namespace, provider in metadata.get('nativeProviders', {}).items():
+            if str(Path(provider).resolve()) in origins:
+                namespaces.setdefault(namespace, name)
     selected, active, emitted_families, output = set(), set(), set(), []
     current_epoch = 0
     def visit(name):
@@ -201,6 +217,14 @@ def project(text, metadata, selected_edges=None):
         active.add(name)
         row, region = records[name], regions[name]
         dependencies = list(row.get('requires', []))
+        defines = row.get('defines', [])
+        for definition in defines:
+            for needed in (metadata.get('namespaceEdges') or {}).get(definition, []):
+                if needed in defines:
+                    continue
+                if needed not in namespaces:
+                    raise ProjectionError('missing selected namespace: ' + needed)
+                dependencies.append(namespaces[needed])
         family = row.get('family')
         for needed in (*metadata.get('familyEdges', {}).get(family, []),
                        *region.demands):

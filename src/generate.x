@@ -139,10 +139,14 @@ static List Compiler._generated_code(Compiler c, List ast, String basename) {
       match (key) case %(directories ?(String provider)):
         companions.push(_projection_relative(
           %"$directory/${Path.stem(provider)}.xnm", Path.dirname(cfile)));
+    Map native_providers = {};
+    foreach (Var (key, path), c.module_layout_plan)
+      match (key) case %(namespace-provider ?id): native_providers[id] = path;
     Map metadata = {
       format: 2, source: Path.basename(cfile), header: Path.basename(hfile),
       regions: records, order: corder, headerOrder: horder,
-      companions: companions,
+      companions: companions, nativeProviders: native_providers,
+      namespaceEdges: c.module_layout_plan[%(namespace-requires)],
       familyEdges: c.module_layout_plan[%(projection-families)]};
     outputs = outputs.append(%("$basename.xnm" ${Var.json(metadata)}));
   }
@@ -161,6 +165,46 @@ static String _projection_relative(String path, String directory) {
   for (int i = common; i < base.len(); ++i) parts.push("..");
   for (int i = common; i < target.len(); ++i) parts.push(target[i]);
   return "/".join(parts);
+}
+
+/* Binding provenance selects the namespace owner. Private type rewriting
+   changes emitted spelling, so recover its authoritative original key first. */
+static String Compiler._projection_namespace(Compiler c, List key) {
+  Map plan = c.module_layout_plan;
+  if (!plan || !(%(namespace-definitions) in plan)) return NULL;
+  String path = c.canonical_path(c.filename);
+  Map names = plan[%(private-types $path)];
+  foreach (Var (original, spelling), names)
+    if (key == %(${original.list().car()} $spelling)) {
+      key = original;
+      break;
+    }
+  String portable = home_portable_path(path);
+  Var id;
+  if (plan.try_get(%(namespace $portable $key), id)) return id;
+  List provider = c.sym.get_exact(%("declaration-file" $key));
+  if (!provider) return NULL;
+  return plan.try_get(%(namespace ${provider.cadr()} $key), id) ? id : NULL;
+}
+
+static Array Compiler._projection_definitions(Compiler c, List node) {
+  Array definitions = [];
+  match (node) case %((!set ?kind (!or declare typedef function)) ?base *): {
+    Type type = base;
+    match (type.base_type())
+      case %((!set ?tag (!or struct union enum)) ?(String name) *): {
+        String id = c._projection_namespace(%($tag $name));
+        if (id) definitions.push(id);
+      }
+    if (kind == <typedef>)
+      foreach (List row, node.caddr().list().cdr())
+        match (row) case %(bind ?binding *): {
+          String name = binding_identity_spelling(binding);
+          String id = name ? c._projection_namespace(%(typedef $name)) : NULL;
+          if (id && !(id in definitions)) definitions.push(id);
+        }
+  }
+  return definitions;
 }
 
 /* Region identities come from final emitted nodes, after cache/init/body
@@ -216,6 +260,7 @@ static List Compiler._projection_nodes(
       String resolved = c.resolve_source_include(include, angle);
       if (resolved) record["includePath"] = c.canonical_path(resolved);
     }
+    record["defines"] = c._projection_definitions(node);
     records.push(record);
     order.push(id);
     marked.push(%(preproc "#pragma x2c_region_begin $id"));
