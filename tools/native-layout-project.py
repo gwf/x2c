@@ -188,13 +188,20 @@ def load_metadata(path, streams=()):
             load(current.parent / companion)
     load(path)
     for text in streams:
-        physical = None
+        physical, include_stack = None, []
         for line in text.splitlines():
             location = LINE.fullmatch(line.strip())
             if location:
                 filename = json.loads(location[2])
                 flags = (location[3] or '').split()
-                if '1' in flags or '2' in flags or physical is None:
+                if '1' in flags:
+                    include_stack.append(physical)
+                    physical = filename
+                elif '2' in flags:
+                    if not include_stack:
+                        raise ProjectionError('native include return without entry')
+                    physical = include_stack.pop()
+                elif physical is None:
                     physical = filename
                 continue
             marker = MARKER.fullmatch(line.strip())
