@@ -8,7 +8,8 @@
 #include "utils.x"
 
 static typedef struct Layouts {
-  Map bodies, variants, aliases, alias_variants, owners, edges, visiting, finished;
+  Map bodies, variants, aliases, alias_variants, owners, edges, variant_edges;
+  Map fixed_edges, visiting, finished;
   Map private_types, private_bindings, private_constants, used_aliases;
   Array order;
 } Layouts;
@@ -210,17 +211,27 @@ static void Layouts.dependencies(Layouts &layouts) {
     aliases[%(typedef $name)] = alias.type_from_ast().declared();
     aliases[%($name)] = %(typedef $name);
   }
-  foreach (Var (key, provider), layouts.bodies) {
-    (Compiler c, List body) = provider;
+  foreach (List family, layouts.bodies.keys()) {
     Map needed = {};
-    Sym resolver = Sym.new(c);
-    resolver.reset_overlay(c.sym.global_symbols(), aliases);
-    List family = key;
-    foreach (List variant, layouts.variants[family].list())
-      layouts.require_body(c, resolver, variant.cadr(), needed);
+    int unconditional = 1;
+    foreach (List variant, layouts.variants[family].list()) {
+      (Compiler owner, List body, List prefix, List arms) = variant;
+      Sym resolver = Sym.new(owner);
+      resolver.reset_overlay(owner.sym.global_symbols(), aliases);
+      Map selected = {};
+      layouts.require_body(owner, resolver, body, selected);
+      Array selected_edges = [];
+      foreach (List prerequisite, selected.keys()) {
+        needed[prerequisite] = 1;
+        selected_edges.push(prerequisite);
+      }
+      layouts.variant_edges[variant] = selected_edges.list_free();
+      if (arms.len()) unconditional = 0;
+    }
     Array prerequisites = [];
     foreach (List prerequisite, needed.keys()) prerequisites.push(prerequisite);
     layouts.edges[family] = prerequisites.list_free();
+    layouts.fixed_edges[family] = unconditional ? layouts.edges[family] : NULL;
   }
 }
 
@@ -233,7 +244,7 @@ static void Layouts.visit(Layouts &layouts, List family) {
       %($family "provider: ${layouts.owners[family]}"));
   }
   layouts.visiting[family] = 1;
-  foreach (List prerequisite, layouts.edges[family].list())
+  foreach (List prerequisite, layouts.fixed_edges[family].list())
     layouts.visit(prerequisite);
   layouts.visiting.del(family);
   layouts.finished[family] = 1;
@@ -407,12 +418,42 @@ static String _layout_macro_guards(List names, String operation) {
   return text;
 }
 
+/* Dependencies belong inside the selected native arm. A recursive family
+   expansion stops at its forward declaration, so native C rejects an active
+   value cycle. Only a selected, completed body defines the family guard.
+   Rendered text repeats each dependency path; shared graphs can grow rapidly. */
+static String Layouts.render(
+  Layouts &layouts, List family, Map expanding, Map plan) {
+  if (family in expanding) return "";
+  expanding[family] = 1;
+  String guard = _layout_guard(family), text = "";
+  foreach (List variant, layouts.variants[family].list().reverse()) {
+    (Compiler c, List body, List prefix, List arms) = variant;
+    String prerequisites = "";
+    foreach (List dependency, layouts.variant_edges[variant].list())
+      prerequisites += layouts.render(dependency, expanding, plan);
+    List macros = _layout_macro_names(prefix);
+    List definitions = %((comment $prerequisites))
+      .append(layouts.alias_nodes(body, plan))
+      .append(%($body (preproc ${%"#define $guard"})));
+    text += %"#ifndef $guard\n";
+    text += _layout_macro_guards(macros, "push");
+    text += _layout_text(c, layouts.prefix(c, prefix, plan, definitions));
+    for (int i = arms.len(); i; i--) text += "#endif\n";
+    text += _layout_macro_guards(macros.reverse(), "pop");
+    text += "#endif\n";
+  }
+  expanding.del(family);
+  plan[%(body $family)] = guard;
+  return text;
+}
+
 /* Render while the bound provider ASTs and their binding facts are alive.
    Consumers export only Strings and keys as their nested Contexts close. */
 Map prepare_module_layouts(List providers) {
   Layouts layouts = {
     .bodies = {}, .variants = {}, .aliases = {}, .alias_variants = {}, .owners = {},
-    .edges = {},
+    .edges = {}, .variant_edges = {}, .fixed_edges = {},
     .visiting = {}, .finished = {}, .order = [],
     .private_types = {}, .private_bindings = {}, .private_constants = {},
     .used_aliases = {}};
@@ -446,22 +487,8 @@ Map prepare_module_layouts(List providers) {
   Map rendered = {}, plan = {};
   foreach (List family, layouts.order) {
     if (!(family in active)) continue;
-    (Compiler c, List body) = layouts.bodies[family];
-    String guard = _layout_guard(family);
-    String text = "";
-    foreach (List dependency, layouts.edges[family].list())
-      text += rendered[dependency].string();
-    foreach (List variant, layouts.variants[family].list().reverse()) {
-      List body = variant.cadr(), prefix = variant.caddr(), arms = variant.cddr().cadr();
-      List macros = _layout_macro_names(prefix);
-      text += _layout_macro_guards(macros, "push");
-      List definitions = layouts.alias_nodes(body, plan).append(%($body));
-      text += _layout_text(c, layouts.prefix(c, prefix, plan, definitions));
-      for (int i = arms.len(); i; i--) text += "#endif\n";
-      text += _layout_macro_guards(macros.reverse(), "pop");
-    }
-    rendered[family] = %"#ifndef $guard\n#define $guard\n$text\n#endif\n";
-    plan[%(body $family)] = guard;
+    Map expanding = {};
+    rendered[family] = layouts.render(family, expanding, plan);
   }
   foreach (List provider, providers) {
     (Compiler c, List ast) = provider;

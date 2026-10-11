@@ -344,6 +344,33 @@ def cases():
         yield f"exclusive_layout_edges_flag_{flag}", exclusive_layout, options, None
         yield f"ordinary_exclusive_layout_edges_flag_{flag}", ordinary(exclusive_layout), {
             "inputs": ["box.x", "box/inner.x", "box/outer.x", "main.x"]}, None
+        separate_providers = {
+            "box.x": 'module {"box/a.x", "box/b.x", "box/outer.x"}\n',
+            "box/a.x": (f'#define SELECT_LAYOUT {flag}\n#if SELECT_LAYOUT\n'
+                        'module typedef struct A {int value;} A;\n'
+                        '#else\nmodule typedef struct A {B nested;} A;\n#endif\n'),
+            "box/b.x": (f'#define SELECT_LAYOUT {flag}\n#if SELECT_LAYOUT\n'
+                        'module typedef struct B {A nested;} B;\n'
+                        '#else\nmodule typedef struct B {int value;} B;\n#endif\n'),
+            "box/outer.x": exclusive_layout["box/outer.x"],
+            "main.x": exclusive_layout["main.x"],
+        }
+        yield f"exclusive_layout_separate_providers_flag_{flag}", separate_providers, options, None
+        selected_cycle = {
+            **exclusive_layout,
+            "box/inner.x": ('module typedef struct A A;\nmodule typedef struct B B;\n'
+                            f'#define SELECT_LAYOUT {flag}\n#if SELECT_LAYOUT\n'
+                            'module typedef struct A {B nested;} A;\n'
+                            'module typedef struct B {A nested;} B;\n'
+                            '#else\nmodule typedef struct A {int value;} A;\n'
+                            'module typedef struct B {int value;} B;\n#endif\n'),
+        }
+        rejection = r"incomplete|cycle|recursive" if flag else None
+        yield f"selected_layout_cycle_flag_{flag}", selected_cycle, {
+            **options, "rejection_phase": "any"}, rejection
+        yield f"ordinary_selected_layout_cycle_flag_{flag}", ordinary(selected_cycle), {
+            "inputs": ["box.x", "box/inner.x", "box/outer.x", "main.x"],
+            "rejection_phase": "any"}, rejection
     for storage in ("", "static "):
         label = "static" if storage else "public"
         macro_effects = {
