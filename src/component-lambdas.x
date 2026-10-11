@@ -165,13 +165,23 @@ meta static Var _lambda_rebuild(Var ast, List none, Map cells, Array named) {
 meta static List _lambda_none(void) =>
   %(return ("Var") (expr ("Var") (literal ("Var") "void")));
 
+/* The block `items` with each bare return returning `none`, rebuilt only
+   when one returns outside the body of a lambda the items hold. */
+meta static List _lambda_returning(List items, List none) {
+  List node;
+  $ast.walk(items, node) {
+    if (node === %(return)) return _lambda_rebuild(items, none, NULL, NULL);
+    if (node.car() == <lambda>) continue;
+  }
+  return items;
+}
+
 /* The block items of the function that runs the lambda body `body`. An
    expression body keeps the origin of the item that holds the lambda, so
    lowering it later reports there. */
 meta static List _lambda_items(Code body) {
   match (body) case %(block *items):
-    return %(@{_lambda_rebuild(items, _lambda_none(), NULL, NULL)}
-             ${_lambda_none()});
+    return %(@{_lambda_returning(items, _lambda_none())} ${_lambda_none()});
   List items = body.match(%(expr (void) ?))
     ? %((stmnt $body) ${_lambda_none()})
     : %((stmnt (return ${body.convert(%("Var"))})));
