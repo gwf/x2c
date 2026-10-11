@@ -40,9 +40,9 @@ Public functions:
 `binding_identity_spelling`, `ast_prototype_declarator`, `Ast.designated`,
 `Ast.lvalue_binding`, `ast_addressed_identifier`, `ast_direct_identifier`,
 `ast_indirect_identifier`, `Ast.written_operand`, `Ast.rewrite_children`,
-`ast_contains_head`, `ast_collect_binding_references`, `Ast.without_origin`,
-`Ast.rewrap_origin`, `Ast.never_returns`, `Symbol.is_assignment_op`,
-`ast_changes_left_operand`, `Ast.initializer_cases`,
+`ast_contains_head`, `ast_replace_nodes`, `ast_collect_binding_references`,
+`Ast.without_origin`, `Ast.rewrap_origin`, `Ast.never_returns`,
+`Symbol.is_assignment_op`, `ast_changes_left_operand`, `Ast.initializer_cases`,
 `Ast.initializer_functions`
 
 ### [src/build.x](../src/build.x)
@@ -466,6 +466,7 @@ Public functions:
 `Compiler.macro_form_is_definition`, `Compiler.local_macro_form_is_definition`,
 `Compiler.keyword_form_is_definition`, `Compiler.parse_keyword_definition`,
 `Compiler.marked_rewrite`, `Compiler.has_rewrites`, `Compiler.rewrite`,
+`Compiler.rewrite_lowered`, `Compiler.lower_replacement`,
 `Compiler.lower_rewrite`, `Compiler.rebound`, `Compiler.watched_step`,
 `Compiler.macro_starts_target_at`, `Compiler.macro_invocation_collection`,
 `Compiler.skip_macro_invocation`, `Compiler.skip_named_type_declaration`,

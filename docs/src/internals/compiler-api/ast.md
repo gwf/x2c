@@ -19,6 +19,7 @@ Shared helpers for x2c compiler AST nodes.
 | [`ast_direct_identifier`](#ast_direct_identifier) | Returns the name an expression designates directly, following the forms that still name the same object - parentheses, a member, an array index, a dereference - or `NULL` when the expression designates no single name. |
 | [`ast_indirect_identifier`](#ast_indirect_identifier) | Returns the name of the pointer an expression designates through, or `NULL` when it designates no object through a single name. |
 | [`ast_prototype_declarator`](#ast_prototype_declarator) | Returns `declarator` with the outermost `volatile` removed from each of its parameters. |
+| [`ast_replace_nodes`](#ast_replace_nodes) | Returns `root` with each list beneath it that `replaced` maps, keyed by its address, swapped for its value, and adds each rebuilt ancestor to `replaced`. |
 | [`binding_identity_new`](#binding_identity_new) | Constructs a `(binding identity spelling)` node. |
 | [`binding_identity_spelling`](#binding_identity_spelling) | Returns a valid binding node's source spelling, or `NULL`. |
 | [`binding_identity_try_parts`](#binding_identity_try_parts) | Extracts a valid `(binding positive-integer string)` node. |
@@ -49,7 +50,7 @@ Source: `src/ast.x:138`
 
 Returns whether `op` writes its left operand.
 
-Source: `src/ast.x:316`
+Source: `src/ast.x:347`
 
 #### ast_collect_binding_references
 
@@ -57,7 +58,7 @@ Source: `src/ast.x:316`
 
 Records in `referenced` the identity of every binding `node` names.
 
-Source: `src/ast.x:222`
+Source: `src/ast.x:253`
 
 #### ast_contains_head
 
@@ -101,6 +102,18 @@ transfer requires belongs to the definition that writes the parameter,
 not to the declaration its callers read.
 
 Source: `src/ast.x:74`
+
+#### ast_replace_nodes
+
+`Var ast_replace_nodes(Var root, Map replaced)`
+
+Returns `root` with each list beneath it that `replaced` maps, keyed
+by its address, swapped for its value, and adds each rebuilt ancestor
+to `replaced`. Only the ancestors of a swapped list are new, so `root`
+returns itself when nothing beneath it is swapped. The walk keeps deep
+expression chains off the C stack.
+
+Source: `src/ast.x:226`
 
 #### binding_identity_new
 
@@ -150,7 +163,7 @@ Source: `src/ast.x:111`
 
 Returns initializer alternatives and their optional native macro input.
 
-Source: `src/ast.x:322`
+Source: `src/ast.x:353`
 
 <a id="Ast.initializer_functions"></a>
 #### Ast.initializer_functions
@@ -161,7 +174,7 @@ Returns function alternatives when every initializer arm calls one shared
 input, and stores that input expression in `source`. Other forms return
 NULL.
 
-Source: `src/ast.x:336`
+Source: `src/ast.x:367`
 
 <a id="Ast.lvalue_binding"></a>
 #### Ast.lvalue_binding
@@ -185,7 +198,7 @@ calls, and blocks ending in either one when the block contains no
 `return`. Generation uses this fact to mark the enclosing function
 `_Noreturn`.
 
-Source: `src/ast.x:269`
+Source: `src/ast.x:300`
 
 <a id="Ast.rewrap_origin"></a>
 #### Ast.rewrap_origin
@@ -195,7 +208,7 @@ Source: `src/ast.x:269`
 Returns `replacement` under the anchors of `original`, the statement it
 replaces, so a rewrite does not lose the node's source position.
 
-Source: `src/ast.x:254`
+Source: `src/ast.x:285`
 
 <a id="Ast.rewrite_children"></a>
 #### Ast.rewrite_children
@@ -219,7 +232,7 @@ in. Every block statement carries one so that a transform-phase
 diagnostic can name its line; a pass that dispatches on a statement tag
 has to see the statement, not the anchor.
 
-Source: `src/ast.x:242`
+Source: `src/ast.x:273`
 
 <a id="Ast.written_operand"></a>
 #### Ast.written_operand
@@ -241,7 +254,7 @@ Source: `src/ast.x:192`
 
 Returns whether `op` is plain or compound assignment.
 
-Source: `src/ast.x:312`
+Source: `src/ast.x:343`
 
 ## Public types
 
