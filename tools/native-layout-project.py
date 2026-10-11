@@ -284,7 +284,7 @@ def project(text, metadata, selected_edges=None, owner_streams=None):
         defines = row.get('defines', [])
         requirements = list(region.namespace_demands)
         for definition in defines:
-            if not row.get('selectedNamespaces'):
+            if not row.get('selectedNamespaces') and definition not in row.get('declarationTags', []):
                 requirements.extend((metadata.get('namespaceEdges') or {}).get(definition, []))
         for needed in requirements:
             if needed in defines:

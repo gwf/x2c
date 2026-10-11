@@ -332,6 +332,16 @@ static List Compiler._projection_nodes(
     }
     Map record = {id: id, role: role, family: family,
       kind: node.car().str(), optional: Json.bool(1)};
+    Array declaration_tags = [];
+    match (node) case %((!or typedef declare function) ?base *): {
+      Type type = base;
+      match (type.base_type())
+        case %((!set ?tag (!or struct union enum)) ?(String name)): {
+          String namespace = c.module_projection_namespace(%($tag $name));
+          if (namespace) declaration_tags.push(namespace);
+        }
+    }
+    record["declarationTags"] = declaration_tags;
     match (node) case %((!or typedef declare) ?base ?): {
       Type type = base;
       match (type.base_type()) case %((!or struct union) *):
