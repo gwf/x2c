@@ -17,6 +17,7 @@
 #include "component-delegate.h"
 #include "component-destructuring.h"
 #include "component-interpolation.h"
+#include "component-lambdas.h"
 #include "component-literals.h"
 #include "component-match.h"
 #include "component-operators.h"
@@ -55,6 +56,8 @@ Code destructure_declaration(Code node);
 Code destructure_statement(Code node);
 
 Code destructure_value(Code node);
+
+Code lambda_lift(Code node);
 
 Code match_lowering(Code node);
 
