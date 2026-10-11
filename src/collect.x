@@ -235,7 +235,9 @@ Map Compiler.collect_symbols(Compiler c, Map globs) {
       c.fn_defs.del(name);
     }
   visited[canonical] = 1;
-  c._walk_file(canonical, c.text, Path.dirname(c.filename), globs, visited);
+  c._walk_file(
+    canonical, c.text, c.unit_source, Path.dirname(c.filename), globs,
+    visited);
   c.bind_pending_inline_bodies(globs, canonical);
   c._record_cold_conformances(globs, visited, canonical);
   return globs;
@@ -267,7 +269,8 @@ static void Compiler._add_prelude(Compiler c, Map globs, Map visited) {
     c.add_translation_dependency(canonical);
     if (c.runtime_hdrs)
       c._walk_file(
-        canonical, c._runtime_text(path), Path.dirname(path), globs, visited);
+        canonical, c._runtime_text(path), NULL, Path.dirname(path), globs,
+        visited);
     else {
       List entry = c._prelude_entry(path, canonical);
       // Its compile-time effects install as the compiler's own.
@@ -496,9 +499,10 @@ static typedef struct FileWalk {
    units, so its declarations must not depend on unit-local names visible
    before the include. */
 static void Compiler._walk_file(
-  Compiler c, String path, String text, String dir, Map globs,
-  Map visited) {
+  Compiler c, String path, String text, ModuleSource module, String dir,
+  Map globs, Map visited) {
   if (path in _process_cache()) (void) c._entry(path);
+  if (module) text = module.text;
   Tokenizer tokenizer = Tokenizer.new(text, <x2c>);
   tokenizer.layout = is_layout_file(path);
   tokenizer.scan();
@@ -508,11 +512,16 @@ static void Compiler._walk_file(
   $let(c.declaration_effects, NULL) $let(c.kw_aliases, {})
   $let(c.layout, tokenizer.layout) {
     FileWalk w = {
-      .c = c, .path = path, .text = text, .dir = dir, .globs = globs,
-      .visited = visited, .parts = [], .definitions = {},
+      .c = c, .path = path, .text = text, .dir = dir, .module = module,
+      .globs = globs, .visited = visited, .parts = [], .definitions = {},
       .dependencies = _cache_map(), .statics = {}, .hashes = _cache_map(),
       .unit = is_source_file(path), .line = 1};
     if (path == _canonical_path(c.filename)) c.meta_hashes = w.hashes;
+    // Editing a member changes the module's contribution.
+    if (module) {
+      _cache_dependencies(w.dependencies, module.members);
+      c.merge_translation_dependencies(module.members);
+    }
     if (w.unit) {
       String provider = home_portable_path(path);
       Map metadata = _cache_map();
@@ -621,7 +630,10 @@ static void FileWalk.prepare(FileWalk &w, Compiler shadow, String segment) {
   shadow.take_unit_state(w.c);
   shadow.tokenize(segment);
   shadow.text = w.text;
-  if (w.c.source_facts) w.c.source_texts[Path.absolute(w.path)] = w.text;
+  if (w.module) shadow.line_markers = w.module.markers;
+  if (w.c.source_facts)
+    w.c.source_texts[Path.absolute(w.path)] =
+      w.module ? w.module.own : w.text;
   _shift_tokens(shadow.tokenizer, w.line, w.pos);
 }
 
@@ -878,8 +890,9 @@ static List Compiler._walk_cold(
    remain unique across the unit and its pending inline-body parses. */
 static void Compiler._walk_apart(
   Compiler c, String path, String text, Map globs, Map visited) {
+  ModuleSource module = c.module_source(path, text);
   $let(c.names.counters, {})
-    c._walk_file(path, text, Path.dirname(path), globs, visited);
+    c._walk_file(path, text, module, Path.dirname(path), globs, visited);
 }
 
 /* `covered` is 1 when the file is in the runtime's `lib/` or
@@ -1297,7 +1310,7 @@ static void FileWalk.queue_public_bodies(FileWalk &w) {
   w.c.public_bodies = 1;
   w.c.pending_inline_bodies.push(
     %(${w.c} ${w.path} ${w.text} ${w.globs} $own
-      ${w.statics} ${w.hashes}));
+      ${w.statics} ${w.hashes} @{w.module ? %(${w.module.markers}) : NULL}));
 }
 
 /* Each provider binds its header bodies in its own original session.
@@ -1310,7 +1323,7 @@ static void Compiler.bind_pending_inline_bodies(
   if (!pending.len()) return;
   while (pending.len()) {
     (Compiler body, String path, String text, Map symbols, Map own,
-     Map statics, Map hashes) = pending.shift();
+     Map statics, Map hashes, Var markers) = pending.shift();
     Map visited = {};
     visited[path] = 1;
     Array effects = [];
@@ -1319,6 +1332,7 @@ static void Compiler.bind_pending_inline_bodies(
     body.filename = path;
     body.meta_hashes = hashes;
     body.tokenize(text);
+    if (markers is not void) body.line_markers = markers;
     List ast = body.full_parse(symbols, 0);
     Map additions = body.inline_type_dependencies(ast);
     body.publish_inline_dependencies(path, own, statics, additions);
@@ -1349,7 +1363,7 @@ static int FileWalk.produces(FileWalk &w) {
    as a unit whose text the prelude already covered, does not replace an
    entry that other units may already have replayed. */
 static void FileWalk.publish(FileWalk &w) {
-  String hash = _content_hash(w.text);
+  String hash = _content_hash(w.module ? w.module.own : w.text);
   if (w.unit) {
     Map metadata = _cache_map();
     String provider = home_portable_path(w.path);
