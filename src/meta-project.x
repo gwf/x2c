@@ -475,6 +475,8 @@ void Compiler.require_native_meta_header(Compiler c, String path) {
       h->header_active[provider] = 1;
       defer h->header_active.del(provider);
       if (!h->prefix_compilers.try_get(owner, compiler)) {
+        // A module parse would execute its members' later producers.
+        if (c.module_tree && c.module_tree.owner(owner)) return;
         String failure = (*h).prepare_native(index);
         if (failure)
           c.report_error(
