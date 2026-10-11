@@ -1949,6 +1949,13 @@ static List Compiler__shipped_lowering(Compiler c, Symbol point, Var kind, List 
 
 #endif
 #ifndef X2C_TRANSFORM_SOURCE
+List Compiler_rewrite(Compiler, Symbol, Var, List, AstPos, Type, Token);
+void Compiler_shipped_support(Compiler c, Symbol kind, List source, String form){
+  if(! _init_guard_) _file_init_();  List bound = Compiler_rewrite(c, 948490, Symbol_var(kind), source, AST_UNIT, NULL, NULL);  if(! List_truth(bound)) Compiler_report_error(c, 50756762, String_join(NULL, cons(String_var(_46), cons(String_var(form), NULL))), NULL, _52);  else Compiler_add_early(c, bound);
+}
+
+#endif
+#ifndef X2C_TRANSFORM_SOURCE
 static Ast Compiler__shipped_statement(Compiler c, Ast ast, Symbol tag){
   return Compiler__shipped_lowering(c, 948490, Symbol_var(tag), ast, AST_STATEMENT, List_type(c -> return_type), String_join(NULL, cons(String_var(Symbol_str(tag)), cons(String_var(_53), NULL))));
 }
@@ -2792,7 +2799,6 @@ static List Compiler__declaration(Compiler c, List ast){
 
 #endif
 #ifndef X2C_TRANSFORM_SOURCE
-List Compiler_rewrite(Compiler, Symbol, Var, List, AstPos, Type, Token);
 static List Compiler__lower_lambda_destructuring(Compiler c, List ast){
   if(! List_truth(ast)) return ast; {
     List _x2c_match_expr = ast; List _x2c_match_cursor;  switch(_x2c_match_expr ? _x2c_match_expr->car.u64 : 0){

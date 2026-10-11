@@ -4,11 +4,11 @@
 #include "x2c.h"
 
 #include "rewrite.h"
-static List _57, _56, _54, _53, _46, _45, _44, _42, _41, _38, _37, _31, _30, _28, _27, _23, _22, _21, _19, _18, _14, _13;
+static List _65, _64, _60, _59, _57, _56, _54, _46, _45, _44, _42, _41, _38, _37, _31, _30, _28, _27, _23, _22, _21, _19, _18, _14, _13;
 
 static String _50, _8, _6, _0;
 
-static Var _63, _62, _61, _60, _59, _58, _55, _52, _51, _49, _48, _47, _43, _40, _39, _36, _35, _34, _33, _32, _29, _26, _25, _24, _20, _17, _16, _15, _12, _11, _10, _9, _7, _5, _4, _3, _2, _1;
+static Var _69, _68, _67, _66, _63, _62, _61, _58, _55, _53, _52, _51, _49, _48, _47, _43, _40, _39, _36, _35, _34, _33, _32, _29, _26, _25, _24, _20, _17, _16, _15, _12, _11, _10, _9, _7, _5, _4, _3, _2, _1;
 
 static int _init_guard_ = 0;
 
@@ -75,40 +75,49 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _50 = String_new("x2c.at");
   _51 = String_var(_50);
   _52 = Symbol_var(377892);
-  _53 = cons(_52, NULL);
-  _54 = cons(_11, _53);
+  _53 = Symbol_var(917238582723620);
+  _54 = cons(_53, NULL);
   _55 = List_var(_54);
-  _56 = cons(_55, _21);
-  _57 = cons(_10, _56);
+  _56 = cons(_52, NULL);
+  _57 = cons(_11, _56);
   _58 = List_var(_57);
-  _59 = Symbol_var(40381208);
-  _60 = Symbol_var(1219800220);
-  _61 = Symbol_var(458361162716);
-  _62 = Symbol_var(102886);
-  _63 = Symbol_var(199448);
+  _59 = cons(_58, _21);
+  _60 = cons(_10, _59);
+  _61 = List_var(_60);
+  _62 = Symbol_var(40381208);
+  _63 = Symbol_var(102886);
+  _64 = cons(_58, _44);
+  _65 = cons(_10, _64);
+  _66 = List_var(_65);
+  _67 = Symbol_var(199448);
+  _68 = Symbol_var(1219800220);
+  _69 = Symbol_var(458361162716);
 }
 
 static Code _protocol_function(List declared, List name, List forward){
-  List params = Var_list(List_car(forward));
-  Code call = Var_list(List_cadr(forward));
+  List params = Var_list(List_car(forward)), args = Var_list(List_caddr(forward));
+  Code callee = Var_list(List_cadr(forward));
   return cons(_1, cons(_2, cons(List_var(cons(_3, cons(List_var(cons(_4, cons(_5, cons(_7, cons(List_var(({
-    Var _x2c_literal_part_4 = List_var(cons(List_var(cons(_9, cons(_24, cons(_25, cons(List_var(declared), NULL))))), NULL));  Var _x2c_literal_part_5 = List_var(({
+    Var _x2c_literal_part_6 = List_var(cons(List_var(cons(_9, cons(_24, cons(_25, cons(List_var(declared), NULL))))), NULL));  Var _x2c_literal_part_7 = List_var(({
       Var _x2c_literal_part_0 = List_var(cons(_9, cons(_32, cons(_33, cons(List_var(name), NULL)))));  Var _x2c_literal_part_1 = List_var(cons(List_var(cons(_34, cons(List_var(cons(_35, cons(List_var(cons(_9, cons(_47, cons(_25, cons(List_var(params), NULL))))), NULL))), NULL))), NULL));  cons(_48, cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, NULL)));
     }
-    ));  Var _x2c_literal_part_6 = List_var(cons(_49, cons(List_var(cons(_51, cons(List_var(({
-      Var _x2c_literal_part_2 = List_var(cons(List_var(cons(_9, cons(_24, cons(_25, cons(List_var(declared), NULL))))), NULL));  Var _x2c_literal_part_3 = List_var(cons(_9, cons(_58, cons(_59, cons(List_var(call), NULL)))));  cons(_60, cons(_x2c_literal_part_2, cons(_x2c_literal_part_3, NULL)));
+    ));  Var _x2c_literal_part_8 = List_var(cons(_49, cons(List_var(cons(_51, cons(List_var(({
+      Var _x2c_literal_part_4 = List_var(cons(List_var(cons(_9, cons(_24, cons(_25, cons(List_var(declared), NULL))))), NULL));  Var _x2c_literal_part_5 = List_var(cons(_52, cons(_55, cons(List_var(({
+        Var _x2c_literal_part_2 = List_var(cons(_9, cons(_61, cons(_62, cons(List_var(callee), NULL)))));  Var _x2c_literal_part_3 = List_var(cons(_63, cons(List_var(cons(_9, cons(_66, cons(_25, cons(List_var(args), NULL))))), NULL)));  cons(_67, cons(_x2c_literal_part_2, cons(_x2c_literal_part_3, NULL)));
+      }
+      )), NULL))));  cons(_68, cons(_x2c_literal_part_4, cons(_x2c_literal_part_5, NULL)));
     }
-    )), NULL))), NULL)));  cons(_61, cons(_x2c_literal_part_4, cons(_x2c_literal_part_5, cons(_x2c_literal_part_6, NULL))));
+    )), NULL))), NULL)));  cons(_69, cons(_x2c_literal_part_6, cons(_x2c_literal_part_7, cons(_x2c_literal_part_8, NULL))));
   }
   )), NULL))))), NULL))), NULL)));
 }
 
 static Code _protocol_runtime(Type result, String name, List arguments){
   return({
-    Var _x2c_literal_part_9 = List_var(result);  Var _x2c_literal_part_10 = List_var(({
-      Var _x2c_literal_part_7 = String_var(name);  Var _x2c_literal_part_8 = List_var(cons(_62, List_append(arguments, NULL)));  cons(_63, cons(_x2c_literal_part_7, cons(_x2c_literal_part_8, NULL)));
+    Var _x2c_literal_part_11 = List_var(result);  Var _x2c_literal_part_12 = List_var(({
+      Var _x2c_literal_part_9 = String_var(name);  Var _x2c_literal_part_10 = List_var(cons(_63, List_append(arguments, NULL)));  cons(_67, cons(_x2c_literal_part_9, cons(_x2c_literal_part_10, NULL)));
     }
-    ));  cons(_52, cons(_x2c_literal_part_9, cons(_x2c_literal_part_10, NULL)));
+    ));  cons(_52, cons(_x2c_literal_part_11, cons(_x2c_literal_part_12, NULL)));
   }
   );
 }

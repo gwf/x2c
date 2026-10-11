@@ -1491,18 +1491,17 @@ static List MemberResolution.complete(MemberResolution &r, List row) {
 /* adapter requirements
 
    Resolution accepts an ordinary conformance only when its adapters can be
-   generated, and adapter generation checks an inherited member the same
-   way. Both describe the adapters with one record. */
+   generated, and presentation checks an inherited member the same way.
+   Both describe the adapters with one record. */
 
 /* The adapters one conformance needs. Resolution fills the base, binder,
-   and converters; generation fills the rest. */
+   and converters; presentation fills the rest. */
 static typedef struct ProtocolAdapters {
   Compiler c;
   Type base, participant;
   String forward, reverse, binder;
   Map variables, bindings;
   List adoption;
-  Array thunks;
   int shares_var_tag, central_initializer;
 } ProtocolAdapters;
 
@@ -1595,11 +1594,6 @@ static String _type_variable(Var value, Map variables) {
     case %(?(String only)): name = only;
   if (!name) return NULL;
   return name in variables ? name : NULL;
-}
-
-static int _variable_is(Var template, Map variables, String name) {
-  String variable = _type_variable(template, variables);
-  return variable && variable == name;
 }
 
 static int _unify(Var pattern, Var actual, Map variables, Map bindings) {
@@ -2141,12 +2135,6 @@ static List Compiler._generated_function(
   return function;
 }
 
-static List Compiler._bound_call(
-  Compiler c, Type result, List callee, List arguments) {
-  Macro shape = $called;
-  return c.rebuild_expression(result, shape(callee, arguments));
-}
-
 /** Returns a generated helper for a direct protocol-backed update.
     The resolved member must have exactly `(Participant, RHS) -> Participant`.
     A matching helper is emitted once into the unit's pending support;
@@ -2303,14 +2291,17 @@ static List DiscardCall.emit(DiscardCall &d) {
 
 /* adapter generation
 
-   Resolved conformances become native aliases, ordinary adapters, and
-   descriptor thunks. Their external signatures are published first, so
-   the unit's own calls bind before the adapters exist. */
+   Resolved conformances become native aliases here, and `conform` forms
+   whose rule writes ordinary adapters and descriptor thunks. Their external
+   signatures are published first, so the unit's own calls bind before the
+   adapters exist. */
 
 /** Generates adapters and descriptor registration for resolved conformances.
     Native aliases are inserted at the participant's inferred public or
-    private boundary. Ordinary adapters and descriptor thunks are added to the
-    unit's pending support. Returns `ast` with native insertions applied.
+    private boundary. Each other conformance whose forward converter the
+    unit defines is presented to the rule on the `conform` head, whose
+    code joins the unit's pending support. Returns `ast` with native
+    insertions applied.
 */
 List Compiler.generate_protocol_adapters(Compiler c, List ast) {
   /* Emit adapters only for finalized, declared conformances. */
@@ -2330,7 +2321,7 @@ List Compiler.generate_protocol_adapters(Compiler c, List ast) {
         }
         if (!c._defines_function(forward)) continue;
         if (c._numeric_participant(participant)) continue;
-        c._ordinary_adapters(ordered_row.cadr(), central_initializer);
+        c._present_conformance(ordered_row.cadr(), central_initializer);
       }
   ordered.free();
   return ast;
@@ -2400,16 +2391,11 @@ static int Compiler._defines_function(Compiler c, String name) {
   return state == <definition> || state == <completed>;
 }
 
-static typedef struct AdapterFunction {
-  Compiler c;
-  String name, source, reverse, binder;
-  Type target, signature, template;
-  Map variables;
-  List binding;
-  int make_static;
-} AdapterFunction;
-
-static void Compiler._ordinary_adapters(
+/* Presents one conformance to the rule on the `conform` head, which
+   `src/component-protocols.x` documents and ships. The owner of each
+   member, its collisions and missing conversions, and the generated
+   names are settled here; the rule writes the code. */
+static void Compiler._present_conformance(
   Compiler c, List conformance, int central_initializer) {
   match (conformance)
     case %(protocol-conformance ?(Type base) ?(Type participant)
@@ -2422,192 +2408,122 @@ static void Compiler._ordinary_adapters(
             .c = c, .base = base, .participant = participant,
             .forward = forward, .reverse = reverse, .binder = binder,
             .variables = variables, .bindings = bindings,
-            .adoption = adoption, .thunks = [],
+            .adoption = adoption,
             .central_initializer = central_initializer,
             .shares_var_tag = base === %("Var") &&
               _adoption_representation(adoption)};
-          foreach (List row, rows) adapters.member(row);
-          adapters.register_descriptor();
+          Array presented = [];
+          foreach (List row, rows) presented.push(adapters.present(row));
+          List members = presented.list_free();
+          List form = %(
+            conform $base $participant $forward $reverse $binder
+              ${adapters.descriptor()} $members);
+          c._generated_support(members, form);
         }
 }
 
-static void ProtocolAdapters.member(ProtocolAdapters &a, List row) {
+/* The rule's functions are generated: one that completes a documented
+   prototype keeps its prose, and none publishes prose of its own. */
+static void Compiler._generated_support(Compiler c, List members, List form) {
+  Map facts = c.semantic_binding_facts(), authored = {};
+  Array keys = [];
+  foreach (List row, members) match (row) case %(? ? ? ? ? *parts):
+    foreach (List part, parts) keys.push(%(api-definition ${part.cadr()}));
+  foreach (List key, keys) {
+    Var fact;
+    if (facts.try_get(key, fact)) authored[key] = fact;
+  }
+  c.shipped_support(<conform>, form, "protocol conformance");
+  foreach (List key, keys) {
+    Var fact;
+    if (authored.try_get(key, fact)) c.set_fact(key, fact);
+    else c.drop_fact(key);
+  }
+}
+
+/* A row and the parts of it this unit writes. A forwarding member is
+   written for a base default; a descriptor of its own also declares a
+   member another conformance generates, and fills the slot of each
+   implemented or declared member that `VarMethods` has. */
+static List ProtocolAdapters.present(ProtocolAdapters &a, List row) {
   match (row)
     case %(?(String member) ?(Symbol status) ?(String source)
            ?(Type expected) ? ?(Type template)): {
-      if (status == <base-dflt>)
-        a.default_member(member, source, expected, template);
-      else if (status == <no-member>)
-        a.missing_member(member, template);
-      else if (status == <implmntd>)
-        a.implemented_member(member, source, expected, template);
+      List parts = NULL;
+      if (status == <base-dflt>) parts = a.default_part(member, expected);
+      else if (a.has_descriptor()) {
+        if (status == <no-member>) parts = a.inherited_part(member, template);
+        if ((status == <implmntd> || parts) &&
+            a.c.sym.lookup_field(%(struct "VarMethods"), %($member)))
+          parts = parts.append(%(${a.thunk(member, template)}));
+      }
+      return %($member $status $source $expected $template @parts);
     }
+  return NULL;
 }
 
-static void ProtocolAdapters.default_member(
-  ProtocolAdapters &a, String member, String source, Type expected,
-  Type template) {
+static int ProtocolAdapters.has_descriptor(ProtocolAdapters &a) =>
+  a.base === %("Var") && !a.shares_var_tag;
+
+static List ProtocolAdapters.default_part(
+  ProtocolAdapters &a, String member, Type expected) {
   List decision = a.c._generated_owner(a.participant, member);
   match (decision) {
     case %(owner ? ? ? ?storage): {
-      int make_static = storage == <static>;
-      String generated = _member_spelling(a.participant, member);
-      AdapterFunction adapter = {
-        .c = a.c, .name = generated, .source = source,
-        .reverse = a.forward, .binder = a.binder, .target = expected,
-        .signature = a.c.sym.get(%($source)), .template = template,
-        .variables = a.variables, .make_static = make_static};
-      a.c.add_early(adapter.generate());
-      if (!make_static) a.c.record_generated_symbol(generated, expected);
+      String spelling = _member_spelling(a.participant, member);
+      if (storage == <static>)
+        return %((default ${a.c.sym.introduce(spelling)} $storage));
+      List name = a.c.sym.reference(%($spelling), NULL);
+      a.c.record_generated_symbol(spelling, expected);
+      return %((default $name $storage));
     }
     case %((!set ?kind (!or linkage conflict)) ?first ?second *):
       a.c._report_collision(a.participant, member, kind, first, second);
   }
+  return NULL;
 }
 
-static void ProtocolAdapters.missing_member(
+static List ProtocolAdapters.inherited_part(
   ProtocolAdapters &a, String member, Type template) {
-  if (a.base !== %("Var") || a.shares_var_tag) return;
   List decision = a.c._generated_owner(a.participant, member);
   match (decision) {
-    case %(owner ? ? ?owner_expected ?):
-      a.inherited_member(member, owner_expected, template);
+    case %(owner ? ? ?owner_expected ?): {
+      List requirement = a.descriptor_requirement(member, template);
+      if (requirement) a.report_requirement(requirement);
+      else {
+        String spelling = _member_spelling(a.participant, member);
+        List name = a.c.sym.reference(%($spelling), NULL);
+        return %((inherited $name $owner_expected));
+      }
+    }
     case %((!set ?kind (!or linkage conflict)) ?first ?second *):
       a.c._report_collision(a.participant, member, kind, first, second);
   }
+  return NULL;
 }
 
-static void ProtocolAdapters.inherited_member(
-  ProtocolAdapters &a, String member, Type expected, Type template) {
-  List requirement = a.descriptor_requirement(member, template);
-  if (requirement) {
-    a.report_requirement(requirement);
-    return;
-  }
-  String inherited = _member_spelling(a.participant, member);
-  a.c.add_early(a.c._signature_declaration(inherited, expected, 0));
-  if (!a.c.sym.lookup_field(%(struct "VarMethods"), %($member))) return;
-  a.thunks.push(a.thunk(member, expected, template, inherited));
-}
-
-static void ProtocolAdapters.implemented_member(
-  ProtocolAdapters &a, String member, String source, Type expected,
-  Type template) {
-  if (a.base !== %("Var") || a.shares_var_tag) return;
-  if (!a.c.sym.lookup_field(%(struct "VarMethods"), %($member))) return;
-  a.thunks.push(a.thunk(member, expected, template, source));
-}
-
+/* A descriptor thunk's name and its signature with every type variable
+   `Var`. */
 static List ProtocolAdapters.thunk(
-  ProtocolAdapters &a, String member, Type expected, Type template,
-  String source) {
+  ProtocolAdapters &a, String member, Type template) {
   Map erased = a.bindings.copy();
   foreach (Var variable, a.variables.keys()) erased[variable] = %("Var");
   Type target = _substitute_signature(template, a.variables, erased);
   String participant_name = a.participant.car().str().lower();
-  String thunk_name = a.c.fresh_name(%"proto_${participant_name}_$member");
-  AdapterFunction adapter = {
-    .c = a.c, .name = thunk_name, .source = source, .reverse = a.reverse,
-    .binder = a.binder, .target = target, .signature = expected,
-    .template = template, .variables = a.variables, .make_static = 1};
-  List function = adapter.generate();
-  if ((member == "str" || member == "repr" || member == "write_str" ||
-       member == "write_repr") &&
-      a.c.sym.normalize_declared_type(a.participant).is_aggregate())
-    function = a.c._guard_rendering(function, member);
-  a.c.add_early(function);
-  return %($member ${adapter.binding} $target);
+  String name = a.c.fresh_name(%"proto_${participant_name}_$member");
+  return %(thunk ${a.c.sym.introduce(name)} $target);
 }
 
-static void ProtocolAdapters.register_descriptor(ProtocolAdapters &a) {
-  List thunks = a.thunks.list_free();
-  if (a.base !== %("Var") || a.shares_var_tag) return;
+static List ProtocolAdapters.descriptor(ProtocolAdapters &a) {
+  if (!a.has_descriptor()) return NULL;
   Symbol tag = _tag_value(_adoption_tag(a.adoption));
   String name = a.participant.car().str();
   if (!tag) name = name.lower();
-  a.c._register_descriptor(
-    a.participant, name, tag, thunks, a.central_initializer);
-}
-
-// adapter functions
-
-static List AdapterFunction.generate(AdapterFunction &a) {
-  List target_parameters = a.target.car().list().cadr();
-  Type target_result = a.target.cdr();
-  List source_parameters = a.signature.car().list().cadr();
-  Type source_result = a.signature.cdr();
-  List template_parameters = a.template.car().list().cadr();
-  (List declarations, List forwarded) =
-    a.c.forward_parameters(target_parameters);
-  Array arguments = [];
-  List template_at = template_parameters, source_at = source_parameters;
-  foreach (List argument, forwarded) {
-    if (_variable_is(template_at.car(), a.variables, a.binder))
-      argument = %(expr ${source_at.car()}
-        (call ${a.reverse} (args $argument)));
-    arguments.push(argument);
-    template_at = template_at.cdr();
-    source_at = source_at.cdr();
-  }
-  List source_binding = a.c.sym.reference(%(${a.source}), NULL);
-  List call = a.c._bound_call(
-    source_result, $!(${a.signature}){ $source_binding },
-    arguments.list_free());
-  a.binding = a.c.sym.reference(%(${a.name}), NULL);
-  if (a.make_static) a.binding = a.c.sym.introduce(a.name);
-  List storage = a.make_static
-    ? %(static inline @target_result) : target_result;
-  return a.c.wrapper_function(
-    storage, a.binding, declarations, %((return $target_result $call)));
-}
-
-static macro Decorator $guard_value_rendering(
-  Function $function, Name $path, Expr $enter, Expr $fallback,
-  Expr $leave, Stmt @body) {
-  RenderPath $path;
-  if (!$enter) return $fallback;
-  defer $leave;
-  @body
-}
-
-/* Copied aggregate boxes have an identity only before unboxing. Their direct
-   value printer has no stable address to guard, so the descriptor thunk owns
-   this boundary. Pointer participants guard their actual recursive writer. */
-static List Compiler._guard_rendering(
-  Compiler c, List function, String member) {
-  match (function)
-    case %(function ?result
-           (!set ?declarator
-             (bind ? ((fnmod (params
-               (param ? (bind ?boxed ?)) *remaining)) *)))
-           (block *body)): {
-      List value = $!Var{ $boxed };
-      List fallback = NULL;
-      if (member == "str" || member == "repr")
-        fallback = c._helper_call(
-          %("String"), "Var_pointer_string", %($value));
-      else match (remaining)
-        case %((param ? (bind ?output ?))):
-          fallback = c._helper_call(
-            %("Buffer"), "Var_write_pointer_repr",
-            %($value ${$!Buffer{ $output }}));
-      List path = c.sym.introduce("render_path");
-      c.set_fact(%(automatic $path), 1);
-      c.set_fact(%(type $path), %("RenderPath"));
-      Macro addressed = $addressed;
-      List address = c.rebuild_expression(
-        $!Type{ RenderPath * },
-        addressed($!RenderPath{ $path }));
-      List pointer =
-        c._helper_call($!Type{ void * }, "Var_pointer", %($value));
-      List enter = c._helper_call(
-        %(int), "RenderPath_enter", %($address $pointer));
-      List leave = c._helper_call(%(void), "RenderPath_leave", %($address));
-      Macro shape = $guard_value_rendering;
-      return c.rebuild_function(
-        function, shape(path, enter, fallback, leave, body));
-    }
-  return function;
+  List methods =
+    a.c.sym.introduce(a.c.fresh_name("_x2c_protocol_methods"));
+  Symbol area = a.central_initializer ? <protocol> : <prepare>;
+  return %($methods $name ${a.participant.var_tag()} $area
+           @{tag ? %($tag) : NULL});
 }
 
 static List Compiler._signature_declaration(
@@ -2622,85 +2538,6 @@ static List Compiler._signature_declaration(
     declare $storage
       (bindings (bind $binding ((fnmod (params @{declarations.list_free()})))))
   );
-}
-
-// descriptor registration
-
-static void Compiler._register_descriptor(
-  Compiler c, Type participant, String name, Symbol explicit_tag,
-  List thunks, int central_initializer) {
-  List methods = c.sym.introduce(c.fresh_name("_x2c_protocol_methods"));
-  List fields = _descriptor_fields(thunks);
-  /* A participant with no thunks still needs its tag registered, and the
-     file-scope table is already zero, so skip the assignment rather than
-     emit an empty initializer, which C only accepts from C23 on. */
-  Symbol tag_symbol = participant.var_tag();
-  List early_call = c._builtin_registration(methods, name, tag_symbol);
-  List registration = c._fallback_registration(methods, name, early_call);
-  List explicit_call = explicit_tag
-    ? c._tagged_registration(methods, name, explicit_tag) : NULL;
-  Symbol queue = central_initializer ? <protocol> : <prepare>;
-  c.add_early(
-    c.bind_syntax($!Unit{ static VarMethods $methods; }, AST_UNIT, NULL));
-  if (thunks) {
-    List assignment = c.bind_syntax(
-      $!{ $methods = (VarMethods){ @fields }; }, AST_BLOCK, NULL);
-    c.add_init(queue, assignment);
-  }
-  List call = explicit_tag ? explicit_call : early_call;
-  c.add_init(
-    queue, central_initializer || explicit_tag
-      ? c.rebuild_statement($!{ $call; }).cadr() : registration);
-}
-
-static List _descriptor_fields(List thunks) {
-  Array fields = [];
-  foreach (List row, thunks) {
-    (String member, List thunk, Type type) = row;
-    fields.push(%(dotinit ($member) (expr $type (ident $thunk))));
-  }
-  return fields.list_free();
-}
-
-static List Compiler._builtin_registration(
-  Compiler c, List methods, String name, Symbol tag) {
-  List symbol = %(expr ("Symbol") (literal ("Symbol") $name $tag));
-  List table = $!VarMethods{ $methods };
-  return c._helper_call(
-    %(int), "x2c_register_builtin_descriptor", %($symbol $table));
-}
-
-static List Compiler._tagged_registration(
-  Compiler c, List methods, String name, Symbol tag) {
-  List symbol = $!Symbol{ $tag };
-  List table = $!VarMethods{ $methods };
-  return c._helper_call(
-    %(void), "x2c_register_tagged_descriptor",
-    %($symbol ${_string_literal(name)} $table));
-}
-
-static List Compiler._fallback_registration(
-  Compiler c, List methods, String name, List early_call) {
-  List table = $!VarMethods{ $methods };
-  List fallback = c._helper_call(
-    %(void), "x2c_register_descriptor", %(${_string_literal(name)} $table));
-  // lint: allow one-statement-braces ST-1: preserves initialization AST block
-  return c.rebuild_statement($!{ if (!$early_call) { $fallback; } }).cadr();
-}
-
-static macro Expression $helper_call(
-    Name $callee, Expr @arguments) => $callee(@arguments);
-
-static List Compiler._helper_call(
-  Compiler c, Type result, String callee, List arguments) {
-  Macro shape = $helper_call;
-  return c.rebuild_expression(result, shape(%($callee), arguments));
-}
-
-static List _string_literal(String value) {
-  String spelling = %"\"$value\"";
-  List chars = %(expr (* char) (literal (* char) $spelling));
-  return %(expr ("String") (call "String_new" (args $chars)));
 }
 
 // alias insertion

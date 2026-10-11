@@ -182,6 +182,17 @@ static List Compiler._shipped_lowering(
   return lowered;
 }
 
+/** Adds to the unit's pending support the file-scope code a rule gives
+    the form `source` of `kind`, bound and lowered with the support. The
+    kernel has no lowering of its own for `source`, so no rule ends the
+    translation as `_shipped_lowering` does. */
+void Compiler.shipped_support(
+  Compiler c, Symbol kind, List source, String form) {
+  List bound = c.rewrite(<node>, kind, source, AST_UNIT, NULL, NULL);
+  if (!bound) $report.xform.no_shipped_rule(c, form);
+  else c.add_early(bound);
+}
+
 static Ast Compiler._shipped_statement(Compiler c, Ast ast, Symbol tag) =>
   c._shipped_lowering(
     <node>, tag, ast, AST_STATEMENT, c.return_type, %"$tag statement");

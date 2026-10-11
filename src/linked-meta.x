@@ -1153,10 +1153,10 @@ Code printf_values(Code code) {
 
 static List _protocol_forward(
   Type target, String source, Type template, String binder, String convert) {
-  List templates = Type.parameters(template);
+  List templates = template.car().list().cadr();
   Array params = [], arguments = [];
   int index = 0;
-  foreach (Type type, Type.parameters(target)) {
+  foreach (Type type, target.car().list().cadr()) {
     List name = x2c_ident(%"a${index++}");
     params.push($!Param{ $type $name });
     Code argument = $!( $name );
@@ -1165,15 +1165,14 @@ static List _protocol_forward(
     arguments.push(argument);
     templates = templates.cdr();
   }
-  Code callee = x2c_ident(source);
-  List args = arguments.list_free();
-  return %(${params.list_free()} ${$!( $callee(@args) )});
+  return %(${params.list_free()} ${x2c_ident(source)}
+           ${arguments.list_free()});
 }
 
 static Code _protocol_function(List declared, List name, List forward) {
-  List params = forward.car();
-  Code call = forward.cadr();
-  return $!Unit{ $declared $name(@params) { return $call; } };
+  List params = forward.car(), args = forward.caddr();
+  Code callee = forward.cadr();
+  return $!Unit{ $declared $name(@params) { return $callee(@args); } };
 }
 
 static int _protocol_renders(String member, Type participant) {
@@ -1184,8 +1183,8 @@ static int _protocol_renders(String member, Type participant) {
 
 static Code _protocol_guarded(
   String member, List name, Type result, List forward) {
-  List params = forward.car();
-  Code call = forward.cadr();
+  List params = forward.car(), args = forward.caddr();
+  Code callee = forward.cadr();
   Code value = x2c_ident("a0");
   Code fallback = member == "str" || member == "repr"
     ? $!( Var_pointer_string($value) )
@@ -1196,18 +1195,18 @@ static Code _protocol_guarded(
       if (!RenderPath_enter(&render_path, Var_pointer($value)))
         return $fallback;
       defer RenderPath_leave(&render_path);
-      return $call;
+      return $callee(@args);
     }
   };
 }
 
 static Code _protocol_prototype(List name, Type expected) {
   Array params = [];
-  foreach (Type type, Type.parameters(expected)) {
+  foreach (Type type, expected.car().list().cadr()) {
     (List base, List modifiers) = type.parts();
     params.push(%(param $base (bind () $modifiers)));
   }
-  Type result = Type.return_type(expected);
+  Type result = expected.cdr();
   List declared = params.list_free();
   return $!Unit{ $result $name(@declared); };
 }
@@ -1244,45 +1243,46 @@ static void _protocol_descriptor(List descriptor, List slots) {
       Code fallback = _protocol_runtime(
         %(void), "x2c_register_descriptor", %($text $table));
       Code missing = %(expr (int) (op ${<!>} $early));
-      x2c_place(init, Code.lowered(
-        %(if $missing (block (stmnt $fallback)))));
+      Code registration = %(if $missing (block (stmnt $fallback)));
+      x2c_place(init, Code.lowered(registration));
     }
 }
 
+/** Places the forwarding members, descriptor thunks, method table, and
+    descriptor registration of one conformance. */
 Code protocol_conformance(Code node) {
   match (node)
     case %(conform ? ?(Type participant) ?(String forward)
            ?(String reverse) ?(String binder) ?descriptor (*rows)): {
-      String prefix = %"${participant.car()}_";
       Array slots = [];
       foreach (List row, rows) match (row)
         case %(?(String member) ? ?(String source) ?(Type expected)
                ?(Type template) *parts):
           foreach (List part, parts) match (part) {
-            case %(default ?(Symbol storage)): {
+            case %(default ?(List name) ?(Symbol storage)): {
               List declared = storage == <static>
-                ? %(static inline @{Type.return_type(expected)})
-                : Type.return_type(expected);
+                ? %(static inline @{expected.cdr()})
+                : expected.cdr();
               List forwarded = _protocol_forward(
                 expected, source, template, binder, forward);
-              x2c_place(%(unit-support), _protocol_function(
-                declared, x2c_ident(prefix + member), forwarded));
+              Code adapter =
+                _protocol_function(declared, name, forwarded);
+              x2c_place(%(unit-support), adapter);
             }
-            case %(inherited ?(Type owner_expected)): {
-              source = prefix + member;
+            case %(inherited ?(List name) ?(Type owner_expected)): {
+              source = Code.binding_spelling(name);
               expected = owner_expected;
-              x2c_place(%(unit-support), _protocol_prototype(
-                x2c_ident(source), expected));
+              x2c_place(%(unit-support), _protocol_prototype(name, expected));
             }
             case %(thunk ?(List name) ?(Type erased)): {
-              Type result = Type.return_type(erased);
+              Type result = erased.cdr();
+              List declared = %(static inline @result);
               List forwarded = _protocol_forward(
                 erased, source, template, binder, reverse);
-              x2c_place(%(unit-support),
-                _protocol_renders(member, participant)
-                  ? _protocol_guarded(member, name, result, forwarded)
-                  : _protocol_function(
-                      %(static inline @result), name, forwarded));
+              Code thunk = _protocol_renders(member, participant)
+                ? _protocol_guarded(member, name, result, forwarded)
+                : _protocol_function(declared, name, forwarded);
+              x2c_place(%(unit-support), thunk);
               slots.push(%(dotinit ($member) (expr $erased (ident $name))));
             }
           }
