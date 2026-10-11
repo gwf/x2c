@@ -1,0 +1,10 @@
+offered count_switch
+offered Shape_area
+offered Disk_shape
+offered Ring_shape
+offered guarded
+offered main
+offered placed_helper
+offered Ring_area
+4 3 5 2 4 5 7
+2
