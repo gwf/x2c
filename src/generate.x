@@ -81,7 +81,8 @@ void publish_generated_files(List outputs) {
     List failure = Error.snapshot(detail);
     String path = failure.assoc(<path>);
     int code = failure.assoc(<"errno">);
-    driver_error(%"failed to write generated file: $path: ${strerror(code)}");
+    String reason = String.new(strerror(code));
+    driver_error(%"failed to write generated file: $path: $reason");
   }
 }
 
