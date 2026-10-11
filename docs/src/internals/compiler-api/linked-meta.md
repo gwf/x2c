@@ -127,7 +127,7 @@ for `+` beside text, text. The call is returned lowered, because an
 operator chain applies this rule once for each term and binding would
 search the whole remaining chain each time.
 
-Source: `src/linked-meta.x:1379`
+Source: `src/linked-meta.x:1382`
 
 #### dynamic_change
 
@@ -136,7 +136,7 @@ Source: `src/linked-meta.x:1379`
 Adds or subtracts one through the `Var` update helpers; the postfix
 forms return the value before the change.
 
-Source: `src/linked-meta.x:1464`
+Source: `src/linked-meta.x:1467`
 
 #### dynamic_compound
 
@@ -145,7 +145,7 @@ Source: `src/linked-meta.x:1464`
 Updates a `Var` or numeric lvalue with a `Var` or numeric operand
 through the update helper of its storage.
 
-Source: `src/linked-meta.x:1438`
+Source: `src/linked-meta.x:1441`
 
 #### dynamic_unary
 
@@ -153,7 +153,7 @@ Source: `src/linked-meta.x:1438`
 
 Rejects a unary numeric operator on a `Var`.
 
-Source: `src/linked-meta.x:1480`
+Source: `src/linked-meta.x:1483`
 
 #### lambda_cells
 
@@ -163,9 +163,11 @@ Moves each local and parameter of the function `node` that a lambda in
 its body shares by reference into a Scope cell, so the binding outlives
 the call: a parameter is copied into its cell at entry, a local is
 declared as its cell, and every read goes through the cell. A lifted
-lambda's function moves its own.
+lambda's function moves its own. The function binds again only its
+cells and the statements that hold them; its other statements are kept
+as they are bound.
 
-Source: `src/linked-meta.x:1031`
+Source: `src/linked-meta.x:1034`
 
 #### lambda_closure
 
@@ -175,7 +177,7 @@ Lifts the capturing lambda `node` to a static function of its
 parameters and captures, and answers a `Func` of a record of the
 captured values and addresses.
 
-Source: `src/linked-meta.x:948`
+Source: `src/linked-meta.x:949`
 
 #### lambda_lift
 
@@ -192,7 +194,7 @@ Source: `src/linked-meta.x:792`
 
 Returns linked definition hashes and provider source dependencies.
 
-Source: `src/linked-meta.x:2073`
+Source: `src/linked-meta.x:2076`
 
 #### linked_meta_targets
 
@@ -200,7 +202,7 @@ Source: `src/linked-meta.x:2073`
 
 Returns the linked copies, and the runtime builders, by name.
 
-Source: `src/linked-meta.x:1858`
+Source: `src/linked-meta.x:1861`
 
 #### match_lowering
 
@@ -209,7 +211,7 @@ Source: `src/linked-meta.x:1858`
 Lowers the bound match `node` to C text around its subject, patterns,
 and bodies.
 
-Source: `src/linked-meta.x:1363`
+Source: `src/linked-meta.x:1366`
 
 #### printf_values
 
@@ -217,7 +219,7 @@ Source: `src/linked-meta.x:1363`
 
 Reads the Var values a printf-family call's static format consumes.
 
-Source: `src/linked-meta.x:1620`
+Source: `src/linked-meta.x:1623`
 
 #### raise_lowering
 
@@ -226,7 +228,7 @@ Source: `src/linked-meta.x:1620`
 Converts a raise's code and details, or declines a raise whose parts
 already have their types.
 
-Source: `src/linked-meta.x:1656`
+Source: `src/linked-meta.x:1659`
 
 #### register_rewrite
 
@@ -248,7 +250,7 @@ every arm returns or raises, control cannot leave them, and a final
 unreachable mark tells C so that a function ending in such a `try`
 needs no return after it.
 
-Source: `src/linked-meta.x:1690`
+Source: `src/linked-meta.x:1693`
 
 #### try_lowering
 
@@ -256,7 +258,7 @@ Source: `src/linked-meta.x:1690`
 
 Lowers the parsed try `node` to its landing form.
 
-Source: `src/linked-meta.x:1802`
+Source: `src/linked-meta.x:1805`
 
 ## Design notes
 
