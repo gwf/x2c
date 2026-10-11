@@ -14,6 +14,7 @@ X2c AST transformation pipeline.
 | --- | --- |
 | [`Compiler.call_in_order`](#Compiler.call_in_order) | Calls the typed callable `callee` with `arguments`, each converted to its parameter and evaluated once, in source order, as a statement expression. |
 | [`Compiler.normalize`](#Compiler.normalize) | Normalizes one bound and typed node. |
+| [`Compiler.shipped_support`](#Compiler.shipped_support) | Adds to the unit's pending support the file-scope code a rule gives the form `source` of `kind`, bound and lowered with the support. |
 | [`Compiler.transform`](#Compiler.transform) | Lowers a bound and typed top-level AST to the normalized form consumed by emission. |
 
 ### `Compiler`
@@ -27,7 +28,7 @@ Calls the typed callable `callee` with `arguments`, each converted to
 its parameter and evaluated once, in source order, as a statement
 expression.
 
-Source: `src/transform.x:1130`
+Source: `src/transform.x:1141`
 
 <a id="Compiler.normalize"></a>
 #### Compiler.normalize
@@ -39,6 +40,18 @@ normalized where it is produced; children enter the same operation, so
 completed units do not require another unit walk.
 
 Source: `src/transform.x:102`
+
+<a id="Compiler.shipped_support"></a>
+#### Compiler.shipped_support
+
+`void Compiler.shipped_support( Compiler c, Symbol kind, List source, String form)`
+
+Adds to the unit's pending support the file-scope code a rule gives
+the form `source` of `kind`, bound and lowered with the support. The
+kernel has no lowering of its own for `source`, so no rule ends the
+translation as `_shipped_lowering` does.
+
+Source: `src/transform.x:189`
 
 <a id="Compiler.transform"></a>
 #### Compiler.transform

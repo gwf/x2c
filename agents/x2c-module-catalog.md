@@ -8,7 +8,7 @@ non-static function definition discovered in source order. It does
 not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
-- Compiler modules: 62
+- Compiler modules: 63
 - Runtime modules: 77
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
@@ -239,6 +239,14 @@ Public functions:
 
 None. This module has no non-static function definitions.
 
+### [src/component-protocols.x](../src/component-protocols.x)
+
+protocol adapters and Var descriptors.
+
+Public functions:
+
+None. This module has no non-static function definitions.
+
 ### [src/component-raise.x](../src/component-raise.x)
 
 raise.
@@ -416,8 +424,8 @@ Public functions:
 `access_update`, `access_prefix`, `access_postfix`, `delegate_member`,
 `destructure_declaration`, `destructure_statement`, `destructure_value`,
 `match_lowering`, `dynamic_binary`, `dynamic_compound`, `dynamic_change`,
-`dynamic_unary`, `printf_values`, `raise_lowering`, `try_catch_cases`,
-`try_lowering`, `linked_meta_targets`, `linked_meta_hashes`
+`dynamic_unary`, `printf_values`, `protocol_conformance`, `raise_lowering`,
+`try_catch_cases`, `try_lowering`, `linked_meta_targets`, `linked_meta_hashes`
 
 ### [src/literals.x](../src/literals.x)
 
@@ -764,7 +772,8 @@ x2c AST transformation pipeline.
 
 Public functions:
 
-`Compiler.transform`, `Compiler.normalize`, `Compiler.call_in_order`
+`Compiler.transform`, `Compiler.normalize`, `Compiler.shipped_support`,
+`Compiler.call_in_order`
 
 ### [src/type-ledger.x](../src/type-ledger.x)
 
