@@ -5267,7 +5267,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_9(void){
   _4614 = String_var(_4613);
   _4615 = String_new("lib/meta.x");
   _4616 = String_var(_4615);
-  _4617 = String_new("4338f495");
+  _4617 = String_new("e06b7d52");
   _4618 = String_var(_4617);
   _4619 = cons(_4618, NULL);
   _4620 = cons(_4616, _4619);
@@ -10514,7 +10514,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_19(void){
   _9831 = List_var(_9830);
   _9832 = String_new("src/macros.x");
   _9833 = String_var(_9832);
-  _9834 = String_new("c846f3c3");
+  _9834 = String_new("29e15a93");
   _9835 = String_var(_9834);
   _9836 = cons(_9835, NULL);
   _9837 = cons(_9833, _9836);
@@ -10525,7 +10525,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_19(void){
   _9842 = List_var(_9841);
   _9843 = String_new("src/transform.x");
   _9844 = String_var(_9843);
-  _9845 = String_new("8be222be");
+  _9845 = String_new("6a3399b4");
   _9846 = String_var(_9845);
   _9847 = cons(_9846, NULL);
   _9848 = cons(_9844, _9847);
@@ -10644,7 +10644,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_19(void){
   _9961 = List_var(_9960);
   _9962 = String_new("src/parse.x");
   _9963 = String_var(_9962);
-  _9964 = String_new("fb71c0d2");
+  _9964 = String_new("6b744aa2");
   _9965 = String_var(_9964);
   _9966 = cons(_9965, NULL);
   _9967 = cons(_9963, _9966);
@@ -10755,7 +10755,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_19(void){
   _10072 = List_var(_10071);
   _10073 = String_new("src/callables.x");
   _10074 = String_var(_10073);
-  _10075 = String_new("dc7457bf");
+  _10075 = String_new("5418a75a");
   _10076 = String_var(_10075);
   _10077 = cons(_10076, NULL);
   _10078 = cons(_10074, _10077);
