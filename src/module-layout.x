@@ -164,7 +164,7 @@ static String _layout_text(Compiler c, List nodes) =>
 /* Public inline bodies capture native state at their authored position.
    Keep them with the prefix, under individual guards, rather than moving
    their native includes ahead of the bodies. */
-static List _layout_prefix(Compiler c, List prefix, Map plan) {
+static List _layout_prefix(Compiler c, List prefix, Map plan, List layouts) {
   Array nodes = [];
   foreach (List node, prefix) {
     match (node)
@@ -173,13 +173,13 @@ static List _layout_prefix(Compiler c, List prefix, Map plan) {
         if (signature.is_inline() && !signature.is_static()) {
           String guard = %"__X2C_LAYOUT_INLINE_${filename_hash(binding.repr())}__";
           plan[%(inline ${c.canonical_path(c.filename)} $binding)] = guard;
-          String body = _layout_text(c, c.module_layout_header_prefix(%($node)));
+          String body = _layout_text(c, c.module_layout_header_prefix(%($node), NULL));
           node = %(preproc ${%"#ifndef $guard\n#define $guard\n$body\n#endif\n"});
         }
       }
     nodes.push(node);
   }
-  return c.module_layout_header_prefix(nodes.list_free());
+  return c.module_layout_header_prefix(nodes.list_free(), layouts);
 }
 
 static void Layouts.alias(
@@ -288,9 +288,8 @@ Map prepare_module_layouts(List providers) {
       List body = variant.cadr(), prefix = variant.caddr(), arms = variant.cddr().cadr();
       List macros = _layout_macro_names(prefix);
       text += _layout_macro_guards(macros, "push");
-      text += _layout_text(c, _layout_prefix(c, prefix, plan));
-      text += layouts.alias_text(body);
-      text += _layout_text(c, %( $body ));
+      List definitions = %((comment ${layouts.alias_text(body)}) $body);
+      text += _layout_text(c, _layout_prefix(c, prefix, plan, definitions));
       for (int i = arms.len(); i; i--) text += "#endif\n";
       text += _layout_macro_guards(macros.reverse(), "pop");
     }

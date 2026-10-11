@@ -157,11 +157,12 @@ static List Compiler._header_and_source(
     Layout prerequisites supply module support separately. Native directives
     and public inline bodies keep their authored order within the prefix.
 */
-List Compiler.module_layout_header_prefix(Compiler c, List ast) {
+List Compiler.module_layout_header_prefix(Compiler c, List ast, List layouts) {
   Partition p = {
     .c = c, .header = [], .pending = [], .open = [], .forwarded = {},
     .included = {}, .statics = {}, .source_groups = {}};
   foreach (Ast node, ast) p.add(node);
+  foreach (List layout, layouts) p.header.push(layout);
   return c._forward_declarations(p.finish(), 0);
 }
 
