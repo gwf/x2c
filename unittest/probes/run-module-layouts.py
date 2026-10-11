@@ -201,6 +201,63 @@ def cases():
                           'return value.outer.hidden.value + value.other.hidden[0].other;}\n'),
         "main.x": probes.consumer("box.x", "answer() == 42 && shadow() == 42"),
     }, options, None
+    enum_layout = {
+        **layout,
+        "box/inner.x": ('static typedef enum Choice {MATCH = 17, COUNT = 1} Choice;\n'
+                        'module typedef struct Inner {Choice choice; int items[COUNT];} Inner;\n'
+                        'module Inner make(void) {Inner item = {MATCH, {25}}; return item;}\n'),
+        "box/outer.x": ('module typedef struct Outer {Inner inner;} Outer;\n'
+                        'int answer(void) {Outer item = {make()}; '
+                        'return item.inner.choice + item.inner.items[0];}\n'),
+    }
+    yield "value_layout_static_enum", enum_layout, options, None
+    yield "ordinary_static_enum", ordinary(enum_layout), {
+        "inputs": ["box.x", "box/inner.x", "box/outer.x", "main.x"]}, None
+    yield "value_layout_repeated_static_enumerators", {
+        "box.x": 'module {"box/left.x", "box/right.x", "box/carrier.x"}\n',
+        "box/left.x": ('static typedef enum Choice {MATCH = 17, COUNT = 1} Choice;\n'
+                       'module typedef struct Left {Choice choice; int items[COUNT];} Left;\n'
+                       'module Left first(void) {Left item = {MATCH, {1}}; return item;}\n'),
+        "box/right.x": ('static typedef enum Choice {MATCH = 25, COUNT = 2} Choice;\n'
+                        'module typedef struct Right {Choice choice; int items[COUNT];} Right;\n'
+                        'module Right second(void) {Right item = {MATCH, {1, 2}}; return item;}\n'),
+        "box/carrier.x": ('module typedef struct Carrier {Left left; Right right;} Carrier;\n'
+                          'int answer(void) {Carrier value = {first(), second()}; '
+                          'return sizeof(value.left.items) == sizeof(int) '
+                          '&& sizeof(value.right.items) == 2 * sizeof(int) '
+                          '? value.left.choice + value.right.choice : 0;}\n'),
+        "main.x": probes.consumer("box.x", "answer() == 42"),
+    }, options, None
+    pointer_alias = {
+        "box.x": 'module {"box/state.x", "box/mirror.x"}\n',
+        "box/state.x": ('module typedef struct Ticket {int value;} *Ticket;\n'
+                        'module Ticket ticket = NULL;\n'),
+        "box/mirror.x": ('module typedef Ticket TicketAlias;\n'
+                         'module TicketAlias mirror = NULL;\n'
+                         'int answer(void) {return ticket == NULL && mirror == NULL ? 42 : 0;}\n'),
+        "main.x": probes.consumer("box.x", "answer() == 42"),
+    }
+    yield "pointer_only_declared_alias", pointer_alias, options, None
+    ordinary_pointer = {name: text.replace("module ", "")
+                        for name, text in pointer_alias.items()}
+    ordinary_pointer["box.x"] = '#include "box/state.x"\n#include "box/mirror.x"\n'
+    ordinary_pointer["box/mirror.x"] = '#include "state.x"\n' + ordinary_pointer["box/mirror.x"]
+    yield "ordinary_pointer_declared_alias", ordinary_pointer, {
+        "inputs": ["box.x", "box/state.x", "box/mirror.x", "main.x"]}, None
+    yield "pointer_only_opaque_alias", {
+        **pointer_alias,
+        "box/state.x": ('module struct Ticket;\n'
+                        'module typedef struct Ticket *Ticket;\n'
+                        'module Ticket ticket = NULL;\n'),
+    }, options, None
+    yield "pointer_array_alias_boundary", {
+        **pointer_alias,
+        "box/state.x": ('module typedef struct Ticket {int value;} *TicketSlots[2];\n'
+                        'module TicketSlots ticket = {NULL, NULL};\n'),
+        "box/mirror.x": ('module typedef TicketSlots SlotAlias;\n'
+                         'module SlotAlias mirror = {NULL, NULL};\n'
+                         'int answer(void) {return ticket[0] == NULL && mirror[1] == NULL ? 42 : 0;}\n'),
+    }, options, None
     yield "value_layout_three_levels", {
         **layout,
         "box.x": ('module typedef struct Inner Inner;\n'
