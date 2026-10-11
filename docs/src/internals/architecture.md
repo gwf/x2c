@@ -600,7 +600,8 @@ The modules under `src/` divide ownership as follows:
   that presents each conformance's adapters to `src/component-protocols.x`;
 - `src/type-ledger.x` -- the `Var` tag lookups projected from the tag ledger,
   kept in their own unit so the units that include `type.x` do not load it;
-- `src/collect.x` -- global environment discovery and unit interfaces;
+- `src/collect.x` -- global environment discovery, unit interfaces, and the
+  splicing of module blocks;
 - `src/utils.x` -- repository discovery, the driver's fatal error line, and
   forked translation workers;
 - `src/transform.x` -- lowering to emitter-ready AST;

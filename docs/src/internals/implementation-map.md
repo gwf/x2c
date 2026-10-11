@@ -155,6 +155,19 @@ is listed under [compiler options](../reference/cli.md).
 - See also: [packages and
   imports](../reference/language.md#packages-and-import)
 
+### Module blocks
+
+- Splice the member files into the entry's text: `Compiler.module_source` in
+  `src/collect.x`, called for a unit's text in `src/frontend.x`, for every
+  cold walk of an included file, and for the project `meta` scan in
+  `src/meta-project.x`
+- Member positions: the unit's `line_markers` rows, read by
+  `Compiler.token_source` and `Compiler.text_source` in `src/diagnostics.x`
+- Member dependencies and the entry's content hash: `FileWalk` in
+  `src/collect.x`
+- Tests: the `module-block` compiler fixtures
+- See also: [module blocks](../reference/language.md#module-blocks)
+
 ### Exact Var-tag tests with `is` and `is not`
 
 - Parse and type selection: `src/expressions.x`, `src/type.x`

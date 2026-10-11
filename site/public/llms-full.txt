@@ -1418,6 +1418,74 @@ Optional modules shipped with x2c are outside that prelude. They require an
 explicit source include, such as `#include "typed-array.x"`. Third-party code
 uses the package `import` described below.
 
+### Module blocks
+
+A module block splits one large source file across a directory without
+splitting the translation unit. The entry file names its member files, and
+the compiler reads each member's text in place of the block. The result
+translates as the single file it replaces, so `static` remains the private
+namespace and nothing else is new.
+
+The entry `calculations.x` names members under its companion directory
+`calculations/`:
+
+<!-- ignore: These two source files must be saved at the displayed paths. -->
+```x2c,ignore
+/* calculations.x */
+#include <stdio.h>
+static int helper(int value);
+static int counter;
+
+module {
+  "calculations/implementation.x",
+}
+
+int main(void) {
+  printf("%d\n", helper(40) + counter);
+  return 0;
+}
+```
+
+<!-- ignore: This member requires the preceding entry file. -->
+```x2c,ignore
+/* calculations/implementation.x */
+static int counter = 2;
+static int helper(int value) { return value + counter; }
+```
+
+The block is `module {`, comma-separated string paths with an optional
+trailing comma, and `}`, with no final semicolon. It appears at file scope,
+once per file. Elsewhere `module` is an ordinary identifier, and
+`struct module {` declares a tag. Each path is relative to the file that holds
+the block and must name a file under that file's companion directory, `NAME/`
+for `NAME.x`, without `..`. Any other path, an unreadable member, a malformed
+block, or a second block is a driver error at the block.
+
+A member's text stands where the block stood, in the listed order, and C
+declaration order applies to the whole. Declarations before the block are
+visible to every member. A member's statics are visible to later members and
+to the entry after the block. A member may hold its own block, whose members
+lie under the member's companion directory; their text is spliced in turn,
+and the namespace stays flat.
+
+A quoted include in a member that names a file beside the member reaches that
+file, in collection and in the generated C. Any other include resolves as it
+would at the block's position in the entry.
+
+Members are not translation units. A build never lists them; the entry's
+generated C and header carry everything. The entry's depfile and interface
+depend on each member's content, so editing a member translates the entry
+again and changes what an including unit collects. Translated on its own, a
+member is an ordinary file.
+
+Diagnostics, `--source-map` line directives, dump locations, and editor
+positions name the member's file and its line there. A unit that includes the
+entry collects the public declarations of every member. A unit that includes a
+member directly collects only that member, as it would any file. The host
+preprocessor reads a block as C, so `--cpp-symbols`, `--live-symbols`, and the
+`--dump-cpp` modes report a module unit as an error. A file without a block
+reads exactly as before.
+
 ### Script units
 
 A script unit is a source file whose first line begins with `#!`, usually

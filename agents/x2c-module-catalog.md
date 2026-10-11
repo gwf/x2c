@@ -115,9 +115,9 @@ source-ordered shallow symbol collection and replay.
 Public functions:
 
 `Compiler.collect_symbols`, `compiler_prelude_sources`, `is_prelude_source`,
-`Compiler.configure_package`, `collect_resolve_include`,
-`Compiler.include_typedef_names`, `Compiler.include_type_dependencies`,
-`Compiler.include_function_declarations`,
+`Compiler.module_source`, `Compiler.configure_package`,
+`collect_resolve_include`, `Compiler.include_typedef_names`,
+`Compiler.include_type_dependencies`, `Compiler.include_function_declarations`,
 `Compiler.runtime_function_declarations`,
 `Compiler.linked_meta_provider_current`,
 `Compiler.linked_meta_definitions_current`, `Compiler.complete_meta_hashes`,
@@ -290,10 +290,11 @@ Public functions:
 `Diagnostics.release`, `Diagnostics.entries`, `Diagnostics.reached_limit`,
 `Diagnostics.report`, `diagnostics_write_json`, `Compiler.print_diagnostic`,
 `Compiler.origin_location`, `Compiler.display_path`, `Compiler.token_location`,
-`Compiler.token_source`, `Compiler.report_error`, `Compiler.report_problem`,
-`Compiler.report_warning`, `Compiler.report_warning_at`,
-`Compiler.take_diagnostics`, `Compiler.error_count`, `Compiler.diagnostics`,
-`Compiler.dump_tokens`, `Compiler.dump_symbol_table`, `Compiler.dump_cache`
+`Compiler.token_source`, `Compiler.text_source`, `Compiler.report_error`,
+`Compiler.report_problem`, `Compiler.report_warning`,
+`Compiler.report_warning_at`, `Compiler.take_diagnostics`,
+`Compiler.error_count`, `Compiler.diagnostics`, `Compiler.dump_tokens`,
+`Compiler.dump_symbol_table`, `Compiler.dump_cache`
 
 ### [src/editor.x](../src/editor.x)
 
