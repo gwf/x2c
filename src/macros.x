@@ -4771,7 +4771,8 @@ int Compiler.take_code_value(
 }
 
 /* Applies a carrier's effects in order and returns what replaces each
-   effect's token in the code. */
+   effect's token in the code. Placed code and early declarations see the
+   tokens of the effects before them. */
 static Map Compiler._code_effects(Compiler c, Var effects) {
   Map replacements = {};
   foreach (List effect, effects)
@@ -4797,7 +4798,8 @@ static Map Compiler._code_effects(Compiler c, Var effects) {
           c.add_early(early);
         }
       }
-      case %(place ?(List where) ?code): c.place(where, code);
+      case %(place ?(List where) ?code):
+        c.place(where, _replace_bindings(code, replacements));
       default:
         c.report_error(
           <macro>, "a meta call returned an unknown code effect", c.token,
@@ -4810,10 +4812,10 @@ static Map Compiler._code_effects(Compiler c, Var effects) {
     transaction: `(after-statement)` after the enclosing block item or
     initialized declarator; `(block-exit)` on every exit from the enclosing
     block from that point on, as a `defer` placed after it;
-    `(function-entry)` at the entry of the enclosing function, in placement
-    order before its first statement; `(unit-support)`
-    among the unit's support declarations, once per KEY with
-    `(unit-support KEY)`; or `(unit-init)` in the unit's file
+    `(function-entry)` at the entry of the enclosing function, at parse or
+    transform time, in placement order before its first statement;
+    `(unit-support)` among the unit's support declarations, once per KEY
+    with `(unit-support KEY)`; or `(unit-init)` in the unit's file
     initialization, in AREA with `(unit-init AREA)`. */
 void Compiler.place(Compiler c, List where, Var code) {
   match (where) {

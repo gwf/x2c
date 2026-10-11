@@ -2608,10 +2608,8 @@ static List Compiler._function_body(
   Compiler c, List declaration, String name, List syntax) {
   int expression_body = !syntax && c._at_function_arrow();
   if (!syntax && !expression_body) c.expect(<"{">);
-  Type old_return = c.return_type, declared_return = NULL;
-  match (declaration.type_from_ast())
-    case %((func *) *result): declared_return = result.type().declared();
-  c.return_type = declared_return;
+  Type old_return = c.return_type;
+  c.return_type = _declared_return(declaration);
   String old_fn = c.fn_name;
   c.fn_name = name;
   c.sym.push_scope(c.params);
@@ -2633,6 +2631,12 @@ static List Compiler._function_body(
     body = c.prepend_setup(body, c._entry_code(depth));
   }
   return body;
+}
+
+static Type _declared_return(List declaration) {
+  match (declaration.type_from_ast())
+    case %((func *) *result): return result.type().declared();
+  return NULL;
 }
 
 /* The code placed at the entry of the function whose row is at `depth`,
@@ -2724,12 +2728,12 @@ void Compiler.enter(Compiler c, Ancestor row) {
   c.ancestors.push(&row);
 }
 
-/** Returns the innermost `what` around the parser as captured code, or
-    NULL when there is none: the declarator whose initializer is being
-    parsed directly in the current block item, as its one-declarator
-    declaration; the block item, as its origin anchor; the function, as a
-    definition whose body is still the empty `(seq)`; or the unit, as a
-    `String` expression of its path. */
+/** Returns the innermost `what` around the parser, or around the function
+    body the transform lowers, as captured code, or NULL when there is none:
+    the declarator whose initializer is being parsed directly in the current
+    block item, as its one-declarator declaration; the block item, as its
+    origin anchor; the function, as a definition whose body is still the
+    empty `(seq)`; or the unit, as a `String` expression of its path. */
 List Compiler.enclosing(Compiler c, Symbol what) {
   if (what == <unit>) {
     String path = c.filename ? c.display_path(c.filename) : "<stdin>";
@@ -2754,9 +2758,36 @@ static List Compiler._ancestor_code(Compiler c, Ancestor row) {
   return %(at $origin (seq));
 }
 
+/** Enters the function definition `declaration`, whose body the
+    transform lowers next, so a rule lowering that body places code at its
+    entry. Returns the row's depth for `Compiler.leave_function`. */
+int Compiler.enter_function(Compiler c, List declaration) {
+  int depth = c.ancestors.len();
+  c.enter((Ancestor){ .what = <function>, .node = declaration });
+  return depth;
+}
+
+/** Leaves the function row at `depth` that `Compiler.enter_function`
+    began and returns the code placed at its entry, in placement order, or
+    NULL. The code binds in a scope of its own with the function's result
+    type; its caller lowers it. */
+List Compiler.leave_function(Compiler c, int depth) {
+  List entry = NULL;
+  if (c.placements.len()) {
+    List declaration = ((Ancestor *) c.ancestors.bytes)[depth].node;
+    c.sym.push_new_scope();
+    $let(c.return_type, _declared_return(declaration))
+      entry = c._entry_code(depth);
+    c.sym.pop_scope();
+  }
+  c.ancestors.truncate(depth);
+  return entry;
+}
+
 /** Records `code` for the entry of the innermost function definition,
-    after its parameters bind and before its first statement. A lambda body
-    is inside the definition that holds it. */
+    after its parameters bind and before its first statement. While parsing,
+    a lambda body is inside the definition that holds it; while lowering, a
+    lambda body is the body of its own lifted function. */
 void Compiler.place_entry(Compiler c, Var code) {
   Ancestor *rows = c.ancestors.bytes;
   int depth = (int) c.ancestors.len() - 1;

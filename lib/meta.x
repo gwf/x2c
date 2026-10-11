@@ -331,8 +331,9 @@ meta Code x2c_enclosing(Symbol what);
     after that item or declarator, as `defer code` written after it runs;
     `%(function-entry)`, at the entry of the enclosing function
     definition, after its parameters bind and before its first statement,
-    in placement order; code in a lambda body enters the definition that
-    holds the lambda;
+    in placement order, at parse or transform time; while parsing, code in
+    a lambda body enters the definition that holds the lambda, and while
+    lowering, the lambda's own lifted function;
     `%(unit-support)` among the unit's file-scope support declarations, or
     `%(unit-support KEY)` once for each KEY; or `%(unit-init)` in the
     unit's initialization, or `%(unit-init AREA)` in its `protocol`,

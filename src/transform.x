@@ -338,10 +338,25 @@ static Ast Compiler._function_node(
     if (ast_contains_head(body, <lambda>))
       prepared_body = c.prepare_lambda_cells(
         declarator, c._lower_lambda_destructuring(body));
-    List new_body = c._step(prepared_body);
+    List declaration = %(declare $return_type (bindings $declarator));
+    List new_body = c._entered_body(declaration, prepared_body);
     transformed = %(function $new_return $new_decl $new_body);
   }
   return transformed;
+}
+
+/* Lowers the block `body` of the function `declaration`, preceded by the
+   code that rules placed at the function's entry while it lowered. A
+   `defer` in that code covers the body, as one written first in it would. */
+static List Compiler._entered_body(Compiler c, List declaration, List body) {
+  int depth = c.enter_function(declaration);
+  List lowered = c._step(body);
+  List entry = c.leave_function(depth);
+  if (!entry) return lowered;
+  List items = c._sequence(entry, 0).append(lowered.cdr());
+  List deferred = c.rewrite_defer_list(items);
+  if (deferred != items) items = c._sequence(deferred, 0);
+  return source_block_content(items);
 }
 
 static Ast Compiler._slice_node(

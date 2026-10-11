@@ -288,7 +288,9 @@ static void CaptureBuild._field(CaptureBuild &b, Array fields, List capture) {
     }
 }
 
-/* The adapter borrows the copied context for each synchronous Func call. */
+/* The adapter borrows the copied context for each synchronous Func call.
+   Rules lowering the body place entry code in the adapter, after the
+   parameters and context bind; the adapter's own lowering lowers it. */
 static void CaptureBuild.publish(
   CaptureBuild &b, List entries, List body, List closure, List argv) {
   Compiler c = b.c;
@@ -297,10 +299,19 @@ static void CaptureBuild.publish(
     c.sym.resolve_key(%("FuncAdapter")), entries ? params : NULL,
     entries.map(_entry_binding), closure, argv);
   List setup = c._context_local(b.value_type, b.environment, closure);
+  int depth = c.enter_function(b._declaration(entries));
   List rewritten = c.normalize(b._rewrite(body));
+  List entry = c.leave_function(depth);
   c._publish_func_adapter(
-    b.adapter, closure, argv, rewritten, %(@locals $setup));
+    b.adapter, closure, argv, rewritten, %(@locals $setup @entry));
   b.signature = c.cache_literal_list(%((func $params) "Var"));
+}
+
+/* The lambda as the function `x2c_enclosing` answers within its body. */
+static List CaptureBuild._declaration(CaptureBuild &b, List entries) {
+  List params = _params_to_decl_params(entries);
+  return %(declare (static "Var")
+           (bindings (bind ${b.adapter} ((fnmod $params)))));
 }
 
 static List _entry_binding(List entry) {
