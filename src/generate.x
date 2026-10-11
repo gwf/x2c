@@ -196,7 +196,7 @@ String Compiler.module_projection_namespace(Compiler c, List key) {
 
 static String Compiler._projection_binding_namespace(
   Compiler c, List binding, int alias) {
-  List key = NULL;
+  List key = NULL, origin = binding;
   Var source;
   if (c.semantic_binding_facts().try_get(%(namespace $binding), source))
     key = source;
@@ -207,6 +207,7 @@ static String Compiler._projection_binding_namespace(
     Map names = c.module_layout_plan[%(private-bindings $path)];
     foreach (Var (original, emitted), names)
       if (binding == emitted) {
+        origin = original;
         String spelling = binding_identity_spelling(original);
         if (spelling) key = %($spelling);
         break;
@@ -218,6 +219,11 @@ static String Compiler._projection_binding_namespace(
   }
   if (!key) return NULL;
   if (alias) key = %(typedef ${key.car()});
+  String provider = c.binding_provider(origin, 1);
+  if (!provider) provider = c.binding_provider(origin, 0);
+  Var id;
+  if (provider && c.module_layout_plan.try_get(
+      %(namespace ${home_portable_path(provider)} $key), id)) return id;
   return c.module_projection_namespace(key);
 }
 
@@ -230,8 +236,8 @@ static Array Compiler._projection_definitions(Compiler c, List node) {
         String id = c.module_projection_namespace(%($tag $name));
         if (id) definitions.push(id);
       }
-    List declarators = kind == <function> ? %(
-      ${node.caddr()}) : node.caddr().list().cdr();
+    List declarators = kind == <function>
+      ? %(${node.caddr()}) : node.caddr().list().cdr();
     foreach (List row, declarators)
       match (row) case %(bind ?binding *): {
         String id = c._projection_binding_namespace(binding,
