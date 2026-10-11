@@ -1578,13 +1578,19 @@ initializer before it binds that release.
 **Rewriting a function definition.** `$rewrite` from `rewrite.x` registers
 a `meta` function as a rule for the code its macro builds. When that macro
 is a `Unit` macro whose body is one function definition, or only its one
-`Function` hole, the rule receives each function definition of the unit
-once, after binding and typing and before the body lowers. It returns the
-definition unchanged to decline, or a replacement definition. The
-replacement is lowered as written and offered to the other rules, but not
-again to the rule that returned it. A pattern that spells its return type,
-such as `int $name(...)`, is tried only on definitions with that return
-type and storage, before the rules whose pattern holds a hole there:
+`Function` hole, the rule receives each function definition the program
+writes once, after binding and typing and before the body lowers. A
+definition that the program's own `meta` code places or returns is the
+program's. One that the compiler writes while lowering is not offered: a
+lambda's function, a `defer`'s cleanup, a `Func` adapter, a protocol's
+forwarding member, or the compiler's own replacement of a definition. The
+statements such a definition holds from the program still reach the
+program's statement rules. The rule returns the definition unchanged to
+decline, or a replacement definition. The replacement is lowered as written
+and offered to the other rules, but not again to the rule that returned it.
+A pattern that spells its return type, such as `int $name(...)`, is tried
+only on definitions with that return type and storage, before the rules
+whose pattern holds a hole there:
 
 ```x2c
 #include "x2c.x"

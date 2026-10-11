@@ -29,7 +29,7 @@ Calls the typed callable `callee` with `arguments`, each converted to
 its parameter and evaluated once, in source order, as a statement
 expression.
 
-Source: `src/transform.x:1151`
+Source: `src/transform.x:1166`
 
 <a id="Compiler.lower_lambda_expr"></a>
 #### Compiler.lower_lambda_expr
@@ -42,7 +42,7 @@ other expressions pass through. A noncapturing lambda typed `Func`,
 which only a meta body leaves unlifted, lifts to a `Func` of its native
 signature.
 
-Source: `src/transform.x:191`
+Source: `src/transform.x:192`
 
 <a id="Compiler.normalize"></a>
 #### Compiler.normalize
@@ -65,7 +65,7 @@ the form `source` of `kind`, bound and lowered with the support. The
 kernel has no lowering of its own for `source`, so no rule ends the
 translation as `_shipped_lowering` does.
 
-Source: `src/transform.x:220`
+Source: `src/transform.x:221`
 
 <a id="Compiler.transform"></a>
 #### Compiler.transform

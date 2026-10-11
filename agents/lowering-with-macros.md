@@ -249,6 +249,13 @@ statement lower outside the rule, so a nested statement of the same kind
 applies it again. Statements the kernel writes while lowering, including
 those a shipped rule's carrier writes, are not source and reach only shipped
 rules, so a program's statement rules see the source parts but not them.
+Definitions follow the same contract. A function the kernel writes, such as
+a `defer`'s cleanup callback or a `Func` adapter, and one a shipped rule
+places or returns, such as a lifted lambda or a protocol's forwarding
+member, is written (`written_definitions`): only shipped function rules see
+it, while its source statements still reach a program's statement rules. A
+definition the source writes, or a program's meta code places or returns,
+reaches every function rule (`Compiler.written_support`).
 The walk does not read the text. Text therefore declares only locals that
 no region owns, transfers control only where no region opens, and holds a
 `switch` or a loop as a node, which stays the barrier its `break` and
