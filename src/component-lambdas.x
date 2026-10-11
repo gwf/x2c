@@ -45,13 +45,22 @@ meta static Code _lambda_cell_read(Var node, Map cells) {
 }
 
 /* The declaration of the cell `name` that holds a `type` copied from
-   `value`, or that a later assignment fills when `value` is NULL. */
+   `value`, or that a later assignment fills when `value` is NULL. Only its
+   allocation is source to bind. */
 meta static Code _lambda_cell(Atom name, Type type, Code value) {
-  if (!value) return $!{ $type *$name = Scope_malloc(sizeof($type)); };
-  if (!value.match(%(expr ? (composite ?)))) value = $!( { $value } );
-  return $!{
-    $type *$name = Scope_memdup((const void *)&($type)$value, sizeof($type));
-  };
+  Type bytes = %(* void), pointer = cons(<*>, type);
+  Code allocated = NULL;
+  if (!value) allocated = $!($bytes){ Scope_malloc(sizeof($type)) };
+  else {
+    if (!value.match(%(expr ? (composite ?))))
+      value = %(expr $type (composite (commas $value)));
+    allocated = $!($bytes){
+      Scope_memdup((const void *)&($type)$value, sizeof($type))
+    };
+  }
+  (List base, List modifiers) = pointer.parts();
+  return %(declare $base
+           (bindings (op = (bind $name $modifiers) $allocated)));
 }
 
 /* The cell declaration of `binding`, initialized from `value`, when `cells`
