@@ -29,6 +29,7 @@
 #include "component-match.x"
 #include "component-operators.x"
 #include "component-printf.x"
+#include "component-protocols.x"
 #include "component-raise.x"
 #include "component-try.x"
 #include "fields.x"
@@ -1148,6 +1149,149 @@ Code printf_values(Code code) {
   return code;
 }
 
+/* --- src/component-protocols.x ------------------------------------------- */
+
+static List _protocol_forward(
+  Type target, String source, Type template, String binder, String convert) {
+  List templates = Type.parameters(template);
+  Array params = [], arguments = [];
+  int index = 0;
+  foreach (Type type, Type.parameters(target)) {
+    List name = x2c_ident(%"a${index++}");
+    params.push($!Param{ $type $name });
+    Code argument = $!( $name );
+    if (templates.car() == %($binder))
+      argument = $!( ${x2c_ident(convert)}($argument) );
+    arguments.push(argument);
+    templates = templates.cdr();
+  }
+  Code callee = x2c_ident(source);
+  List args = arguments.list_free();
+  return %(${params.list_free()} ${$!( $callee(@args) )});
+}
+
+static Code _protocol_function(List declared, List name, List forward) {
+  List params = forward.car();
+  Code call = forward.cadr();
+  return $!Unit{ $declared $name(@params) { return $call; } };
+}
+
+static int _protocol_renders(String member, Type participant) {
+  if (!(member in %("str" "repr" "write_str" "write_repr"))) return 0;
+  match (Type.resolve(participant)) case %((!or struct union) *): return 1;
+  return 0;
+}
+
+static Code _protocol_guarded(
+  String member, List name, Type result, List forward) {
+  List params = forward.car();
+  Code call = forward.cadr();
+  Code value = x2c_ident("a0");
+  Code fallback = member == "str" || member == "repr"
+    ? $!( Var_pointer_string($value) )
+    : $!( Var_write_pointer_repr($value, ${x2c_ident("a1")}) );
+  return $!Unit{
+    static inline $result $name(@params) {
+      RenderPath render_path;
+      if (!RenderPath_enter(&render_path, Var_pointer($value)))
+        return $fallback;
+      defer RenderPath_leave(&render_path);
+      return $call;
+    }
+  };
+}
+
+static Code _protocol_prototype(List name, Type expected) {
+  Array params = [];
+  foreach (Type type, Type.parameters(expected)) {
+    (List base, List modifiers) = type.parts();
+    params.push(%(param $base (bind () $modifiers)));
+  }
+  Type result = Type.return_type(expected);
+  List declared = params.list_free();
+  return $!Unit{ $result $name(@declared); };
+}
+
+static Code _protocol_runtime(Type result, String name, List arguments) =>
+  %(expr $result (call $name (args @arguments)));
+
+static void _protocol_descriptor(List descriptor, List slots) {
+  match (descriptor)
+    case %(?(List methods) ?(String name) ?(Symbol var_tag) ?(Symbol area)
+           *explicit): {
+      Code table = %(expr ("VarMethods") (ident $methods));
+      List init = %(unit-init $area);
+      x2c_place(%(unit-support), $!Unit{ static VarMethods $methods; });
+      /* A table with no slots stays zero, which avoids an empty
+         initializer that C accepts only from C23 on. */
+      if (slots) x2c_place(init, $!{ $table = (VarMethods){ @slots }; });
+      Code text = %(expr ("String") (call "String_new" (args
+        (expr (* char) (literal (* char) ${%"\"$name\""})))));
+      if (explicit) {
+        Code tag = $!Symbol{ ${explicit.car()} };
+        Code tagged = _protocol_runtime(
+          %(void), "x2c_register_tagged_descriptor", %($tag $text $table));
+        x2c_place(init, Code.lowered(%(stmnt $tagged)));
+        return;
+      }
+      Code symbol = %(expr ("Symbol") (literal ("Symbol") $name $var_tag));
+      Code early = _protocol_runtime(
+        %(int), "x2c_register_builtin_descriptor", %($symbol $table));
+      if (area == <protocol>) {
+        x2c_place(init, Code.lowered(%(stmnt $early)));
+        return;
+      }
+      Code fallback = _protocol_runtime(
+        %(void), "x2c_register_descriptor", %($text $table));
+      Code missing = %(expr (int) (op ${<!>} $early));
+      x2c_place(init, Code.lowered(
+        %(if $missing (block (stmnt $fallback)))));
+    }
+}
+
+Code protocol_conformance(Code node) {
+  match (node)
+    case %(conform ? ?(Type participant) ?(String forward)
+           ?(String reverse) ?(String binder) ?descriptor (*rows)): {
+      String prefix = %"${participant.car()}_";
+      Array slots = [];
+      foreach (List row, rows) match (row)
+        case %(?(String member) ? ?(String source) ?(Type expected)
+               ?(Type template) *parts):
+          foreach (List part, parts) match (part) {
+            case %(default ?(Symbol storage)): {
+              List declared = storage == <static>
+                ? %(static inline @{Type.return_type(expected)})
+                : Type.return_type(expected);
+              List forwarded = _protocol_forward(
+                expected, source, template, binder, forward);
+              x2c_place(%(unit-support), _protocol_function(
+                declared, x2c_ident(prefix + member), forwarded));
+            }
+            case %(inherited ?(Type owner_expected)): {
+              source = prefix + member;
+              expected = owner_expected;
+              x2c_place(%(unit-support), _protocol_prototype(
+                x2c_ident(source), expected));
+            }
+            case %(thunk ?(List name) ?(Type erased)): {
+              Type result = Type.return_type(erased);
+              List forwarded = _protocol_forward(
+                erased, source, template, binder, reverse);
+              x2c_place(%(unit-support),
+                _protocol_renders(member, participant)
+                  ? _protocol_guarded(member, name, result, forwarded)
+                  : _protocol_function(
+                      %(static inline @result), name, forwarded));
+              slots.push(%(dotinit ($member) (expr $erased (ident $name))));
+            }
+          }
+      _protocol_descriptor(descriptor, slots.list_free());
+      return %(seq);
+    }
+  return node;
+}
+
 /* --- src/component-raise.x ----------------------------------------------- */
 
 static int _raise_immutable(Type type) {
@@ -1467,6 +1611,14 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_printf_lowered", _printf_lowered);
   $linked.row(rows, "_printf_library", _printf_library);
   $linked.row(rows, "printf_values", printf_values);
+  $linked.row(rows, "_protocol_forward", _protocol_forward);
+  $linked.row(rows, "_protocol_function", _protocol_function);
+  $linked.row(rows, "_protocol_renders", _protocol_renders);
+  $linked.row(rows, "_protocol_guarded", _protocol_guarded);
+  $linked.row(rows, "_protocol_prototype", _protocol_prototype);
+  $linked.row(rows, "_protocol_runtime", _protocol_runtime);
+  $linked.row(rows, "_protocol_descriptor", _protocol_descriptor);
+  $linked.row(rows, "protocol_conformance", protocol_conformance);
   $linked.row(rows, "_raise_immutable", _raise_immutable);
   $linked.row(rows, "_raise_value", _raise_value);
   $linked.row(rows, "raise_lowering", raise_lowering);

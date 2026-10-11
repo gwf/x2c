@@ -110,6 +110,20 @@ is listed under [compiler options](../reference/cli.md).
 - Runtime: statically selected module function
 - Tests: unit suites across runtime types
 
+### Protocol adoptions
+
+- Parse, publish, and resolve declarations and adoptions, and choose each
+  member's owner: `src/protocol.x`; operator mappings:
+  `src/operator-ledger.x`
+- Write forwarding members, `Var` descriptor thunks, method tables, and
+  descriptor registration: `src/component-protocols.x`, on the `conform`
+  form `src/protocol.x` presents for each conformance
+- Runtime descriptors and their registration: `lib/dispatch.x`; built-in
+  adoptions: `lib/protocols.x`
+- Tests: protocol, adoption, and conformance compiler fixtures and the
+  protocol-boundaries probe
+- See also: [protocols](../guide/protocols.md)
+
 ### Compile-time macros and decorators
 
 - Parse, import, hygiene, and expand: `src/macros.x`

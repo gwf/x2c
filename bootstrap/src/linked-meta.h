@@ -21,6 +21,7 @@
 #include "component-match.h"
 #include "component-operators.h"
 #include "component-printf.h"
+#include "component-protocols.h"
 #include "component-raise.h"
 #include "component-try.h"
 #include "fields.h"
@@ -67,6 +68,8 @@ Code dynamic_change(Code code);
 Code dynamic_unary(Code code);
 
 Code printf_values(Code code);
+
+Code protocol_conformance(Code node);
 
 Code raise_lowering(Code node);
 
