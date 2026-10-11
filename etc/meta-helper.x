@@ -473,7 +473,7 @@ void x2c_meta_helper_start(String name) {
 
 static List _initialize(Map table) {
   Var initializers;
-  if (table && table.try_get(<initializers>, initializers)) {
+  if (table && table.try_get(Symbol.new("initializers"), initializers)) {
     foreach (Var (name, function), initializers.map()) {
       List key = %(initializer $name);
       Var state;

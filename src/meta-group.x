@@ -927,7 +927,7 @@ static List Compiler._targets(Compiler c, List named, List functions) {
   Macro shape = $map_value;
   if (c.meta_build)
     entries.push(
-      %(map-entry ${x2c_literal_symbol(<initializers>)}
+      %(map-entry ${x2c_literal_symbol(Symbol.new("initializers"))}
         ${shape(initializers.list_free())}));
   return c.rebuild_expression(%("Map"), shape(entries.list_free()));
 }
