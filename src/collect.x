@@ -2069,7 +2069,7 @@ static List Compiler._interface_load(
   Compiler c, String canonical, String path) {
   String identity = compiler_identity();
   match (_interface_record(path))
-    case %(interface 14 ?(String compiler) *stored):
+    case %(interface 15 ?(String compiler) *stored):
       if (identity && compiler == identity)
         return c._stored_entry(canonical, stored);
   return NULL;
@@ -2097,7 +2097,7 @@ static List _interface_record(String path) {
   try source = input.string_close();
   catch %(io-fail *): return NULL;
   String identity = compiler_identity();
-  if (!identity || !source.startswith(%"(interface 14 \"$identity\" "))
+  if (!identity || !source.startswith(%"(interface 15 \"$identity\" "))
     return NULL;
   return _read_record(source);
 }
@@ -2248,7 +2248,7 @@ String interface_prelude(void) {
   String identity = compiler_identity();
   if (!identity) return NULL;
   String runtime = _canonical_path(%"${x2c_get_root()}/lib/x2c.x");
-  String header = %"(interface 14 \"$identity\" ";
+  String header = %"(interface 15 \"$identity\" ";
   foreach (String path, _interface_candidates(runtime)) {
     String text = NULL;
     try text = Path.read_text(path);
@@ -2279,7 +2279,7 @@ String interface_text(Compiler c) {
 static int _write_interface_entry(
   Buffer out, String canonical, List entry) {
   List record = %(
-    interface 14 ${compiler_identity()} @{_stored_record(canonical, entry)});
+    interface 15 ${compiler_identity()} @{_stored_record(canonical, entry)});
   /* An interface is plain data, which a loader never evaluates. */
   if (!datum_write(out, record, 0)) return 0;
   out.write_char('\n');
