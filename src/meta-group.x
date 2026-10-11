@@ -626,8 +626,10 @@ static Var Compiler._group_include(Compiler c, Var node, String lib) {
     String path = collect_resolve_include(
       c.sources, c.include_dirs, Path.dirname(c.filename), target, angle);
     Var index;
-    if (path && meta_build_tables.try_get(Path.absolute(path), index))
+    if (path && meta_build_tables.try_get(Path.absolute(path), index)) {
+      c.require_native_meta_header(path);
       return %(preproc ${%"#include \"meta_group_$index.h\""});
+    }
     if (Path.is_file(%"$lib$target")) break;
     return void;
   }
