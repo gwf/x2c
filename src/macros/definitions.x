@@ -1216,6 +1216,7 @@ void Compiler.install_compile_time_effects(Compiler c, List rows) {
     }
     case %(compile-time rewrite *): c._install_rewrite(row);
     case %(compile-time lisp ?form (source ?path ?site)): {
+      if (c.signature_only) continue;
       Token token = c.thaw_declaration_syntax(site);
       String file = home_absolute_path(path), text = NULL;
       c.read_source(file, text);
@@ -1227,6 +1228,7 @@ void Compiler.install_compile_time_effects(Compiler c, List rows) {
       }
     }
     case %(compile-time import ?path (source ?source ?site)): {
+      if (c.signature_only) continue;
       Token token = c.thaw_declaration_syntax(site);
       String file = home_absolute_path(source), text = NULL;
       c.read_source(file, text);

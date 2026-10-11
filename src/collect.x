@@ -129,6 +129,7 @@ static List Compiler._entry(Compiler c, String canonical) {
       return cached;
     (void) _process_cache().del(canonical);
   }
+  if (c.signature_only) return NULL;
   return c._interface_read(canonical);
 }
 
@@ -200,16 +201,44 @@ Map Compiler.collect_symbols(Compiler c, Map globs) {
       c.fn_defs.del(name);
     }
   visited[canonical] = 1;
-  if (c.module_owner) {
-    Array effects = [];
-    foreach (String owner, c.module_tree.ancestors(canonical).reverse())
-      if (owner != canonical)
-        c._replay_include(owner, globs, visited, effects);
-  }
   c._module_preamble(canonical, globs, visited, NULL);
+  if (c.module_owner && !c.signature_only)
+    c._collect_module_signatures(canonical, globs);
   c._walk_file(canonical, c.text, Path.dirname(c.filename), globs, visited);
   c.bind_pending_inline_bodies(globs, canonical);
   return globs;
+}
+
+/* Membership supplies ordinary declarations without executing sibling forms.
+   The same collector uses a temporary cache; ordinary entries stay intact. */
+static void Compiler._collect_module_signatures(
+  Compiler c, String canonical, Map globs) {
+  (void) _process_cache();
+  Compiler signatures = Compiler.new_shared(c);
+  defer c.close_child(signatures);
+  signatures.filename = c.filename;
+  signatures.signature_only = 1;
+  signatures.interface_provider = 1;
+  signatures.source_facts = 0;
+  signatures.source_declarations = {};
+  signatures.collection_native_files = {};
+  Map declarations = globs.copy(), visited = {};
+  if (!c.module_tree.entry(canonical)) visited[canonical] = 1;
+  $let(process_cache, _cache_map())
+  $let(provisional_entries, NULL)
+  $let(declared_functions, NULL) {
+    foreach (String owner, c.module_tree.ancestors(canonical).reverse())
+      signatures._replay_include(owner, declarations, visited, NULL);
+  }
+  Map ordinary = {};
+  foreach (Var (key, value), declarations) {
+    if (value is <list>)
+      match (value) case %((!or declaration-source compile-time
+                              package-import project-meta) *): continue;
+    ordinary[key] = value;
+  }
+  c._merge_rows(globs, ordinary);
+  c.merge_translation_dependencies(signatures.deps);
 }
 
 /* Builtin components contribute compile-time definitions beside the runtime
@@ -346,6 +375,7 @@ static void FileWalk.split(FileWalk &w, Token first) {
 
 /* Retain the selected prefix before members or suffix producers run. */
 static void FileWalk.capture_module_preamble(FileWalk &w, ModuleEntry module) {
+  if (w.c.signature_only) return;
   Array parts = [];
   foreach (Var part, w.parts)
     parts.push(part is <map> ? (Var) part.map().copy() : part);
@@ -1271,7 +1301,7 @@ static void FileWalk.add_defaults(FileWalk &w) {
 /* Retain a cold provider's context until every included signature is
    collected. A cycle can refer to a declaration after its include. */
 static void FileWalk.queue_public_bodies(FileWalk &w) {
-  if (!w.unit || !w.c.interface_provider) return;
+  if (!w.unit || !w.c.interface_provider || w.c.signature_only) return;
   int private_types = 0;
   foreach (Var key, w.statics.keys())
     if (key is <list> && _type_family(key)) private_types = 1;
