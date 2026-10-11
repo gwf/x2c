@@ -82,11 +82,11 @@ callable values lowered to C helpers.
 
 Public functions:
 
-`Compiler.lower_lambda_expr`, `Compiler.capture_environment`,
-`Compiler.prepare_lambda_cells`, `Compiler.prepend_setup`,
-`Compiler.lift_func_expression`, `Compiler.maybe_adapt_func_arg`,
-`Compiler.func_parameters`, `Compiler.func_signature`,
-`Compiler.lower_typed_adapter_expr`, `Compiler.adapt_lambda_arg`
+`Compiler.capture_environment`, `Compiler.prepare_lambda_cells`,
+`Compiler.prepend_setup`, `Compiler.lift_func_expression`,
+`Compiler.maybe_adapt_func_arg`, `Compiler.func_parameters`,
+`Compiler.func_signature`, `Compiler.lower_typed_adapter_expr`,
+`Compiler.adapt_lambda_arg`
 
 ### [src/cleanup.x](../src/cleanup.x)
 
@@ -423,9 +423,10 @@ Public functions:
 `_tag_decode_groups`, `_tag_id_checks`, `access_read`, `access_store`,
 `access_update`, `access_prefix`, `access_postfix`, `delegate_member`,
 `destructure_declaration`, `destructure_statement`, `destructure_value`,
-`lambda_lift`, `match_lowering`, `dynamic_binary`, `dynamic_compound`,
-`dynamic_change`, `dynamic_unary`, `printf_values`, `raise_lowering`,
-`try_catch_cases`, `try_lowering`, `linked_meta_targets`, `linked_meta_hashes`
+`lambda_lift`, `lambda_closure`, `match_lowering`, `dynamic_binary`,
+`dynamic_compound`, `dynamic_change`, `dynamic_unary`, `printf_values`,
+`raise_lowering`, `try_catch_cases`, `try_lowering`, `linked_meta_targets`,
+`linked_meta_hashes`
 
 ### [src/literals.x](../src/literals.x)
 
@@ -773,7 +774,8 @@ x2c AST transformation pipeline.
 
 Public functions:
 
-`Compiler.transform`, `Compiler.normalize`, `Compiler.call_in_order`
+`Compiler.transform`, `Compiler.normalize`, `Compiler.lower_lambda_expr`,
+`Compiler.call_in_order`
 
 ### [src/type-ledger.x](../src/type-ledger.x)
 

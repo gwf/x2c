@@ -25,6 +25,7 @@ Shipped `meta` code compiled into the compiler.
 | [`dynamic_change`](#dynamic_change) | Adds or subtracts one through the `Var` update helpers; the postfix forms return the value before the change. |
 | [`dynamic_compound`](#dynamic_compound) | Updates a `Var` or numeric lvalue with a `Var` or numeric operand through the update helper of its storage. |
 | [`dynamic_unary`](#dynamic_unary) | Rejects a unary numeric operator on a `Var`. |
+| [`lambda_closure`](#lambda_closure) | Lifts the capturing lambda `node` to a static function of its parameters and captures, and answers a `Func` of a record of the captured values and addresses. |
 | [`lambda_lift`](#lambda_lift) | Lifts the noncapturing lambda `node` to a static function, whose name is its value. |
 | [`linked_meta_hashes`](#linked_meta_hashes) | Returns linked definition hashes and provider source dependencies. |
 | [`linked_meta_targets`](#linked_meta_targets) | Returns the linked copies, and the runtime builders, by name. |
@@ -125,7 +126,7 @@ for `+` beside text, text. The call is returned lowered, because an
 operator chain applies this rule once for each term and binding would
 search the whole remaining chain each time.
 
-Source: `src/linked-meta.x:981`
+Source: `src/linked-meta.x:1155`
 
 #### dynamic_change
 
@@ -134,7 +135,7 @@ Source: `src/linked-meta.x:981`
 Adds or subtracts one through the `Var` update helpers; the postfix
 forms return the value before the change.
 
-Source: `src/linked-meta.x:1066`
+Source: `src/linked-meta.x:1240`
 
 #### dynamic_compound
 
@@ -143,7 +144,7 @@ Source: `src/linked-meta.x:1066`
 Updates a `Var` or numeric lvalue with a `Var` or numeric operand
 through the update helper of its storage.
 
-Source: `src/linked-meta.x:1040`
+Source: `src/linked-meta.x:1214`
 
 #### dynamic_unary
 
@@ -151,7 +152,17 @@ Source: `src/linked-meta.x:1040`
 
 Rejects a unary numeric operator on a `Var`.
 
-Source: `src/linked-meta.x:1082`
+Source: `src/linked-meta.x:1256`
+
+#### lambda_closure
+
+`Code lambda_closure(Code node)`
+
+Lifts the capturing lambda `node` to a static function of its
+parameters and captures, and answers a `Func` of a record of the
+captured values and addresses.
+
+Source: `src/linked-meta.x:803`
 
 #### lambda_lift
 
@@ -160,7 +171,7 @@ Source: `src/linked-meta.x:1082`
 Lifts the noncapturing lambda `node` to a static function, whose name
 is its value.
 
-Source: `src/linked-meta.x:651`
+Source: `src/linked-meta.x:672`
 
 #### linked_meta_hashes
 
@@ -168,7 +179,7 @@ Source: `src/linked-meta.x:651`
 
 Returns linked definition hashes and provider source dependencies.
 
-Source: `src/linked-meta.x:1651`
+Source: `src/linked-meta.x:1835`
 
 #### linked_meta_targets
 
@@ -176,7 +187,7 @@ Source: `src/linked-meta.x:1651`
 
 Returns the linked copies, and the runtime builders, by name.
 
-Source: `src/linked-meta.x:1460`
+Source: `src/linked-meta.x:1634`
 
 #### match_lowering
 
@@ -185,7 +196,7 @@ Source: `src/linked-meta.x:1460`
 Lowers the bound match `node` to C text around its subject, patterns,
 and bodies.
 
-Source: `src/linked-meta.x:965`
+Source: `src/linked-meta.x:1139`
 
 #### printf_values
 
@@ -193,7 +204,7 @@ Source: `src/linked-meta.x:965`
 
 Reads the Var values a printf-family call's static format consumes.
 
-Source: `src/linked-meta.x:1222`
+Source: `src/linked-meta.x:1396`
 
 #### raise_lowering
 
@@ -202,7 +213,7 @@ Source: `src/linked-meta.x:1222`
 Converts a raise's code and details, or declines a raise whose parts
 already have their types.
 
-Source: `src/linked-meta.x:1258`
+Source: `src/linked-meta.x:1432`
 
 #### register_rewrite
 
@@ -224,7 +235,7 @@ every arm returns or raises, control cannot leave them, and a final
 unreachable mark tells C so that a function ending in such a `try`
 needs no return after it.
 
-Source: `src/linked-meta.x:1292`
+Source: `src/linked-meta.x:1466`
 
 #### try_lowering
 
@@ -232,7 +243,7 @@ Source: `src/linked-meta.x:1292`
 
 Lowers the parsed try `node` to its landing form.
 
-Source: `src/linked-meta.x:1404`
+Source: `src/linked-meta.x:1578`
 
 ## Design notes
 

@@ -16,6 +16,14 @@ declarations. Its parameters keep their declarators, a bare one is a
 return none, and an expression body returns its value. A noncapturing
 lambda's value is that function.
 
+A capturing lambda's function also takes each binding it captures, a
+value as its own type and a reference as a reference. Its value is a
+`Func` that copies each captured value, or the address a reference
+captures, into a context record when the lambda is evaluated, left to
+right. The `Func`'s adapter reads the arguments and calls the function
+with them and the record's fields. A public inline function reaches the
+unit's private record through a bridge function.
+
 Each definition precedes the definitions that call it: the compiler
 settles whether a linked copy reaches a compile-time operation when the
 copy binds.
