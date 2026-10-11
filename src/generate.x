@@ -1808,9 +1808,9 @@ static List Compiler._source_text(Compiler c, List content) {
   String guard = c.generated_unit_hash();
   List runtime = c.runtime_inc ? _include_directive("x2c.x") : NULL;
   Anchors at = _anchors(content, 1);
-  List error = at.error >= 0 ? _include_directive("error.h") : NULL;
+  List error = at.error >= 0 ? _include_directive("error.x") : NULL;
   List exception =
-    c.needs_exception ? _include_directive("exception.h") : NULL;
+    c.needs_exception ? _include_directive("exception.x") : NULL;
   Array lines = [];
   int position = 0;
   foreach (List node, content) {
