@@ -577,11 +577,89 @@ Code destructure_value(Code node) {
 
 /* --- src/component-lambdas.x --------------------------------------------- */
 
-static Var _lambda_replace(Var ast, Map replaced) {
-  Array pending = [ast], building = [0], done = [];
+static Code _lambda_cell_read(Var node, Map cells) {
+  Var cell;
+  match (node) case %(expr ?(Type read) (ident ?binding)):
+    if (cells.try_get(binding, cell)) {
+      (Atom name, Type type) = cell;
+      if (read.car() == <&>) return %(expr $read (ident $name));
+      Type pointer = cons(<*>, type);
+      return %(expr $type
+               (parens (expr $type (op * (expr $pointer (ident $name))))));
+    }
+  return NULL;
+}
+
+static Code _lambda_cell(Atom name, Type type, Code value) {
+  if (!value) return $!{ $type *$name = Scope_malloc(sizeof($type)); };
+  if (!value.match(%(expr ? (composite ?)))) value = $!( { $value } );
+  return $!{
+    $type *$name = Scope_memdup((const void *)&($type)$value, sizeof($type));
+  };
+}
+
+static Code _lambda_declared_cell(
+  List binding, Code value, Map cells, Array named) {
+  Var cell;
+  if (!cells.try_get(binding, cell)) return NULL;
+  (Atom name, Type type) = cell;
+  named.push(%(new-name $name "lambda_cell"));
+  return _lambda_cell(name, type, value);
+}
+
+static Code _lambda_copied_cell(List binding, Map cells, Array named) {
+  Var cell;
+  if (!cells.try_get(binding, cell)) return NULL;
+  Type type = cell.list().cadr();
+  return _lambda_declared_cell(
+    binding, %(expr $type (ident $binding)), cells, named);
+}
+
+static List _lambda_targets(List node) {
+  Array targets = [];
+  match (node) {
+    case %(dstrdecl (params *params) ?):
+      foreach (List param, params)
+        match (param) case %(param ? (bind ?binding ?)): targets.push(binding);
+    case %(dstrdecl ? (targets *names) ?): return names;
+  }
+  return targets.list_free();
+}
+
+static Var _lambda_declare_cells(List node, Map cells, Array named) {
+  Array items = [];
+  int celled = 0;
+  match (node) {
+    case %(declare ?base (bindings *bindings)):
+      foreach (List item, bindings) {
+        Code cell = NULL;
+        match (item) {
+          case %(bind ?binding *):
+            cell = _lambda_declared_cell(binding, NULL, cells, named);
+          case %(op = (bind ?binding *) ?value):
+            cell = _lambda_declared_cell(binding, value, cells, named);
+        }
+        celled |= !!cell;
+        items.push(cell ? cell : %(declare $base (bindings $item)));
+      }
+    case %(dstrdecl *): {
+      items.push(node);
+      foreach (List binding, _lambda_targets(node)) {
+        Code copy = _lambda_copied_cell(binding, cells, named);
+        if (copy) items.push(copy);
+        celled |= !!copy;
+      }
+    }
+  }
+  return celled ? %(seq @{items.list_free()}) : node;
+}
+
+static Var _lambda_rebuild(Var ast, List none, Map cells, Array named) {
+  Array pending = [ast], modes = [0], done = [];
   while (pending.len()) {
     Var node = pending.take_last();
-    if (building.take_last().int()) {
+    int mode = modes.take_last().int();
+    if (mode == 1) {
       int first = done.len() - node.list().len(), index = first;
       Array parts = [];
       int changed = 0;
@@ -590,22 +668,24 @@ static Var _lambda_replace(Var ast, Map replaced) {
         parts.push(done[index++]);
       }
       done.truncate(first);
-      done.push(changed ? parts.list_free() : node);
+      List rebuilt = changed ? parts.list_free() : node;
+      done.push(cells ? _lambda_declare_cells(rebuilt, cells, named)
+                      : rebuilt);
       continue;
     }
-    Var replacement;
-    if (replaced.try_get(node, replacement)) done.push(replacement);
-    else if (node is not <list> || node.is_nil() ||
-             node.list().match(%(expr ? (lambda *))))
-      done.push(node);
+    Code read = cells && !mode ? _lambda_cell_read(node, cells) : NULL;
+    if (mode || node is not <list> || node.is_nil()) done.push(node);
+    else if (none && node.list() === %(return)) done.push(none);
+    else if (read) done.push(read);
     else {
-      pending.push(node);
-      building.push(1);
       Array parts = [];
       foreach (Var part, node.list()) parts.push(part);
+      int body = node.list().car() == <lambda> ? parts.len() - 1 : -1;
+      pending.push(node);
+      modes.push(1);
       for (int i = parts.len() - 1; i >= 0; i--) {
         pending.push(parts[i]);
-        building.push(0);
+        modes.push(i == body ? 2 : 0);
       }
     }
   }
@@ -616,11 +696,9 @@ static List _lambda_none(void) =>
   %(return ("Var") (expr ("Var") (literal ("Var") "void")));
 
 static List _lambda_items(Code body) {
-  match (body) case %(block *items): {
-    Map none = {};
-    none[%(return)] = _lambda_none();
-    return %(@{_lambda_replace(items, none)} ${_lambda_none()});
-  }
+  match (body) case %(block *items):
+    return %(@{_lambda_rebuild(items, _lambda_none(), NULL, NULL)}
+             ${_lambda_none()});
   List items = body.match(%(expr (void) ?))
     ? %((stmnt $body) ${_lambda_none()})
     : %((stmnt (return ${body.convert(%("Var"))})));
@@ -828,6 +906,76 @@ Code lambda_closure(Code node) {
       Code value = _lambda_value(
         effects, adapter, context, adapted.car(), captures);
       return %(code-value "bound" $value ${effects.list_free()});
+    }
+  return node;
+}
+
+static List _lambda_designated(Var value) {
+  for (;;) {
+    match (value) {
+      case %(expr ? ?inner): value = inner;
+      case %(parens ?inner): value = inner;
+      case %(index (!set ?base (expr ((dim *) *) ?)) ?): value = base;
+      case %(op . ?base *): value = base;
+      case %(ident (!set ?binding (binding ? ?))): return binding;
+      default: return NULL;
+    }
+  }
+}
+
+static Map _lambda_shared(List params, List items) {
+  Map declared = {}, shared = {}, cells = {};
+  foreach (List param, params)
+    match (param) case %(param ? (bind ?binding *)): declared[binding] = 1;
+  List node;
+  $ast.walk(items, node) match (node) {
+    case %(declare (!set ?base (* static *)) *): continue;
+    case %(bind ?binding *): declared[binding] = 1;
+    case %(dstrdecl *):
+      foreach (List binding, _lambda_targets(node)) declared[binding] = 1;
+    case %(lambda *parts): {
+      foreach (List part, parts)
+        match (part) case %(captures *rows):
+          foreach (List row, rows)
+            match (row)
+              case %(capture ? (& *type) (expr ? (op & ?target))): {
+                List binding = _lambda_designated(target);
+                if (binding) shared[binding] = type;
+              }
+      continue;
+    }
+  }
+  foreach (Var (binding, type), shared)
+    if (declared.contains(binding)) {
+      Atom name = Atom.intern(%"?__lambda_cell_${cells.len()}");
+      cells[binding] = %($name $type);
+    }
+  return cells;
+}
+
+/** Moves each local and parameter of the function `node` that a lambda in
+    its body shares by reference into a Scope cell, so the binding outlives
+    the call: a parameter is copied into its cell at entry, a local is
+    declared as its cell, and every read goes through the cell. A lifted
+    lambda's function moves its own. */
+Code lambda_cells(Code node) {
+  match (node)
+    case %(function ?type
+           (!set ?declarator (bind ? ((fnmod (params *params))))) ?): {
+      List items = Code.body(node);
+      Map cells = _lambda_shared(params, items);
+      if (!cells.len()) return node;
+      Array named = [], entry = [];
+      foreach (List param, params)
+        match (param) case %(param ? (bind ?binding *)): {
+          Code cell = _lambda_copied_cell(binding, cells, named);
+          if (cell) entry.push(cell);
+        }
+      List body = _lambda_rebuild(items, NULL, cells, named);
+      return %(code-value "source"
+               (function $type $declarator
+                 (block @{entry.list_free()} @body))
+               ${named.list_free()});
     }
   return node;
 }
@@ -1684,7 +1832,13 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "destructure_declaration", destructure_declaration);
   $linked.row(rows, "destructure_statement", destructure_statement);
   $linked.row(rows, "destructure_value", destructure_value);
-  $linked.row(rows, "_lambda_replace", _lambda_replace);
+  $linked.row(rows, "_lambda_cell_read", _lambda_cell_read);
+  $linked.row(rows, "_lambda_cell", _lambda_cell);
+  $linked.row(rows, "_lambda_declared_cell", _lambda_declared_cell);
+  $linked.row(rows, "_lambda_copied_cell", _lambda_copied_cell);
+  $linked.row(rows, "_lambda_targets", _lambda_targets);
+  $linked.row(rows, "_lambda_declare_cells", _lambda_declare_cells);
+  $linked.row(rows, "_lambda_rebuild", _lambda_rebuild);
   $linked.row(rows, "_lambda_none", _lambda_none);
   $linked.row(rows, "_lambda_items", _lambda_items);
   $linked.row(rows, "_lambda_params", _lambda_params);
@@ -1700,6 +1854,9 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_lambda_field_type", _lambda_field_type);
   $linked.row(rows, "_lambda_value", _lambda_value);
   $linked.row(rows, "lambda_closure", lambda_closure);
+  $linked.row(rows, "_lambda_designated", _lambda_designated);
+  $linked.row(rows, "_lambda_shared", _lambda_shared);
+  $linked.row(rows, "lambda_cells", lambda_cells);
   $linked.row(rows, "_match_flush", _match_flush);
   $linked.row(rows, "_match_place", _match_place);
   $linked.row(rows, "_match_items", _match_items);
