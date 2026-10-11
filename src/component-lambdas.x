@@ -101,11 +101,23 @@ meta static List _lambda_targets(List node) {
    again. */
 meta static Code _lambda_kept(Code code) => %(code-value "lowered" $code ());
 
-/* The block `items`, each kept unless `declaring` holds it. */
-meta static List _lambda_kept_items(List items, Map declaring) {
-  Array out = [];
-  foreach (Var item, items)
-    out.push(item in declaring ? item : _lambda_kept(item));
+/* The block items `items`, rebuilt from `original`, each kept unless
+   `declaring` holds it. A run of items that `original` holds unchanged is
+   kept as one sequence, so the function binds one carrier for the run and
+   replacing the cells' names copies no list of it. */
+meta static List _lambda_kept_items(
+  Array items, List original, Map declaring) {
+  Array out = [], run = [];
+  foreach (Var item, items) {
+    if (item === original.car()) run.push(item);
+    else {
+      if (run.len()) out.push(_lambda_kept(%(seq @{run.list()})));
+      run.truncate(0);
+      out.push(item in declaring ? item : _lambda_kept(item));
+    }
+    original = original.cdr();
+  }
+  if (run.len()) out.push(_lambda_kept(%(seq @{run.list()})));
   return out.list_free();
 }
 
@@ -113,7 +125,7 @@ meta static List _lambda_kept_items(List items, Map declaring) {
 meta static int _lambda_mentions(Var item, Map cells) {
   List node;
   $ast.walk(item, node)
-    if (node.car() == <binding> && node in cells) return 1;
+    if (node.car() === <binding> && node in cells) return 1;
   return 0;
 }
 
@@ -168,7 +180,7 @@ meta static Var _lambda_rebuild(
       Array parts = [];
       int changed = 0, declares = 0;
       foreach (Var part, node.list()) {
-        changed |= done[index] != part;
+        changed |= done[index] !== part;
         declares |= cells && done[index] in declaring;
         parts.push(done[index++]);
       }
@@ -176,9 +188,12 @@ meta static Var _lambda_rebuild(
       List rebuilt = changed ? parts.list_free() : node;
       Var result = rebuilt;
       if (cells) result = _lambda_declare_cells(rebuilt, cells, named);
-      if (result != rebuilt || declares) {
-        if (result == rebuilt && rebuilt.car() == <block>)
-          result = %(block @{_lambda_kept_items(rebuilt.cdr(), declaring)});
+      if (result !== rebuilt || declares) {
+        if (result === rebuilt && rebuilt.car() == <block>) {
+          List kept = _lambda_kept_items(
+            rebuilt.cdr().array(), node.cdr(), declaring);
+          result = cons(<block>, kept);
+        }
         declaring[result] = 1;
       }
       done.push(result);
@@ -577,7 +592,7 @@ meta Code lambda_cells(Code node) {
         body.push(
           _lambda_mentions(item, cells)
             ? _lambda_rebuild(item, NULL, cells, named, declaring) : item);
-      List kept = _lambda_kept_items(body.list_free(), declaring);
+      List kept = _lambda_kept_items(body, items, declaring);
       return %(code-value "source"
                (function $type $declarator
                  (block @{entry.list_free()} @kept))
