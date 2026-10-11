@@ -82,7 +82,8 @@ static List _layout_private_node(List node, Map names, Map bindings) {
   Var identity;
   if (bindings.try_get(node, identity)) return identity;
   match (node)
-    case %((!set ?kind (!or declare typedef function param expr cast offsetof))
+    case %((!set ?kind
+                  (!or decl declare typedef function param expr cast offsetof))
            ?type *rest):
       node = %($kind ${_layout_private_type(type, names)} @rest);
   List child;
