@@ -141,6 +141,7 @@ static List Layouts.mark_fields(
   foreach (List field, fields) {
     List declaration = Ast.without_origin(field);
     Map needed = {};
+    Array demands = [];
     if (declaration.car() == <declare>) {
       Type source = declaration.cadr();
       List core = source.base_type(), replacement = NULL;
@@ -162,8 +163,7 @@ static List Layouts.mark_fields(
           declaration, resolver.unit_symbols());
         foreach (List namespace, namespaces.keys()) {
           String id = c.module_projection_namespace(namespace);
-          if (id) marked.push(
-            %(preproc "#pragma x2c_namespace_require $id"));
+          if (id) demands.push(%"#pragma x2c_namespace_require $id");
         }
         foreach (List row, declaration.caddr().list().cdr()) {
           Type type = %(declare ${declaration.cadr()} (bindings $row))
@@ -174,8 +174,9 @@ static List Layouts.mark_fields(
     }
     foreach (List dependency, needed.keys()) {
       String id = filename_hash(dependency.repr());
-      marked.push(%(preproc "#pragma x2c_family_require f_$id"));
+      demands.push(%"#pragma x2c_family_require f_$id");
     }
+    foreach (String demand, demands.sort()) marked.push(%(preproc $demand));
     marked.push(field);
   }
   return marked.list_free();
@@ -189,10 +190,10 @@ List Compiler.module_layout_alias_demands(Compiler c, List node) {
   Sym resolver = Sym.new(c);
   resolver.reset_overlay(rows, c.module_layout_plan[%(projection-aliases)]);
   Map namespaces = declaration_type_namespaces(node, rows);
-  Array marked = [];
+  Array marked = [], demands = [];
   foreach (List namespace, namespaces.keys()) {
     String id = c.module_projection_namespace(namespace);
-    if (id) marked.push(%(preproc "#pragma x2c_namespace_require $id"));
+    if (id) demands.push(%"#pragma x2c_namespace_require $id");
   }
   Map private_types = {}, needed = {};
   private_types[path] = c.module_layout_plan[%(private-types $path)];
@@ -205,8 +206,9 @@ List Compiler.module_layout_alias_demands(Compiler c, List node) {
   }
   foreach (List dependency, needed.keys()) {
     String id = filename_hash(dependency.repr());
-    marked.push(%(preproc "#pragma x2c_family_require f_$id"));
+    demands.push(%"#pragma x2c_family_require f_$id");
   }
+  foreach (String demand, demands.sort()) marked.push(%(preproc $demand));
   return marked.list_free();
 }
 
