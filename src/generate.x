@@ -248,41 +248,38 @@ static Array Compiler._projection_definitions(Compiler c, List node) {
   return definitions;
 }
 
-/* Unmarked native and ordinary-unit headers provide their collected
-   namespaces through this actual include region. Module headers retain
-   their own labelled declaration regions. */
-static Array Compiler._projection_include_names(
+/* Cache each include's immutable namespace/family supplies once per unit.
+   Module headers retain their individually labelled declaration regions. */
+static Map Compiler._projection_include_supplies(
   Compiler c, String path) {
-  Array definitions = [];
-  if (!path || c.module_tree.owner(path)) return definitions;
   Map plan = c.module_layout_plan;
-  foreach (List row, c.declaration_provider_rows(%($path))) {
-    (Var kind, String provider, List key) = row;
-    (void) kind;
-    String canonical = c.canonical_path(home_absolute_path(provider));
-    if (c.module_tree.owner(canonical)) continue;
-    Var id;
-    if (plan.try_get(%(namespace $provider $key), id) &&
-        !(id in definitions)) definitions.push(id);
-  }
-  return definitions;
-}
-
-static Array Compiler._projection_include_families(
-  Compiler c, String path) {
-  Array families = [];
-  if (!path || c.module_tree.owner(path)) return families;
-  foreach (List row, c.declaration_provider_rows(%($path))) {
-    (Var kind, String provider, List key) = row;
-    (void) kind;
-    String canonical = c.canonical_path(home_absolute_path(provider));
-    if (c.module_tree.owner(canonical)) continue;
-    match (key) case %((!or struct union enum) ?): {
-      String id = %"f_${filename_hash(key.repr())}";
-      if (!(id in families)) families.push(id);
+  List cache = %(projection-include $path);
+  Var saved;
+  if (plan.try_get(cache, saved)) return saved;
+  Array definitions = [], families = [];
+  Map names = {}, tags = {};
+  if (path && !c.module_tree.owner(path))
+    foreach (List row, c.declaration_provider_rows(%($path))) {
+      (Var kind, String provider, List key) = row;
+      (void) kind;
+      String canonical = c.canonical_path(home_absolute_path(provider));
+      if (c.module_tree.owner(canonical)) continue;
+      Var id;
+      if (plan.try_get(%(namespace $provider $key), id) && !(id in names)) {
+        names[id] = 1;
+        definitions.push(id);
+      }
+      match (key) case %((!or struct union enum) ?): {
+        String family = %"f_${filename_hash(key.repr())}";
+        if (!(family in tags)) {
+          tags[family] = 1;
+          families.push(family);
+        }
+      }
     }
-  }
-  return families;
+  Map supplies = {names: definitions, families: families};
+  plan[cache] = supplies;
+  return supplies;
 }
 
 /* Region identities come from final emitted nodes, after cache/init/body
@@ -356,8 +353,9 @@ static List Compiler._projection_nodes(
       String resolved = c.resolve_source_include(include, angle);
       if (resolved) {
         String path = c.canonical_path(resolved);
-        definitions = c._projection_include_names(path);
-        record["suppliesFamilies"] = c._projection_include_families(path);
+        Map supplies = c._projection_include_supplies(path);
+        definitions = supplies["names"];
+        record["suppliesFamilies"] = supplies["families"];
       }
     }
     record["defines"] = definitions;

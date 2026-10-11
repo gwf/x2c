@@ -204,7 +204,8 @@ def project(text, metadata, selected_edges=None, owner_streams=None):
     if len(records) != len(metadata['regions']):
         raise ProjectionError('duplicate metadata identity')
     if set(regions) - set(records):
-        raise ProjectionError('emitted region missing metadata')
+        raise ProjectionError('emitted region missing metadata: ' +
+                              ', '.join(sorted(set(regions) - set(records))))
     families = {}
     for name, region in regions.items():
         family = records[name].get('family')
