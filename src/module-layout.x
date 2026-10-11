@@ -138,6 +138,7 @@ List Compiler.module_layout_node(Compiler c, List node) {
    even when the declaration's object type contains no enum-valued field. */
 static void Layouts.require_constants(
   Layouts &l, Compiler c, Sym resolver, List declaration, Map needed) {
+  List node;
   $ast.walk(declaration, node) {
     match (node) case %(expr ?type (ident ?)): {
       Type declared = type;

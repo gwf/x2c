@@ -327,7 +327,7 @@ static void _build_source(String package, String name, String spec) {
   List generated = Path.glob(%"$builds/**/*.c");
   Map directories = {};
   foreach (String source, generated) directories[Path.dirname(source)] = 1;
-  List native_paths = directories.keys().array().sort().list();
+  List native_paths = directories.keys().array().sort();
   native_paths = native_paths.map(
     %!(directory) => %("-Xcc" "-iquote" "-Xcc" $directory)).flatten();
   _run(
