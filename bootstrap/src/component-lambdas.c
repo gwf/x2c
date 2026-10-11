@@ -21,6 +21,8 @@ static List _lambda_none(void);
 
 static List _lambda_params(List params);
 
+static Type _lambda_field_type(Type type);
+
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -145,5 +147,9 @@ static List _lambda_params(List params){
 
   }
   return Array_list_free(out);
+}
+
+static Type _lambda_field_type(Type type){
+  return Var_equal(List_car(type), Symbol_var(77)) ? cons(Symbol_var(54), List_cdr(type)) : _13;
 }
 

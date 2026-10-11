@@ -18,8 +18,6 @@
 #include "protocol.h"
 #include "transform.h"
 #include "lambdas.h"
-List Compiler_lower_lambda_expr(Compiler c, List expression);
-
 List Compiler_capture_environment(Compiler c, List name, List fields);
 
 List Compiler_prepare_lambda_cells(Compiler c, List declarator, List body);
