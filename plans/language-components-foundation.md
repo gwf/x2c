@@ -824,6 +824,19 @@ replacement template and fill steps are the remaining driver cost.
   `(early KEY BINDING DECL)` carrier effect has no producer and still goes
   through `add_early`; a program function rule is offered its own meta
   function in one case and not others, predating this change.
+- 2026-10-11, three cleanups (`kernel/trio`): the `early` carrier effect is
+  deleted with its only producer, the `macro-early` fixture (the
+  `unit-support KEY` placement does its job); the book states that a meta
+  function's runtime form is one of the program's definitions, so a function
+  rule receives it; `_function` in builtins.x spells `(void)` for a default
+  class method without parameters, so generated headers carry prototypes
+  (`Box_alloc(void)`, `SourceView_new(void)`) and `--live-symbols` accepts
+  them. `make proof-conformance` still fails on an older defect: the host
+  preprocessor runs with `-I include/x2c`, so `#include <string.h>` in
+  lib/common.x resolves to the generated `include/x2c/string.h` when
+  lib/x2c.x is preprocessed without `-imacros lib/x2c.x`, and var.h's TagId
+  enum collides with var.x's. Every other unit agrees between prelude and
+  live-symbol modes (141 units).
 - 2026-10-10, facts learned: `function-entry` placement is parse-time, so
   lambda cells need a transform-time entry placement before lambdas move; a
   plain `make build` after editing a shipped component leaves a degraded
