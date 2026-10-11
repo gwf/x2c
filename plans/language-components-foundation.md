@@ -461,7 +461,7 @@ assembly, and the rule driver, with every language feature a file under
 | string interpolation | literal `segments`; delivered in wave 2 | 200 | 730 |
 | truthiness, getindex, dynamic operators | unary, binary, access; delivered in wave 1 | 410 | 620 |
 | lambda lowering | function family; function-entry and unit-support placements | 1,500 | 586 |
-| protocols: declarations, conformance, owners, adapters | unit declaration marks; unit placements | 1,850 | 153 |
+| protocols: adapter synthesis only, per `plans/protocols-component.md` | `conform` node rule; unit-support and unit-init placements | 300 | 153 |
 
 Runtime static locals and class defaults stay in the kernel; the log of
 2026-10-10 records why. `match` moves from the research list to the table
@@ -488,8 +488,13 @@ replacement template and fill steps are the remaining driver cost.
 - `defer` and the landing form: `defer` lowers to a runtime cleanup record
   and thunk while try's exits are lexical. Whether `defer` should become a
   lexical client of the same form is unmeasured for generated C and runtime.
-- Conformance facts across interfaces: `Sym.mark_field` is per field;
-  protocols need per-type facts that cross interfaces and packages.
+- Conformance facts across interfaces: answered 2026-10-10 in
+  `plans/protocols-component.md`. Declarations and adoptions already cross
+  interfaces as source-node rows; no conformance row crosses units, each unit
+  re-derives conformance (about 38 M per unit), and a generic component fact
+  row would replace nothing. Resolution, owners, and the operator ledger stay
+  in the kernel; only adapter synthesis is worth moving, at about +1 M per
+  conformance and +38 total lines, awaiting Gary's choice.
 - `with`: no constructed form, so unifying or extracting it adds
   macro-visible syntax, a language decision.
 - The linked prelude's future: with the cheap reader it pays only in
