@@ -329,7 +329,7 @@ static List Compiler._native_prerequisites(Compiler c) {
   Map seen = {};
   foreach (List unit, c._units()) {
     List node;
-    $ast.walk(unit, node)
+    $ast.walk(unit, node) {
       match (node) case $source_identifier_content(
           %((!set ?binding (binding ? ?(String name))))): {
         String provider = c.binding_provider(binding, 1);
@@ -341,6 +341,7 @@ static List Compiler._native_prerequisites(Compiler c) {
         seen[row] = 1;
         rows.push(row);
       }
+    }
   }
   return rows.list_free();
 }
