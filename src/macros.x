@@ -2710,23 +2710,18 @@ static List Compiler._rewrite(
 
 /* Pushes the parts of `source` that its replacement may hold onto
    `found`, to lower outside its rule: each expression, or for a statement
-   each node it holds directly or through the Lists that hold its rows,
-   such as a match's arms. A nested statement of the same kind in one of
-   them applies the rule again. */
+   each statement and outermost expression beneath it, such as a match's
+   subject, patterns, and arm bodies. A nested statement of the same kind
+   in one of them applies the rule again. */
 static void _held_parts(List source, Symbol point, Array found) {
   if (point != <node>) {
     foreach (Var part, source) _expression_nodes(part, found);
     return;
   }
-  Array pending = $auto([source.cdr()]);
-  while (pending.len()) {
-    List items = pending.take_last();
-    foreach (Var item, items)
-      if (item is <list> && !item.is_nil()) {
-        List node = item;
-        if (node.car() is <list>) pending.push(node);
-        else found.push(node);
-      }
+  List node;
+  $ast.walk(source.cdr(), node) {
+    if (node.car() is <symbol>) found.push(node);
+    if (node.car() == <expr>) continue;
   }
 }
 
@@ -2858,8 +2853,8 @@ static List Compiler._prepared(
   return lowered;
 }
 
-/* Lowers `result` as written, with the source expressions in it lowered
-   outside the active rule. */
+/* Lowers `result` as written, with the source parts in it lowered outside
+   the active rule. */
 static List Compiler._watched(
   Compiler c, Var result, Array sources, AstPos position, Type expected,
   Token site) {

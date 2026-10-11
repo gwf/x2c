@@ -24,6 +24,7 @@
 #include "component-access.x"
 #include "component-delegate.x"
 #include "component-literals.x"
+#include "component-match.x"
 #include "component-operators.x"
 #include "component-printf.x"
 #include "component-raise.x"
@@ -465,6 +466,210 @@ Code delegate_member(Code code) {
     return %(expr () (call $callee (args @arguments)));
   }
   return code;
+}
+
+/* --- src/component-match.x ----------------------------------------------- */
+
+static void _match_place(Buffer b, Array out, Var node) {
+  if (b.len()) {
+    out.push(b.str());
+    b.clear();
+  }
+  out.push(node);
+}
+
+static List _match_items(Array out) {
+  Array items = [], run = [];
+  foreach (Var piece, out) {
+    match (piece) case %(preproc ?): {
+      if (run.len()) items.push(cons(" ", run));
+      run.clear();
+      items.push(piece);
+      continue;
+    }
+    run.push(piece);
+  }
+  if (run.len()) items.push(cons(" ", run));
+  return items.list_free();
+}
+
+static int _match_nesting(String text) {
+  String directive = text.strip(" \t").remove_prefix("#").strip(" \t");
+  if (directive.startswith("endif")) return -1;
+  return directive.startswith("if");
+}
+
+static Symbol _match_head(Var value) {
+  if (value is not <list> || !value.list()) return 0;
+  Var head = value.list().car();
+  if (head is not <symbol> || head == <x2c-dyn> || head.is_binder() ||
+      head.is_match_op())
+    return 0;
+  return head;
+}
+
+static List _match_binders(Var value) {
+  MatchCaptureLayout layout = MatchCaptureLayout.analyze(value);
+  List binders = layout.definite_list();
+  layout.free();
+  return binders;
+}
+
+static Symbol _match_capture_tag(Var element, Var binder) {
+  match (element)
+    case %((!quote !is) ?name type ?(Symbol tag)):
+      if (name == binder && tag != <x2c-dyn> && tag != <varray> &&
+          tag != <vmap>)
+        return tag;
+  return 0;
+}
+
+static int _match_flat_test(Buffer b, Var value, List binders) {
+  Symbol head = _match_head(value);
+  if (!head) return 0;
+  Var literal = head;
+  size_t start = b.len();
+  b.printf(
+    " { List _x2c_match_cursor; if (_x2c_match_expr && "
+    "_x2c_match_expr->car.u64 == %lluULL && "
+    "(_x2c_match_cursor = _x2c_match_expr->cdr, 1)",
+    (unsigned long long) literal.u64);
+  List elements = value.list().cdr();
+  int index = 0;
+  foreach (Var binder, binders) {
+    Var element = elements ? elements.car() : NULL;
+    Symbol tag = element == binder ? 0 : _match_capture_tag(element, binder);
+    if (!elements || !binder.is_atom_binder() || binder == <?> ||
+        (element != binder && !tag)) {
+      b.unwrite(b.len() - start);
+      return 0;
+    }
+    b.write(" && _x2c_match_cursor");
+    if (tag)
+      b.printf(" && Var_is(_x2c_match_cursor->car, %lu)", (unsigned long) tag);
+    b.printf(
+      " && (_x2c_match_values[%d] = _x2c_match_cursor->car, "
+      "_x2c_match_cursor = _x2c_match_cursor->cdr, 1)", index++);
+    elements = elements.cdr();
+  }
+  if (elements) {
+    b.unwrite(b.len() - start);
+    return 0;
+  }
+  b.write(" && !_x2c_match_cursor) {");
+  return 1;
+}
+
+static int _match_test(
+  Buffer b, Array out, List pattern, Var value, List binders, int &sites) {
+  if (pattern.car() == <*>) return 0;
+  match (pattern)
+    case %(expr ? (call (expr ? (ident (binding ? "Macro_case_pattern")))
+                        (args ?template ?labels))): {
+      int site = sites++;
+      b.printf(
+        " static MacroCaseSite _x2c_macro_site_%d; "
+        "if (Macro_case_capture_at(&_x2c_macro_site_%d, _x2c_match_expr, ",
+        site, site);
+      _match_place(b, out, template);
+      b.write(", ");
+      _match_place(b, out, labels);
+      b.write(", &_x2c_match_capture)) {");
+      return 1;
+    }
+  if (_match_flat_test(b, value, binders)) return 2;
+  if (((Code) pattern).is_static_pattern()) {
+    int site = sites++;
+    b.printf(
+      " static MatchCaptureSite _x2c_match_site_%d; "
+      "if (x2c_match_site_try_capture(&_x2c_match_site_%d, ", site, site);
+  }
+  else b.write(" if (x2c_match_try_capture(");
+  b.write("_x2c_match_expr, List_var(");
+  _match_place(b, out, pattern);
+  b.write("), &_x2c_match_capture)) {");
+  return 1;
+}
+
+static void _match_declare(Buffer b, List binders) {
+  int index = -1;
+  foreach (Var binder, binders) {
+    index++;
+    if (binder == <?> || binder == <*>) continue;
+    String name = binder.str()[1:];
+    if (binder.is_list_binder())
+      b.printf(" List %s = Var_list(_x2c_match_values[%d]);", name, index);
+    else b.printf(" Var %s = _x2c_match_values[%d];", name, index);
+  }
+}
+
+static void _match_arm(
+  Buffer b, Array out, List pattern, Var value, List binders, List body,
+  int &sites) {
+  int finish = 1;
+  match (body) case %(guarded ?inner): {
+    body = inner;
+    finish = 0;
+  }
+  int braces = _match_test(b, out, pattern, value, binders, sites);
+  _match_declare(b, binders);
+  _match_place(b, out, body);
+  if (finish) b.write(" break;");
+  while (braces--) b.write(" }");
+}
+
+static String _match_label(Symbol head, Array heads, int &labelling) {
+  if (!labelling) return NULL;
+  if (!head) {
+    labelling = 0;
+    return " default: ;";
+  }
+  if (head in heads) return NULL;
+  heads.push(head);
+  return %" case ${(long) head}: ;";
+}
+
+static Code _match_lowered(Code subject, List rows) {
+  Buffer b = Buffer.new(0);
+  Array out = [], heads = [];
+  int labelling = 1, opening = 0, depth = 0, values = 0, sites = 0;
+  foreach (List row, rows) {
+    match (row) case %(preproc ?(String text)): {
+      int nesting = _match_nesting(text);
+      _match_place(b, out, row);
+      if (nesting > 0 && !depth) opening = out.len() - 1;
+      depth += nesting;
+      continue;
+    }
+    List (pattern, body) = row;
+    Var value = pattern.car() == <*> ? %() : ((Code) pattern).pattern_value();
+    List binders = _match_binders(value);
+    if (binders.len() > values) values = binders.len();
+    String label = _match_label(_match_head(value), heads, labelling);
+    if (label && depth) out.insert(opening++, label);
+    else if (label) b.write(label);
+    _match_arm(b, out, pattern, value, binders, body, sites);
+  }
+  if (labelling) b.write(" default: break;");
+  if (b.len()) out.push(b.str());
+  String buffer = values
+    ? %"Var _x2c_match_values[$values]; MatchCaptureBuffer "
+      + "_x2c_match_capture = { .values = _x2c_match_values, "
+      + %".capacity = $values };"
+    : "MatchCaptureBuffer _x2c_match_capture = { 0 };";
+  String selector = heads.len() ? "Var_symbol(car(_x2c_match_expr))" : "0";
+  List read = subject.convert(%("List")), items = _match_items(out);
+  return Code.lowered(
+    %(block ("List _x2c_match_expr =" $read ";" $buffer)
+            (switch (expr (int) ($selector)) (block @items))));
+}
+
+/** Lowers the bound match `node` to C text around its subject, patterns,
+    and bodies. */
+Code match_lowering(Code node) {
+  match (node) case $matched(?subject, *rows):
+    return _match_lowered(subject, rows);
+  return node;
 }
 
 /* --- src/component-operators.x ------------------------------------------- */
@@ -1001,6 +1206,19 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_delegate_cycle", _delegate_cycle);
   $linked.row(rows, "_delegate_fields", _delegate_fields);
   $linked.row(rows, "delegate_member", delegate_member);
+  $linked.row(rows, "_match_place", _match_place);
+  $linked.row(rows, "_match_items", _match_items);
+  $linked.row(rows, "_match_nesting", _match_nesting);
+  $linked.row(rows, "_match_head", _match_head);
+  $linked.row(rows, "_match_binders", _match_binders);
+  $linked.row(rows, "_match_capture_tag", _match_capture_tag);
+  $linked.row(rows, "_match_flat_test", _match_flat_test);
+  $linked.row(rows, "_match_test", _match_test);
+  $linked.row(rows, "_match_declare", _match_declare);
+  $linked.row(rows, "_match_arm", _match_arm);
+  $linked.row(rows, "_match_label", _match_label);
+  $linked.row(rows, "_match_lowered", _match_lowered);
+  $linked.row(rows, "match_lowering", match_lowering);
   $linked.row(rows, "_dynamic_operand", _dynamic_operand);
   $linked.row(rows, "dynamic_binary", dynamic_binary);
   $linked.row(rows, "_dynamic_operation", _dynamic_operation);

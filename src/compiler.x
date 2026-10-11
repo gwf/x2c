@@ -2516,57 +2516,6 @@ int match_value_is_static(Var value) {
 int Compiler.match_pattern_is_static(Compiler c, List pattern) =>
   match_value_is_static(c.match_pattern_value(pattern));
 
-/** Returns a recovered pattern value's fixed literal head symbol, or zero.
-
-    A binder, guard, non-list value, or computed head has no fixed symbol.
-    Other pattern elements may remain dynamic because a literal head alone
-    constrains the first input element.
-*/
-Symbol match_value_head(Var value) {
-  if (value is not <list>) return 0;
-  Var head = car(value);
-  if (head is not <symbol> || head == <x2c-dyn> ||
-      head.is_binder() || head.is_match_op())
-    return 0;
-  return head;
-}
-
-/** Returns the head of a flat Symbol-and-captures pattern value, or zero.
-
-    Each element after the head is a unique named `?` binder or a typed
-    capture of one. When `tags` is non-null, stores one entry per binder
-    in order: the capture's tag Symbol, or integer zero when untyped.
-*/
-Symbol match_value_flat_head(Var value, List binders, List &?tags) {
-  Symbol head = match_value_head(value);
-  if (!head) return 0;
-  List elements = value.list().cdr();
-  Array typed = $auto([]);
-  for (List cursor = binders; cursor && elements;
-       cursor = cursor.cdr(), elements = elements.cdr()) {
-    Var binder = cursor.car(), element = elements.car();
-    Symbol tag = 0;
-    if (!binder.is_atom_binder() || binder == <?>) return 0;
-    if (element != binder && !(tag = _flat_capture_tag(element, binder)))
-      return 0;
-    typed.push(tag ? (Var) tag : (Var) 0);
-  }
-  if (binders.len() != typed.len() || elements) return 0;
-  if (tags) tags = typed;
-  return head;
-}
-
-/* A typed capture element is `(!is ?name type <tag>)` with a literal tag.
-   The runtime matcher canonicalizes `varray` and `vmap`; those spellings
-   keep the runtime path rather than repeating that rule here. */
-static Symbol _flat_capture_tag(Var element, Var binder) {
-  match (element)
-    case %((!quote !is) ?name type ?(Symbol tag)):
-      if (name == binder && tag != <x2c-dyn> &&
-          tag != <varray> && tag != <vmap>) return tag;
-  return 0;
-}
-
 /* match binders
 
    A pattern's definite binders become declarations in the scope of its

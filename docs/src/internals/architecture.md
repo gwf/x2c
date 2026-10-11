@@ -513,6 +513,8 @@ The modules under `src/` divide ownership as follows:
   assignments, and increments;
 - `src/component-raise.x` -- the raise conversions and detail type check,
   registered as a statement rewrite;
+- `src/component-match.x` -- the match lowering, C text around the subject,
+  patterns, and bodies, registered as a statement rewrite;
 - `src/operator-ledger.x` -- operator precedence, compound assignment,
   and protocol-member mappings from one compile-time ledger;
 - `src/cli.x`, `src/main.x` -- option metadata and parsing, dispatch, logging,
@@ -786,6 +788,19 @@ goes on. It answers the converted raise as a lowered carrier, which binding
 leaves as it is. The compiler lowers that raise's parts in source order,
 moving them into temporaries as literal parts move, and builds its literals
 at run time.
+
+`src/component-match.x` registers `match` on the statement family keyed by
+the `match` head. Its translator answers a lowered carrier of verbatim C
+text around the subject, the patterns, and the arm bodies: a block that
+converts the subject to a `List` once with `Code.convert`, declares the
+capture buffer, and switches on the subject's head Symbol, with a label on
+the first arm of each head. `Code.pattern_value` gives each arm's head and
+binders. A flat pattern is tested in place, a macro-valued case calls
+`Macro_case_capture_at`, and any other pattern calls the Match runtime,
+through a static site when `Code.is_static_pattern` holds. The transform and
+the cleanup walk step into the nodes the text holds, and the parts of the
+match lower outside its rule, so a nested match applies it again. The
+`switch` is the barrier that an arm's `break` leaves.
 
 The components and `src/grammar.x`, whose source forms they recognize, are
 compiler prelude sources.

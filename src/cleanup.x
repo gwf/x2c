@@ -472,8 +472,6 @@ static Var Walk.rewrite(Walk &w, Var value) {
       return w._rewrite_for(initial, condition, increment, body);
     case ${$switched(?subject, ?body)}:
       return w._rewrite_switch(subject, body);
-    case %(matchcases ?subject ?records):
-      return w._rewrite_matchcases(subject, records);
     case %(function *): return w.c._lower_function(node);
     default: return w._rewrite_children(node);
   }
@@ -545,10 +543,6 @@ static List Walk._rewrite_for(
 
 static List Walk._rewrite_switch(Walk &w, List subject, List body) =>
   %(switch ${w.rewrite(subject)} ${w._bounded(body, 0)});
-
-/* A match arm's break exits the match; continue reaches the loop. */
-static List Walk._rewrite_matchcases(Walk &w, List subject, List records) =>
-  %(matchcases ${w.rewrite(subject)} ${w._bounded(records, 0)});
 
 /* Rewrite a construct's body with the transfer barriers it establishes. A
    loop bounds both `break` and `continue`; a switch bounds only `break`,
@@ -1110,8 +1104,8 @@ List Compiler.lower_defer_region(Compiler c, List body, List finalizer) {
 static int _defer_needs_landing(List ast) {
   List node;
   $ast.walk(ast, node) match (node)
-    case %((!or return break continue goto try catchcases
-                 match matchcases) *): return 1;
+    case %((!or return break continue goto try catchcases match) *):
+      return 1;
   return 0;
 }
 

@@ -140,7 +140,7 @@ static Ast Compiler._step_tag(Compiler c, Ast ast, Symbol tag) {
     case <dstrdecl>: next = c._destructure_declaration(ast); break;
     case <stmnt>: next = c._destructure_statement(ast); break;
     case <dstrasgn>: next = c._destructure_value(ast); break;
-    case <match>: return c._match_statement(ast);
+    case <match>: return c._statement_rewrite(ast, tag);
     case <defer>: next = c._defer_node(ast); break;
     case <return>: next = c._return(ast); break;
     case <raise>: return c._raise_node(ast);
@@ -156,13 +156,6 @@ static Ast Compiler._step_tag(Compiler c, Ast ast, Symbol tag) {
   return c._default_node(ast);
 }
 
-/* A registered rule lowers the match; until the shipped one is in the
-   bootstrap, the match records remain. */
-static Ast Compiler._match_statement(Compiler c, Ast ast) {
-  Ast rewritten = c._statement_rewrite(ast, <match>);
-  return rewritten != ast ? rewritten : c._step(c._match_cases(ast));
-}
-
 /* Ordinary registered patterns may replace a typed statement. */
 static Ast Compiler._statement_rewrite(Compiler c, Ast ast, Symbol tag) {
   List rewritten = c.rewrite_rules ? c.lower_rewrite(
@@ -172,22 +165,17 @@ static Ast Compiler._statement_rewrite(Compiler c, Ast ast, Symbol tag) {
 
 static Ast Compiler._default_node(Compiler c, Ast ast) {
   Var head = ast.car();
-  if (head == <seq> || head == <matchcases> ||
-      head == <parens> || head == <block>) return c._finish(ast);
+  if (head == <seq> || head == <parens> || head == <block>)
+    return c._finish(ast);
   return c._children(ast);
 }
 
 /* Normalize synthesized sequences before their containing block absorbs
-   pending defer markers. Matches retain their specialized record driver. */
+   pending defer markers. */
 static Ast Compiler._finish(Compiler c, Ast ast) {
   match (ast) {
     case %(seq *items):
       return %(seq @{c._sequence(items, 0)});
-    case %(matchcases ?subject ?records): {
-      List new_subject = c._step(subject);
-      List new_records = c._match_records(records);
-      return %(matchcases $new_subject $new_records);
-    }
     case %(parens (at ?origin ?inner)):
       return c._step(%(at $origin (parens $inner)));
     case %(parens (block *body)):
@@ -256,19 +244,6 @@ static List Compiler._splice_items(Compiler c, List items, Var parent) {
 static Ast Compiler._children(Compiler c, Ast ast) {
   List child;
   $ast.rewrite_children(ast, child, c._step(child));
-}
-
-static List Compiler._match_records(Compiler c, List records) {
-  Array transformed = [];
-  foreach (List record, records)
-    match (record) {
-      case %(preproc ?): transformed.push(record);
-      case %(?binders ?pattern ?body): {
-        List lowered = c._step(pattern);
-        transformed.push(%($binders $lowered ${c._step(body)}));
-      }
-    }
-  return transformed.list_free();
 }
 
 /* node rewrites
@@ -980,20 +955,6 @@ static List Compiler._destructure_assignments(
 static List Compiler._as_statement(Compiler c, List expression) {
   Macro shape = $expression_statement;
   return c.rebuild_statement(shape(expression)).cadr();
-}
-
-// (match expr ((pattern body) ...))
-static List Compiler._match_cases(Compiler c, List ast) {
-  List (expr, cases) = ast.cdr();
-  expr = c.convert_expression(expr, %("List"));
-  Array values = [];
-  foreach (List rec, cases) {
-    if (rec.car() == <preproc>) values.push(rec);
-    else
-      values.push(%(${c.match_pattern_binders(rec.car(), NULL)} @rec));
-  }
-  List result = values.list_free();
-  return %(matchcases $expr $result);
 }
 
 static List Compiler._return(Compiler c, List ast) {
