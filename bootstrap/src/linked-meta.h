@@ -15,6 +15,7 @@
 #include "varops.h"
 #include "component-access.h"
 #include "component-delegate.h"
+#include "component-interpolation.h"
 #include "component-literals.h"
 #include "component-match.h"
 #include "component-operators.h"

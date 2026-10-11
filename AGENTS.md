@@ -126,8 +126,9 @@ commits need not rebuild from their own bootstrap.
   `component-literals` building Array and Map literals,
   `component-printf` converting Var values in printf-family formats,
   `component-operators` lowering dynamic operators,
-  `component-raise` lowering raise, and
-  `component-match` lowering match)/
+  `component-raise` lowering raise,
+  `component-match` lowering match, and
+  `component-interpolation` joining interpolated Strings)/
   `literals` (+ `lambdas`) -> `ast` (+ `ast-rewrite`, AST traversal and
   rewriting, and `grammar`, source forms used by lowering) ->
   `type` (+ `type-ledger`)/`protocol`

@@ -515,6 +515,8 @@ The modules under `src/` divide ownership as follows:
   registered as a statement rewrite;
 - `src/component-match.x` -- the match lowering, C text around the subject,
   patterns, and bodies, registered as a statement rewrite;
+- `src/component-interpolation.x` -- the join of an interpolated `String`'s
+  parts, registered as a literal rewrite for its `segments` head;
 - `src/operator-ledger.x` -- operator precedence, compound assignment,
   and protocol-member mappings from one compile-time ledger;
 - `src/cli.x`, `src/main.x` -- option metadata and parsing, dispatch, logging,

@@ -211,7 +211,8 @@ List compiler_prelude_sources(void) => %(
   "lib/x2c.x" "src/grammar.x" "src/component-access.x" "src/component-try.x"
   "src/component-delegate.x" "src/component-literals.x"
   "src/component-printf.x" "src/component-operators.x"
-  "src/component-raise.x" "src/component-match.x");
+  "src/component-raise.x" "src/component-match.x"
+  "src/component-interpolation.x");
 
 /** Reports whether the canonical `path` is a compiler prelude source. */
 int is_prelude_source(String path) =>

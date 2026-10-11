@@ -23,6 +23,7 @@
 #include "varops.x"
 #include "component-access.x"
 #include "component-delegate.x"
+#include "component-interpolation.x"
 #include "component-literals.x"
 #include "component-match.x"
 #include "component-operators.x"
@@ -1405,6 +1406,7 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_tag_constant_rows", _tag_constant_rows);
   $linked.row(rows, "_tag_group_top", _tag_group_top);
   $linked.row(rows, "_tag_types", _tag_types);
+  $linked.row(rows, "interpolation", interpolation);
   $linked.row(rows, "array_literal", array_literal);
   $linked.row(rows, "map_literal", map_literal);
   $linked.row(rows, "try_catch_patterns", try_catch_patterns);
