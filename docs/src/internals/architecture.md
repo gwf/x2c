@@ -410,10 +410,12 @@ lambda normalization within the function.
 
 The interpolation is gone, replaced by a `String_join` call over a cons list
 of boxed `Var` values, each `String_var` call naming its callee as a resolved
-binding carrying that function's type. The `return` no longer carries a type
-annotation; nothing downstream needs it. Some children are now raw C text.
-Transforms may produce emitter-ready fragments, so `"String_join(NULL, "` sits
-in the tree as a `String` instead of a call node.
+binding carrying that function's type. The shipped component
+`src/component-interpolation.x` wrote the join; the driver boxed and ordered
+its parts. The `return` no longer carries a type annotation; nothing
+downstream needs it. Some children are now raw C text. Lowering may produce
+emitter-ready fragments, so `"String_join(NULL, "` sits in the tree as a
+`String` instead of a call node.
 
 ### Generation and cache staging
 
@@ -516,7 +518,7 @@ The modules under `src/` divide ownership as follows:
 - `src/component-match.x` -- the match lowering, C text around the subject,
   patterns, and bodies, registered as a statement rewrite;
 - `src/component-interpolation.x` -- the join of an interpolated `String`'s
-  parts, registered as a literal rewrite for its `segments` head;
+  parts, registered as a literal rewrite for its head;
 - `src/operator-ledger.x` -- operator precedence, compound assignment,
   and protocol-member mappings from one compile-time ledger;
 - `src/cli.x`, `src/main.x` -- option metadata and parsing, dispatch, logging,

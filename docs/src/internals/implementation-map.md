@@ -77,7 +77,9 @@ is listed under [compiler options](../reference/cli.md).
   numeric segment takes its nearest declared `T_str` converter when one exists
   and is
   boxed and rendered through `Var_str` otherwise
-- Lower/generate: `src/transform.x` joins the segments with `String_join`
+- Lower/generate: `src/component-interpolation.x` joins the segments with
+  `String_join`, a literal rewrite on the `segments` head; `src/transform.x`
+  converts each insertion and moves ordered parts ahead of the join
 - Runtime: `lib/string.x`, plus `Var.str` for the boxed segments
 - Tests: interpolation suite
 - See also: [values](../guide/values.md)

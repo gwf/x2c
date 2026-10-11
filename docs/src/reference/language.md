@@ -2715,7 +2715,10 @@ the converted result, and returns to the literal grammar. In `%()`, `@` makes
 the same crossing but splices the evaluated `List`'s elements. Collection
 insertion converts to the representation required by the literal; `String`
 insertion accepts `String`, `Symbol`, declared converters, `Var`, aliases of
-`Var`, and supported numeric values under the existing conversion rules.
+`Var`, and supported numeric values under the existing conversion rules. The
+shipped component `src/component-interpolation.x` joins a `%""` literal's
+parts, a translator that `$rewrite(%(expr ("String") (segments *)))` registers
+on the literal's `segments` head; a rule a program registers there runs first.
 
 The braces belong to the unquote and contain one complete x2c expression,
 including nested calls, indexing, casts, assignments, conditionals, comma

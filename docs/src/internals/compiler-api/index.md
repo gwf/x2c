@@ -23,6 +23,7 @@ Functions and types exposed by each compiler module.
 | [`src/compiler.x`](compiler.md) | one x2c unit's translation state and its two parses. |
 | [`src/component-access.x`](component-access.md) | Bracket access policy: Array and Map mutation through their typed helpers, and any other participant's read, store, and update through its indexing members, with each operand evaluated once, in order. Getter resolution remains with admission. |
 | [`src/component-delegate.x`](component-delegate.md) | delegate fields. |
+| [`src/component-interpolation.x`](component-interpolation.md) | interpolated Strings. |
 | [`src/component-literals.x`](component-literals.md) | Array and Map literals. |
 | [`src/component-match.x`](component-match.md) | match statements. |
 | [`src/component-operators.x`](component-operators.md) | dynamic operators. |
