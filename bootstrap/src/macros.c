@@ -4025,8 +4025,8 @@ List Compiler_macro_tag_name(Compiler c, Symbol kind, String name, int definitio
 }
 
 static Var _replace_bindings(Var value, Map bindings){
-  int candidate = Var_is_binder(value);  if(! candidate && Var_is_row(value, 9, 7, 4) && ! Var_is_nil(value)) candidate = binding_identity_try_parts(Var_list(value), NULL, NULL);  Var replacement;  if(candidate && Map_try_get(bindings, value, &(replacement))) return replacement;  if(! Var_is_row(value, 9, 7, 4) || Var_is_nil(value)) return value;  List original = Var_list(value);  Array items = NULL;  for(List cursor = original;  List_truth(cursor);  cursor = List_cdr(cursor)){
-    Var child = List_car(cursor), item = _replace_bindings(child, bindings);  if(!(void *) items && ! Var_equal(item, child)){
+  Var replacement;  if(! Var_is_row(value, 9, 7, 4) || Var_is_nil(value)) return Var_is_binder(value) && Map_try_get(bindings, value, &(replacement)) ? replacement : value;  if(binding_identity_try_parts(Var_list(value), NULL, NULL) && Map_try_get(bindings, value, &(replacement))) return replacement;  List original = Var_list(value);  Array items = NULL;  for(List cursor = original;  List_truth(cursor);  cursor = List_cdr(cursor)){
+    Var child = List_car(cursor), item = _replace_bindings(child, bindings);  if(!(void *) items && ! Var_same(item, child)){
       items = Array_new();  for(List prefix = original;  ! List_equal(prefix, cursor);  prefix = List_cdr(prefix)) Array_push(items, List_car(prefix));
     }
     if((void *) items) Array_push(items, item);
@@ -7183,7 +7183,7 @@ static Var Compiler__eval_string(Compiler c, String source, Token invocation){
                     x2c_exception_landed(& _x2c_exception_frame_0);  if(x2c_exception_is_error_target(& _x2c_exception_frame_0)){
                       int _x2c_macro_selected_0 = x2c_error_catch_selected(_x2c_error_handler_0);  x2c_error_catch_detach(_x2c_error_handler_0);  x2c_exception_mark_handled(& _x2c_exception_frame_0);  if(_x2c_macro_selected_0 == 0){
                         Var volatile category;  category = x2c_error_catch_capture(_x2c_error_handler_0, 0); {
-                          static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/macros.x",.function = "Compiler__eval_string",.line = 5052};  x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(209659067570), category);  __builtin_unreachable();
+                          static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/macros.x",.function = "Compiler__eval_string",.line = 5053};  x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(209659067570), category);  __builtin_unreachable();
                         }
 
                       }
@@ -7326,7 +7326,7 @@ static Var _sdk_identifier_result(Var value){
 
 static Var _lisp_import_hook(String path){
   MetaContext * context = MetaContext_current();  Compiler c = context -> evaluator;  if(! c){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/macros.x",.function = "_lisp_import_hook",.line = 5200};  x2c_error_raise_n(& _x2c_error_site_1, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("compile-time import")), NULL))));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/macros.x",.function = "_lisp_import_hook",.line = 5201};  x2c_error_raise_n(& _x2c_error_site_1, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("compile-time import")), NULL))));  __builtin_unreachable();
   }
   Compiler__import(c, path, context -> site);  return List_var(NULL);
 }
