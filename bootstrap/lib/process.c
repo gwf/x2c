@@ -628,8 +628,6 @@ static int List_truth(List);
 
 static Var String_var(String);
 
-String String_join(String, List);
-
 static Var Symbol_var(Symbol);
 
 String Var_str(Var);

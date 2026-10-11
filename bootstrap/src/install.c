@@ -650,11 +650,18 @@ static void _build_source(String package, String name, String spec){
   );
   _run(cons(String_var(x2c), cons(_37, cons(_39, cons(String_var(builds), List_append(paths, List_append(units, NULL)))))), "translate");
   _run(({
-    Var _x2c_literal_part_7 = String_var(x2c);  Var _x2c_literal_part_8 = String_var(TargetKind_of(1381098885964356) -> spelling);  Var _x2c_literal_part_9 = String_var(String_join(NULL, cons(String_var(builds), cons(String_var(_40), cons(String_var(name), cons(String_var(_29), NULL))))));  Var _x2c_literal_part_10 = String_var(String_join(NULL, cons(String_var(builds), cons(String_var(_41), NULL))));  List _x2c_literal_part_11 = _files_with(builds, _42);  List _x2c_literal_part_12 = _files_with(src, _42);  cons(_x2c_literal_part_7, cons(_44, cons(_46, cons(_x2c_literal_part_8, cons(_48, cons(_x2c_literal_part_9, cons(_50, cons(_x2c_literal_part_10, List_append(_x2c_literal_part_11, List_append(_x2c_literal_part_12, NULL))))))))));
+    Var _x2c_literal_part_7 = String_var(x2c);  Var _x2c_literal_part_8 = String_var(TargetKind_of(1381098885964356) -> spelling);  Var _x2c_literal_part_9 = String_var(String_join(NULL, cons(String_var(builds), cons(String_var(_40), cons(String_var(name), cons(String_var(_29), NULL))))));  Var _x2c_literal_part_10 = String_var(String_join(NULL, cons(String_var(builds), cons(String_var(_41), NULL))));
+    List _x2c_literal_part_11 = _files_with(builds, _42);
+    List _x2c_literal_part_12 = _files_with(src, _42);
+    cons(_x2c_literal_part_7, cons(_44, cons(_46, cons(_x2c_literal_part_8, cons(_48, cons(_x2c_literal_part_9, cons(_50, cons(_x2c_literal_part_10, List_append(_x2c_literal_part_11, List_append(_x2c_literal_part_12, NULL))))))))));
   }
   ), "build");
   if(_native_meta(builds, name)) _run(({
-    Var _x2c_literal_part_13 = String_var(x2c);  Var _x2c_literal_part_14 = String_var(TargetKind_of(904178442) -> spelling);  Var _x2c_literal_part_15 = String_var(String_join(NULL, cons(String_var(builds), cons(String_var(_2), cons(String_var(name), cons(String_var(_51), NULL))))));  Var _x2c_literal_part_16 = String_var(String_join(NULL, cons(String_var(builds), cons(String_var(_52), NULL))));  List _x2c_literal_part_17 = paths;  List _x2c_literal_part_18 = units;  List _x2c_literal_part_19 = _files_with(src, _42);  cons(_x2c_literal_part_13, cons(_44, cons(_46, cons(_x2c_literal_part_14, cons(_48, cons(_x2c_literal_part_15, cons(_50, cons(_x2c_literal_part_16, List_append(_x2c_literal_part_17, List_append(_x2c_literal_part_18, List_append(_x2c_literal_part_19, NULL)))))))))));
+    Var _x2c_literal_part_13 = String_var(x2c);  Var _x2c_literal_part_14 = String_var(TargetKind_of(904178442) -> spelling);  Var _x2c_literal_part_15 = String_var(String_join(NULL, cons(String_var(builds), cons(String_var(_2), cons(String_var(name), cons(String_var(_51), NULL))))));  Var _x2c_literal_part_16 = String_var(String_join(NULL, cons(String_var(builds), cons(String_var(_52), NULL))));
+    List _x2c_literal_part_17 = paths;
+    List _x2c_literal_part_18 = units;
+    List _x2c_literal_part_19 = _files_with(src, _42);
+    cons(_x2c_literal_part_13, cons(_44, cons(_46, cons(_x2c_literal_part_14, cons(_48, cons(_x2c_literal_part_15, cons(_50, cons(_x2c_literal_part_16, List_append(_x2c_literal_part_17, List_append(_x2c_literal_part_18, List_append(_x2c_literal_part_19, NULL)))))))))));
   }
   ), "module build");
   Path_write_text(String_join(NULL, cons(String_var(builds), cons(String_var(_2), cons(String_var(name), cons(String_var(_53), NULL))))), NULL);

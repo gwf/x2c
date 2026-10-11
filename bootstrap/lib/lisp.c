@@ -1329,8 +1329,6 @@ static int _initialize(void){
 
 int Var_is_void(Var);
 
-String String_join(String, List);
-
 int Var_is_atom(Var);
 
 static int Var_is_row(Var, unsigned, unsigned long, unsigned long);

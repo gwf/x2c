@@ -713,10 +713,9 @@ static Ast Compiler._interpolation(Compiler c, Ast ast) {
     <literal>, <segments>, %(expr ("String") $source), AST_EXPRESSION,
     %("String"), NULL);
   match (lowered)
-    case %(expr ?type (call ?callee (args ?separator
-        (expr ? (parens (block *declarations (stmnt ?parts))))))):
-      return _ordered(
-        declarations, type, %(call $callee (args $separator $parts)));
+    case %(expr ?type (?open
+        (expr ? (parens (block *declarations (stmnt ?parts)))) ?close)):
+      return _ordered(declarations, type, %($open $parts $close));
   return lowered.caddr();
 }
 

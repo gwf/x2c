@@ -1725,7 +1725,9 @@ List Build_script_helpers(Build b){
   if(! _init_guard_) _file_init_();
   String script = Var_string(List_car(b -> request -> inputs)), root = x2c_get_root();
   List excluded = List_append(({
-    Var _x2c_literal_part_18 = String_var(String_join(NULL, cons(String_var(root), cons(String_var(_164), NULL))));  Var _x2c_literal_part_19 = String_var(String_join(NULL, cons(String_var(root), cons(String_var(_165), NULL))));  Var _x2c_literal_part_20 = String_var(String_join(NULL, cons(String_var(root), cons(String_var(_166), NULL))));  cons(_x2c_literal_part_18, cons(_x2c_literal_part_19, cons(_x2c_literal_part_20, NULL)));
+    Var _x2c_literal_part_18 = String_var(String_join(NULL, cons(String_var(root), cons(String_var(_164), NULL))));  Var _x2c_literal_part_19 = String_var(String_join(NULL, cons(String_var(root), cons(String_var(_165), NULL))));
+    Var _x2c_literal_part_20 = String_var(String_join(NULL, cons(String_var(root), cons(String_var(_166), NULL))));
+    cons(_x2c_literal_part_18, cons(_x2c_literal_part_19, cons(_x2c_literal_part_20, NULL)));
   }
   ), List_map(CliRequest_package_roots(b -> request), _x2c_func_handle_0));
   List prelude = List_map(compiler_prelude_sources(), ({
