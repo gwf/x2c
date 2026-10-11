@@ -153,6 +153,13 @@ meta Code Code.call_in_order(Code member, List arguments, Type type);
     lowered again. */
 meta Code Code.lowered(Code code);
 
+/** Returns `(SIGNATURE (TYPE READ)...)` for a `Func` adapter of a `Var`
+    function that takes `parameters`, a lambda's parameters: its signature
+    as a constant `List`, and for each parameter, the expression that reads
+    its argument from `argv`, the argument vector of the `Func` `fn`, with
+    the type of the local that holds it, a pointer for a reference. */
+meta List Code.func_parameters(Code parameters, Code fn, Code argv);
+
 /* registering translators */
 
 /** Registers a translator for the code `pattern` recognizes: a macro with
@@ -162,14 +169,14 @@ meta Code Code.lowered(Code code);
 
     The pattern's form selects the operations that test it: an indexed
     access or assignment, a binary operator, a member call by receiver
-    type, a call by callee spelling, an Array, Map, or `%""` literal or a
-    destructuring assignment by head, a `switch`, `try`, `raise`, `match`,
-    or destructuring declaration (`dstrdecl`) node, a destructuring
-    assignment statement, or a function definition. An operator the
-    pattern writes as `(!or OP...)` registers it for each operator. An
-    operator pattern that types the operation or an operand `Var`, or an
-    alias of it, takes the dynamic operations instead: those with an
-    operand of `Var` identity that no protocol member resolved, each
+    type, a call by callee spelling, an Array, Map, or `%""` literal, a
+    destructuring assignment, or a lambda by head, a `switch`, `try`,
+    `raise`, `match`, or destructuring declaration (`dstrdecl`) node, a
+    destructuring assignment statement, or a function definition. An
+    operator the pattern writes as `(!or OP...)` registers it for each
+    operator. An operator pattern that types the operation or an operand
+    `Var`, or an alias of it, takes the dynamic operations instead: those
+    with an operand of `Var` identity that no protocol member resolved, each
     presented typed `Var`. A member call whose receiver pattern is
     `(expr MARK *)`, with a field keyword Symbol for its type, takes the
     calls that find no member on a receiver whose aggregate declares a field
@@ -318,10 +325,11 @@ meta String x2c_embed_text(Var path);
 /** Returns the innermost `what` around the invocation, or nothing when
     there is none. `<declarator>` answers the initialized declarator whose
     initializer directly holds the invocation, as its one-declarator
-    declaration; `<statement>` the enclosing block item, as its origin
-    anchor for `x2c_diagnostic_fail_at`; `<function>` the enclosing
-    function definition, whose body is still the empty `(seq)`; and
-    `<unit>` a `String` expression of the unit's path. */
+    declaration; `<statement>` the enclosing block item, or while lowering
+    the item being lowered, as its origin anchor for
+    `x2c_diagnostic_fail_at`; `<function>` the enclosing function
+    definition, whose body is still the empty `(seq)`; and `<unit>` a
+    `String` expression of the unit's path. */
 meta Code x2c_enclosing(Symbol what);
 
 /** Places `code` under the expansion's transaction. `where` is

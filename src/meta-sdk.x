@@ -271,6 +271,12 @@ Code Code.call_in_order(Code member, List arguments, Type type) {
     `Compiler.take_code_value` consumes. */
 Code Code.lowered(Code code) => %(code-value "lowered" $code ());
 
+/** Answers `Code.func_parameters`, declared in `lib/meta.x`. */
+List Code.func_parameters(Code parameters, Code fn, Code argv) {
+  _sdk_guard("Code.func_parameters");
+  return active.expander.func_parameters(parameters, fn, argv);
+}
+
 /** Answers `Code.exits`, declared in `lib/meta.x`. */
 int Code.exits(Code statement) {
   _sdk_guard("Code.exits");
@@ -445,7 +451,8 @@ Code Code.register_rewrite(Code function, List pattern, List holes) {
     }
     case %(expr ? (call (expr ? (ident (binding ? ?(String callee)))) ?)):
       { point = <call>; kinds = %($callee); }
-    case %(expr ? ((!set ?head (!or array map segments dstrasgn)) *)):
+    case %(expr ?
+           ((!set ?head (!or array map segments dstrasgn lambda)) *)):
       { point = <literal>; kinds = %($head); }
     case %((!quote !or)
            ((!set ?head (!or switch try raise match dstrdecl)) *) *):

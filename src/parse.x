@@ -2731,9 +2731,10 @@ void Compiler.enter(Compiler c, Ancestor row) {
 /** Returns the innermost `what` around the parser, or around the function
     body the transform lowers, as captured code, or NULL when there is none:
     the declarator whose initializer is being parsed directly in the current
-    block item, as its one-declarator declaration; the block item, as its
-    origin anchor; the function, as a definition whose body is still the
-    empty `(seq)`; or the unit, as a `String` expression of its path. */
+    block item, as its one-declarator declaration; the block item, or the
+    one the transform lowers, as its origin anchor; the function, as a
+    definition whose body is still the empty `(seq)`; or the unit, as a
+    `String` expression of its path. */
 List Compiler.enclosing(Compiler c, Symbol what) {
   if (what == <unit>) {
     String path = c.filename ? c.display_path(c.filename) : "<stdin>";
@@ -2743,6 +2744,7 @@ List Compiler.enclosing(Compiler c, Symbol what) {
   for (int i = (int) c.ancestors.len() - 1; i >= 0; i--) {
     Ancestor row = rows[i];
     if (row.what == what) return c._ancestor_code(row);
+    if (row.lowering && what == <statement>) return %(at ${c.origin} (seq));
     if (what == <declarator> || row.what == <function>) return NULL;
   }
   return NULL;
@@ -2763,7 +2765,8 @@ static List Compiler._ancestor_code(Compiler c, Ancestor row) {
     entry. Returns the row's depth for `Compiler.leave_function`. */
 int Compiler.enter_function(Compiler c, List declaration) {
   int depth = c.ancestors.len();
-  c.enter((Ancestor){ .what = <function>, .node = declaration });
+  c.enter((Ancestor){
+    .what = <function>, .node = declaration, .lowering = 1});
   return depth;
 }
 

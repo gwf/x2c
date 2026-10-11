@@ -78,13 +78,14 @@ typedef struct Sym *Sym;
 typedef struct SlotWatch *SlotWatch;
 
 /** One syntax the parser is inside, which `x2c_enclosing` answers: a
-    function body with its declaration in `node`, a block item with the
-    token or origin it starts at, or an initialized declarator with its
-    declaration base in `base` and its `(bind ...)` node in `node`. */
+    function body with its declaration in `node`, and `lowering` set while
+    the transform lowers it, a block item with the token or origin it
+    starts at, or an initialized declarator with its declaration base in
+    `base` and its `(bind ...)` node in `node`. */
 typedef struct Ancestor {
   Symbol what;
   Token token;
-  int origin;
+  int origin, lowering;
   List base, node;
 } Ancestor;
 

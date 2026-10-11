@@ -149,8 +149,11 @@ List Compiler.lower_lambda_expr(Compiler c, List expression) {
       Macro grouped = $grouped;
       return c.rebuild_expression(type, grouped(lowered));
     }
-    case captured(?body, *captures, *entries):
+    case captured(?body, *captures, *entries): {
+      List ruled = c._lambda_rule(expression);
+      if (ruled) return ruled;
       return c._captured_lambda(entries, captures, body);
+    }
     case lambda(?body, *params): {
       Type type = expression.cadr();
       /* Only a meta body leaves a noncapturing `Func` lambda unlifted. */
@@ -159,6 +162,8 @@ List Compiler.lower_lambda_expr(Compiler c, List expression) {
         return c.lift_func_expression(
           c.rebuild_expression(signature, lambda(body, params)));
       }
+      List ruled = c._lambda_rule(expression);
+      if (ruled) return ruled;
       String lname = c.fresh_name("lambda");
       List lambda_binding = c.sym.introduce(lname);
       List decl_params = _params_to_decl_params(params);
@@ -171,6 +176,12 @@ List Compiler.lower_lambda_expr(Compiler c, List expression) {
   }
   return expression;
 }
+
+/* A lambda rule's lowered replacement, or NULL. */
+static List Compiler._lambda_rule(Compiler c, List expression) =>
+  c.rewrite_rules ? c.lower_rewrite(<literal>, <lambda>, expression,
+                                    AST_EXPRESSION, expression.cadr(), NULL)
+                  : NULL;
 
 // Preserve typed declarators; bare lambda parameters remain Var.
 static List _params_to_decl_params(List names) {
@@ -1065,7 +1076,7 @@ static macro Stmt $func_record_result(
 }
 
 /* The argument readers of one adapter, with its `Func` and argument vector
-   parameters. */
+   parameters read as expressions. */
 static typedef struct FuncReaders {
   Compiler c;
   Type diagnostic_type;
@@ -1182,6 +1193,27 @@ static void Compiler._require_func_readers(
 static List Compiler._func_argument_locals(
   Compiler c, Type diagnostic_type, List types, List names,
   List fn_binding, List argv_binding) {
+  List reads = c._func_reads(
+    diagnostic_type, types, $!Func{ $fn_binding },
+    $!(const FuncArg *){ $argv_binding });
+  Array locals = [];
+  Macro local = $func_local;
+  foreach (List read, reads) {
+    (Type storage_type, List value) = read;
+    List binding = names.car();
+    names = names.cdr();
+    List (base, mods) = storage_type.parts();
+    List row = %(op = (bind $binding $mods) $value);
+    locals.push(c.rebuild_statement(local(base, row)).cadr());
+  }
+  return locals.list_free();
+}
+
+/* Each argument of `types` read from `argv`, the argument vector of the
+   Func `fn`, as `(STORAGE READ)`: the type of the local that holds it and
+   the expression that reads it. */
+static List Compiler._func_reads(
+  Compiler c, Type diagnostic_type, List types, List fn, List argv) {
   Type value_type = NULL, reference_type = NULL;
   List value_helper = c._adapter_helper("x2c_func_value_argument", value_type);
   List reference_helper = c._adapter_helper(
@@ -1190,21 +1222,28 @@ static List Compiler._func_argument_locals(
     .c = c, .diagnostic_type = diagnostic_type,
     .value = _func_bound(value_type, value_helper),
     .reference = _func_bound(reference_type, reference_helper),
-    .fn = fn_binding, .argv = argv_binding
+    .fn = fn, .argv = argv
   };
-  Array locals = [];
+  Array reads = [];
   int index = 0;
-  Macro local = $func_local;
   foreach (Type type, types) {
-    List binding = names.car();
-    names = names.cdr();
     Type storage_type = NULL;
     List value = readers.read(type, index++, storage_type);
-    List (base, mods) = storage_type.parts();
-    List row = %(op = (bind $binding $mods) $value);
-    locals.push(c.rebuild_statement(local(base, row)).cadr());
+    reads.push(%($storage_type $value));
   }
-  return locals.list_free();
+  return reads.list_free();
+}
+
+/** Returns `(SIGNATURE (STORAGE READ)...)` for an adapter of a `Var`
+    function taking the lambda parameter rows `entries`: its Func
+    signature as a cached `List`, and each argument as `Compiler._func_reads`
+    reads it from `argv` of the Func `fn`. */
+List Compiler.func_parameters(
+  Compiler c, List entries, List fn, List argv) {
+  List types = c.lambda_param_types(entries);
+  Type adapter = c.sym.resolve_key(%("FuncAdapter"));
+  List reads = entries ? c._func_reads(adapter, types, fn, argv) : NULL;
+  return cons(c.cache_literal_list(%((func $types) "Var")), reads);
 }
 
 static List FuncReaders.read(
@@ -1264,9 +1303,7 @@ static List FuncReaders._value(
 static List FuncReaders._call(
   FuncReaders &r, Type result_type, List target, int index,
   List details) {
-  List fn = $!Func{ ${r.fn} };
-  List argv = $!(const FuncArg *){ ${r.argv} };
-  List arguments = %($fn $argv ${$!int{ $index }} @details);
+  List arguments = %(${r.fn} ${r.argv} ${$!int{ $index }} @details);
   return r.c._func_call(result_type, target, arguments);
 }
 
