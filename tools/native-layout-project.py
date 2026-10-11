@@ -35,6 +35,10 @@ def copied_native_text(source, destination, placements, text=None):
                     relative = placed_include(spelling)
                     if relative is not None:
                         row[field] = relative
+        for namespace, spelling in (metadata.get('nativeProviders') or {}).items():
+            relative = placed_include(spelling)
+            if relative is not None:
+                metadata['nativeProviders'][namespace] = relative
         return json.dumps(metadata, separators=(',', ':'), ensure_ascii=True)
     def reconnect(match):
         relative = placed_include(match[2])
@@ -241,7 +245,11 @@ def load_metadata(path, streams=()):
                 raise ProjectionError('conflicting family identity: ' + family)
             edges[family] = dependencies
         namespace_edges.update(metadata.get('namespaceEdges') or {})
-        native_providers.update(metadata.get('nativeProviders') or {})
+        for namespace, spelling in (metadata.get('nativeProviders') or {}).items():
+            target = Path(spelling)
+            if not target.is_absolute():
+                target = current.parent / target
+            native_providers[namespace] = str(target.resolve())
         for companion in metadata.get('companions', []):
             load(current.parent / companion)
     load(path)
