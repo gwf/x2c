@@ -638,8 +638,8 @@ static String _unit_include(String line) {
   return "/" in target ? target : NULL;
 }
 
-/* Copies the generated header of the included unit, found along the include
-   search, to `target` under `directory`. */
+/* Copies the generated header to its include placement. A metadata companion
+   points back to the authoritative provider without rebasing its records. */
 static void _place_header(
   Map headers, List searched, String directory, String target) {
   String source = %"${target[:target.len() - 2]}.x";
@@ -649,6 +649,13 @@ static void _place_header(
     Path placed = Path.join(directory, target);
     placed.dirname().make_dirs();
     Path.copy_file(header, placed);
+    String metadata = %"${Path.dirname(header)}/${Path.stem(header)}.xnm";
+    Path sidecar = %"${placed.dirname()}/${placed.stem()}.xnm";
+    if (Path.exists(metadata)) {
+      Map reference = {format: 2, regions: [], companions: %(
+        ${native_projection_relative(metadata, placed.dirname())})};
+      sidecar.write_text(Var.json(reference));
+    } else sidecar.remove_file();
     return;
   }
 }

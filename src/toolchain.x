@@ -11,6 +11,20 @@
 #include "path.x"
 #include "process.x"
 
+/* Metadata paths follow output placement, so copying the complete output tree
+   reconnects companions without retaining an absolute checkout location. */
+String native_projection_relative(String path, String directory) {
+  List target = Path.absolute(path).split("/");
+  List base = Path.absolute(directory).split("/");
+  int common = 0;
+  while (common < target.len() && common < base.len() &&
+      target[common] == base[common]) ++common;
+  Array parts = [];
+  for (int i = common; i < base.len(); ++i) parts.push("..");
+  for (int i = common; i < target.len(); ++i) parts.push(target[i]);
+  return "/".join(parts);
+}
+
 /** Holds resolved host tools, native layout, and borrowed option `List`s.
     The record returned by `toolchain_new` is `Scope`-owned. Its `String`s
     follow their owning canonical pools, which may be ancestors; `cpp_args`,

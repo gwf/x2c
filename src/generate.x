@@ -23,6 +23,7 @@
 #include "utils.x"
 #include "module-layout.x"
 #include "json.x"
+#include "toolchain.x"
 
 // diagnostics
 
@@ -144,7 +145,7 @@ static List Compiler._generated_code(Compiler c, List ast, String basename) {
     Map directories = c.module_layout_plan;
     foreach (Var (key, directory), directories)
       match (key) case %(directories ?(String provider)):
-        companions.push(_projection_relative(
+        companions.push(native_projection_relative(
           %"$directory/${Path.stem(provider)}.xnm", Path.dirname(cfile)));
     Map metadata = {
       format: 2, source: Path.basename(cfile), header: Path.basename(hfile),
@@ -161,20 +162,6 @@ static List Compiler._generated_code(Compiler c, List ast, String basename) {
     outputs = outputs.append(%("$basename.xnm" ${Var.json(metadata)}));
   }
   return outputs;
-}
-
-/* Metadata paths follow output placement, so copying the complete output tree
-   reconnects companions without retaining an absolute checkout location. */
-static String _projection_relative(String path, String directory) {
-  List target = Path.absolute(path).split("/");
-  List base = Path.absolute(directory).split("/");
-  int common = 0;
-  while (common < target.len() && common < base.len() &&
-      target[common] == base[common]) ++common;
-  Array parts = [];
-  for (int i = common; i < base.len(); ++i) parts.push("..");
-  for (int i = common; i < target.len(); ++i) parts.push(target[i]);
-  return "/".join(parts);
 }
 
 /* Binding provenance selects the namespace owner. Private type rewriting
