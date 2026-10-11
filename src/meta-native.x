@@ -369,23 +369,42 @@ static int Compiler._code_result(Compiler c, Var value) {
   return binding_identity_try_parts(value, NULL, NULL);
 }
 
-/** Runs the explicit meta call `expression` at `site`. The project meta
-    build's own parse leaves a project function's call for the translation:
-    an expression takes a placeholder, and a template `slot`, which has
-    none, is reported. */
+/** Runs the explicit meta call `expression` at `site`. Full parsing reuses
+    each successful source call collected in the same consuming unit.
+    Repeated calls at one site keep distinct occurrence numbers. Macro and
+    template calls execute in their ordinary expansion environment. */
 Var Compiler.run_meta_call(
   Compiler c, List expression, Token site, int slot) {
   List key = NULL;
-  if (site && !slot && !c.macro_stack) {
-    String source = c.token_source(site, NULL);
-    key = %(native-meta-value ${home_portable_path(absolute_path(source))}
-      ${site.pos});
+  if (site && !slot && !c.macro_stack && !c.signature_only) {
+    String source = home_portable_path(
+      absolute_path(c.token_source(site, NULL)));
+    List counter = %(native-meta-occurrence $source ${site.pos} ${c.shallow});
+    Var previous;
+    int occurrence = c.evaluated_effects.try_get(counter, previous)
+      ? (int) previous : 0;
+    c.evaluated_effects[counter] = occurrence + 1;
+    key = %(native-meta-value $source ${site.pos} $occurrence
+      ${c.freeze_declaration_syntax(c._meta_replay_syntax(expression))});
     Var retained;
     if (c.evaluated_effects.try_get(key, retained)) return retained;
   }
   Var value = c._run_meta(expression, NULL, NULL, site, slot);
   if (key && value is not void) c.evaluated_effects[key] = value;
   return value;
+}
+
+/* Collection and body binding assign different local identity numbers.
+   The selected emitted spelling identifies their shared native operation. */
+static Var Compiler._meta_replay_syntax(Compiler c, Var syntax) {
+  if (syntax is not <list>) return syntax;
+  String spelling = NULL;
+  if (binding_identity_try_parts(syntax, NULL, spelling))
+    return %(native-meta-binding ${c.emitted_binding_name(syntax)}
+             ${c.binding_provider(syntax, 1)});
+  Array rows = [];
+  foreach (Var row, syntax.list()) rows.push(c._meta_replay_syntax(row));
+  return rows.list_free();
 }
 
 /** Applies the meta function spelled `name` to the evaluated `arguments`
@@ -461,7 +480,7 @@ static Var _meta_named_value(
     Macro.use_subject(rows);
     defer Macro.use_subject(previous);
     return c.prepare_meta_call(
-      name, site, arguments, c.meta_declaration_provider(name));
+      name, site, arguments, c.meta_definition_provider(name));
   }
   if (function === _linked_module()[name])
     return _apply_linked(function.pointer(), arguments);
@@ -511,14 +530,11 @@ static Var Compiler._meta_function(Compiler c, String name, Token site) {
   return function;
 }
 
-/** Returns the defining source advertised by an ordinary meta declaration,
-    including a prototype reached before its provider body is ready. */
-String Compiler.meta_declaration_provider(Compiler c, String name) {
-  foreach (Var (key, value), c.sym.unit_symbols())
-    match (key)
-      case %("source-node" (declaration ?(String provider) ?)):
-        foreach (List row, c._native_meta_rows(value))
-          if (row.car() == name) return provider;
+/** Returns an actual body provider. A prototype is never executable code. */
+String Compiler.meta_definition_provider(Compiler c, String name) {
+  List provider = c.sym.get_exact(%("definition-file" ($name)));
+  match (provider) case %(provider ?path):
+    return c.canonical_path(home_absolute_path(path));
   return NULL;
 }
 

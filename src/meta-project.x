@@ -492,6 +492,7 @@ static void Helper.parse_source(
   ParsedUnit unit;
   int started = f.start(path, unit);
   defer unit.close();
+  defer h.export(unit.context);
   unit.compiler.meta_build = index + 1;
   unit.compiler.diagnostics.limit = 0;
   if (!started) return;
@@ -502,6 +503,17 @@ static void Helper.parse_source(
   }
   foreach (Var (read, _), unit.compiler.resolved_translation_dependencies())
     h.deps[read] = 1;
+}
+
+/* Nested provider parsing can append records while an outer Context is
+   current. Move every retained record into its parent before that closes. */
+static void Helper.export(Helper &h, Context context) {
+  h.deps = context.export(h.deps.copy());
+  h.readiness = context.export(h.readiness.copy());
+  h.groups = context.export(h.groups.copy());
+  h.built = context.export(h.built.copy());
+  h.failures = context.export(h.failures.copy());
+  h.objects = context.export(h.objects.copy());
 }
 
 /* Compiles the group a parse left for table `index`, adding the headers it
