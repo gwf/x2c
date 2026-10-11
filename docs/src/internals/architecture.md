@@ -792,12 +792,15 @@ at run time.
 `src/component-match.x` registers `match` on the statement family keyed by
 the `match` head. Its translator answers a lowered carrier of verbatim C
 text around the subject, the patterns, and the arm bodies: a block that
-converts the subject to a `List` once with `Code.convert`, declares the
-capture buffer, and switches on the subject's head Symbol, with a label on
-the first arm of each head. `Code.pattern_value` gives each arm's head and
-binders. A flat pattern is tested in place, a macro-valued case calls
-`Macro_case_capture_at`, and any other pattern calls the Match runtime,
-through a static site when `Code.is_static_pattern` holds. The transform and
+converts the subject to a `List` once with `Code.convert` and switches on
+the bits of the subject's head, with a label on the first arm of each head.
+`Code.pattern_value` gives each arm's head and binders. A cached pattern of
+literals, unique binders, typed captures, nested Lists, and a final `*` is
+tested in place by nested `if` tests on cursors over the subject, each
+binder a local read from its cell. A macro-valued case calls
+`Macro_case_capture_at`, and any other pattern calls the Match runtime
+through the capture buffer, at a static site when `Code.is_static_pattern`
+holds. The transform and
 the cleanup walk step into the nodes the text holds, and the parts of the
 match lower outside its rule, so a nested match applies it again. The
 `switch` is the barrier that an arm's `break` leaves.

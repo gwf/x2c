@@ -11,16 +11,17 @@ Match statements.
 ## Design notes
 
 A match lowers to C text around its subject, patterns, and bodies: a
-block that reads the subject once as a List, declares the buffer the
-arms capture into, and switches on the subject's head Symbol. Lowering
-steps into the nodes the text holds, and the `switch` is the barrier
-the cleanup walk knows, so an arm's `break` leaves the match and
-`continue` reaches the enclosing loop. Each arm tests its pattern,
-declares its binders, runs its body, and breaks; an arm that fails
-falls into the next. A flat pattern, a head Symbol and a capture of
-each binder, is tested in place; a macro-valued case recognizes through
-its macro; any other pattern calls the Match runtime, through a static
-site when the pattern's value is the same each time it runs.
+block that reads the subject once as a List and switches on the bits of
+its head. Lowering steps into the nodes the text holds, and the
+`switch` is the barrier the cleanup walk knows, so an arm's `break`
+leaves the match and `continue` reaches the enclosing loop. Each arm
+tests its pattern, declares its binders, runs its body, and breaks; an
+arm that fails falls into the next. A static pattern of literals,
+unique binders, typed captures, nested Lists, and a final `*` is tested
+in place by nested `if` tests on cursors over the subject. Any other
+pattern captures into a buffer: a macro-valued case through its macro,
+and the rest through the Match runtime, at a static site when the
+pattern's value is the same each time it runs.
 
 Each definition precedes the definitions that call it: the compiler
 settles whether a linked copy reaches a compile-time operation when the

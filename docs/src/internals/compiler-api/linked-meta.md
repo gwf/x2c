@@ -94,7 +94,7 @@ for `+` beside text, text. The call is returned lowered, because an
 operator chain applies this rule once for each term and binding would
 search the whole remaining chain each time.
 
-Source: `src/linked-meta.x:685`
+Source: `src/linked-meta.x:791`
 
 #### dynamic_change
 
@@ -103,7 +103,7 @@ Source: `src/linked-meta.x:685`
 Adds or subtracts one through the `Var` update helpers; the postfix
 forms return the value before the change.
 
-Source: `src/linked-meta.x:770`
+Source: `src/linked-meta.x:876`
 
 #### dynamic_compound
 
@@ -112,7 +112,7 @@ Source: `src/linked-meta.x:770`
 Updates a `Var` or numeric lvalue with a `Var` or numeric operand
 through the update helper of its storage.
 
-Source: `src/linked-meta.x:744`
+Source: `src/linked-meta.x:850`
 
 #### dynamic_unary
 
@@ -120,7 +120,7 @@ Source: `src/linked-meta.x:744`
 
 Rejects a unary numeric operator on a `Var`.
 
-Source: `src/linked-meta.x:786`
+Source: `src/linked-meta.x:892`
 
 #### linked_meta_hashes
 
@@ -128,7 +128,7 @@ Source: `src/linked-meta.x:786`
 
 Returns linked definition hashes and provider source dependencies.
 
-Source: `src/linked-meta.x:1334`
+Source: `src/linked-meta.x:1446`
 
 #### linked_meta_targets
 
@@ -136,7 +136,7 @@ Source: `src/linked-meta.x:1334`
 
 Returns the linked copies, and the runtime builders, by name.
 
-Source: `src/linked-meta.x:1164`
+Source: `src/linked-meta.x:1270`
 
 #### match_lowering
 
@@ -145,7 +145,7 @@ Source: `src/linked-meta.x:1164`
 Lowers the bound match `node` to C text around its subject, patterns,
 and bodies.
 
-Source: `src/linked-meta.x:669`
+Source: `src/linked-meta.x:775`
 
 #### printf_values
 
@@ -153,7 +153,7 @@ Source: `src/linked-meta.x:669`
 
 Reads the Var values a printf-family call's static format consumes.
 
-Source: `src/linked-meta.x:926`
+Source: `src/linked-meta.x:1032`
 
 #### raise_lowering
 
@@ -162,7 +162,7 @@ Source: `src/linked-meta.x:926`
 Converts a raise's code and details, or declines a raise whose parts
 already have their types.
 
-Source: `src/linked-meta.x:962`
+Source: `src/linked-meta.x:1068`
 
 #### register_rewrite
 
@@ -184,7 +184,7 @@ every arm returns or raises, control cannot leave them, and a final
 unreachable mark tells C so that a function ending in such a `try`
 needs no return after it.
 
-Source: `src/linked-meta.x:996`
+Source: `src/linked-meta.x:1102`
 
 #### try_lowering
 
@@ -192,7 +192,7 @@ Source: `src/linked-meta.x:996`
 
 Lowers the parsed try `node` to its landing form.
 
-Source: `src/linked-meta.x:1108`
+Source: `src/linked-meta.x:1214`
 
 ## Design notes
 
