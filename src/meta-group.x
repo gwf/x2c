@@ -331,7 +331,9 @@ static List Compiler._native_prerequisites(Compiler c) {
     List node;
     $ast.walk(unit, node) {
       match (node) case $source_identifier_content(
-          %((!set ?binding (binding ? ?(String name))))): {
+          %((binding ?identity ?name))): {
+        if (name is not <string>) continue;
+        List binding = %(binding $identity $name);
         String provider = c.binding_provider(binding, 1);
         Var index;
         if (!provider || provider == c.canonical_path(c.filename) ||
