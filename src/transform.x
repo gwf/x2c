@@ -143,9 +143,14 @@ static Ast Compiler._step_tag(Compiler c, Ast ast, Symbol tag) {
     case <var>: next = c._to_var(ast.cadr()); break;
     case <segments>: return c._interpolation(ast);
     case <declare>: case <decl>: next = c._declaration(ast); break;
-    case <dstrdecl>: next = c._destructure_declaration(ast); break;
-    case <stmnt>: next = c._destructure_statement(ast); break;
-    case <dstrasgn>: next = c._destructure_value(ast); break;
+    case <dstrdecl>: case <stmnt>: case <dstrasgn>: {
+      List ruled = c._destructure_rule(ast, tag);
+      if (ruled) return ruled;
+      if (tag == <dstrdecl>) next = c._destructure_declaration(ast);
+      else if (tag == <stmnt>) next = c._destructure_statement(ast);
+      else next = c._destructure_value(ast);
+      break;
+    }
     case <match>: return c._shipped_statement(ast, tag);
     case <defer>: next = c._defer_node(ast); break;
     case <return>: next = c._return(ast); break;
@@ -185,6 +190,23 @@ static Ast Compiler._shipped_statement(Compiler c, Ast ast, Symbol tag) {
   List lowered = c._shipped_lowering(
     <node>, tag, ast, AST_STATEMENT, c.return_type, %"$tag statement");
   return lowered ? lowered : %(block);
+}
+
+static List Compiler._destructure_rule(Compiler c, List ast, Symbol tag) {
+  if (!c.rewrite_rules) return NULL;
+  if (tag == <dstrdecl>)
+    return c.lower_rewrite(
+      <node>, tag, ast, AST_BLOCK, c.return_type, NULL);
+  if (tag == <stmnt>) {
+    match (ast) case %(stmnt (expr ? (dstrasgn *))):
+      return c.lower_rewrite(
+        <node>, tag, ast, AST_STATEMENT, c.return_type, NULL);
+    return NULL;
+  }
+  Type type = ast.caddr().cadr();
+  List lowered = c.lower_rewrite(
+    <literal>, tag, %(expr $type $ast), AST_EXPRESSION, type, NULL);
+  return lowered ? lowered.caddr() : NULL;
 }
 
 static Ast Compiler._default_node(Compiler c, Ast ast) {
@@ -810,8 +832,11 @@ static List Compiler._destructure_declaration(Compiler c, List ast) {
 static List Compiler._lower_lambda_destructuring(Compiler c, List ast) {
   if (!ast) return ast;
   match (ast) {
-    case %(dstrdecl *):
-      return c._destructure_declaration(ast);
+    case %(dstrdecl *): {
+      List ruled = c.rewrite_rules ? c.rewrite(
+        <node>, <dstrdecl>, ast, AST_BLOCK, c.return_type, NULL) : NULL;
+      return ruled ? ruled : c._destructure_declaration(ast);
+    }
   }
   // The recursion below then only descends into subtrees it will rewrite.
   if (!ast_contains_head(ast, <dstrdecl>)) return ast;
