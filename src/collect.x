@@ -412,7 +412,8 @@ static void FileWalk.flush(FileWalk &w, String segment) {
    another provider. Metadata carries no language-visible declaration. */
 static void FileWalk.record_declaration_providers(FileWalk &w, Map overlay) {
   String path = home_portable_path(w.path);
-  foreach (List key, overlay.keys()) {
+  Array declarations = $auto(overlay.keys());
+  foreach (List key, declarations) {
     List declared = NULL;
     match (key) {
       case %(?(String name)): declared = %($name);
