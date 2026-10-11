@@ -837,6 +837,22 @@ replacement template and fill steps are the remaining driver cost.
   lib/x2c.x is preprocessed without `-imacros lib/x2c.x`, and var.h's TagId
   enum collides with var.x's. Every other unit agrees between prelude and
   live-symbol modes (141 units).
+- 2026-10-11, host preprocessor search order (`kernel/include-shadow`): in
+  the `--cpp-symbols`, `--live-symbols`, and `--dump-cpp` modes the default
+  include directory `<root>/include/x2c` was passed as `-I`, so an
+  angle-bracket `<string.h>` resolved to the generated runtime header and
+  pulled var.h's `TagId` enum into lib/x2c.x. The default directories now go
+  as `-idirafter`, after the system directories; user `-I` directories are
+  unchanged, and every runtime-header include in the corpus is quoted.
+  Ordinary translation never runs the host preprocessor, so generated C is
+  unchanged. +20/-15 in toolchain.x, frontend.x, utils.x. `make
+  proof-conformance` still fails on lib/x2c.x: the cpp-mode shallow parse
+  skips unit macros (`collect_protocols = 0` in `_tokenize_cpp`), so a static
+  type a unit macro creates in an included file (`ErrorRegion` from
+  `$error.private.types()`) is unknown and lib/error.x fails to parse; past
+  that, `$(defun native.scalar.list ...)` fails compile-time Lisp evaluation
+  in lib/x2c.x only. The prelude has failed in the cpp modes at every
+  revision checked; it owns no conformance rows.
 - 2026-10-10, facts learned: `function-entry` placement is parse-time, so
   lambda cells need a transform-time entry placement before lambdas move; a
   plain `make build` after editing a shipped component leaves a degraded
