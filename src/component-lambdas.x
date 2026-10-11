@@ -45,8 +45,9 @@ meta static Code _lambda_cell_read(Var node, Map cells) {
 }
 
 /* The declaration of the cell `name` that holds a `type` copied from
-   `value`, or that a later assignment fills when `value` is NULL. Only its
-   allocation is source to bind. */
+   `value`, or that a later assignment fills when `value` is NULL. The
+   function binds the declaration, so the cell is a local as a `defer` sees
+   one; its allocation is a typed quotation. */
 meta static Code _lambda_cell(Atom name, Type type, Code value) {
   Type bytes = %(* void), pointer = cons(<*>, type);
   Code allocated = NULL;
@@ -104,7 +105,7 @@ meta static Code _lambda_kept(Code code) => %(code-value "lowered" $code ());
 meta static List _lambda_kept_items(List items, Map declaring) {
   Array out = [];
   foreach (Var item, items)
-    out.push(declaring.contains(item) ? item : _lambda_kept(item));
+    out.push(item in declaring ? item : _lambda_kept(item));
   return out.list_free();
 }
 
@@ -112,7 +113,7 @@ meta static List _lambda_kept_items(List items, Map declaring) {
 meta static int _lambda_mentions(Var item, Map cells) {
   List node;
   $ast.walk(item, node)
-    if (node.car() == <binding> && cells.contains(node)) return 1;
+    if (node.car() == <binding> && node in cells) return 1;
   return 0;
 }
 
@@ -168,7 +169,7 @@ meta static Var _lambda_rebuild(
       int changed = 0, declares = 0;
       foreach (Var part, node.list()) {
         changed |= done[index] != part;
-        declares |= cells && declaring.contains(done[index]);
+        declares |= cells && done[index] in declaring;
         parts.push(done[index++]);
       }
       done.truncate(first);
@@ -364,9 +365,10 @@ meta static Code _lambda_adapter(
   Code context_read = %(expr (* const void)
     (call (expr ((func (("Func"))) * const void) (ident ("Func_context")))
       (args (expr ("Func") (ident $closure)))));
-  items.push(%(declare (const struct $context)
-    (bindings (op = (bind ("record") (*))
-                   (expr $pointer (cast $pointer $context_read))))));
+  items.push(
+    %(declare (const struct $context)
+       (bindings (op = (bind ("record") (*))
+                      (expr $pointer (cast $pointer $context_read))))));
   int index = 0;
   foreach (List capture, captures) {
     Type type = capture.caddr(), stored = _lambda_field_type(type);
@@ -553,7 +555,9 @@ $rewrite(%(function ? (bind ? ((fnmod (params *)))) (block *)))
     its body shares by reference into a Scope cell, so the binding outlives
     the call: a parameter is copied into its cell at entry, a local is
     declared as its cell, and every read goes through the cell. A lifted
-    lambda's function moves its own. */
+    lambda's function moves its own. The function binds again only its
+    cells and the statements that hold them; its other statements are kept
+    as they are bound. */
 meta Code lambda_cells(Code node) {
   match (node)
     case %(function ?type
