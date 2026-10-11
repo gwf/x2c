@@ -150,9 +150,11 @@ static List Compiler._generated_code(Compiler c, List ast, String basename) {
       format: 2, source: Path.basename(cfile), header: Path.basename(hfile),
       provider: c.module_tree.identity(c.canonical_path(c.filename)),
       regions: records, order: corder, headerOrder: horder,
-      companions: companions,
-      namespaceEdges: c.module_layout_plan[%(namespace-requires)],
-      familyEdges: c.module_layout_plan[%(projection-families)]};
+      companions: companions.sort(),
+      namespaceEdges: _projection_sorted_edges(
+        c.module_layout_plan[%(namespace-requires)]),
+      familyEdges: _projection_sorted_edges(
+        c.module_layout_plan[%(projection-families)])};
     outputs = outputs.append(%("$basename.xnm" ${Var.json(metadata)}));
   } else if (Path.exists(%"$basename.xnm")) {
     Map metadata = {format: 2, active: Json.bool(0), regions: []};
@@ -258,6 +260,16 @@ static Array Compiler._projection_definitions(Compiler c, List node) {
   return definitions;
 }
 
+/* Dependency arrays are sets; ordered source and region arrays stay intact. */
+static Map _projection_sorted_edges(Map edges) {
+  Map sorted = {};
+  foreach (Var (key, value), edges) {
+    Array dependencies = value;
+    sorted[key] = dependencies.copy().sort();
+  }
+  return sorted;
+}
+
 /* Cache each include's immutable namespace/family supplies once per unit.
    Module headers retain their individually labelled declaration regions. */
 static Map Compiler._projection_include_supplies(
@@ -269,7 +281,7 @@ static Map Compiler._projection_include_supplies(
   Array definitions = [], families = [];
   Map names = {}, tags = {};
   if (path && !c.module_tree.owner(path))
-    foreach (List row, c.declaration_provider_rows(%($path))) {
+    foreach (List row, c.declaration_provider_rows(%($path), 1)) {
       (Var kind, String provider, List key) = row;
       (void) kind;
       String canonical = c.canonical_path(home_absolute_path(provider));
@@ -287,7 +299,7 @@ static Map Compiler._projection_include_supplies(
         }
       }
     }
-  Map supplies = {names: definitions, families: families};
+  Map supplies = {names: definitions.sort(), families: families.sort()};
   plan[cache] = supplies;
   return supplies;
 }
@@ -354,7 +366,7 @@ static List Compiler._projection_nodes(
           if (namespace) declaration_tags.push(namespace);
         }
     }
-    record["declarationTags"] = declaration_tags;
+    record["declarationTags"] = declaration_tags.sort();
     match (node) case %((!or typedef declare) ?base ?): {
       Type type = base;
       match (type.base_type()) case %((!or struct union) *):
@@ -384,7 +396,7 @@ static List Compiler._projection_nodes(
         record["suppliesFamilies"] = supplies[<families>];
       }
     }
-    record["defines"] = definitions;
+    record["defines"] = definitions.sort();
     records.push(record);
     order.push(id);
     marked.push(%(preproc "#pragma x2c_region_begin $id"));
