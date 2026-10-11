@@ -935,7 +935,7 @@ void Compiler.write_meta_build(Compiler c) {
   (String hfile, String header, String cfile, String source) = code[:4];
   Path.write_text(%"$meta_build_directory/$hfile", header);
   Path.write_text(%"$base.c", source);
-  for (int i = 4; i < (int) code.len(); i += 2) {
+  for (int i = 4; i < code.len(); i += 2) {
     String filename = code[i], text = code[i + 1];
     if (filename.endswith(".xnm")) {
       Map metadata = Json.parse(text);
@@ -1023,7 +1023,7 @@ static String _build_module(String directory, String module, List code) {
   (String hfile, String header, String cfile, String source) = code[:4];
   String output = %"$module.${"%ld".printf((long) getpid())}";
   Path.make_dirs(directory);
-  for (int i = 0; i < (int) code.len(); i += 2)
+  for (int i = 0; i < code.len(); i += 2)
     Path.write_text(%"$directory/${code[i]}", code[i + 1]);
   Toolchain linker = toolchain_meta(meta_cc);
   linker.include_dir = meta_include_dir;
