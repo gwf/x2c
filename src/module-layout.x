@@ -33,11 +33,15 @@ static List _layout_core(Type type) {
   return _layout_family(type) ? core : NULL;
 }
 
-static String Compiler._layout_file_spelling(Compiler c, String name) {
-  String path = c.canonical_path(c.filename);
-  String directory = Path.dirname(c.module_owner);
+static String Compiler._layout_file_spelling(Compiler c, String name) =>
+  c._layout_provider_spelling(c.canonical_path(c.filename), name);
+
+static String Compiler._layout_provider_spelling(
+  Compiler c, String path, String name) {
+  String owner = c.module_tree.owner(path);
+  String directory = Path.dirname(owner);
   String relative = path[directory.len() + 1:];
-  String module = c.module_tree.prefix(c.module_owner);
+  String module = c.module_tree.prefix(owner);
   String identity = %"$module/$relative";
   return %"_x2c_file_${filename_hash(identity)}__$name";
 }
@@ -749,4 +753,104 @@ List Compiler.module_layout_demands(Compiler c, List node) {
       }
   }
   return node;
+}
+
+/* Declaration collection supplies this registry before any implementation is
+   bound. Each provider later contributes generated text while its own unit
+   is active; the registry retains no compiler, symbol scope, or AST owner. */
+static List _registry_namespace(List key, List syntax) {
+  match (key)
+    case %((!set ?kind (!or typedef struct union enum)) ?name *):
+      return %($kind $name);
+  match (key) case %(?name):
+    match (syntax) case %(typedef ${name}): return %(typedef $name);
+  return key;
+}
+
+static String _registry_namespace_id(Compiler c, String path, List key) {
+  String logical = c.module_tree.identity(c.canonical_path(home_absolute_path(path)));
+  return %"n_${filename_hash(%($logical $key).repr())}";
+}
+
+/** Indexes original declaration namespaces and their exact provider edges. */
+Map prepare_module_layout_registry(Compiler c, List providers) {
+  Map plan = {}, definitions = {}, identities = {}, requirements = {};
+  plan[%(native-projection)] = 1;
+  plan[%(projection-families)] = {};
+  plan[%(projection-bodies)] = {};
+  plan[%(projection-aliases)] = {};
+  List details = c.declaration_detail_rows(providers);
+  foreach (List row, details) {
+    (Var kind, String path, List key, List syntax, int privacy) = row;
+    (void) kind;
+    String canonical = c.canonical_path(home_absolute_path(path));
+    if (!privacy || !c.module_tree.owner(canonical)) continue;
+    List namespace = _registry_namespace(key, syntax);
+    match (namespace)
+      case %((!or typedef struct union enum) ?(String name)): {
+        Map names = plan.setdefault(%(private-types $canonical), {});
+        names[namespace] = c._layout_provider_spelling(canonical, name);
+      }
+  }
+  foreach (List row, details) {
+    (Var kind, String path, List key, List syntax, int privacy) = row;
+    (void) kind;
+    (void) privacy;
+    List namespace = _registry_namespace(key, syntax), emitted = namespace;
+    String canonical = c.canonical_path(home_absolute_path(path));
+    Map names = plan.getdefault(%(private-types $canonical), {});
+    Var spelling;
+    if (names.try_get(namespace, spelling))
+      emitted = %(${namespace.car()} $spelling);
+    String id = _registry_namespace_id(c, path, emitted);
+    String identity = %($path $emitted).repr();
+    Var previous;
+    if (identities.try_get(id, previous) && previous != identity)
+      c.report_error(<module>, "module namespace identity collision",
+                     NULL, %($previous $identity));
+    identities[id] = identity;
+    plan[%(namespace $path $key)] = id;
+    plan[%(namespace $path $namespace)] = id;
+    definitions[%($path $namespace)] = id;
+    if (!is_source_file(canonical)) plan[%(namespace-provider $id)] = canonical;
+    match (namespace)
+      case %((!set ?tag (!or struct union enum)) ?name):
+        plan[%(projection-bodies)].map()[emitted] = 1;
+    match (key) case %(typedef ?name): {
+      Map aliases = plan[%(projection-aliases)];
+      aliases[emitted] = _layout_private_type(syntax, names);
+      aliases[%(${emitted.cadr()})] = emitted;
+    }
+  }
+  foreach (List row, c.declaration_prerequisite_rows(providers)) {
+    (Var kind, String path, List key, String required, List target) = row;
+    (void) kind;
+    List namespace = _registry_namespace(key, NULL);
+    Var consumer, dependency;
+    if (!plan.try_get(%(namespace $path $namespace), consumer) ||
+        !plan.try_get(%(namespace $required $target), dependency)) continue;
+    Array edges = requirements.setdefault(consumer, []);
+    if (!(dependency in edges)) edges.push(dependency);
+  }
+  plan[%(namespace-definitions)] = definitions;
+  plan[%(namespace-requires)] = requirements;
+  return plan;
+}
+
+/** Returns an original provider's namespace vertex before private rewriting. */
+String Compiler.module_namespace_id(Compiler c, String path, List key) {
+  if (!c.module_layout_plan) return NULL;
+  path = home_portable_path(c.canonical_path(home_absolute_path(path)));
+  Var id;
+  return c.module_layout_plan.try_get(%(namespace $path $key), id) ? id : NULL;
+}
+
+/** Retains one active provider's private emitted spellings, without its AST. */
+void capture_module_provider(Compiler c, List ast, Map registry) {
+  Layouts layouts = {
+    .private_types = {}, .private_bindings = {}, .private_constants = {}};
+  layouts.private_names(c, ast);
+  String path = c.canonical_path(c.filename);
+  registry[%(private-types $path)] = layouts.private_types[path];
+  registry[%(private-bindings $path)] = layouts.private_bindings[path];
 }
