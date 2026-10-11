@@ -214,7 +214,9 @@ def project(text, metadata, selected_edges=None, owner_streams=None):
                 families[family] = name
                 # Native aliases and prerequisites must use this same stream.
                 for sibling, value in owned.items():
-                    if metadata['_regionProviders'].get(sibling) == provider:
+                    if metadata['_regionProviders'].get(sibling) == provider and (
+                            records.get(sibling, {}).get('role') == 'h' or
+                            records.get(sibling, {}).get('family')):
                         regions[sibling] = value
     namespaces = {}
     for name, region in regions.items():
@@ -310,11 +312,13 @@ def retain_projection_inputs(depfile, metadata):
     path.write_text(text[:position] + insertion + text[position:])
 
 
-def preprocess_owners(metadata, compiler, directory):
+def preprocess_owners(metadata, compiler, directory, consumer_text):
     """Use each defining source's configured CPP environment exactly once."""
     streams = {}
+    selected = extract(consumer_text)
     required = {row.get('familyOwner') for row in metadata['regions']
-                if row.get('family')}
+                if row.get('family') and row['id'] in selected and
+                row.get('familyOwner') != metadata.get('provider')}
     for ordinal, (provider, source) in enumerate(
             metadata.get('_ownerSources', {}).items()):
         if provider not in required:
@@ -356,8 +360,9 @@ def compile_native(arguments):
     try:
         configuration = load_metadata(metadata)
         edges = []
-        streams = preprocess_owners(configuration, compiler, destination.parent)
-        destination.write_text(project(expanded.read_text(), configuration, edges, streams))
+        consumer_text = expanded.read_text()
+        streams = preprocess_owners(configuration, compiler, destination.parent, consumer_text)
+        destination.write_text(project(consumer_text, configuration, edges, streams))
         Path(str(destination) + ".xne").write_text(json.dumps(sorted(edges)))
         retain_projection_inputs(depfile, configuration)
     finally:
@@ -381,8 +386,9 @@ def main():
         expanded, metadata, destination = map(Path, arguments[:3])
         configuration = load_metadata(metadata)
         edges = []
-        streams = preprocess_owners(configuration, compiler, destination.parent) if compiler else None
-        result = project(expanded.read_text(), configuration, edges, streams)
+        consumer_text = expanded.read_text()
+        streams = preprocess_owners(configuration, compiler, destination.parent, consumer_text) if compiler else None
+        result = project(consumer_text, configuration, edges, streams)
         Path(str(destination) + ".xne").write_text(json.dumps(sorted(edges)))
         if len(arguments) == 4:
             retain_projection_inputs(arguments[3], configuration)
