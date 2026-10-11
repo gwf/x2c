@@ -19,12 +19,33 @@ def generated(tree):
                   if source.is_file() and source.suffix in (".c", ".h", ".xnm"))
 
 
+def native_headers(files, generated_placements, bootstrap):
+    """Copy checkout-native quoted header closure at its original structure."""
+    pending, headers = list(files), {}
+    while pending:
+        source = pending.pop()
+        if source.suffix == '.xnm':
+            continue
+        for match in INCLUDE.finditer(source.read_text(encoding='ascii')):
+            spelling = Path(match[2])
+            target = (spelling if spelling.is_absolute() else
+                      source.parent / spelling).resolve()
+            if target in generated_placements or target in headers:
+                continue
+            if not target.is_file() or not target.is_relative_to(ROOT):
+                continue
+            relative = target.relative_to(ROOT)
+            headers[target] = bootstrap / 'native' / relative
+            pending.append(target)
+    return headers
+
+
 def copied_text(source, destination, placements):
     def reconnect(match):
         spelling = Path(match[2])
-        if not spelling.is_absolute():
-            return match[0]
-        placed = placements.get(spelling.resolve())
+        target = (spelling if spelling.is_absolute() else
+                  source.parent / spelling).resolve()
+        placed = placements.get(target)
         if placed is None:
             return match[0]
         relative = os.path.relpath(placed, destination.parent)
@@ -55,6 +76,7 @@ def main():
             return 1
         placements = {p.resolve(): left / p.relative_to(right)
                       for p in generated(right)}
+        placements.update(native_headers(generated(right), placements, left))
         destination = left / relative
         return 0 if destination.read_text(encoding="ascii") == copied_text(
             right / relative, destination, placements) else 1
@@ -62,8 +84,10 @@ def main():
     stage, bootstrap = ROOT / "builds/0", ROOT / "bootstrap"
     files = generated(stage)
     placements = {p.resolve(): bootstrap / p.relative_to(stage) for p in files}
-    for source in files:
-        destination = bootstrap / source.relative_to(stage)
+    native = native_headers(files, placements, bootstrap)
+    placements.update(native)
+    for source in [*files, *native]:
+        destination = placements[source.resolve()]
         destination.parent.mkdir(parents=True, exist_ok=True)
         rewritten = copied_text(source, destination, placements)
         if source.read_text(encoding="ascii") == rewritten:
