@@ -448,9 +448,10 @@ Code Code.register_rewrite(Code function, List pattern, List holes) {
     case %(expr ? ((!set ?head (!or array map segments dstrasgn)) *)):
       { point = <literal>; kinds = %($head); }
     case %((!quote !or)
-           ((!set ?head (!or switch try raise match dstrdecl)) *) *):
+           ((!set ?head (!or switch try raise match dstrdecl conform))
+            *) *):
       { point = <node>; kinds = %($head); }
-    case %((!set ?head (!or switch try raise match dstrdecl)) *):
+    case %((!set ?head (!or switch try raise match dstrdecl conform)) *):
       { point = <node>; kinds = %($head); }
     case %(stmnt (expr ? (dstrasgn *))): { point = <node>; kinds = %(stmnt); }
     case %(!or (api-source ? ? (function ?type *)) (function ?type *)):

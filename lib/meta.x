@@ -164,8 +164,9 @@ meta Code Code.lowered(Code code);
     access or assignment, a binary operator, a member call by receiver
     type, a call by callee spelling, an Array, Map, or `%""` literal or a
     destructuring assignment by head, a `switch`, `try`, `raise`, `match`,
-    or destructuring declaration (`dstrdecl`) node, a destructuring
-    assignment statement, or a function definition. An operator the
+    destructuring declaration (`dstrdecl`), or protocol conformance
+    (`conform`) node, a destructuring assignment statement, or a function
+    definition. An operator the
     pattern writes as `(!or OP...)` registers it for each operator. An
     operator pattern that types the operation or an operand `Var`, or an
     alias of it, takes the dynamic operations instead: those with an
