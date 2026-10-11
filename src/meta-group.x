@@ -232,7 +232,8 @@ static List Compiler._emit(
   try {
     if (c.meta_build) c._name_provider_bindings(provider, units, saved.deps);
     List lowered = c._lower(units, stamp, suffix);
-    if (meta_prefix_published) lowered = c._prefix_lowered(lowered);
+    if (meta_prefix_sequence || meta_prefix_published)
+      lowered = c._prefix_lowered(lowered);
     /* The unit's protocol adapters and their registration belong to the
        program; group code reaches the runtime's own. */
     List ast;
@@ -345,7 +346,8 @@ static void Compiler._name_provider_bindings(
   foreach (List item, units)
     if (_function_identity(item, identity, name) &&
         (c._public_native(item, name) ||
-         (meta_prefix_published && c._prefix_function(name)))) {
+         ((meta_prefix_sequence || meta_prefix_published) &&
+          c._prefix_function(name)))) {
       List binding = item.caddr().cadr();
       c.set_fact(%(emitted $binding), %"_x2c_meta_group_${index}_$name");
     }
