@@ -821,9 +821,10 @@ the conversions lowering applies to an assignment or initialization. The
 expression form keeps the source in a result local as its value. The
 parser has already declared the targets, so binding leaves their
 declarations alone and they keep their scope and identity; the locals are
-`new-name` effects. A function body's declarations are rewritten, without
-lowering, before its lambda cells are prepared, so a destructured name a
-lambda shares by reference gets its cell at its declaration.
+`new-name` effects. In a function body that holds a lambda, the
+declarations are rewritten, without lowering, before its lambda cells are
+prepared, so a destructured name a lambda shares by reference gets its cell
+at its declaration.
 
 The components and `src/grammar.x`, whose source forms they recognize, are
 compiler prelude sources.

@@ -800,9 +800,9 @@ static List Compiler._declaration(Compiler c, List ast) {
   return ast;
 }
 
-/* Cell rewriting needs declaration sites, so a function body's
-   destructuring declarations take their rule's replacement, bound but not
-   yet lowered, before its cells are prepared. */
+/* Cell rewriting needs declaration sites, so the destructuring
+   declarations of a body with a lambda take their rule's replacement,
+   bound but not yet lowered, before its cells are prepared. */
 static List Compiler._lower_lambda_destructuring(Compiler c, List ast) {
   if (!ast) return ast;
   match (ast) {
