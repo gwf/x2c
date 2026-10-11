@@ -5,6 +5,14 @@ first.
 
 ## Unreleased
 
+- Color semantic macro types and all capitalized syntax kinds like prelude
+  types outside macro signatures. Recognize anonymous macros and every
+  quotation kind, standalone `$` unquotes, and qualified or pointer-returning
+  `meta native static` declarations. Add bold sigils and distinct `meta` and
+  `native` modifiers to the recommended VS Code color settings. Also scope
+  class declarations and the C expression forms `_Generic`, `offsetof`,
+  and `va_arg` listed in the machine-readable grammar.
+
 - Highlight `@` sequence parameters, named and computed syntax splices,
   compile-time Lisp splices, and expression-valued quotation holes.
   Remove macro suffix-splice highlighting while preserving native variadics,

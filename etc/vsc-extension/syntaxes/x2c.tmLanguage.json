@@ -36,6 +36,9 @@
 			"include": "#x2c_macro_expression_hole"
 		},
 		{
+			"include": "#x2c_unquote_sigil"
+		},
+		{
 			"include": "#x2c_keyword_alias"
 		},
 		{
@@ -1220,6 +1223,9 @@
 				},
 				{
 					"include": "#x2c_destructuring_assignment"
+				},
+				{
+					"include": "#x2c_prelude_types"
 				},
 				{
 					"include": "#storage_types"
@@ -3689,13 +3695,13 @@
 			]
 		},
 		"x2c_meta_declaration": {
-			"match": "^[ \\t]*(meta)\\b(?=[ \\t]+(?!protocol\\b|native\\b)(?:(?:static|const|inline|extern|volatile|unsigned|signed|long|short)[ \\t]+)*[A-Za-z_]\\w*(?:[ \\t]*[*&]+)?[ \\t]+[A-Za-z_]\\w*(?:\\.[A-Za-z_]\\w*)?[ \\t]*(?:\\(|=|;|\\[))",
+			"match": "^[ \\t]*(meta)\\b(?=[ \\t]+(?!protocol\\b|native\\b)(?:(?:static|const|inline|extern|volatile|restrict|_Noreturn|unsigned|signed|long|short)[ \\t]+)*[A-Za-z_]\\w*(?:\\.[A-Za-z_]\\w*)?(?:[ \\t]*[*&]+[ \\t]*|[ \\t]+)[A-Za-z_]\\w*(?:\\.[A-Za-z_]\\w*)?[ \\t]*(?:\\(|=|;|\\[))",
 			"captures": {
 				"1": { "name": "storage.modifier.meta.x2c" }
 			}
 		},
 		"x2c_native_meta_declaration": {
-			"match": "^[ \\t]*(meta)[ \\t]+(native)\\b(?=[ \\t]+(?:(?:static|const|inline|extern|volatile|unsigned|signed|long|short)[ \\t]+)*[A-Za-z_]\\w*(?:[ \\t]*[*&]+)?[ \\t]+[A-Za-z_]\\w*(?:\\.[A-Za-z_]\\w*)?[ \\t]*\\()",
+			"match": "^[ \\t]*(meta)[ \\t]+(native)\\b(?=[ \\t]+(?:(?:static|const|inline|extern|volatile|restrict|_Noreturn|unsigned|signed|long|short)[ \\t]+)*[A-Za-z_]\\w*(?:\\.[A-Za-z_]\\w*)?(?:[ \\t]*[*&]+[ \\t]*|[ \\t]+)[A-Za-z_]\\w*(?:\\.[A-Za-z_]\\w*)?[ \\t]*\\()",
 			"captures": {
 				"1": { "name": "storage.modifier.meta.x2c" },
 				"2": { "name": "storage.modifier.native.x2c" }
@@ -3843,6 +3849,14 @@
 		"x2c_keywords": {
 			"patterns": [
 				{
+					"match": "\\bclass\\b(?=\\s+[A-Za-z_][A-Za-z0-9_]*)",
+					"name": "keyword.declaration.class.x2c"
+				},
+				{
+					"match": "\\b(_Generic|offsetof|va_arg)\\b(?=\\s*\\()",
+					"name": "keyword.operator.$1.x2c"
+				},
+				{
 					"match": "\\b(in|try|catch|finally|defer|raise|match)\\b",
 					"name": "keyword.control.x2c",
 					"captures": {
@@ -3879,11 +3893,11 @@
 			]
 		},
 		"x2c_prelude_types": {
-			"match": "\\b(Array|Atom|Block|Buffer|Bytes|Context|Error|ErrorHandler|File|Func|Iter|Lambda|Lisp|List|Logger|LogSink|Map|Mutex|Pool|Scope|Split|String|Symbol|SymbolSet|Thread|Token|Tokenizer|Var)\\b",
+			"match": "\\b(Array|Atom|Block|Buffer|Bytes|Context|Error|ErrorHandler|File|Func|Iter|Lambda|Lisp|List|Logger|LogSink|Map|Mutex|Pool|Scope|Split|String|Symbol|SymbolSet|Thread|Token|Tokenizer|Var|Code|Macro|TypeInfo|Source|Expr|Expression|Stmt|Field|Entry|Enumerator|Unit|Declaration|Decorator|Function|NamedType|Type|Decl|DeclaratorRow|Name|Literal|Param|Catch|Captures|MatchRow)\\b",
 			"name": "support.type.prelude.x2c"
 		},
 		"x2c_macro_definition": {
-			"match": "\\b(macro)(\\s+)((?i:expression|expr|stmt|field|entry|enumerator|unit|declaration|decorator))(\\s+)(?:(\\$)([A-Za-z_][A-Za-z0-9_]*(?:\\.[A-Za-z_][A-Za-z0-9_]*)*)|([A-Za-z_][A-Za-z0-9_]*))(?=\\s*\\()",
+			"match": "\\b(macro)(\\s+)((?i:expression|expr|stmt|field|entry|enumerator|unit|declaration|decorator))\\b(\\s*)(?:(\\$)([A-Za-z_][A-Za-z0-9_]*(?:\\.[A-Za-z_][A-Za-z0-9_]*)*)|([A-Za-z_][A-Za-z0-9_]*))?(?=\\s*\\()",
 			"captures": {
 				"1": { "name": "keyword.declaration.macro.x2c" },
 				"3": { "name": "storage.type.macro.result.x2c" },
@@ -3966,10 +3980,14 @@
 				{ "include": "$self" }
 			]
 		},
+		"x2c_unquote_sigil": {
+			"match": "\\$",
+			"name": "punctuation.definition.macro.sigil.x2c"
+		},
 		"x2c_literals": {
 			"patterns": [
 				{
-					"match": "(\\$!)(?:(Type|Param|Unit)\\b)?",
+					"match": "(\\$!)(?:[ \\t]*((?i:Expr|Expression|Stmt|Field|Entry|Enumerator|Unit|Declaration|Decorator|Type|Param))\\b)?",
 					"captures": {
 						"1": { "name": "punctuation.definition.macro.sigil.x2c" },
 						"2": { "name": "storage.type.macro.result.x2c" }
@@ -4030,6 +4048,7 @@
 				{ "include": "#x2c_current_symbol_literal" },
 				{ "match": "\\?[A-Za-z_][A-Za-z0-9_]*", "name": "variable.other.pattern.optional.x2c" },
 				{ "match": "\\*[A-Za-z_][A-Za-z0-9_]*", "name": "variable.other.pattern.variadic.x2c" },
+				{ "include": "#x2c_unquote_sigil" },
 				{ "include": "#numbers" },
 				{ "include": "#x2c_current_list_atom" }
 			]
@@ -4158,6 +4177,7 @@
 				{ "include": "#x2c_current_map_nested" },
 				{ "include": "#x2c_current_list_string_nested" },
 				{ "include": "#x2c_current_symbol_literal" },
+				{ "include": "#x2c_unquote_sigil" },
 				{ "include": "#numbers" },
 				{ "include": "#x2c_void_value" },
 				{ "include": "#x2c_current_collection_separator" },
@@ -4361,6 +4381,8 @@
 						"2": { "name": "variable.other.macro.hole.x2c" }
 					}
 				},
+				{ "include": "#x2c_unquote_sigil" },
+				{ "include": "#x2c_prelude_types" },
 				{ "match": ",@", "name": "punctuation.definition.unquote-splicing.lisp.x2c" },
 				{ "match": ",", "name": "punctuation.definition.unquote.lisp.x2c" },
 				{ "match": "`", "name": "punctuation.definition.quasiquote.lisp.x2c" },

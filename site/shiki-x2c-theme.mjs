@@ -87,9 +87,12 @@ const distinctScopes = [
   "keyword.control.match.x2c",
   "storage.modifier.delegate.x2c",
   "storage.modifier.threaded.x2c",
+  "storage.modifier.meta.x2c",
+  "storage.modifier.native.x2c",
   "keyword.control.import.x2c",
   "keyword.control.with.x2c",
   "keyword.declaration.protocol.x2c",
+  "keyword.declaration.class.x2c",
   "keyword.control.foreach.x2c",
   "keyword.operator.is.x2c",
   "storage.type.self.x2c",
@@ -107,6 +110,19 @@ function withDistinctColors(theme, name, colors) {
       ...theme.tokenColors,
       {
         scope: distinctScopes,
+        settings: {
+          foreground: colors.keyword,
+          fontStyle: "bold"
+        }
+      },
+      {
+        scope: [
+          "source.x2c punctuation.definition.literal",
+          "source.x2c punctuation.definition.interpolation",
+          "punctuation.definition.macro.sigil.x2c",
+          "punctuation.definition.macro.splice.x2c",
+          "source.x2c punctuation.definition.embedded.lisp"
+        ],
         settings: {
           foreground: colors.keyword,
           fontStyle: "bold"
