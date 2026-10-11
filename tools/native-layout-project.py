@@ -66,6 +66,7 @@ def extract(text, selected_edges=None):
     packing, regions, stack = Packing(), {}, []
     initializer_edges = {}
     origin_file, origin_line, epoch = None, 0, 0
+    resolved_origins = {}
     for line in text.splitlines(keepends=True):
         marker = MARKER.fullmatch(line.strip())
         if marker:
@@ -114,7 +115,9 @@ def extract(text, selected_edges=None):
         else:
             origin_line += 1
         if stack and origin_file and not origin_file.startswith('<'):
-            stack[-1]['origins'].add(str(Path(origin_file).resolve()))
+            if origin_file not in resolved_origins:
+                resolved_origins[origin_file] = str(Path(origin_file).resolve())
+            stack[-1]['origins'].add(resolved_origins[origin_file])
         pack = PACK.fullmatch(line.strip())
         if pack:
             packing.apply(pack[1])
@@ -269,6 +272,9 @@ def project(text, metadata, selected_edges=None, owner_streams=None,
                         for supplied in records.get(sibling, {}).get('suppliesFamilies', []):
                             families[supplied] = sibling
     namespaces = {}
+    native_providers = {namespace: str(Path(provider).resolve()) for
+                        namespace, provider in metadata.get(
+                            'nativeProviders', {}).items()}
     for name, region in regions.items():
         row = records[name]
         for namespace in row.get('defines', []):
@@ -277,8 +283,8 @@ def project(text, metadata, selected_edges=None, owner_streams=None,
                     row.get('role') == 'h' or row.get('kind') == 'typedef')):
                 namespaces[namespace] = name
         origins = set(region.origins)
-        for namespace, provider in metadata.get('nativeProviders', {}).items():
-            if str(Path(provider).resolve()) in origins:
+        for namespace, provider in native_providers.items():
+            if provider in origins:
                 namespaces.setdefault(namespace, name)
     selected, active, emitted_families, output = set(), set(), set(), []
     current_epoch = 0
