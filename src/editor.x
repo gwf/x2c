@@ -190,11 +190,16 @@ static Map Query.diagnostic(Query &q, List entry) {
   __builtin_unreachable();
 }
 
-/* A diagnostic without a location is at the start of the unit's file. */
+/* A diagnostic without a location is at the start of the unit's file. A
+   position in a module member counts from the start of the member. */
 static Map Query.diagnostic_range(Query &q, List location) {
   match (location)
     case %((file ?file) ? ? (length ?length) (position ?position)): {
+      Compiler c = q.compiler;
       int start = position, width = length;
+      if (c.line_markers &&
+          c.display_path(c.text_source(position, start)) != file)
+        start = position;
       return q.location(Path.absolute(file), start, start + width);
     }
   return q.location(Path.absolute(q.compiler.filename), 0, 0);

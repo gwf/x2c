@@ -18,6 +18,7 @@
 #include "datum.x"
 #include "utils.x"
 
+#include <ctype.h>
 #include <errno.h>
 #include <limits.h>
 #include <stdio.h>
@@ -64,6 +65,38 @@ static macro Stmt $report.driver.package_prefix(
     <driver>,
     %"package '${$name}' exposes unprefixed top-level declaration '${$spelling}'",
     $site, %( "'${$unit}' is x2c source outside the package; include it ${$fix}" ));
+}
+
+static macro Stmt $report.driver.module_block(Expr $c, Expr $site) {
+  $c.report_error(
+    <driver>,
+    "malformed module block",
+    $site, %("a module block lists member paths as strings, separated by"
+    "commas, between braces"));
+}
+
+static macro Stmt $report.driver.module_second(Expr $c, Expr $site) {
+  $c.report_error(
+    <driver>,
+    "a file holds one module block",
+    $site, NULL);
+}
+
+static macro Stmt $report.driver.module_member(
+  Expr $c, Expr $site, Expr $member, Expr $stem) {
+  $c.report_error(
+    <driver>,
+    %"module member '${$member}' is outside '${$stem}/'",
+    $site, %("a member lies under the companion directory of the file that"
+    "names it"));
+}
+
+static macro Stmt $report.driver.module_read(
+  Expr $c, Expr $site, Expr $path) {
+  $c.report_error(
+    <driver>,
+    "cannot read module member",
+    $site, %("path: ${$path}"));
 }
 
 static macro Stmt $report.emit.interface_write(Expr $c) {
@@ -269,14 +302,191 @@ static void Compiler._merge_rows(Compiler c, Map globs, Map rows) {
   c.merge_source_declarations(globs, rows);
 }
 
+// module blocks
+
+/* Assembles one text from a module's files. `line` is the text line that
+   the next byte written begins. `path` and `text` are the file being
+   appended, and `prefix` is its directory relative to the entry's, or NULL
+   for the entry. */
+static typedef struct Splice {
+  Compiler c, Buffer out, Array markers, Map members, int line;
+  String path, text, prefix;
+} Splice;
+
+/** Returns the x2c source at `path`, whose own text is `text`, with its
+    file-scope `module` block replaced by the text of each member it names,
+    in order, or NULL when the text has no block. A member lies under the
+    companion directory of the file that names it, `NAME/` beside `NAME.x`,
+    and its own block is spliced in turn. A member's quoted include of a
+    file beside it is spelled from the entry's directory, so it names the
+    same file there.
+*/
+ModuleSource Compiler.module_source(Compiler c, String path, String text) {
+  if (!_spells_block(text)) return NULL;
+  Buffer out = $auto(Buffer.new(0));
+  Splice s = {
+    .c = c, .out = out, .markers = [], .members = {}, .line = 1};
+  if (!s.file(path, text, NULL)) return NULL;
+  ModuleSource source = Scope.calloc(1, sizeof(struct ModuleSource));
+  *source = (struct ModuleSource) {
+    .text = s.out.str(), .own = text, .markers = s.markers,
+    .members = s.members};
+  return source;
+}
+
+/* Only a text that spells `module` before `{` can hold a block. */
+static int _spells_block(const char *text) {
+  for (const char *at = strstr(text, "module"); at;
+       at = strstr(at + 1, "module")) {
+    const char *next = at + strlen("module");
+    if (next[strspn(next, " \t\r\n")] == '{') return 1;
+  }
+  return 0;
+}
+
+/* Appends a file with its block spliced and reports whether it had one. A
+   member's text is marked as its own. Diagnostics locate the block in this
+   file. */
+static int Splice.file(Splice &s, String path, String text, String prefix) {
+  $let(s.path, path) $let(s.text, text) $let(s.prefix, prefix)
+  $let(s.c.filename, path) $let(s.c.text, text)
+  $let(s.c.line_markers, NULL) {
+    if (prefix) s.mark(1, 0);
+    Token block = s.block(), close = NULL;
+    if (!block) {
+      s.own(0, text.len(), 1);
+      return 0;
+    }
+    List members = s.members(block, close);
+    s.own(0, block.pos, 1);
+    s.end_line();
+    foreach (String spelling, members) s.member(spelling, block);
+    s.mark(close.line, close.pos + 1);
+    s.own(close.pos + 1, text.len(), close.line);
+    return 1;
+  }
+}
+
+/* The `module` that opens the file's file-scope block, or NULL. The word
+   opens a block where `{` follows it and no word precedes it, so
+   `struct module {` declares a tag. */
+static Token Splice.block(Splice &s) {
+  if (!_spells_block(s.text)) return NULL;
+  Tokenizer tokenizer = Tokenizer.new(s.text, <x2c>);
+  tokenizer.layout = is_layout_file(s.path);
+  tokenizer.scan();
+  Token block = NULL, previous = NULL;
+  int depth = 0;
+  for (Token token = Token.skip_trivia(tokenizer.tokens);
+       token.type != <eof>; token = Token.skip_trivia(token + 1)) {
+    if (!depth && token.text == "module" &&
+        Token.skip_trivia(token + 1).type == <"{"> &&
+        !(previous && _is_word(previous.text))) {
+      if (block) $report.driver.module_second(s.c, token);
+      block = token;
+    }
+    if (token.type == <"}">) depth--;
+    else if (token.type.str().endswith("{")) depth++;
+    previous = token;
+  }
+  return block;
+}
+
+static int _is_word(String text) => isalnum(text[0]) || text[0] == '_';
+
+/* The member paths of the block `block` opens, whose closing brace becomes
+   `close`. */
+static List Splice.members(Splice &s, Token block, Token &close) {
+  Array members = [];
+  Token token = Token.skip_trivia(Token.skip_trivia(block + 1) + 1);
+  while (token.type != <"}">) {
+    if (token.type != <"lit-char*"> || token.text[0] != '"')
+      $report.driver.module_block(s.c, token);
+    members.push(token.text[1:token.len - 1].unescape());
+    token = Token.skip_trivia(token + 1);
+    if (token.type == <",">) token = Token.skip_trivia(token + 1);
+    else if (token.type != <"}">) $report.driver.module_block(s.c, token);
+  }
+  close = token;
+  return members.list_free();
+}
+
+/* Appends the member `spelling` that the file's block at `site` names. */
+static void Splice.member(Splice &s, String spelling, Token site) {
+  String stem = Path.stem(s.path), dir = Path.dirname(s.path), text = NULL;
+  if (!spelling.startswith(%"$stem/") || "/../" in %"/$spelling/")
+    $report.driver.module_member(s.c, site, spelling, stem);
+  String path = dir == "." ? spelling : %"$dir/$spelling";
+  if (!s.c.read_source(path, text))
+    $report.driver.module_read(s.c, site, path);
+  s.members[_canonical_path(path)] = _content_hash(text);
+  String prefix = s.prefix ? %"${s.prefix}/$spelling" : spelling;
+  s.file(path, text, Path.dirname(prefix));
+  s.end_line();
+}
+
+/* Appends the file's text from byte `start` to `end`, which begins its
+   line `line`. A member's include of a file beside it moves under its
+   prefix. */
+static void Splice.own(Splice &s, int start, int end, int line) {
+  const char *run = s.text + start, *limit = s.text + end;
+  if (s.prefix)
+    for (const char *at = run; at < limit; line++) {
+      const char *stop = memchr(at, '\n', limit - at);
+      stop = stop ? stop + 1 : limit;
+      String moved = s.moved_include(at, stop);
+      if (moved) {
+        s.write(run, at);
+        s.write(moved, (const char *) moved + moved.len());
+        s.mark(line + 1, stop - (const char *) s.text);
+        run = stop;
+      }
+      at = stop;
+    }
+  s.write(run, limit);
+}
+
+/* The line from `at` to `stop` with its quoted include of a file beside
+   this one spelled under the prefix, or NULL for any other line. */
+static String Splice.moved_include(
+  Splice &s, const char *at, const char *stop) {
+  const char *hash = at + strspn(at, " \t");
+  if (hash >= stop || *hash != '#') return NULL;
+  int angle = 0;
+  String target =
+    preproc_include_target(String.new_len(hash, stop - hash), angle);
+  if (!target || angle || target.startswith("/") ||
+      !s.c.sources.exists(%"${Path.dirname(s.path)}/$target")) return NULL;
+  return String.new_len(at, stop - at).replace(
+    %"\"$target\"", %"\"${s.prefix}/$target\"");
+}
+
+/* From here on the text comes from this file, at its line `line` and byte
+   `offset`. */
+static void Splice.mark(Splice &s, int line, int offset) {
+  s.markers.push(%(${(int) s.out.len()} ${s.line} ${s.path} $line $offset));
+}
+
+// Each file's text ends its last line before the next file's begins.
+static void Splice.end_line(Splice &s) {
+  if (!s.out.len() || s.out[-1] == '\n') return;
+  s.out.newline();
+  s.line++;
+}
+
+static void Splice.write(Splice &s, const char *start, const char *end) {
+  s.out.write_len(start, end - start);
+  for (const char *ch = start; ch < end; ch++) if (*ch == '\n') s.line++;
+}
+
 // file walks
 
 /* One cold walk of a file. Each segment of the text ends before an include,
    and `line` and `pos` locate the current segment's
    first token. `deferred` marks an entry collected without its declaration
-   defaults. */
+   defaults. A module's walk reads its spliced text. */
 static typedef struct FileWalk {
-  Compiler c, String path, text, dir, Map globs, visited;
+  Compiler c, String path, text, dir, ModuleSource module, Map globs, visited;
   Array parts, Map definitions, dependencies, statics, hashes;
   int unit, linkage, line, pos, deferred;
 } FileWalk;

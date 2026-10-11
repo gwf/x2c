@@ -401,6 +401,23 @@ String Compiler.token_source(Compiler c, Token token, int &?line) {
   return file;
 }
 
+/** Returns the file that a module's line markers give byte `position` of
+    the compiler's text, and sets `offset` to that byte's offset in the file.
+    Without such a marker, the file is the compiler's own and `offset` is
+    `position`. */
+String Compiler.text_source(Compiler c, int position, int &offset) {
+  String file = c.filename;
+  offset = position;
+  if (!c.line_markers) return file;
+  foreach (List row, c.line_markers) {
+    (int start, int text_line, String marked, int line, Var origin) = row;
+    if (start > position || origin is void) break;
+    file = marked;
+    offset = origin.int() + position - start;
+  }
+  return file;
+}
+
 static List _compiler_location(Compiler compiler, Token token) {
   if (!token && compiler.origin) {
     List location = compiler.origin_location(compiler.origin);

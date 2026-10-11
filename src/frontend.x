@@ -74,6 +74,15 @@ static macro Stmt $report.driver.indent_symbols(Expr $c, Expr $site) {
     "an indented unit"));
 }
 
+static macro Stmt $report.driver.module_symbols(Expr $c, Expr $site) {
+  $c.report_error(
+    <driver>,
+    "module units use the default symbol collection",
+    $site, %("the host preprocessor reads a module block as C, so"
+    "--cpp-symbols, --live-symbols, and the --dump-cpp modes cannot read a"
+    "module"));
+}
+
 static macro Stmt $report.driver.cpp_failed(
   Expr $c, Expr $site, Expr $status) {
   $c.report_error(
@@ -237,6 +246,11 @@ static void _tokenize_input(
   String text = _read_input(c);
   if (text && text.startswith("#!"))
     text = _script(c, text, resolved ? String.new(source) : c.filename);
+  c.unit_source = c.module_source(c.filename, text);
+  if (c.unit_source) {
+    text = c.unit_source.text;
+    c.line_markers = c.unit_source.markers;
+  }
   c.include_dirs = frontend.include_dirs;
   unit.source_lines = _source_lines(text);
   c.tokenize(text);
@@ -375,12 +389,14 @@ static void _enter_package(Frontend frontend, Compiler c) {
 }
 
 /* The host preprocessor keeps neither a unit's indentation nor its `#!`
-   line. */
+   line, and it cannot splice a module. */
 static void _check_cpp_unit(Compiler c) {
   if (c.layout)
     $report.driver.indent_symbols(c, _first_directive(c));
   if (c.script)
     $report.driver.script_symbols(c, _first_directive(c));
+  if (c.unit_source)
+    $report.driver.module_symbols(c, _first_directive(c));
 }
 
 static Token _first_directive(Compiler c) {

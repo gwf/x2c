@@ -35,6 +35,18 @@ typedef struct ScriptUnit {
   int defines_main;
 } *ScriptUnit;
 
+/** Describes an x2c source whose `module` block names member files: `text`
+    holds the file's own text, `own`, with each member's text in place of the
+    block. `markers` are the line-marker rows that give each region of
+    `text` its file, line, and byte offset there, and `members` maps each
+    member's canonical path to its content hash.
+*/
+typedef struct ModuleSource {
+  String text, own;
+  Array markers;
+  Map members;
+} *ModuleSource;
+
 /** Holds scope-owned generated-name state shared by related compilers.
 
     `Compiler.new` initializes every valid instance; callers borrow it from
@@ -110,8 +122,11 @@ typedef struct Compiler {
   Token input_boundary;
   Tokenizer tokenizer;
   /* For the host preprocessor's merged output, the file each region came
-     from, as `(position text-line file line)` rows; NULL otherwise. */
+     from, as `(position text-line file line)` rows; NULL otherwise. A
+     module's rows add the region's byte `offset` in that file. */
   Array line_markers;
+  // The unit's text when its `module` block was spliced, or NULL.
+  ModuleSource unit_source;
   List return_type, include_dirs;
   // File paths map to content hashes or 1 when text is not embedded.
   // Include-search candidates map to absence or their resolved identity.
@@ -2101,10 +2116,12 @@ void Compiler.__complete_here(Compiler c, Symbol role, List keywords) {
 */
 int Compiler.record_origin(Compiler c, Token token) {
   if (!token) return 0;
-  String file = c.filename ? c.filename : "<stdin>";
+  int line = token.line;
+  String file = c.line_markers ? c.token_source(token, line) : c.filename;
+  if (!file) file = "<stdin>";
   if (!c.source_map) file = c.display_path(file);
   c.origins.push(
-    %(source $file ${token.line} ${token.col} ${token.len} ${token.pos}));
+    %(source $file $line ${token.col} ${token.len} ${token.pos}));
   return c.origins.len();
 }
 
@@ -2146,9 +2163,12 @@ static List Compiler._source_range(Compiler c, Token first, Token after) {
   while (last > first &&
          (last.type == <space> || last.type == <comment> ||
           last.type == <preproc>)) last--;
-  String path = absolute_path(c.filename);
-  if (!(path in c.source_texts)) c.source_texts[path] = c.text;
-  return %($path ${first.pos} ${last.pos + last.len});
+  // A module member's range counts from the start of the member.
+  int start = first.pos;
+  String path = absolute_path(c.text_source(first.pos, start));
+  if (!c.line_markers && !(path in c.source_texts))
+    c.source_texts[path] = c.text;
+  return %($path $start ${start + last.pos + last.len - first.pos});
 }
 
 /** Records a resolved reference without inventing spans for constructed
