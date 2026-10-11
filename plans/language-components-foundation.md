@@ -793,6 +793,17 @@ replacement template and fill steps are the remaining driver cost.
   callback `_x2c_defer_cleanup_N` that `_callable_defer` writes, and
   lambda-lifted functions raise the same question for kernel-written
   definitions.
+- 2026-10-11, lambda long-function gap (`kernel/lambda-gap`): the cells
+  rule keeps each run of unchanged function items as one lowered `(seq)`
+  carrier instead of one carrier per item, takes the rebuilt items as an
+  Array, and compares by identity; `_replace_bindings` tests only atoms as
+  binders and lists through `binding_identity_try_parts`. The 60-statement
+  shared-local shape went 13.57 M -> 11.95 M per lambda against the kernel's
+  11.59 M fresh (11.75 M in the plan); every other shape is at or below the
+  kernel; functions without lambdas unchanged; C byte-identical. The last
+  0.3 M is the mention walk; recording mentions in the shared walk recovered
+  it but cost every lambda-free 60-statement function +0.35 M, so it was not
+  taken. +33/-17 authored.
 - 2026-10-10, facts learned: `function-entry` placement is parse-time, so
   lambda cells need a transform-time entry placement before lambdas move; a
   plain `make build` after editing a shipped component leaves a degraded
