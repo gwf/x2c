@@ -38,8 +38,9 @@ String Compiler.module_support_header(Compiler c, String path) =>
 
 /** Keeps module output guards independent of invocation path spelling. */
 String Compiler.generated_unit_hash(Compiler c) =>
-  filename_hash(c.module_owner
-    ? c.module_tree.identity(c.canonical_path(c.filename)) : c.filename);
+  filename_hash(
+    c.module_owner
+      ? c.module_tree.identity(c.canonical_path(c.filename)) : c.filename);
 
 /** Returns the relocatable identity of an enrolled source. Canonical paths
     still establish ownership. Identity collisions cannot share native names.
@@ -53,8 +54,10 @@ String ModuleTree.identity(ModuleTree tree, String spelling) {
   if (ancestors) {
     String entry = ancestors.last();
     root = Path.dirname(entry);
-    String package = package_directory(tree.compiler.package_source_dirs, path);
-    if (!package) package = package_directory(tree.compiler.package_dirs, path);
+    String package = package_directory(
+      tree.compiler.package_source_dirs, path);
+    if (!package)
+      package = package_directory(tree.compiler.package_dirs, path);
     if (package && package_source(package, path))
       identity = %"package:${Path.basename(package)}:${path[package.len() + 1:]}";
     else if (identity.startswith("/")) {
@@ -69,8 +72,9 @@ String ModuleTree.identity(ModuleTree tree, String spelling) {
     String native_id = filename_hash(identity);
     String previous = tree.owners[%(identity-owner $native_id)];
     if (previous && previous != path)
-      tree._report(path,
-        %"module identity '$identity' collides with '$previous'; use distinct entry names or a package/project namespace");
+      tree._report(
+        path, %"module identity '$identity' collides with '$previous'; " +
+        "use distinct entry names or a package/project namespace");
     tree.owners[%(identity-owner $native_id)] = path;
   }
   tree.owners[%(identity $path)] = identity;
