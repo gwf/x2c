@@ -160,13 +160,14 @@ def load_metadata(path, streams=()):
     """Load immutable portable companion records without inspecting C names."""
     seen, records, edges, namespace_edges, native_providers = set(), {}, {}, {}, {}
     owner_sources, region_providers = {}, {}
-    primary = json.loads(path.read_text())
+    origin = path.resolve()
+    primary = json.loads(origin.read_text())
     def load(current):
         current = current.resolve()
         if current in seen:
             return
         seen.add(current)
-        metadata = json.loads(current.read_text())
+        metadata = primary if current == origin else json.loads(current.read_text())
         if metadata.get('active') is False:
             return
         if metadata['format'] != primary['format']:
@@ -189,49 +190,54 @@ def load_metadata(path, streams=()):
         for companion in metadata.get('companions', []):
             load(current.parent / companion)
     load(path)
-    for text in streams:
-        physical, include_stack = None, []
-        for line in text.splitlines():
-            location = LINE.fullmatch(line.strip())
-            if location:
-                filename = json.loads(location[2])
-                flags = (location[3] or '').split()
-                if '1' in flags:
-                    include_stack.append(physical)
-                    physical = filename
-                elif '2' in flags:
-                    if not include_stack:
-                        raise ProjectionError('native include return without entry')
-                    physical = include_stack.pop()
-                elif physical is None:
-                    physical = filename
-                continue
-            marker = MARKER.fullmatch(line.strip())
-            if not marker or marker[1] != 'begin' or marker[2] in records:
-                continue
-            if physical is None or physical.startswith('<'):
-                raise ProjectionError('region has no physical provider: ' + marker[2])
-            provider = Path(physical).with_suffix('.xnm')
-            if not provider.exists():
-                raise ProjectionError('missing selected provider metadata: ' + str(provider))
-            load(provider)
-            if marker[2] not in records:
-                raise ProjectionError('selected provider does not define region: ' + marker[2])
-    primary['regions'] = list(records.values())
-    primary['familyEdges'] = edges
-    primary['namespaceEdges'] = namespace_edges
-    primary['nativeProviders'] = native_providers
-    primary['_ownerSources'] = owner_sources
-    primary['_regionProviders'] = region_providers
-    primary['_inputs'] = sorted(str(path) for path in seen)
+    def extend(streams):
+        for text in streams:
+            physical, include_stack = None, []
+            for line in text.splitlines():
+                location = LINE.fullmatch(line.strip())
+                if location:
+                    filename = json.loads(location[2])
+                    flags = (location[3] or '').split()
+                    if '1' in flags:
+                        include_stack.append(physical)
+                        physical = filename
+                    elif '2' in flags:
+                        if not include_stack:
+                            raise ProjectionError('native include return without entry')
+                        physical = include_stack.pop()
+                    elif physical is None:
+                        physical = filename
+                    continue
+                marker = MARKER.fullmatch(line.strip())
+                if not marker or marker[1] != 'begin' or marker[2] in records:
+                    continue
+                if physical is None or physical.startswith('<'):
+                    raise ProjectionError('region has no physical provider: ' + marker[2])
+                provider = Path(physical).with_suffix('.xnm')
+                if not provider.exists():
+                    raise ProjectionError('missing selected provider metadata: ' + str(provider))
+                load(provider)
+                if marker[2] not in records:
+                    raise ProjectionError('selected provider does not define region: ' + marker[2])
+        primary['regions'] = list(records.values())
+        primary['familyEdges'] = edges
+        primary['namespaceEdges'] = namespace_edges
+        primary['nativeProviders'] = native_providers
+        primary['_ownerSources'] = owner_sources
+        primary['_regionProviders'] = region_providers
+        primary['_inputs'] = sorted(str(path) for path in seen)
+    primary['_extendMetadata'] = extend
+    extend(streams)
     return primary
 
 
-def project(text, metadata, selected_edges=None, owner_streams=None):
+def project(text, metadata, selected_edges=None, owner_streams=None,
+            consumer_regions=None):
     """Order exact regions using producer-supplied binding prerequisites."""
     if metadata['format'] not in (1, 2):
         raise ProjectionError('unknown metadata format')
-    regions = extract(text, selected_edges)
+    regions = (consumer_regions if consumer_regions is not None
+               else extract(text, selected_edges))
     records = {row['id']: row for row in metadata['regions']}
     if len(records) != len(metadata['regions']):
         raise ProjectionError('duplicate metadata identity')
@@ -368,10 +374,12 @@ def retain_projection_inputs(depfile, metadata):
     path.write_text(text[:position] + insertion + text[position:])
 
 
-def preprocess_owners(metadata, compiler, directory, consumer_text):
+def preprocess_owners(metadata, compiler, directory, consumer_text,
+                      consumer_regions=None):
     """Use each defining source's configured CPP environment exactly once."""
     streams = {}
-    selected = extract(consumer_text)
+    selected = (consumer_regions if consumer_regions is not None
+                else extract(consumer_text))
     required = {row.get('familyOwner') for row in metadata['regions']
                 if row.get('family') and row['id'] in selected and
                 row.get('familyOwner') != metadata.get('provider')}
@@ -396,6 +404,18 @@ def preprocess_owners(metadata, compiler, directory, consumer_text):
     return streams
 
 
+def project_native_text(text, metadata, compiler, directory, edges):
+    """Share one consumer extraction and one metadata registry per invocation."""
+    configuration = load_metadata(metadata, [text])
+    regions = extract(text, edges)
+    streams = preprocess_owners(configuration, compiler, directory, text,
+                                regions) if compiler else None
+    if streams:
+        configuration['_extendMetadata'](streams.values())
+    return project(text, configuration, owner_streams=streams,
+                   consumer_regions=regions), configuration
+
+
 def compile_native(arguments):
     source, destination, object_file, depfile, *compiler = arguments
     if not compiler or compiler.pop(0) != '--':
@@ -415,13 +435,10 @@ def compile_native(arguments):
         return status
     try:
         consumer_text = expanded.read_text()
-        configuration = load_metadata(metadata, [consumer_text])
         edges = []
-        streams = preprocess_owners(configuration, compiler, destination.parent, consumer_text)
-        receipts = configuration.get('_ownerReceipts', [])
-        configuration = load_metadata(metadata, [consumer_text, *streams.values()])
-        configuration['_ownerReceipts'] = receipts
-        destination.write_text(project(consumer_text, configuration, edges, streams))
+        result, configuration = project_native_text(
+            consumer_text, metadata, compiler, destination.parent, edges)
+        destination.write_text(result)
         Path(str(destination) + ".xne").write_text(json.dumps(sorted(edges)))
         retain_projection_inputs(depfile, configuration)
     finally:
@@ -455,14 +472,10 @@ def project_external(arguments):
         return status
     try:
         text = expanded.read_text()
-        configuration = load_metadata(metadata, [text])
-        streams = preprocess_owners(configuration, compiler,
-                                    destination.parent, text)
-        receipts = configuration.get('_ownerReceipts', [])
-        configuration = load_metadata(metadata, [text, *streams.values()])
-        configuration['_ownerReceipts'] = receipts
         edges = []
-        destination.write_text(project(text, configuration, edges, streams))
+        result, configuration = project_native_text(
+            text, metadata, compiler, destination.parent, edges)
+        destination.write_text(result)
         Path(str(destination) + '.xne').write_text(json.dumps(sorted(edges)))
         retain_projection_inputs(depfile, configuration)
     finally:
@@ -485,14 +498,9 @@ def main():
             arguments = arguments[:divider]
         expanded, metadata, destination = map(Path, arguments[:3])
         consumer_text = expanded.read_text()
-        configuration = load_metadata(metadata, [consumer_text])
         edges = []
-        streams = preprocess_owners(configuration, compiler, destination.parent, consumer_text) if compiler else None
-        receipts = configuration.get('_ownerReceipts', [])
-        if streams:
-            configuration = load_metadata(metadata, [consumer_text, *streams.values()])
-            configuration['_ownerReceipts'] = receipts
-        result = project(consumer_text, configuration, edges, streams)
+        result, configuration = project_native_text(
+            consumer_text, metadata, compiler, destination.parent, edges)
         Path(str(destination) + ".xne").write_text(json.dumps(sorted(edges)))
         if len(arguments) == 4:
             retain_projection_inputs(arguments[3], configuration)
