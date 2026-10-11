@@ -81,6 +81,10 @@ int Compiler_has_rewrites(Compiler c, Symbol point, Var kind);
 
 List Compiler_rewrite(Compiler c, Symbol point, Var kind, List source, AstPos position, Type expected, Token site);
 
+List Compiler_rewrite_lowered(Compiler c, Symbol point, Var kind, List source, AstPos position, Type expected, Token site);
+
+List Compiler_lower_replacement(Compiler c, List replacement, List source);
+
 List Compiler_lower_rewrite(Compiler c, Symbol point, Var kind, List source, AstPos position, Type expected, Token site);
 
 typedef struct Effects{
@@ -92,7 +96,7 @@ struct SlotWatch{
   List values;
   Array outputs, order;
   Effects inner;
-  int repeated, prepares, shipped;
+  int repeated, prepares, shipped, kept;
   List outer;
   SlotWatch parent;
 }

@@ -41,6 +41,8 @@ Ast Ast_rewrite_children(Ast ast, Func per_child);
 
 int ast_contains_head(Var value, Symbol kind);
 
+Var ast_replace_nodes(Var root, Map replaced);
+
 void ast_collect_binding_references(Var node, Map referenced);
 
 Ast Ast_without_origin(Ast ast);
