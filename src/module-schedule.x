@@ -35,13 +35,20 @@ List declaration_components(List providers, Map dependencies) {
     Members of one component retain their original provider order.
 */
 List declaration_work(List providers, Map dependencies) {
-  Array work = [];
+  Array groups = [], work = [];
+  Map components = {};
   foreach (List component, declaration_components(providers, dependencies)) {
+    int index = groups.len();
     Array selected = [];
-    foreach (String provider, providers)
-      if (provider in component) selected.push(provider);
-    if (selected.len()) work.push(selected.list_free());
+    groups.push(selected);
+    foreach (String provider, component) components[provider] = index;
   }
+  foreach (String provider, providers) {
+    Array selected = groups[(int) components[provider]];
+    selected.push(provider);
+  }
+  foreach (Array selected, groups)
+    if (selected.len()) work.push(selected.list_free());
   return work.list_free();
 }
 
