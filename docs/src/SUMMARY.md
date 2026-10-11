@@ -123,6 +123,7 @@
   - [src/component-match.x](internals/compiler-api/component-match.md)
   - [src/component-operators.x](internals/compiler-api/component-operators.md)
   - [src/component-printf.x](internals/compiler-api/component-printf.md)
+  - [src/component-protocols.x](internals/compiler-api/component-protocols.md)
   - [src/component-raise.x](internals/compiler-api/component-raise.md)
   - [src/component-try.x](internals/compiler-api/component-try.md)
   - [src/deps.x](internals/compiler-api/deps.md)

@@ -525,6 +525,9 @@ The modules under `src/` divide ownership as follows:
 - `src/component-lambdas.x` -- lambdas lifted to static functions,
   registered as literal rewrites for both lambda forms, and their shared
   cells, registered as a function rule;
+- `src/component-protocols.x` -- protocol forwarding members, `Var`
+  descriptor thunks, and descriptor registration, registered as a rewrite
+  of the conformance form;
 - `src/operator-ledger.x` -- operator precedence, compound assignment,
   and protocol-member mappings from one compile-time ledger;
 - `src/cli.x`, `src/main.x` -- option metadata and parsing, dispatch, logging,
@@ -580,7 +583,8 @@ The modules under `src/` divide ownership as follows:
 - `src/grammar.x` -- source-form patterns and parsed-node accessors used by
   lowering;
 - `src/type.x`, `src/protocol.x` -- type representation, conversions, protocol
-  declarations, conformance, and generated adapters;
+  declarations, conformance, and native aliases, with the conformance form
+  that presents each conformance's adapters to `src/component-protocols.x`;
 - `src/type-ledger.x` -- the `Var` tag lookups projected from the tag ledger,
   kept in their own unit so the units that include `type.x` do not load it;
 - `src/collect.x` -- global environment discovery and unit interfaces;
@@ -846,6 +850,27 @@ shares by reference moves into a Scope cell, so the binding outlives the
 call. A parameter is copied into its cell at entry, a declarator becomes the
 cell's declaration, a destructuring declaration copies its target after it,
 and every read goes through the cell; the replacement is bound again.
+
+`src/component-protocols.x` registers on the `conform` head. Before the
+transform, the compiler presents each conformance whose forward converter
+the unit defines, and whose participant is not numeric, as a form
+`(conform BASE PARTICIPANT FORWARD REVERSE BINDER DESCRIPTOR (ROW...))`.
+It has already decided each member's owner and storage, reported
+collisions and missing conversions, published the external forwarding
+members' signatures, and bound the name of every function it asks for and
+of the method table. Each row is `(MEMBER STATUS SOURCE EXPECTED TEMPLATE
+PART...)`, whose parts are `(default NAME STORAGE)` for a forwarding
+member, `(inherited NAME EXPECTED)` for the prototype of a member another
+conformance defines, and `(thunk NAME ERASED)` for a descriptor slot. A
+function that completes a documented prototype keeps its prose. DESCRIPTOR is
+`(METHODS NAME VAR-TAG AREA [TAG])` for a `Var` participant with its own
+descriptor, and empty otherwise. The translator places each function and
+the table with `%(unit-support)`, and the table's assignment and the
+registration with `%(unit-init AREA)`, and answers `(seq)`. A rule on the
+head answers file-scope code, which joins the unit's support. When no rule
+answers, the translation ends with `no rule lowers this protocol
+conformance`. Native aliases stay in the compiler, because they enter at
+the participant typedef's header boundary.
 
 The components and `src/grammar.x`, whose source forms they recognize, are
 compiler prelude sources.

@@ -213,7 +213,8 @@ List compiler_prelude_sources(void) => %(
   "src/component-printf.x" "src/component-operators.x"
   "src/component-raise.x" "src/component-match.x"
   "src/component-interpolation.x" "src/component-destructuring.x"
-  "src/component-lambdas.x");
+  "src/component-lambdas.x"
+  "src/component-protocols.x");
 
 /** Reports whether the canonical `path` is a compiler prelude source. */
 int is_prelude_source(String path) =>

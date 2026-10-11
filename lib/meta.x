@@ -171,12 +171,13 @@ meta List Code.func_parameters(Code parameters, Code fn, Code argv);
     access or assignment, a binary operator, a member call by receiver
     type, a call by callee spelling, an Array, Map, or `%""` literal, a
     destructuring assignment, or a lambda by head, a `switch`, `try`,
-    `raise`, `match`, or destructuring declaration (`dstrdecl`) node, a
-    destructuring assignment statement, or a function definition. An
-    operator the pattern writes as `(!or OP...)` registers it for each
-    operator. An operator pattern that types the operation or an operand
-    `Var`, or an alias of it, takes the dynamic operations instead: those
-    with an operand of `Var` identity that no protocol member resolved, each
+    `raise`, `match`, destructuring declaration (`dstrdecl`), or protocol
+    conformance (`conform`) node, a destructuring assignment statement, or
+    a function definition. An operator the pattern writes as `(!or OP...)`
+    registers it for each operator. An operator pattern that types the
+    operation or an operand `Var`, or an alias of it, takes the dynamic
+    operations instead: those with an operand of `Var` identity that no
+    protocol member resolved, each
     presented typed `Var`. A member call whose receiver pattern is
     `(expr MARK *)`, with a field keyword Symbol for its type, takes the
     calls that find no member on a receiver whose aggregate declares a field

@@ -191,7 +191,8 @@ run_fixture() {
 
   for phase in "${phases[@]}"; do
     case "$phase" in
-      tokens|ast|transform|emit|symbols|h|c|compile-status|diagnostics)
+      tokens|ast|transform|emit|symbols|definitions|h|c|compile-status|\
+      diagnostics)
         ;;
       cc-stderr|stdout|stderr|status)
         ;;
@@ -221,6 +222,7 @@ run_fixture() {
   has_phase transform && run_dump transform --dump-transforms
   has_phase emit && run_dump emit --dump-code
   has_phase symbols && run_symbol_dump
+  has_phase definitions && run_dump definitions --dump-definitions
 
   need_compile=0
   for phase in h c compile-status diagnostics cc-stderr stdout stderr \

@@ -461,7 +461,7 @@ assembly, and the rule driver, with every language feature a file under
 | string interpolation | literal `segments`; delivered in wave 2 | 200 | 730 |
 | truthiness, getindex, dynamic operators | unary, binary, access; delivered in wave 1 | 410 | 620 |
 | lambda lowering | lambda rules; unit-support and function-entry placements; delivered in wave 5 | 1,500 | 586 |
-| protocols: adapter synthesis only, per `plans/protocols-component.md` | `conform` node rule; unit-support and unit-init placements | 300 | 153 |
+| protocols: adapter synthesis only, per `plans/protocols-component.md` | `conform` node rule; unit-support and unit-init placements; delivered in wave 6 | 300 | 153 |
 
 Runtime static locals and class defaults stay in the kernel; the log of
 2026-10-10 records why. `match` moves from the research list to the table
@@ -692,6 +692,29 @@ replacement template and fill steps are the remaining driver cost.
   hand-built adapter, and cell declarations built without rebinding;
   `watched_step` scans every source expression once per lowering step, so
   a large lambda body costs quadratically.
+- 2026-10-11, wave 6, protocol adapters (`kernel/protocols-component`,
+  move 1 of `plans/protocols-component.md`): adapter synthesis is
+  `src/component-protocols.x`, 199 lines, a rule on the `conform` form
+  `(conform BASE PARTICIPANT FORWARD REVERSE BINDER DESCRIPTOR (ROW...))`
+  that the kernel presents for each resolved conformance whose forward
+  converter the unit defines; rows carry bound names so generated members
+  keep their method display, and `Compiler._generated_support` keeps a
+  documented prototype's prose. The component writes forwarding members,
+  descriptor thunks, method tables, and registration through unit-support
+  and unit-init placements; `Compiler.shipped_support` binds a rule's
+  result into the unit's support and reports `no rule lowers this protocol
+  conformance` when none answers. Kernel -259/+109 (net -150): the
+  `AdapterFunction` and `ProtocolAdapters` generation, the render guard,
+  descriptor registration and its helpers. No SDK operation; the `conform`
+  head joins `Code.register_rewrite`. Generated C byte-identical for the
+  plan's workloads, lib/common.x, and every fixture. Cost: +1.28 M per
+  conformance (W1 minus W0: 11.1 M -> 13.7 M per type with two
+  conformances) against the plan's +1.0 M; member resolution per use
+  unchanged; lib/common.x +76 M (+1.9%); src/protocol.x -416 M. Sampling
+  puts the cost in `bind_syntax` under `Compiler.place`, about 30% of it
+  landing and thawing quotations. Fixtures: `rewrite-conform` (a user rule
+  on the head) and `protocol-documented-member`, with a new `definitions`
+  fixture phase that runs `--dump-definitions`.
 - 2026-10-10, facts learned: `function-entry` placement is parse-time, so
   lambda cells need a transform-time entry placement before lambdas move; a
   plain `make build` after editing a shipped component leaves a degraded

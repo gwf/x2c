@@ -30,6 +30,7 @@ Functions and types exposed by each compiler module.
 | [`src/component-match.x`](component-match.md) | match statements. |
 | [`src/component-operators.x`](component-operators.md) | dynamic operators. |
 | [`src/component-printf.x`](component-printf.md) | Var values in printf-family formats. |
+| [`src/component-protocols.x`](component-protocols.md) | protocol adapters and Var descriptors. |
 | [`src/component-raise.x`](component-raise.md) | raise. |
 | [`src/component-try.x`](component-try.md) | try, catch, and finally. |
 | [`src/deps.x`](deps.md) | Make dependency output for x2c translation units. |
