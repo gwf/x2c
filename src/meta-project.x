@@ -788,6 +788,13 @@ static String Helper.compile_files(Helper &h, String base, String unit) {
   if (t.project_native_source(
       %"$base.c", directories, projected, native_dependencies, errors))
     return errors;
+  if (!native_dependencies) {
+    Compiler c = Compiler.new();
+    c.configure_module(unit);
+    if (c.module_owner && t.project_native_initializer_source(
+        %"$base.c", directories, projected, native_dependencies, errors))
+      return errors;
+  }
   if (native_dependencies) h.add_depfile(native_dependencies);
   String failure = Compiler.meta_cc_run(
     %(${t.cc} @{_cc_flags()} "-iquote" ${h.directory}

@@ -265,6 +265,28 @@ int Toolchain.project_native_source(
   return status;
 }
 
+/** Selects native initializer edges when a module has no layout metadata.
+    The existing external projection wraps the source without assigning source
+    ownership and returns the same configured preprocessing dependency receipt.
+*/
+int Toolchain.project_native_initializer_source(
+  Toolchain t, String source, List gen_dirs,
+  String &projected, String &dependencies, String &errors) {
+  projected = source;
+  dependencies = NULL;
+  if (t.dry_run) return 0;
+  String directory =
+    %"${home_dir()}/builds/native/${filename_hash(Path.absolute(source))}-initializers";
+  Path.make_dirs(directory);
+  projected = %"$directory/${Path.basename(source)}";
+  dependencies = %"$directory/${Path.stem(source)}.d";
+  String output;
+  return tool_capture(
+    %("python3" ${native_projection_helper()} "--external"
+      $source $projected $dependencies "--" @{t._compile_arguments(gen_dirs)}),
+    output, errors);
+}
+
 static List Toolchain._compile_arguments(Toolchain t, List gen_dirs) => %(
   ${t.cc} "-fsigned-char"
   @{gen_dirs.map(%!(directory) => %("-iquote" $directory)).flatten()}

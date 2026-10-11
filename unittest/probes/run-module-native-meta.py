@@ -234,8 +234,8 @@ CASES = {'module_prerequisite': ({'box.x': 'meta module int left(void);\n'
                                                 'answer()==42?0:1;\n'},
                                      ['main.x'],
                                      False),
- 'module_direct_initializer_cycle': ({'box.x': 'module int a;\n'
-                                               'module int b;\n'
+ 'module_direct_initializer_cycle': ({'box.x': 'module extern int a;\n'
+                                               'module extern int b;\n'
                                                'module '
                                                '{"box/a.x","box/b.x","box/use.x"}\n',
                                       'box/a.x': 'module int a=b+1;\n',
