@@ -52,10 +52,6 @@ Code delegate_member(Code code);
 
 Code destructure_declaration(Code node);
 
-Code destructure_names(Code node);
-
-Code destructure_parameters(Code node);
-
 Code destructure_statement(Code node);
 
 Code destructure_value(Code node);

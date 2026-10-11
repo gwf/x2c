@@ -541,45 +541,6 @@ Code destructure_declaration(Code node) {
   return node;
 }
 
-/** Declares the names of `T (a, b) = source;`, then reads the source into
-    them. */
-Code destructure_names(Code node) {
-  match (node) case %(dstrdecl ?(Type type) (targets *names) ?source): {
-    Atom values = Atom.intern("?__destructure");
-    Array declarators = [], targets = [];
-    foreach (Var name, names) {
-      declarators.push(%(bind $name ()));
-      targets.push(%(expr $type (ident $name)));
-    }
-    List declaration = %(declare $type
-                           (bindings @{declarators.list_free()}));
-    return _destructure_bound(
-      %(seq $declaration ${_destructure_read(values, source)}
-            @{_destructure_writes(targets.list_free(), values)}),
-      values, NULL);
-  }
-  return node;
-}
-
-/** Declares each target of `(T1 a, T2 b) = source;` initialized from its
-    element. */
-Code destructure_parameters(Code node) {
-  match (node) case %(dstrdecl (params *parameters) ?source): {
-    Atom values = Atom.intern("?__destructure");
-    Array declarations = [_destructure_read(values, source)];
-    int index = 0;
-    foreach (List parameter, parameters)
-      match (parameter) case %(param ?base ?declarator): {
-        Code element = _destructure_element(values, index++);
-        declarations.push(
-          %(declare $base (bindings (op = $declarator $element))));
-      }
-    return _destructure_bound(
-      %(seq @{declarations.list_free()}), values, NULL);
-  }
-  return node;
-}
-
 /** Reads the source of `(a, b) = source;` into its targets in a block. */
 Code destructure_statement(Code node) {
   match (node)
@@ -1463,8 +1424,6 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_destructure_writes", _destructure_writes);
   $linked.row(rows, "_destructure_bound", _destructure_bound);
   $linked.row(rows, "destructure_declaration", destructure_declaration);
-  $linked.row(rows, "destructure_names", destructure_names);
-  $linked.row(rows, "destructure_parameters", destructure_parameters);
   $linked.row(rows, "destructure_statement", destructure_statement);
   $linked.row(rows, "destructure_value", destructure_value);
   $linked.row(rows, "_match_flush", _match_flush);
