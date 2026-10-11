@@ -329,6 +329,43 @@ def cases():
     yield "ordinary_native_dependent_alias_forward", ordinary_native_alias, {
         "include_dirs": ["."],
         "inputs": ["box.x", "box/state.x", "box/mirror.x", "main.x"]}, None
+    for flag in (0, 1):
+        exclusive_layout = {
+            "box.x": 'module {"box/inner.x", "box/outer.x"}\n',
+            "box/inner.x": (f'#define SELECT_LAYOUT {flag}\n#if SELECT_LAYOUT\n'
+                            'module typedef struct A {int value;} A;\n'
+                            'module typedef struct B {A nested;} B;\n'
+                            '#else\nmodule typedef struct B {int value;} B;\n'
+                            'module typedef struct A {B nested;} A;\n#endif\n'),
+            "box/outer.x": ('module typedef struct Outer {A first; B second;} Outer;\n'
+                            'int answer(void) {return sizeof(Outer) == 2 * sizeof(int) ? 42 : 0;}\n'),
+            "main.x": probes.consumer("box.x", "answer() == 42"),
+        }
+        yield f"exclusive_layout_edges_flag_{flag}", exclusive_layout, options, None
+        yield f"ordinary_exclusive_layout_edges_flag_{flag}", ordinary(exclusive_layout), {
+            "inputs": ["box.x", "box/inner.x", "box/outer.x", "main.x"]}, None
+    for storage in ("", "static "):
+        label = "static" if storage else "public"
+        macro_effects = {
+            **layout,
+            "settings.h": ('#ifndef LAYOUT_SETTINGS_H\n#define LAYOUT_SETTINGS_H\n'
+                           '#undef NATIVE_FEATURE\n#define NATIVE_FEATURE 1\n'
+                           'typedef int NativeWord;\n#endif\n'),
+            "box/inner.x": ('#define NATIVE_FEATURE 0\n' + storage +
+                            'int early(void) {\n#if NATIVE_FEATURE == 1\n'
+                            'return 1;\n#else\nreturn 0;\n#endif\n}\n'
+                            '#include "settings.h"\n'
+                            'module typedef struct Inner {NativeWord value;} Inner;\n'
+                            'int readstate(void) {return early();}\n'),
+            "box/outer.x": ('module typedef struct Outer {Inner inner;} Outer;\n'
+                            'int answer(void) {Outer item = {{41}}; '
+                            'return readstate() + item.inner.value;}\n'),
+        }
+        yield f"guarded_header_macro_effects_{label}", macro_effects, {
+            **options, "include_dirs": ["."]}, None
+        yield f"ordinary_guarded_header_macro_effects_{label}", ordinary(macro_effects), {
+            "include_dirs": ["."],
+            "inputs": ["box.x", "box/inner.x", "box/outer.x", "main.x"]}, None
     yield "value_layout_three_levels", {
         **layout,
         "box.x": ('module typedef struct Inner Inner;\n'
