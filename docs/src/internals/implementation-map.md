@@ -153,7 +153,8 @@ is listed under [compiler options](../reference/cli.md).
 ### List destructuring
 
 - Parse declarations and binders: `src/parse.x`, `src/statements.x`
-- Type and lower access: `src/type.x`, `src/transform.x`
+- Type access: `src/type.x`; lower: `src/component-destructuring.x`,
+  dispatched from `src/transform.x`
 - Runtime source values: `lib/list.x`
 - Tests: destructuring suite and list-destructuring compiler fixtures
 

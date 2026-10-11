@@ -23,6 +23,7 @@
 #include "varops.x"
 #include "component-access.x"
 #include "component-delegate.x"
+#include "component-destructuring.x"
 #include "component-interpolation.x"
 #include "component-literals.x"
 #include "component-match.x"
@@ -467,6 +468,117 @@ Code delegate_member(Code code) {
     return %(expr () (call $callee (args @arguments)));
   }
   return code;
+}
+
+/* --- src/component-destructuring.x --------------------------------------- */
+
+static Code _destructure_list(Code source) {
+  Code converted =
+    source.type().numeric() ? NULL : source.convert(%("List"));
+  if (!converted || !converted.type().is_named("List"))
+    x2c_diagnostic_fail_at(
+      NULL, <type>, "destructuring requires a List source", NULL);
+  return converted;
+}
+
+static List _destructure_read(Atom values, Code source) =>
+  %(declare ("List")
+     (bindings (op = (bind $values ()) ${_destructure_list(source)})));
+
+static Code _destructure_element(Atom values, int index) {
+  String position = %"$index";
+  return %(expr ("Var")
+           (getindex (expr ("List") (ident $values))
+                     (literal (int) $position)));
+}
+
+static List _destructure_writes(List targets, Atom values) {
+  Array writes = [];
+  int index = 0;
+  foreach (Code target, targets) {
+    Type type = target.cadr();
+    Code element = _destructure_element(values, index++);
+    writes.push(%(stmnt ${$!($type){ $target = $element }}));
+  }
+  return writes.list_free();
+}
+
+static Code _destructure_bound(List code, Atom values, Atom result) {
+  List names = %((new-name $values "destructure"));
+  if (result) names = cons(%(new-name $result "destructure_result"), names);
+  return %(code-value "bound" $code $names);
+}
+
+/** Declares the names of `T (a, b) = source;`, then reads the source into
+    them. */
+Code destructure_names(Code node) {
+  match (node) case %(dstrdecl ?(Type type) (targets *names) ?source): {
+    Atom values = Atom.intern("?__destructure");
+    Array declarators = [], targets = [];
+    foreach (Var name, names) {
+      declarators.push(%(bind $name ()));
+      targets.push(%(expr $type (ident $name)));
+    }
+    List declaration = %(declare $type
+                           (bindings @{declarators.list_free()}));
+    return _destructure_bound(
+      %(seq $declaration ${_destructure_read(values, source)}
+            @{_destructure_writes(targets.list_free(), values)}),
+      values, NULL);
+  }
+  return node;
+}
+
+/** Declares each target of `(T1 a, T2 b) = source;` initialized from its
+    element. */
+Code destructure_parameters(Code node) {
+  match (node) case %(dstrdecl (params *parameters) ?source): {
+    Atom values = Atom.intern("?__destructure");
+    Array declarations = [_destructure_read(values, source)];
+    int index = 0;
+    foreach (List parameter, parameters)
+      match (parameter) case %(param ?base ?declarator): {
+        Code element = _destructure_element(values, index++);
+        declarations.push(
+          %(declare $base (bindings (op = $declarator $element))));
+      }
+    return _destructure_bound(
+      %(seq @{declarations.list_free()}), values, NULL);
+  }
+  return node;
+}
+
+/** Reads the source of `(a, b) = source;` into its targets in a block. */
+Code destructure_statement(Code node) {
+  match (node)
+    case %(stmnt (expr ? (dstrasgn (targets *targets) ?source))): {
+      Atom values = Atom.intern("?__destructure");
+      return _destructure_bound(
+        %(block ${_destructure_read(values, source)}
+                @{_destructure_writes(targets, values)}),
+        values, NULL);
+    }
+  return node;
+}
+
+/** Reads the source of `(a, b) = source` into its targets, and keeps the
+    source in a result local as the expression's value. */
+Code destructure_value(Code node) {
+  match (node)
+    case %(expr ?(Type type) (dstrasgn (targets *targets) ?source)): {
+      Atom values = Atom.intern("?__destructure");
+      Atom result = Atom.intern("?__destructure_result");
+      (List base, List modifiers) = type.parts();
+      Code kept = %(expr $type (ident $result));
+      List block = %(block
+        (declare $base (bindings (op = (bind $result $modifiers) $source)))
+        ${_destructure_read(values, kept)}
+        @{_destructure_writes(targets, values)}
+        (stmnt $kept));
+      return _destructure_bound(
+        %(expr $type (parens $block)), values, result);
+    }
+  return node;
 }
 
 /* --- src/component-match.x ----------------------------------------------- */
@@ -1313,6 +1425,15 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_delegate_cycle", _delegate_cycle);
   $linked.row(rows, "_delegate_fields", _delegate_fields);
   $linked.row(rows, "delegate_member", delegate_member);
+  $linked.row(rows, "_destructure_list", _destructure_list);
+  $linked.row(rows, "_destructure_read", _destructure_read);
+  $linked.row(rows, "_destructure_element", _destructure_element);
+  $linked.row(rows, "_destructure_writes", _destructure_writes);
+  $linked.row(rows, "_destructure_bound", _destructure_bound);
+  $linked.row(rows, "destructure_names", destructure_names);
+  $linked.row(rows, "destructure_parameters", destructure_parameters);
+  $linked.row(rows, "destructure_statement", destructure_statement);
+  $linked.row(rows, "destructure_value", destructure_value);
   $linked.row(rows, "_match_flush", _match_flush);
   $linked.row(rows, "_match_place", _match_place);
   $linked.row(rows, "_match_items", _match_items);

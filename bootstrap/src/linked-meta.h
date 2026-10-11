@@ -15,6 +15,7 @@
 #include "varops.h"
 #include "component-access.h"
 #include "component-delegate.h"
+#include "component-destructuring.h"
 #include "component-interpolation.h"
 #include "component-literals.h"
 #include "component-match.h"
@@ -48,6 +49,14 @@ Code access_prefix(Code code);
 Code access_postfix(Code code);
 
 Code delegate_member(Code code);
+
+Code destructure_names(Code node);
+
+Code destructure_parameters(Code node);
+
+Code destructure_statement(Code node);
+
+Code destructure_value(Code node);
 
 Code match_lowering(Code node);
 

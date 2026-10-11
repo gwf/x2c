@@ -519,6 +519,9 @@ The modules under `src/` divide ownership as follows:
   patterns, and bodies, registered as a statement rewrite;
 - `src/component-interpolation.x` -- the join of an interpolated `String`'s
   parts, registered as a literal rewrite for its head;
+- `src/component-destructuring.x` -- flat List destructuring, registered as
+  statement rewrites for its declarations and assignment statements and as
+  a literal rewrite for its assignment expressions;
 - `src/operator-ledger.x` -- operator precedence, compound assignment,
   and protocol-member mappings from one compile-time ledger;
 - `src/cli.x`, `src/main.x` -- option metadata and parsing, dispatch, logging,
@@ -808,6 +811,19 @@ holds. The transform and
 the cleanup walk step into the nodes the text holds, and the parts of the
 match lower outside its rule, so a nested match applies it again. The
 `switch` is the barrier that an arm's `break` leaves.
+
+`src/component-destructuring.x` registers destructuring declarations on the
+statement family keyed by the `dstrdecl` head, an assignment statement keyed
+by `stmnt`, and an assignment expression on the literal family keyed by
+`dstrasgn`. Its translators answer bound carriers: a `List` local read from
+the source with `Code.convert`, and each target given its element through
+the conversions lowering applies to an assignment or initialization. The
+expression form keeps the source in a result local as its value. The
+parser has already declared the targets, so binding leaves their
+declarations alone and they keep their scope and identity; the locals are
+`new-name` effects. A function body's declarations are rewritten, without
+lowering, before its lambda cells are prepared, so a destructured name a
+lambda shares by reference gets its cell at its declaration.
 
 The components and `src/grammar.x`, whose source forms they recognize, are
 compiler prelude sources.
