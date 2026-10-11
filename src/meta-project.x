@@ -24,6 +24,8 @@
 #include "digest.x"
 #include "deps.x"
 #include "meta-helper-client.x"
+#include "module-schedule.x"
+#include "json.x"
 #include "script.x"
 #include "toolchain.x"
 #include "utils.x"
@@ -66,6 +68,7 @@ static typedef struct Helper {
   Toolchain toolchain, String include, identity, directory;
   List flags, Array modules;
   Map deps, before, readiness, prefix_compilers, publications, prefix_counts;
+  Map native_sources, native_targets, native_loaded;
   Array groups, built, failures, objects, retained_dependencies, int changed;
 } Helper;
 
@@ -80,6 +83,7 @@ void Frontend.prepare_meta(Frontend f, List inputs) {
     .frontend = f, .owners = [],
     .packages = {}, .deps = {}, .before = {}, .readiness = {},
     .prefix_compilers = {}, .publications = {}, .prefix_counts = {},
+    .native_sources = {}, .native_targets = {}, .native_loaded = {},
     .groups = [], .built = [],
     .failures = [], .objects = [], .retained_dependencies = []};
   h.scan(inputs);
@@ -462,16 +466,9 @@ static String Helper.prefix(Helper &h, String owner, int index, String name) {
   h.prefix_counts[index] = sequence;
   String base = %"${h.base(index)}_prefix_$sequence";
   $let(c.meta_build, index + 1) c.write_native_meta_prefix(sequence, published);
-  String failure = h.compile_files(base, owner);
-  if (failure) return failure;
-  String module = %"$base.module", target = %"x2c_module_targets_${index}_prefix_$sequence";
-  List shape = %("-shared");
-#ifdef __APPLE__
-  shape = %("-bundle" "-undefined" "dynamic_lookup");
-#endif
-  failure = Compiler.meta_cc_run(
-    %(${h.toolchain.cc} @shape ${%"$base.o"} "-o" $module), h.directory);
-  if (!failure) failure = Compiler.load_meta_provider(module, index, target);
+  h.native_sources[index] = base;
+  h.native_targets[index] = %"x2c_module_targets_${index}_prefix_$sequence";
+  String failure = h.load_native_closure(index);
   if (failure) return failure;
   h.objects.push(%"$base.o");
   h.changed = 1;
@@ -498,28 +495,102 @@ static String Helper.ready(Helper &h, String owner, int index) {
       foreach (List row, h.failures)
         if (row.car() == index) return row.cadr();
   }
-  h.readiness[owner] = 1;
-  h.publications[index] = {};
-  h.parse(owner, index);
-  String failure = h.compile(index, owner);
+  String failure = h.prepare_native(index);
+  if (!failure) failure = h.load_native_closure(index);
   if (failure) {
     h.record(index, failure);
     h.readiness[owner] = 3;
     return failure;
   }
-  String module = %"${h.base(index)}.module";
-  Toolchain t = h.toolchain;
-  List shape = %("-shared");
+  return NULL;
+}
+
+/* Ordinary parsing publishes signatures and reached body edges once. */
+static String Helper.prepare_native(Helper &h, int index) {
+  String owner = h.owners[index - 1];
+  Var state;
+  if (h.readiness.try_get(owner, state)) {
+    if (state == 1)
+      return index in h.native_sources ? NULL
+        : %"native meta prerequisite cycle: $owner has no available bound prefix";
+    if (state == 2 || state == 4) return NULL;
+    foreach (List row, h.failures)
+      if (row.car() == index) return row.cadr();
+  }
+  h.readiness[owner] = 1;
+  h.publications[index] = {};
+  h.parse(owner, index);
+  String base = h.base(index);
+  if (Path.is_file(%"$base.failure")) return Path.read_text(%"$base.failure");
+  h.native_sources[index] = base;
+  h.native_targets[index] = %"x2c_module_targets_$index";
+  h.readiness[owner] = 4;
+  return NULL;
+}
+
+/* Runtime references differ from declaration and ordered producer edges. */
+static String Helper.native_closure(
+  Helper &h, int index, Map seen, Array providers, Map edges) {
+  if (index in seen) return NULL;
+  seen[index] = 1;
+  String failure = h.prepare_native(index);
+  if (failure) return failure;
+  String owner = h.owners[index - 1], base = h.native_sources[index];
+  providers.push(owner);
+  Array prerequisites = [];
+  String receipt = %"$base.native";
+  if (Path.is_file(receipt))
+    foreach (Var row, Json.parse(Path.read_text(receipt))) {
+      int dependency = row.array()[0];
+      String provider = h.owners[dependency - 1];
+      if (!(provider in prerequisites)) prerequisites.push(provider);
+      failure = h.native_closure(dependency, seen, providers, edges);
+      if (failure) return failure;
+    }
+  edges[owner] = prerequisites.list_free();
+  return NULL;
+}
+
+/* Every member of a runtime component links into one immediate-load object. */
+static String Helper.load_native_closure(Helper &h, int index) {
+  Array providers = [];
+  Map edges = {};
+  String failure = h.native_closure(index, {}, providers, edges);
+  if (failure) return failure;
+  foreach (List component, declaration_work(providers.list_free(), edges)) {
+    Array objects = [], targets = [], indices = [], identities = [];
+    foreach (String owner, component) {
+      int table = h.owners.find(owner) + 1;
+      String base = h.native_sources[table];
+      if (h.native_loaded.getdefault(table, "") == base) continue;
+      failure = h.compile_files(base, owner);
+      if (failure) return failure;
+      objects.push(%"$base.o");
+      targets.push(%($table ${h.native_targets[table]}));
+      indices.push(table);
+      identities.push(base);
+    }
+    if (!indices.len()) continue;
+    String key = "\n".join(identities.list_free()).sha256();
+    String module = %"${h.directory}/component-$key.module";
+    List shape = %("-shared");
 #ifdef __APPLE__
-  shape = %("-bundle" "-undefined" "dynamic_lookup");
+    shape = %("-bundle" "-undefined" "dynamic_lookup");
 #endif
-  failure = Compiler.meta_cc_run(
-    %(${t.cc} @shape ${%"${h.base(index)}.o"} "-o" $module), h.directory);
-  if (!failure)
-    failure = Compiler.load_meta_provider(module, index, %"x2c_module_targets_$index");
-  h.record(index, failure);
-  h.readiness[owner] = failure ? 3 : 2;
-  return failure;
+    failure = Compiler.meta_cc_run(
+      %(${h.toolchain.cc} @shape @{objects.list_free()} "-o" $module), h.directory);
+    if (!failure) failure = Compiler.load_meta_providers(module, targets.list_free());
+    if (failure) return failure;
+    foreach (int table, indices) {
+      h.native_loaded[table] = h.native_sources[table];
+      String owner = h.owners[table - 1];
+      if (h.readiness[owner] == 4) {
+        h.record(table, NULL);
+        h.readiness[owner] = 2;
+      }
+    }
+  }
+  return NULL;
 }
 
 /* The path of table `index`'s group files, without their suffixes. */
@@ -528,7 +599,7 @@ static String Helper.base(Helper &h, int index) =>
 
 /* Removes what a parse left of the group at `base`. */
 static void _clear(String base) {
-  foreach (String suffix, %(".c" ".xnm" ".deps" ".failure")) {
+  foreach (String suffix, %(".c" ".xnm" ".native" ".deps" ".failure")) {
     String file = %"$base$suffix";
     if (Path.exists(file)) Path.remove_file(file);
   }
@@ -559,6 +630,10 @@ static void Helper.parse_source(
   defer h.export(unit.context, dependencies, failures, objects);
   defer h.prefix_compilers.del(path);
   defer h.publications[index] = unit.context.export(h.publications[index].map().copy());
+  defer {
+    foreach (Map retained, %( ${h.native_sources} ${h.native_targets} ${h.native_loaded} ))
+      if (index in retained) retained[index] = unit.context.export(retained[index]);
+  }
   unit.compiler.meta_build = index + 1;
   Map previous = Compiler.use_native_meta_publications(h.publications[index]);
   defer Compiler.use_native_meta_publications(previous);

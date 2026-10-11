@@ -323,6 +323,28 @@ List Compiler.native_prefix_functions(Compiler c) {
   return names.list_free();
 }
 
+/* Only reached bound expressions identify executable provider prerequisites. */
+static List Compiler._native_prerequisites(Compiler c) {
+  Array rows = [];
+  Map seen = {};
+  foreach (List unit, c._units()) {
+    List node;
+    $ast.walk(unit, node)
+      match (node) case $source_identifier_content(
+          %((!set ?binding (binding ? ?(String name))))): {
+        String provider = c.binding_provider(binding, 1);
+        Var index;
+        if (!provider || provider == c.canonical_path(c.filename) ||
+            !meta_build_tables.try_get(provider, index)) continue;
+        List row = %($index $name);
+        if (row in seen) continue;
+        seen[row] = 1;
+        rows.push(row);
+      }
+  }
+  return rows.list_free();
+}
+
 static int Compiler._prefix_value(Compiler c, String name) {
   foreach (List entry, c.meta_group)
     match (entry)
@@ -1071,6 +1093,7 @@ void Compiler.write_meta_build(Compiler c) {
   if (meta_prefix_sequence)
     Path.write_text(%"$meta_build_directory/meta_group_$index.h", header);
   Path.write_text(%"$base.c", source);
+  Path.write_text(%"$base.native", Var.json(c._native_prerequisites()));
   for (int i = 4; i < code.len(); i += 2) {
     String filename = code[i], text = code[i + 1];
     if (filename.endswith(".xnm")) {
