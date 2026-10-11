@@ -1540,8 +1540,10 @@ there runs, `%(function-entry)` at the entry of the enclosing function
 before its first statement, `%(unit-support KEY)` among the unit's
 file-scope declarations once for each key, and `%(unit-init)` in the
 unit's initialization. Code placed at function entry follows the parameters
-and keeps the order of its placements; code in a lambda body enters the
-function that holds the lambda. A failed expansion leaves none of it behind.
+and keeps the order of its placements. A macro in a lambda body places it in
+the function that holds the lambda; a `$rewrite` rule, which runs while the
+body lowers, places it in the lambda's own function. A failed expansion
+leaves none of it behind.
 Here the counter runs after each statement that traces a value:
 
 ```x2c

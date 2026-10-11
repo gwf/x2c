@@ -2040,7 +2040,9 @@ body `(seq)`, which `Code.name`, `Code.parameter`, and `Code.body` read. `<unit>
 `x2c.place` contributes code beyond the expansion's result and returns `nil`.
 It applies under the expansion's semantic transaction, as the effects of a
 code-value carrier do, and a carrier may hold the same `(place WHERE CODE)`
-effect. `WHERE` is one of these Lists:
+effect. A `(new-name TOKEN ROLE)` row before that effect replaces TOKEN in
+CODE with the same fresh local it gives the carrier's code, so placed code
+can declare a local the result uses. `WHERE` is one of these Lists:
 
 - `(after-statement)` places code after the initialized declarator that
   `x2c.enclosing` answers, or otherwise after the enclosing block item. A
@@ -2055,6 +2057,13 @@ effect. `WHERE` is one of these Lists:
 - `(block-exit)` runs code on every transfer that leaves the enclosing
   block after that declarator or block item, as `defer CODE` placed there
   with `(after-statement)` runs, under the same rules.
+- `(function-entry)` places code at the entry of the enclosing function
+  definition, after its parameters and before its first statement, in
+  placement order. It applies to a macro, which runs while the parser reads
+  the body, and to a rewrite rule, which runs while the body lowers. Code a
+  macro places from a lambda body enters the function that holds the
+  lambda; code a rule places there enters the lambda's own function. Code
+  placed outside any function is rejected.
 - `(unit-support)` adds declarations among the unit's file-scope support
   code; `(unit-support KEY)` adds them only for the first placement under
   `KEY`.
