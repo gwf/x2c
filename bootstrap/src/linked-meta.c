@@ -5012,7 +5012,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_8(void){
   _4362 = List_var(_4361);
   _4363 = String_new("lib/macro-value.x");
   _4364 = String_var(_4363);
-  _4365 = String_new("12a9b114");
+  _4365 = String_new("5a16cf19");
   _4366 = String_var(_4365);
   _4367 = cons(_4366, NULL);
   _4368 = cons(_4364, _4367);
@@ -10514,7 +10514,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_19(void){
   _9831 = List_var(_9830);
   _9832 = String_new("src/macros.x");
   _9833 = String_var(_9832);
-  _9834 = String_new("29e15a93");
+  _9834 = String_new("de0cb74b");
   _9835 = String_var(_9834);
   _9836 = cons(_9835, NULL);
   _9837 = cons(_9833, _9836);
@@ -10525,7 +10525,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_19(void){
   _9842 = List_var(_9841);
   _9843 = String_new("src/transform.x");
   _9844 = String_var(_9843);
-  _9845 = String_new("6a3399b4");
+  _9845 = String_new("5f45cc04");
   _9846 = String_var(_9845);
   _9847 = cons(_9846, NULL);
   _9848 = cons(_9844, _9847);

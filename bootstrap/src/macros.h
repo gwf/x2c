@@ -92,8 +92,9 @@ struct SlotWatch{
   List values;
   Array outputs, order;
   Effects inner;
-  int repeated;
+  int repeated, prepares;
   List outer;
+  SlotWatch parent;
 }
 ;
 
