@@ -206,6 +206,38 @@ int Sym.scope_count(Sym s) => s.scopes.len();
 /** Returns whether declarations currently bind at file scope. */
 int Sym.at_file_scope(Sym s) => (int) s.scopes.len() <= s.base_scopes;
 
+/** Retains lexical scopes while a demanded file-level body binds. */
+typedef struct SymSuspension {
+  Block scopes;
+  int local_macro_names;
+} SymSuspension;
+
+/** Keeps exact base scope Maps and binding identities visible. */
+SymSuspension Sym.suspend_locals(Sym s) {
+  SymSuspension saved = {
+    .scopes = s.scopes, .local_macro_names = s.local_macro_names};
+  Block visible = Block.new(sizeof(SymScope));
+  int macros = 0;
+  for (int i = 0; i < s.base_scopes; i++) {
+    SymScope *scope = s._scope_at(i);
+    visible.push(scope);
+    if (scope.macros) macros += scope.macros.len();
+  }
+  s.scopes = visible;
+  s.local_macro_names = macros;
+  return saved;
+}
+
+/** Restores caller scopes before any enclosing semantic rollback. */
+void Sym.restore_locals(Sym s, SymSuspension saved) {
+  Block visible = s.scopes;
+  SymScope *original = saved.scopes.bytes;
+  for (int i = 0; i < s.base_scopes; i++) original[i] = *s._scope_at(i);
+  s.scopes = saved.scopes;
+  s.local_macro_names = saved.local_macro_names;
+  visible.free();
+}
+
 // symbol maps
 
 /** Returns the mutable global symbol map supplied to the latest reset. */
