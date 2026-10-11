@@ -1865,7 +1865,11 @@ static List Compiler._package_aggregate_name(
   if (c.source_module && c.peek(0) == <"{">)
     return %(${c._module_type_spelling(spelling)});
   if (c.peek(0) == <"{">) return %(${c.package_spelling(spelling)});
-  return %(${c._package_type_reference(tag, spelling)});
+  String reference = c._package_type_reference(tag, spelling);
+  if (c.source_module && reference == spelling &&
+      !c.sym.get_exact(%($tag $spelling)))
+    reference = c._module_type_spelling(spelling);
+  return %($reference);
 }
 
 /* Publishes an aggregate whose tokens start at `first`. A constructed
