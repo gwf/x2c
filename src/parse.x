@@ -507,8 +507,11 @@ static List Compiler._declaration_form(Compiler c, int skip_body) {
   if (native && !decl.type_from_ast().is_function())
     $report.parse.meta_function(c, meta);
   if (c.test(<;>)) return c._declared(decl, meta, first);
-  if (c.peek(0) == <"{"> || c._at_function_arrow())
-    return c._defined(decl, meta, native, first);
+  if (c.peek(0) == <"{"> || c._at_function_arrow()) {
+    List node = c._defined(decl, meta, native, first);
+    c._retire_native_prefix_body(first);
+    return node;
+  }
   c.require_input();
   Symbol unexpected = c.peek(0);
   $report.parse.body_expected(c, unexpected);
@@ -524,6 +527,16 @@ static typedef struct NativePrefixBody {
   Map macros, aliases, objects;
   int module, private, origin, kind;
 } NativePrefixBody;
+
+/* Full parsing has bound this source body; its collection cursor is spent. */
+static void Compiler._retire_native_prefix_body(Compiler c, Token first) {
+  if (!c.native_prefix_pending) return;
+  for (int i = c.native_prefix_pending.len() - 1; i >= 0; i--) {
+    NativePrefixBody *pending = c.native_prefix_pending[i].pointer();
+    if (!pending->kind && pending->first.pos == first.pos)
+      c.native_prefix_pending.remove(i);
+  }
+}
 
 /* Ordered native directives and collected types precede later bodies. */
 static void Compiler._retain_native_prefix_nodes(Compiler c, List nodes) {
