@@ -124,8 +124,9 @@ static List Compiler._generated_code(Compiler c, List ast, String basename) {
   int projected = c.module_layout_plan &&
     %(native-projection) in c.module_layout_plan;
   if (projected) {
-    hnodes = c._projection_nodes(hnodes, "h", records, horder);
-    cnodes = c._projection_nodes(cnodes, "c", records, corder);
+    String generation = filename_hash(Path.basename(basename));
+    hnodes = c._projection_nodes(hnodes, "h", generation, records, horder);
+    cnodes = c._projection_nodes(cnodes, "c", generation, records, corder);
   }
   List hcode = c.emit(hnodes, NULL), ccode = c.emit(cnodes, bindings);
   String hfile = %"$basename.h", cfile = %"$basename.c";
@@ -288,7 +289,8 @@ static Map Compiler._projection_include_supplies(
 /* Region identities come from final emitted nodes, after cache/init/body
    placement. They grant no language access and execute no source producer. */
 static List Compiler._projection_nodes(
-  Compiler c, List nodes, String role, Array records, Array order) {
+  Compiler c, List nodes, String role, String generation,
+  Array records, Array order) {
   Array marked = [];
   int ordinal = 0;
   Array split = [];
@@ -322,7 +324,8 @@ static List Compiler._projection_nodes(
         continue;
       }
     }
-    String id = %"u_${c.generated_unit_hash()}_${role}_${ordinal++}";
+    String id =
+      %"u_${c.generated_unit_hash()}_${generation}_${role}_${ordinal++}";
     String family = NULL;
     match (node) case %((!or typedef declare) ?base ?): {
       Type type = base;
