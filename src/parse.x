@@ -510,7 +510,7 @@ static typedef struct NativePrefixBody {
 
 static void Compiler._retain_native_prefix_body(
   Compiler c, List declaration, Token meta, Token first) {
-  NativePrefixBody *pending = calloc(1, sizeof(NativePrefixBody));
+  NativePrefixBody *pending = Scope.calloc(1, sizeof(NativePrefixBody));
   *pending = (NativePrefixBody) {
     .declaration = declaration, .body = c.token, .first = first, .meta = meta,
     .params = c.params, .macros = c.macros.copy(),
