@@ -2216,17 +2216,18 @@ List Compiler.macro_tag_name(
    none of whose children change stays the same List, and only a changed
    List is copied. */
 static Var _replace_bindings(Var value, Map bindings) {
-  int candidate = value.is_binder();
-  if (!candidate && value is <list> && !value.is_nil())
-    candidate = binding_identity_try_parts(value, NULL, NULL);
   Var replacement;
-  if (candidate && bindings.try_get(value, replacement)) return replacement;
-  if (value is not <list> || value.is_nil()) return value;
+  if (value is not <list> || value.is_nil())
+    return value.is_binder() && bindings.try_get(value, replacement)
+      ? replacement : value;
+  if (binding_identity_try_parts(value, NULL, NULL) &&
+      bindings.try_get(value, replacement))
+    return replacement;
   List original = value;
   Array items = NULL;
   for (List cursor = original; cursor; cursor = cursor.cdr()) {
     Var child = cursor.car(), item = _replace_bindings(child, bindings);
-    if (!(void *) items && item != child) {
+    if (!(void *) items && item !== child) {
       items = [];
       for (List prefix = original; prefix != cursor; prefix = prefix.cdr())
         items.push(prefix.car());
