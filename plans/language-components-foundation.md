@@ -460,7 +460,7 @@ assembly, and the rule driver, with every language feature a file under
 | destructuring | statement and declaration rules; delivered in wave 3 | 330 | few |
 | string interpolation | literal `segments`; delivered in wave 2 | 200 | 730 |
 | truthiness, getindex, dynamic operators | unary, binary, access; delivered in wave 1 | 410 | 620 |
-| lambda lowering | function family; function-entry and unit-support placements | 1,500 | 586 |
+| lambda lowering | lambda rules; unit-support and function-entry placements; delivered in wave 5 | 1,500 | 586 |
 | protocols: adapter synthesis only, per `plans/protocols-component.md` | `conform` node rule; unit-support and unit-init placements | 300 | 153 |
 
 Runtime static locals and class defaults stay in the kernel; the log of
@@ -663,6 +663,35 @@ replacement template and fill steps are the remaining driver cost.
   that changes when rebound is not re-offered; `c.return_type` is NULL during
   transform, so a rebound `return` in a statement replacement loses its
   declared type and conversion.
+- 2026-10-10, wave 5, lambdas (held for review on `kernel/wave5-
+  integration`): lambda lowering is `src/component-lambdas.x`, 493 lines,
+  in three moves: the lift of non-capturing lambdas to wrapper functions
+  through a `unit-support` placement; capturing lambdas as a lifted
+  function plus an adapter that calls it, with the kernel lowering in
+  `callables.x` deleted; and the cells, registered in two steps because a
+  function rule fires on every function in every unit that sees the
+  component, so the seed must link `lambda_cells` before it is matched.
+  Kernel -616/+130 (net -486), component +493, total +7; without the shared
+  services the move is -49. One SDK operation, `Code.func_parameters`,
+  returns the signature and reader rows the adapter needs; the `lambda`
+  head joins `Code.register_rewrite` and `x2c_enclosing(<statement>)`
+  answers while lowering. Kept in the kernel: parsing, capture resolution
+  and checks, lambda typing, region checks, `Compiler.lambda_scopes`.
+  `Func` conversions and typed callbacks stay because they also serve
+  native functions. Translation per lambda: non-capturing 7.86 M -> 7.56 M;
+  value capture 9.78 M -> 13.44 M (+37%); reference capture 12.18 M ->
+  18.31 M (+50%), mostly binding the adapter and the placed definitions;
+  the 500-function lambda workload 20.72 G -> 26.46 G; self-translation of
+  expressions.x within noise. Runtime per call: non-capturing unchanged;
+  captures +11 to +13 instructions for the adapter's call into the lifted
+  function. Generated C changes for capturing lambdas only (new shape,
+  fields `c0..`, one conversion per captured value per call); six
+  expectation files and three transform dumps changed. Fixed in passing: a
+  lowering-time diagnostic inside a lambda expression body now reports at
+  the lambda's statement. Follow-ups that recover the capture cost: a
+  hand-built adapter, and cell declarations built without rebinding;
+  `watched_step` scans every source expression once per lowering step, so
+  a large lambda body costs quadratically.
 - 2026-10-10, facts learned: `function-entry` placement is parse-time, so
   lambda cells need a transform-time entry placement before lambdas move; a
   plain `make build` after editing a shipped component leaves a degraded
