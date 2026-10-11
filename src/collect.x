@@ -90,6 +90,10 @@ static Map process_cache = NULL, static Scope process_cache_scope = NULL;
    for its meta calls. */
 static Map provisional_entries = NULL;
 
+/* Files collected cold in this process whose entries declare adoptions and
+   do not yet record their conformances. */
+static Map cold_providers = NULL;
+
 /* Each entry's declared function names; see `_declared_functions`. */
 static Map declared_functions = NULL;
 
@@ -107,6 +111,7 @@ static void _cache_shutdown(void) {
   process_cache_scope = NULL;
   process_cache = NULL;
   provisional_entries = NULL;
+  cold_providers = NULL;
   declared_functions = NULL;
   linked_records = NULL;
 }
@@ -199,6 +204,7 @@ Map Compiler.collect_symbols(Compiler c, Map globs) {
   visited[canonical] = 1;
   c._walk_file(canonical, c.text, Path.dirname(c.filename), globs, visited);
   c.bind_pending_inline_bodies(globs, canonical);
+  c._record_cold_conformances(globs, visited, canonical);
   return globs;
 }
 
@@ -1160,9 +1166,116 @@ static void FileWalk.publish(FileWalk &w) {
   Var prior = _process_cache()[w.path];
   if (prior is <list> && List.equal(prior.list()[4], roots)) return;
   _process_cache()[w.path] = entry;
+  if (w.unit && _declares_adoption(parts)) {
+    if (!cold_providers) cold_providers = _cache_map();
+    cold_providers[w.path] = 1;
+  }
   if (w.deferred || w.c.meta_build) {
     if (!provisional_entries) provisional_entries = _cache_map();
     provisional_entries[w.path] = 1;
+  }
+}
+
+static int _declares_adoption(List parts) {
+  foreach (Var part, parts)
+    if (part is <map>)
+      foreach (Var value, part.map())
+        match (value) case %(adopt ? ? external *): return 1;
+  return 0;
+}
+
+/* The declarations and definitions gathered from a set of files' entries,
+   and the files gathered. */
+static typedef struct Gathered {
+  Map symbols, definitions, visited;
+} Gathered;
+
+/* The compilers that resolve cold files' adoptions for one unit. A file in
+   the prelude sees only the prelude, so one compiler resolves every such
+   file; any other file gets a compiler of its own. */
+static typedef struct ColdConformances {
+  Compiler c, prelude_session;
+  Gathered prelude;
+} ColdConformances;
+
+/* A file collected cold records the conformances it declares as its own
+   translation does, so a unit that includes it reuses the same answer
+   whether or not the file's interface was current. The file's own unit
+   records them when it translates. */
+static void Compiler._record_cold_conformances(
+  Compiler c, Map globs, Map visited, String unit) {
+  ColdConformances cold = {.c = c};
+  defer if (cold.prelude_session) c.close_child(cold.prelude_session);
+  while (cold_providers) {
+    Map pending = cold_providers;
+    cold_providers = NULL;
+    foreach (Var path, pending.keys()) {
+      if (path == unit) continue;
+      Map rows = cold.record(path);
+      if (path in visited) c._merge_rows(globs, rows);
+    }
+  }
+}
+
+static Map ColdConformances.record(ColdConformances &cold, String path) {
+  if (!cold.prelude.symbols) cold.prelude = cold.c._gather_prelude();
+  if (!(path in cold.prelude.visited)) {
+    Compiler provider = cold.c._cold_provider(path, cold.prelude);
+    defer cold.c.close_child(provider);
+    return provider._record_declared();
+  }
+  if (!cold.prelude_session)
+    cold.prelude_session = cold.c._cold_provider(path, cold.prelude);
+  cold.prelude_session.filename = path;
+  return cold.prelude_session._record_declared();
+}
+
+// Every file but `lib/x2c.x`, which declares no adoption, sees the prelude.
+static Gathered Compiler._gather_prelude(Compiler c) {
+  Gathered prelude = {.symbols = {}, .definitions = {}, .visited = {}};
+  foreach (String source, compiler_prelude_sources())
+    c._gather(_canonical_path(%"${x2c_get_root()}/$source"), prelude);
+  return prelude;
+}
+
+/* A compiler of its own for the file at `path` that resolves the adoptions
+   visible to it as the file's translation does: it sees the declarations
+   of the prelude and of the file's include closure. */
+static Compiler Compiler._cold_provider(
+  Compiler c, String path, Gathered &prelude) {
+  Compiler provider = Compiler.new_shared(c);
+  provider.origins = [];
+  provider.filename = path;
+  provider.configure_package(c.package_source_dirs, path);
+  Gathered view = {
+    .symbols = prelude.symbols.copy(),
+    .definitions = prelude.definitions.copy(),
+    .visited = prelude.visited.copy()};
+  provider._gather(path, view);
+  provider.fn_defs = view.definitions;
+  provider.resolve_as_declared(view.symbols);
+  return provider;
+}
+
+// Records the rows of the adoptions the current file declares in its entry.
+static Map Compiler._record_declared(Compiler c) {
+  Map rows = c.conformance_rows(c.declared_adoptions());
+  c.record_conformance_rows(rows);
+  return rows;
+}
+
+/* Adds the declarations and definitions of the file at `path` and of its
+   includes, in source order, without installing their compile-time effects
+   again. */
+static void Compiler._gather(Compiler c, String path, Gathered &into) {
+  if (path in into.visited) return;
+  into.visited[path] = 1;
+  List entry = c._entry(path);
+  if (!entry) return;
+  foreach (Var name, entry.caddr()) into.definitions[name] = 1;
+  foreach (Var part, entry.car()) {
+    if (part is <map>) into.symbols.merge(part);
+    else if (part is <string>) c._gather(part, into);
   }
 }
 
@@ -1316,19 +1429,48 @@ void Compiler.record_generated_symbol(
   contribution[marker_key] = marker;
 }
 
-/** Adds `rows` to the declaration map that the current file's interface
-    publishes, as `record_generated_symbol` does. The cache retains each
-    key and value.
+/** Replaces the recorded conformance rows of the current file's collected
+    entry with `rows`, which join the declaration map its interface
+    publishes, as `record_generated_symbol` adds its rows. A row an earlier
+    cold walk recorded may sit in an earlier map. The cache retains each key
+    and value.
 */
-void Compiler.record_interface_rows(Compiler c, Map rows) {
-  if (!rows.len()) return;
-  Map contribution = _contribution(c.filename);
+void Compiler.record_conformance_rows(Compiler c, Map rows) {
+  Var cached = _process_cache()[_canonical_path(c.filename)];
+  if (cached is void) return;
+  Map contribution = NULL;
+  foreach (Var part, cached.list().car()) {
+    if (part is not <map>) continue;
+    contribution = part;
+    Array stale = $auto([]);
+    foreach (Var (key, value), contribution)
+      match (value) case %(conformance *): stale.push(key);
+    foreach (Var key, stale) contribution.del(key);
+  }
   if (contribution == NULL) return;
   foreach (Var (key, value), rows) {
     _retain(key);
     _retain(value);
     contribution[key] = value;
   }
+}
+
+/** Returns the `(adopt ...)` rows that the current file's collected entry
+    declares, in no particular order. A file that imports a package
+    declares none here: the walk that records them for a cold entry does
+    not install a package's surface. */
+List Compiler.declared_adoptions(Compiler c) {
+  Var cached = _process_cache()[_canonical_path(c.filename)];
+  if (cached is void) return NULL;
+  Array adoptions = $auto([]);
+  foreach (Var part, cached.list().car())
+    if (part is <map>)
+      foreach (Var value, part.map())
+        match (value) {
+          case %(adopt *): adoptions.push(value);
+          case %(package-import *): return NULL;
+        }
+  return adoptions;
 }
 
 // replay

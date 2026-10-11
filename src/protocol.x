@@ -983,7 +983,9 @@ static typedef struct ProtocolRequirements {
     unit declared and recorded keeps that conformance, which is installed
     when it is first used.
 */
-void Compiler.resolve_protocols(Compiler c) {
+void Compiler.resolve_protocols(Compiler c) => c._resolve_visible(1);
+
+static void Compiler._resolve_visible(Compiler c, int report) {
   c.conforms = {};
   String owner = c._path();
   foreach (Var value, c.adoptions) {
@@ -994,14 +996,15 @@ void Compiler.resolve_protocols(Compiler c) {
     String path = c._canonical_file(location);
     if (storage == <static> && path != owner) continue;
     if (c._recorded(base, participant)) continue;
-    c._resolve_adoption(base, participant, path == owner ? location : NULL);
+    c._resolve_adoption(
+      base, participant, report && path == owner ? location : NULL);
   }
 }
 
 // recorded conformance
 
-/* An ordinary external conformance whose adoption the unit's full parse
-   declared is recorded in the unit's interface as
+/* An ordinary external conformance whose adoption the unit's collected
+   entry declares is recorded in the unit's interface as
    `(conformance BASE PARTICIPANT FORWARD REVERSE (bindings (NAME TYPE)...)
    (MEMBER STATUS SOURCE)...)`, with each type variable's binding and each
    member resolved as anything but `no-member`. The expected and template
@@ -1010,15 +1013,7 @@ void Compiler.resolve_protocols(Compiler c) {
    `no-member` elsewhere: no other unit can call that function. A native
    conformance reads no participant member, so each unit resolves it. */
 static void Compiler._record_conformances(Compiler c) {
-  Map rows = {};
-  foreach (Var key, c.protocol_helpers.keys())
-    match (key)
-      case %("parsed-protocol-adoption" ?(Type base) ?(Type participant) ?): {
-        List recorded = c._recorded_conformance(base, participant);
-        if (recorded)
-          rows[%("source-node" (conformance $base $participant))] = recorded;
-      }
-  c.record_interface_rows(rows);
+  c.record_conformance_rows(c.conformance_rows(c.declared_adoptions()));
 }
 
 static List Compiler._recorded_conformance(
@@ -1040,6 +1035,40 @@ static List Compiler._recorded_conformance(
                (bindings @{bound.list_free()}) @{resolved.list_free()});
     }
   return NULL;
+}
+
+/** Returns the interface rows of the resolved conformances `adoptions`
+    declare. */
+Map Compiler.conformance_rows(Compiler c, List adoptions) {
+  Map rows = {};
+  foreach (List adoption, adoptions) {
+    Type (base, participant) = adoption.cdr();
+    List recorded = c._recorded_conformance(base, participant);
+    if (recorded)
+      rows[%("source-node" (conformance $base $participant))] = recorded;
+  }
+  return rows;
+}
+
+/** Resolves the adoptions visible in `symbols` as a declaring unit's full
+    parse resolves its own: before the parse, and again, after the
+    generated members are published, where the parse publishes each one.
+    Their declaring units report their failures, so nothing is reported.
+*/
+void Compiler.resolve_as_declared(Compiler c, Map symbols) {
+  c.sym.reset(symbols);
+  c.rebuild_protocols(symbols);
+  c._resolve_visible(0);
+  c.install_generated_protocol_symbols();
+  Array pairs = [];
+  foreach (Var key, c.conforms.keys()) pairs.push(key);
+  foreach (List pair, pairs) {
+    if (c._recorded(pair.car(), pair.cadr())) continue;
+    c.conforms.del(pair);
+    c.proto_cache = {};
+    c._resolve_adoption(pair.car(), pair.cadr(), NULL);
+  }
+  pairs.free();
 }
 
 /* The row an included interface recorded for an adoption this unit does not
@@ -1085,14 +1114,17 @@ static int Compiler._reuse_conformance(
 /* The recorded conformances this unit may reuse and has not installed, as
    `((BASE PARTICIPANT) ROW)` pairs. */
 static List Compiler._unused_recorded(Compiler c) {
-  Array unused = [];
+  Array candidates = [], unused = [];
   foreach (Var key, c.protocol_helpers.keys())
     match (key)
-      case %("recorded-conformance" ?(Type base) ?(Type participant)): {
-        List row = c._recorded(base, participant);
-        if (row && !(%($base $participant) in c.conforms))
-          unused.push(%(($base $participant) $row));
-      }
+      case %("recorded-conformance" ?(Type base) ?(Type participant)):
+        candidates.push(%($base $participant));
+  // Ownership answers are memoized in the helpers, so they follow the scan.
+  foreach (List pair, candidates) {
+    List row = c._recorded(pair.car(), pair.cadr());
+    if (row && !(pair in c.conforms)) unused.push(%($pair $row));
+  }
+  candidates.free();
   return unused.list_free();
 }
 
@@ -2478,7 +2510,10 @@ List Compiler.generate_protocol_adapters(Compiler c, List ast) {
 */
 void Compiler.install_generated_protocol_symbols(Compiler c) {
   c._reuse_defaults();
-  foreach (Var value, c.conforms)
+  // An owner lookup can install a recorded conformance in the registry.
+  Array conformances = [];
+  foreach (Var value, c.conforms) conformances.push(value);
+  foreach (Var value, conformances)
     match (value)
       case %(protocol-conformance ?(Type base) ?(Type participant)
              ?(String forward) ? ? ? (members *rows)): {
@@ -2501,6 +2536,7 @@ void Compiler.install_generated_protocol_symbols(Compiler c) {
                   c._install_generated(participant, member, signature);
             }
       }
+  conformances.free();
 }
 
 /* Publish resolved external signatures before their adapters are generated. */
