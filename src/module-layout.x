@@ -692,7 +692,22 @@ static List Layouts.mark_fields(
     List declaration = Ast.without_origin(field);
     Map needed = {};
     if (declaration.car() == <declare>) {
-      foreach (List row, declaration.caddr().list().cdr()) {
+      Type source = declaration.cadr();
+      List core = source.base_type(), replacement = NULL;
+      match (core) {
+        case %((!set ?tag (!or struct union)) ?name (fields *rows)):
+          replacement = %($tag $name
+            (fields @{l.mark_fields(c, resolver, rows)}));
+        case %((!set ?tag (!or struct union)) (fields *rows)):
+          replacement = %($tag
+            (fields @{l.mark_fields(c, resolver, rows)}));
+      }
+      if (replacement) {
+        List prefix = source.list()[:source.list().len() - core.len()];
+        declaration = %(declare ${prefix.append(replacement)}
+          ${declaration.caddr()});
+        field = Ast.rewrap_origin(field, declaration);
+      } else foreach (List row, declaration.caddr().list().cdr()) {
         Type type = %(declare ${declaration.cadr()} (bindings $row))
           .type_from_ast();
         l.require_type(c, resolver, type, needed);
