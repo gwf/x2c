@@ -125,13 +125,26 @@ builds/%.c builds/%.h: src/%.x | builds $(DEPENDENCY_PREREQUISITE)
 # builds/ fails with "package is not built".
 $(PACKAGE_ARCHIVE): $(PACKAGE_GENERATED) $(PACKAGE_NATIVE) \
   $(PACKAGE_RESPONSE) package-build-force | $(DEPENDENCY_PREREQUISITE)
-	"$(X2C)" build --kind static-library --output $@ --build-dir builds/cc \
-	  $(PACKAGE_C_FLAGS) $$(find "$(abspath builds)" \
+	@mkdir -p builds/cc; \
+	  sources="builds/cc/package-generated.inputs"; \
+	  directories="builds/cc/package-generated.directories"; \
+	  trap 'rm -f "$$sources" "$$directories"' EXIT HUP INT TERM; \
+	  find "$(abspath builds)" \
 	    -path "$(abspath builds/cc)" -prune -o \
 	    -path "$(abspath builds/module)" -prune -o \
 	    -path "$(abspath builds/native)" -prune -o \
 	    $(PACKAGE_BUNDLE_PRUNE) \
-	    -name '*.c' -print | LC_ALL=C sort) $(PACKAGE_NATIVE)
+	    -name '*.c' -print | LC_ALL=C sort > "$$sources"; \
+	  while IFS= read -r source; do dirname "$$source"; done \
+	    < "$$sources" | LC_ALL=C sort -u > "$$directories"; \
+	  set --; \
+	  while IFS= read -r directory; do \
+	    set -- "$$@" -Xcc -iquote -Xcc "$$directory"; \
+	  done < "$$directories"; \
+	  while IFS= read -r source; do set -- "$$@" "$$source"; \
+	  done < "$$sources"; \
+	  "$(X2C)" build --kind static-library --output $@ --build-dir builds/cc \
+	    $(PACKAGE_C_FLAGS) "$$@" $(PACKAGE_NATIVE)
 
 # The interfaces translation wrote record each of the package's own native
 # `meta` prototypes; without one there is no module to build.

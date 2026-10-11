@@ -324,10 +324,16 @@ static void _build_source(String package, String name, String spec) {
   List paths =
     %("--x-include-dir" $src "--package-dir" ${Path.dirname(package)});
   _run(%($x2c "translate" "--out-dir" $builds @paths @units), "translate");
+  List generated = Path.glob(%"$builds/**/*.c");
+  Map directories = {};
+  foreach (String source, generated) directories[Path.dirname(source)] = 1;
+  List native_paths = directories.keys().array().sort().list();
+  native_paths = native_paths.map(
+    %!(directory) => %("-Xcc" "-iquote" "-Xcc" $directory)).flatten();
   _run(
     %($x2c "build" "--kind" ${TargetKind.of(<static-lib>).spelling}
       "--output" "$builds/lib$name.a"
-      "--build-dir" "$builds/cc" @{Path.glob(%"$builds/**/*.c")}
+      "--build-dir" "$builds/cc" @native_paths @generated
       @{_files_with(src, ".c")}),
     "build");
   if (_native_meta(builds, name))
