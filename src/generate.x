@@ -169,16 +169,24 @@ static String _projection_relative(String path, String directory) {
 
 /* Binding provenance selects the namespace owner. Private type rewriting
    changes emitted spelling, so recover its authoritative original key first. */
+static List Compiler._original_type_namespace(Compiler c, List key) {
+  Map plan = c.module_layout_plan;
+  if (!plan) return key;
+  String path = c.canonical_path(c.filename);
+  Map names = plan[%(private-types $path)];
+  foreach (Var (original, spelling), names)
+    if (key == %(${original.list().car()} $spelling)) return original;
+  return key;
+}
+
+static int Compiler._publishes_emitted_type(Compiler c, List key) =>
+  c.publishes_type_family(c._original_type_namespace(key));
+
 static String Compiler._projection_namespace(Compiler c, List key) {
   Map plan = c.module_layout_plan;
   if (!plan || !(%(namespace-definitions) in plan)) return NULL;
   String path = c.canonical_path(c.filename);
-  Map names = plan[%(private-types $path)];
-  foreach (Var (original, spelling), names)
-    if (key == %(${original.list().car()} $spelling)) {
-      key = original;
-      break;
-    }
+  key = c._original_type_namespace(key);
   String portable = home_portable_path(path);
   Var id;
   if (plan.try_get(%(namespace $portable $key), id)) return id;
@@ -475,7 +483,7 @@ static void Partition.add_typedef(Partition &p, List node) {
   Type core = type.base_type();
   int body = 0;
   match (core) case %((!or struct union enum) ?name (*)):
-    body = p.c.publishes_type_family(%(${core.car()} $name));
+    body = p.c._publishes_emitted_type(%(${core.car()} $name));
   if (type.is_static() && !p.publishes_typedefs(_typedef_names(node))) {
     p.keep();
     if (body) p.publish(%(declare $core (bindings (bind () ()))));
@@ -491,7 +499,7 @@ static void Partition.add_typedef(Partition &p, List node) {
 
 static int Partition.publishes_typedefs(Partition &p, List names) {
   foreach (String name, names)
-    if (p.c.publishes_typedef(name)) return 1;
+    if (p.c._publishes_emitted_type(%(typedef $name))) return 1;
   return 0;
 }
 
@@ -704,7 +712,7 @@ static void Partition.add_declaration(
   if (type.is_static() && _body_tag(type)) {
     List core = type.base_type();
     List family = %(${core.car()} ${core.cadr()});
-    if (p.c.publishes_type_family(family))
+    if (p.c._publishes_emitted_type(family))
       p.publish(%(declare $core (bindings (bind () ()))));
     else p.keep();
     if (_declares_object(bindings)) p.keep();
