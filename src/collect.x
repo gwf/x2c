@@ -483,10 +483,13 @@ static void FileWalk.record_declaration_prerequisites(
         Var syntax;
         if (!overlay.try_get(key, syntax) || syntax is not <list>) continue;
         List family = declaration_type_family(rows, w.statics, key, syntax);
-        int privacy = syntax.list().type().is_static();
+        int privacy = _private_row(w.statics, key, family) ||
+          syntax.list().type().is_static();
         Var aggregate;
         if (family && rows.try_get(family, aggregate) && aggregate is <list>)
           privacy = privacy || aggregate.list().type().is_static();
+        String name = key.car() is <string> ? key.car() : key.cadr();
+        if (shadow.sym.get_exact(%("module-owner" $name))) privacy = 0;
         List detail_key = %("source-node"
           (declaration-detail $path ${w.pos} $key));
         List detail = %(declaration-detail $path $key $syntax $privacy);
