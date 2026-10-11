@@ -27,7 +27,7 @@ Calls the typed callable `callee` with `arguments`, each converted to
 its parameter and evaluated once, in source order, as a statement
 expression.
 
-Source: `src/transform.x:1252`
+Source: `src/transform.x:1253`
 
 <a id="Compiler.normalize"></a>
 #### Compiler.normalize
