@@ -1269,7 +1269,9 @@ static void Compiler.bind_pending_inline_bodies(
 
 /** Groups collected declaration prerequisites without executing source forms.
     Provider records retain the contributing file when inline support copies
-    a type family. Body references and ordered producers remain separate.
+    a type family. Repeated private family spellings conservatively join
+    providers until binding-owned type identities disambiguate them.
+    Body references and ordered producers remain separate.
     A missing provider record returns NULL, requiring ordinary collection.
 */
 List Compiler.collected_declaration_components(Compiler c, List providers) {
@@ -1291,8 +1293,10 @@ List Compiler.collected_declaration_components(Compiler c, List providers) {
             if (!family && key.list().car() is <string> &&
                 %(typedef ${key.list().car()}) in part.map())
               family = %(typedef ${key.list().car()});
-            if (family && (!(family in owners) || key.list().cddr()))
-              owners[family] = provider;
+            if (family) {
+              List known = owners[family].list();
+              if (!(provider in known)) owners[family] = cons(provider, known);
+            }
             own[key] = part.map()[key];
           }
     }
@@ -1306,9 +1310,8 @@ List Compiler.collected_declaration_components(Compiler c, List providers) {
     foreach (String dependency, dependencies[provider].list())
       edges.push(dependency);
     foreach (List family, needed.keys()) {
-      Var owner;
-      if (owners.try_get(family, owner) && owner != provider &&
-          !(owner in edges)) edges.push(owner);
+      foreach (String owner, owners[family].list())
+        if (owner != provider && !(owner in edges)) edges.push(owner);
     }
     dependencies[provider] = edges.list_free();
   }
