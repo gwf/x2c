@@ -125,11 +125,11 @@ Public functions:
 `Compiler.name_meta_provider_bindings`, `Compiler.publishes_typedef`,
 `Compiler.publishes_type_family`, `Compiler.inline_type_dependencies`,
 `Compiler.publish_inline_types`, `Compiler.record_generated_symbol`,
-`Compiler.record_interface_rows`, `Compiler.collect_package`,
-`Compiler.replay_package_imports`, `Compiler.included_compile_time_effects`,
-`Compiler.install_included_effects`, `interface_configure`,
-`interface_prelude`, `interface_text`, `Compiler.linked_prelude_records`,
-`collect_forget_provisional_entries`
+`Compiler.record_conformance_rows`, `Compiler.declared_adoptions`,
+`Compiler.collect_package`, `Compiler.replay_package_imports`,
+`Compiler.included_compile_time_effects`, `Compiler.install_included_effects`,
+`interface_configure`, `interface_prelude`, `interface_text`,
+`Compiler.linked_prelude_records`, `collect_forget_provisional_entries`
 
 ### [src/compiler.x](../src/compiler.x)
 
@@ -661,6 +661,7 @@ Public functions:
 
 `Compiler.reverse_converter_spelling`, `Compiler.parse_protocol_declaration`,
 `Compiler.publish_protocol_node`, `Compiler.resolve_protocols`,
+`Compiler.conformance_rows`, `Compiler.resolve_as_declared`,
 `Compiler.protocol_members_for`, `Compiler.protocol_member_names`,
 `Compiler.protocol_rejects_direct_member`, `Compiler.dump_conformance`,
 `Compiler.resolve_protocol_member`, `Compiler.wrapper_function`,

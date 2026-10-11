@@ -233,9 +233,11 @@ keyed by base and participant. It lists each type variable's binding and
 each member that did not resolve as `no-member`; the expected and template
 types follow from the protocol record. A unit that replays the map installs
 that conformance when it first uses it, instead of resolving the adoption.
-A cold walk has no such row, so the including unit then resolves the
-adoption itself. Cold collection and interface replay use the same ordered
-parts,
+When a cold walk collects a file that declares adoptions, the unit resolves
+them in a compiler that gathers only the prelude's and that file's
+declarations and records the same rows in the file's entry. A file that
+imports a package records none. Cold collection and interface replay use
+the same ordered parts,
 while the full parser installs included compile-time definitions at their
 include positions. Macro names become visible immediately; their templates
 are decoded into the current unit only on first use. The existing semantic
