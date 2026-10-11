@@ -20,6 +20,7 @@
 #pragma once
 #include "frontend.x"
 
+#include "cache.x"
 #include "datum.x"
 #include "digest.x"
 #include "deps.x"
@@ -70,6 +71,7 @@ static typedef struct Helper {
   Map deps, before, readiness, prefix_compilers, publications, prefix_counts, header_active;
   Map native_sources, native_targets, native_loaded;
   Array groups, built, failures, objects, retained_dependencies, retained_tables;
+  Array initializer_receipts;
   Scope lifetime;
   Compiler caller;
   int changed;
@@ -89,7 +91,7 @@ void Frontend.prepare_meta(Frontend f, List inputs) {
     .native_sources = {}, .native_targets = {}, .native_loaded = {},
     .groups = [], .built = [],
     .failures = [], .objects = [], .retained_dependencies = [],
-    .retained_tables = []};
+    .retained_tables = [], .initializer_receipts = []};
   h.lifetime = Scope.owner(h.publications);
   h.scan(inputs);
   String include = NULL, cc = Compiler.meta_cc(include);
@@ -607,20 +609,32 @@ static String Helper.native_closure(
   return NULL;
 }
 
-/* Every member of a runtime component links into one immediate-load object. */
+/* All selected initializer edges are checked before any component is loaded.
+   Earlier loaded snapshots retain their receipts while their state survives.
+   Every member of a runtime component links into one immediate-load object. */
 static String Helper.load_native_closure(Helper &h, int index) {
   Array providers = [];
   Map edges = {};
   String failure = h.native_closure(index, {}, providers, edges);
   if (failure) return failure;
+  foreach (String owner, providers) {
+    int table = h.owners.find(owner) + 1;
+    String base = h.native_sources[table];
+    if (h.native_loaded.getdefault(table, "") == base) continue;
+    failure = h.compile_files(base, owner);
+    if (failure) return failure;
+  }
+  if (h.initializer_receipts.len()) {
+    Compiler c = Compiler.new();
+    c.own_diagnostics();
+    c.check_native_initializer_receipts(h.initializer_receipts.list());
+  }
   foreach (List component, declaration_work(providers.list_free(), edges)) {
     Array objects = [], targets = [], indices = [], identities = [];
     foreach (String owner, component) {
       int table = h.owners.find(owner) + 1;
       String base = h.native_sources[table];
       if (h.native_loaded.getdefault(table, "") == base) continue;
-      failure = h.compile_files(base, owner);
-      if (failure) return failure;
       objects.push(%"$base.o");
       targets.push(%($table ${h.native_targets[table]}));
       indices.push(table);
@@ -781,6 +795,12 @@ static String Helper.compile_files(Helper &h, String base, String unit) {
       "-MD" "-MF" ${%"$base.d"} "-c" $projected "-o" ${%"$base.o"}),
     h.directory);
   h.add_depfile(%"$base.d");
+  if (!failure && native_dependencies) {
+    String receipt = %"$base.xne";
+    Path.write_text(receipt, Path.read_text(%"$projected.xne"));
+    if (!(receipt in h.initializer_receipts))
+      h.initializer_receipts.push(h.retain(receipt));
+  }
   return failure;
 }
 
