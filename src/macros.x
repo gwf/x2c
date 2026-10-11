@@ -2213,7 +2213,8 @@ List Compiler.macro_tag_name(
 }
 
 /* Replaces each binder or binding identity that `bindings` maps. A List
-   none of whose children change stays the same List. */
+   none of whose children change stays the same List, and only a changed
+   List is copied. */
 static Var _replace_bindings(Var value, Map bindings) {
   int candidate = value.is_binder();
   if (!candidate && value is <list> && !value.is_nil())
@@ -2221,14 +2222,18 @@ static Var _replace_bindings(Var value, Map bindings) {
   Var replacement;
   if (candidate && bindings.try_get(value, replacement)) return replacement;
   if (value is not <list> || value.is_nil()) return value;
-  Array items = $auto([]);
-  int changed = 0;
-  foreach (Var child, value.list()) {
-    Var item = _replace_bindings(child, bindings);
-    changed |= item != child;
-    items.push(item);
+  List original = value;
+  Array items = NULL;
+  for (List cursor = original; cursor; cursor = cursor.cdr()) {
+    Var child = cursor.car(), item = _replace_bindings(child, bindings);
+    if (!(void *) items && item != child) {
+      items = [];
+      for (List prefix = original; prefix != cursor; prefix = prefix.cdr())
+        items.push(prefix.car());
+    }
+    if ((void *) items) items.push(item);
   }
-  return changed ? items.list().var() : value;
+  return (void *) items ? items.list_free().var() : value;
 }
 
 /* invocation patterns
