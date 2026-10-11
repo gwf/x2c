@@ -3,9 +3,10 @@
     Lowers typed expressions, literals, and statements into the AST forms
     consumed by C emission. One recursive normalizer rewrites each node
     where it is produced, and children enter the same operation, so a unit
-    is walked once. `callables.x` lowers the lambdas and `Func` conversions
-    it meets, and `cleanup.x` lowers each completed function's cleanup
-    regions. The active Compiler reports errors.
+    is walked once. `callables.x` lowers the `Func` conversions it meets,
+    shipped components lower the forms the kernel no longer lowers, and
+    `cleanup.x` lowers each completed function's cleanup regions. The
+    active Compiler reports errors.
 */
 
 #pragma once
@@ -180,6 +181,36 @@ static List Compiler._shipped_lowering(
     c.lower_rewrite(point, kind, source, position, expected, NULL);
   if (!lowered) $report.xform.no_shipped_rule(c, form);
   return lowered;
+}
+
+/** Lowers a resolved lambda expression, under any position wrappers and
+    parentheses, through the lambda rule of `src/component-lambdas.x`;
+    other expressions pass through. A noncapturing lambda typed `Func`,
+    which only a meta body leaves unlifted, lifts to a `Func` of its native
+    signature. */
+List Compiler.lower_lambda_expr(Compiler c, List expression) {
+  if (expression.car() == <at> || expression.car() == <src>)
+    return Ast.rewrite_children(
+      expression, %!(List child) => c.lower_lambda_expr(child));
+  Macro lambda = $lambda_expression;
+  match (expression) {
+    case %(expr ?type ${$grouped(?inner)}): {
+      List lowered = c.lower_lambda_expr(inner);
+      if (lowered == inner) return expression;
+      Macro grouped = $grouped;
+      return c.rebuild_expression(type, grouped(lowered));
+    }
+    case %(expr ("Func") ${$lambda_expression(?body, *params)}): {
+      Type signature = %((func ${c.lambda_param_types(params)}) "Var");
+      return c.lift_func_expression(
+        c.rebuild_expression(signature, lambda(body, params)));
+    }
+    case $source_any_lambda():
+      return c._shipped_lowering(
+        <literal>, <lambda>, expression, AST_EXPRESSION, expression.cadr(),
+        "lambda");
+  }
+  return expression;
 }
 
 static Ast Compiler._shipped_statement(Compiler c, Ast ast, Symbol tag) =>

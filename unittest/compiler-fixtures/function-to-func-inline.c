@@ -53,14 +53,11 @@ static inline Func inline_noncapturing(void){
   );
 }
 
-Func _x2c_func_from_capture_e915dee0_0(Var _x2c_lambda_capture_1);
+Func _x2c_func_from_capture_e915dee0_0(Var c0);
 
 static inline Func inline_capturing(long bias){
   return({
-    Var _x2c_lambda_capture_value_0 = long_var(bias); ({
-      extern Func _x2c_func_from_capture_e915dee0_0(Var _x2c_lambda_capture_1);  _x2c_func_from_capture_e915dee0_0(_x2c_lambda_capture_value_0);
-    }
-    );
+    Var _x2c_lambda_capture_value_0 = long_var(bias);  _x2c_func_from_capture_e915dee0_0(_x2c_lambda_capture_value_0);
   }
   );
 }
@@ -85,11 +82,13 @@ static Func _x2c_func_handle_1;
 
 _x2c_initializer_choice_EB5855FF_1((_x2c_func_handle_1 = x2c_func_shared(_x2c_func_adapt_2, _18)))
 typedef struct _x2c_lambda_context_0{
-  Var _x2c_lambda_capture_0;
+  Var c0;
 }
 _x2c_lambda_context_0;
 
-static Var _x2c_lambda_1(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0);
+static Var _x2c_lambda_1(long value, long bias);
+
+static Var _x2c_lambda_2(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -192,20 +191,24 @@ Func _x2c_func_get_e915dee0_1(void){
   return _x2c_func_handle_1;
 }
 
-static Var _x2c_lambda_1(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0){
-  long value = Var_long(Var_convert(x2c_func_value_argument(_x2c_lambda_closure_0, _x2c_lambda_argv_0, 0, 818062), 818062));
-  const _x2c_lambda_context_0 * _x2c_lambda_context_value_0 =(const _x2c_lambda_context_0 *) Func_context(_x2c_lambda_closure_0);
-  return long_var(value + Var_long(Var_convert(_x2c_lambda_context_value_0 -> _x2c_lambda_capture_0, 818062)));
+static Var _x2c_lambda_1(long value, long bias){
+  return long_var(value + bias);
   ;
 }
 
-Func _x2c_func_from_capture_e915dee0_0(Var _x2c_lambda_capture_1){
+static Var _x2c_lambda_2(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0){
+  long a0 = Var_long(Var_convert(x2c_func_value_argument(_x2c_lambda_closure_0, _x2c_lambda_argv_0, 0, 818062), 818062));
+  const struct _x2c_lambda_context_0 * record =(const struct _x2c_lambda_context_0 *) Func_context(_x2c_lambda_closure_0);
+  return _x2c_lambda_1(a0, Var_long(Var_convert(record -> c0, 818062)));
+}
+
+Func _x2c_func_from_capture_e915dee0_0(Var c0){
   if(! _init_guard_) _file_init_();
-  _x2c_lambda_context_0 _x2c_lambda_context_1 ={
-    _x2c_lambda_capture_1
+  struct _x2c_lambda_context_0 record ={
+    c0
   }
   ;
-  return Func_new_context(_x2c_lambda_1, _18, & _x2c_lambda_context_1, sizeof _x2c_lambda_context_1);
+  return Func_new_context(_x2c_lambda_2, _18, & record, sizeof record);
 }
 
 #undef _x2c_initializer_choice_EB5855FF_0_expanded

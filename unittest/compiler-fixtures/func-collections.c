@@ -41,18 +41,22 @@ _x2c_func_pointer_context_0;
 static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func_argv_1);
 
 typedef struct _x2c_lambda_context_0{
-  Var _x2c_lambda_capture_0;
+  Var c0;
 }
 _x2c_lambda_context_0;
 
-static Var _x2c_lambda_0(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0);
+static Var _x2c_lambda_0(Var value, int bias);
+
+static Var _x2c_lambda_1(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0);
 
 typedef struct _x2c_lambda_context_2{
-  Var _x2c_lambda_capture_1;
+  Var c0;
 }
 _x2c_lambda_context_2;
 
-static Var _x2c_lambda_1(Func _x2c_lambda_closure_1, const FuncArg * _x2c_lambda_argv_1);
+static Var _x2c_lambda_2(char value, int bias);
+
+static Var _x2c_lambda_3(Func _x2c_lambda_closure_1, const FuncArg * _x2c_lambda_argv_1);
 
 static Var _x2c_func_adapt_2(Func _x2c_func_binding_2, const FuncArg * _x2c_func_argv_2);
 
@@ -120,17 +124,17 @@ int main(void){
   ));
   int bias = 2;
   List captured = List_map(values, ({
-    Var _x2c_lambda_capture_value_0 = int_var(bias);  _x2c_lambda_context_0 _x2c_lambda_context_1 ={
+    Var _x2c_lambda_capture_value_0 = int_var(bias);  struct _x2c_lambda_context_0 _x2c_lambda_context_1 ={
       _x2c_lambda_capture_value_0
     }
-    ;  Func_new_context(_x2c_lambda_0, _16, & _x2c_lambda_context_1, sizeof _x2c_lambda_context_1);
+    ;  Func_new_context(_x2c_lambda_1, _16, & _x2c_lambda_context_1, sizeof _x2c_lambda_context_1);
   }
   ));
   String text = String_map(_17, ({
-    Var _x2c_lambda_capture_value_1 = int_var(bias);  _x2c_lambda_context_2 _x2c_lambda_context_3 ={
+    Var _x2c_lambda_capture_value_1 = int_var(bias);  struct _x2c_lambda_context_2 _x2c_lambda_context_3 ={
       _x2c_lambda_capture_value_1
     }
-    ;  Func_new_context(_x2c_lambda_1, _26, & _x2c_lambda_context_3, sizeof _x2c_lambda_context_3);
+    ;  Func_new_context(_x2c_lambda_3, _26, & _x2c_lambda_context_3, sizeof _x2c_lambda_context_3);
   }
   ));
   String mapped = String_map(_17, _x2c_func_handle_1);
@@ -151,18 +155,26 @@ static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func
   ;
 }
 
-static Var _x2c_lambda_0(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0){
-  Var value = x2c_func_value_argument(_x2c_lambda_closure_0, _x2c_lambda_argv_0, 0, 45156);
-  const _x2c_lambda_context_0 * _x2c_lambda_context_value_0 =(const _x2c_lambda_context_0 *) Func_context(_x2c_lambda_closure_0);
-  return Var_binary(value, 56, int_var(Var_int(Var_convert(_x2c_lambda_context_value_0 -> _x2c_lambda_capture_0, 3453797))));
+static Var _x2c_lambda_0(Var value, int bias){
+  return Var_binary(value, 56, int_var(bias));
   ;
 }
 
-static Var _x2c_lambda_1(Func _x2c_lambda_closure_1, const FuncArg * _x2c_lambda_argv_1){
-  char value = Var_char(Var_convert(x2c_func_value_argument(_x2c_lambda_closure_1, _x2c_lambda_argv_1, 0, 26993), 26993));
-  const _x2c_lambda_context_2 * _x2c_lambda_context_value_1 =(const _x2c_lambda_context_2 *) Func_context(_x2c_lambda_closure_1);
-  return int_var(value + Var_int(Var_convert(_x2c_lambda_context_value_1 -> _x2c_lambda_capture_1, 3453797)));
+static Var _x2c_lambda_1(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0){
+  Var a0 = x2c_func_value_argument(_x2c_lambda_closure_0, _x2c_lambda_argv_0, 0, 45156);
+  const struct _x2c_lambda_context_0 * record =(const struct _x2c_lambda_context_0 *) Func_context(_x2c_lambda_closure_0);
+  return _x2c_lambda_0(a0, Var_int(Var_convert(record -> c0, 3453797)));
+}
+
+static Var _x2c_lambda_2(char value, int bias){
+  return int_var(value + bias);
   ;
+}
+
+static Var _x2c_lambda_3(Func _x2c_lambda_closure_1, const FuncArg * _x2c_lambda_argv_1){
+  char a0 = Var_char(Var_convert(x2c_func_value_argument(_x2c_lambda_closure_1, _x2c_lambda_argv_1, 0, 26993), 26993));
+  const struct _x2c_lambda_context_2 * record =(const struct _x2c_lambda_context_2 *) Func_context(_x2c_lambda_closure_1);
+  return _x2c_lambda_2(a0, Var_int(Var_convert(record -> c0, 3453797)));
 }
 
 static Var _x2c_func_adapt_2(Func _x2c_func_binding_2, const FuncArg * _x2c_func_argv_2){

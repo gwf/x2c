@@ -41,10 +41,7 @@ Func _x2c_func_from_capture_e915dee0_0(Var);
 
 static inline Func inline_capturing(long bias){
   return({
-    Var _x2c_lambda_capture_value_0 = long_var(bias); ({
-      extern Func _x2c_func_from_capture_e915dee0_0(Var _x2c_lambda_capture_1);  _x2c_func_from_capture_e915dee0_0(_x2c_lambda_capture_value_0);
-    }
-    );
+    Var _x2c_lambda_capture_value_0 = long_var(bias);  _x2c_func_from_capture_e915dee0_0(_x2c_lambda_capture_value_0);
   }
   );
 }
@@ -57,7 +54,7 @@ Func _x2c_func_from_pointer_e915dee0_0(long(* _x2c_func_pointer_0)(long, long));
 
 Func _x2c_func_get_e915dee0_1(void);
 
-Func _x2c_func_from_capture_e915dee0_0(Var _x2c_lambda_capture_1);
+Func _x2c_func_from_capture_e915dee0_0(Var c0);
 
 
 #endif /* __GUARD_0xEB5855FF__ */

@@ -5,10 +5,9 @@
     A callable value that C cannot spell directly becomes a static helper
     queued with `Compiler.add_early`. Every `Func` helper shares one
     `FuncAdapter` ABI: arguments are read in index order from the argument
-    vector, and the result is boxed into a `Var`. A capturing lambda copies
-    its snapshots and reference addresses into a file-static context, and
-    the bindings it shares by reference move into Scope cells before the
-    enclosing function body is normalized.
+    vector, and the result is boxed into a `Var`. `src/component-lambdas.x`
+    lowers lambdas; the bindings a lambda shares by reference move into
+    Scope cells here before the enclosing function body is normalized.
 */
 
 #pragma once
@@ -125,83 +124,15 @@ static macro Expression $func_address(Expr $value) => &$value;
 
 static macro Expression $func_size(Expr $value) => sizeof $value;
 
-// lambda lowering
+// Func adapter bodies
 
-/** Lowers a resolved lambda expression to emitter-ready helper references.
-    `expression` must retain the resolved `expr`, `lambda`, `params`, and
-    optional `captures` rows. A noncapturing lambda becomes a static
-    `Var`-returning helper. A lambda with capture rows becomes a `FuncAdapter`
-    helper and a `Func` whose copied context stores value snapshots and typed
-    reference addresses; capture expressions run once from left to right.
-    Nested lambdas lower inside out, block fallthrough and bare returns produce
-    no value, and synthesized declarations enter the early queue. Parentheses
-    remain around lowered helpers; other non-lambda expressions pass through.
-*/
-List Compiler.lower_lambda_expr(Compiler c, List expression) {
-  if (expression.car() == <at> || expression.car() == <src>)
-    return Ast.rewrite_children(
-      expression, %!(List child) => c.lower_lambda_expr(child));
-  Macro lambda = $lambda_expression, captured = $lambda_captured;
-  match (expression) {
-    case %(expr ?type ${$grouped(?inner)}): {
-      List lowered = c.lower_lambda_expr(inner);
-      if (lowered == inner) return expression;
-      Macro grouped = $grouped;
-      return c.rebuild_expression(type, grouped(lowered));
-    }
-    case captured(?body, *captures, *entries): {
-      List ruled = c._lambda_rule(expression);
-      if (ruled) return ruled;
-      return c._captured_lambda(entries, captures, body);
-    }
-    case lambda(?body, *params): {
-      Type type = expression.cadr();
-      /* Only a meta body leaves a noncapturing `Func` lambda unlifted. */
-      if (type.match(%("Func"))) {
-        Type signature = %((func ${c.lambda_param_types(params)}) "Var");
-        return c.lift_func_expression(
-          c.rebuild_expression(signature, lambda(body, params)));
-      }
-      List ruled = c._lambda_rule(expression);
-      if (ruled) return ruled;
-      String lname = c.fresh_name("lambda");
-      List lambda_binding = c.sym.introduce(lname);
-      List decl_params = _params_to_decl_params(params);
-      c.add_early(
-        c.wrapper_function(
-          %(static "Var"), lambda_binding, decl_params.cdr(),
-          c._helper_body(body).cdr()));
-      return _func_bound(type, lambda_binding);
-    }
-  }
-  return expression;
-}
-
-/* A lambda rule's lowered replacement, or NULL. */
-static List Compiler._lambda_rule(Compiler c, List expression) =>
-  c.rewrite_rules ? c.lower_rewrite(<literal>, <lambda>, expression,
-                                    AST_EXPRESSION, expression.cadr(), NULL)
-                  : NULL;
-
-// Preserve typed declarators; bare lambda parameters remain Var.
-static List _params_to_decl_params(List names) {
-  if (!names) return %(params (param (void) (bind () ()))) ;
-  Array out = [];
-  foreach(Var item, names)
-    match (item) {
-      case %(!set ?identity (binding ? ?)):
-        out.push(%(param ("Var") (bind $identity ())));
-      case %(param ? ?): out.push(item);
-    }
-  return %(params @{out.list_free()});
-}
-
+/* The body of an adapter that runs `body`: a block's items and then a
+   return of no value, a void expression and then that return, or a return
+   of the expression's value as a `Var`. */
 static List Compiler._helper_body(Compiler c, List body) {
   match (body) {
-    case $source_block_content(%(*items)): {
-      List normalized = _block_returns(items);
-      return source_block_content(%(@normalized ${_no_value_return()}));
-    }
+    case $source_block_content(%(*items)):
+      return source_block_content(%(@items ${_no_value_return()}));
     case %(expr (void) ?):
       return source_block_content(%((stmnt $body) ${_no_value_return()}));
   }
@@ -209,120 +140,18 @@ static List Compiler._helper_body(Compiler c, List body) {
   return source_block_content(%((stmnt (return $result))));
 }
 
-/* A block lambda returns void for a bare return and for
-   fallthrough. Nested lambdas normalize their own returns when lowered. */
-static List _block_returns(List ast) {
-  if (!ast) return ast;
-  match (ast) {
-    case $source_any_lambda(): return ast;
-    case $source_return_content(%()): return _no_value_return();
-  }
-  return Ast.rewrite_children(ast, _block_returns);
-}
-
 static List _no_value_return(void) => %(
     return ("Var") (expr ("Var") (literal ("Var") "void"))
   );
 
-// captured lambdas
-
-/* One captured lambda: its context type, the adapter that reads a copy of
-   it, and the locals that evaluate each capture. Capture rows arrive
-   resolved and in first-use order from `lambdas.x`. Their locals run
-   before the context aggregate; value fields are snapshots and reference
-   fields retain caller or cell addresses. */
-static typedef struct CaptureBuild {
-  Compiler c;
-  List adapter, environment, signature;
-  Type value_type, pointer_type;
-  Map slots;
-  Array field_types, locals, values;
-} CaptureBuild;
-
-static List Compiler._captured_lambda(
-  Compiler c, List entries, List captures, List body) {
-  CaptureBuild b = {
-    .c = c, .slots = {}, .field_types = [], .locals = [], .values = []
-  };
-  b.adapter = c.sym.introduce(c.fresh_name("lambda"));
-  List closure = c.sym.introduce(c.fresh_name("lambda_closure"));
-  List argv = c.sym.introduce(c.fresh_name("lambda_argv"));
-  String name = c.fresh_name("lambda_context");
-  List type_binding = c.sym.introduce(name);
-  b.value_type = %($name);
-  b.pointer_type = %(* const $name);
-  b.environment = c.sym.introduce(c.fresh_name("lambda_context_value"));
-  c.set_fact(%(automatic ${b.environment}), 1);
-  c.set_fact(%(type ${b.environment}), b.pointer_type);
-  b.declare(type_binding, captures);
-  b.publish(entries, body, closure, argv);
-  return c.inline_header ? b.bridged() : b.direct();
-}
-
-static void CaptureBuild.declare(
-  CaptureBuild &b, List type_binding, List captures) {
-  Array fields = [];
-  foreach (List capture, captures) b._field(fields, capture);
-  b.c.add_early(b.c.capture_environment(type_binding, fields.list_free()));
-}
-
 /** Binds the file-static context type `name` with the field rows `fields`,
-    for captured lambdas and callable defers. The complete typedef is bound
-    at once, so each field keeps its member type.
+    for callable defers. The complete typedef is bound at once, so each
+    field keeps its member type.
 */
 List Compiler.capture_environment(Compiler c, List name, List fields) {
   return c.bind_syntax(
     $!Unit{ static typedef struct $name { @fields } $name; },
     AST_UNIT, NULL);
-}
-
-static void CaptureBuild._field(CaptureBuild &b, Array fields, List capture) {
-  match (capture)
-    case %(capture ?binding ?captured_type ?expression): {
-      Compiler c = b.c;
-      Type source_type = captured_type;
-      Type storage_type = source_type.car() == <&>
-                        ? source_type.cdr().type().reference()
-                        : %("Var");
-      List field = c.sym.introduce(c.fresh_name("lambda_capture"));
-      fields.push(c.rebuild_statement($!{ $storage_type $field; }).cadr());
-      b.field_types.push(storage_type);
-      b.slots[binding] = %($field $storage_type);
-
-      List temporary = c.sym.introduce(c.fresh_name("lambda_capture_value"));
-      List value = c.convert_expression(expression, storage_type);
-      List (base, mods) = storage_type.parts();
-      Macro local = $func_local;
-      List row = %(op = (bind $temporary $mods) $value);
-      b.locals.push(c.rebuild_statement(local(base, row)).cadr());
-      b.values.push(_func_bound(storage_type, temporary));
-    }
-}
-
-/* The adapter borrows the copied context for each synchronous Func call.
-   Rules lowering the body place entry code in the adapter, after the
-   parameters and context bind; the adapter's own lowering lowers it. */
-static void CaptureBuild.publish(
-  CaptureBuild &b, List entries, List body, List closure, List argv) {
-  Compiler c = b.c;
-  List params = c.lambda_param_types(entries);
-  List locals = c._func_argument_locals(
-    c.sym.resolve_key(%("FuncAdapter")), entries ? params : NULL,
-    entries.map(_entry_binding), closure, argv);
-  List setup = c._context_local(b.value_type, b.environment, closure);
-  int depth = c.enter_function(b._declaration(entries));
-  List rewritten = c.normalize(b._rewrite(body));
-  List entry = c.leave_function(depth);
-  c._publish_func_adapter(
-    b.adapter, closure, argv, rewritten, %(@locals $setup @entry));
-  b.signature = c.cache_literal_list(%((func $params) "Var"));
-}
-
-/* The lambda as the function `x2c_enclosing` answers within its body. */
-static List CaptureBuild._declaration(CaptureBuild &b, List entries) {
-  List params = _params_to_decl_params(entries);
-  return %(declare (static "Var")
-           (bindings (bind ${b.adapter} ((fnmod $params)))));
 }
 
 static List _entry_binding(List entry) {
@@ -333,122 +162,9 @@ static List _entry_binding(List entry) {
   return NULL;
 }
 
-/* Capture-construction expressions read through this context, but a nested
-   lambda body is left alone: its own environment and lowering handle that
-   body once the rewritten capture values are available. */
-static List CaptureBuild._rewrite(CaptureBuild &b, List ast) {
-  if (!ast) return ast;
-  Macro lambda = $lambda_expression, captured = $lambda_captured;
-  if (ast.car() == <expr>) {
-    match (ast) {
-      case captured(?body, *captures, *params): {
-        List rows = b._rows(captures);
-        return rows == captures ? ast
-             : b.c.rebuild_expression(
-               ast.cadr(), captured(body, rows, params));
-      }
-      case lambda(?body, *params): return ast;
-      case %(expr ?source_type
-          ${$source_identifier_content(%(?bound))}):
-        return b._read(ast, source_type, bound);
-    }
-  }
-  Var child;
-  $ast.rewrite_children(ast, child, b._rewrite(child));
-}
-
-static List CaptureBuild._rows(CaptureBuild &b, List captures) {
-  Var row;
-  $ast.rewrite_children(captures, row, b._row(row));
-}
-
-static List CaptureBuild._row(CaptureBuild &b, List row) {
-  match (row)
-    case %(capture ?binding ?type ?expression): {
-      List value = b._rewrite(expression);
-      if (value != expression) return %(capture $binding $type $value);
-    }
-  return row;
-}
-
-static List CaptureBuild._read(
-  CaptureBuild &b, List ast, Type source_type, List bound) {
-  Var stored;
-  if (!b.slots.try_get(bound, stored)) return ast;
-  (List field, Type storage_type) = stored;
-  String field_name = binding_identity_spelling(field);
-  List environment = _func_bound(b.pointer_type, b.environment);
-  List read = $!($storage_type){ $environment->$field_name };
-  if (source_type.car() == <&>) return %(expr $source_type ${read.caddr()});
-  List converted = b.c.convert_expression(read, source_type);
-  match (converted)
-    case %(expr ? (call "Var_pointer" ?)):
-      return %(expr $source_type
-               (parens (expr $source_type
-                 (cast $source_type $converted))));
-  return converted;
-}
-
-/* A public inline function reaches the file-static context through a
-   generated bridge that copies the capture values it receives. */
-static List CaptureBuild.bridged(CaptureBuild &b) {
-  Compiler c = b.c;
-  List bridge = c._func_bridge_binding("func_from_capture");
-  Array parameters = [], factory_values = [];
-  foreach (Type field_type, b.field_types) {
-    List parameter = c.sym.introduce(c.fresh_name("lambda_capture"));
-    parameters.push(field_type.parameter_ast(parameter));
-    factory_values.push(_func_bound(field_type, parameter));
-  }
-  List context = c.sym.introduce(c.fresh_name("lambda_context"));
-  List factory_body = c.rebuild_statement(
-    $!{
-      ${b._storage(context, factory_values.list_free())}
-      return ${b._construct(context)};
-    });
-  List declaration_params = %(params @{parameters.list_free()});
-  c.add_early(
-    c.wrapper_function(
-      %("Func"), bridge, declaration_params.cdr(), factory_body.cdr()));
-  List parameter_types = b.field_types.list_free();
-  Type factory_type = %((func $parameter_types) "Func");
-  List call = c._func_bridge_call(
-    bridge, declaration_params, factory_type, b.values.list_free());
-  return b._result(NULL, call);
-}
-
-static List CaptureBuild.direct(CaptureBuild &b) {
-  Compiler c = b.c;
-  List context = c.sym.introduce(c.fresh_name("lambda_context"));
-  List storage = b._storage(context, b.values.list_free());
-  return b._result(storage, b._construct(context));
-}
-
-static List CaptureBuild._storage(CaptureBuild &b, List context, List values) {
-  return b.c.rebuild_statement(
-    $!{ ${b.value_type} $context = { @values }; }).cadr();
-}
-
-static List CaptureBuild._construct(CaptureBuild &b, List context) {
-  Compiler c = b.c;
-  Type constructor_type = NULL;
-  List constructor = c._adapter_helper("Func_new_context", constructor_type);
-  Type adapter_type = c.sym.resolve_key(%("FuncAdapter"));
-  return c._func_context_call(
-    b.value_type, context, _func_bound(adapter_type, b.adapter),
-    b.signature, _func_bound(constructor_type, constructor));
-}
-
 /* A value computed after its setup statements. */
 static macro Expression $statement_value(Expr $value, Stmt @setup) =>
   ({ @setup $value; });
-
-static List CaptureBuild._result(CaptureBuild &b, List storage, List value) {
-  List setup = b.locals.list_free();
-  if (storage) setup = setup.append(%($storage));
-  Macro shape = $statement_value;
-  return b.c.rebuild_expression(%("Func"), shape(value, setup));
-}
 
 // lambda cells
 

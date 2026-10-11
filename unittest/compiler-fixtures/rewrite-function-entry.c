@@ -39,11 +39,13 @@ static Func _x2c_func_handle_0;
 
 _x2c_initializer_choice_477087F8_0((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _10)))
 typedef struct _x2c_lambda_context_0{
-  int * _x2c_lambda_capture_0;
+  int * c0;
 }
 _x2c_lambda_context_0;
 
-static Var _x2c_lambda_1(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0);
+static Var _x2c_lambda_1(Var n, int * base);
+
+static Var _x2c_lambda_2(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0);
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
 
@@ -109,10 +111,10 @@ int main(void){
   , sizeof(int));
   Func plain = _x2c_func_handle_0;
   Func shared =({
-    int * _x2c_lambda_capture_value_0 = &(* _x2c_lambda_cell_0);  _x2c_lambda_context_0 _x2c_lambda_context_1 ={
+    int * _x2c_lambda_capture_value_0 = &(* _x2c_lambda_cell_0);  struct _x2c_lambda_context_0 _x2c_lambda_context_1 ={
       _x2c_lambda_capture_value_0
     }
-    ;  Func_new_context(_x2c_lambda_1, _10, & _x2c_lambda_context_1, sizeof _x2c_lambda_context_1);
+    ;  Func_new_context(_x2c_lambda_2, _10, & _x2c_lambda_context_1, sizeof _x2c_lambda_context_1);
   }
   );
   printf("%d %d\n", Var_int(({
@@ -145,9 +147,9 @@ static Var _x2c_lambda_0(Var n){
     ;
     x2c_cleanup_push(& _x2c_defer_record_1);
     {
-      int _x2c_tally_2 = 0;
+      int _x2c_tally_1 = 0;
       {
-        Var _x2c_return_value_1 = int_var(_x2c_tally_2 += Var_int(n));
+        Var _x2c_return_value_1 = int_var(_x2c_tally_1 += Var_int(n));
         {
           x2c_cleanup_leave(& _x2c_defer_record_1);
           return _x2c_return_value_1;
@@ -167,9 +169,7 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
   ;
 }
 
-static Var _x2c_lambda_1(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0){
-  Var n = x2c_func_value_argument(_x2c_lambda_closure_0, _x2c_lambda_argv_0, 0, 45156);
-  const _x2c_lambda_context_0 * _x2c_lambda_context_value_0 =(const _x2c_lambda_context_0 *) Func_context(_x2c_lambda_closure_0);
+static Var _x2c_lambda_1(Var n, int * base){
   printf("enter %s\n", "_x2c_lambda_1");
   {
     X2CCleanup _x2c_defer_record_2 ={
@@ -178,9 +178,9 @@ static Var _x2c_lambda_1(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda
     ;
     x2c_cleanup_push(& _x2c_defer_record_2);
     {
-      int _x2c_tally_1 = 0;
+      int _x2c_tally_2 = 0;
       {
-        Var _x2c_return_value_2 = int_var((_x2c_tally_1 += Var_int(n)) +(* _x2c_lambda_context_value_0 -> _x2c_lambda_capture_0));
+        Var _x2c_return_value_2 = int_var((_x2c_tally_2 += Var_int(n)) +(* base));
         {
           x2c_cleanup_leave(& _x2c_defer_record_2);
           return _x2c_return_value_2;
@@ -192,6 +192,12 @@ static Var _x2c_lambda_1(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda
     x2c_cleanup_leave(& _x2c_defer_record_2);
   }
 
+}
+
+static Var _x2c_lambda_2(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0){
+  Var a0 = x2c_func_value_argument(_x2c_lambda_closure_0, _x2c_lambda_argv_0, 0, 45156);
+  const struct _x2c_lambda_context_0 * record =(const struct _x2c_lambda_context_0 *) Func_context(_x2c_lambda_closure_0);
+  return _x2c_lambda_1(a0, &(* record -> c0));
 }
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){

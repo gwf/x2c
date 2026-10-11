@@ -113,11 +113,13 @@ _x2c_func_pointer_context_14;
 static Var _x2c_func_adapt_6(Func _x2c_func_binding_6, const FuncArg * _x2c_func_argv_6);
 
 typedef struct _x2c_lambda_context_0{
-  Var _x2c_lambda_capture_0;
+  Var c0;
 }
 _x2c_lambda_context_0;
 
-static Var _x2c_lambda_3(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0);
+static Var _x2c_lambda_3(long value, int bias);
+
+static Var _x2c_lambda_4(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -388,10 +390,10 @@ int main(void){
   )) != 41 || value != 41) return 20;
   int bias = 2;
   Func captured =({
-    Var _x2c_lambda_capture_value_0 = int_var(bias);  _x2c_lambda_context_0 _x2c_lambda_context_1 ={
+    Var _x2c_lambda_capture_value_0 = int_var(bias);  struct _x2c_lambda_context_0 _x2c_lambda_context_1 ={
       _x2c_lambda_capture_value_0
     }
-    ;  Func_new_context(_x2c_lambda_3, _29, & _x2c_lambda_context_1, sizeof _x2c_lambda_context_1);
+    ;  Func_new_context(_x2c_lambda_4, _29, & _x2c_lambda_context_1, sizeof _x2c_lambda_context_1);
   }
   );
   if(passthrough(captured) != captured) return 21;
@@ -465,11 +467,15 @@ static Var _x2c_func_adapt_6(Func _x2c_func_binding_6, const FuncArg * _x2c_func
   ;
 }
 
-static Var _x2c_lambda_3(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0){
-  long value = Var_long(Var_convert(x2c_func_value_argument(_x2c_lambda_closure_0, _x2c_lambda_argv_0, 0, 818062), 818062));
-  const _x2c_lambda_context_0 * _x2c_lambda_context_value_0 =(const _x2c_lambda_context_0 *) Func_context(_x2c_lambda_closure_0);
-  return long_var(value + Var_int(Var_convert(_x2c_lambda_context_value_0 -> _x2c_lambda_capture_0, 3453797)));
+static Var _x2c_lambda_3(long value, int bias){
+  return long_var(value + bias);
   ;
+}
+
+static Var _x2c_lambda_4(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0){
+  long a0 = Var_long(Var_convert(x2c_func_value_argument(_x2c_lambda_closure_0, _x2c_lambda_argv_0, 0, 818062), 818062));
+  const struct _x2c_lambda_context_0 * record =(const struct _x2c_lambda_context_0 *) Func_context(_x2c_lambda_closure_0);
+  return _x2c_lambda_3(a0, Var_int(Var_convert(record -> c0, 3453797)));
 }
 
 #undef _x2c_initializer_choice_1179287B_0_expanded
