@@ -591,11 +591,19 @@ static Code _lambda_cell_read(Var node, Map cells) {
 }
 
 static Code _lambda_cell(Atom name, Type type, Code value) {
-  if (!value) return $!{ $type *$name = Scope_malloc(sizeof($type)); };
-  if (!value.match(%(expr ? (composite ?)))) value = $!( { $value } );
-  return $!{
-    $type *$name = Scope_memdup((const void *)&($type)$value, sizeof($type));
-  };
+  Type bytes = %(* void), pointer = cons(<*>, type);
+  Code allocated = NULL;
+  if (!value) allocated = $!($bytes){ Scope_malloc(sizeof($type)) };
+  else {
+    if (!value.match(%(expr ? (composite ?))))
+      value = %(expr $type (composite (commas $value)));
+    allocated = $!($bytes){
+      Scope_memdup((const void *)&($type)$value, sizeof($type))
+    };
+  }
+  (List base, List modifiers) = pointer.parts();
+  return %(declare $base
+           (bindings (op = (bind $name $modifiers) $allocated)));
 }
 
 static Code _lambda_declared_cell(
