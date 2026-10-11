@@ -775,8 +775,11 @@ static List _ref(String name) => %(expr () (ident ($name)));
 
 static List _param(Type type, String name) => type.parameter_ast(%($name));
 
+/* A function with no parameters declares `(void)`, so its prototype is not
+   an old-style declaration. */
 static List _function(String name, Type result, List parameters, List body) {
   List (base, modifiers) = result.parts();
+  if (!parameters) parameters = %((param (void) (bind () ())));
   return %(function $base
     (bind ($name) ((fnmod (params @parameters)) @modifiers))
     (block @body));

@@ -13,7 +13,7 @@ typedef struct Box{
 
 Box Box_new(int field_v);
 
-Box Box_alloc();
+Box Box_alloc(void);
 
 void Box_free(Box value);
 
