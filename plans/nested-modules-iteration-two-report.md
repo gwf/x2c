@@ -22,14 +22,16 @@ package resolver, user-authored support headers, or child public-name prefixes.
 - Ownership discovery caches canonical entry and ancestor results. Unit startup
   establishes ownership once; borrowed compiler contexts share the existing
   tree rather than constructing another tree during initializer setup.
-- Experimental interface format 11 records portable ownership-search queries,
-  logical identity, and resolved dependencies. Replay resolves location-sensitive
-  queries against the current home.
+- Experimental interface format 12 records portable ownership-search queries,
+  logical identity, resolved dependencies, and declaration-provider provenance.
+  Replay resolves location-sensitive queries against the current home.
 - Anonymous private native names use the outer entry filename and entry-relative
   paths. Distinct canonical trees with the same logical identity diagnose a
   collision before native linkage, as Gary selected.
-- Directed Tarjan components order deferred inline-provider binding. This is
-  one actual collection consumer, not general component-based compilation.
+- Directed Tarjan components order deferred inline-provider binding using
+  recorded include and bound declaration-type dependencies. Provider provenance
+  precedes inline support promotion. This remains one collection consumer;
+  general component staging and exact binding ownership are in progress.
 - Bound aggregate fields supply value/array prerequisites; pointers terminate
   complete-layout demand. Private projected type and enum names retain their
   defining file identity. Alias chains and public hidden inline support use
@@ -44,6 +46,30 @@ package resolver, user-authored support headers, or child public-name prefixes.
 - Full member parsing installs inherited Lisp prefix effects through the
   existing full-parser replay path. Shallow collection no longer substitutes
   queued effects for that full environment. Later suffix effects stay later.
+
+## Combined integration in progress
+
+The root now separates generation from publication. Each provider generates
+its flat portable output records exactly once while its Context is active.
+The records include depfile text and are exported before that Context closes.
+Publication uses text only after all provider Contexts close. This initially
+retains the existing nested Context schedule; it does not claim reduced peak
+memory or complete component staging.
+
+Native-header, native-meta, and scheduling workers implement separate owner
+changes in private worktrees. Root collects their authored changes on the
+private spike branch. Every build and validation requires one explicit serial
+slot. Full compiler/bootstrap integration and combined validation remain
+pending; source checkpoints and standalone native fixtures are insufficient.
+Current receipts are in
+`.context/nested-modules/iteration-two/integration-ledger.md`.
+
+Four non-inline body-order fixtures had expected the earlier native macro
+state, contrary to the existing `_move_bodies` rule. Their expected result
+now follows later declarations/directives. Public inline authored-position
+controls and the introduced guarded-header regression controls are unchanged.
+Final matrix results must distinguish this corrected expectation from a
+compiler repair.
 
 ## Executable evidence
 
