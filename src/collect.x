@@ -416,9 +416,10 @@ static void FileWalk.record_declaration_providers(FileWalk &w, Map overlay) {
   foreach (List key, overlay.keys()) {
     List declared = NULL;
     match (key) {
-      case %(?(String name)): declared = key;
-      case %((!or typedef struct union enum) ?(String name) *):
-        declared = key;
+      case %(?(String name)): declared = %($name);
+      case %((!set ?kind (!or typedef struct union enum))
+             ?(String name) *rest):
+        declared = %($kind $name @rest);
     }
     if (!declared) continue;
     List record = %("source-node"
