@@ -223,7 +223,7 @@ int Toolchain.project_native_source(
   if (external)
     return tool_capture(
       %("python3" $helper "--external" $source $projected $dependencies
-        @{companions.list()} "--" @{t._compile_arguments(gen_dirs)}),
+        @companions "--" @{t._compile_arguments(gen_dirs)}),
       output, errors);
   int status = tool_capture(
     %(@{t._compile_arguments(gen_dirs)} "-E" "-MMD" "-MF" $dependencies
