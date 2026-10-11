@@ -1028,6 +1028,80 @@ def specification_gap_cases():
     }, {**package_options, "inputs": ["main.x", "consumer.c"]}, None
 
 
+def scheduling_acceptance_cases():
+    yield "declaration_scc_ordinary_bodies", {
+        "box.x": (
+            'module typedef struct Left Left;\n'
+            'module typedef struct Right Right;\n'
+            'module {"box/left.x", "box/right.x"}\n'
+            'int answer(void) => left(4) + right(4);\n'
+        ),
+        "box/left.x": (
+            'module typedef struct Left {Right *peer; int value;} Left;\n'
+            'static typedef struct Local {int value;} Local;\n'
+            'static int local_value(void) {Local item = {42}; return item.value;}\n'
+            'module int left(int remaining) {\n'
+            '  Left item = {NULL, local_value()};\n'
+            '  return remaining ? right(remaining - 1) : item.value;\n'
+            '}\n'
+        ),
+        "box/right.x": (
+            'module typedef struct Right {Left *peer; int value;} Right;\n'
+            'static typedef struct Local {int first, second;} Local;\n'
+            'static int local_value(void) {Local item = {17, 25}; return item.first + item.second;}\n'
+            'module int right(int remaining) {\n'
+            '  Right item = {NULL, local_value()};\n'
+            '  return remaining ? left(remaining - 1) : item.value;\n'
+            '}\n'
+        ),
+        "main.x": consumer("box.x", "answer() == 84"),
+    }, {"inputs": ["box.x", "main.x"],
+        "interface_inputs": ["box.x", "main.x"]}, None
+
+    prefixes = {
+        "lisp": (
+            'module $(defun inherited-value () 42)\n',
+            'module $(defun inherited-value () 99)\n',
+            'int answer(void) => $(inherited-value);\n'),
+        "alias": (
+            'macro Expression $inherited_value() => 42;\n'
+            'module keyword inherited_read $inherited_value;\n',
+            'macro Expression $inherited_value() => 99;\n'
+            'module keyword inherited_read $inherited_value;\n',
+            'int answer(void) => inherited_read();\n'),
+        "producer": (
+            'module macro Unit $inherited_produce(Name $name) {int $name(void) => 42;}\n',
+            'module macro Unit $inherited_produce(Name $name) {int $name(void) => 99;}\n',
+            '$inherited_produce(answer);\n'),
+        "native_header": (
+            '#include "settings.h"\n', '',
+            'int answer(void) {NativeWord value = INHERITED_NATIVE_VALUE; return value;}\n'),
+    }
+    for family, (prefix, suffix, body) in prefixes.items():
+        files = {
+            "box.x": prefix + 'module {"box/child.x"}\n' + suffix,
+            "box/child.x": 'module {"child/value.x"}\n',
+            "box/child/value.x": body + 'int main(void) => answer() == 42 ? 0 : 1;\n',
+        }
+        if family == "native_header":
+            files["settings.h"] = ('#pragma once\n#define INHERITED_NATIVE_VALUE 42\n'
+                                   'typedef int NativeWord;\n')
+        yield f"nested_entry_member_{family}_equivalence", files, {
+            "inputs": ["box.x"], "member_equivalence": [
+                "box.x", "box/child/value.x"]}, None
+
+    yield "native_meta_sibling_private_rejected", {
+        "box.x": 'module {"box/left.x", "box/right.x"}\n',
+        "box/left.x": 'module {"left/value.x"}\n',
+        "box/left/value.x": 'meta module int child_only(void) => 42;\n',
+        "box/right.x": 'module {"right/value.x"}\n',
+        "box/right/value.x": 'int answer(void) => $child_only();\n',
+        "main.x": consumer("box.x", "answer() == 42"),
+    }, {"inputs": ["box.x", "main.x"], "rejection_phase": "any"}, (
+        r"(unknown|undeclared|private|not exported|unavailable)[^\n]*child_only|"
+        r"child_only[^\n]*(unknown|undeclared|private|not exported|unavailable)")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("compiler", type=Path)
@@ -1041,6 +1115,9 @@ def main():
     compiler_start = hashlib.sha256(compiler.read_bytes()).hexdigest()
     selected = list(cases()) + list(extended_cases()) + list(final_cases()) + list(protocol_cases()) + list(ordering_cases()) + list(privacy_cases()) + list(initialization_cases()) + list(staged_initialization_cases()) + list(acceptance_cases()) + list(forward_static_cases()) + list(local_shadow_cases()) + list(multihop_initialization_cases()) + list(compile_time_visibility_cases())
     selected += list(specification_gap_cases())
+
+
+    selected += list(scheduling_acceptance_cases())
     names = {case[0] for case in selected}
     unknown = set(args.case) - names
     if unknown:
