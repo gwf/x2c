@@ -36,20 +36,14 @@ int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
   List input = _7;
-
   {
     List _x2c_match_expr = input;
-    Var _x2c_match_values[2];
-  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
-
-    switch (Var_symbol(car(_x2c_match_expr))) {
-      case 948490: ;
-  static MatchCaptureSite _x2c_match_site_0;
-  if (x2c_match_site_try_capture(& _x2c_match_site_0, _x2c_match_expr, List_var(_12), &_x2c_match_capture)) {Var value = _x2c_match_values[0];  List rest = Var_list(_x2c_match_values[1]);  printf("%d %d\n", Var_int(value), List_len(rest));  break;
-}
-default: break;
+    Var _x2c_match_values[2]; MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
+    switch(Var_symbol(car(_x2c_match_expr))){
+        case 948490: ; static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(_12), &_x2c_match_capture)) { Var value = _x2c_match_values[0]; List rest = Var_list(_x2c_match_values[1]);  printf("%d %d\n", Var_int(value), List_len(rest));  break; } default: break;
     }
+
   }
-return 0;
+  return 0;
 }
 

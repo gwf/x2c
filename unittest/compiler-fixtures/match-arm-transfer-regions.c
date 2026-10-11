@@ -10,9 +10,9 @@
 #include "x2c.h"
 static int rounds;
 
-static List _17, _16, _15, _13, _12, _11, _7, _5, _3, _1;
+static List _17, _16, _15, _13, _11, _10, _9, _5, _3, _1;
 
-static Var _14, _10, _9, _8, _6, _4, _2, _0;
+static Var _14, _12, _8, _7, _6, _4, _2, _0;
 
 static int _init_guard_ = 0;
 
@@ -43,22 +43,22 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _init_guard_ = 1;
   _0 = Symbol_var(731488);
   _1 = cons(_0, NULL);
-  _2 = Symbol_var(1268320);
+  _2 = Symbol_var(32784740);
   _3 = cons(_2, NULL);
-  _4 = Symbol_var(1287136);
+  _4 = Symbol_var(1268320);
   _5 = cons(_4, NULL);
-  _6 = Symbol_var(32784740);
-  _7 = cons(_6, NULL);
+  _6 = List_var(_5);
+  _7 = List_var(_1);
   _8 = List_var(_3);
-  _9 = List_var(_1);
-  _10 = List_var(_7);
-  _11 = cons(_10, NULL);
-  _12 = cons(_9, _11);
-  _13 = cons(_8, _12);
-  _14 = List_var(_5);
-  _15 = cons(_9, NULL);
+  _9 = cons(_8, NULL);
+  _10 = cons(_7, _9);
+  _11 = cons(_6, _10);
+  _12 = Symbol_var(1287136);
+  _13 = cons(_12, NULL);
+  _14 = List_var(_13);
+  _15 = cons(_7, NULL);
   _16 = cons(_14, _15);
-  _17 = cons(_9, _16);
+  _17 = cons(_7, _16);
   _x2c_static_initialize_0();
 }
 
@@ -76,22 +76,18 @@ static int deferred(Var item){
     ;
     x2c_cleanup_push(& _x2c_defer_record_0);
     {
+      {
+        List _x2c_match_expr = Var_list(item);
+        MatchCaptureBuffer _x2c_match_capture = { 0 };
+        switch(Var_symbol(car(_x2c_match_expr))){
+            case 731488: ; { List _x2c_match_cursor; if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936762349920ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && !_x2c_match_cursor) {break;
+           break; } } default: ;
+          n = 1;
+           break;
+        }
 
-  {
-    List _x2c_match_expr = Var_list(item);
-    MatchCaptureBuffer _x2c_match_capture = { 0 };
-
-    switch (Var_symbol(car(_x2c_match_expr))) {
-      case 731488: ;
-      { List _x2c_match_cursor;
-      if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936762349920ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && !_x2c_match_cursor) {break;
-      break; } } default: ;
-      n = 1;
-      break;
-
-    }
-  }
-{
+      }
+      {
         int _x2c_return_value_0 = n;
         {
           x2c_cleanup_leave(& _x2c_defer_record_0);
@@ -120,44 +116,36 @@ static int guarded(List items){
           ExceptionFrame _x2c_exception_frame_0;
           x2c_exception_push(& _x2c_exception_frame_0);
           if(! sigsetjmp(_x2c_exception_frame_0.env, 0)){
-
-  {
-    List _x2c_match_expr = Var_list(item);
-    MatchCaptureBuffer _x2c_match_capture = { 0 };
-
-    switch (Var_symbol(car(_x2c_match_expr))) {
-      case 1268320: ;
-            { List _x2c_match_cursor;
-            if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936762886752ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && !_x2c_match_cursor) {{
-              if(x2c_exception_claim(& _x2c_exception_frame_0)){
-                rounds ++;
-              }
-              x2c_exception_leave(& _x2c_exception_frame_0);
-              continue;
-            }
-            break; } } case 731488: ;
-            { List _x2c_match_cursor;
-            if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936762349920ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && !_x2c_match_cursor) {break;
-            break; } } case 1287136: ;
-            { List _x2c_match_cursor;
-            if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936762905568ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && !_x2c_match_cursor) {{
-              int _x2c_return_value_1 = kept + 1000;
-              {
-                if(x2c_exception_claim(& _x2c_exception_frame_0)){
-                  rounds ++;
+            {
+              List _x2c_match_expr = Var_list(item);
+              MatchCaptureBuffer _x2c_match_capture = { 0 };
+              switch(Var_symbol(car(_x2c_match_expr))){
+                  case 1268320: ; { List _x2c_match_cursor; if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936762886752ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && !_x2c_match_cursor) {{
+                  if(x2c_exception_claim(& _x2c_exception_frame_0)){
+                    rounds ++;
+                  }
+                  x2c_exception_leave(& _x2c_exception_frame_0);
+                  continue;
                 }
-                x2c_exception_leave(& _x2c_exception_frame_0);
-                return _x2c_return_value_1;
+                 break; } } case 731488: ; { List _x2c_match_cursor; if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936762349920ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && !_x2c_match_cursor) {break;
+                 break; } } case 1287136: ; { List _x2c_match_cursor; if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936762905568ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && !_x2c_match_cursor) {{
+                  int _x2c_return_value_1 = kept + 1000;
+                  {
+                    if(x2c_exception_claim(& _x2c_exception_frame_0)){
+                      rounds ++;
+                    }
+                    x2c_exception_leave(& _x2c_exception_frame_0);
+                    return _x2c_return_value_1;
+                  }
+
+                }
+                 break; } } default: ;
+                kept += 100;
+                 break;
               }
 
             }
-            break; } } default: ;
-            kept += 100;
-            break;
-
-    }
-  }
-arms ++;
+            arms ++;
           }
           else{
             x2c_exception_landed(& _x2c_exception_frame_0);
@@ -187,8 +175,8 @@ arms ++;
 int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
-  printf("%d %d\n", deferred(List_var(_1)), deferred(List_var(_7)));
-  printf("%d %d %d\n", guarded(_13), rounds, arms);
+  printf("%d %d\n", deferred(List_var(_1)), deferred(List_var(_3)));
+  printf("%d %d %d\n", guarded(_11), rounds, arms);
   printf("%d %d\n", guarded(_17), rounds);
   return 0;
 }

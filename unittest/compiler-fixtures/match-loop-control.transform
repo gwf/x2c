@@ -53,14 +53,21 @@
                     (ident (binding 11 "Var_list"))) 
               (args (expr ("Var") (ident (binding 5 "item")))))))))) 
         (at 51 
-         (matchcases (expr ("List") (ident (binding 10 "value"))) 
-          ((() (expr ("List") (expr ("List") (cache 3))) 
-            (block 
-             (at 20 
-              (stmnt 
-               (expr (int) 
-                (postfix ++ (expr (int) (ident (binding 3 "matched"))))))) 
-             (at 21 (break))))))) 
+         (block 
+          ("List _x2c_match_expr =" (expr ("List") (ident (binding 10 "value"))) 
+           ";" "MatchCaptureBuffer _x2c_match_capture = { 0 };") 
+          (switch (expr (int) ("0")) 
+           (block 
+            (" " 
+             " default: ; static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(" 
+             (expr ("List") (expr ("List") (cache 3))) 
+             "), &_x2c_match_capture)) {" 
+             (block 
+              (at 20 
+               (stmnt 
+                (expr (int) 
+                 (postfix ++ (expr (int) (ident (binding 3 "matched"))))))) 
+              (at 21 (break))) " break; }"))))) 
         (at 23 
          (stmnt 
           (expr (int) (postfix ++ (expr (int) (ident (binding 4 "after"))))))))))))) 
@@ -116,8 +123,15 @@
          (stmnt 
           (expr (int) (postfix ++ (expr (int) (ident (binding 13 "visited"))))))) 
         (at 55 
-         (matchcases (expr ("List") (ident (binding 19 "value"))) 
-          ((() (expr ("List") (expr ("List") (cache 10))) (continue))))) 
+         (block 
+          ("List _x2c_match_expr =" (expr ("List") (ident (binding 19 "value"))) 
+           ";" "MatchCaptureBuffer _x2c_match_capture = { 0 };") 
+          (switch (expr (int) ("0")) 
+           (block 
+            (" " 
+             " default: ; static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(" 
+             (expr ("List") (expr ("List") (cache 10))) 
+             "), &_x2c_match_capture)) {" (continue) " break; }"))))) 
         (at 38 
          (stmnt 
           (expr (int) (postfix ++ (expr (int) (ident (binding 14 "accepted"))))))))))))) 

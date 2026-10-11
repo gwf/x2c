@@ -291,26 +291,34 @@ static Money money_scale(Money amount, int factor){
 
 Code money_times(Code code){
   if(! _init_guard_) _file_init_();
-
   {
     List _x2c_match_expr = code;
-    Var _x2c_match_values[2];
-  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
-
-    switch (0) {
-      default: ;  static MacroCaseSite _x2c_macro_site_0;  if (Macro_case_capture_at(& _x2c_macro_site_0, _x2c_match_expr, _230, _231, &_x2c_match_capture)) {Var amount = _x2c_match_values[0];  Var factor = _x2c_match_values[1];  return cons(_28, cons(_235, cons(List_var(cons(_236, cons(_250, cons(List_var(({
-    Var _x2c_literal_part_0 = Macro_inserted(amount, 1, 1);  Var _x2c_literal_part_1 = Macro_inserted(factor, 1, 1);  cons(_62, cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, NULL)));
-  }
-  )), NULL)))), NULL)));  break;
-}
-
+    Var _x2c_match_values[2]; MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
+    switch(0){
+        default: ; static MacroCaseSite _x2c_macro_site_0; if (Macro_case_capture_at(&_x2c_macro_site_0, _x2c_match_expr, _230, _231, &_x2c_match_capture)) { Var amount = _x2c_match_values[0]; Var factor = _x2c_match_values[1];
+      return cons(_28, cons(_235, cons(List_var(cons(_236, cons(_250, cons(List_var(({
+        Var _x2c_literal_part_0 = Macro_inserted(amount, 1, 1);  Var _x2c_literal_part_1 = Macro_inserted(factor, 1, 1);  cons(_62, cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, NULL)));
+      }
+      )), NULL)))), NULL)));
+       break; }
     }
+
   }
-return code;
+  return code;
 }
 
 int main(void){
-  x2c_initialize();  if(! _init_guard_) _file_init_();  Money price = Var_new(3453797, 250);  Var plain = int_var(3);  int width = 6, height = 7;  int native = width * height;  Money total = money_scale(price, 4);  Var boxed = Var_binary(plain, 54, int_var(5));  x2c_var_update_volatile(&(price), 56, int_var(5));  printf("%d %d %d %d %d\n", native, Var_int(total), Var_int(boxed), Var_int(price), scaled);  return 0;
+  x2c_initialize();
+  if(! _init_guard_) _file_init_();
+  Money price = Var_new(3453797, 250);
+  Var plain = int_var(3);
+  int width = 6, height = 7;
+  int native = width * height;
+  Money total = money_scale(price, 4);
+  Var boxed = Var_binary(plain, 54, int_var(5));
+  x2c_var_update_volatile(&(price), 56, int_var(5));
+  printf("%d %d %d %d %d\n", native, Var_int(total), Var_int(boxed), Var_int(price), scaled);
+  return 0;
 }
 
 #undef _x2c_initializer_choice_C030F1E2_0_expanded

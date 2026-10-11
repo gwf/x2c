@@ -65,30 +65,24 @@ static List same_items(List code){
 }
 
 static List omit_second_capture(List code){
-
   {
     List _x2c_match_expr = code;
-    Var _x2c_match_values[9];
-  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 9 };
-
-    switch (Var_symbol(car(_x2c_match_expr))) {
-      case 42162: ;
-  static MatchCaptureSite _x2c_match_site_0;
-  if (x2c_match_site_try_capture(& _x2c_match_site_0, _x2c_match_expr, List_var(_31), &_x2c_match_capture)) {Var body = _x2c_match_values[0];  Var pattern = _x2c_match_values[1];  Var decl = _x2c_match_values[2];  Var assign = _x2c_match_values[3];  Var removed = _x2c_match_values[4];  Var read = _x2c_match_values[5];  List rest = Var_list(_x2c_match_values[6]);  Var handle = _x2c_match_values[7];  Var finalizer = _x2c_match_values[8];  return cons(List_var(({
-    Var _x2c_literal_part_3 = body;  Var _x2c_literal_part_4 = List_var(({
-      Var _x2c_literal_part_2 = List_var(cons(List_var(({
-        Var _x2c_literal_part_0 = pattern;  Var _x2c_literal_part_1 = List_var(cons(_4, cons(decl, cons(assign, List_append(rest, NULL)))));  cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, NULL));
+    Var _x2c_match_values[9]; MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 9 };
+    switch(Var_symbol(car(_x2c_match_expr))){
+        case 42162: ; static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(_31), &_x2c_match_capture)) { Var body = _x2c_match_values[0]; Var pattern = _x2c_match_values[1]; Var decl = _x2c_match_values[2]; Var assign = _x2c_match_values[3]; Var removed = _x2c_match_values[4]; Var read = _x2c_match_values[5]; List rest = Var_list(_x2c_match_values[6]); Var handle = _x2c_match_values[7]; Var finalizer = _x2c_match_values[8];  return cons(List_var(({
+        Var _x2c_literal_part_3 = body;  Var _x2c_literal_part_4 = List_var(({
+          Var _x2c_literal_part_2 = List_var(cons(List_var(({
+            Var _x2c_literal_part_0 = pattern;  Var _x2c_literal_part_1 = List_var(cons(_4, cons(decl, cons(assign, List_append(rest, NULL)))));  cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, NULL));
+          }
+          )), NULL));  cons(_2, cons(_x2c_literal_part_2, cons(handle, NULL)));
+        }
+        ));  cons(_0, cons(_x2c_literal_part_3, cons(_x2c_literal_part_4, cons(finalizer, NULL))));
       }
-      )), NULL));  cons(_2, cons(_x2c_literal_part_2, cons(handle, NULL)));
+      )), NULL);  break; } default: break;
     }
-    ));  cons(_0, cons(_x2c_literal_part_3, cons(_x2c_literal_part_4, cons(finalizer, NULL))));
+
   }
-  )), NULL);  break;
-}
-default: break;
-    }
-  }
-return cons(List_var(code), NULL);
+  return cons(List_var(code), NULL);
 }
 
 #include "error.h"

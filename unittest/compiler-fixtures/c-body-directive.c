@@ -256,24 +256,21 @@ static int governed(List items){
     _x2c_error_handler_0 = NULL;
     x2c_exception_leave(& _x2c_exception_frame_1);
   }
-
   {
     List _x2c_match_expr = items;
     MatchCaptureBuffer _x2c_match_capture = { 0 };
-
-    switch (0) {
-      default: ;  static MatchCaptureSite _x2c_match_site_0;  if (x2c_match_site_try_capture(& _x2c_match_site_0, _x2c_match_expr, List_var(_3), &_x2c_match_capture)) {
+    switch(0){
+        default: ; static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(_3), &_x2c_match_capture)) {
 #ifdef QUIET
-  total = 0;
+      total = 0;
 #else
-  total += 10000;
+      total += 10000;
 #endif
-  break;
-}
-total = - 1;  break;
+       break; } total = - 1;  break;
     }
+
   }
-return total;
+  return total;
 }
 
 int main(void){

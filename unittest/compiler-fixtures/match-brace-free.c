@@ -25,19 +25,15 @@ int main(void){
   if(! _init_guard_) _file_init_();
   List value = _1;
   int hit = 0;
-
   {
     List _x2c_match_expr = value;
     MatchCaptureBuffer _x2c_match_capture = { 0 };
-
-    switch (Var_symbol(car(_x2c_match_expr))) {
-      case 31626: ;
-  { List _x2c_match_cursor;
-  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936761650058ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && !_x2c_match_cursor) {hit = 1;
-  break; } } default: break;
-
+    switch(Var_symbol(car(_x2c_match_expr))){
+        case 31626: ; { List _x2c_match_cursor; if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936761650058ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && !_x2c_match_cursor) {hit = 1;
+       break; } } default: break;
     }
+
   }
-return hit == 1 ? 0 : 1;
+  return hit == 1 ? 0 : 1;
 }
 

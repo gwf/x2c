@@ -305,21 +305,29 @@
                     (op & (expr (("X2CCleanup")) 
                            (ident (binding 53 "_x2c_defer_record_0"))))))))))))))))) 
   (at 68 
-   (matchcases (expr ("List") (ident (binding 40 "values"))) 
-    (((?head *tail) (expr ("List") (expr ("List") (cache 9))) 
-      (block 
-       (at 42 
-        (stmnt 
-         (expr ("ast_phase1_Count") 
-          (op += (expr ("ast_phase1_Count") (ident (binding 36 "count"))) 
-           (expr (int) (literal (int) "1")))))))) 
-     (() (*) 
-      (block 
-       (at 43 
-        (stmnt 
-         (expr ("ast_phase1_Count") 
-          (op = (expr ("ast_phase1_Count") (ident (binding 36 "count"))) 
-           (expr (int) (literal (int) "0"))))))))))) 
+   (block 
+    ("List _x2c_match_expr =" (expr ("List") (ident (binding 40 "values"))) 
+     ";" 
+     "Var _x2c_match_values[2]; MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };") 
+    (switch (expr (int) ("0")) 
+     (block 
+      (" " 
+       " default: ; static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(" 
+       (expr ("List") (expr ("List") (cache 9))) 
+       
+       "), &_x2c_match_capture)) { Var head = _x2c_match_values[0]; List tail = Var_list(_x2c_match_values[1]);" 
+       (block 
+        (at 42 
+         (stmnt 
+          (expr ("ast_phase1_Count") 
+           (op += (expr ("ast_phase1_Count") (ident (binding 36 "count"))) 
+            (expr (int) (literal (int) "1"))))))) " break; }" 
+       (block 
+        (at 43 
+         (stmnt 
+          (expr ("ast_phase1_Count") 
+           (op = (expr ("ast_phase1_Count") (ident (binding 36 "count"))) 
+            (expr (int) (literal (int) "0"))))))) " break;"))))) 
   (at 45 
    (declare ("Var") 
     (bindings 
