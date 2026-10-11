@@ -61,6 +61,8 @@ Code lambda_lift(Code node);
 
 Code lambda_closure(Code node);
 
+Code lambda_cells(Code node);
+
 Code match_lowering(Code node);
 
 Code dynamic_binary(Code code);

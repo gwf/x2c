@@ -408,12 +408,14 @@ _x2c_defer_env_0;
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
 typedef struct _x2c_lambda_context_0{
-  Var _x2c_lambda_capture_0;
-  Var _x2c_lambda_capture_1;
+  Var c0;
+  Var c1;
 }
 _x2c_lambda_context_0;
 
-static Var _x2c_lambda_0(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0);
+static Var _x2c_lambda_0(Var parameter, Map variables, Map bindings);
+
+static Var _x2c_lambda_1(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0);
 
 static String _x2c_proto_string_add_update(volatile String * _x2c_macro_lhs_0, Symbol _x2c_macro_op_0, String _x2c_macro_rhs_0);
 
@@ -3060,10 +3062,10 @@ static Var _substitute(Var value, Map variables, Map bindings){
 
 static Type _substitute_signature(Type signature, Map variables, Map bindings){
   List parameters = Var_list(List_cadr(Var_list(List_car(Type_list(signature)))));  Type result = List_cdr(signature);  List parameter_types = List_map(parameters, ({
-    Var _x2c_lambda_capture_value_0 = Map_var(variables);  Var _x2c_lambda_capture_value_1 = Map_var(bindings);  _x2c_lambda_context_0 _x2c_lambda_context_1 ={
+    Var _x2c_lambda_capture_value_0 = Map_var(variables);  Var _x2c_lambda_capture_value_1 = Map_var(bindings);  struct _x2c_lambda_context_0 _x2c_lambda_context_1 ={
       _x2c_lambda_capture_value_0, _x2c_lambda_capture_value_1
     }
-    ;  Func_new_context(_x2c_lambda_0, _298, & _x2c_lambda_context_1, sizeof _x2c_lambda_context_1);
+    ;  Func_new_context(_x2c_lambda_1, _298, & _x2c_lambda_context_1, sizeof _x2c_lambda_context_1);
   }
   ));  Type result_type = Var_type(_substitute(List_var(result), variables, bindings));  return List_type(({
     Var _x2c_literal_part_58 = List_var(cons(_278, cons(List_var(parameter_types), NULL)));  List _x2c_literal_part_59 = Type_list(result_type);  cons(_x2c_literal_part_58, List_append(_x2c_literal_part_59, NULL));
@@ -4175,8 +4177,12 @@ static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;  *(*(int * *) _x2c_defer_data_0->_x2c_defer_capture_0) =(*(int *) _x2c_defer_data_0->_x2c_defer_capture_1);
 }
 
-static Var _x2c_lambda_0(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0){
-  Var parameter = x2c_func_value_argument(_x2c_lambda_closure_0, _x2c_lambda_argv_0, 0, 45156);  const _x2c_lambda_context_0 * _x2c_lambda_context_value_0 =(const _x2c_lambda_context_0 *) Func_context(_x2c_lambda_closure_0);  return _substitute(parameter, Var_map(_x2c_lambda_context_value_0 -> _x2c_lambda_capture_0), Var_map(_x2c_lambda_context_value_0 -> _x2c_lambda_capture_1)); ;
+static Var _x2c_lambda_0(Var parameter, Map variables, Map bindings){
+  return _substitute(parameter, variables, bindings); ;
+}
+
+static Var _x2c_lambda_1(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0){
+  Var a0 = x2c_func_value_argument(_x2c_lambda_closure_0, _x2c_lambda_argv_0, 0, 45156);  const struct _x2c_lambda_context_0 * record =(const struct _x2c_lambda_context_0 *) Func_context(_x2c_lambda_closure_0);  return _x2c_lambda_0(a0, Var_map(record -> c0), Var_map(record -> c1));
 }
 
 static String _x2c_proto_string_add_update(volatile String * _x2c_macro_lhs_0, Symbol _x2c_macro_op_0, String _x2c_macro_rhs_0){

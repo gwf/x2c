@@ -266,18 +266,22 @@ static Func _x2c_func_handle_2;
 
 _x2c_initializer_choice_05ED52D8_2((_x2c_func_handle_2 = x2c_func_shared(_x2c_func_adapt_2, _113)))
 typedef struct _x2c_lambda_context_0{
-  Var _x2c_lambda_capture_0;
+  Var c0;
 }
 _x2c_lambda_context_0;
 
-static Var _x2c_lambda_3(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0);
+static Var _x2c_lambda_3(String value, String root);
+
+static Var _x2c_lambda_4(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0);
 
 typedef struct _x2c_lambda_context_2{
-  Var _x2c_lambda_capture_1;
+  Var c0;
 }
 _x2c_lambda_context_2;
 
-static Var _x2c_lambda_4(Func _x2c_lambda_closure_1, const FuncArg * _x2c_lambda_argv_1);
+static Var _x2c_lambda_5(Var path, String option);
+
+static Var _x2c_lambda_6(Func _x2c_lambda_closure_1, const FuncArg * _x2c_lambda_argv_1);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -1361,20 +1365,20 @@ static List _defines(List values){
 
 static List _paths(String root, List values){
   return List_map(values, ({
-    Var _x2c_lambda_capture_value_0 = String_var(root);  _x2c_lambda_context_0 _x2c_lambda_context_1 ={
+    Var _x2c_lambda_capture_value_0 = String_var(root);  struct _x2c_lambda_context_0 _x2c_lambda_context_1 ={
       _x2c_lambda_capture_value_0
     }
-    ;  Func_new_context(_x2c_lambda_3, _106, & _x2c_lambda_context_1, sizeof _x2c_lambda_context_1);
+    ;  Func_new_context(_x2c_lambda_4, _106, & _x2c_lambda_context_1, sizeof _x2c_lambda_context_1);
   }
   ));
 }
 
 static List _path_options(String root, List values, String option){
   return List_flatten(List_map(_paths(root, values), ({
-    Var _x2c_lambda_capture_value_1 = String_var(option);  _x2c_lambda_context_2 _x2c_lambda_context_3 ={
+    Var _x2c_lambda_capture_value_1 = String_var(option);  struct _x2c_lambda_context_2 _x2c_lambda_context_3 ={
       _x2c_lambda_capture_value_1
     }
-    ;  Func_new_context(_x2c_lambda_4, _113, & _x2c_lambda_context_3, sizeof _x2c_lambda_context_3);
+    ;  Func_new_context(_x2c_lambda_6, _113, & _x2c_lambda_context_3, sizeof _x2c_lambda_context_3);
   }
   )));
 }
@@ -1500,21 +1504,26 @@ static Var _x2c_func_adapt_2(Func _x2c_func_binding_2, const FuncArg * _x2c_func
   ;
 }
 
-static Var _x2c_lambda_3(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0){
-  String value = Var_string(x2c_func_value_argument(_x2c_lambda_closure_0, _x2c_lambda_argv_0, 0, 1318210446));
-  const _x2c_lambda_context_0 * _x2c_lambda_context_value_0 =(const _x2c_lambda_context_0 *) Func_context(_x2c_lambda_closure_0);
-  return String_var(Path_join(Var_string(_x2c_lambda_context_value_0 -> _x2c_lambda_capture_0), value));
+static Var _x2c_lambda_3(String value, String root){
+  return String_var(Path_join(root, value));
   ;
 }
 
-static Var _x2c_lambda_4(Func _x2c_lambda_closure_1, const FuncArg * _x2c_lambda_argv_1){
-  Var path = x2c_func_value_argument(_x2c_lambda_closure_1, _x2c_lambda_argv_1, 0, 45156);
-  const _x2c_lambda_context_2 * _x2c_lambda_context_value_1 =(const _x2c_lambda_context_2 *) Func_context(_x2c_lambda_closure_1);
-  return List_var(({
-    Var _x2c_literal_part_21 = String_var(Var_string(_x2c_lambda_context_value_1 -> _x2c_lambda_capture_1));  cons(_x2c_literal_part_21, cons(path, NULL));
-  }
-  ));
+static Var _x2c_lambda_4(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_lambda_closure_0, _x2c_lambda_argv_0, 0, 1318210446));
+  const struct _x2c_lambda_context_0 * record =(const struct _x2c_lambda_context_0 *) Func_context(_x2c_lambda_closure_0);
+  return _x2c_lambda_3(a0, Var_string(record -> c0));
+}
+
+static Var _x2c_lambda_5(Var path, String option){
+  return List_var(cons(String_var(option), cons(path, NULL)));
   ;
+}
+
+static Var _x2c_lambda_6(Func _x2c_lambda_closure_1, const FuncArg * _x2c_lambda_argv_1){
+  Var a0 = x2c_func_value_argument(_x2c_lambda_closure_1, _x2c_lambda_argv_1, 0, 45156);
+  const struct _x2c_lambda_context_2 * record =(const struct _x2c_lambda_context_2 *) Func_context(_x2c_lambda_closure_1);
+  return _x2c_lambda_5(a0, Var_string(record -> c0));
 }
 
 #undef _x2c_initializer_choice_05ED52D8_0_expanded

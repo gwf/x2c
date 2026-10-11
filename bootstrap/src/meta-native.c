@@ -314,11 +314,13 @@ _x2c_defer_env_14;
 static void _x2c_defer_cleanup_15(void * _x2c_defer_opaque_15);
 
 typedef struct _x2c_lambda_context_0{
-  Var _x2c_lambda_capture_0;
+  Var c0;
 }
 _x2c_lambda_context_0;
 
-static Var _x2c_lambda_0(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0);
+static Var _x2c_lambda_0(String path, String name);
+
+static Var _x2c_lambda_1(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0);
 
 static void _x2c_defer_cleanup_16(void * _x2c_defer_opaque_16);
 
@@ -2140,10 +2142,10 @@ String Compiler_native_meta_module(Compiler c, String name, Type * type){
 
 static List _native_module_suppliers(String name){
   return List_filter(native_module_order, ({
-    Var _x2c_lambda_capture_value_0 = String_var(name);  _x2c_lambda_context_0 _x2c_lambda_context_1 ={
+    Var _x2c_lambda_capture_value_0 = String_var(name);  struct _x2c_lambda_context_0 _x2c_lambda_context_1 ={
       _x2c_lambda_capture_value_0
     }
-    ;  Func_new_context(_x2c_lambda_0, _154, & _x2c_lambda_context_1, sizeof _x2c_lambda_context_1);
+    ;  Func_new_context(_x2c_lambda_1, _154, & _x2c_lambda_context_1, sizeof _x2c_lambda_context_1);
   }
   ));
 }
@@ -2744,8 +2746,12 @@ static void _x2c_defer_cleanup_15(void * _x2c_defer_opaque_15){
   _x2c_defer_env_14 * _x2c_defer_data_14 =(_x2c_defer_env_14 *) _x2c_defer_opaque_15;  *(*(Map * *) _x2c_defer_data_14->_x2c_defer_capture_23) =(*(Map *) _x2c_defer_data_14->_x2c_defer_capture_24);
 }
 
-static Var _x2c_lambda_0(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0){
-  String path = Var_string(x2c_func_value_argument(_x2c_lambda_closure_0, _x2c_lambda_argv_0, 0, 1318210446));  const _x2c_lambda_context_0 * _x2c_lambda_context_value_0 =(const _x2c_lambda_context_0 *) Func_context(_x2c_lambda_closure_0);  return int_var(Map_contains((Var_map(Map_getindex(native_modules, String_var(path)))), String_var(Var_string(_x2c_lambda_context_value_0 -> _x2c_lambda_capture_0)))); ;
+static Var _x2c_lambda_0(String path, String name){
+  return int_var(Map_contains((Var_map(Map_getindex(native_modules, String_var(path)))), String_var(name))); ;
+}
+
+static Var _x2c_lambda_1(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_lambda_closure_0, _x2c_lambda_argv_0, 0, 1318210446));  const struct _x2c_lambda_context_0 * record =(const struct _x2c_lambda_context_0 *) Func_context(_x2c_lambda_closure_0);  return _x2c_lambda_0(a0, Var_string(record -> c0));
 }
 
 static void _x2c_defer_cleanup_16(void * _x2c_defer_opaque_16){

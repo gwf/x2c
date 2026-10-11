@@ -123,13 +123,15 @@ static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
 
 typedef struct _x2c_lambda_context_0{
-  Var _x2c_lambda_capture_0;
+  Var c0;
 }
 _x2c_lambda_context_0;
 
-static Var _x2c_lambda_0(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0);
+static Var _x2c_lambda_0(String path, String row);
 
-static Var _x2c_lambda_1(String field);
+static Var _x2c_lambda_1(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0);
+
+static Var _x2c_lambda_2(String field);
 
 static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0);
 
@@ -143,7 +145,7 @@ _x2c_defer_env_0;
 
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
 
-static Var _x2c_lambda_2(String name);
+static Var _x2c_lambda_3(String name);
 
 static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func_argv_1);
 
@@ -771,10 +773,10 @@ static Path _empty_builds(String package){
 static int _native_meta(String builds, String name){
   String row = String_join(NULL, cons(String_var(_65), cons(String_var(name), cons(String_var(_66), NULL))));
   return List_any(_files_with(builds, _67), ({
-    Var _x2c_lambda_capture_value_0 = String_var(row);  _x2c_lambda_context_0 _x2c_lambda_context_1 ={
+    Var _x2c_lambda_capture_value_0 = String_var(row);  struct _x2c_lambda_context_0 _x2c_lambda_context_1 ={
       _x2c_lambda_capture_value_0
     }
-    ;  Func_new_context(_x2c_lambda_0, _81, & _x2c_lambda_context_1, sizeof _x2c_lambda_context_1);
+    ;  Func_new_context(_x2c_lambda_1, _81, & _x2c_lambda_context_1, sizeof _x2c_lambda_context_1);
   }
   ));
 }
@@ -1201,21 +1203,25 @@ static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
   _release_packages();
 }
 
-static Var _x2c_lambda_0(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0){
-  String path = Var_string(x2c_func_value_argument(_x2c_lambda_closure_0, _x2c_lambda_argv_0, 0, 1318210446));
-  const _x2c_lambda_context_0 * _x2c_lambda_context_value_0 =(const _x2c_lambda_context_0 *) Func_context(_x2c_lambda_closure_0);
-  return int_var(String_contains(Path_read_text(path), Var_string(_x2c_lambda_context_value_0 -> _x2c_lambda_capture_0)));
+static Var _x2c_lambda_0(String path, String row){
+  return int_var(String_contains(Path_read_text(path), row));
   ;
 }
 
-static Var _x2c_lambda_1(String field){
+static Var _x2c_lambda_1(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_lambda_closure_0, _x2c_lambda_argv_0, 0, 1318210446));
+  const struct _x2c_lambda_context_0 * record =(const struct _x2c_lambda_context_0 *) Func_context(_x2c_lambda_closure_0);
+  return _x2c_lambda_0(a0, Var_string(record -> c0));
+}
+
+static Var _x2c_lambda_2(String field){
   return int_var(field != NULL);
   ;
 }
 
 static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0){
   String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_0, _x2c_func_argv_0, 0, 1318210446));
-  return _x2c_lambda_1(a0);
+  return _x2c_lambda_2(a0);
   ;
 }
 
@@ -1224,14 +1230,14 @@ static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
   File_cleanup((*(File *) _x2c_defer_data_0->_x2c_defer_capture_0));
 }
 
-static Var _x2c_lambda_2(String name){
+static Var _x2c_lambda_3(String name){
   return int_var(! String_startswith(name, _124));
   ;
 }
 
 static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func_argv_1){
   String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_1, _x2c_func_argv_1, 0, 1318210446));
-  return _x2c_lambda_2(a0);
+  return _x2c_lambda_3(a0);
   ;
 }
 

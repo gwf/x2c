@@ -220,18 +220,22 @@ static Func _x2c_func_handle_0;
 
 _x2c_initializer_choice_8309C62D_0((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _224)))
 typedef struct _x2c_lambda_context_0{
-  Var _x2c_lambda_capture_0;
+  Var c0;
 }
 _x2c_lambda_context_0;
 
-static Var _x2c_lambda_1(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0);
+static Var _x2c_lambda_1(String source, String root);
+
+static Var _x2c_lambda_2(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0);
 
 typedef struct _x2c_lambda_context_2{
-  Var _x2c_lambda_capture_1;
+  Var c0;
 }
 _x2c_lambda_context_2;
 
-static Var _x2c_lambda_2(Func _x2c_lambda_closure_1, const FuncArg * _x2c_lambda_argv_1);
+static Var _x2c_lambda_3(String prefix, String path);
+
+static Var _x2c_lambda_4(Func _x2c_lambda_closure_1, const FuncArg * _x2c_lambda_argv_1);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -1729,10 +1733,10 @@ List Build_script_helpers(Build b){
   }
   ), List_map(CliRequest_package_roots(b -> request), _x2c_func_handle_0));
   List prelude = List_map(compiler_prelude_sources(), ({
-    Var _x2c_lambda_capture_value_0 = String_var(root);  _x2c_lambda_context_0 _x2c_lambda_context_1 ={
+    Var _x2c_lambda_capture_value_0 = String_var(root);  struct _x2c_lambda_context_0 _x2c_lambda_context_1 ={
       _x2c_lambda_capture_value_0
     }
-    ;  Func_new_context(_x2c_lambda_1, _180, & _x2c_lambda_context_1, sizeof _x2c_lambda_context_1);
+    ;  Func_new_context(_x2c_lambda_2, _180, & _x2c_lambda_context_1, sizeof _x2c_lambda_context_1);
   }
   ));
   String depfile = _unit_file(Build__unit_dir(b, script), script, _46);
@@ -1747,10 +1751,10 @@ List Build_script_helpers(Build b){
       {
         if(String_startswith(path, _50) || ! is_source_file(path) || String_equal(path, script) || Array_contains(helpers, String_var(path)) || List_contains(prelude, String_var(path))) continue;
         if(List_any(excluded, ({
-          Var _x2c_lambda_capture_value_1 = String_var(path);  _x2c_lambda_context_2 _x2c_lambda_context_3 ={
+          Var _x2c_lambda_capture_value_1 = String_var(path);  struct _x2c_lambda_context_2 _x2c_lambda_context_3 ={
             _x2c_lambda_capture_value_1
           }
-          ;  Func_new_context(_x2c_lambda_2, _180, & _x2c_lambda_context_3, sizeof _x2c_lambda_context_3);
+          ;  Func_new_context(_x2c_lambda_4, _180, & _x2c_lambda_context_3, sizeof _x2c_lambda_context_3);
         }
         ))) continue;
         Array_push(helpers, String_var(path));
@@ -2342,18 +2346,26 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
   ;
 }
 
-static Var _x2c_lambda_1(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0){
-  String source = Var_string(x2c_func_value_argument(_x2c_lambda_closure_0, _x2c_lambda_argv_0, 0, 1318210446));
-  const _x2c_lambda_context_0 * _x2c_lambda_context_value_0 =(const _x2c_lambda_context_0 *) Func_context(_x2c_lambda_closure_0);
-  return String_var(Path_join(Var_string(_x2c_lambda_context_value_0 -> _x2c_lambda_capture_0), source));
+static Var _x2c_lambda_1(String source, String root){
+  return String_var(Path_join(root, source));
   ;
 }
 
-static Var _x2c_lambda_2(Func _x2c_lambda_closure_1, const FuncArg * _x2c_lambda_argv_1){
-  String prefix = Var_string(x2c_func_value_argument(_x2c_lambda_closure_1, _x2c_lambda_argv_1, 0, 1318210446));
-  const _x2c_lambda_context_2 * _x2c_lambda_context_value_1 =(const _x2c_lambda_context_2 *) Func_context(_x2c_lambda_closure_1);
-  return int_var(String_startswith(Var_string(_x2c_lambda_context_value_1 -> _x2c_lambda_capture_1), prefix));
+static Var _x2c_lambda_2(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_lambda_closure_0, _x2c_lambda_argv_0, 0, 1318210446));
+  const struct _x2c_lambda_context_0 * record =(const struct _x2c_lambda_context_0 *) Func_context(_x2c_lambda_closure_0);
+  return _x2c_lambda_1(a0, Var_string(record -> c0));
+}
+
+static Var _x2c_lambda_3(String prefix, String path){
+  return int_var(String_startswith(path, prefix));
   ;
+}
+
+static Var _x2c_lambda_4(Func _x2c_lambda_closure_1, const FuncArg * _x2c_lambda_argv_1){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_lambda_closure_1, _x2c_lambda_argv_1, 0, 1318210446));
+  const struct _x2c_lambda_context_2 * record =(const struct _x2c_lambda_context_2 *) Func_context(_x2c_lambda_closure_1);
+  return _x2c_lambda_3(a0, Var_string(record -> c0));
 }
 
 #undef _x2c_initializer_choice_8309C62D_0_expanded

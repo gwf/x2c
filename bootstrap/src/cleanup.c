@@ -262,12 +262,14 @@ _x2c_defer_env_5;
 static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5);
 
 typedef struct _x2c_lambda_context_0{
-  Var _x2c_lambda_capture_0;
-  Var _x2c_lambda_capture_1;
+  Var c0;
+  Var c1;
 }
 _x2c_lambda_context_0;
 
-static Var _x2c_lambda_0(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0);
+static Var _x2c_lambda_0(List block, Compiler c, Map runtime);
+
+static Var _x2c_lambda_1(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0);
 
 typedef struct _x2c_defer_env_6{
   const void * _x2c_defer_capture_6;
@@ -298,11 +300,13 @@ _x2c_defer_env_9;
 static void _x2c_defer_cleanup_9(void * _x2c_defer_opaque_9);
 
 typedef struct _x2c_lambda_context_2{
-  Walk * _x2c_lambda_capture_2;
+  Walk * c0;
 }
 _x2c_lambda_context_2;
 
-static Var _x2c_lambda_1(Func _x2c_lambda_closure_1, const FuncArg * _x2c_lambda_argv_1);
+static Var _x2c_lambda_2(List block, Walk * w);
+
+static Var _x2c_lambda_3(Func _x2c_lambda_closure_1, const FuncArg * _x2c_lambda_argv_1);
 
 typedef struct _x2c_defer_env_10{
   const void * _x2c_defer_capture_10;
@@ -341,11 +345,13 @@ _x2c_defer_env_14;
 static void _x2c_defer_cleanup_14(void * _x2c_defer_opaque_14);
 
 typedef struct _x2c_lambda_context_4{
-  Preserve * _x2c_lambda_capture_3;
+  Preserve * c0;
 }
 _x2c_lambda_context_4;
 
-static Var _x2c_lambda_2(Func _x2c_lambda_closure_2, const FuncArg * _x2c_lambda_argv_2);
+static Var _x2c_lambda_4(List block, Preserve * p);
+
+static Var _x2c_lambda_5(Func _x2c_lambda_closure_2, const FuncArg * _x2c_lambda_argv_2);
 
 typedef struct _x2c_defer_env_15{
   const void * _x2c_defer_capture_16;
@@ -1645,10 +1651,10 @@ static List Compiler__static_regions(Compiler c, List ast, Map runtime){
   {
     List _x2c_match_expr = ast; List _x2c_match_cursor; MatchCaptureBuffer _x2c_match_capture = { 0 };  switch(_x2c_match_expr ? _x2c_match_expr->car.u64 : 0){
         case 9224497936761996324ULL: ;  _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497936761996324ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1)) {return _rewrite_expression(ast, ({
-        Var _x2c_lambda_capture_value_0 = Compiler_var(c);  Var _x2c_lambda_capture_value_1 = Map_var(runtime);  _x2c_lambda_context_0 _x2c_lambda_context_1 ={
+        Var _x2c_lambda_capture_value_0 = Compiler_var(c);  Var _x2c_lambda_capture_value_1 = Map_var(runtime);  struct _x2c_lambda_context_0 _x2c_lambda_context_1 ={
           _x2c_lambda_capture_value_0, _x2c_lambda_capture_value_1
         }
-        ;  Func_new_context(_x2c_lambda_0, _34, & _x2c_lambda_context_1, sizeof _x2c_lambda_context_1);
+        ;  Func_new_context(_x2c_lambda_1, _34, & _x2c_lambda_context_1, sizeof _x2c_lambda_context_1);
       }
       ));  break; } default: ;  static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(_43), &_x2c_match_capture)) {return ast;  break; } _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497936761660594ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1)) {return Compiler__landing_form(c, ast, runtime);  break; } _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497945694178442ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor) { Var type = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor) { Var bindings = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {return Compiler__static_initializers(c, Var_type(type), Var_list(bindings), runtime);  break; } } } _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497936766630102ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1)) { List statements = _x2c_match_cursor; {
         Array before = Array_new();  for(List rest = statements;  List_truth(rest);  rest = List_cdr(rest)){
@@ -2007,10 +2013,10 @@ static Var Walk_rewrite(Walk * w, Var value){
 
 static List Walk__rewrite_blocks(Walk * w, List node){
   return _rewrite_expression(node, ({
-    Walk * _x2c_lambda_capture_value_2 = w;  _x2c_lambda_context_2 _x2c_lambda_context_3 ={
+    Walk * _x2c_lambda_capture_value_2 = w;  struct _x2c_lambda_context_2 _x2c_lambda_context_3 ={
       _x2c_lambda_capture_value_2
     }
-    ;  Func_new_context(_x2c_lambda_1, _34, & _x2c_lambda_context_3, sizeof _x2c_lambda_context_3);
+    ;  Func_new_context(_x2c_lambda_3, _34, & _x2c_lambda_context_3, sizeof _x2c_lambda_context_3);
   }
   ));
 }
@@ -2469,10 +2475,10 @@ static Var Preserve_rewrite(Preserve * p, Var value){
   if(! Var_is_row(value, 9, 7, 4) || Var_is_nil(value)) return value;  List node = Var_list(value); {
     List _x2c_match_expr = node; List _x2c_match_cursor;  switch(_x2c_match_expr ? _x2c_match_expr->car.u64 : 0){
         case 9224497936761996324ULL: ;  _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497936761996324ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1)) {return List_var((* p).expression_landings ? _rewrite_expression(node, ({
-        Preserve * _x2c_lambda_capture_value_3 = p;  _x2c_lambda_context_4 _x2c_lambda_context_5 ={
+        Preserve * _x2c_lambda_capture_value_3 = p;  struct _x2c_lambda_context_4 _x2c_lambda_context_5 ={
           _x2c_lambda_capture_value_3
         }
-        ;  Func_new_context(_x2c_lambda_2, _34, & _x2c_lambda_context_5, sizeof _x2c_lambda_context_5);
+        ;  Func_new_context(_x2c_lambda_5, _34, & _x2c_lambda_context_5, sizeof _x2c_lambda_context_5);
       }
       )) : node);  break; } default: break;
     }
@@ -2927,8 +2933,12 @@ static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5){
   _x2c_defer_env_5 * _x2c_defer_data_5 =(_x2c_defer_env_5 *) _x2c_defer_opaque_5;  Array_cleanup((*(Array *) _x2c_defer_data_5->_x2c_defer_capture_5));
 }
 
-static Var _x2c_lambda_0(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0){
-  List block = Var_list(x2c_func_value_argument(_x2c_lambda_closure_0, _x2c_lambda_argv_0, 0, 806120));  const _x2c_lambda_context_0 * _x2c_lambda_context_value_0 =(const _x2c_lambda_context_0 *) Func_context(_x2c_lambda_closure_0);  return List_var(Compiler__static_regions(Var_compiler(_x2c_lambda_context_value_0 -> _x2c_lambda_capture_0), block, Var_map(_x2c_lambda_context_value_0 -> _x2c_lambda_capture_1))); ;
+static Var _x2c_lambda_0(List block, Compiler c, Map runtime){
+  return List_var(Compiler__static_regions(c, block, runtime)); ;
+}
+
+static Var _x2c_lambda_1(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_lambda_closure_0, _x2c_lambda_argv_0, 0, 806120));  const struct _x2c_lambda_context_0 * record =(const struct _x2c_lambda_context_0 *) Func_context(_x2c_lambda_closure_0);  return _x2c_lambda_0(a0, Var_compiler(record -> c0), Var_map(record -> c1));
 }
 
 static void _x2c_defer_cleanup_6(void * _x2c_defer_opaque_6){
@@ -2947,8 +2957,12 @@ static void _x2c_defer_cleanup_9(void * _x2c_defer_opaque_9){
   _x2c_defer_env_9 * _x2c_defer_data_9 =(_x2c_defer_env_9 *) _x2c_defer_opaque_9;  Array_cleanup((*(Array *) _x2c_defer_data_9->_x2c_defer_capture_9));
 }
 
-static Var _x2c_lambda_1(Func _x2c_lambda_closure_1, const FuncArg * _x2c_lambda_argv_1){
-  List block = Var_list(x2c_func_value_argument(_x2c_lambda_closure_1, _x2c_lambda_argv_1, 0, 806120));  const _x2c_lambda_context_2 * _x2c_lambda_context_value_1 =(const _x2c_lambda_context_2 *) Func_context(_x2c_lambda_closure_1);  return Walk_rewrite(&((* _x2c_lambda_context_value_1 -> _x2c_lambda_capture_2)), List_var(block)); ;
+static Var _x2c_lambda_2(List block, Walk * w){
+  return Walk_rewrite(&((* w)), List_var(block)); ;
+}
+
+static Var _x2c_lambda_3(Func _x2c_lambda_closure_1, const FuncArg * _x2c_lambda_argv_1){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_lambda_closure_1, _x2c_lambda_argv_1, 0, 806120));  const struct _x2c_lambda_context_2 * record =(const struct _x2c_lambda_context_2 *) Func_context(_x2c_lambda_closure_1);  return _x2c_lambda_2(a0, &(* record -> c0));
 }
 
 static void _x2c_defer_cleanup_10(void * _x2c_defer_opaque_10){
@@ -2971,8 +2985,12 @@ static void _x2c_defer_cleanup_14(void * _x2c_defer_opaque_14){
   _x2c_defer_env_14 * _x2c_defer_data_14 =(_x2c_defer_env_14 *) _x2c_defer_opaque_14;  Array_cleanup((*(Array *) _x2c_defer_data_14->_x2c_defer_capture_15));
 }
 
-static Var _x2c_lambda_2(Func _x2c_lambda_closure_2, const FuncArg * _x2c_lambda_argv_2){
-  List block = Var_list(x2c_func_value_argument(_x2c_lambda_closure_2, _x2c_lambda_argv_2, 0, 806120));  const _x2c_lambda_context_4 * _x2c_lambda_context_value_2 =(const _x2c_lambda_context_4 *) Func_context(_x2c_lambda_closure_2);  return Preserve_rewrite(&((* _x2c_lambda_context_value_2 -> _x2c_lambda_capture_3)), List_var(block)); ;
+static Var _x2c_lambda_4(List block, Preserve * p){
+  return Preserve_rewrite(&((* p)), List_var(block)); ;
+}
+
+static Var _x2c_lambda_5(Func _x2c_lambda_closure_2, const FuncArg * _x2c_lambda_argv_2){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_lambda_closure_2, _x2c_lambda_argv_2, 0, 806120));  const struct _x2c_lambda_context_4 * record =(const struct _x2c_lambda_context_4 *) Func_context(_x2c_lambda_closure_2);  return _x2c_lambda_4(a0, &(* record -> c0));
 }
 
 static void _x2c_defer_cleanup_15(void * _x2c_defer_opaque_15){

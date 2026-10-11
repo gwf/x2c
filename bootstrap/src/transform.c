@@ -181,11 +181,13 @@ static List _update_call(List target, List operator, List value, String helper);
 
 #endif
 typedef struct _x2c_lambda_context_0{
-  Var _x2c_lambda_capture_0;
+  Var c0;
 }
 _x2c_lambda_context_0;
 
-static Var _x2c_lambda_0(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0);
+static Var _x2c_lambda_0(List child, Compiler c);
+
+static Var _x2c_lambda_1(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0);
 
 typedef struct _x2c_defer_env_0{
   const void * _x2c_defer_capture_0;
@@ -283,11 +285,13 @@ _x2c_defer_env_12;
 static void _x2c_defer_cleanup_12(void * _x2c_defer_opaque_12);
 
 typedef struct _x2c_lambda_context_2{
-  Var _x2c_lambda_capture_1;
+  Var c0;
 }
 _x2c_lambda_context_2;
 
-static Var _x2c_lambda_1(Func _x2c_lambda_closure_1, const FuncArg * _x2c_lambda_argv_1);
+static Var _x2c_lambda_2(List child, Compiler c);
+
+static Var _x2c_lambda_3(Func _x2c_lambda_closure_1, const FuncArg * _x2c_lambda_argv_1);
 
 #include "exception.h"
 
@@ -2153,10 +2157,10 @@ List Compiler_rebuild_expression(Compiler, Type, List);
 List Compiler_lambda_param_types(Compiler, List);
 List Compiler_lower_lambda_expr(Compiler c, List expression){
   if(! _init_guard_) _file_init_();  if(Var_equal(List_car(expression), Symbol_var(104)) || Var_equal(List_car(expression), Symbol_var(40070))) return Ast_rewrite_children(expression, ({
-    Var _x2c_lambda_capture_value_0 = Compiler_var(c);  _x2c_lambda_context_0 _x2c_lambda_context_1 ={
+    Var _x2c_lambda_capture_value_0 = Compiler_var(c);  struct _x2c_lambda_context_0 _x2c_lambda_context_1 ={
       _x2c_lambda_capture_value_0
     }
-    ;  Func_new_context(_x2c_lambda_0, _66, & _x2c_lambda_context_1, sizeof _x2c_lambda_context_1);
+    ;  Func_new_context(_x2c_lambda_1, _66, & _x2c_lambda_context_1, sizeof _x2c_lambda_context_1);
   }
   ));  Macro lambda = _295; {
     List _x2c_match_expr = expression; List _x2c_match_cursor, _x2c_match_cursor1; Var _x2c_match_values[2]; MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };  switch(_x2c_match_expr ? _x2c_match_expr->car.u64 : 0){
@@ -3029,10 +3033,10 @@ static List Compiler__lower_lambda_destructuring(Compiler c, List ast){
 
   }
   if(! ast_contains_head(List_var(ast), 317060294872)) return ast;  return Ast_rewrite_children(ast, ({
-    Var _x2c_lambda_capture_value_1 = Compiler_var(c);  _x2c_lambda_context_2 _x2c_lambda_context_3 ={
+    Var _x2c_lambda_capture_value_1 = Compiler_var(c);  struct _x2c_lambda_context_2 _x2c_lambda_context_3 ={
       _x2c_lambda_capture_value_1
     }
-    ;  Func_new_context(_x2c_lambda_1, _66, & _x2c_lambda_context_3, sizeof _x2c_lambda_context_3);
+    ;  Func_new_context(_x2c_lambda_3, _66, & _x2c_lambda_context_3, sizeof _x2c_lambda_context_3);
   }
   ));
 }
@@ -3351,8 +3355,12 @@ static List _update_call(List target, List operator, List value, String helper){
 }
 
 #endif
-static Var _x2c_lambda_0(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0){
-  List child = Var_list(x2c_func_value_argument(_x2c_lambda_closure_0, _x2c_lambda_argv_0, 0, 806120));  const _x2c_lambda_context_0 * _x2c_lambda_context_value_0 =(const _x2c_lambda_context_0 *) Func_context(_x2c_lambda_closure_0);  return List_var(Compiler_lower_lambda_expr(Var_compiler(_x2c_lambda_context_value_0 -> _x2c_lambda_capture_0), child)); ;
+static Var _x2c_lambda_0(List child, Compiler c){
+  return List_var(Compiler_lower_lambda_expr(c, child)); ;
+}
+
+static Var _x2c_lambda_1(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_lambda_closure_0, _x2c_lambda_argv_0, 0, 806120));  const struct _x2c_lambda_context_0 * record =(const struct _x2c_lambda_context_0 *) Func_context(_x2c_lambda_closure_0);  return _x2c_lambda_0(a0, Var_compiler(record -> c0));
 }
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
@@ -3407,7 +3415,11 @@ static void _x2c_defer_cleanup_12(void * _x2c_defer_opaque_12){
   _x2c_defer_env_12 * _x2c_defer_data_12 =(_x2c_defer_env_12 *) _x2c_defer_opaque_12;  Array_cleanup((*(Array *) _x2c_defer_data_12->_x2c_defer_capture_16));
 }
 
-static Var _x2c_lambda_1(Func _x2c_lambda_closure_1, const FuncArg * _x2c_lambda_argv_1){
-  List child = Var_list(x2c_func_value_argument(_x2c_lambda_closure_1, _x2c_lambda_argv_1, 0, 806120));  const _x2c_lambda_context_2 * _x2c_lambda_context_value_1 =(const _x2c_lambda_context_2 *) Func_context(_x2c_lambda_closure_1);  return List_var(Compiler__lower_lambda_destructuring(Var_compiler(_x2c_lambda_context_value_1 -> _x2c_lambda_capture_1), child)); ;
+static Var _x2c_lambda_2(List child, Compiler c){
+  return List_var(Compiler__lower_lambda_destructuring(c, child)); ;
+}
+
+static Var _x2c_lambda_3(Func _x2c_lambda_closure_1, const FuncArg * _x2c_lambda_argv_1){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_lambda_closure_1, _x2c_lambda_argv_1, 0, 806120));  const struct _x2c_lambda_context_2 * record =(const struct _x2c_lambda_context_2 *) Func_context(_x2c_lambda_closure_1);  return _x2c_lambda_2(a0, Var_compiler(record -> c0));
 }
 

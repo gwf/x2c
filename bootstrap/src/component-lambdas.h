@@ -8,5 +8,6 @@
 #include "x2c.h"
 #include "rewrite.h"
 #include "grammar.h"
+#include "ast-rewrite.h"
 
 #endif /* __GUARD_0xEFEE557B__ */
