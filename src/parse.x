@@ -362,6 +362,8 @@ static int Compiler._static_interface_form(Compiler c) {
    conditional groups around the form. A template's forms have neither. */
 static void Compiler._leading_directives(Compiler c, int skip_body) {
   if (c.macro_holes) return;
+  if (skip_body && c.meta_build && !c.signature_only)
+    c.register_native_meta_prefix();
   List directives = c.leading_preproc();
   c.note_preprocessor_macros(directives);
   if (skip_body && c.meta_build && !c.signature_only && !c.macro_holes && directives)
@@ -469,6 +471,8 @@ static List Compiler._declaration_form(Compiler c, int skip_body) {
     decl = c.parse_declaration_row();
   int body = c.peek(0) == <"{"> || c._at_function_arrow();
   Type type = decl.type_from_ast();
+  if (prefix && meta && type.is_function() && !body)
+    c._retain_native_prefix_nodes(%($decl));
   if (prefix && decl.car() == <typedef>) {
     c._retain_native_prefix_nodes(%($decl));
   }
@@ -528,6 +532,39 @@ static void Compiler._retain_native_prefix_nodes(Compiler c, List nodes) {
   pending->declaration = nodes;
   if (!c.native_prefix_pending) c.native_prefix_pending = [];
   c.native_prefix_pending.push(Var.new(<p48>, pending));
+}
+
+/* A header uses reached signatures without binding pending implementations. */
+Array Compiler.native_meta_prefix_declarations(Compiler c) {
+  Array declarations = [];
+  foreach (List node, c.unit_nodes) {
+    List declaration = _native_prefix_declaration(node);
+    if (declaration) declarations.push(declaration);
+  }
+  foreach (Var value, c.native_prefix_pending) {
+    NativePrefixBody *pending = value.pointer();
+    if (pending->kind == 4)
+      foreach (List node, pending->declaration) declarations.push(node);
+    else declarations.push(_native_prefix_declaration(pending->declaration));
+  }
+  return declarations;
+}
+
+static List _native_prefix_declaration(List node) {
+  match (node) {
+    case %(function ?type ?declarator ?):
+      return %(declare $type (bindings $declarator));
+    case %(declare ?type (bindings *bindings)): {
+      Array bare = [];
+      foreach (List bind, bindings) {
+        match (bind) case %(op = ?declarator ?): bind = declarator;
+        bare.push(bind);
+      }
+      return %(declare $type (bindings @{bare.list_free()}));
+    }
+    case %(module-members ?): return NULL;
+  }
+  return node;
 }
 
 static void Compiler._retain_native_prefix_body(

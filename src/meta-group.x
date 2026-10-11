@@ -45,7 +45,7 @@ static macro Stmt $report.macro.function_unavailable(
 /* The C compiler and x2c include directory that build meta code. */
 static String meta_cc = NULL, meta_include_dir = NULL;
 static Map meta_prefix_published = NULL;
-static int meta_prefix_sequence = 0;
+static int meta_prefix_sequence = 0, meta_declaration_header = 0;
 
 /** Selects the C compiler `cc` that builds the `meta` code of the units
     this process translates, with the runtime headers this compiler was
@@ -622,8 +622,10 @@ static Var Compiler._group_include(Compiler c, Var node, String lib) {
 static void Compiler._provider_include(
   Compiler c, Array includes, String path) {
   Var index;
-  if (meta_build_tables.try_get(Path.absolute(path), index))
+  if (meta_build_tables.try_get(Path.absolute(path), index)) {
+    c.require_native_meta_header(path);
     includes.push(%(preproc ${%"#include \"meta_group_$index.h\""}));
+  }
 }
 
 /* `node`, a declaration whose initializer holds a placeholder, without
@@ -1159,7 +1161,9 @@ void Compiler.write_meta_build(Compiler c) {
       Array companions = [];
       foreach (Var (provider, table), meta_build_tables)
         if (table != index && provider in c.resolved_translation_dependencies() &&
-            c.module_tree.owner(provider))
+            c.module_tree.owner(provider) &&
+            (!meta_declaration_header ||
+             Path.is_file(%"$meta_build_directory/group-$table.xnm")))
           companions.push(%"group-$table.xnm");
       metadata["companions"] = companions;
       String receipt = Var.json(metadata);
@@ -1183,6 +1187,17 @@ static void _publish_meta_metadata(String path, String receipt) {
 void Compiler.write_native_meta_prefix(Compiler c, int sequence, Map published) {
   $let(meta_prefix_sequence, sequence)
   $let(meta_prefix_published, published)
+    c.write_meta_build();
+}
+
+/** Publishes only the active provider's reached declarations for children. */
+void Compiler.write_native_meta_header(Compiler c, int sequence) {
+  Array declarations = c.native_meta_prefix_declarations();
+  $let(c.unit_nodes, declarations)
+  $let(c.meta_group, [])
+  $let(meta_declaration_header, 1)
+  $let(meta_prefix_sequence, sequence)
+  $let(meta_prefix_published, {})
     c.write_meta_build();
 }
 

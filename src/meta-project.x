@@ -67,7 +67,7 @@ static typedef struct Helper {
   Frontend frontend, Array owners, Map packages;
   Toolchain toolchain, String include, identity, directory;
   List flags, Array modules;
-  Map deps, before, readiness, prefix_compilers, publications, prefix_counts;
+  Map deps, before, readiness, prefix_compilers, publications, prefix_counts, header_active;
   Map native_sources, native_targets, native_loaded;
   Array groups, built, failures, objects, retained_dependencies, retained_tables;
   Scope lifetime;
@@ -84,7 +84,7 @@ void Frontend.prepare_meta(Frontend f, List inputs) {
   Helper h = {
     .frontend = f, .owners = [],
     .packages = {}, .deps = {}, .before = {}, .readiness = {},
-    .prefix_compilers = {}, .publications = {}, .prefix_counts = {},
+    .prefix_compilers = {}, .publications = {}, .prefix_counts = {}, .header_active = {},
     .native_sources = {}, .native_targets = {}, .native_loaded = {},
     .groups = [], .built = [],
     .failures = [], .objects = [], .retained_dependencies = [],
@@ -451,6 +451,31 @@ void Compiler.register_native_meta_prefix(Compiler c) {
       h->prefix_compilers[owner] = Var.new(<p48>, c);
       return;
     }
+}
+
+/** Supplies an ancestor interface without requiring unfinished native bodies. */
+void Compiler.require_native_meta_header(Compiler c, String path) {
+  if (!active_helper) return;
+  Helper *h = active_helper;
+  String owner = c.canonical_path(path);
+  Var compiler;
+  if (owner in h->header_active ||
+      !h->prefix_compilers.try_get(owner, compiler)) return;
+  int index = 1;
+  foreach (String provider, h->owners) {
+    if (provider == owner) {
+      h->header_active[provider] = 1;
+      defer h->header_active.del(provider);
+      Var prior;
+      int sequence = h->prefix_counts.try_get(index, prior) ? (int) prior + 1 : 1;
+      h->prefix_counts[index] = sequence;
+      Compiler prefix = compiler.pointer();
+      $let(prefix.meta_build, index + 1)
+        prefix.write_native_meta_header(sequence);
+      return;
+    }
+    index++;
+  }
 }
 
 static String Helper.prefix(Helper &h, String owner, int index, String name) {
