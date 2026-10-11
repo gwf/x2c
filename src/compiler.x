@@ -1885,7 +1885,10 @@ static List Compiler._initializer_variant(
   return %(${c._initializer_graph_binding(binding)} ${targets.list_free()} $arms);
 }
 
-static List Compiler._initializer_graph_binding(Compiler c, List binding) {
+static List Compiler._initializer_graph_binding(Compiler c, List binding) =>
+  binding_identity_new(1, c.initializer_identity(binding));
+
+String Compiler.initializer_identity(Compiler c, List binding) {
   String name = c.emitted_binding_name(binding);
   List key = c._fact(%(namespace $binding));
   Map statics = c.sym.file_statics();
@@ -1896,7 +1899,7 @@ static List Compiler._initializer_graph_binding(Compiler c, List binding) {
     String file = c.module_tree.identity(provider);
     name = %"_x2c_file_init_${filename_hash(file)}__$name";
   }
-  return binding_identity_new(0, name);
+  return name;
 }
 
 /** Rebinds other module units' parsed prerequisites into this unit's table. */
@@ -1934,10 +1937,6 @@ List Compiler.initializer_references(Compiler c, Var value) {
   _collect_references(value, references, ordered);
   return ordered.list_free();
 }
-
-/** Names an initializer graph vertex without exposing its source declaration. */
-String Compiler.initializer_identity(Compiler c, List binding) =>
-  binding_identity_spelling(c._initializer_graph_binding(binding));
 
 static void _collect_references(Var value, Map references, Array ordered) {
   if (value is not <list> || value.is_nil()) return;

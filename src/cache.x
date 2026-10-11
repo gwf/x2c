@@ -635,8 +635,8 @@ void Compiler.check_native_initializer_receipts(Compiler c, List paths) {
     Array selected = Json.read_file(path);
     foreach (Array edge, selected) {
       String source = edge[0], target = edge[1];
-      List binding = binding_identity_new(0, source);
-      List prerequisite = binding_identity_new(0, target);
+      List binding = binding_identity_new(1, source);
+      List prerequisite = binding_identity_new(1, target);
       Array targets = dependencies.setdefault(binding, []);
       if (!(prerequisite in targets)) targets.push(prerequisite);
     }
