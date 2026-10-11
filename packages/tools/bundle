@@ -175,8 +175,8 @@ Map identity = {
   "x2c_sha256": x2c_sha256,
   "runtime_sha256": runtime_sha256,
   "archive_sha256": archive_sha256,
-  "dependency_version": manifest["version"],
-  "dependency_profile": manifest["profile"],
+  "dependency_version": manifest.getdefault("version", (Var) {0}),
+  "dependency_profile": manifest.getdefault("profile", (Var) {0}),
   "dependency_toolchain": toolchain,
 };
 stage.join("BUNDLE.json").write_text(Var.pretty_json(identity) + "\n");
