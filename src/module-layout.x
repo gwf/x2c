@@ -316,7 +316,7 @@ static void Layouts.visit(Layouts &l, List family) {
     Compiler c = l.bodies[family].list().car();
     c.report_error(
       <type>, "complete aggregate layout cycle", NULL,
-      %($family "provider: ${layouts.owners[family]}"));
+      %($family "provider: ${l.owners[family]}"));
   }
   l.visiting[family] = 1;
   foreach (List prerequisite, l.fixed_edges[family].list())
