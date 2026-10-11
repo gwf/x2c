@@ -2321,10 +2321,6 @@ String Compiler.binding_provider(Compiler c, List binding, int definition) {
     List key = c._fact(%(namespace $binding));
     if (key) provider = c.sym.get_exact(definition
       ? %("definition-file" $key) : %("declaration-file" $key));
-    if (!provider && definition) {
-      String spelling = binding_identity_spelling(binding);
-      if (spelling) provider = c.sym.get_exact(%("definition-file" ($spelling)));
-    }
   }
   match (provider) case %(provider ?path):
     return c.canonical_path(home_absolute_path(path));
