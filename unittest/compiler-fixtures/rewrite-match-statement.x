@@ -29,6 +29,19 @@ static int classify(List form) {
   return -1;
 }
 
+/* A match nested in an arm reaches the rule again. */
+static int nested(List form) {
+  match (form) {
+    case %(pair ?inner): {
+      match (%($inner)) {
+        case %(one): return 1;
+      }
+      return 2;
+    }
+  }
+  return 0;
+}
+
 int main(void) {
   match (%(trace now)) {
     case %(a): printf("a\n");
@@ -37,5 +50,7 @@ int main(void) {
   }
   int sum = classify(%(add 1 2)) + classify(%(neg 4)) + classify(%(other));
   printf("%d matched %d\n", sum, matched);
+  int depth = nested(%(pair one));
+  printf("%d matched %d\n", depth, matched);
   return 0;
 }

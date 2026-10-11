@@ -2669,11 +2669,12 @@ List Compiler.rewrite(
 
 /** Binds and lowers a replacement while its rule remains active. The
     source expressions the replacement holds lower outside the rule, so a
-    nested use of the rule applies again; a lowered statement replacement
-    lowers the statements its source held outside the rule as well. An
-    expression retains the result type already established for its parent.
-    A replacement whose template and slot signatures an earlier use in the
-    unit prepared lowers only its captured values. */
+    nested use of the rule applies again. A statement replacement, or a
+    lowered one, also lowers the statements its source held outside the
+    rule, and lowers once, so a new statement it writes stays outside the
+    rule. An expression retains the result type already established for its
+    parent. A replacement whose template and slot signatures an earlier use
+    in the unit prepared lowers only its captured values. */
 List Compiler.lower_rewrite(
   Compiler c, Symbol point, Var kind, List source, AstPos position,
   Type expected, Token site) =>
@@ -2697,7 +2698,9 @@ static List Compiler._rewrite(
     $let(c.active_rewrites, cons(rule, c.active_rewrites)) {
       if (!lower) return c.bind_syntax(result, position, expected);
       if (position == AST_UNIT) return c._lowered_definition(result);
-      match (result) case %(code-value "lowered" *): {
+      int held = point == <node>;
+      match (result) case %(code-value "lowered" *): held = 1;
+      if (held) {
         Array parts = $auto([]);
         _held_parts(source, point, parts);
         return c._watched(result, parts, position, expected, site);
@@ -2780,13 +2783,17 @@ static typedef struct Effects {
 /** Records the values a replacement's lowering watches and what lowering
     each produced, in the order lowering reached them. A watched value is
     source the translator captured, so it lowers under the `outer` rules,
-    those active outside the translator's own. */
+    those active outside the translator's own. A first lowering `prepares`
+    a skeleton from what it records. A replacement lowered as written
+    within another's has that one as its `parent`, whose source it may hold
+    as well. */
 struct SlotWatch {
   List values;
   Array outputs, order;
   Effects inner;
-  int repeated;
+  int repeated, prepares;
   List outer;
+  SlotWatch parent;
 };
 
 static Effects Compiler._effects(Compiler c) {
@@ -2842,6 +2849,7 @@ static List Compiler._prepared(
     return c._watched(result, sources, position, expected, site);
   struct SlotWatch watch = {values.list(), [], []};
   watch.outer = c.active_rewrites.cdr();
+  watch.prepares = 1;
   foreach (Var value, values) watch.outputs.push(NULL);
   Effects before = c._effects();
   List lowered;
@@ -2863,6 +2871,7 @@ static List Compiler._watched(
   Token site) {
   struct SlotWatch watch = {sources.list(), [], []};
   watch.outer = c.active_rewrites.cdr();
+  if (c.slot_watch && !c.slot_watch.prepares) watch.parent = c.slot_watch;
   foreach (Var value, sources) watch.outputs.push(NULL);
   $let(c.slot_watch, &watch)
     return c._lowered(result, position, expected, site);
@@ -3015,17 +3024,33 @@ static List _filled_items(List items, Array lowered) {
     ? items : cons(head, tail);
 }
 
+/* The index of `ast` among the values `watch` watches, or -1. A statement
+   that binding the replacement built again from a value keeps the value's
+   origin. */
+static int SlotWatch.slot(SlotWatch watch, Ast ast) {
+  int slot = 0, at = ast.car() == <at>;
+  for (List v = watch.values; v; v = v.cdr(), slot++) {
+    List value = v.car();
+    if (value === ast ||
+        (at && value.car() == <at> && value.cadr() == ast.cadr()))
+      return slot;
+  }
+  return -1;
+}
+
 /** Lowers `ast` when it is a value the active first lowering watches and
-    records what its lowering produced; NULL otherwise. */
+    records what its lowering produced; NULL otherwise. A value that an
+    enclosing replacement's source held as well lowers outside that
+    replacement's rule too, and that replacement still watches its own
+    values within it. */
 Ast Compiler.watched_step(Compiler c, Ast ast) {
-  SlotWatch watch = c.slot_watch;
-  int slot = 0;
-  for (List v = watch.values; v && v.car().list() !== ast; v = v.cdr())
-    slot++;
-  if (slot == (int) watch.outputs.len()) return NULL;
+  SlotWatch watch = c.slot_watch, owner = watch;
+  int slot = watch.slot(ast);
+  if (slot < 0) return NULL;
+  while (owner.parent && owner.parent.slot(ast) >= 0) owner = owner.parent;
   Effects before = c._effects();
   Ast lowered;
-  $let(c.slot_watch, NULL) $let(c.active_rewrites, watch.outer)
+  $let(c.slot_watch, owner.parent) $let(c.active_rewrites, owner.outer)
     lowered = c.normalize(ast);
   watch.inner = watch.inner.add(c._effects().since(before));
   if (watch.outputs[slot].list()) watch.repeated = 1;

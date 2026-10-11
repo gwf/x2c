@@ -147,7 +147,10 @@ static Ast Compiler._step_tag(Compiler c, Ast ast, Symbol tag) {
     case <defer>: next = c._defer_node(ast); break;
     case <return>: next = c._return(ast); break;
     case <raise>: return c._raise_node(ast);
-    case <switch>: next = c._statement_rewrite(ast, tag); break;
+    case <switch>: {
+      List rewritten = c._statement_rewrite(ast, tag);
+      return rewritten !== ast ? rewritten : c._default_node(ast);
+    }
     case <if>: case <while>: case <do>: case <for>:
       next = c._truthy(ast); break;
     case <call>: next = c._call(ast); break;
