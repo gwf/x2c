@@ -326,10 +326,10 @@ List Compiler.native_prefix_functions(Compiler c) {
 }
 
 /* Only reached bound expressions identify executable provider prerequisites. */
-static List Compiler._native_prerequisites(Compiler c) {
+static List Compiler._native_reference_rows(Compiler c, Array units) {
   Array rows = [];
   Map seen = {};
-  foreach (Var unit, c._units()) {
+  foreach (Var unit, units) {
     List node;
     $ast.walk(unit, node) {
       match (node) case $source_identifier_content(
@@ -340,7 +340,7 @@ static List Compiler._native_prerequisites(Compiler c) {
         Var index;
         if (!provider || provider == c.canonical_path(c.filename) ||
             !meta_build_tables.try_get(provider, index)) continue;
-        List row = %($index $name);
+        List row = %($index $name $binding);
         if (row in seen) continue;
         seen[row] = 1;
         rows.push(row);
@@ -348,6 +348,13 @@ static List Compiler._native_prerequisites(Compiler c) {
     }
   }
   return rows.list_free();
+}
+
+static List Compiler._native_prerequisites(Compiler c) {
+  Array prerequisites = [];
+  foreach (List row, c._native_reference_rows(c._units()))
+    prerequisites.push(row[:2]);
+  return prerequisites.list_free();
 }
 
 /* Published body and object definitions differ from collected prototypes. */
@@ -408,6 +415,10 @@ static void Compiler._name_provider_bindings(
       c.name_meta_provider_bindings(path, index);
   int index = c.meta_build - 1;
   c.name_meta_provider_bindings(provider, index);
+  foreach (List row, c._native_reference_rows(units)) {
+    (int owner, String spelling, List binding) = row;
+    c.set_fact(%(emitted $binding), %"_x2c_meta_group_${owner}_$spelling");
+  }
   Var identity, String name;
   foreach (List item, units)
     if (_function_identity(item, identity, name) &&
