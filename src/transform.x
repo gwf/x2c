@@ -175,7 +175,8 @@ static Ast Compiler._statement_rewrite(Compiler c, Ast ast, Symbol tag) {
 static List Compiler._shipped_lowering(
   Compiler c, Symbol point, Var kind, List source, AstPos position,
   Type expected, String form) {
-  List lowered = c.lower_rewrite(point, kind, source, position, expected, NULL);
+  List lowered =
+    c.lower_rewrite(point, kind, source, position, expected, NULL);
   if (!lowered) $report.xform.no_shipped_rule(c, form);
   return lowered;
 }
