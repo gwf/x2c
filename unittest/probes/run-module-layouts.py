@@ -181,6 +181,26 @@ def cases():
                         'return item.other;}\n'),
         "main.x": probes.consumer("box.x", "answer() == 42"),
     }, options, None
+    yield "value_layout_repeated_static_prerequisites", {
+        "box.x": ('module typedef struct Outer Outer;\n'
+                  'module typedef struct Other Other;\n'
+                  'module {"box/outer.x", "box/other.x", "box/carrier.x"}\n'),
+        "box/outer.x": ('static typedef struct Hidden {int value;} Hidden;\n'
+                        'module typedef struct Outer {Hidden hidden;} Outer;\n'
+                        'module Outer first(void) {Hidden item = {40}; '
+                        'Outer outer = {item}; return outer;}\n'
+                        'int shadow(void) {typedef struct Hidden {long wrong;} Hidden; '
+                        'Hidden item = {42}; return item.wrong;}\n'),
+        "box/other.x": ('static typedef struct Hidden {long other;} Hidden;\n'
+                        'static typedef Hidden Parts[1];\n'
+                        'module typedef struct Other {Parts hidden;} Other;\n'
+                        'module Other second(void) {Parts item = {{2}}; '
+                        'Other other = {{item[0]}}; return other;}\n'),
+        "box/carrier.x": ('module typedef struct Carrier {Outer outer; Other other;} Carrier;\n'
+                          'int answer(void) {Carrier value = {first(), second()}; '
+                          'return value.outer.hidden.value + value.other.hidden[0].other;}\n'),
+        "main.x": probes.consumer("box.x", "answer() == 42 && shadow() == 42"),
+    }, options, None
     yield "value_layout_three_levels", {
         **layout,
         "box.x": ('module typedef struct Inner Inner;\n'

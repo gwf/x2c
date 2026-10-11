@@ -1,6 +1,7 @@
 /* module-layout.x -- complete aggregate prerequisites for module emission */
 #pragma once
 #include "compiler.x"
+#include "module-tree.x"
 #include "ast-rewrite.x"
 #include "format.x"
 #include "generate.x"
@@ -8,6 +9,7 @@
 
 static typedef struct Layouts {
   Map bodies, variants, aliases, owners, prefixes, arms, edges, visiting, finished;
+  Map private_types, private_bindings, used_aliases;
   Array order;
 } Layouts;
 
@@ -26,12 +28,77 @@ static List _layout_core(Type type) {
   return _layout_family(type) ? core : NULL;
 }
 
+static String Compiler._layout_file_spelling(Compiler c, String name) {
+  String path = c.canonical_path(c.filename);
+  String directory = Path.dirname(c.module_owner);
+  String relative = path[directory.len() + 1:];
+  String module = c.module_tree.entry(c.module_owner).prefix;
+  String identity = %"$module/$relative";
+  return %"_x2c_file_${filename_hash(identity)}__$name";
+}
+
+static void Layouts.private_names(Layouts &layouts, Compiler c, List ast) {
+  Map names = {}, bindings = {};
+  if (c.module_owner) foreach (List node, ast)
+    match (node) case %((!or typedef declare) ?base (bindings *rows)): {
+      Type type = base;
+      if (!type.is_static()) continue;
+      match (type.base_type())
+        case %((!set ?kind (!or struct union enum)) ?(String name) *):
+          names[%($kind $name)] = c._layout_file_spelling(name);
+      if (node.car() != <typedef>) continue;
+      foreach (List row, rows)
+        match (row) case %(bind ?identity *): {
+          String name = binding_identity_spelling(identity);
+          if (!name) continue;
+          String spelling = c._layout_file_spelling(name);
+          names[%(typedef $name)] = spelling;
+          bindings[identity] = binding_identity_new(identity.list().cadr(), spelling);
+        }
+    }
+  String path = c.canonical_path(c.filename);
+  layouts.private_types[path] = names;
+  layouts.private_bindings[path] = bindings;
+}
+
+static Type _layout_private_type(Type type, Map names) {
+  if (!type) return type;
+  Type base = type.base_type();
+  List key = base;
+  match (base) {
+    case %(?(String name)): key = %(typedef $name);
+    case %((!set ?kind (!or struct union enum)) ?(String name) *):
+      key = %($kind $name);
+  }
+  Var spelling;
+  if (!names.try_get(key, spelling)) return type;
+  List replacement = base.car() is <string> ? %($spelling)
+    : cons(base.car(), cons(spelling, base.cddr()));
+  return type.list()[:type.list().len() - base.len()].append(replacement);
+}
+
+/* Only type positions and exact typedef bindings receive emitted spellings.
+   Block-local tags and aliases retain their bound identities. */
+static List _layout_private_node(List node, Map names, Map bindings) {
+  Var identity;
+  if (bindings.try_get(node, identity)) return identity;
+  match (node)
+    case %((!set ?kind (!or declare typedef function param expr cast offsetof))
+           ?type *rest):
+      node = %($kind ${_layout_private_type(type, names)} @rest);
+  List child;
+  $ast.rewrite_children(node, child, _layout_private_node(child, names, bindings));
+}
+
 /* Index already bound source nodes. Native directives retain the provider's
    order; source-module includes are supplied by the layout prerequisites. */
 static void Layouts.provider(Layouts &layouts, Compiler c, List ast) {
+  String path = c.canonical_path(c.filename);
+  Map names = layouts.private_types[path], bindings = layouts.private_bindings[path];
   Array prefix = [];
   List arms = NULL;
   foreach (List node, ast) {
+    node = _layout_private_node(node, names, bindings);
     match (node) {
       case %(preproc ?(String text)): {
         arms = preproc_track_arms(arms, text);
@@ -50,7 +117,7 @@ static void Layouts.provider(Layouts &layouts, Compiler c, List ast) {
       }
       case %((!set ?kind (!or typedef declare)) ?base ?bindings): {
         Type type = base;
-        if (type.is_static()) continue;
+        if (type.is_static() && !c.module_owner) continue;
         List family = _layout_family(type);
         if (kind == <typedef>) {
           List alias_base = base;
@@ -88,6 +155,7 @@ static void Layouts.provider(Layouts &layouts, Compiler c, List ast) {
 static void Layouts.require_type(
   Layouts &layouts, Compiler c, Sym resolver, Type type, Map needed) {
   type = resolver.normalize_declared_type(type).canonicalize();
+  type = _layout_private_type(type, layouts.private_types[c.canonical_path(c.filename)]);
   while (type.is_array()) type = type.dereference().canonicalize();
   if (type.is_pointer() || type.is_function()) return;
   Type key = resolver.resolve_key(type);
@@ -127,6 +195,7 @@ static void Layouts.dependencies(Layouts &layouts) {
   foreach (Var (name, row), layouts.aliases) {
     List alias = row.list().cadr();
     aliases[%(typedef $name)] = alias.type_from_ast().declared();
+    aliases[%($name)] = %(typedef $name);
   }
   foreach (Var (key, provider), layouts.bodies) {
     (Compiler c, List body) = provider;
@@ -158,8 +227,18 @@ static void Layouts.visit(Layouts &layouts, List family) {
   layouts.order.push(family);
 }
 
-static String _layout_text(Compiler c, List nodes) =>
-  c.code_pretty_string(c.emit(nodes, NULL), c.filename);
+static String _layout_text(Compiler c, List nodes) {
+  Array support = [];
+  foreach (List node, nodes) {
+    match (node) case %(typedef ?base ?bindings): {
+      Array specifiers = [];
+      foreach (Var item, base) if (item != <static>) specifiers.push(item);
+      node = %(typedef ${specifiers.list_free()} $bindings);
+    }
+    support.push(node);
+  }
+  return c.code_pretty_string(c.emit(support.list_free(), NULL), c.filename);
+}
 
 /* Public inline bodies capture native state at their authored position.
    Keep them with the prefix, under individual guards, rather than moving
@@ -197,6 +276,7 @@ static void Layouts.alias(
       layouts.alias(dependency, done, visiting, text);
   visiting.del(name);
   done[name] = 1;
+  layouts.used_aliases[name] = 1;
   text.push(_layout_text(c, %( $node )));
 }
 
@@ -251,7 +331,12 @@ Map prepare_module_layouts(List providers) {
   Layouts layouts = {
     .bodies = {}, .variants = {}, .aliases = {}, .owners = {}, .prefixes = {}, .arms = {},
     .edges = {},
-    .visiting = {}, .finished = {}, .order = []};
+    .visiting = {}, .finished = {}, .order = [],
+    .private_types = {}, .private_bindings = {}, .used_aliases = {}};
+  foreach (List provider, providers) {
+    (Compiler c, List ast) = provider;
+    layouts.private_names(c, ast);
+  }
   foreach (List provider, providers) {
     (Compiler c, List ast) = provider;
     layouts.provider(c, ast);
@@ -299,6 +384,19 @@ Map prepare_module_layouts(List providers) {
   foreach (List provider, providers) {
     (Compiler c, List ast) = provider;
     String path = c.canonical_path(c.filename), text = "";
+    Map names = {}, bindings = {};
+    foreach (Var (key, spelling), layouts.private_types[path]) {
+      List family = key;
+      if (family.car() == <typedef>
+          ? spelling in layouts.used_aliases
+          : %(${family.car()} $spelling) in active)
+        names[key] = spelling;
+    }
+    foreach (Var (binding, renamed), layouts.private_bindings[path])
+      if (binding_identity_spelling(renamed) in layouts.used_aliases)
+        bindings[binding] = renamed;
+    plan[%(private-types $path)] = names;
+    plan[%(private-bindings $path)] = bindings;
     foreach (List family, layouts.order)
       if (family in active && layouts.owners[family].string() == path)
         text += rendered[family].string();
@@ -320,6 +418,10 @@ String Compiler.module_layout_prefix(Compiler c) {
     have already been emitted behind independent layout guards. */
 List Compiler.module_layout_node(Compiler c, List node) {
   if (!c.module_layout_plan) return node;
+  String path = c.canonical_path(c.filename);
+  Map names = c.module_layout_plan[%(private-types $path)],
+    bindings = c.module_layout_plan[%(private-bindings $path)];
+  if (names) node = _layout_private_node(node, names, bindings);
   match (node)
     case %(function ?type (!set ?declarator (bind ?binding *)) ?):
       if (%(inline ${c.canonical_path(c.filename)} $binding)
