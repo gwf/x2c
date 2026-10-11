@@ -371,15 +371,17 @@ static List Translation.translate_modules(Translation &t) {
       ParsedUnit unit;
       (void) _parse_unit(t.frontend, input, unit);
       Compiler c = unit.compiler;
-      capture_module_provider(c, unit.ast, registry);
-      c.module_layout_plan = registry;
+      Map captured = capture_module_provider(c, unit.ast);
+      Map active = registry.copy();
+      active.merge(captured);
+      c.module_layout_plan = active;
       String directory = t.output_dir(input);
       outputs = outputs.append(generate_code_files(c, unit.ast, directory));
       outputs = outputs.append(
         translation_depfile_files(t.request, c, input, directory));
       if (t.request.fatal_warnings && c.diagnostics()) exit(1);
       outputs = unit.context.export(outputs);
-      registry = unit.context.export(registry);
+      registry.merge(unit.context.export(captured));
       unit.close();
       done++;
     }

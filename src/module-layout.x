@@ -846,11 +846,13 @@ String Compiler.module_namespace_id(Compiler c, String path, List key) {
 }
 
 /** Retains one active provider's private emitted spellings, without its AST. */
-void capture_module_provider(Compiler c, List ast, Map registry) {
+Map capture_module_provider(Compiler c, List ast) {
   Layouts layouts = {
     .private_types = {}, .private_bindings = {}, .private_constants = {}};
   layouts.private_names(c, ast);
   String path = c.canonical_path(c.filename);
-  registry[%(private-types $path)] = layouts.private_types[path];
-  registry[%(private-bindings $path)] = layouts.private_bindings[path];
+  return {
+    %(private-types $path): layouts.private_types[path],
+    %(private-bindings $path): layouts.private_bindings[path]
+  };
 }
