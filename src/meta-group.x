@@ -424,6 +424,19 @@ static void Compiler._name_provider_bindings(
       c.name_meta_provider_bindings(path, index);
   int index = c.meta_build - 1;
   c.name_meta_provider_bindings(provider, index);
+  foreach (Var unit, units) {
+    List node;
+    $ast.walk(unit, node) {
+      match (node) case $source_identifier_content(
+          %((binding ?identity ?name))): {
+        if (name is not <string> || !c._prefix_value(name)) continue;
+        List binding = %(binding $identity $name);
+        if (c.binding_provider(binding, 0) != c.canonical_path(provider))
+          continue;
+        c.set_fact(%(emitted $binding), %"_x2c_meta_group_${index}_$name");
+      }
+    }
+  }
   $let(c.filename, provider)
     foreach (List row, c._native_reference_rows(units)) {
       (int owner, String spelling, List binding) = row;
