@@ -60,6 +60,8 @@ String Code_format(Code value);
 
 int Code_is_static_pattern(Code pattern);
 
+Var Code_pattern_value(Code pattern);
+
 Code Code_promoted(Code value);
 
 Code Code_register_rewrite(Code function, List pattern, List holes);

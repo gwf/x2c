@@ -45,6 +45,8 @@ String Code_format(Code value);
 
 int Code_is_static_pattern(Code pattern);
 
+Var Code_pattern_value(Code pattern);
+
 Code Code_convert(Code value, Type target);
 
 Code Code_promoted(Code value);

@@ -47,6 +47,8 @@ static Ast Compiler__step(Compiler c, Ast ast);
 
 static Ast Compiler__step_tag(Compiler c, Ast ast, Symbol tag);
 
+static Ast Compiler__match_statement(Compiler c, Ast ast);
+
 static Ast Compiler__statement_rewrite(Compiler c, Ast ast, Symbol tag);
 
 static Ast Compiler__default_node(Compiler c, Ast ast);
@@ -1450,7 +1452,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void){
   _1108 = cons(_1107, NULL);
   _1109 = cons(_556, _1108);
   _1110 = List_var(_1109);
-  _1111 = int_var(863);
+  _1111 = int_var(870);
   _1112 = cons(_1111, NULL);
   _1113 = cons(_562, _1112);
   _1114 = List_var(_1113);
@@ -1458,7 +1460,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void){
   _1116 = cons(_1115, NULL);
   _1117 = cons(_567, _1116);
   _1118 = List_var(_1117);
-  _1119 = int_var(31798);
+  _1119 = int_var(32096);
   _1120 = cons(_1119, NULL);
   _1121 = cons(_575, _1120);
   _1122 = List_var(_1121);
@@ -1568,7 +1570,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void){
   _1226 = cons(_1225, NULL);
   _1227 = cons(_524, _1226);
   _1228 = List_var(_1227);
-  _1229 = int_var(771);
+  _1229 = int_var(778);
   _1230 = cons(_1229, NULL);
   _1231 = cons(_562, _1230);
   _1232 = List_var(_1231);
@@ -1576,7 +1578,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void){
   _1234 = cons(_1233, NULL);
   _1235 = cons(_570, _1234);
   _1236 = List_var(_1235);
-  _1237 = int_var(28255);
+  _1237 = int_var(28553);
   _1238 = cons(_1237, NULL);
   _1239 = cons(_575, _1238);
   _1240 = List_var(_1239);
@@ -1664,11 +1666,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void){
   _1322 = cons(_1321, NULL);
   _1323 = cons(_524, _1322);
   _1324 = List_var(_1323);
-  _1325 = int_var(767);
+  _1325 = int_var(774);
   _1326 = cons(_1325, NULL);
   _1327 = cons(_562, _1326);
   _1328 = List_var(_1327);
-  _1329 = int_var(28188);
+  _1329 = int_var(28486);
   _1330 = cons(_1329, NULL);
   _1331 = cons(_575, _1330);
   _1332 = List_var(_1331);
@@ -1806,11 +1808,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void){
   _1464 = cons(_1463, NULL);
   _1465 = cons(_524, _1464);
   _1466 = List_var(_1465);
-  _1467 = int_var(762);
+  _1467 = int_var(769);
   _1468 = cons(_1467, NULL);
   _1469 = cons(_562, _1468);
   _1470 = List_var(_1469);
-  _1471 = int_var(28066);
+  _1471 = int_var(28364);
   _1472 = cons(_1471, NULL);
   _1473 = cons(_575, _1472);
   _1474 = List_var(_1473);
@@ -2894,9 +2896,15 @@ return Compiler__step_tag(c, ast, Var_symbol(head));
 #ifndef X2C_TRANSFORM_SOURCE
 static Ast Compiler__step_tag(Compiler c, Ast ast, Symbol tag){
   Ast next = ast;  switch(tag){
-    case 1139215899608 : case 2391080 : case 895740748108 : case 26416091224 : return ast;  case 377892 : return Compiler__expression_node(c, ast);  case 3313778 : case 1479708786 : case 26720 : case 1468512 : return Compiler__collection_literal(c, ast, tag);  case 199912 : next = Compiler__cast(c, ast);  break;  case 19800432 : next = Compiler__index(c, ast);  break;  case 228262 : case 101723016 : return Compiler__ordered_list(c, ast);  case 45156 : next = Compiler__to_var(c, Var_list(List_cadr(ast)));  break;  case 1316904858918 : next = Compiler__string_segments(c, ast);  break;  case 8932560010 : case 272600 : next = Compiler__declaration(c, ast);  break;  case 317060294872 : next = Compiler__destructure_declaration(c, ast);  break;  case 41184168 : next = Compiler__destructure_statement(c, ast);  break;  case 317060127196 : next = Compiler__destructure_value(c, ast);  break;  case 27369680 : next = Compiler__match_cases(c, ast);  break;  case 8728932 : next = Compiler__defer_node(c, ast);  break;  case 1219800220 : next = Compiler__return(c, ast);  break;  case 37833930 : return Compiler__raise_node(c, ast);  case 1323933904 : next = Compiler__statement_rewrite(c, ast, tag);  break;  case 588 : case 48777994 : case 286 : case 13284 : next = Compiler__truthy(c, ast);  break;  case 199448 : next = Compiler__call(c, ast);  break;  case 992 : next = Compiler__operator(c, ast);  break;  case 35407540848 : next = Compiler__postfix(c, ast);  break;  default: return Compiler__default_node(c, ast);
+    case 1139215899608 : case 2391080 : case 895740748108 : case 26416091224 : return ast;  case 377892 : return Compiler__expression_node(c, ast);  case 3313778 : case 1479708786 : case 26720 : case 1468512 : return Compiler__collection_literal(c, ast, tag);  case 199912 : next = Compiler__cast(c, ast);  break;  case 19800432 : next = Compiler__index(c, ast);  break;  case 228262 : case 101723016 : return Compiler__ordered_list(c, ast);  case 45156 : next = Compiler__to_var(c, Var_list(List_cadr(ast)));  break;  case 1316904858918 : next = Compiler__string_segments(c, ast);  break;  case 8932560010 : case 272600 : next = Compiler__declaration(c, ast);  break;  case 317060294872 : next = Compiler__destructure_declaration(c, ast);  break;  case 41184168 : next = Compiler__destructure_statement(c, ast);  break;  case 317060127196 : next = Compiler__destructure_value(c, ast);  break;  case 27369680 : return Compiler__match_statement(c, ast);  case 8728932 : next = Compiler__defer_node(c, ast);  break;  case 1219800220 : next = Compiler__return(c, ast);  break;  case 37833930 : return Compiler__raise_node(c, ast);  case 1323933904 : next = Compiler__statement_rewrite(c, ast, tag);  break;  case 588 : case 48777994 : case 286 : case 13284 : next = Compiler__truthy(c, ast);  break;  case 199448 : next = Compiler__call(c, ast);  break;  case 992 : next = Compiler__operator(c, ast);  break;  case 35407540848 : next = Compiler__postfix(c, ast);  break;  default: return Compiler__default_node(c, ast);
   }
   if(! List_equal(next, ast)) return Compiler__step(c, next);  return Compiler__default_node(c, ast);
+}
+
+#endif
+#ifndef X2C_TRANSFORM_SOURCE
+static Ast Compiler__match_statement(Compiler c, Ast ast){
+  Ast rewritten = Compiler__statement_rewrite(c, ast, 27369680);  return ! List_equal(rewritten, ast) ? rewritten : Compiler__step(c, Compiler__match_cases(c, ast));
 }
 
 #endif
