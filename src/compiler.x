@@ -710,7 +710,11 @@ List Compiler.replay_declaration_source(Compiler c) {
   match (source)
     case %(declaration-source ?(int end)
            (native-meta-bound ?node ?(int module) ?(int meta)) ?facts): {
-      c._restore_declaration_bindings(node, facts, {});
+      Map retained = {};
+      c._restore_declaration_bindings(node, facts, retained);
+      foreach (Var (key, value), facts)
+        match (key) case %(? ?binding *):
+          if (binding in retained) c.set_fact(key, value);
       List bound = c.thaw_declaration_syntax(node);
       $let(c.source_module, module) {
         if (meta) c.restore_native_meta_source(bound, c.token);
