@@ -224,6 +224,22 @@ static void Compiler._collect_module_signatures(
   signatures.source_declarations = {};
   signatures.collection_native_files = {};
   Map declarations = globs.copy(), visited = {};
+  /* Completed entries contain selected defaults that signature collection
+     cannot produce. Import their declarations without replaying effects. */
+  foreach (String owner, c.module_tree.ancestors(canonical).reverse()) {
+    List entry = c._entry(owner);
+    if (!entry) continue;
+    foreach (Var part, entry.car()) if (part is <map>) {
+      Map ordinary = {};
+      foreach (Var (key, value), part.map()) {
+        if (value is <list>)
+          match (value) case %((!or declaration-source compile-time
+                                  package-import) *): continue;
+        ordinary[key] = value;
+      }
+      $let(c.source_facts, 0) c._merge_rows(declarations, ordinary);
+    }
+  }
   if (!c.module_tree.entry(canonical)) visited[canonical] = 1;
   $let(process_cache, _cache_map())
   $let(provisional_entries, NULL)
