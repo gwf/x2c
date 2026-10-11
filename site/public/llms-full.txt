@@ -4962,6 +4962,10 @@ False tries the next arm; errors propagate normally. A successful guard runs
 the body once. Capture scopes and the existing `break`, `continue`, and
 cleanup rules apply to guarded arms too.
 
+The lowering belongs to the shipped component `src/component-match.x`, a
+translator that `$rewrite($matched)` registers on the `match` statement
+head; a rule a program registers there runs first.
+
 ### Errors and cleanup
 
 `try` requires a following filtered `catch`, `finally`, or both.

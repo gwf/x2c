@@ -123,6 +123,7 @@
 - [src/component-access.x](https://x2c-lang.dev/docs/internals/compiler-api/component-access.html)
 - [src/component-delegate.x](https://x2c-lang.dev/docs/internals/compiler-api/component-delegate.html)
 - [src/component-literals.x](https://x2c-lang.dev/docs/internals/compiler-api/component-literals.html)
+- [src/component-match.x](https://x2c-lang.dev/docs/internals/compiler-api/component-match.html)
 - [src/component-operators.x](https://x2c-lang.dev/docs/internals/compiler-api/component-operators.html)
 - [src/component-printf.x](https://x2c-lang.dev/docs/internals/compiler-api/component-printf.html)
 - [src/component-raise.x](https://x2c-lang.dev/docs/internals/compiler-api/component-raise.html)

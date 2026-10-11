@@ -24,6 +24,7 @@ Functions and types exposed by each compiler module.
 | [`src/component-access.x`](component-access.md) | Bracket access policy: Array and Map mutation through their typed helpers, and any other participant's read, store, and update through its indexing members, with each operand evaluated once, in order. Getter resolution remains with admission. |
 | [`src/component-delegate.x`](component-delegate.md) | delegate fields. |
 | [`src/component-literals.x`](component-literals.md) | Array and Map literals. |
+| [`src/component-match.x`](component-match.md) | match statements. |
 | [`src/component-operators.x`](component-operators.md) | dynamic operators. |
 | [`src/component-printf.x`](component-printf.md) | Var values in printf-family formats. |
 | [`src/component-raise.x`](component-raise.md) | raise. |

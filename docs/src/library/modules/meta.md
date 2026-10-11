@@ -22,7 +22,7 @@ The compiler surface a `meta` function calls.
 Returns the suffix of `type` that begins at its typedef name or base
 keyword, sharing `type`, or `NULL` when it has none.
 
-Source: `lib/meta.x:385`
+Source: `lib/meta.x:390`
 
 #### type_declaration_parts
 
@@ -32,7 +32,7 @@ Returns `(base modifiers)` for reconstructing a declaration of `type`.
 Function modifiers hold parameter syntax, and modifier order retains C
 declarator precedence.
 
-Source: `lib/meta.x:415`
+Source: `lib/meta.x:420`
 
 #### type_name_error
 
@@ -43,7 +43,7 @@ other than a C type keyword, as `%(String)` and `%(* Point)` do, or
 `NULL`. A type name is a String, as in `%("String")` and `%(* "Point")`;
 neither a short Symbol nor a long Atom supplies that representation.
 
-Source: `lib/meta.x:398`
+Source: `lib/meta.x:403`
 
 ## Public types
 

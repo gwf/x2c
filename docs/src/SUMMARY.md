@@ -117,6 +117,7 @@
   - [src/component-access.x](internals/compiler-api/component-access.md)
   - [src/component-delegate.x](internals/compiler-api/component-delegate.md)
   - [src/component-literals.x](internals/compiler-api/component-literals.md)
+  - [src/component-match.x](internals/compiler-api/component-match.md)
   - [src/component-operators.x](internals/compiler-api/component-operators.md)
   - [src/component-printf.x](internals/compiler-api/component-printf.md)
   - [src/component-raise.x](internals/compiler-api/component-raise.md)

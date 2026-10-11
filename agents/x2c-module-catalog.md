@@ -8,7 +8,7 @@ non-static function definition discovered in source order. It does
 not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
-- Compiler modules: 59
+- Compiler modules: 60
 - Runtime modules: 77
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
@@ -164,15 +164,14 @@ Public functions:
 `Compiler.cache_cons_cell`, `Compiler.cache_literal_var`,
 `Compiler.cache_literal_list`, `Compiler.match_pattern_value`,
 `match_value_is_static`, `Compiler.match_pattern_is_static`,
-`match_value_head`, `match_value_flat_head`, `Compiler.match_pattern_binders`,
-`Compiler.define_match_binders`, `Compiler.define_catch_binders`,
-`Compiler.catch_binder_declarations`, `Compiler.own_diagnostics`,
-`Compiler.borrow_diagnostics`, `Compiler.close_child`,
-`Compiler.share_meta_group`, `Compiler.take_unit_state`,
-`Compiler.return_unit_state`, `Compiler.read_source`,
-`Compiler.canonical_path`, `real_path`, `absolute_path`, `home_portable_path`,
-`home_absolute_path`, `Map.merge_translation_dependency`,
-`Compiler.add_translation_dependency`,
+`Compiler.match_pattern_binders`, `Compiler.define_match_binders`,
+`Compiler.define_catch_binders`, `Compiler.catch_binder_declarations`,
+`Compiler.own_diagnostics`, `Compiler.borrow_diagnostics`,
+`Compiler.close_child`, `Compiler.share_meta_group`,
+`Compiler.take_unit_state`, `Compiler.return_unit_state`,
+`Compiler.read_source`, `Compiler.canonical_path`, `real_path`,
+`absolute_path`, `home_portable_path`, `home_absolute_path`,
+`Map.merge_translation_dependency`, `Compiler.add_translation_dependency`,
 `Compiler.merge_translation_dependencies`, `Compiler.new`,
 `Compiler.new_shared`, `Compiler.free_lisp`
 
@@ -199,6 +198,14 @@ Array and Map literals.
 Public functions:
 
 `array_literal`, `map_literal`
+
+### [src/component-match.x](../src/component-match.x)
+
+match statements.
+
+Public functions:
+
+None. This module has no non-static function definitions.
 
 ### [src/component-operators.x](../src/component-operators.x)
 
@@ -391,9 +398,9 @@ Public functions:
 `register_rewrite`, `_dedent_expand`, `_macros_location`, `_tag_decode_group`,
 `_tag_decode_groups`, `_tag_id_checks`, `access_read`, `access_store`,
 `access_update`, `access_prefix`, `access_postfix`, `delegate_member`,
-`dynamic_binary`, `dynamic_compound`, `dynamic_change`, `dynamic_unary`,
-`printf_values`, `raise_lowering`, `try_catch_cases`, `try_lowering`,
-`linked_meta_targets`, `linked_meta_hashes`
+`match_lowering`, `dynamic_binary`, `dynamic_compound`, `dynamic_change`,
+`dynamic_unary`, `printf_values`, `raise_lowering`, `try_catch_cases`,
+`try_lowering`, `linked_meta_targets`, `linked_meta_hashes`
 
 ### [src/literals.x](../src/literals.x)
 
@@ -525,8 +532,8 @@ Public functions:
 `Type.is_text`, `Type.aggregate`, `Type.marked_fields`, `Type.resolve_member`,
 `Type.protocol_member`, `Type.getter`, `Type.update_helper`, `Code.type`,
 `Code.value`, `Code.call_in_order`, `Code.lowered`, `Code.exits`,
-`Code.convert`, `Code.format`, `Code.is_static_pattern`, `Code.promoted`,
-`Code.register_rewrite`, `Code.register_after_initialization`,
+`Code.convert`, `Code.format`, `Code.is_static_pattern`, `Code.pattern_value`,
+`Code.promoted`, `Code.register_rewrite`, `Code.register_after_initialization`,
 `builtin_foreach_bindings`, `meta_function_reference`, `Type.element`,
 `Type.parameters`, `Type.return_type`, `Type.reverse_name`, `Type.resolve`,
 `Type.layout`, `Type.is_value`, `Type.tag_name`, `Type.members`, `Type.fields`,
