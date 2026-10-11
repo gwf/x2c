@@ -763,7 +763,24 @@ replacement template and fill steps are the remaining driver cost.
   empty unit -15.8 M (-1.3%) against the plan's -38 M, because rebuilding
   the expected types and parsing the rows costs about as much as resolving;
   the declaring unit pays about 0.2 M per recorded conformance (W1 +1.1%);
-  lib/common.x -0.6%.
+  lib/common.x -0.6%. Follow-up the same day: the first gate failed in
+  `protocol-generated-owner-precedence-swapped`, a one-unit probe, because
+  the lazy install inserted into `c.conforms` while
+  `install_generated_protocol_symbols` iterated it (a Map traversal is
+  invalid after structural mutation, and List keys hash by address, so the
+  skip depended on layout; 8 failures in 150 serial runs); the loops that
+  can insert now iterate a snapshot. The cold path also agrees with the
+  interface: when collection walks a file that declares external
+  adoptions, a separate compiler resolves them in that file's own view
+  (prelude plus include closure) at the end of `collect_symbols` and writes
+  the same rows into the process-cache entry, so an including unit's answer
+  no longer depends on whether the declaring unit's `.xi` was current. A
+  file that imports a package records nothing in either path. Cost of the
+  cold path: about 0.8 M per adoption the walked file declares (+314 M when
+  a 400-adoption header is walked cold; +41 M on the empty unit with
+  `--no-interfaces`); the warm empty unit is -26 M. Fixture
+  `protocol-recorded-conformance-cold` forces the cold path. Authored total
+  for the change: about +400 lines in collect.x and protocol.x.
 - 2026-10-10, facts learned: `function-entry` placement is parse-time, so
   lambda cells need a transform-time entry placement before lambdas move; a
   plain `make build` after editing a shipped component leaves a degraded
