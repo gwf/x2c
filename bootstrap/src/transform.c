@@ -2946,7 +2946,7 @@ static Ast Compiler__function_node(Compiler c, List function, List return_type, 
             }
             ;  x2c_cleanup_push(& _x2c_defer_record_3); {
               * _x2c_macro_address_1 = inline_header; {
-                List new_return = Compiler__step(c, return_type);  List new_decl = Compiler__step(c, declarator);  List prepared_body = Compiler__lower_lambda_destructuring(c, body);  prepared_body = Compiler_prepare_lambda_cells(c, declarator, prepared_body);  List new_body = Compiler__step(c, prepared_body);  transformed = cons(_0, cons(List_var(new_return), cons(List_var(new_decl), cons(List_var(new_body), NULL))));
+                List new_return = Compiler__step(c, return_type);  List new_decl = Compiler__step(c, declarator);  List prepared_body = body;  if(ast_contains_head(List_var(body), 808259842)) prepared_body = Compiler_prepare_lambda_cells(c, declarator, Compiler__lower_lambda_destructuring(c, body));  List new_body = Compiler__step(c, prepared_body);  transformed = cons(_0, cons(List_var(new_return), cons(List_var(new_decl), cons(List_var(new_body), NULL))));
               }
 
             }

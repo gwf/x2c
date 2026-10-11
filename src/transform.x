@@ -335,8 +335,10 @@ static Ast Compiler._function_node(
   $let(c.fn_name, owner) $let(c.inline_header, inline_header) {
     List new_return = c._step(return_type);
     List new_decl = c._step(declarator);
-    List prepared_body = c._lower_lambda_destructuring(body);
-    prepared_body = c.prepare_lambda_cells(declarator, prepared_body);
+    List prepared_body = body;
+    if (ast_contains_head(body, <lambda>))
+      prepared_body = c.prepare_lambda_cells(
+        declarator, c._lower_lambda_destructuring(body));
     List new_body = c._step(prepared_body);
     transformed = %(function $new_return $new_decl $new_body);
   }
