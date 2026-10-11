@@ -447,6 +447,15 @@ static void FileWalk.record_declaration_prerequisites(
         Map needed = {};
         Var syntax;
         if (!overlay.try_get(key, syntax) || syntax is not <list>) continue;
+        List family = _row_type_family(rows, w.statics, key, syntax);
+        int privacy = _private_row(w.statics, key, family);
+        match (key) case %(?name):
+          if (%(function $name) in w.statics) privacy = 1;
+        List detail_key = %("source-node"
+          (declaration-detail $path ${w.pos} $key));
+        List detail = %(declaration-detail $path $key $syntax $privacy);
+        overlay[detail_key] = detail;
+        w.globs[detail_key] = detail;
         _declaration_type_references(syntax, rows, needed, 1);
         foreach (List required, needed.keys()) {
           List owner = shadow.sym.get_exact(%("declaration-file" $required));
@@ -638,7 +647,7 @@ static void _declaration_type_references(
   while (pending.len()) {
     Var item = pending.take_last();
     if (item is not <list>) continue;
-    match (item) case %((!or declaration-provider definition-provider declaration-prerequisite) *):
+    match (item) case %((!or declaration-provider definition-provider declaration-prerequisite declaration-detail) *):
       continue;
     match (item)
       case %((!or declare typedef function) ?base *)
@@ -1347,6 +1356,10 @@ Map Compiler.collected_declaration_dependencies(Compiler c, List providers) {
 List Compiler.declaration_provider_rows(Compiler c, List providers) =>
   c._declaration_provider_rows(providers, %(declaration-provider).car());
 
+/** Exports original typed declaration rows and their producing-file privacy. */
+List Compiler.declaration_detail_rows(Compiler c, List providers) =>
+  c._declaration_provider_rows(providers, %(declaration-detail).car());
+
 /** Exports exact namespace prerequisite providers from completed collection.
     Native include providers and scalar aliases retain their own vertices.
     Source positions identify contributions without rerunning producers.
@@ -1835,7 +1848,7 @@ static int _package_protocol_row(List key, Var value) {
   return row && row.car() in
     %(protocol adopt meta-protocol declaration-source native-meta
       compile-time project-meta meta-hashes interface-types native-object
-      package-import declaration-provider definition-provider declaration-prerequisite provider);
+      package-import declaration-provider definition-provider declaration-prerequisite declaration-detail provider);
 }
 
 // import replay
@@ -2055,7 +2068,7 @@ static List Compiler._interface_load(
   Compiler c, String canonical, String path) {
   String identity = compiler_identity();
   match (_interface_record(path))
-    case %(interface 13 ?(String compiler) *stored):
+    case %(interface 14 ?(String compiler) *stored):
       if (identity && compiler == identity)
         return c._stored_entry(canonical, stored);
   return NULL;
@@ -2083,7 +2096,7 @@ static List _interface_record(String path) {
   try source = input.string_close();
   catch %(io-fail *): return NULL;
   String identity = compiler_identity();
-  if (!identity || !source.startswith(%"(interface 13 \"$identity\" "))
+  if (!identity || !source.startswith(%"(interface 14 \"$identity\" "))
     return NULL;
   return _read_record(source);
 }
@@ -2234,7 +2247,7 @@ String interface_prelude(void) {
   String identity = compiler_identity();
   if (!identity) return NULL;
   String runtime = _canonical_path(%"${x2c_get_root()}/lib/x2c.x");
-  String header = %"(interface 13 \"$identity\" ";
+  String header = %"(interface 14 \"$identity\" ";
   foreach (String path, _interface_candidates(runtime)) {
     String text = NULL;
     try text = Path.read_text(path);
@@ -2265,7 +2278,7 @@ String interface_text(Compiler c) {
 static int _write_interface_entry(
   Buffer out, String canonical, List entry) {
   List record = %(
-    interface 13 ${compiler_identity()} @{_stored_record(canonical, entry)});
+    interface 14 ${compiler_identity()} @{_stored_record(canonical, entry)});
   /* An interface is plain data, which a loader never evaluates. */
   if (!datum_write(out, record, 0)) return 0;
   out.write_char('\n');
