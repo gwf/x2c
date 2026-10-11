@@ -674,6 +674,9 @@ static List _type_family(List key) {
   return NULL;
 }
 
+/** Returns the aggregate or typedef family that owns this declaration row.
+    Enum values belong to their nonstatic enum family; unrelated rows return NULL.
+*/
 List declaration_type_family(Map rows, Map statics, List key, Var value) {
   List family = _type_family(key);
   if (family) return family;
