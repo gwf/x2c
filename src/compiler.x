@@ -711,12 +711,13 @@ List Compiler.replay_declaration_source(Compiler c) {
     case %(declaration-source ?(int end)
            (native-meta-bound ?node ?(int module) ?(int meta)) ?facts): {
       c._restore_declaration_bindings(node, facts, {});
+      List bound = c.thaw_declaration_syntax(node);
       $let(c.source_module, module) {
-        if (meta) c.restore_native_meta_source(node, c.token);
-        else c.record_declaration_visibility(node);
+        if (meta) c.restore_native_meta_source(bound, c.token);
+        else c.record_declaration_visibility(bound);
       }
       while (c.peek(0) != <eof> && c.token.pos < end) c.next();
-      return node;
+      return bound;
     }
   match (source)
     case %(declaration-source ?(int end) ?syntax ?facts): {
@@ -733,7 +734,7 @@ void Compiler.retain_native_meta_source(
   Compiler c, List node, Token first, Token after, int meta) {
   c.sym.set(c._declaration_source_key(first),
     %(declaration-source ${after.pos}
-      (native-meta-bound $node ${c.source_module} $meta)
+      (native-meta-bound ${c.freeze_declaration_syntax(node)} ${c.source_module} $meta)
       ${c.semantic_binding_facts()}));
   c.register_native_meta_prefix();
 }
