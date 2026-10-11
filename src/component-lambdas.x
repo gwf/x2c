@@ -87,9 +87,30 @@ meta static List _lambda_targets(List node) {
   return targets.list_free();
 }
 
+/* The bound `code`, kept as it is when the function that holds it binds
+   again. */
+meta static Code _lambda_kept(Code code) => %(code-value "lowered" $code ());
+
+/* The block `items`, each kept unless `declaring` holds it. */
+meta static List _lambda_kept_items(List items, Map declaring) {
+  Array out = [];
+  foreach (Var item, items)
+    out.push(declaring.contains(item) ? item : _lambda_kept(item));
+  return out.list_free();
+}
+
+/* Whether `item` names a binding that `cells` maps. */
+meta static int _lambda_mentions(Var item, Map cells) {
+  List node;
+  $ast.walk(item, node)
+    if (node.car() == <binding> && cells.contains(node)) return 1;
+  return 0;
+}
+
 /* `node` with each binding it declares that `cells` maps declared as its
    cell: a declarator's cell takes its initializer, and a destructuring
-   declaration copies each target into its cell after it. */
+   declaration copies each target into its cell after it. Only the cells
+   are source to bind. */
 meta static Var _lambda_declare_cells(List node, Map cells, Array named) {
   Array items = [];
   int celled = 0;
@@ -104,10 +125,11 @@ meta static Var _lambda_declare_cells(List node, Map cells, Array named) {
             cell = _lambda_declared_cell(binding, value, cells, named);
         }
         celled |= !!cell;
-        items.push(cell ? cell : %(declare $base (bindings $item)));
+        items.push(
+          cell ? cell : _lambda_kept(%(declare $base (bindings $item))));
       }
     case %(dstrdecl *): {
-      items.push(node);
+      items.push(_lambda_kept(node));
       foreach (List binding, _lambda_targets(node)) {
         Code copy = _lambda_copied_cell(binding, cells, named);
         if (copy) items.push(copy);
@@ -121,9 +143,12 @@ meta static Var _lambda_declare_cells(List node, Map cells, Array named) {
 /* `ast` rebuilt bottom-up with a pending stack, except the body of each
    lambda it holds, which is the lambda's own: a bare return returns `none`
    when that is set, and each read and declaration of a binding that
-   `cells` maps uses its cell, recording each cell's name in `named`. An
-   unchanged node is kept as it was. */
-meta static Var _lambda_rebuild(Var ast, List none, Map cells, Array named) {
+   `cells` maps uses its cell, recording each cell's name in `named` and
+   each rebuilt node that holds a cell declaration in `declaring`. A block
+   that holds one keeps its other items as they are bound. An unchanged node
+   is kept as it was. */
+meta static Var _lambda_rebuild(
+  Var ast, List none, Map cells, Array named, Map declaring) {
   Array pending = [ast], modes = [0], done = [];
   while (pending.len()) {
     Var node = pending.take_last();
@@ -131,15 +156,22 @@ meta static Var _lambda_rebuild(Var ast, List none, Map cells, Array named) {
     if (mode == 1) {
       int first = done.len() - node.list().len(), index = first;
       Array parts = [];
-      int changed = 0;
+      int changed = 0, declares = 0;
       foreach (Var part, node.list()) {
         changed |= done[index] != part;
+        declares |= cells && declaring.contains(done[index]);
         parts.push(done[index++]);
       }
       done.truncate(first);
       List rebuilt = changed ? parts.list_free() : node;
-      done.push(
-        cells ? _lambda_declare_cells(rebuilt, cells, named) : rebuilt);
+      Var result = rebuilt;
+      if (cells) result = _lambda_declare_cells(rebuilt, cells, named);
+      if (result != rebuilt || declares) {
+        if (result == rebuilt && rebuilt.car() == <block>)
+          result = %(block @{_lambda_kept_items(rebuilt.cdr(), declaring)});
+        declaring[result] = 1;
+      }
+      done.push(result);
       continue;
     }
     Code read = cells && !mode ? _lambda_cell_read(node, cells) : NULL;
@@ -170,7 +202,8 @@ meta static List _lambda_none(void) =>
 meta static List _lambda_returning(List items, List none) {
   List node;
   $ast.walk(items, node) {
-    if (node === %(return)) return _lambda_rebuild(items, none, NULL, NULL);
+    if (node === %(return))
+      return _lambda_rebuild(items, none, NULL, NULL, NULL);
     if (node.car() == <lambda>) continue;
   }
   return items;
@@ -525,10 +558,16 @@ meta Code lambda_cells(Code node) {
           Code cell = _lambda_copied_cell(binding, cells, named);
           if (cell) entry.push(cell);
         }
-      List body = _lambda_rebuild(items, NULL, cells, named);
+      Map declaring = {};
+      Array body = [];
+      foreach (Var item, items)
+        body.push(
+          _lambda_mentions(item, cells)
+            ? _lambda_rebuild(item, NULL, cells, named, declaring) : item);
+      List kept = _lambda_kept_items(body.list_free(), declaring);
       return %(code-value "source"
                (function $type $declarator
-                 (block @{entry.list_free()} @body))
+                 (block @{entry.list_free()} @kept))
                ${named.list_free()});
     }
   return node;
