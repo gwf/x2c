@@ -3086,6 +3086,18 @@ static int SlotWatch.slot(SlotWatch watch, Ast ast) {
   return -1;
 }
 
+/** Records that binding built the statement `bound` again from `source`,
+    a value the active lowering watches, so it watches `bound` as well. A
+    statement without an origin, such as an unbraced body, keeps nothing
+    else that identifies it when a binder it uses binds again. */
+void Compiler.rebound(Compiler c, Var source, List bound) {
+  SlotWatch watch = c.slot_watch;
+  if (!watch || watch.prepares || bound === source || watch.slot(source) < 0)
+    return;
+  watch.values = watch.values.append(%($bound));
+  watch.outputs.push(NULL);
+}
+
 /** Lowers `ast` when it is a value the active first lowering watches and
     records what its lowering produced; NULL otherwise. A value that an
     enclosing replacement's source held as well lowers outside that

@@ -3193,7 +3193,9 @@ static List Compiler._resolve(Compiler c, List expr) =>
 static List Compiler._bind_statement(Compiler c, Var stmt) {
   Symbol kind = _source_clause_kind(stmt);
   if (kind) return c.parse_source_clause(kind);
-  return c.bind_syntax(stmt, AST_STATEMENT, c.return_type);
+  List bound = c.bind_syntax(stmt, AST_STATEMENT, c.return_type);
+  c.rebound(stmt, bound);
+  return bound;
 }
 
 static List Compiler._bind_clause(Compiler c, Var expr) {
