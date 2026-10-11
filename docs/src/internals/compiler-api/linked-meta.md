@@ -18,6 +18,9 @@ Shipped `meta` code compiled into the compiler.
 | [`access_store`](#access_store) | Selects the adopted collection setter for indexed assignment, or a participant's `setindex` member. |
 | [`access_update`](#access_update) | Selects collection compound updates and checks accepted operands, or a participant's `updateindex` member. |
 | [`delegate_member`](#delegate_member) | Rebuilds a call that finds no member on its receiver through the one delegate field path that provides the method. |
+| [`destructure_declaration`](#destructure_declaration) | Declares the names of `T (a, b) = source;` and then reads the source into them, or declares each target of `(T1 a, T2 b) = source;` initialized from its element. |
+| [`destructure_statement`](#destructure_statement) | Reads the source of `(a, b) = source;` into its targets in a block. |
+| [`destructure_value`](#destructure_value) | Reads the source of `(a, b) = source` into its targets, and keeps the source in a result local as the expression's value. |
 | [`dynamic_binary`](#dynamic_binary) | Boxes both operands of an arithmetic, shift, or bitwise operator for `Var.binary`, after rejecting an operand that is neither a number nor, for `+` beside text, text. |
 | [`dynamic_change`](#dynamic_change) | Adds or subtracts one through the `Var` update helpers; the postfix forms return the value before the change. |
 | [`dynamic_compound`](#dynamic_compound) | Updates a `Var` or numeric lvalue with a `Var` or numeric operand through the update helper of its storage. |
@@ -39,7 +42,7 @@ Shipped `meta` code compiled into the compiler.
 
 Stores the updated element and returns its previous value.
 
-Source: `src/linked-meta.x:357`
+Source: `src/linked-meta.x:358`
 
 #### access_prefix
 
@@ -47,7 +50,7 @@ Source: `src/linked-meta.x:357`
 
 Stores and returns the incremented or decremented element.
 
-Source: `src/linked-meta.x:346`
+Source: `src/linked-meta.x:347`
 
 #### access_read
 
@@ -55,7 +58,7 @@ Source: `src/linked-meta.x:346`
 
 Calls the getter bracket admission selected.
 
-Source: `src/linked-meta.x:230`
+Source: `src/linked-meta.x:231`
 
 #### access_store
 
@@ -64,7 +67,7 @@ Source: `src/linked-meta.x:230`
 Selects the adopted collection setter for indexed assignment, or a
 participant's `setindex` member.
 
-Source: `src/linked-meta.x:281`
+Source: `src/linked-meta.x:282`
 
 #### access_update
 
@@ -73,7 +76,7 @@ Source: `src/linked-meta.x:281`
 Selects collection compound updates and checks accepted operands, or a
 participant's `updateindex` member.
 
-Source: `src/linked-meta.x:312`
+Source: `src/linked-meta.x:313`
 
 #### delegate_member
 
@@ -82,7 +85,34 @@ Source: `src/linked-meta.x:312`
 Rebuilds a call that finds no member on its receiver through the one
 delegate field path that provides the method.
 
-Source: `src/linked-meta.x:459`
+Source: `src/linked-meta.x:460`
+
+#### destructure_declaration
+
+`Code destructure_declaration(Code node)`
+
+Declares the names of `T (a, b) = source;` and then reads the source
+into them, or declares each target of `(T1 a, T2 b) = source;`
+initialized from its element.
+
+Source: `src/linked-meta.x:515`
+
+#### destructure_statement
+
+`Code destructure_statement(Code node)`
+
+Reads the source of `(a, b) = source;` into its targets in a block.
+
+Source: `src/linked-meta.x:545`
+
+#### destructure_value
+
+`Code destructure_value(Code node)`
+
+Reads the source of `(a, b) = source` into its targets, and keeps the
+source in a result local as the expression's value.
+
+Source: `src/linked-meta.x:559`
 
 #### dynamic_binary
 
@@ -94,7 +124,7 @@ for `+` beside text, text. The call is returned lowered, because an
 operator chain applies this rule once for each term and binding would
 search the whole remaining chain each time.
 
-Source: `src/linked-meta.x:792`
+Source: `src/linked-meta.x:897`
 
 #### dynamic_change
 
@@ -103,7 +133,7 @@ Source: `src/linked-meta.x:792`
 Adds or subtracts one through the `Var` update helpers; the postfix
 forms return the value before the change.
 
-Source: `src/linked-meta.x:877`
+Source: `src/linked-meta.x:982`
 
 #### dynamic_compound
 
@@ -112,7 +142,7 @@ Source: `src/linked-meta.x:877`
 Updates a `Var` or numeric lvalue with a `Var` or numeric operand
 through the update helper of its storage.
 
-Source: `src/linked-meta.x:851`
+Source: `src/linked-meta.x:956`
 
 #### dynamic_unary
 
@@ -120,7 +150,7 @@ Source: `src/linked-meta.x:851`
 
 Rejects a unary numeric operator on a `Var`.
 
-Source: `src/linked-meta.x:893`
+Source: `src/linked-meta.x:998`
 
 #### linked_meta_hashes
 
@@ -128,7 +158,7 @@ Source: `src/linked-meta.x:893`
 
 Returns linked definition hashes and provider source dependencies.
 
-Source: `src/linked-meta.x:1448`
+Source: `src/linked-meta.x:1561`
 
 #### linked_meta_targets
 
@@ -136,7 +166,7 @@ Source: `src/linked-meta.x:1448`
 
 Returns the linked copies, and the runtime builders, by name.
 
-Source: `src/linked-meta.x:1271`
+Source: `src/linked-meta.x:1376`
 
 #### match_lowering
 
@@ -145,7 +175,7 @@ Source: `src/linked-meta.x:1271`
 Lowers the bound match `node` to C text around its subject, patterns,
 and bodies.
 
-Source: `src/linked-meta.x:776`
+Source: `src/linked-meta.x:881`
 
 #### printf_values
 
@@ -153,7 +183,7 @@ Source: `src/linked-meta.x:776`
 
 Reads the Var values a printf-family call's static format consumes.
 
-Source: `src/linked-meta.x:1033`
+Source: `src/linked-meta.x:1138`
 
 #### raise_lowering
 
@@ -162,7 +192,7 @@ Source: `src/linked-meta.x:1033`
 Converts a raise's code and details, or declines a raise whose parts
 already have their types.
 
-Source: `src/linked-meta.x:1069`
+Source: `src/linked-meta.x:1174`
 
 #### register_rewrite
 
@@ -170,7 +200,7 @@ Source: `src/linked-meta.x:1069`
 
 Registers the decorated translator with its pattern and hole patterns.
 
-Source: `src/linked-meta.x:88`
+Source: `src/linked-meta.x:89`
 
 #### try_catch_cases
 
@@ -184,7 +214,7 @@ every arm returns or raises, control cannot leave them, and a final
 unreachable mark tells C so that a function ending in such a `try`
 needs no return after it.
 
-Source: `src/linked-meta.x:1103`
+Source: `src/linked-meta.x:1208`
 
 #### try_lowering
 
@@ -192,7 +222,7 @@ Source: `src/linked-meta.x:1103`
 
 Lowers the parsed try `node` to its landing form.
 
-Source: `src/linked-meta.x:1215`
+Source: `src/linked-meta.x:1320`
 
 ## Design notes
 

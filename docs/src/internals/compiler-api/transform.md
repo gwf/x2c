@@ -27,7 +27,7 @@ Calls the typed callable `callee` with `arguments`, each converted to
 its parameter and evaluated once, in source order, as a statement
 expression.
 
-Source: `src/transform.x:1253`
+Source: `src/transform.x:1112`
 
 <a id="Compiler.normalize"></a>
 #### Compiler.normalize
@@ -38,7 +38,7 @@ Normalizes one bound and typed node. Newly constructed syntax is
 normalized where it is produced; children enter the same operation, so
 completed units do not require another unit walk.
 
-Source: `src/transform.x:107`
+Source: `src/transform.x:102`
 
 <a id="Compiler.transform"></a>
 #### Compiler.transform
@@ -53,7 +53,7 @@ support declarations are lowered and appended after the input units. Their
 storage determines their interface visibility. The call may add
 generated origins or diagnostics to `c`.
 
-Source: `src/transform.x:87`
+Source: `src/transform.x:82`
 
 ## Design notes
 

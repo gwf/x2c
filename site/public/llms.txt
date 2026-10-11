@@ -122,6 +122,7 @@
 - [src/compiler.x](https://x2c-lang.dev/docs/internals/compiler-api/compiler.html)
 - [src/component-access.x](https://x2c-lang.dev/docs/internals/compiler-api/component-access.html)
 - [src/component-delegate.x](https://x2c-lang.dev/docs/internals/compiler-api/component-delegate.html)
+- [src/component-destructuring.x](https://x2c-lang.dev/docs/internals/compiler-api/component-destructuring.html)
 - [src/component-interpolation.x](https://x2c-lang.dev/docs/internals/compiler-api/component-interpolation.html)
 - [src/component-literals.x](https://x2c-lang.dev/docs/internals/compiler-api/component-literals.html)
 - [src/component-match.x](https://x2c-lang.dev/docs/internals/compiler-api/component-match.html)

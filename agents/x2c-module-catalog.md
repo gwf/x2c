@@ -8,7 +8,7 @@ non-static function definition discovered in source order. It does
 not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
-- Compiler modules: 61
+- Compiler modules: 62
 - Runtime modules: 77
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
@@ -186,6 +186,14 @@ None. This module has no non-static function definitions.
 ### [src/component-delegate.x](../src/component-delegate.x)
 
 delegate fields.
+
+Public functions:
+
+None. This module has no non-static function definitions.
+
+### [src/component-destructuring.x](../src/component-destructuring.x)
+
+flat List destructuring.
 
 Public functions:
 
@@ -406,6 +414,7 @@ Public functions:
 `register_rewrite`, `_dedent_expand`, `_macros_location`, `_tag_decode_group`,
 `_tag_decode_groups`, `_tag_id_checks`, `access_read`, `access_store`,
 `access_update`, `access_prefix`, `access_postfix`, `delegate_member`,
+`destructure_declaration`, `destructure_statement`, `destructure_value`,
 `match_lowering`, `dynamic_binary`, `dynamic_compound`, `dynamic_change`,
 `dynamic_unary`, `printf_values`, `raise_lowering`, `try_catch_cases`,
 `try_lowering`, `linked_meta_targets`, `linked_meta_hashes`

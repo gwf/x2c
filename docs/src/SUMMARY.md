@@ -116,6 +116,7 @@
   - [src/compiler.x](internals/compiler-api/compiler.md)
   - [src/component-access.x](internals/compiler-api/component-access.md)
   - [src/component-delegate.x](internals/compiler-api/component-delegate.md)
+  - [src/component-destructuring.x](internals/compiler-api/component-destructuring.md)
   - [src/component-interpolation.x](internals/compiler-api/component-interpolation.md)
   - [src/component-literals.x](internals/compiler-api/component-literals.md)
   - [src/component-match.x](internals/compiler-api/component-match.md)
