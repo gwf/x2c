@@ -50,11 +50,6 @@ static macro Stmt $report.xform.no_shipped_rule(Expr $c, Expr $form) =>
     NULL, %("the shipped component that owns it is not linked or failed to "
             "collect; rebuild the compiler from the current prelude sources"));
 
-static macro Stmt $report.type.destructure_list(Expr $c, Expr $source_type) =>
-  $c.report_error(
-    <type>, "destructuring requires a List source",
-    NULL, %(("source type" ${$source_type})));
-
 static macro Stmt $report.xform.slice_assignment(Expr $c) =>
   $c.report_error(
     <xform>, "slice expressions are not assignable",
@@ -143,14 +138,11 @@ static Ast Compiler._step_tag(Compiler c, Ast ast, Symbol tag) {
     case <var>: next = c._to_var(ast.cadr()); break;
     case <segments>: return c._interpolation(ast);
     case <declare>: case <decl>: next = c._declaration(ast); break;
-    case <dstrdecl>: case <stmnt>: case <dstrasgn>: {
-      List ruled = c._destructure_rule(ast, tag);
-      if (ruled) return ruled;
-      if (tag == <dstrdecl>) next = c._destructure_declaration(ast);
-      else if (tag == <stmnt>) next = c._destructure_statement(ast);
-      else next = c._destructure_value(ast);
-      break;
-    }
+    case <dstrdecl>: return c._destructuring(ast, tag, AST_BLOCK);
+    case <stmnt>:
+      if (!_destructures(ast)) return c._default_node(ast);
+      return c._destructuring(ast, tag, AST_STATEMENT);
+    case <dstrasgn>: return c._destructuring_value(ast);
     case <match>: return c._shipped_statement(ast, tag);
     case <defer>: next = c._defer_node(ast); break;
     case <return>: next = c._return(ast); break;
@@ -192,21 +184,27 @@ static Ast Compiler._shipped_statement(Compiler c, Ast ast, Symbol tag) {
   return lowered ? lowered : %(block);
 }
 
-static List Compiler._destructure_rule(Compiler c, List ast, Symbol tag) {
-  if (!c.rewrite_rules) return NULL;
-  if (tag == <dstrdecl>)
-    return c.lower_rewrite(
-      <node>, tag, ast, AST_BLOCK, c.return_type, NULL);
-  if (tag == <stmnt>) {
-    match (ast) case %(stmnt (expr ? (dstrasgn *))):
-      return c.lower_rewrite(
-        <node>, tag, ast, AST_STATEMENT, c.return_type, NULL);
-    return NULL;
-  }
+/* A destructuring declaration or assignment statement, which
+   `src/component-destructuring.x` lowers. */
+static Ast Compiler._destructuring(
+  Compiler c, Ast ast, Symbol tag, AstPos position) {
+  String form = position == AST_BLOCK
+    ? "destructuring declaration" : "destructuring statement";
+  return c._shipped_lowering(
+    <node>, tag, ast, position, c.return_type, form);
+}
+
+static int _destructures(List statement) {
+  match (statement) case %(stmnt (expr ? (dstrasgn *))): return 1;
+  return 0;
+}
+
+/* A destructuring assignment expression has its source's type. */
+static Ast Compiler._destructuring_value(Compiler c, Ast ast) {
   Type type = ast.caddr().cadr();
-  List lowered = c.lower_rewrite(
-    <literal>, tag, %(expr $type $ast), AST_EXPRESSION, type, NULL);
-  return lowered ? lowered.caddr() : NULL;
+  return c._shipped_lowering(
+    <literal>, <dstrasgn>, %(expr $type $ast), AST_EXPRESSION, type,
+    "destructuring assignment").caddr();
 }
 
 static Ast Compiler._default_node(Compiler c, Ast ast) {
@@ -770,21 +768,6 @@ static Ast Compiler._interpolation(Compiler c, Ast ast) {
 
 // declarations and statements
 
-static macro Stmt $destructure_typed_target(
-    Type $type, DeclaratorRow $row, Expr $value) {
-  $type $row = $value;
-}
-
-static macro Stmt $destructure_sequence(Stmt @items) {
-  @items
-}
-
-static macro Stmt $destructure_declarations(
-    Name $temporary, Expr $source, Stmt @assignments) {
-  List $temporary = $source;
-  @assignments
-}
-
 static List Compiler._declaration(Compiler c, List ast) {
   match (ast) {
     case %((!set ?head (!or declare decl)) ?target
@@ -815,27 +798,18 @@ static List Compiler._declaration(Compiler c, List ast) {
   return ast;
 }
 
-static List Compiler._destructure_declaration(Compiler c, List ast) {
-  match (ast) {
-    case %(dstrdecl ?type (targets *targets)
-                    (!set ?source (expr ?source_type ?))):
-      return c._named_destructure(type, targets, source, source_type);
-    case %(dstrdecl (params *parameters)
-                    (!set ?source (expr ?source_type ?))):
-      return c._typed_destructure(parameters, source, source_type);
-  }
-  return ast;
-}
-
-/* Cell rewriting needs declaration sites, so lower destructuring
-   with its existing transformation before analyzing a function body. */
+/* Cell rewriting needs declaration sites, so a function body's
+   destructuring declarations take their rule's replacement, bound but not
+   yet lowered, before its cells are prepared. */
 static List Compiler._lower_lambda_destructuring(Compiler c, List ast) {
   if (!ast) return ast;
   match (ast) {
     case %(dstrdecl *): {
-      List ruled = c.rewrite_rules ? c.rewrite(
-        <node>, <dstrdecl>, ast, AST_BLOCK, c.return_type, NULL) : NULL;
-      return ruled ? ruled : c._destructure_declaration(ast);
+      List rewritten = c.rewrite(
+        <node>, <dstrdecl>, ast, AST_BLOCK, c.return_type, NULL);
+      if (!rewritten)
+        $report.xform.no_shipped_rule(c, "destructuring declaration");
+      return rewritten;
     }
   }
   // The recursion below then only descends into subtrees it will rewrite.
@@ -844,149 +818,11 @@ static List Compiler._lower_lambda_destructuring(Compiler c, List ast) {
     ast, %!(List child) => c._lower_lambda_destructuring(child));
 }
 
-// A discarded destructuring result retains its own block scope.
-static List Compiler._destructure_statement(Compiler c, List ast) {
-  match (ast) {
-    case %(stmnt (expr ?
-             (dstrasgn (targets *targets)
-                       (!set ?source (expr ?source_type ?))))): {
-      List temporary = c.sym.introduce(c.fresh_name("destructure"));
-      return c.bind_syntax(
-        $!{
-          {
-            List $temporary = ${c._destructure_source(source, source_type)};
-            @{c._destructure_assignments(targets, temporary)}
-          }
-        }, AST_BLOCK, c.return_type);
-    }
-  }
-  return ast;
-}
-
-/* Keep the source's exact static type and value in one result temporary,
-   then convert it to List once for the left-to-right assignments. */
-static List Compiler._destructure_value(Compiler c, List ast) {
-  match (ast) {
-    case %(dstrasgn (targets *targets)
-                    (!set ?source (expr ?type ?))): {
-      List result = c.sym.introduce(c.fresh_name("destructure_result"));
-      List temporary = c.sym.introduce(c.fresh_name("destructure"));
-      List result_expr = $!($type){ $result };
-      List converted = c._destructure_source(result_expr, type);
-      List assignments = c._destructure_assignments(targets, temporary);
-      Macro shape = macro Expression(
-        Type $type, Name $result, Expr $source, Name $temporary,
-        Expr $converted, Stmt @assignments) => ({
-        $type $result = $source;
-        List $temporary = $converted;
-        @assignments
-        $result;
-      });
-      List bound = c.bind_syntax(
-        shape(
-          type, result, %(code-value "bound" $source ()),
-          temporary, converted, assignments),
-        AST_EXPRESSION, NULL);
-      return bound.caddr();
-    }
-  }
-  return ast;
-}
-
 static List _value_declaration(Type type, List binding, List value) {
   (List base, List mods) = type.parts();
   return value
     ? %(declare $base (bindings (op = (bind $binding $mods) $value)))
     : %(declare $base (bindings (bind $binding $mods)));
-}
-
-// Keep parser-bound targets out of rebinding so their names retain scope and
-// emitted identity; bind only the new temporary and unbound writes.
-static List Compiler._named_destructure(
-  Compiler c, Type type, List targets, List source, Type source_type) {
-  List temporary = c.sym.introduce(c.fresh_name("destructure"));
-  Array declarations = [], expressions = [];
-  foreach (List ident, targets) {
-    declarations.push(%(bind $ident ()));
-    expressions.push($!($type){ $ident });
-  }
-  List target_decl =
-    c.rebuild_statement($!{ $type @{declarations.list_free()}; }).cadr();
-  List assignments = c._destructure_assignments(
-    expressions.list_free(), temporary);
-  Macro shape = $destructure_declarations;
-  List tail = c.bind_syntax(
-    shape(temporary, c._destructure_source(source, source_type), assignments),
-    AST_BLOCK, c.return_type);
-  Macro sequence = $destructure_sequence;
-  return c.rebuild_statement(sequence(cons(target_decl, tail.cdr())));
-}
-
-static List Compiler._typed_destructure(
-  Compiler c, List parameters, List source, Type source_type) {
-  List temporary = c.sym.introduce(c.fresh_name("destructure"));
-  Array declarations = [];
-  int index = 0;
-  Macro target_shape = $destructure_typed_target;
-  foreach (List parameter, parameters) match (parameter) {
-    case %(param ?type ?bind): {
-      List value = _destructure_element(temporary, index++);
-      declarations.push(
-        c.rebuild_statement(target_shape(type, bind, value)).cadr());
-    }
-  }
-  Macro shape = $destructure_declarations;
-  List temp = c.bind_syntax(
-    shape(temporary, c._destructure_source(source, source_type)),
-    AST_BLOCK, c.return_type);
-  Macro sequence = $destructure_sequence;
-  return c.rebuild_statement(sequence(cons(temp, declarations.list_free())));
-}
-
-static List Compiler._destructure_source(
-  Compiler c, List source, Type source_type) {
-  // An integer, floating, or enumeration source cannot destructure. Reject
-  // it before converting so the report names the construct the user wrote;
-  // convert_expression would instead diagnose an integer reaching a
-  // pointer.
-  if (c.sym.resolve_numeric_type(source_type.canonicalize()))
-    $report.type.destructure_list(c, source_type);
-  List converted = c.convert_expression(source, %("List"));
-  Type converted_type = NULL;
-  match (converted)
-    case %(expr ?type ?): converted_type = type;
-  if (!c.sym.is_named_value_type(converted_type, "List"))
-    $report.type.destructure_list(c, source_type);
-  return %(code-value "bound" $converted ());
-}
-
-// Read one element from the issued List temporary.
-static List _destructure_element(List temporary, int index) {
-  String text = %"$index";
-  return %(expr ("Var")
-           (getindex (expr ("List") (ident $temporary))
-                     (literal (int) $text)));
-}
-
-// Preserve typed targets, including the indirection of mutable lambda
-// captures, while constructing their writes in source order.
-static List Compiler._destructure_assignments(
-  Compiler c, List targets, List temporary) {
-  int index = 0;
-  return targets.map(
-    %!(List target) using &index => {
-      match (target)
-        case %(expr ?type ?): {
-          List expression =
-            $!($type){ $target = ${_destructure_element(temporary, index++)} };
-          return c._as_statement(expression);
-        }
-    });
-}
-
-static List Compiler._as_statement(Compiler c, List expression) {
-  Macro shape = $expression_statement;
-  return c.rebuild_statement(shape(expression)).cadr();
 }
 
 static List Compiler._return(Compiler c, List ast) {
