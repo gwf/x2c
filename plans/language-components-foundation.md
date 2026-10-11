@@ -604,8 +604,10 @@ replacement template and fill steps are the remaining driver cost.
 - 2026-10-10, facts learned: `function-entry` placement is parse-time, so
   lambda cells need a transform-time entry placement before lambdas move; a
   plain `make build` after editing a shipped component leaves a degraded
-  compiler (stale embedded prelude records, 9.2 G for the empty unit) until
-  `make bootstrap-refresh`; the printf family table is spelled twice because
+  compiler (stale embedded prelude records, 9.2 G for the empty unit, about
+  twelve dump fixtures differing) until `make bootstrap-refresh`, and a
+  timestamp change alone, with content equal to the bootstrap's, does the
+  same until `make build-safe`; the printf family table is spelled twice because
   the `.str()` warning reads it before the component runs.
 
 ## Next bounded milestone
