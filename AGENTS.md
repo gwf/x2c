@@ -130,7 +130,7 @@ commits need not rebuild from their own bootstrap.
   `component-match` lowering match,
   `component-interpolation` joining interpolated Strings,
   `component-destructuring` lowering List destructuring, and
-  `component-lambdas` lifting lambdas to functions)/
+  `component-lambdas` lowering lambdas and their cells)/
   `literals` (+ `lambdas`) -> `ast` (+ `ast-rewrite`, AST traversal and
   rewriting, and `grammar`, source forms used by lowering) ->
   `type` (+ `type-ledger`)/`protocol`

@@ -215,8 +215,9 @@ inline-lisp example
 
 ### Lambdas
 
-- Parse: `src/literals.x`
-- Lower and direct `Func` calls: `src/callables.x`,
+- Parse and resolve captures: `src/literals.x`, `src/lambdas.x`
+- Lower: `src/component-lambdas.x`, dispatched from `src/transform.x`
+- Direct `Func` calls and conversions: `src/callables.x`,
   `src/expressions.x`
 - Runtime: `lib/func.x` and receiving callback APIs
 - Tests: captured-lambda and lambda-lowering fixtures, lambda and `Func` suites
@@ -308,8 +309,8 @@ The main translation steps are:
 3. `src/expressions.x`, `src/statements.x`, and `src/literals.x` construct
    typed AST forms; `src/ast.x` owns the shared node contracts they build to.
 4. `src/type.x` supplies type facts and canonical forms.
-5. `src/transform.x` lowers most extensions; `src/callables.x` owns lambda
-   helper and adapter synthesis.
+5. `src/transform.x` lowers most extensions; `src/callables.x` owns `Func`
+   adapter synthesis, and `src/component-lambdas.x` lowers lambdas.
 6. `src/cleanup.x` names each `defer` region's runtime record and each
    landing's frame, and places cleanup statements on every exit that leaves
    a region; `src/component-try.x` answers the landing form of a `try`.

@@ -351,23 +351,23 @@ Consumes the parsed AST, produces a lowered AST that the emitter can walk
 without knowing about x2c. `src/transform.x` normalizes each node until its
 identity stops changing, because lowering one construct can expose another.
 `src/cleanup.x` places function cleanup within the shared driver.
-`src/callables.x` handles lambdas, which
-need additional declarations. A noncapturing lambda becomes a static helper
-function, plus an adapter when the receiving callback type differs from the
-helper's signature. When a `Func` is expected, a direct function or
-noncapturing lambda also gets one reusable file-static handle. A
-function-pointer value uses an adapter shared by its canonical pointer type and
-a new `Func` whose copied context snapshots that pointer. A capturing lambda
-becomes a `FuncAdapter` helper and a `Func` whose copied typed context supplies
-its value snapshots and explicitly captured reference addresses. Capture
-bindings have separate identities from their source bindings, so moving a
-source into a shared cell cannot retarget a sibling snapshot. Parsed lambdas
-and constructed capture rows resolve in the same lexical environment.
-A public inline function
-reaches these source-owned helpers through a generated bridge that also runs
-the owning unit's initializer. Those synthesized declarations go onto a
-compiler-owned early-declaration queue, are normalized by the same driver,
-and are appended to the unit.
+`src/component-lambdas.x` lowers lambdas, which need additional
+declarations: each becomes a static function, and `src/callables.x` adds an
+adapter when the receiving callback type differs from its signature. When a
+`Func` is expected, a direct function or noncapturing lambda also gets one
+reusable file-static handle. A function-pointer value uses an adapter shared
+by its canonical pointer type and a new `Func` whose copied context
+snapshots that pointer. A capturing lambda's function also takes its
+captures, and its `Func` copies their value snapshots and explicitly
+captured reference addresses into a typed context that a `FuncAdapter`
+passes back. Capture bindings have separate identities from their source
+bindings, so moving a source into a shared cell cannot retarget a sibling
+snapshot. Parsed lambdas and constructed capture rows resolve in the same
+lexical environment. A public inline function reaches these source-owned
+helpers through a generated bridge that also runs the owning unit's
+initializer. Those synthesized declarations go onto a compiler-owned
+early-declaration queue, are normalized by the same driver, and are
+appended to the unit.
 
 Cleanup lowering completes each function after its body is normalized. A
 `try` first takes the landing form the shipped try component answers, an
@@ -523,7 +523,8 @@ The modules under `src/` divide ownership as follows:
   statement rewrites for its declarations and assignment statements and as
   a literal rewrite for its assignment expressions;
 - `src/component-lambdas.x` -- lambdas lifted to static functions,
-  registered as literal rewrites for both lambda forms;
+  registered as literal rewrites for both lambda forms, and their shared
+  cells, registered as a function rule;
 - `src/operator-ledger.x` -- operator precedence, compound assignment,
   and protocol-member mappings from one compile-time ledger;
 - `src/cli.x`, `src/main.x` -- option metadata and parsing, dispatch, logging,
@@ -586,8 +587,8 @@ The modules under `src/` divide ownership as follows:
 - `src/utils.x` -- repository discovery, the driver's fatal error line, and
   forked translation workers;
 - `src/transform.x` -- lowering to emitter-ready AST;
-- `src/callables.x` -- lambdas, typed callback adapters, and `Func`
-  conversions lowered to C helpers;
+- `src/callables.x` -- typed callback adapters and `Func` conversions
+  lowered to C helpers;
 - `src/adapter-memo.x` -- macros that cache compiler adapters and reuse
   each result by key;
 - `src/cleanup.x` -- which exits leave a cleanup region and which locals an
@@ -823,10 +824,7 @@ the conversions lowering applies to an assignment or initialization. The
 expression form keeps the source in a result local as its value. The
 parser has already declared the targets, so binding leaves their
 declarations alone and they keep their scope and identity; the locals are
-`new-name` effects. In a function body that holds a lambda, the
-declarations are rewritten, without lowering, before its lambda cells are
-prepared, so a destructured name a lambda shares by reference gets its cell
-at its declaration.
+`new-name` effects.
 
 `src/component-lambdas.x` registers both lambda forms on the literal family
 keyed by the `lambda` head, which the transform offers each lambda it meets.
@@ -836,7 +834,18 @@ bound body as a lowered carrier, so it is not bound again. The function
 lowers with the unit's other support declarations, so it prepares its own
 cells and takes its own entry placements. An expression body carries the
 origin of the item that held the lambda, which `x2c_enclosing(<statement>)`
-answers while lowering, so a diagnostic in it points there.
+answers while lowering, so a diagnostic in it points there. A capturing
+lambda's function also takes each captured binding as a parameter, a
+reference as a reference, so its body is not rewritten. The rule places a
+context record and an adapter, which reads the arguments through
+`Code.func_parameters` and calls the function with them and the record's
+fields, and answers the statement expression that evaluates the captures
+left to right and makes the `Func`. The component also registers a function
+rule for every definition: a local or parameter that a lambda in the body
+shares by reference moves into a Scope cell, so the binding outlives the
+call. A parameter is copied into its cell at entry, a declarator becomes the
+cell's declaration, a destructuring declaration copies its target after it,
+and every read goes through the cell; the replacement is bound again.
 
 The components and `src/grammar.x`, whose source forms they recognize, are
 compiler prelude sources.
