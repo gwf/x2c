@@ -1286,6 +1286,17 @@ static void Compiler.publish_inline_dependencies(
   _process_cache()[path] = updated;
 }
 
+/* The declaration map that the file's collected entry contributes, which is
+   the map its interface publishes, or NULL when the file has none. */
+static Map _contribution(String filename) {
+  Var cached = _process_cache()[_canonical_path(filename)];
+  if (cached is void) return NULL;
+  Map contribution = NULL;
+  foreach (Var part, cached.list().car())
+    if (part is <map>) contribution = part;
+  return contribution;
+}
+
 /** Records one generated public callable in the declaration map that the
     current file's collected entry contributes, which is the map its
     interface publishes. A file without a collected declaration map records
@@ -1293,11 +1304,7 @@ static void Compiler.publish_inline_dependencies(
 */
 void Compiler.record_generated_symbol(
   Compiler c, String name, Type signature) {
-  Var cached = _process_cache()[_canonical_path(c.filename)];
-  if (cached is void) return;
-  Map contribution = NULL;
-  foreach (Var part, cached.list().car())
-    if (part is <map>) contribution = part;
+  Map contribution = _contribution(c.filename);
   if (contribution == NULL) return;
   List key = %($name), marker_key = %("generated-protocol" $name);
   List marker = %(generated);
@@ -1307,6 +1314,21 @@ void Compiler.record_generated_symbol(
   _require_retained(signature.try_own());
   contribution[key] = signature;
   contribution[marker_key] = marker;
+}
+
+/** Adds `rows` to the declaration map that the current file's interface
+    publishes, as `record_generated_symbol` does. The cache retains each
+    key and value.
+*/
+void Compiler.record_interface_rows(Compiler c, Map rows) {
+  if (!rows.len()) return;
+  Map contribution = _contribution(c.filename);
+  if (contribution == NULL) return;
+  foreach (Var (key, value), rows) {
+    _retain(key);
+    _retain(value);
+    contribution[key] = value;
+  }
 }
 
 // replay
@@ -1518,16 +1540,17 @@ static String _package_key_spelling(List key) {
        ? spelling_value : NULL;
 }
 
-/* Protocol declarations and adoptions are keyed by source location instead
-   of by a spelling, and a package's rows already name its own prefixed
-   types, so they cross with the rest of its surface. */
+/* Protocol declarations and adoptions are keyed by source location, and
+   recorded conformances by base and participant, instead of by a spelling.
+   A package's rows already name its own prefixed types, so they cross with
+   the rest of its surface. */
 static int _package_protocol_row(List key, Var value) {
   if (key.car() != "source-node" || value is not <list>) return 0;
   List row = value;
   return row && row.car() in
-    %(protocol adopt meta-protocol declaration-source native-meta
-      compile-time project-meta meta-hashes interface-types native-object
-      package-import);
+    %(protocol adopt meta-protocol conformance declaration-source
+      native-meta compile-time project-meta meta-hashes interface-types
+      native-object package-import);
 }
 
 // import replay

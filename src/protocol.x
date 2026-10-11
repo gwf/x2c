@@ -7,7 +7,9 @@
     adoption into a conformance, answers member and operator lookups, and
     generates the adapters a conformance needs. Registries are rebuilt per
     translation unit; a static row is visible only when its canonical source
-    path is the current unit.
+    path is the current unit. The unit that declares an external adoption
+    resolves it and records the conformance in its interface, and a unit
+    that includes that interface reuses the recorded conformance.
 */
 #pragma once
 #include "compiler.x"
@@ -977,7 +979,9 @@ static typedef struct ProtocolRequirements {
 
 /** Resolves every visible adoption into the current conformance registry.
     Resolution starts from an empty registry; diagnostics are located only for
-    adoptions owned by the current translation unit.
+    adoptions owned by the current translation unit. An adoption another
+    unit declared and recorded keeps that conformance, which is installed
+    when it is first used.
 */
 void Compiler.resolve_protocols(Compiler c) {
   c.conforms = {};
@@ -989,8 +993,136 @@ void Compiler.resolve_protocols(Compiler c) {
     List location = _adoption_location(adoption);
     String path = c._canonical_file(location);
     if (storage == <static> && path != owner) continue;
+    if (c._recorded(base, participant)) continue;
     c._resolve_adoption(base, participant, path == owner ? location : NULL);
   }
+}
+
+// recorded conformance
+
+/* An ordinary external conformance whose adoption the unit's full parse
+   declared is recorded in the unit's interface as
+   `(conformance BASE PARTICIPANT FORWARD REVERSE (bindings (NAME TYPE)...)
+   (MEMBER STATUS SOURCE)...)`, with each type variable's binding and each
+   member resolved as anything but `no-member`. The expected and template
+   types follow from the protocol record and the bindings. A member that
+   resolved to a function static to this unit is left out, so it is
+   `no-member` elsewhere: no other unit can call that function. A native
+   conformance reads no participant member, so each unit resolves it. */
+static void Compiler._record_conformances(Compiler c) {
+  Map rows = {};
+  foreach (Var key, c.protocol_helpers.keys())
+    match (key)
+      case %("parsed-protocol-adoption" ?(Type base) ?(Type participant) ?): {
+        List recorded = c._recorded_conformance(base, participant);
+        if (recorded)
+          rows[%("source-node" (conformance $base $participant))] = recorded;
+      }
+  c.record_interface_rows(rows);
+}
+
+static List Compiler._recorded_conformance(
+  Compiler c, Type base, Type participant) {
+  if (c._visibility(base, participant) != <external>) return NULL;
+  match (c.conforms[%($base $participant)])
+    case %(protocol-conformance ? ? ?forward ?reverse ? ?(Map bindings)
+           (members *rows)): {
+      if (_native_rows(rows)) return NULL;
+      Array bound = [], resolved = [];
+      foreach (Var (name, type), bindings) bound.push(%($name $type));
+      bound.sort();
+      foreach (List row, rows)
+        match (row)
+          case %(?member ?(Symbol status) ?(String source) *)
+            if (status != <no-member> && !c._is_private(source)):
+              resolved.push(%($member $status $source));
+      return %(conformance $base $participant $forward $reverse
+               (bindings @{bound.list_free()}) @{resolved.list_free()});
+    }
+  return NULL;
+}
+
+/* The row an included interface recorded for an adoption this unit does not
+   own, or NULL. */
+static List Compiler._recorded(Compiler c, Type base, Type participant) {
+  Var recorded;
+  if (c._owns_adoption(base, participant) ||
+      !c.protocol_helpers.try_get(
+        %("recorded-conformance" $base $participant), recorded))
+    return NULL;
+  return recorded;
+}
+
+/* Installs the conformance an included interface recorded for an adoption
+   this unit does not own. Returns 0 when there is none to reuse. */
+static int Compiler._reuse_conformance(
+  Compiler c, Type base, Type participant) {
+  match (%(${c._record(base)} ${c._recorded(base, participant)}))
+    case %((? ? ? ? (members *templates))
+           (conformance ? ? ?forward ?reverse (bindings *bound) *members)): {
+      Map variables = {}, bindings = {}, resolved = {};
+      foreach (List pair, bound) {
+        (String name, Type type) = pair;
+        variables[name] = 1;
+        bindings[name] = type;
+      }
+      foreach (List member, members) resolved[member.car()] = member;
+      Array rows = [];
+      foreach (List template, templates) {
+        (String member, Type type) = template;
+        Type expected = _substitute_signature(type, variables, bindings);
+        rows.push(_recorded_row(resolved[member], member, expected, type));
+      }
+      c.conforms[%($base $participant)] = %(
+        protocol-conformance $base $participant $forward $reverse
+        $variables $bindings (members @{rows.list_free()})
+      );
+      return 1;
+    }
+  return 0;
+}
+
+/* The recorded conformances this unit may reuse and has not installed, as
+   `((BASE PARTICIPANT) ROW)` pairs. */
+static List Compiler._unused_recorded(Compiler c) {
+  Array unused = [];
+  foreach (Var key, c.protocol_helpers.keys())
+    match (key)
+      case %("recorded-conformance" ?(Type base) ?(Type participant)): {
+        List row = c._recorded(base, participant);
+        if (row && !(%($base $participant) in c.conforms))
+          unused.push(%(($base $participant) $row));
+      }
+  return unused.list_free();
+}
+
+/* Installs each recorded conformance with a base default whose forward
+   converter is defined, so that its forwarding members are published. */
+static void Compiler._reuse_defaults(Compiler c) {
+  foreach (List entry, c._unused_recorded())
+    match (entry)
+      case %((?(Type base) ?(Type participant))
+             (conformance ? ? ?(String forward) ? ? *members)):
+        if (forward in c.fn_defs && _has_default(members))
+          c._reuse_conformance(base, participant);
+}
+
+static int _has_default(List members) {
+  foreach (List member, members) if (member.cadr() == <base-dflt>) return 1;
+  return 0;
+}
+
+/* Rebuilds a member row as resolution writes it. A member the interface
+   does not list resolved as `no-member`. */
+static List _recorded_row(
+  Var recorded, String member, Type expected, Type template) {
+  match (recorded)
+    case %(? ?(Symbol status) ?(String source)): {
+      Symbol kind = status == <base-dflt> ? <ordinary> : <none>;
+      return %($member $status $source $expected $kind $template);
+    }
+  String source = NULL;
+  return %($member no-member $source $expected none $template);
 }
 
 static void Compiler._resolve_adoption(
@@ -1692,10 +1824,11 @@ List Compiler.protocol_members_for(Compiler c, Type participant, Type base) {
      resolved it. `AdoptionDraft.publish` already skips resolving during
      a shallow pass, and an import installed just above resolves nothing.
      `adoptions` holds only the adoptions this compiler may use, and the full
-     parse resolves all of them before it starts, so the full parse has an
-     entry for every pair that reaches this point. */
+     parse resolves all of them before it starts, except those an included
+     interface recorded, which are installed here on first use. */
   if (stored is void) {
-    c._resolve_adoption(base, owner, NULL);
+    if (!c._reuse_conformance(base, owner))
+      c._resolve_adoption(base, owner, NULL);
     stored = c.conforms[key];
   }
   if (stored is not <list>) return NULL;
@@ -2300,18 +2433,22 @@ static List DiscardCall.emit(DiscardCall &d) {
     Native aliases are inserted at the participant's inferred public or
     private boundary. Each other conformance whose forward converter the
     unit defines is presented to the rule on the `conform` head, whose
-    code joins the unit's pending support. Returns `ast` with native
-    insertions applied.
+    code joins the unit's pending support. The external conformances the
+    unit declares are first recorded in its interface. Returns `ast` with
+    native insertions applied.
 */
 List Compiler.generate_protocol_adapters(Compiler c, List ast) {
-  /* Emit adapters only for finalized, declared conformances. */
+  c._record_conformances();
+  /* Emit adapters only for finalized, declared conformances. A recorded
+     one is installed only when this unit emits its adapters. */
   int central_initializer = c._defines_function("x2c_initialize_protocols");
   Array ordered = [];
   foreach (Var (key, value), c.conforms)
     if (value is <list>) ordered.push(%($key $value));
+  foreach (List entry, c._unused_recorded()) ordered.push(entry);
   ordered.sort();
   foreach (List ordered_row, ordered)
-    match (ordered_row)
+    match (ordered_row) {
       case %(? (protocol-conformance ?(Type base) ?(Type participant)
                 ?(String forward) ?(String reverse) ?(Map variables)
                 ?(Map bindings) (members *rows))): {
@@ -2323,6 +2460,15 @@ List Compiler.generate_protocol_adapters(Compiler c, List ast) {
         if (c._numeric_participant(participant)) continue;
         c._present_conformance(ordered_row.cadr(), central_initializer);
       }
+      case %((?(Type base) ?(Type participant))
+             (conformance ? ? ?(String forward) *)): {
+        if (!c._defines_function(forward)) continue;
+        if (c._numeric_participant(participant)) continue;
+        c._reuse_conformance(base, participant);
+        c._present_conformance(
+          c.conforms[%($base $participant)], central_initializer);
+      }
+    }
   ordered.free();
   return ast;
 }
@@ -2331,6 +2477,7 @@ List Compiler.generate_protocol_adapters(Compiler c, List ast) {
     Protocols must already be resolved in the active symbol table.
 */
 void Compiler.install_generated_protocol_symbols(Compiler c) {
+  c._reuse_defaults();
   foreach (Var value, c.conforms)
     match (value)
       case %(protocol-conformance ?(Type base) ?(Type participant)
@@ -2617,8 +2764,9 @@ static int _starts_private_region(List node) {
 
 /** Rebuilds the per-unit protocol and adoption registries from `symbols`.
     Existing rows, helper decisions, and lookup caches are discarded; a null
-    map leaves those registries empty. Conformance reset and resolution belong
-    to `resolve_protocols`.
+    map leaves those registries empty. The conformance rows included
+    interfaces recorded are kept for reuse. Conformance reset and resolution
+    belong to `resolve_protocols`.
 */
 void Compiler.rebuild_protocols(Compiler c, Map symbols) {
   c.protocols = {};
@@ -2635,6 +2783,9 @@ void Compiler.rebuild_protocols(Compiler c, Map symbols) {
         c._install_occurrence(base, record, storage, location);
       }
       case %(adopt *): c._install_stored(value);
+      case %(conformance ?base ?participant *):
+        c.protocol_helpers[%("recorded-conformance" $base $participant)] =
+          value;
     }
   }
 }
