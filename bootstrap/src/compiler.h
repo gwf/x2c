@@ -112,6 +112,7 @@ typedef struct Compiler{
   int meta_body;
   int capture_unit;
   List active_rewrites;
+  List applying;
   Map rewrite_rules;
   Map prepared_rewrites;
   SlotWatch slot_watch;
@@ -270,6 +271,10 @@ String Compiler_fresh_name(Compiler c, String stem);
 List Compiler_gensym(Compiler c);
 
 void Compiler_add_early(Compiler c, List decl);
+
+void Compiler_add_support(Compiler c, List decl);
+
+List written_definitions(List decl);
 
 void Compiler_add_init(Compiler c, Symbol phase, List stmt);
 

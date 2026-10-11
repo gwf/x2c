@@ -89,6 +89,8 @@ List Compiler_rewrite_written(Compiler c, Symbol kind, List source, Type expecte
 
 List Compiler_lower_rewrite(Compiler c, Symbol point, Var kind, List source, AstPos position, Type expected, Token site);
 
+List Compiler_written_support(Compiler c, List bound);
+
 typedef struct Effects{
   int bindings, names, origins, pending, placements, diagnostics;
 }
