@@ -197,8 +197,7 @@ static Map Query.diagnostic_range(Query &q, List location) {
     case %((file ?file) ? ? (length ?length) (position ?position)): {
       Compiler c = q.compiler;
       int start = position, width = length;
-      if (c.line_markers &&
-          c.display_path(c.text_source(position, start)) != file)
+      if (c.display_path(c.text_source(position, start)) != file)
         start = position;
       return q.location(Path.absolute(file), start, start + width);
     }

@@ -337,8 +337,10 @@ ModuleSource Compiler.module_source(Compiler c, String path, String text) {
   return source;
 }
 
-/* Only a text that spells `module` before `{` can hold a block. */
+/* Only a text that spells `module` before `{` can hold a block. An empty
+   file's text is NULL. */
 static int _spells_block(const char *text) {
+  if (!text) return 0;
   for (const char *at = strstr(text, "module"); at;
        at = strstr(at + 1, "module")) {
     const char *next = at + strlen("module");
@@ -395,7 +397,8 @@ static Token Splice.block(Splice &s) {
   return block;
 }
 
-static int _is_word(String text) => isalnum(text[0]) || text[0] == '_';
+static int _is_word(String text) =>
+  isalnum((unsigned char) text[0]) || text[0] == '_';
 
 /* The member paths of the block `block` opens, whose closing brace becomes
    `close`. */
