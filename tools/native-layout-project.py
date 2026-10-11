@@ -386,8 +386,46 @@ def compile_native(arguments):
                            '-o', object_file]).returncode
 
 
+def project_external(arguments):
+    """Enroll a deliberate C consumer without assigning language ownership."""
+    source, destination, depfile, *arguments = arguments
+    divider = arguments.index('--')
+    companions, compiler = arguments[:divider], arguments[divider + 1:]
+    source, destination = Path(source).resolve(), Path(destination)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    wrapper = destination.parent / 'consumer-wrapper.c'
+    metadata = wrapper.with_suffix('.xnm')
+    identity = 'x2c_external_consumer'
+    wrapper.write_text(f'#pragma x2c_region_begin {identity}\n'
+                       f'#include {json.dumps(str(source))}\n'
+                       f'#pragma x2c_region_end {identity}\n')
+    metadata.write_text(json.dumps(dict(format=2, source=wrapper.name,
+        header='', regions=[dict(id=identity, role='c', kind='native',
+        optional=False, defines=[])], order=[identity], headerOrder=[],
+        companions=[str(Path(path).resolve()) for path in companions])))
+    expanded = wrapper.with_suffix('.i')
+    status = subprocess.run([*compiler, '-E', '-MMD', '-MP', '-MF', depfile,
+        '-MT', str(destination), str(wrapper), '-o', str(expanded)]).returncode
+    if status:
+        return status
+    try:
+        configuration = load_metadata(metadata)
+        text = expanded.read_text()
+        streams = preprocess_owners(configuration, compiler,
+                                    destination.parent, text)
+        edges = []
+        destination.write_text(project(text, configuration, edges, streams))
+        Path(str(destination) + '.xne').write_text(json.dumps(sorted(edges)))
+        retain_projection_inputs(depfile, configuration)
+    finally:
+        expanded.unlink(missing_ok=True)
+    return 0
+
+
 def main():
     try:
+        if sys.argv[1:2] == ['--external']:
+            return project_external(sys.argv[2:])
         if sys.argv[1:2] == ['--compile']:
             return compile_native(sys.argv[2:])
         arguments = sys.argv[1:]

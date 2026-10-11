@@ -195,7 +195,21 @@ int Toolchain.project_native_source(
   projected = source;
   dependencies = NULL;
   String metadata = %"${Path.dirname(source)}/${Path.stem(source)}.xnm";
-  if (access(metadata, R_OK) || t.dry_run) return 0;
+  if (t.dry_run) return 0;
+  Array companions = [];
+  int external = access(metadata, R_OK) != 0;
+  if (external) {
+    List directories = gen_dirs.append(%(${t.include_dir}));
+    foreach (String candidate, directories) {
+      if (!Path.is_dir(candidate)) continue;
+      foreach (String file, Path.list_dir(candidate))
+        if (file.endswith(".xnm")) {
+          String path = Path.absolute(%"$candidate/$file");
+          if (!(path in companions)) companions.push(path);
+        }
+    }
+    if (!companions.len()) return 0;
+  }
   String directory =
     %"${home_dir()}/builds/native/${filename_hash(Path.absolute(source))}";
   Path.make_dirs(directory);
@@ -203,13 +217,18 @@ int Toolchain.project_native_source(
   projected = %"$directory/${Path.basename(source)}";
   dependencies = %"$directory/${Path.stem(source)}.d";
   String output;
+  String helper = %"${home_dir()}/tools/native-layout-project.py";
+  if (access(helper, R_OK))
+    helper = %"${home_dir()}/bootstrap/native-layout-project.py";
+  if (external)
+    return tool_capture(
+      %("python3" $helper "--external" $source $projected $dependencies
+        @{companions.list()} "--" @{t._compile_arguments(gen_dirs)}),
+      output, errors);
   int status = tool_capture(
     %(@{t._compile_arguments(gen_dirs)} "-E" "-MMD" "-MF" $dependencies
       "-MT" $projected $source "-o" $expanded), output, errors);
   if (status) return status;
-  String helper = %"${home_dir()}/tools/native-layout-project.py";
-  if (access(helper, R_OK))
-    helper = %"${home_dir()}/bootstrap/native-layout-project.py";
   status = tool_capture(
     %("python3" $helper "--project"
       $expanded $metadata $projected $dependencies
