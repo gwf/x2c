@@ -165,8 +165,8 @@ typedef struct Compiler {
   /* While the full parse runs, the effects each file the unit includes
      delivers at its include line, by the file's canonical path. */
   Map included_effects;
-  Map init_tokens, static_init_deps, fn_defs;
-  Array id_keys;
+  Map init_tokens, static_init_deps, fn_defs, binding_references;
+  Array id_keys, initializer_graph_variants;
   String init_fn, fini_fn;
   Pending pending, int prelude;
   /* `meta_comptime` names the `meta` functions that reach a `Meta`
@@ -545,8 +545,9 @@ void Compiler.record_inline_function(Compiler c, List declaration) {
 
 // `fn_defs` holds each non-static function the unit defines.
 static void Compiler._note_function_body(Compiler c, Type type, List binding) {
-  if (!type.is_function() || type.is_static()) return;
-  c.fn_defs[binding_identity_spelling(binding)] = 1;
+  if (!type.is_function()) return;
+  c.record_binding_definition(binding);
+  if (!type.is_static()) c.fn_defs[binding_identity_spelling(binding)] = 1;
 }
 
 /** Reports whether the current two tokens are `=>`. */
@@ -1248,6 +1249,7 @@ static void Compiler._reset_parse(Compiler c, Map globs, int generated) {
   c.inherit_library_comptime();
   c.init_tokens = {};
   c.static_init_deps = {};
+  c.initializer_graph_variants = [];
   c.origin = 0;
   c.braces.clear();
   c.arms = NULL;
@@ -1784,9 +1786,9 @@ static void Compiler._record_static_object(
              (expr (!set ?initializer_type (*)) ?value)): {
         if (!c.module_owner && declared_var &&
             !c._initializable_type(initializer_type)) continue;
-        Map references = {}, Array ordered = [];
-        _collect_references(value, references, ordered);
-        c.static_init_deps[binding] = ordered.list_free();
+        List dependencies = c.initializer_references(value);
+        c.static_init_deps[binding] = dependencies;
+        c.initializer_graph_variants.push(%($binding $dependencies ${c.arms}));
       }
 }
 
@@ -1794,6 +1796,7 @@ static void Compiler._record_static_object(
 void Compiler.record_module_initializer(
   Compiler c, Type type, List bind) {
   if (!c.module_owner || type.is_static()) return;
+  c.record_binding_definition(bind.cadr());
   String name = binding_identity_spelling(bind.cadr());
   String path = home_portable_path(c.canonical_path(c.filename));
   c.sym.set(
@@ -1834,6 +1837,68 @@ List Compiler.module_initializer_rows(Compiler c) {
   return rows.list_free();
 }
 
+/** Exports initializer dependencies including file-private intermediary objects.
+    Opaque identities distinguish files without adding symbol-table access.
+    Existing emission rows remain separate from this complete cycle graph.
+*/
+List Compiler.module_initializer_graph(Compiler c) {
+  Array rows = [];
+  foreach (Var (binding, dependencies), c.static_init_deps) {
+    Array targets = [];
+    foreach (List dependency, dependencies.list())
+      targets.push(c._initializer_graph_binding(dependency));
+    rows.push(%(${c._initializer_graph_binding(binding)} ${targets.list_free()}));
+  }
+  return rows.list_free();
+}
+
+/** Retains distinct source-arm initializer prerequisites for native selection.
+    Rows contain `(opaque-binding dependencies arms)`. A single source variant
+    uses the transformed dependency row; alternate variants retain their own
+    collected references. Native selection must precede combined cycle checks.
+*/
+List Compiler.module_initializer_variants(Compiler c) {
+  Map variants = {}, seen = {};
+  foreach (List row, c.initializer_graph_variants) {
+    List binding = row.car();
+    variants[binding] = (int) variants.getdefault(binding, 0) + 1;
+  }
+  Array rows = [];
+  foreach (List row, c.initializer_graph_variants) {
+    (List binding, List dependencies, List arms) = row;
+    if ((int) variants[binding] == 1)
+      dependencies = c.static_init_deps[binding];
+    rows.push(c._initializer_variant(binding, dependencies, arms));
+    seen[binding] = 1;
+  }
+  foreach (Var (binding, dependencies), c.static_init_deps)
+    if (!(binding in seen)) rows.push(c._initializer_variant(
+      binding, dependencies, c._fact(%(arms $binding))));
+  return rows.list_free();
+}
+
+static List Compiler._initializer_variant(
+  Compiler c, List binding, List dependencies, List arms) {
+  Array targets = [];
+  foreach (List dependency, dependencies)
+    targets.push(c._initializer_graph_binding(dependency));
+  return %(${c._initializer_graph_binding(binding)} ${targets.list_free()} $arms);
+}
+
+static List Compiler._initializer_graph_binding(Compiler c, List binding) {
+  String name = c.emitted_binding_name(binding);
+  List key = c._fact(%(namespace $binding));
+  Map statics = c.sym.file_statics();
+  if ((key && key in statics) || %($name) in statics) {
+    String provider = c.binding_provider(binding, 1);
+    if (!provider) provider = c.binding_provider(binding, 0);
+    if (!provider) provider = c.canonical_path(c.filename);
+    String file = c.module_tree.identity(provider);
+    name = %"_x2c_file_init_${filename_hash(file)}__$name";
+  }
+  return binding_identity_new(0, name);
+}
+
 /** Rebinds other module units' parsed prerequisites into this unit's table. */
 void Compiler.merge_module_initializers(Compiler c, List rows) {
   foreach (List row, rows) {
@@ -1862,6 +1927,17 @@ static int Compiler._initializable_type(Compiler c, Type type) =>
   c.sym.is_string_type(type) || c.sym.is_named_value_type(type, "List") ||
   c.sym.is_array_type(type) || c.sym.is_map_type(type) ||
   c.sym.is_named_value_type(type, "Func");
+
+/** Returns runtime object references from the ordinary typed initializer. */
+List Compiler.initializer_references(Compiler c, Var value) {
+  Map references = {}, Array ordered = [];
+  _collect_references(value, references, ordered);
+  return ordered.list_free();
+}
+
+/** Names an initializer graph vertex without exposing its source declaration. */
+String Compiler.initializer_identity(Compiler c, List binding) =>
+  binding_identity_spelling(c._initializer_graph_binding(binding));
 
 static void _collect_references(Var value, Map references, Array ordered) {
   if (value is not <list> || value.is_nil()) return;
@@ -2211,10 +2287,79 @@ List Compiler.anchor_origin(Compiler c, List node, Token token) {
   return %(at $occurrence $node);
 }
 
+/** Retains the actual file scope supplying a declared binding.
+    Constructed declarations use the ordinary expansion-site binding owner.
+    Local declarations do not replace another scope's provider facts.
+*/
+void Compiler.record_binding_declaration(Compiler c, List binding) {
+  if (!c.filename || c.macro_holes || !c.sym.at_file_scope()) return;
+  List key = c._fact(%(namespace $binding));
+  if (!key) return;
+  List provider = %(provider ${home_portable_path(c.canonical_path(c.filename))});
+  c.sym.set(%("declaration-file" $key), provider);
+  c.set_fact(%(provider $binding), provider);
+}
+
+/** Records an implementation at the ordinary definition-finishing boundary. */
+void Compiler.record_binding_definition(Compiler c, List binding) {
+  if (!c.filename || c.macro_holes || !c.sym.at_file_scope()) return;
+  List key = c._fact(%(namespace $binding));
+  if (!key) return;
+  List provider = %(provider ${home_portable_path(c.canonical_path(c.filename))});
+  c.sym.set(%("definition-file" $key), provider);
+  c.set_fact(%(definition-provider $binding), provider);
+}
+
+/** Returns a binding's declaration or defining implementation provider.
+    A prototype alone never supplies an executable definition provider.
+*/
+String Compiler.binding_provider(Compiler c, List binding, int definition) {
+  if (!(%(file-binding $binding) in c.semantic_binding_facts())) return NULL;
+  List provider = c._fact(definition
+    ? %(definition-provider $binding) : %(provider $binding));
+  if (!provider) {
+    List key = c._fact(%(namespace $binding));
+    if (key) provider = c.sym.get_exact(definition
+      ? %("definition-file" $key) : %("declaration-file" $key));
+    if (!provider && definition) {
+      String spelling = binding_identity_spelling(binding);
+      if (spelling) provider = c.sym.get_exact(%("definition-file" ($spelling)));
+    }
+  }
+  match (provider) case %(provider ?path):
+    return c.canonical_path(home_absolute_path(path));
+  return NULL;
+}
+
+/** Records resolved file dependencies during ordinary body binding.
+    This graph does not schedule ordered producers or grant name access.
+*/
+void Compiler.record_binding_reference(Compiler c, List binding) {
+  if (c.shallow || c.macro_holes || !c.filename) return;
+  String provider = c.binding_provider(binding, 1);
+  if (!provider) provider = c.binding_provider(binding, 0);
+  if (!provider) return;
+  String consumer = c.canonical_path(c.filename);
+  if (consumer != provider)
+    c.binding_references[%($consumer $provider)] = 1;
+}
+
+/** Exports resolved provider edges as portable immutable source names. */
+List Compiler.binding_reference_rows(Compiler c) {
+  Array rows = [];
+  foreach (List edge, c.binding_references.keys()) {
+    (String consumer, String provider) = edge;
+    rows.push(%(${home_portable_path(consumer)} ${home_portable_path(provider)}));
+  }
+  return rows.list_free();
+}
+
 /** Records a physical declaration using the binding's actual scope and key. */
 void Compiler.record_source_declaration(
   Compiler c, List binding, Token first, Token after) {
-  if (!c.source_facts || c.macro_holes) return;
+  if (c.macro_holes) return;
+  c.record_binding_declaration(binding);
+  if (!c.source_facts) return;
   Var value;
   if (!c.semantic_binding_facts().try_get(%(src-key $binding), value)) return;
   List source_key = value, range = c._source_range(first, after);
@@ -2907,7 +3052,8 @@ static Compiler _new(Compiler owner) {
     owner && owner.diagnostics.printer ? c : NULL,
     owner ? owner.diagnostics.limit : 1);
   $set_fields(
-    c, [], braces, line_starts, import_stack, meta_group, placements);
+    c, [], braces, line_starts, import_stack, meta_group, placements,
+    initializer_graph_variants);
   c.ancestors = Block.new(sizeof(Ancestor));
   c.origins = owner ? owner.origins : [];
   c.root_dir = x2c_get_root();
@@ -2918,7 +3064,7 @@ static void Compiler._init_tables(Compiler c) {
   c.id_keys = [];
   $set_fields(c, {}, key_ids, deps, macros, kw_aliases,
               object_macros, proto_cache, imports, init_tokens,
-              static_init_deps, fn_defs, meta_comptime, meta_regions,
+              static_init_deps, fn_defs, binding_references, meta_comptime, meta_regions,
               meta_hashes, meta_calls, native_meta, project_meta,
               evaluated_effects, meta_group_bound);
 }
@@ -2934,7 +3080,7 @@ static void Compiler._share_unit(Compiler c, Compiler owner) {
                source_facts, source_occurrences, source_definitions,
                source_declarations, source_texts, unit_script, include_dirs,
                meta_build, evaluated_effects, pending_inline_bodies,
-               collection_native_files);
+               collection_native_files, binding_references);
   $copy_fields(c, owner, module_tree, module_owner, module_project_root);
 }
 

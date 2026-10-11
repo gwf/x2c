@@ -427,6 +427,10 @@ static void FileWalk.record_declaration_providers(FileWalk &w, Map overlay) {
     List value = %(declaration-provider $path $declared);
     overlay[record] = value;
     w.globs[record] = value;
+    List namespace = %("declaration-file" $declared);
+    List supplying = %(provider $path);
+    overlay[namespace] = supplying;
+    w.globs[namespace] = supplying;
   }
 }
 
@@ -600,7 +604,8 @@ static void _needed_types(List syntax, Map rows, Map needed) {
   while (pending.len()) {
     Var item = pending.take_last();
     if (item is not <list>) continue;
-    match (item) case %(declaration-provider *): continue;
+    match (item) case %((!or declaration-provider definition-provider) *):
+      continue;
     match (item)
       case %((!or declare typedef function) ?base *)
         if (base.type().is_static()): continue;
@@ -1385,6 +1390,13 @@ static void FileWalk.publish(FileWalk &w) {
       metadata[%("collection-native")] = 1;
       w.c.collection_native_files[w.path] = 1;
     }
+    foreach (String name, w.definitions.keys()) {
+      List key = %($name), supplying = %(provider $provider);
+      metadata[%("definition-file" $key)] = supplying;
+      metadata[%("source-node" (definition-provider $provider 0 $key))] =
+        %(definition-provider $provider $key);
+      w.globs[%("definition-file" $key)] = supplying;
+    }
     // Keep the walk's proof before inline typing enriches entry dependencies.
     metadata[%("source-node" (provider-source $provider 0))] =
       %(source $hash ${_stored_dependencies(w.dependencies)});
@@ -1696,7 +1708,8 @@ static void Surface.merge(Surface &s, String path, Map rows) {
     if (key is not <list> || key.is_nil()) continue;
     if (!s.c.module_row_accessible(key, rows)) continue;
     String spelling = _package_key_spelling(key);
-    if (_package_protocol_row(key, value)) s.take(rows, key, value);
+    if (_package_protocol_row(key, value) || _provider_row(key))
+      s.take(rows, key, value);
     else if (spelling && (keeps || spelling.startswith(prefix)))
       s.take(rows, key, value);
     else if (spelling && foreign) s.reject(path, spelling);
@@ -1763,6 +1776,12 @@ static String _package_key_spelling(List key) {
        ? spelling_value : NULL;
 }
 
+static int _provider_row(List key) {
+  match (key)
+    case %((!or "declaration-file" "definition-file") ?): return 1;
+  return 0;
+}
+
 /* Protocol declarations and adoptions are keyed by source location instead
    of by a spelling, and a package's rows already name its own prefixed
    types, so they cross with the rest of its surface. */
@@ -1772,7 +1791,7 @@ static int _package_protocol_row(List key, Var value) {
   return row && row.car() in
     %(protocol adopt meta-protocol declaration-source native-meta
       compile-time project-meta meta-hashes interface-types native-object
-      package-import declaration-provider);
+      package-import declaration-provider definition-provider provider);
 }
 
 // import replay

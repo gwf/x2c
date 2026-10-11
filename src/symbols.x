@@ -359,8 +359,26 @@ static List Sym._scope_binding(Sym s, SymScope &scope, List key) {
     if (scope.symbols.try_get(%(self $spelling), relative))
       s.put(s.binding_facts, self_key, relative);
   }
+  s.put(s.binding_facts, %(namespace $binding), key);
+  s._binding_provider(scope, key, binding);
   if (s.c.source_facts) s._note_source_key(scope, key, binding);
   return binding;
+}
+
+/* The supplying symbol scope selects provenance just as it selects the
+   declaration. A local shadow has no inherited file-provider metadata. */
+static void Sym._binding_provider(
+  Sym s, SymScope &scope, List key, List binding) {
+  Var provider;
+  for (int i = 0; i < s.base_scopes; i++)
+    if (s._scope_at(i) == &scope) {
+      s.put(s.binding_facts, %(file-binding $binding), 1);
+      break;
+    }
+  if (scope.symbols.try_get(%("declaration-file" $key), provider))
+    s.put(s.binding_facts, %(provider $binding), provider);
+  if (scope.symbols.try_get(%("definition-file" $key), provider))
+    s.put(s.binding_facts, %(definition-provider $binding), provider);
 }
 
 /* Source facts find a binding's declaration through the map and key that
@@ -516,7 +534,9 @@ static List Sym._lookup_from(
     SymScope *scope = s._scope_at(i);
     if (scope.symbols.try_get(key, found)) {
       if (type) type = found;
-      return s._scope_binding(*scope, key);
+      List binding = s._scope_binding(*scope, key);
+      s.c.record_binding_reference(binding);
+      return binding;
     }
     if (scope.bindings.try_get(key, found)) {
       if (type) type = NULL;
@@ -734,6 +754,8 @@ void Compiler.record_declaration_visibility(Compiler c, List declaration) {
     case %(seq *rows):
       foreach (List row, rows) c.record_declaration_visibility(row);
     case %(function ?type (bind ?identity *) *): {
+      c.record_binding_declaration(identity);
+      c.record_binding_definition(identity);
       if (!private && !type.type().is_static()) return;
       String name = binding_identity_spelling(identity);
       if (name) c.sym.mark_static(%($name));
@@ -742,6 +764,15 @@ void Compiler.record_declaration_visibility(Compiler c, List declaration) {
       (!set ?kind (!or typedef declare)) ?type (bindings *rows)
     ): {
       int mark = private || type.type().is_static();
+      foreach (List row, rows) {
+        match (row) case %(op = ?declaration ?): row = declaration;
+        match (row) case %(bind ?binding *): {
+          c.record_binding_declaration(binding);
+          Type declared = %(declare $type (bindings $row)).type_from_ast();
+          if (declared && !declared.is_function() && !declared.is_extern())
+            c.record_binding_definition(binding);
+        }
+      }
       if (mark) {
         Type base = type.type().base_type();
         match (base)

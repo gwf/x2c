@@ -46,7 +46,7 @@ static macro Stmt $report.cache.init_cycle(
    `arms` holds the conditional arms around the declaration being rewritten;
    `state` maps a visiting binding to `<visiting>`, then to its area. */
 static typedef struct StaticQueue {
-  Compiler c, Array initializers, Map pending, state;
+  Compiler c, Array initializers, Map pending, state, dependencies;
   List arms, Symbol deferred_kind;
 } StaticQueue;
 
@@ -64,7 +64,9 @@ static typedef struct StaticQueue {
 List Compiler.setup_cache_init(
   Compiler c, List header, List source, String prefix,
   String guard_name, String initializer_name) {
-  StaticQueue statics = {c, [], {}, {}};
+  StaticQueue statics = {
+    .c = c, .initializers = [], .pending = {}, .state = {},
+    .dependencies = c.static_init_deps};
   header = c._rewrite_statics(header, statics);
   Array header_ids = c._cache_ids(header);
   /* A deferred header initializer is now in the source's initializer,
@@ -180,6 +182,12 @@ static List Compiler._rewrite_statics(Compiler c, List code, StaticQueue &q) {
     output.push(item);
     for (int i = first; i < q.initializers.len(); i++) {
       List initializer = q.initializers[i];
+      if (c.module_owner)
+        foreach (List dependency, initializer[4]) {
+          String source = c.initializer_identity(initializer.car());
+          String target = c.initializer_identity(dependency);
+          output.push(%(preproc ${%"#pragma x2c_init_edge $source $target"}));
+        }
       List function = _initializer_function(
         c, %(static void), initializer.caddr(), %(${initializer.cadr()}));
       output.push(%(sourceinit $function));
@@ -235,7 +243,7 @@ static List Compiler._defer_binding(
           case %(composite (commas *items)): {
             List target = $!($declared){ $name };
             List assign = c._array_block(target, resolved, items);
-            List binding = q.record(name, mods, assign);
+            List binding = q.record(name, mods, assign, %(expr $type $value));
             List zero = c.zero_initializer(value);
             return %(op = $binding (expr $type $zero));
           }
@@ -243,7 +251,7 @@ static List Compiler._defer_binding(
       }
       List stored = _initializer_rhs(decltype, name, mods, type, value);
       List assign = _assignment(name, type, stored);
-      return q.record(name, mods, assign);
+      return q.record(name, mods, assign, %(expr $type $value));
     }
   }
   return bound;
@@ -252,9 +260,10 @@ static List Compiler._defer_binding(
 /* Strip one initialized binding and record the assignment that replaces it
    with the helper that runs it. */
 static List StaticQueue.record(
-  StaticQueue &q, List name, List mods, List assign) {
+  StaticQueue &q, List name, List mods, List assign, List expression) {
   List helper = q.c.sym.introduce(q.c.fresh_name("static_initialize"));
-  List initializer = %($name $assign $helper ${q.arms});
+  List dependencies = q.c.initializer_references(expression);
+  List initializer = %($name $assign $helper ${q.arms} $dependencies);
   q.initializers.push(initializer);
   q.pending.setdefault(name, []).array().push(initializer);
   return %(bind $name $mods);
@@ -599,6 +608,22 @@ static int Compiler._reaches_kind(Compiler c, List code, Symbol kind) {
   return found;
 }
 
+/** Checks complete module initializer prerequisites using the ordinary queue.
+    Rows contain opaque binding identities, not names granted lookup access.
+    Empty definition lists ensure validation emits no initializer calls.
+*/
+void Compiler.check_module_initializer_graph(Compiler c, List rows) {
+  StaticQueue queue = {
+    .c = c, .initializers = [], .pending = {}, .state = {}, .dependencies = {}};
+  foreach (List row, rows) {
+    (List binding, List dependencies) = row;
+    queue.initializers.push(%($binding));
+    queue.pending[binding] = [];
+    queue.dependencies[binding] = dependencies;
+  }
+  queue.queue(0);
+}
+
 /* Queue a stable dependency walk. Dependencies precede their consumers, and
    independent roots retain source order. A dependency queued in `<finish>`
    moves every consuming initializer there as well. */
@@ -615,9 +640,9 @@ static Symbol StaticQueue.visit(StaticQueue &q, List binding) {
   q.state[binding] = <visiting>;
   Array definitions = q.pending[binding];
   Symbol area = q.deferred(definitions) ? <finish> : <statics>;
-  List dependencies = q.c.static_init_deps.getdefault(binding, %());
+  List dependencies = q.dependencies.getdefault(binding, %());
   foreach (List dependency, dependencies)
-    if ((dependency in q.pending || dependency in q.c.static_init_deps) &&
+    if ((dependency in q.pending || dependency in q.dependencies) &&
         q.visit(dependency) == <finish>)
       area = <finish>;
   q.add_calls(definitions, area);
