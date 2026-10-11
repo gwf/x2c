@@ -327,7 +327,7 @@ List Compiler.native_prefix_functions(Compiler c) {
 static List Compiler._native_prerequisites(Compiler c) {
   Array rows = [];
   Map seen = {};
-  foreach (List unit, c._units()) {
+  foreach (Var unit, c._units()) {
     List node;
     $ast.walk(unit, node) {
       match (node) case $source_identifier_content(
