@@ -25,7 +25,7 @@ typedef struct Tokenizer{
 
 Tokenizer Tokenizer_new(char * argument_0, Symbol argument_1);
 
-Tokenizer Tokenizer_alloc();
+Tokenizer Tokenizer_alloc(void);
 
 void Tokenizer_free(Tokenizer value);
 

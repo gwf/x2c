@@ -62,7 +62,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_register_tagged_descriptor(222658595144, String_new("DisjointSet"), _x2c__x2c_protocol_methods_0);
 }
 
-DisjointSet DisjointSet_alloc();
+DisjointSet DisjointSet_alloc(void);
 
 void DisjointSet_init(DisjointSet set, int n);
 
@@ -74,7 +74,7 @@ DisjointSet DisjointSet_new(int argument_0){
 
 void * Scope_calloc(size_t, size_t);
 
-DisjointSet DisjointSet_alloc(){
+DisjointSet DisjointSet_alloc(void){
   DisjointSet _x2c_macro_value_0 = Scope_calloc(1, sizeof(* _x2c_macro_value_0));
   return _x2c_macro_value_0;
 }

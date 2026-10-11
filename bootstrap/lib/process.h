@@ -24,7 +24,7 @@ typedef struct Job{
 }
 * Job;
 
-Job Job_alloc();
+Job Job_alloc(void);
 
 void Job_free(Job value);
 

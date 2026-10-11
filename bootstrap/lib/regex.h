@@ -17,7 +17,7 @@ typedef struct Regex{
 }
 * Regex;
 
-Regex Regex_alloc();
+Regex Regex_alloc(void);
 
 void Regex_free(Regex value);
 

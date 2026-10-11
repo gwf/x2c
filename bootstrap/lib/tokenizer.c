@@ -309,7 +309,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _33 = String_new("catch");
 }
 
-Tokenizer Tokenizer_alloc();
+Tokenizer Tokenizer_alloc(void);
 
 void Tokenizer_init(Tokenizer tokenizer, char * text, Symbol mode);
 
@@ -321,7 +321,7 @@ Tokenizer Tokenizer_new(char * argument_0, Symbol argument_1){
 
 void * Scope_calloc(size_t, size_t);
 
-Tokenizer Tokenizer_alloc(){
+Tokenizer Tokenizer_alloc(void){
   Tokenizer _x2c_macro_value_0 = Scope_calloc(1, sizeof(* _x2c_macro_value_0));
   return _x2c_macro_value_0;
 }

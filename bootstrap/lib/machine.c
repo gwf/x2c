@@ -277,7 +277,7 @@ MachineProgram MachineProgram_new(int field_length, int field_const_count, int f
   return Scope_memdup(& value, sizeof(value));
 }
 
-MachineProgram MachineProgram_alloc(){
+MachineProgram MachineProgram_alloc(void){
   MachineProgram _x2c_macro_value_0 = Scope_calloc(1, sizeof(* _x2c_macro_value_0));
   return _x2c_macro_value_0;
 }

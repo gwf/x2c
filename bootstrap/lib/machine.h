@@ -84,7 +84,7 @@ typedef struct MachineProgram{
 
 MachineProgram MachineProgram_new(int field_length, int field_const_count, int field_binder_count, int field_root);
 
-MachineProgram MachineProgram_alloc();
+MachineProgram MachineProgram_alloc(void);
 
 void MachineProgram_free(MachineProgram value);
 

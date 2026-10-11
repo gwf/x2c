@@ -13,7 +13,7 @@ typedef struct DisjointSet{
 
 DisjointSet DisjointSet_new(int argument_0);
 
-DisjointSet DisjointSet_alloc();
+DisjointSet DisjointSet_alloc(void);
 
 void DisjointSet_free(DisjointSet value);
 

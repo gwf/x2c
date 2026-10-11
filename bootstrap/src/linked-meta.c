@@ -12683,7 +12683,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_23(void){
   _11804 = cons(_503, _11803);
   _11805 = String_new("src/builtins.x");
   _11806 = String_var(_11805);
-  _11807 = String_new("25293c5c");
+  _11807 = String_new("a494e630");
   _11808 = String_var(_11807);
   _11809 = String_new("cwd:./lisp.x");
   _11810 = String_var(_11809);
@@ -12703,7 +12703,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_23(void){
   _11824 = List_var(_11823);
   _11825 = String_new("src/macros.x");
   _11826 = String_var(_11825);
-  _11827 = String_new("029b0eaa");
+  _11827 = String_new("e6fbec2a");
   _11828 = String_var(_11827);
   _11829 = cons(_11828, NULL);
   _11830 = cons(_11826, _11829);

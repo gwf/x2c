@@ -214,7 +214,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
 
 void * Scope_calloc(size_t, size_t);
 
-Job Job_alloc(){
+Job Job_alloc(void){
   Job _x2c_macro_value_0 = Scope_calloc(1, sizeof(* _x2c_macro_value_0));
   return _x2c_macro_value_0;
 }

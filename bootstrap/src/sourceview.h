@@ -12,9 +12,9 @@ typedef struct SourceView{
 }
 * SourceView;
 
-SourceView SourceView_new();
+SourceView SourceView_new(void);
 
-SourceView SourceView_alloc();
+SourceView SourceView_alloc(void);
 
 void SourceView_free(SourceView value);
 

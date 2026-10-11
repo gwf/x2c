@@ -69,17 +69,17 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_register_tagged_descriptor(261698358342, String_new("SourceView"), _x2c__x2c_protocol_methods_0);
 }
 
-SourceView SourceView_alloc();
+SourceView SourceView_alloc(void);
 
 void SourceView_init(SourceView sources);
 
-SourceView SourceView_new(){
+SourceView SourceView_new(void){
   SourceView value = SourceView_alloc();
   SourceView_init(value);
   return value;
 }
 
-SourceView SourceView_alloc(){
+SourceView SourceView_alloc(void){
   SourceView _x2c_macro_value_0 = Scope_calloc(1, sizeof(* _x2c_macro_value_0));
   return _x2c_macro_value_0;
 }
