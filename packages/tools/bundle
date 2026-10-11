@@ -103,6 +103,8 @@ Path generated_root = package.join("builds");
 foreach (String pattern, %("**/*.c" "**/*.h" "**/*.xi" "**/*.xnm" "*.module"))
   foreach (Path generated, Path.glob(generated_root.join(pattern))) {
     String relative = generated.str()[generated_root.len() + 1:];
+    if (relative.startswith("cc/") || relative.startswith("module/") ||
+        relative.startswith("native/")) continue;
     copy(generated, stage.join("builds").join(relative));
   }
 String archive = %"lib$name.a";
