@@ -286,7 +286,7 @@ def final_cases():
 def generated_snapshot(output):
     return {path.relative_to(output).as_posix(): path.read_bytes()
             for path in output.rglob("*")
-            if path.is_file() and path.suffix in {".c", ".h", ".xi"}}
+            if path.is_file() and path.suffix in {".c", ".h", ".xi", ".xnm"}}
 
 
 def interface_replay(compiler, directory, inputs, fresh):
@@ -976,6 +976,58 @@ def compile_time_visibility_cases():
             "main.x": consumer("box.x", "answer() == 42"),
         }, {"rejection_phase": phase}, diagnostic
 
+def specification_gap_cases():
+    yield "module_modifier_outside_membership_rejected", {
+        "main.x": 'module int helper(void) => 42;\nint main(void) => helper() == 42 ? 0 : 1;\n',
+    }, {"rejection_phase": "any"}, r"module|enrolled|member"
+    yield "duplicate_immediate_owner_rejected", {
+        "box.x": 'module {"box/value.x"}\n',
+        "box.xp": 'module {"box/value.x"}\n',
+        "box/value.x": 'int answer(void) => 42;\n',
+        "main.x": consumer("box.x", "answer() == 42"),
+    }, {"inputs": ["box/value.x", "main.x"], "rejection_phase": "any"}, r"owner|ambiguous|belongs|module"
+    yield "nested_child_public_collision_rejected", {
+        "box.x": 'module {"box/left.x", "box/right.x"}\n',
+        "box/left.x": 'module {"left/value.x"}\n',
+        "box/right.x": 'module {"right/value.x"}\n',
+        "box/left/value.x": 'int answer(void) => 41;\n',
+        "box/right/value.x": 'int answer(void) => 42;\n',
+        "main.x": consumer("box.x", "answer() == 42"),
+    }, {"inputs": ["box.x", "main.x"], "rejection_phase": "any"}, r"answer|duplicate|multiple|collision"
+    yield "entry_static_macro_not_inherited", {
+        "box.x": 'static macro Expression $entry_hidden() => 42;\nmodule {"box/value.x"}\n',
+        "box/value.x": 'int answer(void) => $entry_hidden();\n',
+        "main.x": consumer("box.x", "answer() == 42"),
+    }, {"inputs": ["box.x", "main.x"], "rejection_phase": "any"}, r"entry_hidden|macro"
+    yield "external_public_contributions_follow_member_order", {
+        "box.x": 'module {"box/first.x", "box/second.x"}\n',
+        "box/first.x": 'macro Expression $member_order() => 41;\n',
+        "box/second.x": 'macro Expression $member_order() => 42;\n',
+        "main.x": consumer("box.x", "$member_order() == 42"),
+    }, {"inputs": ["box.x", "main.x"]}, None
+    package = {
+        "packages/demo/src/demo.x": 'module int hidden(void) => 42;\nmodule {"demo/child.x"}\n',
+        "packages/demo/src/demo/child.x": 'module {"child/value.x"}\n',
+        "packages/demo/src/demo/child/value.x": 'int answer(void) => hidden();\n',
+        "main.x": 'import "demo" as d;\nint main(void) => d.answer() == 42 ? 0 : 1;\n',
+    }
+    package_options = {"package_dirs": ["packages"], "package_driver": True}
+    yield "package_root_private_reaches_descendants", package, package_options, None
+    yield "package_private_import_rejected", {
+        **package,
+        "main.x": 'import "demo" as d with hidden;\nint main(void) => hidden() == 42 ? 0 : 1;\n',
+    }, {**package_options, "rejection_phase": "any"}, r"hidden|private|export"
+    yield "legacy_package_without_module_block", {
+        "packages/demo/src/demo.x": 'int answer(void) => 42;\n',
+        "main.x": 'import "demo" as d with answer;\nint main(void) => d.answer() == 42 && answer() == 42 ? 0 : 1;\n',
+    }, package_options, None
+    yield "package_public_c_name_unchanged", {
+        **package,
+        "main.x": 'import "demo" as d;\nextern int check_public_c_name(void);\nint main(void) => d.answer() == 42 && check_public_c_name() ? 0 : 1;\n',
+        "consumer.c": 'extern int demo__answer(void);\nint check_public_c_name(void) { return demo__answer() == 42; }\n',
+    }, {**package_options, "inputs": ["main.x", "consumer.c"]}, None
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("compiler", type=Path)
@@ -988,6 +1040,7 @@ def main():
     base.mkdir(parents=True, exist_ok=True)
     compiler_start = hashlib.sha256(compiler.read_bytes()).hexdigest()
     selected = list(cases()) + list(extended_cases()) + list(final_cases()) + list(protocol_cases()) + list(ordering_cases()) + list(privacy_cases()) + list(initialization_cases()) + list(staged_initialization_cases()) + list(acceptance_cases()) + list(forward_static_cases()) + list(local_shadow_cases()) + list(multihop_initialization_cases()) + list(compile_time_visibility_cases())
+    selected += list(specification_gap_cases())
     names = {case[0] for case in selected}
     unknown = set(args.case) - names
     if unknown:
