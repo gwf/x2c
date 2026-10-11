@@ -476,8 +476,11 @@ static void _debug_tokens(Token start, Token end) {
     which can recover at later forms. Included providers reject them here.
 */
 void Compiler.collect_compile_time_definition(Compiler c, int keyword) {
-  if (!keyword && c.signature_only == SIGNATURE_DECLARATIONS) {
-    c.skip_signature_macro_definition();
+  if (c.signature_only == SIGNATURE_DECLARATIONS) {
+    if (keyword) {
+      c._skip_shallow_expression(0);
+      c.expect(<;>);
+    } else c.skip_signature_macro_definition();
     return;
   }
   if (c.interface_provider) {
