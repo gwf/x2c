@@ -102,7 +102,7 @@ typedef struct Compiler {
   String module_owner;
   String module_project_root;
   int source_module;
-  Map collected_statics;
+  Map collected_statics, module_layout_plan;
   /* Package-mode unit: NULL outside. package_dirs holds import search roots;
      package_source_dirs holds the explicit roots that select source ownership.
      package_roots holds each collected package directory, package_aliases each

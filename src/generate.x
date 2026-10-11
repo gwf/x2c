@@ -21,6 +21,7 @@
 #include "format.x"
 #include "emit.x"
 #include "utils.x"
+#include "module-layout.x"
 
 // diagnostics
 
@@ -142,8 +143,14 @@ static List Compiler._header_and_source(
   foreach (String owner, c.module_ancestors().reverse())
     if (owner != c.canonical_path(c.filename))
       p.header.push(%(preproc "#include \"${c.module_support_header(owner)}\""));
-  foreach (Ast node, ast) p.add(node);
-  return %(${p.finish()} ${c._source_projection(ast, inline_bodies)});
+  foreach (Ast node, ast) p.add(c.module_layout_node(node));
+  List header = p.finish(), source = c._source_projection(ast, inline_bodies);
+  String prefix = c.module_layout_prefix();
+  if (prefix) {
+    header = cons(%(comment $prefix), header);
+    source = cons(%(comment $prefix), source);
+  }
+  return %($header $source);
 }
 
 /* The unit consumes its declarations where they were written, independently
@@ -156,6 +163,7 @@ static List Compiler._source_projection(
     if (owner != c.canonical_path(c.filename))
       source.push(%(preproc "#include \"${c.module_support_header(owner)}\""));
   foreach (List node, ast) {
+    node = c.module_layout_node(node);
     match (node) {
       case %(module-members ?members): {
         foreach (String member, members)

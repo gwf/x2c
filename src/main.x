@@ -35,6 +35,7 @@
 #include "utils.x"
 #include "emit.x"
 #include "generate.x"
+#include "module-layout.x"
 #include "format.x"
 #include "protocol.x"
 
@@ -349,6 +350,10 @@ static List Translation.translate_modules(Translation &t) {
     else report_progress(<translate>, i, t.total, input);
     (void) _parse_unit(t.frontend, input, units[i]);
   }
+  Array providers = [];
+  for (int i = 0; i < count; i++)
+    providers.push(%(${units[i].compiler} ${units[i].ast}));
+  Map layout_plan = prepare_module_layouts(providers.list_free());
   Array prerequisites = [];
   for (int i = 0; i < count; i++)
     foreach (List row, units[i].compiler.module_initializer_rows())
@@ -356,9 +361,13 @@ static List Translation.translate_modules(Translation &t) {
   List rows = prerequisites.list_free();
   for (int i = count - 1; i >= 0; i--) {
     String input = modules[i];
+    units[i].compiler.module_layout_plan = layout_plan;
     units[i].compiler.merge_module_initializers(rows);
     _emit_unit(t.frontend, units[i], input, t.output_dir(input));
-    if (i) rows = units[i].context.export(rows);
+    if (i) {
+      rows = units[i].context.export(rows);
+      layout_plan = units[i].context.export(layout_plan);
+    }
     units[i].close();
     if (t.build) t.build.end_translation(input, 0);
     else report_progress(<translate>, count - i, t.total, input);
