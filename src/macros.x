@@ -4921,7 +4921,8 @@ List Compiler.bind_code_value(
 
 /* A named binder left as a carrier's code, identifier, or declarator
    after its effects were applied, or NULL. Binders elsewhere are data,
-   such as a lowered match pattern, and a bare `*` or `?` is syntax. */
+   such as a lowered match pattern, and a bare `*` or `?` is syntax. A
+   carrier the code holds is searched when it is taken. */
 static Var _carrier_binder(Var value) {
   if (value.is_binder()) return value.str().len() > 1 ? value : NULL;
   if (value is not <list>) return NULL;
@@ -4931,7 +4932,8 @@ static Var _carrier_binder(Var value) {
     case %(bind ?name *):
       if (name.is_binder() && name.str().len() > 1) return name;
     case $source_literal_content(%(*)): return NULL;
-    case %((!or "x2c.template" "x2c.quoted" macro-invoke macrodef) *):
+    case %((!or "x2c.template" "x2c.quoted" macro-invoke macrodef
+                code-value) *):
       return NULL;
   }
   foreach (Var child, value.list())
