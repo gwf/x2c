@@ -15,7 +15,7 @@ System utilities for environment discovery and workers.
 | [`build_module_stamp`](#build_module_stamp) | Returns the stamp a native module records: `x2c-module-stamp:` and the running compiler's identity. |
 | [`compiler_identity`](#compiler_identity) | Returns the active compiler's identity in 16 hexadecimal digits. |
 | [`cpp_include_dirs`](#cpp_include_dirs) | Returns the borrowed preprocessor `List` `<root>/lib`, then `<root>/src`. |
-| [`default_include_dirs`](#default_include_dirs) | Returns the borrowed default include `List` containing `<root>/include`. |
+| [`default_include_dirs`](#default_include_dirs) | Returns the borrowed default include `List`, `<root>/include/x2c`. |
 | [`driver_error`](#driver_error) | Prints `x2c: error: <message>` to stderr and exits with status 2. |
 | [`file_identity`](#file_identity) | Returns the identity a compiler executable at `path` has when it runs: the FNV-1a hash of its bytes, or NULL when `path` is NULL or unreadable. |
 | [`file_lock`](#file_lock) | Locks the file `p`, creating it, and returns a descriptor that holds the lock until it is closed or the process exits. |
@@ -81,7 +81,7 @@ Source: `src/utils.x:204`
 
 `List default_include_dirs(void)`
 
-Returns the borrowed default include `List` containing `<root>/include`.
+Returns the borrowed default include `List`, `<root>/include/x2c`.
 Returns NULL before environment setup.
 
 Source: `src/utils.x:198`

@@ -216,21 +216,23 @@ Source: `src/toolchain.x:222`
 `int Toolchain.preprocess( Toolchain t, const char *fname, List include_dirs, const char *imacros, String &output, String &errors, String &dependencies)`
 
 Runs the configured C preprocessor without a shell.
-System headers keep their include directives when the host supports
-that mode. `output`, `errors`, and `dependencies` are cleared before
-use. Source and include paths remain distinct argv elements, and stdout
-and stderr are captured separately. The temporary depfile is read into
-`dependencies` when possible and removed on returning paths, including a
-handled `<io-fail>` while reading it. A non-returning
-`<bad-arg>`, `<size-limit>`, or `<alloc-fail>` may transfer before removal.
-Returns the shell-style child status, 127 when the preprocessor cannot
-start, or -1 for invalid arguments or local setup failure. This operation
-does not consult `dry_run`.
+`include_dirs` precede the system directories, and the runtime header
+directory follows them, so a generated `string.h` never replaces the C
+library's. System headers keep their include directives when the host
+supports that mode. `output`, `errors`, and `dependencies` are cleared
+before use. Source and include paths remain distinct argv elements, and
+stdout and stderr are captured separately. The temporary depfile is read
+into `dependencies` when possible and removed on returning paths, including
+a handled `<io-fail>` while reading it. A non-returning `<bad-arg>`,
+`<size-limit>`, or `<alloc-fail>` may transfer before removal. Returns the
+shell-style child status, 127 when the preprocessor cannot start, or -1 for
+invalid arguments or local setup failure. This operation does not consult
+`dry_run`.
 
 **Raises:** `<io-fail>`, `<bad-arg>`, `<size-limit>`, or `<alloc-fail>` while
 constructing arguments or reading captured text.
 
-Source: `src/toolchain.x:346`
+Source: `src/toolchain.x:348`
 
 <a id="Toolchain.preprocess_action"></a>
 #### Toolchain.preprocess_action
@@ -255,7 +257,7 @@ without explicit options, as it reports them, plus the `lib` directory
 beside each reported `include` directory. A compiler that reports none
 contributes none.
 
-Source: `src/toolchain.x:403`
+Source: `src/toolchain.x:407`
 
 ## Public types
 
