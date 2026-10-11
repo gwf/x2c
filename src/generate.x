@@ -228,7 +228,7 @@ static String Compiler._projection_binding_namespace(
   if (!provider) provider = c.binding_provider(origin, 0);
   Var id;
   if (provider && c.module_layout_plan.try_get(
-      %(namespace ${home_portable_path(provider)} $key), id)) return id;
+    %(namespace ${home_portable_path(provider)} $key), id)) return id;
   return c.module_projection_namespace(key);
 }
 

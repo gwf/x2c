@@ -72,7 +72,6 @@ String native_projection_helper(void) {
     ? %"${home_dir()}/bootstrap/native-layout-project.py" : helper;
 }
 
-
 // command reports
 
 static macro Stmt $report.toolchain.tool_failed(Expr $phase, Expr $status) {

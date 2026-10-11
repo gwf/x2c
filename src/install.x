@@ -250,8 +250,9 @@ static void Install.run(Install &i) {
     _build_source(staged, name, i.spec);
     i.mark_source(staged, name);
   }
-  _run(%("python3" ${native_projection_helper()}
-         "--reconnect-package" $staged $staged), "package include placement");
+  _run(
+    %("python3" ${native_projection_helper()}
+      "--reconnect-package" $staged $staged), "package include placement");
   _publish(staged, i.packages, name);
   if (!i.request.quiet)
     $report.install.installed(i.packages, name);
