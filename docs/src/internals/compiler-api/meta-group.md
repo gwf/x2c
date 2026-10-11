@@ -21,12 +21,18 @@ A unit's meta group, emitted as C.
 | [`Compiler.meta_cc_identity`](#Compiler.meta_cc_identity) | Returns the identity of the C compiler at `cc`: its path and content hash. |
 | [`Compiler.meta_cc_run`](#Compiler.meta_cc_run) | Runs `arguments`, a C compiler command building the group C in `directory`, and returns NULL, or else its first error, which names `directory` when a group's C is the cause. |
 | [`Compiler.meta_reaches_compile_time`](#Compiler.meta_reaches_compile_time) | Answers whether a `meta` body reaches the compiler itself: it names a compile-time-only function or a compiler operation, or constructs a template. |
+| [`Compiler.native_prefix_definitions`](#Compiler.native_prefix_definitions) | Returns the names of function and object definitions in the native prefix. |
+| [`Compiler.native_prefix_functions`](#Compiler.native_prefix_functions) | The reached source bodies whose native storage this prefix publishes. |
+| [`Compiler.native_prefix_values`](#Compiler.native_prefix_values) | Ordinary provider objects share the same retained prefix storage. |
 | [`Compiler.refuse_meta_call`](#Compiler.refuse_meta_call) | Reports at `site` that the `meta` function `name` cannot run at compile time, and `why`. |
 | [`Compiler.refuse_record_meta_call`](#Compiler.refuse_record_meta_call) | Reports at `site` that the group function `name` cannot run at compile time when its result is a struct or union, which its type alone decides. |
 | [`Compiler.stage_meta_in_process`](#Compiler.stage_meta_in_process) | Enables in-process staging of `meta` groups for compiler sessions. |
 | [`Compiler.use_meta_build_directory`](#Compiler.use_meta_build_directory) | Directs each provider group into `directory`, using `owners` to name their headers by table, or stops that when `directory` is NULL. |
 | [`Compiler.use_meta_toolchain`](#Compiler.use_meta_toolchain) | Selects the C compiler `cc` that builds the `meta` code of the units this process translates, with the runtime headers this compiler was built with, found from its installed headers in `include_dir`. |
+| [`Compiler.use_native_meta_publications`](#Compiler.use_native_meta_publications) | Selects publication records while ordinary parsing emits a provider. |
 | [`Compiler.write_meta_build`](#Compiler.write_meta_build) | Writes the group of a unit the project meta build parsed into the build directory as `group-K.c` and `group-K.h`, K being its table, with the x2c sources it read in `group-K.deps`, or its failure in `group-K.failure`. |
+| [`Compiler.write_native_meta_header`](#Compiler.write_native_meta_header) | Publishes only the active provider's reached declarations for children. |
+| [`Compiler.write_native_meta_prefix`](#Compiler.write_native_meta_prefix) | Emits one additional provider prefix against previously published names. |
 
 ### `Compiler`
 
@@ -38,7 +44,7 @@ A unit's meta group, emitted as C.
 Binds the session's group function `name` when it is not bound yet, by
 staging the group, and reports at `site` a function that cannot run.
 
-Source: `src/meta-group.x:943`
+Source: `src/meta-group.x:1238`
 
 <a id="Compiler.finish_meta_functions"></a>
 #### Compiler.finish_meta_functions
@@ -49,7 +55,7 @@ Closes compile-time-only calls across later meta definitions.
 Retained group bodies hold the bound calls, including literal insertions.
 Select runtime definitions only after that relation is complete.
 
-Source: `src/meta-group.x:168`
+Source: `src/meta-group.x:171`
 
 <a id="Compiler.group_meta_function"></a>
 #### Compiler.group_meta_function
@@ -58,7 +64,7 @@ Source: `src/meta-group.x:168`
 
 Records the bodied `meta` function `fn` in the unit's group.
 
-Source: `src/meta-group.x:134`
+Source: `src/meta-group.x:137`
 
 <a id="Compiler.groups_meta"></a>
 #### Compiler.groups_meta
@@ -69,7 +75,7 @@ Answers whether a `meta` function or value belongs to the unit's group:
 a parse meets it outside a macro definition while the project meta build
 parses the unit or a session stages it.
 
-Source: `src/meta-group.x:129`
+Source: `src/meta-group.x:132`
 
 <a id="Compiler.meta_call_missing"></a>
 #### Compiler.meta_call_missing
@@ -79,7 +85,7 @@ Source: `src/meta-group.x:129`
 Returns why the group function `name` has no compile-time entry, from
 its type.
 
-Source: `src/meta-group.x:832`
+Source: `src/meta-group.x:1066`
 
 <a id="Compiler.meta_cc"></a>
 #### Compiler.meta_cc
@@ -89,7 +95,7 @@ Source: `src/meta-group.x:832`
 Returns the C compiler and the runtime header directory that build
 `meta` code, or NULL before `Compiler.use_meta_toolchain`.
 
-Source: `src/meta-group.x:72`
+Source: `src/meta-group.x:75`
 
 <a id="Compiler.meta_cc_identity"></a>
 #### Compiler.meta_cc_identity
@@ -99,7 +105,7 @@ Source: `src/meta-group.x:72`
 Returns the identity of the C compiler at `cc`: its path and content
 hash.
 
-Source: `src/meta-group.x:79`
+Source: `src/meta-group.x:82`
 
 <a id="Compiler.meta_cc_run"></a>
 #### Compiler.meta_cc_run
@@ -110,7 +116,7 @@ Runs `arguments`, a C compiler command building the group C in
 `directory`, and returns NULL, or else its first error, which names
 `directory` when a group's C is the cause.
 
-Source: `src/meta-group.x:88`
+Source: `src/meta-group.x:91`
 
 <a id="Compiler.meta_reaches_compile_time"></a>
 #### Compiler.meta_reaches_compile_time
@@ -121,17 +127,45 @@ Answers whether a `meta` body reaches the compiler itself: it names a
 compile-time-only function or a compiler operation, or constructs a
 template. Such a function has no runtime form.
 
-Source: `src/meta-group.x:147`
+Source: `src/meta-group.x:150`
+
+<a id="Compiler.native_prefix_definitions"></a>
+#### Compiler.native_prefix_definitions
+
+`List Compiler.native_prefix_definitions(Compiler c)`
+
+Returns the names of function and object definitions in the native prefix.
+Collected prototypes do not count as definitions.
+
+Source: `src/meta-group.x:363`
+
+<a id="Compiler.native_prefix_functions"></a>
+#### Compiler.native_prefix_functions
+
+`List Compiler.native_prefix_functions(Compiler c)`
+
+The reached source bodies whose native storage this prefix publishes.
+
+Source: `src/meta-group.x:319`
+
+<a id="Compiler.native_prefix_values"></a>
+#### Compiler.native_prefix_values
+
+`List Compiler.native_prefix_values(Compiler c)`
+
+Ordinary provider objects share the same retained prefix storage.
+
+Source: `src/meta-group.x:396`
 
 <a id="Compiler.refuse_meta_call"></a>
 #### Compiler.refuse_meta_call
 
-`void Compiler.refuse_meta_call( Compiler c, String name, Token site, String why)`
+`_Noreturn void Compiler.refuse_meta_call( Compiler c, String name, Token site, String why)`
 
 Reports at `site` that the `meta` function `name` cannot run at compile
 time, and `why`.
 
-Source: `src/meta-group.x:851`
+Source: `src/meta-group.x:1085`
 
 <a id="Compiler.refuse_record_meta_call"></a>
 #### Compiler.refuse_record_meta_call
@@ -142,7 +176,7 @@ Reports at `site` that the group function `name` cannot run at compile
 time when its result is a struct or union, which its type alone
 decides.
 
-Source: `src/meta-group.x:859`
+Source: `src/meta-group.x:1093`
 
 <a id="Compiler.stage_meta_in_process"></a>
 #### Compiler.stage_meta_in_process
@@ -151,7 +185,7 @@ Source: `src/meta-group.x:859`
 
 Enables in-process staging of `meta` groups for compiler sessions.
 
-Source: `src/meta-group.x:124`
+Source: `src/meta-group.x:127`
 
 <a id="Compiler.use_meta_build_directory"></a>
 #### Compiler.use_meta_build_directory
@@ -161,7 +195,7 @@ Source: `src/meta-group.x:124`
 Directs each provider group into `directory`, using `owners` to name
 their headers by table, or stops that when `directory` is NULL.
 
-Source: `src/meta-group.x:904`
+Source: `src/meta-group.x:1138`
 
 <a id="Compiler.use_meta_toolchain"></a>
 #### Compiler.use_meta_toolchain
@@ -172,7 +206,16 @@ Selects the C compiler `cc` that builds the `meta` code of the units
 this process translates, with the runtime headers this compiler was
 built with, found from its installed headers in `include_dir`.
 
-Source: `src/meta-group.x:50`
+Source: `src/meta-group.x:53`
+
+<a id="Compiler.use_native_meta_publications"></a>
+#### Compiler.use_native_meta_publications
+
+`Map Compiler.use_native_meta_publications(Map published)`
+
+Selects publication records while ordinary parsing emits a provider.
+
+Source: `src/meta-group.x:1225`
 
 <a id="Compiler.write_meta_build"></a>
 #### Compiler.write_meta_build
@@ -185,7 +228,25 @@ x2c sources it read in `group-K.deps`, or its failure in
 `group-K.failure`. Included native and type providers use the same
 group header and object even when they have no `meta` functions.
 
-Source: `src/meta-group.x:916`
+Source: `src/meta-group.x:1150`
+
+<a id="Compiler.write_native_meta_header"></a>
+#### Compiler.write_native_meta_header
+
+`void Compiler.write_native_meta_header(Compiler c, int sequence)`
+
+Publishes only the active provider's reached declarations for children.
+
+Source: `src/meta-group.x:1214`
+
+<a id="Compiler.write_native_meta_prefix"></a>
+#### Compiler.write_native_meta_prefix
+
+`void Compiler.write_native_meta_prefix(Compiler c, int sequence, Map published)`
+
+Emits one additional provider prefix against previously published names.
+
+Source: `src/meta-group.x:1207`
 
 ## Design notes
 

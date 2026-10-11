@@ -12,19 +12,33 @@ Explicit source membership and module ancestry.
 
 | Function | Summary |
 | --- | --- |
-| [`module_support_header`](#module_support_header) | Returns the generated support-header name for a module source. |
+| [`Compiler.generated_unit_hash`](#Compiler.generated_unit_hash) | Keeps module output guards independent of invocation path spelling. |
+| [`Compiler.module_support_header`](#Compiler.module_support_header) | Returns the generated support-header name for a module source. |
 | [`ModuleTree.ancestors`](#ModuleTree.ancestors) | Lists the owning entry followed by its parent entries, nearest first. |
 | [`ModuleTree.entry`](#ModuleTree.entry) | Reads an entry once. |
+| [`ModuleTree.identity`](#ModuleTree.identity) | Returns the relocatable identity of an enrolled source. |
 | [`ModuleTree.new`](#ModuleTree.new) | Creates module discovery state using the compiler's source view. |
 | [`ModuleTree.owner`](#ModuleTree.owner) | Returns the enclosing entry only for an explicitly enrolled member. |
 | [`ModuleTree.ownership_dependencies`](#ModuleTree.ownership_dependencies) | The ownership search facts of this file, independent of prior walks. |
-| [`ModuleTree.units`](#ModuleTree.units) | Expands source inputs into distinct enrolled units, retaining input order. |
+| [`ModuleTree.ownership_query`](#ModuleTree.ownership_query) | Records an ownership query independently of its resolved search paths. |
+| [`ModuleTree.prefix`](#ModuleTree.prefix) | Returns the native prefix using the same identity as support and init. |
+| [`ModuleTree.units`](#ModuleTree.units) | Expands source inputs into distinct enrolled units. |
 
-### Functions
+### `Compiler`
 
-#### module_support_header
+<a id="Compiler.generated_unit_hash"></a>
+#### Compiler.generated_unit_hash
 
-`String module_support_header(String path)`
+`String Compiler.generated_unit_hash(Compiler c)`
+
+Keeps module output guards independent of invocation path spelling.
+
+Source: `src/module-tree.x:40`
+
+<a id="Compiler.module_support_header"></a>
+#### Compiler.module_support_header
+
+`String Compiler.module_support_header(Compiler c, String path)`
 
 Returns the generated support-header name for a module source.
 
@@ -39,7 +53,7 @@ Source: `src/module-tree.x:36`
 
 Lists the owning entry followed by its parent entries, nearest first.
 
-Source: `src/module-tree.x:207`
+Source: `src/module-tree.x:291`
 
 <a id="ModuleTree.entry"></a>
 #### ModuleTree.entry
@@ -48,7 +62,17 @@ Source: `src/module-tree.x:207`
 
 Reads an entry once. Non-entry files also retain their absent result.
 
-Source: `src/module-tree.x:138`
+Source: `src/module-tree.x:202`
+
+<a id="ModuleTree.identity"></a>
+#### ModuleTree.identity
+
+`String ModuleTree.identity(ModuleTree m, String spelling)`
+
+Returns the relocatable identity of an enrolled source. Canonical paths
+still establish ownership. Identity collisions cannot share native names.
+
+Source: `src/module-tree.x:48`
 
 <a id="ModuleTree.new"></a>
 #### ModuleTree.new
@@ -67,7 +91,7 @@ Source: `src/module-tree.x:28`
 Returns the enclosing entry only for an explicitly enrolled member.
 An entry owns itself; its enrollment in a parent is recorded separately.
 
-Source: `src/module-tree.x:193`
+Source: `src/module-tree.x:273`
 
 <a id="ModuleTree.ownership_dependencies"></a>
 #### ModuleTree.ownership_dependencies
@@ -76,17 +100,36 @@ Source: `src/module-tree.x:193`
 
 The ownership search facts of this file, independent of prior walks.
 
-Source: `src/module-tree.x:154`
+Source: `src/module-tree.x:219`
+
+<a id="ModuleTree.ownership_query"></a>
+#### ModuleTree.ownership_query
+
+`List ModuleTree.ownership_query(ModuleTree tree, String path)`
+
+Records an ownership query independently of its resolved search paths.
+
+Source: `src/module-tree.x:242`
+
+<a id="ModuleTree.prefix"></a>
+#### ModuleTree.prefix
+
+`String ModuleTree.prefix(ModuleTree tree, String path)`
+
+Returns the native prefix using the same identity as support and init.
+
+Source: `src/module-tree.x:97`
 
 <a id="ModuleTree.units"></a>
 #### ModuleTree.units
 
 `List ModuleTree.units(ModuleTree tree, List inputs)`
 
-Expands source inputs into distinct enrolled units, retaining input
-order.
+Expands source inputs into distinct enrolled units. An enrolled tree
+starts at its outer entry and follows explicit member order, even when
+the invocation names an implementation member first.
 
-Source: `src/module-tree.x:221`
+Source: `src/module-tree.x:310`
 
 ## Public types
 

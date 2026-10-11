@@ -24,6 +24,7 @@ Declaration ownership and module lookup.
 | [`Compiler.module_row_accessible`](#Compiler.module_row_accessible) | Reports whether a collected declaration row is visible to this unit. |
 | [`Compiler.parse_module_members`](#Compiler.parse_module_members) | Parses module membership and installs enrolled members' compile-time effects. |
 | [`Compiler.record_module_declaration`](#Compiler.record_module_declaration) | Records declaration ownership and checks public signature visibility. |
+| [`Compiler.resolved_translation_dependencies`](#Compiler.resolved_translation_dependencies) | Resolves ownership queries into this request's actual prerequisites. |
 
 ### `Compiler`
 
@@ -34,7 +35,7 @@ Declaration ownership and module lookup.
 
 Assigns a private type its module spelling and records its ownership.
 
-Source: `src/module-access.x:57`
+Source: `src/module-access.x:74`
 
 <a id="Compiler.check_module_binding"></a>
 #### Compiler.check_module_binding
@@ -44,7 +45,7 @@ Source: `src/module-access.x:57`
 Rejects a reference to a module-private declaration outside its
 ancestors.
 
-Source: `src/module-access.x:69`
+Source: `src/module-access.x:86`
 
 <a id="Compiler.configure_module"></a>
 #### Compiler.configure_module
@@ -64,7 +65,7 @@ Source: `src/module-access.x:9`
 Reports whether the current unit can access declarations owned by
 `owner`.
 
-Source: `src/module-access.x:35`
+Source: `src/module-access.x:52`
 
 <a id="Compiler.module_ancestors"></a>
 #### Compiler.module_ancestors
@@ -74,7 +75,7 @@ Source: `src/module-access.x:35`
 Returns the current module followed by its enclosing modules, nearest
 first.
 
-Source: `src/module-access.x:18`
+Source: `src/module-access.x:35`
 
 <a id="Compiler.module_declared_key"></a>
 #### Compiler.module_declared_key
@@ -83,7 +84,7 @@ Source: `src/module-access.x:18`
 
 Qualifies a file-scope module declaration key with its owning prefix.
 
-Source: `src/module-access.x:82`
+Source: `src/module-access.x:99`
 
 <a id="Compiler.module_include_dirs"></a>
 #### Compiler.module_include_dirs
@@ -92,7 +93,7 @@ Source: `src/module-access.x:82`
 
 Returns enclosing module directories in nearest-first include order.
 
-Source: `src/module-access.x:23`
+Source: `src/module-access.x:40`
 
 <a id="Compiler.module_reference_key"></a>
 #### Compiler.module_reference_key
@@ -102,7 +103,7 @@ Source: `src/module-access.x:23`
 Preserves a complete exact key or resolves its module-private
 counterpart.
 
-Source: `src/module-access.x:125`
+Source: `src/module-access.x:142`
 
 <a id="Compiler.module_retry_key"></a>
 #### Compiler.module_retry_key
@@ -111,7 +112,7 @@ Source: `src/module-access.x:125`
 
 Finds a declared key in the current module or its ancestors.
 
-Source: `src/module-access.x:108`
+Source: `src/module-access.x:125`
 
 <a id="Compiler.module_row_accessible"></a>
 #### Compiler.module_row_accessible
@@ -120,7 +121,7 @@ Source: `src/module-access.x:108`
 
 Reports whether a collected declaration row is visible to this unit.
 
-Source: `src/module-access.x:198`
+Source: `src/module-access.x:218`
 
 <a id="Compiler.parse_module_members"></a>
 #### Compiler.parse_module_members
@@ -130,7 +131,7 @@ Source: `src/module-access.x:198`
 Parses module membership and installs enrolled members' compile-time
 effects.
 
-Source: `src/module-access.x:220`
+Source: `src/module-access.x:240`
 
 <a id="Compiler.record_module_declaration"></a>
 #### Compiler.record_module_declaration
@@ -139,4 +140,13 @@ Source: `src/module-access.x:220`
 
 Records declaration ownership and checks public signature visibility.
 
-Source: `src/module-access.x:133`
+Source: `src/module-access.x:150`
+
+<a id="Compiler.resolved_translation_dependencies"></a>
+#### Compiler.resolved_translation_dependencies
+
+`Map Compiler.resolved_translation_dependencies(Compiler c)`
+
+Resolves ownership queries into this request's actual prerequisites.
+
+Source: `src/module-access.x:17`

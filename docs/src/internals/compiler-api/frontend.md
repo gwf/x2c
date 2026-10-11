@@ -34,7 +34,7 @@ Loads process-owned collection support and the native modules `request`
 names before units, and selects those modules, in order, for its
 compile-time calls.
 
-Source: `src/frontend.x:526`
+Source: `src/frontend.x:531`
 
 <a id="Frontend.new"></a>
 #### Frontend.new
@@ -45,7 +45,7 @@ Borrows a configured request for sequential units. The request and this
 session must outlive its units. Initialize process support above any
 temporary command Context before creating a session inside that Context.
 
-Source: `src/frontend.x:537`
+Source: `src/frontend.x:542`
 
 <a id="Frontend.open"></a>
 #### Frontend.open
@@ -55,7 +55,7 @@ Source: `src/frontend.x:537`
 Runs the source stages. On either result, the caller must close the
 unit.
 
-Source: `src/frontend.x:91`
+Source: `src/frontend.x:94`
 
 <a id="Frontend.open_reporting"></a>
 #### Frontend.open_reporting
@@ -67,7 +67,7 @@ and parsing print each diagnostic as it is reported; a tokenizing
 failure prints its diagnostics afterward. A failed unit is closed; the
 caller must close a successful one.
 
-Source: `src/frontend.x:99`
+Source: `src/frontend.x:102`
 
 <a id="Frontend.open_session"></a>
 #### Frontend.open_session
@@ -78,7 +78,7 @@ Opens an empty submission unit with the ordinary runtime prelude.
 Preload macro libraries first. The caller must close the unit on either
 result; submissions and inspection results borrow its Context.
 
-Source: `src/frontend.x:113`
+Source: `src/frontend.x:116`
 
 <a id="Frontend.preload_macro_libraries"></a>
 #### Frontend.preload_macro_libraries
@@ -90,7 +90,7 @@ own definitions, once for the active build or translation target. Returns
 zero after reporting a failed preload, without publishing a partial
 session.
 
-Source: `src/frontend.x:461`
+Source: `src/frontend.x:466`
 
 <a id="Frontend.start"></a>
 #### Frontend.start
@@ -100,7 +100,7 @@ Source: `src/frontend.x:461`
 Tokenizes one input into a fresh unit with its own isolated `Context`.
 The caller must close the unit on either result.
 
-Source: `src/frontend.x:123`
+Source: `src/frontend.x:126`
 
 ### `ParsedUnit`
 
@@ -112,7 +112,7 @@ Source: `src/frontend.x:123`
 Releases the unit after its caller has inspected or exported its
 results.
 
-Source: `src/frontend.x:158`
+Source: `src/frontend.x:161`
 
 <a id="ParsedUnit.collect"></a>
 #### ParsedUnit.collect
@@ -122,7 +122,7 @@ Source: `src/frontend.x:158`
 Collects symbols and retains preprocessor outputs for adapter
 inspection.
 
-Source: `src/frontend.x:129`
+Source: `src/frontend.x:132`
 
 <a id="ParsedUnit.parse"></a>
 #### ParsedUnit.parse
@@ -132,15 +132,25 @@ Source: `src/frontend.x:129`
 Parses a collected unit, retaining both its AST and unsuccessful
 reports.
 
-Source: `src/frontend.x:147`
+Source: `src/frontend.x:150`
 
 ## Public types
 
 | Type | Kind | Summary |
 | --- | --- | --- |
+| [`Frontend`](#Frontend) | struct | Names the configured source frontend across dependency includes. |
 | [`Frontend`](#Frontend) | struct | Borrows a configured request and owns shared native-preprocessor setup. |
 | [`FrontendErrorSink`](#FrontendErrorSink) | callback | Receives borrowed native-preprocessor stderr synchronously during collect. |
 | [`ParsedUnit`](#ParsedUnit) | struct | Owns one isolated source lifetime, including unsuccessful diagnostics. |
+
+<a id="Frontend"></a>
+### Frontend
+
+`typedef struct Frontend *Frontend`
+
+Names the configured source frontend across dependency includes.
+
+Source: `src/frontend.x:11`
 
 <a id="Frontend"></a>
 ### Frontend
@@ -152,7 +162,7 @@ Nested units close in reverse open order.
 Process caches outlive the session.
 The optional stderr sink runs synchronously; units also retain that text.
 
-Source: `src/frontend.x:24`
+Source: `src/frontend.x:27`
 
 <a id="FrontendErrorSink"></a>
 ### FrontendErrorSink
@@ -162,7 +172,7 @@ Source: `src/frontend.x:24`
 Receives borrowed native-preprocessor stderr synchronously during
 collect.
 
-Source: `src/frontend.x:17`
+Source: `src/frontend.x:20`
 
 <a id="ParsedUnit"></a>
 ### ParsedUnit
@@ -172,7 +182,7 @@ Source: `src/frontend.x:17`
 Owns one isolated source lifetime, including unsuccessful diagnostics.
 Results remain borrowed until close; export values that must survive it.
 
-Source: `src/frontend.x:34`
+Source: `src/frontend.x:37`
 
 ## Design notes
 

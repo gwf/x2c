@@ -12,11 +12,35 @@ Cached literal slots and deferred file-static initializers.
 
 | Function | Summary |
 | --- | --- |
+| [`Compiler.check_module_initializer_graph`](#Compiler.check_module_initializer_graph) | Checks complete module initializer prerequisites using the ordinary queue. |
+| [`Compiler.check_native_initializer_receipts`](#Compiler.check_native_initializer_receipts) | Unions the native-selected receipts before checking a complete request. |
 | [`Compiler.initialization_guard`](#Compiler.initialization_guard) | Returns the declaration of the file's initialization `guard`, which starts at zero. |
 | [`Compiler.setup_cache_init`](#Compiler.setup_cache_init) | Materializes cached literals and deferred file-static initialization. |
 | [`Compiler.zero_initializer`](#Compiler.zero_initializer) | Preserves native initializer shape so C infers dimensions and checks designators before cached values are assigned during initialization. |
 
 ### `Compiler`
+
+<a id="Compiler.check_module_initializer_graph"></a>
+#### Compiler.check_module_initializer_graph
+
+`void Compiler.check_module_initializer_graph(Compiler c, List rows)`
+
+Checks complete module initializer prerequisites using the ordinary queue.
+Rows contain opaque binding identities, not names granted lookup access.
+Empty definition lists ensure validation emits no initializer calls.
+
+Source: `src/cache.x:616`
+
+<a id="Compiler.check_native_initializer_receipts"></a>
+#### Compiler.check_native_initializer_receipts
+
+`void Compiler.check_native_initializer_receipts(Compiler c, List paths)`
+
+Unions the native-selected receipts before checking a complete request.
+A receipt is the projection owner's JSON array of emitted-name pairs.
+Its opaque graph vertices grant no source lookup or linkage access.
+
+Source: `src/cache.x:632`
 
 <a id="Compiler.initialization_guard"></a>
 #### Compiler.initialization_guard
@@ -26,7 +50,7 @@ Cached literal slots and deferred file-static initializers.
 Returns the declaration of the file's initialization `guard`, which
 starts at zero.
 
-Source: `src/cache.x:528`
+Source: `src/cache.x:538`
 
 <a id="Compiler.setup_cache_init"></a>
 #### Compiler.setup_cache_init
@@ -44,7 +68,7 @@ to the `<prepare>`, `<statics>`, and `<finish>` initialization areas; the
 operation is not idempotent. Header cache storage remains private to each
 C translation unit that includes it.
 
-Source: `src/cache.x:64`
+Source: `src/cache.x:65`
 
 <a id="Compiler.zero_initializer"></a>
 #### Compiler.zero_initializer
@@ -54,7 +78,7 @@ Source: `src/cache.x:64`
 Preserves native initializer shape so C infers dimensions and checks
 designators before cached values are assigned during initialization.
 
-Source: `src/cache.x:291`
+Source: `src/cache.x:301`
 
 ## Design notes
 

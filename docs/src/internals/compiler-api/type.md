@@ -48,7 +48,7 @@ Source: `src/type.x:27`
 Starts an empty set of source-declared `Var` rows for one translation
 unit.
 
-Source: `src/type.x:280`
+Source: `src/type.x:281`
 
 <a id="Type.declaration_ast"></a>
 #### Type.declaration_ast
@@ -58,7 +58,7 @@ Source: `src/type.x:280`
 Returns a complete `(declare ...)` AST for `type` and `binding`.
 A `NULL` binding produces an abstract declaration.
 
-Source: `src/type.x:174`
+Source: `src/type.x:175`
 
 <a id="Type.declaration_parts"></a>
 #### Type.declaration_parts
@@ -69,7 +69,7 @@ Returns `(base modifiers)` for reconstructing a declaration of `type`,
 through `type_declaration_parts` in `lib/meta.x`, which a project's
 helper shares.
 
-Source: `src/type.x:169`
+Source: `src/type.x:170`
 
 <a id="Type.end_unit"></a>
 #### Type.end_unit
@@ -79,7 +79,7 @@ Source: `src/type.x:169`
 Ends the source-declared `Var`-row lifetime before the unit `Scope` is
 released.
 
-Source: `src/type.x:290`
+Source: `src/type.x:291`
 
 <a id="Type.fixed_var_tag"></a>
 #### Type.fixed_var_tag
@@ -88,7 +88,7 @@ Source: `src/type.x:290`
 
 Returns the process-lifetime `Var` tag fixed for `type`, or zero.
 
-Source: `src/type.x:219`
+Source: `src/type.x:220`
 
 <a id="Type.parameter_ast"></a>
 #### Type.parameter_ast
@@ -98,7 +98,7 @@ Source: `src/type.x:219`
 Returns a complete `(param ...)` AST for `type` and `binding`.
 A `NULL` binding produces an unnamed parameter.
 
-Source: `src/type.x:182`
+Source: `src/type.x:183`
 
 <a id="Type.register_var_adoption"></a>
 #### Type.register_var_adoption
@@ -109,7 +109,7 @@ Replaces a registered type's inferred `Var` tag with `tag`, or with the
 fixed tag of `representation` when `tag` is zero. Missing rows and
 untagged representations leave the table unchanged.
 
-Source: `src/type.x:268`
+Source: `src/type.x:269`
 
 <a id="Type.register_var_tag"></a>
 #### Type.register_var_tag
@@ -120,7 +120,7 @@ Registers one named type's unit-local `Var` tag and exact forward
 converter. The first row for a canonical `Type` wins. A `NULL` type,
 name, or converter, or no active unit, leaves the table unchanged.
 
-Source: `src/type.x:256`
+Source: `src/type.x:257`
 
 <a id="Type.var_converter"></a>
 #### Type.var_converter
@@ -130,7 +130,7 @@ Source: `src/type.x:256`
 Returns the unit-local forward `Var` converter for the canonical form of
 `type`, or `NULL`.
 
-Source: `src/type.x:230`
+Source: `src/type.x:231`
 
 <a id="Type.var_tag"></a>
 #### Type.var_tag
@@ -140,7 +140,7 @@ Source: `src/type.x:230`
 Returns the unit-local `Var` tag for `type`, falling back to its fixed
 tag.
 
-Source: `src/type.x:209`
+Source: `src/type.x:210`
 
 <a id="Type.var_tag_row"></a>
 #### Type.var_tag_row
@@ -151,7 +151,7 @@ Reads the encoding row of `tag` into `top`, `mask`, and `bottom` and
 reports whether one exists. A tag whose decoded form carries a validity
 clause, an immediate width, or a user registration has no constant row.
 
-Source: `src/type.x:241`
+Source: `src/type.x:242`
 
 ## Design notes
 

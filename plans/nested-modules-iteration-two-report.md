@@ -1,174 +1,125 @@
-> Status: active research; full specification unproven.
-> Private branch: codex/nested-modules-spike. Context: individual/private.
-> Original baseline: c09d9a917f4ab1afc072b3fb2ece71e7bb2a6e04.
-> First prototype: ed1e83032b9bfc8073db5a6a79377e42eeb53b5d.
-> No adoption, integration, push, PR, or global installation is authorized.
+# Nested modules: iteration-two research report
 
-# Nested modules: iteration two evidence
+Status: isolated private spike; full specification remains unproven.
+The compiler at 99f0f4e2 regenerated all 78 runtime and 65 compiler
+sources, compiled their native objects, and linked the regenerated compiler.
+The seven-file macro migration also passes its focused check.
+Evidence: `debug/combined-final-descriptor-current-regeneration.log`.
 
-Keep this implementation private and revise it before adoption. Ownership,
-relocatable identity, inherited compile-time effects, and ordinary cross-file
-layouts work in focused executable controls. The expanded layout contract is
-not satisfied: guarded native headers still change later source macro state.
-Native-meta prerequisite staging also remains incorrect in a valid control.
+Repairs at 01bd3982 add completed ancestor constructor declarations, optional
+package manifest values, and selected native initializer receipts for module
+groups without layout metadata. The combined compiler builds successfully. Its module matrix passes 113/113;
+its native-meta matrix passes 10/17. Bootstrap recovery remains pending.
+The receipt fallback adds one configured preprocessing pass for each previously
+unprojected module-native group.
 
-The seven-file compiler macro split remains the real module workload. The
-outer entry is `src/macros.x`; `src/macros/quotations.x` is its nested entry.
-Public package names retain their existing prefixes. This iteration adds no
-package resolver, user-authored support headers, or child public-name prefixes.
+Current bootstrap refresh, independently relocated bootstrap recovery,
+fixed-point self-host comparison, and the final existing correctness gate
+remain pending. Successful regeneration does not establish those results.
+Do not integrate or publish the spike without explicit adoption authorization.
 
-## Implemented changes
+## Latest acceptance evidence
 
-- Ownership discovery caches canonical entry and ancestor results. Unit startup
-  establishes ownership once; borrowed compiler contexts share the existing
-  tree rather than constructing another tree during initializer setup.
-- Experimental interface format 12 records portable ownership-search queries,
-  logical identity, resolved dependencies, and declaration-provider provenance.
-  Replay resolves location-sensitive queries against the current home.
-- Anonymous private native names use the outer entry filename and entry-relative
-  paths. Distinct canonical trees with the same logical identity diagnose a
-  collision before native linkage, as Gary selected.
-- Directed Tarjan components order deferred inline-provider binding using
-  recorded include and bound declaration-type dependencies. Provider provenance
-  precedes inline support promotion. This remains one collection consumer;
-  general component staging and exact binding ownership are in progress.
-- Bound aggregate fields supply value/array prerequisites; pointers terminate
-  complete-layout demand. Private projected type and enum names retain their
-  defining file identity. Alias chains and public hidden inline support use
-  ordinary bindings and generation owners.
-- Each active aggregate family has one generated support header. Dependency
-  includes replace recursively copied bodies. Separate visiting/completion
-  guards reject selected complete-layout cycles and permit inactive alternatives.
-  These artifacts use existing per-unit publication and bootstrap copying.
-- Field directives now survive parsing and emission. They do not enter semantic
-  field rows. Complete-layout prerequisites retain their field conditions;
-  mutually exclusive field edges are not treated as an unconditional cycle.
-- Full member parsing installs inherited Lisp prefix effects through the
-  existing full-parser replay path. Shallow collection no longer substitutes
-  queued effects for that full environment. Later suffix effects stay later.
+The completed serial batch is pinned to source
+01bd39829b9b66c800bfee74bd14a07808dd0b21 and compiler SHA256
+17c1c11782aaf31d674cb76d131f546ce2b0ba51ae078f4ec3df29ac380c4958.
+Its ledger is `.context/nested-modules/iteration-two/final-receipts-fixtures.json`.
+The compiler hash remained unchanged throughout the batch.
+The subsequent 256f67a7 review fix excludes executable project-meta advertisements
+from completed-ancestor signature imports. Final bootstrap validation follows
+that fix and the frontend forward declaration. The complete matrices below
+precede these small source-review fixes. The nine-file API translation batch
+passes with the forward declaration; documentation regeneration honors JOBS1.
+This source repair does not prove general SCC declaration collection.
 
-## Combined integration in progress
-
-The root now separates generation from publication. Each provider generates
-its flat portable output records exactly once while its Context is active.
-The records include depfile text and are exported before that Context closes.
-Publication uses text only after all provider Contexts close. This initially
-retains the existing nested Context schedule; it does not claim reduced peak
-memory or complete component staging.
-
-Native-header, native-meta, and scheduling workers implement separate owner
-changes in private worktrees. Root collects their authored changes on the
-private spike branch. Every build and validation requires one explicit serial
-slot. Full compiler/bootstrap integration and combined validation remain
-pending; source checkpoints and standalone native fixtures are insufficient.
-Current receipts are in
-`.context/nested-modules/iteration-two/integration-ledger.md`.
-
-Four non-inline body-order fixtures had expected the earlier native macro
-state, contrary to the existing `_move_bodies` rule. Their expected result
-now follows later declarations/directives. Public inline authored-position
-controls and the introduced guarded-header regression controls are unchanged.
-Final matrix results must distinguish this corrected expectation from a
-compiler repair.
-
-## Executable evidence
-
-All new research fixture builds request one worker. The host was running hot;
-fixture and build durations are not comparative performance evidence.
-
-| Check | Result | Evidence and scope |
+| Workload | Latest completed evidence | Result and limit |
 | --- | --- | --- |
-| General module matrix at 1027d5bc | 98/98 | `/tmp/x2c-module-probes-ecbgywvt/results.json`; before the field-directive repair |
-| Full layout matrix at 92f62c50 | 57/65 | `/tmp/x2c-layouts-a9fy11a4`; eight failures retained, including two introduced native-header regressions |
-| Field conditional controls at 92f62c50 | 8/8 | `/tmp/x2c-layouts-k9vtckvl`; module and ordinary controls, both flags, active-cycle rejection |
-| Bounded family-header controls | 15/15 | `/tmp/x2c-layouts-a5db9qez`; alternative layouts, selected cycles, aliases, private enums, native inline ordering |
-| Inherited Lisp and producer controls | 9/9 | `/tmp/x2c-module-probes-62n1_5ru/results.json`; privacy, source ordering, direct-member equivalence |
-| Native preprocessing region experiment | 2/2 | `/tmp/x2c-native-layout-regions-v9ovdfyk/results.json`; inert C skeletons, guarded and pragma-once headers |
+| Current compiler regeneration | 99f0f4e2, `debug/combined-final-descriptor-current-regeneration.log` | All 78 runtime and 65 compiler sources regenerate, native compile and link successfully; bootstrap recovery and fixed-point equality pending |
+| Durable native-meta module controls | 01bd3982, `/tmp/x2c-module-native-meta-98tou6tr/results.json` | 10/17 pass; seven required cases fail, detailed below |
+| Module matrix | 01bd3982, `/tmp/x2c-module-probes-za4z56xq/results.json` | 113/113 pass, including the repaired nested entry constructor and retained initialization |
+| Layout matrix | 01bd3982, `/tmp/x2c-layouts-_55e7pvq/results.json` | 70/71 pass; only ordinary packed-provider syntax fails, also unsupported by the baseline |
+| Whole-compiler exact replay | 01bd3982, `/tmp/x2c-modules-final-replay-j0rti9v3/results.json` | All 249 C/H/XI/XNM artifacts match cold/retained in each of two homes |
+| Collection order and identity | 01bd3982, `debug/final-receipts-collection-order.log` and `debug/final-receipts-identity.log` | Standalone/after-module parity, relocation identity and collision controls pass |
+| Reversed object order | 01bd3982, `/tmp/x2c-reversed-object-order-o426j671/results.json` | Both member-type and entry-type cases pass original/reversed object orders; initialization, cleanup and shutdown occur once |
+| Package delivery | 01bd3982, `/tmp/x2c-nested-package-delivery-vrhwqble/results.json` | Canonical Make/archive, consumer, bundle, installation and relocated native-C rebuild controls pass |
+| Structured bootstrap | 12942052, `debug/combined-origin-reuse-bootstrap-refresh.log` | Historical hierarchical artifact refresh compiles and links; current and independent relocated recovery pending |
 
-The native region experiment is not an integrated compiler feature. Its input
-was hand-authored C, and it does not prove native declaration closure, arbitrary
-pragma state, binding privacy, cache behavior, or bootstrap portability.
+The current native-meta positives that pass are `module_prerequisite`,
+`nested_private_meta`, `ordinary_runtime_cycle`, `package_private_meta`,
+`module_lifetime_entry_state`, and `package_public_meta_probe_alias`.
+`module_cycle`, `parent_private_rejection`, and `package_private_rejection`
+reject with their expected diagnostic classifications.
 
-Current-candidate replay, bootstrap recovery, self-hosting, and general gate
-results are recorded separately in
-`.context/nested-modules/iteration-two/verification-status.md`, with full logs
-under `debug/`. Earlier first-prototype gate success cannot validate this changed
-implementation. General gate success cannot substitute for the failing layout
-or native-meta controls.
+The complete module matrix now passes, including the nested entry constructor
+and its retained initialization check. The six added ordinary-body SCC and
+entry/member effect controls also pass.
 
-The research gate wrapper invokes the existing `gate-state.py` ensure operation
-with the private research authorization. An ignored supplemental Makefile runs
-the same gate steps, command builds, and command checks serially. It removes
-explicit shell background overlap that `BUILD_JOBS=1` alone does not control.
-No tracked Makefile, recurring gate, or repository process is changed.
+The current native-meta failures are `active_ordinary_prefix`,
+`active_reached_ordinary_prefix`, `module_ordinary_shared_variable`,
+`module_ordinary_cleanup`, `module_meta_shared_variable`, and
+`module_lifetime_direct_state`. They fail during build.
+`module_initializer_cycle` incorrectly builds successfully.
+`module_direct_initializer_cycle` now rejects with the required diagnostic.
+Its corrected entry uses extern declarations rather than additional tentative
+definitions. The original 99f control crashed before native-provider registration;
+its receipt is retained separately.
+These results prevent a native readiness, state or cycle success claim.
 
-## Remaining correctness failures
+## Implementation and historical repairs
 
-### Native header effects
+Modules retain explicit ownership, separate package identity and file-static
+privacy. Entries and members produce separate implementations. Target-native
+preprocessing selects layout and initialization dependencies. Generated
+metadata carries support declarations without granting language lookup access.
 
-The positive public/static controls `guarded_header_macro_effects_public` and
-`guarded_header_macro_effects_static` fail in the module implementation. Their
-ordinary-file controls pass. A projected prefix includes a guarded native
-header early. The projection restores an explicit feature macro but retains
-the native header guard. At the authored include, the guard suppresses the
-header's feature definition, and the later function observes the wrong value.
+The compiler macro implementation now occupies seven source files, including
+nested quotation members. The real compiler regeneration proves that this
+migration is consumed by the experimental compiler. Canonical signature
+recipes repaired the real `Logger` and loop-alias regeneration blockers.
+Signature collection retains names and types without executing later bodies
+or declaration producers.
 
-Saving more macro names alone is insufficient. Restoring the guard repeats
-native type bodies; retaining it loses effects. `#pragma once` adds include
-state beyond macro names. The current prefix-copy mechanism is therefore
-insufficient for this demonstrated flat-module case. This is not evidence
-that nested modules are impossible.
+Earlier failures identified borrowed Map iteration, unstable marker order,
+private type identity, public opaque completion, ancestor alias binding,
+class signatures, package support placement and preamble replay defects.
+Their focused repairs are implemented. Current matrix receipts must determine
+whether each repaired behavior passes; historical failures are not current
+failure claims.
 
-Faithful native preprocessing can resolve macros in original order before
-moving emitted declarations. The region experiment proves that narrow operation.
-A complete implementation still needs native declaration identity/closure,
-provider-local native bindings, residual pragma state, and exported native
-macro behavior. It must retain the original authoritative x2c binding identities.
+## Full specification coverage
 
-Generation is not idempotent. The current reverse Context lifetime requires
-generating each provider once, exporting immutable emitted regions and graph
-facts, then assembling text after its semantic context closes. Calling the
-generator twice or replaying declaration producers would violate the contract.
+Passing controls establish their tested cases, not an entire specification row.
 
-Freezing native-expanded C into shipped bootstrap would bake in host system
-types, target macros, and ABI. A portable repair instead needs original C/H
-and layout metadata, with target-specific projection before native compilation.
-Bootstrap must have that projection operation before the experimental compiler
-exists. A standalone helper and its declaration/pragma handling are unresolved.
+| Requirement | Implemented and passing evidence | Remaining failure or unattempted evidence |
+| --- | --- | --- |
+| Membership, ownership and nesting | Existing module fixtures cover three levels, duplicate entries, missing members, unlisted consumers, ancestor/sibling privacy and direct members | Current matrix 113/113; comprehensive symlink/ownership-path mutation combinations unattempted |
+| Static/module/public visibility | Function, type, state, macro, alias and protocol fixtures retain exact binding ownership | Full declaration/definition disagreement combinations and repeated private native-meta type spellings insufficiently exercised |
+| Nested public exports and packages | Current durable package meta positives and package-private diagnostic pass; ordinary package naming/aliases/with fixtures exist | Canonical Make/archive, bundle, installation and relocated-C consumer pass; full package protocol/native-module/foreign-name filtering unattempted |
+| Prefix/suffix effects and ordered producers | Lisp, alias, declaration-producer, sibling include and direct-member parity fixtures exist; real macro recipes regenerate compiler | Current reached ordinary prefixes and direct-member native state fail; general readiness contract remains unproven |
+| Declaration collection and scheduling | Collection supplies authoritative registry; Tarjan orders provider body work; seed plus current provider limits retained contexts; full compiler regenerates | This is not SCC-driven declaration collection. Seed binds first; actual producer prerequisites remain separate |
+| Native headers, layouts and hidden support | Target preprocessing selects namespace and complete-family demands; private aliases and opaque completion repairs implemented | Current layout matrix 70/71; arbitrary pragmas, header-injected semantic fields and fully conditional semantic layout remain unproven |
+| Shared objects, initialization and cleanup | Existing runtime shared-object fixtures and historical reversed-link controls pass; current native entry lifetime passes | Current native initialized state/cleanup/direct-member cases fail; corrected direct native cycle rejects, while the indirect-call cycle is missed |
+| Cache equivalence and invalidation | Whole-65 exact replay passes at 01bd in two homes; membership/preamble/nearer-header mutation fixtures check outcomes | Complete 01bd replay passes; invalidated-versus-fresh full artifact/binding equality is not established by outcome-only mutation tests |
+| Generated outputs and bootstrap | Seven-file macro migration and current full compiler regeneration pass; historical hierarchical bootstrap refresh works | Current bootstrap refresh, independent relocated recovery, fixed-point equality and final correctness gate pending |
+| Include portability | Canonical resolved dependencies and native companion metadata implemented | Macro-spelled bootstrap includes, configured-root-only native closure and other platforms insufficiently exercised |
+| Cost and performance | Exact historical matched measurements retained below | Final matched native artifact sizes, whole-workload counts, quiet-host timing and peak memory unmeasured |
 
-This crosses generation, Toolchain, Build receipts/fingerprints, bootstrap/stage
-rules, copying, and stage comparison. If native closure needs a C parser, the
-bootstrap must supply that parser independently. Its implementation size and
-native processing cost are unmeasured. No speculative second parser or unused
-API was added. Detailed owner stages are retained in
-`.context/nested-modules/iteration-two/native-layout-emission-design.md`.
+## Scheduling and initializer limits
 
-### Native-meta prerequisites
+The scheduler forms components from completed declaration facts and orders
+body work from include and typed declaration prerequisites. Recorded
+`binding-references` rows do not drive that schedule. It does not collect
+declarations through a general prerequisite SCC engine. The seed binds before the remaining components.
+Passing body recursion controls do not remove this specification gap.
 
-The valid acyclic native-meta control builds but exits 1. A provider enum calls
-another provider's meta function; helper construction substitutes an integer
-zero before that implementation is available. The same ordinary baseline
-control fails, so the defect is inherited, but the requested contract remains
-unsatisfied. The rejecting cycle control does not prove a deliberate call-cycle
-diagnostic. Records are `/tmp/x2c-meta-prerequisites-3lx61mdv/results.json` and
-`/tmp/x2c-meta-baseline-upfcbwtw/results.json`.
-
-Repair requires demand-driven provider readiness before publishing immediate
-enum values, retained parsed declarations, and incremental native availability
-without restarting helper state. Reordering the current all-parse/all-compile
-loop does not supply those semantics. That repair is not implemented.
-
-### Additional limits
-
-Conditional field directives now emit correctly in the tested configurations.
-Semantic field lookup still contains declarations from feasible native branches;
-branch-specific semantic layout, header-injected fields, and arbitrary pragma
-state are unproven. Native packed-attribute controls and ordinary body-order
-controls also failed in the expanded matrix before the field repair. Their
-ordinary counterparts fail too. Expectations were not weakened to make the
-matrix green.
+Initializer dependency collection follows bound initializer syntax. It does
+not follow arbitrary indirect function calls into bodies to discover every
+object read. Therefore direct-object cycle controls do not prove general
+transitive or indirect-call cycle rejection. Source owner:
+`src/compiler.x`, `Compiler.initializer_references` and `_collect_references`.
 
 ## Measured cost
+
 
 The first prototype was measured before scheduling changes. Gary then warned
 that the host was running hot. No starting or revised wall-clock samples are
@@ -203,15 +154,16 @@ Raw record: `/tmp/x2c-layout-growth-2qmqsolw/results.json`. This establishes
 bounded aggregate-body duplication on those workloads, not bounded alias-prefix
 work, native execution performance, or full compiler throughput.
 
-| Authoritative compiler source | Files | Lines | Bytes |
+| Historical tracked compiler .x source (includes generated linked-meta.x) | Files | Lines | Bytes |
 | --- | ---: | ---: | ---: |
 | Original dev baseline | 55 | 53,225 | 1,994,997 |
 | First prototype | 63 | 54,457 | 2,041,253 |
 | Candidate 92f62c50 | 65 | 55,389 | 2,078,120 |
 
-The macro implementation occupies seven files and 5,511 lines, compared with
-one file and 5,461 lines originally. The candidate has 2,164 more compiler
-source lines than the baseline. Source movement is not counted as new code.
+At historical candidate 92f62c50, the macro implementation occupies seven
+files and 5,511 lines, compared with one file and 5,461 lines originally.
+That candidate has 2,164 more tracked compiler source lines than the baseline.
+Source movement is not counted as new code.
 Records are `.context/nested-modules/iteration-two/source-size.json`.
 
 Comparable full native object/archive sizes, quiet-host cold/retained timing,
@@ -219,34 +171,42 @@ peak memory, parse/replay/producer attribution, and mutation rebuild receipts
 remain unmeasured. A baseline directory with only runtime objects was rejected
 as an invalid comparison with the candidate's compiler and runtime objects.
 
-## Unimplemented or insufficiently exercised requirements
+## Current source size
 
-- General declaration-component staging, binding-use dependency edges, and
-  context lifetime reduction. SCC scheduling currently has one bounded consumer.
-- Faithful native-header layout projection and native-meta prerequisite readiness.
-- Fully conditional semantic field layouts, arbitrary native pragmas, and
-  repeated private native-meta type spellings.
-- Reversed actual native object link order for multi-hop initialization.
-- Comprehensive declaration/definition visibility disagreement combinations.
-- Ownership-query mutation receipts for newly enrolling ancestors and `.xp`
-  competitors; existing membership/preamble/header mutations cover other paths.
-- Precise transformed/recollected unit receipts for private body and public
-  signature edits, plus the remaining performance measurements above.
+These counts use committed source 01bd3982 and the exact starting dev baseline.
+The authored comparison excludes generated `src/linked-meta.x` from both trees.
+No generated bootstrap artifacts contribute to these source counts.
 
-## Recommendation and continuation
+| Source corpus | Files | Lines | Bytes |
+| --- | ---: | ---: | ---: |
+| Baseline authored compiler | 54 | 52,413 | 1,963,433 |
+| Current authored compiler | 64 | 56,461 | 2,124,330 |
+| Baseline tracked compiler .x, including linked-meta.x | 55 | 53,225 | 1,994,997 |
+| Current tracked compiler .x, including linked-meta.x | 65 | 57,273 | 2,155,894 |
+| Baseline macro implementation | 1 | 5,461 | 209,276 |
+| Current seven-file macro implementation | 7 | 5,543 | 211,361 |
 
-Revise this implementation. Preserve structured bootstrap, explicit membership,
-separate ownership/package identity, binding-based privacy, entry-relative
-anonymous names, and bounded family headers. Preserve the failed checkpoints
-and their positive/negative controls for comparison.
+Current authored compiler source adds 4,048 lines and 160,897 bytes versus
+the starting tree. These totals include the complete experimental implementation;
+they do not measure nesting alone. Record:
+`.context/component-scheduling/final-source-size.json` in the scheduling worker.
 
-The unresolved native layout failure also occurs in a flat module. Removing
-nesting would not repair it. The ancestor tree remains a proportionate ownership
-model, but no final timing result proves its cost acceptable. Do not integrate
-the spike or claim that the full original specification is implemented.
+## Latest projection work-count evidence
 
-The next structural experiment must demonstrate portable original-order emission
-plus target-specific projection through one standalone native build operation.
-It must resolve native declaration closure and pragma state before replacing
-the current projection. Native-meta staging requires a separate actual readiness
-model. Neither can be represented as arbitrary SCC execution order.
+
+The same generated outer.c, clang flags, and dependencies compile successfully
+before and after per-extraction canonical-origin reuse. Both outputs have SHA256
+6ba6704be6af0f779a78be42821880bb6083ab7ee66f6d4f5af6fd99c5fc4c4f.
+Path.resolve calls fall from 17,548 to 482. Both versions retain two CPP passes,
+four metadata reads, two extraction calls, and 684,165 extracted bytes.
+Receipt: /tmp/x2c-origin-reuse-pvcop9hl/results.json.
+This partial workload measures repeated work, not elapsed time or full-build
+throughput. The hot host prevents a useful comparative timing claim.
+
+## Recommendation
+
+Revise and keep isolated. Current native state, readiness and cycle failures
+remain material. Bootstrap recovery, final correctness validation and final
+matched cost evidence are also incomplete. These results reject the tested
+implementation paths; they do not establish that nested modules are impossible.
+Any later adoption requires explicit authorization.

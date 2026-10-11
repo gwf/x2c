@@ -12,7 +12,40 @@ The project meta build.
 
 | Function | Summary |
 | --- | --- |
+| [`Compiler.prepare_meta_call`](#Compiler.prepare_meta_call) | Makes a project provider ready before publishing the value its call computes. |
+| [`Compiler.register_native_meta_prefix`](#Compiler.register_native_meta_prefix) | Records the active provider's ordinary-bound prefix for readiness calls. |
+| [`Compiler.require_native_meta_header`](#Compiler.require_native_meta_header) | Supplies an ancestor interface without requiring unfinished native bodies. |
 | [`Frontend.prepare_meta`](#Frontend.prepare_meta) | Builds the helper that runs the project `meta` functions `inputs` reach, or finds it in the cache, and makes it the one their translation calls. |
+
+### `Compiler`
+
+<a id="Compiler.prepare_meta_call"></a>
+#### Compiler.prepare_meta_call
+
+`Var Compiler.prepare_meta_call( Compiler c, String name, Token site, List arguments, String provider)`
+
+Makes a project provider ready before publishing the value its call
+computes. Readiness follows calls actually reached by ordinary parsing.
+
+Source: `src/meta-project.x:418`
+
+<a id="Compiler.register_native_meta_prefix"></a>
+#### Compiler.register_native_meta_prefix
+
+`void Compiler.register_native_meta_prefix(Compiler c)`
+
+Records the active provider's ordinary-bound prefix for readiness calls.
+
+Source: `src/meta-project.x:450`
+
+<a id="Compiler.require_native_meta_header"></a>
+#### Compiler.require_native_meta_header
+
+`void Compiler.require_native_meta_header(Compiler c, String path)`
+
+Supplies an ancestor interface without requiring unfinished native bodies.
+
+Source: `src/meta-project.x:462`
 
 ### `Frontend`
 
@@ -26,7 +59,7 @@ reach, or finds it in the cache, and makes it the one their translation
 calls. Inputs that reach none use no helper. A group or helper that
 does not build is reported at the first call that needs it.
 
-Source: `src/meta-project.x:75`
+Source: `src/meta-project.x:86`
 
 ## Design notes
 

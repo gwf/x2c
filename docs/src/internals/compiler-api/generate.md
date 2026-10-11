@@ -13,10 +13,14 @@ The generated header and source of one unit.
 | Function | Summary |
 | --- | --- |
 | [`generate_code`](#generate_code) | Writes the generated C header and source for one lowered translation unit. |
+| [`generate_code_files`](#generate_code_files) | Generates one unit's complete portable outputs without publishing them. |
 | [`generate_code_text`](#generate_code_text) | Returns the generated header and source of the lowered `ast` as `(hfile htext cfile ctext)`, named from `basename`, without writing them. |
+| [`generate_code_text_files`](#generate_code_text_files) | Returns all portable text outputs, including native projection metadata. |
+| [`publish_generated_files`](#publish_generated_files) | Publishes immutable generated outputs after their semantic Contexts close. |
 | [`Compiler.definition_rows`](#Compiler.definition_rows) | Returns one row for each function, foreign alias, and typedef that the lowered unit `ast` defines, in source order: `(function NAME DISPLAY TYPE PARAMETERS LINE DOC STATIC ORIGIN DECLARATOR SPAN)` or `(typedef NAME BASE MODIFIERS SPAN)`. |
 | [`Compiler.dump_definitions`](#Compiler.dump_definitions) | Prints the `--dump-definitions` projection of the lowered unit `ast`: `(unit PATH)`, the module comment as `(module TEXT)` when the file opens with one, then one row per `Compiler.definition_rows` entry. |
 | [`Compiler.init_statements`](#Compiler.init_statements) | Returns the statements queued for `phase`, in the order they were added. |
+| [`Compiler.module_projection_namespace`](#Compiler.module_projection_namespace) | Finds a collected namespace after reversing private emitted spelling. |
 | [`Compiler.place_source_prelude`](#Compiler.place_source_prelude) | Places generated `declarations` after source types and includes, before the first function or captured initializer that can use them. |
 | [`Init.enter`](#Init.enter) | Returns `function` with its entry setup: the protocol initializer and the type initializer run once, and a `guarded` entry calls the region's initializer unless its guard is set. |
 
@@ -37,7 +41,18 @@ replaces none of them. It appends generated bindings and initialization
 work to the compiler and is not idempotent. Failures are reported as
 `emit` diagnostics.
 
-Source: `src/generate.x:49`
+Source: `src/generate.x:52`
+
+#### generate_code_files
+
+`List generate_code_files(Compiler c, List ast, String dir)`
+
+Generates one unit's complete portable outputs without publishing them.
+The returned flat path/text list owns C, H, interface and layout artifacts.
+Generation mutates the compiler exactly once, as generate_code does.
+Callers retaining the result after closing a Context must export it first.
+
+Source: `src/generate.x:60`
 
 #### generate_code_text
 
@@ -47,7 +62,25 @@ Returns the generated header and source of the lowered `ast` as `(hfile
 htext cfile ctext)`, named from `basename`, without writing them. It
 affects the compiler as `generate_code` does.
 
-Source: `src/generate.x:65`
+Source: `src/generate.x:93`
+
+#### generate_code_text_files
+
+`List generate_code_text_files(Compiler c, List ast, String basename)`
+
+Returns all portable text outputs, including native projection metadata.
+Like generate_code_text, this generates the unit exactly once.
+
+Source: `src/generate.x:98`
+
+#### publish_generated_files
+
+`void publish_generated_files(List outputs)`
+
+Publishes immutable generated outputs after their semantic Contexts close.
+This operation uses no compiler, symbol, type or source-token state.
+
+Source: `src/generate.x:79`
 
 ### `Compiler`
 
@@ -66,7 +99,7 @@ token range and privacy of the top-level form that produced the
 definition; either is empty when the compiler made the definition.
 `LINE` is 1 and `DOC` empty for a definition without authored source.
 
-Source: `src/generate.x:1559`
+Source: `src/generate.x:1869`
 
 <a id="Compiler.dump_definitions"></a>
 #### Compiler.dump_definitions
@@ -78,7 +111,7 @@ Prints the `--dump-definitions` projection of the lowered unit `ast`:
 with one, then one row per `Compiler.definition_rows` entry. The
 command-line reference in the book describes the fields.
 
-Source: `src/generate.x:1652`
+Source: `src/generate.x:1962`
 
 <a id="Compiler.init_statements"></a>
 #### Compiler.init_statements
@@ -87,7 +120,16 @@ Source: `src/generate.x:1652`
 
 Returns the statements queued for `phase`, in the order they were added.
 
-Source: `src/generate.x:1094`
+Source: `src/generate.x:1404`
+
+<a id="Compiler.module_projection_namespace"></a>
+#### Compiler.module_projection_namespace
+
+`String Compiler.module_projection_namespace(Compiler c, List key)`
+
+Finds a collected namespace after reversing private emitted spelling.
+
+Source: `src/generate.x:183`
 
 <a id="Compiler.place_source_prelude"></a>
 #### Compiler.place_source_prelude
@@ -100,7 +142,7 @@ conditional containing that first use follows the declarations. A unit
 without such a use gets them at its end, after the declarations they
 may assign.
 
-Source: `src/generate.x:912`
+Source: `src/generate.x:1222`
 
 ### `Init`
 
@@ -113,7 +155,7 @@ Returns `function` with its entry setup: the protocol initializer and
 the type initializer run once, and a `guarded` entry calls the region's
 initializer unless its guard is set.
 
-Source: `src/generate.x:877`
+Source: `src/generate.x:1187`
 
 ## Public types
 
@@ -133,7 +175,7 @@ the unit's shutdown function, `synthetic` is the synthetic initializer or
 NULL, and `reachable` holds the entries a cache-only file guards, or is
 NULL when every public entry is guarded.
 
-Source: `src/generate.x:839`
+Source: `src/generate.x:1149`
 
 ## Design notes
 

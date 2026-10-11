@@ -141,6 +141,8 @@
   - [src/meta-project.x](internals/compiler-api/meta-project.md)
   - [src/meta-sdk.x](internals/compiler-api/meta-sdk.md)
   - [src/module-access.x](internals/compiler-api/module-access.md)
+  - [src/module-layout.x](internals/compiler-api/module-layout.md)
+  - [src/module-schedule.x](internals/compiler-api/module-schedule.md)
   - [src/module-tree.x](internals/compiler-api/module-tree.md)
   - [src/operator-ledger.x](internals/compiler-api/operator-ledger.md)
   - [src/parse-report-macros.x](internals/compiler-api/parse-report-macros.md)

@@ -12,10 +12,21 @@ Make dependency output for x2c translation units.
 
 | Function | Summary |
 | --- | --- |
+| [`translation_depfile_files`](#translation_depfile_files) | Returns the depfile path and text while the unit's dependency facts live. |
 | [`translation_depfile_parse`](#translation_depfile_parse) | Parses prerequisite words after the first unescaped colon in `text`. |
 | [`translation_depfile_write`](#translation_depfile_write) | Publishes the Make depfile for one completed translation. |
 
 ### Functions
+
+#### translation_depfile_files
+
+`List translation_depfile_files( CliRequest request, Compiler compiler, String input, String output_dir)`
+
+Returns the depfile path and text while the unit's dependency facts live.
+Disabled output and inspection return NULL. The result contains Strings
+only and can be exported before the provider Context closes.
+
+Source: `src/deps.x:55`
 
 #### translation_depfile_parse
 
@@ -29,7 +40,7 @@ A NULL input or no parsed prerequisites returns NULL.
 Returned cells and path `String`s follow the current canonical `List` and
 `String` pool lifetimes.
 
-Source: `src/deps.x:128`
+Source: `src/deps.x:142`
 
 #### translation_depfile_write
 
@@ -47,7 +58,7 @@ return zero. Cleanup attempts to unlink an opened sibling but does not
 report an unlink failure. Allocation failure transfers through ordinary
 runtime `Error` handling instead of returning zero.
 
-Source: `src/deps.x:33`
+Source: `src/deps.x:34`
 
 ## Design notes
 

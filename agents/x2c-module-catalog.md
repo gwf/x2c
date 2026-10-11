@@ -8,7 +8,7 @@ public function definition in source-file and line order. It does
 not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
-- Compiler modules: 57
+- Compiler modules: 59
 - Runtime modules: 77
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
@@ -74,7 +74,9 @@ cached literal slots and deferred file-static initializers.
 Public functions:
 
 `Compiler.setup_cache_init`, `_initializer_function`, `_run_once`,
-`_entry_call`, `Compiler.zero_initializer`, `Compiler.initialization_guard`
+`_entry_call`, `Compiler.zero_initializer`, `Compiler.initialization_guard`,
+`Compiler.check_module_initializer_graph`,
+`Compiler.check_native_initializer_receipts`
 
 ### [src/callables.x](../src/callables.x)
 
@@ -116,7 +118,8 @@ source-ordered shallow symbol collection and replay.
 Public functions:
 
 `Compiler.collect_symbols`, `compiler_prelude_sources`, `is_prelude_source`,
-`Compiler._module_preamble`, `Compiler.configure_package`,
+`Compiler._module_preamble`, `declaration_type_family`,
+`declaration_type_namespaces`, `Compiler.configure_package`,
 `collect_resolve_include`, `Compiler.resolve_source_include`,
 `Compiler.include_typedef_names`, `Compiler.include_type_dependencies`,
 `Compiler.include_function_declarations`,
@@ -125,7 +128,10 @@ Public functions:
 `Compiler.linked_meta_definitions_current`, `Compiler.complete_meta_hashes`,
 `Compiler.meta_provider_hashes`, `Compiler.add_linked_meta_provider_hashes`,
 `Compiler.name_meta_provider_bindings`, `Compiler.publishes_typedef`,
-`Compiler.publishes_type_family`, `Compiler.inline_type_dependencies`,
+`Compiler.publishes_type_family`, `Compiler.collected_declaration_components`,
+`Compiler.collected_declaration_dependencies`,
+`Compiler.declaration_provider_rows`, `Compiler.declaration_detail_rows`,
+`Compiler.declaration_prerequisite_rows`, `Compiler.inline_type_dependencies`,
 `Compiler.publish_inline_types`, `Compiler.record_generated_symbol`,
 `Compiler.collect_package`, `Compiler.replay_package_imports`,
 `Compiler.included_compile_time_effects`, `Compiler.module_member_effects`,
@@ -146,17 +152,22 @@ Public functions:
 `Compiler._at_function_arrow`, `Compiler._skip_shallow_expression`,
 `Compiler.queue_declaration_effect`, `Compiler.run_declaration_effects`,
 `Compiler.collect_unit_macro`, `Compiler.replay_declaration_source`,
-`Compiler.freeze_declaration_syntax`, `Compiler.thaw_declaration_syntax`,
-`Compiler.select_declaration_defaults`, `Compiler.full_parse`,
-`Compiler.skip_collected_script_statement`, `Compiler.skip_script_statement`,
-`Compiler.record_module_initializer`, `Compiler.module_initializer`,
-`module_initializer_entry`, `Compiler.module_initializer_rows`,
-`Compiler.merge_module_initializers`, `Compiler.tokenize`, `Compiler.peek`,
-`Token.skip_trivia`, `Compiler.require_input`, `Compiler.expect`,
-`Compiler.next`, `Compiler.test`, `Compiler.at_word`, `Compiler.take_word`,
-`Symbol.group_step`, `Token.group_close`, `Token.after_group`,
-`Compiler.mark_completion`, `Compiler.at_completion`,
-`Compiler.__complete_here`, `Compiler.record_origin`, `Compiler.anchor_origin`,
+`Compiler.retain_native_meta_source`, `Compiler.freeze_declaration_syntax`,
+`Compiler.thaw_declaration_syntax`, `Compiler.select_declaration_defaults`,
+`Compiler.full_parse`, `Compiler.skip_collected_script_statement`,
+`Compiler.skip_script_statement`, `Compiler.record_module_initializer`,
+`Compiler.module_initializer`, `Compiler.module_initializer_entry`,
+`Compiler.module_initializer_rows`, `Compiler.module_initializer_graph`,
+`Compiler.module_initializer_variants`, `Compiler.initializer_identity`,
+`Compiler.merge_module_initializers`, `Compiler.initializer_references`,
+`Compiler.tokenize`, `Compiler.peek`, `Token.skip_trivia`,
+`Compiler.require_input`, `Compiler.expect`, `Compiler.next`, `Compiler.test`,
+`Compiler.at_word`, `Compiler.take_word`, `Symbol.group_step`,
+`Token.group_close`, `Token.after_group`, `Compiler.mark_completion`,
+`Compiler.at_completion`, `Compiler.__complete_here`, `Compiler.record_origin`,
+`Compiler.anchor_origin`, `Compiler.record_binding_declaration`,
+`Compiler.record_binding_definition`, `Compiler.binding_provider`,
+`Compiler.record_binding_reference`, `Compiler.binding_reference_rows`,
 `Compiler.record_source_declaration`, `Compiler.record_source_reference`,
 `Compiler.copy_source_declaration`, `Compiler.merge_source_declarations`,
 `Compiler.emitted_binding_name`, `Compiler.present_references`,
@@ -210,7 +221,8 @@ Make dependency output for x2c translation units.
 
 Public functions:
 
-`translation_depfile_write`, `translation_depfile_parse`
+`translation_depfile_write`, `translation_depfile_files`,
+`translation_depfile_parse`
 
 ### [src/diagnostics.x](../src/diagnostics.x)
 
@@ -304,7 +316,9 @@ the generated header and source of one unit.
 
 Public functions:
 
-`generate_code`, `generate_code_text`, `Init.enter`,
+`generate_code`, `generate_code_files`, `publish_generated_files`,
+`generate_code_text`, `generate_code_text_files`,
+`Compiler.module_projection_namespace`, `Init.enter`,
 `Compiler.place_source_prelude`, `Compiler.init_statements`,
 `Compiler.definition_rows`, `Compiler.dump_definitions`
 
@@ -405,7 +419,8 @@ Public functions:
 `Compiler.shared_definitions`, `Compiler.shares_meta_definition`,
 `Compiler.install_builtin_macros`, `Compiler.bind_meta_operation`,
 `Compiler.report_lisp_failure`, `macro_library_reset`,
-`Compiler.parse_macro_definition`, `Compiler.try_parse_macro_slot`,
+`Compiler.parse_macro_definition`,
+`Compiler.collect_signature_macro_definition`, `Compiler.try_parse_macro_slot`,
 `Compiler.peek_macro_hole`, `Compiler.after_hole`,
 `Compiler.macro_lisp_starts_declaration`, `Compiler.try_parse_macro_member`,
 `Compiler.macro_introduced_name`, `Compiler.macro_tag_name`,
@@ -442,9 +457,12 @@ Public functions:
 `Compiler.meta_cc_run`, `Compiler.stage_meta_in_process`,
 `Compiler.groups_meta`, `Compiler.group_meta_function`,
 `Compiler.meta_reaches_compile_time`, `Compiler.finish_meta_functions`,
-`Compiler.meta_call_missing`, `Compiler.refuse_meta_call`,
-`Compiler.refuse_record_meta_call`, `Compiler.use_meta_build_directory`,
-`Compiler.write_meta_build`, `Compiler.bind_meta_group`
+`Compiler.native_prefix_functions`, `Compiler.native_prefix_definitions`,
+`Compiler.native_prefix_values`, `Compiler.meta_call_missing`,
+`Compiler.refuse_meta_call`, `Compiler.refuse_record_meta_call`,
+`Compiler.use_meta_build_directory`, `Compiler.write_meta_build`,
+`Compiler.write_native_meta_prefix`, `Compiler.write_native_meta_header`,
+`Compiler.use_native_meta_publications`, `Compiler.bind_meta_group`
 
 ### [src/meta-helper-client.x](../src/meta-helper-client.x)
 
@@ -453,8 +471,9 @@ the compiler's side of the project meta helper.
 Public functions:
 
 `Compiler.report_meta_error`, `Compiler.meta_helper_call`,
-`Compiler.use_meta_helper`, `Compiler.begin_meta_unit`,
-`Compiler.stop_meta_helper`
+`Compiler.use_meta_helper`, `Compiler.meta_helper_building`,
+`Compiler.load_meta_provider`, `Compiler.load_meta_providers`,
+`Compiler.begin_meta_unit`, `Compiler.stop_meta_helper`
 
 ### [src/meta-native.x](../src/meta-native.x)
 
@@ -464,8 +483,9 @@ Public functions:
 
 `Compiler.install_meta_function`, `Compiler.install_collected_meta_function`,
 `Compiler.matches_macro`, `Compiler.install_meta_declaration`,
-`Compiler.evaluate_meta_expression`, `Compiler.evaluate_meta_statement`,
-`Compiler.run_meta_call`, `Compiler.apply_meta_function`,
+`Compiler.restore_native_meta_source`, `Compiler.evaluate_meta_expression`,
+`Compiler.evaluate_meta_statement`, `Compiler.run_meta_call`,
+`Compiler.apply_meta_function`, `Compiler.meta_definition_provider`,
 `Compiler.record_project_meta_effect`, `Compiler.install_project_meta_effect`,
 `Compiler.bind_project_meta`, `Compiler.project_meta_uses_linked`,
 `Compiler.record_native_meta_effect`, `Compiler.install_native_meta_effects`,
@@ -486,7 +506,8 @@ the project meta build.
 
 Public functions:
 
-`Frontend.prepare_meta`
+`Frontend.prepare_meta`, `Compiler.prepare_meta_call`,
+`Compiler.register_native_meta_prefix`, `Compiler.require_native_meta_header`
 
 ### [src/meta-sdk.x](../src/meta-sdk.x)
 
@@ -522,12 +543,31 @@ declaration ownership and module lookup.
 
 Public functions:
 
-`Compiler.configure_module`, `Compiler.module_ancestors`,
-`Compiler.module_include_dirs`, `Compiler.module_accessible`,
-`Compiler._module_type_spelling`, `Compiler.check_module_binding`,
-`Compiler.module_declared_key`, `Compiler.module_retry_key`,
-`Compiler.module_reference_key`, `Compiler.record_module_declaration`,
-`Compiler.module_row_accessible`, `Compiler.parse_module_members`
+`Compiler.configure_module`, `Compiler.resolved_translation_dependencies`,
+`Compiler.module_ancestors`, `Compiler.module_include_dirs`,
+`Compiler.module_accessible`, `Compiler._module_type_spelling`,
+`Compiler.check_module_binding`, `Compiler.module_declared_key`,
+`Compiler.module_retry_key`, `Compiler.module_reference_key`,
+`Compiler.record_module_declaration`, `Compiler.module_row_accessible`,
+`Compiler.parse_module_members`
+
+### [src/module-layout.x](../src/module-layout.x)
+
+complete aggregate prerequisites for module emission.
+
+Public functions:
+
+`Compiler.module_layout_node`, `Compiler.module_layout_alias_demands`,
+`Compiler.module_layout_demands`, `prepare_module_layout_registry`,
+`Compiler.module_namespace_id`, `capture_module_provider`
+
+### [src/module-schedule.x](../src/module-schedule.x)
+
+directed declaration components.
+
+Public functions:
+
+`declaration_components`, `declaration_work`
 
 ### [src/module-tree.x](../src/module-tree.x)
 
@@ -535,9 +575,11 @@ explicit source membership and module ancestry.
 
 Public functions:
 
-`ModuleTree.new`, `module_support_header`, `ModuleTree.entry`,
-`ModuleTree.ownership_dependencies`, `ModuleTree.owner`,
-`ModuleTree.ancestors`, `ModuleTree.units`
+`ModuleTree.new`, `Compiler.module_support_header`,
+`Compiler.generated_unit_hash`, `ModuleTree.identity`, `ModuleTree.prefix`,
+`ModuleTree.entry`, `ModuleTree.ownership_dependencies`,
+`ModuleTree.ownership_query`, `ModuleTree.owner`, `ModuleTree.ancestors`,
+`ModuleTree.units`
 
 ### [src/operator-ledger.x](../src/operator-ledger.x)
 
@@ -564,6 +606,7 @@ x2c declarations, parsed from source or constructed.
 Public functions:
 
 `Compiler.parse_top_level_mode`, `Compiler.skip_linkage_brace`,
+`Compiler.native_meta_prefix_declarations`, `Compiler.bind_native_meta_prefix`,
 `Compiler.parse_top_level`, `Compiler.parse_submission`,
 `Compiler.defines_main`, `Compiler.script_statement_starts`,
 `Compiler.script_statement_executes`, `Compiler.protocol_form_starts`,
@@ -694,12 +737,13 @@ Public functions:
 
 `Sym.new`, `Sym.put`, `Sym.drop`, `Sym.reset`, `Sym.reset_overlay`,
 `Sym.push_new_scope`, `Sym.push_scope`, `Sym.pop_scope`, `Sym.scope_count`,
-`Sym.at_file_scope`, `Sym.global_symbols`, `Sym.base_symbols`,
-`Sym.current_symbols`, `Sym.unit_symbols`, `Sym.file_statics`,
-`Sym.mark_static`, `Sym.visible_symbols`, `Sym.set`, `Sym.define`,
-`Sym.seed_var_tags`, `Sym.define_global`, `Sym.declare_enumerator`,
-`Sym.introduced`, `Sym.introduce`, `Sym.current_binding`,
-`Sym.enumerator_owner`, `Sym.binding_is_local`, `Sym.binding_is_local_before`,
+`Sym.at_file_scope`, `Sym.suspend_locals`, `Sym.restore_locals`,
+`Sym.global_symbols`, `Sym.base_symbols`, `Sym.current_symbols`,
+`Sym.unit_symbols`, `Sym.file_statics`, `Sym.mark_static`,
+`Sym.visible_symbols`, `Sym.set`, `Sym.define`, `Sym.seed_var_tags`,
+`Sym.define_global`, `Sym.declare_enumerator`, `Sym.introduced`,
+`Sym.introduce`, `Sym.current_binding`, `Sym.enumerator_owner`,
+`Sym.binding_is_local`, `Sym.binding_is_local_before`,
 `Compiler.semantic_binding_facts`, `Compiler.set_fact`, `Compiler.drop_fact`,
 `Sym.get`, `Sym.get_exact`, `Sym.lookup`, `Sym.reference`,
 `Sym.resolve_global`, `Sym.reference_global`, `Sym.declare`,
@@ -726,9 +770,11 @@ Host preprocessing, compilation, archive, and link actions.
 
 Public functions:
 
-`toolchain_new`, `toolchain_meta`, `toolchain_meta_cc`, `tool_action_new`,
+`native_projection_relative`, `native_projection_helper`, `toolchain_new`,
+`toolchain_meta`, `toolchain_meta_cc`, `tool_action_new`,
 `ToolAction.as_program`, `Toolchain.compile_action`,
-`Toolchain.preprocess_action`, `Toolchain.archive_action`,
+`Toolchain.preprocess_action`, `Toolchain.project_native_source`,
+`Toolchain.project_native_initializer_source`, `Toolchain.archive_action`,
 `Toolchain.link_action`, `Toolchain.module_action`, `ToolAction.run`,
 `ToolAction.start`, `ToolRun.ready`, `ToolRun.wait`, `tool_capture`,
 `Toolchain.preprocess`, `Toolchain.search_directories`

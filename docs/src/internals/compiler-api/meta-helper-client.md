@@ -13,6 +13,9 @@ The compiler's side of the project meta helper.
 | Function | Summary |
 | --- | --- |
 | [`Compiler.begin_meta_unit`](#Compiler.begin_meta_unit) | Selects the table of the unit at `filename` for the calls that follow, and resets the unit's `meta static` values before the first one. |
+| [`Compiler.load_meta_provider`](#Compiler.load_meta_provider) | Loads one ready provider table without restarting the helper or reinitializing any previously started table. |
+| [`Compiler.load_meta_providers`](#Compiler.load_meta_providers) | Installs every table of one native component before starting new resets. |
+| [`Compiler.meta_helper_building`](#Compiler.meta_helper_building) | Keeps native build calls in one helper session while provider tables become available. |
 | [`Compiler.meta_helper_call`](#Compiler.meta_helper_call) | Calls the project `meta` function `name` in the helper with the values `arguments`, for the call at `site`, and returns its result. |
 | [`Compiler.report_meta_error`](#Compiler.report_meta_error) | Reports a meta function's failure `message` with `notes` under `category` at the position recorded first in or around `node`, or at `site` when it has none. |
 | [`Compiler.stop_meta_helper`](#Compiler.stop_meta_helper) | Stops the helper this process runs, which a translation worker does when its units are done and every process does as it ends. |
@@ -28,7 +31,36 @@ The compiler's side of the project meta helper.
 Selects the table of the unit at `filename` for the calls that follow,
 and resets the unit's `meta static` values before the first one.
 
-Source: `src/meta-helper-client.x:437`
+Source: `src/meta-helper-client.x:462`
+
+<a id="Compiler.load_meta_provider"></a>
+#### Compiler.load_meta_provider
+
+`String Compiler.load_meta_provider(String path, int index, String target)`
+
+Loads one ready provider table without restarting the helper or
+reinitializing any previously started table. Returns its load failure.
+
+Source: `src/meta-helper-client.x:442`
+
+<a id="Compiler.load_meta_providers"></a>
+#### Compiler.load_meta_providers
+
+`String Compiler.load_meta_providers(String path, List targets)`
+
+Installs every table of one native component before starting new resets.
+
+Source: `src/meta-helper-client.x:447`
+
+<a id="Compiler.meta_helper_building"></a>
+#### Compiler.meta_helper_building
+
+`void Compiler.meta_helper_building(int enabled)`
+
+Keeps native build calls in one helper session while provider tables
+become available. Ordinary translation resumes per-unit resets.
+
+Source: `src/meta-helper-client.x:438`
 
 <a id="Compiler.meta_helper_call"></a>
 #### Compiler.meta_helper_call
@@ -44,7 +76,7 @@ call. The call runs in the table of the file that wrote it: an included
 file's own, which runs the constants it computes as its own translation
 does, or else the unit's.
 
-Source: `src/meta-helper-client.x:101`
+Source: `src/meta-helper-client.x:102`
 
 <a id="Compiler.report_meta_error"></a>
 #### Compiler.report_meta_error
@@ -65,7 +97,7 @@ Source: `src/meta-helper-client.x:47`
 Stops the helper this process runs, which a translation worker does
 when its units are done and every process does as it ends.
 
-Source: `src/meta-helper-client.x:451`
+Source: `src/meta-helper-client.x:477`
 
 <a id="Compiler.use_meta_helper"></a>
 #### Compiler.use_meta_helper
@@ -76,7 +108,7 @@ Uses the helper at `path`, or none when it is NULL, whose tables named
 in `failures` could not be built, each with why, and whose table for
 each input or included file path is in `units`.
 
-Source: `src/meta-helper-client.x:424`
+Source: `src/meta-helper-client.x:425`
 
 ## Design notes
 

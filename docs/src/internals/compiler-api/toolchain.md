@@ -12,6 +12,8 @@ Host preprocessing, compilation, archive, and link actions.
 
 | Function | Summary |
 | --- | --- |
+| [`native_projection_helper`](#native_projection_helper) | Returns the shipped native projection and copied-include helper. |
+| [`native_projection_relative`](#native_projection_relative) | Returns the relative path from `directory` to `path`. |
 | [`tool_action_new`](#tool_action_new) | Creates a `Scope`-owned action that reports nonzero status by default. |
 | [`tool_capture`](#tool_capture) | Runs the host tool `arguments` without a shell, captures both streams, and returns its shell-style status. |
 | [`toolchain_meta`](#toolchain_meta) | Creates the toolchain that builds meta code with `cc`. |
@@ -28,9 +30,29 @@ Host preprocessing, compilation, archive, and link actions.
 | [`Toolchain.module_action`](#Toolchain.module_action) | Builds but does not start the link of a native module. |
 | [`Toolchain.preprocess`](#Toolchain.preprocess) | Runs the configured C preprocessor without a shell. |
 | [`Toolchain.preprocess_action`](#Toolchain.preprocess_action) | Builds the preprocessor action whose output identifies an object. |
+| [`Toolchain.project_native_initializer_source`](#Toolchain.project_native_initializer_source) | Selects native initializer edges when a module has no layout metadata. |
+| [`Toolchain.project_native_source`](#Toolchain.project_native_source) | Projects labelled native source using the compilation's configured flags. |
 | [`Toolchain.search_directories`](#Toolchain.search_directories) | Returns the directories the C compiler searches for headers and libraries without explicit options, as it reports them, plus the `lib` directory beside each reported `include` directory. |
 
 ### Functions
+
+#### native_projection_helper
+
+`String native_projection_helper(void)`
+
+Returns the shipped native projection and copied-include helper.
+
+Source: `src/toolchain.x:69`
+
+#### native_projection_relative
+
+`String native_projection_relative(String path, String directory)`
+
+Returns the relative path from `directory` to `path`.
+Projection metadata uses this path to retain companion placement when
+the complete generated output tree moves.
+
+Source: `src/toolchain.x:18`
 
 #### tool_action_new
 
@@ -41,7 +63,7 @@ The action retains `arguments` without copying them.
 
 **Raises:** `<alloc-fail>` when the action cannot be allocated.
 
-Source: `src/toolchain.x:142`
+Source: `src/toolchain.x:167`
 
 #### tool_capture
 
@@ -51,7 +73,7 @@ Runs the host tool `arguments` without a shell, captures both streams,
 and returns its shell-style status. A tool that cannot start returns 127
 and leaves the reason in `errors`.
 
-Source: `src/toolchain.x:297`
+Source: `src/toolchain.x:402`
 
 #### toolchain_meta
 
@@ -60,7 +82,7 @@ Source: `src/toolchain.x:297`
 Creates the toolchain that builds meta code with `cc`. It selects the
 archiver as `toolchain_new` does and has no native options.
 
-Source: `src/toolchain.x:81`
+Source: `src/toolchain.x:106`
 
 #### toolchain_meta_cc
 
@@ -70,7 +92,7 @@ Returns the host C compiler that builds meta code, which runs in this
 process's host: `explicit`, `X2C_META_CC`, `META_CC`, or `cc`, never
 the target compiler.
 
-Source: `src/toolchain.x:133`
+Source: `src/toolchain.x:158`
 
 #### toolchain_new
 
@@ -86,7 +108,7 @@ option `List`s are borrowed.
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the toolchain
 or its canonical layout.
 
-Source: `src/toolchain.x:70`
+Source: `src/toolchain.x:95`
 
 ### `ToolAction`
 
@@ -97,7 +119,7 @@ Source: `src/toolchain.x:70`
 
 Inherits the standard streams and suppresses the failure summary.
 
-Source: `src/toolchain.x:152`
+Source: `src/toolchain.x:177`
 
 <a id="ToolAction.run"></a>
 #### ToolAction.run
@@ -109,7 +131,7 @@ Starts and waits for the action, returning its final status.
 **Raises:** the same construction and capture-reading causes as
 `ToolAction.start` and `ToolRun.wait`.
 
-Source: `src/toolchain.x:241`
+Source: `src/toolchain.x:346`
 
 <a id="ToolAction.start"></a>
 #### ToolAction.start
@@ -123,7 +145,7 @@ starts no child.
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the execution
 or argv.
 
-Source: `src/toolchain.x:250`
+Source: `src/toolchain.x:355`
 
 ### `ToolRun`
 
@@ -135,7 +157,7 @@ Source: `src/toolchain.x:250`
 Checks whether an execution can be waited without blocking. A dry run
 and a tool that could not start are ready immediately.
 
-Source: `src/toolchain.x:268`
+Source: `src/toolchain.x:373`
 
 <a id="ToolRun.wait"></a>
 #### ToolRun.wait
@@ -150,7 +172,7 @@ stderr; program actions inherit standard streams.
 **Raises:** `<io-fail>`, `<bad-arg>`, `<size-limit>`, or `<alloc-fail>` while
 reading either capture as a `String`.
 
-Source: `src/toolchain.x:278`
+Source: `src/toolchain.x:383`
 
 ### `Toolchain`
 
@@ -165,7 +187,7 @@ membership must unlink `output` before it runs.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the action.
 
-Source: `src/toolchain.x:198`
+Source: `src/toolchain.x:303`
 
 <a id="Toolchain.compile_action"></a>
 #### Toolchain.compile_action
@@ -179,7 +201,7 @@ configured compiler arguments. The action requests dependency output at
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the action.
 
-Source: `src/toolchain.x:168`
+Source: `src/toolchain.x:193`
 
 <a id="Toolchain.link_action"></a>
 #### Toolchain.link_action
@@ -192,7 +214,7 @@ runtime archive, and `-lm` follow the inputs.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the action.
 
-Source: `src/toolchain.x:208`
+Source: `src/toolchain.x:313`
 
 <a id="Toolchain.module_action"></a>
 #### Toolchain.module_action
@@ -208,7 +230,7 @@ a missing runtime function fails when the compiler loads it.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the action.
 
-Source: `src/toolchain.x:222`
+Source: `src/toolchain.x:327`
 
 <a id="Toolchain.preprocess"></a>
 #### Toolchain.preprocess
@@ -230,7 +252,7 @@ does not consult `dry_run`.
 **Raises:** `<io-fail>`, `<bad-arg>`, `<size-limit>`, or `<alloc-fail>` while
 constructing arguments or reading captured text.
 
-Source: `src/toolchain.x:346`
+Source: `src/toolchain.x:451`
 
 <a id="Toolchain.preprocess_action"></a>
 #### Toolchain.preprocess_action
@@ -243,7 +265,30 @@ markers, so source locations belong to the identity.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the action.
 
-Source: `src/toolchain.x:181`
+Source: `src/toolchain.x:206`
+
+<a id="Toolchain.project_native_initializer_source"></a>
+#### Toolchain.project_native_initializer_source
+
+`int Toolchain.project_native_initializer_source( Toolchain t, String source, List gen_dirs, String &projected, String &dependencies, String &errors)`
+
+Selects native initializer edges when a module has no layout metadata.
+The existing external projection wraps the source without assigning source
+ownership and returns the same configured preprocessing dependency receipt.
+
+Source: `src/toolchain.x:274`
+
+<a id="Toolchain.project_native_source"></a>
+#### Toolchain.project_native_source
+
+`int Toolchain.project_native_source( Toolchain t, String source, List gen_dirs, String &projected, String &dependencies, String &errors)`
+
+Projects labelled native source using the compilation's configured flags.
+Portable source and metadata remain unchanged. The returned dependency
+file records the original preprocessing inputs, including native headers.
+Returns zero on success and leaves an error message on native failure.
+
+Source: `src/toolchain.x:217`
 
 <a id="Toolchain.search_directories"></a>
 #### Toolchain.search_directories
@@ -255,7 +300,7 @@ without explicit options, as it reports them, plus the `lib` directory
 beside each reported `include` directory. A compiler that reports none
 contributes none.
 
-Source: `src/toolchain.x:403`
+Source: `src/toolchain.x:508`
 
 ## Public types
 
@@ -274,7 +319,7 @@ Describes one `Scope`-owned host-tool argv action and its reporting policy.
 The `arguments` `List` is retained without copying, follows its owning
 canonical pool, and must remain valid through the action's execution.
 
-Source: `src/toolchain.x:28`
+Source: `src/toolchain.x:44`
 
 <a id="ToolRun"></a>
 ### ToolRun
@@ -286,7 +331,7 @@ A tool that could not start has no job and keeps the message its
 `ToolRun.wait` reports. The borrowed action must remain valid through
 that wait.
 
-Source: `src/toolchain.x:37`
+Source: `src/toolchain.x:53`
 
 <a id="Toolchain"></a>
 ### Toolchain
@@ -298,7 +343,7 @@ The record returned by `toolchain_new` is `Scope`-owned. Its `String`s
 follow their owning canonical pools, which may be ancestors; `cpp_args`,
 `cc_args`, and `ld_args` are retained without copying.
 
-Source: `src/toolchain.x:19`
+Source: `src/toolchain.x:35`
 
 ## Design notes
 

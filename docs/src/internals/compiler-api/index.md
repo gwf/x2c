@@ -48,6 +48,8 @@ Functions and types exposed by each compiler module.
 | [`src/meta-project.x`](meta-project.md) | the project meta build. |
 | [`src/meta-sdk.x`](meta-sdk.md) | the compiler's answers to `lib/meta.x` operations. |
 | [`src/module-access.x`](module-access.md) | declaration ownership and module lookup. |
+| [`src/module-layout.x`](module-layout.md) | complete aggregate prerequisites for module emission. |
+| [`src/module-schedule.x`](module-schedule.md) | directed declaration components. |
 | [`src/module-tree.x`](module-tree.md) | explicit source membership and module ancestry. |
 | [`src/operator-ledger.x`](operator-ledger.md) | binary operator facts and case projections. |
 | [`src/parse-report-macros.x`](parse-report-macros.md) | package, binding, and alias diagnostics. |

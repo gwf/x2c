@@ -147,6 +147,8 @@
 - [src/meta-project.x](https://x2c-lang.dev/docs/internals/compiler-api/meta-project.html)
 - [src/meta-sdk.x](https://x2c-lang.dev/docs/internals/compiler-api/meta-sdk.html)
 - [src/module-access.x](https://x2c-lang.dev/docs/internals/compiler-api/module-access.html)
+- [src/module-layout.x](https://x2c-lang.dev/docs/internals/compiler-api/module-layout.html)
+- [src/module-schedule.x](https://x2c-lang.dev/docs/internals/compiler-api/module-schedule.html)
 - [src/module-tree.x](https://x2c-lang.dev/docs/internals/compiler-api/module-tree.html)
 - [src/operator-ledger.x](https://x2c-lang.dev/docs/internals/compiler-api/operator-ledger.html)
 - [src/parse-report-macros.x](https://x2c-lang.dev/docs/internals/compiler-api/parse-report-macros.html)
