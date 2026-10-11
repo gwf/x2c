@@ -141,7 +141,7 @@ static List Compiler._generated_code(Compiler c, List ast, String basename) {
           %"$directory/${Path.stem(provider)}.xnm", Path.dirname(cfile)));
     Map metadata = {
       format: 2, source: Path.basename(cfile), header: Path.basename(hfile),
-      provider: home_portable_path(c.canonical_path(c.filename)),
+      provider: c.module_tree.identity(c.canonical_path(c.filename)),
       regions: records, order: corder, headerOrder: horder,
       companions: companions,
       namespaceEdges: c.module_layout_plan[%(namespace-requires)],
@@ -344,8 +344,9 @@ static List Compiler._projection_nodes(
         List key = c._original_type_namespace(
           %(${core.car()} ${core.cadr()}));
         List owner = c.sym.get_exact(%("declaration-file" $key));
-        record["familyOwner"] = owner ? owner.cadr() :
-          home_portable_path(c.canonical_path(c.filename));
+        String provider = owner ? home_absolute_path(owner.cadr()) :
+          c.canonical_path(c.filename);
+        record["familyOwner"] = c.module_tree.identity(provider);
       }
     }
     Array definitions = c._projection_definitions(node);
