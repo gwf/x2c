@@ -85,23 +85,81 @@ function refers(text, name, value) {
   return text ~ ("(^|[^A-Za-z0-9_])" name \
     (value ? "([^A-Za-z0-9_]|$)" : "[ \t]*\\("))
 }
+function push(mode, depth) { modes[++sp] = mode; depths[sp] = depth }
+# The text a definition evaluates: comments, strings, and the data in its
+# `%(...)` lists and `$!` quotations become spaces, except the code of a
+# `${...}` or `@{...}` hole and the name a `$name` or `@name` hole inserts.
+# A quotation keeps a `(` right after a hole, where a slot calls a
+# definition.
+function code_of(text,    out, i, j, n, ch, two, mode, hole) {
+  n = length(text); out = ""; sp = 0; push("c", 0)
+  for (i = 1; i <= n; i++) {
+    ch = substr(text, i, 1); two = substr(text, i, 2); mode = modes[sp]
+    if (mode == "s") {
+      if (ch == "\\") i++
+      else if (ch == "\"") sp--
+      else if (two == "${") { push("c", 1); i++ }
+      out = out " "; continue
+    }
+    if (two == "/*") {
+      j = index(substr(text, i + 2), "*/"); i = j ? i + j + 2 : n
+      out = out " "; continue
+    }
+    if (two == "//") {
+      j = index(substr(text, i), "\n"); i = j ? i + j - 2 : n
+      out = out " "; continue
+    }
+    if (two == "%\"") { push("s", 0); i++; out = out " "; continue }
+    if (ch == "\"" || ch == "\x27") {
+      for (j = i + 1; j <= n && substr(text, j, 1) != ch; j++)
+        if (substr(text, j, 1) == "\\") j++
+      i = j; out = out " "; continue
+    }
+    if (mode != "c" && (two == "${" || two == "@{")) {
+      push("c", 1); i++; out = out " "; continue
+    }
+    if (mode != "c" && (ch == "$" || ch == "@") &&
+        match(substr(text, i + 1), /^[A-Za-z_][A-Za-z0-9_]*/)) {
+      out = out "$" substr(text, i + 1, RLENGTH); i += RLENGTH
+      hole = mode == "q"; continue
+    }
+    if (mode == "c" && (two == "%(" || two == "$!")) {
+      push(two == "%(" ? "l" : "q", two == "%("); i++; out = out " "; continue
+    }
+    if (ch == "(" || ch == "{" || ch == "[") depths[sp]++
+    # `$!(T){ ... }` quotes its type and then its code.
+    else if ((ch == ")" || ch == "}" || ch == "]") && --depths[sp] == 0 &&
+             sp > 1 && !(mode == "q" && ch == ")" &&
+                         substr(text, i + 1) ~ /^[ \t\n]*\{/)) {
+      sp--; out = out " "; continue
+    }
+    if (mode == "c" || (hole && ch == "(")) out = out ch
+    else out = out " "
+    hole = 0
+  }
+  return out
+}
 END {
-  # A static definition has no run-time symbol, and one that reaches a
-  # compiler operation has no run-time form, so both are copied.
-  for (i = 1; i <= ndef; i++) copied[i] = statics[i]
-  for (i = 1; i <= ndef; i++)
+  # A static definition has no run-time symbol, so it is copied. One that
+  # reaches a compiler operation, through what it calls, has no run-time
+  # form, so it is copied too; any other public function has one.
+  for (i = 1; i <= ndef; i++) {
+    code[i] = code_of(bodies[i])
+    reaches[i] = values[i]
     for (p = 1; p <= nproto; p++)
-      if (refers(bodies[i], prototypes[p])) copied[i] = 1
+      if (refers(code[i], prototypes[p])) reaches[i] = 1
+  }
   do {
     changed = 0
     for (i = 1; i <= ndef; i++) {
-      if (copied[i]) continue
+      if (reaches[i]) continue
       for (j = 1; j <= ndef; j++)
-        if (copied[j] && refers(bodies[i], names[j], values[j])) {
-          copied[i] = 1; changed = 1; break
+        if (reaches[j] && refers(code[i], names[j], values[j])) {
+          reaches[i] = 1; changed = 1; break
         }
     }
   } while (changed)
+  for (i = 1; i <= ndef; i++) copied[i] = statics[i] || reaches[i]
 
   print "/*  linked-meta.x -- shipped `meta` code compiled into the compiler"
   print ""
