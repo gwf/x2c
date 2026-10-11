@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/module-block-member-diagnostic/second.x:4:13: parse: expected atomic expression
+    return 1 +;
+              ^
+  note: token: ; kind: ;
+

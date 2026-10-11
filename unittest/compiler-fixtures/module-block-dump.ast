@@ -1,0 +1,18 @@
+
+(preproc "#include \"x2c.x\"")
+
+(typedef 
+ (struct "Reading" 
+  (fields (declare (int) (bindings (bind (binding 1 "value") ()))))) 
+ (bindings (bind (binding 2 "Reading") ())))
+
+(protocol 
+ ("protocol-record" ("Readable") "T" (associated) 
+  (members ("read" ((func (("T"))) int) ""))) 
+ external 
+ ((file "unittest/compiler-fixtures/module-block-dump/protocol.x") 
+  (line 5) (column 1) (length 8) (position 135)))
+
+(function (int) 
+ (bind (binding 3 "main") ((fnmod (params (param (void) (bind () ())))))) 
+ (block (at 361 (return (int) (expr (int) (literal (int) "0"))))))
