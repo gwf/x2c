@@ -65,7 +65,7 @@ static typedef struct Helper {
   Frontend frontend, Array owners, Map packages;
   Toolchain toolchain, String include, identity, directory;
   List flags, Array modules;
-  Map deps, before, readiness;
+  Map deps, before, readiness, prefix_compilers, publications, prefix_counts;
   Array groups, built, failures, objects, retained_dependencies, int changed;
 } Helper;
 
@@ -79,6 +79,7 @@ void Frontend.prepare_meta(Frontend f, List inputs) {
   Helper h = {
     .frontend = f, .owners = [],
     .packages = {}, .deps = {}, .before = {}, .readiness = {},
+    .prefix_compilers = {}, .publications = {}, .prefix_counts = {},
     .groups = [], .built = [],
     .failures = [], .objects = [], .retained_dependencies = []};
   h.scan(inputs);
@@ -416,9 +417,13 @@ Var Compiler.prepare_meta_call(
   foreach (String owner, h->owners) {
     if (owner == path) {
       Var state;
-      if (h->readiness.try_get(owner, state) && state == 1)
-        c.report_error(<macro>, "native meta prerequisite cycle", site,
-          %("provider: $owner" "function: $name"));
+      if (h->readiness.try_get(owner, state) && state == 1) {
+        String failure = (*h).prefix(owner, index, name);
+        if (failure)
+          c.report_error(<macro>, "native meta prerequisite cycle", site,
+            %("provider: $owner" "function: $name" $failure));
+        return c.meta_helper_call(name, site, arguments, owner);
+      }
       String failure = (*h).ready(owner, index);
       if (failure) c.refuse_meta_call(name, site, failure);
       return c.meta_helper_call(name, site, arguments, owner);
@@ -426,6 +431,58 @@ Var Compiler.prepare_meta_call(
     index++;
   }
   c.refuse_meta_call(name, site, %"no project provider for $path");
+}
+
+/** Records the active provider's ordinary-bound prefix for readiness calls. */
+void Compiler.register_native_meta_prefix(Compiler c) {
+  if (!active_helper) return;
+  Helper *h = active_helper;
+  String path = c.canonical_path(c.filename);
+  foreach (String owner, h->owners)
+    if (owner == path) {
+      h->prefix_compilers[owner] = Var.new(<pointer>, c);
+      return;
+    }
+}
+
+static String Helper.prefix(Helper &h, String owner, int index, String name) {
+  Var compiler;
+  if (!h.prefix_compilers.try_get(owner, compiler))
+    return "the defining body has not been bound";
+  Compiler c = compiler.pointer();
+  int found = 0;
+  foreach (List entry, c.meta_group)
+    match (entry) case %(function ? ?target *): if (target == name) found = 1;
+  if (!found) return "the defining body depends on its unfinished prefix";
+  Map published = h.publications[index];
+  if (%(function $name) in published) return NULL;
+  Var prior;
+  int sequence = h.prefix_counts.try_get(index, prior) ? (int) prior + 1 : 1;
+  h.prefix_counts[index] = sequence;
+  String base = %"${h.base(index)}_prefix_$sequence";
+  $let(c.meta_build, index + 1) c.write_native_meta_prefix(sequence, published);
+  String failure = h.compile_files(base, owner);
+  if (failure) return failure;
+  String module = %"$base.module", target = %"x2c_module_targets_${index}_prefix_$sequence";
+  List shape = %("-shared");
+#ifdef __APPLE__
+  shape = %("-bundle" "-undefined" "dynamic_lookup");
+#endif
+  failure = Compiler.meta_cc_run(
+    %(${h.toolchain.cc} @shape ${%"$base.o"} "-o" $module), h.directory);
+  if (!failure) failure = Compiler.load_meta_provider(module, index, target);
+  if (failure) return failure;
+  h.objects.push(%"$base.o");
+  h.changed = 1;
+  foreach (List entry, c.meta_group)
+    match (entry) {
+      case %(function ? ?target *): published[%(function $target)] = 1;
+      case %(static (declare ? (bindings (op = (bind ?binding *) ?)))):
+        published[%(state ${binding_identity_spelling(binding)})] = 1;
+    }
+  List resets = published.getdefault(%(initializers), %(nil));
+  published[%(initializers)] = resets.append(%(${%"x2c_module_reset_${index}_prefix_$sequence"}));
+  return NULL;
 }
 
 /* A completed provider is loaded once into the persistent build helper.
@@ -439,6 +496,7 @@ static String Helper.ready(Helper &h, String owner, int index) {
         if (row.car() == index) return row.cadr();
   }
   h.readiness[owner] = 1;
+  h.publications[index] = {};
   h.parse(owner, index);
   String failure = h.compile(index, owner);
   if (failure) {
@@ -455,7 +513,7 @@ static String Helper.ready(Helper &h, String owner, int index) {
   failure = Compiler.meta_cc_run(
     %(${t.cc} @shape ${%"${h.base(index)}.o"} "-o" $module), h.directory);
   if (!failure)
-    failure = Compiler.load_meta_provider(module, index);
+    failure = Compiler.load_meta_provider(module, index, %"x2c_module_targets_$index");
   h.record(index, failure);
   h.readiness[owner] = failure ? 3 : 2;
   return failure;
@@ -496,7 +554,11 @@ static void Helper.parse_source(
   int started = f.start(path, unit);
   defer unit.close();
   defer h.export(unit.context, dependencies, failures, objects);
+  defer h.prefix_compilers.del(path);
+  defer h.publications[index] = unit.context.export(h.publications[index].map().copy());
   unit.compiler.meta_build = index + 1;
+  Map previous = Compiler.use_native_meta_publications(h.publications[index]);
+  defer Compiler.use_native_meta_publications(previous);
   unit.compiler.diagnostics.limit = 0;
   if (!started) return;
   if (!unit.collect(f) || !unit.parse()) {
@@ -535,7 +597,10 @@ static void Helper.dependency(Helper &h, String path) {
    read to `deps`. A quoted include resolves from the directory of `unit`.
    Returns NULL when its object is built, or else why not. */
 static String Helper.compile(Helper &h, int index, String unit) {
-  String base = h.base(index);
+  return h.compile_files(h.base(index), unit);
+}
+
+static String Helper.compile_files(Helper &h, String base, String unit) {
   if (!Path.is_file(%"$base.deps")) return "the unit has no group";
   if (Path.is_file(%"$base.failure")) return Path.read_text(%"$base.failure");
   Toolchain t = h.toolchain;

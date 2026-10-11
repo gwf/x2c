@@ -38,9 +38,9 @@ String Compiler.module_support_header(Compiler c, String path) =>
 
 /** Keeps module output guards independent of invocation path spelling. */
 String Compiler.generated_unit_hash(Compiler c) =>
-  filename_hash(
-    c.module_owner
-      ? c.module_tree.identity(c.canonical_path(c.filename)) : c.filename);
+  filename_hash(c.module_owner
+    ? c.module_tree.identity(c.canonical_path(c.filename)) +
+      (c.native_fragment ? c.native_fragment : "") : c.filename);
 
 /** Returns the relocatable identity of an enrolled source. Canonical paths
     still establish ownership. Identity collisions cannot share native names.

@@ -44,6 +44,8 @@ static macro Stmt $report.macro.function_unavailable(
 
 /* The C compiler and x2c include directory that build meta code. */
 static String meta_cc = NULL, meta_include_dir = NULL;
+static Map meta_prefix_published = NULL;
+static int meta_prefix_sequence = 0;
 
 /** Selects the C compiler `cc` that builds the `meta` code of the units
     this process translates, with the runtime headers this compiler was
@@ -225,10 +227,12 @@ static List Compiler._emit(
   struct GenNames names = *c.names;
   SymTxn transaction = c.begin_semantic_transaction();
   c._isolate(saved, names, stem);
+  c.native_fragment = suffix;
   List code = NULL;
   try {
     if (c.meta_build) c._name_provider_bindings(provider, units, saved.deps);
     List lowered = c._lower(units, stamp, suffix);
+    if (meta_prefix_published) lowered = c._prefix_lowered(lowered);
     /* The unit's protocol adapters and their registration belong to the
        program; group code reaches the runtime's own. */
     List ast;
@@ -253,6 +257,65 @@ static List Compiler._emit(
   return code;
 }
 
+/* Language privacy remains on the original bindings. Native prefix objects
+   share provider-qualified storage and previously compiled bodies. */
+static List Compiler._prefix_lowered(Compiler c, List units) {
+  Array result = [];
+  foreach (List node, units) {
+    match (node) {
+      case %(function ?spec (!set ?bound (bind ?binding *)) ?body): {
+        String name = binding_identity_spelling(binding);
+        if (%(function $name) in meta_prefix_published)
+          node = %(declare ${_prefix_spec(spec, 1)} (bindings $bound));
+        else if (spec.type().is_static() && c._prefix_function(name))
+          node = %(function ${_prefix_spec(spec, 0)} $bound $body);
+      }
+      case %(declare ?spec (bindings
+             (op = (!set ?bound (bind ?binding *)) ?initializer))): {
+        String name = binding_identity_spelling(binding);
+        if (!c._prefix_value(name)) break;
+        c.set_fact(%(emitted $binding),
+          %"_x2c_meta_group_${c.meta_build - 1}_$name");
+        node = %(declare ${_prefix_spec(spec,
+          %(state $name) in meta_prefix_published)}
+          (bindings ${%(state $name) in meta_prefix_published
+            ? bound : %(op = $bound $initializer)}));
+      }
+      case %(declare ?spec (bindings (!set ?bound (bind ?binding *)))): {
+        String name = binding_identity_spelling(binding);
+        if (!c._prefix_value(name)) break;
+        c.set_fact(%(emitted $binding),
+          %"_x2c_meta_group_${c.meta_build - 1}_$name");
+        node = %(declare ${_prefix_spec(spec,
+          %(state $name) in meta_prefix_published)} (bindings $bound));
+      }
+    }
+    result.push(node);
+  }
+  return result.list_free();
+}
+
+static List _prefix_spec(List spec, int external) {
+  List result = spec.filter(%!(value) => value != <static> && value != <extern>);
+  return external ? cons(<extern>, result) : result;
+}
+
+static int Compiler._prefix_function(Compiler c, String name) {
+  foreach (List entry, c.meta_group)
+    match (entry) case %(function ? ?target *):
+      if (target == name) return 1;
+  return 0;
+}
+
+static int Compiler._prefix_value(Compiler c, String name) {
+  foreach (List entry, c.meta_group)
+    match (entry)
+      case %(static (declare ? (bindings
+             (op = (bind ?binding *) ?)))):
+        if (binding_identity_spelling(binding) == name) return 1;
+  return 0;
+}
+
 /* A helper owns replacement bodies separately from the linked runtime.
    Included definitions take their provider's spelling; this file's public
    definitions take its own. Evaluator names remain source spellings. */
@@ -266,7 +329,8 @@ static void Compiler._name_provider_bindings(
   Var identity, String name;
   foreach (List item, units)
     if (_function_identity(item, identity, name) &&
-        c._public_native(item, name)) {
+        (c._public_native(item, name) ||
+         (meta_prefix_published && c._prefix_function(name)))) {
       List binding = item.caddr().cadr();
       c.set_fact(%(emitted $binding), %"_x2c_meta_group_${index}_$name");
     }
@@ -355,6 +419,9 @@ static void Compiler._native_lookups(Compiler c, Array units) {
   List lookup = %(expr $lookup_type (ident $lookup_binding));
   units.push(
     c.rebuild_statement($!{ void *$lookup_binding(String, String); }).cadr());
+  units.push(c.rebuild_statement($!{
+    void x2c_meta_helper_start_provider(int);
+  }).cadr());
   for (int i = 0; i < (int) units.len(); i++)
     units[i] = c._native_targets(units[i], lookup);
 }
@@ -591,6 +658,14 @@ static Var Compiler._template_calls(Compiler c, Var node, List callee) {
 static Var Compiler._native_targets(Compiler c, Var node, List lookup) {
   if (node is not <list>) return node;
   match (node) {
+    case %(expr ? (call ?(String entry) (args))): {
+      foreach (Var (provider, table), meta_build_tables)
+        if (provider != c.canonical_path(c.filename) &&
+            c.module_tree.owner(provider) &&
+            entry == c.module_initializer_entry(provider))
+          return %(expr (void) (call "x2c_meta_helper_start_provider"
+            (args (expr (int) (literal (int) ${table.repr()})))));
+    }
     case %(expr ?(Type result) ${$called(
         %(!set ?callee
           (expr ? ${$source_identifier_content(%((binding ? ?name)))})),
@@ -675,6 +750,9 @@ static Map Compiler._initial_copies(Compiler c, Array units) {
       case %(static (!set ?declaration (declare ?spec
                       (bindings (op = (!set ?bound (bind ?binding ?mods))
                                      ?initializer))))): {
+        if (meta_prefix_published &&
+            %(state ${binding_identity_spelling(binding)}) in meta_prefix_published)
+          continue;
         Type type =
           %(declare $spec (bindings $bound)).type_from_ast().declared();
         if (<const> in type) continue;
@@ -724,10 +802,19 @@ static List Compiler._entry(
   List resets = c._resets(initials);
   List reset = _initializer_function(
     c, %(void), c.sym.introduce(%"x2c_module_reset$suffix"), resets);
-  List table = c._targets(c._named(reset), functions);
+  List named = c._named(reset);
+  Array previous = [];
+  if (meta_prefix_published)
+    foreach (String name, meta_prefix_published.getdefault(%(initializers), %(nil))) {
+      List binding = c.sym.introduce(name);
+      previous.push(c.rebuild_statement($!{ void $binding(void); }).cadr());
+      named = named.append(%(($name $binding ((func ((void))) void))));
+    }
+  List table = c._targets(named, functions);
   List stamp_binding = c.sym.introduce(%"x2c_module_stamp$suffix");
   String literal = %"\"$stamp\"";
   return %(
+    @{previous.list_free()}
     (declare (const char)
       (bindings (op = (bind $stamp_binding ((dim)))
                      (expr (* char) (literal (* char) $literal)))))
@@ -780,6 +867,9 @@ static List Compiler._resets(Compiler c, Map initials) {
       case %(static (declare ?spec
                       (bindings (op = (!set ?bound (bind ?binding *))
                                      ?initializer)))): {
+        if (meta_prefix_published &&
+            %(state ${binding_identity_spelling(binding)}) in meta_prefix_published)
+          continue;
         Type type =
           %(declare $spec (bindings $bound)).type_from_ast().declared();
         if (<const> in type) continue;
@@ -828,7 +918,8 @@ static List Compiler._targets(Compiler c, List named, List functions) {
       %(expr $type (ident $binding)), %("Func"));
     catch %(malformed *): continue;
     entries.push(%(map-entry ${x2c_literal_string(name)} $function));
-    if (name == "x2c_module_reset")
+    if (name == "x2c_module_reset" || (meta_prefix_published &&
+        name in meta_prefix_published.getdefault(%(initializers), %(nil))))
       initializers.push(
         %(map-entry ${x2c_literal_string(c.emitted_binding_name(binding))}
           $function));
@@ -933,10 +1024,13 @@ void Compiler.write_meta_build(Compiler c) {
   int index = c.meta_build - 1;
   if (!meta_build_directory) return;
   c.ensure_macro_lisp();
-  String base = %"$meta_build_directory/group-$index";
+  String extra = meta_prefix_sequence ? %"_prefix_$meta_prefix_sequence" : "";
+  String base = meta_prefix_sequence
+    ? %"$meta_build_directory/group-${index}$extra"
+    : %"$meta_build_directory/group-$index";
   String failure = c._unbound();
   List code = failure ? NULL : c._emit(
-    build_module_stamp(), %"meta_group_$index", %"_$index", failure);
+    build_module_stamp(), %"meta_group_${index}$extra", %"_${index}$extra", failure);
   Array sources = [];
   foreach (Var (path, _), c.resolved_translation_dependencies())
     sources.push(path);
@@ -947,6 +1041,8 @@ void Compiler.write_meta_build(Compiler c) {
   }
   (String hfile, String header, String cfile, String source) = code[:4];
   Path.write_text(%"$meta_build_directory/$hfile", header);
+  if (meta_prefix_sequence)
+    Path.write_text(%"$meta_build_directory/meta_group_$index.h", header);
   Path.write_text(%"$base.c", source);
   for (int i = 4; i < code.len(); i += 2) {
     String filename = code[i], text = code[i + 1];
@@ -963,6 +1059,20 @@ void Compiler.write_meta_build(Compiler c) {
     }
     else Path.write_text(%"$meta_build_directory/$filename", text);
   }
+}
+
+/** Emits one additional provider prefix against previously published names. */
+void Compiler.write_native_meta_prefix(Compiler c, int sequence, Map published) {
+  $let(meta_prefix_sequence, sequence)
+  $let(meta_prefix_published, published)
+    c.write_meta_build();
+}
+
+/** Selects publication records while ordinary parsing emits a provider. */
+Map Compiler.use_native_meta_publications(Map published) {
+  Map previous = meta_prefix_published;
+  meta_prefix_published = published;
+  return previous;
 }
 
 // a session group, staged in process

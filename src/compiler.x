@@ -99,7 +99,7 @@ typedef struct Ancestor {
 typedef struct Compiler {
   String filename, text, root_dir;
   ModuleTree module_tree;
-  String module_owner;
+  String module_owner, native_fragment;
   String module_project_root;
   int source_module;
   Map collected_statics, module_layout_plan;
@@ -733,6 +733,7 @@ void Compiler.retain_native_meta_source(
     %(declaration-source ${after.pos}
       (native-meta-bound $node ${c.source_module})
       ${c.semantic_binding_facts()}));
+  c.register_native_meta_prefix();
 }
 
 /* Register only this production's identities. Shared macro frames are
@@ -1835,7 +1836,9 @@ List Compiler.module_initializer(Compiler c, List binding) {
 
 /** The once-only initializer entry for one module source file. */
 String Compiler.module_initializer_entry(Compiler c, String path) =>
-  %"_x2c_module_init_${filename_hash(c.module_tree.identity(c.canonical_path(path)))}";
+  %"_x2c_module_init_${filename_hash(c.module_tree.identity(c.canonical_path(path)) +
+    (c.native_fragment && c.canonical_path(path) == c.canonical_path(c.filename)
+      ? c.native_fragment : ""))}";
 
 /** Projects ordinary parsed prerequisites into portable spelling rows.
     File-static objects stay in their own compiler's initializer queue. */

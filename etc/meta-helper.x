@@ -324,21 +324,34 @@ static Var _ask(String operation, List arguments) {
 
 /* Provider groups become available as their ordinary parses complete.
    Global native lookup lets a later group call a previously loaded group. */
-static void _load_provider(int index, String path) {
+static void _load_provider(int index, String path, String target) {
   void *handle;
   $scope(&helper_module_scope) handle = dlopen(path, RTLD_NOW | RTLD_GLOBAL);
   if (!handle) {
     _reply(%(load-failure ${String.new(dlerror())}));
     return;
   }
-  String name = %"x2c_module_targets_$index";
-  Map (*table)(void) = (Map (*)(void)) dlsym(handle, name);
+  Map (*table)(void) = (Map (*)(void)) dlsym(handle, target);
   if (!table) {
     _reply(%(load-failure ${String.new(dlerror())}));
     return;
   }
   helper_modules[path] = handle;
-  $scope(&helper_module_scope) helper_tables[index] = table();
+  Map next;
+  $scope(&helper_module_scope) next = table();
+  Var previous;
+  if (helper_tables.try_get(index, previous)) {
+    foreach (Var (key, value), previous.map())
+      if (!(key in next)) next[key] = value;
+    if (index in helper_started) {
+      List failure = _initialize(next);
+      if (failure) {
+        _reply(%(load-failure ${failure.repr()}));
+        return;
+      }
+    }
+  }
+  helper_tables[index] = next;
   _reply(%(loaded));
 }
 
@@ -348,7 +361,8 @@ static void _serve(Var request) {
   Var found;
   match (request) {
     case %(reset): _reset();
-    case %(load ?(int index) ?(String path)): _load_provider(index, path);
+    case %(load ?(int index) ?(String path) ?(String target)):
+      _load_provider(index, path, target);
     case %(call ?(int index) ?(String name) ?(List arguments)
            ?(List globals)): {
       Macro.use_subject(globals);
@@ -431,6 +445,16 @@ static List _start(int index, Map table) {
     helper_started[index] = state;
   }
   return state is <list> ? state.list() : NULL;
+}
+
+/* Native module variable access starts its defining provider's current table.
+   Prefix extensions keep the same table index and initializer identities. */
+void x2c_meta_helper_start_provider(int index) {
+  Var value;
+  if (!helper_tables.try_get(index, value))
+    _fail("native initializer provider is not ready", %("provider: $index"));
+  List failure = _start(index, value.map());
+  match (failure) case %(failure (?code *detail)): Error.raise(code, detail);
 }
 
 /* Native calls between providers use the same unit initialization as a
