@@ -443,7 +443,7 @@ Var Compiler.prepare_meta_call(
 
 /** Records the active provider's ordinary-bound prefix for readiness calls. */
 void Compiler.register_native_meta_prefix(Compiler c) {
-  if (!active_helper) return;
+  if (!active_helper || c.interface_provider) return;
   Helper *h = active_helper;
   String path = c.canonical_path(c.filename);
   foreach (String owner, h->owners)
