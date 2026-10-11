@@ -1581,9 +1581,12 @@ is a `Unit` macro whose body is one function definition, or only its one
 `Function` hole, the rule receives each function definition the program
 writes once, after binding and typing and before the body lowers. A
 definition that the program's own `meta` code places or returns is the
-program's. One that the compiler writes while lowering is not offered: a
-lambda's function, a `defer`'s cleanup, a `Func` adapter, a protocol's
-forwarding member, or the compiler's own replacement of a definition. The
+program's. A `meta` function whose body uses only what the runtime library
+provides also has a runtime form, an ordinary C function in its unit, and
+that definition is the program's, so the rule receives it. A definition
+that the compiler writes while lowering is not offered: a lambda's function,
+a `defer`'s cleanup, a `Func` adapter, a protocol's forwarding member, or
+the compiler's own replacement of a definition. The
 statements such a definition holds from the program still reach the
 program's statement rules. The rule returns the definition unchanged to
 decline, or a replacement definition. The replacement is lowered as written
