@@ -4976,7 +4976,9 @@ cleanup rules apply to guarded arms too.
 
 The lowering belongs to the shipped component `src/component-match.x`, a
 translator that `$rewrite($matched)` registers on the `match` statement
-head; a rule a program registers there runs first.
+head; a rule a program registers there runs first. A `switch` rule a
+program registers sees the statements in the arms, but not the `switch` the
+lowering writes.
 
 ### Errors and cleanup
 

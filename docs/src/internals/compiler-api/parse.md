@@ -12,6 +12,7 @@ X2c declarations, parsed from source or constructed.
 
 | Function | Summary |
 | --- | --- |
+| [`declared_return`](#declared_return) | The declared result type of the function `declaration`, which its `return` statements convert to, or NULL. |
 | [`source_clause`](#source_clause) | The source clause `kind`, which the binder parses when it reaches it. |
 | [`Compiler.bind_callable_body`](#Compiler.bind_callable_body) | Binds a callable's outer block in its active parameter scope. |
 | [`Compiler.bind_catch_arm`](#Compiler.bind_catch_arm) | Binds one catch arm's `body` in a scope of its own, with declarations of the definite binders of `pattern`, read through `handle`, before it. |
@@ -68,13 +69,22 @@ X2c declarations, parsed from source or constructed.
 
 ### Functions
 
+#### declared_return
+
+`Type declared_return(List declaration)`
+
+The declared result type of the function `declaration`, which its
+`return` statements convert to, or NULL.
+
+Source: `src/parse.x:2638`
+
 #### source_clause
 
 `Var source_clause(Symbol kind)`
 
 The source clause `kind`, which the binder parses when it reaches it.
 
-Source: `src/parse.x:3630`
+Source: `src/parse.x:3634`
 
 ### `Compiler`
 
@@ -86,7 +96,7 @@ Source: `src/parse.x:3630`
 Binds a callable's outer block in its active parameter scope. Ordinary
 constructed blocks open their own scope before using this operation.
 
-Source: `src/parse.x:3904`
+Source: `src/parse.x:3908`
 
 <a id="Compiler.bind_catch_arm"></a>
 #### Compiler.bind_catch_arm
@@ -99,7 +109,7 @@ Binder diagnostics use `start`. A source arm's body parses here, and a
 template's declares its binders where its expansion binds it. A parsed
 arm's body already begins with them, so it binds unchanged.
 
-Source: `src/parse.x:3765`
+Source: `src/parse.x:3769`
 
 <a id="Compiler.bind_match_arm"></a>
 #### Compiler.bind_match_arm
@@ -111,7 +121,7 @@ definite binders of `pattern` when the arm `binds`. Binder diagnostics
 use `start`. A source arm's body parses here with the typed captures
 `types` that its pattern recorded.
 
-Source: `src/parse.x:3868`
+Source: `src/parse.x:3872`
 
 <a id="Compiler.bind_parameter"></a>
 #### Compiler.bind_parameter
@@ -131,7 +141,7 @@ Source: `src/parse.x:2404`
 Binds the source `if`, `while`, `do`, `for`, `match`, or `try` at the
 cursor through the same binders as constructed syntax.
 
-Source: `src/parse.x:3648`
+Source: `src/parse.x:3652`
 
 <a id="Compiler.bind_syntax"></a>
 #### Compiler.bind_syntax
@@ -144,7 +154,7 @@ The input must evaluate to a nonempty AST `List` valid for the requested
 order; `return_type` applies only while descendants are bound. This method
 mutates `Sym` and does not open a semantic transaction.
 
-Source: `src/parse.x:3003`
+Source: `src/parse.x:3005`
 
 <a id="Compiler.bind_template_local"></a>
 #### Compiler.bind_template_local
@@ -175,7 +185,7 @@ Source: `src/parse.x:1160`
 Gives the placements made since `first` the `result` of the expansion
 that made them.
 
-Source: `src/parse.x:2818`
+Source: `src/parse.x:2820`
 
 <a id="Compiler.defines_main"></a>
 #### Compiler.defines_main
@@ -214,7 +224,7 @@ one the transform lowers, as its origin anchor; the function, as a
 definition whose body is still the empty `(seq)`; or the unit, as a
 `String` expression of its path.
 
-Source: `src/parse.x:2738`
+Source: `src/parse.x:2740`
 
 <a id="Compiler.enter"></a>
 #### Compiler.enter
@@ -225,7 +235,7 @@ Enters `row` as the innermost syntax `Compiler.enclosing` answers. Its
 owner leaves it with `Block.pop`, or with `Compiler.leave_item` for a
 block item.
 
-Source: `src/parse.x:2727`
+Source: `src/parse.x:2729`
 
 <a id="Compiler.enter_function"></a>
 #### Compiler.enter_function
@@ -236,7 +246,7 @@ Enters the function definition `declaration`, whose body the
 transform lowers next, so a rule lowering that body places code at its
 entry. Returns the row's depth for `Compiler.leave_function`.
 
-Source: `src/parse.x:2766`
+Source: `src/parse.x:2768`
 
 <a id="Compiler.finish_foreign_alias"></a>
 #### Compiler.finish_foreign_alias
@@ -248,7 +258,7 @@ Constructs a foreign alias from one direct function declaration and target.
 typed, a function. Storage is limited to `static` or `inline`, when
 present, and variadic parameters are rejected.
 
-Source: `src/parse.x:4048`
+Source: `src/parse.x:4052`
 
 <a id="Compiler.finish_initializers"></a>
 #### Compiler.finish_initializers
@@ -260,7 +270,7 @@ themselves, or that an after-initialization rewrite follows, to
 declarations followed by that code in source order, preserving their
 installed bindings and the enclosing lifetime.
 
-Source: `src/parse.x:2866`
+Source: `src/parse.x:2868`
 
 <a id="Compiler.leave_function"></a>
 #### Compiler.leave_function
@@ -272,7 +282,7 @@ began and returns the code placed at its entry, in placement order, or
 NULL. The code binds in a scope of its own with the function's result
 type; its caller lowers it.
 
-Source: `src/parse.x:2777`
+Source: `src/parse.x:2779`
 
 <a id="Compiler.leave_item"></a>
 #### Compiler.leave_item
@@ -283,7 +293,7 @@ Leaves the block item `enter` began and returns the code placed after
 it, bound in its block, or NULL. A declarator in the item that placed
 code is incomplete unless its block declaration took that code.
 
-Source: `src/parse.x:2828`
+Source: `src/parse.x:2830`
 
 <a id="Compiler.meta_form_is_declaration"></a>
 #### Compiler.meta_form_is_declaration
@@ -565,7 +575,7 @@ Records `code` to follow the innermost block item, or the initialized
 declarator whose initializer is being parsed directly in it. The
 expansion that placed it gives it its result when it finishes.
 
-Source: `src/parse.x:2805`
+Source: `src/parse.x:2807`
 
 <a id="Compiler.place_entry"></a>
 #### Compiler.place_entry
@@ -577,7 +587,7 @@ after its parameters bind and before its first statement. While parsing,
 a lambda body is inside the definition that holds it; while lowering, a
 lambda body is the body of its own lifted function.
 
-Source: `src/parse.x:2794`
+Source: `src/parse.x:2796`
 
 <a id="Compiler.protocol_form_starts"></a>
 #### Compiler.protocol_form_starts
