@@ -2609,7 +2609,7 @@ static List Compiler._function_body(
   int expression_body = !syntax && c._at_function_arrow();
   if (!syntax && !expression_body) c.expect(<"{">);
   Type old_return = c.return_type;
-  c.return_type = _declared_return(declaration);
+  c.return_type = declared_return(declaration);
   String old_fn = c.fn_name;
   c.fn_name = name;
   c.sym.push_scope(c.params);
@@ -2633,7 +2633,9 @@ static List Compiler._function_body(
   return body;
 }
 
-static Type _declared_return(List declaration) {
+/** The declared result type of the function `declaration`, which its
+    `return` statements convert to, or NULL. */
+Type declared_return(List declaration) {
   match (declaration.type_from_ast())
     case %((func *) *result): return result.type().declared();
   return NULL;
@@ -2779,7 +2781,7 @@ List Compiler.leave_function(Compiler c, int depth) {
   if (c.placements.len()) {
     List declaration = ((Ancestor *) c.ancestors.bytes)[depth].node;
     c.sym.push_new_scope();
-    $let(c.return_type, _declared_return(declaration))
+    $let(c.return_type, declared_return(declaration))
       entry = c._entry_code(depth);
     c.sym.pop_scope();
   }

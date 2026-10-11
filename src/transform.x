@@ -388,10 +388,12 @@ static Ast Compiler._function_node(
 
 /* Lowers the block `body` of the function `declaration`, preceded by the
    code that rules placed at the function's entry while it lowered. A
-   `defer` in that code covers the body, as one written first in it would. */
+   `defer` in that code covers the body, as one written first in it would.
+   A `return` that a replacement binds converts to the declared result. */
 static List Compiler._entered_body(Compiler c, List declaration, List body) {
   int depth = c.enter_function(declaration);
-  List lowered = c._step(body);
+  List lowered;
+  $let(c.return_type, declared_return(declaration)) lowered = c._step(body);
   List entry = c.leave_function(depth);
   if (!entry) return lowered;
   List items = c._sequence(entry, 0).append(lowered.cdr());
