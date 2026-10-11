@@ -183,6 +183,18 @@ def cases():
                               'return outer.inner.value; }\n'),
         "main.x": probes.consumer("box.x", "answer() == 42"),
     }, options, None
+    yield "private_type_sizeof_operands", {
+        "box.x": 'module {"box/left.x", "box/right.x"}\n',
+        "box/left.x": ('static typedef struct Hidden {char bytes[17];} Hidden;\n'
+                       'int left(void) {Hidden value = {{0}}; '
+                       'return sizeof(struct Hidden) == 17 '
+                       '&& sizeof(Hidden) == sizeof(value) ? 17 : 0;}\n'),
+        "box/right.x": ('static typedef struct Hidden {char bytes[25];} Hidden;\n'
+                        'int right(void) {Hidden value = {{0}}; '
+                        'return sizeof(struct Hidden) == 25 '
+                        '&& sizeof(Hidden) == sizeof(value) ? 25 : 0;}\n'),
+        "main.x": probes.consumer("box.x", "left() + right() == 42"),
+    }, options, None
     yield "value_layout_file_static_prerequisite", {
         "box.x": ('module typedef struct Outer Outer;\n'
                   'module typedef struct Carrier Carrier;\n'
