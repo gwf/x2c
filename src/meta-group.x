@@ -415,10 +415,11 @@ static void Compiler._name_provider_bindings(
       c.name_meta_provider_bindings(path, index);
   int index = c.meta_build - 1;
   c.name_meta_provider_bindings(provider, index);
-  foreach (List row, c._native_reference_rows(units)) {
-    (int owner, String spelling, List binding) = row;
-    c.set_fact(%(emitted $binding), %"_x2c_meta_group_${owner}_$spelling");
-  }
+  $let(c.filename, provider)
+    foreach (List row, c._native_reference_rows(units)) {
+      (int owner, String spelling, List binding) = row;
+      c.set_fact(%(emitted $binding), %"_x2c_meta_group_${owner}_$spelling");
+    }
   Var identity, String name;
   foreach (List item, units)
     if (_function_identity(item, identity, name) &&
