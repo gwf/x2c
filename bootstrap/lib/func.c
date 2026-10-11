@@ -455,47 +455,27 @@ static Func _new(FuncAdapter adapter, List signature, int rest, const void * con
     static const X2CErrorSite _x2c_error_site_15 = {.file = "../../lib/func.x",.function = "_new",.line = 408};  x2c_error_raise_n(& _x2c_error_site_15, 4372535886, 1, Symbol_var(39502), List_var(signature));  __builtin_unreachable();
   }
   if(context_size && ! context){
-    static const X2CErrorSite _x2c_error_site_16 = {.file = "../../lib/func.x",.function = "_new",.line = 409};  x2c_error_raise_n(& _x2c_error_site_16, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Func.new_context")), NULL))));
-    __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_16 = {.file = "../../lib/func.x",.function = "_new",.line = 409};  x2c_error_raise_n(& _x2c_error_site_16, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Func.new_context")), NULL))));  __builtin_unreachable();
   }
-  size_t context_offset = _context_offset();
-  if(context_size > SIZE_MAX - context_offset){
-    Var _x2c_literal_part_8 = String_var(String_join(NULL, cons(String_var(String_new("Func.new_context")), NULL)));
-    Var _x2c_literal_part_9 = Var_box_ulong(context_size);
-    {
-      static const X2CErrorSite _x2c_error_site_17 = {.file = "../../lib/func.x",.function = "_new",.line = 412};
-      x2c_error_raise_n(& _x2c_error_site_17, 1358596898646632, 2, Symbol_var(34096809266140), _x2c_literal_part_8, Symbol_var(1265290), _x2c_literal_part_9);
-      __builtin_unreachable();
+  size_t context_offset = _context_offset();  if(context_size > SIZE_MAX - context_offset){
+    Var _x2c_literal_part_8 = String_var(String_join(NULL, cons(String_var(String_new("Func.new_context")), NULL)));  Var _x2c_literal_part_9 = Var_box_ulong(context_size); {
+      static const X2CErrorSite _x2c_error_site_17 = {.file = "../../lib/func.x",.function = "_new",.line = 412};  x2c_error_raise_n(& _x2c_error_site_17, 1358596898646632, 2, Symbol_var(34096809266140), _x2c_literal_part_8, Symbol_var(1265290), _x2c_literal_part_9);  __builtin_unreachable();
     }
 
   }
-  int n = List_len(params);
-  int void_params = n == 1 && Var_is_row(List_car(params), 9, 7, 4) && Var_equal(List_car(params), List_var(_33));
-  Func fn = Scope_calloc(1, context_offset + context_size);
-  fn -> sig = signature;
-  fn -> params = void_params ? NULL : params;
-  fn -> adapter = adapter;
-  fn -> rest = rest;
-  fn -> context_size = context_size;
-  fn -> nparams = void_params ? 0 : n;
-  if(context_size) memcpy(Func__context(fn), context, context_size);
-  return fn;
+  int n = List_len(params);  int void_params = n == 1 && Var_is_row(List_car(params), 9, 7, 4) && Var_equal(List_car(params), List_var(_33));  Func fn = Scope_calloc(1, context_offset + context_size);  fn -> sig = signature;  fn -> params = void_params ? NULL : params;  fn -> adapter = adapter;  fn -> rest = rest;  fn -> context_size = context_size;  fn -> nparams = void_params ? 0 : n;  if(context_size) memcpy(Func__context(fn), context, context_size);  return fn;
 }
 
 List Func_signature(Func function){
   if(! function){
-    static const X2CErrorSite _x2c_error_site_18 = {.file = "../../lib/func.x",.function = "Func_signature",.line = 434};
-    x2c_error_raise_n(& _x2c_error_site_18, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Func.signature")), NULL))));
-    __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_18 = {.file = "../../lib/func.x",.function = "Func_signature",.line = 434};  x2c_error_raise_n(& _x2c_error_site_18, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Func.signature")), NULL))));  __builtin_unreachable();
   }
   return function -> sig;
 }
 
 const void * Func_context(Func function){
   if(! function){
-    static const X2CErrorSite _x2c_error_site_19 = {.file = "../../lib/func.x",.function = "Func_context",.line = 444};
-    x2c_error_raise_n(& _x2c_error_site_19, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Func.context")), NULL))));
-    __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_19 = {.file = "../../lib/func.x",.function = "Func_context",.line = 444};  x2c_error_raise_n(& _x2c_error_site_19, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Func.context")), NULL))));  __builtin_unreachable();
   }
   return function -> context_size ? Func__context(function) : NULL;
 }
@@ -510,9 +490,7 @@ Var Func_var(Func function){
 
 Func Var_func(Var v){
   if(! Var_is_row(v, 9, 7, 1)){
-    static const X2CErrorSite _x2c_error_site_20 = {.file = "../../lib/func.x",.function = "Var_func",.line = 467};
-    x2c_error_raise_n(& _x2c_error_site_20, 4477479911782, 2, Symbol_var(1510312), Symbol_var(437126), Symbol_var(74754136), Symbol_var(Var_tag(v)));
-    __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_20 = {.file = "../../lib/func.x",.function = "Var_func",.line = 467};  x2c_error_raise_n(& _x2c_error_site_20, 4477479911782, 2, Symbol_var(1510312), Symbol_var(437126), Symbol_var(74754136), Symbol_var(Var_tag(v)));  __builtin_unreachable();
   }
   return Var_pointer(v);
 }

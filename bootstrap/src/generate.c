@@ -1515,8 +1515,7 @@ static void Compiler__publish(Compiler c, List outputs){
   {
     String _x2c_macro_reason_0 = String_new(strerror(Var_int(Var_convert(List_assoc(failure, Symbol_var(11703198)), 3453797))));
     Compiler_report_error(c, 354920, _8, c -> token, ({
-      Var _x2c_literal_part_7 = String_var(String_join(NULL, cons(String_var(_9), cons(String_var(Var_str(List_assoc(failure, Symbol_var(1051920)))), NULL))));  Var _x2c_literal_part_8 = String_var(String_join(NULL, cons(String_var(_10), cons(String_var(_x2c_macro_reason_0), NULL))));
-      cons(_x2c_literal_part_7, cons(_x2c_literal_part_8, NULL));
+      Var _x2c_literal_part_7 = String_var(String_join(NULL, cons(String_var(_9), cons(String_var(Var_str(List_assoc(failure, Symbol_var(1051920)))), NULL))));  Var _x2c_literal_part_8 = String_var(String_join(NULL, cons(String_var(_10), cons(String_var(_x2c_macro_reason_0), NULL))));  cons(_x2c_literal_part_7, cons(_x2c_literal_part_8, NULL));
     }
     ));
   }
@@ -1575,8 +1574,7 @@ static List Compiler__source_projection(Compiler c, List ast, Map inline_bodies)
               }
 
             }
-             break; } } _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497937393941672ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor) { Var unit = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1)) {node = cons(_23, cons(String_var(String_join(NULL, cons(String_var(_24), cons(String_var(Var_string(unit)), cons(String_var(_25), NULL))))), NULL));
-             break; } } static MatchCaptureSite _x2c_match_site_1; if (x2c_match_site_try_capture(&_x2c_match_site_1, _x2c_match_expr, List_var(_43), &_x2c_match_capture)) { Var type = _x2c_match_values[0]; Var declarator = _x2c_match_values[1]; Var binding = _x2c_match_values[2]; Var body = _x2c_match_values[3]; {
+             break; } } _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497937393941672ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor) { Var unit = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1)) {node = cons(_23, cons(String_var(String_join(NULL, cons(String_var(_24), cons(String_var(Var_string(unit)), cons(String_var(_25), NULL))))), NULL));  break; } } static MatchCaptureSite _x2c_match_site_1; if (x2c_match_site_try_capture(&_x2c_match_site_1, _x2c_match_expr, List_var(_43), &_x2c_match_capture)) { Var type = _x2c_match_values[0]; Var declarator = _x2c_match_values[1]; Var binding = _x2c_match_values[2]; Var body = _x2c_match_values[3]; {
               type = List_var(_with_attributes(Compiler_semantic_binding_facts(c), Var_list(type), binding));  type = List_var(Type_list(_noreturn(Var_type(type), Var_list(declarator), Var_list(body))));  Type function_type = Var_type(type);  if(Type_is_inline(function_type) && ! Type_is_static(function_type)){
                 Map_setindex(inline_bodies, binding, int_var(1));  node = _header_function(Var_type(type), Var_list(declarator), Var_list(body));
               }

@@ -2354,8 +2354,7 @@ static List _initialized_new(String owner, int heap, List extras){
   }
   List value = x2c_ident(_449);
   List declaration = heap ?({
-    List _x2c_hole_9 = _ref(String_join(NULL, cons(String_var(owner), cons(String_var(_684), NULL))));
-    cons(_2, cons(_3, cons(List_var(cons(_118, cons(List_var(({
+    List _x2c_hole_9 = _ref(String_join(NULL, cons(String_var(owner), cons(String_var(_684), NULL))));  cons(_2, cons(_3, cons(List_var(cons(_118, cons(List_var(({
       Var _x2c_literal_part_83 = List_var(cons(List_var(cons(_25, cons(_440, cons(_40, cons(List_var(type), NULL))))), NULL));  Var _x2c_literal_part_84 = List_var(cons(_412, cons(List_var(({
         Var _x2c_literal_part_81 = List_var(cons(_413, cons(List_var(cons(_25, cons(_419, cons(_139, cons(List_var(value), NULL))))), _56)));  Var _x2c_literal_part_82 = List_var(cons(_4, cons(_7, cons(List_var(cons(_8, cons(List_var(cons(_25, cons(_129, cons(_130, cons(List_var(_x2c_hole_9), NULL))))), _63))), NULL))));  cons(_250, cons(_420, cons(_x2c_literal_part_81, cons(_x2c_literal_part_82, NULL))));
       }
@@ -2602,8 +2601,7 @@ static List _string_method(String owner, String member){
 
 static List _pointer_output(String owner, List value){
   return({
-    String _x2c_hole_17 = String_join(NULL, cons(String_var(_1287), cons(String_var(owner), cons(String_var(_1288), NULL))));
-    cons(_2, cons(_3, cons(List_var(cons(_4, cons(_7, cons(List_var(cons(_8, cons(_1301, cons(List_var(({
+    String _x2c_hole_17 = String_join(NULL, cons(String_var(_1287), cons(String_var(owner), cons(String_var(_1288), NULL))));  cons(_2, cons(_3, cons(List_var(cons(_4, cons(_7, cons(List_var(cons(_8, cons(_1301, cons(List_var(({
       Var _x2c_literal_part_105 = List_var(cons(_25, cons(_129, cons(_130, cons(String_var(_x2c_hole_17), NULL)))));  Var _x2c_literal_part_106 = List_var(cons(_4, cons(_7, cons(List_var(cons(_622, cons(_1305, cons(List_var(cons(_25, cons(_129, cons(_130, cons(List_var(value), NULL))))), NULL)))), NULL))));  cons(_23, cons(_x2c_literal_part_105, cons(_x2c_literal_part_106, NULL)));
     }
     )), NULL)))), NULL)))), NULL)));
@@ -2772,8 +2770,7 @@ static List _binding_record(Var group, Var name, List function, List all_rows, L
     while(List_try_next(_x2c_macro_object_13, &(_x2c_macro_cursor_13), &(_x2c_macro_cursor_output_13))){
       row = Var_list(_x2c_macro_cursor_output_13);
       if(Var_equal(List_getindex(row, 1), String_var(lisp_name))) x2c_diagnostic_fail(_1319, ({
-        Var _x2c_literal_part_122 = String_var(String_join(NULL, cons(String_var(_1318), cons(String_var(group_name), NULL))));  Var _x2c_literal_part_123 = String_var(String_join(NULL, cons(String_var(_1320), cons(String_var(lisp_name), NULL))));
-        cons(_x2c_literal_part_122, cons(_x2c_literal_part_123, NULL));
+        Var _x2c_literal_part_122 = String_var(String_join(NULL, cons(String_var(_1318), cons(String_var(group_name), NULL))));  Var _x2c_literal_part_123 = String_var(String_join(NULL, cons(String_var(_1320), cons(String_var(lisp_name), NULL))));  cons(_x2c_literal_part_122, cons(_x2c_literal_part_123, NULL));
       }
       ));
     }

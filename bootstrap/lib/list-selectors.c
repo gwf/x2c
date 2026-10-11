@@ -322,6 +322,8 @@ static String Var_string(Var);
 
 static Var List_car(List);
 
+String String_join(String, List);
+
 static List List_cdr(List);
 
 static List _selector_double(List steps){

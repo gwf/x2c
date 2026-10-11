@@ -749,8 +749,7 @@ static void Call_overdue(Call * c){
 
 static void Call_stopped(Call * call, String reason){
   Compiler_report_error((* call).compiler, 27335838, _19, (* call).site, ({
-    Var _x2c_literal_part_4 = String_var(String_join(NULL, cons(String_var(_15), cons(String_var((* call).name), NULL))));  Var _x2c_literal_part_5 = String_var(String_join(NULL, cons(String_var(_20), cons(String_var(reason), NULL))));
-    cons(_x2c_literal_part_4, cons(_x2c_literal_part_5, NULL));
+    Var _x2c_literal_part_4 = String_var(String_join(NULL, cons(String_var(_15), cons(String_var((* call).name), NULL))));  Var _x2c_literal_part_5 = String_var(String_join(NULL, cons(String_var(_20), cons(String_var(reason), NULL))));  cons(_x2c_literal_part_4, cons(_x2c_literal_part_5, NULL));
   }
   ));
 }

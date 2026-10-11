@@ -416,6 +416,8 @@ static Symbol _kind(Array edits, int at){
 
 static String char_str(char);
 
+String String_join(String, List);
+
 static Hunk _hunk(Array edits, int at, int old_line, int new_line){
   int start = at > _CONTEXT ? at - _CONTEXT : 0, lead = at - start;
   Hunk h ={

@@ -1530,6 +1530,8 @@ static int MapIntInt__core_equal(MapIntInt _x2c_macro_a_1, MapIntInt _x2c_macro_
   return 1;
 }
 
+String String_join(String, List);
+
 MapIntInt MapIntInt_new_capacity(unsigned _x2c_macro_capacity_10){
   if(! _init_guard_) _file_init_();
   if(! _capacity_valid(_x2c_macro_capacity_10)){

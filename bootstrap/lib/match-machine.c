@@ -558,6 +558,8 @@ void MatchMachine_begin(MatchMachine * m, MachineView program, Var input){
 
 static Var String_var(String);
 
+String String_join(String, List);
+
 #include "error.h"
 
 
