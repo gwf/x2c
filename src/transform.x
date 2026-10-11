@@ -368,12 +368,8 @@ static Ast Compiler._function_node(
   $let(c.fn_name, owner) $let(c.inline_header, inline_header) {
     List new_return = c._step(return_type);
     List new_decl = c._step(declarator);
-    List prepared_body = body;
-    if (ast_contains_head(body, <lambda>))
-      prepared_body = c.prepare_lambda_cells(
-        declarator, c._lower_lambda_destructuring(body));
     List declaration = %(declare $return_type (bindings $declarator));
-    List new_body = c._entered_body(declaration, prepared_body);
+    List new_body = c._entered_body(declaration, body);
     transformed = %(function $new_return $new_decl $new_body);
   }
   return transformed;
@@ -844,25 +840,6 @@ static List Compiler._declaration(Compiler c, List ast) {
     }
   }
   return ast;
-}
-
-/* Cell rewriting needs declaration sites, so the destructuring
-   declarations of a body with a lambda take their rule's replacement,
-   bound but not yet lowered, before its cells are prepared. A declaration
-   no rule takes stays for lowering, which reports it. */
-static List Compiler._lower_lambda_destructuring(Compiler c, List ast) {
-  if (!ast) return ast;
-  match (ast) {
-    case %(dstrdecl *): {
-      List rewritten = c.rewrite(
-        <node>, <dstrdecl>, ast, AST_BLOCK, c.return_type, NULL);
-      return rewritten ? rewritten : ast;
-    }
-  }
-  // The recursion below then only descends into subtrees it will rewrite.
-  if (!ast_contains_head(ast, <dstrdecl>)) return ast;
-  return Ast.rewrite_children(
-    ast, %!(List child) => c._lower_lambda_destructuring(child));
 }
 
 static List _value_declaration(Type type, List binding, List value) {

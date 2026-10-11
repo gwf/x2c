@@ -14,6 +14,10 @@
     with them and the record's fields. A public inline function reaches the
     unit's private record through a bridge function.
 
+    A local or parameter that a lambda shares by reference moves into a
+    Scope cell, so it outlives the function that declares it; a function
+    rule rewrites each function definition whose lambdas share one.
+
     Each definition precedes the definitions that call it: the compiler
     settles whether a linked copy reaches a compile-time operation when the
     copy binds.
@@ -460,7 +464,7 @@ meta static Map _lambda_shared(List params, List items) {
   return cells;
 }
 
-$rewrite(%(function ? (bind ? ((fnmod (params *)))) (block *) unused))
+$rewrite(%(function ? (bind ? ((fnmod (params *)))) (block *)))
 /** Moves each local and parameter of the function `node` that a lambda in
     its body shares by reference into a Scope cell, so the binding outlives
     the call: a parameter is copied into its cell at entry, a local is

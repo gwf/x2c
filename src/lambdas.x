@@ -5,7 +5,8 @@
     A source lambda and a lambda that a macro or transform constructs bind
     through the same capture operations, which record each captured binding
     and its value or reference mode in semantic binding facts. The rows
-    leave here resolved and in first-use order; `callables.x` lowers them.
+    leave here resolved and in first-use order; `component-lambdas.x`
+    lowers them.
 */
 #pragma once
 #include "compiler.x"
