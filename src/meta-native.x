@@ -17,6 +17,7 @@
 static $(import "../etc/lisp-bindings.xlisp")
 #include "macros.x"
 #include "meta-group.x"
+#include "meta-project.x"
 #include "meta-sdk.x"
 #include "meta.x"
 #include "stage.x"
@@ -182,7 +183,7 @@ void Compiler.install_collected_meta_function(
   if (c.shares_meta_definition(name)) return;
   c.ensure_macro_lisp();
   Map linked = _linked_module();
-  if (c.groups_meta() && !(name in linked)) return;
+  if (!c.meta_build && c.groups_meta() && !(name in linked)) return;
   c._install_stub(
     name, declaration.type_from_ast().canonicalize(), NULL, marker);
 }
@@ -224,11 +225,14 @@ static Var _meta_stub(Func function, const FuncArg *argv) {
         return c._meta_apply(linked[name], values.list_free());
     }
   }
-  if (c.meta_build) raise %(meta-later (name $name));
   List rows = c._subject_rows(values);
   Var previous = Macro.subject();
   Macro.use_subject(rows);
   defer Macro.use_subject(previous);
+  if (c.meta_build) {
+    if (c.signature_only) raise %(meta-later (name $name));
+    return c.prepare_meta_call(name, site, values.list_free(), provider);
+  }
   if (!c.groups_meta())
     return c.meta_helper_call(name, site, values.list_free(), provider);
   c.bind_meta_group(name, site);
@@ -370,8 +374,19 @@ static int Compiler._code_result(Compiler c, Var value) {
     an expression takes a placeholder, and a template `slot`, which has
     none, is reported. */
 Var Compiler.run_meta_call(
-  Compiler c, List expression, Token site, int slot) =>
-  c._run_meta(expression, NULL, NULL, site, slot);
+  Compiler c, List expression, Token site, int slot) {
+  List key = NULL;
+  if (site && !slot && !c.macro_stack) {
+    String source = c.token_source(site, NULL);
+    key = %(native-meta-value ${home_portable_path(absolute_path(source))}
+      ${site.pos});
+    Var retained;
+    if (c.evaluated_effects.try_get(key, retained)) return retained;
+  }
+  Var value = c._run_meta(expression, NULL, NULL, site, slot);
+  if (key && value is not void) c.evaluated_effects[key] = value;
+  return value;
+}
 
 /** Applies the meta function spelled `name` to the evaluated `arguments`
     at `site`, outside any expansion. A call the project meta build leaves
@@ -440,6 +455,14 @@ static Var _meta_named_value(
   Compiler c, String name, List arguments, Token site) {
   Var function = c._meta_function(name, site);
   meta_call_form = cons(Atom.intern(name), arguments);
+  if (function is void && c.meta_build) {
+    List rows = c._subject_rows(arguments.array());
+    Var previous = Macro.subject();
+    Macro.use_subject(rows);
+    defer Macro.use_subject(previous);
+    return c.prepare_meta_call(
+      name, site, arguments, c.meta_declaration_provider(name));
+  }
   if (function === _linked_module()[name])
     return _apply_linked(function.pointer(), arguments);
   return c._meta_apply(function, arguments);
@@ -479,10 +502,24 @@ static Var Compiler._meta_function(Compiler c, String name, Token site) {
     c.macro_lisp.try_get(name, function);
   if (!c.macro_lisp.try_get(name, function) && c.bind_native_meta(name))
     c.macro_lisp.try_get(name, function);
-  if (function is void && c.meta_build) raise %(meta-later (name $name));
+  if (function is void && c.meta_build) {
+    if (c.signature_only) raise %(meta-later (name $name));
+    return void;
+  }
   if (function is void)
     $report.macro.call_binding(c, site, name);
   return function;
+}
+
+/** Returns the defining source advertised by an ordinary meta declaration,
+    including a prototype reached before its provider body is ready. */
+String Compiler.meta_declaration_provider(Compiler c, String name) {
+  foreach (Var (key, value), c.sym.unit_symbols())
+    match (key)
+      case %("source-node" (declaration ?(String provider) ?)):
+        foreach (List row, c._native_meta_rows(value))
+          if (row.car() == name) return provider;
+  return NULL;
 }
 
 /** Records the provider of a public bodied meta function in its interface.
@@ -527,7 +564,6 @@ static int Compiler._bind_project_meta(
   Compiler c, String name, int install) {
   Var target;
   if (!c.project_meta.try_get(name, target)) return 0;
-  if (c.meta_build) return 0;
   Var bound;
   if (!install && c.macro_lisp.try_get(name, bound)) return 1;
   Var (signature, provider) = target;

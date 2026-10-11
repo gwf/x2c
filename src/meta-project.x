@@ -65,8 +65,10 @@ static typedef struct Helper {
   Frontend frontend, Array owners, Map packages;
   Toolchain toolchain, String include, identity, directory;
   List flags, Array modules;
-  Map deps, before, Array groups, built, failures, objects, int changed;
+  Map deps, before, readiness, Array groups, built, failures, objects, int changed;
 } Helper;
+
+static Helper *active_helper = NULL;
 
 /** Builds the helper that runs the project `meta` functions `inputs`
     reach, or finds it in the cache, and makes it the one their translation
@@ -75,7 +77,8 @@ static typedef struct Helper {
 void Frontend.prepare_meta(Frontend f, List inputs) {
   Helper h = {
     .frontend = f, .owners = [],
-    .packages = {}, .deps = {}, .before = {}, .groups = [], .built = [],
+    .packages = {}, .deps = {}, .before = {}, .readiness = {},
+    .groups = [], .built = [],
     .failures = [], .objects = []};
   h.scan(inputs);
   String include = NULL, cc = Compiler.meta_cc(include);
@@ -346,7 +349,7 @@ static String Helper.identify(Helper &h, String stamp, String compiler) {
 }
 
 /* The C compiler flags of meta code, besides its include directories. */
-static List _cc_flags(void) => %("-fsigned-char" "-O1");
+static List _cc_flags(void) => %("-fsigned-char" "-fPIC" "-O1");
 
 /* Every helper links this unit, which answers the compiler's calls. */
 static String _loop_source(void) => %"${x2c_get_root()}/etc/meta-helper.x";
@@ -379,16 +382,82 @@ static List Helper.build(Helper &h) {
   foreach (String path, %(@{h.owners} @{h.modules} $loop))
     h.deps[path] = 1;
   Compiler.use_meta_build_directory(h.directory, h.owners);
-  int index = 1;
-  foreach (String owner, h.owners) h.parse(owner, index++);
-  Compiler.use_meta_build_directory(NULL, NULL);
-  index = 1;
-  foreach (String owner, h.owners) {
-    String failure = h.compile(index, owner);
-    h.record(index++, failure);
+  defer Compiler.use_meta_build_directory(NULL, NULL);
+  String failure = h.link(count);
+  if (failure) return h.write_manifest(failure);
+  Array tables = [];
+  for (int index = 1; index < count; index++) tables.push(index);
+  h.use(%((groups ${tables.list()}) (failures ()) (failure "")));
+  Compiler.meta_helper_building(1);
+  defer Compiler.meta_helper_building(0);
+  defer Compiler.stop_meta_helper();
+  $let(active_helper, &h) {
+    int index = 1;
+    foreach (String owner, h.owners) h.ready(owner, index++);
   }
+  Compiler.stop_meta_helper();
   collect_forget_provisional_entries();
   return h.write_manifest(h.link(count));
+}
+
+/** Makes a project provider ready before publishing the value its call
+    computes. Readiness follows calls actually reached by ordinary parsing. */
+Var Compiler.prepare_meta_call(
+  Compiler c, String name, Token site, List arguments, String provider) {
+  if (!active_helper) raise %(meta-later (name $name));
+  Helper *h = active_helper;
+  Var row;
+  if (!provider.len() && c.project_meta.try_get(name, row))
+    provider = ((List) row).cadr();
+  String path = provider.len() ? real_path(home_absolute_path(provider))
+                              : c.filename;
+  int index = 1;
+  foreach (String owner, h->owners) {
+    if (owner == path) {
+      Var state;
+      if (h->readiness.try_get(owner, state) && state == 1)
+        c.report_error(<macro>, "native meta prerequisite cycle", site,
+          %("provider: $owner" "function: $name"));
+      String failure = (*h).ready(owner, index);
+      if (failure) c.refuse_meta_call(name, site, failure);
+      return c.meta_helper_call(name, site, arguments, owner);
+    }
+    index++;
+  }
+  c.refuse_meta_call(name, site, %"no project provider for $path");
+}
+
+/* A completed provider is loaded once into the persistent build helper.
+   Adding a table does not reset tables that have already answered calls. */
+static String Helper.ready(Helper &h, String owner, int index) {
+  Var state;
+  if (h.readiness.try_get(owner, state)) {
+    if (state == 2) return NULL;
+    if (state == 3)
+      foreach (List row, h.failures)
+        if (row.car() == index) return row.cadr();
+  }
+  h.readiness[owner] = 1;
+  h.parse(owner, index);
+  String failure = h.compile(index, owner);
+  if (failure) {
+    h.record(index, failure);
+    h.readiness[owner] = 3;
+    return failure;
+  }
+  String module = %"${h.base(index)}.module";
+  Toolchain t = h.toolchain;
+  List shape = %("-shared");
+#ifdef __APPLE__
+  shape = %("-bundle" "-undefined" "dynamic_lookup");
+#endif
+  failure = Compiler.meta_cc_run(
+    %(${t.cc} @shape ${%"${h.base(index)}.o"} "-o" $module), h.directory);
+  if (!failure)
+    failure = Compiler.load_meta_provider(module, index);
+  h.record(index, failure);
+  h.readiness[owner] = failure ? 3 : 2;
+  return failure;
 }
 
 /* The path of table `index`'s group files, without their suffixes. */
@@ -426,11 +495,11 @@ static void Helper.parse_source(
   unit.compiler.meta_build = index + 1;
   unit.compiler.diagnostics.limit = 0;
   if (!started) return;
-  /* A call of a project function the collection meets fails before the
-     helper exists; the parse still reaches every definition. */
-  unit.collect(f);
-  unit.compiler.diagnostics.reset();
-  unit.parse();
+  if (!unit.collect(f) || !unit.parse()) {
+    Path.write_text(%"${h.base(index)}.deps", path);
+    Path.write_text(%"${h.base(index)}.failure",
+      unit.compiler.diagnostics.entries().repr());
+  }
   foreach (Var (read, _), unit.compiler.resolved_translation_dependencies())
     h.deps[read] = 1;
 }

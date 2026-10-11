@@ -322,12 +322,33 @@ static Var _ask(String operation, List arguments) {
   }
 }
 
+/* Provider groups become available as their ordinary parses complete.
+   Global native lookup lets a later group call a previously loaded group. */
+static void _load_provider(int index, String path) {
+  void *handle;
+  $scope(&helper_module_scope) handle = dlopen(path, RTLD_NOW | RTLD_GLOBAL);
+  if (!handle) {
+    _reply(%(load-failure ${String.new(dlerror())}));
+    return;
+  }
+  String name = %"x2c_module_targets_$index";
+  Map (*table)(void) = (Map (*)(void)) dlsym(handle, name);
+  if (!table) {
+    _reply(%(load-failure ${String.new(dlerror())}));
+    return;
+  }
+  helper_modules[path] = handle;
+  $scope(&helper_module_scope) helper_tables[index] = table();
+  _reply(%(loaded));
+}
+
 /* Serves one request; the end of the requests, or `(quit)`, ends the
    helper. */
 static void _serve(Var request) {
   Var found;
   match (request) {
     case %(reset): _reset();
+    case %(load ?(int index) ?(String path)): _load_provider(index, path);
     case %(call ?(int index) ?(String name) ?(List arguments)
            ?(List globals)): {
       Macro.use_subject(globals);

@@ -77,6 +77,7 @@ static Scope helper_scope = NULL;
 static pid_t helper_pid = 0, helper_owner = 0;
 static int helper_to = -1, helper_from = -1, helper_table = 0;
 static int helper_reset = 0, helper_status = -1;
+static int helper_building = 0;
 static Buffer helper_input = NULL;
 
 // calls
@@ -432,9 +433,29 @@ void Compiler.use_meta_helper(String path, Map failures, Map units) {
   }
 }
 
+/** Keeps native build calls in one helper session while provider tables
+    become available. Ordinary translation resumes per-unit resets. */
+void Compiler.meta_helper_building(int enabled) { helper_building = enabled; }
+
+/** Loads one ready provider table without restarting the helper or
+    reinitializing any previously started table. Returns its load failure. */
+String Compiler.load_meta_provider(String path, int index) {
+  Call call = {.name = "provider load", .table = index};
+  call.set_deadline();
+  if (!_helper_start()) return "the compile-time helper did not start";
+  call.send_frame(%(load $index $path));
+  Var reply = call.next_reply();
+  match (reply) {
+    case %(loaded): return NULL;
+    case %(load-failure ?(String failure)): return failure;
+  }
+  return "the helper sent an unknown provider reply";
+}
+
 /** Selects the table of the unit at `filename` for the calls that follow,
     and resets the unit's `meta static` values before the first one. */
 void Compiler.begin_meta_unit(String filename) {
+  if (helper_building) return;
   helper_table = filename ? _table_of(Path.absolute(filename), 0) : 0;
   helper_reset = 1;
 }
