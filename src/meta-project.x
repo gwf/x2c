@@ -675,8 +675,13 @@ static void Helper.export(
     int index = h.retained_tables[i];
     if (index in seen) continue;
     seen[index] = 1;
-    if (index in h.publications)
-      h.publications[index] = context.export(h.publications[index].map().copy());
+    if (index in h.publications) {
+      Map publication = h.publications[index];
+      Map retained = context.export(publication.copy());
+      foreach (Var key, publication.keys()) publication.del(key);
+      publication.merge(retained);
+      h.publications[index] = context.export(publication);
+    }
     foreach (Map retained, %(${h.native_sources} ${h.native_targets} ${h.native_loaded}))
       if (index in retained) retained[index] = context.export(retained[index]);
   }
