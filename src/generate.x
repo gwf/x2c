@@ -190,9 +190,11 @@ static List Compiler._projection_nodes(
       marked.push(node);
       continue;
     }
+    String include = NULL;
+    int angle = 0;
     if (node.car() == <preproc>) {
-      int angle = 0;
       String target = preproc_include_target(node.cadr(), angle);
+      include = target;
       if (!target) {
         marked.push(node);
         continue;
@@ -208,6 +210,12 @@ static List Compiler._projection_nodes(
     }
     Map record = {id: id, role: role, family: family,
       kind: node.car().str(), optional: Json.bool(1)};
+    if (include) {
+      record["includeTarget"] = include;
+      record["includeAngle"] = Json.bool(angle);
+      String resolved = c.resolve_source_include(include, angle);
+      if (resolved) record["includePath"] = c.canonical_path(resolved);
+    }
     records.push(record);
     order.push(id);
     marked.push(%(preproc "#pragma x2c_region_begin $id"));

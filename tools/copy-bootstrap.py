@@ -3,6 +3,7 @@
 
 from pathlib import Path
 import argparse
+import json
 import os
 import re
 import shutil
@@ -29,6 +30,17 @@ def copied_text(source, destination, placements):
         relative = os.path.relpath(placed, destination.parent)
         return f'{match[1]}"{relative}"'
 
+    if source.suffix == ".xnm":
+        metadata = json.loads(source.read_text(encoding="ascii"))
+        for row in metadata["regions"]:
+            for field in ("includeTarget", "includePath"):
+                spelling = row.get(field)
+                if not spelling or not Path(spelling).is_absolute():
+                    continue
+                placed = placements.get(Path(spelling).resolve())
+                if placed is not None:
+                    row[field] = os.path.relpath(placed, destination.parent)
+        return json.dumps(metadata, separators=(",", ":"), ensure_ascii=True)
     return INCLUDE.sub(reconnect, source.read_text(encoding="ascii"))
 
 

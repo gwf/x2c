@@ -23,6 +23,7 @@ class Region:
     unsupported_pragmas: tuple[str, ...]
     children: tuple[str, ...] = ()
     demands: tuple[str, ...] = ()
+    epoch: int = 0
 
 class Packing:
     def __init__(self):
@@ -62,7 +63,7 @@ def extract(text, selected_edges=None):
     """Keep native tokens intact; region ownership comes from the compiler."""
     packing, regions, stack = Packing(), {}, []
     initializer_edges = {}
-    origin_file, origin_line = None, 0
+    origin_file, origin_line, epoch = None, 0, 0
     for line in text.splitlines(keepends=True):
         marker = MARKER.fullmatch(line.strip())
         if marker:
@@ -78,14 +79,14 @@ def extract(text, selected_edges=None):
                     lines.append(f'#line {origin_line + 1} {json.dumps(origin_file)}\n')
                 stack.append(dict(name=name, lines=lines,
                                   alignment=packing.alignment, pragmas=[],
-                                  children=[], demands=[]))
+                                  children=[], demands=[], epoch=epoch))
             elif not stack or stack[-1]['name'] != name:
                 raise ProjectionError(f'unmatched region end: {name}')
             else:
                 row = stack.pop()
                 regions[name] = Region(name, ''.join(row['lines']),
                     row['alignment'], tuple(row['pragmas']),
-                    tuple(row['children']), tuple(row['demands']))
+                    tuple(row['children']), tuple(row['demands']), row['epoch'])
             origin_line += 1
             continue
         edge = re.fullmatch(r'\s*#\s*pragma\s+x2c_init_edge\s+(\w+)\s+(\w+)\s*', line)
@@ -111,7 +112,8 @@ def extract(text, selected_edges=None):
             if pragma and pragma[1].strip() != 'once':
                 if not stack:
                     raise ProjectionError('unowned native pragma: ' + pragma[1].strip())
-                stack[-1]['pragmas'].append(pragma[1].strip())
+                epoch += 1
+                stack[-1]['lines'].append('#pragma x2c_opaque_epoch ' + str(epoch) + '\n')
         if stack:
             if pack:
                 value = '' if packing.alignment is None else str(packing.alignment)
@@ -187,7 +189,9 @@ def project(text, metadata, selected_edges=None):
         if family:
             families.setdefault(family, name)
     selected, active, emitted_families, output = set(), set(), set(), []
+    current_epoch = 0
     def visit(name):
+        nonlocal current_epoch
         if name in selected:
             return
         if name in active:
@@ -209,8 +213,8 @@ def project(text, metadata, selected_edges=None):
             active.remove(name)
             selected.add(name)
             return
-        if region.unsupported_pragmas:
-            raise ProjectionError('pragma state requires projection: ' + ', '.join(region.unsupported_pragmas))
+        if region.epoch != current_epoch:
+            raise ProjectionError('declaration crosses opaque pragma state: ' + name)
         # Pack state is a native-compiler property, so restore the state at the
         # original region boundary. A private stack frame prevents a region's
         # trailing setting from changing another provider's incoming state.
@@ -218,8 +222,13 @@ def project(text, metadata, selected_edges=None):
         output.append('#pragma pack(push)\n#pragma pack(' + value + ')\n')
         for line in region.text.splitlines(keepends=True):
             reference = re.fullmatch(r'\s*#\s*pragma\s+x2c_region_ref\s+(\w+)\s*', line)
+            barrier = re.fullmatch(r'\s*#\s*pragma\s+x2c_opaque_epoch\s+(\d+)\s*', line)
             if reference:
                 visit(reference[1])
+            elif barrier:
+                if int(barrier[1]) != current_epoch + 1:
+                    raise ProjectionError('opaque pragma state order changed: ' + name)
+                current_epoch += 1
             else:
                 output.append(line)
         output.append('\n#pragma pack(pop)\n')
