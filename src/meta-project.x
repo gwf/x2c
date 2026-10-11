@@ -68,9 +68,11 @@ static typedef struct Helper {
   Frontend frontend, Array owners, Map packages;
   Toolchain toolchain, String include, identity, directory;
   List flags, Array modules;
-  Map deps, before, readiness, prefix_compilers, publications, prefix_counts, header_active;
+  Map deps, before, readiness, prefix_compilers, publications, prefix_counts;
+  Map header_active;
   Map native_sources, native_targets, native_loaded;
-  Array groups, built, failures, objects, retained_dependencies, retained_tables;
+  Array groups, built, failures, objects, retained_dependencies;
+  Array retained_tables;
   Array initializer_receipts;
   Scope lifetime;
   Compiler caller;
@@ -87,7 +89,8 @@ void Frontend.prepare_meta(Frontend f, List inputs) {
   Helper h = {
     .frontend = f, .owners = [],
     .packages = {}, .deps = {}, .before = {}, .readiness = {},
-    .prefix_compilers = {}, .publications = {}, .prefix_counts = {}, .header_active = {},
+    .prefix_compilers = {}, .publications = {}, .prefix_counts = {},
+    .header_active = {},
     .native_sources = {}, .native_targets = {}, .native_loaded = {},
     .groups = [], .built = [],
     .failures = [], .objects = [], .retained_dependencies = [],
@@ -432,7 +435,8 @@ Var Compiler.prepare_meta_call(
         if (h->readiness.try_get(owner, state) && state == 1) {
           String failure = (*h).prefix(owner, index, name);
           if (failure)
-            c.report_error(<macro>, "native meta prerequisite cycle", site,
+            c.report_error(
+              <macro>, "native meta prerequisite cycle", site,
               %("provider: $owner" "function: $name" $failure));
           return c.meta_helper_call(name, site, arguments, owner);
         }
@@ -473,12 +477,14 @@ void Compiler.require_native_meta_header(Compiler c, String path) {
       if (!h->prefix_compilers.try_get(owner, compiler)) {
         String failure = (*h).prepare_native(index);
         if (failure)
-          c.report_error(<macro>, "native declaration provider is not ready",
+          c.report_error(
+            <macro>, "native declaration provider is not ready",
             NULL, %("provider: $owner" $failure));
         return;
       }
       Var prior;
-      int sequence = h->prefix_counts.try_get(index, prior) ? (int) prior + 1 : 1;
+      int sequence = h->prefix_counts.try_get(index, prior)
+        ? (int) prior + 1 : 1;
       h->prefix_counts[index] = sequence;
       Compiler prefix = compiler.pointer();
       $let(prefix.meta_build, index + 1)
@@ -494,10 +500,10 @@ static String Helper.prefix(Helper &h, String owner, int index, String name) {
   if (!h.prefix_compilers.try_get(owner, compiler))
     return "the defining body has not been bound";
   Compiler c = compiler.pointer();
-  if (h.caller) {
+  if (h.caller)
     $let(c.diagnostics, h.caller.diagnostics)
       $let(c.diagnostics.printer, c) c.bind_native_meta_prefix();
-  } else c.bind_native_meta_prefix();
+  else c.bind_native_meta_prefix();
   int found = 0;
   foreach (String target, c.native_prefix_definitions())
     if (target == name) found = 1;
@@ -508,9 +514,11 @@ static String Helper.prefix(Helper &h, String owner, int index, String name) {
   int sequence = h.prefix_counts.try_get(index, prior) ? (int) prior + 1 : 1;
   h.prefix_counts[index] = sequence;
   String base = %"${h.base(index)}_prefix_$sequence";
-  $let(c.meta_build, index + 1) c.write_native_meta_prefix(sequence, published);
+  $let(c.meta_build, index + 1)
+    c.write_native_meta_prefix(sequence, published);
   h.native_sources[index] = h.retain(base);
-  h.native_targets[index] = h.retain(%"x2c_module_targets_${index}_prefix_$sequence");
+  h.native_targets[index] = h.retain(
+    %"x2c_module_targets_${index}_prefix_$sequence");
   h.retained_tables.push(index);
   String failure = h.load_native_closure(index);
   if (failure) return failure;
@@ -522,12 +530,15 @@ static String Helper.prefix(Helper &h, String owner, int index, String name) {
     h.publish(published, %(state $value), 1);
   foreach (List entry, c.meta_group)
     match (entry) {
-      case %(function ? ?target *): h.publish(published, %(function $target), 1);
+      case %(function ? ?target *):
+        h.publish(published, %(function $target), 1);
       case %(static (declare ? (bindings (op = (bind ?binding *) ?)))):
-        h.publish(published, %(state ${binding_identity_spelling(binding)}), 1);
+        h.publish(
+          published, %(state ${binding_identity_spelling(binding)}), 1);
     }
   List resets = published.getdefault(%(initializers), %());
-  h.publish(published, %(initializers),
+  h.publish(
+    published, %(initializers),
     resets.append(%(${%"x2c_module_reset_${index}_prefix_$sequence"})));
   return NULL;
 }
@@ -654,8 +665,10 @@ static String Helper.load_native_closure(Helper &h, int index) {
     shape = %("-bundle" "-undefined" "dynamic_lookup");
 #endif
     failure = Compiler.meta_cc_run(
-      %(${h.toolchain.cc} @shape @{objects.list_free()} "-o" $module), h.directory);
-    if (!failure) failure = Compiler.load_meta_providers(module, targets.list_free());
+      %(${h.toolchain.cc} @shape @{objects.list_free()} "-o" $module),
+      h.directory);
+    if (!failure)
+      failure = Compiler.load_meta_providers(module, targets.list_free());
     if (failure) return failure;
     foreach (int table, indices) {
       h.native_loaded[table] = h.native_sources[table];
@@ -676,7 +689,8 @@ static String Helper.base(Helper &h, int index) =>
 
 /* Removes what a parse left of the group at `base`. */
 static void _clear(String base) {
-  foreach (String suffix, %(".c" ".xnm" ".native" ".available" ".deps" ".failure")) {
+  foreach (String suffix,
+    %(".c" ".xnm" ".native" ".available" ".deps" ".failure")) {
     String file = %"$base$suffix";
     if (Path.exists(file)) Path.remove_file(file);
   }
@@ -714,7 +728,8 @@ static void Helper.parse_source(
   if (!started) return;
   if (!unit.collect(f) || !unit.parse()) {
     Path.write_text(%"${h.base(index)}.deps", path);
-    Path.write_text(%"${h.base(index)}.failure",
+    Path.write_text(
+      %"${h.base(index)}.failure",
       unit.compiler.diagnostics.entries().repr());
   }
   foreach (Var (read, _), unit.compiler.resolved_translation_dependencies())
@@ -738,7 +753,8 @@ static void Helper.export(
       publication.export_to(context, _export_native_record, &owner);
       h.publications[index] = publication;
     }
-    foreach (Map retained, %(${h.native_sources} ${h.native_targets} ${h.native_loaded}))
+    foreach (Map retained,
+      %(${h.native_sources} ${h.native_targets} ${h.native_loaded}))
       if (index in retained) retained[index] = context.export(retained[index]);
   }
   for (int i = failures; i < (int) h.failures.len(); i++)
@@ -792,13 +808,13 @@ static String Helper.compile_files(Helper &h, String base, String unit) {
   List directories = %(${h.directory} ${Path.dirname(unit)});
   String projected, native_dependencies, errors;
   if (t.project_native_source(
-      %"$base.c", directories, projected, native_dependencies, errors))
+    %"$base.c", directories, projected, native_dependencies, errors))
     return errors;
   if (!native_dependencies) {
     Compiler c = Compiler.new();
     c.configure_module(unit);
     if (c.module_owner && t.project_native_initializer_source(
-        %"$base.c", directories, projected, native_dependencies, errors))
+      %"$base.c", directories, projected, native_dependencies, errors))
       return errors;
   }
   if (native_dependencies) h.add_depfile(native_dependencies);

@@ -691,7 +691,7 @@ static int Build._compile_sources(Build b) {
   foreach (String source, b.c_sources) {
     String projected, native_deps, errors;
     if (b.toolchain.project_native_source(
-        source, b._include_dirs(source), projected, native_deps, errors)) {
+      source, b._include_dirs(source), projected, native_deps, errors)) {
       fprintf(stderr, "x2c: native layout projection failed: %s\n", errors);
       return 1;
     }

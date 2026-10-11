@@ -286,20 +286,24 @@ static List Compiler._prefix_objects(Compiler c, List spec, List bindings) {
     String name = binding_identity_spelling(bound.cadr());
     if (!name || !c._prefix_value(name)) continue;
     shared = 1;
-    c.set_fact(%(emitted ${bound.cadr()}),
+    c.set_fact(
+      %(emitted ${bound.cadr()}),
       %"_x2c_meta_group_${c.meta_build - 1}_$name");
     if (%(state $name) in meta_prefix_published) external = 1;
   }
   if (!shared) return %(declare $spec (bindings @bindings));
   Array output = [];
   foreach (List declarator, bindings)
-    output.push(external && declarator.car() == <op>
-      ? declarator.caddr() : declarator);
-  return %(declare ${_prefix_spec(spec, external)} (bindings @{output.list_free()}));
+    output.push(
+      external && declarator.car() == <op> ? declarator.caddr() : declarator);
+  return
+    %(declare ${_prefix_spec(spec, external)}
+      (bindings @{output.list_free()}));
 }
 
 static List _prefix_spec(List spec, int external) {
-  List result = spec.filter(%!(value) => value != <static> && value != <extern>);
+  List result =
+    spec.filter(%!(value) => value != <static> && value != <extern>);
   return external ? cons(<extern>, result) : result;
 }
 
@@ -325,7 +329,7 @@ List Compiler.native_prefix_functions(Compiler c) {
   return names.list_free();
 }
 
-/* Only reached bound expressions identify executable provider prerequisites. */
+/* Reached bound expressions identify executable provider prerequisites. */
 static List Compiler._native_reference_rows(Compiler c, Array units) {
   Array rows = [];
   Map seen = {};
@@ -399,9 +403,12 @@ List Compiler.native_prefix_values(Compiler c) {
     match (node) case %(declare ?spec (bindings *bindings)):
       if (!spec.type().is_extern())
         foreach (List declarator, bindings) {
-          List bound = declarator.car() == <op> ? declarator.caddr() : declarator;
+          List bound = declarator.car() == <op>
+            ? declarator.caddr() : declarator;
           String name = binding_identity_spelling(bound.cadr());
-          if (name && !%(declare $spec (bindings $bound)).type_from_ast().is_function())
+          if (name &&
+              !%(declare $spec
+                (bindings $bound)).type_from_ast().is_function())
             names.push(name);
         }
   return names.list_free();
@@ -597,7 +604,8 @@ static void Compiler._required_provider_headers(Compiler c, Array units) {
   Map types = declaration_type_namespaces(units, c.sym.unit_symbols());
   foreach (Var key, types.keys()) {
     List owner = c.sym.get_exact(%("declaration-file" $key));
-    if (owner) providers[c.canonical_path(home_absolute_path(owner.cadr()))] = 1;
+    if (owner)
+      providers[c.canonical_path(home_absolute_path(owner.cadr()))] = 1;
   }
   Array headers = [];
   foreach (String path, providers.keys())
@@ -873,7 +881,8 @@ static Map Compiler._initial_copies(Compiler c, Array units) {
                       (bindings (op = (!set ?bound (bind ?binding ?mods))
                                      ?initializer))))): {
         if (meta_prefix_published &&
-            %(state ${binding_identity_spelling(binding)}) in meta_prefix_published)
+            %(state ${binding_identity_spelling(binding)})
+              in meta_prefix_published)
           continue;
         Type type =
           %(declare $spec (bindings $bound)).type_from_ast().declared();
@@ -927,7 +936,8 @@ static List Compiler._entry(
   List named = c._named(reset);
   Array previous = [];
   if (meta_prefix_published)
-    foreach (String name, meta_prefix_published.getdefault(%(initializers), %())) {
+    foreach (String name,
+      meta_prefix_published.getdefault(%(initializers), %())) {
       List binding = c.sym.introduce(name);
       previous.push(c.rebuild_statement($!{ void $binding(void); }).cadr());
       named = named.append(%(($name $binding ((func ((void))) void))));
@@ -990,7 +1000,8 @@ static List Compiler._resets(Compiler c, Map initials) {
                       (bindings (op = (!set ?bound (bind ?binding *))
                                      ?initializer)))): {
         if (meta_prefix_published &&
-            %(state ${binding_identity_spelling(binding)}) in meta_prefix_published)
+            %(state ${binding_identity_spelling(binding)})
+              in meta_prefix_published)
           continue;
         Type type =
           %(declare $spec (bindings $bound)).type_from_ast().declared();
@@ -1030,7 +1041,8 @@ static List Compiler._named(Compiler c, List reset) {
 static List Compiler._targets(Compiler c, List named, List functions) {
   Array entries = [], initializers = [], initializer_order = [];
   if (meta_prefix_published)
-    foreach (String name, meta_prefix_published.getdefault(%(initializers), %()))
+    foreach (String name,
+      meta_prefix_published.getdefault(%(initializers), %()))
       initializer_order.push(name);
   if (c.meta_build)
     entries.push(
@@ -1161,7 +1173,8 @@ void Compiler.write_meta_build(Compiler c) {
     : %"$meta_build_directory/group-$index";
   String failure = c._unbound();
   List code = failure ? NULL : c._emit(
-    build_module_stamp(), %"meta_group_${index}$extra", %"_${index}$extra", failure);
+    build_module_stamp(), %"meta_group_${index}$extra",
+    %"_${index}$extra", failure);
   Array sources = [];
   foreach (Var (path, _), c.resolved_translation_dependencies())
     sources.push(path);
@@ -1184,7 +1197,8 @@ void Compiler.write_meta_build(Compiler c) {
       metadata["source"] = Path.basename(%"$base.c");
       Array companions = [];
       foreach (Var (provider, table), meta_build_tables)
-        if (table != index && provider in c.resolved_translation_dependencies() &&
+        if (table != index &&
+            provider in c.resolved_translation_dependencies() &&
             c.module_tree.owner(provider) &&
             (!meta_declaration_header ||
              Path.is_file(%"$meta_build_directory/group-$table.xnm")))
@@ -1208,7 +1222,8 @@ static void _publish_meta_metadata(String path, String receipt) {
 }
 
 /** Emits one additional provider prefix against previously published names. */
-void Compiler.write_native_meta_prefix(Compiler c, int sequence, Map published) {
+void Compiler.write_native_meta_prefix(
+  Compiler c, int sequence, Map published) {
   $let(meta_prefix_sequence, sequence)
   $let(meta_prefix_published, published)
     c.write_meta_build();
@@ -1310,7 +1325,7 @@ static String _build_module(String directory, String module, List code) {
   linker.cc_args = %("-fPIC" "-O0");
   String projected, dependencies, errors;
   if (linker.project_native_source(
-      %"$directory/$cfile", %($directory), projected, dependencies, errors))
+    %"$directory/$cfile", %($directory), projected, dependencies, errors))
     return errors;
   List arguments = linker.module_action(
     output,

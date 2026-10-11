@@ -1856,8 +1856,10 @@ List Compiler.module_initializer(Compiler c, List binding) {
 
 /** The once-only initializer entry for one module source file. */
 String Compiler.module_initializer_entry(Compiler c, String path) =>
-  %"_x2c_module_init_${filename_hash(c.module_tree.identity(c.canonical_path(path)) +
-    (c.native_fragment && c.canonical_path(path) == c.canonical_path(c.filename)
+  %"_x2c_module_init_${filename_hash(
+    c.module_tree.identity(c.canonical_path(path)) +
+    (c.native_fragment &&
+     c.canonical_path(path) == c.canonical_path(c.filename)
       ? c.native_fragment : ""))}";
 
 /** Projects ordinary parsed prerequisites into portable spelling rows.
