@@ -211,7 +211,9 @@ int Toolchain.project_native_source(
   if (access(helper, R_OK))
     helper = %"${home_dir()}/bootstrap/native-layout-project.py";
   status = tool_capture(
-    %("python3" $helper $expanded $metadata $projected $dependencies),
+    %("python3" $helper "--project"
+      $expanded $metadata $projected $dependencies
+      "--" @{t._compile_arguments(gen_dirs)}),
     output, errors);
   unlink(expanded);
   return status;

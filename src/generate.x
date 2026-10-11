@@ -144,6 +144,7 @@ static List Compiler._generated_code(Compiler c, List ast, String basename) {
       match (key) case %(namespace-provider ?id): native_providers[id] = path;
     Map metadata = {
       format: 2, source: Path.basename(cfile), header: Path.basename(hfile),
+      provider: home_portable_path(c.canonical_path(c.filename)),
       regions: records, order: corder, headerOrder: horder,
       companions: companions, nativeProviders: native_providers,
       namespaceEdges: c.module_layout_plan[%(namespace-requires)],
@@ -199,7 +200,9 @@ static String Compiler._projection_binding_namespace(
   Compiler c, List binding, int alias) {
   List key = NULL;
   Var source;
-  if (c.semantic_binding_facts().try_get(%(src-key $binding), source))
+  if (c.semantic_binding_facts().try_get(%(namespace $binding), source))
+    key = source;
+  else if (c.semantic_binding_facts().try_get(%(src-key $binding), source))
     key = source.list().cadr();
   if (!key) {
     String path = c.canonical_path(c.filename);
@@ -288,6 +291,17 @@ static List Compiler._projection_nodes(
     }
     Map record = {id: id, role: role, family: family,
       kind: node.car().str(), optional: Json.bool(1)};
+    if (family) {
+      match (node) case %((!or typedef declare) ?base ?): {
+        Type type = base;
+        List core = type.base_type();
+        List key = c._original_type_namespace(
+          %(${core.car()} ${core.cadr()}));
+        List owner = c.sym.get_exact(%("declaration-file" $key));
+        record["familyOwner"] = owner ? owner.cadr() :
+          home_portable_path(c.canonical_path(c.filename));
+      }
+    }
     if (include) {
       record["includeTarget"] = include;
       record["includeAngle"] = Json.bool(angle);

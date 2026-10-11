@@ -150,6 +150,7 @@ def extract(text, selected_edges=None):
 def load_metadata(path):
     """Load immutable portable companion records without inspecting C names."""
     seen, records, edges, namespace_edges, native_providers = set(), {}, {}, {}, {}
+    owner_sources, region_providers = {}, {}
     primary = json.loads(path.read_text())
     def load(current):
         current = current.resolve()
@@ -159,7 +160,11 @@ def load_metadata(path):
         metadata = json.loads(current.read_text())
         if metadata['format'] != primary['format']:
             raise ProjectionError('mixed native metadata formats')
+        provider = metadata.get('provider')
+        if provider:
+            owner_sources[provider] = str(current.parent / metadata['source'])
         for row in metadata['regions']:
+            region_providers[row['id']] = provider
             previous = records.get(row['id'])
             if previous is not None and previous != row:
                 raise ProjectionError('conflicting region identity: ' + row['id'])
@@ -177,11 +182,13 @@ def load_metadata(path):
     primary['familyEdges'] = edges
     primary['namespaceEdges'] = namespace_edges
     primary['nativeProviders'] = native_providers
+    primary['_ownerSources'] = owner_sources
+    primary['_regionProviders'] = region_providers
     primary['_inputs'] = sorted(str(path) for path in seen)
     return primary
 
 
-def project(text, metadata, selected_edges=None):
+def project(text, metadata, selected_edges=None, owner_streams=None):
     """Order exact regions using producer-supplied binding prerequisites."""
     if metadata['format'] not in (1, 2):
         raise ProjectionError('unknown metadata format')
@@ -196,6 +203,19 @@ def project(text, metadata, selected_edges=None):
         family = records[name].get('family')
         if family:
             families.setdefault(family, name)
+    for provider, stream in (owner_streams or {}).items():
+        owned = extract(stream)
+        for name, region in owned.items():
+            row = records.get(name, {})
+            family = row.get('family')
+            if family and row.get('familyOwner') == provider and \
+                    metadata['_regionProviders'].get(name) == provider:
+                regions[name] = region
+                families[family] = name
+                # Native aliases and prerequisites must use this same stream.
+                for sibling, value in owned.items():
+                    if metadata['_regionProviders'].get(sibling) == provider:
+                        regions[sibling] = value
     namespaces = {}
     for name, region in regions.items():
         for namespace in records[name].get('defines', []):
@@ -279,7 +299,41 @@ def retain_projection_inputs(depfile, metadata):
         return value.replace('\\', '\\\\').replace('$', '$$').replace(
             ' ', '\\ ').replace('#', '\\#').replace(':', '\\:')
     insertion = ' \\\n  ' + ' '.join(escape(value) for value in inputs)
+    for owner_receipt in metadata.get('_ownerReceipts', []):
+        owner_text = Path(owner_receipt).read_text()
+        owner_end = re.search(r'(?<!\\)\n', owner_text)
+        rule = owner_text[:owner_end.start()] if owner_end else owner_text
+        delimiter = re.search(r'(?<!\\):', rule)
+        if delimiter is None:
+            raise ProjectionError('malformed owner preprocessing receipt')
+        insertion += ' \\\n  ' + rule[delimiter.end():].strip()
     path.write_text(text[:position] + insertion + text[position:])
+
+
+def preprocess_owners(metadata, compiler, directory):
+    """Use each defining source's configured CPP environment exactly once."""
+    streams = {}
+    required = {row.get('familyOwner') for row in metadata['regions']
+                if row.get('family')}
+    for ordinal, (provider, source) in enumerate(
+            metadata.get('_ownerSources', {}).items()):
+        if provider not in required:
+            continue
+        source = Path(source)
+        if not source.exists():
+            raise ProjectionError('missing defining native source: ' + str(source))
+        expanded = directory / f'owner-{ordinal}.i'
+        receipt = directory / f'owner-{ordinal}.d'
+        status = subprocess.run([*compiler, '-E', '-MMD', '-MP', '-MF',
+            str(receipt), '-MT', str(expanded), str(source), '-o',
+            str(expanded)]).returncode
+        if status:
+            raise ProjectionError('defining source preprocessing failed: ' + str(source))
+        streams[provider] = expanded.read_text()
+        expanded.unlink()
+        metadata['_inputs'].append(str(source))
+        metadata.setdefault('_ownerReceipts', []).append(str(receipt))
+    return streams
 
 
 def compile_native(arguments):
@@ -302,7 +356,8 @@ def compile_native(arguments):
     try:
         configuration = load_metadata(metadata)
         edges = []
-        destination.write_text(project(expanded.read_text(), configuration, edges))
+        streams = preprocess_owners(configuration, compiler, destination.parent)
+        destination.write_text(project(expanded.read_text(), configuration, edges, streams))
         Path(str(destination) + ".xne").write_text(json.dumps(sorted(edges)))
         retain_projection_inputs(depfile, configuration)
     finally:
@@ -316,13 +371,21 @@ def main():
     try:
         if sys.argv[1:2] == ['--compile']:
             return compile_native(sys.argv[2:])
-        expanded, metadata, destination = map(Path, sys.argv[1:4])
+        arguments = sys.argv[1:]
+        compiler = None
+        if arguments[:1] == ['--project']:
+            arguments = arguments[1:]
+            divider = arguments.index('--')
+            compiler = arguments[divider + 1:]
+            arguments = arguments[:divider]
+        expanded, metadata, destination = map(Path, arguments[:3])
         configuration = load_metadata(metadata)
         edges = []
-        result = project(expanded.read_text(), configuration, edges)
+        streams = preprocess_owners(configuration, compiler, destination.parent) if compiler else None
+        result = project(expanded.read_text(), configuration, edges, streams)
         Path(str(destination) + ".xne").write_text(json.dumps(sorted(edges)))
-        if len(sys.argv) == 5:
-            retain_projection_inputs(sys.argv[4], configuration)
+        if len(arguments) == 4:
+            retain_projection_inputs(arguments[3], configuration)
         destination.write_text(result)
         return 0
     except (ProjectionError, OSError, ValueError) as failure:
