@@ -33,12 +33,12 @@
 */
 int translation_depfile_write(
   CliRequest request, Compiler compiler, String input, String output_dir) {
-  if (request.no_deps || request.inspects()) return 1;
-  String path = request.dep_file ? request.dep_file :
-    %"${output_dir.rstrip("/")}/${Path.stem(input)}.d";
+  List files = translation_depfile_files(request, compiler, input, output_dir);
+  if (!files) return 1;
+  String path = files.car();
   long error = 0;
   try {
-    file_publish(%($path ${_contents(request, compiler, input, output_dir)}));
+    file_publish(files);
     return 1;
   }
   catch %((!or not-found io-fail) *failure): error = failure.assoc(<"errno">);
@@ -46,6 +46,18 @@ int translation_depfile_write(
     stderr, "x2c: error: cannot write dependency file: %s\nnote: %s\n", path,
     strerror(error));
   return 0;
+}
+
+/** Returns the depfile path and text while the unit's dependency facts live.
+    Disabled output and inspection return NULL. The result contains Strings
+    only and can be exported before the provider Context closes.
+*/
+List translation_depfile_files(
+  CliRequest request, Compiler compiler, String input, String output_dir) {
+  if (request.no_deps || request.inspects()) return NULL;
+  String path = request.dep_file ? request.dep_file :
+    %"${output_dir.rstrip("/")}/${Path.stem(input)}.d";
+  return %($path ${_contents(request, compiler, input, output_dir)});
 }
 
 /* Collection and cached replay populate a Map with no publication order, so

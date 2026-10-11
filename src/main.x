@@ -331,8 +331,8 @@ static void _preprocessor_errors(String text) {
   Stderr.printf("%s", text);
 }
 
-/* Module providers parse once before any member is emitted. Their Contexts
-   remain nested; reverse emission restores each unit's pool and Type rows. */
+/* Module providers parse once before generation. Reverse generation restores
+   each provider's Type rows; exported text outlives those nested Contexts. */
 static List Translation.translate_modules(Translation &t) {
   Compiler discovery = _module_discovery(t.request);
   ModuleTree tree = discovery.module_tree;
@@ -354,23 +354,39 @@ static List Translation.translate_modules(Translation &t) {
   for (int i = 0; i < count; i++)
     providers.push(%(${units[i].compiler} ${units[i].ast}));
   Map layout_plan = prepare_module_layouts(providers.list_free());
+  for (int i = 0; i < count; i++) {
+    Compiler c = units[i].compiler;
+    layout_plan[%(directories ${c.canonical_path(c.filename)})] =
+      t.output_dir(modules[i]);
+  }
   Array prerequisites = [];
   for (int i = 0; i < count; i++)
     foreach (List row, units[i].compiler.module_initializer_rows())
       prerequisites.push(row);
   List rows = prerequisites.list_free();
+  List outputs = NULL;
   for (int i = count - 1; i >= 0; i--) {
     String input = modules[i];
-    units[i].compiler.module_layout_plan = layout_plan;
-    units[i].compiler.merge_module_initializers(rows);
-    _emit_unit(t.frontend, units[i], input, t.output_dir(input));
+    Compiler c = units[i].compiler;
+    c.module_layout_plan = layout_plan;
+    c.merge_module_initializers(rows);
+    String directory = t.output_dir(input);
+    outputs = outputs.append(generate_code_files(c, units[i].ast, directory));
+    outputs = outputs.append(
+      translation_depfile_files(t.request, c, input, directory));
+    if (t.request.fatal_warnings && c.diagnostics()) exit(1);
+    outputs = units[i].context.export(outputs);
     if (i) {
       rows = units[i].context.export(rows);
       layout_plan = units[i].context.export(layout_plan);
     }
     units[i].close();
+  }
+  publish_generated_files(outputs);
+  for (int i = 0; i < count; i++) {
+    String input = modules[i];
     if (t.build) t.build.end_translation(input, 0);
-    else report_progress(<translate>, count - i, t.total, input);
+    else report_progress(<translate>, i + 1, t.total, input);
   }
   Scope.free(units);
   return ordinary.list_free();
