@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/rewrite-entry-finalizer.x:31:1: macro: code placed at function entry cannot land in a defer finalizer
+  
+  ^
+  note: a finalizer runs as its own callback; place after a statement
+

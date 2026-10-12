@@ -97,7 +97,8 @@ typedef struct SlotWatch *SlotWatch;
 typedef struct Ancestor {
   Symbol what;
   Token token;
-  int origin, lowering;
+  // A function row is a `callback` when the kernel wrote it for a finalizer.
+  int origin, lowering, callback;
   List base, node;
 } Ancestor;
 

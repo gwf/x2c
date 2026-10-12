@@ -386,8 +386,9 @@ static Ast Compiler._function_node(
   if (replaced) return replaced;
   String owner = binding_identity_spelling(binding);
   Var stored_owner;
-  if (c.semantic_binding_facts().try_get(%(defer-ownr $binding), stored_owner))
-    owner = stored_owner;
+  int callback =
+    c.semantic_binding_facts().try_get(%(defer-ownr $binding), stored_owner);
+  if (callback) owner = stored_owner;
   Type function_type = return_type;
   int inline_header = function_type.is_inline() && !function_type.is_static();
   List transformed;
@@ -395,7 +396,8 @@ static Ast Compiler._function_node(
     List new_return = c._step(return_type);
     List new_decl = c._step(declarator);
     List declaration = %(declare $return_type (bindings $declarator));
-    List new_body = c._entered_body(declaration, body);
+    List new_body =
+      c._entered_body(declaration, body, callback);
     transformed = %(function $new_return $new_decl $new_body);
   }
   return transformed;
@@ -404,14 +406,22 @@ static Ast Compiler._function_node(
 /* Lowers the block `body` of the function `declaration`, preceded by the
    code that rules placed at the function's entry while it lowered. A
    `defer` in that code covers the body, as one written first in it would.
-   A `return` that a replacement binds converts to the declared result. */
-static List Compiler._entered_body(Compiler c, List declaration, List body) {
-  int depth = c.enter_function(declaration);
-  List lowered;
-  $let(c.return_type, declared_return(declaration)) lowered = c._step(body);
-  List entry = c.leave_function(depth);
-  if (!entry) return lowered;
-  List items = c._sequence(entry, 0).append(lowered.cdr());
+   A `return` that a replacement binds converts to the declared result.
+   Entry code lowers with the function still entered, so a placement its
+   lowering makes lands at the entry too, ahead of it. A `callback` is a
+   finalizer the kernel wrote, whose entry no program rule may place at. */
+static List Compiler._entered_body(
+  Compiler c, List declaration, List body, int callback) {
+  int depth = c.enter_function(declaration, callback);
+  List lowered, items = NULL;
+  $let(c.return_type, declared_return(declaration)) {
+    lowered = c._step(body);
+    for (List entry = c.function_entry(depth); entry;
+         entry = c.function_entry(depth))
+      items = c._sequence(entry, 0).append(items ? items : lowered.cdr());
+  }
+  c.exit_function(depth);
+  if (!items) return lowered;
   List deferred = c.rewrite_defer_list(items);
   if (deferred != items) items = c._sequence(deferred, 0);
   return source_block_content(items);

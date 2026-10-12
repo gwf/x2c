@@ -235,6 +235,12 @@ static macro Stmt $report.parse.placement_function(Expr $c) =>
     <macro>, "code placed at function entry needs an enclosing function",
     $c.token, NULL);
 
+static macro Stmt $report.parse.placement_finalizer(Expr $c) =>
+  $c.report_error(
+    <macro>, "code placed at function entry cannot land in a defer finalizer",
+    $c.token,
+    %("a finalizer runs as its own callback; place after a statement"));
+
 static macro Stmt $report.parse.syntax_expected(Expr $c) =>
   $c.report_error(
     <parse>, "expected syntax",
@@ -2770,39 +2776,48 @@ static List Compiler._ancestor_code(Compiler c, Ancestor row) {
 /** Enters the function definition `declaration`, whose body the
     transform lowers next, so a rule lowering that body places code at its
     entry. Returns the row's depth for `Compiler.leave_function`. */
-int Compiler.enter_function(Compiler c, List declaration) {
+int Compiler.enter_function(Compiler c, List declaration, int callback) {
   int depth = c.ancestors.len();
-  Ancestor row = {.what = <function>, .node = declaration, .lowering = 1};
+  Ancestor row = {
+    .what = <function>, .node = declaration, .lowering = 1,
+    .callback = callback};
   c.enter(row);
   return depth;
 }
 
-/** Leaves the function row at `depth` that `Compiler.enter_function`
-    began and returns the code placed at its entry, in placement order, or
-    NULL. The code binds in a scope of its own with the function's result
-    type; its caller lowers it. */
-List Compiler.leave_function(Compiler c, int depth) {
-  List entry = NULL;
-  if (c.placements.len()) {
-    List declaration = ((Ancestor *) c.ancestors.bytes)[depth].node;
-    c.sym.push_new_scope();
-    $let(c.return_type, declared_return(declaration))
-      entry = c._entry_code(depth);
-    c.sym.pop_scope();
-  }
-  c.ancestors.truncate(depth);
+/** Returns the code placed at the entry of the function row at `depth`
+    since it was entered or last asked, in placement order, or NULL. The
+    code binds in a scope of its own with the function's result type; its
+    caller lowers it while the row is still entered, so a placement that
+    lowering makes lands at the entry too. */
+List Compiler.function_entry(Compiler c, int depth) {
+  if (!c.placements.len()) return NULL;
+  List declaration = ((Ancestor *) c.ancestors.bytes)[depth].node;
+  c.sym.push_new_scope();
+  List entry;
+  $let(c.return_type, declared_return(declaration))
+    entry = c._entry_code(depth);
+  c.sym.pop_scope();
   return entry;
+}
+
+/** Leaves the function row at `depth` that `Compiler.enter_function`
+    began. */
+void Compiler.exit_function(Compiler c, int depth) {
+  c.ancestors.truncate(depth);
 }
 
 /** Records `code` for the entry of the innermost function definition,
     after its parameters bind and before its first statement. While parsing,
     a lambda body is inside the definition that holds it; while lowering, a
-    lambda body is the body of its own lifted function. */
+    lambda body is the body of its own lifted function, and a finalizer the
+    kernel wrote as a callback has no entry a program can place at. */
 void Compiler.place_entry(Compiler c, Var code) {
   Ancestor *rows = c.ancestors.bytes;
   int depth = (int) c.ancestors.len() - 1;
   while (depth >= 0 && rows[depth].what != <function>) depth--;
   if (depth < 0) $report.parse.placement_function(c);
+  if (rows[depth].callback) $report.parse.placement_finalizer(c);
   c.placements.push(%($depth () () $code));
 }
 
