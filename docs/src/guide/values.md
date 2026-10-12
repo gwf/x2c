@@ -146,7 +146,7 @@ printf("text=%s same=%d\n", text, same != NULL);
 ```
 
 ```text
-text=(1 2 3) same=1
+text=( 1 2 3 ) same=1
 ```
 
 Test `listy is <list>` first when a value must be a `List`. `Var.pointer`
