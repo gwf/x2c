@@ -1277,12 +1277,13 @@ static Var LogMemorySink__retain_lisp_symbol(LogMemorySink l, Var value){
 static List LogMemorySink__retain_list(LogMemorySink l, List list){
   if(! List_truth(list) || _pool_chain_owns(l -> pool, List_var(list))) return list;
   Block heads = Block_new(sizeof(Var));
+  const Block _x2c_macro_acquired_0 = heads;
   {
     _x2c_defer_env_6 _x2c_macro_environment_6 ={
       0
     }
     ;
-    _x2c_macro_environment_6._x2c_defer_capture_13 =(const void *) & heads;
+    _x2c_macro_environment_6._x2c_defer_capture_13 =(const void *) & _x2c_macro_acquired_0;
     X2CCleanup _x2c_defer_record_23 ={
       .fn = _x2c_defer_cleanup_23, .env = & _x2c_macro_environment_6
     }
@@ -1757,7 +1758,7 @@ static void _x2c_defer_cleanup_22(void * _x2c_defer_opaque_22){
 
 static void _x2c_defer_cleanup_23(void * _x2c_defer_opaque_23){
   _x2c_defer_env_6 * _x2c_defer_data_6 =(_x2c_defer_env_6 *) _x2c_defer_opaque_23;
-  Block_cleanup((*(Block *) _x2c_defer_data_6->_x2c_defer_capture_13));
+  Block_cleanup((*(const Block *) _x2c_defer_data_6->_x2c_defer_capture_13));
 }
 
 static void _x2c_defer_cleanup_24(void * _x2c_defer_opaque_24){

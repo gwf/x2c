@@ -509,12 +509,13 @@ int String_len(String);
 
 static int _input(String text){
   File file = _capture_file();
+  const File _x2c_macro_acquired_0 = file;
   {
     _x2c_defer_env_5 _x2c_macro_environment_5 ={
       0
     }
     ;
-    _x2c_macro_environment_5._x2c_defer_capture_7 =(const void *) & file;
+    _x2c_macro_environment_5._x2c_defer_capture_7 =(const void *) & _x2c_macro_acquired_0;
     X2CCleanup _x2c_defer_record_5 ={
       .fn = _x2c_defer_cleanup_5, .env = & _x2c_macro_environment_5
     }
@@ -1313,6 +1314,6 @@ void File_cleanup(File);
 
 static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5){
   _x2c_defer_env_5 * _x2c_defer_data_5 =(_x2c_defer_env_5 *) _x2c_defer_opaque_5;
-  File_cleanup((*(File *) _x2c_defer_data_5->_x2c_defer_capture_7));
+  File_cleanup((*(const File *) _x2c_defer_data_5->_x2c_defer_capture_7));
 }
 

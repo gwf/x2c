@@ -225,11 +225,11 @@ String File_string(File file){
   ;  off_t position = File_tello(file);  if(position >= 0 && File_stat(file, & statbuf) == 0 && S_ISREG(statbuf.st_mode) && statbuf.st_size > position){
     uintmax_t remaining =(uintmax_t)(statbuf.st_size - position);  _string_allocation(remaining);  return _regular_text(file, (size_t) remaining);
   }
-  Block content = Block_new(sizeof(char)); {
+  Block content = Block_new(sizeof(char));  const Block _x2c_macro_acquired_0 = content; {
     _x2c_defer_env_0 _x2c_macro_environment_0 ={
       0
     }
-    ;  _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & content;  X2CCleanup _x2c_defer_record_0 ={
+    ;  _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & _x2c_macro_acquired_0;  X2CCleanup _x2c_defer_record_0 ={
       .fn = _x2c_defer_cleanup_0, .env = & _x2c_macro_environment_0
     }
     ;  x2c_cleanup_push(& _x2c_defer_record_0); {
@@ -248,11 +248,11 @@ String File_string(File file){
 
 FileReadStatus File_readline_into(File f, Block dest);
 String File_readline(File file){
-  if(! _init_guard_) File_initialize();  Block line = Block_new(sizeof(char)); {
+  if(! _init_guard_) File_initialize();  Block line = Block_new(sizeof(char));  const Block _x2c_macro_acquired_1 = line; {
     _x2c_defer_env_1 _x2c_macro_environment_1 ={
       0
     }
-    ;  _x2c_macro_environment_1._x2c_defer_capture_1 =(const void *) & line;  X2CCleanup _x2c_defer_record_1 ={
+    ;  _x2c_macro_environment_1._x2c_defer_capture_1 =(const void *) & _x2c_macro_acquired_1;  X2CCleanup _x2c_defer_record_1 ={
       .fn = _x2c_defer_cleanup_1, .env = & _x2c_macro_environment_1
     }
     ;  x2c_cleanup_push(& _x2c_defer_record_1); {
@@ -630,11 +630,11 @@ void File_initialize(void){
 }
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
-  _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;  Block_cleanup((*(Block *) _x2c_defer_data_0->_x2c_defer_capture_0));
+  _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;  Block_cleanup((*(const Block *) _x2c_defer_data_0->_x2c_defer_capture_0));
 }
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
-  _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;  Block_cleanup((*(Block *) _x2c_defer_data_1->_x2c_defer_capture_1));
+  _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;  Block_cleanup((*(const Block *) _x2c_defer_data_1->_x2c_defer_capture_1));
 }
 
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){

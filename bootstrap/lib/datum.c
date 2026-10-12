@@ -348,12 +348,13 @@ int datum_read_plain(String text, unsigned * cursor, Var * out){
   unsigned at =(* cursor);
   if(String_truth(text)) while(_blank(String_getindex(text, at))) at ++;
   Array items = Array_new();
+  const Array _x2c_macro_acquired_0 = items;
   {
     _x2c_defer_env_0 _x2c_macro_environment_0 ={
       0
     }
     ;
-    _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & items;
+    _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & _x2c_macro_acquired_0;
     X2CCleanup _x2c_defer_record_0 ={
       .fn = _x2c_defer_cleanup_0, .env = & _x2c_macro_environment_0
     }
@@ -576,12 +577,13 @@ String String_join(String, List);
 int datum_frame(Buffer out, Var value){
   if(! _init_guard_) _file_init_();
   Buffer body = Buffer_new(0);
+  const Buffer _x2c_macro_acquired_1 = body;
   {
     _x2c_defer_env_1 _x2c_macro_environment_1 ={
       0
     }
     ;
-    _x2c_macro_environment_1._x2c_defer_capture_1 =(const void *) & body;
+    _x2c_macro_environment_1._x2c_defer_capture_1 =(const void *) & _x2c_macro_acquired_1;
     X2CCleanup _x2c_defer_record_1 ={
       .fn = _x2c_defer_cleanup_1, .env = & _x2c_macro_environment_1
     }
@@ -719,13 +721,13 @@ void Array_cleanup(Array);
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;
-  Array_cleanup((*(Array *) _x2c_defer_data_0->_x2c_defer_capture_0));
+  Array_cleanup((*(const Array *) _x2c_defer_data_0->_x2c_defer_capture_0));
 }
 
 void Buffer_cleanup(Buffer);
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
   _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;
-  Buffer_cleanup((*(Buffer *) _x2c_defer_data_1->_x2c_defer_capture_1));
+  Buffer_cleanup((*(const Buffer *) _x2c_defer_data_1->_x2c_defer_capture_1));
 }
 

@@ -894,12 +894,13 @@ static int Map__core_compare(Map _x2c_macro_a_5, Map _x2c_macro_b_5){
   if(_x2c_macro_asz_0 != _x2c_macro_bsz_0) return _x2c_macro_asz_0 < _x2c_macro_bsz_0 ? - 1 : 1;
   if(! _x2c_macro_asz_0) return 0;
   Scope _x2c_macro_scratch_0 = Scope_new();
+  const Scope _x2c_macro_acquired_0 = _x2c_macro_scratch_0;
   {
     _x2c_defer_env_6 _x2c_macro_environment_6 ={
       0
     }
     ;
-    _x2c_macro_environment_6._x2c_defer_capture_11 =(const void *) & _x2c_macro_scratch_0;
+    _x2c_macro_environment_6._x2c_defer_capture_11 =(const void *) & _x2c_macro_acquired_0;
     X2CCleanup _x2c_defer_record_6 ={
       .fn = _x2c_defer_cleanup_6, .env = & _x2c_macro_environment_6
     }
@@ -1112,7 +1113,7 @@ static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5){
 
 static void _x2c_defer_cleanup_6(void * _x2c_defer_opaque_6){
   _x2c_defer_env_6 * _x2c_defer_data_6 =(_x2c_defer_env_6 *) _x2c_defer_opaque_6;
-  Scope_cleanup((*(Scope *) _x2c_defer_data_6->_x2c_defer_capture_11));
+  Scope_cleanup((*(const Scope *) _x2c_defer_data_6->_x2c_defer_capture_11));
 }
 
 static void _x2c_defer_cleanup_7(void * _x2c_defer_opaque_7){

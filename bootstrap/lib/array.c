@@ -894,12 +894,13 @@ Array Array_sort_with(Array array, Func compare){
   if(! Array_truth(array) || array -> length < 2) return array;
   size_t count = array -> length;
   Array source = Array_copy(array);
+  const Array _x2c_macro_acquired_0 = source;
   {
     _x2c_defer_env_5 _x2c_macro_environment_5 ={
       0
     }
     ;
-    _x2c_macro_environment_5._x2c_defer_capture_8 =(const void *) & source;
+    _x2c_macro_environment_5._x2c_defer_capture_8 =(const void *) & _x2c_macro_acquired_0;
     X2CCleanup _x2c_defer_record_4 ={
       .fn = _x2c_defer_cleanup_5, .env = & _x2c_macro_environment_5
     }
@@ -907,12 +908,13 @@ Array Array_sort_with(Array array, Func compare){
     x2c_cleanup_push(& _x2c_defer_record_4);
     {
       Array target = Array_new();
+      const Array _x2c_macro_acquired_1 = target;
       {
         _x2c_defer_env_4 _x2c_macro_environment_4 ={
           0
         }
         ;
-        _x2c_macro_environment_4._x2c_defer_capture_7 =(const void *) & target;
+        _x2c_macro_environment_4._x2c_defer_capture_7 =(const void *) & _x2c_macro_acquired_1;
         X2CCleanup _x2c_defer_record_5 ={
           .fn = _x2c_defer_cleanup_4, .env = & _x2c_macro_environment_4
         }
@@ -1158,12 +1160,12 @@ static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3){
 
 static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4){
   _x2c_defer_env_4 * _x2c_defer_data_4 =(_x2c_defer_env_4 *) _x2c_defer_opaque_4;
-  Array_cleanup((*(Array *) _x2c_defer_data_4->_x2c_defer_capture_7));
+  Array_cleanup((*(const Array *) _x2c_defer_data_4->_x2c_defer_capture_7));
 }
 
 static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5){
   _x2c_defer_env_5 * _x2c_defer_data_5 =(_x2c_defer_env_5 *) _x2c_defer_opaque_5;
-  Array_cleanup((*(Array *) _x2c_defer_data_5->_x2c_defer_capture_8));
+  Array_cleanup((*(const Array *) _x2c_defer_data_5->_x2c_defer_capture_8));
 }
 
 void Scope_free(void *);

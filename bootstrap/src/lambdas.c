@@ -1242,11 +1242,11 @@ static List Capture_record(Capture * k, Type captured_type, List expression, int
 
 List Ast_written_operand(Ast);
 void Compiler_check_lambda_captures(Compiler c, List ast){
-  if(! _init_guard_) _file_init_();  if(Map_truth(c -> macro_holes)) return;  List node;  Array _x2c_macro_pending_0 = Array_update_n(Array_new(), 1, List_var(ast)); {
+  if(! _init_guard_) _file_init_();  if(Map_truth(c -> macro_holes)) return;  List node;  Array _x2c_macro_pending_0 = Array_update_n(Array_new(), 1, List_var(ast));  const Array _x2c_macro_acquired_0 = _x2c_macro_pending_0; {
     _x2c_defer_env_7 _x2c_macro_environment_7 ={
       0
     }
-    ;  _x2c_macro_environment_7._x2c_defer_capture_12 =(const void *) & _x2c_macro_pending_0;  X2CCleanup _x2c_defer_record_7 ={
+    ;  _x2c_macro_environment_7._x2c_defer_capture_12 =(const void *) & _x2c_macro_acquired_0;  X2CCleanup _x2c_defer_record_7 ={
       .fn = _x2c_defer_cleanup_7, .env = & _x2c_macro_environment_7
     }
     ;  x2c_cleanup_push(& _x2c_defer_record_7); {
@@ -1323,6 +1323,6 @@ static void _x2c_defer_cleanup_6(void * _x2c_defer_opaque_6){
 }
 
 static void _x2c_defer_cleanup_7(void * _x2c_defer_opaque_7){
-  _x2c_defer_env_7 * _x2c_defer_data_7 =(_x2c_defer_env_7 *) _x2c_defer_opaque_7;  Array_cleanup((*(Array *) _x2c_defer_data_7->_x2c_defer_capture_12));
+  _x2c_defer_env_7 * _x2c_defer_data_7 =(_x2c_defer_env_7 *) _x2c_defer_opaque_7;  Array_cleanup((*(const Array *) _x2c_defer_data_7->_x2c_defer_capture_12));
 }
 

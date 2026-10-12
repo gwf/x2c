@@ -158,12 +158,13 @@ static int List_truth(List);
 String String_format(String fmt, List values){
   if(! _init_guard_) _file_init_();
   Buffer out = Buffer_new(0);
+  const Buffer _x2c_macro_acquired_0 = out;
   {
     _x2c_defer_env_0 _x2c_macro_environment_0 ={
       0
     }
     ;
-    _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & out;
+    _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & _x2c_macro_acquired_0;
     X2CCleanup _x2c_defer_record_0 ={
       .fn = _x2c_defer_cleanup_0, .env = & _x2c_macro_environment_0
     }
@@ -522,6 +523,6 @@ _Noreturn static void Format_nested(Format * f, String reason, Var code, List de
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;
-  Buffer_cleanup((*(Buffer *) _x2c_defer_data_0->_x2c_defer_capture_0));
+  Buffer_cleanup((*(const Buffer *) _x2c_defer_data_0->_x2c_defer_capture_0));
 }
 

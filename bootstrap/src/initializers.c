@@ -1769,12 +1769,13 @@ static List Compiler__array_layout(Compiler c, Type type, Type owner, List targe
 
 static List Compiler__record_layout(Compiler c, Type type, Type owner, List target, List string, int * symbolic){
   Array children = Array_new();
+  const Array _x2c_macro_acquired_0 = children;
   {
     _x2c_defer_env_0 _x2c_macro_environment_0 ={
       0
     }
     ;
-    _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & children;
+    _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & _x2c_macro_acquired_0;
     X2CCleanup _x2c_defer_record_0 ={
       .fn = _x2c_defer_cleanup_0, .env = & _x2c_macro_environment_0
     }
@@ -2243,11 +2244,11 @@ static List Compiler__materialize_mixed_row(Compiler c, List original, List sour
 
 Type Type_apply(Type);
 static List Compiler__initializer_adapters(Compiler c, List source, List choices, List placeholder){
-  Type from = Compiler__initializer_value_type(c, Var_type(List_cadr(source)));  if(! List_truth(Type_list(from)) || ! ast_contains_head(List_var(source), 421880102)) return NULL;  Array prepared = Array_new(); {
+  Type from = Compiler__initializer_value_type(c, Var_type(List_cadr(source)));  if(! List_truth(Type_list(from)) || ! ast_contains_head(List_var(source), 421880102)) return NULL;  Array prepared = Array_new();  const Array _x2c_macro_acquired_1 = prepared; {
     _x2c_defer_env_2 _x2c_macro_environment_2 ={
       0
     }
-    ;  _x2c_macro_environment_2._x2c_defer_capture_11 =(const void *) & prepared;  X2CCleanup _x2c_defer_record_2 ={
+    ;  _x2c_macro_environment_2._x2c_defer_capture_11 =(const void *) & _x2c_macro_acquired_1;  X2CCleanup _x2c_defer_record_2 ={
       .fn = _x2c_defer_cleanup_2, .env = & _x2c_macro_environment_2
     }
     ;  x2c_cleanup_push(& _x2c_defer_record_2); {
@@ -2490,7 +2491,7 @@ static Var Compiler__native_modifier(Compiler c, Var modifier, Var * reused){
 }
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
-  _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;  Array_cleanup((*(Array *) _x2c_defer_data_0->_x2c_defer_capture_0));
+  _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;  Array_cleanup((*(const Array *) _x2c_defer_data_0->_x2c_defer_capture_0));
 }
 
 void Diagnostics_release(Diagnostics, DiagnosticsHold, int);
@@ -2506,6 +2507,6 @@ static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
 }
 
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
-  _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_2;  Array_cleanup((*(Array *) _x2c_defer_data_2->_x2c_defer_capture_11));
+  _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_2;  Array_cleanup((*(const Array *) _x2c_defer_data_2->_x2c_defer_capture_11));
 }
 

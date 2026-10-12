@@ -1273,12 +1273,13 @@ static List Helper_write_manifest(Helper * h, String failure){
   }
   );
   Buffer out = Buffer_new(0);
+  const Buffer _x2c_macro_acquired_0 = out;
   {
     _x2c_defer_env_5 _x2c_macro_environment_5 ={
       0
     }
     ;
-    _x2c_macro_environment_5._x2c_defer_capture_7 =(const void *) & out;
+    _x2c_macro_environment_5._x2c_defer_capture_7 =(const void *) & _x2c_macro_acquired_0;
     X2CCleanup _x2c_defer_record_5 ={
       .fn = _x2c_defer_cleanup_5, .env = & _x2c_macro_environment_5
     }
@@ -1495,7 +1496,7 @@ static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4){
 
 static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5){
   _x2c_defer_env_5 * _x2c_defer_data_5 =(_x2c_defer_env_5 *) _x2c_defer_opaque_5;
-  Buffer_cleanup((*(Buffer *) _x2c_defer_data_5->_x2c_defer_capture_7));
+  Buffer_cleanup((*(const Buffer *) _x2c_defer_data_5->_x2c_defer_capture_7));
 }
 
 static void _x2c_defer_cleanup_6(void * _x2c_defer_opaque_6){

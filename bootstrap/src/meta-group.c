@@ -1014,11 +1014,11 @@ void Compiler_finish_meta_functions(Compiler c, Array nodes){
 
 void Compiler_check_meta_call(Compiler, List, Token);
 static void Compiler__check_runtime_meta_calls(Compiler c, Var root){
-  List node;  Array _x2c_macro_pending_0 = Array_update_n(Array_new(), 1, root); {
+  List node;  Array _x2c_macro_pending_0 = Array_update_n(Array_new(), 1, root);  const Array _x2c_macro_acquired_0 = _x2c_macro_pending_0; {
     _x2c_defer_env_0 _x2c_macro_environment_1 ={
       0
     }
-    ;  _x2c_macro_environment_1._x2c_defer_capture_0 =(const void *) & _x2c_macro_pending_0;  X2CCleanup _x2c_defer_record_0 ={
+    ;  _x2c_macro_environment_1._x2c_defer_capture_0 =(const void *) & _x2c_macro_acquired_0;  X2CCleanup _x2c_defer_record_0 ={
       .fn = _x2c_defer_cleanup_0, .env = & _x2c_macro_environment_1
     }
     ;  x2c_cleanup_push(& _x2c_defer_record_0); {
@@ -1993,7 +1993,7 @@ static String _build_module(String directory, String module, List code){
 }
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
-  _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;  Array_cleanup((*(Array *) _x2c_defer_data_0->_x2c_defer_capture_0));
+  _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;  Array_cleanup((*(const Array *) _x2c_defer_data_0->_x2c_defer_capture_0));
 }
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){

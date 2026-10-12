@@ -375,12 +375,13 @@ static List _normalize_pattern(List pattern){
 
 static List _normalize_elements(List elements){
   Block spine = Block_new(sizeof(NormalizedCell));
+  const Block _x2c_macro_acquired_0 = spine;
   {
     _x2c_defer_env_0 _x2c_macro_environment_0 ={
       0
     }
     ;
-    _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & spine;
+    _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & _x2c_macro_acquired_0;
     X2CCleanup _x2c_defer_record_0 ={
       .fn = _x2c_defer_cleanup_0, .env = & _x2c_macro_environment_0
     }
@@ -1033,12 +1034,13 @@ static Var _replace(Var input, ReplacementSource * source){
   if(! List_truth(list)) return input;
   if(Var_equal(List_car(list), Symbol_var(2050325770))) return List_cadr(list);
   Block spine = Block_new(sizeof(ReplacementCell));
+  const Block _x2c_macro_acquired_1 = spine;
   {
     _x2c_defer_env_1 _x2c_macro_environment_1 ={
       0
     }
     ;
-    _x2c_macro_environment_1._x2c_defer_capture_1 =(const void *) & spine;
+    _x2c_macro_environment_1._x2c_defer_capture_1 =(const void *) & _x2c_macro_acquired_1;
     X2CCleanup _x2c_defer_record_1 ={
       .fn = _x2c_defer_cleanup_1, .env = & _x2c_macro_environment_1
     }
@@ -1403,12 +1405,12 @@ static void _sites_shutdown(void){
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;
-  Block_cleanup((*(Block *) _x2c_defer_data_0->_x2c_defer_capture_0));
+  Block_cleanup((*(const Block *) _x2c_defer_data_0->_x2c_defer_capture_0));
 }
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
   _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;
-  Block_cleanup((*(Block *) _x2c_defer_data_1->_x2c_defer_capture_1));
+  Block_cleanup((*(const Block *) _x2c_defer_data_1->_x2c_defer_capture_1));
 }
 
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){

@@ -853,11 +853,11 @@ static List Compiler__pattern_content(Compiler c, List node){
 }
 
 static List Compiler__typed_list(Compiler c, List node, List content, Map tags){
-  Array elements = Array_new(); {
+  Array elements = Array_new();  const Array _x2c_macro_acquired_0 = elements; {
     _x2c_defer_env_2 _x2c_macro_environment_2 ={
       0
     }
-    ;  _x2c_macro_environment_2._x2c_defer_capture_4 =(const void *) & elements;  X2CCleanup _x2c_defer_record_2 ={
+    ;  _x2c_macro_environment_2._x2c_defer_capture_4 =(const void *) & _x2c_macro_acquired_0;  X2CCleanup _x2c_defer_record_2 ={
       .fn = _x2c_defer_cleanup_2, .env = & _x2c_macro_environment_2
     }
     ;  x2c_cleanup_push(& _x2c_defer_record_2); {
@@ -1507,7 +1507,7 @@ static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
 
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
   _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_2;
-  Array_cleanup((*(Array *) _x2c_defer_data_2->_x2c_defer_capture_4));
+  Array_cleanup((*(const Array *) _x2c_defer_data_2->_x2c_defer_capture_4));
 }
 
 static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3){

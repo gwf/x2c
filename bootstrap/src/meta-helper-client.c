@@ -632,12 +632,13 @@ static String _helper_ending(void){
 
 static int _helper_send(List message, double deadline){
   Buffer out = Buffer_new(0);
+  const Buffer _x2c_macro_acquired_0 = out;
   {
     _x2c_defer_env_1 _x2c_macro_environment_1 ={
       0
     }
     ;
-    _x2c_macro_environment_1._x2c_defer_capture_2 =(const void *) & out;
+    _x2c_macro_environment_1._x2c_defer_capture_2 =(const void *) & _x2c_macro_acquired_0;
     X2CCleanup _x2c_defer_record_1 ={
       .fn = _x2c_defer_cleanup_1, .env = & _x2c_macro_environment_1
     }
@@ -873,7 +874,7 @@ static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
   _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;
-  Buffer_cleanup((*(Buffer *) _x2c_defer_data_1->_x2c_defer_capture_2));
+  Buffer_cleanup((*(const Buffer *) _x2c_defer_data_1->_x2c_defer_capture_2));
 }
 
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){

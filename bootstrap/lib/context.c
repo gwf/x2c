@@ -186,12 +186,13 @@ static Var Context__export_atom(Context c, Var value){
 static List Context__export_list(Context c, List list){
   if(! List_truth(list) ||(c -> pool && ! Pool_owns(c -> pool, List_var(list)))) return list;
   Block heads = Block_new(sizeof(Var));
+  const Block _x2c_macro_acquired_0 = heads;
   {
     _x2c_defer_env_0 _x2c_macro_environment_0 ={
       0
     }
     ;
-    _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & heads;
+    _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & _x2c_macro_acquired_0;
     X2CCleanup _x2c_defer_record_0 ={
       .fn = _x2c_defer_cleanup_0, .env = & _x2c_macro_environment_0
     }
@@ -456,7 +457,7 @@ static void _register_shutdown(void){
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;
-  Block_cleanup((*(Block *) _x2c_defer_data_0->_x2c_defer_capture_0));
+  Block_cleanup((*(const Block *) _x2c_defer_data_0->_x2c_defer_capture_0));
 }
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){

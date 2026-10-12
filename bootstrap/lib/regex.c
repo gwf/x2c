@@ -1051,12 +1051,13 @@ Var Func_apply(Func, unsigned, const FuncArg *);
 
 static String _rebuild(Regex r, String subject, int all, Func fn, String replacement){
   Buffer out = Buffer_new(0);
+  const Buffer _x2c_macro_acquired_0 = out;
   {
     _x2c_defer_env_4 _x2c_macro_environment_4 ={
       0
     }
     ;
-    _x2c_macro_environment_4._x2c_defer_capture_4 =(const void *) & out;
+    _x2c_macro_environment_4._x2c_defer_capture_4 =(const void *) & _x2c_macro_acquired_0;
     X2CCleanup _x2c_defer_record_4 ={
       .fn = _x2c_defer_cleanup_4, .env = & _x2c_macro_environment_4
     }
@@ -1145,12 +1146,13 @@ List Regex_capture_names(Regex regex){
 
 String Regex_escape(String literal){
   Buffer out = Buffer_new(0);
+  const Buffer _x2c_macro_acquired_1 = out;
   {
     _x2c_defer_env_5 _x2c_macro_environment_5 ={
       0
     }
     ;
-    _x2c_macro_environment_5._x2c_defer_capture_5 =(const void *) & out;
+    _x2c_macro_environment_5._x2c_defer_capture_5 =(const void *) & _x2c_macro_acquired_1;
     X2CCleanup _x2c_defer_record_5 ={
       .fn = _x2c_defer_cleanup_5, .env = & _x2c_macro_environment_5
     }
@@ -1194,12 +1196,13 @@ List Array_list(Array);
 
 List Regex_find_all(Regex r, String subject){
   Array found = Array_new();
+  const Array _x2c_macro_acquired_2 = found;
   {
     _x2c_defer_env_6 _x2c_macro_environment_6 ={
       0
     }
     ;
-    _x2c_macro_environment_6._x2c_defer_capture_6 =(const void *) & found;
+    _x2c_macro_environment_6._x2c_defer_capture_6 =(const void *) & _x2c_macro_acquired_2;
     X2CCleanup _x2c_defer_record_6 ={
       .fn = _x2c_defer_cleanup_6, .env = & _x2c_macro_environment_6
     }
@@ -1224,12 +1227,13 @@ List Regex_find_all(Regex r, String subject){
 
 List Regex_split(Regex regex, String subject){
   Array parts = Array_new();
+  const Array _x2c_macro_acquired_3 = parts;
   {
     _x2c_defer_env_7 _x2c_macro_environment_7 ={
       0
     }
     ;
-    _x2c_macro_environment_7._x2c_defer_capture_7 =(const void *) & parts;
+    _x2c_macro_environment_7._x2c_defer_capture_7 =(const void *) & _x2c_macro_acquired_3;
     X2CCleanup _x2c_defer_record_7 ={
       .fn = _x2c_defer_cleanup_7, .env = & _x2c_macro_environment_7
     }
@@ -1406,23 +1410,23 @@ void Buffer_cleanup(Buffer);
 
 static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4){
   _x2c_defer_env_4 * _x2c_defer_data_4 =(_x2c_defer_env_4 *) _x2c_defer_opaque_4;
-  Buffer_cleanup((*(Buffer *) _x2c_defer_data_4->_x2c_defer_capture_4));
+  Buffer_cleanup((*(const Buffer *) _x2c_defer_data_4->_x2c_defer_capture_4));
 }
 
 static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5){
   _x2c_defer_env_5 * _x2c_defer_data_5 =(_x2c_defer_env_5 *) _x2c_defer_opaque_5;
-  Buffer_cleanup((*(Buffer *) _x2c_defer_data_5->_x2c_defer_capture_5));
+  Buffer_cleanup((*(const Buffer *) _x2c_defer_data_5->_x2c_defer_capture_5));
 }
 
 void Array_cleanup(Array);
 
 static void _x2c_defer_cleanup_6(void * _x2c_defer_opaque_6){
   _x2c_defer_env_6 * _x2c_defer_data_6 =(_x2c_defer_env_6 *) _x2c_defer_opaque_6;
-  Array_cleanup((*(Array *) _x2c_defer_data_6->_x2c_defer_capture_6));
+  Array_cleanup((*(const Array *) _x2c_defer_data_6->_x2c_defer_capture_6));
 }
 
 static void _x2c_defer_cleanup_7(void * _x2c_defer_opaque_7){
   _x2c_defer_env_7 * _x2c_defer_data_7 =(_x2c_defer_env_7 *) _x2c_defer_opaque_7;
-  Array_cleanup((*(Array *) _x2c_defer_data_7->_x2c_defer_capture_7));
+  Array_cleanup((*(const Array *) _x2c_defer_data_7->_x2c_defer_capture_7));
 }
 

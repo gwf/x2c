@@ -996,12 +996,13 @@ static int _build_manifest(CliRequest request, Array commands){
 
 static int _build_target(CliRequest request, Array commands){
   Context target = Context_open_isolated_named("build target");
+  const Context _x2c_macro_acquired_0 = target;
   {
     _x2c_defer_env_3 _x2c_macro_environment_3 ={
       0
     }
     ;
-    _x2c_macro_environment_3._x2c_defer_capture_3 =(const void *) & target;
+    _x2c_macro_environment_3._x2c_defer_capture_3 =(const void *) & _x2c_macro_acquired_0;
     X2CCleanup _x2c_defer_record_3 ={
       .fn = _x2c_defer_cleanup_4, .env = & _x2c_macro_environment_3
     }
@@ -1306,6 +1307,6 @@ static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3){
 
 static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4){
   _x2c_defer_env_3 * _x2c_defer_data_3 =(_x2c_defer_env_3 *) _x2c_defer_opaque_4;
-  Context_cleanup((*(Context *) _x2c_defer_data_3->_x2c_defer_capture_3));
+  Context_cleanup((*(const Context *) _x2c_defer_data_3->_x2c_defer_capture_3));
 }
 

@@ -3423,11 +3423,11 @@ static List Compiler__cache_boxed(Compiler c, List literal){
 }
 
 static List Compiler__cache_literal_list(Compiler c, List values){
-  Array heads = Array_new(); {
+  Array heads = Array_new();  const Array _x2c_macro_acquired_0 = heads; {
     _x2c_defer_env_13 _x2c_macro_environment_13 ={
       0
     }
-    ;  _x2c_macro_environment_13._x2c_defer_capture_25 =(const void *) & heads;  X2CCleanup _x2c_defer_record_13 ={
+    ;  _x2c_macro_environment_13._x2c_defer_capture_25 =(const void *) & _x2c_macro_acquired_0;  X2CCleanup _x2c_defer_record_13 ={
       .fn = _x2c_defer_cleanup_13, .env = & _x2c_macro_environment_13
     }
     ;  x2c_cleanup_push(& _x2c_defer_record_13); {
@@ -3775,7 +3775,7 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
 }
 
 static void _x2c_defer_cleanup_13(void * _x2c_defer_opaque_13){
-  _x2c_defer_env_13 * _x2c_defer_data_13 =(_x2c_defer_env_13 *) _x2c_defer_opaque_13;  Array_cleanup((*(Array *) _x2c_defer_data_13->_x2c_defer_capture_25));
+  _x2c_defer_env_13 * _x2c_defer_data_13 =(_x2c_defer_env_13 *) _x2c_defer_opaque_13;  Array_cleanup((*(const Array *) _x2c_defer_data_13->_x2c_defer_capture_25));
 }
 
 static void _x2c_defer_cleanup_14(void * _x2c_defer_opaque_14){

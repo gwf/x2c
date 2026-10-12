@@ -554,12 +554,13 @@ static void _remove_entries(Path path, String * failed, int * failure){
   while((entry = readdir(directory))){
     if(! strcmp(entry -> d_name, ".") || ! strcmp(entry -> d_name, "..")) continue;
     Context context = Context_open_isolated();
+    const Context _x2c_macro_acquired_0 = context;
     {
       _x2c_defer_env_0 _x2c_macro_environment_0 ={
         0
       }
       ;
-      _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & context;
+      _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & _x2c_macro_acquired_0;
       X2CCleanup _x2c_defer_record_0 ={
         .fn = _x2c_defer_cleanup_0, .env = & _x2c_macro_environment_0
       }
@@ -626,12 +627,13 @@ int File_copy_to(File, File, size_t *);
 void Path_copy_file(Path source, Path target){
   if(! _init_guard_) _file_init_();
   File input = _open(_12, source, "rb");
+  const File _x2c_macro_acquired_1 = input;
   {
     _x2c_defer_env_2 _x2c_macro_environment_2 ={
       0
     }
     ;
-    _x2c_macro_environment_2._x2c_defer_capture_2 =(const void *) & input;
+    _x2c_macro_environment_2._x2c_defer_capture_2 =(const void *) & _x2c_macro_acquired_1;
     X2CCleanup _x2c_defer_record_1 ={
       .fn = _x2c_defer_cleanup_2, .env = & _x2c_macro_environment_2
     }
@@ -645,12 +647,13 @@ void Path_copy_file(Path source, Path target){
         return;
       }
       File output = _open(_12, target, "wb");
+      const File _x2c_macro_acquired_2 = output;
       {
         _x2c_defer_env_1 _x2c_macro_environment_1 ={
           0
         }
         ;
-        _x2c_macro_environment_1._x2c_defer_capture_1 =(const void *) & output;
+        _x2c_macro_environment_1._x2c_defer_capture_1 =(const void *) & _x2c_macro_acquired_2;
         X2CCleanup _x2c_defer_record_2 ={
           .fn = _x2c_defer_cleanup_1, .env = & _x2c_macro_environment_1
         }
@@ -730,12 +733,13 @@ int File_write_all(File, const void *, size_t);
 void Path_write_text(Path path, String text){
   if(! _init_guard_) _file_init_();
   File output = _open(_17, path, "w");
+  const File _x2c_macro_acquired_3 = output;
   {
     _x2c_defer_env_3 _x2c_macro_environment_3 ={
       0
     }
     ;
-    _x2c_macro_environment_3._x2c_defer_capture_3 =(const void *) & output;
+    _x2c_macro_environment_3._x2c_defer_capture_3 =(const void *) & _x2c_macro_acquired_3;
     X2CCleanup _x2c_defer_record_3 ={
       .fn = _x2c_defer_cleanup_3, .env = & _x2c_macro_environment_3
     }
@@ -766,23 +770,23 @@ void Context_cleanup(Context);
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;
-  Context_cleanup((*(Context *) _x2c_defer_data_0->_x2c_defer_capture_0));
+  Context_cleanup((*(const Context *) _x2c_defer_data_0->_x2c_defer_capture_0));
 }
 
 void File_cleanup(File);
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
   _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;
-  File_cleanup((*(File *) _x2c_defer_data_1->_x2c_defer_capture_1));
+  File_cleanup((*(const File *) _x2c_defer_data_1->_x2c_defer_capture_1));
 }
 
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
   _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_2;
-  File_cleanup((*(File *) _x2c_defer_data_2->_x2c_defer_capture_2));
+  File_cleanup((*(const File *) _x2c_defer_data_2->_x2c_defer_capture_2));
 }
 
 static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3){
   _x2c_defer_env_3 * _x2c_defer_data_3 =(_x2c_defer_env_3 *) _x2c_defer_opaque_3;
-  File_cleanup((*(File *) _x2c_defer_data_3->_x2c_defer_capture_3));
+  File_cleanup((*(const File *) _x2c_defer_data_3->_x2c_defer_capture_3));
 }
 

@@ -1040,12 +1040,13 @@ static String _fetch(String url, String directory, String name){
 
 static void _verify(Path p, String expected){
   File input = File_open(p, "rb");
+  const File _x2c_macro_acquired_0 = input;
   {
     _x2c_defer_env_0 _x2c_macro_environment_0 ={
       0
     }
     ;
-    _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & input;
+    _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & _x2c_macro_acquired_0;
     X2CCleanup _x2c_defer_record_2 ={
       .fn = _x2c_defer_cleanup_2, .env = & _x2c_macro_environment_0
     }
@@ -1228,7 +1229,7 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
 
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
   _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_2;
-  File_cleanup((*(File *) _x2c_defer_data_0->_x2c_defer_capture_0));
+  File_cleanup((*(const File *) _x2c_defer_data_0->_x2c_defer_capture_0));
 }
 
 static Var _x2c_lambda_3(String name){

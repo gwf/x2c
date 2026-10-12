@@ -1377,12 +1377,13 @@ ModuleSource Compiler_module_source(Compiler c, String path, String text){
   if(! _init_guard_) _file_init_();
   if(! _spells_block(text)) return NULL;
   Buffer out = Buffer_new(0);
+  const Buffer _x2c_macro_acquired_0 = out;
   {
     _x2c_defer_env_1 _x2c_macro_environment_1 ={
       0
     }
     ;
-    _x2c_macro_environment_1._x2c_defer_capture_2 =(const void *) & out;
+    _x2c_macro_environment_1._x2c_defer_capture_2 =(const void *) & _x2c_macro_acquired_0;
     X2CCleanup _x2c_defer_record_4 ={
       .fn = _x2c_defer_cleanup_4, .env = & _x2c_macro_environment_1
     }
@@ -1859,12 +1860,13 @@ static void Compiler__walk_file(Compiler c, String path, String text, ModuleSour
 
 static void FileWalk_split(FileWalk * w, Token first){
   Array arms = Array_new();
+  const Array _x2c_macro_acquired_1 = arms;
   {
     _x2c_defer_env_12 _x2c_macro_environment_12 ={
       0
     }
     ;
-    _x2c_macro_environment_12._x2c_defer_capture_23 =(const void *) & arms;
+    _x2c_macro_environment_12._x2c_defer_capture_23 =(const void *) & _x2c_macro_acquired_1;
     X2CCleanup _x2c_defer_record_15 ={
       .fn = _x2c_defer_cleanup_15, .env = & _x2c_macro_environment_12
     }
@@ -2074,11 +2076,11 @@ int Symbol_is_type_qualifier(Symbol);
 int Symbol_is_storage_class(Symbol);
 static Type List_type(List);
 static void _needed_types(List syntax, Map rows, Map needed){
-  Array pending = Array_update_n(Array_new(), 1, List_var(syntax)); {
+  Array pending = Array_update_n(Array_new(), 1, List_var(syntax));  const Array _x2c_macro_acquired_2 = pending; {
     _x2c_defer_env_14 _x2c_macro_environment_14 ={
       0
     }
-    ;  _x2c_macro_environment_14._x2c_defer_capture_26 =(const void *) & pending;  X2CCleanup _x2c_defer_record_17 ={
+    ;  _x2c_macro_environment_14._x2c_defer_capture_26 =(const void *) & _x2c_macro_acquired_2;  X2CCleanup _x2c_defer_record_17 ={
       .fn = _x2c_defer_cleanup_17, .env = & _x2c_macro_environment_14
     }
     ;  x2c_cleanup_push(& _x2c_defer_record_17); {
@@ -2183,11 +2185,11 @@ static void FileWalk_select_public(FileWalk * w){
   while(changed); ; {
     Var part;  Array _x2c_macro_object_12 =(* w).parts;  int _x2c_macro_cursor_12 = 0;  Var _x2c_macro_cursor_output_11;  while(Array_try_next(_x2c_macro_object_12, &(_x2c_macro_cursor_12), &(_x2c_macro_cursor_output_11))){
       part = _x2c_macro_cursor_output_11; {
-        if(! Var_is(part, 26720)) continue;  Array dropped = Array_new(); {
+        if(! Var_is(part, 26720)) continue;  Array dropped = Array_new();  const Array _x2c_macro_acquired_3 = dropped; {
           _x2c_defer_env_15 _x2c_macro_environment_15 ={
             0
           }
-          ;  _x2c_macro_environment_15._x2c_defer_capture_27 =(const void *) & dropped;  X2CCleanup _x2c_defer_record_18 ={
+          ;  _x2c_macro_environment_15._x2c_defer_capture_27 =(const void *) & _x2c_macro_acquired_3;  X2CCleanup _x2c_defer_record_18 ={
             .fn = _x2c_defer_cleanup_18, .env = & _x2c_macro_environment_15
           }
           ;  x2c_cleanup_push(& _x2c_defer_record_18); {
@@ -2336,11 +2338,11 @@ static String _resolve_include(SourceView sources, List extra_dirs, String inclu
   (* covered) = 0;  if(String_startswith(target, _72)){
     if(walk) FileWalk__include_search_dependency(&((* walk)), target);  return SourceView_exists(sources, target) ? target : NULL;
   }
-  Array dirs = _include_dirs(extra_dirs, angle ? NULL : includer_dir, ! walk); {
+  Array dirs = _include_dirs(extra_dirs, angle ? NULL : includer_dir, ! walk);  const Array _x2c_macro_acquired_4 = dirs; {
     _x2c_defer_env_18 _x2c_macro_environment_18 ={
       0
     }
-    ;  _x2c_macro_environment_18._x2c_defer_capture_32 =(const void *) & dirs;  X2CCleanup _x2c_defer_record_21 ={
+    ;  _x2c_macro_environment_18._x2c_defer_capture_32 =(const void *) & _x2c_macro_acquired_4;  X2CCleanup _x2c_defer_record_21 ={
       .fn = _x2c_defer_cleanup_21, .env = & _x2c_macro_environment_18
     }
     ;  x2c_cleanup_push(& _x2c_defer_record_21); {
@@ -2403,11 +2405,11 @@ static void Compiler__add_type_dependencies(Compiler c, Array types, String path
                 Map rows = Var_map(_x2c_match_value_3); {
                   Var key, value;  Map _x2c_macro_object_16 = rows;  unsigned _x2c_macro_cursor_17 = 0;  Var _x2c_macro_cursor_output_15;  Var _x2c_macro_cursor_output_16;  while(Map_try_next(_x2c_macro_object_16, &(_x2c_macro_cursor_17), &(_x2c_macro_cursor_output_15), &(_x2c_macro_cursor_output_16))){
                     key = _x2c_macro_cursor_output_15;  value = _x2c_macro_cursor_output_16; {
-                      if(! Var_is_row(value, 9, 7, 4) ||(! List_truth(_type_family(Var_list(key))) && List_truth(List_cdr(Var_list(key))))) continue;  List item;  Array _x2c_macro_pending_0 = Array_update_n(Array_new(), 1, value); {
+                      if(! Var_is_row(value, 9, 7, 4) ||(! List_truth(_type_family(Var_list(key))) && List_truth(List_cdr(Var_list(key))))) continue;  List item;  Array _x2c_macro_pending_0 = Array_update_n(Array_new(), 1, value);  const Array _x2c_macro_acquired_5 = _x2c_macro_pending_0; {
                         _x2c_defer_env_19 _x2c_macro_environment_19 ={
                           0
                         }
-                        ;  _x2c_macro_environment_19._x2c_defer_capture_33 =(const void *) & _x2c_macro_pending_0;  X2CCleanup _x2c_defer_record_22 ={
+                        ;  _x2c_macro_environment_19._x2c_defer_capture_33 =(const void *) & _x2c_macro_acquired_5;  X2CCleanup _x2c_defer_record_22 ={
                           .fn = _x2c_defer_cleanup_22, .env = & _x2c_macro_environment_19
                         }
                         ;  x2c_cleanup_push(& _x2c_defer_record_22); {
@@ -3266,11 +3268,11 @@ int Type_is_inline(Type);
 Type Sym_aggregate_of(Sym, Type);
 String binding_identity_spelling(List);
 Map Compiler_inline_type_dependencies(Compiler c, List ast){
-  if(! _init_guard_) _file_init_();  Map rows = Map_new();  List function;  Array _x2c_macro_pending_2 = Array_update_n(Array_new(), 1, List_var(ast)); {
+  if(! _init_guard_) _file_init_();  Map rows = Map_new();  List function;  Array _x2c_macro_pending_2 = Array_update_n(Array_new(), 1, List_var(ast));  const Array _x2c_macro_acquired_7 = _x2c_macro_pending_2; {
     _x2c_defer_env_25 _x2c_macro_environment_26 ={
       0
     }
-    ;  _x2c_macro_environment_26._x2c_defer_capture_44 =(const void *) & _x2c_macro_pending_2;  X2CCleanup _x2c_defer_record_29 ={
+    ;  _x2c_macro_environment_26._x2c_defer_capture_44 =(const void *) & _x2c_macro_acquired_7;  X2CCleanup _x2c_defer_record_29 ={
       .fn = _x2c_defer_cleanup_29, .env = & _x2c_macro_environment_26
     }
     ;  x2c_cleanup_push(& _x2c_defer_record_29); {
@@ -3280,11 +3282,11 @@ Map Compiler_inline_type_dependencies(Compiler c, List ast){
             List _x2c_match_expr = function; List _x2c_match_cursor, _x2c_match_cursor1;  switch(_x2c_match_expr ? _x2c_match_expr->car.u64 : 0){
                 case 9224498395122781148ULL: ;  _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224498395122781148ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor) { Var _x2c_match_value_0 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224497936761768840ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1) { Var _x2c_match_value_1 = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1 && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor) { Var _x2c_match_value_2 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
                 Var base;  base = _x2c_match_value_0;  Var binding;  binding = _x2c_match_value_1;  Var body;  body = _x2c_match_value_2; {
-                  Type type = Var_type(base);  if(! Type_is_inline(type) || Type_is_static(type)) continue;  Map types = Map_new();  List node;  Array _x2c_macro_pending_1 = Array_update_n(Array_new(), 1, body); {
+                  Type type = Var_type(base);  if(! Type_is_inline(type) || Type_is_static(type)) continue;  Map types = Map_new();  List node;  Array _x2c_macro_pending_1 = Array_update_n(Array_new(), 1, body);  const Array _x2c_macro_acquired_6 = _x2c_macro_pending_1; {
                     _x2c_defer_env_26 _x2c_macro_environment_25 ={
                       0
                     }
-                    ;  _x2c_macro_environment_25._x2c_defer_capture_45 =(const void *) & _x2c_macro_pending_1;  X2CCleanup _x2c_defer_record_30 ={
+                    ;  _x2c_macro_environment_25._x2c_defer_capture_45 =(const void *) & _x2c_macro_acquired_6;  X2CCleanup _x2c_defer_record_30 ={
                       .fn = _x2c_defer_cleanup_30, .env = & _x2c_macro_environment_25
                     }
                     ;  x2c_cleanup_push(& _x2c_defer_record_30); {
@@ -3422,11 +3424,11 @@ static void Compiler_publish_inline_dependencies(Compiler c, String path, Map al
     }
 
   }
-  Array dropped = Array_new(); {
+  Array dropped = Array_new();  const Array _x2c_macro_acquired_8 = dropped; {
     _x2c_defer_env_28 _x2c_macro_environment_28 ={
       0
     }
-    ;  _x2c_macro_environment_28._x2c_defer_capture_47 =(const void *) & dropped;  X2CCleanup _x2c_defer_record_31 ={
+    ;  _x2c_macro_environment_28._x2c_defer_capture_47 =(const void *) & _x2c_macro_acquired_8;  X2CCleanup _x2c_defer_record_31 ={
       .fn = _x2c_defer_cleanup_32, .env = & _x2c_macro_environment_28
     }
     ;  x2c_cleanup_push(& _x2c_defer_record_31); {
@@ -3451,11 +3453,11 @@ static void Compiler_publish_inline_dependencies(Compiler c, String path, Map al
       _cache_dependencies(Var_map(List_getindex(entry, 3)), c -> deps);  if(! Map_len(additions)){
         x2c_cleanup_leave(& _x2c_defer_record_31);  return;
       }
-      Map retained = _cache_copy(additions);  _retain_rows(cons(Map_var(retained), NULL));  Array replaced = Array_new(); {
+      Map retained = _cache_copy(additions);  _retain_rows(cons(Map_var(retained), NULL));  Array replaced = Array_new();  const Array _x2c_macro_acquired_9 = replaced; {
         _x2c_defer_env_27 _x2c_macro_environment_27 ={
           0
         }
-        ;  _x2c_macro_environment_27._x2c_defer_capture_46 =(const void *) & replaced;  X2CCleanup _x2c_defer_record_32 ={
+        ;  _x2c_macro_environment_27._x2c_defer_capture_46 =(const void *) & _x2c_macro_acquired_9;  X2CCleanup _x2c_defer_record_32 ={
           .fn = _x2c_defer_cleanup_31, .env = & _x2c_macro_environment_27
         }
         ;  x2c_cleanup_push(& _x2c_defer_record_32); {
@@ -3515,11 +3517,11 @@ void Compiler_record_conformance_rows(Compiler c, Map rows){
     }
     );  Var _x2c_macro_item_66;  while(Iter_try_next(_x2c_macro_iterator_66, &(_x2c_macro_item_66))){
       part = _x2c_macro_item_66; {
-        if(! Var_is(part, 26720)) continue;  contribution = Var_map(part);  Array stale = Array_new(); {
+        if(! Var_is(part, 26720)) continue;  contribution = Var_map(part);  Array stale = Array_new();  const Array _x2c_macro_acquired_10 = stale; {
           _x2c_defer_env_29 _x2c_macro_environment_29 ={
             0
           }
-          ;  _x2c_macro_environment_29._x2c_defer_capture_48 =(const void *) & stale;  X2CCleanup _x2c_defer_record_33 ={
+          ;  _x2c_macro_environment_29._x2c_defer_capture_48 =(const void *) & _x2c_macro_acquired_10;  X2CCleanup _x2c_defer_record_33 ={
             .fn = _x2c_defer_cleanup_33, .env = & _x2c_macro_environment_29
           }
           ;  x2c_cleanup_push(& _x2c_defer_record_33); {
@@ -3564,11 +3566,11 @@ void Compiler_record_conformance_rows(Compiler c, Map rows){
 }
 
 List Compiler_declared_adoptions(Compiler c){
-  if(! _init_guard_) _file_init_();  Var cached = Map_getindex(_process_cache(), String_var(_canonical_path(c -> filename)));  if(Var_is_void(cached)) return NULL;  Array adoptions = Array_new(); {
+  if(! _init_guard_) _file_init_();  Var cached = Map_getindex(_process_cache(), String_var(_canonical_path(c -> filename)));  if(Var_is_void(cached)) return NULL;  Array adoptions = Array_new();  const Array _x2c_macro_acquired_11 = adoptions; {
     _x2c_defer_env_30 _x2c_macro_environment_30 ={
       0
     }
-    ;  _x2c_macro_environment_30._x2c_defer_capture_49 =(const void *) & adoptions;  X2CCleanup _x2c_defer_record_34 ={
+    ;  _x2c_macro_environment_30._x2c_defer_capture_49 =(const void *) & _x2c_macro_acquired_11;  X2CCleanup _x2c_defer_record_34 ={
       .fn = _x2c_defer_cleanup_34, .env = & _x2c_macro_environment_30
     }
     ;  x2c_cleanup_push(& _x2c_defer_record_34); {
@@ -3732,11 +3734,11 @@ static void Surface_merge(Surface * s, String path, Map rows){
 }
 
 static void Surface_take_exports(Surface * s, Map rows){
-  Array found = Array_new(); {
+  Array found = Array_new();  const Array _x2c_macro_acquired_12 = found; {
     _x2c_defer_env_32 _x2c_macro_environment_32 ={
       0
     }
-    ;  _x2c_macro_environment_32._x2c_defer_capture_52 =(const void *) & found;  X2CCleanup _x2c_defer_record_36 ={
+    ;  _x2c_macro_environment_32._x2c_defer_capture_52 =(const void *) & _x2c_macro_acquired_12;  X2CCleanup _x2c_defer_record_36 ={
       .fn = _x2c_defer_cleanup_36, .env = & _x2c_macro_environment_32
     }
     ;  x2c_cleanup_push(& _x2c_defer_record_36); {
@@ -4337,11 +4339,11 @@ String interface_prelude(void){
 }
 
 String interface_text(Compiler c){
-  if(! _init_guard_) _file_init_();  if(! String_truth(compiler_identity())) return NULL;  String canonical = _canonical_path(c -> filename);  Var cached = Map_getindex(_process_cache(), String_var(canonical));  if(Var_is_void(cached)) return NULL;  Buffer out = Buffer_new(0); {
+  if(! _init_guard_) _file_init_();  if(! String_truth(compiler_identity())) return NULL;  String canonical = _canonical_path(c -> filename);  Var cached = Map_getindex(_process_cache(), String_var(canonical));  if(Var_is_void(cached)) return NULL;  Buffer out = Buffer_new(0);  const Buffer _x2c_macro_acquired_13 = out; {
     _x2c_defer_env_36 _x2c_macro_environment_36 ={
       0
     }
-    ;  _x2c_macro_environment_36._x2c_defer_capture_58 =(const void *) & out;  X2CCleanup _x2c_defer_record_41 ={
+    ;  _x2c_macro_environment_36._x2c_defer_capture_58 =(const void *) & _x2c_macro_acquired_13;  X2CCleanup _x2c_defer_record_41 ={
       .fn = _x2c_defer_cleanup_41, .env = & _x2c_macro_environment_36
     }
     ;  x2c_cleanup_push(& _x2c_defer_record_41); {
@@ -4536,11 +4538,11 @@ static List _linked_prelude_sources(void){
 }
 
 static String _record_text(List record){
-  Buffer out = Buffer_new(0); {
+  Buffer out = Buffer_new(0);  const Buffer _x2c_macro_acquired_14 = out; {
     _x2c_defer_env_38 _x2c_macro_environment_38 ={
       0
     }
-    ;  _x2c_macro_environment_38._x2c_defer_capture_61 =(const void *) & out;  X2CCleanup _x2c_defer_record_44 ={
+    ;  _x2c_macro_environment_38._x2c_defer_capture_61 =(const void *) & _x2c_macro_acquired_14;  X2CCleanup _x2c_defer_record_44 ={
       .fn = _x2c_defer_cleanup_44, .env = & _x2c_macro_environment_38
     }
     ;  x2c_cleanup_push(& _x2c_defer_record_44); {
@@ -4593,7 +4595,7 @@ static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3){
 }
 
 static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4){
-  _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_4;  Buffer_cleanup((*(Buffer *) _x2c_defer_data_1->_x2c_defer_capture_2));
+  _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_4;  Buffer_cleanup((*(const Buffer *) _x2c_defer_data_1->_x2c_defer_capture_2));
 }
 
 static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5){
@@ -4637,7 +4639,7 @@ static void _x2c_defer_cleanup_14(void * _x2c_defer_opaque_14){
 }
 
 static void _x2c_defer_cleanup_15(void * _x2c_defer_opaque_15){
-  _x2c_defer_env_12 * _x2c_defer_data_12 =(_x2c_defer_env_12 *) _x2c_defer_opaque_15;  Array_cleanup((*(Array *) _x2c_defer_data_12->_x2c_defer_capture_23));
+  _x2c_defer_env_12 * _x2c_defer_data_12 =(_x2c_defer_env_12 *) _x2c_defer_opaque_15;  Array_cleanup((*(const Array *) _x2c_defer_data_12->_x2c_defer_capture_23));
 }
 
 static void _x2c_defer_cleanup_16(void * _x2c_defer_opaque_16){
@@ -4645,11 +4647,11 @@ static void _x2c_defer_cleanup_16(void * _x2c_defer_opaque_16){
 }
 
 static void _x2c_defer_cleanup_17(void * _x2c_defer_opaque_17){
-  _x2c_defer_env_14 * _x2c_defer_data_14 =(_x2c_defer_env_14 *) _x2c_defer_opaque_17;  Array_cleanup((*(Array *) _x2c_defer_data_14->_x2c_defer_capture_26));
+  _x2c_defer_env_14 * _x2c_defer_data_14 =(_x2c_defer_env_14 *) _x2c_defer_opaque_17;  Array_cleanup((*(const Array *) _x2c_defer_data_14->_x2c_defer_capture_26));
 }
 
 static void _x2c_defer_cleanup_18(void * _x2c_defer_opaque_18){
-  _x2c_defer_env_15 * _x2c_defer_data_15 =(_x2c_defer_env_15 *) _x2c_defer_opaque_18;  Array_cleanup((*(Array *) _x2c_defer_data_15->_x2c_defer_capture_27));
+  _x2c_defer_env_15 * _x2c_defer_data_15 =(_x2c_defer_env_15 *) _x2c_defer_opaque_18;  Array_cleanup((*(const Array *) _x2c_defer_data_15->_x2c_defer_capture_27));
 }
 
 static void _x2c_defer_cleanup_19(void * _x2c_defer_opaque_19){
@@ -4661,11 +4663,11 @@ static void _x2c_defer_cleanup_20(void * _x2c_defer_opaque_20){
 }
 
 static void _x2c_defer_cleanup_21(void * _x2c_defer_opaque_21){
-  _x2c_defer_env_18 * _x2c_defer_data_18 =(_x2c_defer_env_18 *) _x2c_defer_opaque_21;  Array_cleanup((*(Array *) _x2c_defer_data_18->_x2c_defer_capture_32));
+  _x2c_defer_env_18 * _x2c_defer_data_18 =(_x2c_defer_env_18 *) _x2c_defer_opaque_21;  Array_cleanup((*(const Array *) _x2c_defer_data_18->_x2c_defer_capture_32));
 }
 
 static void _x2c_defer_cleanup_22(void * _x2c_defer_opaque_22){
-  _x2c_defer_env_19 * _x2c_defer_data_19 =(_x2c_defer_env_19 *) _x2c_defer_opaque_22;  Array_cleanup((*(Array *) _x2c_defer_data_19->_x2c_defer_capture_33));
+  _x2c_defer_env_19 * _x2c_defer_data_19 =(_x2c_defer_env_19 *) _x2c_defer_opaque_22;  Array_cleanup((*(const Array *) _x2c_defer_data_19->_x2c_defer_capture_33));
 }
 
 static void _x2c_defer_cleanup_23(void * _x2c_defer_opaque_23){
@@ -4693,27 +4695,27 @@ static void _x2c_defer_cleanup_28(void * _x2c_defer_opaque_28){
 }
 
 static void _x2c_defer_cleanup_29(void * _x2c_defer_opaque_29){
-  _x2c_defer_env_25 * _x2c_defer_data_25 =(_x2c_defer_env_25 *) _x2c_defer_opaque_29;  Array_cleanup((*(Array *) _x2c_defer_data_25->_x2c_defer_capture_44));
+  _x2c_defer_env_25 * _x2c_defer_data_25 =(_x2c_defer_env_25 *) _x2c_defer_opaque_29;  Array_cleanup((*(const Array *) _x2c_defer_data_25->_x2c_defer_capture_44));
 }
 
 static void _x2c_defer_cleanup_30(void * _x2c_defer_opaque_30){
-  _x2c_defer_env_26 * _x2c_defer_data_26 =(_x2c_defer_env_26 *) _x2c_defer_opaque_30;  Array_cleanup((*(Array *) _x2c_defer_data_26->_x2c_defer_capture_45));
+  _x2c_defer_env_26 * _x2c_defer_data_26 =(_x2c_defer_env_26 *) _x2c_defer_opaque_30;  Array_cleanup((*(const Array *) _x2c_defer_data_26->_x2c_defer_capture_45));
 }
 
 static void _x2c_defer_cleanup_31(void * _x2c_defer_opaque_31){
-  _x2c_defer_env_27 * _x2c_defer_data_27 =(_x2c_defer_env_27 *) _x2c_defer_opaque_31;  Array_cleanup((*(Array *) _x2c_defer_data_27->_x2c_defer_capture_46));
+  _x2c_defer_env_27 * _x2c_defer_data_27 =(_x2c_defer_env_27 *) _x2c_defer_opaque_31;  Array_cleanup((*(const Array *) _x2c_defer_data_27->_x2c_defer_capture_46));
 }
 
 static void _x2c_defer_cleanup_32(void * _x2c_defer_opaque_32){
-  _x2c_defer_env_28 * _x2c_defer_data_28 =(_x2c_defer_env_28 *) _x2c_defer_opaque_32;  Array_cleanup((*(Array *) _x2c_defer_data_28->_x2c_defer_capture_47));
+  _x2c_defer_env_28 * _x2c_defer_data_28 =(_x2c_defer_env_28 *) _x2c_defer_opaque_32;  Array_cleanup((*(const Array *) _x2c_defer_data_28->_x2c_defer_capture_47));
 }
 
 static void _x2c_defer_cleanup_33(void * _x2c_defer_opaque_33){
-  _x2c_defer_env_29 * _x2c_defer_data_29 =(_x2c_defer_env_29 *) _x2c_defer_opaque_33;  Array_cleanup((*(Array *) _x2c_defer_data_29->_x2c_defer_capture_48));
+  _x2c_defer_env_29 * _x2c_defer_data_29 =(_x2c_defer_env_29 *) _x2c_defer_opaque_33;  Array_cleanup((*(const Array *) _x2c_defer_data_29->_x2c_defer_capture_48));
 }
 
 static void _x2c_defer_cleanup_34(void * _x2c_defer_opaque_34){
-  _x2c_defer_env_30 * _x2c_defer_data_30 =(_x2c_defer_env_30 *) _x2c_defer_opaque_34;  Array_cleanup((*(Array *) _x2c_defer_data_30->_x2c_defer_capture_49));
+  _x2c_defer_env_30 * _x2c_defer_data_30 =(_x2c_defer_env_30 *) _x2c_defer_opaque_34;  Array_cleanup((*(const Array *) _x2c_defer_data_30->_x2c_defer_capture_49));
 }
 
 static void _x2c_defer_cleanup_35(void * _x2c_defer_opaque_35){
@@ -4721,7 +4723,7 @@ static void _x2c_defer_cleanup_35(void * _x2c_defer_opaque_35){
 }
 
 static void _x2c_defer_cleanup_36(void * _x2c_defer_opaque_36){
-  _x2c_defer_env_32 * _x2c_defer_data_32 =(_x2c_defer_env_32 *) _x2c_defer_opaque_36;  Array_cleanup((*(Array *) _x2c_defer_data_32->_x2c_defer_capture_52));
+  _x2c_defer_env_32 * _x2c_defer_data_32 =(_x2c_defer_env_32 *) _x2c_defer_opaque_36;  Array_cleanup((*(const Array *) _x2c_defer_data_32->_x2c_defer_capture_52));
 }
 
 static void _x2c_defer_cleanup_37(void * _x2c_defer_opaque_37){
@@ -4741,7 +4743,7 @@ static void _x2c_defer_cleanup_40(void * _x2c_defer_opaque_40){
 }
 
 static void _x2c_defer_cleanup_41(void * _x2c_defer_opaque_41){
-  _x2c_defer_env_36 * _x2c_defer_data_36 =(_x2c_defer_env_36 *) _x2c_defer_opaque_41;  Buffer_cleanup((*(Buffer *) _x2c_defer_data_36->_x2c_defer_capture_58));
+  _x2c_defer_env_36 * _x2c_defer_data_36 =(_x2c_defer_env_36 *) _x2c_defer_opaque_41;  Buffer_cleanup((*(const Buffer *) _x2c_defer_data_36->_x2c_defer_capture_58));
 }
 
 static void _x2c_defer_cleanup_42(void * _x2c_defer_opaque_42){
@@ -4753,7 +4755,7 @@ static void _x2c_defer_cleanup_43(void * _x2c_defer_opaque_43){
 }
 
 static void _x2c_defer_cleanup_44(void * _x2c_defer_opaque_44){
-  _x2c_defer_env_38 * _x2c_defer_data_38 =(_x2c_defer_env_38 *) _x2c_defer_opaque_44;  Buffer_cleanup((*(Buffer *) _x2c_defer_data_38->_x2c_defer_capture_61));
+  _x2c_defer_env_38 * _x2c_defer_data_38 =(_x2c_defer_env_38 *) _x2c_defer_opaque_44;  Buffer_cleanup((*(const Buffer *) _x2c_defer_data_38->_x2c_defer_capture_61));
 }
 
 #undef _x2c_initializer_choice_AB8728A9_0_expanded

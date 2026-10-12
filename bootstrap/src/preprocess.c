@@ -207,12 +207,13 @@ static Token _macro_directive(String content, int * undefined){
 void Compiler_scan_conditionals(Compiler c){
   if(! _init_guard_) _file_init_();
   Array stack = Array_new();
+  const Array _x2c_macro_acquired_0 = stack;
   {
     _x2c_defer_env_1 _x2c_macro_environment_1 ={
       0
     }
     ;
-    _x2c_macro_environment_1._x2c_defer_capture_1 =(const void *) & stack;
+    _x2c_macro_environment_1._x2c_defer_capture_1 =(const void *) & _x2c_macro_acquired_0;
     X2CCleanup _x2c_defer_record_0 ={
       .fn = _x2c_defer_cleanup_1, .env = & _x2c_macro_environment_1
     }
@@ -220,12 +221,13 @@ void Compiler_scan_conditionals(Compiler c){
     x2c_cleanup_push(& _x2c_defer_record_0);
     {
       Map layout = Map_new();
+      const Map _x2c_macro_acquired_1 = layout;
       {
         _x2c_defer_env_0 _x2c_macro_environment_0 ={
           0
         }
         ;
-        _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & layout;
+        _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & _x2c_macro_acquired_1;
         X2CCleanup _x2c_defer_record_1 ={
           .fn = _x2c_defer_cleanup_0, .env = & _x2c_macro_environment_0
         }
@@ -547,11 +549,11 @@ List preproc_within_arms(List arms, List items){
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;
-  Map_cleanup((*(Map *) _x2c_defer_data_0->_x2c_defer_capture_0));
+  Map_cleanup((*(const Map *) _x2c_defer_data_0->_x2c_defer_capture_0));
 }
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
   _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;
-  Array_cleanup((*(Array *) _x2c_defer_data_1->_x2c_defer_capture_1));
+  Array_cleanup((*(const Array *) _x2c_defer_data_1->_x2c_defer_capture_1));
 }
 
