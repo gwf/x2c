@@ -458,7 +458,8 @@ components.
   the bootstrap; the second renames the macros. A component macro rename
   needs no transition; a change to the rule that reserves its spelling
   does (agents/lowering-with-macros.md). Fixture `component-macro-name`.
-- Batch 7 (2026-10-12): the lambda component places its definitions with
+- Batch 7, published to dev as `9478f0fb` (2026-10-12): the lambda
+  component places its definitions with
   `x2c_place` (decision 9). A new SDK operation,
   `x2c_binding_fresh(role)` (Lisp `x2c.binding.fresh`, src/meta-sdk.x),
   returns a binding the compiler names from a role, so the rule allocates
@@ -501,3 +502,63 @@ components.
   still reaches the macro (the b4 case). The names stay reserved, and the
   rename needs a two-round bootstrap transition that a cleanup-phase move
   of shipped component names must plan for.
+
+## Decision needed: what a wrong tag does to `.list()` and its family
+
+`Var.string` raises `<no-convert>` for a value that is not a `String`
+(lib/varconvert.x:72). The unboxers that `$var.tag.unbox` generates
+(lib/common.x:652-671) return NULL for another tag: `.array()`, `.block()`,
+`.buffer()`, `.bytes()`, `.file()`, `.as_iter()`, `.list()`, `.map()`, and
+`.string_payload()`. They also return NULL for `void` and `Null`. An empty
+`List` and an empty `String` return NULL with the right tag. An implicit
+crossing such as `List l = v;` calls the same reader (`Var_list`), and a
+`String` destination calls `Var.as_string`.
+
+Sites that test an unboxer's NULL result for a wrong tag, rather than for an
+empty payload:
+
+- src/macros.x:3215, `watch.outputs[slot].list()`: a slot not yet filled
+  holds `Null`.
+- lib/dispatch.x:346, `List list = v; if (list)`, and :348,
+  `v.string_payload()`: `Var.hash` tries both readers on any value.
+- lib/map-generics.x:29-31: the Map key comparison does the same for two
+  keys.
+- src/parse.x:3343, `if (!type.list())`: the value may be an empty List or
+  another tag.
+
+The seven other `.list()` NULL tests follow an `is <list>` test, so NULL
+means an empty List there. No caller tests `.map()`, `.array()`, `.block()`,
+`.buffer()`, `.bytes()`, `.file()`, or `.as_iter()` for NULL. No unit test
+or fixture asserts NULL for a wrong tag.
+
+The choices:
+
+1. All raise. `.list()`, `.map()`, and the rest raise `<no-convert>` for
+   another tag, like `.string()`. If the implicit crossing `List l = v;`
+   keeps the same reader, it raises too. Then values.md:132-134 ("a wrong
+   tag yields NULL") and :494-497 change, and the generated reference for
+   lib/common.x changes. All four sites above need a tag test or a
+   non-raising reader, and `Var.hash` and the Map key comparison take an
+   extra test on their hot path.
+2. All return NULL. `.string()` returns NULL for another tag again, which
+   reverses decision 4 for the explicit reader. `Var.string_payload` then
+   duplicates `.string()`. from-c.md:156-157, language.md:3910-3912, and
+   values.md:134-138 and :496-497 change, and the fixture
+   `var-string-crossing` changes. No runtime caller changes.
+3. `String` alone raises (current). The book already states this split. It
+   rests on `String` having a display conversion, so `.string()` is the
+   explicit request for an exact payload; no other tag has a display
+   reading.
+
+Recommendation: generalize the `String` rule rather than keep it alone.
+Explicit `.list()`, `.map()`, and the other generated methods raise
+`<no-convert>` for another tag. Implicit crossings and the `_payload`
+readers keep returning NULL, as `String` already does with
+`Var.as_string` and `Var.string_payload`. The generator then emits two
+readers per tag. Only src/macros.x:3215 and possibly src/parse.x:3343
+change in callers, because the hash and Map paths use the implicit or
+payload readers. values.md:494-497 changes; :132-134 stays true for
+crossings. A wrong-tag `.list()` today yields a NULL that fails later, far
+from the cause; a raise reports it where the program asked for a List.
+This change needs two bootstrap rounds: emit the non-raising crossing
+reader first, then make the method raise.
