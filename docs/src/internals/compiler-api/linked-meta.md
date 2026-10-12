@@ -195,7 +195,7 @@ Source: `src/linked-meta.x:812`
 
 Returns linked definition hashes and provider source dependencies.
 
-Source: `src/linked-meta.x:2249`
+Source: `src/linked-meta.x:2265`
 
 #### linked_meta_targets
 
@@ -203,7 +203,7 @@ Source: `src/linked-meta.x:2249`
 
 Returns the linked copies, and the runtime builders, by name.
 
-Source: `src/linked-meta.x:2026`
+Source: `src/linked-meta.x:2040`
 
 #### match_lowering
 
@@ -268,7 +268,7 @@ Source: `src/linked-meta.x:1858`
 
 Lowers the parsed try `node` to its landing form.
 
-Source: `src/linked-meta.x:1970`
+Source: `src/linked-meta.x:1984`
 
 ## Design notes
 

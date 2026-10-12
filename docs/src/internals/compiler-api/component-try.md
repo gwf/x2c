@@ -26,7 +26,7 @@ Try, catch, and finally.
 Returns the statement that prepares each of `items` into its slot of
 the catch site's `patterns`; `$try_site` calls this in a slot.
 
-Source: `src/component-try.x:25`
+Source: `src/component-try.x:26`
 
 #### try_catch_site
 
@@ -36,7 +36,7 @@ Returns the catch site `frame` pushes for the clause `clause`
 describes, or nothing for a try without one; `$try_frame` calls this in
 a slot.
 
-Source: `src/component-try.x:52`
+Source: `src/component-try.x:53`
 
 #### try_exits_placement
 
@@ -46,7 +46,7 @@ Places the lowered exits of a try after its regions, with the effect
 that marks the unit as needing exception support; `$try_frame` calls
 this in a slot.
 
-Source: `src/component-try.x:126`
+Source: `src/component-try.x:127`
 
 #### try_landing
 
@@ -57,16 +57,17 @@ handler selected, or `exits` and no return; `$try_frame` calls this in
 a slot. A landing no catch arm handles runs the region's exits, and
 control does not come back.
 
-Source: `src/component-try.x:112`
+Source: `src/component-try.x:113`
 
 ## Design notes
 
 A try lowers to the landing form `(landing CODE ROWS)` that the cleanup
-walk finishes: its frame, its finalizer lowered outside its regions,
-the exits that close its catch site, claim the finalizer, and leave the
-frame, then its body and each catch arm as regions that run those exits
-on every transfer out of them. The frame lands when something raises,
-and the catch site selects the arm. A clause's facts are
+walk finishes: its frame, its finalizer as a region that leaves the
+frame on a transfer out of it, the exits that close its catch site,
+claim the finalizer, and leave the frame, then its body and each catch
+arm as regions that run those exits on every transfer out of them. The
+frame lands when something raises, and the catch site selects the arm.
+A clause's facts are
 `(HANDLE STATE (ARM...) PATTERN...)`: the handler the parser
 introduced, the catch site's initial state, the arms' tokens, and the
 patterns of the filtered arms, which precede the default arm.
