@@ -61,7 +61,7 @@ Functions and types exposed by each compiler module.
 | [`src/parse.x`](parse.md) | x2c declarations, parsed from source or constructed. |
 | [`src/preprocess.x`](preprocess.md) | C preprocessor directives in x2c source. |
 | [`src/project.x`](project.md) | x2c project manifests. |
-| [`src/protocol.x`](protocol.md) | protocols from declaration to generated adapters. |
+| [`src/protocol.x`](protocol.md) | protocols from declaration to conform forms. |
 | [`src/regions.x`](regions.md) | values that can outlive the region that allocated them. |
 | [`src/report.x`](report.md) | Command progress and completion receipts. |
 | [`src/script.x`](script.md) | Build-once execution of x2c scripts. |

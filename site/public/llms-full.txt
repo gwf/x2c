@@ -4722,6 +4722,9 @@ defines its own `getindex` method. Indexed writes and updates continue to use
 the collection's mutation operations; a read override does not replace them.
 
 - `Array`, `List`, and `String` accept negative indices.
+- An `Array`, `List`, or `String` index is an `int`; a wider value is
+  outside the supported domain and converts as any `Var`-to-`int`
+  conversion does.
 - An out-of-range `Array` or `List` read returns `void`.
 - An out-of-range `String` read returns `-1`; its indexed result is a byte
   represented as an `int`, not a one-byte `String`.

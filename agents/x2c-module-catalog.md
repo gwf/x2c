@@ -166,12 +166,12 @@ Public functions:
 `Compiler.match_pattern_value`, `match_value_is_static`,
 `Compiler.match_pattern_is_static`, `Compiler.match_pattern_binders`,
 `Compiler.define_pattern_binders`, `Compiler.pattern_binder_declarations`,
-`Compiler.own_diagnostics`, `Compiler.borrow_diagnostics`,
-`Compiler.close_child`, `Compiler.share_meta_group`,
-`Compiler.take_unit_state`, `Compiler.return_unit_state`,
-`Compiler.read_source`, `Compiler.canonical_path`, `real_path`,
-`absolute_path`, `home_portable_path`, `home_absolute_path`,
-`Map.merge_translation_dependency`, `Compiler.add_translation_dependency`,
+`Compiler.own_diagnostics`, `Compiler.close_child`,
+`Compiler.share_meta_group`, `Compiler.take_unit_state`,
+`Compiler.return_unit_state`, `Compiler.read_source`,
+`Compiler.canonical_path`, `real_path`, `absolute_path`, `home_portable_path`,
+`home_absolute_path`, `Map.merge_translation_dependency`,
+`Compiler.add_translation_dependency`,
 `Compiler.merge_translation_dependencies`, `Compiler.new`,
 `Compiler.new_shared`, `Compiler.free_lisp`
 
@@ -470,30 +470,30 @@ Public functions:
 `Compiler.marked_rewrite`, `Compiler.has_rewrites`, `Compiler.rewrite`,
 `Compiler.rewrite_lowered`, `Compiler.lower_replacement`,
 `Compiler.rewrite_written`, `Compiler.lower_rewrite`,
-`Compiler.written_support`, `Compiler.rebound`, `Compiler.watched_step`,
-`Compiler.macro_starts_target_at`, `Compiler.macro_invocation_collection`,
-`Compiler.skip_macro_invocation`, `Compiler.skip_named_type_declaration`,
-`Compiler.macro_targets_unit`, `Compiler.try_parse_macro_target_at`,
-`Compiler.try_parse_macro_expression`, `Compiler.evaluate_macro_slot`,
-`Compiler.evaluate_macro_rows`, `Compiler.evaluate_meta_value`,
-`Compiler.evaluate_declaration_recipe`, `x2c_template_call`,
-`Compiler.rebuild_expression`, `Compiler.rebuild_statement`,
-`Compiler.rebuild_unit_function`, `Compiler.rebuild_function`,
-`Compiler.land_quotation`, `Compiler.macro_value_literal`,
-`Compiler.try_parse_macro_pattern`, `Compiler.macro_pattern_at`,
-`Compiler.try_parse_macro_subpattern`, `Compiler.capture_macro_value`,
-`Compiler.take_code_value`, `Compiler.place`, `Compiler.bind_code_value`,
-`Compiler.ensure_macro_lisp`, `Compiler.parse_macro_lisp_top_level`,
-`Compiler.parse_macro_lisp_shallow`, `Compiler.evaluate_declaration_effect`,
-`Compiler.parse_macro_lisp_expression`, `Compiler.lift_macro_lisp_expression`,
-`Compiler.bind_macro_lisp_statement`, `Compiler.source_path`,
-`Compiler.open_macro_library`, `Compiler.add_library_dependencies`,
-`Compiler.publish_macro_library`, `Compiler.inherits_import`,
-`Compiler.record_comptime`, `Compiler.inherit_library_comptime`,
-`macro_library_filling`, `Compiler.shared_definitions`,
-`Compiler.shares_meta_definition`, `Compiler.install_builtin_macros`,
-`Compiler.bind_meta_operation`, `Compiler.report_lisp_failure`,
-`macro_library_reset`
+`Compiler.written_support`, `Compiler.applying_shipped`, `Compiler.rebound`,
+`Compiler.watched_step`, `Compiler.macro_starts_target_at`,
+`Compiler.macro_invocation_collection`, `Compiler.skip_macro_invocation`,
+`Compiler.skip_named_type_declaration`, `Compiler.macro_targets_unit`,
+`Compiler.try_parse_macro_target_at`, `Compiler.try_parse_macro_expression`,
+`Compiler.evaluate_macro_slot`, `Compiler.evaluate_macro_rows`,
+`Compiler.evaluate_meta_value`, `Compiler.evaluate_declaration_recipe`,
+`x2c_template_call`, `Compiler.rebuild_expression`,
+`Compiler.rebuild_statement`, `Compiler.rebuild_unit_function`,
+`Compiler.rebuild_function`, `Compiler.land_quotation`,
+`Compiler.macro_value_literal`, `Compiler.try_parse_macro_pattern`,
+`Compiler.macro_pattern_at`, `Compiler.try_parse_macro_subpattern`,
+`Compiler.capture_macro_value`, `Compiler.take_code_value`, `Compiler.place`,
+`Compiler.bind_code_value`, `Compiler.ensure_macro_lisp`,
+`Compiler.parse_macro_lisp_top_level`, `Compiler.parse_macro_lisp_shallow`,
+`Compiler.evaluate_declaration_effect`, `Compiler.parse_macro_lisp_expression`,
+`Compiler.lift_macro_lisp_expression`, `Compiler.bind_macro_lisp_statement`,
+`Compiler.source_path`, `Compiler.open_macro_library`,
+`Compiler.add_library_dependencies`, `Compiler.publish_macro_library`,
+`Compiler.inherits_import`, `Compiler.record_comptime`,
+`Compiler.inherit_library_comptime`, `macro_library_filling`,
+`Compiler.shared_definitions`, `Compiler.shares_meta_definition`,
+`Compiler.install_builtin_macros`, `Compiler.bind_meta_operation`,
+`Compiler.report_lisp_failure`, `macro_library_reset`
 
 ### [src/main.x](../src/main.x)
 
@@ -628,10 +628,10 @@ Public functions:
 `Compiler.parse_basic_identifier`, `Compiler.parse_optional_identifier`,
 `Compiler.parse_function_definition`, `Compiler.parse_function_target`,
 `declared_return`, `Compiler.enter`, `Compiler.enclosing`,
-`Compiler.enter_function`, `Compiler.leave_function`, `Compiler.place_entry`,
-`Compiler.place_after`, `Compiler.close_placements`, `Compiler.leave_item`,
-`Compiler.finish_initializers`, `Compiler.bind_syntax`, `source_clause`,
-`Compiler.bind_source_statement`, `Compiler.bind_catch_arm`,
+`Compiler.enter_function`, `Compiler.function_entry`, `Compiler.exit_function`,
+`Compiler.place_entry`, `Compiler.place_after`, `Compiler.close_placements`,
+`Compiler.leave_item`, `Compiler.finish_initializers`, `Compiler.bind_syntax`,
+`source_clause`, `Compiler.bind_source_statement`, `Compiler.bind_catch_arm`,
 `Compiler.bind_match_arm`, `Compiler.bind_callable_body`,
 `Compiler.finish_foreign_alias`
 
@@ -657,7 +657,7 @@ Public functions:
 
 ### [src/protocol.x](../src/protocol.x)
 
-protocols from declaration to generated adapters.
+protocols from declaration to conform forms.
 
 Public functions:
 
@@ -758,14 +758,14 @@ Public functions:
 `Compiler.imported_spelling`, `Sym.define_macro`, `Sym.has_local_macros`,
 `Sym.lookup_macro`, `Compiler.macro_definition_locals`,
 `Compiler.macro_template_local`, `Sym.resolve_key`, `Sym.next_typedef`,
-`Sym.resolve_base_type`, `Sym.sole_typedef`, `Sym.normalize_declared_type`,
-`Sym.local_type`, `Sym.resolve_numeric_type`, `Sym.var_tag_for_type`,
-`Sym.is_var_type`, `Sym.is_string_type`, `Sym.is_array_type`,
-`Sym.is_map_type`, `Sym.is_named_value_type`, `Sym.lookup_field`,
-`Sym.declare_field_order`, `Sym.field_order`, `Sym.mark_field`,
-`Sym.marked_fields`, `Sym.aggregate_of`, `Compiler.begin_semantic_transaction`,
-`SymTxn.local_macros_changed`, `Sym.transacting`, `Sym.end_log`,
-`SymTxn.commit`, `SymTxn.commit_transient`, `SymTxn.rollback`
+`Sym.sole_typedef`, `Sym.normalize_declared_type`, `Sym.local_type`,
+`Sym.resolve_numeric_type`, `Sym.var_tag_for_type`, `Sym.is_var_type`,
+`Sym.is_string_type`, `Sym.is_array_type`, `Sym.is_map_type`,
+`Sym.is_named_value_type`, `Sym.lookup_field`, `Sym.declare_field_order`,
+`Sym.field_order`, `Sym.mark_field`, `Sym.marked_fields`, `Sym.aggregate_of`,
+`Compiler.begin_semantic_transaction`, `SymTxn.local_macros_changed`,
+`Sym.transacting`, `Sym.end_log`, `SymTxn.commit`, `SymTxn.commit_transient`,
+`SymTxn.rollback`
 
 ### [src/toolchain.x](../src/toolchain.x)
 

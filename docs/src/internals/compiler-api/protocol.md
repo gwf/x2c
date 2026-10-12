@@ -6,7 +6,7 @@
 
 # `src/protocol.x`
 
-Protocols from declaration to generated adapters.
+Protocols from declaration to conform forms.
 
 ## Functions
 
@@ -16,7 +16,7 @@ Protocols from declaration to generated adapters.
 | [`Compiler.discard_helper`](#Compiler.discard_helper) | Returns `(binding signature)` for a generated helper that calls the function `binding` of type `signature` and then discards the unnamed argument temporaries `which` selects (bit `n` for argument `n`). |
 | [`Compiler.dump_conformance`](#Compiler.dump_conformance) | Prints stable conformance rows for typedefs in `globs`. |
 | [`Compiler.forward_parameters`](#Compiler.forward_parameters) | Returns `(declarations arguments)` for a helper that forwards its parameters of `types`: each declaration names a fresh parameter `a0`, `a1`, ..., and each argument reads it. |
-| [`Compiler.generate_protocol_adapters`](#Compiler.generate_protocol_adapters) | Generates adapters and descriptor registration for resolved conformances. |
+| [`Compiler.generate_protocol_adapters`](#Compiler.generate_protocol_adapters) | Inserts native aliases and presents other resolved conformances as `conform` forms. |
 | [`Compiler.install_generated_protocol_symbols`](#Compiler.install_generated_protocol_symbols) | Publishes external native alias and ordinary adapter signatures. |
 | [`Compiler.native_protocol_alias`](#Compiler.native_protocol_alias) | Reports whether a generated member names a native protocol host function. |
 | [`Compiler.parse_protocol_declaration`](#Compiler.parse_protocol_declaration) | Parses a protocol body or concrete adoption at the current token. |
@@ -89,13 +89,13 @@ Source: `src/protocol.x:2278`
 
 `List Compiler.generate_protocol_adapters(Compiler c, List ast)`
 
-Generates adapters and descriptor registration for resolved conformances.
-Native aliases are inserted at the participant's inferred public or
-private boundary. Each other conformance whose forward converter the
-unit defines is presented to the rule on the `conform` head, whose
-code joins the unit's pending support. The external conformances the
-unit declares are first recorded in its interface. Returns `ast` with
-native insertions applied.
+Inserts native aliases and presents other resolved conformances as
+`conform` forms. A native alias is inserted at the participant's inferred
+public or private boundary. Each other conformance whose forward converter
+the unit defines goes to the rule on the `conform` head, which
+`src/component-protocols.x` registers to write its adapters into the unit's
+pending support. The external conformances the unit declares are first
+recorded in its interface. Returns `ast` with native insertions applied.
 
 Source: `src/protocol.x:2472`
 
@@ -294,8 +294,8 @@ Source: `src/protocol.x:2268`
 This module owns the protocol feature: it parses protocol and adoption
 declarations, keeps their rows in per-unit registries, resolves each
 adoption into a conformance, answers member and operator lookups, and
-generates the adapters a conformance needs. Registries are rebuilt per
-translation unit; a static row is visible only when its canonical source
-path is the current unit. The unit that declares an external adoption
-resolves it and records the conformance in its interface, and a unit
-that includes that interface reuses the recorded conformance.
+presents each conformance as native aliases or a `conform` form, from which
+`src/component-protocols.x` writes the adapters. Registries are rebuilt per
+translation unit; a static row is visible only in the unit of its canonical
+source path. The unit that declares an external adoption resolves it and
+records the conformance in its interface, which an including unit reuses.
