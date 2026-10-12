@@ -429,8 +429,22 @@ def write(path: str, text: str) -> None:
         handle.write(text if text.endswith("\n") else text + "\n")
 
 
+INDEX_HEADER = """# Agent failure incidents
+
+One row per captured incident; the evidence is outside the repository under
+the directory `tools/agent-failure.py list` names.
+
+| Date | Kind | What was reported |
+| --- | --- | --- |
+"""
+
+
 def append_index(path: str, row: str) -> bool:
-    """Append one captured incident unless that exact row is already present."""
+    """Append one captured incident unless that exact row is already present.
+    A missing index starts with its header, so the first capture creates it."""
+    if not os.path.exists(path):
+        with open(path, "w", encoding="utf-8") as handle:
+            handle.write(INDEX_HEADER)
     try:
         with open(path, encoding="utf-8") as handle:
             current = handle.read()
