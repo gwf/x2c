@@ -545,10 +545,12 @@ static Array Compiler._line_starts(Compiler c) {
   return c.line_starts;
 }
 
-/* Clamp the caret to the line while retaining tabs before the token. */
+/* Clamp the caret to the line while retaining tabs before the token. An
+   empty line, such as the end of a file, shows no context. */
 static void _context_caret(
   char *line_start, char *line_end, int column, int length) {
   int line_len = line_end - line_start, start = column > 0 ? column - 1 : 0;
+  if (!line_len) return;
   if (start > line_len) start = line_len;
   int width = length > 0 ? length : 1;
   if (start < line_len && width > line_len - start) width = line_len - start;
