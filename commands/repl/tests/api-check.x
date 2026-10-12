@@ -111,7 +111,7 @@ static void _carrier_rollback(Compiler c) {
   List carrier = %(code-value "source"
     (seq (stmnt (expr () (ident $token))) $placed)
     ((new-name $token "rollback")
-     (early $key $token (declare (int) (bindings (bind $token ()))))
+     (place (unit-support $key) (declare (int) (bindings (bind $token ()))))
      (cleanup $placed (seq))));
   int early = c.pending.area(<support>).len(), exception = c.needs_exception;
   String counters = c.names.counters.repr();
