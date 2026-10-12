@@ -440,7 +440,8 @@ components.
   its prototype stays in the generated header. Fixture
   `rewrite-local-declaration`; `function-to-func-inline` and the lambda
   fixtures pass unchanged, and `make verify` passed.
-- Batch 6 (2026-10-12): the shipped component macros are private. The
+- Batch 6, published to dev as `42867362` (2026-10-12): the shipped
+  component macros are private. The
   `$collection_*`, printf-family, `$try_*`, and `$delegate_call` macros are
   now `$x2c.collection.*`, `$x2c.printf.format` and its relatives,
   `$x2c.try.site`, `$x2c.try.handled`, `$x2c.try.frame`, and
@@ -457,6 +458,24 @@ components.
   the bootstrap; the second renames the macros. A component macro rename
   needs no transition; a change to the rule that reserves its spelling
   does (agents/lowering-with-macros.md). Fixture `component-macro-name`.
+- Batch 7 (2026-10-12): the lambda component places its definitions with
+  `x2c_place` (decision 9). A new SDK operation,
+  `x2c_binding_fresh(role)` (Lisp `x2c.binding.fresh`, src/meta-sdk.x),
+  returns a binding the compiler names from a role, so the rule allocates
+  the names its placed code declares; `lambda_lift` and `lambda_closure`
+  return carriers with no effects. The change took two bootstrap rounds:
+  the operation first, then its use. Generated C is unchanged: after a
+  bootstrap refresh by the new compiler, only `linked-meta.c`, which holds
+  the component, and the prelude record in `collect.c` differ, and every
+  fixture's C matches except the process id `meta-job-lifetime` records.
+  Translating a 500-function file with a non-capturing, a value-capturing,
+  and a reference-capturing lambda in each function took 41.5 G
+  instructions before and 40.7 G after (three runs each). The carrier
+  `(place WHERE CODE)` row stays: the language reference documents it
+  (language.md, `x2c.place`) and the program fixture
+  `rewrite-function-entry` uses it, so deleting it would remove a public
+  feature. `lambda_cells` keeps its `new-name` rows, because a cell is
+  named when its declaration is built, in declaration order.
 - Not done: converging the lambda component's `(place ...)` carrier rows on
   `x2c_place` (decision 9). Both forms reach `Compiler.place`; the carrier
   form exists because the placed code names bindings the driver introduces
