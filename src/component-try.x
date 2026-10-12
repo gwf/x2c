@@ -196,7 +196,6 @@ meta static void _try_check_label(List finalizer) {
       Code.binding_spelling(label)}' would be defined once for each"));
 }
 
-/* The address of the try's frame. */
 meta static List _try_frame_address(Atom frame) {
   Type type = %(("ExceptionFrame")), pointer = %(* ("ExceptionFrame"));
   return %(expr $pointer (op & (expr $type (ident $frame))));
