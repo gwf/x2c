@@ -588,18 +588,20 @@ static int _radix(String text, int end, int &pos) {
 }
 
 /* C gives an integer literal the first type of its suffix's list that holds
-   the value; a decimal literal without `u` skips the unsigned types. */
+   the value; a decimal or signed literal without `u` skips the unsigned
+   types, and a `u` suffix keeps C's modular negation. */
 static Type _integer_literal_type(
   unsigned long long magnitude, int decimal, int is_unsigned,
   int longs, int negative) {
+  int signed_only = decimal || negative;
   if (!is_unsigned && !longs) {
     if (magnitude <= (unsigned long long) INT_MAX + negative) return %(int);
-    if (!decimal && magnitude <= UINT_MAX) return %(unsigned);
+    if (!signed_only && magnitude <= UINT_MAX) return %(unsigned);
     if (magnitude <= (unsigned long long) LONG_MAX + negative) return %(long);
-    if (!decimal && magnitude <= ULONG_MAX) return %(unsigned long);
+    if (!signed_only && magnitude <= ULONG_MAX) return %(unsigned long);
     if (magnitude <= (unsigned long long) LLONG_MAX + negative)
       return %(long long);
-    if (!decimal) return %(unsigned long long);
+    if (!signed_only) return %(unsigned long long);
     return NULL;
   }
   if (is_unsigned && !longs) {
@@ -609,10 +611,10 @@ static Type _integer_literal_type(
   }
   if (!is_unsigned && longs == 1) {
     if (magnitude <= (unsigned long long) LONG_MAX + negative) return %(long);
-    if (!decimal && magnitude <= ULONG_MAX) return %(unsigned long);
+    if (!signed_only && magnitude <= ULONG_MAX) return %(unsigned long);
     if (magnitude <= (unsigned long long) LLONG_MAX + negative)
       return %(long long);
-    if (!decimal) return %(unsigned long long);
+    if (!signed_only) return %(unsigned long long);
     return NULL;
   }
   if (is_unsigned && longs == 1)
@@ -620,7 +622,7 @@ static Type _integer_literal_type(
   if (!is_unsigned && longs == 2) {
     if (magnitude <= (unsigned long long) LLONG_MAX + negative)
       return %(long long);
-    return decimal ? NULL : %(unsigned long long);
+    return signed_only ? NULL : %(unsigned long long);
   }
   return %(unsigned long long);
 }

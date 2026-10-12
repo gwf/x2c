@@ -19,6 +19,15 @@ int main(void) {
          same_width ? minima[1] is <long> : minima[1] is <llong>,
          minima[1] == expected_long,
          minima[2] is <llong>, minima[2] == min_llong);
+  List wide = %(-0x80000001 -0xFFFFFFFF -0o40000000000
+                -0b100000000000000000000000000000001 -1u);
+  printf("%s %d %d\n", wide.str(), wide[0] is <long> || wide[0] is <llong>,
+         wide[4] is <u32>);
+  long w = -2147483649L;
+  match (%($w)) {
+    case %(-0x80000001): puts("wide matched");
+    default: puts("wide missed");
+  }
   int n = -5;
   List runtime = %($n), literal = %(-5);
   printf("%d %d\n", runtime == literal, small[1] == 5);

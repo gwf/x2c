@@ -959,8 +959,10 @@ static List Emitter._literal(Emitter &e, List ast) {
         case <long>: limit = LONG_MAX; suffix = "L"; break;
         case <llong>: limit = LLONG_MAX; suffix = "LL"; break;
       }
+      // A signed decimal spelling keeps C from negating an unsigned type.
       if (limit && magnitude == limit + 1)
         text = %"(-$limit$suffix - 1$suffix)";
+      else if (limit) text = %"-$magnitude$suffix";
     }
   }
   // C has no `0o` prefix; its octal spelling is a bare leading zero.

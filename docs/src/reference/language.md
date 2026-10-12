@@ -2756,7 +2756,12 @@ angle spelling that does not fit is rejected instead of falling back to
 `<lsym>`.
 
 Integer, floating, signed numeric, and character literals retain their
-concrete types. Lowercase `void` remains the absence sentinel and is rejected
+concrete types. A signed integer token is one value, not C's unary minus: it
+selects the first signed type among its suffix's choices that holds the
+signed value, in any radix, so `%(-0x80000001)` is the `long` value
+-2147483649 and `%(-2147483648)` is an `int`. A `u` suffix keeps the unsigned
+type C would choose and its modular negation, so `%(-1u)` is the `unsigned`
+value 4294967295. Lowercase `void` remains the absence sentinel and is rejected
 if collection construction tries to store it.
 
 `$name` inserts one identifier expression into a quoted collection.
