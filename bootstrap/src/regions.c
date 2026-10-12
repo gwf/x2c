@@ -1479,7 +1479,7 @@ Symbol Compiler_region_result(String name){
 
 int Compiler_region_wrapper(String name){
   if(! _init_guard_) _file_init_();
-  return Var_equal(Map_getindex(runtime, String_var(name)), List_var(_44));
+  return x2c_var_equal(Map_getindex(runtime, String_var(name)), List_var(_44));
 }
 
 int Compiler_has_region_row(String name){
@@ -1965,7 +1965,7 @@ static int Walk_note_restored(Walk * w, Var body){
               target = _x2c_match_value_0;
               {
                 Var place = Walk_target_place(&((* w)), target);
-                if(Var_equal(place, _unwrap(target))) return 0;
+                if(x2c_var_equal(place, _unwrap(target))) return 0;
                 (* w).restored = Map_copy((* w).restored);
                 Map_setindex((* w).restored, place, int_var(1));
                 return 1;
@@ -2109,9 +2109,9 @@ static void Walk_scan_call(Walk * w, Var call, String callee, List arguments){
         if(index >= count) continue;
         Type type = NULL, holder_type = NULL;
         Var argument = _passed(types, arguments, index, &(type));
-        if(Var_equal(target, Symbol_var(1317118534))) Walk_flow(&((* w)), argument, type, 1317118534, NULL);
-        else if(Var_equal(target, Symbol_var(46060699100))) Walk_flow(&((* w)), argument, type, 534624, NULL);
-        else if(Var_equal(target, Symbol_var(1219734312))){
+        if(x2c_var_equal(target, Symbol_var(1317118534))) Walk_flow(&((* w)), argument, type, 1317118534, NULL);
+        else if(x2c_var_equal(target, Symbol_var(46060699100))) Walk_flow(&((* w)), argument, type, 534624, NULL);
+        else if(x2c_var_equal(target, Symbol_var(1219734312))){
           int born = 0;
           Region other = NULL;
           Acquired acquired = NULL;
@@ -2155,7 +2155,7 @@ static void Walk_scan_call(Walk * w, Var call, String callee, List arguments){
 
 static int Walk_scan_assignment(Walk * w, Var node, Var root){
   List assignment = _source_assignment(node);
-  if(! List_truth(assignment) || Var_equal(_unwrap(node), root)) return 0;
+  if(! List_truth(assignment) || x2c_var_equal(_unwrap(node), root)) return 0;
   List _x2c_destructure_4 = assignment;
   Var target = List_getindex(_x2c_destructure_4, 0);
   Var stored = List_getindex(_x2c_destructure_4, 1);
@@ -2319,7 +2319,7 @@ static void Walk_declare_initialized(Walk * w, List name, Var value, Type type){
     }
     );  Var _x2c_macro_item_20;  while(Iter_try_next(_x2c_macro_iterator_20, &(_x2c_macro_item_20))){
       part = _x2c_macro_item_20; {
-        if(! Var_is(part, 1328354264) || ! Symbol_is_type_qualifier(Var_symbol(part))) break;  if(Var_equal(part, Symbol_var(7304424))) fact -> constant = 1;
+        if(! Var_is(part, 1328354264) || ! Symbol_is_type_qualifier(Var_symbol(part))) break;  if(x2c_var_equal(part, Symbol_var(7304424))) fact -> constant = 1;
       }
 
     }
@@ -2567,7 +2567,7 @@ static Fact Walk_returned_argument(Walk * w, Var value, List * named){
     }
     );  Var _x2c_macro_item_22;  while(Iter_try_next(_x2c_macro_iterator_22, &(_x2c_macro_item_22))){
       row = Var_list(_x2c_macro_item_22); {
-        List _x2c_destructure_5 = row;  int index = Var_int(Var_convert(List_getindex(_x2c_destructure_5, 0), 3453797));  Var target = List_getindex(_x2c_destructure_5, 1);  if(! Var_equal(target, Symbol_var(1219800220)) || index >= List_len(arguments)) continue;  Type type = NULL;  Fact fact = Walk_fact_of(&((* w)), _passed(types, arguments, index, &(type)), named);  if(fact &&(fact -> param >= 0 || fact -> born || fact -> region || fact -> other || _cleanup(fact -> acquired))) return fact;
+        List _x2c_destructure_5 = row;  int index = Var_int(Var_convert(List_getindex(_x2c_destructure_5, 0), 3453797));  Var target = List_getindex(_x2c_destructure_5, 1);  if(! x2c_var_equal(target, Symbol_var(1219800220)) || index >= List_len(arguments)) continue;  Type type = NULL;  Fact fact = Walk_fact_of(&((* w)), _passed(types, arguments, index, &(type)), named);  if(fact &&(fact -> param >= 0 || fact -> born || fact -> region || fact -> other || _cleanup(fact -> acquired))) return fact;
       }
 
     }
@@ -2601,7 +2601,7 @@ static Fact Walk_fact_of(Walk * w, Var expression, List * named){
     }
 
   }
-  List arguments = NULL;  String callee = _callee_of(inner, &(arguments));  if(! String_truth(callee) || ! Var_equal(Walk_effect(&((* w)), callee), List_var(_44))) return NULL;  return Walk_fact_of(&((* w)), List_car(arguments), named);
+  List arguments = NULL;  String callee = _callee_of(inner, &(arguments));  if(! String_truth(callee) || ! x2c_var_equal(Walk_effect(&((* w)), callee), List_var(_44))) return NULL;  return Walk_fact_of(&((* w)), List_car(arguments), named);
 }
 
 static Fact Walk_value_fact(Walk * w, Var value, List * named){

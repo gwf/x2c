@@ -920,7 +920,7 @@ Var Var_clone_wide(Var value){
   if((raw & 0x7) != 0 || raw >=(1ul << 48)){
     Scope_free(box);
     {
-      static const X2CErrorSite _x2c_error_site_12 = {.file = "../../lib/var.x",.function = "Var_clone_wide",.line = 876};
+      static const X2CErrorSite _x2c_error_site_12 = {.file = "../../lib/var.x",.function = "Var_clone_wide",.line = 877};
       x2c_error_raise_n(& _x2c_error_site_12, 4372507526, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.clone_wide")), NULL))));
       __builtin_unreachable();
     }
@@ -1152,7 +1152,7 @@ int Var_register_object_tag(Symbol tag){
     x2c_cleanup_push(& _x2c_defer_record_3);
     {
       if(x2c_descriptor_registration_frozen()){
-        static const X2CErrorSite _x2c_error_site_13 = {.file = "../../lib/var.x",.function = "Var_register_object_tag",.line = 1254};
+        static const X2CErrorSite _x2c_error_site_13 = {.file = "../../lib/var.x",.function = "Var_register_object_tag",.line = 1255};
         x2c_error_raise_n(& _x2c_error_site_13, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.register_object_tag")), NULL))));
         __builtin_unreachable();
       }

@@ -330,14 +330,14 @@ static Array Array__core_splice(Array _x2c_macro_array_9, int _x2c_macro_index_3
 static int Array__core_find(Array _x2c_macro_array_10, Var _x2c_macro_value_1){
   Var * _x2c_macro_data_6 =(Var *) _x2c_macro_array_10 -> bytes;
   int _x2c_macro_n_6 =(int) _x2c_macro_array_10 -> length;
-  for(int _x2c_macro_i_2 = 0;  _x2c_macro_i_2 < _x2c_macro_n_6;  _x2c_macro_i_2 ++) if(Var_equal(_x2c_macro_data_6[_x2c_macro_i_2], _x2c_macro_value_1)) return _x2c_macro_i_2;
+  for(int _x2c_macro_i_2 = 0;  _x2c_macro_i_2 < _x2c_macro_n_6;  _x2c_macro_i_2 ++) if(x2c_var_equal(_x2c_macro_data_6[_x2c_macro_i_2], _x2c_macro_value_1)) return _x2c_macro_i_2;
   return - 1;
 }
 
 static int Array__core_count(Array _x2c_macro_array_11, Var _x2c_macro_value_2){
   Var * _x2c_macro_data_7 =(Var *) _x2c_macro_array_11 -> bytes;
   int _x2c_macro_n_7 =(int) _x2c_macro_array_11 -> length, _x2c_macro_total_0 = 0;
-  for(int _x2c_macro_i_3 = 0;  _x2c_macro_i_3 < _x2c_macro_n_7;  _x2c_macro_i_3 ++) if(Var_equal(_x2c_macro_data_7[_x2c_macro_i_3], _x2c_macro_value_2)) _x2c_macro_total_0 ++;
+  for(int _x2c_macro_i_3 = 0;  _x2c_macro_i_3 < _x2c_macro_n_7;  _x2c_macro_i_3 ++) if(x2c_var_equal(_x2c_macro_data_7[_x2c_macro_i_3], _x2c_macro_value_2)) _x2c_macro_total_0 ++;
   return _x2c_macro_total_0;
 }
 
@@ -363,7 +363,7 @@ static int Array__core_equal(Array _x2c_macro_a_1, Array _x2c_macro_b_1){
   if(_x2c_macro_a_1 == NULL || _x2c_macro_b_1 == NULL || _x2c_macro_a_1 -> length != _x2c_macro_b_1 -> length || _x2c_macro_a_1 -> width != _x2c_macro_b_1 -> width) return 0;
   Var * _x2c_macro_adata_0 =(Var *) _x2c_macro_a_1 -> bytes;
   Var * _x2c_macro_bdata_0 =(Var *) _x2c_macro_b_1 -> bytes;
-  for(size_t _x2c_macro_i_5 = 0;  _x2c_macro_i_5 < _x2c_macro_a_1 -> length;  _x2c_macro_i_5 ++) if(! Var_equal(_x2c_macro_adata_0[_x2c_macro_i_5], _x2c_macro_bdata_0[_x2c_macro_i_5])) return 0;
+  for(size_t _x2c_macro_i_5 = 0;  _x2c_macro_i_5 < _x2c_macro_a_1 -> length;  _x2c_macro_i_5 ++) if(! x2c_var_equal(_x2c_macro_adata_0[_x2c_macro_i_5], _x2c_macro_bdata_0[_x2c_macro_i_5])) return 0;
   return 1;
 }
 

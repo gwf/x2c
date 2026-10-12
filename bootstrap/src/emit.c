@@ -779,7 +779,7 @@ static List Emitter__emit(Emitter * e, List ast){
   if(! List_truth(ast)) return ast;
   Var head = List_car(ast);
   if(! Var_is(head, 1328354264)) return Emitter__emit_sequence(&((* e)), ast);
-  if(! Var_equal(head, Symbol_var(44661285196)) &&(Symbol_is_storage_class(Var_symbol(head)) || Symbol_is_type_qualifier(Var_symbol(head)) || Symbol_is_inline(Var_symbol(head)))){
+  if(! x2c_var_equal(head, Symbol_var(44661285196)) &&(Symbol_is_storage_class(Var_symbol(head)) || Symbol_is_type_qualifier(Var_symbol(head)) || Symbol_is_inline(Var_symbol(head)))){
     return Emitter__emit_prefix(&((* e)), ast);
   }
   {
@@ -1185,14 +1185,14 @@ static List Emitter__initializer_value(Emitter * e, List ast){
 }
 
 static List Emitter__emit_index_init(Emitter * e, Var index, List value){
-  String assign = Var_equal(List_car(value), Symbol_var(9639129704)) || Var_equal(List_car(value), Symbol_var(20762258403944)) ? _138 : _139;  return({
+  String assign = x2c_var_equal(List_car(value), Symbol_var(9639129704)) || x2c_var_equal(List_car(value), Symbol_var(20762258403944)) ? _138 : _139;  return({
     List _x2c_literal_part_40 = Emitter__emit(&((* e)), cons(index, NULL));  Var _x2c_literal_part_41 = String_var(assign);  List _x2c_literal_part_42 = Emitter__emit(&((* e)), cons(List_var(value), NULL));  cons(_29, List_append(_x2c_literal_part_40, cons(_31, cons(_x2c_literal_part_41, List_append(_x2c_literal_part_42, NULL)))));
   }
   );
 }
 
 static List Emitter__emit_dot_init(Emitter * e, Var field, List value){
-  String assign = Var_equal(List_car(value), Symbol_var(9639129704)) || Var_equal(List_car(value), Symbol_var(20762258403944)) ? _138 : _140;  return({
+  String assign = x2c_var_equal(List_car(value), Symbol_var(9639129704)) || x2c_var_equal(List_car(value), Symbol_var(20762258403944)) ? _138 : _140;  return({
     List _x2c_literal_part_43 = Emitter__emit(&((* e)), cons(field, NULL));  Var _x2c_literal_part_44 = String_var(assign);  List _x2c_literal_part_45 = Emitter__emit(&((* e)), cons(List_var(value), NULL));  cons(_142, List_append(_x2c_literal_part_43, cons(_x2c_literal_part_44, List_append(_x2c_literal_part_45, NULL))));
   }
   );
@@ -1203,7 +1203,7 @@ static Type List_type(List);
 Type Type_declared(Type);
 int Type_is_threaded(Type);
 static List Emitter__local_static(Emitter * e, List declaration, List body){
-  while(Var_equal(List_car(declaration), Symbol_var(104))){
+  while(x2c_var_equal(List_car(declaration), Symbol_var(104))){
     (* e).origin = Var_int(Var_convert(List_cadr(declaration), 3453797));  declaration = Var_list(List_caddr(declaration));
   }
   if(_static_case_entry(body)){
@@ -1272,7 +1272,7 @@ static void Emitter__static_binding(Emitter * e, List binding, Type declared_bas
     List native = Emitter__semantic_name(&((* e)), type, spelling);  List value = List_truth(initial) ? cons(_172, List_append(Emitter__emit(&((* e)), initial), NULL)) : NULL;  Array_push(output, List_var(cons(String_var(storage), List_append(native, List_append(value, _20)))));  return;
   }
   (* e).static_support = 1;  StaticRuntime runtime ={
-    .e = &(* e), .output = output, .declared_base = declared_base, .type = type, .name = name, .initial = initial, .storage = storage, .inferred = Var_equal(List_car(Type_list(type)), Symbol_var(8794)) || List_truth(({ static MatchCaptureSite _x2c_match_site_1;  x2c_match_site_match(& _x2c_match_site_1, Type_list(type), List_var(_176)); }))
+    .e = &(* e), .output = output, .declared_base = declared_base, .type = type, .name = name, .initial = initial, .storage = storage, .inferred = x2c_var_equal(List_car(Type_list(type)), Symbol_var(8794)) || List_truth(({ static MatchCaptureSite _x2c_match_site_1;  x2c_match_site_match(& _x2c_match_site_1, Type_list(type), List_var(_176)); }))
   }
   ;  runtime.alias = Compiler_fresh_name((* e).c, _177);  runtime.pointer = Compiler_fresh_name((* e).c, _178);  runtime.guard = Compiler_fresh_name((* e).c, _179);  runtime.cleanup = Compiler_emitted_binding_name((* e).c, record);  runtime.temporary = Compiler_fresh_name((* e).c, _180);  StaticRuntime_prepare(&(runtime));  StaticRuntime_emit(&(runtime));
 }
@@ -1372,7 +1372,7 @@ static List Emitter__capture_source(Emitter * e, List node, Array inputs, Array 
 
 List Compiler_initializer_native_types(Compiler, Type);
 static List Emitter__capture_definition(Emitter * e, List node, Array inputs, Array declarations){
-  List _x2c_destructure_5 = Compiler_initializer_native_types((* e).c, List_type(node));  Type definition = Var_type(List_getindex(_x2c_destructure_5, 0));  Type reference = Var_type(List_getindex(_x2c_destructure_5, 1));  if(Var_equal(List_car(node), Symbol_var(357722))){
+  List _x2c_destructure_5 = Compiler_initializer_native_types((* e).c, List_type(node));  Type definition = Var_type(List_getindex(_x2c_destructure_5, 0));  Type reference = Var_type(List_getindex(_x2c_destructure_5, 1));  if(x2c_var_equal(List_car(node), Symbol_var(357722))){
     reference = List_type(cons(_316, cons(List_cadr(node), NULL))); {
       List _x2c_match_expr = node; List _x2c_match_cursor, _x2c_match_cursor1;  switch(_x2c_match_expr ? _x2c_match_expr->car.u64 : 0){
           case 9224497936761976154ULL: ;  _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497936761976154ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224497937242824282ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1 && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1 && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor) { Var _x2c_match_value_0 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
@@ -1941,7 +1941,7 @@ static List Emitter__declarator(Emitter * e, List decl, List mods){
 int Type_is_array(Type);
 
 static List Emitter__list_declarator(Emitter * e, List decl, Type mod){
-  if(Var_equal(List_car(Type_list(mod)), Symbol_var(13528008))) return Emitter__function_declarator(&((* e)), decl, Var_list(List_cadr(Type_list(mod))));
+  if(x2c_var_equal(List_car(Type_list(mod)), Symbol_var(13528008))) return Emitter__function_declarator(&((* e)), decl, Var_list(List_cadr(Type_list(mod))));
   if(Var_is_row(List_car(Type_list(mod)), 11, 7, 1)) return({
     List _x2c_literal_part_100 = decl;  List _x2c_literal_part_101 = Type_list(mod);  List_append(_x2c_literal_part_100, List_append(_x2c_literal_part_101, NULL));
   }
@@ -2096,7 +2096,7 @@ static int _is_gensym_tag(List tag){
   if(! List_truth(tag)) return 0;
   Var head = List_car(tag);
   if(! Var_is_row(head, 9, 7, 4)) return 0;
-  return Var_equal(List_car(Var_list(head)), Symbol_var(481205850));
+  return x2c_var_equal(List_car(Var_list(head)), Symbol_var(481205850));
 }
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){

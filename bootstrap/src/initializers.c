@@ -1322,7 +1322,7 @@ static Type Var_type(Var);
 
 static List Compiler__initializer_row(Compiler c, Type root, List original, List target, List * states, int first){
   List value = original;
-  if(Var_equal(List_car(original), Symbol_var(9639129704)) || Var_equal(List_car(original), Symbol_var(20762258403944))){
+  if(x2c_var_equal(List_car(original), Symbol_var(9639129704)) || x2c_var_equal(List_car(original), Symbol_var(20762258403944))){
     List path = Compiler__initializer_designated(c, root, original, &(value), &(original));
     (* states) = cons(List_var(cons(_324, cons(List_var(path), _326))), NULL);
   }
@@ -1424,7 +1424,7 @@ List Sym_field_order(Sym, Type);
 int Type_is_aggregate(Type);
 static List Compiler__initializer_named(Compiler c, Type type, Var name, List parent){
   Type owner = Compiler__initializer_shape(c, type);  List fields = List_cdr(Sym_field_order(c -> sym, owner));  while(List_truth(fields)){
-    List row = Var_list(List_car(fields));  List path = _initializer_field(owner, fields, parent);  if(Var_equal(List_car(row), name)) return path;  Type member = Var_type(List_cadr(row));  if(! Var_truth(List_car(row)) && Type_is_aggregate(Compiler__initializer_shape(c, member))){
+    List row = Var_list(List_car(fields));  List path = _initializer_field(owner, fields, parent);  if(x2c_var_equal(List_car(row), name)) return path;  Type member = Var_type(List_cadr(row));  if(! Var_truth(List_car(row)) && Type_is_aggregate(Compiler__initializer_shape(c, member))){
       List nested = Compiler__initializer_named(c, member, name, path);  if(List_truth(nested)) return nested;
     }
     fields = List_cdr(fields);
@@ -1548,7 +1548,7 @@ static void Compiler__initializer_next(Compiler c, List target, List path, List 
     Type type = Var_type(List_getindex(_x2c_destructure_4, 3));
     List rest = Var_list(List_getindex(_x2c_destructure_4, 4));
     if(kind == 13183752){
-      List next = Var_equal(List_car(Type_list(owner)), Symbol_var(44977116)) ? NULL : _initializer_field(owner, rest, parent);
+      List next = x2c_var_equal(List_car(Type_list(owner)), Symbol_var(44977116)) ? NULL : _initializer_field(owner, rest, parent);
       if(List_truth(next)){
         Array_push(states, List_var(cons(List_var(condition), cons(List_var(next), _326))));
         return;
@@ -1735,7 +1735,7 @@ static List Compiler__initializer_layout(Compiler c, Type type, List target, Lis
   }
   );
   if(Type_is_array(owner)) return Compiler__array_layout(c, type, owner, target, string, &((* symbolic)));
-  if(Var_equal(List_car(Type_list(owner)), Symbol_var(44977116))) return NULL;
+  if(x2c_var_equal(List_car(Type_list(owner)), Symbol_var(44977116))) return NULL;
   return Compiler__record_layout(c, type, owner, target, string, &((* symbolic)));
 }
 
@@ -1910,7 +1910,7 @@ static List Compiler__convert_composite_row(Compiler c, List row, List native_ta
   List original = Var_list(List_getindex(_x2c_destructure_11, 0));
   List cases = Var_list(List_getindex(_x2c_destructure_11, 1));
   List value = original;
-  while(Var_equal(List_car(value), Symbol_var(9639129704)) || Var_equal(List_car(value), Symbol_var(20762258403944))) value = Var_list(List_caddr(value));
+  while(x2c_var_equal(List_car(value), Symbol_var(9639129704)) || x2c_var_equal(List_car(value), Symbol_var(20762258403944))) value = Var_list(List_caddr(value));
   if(List_truth(({ static MatchCaptureSite _x2c_match_site_3;  x2c_match_site_match(& _x2c_match_site_3, value, List_var(_418)); }))) return row_condition == parent_condition ? original : Compiler__convert_initval_row(c, row, value, native_target, row_condition, native_used);
   RowSelection selected = _select_row(cases);
   if(selected.homogeneous) return Compiler__convert_homogeneous_row(c, original, value, selected, native_target, row_condition, native_used);
@@ -2027,7 +2027,7 @@ static List Compiler__initializer_conversion(Compiler c, List value, Type type, 
   if(! List_truth(condition)) return Compiler__convert_initializer(c, value, type, target, native_used);  if(native_used)(* native_used) = 1; {
     List _x2c_match_expr = value; List _x2c_match_cursor, _x2c_match_cursor1, _x2c_match_cursor2;  switch(_x2c_match_expr ? _x2c_match_expr->car.u64 : 0){
         case 9224497936761996324ULL: ;  _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497936761996324ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor) { Var _x2c_match_value_0 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224497936761817880ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1 && Var_equal(_x2c_match_cursor1->car, Var_list(_451 ->cdr->cdr->car)->cdr->car) && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1 && Var_is(_x2c_match_cursor1->car, 806120) && (_x2c_match_cursor2 = Var_list(_x2c_match_cursor1->car), 1) && _x2c_match_cursor2 && _x2c_match_cursor2->car.u64 == 9224497936761721318ULL && (_x2c_match_cursor2 = _x2c_match_cursor2->cdr, 1) && _x2c_match_cursor2) { Var _x2c_match_value_1 = _x2c_match_cursor2->car; if ((_x2c_match_cursor2 = _x2c_match_cursor2->cdr, 1) && _x2c_match_cursor2) { Var _x2c_match_value_2 = _x2c_match_cursor2->car; if ((_x2c_match_cursor2 = _x2c_match_cursor2->cdr, 1) && _x2c_match_cursor2) { Var _x2c_match_value_3 = _x2c_match_cursor2->car; if ((_x2c_match_cursor2 = _x2c_match_cursor2->cdr, 1) && !_x2c_match_cursor2 && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
-        Var stored;  stored = _x2c_match_value_0;  Var when;  when = _x2c_match_value_1;  Var yes;  yes = _x2c_match_value_2;  Var no;  no = _x2c_match_value_3;  if(Var_same(stored, List_var(type)) && Var_same(when, List_var(condition))) return value;
+        Var stored;  stored = _x2c_match_value_0;  Var when;  when = _x2c_match_value_1;  Var yes;  yes = _x2c_match_value_2;  Var no;  no = _x2c_match_value_3;  if(x2c_var_identical(stored, List_var(type)) && x2c_var_identical(when, List_var(condition))) return value;
       }
        break; } } } } } default: break;
     }
@@ -2153,7 +2153,7 @@ static List Compiler__convert_mixed_row(Compiler c, List row, List source, List 
           switch(_x2c_match_expr ? _x2c_match_expr->car.u64 : 0){
               case 9224497936761996324ULL: ;
              _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497936761996324ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224497936761817880ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1 && Var_equal(_x2c_match_cursor1->car, Var_list(_487 ->cdr->cdr->car)->cdr->car) && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1 && Var_is(_x2c_match_cursor1->car, 806120) && (_x2c_match_cursor2 = Var_list(_x2c_match_cursor1->car), 1) && _x2c_match_cursor2 && _x2c_match_cursor2->car.u64 == 9224497936761721318ULL && (_x2c_match_cursor2 = _x2c_match_cursor2->cdr, 1) && _x2c_match_cursor2 && (_x2c_match_cursor2 = _x2c_match_cursor2->cdr, 1) && _x2c_match_cursor2) { Var _x2c_match_value_0 = _x2c_match_cursor2->car; if ((_x2c_match_cursor2 = _x2c_match_cursor2->cdr, 1) && _x2c_match_cursor2 && (_x2c_match_cursor2 = _x2c_match_cursor2->cdr, 1) && !_x2c_match_cursor2 && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
-              Var yes;  yes = _x2c_match_value_0;  if(Var_same(yes, List_var(prepared))) identity = 1;
+              Var yes;  yes = _x2c_match_value_0;  if(x2c_var_identical(yes, List_var(prepared))) identity = 1;
             }
              break; } } default: break;
           }
@@ -2371,7 +2371,7 @@ static List _initializer_drop_bound(List condition, List bound, List base, unsig
       }
        break; } static MatchCaptureSite _x2c_match_site_1; if (x2c_match_site_try_capture(&_x2c_match_site_1, _x2c_match_expr, List_var(_798), &_x2c_match_capture)) { Var _x2c_match_value_0 = _x2c_match_values[0]; Var _x2c_match_value_1 = _x2c_match_values[1]; {
         Var index;  index = _x2c_match_value_0;  Var length;  length = _x2c_match_value_1; {
-          unsigned long long at;  List origin;  _initializer_position(Var_list(index), &(origin), &(at));  if(Var_same(length, List_var(bound)) && origin == base && at <= minimum) return NULL;
+          unsigned long long at;  List origin;  _initializer_position(Var_list(index), &(origin), &(at));  if(x2c_var_identical(length, List_var(bound)) && origin == base && at <= minimum) return NULL;
         }
 
       }

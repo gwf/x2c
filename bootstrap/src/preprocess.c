@@ -291,7 +291,7 @@ static int _hidden_group(Array stack){
     Var _x2c_macro_cursor_output_0;
     while(Array_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
       group = Var_list(_x2c_macro_cursor_output_0);
-      if(Var_equal(List_caddr(group), int_var(2))) return 1;
+      if(x2c_var_equal(List_caddr(group), int_var(2))) return 1;
     }
 
   }
@@ -301,7 +301,7 @@ static int _hidden_group(Array stack){
 static size_t ArmScan_code(ArmScan * s, Token token, size_t i){
   if((* s).hidden && token -> type != 40896714 && token -> type != 11703268) token -> type = 7477210024;
   else if(token -> type == 19147688 && String_equal(token -> text, _27)) return ArmScan__note_attribute(&((* s)), i);
-  else if(token -> type == 19147688 && Map_contains((* s).layout, String_var(token -> text))) ArmScan__mark_layout(&((* s)), i, Var_equal(Map_getindex((* s).layout, String_var(token -> text)), int_var(2)));
+  else if(token -> type == 19147688 && Map_contains((* s).layout, String_var(token -> text))) ArmScan__mark_layout(&((* s)), i, x2c_var_equal(Map_getindex((* s).layout, String_var(token -> text)), int_var(2)));
   return i;
 }
 
@@ -356,7 +356,7 @@ static void ArmScan__note_layout_macro(ArmScan * s, String content){
     int level = Var_int(Var_convert(String_equal(token -> text, _27) ? int_var(_attribute_layout(token)) : Map_contains(layout, String_var(token -> text)) ? Map_getindex(layout, String_var(token -> text)) : int_var(0), 3453797));
     if(level > value) value = level;
   }
-  if(value &&(!(Map_contains(layout, String_var(name -> text))) || Var_compare(Map_getindex(layout, String_var(name -> text)), int_var(value)) < 0)) Map_setindex(layout, String_var(name -> text), int_var(value));
+  if(value &&(!(Map_contains(layout, String_var(name -> text))) || x2c_var_order(Map_getindex(layout, String_var(name -> text)), int_var(value)) < 0)) Map_setindex(layout, String_var(name -> text), int_var(value));
 }
 
 static int _attribute_layout(Token token){
@@ -414,13 +414,13 @@ static void Compiler__note_function_macro(Compiler c, String name, Token params)
   Token first = Token_skip_trivia(params + 1);
   if(first -> type == 19147688 && Token_skip_trivia(first + 1) -> type == 83) param = first -> text;
   Var kind = Compiler__macro_prefix(c, after, param);
-  if(Var_equal(kind, List_var(NULL))) Map_setindex(c -> object_macros, String_var(name), Symbol_var(102150700288988));
-  else if(Var_equal(kind, Symbol_var(50603262308))) Map_setindex(c -> object_macros, String_var(name), Symbol_var(50603262308));
+  if(x2c_var_equal(kind, List_var(NULL))) Map_setindex(c -> object_macros, String_var(name), Symbol_var(102150700288988));
+  else if(x2c_var_equal(kind, Symbol_var(50603262308))) Map_setindex(c -> object_macros, String_var(name), Symbol_var(50603262308));
 }
 
 static void Compiler__note_prefix_macro(Compiler c, String name, Token body){
   Var definition = Compiler__macro_prefix(c, body, NULL), existing;
-  if(! Map_try_get(c -> object_macros, String_var(name), &(existing)) || _prefix_rank(definition) > _prefix_rank(existing) ||(Var_equal(existing, Symbol_var(1318210446)) && ! Var_equal(definition, Symbol_var(1318210446)))) Map_setindex(c -> object_macros, String_var(name), definition);
+  if(! Map_try_get(c -> object_macros, String_var(name), &(existing)) || _prefix_rank(definition) > _prefix_rank(existing) ||(x2c_var_equal(existing, Symbol_var(1318210446)) && ! x2c_var_equal(definition, Symbol_var(1318210446)))) Map_setindex(c -> object_macros, String_var(name), definition);
 }
 
 static Var Compiler__macro_prefix(Compiler c, Token token, String param){
@@ -473,7 +473,7 @@ static int _is_specifier(Symbol type){
 
 static int Compiler__is_annotation(Compiler c, String word){
   Var definition;
-  return String_equal(word, _27) || String_equal(word, _33) ||(Map_try_get(c -> object_macros, String_var(word), &(definition)) && Var_equal(definition, Symbol_var(102150700288988)));
+  return String_equal(word, _27) || String_equal(word, _33) ||(Map_try_get(c -> object_macros, String_var(word), &(definition)) && x2c_var_equal(definition, Symbol_var(102150700288988)));
 }
 
 static int _prefix_rank(Var v){

@@ -293,7 +293,7 @@ int MachineBuilder_emit(MachineBuilder *, int, int, int, int, int, int);
 
 static int MatchLower__compile_binder(MatchLower * l, Var binder){
   int entry =(* l).b.length;
-  if(Var_equal(binder, Symbol_var(58))){
+  if(x2c_var_equal(binder, Symbol_var(58))){
     MachineBuilder_emit(&((* l).b), MW_RET_SUCCESS, 0, 0, 0, 0, 0);
     return MatchLower__stopped(&((* l))) ? - 1 : entry;
   }
@@ -304,7 +304,7 @@ static int MatchLower__compile_binder(MatchLower * l, Var binder){
 void MachineBuilder_set_target(MachineBuilder *, int, int);
 
 static int MatchLower__emit_binder(MatchLower * l, Var binder){
-  if(Var_equal(binder, Symbol_var(58))) return 1;
+  if(x2c_var_equal(binder, Symbol_var(58))) return 1;
   int slot = MachineBuilder_binder(&((* l).b), binder);
   if(slot < 0) return 0;
   int valid = MachineBuilder_emit(&((* l).b), MW_SLOT_VALID, slot, 0, 0, 0, - 1);
@@ -453,11 +453,11 @@ static int MatchLower__stopped(MatchLower * l){
 }
 
 static int MatchLower__compile_guard(MatchLower * l, Var op, List args){
-  if(Var_equal(op, Symbol_var(62436))) return MatchLower__compile_or(&((* l)), args);
-  if(Var_equal(op, Symbol_var(1995752))) return MatchLower__compile_not(&((* l)), args);
-  if(Var_equal(op, Symbol_var(62054))) return MatchLower__compile_is(&((* l)), args);
-  if(Var_equal(op, Symbol_var(2005352))) return MatchLower__compile_set(&((* l)), args);
-  if(Var_equal(op, Symbol_var(1969032))) return MatchLower__compile_and(&((* l)), args);
+  if(x2c_var_equal(op, Symbol_var(62436))) return MatchLower__compile_or(&((* l)), args);
+  if(x2c_var_equal(op, Symbol_var(1995752))) return MatchLower__compile_not(&((* l)), args);
+  if(x2c_var_equal(op, Symbol_var(62054))) return MatchLower__compile_is(&((* l)), args);
+  if(x2c_var_equal(op, Symbol_var(2005352))) return MatchLower__compile_set(&((* l)), args);
+  if(x2c_var_equal(op, Symbol_var(1969032))) return MatchLower__compile_and(&((* l)), args);
   return MatchLower__compile_quote(&((* l)), args);
 }
 
@@ -567,7 +567,7 @@ static int MatchLower__compile_is(MatchLower * l, List args){
   int kind = _match_kind(args);
   if(kind >= 0) return MatchLower__is_kind(&((* l)), kind);
   if(List_equal(args, _1)) return MatchLower__is_atom(&((* l)));
-  if(List_truth(args) && Var_equal(List_car(args), Symbol_var(1362954)) && List_truth(List_cdr(args)) && ! List_truth(List_cddr(args))) return MatchLower__is_type(&((* l)), List_cadr(args));
+  if(List_truth(args) && x2c_var_equal(List_car(args), Symbol_var(1362954)) && List_truth(List_cdr(args)) && ! List_truth(List_cddr(args))) return MatchLower__is_type(&((* l)), List_cadr(args));
   return MatchLower__never(&((* l)));
 }
 
@@ -704,7 +704,7 @@ static int MatchLower__segment_star(MatchLower * l, MatchStar * star){
   if(! List_truth(cell)) return 1;
   Var binder = List_car(cell);
   (* star).tail = List_cdr(cell);
-  if(! Var_equal(binder, Symbol_var(54))){
+  if(! x2c_var_equal(binder, Symbol_var(54))){
     (* star).slot = MachineBuilder_binder(&((* l).b), binder);
     if((* star).slot < 0) return 0;
     (* star).delayed = List_truth((* star).tail) && ! _pattern_contains_binder((* star).tail, binder);
@@ -716,8 +716,6 @@ static int MatchLower__segment_star(MatchLower * l, MatchStar * star){
   return 1;
 }
 
-int Var_equal(Var, Var);
-
 static int _pattern_contains_binder(List pat, Var binder){
   {
     Var part;
@@ -727,10 +725,10 @@ static int _pattern_contains_binder(List pat, Var binder){
     while(List_try_next(_x2c_macro_object_5, &(_x2c_macro_cursor_5), &(_x2c_macro_cursor_output_5))){
       part = _x2c_macro_cursor_output_5;
       {
-        if(Var_equal(part, binder)) return 1;
+        if(x2c_var_equal(part, binder)) return 1;
         if(Var_is_row(part, 9, 7, 4)){
           List nested = Var_list(part);
-          if(List_truth(nested) && ! Var_equal(List_car(nested), Symbol_var(2050325770)) && _pattern_contains_binder(nested, binder)) return 1;
+          if(List_truth(nested) && ! x2c_var_equal(List_car(nested), Symbol_var(2050325770)) && _pattern_contains_binder(nested, binder)) return 1;
         }
 
       }
@@ -787,7 +785,7 @@ static int MatchLower__emit_part(MatchLower * l, MatchSegment * s, int i){
 }
 
 static int MatchLower__emit_head_leaf(MatchLower * l, Var part, int reg){
-  if(Var_equal(part, Symbol_var(58))) return MatchLower__fail_site(&((* l)), MW_SKIP_HEAD, 0, reg, 0, 0);
+  if(x2c_var_equal(part, Symbol_var(58))) return MatchLower__fail_site(&((* l)), MW_SKIP_HEAD, 0, reg, 0, 0);
   if(Var_is_atom_binder(part)){
     int slot = MachineBuilder_binder(&((* l).b), part);
     if(slot < 0) return 0;
@@ -961,8 +959,8 @@ static int _keys(Var pattern, int mode, MatchKeys * keys){
   Var op = List_car(list);
   List args = List_cdr(list);
   if(! Var_is_match_op(op)) return mode != MATCH_KEY_VALUE && _segment_keys(list, mode, &((* keys)));
-  if(Var_equal(op, Symbol_var(2005352)) && _set_binds(args)) return _keys(List_cadr(args), mode, &((* keys)));
-  if(Var_equal(op, Symbol_var(62436)) || Var_equal(op, Symbol_var(2005352))){
+  if(x2c_var_equal(op, Symbol_var(2005352)) && _set_binds(args)) return _keys(List_cadr(args), mode, &((* keys)));
+  if(x2c_var_equal(op, Symbol_var(62436)) || x2c_var_equal(op, Symbol_var(2005352))){
     {
       Var arm;
       List _x2c_macro_object_8 = args;
@@ -976,7 +974,7 @@ static int _keys(Var pattern, int mode, MatchKeys * keys){
     }
     return args != NULL;
   }
-  if(! Var_equal(op, Symbol_var(1969032))) return 0;
+  if(! x2c_var_equal(op, Symbol_var(1969032))) return 0;
   int count =(* keys).count;
   {
     Var operand;

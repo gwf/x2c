@@ -347,7 +347,7 @@ static Map Query_diagnostic_range(Query * q, List location){
         {
           Compiler c =(* q).compiler;
           int start = Var_int(Var_convert(position, 3453797)), width = Var_int(Var_convert(length, 3453797));
-          if(! Var_equal(String_var(Compiler_display_path(c, Compiler_text_source(c, Var_int(Var_convert(position, 3453797)), &(start)))), file)) start = Var_int(Var_convert(position, 3453797));
+          if(! x2c_var_equal(String_var(Compiler_display_path(c, Compiler_text_source(c, Var_int(Var_convert(position, 3453797)), &(start)))), file)) start = Var_int(Var_convert(position, 3453797));
           return Query_location(&((* q)), Path_absolute(Var_as_string(file)), start, start + width);
         }
 

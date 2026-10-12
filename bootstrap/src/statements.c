@@ -426,7 +426,7 @@ static List Compiler__macro_statement(Compiler c){
   List hole = Compiler_peek_macro_hole(c);
   List macro = Compiler_try_parse_macro_target_at(c, AST_STATEMENT);
   if(List_truth(macro)) return macro;
-  List expression = List_truth(hole) && Var_equal(List_assoc(hole, Symbol_var(740232)), Symbol_var(920394)) ? Compiler_parse_expression(c) : Compiler_try_parse_macro_expression(c);
+  List expression = List_truth(hole) && x2c_var_equal(List_assoc(hole, Symbol_var(740232)), Symbol_var(920394)) ? Compiler_parse_expression(c) : Compiler_try_parse_macro_expression(c);
   Compiler_expect(c, 119);
   return cons(_49, cons(List_var(expression), NULL));
 }
@@ -1203,12 +1203,12 @@ static void Compiler__push_item(Compiler c, Array block, int anchor_items){
   Token origin = c -> token;  int expansion = Compiler__expands(c);  Compiler_enter(c, (Ancestor){
     .what = 43159332400040, .token = origin
   }
-  );  List stmt = Compiler_parse_block_item(c);  List after = Compiler_leave_item(c);  if(Map_truth(c -> macro_holes) &&(Var_equal(List_car(stmt), Symbol_var(917238582496136)) || Var_equal(List_car(stmt), Symbol_var(917238583616488)))){
+  );  List stmt = Compiler_parse_block_item(c);  List after = Compiler_leave_item(c);  if(Map_truth(c -> macro_holes) &&(x2c_var_equal(List_car(stmt), Symbol_var(917238582496136)) || x2c_var_equal(List_car(stmt), Symbol_var(917238583616488)))){
     Array_push(block, List_var(stmt));  return;
   }
   if(! expansion) Array_push(block, List_var(anchor_items ? Compiler_anchor_origin(c, stmt, origin) : stmt));  else after = List_append(List_cdr(stmt), after); {
     List item;  List _x2c_macro_object_6 = after;  List _x2c_macro_cursor_6 = _x2c_macro_object_6;  Var _x2c_macro_cursor_output_6;  while(List_try_next(_x2c_macro_object_6, &(_x2c_macro_cursor_6), &(_x2c_macro_cursor_output_6))){
-      item = Var_list(_x2c_macro_cursor_output_6);  Array_push(block, List_var(! anchor_items || Var_equal(List_car(item), Symbol_var(104)) ? item : Compiler_anchor_origin(c, item, origin)));
+      item = Var_list(_x2c_macro_cursor_output_6);  Array_push(block, List_var(! anchor_items || x2c_var_equal(List_car(item), Symbol_var(104)) ? item : Compiler_anchor_origin(c, item, origin)));
     }
 
   }

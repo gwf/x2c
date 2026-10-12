@@ -508,7 +508,7 @@ static int _table_key_equal(Var * _x2c_macro_a_0, Var * _x2c_macro_b_0){
 }
 
 static int _table_value_equal(Var * _x2c_macro_a_1, Var * _x2c_macro_b_1){
-  return Var_equal(_x2c_macro_a_1[0], _x2c_macro_b_1[0]);
+  return x2c_var_equal(_x2c_macro_a_1[0], _x2c_macro_b_1[0]);
 }
 
 static void _table_value_valid(Var * _x2c_macro_value_0){

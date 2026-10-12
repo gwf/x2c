@@ -174,7 +174,7 @@ static inline int MachineSlot_prefix_equal(MachineSlot * slot, List input, int l
     end = slot -> span.end;
   }
   for(int n = 0;  n < length;  n ++){
-    if(! List_truth(input) || ! List_truth(expected) || !(Var_equal(List_car(input), List_car(expected)))) return 0;
+    if(! List_truth(input) || ! List_truth(expected) || ! Var_equal(List_car(input), List_car(expected))) return 0;
     input = List_cdr(input);
     expected = List_cdr(expected);
   }
@@ -186,7 +186,7 @@ static inline int MachineSlot_final_equal(MachineSlot * slot, List input, Machin
     List expected = Var_list(slot -> value);
     if(List_equal(expected, input)) return 1;
     while(List_truth(expected) && List_truth(input)){
-      if(!(Var_equal(List_car(expected), List_car(input)))) return 0;
+      if(! Var_equal(List_car(expected), List_car(input))) return 0;
       expected = List_cdr(expected);
       input = List_cdr(input);
     }
@@ -199,7 +199,7 @@ static inline int MachineSlot_final_equal(MachineSlot * slot, List input, Machin
   List expected = slot -> span.begin, candidate = input;
   int length = 0;
   while(length < slot -> span.length && ! List_equal(expected, slot -> span.end) && List_truth(candidate)){
-    if(!(Var_equal(List_car(expected), List_car(candidate)))) return 0;
+    if(! Var_equal(List_car(expected), List_car(candidate))) return 0;
     expected = List_cdr(expected);
     candidate = List_cdr(candidate);
     length ++;

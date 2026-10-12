@@ -1530,7 +1530,7 @@ List _tag_numeric_table(void){
 
 int _tag_decode_row(List row){
   Var tag = List_getindex(row, 0);
-  return !(Var_equal(tag, Symbol_var(3356265)) || Var_equal(tag, Symbol_var(1328354264)) || Var_equal(tag, Symbol_var(1473096)));
+  return !(x2c_var_equal(tag, Symbol_var(3356265)) || x2c_var_equal(tag, Symbol_var(1328354264)) || x2c_var_equal(tag, Symbol_var(1473096)));
 }
 
 List _tag_decode_rows(void){

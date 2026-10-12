@@ -1728,7 +1728,7 @@ static Type Compiler__func_pointer_value_type(Compiler c, Type type){
   Type resolved = Sym_resolve_key(c -> sym, type);
   if(List_truth(Type_list(resolved))) type = resolved;
   while(List_truth(Type_list(type)) && _func_type_qualifier(List_car(Type_list(type)))) type = List_cdr(type);
-  if(! List_truth(Type_list(type)) || ! Var_equal(List_car(Type_list(type)), Symbol_var(54))) return NULL;
+  if(! List_truth(Type_list(type)) || ! x2c_var_equal(List_car(Type_list(type)), Symbol_var(54))) return NULL;
   List tail = Type_list(List_cdr(type));
   while(List_truth(tail) && _func_type_qualifier(List_car(tail))) tail = List_cdr(tail);
   Type pointer = List_type(cons(Symbol_var(54), tail));
@@ -1736,7 +1736,7 @@ static Type Compiler__func_pointer_value_type(Compiler c, Type type){
 }
 
 static int _func_type_qualifier(Var value){
-  return Var_equal(value, Symbol_var(7304424)) || Var_equal(value, Symbol_var(1544849476362)) || Var_equal(value, Symbol_var(1249006209256));
+  return x2c_var_equal(value, Symbol_var(7304424)) || x2c_var_equal(value, Symbol_var(1544849476362)) || x2c_var_equal(value, Symbol_var(1249006209256));
 }
 
 static List Compiler__indirect_func_lift(Compiler c, List expression, Type pointer_type){
@@ -2015,7 +2015,7 @@ static List Compiler__build_func_adapter(Compiler c, Type diagnostic_type, Type 
   List params = NULL;  Type return_type = NULL;  Type_function_parts(source_type, &(params), &(return_type));  if(_typed_params_variadic(params)){
     Type func_type = Sym_resolve_key(c -> sym, List_type(_321));  String _x2c_macro_message_0 = List_equal(Type_list(Sym_resolve_key(c -> sym, diagnostic_type)), Type_list(func_type)) ? _817 : _818;  Compiler__adapter_error(c, _x2c_macro_message_0, diagnostic_type, source_type, NULL);
   }
-  source_type = Type_canonicalize(source_type);  return_type = Type_canonicalize(return_type);  Compiler__require_func_readers(c, diagnostic_type, source_type);  String name = Compiler_fresh_name(c, _819);  List adapter_binding = Sym_introduce(c -> sym, name);  List fn_binding = List_truth(supplied_fn_binding) ? supplied_fn_binding : Sym_introduce(c -> sym, Compiler_fresh_name(c, _524));  List argv_binding = Sym_introduce(c -> sym, Compiler_fresh_name(c, _820));  List names = Compiler__auto_names(c, List_len(params));  List locals = Compiler__func_argument_locals(c, diagnostic_type, params, names, fn_binding, argv_binding);  List arguments = List_zip_with(params, names, _x2c_func_handle_0);  List call = Compiler__func_call(c, return_type, target, arguments);  Type resolved_result = Sym_resolve_key(c -> sym, return_type);  if(List_truth(Type_list(resolved_result)) && Var_equal(List_car(Type_list(resolved_result)), Symbol_var(1318234344))) call = Compiler__func_record_call(c, return_type, call);  Compiler__publish_func_adapter(c, adapter_binding, fn_binding, argv_binding, call, List_append(prefix, List_append(locals, NULL)));  return adapter_binding;
+  source_type = Type_canonicalize(source_type);  return_type = Type_canonicalize(return_type);  Compiler__require_func_readers(c, diagnostic_type, source_type);  String name = Compiler_fresh_name(c, _819);  List adapter_binding = Sym_introduce(c -> sym, name);  List fn_binding = List_truth(supplied_fn_binding) ? supplied_fn_binding : Sym_introduce(c -> sym, Compiler_fresh_name(c, _524));  List argv_binding = Sym_introduce(c -> sym, Compiler_fresh_name(c, _820));  List names = Compiler__auto_names(c, List_len(params));  List locals = Compiler__func_argument_locals(c, diagnostic_type, params, names, fn_binding, argv_binding);  List arguments = List_zip_with(params, names, _x2c_func_handle_0);  List call = Compiler__func_call(c, return_type, target, arguments);  Type resolved_result = Sym_resolve_key(c -> sym, return_type);  if(List_truth(Type_list(resolved_result)) && x2c_var_equal(List_car(Type_list(resolved_result)), Symbol_var(1318234344))) call = Compiler__func_record_call(c, return_type, call);  Compiler__publish_func_adapter(c, adapter_binding, fn_binding, argv_binding, call, List_append(prefix, List_append(locals, NULL)));  return adapter_binding;
 }
 
 static void Compiler__require_func_readers(Compiler c, Type diagnostic_type, Type source_type){
@@ -2070,7 +2070,7 @@ List Compiler_func_parameters(Compiler c, List entries, List fn, List argv){
 int Type_is_reference(Type);
 Symbol Sym_var_tag_for_type(Sym, Type, Type *);
 static List FuncReaders_read(FuncReaders * r, Type parameter_type, int index, Type * storage_type){
-  if(Type_is_reference(parameter_type)) return FuncReaders__reference(&((* r)), parameter_type, index, &((* storage_type)));  Symbol tag = Sym_var_tag_for_type((* r).c -> sym, parameter_type, NULL);  Type resolved = Sym_resolve_key((* r).c -> sym, parameter_type);  if(! tag && List_truth(Type_list(resolved)) &&(Type_is_pointer(resolved) || Var_equal(List_car(Type_list(resolved)), Symbol_var(1318234344)))) return FuncReaders__pointer(&((* r)), parameter_type, resolved, index, &((* storage_type)));  return FuncReaders__value(&((* r)), parameter_type, tag, index, &((* storage_type)));
+  if(Type_is_reference(parameter_type)) return FuncReaders__reference(&((* r)), parameter_type, index, &((* storage_type)));  Symbol tag = Sym_var_tag_for_type((* r).c -> sym, parameter_type, NULL);  Type resolved = Sym_resolve_key((* r).c -> sym, parameter_type);  if(! tag && List_truth(Type_list(resolved)) &&(Type_is_pointer(resolved) || x2c_var_equal(List_car(Type_list(resolved)), Symbol_var(1318234344)))) return FuncReaders__pointer(&((* r)), parameter_type, resolved, index, &((* storage_type)));  return FuncReaders__value(&((* r)), parameter_type, tag, index, &((* storage_type)));
 }
 
 static List FuncReaders__reference(FuncReaders * r, Type parameter_type, int index, Type * storage_type){
@@ -2341,7 +2341,7 @@ List Compiler_adapt_lambda_arg(Compiler c, List argument, List expected_type){
         case 9224497936761996324ULL: ;
        static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(_1191), &_x2c_match_capture)) { Var _x2c_match_value_0 = _x2c_match_values[0]; {
         Var inner;  inner = _x2c_match_value_0; {
-          List adapted = Compiler_adapt_lambda_arg(c, Var_list(inner), expected_type);  if(Var_equal(List_var(adapted), inner)) return argument;  Macro grouped = _1241;  return Compiler_rebuild_expression(c, List_type(expected_type), Macro_apply(grouped, cons(List_var(adapted), NULL)));
+          List adapted = Compiler_adapt_lambda_arg(c, Var_list(inner), expected_type);  if(x2c_var_equal(List_var(adapted), inner)) return argument;  Macro grouped = _1241;  return Compiler_rebuild_expression(c, List_type(expected_type), Macro_apply(grouped, cons(List_var(adapted), NULL)));
         }
 
       }
@@ -2436,7 +2436,7 @@ static int _typed_params_variadic(List params){
     while(List_try_next(_x2c_macro_object_5, &(_x2c_macro_cursor_5), &(_x2c_macro_cursor_output_5))){
       value = _x2c_macro_cursor_output_5;
       {
-        if(Var_equal(value, Symbol_var(1519197))) return 1;
+        if(x2c_var_equal(value, Symbol_var(1519197))) return 1;
         {
           Var _x2c_match_var = value; int _x2c_match_none = !Var_is(_x2c_match_var, 806120);
           List _x2c_match_expr = Var_list(_x2c_match_var); List _x2c_match_cursor;

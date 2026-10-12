@@ -162,7 +162,7 @@ List type_base_suffix(List type){
 String type_name_error(List type){
   if(! _init_guard_) _file_init_();
   Var name = List_last(type);
-  if(! Var_is(name, 826970) &&(! Var_is(name, 1328354264) || Var_equal(name, Symbol_var(54)) || SymbolSet_contains(_base_keywords, Var_symbol(name)) || SymbolSet_contains(_type_qualifiers, Var_symbol(name)))) return NULL;
+  if(! Var_is(name, 826970) &&(! Var_is(name, 1328354264) || x2c_var_equal(name, Symbol_var(54)) || SymbolSet_contains(_base_keywords, Var_symbol(name)) || SymbolSet_contains(_type_qualifiers, Var_symbol(name)))) return NULL;
   Array fixed = Array_new();
   for(List rest = type;  List_truth(List_cdr(rest));  rest = List_cdr(rest)) Array_push(fixed, List_car(rest));
   Array_push(fixed, String_var(Var_str(name)));

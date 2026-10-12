@@ -169,7 +169,7 @@ static String _match_cursor(int depth){
 static Symbol _match_head(Var value){
   if(! Var_is_row(value, 9, 7, 4) || ! List_truth(Var_list(value))) return 0;
   Var head = List_car(Var_list(value));
-  if(! Var_is(head, 1328354264) || Var_equal(head, Symbol_var(1059020478773725)) || Var_is_binder(head) || Var_is_match_op(head)) return 0;
+  if(! Var_is(head, 1328354264) || x2c_var_equal(head, Symbol_var(1059020478773725)) || Var_is_binder(head) || Var_is_match_op(head)) return 0;
   return Var_symbol(head);
 }
 
@@ -219,10 +219,10 @@ static int _match_element(Buffer b, Var part, String cell, Array seen, int * tes
   Var binder = part;  Symbol tag = Var_is_row(part, 9, 7, 4) ? _match_capture_tag(part, &(binder)) : 0;  if(tag){
     _match_and(b, &((* testing)));  Buffer_printf(b, "Var_is(%s, %lu)", cell, (unsigned long) tag);  part = binder;
   }
-  if(Var_equal(part, Symbol_var(58))) return 0;  if(Var_is_atom_binder(part) && !(Array_contains(seen, part))){
+  if(x2c_var_equal(part, Symbol_var(58))) return 0;  if(Var_is_atom_binder(part) && !(Array_contains(seen, part))){
     Array_push(seen, part);  _match_bind(b, part, cell, seen, &((* testing)), &((* braces)));  return 0;
   }
-  List list = Var_is_row(part, 9, 7, 4) ? Var_list(part) : NULL;  if(Var_is_binder(part) || Var_is_match_op(part) || Var_equal(part, Symbol_var(1059020478773725)) ||(List_truth(list) && Var_is_match_op(List_car(list)))) return - 1;  if(! Var_is(part, 1328354264) && ! List_truth(list)) return 2;  Var literal = part;  Symbol tested = 806120;  _match_and(b, &((* testing)));  if(List_truth(list)) Buffer_printf(b, "Var_is(%s, %lu)", cell, (unsigned long) tested);  else Buffer_printf(b, "%s.u64 == %lluULL", cell, (unsigned long long) literal.u64);  return ! ! List_truth(list);
+  List list = Var_is_row(part, 9, 7, 4) ? Var_list(part) : NULL;  if(Var_is_binder(part) || Var_is_match_op(part) || x2c_var_equal(part, Symbol_var(1059020478773725)) ||(List_truth(list) && Var_is_match_op(List_car(list)))) return - 1;  if(! Var_is(part, 1328354264) && ! List_truth(list)) return 2;  Var literal = part;  Symbol tested = 806120;  _match_and(b, &((* testing)));  if(List_truth(list)) Buffer_printf(b, "Var_is(%s, %lu)", cell, (unsigned long) tested);  else Buffer_printf(b, "%s.u64 == %lluULL", cell, (unsigned long long) literal.u64);  return ! ! List_truth(list);
 }
 
 static int _match_nested(Buffer b, Array out, List pattern, Var value, int * depths){
@@ -268,7 +268,7 @@ static int _match_nested(Buffer b, Array out, List pattern, Var value, int * dep
         Buffer_printf(b, "!%s", cursor);
       }
       else if(List_truth(List_cdr(rest)) || Array_contains(seen, part)) step = - 1;
-      else if(! Var_equal(part, Symbol_var(54))){
+      else if(! x2c_var_equal(part, Symbol_var(54))){
         Array_push(seen, part);
         _match_bind(b, part, cursor, seen, &(testing), &(braces));
       }

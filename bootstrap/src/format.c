@@ -69,7 +69,7 @@ char * Compiler_code_pretty_string(Compiler c, List code, String output_file){
   }
   ;
   for(List lst = code;  List_truth(lst);  lst = List_cdr(lst)){
-    if(Var_equal(List_car(lst), Symbol_var(1313077352))){
+    if(x2c_var_equal(List_car(lst), Symbol_var(1313077352))){
       lst = List_cdr(lst);
       Pretty_source_marker(&(p), List_car(lst));
       continue;

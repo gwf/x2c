@@ -1029,7 +1029,7 @@ static void JobLaunch_route_errors(JobLaunch * l, Var value){
 }
 
 static int _is(Var value, Symbol name){
-  return Var_is(value, 1328354264) && Var_equal(value, Symbol_var(name));
+  return Var_is(value, 1328354264) && x2c_var_equal(value, Symbol_var(name));
 }
 
 Map Map_update_n(Map, unsigned, ...);

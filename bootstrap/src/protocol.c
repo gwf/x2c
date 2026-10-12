@@ -1555,7 +1555,7 @@ static String _member_name(List identity, String participant){
   String name = NULL; {
     List _x2c_match_expr = identity; Var _x2c_match_values[2]; MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };  switch(0){
         default: ;  static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(_100), &_x2c_match_capture)) { Var _x2c_match_value_0 = _x2c_match_values[0]; Var _x2c_match_value_1 = _x2c_match_values[1]; {
-        Var owner;  owner = _x2c_match_value_0;  Var member;  member = _x2c_match_value_1;  if(Var_equal(owner, String_var(participant))) name = Var_as_string(member);
+        Var owner;  owner = _x2c_match_value_0;  Var member;  member = _x2c_match_value_1;  if(x2c_var_equal(owner, String_var(participant))) name = Var_as_string(member);
       }
        break; }
     }
@@ -2048,7 +2048,7 @@ static void Compiler__reuse_defaults(Compiler c){
 static int _has_default(List members){
   {
     List member;  List _x2c_macro_object_13 = members;  List _x2c_macro_cursor_13 = _x2c_macro_object_13;  Var _x2c_macro_cursor_output_13;  while(List_try_next(_x2c_macro_object_13, &(_x2c_macro_cursor_13), &(_x2c_macro_cursor_output_13))){
-      member = Var_list(_x2c_macro_cursor_output_13);  if(Var_equal(List_cadr(member), Symbol_var(4507969008424))) return 1;
+      member = Var_list(_x2c_macro_cursor_output_13);  if(x2c_var_equal(List_cadr(member), Symbol_var(4507969008424))) return 1;
     }
 
   }
@@ -2225,7 +2225,7 @@ static List _native_requirement(String member, String native, Type template, Str
 }
 
 static int _contents(Var value, String variable){
-  if(Var_is_row(value, 11, 7, 1)) return Var_equal(value, String_var(variable)) ? PROTOCOL_VARIABLE : 0;  if(Var_equal(value, Symbol_var(1519197))) return PROTOCOL_VARIADIC;  if(! Var_is_row(value, 9, 7, 4)) return 0;  int contents = 0; {
+  if(Var_is_row(value, 11, 7, 1)) return x2c_var_equal(value, String_var(variable)) ? PROTOCOL_VARIABLE : 0;  if(x2c_var_equal(value, Symbol_var(1519197))) return PROTOCOL_VARIADIC;  if(! Var_is_row(value, 9, 7, 4)) return 0;  int contents = 0; {
     Var item;  List _x2c_macro_object_17 = Var_list(value);  List _x2c_macro_cursor_17 = _x2c_macro_object_17;  Var _x2c_macro_cursor_output_17;  while(List_try_next(_x2c_macro_object_17, &(_x2c_macro_cursor_17), &(_x2c_macro_cursor_output_17))){
       item = _x2c_macro_cursor_output_17;  contents |= _contents(item, variable);
     }
@@ -2412,7 +2412,7 @@ static Type Compiler__method_signature(Compiler c, Type owner, Type participant,
     }
 
   }
-  if(! List_truth(Type_list(signature))) return NULL;  List binding = Sym_reference(c -> sym, cons(String_var(source), NULL), NULL);  signature = Compiler__relative_signature(c, binding, signature, participant);  List parameters = NULL;  Type result = NULL;  if(_function_parts(signature, &(parameters), &(result)) && List_truth(parameters) && Var_equal(List_car(parameters), List_var(owner))){
+  if(! List_truth(Type_list(signature))) return NULL;  List binding = Sym_reference(c -> sym, cons(String_var(source), NULL), NULL);  signature = Compiler__relative_signature(c, binding, signature, participant);  List parameters = NULL;  Type result = NULL;  if(_function_parts(signature, &(parameters), &(result)) && List_truth(parameters) && x2c_var_equal(List_car(parameters), List_var(owner))){
     parameters = _inherited_parameters(parameters, owner, participant);  signature = List_type(({
       Var _x2c_literal_part_68 = List_var(cons(_344, cons(List_var(parameters), NULL)));  List _x2c_literal_part_69 = Type_list(result);  cons(_x2c_literal_part_68, List_append(_x2c_literal_part_69, NULL));
     }
@@ -2428,7 +2428,7 @@ static Type Compiler__relative_signature(Compiler c, List binding, Type signatur
 }
 
 static List _inherited_parameters(List parameters, Type owner, Type participant){
-  if(! List_truth(parameters)) return NULL;  Var parameter = List_car(parameters);  return cons(Var_equal(parameter, List_var(owner)) ? List_var(participant) : parameter, _inherited_parameters(List_cdr(parameters), owner, participant));
+  if(! List_truth(parameters)) return NULL;  Var parameter = List_car(parameters);  return cons(x2c_var_equal(parameter, List_var(owner)) ? List_var(participant) : parameter, _inherited_parameters(List_cdr(parameters), owner, participant));
 }
 
 static int Compiler__default_completes(Compiler c, String name, Type declared, String forward){
@@ -2525,7 +2525,7 @@ static List ProtocolAdapters_conversion_requirement(ProtocolAdapters * a, String
 }
 
 static int _is_exact_variable(Var value, String variable){
-  if(! Var_is_row(value, 9, 7, 4)) return 0;  List type = Var_list(value);  return List_truth(type) && ! List_truth(List_cdr(type)) && Var_is_row(List_car(type), 11, 7, 1) && Var_equal(List_car(type), String_var(variable));
+  if(! Var_is_row(value, 9, 7, 4)) return 0;  List type = Var_list(value);  return List_truth(type) && ! List_truth(List_cdr(type)) && Var_is_row(List_car(type), 11, 7, 1) && x2c_var_equal(List_car(type), String_var(variable));
 }
 
 static void ProtocolAdapters_report_requirement(ProtocolAdapters * a, List failure){
@@ -2575,9 +2575,9 @@ static int _unify(Var pattern, Var actual, Map variables, Map bindings){
     Var bound;  if(! Map_try_get(bindings, String_var(variable), &(bound))){
       Map_setindex(bindings, String_var(variable), actual);  return 1;
     }
-    return Var_equal(bound, actual);
+    return x2c_var_equal(bound, actual);
   }
-  if(Var_is_row(pattern, 9, 7, 4) != Var_is_row(actual, 9, 7, 4)) return 0;  if(! Var_is_row(pattern, 9, 7, 4)) return Var_equal(pattern, actual);  List left = Var_list(pattern), right = Var_list(actual);  while(List_truth(left) && List_truth(right)){
+  if(Var_is_row(pattern, 9, 7, 4) != Var_is_row(actual, 9, 7, 4)) return 0;  if(! Var_is_row(pattern, 9, 7, 4)) return x2c_var_equal(pattern, actual);  List left = Var_list(pattern), right = Var_list(actual);  while(List_truth(left) && List_truth(right)){
     if(! _unify(List_car(left), List_car(right), variables, bindings)) return 0;  left = List_cdr(left);  right = List_cdr(right);
   }
   return ! List_truth(left) && ! List_truth(right);
@@ -2614,7 +2614,7 @@ static Type _substitute_signature(Type signature, Map variables, Map bindings){
 }
 
 static int _exact_conversion(Type signature, Type parameter, Type result){
-  List parameters = NULL;  Type actual_result = NULL;  if(! _function_parts(signature, &(parameters), &(actual_result))) return 0;  return List_truth(parameters) && ! List_truth(List_cdr(parameters)) && Var_equal(List_car(parameters), List_var(parameter)) && List_equal(Type_list(actual_result), Type_list(result));
+  List parameters = NULL;  Type actual_result = NULL;  if(! _function_parts(signature, &(parameters), &(actual_result))) return 0;  return List_truth(parameters) && ! List_truth(List_cdr(parameters)) && x2c_var_equal(List_car(parameters), List_var(parameter)) && List_equal(Type_list(actual_result), Type_list(result));
 }
 
 List Compiler_protocol_members_for(Compiler c, Type participant, Type base){
@@ -2728,7 +2728,7 @@ static List Compiler__member_row(Compiler c, List protocols, Type participant, S
         base = Var_type(List_car(_x2c_macro_entry_1));  if(! Compiler__is_adopted(c, base, participant)) continue;  List _x2c_macro_conformance_1 = Compiler_protocol_members_for(c, participant, base);  if(! List_truth(_x2c_macro_conformance_1)) continue;  rows = List_cdr(Var_list(List_last(_x2c_macro_conformance_1))); {
           {
             List row;  List _x2c_macro_object_33 = rows;  List _x2c_macro_cursor_33 = _x2c_macro_object_33;  Var _x2c_macro_cursor_output_35;  while(List_try_next(_x2c_macro_object_33, &(_x2c_macro_cursor_33), &(_x2c_macro_cursor_output_35))){
-              row = Var_list(_x2c_macro_cursor_output_35);  if(Var_equal(List_car(row), String_var(member))) return row;
+              row = Var_list(_x2c_macro_cursor_output_35);  if(x2c_var_equal(List_car(row), String_var(member))) return row;
             }
 
           }
@@ -2883,7 +2883,7 @@ static int _base_in_ancestry(Type base, Type participant, List ancestry){
 static int _declares_member(List rows, String member){
   {
     List row;  List _x2c_macro_object_41 = rows;  List _x2c_macro_cursor_41 = _x2c_macro_object_41;  Var _x2c_macro_cursor_output_44;  while(List_try_next(_x2c_macro_object_41, &(_x2c_macro_cursor_41), &(_x2c_macro_cursor_output_44))){
-      row = Var_list(_x2c_macro_cursor_output_44);  if(Var_equal(List_car(row), String_var(member))) return 1;
+      row = Var_list(_x2c_macro_cursor_output_44);  if(x2c_var_equal(List_car(row), String_var(member))) return 1;
     }
 
   }
@@ -3522,7 +3522,7 @@ static List ProtocolAdapters_default_part(ProtocolAdapters * a, String member, T
     List _x2c_match_expr = decision; List _x2c_match_cursor; Var _x2c_match_values[3]; MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 3 };  switch(_x2c_match_expr ? _x2c_match_expr->car.u64 : 0){
         case 9224497936794612068ULL: ;  _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497936794612068ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor) { Var _x2c_match_value_0 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
         Var storage;  storage = _x2c_match_value_0; {
-          String spelling = _member_spelling((* a).participant, member);  if(Var_equal(storage, Symbol_var(1317118534))) return cons(List_var(({
+          String spelling = _member_spelling((* a).participant, member);  if(x2c_var_equal(storage, Symbol_var(1317118534))) return cons(List_var(({
             Var _x2c_literal_part_144 = List_var(Sym_introduce((* a).c -> sym, spelling));  cons(_651, cons(_x2c_literal_part_144, cons(storage, NULL)));
           }
           )), NULL);  List name = Sym_reference((* a).c -> sym, cons(String_var(spelling), NULL), NULL);  Compiler_record_generated_symbol((* a).c, spelling, expected);  return cons(List_var(cons(_651, cons(List_var(name), cons(storage, NULL)))), NULL);

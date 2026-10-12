@@ -733,7 +733,7 @@ Var List_last(List lst){
 }
 
 int List_index(List l, Var key){
-  for(int index = 0;  List_truth(l);  l = List_cdr(l), index ++) if(Var_equal(l -> car, key)) return index;
+  for(int index = 0;  List_truth(l);  l = List_cdr(l), index ++) if(x2c_var_equal(l -> car, key)) return index;
   return - 1;
 }
 
@@ -788,7 +788,7 @@ Var List_assoc(List list, Var key){
         List _x2c_destructure_0 = pair;
         pair_key = List_getindex(_x2c_destructure_0, 0);
         value = List_getindex(_x2c_destructure_0, 1);
-        if(Var_equal(pair_key, key)) return value;
+        if(x2c_var_equal(pair_key, key)) return value;
       }
 
     }
@@ -968,7 +968,7 @@ List List_getslice(List list, int start, int stop, int step){
 }
 
 static int _is_active_canonical(List list){
-  return Var_same(Pool_lookup(Pool_current(), List_var(list)), List_var(list));
+  return x2c_var_identical(Pool_lookup(Pool_current(), List_var(list)), List_var(list));
 }
 
 List List_map(List lst, Func fn){

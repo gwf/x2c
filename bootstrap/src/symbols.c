@@ -925,7 +925,7 @@ static List Sym__package_declared_key(Sym s, List context, List key, List ast){
   head = List_getindex(_x2c_destructure_1, 0);
   tag = List_getindex(_x2c_destructure_1, 1);
   if(Var_is_row(head, 11, 7, 1) && ! List_truth(List_cdr(key))) return cons(String_var(Compiler_package_spelling(c, Var_as_string(head))), NULL);
-  if((Var_equal(head, Symbol_var(1318234344)) || Var_equal(head, Symbol_var(44977116)) || Var_equal(head, Symbol_var(357722))) && List_truth(List_cdr(key)) && ! List_truth(List_cddr(key)) && Var_is_row(tag, 11, 7, 1)) return({
+  if((x2c_var_equal(head, Symbol_var(1318234344)) || x2c_var_equal(head, Symbol_var(44977116)) || x2c_var_equal(head, Symbol_var(357722))) && List_truth(List_cdr(key)) && ! List_truth(List_cddr(key)) && Var_is_row(tag, 11, 7, 1)) return({
     Var _x2c_literal_part_5 = head;  Var _x2c_literal_part_6 = String_var(Compiler_package_spelling(c, Var_as_string(tag)));  cons(_x2c_literal_part_5, cons(_x2c_literal_part_6, NULL));
   }
   );
@@ -938,7 +938,7 @@ static String _declared_spelling(List key){
   head = List_getindex(_x2c_destructure_2, 0);
   tag = List_getindex(_x2c_destructure_2, 1);
   if(Var_is_row(head, 11, 7, 1)) return Var_as_string(head);
-  if(Var_equal(head, Symbol_var(1318234344)) || Var_equal(head, Symbol_var(44977116)) || Var_equal(head, Symbol_var(357722))) if(Var_is_row(tag, 11, 7, 1)) return Var_as_string(tag);
+  if(x2c_var_equal(head, Symbol_var(1318234344)) || x2c_var_equal(head, Symbol_var(44977116)) || x2c_var_equal(head, Symbol_var(357722))) if(Var_is_row(tag, 11, 7, 1)) return Var_as_string(tag);
   return NULL;
 }
 
@@ -1117,7 +1117,7 @@ void Compiler_record_declaration_visibility(Compiler c, List declaration){
             }
 
           }
-          Compiler__record_rows_visibility(c, declaration, Var_symbol(kind), private, mark, rows);  if(Var_equal(kind, Symbol_var(8932560010)) && ! mark) Compiler__record_native_objects(c, Var_type(type), rows);
+          Compiler__record_rows_visibility(c, declaration, Var_symbol(kind), private, mark, rows);  if(x2c_var_equal(kind, Symbol_var(8932560010)) && ! mark) Compiler__record_native_objects(c, Var_type(type), rows);
         }
 
       }
@@ -1200,7 +1200,7 @@ String Compiler_package_spelling(Compiler c, String name){
 }
 
 void Compiler_register_package_alias(Compiler c, String name, String alias, Token token){
-  if(! _init_guard_) _file_init_();  Var bound = Map_getindex(c -> package_aliases, String_var(alias));  if(! Var_is_void(bound) && Var_equal(bound, String_var(name))) return;  Compiler__check_package_binding(c, _131, alias, token);  Map_setindex(c -> package_aliases, String_var(alias), String_var(name));
+  if(! _init_guard_) _file_init_();  Var bound = Map_getindex(c -> package_aliases, String_var(alias));  if(! Var_is_void(bound) && x2c_var_equal(bound, String_var(name))) return;  Compiler__check_package_binding(c, _131, alias, token);  Map_setindex(c -> package_aliases, String_var(alias), String_var(name));
 }
 
 void Compiler_register_package_member(Compiler c, String name, String member, String local, Token member_token, Token local_token){
@@ -1311,7 +1311,7 @@ Type Sym_sole_typedef(Sym s, Type type){
             case 9224497981422903628ULL: ; if (!_x2c_match_none) { _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497981422903628ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 1318210446)) { Var _x2c_match_value_0 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
             Var name;  name = _x2c_match_value_0; {
               Var _x2c_match_value_3 = name; {
-                String name = Var_as_string(_x2c_match_value_3);  if(Var_equal(target, List_var(type))){
+                String name = Var_as_string(_x2c_match_value_3);  if(x2c_var_equal(target, List_var(type))){
                   if(String_truth(found) && ! String_equal(found, name)) return NULL;  found = name;
                 }
 
@@ -1435,7 +1435,7 @@ void Sym_declare_field_order(Sym s, Type type, List fields){
   if(! _init_guard_) _file_init_();  Array rows = Array_new(); {
     List declaration;  List _x2c_macro_object_12 = fields;  List _x2c_macro_cursor_12 = _x2c_macro_object_12;  Var _x2c_macro_cursor_output_19;  while(List_try_next(_x2c_macro_object_12, &(_x2c_macro_cursor_12), &(_x2c_macro_cursor_output_19))){
       declaration = Var_list(_x2c_macro_cursor_output_19); {
-        declaration = Ast_without_origin(declaration);  if(Var_equal(List_car(declaration), Symbol_var(272838634664))) continue;  List bindings = Var_list(List_caddr(declaration)); {
+        declaration = Ast_without_origin(declaration);  if(x2c_var_equal(List_car(declaration), Symbol_var(272838634664))) continue;  List bindings = Var_list(List_caddr(declaration)); {
           List declarator;  List _x2c_macro_object_11 = List_cdr(bindings);  List _x2c_macro_cursor_11 = _x2c_macro_object_11;  Var _x2c_macro_cursor_output_18;  while(List_try_next(_x2c_macro_object_11, &(_x2c_macro_cursor_11), &(_x2c_macro_cursor_output_18))){
             declarator = Var_list(_x2c_macro_cursor_output_18);  Array_push(rows, List_var(Sym__field_row(s, type, declaration, declarator)));
           }
@@ -1531,7 +1531,7 @@ static int _same(Map a, Map b){
 
 int SymTxn_local_macros_changed(SymTxn * s){
   if(! _init_guard_) _file_init_();  SymScope * scope = Sym__scope_at((* s).c -> sym, (* s).scope_index);  Map before =(* s).scope.macros, after = scope -> macros;  if(before == NULL || after == NULL) return ! _same(before, after);  Block undo =(* s).c -> sym -> undo;  SymUndo * rows = undo -> bytes;  Map seen = Map_new();  for(int i =(* s).mark;  i <(int) Block_len(undo);  i ++){
-    SymUndo row = rows[i];  if(! _same(row.map, after) || Map_contains(seen, row.key)) continue;  Map_setindex(seen, row.key, int_var(1));  if(Var_is_void(row.value) || ! Var_equal(row.value, Map_getindex(after, row.key))) return 1;
+    SymUndo row = rows[i];  if(! _same(row.map, after) || Map_contains(seen, row.key)) continue;  Map_setindex(seen, row.key, int_var(1));  if(Var_is_void(row.value) || ! x2c_var_equal(row.value, Map_getindex(after, row.key))) return 1;
   }
   return 0;
 }

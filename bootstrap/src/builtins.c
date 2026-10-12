@@ -1974,13 +1974,13 @@ static List _cursor_spec(List collection_type){
   List rest = List_cdr(parameters);
   Type cursor_parameter = Var_type(List_truth(rest) ? List_car(rest) : List_var(NULL));
   List outputs = List_truth(rest) ? List_cdr(rest) : NULL;
-  if(! List_equal(Type_list(Type_return_type(type)), _439) || ! Var_equal(List_car(parameters), List_var(collection_type)) || ! Type_is_pointer(Type_canonicalize(cursor_parameter))) return NULL;
+  if(! List_equal(Type_list(Type_return_type(type)), _439) || ! x2c_var_equal(List_car(parameters), List_var(collection_type)) || ! Type_is_pointer(Type_canonicalize(cursor_parameter))) return NULL;
   Type cursor_type = Type_element(cursor_parameter);
   if(! Type_is_integral(cursor_type) && ! List_equal(Type_list(cursor_type), collection_type)) return NULL;
   if(! List_truth(outputs)) return NULL;
   if(! _valid_outputs(outputs)) return NULL;
   List output_types = List_map(outputs, _x2c_func_handle_0);
-  if(Var_equal(List_car(Type_list(cursor_parameter)), Symbol_var(54))) return cons(List_var(function), cons(List_var(cursor_type), cons(List_var(output_types), NULL)));
+  if(x2c_var_equal(List_car(Type_list(cursor_parameter)), Symbol_var(54))) return cons(List_var(function), cons(List_var(cursor_type), cons(List_var(output_types), NULL)));
   return cons(List_var(function), cons(List_var(cursor_type), cons(List_var(output_types), _441)));
 }
 
@@ -2057,7 +2057,7 @@ static List Foreach_with_iter(Foreach * f, List converter){
   List initializer = builtin_foreach_complete(List_truth(constructor) ? _iter_call(constructor, (* f).collection) :(* f).collection);
   Code next = meta_function_reference(_460);
   List output = Var_list(List_getindex(Type_parameters(Code_type(next)), 1));
-  List item_argument = Var_equal(List_car(output), Symbol_var(54)) ? _address(item_expression) : item_expression;
+  List item_argument = x2c_var_equal(List_car(output), Symbol_var(54)) ? _address(item_expression) : item_expression;
   List condition =({
     List _x2c_hole_2 = _expr(_425, (* f).iterator);  cons(_2, cons(_3, cons(List_var(cons(_4, cons(_7, cons(List_var(({
       Var _x2c_literal_part_17 = List_var(cons(_25, cons(_129, cons(_130, cons(List_var(next), NULL)))));  Var _x2c_literal_part_18 = List_var(({
@@ -2164,7 +2164,7 @@ static List _class_expand(List capture){
   String owner = Var_as_string(List_getindex(capture, 1));
   Type type = Var_type(List_getindex(capture, 2));
   if(! List_truth(Type_list(type))) return cons(List_var(capture), NULL);
-  if(! Type_is_pointer(Type_canonicalize(type)) && Var_equal(List_car(Type_list(type)), Symbol_var(357722))) x2c_diagnostic_fail(String_add(String_join(NULL, cons(String_var(_495), cons(String_var(owner), cons(String_var(_496), NULL)))), _497), _500);
+  if(! Type_is_pointer(Type_canonicalize(type)) && x2c_var_equal(List_car(Type_list(type)), Symbol_var(357722))) x2c_diagnostic_fail(String_add(String_join(NULL, cons(String_var(_495), cons(String_var(owner), cons(String_var(_496), NULL)))), _497), _500);
   return({
     Var _x2c_literal_part_50 = List_var(capture);  Var _x2c_literal_part_51 = List_var(cons(_501, cons(_502, cons(List_var(({
       Var _x2c_literal_part_47 = String_var(owner);  Var _x2c_literal_part_48 = List_var(type);  Var _x2c_literal_part_49 = List_var(meta_invocation_location());  cons(_x2c_literal_part_47, cons(_x2c_literal_part_48, cons(_x2c_literal_part_49, NULL)));
@@ -2191,10 +2191,10 @@ static Shape _shape(String owner, Type type, List location){
   int alias = List_len(Type_list(type)) == 1 && Var_is_row(List_car(Type_list(type)), 11, 7, 1);
   Type pointee = heap ? Type_element(type) : type;
   Type representation = Type_is_value(pointee) ? pointee : Type_resolve(pointee);
-  int aggregate = Var_equal(List_car(Type_list(representation)), Symbol_var(1318234344)) || Var_equal(List_car(Type_list(representation)), Symbol_var(44977116));
+  int aggregate = x2c_var_equal(List_car(Type_list(representation)), Symbol_var(1318234344)) || x2c_var_equal(List_car(Type_list(representation)), Symbol_var(44977116));
   List fields = aggregate ? Type_layout(representation) : NULL;
   List named = _named(fields);
-  int positional = aggregate && Var_equal(List_car(Type_list(representation)), Symbol_var(1318234344)) && _positional(fields);
+  int positional = aggregate && x2c_var_equal(List_car(Type_list(representation)), Symbol_var(1318234344)) && _positional(fields);
   Shape s ={
     .owner = owner, .type = Type_list(type), .location = location, .pointee = Type_list(pointee), .representation = Type_list(representation), .named = named, .heap = heap, .alias = alias, .aggregate = aggregate, .positional = positional
   }
@@ -2365,7 +2365,7 @@ static List Shape_scalar(Shape * s){
 }
 
 static List _new(String owner, List representation, int heap, List named, int positional, List extras){
-  int aggregate = Var_equal(List_car(representation), Symbol_var(1318234344)) || Var_equal(List_car(representation), Symbol_var(44977116));
+  int aggregate = x2c_var_equal(List_car(representation), Symbol_var(1318234344)) || x2c_var_equal(List_car(representation), Symbol_var(44977116));
   if(! aggregate) return _scalar_new(owner, List_type(representation), heap);
   if(positional) return _positional_new(owner, List_type(representation), heap, named);
   return _initialized_new(owner, heap, extras);
@@ -2456,7 +2456,7 @@ static List _finish_new(String owner, List type, List parameters, List body, int
 }
 
 static List _class_initializer(String owner, Var heap_value){
-  int heap = ! Var_equal(heap_value, List_var(NULL));
+  int heap = ! x2c_var_equal(heap_value, List_var(NULL));
   List type = cons(String_var(owner), NULL);
   List receiver = heap ? type : cons(_220, List_append(type, NULL));
   Code method = _method(List_type(type), _505);
@@ -2464,7 +2464,7 @@ static List _class_initializer(String owner, Var heap_value){
     List signature = Type_list(Code_type(method));
     List function = Var_list(List_car(signature));
     List declared = Var_list(List_getindex(function, 1));
-    int reference = ! heap && Var_equal(List_car(declared), List_var(cons(_487, List_append(type, NULL))));
+    int reference = ! heap && x2c_var_equal(List_car(declared), List_var(cons(_487, List_append(type, NULL))));
     if(reference) receiver = Var_list(List_car(declared));
     List parameters = cons(List_var(receiver), List_cdr(declared));
     int refusable = heap && List_equal(signature, cons(List_var(cons(_815, cons(List_var(parameters), NULL))), _439));
@@ -2749,7 +2749,7 @@ static List _value_type(List type){
     while(List_try_next(_x2c_macro_object_11, &(_x2c_macro_cursor_11), &(_x2c_macro_cursor_output_11))){
       item = _x2c_macro_cursor_output_11;
       {
-        if(Var_equal(item, Symbol_var(7304424)) || Var_equal(item, Symbol_var(1544849476362)) || Var_equal(item, Symbol_var(1249006209256))) continue;
+        if(x2c_var_equal(item, Symbol_var(7304424)) || x2c_var_equal(item, Symbol_var(1544849476362)) || x2c_var_equal(item, Symbol_var(1249006209256))) continue;
         {
           Var _x2c_match_var = item; int _x2c_match_none = !Var_is(_x2c_match_var, 806120);
           List _x2c_match_expr = Var_list(_x2c_match_var); List _x2c_match_cursor;
@@ -2845,7 +2845,7 @@ static List _binding_record(Var group, Var name, List function, List all_rows, L
     Var _x2c_macro_cursor_output_12;
     while(List_try_next(_x2c_macro_object_12, &(_x2c_macro_cursor_12), &(_x2c_macro_cursor_output_12))){
       installed = _x2c_macro_cursor_output_12;
-      if(Var_equal(installed, String_var(group_name))) x2c_diagnostic_fail(_1381, cons(String_var(String_join(NULL, cons(String_var(_1382), cons(String_var(group_name), NULL)))), NULL));
+      if(x2c_var_equal(installed, String_var(group_name))) x2c_diagnostic_fail(_1381, cons(String_var(String_join(NULL, cons(String_var(_1382), cons(String_var(group_name), NULL)))), NULL));
     }
 
   }
@@ -2856,7 +2856,7 @@ static List _binding_record(Var group, Var name, List function, List all_rows, L
     Var _x2c_macro_cursor_output_13;
     while(List_try_next(_x2c_macro_object_13, &(_x2c_macro_cursor_13), &(_x2c_macro_cursor_output_13))){
       row = Var_list(_x2c_macro_cursor_output_13);
-      if(Var_equal(List_getindex(row, 1), String_var(lisp_name))) x2c_diagnostic_fail(_1383, ({
+      if(x2c_var_equal(List_getindex(row, 1), String_var(lisp_name))) x2c_diagnostic_fail(_1383, ({
         Var _x2c_literal_part_122 = String_var(String_join(NULL, cons(String_var(_1382), cons(String_var(group_name), NULL))));  Var _x2c_literal_part_123 = String_var(String_join(NULL, cons(String_var(_1384), cons(String_var(lisp_name), NULL))));  cons(_x2c_literal_part_122, cons(_x2c_literal_part_123, NULL));
       }
       ));
@@ -2885,7 +2885,7 @@ static List _binding_rows_for(String group, List rows){
     Var _x2c_macro_cursor_output_14;
     while(List_try_next(_x2c_macro_object_14, &(_x2c_macro_cursor_14), &(_x2c_macro_cursor_output_14))){
       row = Var_list(_x2c_macro_cursor_output_14);
-      if(Var_equal(List_car(row), String_var(group))) Array_push(selected, List_var(row));
+      if(x2c_var_equal(List_car(row), String_var(group))) Array_push(selected, List_var(row));
     }
 
   }

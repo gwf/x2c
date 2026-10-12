@@ -217,7 +217,7 @@ static List _operator_cases(int key, int value, int derived){
       row = Var_list(_x2c_macro_cursor_output_0);
       {
         if(! Var_truth(List_getindex(row, key)) || ! Var_truth(List_getindex(row, value))) continue;
-        if(derived >= 0 && ! Var_equal(List_getindex(row, 4), int_var(derived))) continue;
+        if(derived >= 0 && ! x2c_var_equal(List_getindex(row, 4), int_var(derived))) continue;
         Symbol label = Var_symbol(List_getindex(row, key));
         Var result = List_getindex(row, value);
         Array_push(cases, List_var(cons(_155, cons(_156, cons(List_var(({

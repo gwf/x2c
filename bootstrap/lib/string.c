@@ -213,7 +213,7 @@ int String_is_permanent(String str){
 }
 
 static int _is_active_canonical(String str){
-  return Var_same(Pool_lookup(Pool_current(), String_var(str)), String_var(str));
+  return x2c_var_identical(Pool_lookup(Pool_current(), String_var(str)), String_var(str));
 }
 
 int String_find_within(String str, String sub, int start, int end);

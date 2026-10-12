@@ -37,7 +37,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
 static Var List_var(List);
 
 static int _nil(Var value){
-  return Var_equal(value, List_var(NULL));
+  return x2c_var_equal(value, List_var(NULL));
 }
 
 static Var _truth(int x){

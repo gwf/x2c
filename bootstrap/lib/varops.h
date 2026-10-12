@@ -54,6 +54,12 @@ Var Var_mod(Var lhs, Var rhs);
 
 Var Var_neg(Var value);
 
+int x2c_var_equal(Var a, Var b);
+
+int x2c_var_identical(Var a, Var b);
+
+double x2c_var_order(Var a, Var b);
+
 int Var_truth(Var value);
 
 int Var_fallback_truth(Var value);

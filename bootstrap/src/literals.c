@@ -769,7 +769,7 @@ static int Compiler__recorded(Compiler c, String name, Type type, List tag, Toke
             previous_name = _x2c_match_value_0;
             Var previous_type;
             previous_type = _x2c_match_value_1;
-            if(Var_equal(previous_name, String_var(name)) && List_equal(Compiler_var_tag_expression(c, Var_type(previous_type), origin), tag) && List_equal(Type_list(Sym_normalize_declared_type(c -> sym, Var_type(previous_type))), Type_list(Sym_normalize_declared_type(c -> sym, type)))) repeated = 1;
+            if(x2c_var_equal(previous_name, String_var(name)) && List_equal(Compiler_var_tag_expression(c, Var_type(previous_type), origin), tag) && List_equal(Type_list(Sym_normalize_declared_type(c -> sym, Var_type(previous_type))), Type_list(Sym_normalize_declared_type(c -> sym, type)))) repeated = 1;
           }
            break; } } }
         }
@@ -861,19 +861,19 @@ static List Compiler__typed_list(Compiler c, List node, List content, Map tags){
       .fn = _x2c_defer_cleanup_2, .env = & _x2c_macro_environment_2
     }
     ;  x2c_cleanup_push(& _x2c_defer_record_2); {
-      List tail = Compiler__pattern_elements(c, content, elements);  Var operator = Compiler_match_pattern_value(c, Array_getindex(elements, 0)), tag;  if(Var_equal(operator, Symbol_var(2050325770))){
+      List tail = Compiler__pattern_elements(c, content, elements);  Var operator = Compiler_match_pattern_value(c, Array_getindex(elements, 0)), tag;  if(x2c_var_equal(operator, Symbol_var(2050325770))){
         List _x2c_return_value_2 = node; {
           x2c_cleanup_leave(& _x2c_defer_record_2);  return _x2c_return_value_2;
         }
 
       }
       int first = Var_is_match_op(operator) ? 1 : 0;  List capture_tag = NULL;  if(first && Array_len(elements) > 1){
-        Var binder = Compiler_match_pattern_value(c, Array_getindex(elements, 1));  if(Var_is_atom_binder(binder) &&(! Var_equal(operator, Symbol_var(2005352)) || Array_len(elements) == 3)){
+        Var binder = Compiler_match_pattern_value(c, Array_getindex(elements, 1));  if(Var_is_atom_binder(binder) &&(! x2c_var_equal(operator, Symbol_var(2005352)) || Array_len(elements) == 3)){
           if(Map_try_get(tags, binder, &(tag))) capture_tag = Var_list(tag);  first ++;
         }
 
       }
-      if(! Var_equal(operator, Symbol_var(62054))) for(int i = first;  i < Array_len(elements);  i ++) Array_setindex(elements, i, List_var(Compiler__typed_pattern(c, Var_list(Array_getindex(elements, i)), tags)));  List pattern = Compiler__cons_list(c, elements, tail); {
+      if(! x2c_var_equal(operator, Symbol_var(62054))) for(int i = first;  i < Array_len(elements);  i ++) Array_setindex(elements, i, List_var(Compiler__typed_pattern(c, Var_list(Array_getindex(elements, i)), tags)));  List pattern = Compiler__cons_list(c, elements, tail); {
         List _x2c_return_value_3 = List_truth(capture_tag) ? Compiler__and_tag_test(c, pattern, capture_tag) : pattern; {
           x2c_cleanup_leave(& _x2c_defer_record_2);  return _x2c_return_value_3;
         }
@@ -1217,7 +1217,7 @@ static List Compiler__parse_quoted_entries(Compiler c){
 }
 
 static void _push_entry(Array entries, Ast entry){
-  if(List_truth(entry) && Var_equal(List_car(entry), Symbol_var(39266))){
+  if(List_truth(entry) && x2c_var_equal(List_car(entry), Symbol_var(39266))){
     Var row;
     Iter _x2c_macro_iterator_4 = List_iter(List_cdr(entry), &(struct Iter){
       int_var(0)
@@ -1461,7 +1461,7 @@ static void Compiler__check_binder(Compiler c, Atom atom){
   if(! c -> in_pattern || ! Var_is_atom(atom)) return;
   char first = Atom_first(atom);
   if((first != '?' && first != '*') || Var_is_binder(atom)) return;
-  int reserved = Var_equal(atom, Symbol_var(1997793406138)) || Var_equal(atom, Symbol_var(1860354452666));
+  int reserved = x2c_var_equal(atom, Symbol_var(1997793406138)) || x2c_var_equal(atom, Symbol_var(1860354452666));
   if(reserved && c -> match_is && Compiler_peek(c, 1) == 83) return;
   Compiler_report_error(c, 33658058, _214, c -> token, cons(_216, cons(String_var(Atom_str(atom)), NULL)));
 }

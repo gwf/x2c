@@ -351,22 +351,22 @@ static int _binder_kind(Var atom){
 }
 
 static int _named_binder(Var value){
-  return Var_is_binder(value) && ! Var_equal(value, Symbol_var(58)) && ! Var_equal(value, Symbol_var(54));
+  return Var_is_binder(value) && ! x2c_var_equal(value, Symbol_var(58)) && ! x2c_var_equal(value, Symbol_var(54));
 }
 
 static int _reserved_predicate(Var atom){
-  return Var_is(atom, 1328354264) &&(Var_equal(atom, Symbol_var(1997793406138)) || Var_equal(atom, Symbol_var(1860354452666)) || Var_equal(atom, Symbol_var(1997882)));
+  return Var_is(atom, 1328354264) &&(x2c_var_equal(atom, Symbol_var(1997793406138)) || x2c_var_equal(atom, Symbol_var(1860354452666)) || x2c_var_equal(atom, Symbol_var(1997882)));
 }
 
 static List _normalize_pattern(List pattern){
-  if(! List_truth(pattern) || Var_equal(List_car(pattern), Symbol_var(2050325770))) return pattern;
+  if(! List_truth(pattern) || x2c_var_equal(List_car(pattern), Symbol_var(2050325770))) return pattern;
   List normalized = _normalize_elements(pattern);
   Var op = List_car(normalized);
   List args = List_cdr(normalized);
-  if(! Var_is_match_op(op) || Var_equal(op, Symbol_var(2050325770)) || ! List_truth(args)) return normalized;
+  if(! Var_is_match_op(op) || x2c_var_equal(op, Symbol_var(2050325770)) || ! List_truth(args)) return normalized;
   Var binder = List_car(args);
   List rest = List_cdr(args);
-  if(! Var_is_binder(binder) || ! List_truth(rest) ||(Var_equal(op, Symbol_var(2005352)) && ! List_truth(List_cdr(rest)))) return normalized;
+  if(! Var_is_binder(binder) || ! List_truth(rest) ||(x2c_var_equal(op, Symbol_var(2005352)) && ! List_truth(List_cdr(rest)))) return normalized;
   return({
     Var _x2c_literal_part_0 = binder;  Var _x2c_literal_part_1 = List_var(_normalize_pattern(cons(op, List_append(rest, NULL))));  cons(_0, cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, NULL)));
   }
@@ -399,7 +399,7 @@ static List _normalize_elements(List elements){
       List out = NULL;
       for(size_t i = spine -> length;  i > 0;  i --){
         NormalizedCell row =((NormalizedCell *) spine -> bytes)[i - 1];
-        out = Var_equal(row.head, List_car(row.original)) && List_equal(out, List_cdr(row.original)) ? row.original : cons(row.head, out);
+        out = x2c_var_equal(row.head, List_car(row.original)) && List_equal(out, List_cdr(row.original)) ? row.original : cons(row.head, out);
       }
       {
         List _x2c_return_value_0 = out;
@@ -444,13 +444,13 @@ static void MatchLayoutBuilder__collect(MatchLayoutBuilder * b, Var pattern){
   if(Var_is_nil(pattern)) return;
   List list = Var_list(pattern);
   Var head = List_car(list);
-  if(Var_equal(head, Symbol_var(2050325770))) return;
+  if(x2c_var_equal(head, Symbol_var(2050325770))) return;
   if(Var_is_match_op(head)){
     List args = List_cdr(list);
     if(List_truth(args) && Var_is_list_binder(List_car(args)))(* b).leading_list_binder = 1;
   }
-  List parts = Var_equal(head, Symbol_var(1059020478773725)) ? List_cdr(list) : list;
-  int predicate_form = Var_equal(head, Symbol_var(62054));
+  List parts = x2c_var_equal(head, Symbol_var(1059020478773725)) ? List_cdr(list) : list;
+  int predicate_form = x2c_var_equal(head, Symbol_var(62054));
   for(List at = parts;  List_truth(at);  at = List_cdr(at)){
     Var part = List_car(at);
     if(predicate_form && ! List_truth(List_cdr(at)) && _reserved_predicate(part)) continue;
@@ -463,7 +463,7 @@ static void MatchLayoutBuilder__collect(MatchLayoutBuilder * b, Var pattern){
 static void MatchLayoutBuilder__atom(MatchLayoutBuilder * b, Var atom){
   int kind = _binder_kind(atom);
   if(kind < 0)(* b).malformed_binder = 1;
-  else if(kind && ! Var_equal(atom, Symbol_var(58)) && ! Var_equal(atom, Symbol_var(54)) && MatchLayoutBuilder__add(&((* b)), atom) < 0)(* b).past_capacity = 1;
+  else if(kind && ! x2c_var_equal(atom, Symbol_var(58)) && ! x2c_var_equal(atom, Symbol_var(54)) && MatchLayoutBuilder__add(&((* b)), atom) < 0)(* b).past_capacity = 1;
 }
 
 static int MatchLayoutBuilder__add(MatchLayoutBuilder * b, Atom binder){
@@ -501,11 +501,11 @@ static MatchSlots MatchCaptureLayout__slots(MatchCaptureLayout m, Var pattern){
   List list = Var_list(pattern);
   Var head = List_car(list);
   List args = List_cdr(list);
-  if(Var_equal(head, Symbol_var(2050325770))) return(MatchSlots){
+  if(x2c_var_equal(head, Symbol_var(2050325770))) return(MatchSlots){
     0, 0
   }
   ;
-  if(Var_equal(head, Symbol_var(1059020478773725))) return(MatchSlots){
+  if(x2c_var_equal(head, Symbol_var(1059020478773725))) return(MatchSlots){
     0, MatchCaptureLayout__sequence_slots(m, args).possible
   }
   ;
@@ -514,9 +514,9 @@ static MatchSlots MatchCaptureLayout__slots(MatchCaptureLayout m, Var pattern){
 }
 
 static MatchSlots MatchCaptureLayout__guard_slots(MatchCaptureLayout m, Var op, List args){
-  if(Var_equal(op, Symbol_var(1969032)) ||(Var_equal(op, Symbol_var(2005352)) && _set_capture(args))) return MatchCaptureLayout__sequence_slots(m, args);
-  if(Var_equal(op, Symbol_var(62436)) || Var_equal(op, Symbol_var(2005352))) return MatchCaptureLayout__choice_slots(m, args);
-  if(Var_equal(op, Symbol_var(1995752))) return(MatchSlots){
+  if(x2c_var_equal(op, Symbol_var(1969032)) ||(x2c_var_equal(op, Symbol_var(2005352)) && _set_capture(args))) return MatchCaptureLayout__sequence_slots(m, args);
+  if(x2c_var_equal(op, Symbol_var(62436)) || x2c_var_equal(op, Symbol_var(2005352))) return MatchCaptureLayout__choice_slots(m, args);
+  if(x2c_var_equal(op, Symbol_var(1995752))) return(MatchSlots){
     0, MatchCaptureLayout__sequence_slots(m, args).possible
   }
   ;
@@ -1032,7 +1032,7 @@ static Var _replace(Var input, ReplacementSource * source){
   if(! Var_is_row(input, 9, 7, 4)) return input;
   List list = Var_list(input);
   if(! List_truth(list)) return input;
-  if(Var_equal(List_car(list), Symbol_var(2050325770))) return List_cadr(list);
+  if(x2c_var_equal(List_car(list), Symbol_var(2050325770))) return List_cadr(list);
   Block spine = Block_new(sizeof(ReplacementCell));
   const Block _x2c_macro_acquired_1 = spine;
   {
@@ -1050,12 +1050,12 @@ static Var _replace(Var input, ReplacementSource * source){
       Var tail = List_var((List) NULL);
       for(;  List_truth(list);  list = List_cdr(list)){
         Var head = List_car(list);
-        if(Var_equal(head, Symbol_var(2050325770))){
+        if(x2c_var_equal(head, Symbol_var(2050325770))){
           tail = List_cadr(list);
           break;
         }
         ReplacementCell row ={
-          _replace(head, &((* source))), Var_is_list_binder(head) && ! Var_equal(head, Symbol_var(54)) && ! Var_equal(head, Symbol_var(58))
+          _replace(head, &((* source))), Var_is_list_binder(head) && ! x2c_var_equal(head, Symbol_var(54)) && ! x2c_var_equal(head, Symbol_var(58))
         }
         ;
         Block_push(spine, & row);

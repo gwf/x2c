@@ -984,7 +984,7 @@ static const char * ErrorHandler__prepare_plans(ErrorHandler h, Var * patterns, 
   int pushed = _scope_push(97614135954008, "could not enter error scope for catch patterns");
   h -> plans = Block_new(sizeof(MatchPlan));
   for(int i = 0;  i < site -> arm_count;  i ++){
-    MatchPlan plan = i == site -> default_arm || Var_equal(patterns[i], Symbol_var(8938171176)) ? NULL : MatchPlan_prepare(patterns[i]);
+    MatchPlan plan = i == site -> default_arm || x2c_var_equal(patterns[i], Symbol_var(8938171176)) ? NULL : MatchPlan_prepare(patterns[i]);
     Block_push(h -> plans, & plan);
     if(plan && plan -> status == MACHINE_INELIGIBLE && ! fenced){
       fenced = plan -> reason;
@@ -1010,7 +1010,7 @@ ErrorHandler x2c_error_catch_push(void * target, unsigned arm_count, ...){
   va_start(args, arm_count);
   for(unsigned i = 0;  i < arm_count;  i ++){
     patterns[i] = va_arg(args, Var);
-    if(Var_equal(patterns[i], Symbol_var(8938171176)) && site -> default_arm < 0) site -> default_arm =(int) i;
+    if(x2c_var_equal(patterns[i], Symbol_var(8938171176)) && site -> default_arm < 0) site -> default_arm =(int) i;
   }
   va_end(args);
   return x2c_error_catch_site_push(target, site, patterns);

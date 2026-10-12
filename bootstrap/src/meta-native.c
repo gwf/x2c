@@ -1595,7 +1595,7 @@ static Var _meta_call_value(Compiler c, List expression, Token site){
 }
 
 static Var _meta_named_value(Compiler c, String name, List arguments, Token site){
-  Var function = Compiler__shipped_callee(c, name);  if(Var_is_void(function)) function = Compiler__meta_function(c, name, site);  meta_call_form = cons(Atom_intern(name), arguments);  if(Var_same(function, Map_getindex(_linked_module(), String_var(name)))) return _apply_linked(Var_pointer(function), arguments);  return Compiler__meta_apply(c, function, arguments);
+  Var function = Compiler__shipped_callee(c, name);  if(Var_is_void(function)) function = Compiler__meta_function(c, name, site);  meta_call_form = cons(Atom_intern(name), arguments);  if(x2c_var_identical(function, Map_getindex(_linked_module(), String_var(name)))) return _apply_linked(Var_pointer(function), arguments);  return Compiler__meta_apply(c, function, arguments);
 }
 
 static Var Compiler__shipped_callee(Compiler c, String name){
@@ -2124,7 +2124,7 @@ static Var NativeBinding_module_target(NativeBinding * n){
 static void NativeBinding_check(NativeBinding * n, Var function){
   Compiler c =(* n).c;
   List suppliers =(* n).suppliers;
-  if(List_truth(List_cdr(suppliers)) && Var_equal(function, NativeBinding_module_target(&((* n))))) Compiler_report_warning(c, 942951818, _131, (* n).marker, ({
+  if(List_truth(List_cdr(suppliers)) && x2c_var_equal(function, NativeBinding_module_target(&((* n))))) Compiler_report_warning(c, 942951818, _131, (* n).marker, ({
     Var _x2c_literal_part_11 = String_var(String_join(NULL, cons(String_var(_130), cons(String_var((* n).name), NULL))));  Var _x2c_literal_part_12 = String_var(String_join(NULL, cons(String_var(_132), cons(String_var(Var_str(List_car(suppliers))), NULL))));  Var _x2c_literal_part_13 = String_var(String_join(NULL, cons(String_var(_133), cons(String_var(String_join(_134, List_cdr(suppliers))), NULL))));  cons(_x2c_literal_part_11, cons(_x2c_literal_part_12, cons(_x2c_literal_part_13, NULL)));
   }
   ));
@@ -2252,7 +2252,7 @@ String Compiler_native_meta_module(Compiler c, String name, Type * type){
   if(! String_startswith(path, _145)) return NULL;
   Var target = Map_getindex((Var_map(Map_getindex(native_modules, String_var(path)))), String_var(name));
   Var bound;
-  if(! Lisp_try_get(c -> macro_lisp, name, &(bound)) || ! Var_equal(bound, target)) return NULL;
+  if(! Lisp_try_get(c -> macro_lisp, name, &(bound)) || ! x2c_var_equal(bound, target)) return NULL;
   (* type) = List_type(Func_signature((Var_pointer(target))));
   return path;
 }
@@ -2345,7 +2345,7 @@ static int Compiler__native_handle(Compiler c, List type, int parameter){
   }
   Symbol tag = Sym_var_tag_for_type(c -> sym, List_type(type), NULL);  if(tag == 45156 || tag == 1328354264 || tag == 1318210446 || tag == 806120 || tag == 3313778 || tag == 26720 || tag == 437126) return 0;  type = Type_list(Sym_normalize_declared_type(c -> sym, List_type(type))); {
     Var part;  List _x2c_macro_object_11 = type;  List _x2c_macro_cursor_12 = _x2c_macro_object_11;  Var _x2c_macro_cursor_output_15;  while(List_try_next(_x2c_macro_object_11, &(_x2c_macro_cursor_12), &(_x2c_macro_cursor_output_15))){
-      part = _x2c_macro_cursor_output_15;  if(! Var_is(part, 1328354264) || Var_equal(part, Symbol_var(54))) return 1;
+      part = _x2c_macro_cursor_output_15;  if(! Var_is(part, 1328354264) || x2c_var_equal(part, Symbol_var(54))) return 1;
     }
 
   }
@@ -2519,7 +2519,7 @@ static int _iterator_operation(List signature){
         default: ;  _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224497936762055558ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1 && Var_is(_x2c_match_cursor1->car, 806120)) { Var _x2c_match_value_0 = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_equal(_x2c_match_cursor->car, _245 ->cdr->car) && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
         Var parameters;  parameters = _x2c_match_value_0; {
           Var _x2c_match_value_15 = parameters; {
-            List parameters = Var_list(_x2c_match_value_15);  return List_truth(parameters) && Var_equal(List_last(parameters), List_var(_244));
+            List parameters = Var_list(_x2c_match_value_15);  return List_truth(parameters) && x2c_var_equal(List_last(parameters), List_var(_244));
           }
 
         }
@@ -2548,7 +2548,7 @@ int Compiler_bind_linked_meta(Compiler c, List fn, Type type){
     }
 
   }
-  if(! String_truth(name)) return 0;  Map linked = _linked_module();  Var function, bound;  if(! Map_try_get(linked, String_var(name), &(function))) return 0;  if(! Compiler__linked_copy(c, name, linked)) return 0;  if(! c -> collect_protocols) Compiler_run_declaration_effects(c);  Compiler_ensure_macro_lisp(c);  if(! Compiler_native_meta_accepts(c, function, Compiler_func_signature(c, type))) return 0;  if(!(macro_library_filling() && Type_is_static(Var_type(List_cadr(fn)))) &&(! Lisp_try_get(c -> macro_lisp, name, &(bound)) || ! Var_equal(bound, function))) Lisp_set_global(c -> macro_lisp, name, function);  if(Compiler_meta_reaches_compile_time(c, List_var(fn))) Compiler_record_comptime(c, name);  return 1;
+  if(! String_truth(name)) return 0;  Map linked = _linked_module();  Var function, bound;  if(! Map_try_get(linked, String_var(name), &(function))) return 0;  if(! Compiler__linked_copy(c, name, linked)) return 0;  if(! c -> collect_protocols) Compiler_run_declaration_effects(c);  Compiler_ensure_macro_lisp(c);  if(! Compiler_native_meta_accepts(c, function, Compiler_func_signature(c, type))) return 0;  if(!(macro_library_filling() && Type_is_static(Var_type(List_cadr(fn)))) &&(! Lisp_try_get(c -> macro_lisp, name, &(bound)) || ! x2c_var_equal(bound, function))) Lisp_set_global(c -> macro_lisp, name, function);  if(Compiler_meta_reaches_compile_time(c, List_var(fn))) Compiler_record_comptime(c, name);  return 1;
 }
 
 int Compiler_native_module_loaded(String path);
@@ -2663,7 +2663,7 @@ static int Compiler__linked_texts_match(Compiler c, String name, Map linked, Map
     return !(Map_contains(linked_hashes, String_var(name)));
   }
   if(is_prelude_source(file)) return Map_contains(linked, String_var(name));  if(Map_contains(reached, String_var(key))) return 1;  Map_setindex(reached, String_var(key), int_var(1));  if(Map_try_get(linked_hashes, String_var(name), &(hash))){
-    List row = Var_list(hash);  hash = List_car(row);  names = List_cadr(row);  if(! Var_equal(hash, own)) return 0;
+    List row = Var_list(hash);  hash = List_car(row);  names = List_cadr(row);  if(! x2c_var_equal(hash, own)) return 0;
   }
   else if(!(Map_contains(linked, String_var(name))) && !(Map_contains(c -> native_meta, String_var(name)))) return 0;  Map_try_get(c -> meta_calls, String_var(name), &(names));  if(Var_is_row(names, 11, 7, 1)) return Compiler_linked_meta_definitions_current(c, home_absolute_path(Var_as_string(names)));  if(Var_is_row(names, 9, 7, 4)){
     String callee;  List _x2c_macro_object_17 = Var_list(names);  List _x2c_macro_cursor_18 = _x2c_macro_object_17;  Var _x2c_macro_cursor_output_23;  while(List_try_next(_x2c_macro_object_17, &(_x2c_macro_cursor_18), &(_x2c_macro_cursor_output_23))){

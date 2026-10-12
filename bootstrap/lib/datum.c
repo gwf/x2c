@@ -658,7 +658,7 @@ List datum_result_problem(Var value, Map marks){
   if(Var_is_row(value, 9, 7, 4)) return _items_problem(value, marks);
   if(! Var_is(value, 3313778) && ! Var_is(value, 26720)) return NULL;
   ulong address =(ulong) value.u64;
-  if(Map_contains(marks, ulong_var(address))) return cons(String_var(Var_equal(Map_getindex(marks, ulong_var(address)), int_var(1)) ? _53 : _54), _59);
+  if(Map_contains(marks, ulong_var(address))) return cons(String_var(x2c_var_equal(Map_getindex(marks, ulong_var(address)), int_var(1)) ? _53 : _54), _59);
   Map_setindex(marks, ulong_var(address), int_var(1));
   List problem = _items_problem(value, marks);
   if(! List_truth(problem)) Map_setindex(marks, ulong_var(address), int_var(2));

@@ -97,7 +97,7 @@ static Symbol _dynamic_operation(Symbol assignment){
     Var _x2c_macro_cursor_output_0;
     while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
       row = Var_list(_x2c_macro_cursor_output_0);
-      if(Var_equal(List_car(row), Symbol_var(assignment))) return Var_symbol(List_cadr(row));
+      if(x2c_var_equal(List_car(row), Symbol_var(assignment))) return Var_symbol(List_cadr(row));
     }
 
   }

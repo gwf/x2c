@@ -427,6 +427,12 @@ int Var_compare(Var a, Var b);
 
 int Var_fallback_compare(Var a, Var b);
 
+int x2c_var_equal(Var a, Var b);
+
+int x2c_var_identical(Var a, Var b);
+
+double x2c_var_order(Var a, Var b);
+
 Var Var_convert(Var value, Symbol target);
 
 int Var_truth(Var value);

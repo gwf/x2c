@@ -158,7 +158,7 @@ static Code _lambda_cell_read(Var node, Map cells){
               List _x2c_destructure_0 = Var_list(cell);
               Atom name = List_getindex(_x2c_destructure_0, 0);
               Type type = Var_list(List_getindex(_x2c_destructure_0, 1));
-              if(Var_equal(List_car(read), Symbol_var(77))) return({
+              if(x2c_var_equal(List_car(read), Symbol_var(77))) return({
                 Var _x2c_literal_part_0 = List_var(read);  Var _x2c_literal_part_1 = List_var(cons(_0, cons(name, NULL)));  cons(_1, cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, NULL)));
               }
               );
@@ -248,7 +248,7 @@ static List _lambda_kept_items(Array items, List original, Map declaring){
     while(Array_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
       item = _x2c_macro_cursor_output_1;
       {
-        if(Var_same(item, List_car(original))) Array_push(run, item);
+        if(x2c_var_identical(item, List_car(original))) Array_push(run, item);
         else{
           if(Array_len(run)) Array_push(out, List_var(_lambda_kept(cons(_10, List_append(Array_list(run), NULL)))));
           Array_truncate(run, 0);
@@ -284,7 +284,7 @@ static int _lambda_mentions(Var item, Map cells){
         Var _x2c_macro_current_0 = Array_take_last(_x2c_macro_pending_0);
         if(! Var_is_row(_x2c_macro_current_0, 9, 7, 4) || Var_is_nil(_x2c_macro_current_0)) continue;
         node = Var_list(_x2c_macro_current_0);
-        if(Var_same(List_car(node), Symbol_var(4928588686)) && Map_contains(cells, List_var(node))){
+        if(x2c_var_identical(List_car(node), Symbol_var(4928588686)) && Map_contains(cells, List_var(node))){
           int _x2c_return_value_0 = 1;
           {
             x2c_cleanup_leave(& _x2c_defer_record_0);
@@ -345,7 +345,7 @@ static List _lambda_member(int index){
 }
 
 static Type _lambda_field_type(Type type){
-  return Var_equal(List_car(type), Symbol_var(77)) ? cons(Symbol_var(54), List_cdr(type)) : _14;
+  return x2c_var_equal(List_car(type), Symbol_var(77)) ? cons(Symbol_var(54), List_cdr(type)) : _14;
 }
 
 static List _lambda_designated(Var value){

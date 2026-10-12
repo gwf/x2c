@@ -560,7 +560,7 @@ Ast Ast_rewrite_children(Ast ast, Func per_child){
       }
       );
     }
-    if(!(void *) _x2c_macro_rewritten_0 && ! Var_equal(_x2c_macro_value_0, _x2c_macro_item_2)){
+    if(!(void *) _x2c_macro_rewritten_0 && ! x2c_var_equal(_x2c_macro_value_0, _x2c_macro_item_2)){
       _x2c_macro_rewritten_0 = Array_new();  for(List _x2c_macro_prefix_0 = _x2c_macro_original_0;  ! List_equal(_x2c_macro_prefix_0, _x2c_macro_cursor_2);  _x2c_macro_prefix_0 = List_cdr(_x2c_macro_prefix_0)) Array_push(_x2c_macro_rewritten_0, List_car(_x2c_macro_prefix_0));
     }
     if((void *) _x2c_macro_rewritten_0) Array_push(_x2c_macro_rewritten_0, _x2c_macro_value_0);
@@ -578,7 +578,7 @@ int ast_contains_head(Var value, Symbol kind){
     }
     ;  x2c_cleanup_push(& _x2c_defer_record_0); {
       while(Array_len(_x2c_macro_pending_0)){
-        Var _x2c_macro_current_0 = Array_take_last(_x2c_macro_pending_0);  if(! Var_is_row(_x2c_macro_current_0, 9, 7, 4) || Var_is_nil(_x2c_macro_current_0)) continue;  node = Var_list(_x2c_macro_current_0);  if(Var_same(List_car(node), Symbol_var(kind))){
+        Var _x2c_macro_current_0 = Array_take_last(_x2c_macro_pending_0);  if(! Var_is_row(_x2c_macro_current_0, 9, 7, 4) || Var_is_nil(_x2c_macro_current_0)) continue;  node = Var_list(_x2c_macro_current_0);  if(x2c_var_identical(List_car(node), Symbol_var(kind))){
           int _x2c_return_value_0 = 1; {
             x2c_cleanup_leave(& _x2c_defer_record_0);  return _x2c_return_value_0;
           }
@@ -618,7 +618,7 @@ Var ast_replace_nodes(Var root, Map replaced){
         ;  x2c_cleanup_push(& _x2c_defer_record_2); {
           while(Array_len(_x2c_macro_pending_1)){
             Var _x2c_macro_current_1 = Array_take_last(_x2c_macro_pending_1);  if(! Var_is_row(_x2c_macro_current_1, 9, 7, 4) || Var_is_nil(_x2c_macro_current_1)) continue;  node = Var_list(_x2c_macro_current_1); {
-              if(! Var_same(_replaced_node(List_var(node), replaced), List_var(node))) continue;  Array_push(levels, List_var(node));
+              if(! x2c_var_identical(_replaced_node(List_var(node), replaced), List_var(node))) continue;  Array_push(levels, List_var(node));
             }
             for(List _x2c_macro_cursor_4 = node;  List_truth(_x2c_macro_cursor_4);  _x2c_macro_cursor_4 = List_cdr(_x2c_macro_cursor_4)) if(Var_is_row(List_car(_x2c_macro_cursor_4), 9, 7, 4)) Array_push(_x2c_macro_pending_1, List_car(_x2c_macro_cursor_4));
           }
@@ -651,7 +651,7 @@ static List _replaced_children(List node, Map replaced){
     Var _x2c_macro_item_3 = List_car(_x2c_macro_cursor_5), _x2c_macro_value_1 = _x2c_macro_item_3;  if(Var_is_row(_x2c_macro_item_3, 9, 7, 4)){
       child = _x2c_macro_item_3;  _x2c_macro_value_1 = _replaced_node(child, replaced);
     }
-    if(!(void *) _x2c_macro_rewritten_1 && ! Var_equal(_x2c_macro_value_1, _x2c_macro_item_3)){
+    if(!(void *) _x2c_macro_rewritten_1 && ! x2c_var_equal(_x2c_macro_value_1, _x2c_macro_item_3)){
       _x2c_macro_rewritten_1 = Array_new();  for(List _x2c_macro_prefix_1 = _x2c_macro_original_1;  ! List_equal(_x2c_macro_prefix_1, _x2c_macro_cursor_5);  _x2c_macro_prefix_1 = List_cdr(_x2c_macro_prefix_1)) Array_push(_x2c_macro_rewritten_1, List_car(_x2c_macro_prefix_1));
     }
     if((void *) _x2c_macro_rewritten_1) Array_push(_x2c_macro_rewritten_1, _x2c_macro_value_1);
@@ -743,7 +743,7 @@ static int _contains_return(List items){
     ;  x2c_cleanup_push(& _x2c_defer_record_3); {
       while(Array_len(_x2c_macro_pending_2)){
         Var _x2c_macro_current_2 = Array_take_last(_x2c_macro_pending_2);  if(! Var_is_row(_x2c_macro_current_2, 9, 7, 4) || Var_is_nil(_x2c_macro_current_2)) continue;  node = Var_list(_x2c_macro_current_2); {
-          if(Var_equal(List_car(node), Symbol_var(458361162716))) continue;  if(Var_equal(List_car(node), Symbol_var(1219800220))){
+          if(x2c_var_equal(List_car(node), Symbol_var(458361162716))) continue;  if(x2c_var_equal(List_car(node), Symbol_var(1219800220))){
             int _x2c_return_value_3 = 1; {
               x2c_cleanup_leave(& _x2c_defer_record_3);  return _x2c_return_value_3;
             }
@@ -835,7 +835,7 @@ static List _arm_function(List choice, List argument){
     List _x2c_match_expr = expression; Var _x2c_match_values[3]; MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 3 };  switch(_x2c_match_expr ? _x2c_match_expr->car.u64 : 0){
         case 9224497936761996324ULL: ;  static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(_201), &_x2c_match_capture)) { Var _x2c_match_value_0 = _x2c_match_values[0]; Var _x2c_match_value_1 = _x2c_match_values[1]; Var _x2c_match_value_2 = _x2c_match_values[2]; {
         Var callee;  callee = _x2c_match_value_0;  Var callee_type;  callee_type = _x2c_match_value_1;  Var actual;  actual = _x2c_match_value_2; {
-          if(! Var_same(actual, List_var(argument))) return NULL;  return cons(List_var(condition), cons(List_var(path), cons(callee_type, cons(callee, NULL))));
+          if(! x2c_var_identical(actual, List_var(argument))) return NULL;  return cons(List_var(condition), cons(List_var(path), cons(callee_type, cons(callee, NULL))));
         }
 
       }

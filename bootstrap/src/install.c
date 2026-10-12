@@ -932,7 +932,7 @@ static List _index_row(CliRequest request, String name, String work){
     while(List_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_3))){
       row = Var_list(_x2c_macro_cursor_output_3);
       {
-        if(! Var_equal(List_car(row), String_var(name))) continue;
+        if(! x2c_var_equal(List_car(row), String_var(name))) continue;
         String kind = Var_as_string(List_getindex(row, 2)), target = Var_as_string(List_getindex(row, 3));
         if(String_equal(kind, _84) && String_equal(target, platform)) return row;
         if(String_equal(kind, _15)) source = row;

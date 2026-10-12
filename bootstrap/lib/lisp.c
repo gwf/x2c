@@ -1776,16 +1776,14 @@ static Var Lisp__special_import(Lisp lisp, List args, LispEnv * env){
 
 }
 
-int Var_equal(Var, Var);
-
 List Var_cons(Var, List);
 
 static Var Lisp__qq(Lisp l, Var expr, LispEnv * env, int depth){
   if(! Var_is_row(expr, 9, 7, 4) || Var_is_nil(expr)) return expr;
   List form = Var_list(expr);
   Var head = List_car(form);
-  if(Var_equal(head, lsym_quasiquote)) return List_var(Var_cons(head, Lisp__qq_elements(l, List_cdr(form), env, depth + 1)));
-  if(! Var_equal(head, lsym_unquote) && ! Var_equal(head, lsym_splicing)) return List_var(Lisp__qq_elements(l, form, env, depth));
+  if(x2c_var_equal(head, lsym_quasiquote)) return List_var(Var_cons(head, Lisp__qq_elements(l, List_cdr(form), env, depth + 1)));
+  if(! x2c_var_equal(head, lsym_unquote) && ! x2c_var_equal(head, lsym_splicing)) return List_var(Lisp__qq_elements(l, form, env, depth));
   if(List_len(form) != 2){
     Var _x2c_literal_part_25 = String_var(String_join(NULL, cons(String_var(String_new("quasiquote")), NULL)));
     {
@@ -1797,7 +1795,7 @@ static Var Lisp__qq(Lisp l, Var expr, LispEnv * env, int depth){
   }
   if(depth > 0) return List_var(Var_cons(head, Lisp__qq_elements(l, List_cdr(form), env, depth - 1)));
   Var value = Lisp__eval(l, List_cadr(form), env);
-  if(Var_equal(head, lsym_splicing)){
+  if(x2c_var_equal(head, lsym_splicing)){
     Var _x2c_literal_part_26 = String_var(String_join(NULL, cons(String_var(String_new("quasiquote-splice")), NULL)));
     Var _x2c_literal_part_27 = Symbol_var(Var_kind(expr));
     {
@@ -1874,7 +1872,7 @@ static List Lisp__qq_elements(Lisp lisp, List items, LispEnv * env, int depth){
 Var Var_car(Var);
 
 static int _is_splice(Var expr){
-  return Var_is_row(expr, 9, 7, 4) && ! Var_is_nil(expr) && Var_equal(Var_car(expr), lsym_splicing);
+  return Var_is_row(expr, 9, 7, 4) && ! Var_is_nil(expr) && x2c_var_equal(Var_car(expr), lsym_splicing);
 }
 
 static List Lisp__splice(Lisp lisp, Var expr, LispEnv * env){
@@ -2071,8 +2069,8 @@ static void FreeNames_call(FreeNames * f, List items, List bound){
 }
 
 static int _quote_depth(Var head, int depth){
-  if(Var_equal(head, lsym_quasiquote)) return depth + 1;
-  if(Var_equal(head, lsym_unquote) || Var_equal(head, lsym_splicing)) return depth ? depth - 1 : 0;
+  if(x2c_var_equal(head, lsym_quasiquote)) return depth + 1;
+  if(x2c_var_equal(head, lsym_unquote) || x2c_var_equal(head, lsym_splicing)) return depth ? depth - 1 : 0;
   return - 1;
 }
 
@@ -2099,7 +2097,7 @@ static int _param_has(List params, Var name){
     Var _x2c_macro_cursor_output_8;
     while(List_try_next(_x2c_macro_object_8, &(_x2c_macro_cursor_8), &(_x2c_macro_cursor_output_8))){
       param = _x2c_macro_cursor_output_8;
-      if(Var_equal(param, name)) return 1;
+      if(x2c_var_equal(param, name)) return 1;
     }
 
   }
@@ -2952,6 +2950,8 @@ Var lisp_cdr(Var value){
   }
   return List_var(Var_cdr(value));
 }
+
+int Var_equal(Var, Var);
 
 Var lisp_eq(Var a, Var b){
   if(! _init_guard_) _file_init_();

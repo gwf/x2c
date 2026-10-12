@@ -823,7 +823,7 @@ static int _ground(Var pattern){
 }
 
 static int _function_hole(Macro shape){
-  List parameters = Var_list(List_assoc(shape, Symbol_var(1129338912386214)));  if(List_len(parameters) != 1 || ! Var_equal(List_assoc(Var_list(List_car(parameters)), Symbol_var(740232)), Symbol_var(458361162716))) return 0; {
+  List parameters = Var_list(List_assoc(shape, Symbol_var(1129338912386214)));  if(List_len(parameters) != 1 || ! x2c_var_equal(List_assoc(Var_list(List_car(parameters)), Symbol_var(740232)), Symbol_var(458361162716))) return 0; {
     Var _x2c_match_var = List_assoc(shape, Symbol_var(1386033712394)); int _x2c_match_none = !Var_is(_x2c_match_var, 806120);  List _x2c_match_expr = Var_list(_x2c_match_var); List _x2c_match_cursor;  switch(_x2c_match_expr ? _x2c_match_expr->car.u64 : 0){
         case 9224497936761657698ULL: ; if (!_x2c_match_none) { _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497936761657698ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor) { Var _x2c_match_value_0 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
         Var only;  only = _x2c_match_value_0;  return Var_is_binder(only);
@@ -915,7 +915,7 @@ static List _rule_dynamic_kinds(List operators, Symbol form){
 static List _unmarked(List holes, Symbol mark){
   Array kept = Array_new(); {
     Var hole;  List _x2c_macro_object_6 = holes;  List _x2c_macro_cursor_6 = _x2c_macro_object_6;  Var _x2c_macro_cursor_output_6;  while(List_try_next(_x2c_macro_object_6, &(_x2c_macro_cursor_6), &(_x2c_macro_cursor_output_6))){
-      hole = _x2c_macro_cursor_output_6;  Array_push(kept, Var_equal(hole, List_var(cons(_38, cons(Symbol_var(mark), _23)))) ? List_var(_94) : hole);
+      hole = _x2c_macro_cursor_output_6;  Array_push(kept, x2c_var_equal(hole, List_var(cons(_38, cons(Symbol_var(mark), _23)))) ? List_var(_94) : hole);
     }
 
   }
@@ -1173,7 +1173,7 @@ Symbol Type_tag_name(String name){
 }
 
 List Type_members(Type type){
-  if(! _init_guard_) _file_init_();  Type resolved = Type_resolve(type);  if(! Var_equal(List_car(Type_list(resolved)), Symbol_var(357722))) _sdk_reject_value(_287, List_var(type));  Array rows = Array_new(); {
+  if(! _init_guard_) _file_init_();  Type resolved = Type_resolve(type);  if(! x2c_var_equal(List_car(Type_list(resolved)), Symbol_var(357722))) _sdk_reject_value(_287, List_var(type));  Array rows = Array_new(); {
     List member;  Iter _x2c_macro_iterator_9 = Var_iter(List_last(Type_list(resolved)), &(struct Iter){
       int_var(0)
     }
@@ -1694,7 +1694,7 @@ List meta_type_description(Var value){
     }
 
   }
-  if(Var_equal(kind, Symbol_var(1318234344)) || Var_equal(kind, Symbol_var(44977116))) fields = Type_fields(type);  Compiler c = active.expander;  Array methods = Array_new(); {
+  if(x2c_var_equal(kind, Symbol_var(1318234344)) || x2c_var_equal(kind, Symbol_var(44977116))) fields = Type_fields(type);  Compiler c = active.expander;  Array methods = Array_new(); {
     String member;  List _x2c_macro_object_19 = Compiler_postfix_completions(c, type, 93);  List _x2c_macro_cursor_19 = _x2c_macro_object_19;  Var _x2c_macro_cursor_output_15;  while(List_try_next(_x2c_macro_object_19, &(_x2c_macro_cursor_19), &(_x2c_macro_cursor_output_15))){
       member = Var_as_string(_x2c_macro_cursor_output_15); {
         List _x2c_match_expr = Compiler_resolve_postfix_member(c, type, cons(String_var(member), NULL), 93, 1); MatchCaptureBuffer _x2c_match_capture = { 0 };  switch(_x2c_match_expr ? _x2c_match_expr->car.u64 : 0){

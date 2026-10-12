@@ -1008,7 +1008,7 @@ static List _locked_row(List rows, ProjectDependency entry){
     Var _x2c_macro_cursor_output_3;
     while(List_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_3))){
       row = Var_list(_x2c_macro_cursor_output_3);
-      if(Var_equal(List_car(row), String_var(entry -> name)) && Var_equal(List_cadr(row), String_var(entry -> version))) found = row;
+      if(x2c_var_equal(List_car(row), String_var(entry -> name)) && x2c_var_equal(List_cadr(row), String_var(entry -> version))) found = row;
     }
 
   }

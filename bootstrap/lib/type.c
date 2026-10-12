@@ -417,7 +417,7 @@ int Type_is_pointer(Type t){
 
 int Type_is_reference(Type t){
   if(! _init_guard_) _file_init_();
-  return Var_equal(List_car(Type_list(t)), Symbol_var(77)) || Var_equal(List_car(Type_list(t)), Symbol_var(33330008396));
+  return x2c_var_equal(List_car(Type_list(t)), Symbol_var(77)) || x2c_var_equal(List_car(Type_list(t)), Symbol_var(33330008396));
 }
 
 int Type_is_array(Type type){
@@ -593,7 +593,7 @@ int Type_is_threaded(Type type){
 
 int Type_is_typedef(Type type){
   if(! _init_guard_) _file_init_();
-  return List_truth(Type_list(type)) && Var_equal(List_car(Type_list(type)), Symbol_var(44661285196));
+  return List_truth(Type_list(type)) && x2c_var_equal(List_car(Type_list(type)), Symbol_var(44661285196));
 }
 
 Type Type_base_type(Type type){

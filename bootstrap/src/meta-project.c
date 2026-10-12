@@ -1110,7 +1110,7 @@ static void Helper_record(Helper * h, int index, String failure){
   else{
     Array_push((* h).built, int_var(index));
     Array_push((* h).objects, String_var(String_join(NULL, cons(String_var(base), cons(String_var(_45), NULL)))));
-    if(! Var_equal(String_var(_digest(String_join(NULL, cons(String_var(base), cons(String_var(_45), NULL))))), Map_getindex((* h).before, int_var(index))))(* h).changed = 1;
+    if(! x2c_var_equal(String_var(_digest(String_join(NULL, cons(String_var(base), cons(String_var(_45), NULL))))), Map_getindex((* h).before, int_var(index))))(* h).changed = 1;
   }
 
 }
