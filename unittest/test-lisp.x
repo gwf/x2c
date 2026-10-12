@@ -1001,6 +1001,43 @@ static void lisp_plain_datum_read_matches_reader(void) {
   lisp.destroy();
 }
 
+/* Both datum entries leave the failing form and destination untouched. */
+static void lisp_datum_rejects_malformed_string_escapes(void) {
+  foreach (String text, %("\"\\q\"" "\"\\8\"" "(head \"\\q\")"))
+    for (int tagged = 0; tagged < 2; tagged++)
+      for (unsigned start = 0; start <= 2; start += 2) {
+        String source = start ? %"xx$text" : text;
+        unsigned cursor = start;
+        Var value = 73;
+        Symbol status = 0;
+        try {
+          if (tagged) datum_read(source, cursor, value);
+          else datum_read_plain(source, cursor, value);
+        }
+        catch %(malformed *): status = <malformed>;
+        EXPECT_INT_EQ(status, <malformed>);
+        EXPECT_INT_EQ(cursor, start);
+        EXPECT_VAR_EQ(value, (Var) 73);
+      }
+}
+
+/* Valid escapes retain the reader's decoded value through both entries. */
+static void lisp_datum_reads_valid_string_escapes(void) {
+  foreach (List pair, %(
+      ("\"\\x41\"" "A") ("\"\\n\"" "\n")
+      ("\"\\\\\"" "\\") ("\"\\\"\"" "\"")))
+    for (int tagged = 0; tagged < 2; tagged++) {
+      String source = pair.car();
+      unsigned cursor = 0;
+      Var value = void;
+      int read = tagged ? datum_read(source, cursor, value)
+                       : datum_read_plain(source, cursor, value);
+      EXPECT_TRUE(read);
+      EXPECT_INT_EQ(cursor, source.len());
+      EXPECT_VAR_EQ(value, pair.cadr());
+    }
+}
+
 /* A written Atom reads back as itself, including a spelling that opens a
    reader comment. */
 static void lisp_datum_atom_round_trips(void) {
@@ -2010,6 +2047,8 @@ void lisp_suite(void) {
   $test.run(lisp_numeric_comparison_reads_the_value);
   $test.run(lisp_read_fences_nesting_depth);
   $test.run(lisp_plain_datum_read_matches_reader);
+  $test.run(lisp_datum_rejects_malformed_string_escapes);
+  $test.run(lisp_datum_reads_valid_string_escapes);
   $test.run(lisp_datum_atom_round_trips);
   $test.run(lisp_datum_symbol_round_trips);
   $test.run(lisp_pattern_matching_operations);

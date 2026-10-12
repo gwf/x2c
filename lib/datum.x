@@ -200,13 +200,13 @@ static int _plain_list(
   return 1;
 }
 
+/* Escaped strings use the Lisp reader's escape validation. */
 static int _plain_string(char *s, unsigned &at, Var &out) {
   unsigned end = at + 1;
-  for (; s[end] != '"'; end += s[end] == '\\' ? 2 : 1)
-    if (!s[end] || s[end] == '\n' || (s[end] == '\\' && !s[end + 1]))
-      return 0;
+  for (; s[end] != '"'; end++)
+    if (!s[end] || s[end] == '\n' || s[end] == '\\') return 0;
   if (!_token_end(s[end + 1])) return 0;
-  out = _unescaped(String.new_len(s + at + 1, end - at - 1));
+  out = String.new_len(s + at + 1, end - at - 1);
   at = end + 1;
   return 1;
 }
@@ -238,10 +238,6 @@ static int _plain_atom(char *s, unsigned &at, Var &out) {
   at += length;
   return 1;
 }
-
-/* `text.unescape()`, which leaves text without a backslash as it is. */
-static String _unescaped(String text) =>
-  memchr(text, '\\', text.len()) ? text.unescape() : text;
 
 static int _digit(char c) => c >= '0' && c <= '9';
 
