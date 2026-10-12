@@ -77,7 +77,7 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
 }
 
 static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func_argv_1){
-  Text a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_1, _x2c_func_argv_1, 0, 1318210446));
+  Text a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_1, _x2c_func_argv_1, 0, 1318210446));
   return String_var(echo(a0));
   ;
 }

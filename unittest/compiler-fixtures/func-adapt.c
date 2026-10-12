@@ -151,7 +151,7 @@ static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func
 }
 
 static Var _x2c_func_adapt_2(Func _x2c_func_binding_2, const FuncArg * _x2c_func_argv_2){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_2, _x2c_func_argv_2, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_2, _x2c_func_argv_2, 0, 1318210446));
   return int_var(width(a0));
   ;
 }

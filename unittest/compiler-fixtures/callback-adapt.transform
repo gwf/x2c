@@ -204,7 +204,7 @@
            (ident (binding 43 "String_str"))) 
      (args (expr ("String") 
             (call (expr ((func (("Var"))) "String") 
-                   (ident (binding 44 "Var_string"))) 
+                   (ident (binding 44 "Var_as_string"))) 
              (args (expr ("Var") (ident (binding 42 "a0"))))))))))))
 
 (function (static "String") 
@@ -216,7 +216,7 @@
     (call (expr ((func (("String"))) "String") (ident (binding 10 "echo"))) 
      (args (expr ("String") 
             (call (expr ((func (("Var"))) "String") 
-                   (ident (binding 44 "Var_string"))) 
+                   (ident (binding 44 "Var_as_string"))) 
              (args (expr ("Var") (ident (binding 45 "a0"))))))))))))
 
 (function (static int) 

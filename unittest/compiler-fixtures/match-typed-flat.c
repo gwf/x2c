@@ -59,7 +59,7 @@ static int classify(List form){
         {
           Var _x2c_match_value_0 = callee;
           {
-            String callee = Var_string(_x2c_match_value_0);
+            String callee = Var_as_string(_x2c_match_value_0);
             return 1;
           }
 

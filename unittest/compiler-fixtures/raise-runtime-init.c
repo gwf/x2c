@@ -24,7 +24,7 @@ int main(void){
   List nested = Var_list(List_cadr(Var_list(List_car(detail))));
   List _x2c_destructure_0 = nested;
   Symbol tag = Var_symbol(List_getindex(_x2c_destructure_0, 0));
-  String value = Var_string(List_getindex(_x2c_destructure_0, 1));
+  String value = Var_as_string(List_getindex(_x2c_destructure_0, 1));
   printf("%s %s\n", Symbol_str(tag), value);
   return 0;
 }

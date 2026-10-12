@@ -55,7 +55,7 @@ void String_initialize(void){
 }
 
 static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_0, _x2c_func_argv_0, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_0, _x2c_func_argv_0, 0, 1318210446));
   return String_var(identity(a0));
   ;
 }

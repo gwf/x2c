@@ -96,11 +96,11 @@ int main(void){
 }
 
 static String _x2c_callback_adapt_0(Var a0){
-  return String_str(Var_string(a0));
+  return String_str(Var_as_string(a0));
 }
 
 static String _x2c_callback_adapt_1(Var a0){
-  return echo(Var_string(a0));
+  return echo(Var_as_string(a0));
 }
 
 static int _x2c_callback_adapt_2(Var a0, Var a1){
