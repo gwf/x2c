@@ -262,9 +262,10 @@ The subject of a `match` is a `List`, so the shapes you can match are `List`
 shapes. `Array`s, `Map`s, and `String`s are not `match` subjects.
 
 A `Var` subject works because the compiler inserts the conversion to `List`
-for you. The conversion does not check the tag, so only `match` a `Var` you
-already know holds a `List`; test `value is <list>` at the boundary if you do
-not. See [values and Var](values.md) for the tag rules and
+for you. A `Var` whose tag is not `<list>` is not a `List`: it matches no
+`List` pattern, not even `%()` or `%(*rest)`, and reaches the `default` arm
+when there is one. A `Var` holding an empty `List` still matches `%()`. See
+[values and Var](values.md) for the tag rules and
 [symbols and atoms](symbols.md) for what a bare pattern spelling means.
 
 Nil is typed `List` data, not the absence of a `List`. A null `List` is a legal

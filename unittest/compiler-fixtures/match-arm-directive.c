@@ -181,14 +181,18 @@ int main(void){
   {
     Var item;  List _x2c_macro_object_1 = _53;  List _x2c_macro_cursor_1 = _x2c_macro_object_1;  Var _x2c_macro_cursor_output_1;  while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
       item = _x2c_macro_cursor_output_1; {
-        List _x2c_match_expr = Var_list(item); List _x2c_match_cursor;  switch(0){
+        Var _x2c_match_var = item; int _x2c_match_none = !Var_is(_x2c_match_var, 806120);  List _x2c_match_expr = Var_list(_x2c_match_var); List _x2c_match_cursor;
+        switch(0){
             default: ;
 #ifdef OFF
-            _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && Var_equal(_x2c_match_cursor->car, _5 ->car) && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {puts("loop off two");  break; }
+            if (!_x2c_match_none) { _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && Var_equal(_x2c_match_cursor->car, _5 ->car) && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {puts("loop off two");
+           break; } }
 #endif
-            _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && Var_equal(_x2c_match_cursor->car, _5 ->car) && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {puts("loop two");  break; }
+            if (!_x2c_match_none) { _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && Var_equal(_x2c_match_cursor->car, _5 ->car) && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {puts("loop two");
+           break; } }
 #ifdef OFF
-           puts("loop off");  break;
+           puts("loop off");
+           break;
 #endif
 
         }
@@ -199,8 +203,13 @@ int main(void){
 
   }
   {
-    List subject;  List _x2c_macro_object_2 = _55;  List _x2c_macro_cursor_2 = _x2c_macro_object_2;  Var _x2c_macro_cursor_output_2;  while(List_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
-      subject = Var_list(_x2c_macro_cursor_output_2);  defaults(subject);
+    List subject;
+    List _x2c_macro_object_2 = _55;
+    List _x2c_macro_cursor_2 = _x2c_macro_object_2;
+    Var _x2c_macro_cursor_output_2;
+    while(List_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
+      subject = Var_list(_x2c_macro_cursor_output_2);
+      defaults(subject);
     }
 
   }

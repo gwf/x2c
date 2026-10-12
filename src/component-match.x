@@ -341,12 +341,15 @@ meta static String _match_locals(int depths, int values) {
    as a List and declares the arms' cursors and capture buffer, then
    switches on the bits of the subject's head. A label sits before the
    conditional groups around its arm, so the switch still reaches later
-   arms when the preprocessor removes that one. */
+   arms when the preprocessor removes that one. A `Var` subject whose tag
+   is not `<list>` is no List: every List arm is skipped, and only a `*`
+   arm runs. */
 meta static Code _match_lowered(Code subject, List rows) {
   Buffer b = Buffer.new(0);
   Array out = [], heads = [];
   int labelling = 1, opening = 0, depth = 0, sites = 0;
   int depths = -1, values = -1;
+  int dynamic = subject.type().is_named("Var");
   foreach (List row, rows) {
     match (row) case %(preproc ?(String text)): {
       int nesting = _match_nesting(text);
@@ -361,6 +364,8 @@ meta static Code _match_lowered(Code subject, List rows) {
     String label = _match_label(_match_head(value), heads, labelling);
     if (label && depth) out.insert(opening++, label);
     else if (label) b.write(label);
+    int guarded = dynamic && !otherwise;
+    if (guarded) b.write(" if (!_x2c_match_none) {");
     int braces =
       otherwise ? 0 : _match_nested(b, out, pattern, value, depths);
     if (braces < 0) {
@@ -369,17 +374,30 @@ meta static Code _match_lowered(Code subject, List rows) {
       braces = _match_test(b, out, pattern, sites);
       _match_captures(b, binders);
     }
-    _match_body(b, out, body, braces);
+    _match_body(b, out, body, braces + guarded);
   }
   if (labelling) b.write(" default: break;");
   _match_flush(b, out);
   String selector = heads.len()
     ? "_x2c_match_expr ? _x2c_match_expr->car.u64 : 0" : "0";
-  List read = subject.convert(%("List")), items = _match_items(out);
+  List items = _match_items(out);
   String locals = _match_locals(depths, values);
+  List prologue = dynamic
+    ? _match_dynamic_read(subject, locals)
+    : %("List _x2c_match_expr =" ${subject.convert(%("List"))} $locals);
   return Code.lowered(
-    %(block ("List _x2c_match_expr =" $read $locals)
+    %(block $prologue
             (switch (expr ("uint64_t") ($selector)) (block @items))));
+}
+
+/* The reads of a `Var` subject: once into a local, then as a List, with
+   `_x2c_match_none` set when its tag is not `<list>`. */
+meta static List _match_dynamic_read(Code subject, String locals) {
+  Symbol list = <list>;
+  String tested = "; int _x2c_match_none = !Var_is(_x2c_match_var, %lu);"
+    .printf((unsigned long) list);
+  return %("Var _x2c_match_var =" $subject $tested
+           "List _x2c_match_expr = Var_list(_x2c_match_var)" $locals);
 }
 
 $rewrite($matched)
