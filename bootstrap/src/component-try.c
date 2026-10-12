@@ -70,7 +70,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_0(void){
   _28 = Symbol_var(123);
   _29 = Symbol_var(895740748108);
   _30 = Symbol_var(920394);
-  _31 = Atom_intern(String_new("try_site"));
+  _31 = Atom_intern(String_new("x2c.try.site"));
   _32 = cons(_31, NULL);
   _33 = cons(_30, _32);
   _34 = List_var(_33);
@@ -629,7 +629,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_1(void){
   _584 = cons(_581, _583);
   _585 = List_var(_584);
   _586 = Symbol_var(1133019155420);
-  _587 = int_var(1428);
+  _587 = int_var(1432);
   _588 = cons(_587, NULL);
   _589 = cons(_586, _588);
   _590 = List_var(_589);
@@ -673,7 +673,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_1(void){
   _628 = cons(_34, _627);
   _629 = cons(_29, _628);
   _630 = String_new("-1");
-  _631 = Atom_intern(String_new("try_handled"));
+  _631 = Atom_intern(String_new("x2c.try.handled"));
   _632 = cons(_631, NULL);
   _633 = cons(_30, _632);
   _634 = List_var(_633);
@@ -935,11 +935,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_1(void){
   _890 = cons(_889, NULL);
   _891 = cons(_267, _890);
   _892 = List_var(_891);
-  _893 = int_var(98);
+  _893 = int_var(99);
   _894 = cons(_893, NULL);
   _895 = cons(_573, _894);
   _896 = List_var(_895);
-  _897 = int_var(3608);
+  _897 = int_var(3629);
   _898 = cons(_897, NULL);
   _899 = cons(_586, _898);
   _900 = List_var(_899);

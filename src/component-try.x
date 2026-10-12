@@ -22,7 +22,7 @@
 // catch sites
 
 /** Returns the statement that prepares each of `items` into its slot of
-    the catch site's `patterns`; `$try_site` calls this in a slot. */
+    the catch site's `patterns`; `$x2c.try.site` calls this in a slot. */
 meta List try_catch_patterns(List patterns, List items) {
   Array prepared = [];
   int index = 0;
@@ -35,8 +35,9 @@ meta List try_catch_patterns(List patterns, List items) {
 
 /* One catch site: its patterns prepared once, its handler pushed with
    them. */
-macro Stmt $try_site(Name $frame, Name $handle, Expr $count,
-    Expr $fallback, Expr $state, Expr @patterns) {
+macro Stmt $x2c.try.site(
+  Name $frame, Name $handle, Expr $count, Expr $fallback, Expr $state,
+  Expr @patterns) {
   static MatchCaptureSite arms[$count];
   Var patterns[$count];
   static ErrorCatchSite site = {arms, $fallback, $count, $state, -1};
@@ -48,10 +49,10 @@ macro Stmt $try_site(Name $frame, Name $handle, Expr $count,
 }
 
 /** Returns the catch site `frame` pushes for the clause `clause`
-    describes, or nothing for a try without one; `$try_frame` calls this in
+    describes, or nothing for a try without one; `$x2c.try.frame` calls this in
     a slot. */
 meta List try_catch_site(List frame, List clause) {
-  Macro site = $try_site;
+  Macro site = $x2c.try.site;
   match (clause)
     case %(?handle ?(String state) ?(List arms) *patterns): {
       int count = arms.len(), filtered = patterns.len();
@@ -76,7 +77,7 @@ meta static int _try_arm_exits(List arm) {
 }
 
 /** Returns each lowered arm of `arms` chosen by its index in `selected`;
-    `$try_handled` calls this in a slot. Each arm is its own
+    `$x2c.try.handled` calls this in a slot. Each arm is its own
     statement, so a `break` or `continue` in it still reaches the enclosing
     loop, and only one test holds because `selected` does not change. When
     every arm returns or raises, control cannot leave them, and a final
@@ -95,8 +96,8 @@ meta List try_catch_cases(List selected, List arms) {
 }
 
 /* A landing that hands a raised error to the arm its handler selected. */
-macro Stmt $try_handled(Name $frame, Name $handle,
-    Stmt $unhandled, Stmt @arms) {
+macro Stmt $x2c.try.handled(
+  Name $frame, Name $handle, Stmt $unhandled, Stmt @arms) {
   if (x2c_exception_is_error_target(&$frame)) {
     int selected = x2c_error_catch_selected($handle);
     x2c_error_catch_detach($handle);
@@ -107,11 +108,11 @@ macro Stmt $try_handled(Name $frame, Name $handle,
 }
 
 /** Returns what runs when `frame` lands: the catch arm the clause's
-    handler selected, or `exits` and no return; `$try_frame` calls this in
+    handler selected, or `exits` and no return; `$x2c.try.frame` calls this in
     a slot. A landing no catch arm handles runs the region's exits, and
     control does not come back. */
 meta List try_landing(List frame, List clause, List exits) {
-  Macro landing = $try_handled;
+  Macro landing = $x2c.try.handled;
   List otherwise = $!{ { $exits __builtin_unreachable(); } };
   match (clause)
     case %(?handle ? ?arms *):
@@ -122,7 +123,7 @@ meta List try_landing(List frame, List clause, List exits) {
 // the frame
 
 /** Places the lowered exits of a try after its regions, with the effect
-    that marks the unit as needing exception support; `$try_frame` calls
+    that marks the unit as needing exception support; `$x2c.try.frame` calls
     this in a slot. */
 meta List try_exits_placement(List exits) {
   Atom token = Atom.intern("?__try_cleanup");
@@ -133,8 +134,8 @@ meta List try_exits_placement(List exits) {
 }
 
 /* A try pushes its frame and lands on it when something raises. */
-macro Stmt $try_frame(Name $frame, Expr $clause,
-    Stmt $body, Stmt $exits) {
+macro Stmt $x2c.try.frame(
+  Name $frame, Expr $clause, Stmt $body, Stmt $exits) {
   {
     ExceptionFrame $frame;
     @try_catch_site($frame, $clause)
@@ -232,7 +233,7 @@ meta static List _try_exits(Atom frame, List handle, Atom finalizer) {
   return $!{ @before x2c_exception_leave($address); };
 }
 
-/* The facts `$try_frame` writes a try's catch site and landing from, or
+/* The facts `$x2c.try.frame` writes a try's catch site and landing from, or
    NULL for a try without catches. Each arm is its own region, which a
    jump from the body may not enter, and leaves the try's exits. A pattern
    with a dynamic part is prepared again on each entry. */
@@ -274,7 +275,7 @@ meta static Code _try_landing(
   rows.push(%(exits $exits ${_try_exits(frame, handle, finished)}));
   rows.push(%(region $lowered $body));
   List clause = _try_catch_clause(handle, arms, rows);
-  Macro shape = $try_frame;
+  Macro shape = $x2c.try.frame;
   List code = shape(frame, clause, lowered, exits);
   return Code.lowered(%(landing $code ${rows.list_free()}));
 }

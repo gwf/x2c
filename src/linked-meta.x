@@ -282,7 +282,7 @@ static Code _participant_update(
 /** Selects the adopted collection setter for indexed assignment, or a
     participant's `setindex` member. */
 Code access_store(Code code) {
-  match (code) case $collection_store(?base, ?key, ?value): {
+  match (code) case $x2c.collection.store(?base, ?key, ?value): {
     Code receiver = base;
     Code setter = _collection_family(base)
       ? receiver.type().protocol_member("setindex") : NULL;
@@ -314,25 +314,25 @@ static Code _access_update(
     participant's `updateindex` member. */
 Code access_update(Code code) {
   match (code) {
-    case $collection_add(?base, ?key, ?value):
+    case $x2c.collection.add(?base, ?key, ?value):
       return _access_update(code, base, key, value, <"+">);
-    case $collection_subtract(?base, ?key, ?value):
+    case $x2c.collection.subtract(?base, ?key, ?value):
       return _access_update(code, base, key, value, <"-">);
-    case $collection_multiply(?base, ?key, ?value):
+    case $x2c.collection.multiply(?base, ?key, ?value):
       return _access_update(code, base, key, value, <"*">);
-    case $collection_divide(?base, ?key, ?value):
+    case $x2c.collection.divide(?base, ?key, ?value):
       return _access_update(code, base, key, value, <"/">);
-    case $collection_remainder(?base, ?key, ?value):
+    case $x2c.collection.remainder(?base, ?key, ?value):
       return _access_update(code, base, key, value, <"%">);
-    case $collection_and(?base, ?key, ?value):
+    case $x2c.collection.and(?base, ?key, ?value):
       return _access_update(code, base, key, value, <"&">);
-    case $collection_or(?base, ?key, ?value):
+    case $x2c.collection.or(?base, ?key, ?value):
       return _access_update(code, base, key, value, <"|">);
-    case $collection_xor(?base, ?key, ?value):
+    case $x2c.collection.xor(?base, ?key, ?value):
       return _access_update(code, base, key, value, <"^">);
-    case $collection_left(?base, ?key, ?value):
+    case $x2c.collection.left(?base, ?key, ?value):
       return _access_update(code, base, key, value, <"<<">);
-    case $collection_right(?base, ?key, ?value):
+    case $x2c.collection.right(?base, ?key, ?value):
       return _access_update(code, base, key, value, <">>">);
   }
   return code;
@@ -348,9 +348,9 @@ static Code _access_step(Code code, Code base, Code key, Symbol op) {
 /** Stores and returns the incremented or decremented element. */
 Code access_prefix(Code code) {
   match (code) {
-    case $collection_increment(?base, ?key):
+    case $x2c.collection.increment(?base, ?key):
       return _access_step(code, base, key, <+>);
-    case $collection_decrement(?base, ?key):
+    case $x2c.collection.decrement(?base, ?key):
       return _access_step(code, base, key, <->);
   }
   return code;
@@ -361,8 +361,10 @@ Code access_postfix(Code code) {
   Code base, key;
   Symbol op;
   match (code) {
-    case $collection_postincrement(?b, ?k): { base = b; key = k; op = <++>; }
-    case $collection_postdecrement(?b, ?k): { base = b; key = k; op = <-->; }
+    case $x2c.collection.postincrement(?b, ?k):
+      { base = b; key = k; op = <++>; }
+    case $x2c.collection.postdecrement(?b, ?k):
+      { base = b; key = k; op = <-->; }
     default: return code;
   }
   int family = _collection_family(base);
@@ -460,7 +462,7 @@ static List _delegate_fields(Type outer, String member) {
 /** Rebuilds a call that finds no member on its receiver through the one
     delegate field path that provides the method. */
 Code delegate_member(Code code) {
-  match (code) case $delegate_call(?receiver, ?member, *arguments): {
+  match (code) case $x2c.delegate.call(?receiver, ?member, *arguments): {
     String name = Code.binding_spelling(member);
     List fields = _delegate_fields(receiver.cadr(), name);
     if (!fields) return code;
@@ -1658,13 +1660,16 @@ static Code _printf_library(Code code, Code format, List values) {
 /** Reads the Var values a printf-family call's static format consumes. */
 Code printf_values(Code code) {
   match (code) {
-    case $printf_format(?f, *v): return _printf_library(code, f, v);
-    case $fprintf_format(?, ?f, *v): return _printf_library(code, f, v);
-    case $sprintf_format(?, ?f, *v): return _printf_library(code, f, v);
-    case $snprintf_format(?, ?, ?f, *v): return _printf_library(code, f, v);
-    case $string_printf_format(?f, *v): return _printf_lowered(code, f, v);
-    case $file_printf_format(?, ?f, *v): return _printf_lowered(code, f, v);
-    case $buffer_printf_format(?, ?f, *v): return _printf_lowered(code, f, v);
+    case $x2c.printf.format(?f, *v): return _printf_library(code, f, v);
+    case $x2c.fprintf.format(?, ?f, *v): return _printf_library(code, f, v);
+    case $x2c.sprintf.format(?, ?f, *v): return _printf_library(code, f, v);
+    case $x2c.snprintf.format(?, ?, ?f, *v):
+      return _printf_library(code, f, v);
+    case $x2c.string_printf.format(?f, *v): return _printf_lowered(code, f, v);
+    case $x2c.file_printf.format(?, ?f, *v):
+      return _printf_lowered(code, f, v);
+    case $x2c.buffer_printf.format(?, ?f, *v):
+      return _printf_lowered(code, f, v);
   }
   return code;
 }
@@ -1863,7 +1868,7 @@ static int _try_arm_exits(List arm) {
 }
 
 /** Returns each lowered arm of `arms` chosen by its index in `selected`;
-    `$try_handled` calls this in a slot. Each arm is its own
+    `$x2c.try.handled` calls this in a slot. Each arm is its own
     statement, so a `break` or `continue` in it still reaches the enclosing
     loop, and only one test holds because `selected` does not change. When
     every arm returns or raises, control cannot leave them, and a final
@@ -1989,7 +1994,7 @@ static Code _try_landing(
   rows.push(%(exits $exits ${_try_exits(frame, handle, finished)}));
   rows.push(%(region $lowered $body));
   List clause = _try_catch_clause(handle, arms, rows);
-  Macro shape = $try_frame;
+  Macro shape = $x2c.try.frame;
   List code = shape(frame, clause, lowered, exits);
   return Code.lowered(%(landing $code ${rows.list_free()}));
 }

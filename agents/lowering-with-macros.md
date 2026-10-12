@@ -112,7 +112,7 @@ meta static Code _try_landing(
   rows.push(%(exits $exits ${_try_exits(frame, handle, finished)}));
   rows.push(%(region $lowered $body));
   List clause = _try_catch_clause(handle, arms, rows);
-  Macro shape = $try_frame;
+  Macro shape = $x2c.try.frame;
   List code = shape(frame, clause, lowered, exits);
   return Code.lowered(%(landing $code ${rows.list_free()}));
 }
@@ -142,10 +142,16 @@ meta static List _try_catch_clause(List handle, List records, Array rows) {
 
 ## The templates
 
+A shipped component's own macros take `x2c.` spellings, such as
+`$x2c.try.frame`. Only the compiler's prelude sources may define them, so
+a program's macro or meta function never meets one by name. Adding or
+renaming such a macro needs no bootstrap transition; changing the rule
+that reserves the spelling does.
+
 ```x2c
 /* A try pushes its frame and lands on it when something raises. */
-macro Stmt $try_frame(Name $frame, Expr $clause,
-    Stmt $body, Stmt $exits) {
+macro Stmt $x2c.try.frame(
+  Name $frame, Expr $clause, Stmt $body, Stmt $exits) {
   {
     ExceptionFrame $frame;
     @try_catch_site($frame, $clause)
@@ -161,8 +167,9 @@ macro Stmt $try_frame(Name $frame, Expr $clause,
 
 /* One catch site: its patterns prepared once, its handler pushed with
    them. */
-macro Stmt $try_site(Name $frame, Name $handle, Expr $count,
-    Expr $fallback, Expr $state, Expr @patterns) {
+macro Stmt $x2c.try.site(
+  Name $frame, Name $handle, Expr $count, Expr $fallback, Expr $state,
+  Expr @patterns) {
   static MatchCaptureSite arms[$count];
   Var patterns[$count];
   static ErrorCatchSite site = {arms, $fallback, $count, $state, -1};
@@ -174,8 +181,8 @@ macro Stmt $try_site(Name $frame, Name $handle, Expr $count,
 }
 
 /* A landing that hands a raised error to the arm its handler selected. */
-macro Stmt $try_handled(Name $frame, Name $handle,
-    Stmt $unhandled, Stmt @arms) {
+macro Stmt $x2c.try.handled(
+  Name $frame, Name $handle, Stmt $unhandled, Stmt @arms) {
   if (x2c_exception_is_error_target(&$frame)) {
     int selected = x2c_error_catch_selected($handle);
     x2c_error_catch_detach($handle);
@@ -195,7 +202,7 @@ compile-time operation when the copy binds.
 
 ```x2c
 /** Returns each lowered arm of `arms` chosen by its index in `selected`;
-    `$try_handled` calls this in a slot. ... */
+    `$x2c.try.handled` calls this in a slot. ... */
 meta List try_catch_cases(List selected, List arms) {
   Array cases = [];
   int index = 0, exits = 1;
@@ -209,10 +216,10 @@ meta List try_catch_cases(List selected, List arms) {
 }
 
 /** Returns what runs when `frame` lands: the catch arm the clause's
-    handler selected, or `exits` and no return; `$try_frame` calls this in
-    a slot. ... */
+    handler selected, or `exits` and no return; `$x2c.try.frame` calls
+    this in a slot. ... */
 meta List try_landing(List frame, List clause, List exits) {
-  Macro landing = $try_handled;
+  Macro landing = $x2c.try.handled;
   List otherwise = $!{ { $exits __builtin_unreachable(); } };
   match (clause)
     case %(?handle ? ?arms *):

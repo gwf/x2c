@@ -169,40 +169,45 @@ meta static Code _printf_library(Code code, Code format, List values) {
 
 // the family
 
-macro Expression $printf_format(Expr $format, Expr @values) =>
+macro Expression $x2c.printf.format(Expr $format, Expr @values) =>
   printf($format, @values);
-macro Expression $fprintf_format(Expr $stream, Expr $format, Expr @values) =>
+macro Expression $x2c.fprintf.format(
+    Expr $stream, Expr $format, Expr @values) =>
   fprintf($stream, $format, @values);
-macro Expression $sprintf_format(Expr $text, Expr $format, Expr @values) =>
+macro Expression $x2c.sprintf.format(Expr $text, Expr $format, Expr @values) =>
   sprintf($text, $format, @values);
-macro Expression $snprintf_format(
+macro Expression $x2c.snprintf.format(
     Expr $text, Expr $size, Expr $format, Expr @values) =>
   snprintf($text, $size, $format, @values);
-macro Expression $string_printf_format(Expr $format, Expr @values) =>
+macro Expression $x2c.string_printf.format(Expr $format, Expr @values) =>
   String_printf($format, @values);
-macro Expression $file_printf_format(Expr $file, Expr $format, Expr @values) =>
+macro Expression $x2c.file_printf.format(
+    Expr $file, Expr $format, Expr @values) =>
   File_printf($file, $format, @values);
-macro Expression $buffer_printf_format(
+macro Expression $x2c.buffer_printf.format(
     Expr $buffer, Expr $format, Expr @values) =>
   Buffer_printf($buffer, $format, @values);
 
-$rewrite($printf_format)
-$rewrite($fprintf_format)
-$rewrite($sprintf_format)
-$rewrite($snprintf_format)
-$rewrite($string_printf_format)
-$rewrite($file_printf_format)
-$rewrite($buffer_printf_format)
+$rewrite($x2c.printf.format)
+$rewrite($x2c.fprintf.format)
+$rewrite($x2c.sprintf.format)
+$rewrite($x2c.snprintf.format)
+$rewrite($x2c.string_printf.format)
+$rewrite($x2c.file_printf.format)
+$rewrite($x2c.buffer_printf.format)
 /** Reads the Var values a printf-family call's static format consumes. */
 meta Code printf_values(Code code) {
   match (code) {
-    case $printf_format(?f, *v): return _printf_library(code, f, v);
-    case $fprintf_format(?, ?f, *v): return _printf_library(code, f, v);
-    case $sprintf_format(?, ?f, *v): return _printf_library(code, f, v);
-    case $snprintf_format(?, ?, ?f, *v): return _printf_library(code, f, v);
-    case $string_printf_format(?f, *v): return _printf_lowered(code, f, v);
-    case $file_printf_format(?, ?f, *v): return _printf_lowered(code, f, v);
-    case $buffer_printf_format(?, ?f, *v): return _printf_lowered(code, f, v);
+    case $x2c.printf.format(?f, *v): return _printf_library(code, f, v);
+    case $x2c.fprintf.format(?, ?f, *v): return _printf_library(code, f, v);
+    case $x2c.sprintf.format(?, ?f, *v): return _printf_library(code, f, v);
+    case $x2c.snprintf.format(?, ?, ?f, *v):
+      return _printf_library(code, f, v);
+    case $x2c.string_printf.format(?f, *v): return _printf_lowered(code, f, v);
+    case $x2c.file_printf.format(?, ?f, *v):
+      return _printf_lowered(code, f, v);
+    case $x2c.buffer_printf.format(?, ?f, *v):
+      return _printf_lowered(code, f, v);
   }
   return code;
 }

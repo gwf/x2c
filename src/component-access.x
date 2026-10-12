@@ -6,33 +6,38 @@
 #include "rewrite.x"
 #include "grammar.x"
 
-macro Expression $collection_store(Expr $base, Expr $key, Expr $value) =>
+macro Expression $x2c.collection.store(Expr $base, Expr $key, Expr $value) =>
   $base[$key] = $value;
-macro Expression $collection_add(Expr $base, Expr $key, Expr $value) =>
+macro Expression $x2c.collection.add(Expr $base, Expr $key, Expr $value) =>
   $base[$key] += $value;
-macro Expression $collection_subtract(Expr $base, Expr $key, Expr $value) =>
+macro Expression $x2c.collection.subtract(
+  Expr $base, Expr $key, Expr $value) =>
   $base[$key] -= $value;
-macro Expression $collection_multiply(Expr $base, Expr $key, Expr $value) =>
+macro Expression $x2c.collection.multiply(
+  Expr $base, Expr $key, Expr $value) =>
   $base[$key] *= $value;
-macro Expression $collection_divide(Expr $base, Expr $key, Expr $value) =>
+macro Expression $x2c.collection.divide(Expr $base, Expr $key, Expr $value) =>
   $base[$key] /= $value;
-macro Expression $collection_remainder(Expr $base, Expr $key, Expr $value) =>
+macro Expression $x2c.collection.remainder(
+  Expr $base, Expr $key, Expr $value) =>
   $base[$key] %= $value;
-macro Expression $collection_and(Expr $base, Expr $key, Expr $value) =>
+macro Expression $x2c.collection.and(Expr $base, Expr $key, Expr $value) =>
   $base[$key] &= $value;
-macro Expression $collection_or(Expr $base, Expr $key, Expr $value) =>
+macro Expression $x2c.collection.or(Expr $base, Expr $key, Expr $value) =>
   $base[$key] |= $value;
-macro Expression $collection_xor(Expr $base, Expr $key, Expr $value) =>
+macro Expression $x2c.collection.xor(Expr $base, Expr $key, Expr $value) =>
   $base[$key] ^= $value;
-macro Expression $collection_left(Expr $base, Expr $key, Expr $value) =>
+macro Expression $x2c.collection.left(Expr $base, Expr $key, Expr $value) =>
   $base[$key] <<= $value;
-macro Expression $collection_right(Expr $base, Expr $key, Expr $value) =>
+macro Expression $x2c.collection.right(Expr $base, Expr $key, Expr $value) =>
   $base[$key] >>= $value;
-macro Expression $collection_increment(Expr $base, Expr $key) => ++$base[$key];
-macro Expression $collection_decrement(Expr $base, Expr $key) => --$base[$key];
-macro Expression $collection_postincrement(Expr $base, Expr $key) =>
+macro Expression $x2c.collection.increment(Expr $base, Expr $key) =>
+  ++$base[$key];
+macro Expression $x2c.collection.decrement(Expr $base, Expr $key) =>
+  --$base[$key];
+macro Expression $x2c.collection.postincrement(Expr $base, Expr $key) =>
   $base[$key]++;
-macro Expression $collection_postdecrement(Expr $base, Expr $key) =>
+macro Expression $x2c.collection.postdecrement(Expr $base, Expr $key) =>
   $base[$key]--;
 
 meta static int _collection_family(Code base) {
@@ -104,11 +109,11 @@ meta static Code _participant_update(
   return member.call_in_order(arguments, code.cadr());
 }
 
-$rewrite($collection_store)
+$rewrite($x2c.collection.store)
 /** Selects the adopted collection setter for indexed assignment, or a
     participant's `setindex` member. */
 meta Code access_store(Code code) {
-  match (code) case $collection_store(?base, ?key, ?value): {
+  match (code) case $x2c.collection.store(?base, ?key, ?value): {
     Code receiver = base;
     Code setter = _collection_family(base)
       ? receiver.type().protocol_member("setindex") : NULL;
@@ -138,39 +143,39 @@ meta static Code _access_update(
   return $!Var{ Map_updateindex($base, $key, $op, $value) };
 }
 
-$rewrite($collection_add)
-$rewrite($collection_subtract)
-$rewrite($collection_multiply)
-$rewrite($collection_divide)
-$rewrite($collection_remainder)
-$rewrite($collection_and)
-$rewrite($collection_or)
-$rewrite($collection_xor)
-$rewrite($collection_left)
-$rewrite($collection_right)
+$rewrite($x2c.collection.add)
+$rewrite($x2c.collection.subtract)
+$rewrite($x2c.collection.multiply)
+$rewrite($x2c.collection.divide)
+$rewrite($x2c.collection.remainder)
+$rewrite($x2c.collection.and)
+$rewrite($x2c.collection.or)
+$rewrite($x2c.collection.xor)
+$rewrite($x2c.collection.left)
+$rewrite($x2c.collection.right)
 /** Selects collection compound updates and checks accepted operands, or a
     participant's `updateindex` member. */
 meta Code access_update(Code code) {
   match (code) {
-    case $collection_add(?base, ?key, ?value):
+    case $x2c.collection.add(?base, ?key, ?value):
       return _access_update(code, base, key, value, <"+">);
-    case $collection_subtract(?base, ?key, ?value):
+    case $x2c.collection.subtract(?base, ?key, ?value):
       return _access_update(code, base, key, value, <"-">);
-    case $collection_multiply(?base, ?key, ?value):
+    case $x2c.collection.multiply(?base, ?key, ?value):
       return _access_update(code, base, key, value, <"*">);
-    case $collection_divide(?base, ?key, ?value):
+    case $x2c.collection.divide(?base, ?key, ?value):
       return _access_update(code, base, key, value, <"/">);
-    case $collection_remainder(?base, ?key, ?value):
+    case $x2c.collection.remainder(?base, ?key, ?value):
       return _access_update(code, base, key, value, <"%">);
-    case $collection_and(?base, ?key, ?value):
+    case $x2c.collection.and(?base, ?key, ?value):
       return _access_update(code, base, key, value, <"&">);
-    case $collection_or(?base, ?key, ?value):
+    case $x2c.collection.or(?base, ?key, ?value):
       return _access_update(code, base, key, value, <"|">);
-    case $collection_xor(?base, ?key, ?value):
+    case $x2c.collection.xor(?base, ?key, ?value):
       return _access_update(code, base, key, value, <"^">);
-    case $collection_left(?base, ?key, ?value):
+    case $x2c.collection.left(?base, ?key, ?value):
       return _access_update(code, base, key, value, <"<<">);
-    case $collection_right(?base, ?key, ?value):
+    case $x2c.collection.right(?base, ?key, ?value):
       return _access_update(code, base, key, value, <">>">);
   }
   return code;
@@ -185,28 +190,30 @@ meta static Code _access_step(Code code, Code base, Code key, Symbol op) {
   return _access_update(code, base, key, $!int{1}, op);
 }
 
-$rewrite($collection_increment)
-$rewrite($collection_decrement)
+$rewrite($x2c.collection.increment)
+$rewrite($x2c.collection.decrement)
 /** Stores and returns the incremented or decremented element. */
 meta Code access_prefix(Code code) {
   match (code) {
-    case $collection_increment(?base, ?key):
+    case $x2c.collection.increment(?base, ?key):
       return _access_step(code, base, key, <+>);
-    case $collection_decrement(?base, ?key):
+    case $x2c.collection.decrement(?base, ?key):
       return _access_step(code, base, key, <->);
   }
   return code;
 }
 
-$rewrite($collection_postincrement)
-$rewrite($collection_postdecrement)
+$rewrite($x2c.collection.postincrement)
+$rewrite($x2c.collection.postdecrement)
 /** Stores the updated element and returns its previous value. */
 meta Code access_postfix(Code code) {
   Code base, key;
   Symbol op;
   match (code) {
-    case $collection_postincrement(?b, ?k): { base = b; key = k; op = <++>; }
-    case $collection_postdecrement(?b, ?k): { base = b; key = k; op = <-->; }
+    case $x2c.collection.postincrement(?b, ?k):
+      { base = b; key = k; op = <++>; }
+    case $x2c.collection.postdecrement(?b, ?k):
+      { base = b; key = k; op = <-->; }
     default: return code;
   }
   int family = _collection_family(base);

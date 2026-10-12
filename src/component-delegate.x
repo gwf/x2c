@@ -113,15 +113,15 @@ meta static List _delegate_fields(Type outer, String member) {
 }
 
 /* A call on a delegating receiver, before member lookup. */
-macro Expression $delegate_call(
-    Expr $receiver, Name $member, Expr @arguments) =>
+macro Expression $x2c.delegate.call(
+  Expr $receiver, Name $member, Expr @arguments) =>
   $receiver.$member(@arguments);
 
-$rewrite($delegate_call, %(expr <delegate> *), <?member>, <*arguments>)
+$rewrite($x2c.delegate.call, %(expr <delegate> *), <?member>, <*arguments>)
 /** Rebuilds a call that finds no member on its receiver through the one
     delegate field path that provides the method. */
 meta Code delegate_member(Code code) {
-  match (code) case $delegate_call(?receiver, ?member, *arguments): {
+  match (code) case $x2c.delegate.call(?receiver, ?member, *arguments): {
     String name = Code.binding_spelling(member);
     List fields = _delegate_fields(receiver.cadr(), name);
     if (!fields) return code;

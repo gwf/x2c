@@ -428,7 +428,8 @@ components.
   were deleted; the 14 unmerged branches and the desktop app's session
   branches stay. The workspace note tracked inside the ignored `.context/`
   directory is untracked.
-- Batch 5 (2026-10-12): the transform-time binding leak (A6) is fixed. A
+- Batch 5, published to dev as `27bac892` (2026-10-12): the
+  transform-time binding leak (A6) is fixed. A
   statement or expression replacement bound with no local scope open, as
   when the transform lowers a function, declares its names in a scope of
   its own (`Compiler._bind_replacement` in src/macros.x), so a quotation in
@@ -439,6 +440,23 @@ components.
   its prototype stays in the generated header. Fixture
   `rewrite-local-declaration`; `function-to-func-inline` and the lambda
   fixtures pass unchanged, and `make verify` passed.
+- Batch 6 (2026-10-12): the shipped component macros are private. The
+  `$collection_*`, printf-family, `$try_*`, and `$delegate_call` macros are
+  now `$x2c.collection.*`, `$x2c.printf.format` and its relatives,
+  `$x2c.try.site`, `$x2c.try.handled`, `$x2c.try.frame`, and
+  `$x2c.delegate.call`, so a program meta function such as
+  `collection_store` is what `$collection_store(...)` calls. A plain rename
+  of a component macro no longer fails the stage-0 build: on current dev,
+  renaming `$delegate_call`, `$try_frame`, or the whole `$collection_*`
+  family builds through `make build` and `make build-safe`, so the recorded
+  failure did not reproduce. The `x2c.` spelling needed the transition
+  instead: a macro named `x2c.*` was accepted only while the compiler
+  replays its prelude, and the seed rejected it while translating the
+  component as a stage source. The first round lets a prelude source
+  define `x2c.*` macros (`Definition.naming` in src/macros.x) and refreshes
+  the bootstrap; the second renames the macros. A component macro rename
+  needs no transition; a change to the rule that reserves its spelling
+  does (agents/lowering-with-macros.md). Fixture `component-macro-name`.
 - Not done: converging the lambda component's `(place ...)` carrier rows on
   `x2c_place` (decision 9). Both forms reach `Compiler.place`; the carrier
   form exists because the placed code names bindings the driver introduces
