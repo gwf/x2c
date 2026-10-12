@@ -166,6 +166,7 @@ function renderMap(gs) {
   graphResize?.disconnect();
   const host = $("workspace");
   host.classList.add("graph-workspace");
+  const insideCount = gs.length;
   const arrangement = arrangementData(D, gs, scope ? visible() : gs);
   gs = arrangement.groups;
   const { links, callers, incoming } = arrangement;
@@ -214,12 +215,18 @@ function renderMap(gs) {
       gs.map((g) => [g.id, g.members, !!g.outside, g.consumerCount]),
     );
   if (projectMapCache?.key !== key)
-    projectMapCache = { key, ps: projectLayout(nodes, links) };
+    projectMapCache = {
+      key,
+      ps: projectLayout(
+        nodes.slice(0, insideCount),
+        links.filter((e) => !e.outside),
+      ),
+    };
   const ps = projectMapCache.ps;
   host.innerHTML =
     '<div class="graph-tools"><button id="map-minus">\u2212</button><button id="map-fit">Fit groups</button><button id="map-plus">+</button><button id="map-calls" aria-expanded="false">Call details</button><span>' +
     (scope
-      ? "Inside: functions; outside: callers"
+      ? "Circles: functions in each group"
       : "Circle area: source lines; count: functions") +
     ' \u00b7 Edges: call sites; outside edges: callers \u00b7 Thicker = more calls</span></div><svg id="project-map" style="flex:1;min-height:300px;width:100%;touch-action:none" aria-label="Groups and directed calls"></svg><div class="graph-legend"><span><span style="color:#59cfff">Source (blue)</span> \u2192 <span style="color:#ffb454">destination (orange)</span></span><span>Scroll to zoom \u00b7 drag background to pan \u00b7 click to explore \u00b7 Shift-click to select \u00b7 hover to isolate connections</span></div>';
   const details = document.createElement("div");
@@ -240,13 +247,30 @@ function renderMap(gs) {
     $("map-calls").setAttribute("aria-expanded", String(!details.hidden));
   };
   const svg = $("project-map");
+  const rail = document.createElement("div");
+  rail.id = "caller-rail";
+  rail.hidden = gs.length === insideCount;
+  rail.innerHTML = `<strong>OUTSIDE CALLER GROUPS</strong><p>Distinct callers into this view. Hover to trace links.</p>${gs
+    .slice(insideCount)
+    .map(
+      (g, n) =>
+        `<button data-outside-group="${insideCount + n}" title="${esc(g.name)}"><span>${esc(g.name)}</span><b>${g.consumerCount}</b></button>`,
+    )
+    .join("")}`;
+  host.append(rail);
+  let highlighted = null;
+  const gutter = () =>
+    rail.hidden ? 0 : Math.min(222, svg.clientWidth * 0.3) + 24;
+  rail.style.width = "min(222px, 30%)";
+
   let camera = { x: 0, y: 0, k: 1 },
     drag = null,
     moved = false;
   svg.innerHTML =
     '<defs><marker id="map-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto"><path d="M0 0L8 4L0 8" fill="#ffb454"/></marker>' +
     links
-      .map(({ ids: [i, j] }, n) => {
+      .map(({ ids: [i, j], outside }, n) => {
+        if (outside) return "";
         const a = ps[i],
           b = ps[j],
           d = Math.hypot(b.x - a.x, b.y - a.y) || 1;
@@ -255,9 +279,10 @@ function renderMap(gs) {
         return `<linearGradient id="call-gradient-${n}" gradientUnits="userSpaceOnUse" x1="${a.x + ux * a.r}" y1="${a.y + uy * a.r}" x2="${b.x - ux * (b.r + 3)}" y2="${b.y - uy * (b.r + 3)}"><stop offset="0" stop-color="#59cfff"/><stop offset=".5" stop-color="#b797f5"/><stop offset="1" stop-color="#ffb454"/></linearGradient>`;
       })
       .join("") +
-    '</defs><g id="map-scene">' +
+    '<marker id="outside-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" orient="auto"><path d="M0 0L8 4L0 8" fill="#ffb454"/></marker></defs><g id="outside-links"></g><g id="map-scene">' +
     links
       .map(({ ids: [i, j], w, outside, calls }, n) => {
+        if (outside) return "";
         const a = ps[i],
           b = ps[j],
           d = Math.hypot(b.x - a.x, b.y - a.y) || 1,
@@ -267,9 +292,10 @@ function renderMap(gs) {
       })
       .join("") +
     links
-      .map(
-        ({ ids: [i, j], w, outside }, n) =>
-          `<text data-call-count="${n}" data-call-pair="${i},${j}" text-anchor="middle" fill="#fff" font-size="12" font-weight="600" paint-order="stroke" stroke="#11181c" stroke-width="5" style="pointer-events:none">${fmt(w)}${outside ? "c" : ""}</text>`,
+      .map(({ ids: [i, j], w, outside }, n) =>
+        outside
+          ? ""
+          : `<text data-call-count="${n}" data-call-pair="${i},${j}" text-anchor="middle" fill="#fff" font-size="12" font-weight="600" paint-order="stroke" stroke="#11181c" stroke-width="5" style="pointer-events:none">${fmt(w)}${outside ? "c" : ""}</text>`,
       )
       .join("") +
     ps
@@ -279,6 +305,53 @@ function renderMap(gs) {
       )
       .join("") +
     "</g>";
+  function paintOutside() {
+    rail.style.top = `${svg.getBoundingClientRect().top - host.getBoundingClientRect().top}px`;
+    rail.style.height = `${svg.clientHeight}px`;
+    rail.style.bottom = "auto";
+    const rect = svg.getBoundingClientRect(),
+      edge = rail.getBoundingClientRect();
+    $("outside-links").innerHTML = links
+      .flatMap(({ ids: [i, j], w, calls, outside }, n) => {
+        if (!outside) return [];
+        const row = rail
+          .querySelector(`[data-outside-group="${i}"]`)
+          .getBoundingClientRect();
+        if (row.top < edge.top || row.bottom > edge.bottom) return [];
+        const x = edge.right - rect.left + 4,
+          y = (row.top + row.bottom) / 2 - rect.top;
+        const p = ps[j],
+          cx = p.x * camera.k + camera.x,
+          cy = p.y * camera.k + camera.y;
+        const d = Math.hypot(cx - x, cy - y) || 1,
+          r = p.r * camera.k + 3;
+        const tx = cx - ((cx - x) * r) / d,
+          ty = cy - ((cy - y) * r) / d;
+        const related =
+          highlighted === null || highlighted === i || highlighted === j;
+        return [
+          `<g opacity="${related ? 0.65 : 0.04}"><title>${esc(gs[i].name)} to ${esc(gs[j].name)}: ${w} callers / ${calls} call sites</title><linearGradient id="outside-gradient-${n}" gradientUnits="userSpaceOnUse" x1="${x}" y1="${y}" x2="${tx}" y2="${ty}"><stop stop-color="#59cfff"/><stop offset="1" stop-color="#ffb454"/></linearGradient><path d="M${x} ${y} C${x + 40} ${y} ${tx - 40} ${ty} ${tx} ${ty}" stroke="url(#outside-gradient-${n})" stroke-width="${1 + Math.log2(w + 1)}" fill="none" marker-end="url(#outside-arrow)"/><text x="${(x + tx) / 2}" y="${(y + ty) / 2 - 5}" fill="#dcecff" font-size="12" paint-order="stroke" stroke="#11181c" stroke-width="4">${w}c</text></g>`,
+        ];
+      })
+      .join("");
+  }
+  rail.onscroll = paintOutside;
+  rail.querySelectorAll("[data-outside-group]").forEach((e) => {
+    const i = +e.dataset.outsideGroup;
+    e.onpointerenter = e.onfocus = () => {
+      highlighted = i;
+      paintOutside();
+    };
+    e.onpointerleave = e.onblur = () => {
+      highlighted = null;
+      paintOutside();
+    };
+    e.onclick = () => {
+      if (preview)
+        toast("Accept or discard the split before opening an outside group.");
+      else enter(gs[i].id);
+    };
+  });
   function paint() {
     svg.setAttribute("viewBox", `0 0 ${svg.clientWidth} ${svg.clientHeight}`);
     $("map-scene").setAttribute(
@@ -313,6 +386,7 @@ function renderMap(gs) {
       );
       e.style.opacity = scope ? "1" : "0";
     });
+    paintOutside();
     const occupied = [];
     [...svg.querySelectorAll("[data-map-label]")]
       .sort((a, b) => ps[+b.dataset.mapLabel].r - ps[+a.dataset.mapLabel].r)
@@ -339,7 +413,8 @@ function renderMap(gs) {
       });
   }
   function fit() {
-    const width = svg.clientWidth,
+    const left = gutter(),
+      width = svg.clientWidth - left,
       height = svg.clientHeight;
     if (!width || !height) return;
     const x = Math.min(...ps.map((p) => p.x - p.r)),
@@ -349,7 +424,11 @@ function renderMap(gs) {
     // Labels retain screen-pixel size while circles scale with the camera.
     const labelMargin = Math.min(
       width * 0.25,
-      Math.max(...labels.map((name) => name.length * 6.3)) / 2 + 16,
+      Math.max(
+        ...labels.slice(0, insideCount).map((name) => name.length * 6.3),
+      ) /
+        2 +
+        16,
     );
     camera.k = Math.max(
       0.01,
@@ -358,7 +437,7 @@ function renderMap(gs) {
         (height - 64) / Math.max(1, h),
       ),
     );
-    camera.x = (width - w * camera.k) / 2 - x * camera.k;
+    camera.x = left + (width - w * camera.k) / 2 - x * camera.k;
     camera.y = (height - 24 - h * camera.k) / 2 - y * camera.k;
     paint();
   }
@@ -413,6 +492,8 @@ function renderMap(gs) {
       if (ev.key === "Enter") open(ev);
     };
     e.onpointerenter = e.onfocus = () => {
+      highlighted = i;
+      paintOutside();
       svg
         .querySelectorAll("[data-map-edge]")
         .forEach((edge) =>
@@ -431,6 +512,7 @@ function renderMap(gs) {
       e.querySelector("[data-map-label]").style.opacity = "1";
     };
     e.onpointerleave = e.onblur = () => {
+      highlighted = null;
       svg
         .querySelectorAll("[data-map-edge]")
         .forEach((edge) => edge.setAttribute("opacity", scope ? ".8" : ".2"));
