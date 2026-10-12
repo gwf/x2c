@@ -12394,7 +12394,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_22(void){
   _11518 = cons(_503, _11517);
   _11519 = String_new("src/build.x");
   _11520 = String_var(_11519);
-  _11521 = String_new("ce8150ed");
+  _11521 = String_new("8610f9d6");
   _11522 = String_var(_11521);
   _11523 = String_new("cwd:./json.x");
   _11524 = String_var(_11523);
