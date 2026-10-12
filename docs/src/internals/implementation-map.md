@@ -63,7 +63,7 @@ is listed under [compiler options](../reference/cli.md).
 ### Collection and String literals
 
 - Parse: `src/literals.x`
-- Lower/generate: `src/transform.x`, `src/cache.x`
+- Lower/generate: `src/component-literals.x`, `src/transform.x`, `src/cache.x`
 - Runtime: `lib/list.x`, `lib/array.x`, `lib/map.x`, `lib/string.x`
 - Tests: literal-cache and mutable-empty fixtures, collection suites
 - See also: [collections](../guide/collections.md)
@@ -97,7 +97,8 @@ is listed under [compiler options](../reference/cli.md).
 ### Indexing and slicing
 
 - Parse/type: `src/expressions.x`, `src/type.x`
-- Lower: `src/transform.x`
+- Lower: `src/component-access.x` with ordinary ordered-call and conversion
+  operations from `src/transform.x`
 - Runtime: collection helpers plus the shared bounds normalizer in
   `lib/common.x`
 - Tests: index/slice suite and checked indexing example
@@ -200,7 +201,9 @@ inline-lisp example
 - Type selection: `src/type.x`
 - Typedef identity and scopes: `src/symbols.x`, `src/statements.x`
 - Conversion lowering: `src/expressions.x`
-- Operator and truthiness lowering: `src/transform.x`, `src/emit.x`
+- Protocol operator selection: `src/expressions.x`
+- Dynamic operators: `src/component-operators.x`
+- Truthiness and native emission: `src/transform.x`, `src/emit.x`
 - Sentinel literal parsing and C spelling: `src/literals.x`, `src/emit.x`;
   expression context distinguishes the literal from C `void` type positions
 - Runtime representation: `lib/common.x`, `lib/var.x`, `lib/scope.x`
@@ -281,8 +284,9 @@ inline-lisp example
 ### Match statement
 
 - Parse: `src/statements.x`
-- Lower/generate: `src/transform.x`, `src/emit.x`; emitted code calls
-  `List.match`
+- Lower: `src/component-match.x` emits direct tests for static patterns and
+  capture storage for runtime matching
+- Native emission: `src/emit.x`
 - Runtime: `lib/match.x` owns pattern semantics; `lib/match-plan.x`
   compiles patterns to plans, `lib/match-cache.x` retains them, and
   `lib/match-machine.x` executes them over wordcode and state definitions
@@ -319,13 +323,13 @@ inline-lisp example
 - Produce: all parser phases
 - Collect/render: `src/diagnostics.x`
 - Destination: standard error, written directly; `src/report.x` suspends the
-  progress line first. Nothing is logged to a file
+  progress line first. `--diagnostics-file` also writes JSON Lines diagnostics
 - Tests: parse-error, diagnostic-width, and invalid-list-splice fixtures plus
   the diagnostics suite
 
 The exact location fields, one-based coordinates, token-width rendering,
-one-error compiler default, and reusable store limit are documented in
-`agents/logger-and-diagnostics-guide.md`.
+CLI default of 20 errors, low-level one-error default, and reusable store
+limit are documented in `agents/logger-and-diagnostics-guide.md`.
 
 ## Compiler phase boundaries
 

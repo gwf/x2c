@@ -109,8 +109,8 @@ static protocol Prepared(LocalPlan);
 `static` makes an adoption local to its translation unit, even when all its
 dependencies are public. It is also valid when the protocol, participant, or
 converters are already private; then it states explicitly what the compiler
-would infer. The resulting linkage is the same. Only an adoption can be
-`static`, not a protocol body.
+would infer. The resulting linkage is the same. A protocol body can also be
+`static`, which keeps its declaration private to the source file.
 
 An adoption marked `meta`, such as `meta protocol Iter(List);`, also makes
 that conformance's witnesses available to compile-time code, as described in
@@ -154,8 +154,8 @@ location. Local native aliases and local descriptor registration are still
 allowed.
 
 Protocol declarations and adoptions appear at the top level. Neither creates
-a program object or an AST node. The compiler collects them with surrounding
-declarations for each translation unit; reading source, cached declarations,
+a runtime object. The compiler retains their declaration AST nodes and collects
+them with surrounding declarations for each translation unit. Reading source, cached declarations,
 or a unit interface gives the same result. Repeating a byte-identical
 declaration has no effect. Conflicting declarations produce errors at their
 source locations.

@@ -1,7 +1,7 @@
 # Meta Functions
 
-x2c extends C. A `meta` function is compiled by the same backend as the
-rest of the program and runs as native code inside the compiler, so its
+x2c extends C. A `meta` function uses the x2c backend and the host compiler
+selected by `--meta-cc`. It runs as native code during translation, and its
 body is ordinary x2c: anything the unit can compile, it can run during
 translation. Two questions remain, both at the boundary between the
 program and compile-time code:
@@ -924,8 +924,10 @@ program.
 
 ## Compile-time arithmetic and evidence
 
-Compile-time code is compiled by the same backend with the same C compiler
-as the program, so its arithmetic, conversions and casts are the program's.
+Compile-time code uses the x2c backend and the host C compiler selected by
+`--meta-cc`, which defaults to `cc`. The target `--cc` does not select that
+compiler. Arithmetic, conversions and casts follow the host build's native
+semantics.
 The `meta-differential` compiler fixture checks narrow and unsigned
 arithmetic, wide intermediate values, floating operations and conversions
 against runtime calls. The `comptime-lowering`, `meta-native-constructs`,
@@ -1658,9 +1660,9 @@ source code and have no runtime forms. The consumer uses their returned code.
 A `meta` function that needs no compiler query, like `poly` above,
 keeps both forms and is emitted normally.
 
-The queries themselves belong to the compiler's own `meta` code. A project
-`meta` function reaches the compiler only through what a call passes it:
-constants, captured syntax, a `TypeInfo`, or a `Source`.
+A project `meta` function can inspect constants, captured syntax, `TypeInfo`,
+and `Source` values. Its compiler queries are answered by the compiler while
+the helper call waits; see [What the compiler answers](#what-the-compiler-answers).
 
 ## A complete example
 

@@ -682,9 +682,10 @@ describes which errors are reported together.
 
 ### Warnings
 
-Translation also reports warnings, which never stop a build: the unit
-compiles and the program runs. Warnings do not count against `--max-errors`,
-and there is no option to suppress or escalate one. A warning describes
+Ordinary translation reports warnings without stopping the build. Warnings
+do not count against `--max-errors`. The internal self-host stage option
+`--fatal-warnings` makes warnings fail those builds; it is not a public
+per-warning suppression or escalation control. A warning describes
 something the compiler can see and you may have arranged deliberately, so
 code that means what it says can be left as written.
 

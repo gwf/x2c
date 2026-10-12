@@ -185,8 +185,9 @@ meta List Code.func_parameters(Code parameters, Code fn, Code argv);
 
     A `Unit` macro whose body is one function definition, or only its one
     `Function` hole, registers a function rule. The compiler offers each
-    function definition the unit emits, including a lifted lambda body, to
-    the function rules once, bound and typed, before its body lowers.
+    program function definition to the function rules once, bound and typed,
+    before its body lowers. Compiler-written definitions, including lifted
+    lambda bodies, bypass program function rules.
     Rules keyed by the return type and storage the pattern spells come
     before rules whose pattern holds a hole there. A rule declines by
     returning its input, void, or null, and then costs only its match and

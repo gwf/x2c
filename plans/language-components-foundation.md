@@ -16,13 +16,16 @@ statement placement, and lifecycle correctness with their existing owners.
 Judge the entire authored change, including library and support code; a smaller
 kernel alone is not proof of simplification.
 
-The current foundation preserves the Array/Map mutation component and 17
-optional examples across access, declarations, dispatch, and delegation.
-`$auto`, recursive delegation, and try cleanup retain dev's implementations.
-The examples for selected-type cleanup and one wrapper's delegation are bounded
-proofs, not complete builtin replacements.
+The delivered log below records the current foundation: component lowering
+for access, matching, literals, operators, lambdas, protocols, and Error forms,
+plus ordinary managed-initializer placement. Those delivered decisions
+supersede the initial recovery exclusions and milestone list preserved below.
+The remaining self-meta function-rule observation discrepancy is still open.
+The confirmed acquired-value cleanup repair is tracked in
+[review remediation](review-remediation-2026-10-11.md); the initial phrase
+"cleanup of the declared binding" does not override that requirement.
 
-## Recovery scope
+## Initial recovery scope (historical)
 
 Preserved from `gwf/language-components` at `5b7a7769`:
 
@@ -914,7 +917,7 @@ replacement template and fill steps are the remaining driver cost.
   the body into the adapter would place function-entry code ahead of the
   lambda's parameters.
 
-## Next bounded milestone
+## Initial milestone sequence (superseded by the delivered log)
 
 1. Establish a complete declaration use case for initializer-only `$auto`.
    Compare a concrete implementation against the retained owner. Preserve mixed
@@ -938,8 +941,8 @@ lowering separately rather than assuming a single producer requires a framework.
 
 ## Starting a fresh session
 
-Use the directory and branch above. Read this plan, `AGENTS.md`,
-`agents/README.md`, and the example README. Inspect `git status` and verify the
-branch before editing. Use current source and recorded logs as evidence; no
-previous chat is required. Other active repository plans are unrelated unless
-this plan names them. Local commits are allowed; publication remains held.
+Start from current `origin/dev` and read the delivered log before selecting
+remaining work. The old branch and recovery exclusions record historical
+scope. Root `AGENTS.md` owns current delivery, and a new task instruction owns
+its implementation scope. Do not repeat delivered extraction milestones or
+treat their historical publication hold as current authorization.

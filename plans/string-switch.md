@@ -82,14 +82,15 @@ integer constants.
    owned `(case ...)` must hold a string literal; otherwise report the new
    diagnostic through a `$report.xform` macro. Assign indices from 1 by
    distinct label content in source order, and rewrite each label to
-   `(case (expr (int) (literal (int) "N")))` with `x2c_literal_int`.
+   `(case EXPR)` with an ordinary integer quotation, such as `$!int{ $index }`.
 3. **Contribute the helper.** Under `$adapter.memo`
    ([adapter-memo.x](../src/adapter-memo.x)) keyed by
    `(string-switch TYPE LABELS)`, introduce a fresh name, build
    `static int NAME(TYPE s) { if (s == LABEL) return N; ... return 0; }` with
    a `$!Unit` template whose tests are a spliced statement sequence, bind it
    with `bind_syntax(..., AST_UNIT, NULL)`, and queue it with
-   `add_support`. The transform drain lowers it, so literal conversion and
+   `add_early` so the compiler-written helper bypasses program function rules.
+   The transform drain lowers it, so literal conversion and
    protocol `equal` dispatch come from ordinary lowering and the literals
    enter the literal cache.
 4. **Rewrite.** Return `switch (NAME(selector)) BODY` with the rewritten

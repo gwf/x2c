@@ -1,8 +1,9 @@
 # Module blocks: one source split across a directory
 
-> Status: delivered 2026-10-11 on `kernel/module-blocks-impl`; authorized 2026-10-11, replaces the separate-unit module
-> design researched on `codex/module-m1-current-dev`, which stays as
-> reference only.
+> Status: done - delivered 2026-10-11, recorded by `0ff8816e`, on dev
+> before `6529e868`. Discovery and script boundaries were repaired by
+> `28fc8c97`. This replaces the separate-unit design researched on
+> `codex/module-m1-current-dev`, which remains historical reference.
 
 ## Requirement
 
@@ -47,10 +48,10 @@ static int helper(int value) { return value + counter; }
   at the block.
 - A member is spliced where the block stands. Declarations before the block
   are visible to every member; a member's statics are visible to later
-  members and to the entry after the block; declaration order follows C, so
-  a prototype is needed only where a member uses a name defined later, as in
-  one file. A member may hold its own block, spliced in turn; the namespace
-  stays flat.
+  members and to the entry after the block. Function declarations are
+  collected across the whole unit, so calls to later-defined functions need
+  no explicit prototype. Other declarations retain ordinary placement rules.
+  A member may hold its own block, spliced in turn; the namespace stays flat.
 - Members are not translation units. The build never lists them; the entry's
   C and header carry everything. The entry's depfile and collection entry
   depend on every member's content, so editing a member retranslates the

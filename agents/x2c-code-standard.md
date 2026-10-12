@@ -1167,7 +1167,7 @@ that is not selected is not checked for a matching finding.
 | `car() == <a> \|\| car() == <b>` chains | MA-7 | `manual-shape-checks` |
 
 Calibrated trust boundaries keep their checks: macro SDK argument checks,
-`Ast.try_sequence`, `Compiler.rebuild_protocols`, the artifact readers in
+`Compiler.rebuild_protocols`, the artifact readers in
 `collect.x`, and the transforms that distinguish lowered from unlowered
 forms. A source `match` in a function does not make that function's other
 guards trustworthy.

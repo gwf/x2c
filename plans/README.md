@@ -93,6 +93,9 @@ execution.
   The remaining recorded limits are system-header/layout details and
   `off_t`/`time_t` mapping; they do not block the delivered capabilities.
 
+[Module blocks](archive/module-blocks.md) are delivered; the archived record
+names their landing and subsequent discovery fixes.
+
 ### Open backlog and scoped follow-ups
 
 | Record | What remains |

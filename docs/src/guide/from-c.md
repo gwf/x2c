@@ -408,7 +408,8 @@ Keep these boundaries in mind:
   Other new keywords can collide with C names. Check the
   [keyword inventory](../reference/syntax/lexical-data.md#keywords).
 - Literal printf-family formats can trigger conversions of Var arguments.
-  A computed format does not; respect the native variadic ABI.
+  A computed format with a Var argument is rejected. For native arguments,
+  respect the native variadic ABI.
 
 For the complete inventory, use the [x2c syntax map](x2c-syntax-map.md).
 For exact productions and lexical decisions, use the

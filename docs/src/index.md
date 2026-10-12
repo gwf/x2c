@@ -19,8 +19,8 @@ Start with C types and calls, then add what the program needs:
   mutable `Array` and `Map` containers grow automatically and store `Var`s.
 - `Symbol` provides compact named values without declaring an enum;
   `SymbolSet` gives those names an explicit order and indexing.
-- `Iter` composes traversal operations, and `foreach` visits collections,
-  `File` contents, and `Slice` sequences.
+- `Iter` composes traversal operations, and `foreach` visits collections
+  and `File` contents.
 - `protocol` defines interfaces that concrete types explicitly adopt.
   Namespaced methods, inherited typedef methods, delegation, and static or
   dynamic dispatch let types share behavior while retaining C layouts.
@@ -65,6 +65,7 @@ and pattern matching.
 - [Compiler architecture](internals/architecture.md) explains the self-hosting
   implementation for readers who want to study or contribute to it.
 
-The book describes implemented behavior. Its x2c samples are translated and
-checked for valid C syntax. `make examples` also runs the showcase programs
-and checks their output.
+The book describes implemented behavior. The optional `make doc-examples`
+translates its x2c samples and compiles them to objects. `make doc-outputs`
+also links and runs samples with expected output. The optional `make examples`
+runs the showcase programs and checks their output.

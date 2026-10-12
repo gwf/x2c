@@ -680,8 +680,8 @@ and a walk never reconverts. `car` of `nil` is the element's zero, not `void`.
 There is no `long` family, because `Var.box_long` allocates a `Scope`-owned box:
 a cell would outlive its car and every `cons` would miss the pool.
 
-These types adopt no `protocol Var`, so they have **no bracket indexing**.
-`values[0]` does not compile. Use `car` and `nth_cdr`. Predicate-only
+These types inherit List bracket reads: `values[0]` returns a `Var`.
+Use `car` for the family's native element type and `nth_cdr` for a tail. Predicate-only
 `filter` keeps the typed spelling, since it cannot replace an element.
 Operations such as `map`, whose callbacks can produce new values, need a
 widening assignment to `List`, as above.
@@ -1000,7 +1000,7 @@ is raw. A typed `Array` boxes into a `Var` and iterates, so
 `foreach(Var item, numbers)` and dynamic indexing through a `Var` receiver
 both work. The dynamic bracket reaches the same raw member.
 
-All six packed `Array`s can cross a `Context` or `Thread` boundary while boxed.
+All seven packed `Array`s can cross a `Context` or `Thread` boundary while boxed.
 An `Array` owned by the source keeps its pointer, and its `Block` header and
 backing allocation move together so it can continue growing after the source
 closes. An `Array` borrowed from an outer `Context` is returned untouched.

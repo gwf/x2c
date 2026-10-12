@@ -64,7 +64,8 @@ temporaries are freed before the surrounding work finishes."
 
 The active slot tracks the match. An empty retained region still releases
 normally, but an extra release, or a release from a different pushed slot,
-aborts instead of destroying the surrounding process root.
+raises `<bad-state>` instead of destroying the surrounding process root.
+A matching catch can handle the error; without one, the default policy aborts.
 
 Storage returned by these calls is managed memory. `Scope.realloc` grows or
 shrinks it in place, and `Scope.free` ends its life early without waiting
@@ -95,7 +96,7 @@ above and the program prints this on standard error before it ends:
 Scope leak detected:
 	live_scopes: 1
 	live_allocations: 1
-	scope "forgotten": 1 allocations
+	scope "request": 1 allocations
 	live_backing_allocations: 2
 ```
 
@@ -107,9 +108,9 @@ When several operations should allocate in the same scope without passing a
 slot to every call, `Scope.push` makes a slot active and `Scope.pop`
 restores the previous one. `Scope.destroy` refuses a scope that is still in
 use: the active root, a slot still on the pushed stack, or a region with
-another region attached below it. Those cases print a diagnostic and abort
-instead of corrupting the allocation lists. A mismatched push/pop or a
-double destroy aborts with a diagnostic.
+another region attached below it. Those cases raise `<bad-state>` instead
+of corrupting the allocation lists. Mismatched push/pop and double destroy
+use the same cause; its default uncaught policy aborts.
 
 ## Bounding temporary canonical Lists
 
@@ -238,7 +239,9 @@ Feed Feed.open(void) {
 
 The finalizer runs exactly once with the record's pointer: on `Scope.free`,
 on a `Scope.realloc` to size zero, when the owning scope is released or
-destroyed, or at thread and process shutdown. It follows the record through
+destroyed, or when shutdown releases its owning root region. A detached Scope
+that remains live at shutdown is reported as a leak; its finalizers do not run.
+The finalizer follows the record through
 `Scope.move`, and `Scope.realloc` keeps it and passes the resized pointer.
 Records are reclaimed most recent first, so a finalizer can still read older
 records in the same scope.
@@ -303,8 +306,10 @@ storage in a region, canonical result outside it.
 ## `defer` for cleanup
 
 `defer statement` schedules a statement for the exit of the enclosing block.
-It runs on normal exit, on `return`, on `break`, and when an `Error`
-passes through; multiple `defer` statements run last-in, first-out.
+It runs on normal exit and lexical transfers such as `return` and `break`,
+and when an Error transfers through the block to a selected catch. Multiple
+`defer` statements run last-in, first-out. An uncaught abort has no selected
+transfer. Native `exit` and `longjmp` calls do not run lexical deferred cleanup.
 
 ```x2c
 FILE *log = fopen("/dev/null", "a");

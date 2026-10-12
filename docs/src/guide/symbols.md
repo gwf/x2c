@@ -154,7 +154,8 @@ representations:
 can see which one you have: `value.is_atom()` accepts both, and
 `value is Symbol` tells them apart. Most code does not need to. Because
 canonicalization happens once, in one place, `Atom.str` returns the exact
-bytes without copying and `Atom.hash` is the `String`'s cached hash.
+bytes without copying. The Atom descriptor's hash operation uses the cached
+String hash for a String-backed Atom.
 
 ## Identity and equality
 

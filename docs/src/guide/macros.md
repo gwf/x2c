@@ -329,9 +329,9 @@ macro Unit $project.generated() {
 
 The directive creates syntax identity, not runtime storage. It can therefore
 name a generated helper function or label as well as an automatic variable.
-All `using` directives must precede the body's ordinary items. The older
-signature `using` form remains accepted for compatibility; lambdas separately
-use `using &name` for reference capture.
+All `using` directives must precede the body's ordinary items. A signature
+`using` clause can also supply names, including for an Expression macro's
+arrow body. Lambdas separately use `using &name` for reference capture.
 
 ## Put reusable macros in ordinary source modules
 

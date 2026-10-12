@@ -16,7 +16,7 @@ features:
   - name: Compound <br/> Literals
     detail: "Containers: `[a, b]`, `{key: value}`, `%(a b)`. Strings: `%\"hi $name\"`. Quoted names are data; `$` inserts expressions, `@` splices Lists."
   - name: Iteration <br/>& Loops
-    detail: "Chained functional iterators and `foreach` over anything sequence-like, including `File`s and `Slice`s."
+    detail: "Chained functional iterators and `foreach` over anything sequence-like, including `File`s."
   - name: Object <br/>Orientation
     detail: "Namespaced methods, `typedef` inheritance, `protocol`s, delegation, and static or dynamic dispatch."
   - name: Functional <br/>Tools
