@@ -415,14 +415,17 @@ static int _plain_list(char * s, unsigned * at, Var * out, Array items, int dept
   return 1;
 }
 
+int scan_c_string(char *);
+
+String String_unescape(String);
+
 String String_new_len(const char *, int);
 
 static int _plain_string(char * s, unsigned * at, Var * out){
-  unsigned end =(* at) + 1;
-  for(;  s[end] != '"';  end ++) if(! s[end] || s[end] == '\n' || s[end] == '\\') return 0;
-  if(! _token_end(s[end + 1])) return 0;
-  (* out) = String_var(String_new_len(s +(* at) + 1, end -(* at) - 1));
-  (* at) = end + 1;
+  int length = scan_c_string(s +(* at));
+  if(length < 0 || ! _token_end(s[(* at) + length])) return 0;
+  (* out) = String_var(String_unescape(String_new_len(s +(* at) + 1, length - 2)));
+  (* at) += length;
   return 1;
 }
 
@@ -631,7 +634,7 @@ int datum_unframe(String input, size_t * used, Var * value){
   unsigned cursor = 0;
   (* value) =((void) 0, Void);
   if(! datum_read(frame, &(cursor), &((* value)))){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/datum.x",.function = "datum_unframe",.line = 321};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/datum.x",.function = "datum_unframe",.line = 319};
     x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(13765450), String_var(frame));
     __builtin_unreachable();
   }
