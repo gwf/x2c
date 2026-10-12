@@ -35,7 +35,7 @@ Shipped `meta` code compiled into the compiler.
 | [`protocol_conformance`](#protocol_conformance) | Places the forwarding members, descriptor thunks, method table, and descriptor registration of one conformance. |
 | [`raise_lowering`](#raise_lowering) | Converts a raise's code and details, or declines a raise whose parts already have their types. |
 | [`register_rewrite`](#register_rewrite) | Registers the decorated translator with its pattern and hole patterns. |
-| [`try_catch_cases`](#try_catch_cases) | Returns each lowered arm of `arms` chosen by its index in `selected`; `$try_handled` calls this in a slot. |
+| [`try_catch_cases`](#try_catch_cases) | Returns each lowered arm of `arms` chosen by its index in `selected`; `$x2c.try.handled` calls this in a slot. |
 | [`try_lowering`](#try_lowering) | Lowers the parsed try `node` to its landing form. |
 
 ### Functions
@@ -89,7 +89,7 @@ Source: `src/linked-meta.x:315`
 Rebuilds a call that finds no member on its receiver through the one
 delegate field path that provides the method.
 
-Source: `src/linked-meta.x:462`
+Source: `src/linked-meta.x:464`
 
 #### destructure_declaration
 
@@ -99,7 +99,7 @@ Declares the names of `T (a, b) = source;` and then reads the source
 into them, or declares each target of `(T1 a, T2 b) = source;`
 initialized from its element.
 
-Source: `src/linked-meta.x:517`
+Source: `src/linked-meta.x:519`
 
 #### destructure_statement
 
@@ -107,7 +107,7 @@ Source: `src/linked-meta.x:517`
 
 Reads the source of `(a, b) = source;` into its targets in a block.
 
-Source: `src/linked-meta.x:547`
+Source: `src/linked-meta.x:549`
 
 #### destructure_value
 
@@ -116,7 +116,7 @@ Source: `src/linked-meta.x:547`
 Reads the source of `(a, b) = source` into its targets, and keeps the
 source in a result local as the expression's value.
 
-Source: `src/linked-meta.x:561`
+Source: `src/linked-meta.x:563`
 
 #### dynamic_binary
 
@@ -128,7 +128,7 @@ for `+` beside text, text. The call is returned lowered, because an
 operator chain applies this rule once for each term and binding would
 search the whole remaining chain each time.
 
-Source: `src/linked-meta.x:1418`
+Source: `src/linked-meta.x:1420`
 
 #### dynamic_change
 
@@ -137,7 +137,7 @@ Source: `src/linked-meta.x:1418`
 Adds or subtracts one through the `Var` update helpers; the postfix
 forms return the value before the change.
 
-Source: `src/linked-meta.x:1503`
+Source: `src/linked-meta.x:1505`
 
 #### dynamic_compound
 
@@ -146,7 +146,7 @@ Source: `src/linked-meta.x:1503`
 Updates a `Var` or numeric lvalue with a `Var` or numeric operand
 through the update helper of its storage.
 
-Source: `src/linked-meta.x:1477`
+Source: `src/linked-meta.x:1479`
 
 #### dynamic_unary
 
@@ -154,7 +154,7 @@ Source: `src/linked-meta.x:1477`
 
 Rejects a unary numeric operator on a `Var`.
 
-Source: `src/linked-meta.x:1519`
+Source: `src/linked-meta.x:1521`
 
 #### lambda_cells
 
@@ -168,7 +168,7 @@ lambda's function moves its own. The function binds again only its
 cells and the statements that hold them; its other statements are kept
 as they are bound.
 
-Source: `src/linked-meta.x:1054`
+Source: `src/linked-meta.x:1056`
 
 #### lambda_closure
 
@@ -178,7 +178,7 @@ Lifts the capturing lambda `node` to a static function of its
 parameters and captures, and answers a `Func` of a record of the
 captured values and addresses.
 
-Source: `src/linked-meta.x:969`
+Source: `src/linked-meta.x:971`
 
 #### lambda_lift
 
@@ -187,7 +187,7 @@ Source: `src/linked-meta.x:969`
 Lifts the noncapturing lambda `node` to a static function, whose name
 is its value.
 
-Source: `src/linked-meta.x:812`
+Source: `src/linked-meta.x:814`
 
 #### linked_meta_hashes
 
@@ -195,7 +195,7 @@ Source: `src/linked-meta.x:812`
 
 Returns linked definition hashes and provider source dependencies.
 
-Source: `src/linked-meta.x:2280`
+Source: `src/linked-meta.x:2285`
 
 #### linked_meta_targets
 
@@ -203,7 +203,7 @@ Source: `src/linked-meta.x:2280`
 
 Returns the linked copies, and the runtime builders, by name.
 
-Source: `src/linked-meta.x:2054`
+Source: `src/linked-meta.x:2059`
 
 #### match_lowering
 
@@ -212,7 +212,7 @@ Source: `src/linked-meta.x:2054`
 Lowers the bound match `node` to C text around its subject, patterns,
 and bodies.
 
-Source: `src/linked-meta.x:1402`
+Source: `src/linked-meta.x:1404`
 
 #### printf_values
 
@@ -220,7 +220,7 @@ Source: `src/linked-meta.x:1402`
 
 Reads the Var values a printf-family call's static format consumes.
 
-Source: `src/linked-meta.x:1659`
+Source: `src/linked-meta.x:1661`
 
 #### protocol_conformance
 
@@ -229,7 +229,7 @@ Source: `src/linked-meta.x:1659`
 Places the forwarding members, descriptor thunks, method table, and
 descriptor registration of one conformance.
 
-Source: `src/linked-meta.x:1773`
+Source: `src/linked-meta.x:1778`
 
 #### raise_lowering
 
@@ -238,7 +238,7 @@ Source: `src/linked-meta.x:1773`
 Converts a raise's code and details, or declines a raise whose parts
 already have their types.
 
-Source: `src/linked-meta.x:1838`
+Source: `src/linked-meta.x:1843`
 
 #### register_rewrite
 
@@ -253,14 +253,14 @@ Source: `src/linked-meta.x:91`
 `List try_catch_cases(List selected, List arms)`
 
 Returns each lowered arm of `arms` chosen by its index in `selected`;
-`$try_handled` calls this in a slot. Each arm is its own
+`$x2c.try.handled` calls this in a slot. Each arm is its own
 statement, so a `break` or `continue` in it still reaches the enclosing
 loop, and only one test holds because `selected` does not change. When
 every arm returns or raises, control cannot leave them, and a final
 unreachable mark tells C so that a function ending in such a `try`
 needs no return after it.
 
-Source: `src/linked-meta.x:1872`
+Source: `src/linked-meta.x:1877`
 
 #### try_lowering
 
@@ -268,7 +268,7 @@ Source: `src/linked-meta.x:1872`
 
 Lowers the parsed try `node` to its landing form.
 
-Source: `src/linked-meta.x:1998`
+Source: `src/linked-meta.x:2003`
 
 ## Design notes
 
