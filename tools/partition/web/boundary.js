@@ -16,7 +16,7 @@ const BoundaryGraph = {
         inside = bi ? b : a,
         outside = bi ? a : b,
         g = owner.get(outside),
-        key = direction + ":" + g.id;
+        key = bi ? "in:file-" + data.functions[outside].f : "out:" + g.id;
       if (bi) incoming += w;
       else outgoing += w;
       if (!ports.has(key))
@@ -24,7 +24,7 @@ const BoundaryGraph = {
           key,
           direction,
           group: g.id,
-          name: g.name,
+          name: bi ? data.files[data.functions[outside].f].id : g.name,
           calls: 0,
           edges: [],
         });
@@ -48,7 +48,10 @@ const BoundaryGraph = {
       functions.get(inside)[direction] += w;
     }
     return {
-      ports: [...ports.values()],
+      ports: [...ports.values()].map((p) => ({
+        ...p,
+        consumers: new Set(p.edges.map(([a]) => a)).size,
+      })),
       links: [...links.values()],
       functions,
       incoming,

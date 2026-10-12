@@ -2,6 +2,8 @@ const assert = require("node:assert/strict"),
   B = require("../web/boundary.js"),
   D = require(process.env.PARTITION_GRAPH || "../data/graph.json");
 const fixture = {
+  functions: [{ f: 0 }, { f: 1 }, { f: 2 }],
+  files: [{ id: "a.x" }, { id: "inside.x" }, { id: "b.x" }],
   edges: [
     [0, 1, 2],
     [1, 0, 3],
@@ -31,7 +33,7 @@ const merged = B.collect(fixture, new Set([1]), [
   groups[1],
   { id: "combined", name: "Combined", members: [0, 2] },
 ]);
-assert.equal(merged.ports.length, 2);
+assert.equal(merged.ports.length, 3); // Incoming source files stay separate after merging groups.
 assert.equal(merged.incoming, b.incoming);
 assert.equal(merged.outgoing, b.outgoing);
 const ids = new Set(
@@ -60,4 +62,29 @@ assert.equal(
 );
 console.log(
   "PASS: boundary direction, aggregation, and complete current-snapshot coverage",
+);
+
+const twenty = {
+  files: Array.from({ length: 6 }, (_, i) => ({ id: `file-${i}.x` })),
+  functions: Array.from({ length: 22 }, (_, i) => ({
+    f: i < 20 ? Math.floor(i / 4) : 5,
+  })),
+  edges: Array.from({ length: 20 }, (_, i) => [i, 20, 2]).concat([[0, 21, 3]]),
+};
+const example = B.collect(twenty, new Set([20, 21]), [
+  {
+    id: "all",
+    name: "Merged",
+    members: Array.from({ length: 22 }, (_, i) => i),
+  },
+]);
+assert.equal(example.ports.length, 5);
+assert.deepEqual(
+  example.ports.map((p) => p.consumers),
+  [4, 4, 4, 4, 4],
+);
+assert.equal(example.ports[0].calls, 11);
+assert.equal(example.incoming, 43);
+console.log(
+  "PASS: twenty callers in five files produce five weights of four; repeated sites and targets do not inflate consumers",
 );

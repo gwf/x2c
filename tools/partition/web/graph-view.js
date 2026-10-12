@@ -395,32 +395,29 @@ function renderGraph(gs, map) {
       rail.id = "caller-rail";
       host.appendChild(rail);
     }
-    const targets = [...boundary.functions]
-      .filter(([v, t]) => t.in)
+    const files = boundary.ports
+      .filter((p) => p.direction === "in")
       .sort(
-        (a, b) =>
-          Number(D.functions[a[0]].s) - Number(D.functions[b[0]].s) ||
-          b[1].in - a[1].in,
+        (a, b) => b.consumers - a.consumers || a.name.localeCompare(b.name),
       );
     const scroll = rail.scrollTop;
     rail.innerHTML =
-      "<strong>CALLERS OUTSIDE VIEW</strong><p>Each row connects to its target function.<br>Consumers / call sites</p>" +
-      targets
-        .map(([v, t]) => {
-          const es = boundary.links
-              .filter((l) => l.direction === "in" && l.inside === v)
-              .flatMap((l) => l.edges),
-            count = new Set(es.map((e) => e[0])).size;
-          return `<button data-caller-target="${v}" title="${esc(D.functions[v].n)}: ${count} outside consumers, ${t.in} call sites" style="color:${functionColor(v)}"><span>${esc(D.functions[v].n)}</span><b>${count} / ${t.in}</b><small>${D.functions[v].s ? "Static target" : "Public entry point"}</small></button>`;
-        })
+      "<strong>CALLER FILES OUTSIDE VIEW</strong><p>Caller functions / call sites.<br>Click a file to inspect targets.</p>" +
+      files
+        .map(
+          (p) =>
+            `<button data-caller-file="${esc(p.key)}" title="${esc(p.name)}: ${p.consumers} caller functions, ${p.calls} call sites"><span>${esc(p.name)}</span><b>${p.consumers} / ${p.calls}</b></button>`,
+        )
         .join("");
-    rail.hidden = !targets.length;
+    rail.hidden = !files.length;
     rail.scrollTop = scroll;
-    rail.querySelectorAll("[data-caller-target]").forEach(
+    rail.querySelectorAll("[data-caller-file]").forEach(
       (e) =>
         (e.onclick = () => {
-          active = +e.dataset.callerTarget;
-          inspector();
+          activePort = e.dataset.callerFile;
+          active = null;
+          hovered = null;
+          boundaryInspector(activePort, null);
           paintLabels();
         }),
     );
@@ -434,20 +431,33 @@ function renderGraph(gs, map) {
     }
     const rect = svg.getBoundingClientRect(),
       railRect = rail.getBoundingClientRect();
-    $("boundary-links").innerHTML = targets
-      .map(([v, t]) => {
-        const el = rail.querySelector(`[data-caller-target="${v}"]`),
-          box = el.getBoundingClientRect(),
-          p = byId.get(v),
-          x = p.x * c.k + c.x,
-          y = p.y * c.k + c.y,
-          A = {
-            x: railRect.right - rect.left + 4,
-            y: (box.top + box.bottom) / 2 - rect.top,
-          };
-        if (box.top < railRect.top || box.bottom > railRect.bottom) return "";
-        const related = focusId === null || focusId === v;
-        return `<path class="boundary-edge" data-inside="${v}" d="M${A.x} ${A.y} C${A.x + 40} ${A.y} ${x - 40} ${y} ${x - nodeRadius(v) - 3} ${y}" stroke="${functionColor(v)}" stroke-width="${Math.min(4, 1 + Math.log2(t.in + 1) * 0.35)}" opacity="${related ? 0.65 : 0.08}" fill="none" marker-end="url(#arrow2)"/>`;
+    $("boundary-links").innerHTML = files
+      .flatMap((file) => {
+        const el = rail.querySelector(`[data-caller-file="${file.key}"]`),
+          box = el.getBoundingClientRect();
+        if (box.top < railRect.top || box.bottom > railRect.bottom) return [];
+        const A = {
+          x: railRect.right - rect.left + 4,
+          y: (box.top + box.bottom) / 2 - rect.top,
+        };
+        return regions.flatMap((r) => {
+          const members = new Set(gs.find((g) => g.id === r.id).members);
+          const edges = file.edges.filter(([, b]) => members.has(b));
+          if (!edges.length) return [];
+          const count = new Set(edges.map(([a]) => a)).size,
+            calls = edges.reduce((n, e) => n + e[2], 0);
+          const x = r.x * c.k + c.x,
+            y = (r.y + r.h / 2) * c.k + c.y;
+          const related =
+            (!activePort ||
+              activePort === file.key ||
+              activePort === "in:*" ||
+              activePort === "group-in:" + r.id) &&
+            (focusId === null || edges.some(([, b]) => b === focusId));
+          return [
+            `<g opacity="${related ? 0.85 : 0.08}"><title>${esc(file.name)} to ${esc(r.name || gs.find((g) => g.id === r.id).name)}: ${count} caller functions, ${calls} call sites</title><path class="boundary-edge" d="M${A.x} ${A.y} C${A.x + 40} ${A.y} ${x - 40} ${y} ${x - 3} ${y}" stroke="#86c7ff" stroke-width="${1 + Math.sqrt(count)}" fill="none" marker-end="url(#arrow2)"/><text x="${(A.x + x) / 2}" y="${(A.y + y) / 2 - 5}" fill="#dcecff" font-size="12" paint-order="stroke" stroke="#11181c" stroke-width="3">${count}</text></g>`,
+          ];
+        });
       })
       .join("");
     rail.onscroll = () => paintBoundary(hovered ?? active);
@@ -526,7 +536,7 @@ function renderGraph(gs, map) {
           ? ports[0].name
           : "Calls across this view";
     $("inspector").innerHTML =
-      `<div class="paneltag">OUTSIDE CONNECTIONS</div><h2>${esc(name)}</h2><p>${key ? (ports[0].direction === "in" ? "These outside functions call into this view." : "These functions in this view call outside.") : "All resolved calls with one endpoint outside the current view."}</p><div class="costrow"><span>Incoming call sites</span><strong>${ports.filter((p) => p.direction === "in").reduce((s, p) => s + p.calls, 0)}</strong></div><div class="costrow"><span>Outgoing call sites</span><strong>${ports.filter((p) => p.direction === "out").reduce((s, p) => s + p.calls, 0)}</strong></div><h3>${rows.length} directed function pairs</h3><div class="boundary-details">${rows.map(({ p, edge: [a, b, w] }) => `<div class="boundary-detail"><span class="boundary-direction">${p.direction === "in" ? "INCOMING" : "OUTGOING"} \u00b7 ${w} call site${w === 1 ? "" : "s"}</span><button data-boundary-function="${a}">${esc(D.functions[a].n)}</button><span class="boundary-arrow">\u2193 calls</span><button data-boundary-function="${b}">${esc(D.functions[b].n)}</button><small>Outside group: ${esc(p.name)}</small></div>`).join("") || "<p>No resolved calls cross this view boundary.</p>"}</div><button id="return-graph-inspector" class="wide">${preview ? "\u2190 Split preview" : "\u2190 Group inspector"}</button>`;
+      `<div class="paneltag">OUTSIDE CONNECTIONS</div><h2>${esc(name)}</h2><p>${key ? (ports[0].direction === "in" ? "These outside functions call into this view." : "These functions in this view call outside.") : "All resolved calls with one endpoint outside the current view."}</p><div class="costrow"><span>Incoming call sites</span><strong>${ports.filter((p) => p.direction === "in").reduce((s, p) => s + p.calls, 0)}</strong></div><div class="costrow"><span>Outgoing call sites</span><strong>${ports.filter((p) => p.direction === "out").reduce((s, p) => s + p.calls, 0)}</strong></div><h3>${rows.length} directed function pairs</h3><div class="boundary-details">${rows.map(({ p, edge: [a, b, w] }) => `<div class="boundary-detail"><span class="boundary-direction">${p.direction === "in" ? "INCOMING" : "OUTGOING"} \u00b7 ${w} call site${w === 1 ? "" : "s"}</span><button data-boundary-function="${a}">${esc(D.functions[a].n)}</button><span class="boundary-arrow">\u2193 calls</span><button data-boundary-function="${b}">${esc(D.functions[b].n)}</button><small>Outside ${p.direction === "in" ? "file" : "group"}: ${esc(p.name)}</small></div>`).join("") || "<p>No resolved calls cross this view boundary.</p>"}</div><button id="return-graph-inspector" class="wide">${preview ? "\u2190 Split preview" : "\u2190 Group inspector"}</button>`;
     $("return-graph-inspector").onclick = () => {
       activePort = null;
       active = null;
