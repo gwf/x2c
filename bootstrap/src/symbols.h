@@ -121,8 +121,6 @@ Type Sym_resolve_key(Sym s, Type key);
 
 Type Sym_next_typedef(Sym s, Type type, int * hops);
 
-Type Sym_resolve_base_type(Sym s, Type key);
-
 Type Sym_sole_typedef(Sym s, Type type);
 
 Type Sym_normalize_declared_type(Sym s, Type type);

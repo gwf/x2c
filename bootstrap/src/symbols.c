@@ -535,10 +535,10 @@ List Sym_visible_symbols(Sym s){
         key = _x2c_macro_cursor_output_0;
         value = _x2c_macro_cursor_output_1;
         {
-          List _x2c_match_expr = Var_list(key); List _x2c_match_cursor;
+          Var _x2c_match_var = key; int _x2c_match_none = !Var_is(_x2c_match_var, 806120);
+          List _x2c_match_expr = Var_list(_x2c_match_var); List _x2c_match_cursor;
           switch(0){
-              default: ;
-             _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && Var_is(_x2c_match_cursor->car, 1318210446)) { Var _x2c_match_value_0 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
+              default: ; if (!_x2c_match_none) { _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && Var_is(_x2c_match_cursor->car, 1318210446)) { Var _x2c_match_value_0 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
               Var name;
               name = _x2c_match_value_0;
               {
@@ -551,7 +551,7 @@ List Sym_visible_symbols(Sym s){
               }
 
             }
-             break; } }
+             break; } } }
           }
 
         }
@@ -1303,19 +1303,12 @@ Type Sym_next_typedef(Sym s, Type type, int * hops){
   if(! _init_guard_) _file_init_();  if(++(* hops) > RESOLVE_KEY_MAX_HOPS) Sym__typedef_budget_error(s, type);  return Type_is_typedef_name(type) || Type_is_typedef(type) ? Sym__typedef_target(s, type) : List_type(Sym_get(s, Type_list(type)));
 }
 
-Type Sym_resolve_base_type(Sym s, Type key){
-  if(! _init_guard_) _file_init_();  Type type = Sym__typedef_target(s, key);  for(int hops = 0;  List_truth(Type_list(type)) && hops < RESOLVE_KEY_MAX_HOPS;  hops ++){
-    Type next = Sym__typedef_target(s, type);  if(! List_truth(Type_list(next))) break;  type = next;
-  }
-  return type;
-}
-
 Type Sym_sole_typedef(Sym s, Type type){
   if(! _init_guard_) _file_init_();  String found = NULL;  for(int i = 0;  i < s -> base_scopes;  i ++){
     Var key, target;  Map _x2c_macro_object_9 = Sym__scope_at(s, i) -> symbols;  unsigned _x2c_macro_cursor_9 = 0;  Var _x2c_macro_cursor_output_15;  Var _x2c_macro_cursor_output_16;  while(Map_try_next(_x2c_macro_object_9, &(_x2c_macro_cursor_9), &(_x2c_macro_cursor_output_15), &(_x2c_macro_cursor_output_16))){
       key = _x2c_macro_cursor_output_15;  target = _x2c_macro_cursor_output_16; {
-        List _x2c_match_expr = Var_list(key); List _x2c_match_cursor;  switch(_x2c_match_expr ? _x2c_match_expr->car.u64 : 0){
-            case 9224497981422903628ULL: ;  _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497981422903628ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 1318210446)) { Var _x2c_match_value_0 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
+        Var _x2c_match_var = key; int _x2c_match_none = !Var_is(_x2c_match_var, 806120);  List _x2c_match_expr = Var_list(_x2c_match_var); List _x2c_match_cursor;  switch(_x2c_match_expr ? _x2c_match_expr->car.u64 : 0){
+            case 9224497981422903628ULL: ; if (!_x2c_match_none) { _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497981422903628ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 1318210446)) { Var _x2c_match_value_0 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
             Var name;  name = _x2c_match_value_0; {
               Var _x2c_match_value_3 = name; {
                 String name = Var_string(_x2c_match_value_3);  if(Var_equal(target, List_var(type))){
@@ -1327,7 +1320,7 @@ Type Sym_sole_typedef(Sym s, Type type){
             }
 
           }
-           break; } } default: break;
+           break; } } } default: break;
         }
 
       }

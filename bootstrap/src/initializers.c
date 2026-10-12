@@ -2461,18 +2461,18 @@ List Compiler_initializer_native_types(Compiler c, Type type){
 
 static Var Compiler__native_modifier(Compiler c, Var modifier, Var * reused){
   (* reused) = modifier; {
-    List _x2c_match_expr = Var_list(modifier); List _x2c_match_cursor;  switch(_x2c_match_expr ? _x2c_match_expr->car.u64 : 0){
-        case 9224497936761627226ULL: ;  _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497936761627226ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor) { Var _x2c_match_value_0 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
+    Var _x2c_match_var = modifier; int _x2c_match_none = !Var_is(_x2c_match_var, 806120);  List _x2c_match_expr = Var_list(_x2c_match_var); List _x2c_match_cursor;  switch(_x2c_match_expr ? _x2c_match_expr->car.u64 : 0){
+        case 9224497936761627226ULL: ; if (!_x2c_match_none) { _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497936761627226ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor) { Var _x2c_match_value_0 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
         Var bound;  bound = _x2c_match_value_0; {
           unsigned long long count;  if(! Var_truth(bound) || _initializer_integer(Var_list(bound), &(count))) return modifier; {
-            List _x2c_match_expr = Var_list(bound); Var _x2c_match_values[1]; MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };  switch(_x2c_match_expr ? _x2c_match_expr->car.u64 : 0){
-                case 9224497936761996324ULL: ;  static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(_899), &_x2c_match_capture)) { Var _x2c_match_value_0 = _x2c_match_values[0]; {
+            Var _x2c_match_var = bound; int _x2c_match_none = !Var_is(_x2c_match_var, 806120);  List _x2c_match_expr = Var_list(_x2c_match_var); Var _x2c_match_values[1]; MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };  switch(_x2c_match_expr ? _x2c_match_expr->car.u64 : 0){
+                case 9224497936761996324ULL: ; if (!_x2c_match_none) { static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(_899), &_x2c_match_capture)) { Var _x2c_match_value_0 = _x2c_match_values[0]; {
                 Var tag;  tag = _x2c_match_value_0; {
                   (* reused) = List_var(cons(_316, cons(List_var(cons(_2, cons(_901, cons(List_var(cons(_322, cons(List_var(cons(_304, cons(List_var(cons(_824, cons(tag, NULL))), NULL))), NULL))), NULL)))), NULL)));  return modifier;
                 }
 
               }
-               break; } default: break;
+               break; } } default: break;
             }
 
           }
@@ -2483,7 +2483,7 @@ static Var Compiler__native_modifier(Compiler c, Var modifier, Var * reused){
         }
 
       }
-       break; } } default: break;
+       break; } } } default: break;
     }
 
   }

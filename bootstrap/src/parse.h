@@ -98,9 +98,11 @@ void Compiler_enter(Compiler c, Ancestor row);
 
 List Compiler_enclosing(Compiler c, Symbol what);
 
-int Compiler_enter_function(Compiler c, List declaration);
+int Compiler_enter_function(Compiler c, List declaration, int callback);
 
-List Compiler_leave_function(Compiler c, int depth);
+List Compiler_function_entry(Compiler c, int depth);
+
+void Compiler_exit_function(Compiler c, int depth);
 
 void Compiler_place_entry(Compiler c, Var code);
 

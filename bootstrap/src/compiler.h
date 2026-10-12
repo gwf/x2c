@@ -61,7 +61,7 @@ typedef struct SlotWatch * SlotWatch;
 typedef struct Ancestor{
   Symbol what;
   Token token;
-  int origin, lowering;
+  int origin, lowering, callback;
   List base, node;
 }
 Ancestor;
@@ -317,8 +317,6 @@ List Compiler_define_pattern_binders(Compiler c, List pattern);
 List Compiler_pattern_binder_declarations(Compiler c, List bindings, List handle);
 
 void Compiler_own_diagnostics(Compiler c);
-
-void Compiler_borrow_diagnostics(Compiler c, Compiler owner);
 
 void Compiler_close_child(Compiler c, Compiler child);
 

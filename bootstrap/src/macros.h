@@ -91,6 +91,8 @@ List Compiler_lower_rewrite(Compiler c, Symbol point, Var kind, List source, Ast
 
 List Compiler_written_support(Compiler c, List bound);
 
+int Compiler_applying_shipped(Compiler c);
+
 typedef struct Effects{
   int bindings, names, origins, pending, placements, diagnostics;
 }

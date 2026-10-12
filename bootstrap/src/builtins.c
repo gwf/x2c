@@ -2751,11 +2751,11 @@ static List _value_type(List type){
       {
         if(Var_equal(item, Symbol_var(7304424)) || Var_equal(item, Symbol_var(1544849476362)) || Var_equal(item, Symbol_var(1249006209256))) continue;
         {
-          List _x2c_match_expr = Var_list(item); List _x2c_match_cursor;
+          Var _x2c_match_var = item; int _x2c_match_none = !Var_is(_x2c_match_var, 806120);
+          List _x2c_match_expr = Var_list(_x2c_match_var); List _x2c_match_cursor;
           switch(_x2c_match_expr ? _x2c_match_expr->car.u64 : 0){
-              case 9224498094883285768ULL: ;
-             _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224498094883285768ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1)) {continue;
-             break; } default: break;
+              case 9224498094883285768ULL: ; if (!_x2c_match_none) { _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224498094883285768ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1)) {continue;
+             break; } } default: break;
           }
 
         }
@@ -2771,10 +2771,10 @@ static List _value_type(List type){
 static List _field_on(List field, List receiver){
   String name = Var_string(List_getindex(field, 0));
   {
-    List _x2c_match_expr = Var_list(List_getindex(field, 1)); List _x2c_match_cursor, _x2c_match_cursor1;
+    Var _x2c_match_var = List_getindex(field, 1); int _x2c_match_none = !Var_is(_x2c_match_var, 806120);
+    List _x2c_match_expr = Var_list(_x2c_match_var); List _x2c_match_cursor, _x2c_match_cursor1;
     switch(0){
-        default: ;
-       _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224498094883285768ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1)) {{
+        default: ; if (!_x2c_match_none) { _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224498094883285768ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1)) {{
         Type type = List_type(_value_type(Var_list(List_getindex(field, 1))));
         return cons(_2, cons(_3, cons(List_var(cons(_4, cons(_7, cons(List_var(({
           Var _x2c_literal_part_112 = List_var(cons(_165, cons(List_var(cons(List_var(cons(_25, cons(_494, cons(_40, cons(List_var(type), NULL))))), NULL)), _683)));  Var _x2c_literal_part_113 = List_var(cons(_4, cons(_7, cons(List_var(({
@@ -2784,7 +2784,7 @@ static List _field_on(List field, List receiver){
         }
         )), NULL)))), NULL)));
       }
-       break; }
+       break; } }
     }
 
   }

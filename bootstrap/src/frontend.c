@@ -658,10 +658,10 @@ static List _unit_private_rows(Compiler c, Map globs){
       key = _x2c_macro_cursor_output_2;
       owner = _x2c_macro_cursor_output_3;
       {
-        List _x2c_match_expr = Var_list(key); List _x2c_match_cursor;
+        Var _x2c_match_var = key; int _x2c_match_none = !Var_is(_x2c_match_var, 806120);
+        List _x2c_match_expr = Var_list(_x2c_match_var); List _x2c_match_cursor;
         switch(0){
-            default: ;
-           _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && Var_equal(_x2c_match_cursor->car, _21 ->car) && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor) { Var _x2c_match_value_0 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
+            default: ; if (!_x2c_match_none) { _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && Var_equal(_x2c_match_cursor->car, _21 ->car) && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor) { Var _x2c_match_value_0 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
             Var name;
             name = _x2c_match_value_0;
             {
@@ -672,7 +672,7 @@ static List _unit_private_rows(Compiler c, Map globs){
             }
 
           }
-           break; } }
+           break; } } }
         }
 
       }
