@@ -149,6 +149,9 @@ TOOL_ARGS_LOG="$tool_log" X2C_CC=wrong-cc CC=also-wrong \
 grep -Fxq "$BUILD/tool source.c" "$tool_log"
 grep -Fxq "$BUILD/tool build/obj/tool source-"*".o" "$tool_log"
 python3 - "$tool_log" "$BUILD/tool source.c" <<'PY_NATIVE_PHASES'
+if not __debug__:
+    raise SystemExit("this check cannot run with optimized Python")
+
 from pathlib import Path
 import sys
 

@@ -7,6 +7,9 @@ BUILD=${META_TRANSPORT_BUILD:-"$ROOT/unittest/build/meta-transport"}
 X2C=${X2C:-"$ROOT/builds/0/x2c"}
 mkdir -p "$BUILD/out"
 python3 - "$X2C" "$BUILD" <<'PY'
+if not __debug__:
+    raise SystemExit("this check cannot run with optimized Python")
+
 from pathlib import Path
 import os
 import signal
