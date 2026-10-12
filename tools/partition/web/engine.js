@@ -152,21 +152,80 @@ const Engine = (() => {
     }
     return best.groups.sort((a, b) => b.length - a.length);
   }
-  function suggestMoves(data, groups, ties = [], focus = null) {
+  function moveEvaluator(data, groups) {
     const owners = membership(groups, data.functions.length);
+    const incident = data.functions.map(() => []),
+      crossing = data.functions.map(() => 0);
+    data.edges.forEach(([a, b], i) => {
+      incident[a].push(i);
+      if (a !== b) incident[b].push(i);
+      if (owners[a] !== owners[b]) crossing[b]++;
+    });
+    const beforeCut = metrics(data, groups).cut;
+    function impact(members, destination) {
+      const to = groups.findIndex((g) => g.id === destination),
+        moved = new Set(members);
+      const owner = (v) => (moved.has(v) ? to : owners[v]);
+      const changes = new Map();
+      let addedCalls = 0,
+        removedCalls = 0;
+      for (const i of new Set(members.flatMap((v) => incident[v]))) {
+        const [a, b, w] = data.edges[i],
+          before = owners[a] !== owners[b],
+          after = owner(a) !== owner(b);
+        if (!before && after) addedCalls += w;
+        if (before && !after) removedCalls += w;
+        changes.set(b, (changes.get(b) || 0) + Number(after) - Number(before));
+      }
+      const added = [],
+        removed = [],
+        localized = [],
+        delocalized = [];
+      for (const [v, d] of changes) {
+        const before = crossing[v],
+          after = before + d;
+        if (data.functions[v].s) {
+          if (!before && after) added.push(v);
+          if (before && !after) removed.push(v);
+        } else if (!data.functions[v].k) {
+          if (before && !after) localized.push(v);
+          if (!before && after) delocalized.push(v);
+        }
+      }
+      const remaining = members.map((v) => ({
+        v,
+        callers: [
+          ...new Set(
+            incident[v].flatMap((i) => {
+              const [a, b] = data.edges[i];
+              return b === v && owner(a) !== owner(b) ? [a] : [];
+            }),
+          ),
+        ],
+      }));
+      return {
+        beforeCut,
+        afterCut: beforeCut + addedCalls - removedCalls,
+        delta: addedCalls - removedCalls,
+        addedCalls,
+        removedCalls,
+        added,
+        removed,
+        localized,
+        delocalized,
+        remaining,
+      };
+    }
+    return { owners, incident, impact };
+  }
+  function suggestMoves(data, groups, ties = [], focus = null, mode = "cut") {
+    const { owners, incident, impact } = moveEvaluator(data, groups);
     const blocks = atoms(
       data.functions.map((_, i) => i),
       ties,
     );
     const blockOf = new Map();
     blocks.forEach((b, i) => b.forEach((v) => blockOf.set(v, i)));
-    const incident = data.functions.map(() => []),
-      crossing = data.functions.map(() => 0);
-    data.edges.forEach(([a, b], i) => {
-      incident[a].push(i);
-      incident[b].push(i);
-      if (owners[a] !== owners[b]) crossing[b]++;
-    });
     const seen = new Set(),
       results = [];
     for (const block of blocks) {
@@ -195,8 +254,7 @@ const Engine = (() => {
       if (neighbor) bundles.push([...block, ...blocks[neighbor[0]]]);
       for (const members of bundles) {
         if (members.length >= groups[from].members.length) continue;
-        const moved = new Set(members),
-          edges = new Set(members.flatMap((v) => incident[v])),
+        const edges = new Set(members.flatMap((v) => incident[v])),
           destinations = new Set();
         for (const i of edges)
           for (const v of data.edges[i].slice(0, 2))
@@ -212,35 +270,18 @@ const Engine = (() => {
             to;
           if (seen.has(key)) continue;
           seen.add(key);
-          let delta = 0;
-          const privateChanges = new Map();
-          for (const i of edges) {
-            const [a, b, w] = data.edges[i];
-            const before = owners[a] !== owners[b],
-              after =
-                (moved.has(a) ? to : owners[a]) !==
-                (moved.has(b) ? to : owners[b]);
-            delta += (Number(after) - Number(before)) * w;
-            if (data.functions[b].s)
-              privateChanges.set(
-                b,
-                (privateChanges.get(b) || 0) + Number(after) - Number(before),
-              );
-          }
-          if (delta >= 0) continue;
-          const added = [],
-            removed = [];
-          for (const [v, d] of privateChanges) {
-            if (!crossing[v] && crossing[v] + d > 0) added.push(v);
-            if (crossing[v] > 0 && crossing[v] + d === 0) removed.push(v);
-          }
+          const effect = impact(members, groups[to].id);
+          if (
+            mode === "localize"
+              ? effect.localized.length <= effect.delocalized.length
+              : effect.delta >= 0
+          )
+            continue;
           results.push({
             members: members.slice(),
             from: groups[from].id,
             to: groups[to].id,
-            delta,
-            added,
-            removed,
+            ...effect,
           });
         }
       }
@@ -248,12 +289,17 @@ const Engine = (() => {
     return results
       .sort(
         (a, b) =>
+          (mode === "localize"
+            ? b.localized.length -
+              b.delocalized.length -
+              (a.localized.length - a.delocalized.length)
+            : 0) ||
           a.delta - b.delta ||
           a.added.length - b.added.length ||
           a.members.length - b.members.length,
       )
       .slice(0, 12);
   }
-  return { membership, metrics, partition, atoms, suggestMoves };
+  return { membership, metrics, partition, atoms, suggestMoves, moveEvaluator };
 })();
 if (typeof module !== "undefined") module.exports = Engine;

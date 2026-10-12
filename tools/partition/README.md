@@ -62,6 +62,16 @@ are served directly. Node.js is needed only for the optional checks below.
   change, and private boundaries before applying one move. Undo restores it.
   Initializers and moves that empty a group are excluded. These local candidates
   are design evidence, not proof of semantic suitability or global optimality.
+- Localize functions ranks the same bounded moves by net private-visibility
+  opportunities, then cut cost. Zero-cut and higher-cut moves remain eligible
+  when visibility improves. Gains and losses name public functions whose last
+  known outside caller disappears or whose first outside caller appears.
+  These are candidates for source review, not automatic visibility edits:
+  callback references, exported uses, and unresolved calls need checking.
+- Manual and suggested moves show a result with before/after global cut,
+  crossing call sites removed and introduced, visibility opportunities gained
+  and lost, and remaining outside callers for each moved function. Existing
+  private targets crossing boundaries are reported separately.
 - Preview does not change the saved plan. Accept it before moving functions.
   Select a function, then drag it to another group, or use the inspector's
   destination selector. The function list supports keep-together sets.

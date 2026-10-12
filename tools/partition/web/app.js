@@ -150,7 +150,7 @@ function render(skipInspector = false) {
       ? metric("Crossing within this view", fmt(scopeCut))
       : metric("Functions", fmt(D.functions.length)));
   $("toolbar").innerHTML =
-    `${scope ? `<button id="back">\u2190 ${previewGroup ? "Group arrangement" : scopeStack.length ? "Parent group" : "Project"}</button>` : ""}<button id="split" ${selected.size !== 1 || preview ? "disabled" : ""}>Preview split</button><button id="merge" ${selected.size < 2 || preview ? "disabled" : ""}>Merge ${selected.size > 1 ? selected.size + " groups" : "groups"}</button>${preview ? '<span class="previewbadge">Tentative split</span>' : ""}${scope ? `<button id="suggest-moves" ${preview ? "disabled" : ""}>Suggest moves</button><button id="view-groups">Group arrangement</button><button id="view-graph">Functions</button><button id="view-list">Function list</button>` : ""}<small>${scope ? "Open groups or switch to Functions to move members" : "Lines show aggregated calls \u00b7 hover to trace connections"}</small>`;
+    `${scope ? `<button id="back">\u2190 ${previewGroup ? "Group arrangement" : scopeStack.length ? "Parent group" : "Project"}</button>` : ""}<button id="split" ${selected.size !== 1 || preview ? "disabled" : ""}>Preview split</button><button id="merge" ${selected.size < 2 || preview ? "disabled" : ""}>Merge ${selected.size > 1 ? selected.size + " groups" : "groups"}</button>${preview ? '<span class="previewbadge">Tentative split</span>' : ""}${scope ? `<button id="suggest-moves" ${preview ? "disabled" : ""}>Suggest moves</button><button id="localize-functions" ${preview ? "disabled" : ""}>Localize functions</button><button id="view-groups">Group arrangement</button><button id="view-graph">Functions</button><button id="view-list">Function list</button>` : ""}<small>${scope ? "Open groups or switch to Functions to move members" : "Lines show aggregated calls \u00b7 hover to trace connections"}</small>`;
   $("back")?.addEventListener("click", () => {
     if (previewGroup) {
       previewGroup = null;
@@ -175,7 +175,10 @@ function render(skipInspector = false) {
       previewGroup = null;
       render();
     });
-  $("suggest-moves")?.addEventListener("click", renderMoveSuggestions);
+  $("suggest-moves")?.addEventListener("click", () => renderMoveSuggestions());
+  $("localize-functions")?.addEventListener("click", () =>
+    renderMoveSuggestions("localize"),
+  );
   renderNav();
   if (scope) {
     const shown = previewGroup
@@ -462,6 +465,7 @@ function move(v, id) {
   if (preview || !group(id) || !D.functions[v]) return;
   const members = tied(v);
   if (members.every((i) => group(id).members.includes(i))) return;
+  const effect = Engine.moveEvaluator(D, S.groups).impact(members, id);
   change(
     `Moved ${members.length} function${members.length === 1 ? "" : "s"}`,
     () => {
@@ -473,6 +477,7 @@ function move(v, id) {
         scope.members = [...new Set([...scope.members, ...group(id).members])];
     },
   );
+  renderMoveFeedback(members, effect);
 }
 function keep() {
   const values = [...picked];
@@ -498,25 +503,34 @@ function peel() {
     });
   });
 }
-function renderMoveSuggestions() {
+function moveImpactMarkup(effect) {
+  const names = (values) => values.map((v) => esc(D.functions[v].n)).join(", ");
+  return `<h3>Cut change</h3><p><strong>${effect.delta > 0 ? "+" : ""}${fmt(effect.delta)} crossing call sites${effect.delta === 0 ? " (unchanged)" : ""}</strong><br>Global cut: ${fmt(effect.beforeCut)} \u2192 ${fmt(effect.afterCut)}<br>${effect.removedCalls} removed; ${effect.addedCalls} introduced</p><h3>Private visibility opportunities</h3><p>${effect.localized.length} gained; ${effect.delocalized.length} lost</p>${effect.localized.length ? `<p>New candidates: ${names(effect.localized)}</p>` : ""}${effect.delocalized.length ? `<p>Now have outside callers: ${names(effect.delocalized)}</p>` : ""}<p class="note">Candidates have no known callers outside their group. Check callbacks, exported uses, and unresolved references before making them private. Source visibility is unchanged.</p><p>Existing private targets crossing: +${effect.added.length} / -${effect.removed.length}</p>`;
+}
+function renderMoveFeedback(members, effect) {
+  $("inspector").innerHTML =
+    `<div class="paneltag">MOVE RESULT</div><h2>Moved ${members.length} function${members.length === 1 ? "" : "s"}</h2>${moveImpactMarkup(effect)}<h3>Remaining outside callers</h3>${effect.remaining.map(({ v, callers }) => `<p><strong>${esc(D.functions[v].n)}</strong>: ${callers.length}${callers.length ? `<br>${callers.map((a) => esc(D.functions[a].n) + " (" + esc(S.groups.find((g) => g.members.includes(a)).name) + ")").join("<br>")}` : ""}</p>`).join("")}<button id="review-more-moves" class="wide">Localize functions</button><p class="note">Undo restores the previous plan.</p>`;
+  $("review-more-moves").onclick = () => renderMoveSuggestions("localize");
+}
+function renderMoveSuggestions(mode = "cut") {
   if (preview || !scope) return;
   const proposals = Engine.suggestMoves(
     D,
     S.groups,
     S.ties,
     new Set(scope.members),
+    mode,
   );
-  const current = Engine.metrics(D, S.groups).cut;
   $("inspector").innerHTML =
-    `<div class="paneltag">LOCAL MOVE SUGGESTIONS</div><h2>${proposals.length} candidates</h2><p>Moves out of this view into connected groups. Ranked by fewer crossing call sites. Nothing changes until you apply a move.</p><div class="hint note">A cheaper cut can put an API beside its consumers and away from its helper. Review the functions and private boundaries. Keep-together sets are always preserved.</div><p class="note">Tries each function or keep-together set, alone and with its strongest connected neighbor set. Initializers and moves that empty a group are excluded.</p>${
+    `<div class="paneltag">${mode === "localize" ? "LOCALIZE FUNCTIONS" : "LOCAL MOVE SUGGESTIONS"}</div><h2>${proposals.length} candidates</h2><p>Moves out of this view into connected groups. ${mode === "localize" ? "Ranked by net private-visibility opportunities, then cut cost. Includes unchanged or higher cuts when visibility improves." : "Ranked by fewer crossing call sites."} Nothing changes until you apply a move.</p><div class="hint note">A cheaper cut can put an API beside its consumers and away from its helper. Review the functions and private boundaries. Keep-together sets are always preserved.</div><p class="note">Tries each function or keep-together set, alone and with its strongest connected neighbor set. Initializers and moves that empty a group are excluded.</p>${
       proposals
         .map((p, i) => {
           const from = group(p.from),
             to = group(p.to);
-          return `<div class="rule"></div><h3>${esc(from.name)} \u2192 ${esc(to.name)}</h3><p><strong>${fmt(p.delta)} crossing call sites</strong><br>Global cut: ${fmt(current)} \u2192 ${fmt(current + p.delta)}<br>Group sizes: ${from.members.length} / ${to.members.length} \u2192 ${from.members.length - p.members.length} / ${to.members.length + p.members.length}<br>Private targets crossing: +${p.added.length} / -${p.removed.length}</p><details><summary>${p.members.length} functions to move</summary><p>${p.members.map((v) => esc(D.functions[v].n)).join("<br>")}</p>${p.added.length ? `<p>New private boundaries: ${p.added.map((v) => esc(D.functions[v].n)).join(", ")}</p>` : ""}</details><button class="wide" data-apply-move="${i}">Apply this move</button>`;
+          return `<div class="rule"></div><h3>${esc(from.name)} \u2192 ${esc(to.name)}</h3><p>Group sizes: ${from.members.length} / ${to.members.length} \u2192 ${from.members.length - p.members.length} / ${to.members.length + p.members.length}</p>${moveImpactMarkup(p)}<details><summary>${p.members.length} functions to move</summary><p>${p.members.map((v) => esc(D.functions[v].n)).join("<br>")}</p>${p.added.length ? `<p>New private boundaries: ${p.added.map((v) => esc(D.functions[v].n)).join(", ")}</p>` : ""}</details><button class="wide" data-apply-move="${i}">Apply this move</button>`;
         })
         .join("") ||
-      "<p>No cut-reducing moves found in this neighborhood. This does not prove the partition is optimal.</p>"
+      `<p>No ${mode === "localize" ? "visibility-improving" : "cut-reducing"} moves found in this neighborhood. This does not prove the partition is optimal.</p>`
     }<button id="leave-suggestions" class="quiet wide">Back to group inspector</button>`;
   $("leave-suggestions").onclick = () =>
     renderInspector(Engine.metrics(D, visible()), Engine.metrics(D, S.groups));
@@ -539,7 +553,7 @@ function renderMoveSuggestions() {
               ];
             },
           );
-          renderMoveSuggestions();
+          renderMoveFeedback(p.members, p);
         }),
     );
 }
