@@ -131,8 +131,10 @@ meta static int _lambda_mentions(Var item, Map cells) {
 
 /* `node` with each binding it declares that `cells` maps declared as its
    cell: a declarator's cell takes its initializer, and a destructuring
-   declaration copies each target into its cell after it. Only the cells
-   are source to bind. */
+   declaration copies each target into its cell after it. A for initializer
+   declares its cells in a block around the loop, preserving its scope and
+   leaving continue to run the loop's increment. Only the cells are source
+   to bind. */
 meta static Var _lambda_declare_cells(List node, Map cells, Array named) {
   Array items = [];
   int celled = 0;
@@ -157,6 +159,13 @@ meta static Var _lambda_declare_cells(List node, Map cells, Array named) {
         if (copy) items.push(copy);
         celled |= !!copy;
       }
+    }
+    case %(for (decl ?base ?bindings) ?test ?next ?body): {
+      Code declaration =
+        _lambda_declare_cells(%(declare $base $bindings), cells, named);
+      match (declaration) case %(seq *initial):
+        return %(block @initial
+                 ${_lambda_kept(%(for () $test $next $body))});
     }
   }
   return celled ? %(seq @{items.list_free()}) : node;
