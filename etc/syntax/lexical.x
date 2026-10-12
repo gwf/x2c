@@ -523,7 +523,6 @@ List syntax_lexical(void) => %(lexical
     (layout-status indent)
     (prefix-preconditions external-error)
     (numeric-signed-invalid-prefix may-return-zero)
-    (string-leading-dollar dispatch-before-segment)
     (legacy-number-type-helper skip-minus-only))
   (sources
     (source "lib/scan.x")

@@ -320,7 +320,7 @@ static int Tokenizer._symbol_set_tokens(Tokenizer t) {
 
 static int Tokenizer._string_tokens(Tokenizer t) {
   char *text = t.text + t.pos;
-  if (text[0] == '$')
+  if (text[0] == '$' && text[1] != '$')
     return text[1] == '{'
          ? t._operator(2)
          : t._named_reference();

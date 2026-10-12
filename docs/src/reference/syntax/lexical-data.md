@@ -473,7 +473,6 @@ See [the lexical specification](lexical.md) for explanations and
  (semantic-stop first-eof) (unclosed-mode-at-eof parser-responsibility)
  (layout-status indent) (prefix-preconditions external-error)
  (numeric-signed-invalid-prefix may-return-zero)
- (string-leading-dollar dispatch-before-segment)
  (legacy-number-type-helper skip-minus-only))
 ```
 

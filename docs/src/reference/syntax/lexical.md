@@ -395,14 +395,10 @@ that first EOF because failure callbacks return zero to chained dispatch.
 Consumers must not equate lexical
 success with balanced delimiters or a valid program.
 
-Two dispatch/detection details need care in a future independent lexer:
-
-- The segment scanner accepts `$$` inside a segment, but String dispatch
-  consumes a leading `$` first. The book's doubled-dollar description alone
-  does not describe that boundary case. `\$` has an unambiguous escape path.
-- The tab detector examines the immediately preceding whitespace token only
-  when it contains LF. This is narrower than a universal scan for indentation
-  tabs, although the documented source convention requires spaces.
+One detection detail needs care in a future independent lexer: the tab
+detector examines the immediately preceding whitespace token only when it
+contains LF. This is narrower than a universal scan for indentation tabs,
+although the documented source convention requires spaces.
 
 These are source-derived implementation observations. They do not silently
 change the language contract or claim a repaired implementation.
