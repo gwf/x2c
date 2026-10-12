@@ -220,6 +220,11 @@ static macro Stmt $report.parse.init_incomplete(Expr $c, Expr $origin) =>
     "managed initializer requires a complete block-local initializer",
     $origin, NULL);
 
+static macro Stmt $report.parse.placement_repeated(Expr $c, Expr $origin) =>
+  $c.report_error(
+    <parse>, "code placed after a declarator repeats an earlier placement",
+    $origin, %("a managed initializer cannot manage another one"));
+
 static macro Stmt $report.parse.placement_item(Expr $c) =>
   $c.report_error(
     <macro>, "code placed after a statement needs an enclosing block item",
@@ -2954,6 +2959,7 @@ static List Compiler._take_placed(
     }
     if (!_complete(value, placed))
       $report.parse.init_incomplete(c, origin);
+    if (item in code) $report.parse.placement_repeated(c, origin);
     result = placed;
     code.push(item);
   }

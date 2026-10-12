@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/managed-nested.x:14:3: parse: code placed after a declarator repeats an earlier placement
+    Handle h = $auto($auto(acquire()));
+    ^^^^^^
+  note: a managed initializer cannot manage another one
+
