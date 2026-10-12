@@ -1707,7 +1707,7 @@ static List Compiler__resets(Compiler c, Map initials){
                   ));  cons(_135, cons(_x2c_literal_part_58, cons(_x2c_literal_part_59, NULL)));
                 }
                 ));  Array_push(resets, List_cadr(Compiler_rebuild_statement(c, cons(_137, cons(_138, cons(List_var(cons(_139, cons(List_var(cons(_343, cons(List_var(cons(_135, cons(_346, cons(List_var(cons(_241, cons(_392, cons(List_var(({
-                  Var _x2c_literal_part_60 = List_var(cons(_141, cons(_352, cons(_353, cons(List_var(target), NULL)))));  Var _x2c_literal_part_61 = List_var(cons(_141, cons(_352, cons(_353, cons(initializer, NULL)))));  Var _x2c_literal_part_62 = List_var(cons(_135, cons(_396, cons(List_var(cons(_397, cons(List_var(cons(_135, cons(_346, cons(List_var(cons(_379, cons(List_var(cons(_141, cons(_352, cons(_353, cons(List_var(target), NULL))))), NULL))), NULL)))), NULL))), NULL))));  cons(_240, cons(_x2c_literal_part_60, cons(_x2c_literal_part_61, cons(_x2c_literal_part_62, NULL))));
+                  Var _x2c_literal_part_60 = List_var(cons(_141, cons(_352, cons(_353, cons(List_var(target), NULL)))));  Var _x2c_literal_part_61 = List_var(cons(_141, cons(_352, cons(_353, cons(initializer, NULL)))));  Var _x2c_literal_part_62 = List_var(cons(_135, cons(_396, cons(List_var(cons(_397, cons(List_var(cons(_379, cons(List_var(cons(_141, cons(_352, cons(_353, cons(List_var(target), NULL))))), NULL))), NULL))), NULL))));  cons(_240, cons(_x2c_literal_part_60, cons(_x2c_literal_part_61, cons(_x2c_literal_part_62, NULL))));
                 }
                 )), NULL)))), NULL)))), NULL))), NULL))), NULL))))));
               }
