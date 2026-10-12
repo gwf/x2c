@@ -118,6 +118,12 @@ done
 
 for phases in "$ROOT"/unittest/compiler-fixtures/*.phases; do
   [[ -e "$phases" ]] || continue
+  if [[ $(basename "$phases") == module-block*.phases &&
+        -z ${exclusions[${phases%.phases}.x]+classified} ]]; then
+    exclusions["${phases%.phases}.x"]=$(
+      printf '%s' "module fixture: CPP symbol modes do not support member splicing"
+    )
+  fi
   if [[ $(tr -d '[:space:]' <"$phases") == tokens ]]; then
     name=$(basename "$phases" .phases)
     exclusions["$ROOT/unittest/compiler-fixtures/$name.x"]=$(

@@ -4,14 +4,12 @@
 ###############################################################################
 include ../../etc/make-command.mk
 include ../../etc/build-config.mk
-CWD          := $(shell pwd)
-DIRECTORY    := $(shell basename $(CWD))
-# test if the directory is not a number
-ifeq ($(shell echo $(DIRECTORY) | grep -q [0-9]; echo $$?), 1)
-stop:
-	@echo "This Makefile is not meant to be run in this directory"
-	@exit 0
-else ifeq ($(DIRECTORY), 0)
+DIRECTORY    := $(notdir $(CURDIR))
+# Stages are numeric directories; an invalid invocation must fail.
+ifeq ($(shell printf '%s\n' "$(DIRECTORY)" | grep -E '^[0-9]+$$'),)
+$(error stage.mk requires a numeric stage directory: $(CURDIR))
+endif
+ifeq ($(DIRECTORY), 0)
 	X2C_COMPILER := ../../bin/x2c
 else
 	PREV := $(shell expr $(DIRECTORY) - 1)

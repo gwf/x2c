@@ -121,7 +121,8 @@ if s.get('advance_on_gate'):
 if mode == 'ordinary' or mode == 'bootstrap_once':
     if mode == 'bootstrap_once': s.pop('gate_failure')
     p.write_text(json.dumps(s))
-    print('[stage-diff-0] Error' if mode == 'bootstrap_once' else 'fixture test failure')
+    print(s.get('gate_error', '[stage-diff-0] Error')
+          if mode == 'bootstrap_once' else 'fixture test failure')
     sys.exit(1)
 if s.get('authored_mutation'):
     (root/'src'/'surprise.x').write_text('unreviewed mutation\n')
@@ -672,6 +673,13 @@ if hasattr(lock,'close'): lock.close()
 
     def test_bootstrap_second_round_is_bounded(self):
         self.pr(1); self.state(gate_failure='bootstrap_once')
+        batch=self.prepare(); self.land(batch)
+        self.assertEqual(len(self.state()['gates']),2)
+
+    def test_bootstrap_second_round_accepts_make4_target_location(self):
+        self.pr(1)
+        self.state(gate_failure='bootstrap_once',
+                   gate_error='make[1]: *** [Makefile:6: stage-diff-0] Error 1')
         batch=self.prepare(); self.land(batch)
         self.assertEqual(len(self.state()['gates']),2)
 

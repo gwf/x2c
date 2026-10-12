@@ -1,3 +1,8 @@
+# Make's file lists do not preserve whitespace in checkout paths.
+ifneq ($(words $(CURDIR)),1)
+$(error checkout paths containing whitespace are unsupported: $(CURDIR))
+endif
+
 # Preserve the Make selected by PATH. GNU Make 3.81 otherwise canonicalizes
 # recursive $(MAKE) invocations to Xcode's bundled binary on macOS.
 PATH_MAKE := $(shell command -v make)

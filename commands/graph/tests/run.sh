@@ -26,10 +26,10 @@ check_ast_parity() {
     --x-include-dir . --x-include-dir src \
     --c-include-dir builds/0/src \
     commands/graph/tests/ast-parity.x builds/0/libx2c-dev.a
-  builds/0/commands/ast-parity "$fixtures/calls.x" |
-    ast_shape >"$tmp/embedded.ast"
-  builds/0/x2c translate --plain --dump-ast "$fixtures/calls.x" |
-    ast_shape >"$tmp/cli.ast"
+  builds/0/commands/ast-parity "$fixtures/calls.x" >"$tmp/embedded.raw"
+  ast_shape <"$tmp/embedded.raw" >"$tmp/embedded.ast"
+  builds/0/x2c translate --plain --dump-ast "$fixtures/calls.x" >"$tmp/cli.raw"
+  ast_shape <"$tmp/cli.raw" >"$tmp/cli.ast"
   cmp "$tmp/embedded.ast" "$tmp/cli.ast"
 }
 

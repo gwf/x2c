@@ -163,7 +163,7 @@ def prepare(args: argparse.Namespace, run: Path) -> None:
         gate = ["tools/gate-state.py", "ensure", args.gate]
         if not command(gate, logs / "gate.log"):
             if (args.gate != "agent-pr-check" or not re.search(
-                    r"\[stage-diff-0\] Error", (logs / "gate.log").read_text())):
+                    r"\[(?:[^]\n]+: )?stage-diff-0\] Error", (logs / "gate.log").read_text())):
                 raise ValueError("gate failed; tree preserved; see " +
                                  str(logs / "gate.log"))
             print("land-dev: bootstrap needs a second round; "

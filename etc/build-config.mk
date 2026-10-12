@@ -13,8 +13,8 @@ BUILD_CONFIG_DIR := $(dir $(BUILD_CONFIG_MK))
 REPO_ROOT := $(abspath $(BUILD_CONFIG_DIR)/..)
 BUILD_MODE_FILE := $(REPO_ROOT)/etc/build-mode
 BUILD_MODE_LOCAL_FILE := $(REPO_ROOT)/etc/build-mode.local
-BUILD_MODE ?= $(shell cat $(BUILD_MODE_LOCAL_FILE) 2>/dev/null || \
-    cat $(BUILD_MODE_FILE) 2>/dev/null || echo debug)
+BUILD_MODE ?= $(shell cat "$(BUILD_MODE_LOCAL_FILE)" 2>/dev/null || \
+    cat "$(BUILD_MODE_FILE)" 2>/dev/null || echo debug)
 BUILD_LTO ?= 0
 
 # Define compiler flags for each mode

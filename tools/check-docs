@@ -321,6 +321,9 @@ static List _ledger_rows(String text):
     "(?m)^\\|\\s*([^|]+?)\\s*\\|\\s*([^|]+?)\\s*\\|")
   int start = text.find("## Contract ledger")
   int stop = text.find("## Verified contracts")
+  if start < 0 || stop <= start:
+    errors.push("agents/x2c-philosophy.md: missing or unordered ledger headings")
+    return %()
   Array rows = []
   foreach RegexMatch found in row.find_all(text[start:stop]):
     String name = found[1]
@@ -333,6 +336,9 @@ static void _check_ledger_placement(void):
   List rows = _ledger_rows(text)
   int start = text.find("## Partial contracts and open decisions")
   int stop = text.find("## Working rules")
+  if start < 0 || stop <= start:
+    errors.push(%"$relative: missing or unordered partial-contract headings")
+    return
   List sections = Regex.compile("(?m)^### ").split(text[start:stop]).cdr()
   foreach String section in sections:
     (String heading, String mark, String body) = section.partition("\n")

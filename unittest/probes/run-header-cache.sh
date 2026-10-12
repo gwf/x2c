@@ -146,7 +146,9 @@ region_warnings() {
   local out="$BUILD/regions-$1"
   shift
   mkdir -p "$out"
-  "$X2C" translate --out-dir "$out" "$@" 2>&1 | grep ': region: ' || true
+  "$X2C" translate --out-dir "$out" "$@" >"$out/diagnostics" 2>&1 ||
+    fail "region translation failed: $(cat "$out/diagnostics")"
+  grep ': region: ' "$out/diagnostics" || true
 }
 region_expected=$(region_warnings solo "$BUILD/src/region-use.x")
 [[ $(grep -c '' <<<"$region_expected") == 1 &&
@@ -1182,6 +1184,9 @@ PY_LITERAL_INPUT
 "$X2C" translate --quiet --out-dir "$literal/out" \
   "$literal/first.x" "$literal/second.x" "$literal/use.x"
 python3 - "$literal/out" <<'PY_LITERAL_BOUNDS'
+if not __debug__:
+    raise SystemExit("this check cannot run with optimized Python")
+
 from pathlib import Path
 import re
 import sys

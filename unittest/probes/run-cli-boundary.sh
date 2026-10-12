@@ -48,14 +48,14 @@ cmp "$BUILD/build.help" "$BUILD/build-short.help"
 cmp "$BUILD/run.help" "$BUILD/run-short.help"
 cmp "$BUILD/script.help" "$BUILD/script-short.help"
 cmp "$BUILD/help.help" "$BUILD/help-short.help"
-[[ $("$X2C" --version) == "x2c 0.15.0" ]]
-[[ $("$X2C" -V) == "x2c 0.15.0" ]]
+[[ $("$X2C" --version) == "x2c 0.15.0" ]] || exit 1
+[[ $("$X2C" -V) == "x2c 0.15.0" ]] || exit 1
 set +e
 "$X2C" help '' >"$BUILD/help-empty.stdout" 2>"$BUILD/help-empty.stderr"
 help_empty_status=$?
 set -e
-[[ $help_empty_status == 2 ]]
-[[ $(<"$BUILD/help-empty.stderr") == "x2c: error: unknown help command ''" ]]
+[[ $help_empty_status == 2 ]] || exit 1
+[[ $(<"$BUILD/help-empty.stderr") == "x2c: error: unknown help command ''" ]] || exit 1
 "$X2C" build -q --help >"$BUILD/build-short-quiet.help"
 "$X2C" build --compile-only --help >"$BUILD/build-long-compile.help"
 "$X2C" build -j 1 --help >"$BUILD/build-short-jobs.help"
@@ -72,7 +72,7 @@ printf 'translate\n--out-dir\n%s\n"%s"\n' \
 printf '# first non-whitespace comment\n@%s\n' "$BUILD/inner.rsp" \
   >"$BUILD/outer.rsp"
 "$X2C" @"$BUILD/outer.rsp"
-[[ -f "$BUILD/out/quoted.c" && -f "$BUILD/out/quoted.h" ]]
+[[ -f "$BUILD/out/quoted.c" && -f "$BUILD/out/quoted.h" ]] || exit 1
 
 # Attached translate options use the same values as their separate forms.
 mkdir -p "$BUILD/attached" "$BUILD/separate"
@@ -87,7 +87,7 @@ set +e
   2>"$BUILD/unknown.stderr"
 unknown_status=$?
 set -e
-[[ $unknown_status == 2 ]]
+[[ $unknown_status == 2 ]] || exit 1
 grep -Fxq "x2c: error: unknown option '-not-a-real-option'" "$BUILD/unknown.stderr"
 if grep -Fq 'note:' "$BUILD/unknown.stderr"; then
   echo "unknown option printed a note" >&2
@@ -98,8 +98,8 @@ fi
 (cd "$BUILD" && "$X2C" translate "$BUILD/space dir/quoted.x")
 cmp "$BUILD/quoted.c" "$BUILD/out/quoted.c"
 cmp "$BUILD/quoted.h" "$BUILD/out/quoted.h"
-[[ -f "$BUILD/quoted.d" ]]
-[[ ! -e "$BUILD/space dir/quoted.c" ]]
+[[ -f "$BUILD/quoted.d" ]] || exit 1
+[[ ! -e "$BUILD/space dir/quoted.c" ]] || exit 1
 
 
 printf '#include "x2c.x"\n' >"$BUILD/space dir/hash#name.x"
@@ -113,7 +113,7 @@ printf 'translate --out-dir %s %s/space\\ dir/quoted.x\n' \
 printf '#include "x2c.x"\n' >"$BUILD/@literal.x"
 printf 'translate --out-dir out @@literal.x\n' >"$BUILD/literal.rsp"
 (cd "$BUILD" && "$X2C" @literal.rsp)
-[[ -f "$BUILD/out/@literal.c" ]]
+[[ -f "$BUILD/out/@literal.c" ]] || exit 1
 
 printf '@%s\n' "$BUILD/cycle-b.rsp" >"$BUILD/cycle-a.rsp"
 printf '@%s\n' "$BUILD/cycle-a.rsp" >"$BUILD/cycle-b.rsp"
@@ -132,13 +132,13 @@ utf8_status=$?
 "$X2C" @ >"$BUILD/empty-reference.stdout" 2>"$BUILD/empty-reference.stderr"
 empty_reference_status=$?
 set -e
-[[ $cycle_status == 2 && $malformed_status == 2 && $utf8_status == 2 ]]
-[[ $empty_reference_status == 2 ]]
+[[ $cycle_status == 2 && $malformed_status == 2 && $utf8_status == 2 ]] || exit 1
+[[ $empty_reference_status == 2 ]] || exit 1
 grep -Fq "recursive response-file inclusion" "$BUILD/cycle.stderr"
 grep -Fq "unterminated quote" "$BUILD/malformed.stderr"
 grep -Fq "input is not valid UTF-8" "$BUILD/utf8.stderr"
 [[ $(<"$BUILD/empty-reference.stderr") == \
-   "x2c: error: empty response-file reference '@'" ]]
+   "x2c: error: empty response-file reference '@'" ]] || exit 1
 
 printf '#include "x2c.x"\n' >"$BUILD/a/item.x"
 printf '#include "x2c.x"\n' >"$BUILD/b/item.x"
@@ -153,7 +153,7 @@ cmp "$BUILD/dump-cpp.stderr" "$BUILD/dump-cpp-text.stderr"
 "$X2C" translate --color=auto --out-dir "$BUILD/out" \
   "$BUILD/a/item.x" >"$BUILD/receipt.stdout" \
   2>"$BUILD/receipt.stderr"
-[[ ! -s "$BUILD/receipt.stdout" ]]
+[[ ! -s "$BUILD/receipt.stdout" ]] || exit 1
 grep -Fq "Translated 1 x2c file to $BUILD/out" "$BUILD/receipt.stderr"
 grep -Fq "Generated 1 C file and 1 header" "$BUILD/receipt.stderr"
 if LC_ALL=C grep -q $'\033' "$BUILD/receipt.stderr" ||
@@ -164,7 +164,7 @@ fi
 
 "$X2C" translate --quiet --out-dir "$BUILD/out" "$BUILD/a/item.x" \
   >"$BUILD/quiet.stdout" 2>"$BUILD/quiet.stderr"
-[[ ! -s "$BUILD/quiet.stdout" && ! -s "$BUILD/quiet.stderr" ]]
+[[ ! -s "$BUILD/quiet.stdout" && ! -s "$BUILD/quiet.stderr" ]] || exit 1
 
 "$X2C" translate --color=always --out-dir "$BUILD/out" \
   "$BUILD/a/item.x" >"$BUILD/color.stdout" 2>"$BUILD/color.stderr"
@@ -265,17 +265,17 @@ for _ in $(seq 100); do
   [[ $(wc -w <<<"$workers") -eq 2 ]] && break
   sleep 0.05
 done
-[[ $(wc -w <<<"$workers") -eq 2 ]]
+[[ $(wc -w <<<"$workers") -eq 2 ]] || exit 1
 kill -TERM "$parent"
 stopped_status=0
 wait "$parent" || stopped_status=$?
-[[ $stopped_status == 143 ]]
+[[ $stopped_status == 143 ]] || exit 1
 if ! ended $workers; then
   echo "a translation worker outlived its stopped parent" >&2
   kill -KILL $workers 2>/dev/null || true
   exit 1
 fi
-[[ ! -e "$stopped/out/first.c" && ! -e "$stopped/out/second.c" ]]
+[[ ! -e "$stopped/out/first.c" && ! -e "$stopped/out/second.c" ]] || exit 1
 
 set +e
 "$X2C" translate --color=invalid --out-dir "$BUILD/out" \
@@ -287,7 +287,7 @@ color_status=$?
   2>"$BUILD/color-empty.stderr"
 color_empty_status=$?
 set -e
-[[ $color_status == 2 && $color_empty_status == 2 ]]
+[[ $color_status == 2 && $color_empty_status == 2 ]] || exit 1
 grep -Fq "invalid color mode 'invalid'" "$BUILD/color-invalid.stderr"
 grep -Fq "color requires auto, always, or never" \
   "$BUILD/color-empty.stderr"
@@ -307,9 +307,9 @@ out_dir_status=$?
   >"$BUILD/directory.stdout" 2>"$BUILD/directory.stderr"
 directory_status=$?
 set -e
-[[ $preflight_status == 2 && $collision_status == 2 ]]
-[[ $out_dir_status == 2 && $directory_status == 2 ]]
-[[ ! -e "$BUILD/out/item.c" && ! -e "$BUILD/out/item.h" ]]
+[[ $preflight_status == 2 && $collision_status == 2 ]] || exit 1
+[[ $out_dir_status == 2 && $directory_status == 2 ]] || exit 1
+[[ ! -e "$BUILD/out/item.c" && ! -e "$BUILD/out/item.h" ]] || exit 1
 grep -Fq "$BUILD/missing.x" "$BUILD/preflight.stderr"
 grep -Fq "$BUILD/a" "$BUILD/directory.stderr"
 grep -Fq "inputs produce the same output stem 'item'" \
@@ -317,7 +317,7 @@ grep -Fq "inputs produce the same output stem 'item'" \
 
 "$X2C" translate -### --out-dir "$BUILD/out" "$BUILD/a/item.x" \
   >"$BUILD/dry-run.stdout" 2>"$BUILD/dry-run.stderr"
-[[ ! -e "$BUILD/out/item.c" && ! -e "$BUILD/out/item.h" ]]
+[[ ! -e "$BUILD/out/item.c" && ! -e "$BUILD/out/item.h" ]] || exit 1
 grep -Fq "x2c: translate --out-dir" "$BUILD/dry-run.stderr"
 
 # An inspection covers every input, so a later input's error fails it.
@@ -327,7 +327,7 @@ set +e
   >"$BUILD/dump-later.stdout" 2>"$BUILD/dump-later.stderr"
 dump_later_status=$?
 set -e
-[[ $dump_later_status == 1 ]]
+[[ $dump_later_status == 1 ]] || exit 1
 grep -Fq "expected atomic expression" "$BUILD/dump-later.stderr"
 
 # Template documentation keeps each argument's spelling through forwarding.
@@ -372,8 +372,8 @@ old_o_status=$?
   2>"$BUILD/one-dash.stderr"
 one_dash_status=$?
 set -e
-[[ $no_command_status == 2 && $old_o_status == 2 ]]
-[[ $one_dash_status == 2 ]]
+[[ $no_command_status == 2 && $old_o_status == 2 ]] || exit 1
+[[ $one_dash_status == 2 ]] || exit 1
 grep -Fq "expected a command before" "$BUILD/no-command.stderr"
 grep -Fq "option '-o' was removed" "$BUILD/old-o.stderr"
 grep -Fq "one-dash long option '-dump-ast' was removed" \
@@ -439,23 +439,26 @@ set +e
   2>"$BUILD/deps/stale.stderr"
 stale_dep_status=$?
 set -e
-[[ $stale_dep_status == 1 ]]
+[[ $stale_dep_status == 1 ]] || exit 1
 cmp "$BUILD/deps/root.d.saved" "$BUILD/deps/out/root.d"
 
 rm -f "$BUILD/deps/out/root.d"
 "$X2C" translate --no-deps --out-dir "$BUILD/deps/out" \
   -I "$BUILD/deps/src" "$BUILD/deps/src/root.x"
-[[ ! -e "$BUILD/deps/out/root.d" ]]
+[[ ! -e "$BUILD/deps/out/root.d" ]] || exit 1
 
 "$X2C" translate --no-phony-deps \
   --dep-file "$BUILD/deps/custom.d" --dep-target "custom target" \
   --out-dir "$BUILD/deps/out" -I "$BUILD/deps/src" \
   "$BUILD/deps/src/root.x"
 grep -Fq "custom\\ target:" "$BUILD/deps/custom.d"
-[[ $(grep -c '^[^#]' "$BUILD/deps/custom.d") == 1 ]]
+[[ $(grep -c '^[^#]' "$BUILD/deps/custom.d") == 1 ]] || exit 1
 
 # Escaped target colons must preserve translation reuse on an unchanged build.
 python3 - "$X2C" "$BUILD/deps/reuse" <<'PY_DEP_REUSE'
+if not __debug__:
+    raise SystemExit("this check cannot run with optimized Python")
+
 from pathlib import Path
 import subprocess
 import sys
@@ -485,7 +488,7 @@ set +e
   2>"$BUILD/deps/multi.stderr"
 multi_dep_status=$?
 set -e
-[[ $multi_dep_status == 2 ]]
+[[ $multi_dep_status == 2 ]] || exit 1
 grep -Fq "require exactly one input" "$BUILD/deps/multi.stderr"
 
 printf 'int broken( {\n' >"$BUILD/deps/bad-src/bad.x"
@@ -495,8 +498,8 @@ set +e
   2>"$BUILD/deps/bad.stderr"
 bad_dep_status=$?
 set -e
-[[ $bad_dep_status == 1 ]]
-[[ ! -e "$BUILD/deps/out/bad.d" ]]
+[[ $bad_dep_status == 1 ]] || exit 1
+[[ ! -e "$BUILD/deps/out/bad.d" ]] || exit 1
 
 mtime() {
   stat -c %Y "$1" 2>/dev/null || stat -f %m "$1"
@@ -518,8 +521,8 @@ make -C "$ROOT/unittest" -f build/cli-boundary/deps/Makefile \
   default >/dev/null
 root_after=$(mtime "$BUILD/deps/make-out/root.c")
 other_after=$(mtime "$BUILD/deps/make-out/other.c")
-[[ $root_after -gt $root_before ]]
-[[ $other_after == "$other_before" ]]
+[[ $root_after -gt $root_before ]] || exit 1
+[[ $other_after == "$other_before" ]] || exit 1
 
 # A recursive build adds the default job count unless the command line sets
 # a job limit. An option argument holding a j sets none. GNU Make records
@@ -532,10 +535,10 @@ for make_program in make gmake; do
     MAKEFLAGS= MFLAGS= MAKELEVEL= \
       "$make_program" -s -f "$BUILD/jobs.mk" "$@" show BUILD_JOBS=7
   }
-  [[ $(jobs_make -I /home/jo/inc) == *" -j7" ]]
+  [[ $(jobs_make -I /home/jo/inc) == *" -j7" ]] || exit 1
   [[ $make_program == make && $(make --version) == *" 3."* ]] && continue
-  [[ $(jobs_make -j1) != *" -j7" ]]
-  [[ $(jobs_make -j 1) != *" -j7" ]]
+  [[ $(jobs_make -j1) != *" -j7" ]] || exit 1
+  [[ $(jobs_make -j 1) != *" -j7" ]] || exit 1
 done
 
 # A stopped parallel run stops what its jobs started. Background jobs ignore
@@ -559,7 +562,7 @@ for check in commands gate; do
     [[ -n $sleeper ]] && break
     sleep 0.05
   done
-  [[ -n $sleeper ]]
+  [[ -n $sleeper ]] || exit 1
   kill -TERM "$runner"
   wait "$runner" || true
   if ! ended $sleeper; then
@@ -585,18 +588,18 @@ mkdir -p "$BUILD/direct/a" "$BUILD/direct/b"
 printf '#include "x2c.x"\nint main(void) { puts("one"); return 0; }\n' \
   >"$BUILD/direct/one.x"
 "$X2C" build --output "$BUILD/direct/one" "$BUILD/direct/one.x"
-[[ $("$BUILD/direct/one") == one ]]
+[[ $("$BUILD/direct/one") == one ]] || exit 1
 
 (
   cd "$BUILD/direct"
   "$X2C" build --save-temps --output keep-default one.x
 )
 [[ $(find "$BUILD/direct/.x2c-build/gen" -name one.c | wc -l |
-      tr -d ' ') == 1 ]]
+      tr -d ' ') == 1 ]] || exit 1
 "$X2C" build --save-temps="$BUILD/direct/saved" \
   --output "$BUILD/direct/keep-assigned" "$BUILD/direct/one.x"
 [[ $(find "$BUILD/direct/saved/gen" -name one.c | wc -l |
-      tr -d ' ') == 1 ]]
+      tr -d ' ') == 1 ]] || exit 1
 
 printf '#include "x2c.x"\nint helper(void) { return 4; }\n' \
   >"$BUILD/direct/helper.x"
@@ -605,7 +608,7 @@ printf '%s\n' '#include "x2c.x"' 'int helper(void);' 'int main(void) {' \
   >"$BUILD/direct/many-main.x"
 "$X2C" build --output "$BUILD/direct/many" \
   "$BUILD/direct/many-main.x" "$BUILD/direct/helper.x"
-[[ $("$BUILD/direct/many") == 4 ]]
+[[ $("$BUILD/direct/many") == 4 ]] || exit 1
 
 printf 'int c_source(void) { return 2; }\n' >"$BUILD/direct/source.c"
 "$X2C" build -### -j2 -I"$BUILD/includes/first" -DCLI_ATTACHED=1 \
@@ -629,14 +632,14 @@ printf '%s\n' '#include "x2c.x"' \
 "$X2C" build --output "$BUILD/direct/mixed" \
   "$BUILD/direct/mixed.x" "$BUILD/direct/source.c" \
   "$BUILD/direct/object.o" "$BUILD/direct/libarchive.a"
-[[ $("$BUILD/direct/mixed") == 9 ]]
+[[ $("$BUILD/direct/mixed") == 9 ]] || exit 1
 
 printf '#include "x2c.x"\nint library_value(void) { return 9; }\n' \
   >"$BUILD/direct/library.x"
 "$X2C" build --kind static-library \
   --output "$BUILD/direct/libdirect.a" "$BUILD/direct/library.x"
 "$host_ar" -t "$BUILD/direct/libdirect.a" >"$BUILD/direct/archive.list"
-[[ $(grep -c '\.o$' "$BUILD/direct/archive.list") == 1 ]]
+[[ $(grep -c '\.o$' "$BUILD/direct/archive.list") == 1 ]] || exit 1
 
 # A static-library build does not link x2c and must not require a matching
 # runtime beside the invoking compiler.
@@ -647,7 +650,7 @@ cp "$X2C" "$BUILD/standalone/bin/x2c"
   ./bin/x2c build --kind static-library \
     --output libstandalone.a ../direct/source.c
 )
-[[ -f "$BUILD/standalone/libstandalone.a" ]]
+[[ -f "$BUILD/standalone/libstandalone.a" ]] || exit 1
 
 # A directory named builds is not sufficient to identify a repository stage.
 mkdir -p "$BUILD/standalone/src" "$BUILD/standalone/include" \
@@ -665,7 +668,7 @@ printf '%s\n' '#include <stdio.h>' 'int library_value(void);' \
   >"$BUILD/direct/consumer.c"
 "$host_cc" "$BUILD/direct/consumer.c" "$BUILD/direct/libdirect.a" \
   "$ROOT/builds/0/libx2c.a" -lm -o "$BUILD/direct/consumer"
-[[ $("$BUILD/direct/consumer") == 9 ]]
+[[ $("$BUILD/direct/consumer") == 9 ]] || exit 1
 
 retained="$BUILD/direct/retained-link"
 mkdir -p "$retained/first" "$retained/second"
@@ -680,7 +683,7 @@ for value in 1 2 3; do
     --output "$retained/app" "$BUILD/direct/consumer.c" \
     -L "$retained/first" -L "$retained/second" -lvalue \
     >"$retained/$value.stdout" 2>"$retained/$value.stderr"
-  [[ $("$retained/app") == "$value" ]]
+  [[ $("$retained/app") == "$value" ]] || exit 1
   if [[ $value != 1 ]]; then
     grep -Fq 'x2c: up-to-date compile ' "$retained/$value.stderr"
     grep -Fq 'x2c: link ' "$retained/$value.stderr"
@@ -705,12 +708,12 @@ build_archive --ar "$archived/failing-ar" >"$archived/failed.stdout" \
   2>"$archived/failed.stderr"
 failed_archive_status=$?
 set -e
-[[ $failed_archive_status == 1 ]]
+[[ $failed_archive_status == 1 ]] || exit 1
 build_archive -### >"$archived/dry.stdout" 2>"$archived/dry.stderr"
 build_archive -v >"$archived/last.stdout" 2>"$archived/last.stderr"
 "$host_cc" "$BUILD/direct/consumer.c" "$archived/libvalue.a" \
   -o "$archived/consumer"
-[[ $("$archived/consumer") == 2 ]]
+[[ $("$archived/consumer") == 2 ]] || exit 1
 
 # Binding groups belong to a translation unit, not the shared Lisp parent.
 bindings="$BUILD/binding-units"
@@ -752,6 +755,9 @@ for case in build:. build:nested script:nested; do
   kind=${case%%:*}
   suffix=${case#*:}
   python3 - "$X2C" "$BUILD/translation-reuse/$kind/$suffix" "$suffix" "$kind" <<'PY_XLAT_REUSE'
+if not __debug__:
+    raise SystemExit("this check cannot run with optimized Python")
+
 from pathlib import Path
 import os
 import subprocess
@@ -816,6 +822,9 @@ done
 # Reuse follows the native preprocessor, including newly selected headers
 # and availability tests that do not add an included file to the depfile.
 python3 - "$X2C" "$BUILD/native-reuse" <<'PY_NATIVE_REUSE'
+if not __debug__:
+    raise SystemExit("this check cannot run with optimized Python")
+
 import os
 from pathlib import Path
 import subprocess
@@ -878,11 +887,14 @@ printf '%s\n' 'int first_item(void); int second_item(void);' \
   "$BUILD/direct/b/item.x" "$BUILD/direct/collision-main.c"
 "$BUILD/direct/collision"
 [[ $(find "$BUILD/direct/collision-build/gen" -name item.c | wc -l |
-      tr -d ' ') == 2 ]]
+      tr -d ' ') == 2 ]] || exit 1
 
 # Build defaults respect the host and outer Make; explicit jobs own the limit.
 # Parallel units retain separate same-stem outputs and prerequisite sets.
 python3 - "$X2C" "$BUILD/direct" <<'PY_BUILD_JOBS'
+if not __debug__:
+    raise SystemExit("this check cannot run with optimized Python")
+
 import json
 import os
 import pathlib
@@ -991,11 +1003,11 @@ PY_BUILD_JOBS
 
 "$X2C" build -c --output "$BUILD/direct/single.o" \
   "$BUILD/direct/source.c"
-[[ -f "$BUILD/direct/single.o" ]]
+[[ -f "$BUILD/direct/single.o" ]] || exit 1
 "$X2C" build -c --build-dir "$BUILD/direct/multiple-objects" \
   "$BUILD/direct/helper.x" "$BUILD/direct/source.c"
 [[ $(find "$BUILD/direct/multiple-objects/obj" -name '*.o' | wc -l |
-      tr -d ' ') == 2 ]]
+      tr -d ' ') == 2 ]] || exit 1
 
 set +e
 "$X2C" build -c --output "$BUILD/direct/ambiguous.o" \
@@ -1007,8 +1019,8 @@ compile_only_status=$?
   >"$BUILD/direct/run.stdout" 2>"$BUILD/direct/run.stderr"
 run_status=$?
 set -e
-[[ $compile_only_status == 2 && $run_status == 0 ]]
-[[ $(cat "$BUILD/direct/run.stdout") == one ]]
+[[ $compile_only_status == 2 && $run_status == 0 ]] || exit 1
+[[ $(cat "$BUILD/direct/run.stdout") == one ]] || exit 1
 grep -Fq 'temporary; removed after run' "$BUILD/direct/run.stderr"
 
 cat >"$BUILD/direct/terminal.c" <<'EOF'
@@ -1021,6 +1033,9 @@ int main(void) {
 }
 EOF
 python3 - "$X2C" "$BUILD/direct/terminal.c" <<'PY'
+if not __debug__:
+    raise SystemExit("this check cannot run with optimized Python")
+
 import os
 import pty
 import select
@@ -1053,6 +1068,9 @@ PY
 
 # A terminal build clears its active progress line before each receipt.
 python3 - "$X2C" "$BUILD/direct/progress" <<'PY_PROGRESS'
+if not __debug__:
+    raise SystemExit("this check cannot run with optimized Python")
+
 import os
 import pathlib
 import pty
@@ -1106,9 +1124,12 @@ PY_PROGRESS
   "$BUILD/direct/source.c" >"$BUILD/direct/matched.stdout" \
   2>"$BUILD/direct/matched.stderr"
 grep -Fq "$ROOT/builds/0/libx2c.a" "$BUILD/direct/matched.stderr"
-[[ ! -e "$BUILD/direct/matched-dry" ]]
+[[ ! -e "$BUILD/direct/matched-dry" ]] || exit 1
 
 python3 - "$X2C" "$BUILD/scheduling" <<'PY_SCHEDULING'
+if not __debug__:
+    raise SystemExit("this check cannot run with optimized Python")
+
 import os
 from pathlib import Path
 import shutil
@@ -1204,6 +1225,9 @@ for fail in (False, True):
 PY_SCHEDULING
 
 python3 - "$X2C" "$BUILD/compile-commands" <<'PY_COMMANDS'
+if not __debug__:
+    raise SystemExit("this check cannot run with optimized Python")
+
 import json
 import os
 from pathlib import Path
@@ -1328,14 +1352,14 @@ printf 'int main(void) { return 99; }\n' >"$manifest/src/excluded.x"
 (cd "$manifest/nested" && "$X2C" build -v --profile release \
   --compile-commands "$manifest/compile_commands.json") \
   >"$manifest/first.stdout" 2>"$manifest/first.stderr"
-[[ $("$manifest/out/app") == 10 ]]
+[[ $("$manifest/out/app") == 10 ]] || exit 1
 grep -Fq "excluded $manifest/src/excluded.x from target app" \
   "$manifest/first.stderr"
 archive_line=$(grep -n '^x2c: archive ' "$manifest/first.stderr" |
   cut -d: -f1)
 link_line=$(grep -n '^x2c: link ' "$manifest/first.stderr" |
   cut -d: -f1)
-[[ $archive_line -lt $link_line ]]
+[[ $archive_line -lt $link_line ]] || exit 1
 grep -Fq -- '-O2 -g' "$manifest/first.stderr"
 
 cp "$manifest/compile_commands.json" "$manifest/commands-first.json"
@@ -1344,6 +1368,9 @@ cp "$manifest/compile_commands.json" "$manifest/commands-first.json"
   >"$manifest/noop.stdout" 2>"$manifest/noop.stderr"
 cmp "$manifest/commands-first.json" "$manifest/compile_commands.json"
 python3 - "$manifest" <<'PY_MANIFEST_COMMANDS'
+if not __debug__:
+    raise SystemExit("this check cannot run with optimized Python")
+
 import json
 from pathlib import Path
 import sys
@@ -1360,26 +1387,26 @@ for row in rows:
     assert argv[argv.index('-c') + 1] == row['file']
     assert argv[argv.index('-o') + 1] == row['output']
 PY_MANIFEST_COMMANDS
-[[ $(grep -c '^x2c: up-to-date ' "$manifest/noop.stderr") == 8 ]]
-[[ $(grep -c '^x2c: compile ' "$manifest/noop.stderr") == 0 ]]
+[[ $(grep -c '^x2c: up-to-date ' "$manifest/noop.stderr") == 8 ]] || exit 1
+[[ $(grep -c '^x2c: compile ' "$manifest/noop.stderr") == 0 ]] || exit 1
 grep -Fq 'x2c: up-to-date archive ' "$manifest/noop.stderr"
 grep -Fq 'x2c: link ' "$manifest/noop.stderr"
 
 printf '\n  # A presentation-only manifest edit.\n\n' >>"$manifest/x2c.toml"
 (cd "$manifest/nested" && "$X2C" build -v --profile release) \
   >"$manifest/comment.stdout" 2>"$manifest/comment.stderr"
-[[ $(grep -c '^x2c: up-to-date ' "$manifest/comment.stderr") == 8 ]]
-[[ $(grep -c '^x2c: compile ' "$manifest/comment.stderr") == 0 ]]
-[[ $("$manifest/out/app") == 10 ]]
+[[ $(grep -c '^x2c: up-to-date ' "$manifest/comment.stderr") == 8 ]] || exit 1
+[[ $(grep -c '^x2c: compile ' "$manifest/comment.stderr") == 0 ]] || exit 1
+[[ $("$manifest/out/app") == 10 ]] || exit 1
 
 printf 'defines = ["MANIFEST_PROBE=1"]\n' >>"$manifest/x2c.toml"
 (cd "$manifest/nested" && "$X2C" build -v --profile release) \
   >"$manifest/setting.stdout" 2>"$manifest/setting.stderr"
-[[ $(grep -c '^x2c: compile ' "$manifest/setting.stderr") == 2 ]]
+[[ $(grep -c '^x2c: compile ' "$manifest/setting.stderr") == 2 ]] || exit 1
 grep '^x2c: compile ' "$manifest/setting.stderr" |
   grep -Fq -- '-DMANIFEST_PROBE=1'
 grep -Fq 'x2c: up-to-date archive ' "$manifest/setting.stderr"
-[[ $("$manifest/out/app") == 10 ]]
+[[ $("$manifest/out/app") == 10 ]] || exit 1
 
 printf '%s\n' '#include "x2c.x"' \
   'int core_value(void); int native_value(void);' 'int main(void) {' \
@@ -1388,8 +1415,8 @@ printf '%s\n' '#include "x2c.x"' \
   >"$manifest/src/main.x"
 (cd "$manifest/nested" && "$X2C" build -v --profile release) \
   >"$manifest/source.stdout" 2>"$manifest/source.stderr"
-[[ $(grep -c '^x2c: translate ' "$manifest/source.stderr") == 1 ]]
-[[ $(grep -c '^x2c: compile ' "$manifest/source.stderr") == 1 ]]
+[[ $(grep -c '^x2c: translate ' "$manifest/source.stderr") == 1 ]] || exit 1
+[[ $(grep -c '^x2c: compile ' "$manifest/source.stderr") == 1 ]] || exit 1
 
 printf 'int leaf_value(void) { return 10; }\n' >"$manifest/src/leaf.x"
 (cd "$manifest/nested" && "$X2C" build -v --profile release) \
@@ -1397,14 +1424,14 @@ printf 'int leaf_value(void) { return 10; }\n' >"$manifest/src/leaf.x"
 grep -Fq "x2c: translate --out-dir" "$manifest/xdep.stderr"
 grep -Fq "$manifest/src/core.x" "$manifest/xdep.stderr"
 grep -Fq "x2c: archive " "$manifest/xdep.stderr"
-[[ $("$manifest/out/app") == 12 ]]
+[[ $("$manifest/out/app") == 12 ]] || exit 1
 
 printf '#define NATIVE_VALUE 3\n' >"$manifest/include/native.h"
 (cd "$manifest/nested" && "$X2C" build -v --profile release) \
   >"$manifest/cdep.stdout" 2>"$manifest/cdep.stderr"
-[[ $(grep -c '^x2c: compile ' "$manifest/cdep.stderr") == 1 ]]
+[[ $(grep -c '^x2c: compile ' "$manifest/cdep.stderr") == 1 ]] || exit 1
 grep -Fq "$manifest/src/native.c" "$manifest/cdep.stderr"
-[[ $("$manifest/out/app") == 13 ]]
+[[ $("$manifest/out/app") == 13 ]] || exit 1
 
 (cd "$manifest/nested" && "$X2C" build -v --profile release -O0) \
   >"$manifest/override.stdout" 2>"$manifest/override.stderr"
@@ -1419,7 +1446,7 @@ fi
 (cd "$manifest/nested" && "$X2C" build -v) \
   >"$manifest/profile-change.stdout" \
   2>"$manifest/profile-change.stderr"
-[[ $(grep -c '^x2c: compile ' "$manifest/profile-change.stderr") -ge 1 ]]
+[[ $(grep -c '^x2c: compile ' "$manifest/profile-change.stderr") -ge 1 ]] || exit 1
 
 real_cc=$(command -v cc)
 printf '#!/usr/bin/env bash\nexec "%s" "$@"\n' "$real_cc" \
@@ -1431,19 +1458,19 @@ chmod +x "$manifest/cc-wrapper"
 (cd "$manifest/nested" && "$X2C" build -v --profile release \
   --cc "$manifest/cc-wrapper") >"$manifest/tool-noop.stdout" \
   2>"$manifest/tool-noop.stderr"
-[[ $(grep -c '^x2c: compile ' "$manifest/tool-noop.stderr") == 0 ]]
+[[ $(grep -c '^x2c: compile ' "$manifest/tool-noop.stderr") == 0 ]] || exit 1
 printf '#!/usr/bin/env bash\n# changed identity\nexec "%s" "$@"\n' "$real_cc" \
   >"$manifest/cc-wrapper"
 (cd "$manifest/nested" && "$X2C" build -v --profile release \
   --cc "$manifest/cc-wrapper") >"$manifest/tool-change.stdout" \
   2>"$manifest/tool-change.stderr"
-[[ $(grep -c '^x2c: compile ' "$manifest/tool-change.stderr") -ge 1 ]]
+[[ $(grep -c '^x2c: compile ' "$manifest/tool-change.stderr") -ge 1 ]] || exit 1
 
 rm "$manifest/out/app"
 (cd "$manifest/nested" && "$X2C" build -v --profile release \
   --cc "$manifest/cc-wrapper") >"$manifest/removed.stdout" \
   2>"$manifest/removed.stderr"
-[[ $(grep -c '^x2c: link ' "$manifest/removed.stderr") == 1 ]]
+[[ $(grep -c '^x2c: link ' "$manifest/removed.stderr") == 1 ]] || exit 1
 
 final_state=$(find "$manifest/out/.x2c/core/.x2c-state" \
   -name 'final-*' -type f)
@@ -1451,13 +1478,13 @@ printf 'corrupt private state\n' >"$final_state"
 (cd "$manifest/nested" && "$X2C" build -v --profile release \
   --cc "$manifest/cc-wrapper") >"$manifest/corrupt.stdout" \
   2>"$manifest/corrupt.stderr"
-[[ $(grep -c '^x2c: link ' "$manifest/corrupt.stderr") == 1 ]]
-[[ $(grep -c '^x2c: archive ' "$manifest/corrupt.stderr") == 1 ]]
+[[ $(grep -c '^x2c: link ' "$manifest/corrupt.stderr") == 1 ]] || exit 1
+[[ $(grep -c '^x2c: archive ' "$manifest/corrupt.stderr") == 1 ]] || exit 1
 
 "$X2C" run --manifest-path "$manifest/x2c.toml" \
   --profile release -- -leading program.x \
   >"$manifest/run.stdout" 2>"$manifest/run.stderr"
-[[ $(cat "$manifest/run.stdout") == 13 ]]
+[[ $(cat "$manifest/run.stdout") == 13 ]] || exit 1
 
 mkdir -p "$manifest/direct-nearby"
 printf '[broken\n' >"$manifest/direct-nearby/x2c.toml"
@@ -1465,7 +1492,7 @@ printf 'int main(void) { return 0; }\n' \
   >"$manifest/direct-nearby/main.c"
 (cd "$manifest/direct-nearby" && "$X2C" build \
   --output explicit main.c)
-[[ -x "$manifest/direct-nearby/explicit" ]]
+[[ -x "$manifest/direct-nearby/explicit" ]] || exit 1
 
 {
   printf '[target.a]\n'
@@ -1488,7 +1515,7 @@ cycle_manifest_status=$?
   >"$manifest/unmatched.stdout" 2>"$manifest/unmatched.stderr"
 unmatched_status=$?
 set -e
-[[ $cycle_manifest_status == 2 && $unmatched_status == 2 ]]
+[[ $cycle_manifest_status == 2 && $unmatched_status == 2 ]] || exit 1
 grep -Fq 'target dependency cycle' "$manifest/cycle.stderr"
 grep -Fq 'unmatched source pattern' "$manifest/unmatched.stderr"
 
@@ -1500,7 +1527,7 @@ printf '[target.linked]\nsources = ["src/*.x"]\n' \
   >"$manifest/linked/x2c.toml"
 "$X2C" build -q --manifest-path "$manifest/linked/x2c.toml" \
   --output "$manifest/linked/app"
-[[ -x "$manifest/linked/app" ]]
+[[ -x "$manifest/linked/app" ]] || exit 1
 
 equivalent="$BUILD/equivalent"
 mkdir -p "$equivalent"
@@ -1528,7 +1555,7 @@ set +e
 "$X2C" new "$starter" 2>"$BUILD/starter/again.stderr"
 starter_status=$?
 set -e
-[[ $starter_status == 2 ]]
+[[ $starter_status == 2 ]] || exit 1
 grep -Fq "exists and is not an empty directory" "$BUILD/starter/again.stderr"
 cmp "$BUILD/starter/x2c.toml.before" "$starter/x2c.toml"
 
@@ -1537,7 +1564,7 @@ set +e
 (cd "$starter" && "$X2C" new "") 2>"$BUILD/starter/empty.stderr"
 empty_status=$?
 set -e
-[[ $empty_status == 2 ]]
+[[ $empty_status == 2 ]] || exit 1
 grep -Fq "the directory operand is empty" "$BUILD/starter/empty.stderr"
 cmp "$BUILD/starter/x2c.toml.before" "$starter/x2c.toml"
 mkdir -p "$BUILD/starter/real-name"
@@ -1556,7 +1583,7 @@ for run in first second; do
   rm -f "$nostate/out.o"
   (cd "$nostate" && env -u PATH "$X2C" build -c --plain --build-dir bd \
     --output out.o hello.x) >"$nostate/$run.stdout" 2>"$nostate/$run.stderr"
-  [[ -s "$nostate/out.o" ]]
+  [[ -s "$nostate/out.o" ]] || exit 1
 done
 
 # A path holding a percent is a path, not a format.
@@ -1564,20 +1591,20 @@ percent="$BUILD/percent"
 mkdir -p "$percent"
 printf 'int main(void) { printf("percent\\n"); return 0; }\n' \
   >"$percent/r%s.x"
-[[ $("$X2C" run -q "$percent/r%s.x") == percent ]]
+[[ $("$X2C" run -q "$percent/r%s.x") == percent ]] || exit 1
 "$X2C" build -q --output "$percent/out" "$percent/r%s.x"
-[[ $("$percent/out") == percent ]]
+[[ $("$percent/out") == percent ]] || exit 1
 X2C_CACHE_DIR="$percent/cache" "$X2C" script "$percent/r%s.x" \
   >"$percent/script.stdout"
-[[ $(cat "$percent/script.stdout") == percent ]]
+[[ $(cat "$percent/script.stdout") == percent ]] || exit 1
 X2C_CACHE_DIR="$percent/cache" "$X2C" script "$percent/r%s.x" \
   >"$percent/warm.stdout"
-[[ $(cat "$percent/warm.stdout") == percent ]]
+[[ $(cat "$percent/warm.stdout") == percent ]] || exit 1
 
 # A requested dump is data on stdout.
 [[ -s $("$X2C" translate --dump-cpp "$percent/r%s.x" \
-  >"$percent/cpp.stdout" 2>"$percent/cpp.stderr"; echo "$percent/cpp.stdout") ]]
-[[ ! -s "$percent/cpp.stderr" ]]
+  >"$percent/cpp.stdout" 2>"$percent/cpp.stderr"; echo "$percent/cpp.stdout") ]] || exit 1
+[[ ! -s "$percent/cpp.stderr" ]] || exit 1
 "$X2C" translate --dump-cpp-text "$percent/r%s.x" >"$percent/cpp-text.stdout"
 cmp "$percent/cpp.stdout" "$percent/cpp-text.stdout"
 
@@ -1586,15 +1613,15 @@ joined="$BUILD/joined"
 mkdir -p "$joined/out"
 printf 'int main(void) { return 0; }\n' >"$joined/main.x"
 "$X2C" build -q --jobs=2 --output "$joined/app" "$joined/main.x"
-[[ -x "$joined/app" ]]
+[[ -x "$joined/app" ]] || exit 1
 "$X2C" translate --out-dir="$joined/out" "$joined/main.x" >/dev/null
-[[ -f "$joined/out/main.c" ]]
+[[ -f "$joined/out/main.c" ]] || exit 1
 set +e
 "$X2C" build -q --plain=yes --output "$joined/app" "$joined/main.x" \
   2>"$joined/value.stderr"
 joined_status=$?
 set -e
-[[ $joined_status == 2 ]]
+[[ $joined_status == 2 ]] || exit 1
 grep -Fq "option takes no value '--plain=yes'" "$joined/value.stderr"
 
 # Manifest options describe a manifest build, so operands refuse them.
@@ -1609,7 +1636,7 @@ joined_profile=$?
   2>"$joined/compile.stderr"
 joined_compile=$?
 set -e
-[[ $joined_target == 2 && $joined_profile == 2 && $joined_compile == 2 ]]
+[[ $joined_target == 2 && $joined_profile == 2 && $joined_compile == 2 ]] || exit 1
 grep -Fq -- "--target conflicts with explicit inputs" "$joined/target.stderr"
 grep -Fq -- "--profile conflicts with explicit inputs" "$joined/profile.stderr"
 grep -Fq -- "--compile-only needs input operands" "$joined/compile.stderr"
@@ -1621,14 +1648,14 @@ printf 'int main(void) { printf("spanning\\n"); return 0; }\n' \
   >"$spanning/src/main.x"
 printf '[target.spanning]\nsources = [\n  "src/*.x",\n]\n' \
   >"$spanning/x2c.toml"
-[[ $("$X2C" run -q --manifest-path "$spanning/x2c.toml") == spanning ]]
+[[ $("$X2C" run -q --manifest-path "$spanning/x2c.toml") == spanning ]] || exit 1
 printf '[target.spanning]\nsources = [\n  "src/*.x"\n' \
   >"$spanning/open.toml"
 set +e
 "$X2C" build --manifest-path "$spanning/open.toml" 2>"$spanning/open.stderr"
 spanning_status=$?
 set -e
-[[ $spanning_status == 2 ]]
+[[ $spanning_status == 2 ]] || exit 1
 grep -Fq 'unterminated array' "$spanning/open.stderr"
 
 # A field without a value is an error at its line, and so is a second
@@ -1647,10 +1674,10 @@ invalid_empty=$?
   2>"$invalid/repeated.stderr"
 invalid_repeated=$?
 set -e
-[[ $invalid_empty == 2 ]]
+[[ $invalid_empty == 2 ]] || exit 1
 grep -Fq "empty.toml':2: expected an array of quoted strings" \
   "$invalid/empty.stderr"
-[[ $invalid_repeated == 2 ]]
+[[ $invalid_repeated == 2 ]] || exit 1
 grep -Fq "repeated.toml':2: duplicate dependencies section" \
   "$invalid/repeated.stderr"
 
@@ -1669,9 +1696,9 @@ printf '%s\n' '#include "x2c.x"' 'int core_value(void);' \
   printf '[target.app]\nsources = ["src/main.x"]\ndependencies = ["core"]\n\n'
   printf '[target.app.profile.release]\noptimization = "O2"\n'
 } >"$profiles/x2c.toml"
-[[ $(cd "$profiles" && "$X2C" run -q) == 1 ]]
+[[ $(cd "$profiles" && "$X2C" run -q) == 1 ]] || exit 1
 rm -rf "$profiles/.x2c-build"
-[[ $(cd "$profiles" && "$X2C" run -q --profile release) == 100 ]]
+[[ $(cd "$profiles" && "$X2C" run -q --profile release) == 100 ]] || exit 1
 
 # A dry run on a manifest whose target consumes a planned archive prints the
 # actions and creates nothing.
@@ -1680,7 +1707,7 @@ rm -rf "$profiles/.x2c-build"
   2>"$profiles/dry.stderr"
 grep -q '^x2c: archive ' "$profiles/dry.stderr"
 grep -q '^x2c: link ' "$profiles/dry.stderr"
-[[ ! -e "$profiles/.x2c-build" ]]
+[[ ! -e "$profiles/.x2c-build" ]] || exit 1
 
 # Builds of one project may run at the same time.
 (cd "$profiles" && "$X2C" build -q)
@@ -1697,7 +1724,7 @@ for job in "${parallel_jobs[@]}"; do wait "$job" || parallel_failed=1; done
   cat "$profiles"/parallel-*.stderr >&2
   exit 1
 }
-[[ $("$profiles/.x2c-build/app") == 1 ]]
+[[ $("$profiles/.x2c-build/app") == 1 ]] || exit 1
 
 # A script edited while it builds is never reused for the source it was not
 # built from.
@@ -1714,10 +1741,13 @@ X2C_CACHE_DIR="$edited/cache" "$X2C" script --rebuild "$edited/e.x" \
 wait "$edit_job"
 X2C_CACHE_DIR="$edited/cache" "$X2C" script "$edited/e.x" \
   >"$edited/after.stdout"
-[[ $(cat "$edited/after.stdout") == second ]]
+[[ $(cat "$edited/after.stdout") == second ]] || exit 1
 
 # Source mapping is independent of -g and belongs to translation reuse.
 python3 - "$X2C" "$BUILD/source-map" <<'PY_SOURCE_MAP'
+if not __debug__:
+    raise SystemExit("this check cannot run with optimized Python")
+
 from pathlib import Path
 import subprocess
 import sys
@@ -1793,7 +1823,7 @@ printf '%s\n' '#include "x2c.x"' \
   >"$BUILD/finally-return.x"
 "$X2C" build --quiet -Xcc -Werror=return-type \
   --output "$BUILD/finally-return" "$BUILD/finally-return.x"
-[[ $("$BUILD/finally-return") == 2 ]]
+[[ $("$BUILD/finally-return") == 2 ]] || exit 1
 
 SCRIPT="$BUILD/script"
 mkdir -p "$SCRIPT/bin"
@@ -1818,14 +1848,14 @@ script_output=$(run_script "$SCRIPT/args.x" "two words" "" -- --help @none \
 script_status=$?
 set -e
 [[ $script_status == 5 &&
-   $script_output == 'hello [two words] [] [--] [--help] [@none]' ]]
-[[ ! -s "$SCRIPT/first.stderr" ]]
+   $script_output == 'hello [two words] [] [--] [--help] [@none]' ]] || exit 1
+[[ ! -s "$SCRIPT/first.stderr" ]] || exit 1
 [[ $(PATH="$SCRIPT/bin:$PATH" X2C_CACHE_DIR="$SCRIPT/cache" \
-     "$SCRIPT/args.x") == hello ]]
+     "$SCRIPT/args.x") == hello ]] || exit 1
 # A script is x2c source by its shebang line, whatever its name.
 cp "$SCRIPT/args.x" "$SCRIPT/greet"
 [[ $(PATH="$SCRIPT/bin:$PATH" X2C_CACHE_DIR="$SCRIPT/cache" \
-     "$SCRIPT/greet" there) == 'hello [there]' ]]
+     "$SCRIPT/greet" there) == 'hello [there]' ]] || exit 1
 # Copying `greet` beside the script changed a directory the build searched,
 # so the next run rebuilds. After that a warm run builds nothing at all. The
 # logs go outside the script directory, because a new file there is itself a
@@ -1844,7 +1874,7 @@ run_script -v "$SCRIPT/args.x" >/dev/null 2>"$BUILD/script-dir.stderr"
 grep -q '^x2c: link ' "$BUILD/script-dir.stderr"
 printf '%s\n' 'macro Expression $greeting() => "changed";' \
   >"$SCRIPT/greeting.x"
-[[ $(run_script "$SCRIPT/args.x") == changed ]]
+[[ $(run_script "$SCRIPT/args.x") == changed ]] || exit 1
 run_script -v --rebuild "$SCRIPT/args.x" >/dev/null 2>"$SCRIPT/rebuild.stderr"
 grep -q '^x2c: link ' "$SCRIPT/rebuild.stderr"
 rm -rf "$SCRIPT/cache"
@@ -1866,10 +1896,11 @@ broken_status=$?
 run_script >/dev/null 2>"$SCRIPT/none.stderr"
 none_status=$?
 set -e
-[[ $broken_status == 1 ]] && grep -q 'broken.x:1:' "$SCRIPT/broken.stderr"
-[[ $none_status == 2 ]] &&
-  grep -q 'script requires a script file' "$SCRIPT/none.stderr"
-[[ $(X2C_CACHE_DIR="$SCRIPT/cache" "$X2C" env cache_dir) == "$SCRIPT/cache" ]]
+[[ $broken_status == 1 ]] || exit 1
+grep -q 'broken.x:1:' "$SCRIPT/broken.stderr"
+[[ $none_status == 2 ]] || exit 1
+grep -q 'script requires a script file' "$SCRIPT/none.stderr"
+[[ $(X2C_CACHE_DIR="$SCRIPT/cache" "$X2C" env cache_dir) == "$SCRIPT/cache" ]] || exit 1
 cp "$SCRIPT/args.x" "$SCRIPT/doomed.x"
 run_script "$SCRIPT/doomed.x" >/dev/null
 compgen -G "$SCRIPT/cache/scripts/doomed-*" >/dev/null
@@ -1879,7 +1910,7 @@ if compgen -G "$SCRIPT/cache/scripts/doomed-*" >/dev/null; then
   echo "a removed script kept its cache entry" >&2
   exit 1
 fi
-[[ -z $(run_script --clean "$SCRIPT/args.x") ]]
+[[ -z $(run_script --clean "$SCRIPT/args.x") ]] || exit 1
 if compgen -G "$SCRIPT/cache/scripts/args-*" >/dev/null; then
   echo "--clean left the cache entry behind" >&2
   exit 1
@@ -1901,9 +1932,9 @@ unit_status=$?
 run_script "$SCRIPT/unit.x" fail >/dev/null 2>"$SCRIPT/fail.stderr"
 fail_status=$?
 set -e
-[[ $unit_status == 2 && $unit_output == '2:first' ]]
-[[ $fail_status == 7 ]] &&
-  grep -Fq 'command (sh -c "exit 7") failed with status 7' "$SCRIPT/fail.stderr"
+[[ $unit_status == 2 && $unit_output == '2:first' ]] || exit 1
+[[ $fail_status == 7 ]] || exit 1
+grep -Fq 'command (sh -c "exit 7") failed with status 7' "$SCRIPT/fail.stderr"
 
 cat >"$SCRIPT/missing.x" <<'EOF'
 #!/usr/bin/env -S x2c script
@@ -1917,15 +1948,15 @@ missing_status=$?
   >/dev/null 2>"$SCRIPT/cpp.stderr"
 cpp_status=$?
 set -e
-[[ $missing_status == 1 ]] &&
-  grep -Fq \
+[[ $missing_status == 1 ]] || exit 1
+grep -Fq \
     'not-found ((operation "Path.read_text") (path "/x2c-script-probe-missing")' \
     "$SCRIPT/missing.stderr"
-[[ $cpp_status == 1 ]] &&
-  grep -q 'script units use the default symbol collection' "$SCRIPT/cpp.stderr"
+[[ $cpp_status == 1 ]] || exit 1
+grep -q 'script units use the default symbol collection' "$SCRIPT/cpp.stderr"
 if [[ $(uname) == Darwin ]]; then
   run_script --source-map -g "$SCRIPT/unit.x" >/dev/null
-  [[ -d $(echo "$SCRIPT"/cache/scripts/unit-*/run.dSYM) ]]
+  [[ -d $(echo "$SCRIPT"/cache/scripts/unit-*/run.dSYM) ]] || exit 1
 fi
 
 mkdir -p "$SCRIPT/helpers/lib"
@@ -1945,17 +1976,17 @@ cat >"$SCRIPT/helpers/uses.x" <<'EOF'
 #include "greet.x"
 printf("%s\n", greeting());
 EOF
-[[ $(run_script "$SCRIPT/helpers/uses.x") == 'answer 42' ]]
+[[ $(run_script "$SCRIPT/helpers/uses.x") == 'answer 42' ]] || exit 1
 printf '%s\n' '#include "greet.x"' \
   'int main(void) { printf("%s\n", greeting()); return 0; }' \
   >"$SCRIPT/helpers/program.x"
 (cd "$SCRIPT/helpers" &&
   "$X2C" build --quiet --output program program.x greet.x lib/inner.x)
-[[ $("$SCRIPT/helpers/program") == 'answer 42' ]]
+[[ $("$SCRIPT/helpers/program") == 'answer 42' ]] || exit 1
 sed 's/=> 40;/=> 50;/' "$SCRIPT/helpers/lib/inner.x" \
   >"$SCRIPT/helpers/lib/inner.next" &&
   mv "$SCRIPT/helpers/lib/inner.next" "$SCRIPT/helpers/lib/inner.x"
-[[ $(run_script "$SCRIPT/helpers/uses.x") == 'answer 52' ]]
+[[ $(run_script "$SCRIPT/helpers/uses.x") == 'answer 52' ]] || exit 1
 
 # Module members are text in their entry, while an ordinary helper beside
 # them remains a separate unit. Nested member edits still invalidate a run.
@@ -1977,12 +2008,12 @@ cat >"$SCRIPT/module/app.x" <<'EOF'
 module /* Member paths can follow a comment. */ { "app/part.x" }
 int main(void) { printf("%d\n", answer()); return 0; }
 EOF
-[[ $(run_script "$SCRIPT/module/app.x") == 42 ]]
-[[ $(run_script "$SCRIPT/module/app.x") == 42 ]]
+[[ $(run_script "$SCRIPT/module/app.x") == 42 ]] || exit 1
+[[ $(run_script "$SCRIPT/module/app.x") == 42 ]] || exit 1
 sed 's/= 40;/= 41;/' "$SCRIPT/module/app/part/inner.x" \
   >"$SCRIPT/module/app/part/inner.next" &&
   mv "$SCRIPT/module/app/part/inner.next" "$SCRIPT/module/app/part/inner.x"
-[[ $(run_script "$SCRIPT/module/app.x") == 43 ]]
+[[ $(run_script "$SCRIPT/module/app.x") == 43 ]] || exit 1
 
 mkdir -p "$SCRIPT/search/first" "$SCRIPT/search/second"
 printf '%s\n' '#define WHICH "second"' >"$SCRIPT/search/second/config.h"
@@ -1999,10 +2030,10 @@ pick() {
   run_script -I "$SCRIPT/search/first" -I "$SCRIPT/search/second" \
     "$SCRIPT/search/pick.x"
 }
-[[ $(pick) == 'second plain' ]]
+[[ $(pick) == 'second plain' ]] || exit 1
 printf '%s\n' '#define WHICH "first"' >"$SCRIPT/search/first/config.h"
-[[ $(pick) == 'first plain' ]]
+[[ $(pick) == 'first plain' ]] || exit 1
 : >"$SCRIPT/search/second/optional.h"
-[[ $(pick) == 'first optional' ]]
+[[ $(pick) == 'first optional' ]] || exit 1
 
 echo "CLI, dependency, build, run, script, manifest, and state probes passed"
