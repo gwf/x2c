@@ -477,6 +477,30 @@ components.
   `rewrite-function-entry` uses it, so deleting it would remove a public
   feature. `lambda_cells` keeps its `new-name` rows, because a cell is
   named when its declaration is built, in declaration order.
+- Batch 8 (2026-10-12): the unboxer wrong-tag decision is written up
+  below ("Decision needed"), published to dev as `d6066eac`; behavior is
+  unchanged.
+- Build-cost measurement (2026-10-12, idle host, no gate change): the
+  climb is real. `make performance-snapshot` on `d6066eac` recorded a
+  sequential stage build of 47.4 CPU s for 89,595 authored lines (Oct 7:
+  35.4 s; Oct 10 and 11: 44.7 s). `tools/build-scaling.py` on fresh trees,
+  each commit run twice, alternating, gave 38.0 and 38.5 s for `0bba0aed`
+  (Oct 7) and 49.0 and 49.7 s for `d6066eac`: +11.2 s, +29%, or +14% per
+  authored line. One stage build of each fresh tree with every translator
+  and `cc` call timed splits the increase:
+  - translating lib/: 6.3 -> 10.2 s. A unit's fixed cost grew: translating
+    a file that only includes x2c.x takes 0.06 -> 0.18 s (0.99 -> 2.59 G
+    instructions), and lib/ has 78 units instead of 64. In a built tree,
+    where interfaces are already written, lib/ translation fell from 5.0
+    to 4.4 s, so the fixed cost is paid by cold units.
+  - translating src/: 15.9 -> 17.9 s, most of it the generated
+    `src/linked-meta.x` (887 -> 2,278 lines; 0.66 -> 2.2 s alone).
+  - `cc`: 13.5 -> 16.2 s: `linked-meta.c` 0.36 -> 1.65 s (239 KB ->
+    851 KB) and 32 new translation units 0.93 s.
+  The representative translation workload (six compiler sources) did not
+  climb: stage-1 live 3.68 s on Oct 7 and 3.88 s now. The next step, not
+  taken here, is to find what each unit now does once at startup, likely
+  the replay of the twelve prelude components.
 - Not done: converging the lambda component's `(place ...)` carrier rows on
   `x2c_place` (decision 9). Both forms reach `Compiler.place`; the carrier
   form exists because the placed code names bindings the driver introduces
