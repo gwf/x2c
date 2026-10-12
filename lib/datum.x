@@ -200,14 +200,12 @@ static int _plain_list(
   return 1;
 }
 
-/* Escaped strings use the Lisp reader's escape validation. */
+/* Use the same string scanner as the Lisp tokenizer. */
 static int _plain_string(char *s, unsigned &at, Var &out) {
-  unsigned end = at + 1;
-  for (; s[end] != '"'; end++)
-    if (!s[end] || s[end] == '\n' || s[end] == '\\') return 0;
-  if (!_token_end(s[end + 1])) return 0;
-  out = String.new_len(s + at + 1, end - at - 1);
-  at = end + 1;
+  int length = scan_c_string(s + at);
+  if (length < 0 || !_token_end(s[at + length])) return 0;
+  out = String.new_len(s + at + 1, length - 2).unescape();
+  at += length;
   return 1;
 }
 
