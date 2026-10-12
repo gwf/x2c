@@ -1287,8 +1287,8 @@ static Given _take_option(Array args, int * i, int mask){
   String arg = Var_string(Array_getindex(args, (* i))), written = arg, joined = NULL, suffix = NULL;
   int equals = String_startswith(arg, _85) ? String_find(arg, _91) : - 1;
   if(equals > 2){
-    written = String_getslice(arg, -2147483648, equals, 1);
-    joined = String_getslice(arg, equals + 1, -2147483648, 1);
+    written = String_getslice(arg, (-2147483647 - 1), equals, 1);
+    joined = String_getslice(arg, equals + 1, (-2147483647 - 1), 1);
   }
   Given given ={
     _find_option(written, mask, &(suffix)), written
@@ -1317,7 +1317,7 @@ static CliOption * _find_option(String spelling, int mask, String * attached){
     }
     if(String_equal(spelling, form) || String_equal(spelling, option -> alias)) return option;
     if(option -> value && String_len(form) == 2 && longer){
-      (* attached) = String_getslice(spelling, 2, -2147483648, 1);
+      (* attached) = String_getslice(spelling, 2, (-2147483647 - 1), 1);
       return option;
     }
 
@@ -1578,11 +1578,11 @@ static void _expand_argument(Array out, String arg, List stack){
     return;
   }
   if(String_getindex(arg, 1) == '@'){
-    Array_push(out, String_var(String_getslice(arg, 1, -2147483648, 1)));
+    Array_push(out, String_var(String_getslice(arg, 1, (-2147483647 - 1), 1)));
     return;
   }
   if(String_len(arg) == 1) driver_error("empty response-file reference '@'");
-  String path = String_getslice(arg, 1, -2147483648, 1), identity = Path_absolute(path);
+  String path = String_getslice(arg, 1, (-2147483647 - 1), 1), identity = Path_absolute(path);
   if(List_contains(stack, String_var(identity))) _fail(String_join(NULL, cons(String_var(_127), cons(String_var(path), NULL))), NULL);
   List nested = cons(String_var(identity), stack);
   {

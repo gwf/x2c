@@ -572,9 +572,9 @@ static String _script(Compiler c, String text, String path){
   int end = String_find(text, _14);
   ScriptUnit script = Scope_calloc(1, sizeof(struct ScriptUnit));
   script -> path = path;
-  script -> shebang = end < 0 ? text : String_getslice(text, -2147483648, end, 1);
+  script -> shebang = end < 0 ? text : String_getslice(text, (-2147483647 - 1), end, 1);
   c -> unit_script = script;
-  return String_join(NULL, cons(String_var(_15), cons(String_var(end < 0 ? _16 : String_getslice(text, end, -2147483648, 1)), NULL)));
+  return String_join(NULL, cons(String_var(_15), cons(String_var(end < 0 ? _16 : String_getslice(text, end, (-2147483647 - 1), 1)), NULL)));
 }
 
 static int _source_lines(String text){
@@ -661,11 +661,16 @@ static List _unit_private_rows(Compiler c, Map globs){
         List _x2c_match_expr = Var_list(key); List _x2c_match_cursor;
         switch(0){
             default: ;
-           _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && Var_equal(_x2c_match_cursor->car, _21 ->car) && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor) { Var name = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
-            String path = home_absolute_path(Var_string(List_car(Var_list(owner))));
-            if(String_equal(Compiler_canonical_path(c, path), unit)) continue;
-            Array_push(rows, List_var(_unit_private_row(globs, cons(name, NULL))));
-            Array_push(rows, List_var(_unit_private_row(globs, cons(_22, cons(name, NULL)))));
+           _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && Var_equal(_x2c_match_cursor->car, _21 ->car) && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor) { Var _x2c_match_value_0 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
+            Var name;
+            name = _x2c_match_value_0;
+            {
+              String path = home_absolute_path(Var_string(List_car(Var_list(owner))));
+              if(String_equal(Compiler_canonical_path(c, path), unit)) continue;
+              Array_push(rows, List_var(_unit_private_row(globs, cons(name, NULL))));
+              Array_push(rows, List_var(_unit_private_row(globs, cons(_22, cons(name, NULL)))));
+            }
+
           }
            break; } }
         }

@@ -43,7 +43,11 @@
 #include <unistd.h>
 static String executable_path, root_path;
 
-static String _34, _33, _32, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static List _31, _30;
+
+static String _39, _38, _37, _36, _35, _34, _33, _32, _28, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+
+static Var _29, _27;
 
 static int _init_guard_ = 0;
 
@@ -116,15 +120,20 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _23 = String_new(".o");
   _24 = String_new(".a");
   _25 = String_new("/");
-  _26 = String_new("/src/");
-  _27 = String_new(".x");
-  _28 = String_new("x2c-module-stamp:");
-  _29 = String_new("%016llx");
-  _30 = String_new("%08X");
-  _31 = String_new("cannot lock ");
-  _32 = String_new(".tmp.%ld");
-  _33 = String_new(" ");
-  _34 = String_new(": ");
+  _26 = String_new(".x");
+  _27 = String_var(_26);
+  _28 = String_new(".xp");
+  _29 = String_var(_28);
+  _30 = cons(_29, NULL);
+  _31 = cons(_27, _30);
+  _32 = String_new("/src/");
+  _33 = String_new("x2c-module-stamp:");
+  _34 = String_new("%016llx");
+  _35 = String_new("%08X");
+  _36 = String_new("cannot lock ");
+  _37 = String_new(".tmp.%ld");
+  _38 = String_new(" ");
+  _39 = String_new(": ");
   _x2c_static_initialize_0();
   _x2c_static_initialize_1();
   _x2c_static_initialize_2();
@@ -324,21 +333,35 @@ String package_entry(SourceView sources, List roots, String name, String * direc
   if(! _init_guard_) _file_init_();
   {
     String package_dir;
-    List _x2c_macro_object_2 = roots;
-    List _x2c_macro_cursor_2 = _x2c_macro_object_2;
-    Var _x2c_macro_cursor_output_2;
-    while(List_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
-      package_dir = Var_string(_x2c_macro_cursor_output_2);
+    List _x2c_macro_object_3 = roots;
+    List _x2c_macro_cursor_3 = _x2c_macro_object_3;
+    Var _x2c_macro_cursor_output_3;
+    while(List_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_3))){
+      package_dir = Var_string(_x2c_macro_cursor_output_3);
       {
         String root =({
           Var _x2c_literal_part_0 = String_var(Path_absolute(package_dir));  String_join(NULL, cons(_x2c_literal_part_0, cons(String_var(_25), cons(String_var(name), NULL))));
         }
         );
-        String nested = String_join(NULL, cons(String_var(root), cons(String_var(_26), cons(String_var(name), cons(String_var(_27), NULL)))));
-        String entry = SourceView_exists(sources, nested) ? nested : String_join(NULL, cons(String_var(root), cons(String_var(_25), cons(String_var(name), cons(String_var(_27), NULL)))));
-        if(! SourceView_exists(sources, entry)) continue;
-        (* directory) = root;
-        return Path_absolute(entry);
+        {
+          String suffix;
+          List _x2c_macro_object_2 = _31;
+          List _x2c_macro_cursor_2 = _x2c_macro_object_2;
+          Var _x2c_macro_cursor_output_2;
+          while(List_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
+            suffix = Var_string(_x2c_macro_cursor_output_2);
+            {
+              String nested = String_join(NULL, cons(String_var(root), cons(String_var(_32), cons(String_var(name), cons(String_var(suffix), NULL)))));
+              String entry = SourceView_exists(sources, nested) ? nested : String_join(NULL, cons(String_var(root), cons(String_var(_25), cons(String_var(name), cons(String_var(suffix), NULL)))));
+              if(! SourceView_exists(sources, entry)) continue;
+              (* directory) = root;
+              return Path_absolute(entry);
+            }
+
+          }
+
+        }
+
       }
 
     }
@@ -349,9 +372,9 @@ String package_entry(SourceView sources, List roots, String name, String * direc
 
 int package_source(String directory, String path){
   if(! _init_guard_) _file_init_();
-  if(String_startswith(path, String_join(NULL, cons(String_var(directory), cons(String_var(_26), NULL))))) return 1;
-  String name = String_getslice(directory, String_rfind(directory, _6) + 1, -2147483648, 1);
-  return String_equal(path, String_join(NULL, cons(String_var(directory), cons(String_var(_25), cons(String_var(name), cons(String_var(_27), NULL))))));
+  if(String_startswith(path, String_join(NULL, cons(String_var(directory), cons(String_var(_32), NULL))))) return 1;
+  String name = String_getslice(directory, String_rfind(directory, _6) + 1, (-2147483647 - 1), 1);
+  return String_equal(path, String_join(NULL, cons(String_var(directory), cons(String_var(_25), cons(String_var(name), cons(String_var(_26), NULL)))))) || String_equal(path, String_join(NULL, cons(String_var(directory), cons(String_var(_25), cons(String_var(name), cons(String_var(_28), NULL))))));
 }
 
 String compiler_identity(void){
@@ -362,7 +385,7 @@ String compiler_identity(void){
 String build_module_stamp(void){
   if(! _init_guard_) _file_init_();
   String identity = compiler_identity();
-  return String_truth(identity) ? String_join(NULL, cons(String_var(_28), cons(String_var(identity), NULL))) : NULL;
+  return String_truth(identity) ? String_join(NULL, cons(String_var(_33), cons(String_var(identity), NULL))) : NULL;
 }
 
 uint64_t fnv_file(uint64_t hash, String path, int * ok);
@@ -372,7 +395,7 @@ String file_identity(String path){
   int ok = path != NULL;
   uint64_t hash = FNV_OFFSET_BASIS;
   if(ok) hash = fnv_file(hash, path, &(ok));
-  return ok ? String_printf(_29, (unsigned long long) hash) : NULL;
+  return ok ? String_printf(_34, (unsigned long long) hash) : NULL;
 }
 
 uint64_t fnv_bytes(uint64_t hash, const void * bytes, size_t length);
@@ -407,22 +430,22 @@ String filename_hash(String filename){
   unsigned hash = 0;
   {
     char byte;
-    String _x2c_macro_object_3 = filename;
-    int _x2c_macro_cursor_3 = 0;
-    int _x2c_macro_cursor_output_3;
-    while(String_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_3))){
-      byte = _x2c_macro_cursor_output_3;
+    String _x2c_macro_object_4 = filename;
+    int _x2c_macro_cursor_4 = 0;
+    int _x2c_macro_cursor_output_4;
+    while(String_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_4))){
+      byte = _x2c_macro_cursor_output_4;
       hash = hash * 31 +(unsigned char) byte;
     }
 
   }
-  return String_printf(_30, hash);
+  return String_printf(_35, hash);
 }
 
 int file_lock(Path p, int wait){
   if(! _init_guard_) _file_init_();
   int lock = open(p, O_RDWR | O_CREAT | O_CLOEXEC, 0666);
-  if(lock < 0) driver_error(String_join(NULL, cons(String_var(_31), cons(String_var(p), NULL))));
+  if(lock < 0) driver_error(String_join(NULL, cons(String_var(_36), cons(String_var(p), NULL))));
   int operation = wait ? LOCK_EX : LOCK_EX | LOCK_NB;
   while(flock(lock, operation)){
     if(errno == EINTR) continue;
@@ -434,7 +457,7 @@ int file_lock(Path p, int wait){
 
 void file_publish(List outputs){
   if(! _init_guard_) _file_init_();
-  String suffix = String_printf(_32, (long) getpid());
+  String suffix = String_printf(_37, (long) getpid());
   {
     _x2c_defer_env_0 _x2c_macro_environment_0 ={
       0
@@ -513,7 +536,7 @@ void host_error(List detail){
   if(Var_is_void(subject)) subject = List_assoc(detail, Symbol_var(35599650906));
   long error = Var_long(Var_convert(List_assoc(detail, Symbol_var(11703198)), 818062));
   driver_error(({
-    Var _x2c_literal_part_2 = String_var(Var_str(List_assoc(detail, Symbol_var(34096809266140))));  Var _x2c_literal_part_3 = String_var(Var_str(subject));  Var _x2c_literal_part_4 = String_var(String_new(strerror(error)));  String_join(NULL, cons(_x2c_literal_part_2, cons(String_var(_33), cons(_x2c_literal_part_3, cons(String_var(_34), cons(_x2c_literal_part_4, NULL))))));
+    Var _x2c_literal_part_2 = String_var(Var_str(List_assoc(detail, Symbol_var(34096809266140))));  Var _x2c_literal_part_3 = String_var(Var_str(subject));  Var _x2c_literal_part_4 = String_var(String_new(strerror(error)));  String_join(NULL, cons(_x2c_literal_part_2, cons(String_var(_38), cons(_x2c_literal_part_3, cons(String_var(_39), cons(_x2c_literal_part_4, NULL))))));
   }
   ));
 }

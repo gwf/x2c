@@ -391,7 +391,7 @@ static void Option__read_row(Option * o, List row, Map index, int position){
   if((* o).operand)(* o).name = first;
   else{
     int dashes = String_startswith((* o).spelling, _0) ? 2 : 1;
-    (* o).name = String_getslice((* o).spelling, dashes, -2147483648, 1);
+    (* o).name = String_getslice((* o).spelling, dashes, (-2147483647 - 1), 1);
   }
   if((* o).defaulted) return;
   if((* o).repeated)(* o).fallback = List_var((List) NULL);
@@ -433,13 +433,13 @@ int String_find(String, String);
 
 static void Spec__parse_long(Spec * s, Map result, List * rest, String word){
   int equals = String_find(word, _9);
-  String spelling = equals < 0 ? word : String_getslice(word, -2147483648, equals, 1);
+  String spelling = equals < 0 ? word : String_getslice(word, (-2147483647 - 1), equals, 1);
   Option * option = Spec__find(&((* s)), spelling);
   if(! String_truth(option -> value)){
     if(equals >= 0) _bad_option(_10, spelling);
     Option__store(&((* option)), result, int_var(1));
   }
-  else if(equals >= 0) Option__store(&((* option)), result, String_var(String_getslice(word, equals + 1, -2147483648, 1)));
+  else if(equals >= 0) Option__store(&((* option)), result, String_var(String_getslice(word, equals + 1, (-2147483647 - 1), 1)));
   else Option__store(&((* option)), result, String_var(_next_value(&((* rest)), spelling)));
 }
 
@@ -451,7 +451,7 @@ static void Spec__parse_short(Spec * s, Map result, List * rest, String word){
       Option__store(&((* option)), result, int_var(1));
       continue;
     }
-    String value = at + 1 < String_len(word) ? String_getslice(word, at + 1, -2147483648, 1) : _next_value(&((* rest)), spelling);
+    String value = at + 1 < String_len(word) ? String_getslice(word, at + 1, (-2147483647 - 1), 1) : _next_value(&((* rest)), spelling);
     Option__store(&((* option)), result, String_var(value));
     return;
   }

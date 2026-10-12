@@ -312,11 +312,9 @@ int Compiler_match_pattern_is_static(Compiler c, List pattern);
 
 List Compiler_match_pattern_binders(Compiler c, List pattern, List * possible);
 
-void Compiler_define_match_binders(Compiler c, List pattern);
+List Compiler_define_pattern_binders(Compiler c, List pattern);
 
-List Compiler_define_catch_binders(Compiler c, List pattern);
-
-List Compiler_catch_binder_declarations(Compiler c, List bindings, List handle);
+List Compiler_pattern_binder_declarations(Compiler c, List bindings, List handle);
 
 void Compiler_own_diagnostics(Compiler c);
 

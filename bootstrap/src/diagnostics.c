@@ -360,17 +360,30 @@ static void Compiler__write_json_location(Compiler c, Buffer out, List location)
     List _x2c_match_expr = location; List _x2c_match_cursor, _x2c_match_cursor1;
     switch(0){
         default: ;
-       _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224497936762030858ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1) { Var file = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224497936762424202ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1) { Var line = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224497936995232604ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1) { Var column = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224497937578343696ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1) { Var length = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224499069780773852ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1) { Var position = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
-        Buffer_write(out, String_join(NULL, cons(String_var(_16), cons(String_var(Var_json(String_var(Compiler__json_path(c, Var_string(file))))), NULL))));
-        Buffer_write(out, ({
-          Var _x2c_literal_part_5 = String_var(Var_str(line));  Var _x2c_literal_part_6 = String_var(Var_str(column));  String_join(NULL, cons(String_var(_17), cons(_x2c_literal_part_5, cons(String_var(_18), cons(_x2c_literal_part_6, NULL)))));
+       _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224497936762030858ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1) { Var _x2c_match_value_0 = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224497936762424202ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1) { Var _x2c_match_value_1 = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224497936995232604ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1) { Var _x2c_match_value_2 = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224497937578343696ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1) { Var _x2c_match_value_3 = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224499069780773852ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1) { Var _x2c_match_value_4 = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
+        Var file;
+        file = _x2c_match_value_0;
+        Var line;
+        line = _x2c_match_value_1;
+        Var column;
+        column = _x2c_match_value_2;
+        Var length;
+        length = _x2c_match_value_3;
+        Var position;
+        position = _x2c_match_value_4;
+        {
+          Buffer_write(out, String_join(NULL, cons(String_var(_16), cons(String_var(Var_json(String_var(Compiler__json_path(c, Var_string(file))))), NULL))));
+          Buffer_write(out, ({
+            Var _x2c_literal_part_5 = String_var(Var_str(line));  Var _x2c_literal_part_6 = String_var(Var_str(column));  String_join(NULL, cons(String_var(_17), cons(_x2c_literal_part_5, cons(String_var(_18), cons(_x2c_literal_part_6, NULL)))));
+          }
+          ));
+          Buffer_write(out, ({
+            Var _x2c_literal_part_7 = String_var(Var_str(length));  Var _x2c_literal_part_8 = String_var(Var_str(position));  String_join(NULL, cons(String_var(_19), cons(_x2c_literal_part_7, cons(String_var(_20), cons(_x2c_literal_part_8, NULL)))));
+          }
+          ));
+          return;
         }
-        ));
-        Buffer_write(out, ({
-          Var _x2c_literal_part_7 = String_var(Var_str(length));  Var _x2c_literal_part_8 = String_var(Var_str(position));  String_join(NULL, cons(String_var(_19), cons(_x2c_literal_part_7, cons(String_var(_20), cons(_x2c_literal_part_8, NULL)))));
-        }
-        ));
-        return;
+
       }
        break; } } } } } }
     }
@@ -386,16 +399,29 @@ void Compiler_print_diagnostic(Compiler compiler, List entry){
     List _x2c_match_expr = entry; List _x2c_match_cursor, _x2c_match_cursor1;
     switch(0){
         default: ;
-       _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224497936761846026ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1) { Var code = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224499254657174834ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1) { Var severity = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224497965055543754ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1) { Var message = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224498793812347868ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1) { Var location = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224497936792002918ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1) { Var notes = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
-        String note = _note_line(Var_list(notes));
-        if(diagnostics_json >= 0){
-          Compiler__write_json(compiler, Var_symbol(code), Var_symbol(severity), Var_string(message), Var_list(location), note);
-          return;
+       _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224497936761846026ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1) { Var _x2c_match_value_0 = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224499254657174834ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1) { Var _x2c_match_value_1 = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224497965055543754ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1) { Var _x2c_match_value_2 = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224498793812347868ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1) { Var _x2c_match_value_3 = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224497936792002918ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1) { Var _x2c_match_value_4 = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
+        Var code;
+        code = _x2c_match_value_0;
+        Var severity;
+        severity = _x2c_match_value_1;
+        Var message;
+        message = _x2c_match_value_2;
+        Var location;
+        location = _x2c_match_value_3;
+        Var notes;
+        notes = _x2c_match_value_4;
+        {
+          String note = _note_line(Var_list(notes));
+          if(diagnostics_json >= 0){
+            Compiler__write_json(compiler, Var_symbol(code), Var_symbol(severity), Var_string(message), Var_list(location), note);
+            return;
+          }
+          Compiler__write_heading(compiler, Var_symbol(code), Var_string(message), Var_list(location));
+          if(String_truth(note)) fprintf(stderr, "  note: %s\n", note);
+          fprintf(stderr, "\n");
+          fflush(stderr);
         }
-        Compiler__write_heading(compiler, Var_symbol(code), Var_string(message), Var_list(location));
-        if(String_truth(note)) fprintf(stderr, "  note: %s\n", note);
-        fprintf(stderr, "\n");
-        fflush(stderr);
+
       }
        break; } } } } } }
     }
@@ -409,15 +435,28 @@ static void Compiler__write_heading(Compiler c, Symbol code, String message, Lis
     List _x2c_match_expr = location; List _x2c_match_cursor, _x2c_match_cursor1;
     switch(0){
         default: ;
-       _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224497936762030858ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1) { Var file = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224497936762424202ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1) { Var line = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224497936995232604ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1) { Var column = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224497937578343696ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1) { Var length = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224499069780773852ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1) { Var position = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
-        String place =({
-          Var _x2c_literal_part_9 = String_var(Var_str(file));  Var _x2c_literal_part_10 = String_var(Var_str(line));  Var _x2c_literal_part_11 = String_var(Var_str(column));  String_join(NULL, cons(_x2c_literal_part_9, cons(String_var(_21), cons(_x2c_literal_part_10, cons(String_var(_21), cons(_x2c_literal_part_11, NULL))))));
+       _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224497936762030858ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1) { Var _x2c_match_value_0 = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224497936762424202ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1) { Var _x2c_match_value_1 = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224497936995232604ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1) { Var _x2c_match_value_2 = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224497937578343696ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1) { Var _x2c_match_value_3 = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224499069780773852ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1) { Var _x2c_match_value_4 = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
+        Var file;
+        file = _x2c_match_value_0;
+        Var line;
+        line = _x2c_match_value_1;
+        Var column;
+        column = _x2c_match_value_2;
+        Var length;
+        length = _x2c_match_value_3;
+        Var position;
+        position = _x2c_match_value_4;
+        {
+          String place =({
+            Var _x2c_literal_part_9 = String_var(Var_str(file));  Var _x2c_literal_part_10 = String_var(Var_str(line));  Var _x2c_literal_part_11 = String_var(Var_str(column));  String_join(NULL, cons(_x2c_literal_part_9, cons(String_var(_21), cons(_x2c_literal_part_10, cons(String_var(_21), cons(_x2c_literal_part_11, NULL))))));
+          }
+          );
+          fprintf(stderr, "%s: %s: %s\n", place, Symbol_str(code), message);
+          if(Array_truth(c -> line_markers)) line = int_var(Compiler__text_line(c, Var_int(Var_convert(position, 3453797))));
+          Compiler__show_source_context(c, Var_int(Var_convert(line, 3453797)), Var_int(Var_convert(column, 3453797)), Var_int(Var_convert(length, 3453797)));
+          return;
         }
-        );
-        fprintf(stderr, "%s: %s: %s\n", place, Symbol_str(code), message);
-        if(Array_truth(c -> line_markers)) line = int_var(Compiler__text_line(c, Var_int(Var_convert(position, 3453797))));
-        Compiler__show_source_context(c, Var_int(Var_convert(line, 3453797)), Var_int(Var_convert(column, 3453797)), Var_int(Var_convert(length, 3453797)));
-        return;
+
       }
        break; } } } } } }
     }
@@ -454,13 +493,19 @@ List Compiler_origin_location(Compiler compiler, int occurrence){
       List _x2c_match_expr = origin; List _x2c_match_cursor; Var _x2c_match_values[1]; MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
       switch(_x2c_match_expr ? _x2c_match_expr->car.u64 : 0){
           case 9224513703959961928ULL: ;
-         static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(_33), &_x2c_match_capture)) { Var parent = _x2c_match_values[0]; {
-          occurrence = Var_int(Var_convert(parent, 3453797));  continue;
+         static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(_33), &_x2c_match_capture)) { Var _x2c_match_value_0 = _x2c_match_values[0]; {
+          Var parent;  parent = _x2c_match_value_0; {
+            occurrence = Var_int(Var_convert(parent, 3453797));  continue;
+          }
+
         }
-         break; } case 9224497938069557450ULL: ;  _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497938069557450ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor) { Var file = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor) { Var line = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor) { Var column = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor) { Var length = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor) { Var position = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {return({
-          Var _x2c_literal_part_12 = List_var(cons(_34, cons(file, NULL)));  Var _x2c_literal_part_13 = List_var(cons(_35, cons(line, NULL)));  Var _x2c_literal_part_14 = List_var(cons(_36, cons(column, NULL)));  Var _x2c_literal_part_15 = List_var(cons(_37, cons(length, NULL)));  Var _x2c_literal_part_16 = List_var(cons(_38, cons(position, NULL)));  cons(_x2c_literal_part_12, cons(_x2c_literal_part_13, cons(_x2c_literal_part_14, cons(_x2c_literal_part_15, cons(_x2c_literal_part_16, NULL)))));
+         break; } case 9224497938069557450ULL: ;  _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497938069557450ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor) { Var _x2c_match_value_0 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor) { Var _x2c_match_value_1 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor) { Var _x2c_match_value_2 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor) { Var _x2c_match_value_3 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor) { Var _x2c_match_value_4 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
+          Var file;  file = _x2c_match_value_0;  Var line;  line = _x2c_match_value_1;  Var column;  column = _x2c_match_value_2;  Var length;  length = _x2c_match_value_3;  Var position;  position = _x2c_match_value_4;  return({
+            Var _x2c_literal_part_12 = List_var(cons(_34, cons(file, NULL)));  Var _x2c_literal_part_13 = List_var(cons(_35, cons(line, NULL)));  Var _x2c_literal_part_14 = List_var(cons(_36, cons(column, NULL)));  Var _x2c_literal_part_15 = List_var(cons(_37, cons(length, NULL)));  Var _x2c_literal_part_16 = List_var(cons(_38, cons(position, NULL)));  cons(_x2c_literal_part_12, cons(_x2c_literal_part_13, cons(_x2c_literal_part_14, cons(_x2c_literal_part_15, cons(_x2c_literal_part_16, NULL)))));
+          }
+          );
         }
-        );  break; } } } } } } default: break;
+         break; } } } } } } default: break;
       }
 
     }
@@ -470,22 +515,50 @@ List Compiler_origin_location(Compiler compiler, int occurrence){
 }
 
 String Compiler_display_path(Compiler compiler, String path){
-  if(! _init_guard_) _file_init_();  if(! String_truth(path) || String_startswith(path, _7)) return path;  if(compiler -> source_facts) return Path_absolute(path);  String root = compiler -> root_dir;  if(String_truth(root) && String_truth(path) && String_startswith(path, root) && String_len(path) > String_len(root) && String_getindex(path, String_len(root)) == '/') return String_getslice(path, String_len(root) + 1, -2147483648, 1);  return path;
+  if(! _init_guard_) _file_init_();  if(! String_truth(path) || String_startswith(path, _7)) return path;  if(compiler -> source_facts) return Path_absolute(path);  String root = compiler -> root_dir;  if(String_truth(root) && String_truth(path) && String_startswith(path, root) && String_len(path) > String_len(root) && String_getindex(path, String_len(root)) == '/') return String_getslice(path, String_len(root) + 1, (-2147483647 - 1), 1);
+  return path;
 }
 
 String Compiler_token_source(Compiler c, Token token, int * line);
+
 List Compiler_token_location(Compiler compiler, Token token){
-  if(! _init_guard_) _file_init_();  String file = String_truth(compiler -> filename) ? compiler -> filename : _39;  if(compiler -> source_facts) file = Compiler_display_path(compiler, file);  if(! token) token = compiler -> token;  if(! token) return cons(List_var(cons(_34, cons(String_var(file), NULL))), _55);  int line = token -> line;  if(Array_truth(compiler -> line_markers)) file = Compiler_token_source(compiler, token, &(line));  file = Compiler_display_path(compiler, file);  return({
+  if(! _init_guard_) _file_init_();
+  String file = String_truth(compiler -> filename) ? compiler -> filename : _39;
+  if(compiler -> source_facts) file = Compiler_display_path(compiler, file);
+  if(! token) token = compiler -> token;
+  if(! token) return cons(List_var(cons(_34, cons(String_var(file), NULL))), _55);
+  int line = token -> line;
+  if(Array_truth(compiler -> line_markers)) file = Compiler_token_source(compiler, token, &(line));
+  file = Compiler_display_path(compiler, file);
+  return({
     Var _x2c_literal_part_17 = List_var(cons(_34, cons(String_var(file), NULL)));  Var _x2c_literal_part_18 = List_var(cons(_35, cons(int_var(line), NULL)));  Var _x2c_literal_part_19 = List_var(cons(_36, cons(int_var(token -> col), NULL)));  Var _x2c_literal_part_20 = List_var(cons(_37, cons(int_var(token -> len), NULL)));  Var _x2c_literal_part_21 = List_var(cons(_38, cons(int_var(token -> pos), NULL)));  cons(_x2c_literal_part_17, cons(_x2c_literal_part_18, cons(_x2c_literal_part_19, cons(_x2c_literal_part_20, cons(_x2c_literal_part_21, NULL)))));
   }
   );
 }
 
 String Compiler_token_source(Compiler c, Token token, int * line){
-  if(! _init_guard_) _file_init_();  if(line)(* line) = token -> line;  if(! Array_truth(c -> line_markers)) return c -> filename;  Token base = c -> tokenizer -> tokens;  if(token < base || token >= base + Bytes_len(c -> tokenizer -> tokens)) return c -> filename;  String file = c -> filename; {
-    List row;  Array _x2c_macro_object_1 = c -> line_markers;  int _x2c_macro_cursor_1 = 0;  Var _x2c_macro_cursor_output_1;  while(Array_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
-      row = Var_list(_x2c_macro_cursor_output_1); {
-        List _x2c_destructure_0 = row;  int position = Var_int(Var_convert(List_getindex(_x2c_destructure_0, 0), 3453797));  int text_line = Var_int(Var_convert(List_getindex(_x2c_destructure_0, 1), 3453797));  String marked = Var_string(List_getindex(_x2c_destructure_0, 2));  int marked_line = Var_int(Var_convert(List_getindex(_x2c_destructure_0, 3), 3453797));  if(position > token -> pos) break;  file = marked;  if(line)(* line) = marked_line + token -> line - text_line;
+  if(! _init_guard_) _file_init_();
+  if(line)(* line) = token -> line;
+  if(! Array_truth(c -> line_markers)) return c -> filename;
+  Token base = c -> tokenizer -> tokens;
+  if(token < base || token >= base + Bytes_len(c -> tokenizer -> tokens)) return c -> filename;
+  String file = c -> filename;
+  {
+    List row;
+    Array _x2c_macro_object_1 = c -> line_markers;
+    int _x2c_macro_cursor_1 = 0;
+    Var _x2c_macro_cursor_output_1;
+    while(Array_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
+      row = Var_list(_x2c_macro_cursor_output_1);
+      {
+        List _x2c_destructure_0 = row;
+        int position = Var_int(Var_convert(List_getindex(_x2c_destructure_0, 0), 3453797));
+        int text_line = Var_int(Var_convert(List_getindex(_x2c_destructure_0, 1), 3453797));
+        String marked = Var_string(List_getindex(_x2c_destructure_0, 2));
+        int marked_line = Var_int(Var_convert(List_getindex(_x2c_destructure_0, 3), 3453797));
+        if(position > token -> pos) break;
+        file = marked;
+        if(line)(* line) = marked_line + token -> line - text_line;
       }
 
     }
@@ -495,10 +568,27 @@ String Compiler_token_source(Compiler c, Token token, int * line){
 }
 
 String Compiler_text_source(Compiler c, int position, int * offset){
-  if(! _init_guard_) _file_init_();  String file = c -> filename; (* offset) = position;  if(! Array_truth(c -> line_markers)) return file; {
-    List row;  Array _x2c_macro_object_2 = c -> line_markers;  int _x2c_macro_cursor_2 = 0;  Var _x2c_macro_cursor_output_2;  while(Array_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
-      row = Var_list(_x2c_macro_cursor_output_2); {
-        List _x2c_destructure_1 = row;  int start = Var_int(Var_convert(List_getindex(_x2c_destructure_1, 0), 3453797));  int text_line = Var_int(Var_convert(List_getindex(_x2c_destructure_1, 1), 3453797));  String marked = Var_string(List_getindex(_x2c_destructure_1, 2));  int line = Var_int(Var_convert(List_getindex(_x2c_destructure_1, 3), 3453797));  Var origin = List_getindex(_x2c_destructure_1, 4);  if(start > position || Var_is_void(origin)) break;  file = marked; (* offset) = Var_int(origin) + position - start;
+  if(! _init_guard_) _file_init_();
+  String file = c -> filename;
+  (* offset) = position;
+  if(! Array_truth(c -> line_markers)) return file;
+  {
+    List row;
+    Array _x2c_macro_object_2 = c -> line_markers;
+    int _x2c_macro_cursor_2 = 0;
+    Var _x2c_macro_cursor_output_2;
+    while(Array_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
+      row = Var_list(_x2c_macro_cursor_output_2);
+      {
+        List _x2c_destructure_1 = row;
+        int start = Var_int(Var_convert(List_getindex(_x2c_destructure_1, 0), 3453797));
+        int text_line = Var_int(Var_convert(List_getindex(_x2c_destructure_1, 1), 3453797));
+        String marked = Var_string(List_getindex(_x2c_destructure_1, 2));
+        int line = Var_int(Var_convert(List_getindex(_x2c_destructure_1, 3), 3453797));
+        Var origin = List_getindex(_x2c_destructure_1, 4);
+        if(start > position || Var_is_void(origin)) break;
+        file = marked;
+        (* offset) = Var_int(origin) + position - start;
       }
 
     }
@@ -509,24 +599,37 @@ String Compiler_text_source(Compiler c, int position, int * offset){
 
 static List _compiler_location(Compiler compiler, Token token){
   if(! token && compiler -> origin){
-    List location = Compiler_origin_location(compiler, compiler -> origin);  if(List_truth(location)) return location;
+    List location = Compiler_origin_location(compiler, compiler -> origin);
+    if(List_truth(location)) return location;
   }
   return Compiler_token_location(compiler, token);
 }
 
 void Compiler_report_problem(Compiler c, Symbol code, String message, Token token, List notes);
+
 #include "error.h"
 
 
 
 
 _Noreturn void Compiler_report_error(Compiler compiler, Symbol code, String message, Token token, List notes){
-  if(! _init_guard_) _file_init_();  report_suspend();  Compiler_report_problem(compiler, code, message, token, notes);  Diagnostics diag = compiler -> diagnostics;  if(compiler -> recovery_depth > 0){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/diagnostics.x",.function = "Compiler_report_error",.line = 441};  x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(209659067570), Symbol_var(code));  __builtin_unreachable();
+  if(! _init_guard_) _file_init_();
+  report_suspend();
+  Compiler_report_problem(compiler, code, message, token, notes);
+  Diagnostics diag = compiler -> diagnostics;
+  if(compiler -> recovery_depth > 0){
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/diagnostics.x",.function = "Compiler_report_error",.line = 441};
+    x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(209659067570), Symbol_var(code));
+    __builtin_unreachable();
   }
   if(! diag -> printer){
-    Var held;  List _x2c_macro_object_3 = Diagnostics_entries(diag);  List _x2c_macro_cursor_3 = _x2c_macro_object_3;  Var _x2c_macro_cursor_output_3;  while(List_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_3))){
-      held = _x2c_macro_cursor_output_3;  Compiler_print_diagnostic(compiler, Var_list(held));
+    Var held;
+    List _x2c_macro_object_3 = Diagnostics_entries(diag);
+    List _x2c_macro_cursor_3 = _x2c_macro_object_3;
+    Var _x2c_macro_cursor_output_3;
+    while(List_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_3))){
+      held = _x2c_macro_cursor_output_3;
+      Compiler_print_diagnostic(compiler, Var_list(held));
     }
 
   }
@@ -534,62 +637,116 @@ _Noreturn void Compiler_report_error(Compiler compiler, Symbol code, String mess
 }
 
 void Compiler_report_problem(Compiler c, Symbol code, String message, Token token, List notes){
-  if(! _init_guard_) _file_init_();  message = String_truth(message) ? message : _56;  Diagnostics_report(c -> diagnostics, code, message, _compiler_location(c, token), notes);
+  if(! _init_guard_) _file_init_();
+  message = String_truth(message) ? message : _56;
+  Diagnostics_report(c -> diagnostics, code, message, _compiler_location(c, token), notes);
 }
 
 void Compiler_report_warning_at(Compiler compiler, Symbol code, String message, List location, List notes);
+
 void Compiler_report_warning(Compiler c, Symbol code, String message, Token token, List notes){
-  if(! _init_guard_) _file_init_();  Compiler_report_warning_at(c, code, message, _compiler_location(c, token), notes);
+  if(! _init_guard_) _file_init_();
+  Compiler_report_warning_at(c, code, message, _compiler_location(c, token), notes);
 }
 
 void Compiler_report_warning_at(Compiler compiler, Symbol code, String message, List location, List notes){
-  if(! _init_guard_) _file_init_();  report_suspend();  Diagnostics diag = compiler -> diagnostics;  message = String_truth(message) ? message : _57;  Diagnostics__warn(diag, code ? code : 49497918350, message, location, notes);
+  if(! _init_guard_) _file_init_();
+  report_suspend();
+  Diagnostics diag = compiler -> diagnostics;
+  message = String_truth(message) ? message : _57;
+  Diagnostics__warn(diag, code ? code : 49497918350, message, location, notes);
 }
 
 static void Compiler__show_source_context(Compiler compiler, int line, int column, int length){
-  if(! String_truth(compiler -> text)) return;  char * line_start, * line_end;  if(_context_line(compiler, line, &(line_start), &(line_end))) _context_caret(line_start, line_end, column, length);
+  if(! String_truth(compiler -> text)) return;
+  char * line_start, * line_end;
+  if(_context_line(compiler, line, &(line_start), &(line_end))) _context_caret(line_start, line_end, column, length);
 }
 
 static int _context_line(Compiler c, int line, char * * line_start, char * * line_end){
-  char * text = c -> text; (* line_start) =(* line_end) = text;  if(line <= 1){
+  char * text = c -> text;
+  (* line_start) =(* line_end) = text;
+  if(line <= 1){
     if(c -> script){
-      (* line_start) = c -> script -> shebang; (* line_end) =(* line_start) + strlen((* line_start));
+      (* line_start) = c -> script -> shebang;
+      (* line_end) =(* line_start) + strlen((* line_start));
     }
-    else while(*(* line_end) && *(* line_end) != '\n')(* line_end) ++;  return line == 1;
+    else while(*(* line_end) && *(* line_end) != '\n')(* line_end) ++;
+    return line == 1;
   }
-  Array starts = Compiler__line_starts(c);  if(line > Array_len(starts)) return 0; (* line_start) =(* line_end) = text + Var_int(Array_getindex(starts, line - 1));  while(*(* line_end) && *(* line_end) != '\n')(* line_end) ++;  return 1;
+  Array starts = Compiler__line_starts(c);
+  if(line > Array_len(starts)) return 0;
+  (* line_start) =(* line_end) = text + Var_int(Array_getindex(starts, line - 1));
+  while(*(* line_end) && *(* line_end) != '\n')(* line_end) ++;
+  return 1;
 }
 
 static Array Compiler__line_starts(Compiler c){
-  if(c -> lines_text == c -> text) return c -> line_starts;  c -> lines_text = c -> text;  Array_clear(c -> line_starts);  Array_push(c -> line_starts, int_var(0));  for(char * p = c -> text;  * p;  p ++) if(* p == '\n') Array_push(c -> line_starts, Var_box_long(p + 1 -(char *) c -> text));  return c -> line_starts;
+  if(c -> lines_text == c -> text) return c -> line_starts;
+  c -> lines_text = c -> text;
+  Array_clear(c -> line_starts);
+  Array_push(c -> line_starts, int_var(0));
+  for(char * p = c -> text;  * p;  p ++) if(* p == '\n') Array_push(c -> line_starts, Var_box_long(p + 1 -(char *) c -> text));
+  return c -> line_starts;
 }
 
 static void _context_caret(char * line_start, char * line_end, int column, int length){
-  int line_len = line_end - line_start, start = column > 0 ? column - 1 : 0;  if(start > line_len) start = line_len;  int width = length > 0 ? length : 1;  if(start < line_len && width > line_len - start) width = line_len - start;  if(width < 1) width = 1;  fprintf(stderr, "  %.*s\n", line_len, line_start);  fprintf(stderr, "  ");  for(int i = 0;  i < start;  i ++) putc(line_start[i] == '\t' ? '\t' : ' ', stderr);  for(int i = 0;  i < width;  i ++) putc('^', stderr);  fprintf(stderr, "\n");
+  int line_len = line_end - line_start, start = column > 0 ? column - 1 : 0;
+  if(start > line_len) start = line_len;
+  int width = length > 0 ? length : 1;
+  if(start < line_len && width > line_len - start) width = line_len - start;
+  if(width < 1) width = 1;
+  fprintf(stderr, "  %.*s\n", line_len, line_start);
+  fprintf(stderr, "  ");
+  for(int i = 0;  i < start;  i ++) putc(line_start[i] == '\t' ? '\t' : ' ', stderr);
+  for(int i = 0;  i < width;  i ++) putc('^', stderr);
+  fprintf(stderr, "\n");
 }
 
 void Compiler_take_diagnostics(Compiler c, Compiler child){
-  if(! _init_guard_) _file_init_();  Diagnostics target = c -> diagnostics, source = child -> diagnostics;  if(target == source) return; {
-    List entry;  Array _x2c_macro_object_4 = source -> entries;  int _x2c_macro_cursor_4 = 0;  Var _x2c_macro_cursor_output_4;  while(Array_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_4))){
-      entry = Var_list(_x2c_macro_cursor_output_4);  Diagnostics__store(target, entry);
+  if(! _init_guard_) _file_init_();
+  Diagnostics target = c -> diagnostics, source = child -> diagnostics;
+  if(target == source) return;
+  {
+    List entry;
+    Array _x2c_macro_object_4 = source -> entries;
+    int _x2c_macro_cursor_4 = 0;
+    Var _x2c_macro_cursor_output_4;
+    while(Array_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_4))){
+      entry = Var_list(_x2c_macro_cursor_output_4);
+      Diagnostics__store(target, entry);
     }
 
   }
-  target -> count += source -> count;  target -> limit_notified |= source -> limit_notified;  Diagnostics_reset(source);
+  target -> count += source -> count;
+  target -> limit_notified |= source -> limit_notified;
+  Diagnostics_reset(source);
 }
 
 int Compiler_error_count(Compiler compiler){
-  if(! _init_guard_) _file_init_();  return compiler -> diagnostics -> count;
+  if(! _init_guard_) _file_init_();
+  return compiler -> diagnostics -> count;
 }
 
 List Compiler_diagnostics(Compiler compiler){
-  if(! _init_guard_) _file_init_();  return Diagnostics_entries(compiler -> diagnostics);
+  if(! _init_guard_) _file_init_();
+  return Diagnostics_entries(compiler -> diagnostics);
 }
 
 static void _pprint(char * text, int len){
   for(int i = 0;  i < len;  i ++){
-    char c = text[i];  switch(c){
-      case '\n' : fputs("\u2424", stdout);  break;  case '\r' : fputs("\u240D", stdout);  break;  case '\t' : fputs("\u2409", stdout);  break;  case ' ' : fputs("\u2420", stdout);  break;  default: putchar(c);  break;
+    char c = text[i];
+    switch(c){
+      case '\n' : fputs("\u2424", stdout);
+      break;
+      case '\r' : fputs("\u240D", stdout);
+      break;
+      case '\t' : fputs("\u2409", stdout);
+      break;
+      case ' ' : fputs("\u2420", stdout);
+      break;
+      default: putchar(c);
+      break;
     }
 
   }
@@ -597,16 +754,28 @@ static void _pprint(char * text, int len){
 }
 
 void Compiler_dump_tokens(Compiler compiler){
-  if(! _init_guard_) _file_init_();  Token tokens = compiler -> tokenizer -> tokens;  for(Token token = tokens;  token -> type != 11212;  token ++){
-    printf("(%4d, %-3d)\t%-20s", token -> line, token -> col, Symbol_str(token -> type));  _pprint(token -> text, token -> len);  putchar('\n');
+  if(! _init_guard_) _file_init_();
+  Token tokens = compiler -> tokenizer -> tokens;
+  for(Token token = tokens;  token -> type != 11212;  token ++){
+    printf("(%4d, %-3d)\t%-20s", token -> line, token -> col, Symbol_str(token -> type));
+    _pprint(token -> text, token -> len);
+    putchar('\n');
   }
 
 }
 
 void Compiler_dump_symbol_table(Compiler compiler, Map map){
-  if(! _init_guard_) _file_init_(); {
-    Var key, value;  Map _x2c_macro_object_5 = map;  unsigned _x2c_macro_cursor_5 = 0;  Var _x2c_macro_cursor_output_5;  Var _x2c_macro_cursor_output_6;  while(Map_try_next(_x2c_macro_object_5, &(_x2c_macro_cursor_5), &(_x2c_macro_cursor_output_5), &(_x2c_macro_cursor_output_6))){
-      key = _x2c_macro_cursor_output_5;  value = _x2c_macro_cursor_output_6;  printf("%s ==>\n%s\n", Var_str(key), Var_str(value));
+  if(! _init_guard_) _file_init_();
+  {
+    Var key, value;
+    Map _x2c_macro_object_5 = map;
+    unsigned _x2c_macro_cursor_5 = 0;
+    Var _x2c_macro_cursor_output_5;
+    Var _x2c_macro_cursor_output_6;
+    while(Map_try_next(_x2c_macro_object_5, &(_x2c_macro_cursor_5), &(_x2c_macro_cursor_output_5), &(_x2c_macro_cursor_output_6))){
+      key = _x2c_macro_cursor_output_5;
+      value = _x2c_macro_cursor_output_6;
+      printf("%s ==>\n%s\n", Var_str(key), Var_str(value));
     }
 
   }
@@ -614,9 +783,17 @@ void Compiler_dump_symbol_table(Compiler compiler, Map map){
 }
 
 void Compiler_dump_cache(Compiler compiler){
-  if(! _init_guard_) _file_init_(); {
-    Var key, value;  Map _x2c_macro_object_6 = compiler -> key_ids;  unsigned _x2c_macro_cursor_6 = 0;  Var _x2c_macro_cursor_output_7;  Var _x2c_macro_cursor_output_8;  while(Map_try_next(_x2c_macro_object_6, &(_x2c_macro_cursor_6), &(_x2c_macro_cursor_output_7), &(_x2c_macro_cursor_output_8))){
-      key = _x2c_macro_cursor_output_7;  value = _x2c_macro_cursor_output_8;  printf("%s\t==>\t%s\n", Var_repr(value), Var_repr(key));
+  if(! _init_guard_) _file_init_();
+  {
+    Var key, value;
+    Map _x2c_macro_object_6 = compiler -> key_ids;
+    unsigned _x2c_macro_cursor_6 = 0;
+    Var _x2c_macro_cursor_output_7;
+    Var _x2c_macro_cursor_output_8;
+    while(Map_try_next(_x2c_macro_object_6, &(_x2c_macro_cursor_6), &(_x2c_macro_cursor_output_7), &(_x2c_macro_cursor_output_8))){
+      key = _x2c_macro_cursor_output_7;
+      value = _x2c_macro_cursor_output_8;
+      printf("%s\t==>\t%s\n", Var_repr(value), Var_repr(key));
     }
 
   }
@@ -624,15 +801,19 @@ void Compiler_dump_cache(Compiler compiler){
 }
 
 static Var _x2c_lambda_0(Var entry){
-  return int_var(Var_is_row(entry, 11, 7, 1)); ;
+  return int_var(Var_is_row(entry, 11, 7, 1));
+  ;
 }
 
 static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_0, _x2c_func_argv_0, 0, 45156);  return _x2c_lambda_0(a0); ;
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_0, _x2c_func_argv_0, 0, 45156);
+  return _x2c_lambda_0(a0);
+  ;
 }
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
-  _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;  Buffer_cleanup((*(Buffer *) _x2c_defer_data_0->_x2c_defer_capture_0));
+  _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;
+  Buffer_cleanup((*(Buffer *) _x2c_defer_data_0->_x2c_defer_capture_0));
 }
 
 #undef _x2c_initializer_choice_B8F5462B_0_expanded

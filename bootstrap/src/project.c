@@ -583,8 +583,8 @@ static void Manifest_target_header(Manifest * m, String header){
   String name = String_remove_prefix(header, _16), profile = NULL;
   int split = String_find(name, _17);
   if(split >= 0){
-    profile = String_getslice(name, split + 9, -2147483648, 1);
-    name = String_getslice(name, -2147483648, split, 1);
+    profile = String_getslice(name, split + 9, (-2147483647 - 1), 1);
+    name = String_getslice(name, (-2147483647 - 1), split, 1);
   }
   if(! String_startswith(header, _16) || ! _name_ok(name) ||(split >= 0 && ! _name_ok(profile))) _error(p, (* m).line, _18);
   ProjectTarget target = _target(p, name);

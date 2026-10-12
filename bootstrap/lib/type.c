@@ -98,7 +98,7 @@ static int _literal_magnitude(String text, int end, unsigned long long * magnitu
 
 static int _radix(String text, int end, int * pos);
 
-static Type _integer_literal_type(unsigned long long magnitude, int decimal, int is_unsigned, int longs);
+static Type _integer_literal_type(unsigned long long magnitude, int decimal, int is_unsigned, int longs, int negative);
 
 static Var Symbol_var(Symbol);
 
@@ -523,32 +523,46 @@ int Type_function_parts(Type type, List * params, Type * return_type){
     List _x2c_match_expr = Type_list(type); List _x2c_match_cursor, _x2c_match_cursor1, _x2c_match_cursor2;
     switch(0){
         default: ;
-       _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224497936762055558ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1 && Var_is(_x2c_match_cursor1->car, 806120) && (_x2c_match_cursor2 = Var_list(_x2c_match_cursor1->car), 1)) { List parameters = _x2c_match_cursor2; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor) { Var return_head = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1)) { List return_tail = _x2c_match_cursor;
+       _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224497936762055558ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1 && Var_is(_x2c_match_cursor1->car, 806120) && (_x2c_match_cursor2 = Var_list(_x2c_match_cursor1->car), 1)) { List _x2c_match_list_0 = _x2c_match_cursor2; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor) { Var _x2c_match_value_1 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1)) { List _x2c_match_list_2 = _x2c_match_cursor;
       {
-        List values = parameters;
+        List parameters;
+        parameters = _x2c_match_list_0;
+        Var return_head;
+        return_head = _x2c_match_value_1;
+        List return_tail;
+        return_tail = _x2c_match_list_2;
         {
-          List _x2c_match_expr = values; List _x2c_match_cursor;
-          switch(0){
-              default: ;
-             _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120)) { Var only = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
-              Var _x2c_match_value_0 = only;
-              {
-                Type only = Var_type(_x2c_match_value_0);
-                if(Type_canonicalize(only) == _58){
-                  values = NULL;
-                  break;
+          List values = parameters;
+          {
+            List _x2c_match_expr = values; List _x2c_match_cursor;
+            switch(0){
+                default: ;
+               _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120)) { Var _x2c_match_value_0 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
+                Var only;
+                only = _x2c_match_value_0;
+                {
+                  Var _x2c_match_value_0 = only;
+                  {
+                    Type only = Var_type(_x2c_match_value_0);
+                    if(Type_canonicalize(only) == _58){
+                      values = NULL;
+                      break;
+                    }
+
+                  }
+
                 }
 
               }
-
+               } }
             }
-             } }
-          }
 
+          }
+          (* params) = values;
+          if(return_type)(* return_type) = List_type(cons(return_head, List_append(return_tail, NULL)));
+          return 1;
         }
-        (* params) = values;
-        if(return_type)(* return_type) = List_type(cons(return_head, List_append(return_tail, NULL)));
-        return 1;
+
       }
        break; } } }
     }
@@ -878,6 +892,9 @@ Type Type_numeric_literal(String text, int floating){
     if(last == 'l' || last == 'L') return List_type(_89);
     return List_type(_88);
   }
+  int negative = String_getindex(text, 0) == '-';
+  if(negative || String_getindex(text, 0) == '+') text = String_getslice(text, 1, (-2147483647 - 1), 1);
+  length = String_len(text);
   int suffix = _integer_literal_end(text);
   int is_unsigned = 0, longs = 0;
   for(int i = suffix;  i < length;  i ++){
@@ -888,7 +905,7 @@ Type Type_numeric_literal(String text, int floating){
   unsigned long long magnitude;
   int decimal;
   if(! _literal_magnitude(text, suffix, &(magnitude), &(decimal))) return NULL;
-  return _integer_literal_type(magnitude, decimal, is_unsigned, longs);
+  return _integer_literal_type(magnitude, decimal, is_unsigned, longs, negative);
 }
 
 static Var float_var(float);
@@ -913,7 +930,7 @@ Var Type_numeric_literal_value(Type type, String text){
     return Var_box_long_double(value);
   }
   int negative = String_getindex(text, 0) == '-';
-  if(negative || String_getindex(text, 0) == '+') text = String_getslice(text, 1, -2147483648, 1);
+  if(negative || String_getindex(text, 0) == '+') text = String_getslice(text, 1, (-2147483647 - 1), 1);
   int end = _integer_literal_end(text);
   unsigned long long magnitude;
   int decimal;
@@ -969,13 +986,13 @@ static int _radix(String text, int end, int * pos){
   return String_getindex(text, 1) >= '0' && String_getindex(text, 1) <= '7' ? 8 : 10;
 }
 
-static Type _integer_literal_type(unsigned long long magnitude, int decimal, int is_unsigned, int longs){
+static Type _integer_literal_type(unsigned long long magnitude, int decimal, int is_unsigned, int longs, int negative){
   if(! is_unsigned && ! longs){
-    if(magnitude <= INT_MAX) return List_type(_103);
+    if(magnitude <=(unsigned long long) INT_MAX + negative) return List_type(_103);
     if(! decimal && magnitude <= UINT_MAX) return List_type(_101);
-    if(magnitude <= LONG_MAX) return List_type(_97);
+    if(magnitude <=(unsigned long long) LONG_MAX + negative) return List_type(_97);
     if(! decimal && magnitude <= ULONG_MAX) return List_type(_98);
-    if(magnitude <= LLONG_MAX) return List_type(_99);
+    if(magnitude <=(unsigned long long) LLONG_MAX + negative) return List_type(_99);
     if(! decimal) return List_type(_100);
     return NULL;
   }
@@ -985,15 +1002,15 @@ static Type _integer_literal_type(unsigned long long magnitude, int decimal, int
     return List_type(_100);
   }
   if(! is_unsigned && longs == 1){
-    if(magnitude <= LONG_MAX) return List_type(_97);
+    if(magnitude <=(unsigned long long) LONG_MAX + negative) return List_type(_97);
     if(! decimal && magnitude <= ULONG_MAX) return List_type(_98);
-    if(magnitude <= LLONG_MAX) return List_type(_99);
+    if(magnitude <=(unsigned long long) LLONG_MAX + negative) return List_type(_99);
     if(! decimal) return List_type(_100);
     return NULL;
   }
   if(is_unsigned && longs == 1) return List_type(magnitude <= ULONG_MAX ? _98 : _100);
   if(! is_unsigned && longs == 2){
-    if(magnitude <= LLONG_MAX) return List_type(_99);
+    if(magnitude <=(unsigned long long) LLONG_MAX + negative) return List_type(_99);
     return decimal ? NULL : List_type(_100);
   }
   return List_type(_100);

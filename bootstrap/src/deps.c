@@ -179,7 +179,7 @@ static String _contents(CliRequest request, Compiler compiler, String input, Str
               {
                 if(Var_is_row(content_hash, 11, 7, 1) && String_startswith(Var_string(content_hash), _2)){
                   String candidate = Var_string(path);
-                  Array_push(searches, String_var(String_startswith(candidate, _3) ? String_getslice(candidate, 4, -2147483648, 1) : candidate));
+                  Array_push(searches, String_var(String_startswith(candidate, _3) ? String_getslice(candidate, 4, (-2147483647 - 1), 1) : candidate));
                 }
                 else Array_push(paths, path);
               }

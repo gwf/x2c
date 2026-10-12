@@ -176,9 +176,9 @@ String preproc_include_target(String text, int * angle){
   body = String_lstrip(String_remove_prefix(body, _21), " \t");
   if(! String_len(body) ||(String_getindex(body, 0) != '"' && String_getindex(body, 0) != '<')) return NULL;
   (* angle) = String_getindex(body, 0) == '<';
-  String rest = String_getslice(body, 1, -2147483648, 1);
+  String rest = String_getslice(body, 1, (-2147483647 - 1), 1);
   int close = String_find(rest, (* angle) ? _22 : _23);
-  return close > 0 ? String_getslice(rest, -2147483648, close, 1) : NULL;
+  return close > 0 ? String_getslice(rest, (-2147483647 - 1), close, 1) : NULL;
 }
 
 String preproc_marker_file(String text, int * line){
@@ -186,9 +186,9 @@ String preproc_marker_file(String text, int * line){
   String body = preproc_directive(text);
   size_t digits = 0;
   while(digits < String_len(body) && isdigit(String_getindex(body, digits))) digits ++;
-  String rest = String_lstrip(String_getslice(body, digits, -2147483648, 1), " \t");
+  String rest = String_lstrip(String_getslice(body, digits, (-2147483647 - 1), 1), " \t");
   if(! digits || ! String_startswith(rest, _23)) return NULL;
-  int close = String_find(String_getslice(rest, 1, -2147483648, 1), _23);
+  int close = String_find(String_getslice(rest, 1, (-2147483647 - 1), 1), _23);
   if(close < 0) return NULL;
   (* line) = atoi(body);
   return String_unescape(String_getslice(rest, 1, close + 1, 1));

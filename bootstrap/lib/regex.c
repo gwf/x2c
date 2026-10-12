@@ -1073,7 +1073,7 @@ static String _rebuild(Regex r, String subject, int all, Func fn, String replace
         else _expand(out, found, replacement);
         cursor = RegexCapture_end(_whole(found));
       }
-      String_write_str(String_getslice(subject, cursor, -2147483648, 1), out);
+      String_write_str(String_getslice(subject, cursor, (-2147483647 - 1), 1), out);
       {
         String _x2c_return_value_5 = Buffer_str(out);
         {
@@ -1241,7 +1241,7 @@ List Regex_split(Regex regex, String subject){
         Array_push(parts, String_var(String_getslice(subject, cursor, RegexCapture_start(_whole(found)), 1)));
         cursor = RegexCapture_end(_whole(found));
       }
-      Array_push(parts, String_var(String_getslice(subject, cursor, -2147483648, 1)));
+      Array_push(parts, String_var(String_getslice(subject, cursor, (-2147483647 - 1), 1)));
       {
         List _x2c_return_value_8 = Array_list(parts);
         {

@@ -1103,7 +1103,7 @@ static String _unit_include(String line){
 void Path_copy_file(Path, Path);
 
 static void _place_header(Map headers, List searched, String directory, String target){
-  String source = String_join(NULL, cons(String_var(String_getslice(target, -2147483648, String_len(target) - 2, 1)), cons(String_var(_63), NULL)));
+  String source = String_join(NULL, cons(String_var(String_getslice(target, (-2147483647 - 1), String_len(target) - 2, 1)), cons(String_var(_63), NULL)));
   {
     String dir;
     List _x2c_macro_object_13 = searched;
@@ -1937,7 +1937,7 @@ static void _add_option_dirs(Array directories, List args){
         flag = Var_string(_x2c_macro_cursor_output_32);
         {
           if(! String_startswith(arg, flag)) continue;
-          if(String_len(arg) > String_len(flag)) Array_push(directories, String_var(String_getslice(arg, String_len(flag), -2147483648, 1)));
+          if(String_len(arg) > String_len(flag)) Array_push(directories, String_var(String_getslice(arg, String_len(flag), (-2147483647 - 1), 1)));
           else if(List_truth(List_cdr(p))) Array_push(directories, List_cadr(p));
           break;
         }
@@ -2074,7 +2074,7 @@ double Path_modified_time(Path);
 
 static uint64_t _state_entry(uint64_t hash, String path, int * ok){
   if(String_startswith(path, _50)){
-    String candidate = String_getslice(path, 7, -2147483648, 1);
+    String candidate = String_getslice(path, 7, (-2147483647 - 1), 1);
     String found = SourceView_exists(NULL, candidate) ? Path_absolute(candidate) : _211;
     return _state_text(_state_text(hash, path), found);
   }
@@ -2222,7 +2222,7 @@ static List _depfile_inputs(String depfile){
   long search = String_find(text, _214);
   if(search >= 0){
     String candidate;
-    List _x2c_macro_object_39 = translation_depfile_parse(String_getslice(text, search + 1, -2147483648, 1));
+    List _x2c_macro_object_39 = translation_depfile_parse(String_getslice(text, search + 1, (-2147483647 - 1), 1));
     List _x2c_macro_cursor_39 = _x2c_macro_object_39;
     Var _x2c_macro_cursor_output_39;
     while(List_try_next(_x2c_macro_object_39, &(_x2c_macro_cursor_39), &(_x2c_macro_cursor_output_39))){
@@ -2363,7 +2363,7 @@ static int Build__files_unchanged(Build b, List files){
     while(List_try_next(_x2c_macro_object_41, &(_x2c_macro_cursor_41), &(_x2c_macro_cursor_output_41))){
       path = Var_string(_x2c_macro_cursor_output_41);
       {
-        if(String_startswith(path, _50)) path = String_getslice(path, 7, -2147483648, 1);
+        if(String_startswith(path, _50)) path = String_getslice(path, 7, (-2147483647 - 1), 1);
         if(String_startswith(Path_absolute(path), work)) continue;
         if(Path_is_file(path) && Path_modified_time(path) >= b -> started_wall) return 0;
       }

@@ -5,11 +5,11 @@
 
 #include "rewrite.h"
 #include "grammar.h"
-static List _43, _42, _41, _39, _38, _37, _35, _34, _33, _31, _30, _23, _22, _21, _20, _18, _17, _16, _15, _9, _8;
+static List _41, _40, _39, _37, _36, _35, _33, _32, _31, _29, _28, _23, _22, _21, _20, _18, _17, _16, _15, _9, _8;
 
-static String _50, _49, _48, _47, _46, _45, _44, _25, _24, _5, _4, _3, _2, _1, _0;
+static String _48, _47, _46, _45, _44, _43, _42, _5, _4, _3, _2, _1, _0;
 
-static Var _40, _36, _32, _29, _28, _27, _26, _19, _14, _13, _12, _11, _10, _7, _6;
+static Var _38, _34, _30, _27, _26, _25, _24, _19, _14, _13, _12, _11, _10, _7, _6;
 
 static int _init_guard_ = 0;
 
@@ -33,13 +33,13 @@ static Symbol _match_capture_tag(Var element, Var * binder);
 
 static void _match_and(Buffer b, int * testing);
 
-static void _match_bind(Buffer b, Var binder, String cell, int * testing, int * braces);
+static void _match_bind(Buffer b, Var binder, String cell, Array seen, int * testing, int * braces);
 
 static int _match_element(Buffer b, Var part, String cell, Array seen, int * testing, int * braces);
 
 static int _match_nested(Buffer b, Array out, List pattern, Var value, int * depths);
 
-static void _match_declare(Buffer b, List binders);
+static void _match_captures(Buffer b, List binders);
 
 static void _match_body(Buffer b, Array out, List body, int braces);
 
@@ -75,33 +75,31 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _21 = cons(_12, _20);
   _22 = cons(_11, _21);
   _23 = cons(_10, _22);
-  _24 = String_new("List");
-  _25 = String_new("Var");
-  _26 = Symbol_var(377892);
-  _27 = Symbol_var(58);
-  _28 = Symbol_var(62436);
-  _29 = Symbol_var(6363658);
-  _30 = cons(_27, NULL);
-  _31 = cons(_29, _30);
-  _32 = List_var(_31);
-  _33 = cons(_32, NULL);
-  _34 = cons(_27, _33);
-  _35 = cons(_26, _34);
-  _36 = List_var(_35);
-  _37 = cons(_36, NULL);
-  _38 = cons(_32, _37);
-  _39 = cons(_28, _38);
-  _40 = List_var(_39);
-  _41 = cons(_40, NULL);
-  _42 = cons(_27, _41);
-  _43 = cons(_26, _42);
-  _44 = String_new("");
-  _45 = String_new("->car");
-  _46 = String_new("->car)");
-  _47 = String_new("->cdr");
-  _48 = String_new(" default: ;");
-  _49 = String_new(" case ");
-  _50 = String_new("ULL: ;");
+  _24 = Symbol_var(377892);
+  _25 = Symbol_var(58);
+  _26 = Symbol_var(62436);
+  _27 = Symbol_var(6363658);
+  _28 = cons(_25, NULL);
+  _29 = cons(_27, _28);
+  _30 = List_var(_29);
+  _31 = cons(_30, NULL);
+  _32 = cons(_25, _31);
+  _33 = cons(_24, _32);
+  _34 = List_var(_33);
+  _35 = cons(_34, NULL);
+  _36 = cons(_30, _35);
+  _37 = cons(_26, _36);
+  _38 = List_var(_37);
+  _39 = cons(_38, NULL);
+  _40 = cons(_25, _39);
+  _41 = cons(_24, _40);
+  _42 = String_new("");
+  _43 = String_new("->car");
+  _44 = String_new("->car)");
+  _45 = String_new("->cdr");
+  _46 = String_new(" default: ;");
+  _47 = String_new(" case ");
+  _48 = String_new("ULL: ;");
 }
 
 static void _match_flush(Buffer b, Array out){
@@ -180,10 +178,13 @@ static Symbol _match_capture_tag(Var element, Var * binder){
     List _x2c_match_expr = Var_list(element); Var _x2c_match_values[2]; MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
     switch(0){
         default: ;
-       static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(_23), &_x2c_match_capture)) { Var name = _x2c_match_values[0]; Var tag = _x2c_match_values[1]; {
-        Var _x2c_match_value_0 = tag; {
-          Symbol tag = Var_symbol(_x2c_match_value_0);  if(tag != 1059020478773725 && tag != 1479708786 && tag != 1468512){
-            (* binder) = name;  return tag;
+       static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(_23), &_x2c_match_capture)) { Var _x2c_match_value_0 = _x2c_match_values[0]; Var _x2c_match_value_1 = _x2c_match_values[1]; {
+        Var name;  name = _x2c_match_value_0;  Var tag;  tag = _x2c_match_value_1; {
+          Var _x2c_match_value_0 = tag; {
+            Symbol tag = Var_symbol(_x2c_match_value_0);  if(tag != 1059020478773725 && tag != 1479708786 && tag != 1468512){
+              (* binder) = name;  return tag;
+            }
+
           }
 
         }
@@ -200,11 +201,11 @@ static void _match_and(Buffer b, int * testing){
   Buffer_write(b, (* testing) ? " && " : " if ("); (* testing) = 1;
 }
 
-static void _match_bind(Buffer b, Var binder, String cell, int * testing, int * braces){
+static void _match_bind(Buffer b, Var binder, String cell, Array seen, int * testing, int * braces){
   if((* testing)){
     Buffer_write(b, ") {"); (* braces) ++; (* testing) = 0;
   }
-  String type = Var_is_list_binder(binder) ? _24 : _25;  String name = String_getslice(Var_str(binder), 1, -2147483648, 1);  Buffer_printf(b, " %s %s = %s;", type, name, cell);
+  int index = Array_len(seen) - 1;  int list = Var_is_list_binder(binder);  Buffer_printf(b, " %s _x2c_match_%s_%d = %s;", list ? "List" : "Var", list ? "list" : "value", index, cell);
 }
 
 static int _match_element(Buffer b, Var part, String cell, Array seen, int * testing, int * braces){
@@ -212,25 +213,25 @@ static int _match_element(Buffer b, Var part, String cell, Array seen, int * tes
     _match_and(b, &((* testing)));  Buffer_printf(b, "Var_is(%s, %lu)", cell, (unsigned long) tag);  part = binder;
   }
   if(Var_equal(part, Symbol_var(58))) return 0;  if(Var_is_atom_binder(part) && !(Array_contains(seen, part))){
-    Array_push(seen, part);  _match_bind(b, part, cell, &((* testing)), &((* braces)));  return 0;
+    Array_push(seen, part);  _match_bind(b, part, cell, seen, &((* testing)), &((* braces)));  return 0;
   }
   List list = Var_is_row(part, 9, 7, 4) ? Var_list(part) : NULL;  if(Var_is_binder(part) || Var_is_match_op(part) || Var_equal(part, Symbol_var(1059020478773725)) ||(List_truth(list) && Var_is_match_op(List_car(list)))) return - 1;  if(! Var_is(part, 1328354264) && ! List_truth(list)) return 2;  Var literal = part;  Symbol tested = 806120;  _match_and(b, &((* testing)));  if(List_truth(list)) Buffer_printf(b, "Var_is(%s, %lu)", cell, (unsigned long) tested);  else Buffer_printf(b, "%s.u64 == %lluULL", cell, (unsigned long long) literal.u64);  return ! ! List_truth(list);
 }
 
 static int _match_nested(Buffer b, Array out, List pattern, Var value, int * depths){
-  if(! List_truth(({ static MatchCaptureSite _x2c_match_site_0;  x2c_match_site_match(& _x2c_match_site_0, pattern, List_var(_43)); })) || ! Var_is_row(value, 9, 7, 4)) return - 1;
+  if(! List_truth(({ static MatchCaptureSite _x2c_match_site_0;  x2c_match_site_match(& _x2c_match_site_0, pattern, List_var(_41)); })) || ! Var_is_row(value, 9, 7, 4)) return - 1;
   _match_flush(b, out);
   Array rests = Array_new(), paths = Array_new(), seen = Array_new();
   int mark = Array_len(out), testing = 0, braces = 0, step = 0, deepest = 0;
   List rest = Var_list(value);
-  String path = _44;
+  String path = _42;
   Buffer_write(b, " _x2c_match_cursor = _x2c_match_expr;");
   for(; ; ){
     int levels = Array_len(rests);
     String cursor = _match_cursor(levels);
     Var part = List_truth(rest) ? List_car(rest) : Var_null();
     if(List_truth(rest) && ! Var_is_list_binder(part)){
-      String cell = String_join(NULL, cons(String_var(cursor), cons(String_var(_45), NULL)));
+      String cell = String_join(NULL, cons(String_var(cursor), cons(String_var(_43), NULL)));
       _match_and(b, &(testing));
       Buffer_write(b, cursor);
       step = _match_element(b, part, cell, seen, &(testing), &(braces));
@@ -241,7 +242,7 @@ static int _match_nested(Buffer b, Array out, List pattern, Var value, int * dep
         Array_push(paths, String_var(path));
         if(levels >= deepest) deepest = levels + 1;
         rest = Var_list(part);
-        path = String_add(path, _46);
+        path = String_add(path, _44);
         continue;
       }
       if(step == 2){
@@ -262,7 +263,7 @@ static int _match_nested(Buffer b, Array out, List pattern, Var value, int * dep
       else if(List_truth(List_cdr(rest)) || Array_contains(seen, part)) step = - 1;
       else if(! Var_equal(part, Symbol_var(54))){
         Array_push(seen, part);
-        _match_bind(b, part, cursor, &(testing), &(braces));
+        _match_bind(b, part, cursor, seen, &(testing), &(braces));
       }
       if(step < 0 || ! levels) break;
       rest = Var_list(Array_take_last(rests));
@@ -273,7 +274,7 @@ static int _match_nested(Buffer b, Array out, List pattern, Var value, int * dep
     _match_and(b, &(testing));
     Buffer_printf(b, "(%s = %s->cdr, 1)", cursor, cursor);
     rest = List_cdr(rest);
-    path = String_add(path, _47);
+    path = String_add(path, _45);
   }
   if(step < 0){
     while(Array_len(out) > mark) Array_take_last(out);
@@ -288,8 +289,8 @@ static int _match_nested(Buffer b, Array out, List pattern, Var value, int * dep
   return braces;
 }
 
-static void _match_declare(Buffer b, List binders){
-  int index = - 1;
+static void _match_captures(Buffer b, List binders){
+  int index = 0;
   {
     Var binder;
     List _x2c_macro_object_1 = binders;
@@ -298,11 +299,9 @@ static void _match_declare(Buffer b, List binders){
     while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
       binder = _x2c_macro_cursor_output_1;
       {
+        int list = Var_is_list_binder(binder);
+        Buffer_printf(b, " %s _x2c_match_%s_%d = %s_x2c_match_values[%d]%s;", list ? "List" : "Var", list ? "list" : "value", index, list ? "Var_list(" : "", index, list ? ")" : "");
         index ++;
-        if(Var_equal(binder, Symbol_var(58)) || Var_equal(binder, Symbol_var(54))) continue;
-        String name = String_getslice(Var_str(binder), 1, -2147483648, 1);
-        if(Var_is_list_binder(binder)) Buffer_printf(b, " List %s = Var_list(_x2c_match_values[%d]);", name, index);
-        else Buffer_printf(b, " Var %s = _x2c_match_values[%d];", name, index);
       }
 
     }
@@ -317,9 +316,14 @@ static void _match_body(Buffer b, Array out, List body, int braces){
     List _x2c_match_expr = body; List _x2c_match_cursor;
     switch(_x2c_match_expr ? _x2c_match_expr->car.u64 : 0){
         case 9224497953206575432ULL: ;
-       _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497953206575432ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor) { Var inner = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
-        body = Var_list(inner);
-        finish = 0;
+       _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497953206575432ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor) { Var _x2c_match_value_0 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
+        Var inner;
+        inner = _x2c_match_value_0;
+        {
+          body = Var_list(inner);
+          finish = 0;
+        }
+
       }
        break; } } default: break;
     }
@@ -334,12 +338,12 @@ static String _match_label(Symbol head, Array heads, int * labelling){
   if(!(* labelling)) return NULL;
   if(! head){
     (* labelling) = 0;
-    return _48;
+    return _46;
   }
   if(Array_contains(heads, Symbol_var(head))) return NULL;
   Array_push(heads, Symbol_var(head));
   Var literal = Symbol_var(head);
-  return String_join(NULL, cons(String_var(_49), cons(String_var(Var_str(Var_box_ulong_long((unsigned long long) literal.u64))), cons(String_var(_50), NULL))));
+  return String_join(NULL, cons(String_var(_47), cons(String_var(Var_str(Var_box_ulong_long((unsigned long long) literal.u64))), cons(String_var(_48), NULL))));
 }
 
 static String _match_locals(int depths, int values){

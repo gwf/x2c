@@ -1407,7 +1407,7 @@ static List _current(String directory){
 int SourceView_exists(SourceView, String);
 
 static String _digest(String path){
-  if(String_startswith(path, _90)) path = String_getslice(path, 4, -2147483648, 1);
+  if(String_startswith(path, _90)) path = String_getslice(path, 4, (-2147483647 - 1), 1);
   if(! SourceView_exists(NULL, path)) return _91;
   File input = fopen(path, "rb");
   if(! input) return NULL;

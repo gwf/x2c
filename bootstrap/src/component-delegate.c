@@ -69,7 +69,10 @@ static String _delegate_type_name(Type type){
     List _x2c_match_expr = base; Var _x2c_match_values[1]; MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch(0){
         default: ;
-       static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(_35), &_x2c_match_capture)) { Var tag = _x2c_match_values[0];  return Var_str(tag);  break; }
+       static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(_35), &_x2c_match_capture)) { Var _x2c_match_value_0 = _x2c_match_values[0]; {
+        Var tag;  tag = _x2c_match_value_0;  return Var_str(tag);
+      }
+       break; }
     }
 
   }
