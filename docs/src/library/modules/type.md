@@ -215,7 +215,7 @@ Source: `lib/type.x:176`
 Reads an integer literal of `type` spelled in digits, with any suffix,
 into `value`. Returns 0 for any other literal.
 
-Source: `lib/type.x:542`
+Source: `lib/type.x:543`
 
 <a id="Type.is_aggregate"></a>
 #### Type.is_aggregate
@@ -447,7 +447,7 @@ Source: `lib/type.x:495`
 Reads a validated numeric literal at its semantic type's precision.
 Returns `void` when its magnitude exceeds the integer representation.
 
-Source: `lib/type.x:522`
+Source: `lib/type.x:523`
 
 <a id="Type.promote"></a>
 #### Type.promote
