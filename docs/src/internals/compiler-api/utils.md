@@ -31,7 +31,7 @@ System utilities for environment discovery and workers.
 | [`is_layout_file`](#is_layout_file) | Reports whether `path` names a file in the indentation syntax. |
 | [`is_source_file`](#is_source_file) | Reports whether `path` is x2c source: a `.x` or `.xp` file, or a file of any other name whose first line is a shebang, which is a script. |
 | [`package_directory`](#package_directory) | Returns the package directory that holds `path` below one of `roots`: the root's child on the way to `path`, compared by canonical path, when that child's name is an identifier. |
-| [`package_entry`](#package_entry) | Resolves the first readable package entry under `roots`, using the same source view as the importing compiler. |
+| [`package_entry`](#package_entry) | Resolves the first readable package entry under `roots`, preferring `.x` to `.xp`, using the importing compiler's source view. |
 | [`package_source`](#package_source) | Recognizes a package's `src/` files or its package-named legacy entry. |
 | [`shell_status`](#shell_status) | Decodes the wait status `raw` of a child that has ended. |
 | [`stage_dir`](#stage_dir) | Returns the directory of a compiler staged at `<home>/builds/<stage>/`, or NULL for any other compiler. |
@@ -54,7 +54,7 @@ Returns the stamp a native module records: `x2c-module-stamp:` and the
 running compiler's identity. Returns NULL when the executable cannot be
 read. Only the compiler that built a module loads it.
 
-Source: `src/utils.x:295`
+Source: `src/utils.x:297`
 
 #### compiler_identity
 
@@ -65,7 +65,7 @@ Ordinary compiler startup hashes its executable with FNV-1a; an external
 command uses the identity embedded from the compiler that built it.
 Returns NULL if ordinary startup could not read its executable.
 
-Source: `src/utils.x:289`
+Source: `src/utils.x:291`
 
 #### cpp_include_dirs
 
@@ -95,7 +95,7 @@ The streams are flushed and `atexit` handlers do not run, so the call is
 safe inside a `try` body or a catch arm, whose records those handlers
 would otherwise find still live.
 
-Source: `src/utils.x:442`
+Source: `src/utils.x:444`
 
 #### file_identity
 
@@ -104,7 +104,7 @@ Source: `src/utils.x:442`
 Returns the identity a compiler executable at `path` has when it runs:
 the FNV-1a hash of its bytes, or NULL when `path` is NULL or unreadable.
 
-Source: `src/utils.x:303`
+Source: `src/utils.x:305`
 
 #### file_lock
 
@@ -114,7 +114,7 @@ Locks the file `p`, creating it, and returns a descriptor that holds the
 lock until it is closed or the process exits. Returns -1 when `wait` is
 zero and another process holds the lock.
 
-Source: `src/utils.x:350`
+Source: `src/utils.x:352`
 
 #### file_publish
 
@@ -129,7 +129,7 @@ destinations replaced.
 
 **Raises:** `<not-found>` or `<io-fail>`, after removing the siblings.
 
-Source: `src/utils.x:370`
+Source: `src/utils.x:372`
 
 #### filename_hash
 
@@ -137,7 +137,7 @@ Source: `src/utils.x:370`
 
 Hashes unit filename spelling for stable generated C identifiers.
 
-Source: `src/utils.x:338`
+Source: `src/utils.x:340`
 
 #### find_program
 
@@ -155,7 +155,7 @@ Source: `src/utils.x:210`
 
 Returns `hash` extended with `length` `bytes` by 64-bit FNV-1a.
 
-Source: `src/utils.x:328`
+Source: `src/utils.x:330`
 
 #### fnv_file
 
@@ -164,7 +164,7 @@ Source: `src/utils.x:328`
 Returns `hash` extended with the contents of the file at `path`.
 A missing or unreadable file clears `ok`.
 
-Source: `src/utils.x:313`
+Source: `src/utils.x:315`
 
 #### home_dir
 
@@ -197,7 +197,7 @@ Source: `src/utils.x:182`
 Reports a caught `<not-found>` or `<io-fail>` through `driver_error`
 as its operation, path or program, and system reason.
 
-Source: `src/utils.x:451`
+Source: `src/utils.x:453`
 
 #### is_layout_file
 
@@ -230,8 +230,8 @@ Source: `src/utils.x:244`
 
 `String package_entry( SourceView sources, List roots, String name, String &directory)`
 
-Resolves the first readable package entry under `roots`, using the same
-source view as the importing compiler. Returns its canonical directory
+Resolves the first readable package entry under `roots`, preferring `.x`
+to `.xp`, using the importing compiler's source view. Returns its directory
 through `directory`, or NULL when the package does not exist.
 
 Source: `src/utils.x:260`
@@ -243,7 +243,7 @@ Source: `src/utils.x:260`
 Recognizes a package's `src/` files or its package-named legacy entry.
 Other files under the package directory are consumers.
 
-Source: `src/utils.x:276`
+Source: `src/utils.x:278`
 
 #### shell_status
 
@@ -253,7 +253,7 @@ Decodes the wait status `raw` of a child that has ended. Returns its
 exit status, `128 + signal` when a signal ended it, or -1 otherwise,
 and stores that signal in `signal`, or 0 when no signal ended it.
 
-Source: `src/utils.x:429`
+Source: `src/utils.x:431`
 
 #### stage_dir
 
@@ -273,7 +273,7 @@ Flush failure is ignored. This function does not return and does not run
 `atexit` handlers. Those belong to the parent process and would close its
 log and process-lifetime `Scope`s twice.
 
-Source: `src/utils.x:402`
+Source: `src/utils.x:404`
 
 #### worker_fork
 
@@ -285,7 +285,7 @@ The call attempts to flush all process streams before the fork so
 successfully flushed bytes cannot be written by both processes. Flush
 failure is ignored. The child must leave through `worker_exit`.
 
-Source: `src/utils.x:391`
+Source: `src/utils.x:393`
 
 #### worker_wait_any
 
@@ -296,7 +296,7 @@ index, storing its shell-style status: the exit status, `128 + signal`,
 or -1 when it cannot be waited. Other children stay unreaped, so the
 wait polls with a short sleep.
 
-Source: `src/utils.x:412`
+Source: `src/utils.x:414`
 
 #### x2c_get_executable
 

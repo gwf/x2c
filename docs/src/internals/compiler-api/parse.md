@@ -96,7 +96,7 @@ Source: `src/parse.x:3634`
 Binds a callable's outer block in its active parameter scope. Ordinary
 constructed blocks open their own scope before using this operation.
 
-Source: `src/parse.x:3908`
+Source: `src/parse.x:3922`
 
 <a id="Compiler.bind_catch_arm"></a>
 #### Compiler.bind_catch_arm
@@ -121,7 +121,7 @@ definite binders of `pattern` when the arm `binds`. Binder diagnostics
 use `start`. A source arm's body parses here with the typed captures
 `types` that its pattern recorded.
 
-Source: `src/parse.x:3872`
+Source: `src/parse.x:3878`
 
 <a id="Compiler.bind_parameter"></a>
 #### Compiler.bind_parameter
@@ -258,7 +258,7 @@ Constructs a foreign alias from one direct function declaration and target.
 typed, a function. Storage is limited to `static` or `inline`, when
 present, and variadic parameters are rejected.
 
-Source: `src/parse.x:4052`
+Source: `src/parse.x:4066`
 
 <a id="Compiler.finish_initializers"></a>
 #### Compiler.finish_initializers
