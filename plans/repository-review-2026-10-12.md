@@ -408,6 +408,19 @@ components.
   empty context line at the end of a file.
 - Batch 3, published to dev as `3db5216c` (2026-10-12), is the String
   crossing and module batch above.
+- Batch 4 (this record's next publication): numeric comparisons follow C
+  (decision 1). `Compiler._comparison` lowers every comparison with a `Var`
+  operand: `==` and `!=` call `x2c_var_equal`, `===` and `!==` call
+  `x2c_var_identical`, and the relational operators compare
+  `x2c_var_order` with 0, all in a comparisons section of lib/varops.x on
+  the conversion ladder `Var.binary` uses. Map and Pool keys, `Var.hash`,
+  `Var.compare`, and sorting are pinned to `.same()`, `.equal()`, and
+  `.compare()`, so they are unchanged; collection search and equality use
+  `==` and so follow C (`3L in [3]` is now 1). A new 225-pair comparison
+  test and the fixture `var-numeric-comparison` pin the rule; seven
+  fixtures changed by helper name or by the two-box `===` result; the book
+  and doc comments state the rule. Serial self-translation time matched the
+  baseline over five alternating rounds.
 - Hygiene (decision 11), 2026-10-12: 112 remote branches merged into dev
   were deleted; the 14 unmerged branches and the desktop app's session
   branches stay. The workspace note tracked inside the ignored `.context/`
