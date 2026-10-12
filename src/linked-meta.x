@@ -685,6 +685,13 @@ static Var _lambda_declare_cells(List node, Map cells, Array named) {
         celled |= !!copy;
       }
     }
+    case %(for (decl ?base ?bindings) ?test ?next ?body): {
+      Code declaration =
+        _lambda_declare_cells(%(declare $base $bindings), cells, named);
+      match (declaration) case %(seq *initial):
+        return %(block @initial
+                 ${_lambda_kept(%(for () $test $next $body))});
+    }
   }
   return celled ? %(seq @{items.list_free()}) : node;
 }
