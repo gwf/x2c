@@ -156,7 +156,7 @@ See [the lexical specification](lexical.md) for explanations and
  (rule string-segment
   (repeat 1
    (ordered (seq (byte 92) (byte 36)) (ref x2c-escape)
-    (bytes "$") (except (byte 0) (byte 34) (byte 36) (byte 92))))
+    (bytes "$$") (except (byte 0) (byte 34) (byte 36) (byte 92))))
   (stop-before (choice (byte 34) (byte 36)))
   (on-nul malformed) (emit segment))
  (rule common
@@ -465,8 +465,8 @@ See [the lexical specification](lexical.md) for explanations and
 (failures
  (scanner-result (positive matched-byte-count)
   (zero no-match) (negative failure))
- (unsupported-start (scan_keyword -1l) (scan_c_operator -1l))
- (empty-input (scan_white_space -1l)) (status-aware ok incomplete malformed)
+ (unsupported-start (scan_keyword -1) (scan_c_operator -1))
+ (empty-input (scan_white_space -1)) (status-aware ok incomplete malformed)
  (statusless-failure malformed) (record-first-status)
  (append (token error (width 0)) (token eof (width 0)))
  (callback-result 0) (dispatch-may-continue true)
