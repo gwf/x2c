@@ -33,7 +33,8 @@ const merged = B.collect(fixture, new Set([1]), [
   groups[1],
   { id: "combined", name: "Combined", members: [0, 2] },
 ]);
-assert.equal(merged.ports.length, 3); // Incoming source files stay separate after merging groups.
+assert.equal(merged.ports.length, 2);
+assert.equal(merged.ports.find((p) => p.direction === "in").name, "Combined");
 assert.equal(merged.incoming, b.incoming);
 assert.equal(merged.outgoing, b.outgoing);
 const ids = new Set(
@@ -71,12 +72,15 @@ const twenty = {
   })),
   edges: Array.from({ length: 20 }, (_, i) => [i, 20, 2]).concat([[0, 21, 3]]),
 };
+const currentGroups = Array.from({ length: 5 }, (_, i) => ({
+  id: `part-${i}`,
+  name: `Part ${i}`,
+  members: [i * 4, i * 4 + 1, i * 4 + 2, i * 4 + 3],
+}));
+const targetGroup = { id: "target", name: "Target", members: [20, 21] };
 const example = B.collect(twenty, new Set([20, 21]), [
-  {
-    id: "all",
-    name: "Merged",
-    members: Array.from({ length: 22 }, (_, i) => i),
-  },
+  ...currentGroups,
+  targetGroup,
 ]);
 assert.equal(example.ports.length, 5);
 assert.deepEqual(
@@ -86,5 +90,39 @@ assert.deepEqual(
 assert.equal(example.ports[0].calls, 11);
 assert.equal(example.incoming, 43);
 console.log(
-  "PASS: twenty callers in five files produce five weights of four; repeated sites and targets do not inflate consumers",
+  "PASS: twenty callers in five groups produce five weights of four; repeated sites and targets do not inflate consumers",
+);
+
+const splitGroups = currentGroups
+  .slice(1)
+  .concat([
+    { id: "preview-a", name: "Split A", members: [0, 1] },
+    { id: "preview-b", name: "Split B", members: [2, 3] },
+    targetGroup,
+  ]);
+const split = B.collect(twenty, new Set([20, 21]), splitGroups);
+assert.equal(split.ports.length, 6);
+assert(!split.ports.some((p) => p.group === "part-0"));
+assert.deepEqual(
+  split.ports
+    .filter((p) => p.group.startsWith("preview-"))
+    .map((p) => [p.name, p.consumers]),
+  [
+    ["Split A", 2],
+    ["Split B", 2],
+  ],
+);
+const combined = B.collect(twenty, new Set([20, 21]), [
+  {
+    id: "merged",
+    name: "Merged callers",
+    members: Array.from({ length: 20 }, (_, i) => i),
+  },
+  targetGroup,
+]);
+assert.equal(combined.ports.length, 1);
+assert.equal(combined.ports[0].consumers, 20);
+assert.equal(combined.ports[0].calls, 43);
+console.log(
+  "PASS: current and preview partitions replace obsolete caller groups after splits and merges",
 );

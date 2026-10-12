@@ -57,10 +57,10 @@ are served directly. Node.js is needed only for the optional checks below.
   gray. Public-node size reflects distinct consumers outside the current
   group. Static-node size reflects consumers inside the group. Size is not a
   measurement of function source length.
-- The outside-caller panel groups callers by original source file. Each file
+- The outside-caller panel groups callers by current partition membership. Each group
   connects to each group it calls; line weight and label count distinct caller
   functions, without multiplying callers that use several targets or call sites.
-  Rows also show separate call-site totals. Click a file to inspect the exact
+  Rows also show separate call-site totals. Split previews use their tentative memberships too. Click a group to inspect the exact
   callers and target functions. Per-group
   caller badges include sibling groups. Outside callees remain available in
   the inspector but are omitted from the graph.
