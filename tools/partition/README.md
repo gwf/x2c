@@ -36,7 +36,12 @@ are served directly. Node.js is needed only for the optional checks below.
   apportioned by function count. Directed edges aggregate crossing call sites.
 - Decomposed scopes and split previews start as circular group arrangements.
   Springs use aggregated call weights; repulsion separates groups. Hover traces
-  connections and reports directed call counts. Labels count distinct callers
+  connections. Workspace circle area is proportional to function count, printed
+  inside each circle. Edges run from blue through purple to orange, with an
+  orange arrowhead at the destination. Edge labels show exact call-site counts;
+  width increases logarithmically with count. Call details lists every directed
+  group pair and its exact count, largest first. Project edge counts appear on
+  hover or keyboard focus. Labels count distinct callers
   outside each group, including siblings.
 - Click a group to inspect its functions. Back returns to the arrangement.
   Tentative groups can be inspected without accepting the preview. Use Functions

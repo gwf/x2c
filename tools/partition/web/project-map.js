@@ -156,7 +156,7 @@ function renderMap(gs) {
       lines,
       estimated: !original,
       r: scope
-        ? 14 + Math.sqrt(lines) * 0.72
+        ? 24 * Math.sqrt(Math.max(1, g.members.length))
         : Math.max(5, Math.sqrt(lines) * 0.72),
     };
   });
@@ -168,27 +168,65 @@ function renderMap(gs) {
     projectMapCache = { key, ps: projectLayout(nodes, links) };
   const ps = projectMapCache.ps;
   host.innerHTML =
-    '<div class="graph-tools"><button id="map-minus">\u2212</button><button id="map-fit">Fit groups</button><button id="map-plus">+</button><span>Size reflects source lines (minimum hit area) \u00b7 edge weight = crossing call sites</span></div><svg id="project-map" style="flex:1;min-height:300px;width:100%;touch-action:none" aria-label="Groups and directed calls"></svg><div class="graph-legend">Scroll to zoom \u00b7 drag background to pan \u00b7 click to explore \u00b7 Shift-click to select \u00b7 hover for calls and size</div>';
+    '<div class="graph-tools"><button id="map-minus">\u2212</button><button id="map-fit">Fit groups</button><button id="map-plus">+</button><button id="map-calls" aria-expanded="false">Call details</button><span>' +
+    (scope
+      ? "Circle area/count: functions"
+      : "Circle area: source lines; count: functions") +
+    ' \u00b7 Edge numbers: call sites \u00b7 Thicker = more calls</span></div><svg id="project-map" style="flex:1;min-height:300px;width:100%;touch-action:none" aria-label="Groups and directed calls"></svg><div class="graph-legend"><span><span style="color:#59cfff">Source (blue)</span> \u2192 <span style="color:#ffb454">destination (orange)</span></span><span>Scroll to zoom \u00b7 drag background to pan \u00b7 click to explore \u00b7 Shift-click to select \u00b7 hover to isolate connections</span></div>';
+  const details = document.createElement("div");
+  details.hidden = true;
+  details.style.cssText =
+    "position:absolute;right:12px;top:48px;max-height:65%;max-width:90%;overflow:auto;background:#182125;border:1px solid #52666c;padding:12px;z-index:3;font-size:12px";
+  details.innerHTML = `<strong>Directed calls between groups</strong><p>Static call sites, not runtime frequency.</p><table><thead><tr><th>Source</th><th>Destination</th><th>Call sites</th></tr></thead><tbody>${links
+    .slice()
+    .sort((a, b) => b.w - a.w)
+    .map(
+      ({ ids: [i, j], w }) =>
+        `<tr><td style="padding:5px 12px 5px 0">${esc(gs[i].name)}</td><td style="padding:5px 12px">${esc(gs[j].name)}</td><td style="text-align:right">${fmt(w)}</td></tr>`,
+    )
+    .join("")}</tbody></table>`;
+  host.append(details);
+  $("map-calls").onclick = () => {
+    details.hidden = !details.hidden;
+    $("map-calls").setAttribute("aria-expanded", String(!details.hidden));
+  };
   const svg = $("project-map");
   let camera = { x: 0, y: 0, k: 1 },
     drag = null,
     moved = false;
   svg.innerHTML =
-    '<defs><marker id="map-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="4" markerHeight="4" orient="auto"><path d="M0 0L8 4L0 8" fill="#9abfce"/></marker></defs><g id="map-scene">' +
+    '<defs><marker id="map-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto"><path d="M0 0L8 4L0 8" fill="#ffb454"/></marker>' +
     links
-      .map(({ ids: [i, j], w }) => {
+      .map(({ ids: [i, j] }, n) => {
+        const a = ps[i],
+          b = ps[j],
+          d = Math.hypot(b.x - a.x, b.y - a.y) || 1;
+        const ux = (b.x - a.x) / d,
+          uy = (b.y - a.y) / d;
+        return `<linearGradient id="call-gradient-${n}" gradientUnits="userSpaceOnUse" x1="${a.x + ux * a.r}" y1="${a.y + uy * a.r}" x2="${b.x - ux * (b.r + 3)}" y2="${b.y - uy * (b.r + 3)}"><stop offset="0" stop-color="#59cfff"/><stop offset=".5" stop-color="#b797f5"/><stop offset="1" stop-color="#ffb454"/></linearGradient>`;
+      })
+      .join("") +
+    '</defs><g id="map-scene">' +
+    links
+      .map(({ ids: [i, j], w }, n) => {
         const a = ps[i],
           b = ps[j],
           d = Math.hypot(b.x - a.x, b.y - a.y) || 1,
           ux = (b.x - a.x) / d,
           uy = (b.y - a.y) / d;
-        return `<path data-map-edge="${i},${j}" d="M${a.x + ux * a.r} ${a.y + uy * a.r} Q${(a.x + b.x) / 2 - uy * 10} ${(a.y + b.y) / 2 + ux * 10} ${b.x - ux * (b.r + 3)} ${b.y - uy * (b.r + 3)}" fill="none" vector-effect="non-scaling-stroke" stroke="#91aaa9" stroke-width="${Math.min(4, 0.4 + Math.log2(w + 1) * 0.32)}" opacity="${scope ? ".4" : ".13"}" marker-end="url(#map-arrow)"><title>${esc(gs[i].name)} to ${esc(gs[j].name)}: ${w} call sites</title></path>`;
+        return `<path data-map-edge="${i},${j}" d="M${a.x + ux * a.r} ${a.y + uy * a.r} Q${(a.x + b.x) / 2 - uy * 28} ${(a.y + b.y) / 2 + ux * 28} ${b.x - ux * (b.r + 3)} ${b.y - uy * (b.r + 3)}" fill="none" vector-effect="non-scaling-stroke" stroke="url(#call-gradient-${n})" stroke-width="${1.5 + Math.log2(w + 1) * 1.2}" opacity="${scope ? ".8" : ".2"}" marker-end="url(#map-arrow)"><title>${esc(gs[i].name)} to ${esc(gs[j].name)}: ${w} call sites</title></path>`;
       })
+      .join("") +
+    links
+      .map(
+        ({ ids: [i, j], w }, n) =>
+          `<text data-call-count="${n}" data-call-pair="${i},${j}" text-anchor="middle" fill="#fff" font-size="12" font-weight="600" paint-order="stroke" stroke="#11181c" stroke-width="5" style="pointer-events:none">${fmt(w)}</text>`,
+      )
       .join("") +
     ps
       .map(
         (p, i) =>
-          `<g data-map-node="${i}" tabindex="0" role="button" aria-label="Open ${esc(gs[i].name)}" style="cursor:pointer"><title>${esc(gs[i].name)}: ${p.estimated ? "approximately " : ""}${fmt(p.lines)} source lines; ${gs[i].members.length} functions; ${callers[i]} callers outside group / ${incoming[i]} incoming call sites${p.estimated ? " (size apportioned by function count)" : ""}</title><circle cx="${p.x}" cy="${p.y}" r="${p.r}" fill="${gs[i].name.startsWith("lib/") ? "#244553" : "#34482e"}" stroke="${selected.has(gs[i].id) ? "#fff" : gs[i].name.startsWith("lib/") ? "#9abfce" : "#b5dba0"}" stroke-width="${selected.has(gs[i].id) ? 3 : 1.2}"/><text data-map-label="${i}" text-anchor="middle" fill="#e0e8e6" font-size="11" paint-order="stroke" stroke="#11181c" stroke-width="3">${esc(labels[i])}</text></g>`,
+          `<g data-map-node="${i}" tabindex="0" role="button" aria-label="Open ${esc(gs[i].name)}" style="cursor:pointer"><title>${esc(gs[i].name)}: ${p.estimated ? "approximately " : ""}${fmt(p.lines)} source lines; ${gs[i].members.length} functions; ${callers[i]} callers outside group / ${incoming[i]} incoming call sites${p.estimated ? " (size apportioned by function count)" : ""}</title><circle cx="${p.x}" cy="${p.y}" r="${p.r}" fill="${gs[i].name.startsWith("lib/") ? "#244553" : "#34482e"}" stroke="${selected.has(gs[i].id) ? "#fff" : gs[i].name.startsWith("lib/") ? "#9abfce" : "#b5dba0"}" stroke-width="${selected.has(gs[i].id) ? 3 : 1.2}"/><text data-function-count="${i}" text-anchor="middle" dominant-baseline="central" fill="#fff" font-size="15" font-weight="600" style="pointer-events:none">${gs[i].members.length}</text><text data-map-label="${i}" text-anchor="middle" fill="#e0e8e6" font-size="11" paint-order="stroke" stroke="#11181c" stroke-width="3">${esc(labels[i])}</text></g>`,
       )
       .join("") +
     "</g>";
@@ -198,6 +236,34 @@ function renderMap(gs) {
       "transform",
       `translate(${camera.x} ${camera.y}) scale(${camera.k})`,
     );
+    const marker = $("map-arrow");
+    marker.setAttribute("markerWidth", 12 / camera.k);
+    marker.setAttribute("markerHeight", 12 / camera.k);
+    svg.querySelectorAll("[data-function-count]").forEach((e) => {
+      const p = ps[+e.dataset.functionCount];
+      e.setAttribute(
+        "transform",
+        `translate(${p.x} ${p.y}) scale(${1 / camera.k})`,
+      );
+      e.style.opacity = scope || p.r * camera.k > 12 ? "1" : "0";
+    });
+    svg.querySelectorAll("[data-call-count]").forEach((e) => {
+      const {
+          ids: [i, j],
+        } = links[+e.dataset.callCount],
+        a = ps[i],
+        b = ps[j];
+      const d = Math.hypot(b.x - a.x, b.y - a.y) || 1;
+      const ux = (b.x - a.x) / d,
+        uy = (b.y - a.y) / d;
+      const x = (a.x + b.x) / 2 + (ux * (a.r - b.r - 3)) / 4 - uy * 14;
+      const y = (a.y + b.y) / 2 + (uy * (a.r - b.r - 3)) / 4 + ux * 14;
+      e.setAttribute(
+        "transform",
+        `translate(${x} ${y}) scale(${1 / camera.k})`,
+      );
+      e.style.opacity = scope ? "1" : "0";
+    });
     const occupied = [];
     [...svg.querySelectorAll("[data-map-label]")]
       .sort((a, b) => ps[+b.dataset.mapLabel].r - ps[+a.dataset.mapLabel].r)
@@ -304,12 +370,19 @@ function renderMap(gs) {
             edge.dataset.mapEdge.split(",").includes(String(i)) ? ".9" : ".025",
           ),
         );
-      e.querySelector("text").style.opacity = "1";
+      svg.querySelectorAll("[data-call-count]").forEach((label) => {
+        label.style.opacity = label.dataset.callPair
+          .split(",")
+          .includes(String(i))
+          ? "1"
+          : ".08";
+      });
+      e.querySelector("[data-map-label]").style.opacity = "1";
     };
     e.onpointerleave = e.onblur = () => {
       svg
         .querySelectorAll("[data-map-edge]")
-        .forEach((edge) => edge.setAttribute("opacity", scope ? ".4" : ".13"));
+        .forEach((edge) => edge.setAttribute("opacity", scope ? ".8" : ".2"));
       paint();
     };
   });
