@@ -3889,8 +3889,9 @@ These explicit calls differ from the implicit crossing and are not reported:
 - `.str()` on a `Var` at a typed destination, and any other converter call
   on a `Var` in an interpolation hole or a printf-family value. Holes and
   formats render a `Var` through `Var.str`, which displays any value. The
-  implicit crossing to `String` reads the String payload and yields an empty
-  `String` for any other tag.
+  implicit crossing to `String` displays any value but `void`, which it
+  reads as NULL, while `.string()` reads the String payload and raises
+  `<no-convert>` for another tag.
 - A `Var` read into a numeric type other than `Symbol`, such as `v.int()` or
   `v.integer()`. The implicit crossing calls `Var.convert` and then reads the
   result. `Var.int` already converts, and `Var.integer` returns 0 where

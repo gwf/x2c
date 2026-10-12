@@ -60,8 +60,18 @@ static macro Stmt $error.source.numeric(Expr $source_tag, Expr $target) {
   }
 }
 
-static macro Stmt $error.target.numeric(Expr $source_tag, Expr $target) {
+static macro Stmt $error.no_convert(Expr $source_tag, Expr $target) {
   raise %(no-convert (source ${$source_tag}) (target ${$target}));
+}
+
+/** Extracts the `String` payload of `value`.
+    Raises: `<no-convert>` for any other tag. A `String` destination converts
+    a `Var` implicitly through `Var.as_string` instead, and
+    `Var.string_payload` reads the payload or NULL without raising.
+*/
+String Var.string(Var value) {
+  if (value is not <string>) $error.no_convert(value.tag(), "String");
+  return value.string_payload();
 }
 
 static macro Stmt $error.decode.output() {
@@ -134,7 +144,7 @@ meta native Var Var.convert(Var value, Symbol target) {
   X2CVarNumeric source;
   _numeric_decode(value, info, source);
   if (!Var.numeric_info(target, info))
-    $error.target.numeric(source_tag, target);
+    $error.no_convert(source_tag, target);
   return info.floating
        ? _convert_to_float(source, target)
        : _convert_to_integer(source, target, info.unsigned_value, info.bits);

@@ -129,25 +129,28 @@ readers, are silent low-level decoders that return zero for a tag they do
 not handle.
 
 A crossing to a pointer-shaped runtime type has nothing to convert. The
-payload either has that tag or it does not. Assigning to `String`, `List`,
-`Map`, `Array`, `Symbol`, or a type with a declared `protocol Var(T)`
-conversion uses that type's exact reader, and a wrong tag yields NULL. An
-alias of such a type, declared with `class` or `typedef`, uses the reader of
-its nearest ancestor that has one:
+payload either has that tag or it does not. Assigning to `List`, `Map`,
+`Array`, `Symbol`, or a type with a declared `protocol Var(T)` conversion
+uses that type's exact reader, and a wrong tag yields NULL. An alias of such
+a type, declared with `class` or `typedef`, uses the reader of its nearest
+ancestor that has one. A `String` destination reads a `String` payload as
+itself, displays any other value through `.str()`, and reads `void` as
+NULL. The explicit `.string()` extracts a `String` payload and raises
+`<no-convert>` for any other tag:
 
 ```x2c
 Var listy = %(1 2 3);
 String text = listy;
 List same = listy;
-printf("text=%d same=%d\n", text != NULL, same != NULL);
+printf("text=%s same=%d\n", text, same != NULL);
 ```
 
 ```text
-text=0 same=1
+text=(1 2 3) same=1
 ```
 
-Test the result, or test `listy is <list>` first. `Var.pointer` is the
-unchecked read, for a raw native pointer that has no tag to check.
+Test `listy is <list>` first when a value must be a `List`. `Var.pointer`
+is the unchecked read, for a raw native pointer that has no tag to check.
 
 ## Formatting dynamic values
 
@@ -471,9 +474,10 @@ int clamp(int value, int low, int high) {
 ```
 
 The numeric conversion matrix does *not* generalize to nonnumeric tags.
-`String`, `Symbol`, collection, and pointer crossings have their own typed
-readers. The exact readers for pointer-shaped runtime values return NULL when
-the tag does not match; test the tag or returned value before using it.
+`Symbol`, collection, and pointer crossings have their own typed readers,
+which return NULL when the tag does not match; test the tag or returned
+value before using it. A `String` destination displays any value instead,
+and `.string()` raises for a value that is not a `String`.
 
 `String` interpolation reads a value instead of demanding a tag, so it has no
 such limit. A numeric segment renders through its nearest declared `T_str`

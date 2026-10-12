@@ -77,6 +77,16 @@ String Var.str(Var v) {
   return v.fallback_str();
 }
 
+/** Returns what a `String` destination reads from `Var`: its `String`
+    payload, the display `String` of any other value, or NULL for `void`
+    and for `Null`, the null pointer.
+*/
+String Var.as_string(Var v) {
+  String text = v.string_payload();
+  if (text || v is <string>) return text;
+  return v.is_void() || v.is_null() ? NULL : v.str();
+}
+
 /** Returns the non-dispatch display `String` of `Var`. */
 String Var.fallback_str(Var v) {
   Symbol tag = v.tag();
@@ -335,7 +345,7 @@ unsigned Var.hash(Var v) {
      `String` unbox as NULL and take the general path. */
   List list = v;
   if (list) return list.hash();
-  String text = v;
+  String text = v.string_payload();
   if (text) return _nonzero(text.hash());
   VarDescriptor *descriptor = _descriptor(v);
   if (descriptor && descriptor.methods.hash)

@@ -3076,11 +3076,15 @@ static void Compiler._check_noted_converter(
   Type source = receiver.cadr();
   if (!source) return;
   int source_is_var = c.sym.is_var_type(source);
-  /* `Var.str` displays any value, while the implicit crossing to String
-     reads the String payload: a different operation for a Symbol or a
-     number. A hole and a format render a Var through `Var.str`, so there
-     only `.str()` repeats the crossing. */
-  if (source_is_var && (method == "str") != (context != 0)) return;
+  /* A hole and a format render a Var through `Var.str`, so there `.str()`
+     repeats the crossing. A String destination displays any value but
+     `void`, while `Var.string` reads the payload and raises for another
+     tag: a different operation, never redundant, and `.str()` there asks
+     for the display of `void` too. */
+  if (source_is_var && context != 0 && method != "str") return;
+  if (source_is_var && context == 0 &&
+      (method == "str" || c.sym.is_string_type(target)))
+    return;
   /* A Var reaches a numeric scalar other than Symbol through `Var.convert`
      and then a read. `Var.int` already converts, and a raw reader such as
      `Var.integer` skips the conversion, so either call differs. */
@@ -3513,12 +3517,16 @@ static List Compiler._var_checked_reader(
 }
 
 /* The exact reader for a built-in Var payload is `Var.<target>`: it checks the
-   tag and yields NULL for any other kind. `Var.pointer` checks nothing, so
-   trying it first let a List-valued Var read as a String. Only a raw native
-   pointer with no typed Var reader should still take that path. */
+   tag and yields NULL for any other kind. A `String` destination instead
+   reads `Var.as_string`: the payload, the display text of another value, or
+   NULL for `void`. `Var.pointer` checks nothing, so trying it first let a
+   List-valued Var read as a String. Only a raw native pointer with no typed
+   Var reader should still take that path. */
 static List Compiler._var_exact_reader(Compiler c, List expr, Type target) {
   if (!target.match(%(?))) return NULL;
-  String reader = %"Var_${target.car().str().lower()}", Type readertype = NULL;
+  String reader = target == %("String")
+    ? "Var_as_string" : %"Var_${target.car().str().lower()}";
+  Type readertype = NULL;
   List binding = c.sym.resolve_global(%($reader), readertype);
   if (!binding || !readertype || readertype.car() is not <list>) return NULL;
   List function = readertype.car();

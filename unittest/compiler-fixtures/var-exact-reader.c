@@ -31,10 +31,10 @@ int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
   Var list_valued = List_var(_5);
-  String wrong = Var_string(list_valued);
+  String wrong = Var_as_string(list_valued);
   List right = Var_list(list_valued);
   Var text = String_var(_6);
-  String exact = Var_string(text);
+  String exact = Var_as_string(text);
   List not_a_list = Var_list(text);
   Var mapped = Map_var(Map_update_n(Map_new(), 1, Symbol_var(22), int_var(1)));
   Map map = Var_map(mapped);

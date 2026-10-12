@@ -153,7 +153,8 @@ Initializers, assignments, typed arguments, and returns can call converters.
 For example, `Var v = 42;` boxes, while a supported typed destination unboxes
 or converts. This is not a promise that every pair converts or that extraction
 validates a custom value. Test dynamic tags with `is` when the input is mixed.
-Explicit `.str()` renders a value; extracting a String payload is different.
+A `String` destination renders a value; `.string()` extracts a `String`
+payload and raises for another tag.
 
 Three distinctions matter immediately:
 

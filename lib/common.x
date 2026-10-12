@@ -665,7 +665,7 @@ $var.tag.unbox(File, file, <file>);
 $var.tag.unbox(Iter, as_iter, <iter>);
 $var.tag.unbox(List, list, <list>);
 $var.tag.unbox(Map, map, <map>);
-$var.tag.unbox(String, string, <string>);
+$var.tag.unbox(String, string_payload, <string>);
 
 meta Iter Var.as_iter(Var value);
 meta File Var.file(Var value);

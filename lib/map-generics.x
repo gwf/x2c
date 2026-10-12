@@ -26,7 +26,7 @@ macro Unit $map.var.family(
        kinds unbox as NULL and take the general path unchanged. */
     List alist = a[0], blist = b[0];
     if (alist && blist) return alist == blist;
-    String astr = a[0], bstr = b[0];
+    String astr = a[0].string_payload(), bstr = b[0].string_payload();
     if (astr && bstr) return astr == bstr;
     return a[0] is not <array> && a[0] is not <map> && a[0] == b[0];
   }

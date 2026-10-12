@@ -1,0 +1,10 @@
+string=hello
+number=42
+list=( 1 2 )
+void=NULL
+absent=NULL
+null=NULL
+map={ k: 1 }
+exact=hello
+string() of a number raised no-convert
+tag tests 0 1
