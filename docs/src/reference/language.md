@@ -101,9 +101,10 @@ The block is `module {`, comma-separated string paths with an optional
 trailing comma, and `}`, with no final semicolon. It appears at file scope,
 once per file. Elsewhere `module` is an ordinary identifier, and
 `struct module {` declares a tag. Each path is relative to the file that holds
-the block and must name a file under that file's companion directory, `NAME/`
-for `NAME.x`, without `..`. Any other path, an unreadable member, a malformed
-block, or a second block is a driver error at the block.
+the block and must lead to a file under that file's companion directory,
+`NAME/` for `NAME.x`, once `..` and symbolic links are resolved. A path that
+leads elsewhere, a member that is already being spliced, an unreadable member,
+a malformed block, or a second block is a driver error at the block.
 
 A member's text stands where the block stood, in the listed order. All members
 share the entry's translation unit. Function declarations are collected across

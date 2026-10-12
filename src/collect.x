@@ -99,6 +99,14 @@ static macro Stmt $report.driver.module_read(
     $site, %("path: ${$path}"));
 }
 
+static macro Stmt $report.driver.module_cycle(
+  Expr $c, Expr $site, Expr $member, Expr $path) {
+  $c.report_error(
+    <driver>,
+    %"module member '${$member}' is already being spliced",
+    $site, %("path: ${$path}"));
+}
+
 static macro Stmt $report.emit.interface_write(Expr $c) {
   $c.report_error(
     <emit>,
@@ -310,9 +318,10 @@ static void Compiler._merge_rows(Compiler c, Map globs, Map rows) {
 /* Assembles one text from a module's files. `line` is the text line that
    the next byte written begins. `path` and `text` are the file being
    appended, and `prefix` is its directory relative to the entry's, or NULL
-   for the entry. */
+   for the entry. `splicing` holds the resolved paths of the files being
+   appended. */
 static typedef struct Splice {
-  Compiler c, Buffer out, Array markers, Map members, int line;
+  Compiler c, Buffer out, Array markers, Map members, splicing, int line;
   String path, text, prefix;
 } Splice;
 
@@ -328,7 +337,9 @@ ModuleSource Compiler.module_source(Compiler c, String path, String text) {
   if (!_spells_block(text)) return NULL;
   Buffer out = $auto(Buffer.new(0));
   Splice s = {
-    .c = c, .out = out, .markers = [], .members = {}, .line = 1};
+    .c = c, .out = out, .markers = [], .members = {}, .splicing = {},
+    .line = 1};
+  s.splicing[Path.absolute(path)] = 1;
   if (!s.file(path, text, NULL)) return NULL;
   ModuleSource source = Scope.calloc(1, sizeof(struct ModuleSource));
   *source = (struct ModuleSource) {
@@ -413,17 +424,26 @@ static List Splice.members(Splice &s, Token block, Token &close) {
   return members.list_free();
 }
 
-/* Appends the member `spelling` that the file's block at `site` names. */
+/* Appends the member `spelling` that the file's block at `site` names. The
+   member's resolved location, with links followed, must lie in the
+   resolved companion directory, and a file being spliced cannot be spliced
+   again inside itself. */
 static void Splice.member(Splice &s, String spelling, Token site) {
   String stem = Path.stem(s.path), dir = Path.dirname(s.path), text = NULL;
-  if (!spelling.startswith(%"$stem/") || "/../" in %"/$spelling/")
+  String path = dir == "." ? spelling : Path.join(dir, spelling);
+  String companion = Path.absolute(Path.join(dir, stem));
+  String resolved = Path.absolute(path);
+  if (!%"$resolved/".startswith(%"$companion/"))
     $report.driver.module_member(s.c, site, spelling, stem);
-  String path = dir == "." ? spelling : %"$dir/$spelling";
+  if (resolved in s.splicing)
+    $report.driver.module_cycle(s.c, site, spelling, resolved);
   if (!s.c.read_source(path, text))
     $report.driver.module_read(s.c, site, path);
   s.members[_canonical_path(path)] = _content_hash(text);
-  String prefix = s.prefix ? %"${s.prefix}/$spelling" : spelling;
+  String prefix = s.prefix ? Path.join(s.prefix, spelling) : spelling;
+  s.splicing[resolved] = 1;
   s.file(path, text, Path.dirname(prefix));
+  s.splicing.del(resolved);
   s.end_line();
 }
 
@@ -465,9 +485,13 @@ static String Splice.moved_include(
 }
 
 /* From here on the text comes from this file, at its line `line` and byte
-   `offset`. */
+   `offset`, continuing that line's text before `offset`. */
 static void Splice.mark(Splice &s, int line, int offset) {
-  s.markers.push(%(${(int) s.out.len()} ${s.line} ${s.path} $line $offset));
+  int start = offset;
+  while (start > 0 && s.text[start - 1] != '\n') start--;
+  String before = s.text[start:offset];
+  s.markers.push(
+    %(${(int) s.out.len()} ${s.line} ${s.path} $line $offset $before));
 }
 
 // Each file's text ends its last line before the next file's begins.
@@ -630,10 +654,7 @@ static void FileWalk.prepare(FileWalk &w, Compiler shadow, String segment) {
   shadow.take_unit_state(w.c);
   shadow.tokenize(segment);
   shadow.text = w.text;
-  if (w.module) {
-    shadow.line_markers = w.module.markers;
-    shadow.unit_source = w.module;
-  }
+  if (w.module) shadow.line_markers = w.module.markers;
   if (w.c.source_facts)
     w.c.source_texts[Path.absolute(w.path)] =
       w.module ? w.module.own : w.text;

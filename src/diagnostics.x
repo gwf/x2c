@@ -297,42 +297,10 @@ static void Compiler._write_heading(
            (position ?position)): {
       String place = %"$file:$line:$column";
       fprintf(stderr, "%s: %s: %s\n", place, code.str(), message);
-      int offset, start = c._own_line_start(position, offset);
-      if (start >= 0) {
-        char *line_start = c.unit_source.own + start, *line_end = line_start;
-        while (*line_end && *line_end != '\n') line_end++;
-        _context_caret(line_start, line_end, column, length);
-        return;
-      }
-      if (c.line_markers) line = c._text_line(position);
-      c._show_source_context(line, column, length);
+      c._show_source_context(line, column, length, position);
       return;
     }
   fprintf(stderr, "%s: %s\n", code.str(), message);
-}
-
-/* Where the compiler file's own line that holds merged byte `position`
-   starts in that file, setting `offset` to the byte's offset there; -1 for
-   a unit without a spliced module block or a byte from a member. Code that
-   follows a block's `}` keeps its own columns this way. */
-static int Compiler._own_line_start(Compiler c, int position, int &offset) {
-  if (!c.unit_source) return -1;
-  String file = c.text_source(position, offset);
-  if (Path.absolute(file) != Path.absolute(c.filename)) return -1;
-  int start = offset;
-  while (start > 0 && c.unit_source.own[start - 1] != '\n') start--;
-  return start;
-}
-
-/* A merged text's location names a line of the file it came from, and the
-   context shows the line of the text that holds its byte position. */
-static int Compiler._text_line(Compiler c, int position) {
-  int line = 0;
-  foreach (Var start, c._line_starts()) {
-    if (start.int() > position) break;
-    line++;
-  }
-  return line;
 }
 
 /** Resolves a recorded occurrence through generated ancestry to its source.
@@ -393,10 +361,8 @@ List Compiler.token_location(Compiler compiler, Token token) {
   if (!token) token = compiler.token;
   if (!token)
     return %( (file $file) (line 1) (column 1) (length 0) (position 0) );
-  int line = token.line, column = token.col, offset;
+  int line = token.line, column = compiler.token_column(token);
   if (compiler.line_markers) file = compiler.token_source(token, line);
-  int start = compiler._own_line_start(token.pos, offset);
-  if (start >= 0) column = offset - start + 1;
   file = compiler.display_path(file);
   return %( (file $file) (line $line)
             (column $column) (length ${token.len})
@@ -409,18 +375,20 @@ List Compiler.token_location(Compiler compiler, Token token) {
     marked regions keeps the compiler's own file and its line. */
 String Compiler.token_source(Compiler c, Token token, int &?line) {
   if (line) line = token.line;
-  if (!c.line_markers) return c.filename;
-  Token base = c.tokenizer.tokens;
-  if (token < base || token >= base + c.tokenizer.tokens.len())
-    return c.filename;
-  String file = c.filename;
-  foreach (List row, c.line_markers) {
-    (int position, int text_line, String marked, int marked_line) = row;
-    if (position > token.pos) break;
-    file = marked;
-    if (line) line = marked_line + token.line - text_line;
-  }
+  List region = c._token_region(token);
+  if (!region) return c.filename;
+  (int start, int text_line, String file, int file_line) = region;
+  if (line) line = file_line + token.line - text_line;
   return file;
+}
+
+/** Returns `token`'s column in the file that holds it. A module region
+    that begins inside a line of its file continues that line's columns. */
+int Compiler.token_column(Compiler c, Token token) {
+  match (c._token_region(token))
+    case %(? ?(int text_line) ? ? ? ?(String before)):
+      if (token.line == text_line) return before.len() + token.col;
+  return token.col;
 }
 
 /** Returns the file that a module's line markers give byte `position` of
@@ -428,16 +396,50 @@ String Compiler.token_source(Compiler c, Token token, int &?line) {
     Without such a marker, the file is the compiler's own and `offset` is
     `position`. */
 String Compiler.text_source(Compiler c, int position, int &offset) {
-  String file = c.filename;
   offset = position;
-  if (!c.line_markers) return file;
-  foreach (List row, c.line_markers) {
-    (int start, int text_line, String marked, int line, Var origin) = row;
-    if (start > position || origin is void) break;
-    file = marked;
-    offset = origin.int() + position - start;
-  }
-  return file;
+  match (c._region(position))
+    case %(?(int start) ? ?(String file) ? ?(int origin) ?): {
+      offset = origin + position - start;
+      return file;
+    }
+  return c.filename;
+}
+
+/** Returns a copy of `token` at its line, column, and byte offset in the
+    own text of the file that holds it, and sets `file` to that file. The
+    host preprocessor's rows record no offsets, so a token of its output
+    keeps its merged offset. */
+Token Compiler.source_token(Compiler c, Token token, String &file) {
+  Token placed = Scope.calloc(1, sizeof(struct Token));
+  *placed = *token;
+  placed.col = c.token_column(token);
+  file = c.token_source(token, placed.line);
+  (void) c.text_source(token.pos, placed.pos);
+  return placed;
+}
+
+/* The region that places `token`. The host preprocessor's rows place only
+   the tokens scanned from its output. A module's rows place any token of
+   the spliced text, including the thawed copy of a queued effect's site. */
+static List Compiler._token_region(Compiler c, Token token) {
+  List region = c._region(token.pos);
+  match (region) case %(? ? ? ? ? ?): return region;
+  if (!region) return NULL;
+  Token first = c.tokenizer.tokens;
+  return token >= first && token < first + c.tokenizer.tokens.len()
+       ? region : NULL;
+}
+
+/* The line-marker row of the region of the compiler's text that holds byte
+   `position`, or NULL before the first region. */
+static List Compiler._region(Compiler c, int position) {
+  List region = NULL;
+  if (c.line_markers)
+    foreach (List row, c.line_markers) {
+      if (row.car().int() > position) break;
+      region = row;
+    }
+  return region;
 }
 
 static List _compiler_location(Compiler compiler, Token token) {
@@ -503,13 +505,34 @@ void Compiler.report_warning_at(
 
 /* Locations use one-based coordinates while source indexing is zero-based.
    Clamp a stale column or width to the current line, retain tabs before the
-   token, and render at least one caret. */
+   token, and render at least one caret. A merged text shows its line that
+   holds byte `position`, after the text that line continues in its file. */
 static void Compiler._show_source_context(
-  Compiler compiler, int line, int column, int length) {
+  Compiler compiler, int line, int column, int length, int position) {
   if (!compiler.text) return;
+  if (compiler.line_markers) line = compiler._text_line(position);
   char *line_start, *line_end;
-  if (_context_line(compiler, line, line_start, line_end))
-    _context_caret(line_start, line_end, column, length);
+  if (!_context_line(compiler, line, line_start, line_end)) return;
+  match (compiler._region(position))
+    case %(? ?(int text_line) ? ? ? ?(String before)):
+      if (line == text_line && before.len()) {
+        String shown =
+          %"$before${String.new_len(line_start, line_end - line_start)}";
+        line_start = shown;
+        line_end = line_start + shown.len();
+      }
+  _context_caret(line_start, line_end, column, length);
+}
+
+/* A merged text's location names a line of the file it came from, and the
+   context shows the line of the text that holds its byte position. */
+static int Compiler._text_line(Compiler c, int position) {
+  int line = 0;
+  foreach (Var start, c._line_starts()) {
+    if (start.int() > position) break;
+    line++;
+  }
+  return line;
 }
 
 /* Find the physical line, including a script's shebang at line one. */

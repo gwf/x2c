@@ -40,7 +40,7 @@ Module blocks are expanded by `src/collect.x` before `translation-unit`
 parsing. `module-block` describes this source-assembly form, not a `unit-item`.
 It contains quoted member paths, separated by commas, with an optional
 trailing comma. Members are inserted in order from the containing file's
-companion directory, `NAME/` beside `NAME.x`; paths cannot contain `..`.
+companion directory, `NAME/` beside `NAME.x`; each path must resolve inside it.
 Nested module blocks are expanded too. Each file permits one file-scope
 block and must use default symbol collection. CPP and live-symbol modes do
 not support member splicing. Ordinary `module` identifiers remain identifiers.

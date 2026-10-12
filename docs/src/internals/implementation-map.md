@@ -166,7 +166,10 @@ is listed under [compiler options](../reference/cli.md).
   cold walk of an included file, and for the project `meta` scan in
   `src/meta-project.x`
 - Member positions: the unit's `line_markers` rows, read by
-  `Compiler.token_source` and `Compiler.text_source` in `src/diagnostics.x`
+  `Compiler.token_source`, `Compiler.token_column`, and
+  `Compiler.text_source` in `src/diagnostics.x`; a replayed compile-time
+  effect records its site in the member's own text through
+  `Compiler.source_token`
 - Member dependencies and the entry's content hash: `FileWalk` in
   `src/collect.x`
 - Tests: the `module-block` compiler fixtures

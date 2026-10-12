@@ -5121,11 +5121,8 @@ void Compiler.parse_macro_lisp_shallow(Compiler c) {
   if (c._import_path(requested)) {
     if (!c.source_private) {
       String path = home_portable_path(c._canonical_path(requested, c.token));
-      String source = home_portable_path(Path.absolute(c.filename));
       c.record_compile_time_effect(
-        %(compile-time import $path
-          (source $source ${c.freeze_declaration_syntax(c.token)})),
-        c.token);
+        %(compile-time import $path ${c._effect_source(c.token)}), c.token);
     }
     c.parse_macro_lisp_top_level();
     return;
@@ -5135,13 +5132,20 @@ void Compiler.parse_macro_lisp_shallow(Compiler c) {
   /* As in full parsing, the shared session already holds an inherited
      import's forms, and running one again would rebind an ancestor's name. */
   if (c.inherited_lisp) return;
-  if (!c.source_private) {
-    String path = home_portable_path(Path.absolute(c.filename));
+  if (!c.source_private)
     c.record_compile_time_effect(
-      %(compile-time lisp $form
-        (source $path ${c.freeze_declaration_syntax(first)})), first);
-  }
+      %(compile-time lisp $form ${c._effect_source(first)}), first);
   c.queue_declaration_effect(form, first, c.token);
+}
+
+/* An including unit replays a recorded effect in the own text of the file
+   that holds its site, which for a module member is the member's file, so
+   the site is recorded at its place in that file. */
+static List Compiler._effect_source(Compiler c, Token site) {
+  String file = NULL;
+  Token placed = c.source_token(site, file);
+  return %(source ${home_portable_path(Path.absolute(file))}
+    ${c.freeze_declaration_syntax(placed)});
 }
 
 /** Evaluates a queued source Lisp form with its original diagnostic site. */

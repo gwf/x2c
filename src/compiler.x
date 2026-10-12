@@ -38,8 +38,9 @@ typedef struct ScriptUnit {
 /** Describes an x2c source whose `module` block names member files: `text`
     holds the file's own text, `own`, with each member's text in place of the
     block. `markers` are the line-marker rows that give each region of
-    `text` its file, line, and byte offset there, and `members` maps each
-    member's canonical path to its content hash.
+    `text` its file, line, and byte offset there, with the text that
+    precedes that offset on its line, and `members` maps each member's
+    canonical path to its content hash.
 */
 typedef struct ModuleSource {
   String text, own;
@@ -124,9 +125,10 @@ typedef struct Compiler {
   Tokenizer tokenizer;
   /* For the host preprocessor's merged output, the file each region came
      from, as `(position text-line file line)` rows; NULL otherwise. A
-     module's rows add the region's byte `offset` in that file. */
+     module's rows add the region's byte `offset` in that file and the text
+     before it on its line. */
   Array line_markers;
-  // The file's text when its `module` block was spliced, or NULL.
+  // The unit's text when its `module` block was spliced, or NULL.
   ModuleSource unit_source;
   List return_type, include_dirs;
   // File paths map to content hashes or 1 when text is not embedded.
@@ -2123,7 +2125,7 @@ int Compiler.record_origin(Compiler c, Token token) {
   if (!file) file = "<stdin>";
   if (!c.source_map) file = c.display_path(file);
   c.origins.push(
-    %(source $file $line ${token.col} ${token.len} ${token.pos}));
+    %(source $file $line ${c.token_column(token)} ${token.len} ${token.pos}));
   return c.origins.len();
 }
 
