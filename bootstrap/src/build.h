@@ -9,6 +9,7 @@
 #include "cli.h"
 #include "deps.h"
 #include "toolchain.h"
+#include "compiler.h"
 typedef struct Build{
   CliRequest request;
   Toolchain toolchain;

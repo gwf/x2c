@@ -37,8 +37,6 @@ static int _plain_integer(char * s, unsigned * at, Var * out);
 
 static int _plain_atom(char * s, unsigned * at, Var * out);
 
-static String _unescaped(String text);
-
 static int _digit(char c);
 
 static int _blank(char c);
@@ -421,9 +419,9 @@ String String_new_len(const char *, int);
 
 static int _plain_string(char * s, unsigned * at, Var * out){
   unsigned end =(* at) + 1;
-  for(;  s[end] != '"';  end += s[end] == '\\' ? 2 : 1) if(! s[end] || s[end] == '\n' ||(s[end] == '\\' && ! s[end + 1])) return 0;
+  for(;  s[end] != '"';  end ++) if(! s[end] || s[end] == '\n' || s[end] == '\\') return 0;
   if(! _token_end(s[end + 1])) return 0;
-  (* out) = String_var(_unescaped(String_new_len(s +(* at) + 1, end -(* at) - 1)));
+  (* out) = String_var(String_new_len(s +(* at) + 1, end -(* at) - 1));
   (* at) = end + 1;
   return 1;
 }
@@ -459,14 +457,6 @@ static int _plain_atom(char * s, unsigned * at, Var * out){
   (* out) = Atom_intern(spelling);
   (* at) += length;
   return 1;
-}
-
-int String_len(String);
-
-String String_unescape(String);
-
-static String _unescaped(String text){
-  return memchr(text, '\\', String_len(text)) ? String_unescape(text) : text;
 }
 
 static int _digit(char c){
@@ -624,6 +614,8 @@ int datum_frame(Buffer out, Var value){
 
 int String_find(String, String);
 
+int String_len(String);
+
 #include "error.h"
 
 
@@ -639,7 +631,7 @@ int datum_unframe(String input, size_t * used, Var * value){
   unsigned cursor = 0;
   (* value) =((void) 0, Void);
   if(! datum_read(frame, &(cursor), &((* value)))){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/datum.x",.function = "datum_unframe",.line = 325};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/datum.x",.function = "datum_unframe",.line = 321};
     x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(13765450), String_var(frame));
     __builtin_unreachable();
   }

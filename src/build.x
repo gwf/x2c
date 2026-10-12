@@ -1097,7 +1097,7 @@ List Build.script_helpers(Build b) {
     if (excluded.any(%!(String prefix) => path.startswith(prefix))) continue;
     candidates.push(path);
   }
-  Map members = b.script_members(candidates.list());
+  Map members = b.script_members(candidates);
   foreach (String path, candidates) {
     if (path == script || path in members) continue;
     helpers.push(path);
