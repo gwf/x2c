@@ -2855,6 +2855,13 @@ List Compiler.written_support(Compiler c, List bound) {
   return writer && writer.builtin ? written_definitions(bound) : bound;
 }
 
+/** Whether the rule whose meta function now runs is shipped, so that the
+    names it calls resolve to the copies the compiler links. */
+int Compiler.applying_shipped(Compiler c) {
+  RewriteRule applying = c.applying ? c.applying.car() : NULL;
+  return applying && applying.builtin;
+}
+
 /* Binds, converts, and lowers a replacement as written. */
 static List Compiler._lowered(
   Compiler c, Var result, AstPos position, Type expected, Token site) {

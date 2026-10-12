@@ -457,11 +457,29 @@ static Var _meta_call_value(Compiler c, List expression, Token site) {
    through its Func. */
 static Var _meta_named_value(
   Compiler c, String name, List arguments, Token site) {
-  Var function = c._meta_function(name, site);
+  Var function = c._shipped_callee(name);
+  if (function is void) function = c._meta_function(name, site);
   meta_call_form = cons(Atom.intern(name), arguments);
   if (function === _linked_module()[name])
     return _apply_linked(function.pointer(), arguments);
   return c._meta_apply(function, arguments);
+}
+
+/* The compiler's linked copy of `name` when shipped code calls it, or
+   void. A shipped rule's translator and a template defined in a linked
+   provider resolve their calls to the copies the compiler links, so a
+   program definition spelled the same is a separate definition. */
+static Var Compiler._shipped_callee(Compiler c, String name) {
+  if (!c.applying_shipped() && !_shipped_definition()) return void;
+  Var function;
+  return _linked_module().try_get(name, function) ? function : void;
+}
+
+/* Whether the template now expanding was defined in a linked provider. */
+static int _shipped_definition(void) {
+  String file = MetaContext.current().definition_file;
+  if (!file || file.startswith("<")) return 0;
+  return !!linked_meta_provider_source(home_portable_path(file));
 }
 
 static Var _apply_linked(Func function, List arguments) {
