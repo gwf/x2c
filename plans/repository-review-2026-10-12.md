@@ -428,6 +428,17 @@ components.
   were deleted; the 14 unmerged branches and the desktop app's session
   branches stay. The workspace note tracked inside the ignored `.context/`
   directory is untracked.
+- Batch 5 (2026-10-12): the transform-time binding leak (A6) is fixed. A
+  statement or expression replacement bound with no local scope open, as
+  when the transform lowers a function, declares its names in a scope of
+  its own (`Compiler._bind_replacement` in src/macros.x), so a quotation in
+  another function no longer resolves them. Unit-support code placed while
+  such a replacement binds, such as a capturing lambda's bridge, binds at
+  file scope with the open local scopes set aside
+  (`Sym.close_local_scopes` and `Sym.reopen_scopes` in src/symbols.x), so
+  its prototype stays in the generated header. Fixture
+  `rewrite-local-declaration`; `function-to-func-inline` and the lambda
+  fixtures pass unchanged, and `make verify` passed.
 - Not done: converging the lambda component's `(place ...)` carrier rows on
   `x2c_place` (decision 9). Both forms reach `Compiler.place`; the carrier
   form exists because the placed code names bindings the driver introduces

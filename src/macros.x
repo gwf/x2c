@@ -2795,14 +2795,27 @@ static void _held_parts(List source, Symbol point, Array found) {
 static List Compiler._bound(
   Compiler c, Symbol point, Var kind, List source, Var result,
   AstPos position, Type expected, Token site, int lower) {
-  if (point != <node>) return c.bind_syntax(result, position, expected);
+  if (point != <node>)
+    return c._bind_replacement(result, position, expected);
   Array parts = $auto([]);
   _held_parts(source, point, parts);
   if (lower) result = _kept_lowered(result, source, parts);
-  List bound = c.bind_syntax(result, position, expected);
+  List bound = c._bind_replacement(result, position, expected);
   if (position == AST_UNIT) bound = c.written_support(bound);
   struct SlotWatch held = {parts.list()};
   return c._bound_held(&held, kind, bound, position, expected, site, lower);
+}
+
+/* Binds a replacement at `position`. Outside any local scope, as when the
+   transform lowers a function, a statement or expression replacement
+   declares its names in a scope of its own, so no other function sees
+   them. */
+static List Compiler._bind_replacement(
+  Compiler c, Var result, AstPos position, Type expected) {
+  int own = position != AST_UNIT && c.sym.at_file_scope();
+  if (own) c.sym.push_new_scope();
+  defer if (own) c.sym.pop_scope();
+  return c.bind_syntax(result, position, expected);
 }
 
 /* `result` with `source` and each of its `parts` that it holds marked as
@@ -2865,7 +2878,7 @@ int Compiler.applying_shipped(Compiler c) {
 /* Binds, converts, and lowers a replacement as written. */
 static List Compiler._lowered(
   Compiler c, Var result, AstPos position, Type expected, Token site) {
-  List bound = c.bind_syntax(result, position, expected);
+  List bound = c._bind_replacement(result, position, expected);
   if (position == AST_EXPRESSION) {
     bound = c.convert_expression(bound, expected);
     Type actual = bound.cadr();
@@ -5003,8 +5016,11 @@ void Compiler.place(Compiler c, List where, Var code) {
   }
 }
 
-/* Adds the file-scope `code` a placement gives to the unit's support. */
+/* Adds the file-scope `code` a placement gives to the unit's support. It
+   binds at file scope whatever local scope is open. */
 static void Compiler._place_support(Compiler c, Var code) {
+  Block local = c.sym.close_local_scopes();
+  defer c.sym.reopen_scopes(local);
   c.add_support(c.written_support(c.bind_syntax(code, AST_UNIT, NULL)));
 }
 

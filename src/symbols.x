@@ -206,6 +206,22 @@ int Sym.scope_count(Sym s) => s.scopes.len();
 /** Returns whether declarations currently bind at file scope. */
 int Sym.at_file_scope(Sym s) => (int) s.scopes.len() <= s.base_scopes;
 
+/** Sets aside the local scopes now open, so declarations bind at file
+    scope until `Sym.reopen_scopes` restores the returned scopes. */
+Block Sym.close_local_scopes(Sym s) {
+  Block local = Block.new(sizeof(SymScope));
+  if (s.at_file_scope()) return local;
+  local.append(s._scope_at(s.base_scopes), s.scopes.len() - s.base_scopes);
+  s.scopes.truncate(s.base_scopes);
+  return local;
+}
+
+/** Reopens the local scopes `Sym.close_local_scopes` set aside. */
+void Sym.reopen_scopes(Sym s, Block local) {
+  s.scopes.append(local.bytes, local.len());
+  local.free();
+}
+
 // symbol maps
 
 /** Returns the mutable global symbol map supplied to the latest reset. */
