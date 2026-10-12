@@ -247,6 +247,7 @@ p {
 }
 #toolbar {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   align-items: center;
   padding: 12px 24px;

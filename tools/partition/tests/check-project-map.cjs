@@ -22,3 +22,26 @@ for (let i = 0; i < result.length; i++) {
 console.log(
   "PASS: deterministic project layout, complete membership, no disk overlaps",
 );
+
+// Scoped groups retain direction and weight without phantom outside nodes.
+const quotient = layout.aggregateGroupCalls(
+  {
+    edges: [
+      [0, 1, 2],
+      [0, 2, 3],
+      [2, 0, 4],
+      [3, 1, 5],
+      [0, 4, 6],
+      [1, 0, 7],
+    ],
+  },
+  [{ members: [0, 1] }, { members: [2] }],
+);
+assert.deepEqual(quotient.links, [
+  { ids: [0, 1], w: 3 },
+  { ids: [1, 0], w: 4 },
+]);
+assert.deepEqual(quotient.callers, [2, 1]);
+assert.deepEqual(quotient.incoming, [9, 3]);
+assert.equal(layout([{ r: 10 }], []).length, 1);
+console.log("PASS: scoped directed aggregation and incoming consumers");

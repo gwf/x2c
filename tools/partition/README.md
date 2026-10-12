@@ -34,7 +34,14 @@ are served directly. Node.js is needed only for the optional checks below.
 - Project nodes represent current groups. Original-file circle area indicates
   physical source lines; edited groups use an explicitly labeled estimate
   apportioned by function count. Directed edges aggregate crossing call sites.
-- Click a group to inspect its functions. Shift-click project nodes or use
+- Decomposed scopes and split previews start as circular group arrangements.
+  Springs use aggregated call weights; repulsion separates groups. Hover traces
+  connections and reports directed call counts. Labels count distinct callers
+  outside each group, including siblings.
+- Click a group to inspect its functions. Back returns to the arrangement.
+  Tentative groups can be inspected without accepting the preview. Use Functions
+  to expand all groups for moving functions, or Function list for keep-together
+  selection. Shift-click project nodes or use
   the sidebar checkboxes to select groups for merging.
 - The partition-detail slider changes the suggested group count and balance
   penalty. Fix group count when comparing alternatives with the same count.

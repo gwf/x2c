@@ -88,16 +88,50 @@ function projectLayout(nodes, links) {
   }
   return ps;
 }
+// Only calls between displayed groups become edges. Outside callers remain
+// counted per group and are shown individually when the group is opened.
+function aggregateGroupCalls(data, groups) {
+  const membership = new Map();
+  groups.forEach((g, i) => g.members.forEach((v) => membership.set(v, i)));
+  const pairs = new Map(),
+    callers = groups.map(() => new Set());
+  const incoming = groups.map(() => 0);
+  for (const [a, b, w] of data.edges) {
+    const i = membership.get(a),
+      j = membership.get(b);
+    if (i === j) continue;
+    if (j !== undefined) {
+      callers[j].add(a);
+      incoming[j] += w;
+    }
+    if (i === undefined || j === undefined) continue;
+    const key = i + ":" + j;
+    pairs.set(key, (pairs.get(key) || 0) + w);
+  }
+  return {
+    links: [...pairs].map(([key, w]) => ({
+      ids: key.split(":").map(Number),
+      w,
+    })),
+    callers: callers.map((s) => s.size),
+    incoming,
+  };
+}
 let projectMapCache = null;
-function renderMap(gs, m) {
+function renderMap(gs) {
   graphWorker?.terminate();
   graphResize?.disconnect();
   const host = $("workspace");
   host.classList.add("graph-workspace");
-  const links = [...m.links].map(([key, w]) => ({
-    ids: key.split(":").map(Number),
-    w,
-  }));
+  const { links, callers, incoming } = aggregateGroupCalls(D, gs);
+  const labels = gs.map((g, i) => {
+    if (!scope) return g.name;
+    const stem = scope.name.replace(/\.x$/, "");
+    const name = g.name.startsWith(stem + ".")
+      ? "Group " + g.name.slice(stem.length + 1).replace(/\.x$/, "")
+      : g.name;
+    return name + " / " + callers[i] + " callers";
+  });
   const nodes = gs.map((g) => {
     const counts = new Map();
     g.members.forEach((v) => {
@@ -121,15 +155,20 @@ function renderMap(gs, m) {
     return {
       lines,
       estimated: !original,
-      r: Math.max(5, Math.sqrt(lines) * 0.72),
+      r: scope
+        ? 14 + Math.sqrt(lines) * 0.72
+        : Math.max(5, Math.sqrt(lines) * 0.72),
     };
   });
-  const key = D.revision + JSON.stringify(gs.map((g) => [g.id, g.members]));
+  const key =
+    D.revision +
+    Boolean(scope) +
+    JSON.stringify(gs.map((g) => [g.id, g.members]));
   if (projectMapCache?.key !== key)
     projectMapCache = { key, ps: projectLayout(nodes, links) };
   const ps = projectMapCache.ps;
   host.innerHTML =
-    '<div class="graph-tools"><button id="map-minus">\u2212</button><button id="map-fit">Fit project</button><button id="map-plus">+</button><span>Node area = source lines \u00b7 edge weight = crossing call sites</span></div><svg id="project-map" style="flex:1;min-height:300px;width:100%;touch-action:none" aria-label="Project groups and directed calls"></svg><div class="graph-legend">Scroll to zoom \u00b7 drag background to pan \u00b7 click to explore \u00b7 Shift-click to select \u00b7 hover for calls and size</div>';
+    '<div class="graph-tools"><button id="map-minus">\u2212</button><button id="map-fit">Fit groups</button><button id="map-plus">+</button><span>Size reflects source lines (minimum hit area) \u00b7 edge weight = crossing call sites</span></div><svg id="project-map" style="flex:1;min-height:300px;width:100%;touch-action:none" aria-label="Groups and directed calls"></svg><div class="graph-legend">Scroll to zoom \u00b7 drag background to pan \u00b7 click to explore \u00b7 Shift-click to select \u00b7 hover for calls and size</div>';
   const svg = $("project-map");
   let camera = { x: 0, y: 0, k: 1 },
     drag = null,
@@ -143,13 +182,13 @@ function renderMap(gs, m) {
           d = Math.hypot(b.x - a.x, b.y - a.y) || 1,
           ux = (b.x - a.x) / d,
           uy = (b.y - a.y) / d;
-        return `<path data-map-edge="${i},${j}" d="M${a.x + ux * a.r} ${a.y + uy * a.r} Q${(a.x + b.x) / 2 - uy * 10} ${(a.y + b.y) / 2 + ux * 10} ${b.x - ux * (b.r + 3)} ${b.y - uy * (b.r + 3)}" fill="none" stroke="#91aaa9" stroke-width="${Math.min(4, 0.4 + Math.log2(w + 1) * 0.32)}" opacity=".13" marker-end="url(#map-arrow)"/>`;
+        return `<path data-map-edge="${i},${j}" d="M${a.x + ux * a.r} ${a.y + uy * a.r} Q${(a.x + b.x) / 2 - uy * 10} ${(a.y + b.y) / 2 + ux * 10} ${b.x - ux * (b.r + 3)} ${b.y - uy * (b.r + 3)}" fill="none" vector-effect="non-scaling-stroke" stroke="#91aaa9" stroke-width="${Math.min(4, 0.4 + Math.log2(w + 1) * 0.32)}" opacity="${scope ? ".4" : ".13"}" marker-end="url(#map-arrow)"><title>${esc(gs[i].name)} to ${esc(gs[j].name)}: ${w} call sites</title></path>`;
       })
       .join("") +
     ps
       .map(
         (p, i) =>
-          `<g data-map-node="${i}" tabindex="0" role="button" aria-label="Open ${esc(gs[i].name)}" style="cursor:pointer"><title>${esc(gs[i].name)}: ${p.estimated ? "approximately " : ""}${fmt(p.lines)} source lines; ${gs[i].members.length} functions${p.estimated ? " (size apportioned by function count)" : ""}</title><circle cx="${p.x}" cy="${p.y}" r="${p.r}" fill="${gs[i].name.startsWith("lib/") ? "#244553" : "#34482e"}" stroke="${selected.has(gs[i].id) ? "#fff" : gs[i].name.startsWith("lib/") ? "#9abfce" : "#b5dba0"}" stroke-width="${selected.has(gs[i].id) ? 3 : 1.2}"/><text data-map-label="${i}" text-anchor="middle" fill="#e0e8e6" font-size="11" paint-order="stroke" stroke="#11181c" stroke-width="3">${esc(gs[i].name)}</text></g>`,
+          `<g data-map-node="${i}" tabindex="0" role="button" aria-label="Open ${esc(gs[i].name)}" style="cursor:pointer"><title>${esc(gs[i].name)}: ${p.estimated ? "approximately " : ""}${fmt(p.lines)} source lines; ${gs[i].members.length} functions; ${callers[i]} callers outside group / ${incoming[i]} incoming call sites${p.estimated ? " (size apportioned by function count)" : ""}</title><circle cx="${p.x}" cy="${p.y}" r="${p.r}" fill="${gs[i].name.startsWith("lib/") ? "#244553" : "#34482e"}" stroke="${selected.has(gs[i].id) ? "#fff" : gs[i].name.startsWith("lib/") ? "#9abfce" : "#b5dba0"}" stroke-width="${selected.has(gs[i].id) ? 3 : 1.2}"/><text data-map-label="${i}" text-anchor="middle" fill="#e0e8e6" font-size="11" paint-order="stroke" stroke="#11181c" stroke-width="3">${esc(labels[i])}</text></g>`,
       )
       .join("") +
     "</g>";
@@ -165,7 +204,7 @@ function renderMap(gs, m) {
       .forEach((e) => {
         const i = +e.dataset.mapLabel,
           p = ps[i],
-          w = gs[i].name.length * 6.3,
+          w = labels[i].length * 6.3,
           x = p.x * camera.k + camera.x,
           y = p.y * camera.k + camera.y + p.r * camera.k + 12;
         e.setAttribute(
@@ -195,7 +234,7 @@ function renderMap(gs, m) {
     // Labels retain screen-pixel size while circles scale with the camera.
     const labelMargin = Math.min(
       width * 0.25,
-      Math.max(...gs.map((g) => g.name.length * 6.3)) / 2 + 16,
+      Math.max(...labels.map((name) => name.length * 6.3)) / 2 + 16,
     );
     camera.k = Math.max(
       0.01,
@@ -247,6 +286,9 @@ function renderMap(gs, m) {
           ? selected.delete(gs[i].id)
           : selected.add(gs[i].id);
         render();
+      } else if (preview) {
+        previewGroup = gs[i].id;
+        render();
       } else enter(gs[i].id);
     };
     e.onclick = open;
@@ -267,7 +309,7 @@ function renderMap(gs, m) {
     e.onpointerleave = e.onblur = () => {
       svg
         .querySelectorAll("[data-map-edge]")
-        .forEach((edge) => edge.setAttribute("opacity", ".13"));
+        .forEach((edge) => edge.setAttribute("opacity", scope ? ".4" : ".13"));
       paint();
     };
   });
@@ -275,4 +317,7 @@ function renderMap(gs, m) {
   graphResize.observe(svg);
   fit();
 }
-if (typeof module !== "undefined") module.exports = projectLayout;
+if (typeof module !== "undefined") {
+  module.exports = projectLayout;
+  module.exports.aggregateGroupCalls = aggregateGroupCalls;
+}

@@ -12,7 +12,8 @@ let D,
   exact = false,
   kval = 4,
   serial = 0,
-  view = "graph",
+  view = "groups",
+  previewGroup = null,
   scopeStack = [];
 const $ = (id) => document.getElementById(id),
   esc = (s) =>
@@ -92,6 +93,8 @@ function enter(id) {
   const g = group(id);
   if (!g) return;
   preview = null;
+  previewGroup = null;
+  view = "groups";
   if (
     scope &&
     !(
@@ -119,6 +122,7 @@ function metric(label, value, delta) {
   return `<div class="metric"><b>${value}</b>${delta ? `<em>${delta > 0 ? "+" : ""}${fmt(delta)}</em>` : ""}<label>${label}</label></div>`;
 }
 function render(skipInspector = false) {
+  if (!preview) previewGroup = null;
   const gs = visible(),
     m = Engine.metrics(D, gs),
     current = Engine.metrics(D, S.groups),
@@ -147,8 +151,14 @@ function render(skipInspector = false) {
       ? metric("Crossing within this view", fmt(scopeCut))
       : metric("Functions", fmt(D.functions.length)));
   $("toolbar").innerHTML =
-    `${scope ? `<button id="back">\u2190 ${scopeStack.length ? "Parent group" : "Project"}</button>` : ""}<button id="split" ${selected.size !== 1 || preview ? "disabled" : ""}>Preview split</button><button id="merge" ${selected.size < 2 || preview ? "disabled" : ""}>Merge ${selected.size > 1 ? selected.size + " groups" : "groups"}</button>${preview ? '<span class="previewbadge">Tentative split</span>' : ""}${scope ? `<button id="toggle-view">${view === "graph" ? "Function list" : "Call graph"}</button>` : ""}<small>${scope ? "Click to select \u00b7 drag a selected function to move it" : "Lines show aggregated calls \u00b7 hover to trace connections"}</small>`;
+    `${scope ? `<button id="back">\u2190 ${previewGroup ? "Group arrangement" : scopeStack.length ? "Parent group" : "Project"}</button>` : ""}<button id="split" ${selected.size !== 1 || preview ? "disabled" : ""}>Preview split</button><button id="merge" ${selected.size < 2 || preview ? "disabled" : ""}>Merge ${selected.size > 1 ? selected.size + " groups" : "groups"}</button>${preview ? '<span class="previewbadge">Tentative split</span>' : ""}${scope ? `<button id="view-groups">Group arrangement</button><button id="view-graph">Functions</button><button id="view-list">Function list</button>` : ""}<small>${scope ? "Open groups or switch to Functions to move members" : "Lines show aggregated calls \u00b7 hover to trace connections"}</small>`;
   $("back")?.addEventListener("click", () => {
+    if (previewGroup) {
+      previewGroup = null;
+      render();
+      return;
+    }
+    view = "groups";
     if (scopeStack.length) {
       scope = scopeStack.pop();
       preview = null;
@@ -160,15 +170,21 @@ function render(skipInspector = false) {
   });
   $("split").onclick = startPreview;
   $("merge").onclick = merge;
-  $("toggle-view")?.addEventListener("click", () => {
-    view = view === "graph" ? "list" : "graph";
-    render();
-  });
+  for (const mode of ["groups", "graph", "list"])
+    $("view-" + mode)?.addEventListener("click", () => {
+      view = mode;
+      previewGroup = null;
+      render();
+    });
   renderNav();
   if (scope) {
-    if (view === "graph") renderGraph(scoped, map);
-    else renderBoard(scoped, map);
-  } else renderMap(gs, m);
+    const shown = previewGroup
+      ? scoped.filter((g) => g.id === previewGroup)
+      : scoped;
+    if (view === "groups" && shown.length > 1) renderMap(shown);
+    else if (view === "list") renderBoard(shown, map);
+    else renderGraph(shown, map);
+  } else renderMap(gs);
   if (!skipInspector) renderInspector(m, current);
   $("status").textContent = preview
     ? "Preview only \u00b7 accept to change the plan"
@@ -364,6 +380,8 @@ function renderBoard(gs, map) {
   });
 }
 function startPreview() {
+  view = "groups";
+  previewGroup = null;
   const g = group([...selected][0]);
   if (!g || g.members.length < 2) {
     toast("This group has fewer than two functions.");
@@ -376,6 +394,7 @@ function startPreview() {
   updatePreview();
 }
 function updatePreview(skipInspector = false) {
+  previewGroup = null;
   fn = null;
   const g = group(preview.target),
     count = exact ? kval : 2 + Math.round((level / 100) * 6),
@@ -396,6 +415,8 @@ function updatePreview(skipInspector = false) {
   render(skipInspector);
 }
 function applyPreview() {
+  previewGroup = null;
+  view = "groups";
   const p = preview;
   change(`Accepted ${p.parts.length} groups`, () => {
     const g = group(p.target);
