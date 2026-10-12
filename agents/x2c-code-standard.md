@@ -541,11 +541,9 @@ generated code calls, native callers, and process setup. Ordinary public
 operations are type methods; private helpers are `static`. An `x2c_*` name
 without `static` enters generated headers. Verify the
 generated-code and native callers of a retained C entry before renaming it.
-The `builtin_*` functions in `src/builtins.x` stay non-static because
-`src/cleanup.x` calls the lowering slot `builtin_try_cleanup_placement`
-and `src/macros.x` calls the registry `builtin_targets` across units.
-Making the slot static fails native linking; making the registry static
-fails translation of `src/macros.x`.
+The registry `builtin_targets` in `src/builtins.x` stays non-static because
+`src/macros.x` calls it across units; making it static fails translation
+of `src/macros.x`.
 
 ### Module sets
 
@@ -884,9 +882,10 @@ or change the Lisp session. Prefer `x2c_ident(...)` in meta
 code to `$(x2c.ident ...)`, and `$f(...)` meta calls to Lisp helpers.
 
 **LI-3** Keep Lisp surfaces thin: a binding file names an x2c operation and
-checks arguments only where a Lisp-facing diagnostic needs it. Name
-supported SDK operations `x2c.<noun>.<verb>` and internal primitives with
-the single reserved `_x2c.` prefix.
+checks arguments only where a Lisp-facing diagnostic needs it. Name a
+supported SDK operation on captured code or a semantic type `Code.member`
+or `Type.member`, any other supported operation `x2c.<noun>.<verb>`, and
+internal primitives with the single reserved `_x2c.` prefix.
 
 **LI-4** Ship a library's Lisp bindings behind one public installer
 (`RegexpLisp.install(Lisp)`) built from `$lisp.binding` groups. Bindings take
@@ -900,10 +899,10 @@ previous phase's documented AST: tokenize (`lib/tokenizer.x`) -> collect
 declarations (`collect.x`, `.xi` interfaces) -> parse, bind, and type
 (`parse.x`, `expressions.x`, `statements.x`, `literals.x`, `type.x`, with
 macro expansion and compile-time code inside) -> region analysis
-(`regions.x`) -> lowering to a fixed point (`transform.x`, `callables.x`,
-`cleanup.x`) -> generation (`generate.x`, `cache.x`) -> emission (`emit.x`)
--> formatting (`format.x`). Put a behavior in the phase whose contract it
-changes.
+(`regions.x`) -> lowering to a fixed point (`transform.x`, the shipped
+`component-*.x` rules, `callables.x`, `cleanup.x`) -> generation
+(`generate.x`, `cache.x`) -> emission (`emit.x`) -> formatting
+(`format.x`). Put a behavior in the phase whose contract it changes.
 
 **AR-2** Parsing preserves source order and attaches types as the tree is
 built: every expression is `(expr TYPE CONTENT)`. Later phases preserve
@@ -912,8 +911,9 @@ owner.
 
 **AR-3** Transforms own runtime crossings and normalization. A transform
 helper rewrites its node and returns the replacement; the fixed-point driver
-processes the returned children. Fold a new lowering step into the driver;
-never add an ordered pass list or a struct IR.
+processes the returned children. Write a new lowering as a shipped
+component on the two primitives; the driver gains no ordered pass list and
+no struct IR.
 
 **AR-4** Emission prints the normalized shape and repairs nothing. A
 semantic decision moves into a lowering with a template, or is recorded as

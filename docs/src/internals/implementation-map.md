@@ -107,9 +107,11 @@ is listed under [compiler options](../reference/cli.md).
 ### Method-style calls
 
 - Parse/type: `src/expressions.x`, `src/type.x`
-- Lower: `src/transform.x`
+- Lower: `src/transform.x`; a call that finds no member on a receiver with
+  `delegate` fields goes through the one field path that provides it,
+  which `src/component-delegate.x` finds
 - Runtime: statically selected module function
-- Tests: unit suites across runtime types
+- Tests: unit suites across runtime types and the delegate compiler fixtures
 
 ### Protocol adoptions
 
@@ -128,7 +130,8 @@ is listed under [compiler options](../reference/cli.md).
 ### Compile-time macros and decorators
 
 - Parse, import, hygiene, and expand: `src/macros.x`
-- Shared compile-time syntax builders: `lib/meta.x`
+- Compiler operations for `meta` code, the `Code` and `Type` methods and
+  the `x2c_` helpers: `lib/meta.x`
 - Macro values, their application, and macro-valued `case` recognition:
   `lib/macro-value.x`
 - Compile-time Lisp boundary adapters: `etc/compiler-sdk.xlisp`
@@ -171,8 +174,9 @@ is listed under [compiler options](../reference/cli.md).
 
 ### Exact Var-tag tests with `is` and `is not`
 
-- Parse and type selection: `src/expressions.x`, `src/type.x`
-- Lower and emit: `src/transform.x`, `src/emit.x`
+- Parse, type, and lower: `src/expressions.x` types each test as a
+  `Var.is`, `Var.is_void`, or constant-row `Var.is_row` call; `src/type.x`
+  supplies the tag facts
 - Runtime tag representation: `lib/var.x`, `lib/common.x`
 - Tests: is-type and is-not compiler fixtures plus `Var` suites
 - See also: [exact Var-tag
@@ -265,7 +269,8 @@ inline-lisp example
 ### Status-bearing Map operations
 
 - Runtime owner: `lib/map.x`
-- Literal boundary: `src/emit.x` emits counted `Map.update_n` construction
+- Literal boundary: `src/component-literals.x` builds counted
+  `Map.update_n` construction
 - Generic routing: `lib/dispatch.x`
 - Value-returning wrappers: `Map.get` and `Map.del`
 - Cursor contract: structural mutation invalidates outstanding traversal state
@@ -276,10 +281,21 @@ inline-lisp example
 ### Counted Array construction
 
 - Runtime owner: `lib/array.x` through `Array.update_n` and `Array.push`
-- Literal boundary: `src/emit.x` emits counted `Array.update_n` construction
+- Literal boundary: `src/component-literals.x` builds counted
+  `Array.update_n` construction
 - Value contract: raw `Null` is data; `void` is rejected
 - Tests: `Array` suite and the counted-literal compiler fixture
 - See also: [collections](../guide/collections.md)
+
+### Var values in printf-family formats
+
+- Parse and type the call: `src/expressions.x`
+- Lower: `src/component-printf.x` reads the static format once and converts
+  each `Var` value a conversion consumes, one call pattern per family member
+- Runtime: `Var.convert` in `lib/varconvert.x` and `Var.str` in
+  `lib/dispatch.x`
+- Tests: the `printf-var` compiler fixtures
+- See also: [values and Var](../guide/values.md)
 
 ### Match statement
 
@@ -298,7 +314,8 @@ inline-lisp example
 ### Raise, filtered catch, finally, and defer
 
 - Parse: `src/statements.x`
-- Lower/generate: `src/transform.x`; `src/component-try.x` lowers `try` to a
+- Lower/generate: `src/transform.x`; `src/component-raise.x` converts a
+  `raise`'s code and details; `src/component-try.x` lowers `try` to a
   landing form; `src/cleanup.x` places cleanup on every exit from a region;
   `src/emit.x`
 - Runtime: `lib/exception.x` owns the frame/jump engine for transfer and
@@ -340,8 +357,10 @@ The main translation steps are:
 3. `src/expressions.x`, `src/statements.x`, and `src/literals.x` construct
    typed AST forms; `src/ast.x` owns the shared node contracts they build to.
 4. `src/type.x` supplies type facts and canonical forms.
-5. `src/transform.x` lowers most extensions; `src/callables.x` owns `Func`
-   adapter synthesis, and `src/component-lambdas.x` lowers lambdas.
+5. `src/transform.x` normalizes the typed forms and dispatches each
+   feature a shipped component owns to its rules, such as lambdas to
+   `src/component-lambdas.x`; `src/callables.x` owns `Func` adapter
+   synthesis.
 6. `src/cleanup.x` names each `defer` region's runtime record and each
    landing's frame, and places cleanup statements on every exit that leaves
    a region; `src/component-try.x` answers the landing form of a `try`.

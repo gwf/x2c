@@ -780,6 +780,17 @@ fields with `Type.marked_fields` and `Type.resolve_member`, reports an
 ambiguous path or a cycle, and returns the call through the field path as
 constructed syntax, which ordinary call resolution binds.
 
+`src/component-literals.x` registers the Array and Map literal forms,
+`$array_value` and `$map_value` from `src/grammar.x`, on the literal family
+keyed by the `array` and `map` heads. Each translator answers the counted
+constructor, `Array.update_n` or `Map.update_n` on a new container, with
+each element, or each key and value, converted to `Var` in source order; an
+empty brace among them is an empty Map, and an empty literal is the bare
+`Array.new()` or `Map.new()`. Each part runs once, left to right: once two
+or more parts read state, the transform moves each part that reads state,
+through the last one that may change state, into a temporary ahead of the
+call, as "literal order" in `src/transform.x` describes.
+
 `src/component-printf.x` registers one call pattern for each printf-family
 member, on the call family keyed by the callee's spelling, so a call to any
 other function only looks its spelling up. The translator reads the static
@@ -832,6 +843,16 @@ holds. The transform and
 the cleanup walk step into the nodes the text holds, and the parts of the
 match lower outside its rule, so a nested match applies it again. The
 `switch` is the barrier that an arm's `break` leaves.
+
+`src/component-interpolation.x` registers a `%"..."` literal on the literal
+family keyed by the `segments` head. The transform first converts each `$`
+insertion to a `String` as the parser converts its own, and a constructed
+String of one constant text reuses the parsed literal's cache slot. The
+translator joins the parts with `String.join` over a `List` chain of them:
+cached text, a converted insertion, or `String.new` of the raw text that
+constructed syntax spells. The compiler boxes the chain's parts and
+evaluates them once each, left to right, moving them ahead of the join when
+they move.
 
 `src/component-destructuring.x` registers destructuring declarations on the
 statement family keyed by the `dstrdecl` head, an assignment statement keyed

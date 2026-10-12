@@ -123,7 +123,8 @@ as an ordinary filesystem/include problem, not escaped as command text.
 - "expected atomic expression": test for a declaration and call
   `Compiler.parse_simple_declaration` at that parser boundary.
 - Missing field lookup: inspect pointer/aggregate classification in
-  `src/type.x` and field resolution in `src/compiler.x`.
+  `src/type.x` and field resolution in `Sym.lookup_field` in
+  `src/symbols.x`.
 - Iterator returning nothing: inspect the adapter in `lib/dispatch.x` and the
   protocol in `lib/iter.x`.
 - Literal emitted twice: inspect `src/cache.x` and the lowering that emits the

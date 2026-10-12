@@ -2,7 +2,10 @@
 
 Historical citations below refer to files that have been removed:
 `etc/builtin-macros.xlisp`, `lib/varops.xlisp`, `lib/system-macros.xlisp`,
-`src/comptime.x`, and `etc/comptime.xlisp`. They describe the earlier tree.
+`src/comptime.x`, and `etc/comptime.xlisp`. They describe the earlier tree,
+as do most `x2c.*` and `_x2c.*` operations the plan names: those were
+deleted or became `Code` and `Type` methods, and `lib/meta.x` declares the
+current set.
 
 
 > Status: reference - diagnostic-location and enum-consumer follow-ups remain

@@ -1,15 +1,15 @@
-/*  protocol.x -- protocols from declaration to generated adapters
+/*  protocol.x -- protocols from declaration to conform forms
 
     Copyright (c) 2025 Gary William Flake.
 
     This module owns the protocol feature: it parses protocol and adoption
     declarations, keeps their rows in per-unit registries, resolves each
     adoption into a conformance, answers member and operator lookups, and
-    generates the adapters a conformance needs. Registries are rebuilt per
-    translation unit; a static row is visible only when its canonical source
-    path is the current unit. The unit that declares an external adoption
-    resolves it and records the conformance in its interface, and a unit
-    that includes that interface reuses the recorded conformance.
+    presents each conformance as native aliases or a `conform` form, from which
+    `src/component-protocols.x` writes the adapters. Registries are rebuilt per
+    translation unit; a static row is visible only in the unit of its canonical
+    source path. The unit that declares an external adoption resolves it and
+    records the conformance in its interface, which an including unit reuses.
 */
 #pragma once
 #include "compiler.x"
@@ -2461,13 +2461,13 @@ static List DiscardCall.emit(DiscardCall &d) {
    signatures are published first, so the unit's own calls bind before the
    adapters exist. */
 
-/** Generates adapters and descriptor registration for resolved conformances.
-    Native aliases are inserted at the participant's inferred public or
-    private boundary. Each other conformance whose forward converter the
-    unit defines is presented to the rule on the `conform` head, whose
-    code joins the unit's pending support. The external conformances the
-    unit declares are first recorded in its interface. Returns `ast` with
-    native insertions applied.
+/** Inserts native aliases and presents other resolved conformances as
+    `conform` forms. A native alias is inserted at the participant's inferred
+    public or private boundary. Each other conformance whose forward converter
+    the unit defines goes to the rule on the `conform` head, which
+    `src/component-protocols.x` registers to write its adapters into the unit's
+    pending support. The external conformances the unit declares are first
+    recorded in its interface. Returns `ast` with native insertions applied.
 */
 List Compiler.generate_protocol_adapters(Compiler c, List ast) {
   c._record_conformances();

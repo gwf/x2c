@@ -29,9 +29,8 @@ because their interfaces expose different actions. `tools/repo-metrics.py`
 measures repository and agent-facing text size. Record a relevant baseline.
 
 When Gary's reported incidents are relevant, `tools/agent-failure.py list`
-and `plans/agent-failures.md` locate captured evidence. Read that evidence;
-index rows and counters alone do not establish what happened. Preserve raw
-history outside the repository.
+locates captured evidence. Read that evidence; index rows and counters alone
+do not establish what happened. Preserve raw history outside the repository.
 
 ## Change the existing guidance or tool
 

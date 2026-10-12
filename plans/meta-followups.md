@@ -2,7 +2,8 @@
 
 Historical citations below refer to files that have been removed:
 `etc/builtin-macros.xlisp`, `lib/varops.xlisp`, `lib/system-macros.xlisp`,
-`src/comptime.x`, and `etc/comptime.xlisp`. They describe the earlier tree.
+`src/comptime.x`, `etc/comptime.xlisp`, and `etc/runtime-objects.sh`. The
+`--system-headers` option is removed too. They describe the earlier tree.
 
 
 > Status: reference with selected follow-ups. A and C shipped, B was

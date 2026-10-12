@@ -28,10 +28,15 @@ it, as the kernel does. That compiler runs its linked copies of the
 component's translators even after the source changes. It also skips a
 prelude rule whose translator it does not link, so the form keeps its own
 lowering. No translation builds a meta helper for a shipped component.
-Therefore an edited component takes effect in the compiler built from it:
-`make build` succeeds without a bootstrap change, and stage 0 runs the edit.
-`make bootstrap-refresh && make build-safe`, run twice, then converges as
-for any compiler change.
+Therefore an edited component takes effect only in a compiler built from
+it. A plain `make build` after the edit leaves a degraded stage 0 until
+`make bootstrap-refresh`: its embedded prelude records are stale, the empty
+unit costs about 9.2 G instructions, and about twelve dump fixtures differ.
+A plain `make build` after `make bootstrap-refresh`, or a timestamp change
+that leaves the component equal to the bootstrap's, degrades stage 0 the
+same way until `make build-safe`. Run
+`make bootstrap-refresh && make build-safe`, twice, to converge as for any
+compiler change.
 
 ## Runtime representations
 

@@ -194,15 +194,20 @@ other executable file-scope forms connected to their unit. It is
 an ordinary graph node. Calls that do not resolve are retained only in the
 two count columns on their caller; the exporter never invents a destination.
 
-The optional Make target exports all hand-authored compiler and runtime units
-and excludes generated `lib/x2c.x`:
+To export the compiler and runtime units, this shell example names the
+`src` files before `--` and the `lib` files after it, excluding the
+generated `lib/x2c.x` prelude:
 
 ```sh
-make datasets
-make datasets DATASET_DIR=/tmp/x2c-datasets
+set -- src/*.x --
+for unit in lib/*.x; do
+  [ "$unit" = lib/x2c.x ] || set -- "$@" "$unit"
+done
+builds/0/libexec/x2c-graph datasets /tmp/x2c-datasets "$@"
 ```
 
-The output directory is supplied explicitly to `datasets`.
+The compiler driver runs the same command as
+`x2c graph datasets OUTPUT [-I DIR] SRC_FILE... -- LIB_FILE...`.
 
 ### Reading and analyzing the datasets
 

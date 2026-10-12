@@ -13,6 +13,8 @@
 > the Python analyzers and that the class ceiling gets a diagnostic rather
 > than a runtime change. Its third decision, lint as an `x2c lint`
 > subcommand, is reopened by decision 1 below.
+> The `tools/x2c-lint` and `tools/x2c-graph` paths below are historical;
+> those tools are now `commands/lint` and `commands/graph`.
 
 ## Current remaining work, 2026-10-12
 

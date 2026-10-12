@@ -5,6 +5,9 @@
 > under `~/.codex/x2c-overengineering/`. The live table contains only internal
 > abstractions whose removal is expected to preserve intended behavior. A row
 > is not authorization to remove code.
+>
+> Paths and lines in the retired and calibration tables are historical:
+> `src/comptime.x` and the cited `lib/match.x` memo lines no longer exist.
 
 # Overengineering candidates
 

@@ -80,17 +80,20 @@ meta Code try_lowering(Code node) {
 
 ## The lowering
 
-The body and each arm lower inside regions that only the cleanup walk can
-open, so the translator answers a landing form, `(landing CODE ROWS)`,
-instead of finished code. Each row names a token that the walk replaces in
-CODE and in later rows with what the row lowered: a fresh binding, the
-finalizer lowered outside the regions, the bound exits, and each region.
-The walk applies the rows in order and then binds CODE. `catch_handle`
-reads the handler the parser introduced, which no source form writes.
+The finalizer, the body, and each arm lower inside regions that only the
+cleanup walk can open, so the translator answers a landing form,
+`(landing CODE ROWS)`, instead of finished code. Each row names a token
+that the walk replaces in CODE and in later rows with what the row lowered:
+a fresh binding, bound exits, or a region that runs the exits bound before
+it on every transfer out of it. The finalizer's region leaves the frame,
+and the body and each arm run the try's exits. The walk applies the rows in
+order and then binds CODE. `catch_handle` reads the handler the parser
+introduced, which no source form writes.
 
 ```x2c
-/* The landing form of the try `node`: its frame, its finalizer outside
-   its regions, its exits, then its body and each arm inside them. */
+/* The landing form of the try `node`: its frame, its finalizer in a
+   region that leaves the frame, its exits, then its body and each arm
+   inside them. */
 meta static Code _try_landing(
   Code node, List body, List arms, List finalizer) {
   _try_check_label(finalizer);
@@ -101,15 +104,17 @@ meta static Code _try_landing(
   List handle = arms ? catch_handle(node) : NULL;
   Array rows = [%(new-name $frame "exception_frame")];
   if (finalizer) {
+    Atom departure = Atom.intern("?__try_departure");
     finished = Atom.intern("?__try_finalizer");
-    rows.push(%(outer $finished $finalizer));
+    rows.push(%(exits $departure ${_try_departure(frame)}));
+    rows.push(%(region $finished $finalizer));
   }
   rows.push(%(exits $exits ${_try_exits(frame, handle, finished)}));
   rows.push(%(region $lowered $body));
   List clause = _try_catch_clause(handle, arms, rows);
   Macro shape = $try_frame;
   List code = shape(frame, clause, lowered, exits);
-  return %(code-value "lowered" (landing $code ${rows.list_free()}) ());
+  return Code.lowered(%(landing $code ${rows.list_free()}));
 }
 ```
 
@@ -370,7 +375,7 @@ examples are excerpts from current source.
 A hand-built `%(...)` List is still right in these cases:
 
 - **Patterns and data.** `case` patterns are not code. Neither are fact
-  rows, such as the one `Walk._catch_clause` returns above.
+  rows, such as the one `_try_catch_clause` returns above.
 - **Parser productions.** The parser assembles nodes from children it has
   already parsed and bound, as in `%(while $cond $body)` in
   `src/statements.x`. A quotation would bind them again.
@@ -387,8 +392,8 @@ A hand-built `%(...)` List is still right in these cases:
 - **Code queued with `Compiler.add_init`.** Generation splices it after the
   transform, so it must already be lowered. Bind a quotation for it only
   when nothing in it still needs lowering; a `String` literal still does.
-  Otherwise build it from lowered pieces, as `_builtin_registration` in
-  `src/protocol.x` does.
+  Otherwise build it from lowered pieces, as `Compiler._cache_value` in
+  `src/cache.x` does.
 - **Measured hot paths.** Keep the List where a converged A/B shows that
   the quotation costs more. As a quotation, `_assignment` cost 2.1% more
   (PR #142). Measure before converting a producer that runs for every

@@ -280,7 +280,8 @@ manifest, including the deterministic Lisp showcase.
 
 ## Implementation landmarks
 
-- Percent literals and lambdas: `src/literals.x`.
+- Percent literals: `src/literals.x`; lambdas: `src/lambdas.x` parses them
+  and resolves captures, and `src/component-lambdas.x` lowers them.
 - Statements: `src/statements.x`; the built-in `foreach(item, collection)`
   source macro: `etc/builtin-macros.x` and `src/builtins.x`, loaded by
   `src/macros.x`.

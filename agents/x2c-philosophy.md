@@ -103,7 +103,7 @@ captures a value; by itself it does not establish that value's type.
 | Type-owned shutdown | verified | parser/generator and `Scope.shutdown_hook` | lifecycle fixtures and Scope probes |
 | Typedef method and converter inheritance | verified | postfix parser and conversion lowering | fixtures/example |
 | Numeric/`Var` String interpolation | verified | interpolation converter | interpolation suite/example |
-| Static printf-family `Var` conversion | verified | printf transform | compiler fixtures |
+| Static printf-family `Var` conversion | verified | `src/component-printf.x` | compiler fixtures |
 | Structural `Var` decoding | verified | `lib/var.x` | VarOps suite |
 | Cross-tag numeric conversion | verified | `Var.convert` | VarOps |
 | Dynamic numeric operations | verified | `Var.binary` | VarOps/fixture |
@@ -625,7 +625,7 @@ failure, out-of-home includes, and batch-vs-solo output parity;
 
 Generated `try` uses POSIX `sigsetjmp(env, 0)`/`siglongjmp`, so Error
 transfer preserves registers and stack state without restoring a signal mask.
-`src/transform.x` owns the C rule that automatic state changed across that
+`src/cleanup.x` owns the C rule that automatic state changed across that
 boundary must be volatile. It qualifies directly modified named locals and
 parameters in the definition, and locals the body writes through a pointer it
 holds, along with that pointer's pointee type; a prototype drops the parameter
@@ -774,10 +774,11 @@ also renders through `Var.str` for every runtime tag.
 The interpolation suite provides executable evidence.
 
 Static printf-family formats provide a separate presentation crossing for
-`Var`. The transform recognizes `printf`, `fprintf`, `sprintf`, `snprintf`,
-and the `printf` methods on String, File, and Buffer. Numeric conversions use
-checked `Var.convert`, while `%s` uses `Var.str`; the compiler fixtures own
-the exact supported format grammar and its diagnostics.
+`Var`. `src/component-printf.x` recognizes `printf`, `fprintf`, `sprintf`,
+`snprintf`, and the `printf` methods on String, File, and Buffer. Numeric
+conversions use checked `Var.convert`, while `%s` uses `Var.str`; the
+compiler fixtures own the exact supported format grammar and its
+diagnostics.
 
 Neither crossing establishes a universal nonnumeric conversion policy. The
 separately classified `examples/love/values.x` showcase includes

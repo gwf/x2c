@@ -133,12 +133,12 @@ campaign.
 Current proven shapes include:
 
 - Uniform method or function families in `lib/logger.x:739-744` and `755-760`
-  and in `lib/common.x:590-599`. Names and types vary; behavior does not.
+  and in `lib/common.x:589-598`. Names and types vary; behavior does not.
 - Private pointer conversion pairs in `lib/iter.x`. The tagged
   form preserves `Var.new` and `Var.pointer`; the raw form preserves the
   direct `p64` store and load used by iterator callbacks.
-- The native adapter family in `lib/varops.x:55-68`. Each invocation supplies
-  the facts that differ.
+- The native update family, `$native.update` at `lib/varops.x:94` and its
+  invocations after it. Each invocation supplies the facts that differ.
 - Local resource setup in `$match.machine` in `lib/match.x` and
   `$match.plan` in `lib/match-cache.x`. The macro hides stack-storage
   mechanics while release and fallback policy stay visible.
@@ -205,8 +205,8 @@ clearest possible ledger: the enum itself.
 ### Keep important names explicit
 
 Do not make a reader reverse-engineer public function names, C types, or
-failure modes from clever Lisp. The native update macro in
-`lib/varops.x:25` explicitly receives both the native type and public
+failure modes from clever Lisp. The native update macro at
+`lib/varops.x:94` explicitly receives both the native type and public
 function name at each invocation. That repetition is useful documentation at
 the call site.
 
@@ -564,9 +564,9 @@ inside an expansion.
 Proof: generated `.h` and `.c` byte-identical for `lib/var.x` and
 `lib/varops.x` before and after adoption; `make precommit` and `make check`.
 
-Limits or counterexample: the shapes without a constructor, such as `switch`
-and `case`, are still hand-written quasiquotes. Add constructors for those
-when a second generator needs the same one, not before.
+Limits or counterexample: the SDK declares no other constructors. A
+`switch`, a `case`, and every other shape are quotations in `meta` code or
+quasiquoted Lists.
 
 Language gap, if any: none; this is an SDK addition, not a compiler change.
 

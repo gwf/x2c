@@ -93,10 +93,12 @@ The optional Lisp equivalent is `$(poly 7)`. It calls the same implementation;
 use it when working with Lisp code already in the compiler session.
 
 These are the two forms of a `meta` function: one runs in your program,
-and one runs in the compiler. Both come from the same body. Functions that
-need compiler queries, explicit compile-time calls or source-template
-construction are exceptions: they only run during translation. We will
-reach those after ordinary calculations.
+and one runs in the compiler. Both come from the same body. A
+[rewrite rule](#what-the-compiler-answers) in your program changes only the
+program's copy; the copy the compiler runs is compiled as written.
+Functions that need compiler queries, explicit compile-time calls or
+source-template construction are exceptions: they only run during
+translation. We will reach those after ordinary calculations.
 
 ## Compute the arguments too
 
@@ -1544,8 +1546,11 @@ file-scope declarations once for each key, and `%(unit-init)` in the
 unit's initialization. Code placed at function entry follows the parameters
 and keeps the order of its placements. A macro in a lambda body places it in
 the function that holds the lambda; a `$rewrite` rule, which runs while the
-body lowers, places it in the lambda's own function. A failed expansion
-leaves none of it behind.
+body lowers, places it in the lambda's own function. A macro in a `defer`
+finalizer places it in the function that holds the `defer`; a `$rewrite`
+rule that places it while the finalizer lowers is rejected, because the
+finalizer runs as its own callback. A failed expansion leaves none of it
+behind.
 Here the counter runs after each statement that traces a value:
 
 ```x2c
@@ -1635,6 +1640,12 @@ name from it: a method keeps its spelling, so `Code.binding_spelling` is
 quotation, so the Lisp library also defines `x2c.literal.string`,
 `x2c.literal.int` and `x2c.literal.symbol`, which build the literal a
 `$(...)` form returns for a value.
+
+The compiler's shipped components lower language features with the same
+`$rewrite` decorator. A program definition spelled like a shipped
+component's `meta` function or helper is a separate definition: shipped
+rules and templates resolve their own names to the copies the compiler
+links.
 
 ## Functions that need the compiler
 
