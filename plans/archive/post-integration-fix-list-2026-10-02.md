@@ -1,12 +1,8 @@
-> Status: active
-> Integrated backlog, reconciled 2026-10-02 against dev `2c8ddfb3`, with
-> the named-macro catalogue spike reviewed against its `1b71a410` base.
-> Implementation authorized 2026-10-02 through orchestrate-x2c-work.
-> Sol 6.1 workers provide private handoffs; this session integrates and delivers
-> coherent PR batches to dev through the shared integrator, as selected by
-> Gary on 2026-10-02. The integrator owns combined validation and publication.
-> Three prior repairs are already delivered.
-> Open items retain their evidence limits and unresolved compatibility choices.
+> Status: done
+> Archived 2026-10-12. Delivered on dev through `a6d155dc0`, `6ab6c1a6f`,
+> `6e1dd3e9`, `715267d97`, and `63d90c26`.
+> The integrated fix-list campaign is delivered.
+> The remaining body preserves historical decisions, restrictions, and evidence.
 
 # Integrated post-integration fix list
 

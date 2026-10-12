@@ -1,18 +1,13 @@
 # x2c code standard: authority, enforcement, and improvement
 
-> Status: active. Stages 1 and 3 are complete. D2, D3, and D5 are
-> implemented. The initial violation cycle now reports zero violations
-> across 108 hand-authored src/lib files; all five held decisions are
-> approved and implemented. Original long-function candidates have
-> repaired lengths or reviewed dispatcher exceptions. Broader candidate
-> cycles remain; this is not whole-file or whole-campaign certification.
-> Source `f4b65aea` is ready for shared-integrator submission.
-> See [Progress](#progress). The single standard is
-> [agents/x2c-code-standard.md](../agents/x2c-code-standard.md).
+> Status: done
+> Archived 2026-10-12. Delivered on dev through `2a508c233`.
+> The approved standard decisions and selected cleanup are delivered. Future candidate cycles are separate work.
+> The remaining body preserves historical decisions, restrictions, and evidence.
 
 ## The result
 
-[agents/x2c-code-standard.md](../agents/x2c-code-standard.md) is the single
+[agents/x2c-code-standard.md](../../agents/x2c-code-standard.md) is the single
 definition of good x2c source. Every other guide, skill, and tool cites its
 rule IDs and holds no competing copy of a rule. `x2c lint` reports each
 finding under its rule ID, a ratchet keeps violation counts from rising, and
@@ -289,7 +284,7 @@ item is one delivery with `agent-pr-check`.
 1. **Rule IDs.** In `commands/lint/lint.x`, the `Rule.section` field names a
    style-guide section. Rename the field `rule` and set it to the
    standard's rule ID for every code, taken from the standard's
-   [signal catalog](../agents/x2c-code-standard.md#finding-bad-code). Print
+   [signal catalog](../../agents/x2c-code-standard.md#finding-bad-code). Print
    it in each finding and in `--rules`. Update the doc comment of `Rule`.
    Update `commands/lint/tests/expected.txt` and
    `tests/validation-macros.expected` for the new output, and review every

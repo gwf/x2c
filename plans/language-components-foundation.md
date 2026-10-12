@@ -464,11 +464,11 @@ assembly, and the rule driver, with every language feature a file under
 | string interpolation | literal `segments`; delivered in wave 2 | 200 | 730 |
 | truthiness, getindex, dynamic operators | unary, binary, access; delivered in wave 1 | 410 | 620 |
 | lambda lowering | lambda rules; unit-support and function-entry placements; delivered in wave 5 | 1,500 | 586 |
-| protocols: adapter synthesis only, per `plans/protocols-component.md` | `conform` node rule; unit-support and unit-init placements; delivered in wave 6 | 300 | 153 |
+| protocols: adapter synthesis only, per `plans/archive/protocols-component.md` | `conform` node rule; unit-support and unit-init placements; delivered in wave 6 | 300 | 153 |
 
 Runtime static locals and class defaults stay in the kernel; the log of
 2026-10-10 records why. `match` moves from the research list to the table
-once `plans/match-component.md` is accepted.
+once `plans/archive/match-component.md` is accepted.
 
 Kernel deletions no feature blocks: none remain; the `function-entry`
 placement now works at transform time for lambdas, and destructuring needed
@@ -479,7 +479,7 @@ replacement template and fill steps are the remaining driver cost.
 ### Open, needing research before a decision
 
 - `match`: delivered in wave 2 as `src/component-match.x` per
-  `plans/match-component.md`; verbatim C text in a lowered carrier is now a
+  `plans/archive/match-component.md`; verbatim C text in a lowered carrier is now a
   documented kernel service.
 - Kernel lowerings in the component form: the try and defer templates, the
   `Func` call construct-and-recognize pair, wrapper synthesis, and scope cells
@@ -492,7 +492,7 @@ replacement template and fill steps are the remaining driver cost.
   and thunk while try's exits are lexical. Whether `defer` should become a
   lexical client of the same form is unmeasured for generated C and runtime.
 - Conformance facts across interfaces: answered 2026-10-10 in
-  `plans/protocols-component.md`. Declarations and adoptions already cross
+  `plans/archive/protocols-component.md`. Declarations and adoptions already cross
   interfaces as source-node rows; no conformance row crosses units, each unit
   re-derives conformance (about 38 M per unit), and a generic component fact
   row would replace nothing. Resolution, owners, and the operator ledger stay
@@ -548,7 +548,7 @@ replacement template and fill steps are the remaining driver cost.
   a List or Var value reach the floor when the raise runs; the
   `raise-invalid-nested` fixture is gone, and a probe confirmed the floor
   message for its program.
-- 2026-10-10, match research (`plans/match-component.md`, branch
+- 2026-10-10, match research (`plans/archive/match-component.md`, branch
   `kernel/match-research`): a match component is feasible at 4.75 M per use
   against 4.62 M for the kernel arm on a three-arm workload, with runtime
   3.6-10x faster than the plan cache, deleting about 334 kernel lines. It
@@ -557,7 +557,7 @@ replacement template and fill steps are the remaining driver cost.
   skip the prepared walk.
 - 2026-10-10, wave 2 (held for review on `kernel/wave2-integration`): three
   workers from 9805f3c2, integrated as one batch.
-  - `match` is `src/component-match.x` per `plans/match-component.md`, in
+  - `match` is `src/component-match.x` per `plans/archive/match-component.md`, in
     two moves. Move 1 ports the emitter: kernel -340 (emit.x match section
     and templates, transform.x `_match_cases`/`_match_records`/`matchcases`,
     compiler.x flat-pattern helpers, cleanup.x `matchcases`), shared
@@ -696,7 +696,7 @@ replacement template and fill steps are the remaining driver cost.
   `watched_step` scans every source expression once per lowering step, so
   a large lambda body costs quadratically.
 - 2026-10-11, wave 6, protocol adapters (`kernel/protocols-component`,
-  move 1 of `plans/protocols-component.md`): adapter synthesis is
+  move 1 of `plans/archive/protocols-component.md`): adapter synthesis is
   `src/component-protocols.x`, 199 lines, a rule on the `conform` form
   `(conform BASE PARTICIPANT FORWARD REVERSE BINDER DESCRIPTOR (ROW...))`
   that the kernel presents for each resolved conformance whose forward

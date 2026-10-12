@@ -1,17 +1,9 @@
 # Macro sequence splicing with @
 
-> Status: active
-> Implemented locally; publication held. Gary authorized the complete
-> implementation on 2026-10-07, including `@{expression}` and operator removal.
-> Final validation and review evidence: `.context/macro-at-review.md` (local report).
-> Implementation branch: `codex/macro-at-implementation`.
-> Historical plan branch: `codex/macro-at-splicing`.
-> Baseline: `origin/dev` at `ae34288c8a4de03168e4055d885b796cbc35da27`.
-> The branch fast-forwarded to this snapshot. The October 4 plan was
-> recovered from local snapshot `332d0bc3` and revised against current code.
-> Gary authorized publishing the plan to dev on 2026-10-07. The implementation
-> now uses isolated worker/private delivery to its local orchestrator.
-> The implementation review hold remains: no PR, push, merge, or publication.
+> Status: done
+> Archived 2026-10-12. Delivered on dev through `f5d544eca`, `0895fe073`, and `9fd19789d`.
+> Sequence splices and operator removal are delivered.
+> The remaining body preserves historical decisions, restrictions, and evidence.
 
 ## Result
 

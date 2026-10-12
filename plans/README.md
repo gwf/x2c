@@ -37,87 +37,110 @@ as `do not reopen` or `no other candidate` as historical unless current
 
 ## Current work and backlog
 
-Reviewed against dev 2685655f on 2026-09-30. A historical
-plan's original branch, baseline and authorization notes are evidence for
-that work; its opening status and this index distinguish them from current
-execution.
+Reviewed against `origin/dev` at `cff952cb` on 2026-10-12 by inspecting
+changes, source, and delivery history. No build was rerun. Historical branch
+and authorization notes describe their original work, not current delivery.
+The decisions below preserve unfinished work without authorizing implementation
+or adding a gate.
 
-### Current work
+### Partially complete plans: next decisions
 
-- [Repository review remediation, October 11](review-remediation-2026-10-11.md):
-  critical assessment from dev `6529e868`, with final delta
-  checked at `9004c40b`. Finding evidence and a
-  181-row language ledger separate demonstrated repairs, documentation changes,
-  and unresolved semantic choices. Confirmed repairs are authorized; broader
-  semantics and expanded gates remain excluded.
-- [How small the compiler kernel can get](compiler-kernel-minimal.md):
-  2026-10-09 analysis against the foundation branch. Two primitives,
-  recognition through rewrite families and contribution through placement
-  and ancestry, the measured driver costs, and a migration catalog.
-  Reference input to the foundation plan; Gary selects what to execute.
-- [Language component foundation](language-components-foundation.md): local
-  recovery on `codex/language-components-foundation`; collection mutation
-  component and ordinary authoring proofs, with dev semantic owners retained.
-
-- [Ordinary switch over String](string-switch.md): planned against dev
-  0916ff92. String and String-alias selectors with string-literal labels,
-  dispatched through one memoized helper in unit support; awaiting
-  execution.
-- [Harness simplification and messaging](harness-simplification-and-messaging.md):
-  authorized corrections to existing tools and guidance, a small
-  cross-platform integrator messaging pilot, and separate external runtime
-  repairs. Tool repairs and native messaging are implemented; external
-  runtime repairs remain open. Its tracked
-  [evidence and reproduction reports](harness-evidence-2026-10-05.md) support
-  continuation from another checkout.
-- [x2c code standard](x2c-code-standard.md): stages 1 and 3 are complete.
-  D3 and D5 are delivered; D2 retains four Array raises for a decision.
-  Stage 4 repaired 59 of 106 violations; 47 findings remain recorded.
-  Package Error packs and the first import-helper deletion are delivered.
-  Candidate cycles remain active; 12 length candidates and the broader
-  macro ownership review remain unfinished.
-- [x2c self-expression](x2c-self-expression.md): Phase 0, language work,
-  three waves, and the retained prototypes are on dev. The recorded
-  follow-ups and unresolved language questions remain active.
-- [Source consolidation research](source-consolidation-research.md): working
-  typed-family, lowering, runtime, transaction, and package prototypes, with
-  all original proposals tracked separately. Publication is implementation authorized.
-  The earlier [first-wave record](archive/evaluator-and-source-consolidation.md)
-  remains as corrected historical evidence.
-- [Public release workflow](public-release-workflow.md): staging is live at
-  `staging.x2c-lang.dev`, with successful candidate and staging runs. Only
-  production baseline recovery, candidate/version choice, and promotion to
-  `main` remain as release decisions.
-- [Meta follow-ups](meta-followups.md): the meta protocol and native extension
-  milestones were delivered through [meta sequencing](archive/meta-sequencing.md).
-  The remaining recorded limits are system-header/layout details and
-  `off_t`/`time_t` mapping; they do not block the delivered capabilities.
-
-[Module blocks](archive/module-blocks.md) are delivered; the archived record
-names their landing and subsequent discovery fixes.
-
-### Open backlog and scoped follow-ups
-
-| Record | What remains |
+| Plan | Delivered work and specific next decision |
 | --- | --- |
-| [Compiler ownership investigation](compiler-ownership-investigation.md) | Reference assessment of lifetimes, transactions, declaration transport, and dependencies at 548b381f. Full field inventory and bounded candidates; no compiler refactor approved or implemented. |
-| [Idiom synthesis, October 4](idiom-synthesis-2026-10-04.md) | Private implementation against origin/dev fd88fae4. Binder syntax clarified; three adjacent defects repaired. Fifteen issue families, four research records, selected rewrites, retained contracts, and bounded composition experiments. Delivery authorized only to codex/idiom-synthesis-refresh; PR and integration held. |
-| [Post-integration fix list, October 2](post-integration-fix-list-2026-10-02.md) | Active orchestrated campaign: 42 scopes, three prior delivered repairs, and every review finding accounted for. Sol workers implement private batches, including the named-macro catalogue replacement and its literal-lowering prerequisite. |
-| [Quotation adoption audit](quotation-adoption-audit-2026-10-03.md) | Param, Type, and Decl quotations; a structural rebuild for Unit, Field, and declarator syntax; and the retained autodiff review. Its other follow-ups landed through PRs #131, #142, and #143. |
-| [SDK and system macros](macro-sdk-and-system-macros.md) | Captured-code diagnostic locations and enum consumers; the removed varops Lisp file is no longer work. |
-| [Lint, format, and compiler-backed tools](x2c-lint-and-format.md) | Active; phases 0-7 delivered. The completed linter now runs as experimental `x2c lint`; later lint, format, and source-tool phases remain. |
-| [Tooling ports](x2c-scripting-ports.md) | Extensionless tool names, the llms.txt generator, the documentation sample checks and `tools/check-docs` are delivered; release and gate ports remain; the compiler-backed rewrite moved to the lint plan. |
-| [C on-ramp](x2c-c-on-ramp.md) | Landing-page adoption examples; the parser/corpus work already shipped. |
-| [Explicit meta campaign](archive/explicit-meta-and-lifetime-campaign.md#backlog) | Parked compound-selector owner, direct function-handle assignment in meta bodies, a REPL test for wide scalar globals, destructuring beside a cleanup, and three small heap limits. |
-| [Lifetime proof follow-up](lifetime-proof-followup.md) | Results from the shipped selected-root audit and an optional path to model indexed borrows, container values, native handles, and iterator callbacks. |
-| [Source organization follow-ups](archive/x2c-source-organization.md#outside-this-plan) | Defects and costs found during the campaign, all fixed: the lambda cell cost, file-init inlining, private-include header types, the region cast false positive, the `try return` warning, the unused open-template paths, nested macro expansion cost, struct-tag method lookup, flaky libuv watch tests, and nondeterministic certify paths. |
-| [Scoped memoization](archive/unit-initialization-and-assembly.md#scoped-memoization-deferred) | Start only after an inventory names a repeated substantial computation, its complete inputs, and the owner that bounds its lifetime. |
-| [Consolidation catalog C13](archive/consolidation-catalog-f28fc36.md#c13-larger-lifetime-sharing-locate-overlap-without-pretending-equivalence) | Shared lifetime summary and flow production; design and measurement before any rewrite. |
+| [Review remediation, October 11](review-remediation-2026-10-11.md) | Repair batches A-E, the batch F decisions, and cleanup are delivered. Finish the three writing items: canonical forms and legal positions; rewrite ordering, decline, and visibility; compile-time Lisp truthiness, binding, and host `set_global` limits. Decide batch G semantics separately, as listed below. |
+| [Language component foundation](language-components-foundation.md) | Selected components and authoring proofs are delivered. Resolve the self-meta function-rule visibility discrepancy before further extraction. Then select or park insertion-site free names/open templates, lexical defer, constructed `with`, and component interface/prelude packaging. Acquired-value cleanup is delivered, not an open decision. |
+| [Quotation adoption audit](quotation-adoption-audit-2026-10-03.md) | Type and Param adoption and helper cleanup are delivered. Review remaining structural rebuilds and the 17 autodiff operations individually. Adopt quotations only where they preserve binding and canonical Lists; require a concrete benefit before extending Decl results. |
+| [Source consolidation research](source-consolidation-research.md) | Selected prototypes and source changes are delivered. Close the historical campaign, or select one current hypothesis for investigation. Frame-chain sharing is uninvestigated; transaction proposals must be reassessed against the current undo log. Do not dispatch all original hypotheses as one implementation. |
+| [Self-expression](x2c-self-expression.md) | Phase 0, language work, and the selected waves are delivered. Select one bounded case: grammar constructors (L5), Lisp string-to-atom (L6), Lisp callables through Func (L7), named protocol methods (L8), pointer-handle Var converters (L11), callback ErrorSlot ownership (L12), generated TagId (L13), or Type-hole _Alignof (L14). Otherwise retire the umbrella as completed waves with reference follow-ups. Reproduce old defect claims on current source first. |
+| [Meta continuation](meta-continuation.md) | The operator ledger is delivered. Choose a concrete workload for static Match, prepared formats, scalar Lisp projections, grammar descriptors, Torch generated operations, or numeric policy; otherwise retain these as a reference roadmap. |
+| [Harness simplification and messaging](harness-simplification-and-messaging.md) | Repository repairs and the messaging pilot are delivered. Decide whether to pursue the three external runtime reports or retain documented limitations. Use a real PR for the messaging trial only when that work and its messages are authorized. |
+| [Public release workflow](public-release-workflow.md) | Candidate and staging work is recorded as delivered. Choose the production baseline and recovery procedure, then the candidate version and promotion destination. This audit does not verify current deployment state or authorize promotion to main. |
+| [C on-ramp](x2c-c-on-ramp.md) | Parser/corpus work is delivered. Implement the four worked adoption examples in section 4b2 above the fold, or retire that remaining website proposal. |
+| [Lint and format](x2c-lint-and-format.md) | Phases 0-7 and experimental lint are delivered. Choose whether to implement phase 8 List findings and compiler consumption during builds, or park it. Decide editor integration and distribution only if lint will ship. Any added recurring build cost needs Gary's approval. |
+| [Scripting ports](x2c-scripting-ports.md) | Extensionless tools and documentation checks are delivered. Select a bounded fixture, example, probe, benchmark, or graph port. Treat `release-candidate.py` as separate release-safety work; the old release workflow target needs reassessment. |
 
-An entry here preserves remaining work; it does not dispatch it or add a gate.
-Production promotion remains separately authorized under the release workflow.
+Recommended disposition: finish the three remediation writing items and resolve
+the foundation visibility contradiction first. Retire completed umbrella
+campaigns with their evidence; select new bounded work only where a current
+caller or workload establishes its value.
+
+### Unstarted delivery and semantic choices
+
+[Ordinary switch over String](string-switch.md) has a private implementation
+on `independent-case-design`, but no shipped feature on dev. Decide whether to
+review and resume that implementation against current quotation and `add_early`
+APIs, or defer the feature. Its next step is not a fresh implementation from
+an empty baseline.
+
+The remediation plan's batch G is a decision list, not eleven approved repairs:
+
+| Choice | Decision needed |
+| --- | --- |
+| Cross-tag Var equality and ordering | Define conversion and comparison rules together with hash, Map, and sorting consistency. |
+| Expression rewrite visibility | Resolve the foundation discrepancy through the existing visibility owner before adding state. |
+| General evaluation order | Inventory unresolved operations before promising one universal ordering rule. |
+| Wide indices | Choose one conversion boundary that prevents incorrect narrowing, and decide compatibility for oversized indices. |
+| Non-List Var match | Decide whether nil coercion or rejection is the public contract; align the guide and implementation. |
+| Class unboxing and scalar sibling typedefs | Decide the supported conversions before expanding the advertised surface. |
+| Module mode and conditional entry | Retain conservative behavior or commission full native entry semantics as a feature. |
+| Foreign-thread embedding | Define process initialization and thread initialization/teardown separately. |
+| Platform ABI and stability | Document current limits or commission new C11 AST ABI/platform support. |
+| Numeric shorthands | Decide what `u128`/`i128` mean where they currently map to 64-bit types. |
+| Expanded recurring validation | Retain existing gates unless a cost-neutral replacement is approved. |
+
+[Module blocks](archive/module-blocks.md) are delivered and already archived.
+Two follow-ups need a separate decision: repair included-module diagnostic
+location replay through the existing mapping owner, or document the limitation;
+and retain the companion-path spelling restriction, or normalize paths before
+checking containment. The diagnostic location defect was reproduced before
+this source-only refresh; the refresh did not rerun its executable probe.
+
+### Reference inputs and dormant proposals
+
+These records do not describe approved, unstarted implementation campaigns.
+
+| Record | Disposition or decision |
+| --- | --- |
+| [Compiler kernel analysis](compiler-kernel-minimal.md) | Reference for component extraction. Select a remaining migration only after foundation semantics are settled. |
+| [Compiler ownership investigation](compiler-ownership-investigation.md) | Seven bounded candidates and a field inventory; no compiler refactor approved. Select one current ownership question or retain the assessment. |
+| [Lifetime proof follow-up](lifetime-proof-followup.md) | Selected-root audit is delivered. Indexed borrows, container values, native handles, and iterator callbacks remain optional extensions without a commissioned workload. |
+| [SDK and system macros](macro-sdk-and-system-macros.md) | Located errors are delivered. Choose whether node-located warnings or enum consumers justify another bounded change. |
+| [Meta follow-ups](meta-followups.md) | Recorded `off_t`/`time_t` and atomic aggregate limits remain reference constraints. The packing proposal was withdrawn. |
+| [Prepared formats](prepared-format.md) | Feasibility research is complete. Defer a FormatPlan API until a real repeated-format workload justifies it. |
+| [Overengineering candidates](overengineering-candidates.md) | Reference ledger used by forensic skills. Its remaining `comptime.x` lowering candidate is obsolete because that source was removed; do not dispatch the old row. |
+| [Harness evidence](harness-evidence-2026-10-05.md) | Supporting reproductions for the external runtime decisions above. |
+| [Remediation evidence](review-remediation-evidence-2026-10-11.md) | Dated repair and analysis evidence, not a second task queue. |
+| [Remediation language ledger](review-remediation-language-ledger-2026-10-11.md) | The 181 rows are a coverage ledger, not 181 unstarted tasks. Use the main plan's remaining writing and semantic choices. |
+| [Explicit meta backlog](archive/explicit-meta-and-lifetime-campaign.md#backlog) | Parked compound selectors, meta function-handle assignment, wide-scalar REPL coverage, destructuring beside cleanup, and heap limits. Recheck current behavior before selecting one. |
+| [Scoped memoization](archive/unit-initialization-and-assembly.md#scoped-memoization-deferred) | Require a repeated substantial computation, its complete inputs, and a lifetime owner before starting. |
+| [Consolidation C13](archive/consolidation-catalog-f28fc36.md#c13-larger-lifetime-sharing-locate-overlap-without-pretending-equivalence) | Investigate actual overlap between lifetime summary and flow production before proposing shared machinery. |
 
 ### Decisions and completed records
+
+Archived 2026-10-12 after checking delivery on dev:
+
+- [Macro sequence splicing](archive/macro-at-splicing.md): delivered through
+  `f5d544eca`, `0895fe073`, and `9fd19789d`.
+- [Match component](archive/match-component.md): delivered through
+  `7febe4376` and `abcb8a87a`.
+- [Protocols component](archive/protocols-component.md): delivered through
+  `13e0b5719`, with subsequent conformance and discovery fixes.
+- [Idiom synthesis](archive/idiom-synthesis-2026-10-04.md): delivered through
+  `59654330a` and `27cc9a782`, with its four completed research records:
+  [AST](archive/idiom-synthesis-ast-2026-10-04.md),
+  [boundaries](archive/idiom-synthesis-boundaries-2026-10-04.md),
+  [generators](archive/idiom-synthesis-generators-2026-10-04.md), and
+  [ledgers](archive/idiom-synthesis-ledgers-2026-10-04.md).
+- [October 2 fix list](archive/post-integration-fix-list-2026-10-02.md):
+  delivered through `a6d155dc0`, `6ab6c1a6f`, `6e1dd3e9`,
+  `715267d97`, and `63d90c26`.
+- [Code standard campaign](archive/x2c-code-standard.md): approved decisions
+  and selected cleanup delivered through `2a508c233`.
+- [Metalanguage campaign](archive/x2c-metalanguage.md): delivery recorded at
+  `df41119d`, with subsequent ordinary-source adoption at `a5cd78da`.
+- [Protocol-call catalog](archive/var-protocol-call-catalog.md) and its
+  [CSV](archive/var-protocol-call-catalog.csv): delivered through `649371ab3`
+  and `2b1e52516`.
 
 - [Unit initialization, entry setup, and assembly](archive/unit-initialization-and-assembly.md):
   done 2026-10-07 at `0916ff92`. One pending owner with named destinations,
@@ -134,7 +157,7 @@ Production promotion remains separately authorized under the release workflow.
 - [Compiler error catalogue](archive/compiler-error-catalogue.md): done;
   catalogue and callers landed through `c08f1d84` and `bef9923d`, with
   once-only table initialization through `fcfaff40` and `2c8ddfb3`.
-  The active post-integration campaign owns its named-macro replacement.
+  The archived October 2 fix list records its delivered named-macro replacement.
 - [Value declarations and reference style](archive/value-reference-style.md):
   done; private contexts landed in PR #76, and public contexts through
   `cbecd92e` and `a373970c`. F14 and F29 track the runtime follow-ups.

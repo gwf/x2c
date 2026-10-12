@@ -1,8 +1,7 @@
-> Status: reference
-> Reviewed 2026-10-06 at dev cb67de5ec658af4f9108433f24f062543c6087d4.
-> Follow-ups completed: collection alias reads and linked-meta rebuilding.
-> The CSV records 175 changed calls, five regenerated copies, and retained cases.
-> The shared integration agent owns final validation and dev publication.
+> Status: done
+> Archived 2026-10-12. Delivered on dev through `649371ab3` and `2b1e52516`.
+> The selected protocol-call simplifications and follow-ups are delivered.
+> The remaining body preserves historical decisions, restrictions, and evidence.
 
 # Explicit protocol-call catalog
 

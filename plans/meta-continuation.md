@@ -74,7 +74,7 @@ Relevant evidence at the baseline:
 | Existing meta ledger projections | `lib/var-tags.x` |
 | Literal computation with runtime fallback | `lib/system-macros.x`, `$dedent` |
 
-The dev records `plans/x2c-metalanguage.md`,
+The dev records `plans/archive/x2c-metalanguage.md`,
 `plans/quotation-adoption-audit-2026-10-03.md`, and
 `plans/meta-followups.md` retain previous decisions and results. This plan
 continues that work. It does not reopen completed migrations by treating

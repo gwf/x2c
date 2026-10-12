@@ -1,12 +1,9 @@
 # x2c as its own metalanguage
 
-> Status: active, 2026-10-02. Gary approved the plan and its
-> recommendations as one campaign on branch `gwf/macro-metalanguage`,
-> started from dev d84f3c26. The branch is pushed freely; the finished
-> campaign was submitted as PR #108; the integrator stopped on review
-> findings, and Gary handed the integration to the author on 2026-10-02.
-> The author merged dev 21b1c3d4, fixed the findings (Integration below),
-> and publishes directly after the publication gate.
+> Status: done
+> Archived 2026-10-12. Delivered on dev through `df41119d` and `a5cd78da`.
+> The campaign and subsequent ordinary-source adoption are delivered.
+> The remaining body preserves historical decisions, restrictions, and evidence.
 
 ## Question
 

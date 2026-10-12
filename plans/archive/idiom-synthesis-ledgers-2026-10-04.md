@@ -1,10 +1,7 @@
-> Status: reference
-> Research snapshot, 2026-10-04, against origin/dev
-> 4107b60af83a67abb4ceb058d4d327ce13e36ce7; original baseline 272ba77c.
-> Gary subsequently authorized private implementation. The main synthesis
-> owns the current dev refresh, binder decision, changes, and verification.
-> Historical statements below describe the investigation before implementation.
-> Publication and a PR remain held for Gary.
+> Status: done
+> Archived 2026-10-12. Delivered on dev through `59654330a` and `27cc9a782`.
+> Research supporting the delivered idiom campaign is complete; retained and declined cases remain evidence.
+> The remaining body preserves historical decisions, restrictions, and evidence.
 
 # Synthesize ledger, callback, and literal-reader idioms
 

@@ -1,10 +1,9 @@
 # Protocols as a component
 
-> Status: reference
-> Research on `kernel/protocols-research` from dev `358a27c1`, 2026-10-10.
-> The prototype commits on that branch are evidence, not for integration.
-> The recommendation awaits Gary's choice; nothing here authorizes
-> delivery.
+> Status: done
+> Archived 2026-10-12. Delivered on dev through `13e0b5719`, `06481f630`, `7a7c6c00a`, and `8d3adaee8`.
+> The shipped protocols component supersedes the research prototype.
+> The remaining body preserves historical decisions, restrictions, and evidence.
 
 Question: which parts of protocols (declarations, conformance, owners,
 adapters; the migration table's 1,850 kernel lines) can leave the kernel as

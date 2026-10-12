@@ -1,9 +1,9 @@
 # Match as a component
 
-> Status: reference
-> Research on `kernel/match-research` from dev `1829e259`, 2026-10-10. The
-> prototype commits are throwaway evidence, not for integration. The
-> recommendation awaits Gary's choice; nothing here authorizes delivery.
+> Status: done
+> Archived 2026-10-12. Delivered on dev through `7febe4376` and `abcb8a87a`.
+> The shipped match component supersedes the research prototype.
+> The remaining body preserves historical decisions, restrictions, and evidence.
 
 Question: can `match` become `src/component-match.x`, returning lowered
 code, at or under 12.4 M instructions per use and with generated programs

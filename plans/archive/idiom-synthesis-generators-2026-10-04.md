@@ -1,10 +1,7 @@
-> Status: reference
-> Research snapshot, 2026-10-04, against origin/dev
-> 4107b60af83a67abb4ceb058d4d327ce13e36ce7; original baseline 272ba77c.
-> Gary subsequently authorized private implementation. The main synthesis
-> owns the current dev refresh, binder decision, changes, and verification.
-> Historical statements below describe the investigation before implementation.
-> Publication and a PR remain held for Gary.
+> Status: done
+> Archived 2026-10-12. Delivered on dev through `59654330a` and `27cc9a782`.
+> Research supporting the delivered idiom campaign is complete; retained and declined cases remain evidence.
+> The remaining body preserves historical decisions, restrictions, and evidence.
 
 # Compose container families without hiding their policies
 
@@ -57,18 +54,18 @@ deletions.
 
 | File | Total lines | Relevant range | Range lines | Finding |
 | --- | ---: | --- | ---: | --- |
-| [map-generics.x](../lib/map-generics.x) | 961 | 354-618 | 265 | One operations generator mixes native and boxed policies through constant holes. Its `unbox` slot is never read. |
-| [map-generics.x](../lib/map-generics.x) | 961 | 691-736 | 46 | The observation generator accepts five arguments but uses only `map`. |
-| [map-generics.x](../lib/map-generics.x) | 961 | 503-556 | 54 | Update and postfix functions carry boxed/native admission, missing-key, numeric, and postfix policy branches. |
-| [map-generics.x](../lib/map-generics.x) | 961 | 69-352 | 284 | Fourteen slots supply actual storage layout, callbacks, and error owners. These are not all incidental parameters. |
-| [array-generics.x](../lib/array-generics.x) | 911 | 27-152 | 126 | Integer, floating, and String update generators state different native arithmetic policies separately. |
-| [array-generics.x](../lib/array-generics.x) | 911 | 345-628 | 284 | Array also uses a boxed flag in common operations. It is not uniformly a policy-free counterpart to Map. |
-| [array-generics.x](../lib/array-generics.x) | 911 | 668-708 | 41 | The observer already takes only the three facts it uses and calls ordinary Buffer owners. |
-| [typed-map.x](../lib/typed-map.x) | 356 | 225-338 | 114 | Four built-in families repeat mechanical wiring, but String export bodies interrupt that family wiring for a real ownership reason. |
-| [typed-array.x](../lib/typed-array.x) | 189 | 103-165 | 63 | Seven typed families compose storage, public operations, observation, update, publication, and iteration. |
-| [typed-list.x](../lib/typed-list.x) | 102 | 23-102 | 80 | A typed List retains canonical List representation and inherits operations instead of generating storage algorithms. |
-| [typed-list.x](../lib/typed-list.x) | 123 | 97-123 | 27 | Seven typed-list invocations state codecs and element tags explicitly. |
-| [regions.x](../src/regions.x) | 1,455 | 165-180 | 16 | Four ordinary wrappers and eleven typed-container conversion pairs are explicit effects keyed by emitted C name. |
+| [map-generics.x](../../lib/map-generics.x) | 961 | 354-618 | 265 | One operations generator mixes native and boxed policies through constant holes. Its `unbox` slot is never read. |
+| [map-generics.x](../../lib/map-generics.x) | 961 | 691-736 | 46 | The observation generator accepts five arguments but uses only `map`. |
+| [map-generics.x](../../lib/map-generics.x) | 961 | 503-556 | 54 | Update and postfix functions carry boxed/native admission, missing-key, numeric, and postfix policy branches. |
+| [map-generics.x](../../lib/map-generics.x) | 961 | 69-352 | 284 | Fourteen slots supply actual storage layout, callbacks, and error owners. These are not all incidental parameters. |
+| [array-generics.x](../../lib/array-generics.x) | 911 | 27-152 | 126 | Integer, floating, and String update generators state different native arithmetic policies separately. |
+| [array-generics.x](../../lib/array-generics.x) | 911 | 345-628 | 284 | Array also uses a boxed flag in common operations. It is not uniformly a policy-free counterpart to Map. |
+| [array-generics.x](../../lib/array-generics.x) | 911 | 668-708 | 41 | The observer already takes only the three facts it uses and calls ordinary Buffer owners. |
+| [typed-map.x](../../lib/typed-map.x) | 356 | 225-338 | 114 | Four built-in families repeat mechanical wiring, but String export bodies interrupt that family wiring for a real ownership reason. |
+| [typed-array.x](../../lib/typed-array.x) | 189 | 103-165 | 63 | Seven typed families compose storage, public operations, observation, update, publication, and iteration. |
+| [typed-list.x](../../lib/typed-list.x) | 102 | 23-102 | 80 | A typed List retains canonical List representation and inherits operations instead of generating storage algorithms. |
+| [typed-list.x](../../lib/typed-list.x) | 123 | 97-123 | 27 | Seven typed-list invocations state codecs and element tags explicitly. |
+| [regions.x](../../src/regions.x) | 1,455 | 165-180 | 16 | Four ordinary wrappers and eleven typed-container conversion pairs are explicit effects keyed by emitted C name. |
 
 An initial survey called the Map operations signature fifteen arguments.
 The checked count is fourteen: three Type slots, six Name slots, and five
@@ -138,7 +135,7 @@ that all storage owners lose their callback choices.
 
 ### PoolTable: a sixth production core consumer
 
-The refreshed [pool.x](../lib/pool.x) has 1,035 lines. PoolTable's type at
+The refreshed [pool.x](../../lib/pool.x) has 1,035 lines. PoolTable's type at
 lines 28-31 has the Scope, parallel hash/entry Blocks, used count, capacity,
 and mask that the shared Map core expects. Its scaffold at 73-76, Var
 callbacks at 78-79, and core family at 81-84 compose the existing owners.
@@ -215,12 +212,12 @@ remove.
    composed the boxed public wrappers from them. It recorded 724 net
    production lines removed across the six family files after integration.
    That measurement belongs to that historical patch, not this proposal.
-2. [Source consolidation research](source-consolidation-research.md), under
+2. [Source consolidation research](../source-consolidation-research.md), under
    "Readiness correction", records restoration of the original custom Map
    invocation forms. An earlier candidate broke the existing consumer; the
    repaired composed templates restored it. Name-hole forwarding needed a
    compiler correction. Keep those original forms and conformance rows.
-3. [Self-expression](x2c-self-expression.md), decision 4, explicitly records
+3. [Self-expression](../x2c-self-expression.md), decision 4, explicitly records
    Gary's choice to retain `$map.core.family` callback parameters. H8 shares
    scaffold generation instead. This plan follows that decision.
 4. Commit 27ee651f4, "state family structure and let ordinary operations
@@ -269,7 +266,7 @@ for a larger experiment, while leaving the small cleanup selected.
 
 ### Field lists already compose templates and meta projections
 
-[fields.x](../src/fields.x) is 32 lines. Its helpers at lines 4-17
+[fields.x](../../src/fields.x) is 32 lines. Its helpers at lines 4-17
 build assignment statements with source quotations. `copy_fields` and
 `set_fields` at lines 19-25 splice their results. `segment_state` at 29-32
 names one repeated seven-field relationship using the same copy primitive.
@@ -294,8 +291,8 @@ The earlier binding concern therefore remains an exact separate boundary.
 
 ### Selector generation makes policy choice inspectable
 
-[list-selectors.x](../lib/list-selectors.x) is 67 lines and
-[list-selectors.x](../lib/list-selectors.x) is now 16 lines. Previously the
+[list-selectors.x](../../lib/list-selectors.x) is 67 lines and
+[list-selectors.x](../../lib/list-selectors.x) is now 16 lines. Previously the
 module alone was 113 lines. These two authoritative files total 83 lines,
 30 fewer physical lines, excluding generated output and documentation.
 
