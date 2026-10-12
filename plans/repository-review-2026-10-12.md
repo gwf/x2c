@@ -364,8 +364,9 @@ components.
   `case` or `default` label that enters a region with exits is rejected at
   compile time (A5, decision 6); `$auto($auto(x))` is rejected (A9).
   Fixtures `finalizer-return-frame`, `defer-case-label`, `managed-nested`.
-- Batch 2 (this record's next publication): shipped rule translators and
-  templates defined in a linked provider resolve the names they call to the
+- Batch 2, published to dev as `329edf52` (2026-10-12): shipped rule
+  translators and templates defined in a linked provider resolve the names
+  they call to the
   compiler's linked copies, so a program meta function spelled like a
   component's translator or helper is a separate definition (A2, decision
   5; `Compiler._shipped_callee` in src/meta-native.x); code placed
@@ -382,6 +383,29 @@ components.
   `after-initialization-rule` (decision 8). Fixtures `rewrite-shipped-names`,
   `rewrite-entry-again`,
   `rewrite-entry-finalizer`, `match-var-non-list`.
+- Batch 3 (this record's next publication): a `String` destination reads a
+  `Var` through `Var.as_string`, its `String` payload, the display text of
+  any other value, or NULL for `void` and `Null` (decision 4; the exact
+  reader is `Var.string_payload`, `Var.hash` and the Map key comparison
+  read it, and `Var.string` raises `<no-convert>` for another tag). The
+  change needed two bootstrap rounds in one branch: the seed's generated C
+  read implicit crossings through `Var_string`, so the raising extractor
+  landed only after a refresh that emits `Var_as_string`. The conversion
+  lint no longer reports `.string()` or `.str()` at a String destination.
+  Fixture `var-string-crossing`; `var-exact-reader` and `string-alias`
+  expectations follow the new reads. Book: values.md, from-c.md,
+  language.md. The same batch carries the module repairs (A3, A4, C7): a
+  recorded compile-time effect stores the physical file and coordinates of
+  its site, so a replayed member effect reports the member; every marker
+  row records the text before its region, and one lookup in
+  src/diagnostics.x answers file, line, column, and context, replacing
+  `_own_line_start`; a member path resolves with links followed and must
+  lie inside the resolved companion directory, and a member already being
+  spliced is an error. Fixtures `module-block-replay-diagnostic`,
+  `module-block-member-paths`, `module-block-member-escape`. Batch 2 also
+  made `tools/agent-failure.py capture` create its index on first use (the
+  index file had been deleted) and stopped diagnostics from printing an
+  empty context line at the end of a file.
 - Not done in batch 2: the transform-time binding leak (A6). Binding a
   rule's replacement in a transient symbol scope fixes the leak, but a
   unit-support declaration made while that replacement binds, such as the
