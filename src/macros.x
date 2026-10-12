@@ -3678,7 +3678,7 @@ static List Compiler._forwarded_capture(Compiler c, Var captured) {
 static List Compiler._forwarded_hole(Compiler c, Var captured) {
   if (!c.macro_holes || captured is not <list> || captured.is_nil())
     return NULL;
-  Var direct;
+  Var direct = void;
   match (captured) {
     case %(expr (<macro-expr>)
            (macro-bind ?slot)): direct = slot;

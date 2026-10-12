@@ -1,4 +1,5 @@
 class Box struct { int v; } *;
+class Values Array;
 typedef struct After { int w; } After;
 typedef struct Uses { After a; } *Uses;
 

@@ -110,18 +110,18 @@ meta static void _match_and(Buffer b, int &testing) {
   testing = 1;
 }
 
-/* Declares `binder` from `cell`, a `List` for a `*name` binder, after the
-   open condition, whose brace `braces` counts. */
+/* Saves a binder's capture from its cell after the open condition. */
 meta static void _match_bind(
-  Buffer b, Var binder, String cell, int &testing, int &braces) {
+  Buffer b, Var binder, String cell, Array seen, int &testing, int &braces) {
   if (testing) {
     b.write(") {");
     braces++;
     testing = 0;
   }
-  String type = binder.is_list_binder() ? "List" : "Var";
-  String name = binder.str()[1:];
-  b.printf(" %s %s = %s;", type, name, cell);
+  int index = seen.len() - 1;
+  int list = binder.is_list_binder();
+  b.printf(" %s _x2c_match_%s_%d = %s;",
+    list ? "List" : "Var", list ? "list" : "value", index, cell);
 }
 
 /* Writes the tests of the element `part` of a static pattern, read from
@@ -141,7 +141,7 @@ meta static int _match_element(
   if (part == <?>) return 0;
   if (part.is_atom_binder() && !(part in seen)) {
     seen.push(part);
-    _match_bind(b, part, cell, testing, braces);
+    _match_bind(b, part, cell, seen, testing, braces);
     return 0;
   }
   List list = part is <list> ? part.list() : NULL;
@@ -211,7 +211,7 @@ meta static int _match_nested(
       else if (rest.cdr() || part in seen) step = -1;
       else if (part != <*>) {
         seen.push(part);
-        _match_bind(b, part, cursor, testing, braces);
+        _match_bind(b, part, cursor, seen, testing, braces);
       }
       if (step < 0 || !levels) break;
       rest = rests.take_last();
@@ -238,6 +238,18 @@ meta static int _match_nested(
 }
 
 // arms
+
+/* Copies runtime capture slots to the values the ordinary arm reads. */
+meta static void _match_captures(Buffer b, List binders) {
+  int index = 0;
+  foreach (Var binder, binders) {
+    int list = binder.is_list_binder();
+    b.printf(" %s _x2c_match_%s_%d = %s_x2c_match_values[%d]%s;",
+      list ? "List" : "Var", list ? "list" : "value", index, list ? "Var_list(" : "",
+      index, list ? ")" : "");
+    index++;
+  }
+}
 
 /* Writes the test of `pattern` that captures into the buffer and returns
    the brace that closes it. `sites` numbers the static sites within the
@@ -268,20 +280,6 @@ meta static int _match_test(Buffer b, Array out, List pattern, int &sites) {
   _match_place(b, out, pattern);
   b.write("), &_x2c_match_capture)) {");
   return 1;
-}
-
-/* Declares each named binder from its slot of the capture buffer; `?` and
-   `*` declare nothing. */
-meta static void _match_declare(Buffer b, List binders) {
-  int index = -1;
-  foreach (Var binder, binders) {
-    index++;
-    if (binder == <?> || binder == <*>) continue;
-    String name = binder.str()[1:];
-    if (binder.is_list_binder())
-      b.printf(" List %s = Var_list(_x2c_match_values[%d]);", name, index);
-    else b.printf(" Var %s = _x2c_match_values[%d];", name, index);
-  }
 }
 
 /* Writes the arm's body, which then breaks unless a guard decides that
@@ -367,7 +365,7 @@ meta static Code _match_lowered(Code subject, List rows) {
       List binders = _match_binders(value);
       if (binders.len() > values) values = binders.len();
       braces = _match_test(b, out, pattern, sites);
-      _match_declare(b, binders);
+      _match_captures(b, binders);
     }
     _match_body(b, out, body, braces);
   }

@@ -35,6 +35,10 @@ Buffer Box_write_repr(Box value, Buffer out);
 
 String Box_repr(Box value);
 
+typedef Array Values;
+
+Values Values_new(void);
+
 typedef struct After{
   int w;
 }

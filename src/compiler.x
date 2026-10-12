@@ -1182,6 +1182,7 @@ static List Compiler._forwarder(
     parameters.push(%(param $type (bind ($argument) ())));
     arguments.push(%(expr $type (ident ($argument))));
   }
+  if (!parameters.len()) parameters.push(%(param (void) (bind () ())));
   List call = %(expr ()
     (call (expr $signature (ident $binding)) (args @{arguments.list_free()})));
   List body = %(block (return () (expr () (cast $child $call))));
@@ -2578,20 +2579,17 @@ List Compiler.match_pattern_binders(
   return definite;
 }
 
-/** Defines a typed `Match` pattern's definite binders in the current scope. */
-void Compiler.define_match_binders(Compiler c, List pattern) {
-  foreach (Var binder, c.match_pattern_binders(pattern, NULL)) {
-    String name = binder.str()[1:];
-    c.sym.define(%($name), _binder_type(binder));
-  }
-}
-
-/** Defines catch binders and returns their capture-token/binding pairs. */
-List Compiler.define_catch_binders(Compiler c, List pattern) {
+/** Declares pattern locals and returns their capture-token/binding pairs. */
+List Compiler.define_pattern_binders(Compiler c, List pattern) {
   Array rows = [];
   foreach (Var binder, c.match_pattern_binders(pattern, NULL)) {
     String name = binder.str()[1:];
-    List binding = c.sym.declare(NULL, %($name), _binder_type(binder));
+    List binding;
+    if (c.macro_holes) {
+      binding = c.macro_introduced_name(name);
+      c.bind_template_local(binding, _binder_type(binder), NULL);
+    }
+    else binding = c.sym.declare(NULL, %($name), _binder_type(binder));
     rows.push(%($binder $binding));
   }
   return rows.list_free();
@@ -2600,18 +2598,22 @@ List Compiler.define_catch_binders(Compiler c, List pattern) {
 static List _binder_type(Var binder) =>
   binder.is_list_binder() ? %("List") : %("Var");
 
-/** Builds ordinary declarations from a catch scope's issued bindings. */
-List Compiler.catch_binder_declarations(
+/** Builds ordinary declarations from a pattern scope's issued bindings.
+    A catch reads through its handler; a match reads its capture slots. */
+List Compiler.pattern_binder_declarations(
   Compiler c, List bindings, List handle) {
   Array declarations = [];
   int index = 0;
   foreach (List row, bindings) {
     Type type = _binder_type(row.car());
-    List value = %(expr ("Var")
+    List value = handle ? %(expr ("Var")
       (call "x2c_error_catch_capture"
         (args (expr ("ErrorHandler") (ident $handle))
-              (expr (int) (literal (int) ${%"${index++}"})))));
-    if (row.car().is_list_binder())
+              (expr (int) (literal (int) ${%"$index"})))))
+      : %(expr $type (${%"_x2c_match_${
+          row.car().is_list_binder() ? "list" : "value"}_$index"}));
+    index++;
+    if (handle && row.car().is_list_binder())
       value = %(expr $type (call "Var_list" (args $value)));
     declarations.push(%(declare $type (bindings (bind ${row.cadr()} ()))));
     declarations.push(

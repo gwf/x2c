@@ -3773,14 +3773,13 @@ List Compiler.bind_catch_arm(
   List bindings = NULL;
   if (pattern) {
     c._check_binders(pattern, start, "catch");
-    bindings = c.define_catch_binders(pattern);
+    bindings = c.define_pattern_binders(pattern);
   }
-  int source = !!_source_clause_kind(body);
   List statement = c._bind_statement(body);
-  if (source ? !!c.macro_holes : _declares_binders(body, bindings))
+  if (c._declares_binders(body, bindings))
     return %($pattern $statement);
   return %($pattern (block
-    @{c.catch_binder_declarations(bindings, handle)} $statement));
+    @{c.pattern_binder_declarations(bindings, handle)} $statement));
 }
 
 /* Rejects the two ways a match or catch pattern can name a binder it does
@@ -3800,21 +3799,28 @@ static void Compiler._check_binders(
   }
 }
 
-/* Whether a catch arm's `body` begins with the binder declarations that
-   `catch_binder_declarations` builds, one pair for every definite binder. */
-static int _declares_binders(List body, List bindings) {
+/* Whether an arm already carries its ordinary capture declarations. */
+static int Compiler._declares_binders(Compiler c, List body, List bindings) {
+  match (body) case %(guarded ?inner): body = inner;
   match (body) case %(block *items): {
+    int index = 0;
     foreach (List binding, bindings) {
+      String slot = %"_x2c_match_${
+        binding.car().is_list_binder() ? "list" : "value"}_${index++}";
       match (items)
         case %((declare ? (bindings (bind ?declared ())))
                (stmnt (expr ? (op = (expr ? (ident ?assigned))
                  (expr ? (!or (call "x2c_error_catch_capture" *)
                    (call "Var_list"
-                     (args (expr ? (call "x2c_error_catch_capture" *)))))))))
+                     (args (expr ? (call "x2c_error_catch_capture" *))))
+                   ($slot))))))
                *rest): {
-          if (declared != assigned ||
-              binding_identity_spelling(declared) !=
-              binding_identity_spelling(binding.cadr())) return 0;
+          if (declared != assigned) return 0;
+          Var source;
+          String name = c.semantic_binding_facts().try_get(
+            %(source-spelling $declared), source)
+              ? source.string() : binding_identity_spelling(declared);
+          if (name != binding_identity_spelling(binding.cadr())) return 0;
           items = rest;
           continue;
         }
@@ -3873,11 +3879,19 @@ List Compiler.bind_match_arm(
   Compiler c, List pattern, Var body, Token start, int binds, List types) {
   c.sym.push_new_scope();
   defer c.sym.pop_scope();
+  List bindings = NULL;
   if (binds) {
     c._check_binders(pattern, start, "match");
-    c.define_match_binders(pattern);
+    bindings = c.define_pattern_binders(pattern);
   }
-  return %($pattern ${c._bind_arm_body(body, types)});
+  List statement = c._bind_arm_body(body, types);
+  if (!bindings || c._declares_binders(body, bindings))
+    return %($pattern $statement);
+  List declarations = c.pattern_binder_declarations(bindings, NULL);
+  match (statement)
+    case %(guarded ?inner):
+      return %($pattern (guarded (block @declarations $inner)));
+  return %($pattern (block @declarations $statement));
 }
 
 static List Compiler._bind_arm_body(Compiler c, Var body, List types) {
