@@ -120,7 +120,8 @@ meta static void _match_bind(
   }
   int index = seen.len() - 1;
   int list = binder.is_list_binder();
-  b.printf(" %s _x2c_match_%s_%d = %s;",
+  b.printf(
+    " %s _x2c_match_%s_%d = %s;",
     list ? "List" : "Var", list ? "list" : "value", index, cell);
 }
 
@@ -244,7 +245,8 @@ meta static void _match_captures(Buffer b, List binders) {
   int index = 0;
   foreach (Var binder, binders) {
     int list = binder.is_list_binder();
-    b.printf(" %s _x2c_match_%s_%d = %s_x2c_match_values[%d]%s;",
+    b.printf(
+      " %s _x2c_match_%s_%d = %s_x2c_match_values[%d]%s;",
       list ? "List" : "Var", list ? "list" : "value", index, list ? "Var_list(" : "",
       index, list ? ")" : "");
     index++;

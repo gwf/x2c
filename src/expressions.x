@@ -1384,17 +1384,21 @@ static int Compiler._expression_is_addressable(Compiler c, List expression) {
    those requirements for the C assignment operator to check. */
 static void Compiler._check_dynamic_target(
   Compiler c, List target, Token origin) {
-  if (c._builtin_index_lvalue(target)) return;
+  match (target) {
+    case %(expr ? (getindex ? ?)): return;
+    case %(expr ? ${$grouped(?inner)}):
+      return c._check_dynamic_target(inner, origin);
+  }
   Type type = c.sym.normalize_declared_type(target.cadr());
   foreach (Var part, type) {
     if (part is not <symbol> || !part.symbol().is_type_qualifier()) break;
     if (part == <const>)
-      c.report_error(<type>, "dynamic update cannot target a const object",
-                     origin, NULL);
+      c.report_error(
+        <type>, "dynamic update cannot target a const object", origin, NULL);
   }
   if (!c._expression_is_addressable(target))
-    c.report_error(<type>, "dynamic update requires an addressable object",
-                   origin, NULL);
+    c.report_error(
+      <type>, "dynamic update requires an addressable object", origin, NULL);
 }
 
 // indexing and slices

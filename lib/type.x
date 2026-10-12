@@ -513,7 +513,8 @@ Type Type.numeric_literal(String text, int floating) {
   unsigned long long magnitude;
   int decimal;
   if (!_literal_magnitude(text, suffix, magnitude, decimal)) return NULL;
-  return _integer_literal_type(magnitude, decimal, is_unsigned, longs, negative);
+  return _integer_literal_type(
+    magnitude, decimal, is_unsigned, longs, negative);
 }
 
 /** Reads a validated numeric literal at its semantic type's precision.
@@ -596,7 +597,8 @@ static Type _integer_literal_type(
     if (!decimal && magnitude <= UINT_MAX) return %(unsigned);
     if (magnitude <= (unsigned long long) LONG_MAX + negative) return %(long);
     if (!decimal && magnitude <= ULONG_MAX) return %(unsigned long);
-    if (magnitude <= (unsigned long long) LLONG_MAX + negative) return %(long long);
+    if (magnitude <= (unsigned long long) LLONG_MAX + negative)
+      return %(long long);
     if (!decimal) return %(unsigned long long);
     return NULL;
   }
@@ -608,14 +610,16 @@ static Type _integer_literal_type(
   if (!is_unsigned && longs == 1) {
     if (magnitude <= (unsigned long long) LONG_MAX + negative) return %(long);
     if (!decimal && magnitude <= ULONG_MAX) return %(unsigned long);
-    if (magnitude <= (unsigned long long) LLONG_MAX + negative) return %(long long);
+    if (magnitude <= (unsigned long long) LLONG_MAX + negative)
+      return %(long long);
     if (!decimal) return %(unsigned long long);
     return NULL;
   }
   if (is_unsigned && longs == 1)
     return magnitude <= ULONG_MAX ? %(unsigned long) : %(unsigned long long);
   if (!is_unsigned && longs == 2) {
-    if (magnitude <= (unsigned long long) LLONG_MAX + negative) return %(long long);
+    if (magnitude <= (unsigned long long) LLONG_MAX + negative)
+      return %(long long);
     return decimal ? NULL : %(unsigned long long);
   }
   return %(unsigned long long);
