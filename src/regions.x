@@ -889,7 +889,8 @@ static void Walk.declare(Walk &w, Var specifiers, List bindings) {
     }
 }
 
-static void Walk.declare_initialized(Walk &w, List name, Var value, Type type) {
+static void Walk.declare_initialized(
+  Walk &w, List name, Var value, Type type) {
   Fact fact = w.new_fact(name, -1);
   foreach (Var part, w.c.sym.normalize_declared_type(type)) {
     if (part is not <symbol> || !part.symbol().is_type_qualifier()) break;
@@ -1129,7 +1130,8 @@ static Symbol _sink_of(Fact base, int through, Fact &target) {
    Scope/Pool result keeps its Pool region in `other`. `type` is the
    declared type a compound literal initializes, or NULL for its own. */
 static Region Walk.birth(
-  Walk &w, Var value, Type type, int &born, Region &other, Acquired &acquired) {
+  Walk &w, Var value, Type type, int &born, Region &other,
+  Acquired &acquired) {
   List arguments = NULL;
   String callee = _callee_of(value, arguments);
   born = 1;
@@ -1326,7 +1328,8 @@ static Acquired _acquired(Fact fact) {
   return fact.acquired;
 }
 
-static Region _cleanup(Acquired acquired) => acquired ? acquired.cleanup : NULL;
+static Region _cleanup(Acquired acquired) =>
+  acquired ? acquired.cleanup : NULL;
 
 static int _closed(Region region) {
   if (!region) return 0;
