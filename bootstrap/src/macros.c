@@ -3143,11 +3143,13 @@ static Symbol Compiler__result_kind_token(Compiler c, Token token){
   const MacroCategory * category = _category(token -> text);  if(! category || ! category -> result) Compiler_report_error(c, 33658058, String_join(NULL, cons(String_var(_151), cons(String_var(token -> text), cons(String_var(_16), NULL)))), token, NULL);  return category -> result;
 }
 
+int is_prelude_source(String);
+String Compiler_source_path(Compiler c, String file);
 static void Definition_naming(Definition * d){
   Compiler c =(* d).c;  if((* d).anonymous)(* d).name = Atom_intern(Compiler_fresh_name(c, _152));  else if((* d).local){
     (* d).name = Atom_intern(c -> token -> text);  Compiler_next(c);
   }
-  else(* d).name = Compiler__name(c);  String spelling = Atom_str((* d).name);  if((* d).local && x2c_var_equal((* d).name, Symbol_var(1527056))) Compiler_report_error(c, 27335838, _153, (* d).start, NULL);  if(String_startswith(spelling, _154) && ! c -> builtin_defs) Compiler_report_error(c, 33658058, String_join(NULL, cons(String_var(_155), cons(String_var(spelling), cons(String_var(_156), NULL)))), (* d).start, _159);
+  else(* d).name = Compiler__name(c);  String spelling = Atom_str((* d).name);  if((* d).local && x2c_var_equal((* d).name, Symbol_var(1527056))) Compiler_report_error(c, 27335838, _153, (* d).start, NULL);  if(String_startswith(spelling, _154) && ! c -> builtin_defs && ! is_prelude_source(Compiler_source_path(c, c -> filename))) Compiler_report_error(c, 33658058, String_join(NULL, cons(String_var(_155), cons(String_var(spelling), cons(String_var(_156), NULL)))), (* d).start, _159);
 }
 
 static void Definition_signature(Definition * d){
@@ -3201,7 +3203,6 @@ static void Definition_body_error(Definition * d){
 }
 
 List Compiler_token_location(Compiler, Token);
-String Compiler_source_path(Compiler c, String file);
 static void Definition_announce(Definition * d){
   Compiler c =(* d).c; (void) Compiler_record_origin(c, (* d).start); (* d).origin = Compiler_token_location(c, (* d).start); (* d).file = home_portable_path(Compiler_source_path(c, c -> filename));  Definition_show(&((* d)), Definition_node(&((* d))));
 }
@@ -8965,7 +8966,7 @@ static Var Compiler__eval_string(Compiler c, String source, Token invocation){
                     x2c_exception_landed(& _x2c_exception_frame_0);  if(x2c_exception_is_error_target(& _x2c_exception_frame_0)){
                       int _x2c_macro_selected_0 = x2c_error_catch_selected(_x2c_error_handler_0);  x2c_error_catch_detach(_x2c_error_handler_0);  x2c_exception_mark_handled(& _x2c_exception_frame_0);  if(_x2c_macro_selected_0 == 0){
                         Var volatile category;  category = x2c_error_catch_capture(_x2c_error_handler_0, 0); {
-                          static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/macros.x",.function = "Compiler__eval_string",.line = 5099};  x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(209659067570), category);  __builtin_unreachable();
+                          static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/macros.x",.function = "Compiler__eval_string",.line = 5100};  x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(209659067570), category);  __builtin_unreachable();
                         }
 
                       }
@@ -9124,7 +9125,7 @@ static Var _lisp_import_hook(String path){
   MetaContext * context = MetaContext_current();
   Compiler c = context -> evaluator;
   if(! c){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/macros.x",.function = "_lisp_import_hook",.line = 5251};
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/macros.x",.function = "_lisp_import_hook",.line = 5252};
     x2c_error_raise_n(& _x2c_error_site_1, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("compile-time import")), NULL))));
     __builtin_unreachable();
   }

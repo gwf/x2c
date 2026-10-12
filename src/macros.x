@@ -790,7 +790,8 @@ static void Definition.naming(Definition &d) {
   String spelling = d.name.str();
   if (d.local && d.name == <with>)
     $report.macro.name_with(c, d.start);
-  if (spelling.startswith("x2c.") && !c.builtin_defs)
+  if (spelling.startswith("x2c.") && !c.builtin_defs &&
+      !is_prelude_source(c.source_path(c.filename)))
     $report.parse.macro_reserved(c, spelling, d.start);
 }
 

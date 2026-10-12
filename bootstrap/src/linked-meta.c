@@ -12675,7 +12675,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_23(void){
   _11784 = List_var(_11783);
   _11785 = String_new("src/macros.x");
   _11786 = String_var(_11785);
-  _11787 = String_new("b0056ee0");
+  _11787 = String_new("891d4145");
   _11788 = String_var(_11787);
   _11789 = cons(_11788, NULL);
   _11790 = cons(_11786, _11789);
