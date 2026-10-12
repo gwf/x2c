@@ -406,6 +406,19 @@ components.
   made `tools/agent-failure.py capture` create its index on first use (the
   index file had been deleted) and stopped diagnostics from printing an
   empty context line at the end of a file.
+- Batch 3, published to dev as `3db5216c` (2026-10-12), is the String
+  crossing and module batch above.
+- Hygiene (decision 11), 2026-10-12: 112 remote branches merged into dev
+  were deleted; the 14 unmerged branches and the desktop app's session
+  branches stay. The workspace note tracked inside the ignored `.context/`
+  directory is untracked.
+- Not done: converging the lambda component's `(place ...)` carrier rows on
+  `x2c_place` (decision 9). Both forms reach `Compiler.place`; the carrier
+  form exists because the placed code names bindings the driver introduces
+  for the carrier's `new-name` rows, which a call inside the rule's function
+  cannot see. Moving the lambda component onto `x2c_place` means allocating
+  those names in the rule itself, a behavior-preserving rewrite of
+  `src/component-lambdas.x` that belongs to the cleanup phase.
 - Not done in batch 2: the transform-time binding leak (A6). Binding a
   rule's replacement in a transient symbol scope fixes the leak, but a
   unit-support declaration made while that replacement binds, such as the
