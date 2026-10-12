@@ -930,7 +930,7 @@ static List Emitter._raise(Emitter &e, Ast ast, Var cause, List arguments) {
 
 static String _c_string_literal(String value) {
   if (!value) value = "<unknown>";
-  return %"\"${value.escape().replace("$$", "$")}\"";
+  return %"\"${value.escape()}\"";
 }
 
 // literals and directives
@@ -940,7 +940,7 @@ static List Emitter._literal(Emitter &e, List ast) {
   if (type === %("Var") && text == "void") return %("((void) 0, Void)");
   if (type === %("String")) {
     String qq = "\"";
-    text = qq + text.escape().replace("$$", "$") + qq;
+    text = qq + text.escape() + qq;
     return %("String_new" "(" $text ")");
   }
   if (type === %("Symbol")) {
@@ -948,14 +948,31 @@ static List Emitter._literal(Emitter &e, List ast) {
     text = %"${(long) symbol}";
   }
   if (type === %("Atom")) return _atom_intern(text);
+  Type numeric = type;
+  if (text[0] == '-') {
+    unsigned long long magnitude;
+    if (numeric.integer_literal_magnitude(String.new(text + 1), magnitude)) {
+      unsigned long long limit = 0;
+      String suffix = "";
+      switch (numeric.scalar_tag()) {
+        case <i32>: limit = INT_MAX; break;
+        case <long>: limit = LONG_MAX; suffix = "L"; break;
+        case <llong>: limit = LLONG_MAX; suffix = "LL"; break;
+      }
+      if (limit && magnitude == limit + 1)
+        text = %"(-$limit$suffix - 1$suffix)";
+    }
+  }
   // C has no `0o` prefix; its octal spelling is a bare leading zero.
-  if (text[0] == '0' && (text[1] == 'o' || text[1] == 'O'))
-    text = "0" + String.new(text + 2);
+  int digits = text[0] == '-' || text[0] == '+';
+  if (text[digits] == '0' &&
+      (text[digits + 1] == 'o' || text[digits + 1] == 'O'))
+    text = text[:digits] + "0" + String.new(text + digits + 2);
   return %( $text );
 }
 
 static List _atom_intern(String spelling) {
-  String qq = "\"", text = %"$qq${spelling.escape().replace("$$", "$")}$qq";
+  String qq = "\"", text = %"$qq${spelling.escape()}$qq";
   Atom atom = Atom.intern(spelling);
   if (atom is <symbol>) return %( "Symbol_var(Symbol_new($text))" );
   return %( "Atom_intern(String_new($text))" );

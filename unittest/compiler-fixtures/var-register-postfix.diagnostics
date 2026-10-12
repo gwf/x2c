@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/var-register-postfix.x:4:34: type: dynamic update requires an addressable object
+    register Var target = 3; target++;
+                                   ^^
+

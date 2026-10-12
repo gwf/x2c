@@ -21,8 +21,6 @@ int main(void){
   float single = 1.0f;
   double real = 1.0;
   long double extended = 1.0L;
-  const int fixed = 3;
-  register int local = 4;
   x2c_var_update_i8(&(plain), 56, increment);
   x2c_var_update_schar(&(signed_byte), 56, increment);
   x2c_var_update_u8(&(byte), 56, increment);
@@ -37,8 +35,15 @@ int main(void){
   x2c_var_update_f32(&(single), 56, increment);
   x2c_var_update_f64(&(real), 56, increment);
   x2c_var_update_long_double(&(extended), 56, increment);
-  x2c_var_update_i32(&(fixed), 56, increment);
-  x2c_var_update_i32(&(local), 56, increment);
-  return observed;
+  Var dynamic = int_var(1);
+  volatile Var changing = int_var(2);
+  x2c_var_update_volatile(&(dynamic), 56, increment);
+  x2c_var_update_volatile(&(changing), 56, int_var(1));
+  register int native = 1;
+  native ++;
+  int pointed = 1;
+  register int * pointer = & pointed;
+  x2c_var_update_i32(&(pointer[0]), 56, increment);
+  return observed == 3 && Var_equal(dynamic, int_var(2)) && Var_equal(changing, int_var(3)) && native == 2 && pointed == 2 ? 0 : 1;
 }
 

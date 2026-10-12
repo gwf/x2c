@@ -42,6 +42,28 @@ grep -q "^x2c: error: remove: no installed package 'nosuch'" \
   "$BUILD/remove-nosuch.stderr" || fail "remove diagnostic"
 [[ ! -e "$BUILD/home/packages/.lock" ]] || fail "failed removal took the lock"
 
+# An installed indentation entry imports like an ordinary source entry.
+mkdir -p "$BUILD/src/xppkg/src"
+printf 'int answer(void):\n  return 7\n' >"$BUILD/src/xppkg/src/xppkg.xp"
+cat >"$BUILD/xp-client.x" <<'SOURCE'
+import "xppkg" as xp;
+int main(void) { return xp.answer() == 7 ? 0 : 1; }
+SOURCE
+"$x2c" install -q "$BUILD/src/xppkg"
+"$x2c" run -q "$BUILD/xp-client.x" || fail "installed .xp entry import"
+"$x2c" remove -q xppkg
+
+# The existing .x entry still wins when both source spellings exist.
+printf 'int answer(void) { return 11; }\n' >"$BUILD/src/xppkg/src/xppkg.x"
+printf 'int alternate(void):\n  return 7\n' >"$BUILD/src/xppkg/src/xppkg.xp"
+sed 's/== 7/== 11/' "$BUILD/xp-client.x" >"$BUILD/x-entry-client.x"
+mkdir -p "$BUILD/x-precedence"
+"$x2c" translate --out-dir "$BUILD/x-precedence" --package-dir "$BUILD/src" \
+  "$BUILD/x-entry-client.x" >/dev/null || fail ".x entry precedence"
+mv "$BUILD/src/xppkg/src/xppkg.x" "$BUILD/src/xppkg/xppkg.x"
+"$x2c" translate --out-dir "$BUILD/x-precedence" --package-dir "$BUILD/src" \
+  "$BUILD/x-entry-client.x" >/dev/null || fail "root .x precedes nested .xp"
+
 # A source package from a directory, then through file:// with a digest.
 cp -R "$ROOT/examples/packages/greet" "$BUILD/src/greet"
 rm -rf "$BUILD/src/greet/builds"
@@ -128,7 +150,7 @@ set +e
 "$x2c" install --force "$BUILD/broken/badbundle" 2>"$BUILD/badbundle.stderr"
 [[ $? == 2 ]] || fail "an unreadable BUNDLE.json did not refuse with 2"
 set -e
-grep -q "has no src/nosrc.x entry unit" "$BUILD/nosrc.stderr" ||
+grep -q "has no src/nosrc.x or src/nosrc.xp entry unit" "$BUILD/nosrc.stderr" ||
   fail "missing src diagnostic"
 grep -q "no readable BUNDLE.json" "$BUILD/badbundle.stderr" ||
   fail "unreadable bundle diagnostic"

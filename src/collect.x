@@ -48,7 +48,7 @@ static macro Stmt $report.driver.package_unknown(
   $c.report_error(
     <driver>,
     %"unknown package '${$name}'",
-    $site, %( "searched: <root>/${$name}/src/${$name}.x, <root>/${$name}/${$name}.x" ));
+    $site, %( "searched: <root>/${$name}/src/${$name}.{x,xp}, <root>/${$name}/${$name}.{x,xp}" ));
 }
 
 static macro Stmt $report.driver.package_read(
@@ -431,6 +431,7 @@ static void Splice.member(Splice &s, String spelling, Token site) {
    line `line`. A member's include of a file beside it moves under its
    prefix. */
 static void Splice.own(Splice &s, int start, int end, int line) {
+  if (start == end) return;
   const char *run = s.text + start, *limit = s.text + end;
   if (s.prefix)
     for (const char *at = run; at < limit; line++) {

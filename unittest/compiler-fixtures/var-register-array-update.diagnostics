@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/var-register-array-update.x:6:13: type: dynamic update requires an addressable object
+    values[0] += step;
+              ^^
+

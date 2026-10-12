@@ -406,19 +406,19 @@ static List Compiler._parse_unary_op(Compiler c) {
 
 static List Compiler._parse_sizeof(Compiler c) {
   c.expect(<sizeof>);
-  int parens = c.test(<(>);
   Token head = c.token;
+  int parens = c.test(<(>);
   List arg = NULL;
-  if (c.test_declaration()) arg = c.parse_type_operand(NULL);
-  // `sizeof(x + 1)` measures any expression; only `sizeof x` is unary.
-  else if (parens) arg = c.parse_expression();
+  if (c.test_declaration()) {
+    arg = c.parse_type_operand(NULL);
+    if (parens) {
+      c.expect(<)>);
+      arg = %(parens $arg);
+    }
+  }
   else {
     c.token = head;
     arg = c._parse_unary_op();
-  }
-  if (parens) {
-    c.expect(<)>);
-    arg = %(parens $arg);
   }
   return %(expr ("size_t") (sizeof $arg));
 }
@@ -1359,9 +1359,15 @@ static List Compiler._read_bound_reference(
 
 static int Compiler._expression_is_addressable(Compiler c, List expression) {
   match (expression) {
-    case %(expr ? ${$source_identifier_content(%(?binding))}):
-      return !(%(lambda-snapshot $binding) in c.semantic_binding_facts());
-    case %(expr ? ${$indexed(?receiver, ?selector)}): return 1;
+    case %(expr ? ${$source_identifier_content(%(?binding))}): {
+      Map facts = c.semantic_binding_facts();
+      Type declared = facts[%(type $binding)];
+      return !(%(lambda-snapshot $binding) in facts) &&
+             !declared.match(%(* register *));
+    }
+    case %(expr ? ${$indexed(?receiver, ?selector)}):
+      return !c.sym.normalize_declared_type(receiver.cadr()).is_array() ||
+             c._expression_is_addressable(receiver);
     case %(expr ? ${$source_operator_content(
         %((!quote *) ?operand))}): return 1;
     case %(expr ? ${$source_operator_content(
@@ -1372,6 +1378,23 @@ static int Compiler._expression_is_addressable(Compiler c, List expression) {
       return c._expression_is_addressable(base);
   }
   return 0;
+}
+
+/* Dynamic update helpers take a writable native address rather than leaving
+   those requirements for the C assignment operator to check. */
+static void Compiler._check_dynamic_target(
+  Compiler c, List target, Token origin) {
+  if (c._builtin_index_lvalue(target)) return;
+  Type type = c.sym.normalize_declared_type(target.cadr());
+  foreach (Var part, type) {
+    if (part is not <symbol> || !part.symbol().is_type_qualifier()) break;
+    if (part == <const>)
+      c.report_error(<type>, "dynamic update cannot target a const object",
+                     origin, NULL);
+  }
+  if (!c._expression_is_addressable(target))
+    c.report_error(<type>, "dynamic update requires an addressable object",
+                   origin, NULL);
 }
 
 // indexing and slices
@@ -2220,6 +2243,9 @@ static List Resolve._unary(Resolve &r, Var operator, List operand) {
     }
   }
   if ((operator == <++> || operator == <-->) &&
+      r.c.sym.is_var_type(lhs_type))
+    r.c._check_dynamic_target(lhs, r.origin);
+  if ((operator == <++> || operator == <-->) &&
       r.c._builtin_index_lvalue(lhs)) type = %("Var");
   return source_operator_expression(type, %($operator $lhs));
 }
@@ -2232,6 +2258,8 @@ static List Resolve._postfix(Resolve &r, Var operator, List operand) {
   if (operand_type === %(<macro-expr>))
     return source_postfix_expression(
       %(<macro-expr>), %($operator $operand));
+  if (r.c.sym.is_var_type(operand_type))
+    r.c._check_dynamic_target(operand, r.origin);
   if (r.c._builtin_index_lvalue(operand)) operand_type = %("Var");
   return source_postfix_expression(
     operand_type, %($operator $operand));
@@ -2286,6 +2314,9 @@ static List Compiler._binary_expression(
     return source_operator_expression(
       %(<macro-expr>), %($operator $lhs $rhs));
   if (operator.is_assignment_op()) {
+    if (operator != <=> &&
+        (c.sym.is_var_type(lhs_type) || c.sym.is_var_type(rhs_type)))
+      c._check_dynamic_target(lhs, origin);
     Type type = lhs_type;
     int builtin_index = c._builtin_index_lvalue(lhs);
     if (builtin_index) type = %("Var");

@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/var-const-increment.x:4:25: type: dynamic update cannot target a const object
+    const Var target = 3; ++target;
+                          ^^
+

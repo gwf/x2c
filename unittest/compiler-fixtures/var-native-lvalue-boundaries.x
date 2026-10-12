@@ -16,8 +16,6 @@ int main(void) {
   float single = 1.0f;
   double real = 1.0;
   long double extended = 1.0L;
-  const int fixed = 3;
-  register int local = 4;
   plain += increment;
   signed_byte += increment;
   byte += increment;
@@ -32,7 +30,15 @@ int main(void) {
   single += increment;
   real += increment;
   extended += increment;
-  fixed += increment;
-  local += increment;
-  return observed;
+  Var dynamic = 1;
+  volatile Var changing = 2;
+  dynamic += increment;
+  ++changing;
+  register int native = 1;
+  native++;
+  int pointed = 1;
+  register int *pointer = &pointed;
+  pointer[0] += increment;
+  return observed == 3 && dynamic == 2 && changing == 3 &&
+         native == 2 && pointed == 2 ? 0 : 1;
 }

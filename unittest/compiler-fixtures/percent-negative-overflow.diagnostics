@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/percent-negative-overflow.x:2:16: type: numeric literal is outside the supported scalar range
+  List value = %(-18446744073709551616ULL);
+                 ^^^^^^^^^^^^^^^^^^^^^^^^
+  note: literal: -18446744073709551616ULL
+

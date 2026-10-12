@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/var-const-pointer-update.x:5:28: type: dynamic update cannot target a const object
+    Var step = 1; pointer[0] += step;
+                             ^^
+

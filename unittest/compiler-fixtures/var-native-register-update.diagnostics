@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/var-native-register-update.x:4:49: type: dynamic update requires an addressable object
+    register int target = 3; Var step = 1; target += step;
+                                                  ^^
+

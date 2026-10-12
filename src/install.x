@@ -47,7 +47,7 @@ static macro Stmt $report.install.bundle_archive_missing(Expr $name) =>
   _error(%"bundle ${$name} has no builds/lib${$name}.a");
 
 static macro Stmt $report.install.entry_missing(Expr $spec, Expr $name) =>
-  _error(%"${$spec} has no src/${$name}.x entry unit");
+  _error(%"${$spec} has no src/${$name}.x or src/${$name}.xp entry unit");
 
 static macro Stmt $report.install.dependencies_missing(Expr $name) =>
   _error(%"${$name} needs native dependencies; install its bundle");
@@ -338,7 +338,7 @@ static void _build_source(String package, String name, String spec) {
   Path.write_text(%"$builds/$name.native.rsp", NULL);
 }
 
-/* The package's x2c units, which include its `src/<name>.x` entry unit. */
+/* The package's x2c units include its `src/<name>.x` or `.xp` entry. */
 static List _source_units(String src, String name, String spec) {
   List units = NULL;
   try units = _files_with(src, ".x").append(_files_with(src, ".xp"));

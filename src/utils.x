@@ -253,19 +253,21 @@ String package_directory(List roots, String path) {
   return NULL;
 }
 
-/** Resolves the first readable package entry under `roots`, using the same
-    source view as the importing compiler. Returns its canonical directory
+/** Resolves the first readable package entry under `roots`, preferring `.x`
+    to `.xp`, using the importing compiler's source view. Returns its directory
     through `directory`, or NULL when the package does not exist.
 */
 String package_entry(
   SourceView sources, List roots, String name, String &directory) {
   foreach (String package_dir, roots) {
     String root = %"${Path.absolute(package_dir)}/$name";
-    String nested = %"$root/src/$name.x";
-    String entry = sources.exists(nested) ? nested : %"$root/$name.x";
-    if (!sources.exists(entry)) continue;
-    directory = root;
-    return Path.absolute(entry);
+    foreach (String suffix, %(".x" ".xp")) {
+      String nested = %"$root/src/$name$suffix";
+      String entry = sources.exists(nested) ? nested : %"$root/$name$suffix";
+      if (!sources.exists(entry)) continue;
+      directory = root;
+      return Path.absolute(entry);
+    }
   }
   return NULL;
 }
@@ -276,7 +278,7 @@ String package_entry(
 int package_source(String directory, String path) {
   if (path.startswith(%"$directory/src/")) return 1;
   String name = directory[directory.rfind("/") + 1:];
-  return path == %"$directory/$name.x";
+  return path == %"$directory/$name.x" || path == %"$directory/$name.xp";
 }
 
 // identity

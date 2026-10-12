@@ -489,7 +489,8 @@ static Type _unsigned_scalar(Type type) {
 
 /** Returns the native type selected by a validated numeric token.
     `floating` selects floating suffix rules; an integer outside all supported
-    native families returns `NULL`.
+    native families returns `NULL`. A signed data token includes its sign
+    when selecting a family, so a signed minimum fits that family.
 */
 Type Type.numeric_literal(String text, int floating) {
   int length = text.len();
@@ -499,6 +500,9 @@ Type Type.numeric_literal(String text, int floating) {
     if (last == 'l' || last == 'L') return %(long double);
     return %(double);
   }
+  int negative = text[0] == '-';
+  if (negative || text[0] == '+') text = text[1:];
+  length = text.len();
   int suffix = _integer_literal_end(text);
   int is_unsigned = 0, longs = 0;
   for (int i = suffix; i < length; i++) {
@@ -509,7 +513,7 @@ Type Type.numeric_literal(String text, int floating) {
   unsigned long long magnitude;
   int decimal;
   if (!_literal_magnitude(text, suffix, magnitude, decimal)) return NULL;
-  return _integer_literal_type(magnitude, decimal, is_unsigned, longs);
+  return _integer_literal_type(magnitude, decimal, is_unsigned, longs, negative);
 }
 
 /** Reads a validated numeric literal at its semantic type's precision.
@@ -585,13 +589,14 @@ static int _radix(String text, int end, int &pos) {
 /* C gives an integer literal the first type of its suffix's list that holds
    the value; a decimal literal without `u` skips the unsigned types. */
 static Type _integer_literal_type(
-  unsigned long long magnitude, int decimal, int is_unsigned, int longs) {
+  unsigned long long magnitude, int decimal, int is_unsigned,
+  int longs, int negative) {
   if (!is_unsigned && !longs) {
-    if (magnitude <= INT_MAX) return %(int);
+    if (magnitude <= (unsigned long long) INT_MAX + negative) return %(int);
     if (!decimal && magnitude <= UINT_MAX) return %(unsigned);
-    if (magnitude <= LONG_MAX) return %(long);
+    if (magnitude <= (unsigned long long) LONG_MAX + negative) return %(long);
     if (!decimal && magnitude <= ULONG_MAX) return %(unsigned long);
-    if (magnitude <= LLONG_MAX) return %(long long);
+    if (magnitude <= (unsigned long long) LLONG_MAX + negative) return %(long long);
     if (!decimal) return %(unsigned long long);
     return NULL;
   }
@@ -601,16 +606,16 @@ static Type _integer_literal_type(
     return %(unsigned long long);
   }
   if (!is_unsigned && longs == 1) {
-    if (magnitude <= LONG_MAX) return %(long);
+    if (magnitude <= (unsigned long long) LONG_MAX + negative) return %(long);
     if (!decimal && magnitude <= ULONG_MAX) return %(unsigned long);
-    if (magnitude <= LLONG_MAX) return %(long long);
+    if (magnitude <= (unsigned long long) LLONG_MAX + negative) return %(long long);
     if (!decimal) return %(unsigned long long);
     return NULL;
   }
   if (is_unsigned && longs == 1)
     return magnitude <= ULONG_MAX ? %(unsigned long) : %(unsigned long long);
   if (!is_unsigned && longs == 2) {
-    if (magnitude <= LLONG_MAX) return %(long long);
+    if (magnitude <= (unsigned long long) LLONG_MAX + negative) return %(long long);
     return decimal ? NULL : %(unsigned long long);
   }
   return %(unsigned long long);

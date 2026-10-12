@@ -886,7 +886,20 @@ static List Compiler._parse_braced_segment(Compiler c) {
 
 static String _decode_segment(String raw) {
   if (!raw) return "";
-  return _normalize_newlines(raw).unescape().replace("$$", "$");
+  raw = _normalize_newlines(raw);
+  if (!("$$" in raw)) return raw.unescape();
+  int n = raw.len(), dst = 0;
+  char *buf = Scope.malloc(n + 1);
+  for (int i = 0; i < n; i++) {
+    char ch = raw[i];
+    buf[dst++] = ch;
+    if (ch == '\\' && i + 1 < n) buf[dst++] = raw[++i];
+    else if (ch == '$' && i + 1 < n && raw[i + 1] == '$') i++;
+  }
+  buf[dst] = '\0';
+  String text = String.new_len(buf, dst);
+  Scope.free(buf);
+  return text.unescape();
 }
 
 /* Text with no line continuation and no CR returns unchanged. */
