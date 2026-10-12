@@ -105,13 +105,11 @@ the block and must name a file under that file's companion directory, `NAME/`
 for `NAME.x`, without `..`. Any other path, an unreadable member, a malformed
 block, or a second block is a driver error at the block.
 
-A member's text stands where the block stood, in the listed order, and C
-declaration order applies to the whole. Declarations before the block are
-visible to every member. A member's statics are visible to later members and
-to the entry after the block, so `main` above needs no prototypes. A member
-that uses a name defined later, in a later member or in the entry after the
-block, needs a prototype before the use, as it would in one file. A member
-may hold its own block, whose members lie under the member's companion
+A member's text stands where the block stood, in the listed order. All members
+share the entry's translation unit. Function declarations are collected across
+that complete unit, so a function can call a later-defined function without an
+explicit prototype. Other declarations retain their ordinary placement rules.
+A member may hold its own block, whose members lie under the member's companion
 directory; their text is spliced in turn, and the namespace stays flat.
 
 A quoted include in a member that names a file beside the member reaches that
@@ -657,11 +655,11 @@ Protocols declare a compile-time relationship between a concrete base and
 explicit participant types. The grammar is:
 
 ```text
-protocol-declaration := protocol type-name ( identifier ) {
+protocol-declaration := [ static ] protocol type-name ( identifier ) {
                           associated-declaration*
                           protocol-member*
                         }
-protocol-adoption    := [ static ] protocol type-name ( identifier )
+protocol-adoption    := [ meta ] [ static ] protocol type-name ( identifier )
                         [ as type-name | tag symbol-literal ] ;
 associated-declaration
                      := associated identifier = type-name ;
@@ -1373,7 +1371,8 @@ singular, explicitly annotated, and one of:
 Parameters after the target are explicit invocation arguments. When a braced
 macro needs a generated name before any declaration can introduce it, a
 leading `using $name;` directive in the body creates that expansion-private
-name. The former signature `using` clause remains accepted for compatibility.
+name. A signature `using` clause also supplies names, including for an
+Expression macro's arrow body.
 A decorator application has no semicolon; that omission pairs it with the
 following target.
 Only whitespace and comments may separate them. When a statement decorator
@@ -1460,8 +1459,8 @@ declaration for the same alias replaces it only for following source.
 
 Registration and use are source ordered. Expression, statement, field,
 entry, enumerator, and unit macro aliases retain their result positions.
-`Decorator` aliases retain their captured `Expr`, `Function`, `Stmt` or
-`Block`, `Field`, or `Unit` target. An invocation in the wrong position
+`Decorator` aliases retain their captured `Expr`, `Function`, `Stmt`,
+`Field`, `Unit`, or `NamedType` target. An invocation in the wrong position
 receives the same result or target diagnostic as its direct spelling.
 
 Aliases do not globally reserve their identifiers. A macro or a decorator with
@@ -2295,8 +2294,10 @@ floating values, Strings and collections during compile-time execution.
 Explicit `$name(args)` insertion, and the optional `$(name args)` Lisp form,
 accept numeric values with their native Var family, computed strings as C
 string literals, Symbols, identifiers
-and nonempty expression-code Lists. It does not directly materialize mutable
-collections, callable values or compiler addresses. A parameter or result
+and nonempty expression-code Lists. Arrays and Maps are reconstructed as
+fresh runtime collections, including nested collections; cycles and shared
+mutable collections are rejected. Callable values and compiler addresses
+cannot be materialized directly. A parameter or result
 with no Var form, such as a struct, a C `bool` or a pointer, cannot cross a
 dollar call. This boundary does not limit internal
 returns to `int`; see
@@ -2316,8 +2317,8 @@ lowering of `meta` bodies, with these consequences:
 - A `meta` function defined by a macro expansion or a `$` call is an
   error; one written in an ordinary `.x` file joins
   the project meta module.
-- A project `meta` body receives compiler facts as arguments, such as
-  `TypeInfo` and `Source` parameters, and does not query the compiler.
+- A project `meta` body receives compiler facts as arguments and can query
+  the compiler while its helper call waits.
 - A raise in a body is a diagnostic at the `$` call. A crash, exit, or
   stack overflow ends the helper and is reported at the call; the
   compiler continues. The Lisp step and depth budgets do not apply to a
@@ -2555,7 +2556,8 @@ operations, generated for supported value fields.
 to repr; heap str prints identity. Generated repr traverses printable fields
 and uses addresses for opaque pointers and fixed arrays. Repeated identities
 on the active rendering path print their pointer form. Descriptor registration retains the
-runtime's fixed capacity and worker-start freeze rules.
+runtime's worker-start freeze rule. Overflow descriptors extend the compact
+descriptor table's capacity.
 
 ### Managed initializers
 
@@ -3207,7 +3209,7 @@ exhausted; the test does not probe its producer. `void` is outside the value
 domain, and a compiler-inserted `Var.truth` raises `<void-op>` for it. That
 raise does not return to the test.
 
-If either operand of `+`, `-`, `*`, `/`, `%`, `@`, `<<`, `>>`, `&`, `^`, or
+If either operand of `+`, `-`, `*`, `/`, `%`, `<<`, `>>`, `&`, `^`, or
 `|` has static `Var` identity and the other operand is `Var` or statically numeric,
 both operands convert to `Var` and the result is `Var`. A nonnumeric operand is
 rejected at compile time if its type is known statically, or at runtime if it
@@ -3248,7 +3250,7 @@ the result is the `String` that `String.add` returns, so `path + ".o"`
 concatenates.
 
 These lowerings, the dynamic compound assignments and increments below, and
-the rejection of unary `+`, `-`, and `~` on a `Var` belong to the shipped
+unary fallback rejection after protocol resolution belong to the shipped
 component `src/component-operators.x`. It registers each translator with
 `$rewrite` and a Match pattern typed `Var`, such as
 `%(expr ("Var") (op (!or + - (!quote *) / % ...) ? ?))`, which keys the rule
@@ -3840,9 +3842,9 @@ direction. An `Array` can therefore be used as a `Block`, and an `Ast` as a
 `List`, without conversion. Two typedefs of a common type cannot substitute for
 each other this way: they may describe different contents despite sharing a C
 representation. Thus `ArrayInt counts = someArrayDbl;` is a type error that
-names the required converter. Declaring that converter, as `lib/typed-array.x`
-does for `Array.arrayint`, permits the conversion; a cast still permits
-reinterpretation.
+names the required sibling converter, `ArrayDbl.arrayint`. The existing
+`Array.arrayint` instead converts from the common Array ancestor. A cast
+still permits reinterpretation.
 
 The compiler warns with code `conversion` when source spells a
 conversion that its destination already performs. Translation continues.
