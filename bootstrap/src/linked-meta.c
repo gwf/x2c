@@ -12847,7 +12847,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_23(void){
   _11968 = cons(_503, _11967);
   _11969 = String_new("src/builtins.x");
   _11970 = String_var(_11969);
-  _11971 = String_new("ea8757d8");
+  _11971 = String_new("d98d0b5e");
   _11972 = String_var(_11971);
   _11973 = String_new("cwd:./lisp.x");
   _11974 = String_var(_11973);
