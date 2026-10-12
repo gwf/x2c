@@ -78,13 +78,15 @@ static void Compiler__write_json_location(Compiler c, Buffer out, List location)
 
 static void Compiler__write_heading(Compiler c, Symbol code, String message, List location);
 
-static int Compiler__own_line_start(Compiler c, int position, int * offset);
+static List Compiler__token_region(Compiler c, Token token);
 
-static int Compiler__text_line(Compiler c, int position);
+static List Compiler__region(Compiler c, int position);
 
 static List _compiler_location(Compiler compiler, Token token);
 
-static void Compiler__show_source_context(Compiler compiler, int line, int column, int length);
+static void Compiler__show_source_context(Compiler compiler, int line, int column, int length, int position);
+
+static int Compiler__text_line(Compiler c, int position);
 
 static int _context_line(Compiler c, int line, char * * line_start, char * * line_end);
 
@@ -455,15 +457,7 @@ static void Compiler__write_heading(Compiler c, Symbol code, String message, Lis
           }
           );
           fprintf(stderr, "%s: %s: %s\n", place, Symbol_str(code), message);
-          int offset, start = Compiler__own_line_start(c, Var_int(Var_convert(position, 3453797)), &(offset));
-          if(start >= 0){
-            char * line_start = c -> unit_source -> own + start, * line_end = line_start;
-            while(* line_end && * line_end != '\n') line_end ++;
-            _context_caret(line_start, line_end, Var_int(Var_convert(column, 3453797)), Var_int(Var_convert(length, 3453797)));
-            return;
-          }
-          if(Array_truth(c -> line_markers)) line = int_var(Compiler__text_line(c, Var_int(Var_convert(position, 3453797))));
-          Compiler__show_source_context(c, Var_int(Var_convert(line, 3453797)), Var_int(Var_convert(column, 3453797)), Var_int(Var_convert(length, 3453797)));
+          Compiler__show_source_context(c, Var_int(Var_convert(line, 3453797)), Var_int(Var_convert(column, 3453797)), Var_int(Var_convert(length, 3453797)), Var_int(Var_convert(position, 3453797)));
           return;
         }
 
@@ -473,37 +467,6 @@ static void Compiler__write_heading(Compiler c, Symbol code, String message, Lis
 
   }
   fprintf(stderr, "%s: %s\n", Symbol_str(code), message);
-}
-
-String Compiler_text_source(Compiler c, int position, int * offset);
-
-static int Compiler__own_line_start(Compiler c, int position, int * offset){
-  if(! c -> unit_source) return - 1;
-  String file = Compiler_text_source(c, position, &((* offset)));
-  if(! String_equal(Path_absolute(file), Path_absolute(c -> filename))) return - 1;
-  int start =(* offset);
-  while(start > 0 && String_getindex(c -> unit_source -> own, start - 1) != '\n') start --;
-  return start;
-}
-
-static int Compiler__text_line(Compiler c, int position){
-  int line = 0;
-  {
-    Var start;
-    Array _x2c_macro_object_0 = Compiler__line_starts(c);
-    int _x2c_macro_cursor_0 = 0;
-    Var _x2c_macro_cursor_output_0;
-    while(Array_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
-      start = _x2c_macro_cursor_output_0;
-      {
-        if(Var_int(start) > position) break;
-        line ++;
-      }
-
-    }
-
-  }
-  return line;
 }
 
 List Compiler_origin_location(Compiler compiler, int occurrence){
@@ -540,6 +503,8 @@ String Compiler_display_path(Compiler compiler, String path){
   return path;
 }
 
+int Compiler_token_column(Compiler c, Token token);
+
 String Compiler_token_source(Compiler c, Token token, int * line);
 
 List Compiler_token_location(Compiler compiler, Token token){
@@ -548,10 +513,8 @@ List Compiler_token_location(Compiler compiler, Token token){
   if(compiler -> source_facts) file = Compiler_display_path(compiler, file);
   if(! token) token = compiler -> token;
   if(! token) return cons(List_var(cons(_34, cons(String_var(file), NULL))), _55);
-  int line = token -> line, column = token -> col, offset;
+  int line = token -> line, column = Compiler_token_column(compiler, token);
   if(Array_truth(compiler -> line_markers)) file = Compiler_token_source(compiler, token, &(line));
-  int start = Compiler__own_line_start(compiler, token -> pos, &(offset));
-  if(start >= 0) column = offset - start + 1;
   file = Compiler_display_path(compiler, file);
   return({
     Var _x2c_literal_part_17 = List_var(cons(_34, cons(String_var(file), NULL)));  Var _x2c_literal_part_18 = List_var(cons(_35, cons(int_var(line), NULL)));  Var _x2c_literal_part_19 = List_var(cons(_36, cons(int_var(column), NULL)));  Var _x2c_literal_part_20 = List_var(cons(_37, cons(int_var(token -> len), NULL)));  Var _x2c_literal_part_21 = List_var(cons(_38, cons(int_var(token -> pos), NULL)));  cons(_x2c_literal_part_17, cons(_x2c_literal_part_18, cons(_x2c_literal_part_19, cons(_x2c_literal_part_20, cons(_x2c_literal_part_21, NULL)))));
@@ -562,62 +525,130 @@ List Compiler_token_location(Compiler compiler, Token token){
 String Compiler_token_source(Compiler c, Token token, int * line){
   if(! _init_guard_) _file_init_();
   if(line)(* line) = token -> line;
-  if(! Array_truth(c -> line_markers)) return c -> filename;
-  Token base = c -> tokenizer -> tokens;
-  if(token < base || token >= base + Bytes_len(c -> tokenizer -> tokens)) return c -> filename;
-  String file = c -> filename;
-  {
-    List row;
-    Array _x2c_macro_object_1 = c -> line_markers;
-    int _x2c_macro_cursor_1 = 0;
-    Var _x2c_macro_cursor_output_1;
-    while(Array_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
-      row = Var_list(_x2c_macro_cursor_output_1);
-      {
-        List _x2c_destructure_0 = row;
-        int position = Var_int(Var_convert(List_getindex(_x2c_destructure_0, 0), 3453797));
-        int text_line = Var_int(Var_convert(List_getindex(_x2c_destructure_0, 1), 3453797));
-        String marked = Var_as_string(List_getindex(_x2c_destructure_0, 2));
-        int marked_line = Var_int(Var_convert(List_getindex(_x2c_destructure_0, 3), 3453797));
-        if(position > token -> pos) break;
-        file = marked;
-        if(line)(* line) = marked_line + token -> line - text_line;
-      }
+  List region = Compiler__token_region(c, token);
+  if(! List_truth(region)) return c -> filename;
+  List _x2c_destructure_0 = region;
+  int start = Var_int(Var_convert(List_getindex(_x2c_destructure_0, 0), 3453797));
+  int text_line = Var_int(Var_convert(List_getindex(_x2c_destructure_0, 1), 3453797));
+  String file = Var_as_string(List_getindex(_x2c_destructure_0, 2));
+  int file_line = Var_int(Var_convert(List_getindex(_x2c_destructure_0, 3), 3453797));
+  if(line)(* line) = file_line + token -> line - text_line;
+  return file;
+}
 
+int Compiler_token_column(Compiler c, Token token){
+  if(! _init_guard_) _file_init_();
+  {
+    List _x2c_match_expr = Compiler__token_region(c, token); List _x2c_match_cursor;
+    switch(0){
+        default: ;
+       _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 3453797)) { Var _x2c_match_value_0 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 1318210446)) { Var _x2c_match_value_1 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
+        Var text_line;
+        text_line = _x2c_match_value_0;
+        Var before;
+        before = _x2c_match_value_1;
+        {
+          Var _x2c_match_value_0 = text_line;
+          Var _x2c_match_value_1 = before;
+          {
+            int text_line = Var_int(Var_convert(_x2c_match_value_0, 3453797));
+            String before = Var_as_string(_x2c_match_value_1);
+            if(token -> line == text_line) return String_len(before) + token -> col;
+          }
+
+        }
+
+      }
+       break; } } }
     }
 
   }
-  return file;
+  return token -> col;
 }
 
 String Compiler_text_source(Compiler c, int position, int * offset){
   if(! _init_guard_) _file_init_();
-  String file = c -> filename;
   (* offset) = position;
-  if(! Array_truth(c -> line_markers)) return file;
   {
+    List _x2c_match_expr = Compiler__region(c, position); List _x2c_match_cursor;
+    switch(0){
+        default: ;
+       _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && Var_is(_x2c_match_cursor->car, 3453797)) { Var _x2c_match_value_0 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 1318210446)) { Var _x2c_match_value_1 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 3453797)) { Var _x2c_match_value_2 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
+        Var start;
+        start = _x2c_match_value_0;
+        Var file;
+        file = _x2c_match_value_1;
+        Var origin;
+        origin = _x2c_match_value_2;
+        {
+          Var _x2c_match_value_2 = start;
+          Var _x2c_match_value_3 = file;
+          Var _x2c_match_value_4 = origin;
+          {
+            int start = Var_int(Var_convert(_x2c_match_value_2, 3453797));
+            String file = Var_as_string(_x2c_match_value_3);
+            int origin = Var_int(Var_convert(_x2c_match_value_4, 3453797));
+            {
+              (* offset) = origin + position - start;
+              return file;
+            }
+
+          }
+
+        }
+
+      }
+       break; } } } }
+    }
+
+  }
+  return c -> filename;
+}
+
+Token Compiler_source_token(Compiler c, Token token, String * file){
+  if(! _init_guard_) _file_init_();
+  Token placed = Scope_calloc(1, sizeof(struct Token));
+  * placed = * token;
+  placed -> col = Compiler_token_column(c, token);
+  (* file) = Compiler_token_source(c, token, &(placed -> line));
+  (void) Compiler_text_source(c, token -> pos, &(placed -> pos));
+  return placed;
+}
+
+static List Compiler__token_region(Compiler c, Token token){
+  List region = Compiler__region(c, token -> pos);
+  {
+    List _x2c_match_expr = region; List _x2c_match_cursor;
+    switch(0){
+        default: ;
+       _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {return region;
+       break; }
+    }
+
+  }
+  if(! List_truth(region)) return NULL;
+  Token first = c -> tokenizer -> tokens;
+  return token >= first && token < first + Bytes_len(c -> tokenizer -> tokens) ? region : NULL;
+}
+
+static List Compiler__region(Compiler c, int position){
+  List region = NULL;
+  if(Array_truth(c -> line_markers)){
     List row;
-    Array _x2c_macro_object_2 = c -> line_markers;
-    int _x2c_macro_cursor_2 = 0;
-    Var _x2c_macro_cursor_output_2;
-    while(Array_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
-      row = Var_list(_x2c_macro_cursor_output_2);
+    Array _x2c_macro_object_0 = c -> line_markers;
+    int _x2c_macro_cursor_0 = 0;
+    Var _x2c_macro_cursor_output_0;
+    while(Array_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
+      row = Var_list(_x2c_macro_cursor_output_0);
       {
-        List _x2c_destructure_1 = row;
-        int start = Var_int(Var_convert(List_getindex(_x2c_destructure_1, 0), 3453797));
-        int text_line = Var_int(Var_convert(List_getindex(_x2c_destructure_1, 1), 3453797));
-        String marked = Var_as_string(List_getindex(_x2c_destructure_1, 2));
-        int line = Var_int(Var_convert(List_getindex(_x2c_destructure_1, 3), 3453797));
-        Var origin = List_getindex(_x2c_destructure_1, 4);
-        if(start > position || Var_is_void(origin)) break;
-        file = marked;
-        (* offset) = Var_int(origin) + position - start;
+        if(Var_int(List_car(row)) > position) break;
+        region = row;
       }
 
     }
 
   }
-  return file;
+  return region;
 }
 
 static List _compiler_location(Compiler compiler, Token token){
@@ -641,17 +672,17 @@ _Noreturn void Compiler_report_error(Compiler compiler, Symbol code, String mess
   Compiler_report_problem(compiler, code, message, token, notes);
   Diagnostics diag = compiler -> diagnostics;
   if(compiler -> recovery_depth > 0){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/diagnostics.x",.function = "Compiler_report_error",.line = 463};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/diagnostics.x",.function = "Compiler_report_error",.line = 465};
     x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(209659067570), Symbol_var(code));
     __builtin_unreachable();
   }
   if(! diag -> printer){
     Var held;
-    List _x2c_macro_object_3 = Diagnostics_entries(diag);
-    List _x2c_macro_cursor_3 = _x2c_macro_object_3;
-    Var _x2c_macro_cursor_output_3;
-    while(List_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_3))){
-      held = _x2c_macro_cursor_output_3;
+    List _x2c_macro_object_1 = Diagnostics_entries(diag);
+    List _x2c_macro_cursor_1 = _x2c_macro_object_1;
+    Var _x2c_macro_cursor_output_1;
+    while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
+      held = _x2c_macro_cursor_output_1;
       Compiler_print_diagnostic(compiler, Var_list(held));
     }
 
@@ -680,10 +711,65 @@ void Compiler_report_warning_at(Compiler compiler, Symbol code, String message, 
   Diagnostics__warn(diag, code ? code : 49497918350, message, location, notes);
 }
 
-static void Compiler__show_source_context(Compiler compiler, int line, int column, int length){
+static void Compiler__show_source_context(Compiler compiler, int line, int column, int length, int position){
   if(! String_truth(compiler -> text)) return;
+  if(Array_truth(compiler -> line_markers)) line = Compiler__text_line(compiler, position);
   char * line_start, * line_end;
-  if(_context_line(compiler, line, &(line_start), &(line_end))) _context_caret(line_start, line_end, column, length);
+  if(! _context_line(compiler, line, &(line_start), &(line_end))) return;
+  {
+    List _x2c_match_expr = Compiler__region(compiler, position); List _x2c_match_cursor;
+    switch(0){
+        default: ;
+       _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 3453797)) { Var _x2c_match_value_0 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 1318210446)) { Var _x2c_match_value_1 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
+        Var text_line;
+        text_line = _x2c_match_value_0;
+        Var before;
+        before = _x2c_match_value_1;
+        {
+          Var _x2c_match_value_5 = text_line;
+          Var _x2c_match_value_6 = before;
+          {
+            int text_line = Var_int(Var_convert(_x2c_match_value_5, 3453797));
+            String before = Var_as_string(_x2c_match_value_6);
+            if(line == text_line && String_len(before)){
+              String shown =({
+                Var _x2c_literal_part_22 = String_var(before);  Var _x2c_literal_part_23 = String_var(String_new_len(line_start, line_end - line_start));  String_join(NULL, cons(_x2c_literal_part_22, cons(_x2c_literal_part_23, NULL)));
+              }
+              );
+              line_start = shown;
+              line_end = line_start + String_len(shown);
+            }
+
+          }
+
+        }
+
+      }
+       break; } } }
+    }
+
+  }
+  _context_caret(line_start, line_end, column, length);
+}
+
+static int Compiler__text_line(Compiler c, int position){
+  int line = 0;
+  {
+    Var start;
+    Array _x2c_macro_object_2 = Compiler__line_starts(c);
+    int _x2c_macro_cursor_2 = 0;
+    Var _x2c_macro_cursor_output_2;
+    while(Array_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
+      start = _x2c_macro_cursor_output_2;
+      {
+        if(Var_int(start) > position) break;
+        line ++;
+      }
+
+    }
+
+  }
+  return line;
 }
 
 static int _context_line(Compiler c, int line, char * * line_start, char * * line_end){
@@ -733,11 +819,11 @@ void Compiler_take_diagnostics(Compiler c, Compiler child){
   if(target == source) return;
   {
     List entry;
-    Array _x2c_macro_object_4 = source -> entries;
-    int _x2c_macro_cursor_4 = 0;
-    Var _x2c_macro_cursor_output_4;
-    while(Array_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_4))){
-      entry = Var_list(_x2c_macro_cursor_output_4);
+    Array _x2c_macro_object_3 = source -> entries;
+    int _x2c_macro_cursor_3 = 0;
+    Var _x2c_macro_cursor_output_3;
+    while(Array_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_3))){
+      entry = Var_list(_x2c_macro_cursor_output_3);
       Diagnostics__store(target, entry);
     }
 
@@ -792,13 +878,13 @@ void Compiler_dump_symbol_table(Compiler compiler, Map map){
   if(! _init_guard_) _file_init_();
   {
     Var key, value;
-    Map _x2c_macro_object_5 = map;
-    unsigned _x2c_macro_cursor_5 = 0;
+    Map _x2c_macro_object_4 = map;
+    unsigned _x2c_macro_cursor_4 = 0;
+    Var _x2c_macro_cursor_output_4;
     Var _x2c_macro_cursor_output_5;
-    Var _x2c_macro_cursor_output_6;
-    while(Map_try_next(_x2c_macro_object_5, &(_x2c_macro_cursor_5), &(_x2c_macro_cursor_output_5), &(_x2c_macro_cursor_output_6))){
-      key = _x2c_macro_cursor_output_5;
-      value = _x2c_macro_cursor_output_6;
+    while(Map_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_4), &(_x2c_macro_cursor_output_5))){
+      key = _x2c_macro_cursor_output_4;
+      value = _x2c_macro_cursor_output_5;
       printf("%s ==>\n%s\n", Var_str(key), Var_str(value));
     }
 
@@ -810,13 +896,13 @@ void Compiler_dump_cache(Compiler compiler){
   if(! _init_guard_) _file_init_();
   {
     Var key, value;
-    Map _x2c_macro_object_6 = compiler -> key_ids;
-    unsigned _x2c_macro_cursor_6 = 0;
+    Map _x2c_macro_object_5 = compiler -> key_ids;
+    unsigned _x2c_macro_cursor_5 = 0;
+    Var _x2c_macro_cursor_output_6;
     Var _x2c_macro_cursor_output_7;
-    Var _x2c_macro_cursor_output_8;
-    while(Map_try_next(_x2c_macro_object_6, &(_x2c_macro_cursor_6), &(_x2c_macro_cursor_output_7), &(_x2c_macro_cursor_output_8))){
-      key = _x2c_macro_cursor_output_7;
-      value = _x2c_macro_cursor_output_8;
+    while(Map_try_next(_x2c_macro_object_5, &(_x2c_macro_cursor_5), &(_x2c_macro_cursor_output_6), &(_x2c_macro_cursor_output_7))){
+      key = _x2c_macro_cursor_output_6;
+      value = _x2c_macro_cursor_output_7;
       printf("%s\t==>\t%s\n", Var_repr(value), Var_repr(key));
     }
 

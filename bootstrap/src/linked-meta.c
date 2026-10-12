@@ -10109,7 +10109,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_18(void){
   _9233 = List_var(_9232);
   _9234 = String_new("lib/varconvert.x");
   _9235 = String_var(_9234);
-  _9236 = String_new("786ddb95");
+  _9236 = String_new("c270fe1a");
   _9237 = String_var(_9236);
   _9238 = cons(_9237, NULL);
   _9239 = cons(_9235, _9238);
@@ -10259,7 +10259,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_18(void){
   _9383 = List_var(_9382);
   _9384 = String_new("lib/dispatch.x");
   _9385 = String_var(_9384);
-  _9386 = String_new("0d2a0248");
+  _9386 = String_new("95605d1e");
   _9387 = String_var(_9386);
   _9388 = cons(_9387, NULL);
   _9389 = cons(_9385, _9388);
@@ -12505,7 +12505,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_22(void){
   _11617 = List_var(_11616);
   _11618 = String_new("src/compiler.x");
   _11619 = String_var(_11618);
-  _11620 = String_new("e7913915");
+  _11620 = String_new("f0cf1e5a");
   _11621 = String_var(_11620);
   _11622 = cons(_11621, NULL);
   _11623 = cons(_11619, _11622);
@@ -12658,7 +12658,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_22(void){
   _11770 = List_var(_11769);
   _11771 = String_new("src/diagnostics.x");
   _11772 = String_var(_11771);
-  _11773 = String_new("cd43651c");
+  _11773 = String_new("b6d674c0");
   _11774 = String_var(_11773);
   _11775 = cons(_11774, NULL);
 }
@@ -12675,7 +12675,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_23(void){
   _11784 = List_var(_11783);
   _11785 = String_new("src/macros.x");
   _11786 = String_var(_11785);
-  _11787 = String_new("f88f6bd5");
+  _11787 = String_new("4486b695");
   _11788 = String_var(_11787);
   _11789 = cons(_11788, NULL);
   _11790 = cons(_11786, _11789);
@@ -12792,7 +12792,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_23(void){
   _11901 = cons(_503, _11900);
   _11902 = String_new("src/collect.x");
   _11903 = String_var(_11902);
-  _11904 = String_new("e6c14493");
+  _11904 = String_new("7d291cf1");
   _11905 = String_var(_11904);
   _11906 = cons(_11905, NULL);
   _11907 = cons(_11903, _11906);

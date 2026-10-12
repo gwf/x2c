@@ -822,6 +822,8 @@ static Var Compiler__eval_string(Compiler c, String source, Token invocation);
 
 static String Compiler__lisp_form(Compiler c);
 
+static List Compiler__effect_source(Compiler c, Token site);
+
 static int Compiler__statement_expression(Compiler c, List value);
 
 static Var _sdk_identifier_result(Var value);
@@ -8945,31 +8947,30 @@ List Compiler_parse_macro_lisp_top_level(Compiler c){
 void Compiler_parse_macro_lisp_shallow(Compiler c){
   if(! _init_guard_) _file_init_();  String requested = NULL;  if(Compiler__import_path(c, &(requested))){
     if(! c -> source_private){
-      String path = home_portable_path(Compiler__canonical_path(c, requested, c -> token));  String source = home_portable_path(Path_absolute(c -> filename));  Compiler_record_compile_time_effect(c, ({
-        Var _x2c_literal_part_132 = String_var(path);  Var _x2c_literal_part_133 = List_var(({
-          Var _x2c_literal_part_130 = String_var(source);  Var _x2c_literal_part_131 = Compiler_freeze_declaration_syntax(c, Token_var(c -> token));  cons(_6, cons(_x2c_literal_part_130, cons(_x2c_literal_part_131, NULL)));
-        }
-        ));  cons(_433, cons(_466, cons(_x2c_literal_part_132, cons(_x2c_literal_part_133, NULL))));
+      String path = home_portable_path(Compiler__canonical_path(c, requested, c -> token));  Compiler_record_compile_time_effect(c, ({
+        Var _x2c_literal_part_130 = String_var(path);  Var _x2c_literal_part_131 = List_var(Compiler__effect_source(c, c -> token));  cons(_433, cons(_466, cons(_x2c_literal_part_130, cons(_x2c_literal_part_131, NULL))));
       }
       ), c -> token);
     }
     Compiler_parse_macro_lisp_top_level(c);  return;
   }
-  Token first = c -> token;  String form = Compiler__lisp_form(c);  if(c -> inherited_lisp) return;  if(! c -> source_private){
-    String path = home_portable_path(Path_absolute(c -> filename));  Compiler_record_compile_time_effect(c, ({
-      Var _x2c_literal_part_136 = String_var(form);  Var _x2c_literal_part_137 = List_var(({
-        Var _x2c_literal_part_134 = String_var(path);  Var _x2c_literal_part_135 = Compiler_freeze_declaration_syntax(c, Token_var(first));  cons(_6, cons(_x2c_literal_part_134, cons(_x2c_literal_part_135, NULL)));
-      }
-      ));  cons(_433, cons(_454, cons(_x2c_literal_part_136, cons(_x2c_literal_part_137, NULL))));
-    }
-    ), first);
+  Token first = c -> token;  String form = Compiler__lisp_form(c);  if(c -> inherited_lisp) return;  if(! c -> source_private) Compiler_record_compile_time_effect(c, ({
+    Var _x2c_literal_part_132 = String_var(form);  Var _x2c_literal_part_133 = List_var(Compiler__effect_source(c, first));  cons(_433, cons(_454, cons(_x2c_literal_part_132, cons(_x2c_literal_part_133, NULL))));
   }
-  Compiler_queue_declaration_effect(c, form, first, c -> token);
+  ), first);  Compiler_queue_declaration_effect(c, form, first, c -> token);
+}
+
+Token Compiler_source_token(Compiler, Token, String *);
+static List Compiler__effect_source(Compiler c, Token site){
+  String file = NULL;  Token placed = Compiler_source_token(c, site, &(file));  return({
+    Var _x2c_literal_part_134 = String_var(home_portable_path(Path_absolute(file)));  Var _x2c_literal_part_135 = Compiler_freeze_declaration_syntax(c, Token_var(placed));  cons(_6, cons(_x2c_literal_part_134, cons(_x2c_literal_part_135, NULL)));
+  }
+  );
 }
 
 void Compiler_evaluate_declaration_effect(Compiler c, String form, Token invocation){
   if(! _init_guard_) _file_init_();  List key =({
-    Var _x2c_literal_part_138 = String_var(home_portable_path(Path_absolute(c -> filename)));  cons(_x2c_literal_part_138, cons(int_var(invocation -> pos), cons(String_var(form), NULL)));
+    Var _x2c_literal_part_136 = String_var(home_portable_path(Path_absolute(c -> filename)));  cons(_x2c_literal_part_136, cons(int_var(invocation -> pos), cons(String_var(form), NULL)));
   }
   );  if(Map_contains(c -> evaluated_effects, List_var(key)) ||(! library_filling && Map_truth(library_imports) && Map_contains(library_imports, List_var(key)))) return; {
     int * _x2c_macro_address_51 = & c -> collect_protocols;  int _x2c_macro_previous_51 = * _x2c_macro_address_51; {
@@ -9061,7 +9062,7 @@ static Var _lisp_import_hook(String path){
   MetaContext * context = MetaContext_current();
   Compiler c = context -> evaluator;
   if(! c){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/macros.x",.function = "_lisp_import_hook",.line = 5231};
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/macros.x",.function = "_lisp_import_hook",.line = 5235};
     x2c_error_raise_n(& _x2c_error_site_1, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("compile-time import")), NULL))));
     __builtin_unreachable();
   }
@@ -9197,7 +9198,7 @@ int SourceView_exists(SourceView, String);
 static String Compiler__canonical_path(Compiler c, String path, Token site){
   if(! String_truth(path) || String_getindex(path, 0) == '/') return Compiler_canonical_path(c, path);
   String local =({
-    Var _x2c_literal_part_139 = String_var(Compiler__source_dir(c, site));  String_join(NULL, cons(_x2c_literal_part_139, cons(String_var(_52), cons(String_var(path), NULL))));
+    Var _x2c_literal_part_137 = String_var(Compiler__source_dir(c, site));  String_join(NULL, cons(_x2c_literal_part_137, cons(String_var(_52), cons(String_var(path), NULL))));
   }
   );
   String system = String_join(NULL, cons(String_var(c -> root_dir), cons(String_var(_901), cons(String_var(path), NULL))));
@@ -9397,10 +9398,10 @@ static List _library_files(void){
       relative = List_getindex(_x2c_macro_pair_75, 0);
       message = List_getindex(_x2c_macro_pair_75, 1);
       Array_push(rows, List_var(({
-        Var _x2c_literal_part_142 = String_var(({
-          Var _x2c_literal_part_140 = String_var(x2c_get_root());  Var _x2c_literal_part_141 = String_var(Var_str(relative));  String_join(NULL, cons(_x2c_literal_part_140, cons(String_var(_52), cons(_x2c_literal_part_141, NULL))));
+        Var _x2c_literal_part_140 = String_var(({
+          Var _x2c_literal_part_138 = String_var(x2c_get_root());  Var _x2c_literal_part_139 = String_var(Var_str(relative));  String_join(NULL, cons(_x2c_literal_part_138, cons(String_var(_52), cons(_x2c_literal_part_139, NULL))));
         }
-        ));  cons(_x2c_literal_part_142, cons(message, NULL));
+        ));  cons(_x2c_literal_part_140, cons(message, NULL));
       }
       )));
     }
@@ -9514,7 +9515,7 @@ int Compiler_shares_meta_definition(Compiler c, String name){
   if(! _init_guard_) _file_init_();
   if(library_filling || library_definitions == NULL || ! String_truth(c -> filename)) return 0;
   String key =({
-    Var _x2c_literal_part_143 = String_var(Path_absolute(c -> filename));  String_join(NULL, cons(_x2c_literal_part_143, cons(String_var(_938), cons(String_var(name), NULL))));
+    Var _x2c_literal_part_141 = String_var(Path_absolute(c -> filename));  String_join(NULL, cons(_x2c_literal_part_141, cons(String_var(_938), cons(String_var(name), NULL))));
   }
   );
   return Map_contains(library_definitions, String_var(key));
@@ -9642,9 +9643,9 @@ void Compiler_bind_meta_operation(Lisp lisp, String name, Var function){
 
 static String _meta_lisp_name(String name){
   return String_startswith(name, _971) ? String_replace(name, _972, _902) :({
-    Var _x2c_literal_part_144 = String_var(String_getslice(name, (-2147483647 - 1), 4, 1));
-    Var _x2c_literal_part_145 = String_var(String_getslice(name, 5, (-2147483647 - 1), 1));
-    String_join(NULL, cons(_x2c_literal_part_144, cons(String_var(_539), cons(_x2c_literal_part_145, NULL))));
+    Var _x2c_literal_part_142 = String_var(String_getslice(name, (-2147483647 - 1), 4, 1));
+    Var _x2c_literal_part_143 = String_var(String_getslice(name, 5, (-2147483647 - 1), 1));
+    String_join(NULL, cons(_x2c_literal_part_142, cons(String_var(_539), cons(_x2c_literal_part_143, NULL))));
   }
   );
 }
