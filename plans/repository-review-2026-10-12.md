@@ -2,8 +2,56 @@
 
 > Status: active - review record at `origin/dev` `2ec6ea71`, 2026-10-12.
 > Every finding below was reproduced at that commit in this worktree unless a
-> row says "by reading". The record selects nothing; Gary chooses which rows
-> land before the cleanup phase freezes behavior.
+> row says "by reading". Gary decided the rows on 2026-10-12; the
+> [decisions](#decisions-recorded-2026-10-12) section records them, and the
+> execution log at the end records what landed.
+
+## Decisions recorded 2026-10-12
+
+1. **Numeric comparisons.** `==`, `!=`, `<`, `<=`, `>`, and `>=` on two
+   numeric Vars behave as the same comparison between their native values in
+   C, through the arithmetic conversion ladder `Var.binary` already uses, so
+   mixed signedness and NaN follow C. `===` on numbers requires the same type
+   and the same bits, so `NaN === NaN` stays true and `+0.0 === -0.0` stays
+   false. Map and Pool keys, `Var.hash`, `Var.compare` and sorting are
+   unchanged; value classes keep identity for `===`; native static operands
+   are unchanged.
+2. **Indices are 32-bit `int`.** The book states it. No compiler or runtime
+   change; a wider value is outside the supported domain.
+3. **Non-List match.** A Var subject whose tag is not `<list>` matches no
+   List arm and reaches `default`. `Null` and `void` are not Lists. The owner
+   is the match component's subject read.
+4. **Var to String.** An implicit String destination calls `.str()`, which
+   already returns a String-tagged Var's String itself and renders every other
+   tag. An explicit `.string()` raises when the Var is not a String instead of
+   returning NULL. The unnecessary-conversion lint stops flagging `.string()`
+   at a String destination. Compiler and runtime sites that read the old NULL
+   as "not a String" become `is String` tests.
+5. **Component dispatch.** Each shipped rule binds to its registered function;
+   component macros and helpers are private to the prelude, so a program
+   definition of the same name is a separate definition.
+6. **A `case` or `default` label that enters a protected cleanup region** is
+   rejected at compile time with the `goto` diagnostic family.
+7. **Self-meta.** A function rule rewrites the program's definitions; the copy
+   the compiler runs is compiled as written. The book sentence at
+   `docs/src/guide/meta-functions.md:96` says so. No code change.
+8. **SDK.** `Code.register_after_initialization` stays: it is the only hook on
+   every initialized declaration of a type, `$rewrite` rejects ordinary
+   declaration patterns, and the optional spike runner still passes all 17
+   cases. One spike case becomes a compiler fixture. `x2c_meta_definition_hashes`
+   stays.
+9. **Seams.** Both components place code through `x2c_place`; `add_early`,
+   `needs_exception`, `localinit`, and `lower_defer_region` stay
+   kernel-internal; the linked prelude stays, and the generated
+   `src/linked-meta.x` is excluded from lint censuses and module maps.
+10. **AR-3** is reworded: a new lowering is a shipped component on the two
+    primitives, and the driver gains no ordered pass list and no struct IR.
+11. String `switch` and typed `_Alignof` are deferred past the cleanup phase.
+    The 114 remote branches merged into dev are deleted; the 14 unmerged stay.
+    `.context/language-components/performance.json` is untracked.
+
+Delivery: direct to dev through `tools/land-dev`, one gate per batch, in the
+order of the recommended order below.
 
 ## Result
 
