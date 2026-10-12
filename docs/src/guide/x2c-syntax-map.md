@@ -15,7 +15,7 @@ reference](../reference/language.md) owns each construct's meaning.
 
 | Extension family | Grammar additions | Lexical changes |
 | --- | --- | --- |
-| [Source organization](../reference/language.md#source-files-and-visibility) | import with aliases/member selection, package-qualified alias.Type/alias.member names, and script statements outside an explicit main. | import is a keyword; a leading shebang is handled before lexing. |
+| [Source organization](../reference/language.md#source-files-and-visibility) | import with aliases/member selection, package-qualified alias.Type/alias.member names, module member text splicing before parsing, and script statements outside an explicit main. | import is a keyword; a leading shebang is handled before lexing. |
 | [Optional indentation](../reference/language.md#indentation-syntax) | The parser receives ordinary braces, parentheses, and semicolons. | In .xp or after #pragma indent, a token pass rewrites layout and colons. |
 | [Declarations and references](../reference/language.md#c-foundation) | Mixed-type rows, T.method names, & and &? parameters, delegate fields, destructuring, class/NamedType forms, and static type visibility. | delegate and threaded are keywords; Self is contextual. Existing punctuation gains declaration roles. |
 | [Protocols](../reference/language.md#protocols) | Protocol definitions/adoptions, associated types, member aliases, and as/tag adoption modifiers. | protocol and associated are keywords; as and tag are contextual words. |

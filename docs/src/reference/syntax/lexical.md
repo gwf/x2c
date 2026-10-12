@@ -7,6 +7,11 @@ recognition. The [source grammar](grammar.md) consumes their output.
 The same rules are available as [structured List data](data.md), with a
 [generated inventory](lexical-data.md).
 
+Before ordinary unit parsing, collection scans active file-scope `module`
+blocks and splices member text. This contextual source-assembly pass uses
+`src/collect.x`; it does not add a tokenizer keyword or parser production.
+See [module collection](grammar.md#notation-and-entry-points).
+
 ## Input and output
 
 Input is a NUL-terminated byte sequence. The first NUL ends scanning in
@@ -77,7 +82,7 @@ while retaining original token text:
 
 Other words initially emit `ident`, including `is`, `not`, `with`, `as`,
 `tag`, `macro`, `keyword`, `using`, `meta`, `native`, `Self`, `class`,
-`foreach`, `_Static_assert`, `_Generic`, `offsetof`, and `va_arg`.
+`foreach`, `module`, `_Static_assert`, `_Generic`, `offsetof`, and `va_arg`.
 Parser context or visible macro definitions give these words their roles.
 A named-reference sigil scans the immediately following identifier as
 `ident` without applying the keyword table.

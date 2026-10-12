@@ -336,6 +336,11 @@ List syntax_lexical(void) => %(lexical
       ident lit-int lit-float lit-char* lit-char lit-atom lit-symbol
       "(" "%(" "%[" "%{" "\$(" "\${" "\$" "!" "-" "*" "&" "~" "++" "--"))
   (passes
+    (pass module-collection
+      (external "src/collect.x; active file-scope module blocks before unit parsing")
+      (enabled-by default-symbol-collection)
+      (splice member-text-in-order) (resolve under-containing-file-companion-directory)
+      (recursive true) (word "module" ident))
     (pass pipeline (ordered frontend-shebang scan layout lexical-diagnostics
       conditionals keyword-retag parser))
     (pass frontend-shebang

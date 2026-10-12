@@ -14,12 +14,12 @@ List syntax_extensions(void) => %(
   (features
     (feature source-organization
       (title "Source organization")
-      (summary "Import packages and run statements in script units.")
-      (grammar import-declaration import-member script-unit type-reference identifier)
+      (summary "Import packages, assemble module members, and run script statements.")
+      (grammar import-declaration import-member module-block script-unit type-reference identifier)
       (lexical c-tokens)
-      (grammar-note "import with aliases/member selection, package-qualified alias.Type/alias.member names, and script statements outside an explicit main.")
+      (grammar-note "import with aliases/member selection, package-qualified alias.Type/alias.member names, module member text splicing before parsing, and script statements outside an explicit main.")
       (lexical-note "import is a keyword; a leading shebang is handled before lexing.")
-      (spellings "import" "as" "with" "#!")
+      (spellings "import" "as" "with" "module" "#!")
       (reference "../reference/language.md#source-files-and-visibility"))
     (feature layout
       (title "Optional indentation")

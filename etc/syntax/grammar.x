@@ -21,6 +21,16 @@ List syntax_grammar(void) => %(grammar
 
     (rule translation-unit (repeat 0 (ref unit-item)))
 
+    (rule module-block
+      (seq (token "module") (token "{")
+        (optional (seq (ref c-string)
+          (repeat 0 (seq (token ",") (ref c-string)))
+          (optional (token ","))))
+        (token "}")))
+
+    (rule private-interface
+      (external "static typedef, protocol body, class, or Lisp interface item; D4"))
+
     (rule unit-item
       (choice
         (ref directive)
@@ -29,7 +39,8 @@ List syntax_grammar(void) => %(grammar
         (ref protocol-form)
         (ref macro-definition)
         (ref keyword-definition)
-        (seq (optional (token "static")) (ref lisp-escape))
+        (ref private-interface)
+        (ref lisp-escape)
         (ref linkage-group)
         (ref declaration-definition)
         (ref unit-extension)))
@@ -50,7 +61,7 @@ List syntax_grammar(void) => %(grammar
 
     (rule function-body
       (choice
-        (ref block)
+        (ref raw-block)
         (seq (token "=") (token ">") (ref expression) (token ";"))))
 
     (rule import-declaration
@@ -85,12 +96,17 @@ List syntax_grammar(void) => %(grammar
 
     (rule declaration-group
       (choice
+        (ref typedef-declaration)
         (seq (ref specifiers) (ref declarator-list))
         (seq
           (ref specifiers)
           (ref destructuring-targets)
           (token "=")
           (ref assignment))))
+
+    (rule typedef-declaration
+      (seq (token "typedef") (repeat 0 (ref qualifier))
+        (ref type-specifier) (ref declarator-list)))
 
     (rule specifiers
       (seq
@@ -112,7 +128,6 @@ List syntax_grammar(void) => %(grammar
 
     (rule storage
       (choice
-        (token "typedef")
         (seq (token "extern") (optional (ref c-string)))
         (token "static")
         (token "auto")
@@ -125,6 +140,7 @@ List syntax_grammar(void) => %(grammar
     (rule type-specifier
       (choice
         (ref scalar-specifiers)
+        (token "Self")
         (ref aggregate)
         (ref enumeration)
         (ref type-reference)
@@ -350,7 +366,12 @@ List syntax_grammar(void) => %(grammar
         (optional (seq (token "=") (ref identifier)))
         (token ";")))
 
-    (rule block (seq (token "{") (repeat 0 (ref block-item)) (token "}")))
+    (rule raw-block
+      (seq (token "{") (repeat 0 (ref block-item)) (token "}")))
+
+    (rule block
+      (seq (choice (token "{") (token "%{"))
+        (repeat 0 (ref block-item)) (token "}")))
 
     (rule block-item
       (choice
@@ -425,7 +446,7 @@ List syntax_grammar(void) => %(grammar
         (token "with")
         (ref expression)
         (optional (seq (token "as") (ref identifier)))
-        (ref block)))
+        (ref raw-block)))
 
     (rule match-statement
       (seq
@@ -452,7 +473,7 @@ List syntax_grammar(void) => %(grammar
 
     (rule pattern
       (external
-        "expression yielding a static List pattern, or macro pattern P1"))
+        "expression yielding a List pattern, or macro pattern P1"))
 
     (rule try-statement
       (seq
@@ -604,8 +625,11 @@ List syntax_grammar(void) => %(grammar
 
     (rule cast
       (choice
-        (seq (token "(") (ref type-operand) (token ")") (ref cast))
+        (seq (ref cast-head) (ref cast))
         (ref unary)))
+
+    (rule cast-head
+      (external "parenthesized type operand with cast-follow lookahead; E1"))
 
     (rule unary
       (choice
@@ -699,7 +723,7 @@ List syntax_grammar(void) => %(grammar
     (rule native-string-word
       (external "adjacent native macro or unbound word accepted by E3"))
 
-    (rule statement-expression (seq (token "(") (ref block) (token ")")))
+    (rule statement-expression (seq (token "(") (ref raw-block) (token ")")))
 
     (rule initializer
       (seq
@@ -798,7 +822,7 @@ List syntax_grammar(void) => %(grammar
         (optional (seq (token "using") (ref capture-list)))
         (token "=")
         (token ">")
-        (choice (ref block) (ref assignment))))
+        (choice (ref raw-block) (ref assignment))))
 
     (rule bare-parameters
       (seq (ref identifier) (repeat 0 (seq (token ",") (ref identifier)))))
@@ -807,9 +831,11 @@ List syntax_grammar(void) => %(grammar
       (choice
         (seq
           (token "&")
-          (ref declaration-name)
-          (repeat 0 (seq (token ",") (token "&") (ref declaration-name))))
+          (ref capture-name)
+          (repeat 0 (seq (token ",") (token "&") (ref capture-name))))
         (ref captures-slot)))
+
+    (rule capture-name (choice (ref identifier) (ref name-slot)))
 
     (rule quoted-list
       (seq (token "%(") (repeat 0 (ref list-element)) (token ")")))
@@ -860,7 +886,8 @@ List syntax_grammar(void) => %(grammar
         (token "]")))
 
     (rule quoted-array-item
-      (choice (ref data-element) (ref argument-slot)))
+      (choice (ref data-element) (ref argument-slot)
+        (seq (token "\${") (ref argument-slot) (token "}"))))
 
     (rule data-element (choice (ref literal-element) (ref insertion)))
 
@@ -877,6 +904,7 @@ List syntax_grammar(void) => %(grammar
     (rule quoted-entry
       (choice
         (seq (ref data-element) (token ":") (ref data-element))
+        (ref entry-extension)
         (ref quoted-entry-extension)))
 
     (rule quoted-entry-extension
@@ -898,7 +926,7 @@ List syntax_grammar(void) => %(grammar
       (choice (ref class-declaration) (ref unit-macro) (ref decorator)))
 
     (rule class-declaration
-      (seq (optional (token "static")) (token "class") (ref named-type)))
+      (seq (token "class") (ref named-type)))
 
     (rule statement-extension
       (choice
@@ -993,8 +1021,11 @@ List syntax_grammar(void) => %(grammar
           (ref identifier)
           (repeat 0 (seq (token ",") (ref identifier))))))
 
+    (rule body-using
+      (seq (token "using") (ref using-list) (token ";")))
+
     (rule macro-body
-      (external "body selected by result/target kind; contract M2"))
+      (external "body selected by result/target kind; braced bodies start with body-using lines; M2"))
 
     (rule macro-call
       (seq (ref macro-name) (token "(") (ref macro-arguments) (token ")")))

@@ -5,19 +5,22 @@
 source-unit = ( translation-unit | script-unit ) ;
 script-unit = ? script partition described in grammar.md entry points ? ;
 translation-unit = { unit-item } ;
+module-block = ( "module" , "{" , [ ( c-string , { ( "," , c-string ) } , [ "," ] ) ] , "}" ) ;
+private-interface = ? static typedef, protocol body, class, or Lisp interface item; D4 ? ;
 unit-item = ( directive |
     static-assert |
     import-declaration |
     protocol-form |
     macro-definition |
     keyword-definition |
-    ( [ "static" ] , lisp-escape ) |
+    private-interface |
+    lisp-escape |
     linkage-group |
     declaration-definition |
     unit-extension ) ;
 linkage-group = ( "extern" , c-string , "{" , { unit-item } , "}" ) ;
 declaration-definition = ( [ ( "meta" , [ "native" ] ) ] , declaration-row , ( ";" | function-body ) ) ;
-function-body = ( block | ( "=" , ">" , expression , ";" ) ) ;
+function-body = ( raw-block | ( "=" , ">" , expression , ";" ) ) ;
 import-declaration = ( "import" ,
     c-string ,
     [ ( "as" , identifier ) ] ,
@@ -26,14 +29,16 @@ import-declaration = ( "import" ,
 import-member = ( identifier , [ ( "as" , identifier ) ] ) ;
 static-assert = ( "_Static_assert" , "(" , assignment , "," , assignment , ")" , ";" ) ;
 declaration-row = ( declaration-group , { ( "," , declaration-group ) } ) ;
-declaration-group = ( ( specifiers , declarator-list ) |
+declaration-group = ( typedef-declaration |
+    ( specifiers , declarator-list ) |
     ( specifiers , destructuring-targets , "=" , assignment ) ) ;
+typedef-declaration = ( "typedef" , { qualifier } , type-specifier , declarator-list ) ;
 specifiers = ( { declaration-prefix } , { qualifier } , type-specifier , { trailing-storage } ) ;
 declaration-prefix = ( storage | "inline" | "_Noreturn" | attribute | prefix-macro ) ;
 trailing-storage = ( storage | "inline" | prefix-macro ) ;
-storage = ( "typedef" | ( "extern" , [ c-string ] ) | "static" | "auto" | "register" | "threaded" ) ;
+storage = ( ( "extern" , [ c-string ] ) | "static" | "auto" | "register" | "threaded" ) ;
 qualifier = ( "const" | "restrict" | "volatile" ) ;
-type-specifier = ( scalar-specifiers | aggregate | enumeration | type-reference | type-slot ) ;
+type-specifier = ( scalar-specifiers | "Self" | aggregate | enumeration | type-reference | type-slot ) ;
 scalar-specifiers = ( scalar-word , { scalar-word } ) ;
 scalar-word = ( "void" | "char" | "short" | "int" | "long" | "float" | "double" | "signed" | "unsigned" ) ;
 type-reference = ( identifier , [ ( "." , identifier ) ] ) ;
@@ -96,7 +101,8 @@ protocol-form = ( ( "protocol" ,
     ";" ) ) ;
 associated-type = ( "associated" , identifier , "=" , type-name , ";" ) ;
 protocol-member = ( specifiers , declarator , [ ( "=" , identifier ) ] , ";" ) ;
-block = ( "{" , { block-item } , "}" ) ;
+raw-block = ( "{" , { block-item } , "}" ) ;
+block = ( ( "{" | "%{" ) , { block-item } , "}" ) ;
 block-item = ( directive |
     static-assert |
     ( declaration-row , ";" ) |
@@ -134,7 +140,7 @@ statement = ( block |
     statement-extension ) ;
 for-init = ( type-operand | expression ) ;
 governed = ? one statement, with directive handling G1 ? ;
-with-statement = ( "with" , expression , [ ( "as" , identifier ) ] , block ) ;
+with-statement = ( "with" , expression , [ ( "as" , identifier ) ] , raw-block ) ;
 match-statement = ( "match" ,
     "(" ,
     expression ,
@@ -145,7 +151,7 @@ match-row = ( ( ( ( "case" , pattern ) | "default" ) ,
     ":" ,
     governed ) |
     match-row-slot ) ;
-pattern = ? expression yielding a static List pattern, or macro pattern P1 ? ;
+pattern = ? expression yielding a List pattern, or macro pattern P1 ? ;
 try-statement = ( "try" ,
     governed ,
     ( ( catch-arm , { catch-arm } , [ ( "finally" , governed ) ] ) | ( "finally" , governed ) ) ) ;
@@ -177,7 +183,8 @@ type-selector = ( type-name | ( "(" , type-name , ")" ) | cast ) ;
 shift = ( additive , { ( ( "<<" | ">>" ) , additive ) } ) ;
 additive = ( multiplicative , { ( ( "+" | "-" ) , multiplicative ) } ) ;
 multiplicative = ( cast , { ( ( "*" | "/" | "%" ) , cast ) } ) ;
-cast = ( ( "(" , type-operand , ")" , cast ) | unary ) ;
+cast = ( ( cast-head , cast ) | unary ) ;
+cast-head = ? parenthesized type operand with cast-follow lookahead; E1 ? ;
 unary = ( ( ( "++" | "--" ) , unary ) |
     ( ( "&" | "*" | "+" | "-" | "~" | "!" ) , cast ) |
     ( "sizeof" , ( ( "(" , ( type-operand | expression ) , ")" ) | type-operand | unary ) ) |
@@ -216,7 +223,7 @@ primary = ( atomic |
 atomic = ( integer | floating | character | c-string | symbol | atom | "void" ) ;
 c-string-run = ( c-string , { ( c-string | native-string-word ) } ) ;
 native-string-word = ? adjacent native macro or unbound word accepted by E3 ? ;
-statement-expression = ( "(" , block , ")" ) ;
+statement-expression = ( "(" , raw-block , ")" ) ;
 initializer = ( "{" , [ ( initializer-item , { ( "," , initializer-item ) } , [ "," ] ) ] , "}" ) ;
 initializer-item = ( assignment | argument-slot | ( designator , { designator } , "=" , assignment ) ) ;
 designator = ( ( "." , identifier ) | ( "[" , assignment , "]" ) ) ;
@@ -243,9 +250,10 @@ lambda = ( "%!" ,
     [ ( "using" , capture-list ) ] ,
     "=" ,
     ">" ,
-    ( block | assignment ) ) ;
+    ( raw-block | assignment ) ) ;
 bare-parameters = ( identifier , { ( "," , identifier ) } ) ;
-capture-list = ( ( "&" , declaration-name , { ( "," , "&" , declaration-name ) } ) | captures-slot ) ;
+capture-list = ( ( "&" , capture-name , { ( "," , "&" , capture-name ) } ) | captures-slot ) ;
+capture-name = ( identifier | name-slot ) ;
 quoted-list = ( "%(" , { list-element } , ")" ) ;
 nested-list = ( "(" , { list-element } , ")" ) ;
 list-element = ( literal-element | insertion | splice | ( reader-prefix , list-element ) ) ;
@@ -255,16 +263,16 @@ splice = ( ( "@" , identifier ) | ( "@{" , expression , "}" ) ) ;
 reader-prefix = ( "\'" | "`" | "," | ",@" ) ;
 typed-capture = ( "?(" , type-name , identifier , ")" ) ;
 quoted-array = ( "%[" , [ ( quoted-array-item , { ( "," , quoted-array-item ) } , [ "," ] ) ] , "]" ) ;
-quoted-array-item = ( data-element | argument-slot ) ;
+quoted-array-item = ( data-element | argument-slot | ( "${" , argument-slot , "}" ) ) ;
 data-element = ( literal-element | insertion ) ;
 quoted-map = ( "%{" , [ ( quoted-entry , { ( "," , quoted-entry ) } , [ "," ] ) ] , "}" ) ;
-quoted-entry = ( ( data-element , ":" , data-element ) | quoted-entry-extension ) ;
+quoted-entry = ( ( data-element , ":" , data-element ) | entry-extension | quoted-entry-extension ) ;
 quoted-entry-extension = ( "${" , entry-extension , "}" ) ;
 percent-string = ( "%\"" , { ( string-segment | insertion ) } , "\"" ) ;
 symbol-set = ( "%<<" , { symbol-set-member } , ">>" ) ;
 symbol-set-member = ? symbol-set-mode lit-atom or lit-symbol ? ;
 unit-extension = ( class-declaration | unit-macro | decorator ) ;
-class-declaration = ( [ "static" ] , "class" , named-type ) ;
+class-declaration = ( "class" , named-type ) ;
 statement-extension = ( foreach-statement | statement-macro | decorator ) ;
 foreach-statement = ( "foreach" , "(" , declaration-argument , ( "in" | "," ) , assignment , ")" , governed ) ;
 declaration-argument = ( specifiers , ( init-declarator | destructuring-targets ) ) ;
@@ -281,7 +289,8 @@ macro-signature = ( "(" ,
 hole-parameter = ( [ hole-kind ] , ( "$" | "@" ) , identifier ) ;
 using-list = ( ( "$" , identifier , { ( "," , "$" , identifier ) } ) |
     ( identifier , { ( "," , identifier ) } ) ) ;
-macro-body = ? body selected by result/target kind; contract M2 ? ;
+body-using = ( "using" , using-list , ";" ) ;
+macro-body = ? body selected by result/target kind; braced bodies start with body-using lines; M2 ? ;
 macro-call = ( macro-name , "(" , macro-arguments , ")" ) ;
 local-macro-call = ( identifier , "(" , macro-arguments , ")" ) ;
 meta-call = ( macro-name , "(" , [ ( meta-argument , { ( "," , meta-argument ) } ) ] , ")" ) ;

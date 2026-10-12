@@ -8,7 +8,7 @@ Three modules under `etc/syntax/` own the data:
 
 | Module | Accessor | Contents |
 | --- | --- | --- |
-| `grammar.x` | `syntax_grammar()` | Entry point and 179 source productions |
+| `grammar.x` | `syntax_grammar()` | Entry point and 186 source productions |
 | `lexical.x` | `syntax_lexical()` | Byte patterns, ordered scanning, modes, transitions, predicates, token passes, failures |
 | `extensions.x` | `syntax_extensions()` | Reviewed C11 comparison, feature groups, affected rule names, example spellings, documentation links |
 

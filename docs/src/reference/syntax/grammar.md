@@ -36,6 +36,15 @@ uses `Compiler.script_statement_starts`, `_declaration_stays`, and
 `defines_main` in `src/parse.x`; arbitrary interleaving is not permission to
 refer to script locals from file-level functions.
 
+Module blocks are expanded by `src/collect.x` before `translation-unit`
+parsing. `module-block` describes this source-assembly form, not a `unit-item`.
+It contains quoted member paths, separated by commas, with an optional
+trailing comma. Members are inserted in order from the containing file's
+companion directory, `NAME/` beside `NAME.x`; paths cannot contain `..`.
+Nested module blocks are expanded too. Each file permits one file-scope
+block and must use default symbol collection. CPP and live-symbol modes do
+not support member splicing. Ordinary `module` identifiers remain identifiers.
+
 ## Declaration contracts
 
 **D1: names and declaration starts.** `Compiler.test_declaration` uses
@@ -47,9 +56,9 @@ named `TYPE_NAME`. Import aliases fold through the current symbol table;
 local bindings can shadow them. An imported package string must decode to
 an identifier, and each imported member must exist.
 
-`identifier` normally consumes `ident`. Method/declarator name positions
-also accept identifier-shaped keyword text when their parser explicitly
-does so. `method-owner` is the owner recognized by
+`identifier` normally consumes `ident`. Member selection, method names,
+and declarator names also accept identifier-shaped keyword text where
+their parser explicitly does so. `method-owner` is the owner recognized by
 `Compiler._complex_identifier`: a built-in type word or known typedef,
 including package-qualified type names. `Self` is resolved as a contextual
 type. Type existence and a valid scalar combination remain semantic checks.
@@ -96,15 +105,21 @@ is a binder; an adoption's participant is a type. Protocol members must be
 single function declarations owned by that binder. Associated types precede
 members; `as` and `tag` are mutually exclusive Var-adoption modifiers.
 
-A leading `static` on a typedef, protocol, class, or top-level Lisp form
+**D4: interface modifiers.** `private-interface` names the top-level
+visibility dispatch before declaration parsing. A leading `static` on a
+typedef, protocol body, class, or top-level Lisp form
 also controls source visibility. `meta native` applies to function
-interfaces. See the reference for the public/private and compile-time rules.
+interfaces. Protocol adoptions permit `meta` followed by optional `static`,
+or `static` alone; protocol bodies reject `meta`. See the reference for
+the public/private and compile-time rules.
 
 ## Expression contracts
 
 **E1: casts, selectors, and braces.** A parenthesized declaration start
-selects a cast; otherwise parentheses group an expression. At statement
-start, named parameters in the parentheses select a typed destructuring
+selects a cast only when the token after `)` can start its operand.
+`_cast_operand_follows` recognizes primary starts, `sizeof`, prefix update,
+and unary operators. Otherwise parentheses resume a grouped expression.
+At statement start, named parameters in the parentheses select a typed destructuring
 declaration; one anonymous parameter can instead be a cast.
 
 `is [not]` shares relational precedence. Its right operand is a type when
@@ -140,7 +155,7 @@ parentheses without braces do not form a statement expression.
 | Binary 7 | `< <= > >= in is` (`is not` included) | Left |
 | Binary 8 | `<< >>` | Left |
 | Binary 9 | `+ -` | Left |
-| Binary 10 | `* / % @` | Left |
+| Binary 10 | `* / %` | Left |
 | Cast/unary | Cast, prefix update, address, dereference, sign, `~ ! sizeof` | Prefix nesting |
 | Postfix | Call, index, slice, member selection, postfix update | Left |
 
@@ -149,6 +164,15 @@ handler in `src/expressions.x`. Assignment parses a conditional left side;
 whether that side is assignable is a semantic question. An expression-bodied
 function uses a full expression, while a lambda expression body uses an
 assignment expression. Calls and literal element lists permit trailing commas.
+
+| Form | Operand or target |
+| --- | --- |
+| `in` | Shift expression at relational precedence |
+| `is [not]` | Contextual type selector or one cast expression |
+| Lambda `=>` body | Assignment expression, or raw braced block |
+| Function `=>` body | Full comma expression |
+| Expression macro body | Full comma expression |
+| Expression decorator target | One cast expression |
 
 **E3: special primaries.** `_Generic`, `va_arg`, and `offsetof` are recognized
 by identifier spelling in `_parse_ident_primary`. Adjacent C strings join.
@@ -171,14 +195,16 @@ catches must be last in their applicable arm sequence. A label, `case`, or
 `default` is a parsed row by itself. `do ... while (...)` does not consume
 a semicolon; a conventional following `;` is an empty statement. This
 matters when comparing parser consumption, even though emitted C uses its
-required do-while punctuation. The statement parser also accepts a `%{`
+required do-while punctuation. `case` consumes a full expression, including
+a comma expression, but not a GNU `...` range. Native C still checks
+constant-expression validity. The statement parser also accepts a `%{`
 token as a compound-statement opener; its contents still arrive from Map
 lexical mode, so it is not a general substitute for a code-mode `{`.
 
-**P1: patterns and error payloads.** A match pattern must reduce to a static
-List pattern. Besides a List expression, a visible macro can supply a derived
-pattern. Its arguments are `?`/`*` binders with optional identifiers, nested
-macro patterns, or List patterns. `${$macro(...)}` embeds a derived pattern
+**P1: patterns and error payloads.** A match pattern yields a List pattern,
+which can be static or supplied at runtime. Besides a List expression, a
+visible macro can supply a derived pattern. Its arguments are `?`/`*`
+binders with optional identifiers, nested macro patterns, or List patterns. `${$macro(...)}` embeds a derived pattern
 inside a List; in an `(expr TYPE CONTENT)` pattern its position can request
 only the content. Typed captures use `?(Type name)` and the type's Var tag.
 `src/literals.x` and `src/macros.x` own these rules; `lib/match.x` and its
@@ -188,7 +214,9 @@ Raise and catch payloads have narrower rules than an arbitrary List.
 Raise detail keys are bare exact Symbols; each detail contains one value.
 Catch details are a `*`-prefixed pattern or `(key pattern)` pair. A pair's
 value/pattern cannot be an outer splice, and a raise/catch code is required.
-Cause and key Symbols must round-trip through the compact representation.
+A catch code may instead be a nested List pattern such as `(!or io eof)`.
+Raise causes and bare catch causes and detail keys must round-trip through
+the compact Symbol representation.
 Template slots can produce the corresponding expression or argument rows;
 they do not create a separate unchecked payload grammar.
 
@@ -225,6 +253,8 @@ productions, without treating extension contents as unrestricted text.
 
 **M1: arguments and positions.** Look up the macro or keyword alias in the
 active compiler state, then parse each argument using its signature category.
+Invocation arguments reject a trailing comma. The first `Param` argument
+opens one scope shared by the remaining arguments.
 An untyped hole initially reads an assignment expression. A final sequence
 parameter repeats its category with commas; it can capture zero elements.
 After a `Decl` argument, `in` may replace the separating comma, which is how
@@ -276,6 +306,7 @@ semicolon selects the canonical form. See `_legacy_expression_body` and
 
 A braced template can begin with `using` lines terminated by semicolons.
 `using $name` declares fresh names; `using name` retains a file-level binding.
+`body-using` describes those leading lines.
 A signature can also have a `using` clause. Sequence parameters must be last.
 Local definitions cannot produce Unit/Declaration results or decorate
 Function/Unit/NamedType targets. These restrictions are enforced by
@@ -290,6 +321,10 @@ Unit/Function/NamedType decorators therefore extend file scope as well as
 block/expression positions. In indentation syntax, the leading `@` in
 `@$decorator(...)` is a layout marker removed before parsing. Sequence
 prefixes `@name`, `@producer(...)`, and `@(form)` remain. Brace-source decorators compose directly before their target.
+A decorator invocation consumes its following target and must not end
+with a semicolon. At file scope, a `Stmt` decorator applied to a function
+definition captures and decorates the function body. This adaptation does
+not permit arbitrary Unit targets for `Stmt` decorators.
 A naked file-scope `@` is rejected. Target placement and alias shadowing
 follow `try_parse_macro_target_at`, not arbitrary grammar substitution.
 
@@ -311,6 +346,10 @@ enumerator, match row, catch, captures, block, or unit) and whether a sequence
 is permitted. In a meta call, a whole `$name` hole passes its captured value;
 a whole sequence hole passes one List, rather than splicing call arguments.
 Meta argument lists do not allow a trailing comma.
+Lambda templates accept `&$name` capture rows as well as one Captures slot.
+Quoted Arrays accept `${@sequence}` in an argument-sequence position.
+Quoted Maps accept a bare Entry slot or a slot inside `${...}`. These
+slots require a compatible template context.
 Call arguments, initializer elements, quoted Array elements,
 and raise details also have argument-sequence positions. A sequence marker
 is not permission to insert multiple statements where one statement is needed.
@@ -334,7 +373,7 @@ one copy of the production inventory.
 The inventory covers declarations, types, expressions, statements, literals,
 protocols, macro syntax, embedded Lisp reading, and script entry selection.
 External recognizers name deliberate boundaries: native annotation contents,
-dynamic macro signatures, context-sensitive names, slots, and static patterns.
+dynamic macro signatures, context-sensitive names, slots, and pattern recognition.
 The accompanying lexical specification covers raw source and layout spelling.
 
 Source comparison, existing fixtures, and focused probes can establish
