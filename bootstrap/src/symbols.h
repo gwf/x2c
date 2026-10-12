@@ -31,6 +31,10 @@ int Sym_scope_count(Sym s);
 
 int Sym_at_file_scope(Sym s);
 
+Block Sym_close_local_scopes(Sym s);
+
+void Sym_reopen_scopes(Sym s, Block local);
+
 Map Sym_global_symbols(Sym s);
 
 Map Sym_base_symbols(Sym s);

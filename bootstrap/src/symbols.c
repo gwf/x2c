@@ -484,6 +484,21 @@ int Sym_at_file_scope(Sym s){
   return(int) Block_len(s -> scopes) <= s -> base_scopes;
 }
 
+Block Sym_close_local_scopes(Sym s){
+  if(! _init_guard_) _file_init_();
+  Block local = Block_new(sizeof(SymScope));
+  if(Sym_at_file_scope(s)) return local;
+  Block_append(local, Sym__scope_at(s, s -> base_scopes), Block_len(s -> scopes) - s -> base_scopes);
+  Block_truncate(s -> scopes, s -> base_scopes);
+  return local;
+}
+
+void Sym_reopen_scopes(Sym s, Block local){
+  if(! _init_guard_) _file_init_();
+  Block_append(s -> scopes, local -> bytes, Block_len(local));
+  Block_free(local);
+}
+
 Map Sym_global_symbols(Sym s){
   if(! _init_guard_) _file_init_();
   return s -> globals;

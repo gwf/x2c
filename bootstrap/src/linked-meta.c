@@ -12675,7 +12675,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_23(void){
   _11784 = List_var(_11783);
   _11785 = String_new("src/macros.x");
   _11786 = String_var(_11785);
-  _11787 = String_new("4486b695");
+  _11787 = String_new("b0056ee0");
   _11788 = String_var(_11787);
   _11789 = cons(_11788, NULL);
   _11790 = cons(_11786, _11789);
@@ -12732,7 +12732,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_23(void){
   _11841 = List_var(_11840);
   _11842 = String_new("src/symbols.x");
   _11843 = String_var(_11842);
-  _11844 = String_new("1f6ec95f");
+  _11844 = String_new("67765adf");
   _11845 = String_var(_11844);
   _11846 = cons(_11845, NULL);
   _11847 = cons(_11843, _11846);
