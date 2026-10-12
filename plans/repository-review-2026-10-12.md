@@ -38,8 +38,8 @@
 8. **SDK.** `Code.register_after_initialization` stays: it is the only hook on
    every initialized declaration of a type, `$rewrite` rejects ordinary
    declaration patterns, and the optional spike runner still passes all 17
-   cases. One spike case becomes a compiler fixture. `x2c_meta_definition_hashes`
-   stays.
+   cases. One spike case becomes a compiler fixture.
+   `x2c_meta_definition_hashes` stays.
 9. **Seams.** Both components place code through `x2c_place`; `add_early`,
    `needs_exception`, `localinit`, and `lower_defer_region` stay
    kernel-internal; the linked prelude stays, and the generated
@@ -354,3 +354,49 @@ components.
 5. Section E as one documentation pass, then section D as the cleanup
    backlog, beginning with the one-owner rows in C4 and the duplicate
    `$error.apply.arity`.
+
+## Execution log
+
+- Batch 1, published to dev as `7d4b9fc2` (2026-10-12): a `return`,
+  `break`, or `continue` out of a `defer` finalizer or source `finally`
+  now leaves the exception frame first (A1; the finalizer is a region of
+  the landing form whose exits mark the frame handled and leave it); a
+  `case` or `default` label that enters a region with exits is rejected at
+  compile time (A5, decision 6); `$auto($auto(x))` is rejected (A9).
+  Fixtures `finalizer-return-frame`, `defer-case-label`, `managed-nested`.
+- Batch 2 (this record's next publication): shipped rule translators and
+  templates defined in a linked provider resolve the names they call to the
+  compiler's linked copies, so a program meta function spelled like a
+  component's translator or helper is a separate definition (A2, decision
+  5; `Compiler._shipped_callee` in src/meta-native.x); code placed
+  at function entry lowers with the function still entered, so a placement
+  made while it lowers lands at the entry too, ahead of it (A7;
+  `Compiler.function_entry`); a function-entry placement from inside a
+  `defer` finalizer, which the kernel writes as its own callback, is
+  rejected (A7); a `Var` match subject whose tag is not `<list>` matches no
+  List arm and reaches `default` (decision 3; `_match_dynamic_read` in
+  src/component-match.x); `Compiler.borrow_diagnostics` and
+  `Sym.resolve_base_type` are deleted (A11); the REPL rollback test builds a
+  `unit-support` placement in place of the deleted `early` effect (A12);
+  the spike case for `Code.register_after_initialization` is the fixture
+  `after-initialization-rule` (decision 8). Fixtures `rewrite-shipped-names`,
+  `rewrite-entry-again`,
+  `rewrite-entry-finalizer`, `match-var-non-list`.
+- Not done in batch 2: the transform-time binding leak (A6). Binding a
+  rule's replacement in a transient symbol scope fixes the leak, but a
+  unit-support declaration made while that replacement binds, such as the
+  bridge of a capturing lambda in `function-to-func-inline`, then lands in
+  the transient scope and leaves the generated header. A repair needs
+  unit-support declarations that bind at file scope whatever scope is open,
+  or hygiene for hand-built declarations in transform-time replacements.
+- Not done in batch 2: making the component macros (`$collection_*`,
+  `$printf_format` and relatives, `$try_site`, `$try_handled`, `$try_frame`,
+  `$delegate_call`) private. A `static macro` in a component is invisible
+  to the generated `src/linked-meta.x`, whose copies use the macros from
+  another unit, and renaming them fails the stage-0 build: the seed
+  compiler serves a shipped component's prelude entry from its own records,
+  so the regenerated copies name macros the seed does not know. A program
+  meta function spelled like one of those macros and called as `$name(...)`
+  still reaches the macro (the b4 case). The names stay reserved, and the
+  rename needs a two-round bootstrap transition that a cleanup-phase move
+  of shipped component names must plan for.
