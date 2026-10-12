@@ -630,7 +630,10 @@ static void FileWalk.prepare(FileWalk &w, Compiler shadow, String segment) {
   shadow.take_unit_state(w.c);
   shadow.tokenize(segment);
   shadow.text = w.text;
-  if (w.module) shadow.line_markers = w.module.markers;
+  if (w.module) {
+    shadow.line_markers = w.module.markers;
+    shadow.unit_source = w.module;
+  }
   if (w.c.source_facts)
     w.c.source_texts[Path.absolute(w.path)] =
       w.module ? w.module.own : w.text;

@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/module-block-same-line-diagnostic.x:2:81: parse: expected atomic expression
+  module { "module-block-same-line-diagnostic/member.x" } int g(void) { return 1 +; }
+                                                                                  ^
+  note: token: ; kind: ;
+

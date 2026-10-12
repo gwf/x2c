@@ -125,7 +125,7 @@ typedef struct Compiler {
      from, as `(position text-line file line)` rows; NULL otherwise. A
      module's rows add the region's byte `offset` in that file. */
   Array line_markers;
-  // The unit's text when its `module` block was spliced, or NULL.
+  // The file's text when its `module` block was spliced, or NULL.
   ModuleSource unit_source;
   List return_type, include_dirs;
   // File paths map to content hashes or 1 when text is not embedded.

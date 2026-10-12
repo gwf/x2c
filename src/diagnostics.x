@@ -297,11 +297,31 @@ static void Compiler._write_heading(
            (position ?position)): {
       String place = %"$file:$line:$column";
       fprintf(stderr, "%s: %s: %s\n", place, code.str(), message);
+      int offset, start = c._own_line_start(position, offset);
+      if (start >= 0) {
+        char *line_start = c.unit_source.own + start, *line_end = line_start;
+        while (*line_end && *line_end != '\n') line_end++;
+        _context_caret(line_start, line_end, column, length);
+        return;
+      }
       if (c.line_markers) line = c._text_line(position);
       c._show_source_context(line, column, length);
       return;
     }
   fprintf(stderr, "%s: %s\n", code.str(), message);
+}
+
+/* Where the compiler file's own line that holds merged byte `position`
+   starts in that file, setting `offset` to the byte's offset there; -1 for
+   a unit without a spliced module block or a byte from a member. Code that
+   follows a block's `}` keeps its own columns this way. */
+static int Compiler._own_line_start(Compiler c, int position, int &offset) {
+  if (!c.unit_source) return -1;
+  String file = c.text_source(position, offset);
+  if (Path.absolute(file) != Path.absolute(c.filename)) return -1;
+  int start = offset;
+  while (start > 0 && c.unit_source.own[start - 1] != '\n') start--;
+  return start;
 }
 
 /* A merged text's location names a line of the file it came from, and the
@@ -373,11 +393,13 @@ List Compiler.token_location(Compiler compiler, Token token) {
   if (!token) token = compiler.token;
   if (!token)
     return %( (file $file) (line 1) (column 1) (length 0) (position 0) );
-  int line = token.line;
+  int line = token.line, column = token.col, offset;
   if (compiler.line_markers) file = compiler.token_source(token, line);
+  int start = compiler._own_line_start(token.pos, offset);
+  if (start >= 0) column = offset - start + 1;
   file = compiler.display_path(file);
   return %( (file $file) (line $line)
-            (column ${token.col}) (length ${token.len})
+            (column $column) (length ${token.len})
             (position ${token.pos})
           );
 }
