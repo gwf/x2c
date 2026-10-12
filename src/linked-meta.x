@@ -1908,6 +1908,19 @@ static void _try_check_label(List finalizer) {
       Code.binding_spelling(label)}' would be defined once for each"));
 }
 
+static List _try_frame_address(Atom frame) {
+  Type type = %(("ExceptionFrame")), pointer = %(* ("ExceptionFrame"));
+  return %(expr $pointer (op & (expr $type (ident $frame))));
+}
+
+static List _try_departure(Atom frame) {
+  List address = _try_frame_address(frame);
+  return $!{
+    x2c_exception_mark_handled($address);
+    x2c_exception_leave($address);
+  };
+}
+
 static List _try_exits(Atom frame, List handle, Atom finalizer) {
   List before = NULL;
   if (handle) {
@@ -1915,8 +1928,7 @@ static List _try_exits(Atom frame, List handle, Atom finalizer) {
     List close = $!{ x2c_error_catch_close($handler); $handler = NULL; };
     before = %($close);
   }
-  Type type = %(("ExceptionFrame")), pointer = %(* ("ExceptionFrame"));
-  List address = %(expr $pointer (op & (expr $type (ident $frame))));
+  List address = _try_frame_address(frame);
   if (finalizer)
     return $!{
       if (x2c_exception_claim($address)) {
@@ -1955,8 +1967,10 @@ static Code _try_landing(
   List handle = arms ? catch_handle(node) : NULL;
   Array rows = [%(new-name $frame "exception_frame")];
   if (finalizer) {
+    Atom departure = Atom.intern("?__try_departure");
     finished = Atom.intern("?__try_finalizer");
-    rows.push(%(outer $finished $finalizer));
+    rows.push(%(exits $departure ${_try_departure(frame)}));
+    rows.push(%(region $finished $finalizer));
   }
   rows.push(%(exits $exits ${_try_exits(frame, handle, finished)}));
   rows.push(%(region $lowered $body));
@@ -2162,6 +2176,8 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "try_catch_cases", try_catch_cases);
   $linked.row(rows, "_try_finalizer_label", _try_finalizer_label);
   $linked.row(rows, "_try_check_label", _try_check_label);
+  $linked.row(rows, "_try_frame_address", _try_frame_address);
+  $linked.row(rows, "_try_departure", _try_departure);
   $linked.row(rows, "_try_exits", _try_exits);
   $linked.row(rows, "_try_catch_clause", _try_catch_clause);
   $linked.row(rows, "_try_landing", _try_landing);
