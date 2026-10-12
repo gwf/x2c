@@ -1004,18 +1004,6 @@ Type Sym.next_typedef(Sym s, Type type, int &hops) {
        ? s._typedef_target(type) : s.get(type);
 }
 
-/** Resolves a typedef name through the base scopes only, ignoring local
-    typedefs, or returns NULL when the base scopes do not declare it. */
-Type Sym.resolve_base_type(Sym s, Type key) {
-  Type type = s._typedef_target(key);
-  for (int hops = 0; type && hops < RESOLVE_KEY_MAX_HOPS; hops++) {
-    Type next = s._typedef_target(type);
-    if (!next) break;
-    type = next;
-  }
-  return type;
-}
-
 /** Returns the name of the one file-scope typedef declared directly as
     `type`, or NULL when no typedef or several typedefs are. */
 Type Sym.sole_typedef(Sym s, Type type) {

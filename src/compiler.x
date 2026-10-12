@@ -2636,14 +2636,6 @@ void Compiler.own_diagnostics(Compiler c) {
   c.diagnostics.printer = c;
 }
 
-/** Shares a caller's diagnostic stream while preserving its emission policy.
-    The caller restores the saved printer after this child finishes.
-*/
-void Compiler.borrow_diagnostics(Compiler c, Compiler owner) {
-  c.diagnostics = owner.diagnostics;
-  if (c.diagnostics.printer) c.own_diagnostics();
-}
-
 /** Retains a child's final diagnostics and closes its owned Lisp session. */
 void Compiler.close_child(Compiler c, Compiler child) {
   c.take_diagnostics(child);
