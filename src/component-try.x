@@ -1,11 +1,12 @@
 /*  component-try.x -- try, catch, and finally
 
     A try lowers to the landing form `(landing CODE ROWS)` that the cleanup
-    walk finishes: its frame, its finalizer lowered outside its regions,
-    the exits that close its catch site, claim the finalizer, and leave the
-    frame, then its body and each catch arm as regions that run those exits
-    on every transfer out of them. The frame lands when something raises,
-    and the catch site selects the arm. A clause's facts are
+    walk finishes: its frame, its finalizer as a region that leaves the
+    frame on a transfer out of it, the exits that close its catch site,
+    claim the finalizer, and leave the frame, then its body and each catch
+    arm as regions that run those exits on every transfer out of them. The
+    frame lands when something raises, and the catch site selects the arm.
+    A clause's facts are
     `(HANDLE STATE (ARM...) PATTERN...)`: the handler the parser
     introduced, the catch site's initial state, the arms' tokens, and the
     patterns of the filtered arms, which precede the default arm.
@@ -195,6 +196,23 @@ meta static void _try_check_label(List finalizer) {
       Code.binding_spelling(label)}' would be defined once for each"));
 }
 
+/* The address of the try's frame. */
+meta static List _try_frame_address(Atom frame) {
+  Type type = %(("ExceptionFrame")), pointer = %(* ("ExceptionFrame"));
+  return %(expr $pointer (op & (expr $type (ident $frame))));
+}
+
+/* A transfer out of a claimed finalizer leaves the frame as a handler
+   that returns does: a pending error is discarded, and the frame is left
+   without continuing its transfer. */
+meta static List _try_departure(Atom frame) {
+  List address = _try_frame_address(frame);
+  return $!{
+    x2c_exception_mark_handled($address);
+    x2c_exception_leave($address);
+  };
+}
+
 /* A catch closes before a claimed finalizer, then the frame leaves. */
 meta static List _try_exits(Atom frame, List handle, Atom finalizer) {
   List before = NULL;
@@ -203,8 +221,7 @@ meta static List _try_exits(Atom frame, List handle, Atom finalizer) {
     List close = $!{ x2c_error_catch_close($handler); $handler = NULL; };
     before = %($close);
   }
-  Type type = %(("ExceptionFrame")), pointer = %(* ("ExceptionFrame"));
-  List address = %(expr $pointer (op & (expr $type (ident $frame))));
+  List address = _try_frame_address(frame);
   if (finalizer)
     return $!{
       if (x2c_exception_claim($address)) {
@@ -237,8 +254,9 @@ meta static List _try_catch_clause(List handle, List records, Array rows) {
   return %($handle $state ${arms.list_free()} @{patterns.list_free()});
 }
 
-/* The landing form of the try `node`: its frame, its finalizer outside
-   its regions, its exits, then its body and each arm inside them. */
+/* The landing form of the try `node`: its frame, its finalizer in a
+   region that leaves the frame, its exits, then its body and each arm
+   inside them. */
 meta static Code _try_landing(
   Code node, List body, List arms, List finalizer) {
   _try_check_label(finalizer);
@@ -249,8 +267,10 @@ meta static Code _try_landing(
   List handle = arms ? catch_handle(node) : NULL;
   Array rows = [%(new-name $frame "exception_frame")];
   if (finalizer) {
+    Atom departure = Atom.intern("?__try_departure");
     finished = Atom.intern("?__try_finalizer");
-    rows.push(%(outer $finished $finalizer));
+    rows.push(%(exits $departure ${_try_departure(frame)}));
+    rows.push(%(region $finished $finalizer));
   }
   rows.push(%(exits $exits ${_try_exits(frame, handle, finished)}));
   rows.push(%(region $lowered $body));

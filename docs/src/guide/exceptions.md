@@ -276,6 +276,10 @@ that leaves the region, so the generated C repeats them, and a label among
 them would be defined more than once. x2c reports an error at the label. A
 `goto` that leaves the region is allowed, as is one inside the `try` body.
 
+A `return`, `break`, or `continue` that leaves a `finally` or `defer` body
+leaves its frame first. When that body is running for a propagating
+`Error`, the transfer discards the `Error`, as a handler that returns does.
+
 ### Raising during cleanup
 
 A `raise` inside a `finally` or `defer` body transfers to the enclosing

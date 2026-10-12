@@ -1,0 +1,6 @@
+deferred 4 -1
+caught 99
+finished 5 -1 -1
+caught 99
+looped 2
+caught 99
