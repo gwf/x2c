@@ -540,25 +540,34 @@ done
 
 # A stopped parallel run stops what its jobs started. Background jobs ignore
 # SIGINT, so their children would otherwise outlive an interrupt.
-sh -c '. "$1/commands/parallel.sh"
-  parallel_start slow sh -c "sleep 37; :"
-  parallel_wait' sh "$ROOT" >/dev/null 2>&1 &
-runner=$!
-sleeper=
-for _ in $(seq 100); do
-  job=$(pgrep -P "$runner" | paste -sd, - || true)
-  sleeper=$([[ -n $job ]] && pgrep -x -P "$job" sleep || true)
-  [[ -n $sleeper ]] && break
-  sleep 0.05
+printf '#!/bin/sh\nexec sleep 37\n' >"$BUILD/slow-make"
+chmod +x "$BUILD/slow-make"
+for check in commands gate; do
+  if [[ $check == commands ]]; then
+    sh -c '. "$1/commands/parallel.sh"
+      parallel_start slow sh -c "sleep 37; :"
+      parallel_wait' sh "$ROOT" >/dev/null 2>&1 &
+  else
+    MAKE="$BUILD/slow-make" sh "$ROOT/tools/run-make-steps.sh" \
+      "$BUILD/slow-gate" -- slow >/dev/null 2>&1 &
+  fi
+  runner=$!
+  sleeper=
+  for _ in $(seq 100); do
+    job=$(pgrep -P "$runner" | paste -sd, - || true)
+    sleeper=$([[ -n $job ]] && pgrep -x -P "$job" sleep || true)
+    [[ -n $sleeper ]] && break
+    sleep 0.05
+  done
+  [[ -n $sleeper ]]
+  kill -TERM "$runner"
+  wait "$runner" || true
+  if ! ended $sleeper; then
+    echo "a $check job's child outlived its stopped run" >&2
+    kill $sleeper
+    exit 1
+  fi
 done
-[[ -n $sleeper ]]
-kill -TERM "$runner"
-wait "$runner" || true
-if ! ended $sleeper; then
-  echo "a parallel job's child outlived its stopped run" >&2
-  kill $sleeper
-  exit 1
-fi
 
 # GNU Make 4 remakes a deleted included file, and the unit that included it
 # then translates again. Keep its jobserver separate from the parent Make.

@@ -16,17 +16,21 @@ shift
 
 rm -rf "$logs"
 mkdir -p "$logs"
+root=$(cd "$(dirname "$0")/.." && pwd)
+. "$root/commands/parallel.sh"
+run_step() {
+  target=$1
+  start=$(date +%s)
+  # The options are Make flags written by the caller, so split them.
+  # shellcheck disable=SC2086
+  ${MAKE:-make} $options "$target" >"$logs/$target.log" 2>&1
+  status=$?
+  echo "$status $(($(date +%s) - start))" >"$logs/$target.status"
+}
 for target; do
-  (
-    start=$(date +%s)
-    # The options are Make flags written by the caller, so split them.
-    # shellcheck disable=SC2086
-    ${MAKE:-make} $options "$target" >"$logs/$target.log" 2>&1
-    status=$?
-    echo "$status $(($(date +%s) - start))" >"$logs/$target.status"
-  ) &
+  parallel_start "$target" run_step "$target"
 done
-wait
+parallel_wait
 
 failed=
 for target; do
