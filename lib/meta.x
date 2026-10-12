@@ -298,6 +298,12 @@ meta String Type.reverse_name(String base, String participant);
     when `spelling` is not an identifier. */
 meta List x2c_ident(String spelling);
 
+/** Returns a new binding the compiler names from `role`, as it names its
+    own generated declarations, so that code a meta function places can
+    declare it and its result can refer to it. Fails the expansion when
+    `role` is not an identifier. */
+meta List x2c_binding_fresh(String role);
+
 /* the invocation site
 
    Where the macro was written and what is beside it. A macro that reports

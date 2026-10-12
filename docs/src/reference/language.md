@@ -1991,6 +1991,7 @@ The compiler supplies these contextual Lisp operations:
 (Type.tag_name name)
 (Type.reverse_name base participant)
 (x2c.ident spelling)
+(x2c.binding.fresh role)
 (x2c.literal.string value)
 (x2c.literal.int value)
 (x2c.literal.symbol value)
@@ -2033,6 +2034,10 @@ AST rather than its source spelling.
 
 `x2c.ident` returns the tagged name value described above and accepts a
 `String` that is a valid identifier spelling.
+
+`x2c.binding.fresh` returns a new binding that the compiler names from the
+identifier `role`, as it names its own generated declarations. Code that
+the macro places can declare the binding, and its result can refer to it.
 
 `x2c.invocation.file`, `.line`, and `.column` return the caller's x2c source
 location while a macro body is expanding. Lines and columns are one-based; an

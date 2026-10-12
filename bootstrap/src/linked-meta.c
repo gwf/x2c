@@ -6195,7 +6195,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_10(void){
   _5343 = String_var(_5342);
   _5344 = String_new("lib/meta.x");
   _5345 = String_var(_5344);
-  _5346 = String_new("da22e474");
+  _5346 = String_new("634f136e");
   _5347 = String_var(_5346);
   _5348 = cons(_5347, NULL);
   _5349 = cons(_5345, _5348);
@@ -13049,7 +13049,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_23(void){
   _12158 = List_var(_12157);
   _12159 = String_new("src/meta-sdk.x");
   _12160 = String_var(_12159);
-  _12161 = String_new("131f07eb");
+  _12161 = String_new("2b70b477");
   _12162 = String_var(_12161);
   _12163 = cons(_12162, NULL);
   _12164 = cons(_12160, _12163);

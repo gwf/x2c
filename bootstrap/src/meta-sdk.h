@@ -98,6 +98,8 @@ String Code_binding_spelling(Var syntax);
 
 List x2c_ident(String spelling);
 
+List x2c_binding_fresh(String role);
+
 Var builtin_foreach_unique(String stem);
 
 Map x2c_meta_definition_hashes(void);

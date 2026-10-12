@@ -56,6 +56,7 @@ String Type.update_helper(Type type) => _ask("Type_update_helper", %($type));
 Symbol Type.tag_name(String name) => _ask("Type_tag_name", %($name));
 String Type.reverse_name(String base, String participant) =>
   _ask("Type_reverse_name", %($base $participant));
+List x2c_binding_fresh(String role) => _ask("x2c_binding_fresh", %($role));
 String x2c_invocation_file(void) => _ask("x2c_invocation_file", %());
 int x2c_invocation_line(void) => _ask("x2c_invocation_line", %());
 int x2c_invocation_column(void) => _ask("x2c_invocation_column", %());

@@ -68,6 +68,9 @@ static macro Stmt $report.sdk.identifier(Expr $spelling) =>
   _sdk_reject_value(
     "x2c.ident requires an identifier spelling", $spelling);
 
+static macro Stmt $report.sdk.binding_role(Expr $role) =>
+  _sdk_reject_value("x2c.binding.fresh requires an identifier role", $role);
+
 static macro Stmt $report.sdk.unique_stem(Expr $stem) =>
   _sdk_reject_value(
     "_x2c.name.unique requires an identifier stem", $stem);
@@ -664,6 +667,14 @@ List x2c_ident(String spelling) {
   if (!spelling.is_identifier())
     $report.sdk.identifier(spelling);
   return %("x2c.ident" $spelling);
+}
+
+/** Answers `x2c.binding.fresh`, declared in `lib/meta.x`. */
+List x2c_binding_fresh(String role) {
+  _sdk_guard("x2c.binding.fresh");
+  if (!role.is_identifier()) $report.sdk.binding_role(role);
+  Compiler c = active.expander;
+  return c.sym.introduce(c.fresh_name(role));
 }
 
 /** Returns a fresh binding whose spelling starts with `stem`. */

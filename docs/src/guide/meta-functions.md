@@ -1550,7 +1550,9 @@ body lowers, places it in the lambda's own function. A macro in a `defer`
 finalizer places it in the function that holds the `defer`; a `$rewrite`
 rule that places it while the finalizer lowers is rejected, because the
 finalizer runs as its own callback. A failed expansion leaves none of it
-behind.
+behind. Placed code that declares a name takes it from
+`x2c_binding_fresh(role)`, which returns a binding the compiler names, so
+the result can refer to the same binding.
 Here the counter runs after each statement that traces a value:
 
 ```x2c

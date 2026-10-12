@@ -99,6 +99,8 @@ String Type_reverse_name(String base, String participant);
 
 List x2c_ident(String spelling);
 
+List x2c_binding_fresh(String role);
+
 String x2c_invocation_file(void);
 
 int x2c_invocation_line(void);
