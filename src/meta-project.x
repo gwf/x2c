@@ -186,8 +186,7 @@ static int Scan.file(Scan &s, String path) {
   String text = NULL;
   try text = Path.read_text(path);
   catch %((!or not-found io-fail) *): return 0;
-  ModuleSource module = s.c.module_source(path, text);
-  if (module) text = module.text;
+  text = s.module_text(path, text);
   Tokenizer tokens = Tokenizer.new(text, <x2c>);
   tokens.layout = is_layout_file(path);
   tokens.scan();
@@ -197,6 +196,20 @@ static int Scan.file(Scan &s, String path) {
        s.c.linked_meta_definitions_current(path))) meta &= ~1;
   s.seen[path] = meta;
   return meta;
+}
+
+/* The file's text with its module block spliced. A malformed block leaves
+   the text as written, for translation to report. */
+static String Scan.module_text(Scan &s, String path, String text) {
+  Compiler c = s.c;
+  ModuleSource module = NULL;
+  DiagnosticsHold hold = c.diagnostics.hold();
+  $let(c.recovery_depth, c.recovery_depth + 1) {
+    try module = c.module_source(path, text);
+    catch %(malformed *): module = NULL;
+  }
+  c.diagnostics.release(hold, 0);
+  return module ? module.text : text;
 }
 
 /* Only file-scope tokens count. Each arm reads the tokens that follow its
