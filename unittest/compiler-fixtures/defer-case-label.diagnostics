@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/defer-case-label.x:13:3: emit: case label cannot enter a protected cleanup region
+    case 1:
+    ^^^^
+  note: open the region inside the case's own block
+

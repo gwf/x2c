@@ -3772,7 +3772,8 @@ A `return` expression is evaluated and saved before its cleanups run; the
 saved result is returned afterward. A `goto` within the same cleanup ancestry
 runs no cleanup. An outward `goto` runs every cleanup region it exits. A
 `goto` into a protected cleanup region, or into a sibling protected region,
-is rejected at compile time.
+is rejected at compile time, and so is a `case` or `default` label that
+would enter a region its `switch` body opened before it.
 
 Generated `Error` transfer preserves the automatic locals and parameters a
 protected body modifies under the repository's optimized build, whether the

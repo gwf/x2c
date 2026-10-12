@@ -28,11 +28,12 @@
 static String _record_type = "X2CCleanup";
 
 /* The walk state for one function body: the open regions, the depths a
-   `break` and `continue` unwind to, and each label's region ancestry. */
+   `break` and `continue` unwind to, the depth the innermost switch opened
+   at, and each label's region ancestry. */
 static typedef struct Walk {
   Compiler c;
   Array regions;
-  int break_stop, continue_stop, origin;
+  int break_stop, continue_stop, switch_stop, origin;
   Map labels;
 } Walk;
 
@@ -461,6 +462,7 @@ static Var Walk.rewrite(Walk &w, Var value) {
       return w._rewrite_for(initial, condition, increment, body);
     case ${$switched(?subject, ?body)}:
       return w._rewrite_switch(subject, body);
+    case %((!or case default) *): return w._case_label(node);
     case %(function *): return w.c._lower_function(node);
     default: return w._rewrite_children(node);
   }
@@ -530,8 +532,28 @@ static List Walk._rewrite_for(
   %(for ${w.rewrite(initial)} ${w.rewrite(condition)}
         ${w.rewrite(increment)} ${w._bounded(body, 1)});
 
-static List Walk._rewrite_switch(Walk &w, List subject, List body) =>
-  %(switch ${w.rewrite(subject)} ${w._bounded(body, 0)});
+static List Walk._rewrite_switch(Walk &w, List subject, List body) {
+  int saved = w.switch_stop;
+  w.switch_stop = (int) w.regions.len();
+  List result = %(switch ${w.rewrite(subject)} ${w._bounded(body, 0)});
+  w.switch_stop = saved;
+  return result;
+}
+
+/* A case label is a jump target of its switch, so it may not sit inside a
+   region with exits opened since the switch began; a `goto` into one is
+   rejected the same way. A static initializer's region has no exits, and
+   the emitter reports a switch that bypasses it. */
+static List Walk._case_label(Walk &w, List label) {
+  for (int i = w.switch_stop; i < (int) w.regions.len(); i++)
+    if (w.regions[i].list().car()) {
+      w._report_at(
+        w.origin, "case label cannot enter a protected cleanup region",
+        %("open the region inside the case's own block"));
+      break;
+    }
+  return w._rewrite_children(label);
+}
 
 /* Rewrite a construct's body with the transfer barriers it establishes. A
    loop bounds both `break` and `continue`; a switch bounds only `break`,
