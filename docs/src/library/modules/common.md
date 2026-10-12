@@ -55,7 +55,7 @@ The `Var` encoding every runtime module shares.
 | [`Var.map`](#Var.map) | Extracts the `Map` payload of `value`, or NULL for another tag. |
 | [`Var.payload32`](#Var.payload32) | Returns the low 32 payload bits of an immediate `Var`. |
 | [`Var.short`](#Var.short) | Returns `x` as a native `short` under the `Var.convert` rules. |
-| [`Var.string`](#Var.string) | Extracts the `String` payload of `value`, or NULL for another tag. |
+| [`Var.string_payload`](#Var.string_payload) | Extracts the `String` payload of `value`, or NULL for another tag. |
 | [`Var.symbol`](#Var.symbol) | Extracts the `symbol` payload after the caller establishes the matching `Var` kind. |
 | [`Var.uchar`](#Var.uchar) | Returns `x` as a native `uchar` under the `Var.convert` rules. |
 | [`Var.uint`](#Var.uint) | Returns `x` as a native `uint` under the `Var.convert` rules. |
@@ -559,10 +559,10 @@ of floating range, or invalidly encoded.
 
 Source: `lib/common.x:709`
 
-<a id="Var.string"></a>
-#### Var.string
+<a id="Var.string_payload"></a>
+#### Var.string_payload
 
-`String Var.string(Var value)`
+`String Var.string_payload(Var value)`
 
 Extracts the `String` payload of `value`, or NULL for another tag.
 

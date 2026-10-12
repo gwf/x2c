@@ -289,11 +289,11 @@ Public functions:
 `Diagnostics.release`, `Diagnostics.entries`, `Diagnostics.reached_limit`,
 `Diagnostics.report`, `diagnostics_write_json`, `Compiler.print_diagnostic`,
 `Compiler.origin_location`, `Compiler.display_path`, `Compiler.token_location`,
-`Compiler.token_source`, `Compiler.text_source`, `Compiler.report_error`,
-`Compiler.report_problem`, `Compiler.report_warning`,
-`Compiler.report_warning_at`, `Compiler.take_diagnostics`,
-`Compiler.error_count`, `Compiler.diagnostics`, `Compiler.dump_tokens`,
-`Compiler.dump_symbol_table`, `Compiler.dump_cache`
+`Compiler.token_source`, `Compiler.token_column`, `Compiler.text_source`,
+`Compiler.source_token`, `Compiler.report_error`, `Compiler.report_problem`,
+`Compiler.report_warning`, `Compiler.report_warning_at`,
+`Compiler.take_diagnostics`, `Compiler.error_count`, `Compiler.diagnostics`,
+`Compiler.dump_tokens`, `Compiler.dump_symbol_table`, `Compiler.dump_cache`
 
 ### [src/editor.x](../src/editor.x)
 
@@ -937,11 +937,11 @@ Public functions:
 `unsigned.repr`, `float.var`, `float.str`, `float.repr`, `double.var`,
 `double.str`, `double.repr`, `long.var`, `ulong.var`, `long.str`, `long.repr`,
 `Var.is_row`, `Var.array`, `Var.block`, `Var.buffer`, `Var.bytes`, `Var.file`,
-`Var.as_iter`, `Var.list`, `Var.map`, `Var.string`, `Var.symbol`, `Var.char`,
-`Var.uchar`, `Var.short`, `Var.ushort`, `Var.int`, `Var.uint`, `Var.unsigned`,
-`Var.long`, `Var.ulong`, `Var.long_long`, `Var.ulong_long`, `Var.long_double`,
-`Var.float`, `Var.double`, `x2c_initialize_protocols`, `x2c_initialize`,
-`x2c_normalize_index`, `x2c_normalize_slice`
+`Var.as_iter`, `Var.list`, `Var.map`, `Var.string_payload`, `Var.symbol`,
+`Var.char`, `Var.uchar`, `Var.short`, `Var.ushort`, `Var.int`, `Var.uint`,
+`Var.unsigned`, `Var.long`, `Var.ulong`, `Var.long_long`, `Var.ulong_long`,
+`Var.long_double`, `Var.float`, `Var.double`, `x2c_initialize_protocols`,
+`x2c_initialize`, `x2c_normalize_index`, `x2c_normalize_slice`
 
 ### [lib/context.x](../lib/context.x)
 
@@ -986,19 +986,19 @@ typed descriptors for runtime `Var` behavior.
 
 Public functions:
 
-`Var.str`, `Var.fallback_str`, `Var.pointer_string`, `Var.write_str`,
-`Var.fallback_write_str`, `Var.repr`, `Var.fallback_repr`, `Var.write_repr`,
-`Var.fallback_write_repr`, `Var.write_pointer_repr`, `RenderPath.enter`,
-`RenderPath.leave`, `Var.hash`, `Var.fallback_hash`, `Var.equal`,
-`Var.fallback_equal`, `Var.same`, `Var.compare`, `Var.fallback_compare`,
-`Var.iter`, `Var.fallback_iter`, `Var.contains`, `Var.getindex`,
-`Var.setindex`, `Var.updateindex`, `Var.postfixindex`, `Var.dispatch_truth`,
-`Var.try_dispatch_binary`, `Var.try_dispatch_unary`, `Var.try_export_context`,
-`x2c_register_type`, `x2c_register_builtin_descriptor`,
-`x2c_try_register_descriptor`, `x2c_register_descriptor`,
-`x2c_try_register_tagged_descriptor`, `x2c_register_tagged_descriptor`,
-`x2c_descriptor_thread_start_begin`, `x2c_descriptor_thread_start_end`,
-`x2c_descriptor_registration_frozen`
+`Var.str`, `Var.as_string`, `Var.fallback_str`, `Var.pointer_string`,
+`Var.write_str`, `Var.fallback_write_str`, `Var.repr`, `Var.fallback_repr`,
+`Var.write_repr`, `Var.fallback_write_repr`, `Var.write_pointer_repr`,
+`RenderPath.enter`, `RenderPath.leave`, `Var.hash`, `Var.fallback_hash`,
+`Var.equal`, `Var.fallback_equal`, `Var.same`, `Var.compare`,
+`Var.fallback_compare`, `Var.iter`, `Var.fallback_iter`, `Var.contains`,
+`Var.getindex`, `Var.setindex`, `Var.updateindex`, `Var.postfixindex`,
+`Var.dispatch_truth`, `Var.try_dispatch_binary`, `Var.try_dispatch_unary`,
+`Var.try_export_context`, `x2c_register_type`,
+`x2c_register_builtin_descriptor`, `x2c_try_register_descriptor`,
+`x2c_register_descriptor`, `x2c_try_register_tagged_descriptor`,
+`x2c_register_tagged_descriptor`, `x2c_descriptor_thread_start_begin`,
+`x2c_descriptor_thread_start_end`, `x2c_descriptor_registration_frozen`
 
 ### [lib/error-macros.x](../lib/error-macros.x)
 
@@ -1833,8 +1833,8 @@ Public functions:
 
 Public functions:
 
-`Var.convert`, `Var.numeric_info`, `Var.numeric_decode`, `Var.integer_box`,
-`Var.integer_tag`, `Var.width_mask`, `Var.signed_from_bits`,
+`Var.string`, `Var.convert`, `Var.numeric_info`, `Var.numeric_decode`,
+`Var.integer_box`, `Var.integer_tag`, `Var.width_mask`, `Var.signed_from_bits`,
 `X2CVarNumeric.f32`, `X2CVarNumeric.f64`, `X2CVarNumeric.ldouble`
 
 ### [lib/varops.x](../lib/varops.x)

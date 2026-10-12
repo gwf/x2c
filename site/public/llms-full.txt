@@ -163,7 +163,8 @@ Initializers, assignments, typed arguments, and returns can call converters.
 For example, `Var v = 42;` boxes, while a supported typed destination unboxes
 or converts. This is not a promise that every pair converts or that extraction
 validates a custom value. Test dynamic tags with `is` when the input is mixed.
-Explicit `.str()` renders a value; extracting a String payload is different.
+A `String` destination renders a value; `.string()` extracts a `String`
+payload and raises for another tag.
 
 Three distinctions matter immediately:
 
@@ -1467,9 +1468,10 @@ The block is `module {`, comma-separated string paths with an optional
 trailing comma, and `}`, with no final semicolon. It appears at file scope,
 once per file. Elsewhere `module` is an ordinary identifier, and
 `struct module {` declares a tag. Each path is relative to the file that holds
-the block and must name a file under that file's companion directory, `NAME/`
-for `NAME.x`, without `..`. Any other path, an unreadable member, a malformed
-block, or a second block is a driver error at the block.
+the block and must lead to a file under that file's companion directory,
+`NAME/` for `NAME.x`, once `..` and symbolic links are resolved. A path that
+leads elsewhere, a member that is already being spliced, an unreadable member,
+a malformed block, or a second block is a driver error at the block.
 
 A member's text stands where the block stood, in the listed order. All members
 share the entry's translation unit. Function declarations are collected across
@@ -5255,8 +5257,9 @@ These explicit calls differ from the implicit crossing and are not reported:
 - `.str()` on a `Var` at a typed destination, and any other converter call
   on a `Var` in an interpolation hole or a printf-family value. Holes and
   formats render a `Var` through `Var.str`, which displays any value. The
-  implicit crossing to `String` reads the String payload and yields an empty
-  `String` for any other tag.
+  implicit crossing to `String` displays any value but `void`, which it
+  reads as NULL, while `.string()` reads the String payload and raises
+  `<no-convert>` for another tag.
 - A `Var` read into a numeric type other than `Symbol`, such as `v.int()` or
   `v.integer()`. The implicit crossing calls `Var.convert` and then reads the
   result. `Var.int` already converts, and `Var.integer` returns 0 where
