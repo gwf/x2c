@@ -4,7 +4,10 @@
 > Every finding below was reproduced at that commit in this worktree unless a
 > row says "by reading". Gary decided the rows on 2026-10-12; the
 > [decisions](#decisions-recorded-2026-10-12) section records them, and the
-> execution log at the end records what landed.
+> [execution log](#execution-log) records what landed: four batches through
+> `c397213b` on 2026-10-12. Open after them: the transform-time binding leak
+> (A6), the lambda component's carrier placements (decision 9), and the
+> reserved component macro names, each with its reason in the log.
 
 ## Decisions recorded 2026-10-12
 
@@ -408,8 +411,8 @@ components.
   empty context line at the end of a file.
 - Batch 3, published to dev as `3db5216c` (2026-10-12), is the String
   crossing and module batch above.
-- Batch 4 (this record's next publication): numeric comparisons follow C
-  (decision 1). `Compiler._comparison` lowers every comparison with a `Var`
+- Batch 4, published to dev as `c397213b` (2026-10-12): numeric
+  comparisons follow C (decision 1). `Compiler._comparison` lowers every comparison with a `Var`
   operand: `==` and `!=` call `x2c_var_equal`, `===` and `!==` call
   `x2c_var_identical`, and the relational operators compare
   `x2c_var_order` with 0, all in a comparisons section of lib/varops.x on
