@@ -235,10 +235,11 @@ static macro Stmt $report.parse.placement_function(Expr $c) =>
     <macro>, "code placed at function entry needs an enclosing function",
     $c.token, NULL);
 
+/* Reported at the lowering origin when one is set. */
 static macro Stmt $report.parse.placement_finalizer(Expr $c) =>
   $c.report_error(
     <macro>, "code placed at function entry cannot land in a defer finalizer",
-    $c.token,
+    NULL,
     %("a finalizer runs as its own callback; place after a statement"));
 
 static macro Stmt $report.parse.syntax_expected(Expr $c) =>
