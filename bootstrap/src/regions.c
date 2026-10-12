@@ -2172,7 +2172,7 @@ static void Walk_assign(Walk * w, Fact fact, Var value, Type type, int store){
     }
     else kept =(owners & 2) ||(region && region -> kind == 1080280);
   }
-  if(kept && store && source &&(region || other || _cleanup(source -> acquired))) kept = ! Walk_flow(&((* w)), value, type, 26155096, fact);  if(kept && source && ! copies && ! source -> empty) acquired = _acquired(source);  fact -> acquired = copies ||(source && ! kept) ? NULL : acquired;  fact -> empty = source ? source -> empty : _empty(value);  fact -> dead = 0;  fact -> points = kept && source ? source -> points : NULL;  fact -> place = kept && source ? source -> place : NULL;  fact -> owner = NULL;  fact -> region = kept ? region : NULL;  fact -> other = kept ? other : NULL;  fact -> born = kept ? owners : 0;  fact -> param = kept && source ? source -> param : - 1;
+  if(kept && store && source &&(region || other || _cleanup(source -> acquired))) kept = ! Walk_flow(&((* w)), value, type, 26155096, fact);  if(kept && source && ! copies && ! source -> empty) acquired = _acquired(source);  if(copies ||(source && ! kept)) acquired = NULL;  if(! acquired && store && fact -> depth <(* w).depth) acquired = fact -> acquired;  fact -> acquired = acquired;  fact -> empty = source ? source -> empty : _empty(value);  fact -> dead = 0;  fact -> points = kept && source ? source -> points : NULL;  fact -> place = kept && source ? source -> place : NULL;  fact -> owner = NULL;  fact -> region = kept ? region : NULL;  fact -> other = kept ? other : NULL;  fact -> born = kept ? owners : 0;  fact -> param = kept && source ? source -> param : - 1;
 }
 
 Map Compiler_semantic_binding_facts(Compiler);

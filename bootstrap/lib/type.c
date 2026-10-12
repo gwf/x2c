@@ -987,13 +987,14 @@ static int _radix(String text, int end, int * pos){
 }
 
 static Type _integer_literal_type(unsigned long long magnitude, int decimal, int is_unsigned, int longs, int negative){
+  int signed_only = decimal || negative;
   if(! is_unsigned && ! longs){
     if(magnitude <=(unsigned long long) INT_MAX + negative) return List_type(_103);
-    if(! decimal && magnitude <= UINT_MAX) return List_type(_101);
+    if(! signed_only && magnitude <= UINT_MAX) return List_type(_101);
     if(magnitude <=(unsigned long long) LONG_MAX + negative) return List_type(_97);
-    if(! decimal && magnitude <= ULONG_MAX) return List_type(_98);
+    if(! signed_only && magnitude <= ULONG_MAX) return List_type(_98);
     if(magnitude <=(unsigned long long) LLONG_MAX + negative) return List_type(_99);
-    if(! decimal) return List_type(_100);
+    if(! signed_only) return List_type(_100);
     return NULL;
   }
   if(is_unsigned && ! longs){
@@ -1003,15 +1004,15 @@ static Type _integer_literal_type(unsigned long long magnitude, int decimal, int
   }
   if(! is_unsigned && longs == 1){
     if(magnitude <=(unsigned long long) LONG_MAX + negative) return List_type(_97);
-    if(! decimal && magnitude <= ULONG_MAX) return List_type(_98);
+    if(! signed_only && magnitude <= ULONG_MAX) return List_type(_98);
     if(magnitude <=(unsigned long long) LLONG_MAX + negative) return List_type(_99);
-    if(! decimal) return List_type(_100);
+    if(! signed_only) return List_type(_100);
     return NULL;
   }
   if(is_unsigned && longs == 1) return List_type(magnitude <= ULONG_MAX ? _98 : _100);
   if(! is_unsigned && longs == 2){
     if(magnitude <=(unsigned long long) LLONG_MAX + negative) return List_type(_99);
-    return decimal ? NULL : List_type(_100);
+    return signed_only ? NULL : List_type(_100);
   }
   return List_type(_100);
 }

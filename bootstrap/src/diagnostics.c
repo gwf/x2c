@@ -78,6 +78,8 @@ static void Compiler__write_json_location(Compiler c, Buffer out, List location)
 
 static void Compiler__write_heading(Compiler c, Symbol code, String message, List location);
 
+static int Compiler__own_line_start(Compiler c, int position, int * offset);
+
 static int Compiler__text_line(Compiler c, int position);
 
 static List _compiler_location(Compiler compiler, Token token);
@@ -453,6 +455,13 @@ static void Compiler__write_heading(Compiler c, Symbol code, String message, Lis
           }
           );
           fprintf(stderr, "%s: %s: %s\n", place, Symbol_str(code), message);
+          int offset, start = Compiler__own_line_start(c, Var_int(Var_convert(position, 3453797)), &(offset));
+          if(start >= 0){
+            char * line_start = c -> unit_source -> own + start, * line_end = line_start;
+            while(* line_end && * line_end != '\n') line_end ++;
+            _context_caret(line_start, line_end, Var_int(Var_convert(column, 3453797)), Var_int(Var_convert(length, 3453797)));
+            return;
+          }
           if(Array_truth(c -> line_markers)) line = int_var(Compiler__text_line(c, Var_int(Var_convert(position, 3453797))));
           Compiler__show_source_context(c, Var_int(Var_convert(line, 3453797)), Var_int(Var_convert(column, 3453797)), Var_int(Var_convert(length, 3453797)));
           return;
@@ -464,6 +473,17 @@ static void Compiler__write_heading(Compiler c, Symbol code, String message, Lis
 
   }
   fprintf(stderr, "%s: %s\n", Symbol_str(code), message);
+}
+
+String Compiler_text_source(Compiler c, int position, int * offset);
+
+static int Compiler__own_line_start(Compiler c, int position, int * offset){
+  if(! c -> unit_source) return - 1;
+  String file = Compiler_text_source(c, position, &((* offset)));
+  if(! String_equal(Path_absolute(file), Path_absolute(c -> filename))) return - 1;
+  int start =(* offset);
+  while(start > 0 && String_getindex(c -> unit_source -> own, start - 1) != '\n') start --;
+  return start;
 }
 
 static int Compiler__text_line(Compiler c, int position){
@@ -528,11 +548,13 @@ List Compiler_token_location(Compiler compiler, Token token){
   if(compiler -> source_facts) file = Compiler_display_path(compiler, file);
   if(! token) token = compiler -> token;
   if(! token) return cons(List_var(cons(_34, cons(String_var(file), NULL))), _55);
-  int line = token -> line;
+  int line = token -> line, column = token -> col, offset;
   if(Array_truth(compiler -> line_markers)) file = Compiler_token_source(compiler, token, &(line));
+  int start = Compiler__own_line_start(compiler, token -> pos, &(offset));
+  if(start >= 0) column = offset - start + 1;
   file = Compiler_display_path(compiler, file);
   return({
-    Var _x2c_literal_part_17 = List_var(cons(_34, cons(String_var(file), NULL)));  Var _x2c_literal_part_18 = List_var(cons(_35, cons(int_var(line), NULL)));  Var _x2c_literal_part_19 = List_var(cons(_36, cons(int_var(token -> col), NULL)));  Var _x2c_literal_part_20 = List_var(cons(_37, cons(int_var(token -> len), NULL)));  Var _x2c_literal_part_21 = List_var(cons(_38, cons(int_var(token -> pos), NULL)));  cons(_x2c_literal_part_17, cons(_x2c_literal_part_18, cons(_x2c_literal_part_19, cons(_x2c_literal_part_20, cons(_x2c_literal_part_21, NULL)))));
+    Var _x2c_literal_part_17 = List_var(cons(_34, cons(String_var(file), NULL)));  Var _x2c_literal_part_18 = List_var(cons(_35, cons(int_var(line), NULL)));  Var _x2c_literal_part_19 = List_var(cons(_36, cons(int_var(column), NULL)));  Var _x2c_literal_part_20 = List_var(cons(_37, cons(int_var(token -> len), NULL)));  Var _x2c_literal_part_21 = List_var(cons(_38, cons(int_var(token -> pos), NULL)));  cons(_x2c_literal_part_17, cons(_x2c_literal_part_18, cons(_x2c_literal_part_19, cons(_x2c_literal_part_20, cons(_x2c_literal_part_21, NULL)))));
   }
   );
 }
@@ -619,7 +641,7 @@ _Noreturn void Compiler_report_error(Compiler compiler, Symbol code, String mess
   Compiler_report_problem(compiler, code, message, token, notes);
   Diagnostics diag = compiler -> diagnostics;
   if(compiler -> recovery_depth > 0){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/diagnostics.x",.function = "Compiler_report_error",.line = 441};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/diagnostics.x",.function = "Compiler_report_error",.line = 463};
     x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(209659067570), Symbol_var(code));
     __builtin_unreachable();
   }

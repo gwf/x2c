@@ -10946,7 +10946,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_19(void){
   _10079 = List_var(_10078);
   _10080 = String_new("lib/tokenizer.x");
   _10081 = String_var(_10080);
-  _10082 = String_new("7ff9cb09");
+  _10082 = String_new("7711d859");
   _10083 = String_var(_10082);
   _10084 = cons(_10083, NULL);
   _10085 = cons(_10081, _10084);
@@ -11665,7 +11665,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_21(void){
   _10792 = cons(_503, _10791);
   _10793 = String_new("lib/type.x");
   _10794 = String_var(_10793);
-  _10795 = String_new("08c6c0ae");
+  _10795 = String_new("ce12e45d");
   _10796 = String_var(_10795);
   _10797 = cons(_9514, _10706);
   _10798 = cons(_10429, _10797);
@@ -12415,7 +12415,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_22(void){
   _11539 = List_var(_11538);
   _11540 = String_new("src/compiler.x");
   _11541 = String_var(_11540);
-  _11542 = String_new("2b536297");
+  _11542 = String_new("21641208");
   _11543 = String_var(_11542);
   _11544 = cons(_11543, NULL);
   _11545 = cons(_11541, _11544);
@@ -12568,7 +12568,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_22(void){
   _11692 = List_var(_11691);
   _11693 = String_new("src/diagnostics.x");
   _11694 = String_var(_11693);
-  _11695 = String_new("08d31200");
+  _11695 = String_new("686b4595");
   _11696 = String_var(_11695);
   _11697 = cons(_11696, NULL);
   _11698 = cons(_11694, _11697);
@@ -12702,7 +12702,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_23(void){
   _11823 = cons(_503, _11822);
   _11824 = String_new("src/collect.x");
   _11825 = String_var(_11824);
-  _11826 = String_new("773d12c4");
+  _11826 = String_new("e6c14493");
   _11827 = String_var(_11826);
   _11828 = cons(_11827, NULL);
   _11829 = cons(_11825, _11828);
@@ -12961,7 +12961,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_23(void){
   _12082 = List_var(_12081);
   _12083 = String_new("src/regions.x");
   _12084 = String_var(_12083);
-  _12085 = String_new("634246cb");
+  _12085 = String_new("5932f51d");
   _12086 = String_var(_12085);
   _12087 = cons(_12086, NULL);
   _12088 = cons(_12084, _12087);
@@ -13194,7 +13194,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_24(void){
   _12312 = List_var(_12311);
   _12313 = String_new("src/emit.x");
   _12314 = String_var(_12313);
-  _12315 = String_new("ca4c122b");
+  _12315 = String_new("7bc0e7d9");
   _12316 = String_var(_12315);
   _12317 = cons(_12316, NULL);
   _12318 = cons(_12314, _12317);

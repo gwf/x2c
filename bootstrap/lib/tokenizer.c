@@ -781,7 +781,7 @@ int scan_string_segment(char *);
 
 static int Tokenizer__string_tokens(Tokenizer t){
   char * text = t -> text + t -> pos;
-  if(text[0] == '$') return text[1] == '{' ? Tokenizer__operator(t, 2) : Tokenizer__named_reference(t);
+  if(text[0] == '$' && text[1] != '$') return text[1] == '{' ? Tokenizer__operator(t, 2) : Tokenizer__named_reference(t);
   if(text[0] == '"') return Tokenizer__operator(t, 1);
   int len = scan_string_segment(text);
   if(len < 0) return Tokenizer_error(t);

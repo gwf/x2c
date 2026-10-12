@@ -1981,7 +1981,10 @@ static void FileWalk_prepare(FileWalk * w, Compiler shadow, String segment){
   Compiler_take_unit_state(shadow, (* w).c);
   Compiler_tokenize(shadow, segment);
   shadow -> text =(* w).text;
-  if((* w).module) shadow -> line_markers =(* w).module -> markers;
+  if((* w).module){
+    shadow -> line_markers =(* w).module -> markers;
+    shadow -> unit_source =(* w).module;
+  }
   if((* w).c -> source_facts) Map_setindex((* w).c -> source_texts, String_var(Path_absolute((* w).path)), String_var((* w).module ?(* w).module -> own :(* w).text));
   _shift_tokens(shadow -> tokenizer, (* w).line, (* w).pos);
 }
