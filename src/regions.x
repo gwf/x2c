@@ -854,7 +854,10 @@ static void Walk.assign(Walk &w, Fact fact, Var value, Type type, int store) {
     kept = !w.flow(value, type, <local>, fact);
   if (kept && source && !copies && !source.empty)
     acquired = _acquired(source);
-  fact.acquired = copies || (source && !kept) ? NULL : acquired;
+  if (copies || (source && !kept)) acquired = NULL;
+  /* A nested store runs on some paths; the others keep the earlier value. */
+  if (!acquired && store && fact.depth < w.depth) acquired = fact.acquired;
+  fact.acquired = acquired;
   fact.empty = source ? source.empty : _empty(value);
   fact.dead = 0;
   fact.points = kept && source ? source.points : NULL;

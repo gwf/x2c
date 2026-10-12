@@ -73,3 +73,15 @@ Array conditional_cleanup(int flag) {
   Array result = flag ? plain : managed;
   return result;
 }
+
+Array branch_keeps_cleanup(int flag) {
+  Array a = $auto([]);
+  if (flag) a = [];
+  return a;
+}
+
+Array loop_keeps_cleanup(int count) {
+  Array a = $auto([]);
+  for (int i = 0; i < count; i++) a = [];
+  return a;
+}
