@@ -251,7 +251,13 @@ The macro mechanism makes a fixed enumeration of every source spelling
 impossible. These contracts specify how visible definitions extend the
 productions, without treating extension contents as unrestricted text.
 
-**M1: arguments and positions.** Look up the macro or keyword alias in the
+**M1: arguments and positions.** Global macro definition names and keyword
+alias targets require `$`; `@` cannot replace that prefix. Dotted macro
+names permit keyword-shaped components after the first component, such as
+`$error.arg.void`. A scalar macro expression uses `$name(...)`, a local
+macro name, or a keyword alias; `@name(...)` is not a scalar expression.
+
+Look up the macro or keyword alias in the
 active compiler state, then parse each argument using its signature category.
 Invocation arguments reject a trailing comma. The first `Param` argument
 opens one scope shared by the remaining arguments.
@@ -340,7 +346,10 @@ restrictions described in the reference.
 **M5: slots and sequences.** Inside a template, `$name` inserts a declared
 hole in a category-compatible position, and `@name` splices a sequence.
 `${expression}` and `$(...)` supply computed syntax in the applicable slot;
-meta calls use the same binding operations. The parser selects the slot's
+meta calls use the same binding operations. `@producer(...)` and `@(form)`
+can supply sequences in positions that accept a sequence slot. Shared
+invocation lookup recognizing `@` does not permit scalar `@` calls or
+`@` definition names. The parser selects the slot's
 role (expression, type, name, parameter, declarator row, field, entry,
 enumerator, match row, catch, captures, block, or unit) and whether a sequence
 is permitted. In a meta call, a whole `$name` hole passes its captured value;
