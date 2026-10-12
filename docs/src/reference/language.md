@@ -2567,7 +2567,8 @@ declarator with `x2c.place`, and returns `value` unchanged. Forwarding through
 another macro or parentheses keeps that result the complete initializer.
 When the declaration finishes, it checks that the result is the declarator's
 complete initializer and then binds the release, which requires automatic
-storage and Cleanup participation and defers the binding's `cleanup` call.
+storage and Cleanup participation, saves the initialized value in a private
+const local, and defers that saved value's `cleanup` call.
 The declaration keeps its type, binding identity, initialization conversions,
 and enclosing scope.
 
@@ -2575,9 +2576,11 @@ The declared type must participate in `Cleanup(T)`, whose member is
 `void T.cleanup(T)`, directly or through its ordinary typedef ancestry.
 Initializers run once in source order. Each successful initializer registers
 its cleanup before the following initializer runs, including within a compound
-declaration. Cleanup observes the declared binding at exit; reassignment does
-not dispose the old value, and returning or storing an alias does not cancel
-cleanup.
+declaration. Cleanup releases the acquired value even if the declared binding
+is reassigned. Reassignment does not release that value early, and returning
+or storing an alias does not cancel cleanup. Use an explicit `defer` when
+cleanup must instead read the binding's value at exit, such as a lazily filled
+Scope slot or a staging buffer cleared after ownership transfer.
 
 Static, external, or threaded storage, field initializers, for-header
 declarations, assignments, returns, call arguments, and forms nested inside

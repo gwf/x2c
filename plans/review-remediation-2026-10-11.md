@@ -513,7 +513,7 @@ No recurring gate or validation order was expanded.
 | E: source boundaries | Empty module members return before null pointer arithmetic. A targeted instrumented owner fails before and passes after. Installed `.xp` entries import successfully; source lookup retains `.x` precedence. Competing same-stem installation remains an output collision. |
 | F: settled descriptions | Book and source comments correct the verified contradictions. Existing syntax data and contextual contracts were corrected and regenerated. The completed module plan is archived; foundation and String-switch continuation records use current owners. `syntax-spec check` reports no stale outputs. |
 
-### Acquired-value cleanup remains open
+### Acquired-value cleanup follow-up, 2026-10-12
 
 The small `$auto` prototype saves the acquired value and passes its runtime
 reassignment probe. It removes two existing `region-escapes` warnings, at the
@@ -521,12 +521,21 @@ returned Array and a returned closure that captures that Array. The region
 pass attaches the deferred cleanup to a local fact; it does not retain shared
 acquisition identity across the new saved local.
 
-The prototype is excluded from the delivery candidate. Existing expectations
-were not weakened. The user was asked whether to hold this repair for a
-separate design or extend this batch to shared lifetime tracking, because that
-extension exceeds the original small repair. The acquired-value requirement
-is settled; the implementation boundary is the open question. The saved
-prototype and focused failure evidence remain in the workspace.
+The prototype was excluded from the first delivery. Gary then approved a
+separate design and its implementation. The acquired value is saved in a
+hygienic const local, followed by ordinary deferred cleanup. The region pass
+shares that stable value's cleanup independently of its allocation region;
+reassignment detaches the public binding. Mutable defer targets retain their
+existing binding-local analysis. Scope allocation attaches the handle's
+cleanup to its existing storage region, without joining copied NULL slots.
+
+The Lisp evaluator's lazy Scope and Map growth's replaceable staging buffers
+use explicit late-bound defer. Existing Array and closure warnings remain
+unchanged. Focused fixtures cover replacement values, conditional aliases,
+Scope slot population, ownership moves, const and volatile locals, aggregate
+snapshots, and lazy allocation. No general alias analysis or gate is added.
+Final validation and performance results belong to the follow-up delivery
+report.
 
 Wide indexing, cross-tag numeric equality, class unboxing checks, rewrite
 visibility policy, additional platform guarantees, and expanded gates remain

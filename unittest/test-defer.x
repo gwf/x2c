@@ -308,7 +308,7 @@ static void managed_local_preserves_binding_and_order(void) {
   EXPECT_INT_EQ(defer_index, 3);
   EXPECT_INT_EQ(defer_log[0], 3);
   EXPECT_INT_EQ(defer_log[1], 2);
-  EXPECT_INT_EQ(defer_log[2], 4);
+  EXPECT_INT_EQ(defer_log[2], 1);
 }
 
 static void managed_local_cleans_before_failed_later_acquisition(void) {

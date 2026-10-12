@@ -176,9 +176,11 @@ macro Unit $map.core.family(Type $map, Type $storage, Type $key, Type $value,
     unsigned cap = map.capacity;
     if (cap > ~0u / 2) raise %(size-limit (size $cap));
     unsigned capacity = cap * 2;
-    Bytes staged_hashes = $auto(Bytes_new(sizeof($hash_cell)));
+    Bytes staged_hashes = Bytes_new(sizeof($hash_cell));
+    defer staged_hashes.cleanup();
     staged_hashes = staged_hashes.append(0, capacity);
-    Bytes staged_entries = $auto(Bytes_new(sizeof($entry)));
+    Bytes staged_entries = Bytes_new(sizeof($entry));
+    defer staged_entries.cleanup();
     staged_entries = staged_entries.append(0, capacity);
 
     /* Build both replacement arrays before touching `map`; allocation or

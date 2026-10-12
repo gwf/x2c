@@ -313,7 +313,18 @@ defer free(buffer);
 ```
 
 `$auto` requires the type to participate in `Cleanup(T)`; the runtime's owning
-types already do.
+types already do. It saves the acquired value for cleanup; later reassignment
+does not change what it releases. Use an explicit `defer` when cleanup must
+read a binding at exit, including a Scope slot populated lazily:
+
+```x2c
+~int main(void) {
+Scope work = NULL;
+defer work.cleanup();
+$scope(&work) { Array items = []; items.push(1); }
+~  return 0;
+~}
+```
 
 ## Raise failures; return ordinary outcomes
 

@@ -94,16 +94,24 @@ static macro Expression $region.reason.freed() => "it was freed";
 
 // walk state
 
+/* Aliases share a stable value's scheduled cleanup, independently of the
+   allocator that owns it. Mutable defer targets keep binding-local facts. */
+static typedef struct Acquired {
+  struct Region *cleanup;
+} *Acquired;
+
 /* An open or closed region. `kind` is scope, pool, slot, auto, local: the
    storage of a Scope local whose end has not been seen, or frame: the
    storage of the function's locals and parameters. `depth` is the
    block depth it belongs to, `origin` the statement that opened it, `slot`
-   the Scope local a pushed slot names, and `outer` the next open region. */
+   the Scope local a pushed slot names, and `outer` the next open region.
+   A Scope's storage also ends when its acquired handle is cleaned. */
 static typedef struct Region {
   Symbol kind;
   int depth, origin, closed;
   struct Fact *slot;
   struct Region *outer;
+  Acquired acquired;
 } *Region;
 
 /* What the walk knows about one local or parameter: the block depth that
@@ -113,13 +121,16 @@ static typedef struct Region {
    (and the Pool alternative of a mixed result), the region a Scope local's
    own storage forms, and for a pointer taken
    with `&`, the local and place it names. `born` records a scoped or pooled
-   result, including when the allocation has no local region. */
+   result, including when the allocation has no local region. `constant`
+   marks a stable cleanup target; `empty` distinguishes a NULL handle from
+   the value its slot may later acquire. */
 static typedef struct Fact {
-  int depth, origin, param, born;
+  int depth, origin, param, born, constant, empty;
   Symbol dead, ending;
   struct Region *region, *other, *owner;
   struct Fact *points;
   List place;
+  Acquired acquired;
 } *Fact;
 
 static Var Fact.var(Fact fact) => Var.new(<p48>, fact);
@@ -518,7 +529,12 @@ static int Walk.region_call(Walk &w, String callee, List arguments) {
     }
     case %(destroy): if (fact && fact.depth == w.depth && fact.owner)
       fact.owner.closed = 1;
-    case %(move): if (fact) _move(fact, w.owner(w.slot(arguments.cadr())));
+    case %(move): {
+      Fact slot = w.slot(arguments.cadr());
+      Region owner = (fact && fact.empty) || _empty(arguments.car())
+        ? w.owner(slot) : w.allocate_in(slot);
+      if (fact) _move(fact, owner);
+    }
     case %(exit): if (fact) _move(fact, NULL);
     default: return 0;
   }
@@ -554,6 +570,12 @@ static void Walk.walk_defer(Walk &w, Var body) {
   Fact fact = w.fact_of(arguments.car(), NULL);
   match (callee ? w.effect(callee) : void) {
     case %(close ?): return;
+    case %((!or free destroy) *)
+      if (fact && fact.constant && fact.param < 0): {
+      if (!fact.empty)
+        _acquired(fact).cleanup = w.open_region(<auto>, NULL);
+      return;
+    }
     case %(free *) if (fact && fact.param < 0): {
       fact.region = w.open_region(<auto>, NULL);
       return;
@@ -676,9 +698,11 @@ static void Walk.scan_call(Walk &w, Var call, String callee, List arguments) {
     else if (target == <result>) {
       int born = 0;
       Region other = NULL;
-      Region region = w.birth(call, NULL, born, other);
+      Acquired acquired = NULL;
+      Region region = w.birth(call, NULL, born, other, acquired);
       struct Fact result = {
-        .param = -1, .born = born, .region = region, .other = other};
+        .param = -1, .born = born, .region = region, .other = other,
+        .acquired = acquired};
       w.flow(argument, type, <heap>, &result);
     }
     else match (target) case %(param ?other): {
@@ -721,8 +745,9 @@ static void Walk.scan_ident(Walk &w, Var binding) {
   Var found = w.facts[binding];
   if (found is void) return;
   Fact fact = found;
-  if (w.audit && ((fact.region && fact.region.closed) ||
-                  (fact.other && fact.other.closed))) {
+  Region cleanup = _cleanup(fact.acquired);
+  if (w.audit && (_closed(fact.region) || _closed(fact.other) ||
+                  (cleanup && cleanup.closed))) {
     String name = binding_identity_spelling(binding);
     $report.region.read_ended(w, name);
     return;
@@ -738,7 +763,8 @@ static void Walk.scan_ident(Walk &w, Var binding) {
 static void Walk.scan_cons(Walk &w, Var node, Var head, Var tail) {
   int born = 0;
   Region other = NULL;
-  Region region = w.birth(node, NULL, born, other);
+  Acquired acquired = NULL;
+  Region region = w.birth(node, NULL, born, other, acquired);
   struct Fact result = {.param = -1, .born = born, .region = region};
   w.flow(head, NULL, <heap>, &result);
   w.flow(tail, NULL, <heap>, &result);
@@ -809,11 +835,13 @@ static void Walk.assign(Walk &w, Fact fact, Var value, Type type, int store) {
   if (!source) source = w.returned_argument(value, NULL);
   int born = 0;
   Region other = source ? source.other : NULL;
+  Acquired acquired = NULL;
   Region region = source ? source.region
-                         : w.birth(value, type, born, other);
+                         : w.birth(value, type, born, other, acquired);
   int owners = source ? source.born : born;
   int kept = (source || born) && !w.number(type, value);
-  if (kept && w.copies(type, value)) {
+  int copies = kept && w.copies(type, value);
+  if (kept && copies) {
     if (owners == 3) {
       region = other;
       other = NULL;
@@ -821,8 +849,13 @@ static void Walk.assign(Walk &w, Fact fact, Var value, Type type, int store) {
     }
     else kept = (owners & 2) || (region && region.kind == <pool>);
   }
-  if (kept && store && source && (region || other))
+  if (kept && store && source &&
+      (region || other || _cleanup(source.acquired)))
     kept = !w.flow(value, type, <local>, fact);
+  if (kept && source && !copies && !source.empty)
+    acquired = _acquired(source);
+  fact.acquired = copies || (source && !kept) ? NULL : acquired;
+  fact.empty = source ? source.empty : _empty(value);
   fact.dead = 0;
   fact.points = kept && source ? source.points : NULL;
   fact.place = kept && source ? source.place : NULL;
@@ -851,9 +884,18 @@ static void Walk.declare(Walk &w, Var specifiers, List bindings) {
   foreach (Var item, bindings)
     match (item) {
       case %(op (!quote =) (bind (!set ?name (binding ? ?)) ?) ?value):
-        w.assign(w.new_fact(name, -1), value, types[%(type $name)], 0);
+        w.declare_initialized(name, value, types[%(type $name)]);
       case %(bind (!set ?name (binding ? ?)) ?): w.new_fact(name, -1);
     }
+}
+
+static void Walk.declare_initialized(Walk &w, List name, Var value, Type type) {
+  Fact fact = w.new_fact(name, -1);
+  foreach (Var part, w.c.sym.normalize_declared_type(type)) {
+    if (part is not <symbol> || !part.symbol().is_type_qualifier()) break;
+    if (part == <const>) fact.constant = 1;
+  }
+  w.assign(fact, value, type, 0);
 }
 
 // flows
@@ -886,7 +928,9 @@ static int Walk.flow(Walk &w, Var value, Type type, Symbol sink, Fact target) {
   if (!fact) fact = w.returned_argument(value, named);
   int born = 0;
   Region other = NULL;
-  Region region = fact ? fact.region : w.birth(value, NULL, born, other);
+  Acquired acquired = fact ? fact.acquired : NULL;
+  Region region = fact ? fact.region
+                       : w.birth(value, NULL, born, other, acquired);
   if (!fact && !born) return 0;
   if (fact && fact.param >= 0) {
     w.sink_parameter(fact, sink, target);
@@ -897,7 +941,9 @@ static int Walk.flow(Walk &w, Var value, Type type, Symbol sink, Fact target) {
     other = fact.other;
   }
   Flow flow = {&w, value, type, sink, fact, named};
-  return flow.owners(target, region, other, born);
+  return flow.owners(target, region, other, born) ||
+         (_cleanup(acquired) &&
+          flow.check(target, acquired.cleanup, 1, 1));
 }
 
 static void Walk.sink_parameter(Walk &w, Fact fact, Symbol sink, Fact target) {
@@ -941,6 +987,8 @@ static int Flow.check(
     if (f.sink == <return>) f.w.fresh |= born;
     return 0;
   }
+  Region cleanup = _cleanup(region.acquired);
+  if (cleanup && f.check(target, cleanup, 1, report)) return 1;
   String subject = (*f.w).subject(f.value, f.named, f.fact);
   if (region.closed) {
     if (report)
@@ -972,6 +1020,9 @@ static String Flow.exit(Flow &f, Fact target, Region region) {
       if (!target) return $region.reason.pointer();
       if (target.param >= 0) return $region.reason.parameter();
       if (target.region == region) return NULL;
+      if (_cleanup(target.acquired) == region ||
+          (target.region && _cleanup(target.region.acquired) == region))
+        return NULL;
       /* Every region a function opens ends before its own storage. */
       if (target.region)
         return region == f.w.frame ? NULL
@@ -1040,6 +1091,7 @@ static Fact Walk.borrow(Walk &w, Var place, List &?named) {
   borrow.region = through ? base.region : w.frame;
   borrow.other = through ? base.other : NULL;
   borrow.born = through ? base.born : 0;
+  if (through && !base.empty) borrow.acquired = _acquired(base);
   if (through) borrow.param = base.param;
   return borrow;
 }
@@ -1077,13 +1129,14 @@ static Symbol _sink_of(Fact base, int through, Fact &target) {
    Scope/Pool result keeps its Pool region in `other`. `type` is the
    declared type a compound literal initializes, or NULL for its own. */
 static Region Walk.birth(
-  Walk &w, Var value, Type type, int &born, Region &other) {
+  Walk &w, Var value, Type type, int &born, Region &other, Acquired &acquired) {
   List arguments = NULL;
   String callee = _callee_of(value, arguments);
   born = 1;
   other = NULL;
+  acquired = NULL;
   match (callee ? w.effect(callee) : void) {
-    case %(alloc slot): return w.owner(w.slot(arguments.car()));
+    case %(alloc slot): return w.allocate_in(w.slot(arguments.car()));
     case %(alloc pool): return w.pooled(born);
     case %(alloc final) if (w.meta): return w.frame;
     case %(alloc *): return w.active();
@@ -1095,7 +1148,7 @@ static Region Walk.birth(
        reference capture moves its local into a cell of the active region,
        so the closure holds the local's value, not its address. */
     case captured(?body, *captures, *params):
-      return w.captured_birth(captures, born, other);
+      return w.captured_birth(captures, born, other, acquired);
   }
   match (_unwrap(value)) {
     case %(cons *): return w.pooled(born);
@@ -1137,14 +1190,16 @@ static Region Walk.summary_birth(
 /* A closure keeps the first captured value with an owner; an address
    capture keeps the place it names. */
 static Region Walk.captured_birth(
-  Walk &w, List captures, int &born, Region &other) {
+  Walk &w, List captures, int &born, Region &other, Acquired &acquired) {
   foreach (Var capture, captures)
     match (capture) case %(capture ? ? ?captured): {
       Var place = _address_of(captured);
       Fact fact = w.fact_of(place is void ? captured : place, NULL);
-      if (fact && (fact.born || fact.region || fact.other)) {
+      if (fact && (fact.born || fact.region || fact.other ||
+                   _cleanup(fact.acquired))) {
         if (fact.born) born = fact.born;
         other = fact.other;
+        acquired = fact.acquired;
         return fact.region;
       }
     }
@@ -1194,7 +1249,8 @@ static Fact Walk.returned_argument(Walk &w, Var value, List &?named) {
     if (target != <return> || index >= arguments.len()) continue;
     Type type = NULL;
     Fact fact = w.fact_of(_passed(types, arguments, index, type), named);
-    if (fact && (fact.param >= 0 || fact.born || fact.region || fact.other))
+    if (fact && (fact.param >= 0 || fact.born || fact.region || fact.other ||
+                 _cleanup(fact.acquired)))
       return fact;
   }
   return NULL;
@@ -1220,8 +1276,9 @@ static Fact Walk.fact_of(Walk &w, Var expression, List &?named) {
       List yes_name = NULL, no_name = NULL;
       Fact fact = w.fact_of(yes, yes_name);
       Fact other = w.fact_of(no, no_name);
-      if (other && (!fact || ((other.region || other.other) &&
-                             !fact.region && !fact.other))) {
+      if (other && (!fact ||
+          ((other.region || other.other || _cleanup(other.acquired)) &&
+           !fact.region && !fact.other && !_cleanup(fact.acquired)))) {
         fact = other;
         yes_name = no_name;
       }
@@ -1251,7 +1308,9 @@ static Fact Walk.value_fact(Walk &w, Var value, List &?named) {
 /* Accepts `&local` or a `Scope *` local. */
 static Fact Walk.slot(Walk &w, Var argument) {
   Fact fact = w.fact_of(_address_of(argument), NULL);
-  return fact ? fact : w.fact_of(argument, NULL);
+  if (fact) return fact;
+  fact = w.fact_of(argument, NULL);
+  return fact && fact.points ? fact.points : fact;
 }
 
 static Fact Walk.new_fact(Walk &w, List binding, int param) {
@@ -1259,6 +1318,33 @@ static Fact Walk.new_fact(Walk &w, List binding, int param) {
   *fact = (struct Fact) {.depth = w.depth, .origin = w.origin, .param = param};
   if (binding) w.facts[binding] = fact;
   return fact;
+}
+
+static Acquired _acquired(Fact fact) {
+  if (!fact.acquired)
+    fact.acquired = Scope.calloc(1, sizeof(struct Acquired));
+  return fact.acquired;
+}
+
+static Region _cleanup(Acquired acquired) => acquired ? acquired.cleanup : NULL;
+
+static int _closed(Region region) {
+  if (!region) return 0;
+  Region cleanup = _cleanup(region.acquired);
+  return region.closed || (cleanup && cleanup.closed);
+}
+
+/* A known empty handle has no identity to share with another empty slot. */
+static int _empty(Var value) {
+  match (_unwrap(value)) {
+    case $source_identifier_content(%((binding ? "NULL"))): return 1;
+    case $source_literal_content(%(?ltype ?text)): {
+      Type type = ltype;
+      unsigned long long number;
+      return type.integer_literal_magnitude(text, number) && !number;
+    }
+  }
+  return 0;
 }
 
 /* The region a Scope local's own storage forms. It ends at `Scope.destroy`
@@ -1272,6 +1358,17 @@ static Region Walk.owner(Walk &w, Fact slot) {
     *slot.owner = (struct Region) {<local>, slot.depth, slot.origin};
   }
   return slot.owner;
+}
+
+/* An allocation fills an empty Scope slot. A deferred destroy may already
+   own that slot, but a copy of its earlier NULL did not acquire this Scope. */
+static Region Walk.allocate_in(Walk &w, Fact slot) {
+  Region owner = w.owner(slot);
+  if (owner) {
+    slot.empty = 0;
+    owner.acquired = _acquired(slot);
+  }
+  return owner;
 }
 
 /* `fact` now belongs to `region`, or to an owner outside this function. */
@@ -1304,7 +1401,7 @@ static Region Walk.active(Walk &w) {
   while (region && (region.closed ||
          (region.kind != <scope> && region.kind != <slot>)))
     region = region.outer;
-  return region && region.kind == <slot> ? w.owner(region.slot) : region;
+  return region && region.kind == <slot> ? w.allocate_in(region.slot) : region;
 }
 
 // warnings

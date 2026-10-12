@@ -1,0 +1,10 @@
+current 2
+release 1
+const 3
+release 3
+release 5
+current value 7
+value 6
+volatile 9
+release 8
+lazy 1 1
