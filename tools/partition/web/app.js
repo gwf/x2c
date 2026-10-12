@@ -8,8 +8,7 @@ let D,
   scope = null,
   history = [],
   future = [],
-  level = 38,
-  exact = false,
+  balance = 38,
   kval = 4,
   serial = 0,
   view = "groups",
@@ -151,7 +150,7 @@ function render(skipInspector = false) {
       ? metric("Crossing within this view", fmt(scopeCut))
       : metric("Functions", fmt(D.functions.length)));
   $("toolbar").innerHTML =
-    `${scope ? `<button id="back">\u2190 ${previewGroup ? "Group arrangement" : scopeStack.length ? "Parent group" : "Project"}</button>` : ""}<button id="split" ${selected.size !== 1 || preview ? "disabled" : ""}>Preview split</button><button id="merge" ${selected.size < 2 || preview ? "disabled" : ""}>Merge ${selected.size > 1 ? selected.size + " groups" : "groups"}</button>${preview ? '<span class="previewbadge">Tentative split</span>' : ""}${scope ? `<button id="view-groups">Group arrangement</button><button id="view-graph">Functions</button><button id="view-list">Function list</button>` : ""}<small>${scope ? "Open groups or switch to Functions to move members" : "Lines show aggregated calls \u00b7 hover to trace connections"}</small>`;
+    `${scope ? `<button id="back">\u2190 ${previewGroup ? "Group arrangement" : scopeStack.length ? "Parent group" : "Project"}</button>` : ""}<button id="split" ${selected.size !== 1 || preview ? "disabled" : ""}>Preview split</button><button id="merge" ${selected.size < 2 || preview ? "disabled" : ""}>Merge ${selected.size > 1 ? selected.size + " groups" : "groups"}</button>${preview ? '<span class="previewbadge">Tentative split</span>' : ""}${scope ? `<button id="suggest-moves" ${preview ? "disabled" : ""}>Suggest moves</button><button id="view-groups">Group arrangement</button><button id="view-graph">Functions</button><button id="view-list">Function list</button>` : ""}<small>${scope ? "Open groups or switch to Functions to move members" : "Lines show aggregated calls \u00b7 hover to trace connections"}</small>`;
   $("back")?.addEventListener("click", () => {
     if (previewGroup) {
       previewGroup = null;
@@ -176,6 +175,7 @@ function render(skipInspector = false) {
       previewGroup = null;
       render();
     });
+  $("suggest-moves")?.addEventListener("click", renderMoveSuggestions);
   renderNav();
   if (scope) {
     const shown = previewGroup
@@ -397,8 +397,9 @@ function updatePreview(skipInspector = false) {
   previewGroup = null;
   fn = null;
   const g = group(preview.target),
-    count = exact ? kval : 2 + Math.round((level / 100) * 6),
-    parts = Engine.partition(D, g.members, count, level / 100, S.ties);
+    count = Math.max(1, Math.min(kval, Engine.atoms(g.members, S.ties).length)),
+    parts = Engine.partition(D, g.members, count, balance / 100, S.ties);
+  kval = count;
   preview = {
     target: g.id,
     parts,
@@ -497,29 +498,75 @@ function peel() {
     });
   });
 }
+function renderMoveSuggestions() {
+  if (preview || !scope) return;
+  const proposals = Engine.suggestMoves(
+    D,
+    S.groups,
+    S.ties,
+    new Set(scope.members),
+  );
+  const current = Engine.metrics(D, S.groups).cut;
+  $("inspector").innerHTML =
+    `<div class="paneltag">LOCAL MOVE SUGGESTIONS</div><h2>${proposals.length} candidates</h2><p>Moves out of this view into connected groups. Ranked by fewer crossing call sites. Nothing changes until you apply a move.</p><div class="hint note">A cheaper cut can put an API beside its consumers and away from its helper. Review the functions and private boundaries. Keep-together sets are always preserved.</div><p class="note">Tries each function or keep-together set, alone and with its strongest connected neighbor set. Initializers and moves that empty a group are excluded.</p>${
+      proposals
+        .map((p, i) => {
+          const from = group(p.from),
+            to = group(p.to);
+          return `<div class="rule"></div><h3>${esc(from.name)} \u2192 ${esc(to.name)}</h3><p><strong>${fmt(p.delta)} crossing call sites</strong><br>Global cut: ${fmt(current)} \u2192 ${fmt(current + p.delta)}<br>Group sizes: ${from.members.length} / ${to.members.length} \u2192 ${from.members.length - p.members.length} / ${to.members.length + p.members.length}<br>Private targets crossing: +${p.added.length} / -${p.removed.length}</p><details><summary>${p.members.length} functions to move</summary><p>${p.members.map((v) => esc(D.functions[v].n)).join("<br>")}</p>${p.added.length ? `<p>New private boundaries: ${p.added.map((v) => esc(D.functions[v].n)).join(", ")}</p>` : ""}</details><button class="wide" data-apply-move="${i}">Apply this move</button>`;
+        })
+        .join("") ||
+      "<p>No cut-reducing moves found in this neighborhood. This does not prove the partition is optimal.</p>"
+    }<button id="leave-suggestions" class="quiet wide">Back to group inspector</button>`;
+  $("leave-suggestions").onclick = () =>
+    renderInspector(Engine.metrics(D, visible()), Engine.metrics(D, S.groups));
+  $("inspector")
+    .querySelectorAll("[data-apply-move]")
+    .forEach(
+      (e) =>
+        (e.onclick = () => {
+          const p = proposals[+e.dataset.applyMove],
+            moved = new Set(p.members);
+          change(
+            `Moved ${p.members.length} functions; ${p.delta} crossing call sites`,
+            () => {
+              S.groups.forEach(
+                (g) => (g.members = g.members.filter((v) => !moved.has(v))),
+              );
+              group(p.to).members.push(...p.members);
+              scope.members = [
+                ...new Set([...scope.members, ...group(p.to).members]),
+              ];
+            },
+          );
+          renderMoveSuggestions();
+        }),
+    );
+}
 function renderInspector(m, current) {
   if (preview && fn === null) {
     const target = group(preview.target),
       sizes = preview.parts.map((p) => p.length),
       delta = m.cut - current.cut;
     $("inspector").innerHTML =
-      `<div class="paneltag">SPLIT PREVIEW</div><h2>${esc(target.name)}</h2><p>Explore a tentative split. Accept it when the boundaries make sense.</p><div class="control"><label for="level">Partition detail <span style="float:right">${level}</span></label><input id="level" type="range" min="0" max="100" value="${level}"><div class="scale"><span>Fewer / uneven</span><span>More / balanced</span></div></div><div class="spread"><label><input id="exact" type="checkbox" ${exact ? "checked" : ""}> Fix group count</label><input id="k" class="number" aria-label="Exact group count" type="number" min="2" max="${Math.min(target.members.length, 30)}" value="${kval}" ${exact ? "" : "disabled"}></div><p class="note">${exact ? "Count stays fixed. The slider adjusts the preference for similar sizes." : "One exploration path changes both group count and the preference for similar sizes."}</p><h3>${sizes.length} proposed groups</h3><div class="sizes">${sizes.map((n, i) => `<i style="flex:${n};background:${colors[i % 8]}" title="${n} functions"></i>`).join("")}</div><div class="spread"><small>${sizes.join(" / ")} functions</small></div><div class="rule"></div><div class="costrow"><span>Global cut change</span><strong>${delta >= 0 ? "+" : ""}${fmt(delta)} call sites</strong></div><div class="costrow"><span>Private targets crossing</span><strong>${m.exposed.length}</strong></div><div class="costrow"><span>Keep-together sets</span><strong>${S.ties.filter((t) => t.some((v) => target.members.includes(v))).length} respected</strong></div><button id="accept" class="primary wide">Accept ${sizes.length} groups</button><button id="cancel" class="quiet wide">Discard preview</button><div class="hint note">A lower cut is evidence, not a design decision. Inspect API entry points before accepting.</div>`;
-    $("level").oninput = (e) => {
-      level = +e.target.value;
-      updatePreview(true);
-    };
-    $("level").onchange = () => updatePreview();
-    $("exact").onchange = (e) => {
-      exact = e.target.checked;
+      `<div class="paneltag">SPLIT PREVIEW</div><h2>${esc(target.name)}</h2><p>Explore a tentative split. Accept it when the boundaries make sense.</p><div class="control"><label for="cluster-count">Group count: ${kval}</label><input id="cluster-count" type="range" min="1" max="${Math.max(kval, Math.ceil(Engine.atoms(target.members, S.ties).length / 2))}" value="${kval}"><div class="scale"><span>One group</span><span>More groups</span></div></div><div class="spread"><label for="k">Exact group count</label><input id="k" class="number" type="number" min="1" max="${Engine.atoms(target.members, S.ties).length}" value="${kval}"></div><p class="note">Slider reaches about two functions per group. Exact count can reach ${Engine.atoms(target.members, S.ties).length}; keep-together sets stay intact.</p><div class="control"><label for="balance">Size balance: ${balance}</label><input id="balance" type="range" min="0" max="100" value="${balance}"><div class="scale"><span>Prefer low cut cost</span><span>Prefer similar sizes</span></div></div><p class="note">Balance changes the size penalty without changing group count.</p><h3>${sizes.length} proposed groups</h3><div class="sizes">${sizes.map((n, i) => `<i style="flex:${n};background:${colors[i % 8]}" title="${n} functions"></i>`).join("")}</div><div class="spread"><small>${sizes.join(" / ")} functions</small></div><div class="rule"></div><div class="costrow"><span>Global cut change</span><strong>${delta >= 0 ? "+" : ""}${fmt(delta)} call sites</strong></div><div class="costrow"><span>Private targets crossing</span><strong>${m.exposed.length}</strong></div><div class="costrow"><span>Keep-together sets</span><strong>${S.ties.filter((t) => t.some((v) => target.members.includes(v))).length} respected</strong></div><button id="accept" class="primary wide" ${sizes.length < 2 ? "disabled" : ""}>Accept ${sizes.length} groups</button><button id="cancel" class="quiet wide">Discard preview</button><div class="hint note">A lower cut is evidence, not a design decision. Inspect API entry points before accepting.</div>`;
+    $("cluster-count").onchange = (e) => {
+      kval = +e.target.value;
       updatePreview();
     };
-    $("k").oninput = (e) => {
+    $("balance").onchange = (e) => {
+      balance = +e.target.value;
+      updatePreview();
+    };
+    $("k").onchange = (e) => {
       kval = Math.max(
-        2,
-        Math.min(30, target.members.length, Math.round(+e.target.value) || 2),
+        1,
+        Math.min(
+          Engine.atoms(target.members, S.ties).length,
+          Math.round(+e.target.value) || 1,
+        ),
       );
       updatePreview();
-      $("k").focus();
     };
     $("accept").onclick = applyPreview;
     $("cancel").onclick = () => {

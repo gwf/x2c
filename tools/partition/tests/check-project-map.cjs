@@ -45,3 +45,33 @@ assert.deepEqual(quotient.callers, [2, 1]);
 assert.deepEqual(quotient.incoming, [9, 3]);
 assert.equal(layout([{ r: 10 }], []).length, 1);
 console.log("PASS: scoped directed aggregation and incoming consumers");
+const context = layout.arrangementData(
+  {
+    functions: [{}, {}, {}, {}],
+    edges: [
+      [2, 0, 2],
+      [2, 1, 3],
+      [3, 1, 4],
+      [0, 2, 8],
+    ],
+  },
+  [
+    { id: "a", members: [0] },
+    { id: "b", members: [1] },
+  ],
+  [
+    { id: "a", members: [0] },
+    { id: "b", members: [1] },
+    { id: "outside-current", members: [2, 3] },
+  ],
+);
+assert.equal(context.groups.length, 3);
+assert.equal(context.groups[2].id, "outside-current");
+assert.equal(context.groups[2].consumerCount, 2);
+assert.deepEqual(context.links, [
+  { ids: [2, 0], w: 1, calls: 2, outside: true },
+  { ids: [2, 1], w: 2, calls: 7, outside: true },
+]);
+console.log(
+  "PASS: collapsed outside groups have deduplicated caller weights and no outgoing callee links",
+);

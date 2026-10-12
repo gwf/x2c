@@ -48,8 +48,18 @@ are served directly. Node.js is needed only for the optional checks below.
   to expand all groups for moving functions, or Function list for keep-together
   selection. Shift-click project nodes or use
   the sidebar checkboxes to select groups for merging.
-- The partition-detail slider changes the suggested group count and balance
-  penalty. Fix group count when comparing alternatives with the same count.
+- Group count ranges from one group to about two functions per group on the
+  slider. Exact count can reach singletons, subject to keep-together sets.
+  Size balance independently trades lower cut cost for more similar group sizes.
+- Collapsed arrangements include dashed outside caller groups. Their node counts
+  and links count distinct callers; links marked `c` distinguish these from
+  internal call-site weights. Outside callees are omitted.
+- Suggest moves ranks up to twelve cut-reducing moves from the current view into
+  connected groups. Each candidate moves a function or keep-together set, alone
+  or with its strongest neighboring set. Review exact members, group sizes, cut
+  change, and private boundaries before applying one move. Undo restores it.
+  Initializers and moves that empty a group are excluded. These local candidates
+  are design evidence, not proof of semantic suitability or global optimality.
 - Preview does not change the saved plan. Accept it before moving functions.
   Select a function, then drag it to another group, or use the inspector's
   destination selector. The function list supports keep-together sets.
@@ -102,6 +112,7 @@ After generating the snapshot:
 
 ```sh
 node tools/partition/tests/check-engine.cjs
+node tools/partition/tests/check-moves.cjs
 node tools/partition/tests/check-boundary.cjs
 node tools/partition/tests/check-layout.cjs
 node tools/partition/tests/check-project-map.cjs
