@@ -286,8 +286,9 @@ static void var_numeric_exact_floating_boundaries(void) {
   unsigned long long lower_value = (1ull << 53) + 3ull;
   Var lower = Var.box_ulong_long(lower_value);
   Var upper = Var.new(<f64>, (double) (lower_value + 1ull));
-  EXPECT_TRUE(lower < upper);
-  EXPECT_TRUE(upper > lower);
+  EXPECT_TRUE(lower == upper);
+  EXPECT_TRUE(lower.compare(upper) < 0);
+  EXPECT_TRUE(upper.compare(lower) > 0);
 }
 
 
@@ -431,6 +432,32 @@ static void var_all_family_integral_matrix(void) {
         EXPECT_TRUE(result is expected_tag);
         EXPECT_TRUE(converted_test_value(result) == expected[op_index]);
       }
+    }
+  }
+}
+
+/* Two numbers compare as C compares them in their common type, so -1 meets
+   an unsigned common type as that type's largest value. */
+static void var_all_family_comparison_matrix(void) {
+  $test.scoped();
+  Symbol tags[] = {
+    <i8>, <u8>, <i16>, <u16>, <i32>, <u32>, <i48>, <u48>,
+    <long>, <ulong>, <llong>, <ullong>, <f32>, <f64>, <ldouble>
+  };
+  int count = sizeof(tags) / sizeof(tags[0]);
+  for (int left = 0; left < count; left++) {
+    for (int right = 0; right < count; right++) {
+      Var two = numeric_value_for_tag(tags[left], 2);
+      Var also_two = numeric_value_for_tag(tags[right], 2);
+      Var twelve = numeric_value_for_tag(tags[right], 12);
+      EXPECT_TRUE(two == also_two && two <= also_two && two >= also_two);
+      EXPECT_TRUE(two < twelve && twelve > two && two != twelve);
+      EXPECT_INT_EQ(two === also_two, left == right);
+      Symbol common = expected_numeric_tag(tags[left], tags[right]);
+      if (numeric_rank(tags[left]) >= 7 || numeric_unsigned(tags[left]))
+        continue;
+      Var negative = numeric_value_for_tag(tags[left], -1);
+      EXPECT_INT_EQ(negative < twelve, !numeric_unsigned(common));
     }
   }
 }
@@ -604,6 +631,13 @@ static void var_truth_and_generic_predicates(void) {
   EXPECT_INT_EQ(Var.binary(4, <">=">, 4).int(), 1);
   EXPECT_INT_EQ(Var.binary("same", <==>, "same").int(), 1);
   EXPECT_INT_EQ(Var.binary("a", <"<">, "b").int(), 1);
+  Var nan = 0.0 / 0.0, long_box = Var.box_long(3L);
+  EXPECT_INT_EQ(Var.binary(3, <==>, 3L).int(), 1);
+  EXPECT_INT_EQ(Var.binary(3, <===>, 3L).int(), 0);
+  EXPECT_INT_EQ(Var.binary(-1, <"<">, 1u).int(), 0);
+  EXPECT_INT_EQ(Var.binary(nan, <==>, nan).int(), 0);
+  EXPECT_INT_EQ(Var.binary(nan, <===>, nan).int(), 1);
+  EXPECT_INT_EQ(Var.binary(long_box, <===>, Var.box_long(3L)).int(), 1);
 
   Symbol numeric_tags[] = {
     <i8>, <u8>, <i16>, <u16>, <i32>, <u32>, <i48>, <u48>,
@@ -806,6 +840,7 @@ void varops_suite(void) {
   $test.run(var_integral_pair_matrix);
   $test.run(var_all_family_arithmetic_matrix);
   $test.run(var_all_family_integral_matrix);
+  $test.run(var_all_family_comparison_matrix);
   $test.run(var_operation_edges_and_status);
   $test.run(var_invalid_encoding_status_is_atomic);
   $test.run(var_truth_and_generic_predicates);

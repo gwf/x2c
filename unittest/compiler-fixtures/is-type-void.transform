@@ -30,25 +30,25 @@
     (bindings 
      (op = (bind (binding 6 "pointer") (*)) 
       (expr () (ident (binding 7 "NULL"))))))) 
-  (at 37 
+  (at 40 
    (declare (void) 
     (bindings 
      (op = (bind (binding 8 "cast_pointer") (*)) 
       (expr (* void) 
        (cast (* void) (expr (* void) (ident (binding 6 "pointer"))))))))) 
-  (at 38 
+  (at 41 
    (stmnt 
     (expr (void) 
      (cast (void) 
       (expr (void) 
        (call (expr ((func ((void))) void) (ident (binding 2 "touch"))) 
         (args (expr (void) ())))))))) 
-  (at 39 
+  (at 42 
    (stmnt 
     (expr (void) 
      (cast (void) 
       (expr ("size_t") (sizeof (parens (decl (void) (bindings (bind () ())))))))))) 
-  (at 50 
+  (at 56 
    (declare (int) 
     (bindings 
      (op = (bind (binding 9 "ok") ()) 
@@ -156,15 +156,18 @@
                                                       (literal ("Var") "void")) 
                                                 (expr ("Symbol") "3453797")))))))) 
                                     (expr (int) 
-                                     (call (expr ((func (("Var") ("Var"))) int) 
-                                            (ident (binding 12 "Var_equal"))) 
-                                      (args (expr ("Var") 
-                                             (literal ("Var") "void")) 
-                                       (expr ("Var") (literal ("Var") "void"))))))) 
+                                     (at 43 
+                                      (call (expr (macro-expr) 
+                                             (ident 
+                                              (binding-name "x2c_var_equal"))) 
+                                       (args (expr ("Var") 
+                                              (literal ("Var") "void")) 
+                                        (expr ("Var") (literal ("Var") "void")))))))) 
                                   (expr (int) 
-                                   (at 40 
+                                   (at 44 
                                     (call (expr (macro-expr) 
-                                           (ident (binding-name "Var_same"))) 
+                                           (ident 
+                                            (binding-name "x2c_var_identical"))) 
                                      (args (expr ("Var") 
                                             (literal ("Var") "void")) 
                                       (expr ("Var") (literal ("Var") "void")))))))) 
@@ -172,145 +175,149 @@
                                  (op ! (expr (int) 
                                         (parens 
                                          (expr (int) 
-                                          (op ! (expr (int) 
-                                                 (call (expr ((func (("Var") 
-                                                                     ("Var"))) 
-                                                              int) 
-                                                        (ident 
-                                                         (binding 12 "Var_equal"))) 
-                                                  (args (expr ("Var") 
-                                                         (literal ("Var") "void")) 
-                                                   (expr ("Var") 
-                                                    (literal ("Var") "void"))))))))))))) 
+                                          (at 45 
+                                           (expr (int) 
+                                            (op ! (expr (macro-expr) 
+                                                   (call (expr (macro-expr) 
+                                                          (ident 
+                                                           (binding-name 
+                                                            "x2c_var_equal"))) 
+                                                    (args (expr ("Var") 
+                                                           (literal ("Var") 
+                                                            "void")) 
+                                                     (expr ("Var") 
+                                                      (literal ("Var") "void"))))))))))))))) 
                               (expr (int) 
                                (op ! (expr (int) 
                                       (parens 
                                        (expr (int) 
-                                        (at 41 
+                                        (at 46 
                                          (expr (int) 
                                           (op ! (expr (macro-expr) 
                                                  (call (expr (macro-expr) 
                                                         (ident 
                                                          (binding-name 
-                                                          "Var_same"))) 
+                                                          "x2c_var_identical"))) 
                                                   (args (expr ("Var") 
                                                          (literal ("Var") "void")) 
                                                    (expr ("Var") 
                                                     (literal ("Var") "void"))))))))))))))) 
                             (expr (int) 
-                             (at 42 
+                             (at 47 
                               (expr (int) 
                                (op ! (expr (macro-expr) 
                                       (call (expr (macro-expr) 
-                                             (ident (binding-name "Var_equal"))) 
+                                             (ident 
+                                              (binding-name "x2c_var_equal"))) 
                                        (args (expr ("Var") 
                                               (literal ("Var") "void")) 
                                         (expr ("Var") 
                                          (call (expr ((func ((int))) "Var") 
-                                                (ident (binding 13 "int_var"))) 
+                                                (ident (binding 12 "int_var"))) 
                                           (args (expr (int) (literal (int) "1")))))))))))))) 
                           (expr (int) 
-                           (at 43 
+                           (at 48 
                             (expr (int) 
                              (op ! (expr (macro-expr) 
                                     (call (expr (macro-expr) 
-                                           (ident (binding-name "Var_equal"))) 
+                                           (ident (binding-name "x2c_var_equal"))) 
                                      (args (expr ("Var") 
                                             (call (expr ((func ((int))) "Var") 
-                                                   (ident (binding 13 "int_var"))) 
+                                                   (ident (binding 12 "int_var"))) 
                                              (args (expr (int) 
                                                     (literal (int) "1"))))) 
                                       (expr ("Var") (literal ("Var") "void"))))))))))) 
                         (expr (int) 
-                         (at 44 
+                         (at 49 
                           (expr (int) 
                            (op ! (expr (macro-expr) 
                                   (call (expr (macro-expr) 
-                                         (ident (binding-name "Var_same"))) 
+                                         (ident 
+                                          (binding-name "x2c_var_identical"))) 
                                    (args (expr ("Var") (literal ("Var") "void")) 
                                     (expr ("Var") 
                                      (call (expr ((func ((int))) "Var") 
-                                            (ident (binding 13 "int_var"))) 
+                                            (ident (binding 12 "int_var"))) 
                                       (args (expr (int) (literal (int) "1")))))))))))))) 
                       (expr (int) 
-                       (at 45 
+                       (at 50 
                         (expr (int) 
                          (op ! (expr (macro-expr) 
                                 (call (expr (macro-expr) 
-                                       (ident (binding-name "Var_same"))) 
+                                       (ident (binding-name "x2c_var_identical"))) 
                                  (args (expr ("Var") 
                                         (call (expr ((func ((int))) "Var") 
-                                               (ident (binding 13 "int_var"))) 
+                                               (ident (binding 12 "int_var"))) 
                                          (args (expr (int) (literal (int) "1"))))) 
                                   (expr ("Var") (literal ("Var") "void"))))))))))) 
                     (expr (int) 
                      (op ! (expr (int) 
                             (parens 
                              (expr (int) 
-                              (at 46 
+                              (at 51 
                                (call (expr (macro-expr) 
-                                      (ident (binding-name "Var_equal"))) 
+                                      (ident (binding-name "x2c_var_equal"))) 
                                 (args (expr ("Var") (literal ("Var") "void")) 
                                  (expr ("Var") 
                                   (call (expr ((func ((int))) "Var") 
-                                         (ident (binding 13 "int_var"))) 
+                                         (ident (binding 12 "int_var"))) 
                                    (args (expr (int) (literal (int) "1"))))))))))))))) 
                   (expr (int) 
                    (op ! (expr (int) 
                           (parens 
                            (expr (int) 
-                            (at 47 
+                            (at 52 
                              (call (expr (macro-expr) 
-                                    (ident (binding-name "Var_equal"))) 
+                                    (ident (binding-name "x2c_var_equal"))) 
                               (args (expr ("Var") 
                                      (call (expr ((func ((int))) "Var") 
-                                            (ident (binding 13 "int_var"))) 
+                                            (ident (binding 12 "int_var"))) 
                                       (args (expr (int) (literal (int) "1"))))) 
                                (expr ("Var") (literal ("Var") "void")))))))))))) 
                 (expr (int) 
                  (op ! (expr (int) 
                         (parens 
                          (expr (int) 
-                          (at 48 
+                          (at 53 
                            (call (expr (macro-expr) 
-                                  (ident (binding-name "Var_same"))) 
+                                  (ident (binding-name "x2c_var_identical"))) 
                             (args (expr ("Var") (literal ("Var") "void")) 
                              (expr ("Var") 
                               (call (expr ((func ((int))) "Var") 
-                                     (ident (binding 13 "int_var"))) 
+                                     (ident (binding 12 "int_var"))) 
                                (args (expr (int) (literal (int) "1"))))))))))))))) 
               (expr (int) 
                (op ! (expr (int) 
                       (parens 
                        (expr (int) 
-                        (at 49 
+                        (at 54 
                          (call (expr (macro-expr) 
-                                (ident (binding-name "Var_same"))) 
+                                (ident (binding-name "x2c_var_identical"))) 
                           (args (expr ("Var") 
                                  (call (expr ((func ((int))) "Var") 
-                                        (ident (binding 13 "int_var"))) 
+                                        (ident (binding 12 "int_var"))) 
                                   (args (expr (int) (literal (int) "1"))))) 
                            (expr ("Var") (literal ("Var") "void")))))))))))) 
             (expr (int) 
-             (call (expr ((func (("Var") ("Var"))) int) 
-                    (ident (binding 12 "Var_equal"))) 
-              (args (expr ("Var") 
-                     (parens (expr ("Var") (literal ("Var") "void")))) 
-               (expr ("Var") (literal ("Var") "void"))))))) 
+             (at 55 
+              (call (expr (macro-expr) (ident (binding-name "x2c_var_equal"))) 
+               (args (expr ("Var") 
+                      (parens (expr ("Var") (literal ("Var") "void")))) 
+                (expr ("Var") (literal ("Var") "void")))))))) 
           (expr (int) 
            (op == (expr (* void) (ident (binding 8 "cast_pointer"))) 
             (expr (* void) (ident (binding 6 "pointer"))))))) 
         (expr (int) 
          (op == (expr (int) (ident (binding 1 "calls"))) 
           (expr (int) (literal (int) "1")))))))))) 
-  (at 35 
+  (at 38 
    (stmnt 
     (expr () 
-     (call (expr () (ident (binding 14 "printf"))) 
+     (call (expr () (ident (binding 13 "printf"))) 
       (args (expr (* char) (literal (* char) "\"%d %d\\n\"")) 
        (expr (int) (ident (binding 9 "ok"))) 
        (expr (int) (ident (binding 1 "calls")))))))) 
-  (at 51 
+  (at 57 
    (return 
     (expr (int) 
      (op ? (expr (int) (ident (binding 9 "ok"))) 

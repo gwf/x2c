@@ -80,7 +80,7 @@ static Var double_value(Var value){
 }
 
 static int is_even(Var value){
-  return Var_equal(Var_binary(value, 75, int_var(2)), int_var(0));
+  return x2c_var_equal(Var_binary(value, 75, int_var(2)), int_var(0));
 }
 
 static Var add_pair(Var left, Var right){

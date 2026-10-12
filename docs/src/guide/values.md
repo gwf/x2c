@@ -339,9 +339,26 @@ Var bad = count + label;   /* xform: dynamic numeric operators require
 A `Var` that *happens* to hold a `String` passes the static check and fails
 at run time instead.
 
-These rules do not apply to comparisons. With a `Var` operand, `==` and `!=`
-use `Var.equal`, `===` and `!==` use `Var.same`, and the relational
-operators use `Var.compare`. See
+Comparisons have their own rule. A comparison of two numeric `Var`s behaves
+as the same comparison between their native values in C, after the usual
+arithmetic conversions. `===` and `!==` on numbers require the same type and
+the same bits. Other `Var` operands compare through `Var.equal`, `Var.same`,
+and `Var.compare`.
+
+```x2c
+Var three = 3, wide = 3L, nan = 0.0 / 0.0;
+printf("3 == 3L: %d  3 === 3L: %d  -1 < 1u: %d\n",
+       three == wide, three === wide, (Var) -1 < 1u);
+printf("NaN == NaN: %d  NaN === NaN: %d\n", nan == nan, nan === nan);
+```
+
+```text
+3 == 3L: 1  3 === 3L: 0  -1 < 1u: 0
+NaN == NaN: 0  NaN === NaN: 1
+```
+
+`Map` keys and sorting keep the numeric types apart; see
+[Collections](collections.md). See
 [the language reference](../reference/language.md) for the dispatch.
 
 ## Handling dynamic-operation failures

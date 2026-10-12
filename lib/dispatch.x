@@ -370,7 +370,11 @@ unsigned Var.fallback_hash(Var v) {
    the low bits, which fmix64 avalanches as well as the high ones. */
 static unsigned _default_hash(Var v) => x2c_hash_word(v.u64);
 
-/** Applies the registered equality operation for `a` and `b`. */
+/** Applies the registered equality operation for `a` and `b`.
+    Two numbers are equal only with the same tag and the same bits, so this
+    agrees with `Var.hash`; Map and Pool keys compare this way. The `==`
+    operator compares two numbers as C does instead.
+*/
 int Var.equal(Var a, Var b) {
   if (a.u64 == b.u64) return 1;
   if (a.u64 == VAR_VOID_BITS || b.u64 == VAR_VOID_BITS) return 0;
@@ -401,7 +405,9 @@ int Var.fallback_equal(Var a, Var b) {
   return 0;
 }
 
-/** Reports whether `a` and `b` have identical `Var` bits. */
+/** Reports whether `a` and `b` have identical `Var` bits.
+    Two boxes of one wide number differ here, although `===` holds for them.
+*/
 meta native int Var.same(Var a, Var b) => a.u64 == b.u64;
 
 /* ordering
@@ -411,6 +417,9 @@ meta native int Var.same(Var a, Var b) => a.u64 == b.u64;
    lexicographically by element. */
 
 /** Compares `a` and `b` by runtime value group and registered ordering.
+    The order is total, so sorting uses it: numbers order by value, NaN after
+    every other number, and equal values of different types by type. The
+    relational operators compare two numbers as C does instead.
     Raises: `<void-op>` when either operand is `void`.
 */
 meta native int Var.compare(Var a, Var b) {

@@ -269,7 +269,7 @@ inline int MachineSlot.prefix_equal(
     end = slot.span.end;
   }
   for (int n = 0; n < length; n++) {
-    if (!input || !expected || !(input.car() == expected.car())) return 0;
+    if (!input || !expected || !input.car().equal(expected.car())) return 0;
     input = input.cdr();
     expected = expected.cdr();
   }
@@ -289,7 +289,7 @@ inline int MachineSlot.final_equal(
     List expected = slot.value;
     if (expected == input) return 1;
     while (expected && input) {
-      if (!(expected.car() == input.car())) return 0;
+      if (!expected.car().equal(input.car())) return 0;
       expected = expected.cdr();
       input = input.cdr();
     }
@@ -301,7 +301,7 @@ inline int MachineSlot.final_equal(
   }
   List expected = slot.span.begin, candidate = input, int length = 0;
   while (length < slot.span.length && expected != slot.span.end && candidate) {
-    if (!(expected.car() == candidate.car())) return 0;
+    if (!expected.car().equal(candidate.car())) return 0;
     expected = expected.cdr();
     candidate = candidate.cdr();
     length++;

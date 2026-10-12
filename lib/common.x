@@ -393,6 +393,9 @@ int Var.fallback_equal(Var a, Var b);
 int Var.same(Var a, Var b);
 int Var.compare(Var a, Var b);
 int Var.fallback_compare(Var a, Var b);
+int x2c_var_equal(Var a, Var b);
+int x2c_var_identical(Var a, Var b);
+double x2c_var_order(Var a, Var b);
 
 Var Var.convert(Var value, Symbol target);
 int Var.truth(Var value);

@@ -372,8 +372,9 @@ once, its current value is passed to the member once, and the returned
 stored value; postfix forms return the value from before the call.
 
 Plain `=`, `===`, and `!==` are never overloaded. `===` and `!==` retain
-native identity for static participants and `Var`-bit identity for boxed
-values.
+native identity for static participants. Boxed values are identical when
+their `Var` bits are, and two numbers are identical when they have the same
+type and the same bits.
 
 ## When protocols share a method
 

@@ -40,8 +40,8 @@ int main(void){
   assigned = Var_box_long(precise + 1);
   DynamicAlias argument = pass_alias(Var_box_long(precise)), returned = make_alias(precise);
   long direct = Var_long(Var_convert(returned, 818062)), through = take_alias(initialized);
-  printf("crossings=%d,%d,%d,%d,%d,%d calls=%d\n", Var_equal(initialized, long_var(precise)), Var_equal(assigned, long_var(precise + 1)), Var_equal(argument, long_var(precise)), Var_equal(returned, long_var(precise)), direct == precise, through == precise, pass_calls + take_calls);
-  printf("compare=%d,%d,%d,%d,%d,%d,%d,%d mixed=%d,%d\n", Var_equal(returned, initialized), ! Var_equal(returned, assigned), Var_same(returned, initialized), ! Var_same(returned, initialized), Var_compare(returned, assigned) < 0, Var_compare(returned, initialized) <= 0, Var_compare(assigned, returned) > 0, Var_compare(initialized, returned) >= 0, Var_equal(argument, long_var(precise)), Var_compare(long_var(precise), assigned) < 0);
+  printf("crossings=%d,%d,%d,%d,%d,%d calls=%d\n", x2c_var_equal(initialized, long_var(precise)), x2c_var_equal(assigned, long_var(precise + 1)), x2c_var_equal(argument, long_var(precise)), x2c_var_equal(returned, long_var(precise)), direct == precise, through == precise, pass_calls + take_calls);
+  printf("compare=%d,%d,%d,%d,%d,%d,%d,%d mixed=%d,%d\n", x2c_var_equal(returned, initialized), ! x2c_var_equal(returned, assigned), x2c_var_identical(returned, initialized), ! x2c_var_identical(returned, initialized), x2c_var_order(returned, assigned) < 0, x2c_var_order(returned, initialized) <= 0, x2c_var_order(assigned, returned) > 0, x2c_var_order(initialized, returned) >= 0, x2c_var_equal(argument, long_var(precise)), x2c_var_order(long_var(precise), assigned) < 0);
   return 0;
 }
 

@@ -836,7 +836,7 @@ meta native Var Iter.product(Iter iter) {
 }
 
 /** Returns the largest remaining element, or `void` when there is none.
-    Consumes the iterator, comparing with `Var` ordering, which is total
+    Consumes the iterator, comparing with `Var.compare`, which is total
     across types. Equal values keep the earliest, so the result is the first
     of any tie.
     Raises: `<void-op>` for a source callback that yields `void`, plus any
@@ -845,12 +845,12 @@ meta native Var Iter.product(Iter iter) {
 meta native Var Iter.max(Iter iter) {
   Var best;
   if (!iter.try_next(best)) return void;
-  foreach (Var item, iter) if (item > best) best = item;
+  foreach (Var item, iter) if (item.compare(best) > 0) best = item;
   return best;
 }
 
 /** Returns the smallest remaining element, or `void` when there is none.
-    Consumes the iterator, comparing with `Var` ordering, which is total
+    Consumes the iterator, comparing with `Var.compare`, which is total
     across types. Equal values keep the earliest, so the result is the first
     of any tie.
     Raises: `<void-op>` for a source callback that yields `void`, plus any
@@ -859,6 +859,6 @@ meta native Var Iter.max(Iter iter) {
 meta native Var Iter.min(Iter iter) {
   Var best;
   if (!iter.try_next(best)) return void;
-  foreach (Var item, iter) if (item < best) best = item;
+  foreach (Var item, iter) if (item.compare(best) < 0) best = item;
   return best;
 }

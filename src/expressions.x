@@ -2587,6 +2587,10 @@ static List Compiler._resolve_protocol_operator(
     if (!member) member = source;
     derived = source;
     if (!member) return NULL;
+    // `Compiler._comparison` lowers a comparison of two `Var` operands.
+    if ((member == <equal> || member == <compare>) &&
+        c.sym.is_var_type(participant))
+      return NULL;
     if (participant !== rhs_type) {
       participant = c._converted_participant(
         member, participant, rhs_type, lhs, rhs);

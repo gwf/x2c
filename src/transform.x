@@ -1082,12 +1082,12 @@ static List Compiler._comparison(
   lhs = c.convert_expression(lhs, %("Var"));
   rhs = c.convert_expression(rhs, %("Var"));
   switch (op) {
-    case <==>:  return $!int{ Var_equal($lhs, $rhs) }.caddr();
-    case <!=>:  return $!int{ !Var_equal($lhs, $rhs) };
-    case <===>: return $!int{ Var_same($lhs, $rhs) }.caddr();
-    case <!==>: return $!int{ !Var_same($lhs, $rhs) };
+    case <==>:  return $!int{ x2c_var_equal($lhs, $rhs) }.caddr();
+    case <!=>:  return $!int{ !x2c_var_equal($lhs, $rhs) };
+    case <===>: return $!int{ x2c_var_identical($lhs, $rhs) }.caddr();
+    case <!==>: return $!int{ !x2c_var_identical($lhs, $rhs) };
   }
-  List call = %(call "Var_compare" (args $lhs $rhs));
+  List call = %(call "x2c_var_order" (args $lhs $rhs));
   List zero = $!int{ 0 };
   return %(expr (int) (op $op $call $zero));
 }

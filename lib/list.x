@@ -126,7 +126,7 @@ meta native unsigned List.hash(List lst) {
 int List.equal(List a, List b) {
   if ((void *) a == (void *) b) return 1;
   if (!a || !b) return 0;
-  return a.car === b.car && a.cdr == b.cdr;
+  return a.car.same(b.car) && a.cdr == b.cdr;
 }
 
 /** Compares `a` and `b` lexicographically through `Var.compare`.

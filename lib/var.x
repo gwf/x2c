@@ -787,15 +787,15 @@ static Var _new_wide(TagId id, VarWideValue value) {
     small immutable box in the active scope, and the result lives for that
     scope's lifetime like any other scope allocation.
 
-    Two boxes of the same number are equal but not identical. On `Var`
-    operands `==` is `Var.equal`, which compares payloads, while `===` is
-    `Var.same`, which compares the 64 bits and therefore the box addresses.
+    Two boxes of the same number are equal and identical: `==` compares the
+    values, and `===` compares the type and the value bits. `Var.same`
+    compares the 64 `Var` bits, and therefore the box addresses.
 
     ```x2c
     ~Var five = Var.box_long(5L);
     ~Var also = Var.box_long(5L);
-    printf("equal=%d same=%d tag=%s\n", five == also, five === also,
-           five.tag().str());
+    printf("equal=%d identical=%d same=%d tag=%s\n", five == also,
+           five === also, five.same(also), five.tag().str());
     ```
     Raises: `<alloc-fail>` when the box cannot be allocated and `<bad-enc>`
     when its address cannot be represented in a `Var`. Before `Error`
@@ -808,9 +808,10 @@ Var Var.box_long(long value) {
 }
 
 /** Boxes an `unsigned long` into a scope-owned `<ulong>` value.
-    `<ulong>` is a distinct family from `<long>`, so a box made here never
-    compares equal to one made by `Var.box_long` even when both hold the same
-    bit pattern; `Var.wide_equal` requires matching tags. Read it back with
+    `<ulong>` is a distinct family from `<long>`. A box made here is never
+    `Var.equal` or identical to one made by `Var.box_long`, even when both
+    hold the same bit pattern, because `Var.wide_equal` requires matching
+    tags. `==` converts the two as C does. Read it back with
     `Var.ulong_value`, the one reader that returns the payload unsigned.
     Raises: `<alloc-fail>` when the box cannot be allocated and `<bad-enc>`
     when its address cannot be represented in a `Var`. Before `Error`
@@ -860,8 +861,8 @@ Var Var.box_long_double(long double value) {
 }
 
 /** Clones the wide numeric `value` into a new box in the active `Scope`.
-    The clone compares equal but not identical to `value`. Returns `void` when
-    `value` is not wide.
+    The clone is `==` and `===` to `value` but has its own box, so `Var.same`
+    tells the two apart. Returns `void` when `value` is not wide.
     Raises: `<alloc-fail>` when the clone cannot be allocated, or `<bad-enc>`
     if its address cannot be represented in a `Var`.
 */
@@ -1106,14 +1107,14 @@ static unsigned _hash_wide(Symbol tag, VarWideValue *value, size_t width) =>
 /** Reports content equality for supported wide scalar boxes.
     Boxed `<long>`, `<ulong>`, `<llong>`, `<ullong>`, and `<ldouble>` values
     are separate allocations, so bit identity says nothing about their
-    contents. This is the payload comparison that `==` uses for those tags. An
-    `<ldouble>` pair is compared byte for byte, so two NaNs sharing one
-    representation compare equal here.
+    contents. This is the payload comparison that `Var.equal` and `===` use
+    for those tags. An `<ldouble>` pair is compared byte for byte, so two NaNs
+    sharing one representation compare equal here.
 
     A 0 result means "not equal as wide boxes". It also covers an argument
     that is not a wide box and a pair whose tags differ. For a general
-    equality test use `==`, which reaches `Var.equal` and covers every
-    family.
+    equality test use `Var.equal`, which covers every family, or `==`, which
+    compares two numbers as C does.
 */
 int Var.wide_equal(Var a, Var b) {
   if (!a.is_wide() || !b.is_wide()) return 0;
@@ -1222,8 +1223,8 @@ static int _magnitude_compare(
     order deterministically.
 
     0 means equal, and it is also the answer for mismatched tags and for an
-    argument that is not a wide box. Check the tags first, or use the
-    relational operators, which reach the runtime's full ordering.
+    argument that is not a wide box. Check the tags first, or use
+    `Var.compare`, the runtime's full ordering.
 */
 int Var.wide_compare(Var a, Var b) {
   if (!a.is_wide() || !b.is_wide()) return 0;

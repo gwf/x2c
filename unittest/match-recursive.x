@@ -27,7 +27,7 @@ static int _bind(RecursiveMatchState &state, Var binder, Var value) {
   if (index < 0) return 0;
   unsigned long bit = 1UL << index;
   if (state.present & bit)
-    return !(state.spans & bit) && state.values[index] == value;
+    return !(state.spans & bit) && state.values[index].equal(value);
   state.values[index] = value;
   state.present |= bit;
   return 1;
@@ -58,7 +58,7 @@ static int _bind_span(
     expected = r.values[index];
   }
   for (int i = 0; i < length; i++) {
-    if (!input || !expected || !(input.car() == expected.car())) return 0;
+    if (!input || !expected || !input.car().equal(expected.car())) return 0;
     input = input.cdr();
     expected = expected.cdr();
   }
@@ -76,7 +76,7 @@ static int _bind_final(
     if (state.values[index] is not <list>) return 0;
     List stored = state.values[index], rest = input;
     while (stored && rest) {
-      if (!(stored.car() == rest.car())) return 0;
+      if (!stored.car().equal(rest.car())) return 0;
       stored = stored.cdr();
       rest = rest.cdr();
     }
@@ -87,7 +87,7 @@ static int _bind_final(
   List expected = state.span_begin[index], candidate = input, int length = 0;
   while (length < state.span_length[index] &&
          expected != state.span_end[index] && candidate) {
-    if (!(expected.car() == candidate.car())) return 0;
+    if (!expected.car().equal(candidate.car())) return 0;
     expected = expected.cdr();
     candidate = candidate.cdr();
     length++;
@@ -182,7 +182,8 @@ static int _is(Var input, List patterns) {
 static int _match(
   RecursiveMatchState &state, Var input, Var pattern) {
   if (pattern.is_atom_binder()) return _bind(state, pattern, input);
-  if (input is not <list> && pattern is not <list>) return input == pattern;
+  if (input is not <list> && pattern is not <list>)
+    return input.equal(pattern);
   if (pattern is not <list>) return 0;
 
   List list_pattern = pattern;
@@ -198,7 +199,7 @@ static int _match(
         if (tail.len() == 2 && tail.car().is_atom_binder())
           return _all(state, input, tail);
         return _any(state, input, tail);
-      case <!quote>: return tail.car() == input;
+      case <!quote>: return tail.car().equal(input);
     }
   }
   if (input is not <list>) return 0;

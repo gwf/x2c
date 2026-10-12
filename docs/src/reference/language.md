@@ -3238,13 +3238,25 @@ floating operand. Direct `Var` lvalues support prefix and postfix `++`/`--`;
 prefix returns the updated `Var` and postfix returns its original value. Unary
 `-` uses an eligible `neg` protocol member for a static participant or the
 `Var` base member for a dynamic value. Comparisons dispatch separately.
-`==`/`!=` use an eligible `equal` member, relational punctuation derives from
-`compare`, and `===`/`!==` remain unconditional identity tests. Eligible means
-implemented, native, or a base default. When the operands of a protocol
-operator are two different typedef names that share an ancestor, such as an
-alias of `String` and a `String`, or two aliases of `String`, the operator
-uses the eligible member of their nearest shared ancestor. Equality,
-identity, and total ordering do not become binary-arithmetic operations.
+For a static participant, `==`/`!=` use an eligible `equal` member,
+relational punctuation derives from `compare`, and `===`/`!==` remain
+unconditional identity tests. Eligible means implemented, native, or a base
+default. When the operands of a protocol operator are two different typedef
+names that share an ancestor, such as an alias of `String` and a `String`, or
+two aliases of `String`, the operator uses the eligible member of their
+nearest shared ancestor. Equality, identity, and total ordering do not become
+binary-arithmetic operations.
+
+A comparison with a `Var` operand converts both operands to `Var`. A
+comparison of two numeric `Var`s behaves as the same comparison between their
+native values in C, after the usual arithmetic conversions. So `3 == 3L` and
+`-1 == 4294967295u` hold, `-1 < 1u` does not, and a NaN is unequal to and
+unordered with every value. Other `Var` operands compare with `Var.equal`,
+and relational punctuation orders them with `Var.compare`. `===` on `Var`
+operands compares their bits, and two numbers are identical when they have
+the same type and the same bits. So `NaN === NaN` holds and
+`+0.0 === -0.0` does not. `Map` keys compare with `Var.equal` and sorting
+uses `Var.compare`, so both keep numeric types apart.
 
 For `==`, `!=`, `<`, `>`, `<=`, and `>=`, a C string literal opposite an
 operand of static type `String`, or an alias reaching `String`, converts to

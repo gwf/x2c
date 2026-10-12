@@ -320,7 +320,7 @@ int Pool.owns(Pool pool, Var key) {
 
 static int Pool._owns_locked(Pool pool, Var key) {
   Var found = pool.table._get_hashed(key, key.hash());
-  return found is not void && found === key;
+  return found is not void && found.same(key);
 }
 
 // allocation

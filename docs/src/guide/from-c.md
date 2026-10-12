@@ -218,8 +218,8 @@ but remain operators in code. See [literal rules](../reference/language.md#perce
 
 | Spelling | Meaning |
 | --- | --- |
-| `a == b`, `a != b` | May use a type's equality operation; not necessarily a pointer comparison |
-| `a === b`, `a !== b` | Identity tests; for `Var`, compare tagged representation |
+| `a == b`, `a != b` | May use a type's equality operation; not necessarily a pointer comparison. Two `Var` numbers compare as their C values do |
+| `a === b`, `a !== b` | Identity tests; two `Var` numbers are identical with the same type and bits |
 | `value is Type`, `value is not Type` | Require a Var left operand; test its exact tag, not ancestry or convertibility; a tag Symbol may replace `Type` |
 | `item in collection` | Membership; Maps test keys, Strings test substrings; negate with `!(item in collection)` |
 | `a.matmul(b)` | Multiply matrices through an ordinary method supplied by the participating type |

@@ -1280,7 +1280,7 @@ Var lisp_cdr(Var value) {
 }
 
 /** Returns Lisp true when `a` and `b` are equal by `Var.equal`. */
-Var lisp_eq(Var a, Var b) => _bool(a == b);
+Var lisp_eq(Var a, Var b) => _bool(a.equal(b));
 
 /** Returns Lisp true when `value` is a nonempty `List`. */
 Var lisp_pair(Var value) => _bool(value is <list> && !value.is_nil());

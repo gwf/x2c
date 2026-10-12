@@ -22,7 +22,7 @@
    (return 
     (expr (int) 
      (at 55 
-      (call (expr (macro-expr) (ident (binding-name "Var_equal"))) 
+      (call (expr (macro-expr) (ident (binding-name "x2c_var_equal"))) 
        (args (expr ("Var") 
               (at 54 
                (call (expr (macro-expr) (ident (binding-name "Var_binary"))) 

@@ -1,4 +1,4 @@
-/* Native comparison arguments use C conversions; Var compares exactly. */
+/* Native and Var comparisons use C conversions; Lisp compares exactly. */
 #include "x2c.x"
 
 meta static int identity(int value) => value;

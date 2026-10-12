@@ -523,9 +523,11 @@ map structural: 1  identity: 0
 ```
 
 `Array.equal` and `Map.equal` compare contents, and `==`/`!=` call them.
-`===`/`!==` are the identity operators for typed objects and boxed `Var`
-values. Boxed `Array` and `Map` hashing is identity-based, so they make poor
-`Map` keys:
+They compare elements and values with `==`, so two numbers compare as their
+native values do in C. `===`/`!==` are the identity operators for typed
+objects and boxed `Var` values; two numbers are identical when they have the
+same type and the same bits. Boxed `Array` and `Map` hashing is
+identity-based, so they make poor `Map` keys:
 
 ```x2c
 Map by_list = {};
@@ -543,14 +545,27 @@ Array key, equal contents: void
 ```
 
 Key your `Map`s with `String`s, `Symbol`s, `Atom`s, or numbers. Those compare
-by content.
+by content. Keys compare by `Var.equal`, which agrees with `Var.hash`, so a
+number key also keeps its type: `3` and `3L` are two keys although
+`3 == 3L`.
+
+```x2c
+Map by_number = {};
+by_number[3] = "int";
+by_number[3L] = "long";
+printf("keys: %d  [3] == [3L]: %d\n", by_number.len(), [3] == [3L]);
+```
+
+```text
+keys: 2  [3] == [3L]: 1
+```
 
 A `List` key compares by content only as far as its elements do. `List.equal`
 and `List.hash` read the head's exact bits and the tail's identity, which is a
 constant-time test that works because cells are canonical. An element that
 lives inside the `Var` word compares by content: a small number, a `Symbol`, an
 `Atom`, a canonical `String`, or a nested `List`. An element that the `Var`
-word only points at compares by identity: a wide number boxed in a `Scope`
+word only points at compares by address: a wide number boxed in a `Scope`
 (`long`, `ulong`, `long long`, `long double`), an `Array`, or a `Map`. Two
 `List`s built from one `long` value hold two boxes, so they are different keys:
 

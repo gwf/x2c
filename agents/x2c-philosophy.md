@@ -192,7 +192,8 @@ uses that retained positional state.
 `cons` owns List canonicalization. Repeated construction with the same head and
 tail returns the same cell. List hashing and equality use the identities of the
 head and canonical tail, so nested Lists canonicalize from the tail outward.
-Map key comparisons on boxed Lists lower from `Var == Var` to `Var.equal`.
+Map key comparisons call `Var.equal`, which reaches `List.equal` for boxed
+Lists.
 Compiler transforms may rely on identity for Lists created through `cons`.
 
 `cons` probes the pool chain for a canonical hit before allocating. That
@@ -209,8 +210,8 @@ self-compilation before simplifying a canonicalization path.
 canonicalization. The empty String canonicalizes to the native null pointer and
 requires no allocation or intern-table entry. Equal non-empty content returns
 the same interned String, including when the candidate begins as a separately
-allocated buffer. Map key comparisons on boxed Strings lower from `Var == Var`
-to content-aware `Var.equal`. `String.malloc` alone creates a transient mutable
+allocated buffer. Map key comparisons on boxed Strings call content-aware
+`Var.equal`. `String.malloc` alone creates a transient mutable
 buffer; `String.intern_free` finalizes that owned buffer and releases it when
 canonical content already exists. `String.intern` copies borrowed C input into
 canonical storage.
@@ -473,17 +474,21 @@ and ordering use stream-handle identity rather than the reusable file
 descriptor; boxed File values delegate to that same owner. Every Var hash,
 including a registered callback result, is normalized to a nonzero value.
 
-Wide scalar boxes instead retain value semantics: equal tag and payload hash
-and compare equally even when allocated separately, while `Var.same` exposes
-their distinct box identities. Signed and unsigned integer boxes compare in
-the integer domain without conversion through floating point, preserving
+Wide scalar boxes instead retain value semantics: equal tag and payload hash,
+compare equally, and are identical under `===` even when allocated
+separately, while `Var.same` exposes their distinct box identities.
+`Var.equal` and `Var.compare` compare signed and unsigned integer boxes in the
+integer domain without conversion through floating point, preserving
 adjacent values above double precision and exact Map key lookup.
 
 Source comparisons with either operand statically typed as `Var` have one
-transform owner. `==`/`!=` use `Var.equal`, `===`/`!==` use `Var.same`, and
-relational operators compare `Var.compare` with zero. Both operands cross to
-`Var` exactly once. Without a `Var` operand, comparisons remain native C and
-`===`/`!==` normalize to `==`/`!=`.
+transform owner, `Compiler._comparison`; protocol resolution leaves two `Var`
+operands to it. `==`/`!=` call `x2c_var_equal`, `===`/`!==` call
+`x2c_var_identical`, and relational operators compare `x2c_var_order` with
+zero. Two numbers compare by C's usual arithmetic conversions through the
+ladder `Var.binary` uses; other values reach `Var.equal`, `Var.same`, and
+`Var.compare`. Both operands cross to `Var` exactly once. Without a `Var`
+operand, comparisons remain native C and `===`/`!==` normalize to `==`/`!=`.
 
 Typedef scope and conversion semantics are defined in
 [Types and conversions](../docs/src/reference/language.md#types-and-conversions).

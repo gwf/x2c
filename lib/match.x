@@ -545,7 +545,7 @@ static int MatchPlan._key_admits(
 }
 
 static int MatchPlan._key_equal(MatchPlan plan, Var value, Var key) =>
-  plan.key_bits ? value.u64 == key.u64 : value == key;
+  plan.key_bits ? value.u64 == key.u64 : value.equal(key);
 
 /* Runs one prepared execution and commits positional values only after the
    machine and every lazy-span materialization have succeeded. */

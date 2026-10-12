@@ -320,7 +320,7 @@ Self Array.sort_by(Self array, Func key) {
 static void _heap_shift_up(Array heap, int i) {
   while (i > 0) {
     int p = (i - 1) / 2;
-    if (heap[p] <= heap[i]) break;
+    if (heap[p].compare(heap[i]) <= 0) break;
     Var tmp = heap[p]; heap[p] = heap[i]; heap[i] = tmp;
     i = p;
   }
@@ -330,8 +330,8 @@ static void _heap_shift_down(Array heap, int i) {
   int n = _int_length(heap);
   loop {
     int l = (i * 2) + 1, r = l + 1, mini = i;
-    if (l < n && heap[l] < heap[mini]) mini = l;
-    if (r < n && heap[r] < heap[mini]) mini = r;
+    if (l < n && heap[l].compare(heap[mini]) < 0) mini = l;
+    if (r < n && heap[r].compare(heap[mini]) < 0) mini = r;
     if (mini == i) break;
     Var tmp = heap[i]; heap[i] = heap[mini]; heap[mini] = tmp;
     i = mini;

@@ -46,20 +46,20 @@ Var lisp_last(Var values) {
 /* Returns the value of the last argument, or nil without arguments. */
 Var lisp_begin(List values) => lisp_last(values);
 
-/* Returns the first tail of `values` whose head equals `value`, or nil. */
+/* Returns the first tail of `values` whose head is `Var.equal` to `value`,
+   or nil. */
 Var lisp_member(Var value, Var values) {
-  while (!_nil(values) && lisp_car(values) != value)
+  while (!_nil(values) && !lisp_car(values).equal(value))
     values = lisp_cdr(values);
   return values;
 }
 
-/* Returns the first pair in `pairs` whose head equals `key`, or nil.
-    Elements that are not pairs are skipped.
-*/
+/* Returns the first pair in `pairs` whose head is `Var.equal` to `key`, or
+   nil. Elements that are not pairs are skipped. */
 Var lisp_assoc(Var key, Var pairs) {
   for (; !_nil(pairs); pairs = lisp_cdr(pairs)) {
     Var pair = lisp_car(pairs);
-    if (pair is <list> && !pair.is_nil() && lisp_car(pair) == key)
+    if (pair is <list> && !pair.is_nil() && lisp_car(pair).equal(key))
       return pair;
   }
   return %();

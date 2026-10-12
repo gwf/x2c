@@ -103,7 +103,7 @@ The `Var` encoding every runtime module shares.
 
 Initializes the x2c runtime once for the current process.
 
-Source: `lib/common.x:841`
+Source: `lib/common.x:844`
 
 #### x2c_initialize_protocols
 
@@ -111,7 +111,7 @@ Source: `lib/common.x:841`
 
 Runs compiler-generated runtime protocol registration.
 
-Source: `lib/common.x:837`
+Source: `lib/common.x:840`
 
 #### x2c_normalize_index
 
@@ -119,7 +119,7 @@ Source: `lib/common.x:837`
 
 Normalizes one element index against `length`.
 
-Source: `lib/common.x:867`
+Source: `lib/common.x:870`
 
 #### x2c_normalize_slice
 
@@ -127,7 +127,7 @@ Source: `lib/common.x:867`
 
 Normalizes slice bounds and returns the resulting element count.
 
-Source: `lib/common.x:887`
+Source: `lib/common.x:890`
 
 ### `Array`
 
@@ -138,7 +138,7 @@ Source: `lib/common.x:887`
 
 Boxes an `Array` value as `Var`.
 
-Source: `lib/common.x:547`
+Source: `lib/common.x:550`
 
 ### `Block`
 
@@ -149,7 +149,7 @@ Source: `lib/common.x:547`
 
 Boxes a `Block` value as `Var`.
 
-Source: `lib/common.x:549`
+Source: `lib/common.x:552`
 
 ### `Buffer`
 
@@ -160,7 +160,7 @@ Source: `lib/common.x:549`
 
 Boxes a `Buffer` value as `Var`.
 
-Source: `lib/common.x:551`
+Source: `lib/common.x:554`
 
 ### `Bytes`
 
@@ -171,7 +171,7 @@ Source: `lib/common.x:551`
 
 Boxes a `Bytes` value as `Var`.
 
-Source: `lib/common.x:553`
+Source: `lib/common.x:556`
 
 ### `File`
 
@@ -182,7 +182,7 @@ Source: `lib/common.x:553`
 
 Boxes a `File` value as `Var`.
 
-Source: `lib/common.x:558`
+Source: `lib/common.x:561`
 
 ### `Iter`
 
@@ -193,7 +193,7 @@ Source: `lib/common.x:558`
 
 Returns nonzero when `iter` is not null.
 
-Source: `lib/common.x:421`
+Source: `lib/common.x:424`
 
 <a id="Iter.var"></a>
 #### Iter.var
@@ -202,7 +202,7 @@ Source: `lib/common.x:421`
 
 Boxes an `Iter` value as `Var`.
 
-Source: `lib/common.x:568`
+Source: `lib/common.x:571`
 
 ### `List`
 
@@ -213,7 +213,7 @@ Source: `lib/common.x:568`
 
 Returns nonzero when `list` is not `nil`, the null empty List.
 
-Source: `lib/common.x:424`
+Source: `lib/common.x:427`
 
 <a id="List.var"></a>
 #### List.var
@@ -222,7 +222,7 @@ Source: `lib/common.x:424`
 
 Boxes a `List` value as `Var`.
 
-Source: `lib/common.x:555`
+Source: `lib/common.x:558`
 
 ### `Map`
 
@@ -233,7 +233,7 @@ Source: `lib/common.x:555`
 
 Boxes a `Map` value as `Var`.
 
-Source: `lib/common.x:560`
+Source: `lib/common.x:563`
 
 ### `String`
 
@@ -245,7 +245,7 @@ Source: `lib/common.x:560`
 Returns nonzero when `string` contains at least one byte.
 The canonical empty String is null, with no allocated storage.
 
-Source: `lib/common.x:428`
+Source: `lib/common.x:431`
 
 <a id="String.var"></a>
 #### String.var
@@ -254,7 +254,7 @@ Source: `lib/common.x:428`
 
 Boxes a `String` value as `Var`.
 
-Source: `lib/common.x:562`
+Source: `lib/common.x:565`
 
 ### `Symbol`
 
@@ -265,7 +265,7 @@ Source: `lib/common.x:562`
 
 Boxes a `Symbol` value as `Var`.
 
-Source: `lib/common.x:565`
+Source: `lib/common.x:568`
 
 ### `Var`
 
@@ -276,7 +276,7 @@ Source: `lib/common.x:565`
 
 Extracts the `Array` payload of `value`, or NULL for another tag.
 
-Source: `lib/common.x:660`
+Source: `lib/common.x:663`
 
 <a id="Var.as_iter"></a>
 #### Var.as_iter
@@ -285,7 +285,7 @@ Source: `lib/common.x:660`
 
 Extracts the `Iter` payload of `value`, or NULL for another tag.
 
-Source: `lib/common.x:665`
+Source: `lib/common.x:668`
 
 <a id="Var.block"></a>
 #### Var.block
@@ -294,7 +294,7 @@ Source: `lib/common.x:665`
 
 Extracts the `Block` payload of `value`, or NULL for another tag.
 
-Source: `lib/common.x:661`
+Source: `lib/common.x:664`
 
 <a id="Var.box_f32"></a>
 #### Var.box_f32
@@ -303,7 +303,7 @@ Source: `lib/common.x:661`
 
 Boxes a native `float` as an immediate `<f32>` `Var`.
 
-Source: `lib/common.x:529`
+Source: `lib/common.x:532`
 
 <a id="Var.box_f64"></a>
 #### Var.box_f64
@@ -312,7 +312,7 @@ Source: `lib/common.x:529`
 
 Boxes a native `double` as an immediate `<f64>` `Var`.
 
-Source: `lib/common.x:536`
+Source: `lib/common.x:539`
 
 <a id="Var.box_i16"></a>
 #### Var.box_i16
@@ -321,7 +321,7 @@ Source: `lib/common.x:536`
 
 Boxes a native `short` as an immediate `<i16>` `Var`.
 
-Source: `lib/common.x:520`
+Source: `lib/common.x:523`
 
 <a id="Var.box_i32_bits"></a>
 #### Var.box_i32_bits
@@ -330,7 +330,7 @@ Source: `lib/common.x:520`
 
 Boxes an unsigned 32-bit pattern as an immediate `<i32>` `Var`.
 
-Source: `lib/common.x:524`
+Source: `lib/common.x:527`
 
 <a id="Var.box_i8"></a>
 #### Var.box_i8
@@ -339,7 +339,7 @@ Source: `lib/common.x:524`
 
 Boxes a native `char` as an immediate `<i8>` `Var`.
 
-Source: `lib/common.x:516`
+Source: `lib/common.x:519`
 
 <a id="Var.box_u16"></a>
 #### Var.box_u16
@@ -348,7 +348,7 @@ Source: `lib/common.x:516`
 
 Boxes a native `ushort` as an immediate `<u16>` `Var`.
 
-Source: `lib/common.x:522`
+Source: `lib/common.x:525`
 
 <a id="Var.box_u32"></a>
 #### Var.box_u32
@@ -357,7 +357,7 @@ Source: `lib/common.x:522`
 
 Boxes a native `uint` as an immediate `<u32>` `Var`.
 
-Source: `lib/common.x:526`
+Source: `lib/common.x:529`
 
 <a id="Var.box_u8"></a>
 #### Var.box_u8
@@ -366,7 +366,7 @@ Source: `lib/common.x:526`
 
 Boxes a native `uchar` as an immediate `<u8>` `Var`.
 
-Source: `lib/common.x:518`
+Source: `lib/common.x:521`
 
 <a id="Var.buffer"></a>
 #### Var.buffer
@@ -375,7 +375,7 @@ Source: `lib/common.x:518`
 
 Extracts the `Buffer` payload of `value`, or NULL for another tag.
 
-Source: `lib/common.x:662`
+Source: `lib/common.x:665`
 
 <a id="Var.bytes"></a>
 #### Var.bytes
@@ -384,7 +384,7 @@ Source: `lib/common.x:662`
 
 Extracts the `Bytes` payload of `value`, or NULL for another tag.
 
-Source: `lib/common.x:663`
+Source: `lib/common.x:666`
 
 <a id="Var.char"></a>
 #### Var.char
@@ -396,7 +396,7 @@ Returns `x` as a native `char` under the `Var.convert` rules.
 **Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
 of floating range, or invalidly encoded.
 
-Source: `lib/common.x:691`
+Source: `lib/common.x:694`
 
 <a id="Var.decode_f32"></a>
 #### Var.decode_f32
@@ -405,7 +405,7 @@ Source: `lib/common.x:691`
 
 Decodes an immediate `<f32>` `Var`.
 
-Source: `lib/common.x:488`
+Source: `lib/common.x:491`
 
 <a id="Var.decode_f64"></a>
 #### Var.decode_f64
@@ -414,7 +414,7 @@ Source: `lib/common.x:488`
 
 Decodes an immediate `<f64>` `Var`.
 
-Source: `lib/common.x:496`
+Source: `lib/common.x:499`
 
 <a id="Var.double"></a>
 #### Var.double
@@ -426,7 +426,7 @@ Returns `x` as a native `double` under the `Var.convert` rules.
 **Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, or
 invalidly encoded.
 
-Source: `lib/common.x:820`
+Source: `lib/common.x:823`
 
 <a id="Var.file"></a>
 #### Var.file
@@ -435,7 +435,7 @@ Source: `lib/common.x:820`
 
 Extracts the `File` payload of `value`, or NULL for another tag.
 
-Source: `lib/common.x:664`
+Source: `lib/common.x:667`
 
 <a id="Var.float"></a>
 #### Var.float
@@ -447,7 +447,7 @@ Returns `x` as a native `float` under the `Var.convert` rules.
 **Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, or
 invalidly encoded.
 
-Source: `lib/common.x:811`
+Source: `lib/common.x:814`
 
 <a id="Var.int"></a>
 #### Var.int
@@ -459,7 +459,7 @@ Returns `x` as a native `int` under the `Var.convert` rules.
 **Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
 of floating range, or invalidly encoded.
 
-Source: `lib/common.x:727`
+Source: `lib/common.x:730`
 
 <a id="Var.is_row"></a>
 #### Var.is_row
@@ -473,7 +473,7 @@ compares instead of a decode. `var-tags.x` projects the rows that
 qualify; a row whose decoded form carries a validity clause is not one
 of them and must ask `Var.is`.
 
-Source: `lib/common.x:620`
+Source: `lib/common.x:623`
 
 <a id="Var.is_wide"></a>
 #### Var.is_wide
@@ -482,7 +482,7 @@ Source: `lib/common.x:620`
 
 Reports whether `v` uses a scope-owned wide numeric box.
 
-Source: `lib/common.x:479`
+Source: `lib/common.x:482`
 
 <a id="Var.list"></a>
 #### Var.list
@@ -491,7 +491,7 @@ Source: `lib/common.x:479`
 
 Extracts the `List` payload of `value`, or NULL for another tag.
 
-Source: `lib/common.x:666`
+Source: `lib/common.x:669`
 
 <a id="Var.long"></a>
 #### Var.long
@@ -503,7 +503,7 @@ Returns `x` as a native `long` under the `Var.convert` rules.
 **Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
 of floating range, or invalidly encoded.
 
-Source: `lib/common.x:754`
+Source: `lib/common.x:757`
 
 <a id="Var.long_double"></a>
 #### Var.long_double
@@ -515,7 +515,7 @@ Returns `x` as a native `long double` under the `Var.convert` rules.
 **Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, or
 invalidly encoded.
 
-Source: `lib/common.x:801`
+Source: `lib/common.x:804`
 
 <a id="Var.long_long"></a>
 #### Var.long_long
@@ -527,7 +527,7 @@ Returns `x` as a native `long long` under the `Var.convert` rules.
 **Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
 of floating range, or invalidly encoded.
 
-Source: `lib/common.x:777`
+Source: `lib/common.x:780`
 
 <a id="Var.map"></a>
 #### Var.map
@@ -536,7 +536,7 @@ Source: `lib/common.x:777`
 
 Extracts the `Map` payload of `value`, or NULL for another tag.
 
-Source: `lib/common.x:667`
+Source: `lib/common.x:670`
 
 <a id="Var.payload32"></a>
 #### Var.payload32
@@ -545,7 +545,7 @@ Source: `lib/common.x:667`
 
 Returns the low 32 payload bits of an immediate `Var`.
 
-Source: `lib/common.x:485`
+Source: `lib/common.x:488`
 
 <a id="Var.short"></a>
 #### Var.short
@@ -557,7 +557,7 @@ Returns `x` as a native `short` under the `Var.convert` rules.
 **Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
 of floating range, or invalidly encoded.
 
-Source: `lib/common.x:709`
+Source: `lib/common.x:712`
 
 <a id="Var.string_payload"></a>
 #### Var.string_payload
@@ -566,7 +566,7 @@ Source: `lib/common.x:709`
 
 Extracts the `String` payload of `value`, or NULL for another tag.
 
-Source: `lib/common.x:668`
+Source: `lib/common.x:671`
 
 <a id="Var.symbol"></a>
 #### Var.symbol
@@ -576,7 +576,7 @@ Source: `lib/common.x:668`
 Extracts the `symbol` payload after the caller establishes the matching
 `Var` kind.
 
-Source: `lib/common.x:677`
+Source: `lib/common.x:680`
 
 <a id="Var.uchar"></a>
 #### Var.uchar
@@ -588,7 +588,7 @@ Returns `x` as a native `uchar` under the `Var.convert` rules.
 **Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
 of floating range, or invalidly encoded.
 
-Source: `lib/common.x:700`
+Source: `lib/common.x:703`
 
 <a id="Var.uint"></a>
 #### Var.uint
@@ -600,7 +600,7 @@ Returns `x` as a native `uint` under the `Var.convert` rules.
 **Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
 of floating range, or invalidly encoded.
 
-Source: `lib/common.x:736`
+Source: `lib/common.x:739`
 
 <a id="Var.ulong"></a>
 #### Var.ulong
@@ -612,7 +612,7 @@ Returns `x` as a native `ulong` under the `Var.convert` rules.
 **Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
 of floating range, or invalidly encoded.
 
-Source: `lib/common.x:766`
+Source: `lib/common.x:769`
 
 <a id="Var.ulong_long"></a>
 #### Var.ulong_long
@@ -625,7 +625,7 @@ rules.
 **Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
 of floating range, or invalidly encoded.
 
-Source: `lib/common.x:789`
+Source: `lib/common.x:792`
 
 <a id="Var.unsigned"></a>
 #### Var.unsigned
@@ -637,7 +637,7 @@ Returns `x` as a native `unsigned` under the `Var.convert` rules.
 **Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
 of floating range, or invalidly encoded.
 
-Source: `lib/common.x:745`
+Source: `lib/common.x:748`
 
 <a id="Var.ushort"></a>
 #### Var.ushort
@@ -649,7 +649,7 @@ Returns `x` as a native `ushort` under the `Var.convert` rules.
 **Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
 of floating range, or invalidly encoded.
 
-Source: `lib/common.x:718`
+Source: `lib/common.x:721`
 
 ### `char`
 
@@ -660,7 +660,7 @@ Source: `lib/common.x:718`
 
 Returns the readable representation of `char`.
 
-Source: `lib/common.x:589`
+Source: `lib/common.x:592`
 
 <a id="char.str"></a>
 #### char.str
@@ -669,7 +669,7 @@ Source: `lib/common.x:589`
 
 Returns the display `String` of `char`.
 
-Source: `lib/common.x:589`
+Source: `lib/common.x:592`
 
 <a id="char.var"></a>
 #### char.var
@@ -678,7 +678,7 @@ Source: `lib/common.x:589`
 
 Boxes a native `char` value as `Var`.
 
-Source: `lib/common.x:589`
+Source: `lib/common.x:592`
 
 ### `double`
 
@@ -689,7 +689,7 @@ Source: `lib/common.x:589`
 
 Returns the readable representation of `double`.
 
-Source: `lib/common.x:598`
+Source: `lib/common.x:601`
 
 <a id="double.str"></a>
 #### double.str
@@ -698,7 +698,7 @@ Source: `lib/common.x:598`
 
 Returns the display `String` of `double`.
 
-Source: `lib/common.x:598`
+Source: `lib/common.x:601`
 
 <a id="double.var"></a>
 #### double.var
@@ -707,7 +707,7 @@ Source: `lib/common.x:598`
 
 Boxes a native `double` value as `Var`.
 
-Source: `lib/common.x:598`
+Source: `lib/common.x:601`
 
 ### `float`
 
@@ -718,7 +718,7 @@ Source: `lib/common.x:598`
 
 Returns the readable representation of `float`.
 
-Source: `lib/common.x:597`
+Source: `lib/common.x:600`
 
 <a id="float.str"></a>
 #### float.str
@@ -727,7 +727,7 @@ Source: `lib/common.x:597`
 
 Returns the display `String` of `float`.
 
-Source: `lib/common.x:597`
+Source: `lib/common.x:600`
 
 <a id="float.var"></a>
 #### float.var
@@ -736,7 +736,7 @@ Source: `lib/common.x:597`
 
 Boxes a native `float` value as `Var`.
 
-Source: `lib/common.x:597`
+Source: `lib/common.x:600`
 
 ### `int`
 
@@ -747,7 +747,7 @@ Source: `lib/common.x:597`
 
 Returns the readable representation of `int`.
 
-Source: `lib/common.x:593`
+Source: `lib/common.x:596`
 
 <a id="int.str"></a>
 #### int.str
@@ -756,7 +756,7 @@ Source: `lib/common.x:593`
 
 Returns the display `String` of `int`.
 
-Source: `lib/common.x:593`
+Source: `lib/common.x:596`
 
 <a id="int.var"></a>
 #### int.var
@@ -765,7 +765,7 @@ Source: `lib/common.x:593`
 
 Boxes a native `int` value as `Var`.
 
-Source: `lib/common.x:593`
+Source: `lib/common.x:596`
 
 ### `long`
 
@@ -776,7 +776,7 @@ Source: `lib/common.x:593`
 
 Returns the readable representation of `long`.
 
-Source: `lib/common.x:609`
+Source: `lib/common.x:612`
 
 <a id="long.str"></a>
 #### long.str
@@ -785,7 +785,7 @@ Source: `lib/common.x:609`
 
 Returns the display `String` of `long`.
 
-Source: `lib/common.x:607`
+Source: `lib/common.x:610`
 
 <a id="long.var"></a>
 #### long.var
@@ -794,7 +794,7 @@ Source: `lib/common.x:607`
 
 Boxes a long value as `Var`.
 
-Source: `lib/common.x:603`
+Source: `lib/common.x:606`
 
 ### `short`
 
@@ -805,7 +805,7 @@ Source: `lib/common.x:603`
 
 Returns the readable representation of `short`.
 
-Source: `lib/common.x:591`
+Source: `lib/common.x:594`
 
 <a id="short.str"></a>
 #### short.str
@@ -814,7 +814,7 @@ Source: `lib/common.x:591`
 
 Returns the display `String` of `short`.
 
-Source: `lib/common.x:591`
+Source: `lib/common.x:594`
 
 <a id="short.var"></a>
 #### short.var
@@ -823,7 +823,7 @@ Source: `lib/common.x:591`
 
 Boxes a native `short` value as `Var`.
 
-Source: `lib/common.x:591`
+Source: `lib/common.x:594`
 
 ### `uchar`
 
@@ -834,7 +834,7 @@ Source: `lib/common.x:591`
 
 Returns the readable representation of `uchar`.
 
-Source: `lib/common.x:590`
+Source: `lib/common.x:593`
 
 <a id="uchar.str"></a>
 #### uchar.str
@@ -843,7 +843,7 @@ Source: `lib/common.x:590`
 
 Returns the display `String` of `uchar`.
 
-Source: `lib/common.x:590`
+Source: `lib/common.x:593`
 
 <a id="uchar.var"></a>
 #### uchar.var
@@ -852,7 +852,7 @@ Source: `lib/common.x:590`
 
 Boxes a native `uchar` value as `Var`.
 
-Source: `lib/common.x:590`
+Source: `lib/common.x:593`
 
 ### `uint`
 
@@ -863,7 +863,7 @@ Source: `lib/common.x:590`
 
 Returns the readable representation of `uint`.
 
-Source: `lib/common.x:594`
+Source: `lib/common.x:597`
 
 <a id="uint.str"></a>
 #### uint.str
@@ -872,7 +872,7 @@ Source: `lib/common.x:594`
 
 Returns the display `String` of `uint`.
 
-Source: `lib/common.x:594`
+Source: `lib/common.x:597`
 
 <a id="uint.var"></a>
 #### uint.var
@@ -881,7 +881,7 @@ Source: `lib/common.x:594`
 
 Boxes a native `uint` value as `Var`.
 
-Source: `lib/common.x:594`
+Source: `lib/common.x:597`
 
 ### `ulong`
 
@@ -892,7 +892,7 @@ Source: `lib/common.x:594`
 
 Boxes a `ulong` value as `Var`.
 
-Source: `lib/common.x:605`
+Source: `lib/common.x:608`
 
 ### `unsigned`
 
@@ -903,7 +903,7 @@ Source: `lib/common.x:605`
 
 Returns the readable representation of `unsigned`.
 
-Source: `lib/common.x:595`
+Source: `lib/common.x:598`
 
 <a id="unsigned.str"></a>
 #### unsigned.str
@@ -912,7 +912,7 @@ Source: `lib/common.x:595`
 
 Returns the display `String` of `unsigned`.
 
-Source: `lib/common.x:595`
+Source: `lib/common.x:598`
 
 <a id="unsigned.var"></a>
 #### unsigned.var
@@ -921,7 +921,7 @@ Source: `lib/common.x:595`
 
 Boxes a native `unsigned` value as `Var`.
 
-Source: `lib/common.x:595`
+Source: `lib/common.x:598`
 
 ### `ushort`
 
@@ -932,7 +932,7 @@ Source: `lib/common.x:595`
 
 Returns the readable representation of `ushort`.
 
-Source: `lib/common.x:592`
+Source: `lib/common.x:595`
 
 <a id="ushort.str"></a>
 #### ushort.str
@@ -941,7 +941,7 @@ Source: `lib/common.x:592`
 
 Returns the display `String` of `ushort`.
 
-Source: `lib/common.x:592`
+Source: `lib/common.x:595`
 
 <a id="ushort.var"></a>
 #### ushort.var
@@ -950,7 +950,7 @@ Source: `lib/common.x:592`
 
 Boxes a native `ushort` value as `Var`.
 
-Source: `lib/common.x:592`
+Source: `lib/common.x:595`
 
 ## Runtime-internal callables
 
@@ -974,7 +974,7 @@ Hashes an arbitrary byte block through the shared 64-bit mixer.
 types; the byte width distinguishes a final partial word from zero
 padding.
 
-Source: `lib/common.x:458`
+Source: `lib/common.x:461`
 
 #### x2c_hash_word
 
@@ -983,7 +983,7 @@ Source: `lib/common.x:458`
 Narrows a mixed word to the nonzero 32-bit hash the tables expect.
 Zero is reserved to mark an empty bucket, so it maps to all ones.
 
-Source: `lib/common.x:448`
+Source: `lib/common.x:451`
 
 #### x2c_mix64
 
@@ -995,7 +995,7 @@ fixed-width hash in the runtime. It is six instructions, and its low bits
 are as well distributed as its high ones, which is what `Map` masks. Use
 `x2c_hash_bytes` for a block that spans several words.
 
-Source: `lib/common.x:436`
+Source: `lib/common.x:439`
 
 ## Public types
 

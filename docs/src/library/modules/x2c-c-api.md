@@ -75,6 +75,9 @@ prefix.
 | [`x2c_var_custom_descriptor`](var.md#x2c_var_custom_descriptor) | `lib/var.x` | `VarDescriptor *x2c_var_custom_descriptor(Var value)` |
 | [`x2c_var_declare`](var.md#x2c_var_declare) | `lib/var.x` | `VarDescriptor *x2c_var_declare(Symbol tag)` |
 | [`x2c_var_descriptor_index`](var.md#x2c_var_descriptor_index) | `lib/var.x` | `int x2c_var_descriptor_index(Var value)` |
+| [`x2c_var_equal`](varops.md#x2c_var_equal) | `lib/varops.x` | `int x2c_var_equal(Var a, Var b)` |
+| [`x2c_var_identical`](varops.md#x2c_var_identical) | `lib/varops.x` | `int x2c_var_identical(Var a, Var b)` |
+| [`x2c_var_order`](varops.md#x2c_var_order) | `lib/varops.x` | `double x2c_var_order(Var a, Var b)` |
 | [`x2c_var_postfix_volatile`](varops.md#x2c_var_postfix_volatile) | `lib/varops.x` | `Var x2c_var_postfix_volatile(volatile Var &?lhs, Symbol op)` |
 | [`x2c_var_tag_descriptor_index`](var.md#x2c_var_tag_descriptor_index) | `lib/var.x` | `int x2c_var_tag_descriptor_index(Symbol tag)` |
 | [`x2c_var_update_f32`](varops.md#x2c_var_update_f32) | `lib/varops.x` | `float x2c_var_update_f32(volatile float *lhs, Symbol op, Var rhs)` |
@@ -93,4 +96,4 @@ prefix.
 | [`x2c_var_update_ulong_long`](varops.md#x2c_var_update_ulong_long) | `lib/varops.x` | `unsigned long long x2c_var_update_ulong_long(volatile unsigned long long *lhs, Symbol op, Var rhs)` |
 | [`x2c_var_update_volatile`](varops.md#x2c_var_update_volatile) | `lib/varops.x` | `Var x2c_var_update_volatile(volatile Var &?lhs, Symbol op, Var rhs)` |
 
-Total: 81 functions.
+Total: 84 functions.

@@ -802,7 +802,7 @@ static int _macro_identity_equal(
       spelling = _macro_source_spelling(left);
     if (spelling) return spelling == (left is <string> ? left : right);
   }
-  if (left != right) return 0;
+  if (!left.equal(right)) return 0;
   if (!_macro_has_slot(policy.slots, policy.count, slot)) return 1;
   return !_macro_held_elsewhere(*machine, policy, slot, right);
 }
@@ -830,7 +830,7 @@ static int _macro_held_elsewhere(
   for (int i = 0; i < policy.count; i++) {
     int other = policy.slots[i];
     if (other != slot && machine.slots[other].kind == MACHINE_SLOT_VALUE &&
-        machine.slots[other].value == value)
+        machine.slots[other].value.equal(value))
       return 1;
   }
   return 0;

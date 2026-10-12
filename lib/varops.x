@@ -2,8 +2,9 @@
 
     `Var` arithmetic applies C-style numeric promotion to runtime tags, wraps
     integer results to the selected type's width, and delegates eligible object
-    operations through registered protocols. Compound updates compute and
-    convert completely before changing their destination.
+    operations through registered protocols. Comparisons of two numbers use
+    the same promotion. Compound updates compute and convert completely before
+    changing their destination.
  */
 
 #pragma once
@@ -167,6 +168,8 @@ $floating.step(long double, _ldouble_step);
     Integers use C-style promotion and wrap to the result type's width;
     shifts use the promoted left operand's type and sign-fill signed right
     shifts. Floating arithmetic uses the widest floating-point operand type.
+    Comparisons and identity tests give the operators' results on `Var`
+    operands, so two numbers compare as their native values do in C.
     The logical operators are eager in this direct API. Equality and identity
     are the only operations that accept `void` and return an `<i32>` predicate.
     Immediate results are self-contained, canonical `String`s keep their pool
@@ -471,6 +474,100 @@ static Var _floating_binary(
   }
   long double a = lhs.ldouble(), b = rhs.ldouble();
   return Var.box_long_double(_ldouble_step(op, a, b));
+}
+
+// comparisons
+
+/** Evaluates `==` on two `Var` operands.
+    Two numbers compare as their native values do in C after the usual
+    arithmetic conversions, so `3 == 3L` and `-1 == 4294967295u` hold and a
+    NaN equals nothing. Other values compare through `Var.equal`.
+    Raises: `<bad-enc>` when a numeric comparison meets invalid `Var` bits.
+*/
+int x2c_var_equal(Var a, Var b) {
+  if (a.u64 == b.u64) return !_nan(a);
+  if (_numeric(a) && _numeric(b)) return _numeric_order(a, b) == 0;
+  return a.equal(b);
+}
+
+/** Evaluates `===` on two `Var` operands.
+    Two numbers are identical when they have the same tag and the same bits,
+    so two boxes of one `long` are identical, `NaN === NaN` holds, and
+    `+0.0 === -0.0` does not. Other values are identical when their `Var`
+    bits are, as `Var.same` reports.
+*/
+int x2c_var_identical(Var a, Var b) => a.u64 == b.u64 || a.wide_equal(b);
+
+/** Orders two `Var` operands for `<`, `<=`, `>`, and `>=`.
+    Two numbers order as their native values do in C after the usual
+    arithmetic conversions. The result is -1, 0, or 1, or NaN when a NaN
+    leaves the pair unordered, so each relation to zero is false. Other
+    values return the order `Var.compare` gives.
+    Raises: `<void-op>` when either operand is `void`, and `<bad-enc>` when
+    a numeric comparison meets invalid `Var` bits.
+*/
+double x2c_var_order(Var a, Var b) {
+  if (_numeric(a) && _numeric(b)) return _numeric_order(a, b);
+  return a.compare(b);
+}
+
+/* Most comparisons the compiler makes have a Symbol or a List operand, so
+   this reads numberhood from the top 16 bits instead of the full decode in
+   `Var.kind`. Below 0x0010 only the wide boxes are numbers, 0x8004 through
+   0x800F hold Symbols and custom objects, and `void` is the one other
+   non-number. */
+static inline int _numeric(Var value) {
+  unsigned top = value.u64 >> 48;
+  if (top < 0x0010) return value.is_wide();
+  if (top >= 0x8004 && top <= 0x800F) return 0;
+  return value.u64 != VAR_VOID_BITS;
+}
+
+/* Equal bits hold equal values except NaN, which C makes unequal to itself.
+   An `<f64>` NaN has the one `<nan>` encoding; an `<f32>` or `<ldouble>`
+   NaN keeps its payload. */
+static int _nan(Var value) {
+  if (value.u64 == VAR_NAN_BITS) return 1;
+  if ((value.u64 & 0xFFFFFFFF00000000ul) == VAR_F32_PREFIX) {
+    float f = value.decode_f32();
+    return f != f;
+  }
+  if (!value.is_wide()) return 0;
+  long double x = value.long_double_value();
+  return x != x;
+}
+
+/* C's usual arithmetic conversions bring a numeric pair to one type: the
+   wider floating family when either operand is floating, otherwise the
+   integer type arithmetic would produce. Returns -1, 0, or 1, or NaN for an
+   unordered pair. */
+static double _numeric_order(Var lhs, Var rhs) {
+  X2CVarNumeric left, right;
+  lhs.numeric_decode(left);
+  rhs.numeric_decode(right);
+  if (left.floating || right.floating) return _floating_order(left, right);
+  X2CVarNumericInfo info;
+  Var.numeric_info(_integer_result_tag(left, right), info);
+  unsigned long long a = _raw_for_width(left, info.bits);
+  unsigned long long b = _raw_for_width(right, info.bits);
+  if (info.unsigned_value) return a < b ? -1 : a > b;
+  long long x = Var.signed_from_bits(a, info.bits);
+  long long y = Var.signed_from_bits(b, info.bits);
+  return x < y ? -1 : x > y;
+}
+
+/* Widening the common floating family to `long double` keeps every value
+   exact, so one comparison serves all three families. */
+static double _floating_order(X2CVarNumeric &lhs, X2CVarNumeric &rhs) {
+  long double a, b;
+  switch (_floating_tag(lhs, rhs)) {
+    case <f32>: a = lhs.f32(); b = rhs.f32(); break;
+    case <f64>: a = lhs.f64(); b = rhs.f64(); break;
+    default:    a = lhs.ldouble(); b = rhs.ldouble();
+  }
+  if (a < b) return -1;
+  if (a > b) return 1;
+  return a == b ? 0 : 0.0 / 0.0;
 }
 
 // truthiness

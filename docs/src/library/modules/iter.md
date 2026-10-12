@@ -263,7 +263,7 @@ Source: `lib/iter.x:489`
 `meta native Var Iter.max(Iter iter)`
 
 Returns the largest remaining element, or `void` when there is none.
-Consumes the iterator, comparing with `Var` ordering, which is total
+Consumes the iterator, comparing with `Var.compare`, which is total
 across types. Equal values keep the earliest, so the result is the first
 of any tie.
 
@@ -278,7 +278,7 @@ Source: `lib/iter.x:845`
 `meta native Var Iter.min(Iter iter)`
 
 Returns the smallest remaining element, or `void` when there is none.
-Consumes the iterator, comparing with `Var` ordering, which is total
+Consumes the iterator, comparing with `Var.compare`, which is total
 across types. Equal values keep the earliest, so the result is the first
 of any tie.
 

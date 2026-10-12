@@ -17,8 +17,10 @@ macro Unit $map.var.family(
     return key[0].hash();
   }
 
+  /* Keys compare by `Var.equal`, which agrees with `Var.hash`, so keys of
+     two numeric types stay distinct where `==` would call them equal. */
   static int $key_equal(Var *a, Var *b) {
-    if (a[0] === b[0]) return 1;
+    if (a[0].same(b[0])) return 1;
     /* `List` and `String` keys are nearly all of what the pool tables
        compare, and unboxing a known tag is one mask and compare where the
        general path decodes the tag twice before reaching the same
@@ -28,7 +30,7 @@ macro Unit $map.var.family(
     if (alist && blist) return alist == blist;
     String astr = a[0].string_payload(), bstr = b[0].string_payload();
     if (astr && bstr) return astr == bstr;
-    return a[0] is not <array> && a[0] is not <map> && a[0] == b[0];
+    return a[0] is not <array> && a[0] is not <map> && a[0].equal(b[0]);
   }
 
   static int $value_equal(Var *a, Var *b) {

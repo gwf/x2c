@@ -49,7 +49,7 @@
     (expr (void) 
      (cast (decl (void) (bindings (bind () ()))) 
       (expr ("size_t") (sizeof (parens (decl (void) (bindings (bind () ())))))))))) 
-  (at 34 
+  (at 37 
    (declare (int) 
     (bindings 
      (op = (bind (binding 9 "ok") ()) 
@@ -157,13 +157,12 @@
                                                       (literal ("Var") "void")) 
                                                 (expr ("Symbol") "3453797")))))))) 
                                     (expr (int) 
-                                     (call (expr ((func (("Var") ("Var"))) int) 
-                                            (ident (binding 12 "Var_equal"))) 
-                                      (args (expr ("Var") 
-                                             (literal ("Var") "void")) 
+                                     (at 24 
+                                      (op == 
+                                       (expr ("Var") (literal ("Var") "void")) 
                                        (expr ("Var") (literal ("Var") "void"))))))) 
                                   (expr (int) 
-                                   (at 24 
+                                   (at 25 
                                     (op === 
                                      (expr ("Var") (literal ("Var") "void")) 
                                      (expr ("Var") (literal ("Var") "void"))))))) 
@@ -171,73 +170,68 @@
                                  (op ! (expr (int) 
                                         (parens 
                                          (expr (int) 
-                                          (op ! (expr (int) 
-                                                 (call (expr ((func (("Var") 
-                                                                     ("Var"))) 
-                                                              int) 
-                                                        (ident 
-                                                         (binding 12 "Var_equal"))) 
-                                                  (args (expr ("Var") 
-                                                         (literal ("Var") "void")) 
-                                                   (expr ("Var") 
-                                                    (literal ("Var") "void"))))))))))))) 
+                                          (at 26 
+                                           (op != 
+                                            (expr ("Var") 
+                                             (literal ("Var") "void")) 
+                                            (expr ("Var") 
+                                             (literal ("Var") "void"))))))))))) 
                               (expr (int) 
                                (op ! (expr (int) 
                                       (parens 
                                        (expr (int) 
-                                        (at 25 
+                                        (at 27 
                                          (op !== 
                                           (expr ("Var") (literal ("Var") "void")) 
                                           (expr ("Var") (literal ("Var") "void"))))))))))) 
                             (expr (int) 
-                             (at 26 
+                             (at 28 
                               (op != (expr ("Var") (literal ("Var") "void")) 
                                (expr (int) (literal (int) "1"))))))) 
                           (expr (int) 
-                           (at 27 
+                           (at 29 
                             (op != (expr (int) (literal (int) "1")) 
                              (expr ("Var") (literal ("Var") "void"))))))) 
                         (expr (int) 
-                         (at 28 
+                         (at 30 
                           (op !== (expr ("Var") (literal ("Var") "void")) 
                            (expr (int) (literal (int) "1"))))))) 
                       (expr (int) 
-                       (at 29 
+                       (at 31 
                         (op !== (expr (int) (literal (int) "1")) 
                          (expr ("Var") (literal ("Var") "void"))))))) 
                     (expr (int) 
                      (op ! (expr (int) 
                             (parens 
                              (expr (int) 
-                              (at 30 
+                              (at 32 
                                (op == (expr ("Var") (literal ("Var") "void")) 
                                 (expr (int) (literal (int) "1"))))))))))) 
                   (expr (int) 
                    (op ! (expr (int) 
                           (parens 
                            (expr (int) 
-                            (at 31 
+                            (at 33 
                              (op == (expr (int) (literal (int) "1")) 
                               (expr ("Var") (literal ("Var") "void"))))))))))) 
                 (expr (int) 
                  (op ! (expr (int) 
                         (parens 
                          (expr (int) 
-                          (at 32 
+                          (at 34 
                            (op === (expr ("Var") (literal ("Var") "void")) 
                             (expr (int) (literal (int) "1"))))))))))) 
               (expr (int) 
                (op ! (expr (int) 
                       (parens 
                        (expr (int) 
-                        (at 33 
+                        (at 35 
                          (op === (expr (int) (literal (int) "1")) 
                           (expr ("Var") (literal ("Var") "void"))))))))))) 
             (expr (int) 
-             (call (expr ((func (("Var") ("Var"))) int) 
-                    (ident (binding 12 "Var_equal"))) 
-              (args (expr ("Var") 
-                     (parens (expr ("Var") (literal ("Var") "void")))) 
+             (at 36 
+              (op == 
+               (expr ("Var") (parens (expr ("Var") (literal ("Var") "void")))) 
                (expr ("Var") (literal ("Var") "void"))))))) 
           (expr (int) 
            (op == (expr (* void) (ident (binding 8 "cast_pointer"))) 
@@ -245,14 +239,14 @@
         (expr (int) 
          (op == (expr (int) (ident (binding 1 "calls"))) 
           (expr (int) (literal (int) "1")))))))))) 
-  (at 35 
+  (at 38 
    (stmnt 
     (expr () 
-     (call (expr () (ident (binding 13 "printf"))) 
+     (call (expr () (ident (binding 12 "printf"))) 
       (args (expr (* char) (literal (* char) "\"%d %d\\n\"")) 
        (expr (int) (ident (binding 9 "ok"))) 
        (expr (int) (ident (binding 1 "calls")))))))) 
-  (at 36 
+  (at 39 
    (return (int) 
     (expr (int) 
      (op ? (expr (int) (ident (binding 9 "ok"))) 

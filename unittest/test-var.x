@@ -570,6 +570,8 @@ static void var_compare_strict_encodings(void) {
   EXPECT_FALSE(u.equal(i));
   EXPECT_TRUE(u.compare(i) != 0);
   EXPECT_INT_EQ(u.compare(i), -i.compare(u));
+  EXPECT_TRUE(u == i);
+  EXPECT_FALSE(u === i);
 
   Var zp = Var.new(<f64>, 0.0);
   double negzero = -0.0;
@@ -577,6 +579,8 @@ static void var_compare_strict_encodings(void) {
   EXPECT_FALSE(zp.equal(zn));
   EXPECT_TRUE(zp.compare(zn) != 0);
   EXPECT_INT_EQ(zp.compare(zn), -zn.compare(zp));
+  EXPECT_TRUE(zp == zn);
+  EXPECT_FALSE(zp === zn);
 
 }
 
@@ -973,21 +977,28 @@ static void var_wide_value_semantics(void) {
   Var wide_infinity = Var.box_long_double(1.0L / 0.0L);
   Var wide_nan = Var.box_long_double(0.0L / 0.0L);
 
-  EXPECT_FALSE(first === same_value);
+  EXPECT_TRUE(first === same_value);
+  EXPECT_FALSE(first.same(same_value));
   EXPECT_TRUE(first == same_value);
   EXPECT_TRUE(first.hash() != 0);
   EXPECT_INT_EQ(first.hash(), same_value.hash());
   EXPECT_INT_EQ(first.compare(same_value), 0);
   EXPECT_TRUE(first < adjacent);
   EXPECT_TRUE(adjacent > first);
-  EXPECT_TRUE(negative < unsigned_value);
-  EXPECT_FALSE(first_float === same_float);
+  EXPECT_TRUE(negative == unsigned_value);
+  EXPECT_TRUE(negative.compare(unsigned_value) < 0);
+  EXPECT_TRUE(first_float === same_float);
+  EXPECT_FALSE(first_float.same(same_float));
   EXPECT_TRUE(first_float == same_float);
   EXPECT_INT_EQ(first_float.hash(), same_float.hash());
   EXPECT_INT_EQ(first_float.compare(same_float), 0);
   EXPECT_TRUE(first_float < wide_infinity);
-  EXPECT_TRUE(wide_infinity < wide_nan);
-  EXPECT_TRUE(wide_nan > first_float);
+  EXPECT_FALSE(wide_infinity < wide_nan);
+  EXPECT_FALSE(wide_nan > first_float);
+  EXPECT_FALSE(wide_nan == wide_nan);
+  EXPECT_TRUE(wide_nan === wide_nan);
+  EXPECT_TRUE(wide_infinity.compare(wide_nan) < 0);
+  EXPECT_TRUE(wide_nan.compare(first_float) > 0);
 
   Map map = {};
   map[first] = 73;
@@ -1251,14 +1262,16 @@ static void var_clone_wide_copies_wide_boxes(void) {
   EXPECT_TRUE(clone is <long>);
   EXPECT_TRUE(clone.long_value() == precise);
   EXPECT_TRUE(clone == source);
-  EXPECT_FALSE(clone === source);
+  EXPECT_TRUE(clone === source);
+  EXPECT_FALSE(clone.same(source));
 
   Var wide_float = Var.box_long_double(1.25L);
   Var float_clone = wide_float.clone_wide();
   EXPECT_TRUE(float_clone is <ldouble>);
   EXPECT_TRUE(float_clone.long_double_value() == 1.25L);
   EXPECT_TRUE(float_clone == wide_float);
-  EXPECT_FALSE(float_clone === wide_float);
+  EXPECT_TRUE(float_clone === wide_float);
+  EXPECT_FALSE(float_clone.same(wide_float));
 }
 
 

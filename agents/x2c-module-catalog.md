@@ -1849,5 +1849,6 @@ Public functions:
 `x2c_var_update_long_long`, `x2c_var_update_ulong_long`, `x2c_var_update_f32`,
 `x2c_var_update_f64`, `x2c_var_update_long_double`, `Var.binary`, `Var.add`,
 `Var.sub`, `Var.mul`, `Var.matmul`, `Var.div`, `Var.mod`, `Var.neg`,
-`Var.truth`, `Var.fallback_truth`, `Var.update`, `x2c_var_update_volatile`,
-`Var.postfix`, `x2c_var_postfix_volatile`
+`x2c_var_equal`, `x2c_var_identical`, `x2c_var_order`, `Var.truth`,
+`Var.fallback_truth`, `Var.update`, `x2c_var_update_volatile`, `Var.postfix`,
+`x2c_var_postfix_volatile`

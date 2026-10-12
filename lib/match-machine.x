@@ -114,9 +114,9 @@ static void MatchMachine._execute(MatchMachine &m, const MachineWord &w) {
 
 // value tests
 
-/* Compares by raw Var bits or by language equality, as `mode` selects. */
+/* A plan selects raw Var bits only where they agree with `Var.equal`. */
 static int _equal(int mode, Var left, Var right) =>
-  mode == MACHINE_COMPARE_BITS ? left.u64 == right.u64 : left == right;
+  mode == MACHINE_COMPARE_BITS ? left.u64 == right.u64 : left.equal(right);
 
 static void MatchMachine._tag(MatchMachine &m, const MachineWord &w) {
   Symbol tag = m._const(w.a);
@@ -325,7 +325,7 @@ static int MatchMachine._value_equal(MatchMachine &m, int index, Var value) {
   if (slot.kind != MACHINE_SLOT_VALUE) return 0;
   if (m.relation)
     return m.relation(&m, index, slot.value, value, m.relation_context);
-  return slot.value == value;
+  return slot.value.equal(value);
 }
 
 /* Compares slot `a` with the cells from cursor `b` to cursor `c`. */
