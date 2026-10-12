@@ -337,17 +337,10 @@ ModuleSource Compiler.module_source(Compiler c, String path, String text) {
   return source;
 }
 
-/* Only a text that spells `module` before `{` can hold a block. An empty
-   file's text is NULL. */
-static int _spells_block(const char *text) {
-  if (!text) return 0;
-  for (const char *at = strstr(text, "module"); at;
-       at = strstr(at + 1, "module")) {
-    const char *next = at + strlen("module");
-    if (next[strspn(next, " \t\r\n")] == '{') return 1;
-  }
-  return 0;
-}
+/* The token scan decides whether `module` opens a block, including when
+   comments separate it from its brace. */
+static int _spells_block(const char *text) =>
+  text && strstr(text, "module");
 
 /* Appends a file with its block spliced and reports whether it had one. A
    member's text is marked as its own. Diagnostics locate the block in this
@@ -380,6 +373,9 @@ static Token Splice.block(Splice &s) {
   Tokenizer tokenizer = Tokenizer.new(s.text, <x2c>);
   tokenizer.layout = is_layout_file(s.path);
   tokenizer.scan();
+  Compiler scan = Scope.calloc(1, sizeof(struct Compiler));
+  scan.tokenizer = tokenizer;
+  scan.scan_conditionals();
   Token block = NULL, previous = NULL;
   int depth = 0;
   for (Token token = Token.skip_trivia(tokenizer.tokens);

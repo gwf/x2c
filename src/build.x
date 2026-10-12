@@ -11,6 +11,7 @@
 #include "cli.x"
 #include "deps.x"
 #include "toolchain.x"
+#include "compiler.x"
 
 /** Holds `Scope`-owned mutable state for one prepared native build target.
     `CliRequest.prepare` allocates the record in the current `Scope` and
@@ -1089,15 +1090,35 @@ List Build.script_helpers(Build b) {
   List prelude = compiler_prelude_sources().map(
     %!(String source) => Path.join(root, source));
   String depfile = _unit_file(b._unit_dir(script), script, ".d");
-  Array helpers = [];
+  Array candidates = [], helpers = [];
   foreach (String path, _depfile_inputs(depfile)) {
     if (path.startswith("search:") || !is_source_file(path) ||
-        path == script || path in helpers || path in prelude) continue;
+        path in candidates || path in prelude) continue;
     if (excluded.any(%!(String prefix) => path.startswith(prefix))) continue;
+    candidates.push(path);
+  }
+  Map members = b.script_members(candidates.list());
+  foreach (String path, candidates) {
+    if (path == script || path in members) continue;
     helpers.push(path);
     b.xlat_n++;
   }
   return helpers.list_free();
+}
+
+/* A module member is a content prerequisite, already translated in its
+   entry. Ordinary included helpers can live beside those members. */
+static Map Build.script_members(Build b, List candidates) {
+  Compiler c = Compiler.new();
+  c.sources = b.request.sources;
+  Map members = {};
+  foreach (String path, candidates) {
+    String text = NULL;
+    if (!c.read_source(path, text)) continue;
+    ModuleSource module = c.module_source(path, text);
+    if (module) members.merge(module.members);
+  }
+  return members;
 }
 
 /** Moves a script's built executable, and its debug symbols on macOS, to

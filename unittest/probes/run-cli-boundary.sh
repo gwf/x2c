@@ -1957,6 +1957,33 @@ sed 's/=> 40;/=> 50;/' "$SCRIPT/helpers/lib/inner.x" \
   mv "$SCRIPT/helpers/lib/inner.next" "$SCRIPT/helpers/lib/inner.x"
 [[ $(run_script "$SCRIPT/helpers/uses.x") == 'answer 52' ]]
 
+# Module members are text in their entry, while an ordinary helper beside
+# them remains a separate unit. Nested member edits still invalidate a run.
+mkdir -p "$SCRIPT/module/app/part"
+cat >"$SCRIPT/module/app/ordinary.x" <<'EOF'
+int ordinary(void);
+int ordinary(void) => 2;
+EOF
+cat >"$SCRIPT/module/app/part/inner.x" <<'EOF'
+static int nested_value = 40;
+EOF
+cat >"$SCRIPT/module/app/part.x" <<'EOF'
+module { "part/inner.x" }
+int answer(void) => nested_value + ordinary();
+EOF
+cat >"$SCRIPT/module/app.x" <<'EOF'
+#include "x2c.x"
+#include "app/ordinary.x"
+module /* Member paths can follow a comment. */ { "app/part.x" }
+int main(void) { printf("%d\n", answer()); return 0; }
+EOF
+[[ $(run_script "$SCRIPT/module/app.x") == 42 ]]
+[[ $(run_script "$SCRIPT/module/app.x") == 42 ]]
+sed 's/= 40;/= 41;/' "$SCRIPT/module/app/part/inner.x" \
+  >"$SCRIPT/module/app/part/inner.next" &&
+  mv "$SCRIPT/module/app/part/inner.next" "$SCRIPT/module/app/part/inner.x"
+[[ $(run_script "$SCRIPT/module/app.x") == 43 ]]
+
 mkdir -p "$SCRIPT/search/first" "$SCRIPT/search/second"
 printf '%s\n' '#define WHICH "second"' >"$SCRIPT/search/second/config.h"
 cat >"$SCRIPT/search/pick.x" <<'EOF'
