@@ -57,6 +57,8 @@ List Compiler_token_location(Compiler compiler, Token token);
 
 String Compiler_token_source(Compiler c, Token token, int * line);
 
+String Compiler_text_source(Compiler c, int position, int * offset);
+
 _Noreturn void Compiler_report_error(Compiler compiler, Symbol code, String message, Token token, List notes);
 
 void Compiler_report_problem(Compiler c, Symbol code, String message, Token token, List notes);

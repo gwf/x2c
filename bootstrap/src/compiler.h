@@ -21,6 +21,13 @@ typedef struct ScriptUnit{
 }
 * ScriptUnit;
 
+typedef struct ModuleSource{
+  String text, own;
+  Array markers;
+  Map members;
+}
+* ModuleSource;
+
 typedef struct GenNames{
   Map counters, adapters, file_scope_owners;
   int next_binding, issued;
@@ -68,6 +75,7 @@ typedef struct Compiler{
   Token input_boundary;
   Tokenizer tokenizer;
   Array line_markers;
+  ModuleSource unit_source;
   List return_type, include_dirs;
   Map deps;
   List aggregate_type, macro_stack, declaration_effects;

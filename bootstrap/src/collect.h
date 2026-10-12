@@ -11,6 +11,7 @@
 #include "buffer.h"
 #include "datum.h"
 #include "utils.h"
+#include <ctype.h>
 #include <errno.h>
 #include <limits.h>
 #include <stdio.h>
@@ -22,6 +23,8 @@ Map Compiler_collect_symbols(Compiler c, Map globs);
 List compiler_prelude_sources(void);
 
 int is_prelude_source(String path);
+
+ModuleSource Compiler_module_source(Compiler c, String path, String text);
 
 void Compiler_configure_package(Compiler c, List roots, String filename);
 

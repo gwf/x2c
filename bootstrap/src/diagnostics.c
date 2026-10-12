@@ -494,6 +494,19 @@ String Compiler_token_source(Compiler c, Token token, int * line){
   return file;
 }
 
+String Compiler_text_source(Compiler c, int position, int * offset){
+  if(! _init_guard_) _file_init_();  String file = c -> filename; (* offset) = position;  if(! Array_truth(c -> line_markers)) return file; {
+    List row;  Array _x2c_macro_object_2 = c -> line_markers;  int _x2c_macro_cursor_2 = 0;  Var _x2c_macro_cursor_output_2;  while(Array_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
+      row = Var_list(_x2c_macro_cursor_output_2); {
+        List _x2c_destructure_1 = row;  int start = Var_int(Var_convert(List_getindex(_x2c_destructure_1, 0), 3453797));  int text_line = Var_int(Var_convert(List_getindex(_x2c_destructure_1, 1), 3453797));  String marked = Var_string(List_getindex(_x2c_destructure_1, 2));  int line = Var_int(Var_convert(List_getindex(_x2c_destructure_1, 3), 3453797));  Var origin = List_getindex(_x2c_destructure_1, 4);  if(start > position || Var_is_void(origin)) break;  file = marked; (* offset) = Var_int(origin) + position - start;
+      }
+
+    }
+
+  }
+  return file;
+}
+
 static List _compiler_location(Compiler compiler, Token token){
   if(! token && compiler -> origin){
     List location = Compiler_origin_location(compiler, compiler -> origin);  if(List_truth(location)) return location;
@@ -509,11 +522,11 @@ void Compiler_report_problem(Compiler c, Symbol code, String message, Token toke
 
 _Noreturn void Compiler_report_error(Compiler compiler, Symbol code, String message, Token token, List notes){
   if(! _init_guard_) _file_init_();  report_suspend();  Compiler_report_problem(compiler, code, message, token, notes);  Diagnostics diag = compiler -> diagnostics;  if(compiler -> recovery_depth > 0){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/diagnostics.x",.function = "Compiler_report_error",.line = 424};  x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(209659067570), Symbol_var(code));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/diagnostics.x",.function = "Compiler_report_error",.line = 441};  x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(209659067570), Symbol_var(code));  __builtin_unreachable();
   }
   if(! diag -> printer){
-    Var held;  List _x2c_macro_object_2 = Diagnostics_entries(diag);  List _x2c_macro_cursor_2 = _x2c_macro_object_2;  Var _x2c_macro_cursor_output_2;  while(List_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
-      held = _x2c_macro_cursor_output_2;  Compiler_print_diagnostic(compiler, Var_list(held));
+    Var held;  List _x2c_macro_object_3 = Diagnostics_entries(diag);  List _x2c_macro_cursor_3 = _x2c_macro_object_3;  Var _x2c_macro_cursor_output_3;  while(List_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_3))){
+      held = _x2c_macro_cursor_output_3;  Compiler_print_diagnostic(compiler, Var_list(held));
     }
 
   }
@@ -557,8 +570,8 @@ static void _context_caret(char * line_start, char * line_end, int column, int l
 
 void Compiler_take_diagnostics(Compiler c, Compiler child){
   if(! _init_guard_) _file_init_();  Diagnostics target = c -> diagnostics, source = child -> diagnostics;  if(target == source) return; {
-    List entry;  Array _x2c_macro_object_3 = source -> entries;  int _x2c_macro_cursor_3 = 0;  Var _x2c_macro_cursor_output_3;  while(Array_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_3))){
-      entry = Var_list(_x2c_macro_cursor_output_3);  Diagnostics__store(target, entry);
+    List entry;  Array _x2c_macro_object_4 = source -> entries;  int _x2c_macro_cursor_4 = 0;  Var _x2c_macro_cursor_output_4;  while(Array_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_4))){
+      entry = Var_list(_x2c_macro_cursor_output_4);  Diagnostics__store(target, entry);
     }
 
   }
@@ -592,8 +605,8 @@ void Compiler_dump_tokens(Compiler compiler){
 
 void Compiler_dump_symbol_table(Compiler compiler, Map map){
   if(! _init_guard_) _file_init_(); {
-    Var key, value;  Map _x2c_macro_object_4 = map;  unsigned _x2c_macro_cursor_4 = 0;  Var _x2c_macro_cursor_output_4;  Var _x2c_macro_cursor_output_5;  while(Map_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_4), &(_x2c_macro_cursor_output_5))){
-      key = _x2c_macro_cursor_output_4;  value = _x2c_macro_cursor_output_5;  printf("%s ==>\n%s\n", Var_str(key), Var_str(value));
+    Var key, value;  Map _x2c_macro_object_5 = map;  unsigned _x2c_macro_cursor_5 = 0;  Var _x2c_macro_cursor_output_5;  Var _x2c_macro_cursor_output_6;  while(Map_try_next(_x2c_macro_object_5, &(_x2c_macro_cursor_5), &(_x2c_macro_cursor_output_5), &(_x2c_macro_cursor_output_6))){
+      key = _x2c_macro_cursor_output_5;  value = _x2c_macro_cursor_output_6;  printf("%s ==>\n%s\n", Var_str(key), Var_str(value));
     }
 
   }
@@ -602,8 +615,8 @@ void Compiler_dump_symbol_table(Compiler compiler, Map map){
 
 void Compiler_dump_cache(Compiler compiler){
   if(! _init_guard_) _file_init_(); {
-    Var key, value;  Map _x2c_macro_object_5 = compiler -> key_ids;  unsigned _x2c_macro_cursor_5 = 0;  Var _x2c_macro_cursor_output_6;  Var _x2c_macro_cursor_output_7;  while(Map_try_next(_x2c_macro_object_5, &(_x2c_macro_cursor_5), &(_x2c_macro_cursor_output_6), &(_x2c_macro_cursor_output_7))){
-      key = _x2c_macro_cursor_output_6;  value = _x2c_macro_cursor_output_7;  printf("%s\t==>\t%s\n", Var_repr(value), Var_repr(key));
+    Var key, value;  Map _x2c_macro_object_6 = compiler -> key_ids;  unsigned _x2c_macro_cursor_6 = 0;  Var _x2c_macro_cursor_output_7;  Var _x2c_macro_cursor_output_8;  while(Map_try_next(_x2c_macro_object_6, &(_x2c_macro_cursor_6), &(_x2c_macro_cursor_output_7), &(_x2c_macro_cursor_output_8))){
+      key = _x2c_macro_cursor_output_7;  value = _x2c_macro_cursor_output_8;  printf("%s\t==>\t%s\n", Var_repr(value), Var_repr(key));
     }
 
   }

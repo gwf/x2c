@@ -30,6 +30,13 @@ typedef struct ScriptUnit{
 }
 * ScriptUnit;
 
+typedef struct ModuleSource{
+  String text, own;
+  Array markers;
+  Map members;
+}
+* ModuleSource;
+
 typedef struct GenNames{
   Map counters, adapters, file_scope_owners;
   int next_binding, issued;
@@ -77,6 +84,7 @@ typedef struct Compiler{
   Token input_boundary;
   Tokenizer tokenizer;
   Array line_markers;
+  ModuleSource unit_source;
   List return_type, include_dirs;
   Map deps;
   List aggregate_type, macro_stack, declaration_effects;
@@ -2873,7 +2881,7 @@ int Compiler_at_completion(Compiler c);
 Symbol Compiler_peek(Compiler c, int steps){
   if(! _init_guard_) _file_init_();  Token token = c -> token;  if(! steps && Compiler_at_completion(c)){
     List rows = Sym_visible_symbols(c -> sym); {
-      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/compiler.x",.function = "Compiler_peek",.line = 1922};  x2c_error_raise_n(& _x2c_error_site_0, 1248787135328, 3, Symbol_var(740232), Symbol_var(29452646), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
+      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/compiler.x",.function = "Compiler_peek",.line = 1937};  x2c_error_raise_n(& _x2c_error_site_0, 1248787135328, 3, Symbol_var(740232), Symbol_var(29452646), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
     }
 
   }
@@ -2908,7 +2916,7 @@ static Token _skip_backward(Token token, Token origin){
 
 void Compiler_require_input(Compiler c){
   if(! _init_guard_) _file_init_();  if(c -> input_boundary && c -> token >= c -> input_boundary){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/compiler.x",.function = "Compiler_require_input",.line = 1963};  x2c_error_raise_n(& _x2c_error_site_1, 664344300629258, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/compiler.x",.function = "Compiler_require_input",.line = 1978};  x2c_error_raise_n(& _x2c_error_site_1, 664344300629258, 0);  __builtin_unreachable();
   }
 
 }
@@ -2974,13 +2982,13 @@ int Compiler_at_completion(Compiler c){
 
 void Compiler___complete_here(Compiler c, Symbol role, List keywords){
   if(! _init_guard_) _file_init_();  if(! Compiler_at_completion(c)) return;  List rows = Sym_visible_symbols(c -> sym); {
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../src/compiler.x",.function = "Compiler___complete_here",.line = 2087};  x2c_error_raise_n(& _x2c_error_site_2, 1248787135328, 3, Symbol_var(740232), Symbol_var(role), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(keywords));
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../src/compiler.x",.function = "Compiler___complete_here",.line = 2102};  x2c_error_raise_n(& _x2c_error_site_2, 1248787135328, 3, Symbol_var(740232), Symbol_var(role), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(keywords));
   }
 
 }
 
 int Compiler_record_origin(Compiler c, Token token){
-  if(! _init_guard_) _file_init_();  if(! token) return 0;  String file = String_truth(c -> filename) ? c -> filename : _379;  if(! c -> source_map) file = Compiler_display_path(c, file);  Array_push(c -> origins, List_var(cons(_59, cons(String_var(file), cons(int_var(token -> line), cons(int_var(token -> col), cons(int_var(token -> len), cons(int_var(token -> pos), NULL))))))));  return Array_len(c -> origins);
+  if(! _init_guard_) _file_init_();  if(! token) return 0;  int line = token -> line;  String file = Array_truth(c -> line_markers) ? Compiler_token_source(c, token, &(line)) : c -> filename;  if(! String_truth(file)) file = _379;  if(! c -> source_map) file = Compiler_display_path(c, file);  Array_push(c -> origins, List_var(cons(_59, cons(String_var(file), cons(int_var(line), cons(int_var(token -> col), cons(int_var(token -> len), cons(int_var(token -> pos), NULL))))))));  return Array_len(c -> origins);
 }
 
 List Compiler_anchor_origin(Compiler c, List node, Token token){
@@ -2995,8 +3003,8 @@ void Compiler_record_source_declaration(Compiler c, List binding, Token first, T
 }
 
 static List Compiler__source_range(Compiler c, Token first, Token after){
-  if(! first || ! after || first >= after || Map_truth(c -> macro_holes)) return NULL;  Token last = after - 1;  while(last > first &&(last -> type == 40896714 || last -> type == 7477210024 || last -> type == 35579270086)) last --;  String path = absolute_path(c -> filename);  if(!(Map_contains(c -> source_texts, String_var(path)))) Map_setindex(c -> source_texts, String_var(path), String_var(c -> text));  return({
-    Var _x2c_literal_part_58 = String_var(path);  Var _x2c_literal_part_59 = int_var(first -> pos);  Var _x2c_literal_part_60 = int_var(last -> pos + last -> len);  cons(_x2c_literal_part_58, cons(_x2c_literal_part_59, cons(_x2c_literal_part_60, NULL)));
+  if(! first || ! after || first >= after || Map_truth(c -> macro_holes)) return NULL;  Token last = after - 1;  while(last > first &&(last -> type == 40896714 || last -> type == 7477210024 || last -> type == 35579270086)) last --;  int start = first -> pos;  String path = absolute_path(Compiler_text_source(c, first -> pos, &(start)));  if(! Array_truth(c -> line_markers) && !(Map_contains(c -> source_texts, String_var(path)))) Map_setindex(c -> source_texts, String_var(path), String_var(c -> text));  return({
+    Var _x2c_literal_part_58 = String_var(path);  Var _x2c_literal_part_59 = int_var(start);  Var _x2c_literal_part_60 = int_var(start + last -> pos + last -> len - first -> pos);  cons(_x2c_literal_part_58, cons(_x2c_literal_part_59, cons(_x2c_literal_part_60, NULL)));
   }
   );
 }

@@ -38,11 +38,11 @@ ParsedUnit;
 #include "collect.h"
 #include "deps.h"
 #include "utils.h"
-static List _64, _63, _59, _58, _56, _54, _39, _38, _32, _31, _30, _21, _20, _13;
+static List _74, _73, _69, _68, _66, _64, _49, _48, _47, _39, _38, _32, _31, _30, _21, _20, _13;
 
-static String _61, _52, _50, _49, _48, _47, _46, _45, _44, _42, _41, _40, _36, _34, _33, _28, _26, _24, _23, _17, _16, _15, _14, _11, _10, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _71, _62, _60, _59, _58, _57, _56, _55, _54, _52, _51, _50, _45, _43, _41, _40, _36, _34, _33, _28, _26, _24, _23, _17, _16, _15, _14, _11, _10, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
-static Var _62, _60, _57, _55, _53, _51, _43, _37, _35, _29, _27, _25, _22, _19, _18, _12, _9;
+static Var _72, _70, _67, _65, _63, _61, _53, _46, _44, _42, _37, _35, _29, _27, _25, _22, _19, _18, _12, _9;
 
 static int _init_guard_ = 0;
 
@@ -130,7 +130,7 @@ static Func _x2c_func_handle_0;
 
 
 
-_x2c_initializer_choice_1A2A7247_0((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _64)))
+_x2c_initializer_choice_1A2A7247_0((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _74)))
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -175,31 +175,41 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _37 = String_var(_36);
   _38 = cons(_37, NULL);
   _39 = cons(_35, _38);
-  _40 = String_new("/lib/x2c.x");
-  _41 = String_new("failed to run C preprocessor");
-  _42 = String_new("stage: preprocess");
-  _43 = String_var(_42);
-  _44 = String_new("status: ");
-  _45 = String_new("#");
-  _46 = String_new("<");
-  _47 = String_new("/lib/meta.x");
-  _48 = String_new("x2c_");
-  _49 = String_new("Code_");
-  _50 = String_new("Type_");
-  _51 = Symbol_var(437126);
-  _52 = String_new("String");
+  _40 = String_new("module units use the default symbol collection");
+  _41 = String_new("the host preprocessor reads a module block as C, so");
+  _42 = String_var(_41);
+  _43 = String_new("--cpp-symbols, --live-symbols, and the --dump-cpp modes cannot read a");
+  _44 = String_var(_43);
+  _45 = String_new("module");
+  _46 = String_var(_45);
+  _47 = cons(_46, NULL);
+  _48 = cons(_44, _47);
+  _49 = cons(_42, _48);
+  _50 = String_new("/lib/x2c.x");
+  _51 = String_new("failed to run C preprocessor");
+  _52 = String_new("stage: preprocess");
   _53 = String_var(_52);
-  _54 = cons(_53, NULL);
-  _55 = List_var(_54);
-  _56 = cons(_55, NULL);
-  _57 = List_var(_56);
-  _58 = cons(_57, NULL);
-  _59 = cons(_51, _58);
-  _60 = List_var(_59);
-  _61 = String_new("Var");
-  _62 = String_var(_61);
-  _63 = cons(_62, NULL);
-  _64 = cons(_60, _63);
+  _54 = String_new("status: ");
+  _55 = String_new("#");
+  _56 = String_new("<");
+  _57 = String_new("/lib/meta.x");
+  _58 = String_new("x2c_");
+  _59 = String_new("Code_");
+  _60 = String_new("Type_");
+  _61 = Symbol_var(437126);
+  _62 = String_new("String");
+  _63 = String_var(_62);
+  _64 = cons(_63, NULL);
+  _65 = List_var(_64);
+  _66 = cons(_65, NULL);
+  _67 = List_var(_66);
+  _68 = cons(_67, NULL);
+  _69 = cons(_61, _68);
+  _70 = List_var(_69);
+  _71 = String_new("Var");
+  _72 = String_var(_71);
+  _73 = cons(_72, NULL);
+  _74 = cons(_70, _73);
   _x2c_static_initialize_0();
 }
 
@@ -514,6 +524,11 @@ static void _tokenize_input(Frontend frontend, ParsedUnit * unit, String filenam
   _runtime_roles(c, resolved ? source : NULL);
   String text = _read_input(c);
   if(String_truth(text) && String_startswith(text, _2)) text = _script(c, text, resolved ? String_new(source) : c -> filename);
+  c -> unit_source = Compiler_module_source(c, c -> filename, text);
+  if(c -> unit_source){
+    text = c -> unit_source -> text;
+    c -> line_markers = c -> unit_source -> markers;
+  }
   c -> include_dirs = frontend -> include_dirs;
   (* unit).source_lines = _source_lines(text);
   Compiler_tokenize(c, text);
@@ -721,6 +736,7 @@ static void _enter_package(Frontend frontend, Compiler c){
 static void _check_cpp_unit(Compiler c){
   if(c -> layout) Compiler_report_error(c, 306819428, _23, _first_directive(c), _32);
   if(c -> script) Compiler_report_error(c, 306819428, _33, _first_directive(c), _39);
+  if(c -> unit_source) Compiler_report_error(c, 306819428, _40, _first_directive(c), _49);
 }
 
 static Token _first_directive(Compiler c){
@@ -733,12 +749,12 @@ static Compiler _run_cpp(Frontend frontend, ParsedUnit * unit){
   (* unit).preprocessor = cpp;
   cpp -> filename = c -> filename;
   String text = NULL, errors = NULL, dependency_text = NULL;
-  String runtime = c -> prelude ? String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_40), NULL))) : NULL;
+  String runtime = c -> prelude ? String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_50), NULL))) : NULL;
   int status = Toolchain_preprocess(frontend -> toolchain, c -> filename, frontend -> request -> include_dirs, runtime, &(text), &(errors), &(dependency_text));
   (* unit).preprocessor_output = String_truth(text) ? _take_line_markers(cpp, text) : NULL;
   (* unit).preprocessor_errors = errors;
   if(String_truth(errors) && frontend -> preprocessor_errors) frontend -> preprocessor_errors(errors);
-  if(status) Compiler_report_error(c, 306819428, _41, _first_directive(c), cons(_43, cons(String_var(String_join(NULL, cons(String_var(_44), cons(String_var(int_str(status)), NULL)))), NULL)));
+  if(status) Compiler_report_error(c, 306819428, _51, _first_directive(c), cons(_53, cons(String_var(String_join(NULL, cons(String_var(_54), cons(String_var(int_str(status)), NULL)))), NULL)));
   {
     String dependency;
     List _x2c_macro_object_3 = translation_depfile_parse(dependency_text);
@@ -767,13 +783,13 @@ static String _take_line_markers(Compiler cpp, String text){
       line = Var_string(_x2c_macro_cursor_output_5);
       {
         int number = 0;
-        String file = String_startswith(line, _45) ? preproc_marker_file(line, &(number)) : NULL;
+        String file = String_startswith(line, _55) ? preproc_marker_file(line, &(number)) : NULL;
         if(! String_truth(file)){
           Array_push(kept, String_var(line));
           position += String_len(line) + 1;
           text_line ++;
         }
-        else if(! String_startswith(file, _46)) Array_push(markers, List_var(cons(int_var(position), cons(int_var(text_line), cons(String_var(file), cons(int_var(number), NULL))))));
+        else if(! String_startswith(file, _56)) Array_push(markers, List_var(cons(int_var(position), cons(int_var(text_line), cons(String_var(file), cons(int_var(number), NULL))))));
       }
 
     }
@@ -825,7 +841,7 @@ static int _preload_meta_surface(Frontend frontend, Lisp shared){
   struct Frontend session = * frontend;
   session.request = & request;
   ParsedUnit unit;
-  String path = String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_47), NULL)));
+  String path = String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_57), NULL)));
   Context context = Context_open_named("shared translation unit");
   int started = _start(& session, path, &(unit), context, NULL);
   Compiler c = unit.compiler;
@@ -874,7 +890,7 @@ static int _preload_meta_surface(Frontend frontend, Lisp shared){
           name = Var_string(_x2c_macro_item_6);
           {
             Var function;
-            if((String_startswith(name, _48) || String_startswith(name, _49) || String_startswith(name, _50)) && Lisp_try_get(shared, name, &(function))) Compiler_bind_meta_operation(shared, name, function);
+            if((String_startswith(name, _58) || String_startswith(name, _59) || String_startswith(name, _60)) && Lisp_try_get(shared, name, &(function))) Compiler_bind_meta_operation(shared, name, function);
           }
 
         }
