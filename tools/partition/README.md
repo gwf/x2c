@@ -48,10 +48,11 @@ are served directly. Node.js is needed only for the optional checks below.
   to expand all groups for moving functions, or Function list for keep-together
   selection. Shift-click project nodes or use
   the sidebar checkboxes to select groups for merging.
-- Group count ranges from one to 50 on the slider, limited by available
-  functions and keep-together sets. Its pending value updates during dragging;
-  the partition changes on release. Exact count can reach singletons, subject to keep-together sets.
-  Size balance independently trades lower cut cost for more similar group sizes.
+- Group count and size balance each have left/right buttons that change the
+  displayed value by one and immediately update the preview. Group count ranges
+  from one to 50, limited by available functions and keep-together sets. Size
+  balance ranges from 0 (lower cut cost) to 100 (more similar group sizes),
+  independently of group count.
 - Collapsed arrangements keep outside caller groups in a fixed, scrollable
   peripheral rail. Only editable groups participate in the force layout. Rail
   counts and links count distinct callers; links marked `c` distinguish these from

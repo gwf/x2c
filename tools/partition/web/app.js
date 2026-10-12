@@ -400,7 +400,10 @@ function updatePreview(skipInspector = false) {
   previewGroup = null;
   fn = null;
   const g = group(preview.target),
-    count = Math.max(1, Math.min(kval, Engine.atoms(g.members, S.ties).length)),
+    count = Math.max(
+      1,
+      Math.min(50, kval, Engine.atoms(g.members, S.ties).length),
+    ),
     parts = Engine.partition(D, g.members, count, balance / 100, S.ties);
   kval = count;
   preview = {
@@ -557,39 +560,34 @@ function renderMoveSuggestions(mode = "cut") {
         }),
     );
 }
+function stepper(id, label, value, min, max) {
+  return `<div class="control"><label id="${id}-label">${label}</label><div class="spread" role="group" aria-labelledby="${id}-label"><button id="${id}-less" aria-label="Decrease ${label.toLowerCase()}" ${value <= min ? "disabled" : ""}>\u2190</button><output id="${id}" aria-live="polite">${value}</output><button id="${id}-more" aria-label="Increase ${label.toLowerCase()}" ${value >= max ? "disabled" : ""}>\u2192</button></div></div>`;
+}
 function renderInspector(m, current) {
   if (preview && fn === null) {
     const target = group(preview.target),
       sizes = preview.parts.map((p) => p.length),
       delta = m.cut - current.cut;
     $("inspector").innerHTML =
-      `<div class="paneltag">SPLIT PREVIEW</div><h2>${esc(target.name)}</h2><p>Explore a tentative split. Accept it when the boundaries make sense.</p><div class="control"><label for="cluster-count">Group count: ${kval}</label><input id="cluster-count" type="range" min="1" max="${Math.min(50, Engine.atoms(target.members, S.ties).length)}" value="${kval}"><div class="scale"><span>One group</span><span>More groups</span></div></div><div class="spread"><label for="k">Exact group count</label><input id="k" class="number" type="number" min="1" max="${Engine.atoms(target.members, S.ties).length}" value="${kval}"></div><p class="note">Slider stops at 50 groups or the available keep-together sets. Exact count can reach ${Engine.atoms(target.members, S.ties).length}; keep-together sets stay intact.</p><div class="control"><label for="balance">Size balance: ${balance}</label><input id="balance" type="range" min="0" max="100" value="${balance}"><div class="scale"><span>Prefer low cut cost</span><span>Prefer similar sizes</span></div></div><p class="note">Balance changes the size penalty without changing group count.</p><h3>${sizes.length} proposed groups</h3><div class="sizes">${sizes.map((n, i) => `<i style="flex:${n};background:${colors[i % 8]}" title="${n} functions"></i>`).join("")}</div><div class="spread"><small>${sizes.join(" / ")} functions</small></div><div class="rule"></div><div class="costrow"><span>Global cut change</span><strong>${delta >= 0 ? "+" : ""}${fmt(delta)} call sites</strong></div><div class="costrow"><span>Private targets crossing</span><strong>${m.exposed.length}</strong></div><div class="costrow"><span>Keep-together sets</span><strong>${S.ties.filter((t) => t.some((v) => target.members.includes(v))).length} respected</strong></div><button id="accept" class="primary wide" ${sizes.length < 2 ? "disabled" : ""}>Accept ${sizes.length} groups</button><button id="cancel" class="quiet wide">Discard preview</button><div class="hint note">A lower cut is evidence, not a design decision. Inspect API entry points before accepting.</div>`;
-    $("cluster-count").oninput = (e) => {
-      document.querySelector('label[for="cluster-count"]').textContent =
-        `Group count on release: ${e.target.value}`;
-    };
-    $("balance").oninput = (e) => {
-      document.querySelector('label[for="balance"]').textContent =
-        `Size balance on release: ${e.target.value}`;
-    };
-    $("cluster-count").onchange = (e) => {
-      kval = +e.target.value;
-      updatePreview();
-    };
-    $("balance").onchange = (e) => {
-      balance = +e.target.value;
-      updatePreview();
-    };
-    $("k").onchange = (e) => {
-      kval = Math.max(
-        1,
-        Math.min(
-          Engine.atoms(target.members, S.ties).length,
-          Math.round(+e.target.value) || 1,
-        ),
-      );
-      updatePreview();
-    };
+      `<div class="paneltag">SPLIT PREVIEW</div><h2>${esc(target.name)}</h2><p>Explore a tentative split. Accept it when the boundaries make sense.</p>${stepper("cluster-count", "Group count", kval, 1, Math.min(50, Engine.atoms(target.members, S.ties).length))}<p class="note">Up to 50 groups; keep-together sets stay intact.</p>${stepper("balance", "Size balance", balance, 0, 100)}<div class="scale"><span>Lower cut cost</span><span>Similar sizes</span></div><p class="note">Balance changes the size penalty without changing group count.</p><h3>${sizes.length} proposed groups</h3><div class="sizes">${sizes.map((n, i) => `<i style="flex:${n};background:${colors[i % 8]}" title="${n} functions"></i>`).join("")}</div><div class="spread"><small>${sizes.join(" / ")} functions</small></div><div class="rule"></div><div class="costrow"><span>Global cut change</span><strong>${delta >= 0 ? "+" : ""}${fmt(delta)} call sites</strong></div><div class="costrow"><span>Private targets crossing</span><strong>${m.exposed.length}</strong></div><div class="costrow"><span>Keep-together sets</span><strong>${S.ties.filter((t) => t.some((v) => target.members.includes(v))).length} respected</strong></div><button id="accept" class="primary wide" ${sizes.length < 2 ? "disabled" : ""}>Accept ${sizes.length} groups</button><button id="cancel" class="quiet wide">Discard preview</button><div class="hint note">A lower cut is evidence, not a design decision. Inspect API entry points before accepting.</div>`;
+    for (const name of ["cluster-count", "balance"]) {
+      for (const [suffix, delta] of [
+        ["less", -1],
+        ["more", 1],
+      ]) {
+        const id = `${name}-${suffix}`;
+        $(id).onclick = () => {
+          if (name === "cluster-count") kval += delta;
+          else balance += delta;
+          updatePreview();
+          const next = $(id);
+          (next.disabled
+            ? $(`${name}-${suffix === "less" ? "more" : "less"}`)
+            : next
+          ).focus();
+        };
+      }
+    }
     $("accept").onclick = applyPreview;
     $("cancel").onclick = () => {
       preview = null;
