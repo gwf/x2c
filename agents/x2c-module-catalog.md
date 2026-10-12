@@ -575,15 +575,15 @@ Public functions:
 `meta_function_reference`, `Type.element`, `Type.parameters`,
 `Type.return_type`, `Type.reverse_name`, `Type.resolve`, `Type.layout`,
 `Type.is_value`, `Type.tag_name`, `Type.members`, `Type.fields`,
-`Code.binding_spelling`, `x2c_ident`, `builtin_foreach_unique`,
-`x2c_meta_definition_hashes`, `Code.name`, `Code.body`, `Code.arguments`,
-`Code.parameter`, `binding_native_type`, `binding_literal_list`,
-`Code.source_text`, `x2c_embed_text`, `meta_invocation_location`,
-`x2c_invocation_file`, `x2c_invocation_line`, `x2c_invocation_column`,
-`x2c_diagnostic_fail`, `x2c_diagnostic_fail_at`, `x2c_diagnostic_error_at`,
-`x2c_diagnostic_warn`, `x2c_enclosing`, `x2c_place`, `meta_type_description`,
-`meta_source_description`, `builtin_foreach_complete`, `MetaContext.reject`,
-`Compiler.bind_sdk_primitives`
+`Code.binding_spelling`, `x2c_ident`, `x2c_binding_fresh`,
+`builtin_foreach_unique`, `x2c_meta_definition_hashes`, `Code.name`,
+`Code.body`, `Code.arguments`, `Code.parameter`, `binding_native_type`,
+`binding_literal_list`, `Code.source_text`, `x2c_embed_text`,
+`meta_invocation_location`, `x2c_invocation_file`, `x2c_invocation_line`,
+`x2c_invocation_column`, `x2c_diagnostic_fail`, `x2c_diagnostic_fail_at`,
+`x2c_diagnostic_error_at`, `x2c_diagnostic_warn`, `x2c_enclosing`, `x2c_place`,
+`meta_type_description`, `meta_source_description`, `builtin_foreach_complete`,
+`MetaContext.reject`, `Compiler.bind_sdk_primitives`
 
 ### [src/operator-ledger.x](../src/operator-ledger.x)
 
