@@ -44,6 +44,12 @@ execution.
 
 ### Current work
 
+- [Repository review remediation, October 11](review-remediation-2026-10-11.md):
+  critical assessment from dev `6529e868`, with final delta
+  checked at `9004c40b`. Finding evidence and a
+  181-row language ledger separate demonstrated repairs, documentation changes,
+  and unresolved semantic choices. Confirmed repairs are authorized; broader
+  semantics and expanded gates remain excluded.
 - [How small the compiler kernel can get](compiler-kernel-minimal.md):
   2026-10-09 analysis against the foundation branch. Two primitives,
   recognition through rewrite families and contribution through placement

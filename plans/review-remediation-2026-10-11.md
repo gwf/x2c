@@ -1,0 +1,497 @@
+# Repository review and language-reference remediation
+
+> Status: active - confirmed repairs authorized, 2026-10-11.
+> Critically assessed against fetched `origin/dev`
+> `6529e8689702d98db2754571ef7f3d9b43b0d5b9`.
+> Final delta reviewed through fetched `origin/dev`
+> `9004c40b63ad489625d1a19371124f4b4f32978a`; superseded work removed below.
+> Gary authorized implementing and delivering confirmed repairs, with performance
+> measurements. Unresolved semantic changes and expanded gates remain excluded.
+> Implementation-ready repairs and unresolved semantic choices are separated below.
+
+## Result
+
+Repair demonstrated wrong behavior and checks that falsely report success.
+Bring the existing book, syntax data, API comments, and continuation plans into
+agreement with the intended language. Preserve the compiler's shared binding,
+typing, placement, cleanup, and emission owners.
+
+The supplied review is useful evidence, but it is not a ready implementation
+specification. Its ranked findings mix defects, intentional semantics,
+coverage limitations, and new policy proposals. The language study contains
+181 gap rows, not approximately 150. Its draft grammar describes some bugs as
+syntax, and several summaries contradict current behavior or its own later
+verification evidence.
+
+This plan does not adopt the study's draft EBNF or its sixteen-chapter outline
+as a replacement specification. Repair existing semantic owners first. A
+navigation outline can then link those owners without duplicating them.
+
+## Inputs, evidence, and limits
+
+Inputs are `x2c-review-findings-6529e868.md`,
+`x2c-lang-study-6529e868.md`, and their adjacent reviewer, verifier, update,
+and probe reports supplied by Gary. Their appendix citations often describe
+`1e90f378`; their conclusions were checked against the baseline above.
+
+The initial checkout was clean and exactly matched fetched `origin/dev`.
+`make build-safe` succeeded and produced `builds/0/x2c`. Three independent
+reviewers divided compiler findings, core language, and meta/runtime material.
+The coordinating reviewer inspected the findings and their semantic owners,
+replayed consequential probes, and independently tested tooling claims.
+
+The companion ledgers account for the ranked findings, lower-value claims,
+181 specification rows, and 35 original questions. Evidence labels distinguish
+executed behavior, source inspection, known limitations, and open hypotheses.
+An unexecuted inference is not an accepted compiler defect.
+
+- [Finding evidence and reproductions](review-remediation-evidence-2026-10-11.md).
+- [Language gaps and question dispositions](review-remediation-language-ledger-2026-10-11.md).
+
+Local transcripts and probes are retained under `.context/critical-review/`;
+full build, warning, raw-symbol, and documentation-mutation logs are under
+`debug/critical-*`. Mutation checks used disposable source copies. Production
+source and existing documentation were not edited for this assessment.
+
+This was a review of the supplied analysis, not a fresh proof of the entire
+repository. No full correctness gate, release test, performance campaign,
+cross-platform run, or exhaustive protocol conformance study was performed.
+Passing focused probes does not establish those broader properties.
+
+## Upstream changes during this review
+
+The final fetch advanced `origin/dev` by nine commits to `9004c40b`. The
+coordinator inspected the complete authored delta and built that revision in
+an isolated physical copy with `make build-safe`.
+
+- `eff08cee` fixes reference-captured for-initializer cells. Its executable
+  fixture passes with output `2`, `12 99`, `4 5`. Preserve this repair;
+  it is no longer implementation work in batch A.
+- `28fc8c97` fixes the module comment prefilter. Its trivia fixture prints 42,
+  and the formerly failing commented opener now works. It also suppresses
+  module discovery in recognized unreachable conditional arms. `#if 0` with
+  a missing member succeeds; a local macro defined as zero still produces
+  a member-read error because this is not full native preprocessing.
+- That commit also excludes actual module members from script helper units.
+  The installed payload and linked-meta adoption questions remain separate.
+- Datum string validation and gate-worker interruption handling changed too.
+  The datum reader repair does not repair compiler percent strings. Fresh
+  current-tip probes still reproduce escaped-dollar loss, wrong match/catch
+  binding, and signed percent-literal mismatch.
+
+The ledgers retain original-baseline evidence and label these supersessions.
+Unaffected source owners were compared across the delta; the full baseline
+probe collection and broad gates were not repeated at the final tip.
+Implementation should start from that final tip or recheck later changes.
+
+## Corrections to the supplied analysis
+
+- Unary `-` on a `Var` reaches its protocol member and works. A later rejecting
+  dynamic fallback does not prove that all unary negation is rejected.
+- Match binders do receive an identity from `Sym.define`. They bypass ordinary
+  declaration facts and template-local handling, and lowering loses that
+  identity. The report's literal claim of no binding identity is inaccurate.
+- Typed List bracket reads work through inherited List access. Correct the
+  contradictory rejection sentence; do not implement another access path.
+- Eight native Lisp arguments is a stack-allocation threshold, not an arity
+  limit. A nine-argument native call works.
+- A trailing `kernel` field is not accepted as an ordinary constructed source
+  function. The unmarked control is accepted. Public canonical syntax and
+  internal bound/lowered forms are different contracts.
+- `MatchRow` is a hole category, not a supported decorator target. Adding it
+  to the target table would introduce a feature, not repair documentation.
+- `x2c_place` and Lisp `x2c.place` are documented context-specific spellings.
+  No canonical-spelling migration is needed.
+- Script failure is not invariably status 1: `cmd-fail` preserves its child's
+  status. Shell status 134 is not a portable language definition of abort.
+- A C/H-only fixture proves its declared emission phase. Such fixtures are not
+  inherently broken because they do not also compile. The lvalue fixture is
+  broken because its expected output violates its claimed operation.
+- Optional examples, syntax checks, and proofs are deliberate policy. Their
+  absence from a gate is not, by itself, a process defect.
+- Unused public API and unreferenced local branches are not automatically
+  deletable. External callers and recoverable work must be considered.
+
+The study also misses a current contradiction: `lib/meta.x` still says function
+rules receive lifted lambdas, while the current guide and implementation
+exclude compiler-written definitions from program function rules.
+
+## Remediation order and dependencies
+
+| Batch | Result | Dependencies | Readiness |
+| --- | --- | --- | --- |
+| A | Correct match/catch binding identity and macro hygiene | Preserve landed loop-cell repair | Implement remaining paths after scoped design review below |
+| B | Remove undefined local reads, invalid dynamic stores, and wrong acquired-value cleanup | Standing acquired-value requirement | Implement demonstrated paths; do not invent emitter validation |
+| C | Correct literal decoding and sizeof operands; settle wide indexing | Existing C operand contract; literal/escape contracts; index decision | Literal/sizeof repairs scoped; escape contract and index choices explicit |
+| D | Make existing build and verification commands report failure truthfully | None | Existing-check repairs ready; broader gates remain proposals |
+| E | Repair module splicing boundaries and optional proof classification | Existing textual-splice contract | Narrow repairs ready; self-host adoption separately bounded |
+| F | Reconcile book, generated API text, grammar, and continuation status | Confirmed source/probe evidence; semantic decisions below | Most wording work ready; unresolved claims stay explicit |
+| G | Specify rewrite visibility, numeric equality, evaluation order, and support boundaries | Decisions below | Do not implement competing semantics before decision |
+
+A, B, D, and the bounded parts of E can proceed independently in isolated
+implementation worktrees. A owns shared binder/hygiene edits; do not split
+those among simultaneous writers. F may proceed for settled facts, but grammar
+and normative text must follow any accepted changes from C and G.
+
+### A. Preserve lexical identity through match, catch, and closures
+
+**Problem.** Match binders receive stable identities through `define`, but
+bypass the declaration facts that ordinary locals and catch binders receive.
+Closure capture consults automatic-binding facts. A lambda can resolve a same-named global
+instead of its enclosing match binder. Separately, match and catch declarations
+inside a macro can capture a caller expression's same-named local. The separate
+`for` initializer cell defect was repaired upstream during this review.
+
+**Owners.** `Compiler.define_match_binders` and catch binding in
+`src/compiler.x`; ordinary declarations in `src/symbols.x` and `src/parse.x`;
+template binding in `src/macros.x`; capture resolution in `src/lambdas.x`;
+cell placement and lowering in `src/component-lambdas.x` and
+`src/component-match.x`. `MatchCaptureLayout` already owns capture order.
+
+**Implementation.** Route match locals through ordinary declaration handling
+and carry their identities to component declarations. Preserve the
+distinction between pattern capture tokens and lexical bindings. Make the
+template's pattern declarations participate in the same private-binding
+substitution as ordinary macro locals. Caller argument bindings remain their
+original bindings. Preserve upstream's loop-initializer cell placement and its
+ordinary block scope; do not add another lambda-specific lookup or spelling
+replacement.
+
+**Acceptance.** Match-arm value and reference captures read/write the arm's
+binding while a same-named global stays unchanged. A caller local remains 77
+inside a macro whose pattern binder is 5, for both match and catch, including
+guards. Nested scopes and repeated binder spellings retain separate identities.
+Retain the landed for-initializer fixture as a regression boundary. Compare
+source and constructed/template routes for the remaining repairs. Preserve the
+existing capture lifetime and loop-binding contract; do not change to fresh
+per-iteration cells merely to eliminate a crash.
+
+### B. Remove undefined reads and preserve writable-lvalue requirements
+
+**Uninitialized capture.** `_forwarded_hole` in `src/macros.x` reads `direct`
+after neither match arm assigned it. Initialize the absent result to `void`,
+or return from each matching arm and decline otherwise. Keep one absence
+representation and the current capture projection owner. Prove the ordinary
+nonmatching capture path, not only the successful forwarded-hole path.
+
+Clang's warnings also identify `name`/`mods` in
+`Emitter._static_binding`. The emitter consumes an established binding shape.
+Do not add a second malformed-AST validator or default values merely to quiet
+that warning. Trace the producer guarantee and express the exhaustive shape
+directly if a warning-clean restructuring is needed. No reachable wrong-input
+path has been established for that second site.
+
+**Dynamic native stores.** The current lvalue fixture takes the address of a
+`register` object and writes through a discarded `const` qualifier. Dynamic
+lowering must preserve the writable/addressable requirements it bypasses.
+Inspect ordinary expression addressability and declaration storage facts;
+reuse or complete that owner once, then consume its result in dynamic update
+lowering. The current addressability helper alone is not sufficient: it checks
+expression shape and lambda snapshots, not all native storage restrictions.
+
+Keep valid volatile updates. Reject an unsupported non-addressable target at
+the semantic boundary, or preserve a valid native operation if the existing
+owner already provides one. Do not remove native `register` support globally.
+Split the existing mixed fixture into positive writable targets and focused
+negative const/register cases so valid cases still reach native compilation.
+
+**Acceptance.** Nonmatching forwarded captures translate with both normal and
+focused unoptimized builds. The initialized form has no uninitialized-read
+warning. Dynamic update of valid scalar/Var/volatile lvalues works; const
+targets cannot silently accept a write; unsupported register addressing gives
+a deliberate diagnostic. Existing enum and bitfield behavior stays intact.
+
+**Acquired-value cleanup.** `$auto` currently schedules cleanup of the user
+binding, so reassignment changes which value is cleaned. Retain the acquired
+value once through existing binding, placement, Cleanup, and region operations.
+The public initializer still returns that value. Acceptance proves single
+evaluation, cleanup of the acquired value after reassignment, and existing
+normal/error-transfer cleanup behavior. This follows the standing requirement;
+current fixture behavior must not override it.
+
+**Empty parameter forwarders.** Alias constructor forwarders still produce
+`Values_new()` despite the generated-prototype change. Reuse the canonical
+`void` parameter representation in `Compiler._forwarder`. Check generated
+declarations/definitions and compile the focused output with strict-prototype
+warnings. This repair does not depend on adding a recurring warning flag.
+
+### C. Repair literal and sizeof parsing; settle wide indexing separately
+
+`Type.numeric_literal` receives signed percent-literal tokens, but its
+magnitude helper expects unsigned digits. `%(-5)` acquires the wrong family,
+and larger negative spellings can be rejected. Handle the optional sign at the
+shared numeric-token boundary before magnitude selection and value decoding.
+Do not repair only match labels or add a second percent-list numeric parser.
+Preserve suffix/radix behavior and distinguish a signed data token from C's
+separate unary-minus expression. Select signed-minimum types using magnitude
+without overflowing a signed intermediate.
+
+Acceptance covers positive/negative decimal, supported radix forms and
+suffixes, signed minimum values, overflow, runtime versus inserted values,
+and matching a runtime negative against its percent-list pattern. Do not fix
+the symptom by making all Var numeric families compare equal.
+
+Percent-string decoding has a separate reproduced problem: `_decode_segment`
+unescapes first and then replaces `$$`, so two escaped dollars collapse into
+one. State the escape contract from the reference and scripting guide, then
+decode once without losing which dollar was escaped. Reuse the literal owner;
+do not repair only the generated syntax inventory. Cover escaped dollars,
+double-dollar escapes, interpolation adjacency, literal backslashes, and
+ordinary strings. Refresh generated lexical data only after that behavior is
+settled and verified.
+
+`sizeof (xs)[0]` is valid native C and measures one array element. x2c rejects
+it because `_parse_sizeof` consumes the parenthesized expression and returns
+before its postfix continuation. Restore the ordinary unevaluated unary-operand
+grammar through the existing expression parser, keeping the type-name branch
+distinct. Do not add a second postfix parser. Acceptance distinguishes
+`sizeof xs`, `sizeof (xs)`, `sizeof (xs)[0]`, and `sizeof(type)`, and verifies
+that a side-effecting ordinary operand is not evaluated. Preserve existing
+native VLA obligations rather than promising that every sizeof operand is
+unevaluated in all native cases.
+
+Wide native indices currently narrow at int-taking collection APIs. The
+demonstrated `4294967297L` write changes element 1. Direct C-like calls to an
+int parameter ordinarily permit conversion; that is different from a library
+promise to reject an out-of-range index. Before changing APIs, decide whether
+bracket syntax promises range-preserving conversion. Recommended behavior is
+that an index outside the representable domain cannot alias a valid element.
+
+For that decision, inventory String/List/Array reads, writes, compound writes,
+and slices, including Var-index dispatch and direct methods. Reuse the existing
+index/slice normalization and conversion owners. Choose one checked conversion
+boundary or one compatible wider API design; do not scatter casts or checks
+among component templates. Document any direct-method versus bracket difference
+explicitly. Changing public signatures requires a compatibility assessment.
+
+### D. Repair existing checks before expanding verification policy
+
+1. Replace the five `status && grep` assertions with explicit failure paths.
+   Do not rely on `set -e` for compound lists. The host's Bash 3.2 also ignores
+   failing bare `[[ ... ]]` under `set -e`; repair assertion failure behavior
+   across the affected probes or enforce the already-required shell version
+   at their existing entry boundary. Do not silently skip assertions.
+2. Capture translation status before filtering region warnings. Capture each
+   graph AST producer's status before normalization and comparison. A crashed
+   producer must not pass because text is equal or empty.
+3. Make assertion-dependent Python probes remain effective with optimization,
+   using explicit failures or a clear existing-entry check. This is a test
+   correctness repair, not a new verification stage.
+4. Compare generated documentation bytes for equality; use a line diff only
+   to display a mismatch. Reject missing section delimiters before inspecting
+   the existing contract-ledger section.
+5. Repair Make path handling and mode-file lookup together. At minimum reject
+   unsupported checkout paths with nonzero status before work begins; a command
+   that produces no stage compiler must not report success. Full arbitrary-path
+   support needs a separate measured scope if more than quoting these owners
+   is required. Do not claim support after repairing only `basename`.
+6. Match the known `stage-diff-0` failure in both Make 3.81 and Make 4 formats,
+   without treating an arbitrary build failure as permission for a second
+   bootstrap round. Preserve fail-closed publication behavior.
+7. Remove the undeclared stale `meta-helper-compiler-query.compile-status`
+   sidecar after confirming that fixture's current declared phases. Keep
+   emission-only fixtures when emission is their intended contract.
+
+Fault injection must show that a wrong status, crash after warning, failed AST
+producer, missing heading, newline drift, and unsupported build path fail their
+existing commands. Ordinary passing inputs must still pass.
+
+**Separate policy proposals.** `doc-check` currently accepts a wrong expected
+sample output after generated text is refreshed; `doc-outputs` rejects it.
+This is a real coverage boundary. Adding `doc-outputs` to every documentation
+gate, adding strict warning flags, or compiling every C/H-only fixture expands
+recurring work. None is silently approved here. First measure changed-page
+sample checking or relocating/consolidating existing work, identify comparable
+cost to remove, then ask Gary to select the policy. Keep optional syntax and
+raw-symbol checks optional. Do not add a second gate framework.
+
+### E. Complete module boundaries without redesigning modules
+
+`module` blocks are ordered textual splices into one translation unit. Members
+do not become independent compilation units or acquire their own namespaces.
+
+- Preserve the landed conservative candidate test and existing lexical owner.
+  Commented module openers now work. Preserve the shared conditional-arm
+  classification added upstream; do not rebuild either mechanism.
+- Avoid pointer arithmetic on the null representation of empty source text
+  in `Splice.own`. An empty member is valid input. Handle the empty range
+  before pointer arithmetic rather than banning empty members.
+- Update the optional raw-symbol proof's classification for intentionally
+  unsupported module units. Preserve one receipt per input and ensure ordinary
+  sources containing `module` identifiers/comments are not broadly excluded.
+  Prefer existing classification knowledge or the focused module fixture set
+  over a second incomplete parser in shell.
+- Compile/link the included-module fixture's consumer and provider as focused
+  acceptance evidence, proving the member's public declaration reaches the
+  header. A textual C comparison alone does not prove that contract. Adding
+  recurring native phases needs the same cost/approval decision as D's broader
+  fixture proposal; this plan does not silently expand that requirement.
+- Document entry syntax mode, ordered duplicate splicing, and preprocessing
+  order as properties of textual assembly. Recognized unreachable arms now
+  suppress member reads; unresolved native conditions still permit eager reads.
+  Do not add duplicate-member validation solely for earlier diagnostics.
+- Before splitting shipped `lib/` or `src/` units, extend payload copying and
+  linked-meta discovery to the declared member closure. Preserve relative
+  member paths; do not scan all nested files as independent units. This is an
+  adoption prerequisite, not a present install failure: no shipped source
+  currently uses module blocks.
+
+**Package entry agreement.** A fresh local `.xp` source package installs
+successfully, but importing that installed package reports unknown package
+because `package_entry` searches only `.x`. Align source-entry recognition
+between install and import. The recommended repair supports the `.xp` entry
+already accepted by installation, preserving existing `.x` precedence and
+package ownership. Verify installed import and a same-name entry precedence
+case. If `.xp` packages are intentionally unsupported, installation must reject
+them explicitly instead; do not leave a successful unusable installation.
+
+Acceptance includes comments/trivia, empty members, nesting, member diagnostics,
+included public declarations, missing files, conditional blocks, and unchanged
+non-module output. Module adoption additionally needs an installed-home probe
+with a member-defined meta function. Use `module_source` and its dependency
+information rather than inventing another ownership graph.
+
+### F. Repair the existing book and syntax owners
+
+Work from the companion row ledgers. A documentation gap is resolved either by
+correcting its owner, linking an existing contract, recording an implementation
+limit, or explicitly retaining a semantic decision. It is not resolved by
+copying the observed implementation into normative prose.
+
+**First corrections.** Remove stale `@` operator and `Slice` claims. Correct
+Var negation, typed List access, descriptor capacity, fresh meta collection
+insertion, project compiler queries, meta compiler selection, supported macro
+categories, and function-rule visibility. Correct API comments before
+regenerating library pages. Qualify cleanup at selected Error transfers versus
+the fatal floor, detached-scope finalization, and script status propagation.
+
+Correct two protocol-guide contradictions: static protocol bodies are private
+and supported; declarations retain AST nodes but create no runtime object.
+Keep the existing protocol collection and adoption design. The supporting
+fixtures and fresh associated-type probes do not establish exhaustive protocol
+conformance, so do not use them to close unrelated protocol questions.
+
+Separate parse acceptance from completed language support. `goto;` is rejected
+by emission, `sizeof (xs)[0]` is rejected by parsing, and a translated comma
+case label still needs native constant-expression validity. Keyword method names
+work, but that does not make every keyword usable as a native C variable.
+Document that native `exit` and `longjmp` bypass lexical deferred cleanup;
+do not add foreign-call interception as a documentation repair.
+
+**Syntax.** Edit `etc/syntax/grammar.x`, `lexical.x`, and `extensions.x` where
+they are the generator inputs; regenerate through `tools/syntax-spec`. Update
+contextual prose in the existing syntax pages. Add module blocks and the
+verified S-row corrections. Do not hand-edit generated EBNF. Keep the grammar
+descriptive: it is not a second parser or an AST validator. Existing focused
+fixtures and optional syntax checks supply evidence for affected productions.
+
+Correct the study's module grammar before using it: nesting a module inside
+`extern "C" { ... }` is not supported simply because its `unit-item`
+nonterminal includes module blocks. The old comment rejection was a fast-path bug, now repaired upstream,
+not a normative lexical constraint. The grammar also needs explicit contextual
+boundaries for scripts, decorators, macro categories, typedef names, and
+constructed syntax. An unexecuted EBNF cannot certify parser conformance.
+
+The production-family review found additional overacceptance: missing static
+typedef termination, shared definition/invocation names, scalar sequence calls,
+percent-braced `with` bodies, unparenthesized pointer selectors, and unrestricted
+macro-body alternatives. Nine translation counterexamples were replayed; eight
+reject and do/while without a semicolon translates. Correct the draft using the
+existing recognizers before incorporating it into generated syntax data.
+
+**Ownership of text.** Keep language contracts in the book, syntax forms in
+the syntax reference, runtime API contracts in authoritative source comments
+and generated library pages, and compiler implementation routes in internals.
+Guides teach through examples and link complete tables. A reference may link
+the protocols guide while it is the designated semantic owner; moving that
+material is not required to fix a contradiction. Do not require a page for
+every private runtime source file or a tour example for every feature.
+
+**Continuation records.** Reconcile the foundation plan's opening status and
+next-step instructions with its dated delivered log. Preserve genuinely open
+work and historical holds. Archive the completed module-block plan with its
+landing evidence and index it. Re-plan String switch through the current
+component and placement APIs; the fixture is a prototype, not proof that the
+ordinary feature ships. Keep its accepted behavior, including fallthrough,
+break/continue, duplicate labels, aliases, and single selector evaluation.
+
+Existing overlapping plans remain owners of their decisions. In particular,
+the foundation plan owns rewrite/component continuation; String switch owns
+that feature; the post-integration fix list already owns plan-status and
+documentation-classification cleanup. Cross-link this evidence instead of
+creating two competing implementation queues or declaring old work complete.
+
+The String-switch plan specifically names removed `x2c_literal_int` and now
+uses `add_support` for a compiler-written helper. That operation offers the
+definition to program function rules; written definitions use `add_early`.
+Refresh those interfaces within the accepted feature design. Also correct the
+module plan/book's blanket prototype-before-use claim: a member's early
+function can call a later entry function without a prototype. Complete-unit
+function collection and private type emission order are different contracts.
+
+Complete the reference with a compact catalog of public canonical source forms
+and their positions, rewrite ordering/decline/visibility, and compile-time Lisp
+truthiness, binding, host `set_global`, and actual implementation limits. Link
+existing API owners. Do not publish every internal bound/lowered carrier as
+source syntax or turn the eight-slot fast path into an arity limit.
+
+### G. Resolve consequential semantics before changing them
+
+The original 35 questions are dispositioned in the companion ledger. Many are
+discoverable facts, existing limitations, or editorial choices. These decisions
+remain consequential:
+
+| Decision | Recommendation | What must wait |
+| --- | --- | --- |
+| Var equality/order across numeric tags | Preserve existing Map/hash/sort consistency while deciding operator semantics; document current tag behavior now as observed behavior | Any cross-tag equality or ordering change |
+| Visibility of component-written expressions to program rules | State one rule for source subexpressions and compiler-introduced operations across rewrite families; align with the already accepted statement/function boundary | New visibility state, marks, or filtering machinery |
+| General evaluation order | Preserve established sequencing guarantees; inventory unresolved dynamic operations before promising a universal order | New temporaries or broad sequencing changes |
+| Wide indices | Prevent unrepresentable indices from selecting an unrelated valid element, with one conversion owner | Public API widening or changed direct-call conversion rules |
+| Non-List Var match | Choose deliberate nil coercion versus rejection against the guide's promise | New rejection or endorsement of current coercion as intended |
+| Unchecked class unboxing and scalar sibling typedefs | Reconcile intended conversion contracts with actual generated converters and pointer-only enforcement | New runtime tag checks or extended scalar type rejection |
+| Module mode and conditional membership | Keep entry-mode textual assembly and the landed known-unreachable-arm suppression; describe unresolved native-condition reads separately | Per-member parser modes or full native conditional dependency semantics |
+| Embedding and foreign threads | Specify supported initialization/teardown separately for process and thread; process-once initialization is insufficient as a foreign-thread recipe | A blanket support promise or new public lifecycle API |
+| Platform, ABI, and stability | Describe current supported limits without asserting a new C11 conformance or stable internal AST ABI | New target guarantees, default `-std`, or public API removal |
+| Numeric fallback names | Decide which names are source-language aliases versus semantic fallback knowledge; `u8` alone does not emit a native typedef and `u128` currently maps to 64 bits | Automatically declaring aliases or promising 128-bit storage |
+| Broader recurring validation | Repair false passes first; measure a concrete cost-neutral consolidation | Expanded flags, fixtures, gates, or recurring requirements |
+
+The `$auto` reassignment behavior also conflicts with Gary's standing
+acquired-value requirement. The current code schedules cleanup of the user
+binding and a probe cleans the replacement value. Record this contradiction
+explicitly; do not preserve it as compatibility. The repair must retain the
+acquired value once, use the existing Cleanup and placement owners, and prove
+single evaluation plus reassignment behavior. The standing semantic requirement
+is settled; the subsequent implementation request authorizes this repair.
+
+## Validation and delivery for a later implementation
+
+Use meaningful fail-before/pass-after evidence for each accepted defect.
+Keep tests in existing suites and probes; do not add a recurring stage merely
+because this review found an uncovered case. Source-only, native-compilation,
+and runtime assertions prove different boundaries and must be named accurately.
+
+Each coherent batch ends by reviewing and fixing the complete authored diff,
+including generated changes. Then follow current root delivery instructions.
+Direct code delivery uses `tools/gate-state.py ensure agent-pr-check` on the
+final integrated tree; documentation-only delivery uses `doc-check`. A
+shared-integrator submission follows its focused-evidence exception instead.
+Performance-sensitive changes use the existing performance-checkpoint policy.
+Do not run broad gate components repeatedly just to collect review evidence.
+
+The subsequent implementation request authorizes confirmed repairs and normal
+validated delivery to `dev`. Keep unresolved semantics and expanded gates out.
+
+## Design review
+
+The plan repairs facts at their existing owners: lexical identities at binding,
+numeric decoding at Type, bounds at conversion/normalization, splicing at source
+assembly, status at command boundaries, and semantics in the book. It does not
+add origin authentication, recursive AST validation, a replacement parser,
+duplicate runtime checks, or a new gate framework.
+
+The largest risks are silently changing public numeric equality, promising
+evaluation order without complete lowering evidence, and treating internal AST
+reachability as stable source syntax. Those changes remain decision-dependent.
+Self-hosted module adoption and broader verification policy are separate from
+the narrow bugs that motivated them. Completed implementation must be reviewed
+against these boundaries before publication validation.
