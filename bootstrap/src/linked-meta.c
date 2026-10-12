@@ -12718,7 +12718,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_23(void){
   _11827 = List_var(_11826);
   _11828 = String_new("src/protocol.x");
   _11829 = String_var(_11828);
-  _11830 = String_new("0172c461");
+  _11830 = String_new("a31f82cb");
   _11831 = String_var(_11830);
   _11832 = cons(_11831, NULL);
   _11833 = cons(_11829, _11832);
