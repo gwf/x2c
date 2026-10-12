@@ -5943,7 +5943,7 @@ void Compiler_exit_function(Compiler c, int depth){
 }
 
 void Compiler_place_entry(Compiler c, Var code){
-  if(! _init_guard_) _file_init_();  Ancestor * rows = c -> ancestors -> bytes;  int depth =(int) Block_len(c -> ancestors) - 1;  while(depth >= 0 && rows[depth].what != 458361162716) depth --;  if(depth < 0) Compiler_report_error(c, 27335838, _355, c -> token, NULL);  if(rows[depth].callback) Compiler_report_error(c, 27335838, _356, c -> token, _359);  Array_push(c -> placements, List_var(cons(int_var(depth), cons(_96, cons(_96, cons(code, NULL))))));
+  if(! _init_guard_) _file_init_();  Ancestor * rows = c -> ancestors -> bytes;  int depth =(int) Block_len(c -> ancestors) - 1;  while(depth >= 0 && rows[depth].what != 458361162716) depth --;  if(depth < 0) Compiler_report_error(c, 27335838, _355, c -> token, NULL);  if(rows[depth].callback) Compiler_report_error(c, 27335838, _356, NULL, _359);  Array_push(c -> placements, List_var(cons(int_var(depth), cons(_96, cons(_96, cons(code, NULL))))));
 }
 
 void Compiler_place_after(Compiler c, Var code){

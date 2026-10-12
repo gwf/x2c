@@ -12658,7 +12658,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_22(void){
   _11770 = List_var(_11769);
   _11771 = String_new("src/diagnostics.x");
   _11772 = String_var(_11771);
-  _11773 = String_new("686b4595");
+  _11773 = String_new("cd43651c");
   _11774 = String_var(_11773);
   _11775 = cons(_11774, NULL);
 }
@@ -12700,7 +12700,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_23(void){
   _11809 = List_var(_11808);
   _11810 = String_new("src/parse.x");
   _11811 = String_var(_11810);
-  _11812 = String_new("eebd1a76");
+  _11812 = String_new("46e76762");
   _11813 = String_var(_11812);
   _11814 = cons(_11813, NULL);
   _11815 = cons(_11811, _11814);
