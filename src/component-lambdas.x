@@ -294,7 +294,7 @@ meta static List _lambda_closure_params(
 
 /* The static function `name` that runs `body` with `params`. The body is
    bound already, so it is not bound again. */
-meta static Code _lambda_function(Atom name, List params, Code body) {
+meta static Code _lambda_function(List name, List params, Code body) {
   if (!params) params = %((param (void) (bind () ())));
   List lowered = %(code-value "lowered" (seq @{_lambda_items(body)}) ());
   return %(function (static "Var") (bind $name ((fnmod (params @params))))
@@ -306,10 +306,10 @@ $rewrite($lambda_expression)
     is its value. */
 meta Code lambda_lift(Code node) {
   match (node) case %(expr ?type ${$lambda_expression(?body, *params)}): {
-    Atom name = Atom.intern("?__lambda");
-    List function = _lambda_function(name, _lambda_params(params), body);
-    return %(code-value "bound" (expr $type (ident $name))
-             ((new-name $name "lambda") (place (unit-support) $function)));
+    List name = x2c_binding_fresh("lambda");
+    x2c_place(
+      %(unit-support), _lambda_function(name, _lambda_params(params), body));
+    return %(code-value "bound" (expr $type (ident $name)) ());
   }
   return node;
 }
@@ -348,7 +348,7 @@ meta static Type _lambda_field_type(Type type) =>
 
 /* The record `context`, with a field of each type in `types`, as bound
    code. */
-meta static Code _lambda_record(Atom context, List types) {
+meta static Code _lambda_record(List context, List types) {
   Array fields = [];
   foreach (Type type, types) {
     (List base, List modifiers) = type.parts();
@@ -367,7 +367,7 @@ meta static Code _lambda_record(Atom context, List types) {
    and with the field of the `context` record for each of `captures`; a
    reference passes what the address it holds refers to. */
 meta static Code _lambda_adapter(
-  Atom adapter, Atom closure, Atom argv, Atom lifted, Atom context,
+  List adapter, List closure, List argv, List lifted, List context,
   List params, List reads, List captures, List declared) {
   Type pointer = %(* const struct $context);
   Code record = %(expr $pointer (ident ("record")));
@@ -418,7 +418,7 @@ meta static Code _lambda_adapter(
    Func of `adapter` and its `context` record, whose fields have `types`.
    The adapter is bound code, so the bridge names it as a typed value. */
 meta static Code _lambda_bridge(
-  Atom bridge, Atom adapter, Atom context, Code signature, List types) {
+  List bridge, List adapter, List context, Code signature, List types) {
   List record = x2c_ident("record");
   Array parameters = [], fields = [];
   foreach (Type type, types) {
@@ -439,18 +439,15 @@ meta static Code _lambda_bridge(
 
 /* The bound value of a capturing lambda: it evaluates its `captures`, left
    to right, into locals, and makes a Func of `adapter` from a `context`
-   record of them. Effects that name and place its parts are pushed onto
-   `effects`. */
+   record of them. */
 meta static Code _lambda_value(
-  Array effects, Atom adapter, Atom context, Code signature,
-  List captures) {
+  List adapter, List context, Code signature, List captures) {
   Array setup = [], values = [], types = [];
   foreach (List capture, captures)
     match (capture) case %(capture ? ?(Type type) ?(Code value)): {
       Type stored = _lambda_field_type(type);
       (List base, List modifiers) = stored.parts();
-      Atom local = Atom.intern(%"?__lambda_capture_${types.len()}");
-      effects.push(%(new-name $local "lambda_capture_value"));
+      List local = x2c_binding_fresh("lambda_capture_value");
       Code converted = value.convert(stored);
       setup.push(
         %(declare $base
@@ -461,18 +458,16 @@ meta static Code _lambda_value(
   List initial = values.list_free();
   Code made = NULL;
   if (_lambda_in_public_inline()) {
-    Atom bridge = Atom.intern("?__lambda_bridge");
-    effects.push(%(new-name $bridge ${_lambda_bridge_role()}));
-    Code bridged = _lambda_bridge(
-      bridge, adapter, context, signature, types.list_free());
-    effects.push(%(place (unit-support) $bridged));
+    List bridge = x2c_binding_fresh(_lambda_bridge_role());
+    x2c_place(
+      %(unit-support),
+      _lambda_bridge(bridge, adapter, context, signature, types.list_free()));
     made = %(expr ("Func") (call (expr () (ident $bridge)) (args @initial)));
   }
   else {
-    Atom storage = Atom.intern("?__lambda_storage");
+    List storage = x2c_binding_fresh("lambda_context");
     Type type = %(struct $context);
     Code record = %(expr $type (ident $storage));
-    effects.push(%(new-name $storage "lambda_context"));
     Code initial_record = %(expr $type (composite (commas @initial)));
     setup.push(
       %(declare $type (bindings (op = (bind $storage ()) $initial_record))));
@@ -491,15 +486,11 @@ $rewrite($lambda_captured)
 meta Code lambda_closure(Code node) {
   match (node)
     case %(expr ? ${$lambda_captured(?body, *captures, *params)}): {
-      Atom lifted = Atom.intern("?__lambda");
-      Atom adapter = Atom.intern("?__lambda_adapter");
-      Atom closure = Atom.intern("?__lambda_closure");
-      Atom argv = Atom.intern("?__lambda_argv");
-      Atom context = Atom.intern("?__lambda_context");
-      Array effects = [
-        %(new-name $lifted "lambda"), %(new-name $adapter "lambda"),
-        %(new-name $closure "lambda_closure"), %(new-name $argv "lambda_argv"),
-        %(new-name $context "lambda_context")];
+      List lifted = x2c_binding_fresh("lambda");
+      List adapter = x2c_binding_fresh("lambda");
+      List closure = x2c_binding_fresh("lambda_closure");
+      List argv = x2c_binding_fresh("lambda_argv");
+      List context = x2c_binding_fresh("lambda_context");
       List adapted = Code.func_parameters(
         params, %(expr ("Func") (ident $closure)),
         %(expr (* const "FuncArg") (ident $argv)));
@@ -513,12 +504,11 @@ meta Code lambda_closure(Code node) {
       Code adapter_function = _lambda_adapter(
         adapter, closure, argv, lifted, context, params, reads, captures,
         declared);
-      effects.push(%(place (unit-support) $record_type));
-      effects.push(%(place (unit-support) $function));
-      effects.push(%(place (unit-support) $adapter_function));
-      Code value = _lambda_value(
-        effects, adapter, context, adapted.car(), captures);
-      return %(code-value "bound" $value ${effects.list_free()});
+      x2c_place(%(unit-support), record_type);
+      x2c_place(%(unit-support), function);
+      x2c_place(%(unit-support), adapter_function);
+      Code value = _lambda_value(adapter, context, adapted.car(), captures);
+      return %(code-value "bound" $value ());
     }
   return node;
 }
