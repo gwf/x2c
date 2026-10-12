@@ -6,13 +6,22 @@
 > into experimental `commands/lint` in `9b31112e` under the
 > [external commands](archive/external-commands.md) plan.
 > This plan now also owns the compiler-backed rewrite from
-> [x2c-scripting-ports](x2c-scripting-ports.md) ("Rewrite on the compiler
+> [x2c-scripting-ports](archive/x2c-scripting-ports.md) ("Rewrite on the compiler
 > instead of translating"), including catalog item
 > [C09](archive/consolidation-catalog-f28fc36.md#c09-remove-docs-independent-declarationmacro-interpretation).
 > The 2026-09-17 design decided that lint stays optional until it replaces
 > the Python analyzers and that the class ceiling gets a diagnostic rather
 > than a runtime change. Its third decision, lint as an `x2c lint`
 > subcommand, is reopened by decision 1 below.
+
+## Current remaining work, 2026-10-12
+
+Phase 8 structured List findings and their compiler consumption were already
+approved on 2026-09-24. Keep that deliverable in this plan. Lint stays optional;
+do not turn the work into lint on every build or another recurring gate.
+Editor integration remains part of the existing optional workflow. Earlier
+subcommand discussion records history, not a new question for Gary.
+
 
 ## The result
 

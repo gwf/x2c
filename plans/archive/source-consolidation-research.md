@@ -1,10 +1,8 @@
 # Source consolidation research
 
-> Status: active
-> Working local prototypes on `codex/consolidation-research`, based on
-> `origin/dev` at `df3b43822d6454fa9d3e1295a53e70e9b277c212`.
-> Publication is held for Gary's review. This is a research result, not a
-> declaration that every original consolidation target is finished.
+> Status: retired - umbrella closed on 2026-10-12.
+> Selected source changes landed through 0f667604. Unattempted hypotheses remain
+> research evidence, not an approved compiler refactor or implementation queue.
 
 ## Scope and preserved evidence
 

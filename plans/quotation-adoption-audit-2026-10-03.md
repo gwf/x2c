@@ -1,8 +1,7 @@
-> Status: active
-> Audited origin/dev 32c6e1293e72d9d99398ec005dbeaa3d5ed231bc.
-> The accompanying change and refinement 1 are on dev. PRs #131, #142,
-> and #143 delivered the later follow-ups. Refinements 2 and 3 and the
-> retained autodiff review remain; see "Remaining work".
+> Status: active - selected follow-ups recorded on 2026-10-12.
+> Earlier quotation adoption and PRs #131, #142, and #143 are delivered.
+> Remaining work owns typed _Alignof, scalar cleanup, and individual adoption.
+> TagId generation is a lower-priority candidate, not a selected change.
 
 # Quotation adoption audit, October 3
 
@@ -258,11 +257,58 @@ expansion applies them. Foreach expansion is a hot path.
 
 ## Remaining work
 
-- Refinement 2: Param, Type, and Decl quotations. `macro_categories` in
-  `src/macros.x` still gives these categories no result kind.
-- Refinement 3: a structural rebuild for Unit, Field, and declarator
-  syntax. Meta-group helper prototypes and the capture fields in
-  `src/callables.x` and `src/cleanup.x` still build declarations as Lists.
-- The 17 retained autodiff operations still need their caller-stage and
-  cost review. `ad_is_zero` and `ad_is_one` compare code with `ad_zero()`
-  and `ad_one()`, so those two must stay inspectable syntax.
+Recorded with Gary on 2026-10-12. Type and Param adoption is delivered;
+the old claim that their quotation support remains unimplemented is obsolete.
+
+### Typed _Alignof and scalar generator cleanup
+
+Allow a Type hole in `_Alignof`:
+
+```x2c
+Type type = $!Type{ double };
+Code expression = $!( _Alignof($type) );
+```
+
+The expression emits `_Alignof(double)` and uses the target C compiler's
+alignment. It must not substitute the host meta process's alignment.
+`lib/native-scalar-types.x` is the current caller: it constructs alignment
+syntax through Lisp because direct typed quotation is missing.
+
+Replace `native.scalar.list`, `native.scalar.access-name`,
+`native.scalar.alignment`, and `native.scalar.access-entry` with ordinary meta
+operations and quotations where they express the same work directly.
+Keep the scalar table as the single owner. Preserve exact C spellings,
+List keys, sort order, native size and alignment, load/store behavior, and
+wide-value ownership. The existing quoted load/store bodies need no parallel
+implementation. Verify target alignment and scalar access when implementing.
+
+### Individual quotation adoption
+
+Review structural declaration rebuilds and the 17 retained autodiff operations
+one at a time. Change only cases where quotation simplifies the complete
+operation while preserving binding, canonical Lists, stage, timing, and ownership.
+`ad_is_zero` and `ad_is_one` require inspectable syntax from `ad_zero()` and
+`ad_one()`. This is not authorization for a blanket syntax-builder rewrite or
+a new Decl API without a useful caller.
+
+### Candidate: generate TagId from its rows
+
+Lower priority, not selected for implementation. `lib/var.x` and
+`lib/var-tags.x` repeat tag ordering; existing assertions already check it.
+A useful cleanup must preserve every numeric ID and name, including
+`_invalid_ = -1` and `_tag_count_`, without making ordinary Var users import
+meta machinery. Reject a cleanup that adds a framework or more work than it removes.
+
+### Dropped callback wrapper
+
+Do not add a shared ErrorSlot abstraction. libuv already snapshots the first
+callback error and stops its loop. libcurl batch failures belong to individual
+items and remain available for repeated response access. A shared wrapper does
+not remove those distinct policies or meaningful duplication.
+
+## Review of the remaining scope
+
+The typed `_Alignof` hole has a current caller. Pair it with the scalar cleanup.
+Preserve the existing scalar table and conversion owners. Other quotation
+adoption needs a concrete simplification; TagId remains a candidate only.
+This documentation update starts no implementation and adds no validation gate.

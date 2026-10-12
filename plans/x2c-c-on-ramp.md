@@ -1,13 +1,16 @@
 # The C on-ramp
 
-> Status: reference - landing-page follow-up remains open. 4a landed on main as `8c6eccf` and `6cdd7c2` (2026-09-16).
-> No delivery of 4b (the landing page) is recorded here. The failures under "End-to-end
-> result" and the rest of a 22-unit corpus were handled by
-> `plans/archive/x2c-c-on-ramp-corpus.md`, which replaced the linkage-guard
-> design below: the `__cplusplus` arm is skipped, so only an unguarded
-> `extern "C" {` reaches `Compiler.skip_linkage_brace`. Typed `_Generic`
-> selection was removed on 2026-09-17: a selection is now emitted unchanged
-> with no x2c type, so the selection design below is history.
+> Status: active - remaining landing-page examples recorded on 2026-10-12.
+> Parser and corpus work is delivered. Section 4b owns the existing website work.
+> Earlier linkage and _Generic designs below are historical, not new implementation requirements.
+
+## Current remaining work, 2026-10-12
+
+Finish the existing landing-page examples for two adoption directions: rename
+C source to `.x`, and call an x2c file from a C main through its generated header.
+Show accepted code, the commands, and the result. The parser and corpus campaign
+is delivered; do not repeat it or invent four new examples as a prerequisite.
+
 
 ## The result
 

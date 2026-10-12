@@ -2,7 +2,7 @@
 
 > Status: done - 2026-09-16. All four phases are done. The remaining ports,
 > the library gaps they need, and the regex and diff modules that landed
-> afterwards are in `plans/x2c-scripting-ports.md`.
+> afterwards are in `plans/archive/x2c-scripting-ports.md`.
 > Second of four plans from the 2026-09-15 capabilities and market spike.
 > The scripting capability shipped 2026-09-15 and the repository still runs
 > 30,212 lines of Python, shell, and awk automation against it.
@@ -50,7 +50,7 @@ which is why `plans/archive/x2c-include-prefix.md` landed first.
 `tools/check-generated-stages.sh` run inside the Makefile's gate path
 (`Makefile:207-220`), and rewriting them in x2c would put the check that
 detects a broken compiler behind the compiler's own scripting feature.
-`plans/x2c-scripting-ports.md` records the later ruling: a probe that fails
+`plans/archive/x2c-scripting-ports.md` records the later ruling: a probe that fails
 loud may be a script, the stage-diff check and `gate-state.py` are Gary's
 call.
 

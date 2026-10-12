@@ -1,11 +1,10 @@
 # Harness simplification and cross-platform collaboration
 
-> Status: active
-> Implementation authorized, 2026-10-05. Tool repairs, guidance simplification,
-> and the host messaging pilot were delivered to dev at 3459d664 on 2026-10-05.
-> External runtime repairs and a real-PR messaging trial remain open.
-> Continuation requires no original worktree or pilot session.
-> Planning baseline: origin/dev fe7123f3bb659b3e6624bdfb1e356d1999d38a5c.
+> Status: done - selected repository repairs and messaging pilot delivered
+> through 3459d664 on 2026-10-05; umbrella closed on 2026-10-12.
+> External runtime reports remain incident evidence, not x2c feature decisions.
+> A real-PR trial is opportunistic and needs actual authorized work and messages.
+> Closing this campaign does not claim that external runtime defects are fixed.
 
 ## Intended result
 
@@ -24,7 +23,7 @@ discarded benchmark reproductions, incorrect starting revisions, repeated
 checks, correction-handling failures, and incomplete metrics. Full raw session
 history remains outside the repository. The delivered tool changes repair the observed
 benchmark cleanup and metrics defects.
-The tracked [evidence record](harness-evidence-2026-10-05.md) preserves the
+The tracked [evidence record](../harness-evidence-2026-10-05.md) preserves the
 observations, validation, transport limits, and external reproduction reports.
 Private raw transcripts are supporting evidence, not a continuation dependency.
 

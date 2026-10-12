@@ -1,13 +1,10 @@
 # Porting the repository's tooling to x2c scripts
 
-> Status: active - refreshed against dev at `1aaf9479` on 2026-09-24.
-> The extensionless tool rename, the llms.txt generator port, the
-> documentation sample check ports and the `tools/check-docs` port are
-> delivered, and on 2026-09-24 every row of the ready table except the
-> release.yml step; later release, gate and compiler-backed ports remain
-> separately sequenced.
-> Continues `plans/archive/x2c-scripting-library.md`, whose four phases shipped the
-> scripting primitives; this plan decides where the remaining effort goes.
+> Status: retired - selected ports delivered; umbrella closed on 2026-10-12.
+> Extensionless tools, llms.txt generation, and documentation checks are on dev,
+> including subsequent documentation generator changes through 4c114ab2.
+> Arbitrary remaining ports and release-candidate.py are not commissioned.
+> Existing compiler-backed tooling belongs to the lint and format plan.
 
 ## The result
 
@@ -234,7 +231,7 @@ probes still copy their prelude by hand.
 These tools contain a second parser for x2c source, written as regular
 expressions. Translating them would keep that parser, so they are not
 ported here. On 2026-09-24 this rewrite, including catalog item C09, moved
-into [x2c lint, format, and compiler-backed source tools](x2c-lint-and-format.md),
+into [x2c lint, format, and compiler-backed source tools](../x2c-lint-and-format.md),
 which sequences the doc generators, metrics, and the skill analyzers over
 one shared compiler definition walk. The indentation syntax has landed, so
 the new scripts use it.

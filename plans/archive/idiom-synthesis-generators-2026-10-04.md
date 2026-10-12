@@ -212,12 +212,12 @@ remove.
    composed the boxed public wrappers from them. It recorded 724 net
    production lines removed across the six family files after integration.
    That measurement belongs to that historical patch, not this proposal.
-2. [Source consolidation research](../source-consolidation-research.md), under
+2. [Source consolidation research](source-consolidation-research.md), under
    "Readiness correction", records restoration of the original custom Map
    invocation forms. An earlier candidate broke the existing consumer; the
    repaired composed templates restored it. Name-hole forwarding needed a
    compiler correction. Keep those original forms and conformance rows.
-3. [Self-expression](../x2c-self-expression.md), decision 4, explicitly records
+3. [Self-expression](x2c-self-expression.md), decision 4, explicitly records
    Gary's choice to retain `$map.core.family` callback parameters. H8 shares
    scaffold generation instead. This plan follows that decision.
 4. Commit 27ee651f4, "state family structure and let ordinary operations

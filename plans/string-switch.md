@@ -1,9 +1,9 @@
 # Ordinary switch over String
 
-> Status: active
-> Planned 2026-10-07 against `dev` `0916ff92`. Source read and one probe of
-> the lowered shape; no implementation yet. Obtain Gary's execution
-> instruction before changing production code.
+> Status: active - feature selected by Gary on 2026-10-12.
+> A private implementation exists on independent-case-design; it is not on dev.
+> Review and resume it against current quotation and add_early APIs.
+> This planning update does not start implementation.
 
 ## Result
 

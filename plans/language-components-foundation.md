@@ -7,6 +7,30 @@
 > and the driver work; this plan records what landed and owns the
 > extraction order that follows. `main` is untouched.
 
+## Recorded decisions
+
+Recorded with Gary on 2026-10-12. Selected component extraction is delivered;
+the next work is limited to these existing language boundaries.
+
+- Program rewrite rules see developer-written expressions, including `name`
+  inside an interpolation hole. They must not intercept a compiler-inserted
+  `String.join` support call merely because interpolation uses that call.
+  A developer-written `String.join` call remains program code. Definitions of
+  the program's own meta functions remain program code and reach function rules.
+  Reconcile the historical self-meta discrepancy through the existing visibility
+  owner. Do not add origin authentication for canonical constructed Lists.
+- Ordinary templates bind external names at the author's definition. A template
+  referring to the author's `helper` keeps that binding when a caller has another
+  `helper`. Caller-site lookup requires an explicit request; it is not the default.
+  Preserve hygiene for introduced names.
+- A macro-constructed `with` form behaves like the same handwritten `with` form.
+  Use the ordinary binding, placement, and lifecycle owners.
+
+Do not start lexical defer or component interface/prelude packaging from this
+plan. No current problem justified those proposals. Acquired-value cleanup is
+already delivered. The later sections retain the extraction history; older
+questions do not override these decisions.
+
 ## Goal and current boundary
 
 Move language policy out of the compiler when ordinary component authoring makes

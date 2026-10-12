@@ -1,10 +1,18 @@
 # x2c Self-Expression
 
-> Status: active, 2026-10-02. Phase 0, L1-L4, and Waves 1-3 are on dev
-> (Phase 0 ff9946c8; L1/L3 63576dd1; #78, #92, #94, #95). The kept
-> prototypes landed through `9483437e`; qualifier and identifier repairs
-> landed through `80bde80f`. Remaining work is the follow-ups and signals
-> below, including those tracked in the post-integration fix list.
+> Status: done - selected campaign closed on 2026-10-12.
+> Phase 0, L1-L4, and selected waves landed through ff9946c8, 63576dd1,
+> 9483437e, and 80bde80f. Signals below are historical, not open decisions.
+> Typed _Alignof and scalar cleanup move to the quotation adoption plan;
+> TagId is a candidate there. Shared ErrorSlot and unsupported feature pitches
+> are dropped. No blanket API retirement or rewrite follows from this campaign.
+
+## Current follow-up owner
+
+The [quotation adoption plan](../quotation-adoption-audit-2026-10-03.md#remaining-work)
+owns the selected typed `_Alignof` and scalar generator cleanup. The
+[index](../README.md#current-work-and-backlog) owns the current task list.
+The proposals below retain their historical context; they are not a second queue.
 
 ## Result
 

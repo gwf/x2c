@@ -88,7 +88,7 @@ making a worker fall back to direct publication without Gary's instruction.
   copy the new skill or delivery rules into separate provider versions.
 - [Performance guidance](../../agents/performance-checkpoints.md) already
   measures applicable coherent batches separately from correctness gates.
-- [The tooling plan](../x2c-scripting-ports.md#ruling-on-gate-tooling) keeps
+- [The tooling plan](x2c-scripting-ports.md#ruling-on-gate-tooling) keeps
   tooling that operates around bootstrap independent of the compiler.
 
 Current local gate duration, queue arrival rate, and realized batching savings

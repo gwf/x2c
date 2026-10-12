@@ -1,13 +1,9 @@
 # Repository review and language-reference remediation
 
-> Status: active - implementation checkpoint recorded below, 2026-10-11.
-> Critically assessed against fetched `origin/dev`
-> `6529e8689702d98db2754571ef7f3d9b43b0d5b9`.
-> Final delta reviewed through fetched `origin/dev`
-> `9004c40b63ad489625d1a19371124f4b4f32978a`; superseded work removed below.
-> Gary authorized implementing and delivering confirmed repairs, with performance
-> measurements. Unresolved semantic changes and expanded gates remain excluded.
-> Implementation-ready repairs and unresolved semantic choices are separated below.
+> Status: active - remaining decisions recorded on 2026-10-12.
+> Repair batches A-E and acquired-value cleanup are delivered.
+> The decisions below govern the remaining work; earlier checkpoints are history.
+> This consolidation changes plans only. It starts no implementation.
 
 ## Result
 
@@ -435,33 +431,99 @@ truthiness, binding, host `set_global`, and actual implementation limits. Link
 existing API owners. Do not publish every internal bound/lowered carrier as
 source syntax or turn the eight-slot fast path into an arity limit.
 
-### G. Resolve consequential semantics before changing them
+### G. Decisions recorded on 2026-10-12
 
-The original 35 questions are dispositioned in the companion ledger. Many are
-discoverable facts, existing limitations, or editorial choices. These decisions
-remain consequential:
+These decisions replace the earlier question list. They describe intended
+behavior, not a claim that the implementation already provides it.
 
-| Decision | Recommendation | What must wait |
-| --- | --- | --- |
-| Var equality/order across numeric tags | Preserve existing Map/hash/sort consistency while deciding operator semantics; document current tag behavior now as observed behavior | Any cross-tag equality or ordering change |
-| Visibility of component-written expressions to program rules | State one rule for source subexpressions and compiler-introduced operations across rewrite families; align with the already accepted statement/function boundary | New visibility state, marks, or filtering machinery |
-| General evaluation order | Preserve established sequencing guarantees; inventory unresolved dynamic operations before promising a universal order | New temporaries or broad sequencing changes |
-| Wide indices | Prevent unrepresentable indices from selecting an unrelated valid element, with one conversion owner | Public API widening or changed direct-call conversion rules |
-| Non-List Var match | Choose deliberate nil coercion versus rejection against the guide's promise | New rejection or endorsement of current coercion as intended |
-| Unchecked class unboxing and scalar sibling typedefs | Reconcile intended conversion contracts with actual generated converters and pointer-only enforcement | New runtime tag checks or extended scalar type rejection |
-| Module mode and conditional membership | Keep entry-mode textual assembly and the landed known-unreachable-arm suppression; describe unresolved native-condition reads separately | Per-member parser modes or full native conditional dependency semantics |
-| Embedding and foreign threads | Specify supported initialization/teardown separately for process and thread; process-once initialization is insufficient as a foreign-thread recipe | A blanket support promise or new public lifecycle API |
-| Platform, ABI, and stability | Describe current supported limits without asserting a new C11 conformance or stable internal AST ABI | New target guarantees, default `-std`, or public API removal |
-| Numeric fallback names | Decide which names are source-language aliases versus semantic fallback knowledge; `u8` alone does not emit a native typedef and `u128` currently maps to 64 bits | Automatically declaring aliases or promising 128-bit storage |
-| Broader recurring validation | Repair false passes first; measure a concrete cost-neutral consolidation | Expanded flags, fixtures, gates, or recurring requirements |
+#### Numeric comparisons
 
-The `$auto` reassignment behavior also conflicts with Gary's standing
-acquired-value requirement. The current code schedules cleanup of the user
-binding and a probe cleans the replacement value. Record this contradiction
-explicitly; do not preserve it as compatibility. The repair must retain the
-acquired value once, use the existing Cleanup and placement owners, and prove
-single evaluation plus reassignment behavior. The standing semantic requirement
-is settled; the subsequent implementation request authorizes this repair.
+Use the C comparison rules for the corresponding native numeric operands.
+Do not convert every number to double.
+
+```x2c
+Var a = 3;
+Var b = 3L;
+a == b;   // true: C compares int 3 and long 3 as equal
+a === b;  // false: the value types differ
+```
+
+For value types, `===` requires equal values and the same type. Reference
+objects retain identity comparison. Review hashing, Map keys, and sorting with
+this change so their contracts remain consistent. Gary did not separately
+approve a new Map key policy; an actual conflict needs a concrete example.
+
+#### Collection indices and match
+
+An index such as `4294967297L` must not narrow to index 1. Reads, writes,
+and slices use the collection's existing out-of-range behavior. Put the
+conversion in one owner; do not widen every public API automatically.
+
+Matching a non-List Var must reject the input. A genuine empty List remains
+valid and can match an empty-List pattern. Update the guide's current unchecked
+conversion wording when implementing the change.
+
+#### Var to String
+
+Implicit assignment invokes the input's `.str()` method:
+
+```x2c
+Var value = 42;
+String text = value; // "42", through value.str()
+```
+
+Raise a runtime error when the input has no `.str()` method. Explicit
+`value.string()` continues to extract an existing String payload. This decision
+does not commission general class-unboxing checks.
+
+#### Module follow-ups
+
+Report the included module file and its correct line and column. Related
+source mapping repairs landed in `9db47909`; the earlier reproduction predates
+those repairs. Recheck that reproduction on current dev before editing. This
+planning refresh did not run the compiler or establish a remaining failure.
+
+Normalize companion member paths before checking containment. Accept harmless
+`..` segments that stay inside the companion directory. Reject paths that
+escape it, including escapes through symlinks. Do not impose a spelling ban
+as a substitute for checking the resolved destination.
+
+#### Writing and supported features
+
+Finish three explanations in the existing book:
+
+1. Show canonical source forms and the positions where each form is legal.
+2. Explain rewrite order, decline, and visibility with accepted examples.
+3. Explain compile-time Lisp truthiness, binding, and host `set_global` limits.
+
+Maintain a factual list of supported language features and platforms. Update
+that list as support changes. This is ordinary documentation maintenance,
+not a new ABI promise or portability campaign.
+
+#### Settled boundaries and withdrawn questions
+
+- Keep established evaluation order. Do not promise universal left-to-right
+  evaluation; C function arguments remain unspecified. Developers can use
+  explicit locals when order matters. Preserve collection and quotation promises.
+- Preserve prototype chains and List/Type interoperability. Do not introduce
+  blanket sibling typedef or scalar restrictions. `typedef List Type` remains
+  a working example of the intended relationship.
+- Offer practical CPP compatibility without a new CPP/module interaction
+  guarantee or native conditional dependency redesign.
+- Thread remains x2c's simplified thread abstraction. Sharing the word
+  "thread" creates no interoperability obligation with arbitrary C threads.
+- Withdraw the claimed u128 feature defect. The internal fallback dates to
+  `4235c383`; a lookup entry does not emit a source typedef. No 128-bit feature,
+  alias removal, or rejection change is commissioned by this discussion.
+- Repair false passes in existing checks. Add no recurring gate or default lint.
+- Acquired-value cleanup is already delivered; do not reopen it as lexical defer.
+
+The [foundation plan](language-components-foundation.md#recorded-decisions)
+owns rewrite visibility, template binding, and constructed `with`. The
+[String switch plan](string-switch.md) owns that selected feature. The
+[quotation plan](quotation-adoption-audit-2026-10-03.md#remaining-work)
+owns `_Alignof` and the scalar generator cleanup. Historical coverage ledgers
+are evidence, not additional task queues.
 
 ## Validation and delivery for a later implementation
 
@@ -479,7 +541,7 @@ Performance-sensitive changes use the existing performance-checkpoint policy.
 Do not run broad gate components repeatedly just to collect review evidence.
 
 The subsequent implementation request authorizes confirmed repairs and normal
-validated delivery to `dev`. Keep unresolved semantics and expanded gates out.
+validated delivery to `dev`. Use the recorded decisions above. Keep uncommissioned proposals and expanded gates out.
 
 ## Design review
 

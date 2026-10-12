@@ -62,7 +62,7 @@ The ready-tranche findings now stand as follows:
 This plan owns internal adoption and the deletion it enables. It coordinates
 with, but does not absorb, these existing efforts:
 
-- [Tooling ports](../x2c-scripting-ports.md) owns translations of Python and shell
+- [Tooling ports](x2c-scripting-ports.md) owns translations of Python and shell
   tools. This campaign only renames the two already-native x2c scripts.
 - [Meta authoring and coverage](meta-authoring-and-coverage.md) owns the method
   inventory and representation boundaries. This campaign consumes its

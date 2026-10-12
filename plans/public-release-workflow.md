@@ -1,9 +1,7 @@
-> Status: staging active; production promotion pending.
-> `gwf/x2c-staging` serves `https://staging.x2c-lang.dev` with HTTPS.
-> Successful staging runs on `dev` include 2026-09-21 and 2026-09-24
-> (`stage candidate` run 36015318554). The provisioning and first-deployment
-> instructions below are historical. Production baseline recovery, candidate
-> selection, version/tag, and advancement of `main` remain separate decisions.
+> Status: reference - delivered staging work and future release procedure.
+> The staging observations below are dated evidence, not a current deployment check.
+> A future explicitly selected release owns baseline recovery, version, and promotion.
+> This consolidation authorizes no production release or advancement of main.
 
 # Public dev, staging, and production
 

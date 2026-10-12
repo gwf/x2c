@@ -1,17 +1,18 @@
 # Meta continuation: x2c as its own metalanguage
 
-> Status: active, refreshed 2026-10-04 against origin/dev
-> 12a095f9728796f5138278a3082f4e3e7b5e085e. The original review used
-> fe19c15f13c22dfcad8930a7d9bf97e0d6de428a.
-> Item 1 has a local compiler prototype and a separate deep plan in worktree
-> `4c75`; neither is shipped on dev. Match preparation and prepared formatting
-> are deferred. The operator ledger from item 4 is implemented locally.
-> The other opportunities and the numeric policy experiment remain proposed.
-> This document is a campaign roadmap, not an implementation specification.
-> Updating this record does not authorize implementation or publication.
-> Follow-up: Gary approved the operator ledger implementation. It is integrated
-> on origin/dev b5c2dde7. Implementation and verification are complete, and
-> the advisory performance checkpoint is neutral. The destination is dev.
+> Status: retired - umbrella closed on 2026-10-12.
+> The selected operator ledger landed through b5c2dde7. Other experiments
+> remain reference evidence until a real workload justifies them.
+> Typed _Alignof and scalar cleanup move to the quotation adoption plan.
+> Match preparation, prepared formats, grammar descriptors, Torch generation,
+> and the numeric pair table are not commissioned follow-ups.
+
+## Current follow-up owner
+
+The [quotation adoption plan](../quotation-adoption-audit-2026-10-03.md#remaining-work)
+owns the selected typed `_Alignof` and scalar generator cleanup. The
+[index](../README.md#current-work-and-backlog) owns the current task list.
+The proposals below retain their historical context; they are not a second queue.
 
 ## Intended result
 
@@ -88,7 +89,7 @@ their original proposals as current gaps.
   code values bypass helper-result traversal and the leftover-binder scan;
   binding replacement runs only when effects supply replacements. This is
   already-shipped adoption of the governing source rule, not future work.
-  [Macro application cost](archive/macro-application-cost.md) records the
+  [Macro application cost](macro-application-cost.md) records the
   capture representation and translation-memory questions.
 - `88df676e` makes `Definition.body` read complete templates during collection,
   including declaration initializers. The earlier shallow collection path
@@ -247,7 +248,7 @@ bounded source improvement, not a promised performance change.
 
 ### 3. Precompute fixed format specifications
 
-Further investigation produced a [prepared-format feasibility result](prepared-format.md).
+Further investigation produced a [prepared-format feasibility result](../prepared-format.md).
 A native x2c analyzer now emits fixed descriptions through quotations.
 The refactored prototype shares conversion code, matches 43 static cases,
 and passes 4,000 calls sharing one plan across four Thread workers. Static

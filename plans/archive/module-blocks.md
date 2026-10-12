@@ -5,6 +5,13 @@
 > `28fc8c97`. This replaces the separate-unit design researched on
 > `codex/module-m1-current-dev`, which remains historical reference.
 
+## Follow-ups recorded on 2026-10-12
+
+The [remediation plan](../review-remediation-2026-10-11.md#module-follow-ups)
+owns diagnostic location and normalized companion-path containment. Recheck
+historical diagnostic failures after `9db47909` before editing; this planning
+refresh did not rerun their executable reproduction.
+
 ## Requirement
 
 Split a large source file into a directory of files that share one private

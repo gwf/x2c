@@ -3,6 +3,15 @@
 > Status: reference, 2026-09-25. The selected-root audit is shipped on
 > `dev`. The extension below is a follow-up proposal, not dispatched work.
 
+## Current disposition, 2026-10-12
+
+Reference and optional investigation candidate. The selected-root audit is
+delivered. Before expanding it, name a current program blocked by indexed
+borrows, container values, native handles, or iterator callbacks. Refresh the
+old obstacle list against current code. No broader audit or build gate is
+commissioned by this consolidation.
+
+
 ## What shipped
 
 `x2c-graph certify --root NAME` audits reachable, bound and typed code from
