@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+  <meta charset="utf-8" /><meta
+    name="viewport"
+    content="width=device-width,initial-scale=1"
+  /><title>Partition / x2c</title
+  ><link rel="stylesheet" href="style.css?v=consumers-1" />
+  <body>
+    <header>
+      <a class="brand" href="#" id="home"
+        ><span class="brandmark">&#9707;</span> Partition</a
+      ><span class="divider"></span
+      ><span>x2c <span class="muted">/ source workspace</span></span
+      ><span class="grow"></span><span class="concept">INTERACTIVE CONCEPT</span
+      ><button id="undo" disabled>&#8630; Undo</button
+      ><button id="redo" disabled>&#8631; Redo</button
+      ><button id="export">Export plan &#8599;</button>
+    </header>
+    <div class="shell">
+      <nav>
+        <div class="navtitle">GROUPS <span id="group-count"></span></div>
+        <input
+          id="search"
+          aria-label="Find a group or function"
+          placeholder="Find a group or function&#8230;"
+        /><button class="project" id="project">
+          &#9707; &nbsp; Project map
+        </button>
+        <div id="groups"></div>
+        <div class="navfoot">
+          Original files are the starting groups.<br />All edits are
+          tentative.<button id="reset" class="quiet wide">
+            Restore original groups
+          </button>
+        </div>
+      </nav>
+      <main>
+        <div id="heading"></div>
+        <div id="metrics"></div>
+        <div id="toolbar"></div>
+        <div id="workspace"></div>
+        <footer>
+          <span id="status">Ready</span><span id="snapshot"></span>
+        </footer>
+      </main>
+      <aside id="inspector"></aside>
+    </div>
+    <div id="toast" role="status"></div>
+    <dialog id="source">
+      <div id="source-content"></div>
+      <button id="close-source">Close</button>
+    </dialog>
+    <script src="engine.js"></script>
+    <script src="boundary.js"></script>
+    <script src="graph-view.js?v=consumers-1"></script>
+    <script src="project-map.js?v=canvas-fit-2"></script>
+    <script src="app.js?v=project-map-1"></script>
+  </body>
+</html>
