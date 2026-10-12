@@ -79,7 +79,8 @@ static void machine_program_is_exact_sized_and_immutable(void) {
 static void machine_builder_value_cleanup_releases_shared_arrays(void) {
   ScopeStats before = Scope.stats();
   {
-    MachineBuilder b = $auto(MachineBuilder.new());
+    MachineBuilder b = MachineBuilder.new();
+    defer b.cleanup();
     ScopeStats empty = Scope.stats();
     EXPECT_INT_EQ(empty.live_allocations, before.live_allocations);
     EXPECT_NULL(b.code);

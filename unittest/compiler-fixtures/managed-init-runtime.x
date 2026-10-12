@@ -14,9 +14,10 @@ int main(void) {
     Scope scope = $auto(Scope.new());
     File input = $auto(File.open("/dev/null", "r"));
     Lisp lisp = $auto(Lisp.kernel());
-    MachineBuilder builder = $auto(MachineBuilder.new());
+    MachineBuilder builder = MachineBuilder.new();
     builder.emit(MW_RET_SUCCESS, 0, 0, 0, 0, 0);
     builder.constant(1);
+    MachineBuilder acquired = $auto(builder);
     ArrayInt ints = $auto(ArrayInt.new());
     MapStringInt counts = $auto(MapStringInt.new());
     array.push(1);
