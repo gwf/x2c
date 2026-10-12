@@ -3766,7 +3766,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_5(void){
   _2941 = List_var(_2940);
   _2942 = cons(_2941, _2938);
   _2943 = cons(_1743, _2942);
-  _2944 = int_var(1679);
+  _2944 = int_var(1681);
   _2945 = String_new("str");
   _2946 = String_var(_2945);
   _2947 = String_new("repr");
@@ -3816,7 +3816,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_5(void){
   _2991 = List_var(_2990);
   _2992 = cons(_2991, NULL);
   _2993 = List_var(_2992);
-  _2994 = int_var(1697);
+  _2994 = int_var(1699);
   _2995 = Symbol_var(60);
   _2996 = String_new("RenderPath_enter");
   _2997 = String_var(_2996);
@@ -11656,7 +11656,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_21(void){
   _10783 = cons(_503, _10782);
   _10784 = String_new("lib/type.x");
   _10785 = String_var(_10784);
-  _10786 = String_new("4894ea74");
+  _10786 = String_new("08c6c0ae");
   _10787 = String_var(_10786);
   _10788 = cons(_9505, _10697);
   _10789 = cons(_10420, _10788);
@@ -12917,14 +12917,14 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_23(void){
   _12038 = List_var(_12037);
   _12039 = String_new("src/expressions.x");
   _12040 = String_var(_12039);
-  _12041 = String_new("fb611f06");
+  _12041 = String_new("1985164c");
   _12042 = String_var(_12041);
   _12043 = cons(_12042, NULL);
   _12044 = cons(_12040, _12043);
   _12045 = List_var(_12044);
   _12046 = String_new("src/linked-meta.x");
   _12047 = String_var(_12046);
-  _12048 = String_new("5862fff2");
+  _12048 = String_new("26910cc2");
   _12049 = String_var(_12048);
   _12050 = cons(_12049, NULL);
   _12051 = cons(_12047, _12050);
@@ -13572,7 +13572,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_24(void){
   _12690 = cons(_503, _12689);
   _12691 = String_new("src/component-match.x");
   _12692 = String_var(_12691);
-  _12693 = String_new("cbbf4517");
+  _12693 = String_new("6e7a12a1");
   _12694 = String_var(_12693);
   _12695 = String_new("cbccf2ca");
   _12696 = String_var(_12695);

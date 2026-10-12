@@ -419,6 +419,7 @@ static List Compiler._parse_sizeof(Compiler c) {
   else {
     c.token = head;
     arg = c._parse_unary_op();
+    match (arg) case %(expr ? (parens ?inner)): arg = %(parens $inner);
   }
   return %(expr ("size_t") (sizeof $arg));
 }

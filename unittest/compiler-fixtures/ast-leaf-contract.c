@@ -156,9 +156,16 @@ int main(void){
     List _x2c_match_expr = values; List _x2c_match_cursor;
     switch(0){
         default: ;
-       _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor) { Var head = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1)) { List tail = _x2c_match_cursor;
+       _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor) { Var _x2c_match_value_0 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1)) { List _x2c_match_list_1 = _x2c_match_cursor;
       {
-        count += 1;
+        Var head;
+        head = _x2c_match_value_0;
+        List tail;
+        tail = _x2c_match_list_1;
+        {
+          count += 1;
+        }
+
       }
        break; } }{
         count = 0;

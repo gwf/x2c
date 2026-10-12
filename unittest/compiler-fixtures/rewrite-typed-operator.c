@@ -294,11 +294,17 @@ Code money_times(Code code){
   {
     List _x2c_match_expr = code; Var _x2c_match_values[2]; MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
     switch(0){
-        default: ; static MacroCaseSite _x2c_macro_site_0; if (Macro_case_capture_at(&_x2c_macro_site_0, _x2c_match_expr, _230, _231, &_x2c_match_capture)) { Var amount = _x2c_match_values[0]; Var factor = _x2c_match_values[1];
-      return cons(_28, cons(_235, cons(List_var(cons(_236, cons(_250, cons(List_var(({
-        Var _x2c_literal_part_0 = Macro_inserted(amount, 1, 1);  Var _x2c_literal_part_1 = Macro_inserted(factor, 1, 1);  cons(_62, cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, NULL)));
+        default: ; static MacroCaseSite _x2c_macro_site_0; if (Macro_case_capture_at(&_x2c_macro_site_0, _x2c_match_expr, _230, _231, &_x2c_match_capture)) { Var _x2c_match_value_0 = _x2c_match_values[0]; Var _x2c_match_value_1 = _x2c_match_values[1];
+      {
+        Var amount;
+        amount = _x2c_match_value_0;
+        Var factor;
+        factor = _x2c_match_value_1;
+        return cons(_28, cons(_235, cons(List_var(cons(_236, cons(_250, cons(List_var(({
+          Var _x2c_literal_part_0 = Macro_inserted(amount, 1, 1);  Var _x2c_literal_part_1 = Macro_inserted(factor, 1, 1);  cons(_62, cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, NULL)));
+        }
+        )), NULL)))), NULL)));
       }
-      )), NULL)))), NULL)));
        break; }
     }
 

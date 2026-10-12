@@ -79,7 +79,7 @@
                (expr ("Symbol") (literal ("Symbol") "widget" widget))))) 
         (expr (int) 
          (op * (expr (int) (ident (binding 7 "count"))) 
-          (expr (int) (literal (int) "2")))) (expr (long) (literal (long) "-3")) 
+          (expr (int) (literal (int) "2")))) (expr (int) (literal (int) "-3")) 
         (expr (char) (literal (char) "\'q\'")) 
         (expr ("Atom") (literal ("Atom") "colon:name" colon:name)) 
         (expr ("Symbol") (literal ("Symbol") "right\\]" right\x5D)) 

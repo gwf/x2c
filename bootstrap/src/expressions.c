@@ -2523,7 +2523,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_3(void){
   _1959 = cons(_1958, NULL);
   _1960 = cons(_239, _1959);
   _1961 = List_var(_1960);
-  _1962 = int_var(1987);
+  _1962 = int_var(1991);
   _1963 = cons(_1962, NULL);
   _1964 = cons(_245, _1963);
   _1965 = List_var(_1964);
@@ -2531,7 +2531,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_3(void){
   _1967 = cons(_1966, NULL);
   _1968 = cons(_253, _1967);
   _1969 = List_var(_1968);
-  _1970 = int_var(75374);
+  _1970 = int_var(75462);
   _1971 = cons(_1970, NULL);
   _1972 = cons(_258, _1971);
   _1973 = List_var(_1972);
@@ -2729,11 +2729,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2162 = cons(_2161, NULL);
   _2163 = cons(_205, _2162);
   _2164 = List_var(_2163);
-  _2165 = int_var(1995);
+  _2165 = int_var(1999);
   _2166 = cons(_2165, NULL);
   _2167 = cons(_245, _2166);
   _2168 = List_var(_2167);
-  _2169 = int_var(75736);
+  _2169 = int_var(75824);
   _2170 = cons(_2169, NULL);
   _2171 = cons(_258, _2170);
   _2172 = List_var(_2171);
@@ -2846,11 +2846,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2279 = cons(_2278, NULL);
   _2280 = cons(_205, _2279);
   _2281 = List_var(_2280);
-  _2282 = int_var(2006);
+  _2282 = int_var(2010);
   _2283 = cons(_2282, NULL);
   _2284 = cons(_245, _2283);
   _2285 = List_var(_2284);
-  _2286 = int_var(76148);
+  _2286 = int_var(76236);
   _2287 = cons(_2286, NULL);
   _2288 = cons(_258, _2287);
   _2289 = List_var(_2288);
@@ -2944,11 +2944,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2377 = cons(_2376, NULL);
   _2378 = cons(_205, _2377);
   _2379 = List_var(_2378);
-  _2380 = int_var(2009);
+  _2380 = int_var(2013);
   _2381 = cons(_2380, NULL);
   _2382 = cons(_245, _2381);
   _2383 = List_var(_2382);
-  _2384 = int_var(76232);
+  _2384 = int_var(76320);
   _2385 = cons(_2384, NULL);
   _2386 = cons(_258, _2385);
   _2387 = List_var(_2386);
@@ -3036,11 +3036,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2469 = cons(_2468, NULL);
   _2470 = cons(_205, _2469);
   _2471 = List_var(_2470);
-  _2472 = int_var(2013);
+  _2472 = int_var(2017);
   _2473 = cons(_2472, NULL);
   _2474 = cons(_245, _2473);
   _2475 = List_var(_2474);
-  _2476 = int_var(76439);
+  _2476 = int_var(76527);
   _2477 = cons(_2476, NULL);
   _2478 = cons(_258, _2477);
   _2479 = List_var(_2478);
@@ -3251,11 +3251,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_5(void){
   _2681 = List_var(_2680);
   _2682 = cons(_205, _87);
   _2683 = List_var(_2682);
-  _2684 = int_var(2062);
+  _2684 = int_var(2066);
   _2685 = cons(_2684, NULL);
   _2686 = cons(_245, _2685);
   _2687 = List_var(_2686);
-  _2688 = int_var(78542);
+  _2688 = int_var(78630);
   _2689 = cons(_2688, NULL);
   _2690 = cons(_258, _2689);
   _2691 = List_var(_2690);
@@ -5093,7 +5093,16 @@ static int Compiler__expression_is_addressable(Compiler c, List expression){
 
 int Symbol_is_type_qualifier(Symbol);
 static void Compiler__check_dynamic_target(Compiler c, List target, Token origin){
-  if(Compiler__builtin_index_lvalue(c, target)) return;  Type type = Sym_normalize_declared_type(c -> sym, Var_type(List_cadr(target))); {
+  {
+    List _x2c_match_expr = target; List _x2c_match_cursor, _x2c_match_cursor1; Var _x2c_match_values[1]; MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };  switch(_x2c_match_expr ? _x2c_match_expr->car.u64 : 0){
+        case 9224497936761996324ULL: ;  _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497936761996324ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224498429897351536ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1 && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1 && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {return;  break; } static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(_480), &_x2c_match_capture)) { Var _x2c_match_value_0 = _x2c_match_values[0]; {
+        Var inner;  inner = _x2c_match_value_0;  return Compiler__check_dynamic_target(c, Var_list(inner), origin);
+      }
+       break; } default: break;
+    }
+
+  }
+  Type type = Sym_normalize_declared_type(c -> sym, Var_type(List_cadr(target))); {
     Var part;  Iter _x2c_macro_iterator_5 = List_iter(Type_list(type), &(struct Iter){
       int_var(0)
     }

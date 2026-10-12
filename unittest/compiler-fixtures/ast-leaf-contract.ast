@@ -236,12 +236,22 @@
   (at 44 
    (match (expr ("List") (ident (binding 40 "values"))) 
     (((expr ("List") (expr ("List") (cache 9))) 
-      (block 
-       (at 42 
-        (stmnt 
-         (expr ("ast_phase1_Count") 
-          (op += (expr ("ast_phase1_Count") (ident (binding 36 "count"))) 
-           (expr (int) (literal (int) "1")))))))) 
+      (block (declare ("Var") (bindings (bind (binding 50 "head") ()))) 
+       (stmnt 
+        (expr ("Var") 
+         (op = (expr ("Var") (ident (binding 50 "head"))) 
+          (expr ("Var") ("_x2c_match_value_0"))))) 
+       (declare ("List") (bindings (bind (binding 51 "tail") ()))) 
+       (stmnt 
+        (expr ("List") 
+         (op = (expr ("List") (ident (binding 51 "tail"))) 
+          (expr ("List") ("_x2c_match_list_1"))))) 
+       (block 
+        (at 42 
+         (stmnt 
+          (expr ("ast_phase1_Count") 
+           (op += (expr ("ast_phase1_Count") (ident (binding 36 "count"))) 
+            (expr (int) (literal (int) "1"))))))))) 
      ((*) (block 
            (at 43 
             (stmnt 
@@ -251,7 +261,7 @@
   (at 45 
    (declare ("Var") 
     (bindings 
-     (op = (bind (binding 50 "caught") ()) 
+     (op = (bind (binding 52 "caught") ()) 
       (expr ("Var") (literal ("Var") "void")))))) 
   (at 49 
    (try (block 
@@ -273,43 +283,43 @@
         (expr ("List") 
          (cons (expr ("Var") 
                 (call (expr ((func (("Symbol"))) "Var") 
-                       (ident (binding 51 "Symbol_var"))) 
+                       (ident (binding 53 "Symbol_var"))) 
                  (args (expr ("Symbol") 
                         (literal ("Symbol") "invariant" invariant))))) 
           (expr ("List") 
            (cons (expr ("Var") 
                   (call (expr ((func (("List"))) "Var") 
-                         (ident (binding 52 "List_var"))) 
+                         (ident (binding 54 "List_var"))) 
                    (args (expr ("List") 
                           (expr ("List") 
                            (cons (expr ("Var") 
                                   (call (expr ((func (("Symbol"))) "Var") 
-                                         (ident (binding 51 "Symbol_var"))) 
+                                         (ident (binding 53 "Symbol_var"))) 
                                    (args (expr ("Symbol") 
                                           (literal ("Symbol") "value" value))))) 
                             (expr ("List") 
                              (cons (expr ("Var") 
                                     (call (expr ((func (("Symbol"))) "Var") 
-                                           (ident (binding 51 "Symbol_var"))) 
+                                           (ident (binding 53 "Symbol_var"))) 
                                      (args (expr ("Symbol") 
                                             (literal ("Symbol") "?value" ?value))))) 
                               (nil))))))))) (nil)))))) 
-       (block (declare ("Var") (bindings (bind (binding 53 "value") ()))) 
+       (block (declare ("Var") (bindings (bind (binding 55 "value") ()))) 
         (stmnt 
          (expr ("Var") 
-          (op = (expr ("Var") (ident (binding 53 "value"))) 
+          (op = (expr ("Var") (ident (binding 55 "value"))) 
            (expr ("Var") 
             (call "x2c_error_catch_capture" 
              (args (expr ("ErrorHandler") 
-                    (ident (binding 54 "_x2c_error_handler_0"))) 
+                    (ident (binding 56 "_x2c_error_handler_0"))) 
               (expr (int) (literal (int) "0")))))))) 
         (block 
          (at 47 
           (stmnt 
            (expr ("Var") 
-            (op = (expr ("Var") (ident (binding 50 "caught"))) 
-             (expr ("Var") (ident (binding 53 "value"))))))))))) 
-     (binding 54 "_x2c_error_handler_0")) 
+            (op = (expr ("Var") (ident (binding 52 "caught"))) 
+             (expr ("Var") (ident (binding 55 "value"))))))))))) 
+     (binding 56 "_x2c_error_handler_0")) 
     (block 
      (at 48 
       (stmnt 
@@ -318,17 +328,17 @@
   (at 50 
    (declare ("Var") 
     (bindings 
-     (op = (bind (binding 55 "lambda_value") ()) 
+     (op = (bind (binding 57 "lambda_value") ()) 
       (expr ("Var") 
        (call (expr ((func (("Var"))) "Var") 
               (parens 
                (expr ((func (("Var"))) "Var") 
-                (lambda (params (param ("Var") (bind (binding 56 "value") ()))) 
+                (lambda (params (param ("Var") (bind (binding 58 "value") ()))) 
                  (expr (int) 
                   (op + (expr (int) 
                          (call (expr ((func (("Var"))) (int)) 
                                 (ident (binding 44 "Var_int"))) 
-                          (args (expr ("Var") (ident (binding 56 "value")))))) 
+                          (args (expr ("Var") (ident (binding 58 "value")))))) 
                    (expr (int) (literal (int) "1")))))))) 
         (args (expr (int) (literal (int) "2"))))))))) 
   (at 51 
@@ -339,7 +349,7 @@
       (args (expr ("ast_phase1_Pair") (ident (binding 35 "pair"))) 
        (expr (int) 
         (call (expr ((func (("Var"))) (int)) (ident (binding 44 "Var_int"))) 
-         (args (expr ("Var") (ident (binding 50 "caught"))))))))))) 
+         (args (expr ("Var") (ident (binding 52 "caught"))))))))))) 
   (at 52 
    (stmnt 
     (expr (void) 
@@ -354,5 +364,5 @@
    (stmnt 
     (expr (void) 
      (cast (decl (void) (bindings (bind () ()))) 
-      (expr ("Var") (ident (binding 55 "lambda_value"))))))) 
+      (expr ("Var") (ident (binding 57 "lambda_value"))))))) 
   (at 55 (return (int) (expr (int) (literal (int) "0"))))))
