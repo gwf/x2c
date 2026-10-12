@@ -59,7 +59,7 @@ const Engine = (() => {
     }
     const sizes = blocks.map((b) => b.length),
       degree = adj.map((a) => [...a.values()].reduce((s, v) => s + v, 0));
-    // One exploration control increases group count (in the UI) and balance penalty.
+    // Balance penalizes squared group sizes independently of the requested count.
     const penalty =
       (6 * t * t * Math.max(weight, 1)) /
       Math.max(1, (members.length * members.length) / k);
@@ -152,6 +152,108 @@ const Engine = (() => {
     }
     return best.groups.sort((a, b) => b.length - a.length);
   }
-  return { membership, metrics, partition, atoms };
+  function suggestMoves(data, groups, ties = [], focus = null) {
+    const owners = membership(groups, data.functions.length);
+    const blocks = atoms(
+      data.functions.map((_, i) => i),
+      ties,
+    );
+    const blockOf = new Map();
+    blocks.forEach((b, i) => b.forEach((v) => blockOf.set(v, i)));
+    const incident = data.functions.map(() => []),
+      crossing = data.functions.map(() => 0);
+    data.edges.forEach(([a, b], i) => {
+      incident[a].push(i);
+      incident[b].push(i);
+      if (owners[a] !== owners[b]) crossing[b]++;
+    });
+    const seen = new Set(),
+      results = [];
+    for (const block of blocks) {
+      const from = owners[block[0]];
+      if (
+        from < 0 ||
+        block.some((v) => owners[v] !== from || data.functions[v].k) ||
+        (focus && !block.some((v) => focus.has(v)))
+      )
+        continue;
+      const neighbors = new Map();
+      for (const v of block)
+        for (const index of incident[v]) {
+          const [a, b, w] = data.edges[index],
+            u = a === v ? b : a,
+            other = blockOf.get(u);
+          if (other !== blockOf.get(v) && owners[u] === from)
+            neighbors.set(other, (neighbors.get(other) || 0) + w);
+        }
+      const neighbor = [...neighbors]
+        .sort((a, b) => b[1] - a[1] || a[0] - b[0])
+        .find(([i]) =>
+          blocks[i].every((v) => owners[v] === from && !data.functions[v].k),
+        );
+      const bundles = [block];
+      if (neighbor) bundles.push([...block, ...blocks[neighbor[0]]]);
+      for (const members of bundles) {
+        if (members.length >= groups[from].members.length) continue;
+        const moved = new Set(members),
+          edges = new Set(members.flatMap((v) => incident[v])),
+          destinations = new Set();
+        for (const i of edges)
+          for (const v of data.edges[i].slice(0, 2))
+            if (owners[v] >= 0 && owners[v] !== from)
+              destinations.add(owners[v]);
+        for (const to of destinations) {
+          const key =
+            members
+              .slice()
+              .sort((a, b) => a - b)
+              .join(",") +
+            ":" +
+            to;
+          if (seen.has(key)) continue;
+          seen.add(key);
+          let delta = 0;
+          const privateChanges = new Map();
+          for (const i of edges) {
+            const [a, b, w] = data.edges[i];
+            const before = owners[a] !== owners[b],
+              after =
+                (moved.has(a) ? to : owners[a]) !==
+                (moved.has(b) ? to : owners[b]);
+            delta += (Number(after) - Number(before)) * w;
+            if (data.functions[b].s)
+              privateChanges.set(
+                b,
+                (privateChanges.get(b) || 0) + Number(after) - Number(before),
+              );
+          }
+          if (delta >= 0) continue;
+          const added = [],
+            removed = [];
+          for (const [v, d] of privateChanges) {
+            if (!crossing[v] && crossing[v] + d > 0) added.push(v);
+            if (crossing[v] > 0 && crossing[v] + d === 0) removed.push(v);
+          }
+          results.push({
+            members: members.slice(),
+            from: groups[from].id,
+            to: groups[to].id,
+            delta,
+            added,
+            removed,
+          });
+        }
+      }
+    }
+    return results
+      .sort(
+        (a, b) =>
+          a.delta - b.delta ||
+          a.added.length - b.added.length ||
+          a.members.length - b.members.length,
+      )
+      .slice(0, 12);
+  }
+  return { membership, metrics, partition, atoms, suggestMoves };
 })();
 if (typeof module !== "undefined") module.exports = Engine;

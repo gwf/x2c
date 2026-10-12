@@ -117,14 +117,60 @@ function aggregateGroupCalls(data, groups) {
     incoming,
   };
 }
+function arrangementData(data, groups, allGroups) {
+  const result = aggregateGroupCalls(data, groups);
+  const inside = new Map(
+    groups.flatMap((g, i) => g.members.map((v) => [v, i])),
+  );
+  const owner = new Map(allGroups.flatMap((g) => g.members.map((v) => [v, g])));
+  const outside = new Map(),
+    pairs = new Map();
+  for (const [a, b, w] of data.edges) {
+    if (inside.has(a) || !inside.has(b)) continue;
+    const g = owner.get(a),
+      j = inside.get(b),
+      key = g.id + ":" + j;
+    if (!outside.has(g.id))
+      outside.set(g.id, { group: g, consumers: new Set() });
+    outside.get(g.id).consumers.add(a);
+    if (!pairs.has(key))
+      pairs.set(key, { id: g.id, j, consumers: new Set(), calls: 0 });
+    const pair = pairs.get(key);
+    pair.consumers.add(a);
+    pair.calls += w;
+  }
+  const displayed = groups.slice(),
+    index = new Map();
+  for (const [id, p] of outside) {
+    index.set(id, displayed.length);
+    displayed.push({
+      ...p.group,
+      outside: true,
+      consumerCount: p.consumers.size,
+    });
+    result.callers.push(0);
+    result.incoming.push(0);
+  }
+  for (const p of pairs.values())
+    result.links.push({
+      ids: [index.get(p.id), p.j],
+      w: p.consumers.size,
+      calls: p.calls,
+      outside: true,
+    });
+  return { ...result, groups: displayed };
+}
 let projectMapCache = null;
 function renderMap(gs) {
   graphWorker?.terminate();
   graphResize?.disconnect();
   const host = $("workspace");
   host.classList.add("graph-workspace");
-  const { links, callers, incoming } = aggregateGroupCalls(D, gs);
+  const arrangement = arrangementData(D, gs, scope ? visible() : gs);
+  gs = arrangement.groups;
+  const { links, callers, incoming } = arrangement;
   const labels = gs.map((g, i) => {
+    if (g.outside) return "Outside: " + g.name;
     if (!scope) return g.name;
     const stem = scope.name.replace(/\.x$/, "");
     const name = g.name.startsWith(stem + ".")
@@ -156,33 +202,36 @@ function renderMap(gs) {
       lines,
       estimated: !original,
       r: scope
-        ? 24 * Math.sqrt(Math.max(1, g.members.length))
+        ? 24 *
+          Math.sqrt(Math.max(1, g.outside ? g.consumerCount : g.members.length))
         : Math.max(5, Math.sqrt(lines) * 0.72),
     };
   });
   const key =
     D.revision +
     Boolean(scope) +
-    JSON.stringify(gs.map((g) => [g.id, g.members]));
+    JSON.stringify(
+      gs.map((g) => [g.id, g.members, !!g.outside, g.consumerCount]),
+    );
   if (projectMapCache?.key !== key)
     projectMapCache = { key, ps: projectLayout(nodes, links) };
   const ps = projectMapCache.ps;
   host.innerHTML =
     '<div class="graph-tools"><button id="map-minus">\u2212</button><button id="map-fit">Fit groups</button><button id="map-plus">+</button><button id="map-calls" aria-expanded="false">Call details</button><span>' +
     (scope
-      ? "Circle area/count: functions"
+      ? "Inside: functions; outside: callers"
       : "Circle area: source lines; count: functions") +
-    ' \u00b7 Edge numbers: call sites \u00b7 Thicker = more calls</span></div><svg id="project-map" style="flex:1;min-height:300px;width:100%;touch-action:none" aria-label="Groups and directed calls"></svg><div class="graph-legend"><span><span style="color:#59cfff">Source (blue)</span> \u2192 <span style="color:#ffb454">destination (orange)</span></span><span>Scroll to zoom \u00b7 drag background to pan \u00b7 click to explore \u00b7 Shift-click to select \u00b7 hover to isolate connections</span></div>';
+    ' \u00b7 Edges: call sites; outside edges: callers \u00b7 Thicker = more calls</span></div><svg id="project-map" style="flex:1;min-height:300px;width:100%;touch-action:none" aria-label="Groups and directed calls"></svg><div class="graph-legend"><span><span style="color:#59cfff">Source (blue)</span> \u2192 <span style="color:#ffb454">destination (orange)</span></span><span>Scroll to zoom \u00b7 drag background to pan \u00b7 click to explore \u00b7 Shift-click to select \u00b7 hover to isolate connections</span></div>';
   const details = document.createElement("div");
   details.hidden = true;
   details.style.cssText =
     "position:absolute;right:12px;top:48px;max-height:65%;max-width:90%;overflow:auto;background:#182125;border:1px solid #52666c;padding:12px;z-index:3;font-size:12px";
-  details.innerHTML = `<strong>Directed calls between groups</strong><p>Static call sites, not runtime frequency.</p><table><thead><tr><th>Source</th><th>Destination</th><th>Call sites</th></tr></thead><tbody>${links
+  details.innerHTML = `<strong>Directed calls between groups</strong><p>Inside links count static call sites. Outside links count distinct caller functions (c), not runtime frequency.</p><table><thead><tr><th>Source</th><th>Destination</th><th>Weight</th></tr></thead><tbody>${links
     .slice()
     .sort((a, b) => b.w - a.w)
     .map(
-      ({ ids: [i, j], w }) =>
-        `<tr><td style="padding:5px 12px 5px 0">${esc(gs[i].name)}</td><td style="padding:5px 12px">${esc(gs[j].name)}</td><td style="text-align:right">${fmt(w)}</td></tr>`,
+      ({ ids: [i, j], w, outside }) =>
+        `<tr><td style="padding:5px 12px 5px 0">${esc(gs[i].name)}</td><td style="padding:5px 12px">${esc(gs[j].name)}</td><td style="text-align:right">${fmt(w)} ${outside ? "callers" : "call sites"}</td></tr>`,
     )
     .join("")}</tbody></table>`;
   host.append(details);
@@ -208,25 +257,25 @@ function renderMap(gs) {
       .join("") +
     '</defs><g id="map-scene">' +
     links
-      .map(({ ids: [i, j], w }, n) => {
+      .map(({ ids: [i, j], w, outside, calls }, n) => {
         const a = ps[i],
           b = ps[j],
           d = Math.hypot(b.x - a.x, b.y - a.y) || 1,
           ux = (b.x - a.x) / d,
           uy = (b.y - a.y) / d;
-        return `<path data-map-edge="${i},${j}" d="M${a.x + ux * a.r} ${a.y + uy * a.r} Q${(a.x + b.x) / 2 - uy * 28} ${(a.y + b.y) / 2 + ux * 28} ${b.x - ux * (b.r + 3)} ${b.y - uy * (b.r + 3)}" fill="none" vector-effect="non-scaling-stroke" stroke="url(#call-gradient-${n})" stroke-width="${1.5 + Math.log2(w + 1) * 1.2}" opacity="${scope ? ".8" : ".2"}" marker-end="url(#map-arrow)"><title>${esc(gs[i].name)} to ${esc(gs[j].name)}: ${w} call sites</title></path>`;
+        return `<path data-map-edge="${i},${j}" d="M${a.x + ux * a.r} ${a.y + uy * a.r} Q${(a.x + b.x) / 2 - uy * 28} ${(a.y + b.y) / 2 + ux * 28} ${b.x - ux * (b.r + 3)} ${b.y - uy * (b.r + 3)}" fill="none" vector-effect="non-scaling-stroke" stroke="url(#call-gradient-${n})" stroke-width="${1.5 + Math.log2(w + 1) * 1.2}" opacity="${scope ? ".8" : ".2"}" marker-end="url(#map-arrow)"><title>${esc(gs[i].name)} to ${esc(gs[j].name)}: ${w} ${outside ? "caller functions / " + calls + " call sites" : "call sites"}</title></path>`;
       })
       .join("") +
     links
       .map(
-        ({ ids: [i, j], w }, n) =>
-          `<text data-call-count="${n}" data-call-pair="${i},${j}" text-anchor="middle" fill="#fff" font-size="12" font-weight="600" paint-order="stroke" stroke="#11181c" stroke-width="5" style="pointer-events:none">${fmt(w)}</text>`,
+        ({ ids: [i, j], w, outside }, n) =>
+          `<text data-call-count="${n}" data-call-pair="${i},${j}" text-anchor="middle" fill="#fff" font-size="12" font-weight="600" paint-order="stroke" stroke="#11181c" stroke-width="5" style="pointer-events:none">${fmt(w)}${outside ? "c" : ""}</text>`,
       )
       .join("") +
     ps
       .map(
         (p, i) =>
-          `<g data-map-node="${i}" tabindex="0" role="button" aria-label="Open ${esc(gs[i].name)}" style="cursor:pointer"><title>${esc(gs[i].name)}: ${p.estimated ? "approximately " : ""}${fmt(p.lines)} source lines; ${gs[i].members.length} functions; ${callers[i]} callers outside group / ${incoming[i]} incoming call sites${p.estimated ? " (size apportioned by function count)" : ""}</title><circle cx="${p.x}" cy="${p.y}" r="${p.r}" fill="${gs[i].name.startsWith("lib/") ? "#244553" : "#34482e"}" stroke="${selected.has(gs[i].id) ? "#fff" : gs[i].name.startsWith("lib/") ? "#9abfce" : "#b5dba0"}" stroke-width="${selected.has(gs[i].id) ? 3 : 1.2}"/><text data-function-count="${i}" text-anchor="middle" dominant-baseline="central" fill="#fff" font-size="15" font-weight="600" style="pointer-events:none">${gs[i].members.length}</text><text data-map-label="${i}" text-anchor="middle" fill="#e0e8e6" font-size="11" paint-order="stroke" stroke="#11181c" stroke-width="3">${esc(labels[i])}</text></g>`,
+          `<g data-map-node="${i}" tabindex="0" role="button" aria-label="Open ${esc(gs[i].name)}" style="cursor:pointer"><title>${esc(gs[i].name)}: ${p.estimated ? "approximately " : ""}${fmt(p.lines)} source lines; ${gs[i].members.length} functions; ${gs[i].outside ? `${gs[i].consumerCount} functions call into this view` : `${callers[i]} callers outside group / ${incoming[i]} incoming call sites`}${p.estimated ? " (size apportioned by function count)" : ""}</title><circle stroke-dasharray="${gs[i].outside ? "5 4" : "none"}" cx="${p.x}" cy="${p.y}" r="${p.r}" fill="${gs[i].name.startsWith("lib/") ? "#244553" : "#34482e"}" stroke="${selected.has(gs[i].id) ? "#fff" : gs[i].name.startsWith("lib/") ? "#9abfce" : "#b5dba0"}" stroke-width="${selected.has(gs[i].id) ? 3 : 1.2}"/><text data-function-count="${i}" text-anchor="middle" dominant-baseline="central" fill="#fff" font-size="15" font-weight="600" style="pointer-events:none">${gs[i].outside ? gs[i].consumerCount : gs[i].members.length}</text><text data-map-label="${i}" text-anchor="middle" fill="#e0e8e6" font-size="11" paint-order="stroke" stroke="#11181c" stroke-width="3">${esc(labels[i])}</text></g>`,
       )
       .join("") +
     "</g>";
@@ -352,6 +401,8 @@ function renderMap(gs) {
           ? selected.delete(gs[i].id)
           : selected.add(gs[i].id);
         render();
+      } else if (preview && gs[i].outside) {
+        toast("Accept or discard the split before opening an outside group.");
       } else if (preview) {
         previewGroup = gs[i].id;
         render();
@@ -393,4 +444,5 @@ function renderMap(gs) {
 if (typeof module !== "undefined") {
   module.exports = projectLayout;
   module.exports.aggregateGroupCalls = aggregateGroupCalls;
+  module.exports.arrangementData = arrangementData;
 }

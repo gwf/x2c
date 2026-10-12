@@ -8,7 +8,7 @@ assert.equal(E.metrics(D, groups).cut, D.stats.crossCalls);
 for (const name of ["src/compiler.x", "src/parse.x", "lib/typed-array.x"]) {
   const i = D.files.findIndex((f) => f.id === name),
     members = groups[i].members;
-  for (const k of [2, 4, 8])
+  for (const k of [1, 2, 4, 8, 40])
     for (const t of [0, 0.38, 1]) {
       const ties = [members.slice(0, 3)],
         parts = E.partition(D, members, k, t, ties);
