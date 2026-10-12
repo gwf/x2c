@@ -1,6 +1,6 @@
 # Module blocks: one source split across a directory
 
-> Status: active; authorized 2026-10-11, replaces the separate-unit module
+> Status: delivered 2026-10-11 on `kernel/module-blocks-impl`; authorized 2026-10-11, replaces the separate-unit module
 > design researched on `codex/module-m1-current-dev`, which stays as
 > reference only.
 
@@ -107,3 +107,23 @@ downstream mechanism unchanged. It gives up per-member compilation and
 per-member privacy, which the separate-unit design paid 1,774 kernel lines, a
 doubled per-unit cost, and an interface format bump to provide. If per-member
 compilation is wanted later, the block already names the members.
+
+## Result, 2026-10-11
+
+`Compiler.module_source` in src/collect.x splices members at read time and
+returns the text, the marker rows, and member content hashes; the frontend's
+unit text, the collector's cold walk (`_walk_apart`), and the project meta
+scan reach it. A file without a block costs one substring search. Member
+positions reach diagnostics, origins, `--source-map`, and the editor through
+`token_source` and a new `Compiler.text_source`; member hashes join the
+collection entry, the `.xi`, and the depfile. A member's quoted include of a
+file beside it is rewritten to the entry-relative spelling while splicing, so
+collection, parsing, and the generated `#include` agree. The cpp-symbol modes
+reject a module unit as they reject indented and script units. Source
++320/-21; eight fixtures (the plan's seven and `module-block-meta`); book
+section "Module blocks". Measurements against dev: empty unit 1,192 M both;
+1,000-function unit 2,930 M -> 2,928 M; a four-member module within noise of
+the same code in one file; depfile of a unit without a block unchanged.
+Generated C byte-identical for every fixture and the compiler's sources. Open:
+compile-time effects replayed from a member report the entry file and the
+spliced line; the companion check is textual and rejects `NAME/../NAME/x.x`.
